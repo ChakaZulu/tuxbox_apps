@@ -120,7 +120,7 @@ NVODStream::NVODStream(eListbox *listbox, int transport_stream_id, int original_
 	eit.start();
 }
 
-eString NVODStream::getText(int col=0) const
+eString NVODStream::getText(int col) const
 {
 	if (eit.ready && !eit.error)
 	{
@@ -184,7 +184,7 @@ AudioStream::AudioStream(eListbox *listbox, PMTEntry *stream): eListboxEntry(lis
 {
 }
 
-eString AudioStream::getText(int col=0) const
+eString AudioStream::getText(int col) const
 {
 	int isAC3=0;
 	eString language;
@@ -263,7 +263,7 @@ SubService::SubService(eListbox *listbox, LinkageDescriptor *descr): eListboxEnt
 	service_id=descr->service_id;
 }
 
-eString SubService::getText(int col=0) const
+eString SubService::getText(int col) const
 {
 	return name;
 }

@@ -6,7 +6,7 @@
 #include <core/system/init.h>
 #include <core/system/econfig.h>
 
-#define DEFAULTSKIN "neutrino.esml"
+#define DEFAULTSKIN "chkv2.esml"
 
 class eSkinInit
 {

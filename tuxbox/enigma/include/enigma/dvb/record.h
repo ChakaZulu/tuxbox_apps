@@ -14,7 +14,7 @@
  * asynchronously. Internally this is done with a \c eMessagePump.
  * \todo Howto disable this warning?
  */
-class eDVBRecorder: private eThread, eMainloop, public Object
+class eDVBRecorder: private eThread, eMainloop
 {
 	struct eDVBRecorderMessage
 	{

@@ -4,6 +4,7 @@
 #include <vector>
 #include <list>
 #include <ext/hash_map>
+#include <ext/stl_hash_fun.h>
 
 #include "si.h"
 #include "dvb.h"
@@ -15,11 +16,11 @@
 
 class eventData;
 
-typedef std::map<int, eventData*> eventMap;
-typedef std::hash_map<sref, eventMap > eventCache;
-typedef std::hash_map<sref, time_t > updateMap;
+#define eventMap std::map<int, eventData*>
+#define eventCache __gnu_cxx::hash_map<sref, eventMap >
+#define updateMap __gnu_cxx::hash_map<sref, time_t >
 
-namespace std
+namespace __gnu_cxx
 {
 struct hash<sref>
 {

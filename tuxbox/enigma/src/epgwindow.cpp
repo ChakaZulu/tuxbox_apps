@@ -8,7 +8,7 @@
 #include <core/dvb/edvb.h>
 
 
-eString eListboxEntryEPG::getText(int col=0) const
+eString eListboxEntryEPG::getText(int col) const
 {
 		tm* t = localtime(&event->start_time);
 		eString DateTime;

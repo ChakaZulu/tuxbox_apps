@@ -6,9 +6,16 @@
 template <class T>
 class ePtrList : public std::list<T*>
 {
-	bool autoDelete;
-	iterator cur;
 public:
+	typedef typename std::list<T*, std::allocator<T*> >::iterator std_list_T_iterator;  // to remove compiler warnings
+	typedef typename std::list<T*, std::allocator<T*> >::const_iterator std_list_T_const_iterator;
+	typedef typename std::list<T*, std::allocator<T*> >::reverse_iterator std_list_T_reverse_iterator;
+	typedef typename std::list<T*, std::allocator<T*> >::const_reverse_iterator std_list_T_const_reverse_iterator;
+	typedef typename ePtrList<T>::iterator T_iterator;
+	typedef typename ePtrList<T>::const_iterator T_const_iterator;
+	typedef typename ePtrList<T>::reverse_iterator T_reverse_iterator;
+	typedef typename ePtrList<T>::const_reverse_iterator T_const_reverse_iterator;
+
 // Iterator classes
 	class iterator;
 	class const_iterator;
@@ -20,23 +27,11 @@ public:
 	inline ePtrList(const ePtrList&);
 	inline ~ePtrList();
 
-// overwritten methods
-	inline iterator begin();
-	inline iterator end();
-	inline const_iterator begin() const;
-	inline const_iterator end() const;
-	inline reverse_iterator rbegin();
-	inline reverse_iterator rend();
-	inline const_reverse_iterator rbegin() const;
-	inline const_reverse_iterator rend() const;
-
 // overwritted sort method
 	inline void sort();
 
 // changed methods for autodelete and current implementation
 	inline void remove(T* t);
-	inline iterator erase(iterator it);
-	inline iterator erase(iterator from, iterator to);
 	inline void clear();
 	inline void pop_back();
 	inline void pop_front();
@@ -61,10 +56,6 @@ public:
 // added operator methods
 	inline operator bool();
 	inline bool operator!();
-	inline operator iterator();
-	inline operator const_iterator() const;
-	inline operator reverse_iterator();
-	inline operator const_reverse_iterator() const;
 
 // added methods for autodelete implementation
 	inline void setAutoDelete(bool b);
@@ -72,6 +63,105 @@ public:
 
 // added compare struct ... to sort
 	struct less;
+private:
+	iterator cur;
+	bool autoDelete;
+
+public:
+	iterator ePtrList<T>::begin()
+	{				
+	//	makes implicit type conversion form std::list::iterator to ePtrList::iterator
+		return std::list<T*>::begin();		
+	}
+
+	iterator ePtrList<T>::end()
+	{				
+	//	makes implicit type conversion form std::list::iterator to ePtrList::iterator
+		return std::list<T*>::end();		
+	}
+
+	const_iterator ePtrList<T>::begin() const
+	{				
+	//	makes implicit type conversion form std::list::const_iterator to ePtrList::const_iterator
+		return std::list<T*>::begin();		
+	}
+
+	const_iterator ePtrList<T>::end() const
+	{				
+	//	makes implicit type conversion form std::list::const_iterator to ePtrList::const_iterator
+		return std::list<T*>::end();		
+	}
+
+	reverse_iterator ePtrList<T>::rbegin()
+	{				
+	//	makes implicit type conversion form std::list::reverse:_iterator to ePtrList::reverse_iterator
+		return std::list<T*>::rbegin();		
+	}
+
+	reverse_iterator ePtrList<T>::rend()
+	{				
+	//	makes implicit type conversion form std::list::reverse_iterator to ePtrList::reverse_iterator
+		return std::list<T*>::rend();		
+	}
+
+	const_reverse_iterator ePtrList<T>::rbegin() const
+	{				
+	//	makes implicit type conversion form std::list::const_reverse_iterator to ePtrList::const_reverse_iterator
+		return std::list<T*>::rbegin();		
+	}
+
+	const_reverse_iterator ePtrList<T>::rend() const
+	{				
+	//	makes implicit type conversion form std::list::const_reverse_iterator to ePtrList::const_reverse_iterator
+		return std::list<T*>::rend();		
+	}
+
+	iterator ePtrList<T>::erase(iterator it)
+	{
+	// 	Remove the item it, if auto-deletion is enabled, than the list call delete for this item
+	//  If current is equal to the item that was removed, current is set to the next item in the list
+		if (autoDelete && *it)
+			delete *it;                             	
+
+		if (cur == it)
+			return cur = std::list<T*>::erase(it);
+		else
+			return std::list<T*>::erase(it);
+	}
+
+	iterator ePtrList<T>::erase(iterator from, iterator to)
+	{
+	// 	Remove all items between the to iterators from and to
+	//	If auto-deletion is enabled, than the list call delete for all removed items
+		while (from != to)
+			from = erase(from);
+	
+		return from;
+	}
+
+	operator iterator()	
+	{
+	//	Returns a iterator that equal to begin() of the list
+		return begin();	
+	}
+
+	operator const_iterator() const
+	{
+	//	Returns a const_iterator that equal to begin() of the list
+		return begin();	
+	}
+
+	operator reverse_iterator()
+	{
+	//	Returns a reverse_iterator that equal to rbegin() of the list
+		return rbegin();	
+	}
+
+	operator const_reverse_iterator() const	
+	{
+	//	Returns a const_reverse_iterator that equal to rbegin() of the list
+		return rbegin();	
+	}
 };
 
 /////////////////// iterator class /////////////////////////////
@@ -80,7 +170,7 @@ class ePtrList<T>::iterator : public std::list<T*>::iterator
 {
 public:
 	// Constructors
-	iterator(const std::list<T*>::iterator& Q)		:std::list<T*>::iterator(Q)	{	}
+	iterator(const std_list_T_iterator& Q)		: std_list_T_iterator(Q)	{	}
 
 	// changed operator for pointer
 	T* operator->() const
@@ -105,7 +195,7 @@ class ePtrList<T>::const_iterator : public std::list<T*>::const_iterator
 {
 public:
 	// Constructors
-	const_iterator(const std::list<T*>::const_iterator& Q)		:std::list<T*>::const_iterator(Q)	{	}
+	const_iterator(const std_list_T_const_iterator& Q)		:std_list_T_const_iterator(Q)	{	}
 
 	// changed operator for pointer
 	T* operator->() const
@@ -130,7 +220,7 @@ class ePtrList<T>::reverse_iterator : public std::list<T*>::reverse_iterator
 {
 public:
 	// Constructors
-	reverse_iterator(const std::list<T*>::reverse_iterator& Q)		:std::list<T*>::reverse_iterator(Q)	{	}
+	reverse_iterator(const std_list_T_reverse_iterator& Q)		:std_list_T_reverse_iterator(Q)	{	}
 
 	// changed operators for pointer
 	T* operator->() const
@@ -155,7 +245,7 @@ class ePtrList<T>::const_reverse_iterator : public std::list<T*>::const_reverse_
 {
 public:
 	// Constructors
-	const_reverse_iterator(const std::list<T*>::const_reverse_iterator& Q)		:std::list<T*>::const_reverse_iterator(Q)	{	}
+	const_reverse_iterator(const std_list_T_const_reverse_iterator& Q)		:std_list_T_const_reverse_iterator(Q)	{	}
 
 	// changed operators for pointer
 	T* operator->() const
@@ -196,73 +286,10 @@ inline ePtrList<T>::~ePtrList()
 {
 // if autoDelete is enabled, delete is called for all elements in the list
 	if (autoDelete)
-		for (std::list<T*>::iterator it(std::list<T*>::begin()); it != std::list<T*>::end(); it++)
+		for (std_list_T_iterator it(std::list<T*>::begin()); it != std::list<T*>::end(); it++)
 			delete *it;
 }
 
-/////////////////// ePtrList begin() for iterator /////////////////////////////
-template <class T>
-inline ePtrList<T>::iterator ePtrList<T>::begin()
-{				
-//	makes implicit type conversion form std::list::iterator to ePtrList::iterator
-	return std::list<T*>::begin();		
-}
-
-/////////////////// ePtrList end() for iterator /////////////////////////////
-template <class T>
-inline ePtrList<T>::iterator ePtrList<T>::end()
-{				
-//	makes implicit type conversion form std::list::iterator to ePtrList::iterator
-	return std::list<T*>::end();		
-}
-
-/////////////////// ePtrList begin() for const_iterator /////////////////////////////
-template <class T>
-inline ePtrList<T>::const_iterator ePtrList<T>::begin() const
-{				
-//	makes implicit type conversion form std::list::const_iterator to ePtrList::const_iterator
-	return std::list<T*>::begin();		
-}
-
-/////////////////// ePtrList end() for const_iterator /////////////////////////////
-template <class T>
-inline ePtrList<T>::const_iterator ePtrList<T>::end() const
-{				
-//	makes implicit type conversion form std::list::const_iterator to ePtrList::const_iterator
-	return std::list<T*>::end();		
-}
-
-/////////////////// ePtrList rbegin() for reverse_iterator /////////////////////////////
-template <class T>
-inline ePtrList<T>::reverse_iterator ePtrList<T>::rbegin()
-{				
-//	makes implicit type conversion form std::list::reverse:_iterator to ePtrList::reverse_iterator
-	return std::list<T*>::rbegin();		
-}
-
-/////////////////// ePtrList rend() for reverse_iterator /////////////////////////////
-template <class T>
-inline ePtrList<T>::reverse_iterator ePtrList<T>::rend()
-{				
-//	makes implicit type conversion form std::list::reverse_iterator to ePtrList::reverse_iterator
-	return std::list<T*>::rend();		
-}
-
-/////////////////// ePtrList rbegin() for const_reverse_iterator /////////////////////////////
-template <class T>
-inline ePtrList<T>::const_reverse_iterator ePtrList<T>::rbegin() const
-{				
-//	makes implicit type conversion form std::list::const_reverse_iterator to ePtrList::const_reverse_iterator
-	return std::list<T*>::rbegin();		
-}
-
-/////////////////// ePtrList rend() for const_reverse_iterator /////////////////////////////
-template <class T>
-inline ePtrList<T>::const_reverse_iterator ePtrList<T>::rend() const
-{				
-//	makes implicit type conversion form std::list::const_reverse_iterator to ePtrList::const_reverse_iterator
-	return std::list<T*>::rend();		
-}
 
 /////////////////// ePtrList sort() /////////////////////////
 template <class T>
@@ -279,7 +306,7 @@ inline void ePtrList<T>::remove(T* t)
 {
 // 	Remove all items that, equals to t, if auto-deletion is enabled, than the list call delete for the removed items
 //  If current is equal to one of the removed items, current is set to the next valid item
-	std::list<T*>::iterator it(std::list<T*>::begin());
+	T_iterator it(std::list<T*>::begin());
 
 	while (it != std::list<T*>::end())
 		if (*it == t)
@@ -296,33 +323,6 @@ inline void ePtrList<T>::remove(T* t)
 		else
 			it++;
 			
-}
-
-/////////////////// ePtrList erase(iterator) ///////////////////////
-template <class T>
-inline ePtrList<T>::iterator ePtrList<T>::erase(iterator it)
-{
-// 	Remove the item it, if auto-deletion is enabled, than the list call delete for this item
-//  If current is equal to the item that was removed, current is set to the next item in the list
-	if (autoDelete && *it)
-		delete *it;
-
-	if (cur == it)
-		return cur = std::list<T*>::erase(it);
-	else
-		return std::list<T*>::erase(it);
-}
-
-/////////////////// ePtrList erase(iterator from. iterator to) //////////////////
-template <class T>
-inline ePtrList<T>::iterator ePtrList<T>::erase(iterator from, iterator to)
-{
-// 	Remove all items between the to iterators from and to
-//	If auto-deletion is enabled, than the list call delete for all removed items
-	while (from != to)
-		from = erase(from);
-
-	return from;
 }
 
 /////////////////// ePtrList clear() //////////////////
@@ -401,7 +401,7 @@ inline T* ePtrList<T>::setCurrent(const T* t)
 {
 	// Sets the internal current iterator to the first element that equals to t, and returns t when a item is found,
 	// otherwise it returns 0 !
-	for (std::list<T*>::iterator it(std::list<T*>::begin()); it != std::list<T*>::end(); ++it)
+	for (T_iterator it(std::list<T*>::begin()); it != std::list<T*>::end(); ++it)
 		if (*it == t)
 		{
 			cur = it;
@@ -540,6 +540,113 @@ bool ePtrList<T>::operator!()
 }
 
 template <class T>
+void ePtrList<T>::setAutoDelete(bool b)
+{
+//	switched autoDelete on or off
+// 	if autoDelete is true, than the pointer list controls the heap memory behind the pointer itself
+//	the list calls delete for the item before it removed from the list
+	autoDelete=b;	
+}
+
+template <class T>
+bool ePtrList<T>::isAutoDelete()	
+{		
+// returns a bool that contains the state of autoDelete
+	return autoDelete;	
+}
+
+/*
+/////////////////// ePtrList begin() for iterator /////////////////////////////
+template <class T>
+inline ePtrList<T>::iterator ePtrList<T>::begin()
+{				
+//	makes implicit type conversion form std::list::iterator to ePtrList::iterator
+	return std::list<T*>::begin();		
+}
+
+/////////////////// ePtrList end() for iterator /////////////////////////////
+template <class T>
+inline ePtrList<T>::iterator ePtrList<T>::end()
+{				
+//	makes implicit type conversion form std::list::iterator to ePtrList::iterator
+	return std::list<T*>::end();		
+}
+
+/////////////////// ePtrList begin() for const_iterator /////////////////////////////
+template <class T>
+inline ePtrList<T>::const_iterator ePtrList<T>::begin() const
+{				
+//	makes implicit type conversion form std::list::const_iterator to ePtrList::const_iterator
+	return std::list<T*>::begin();		
+}
+
+/////////////////// ePtrList end() for const_iterator /////////////////////////////
+template <class T>
+inline ePtrList<T>::const_iterator ePtrList<T>::end() const
+{				
+//	makes implicit type conversion form std::list::const_iterator to ePtrList::const_iterator
+	return std::list<T*>::end();		
+}
+
+/////////////////// ePtrList rbegin() for reverse_iterator /////////////////////////////
+template <class T>
+inline ePtrList<T>::reverse_iterator ePtrList<T>::rbegin()
+{				
+//	makes implicit type conversion form std::list::reverse:_iterator to ePtrList::reverse_iterator
+	return std::list<T*>::rbegin();		
+}
+
+/////////////////// ePtrList rend() for reverse_iterator /////////////////////////////
+template <class T>
+inline ePtrList<T>::reverse_iterator ePtrList<T>::rend()
+{				
+//	makes implicit type conversion form std::list::reverse_iterator to ePtrList::reverse_iterator
+	return std::list<T*>::rend();		
+}
+
+/////////////////// ePtrList rbegin() for const_reverse_iterator /////////////////////////////
+template <class T>
+inline ePtrList<T>::const_reverse_iterator ePtrList<T>::rbegin() const
+{				
+//	makes implicit type conversion form std::list::const_reverse_iterator to ePtrList::const_reverse_iterator
+	return std::list<T*>::rbegin();		
+}
+
+/////////////////// ePtrList rend() for const_reverse_iterator /////////////////////////////
+template <class T>
+inline ePtrList<T>::const_reverse_iterator ePtrList<T>::rend() const
+{				
+//	makes implicit type conversion form std::list::const_reverse_iterator to ePtrList::const_reverse_iterator
+	return std::list<T*>::rend();		
+}
+
+/////////////////// ePtrList erase(iterator) ///////////////////////
+template <class T>
+inline ePtrList<T>::iterator ePtrList<T>::erase(iterator it)
+{
+// 	Remove the item it, if auto-deletion is enabled, than the list call delete for this item
+//  If current is equal to the item that was removed, current is set to the next item in the list
+	if (autoDelete && *it)
+		delete *it;                             	
+
+	if (cur == it)
+		return cur = std::list<T*>::erase(it);
+	else
+		return std::list<T*>::erase(it);
+}
+
+/////////////////// ePtrList erase(iterator from. iterator to) //////////////////
+template <class T>
+inline ePtrList<T>::iterator ePtrList<T>::erase(iterator from, iterator to)
+{
+// 	Remove all items between the to iterators from and to
+//	If auto-deletion is enabled, than the list call delete for all removed items
+	while (from != to)
+		from = erase(from);
+
+	return from;
+}
+template <class T>
 ePtrList<T>::operator iterator()	
 {
 //	Returns a iterator that equal to begin() of the list
@@ -567,20 +674,6 @@ ePtrList<T>::operator const_reverse_iterator() const
 	return rbegin();	
 }
 
-template <class T>
-void ePtrList<T>::setAutoDelete(bool b)
-{
-//	switched autoDelete on or off
-// 	if autoDelete is true, than the pointer list controls the heap memory behind the pointer itself
-//	the list calls delete for the item before it removed from the list
-	autoDelete=b;	
-}
-
-template <class T>
-bool ePtrList<T>::isAutoDelete()	
-{		
-// returns a bool that contains the state of autoDelete
-	return autoDelete;	
-}
+*/
 
 #endif // _E_PTRLIST

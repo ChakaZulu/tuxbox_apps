@@ -13,9 +13,10 @@
 template <class T>
 class eListBox: public eWidget
 {
+	typedef typename ePtrList<T>::iterator ePtrList_T_iterator;
 	void redrawWidget(gPainter *target, const eRect &area);
 	ePtrList<T> childs;
-	ePtrList<T>::iterator top, bottom, current;
+	ePtrList_T_iterator top, bottom, current;
 
 	int entries, font_size, item_height;
 	gColor col_active;
@@ -232,7 +233,7 @@ inline void eListBox<T>::setActiveColor(gColor active)
 
 	if (current != childs.end())
 	{
-		ePtrList<T>::iterator it(top);
+		ePtrList_T_iterator it(top);
 
 		for (int i = 0; i < entries; i++, it++)
 		{
@@ -289,7 +290,7 @@ inline void eListBox<T>::redrawWidget(gPainter *target, const eRect &where)
 	if (!have_focus)
 		return;
 
-	ePtrList<T>::iterator entry(top);   // refresh bottom here...
+	ePtrList_T_iterator entry(top);   // refresh bottom here...
 
 	int i=0;
   do
@@ -440,7 +441,7 @@ inline void eListBox<T>::keyDown(int rc)
 			int i=0;
 			int old=-1, cur=-1;
 
-			for (ePtrList<T>::iterator entry(top); i<entries; i++, ++entry)
+			for (ePtrList_T_iterator entry(top); i<entries; i++, ++entry)
 				if ( *entry == oldptr)
 					old=i;
 				else if ( *entry == *current )
@@ -486,7 +487,7 @@ inline void eListBox<T>::setCurrent(T *c)
 
 	if (current != childs.end() )
 	{
-		ePtrList<T>::iterator it(top);
+		ePtrList_T_iterator it(top);
 
 		int i = 0;
 		for (; i<entries; ++i, ++it)

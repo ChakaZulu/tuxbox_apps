@@ -1,28 +1,35 @@
+#include "font.h"
+
 #include <eerror.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <pthread.h>
-#include "font.h"
-#include "lcd.h"
-#include "grc.h"
-#include "elock.h"
-#include "init.h"
-
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <freetype/freetype.h>
+#include "config.h"
+
+// use this for init Freetype...
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
+#include <core/gdi/lcd.h>
+#include <core/gdi/grc.h>
+#include <core/system/elock.h>
+#include <core/system/init.h>
+
+
+//#include <freetype/freetype.h>
 
 	/* the following header shouldn't be used in normal programs */
-#include <freetype/internal/ftdebug.h>
+//#include <freetype/internal/ftdebug.h>
 
 	/* showing driver name */
-#include <freetype/ftmodule.h>
-#include <freetype/internal/ftobjs.h>
-#include <freetype/internal/ftdriver.h>
-
-#include "config.h"
+//#include <freetype/ftmodule.h>
+//#include <freetype/internal/ftobjs.h>
+//#include <freetype/internal/ftdriver.h>
 
 fontRenderClass *fontRenderClass::instance;
 static eLock ftlock;
@@ -83,6 +90,7 @@ int fontRenderClass::AddFont(const char *filename)
 
 	FT_Face face;
 	eLocker lock(ftlock);
+
 	if ((error=FT_New_Face(library, filename, 0, &face)))
 	{
 		printf(" failed: %s\n", strerror(error));
@@ -293,6 +301,7 @@ eTextPara::~eTextPara()
 void eTextPara::destroy()
 {
 	eLocker lock(refcntlck);
+
 	if (!refcnt--)
 		delete this;
 }
@@ -300,6 +309,7 @@ void eTextPara::destroy()
 eTextPara *eTextPara::grab()
 {
 	eLocker lock(refcntlck);
+
 	refcnt++;
 	return this;
 }
@@ -321,6 +331,7 @@ void eTextPara::setFont(Font *fnt)
 		delete current_font;
 	current_font=fnt;
 	eLocker lock(ftlock);
+
 	if (FTC_Manager_Lookup_Size(fontRenderClass::instance->cacheManager, &current_font->font.font, &current_face, &current_font->size)<0)
 	{
 		printf("FTC_Manager_Lookup_Size failed!\n");
@@ -400,7 +411,10 @@ int eTextPara::renderString(const eString &string, int rflags)
 			if (!index)
 				; // eDebug("unicode %d ('%c') not present", uc, uc);
 			else
+			{
+				eDebug("appendGlyph");
 				appendGlyph(index, flags);
+			}
 		}
 		p++;
 	}
@@ -562,6 +576,7 @@ void eTextPara::realign(int dir)	// der code hier ist ein wenig merkwuerdig.
 void eTextPara::clear()
 {
 	eLocker lock(ftlock);
+
 	for (glyphString::iterator i(glyphs.begin()); i!=glyphs.end(); ++i)
 	{
 		i->font->unlock();

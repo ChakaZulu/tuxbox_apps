@@ -21,7 +21,8 @@ gRC::gRC(): queuelock(MAXSIZE)
 //	ASSERT(!instance);
 	instance=this;
 	queuelock.lock(MAXSIZE);
-	pthread_create(&the_thread, 0, thread_wrapper, this);
+	eDebug("------------------------------------------------- gRC -----------------");
+	eDebug(pthread_create(&the_thread, 0, thread_wrapper, this)?"RC thread couldn't be created":"RC thread createted successfully");
 }
 
 gRC::~gRC()
@@ -170,7 +171,7 @@ void gPainter::clear()
 	rc.submit(o);
 }
 
-void gPainter::setPalette(gRGB *colors, int start=0, int len=256)
+void gPainter::setPalette(gRGB *colors, int start, int len)
 {
 	gOpcode o;
 	o.dc=&dc;

@@ -43,7 +43,7 @@ eListboxEntryService::~eListboxEntryService()
 {
 }
 
-eString eListboxEntryService::getText(int col=0) const
+eString eListboxEntryService::getText(int col) const
 {
 	switch (col)
 	{

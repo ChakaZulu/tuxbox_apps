@@ -1,4 +1,3 @@
-#include <qglobal.h>
 #include <png.h>
 #include <stdio.h>
 #include "epng.h"
@@ -12,12 +11,12 @@ gImage *loadPNG(const char *filename)
 	
 	if (!fp)
 	{
-		qDebug("couldn't open");
+		eDebug("couldn't open");
 		return 0;
 	}
 	if (!fread(header, 8, 1, fp))
 	{
-		qDebug("couldn't read");
+		eDebug("couldn't read");
 		fclose(fp);
 		return 0;
 	}
@@ -29,14 +28,14 @@ gImage *loadPNG(const char *filename)
 	png_structp png_ptr=png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
 	if (!png_ptr)
 	{
-		qDebug("no pngptr");
+		eDebug("no pngptr");
 		fclose(fp);
 		return 0;
 	}
 	png_infop info_ptr=png_create_info_struct(png_ptr);
 	if (!info_ptr)
 	{
-		qDebug("no info ptr");
+		eDebug("no info ptr");
 		png_destroy_read_struct(&png_ptr, (png_infopp)0, (png_infopp)0);
 		fclose(fp);
 		return 0;
@@ -44,14 +43,14 @@ gImage *loadPNG(const char *filename)
 	png_infop end_info = png_create_info_struct(png_ptr);
 	if (!end_info)
 	{
-		qDebug("no end");
+		eDebug("no end");
 		png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
 		fclose(fp);
 		return 0;
 	 }
 	if (setjmp(png_ptr->jmpbuf))
 	{
-		qDebug("das war wohl nix");
+		eDebug("das war wohl nix");
 		png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
 		fclose(fp);
 		if (res)
@@ -69,7 +68,7 @@ gImage *loadPNG(const char *filename)
 	
 	png_get_IHDR(png_ptr, info_ptr, &width, &height, &bit_depth, &color_type, 0, 0, 0);
 	
-	qDebug("%s: %dx%dx%d png, %d", filename, (int)width, (int)height, (int)bit_depth, color_type);
+	eDebug("%s: %dx%dx%d png, %d", filename, (int)width, (int)height, (int)bit_depth, color_type);
 	
 	if (color_type != 6)
 	{

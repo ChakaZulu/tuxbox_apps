@@ -4,7 +4,7 @@
 #include <core/system/init.h>
 #include <core/gui/eskin.h>
 
-eCheckbox::eCheckbox(eWidget *parent, int checked=0, int Size, eLabel* descr):
+eCheckbox::eCheckbox(eWidget *parent, int checked, int Size, eLabel* descr):
 	eButton(parent, descr)
 {
 	setCheck(checked);
