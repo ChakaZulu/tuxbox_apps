@@ -1,6 +1,7 @@
 AC_INIT(tuxbox-apps-misc-libs,0.0.1,,tuxbox-libs)
 AM_INIT_AUTOMAKE(tuxbox-libs,0.0.1)
 
+TUXBOX_APPS_ENDIAN
 TUXBOX_APPS
 
 AC_PROG_CC
