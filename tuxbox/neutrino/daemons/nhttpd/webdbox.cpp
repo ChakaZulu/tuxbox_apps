@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.17 2002/04/17 00:41:29 dirch Exp $
+	$Id: webdbox.cpp,v 1.18 2002/04/17 01:31:50 dirch Exp $
 
 	License: GPL
 
@@ -66,7 +66,7 @@ TWebDbox::~TWebDbox()
 bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 {
 	if(Parent->DEBUG) printf("Execute CGI : %s\n",request->Filename.c_str());
-//	if(strcmp(request->Filename.c_str(),"getdate") == 0)
+
 	if(request->Filename.compare("getdate") == 0)
 	{
 		request->SendPlainHeader();          // Standard httpd header senden
@@ -434,12 +434,6 @@ bool TWebDbox::Execute(CWebserverRequest* request)
 	if (request->Filename.compare("channellist.dbox2") == 0)
 	{
 		request->SendPlainHeader("text/html");
-		printf("ParameterList.size='%d' [bouquet]='%s'\n",request->ParameterList.size(),request->ParameterList["bouquet"].c_str());
-//		if(request->ParameterList.size() == 0)
-//		{
-//			if(Parent->DEBUG) printf("Show jetzt das Bouquet (Channellist)\n");
-//			ShowBouquet(request);
-//		}
 		if( (request->ParameterList.size() == 1) && ( request->ParameterList["bouquet"] != "") )
 		{
 			ShowBouquet(request,atoi(request->ParameterList["bouquet"].c_str()));
@@ -546,6 +540,7 @@ bool TWebDbox::Execute(CWebserverRequest* request)
 					sleep(1);
 					request->SocketWriteLn("HTTP/1.0 302 Moved Temporarily");
 					request->SocketWriteLn("Location: channellist.dbox2#akt");
+					UpdateBouquets();
 					return true;
 				}
 
@@ -556,6 +551,7 @@ bool TWebDbox::Execute(CWebserverRequest* request)
 					sleep(1);
 					request->SocketWriteLn("HTTP/1.0 302 Moved Temporarily");
 					request->SocketWriteLn("Location: channellist.dbox2#akt");
+					UpdateBouquets();
 					return true;
 				}
 
@@ -942,13 +938,13 @@ void TWebDbox::ShowControlpanel(CWebserverRequest* request)
 {
 	if (request->ParameterList.size() > 0)
 	{
-		if( request->ParameterList["volumemute"] != "")
+		if( request->ParameterList["1"] != "volumemute")
 		{
 			bool mute = controld.getMute();
 			controld.setMute( !mute );
 			if(request->Parent->DEBUG) printf("mute\n");
 		}
-		else if( request->ParameterList["volumeplus"] != "")
+		else if( request->ParameterList["1"] != "volumeplus")
 		{
 			char vol = controld.getVolume();
 			vol+=5;
@@ -957,7 +953,7 @@ void TWebDbox::ShowControlpanel(CWebserverRequest* request)
 			controld.setVolume(vol);
 			if(request->Parent->DEBUG) printf("Volume plus: %d\n",vol);
 		}
-		else if( request->ParameterList["volumeminus"] != "")
+		else if( request->ParameterList["1"] != "volumeminus")
 		{
 			char vol = controld.getVolume();
 			if (vol>0)
