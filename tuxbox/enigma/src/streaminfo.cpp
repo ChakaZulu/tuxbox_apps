@@ -1,39 +1,30 @@
 #include <stdlib.h>
 #include "streaminfo.h"
-#include "rc.h"
-#include "dvb.h"
-#include "edvb.h"
-#include "elabel.h"
-#include "decoder.h"
-#include "multipage.h"
-#include "eskin.h"
+#include <core/driver/rc.h>
+#include <core/dvb/dvb.h>
+#include <core/dvb/edvb.h>
+#include <core/gui/elabel.h>
+#include <core/dvb/decoder.h>
+#include <core/gui/multipage.h>
+#include <core/gui/eskin.h>
+#include <core/gui/guiactions.h>
 
-int eStreaminfo::keyUp(int code)
+int eStreaminfo::eventHandler(const eWidgetEvent &event)
 {
-	switch (code)
+	switch (event.type)
 	{
-	case eRCInput::RC_OK:
-	case eRCInput::RC_HELP:
-		close(0);
+	case eWidgetEvent::evtAction:
+		if ((event.action == &i_cursorActions->ok) || (event.action == &i_cursorActions->cancel))
+			close(0);
+		else if (event.action == &i_cursorActions->right)
+			mp.next();
+		else if (event.action == &i_cursorActions->left)
+			mp.prev();
+		else
+			break;
 		return 1;
-	default:
-		return 0;
 	}
-}
-
-int eStreaminfo::keyDown(int code)
-{
-	switch (code)
-	{
-	case eRCInput::RC_RIGHT:
-		mp.next();
-		return 1;
-	case eRCInput::RC_LEFT:
-		mp.prev();
-		return 1;
-	default:
-		return 0;
-	}
+	return eWindow::eventHandler(event);
 }
 
 static eString getCAName(int casysid)
@@ -341,6 +332,7 @@ void siCA::redrawWidget()
 
 eStreaminfo::eStreaminfo(int mode, decoderParameters *parms): eWindow(1)
 {
+	addActionMap(&i_cursorActions->map);
 	setText(mode?"Record mode - read manual":"Streaminfo");
 	cmove(ePoint(100, 80));
 	cresize(eSize(450, 450));

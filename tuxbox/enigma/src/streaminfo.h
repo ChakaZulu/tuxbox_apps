@@ -12,8 +12,7 @@ class eStreaminfo: public eWindow
 {
 	eMultipage mp;
 protected:
-	int keyUp(int code);
-	int keyDown(int code);
+	int eventHandler(const eWidgetEvent &event);
 public:
 	eStreaminfo(int mode=0, decoderParameters *parms=0);
 };
