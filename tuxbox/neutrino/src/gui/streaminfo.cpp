@@ -206,7 +206,7 @@ void CStreamInfo::paint()
 
 	//tsfrequenz
 	ypos+= mheight;
-	sprintf((char*) buf, "%s: %dkhz (%c)", "tsf", si.tsfrequency, (si.polarisation == 1) ? 'v' : 'h');
+	sprintf((char*) buf, "%s: %dkhz (%c)", "tsf", si.tsfrequency, (si.polarisation == HORIZONTAL) ? 'h' : 'v');
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 	//vpid
