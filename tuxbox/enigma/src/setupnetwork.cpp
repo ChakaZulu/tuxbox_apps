@@ -639,14 +639,14 @@ eZapNetworkSetup::eZapNetworkSetup():
 	ok->setShortcut("green");
 	ok->setShortcutPixmap("green");
 	ok->move(ePoint(20, 295));
-	ok->resize(eSize(220, 40));
+	ok->resize(eSize(200, 40));
 	ok->setHelpText(_("save changes and return"));
 	ok->loadDeco();
 	CONNECT(ok->selected, eZapNetworkSetup::okPressed);
 
 #ifndef DISABLE_NFS
 	nfs = new eButton(this);
-	nfs->move(ePoint(250,295));
+	nfs->move(ePoint(230,295));
 	nfs->resize(eSize(clientrect.width()-250, 40));
 	nfs->setText(_("mounts"));
 	nfs->setShortcut("blue");
