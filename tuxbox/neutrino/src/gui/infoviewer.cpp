@@ -313,6 +313,9 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 		{
 			// show failure..!
 			printf("zap failed!\n");
+			#ifdef USEACTIONLOG
+				g_ActionLog->println("channel unavailable");
+			#endif
 		}
 	    return messages_return::handled;
 	}
