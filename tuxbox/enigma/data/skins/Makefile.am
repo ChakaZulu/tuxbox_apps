@@ -6,7 +6,7 @@ EXTRA_DIST = \
 #	chkdesign.esml chkdesign.info \
 #	chkv2.esml chkv2.info \
 #	default.esml \
-#	dream.esml dream.info \
+#	dream.esml dream.info
 
 install-data-local:
 	install -d $(DATADIR)/enigma/skins
