@@ -1,486 +1,40 @@
-menu.back wróc
-
-options.off wyl
-options.on wla
-options.serial szeregowy
-options.fb ekran
-options.null brak
-options.default ustaw fabryczne
-
-mainmenu.head Menu glówne
-mainmenu.tvmode Telewizja
-mainmenu.radiomode Radio
-mainmenu.scartmode Tryb Euro
-mainmenu.games Gry
-mainmenu.mp3player Odtwarzacz mp3
-mainmenu.sleeptimer Wylacznik czasowy
-mainmenu.shutdown Wylacz
-mainmenu.settings Ustawienia
-mainmenu.service Serwis
-mainmenu.recording Nagrywanie
-mainmenu.recording_start rozpocznij
-mainmenu.recording_stop zatrzymaj
-mainmenu.pictureviewer Przegladarka zdjec
-mainmenu.movieplayer Odtwarzacz filmow
-mainmenu.pausesectionsd czytaj EPG
-
-servicemenu.head Ustawienia
-servicemenu.update Aktualizacja oprogramowania
-servicemenu.scants Strojenie
-servicemenu.ucodecheck Wersja ucodes
-servicemenu.reload przeladuj liste kanalów
-servicemenu.reload_hint Przeladowje liste,\nprosze czekaj...
-
-cablesetup.provider provider kablowy
-
-satsetup.diseqc DiSEqC
-satsetup.satellite Satelity
-satsetup.extended DiSEqC-ustawienia
-satsetup.extended_lnb LNB-ustawienia
-satsetup.extended_motor Silownik-ustawienia
-satsetup.nodiseqc bez DiSEqC
-satsetup.minidiseqc Mini-DiSEqC
-satsetup.diseqc10 DiSEqC 1.0
-satsetup.diseqc11 DiSEqC 1.1
-satsetup.diseqc12 DiSEqC 1.2
-satsetup.smatvremote Strojenie SMATV
-satsetup.diseqcrepeat DiSEqC-powtórzenia
-satsetup.savesettingsnow Zapisz natychmiast ustawienia
-satsetup.motorcontrol Silownik-konfiguracja
-
-mainsettings.head Glówne ustawienia
-mainsettings.savesettingsnow Zapisz natychmiast ustawienia
-mainsettings.savesettingsnow_hint Zapisuje ustawienia,\nprosze czekaj...
-mainsettings.language Jezyk
-mainsettings.audio Dzwiek
-mainsettings.video Obraz
-mainsettings.network Siec
-mainsettings.recording Nagrywanie
-mainsettings.streaming Odtwarzacz filmów
-mainsettings.colors Kolory / Tematy
-mainsettings.plugins Dodatki
-mainsettings.lcd LCD-ustawienia
-mainsettings.keybinding Wybór klawiszy
-mainsettings.misc Inne Ustawienia
-mainsettings.scan Ustawienia Strojenia
-
-mp3picsettings.general Odtwarzacz MP3 / Przegladarka
-
-miscsettings.head Inne Ustawienia
-miscsettings.shutdown_real Zalacz Standby
-miscsettings.shutdown_real_rcdelay Opóznione wylaczenie
-miscsettings.boxtype Tyb DBox'a
-miscsettings.bootinfo Pokaz info przy starcie
-miscsettings.startbhdriver zaladuj drivery BH
-miscsettings.general Glówne
-miscsettings.fb_destination Ekspert! -konsola
-miscsettings.infobar_sat_display Nazwa satelity na pasku
-miscsettings.sptsmode SPTS-Mode drivery ladowac
-miscsettings.hwsections HW-Sekcje uzywac
-miscsettings.driver_boot Ustawiena driverów i Startu
-
-languagesetup.head Wybór jezyka
-languagesetup.select jezyk
-
-audiomenu.head Wybór Dzwieku
-audiomenu.analogout wyjscie analogowe
-audiomenu.monoright prawy mono
-audiomenu.monoleft lewy mono
-audiomenu.stereo stereo
-audiomenu.dolbydigital Dolby Digital
-audiomenu.avs_control sterowanie avs
-audiomenu.avs avs
-audiomenu.ost ost
-audiomenu.lirc lirc
-audiomenu.PCMOffset Regulacja dzwieku PCM
-
-videomenu.head Ustawienie Obrazu
-videomenu.screensetup Ustawienie widocznej czesci obrazu
-videomenu.videosignal typ sygnalu video
-videomenu.videosignal_rgb RGB + CVBS
-videomenu.videosignal_svideo S-Video
-videomenu.videosignal_yuv_v YUV + VBS
-videomenu.videosignal_yuv_c YUV + CVBS
-videomenu.videosignal_composite CVBS
-videomenu.videoformat format obrazu
-videomenu.videoformat_43 4:3 (LB)
-videomenu.videoformat_431 4:3 (PS)
-videomenu.videoformat_169 16:9
-videomenu.videoformat_autodetect autodetekcja
-videomenu.vcrswitch euro-automatyka
-videomenu.rgb_centering Wyposrodkowanie-RGB
-videomenu.csync Sync.-Korekcja
-
-networkmenu.head Ustawienia Sieci
-networkmenu.test testuj siec
-networkmenu.show pokaz aktualne ustawienia sieci
-networkmenu.setupnow zastosuj teraz
-networkmenu.setuponstartup zastosuj przy starcie
-networkmenu.ipaddress adres IP
-networkmenu.netmask maska podsieci
-networkmenu.broadcast adres rozgloszeniowy
-networkmenu.gateway brama
-networkmenu.nameserver serwer nazw
-
-recordingmenu.head Ustawienia nagrywania
-recordingmenu.recording_type urzadzenie nagrywajace
-recordingmenu.server_ip IP serwera nagr.
-recordingmenu.server_port port serwera nagr.
-recordingmenu.stopplayback zatrzymaj wyswietlanie
-recordingmenu.stopsectionsd zatrzymaj EPG
-recordingmenu.vcr_devicename marka video (lirc)
-recordingmenu.off wyl
-recordingmenu.server serwer
-recordingmenu.vcr video
-recordingmenu.file bezposrednio (Plik)
-recordingmenu.defdir Folder do nagrywania
-recordingmenu.filesettingsseparator filesettingsseparator
-recordingmenu.server_wakeup Uruchamianie nagrywania przez siec
-recordingmenu.server_mac MAC adres
-recordingmenu.setupnow wykonaj zmiany 
-recordingmenu.no_scart nie przelaczaj w tryb Euro
-recordingmenu.splitsize Max. wielkosc pliku(MB)
-recordingmenu.stream_all_audio_pids Nagrywaj wszystkie audio-kanaly
-
-streaming.buffer_overflow Nagrywanie zostalo przerwane,\nponiewarz plik nie mogl byc wystarczajaco \nszybko zapisany.
-streaming.busy Pzrynalmniej jeden proces nagrywania jest aktywny.\nJesli nagrywanie jest zakonczone,\npowinien ponowny start pomoc.
-streaming.dir_not_writable Nie moge pisac w podanym folderze.\nNagrywanie jest przez to nie mozliwe.
-streaming.success Nagranie zostalo pomyslnie zakonczone.
-streaming.write_error Nagranie zostalo niestety przerwane,\nponiewarz zaistnial blad podczas zapisu.
-streaming.write_error_open Nagranie zostalo niestety przerwane,\nponiewarz plik nie mogl zostac otwarty.
-
-streamingmenu.head Ustawienia odtwarzacza
-streamingmenu.streaming_type Typ serwera
-streamingmenu.server_ip IP serwera
-streamingmenu.server_port Port serwera
-streamingmenu.streaming_server_cddrive Naped DVD
-streamingmenu.streaming_server_startdir Volumin (VLC)
-streamingmenu.streaming_videorate Obraz-przeplywnosc
-streamingmenu.streaming_audiorate Dzwiek-przeplywnosc
-streamingmenu.off Wyl
-streamingmenu.on Wl
-streamingmenu.streaming_resolution Rozdzielczosc
-streamingmenu.352x288 352x288
-streamingmenu.352x576 352x576
-streamingmenu.480x576 480x576
-streamingmenu.704x576 704x576
-streamingmenu.streaming_transcode_audio Transcod. Audio (dvd/vcd/mpg)
-streamingmenu.streaming_force_avi_rawaudio Wymus AC3 przy avi
-streamingmenu.streaming_force_transcode_video Transcoduj tez mpg/vcd obraz
-streamingmenu.streaming_transcode_video_codec MPEG Video Codec
-streamingmenu.mpeg1 MPEG1
-streamingmenu.mpeg2 MPEG2
-
-ping.ok osiagalny (ping)
-ping.unreachable nieosiagalny
-ping.protocol nieosiagalny (blad hosta lub protokolu )
-ping.socket nieosiagalny (socket error)
-
-ipsetup.hint_1 Klawisze 0...9, albo Góra/Dól,
-ipsetup.hint_2 OK zapisuje, Home wychodzi
-
-colormenu.head Ustawienia kolorów
-colormenu.statusbar Listwa statusowa
-colormenu.themeselect Wybór tematu
-colormenu.font Czcionka
-colormenu.menucolors Kolory menu
-colormenu.background Kolor tla
-colormenu.background_head Kolor tla
-colormenu.textcolor Kolor tekstu
-colormenu.textcolor_head Kolor tekstu
-colormenu.fade Redukcja kontrastu 
-colormenu.timing Czas wyswietlania OSD
-
-colorthememenu.head Wybór tematu
-colorthememenu.neutrino_theme Temat Neutrino
-colorthememenu.classic_theme Klasyczny temat
-
-colormenusetup.head Kolory Menu
-colormenusetup.menuhead Lista tytuowa
-colormenusetup.menucontent Zawartosc okien
-colormenusetup.menucontent_inactive Zawartosc okien wylaczona
-colormenusetup.menucontent_selected Wybór zawartosci okien
-
-colorstatusbar.head Kolory listwy statusowej
-colorstatusbar.text Listwa Statusowa
-
-timing.head Czas wyswietlania OSD
-timing.menu Menu
-timing.chanlist Lista kanalów
-timing.epg EPG
-timing.infobar Info
-timing.filebrowser Przegldarka plików
-timing.hint_1 Czas w sekundach po którym
-timing.hint_2 listwa info zostanie wygaszona
-
-repeatblocker.hint_1 czas (w ms) pomiedzy nacisnieciami klawisza
-repeatblocker.hint_2 0 wylacza blokade (czerwony jest " ")
-
-keybindingmenu.RC Pilot
-keybindingmenu.repeatblock opóznienie samopowtarzania
-keybindingmenu.repeatblockgeneric podstawowe opóznienie
-keybindingmenu.head Ustawienia klawiszy
-keybindingmenu.modechange Zmiana Trybu
-keybindingmenu.channellist Lista kanalów
-keybindingmenu.quickzap Szybkie przelaczanie
-keybindingmenu.tvradiomode Telewizja/radio
-keybindingmenu.tvradiomode_head Telewizja/radio
-keybindingmenu.pageup Strona dalej
-keybindingmenu.pageup_head Strona dalej
-keybindingmenu.pagedown Strona wstecz 
-keybindingmenu.pagedown_head strona wstecz 
-keybindingmenu.cancel Zamknij liste kanalów
-keybindingmenu.cancel_head Zamknij liste kanalów
-keybindingmenu.sort Sortuj
-keybindingmenu.sort_head Sortuj
-keybindingmenu.addrecord dodaj timer nagrywania
-keybindingmenu.addrecord_head dodaj timer nagrywania
-keybindingmenu.addremind dodaj timer przelaczenia
-keybindingmenu.addremind_head dodaj timer przelaczenia
-keybindingmenu.channelup Kanal do góry
-keybindingmenu.channelup_head Kanal do góry
-keybindingmenu.channeldown Kanal na dol
-keybindingmenu.channeldown_head Kanal na dól
-keybindingmenu.bouquetup Nastepny bukiet
-keybindingmenu.bouquetup_head Nastepny bukiet
-keybindingmenu.bouquetdown Poprzedni bukiet
-keybindingmenu.bouquetdown_head Poprzedni bukiet
-keybindingmenu.bouquethandling Kontrola bukietów
-keybindingmenu.bouquetchannels_on_ok Biezacy bukiet
-keybindingmenu.bouquetlist_on_ok Lista bukietów
-keybindingmenu.allchannels_on_ok Wszystkie programy
-keybindingmenu.subchannelup Podprogram do góry
-keybindingmenu.subchannelup_head Podprogram do góry
-keybindingmenu.subchanneldown Podprogram na dól
-keybindingmenu.subchanneldown_head Podprogram na dól
-
-colorchooser.red czer.
-colorchooser.green ziel.
-colorchooser.blue nieb.
-colorchooser.alpha nasycenie
-
-lcdmenu.head Ustawienia LCD
-lcdmenu.inverse Inversja
-lcdmenu.power Wl / Wyl
-lcdmenu.autodimm Auto-zciemnij
-lcdmenu.lcdcontroler Kontrast / Jasnosc
-lcdmenu.statusline Linia Statusowa
-lcdmenu.statusline.volume Glosnosc
-lcdmenu.statusline.playtime Czas odtwarzania
-lcdmenu.statusline.both Glosnosc / Czas
-
-lcdcontroler.head Ustawienia LCD
-lcdcontroler.contrast Kontrast
-lcdcontroler.brightness normalna Jasnosc
-lcdcontroler.brightnessstandby Jasnosc w standby
-
-keychoosermenu.setnew Wybierz nowy klawisz
-keychoosermenu.setnone Zaden
-keychoosermenu.currentkey Aktualny klawisz
-
-keychooser.head Wybierz nowy klawisz
-keychooser.text1 Prosze nacisnac klawisz
-keychooser.text2 Prosze czekaj, przerywam
-
-screensetup.upperleft czerw = lewy-góra
-screensetup.lowerright ziel = prawy-dól
-
-bouquetlist.head Bukiety
-
-channellist.head Wszystkie Kanaly
-channellist.nonefound Brak listy kanalow!\nUruchom strojenie\n(ustawienia -> strojenie)
-channellist.since od %02d:%02d
-
-infoviewer.epgnotload EPG nie zaladowane...
-infoviewer.epgwait Czekam na EPG...
-infoviewer.streaminfo Funkcje
-infoviewer.eventlist Lista programow
-infoviewer.languages Dzwiek
-infoviewer.notavailable Kanal niedostepny
-infoviewer.cantdecode Kanal nie mozliwy do zdekodowania
-infoviewer.selecttime Wybor czasu
-infoviewer.nocurrent INFO nie dostepne dla tego kanalu
-infoviewer.noepg EPG nie dostepne
-infoviewer.subservice Podkanaly
-infoviewer.waittime Oczekiwanie na czas...
-infoviewer.motor_moving Ustawianie anteny
-
-epgviewer.notfound EPG-Informacje nie znalezione
-epgviewer.nodetailed Informacje nie sa dostepne
-epgviewer.More_Screenings Powtórki na tym kanale:
-epglist.head Przeglad - %s
-epglist.noevents EPG niedostepne...
-
-streaminfo.head Informacje
-streaminfo.resolution Rozdzielczosc
-streaminfo.bitrate Przeplywnosc
-streaminfo.aratio Format
-streaminfo.aratio_unknown Format: nieznany
-streaminfo.framerate Przekaz
-streaminfo.framerate_unknown Przekaz: nieznany
-streaminfo.audiotype Typ Dzwieku
-streaminfo.audiotype_unknown Typ Dzwieku: nieznany
-streaminfo.not_crypted nie kodowany
-streaminfo.ecm_invalid Nie prawidlowy system CA
-streaminfo.not_available nie dostepny
-
-streamfeatures.head Funkcje
-streamfeatures.info Informacje o strumienu
-
-apidselector.head Wybór Jezyka
-
-nvodselector.head Czas rozpoczecia
-nvodselector.subservice Wybierz podserwis
-nvodselector.directormode Tryb bezposredni
-
-ucodecheck.head Status UCodes
-ucodecheck.avia500 Avia 500
-ucodecheck.avia600 Avia 600
-ucodecheck.ucode UCode
-ucodecheck.cam-alpha Cam-Alpha
-
-date.Mon  Pon
-date.Tue  Wt
-date.Wed  Sr
-date.Thu  Czw
-date.Fri  Pt
-date.Sat  Sob
-date.Sun  Nd
-
-date.Jan  Sty
-date.Feb  Lut
-date.Mar  Mar
-date.Apr  Kwi
-date.May  Maj
-date.Jun  Cze
-date.Jul  Lip
-date.Aug  Sie
-date.Sep  Wrz
-date.Oct  Paz
-date.Nov  Lis
-date.Dec  Gru
-
-nvod.starting (start za %d min)
-nvod.proz (%d%% po starcie)
-
-scants.head Strojenie
-scants.startnow Rozpocznij Strojenie
-scants.actsatellite Satelity:
-scants.actcable Kabel:
-scants.transponders Transpondery:
-scants.freqdata Czestotliwosc:
-scants.provider Dostawca
-scants.channel Kanal
-scants.numberoftvservices TV
-scants.numberofradioservices Radio
-scants.numberofdataservices Dane
-scants.numberoftotalservices All
-scants.services Kanaly:
-scants.bouquet Bukiety
-scants.bouquet_leave pozostaw obecne
-scants.bouquet_create utworz nowe
-scants.bouquet_erase kasuj wszystkie
-scants.bouquet_satellite Bukiet satelity
-scants.bouquet_update aktualizacja
-scants.failed Brak transpondera!
-scants.finished Strojenie zakonczone sukcesem!
-
-motorcontrol.head Silownik-konfiguracja
-
-flashupdate.head Aktualizacja oprogramowania
-flashupdate.action Stan:
-flashupdate.globalprogress Calkowity postep :
-flashupdate.getinfofile Sprawdzanie wersji
-flashupdate.getinfofileerror nie moge sprawdzic wersji
-flashupdate.getupdatefile pobieram aktualizacje
-flashupdate.getupdatefileerror nie moge pobrac aktualizacji
-flashupdate.cantopenfile nie moge otworzyc pliku
-flashupdate.fileis0bytes rozmiar pliku 0 Bajtow
-flashupdate.eraseingflash kasuje flash
-flashupdate.erasefailed kasowanie nie udane
-flashupdate.programmingflash programuje flash
-flashupdate.cantopenmtd nie moge otworzyc urzadzenia Mtd
-flashupdate.ready gotowy
-flashupdate.reboot restartuje....
-flashupdate.updatemode Tryb aktualizacji
-flashupdate.updatemode_manual recznie (ftp)
-flashupdate.updatemode_internet internet
-flashupdate.currentversion_sep Biezaca wersja
-flashupdate.currentversiondate Data
-flashupdate.currentversiontime Czas
-flashupdate.currentreleasecycle Release cycle
-flashupdate.currentversionsnapshot Typ Image
-flashupdate.checkupdate Szukaj nowej wersji
-flashupdate.versioncheck Sprawdzam wersje
-flashupdate.md5check sprawdzam  image
-flashupdate.md5sumerror image zawiera bledy
-flashupdate.url_file plik konfiguracyjny
-flashupdate.proxyserver_sep Serwer Proxy
-flashupdate.proxyserver Nazwa Hosta
-flashupdate.proxyserver_hint1 Wprowadz nazwe lub IP hosta, uzyj host:port
-flashupdate.proxyserver_hint2 pusty bez proxy
-flashupdate.proxyusername Uzytkownik
-flashupdate.proxyusername_hint1 Wprowadz uzytkownika proxyserwera
-flashupdate.proxyusername_hint2 pusty - bez proxy
-flashupdate.proxypassword Haslo
-flashupdate.proxypassword_hint1 Wprowadz haslo proxyserwera
-flashupdate.proxypassword_hint2
-flashupdate.selectimage Dostepne Image
-flashupdate.msgbox Znaleziono nastepujacy nowy image:\nData: %s, %s\nBaseImage: %s\nTyp Image: %s\n\nCzy chcesz pobrac i zainstalowac image ?
-flashupdate.msgbox_manual Znaleziono nastepujacy nowy image:\nData: %s, %s\nBaseImage: %s\nTyp Image: %s\n\nCzy chcesz pobrac i zainstalowac image ?
-flashupdate.expertfunctions Zaawansowane (ekspert)
-flashupdate.readflash Czytaj caly image
-flashupdate.writeflash Zapisz caly image
-flashupdate.readflashmtd Czytaj jedna partycje
-flashupdate.writeflashmtd Zapisz jedna partycje
-flashupdate.savesuccess Image zapisany poprawnie \njako %s.
-flashupdate.mtdselector Wybór partycji
-flashupdate.titlereadflash Czytam Flash
-flashupdate.actionreadflash Czytam
-flashupdate.fileselector Wybór plikow
-flashupdate.titlewriteflash Zapis Flasha
-flashupdate.actionwriteflash zapis
-flashupdate.flashreadyreboot Image prawidlowo zapisany.\nDBox zresetuje sie.
-flashupdate.reallyflashmtd Napewno chcesz aktualizowac?\n\nJezeli wystapi blad lub plik image jest\nwadliwy, Dbox nie uruchomi sie.\n\nNazwa Image: %s\nCel: %s
-flashupdate.wrongbase Ta wersja Release cycle jest zbyt stara, \nprosze wgrac nowsza wersje!
-flashupdate.experimentalimage Wybrany image nie byl testowany, to\n oznacza, ze twój box moze nie\ndzialac po aktualizacji.\n\nCzy jestes pewny ze chcesz\ngo aktualizowac? na ta wersje?
-flashupdate.squashfs.noversion Przy SquashFS aktualizacji sprawdzana jest wersja tylko przy aktualizacji prze WEB.\nCzy jestes pewny ze chcesz aktualizowac ?
-
-bouqueteditor.name Edytor Bukietów
-bouqueteditor.delete Kasuj
-bouqueteditor.add Dodaj
-bouqueteditor.move Przenies
-bouqueteditor.rename Zmien nazwe
-bouqueteditor.hide Ukryj
-bouqueteditor.lock Zabezpiecz
-bouqueteditor.newbouquetname Nowa nazwa bukietu
-bouqueteditor.bouquetname Nazwa bukietu
-bouqueteditor.savechanges? Czy chcesz zapisac zmiany?
-bouqueteditor.savingchanges Zapisuje zmiany. Prosze czekac ...
-bouqueteditor.discardingchanges Anuluje zmiany. Prosze czekac ...
-bouqueteditor.switch dodaj/usun kanal
-bouqueteditor.switchmode TV/Radio
-bouqueteditor.return Gotowy
-
-messagebox.yes tak
-messagebox.no nie
-messagebox.cancel anuluj
-messagebox.back wróc
-messagebox.error blad
-messagebox.discard anulowac zmiany?
-messagebox.info informacje
-
-settings.noconffile Nie znaleziono ustawien.\nUzyje fabrycznych.
-settings.missingoptionsconffile Ustawienia Neutrino zaktualizowane.\nNowe opcje zostana dodane do fabrycznych.
-
-cam.wrong UWAGA, TWOJA KARTA \nJEST NIEZGODNA  Z CAMALPHA.BIN!!\n\Czy ponawiac to ostrzezenie?
-ucodes.failure UWAGA, brak µCodes!\n\nWyslij je przez FTP (lub przez DBox-BootManager),\npotem zrestartuj DBox'a!
-
-stringinput.caps duze/male
-stringinput.clear usun wszystko
-
-streamingserver.noconnect Brak polaczenia do streaming-serwera.\nRnagrywanie anulowane.
-
+EPGMenu.epgplus Przeglad
+EPGMenu.eventinfo Info o audycji
+EPGMenu.eventlist Przeglad aktualnego programu
+EPGMenu.head EPG - Informacje o programie
+EPGMenu.streaminfo Informacje techniczne
+EPGPlus.head Przeglad (EPG Plus)
+EPGPlus.record Nagrywanie
+EPGPlus.refresh_epg zaktualizowac
+EPGPlus.remind zaznaczyc
+EPGPlus.scroll_mode Scroll Mode
+EPGPlus.stretch_mode Stretch Mode
+GENRE.ARTS.0 sztuka/kultura
+GENRE.ARTS.1 performing arts
+GENRE.ARTS.10 sztuka/magazyny kultury
+GENRE.ARTS.11 moda
+GENRE.ARTS.2 fine arts
+GENRE.ARTS.3 religia
+GENRE.ARTS.4 kultura popularna/sztuka tradycyjna
+GENRE.ARTS.5 literatura
+GENRE.ARTS.6 film/kino
+GENRE.ARTS.7 film eksperymentalny/video
+GENRE.ARTS.8 przekaz/prasa
+GENRE.ARTS.9 nowe media
+GENRE.CHILDRENs_PROGRAMMES.0 dla dzieci/mlodziezy
+GENRE.CHILDRENs_PROGRAMMES.1 programy dla przedszkolaków
+GENRE.CHILDRENs_PROGRAMMES.2 programy rozrywkowe od 6 do 14 lat
+GENRE.CHILDRENs_PROGRAMMES.3 programy rozrywkowe od 10 do 16 lat
+GENRE.CHILDRENs_PROGRAMMES.4 programy edukacyjne/szkolne
+GENRE.CHILDRENs_PROGRAMMES.5 kreskówki
+GENRE.DOCUS_MAGAZINES.0 Dokumenty / Magazyn
+GENRE.DOCUS_MAGAZINES.1 natura/zwierzeta
+GENRE.DOCUS_MAGAZINES.2 technologia/nauki naturalne
+GENRE.DOCUS_MAGAZINES.3 medycyna/psyhologia
+GENRE.DOCUS_MAGAZINES.4 obce kraje/ekspedycje
+GENRE.DOCUS_MAGAZINES.5 nauki spoleczne/duchowe
+GENRE.DOCUS_MAGAZINES.6 szkolnictwo wyzsze
+GENRE.DOCUS_MAGAZINES.7 jezyki
 GENRE.MOVIE.0 film akcji / dramat
 GENRE.MOVIE.1 detektyw./sensacyjny
 GENRE.MOVIE.2 przygod./western/wojenny
@@ -490,20 +44,30 @@ GENRE.MOVIE.5 serial/melodramat
 GENRE.MOVIE.6 romans
 GENRE.MOVIE.7 serial/klasyka/religia/historia
 GENRE.MOVIE.8 dla doroslych
-
+GENRE.MUSIC_DANCE.0 muzyka/balet/taniec
+GENRE.MUSIC_DANCE.1 rock/pop
+GENRE.MUSIC_DANCE.2 muzyka powazna/klasyka
+GENRE.MUSIC_DANCE.3 folk/muzyka tradycyjna
+GENRE.MUSIC_DANCE.4 jazz
+GENRE.MUSIC_DANCE.5 musical/opera
+GENRE.MUSIC_DANCE.6 balet
 GENRE.NEWS.0 wiadomosci
 GENRE.NEWS.1 nowosci/pogoda
 GENRE.NEWS.2 magazyn
 GENRE.NEWS.3 dokument
 GENRE.NEWS.4 dyskusja/wywiad/debata
-
 GENRE.SHOW.0 Show / Gameshow
 GENRE.SHOW.1 game show/quiz
 GENRE.SHOW.2 variety show
 GENRE.SHOW.3 talk show
-
+GENRE.SOZIAL_POLITICAL.0 publicystyka/polityka
+GENRE.SOZIAL_POLITICAL.1 magazyny/raporty/dokumentacja
+GENRE.SOZIAL_POLITICAL.2 ekonomia/socjologia
+GENRE.SOZIAL_POLITICAL.3 ludzie
 GENRE.SPORTS.0 sport
 GENRE.SPORTS.1 imprezy specjalne(Olimpiada,Puchar swiata itd.)
+GENRE.SPORTS.10 jazda konna
+GENRE.SPORTS.11 sporty wojskowe
 GENRE.SPORTS.2 magazyny sportowe
 GENRE.SPORTS.3 pilka nozna
 GENRE.SPORTS.4 tenis/squash
@@ -512,51 +76,6 @@ GENRE.SPORTS.6 atletyka
 GENRE.SPORTS.7 sporty motorowe
 GENRE.SPORTS.8 sporty wodne
 GENRE.SPORTS.9 sporty zimowe
-GENRE.SPORTS.10 jazda konna
-GENRE.SPORTS.11 sporty wojskowe
-
-GENRE.CHILDRENs_PROGRAMMES.0 dla dzieci/mlodziezy
-GENRE.CHILDRENs_PROGRAMMES.1 programy dla przedszkolaków
-GENRE.CHILDRENs_PROGRAMMES.2 programy rozrywkowe od 6 do 14 lat
-GENRE.CHILDRENs_PROGRAMMES.3 programy rozrywkowe od 10 do 16 lat
-GENRE.CHILDRENs_PROGRAMMES.4 programy edukacyjne/szkolne
-GENRE.CHILDRENs_PROGRAMMES.5 kreskówki
-
-GENRE.MUSIC_DANCE.0 muzyka/balet/taniec
-GENRE.MUSIC_DANCE.1 rock/pop
-GENRE.MUSIC_DANCE.2 muzyka powazna/klasyka
-GENRE.MUSIC_DANCE.3 folk/muzyka tradycyjna
-GENRE.MUSIC_DANCE.4 jazz
-GENRE.MUSIC_DANCE.5 musical/opera
-GENRE.MUSIC_DANCE.6 balet
-
-GENRE.ARTS.0 sztuka/kultura
-GENRE.ARTS.1 performing arts
-GENRE.ARTS.2 fine arts
-GENRE.ARTS.3 religia
-GENRE.ARTS.4 kultura popularna/sztuka tradycyjna
-GENRE.ARTS.5 literatura
-GENRE.ARTS.6 film/kino
-GENRE.ARTS.7 film eksperymentalny/video
-GENRE.ARTS.8 przekaz/prasa
-GENRE.ARTS.9 nowe media
-GENRE.ARTS.10 sztuka/magazyny kultury
-GENRE.ARTS.11 moda
-
-GENRE.SOZIAL_POLITICAL.0 publicystyka/polityka
-GENRE.SOZIAL_POLITICAL.1 magazyny/raporty/dokumentacja
-GENRE.SOZIAL_POLITICAL.2 ekonomia/socjologia
-GENRE.SOZIAL_POLITICAL.3 ludzie
-
-GENRE.DOCUS_MAGAZINES.0 Dokumenty / Magazyn
-GENRE.DOCUS_MAGAZINES.1 natura/zwierzeta
-GENRE.DOCUS_MAGAZINES.2 technologia/nauki naturalne
-GENRE.DOCUS_MAGAZINES.3 medycyna/psyhologia
-GENRE.DOCUS_MAGAZINES.4 obce kraje/ekspedycje
-GENRE.DOCUS_MAGAZINES.5 nauki spoleczne/duchowe
-GENRE.DOCUS_MAGAZINES.6 szkolnictwo wyzsze
-GENRE.DOCUS_MAGAZINES.7 jezyki
-
 GENRE.TRAVEL_HOBBIES.0 podróze i wolny czas
 GENRE.TRAVEL_HOBBIES.1 turystyka/podróze
 GENRE.TRAVEL_HOBBIES.2 rzemioslo
@@ -565,280 +84,675 @@ GENRE.TRAVEL_HOBBIES.4 fitness i zdrowie
 GENRE.TRAVEL_HOBBIES.5 gotowanie
 GENRE.TRAVEL_HOBBIES.6 reklama/zakupy
 GENRE.TRAVEL_HOBBIES.7 ogrodnictwo
-
 GENRE.UNKNOWN Nieznany
-
-parentallock.parentallock Blokada wiekowa
-
-parentallock.prompt podaj PIN
-parentallock.never nigdy
-parentallock.onstart przy starcie
-parentallock.changetolocked na zabezpieczonych bukietach
-parentallock.onsignal na zabezpieczeniu nadawcy
-parentallock.lockedsender Locked sender...
-parentallock.lockedprogram Program zablokowany (od %d lat w zwyz)
-parentallock.head Wprowadz kod PIN
-
-parentallock.lockage lock program
-parentallock.lockage12 od 12 lat w zwyz
-parentallock.lockage16 od 16 lat w zwyz
-parentallock.lockage18 od 18 lat w zwyz
-
-parentallock.changepin Zmien kod PIN
-parentallock.changepin_hint1 Wprowadz nowy kod blokady wiekowej!
-
-pinprotection.wrongcode Bledny PIN-kod! Popraw.
-pinprotection.head Wprowadz kod PIN
-
-favorites.bouquetname Moje Ulubione
-favorites.nobouquets Ulubione dostepne sa wylacznie dla aktywnych Bukietów.
+apids.hint_1 Podaj APIDy do odbioru w
+apids.hint_2 formacie hex rozdzielone przez ' '
+apidselector.head Wybór Jezyka
+audiomenu.PCMOffset Regulacja dzwieku PCM
+audiomenu.analogout wyjscie analogowe
+audiomenu.avs avs
+audiomenu.avs_control sterowanie avs
+audiomenu.dolbydigital Dolby Digital
+audiomenu.head Wybór Dzwieku
+audiomenu.lirc lirc
+audiomenu.monoleft lewy mono
+audiomenu.monoright prawy mono
+audiomenu.ost ost
+audiomenu.stereo stereo
+bookmarkmanager.delete Zmazac
+bookmarkmanager.name Zaznaczenia
+bookmarkmanager.rename Zmienic nazwe
+bookmarkmanager.select Wybrac
+bouqueteditor.add Dodaj
+bouqueteditor.bouquetname Nazwa bukietu
+bouqueteditor.delete Kasuj
+bouqueteditor.discardingchanges Anuluje zmiany. Prosze czekac ...
+bouqueteditor.hide Ukryj
+bouqueteditor.lock Zabezpiecz
+bouqueteditor.move Przenies
+bouqueteditor.name Edytor Bukietów
+bouqueteditor.newbouquetname Nowa nazwa bukietu
+bouqueteditor.rename Zmien nazwe
+bouqueteditor.return Gotowy
+bouqueteditor.savechanges? Czy chcesz zapisac zmiany?
+bouqueteditor.savingchanges Zapisuje zmiany. Prosze czekac ...
+bouqueteditor.switch dodaj/usun kanal
+bouqueteditor.switchmode TV/Radio
+bouquetlist.head Bukiety
+cablesetup.provider provider kablowy
+cam.wrong UWAGA, TWOJA KARTA \nJEST NIEZGODNA  Z CAMALPHA.BIN!!\n\Czy ponawiac to ostrzezenie?
+channellist.head Wszystkie Kanaly
+channellist.nonefound Brak listy kanalow!\nUruchom strojenie\n(ustawienia -> strojenie)
+channellist.since od %02d:%02d
+colorchooser.alpha nasycenie
+colorchooser.blue nieb.
+colorchooser.green ziel.
+colorchooser.red czer.
+colormenu.background Kolor tla
+colormenu.background_head Kolor tla
+colormenu.fade Redukcja kontrastu 
+colormenu.font Czcionka
+colormenu.gtx_alpha Przezroczystosc (GTX)
+colormenu.head Ustawienia kolorów
+colormenu.menucolors Kolory menu
+colormenu.statusbar Listwa statusowa
+colormenu.textcolor Kolor tekstu
+colormenu.textcolor_head Kolor tekstu
+colormenu.themeselect Wybór tematu
+colormenu.timing Czas wyswietlania OSD
+colormenusetup.head Kolory Menu
+colormenusetup.menucontent Zawartosc okien
+colormenusetup.menucontent_inactive Zawartosc okien wylaczona
+colormenusetup.menucontent_selected Wybór zawartosci okien
+colormenusetup.menuhead Lista tytuowa
+colorstatusbar.head Kolory listwy statusowej
+colorstatusbar.text Listwa Statusowa
+colorthememenu.classic_theme Klasyczny temat
+colorthememenu.head Wybór tematu
+colorthememenu.neutrino_theme Temat Neutrino
+date.Apr  Kwi
+date.Aug  Sie
+date.Dec  Gru
+date.Feb  Lut
+date.Fri  Pt
+date.Jan  Sty
+date.Jul  Lip
+date.Jun  Cze
+date.Mar  Mar
+date.May  Maj
+date.Mon  Pon
+date.Nov  Lis
+date.Oct  Paz
+date.Sat  Sob
+date.Sep  Wrz
+date.Sun  Nd
+date.Thu  Czw
+date.Tue  Wt
+date.Wed  Sr
+epglist.head Przeglad - %s
+epglist.noevents EPG niedostepne...
+epgviewer.More_Screenings Powtórki na tym kanale:
+epgviewer.nodetailed Informacje nie sa dostepne
+epgviewer.notfound EPG-Informacje nie znalezione
+eventlistbar.channelswitch Przelaczyc
+eventlistbar.eventsort Ulozyc
+eventlistbar.recordevent Nagrac
 favorites.addchannel Biezacy kanal zostanie dodany \ndo bukietu "Moje Ulubione". \n To moze potrwac kilka sekund...
-favorites.menueadd Dodaj kanal do ulubionych
+favorites.bouquetname Moje Ulubione
 favorites.bqcreated Bukiuet "Moje Ulubione" zostal utworzony...\n
 favorites.chadded Biezacy kanal zostal dodany do ulubionych...\n
 favorites.chalreadyinbq Ten kanal jest juz w twoich ulubionych...\n
 favorites.finalhint \nUzyj edytora bukietow aby zmienic twoje ulubione.\n
-
-sleeptimerbox.title Wylacznik czasowy
-sleeptimerbox.hint1 Czas wylaczenia w min.
-sleeptimerbox.hint2 Dbox wylaczy sie po tym czasie.
-sleeptimerbox.announce Wylaczenie za 1 min
-
-zaptotimer.announce Uruchom timer za minute
-recordtimer.announce Nagrywanie rozpocznie sie za minute
-shutdowntimer.announce Dbox wylaczy sie za minute\nZatrzymac wylaczanie ? 
-
-timerbar.channelswitch Przeglad
-timerbar.recordevent Nagrywanie
-timer.eventtimed.title Przeglad eventów
-timer.eventtimed.msg Eventy ustawione.\nDbox wlaczy sie i\nustawi na tym kanale o czasie.
-timer.eventrecord.title Przeglad nagran
-timer.eventrecord.msg ... Zrobione, lub nie zrobione... 
-timerlist.name Lista nagran
-timerlist.delete Kasowanie
-timerlist.empty Brak zaprogramowanych nagran
-timerlist.type.shutdown Wylaczenie
-timerlist.type.nextprogram Nastepny program
-timerlist.type.zapto Ustaw na
-timerlist.type.standby Standby
-timerlist.type.record Nagrywanie
-timerlist.type.remind Przypomnienie
-timerlist.type.sleeptimer Wylacznik czasowy
-timerlist.type.unknown Nieznany
-timerlist.repeat.once Raz
-timerlist.repeat.daily Codziennie
-timerlist.repeat.weekly Co tydzien
-timerlist.repeat.biweekly Co dwa tygodnie
-timerlist.repeat.fourweekly Co cztery tygodnie
-timerlist.repeat.monthly Miesiecznie
-timerlist.repeat.byeventdescription zobacz timer
-timerlist.repeat.unknown nieznany
-timerlist.repeat.weekdays na wekend
-timerlist.repeat.sunday Nd
-timerlist.repeat.monday Po
-timerlist.repeat.tuesday Wt
-timerlist.repeat.wednesday Sr
-timerlist.repeat.thursday Cz
-timerlist.repeat.friday Pt
-timerlist.repeat.saturday So
-timerlist.weekdays na tydzien
-timerlist.weekdays.hint_1 Po Wt Sr Cz Pt So Nd
-timerlist.weekdays.hint_2 'X'=timer '-' brak timera 
-timerlist.program.unknown Program nieznany
-timerlist.standby.off Pozostan w standby
-timerlist.standby.on Zalacz standby
-timerlist.alarmtime Czas alarmu
-timerlist.stoptime Zatrzymaj
-timerlist.new Nowy timer
-timerlist.menumodify Zmien timer
-timerlist.type Typ timera
-timerlist.repeat Powtórzenie
-timerlist.save Zapisz timer
-timerlist.standby Tryb standby
-timerlist.channel Kanal
-timerlist.menunew Nowy timer
-timerlist.reload Przeladuj
-timerlist.modify Zmien
-timerlist.message Wiadomosc
-timerlist.apids Audio PIDs
-timerlist.bouquetselect Wybierz bukiet
-timerlist.channelselect Wybierz kanal
-timerlist.modeselect Wybór trybu
-timerlist.modetv Kanaly TV
-timerlist.moderadio Kanaly radiowe
-timersettings.separator Ustawienia timera
-timersettings.record_safety_time_before Popraw czas rozpoczecia
-timersettings.record_safety_time_before.hint_1 Poprawka czasu w minutach (00=wyl).
-timersettings.record_safety_time_before.hint_2 Zostanie zmienione na kazdym timerze.
-timersettings.record_safety_time_after Popraw czas zakonczenia
-timersettings.record_safety_time_after.hint_1 Poprawka czasu w minutach (00=wyl).
-timersettings.record_safety_time_after.hint_2 Zostanie zmienione na kazdym timerze.
-
-fontsize.menu Tekst menu
-fontsize.menu_title Tytul menu
-fontsize.menu_info Info menu
-fontsize.epg_title Tytul Epg
-fontsize.epg_info1 Epg info 1
-fontsize.epg_info2 Epg info 2
-fontsize.epg_date Data Epg
-fontsize.alert Alarm
-fontsize.eventlist_title Tytul
-fontsize.eventlist_itemlarge duzy
-fontsize.eventlist_itemsmall maly
-fontsize.eventlist_datetime data / czas
-fontsize.channellist Lista kanalów
-fontsize.channellist_descr Opis
-fontsize.channellist_number Numer
-fontsize.infobar_number Numer
-fontsize.infobar_channame Nazwa kanalu
-fontsize.infobar_info Info
-fontsize.infobar_small maly
-fontsize.gamelist_itemlarge duzy
-fontsize.gamelist_itemsmall maly
-fontsize.filebrowser_item element przeglad.
-fontsize.hint Inicjalizuje czcionki,\nprosze czekaj...
-
-fontmenu.head Rozmiar czcionki
-fontmenu.channellist Lista kan.
-fontmenu.eventlist Lista event
-fontmenu.epg EPG
-fontmenu.infobar Listwa info
-fontmenu.gamelist Lista gier
-
-colormenu.gtx_alpha Przezroczystosc (GTX)
-gtxalpha.alpha1 Alfa1
-gtxalpha.alpha2 Alfa2
-
-mp3player.name Odtwarzacz MP3
-mp3player.head Mp3
-mp3player.play Start
-mp3player.add Dodaj
-mp3player.delete Kasuj
-mp3player.stop Zatrzymaj
-mp3player.playall Odtwarzaj wszystkie
-mp3player.shuffle Losowo
-mp3player.deleteall Kasuj wszystkie
-mp3player.title Tytul
-mp3player.artist Wykonawca
-mp3player.playing Biezacy
-mp3player.id3scan Skanuj ID3 info
-mp3player.keylevel poziom
-mp3player.fastforward przewin.
-mp3player.pause pauza
-mp3player.rewind cofnij
-mp3player.artist_title Interpretacja, Tytul
-mp3player.title_artist Tytul, Interpretacja
-mp3player.display_order Kolejnosc
-mp3player.follow Auto-wybór biezacy
-mp3player.screensaver_timeout wygaszacz za:(min, 0=off)
-mp3player.defdir folder startowy
-mp3player.highprio Wysokie pierwschenstwo rozkodowywania
-
-movieplayer.name Odtwarzacz filmów
-movieplayer.head Odtwarzacz filmów 
-movieplayer.play Start
-movieplayer.choosets Odtwarzaj TS
-movieplayer.chooseps Odtwarzaj PS
-movieplayer.choosestream strumien
-movieplayer.choosepes Odtwarzaj PES
-movieplayer.bookmark Ulubione
-movieplayer.choosestreamsvcd (S)VCD
-movieplayer.choosestreamdvd DVD
-movieplayer.choosestreamfile plik z VLC
-movieplayer.pleasewait Poczekaj.\nLaczenie do streaming serwera...
-movieplayer.nostreamingserver Sreaming serwer nieosiagalny.
-movieplayer.defdir folder startowy
-movieplayer.buffering Buforuje...
-movieplayer.tsplayback Odtwarzaj TS
-movieplayer.pesplayback Odtwarzaj PES (Experymentalnie)
-movieplayer.fileplayback Plik przez VLC
-movieplayer.dvdplayback DVD
-movieplayer.vcdplayback (S)VCD
-movieplayer.vlchelp CZERW./Home Stop\nZIEL. Resync\nZOLTY Przerwa/Dalej\nNIEBIE. zaznaczyc\nd-box Czas wysfietlic\nv Skok\n1 cofnij ok.1 minute\n3 przyspiesz ok.1 minute\n4 cofnij ok.5 minut\n6 przyspiesz ok.5 minut\n7 cofnij ok.10 minut\n9 przyspiesz ok.10 minut\nPomoc: http://www.giggo.de/dbox2/movieplayer.html\n
-movieplayer.toomanybookmarks Zostalo juz za duzo zaznaczone.\nMusisz najpierw jakies zaznaczenie zmazac.
-movieplayer.bookmarkname Nazwa zaznaczenia
-movieplayer.bookmarkname_hint1 Podaj bowa nazwe dla zaznaczenia
-movieplayer.bookmarkname_hint2 
-movieplayer.goto Skoch do ...
-movieplayer.goto.h1 = -> absolutny skok
-movieplayer.goto.h2 +,- -> relatywny skok
-movieplayer.wrongvlcversion Funkcja jest z terazniejsza wersja VLC niedostepna
-
-bookmarkmanager.name Zaznaczenia
-bookmarkmanager.delete Zmazac
-bookmarkmanager.rename Zmienic nazwe
-bookmarkmanager.select Wybrac
-
-filebrowser.head Przegladarka
-filebrowser.filter.active Filtr wlaczony
-filebrowser.filter.inactive Filtr wylaczony
-filebrowser.select Wybierz
-filebrowser.mark Zaznacz
-filebrowser.scan Przeszukaj folder
-filebrowser.sort.name (Nazwa)
-filebrowser.sort.namedirsfirst (Nazwa2)
-filebrowser.sort.date (Data)
-filebrowser.sort.type (Typ)
-filebrowser.sort.size (Wielkosc)
-filebrowser.nextpage Nastepna strona
-filebrowser.prevpage Poprzednia strona
-filebrowser.showrights Pokarz prawa plikow
+favorites.menueadd Dodaj kanal do ulubionych
+favorites.nobouquets Ulubione dostepne sa wylacznie dla aktywnych Bukietów.
 filebrowser.delete zmazac
 filebrowser.dodelete1 Ma zostac
 filebrowser.dodelete2 zmazane ?
-
-nfs.mount Zamontuj volumin NFS/CIFS
-nfs.ip NFS/CIFS IP serwera
-nfs.dir katalog NFS/CIFS
-nfs.localdir lokalny katalog
+filebrowser.filter.active Filtr wlaczony
+filebrowser.filter.inactive Filtr wylaczony
+filebrowser.head Przegladarka
+filebrowser.mark Zaznacz
+filebrowser.nextpage Nastepna strona
+filebrowser.prevpage Poprzednia strona
+filebrowser.scan Przeszukaj folder
+filebrowser.select Wybierz
+filebrowser.showrights Pokarz prawa plikow
+filebrowser.sort.date (Data)
+filebrowser.sort.name (Nazwa)
+filebrowser.sort.namedirsfirst (Nazwa2)
+filebrowser.sort.size (Wielkosc)
+filebrowser.sort.type (Typ)
+flashupdate.action Stan:
+flashupdate.actionreadflash Czytam
+flashupdate.actionwriteflash zapis
+flashupdate.cantopenfile nie moge otworzyc pliku
+flashupdate.cantopenmtd nie moge otworzyc urzadzenia Mtd
+flashupdate.checkupdate Szukaj nowej wersji
+flashupdate.currentreleasecycle Release cycle
+flashupdate.currentversion_sep Biezaca wersja
+flashupdate.currentversiondate Data
+flashupdate.currentversionsnapshot Typ Image
+flashupdate.currentversiontime Czas
+flashupdate.erasefailed kasowanie nie udane
+flashupdate.eraseingflash kasuje flash
+flashupdate.experimentalimage Wybrany image nie byl testowany, to\n oznacza, ze twój box moze nie\ndzialac po aktualizacji.\n\nCzy jestes pewny ze chcesz\ngo aktualizowac? na ta wersje?
+flashupdate.expertfunctions Zaawansowane (ekspert)
+flashupdate.fileis0bytes rozmiar pliku 0 Bajtow
+flashupdate.fileselector Wybór plikow
+flashupdate.flashreadyreboot Image prawidlowo zapisany.\nDBox zresetuje sie.
+flashupdate.getinfofile Sprawdzanie wersji
+flashupdate.getinfofileerror nie moge sprawdzic wersji
+flashupdate.getupdatefile pobieram aktualizacje
+flashupdate.getupdatefileerror nie moge pobrac aktualizacji
+flashupdate.globalprogress Calkowity postep :
+flashupdate.head Aktualizacja oprogramowania
+flashupdate.md5check sprawdzam  image
+flashupdate.md5sumerror image zawiera bledy
+flashupdate.msgbox Znaleziono nastepujacy nowy image:\nData: %s, %s\nBaseImage: %s\nTyp Image: %s\n\nCzy chcesz pobrac i zainstalowac image ?
+flashupdate.msgbox_manual Znaleziono nastepujacy nowy image:\nData: %s, %s\nBaseImage: %s\nTyp Image: %s\n\nCzy chcesz pobrac i zainstalowac image ?
+flashupdate.mtdselector Wybór partycji
+flashupdate.programmingflash programuje flash
+flashupdate.proxypassword Haslo
+flashupdate.proxypassword_hint1 Wprowadz haslo proxyserwera
+flashupdate.proxypassword_hint2
+flashupdate.proxyserver Nazwa Hosta
+flashupdate.proxyserver_hint1 Wprowadz nazwe lub IP hosta, uzyj host:port
+flashupdate.proxyserver_hint2 pusty bez proxy
+flashupdate.proxyserver_sep Serwer Proxy
+flashupdate.proxyusername Uzytkownik
+flashupdate.proxyusername_hint1 Wprowadz uzytkownika proxyserwera
+flashupdate.proxyusername_hint2 pusty - bez proxy
+flashupdate.readflash Czytaj caly image
+flashupdate.readflashmtd Czytaj jedna partycje
+flashupdate.ready gotowy
+flashupdate.reallyflashmtd Napewno chcesz aktualizowac?\n\nJezeli wystapi blad lub plik image jest\nwadliwy, Dbox nie uruchomi sie.\n\nNazwa Image: %s\nCel: %s
+flashupdate.reboot restartuje....
+flashupdate.savesuccess Image zapisany poprawnie \njako %s.
+flashupdate.selectimage Dostepne Image
+flashupdate.squashfs.noversion Przy SquashFS aktualizacji sprawdzana jest wersja tylko przy aktualizacji prze WEB.\nCzy jestes pewny ze chcesz aktualizowac ?
+flashupdate.titlereadflash Czytam Flash
+flashupdate.titlewriteflash Zapis Flasha
+flashupdate.updatemode Tryb aktualizacji
+flashupdate.updatemode_internet internet
+flashupdate.updatemode_manual recznie (ftp)
+flashupdate.url_file plik konfiguracyjny
+flashupdate.versioncheck Sprawdzam wersje
+flashupdate.writeflash Zapisz caly image
+flashupdate.writeflashmtd Zapisz jedna partycje
+flashupdate.wrongbase Ta wersja Release cycle jest zbyt stara, \nprosze wgrac nowsza wersje!
+fontmenu.channellist Lista kan.
+fontmenu.epg EPG
+fontmenu.eventlist Lista event
+fontmenu.gamelist Lista gier
+fontmenu.head Rozmiar czcionki
+fontmenu.infobar Listwa info
+fontsize.alert Alarm
+fontsize.channellist Lista kanalów
+fontsize.channellist_descr Opis
+fontsize.channellist_number Numer
+fontsize.epg_date Data Epg
+fontsize.epg_info1 Epg info 1
+fontsize.epg_info2 Epg info 2
+fontsize.epg_title Tytul Epg
+fontsize.eventlist_datetime data / czas
+fontsize.eventlist_itemlarge duzy
+fontsize.eventlist_itemsmall maly
+fontsize.eventlist_title Tytul
+fontsize.filebrowser_item element przeglad.
+fontsize.gamelist_itemlarge duzy
+fontsize.gamelist_itemsmall maly
+fontsize.hint Inicjalizuje czcionki,\nprosze czekaj...
+fontsize.infobar_channame Nazwa kanalu
+fontsize.infobar_info Info
+fontsize.infobar_number Numer
+fontsize.infobar_small maly
+fontsize.menu Tekst menu
+fontsize.menu_info Info menu
+fontsize.menu_title Tytul menu
+gtxalpha.alpha1 Alfa1
+gtxalpha.alpha2 Alfa2
+infoviewer.cantdecode Kanal nie mozliwy do zdekodowania
+infoviewer.epgnotload EPG nie zaladowane...
+infoviewer.epgwait Czekam na EPG...
+infoviewer.eventlist Lista programow
+infoviewer.languages Dzwiek
+infoviewer.motor_moving Ustawianie anteny
+infoviewer.nocurrent INFO nie dostepne dla tego kanalu
+infoviewer.noepg EPG nie dostepne
+infoviewer.notavailable Kanal niedostepny
+infoviewer.selecttime Wybor czasu
+infoviewer.streaminfo Funkcje
+infoviewer.subservice Podkanaly
+infoviewer.waittime Oczekiwanie na czas...
+ipsetup.hint_1 Klawisze 0...9, albo Góra/Dól,
+ipsetup.hint_2 OK zapisuje, Home wychodzi
+keybindingmenu.RC Pilot
+keybindingmenu.addrecord dodaj timer nagrywania
+keybindingmenu.addrecord_head dodaj timer nagrywania
+keybindingmenu.addremind dodaj timer przelaczenia
+keybindingmenu.addremind_head dodaj timer przelaczenia
+keybindingmenu.allchannels_on_ok Wszystkie programy
+keybindingmenu.bouquetchannels_on_ok Biezacy bukiet
+keybindingmenu.bouquetdown Poprzedni bukiet
+keybindingmenu.bouquetdown_head Poprzedni bukiet
+keybindingmenu.bouquethandling Kontrola bukietów
+keybindingmenu.bouquetlist_on_ok Lista bukietów
+keybindingmenu.bouquetup Nastepny bukiet
+keybindingmenu.bouquetup_head Nastepny bukiet
+keybindingmenu.cancel Zamknij liste kanalów
+keybindingmenu.cancel_head Zamknij liste kanalów
+keybindingmenu.channeldown Kanal na dol
+keybindingmenu.channeldown_head Kanal na dól
+keybindingmenu.channellist Lista kanalów
+keybindingmenu.channelup Kanal do góry
+keybindingmenu.channelup_head Kanal do góry
+keybindingmenu.head Ustawienia klawiszy
+keybindingmenu.modechange Zmiana Trybu
+keybindingmenu.pagedown Strona wstecz 
+keybindingmenu.pagedown_head strona wstecz 
+keybindingmenu.pageup Strona dalej
+keybindingmenu.pageup_head Strona dalej
+keybindingmenu.quickzap Szybkie przelaczanie
+keybindingmenu.repeatblock opóznienie samopowtarzania
+keybindingmenu.repeatblockgeneric podstawowe opóznienie
+keybindingmenu.sort Sortuj
+keybindingmenu.sort_head Sortuj
+keybindingmenu.subchanneldown Podprogram na dól
+keybindingmenu.subchanneldown_head Podprogram na dól
+keybindingmenu.subchannelup Podprogram do góry
+keybindingmenu.subchannelup_head Podprogram do góry
+keybindingmenu.tvradiomode Telewizja/radio
+keybindingmenu.tvradiomode_head Telewizja/radio
+keychooser.head Wybierz nowy klawisz
+keychooser.text1 Prosze nacisnac klawisz
+keychooser.text2 Prosze czekaj, przerywam
+keychoosermenu.currentkey Aktualny klawisz
+keychoosermenu.setnew Wybierz nowy klawisz
+keychoosermenu.setnone Zaden
+languagesetup.head Wybór jezyka
+languagesetup.select jezyk
+lcdcontroler.brightness normalna Jasnosc
+lcdcontroler.brightnessstandby Jasnosc w standby
+lcdcontroler.contrast Kontrast
+lcdcontroler.head Ustawienia LCD
+lcdmenu.autodimm Auto-zciemnij
+lcdmenu.head Ustawienia LCD
+lcdmenu.inverse Inversja
+lcdmenu.lcdcontroler Kontrast / Jasnosc
+lcdmenu.power Wl / Wyl
+lcdmenu.statusline Linia Statusowa
+lcdmenu.statusline.both Glosnosc / Czas
+lcdmenu.statusline.playtime Czas odtwarzania
+lcdmenu.statusline.volume Glosnosc
+mainmenu.games Gry
+mainmenu.head Menu glówne
+mainmenu.movieplayer Odtwarzacz filmow
+mainmenu.mp3player Odtwarzacz mp3
+mainmenu.pausesectionsd czytaj EPG
+mainmenu.pictureviewer Przegladarka zdjec
+mainmenu.radiomode Radio
+mainmenu.recording Nagrywanie
+mainmenu.recording_start rozpocznij
+mainmenu.recording_stop zatrzymaj
+mainmenu.scartmode Tryb Euro
+mainmenu.service Serwis
+mainmenu.settings Ustawienia
+mainmenu.shutdown Wylacz
+mainmenu.sleeptimer Wylacznik czasowy
+mainmenu.tvmode Telewizja
+mainsettings.audio Dzwiek
+mainsettings.colors Kolory / Tematy
+mainsettings.head Glówne ustawienia
+mainsettings.keybinding Wybór klawiszy
+mainsettings.language Jezyk
+mainsettings.lcd LCD-ustawienia
+mainsettings.misc Inne Ustawienia
+mainsettings.network Siec
+mainsettings.plugins Dodatki
+mainsettings.recording Nagrywanie
+mainsettings.savesettingsnow Zapisz natychmiast ustawienia
+mainsettings.savesettingsnow_hint Zapisuje ustawienia,\nprosze czekaj...
+mainsettings.scan Ustawienia Strojenia
+mainsettings.streaming Odtwarzacz filmów
+mainsettings.video Obraz
+menu.back wróc
+messagebox.back wróc
+messagebox.cancel anuluj
+messagebox.discard anulowac zmiany?
+messagebox.error blad
+messagebox.info informacje
+messagebox.no nie
+messagebox.yes tak
+miscsettings.bootinfo Pokaz info przy starcie
+miscsettings.boxtype Tyb DBox'a
+miscsettings.driver_boot Ustawiena driverów i Startu
+miscsettings.fb_destination Ekspert! -konsola
+miscsettings.general Glówne
+miscsettings.head Inne Ustawienia
+miscsettings.hwsections HW-Sekcje uzywac
+miscsettings.infobar_sat_display Nazwa satelity na pasku
+miscsettings.shutdown_real Zalacz Standby
+miscsettings.shutdown_real_rcdelay Opóznione wylaczenie
+miscsettings.sptsmode SPTS-Mode drivery ladowac
+miscsettings.startbhdriver zaladuj drivery BH
+motorcontrol.head Silownik-konfiguracja
+movieplayer.bookmark Ulubione
+movieplayer.bookmarkname Nazwa zaznaczenia
+movieplayer.bookmarkname_hint1 Podaj bowa nazwe dla zaznaczenia
+movieplayer.bookmarkname_hint2 
+movieplayer.buffering Buforuje...
+movieplayer.choosepes Odtwarzaj PES
+movieplayer.chooseps Odtwarzaj PS
+movieplayer.choosestream strumien
+movieplayer.choosestreamdvd DVD
+movieplayer.choosestreamfile plik z VLC
+movieplayer.choosestreamsvcd (S)VCD
+movieplayer.choosets Odtwarzaj TS
+movieplayer.defdir folder startowy
+movieplayer.dvdplayback DVD
+movieplayer.fileplayback Plik przez VLC
+movieplayer.goto Skoch do ...
+movieplayer.goto.h1 = -> absolutny skok
+movieplayer.goto.h2 +,- -> relatywny skok
+movieplayer.head Odtwarzacz filmów 
+movieplayer.name Odtwarzacz filmów
+movieplayer.nostreamingserver Sreaming serwer nieosiagalny.
+movieplayer.pesplayback Odtwarzaj PES (Experymentalnie)
+movieplayer.play Start
+movieplayer.pleasewait Poczekaj.\nLaczenie do streaming serwera...
+movieplayer.toomanybookmarks Zostalo juz za duzo zaznaczone.\nMusisz najpierw jakies zaznaczenie zmazac.
+movieplayer.tsplayback Odtwarzaj TS
+movieplayer.vcdplayback (S)VCD
+movieplayer.vlchelp CZERW./Home Stop\nZIEL. Resync\nZOLTY Przerwa/Dalej\nNIEBIE. zaznaczyc\nd-box Czas wysfietlic\nv Skok\n1 cofnij ok.1 minute\n3 przyspiesz ok.1 minute\n4 cofnij ok.5 minut\n6 przyspiesz ok.5 minut\n7 cofnij ok.10 minut\n9 przyspiesz ok.10 minut\nPomoc: http://www.giggo.de/dbox2/movieplayer.html\n
+movieplayer.wrongvlcversion Funkcja jest z terazniejsza wersja VLC niedostepna
+mp3picsettings.general Odtwarzacz MP3 / Przegladarka
+mp3player.add Dodaj
+mp3player.artist Wykonawca
+mp3player.artist_title Interpretacja, Tytul
+mp3player.defdir folder startowy
+mp3player.delete Kasuj
+mp3player.deleteall Kasuj wszystkie
+mp3player.display_order Kolejnosc
+mp3player.fastforward przewin.
+mp3player.follow Auto-wybór biezacy
+mp3player.head Mp3
+mp3player.highprio Wysokie pierwschenstwo rozkodowywania
+mp3player.id3scan Skanuj ID3 info
+mp3player.keylevel poziom
+mp3player.name Odtwarzacz MP3
+mp3player.pause pauza
+mp3player.play Start
+mp3player.playall Odtwarzaj wszystkie
+mp3player.playing Biezacy
+mp3player.rewind cofnij
+mp3player.screensaver_timeout wygaszacz za:(min, 0=off)
+mp3player.shuffle Losowo
+mp3player.stop Zatrzymaj
+mp3player.title Tytul
+mp3player.title_artist Tytul, Interpretacja
+networkmenu.broadcast adres rozgloszeniowy
+networkmenu.gateway brama
+networkmenu.head Ustawienia Sieci
+networkmenu.ipaddress adres IP
+networkmenu.nameserver serwer nazw
+networkmenu.netmask maska podsieci
+networkmenu.setupnow zastosuj teraz
+networkmenu.setuponstartup zastosuj przy starcie
+networkmenu.show pokaz aktualne ustawienia sieci
+networkmenu.test testuj siec
+nfs.alreadymounted katalog juz zamontowny
 nfs.automount zamontuj przy starcie
-nfs.mountnow zamontuj teraz
+nfs.dir katalog NFS/CIFS
+nfs.ip NFS/CIFS IP serwera
+nfs.localdir lokalny katalog
+nfs.mount Zamontuj volumin NFS/CIFS
+nfs.mount_options parametry
 nfs.mounterror blad montowania
+nfs.mounterror_notsup nie prawidlowy sytem pliku
+nfs.mountnow zamontuj teraz
 nfs.mounttimeout Przekroczony czas
+nfs.password CIFS haslo
+nfs.type Typ
+nfs.type_cifs CIFS
+nfs.type_nfs NFS
 nfs.umount Odmontuj volumin NFS/CIFS
 nfs.umounterror blad odmontowania voluminu
-nfs.alreadymounted katalog juz zamontowny
-nfs.mount_options parametry
-nfs.type Typ
-nfs.type_nfs NFS
-nfs.type_cifs CIFS
 nfs.username CIFS uzytkownik
-nfs.password CIFS haslo
-nfs.mounterror_notsup nie prawidlowy sytem pliku
 nfsmenu.head ustawienia NFS/CIFS
-
-apids.hint_1 Podaj APIDy do odbioru w
-apids.hint_2 formacie hex rozdzielone przez ' '
-
+nvod.proz (%d%% po starcie)
+nvod.starting (start za %d min)
+nvodselector.directormode Tryb bezposredni
+nvodselector.head Czas rozpoczecia
+nvodselector.subservice Wybierz podserwis
+options.default ustaw fabryczne
+options.fb ekran
+options.null brak
+options.off wyl
+options.on wla
+options.serial szeregowy
+parentallock.changepin Zmien kod PIN
+parentallock.changepin_hint1 Wprowadz nowy kod blokady wiekowej!
+parentallock.changetolocked na zabezpieczonych bukietach
+parentallock.head Wprowadz kod PIN
+parentallock.lockage lock program
+parentallock.lockage12 od 12 lat w zwyz
+parentallock.lockage16 od 16 lat w zwyz
+parentallock.lockage18 od 18 lat w zwyz
+parentallock.lockedprogram Program zablokowany (od %d lat w zwyz)
+parentallock.lockedsender Locked sender...
+parentallock.never nigdy
+parentallock.onsignal na zabezpieczeniu nadawcy
+parentallock.onstart przy starcie
+parentallock.parentallock Blokada wiekowa
+parentallock.prompt podaj PIN
+pictureviewer.defdir folder startowy
 pictureviewer.head Przegladarka obrazów
+pictureviewer.scaling skalowanie
+pictureviewer.show pokaz
+pictureviewer.slide_time czas przewijania
+pictureviewer.slideshow przewijaj
 pictureviewer.sortorder zmien kolejnosc sortowania
 pictureviewer.sortorder.date (data)
 pictureviewer.sortorder.filename (nazwa)
-pictureviewer.show pokaz
-pictureviewer.slideshow przewijaj
-pictureviewer.slide_time czas przewijania
-pictureviewer.scaling skalowanie
-pictureviewer.defdir folder startowy
-
+ping.ok osiagalny (ping)
+ping.protocol nieosiagalny (blad hosta lub protokolu )
+ping.socket nieosiagalny (socket error)
+ping.unreachable nieosiagalny
+pinprotection.head Wprowadz kod PIN
+pinprotection.wrongcode Bledny PIN-kod! Popraw.
+rclock.lockmsg Pilot d-boxa zablokowany.\n Aby zwolnic blokade\n <CZERW.> i <DBOX> na Pilocie\n nacisnac.
 rclock.menueadd Blokada pilota
 rclock.title zablokowac Pilota
-rclock.lockmsg Pilot d-boxa zablokowany.\n Aby zwolnic blokade\n <CZERW.> i <DBOX> na Pilocie\n nacisnac.
 rclock.unlockmsg DBOX2 Pilot odblokowany...
-
-EPGMenu.head EPG - Informacje o programie
-EPGMenu.eventinfo Info o audycji
-EPGMenu.eventlist Przeglad aktualnego programu
-EPGMenu.epgplus Przeglad
-EPGMenu.streaminfo Informacje techniczne
-
-EPGPlus.head Przeglad (EPG Plus)
-EPGPlus.record Nagrywanie
-EPGPlus.refresh_epg zaktualizowac
-EPGPlus.remind zaznaczyc
-EPGPlus.scroll_mode Scroll Mode
-EPGPlus.stretch_mode Stretch Mode
-
-eventlistbar.channelswitch Przelaczyc
-eventlistbar.recordevent Nagrac
-eventlistbar.eventsort Ulozyc
-
+recordingmenu.defdir Folder do nagrywania
+recordingmenu.file bezposrednio (Plik)
+recordingmenu.filesettingsseparator filesettingsseparator
+recordingmenu.head Ustawienia nagrywania
+recordingmenu.no_scart nie przelaczaj w tryb Euro
+recordingmenu.off wyl
+recordingmenu.recording_type urzadzenie nagrywajace
+recordingmenu.server serwer
+recordingmenu.server_ip IP serwera nagr.
+recordingmenu.server_mac MAC adres
+recordingmenu.server_port port serwera nagr.
+recordingmenu.server_wakeup Uruchamianie nagrywania przez siec
+recordingmenu.setupnow wykonaj zmiany 
+recordingmenu.splitsize Max. wielkosc pliku(MB)
+recordingmenu.stopplayback zatrzymaj wyswietlanie
+recordingmenu.stopsectionsd zatrzymaj EPG
+recordingmenu.stream_all_audio_pids Nagrywaj wszystkie audio-kanaly
+recordingmenu.vcr video
+recordingmenu.vcr_devicename marka video (lirc)
+recordtimer.announce Nagrywanie rozpocznie sie za minute
+repeatblocker.hint_1 czas (w ms) pomiedzy nacisnieciami klawisza
+repeatblocker.hint_2 0 wylacza blokade (czerwony jest " ")
+satsetup.diseqc DiSEqC
+satsetup.diseqc10 DiSEqC 1.0
+satsetup.diseqc11 DiSEqC 1.1
+satsetup.diseqc12 DiSEqC 1.2
+satsetup.diseqcrepeat DiSEqC-powtórzenia
+satsetup.extended DiSEqC-ustawienia
+satsetup.extended_lnb LNB-ustawienia
+satsetup.extended_motor Silownik-ustawienia
+satsetup.minidiseqc Mini-DiSEqC
+satsetup.motorcontrol Silownik-konfiguracja
+satsetup.nodiseqc bez DiSEqC
+satsetup.satellite Satelity
+satsetup.savesettingsnow Zapisz natychmiast ustawienia
+satsetup.smatvremote Strojenie SMATV
+scants.actcable Kabel:
+scants.actsatellite Satelity:
+scants.bouquet Bukiety
+scants.bouquet_create utworz nowe
+scants.bouquet_erase kasuj wszystkie
+scants.bouquet_leave pozostaw obecne
+scants.bouquet_satellite Bukiet satelity
+scants.bouquet_update aktualizacja
+scants.channel Kanal
+scants.failed Brak transpondera!
+scants.finished Strojenie zakonczone sukcesem!
+scants.freqdata Czestotliwosc:
+scants.head Strojenie
+scants.numberofdataservices Dane
+scants.numberofradioservices Radio
+scants.numberoftotalservices All
+scants.numberoftvservices TV
+scants.provider Dostawca
+scants.services Kanaly:
+scants.startnow Rozpocznij Strojenie
+scants.transponders Transpondery:
+screensetup.lowerright ziel = prawy-dól
+screensetup.upperleft czerw = lewy-góra
+servicemenu.head Ustawienia
+servicemenu.reload przeladuj liste kanalów
+servicemenu.reload_hint Przeladowje liste,\nprosze czekaj...
+servicemenu.scants Strojenie
+servicemenu.ucodecheck Wersja ucodes
+servicemenu.update Aktualizacja oprogramowania
+settings.missingoptionsconffile Ustawienia Neutrino zaktualizowane.\nNowe opcje zostana dodane do fabrycznych.
+settings.noconffile Nie znaleziono ustawien.\nUzyje fabrycznych.
+shutdowntimer.announce Dbox wylaczy sie za minute\nZatrzymac wylaczanie ? 
+sleeptimerbox.announce Wylaczenie za 1 min
+sleeptimerbox.hint1 Czas wylaczenia w min.
+sleeptimerbox.hint2 Dbox wylaczy sie po tym czasie.
+sleeptimerbox.title Wylacznik czasowy
+streamfeatures.head Funkcje
+streamfeatures.info Informacje o strumienu
+streaminfo.aratio Format
+streaminfo.aratio_unknown Format: nieznany
+streaminfo.audiotype Typ Dzwieku
+streaminfo.audiotype_unknown Typ Dzwieku: nieznany
+streaminfo.bitrate Przeplywnosc
+streaminfo.ecm_invalid Nie prawidlowy system CA
+streaminfo.framerate Przekaz
+streaminfo.framerate_unknown Przekaz: nieznany
+streaminfo.head Informacje
+streaminfo.not_available nie dostepny
+streaminfo.not_crypted nie kodowany
+streaminfo.resolution Rozdzielczosc
+streaming.buffer_overflow Nagrywanie zostalo przerwane,\nponiewarz plik nie mogl byc wystarczajaco \nszybko zapisany.
+streaming.busy Pzrynalmniej jeden proces nagrywania jest aktywny.\nJesli nagrywanie jest zakonczone,\npowinien ponowny start pomoc.
+streaming.dir_not_writable Nie moge pisac w podanym folderze.\nNagrywanie jest przez to nie mozliwe.
+streaming.success Nagranie zostalo pomyslnie zakonczone.
+streaming.write_error Nagranie zostalo niestety przerwane,\nponiewarz zaistnial blad podczas zapisu.
+streaming.write_error_open Nagranie zostalo niestety przerwane,\nponiewarz plik nie mogl zostac otwarty.
+streamingmenu.352x288 352x288
+streamingmenu.352x576 352x576
+streamingmenu.480x576 480x576
+streamingmenu.704x576 704x576
+streamingmenu.head Ustawienia odtwarzacza
+streamingmenu.mpeg1 MPEG1
+streamingmenu.mpeg2 MPEG2
+streamingmenu.off Wyl
+streamingmenu.on Wl
+streamingmenu.server_ip IP serwera
+streamingmenu.server_port Port serwera
+streamingmenu.streaming_audiorate Dzwiek-przeplywnosc
+streamingmenu.streaming_force_avi_rawaudio Wymus AC3 przy avi
+streamingmenu.streaming_force_transcode_video Transcoduj tez mpg/vcd obraz
+streamingmenu.streaming_resolution Rozdzielczosc
+streamingmenu.streaming_server_cddrive Naped DVD
+streamingmenu.streaming_server_startdir Volumin (VLC)
+streamingmenu.streaming_transcode_audio Transcod. Audio (dvd/vcd/mpg)
+streamingmenu.streaming_transcode_video_codec MPEG Video Codec
+streamingmenu.streaming_type Typ serwera
+streamingmenu.streaming_videorate Obraz-przeplywnosc
+streamingserver.noconnect Brak polaczenia do streaming-serwera.\nRnagrywanie anulowane.
+stringinput.caps duze/male
+stringinput.clear usun wszystko
+timer.eventrecord.msg ... Zrobione, lub nie zrobione... 
+timer.eventrecord.title Przeglad nagran
+timer.eventtimed.msg Eventy ustawione.\nDbox wlaczy sie i\nustawi na tym kanale o czasie.
+timer.eventtimed.title Przeglad eventów
+timerbar.channelswitch Przeglad
+timerbar.recordevent Nagrywanie
+timerlist.alarmtime Czas alarmu
+timerlist.apids Audio PIDs
+timerlist.bouquetselect Wybierz bukiet
+timerlist.channel Kanal
+timerlist.channelselect Wybierz kanal
+timerlist.delete Kasowanie
+timerlist.empty Brak zaprogramowanych nagran
+timerlist.menumodify Zmien timer
+timerlist.menunew Nowy timer
+timerlist.message Wiadomosc
+timerlist.moderadio Kanaly radiowe
+timerlist.modeselect Wybór trybu
+timerlist.modetv Kanaly TV
+timerlist.modify Zmien
+timerlist.name Lista nagran
+timerlist.new Nowy timer
+timerlist.program.unknown Program nieznany
+timerlist.reload Przeladuj
+timerlist.repeat Powtórzenie
+timerlist.repeat.biweekly Co dwa tygodnie
+timerlist.repeat.byeventdescription zobacz timer
+timerlist.repeat.daily Codziennie
+timerlist.repeat.fourweekly Co cztery tygodnie
+timerlist.repeat.friday Pt
+timerlist.repeat.monday Po
+timerlist.repeat.monthly Miesiecznie
+timerlist.repeat.once Raz
+timerlist.repeat.saturday So
+timerlist.repeat.sunday Nd
+timerlist.repeat.thursday Cz
+timerlist.repeat.tuesday Wt
+timerlist.repeat.unknown nieznany
+timerlist.repeat.wednesday Sr
+timerlist.repeat.weekdays na wekend
+timerlist.repeat.weekly Co tydzien
+timerlist.save Zapisz timer
+timerlist.standby Tryb standby
+timerlist.standby.off Pozostan w standby
+timerlist.standby.on Zalacz standby
+timerlist.stoptime Zatrzymaj
+timerlist.type Typ timera
+timerlist.type.nextprogram Nastepny program
+timerlist.type.record Nagrywanie
+timerlist.type.remind Przypomnienie
+timerlist.type.shutdown Wylaczenie
+timerlist.type.sleeptimer Wylacznik czasowy
+timerlist.type.standby Standby
+timerlist.type.unknown Nieznany
+timerlist.type.zapto Ustaw na
+timerlist.weekdays na tydzien
+timerlist.weekdays.hint_1 Po Wt Sr Cz Pt So Nd
+timerlist.weekdays.hint_2 'X'=timer '-' brak timera 
+timersettings.record_safety_time_after Popraw czas zakonczenia
+timersettings.record_safety_time_after.hint_1 Poprawka czasu w minutach (00=wyl).
+timersettings.record_safety_time_after.hint_2 Zostanie zmienione na kazdym timerze.
+timersettings.record_safety_time_before Popraw czas rozpoczecia
+timersettings.record_safety_time_before.hint_1 Poprawka czasu w minutach (00=wyl).
+timersettings.record_safety_time_before.hint_2 Zostanie zmienione na kazdym timerze.
+timersettings.separator Ustawienia timera
+timing.chanlist Lista kanalów
+timing.epg EPG
+timing.filebrowser Przegldarka plików
+timing.head Czas wyswietlania OSD
+timing.hint_1 Czas w sekundach po którym
+timing.hint_2 listwa info zostanie wygaszona
+timing.infobar Info
+timing.menu Menu
+ucodecheck.avia500 Avia 500
+ucodecheck.avia600 Avia 600
+ucodecheck.cam-alpha Cam-Alpha
+ucodecheck.head Status UCodes
+ucodecheck.ucode UCode
+ucodes.failure UWAGA, brak µCodes!\n\nWyslij je przez FTP (lub przez DBox-BootManager),\npotem zrestartuj DBox'a!
+videomenu.csync Sync.-Korekcja
+videomenu.head Ustawienie Obrazu
+videomenu.rgb_centering Wyposrodkowanie-RGB
+videomenu.screensetup Ustawienie widocznej czesci obrazu
+videomenu.vcrswitch euro-automatyka
+videomenu.videoformat format obrazu
+videomenu.videoformat_169 16:9
+videomenu.videoformat_43 4:3 (LB)
+videomenu.videoformat_431 4:3 (PS)
+videomenu.videoformat_autodetect autodetekcja
+videomenu.videosignal typ sygnalu video
+videomenu.videosignal_composite CVBS
+videomenu.videosignal_rgb RGB + CVBS
+videomenu.videosignal_svideo S-Video
+videomenu.videosignal_yuv_c YUV + CVBS
+videomenu.videosignal_yuv_v YUV + VBS
+zaptotimer.announce Uruchom timer za minute
