@@ -424,8 +424,8 @@ bool CFrameBuffer::paintIcon8(const std::string & filename, const int x, const i
 	height = (header.height_hi << 8) | header.height_lo;
 
 	unsigned char pixbuf[768];
-	fb_pixel_t *d = getFrameBufferPointer() + x +stride*y;
-	fb_pixel_t *d2;
+	fb_pixel_t * d = getFrameBufferPointer() + x * sizeof(fb_pixel_t) + stride * y;
+	fb_pixel_t * d2;
 	for (int count=0; count<height; count ++ )
 	{
 		read(fd, &pixbuf, width );
@@ -470,8 +470,8 @@ bool CFrameBuffer::paintIcon(const std::string & filename, const int x, const in
 	height = (header.height_hi << 8) | header.height_lo;
 
 	unsigned char pixbuf[768];
-	fb_pixel_t *d = getFrameBufferPointer() + x +stride*y;
-	fb_pixel_t *d2;
+	fb_pixel_t * d = getFrameBufferPointer() + x * sizeof(fb_pixel_t) + stride * y;
+	fb_pixel_t * d2;
 	for (int count=0; count<height; count ++ )
 	{
 		read(fd, &pixbuf, width >> 1 );
@@ -662,10 +662,10 @@ bool CFrameBuffer::loadPictureToMem(const std::string & filename, const uint16_t
 	}
 
 	if ((stride == 0) || (stride == width))
-	    read(fd, memp, width * height);
+		read(fd, memp, width * height * sizeof(fb_pixel_t));
 	else
-	    for (int i = 0; i < height; i++)
-		read(fd, memp + i * stride, width);
+		for (int i = 0; i < height; i++)
+			read(fd, memp + i * stride, width);
 
 	close(fd);
 	return true;
@@ -709,7 +709,7 @@ bool CFrameBuffer::savePictureFromMem(const std::string & filename, const fb_pix
 
 	write(fd, &header, sizeof(struct rawHeader));
 
-	write(fd, memp, width * height);
+	write(fd, memp, width * height * sizeof(fb_pixel_t));
 
 	close(fd);
 	return true;
