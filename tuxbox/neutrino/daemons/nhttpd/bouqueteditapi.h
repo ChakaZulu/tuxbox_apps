@@ -19,7 +19,16 @@ class CBouqueteditAPI
 	private:
 		CWebDbox * Parent;
 
-	void BEShowBouquets(CWebserverRequest* request, unsigned int selected);
+	bool showBouquets(CWebserverRequest* request);
+	bool addBouquet(CWebserverRequest* request);
+	bool moveBouquet(CWebserverRequest* request);
+	bool deleteBouquet(CWebserverRequest* request);
+	bool saveBouquet(CWebserverRequest* request);
+	bool renameBouquet(CWebserverRequest* request);
+	bool editBouquet(CWebserverRequest* request);
+	bool changeBouquet(CWebserverRequest* request);
+	bool setBouquet(CWebserverRequest* request);
+
 
 	public:
 		CBouqueteditAPI(CWebDbox *parent){Parent = parent;};

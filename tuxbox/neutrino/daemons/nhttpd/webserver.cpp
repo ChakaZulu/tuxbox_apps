@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski
 
-	$Id: webserver.cpp,v 1.17 2002/09/24 08:09:19 dirch Exp $
+	$Id: webserver.cpp,v 1.18 2002/10/05 20:32:06 dirch Exp $
 
 	License: GPL
 
@@ -53,17 +53,16 @@ CWebserver::CWebserver(bool debug)
 	ListenSocket = 0;
 	PublicDocumentRoot = "";
 	PrivateDocumentRoot = "";
-	DEBUG = false;
 	STOP = false;
 	NewGui = false;
-	DEBUG = debug;
+	CDEBUG::getInstance()->Debug = debug;
 	AuthUser = "";
 	AuthPassword = "";
  
 	ReadConfig();
 
 	WebDbox = new CWebDbox(this);
-	if(DEBUG) printf("WebDbox initialized\n");
+	dprintf("WebDbox initialized\n");
 }
 //-------------------------------------------------------------------------
 CWebserver::~CWebserver()
@@ -87,7 +86,8 @@ void CWebserver::ReadConfig()
 	}
 	Port = Config->getInt32("Port");
 	THREADS = Config->getBool("THREADS");
-	VERBOSE = Config->getBool("VERBOSE");
+	CDEBUG::getInstance()->Verbose = Config->getBool("VERBOSE");
+	CDEBUG::getInstance()->Log = Config->getBool("LOG");
 	MustAuthenticate = Config->getBool("Authenticate");
 	PrivateDocumentRoot = Config->getString("PrivatDocRoot");
 	PublicDocumentRoot = Config->getString("PublicDocRoot");
@@ -106,6 +106,7 @@ void CWebserver::SaveConfig()
 	Config->setInt32("Port", 80);
 	Config->setBool("THREADS",true);
 	Config->setBool("VERBOSE",false);
+	Config->setBool("LOG",false);
 	Config->setBool("Authenticate",false);
 	Config->setString("AuthUser","root");
 	Config->setString("AuthPassword","dbox2");
@@ -152,7 +153,7 @@ bool CWebserver::Start()
 			perror("listen failed...");
 			return false;
 	}
-	if(DEBUG) printf("Server gestartet\n");
+	dprintf("Server gestartet\n");
 				
 	return true;
 }
@@ -176,21 +177,21 @@ CWebserverRequest	*req;
 			aprintf("Too many requests, waitin one sec\n");
 			sleep(1);
 		}
-		if(req->Parent->DEBUG) aprintf("++ Thread 0x06%X gestartet, ThreadCount: %d\n",(int)pthread_self(),ThreadsCount);	
+		dprintf("++ Thread 0x06%X gestartet, ThreadCount: %d\n",(int)pthread_self(),ThreadsCount);	
 		if(req->ParseRequest())
 		{
 			req->SendResponse();
-			if(req->Parent->DEBUG || req->Parent->VERBOSE) req->PrintRequest();
+			req->PrintRequest();
 			req->EndRequest();
 		}
 		else
-			if(req->Parent->DEBUG) aprintf("Error while parsing request\n");
+			dprintf("Error while parsing request\n");
 
 		pthread_mutex_lock( &ServerData_mutex );
 		ThreadsCount--;
 		pthread_mutex_unlock( &ServerData_mutex );
 
-		if(req->Parent->DEBUG) aprintf("-- Thread 0x06%X beendet, ThreadCount: %d\n",(int)pthread_self(),ThreadsCount);
+		dprintf("-- Thread 0x06%X beendet, ThreadCount: %d\n",(int)pthread_self(),ThreadsCount);
 		delete req;
 		delete (Cmyconn *) myconn;
 	}
@@ -224,7 +225,7 @@ pthread_t Threads[30];
                 continue;
         }
 		setsockopt(sock_connect,SOL_TCP,TCP_CORK,&t,sizeof(t));
-        if(DEBUG) printf("nhttpd: got connection from %s\n", inet_ntoa(cliaddr.sin_addr));		// request from client arrives
+        dprintf("nhttpd: got connection from %s\n", inet_ntoa(cliaddr.sin_addr));		// request from client arrives
 
 
 		if(THREADS)		
@@ -255,7 +256,7 @@ pthread_t Threads[30];
 				{
 //					if(DEBUG) printf("SendResponse()\n");				
 					req->SendResponse();														// send the proper response
-					if( DEBUG || VERBOSE ) req->PrintRequest();									// and print if wanted
+					req->PrintRequest();									// and print if wanted
 				}
 				else
 					dperror("Error while parsing request");
@@ -300,7 +301,7 @@ int CWebserver::SocketConnect(Tmconnect * con,int Port)
 
 	if(connect(con->sock_fd, (SA *)&con->servaddr, sizeof(con->servaddr))==-1)
 	{
-		printf("[nhttp]: connect to socket %d failed\n",Port);
+		aprintf("[nhttp]: connect to socket %d failed\n",Port);
 		return -1;
 	}
 	else

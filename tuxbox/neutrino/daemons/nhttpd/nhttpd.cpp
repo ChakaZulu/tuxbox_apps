@@ -53,17 +53,23 @@ CWebserver* webserver;
 
 void sig_catch(int msignal)
 {
-	if(msignal == SIGHUP)
+	switch(msignal)
 	{
-		aprintf("[nhttpd] got signal HUP, reading config\n");
-		webserver->ReadConfig();
-	}
-	else
-	{
-        aprintf("[nhttpd] stop requested......\n");
-        webserver->Stop();
-        delete(webserver);
-        exit(0);
+		case SIGHUP :
+				aprintf("got signal HUP, reading config\n");
+				webserver->ReadConfig();
+			break;
+/*
+		case SIGUSR1 :
+				aprintf("got signal USR1, toogling Debug\n");
+				CDEBUG::getInstance()->Debug = !CDEBUG:getInstance()->Debug;
+			break;
+*/
+		default:
+				aprintf("stop requested......\n");
+				webserver->Stop();
+				delete(webserver);
+				exit(0);
 	}
 }
 //-------------------------------------------------------------------------
@@ -82,7 +88,7 @@ int main(int argc, char **argv)
 
 			if (strncmp(argv[i], "-d", 2) == 0)
 			{
-				debug = true;
+				CDEBUG::getInstance()->Debug = true;
 				do_fork = false;
 			}
 			else 
@@ -111,10 +117,11 @@ int main(int argc, char **argv)
 
 	signal(SIGINT,sig_catch);
 	signal(SIGHUP,sig_catch);
+//	signal(SIGUSR1,sig_catch);
 	signal(SIGTERM,sig_catch);
 
 	aprintf("Neutrino HTTP-Server starting..\n");
-
+	
 	if (do_fork)
 	{
 		switch (fork())

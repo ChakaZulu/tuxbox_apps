@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.29 2002/09/24 08:09:19 dirch Exp $
+	$Id: request.cpp,v 1.30 2002/10/05 20:32:06 dirch Exp $
 
 	License: GPL
 
@@ -34,6 +34,8 @@
 #include "webdbox.h"
 #include "debug.h"
 
+#define OUTBUFSIZE 2048
+
 //-------------------------------------------------------------------------
 CWebserverRequest::CWebserverRequest(CWebserver *server) 
 {
@@ -49,11 +51,17 @@ CWebserverRequest::CWebserverRequest(CWebserver *server)
 	ContentType = "";
 	HttpStatus = 0;
 	RequestCanceled = false;
+
+	outbuf = new char[OUTBUFSIZE];
+
 }
 
 //-------------------------------------------------------------------------
 CWebserverRequest::~CWebserverRequest() 
 {
+	if(outbuf)
+		delete[] outbuf;
+
 	EndRequest();
 }
 
@@ -64,7 +72,7 @@ bool CWebserverRequest::Authenticate()			// check if authentication is required
 	{
 		if(!CheckAuth())
 		{
-//			if(Parent->DEBUG) printf("Authenticate\n");
+//			dprintf("Authenticate\n");
 			SocketWriteLn("HTTP/1.0 401 Unauthorized");
 			SocketWriteLn("WWW-Authenticate: Basic realm=\"dbox\"\r\n");
 			if (Method != M_HEAD) {
@@ -74,7 +82,7 @@ bool CWebserverRequest::Authenticate()			// check if authentication is required
 		}
 		else
 		{
-//			if(Parent->DEBUG) printf("Zugriff ok\n");
+//			dprintf("Zugriff ok\n");
 			return true;
 		}
 	}
@@ -92,16 +100,16 @@ bool CWebserverRequest::CheckAuth()			// check if given username an pssword are 
 	int pos = decodet.find_first_of(':');
 	string user = decodet.substr(0,pos);
 	string passwd = decodet.substr(pos + 1, decodet.length() - pos - 1);
-//	if(Parent->DEBUG) printf("user: '%s' passwd: '%s'\n",user.c_str(),passwd.c_str());
+//	dprintf("user: '%s' passwd: '%s'\n",user.c_str(),passwd.c_str());
 
 	if(user.compare(Parent->AuthUser) == 0 && passwd.compare(Parent->AuthPassword) == 0)
 	{
-//		if(Parent->DEBUG) printf("passwort ok\n");
+//		dprintf("passwort ok\n");
 		return true;
 	}
 	else
 	{
-//		if(Parent->DEBUG) printf("passwort nicht ok\n");
+//		dprintf("passwort nicht ok\n");
 		return false;
 	}
 }
@@ -170,7 +178,7 @@ bool ende = false;
 			param = param_str;
 			ende = true;
 		}
-//		if(Parent->DEBUG) printf("param: '%s' param_str: '%s'\n",param.c_str(),param_str.c_str());
+//		dprintf("param: '%s' param_str: '%s'\n",param.c_str(),param_str.c_str());
 		SplitParameter(param);
 	}
 	return true;
@@ -191,7 +199,7 @@ int ende, anfang, t;
 		method= zeile.substr(0,anfang);
 		url = zeile.substr(anfang+1,ende - (anfang+1));
 		http = zeile.substr(ende+1,zeile.length() - ende+1);
-//		if(Parent->DEBUG) printf("m: '%s' u: '%s' h:'%s'\n",method.c_str(),url.c_str(),http.c_str());
+//		dprintf("m: '%s' u: '%s' h:'%s'\n",method.c_str(),url.c_str(),http.c_str());
 
 		if(method.compare("POST") == 0)
 			Method = M_POST;
@@ -203,8 +211,8 @@ int ende, anfang, t;
 			Method = M_HEAD;
 		else
 		{
-			aprintf("[nhttpd] Unknown method or invalid request");
-			if(Parent->DEBUG) printf("Request: '%s'\n",rawbuffer.c_str());
+			aprintf("Unknown method or invalid request");
+			dprintf("Request: '%s'\n",rawbuffer.c_str());
 			return false;
 		}
 		
@@ -244,7 +252,7 @@ string sheader;
 		if((pos = sheader.find_first_of(':')) > 0)
 		{
 			HeaderList[sheader.substr(0,pos)] = sheader.substr(pos+2,sheader.length() - pos - 2);
-//			if(Parent->DEBUG) printf("%s: %s\n",sheader.substr(0,pos).c_str(),HeaderList[sheader.substr(0,pos)].c_str());
+//			dprintf("%s: %s\n",sheader.substr(0,pos).c_str(),HeaderList[sheader.substr(0,pos)].c_str());
 		}
 	}
 return true;	
@@ -253,7 +261,7 @@ return true;
 //-------------------------------------------------------------------------
 bool CWebserverRequest::ParseBoundaries(string bounds)			// parse boundaries of post method
 {
-	printf("formdata: '%s'\n",bounds.c_str());
+	aprintf("formdata: '%s'\n",bounds.c_str());
 	int i=0;
 	char * e_ende;
 	char * anfang = (char *) bounds.c_str();
@@ -261,13 +269,13 @@ bool CWebserverRequest::ParseBoundaries(string bounds)			// parse boundaries of 
 	do
 	{	
 		anfang = strstr(anfang,Boundary.c_str());
-//		printf("anfang: %s\n",anfang);
+//		dprintf("anfang: %s\n",anfang);
 		if(anfang != 0)
 		{
 			e_ende = strstr(anfang +1,Boundary.c_str());
 			if(e_ende == 0)
 				e_ende = ende - 4;
-//			printf("ende: %s\n",e_ende); 
+//			dprintf("ende: %s\n",e_ende); 
 			boundaries[i] = string(anfang + Boundary.length() +2,e_ende - (anfang + Boundary.length()+2) -2);
 			aprintf("boundary[%d]='%s'\n",i,boundaries[i].c_str());
 			anfang = e_ende;
@@ -286,7 +294,7 @@ int ende;
 	{
 		if((ende = rawbuffer.find_first_of('\n')) == 0)
 		{
-			aprintf("[nhttpd] ParseRequest: End of line not found\n");
+			aprintf("ParseRequest: End of line not found\n");
 			Send500Error();
 			return false;
 		}
@@ -297,10 +305,10 @@ int ende;
 			unsigned int i;
 			for(i = 0; ((rawbuffer[i] != '\n') || (rawbuffer[i+2] != '\n')) && (i < rawbuffer.length());i++);
 			int headerende = i;
-//			if(Parent->DEBUG) printf("headerende: %d buffer_len: %d\n",headerende,rawbuffer_len);
+//			dprintf("headerende: %d buffer_len: %d\n",headerende,rawbuffer_len);
 			if(headerende == 0)
 			{
-				aprintf("[nhttpd] ParseRequest: no headers found\n");
+				aprintf("ParseRequest: no headers found\n");
 				Send500Error();
 				return false;
 			}
@@ -315,14 +323,14 @@ int ende;
 				{
 					SocketWriteLn("Sorry, momentan broken\n");
 					/*Boundary = "--" + HeaderList["Content-Type"].substr(t.length(),HeaderList["Content-Type"].length() - t.length());
-					if(Parent->DEBUG) printf("Boundary: '%s'\n",Boundary.c_str());
+					dprintf("Boundary: '%s'\n",Boundary.c_str());
 					if((headerende + 3) < rawbuffer_len)
 						ParseBoundaries(rawbuffer.substr(headerende + 3,rawbuffer_len - (headerende + 3)));
 					HandleUpload();*/
 				}			
 				else if(HeaderList["Content-Type"].compare("application/x-www-form-urlencoded") == 0)
 				{
-					if(Parent->DEBUG) printf("Form Daten in Parameter String\n");
+					dprintf("Form Daten in Parameter String\n");
 					if((headerende + 3) < rawbuffer_len)
 					{
 						string params = rawbuffer.substr(headerende + 3,rawbuffer_len - (headerende + 3));
@@ -332,7 +340,7 @@ int ende;
 					}
 				}
 				
-				if(Parent->DEBUG) printf("Method Post !\n");
+				dprintf("Method Post !\n");
 			}
 
 /*
@@ -343,14 +351,14 @@ int ende;
 //					Parent->Debug("Post Parameter vorhanden\n");
 					anfang = ende + 3;
 					Param_String = string(anfang,rawbuffer + rawbuffer_len - anfang);
-					if(Parent->DEBUG) printf("Post Param_String: %s\n",Param_String.c_str());
+					dprintf("Post Param_String: %s\n",Param_String.c_str());
 					ParseParams(Param_String);
 				}
 				if(HeaderList->GetIndex("Content-Type") != -1)
 				{
-					if(Parent->DEBUG) printf("Content-Type: %s\n",HeaderList->GetValue(HeaderList->GetIndex("Content-Type")));
+					dprintf("Content-Type: %s\n",HeaderList->GetValue(HeaderList->GetIndex("Content-Type")));
 					if(strcasecmp("application/x-www-form-urlencoded",HeaderList->GetValue(HeaderList->GetIndex("Content-Type"))) == 0)
-						if(Parent->DEBUG) printf("Form Daten in Parameter String\n");
+						dprintf("Form Daten in Parameter String\n");
 					if(strstr(HeaderList->GetValue(HeaderList->GetIndex("Content-Type")),"multipart/form-data") != 0)
 					{
 						char * boundary;
@@ -359,11 +367,11 @@ int ende;
 						{
 							boundary += strlen("boundary=");
 
-							if(Parent->DEBUG) printf("boundary : %s\n",boundary);
+							dprintf("boundary : %s\n",boundary);
 							Upload = new TUpload(this);
 							Upload->Boundary = new TString(boundary);
 							Boundary = new TString(boundary);
-							if(Parent->DEBUG) printf("Form Daten in Parameter String und Datei upload\nBoundary: %ld\n",Boundary);
+							dprintf("Form Daten in Parameter String und Datei upload\nBoundary: %ld\n",Boundary);
 						}
 					}					
 				}
@@ -376,7 +384,7 @@ int ende;
 			SocketWrite("Content-Type: text/plain\r\n\r\n");
 			SocketWrite("501 : Request-Method not implemented.\n");
 			HttpStatus = 501;
-//			if(Parent->DEBUG) printf("501 : Request-Method not implemented.\n");
+//			dprintf("501 : Request-Method not implemented.\n");
 			return false;
 		}
 	}
@@ -393,26 +401,26 @@ bool CWebserverRequest::HandleUpload()				// momentan broken
 
 	if(HeaderList["Content-Length"] != "")
 	{
-		if(Parent->DEBUG) printf("Contenlaenge gefunden\n");
+		dprintf("Contenlaenge gefunden\n");
 		long contentsize = atol(HeaderList["Content-Length"].c_str());
-		if(Parent->DEBUG) printf("Contenlaenge :%ld\n",contentsize);
+		dprintf("Contenlaenge :%ld\n",contentsize);
 		char *buffer2 =(char *) malloc(contentsize);
 		if(!buffer2)
 		{
-			printf("Kein Speicher für upload\n");
+			dprintf("Kein Speicher für upload\n");
 			return false;
 		}
 		long long gelesen = 0;
-		if(Parent->DEBUG) printf("Buffer ok Groesse:%ld\n",contentsize);
+		dprintf("Buffer ok Groesse:%ld\n",contentsize);
 		while(gelesen < contentsize)
 		{
 			t = read(Socket,&buffer2[gelesen],contentsize-gelesen);
 			if(t <= 0)
-				printf("nix mehr\n");
+				dprintf("nix mehr\n");
 			gelesen += t;
-			if(Parent->DEBUG) printf("gelesen %lld\n",gelesen);
+			dprintf("gelesen %lld\n",gelesen);
 		}
-		printf("fertig\n");
+		dprintf("fertig\n");
 		FILE *out = fopen("/var/tmp/test.ausgabe","w");
 		if(out != NULL)
 		{
@@ -420,37 +428,30 @@ bool CWebserverRequest::HandleUpload()				// momentan broken
 			fclose(out);
 		}
 		else
-			printf("nicht geschreiben\n");
+			dprintf("nicht geschreiben\n");
 		free(buffer2);
 		
 		if(gelesen == contentsize)
 		{
-			if(Parent->DEBUG) printf("Upload komplett gelesen: %ld bytes\n",contentsize);
+			dprintf("Upload komplett gelesen: %ld bytes\n",contentsize);
 			return true;
 		} 
 		else
 		{
-			if(Parent->DEBUG) printf("Upload konnte nicht komplett gelesen werden  %ld bytes\n",contentsize);
+			dprintf("Upload konnte nicht komplett gelesen werden  %ld bytes\n",contentsize);
 			return false;
 		}
 	}
 	else
 	{
-		printf("Content-Length ist nicht in der HeaderListe\n");
+		dprintf("Content-Length ist nicht in der HeaderListe\n");
 		return false;
 	}
 }
 //-------------------------------------------------------------------------
 void CWebserverRequest::PrintRequest()					// for debugging and verbose output
 {
-	char method[6] = {0};
-	if(Method == M_GET)
-		sprintf(method,"GET");
-	else if(Method == M_POST)
-		sprintf(method,"POST");
-	else if(Method == M_HEAD)
-		sprintf(method,"HEAD");
-	aprintf("%04lu %s %3d %-6s %-35s %-20s %-25s %-10s %s\n",RequestNumber,Client_Addr.c_str(),HttpStatus,method,Path.c_str(),Filename.c_str(),URL.c_str(),ContentType.c_str(),Param_String.c_str());
+	CDEBUG::getInstance()->LogRequest(this);
 }
 
 //-------------------------------------------------------------------------
@@ -530,7 +531,7 @@ void CWebserverRequest::RewriteURL()
 		if(split < URL.length())
 			Filename= URL.substr(split,URL.length()- split);
 		else
-			if(Parent->DEBUG) aprintf("Kein Dateiname !\n");	
+			dprintf("Kein Dateiname !\n");	
 	}
 	// Nur umschreiben wenn nicht mit /fb/ oder /control/ anfängt
 	if( (strncmp(Path.c_str(),"/fb",3) != 0) && (strncmp(Path.c_str(),"/control",8) != 0) && (strncmp(Path.c_str(),"/bouquetedit",12) != 0))	
@@ -669,6 +670,23 @@ void CWebserverRequest::SendError()
 	SocketWrite("error");
 }
 //-------------------------------------------------------------------------
+void CWebserverRequest::printf ( const char *fmt, ... )
+{
+#define OUTBUFSIZE 2048
+
+char *buffer = new char[OUTBUFSIZE];
+	buffer[0] = 0;
+	va_list arglist;
+	va_start( arglist, fmt );
+//	if(arglist)
+		vsnprintf( buffer,OUTBUFSIZE, fmt, arglist );
+	va_end(arglist);
+//	::printf(buffer);
+	SocketWriteData(buffer,strlen(buffer));
+	delete[] buffer;
+}
+
+
 bool CWebserverRequest::SocketWrite(char *text)
 {
 	return SocketWriteData(text, strlen(text));
@@ -688,7 +706,7 @@ bool CWebserverRequest::SocketWriteData( char* data, long length )
 		return false;
 	if((write(Socket, data, length) == -1) )
 	{
-		if(Parent->DEBUG) aprintf("[nhttpd] request canceled\n");
+		dprintf("request canceled\n");
 		RequestCanceled = true;
 		return false;
 	}
@@ -733,7 +751,7 @@ int CWebserverRequest::OpenFile(string path, string filename)
 		tmpint = open( tmpstring.c_str(), O_RDONLY );
 		if (tmpint<=0)
 		{
-			aprintf("[nhttpd] cannot open file %s\n", tmpstring.c_str());
+			aprintf("cannot open file %s\n", tmpstring.c_str());
 			dperror("");
 		}
 		fstat(tmpint,&statbuf);
@@ -762,9 +780,11 @@ bool CWebserverRequest::ParseFile(string file,CStringList params)		// replace al
 	}
 	while(!feof(f))
 	{
-		fgets(zeile,sizeof(zeile),f);
-		SocketWrite(ParseLine(zeile,params));
-	}
+		if(fgets(zeile,sizeof(zeile),f))
+		{
+			SocketWrite(ParseLine(zeile,params));
+		}
+	};
 	fclose(f);
 	return true;
 }

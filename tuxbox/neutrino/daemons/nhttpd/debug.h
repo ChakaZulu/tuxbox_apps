@@ -26,9 +26,39 @@
 #ifndef __nhttpd_debug__
 #define __nhttpd_debug__
 
-//#define dprintf(fmt, args...) {if(CWebserver::getDebug()) printf( "[nhttpd] " fmt, ## args);}
-#define aprintf(fmt, args...) {printf( "[nhttpd] " fmt, ## args);}
-#define dperror(str) {perror("[nhttpd] " str);}
+#include <stdio.h>
+#include <pthread.h>
+#include <stdarg.h>
 
+#include "request.h"
+
+class CDEBUG
+{
+	private:
+		pthread_mutex_t Log_mutex;
+		char *buffer;
+		FILE *Logfile;
+
+		CDEBUG();
+		~CDEBUG();
+
+	public:
+		bool Debug;
+		bool Log;
+		bool Verbose;
+
+		static CDEBUG* getInstance();
+		void printf( const char *fmt, ... );
+		void debugprintf( const char *fmt, ... );
+		void logprintf( const char *fmt, ... );
+		void LogRequest(CWebserverRequest *Request);
+
+
+};
+
+#define aprintf(fmt, args...) {CDEBUG::getInstance()->printf( "[nhttpd] " fmt, ## args);}
+#define dprintf(fmt, args...) {CDEBUG::getInstance()->debugprintf( "[nhttpd] " fmt, ## args);}
+#define lprintf(fmt, args...) {CDEBUG::getInstance()->logprintf( "[nhttpd] " fmt, ## args);}
+#define dperror(str) {perror("[nhttpd] " str);}
 
 #endif

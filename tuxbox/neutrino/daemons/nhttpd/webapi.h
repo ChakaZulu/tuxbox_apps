@@ -24,7 +24,7 @@ class CWebAPI
 		bool ShowTimerList(CWebserverRequest* request);
 		bool ShowEventList(CWebserverRequest* request, t_channel_id channel_id);
 		bool ShowBouquet(CWebserverRequest *request,int BouquetNr = -1);
-		bool ShowBouquets(CWebserverRequest *request, unsigned int BouquetNr = 0);
+		bool ShowBouquets(CWebserverRequest *request);
 		bool ShowControlpanel(CWebserverRequest* request);
 		bool ShowCurrentStreamInfo(CWebserverRequest* request);
 		bool ShowEpg(CWebserverRequest* request,string EpgID,string Startzeit = "");
@@ -35,7 +35,6 @@ class CWebAPI
 		bool Timer(CWebserverRequest* request);
 		bool Info(CWebserverRequest* request);
 		bool Dbox(CWebserverRequest* request);
-		bool Bouquetlist(CWebserverRequest* request);
 		bool Channellist(CWebserverRequest* request);
 		bool Controlpanel(CWebserverRequest* request);
 		bool ActualEPG(CWebserverRequest* request);

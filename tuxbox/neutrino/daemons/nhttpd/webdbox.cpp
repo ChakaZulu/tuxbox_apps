@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.38 2002/10/03 19:05:12 thegoodguy Exp $
+	$Id: webdbox.cpp,v 1.39 2002/10/05 20:32:06 dirch Exp $
 
 	License: GPL
 
@@ -39,6 +39,7 @@
 #include "webserver.h"
 #include "request.h"
 #include "helper.h"
+#include "debug.h"
 
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
@@ -59,11 +60,11 @@ void CWebDbox::ZapTo(string target)
 	t_channel_id channel_id = atoi(target.c_str());
 	if(channel_id == Zapit->getCurrentServiceID())
 	{
-		if(Parent->DEBUG) printf("Kanal ist aktuell\n");
+		dprintf("Kanal ist aktuell\n");
 		return;
 	}
 	int status = Zapit->zapTo_serviceID(channel_id);
-	printf("Zapto Status: %d\n",status);
+	dprintf("Zapto Status: %d\n",status);
 	Sectionsd->setServiceChanged(channel_id,false);
 
 }
@@ -104,27 +105,13 @@ CWebDbox::CWebDbox(CWebserver *server)
 	audiotype_names[3] = "joint stereo";
 	audiotype_names[4] = "stereo";
 
-/*
-	TimerEventNames[CTimerEvent::TIMER_NEXTPROGRAM] = "Umschalten";
-	TimerEventNames[CTimerEvent::TIMER_SHUTDOWN] = "Shutdown";
-	TimerEventNames[CTimerEvent::TIMER_STANDBY] = "Standby";
-	TimerEventNames[CTimerEvent::TIMER_RECORD] = "Record";
-	TimerEventNames[CTimerEvent::TIMER_ZAPTO] = "Zapto";
-	TimerEventNames[CTimerEvent::TIMER_SLEEPTIMER] = "Sleeptimer";
-
-	TimerEventStateNames[CTimerEvent::TIMERSTATE_SCHEDULED]="wartet";
-	TimerEventStateNames[CTimerEvent::TIMERSTATE_PREANNOUNCE]="announced";
-	TimerEventStateNames[CTimerEvent::TIMERSTATE_ISRUNNING]="aktiv";
-	TimerEventStateNames[CTimerEvent::TIMERSTATE_HASFINISHED]= "beendet";
-	TimerEventStateNames[CTimerEvent::TIMERSTATE_TERMINATED]= "beendet";
-*/
 	EventServer = new CEventServer;
-	EventServer->registerEvent2( NeutrinoMessages::SHUTDOWN, CEventServer::INITID_THTTPD, "/tmp/neutrino.sock");
-	EventServer->registerEvent2( NeutrinoMessages::STANDBY_ON, CEventServer::INITID_THTTPD, "/tmp/neutrino.sock");
-	EventServer->registerEvent2( NeutrinoMessages::STANDBY_OFF, CEventServer::INITID_THTTPD, "/tmp/neutrino.sock");
-	EventServer->registerEvent2( NeutrinoMessages::EVT_POPUP, CEventServer::INITID_THTTPD, "/tmp/neutrino.sock");
-	EventServer->registerEvent2( NeutrinoMessages::EVT_EXTMSG, CEventServer::INITID_THTTPD, "/tmp/neutrino.sock");
-	EventServer->registerEvent2( NeutrinoMessages::CHANGEMODE, CEventServer::INITID_THTTPD, "/tmp/neutrino.sock");
+	EventServer->registerEvent2( NeutrinoMessages::SHUTDOWN, CEventServer::INITID_HTTPD, "/tmp/neutrino.sock");
+	EventServer->registerEvent2( NeutrinoMessages::STANDBY_ON, CEventServer::INITID_HTTPD, "/tmp/neutrino.sock");
+	EventServer->registerEvent2( NeutrinoMessages::STANDBY_OFF, CEventServer::INITID_HTTPD, "/tmp/neutrino.sock");
+	EventServer->registerEvent2( NeutrinoMessages::EVT_POPUP, CEventServer::INITID_HTTPD, "/tmp/neutrino.sock");
+	EventServer->registerEvent2( NeutrinoMessages::EVT_EXTMSG, CEventServer::INITID_HTTPD, "/tmp/neutrino.sock");
+	EventServer->registerEvent2( NeutrinoMessages::CHANGEMODE, CEventServer::INITID_HTTPD, "/tmp/neutrino.sock");
 
 }
 //-------------------------------------------------------------------------
@@ -167,7 +154,7 @@ bool CWebDbox::GetStreamInfo(int bitInfo[10])
 	FILE* fd = fopen("/proc/bus/bitstream", "rt");
 	if (fd==NULL)
 	{
-		printf("error while opening proc-bitstream\n" );
+		aprintf("error while opening proc-bitstream\n" );
 		return false;
 	}
 

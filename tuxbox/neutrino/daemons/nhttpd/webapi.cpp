@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.6 2002/10/03 19:05:12 thegoodguy Exp $
+	$Id: webapi.cpp,v 1.7 2002/10/05 20:32:06 dirch Exp $
 
 	License: GPL
 
@@ -24,7 +24,6 @@
 */
 #include "webapi.h"
 #include "debug.h"
-#define dprintf(fmt, args...) {if(Parent->Parent->DEBUG) aprintf( "[nhttpd] " fmt, ## args);}
 
 //-------------------------------------------------------------------------
 bool CWebAPI::Execute(CWebserverRequest* request)
@@ -64,7 +63,7 @@ bool CWebAPI::Execute(CWebserverRequest* request)
 			break;
 		case 3:	return Dbox(request);
 			break;
-		case 4:	return Bouquetlist(request);
+		case 4:	return ShowBouquets(request);
 			break;
 		case 5:	return Channellist(request);
 			break;
@@ -91,7 +90,8 @@ bool CWebAPI::Test(CWebserverRequest* request)
 
 void CWebAPI::loadTimerMain(CWebserverRequest* request)
 {
-   request->SocketWrite("<html><script language=\"JavaScript\">location.href=\"/fb/timer.dbox2\"</script></html>\n");
+//	request->SocketWrite("<HTML><script language=\"JavaScript\">location.href=\"/fb/timer.dbox2\"</script></HTML>\n");
+	request->Send302("/fb/timer.dbox2");
 }
 
 //-------------------------------------------------------------------------
@@ -99,7 +99,6 @@ bool CWebAPI::Timer(CWebserverRequest* request)
 // timer functions
 {
 
-	request->SendPlainHeader("text/html");
 	if(Parent->Timerd->isTimerdAvailable())
 	{
 		if((request->ParameterList.size() > 0))
@@ -112,6 +111,7 @@ bool CWebAPI::Timer(CWebserverRequest* request)
 			}
 			else if(request->ParameterList["action"] == "modify-form")
 			{
+				request->SendPlainHeader("text/html");
 				unsigned modyId = atoi(request->ParameterList["id"].c_str());
 				modifyTimerForm(request, modyId);
 			}
@@ -122,6 +122,7 @@ bool CWebAPI::Timer(CWebserverRequest* request)
 			}
 			else if(request->ParameterList["action"] == "new-form")
 			{
+				request->SendPlainHeader("text/html");
 				newTimerForm(request);
 			}
 			else if(request->ParameterList["action"] == "new")
@@ -131,16 +132,21 @@ bool CWebAPI::Timer(CWebserverRequest* request)
 			}
 			else
 			{
+				request->SendPlainHeader("text/html");
 				request->SendHTMLHeader("UNKNOWN ACTION");
 				aprintf("Unknown action : %s\n",request->ParameterList["action"].c_str());
 				request->SendHTMLFooter ();
 			}
 		}
 		else
+		{
+			request->SendPlainHeader("text/html");
 			ShowTimerList(request);
+		}
 	}
 	else
 	{
+		request->SendPlainHeader("text/html");
 		request->SendHTMLHeader ("Error");
 		aprintf("<h1>Error: Timerd not available</h1>\n");
 		request->SendHTMLFooter ();
@@ -165,31 +171,40 @@ bool CWebAPI::Dbox(CWebserverRequest* request)
 	ShowDboxMenu(request);
 	return true;
 }
-
-/*
-	else if(operation == 4)		// send services.xml
-	{
-		request->SendPlainHeader("text/xml");
-		request->SendFile(Parent->Zapit_XML_Path,"services.xml");
-		request->HttpStatus = 200;
-		return true;
-	}
-
-	else if(operation == 5)		// send bouquets.xml
-	{
-		request->SendPlainHeader("text/xml");
-		request->SendFile(Parent->Zapit_XML_Path,"bouquets.xml");
-		request->HttpStatus = 200;
-		return true;
-	}
-*/
 //-------------------------------------------------------------------------
-bool CWebAPI::Bouquetlist(CWebserverRequest* request)
+bool CWebAPI::ShowBouquets(CWebserverRequest* request)
 // show the bouquet list
 {
+string classname;
 	request->SendPlainHeader("text/html");
-	ShowBouquets(request,(request->ParameterList["bouquet"] != "")?atoi(request->ParameterList["bouquet"].c_str()):0);
+//	ShowBouquets(request,(request->ParameterList["bouquet"] != "")?atoi(request->ParameterList["bouquet"].c_str()):0);
+//	return true;
+	int BouquetNr = (request->ParameterList["bouquet"] != "")?atoi(request->ParameterList["bouquet"].c_str()):0;
+	bool javascript = (request->ParameterList["js"].compare("1") == 0);
+	request->SocketWriteLn("<HTML>\n<HEAD><title>DBOX2-Neutrino Bouquetliste</title><link rel=\"stylesheet\" TYPE=\"text/css\" HREF=\"../global.css\">");
+	request->SocketWrite("<SCRIPT LANGUAGE=\"JavaScript\">\n<!--\n function goto(url1, url2)\n{\n top.content.location.href = url1;\n top.bouquets.location.href = url2;\n }\n//-->\n </SCRIPT>\n</HEAD><BODY>");
+
+	request->SocketWriteLn("<TABLE cellspacing=0 cellpadding=0 border=0 width=\"100%\">");
+	request->SocketWriteLn("<TR><TD><A CLASS=\"blist\" HREF=\"/bouquetedit/main\" TARGET=\"content\">Bouqueteditor</A></TD></TR>\n<TR><TD><HR></TD></TR>");
+	classname = (BouquetNr == 0)?" CLASS=\"bouquet\"":"";
+	if(javascript)
+		request->SocketWrite("<TR height=20"+ classname + "><TD><a CLASS=\"blist\" HREF=\"javascript:goto('/fb/channellist.dbox2#akt','/fb/bouquetlist.dbox2?bouquet=0')\">Alle Kanäle</a></TD></TR>\n");
+	else
+		request->SocketWrite("<TR height=20"+ classname + "><TD><a CLASS=\"blist\" HREF=\"/fb/channellist.dbox2#akt\" TARGET=\"content\">Alle Kanäle</a></TD></TR>\n");
+	request->SocketWrite("<TR><TD><HR></TD></TR>\n");
+	CZapitClient::BouquetList::iterator bouquet = Parent->BouquetList.begin();
+	for(; bouquet != Parent->BouquetList.end();bouquet++)
+	{
+		classname = ((bouquet->bouquet_nr + 1) == (uint) BouquetNr)?" CLASS=\"bouquet\"":"";
+		if(javascript)
+			request->printf("<tr height=\"20\"%s><TD><NOBR><a CLASS=\"blist\" HREF=\"javascript:goto('/fb/channellist.dbox2?bouquet=%d#akt','/fb/bouquetlist.dbox2?js=1&bouquet=%d');\">%s</a></NOBR></TD></TR>\n",classname.c_str(),(bouquet->bouquet_nr + 1),(bouquet->bouquet_nr + 1),bouquet->name);
+		else
+			request->printf("<tr height=\"20\"%s><TD><NOBR><a CLASS=\"blist\" HREF=\"/fb/channellist.dbox2?bouquet=%d#akt\" TARGET=\"content\">%s</a></NOBR></TD></TR>\n",classname.c_str(),(bouquet->bouquet_nr + 1),bouquet->name);
+	}
+	request->SocketWrite("</TABLE>\n");
+	request->SendHTMLFooter();
 	return true;
+
 }
 //-------------------------------------------------------------------------
 
@@ -247,12 +262,12 @@ int mode;
 		{
 			if(request->ParameterList["standby"] == "on")
 			{
-				Parent->EventServer->sendEvent(NeutrinoMessages::STANDBY_ON, CEventServer::INITID_THTTPD);
+				Parent->EventServer->sendEvent(NeutrinoMessages::STANDBY_ON, CEventServer::INITID_HTTPD);
 //				standby_mode = true;
 			}
 			if(request->ParameterList["standby"] == "off")
 			{
-				Parent->EventServer->sendEvent(NeutrinoMessages::STANDBY_OFF, CEventServer::INITID_THTTPD);
+				Parent->EventServer->sendEvent(NeutrinoMessages::STANDBY_OFF, CEventServer::INITID_HTTPD);
 //				standby_mode = false;
 			}
 		}
@@ -261,7 +276,7 @@ int mode;
 			if(!request->Authenticate())
 				return false;
 			mode = NeutrinoMessages::mode_tv;
-			Parent->EventServer->sendEvent(NeutrinoMessages::CHANGEMODE, CEventServer::INITID_THTTPD, (void *)&mode,sizeof(int));
+			Parent->EventServer->sendEvent(NeutrinoMessages::CHANGEMODE, CEventServer::INITID_HTTPD, (void *)&mode,sizeof(int));
 			sleep(1);
 			Parent->UpdateBouquets();
 			request->Send302("channellist.dbox2#akt");
@@ -272,7 +287,7 @@ int mode;
 			if(!request->Authenticate())
 				return false;
 			mode = NeutrinoMessages::mode_radio;
-			Parent->EventServer->sendEvent(NeutrinoMessages::CHANGEMODE, CEventServer::INITID_THTTPD, (void *)&mode,sizeof(int));
+			Parent->EventServer->sendEvent(NeutrinoMessages::CHANGEMODE, CEventServer::INITID_HTTPD, (void *)&mode,sizeof(int));
 			sleep(1);
 			Parent->UpdateBouquets();
 			request->Send302("channellist.dbox2#akt");
@@ -327,7 +342,7 @@ bool CWebAPI::EPG(CWebserverRequest* request)
 			return true;
 		}
 	}
-	dperror("[THTTPD] Get epgid error\n");
+	dperror("[HTTPD] Get epgid error\n");
 	return false;
 }
 
@@ -362,7 +377,7 @@ bool CWebAPI::Switch(CWebserverRequest* request)
 			request->SendFile(Parent->Parent->PrivateDocumentRoot,"/shutdown.html");	// send shutdown page
 			request->EndRequest();
 			sleep(1);															// wait 
-			Parent->EventServer->sendEvent(NeutrinoMessages::SHUTDOWN, CEventServer::INITID_THTTPD);
+			Parent->EventServer->sendEvent(NeutrinoMessages::SHUTDOWN, CEventServer::INITID_HTTPD);
 			return true;
 		}
 
@@ -441,7 +456,6 @@ bool CWebAPI::ShowCurrentStreamInfo(CWebserverRequest* request)
 //-------------------------------------------------------------------------
 bool CWebAPI::ShowEventList(CWebserverRequest *request,t_channel_id channel_id)
 {
-char *buf = new char[1400];
 char classname;
 int pos = 0;
 	
@@ -450,9 +464,9 @@ int pos = 0;
 	request->SendHTMLHeader("DBOX2-Neutrino Channellist");
 
 
-	request->SocketWriteLn("<H3 CLASS=\"epg\">Programmvorschau: " + Parent->GetServiceName(channel_id) + "</H3>");
+	request->SocketWriteLn("<CENTER><H3 CLASS=\"epg\">Programmvorschau: " + Parent->GetServiceName(channel_id) + "</H3></CENTER>");
 
-	request->SocketWrite("<TABLE WIDTH=\"90%\" CELLSPACING=\"0\">\n");
+	request->SocketWrite("<CENTER><TABLE WIDTH=\"95%\" CELLSPACING=\"0\">\n");
 
     for( eventIterator = Parent->eList.begin(); eventIterator != Parent->eList.end(); eventIterator++, pos++ )
 	{
@@ -460,51 +474,21 @@ int pos = 0;
 		char zbuffer[25] = {0};
 		struct tm *mtime = localtime(&eventIterator->startTime); //(const time_t*)eventIterator->startTime);
 		strftime(zbuffer,20,"%d.%m. %H:%M",mtime);
-		sprintf(buf,"<TR VALIGN=\"top\" HEIGHT=\"%d\" CLASS=\"%c\">\n",(eventIterator->duration > 20 * 60)?(eventIterator->duration / 60):20 , classname);
-		request->SocketWrite(buf); 
-		sprintf(buf,"<TD><A HREF=\"/fb/timer.dbox2?action=new&type=%d&alarm=%u&channel_id=%u\">&nbsp;<IMG SRC=\"/images/timer.gif\" WIDTH=\"21\" HEIGHT=\"21\" BORDER=0 ALT=\"Timer setzen\"></A>&nbsp;</TD>\n",CTimerEvent::TIMER_ZAPTO,(uint) eventIterator->startTime,channel_id); 
-		request->SocketWrite(buf);
-		sprintf(buf, "<TD><NOBR>%s&nbsp;<font size=\"-2\">(%d min)</font>&nbsp;</NOBR></TD>\n", zbuffer, eventIterator->duration / 60);
-		sprintf(&buf[strlen(buf)], "<TD><A HREF=epg.dbox2?eventid=%llx>%s</A></TD>\n</TR>\n", eventIterator->eventID, eventIterator->description.c_str());
-		request->SocketWrite(buf);
+		request->printf("<TR VALIGN=\"top\" HEIGHT=\"%d\" CLASS=\"%c\">\n",(eventIterator->duration > 20 * 60)?(eventIterator->duration / 60):20 , classname);
+		request->printf("<TD><A HREF=\"/fb/timer.dbox2?action=new&type=%d&alarm=%u&channel_id=%u\">&nbsp;<IMG SRC=\"/images/timer.gif\" WIDTH=\"21\" HEIGHT=\"21\" ALT=\"Timer setzen\"></A>&nbsp;</TD>\n",CTimerEvent::TIMER_ZAPTO,(uint) eventIterator->startTime,channel_id); 
+		request->printf("<TD><NOBR>%s&nbsp;<font size=\"-2\">(%d min)</font>&nbsp;</NOBR></TD>\n", zbuffer, eventIterator->duration / 60);
+		request->printf("<TD><A CLASS=\"elist\" HREF=epg.dbox2?eventid=%llx>%s</A></TD>\n</TR>\n", eventIterator->eventID, eventIterator->description.c_str());
 	}
-	delete[] buf;
-	request->SocketWriteLn("</TABLE>");
+
+	request->SocketWriteLn("</TABLE></CENTER>");
 	request->SendHTMLFooter();
 	return true;
 }
 //-------------------------------------------------------------------------
-
-bool CWebAPI::ShowBouquets(CWebserverRequest *request, unsigned int BouquetNr)
-{
-char *buffer = new char[300];
-string classname;
-	
-	request->SocketWriteLn("<html>\n<head><title>DBOX2-Neutrino Bouquetliste</title><link rel=\"stylesheet\" type=\"text/css\" href=\"../global.css\">");
-	request->SocketWrite("<SCRIPT LANGUAGE=\"JavaScript\">\n<!--\n function goto(url1, url2)\n{\n parent.frames[1].location.href=url1;\n parent.frames[2].location.href=url2;\n }\n//-->\n </SCRIPT>\n</HEAD><BODY>");
-
-	request->SocketWriteLn("<table cellspacing=0 cellpadding=0 border=0 width=\"100%\">");
-	request->SocketWriteLn("<tr><td><A HREF=\"/bouquetedit/main\" TARGET=\"content\">Bouqueteditor</A></td></tr>\n<tr><td><HR></td></tr>");
-	classname = (BouquetNr == 0)?" class=\"bouquet\"":"";
-	request->SocketWrite("<tr height=20"+ classname + "><td><a class=bouquets href=\"javascript:goto('/fb/channellist.dbox2#akt','/fb/bouquetlist.dbox2?bouquet=0')\">Alle Kanäle</a></td></tr>\n");
-	request->SocketWrite("<tr><td><HR></td></tr>\n");
-	CZapitClient::BouquetList::iterator bouquet = Parent->BouquetList.begin();
-	for(; bouquet != Parent->BouquetList.end();bouquet++)
-	{
-		classname = ((bouquet->bouquet_nr + 1) == (uint) BouquetNr)?" class=\"bouquet\"":"";
-		sprintf(buffer,"<tr height=\"20\"%s><td><a class=bouquets href=\"javascript:goto('/fb/channellist.dbox2?bouquet=%d#akt','/fb/bouquetlist.dbox2?bouquet=%d');\">%s</a></td></tr>\n",classname.c_str(),(bouquet->bouquet_nr + 1),(bouquet->bouquet_nr + 1),bouquet->name);
-		request->SocketWrite(buffer);
-	}
-	request->SocketWrite("</table>\n");
-	request->SendHTMLFooter();
-	delete[] buffer;
-	return true;
-}
 
 //-------------------------------------------------------------------------
 bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 {
-	dprintf("ShowBouquet\n");
 	CZapitClient::BouquetChannelList *channellist;
 	if(BouquetNr > 0)
 		channellist = &(Parent->BouquetsList[BouquetNr]);
@@ -515,11 +499,10 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 
 	request->SendHTMLHeader("DBOX2-Neutrino Kanalliste");
 
-	request->SocketWriteLn("<table cellspacing=0 border=0>");
+	request->SocketWriteLn("<TABLE cellspacing=0 border=0 WIDTH=\"90%\">");
 
 	int i = 1;
-	string classname;
-	char *buffer = new char[400];
+	char classname;
 	t_channel_id current_channel = Parent->Zapit->getCurrentServiceID();
 	int prozent;
 
@@ -533,37 +516,34 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 
 		string bouquetstr = (BouquetNr >=0)?"&bouquet="+itoa(BouquetNr):"";
 		
-		request->SocketWrite("<tr><td colspan=2 class=\""+string(classname)+"\">");
-		sprintf(buffer,"%s<a href=\"switch.dbox2?zapto=%d%s\">%d. %s</a>&nbsp;<a href=\"epg.dbox2?eventlist=%u\">%s</a></td></tr>",((channel->channel_id == current_channel)?"<a name=akt></a>":" "),channel->channel_id,bouquetstr.c_str(),channel->nr,channel->name,channel->channel_id,((Parent->ChannelListEvents[channel->channel_id])?"<img src=\"../images/elist.gif\" border=\"0\" alt=\"Programmvorschau\">":""));
-		request->SocketWriteLn(buffer);
+		request->printf("<TR><TD colspan=2 CLASS=\"%c\">",classname);
+		request->printf("%s<A CLASS=\"clist\" HREF=\"switch.dbox2?zapto=%d%s\">%d. %s</A>&nbsp;<A HREF=\"epg.dbox2?eventlist=%u\">%s</A></TD></TR>",((channel->channel_id == current_channel)?"<A NAME=akt></a>":" "),channel->channel_id,bouquetstr.c_str(),channel->nr,channel->name,channel->channel_id,((Parent->ChannelListEvents[channel->channel_id])?"<img src=\"../images/elist.gif\" ALT=\"Programmvorschau\">":""));
 
 		CChannelEvent *event = Parent->ChannelListEvents[channel->channel_id];
 		if(event)
 		{
 			prozent = 100 * (time(NULL) - event->startTime) / event->duration;
-			request->SocketWrite("<tr><td align=left width=31 class=\""+ string(classname) +"epg\">");
-			sprintf(buffer,"<table border=1 rules=none bordercolor=#000000 heigth=10 width=30 cellspacing=0 cellpadding=0><tr><td bgcolor=\"#0000FF\" height=10 width=%d></td><td bgcolor=\"#EAEBFF\" heigth=10 width=%d></td></tr></table></td>",(prozent / 10) * 3,(10 - (prozent / 10))*3);
-			request->SocketWrite(buffer);
-			request->SocketWrite("<td class=\""+ string(classname) +"epg\">");
-			sprintf(buffer,"<a href=epg.dbox2?epgid=%llx&startzeit=%lx>",event->eventID,event->startTime);
-			request->SocketWrite(buffer);
-			request->SocketWrite((char *) event->description.c_str());
-			request->SocketWrite("&nbsp;"); 
-			sprintf(buffer,"<font size=-3><nobr>(%ld von %d min, %d%%)</nobr></font></a>&nbsp;</td></tr>\n",(time(NULL) - event->startTime)/60,event->duration / 60,prozent  ); 
-			request->SocketWrite(buffer);
+			request->printf("<TR><TD align=left width=31 CLASS=\"%cepg\">",classname);
+			request->printf("<TABLE border=1 rules=none bordercolor=#000000 heigth=10 width=30 cellspacing=0 cellpadding=0><TR><TD bgcolor=\"#2211FF\" height=10 width=%d></TD><TD bgcolor=\"#EAEBFF\" heigth=10 width=%d></TD></TR></TABLE></TD>",(prozent / 10) * 3,(10 - (prozent / 10))*3);
+			request->printf("<TD CLASS=\"%cepg\">",classname);
+			request->printf("<A CLASS=\"clistsmall\" HREF=epg.dbox2?epgid=%llx&startzeit=%lx>",event->eventID,event->startTime);
+			request->printf("%s&nbsp;",event->description.c_str()); 
+			request->printf("<font size=-3><NOBR>(%ld von %d min, %d%%)</NOBR></font></a>&nbsp;</TD></TR>\n",(time(NULL) - event->startTime)/60,event->duration / 60,prozent  ); 
 		}
+		request->printf("<tr height=2><TD colspan=2></TD></TR>\n");
+
 	}
 
-	request->SocketWriteLn("</table>");
+	request->printf("</TABLE>\n");
 
 	request->SendHTMLFooter();
-	delete[] buffer;
 	return true;
 }
 //-------------------------------------------------------------------------
 
 bool CWebAPI::ShowControlpanel(CWebserverRequest* request)
 {
+		char mutestr[6]={0};
 
 	if(Parent->Parent->NewGui)
 	{
@@ -581,29 +561,23 @@ bool CWebAPI::ShowControlpanel(CWebserverRequest* request)
 	}
 	else
 	{
-	char volstr_on[10];
-	char volstr_off[10];
 
 		request->SendPlainHeader("text/html");
 
-		string mutefile = Parent->Controld->getMute()?"mute":"muted";
-		string mutestring = "<td><a href=\"/fb/controlpanel.dbox2?volumemute\" target=navi onMouseOver=\"mute.src='../images/"+ mutefile+"_on.jpg';\" onMouseOut=\"mute.src='../images/"+ mutefile+"_off.jpg';\"><img src=/images/"+ mutefile+"_off.jpg width=25 height=28 border=0 name=mute></a><br></td>\n";
+		int vol = Parent->Controld->getVolume();
 
-		char vol = Parent->Controld->getVolume();
-		sprintf((char*) &volstr_on, "%d", vol);
-		sprintf((char*) &volstr_off, "%d", 100-vol);
-	 
 		request->SendFile(Parent->Parent->PrivateDocumentRoot,"/controlpanel.include1");
 		//muted
-		request->SocketWrite(mutestring);
+//		request->SocketWrite(mutestring);
+		if(	Parent->Controld->getMute())
+			strcpy(mutestr,"mute");
+		else
+			strcpy(mutestr,"muted");
+		request->printf("<TD><a HREF=\"/fb/controlpanel.dbox2?volumemute\" target=navi onMouseOver=\"mute.src='../images/%s_on.jpg';\" onMouseOut=\"mute.src='../images/%s_off.jpg';\"><img src=/images/%s_off.jpg width=25 height=28 name=mute></a><br></TD>\n",mutestr,mutestr,mutestr);
 		request->SendFile(Parent->Parent->PrivateDocumentRoot,"/controlpanel.include2");
 		//volume bar...
-		request->SocketWrite("<td><img src=../images/vol_flashed.jpg width=");
-		request->SocketWrite(volstr_on);
-		request->SocketWrite(" height=10 border=0><br></td>\n");
-		request->SocketWrite("<td><img src=../images/vol_unflashed.jpg width=");
-		request->SocketWrite(volstr_off);
-		request->SocketWrite(" height=10 border=0><br></td>\n");
+		request->printf("<TD><img src=../images/vol_flashed.jpg width=%d height=10><br></TD>\n",vol);
+		request->printf("<TD><img src=../images/vol_unflashed.jpg width=%d height=10><br></TD>\n",100-vol);
 		request->SendFile(Parent->Parent->PrivateDocumentRoot,"/controlpanel.include3");
 	}
 	return true;
@@ -662,38 +636,26 @@ bool CWebAPI::ShowEpg(CWebserverRequest *request,string EpgID,string Startzeit)
 }
 
 //-------------------------------------------------------------------------
+int minmax(int value,int min, int max)
+{
+	if(value < min)	return min;
+	if(value > max)	return max;
+	return value;
+}
 
 void CWebAPI::correctTime(struct tm *zt)
 {
-   if(zt->tm_year>129)
-      zt->tm_year=129;
-   if(zt->tm_year<0)
-      zt->tm_year=0;
-   if(zt->tm_mon>11)
-      zt->tm_mon=11;
-   if(zt->tm_mon<0)
-      zt->tm_mon=0;
-   if(zt->tm_mday>31) //-> eine etwas laxe pruefung, aber mktime biegt das wieder grade
-      zt->tm_mday=31;
-   if(zt->tm_mday<1)
-      zt->tm_mday=1;
-   if(zt->tm_hour>23)
-      zt->tm_hour=23;
-   if(zt->tm_hour<0)
-      zt->tm_hour=0;
-   if(zt->tm_min>59)
-      zt->tm_min=59;
-   if(zt->tm_min<0)
-      zt->tm_min=0;
-   if(zt->tm_sec>59)
-      zt->tm_sec=59;
-   if(zt->tm_sec<0)
-      zt->tm_sec=0;
+
+	zt->tm_year = minmax(zt->tm_year,0,129);
+	zt->tm_mon = minmax(zt->tm_mon,0,11);
+	zt->tm_mday = minmax(zt->tm_mday,1,31); //-> eine etwas laxe pruefung, aber mktime biegt das wieder grade
+	zt->tm_hour = minmax(zt->tm_hour,0,23);
+	zt->tm_min = minmax(zt->tm_min,0,59);
+	zt->tm_sec = minmax(zt->tm_sec,0,59);
 }
 //-------------------------------------------------------------------------
 bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 {
-char *buffer = new char[300];
 
    CTimerd::TimerList timerlist;             // List of bouquets
 
@@ -705,15 +667,13 @@ char *buffer = new char[300];
    channellist.clear();
 
    request->SendHTMLHeader("TIMERLIST");
-   request->SocketWrite("<center>\n");
-   request->SocketWrite("<table border=0>\n");
-   request->SocketWrite("<tr>\n");
-   request->SocketWrite("<td class=\"cepg\" align=\"left\"><b>Alarm Time</td>\n");
-   request->SocketWrite("<td class=\"cepg\" align=\"left\"><b>Stop Time</td>\n");
-   request->SocketWrite("<td class=\"cepg\" align=\"left\"><b>Repeat</td>\n");
-   request->SocketWrite("<td class=\"cepg\" align=\"left\"><b>Type</td>\n");
-   request->SocketWrite("<td class=\"cepg\" align=\"left\"><b>Add. Data</td>\n");
-   request->SocketWrite("<td class=\"cepg\"><td class=\"cepg\"></tr>\n");
+   request->SocketWrite("<center>\n<TABLE border=0>\n<TR>\n");
+   request->SocketWrite("<TD CLASS=\"cepg\" align=\"left\"><b>Alarm Time</TD>\n");
+   request->SocketWrite("<TD CLASS=\"cepg\" align=\"left\"><b>Stop Time</TD>\n");
+   request->SocketWrite("<TD CLASS=\"cepg\" align=\"left\"><b>Repeat</TD>\n");
+   request->SocketWrite("<TD CLASS=\"cepg\" align=\"left\"><b>Type</TD>\n");
+   request->SocketWrite("<TD CLASS=\"cepg\" align=\"left\"><b>Add. Data</TD>\n");
+   request->SocketWrite("<TD CLASS=\"cepg\"><TD CLASS=\"cepg\"></TR>\n");
 
    int i = 1;
    char classname= 'a';
@@ -737,20 +697,15 @@ char *buffer = new char[300];
          strftime(zStopTime,20,"%d.%m. %H:%M",stopTime);     
       }
 
-     // sprintf(buffer, "<tr><td class=\"%cepg\" align=center>%d</td>",classname, timer->eventID);
-	  //request->SocketWrite(buffer);
-      sprintf(buffer, "<tr><td class=\"%cepg\" align=left>%s</td>", classname, zAlarmTime);
-  	  request->SocketWrite(buffer);
-      sprintf(buffer, "<td class=\"%cepg\" align=left>%s</td>", classname, zStopTime);
-  	  request->SocketWrite(buffer);
+     // request->printf("<TR><TD CLASS=\"%cepg\" align=center>%d</TD>",classname, timer->eventID);
+      request->printf("<TR><TD CLASS=\"%cepg\" align=left>%s</TD>", classname, zAlarmTime);
+      request->printf("<TD CLASS=\"%cepg\" align=left>%s</TD>", classname, zStopTime);
       char zRep[20+1];
       Parent->timerEventRepeat2Str(timer->eventRepeat,zRep,sizeof(zRep)-1);
-      sprintf(buffer,"<td class=\"%cepg\" align=left>%s</td>", classname, zRep);
-  	  request->SocketWrite(buffer);
+      request->printf("<TD CLASS=\"%cepg\" align=left>%s</TD>", classname, zRep);
       char zType[20+1];
       Parent->timerEventType2Str(timer->eventType,zType,sizeof(zType)-1);
-      sprintf(buffer, "<td class=\"%cepg\" align=left>%s", classname, zType);
-  	  request->SocketWrite(buffer);
+      request->printf("<TD CLASS=\"%cepg\" align=left>%s", classname, zType);
 
       // Add Data
       char zAddData[20+1]={0};
@@ -785,40 +740,30 @@ char *buffer = new char[300];
             break;
          default:{}
       }
-      sprintf(buffer, "<td class=\"%cepg\" align=left>%s\n",
+      request->printf("<TD CLASS=\"%cepg\" align=left>%s\n",
              classname, zAddData);
-	  request->SocketWrite(buffer);
-      sprintf(buffer, "<td class=\"%cepg\" align=center><a href=\"/fb/timer.dbox2?action=remove&id=%d\">\n",
+      request->printf("<TD CLASS=\"%cepg\" align=center><a HREF=\"/fb/timer.dbox2?action=remove&id=%d\">\n",
              classname, timer->eventID);
-	  request->SocketWrite(buffer);
-   	  request->SocketWrite("<img src=\"../images/remove.gif\" alt=\"Timer löschen\" border=0></a></td>\n");
-      sprintf(buffer, "<td class=\"%cepg\" align=center><a href=\"/fb/timer.dbox2?action=modify-form&id=%d\">", 
+   	  request->SocketWrite("<img src=\"../images/remove.gif\" alt=\"Timer löschen\"></a></TD>\n");
+      request->printf("<TD CLASS=\"%cepg\" align=center><a HREF=\"/fb/timer.dbox2?action=modify-form&id=%d\">", 
 				  classname, timer->eventID);
-	  request->SocketWrite(buffer);
-      sprintf(buffer,"<img src=\"../images/modify.gif\" alt=\"Timer ändern\" border=0></a><nobr></td><tr>\n");
-	  request->SocketWrite(buffer);
-
-   }
-   classname = (i++&1)?'a':'b';
-   sprintf(buffer, "<tr><td class=\"%cepg\" colspan=5></td>\n<td class=\"%cepg\" align=\"center\">\n",classname,classname);
-   request->SocketWrite(buffer);
-   request->SocketWrite("<a href=\"javascript:location.reload()\">\n");
-   request->SocketWrite("<img src=\"../images/reload.gif\" alt=\"Aktualisieren\" border=0></a></td>\n");   
-	sprintf(buffer, "<td class=\"%cepg\" align=\"center\">\n",classname);
-   request->SocketWrite(buffer);
-   request->SocketWrite("<a href=\"/fb/timer.dbox2?action=new-form\">\n");
-   request->SocketWrite("<img src=\"../images/new.gif\" alt=\"neuer Timer\" border=0></a></td></tr>\n");
-   request->SocketWrite("</table>\n");
-   request->SendHTMLFooter();
-   delete[] buffer;
-   return true;
+      request->printf("<img src=\"../images/modify.gif\" alt=\"Timer ändern\"></a><NOBR></TD><TR>\n");
+	}
+	classname = (i++&1)?'a':'b';
+	request->printf("<TR><TD CLASS=\"%cepg\" colspan=5></TD>\n<TD CLASS=\"%cepg\" align=\"center\">\n",classname,classname);
+	request->SocketWrite("<a HREF=\"javascript:location.reload()\">\n");
+	request->SocketWrite("<img src=\"../images/reload.gif\" alt=\"Aktualisieren\"></a></TD>\n");   
+	request->printf("<TD CLASS=\"%cepg\" align=\"center\">\n",classname);
+	request->SocketWrite("<a HREF=\"/fb/timer.dbox2?action=new-form\">\n");
+	request->SocketWrite("<img src=\"../images/new.gif\" alt=\"neuer Timer\"></a></TD></TR>\n");
+	request->SocketWrite("</TABLE>\n");
+	request->SendHTMLFooter();
+	return true;
 }
 //-------------------------------------------------------------------------
 void CWebAPI::modifyTimerForm(CWebserverRequest *request, unsigned timerId)
 {
-	char *buffer = new char[300];
 	CTimerd::responseGetTimer timer;             // Timer
-
 
 	Parent->Timerd->getTimer(timer, timerId);
 
@@ -827,74 +772,59 @@ void CWebAPI::modifyTimerForm(CWebserverRequest *request, unsigned timerId)
 
 	request->SendHTMLHeader("MODIFY TIMER" + timerId);
 	request->SocketWrite("<center>");
-	request->SocketWrite("<table border=2 ><tr class=\"a\"><td>\n");
+	request->SocketWrite("<TABLE border=2 ><tr CLASS=\"a\"><TD>\n");
 	request->SocketWrite("<form method=\"GET\" name=\"modify\" action=\"/fb/timer.dbox2\">\n");
-	request->SocketWrite("<input type=\"hidden\" name=\"action\" value=\"modify\">\n");
-	sprintf(buffer,"<input name=\"id\" type=\"hidden\" value=\"%d\">\n",timerId);
-	request->SocketWrite(buffer);
-	request->SocketWrite("<table border=0 >\n");
-	sprintf(buffer,"<tr class=\"c\"><td colspan=\"2\" align=\"center\">MODIFY TIMER %d - %s</td></tr>\n",
+	request->SocketWrite("<INPUT TYPE=\"hidden\" name=\"action\" value=\"modify\">\n");
+	request->printf("<INPUT name=\"id\" TYPE=\"hidden\" value=\"%d\">\n",timerId);
+	request->SocketWrite("<TABLE border=0 >\n");
+	request->printf("<tr CLASS=\"c\"><TD colspan=\"2\" align=\"center\">MODIFY TIMER %d - %s</TD></TR>\n",
 		  timerId,zType);
-	request->SocketWrite(buffer);
+
 	struct tm *alarmTime = localtime(&(timer.alarmTime));
-	sprintf(buffer,"<tr><td align=\"right\"><nobr>alarm date: <input type=\"text\" name=\"ad\" value=\"%02d\" size=2 maxlength=2>. ",
+	request->printf("<TR><TD align=\"right\"><NOBR>alarm date: <INPUT TYPE=\"text\" name=\"ad\" value=\"%02d\" size=2 maxlength=2>. ",
 		  alarmTime->tm_mday );
-	request->SocketWrite(buffer);
-	sprintf(buffer,"<input type=\"text\" name=\"amo\" value=\"%02d\" size=2 maxlength=2>.&nbsp",
+	request->printf("<INPUT TYPE=\"text\" name=\"amo\" value=\"%02d\" size=2 maxlength=2>.&nbsp",
 		  alarmTime->tm_mon +1);
-	request->SocketWrite(buffer);
-	sprintf(buffer,"<input type=\"text\" name=\"ay\" value=\"%04d\" size=4 maxlength=4></td>\n",
+	request->printf("<INPUT TYPE=\"text\" name=\"ay\" value=\"%04d\" size=4 maxlength=4></TD>\n",
 		  alarmTime->tm_year + 1900);
-	request->SocketWrite(buffer);
-	sprintf(buffer,"<td align=\"center\"><nobr>time:&nbsp;<input type=\"text\" name=\"ah\" value=\"%02d\" size=2 maxlength=2>&nbsp;:&nbsp;",
+	request->printf("<TD align=\"center\"><NOBR>time:&nbsp;<INPUT TYPE=\"text\" name=\"ah\" value=\"%02d\" size=2 maxlength=2>&nbsp;:&nbsp;",
 		  alarmTime->tm_hour );
-	request->SocketWrite(buffer);
-	sprintf(buffer,"<input type=\"text\" name=\"ami\" value=\"%02d\" size=2 maxlength=2></td></tr>\n",
+	request->printf("<INPUT TYPE=\"text\" name=\"ami\" value=\"%02d\" size=2 maxlength=2></TD></TR>\n",
 		  alarmTime->tm_min);
-	request->SocketWrite(buffer);
 	if(timer.stopTime > 0)
 	{
 		struct tm *stopTime = localtime(&(timer.stopTime));
-		sprintf(buffer,"<tr><nobr><td align=\"right\"><nobr>stop&nbsp;date:&nbsp;<input type=\"text\" name=\"sd\" value=\"%02d\" size=2 maxlength=2>.&nbsp;",
+		request->printf("<TR><NOBR><TD align=\"right\"><NOBR>stop&nbsp;date:&nbsp;<INPUT TYPE=\"text\" name=\"sd\" value=\"%02d\" size=2 maxlength=2>.&nbsp;",
 			 stopTime->tm_mday );
-		request->SocketWrite(buffer);
-		sprintf(buffer,"<input type=\"text\" name=\"smo\" value=\"%02d\" size=2 maxlength=2>.&nbsp;",
+		request->printf("<INPUT TYPE=\"text\" name=\"smo\" value=\"%02d\" size=2 maxlength=2>.&nbsp;",
 			 stopTime->tm_mon +1);
-		request->SocketWrite(buffer);
-		sprintf(buffer,"<input type=\"text\" name=\"sy\" value=\"%04d\" size=4 maxlength=4></td>\n",
+		request->printf("<INPUT TYPE=\"text\" name=\"sy\" value=\"%04d\" size=4 maxlength=4></TD>\n",
 			 stopTime->tm_year + 1900);
-		request->SocketWrite(buffer);
-		sprintf(buffer,"<td align=\"center\"><nobr>time:&nbsp;<input type=\"text\" name=\"sh\" value=\"%02d\" size=2 maxlength=2>&nbsp;:&nbsp;",
+		request->printf("<TD align=\"center\"><NOBR>time:&nbsp;<INPUT TYPE=\"text\" name=\"sh\" value=\"%02d\" size=2 maxlength=2>&nbsp;:&nbsp;",
 			 stopTime->tm_hour );
-		request->SocketWrite(buffer);
-		sprintf(buffer,"<input type=\"text\" name=\"smi\" value=\"%02d\" size=2 maxlength=2></td></tr>\n",
+		request->printf("<INPUT TYPE=\"text\" name=\"smi\" value=\"%02d\" size=2 maxlength=2></TD></TR>\n",
 			 stopTime->tm_min);
-		request->SocketWrite(buffer);
 	}
-	request->SocketWrite("<TR><td align=\"center\">repeat\n");
+	request->SocketWrite("<TR><TD align=\"center\">repeat\n");
 	request->SocketWrite("<select name=\"rep\">\n");
 	for(int i=0; i<=6;i++)
 	{
 		char zRep[21];
 		Parent->timerEventRepeat2Str((CTimerEvent::CTimerEventRepeat) i, zRep, sizeof(zRep)-1);
-		sprintf(buffer,"<option value=\"%d\"",i);
-		request->SocketWrite(buffer);
+		request->printf("<option value=\"%d\"",i);
 		if(((int)timer.eventRepeat) == i)
 		{
-			sprintf(buffer," selected");
-			request->SocketWrite(buffer);
+			request->SocketWrite(" selected");
 		}
-		sprintf(buffer,">%s\n",zRep);
-		request->SocketWrite(buffer);
+		request->printf(">%s\n",zRep);
 	}
 	request->SocketWrite("</select></TD></TR>\n");
 
-	request->SocketWrite("<tr><td colspan=2 height=10></tr>\n");
-	request->SocketWrite("<tr><td><center><input type=\"submit\" value=\"OK\"></center></td>\n");
-	request->SocketWrite("<td><center><form method=\"GET\" action=\"/fb/timer.dbox2\"><input type=\"submit\" value=\"CANCEL\"><form></center></td>\n");
-	request->SocketWrite("</tr></table></form>");
+	request->SocketWrite("<TR><TD colspan=2 height=10></TR>\n");
+	request->SocketWrite("<TR><TD><center><INPUT TYPE=\"submit\" value=\"OK\"></center></TD>\n");
+	request->SocketWrite("<TD><center><form method=\"GET\" action=\"/fb/timer.dbox2\"><INPUT TYPE=\"submit\" value=\"CANCEL\"><form></center></TD>\n");
+	request->SocketWrite("</TR></TABLE></form>");
 	request->SendHTMLFooter();
-	delete[] buffer;
 }
 
 //-------------------------------------------------------------------------
@@ -962,7 +892,6 @@ void CWebAPI::doModifyTimer(CWebserverRequest *request)
 //-------------------------------------------------------------------------
 void CWebAPI::newTimerForm(CWebserverRequest *request)
 {
-	char *buffer = new char[300];
 	request->SendHTMLHeader("NEW TIMER");
 	// Javascript
 	request->SocketWrite("<script language =\"javascript\">\n");
@@ -971,96 +900,80 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 	request->SocketWrite("function focusNMark() { document.NewTimerForm.ad.select();\n");
 	request->SocketWrite("                        document.NewTimerForm.ad.focus();}\n");
 	request->SocketWrite("function onEventChange() { tType=document.NewTimerForm.type.value;\n");
-	sprintf(buffer,"  if (tType == \"%d\") my_show(\"StopDateRow\"); else my_hide(\"StopDateRow\");\n",
+	request->printf("  if (tType == \"%d\") my_show(\"StopDateRow\"); else my_hide(\"StopDateRow\");\n",
 		  (int)CTimerEvent::TIMER_RECORD);
-	request->SocketWrite(buffer);
-	sprintf(buffer,"  if (tType == \"%d\") my_show(\"StandbyRow\"); else my_hide(\"StandbyRow\");\n",
+	request->printf("  if (tType == \"%d\") my_show(\"StandbyRow\"); else my_hide(\"StandbyRow\");\n",
 		  (int)CTimerEvent::TIMER_STANDBY);
-	request->SocketWrite(buffer);
-	sprintf(buffer,"  if (tType == \"%d\" || tType==\"%d\" || tType==\"%d\")\n",
+	request->printf("  if (tType == \"%d\" || tType==\"%d\" || tType==\"%d\")\n",
 		  (int)CTimerEvent::TIMER_RECORD, (int)CTimerEvent::TIMER_NEXTPROGRAM,
 		  (int)CTimerEvent::TIMER_ZAPTO);
-	request->SocketWrite(buffer);
 	request->SocketWrite("     my_show(\"ProgramRow\"); else my_hide(\"ProgramRow\");\n");
 	request->SocketWrite("  focusNMark();}\n");
 	request->SocketWrite("</script>\n");
-	// head of table
-	request->SocketWrite("<center><table border=2 width=420><tr class=\"a\"><td>\n");
+	// head of TABLE
+	request->SocketWrite("<center><TABLE border=2 width=\"70%\"><tr CLASS=\"a\"><TD>\n");
 	// Form
 	request->SocketWrite("<form method=\"GET\" action=\"/fb/timer.dbox2\" name=\"NewTimerForm\">\n");
-	request->SocketWrite("<input type=\"hidden\" name=\"action\" value=\"new\">\n");
-	request->SocketWrite("<table border=0 width=\"100%%\">\n");
-	request->SocketWrite("<tr class=\"c\"><td colspan=\"2\" align=\"center\">NEW TIMER</td></tr>\n");
+	request->SocketWrite("<INPUT TYPE=\"hidden\" name=\"action\" value=\"new\">\n");
+	request->SocketWrite("<TABLE border=0 width=\"100%%\">\n");
+	request->SocketWrite("<tr CLASS=\"c\"><TD colspan=\"2\" align=\"center\">NEW TIMER</TD></TR>\n");
 	// Timer type
-	request->SocketWrite("<tr><td align=\"center\">timer type\n");
+	request->SocketWrite("<TR><TD align=\"center\">timer type\n");
 	request->SocketWrite("<select name=\"type\" onchange=\"onEventChange();\">\n");
 	for(int i=1; i<=7;i++)
 	{
 		char zType[21];
 		Parent->timerEventType2Str((CTimerEvent::CTimerEventTypes) i, zType, sizeof(zType)-1);
-		sprintf(buffer,"<option value=\"%d\">%s\n",i,zType);
-		request->SocketWrite(buffer);
+		request->printf("<option value=\"%d\">%s\n",i,zType);
 	}
 	request->SocketWrite("</select>\n");
 	// timer repeat
-	request->SocketWrite("<td align=\"center\">repeat\n");
+	request->SocketWrite("<TD align=\"center\">repeat\n");
 	request->SocketWrite("<select name=\"rep\" onchange=\"focusNMark();\">\n");
 	for(int i=0; i<=6;i++)
 	{
 		char zRep[21];
 		Parent->timerEventRepeat2Str((CTimerEvent::CTimerEventRepeat) i, zRep, sizeof(zRep)-1);
-		sprintf(buffer,"<option value=\"%d\">%s\n",i,zRep);
-		request->SocketWrite(buffer);
+		request->printf("<option value=\"%d\">%s\n",i,zRep);
 	}
 	request->SocketWrite("</select>\n");
 
 	time_t now_t = time(NULL);
 	struct tm *now=localtime(&now_t);
 	// alarm day
-	request->SocketWrite("<tr><td align=\"right\">\n");
-	sprintf(buffer,"alarm date: <input type=\"text\" name=\"ad\" value=\"%02d\" size=2 maxlength=2>. \n",
+	request->SocketWrite("<TR><TD align=\"right\">\n<NOBR>");
+	request->printf("alarm date: <INPUT TYPE=\"text\" name=\"ad\" value=\"%02d\" size=2 maxlength=2>. \n",
 		  now->tm_mday);
-	request->SocketWrite(buffer);
 	// alarm month
-	sprintf(buffer,"<input type=\"text\" name=\"amo\" value=\"%02d\" size=2 maxlength=2>. \n",
+	request->printf("<INPUT TYPE=\"text\" name=\"amo\" value=\"%02d\" size=2 maxlength=2>. \n",
 		  now->tm_mon+1);
-	request->SocketWrite(buffer);
 	// alarm year
-	sprintf(buffer,"<input type=\"text\" name=\"ay\" value=\"%04d\" size=4 maxlength=4>\n",
+	request->printf("<INPUT TYPE=\"text\" name=\"ay\" value=\"%04d\" size=4 maxlength=4>\n",
 		  now->tm_year+1900);
-	request->SocketWrite(buffer);
 	// alarm time
-	request->SocketWrite("</td><td align=\"center\">\n");
-	sprintf(buffer,"time: <input type=\"text\" name=\"ah\" value=\"%02d\" size=2 maxlength=2> : \n",
+	request->SocketWrite("</NOBR></TD><TD align=\"center\"><NOBR>\n");
+	request->printf("time: <INPUT TYPE=\"text\" name=\"ah\" value=\"%02d\" size=2 maxlength=2> : \n",
 		  now->tm_hour);
-	request->SocketWrite(buffer);
-	sprintf(buffer,"<input type=\"text\" name=\"ami\" value=\"%02d\" size=2 maxlength=2></td>\n",
+	request->printf("<INPUT TYPE=\"text\" name=\"ami\" value=\"%02d\" size=2 maxlength=2></NOBR></TD>\n",
 		  now->tm_min);
-	request->SocketWrite(buffer);
 	// stop day
-	sprintf(buffer,"</tr><tr id=\"StopDateRow\" style=\"visibility:hidden\"><td align=\"right\">\n");
-	request->SocketWrite(buffer);
-	sprintf(buffer,"stop date: <input type=\"text\" name=\"sd\" value=\"%02d\" size=2 maxlength=2>. \n",
+	request->printf("</TR><tr id=\"StopDateRow\" style=\"visibility:hidden\"><TD align=\"right\"><NOBR>\n");
+	request->printf("stop date: <INPUT TYPE=\"text\" name=\"sd\" value=\"%02d\" size=2 maxlength=2>. \n",
 		  now->tm_mday);
-	request->SocketWrite(buffer);
 	// stop month
-	sprintf(buffer,"<input type=\"text\" name=\"smo\" value=\"%02d\" size=2 maxlength=2>. \n",
+	request->printf("<INPUT TYPE=\"text\" name=\"smo\" value=\"%02d\" size=2 maxlength=2>. \n",
 		  now->tm_mon+1);
-	request->SocketWrite(buffer);
 	// stop year
-	sprintf(buffer,"<input type=\"text\" name=\"sy\" value=\"%04d\" size=4 maxlength=4>\n",
+	request->printf("<INPUT TYPE=\"text\" name=\"sy\" value=\"%04d\" size=4 maxlength=4>\n",
 		  now->tm_year+1900);
-	request->SocketWrite(buffer);
-	request->SocketWrite("</td><td align=\"center\">\n");
+	request->SocketWrite("</NOBR></TD><TD align=\"center\"><NOBR>\n");
 	// stop time
-	sprintf(buffer,"time: <input type=\"text\" name=\"sh\" value=\"%02d\" size=2 maxlength=2> : \n",
+	request->printf("time: <INPUT TYPE=\"text\" name=\"sh\" value=\"%02d\" size=2 maxlength=2> : \n",
 		  now->tm_hour);
-	request->SocketWrite(buffer);
-	sprintf(buffer,"<input type=\"text\" name=\"smi\" value=\"%02d\" size=2 maxlength=2></td></tr>\n",
+	request->printf("<INPUT TYPE=\"text\" name=\"smi\" value=\"%02d\" size=2 maxlength=2></NOBR></TD></TR>\n",
 		  now->tm_min);
-	request->SocketWrite(buffer);
 	// ONID-SID
-	request->SocketWrite("<tr id=\"ProgramRow\" style=\"visibility:hidden\"><td colspan=2>\n");
+	request->SocketWrite("<tr id=\"ProgramRow\" style=\"visibility:hidden\"><TD colspan=2>\n");
 	request->SocketWrite("<select name=\"channel_id\">\n");
 	CZapitClient::BouquetChannelList channellist;     
 	channellist.clear();
@@ -1069,24 +982,21 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 	CZapitClient::BouquetChannelList::iterator channel = channellist.begin();
 	for(; channel != channellist.end();channel++)
 	{
-		sprintf(buffer,"<option value=\"%d\"",channel->channel_id);
-		request->SocketWrite(buffer);
+		request->printf("<option value=\"%d\"",channel->channel_id);
 		if(channel->channel_id == current_channel)
 			request->SocketWrite(" selected");
-		sprintf(buffer,">%s\n",channel->name);
-		request->SocketWrite(buffer);
+		request->printf(">%s\n",channel->name);
 	}
-	request->SocketWrite("</selected></tr>\n");
+	request->SocketWrite("</selected></TR>\n");
 	//standby
-	request->SocketWrite("<tr id=\"StandbyRow\" style=\"visibility:hidden\"><td colspan=2>\n");
-	request->SocketWrite("Standby on ?<input type=\"radio\" name=\"sbon\" value=\"1\">Yes\n");
-	request->SocketWrite("<input type=\"radio\" name=\"sbon\" value=\"0\" checked>No</td></tr>\n");
+	request->SocketWrite("<tr id=\"StandbyRow\" style=\"visibility:hidden\"><TD colspan=2>\n");
+	request->SocketWrite("Standby on ?<INPUT TYPE=\"radio\" name=\"sbon\" value=\"1\">Yes\n");
+	request->SocketWrite("<INPUT TYPE=\"radio\" name=\"sbon\" value=\"0\" checked>No</TD></TR>\n");
 	// Buttons
-	request->SocketWrite("<td align=\"center\"><input type=\"submit\" value=\"OK\">\n");
-	request->SocketWrite("<td align=\"center\"><form method=\"GET\" action=\"/fb/timer.dbox2\"><input type=\"submit\" value=\"CANCEL\"><form></center></td>\n");
-	request->SocketWrite("</table></form></table>\n");
+	request->SocketWrite("<TD align=\"center\"><INPUT TYPE=\"submit\" value=\"OK\">\n");
+	request->SocketWrite("<TD align=\"center\"><form method=\"GET\" action=\"/fb/timer.dbox2\"><INPUT TYPE=\"submit\" value=\"CANCEL\"><form></center></TD>\n");
+	request->SocketWrite("</TABLE></form></TABLE>\n");
 	request->SendHTMLFooter();
-	delete[] buffer;
 }
 
 //-------------------------------------------------------------------------

@@ -33,6 +33,7 @@ private:
 	bool RequestCanceled;
 	string rawbuffer;
 	int rawbuffer_len;
+	char *outbuf;
 
 	void SplitParameter(string param_str);
 
@@ -56,6 +57,8 @@ public:
 	string			Client_Addr;
 	int				Socket;
 	unsigned long	RequestNumber;
+
+	void printf ( const char *fmt, ... );
 
 	bool SocketWrite( char* text);
 	bool SocketWriteLn( char* text);

@@ -43,7 +43,6 @@ class CWebserver
 public:
 // config vars / switches
 	bool			STOP;
-	bool			DEBUG;
 	bool			VERBOSE;
 	bool			MustAuthenticate;
 	bool			NewGui;

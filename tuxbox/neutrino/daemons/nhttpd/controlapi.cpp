@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.4 2002/10/03 19:05:12 thegoodguy Exp $
+	$Id: controlapi.cpp,v 1.5 2002/10/05 20:32:06 dirch Exp $
 
 	License: GPL
 
@@ -26,7 +26,6 @@
 #include "controlapi.h"
 #include "debug.h"
 
-#define dprintf(fmt, args...) {if(Parent->Parent->DEBUG) aprintf( "[nhttpd] " fmt, ## args);}
 
 bool CControlAPI::Execute(CWebserverRequest* request)
 {
@@ -189,11 +188,11 @@ bool CControlAPI::StandbyCGI(CWebserverRequest *request)
 	{
 		if (request->ParameterList["1"] == "on")	// in standby mode schalten
 		{
-			Parent->EventServer->sendEvent(NeutrinoMessages::STANDBY_ON, CEventServer::INITID_THTTPD);
+			Parent->EventServer->sendEvent(NeutrinoMessages::STANDBY_ON, CEventServer::INITID_HTTPD);
 		}
 		if (request->ParameterList["1"] == "off")	// standby mode ausschalten
 		{
-			Parent->EventServer->sendEvent(NeutrinoMessages::STANDBY_OFF, CEventServer::INITID_THTTPD);
+			Parent->EventServer->sendEvent(NeutrinoMessages::STANDBY_OFF, CEventServer::INITID_HTTPD);
 		}
 	}
 	request->SendOk();
@@ -271,9 +270,7 @@ bool CControlAPI::GetBouquetsxmlCGI(CWebserverRequest *request)		// sendet die d
 bool CControlAPI::GetChannel_IDCGI(CWebserverRequest *request) // sendet die aktuelle channel_id
 {
 	request->SendPlainHeader("text/plain");
-	char buf[10];
-	sprintf(buf, "%u\n", Parent->Zapit->getCurrentServiceID());
-	request->SocketWrite(buf);
+	request->printf("%u\n", Parent->Zapit->getCurrentServiceID());
 	return true;
 }
 //-------------------------------------------------------------------------
@@ -301,7 +298,7 @@ bool CControlAPI::MessageCGI(CWebserverRequest *request)
 	if(event != 0)
 	{
 		request->URLDecode(message);
-		Parent->EventServer->sendEvent(event, CEventServer::INITID_THTTPD, (void *) message.c_str(), message.length() + 1);
+		Parent->EventServer->sendEvent(event, CEventServer::INITID_HTTPD, (void *) message.c_str(), message.length() + 1);
 		request->SendOk();
 		return true;
 	}
@@ -355,7 +352,7 @@ bool CControlAPI::ShutdownCGI(CWebserverRequest *request)
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
 	if (request->ParameterList.size() == 0)
 	{	//paramlos
-		Parent->EventServer->sendEvent(NeutrinoMessages::SHUTDOWN, CEventServer::INITID_THTTPD);
+		Parent->EventServer->sendEvent(NeutrinoMessages::SHUTDOWN, CEventServer::INITID_HTTPD);
 
 		request->SendOk();
 		return true;
@@ -373,9 +370,7 @@ bool CControlAPI::VolumeCGI(CWebserverRequest *request)
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
 	if (request->ParameterList.size() == 0)
 	{	//paramlos - aktuelle volume anzeigen
-		char buf[10];
-		sprintf(buf, "%d", Parent->Controld->getVolume());			// volume ausgeben
-		request->SocketWrite(buf);
+		request->printf("%d", Parent->Controld->getVolume());			// volume ausgeben
 		return true;
 	}
 	else
@@ -456,17 +451,14 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
 	if(request->ParameterList.size() == 0)
 	{
-		char  *buffer = new char[255];
 		for(unsigned int i = 0; i < Parent->ChannelList.size();i++)
 		{
 			event = Parent->ChannelListEvents[Parent->ChannelList[i].channel_id];
 			if(event)
 			{
-				sprintf(buffer,"%u %llu %s\n",Parent->ChannelList[i].channel_id,event->eventID,event->description.c_str() /*eList[n].eventID,eList[n].description.c_str()*/);
-				request->SocketWrite(buffer);
+				request->printf("%u %llu %s\n",Parent->ChannelList[i].channel_id,event->eventID,event->description.c_str() /*eList[n].eventID,eList[n].description.c_str()*/);
 			}
 		}
-		delete buffer;
 		return true;
 	}
 	else if(request->ParameterList.size() == 1)
@@ -474,18 +466,14 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 
 		if(request->ParameterList["1"] == "ext")
 		{
-			char  *buffer = new char[255];
 			for(unsigned int i = 0; i < Parent->ChannelList.size();i++)
 			{
 				event = Parent->ChannelListEvents[Parent->ChannelList[i].channel_id];
 				if(event)
 				{
-
-					sprintf(buffer,"%u %ld %u %llu %s\n",Parent->ChannelList[i].channel_id,event->startTime,event->duration,event->eventID,event->description.c_str() /*eList[n].eventID,eList[n].description.c_str()*/);
-					request->SocketWrite(buffer);
+					request->printf("%u %ld %u %llu %s\n",Parent->ChannelList[i].channel_id,event->startTime,event->duration,event->eventID,event->description.c_str() /*eList[n].eventID,eList[n].description.c_str()*/);
 				}
 			}
-			delete buffer;
 			return true;
 		}
 		else if(request->ParameterList["eventid"] != "")
@@ -528,9 +516,7 @@ bool CControlAPI::ZaptoCGI(CWebserverRequest *request)
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
 	if (request->ParameterList.size() == 0)
 	{	//paramlos - aktuelles programm anzeigen
-		char buf[10];
-		sprintf(buf, "%u\n", Parent->Zapit->getCurrentServiceID());
-		request->SocketWrite(buf);
+		request->printf("%u\n", Parent->Zapit->getCurrentServiceID());
 		return true;
 	}
 	else if (request->ParameterList.size() == 1)
@@ -601,53 +587,40 @@ bool CControlAPI::ZaptoCGI(CWebserverRequest *request)
 void CControlAPI::SendEventList(CWebserverRequest *request,unsigned channel_id)
 {
 int pos;
-char *buffer = new char[400];
 
 	Parent->eList = Parent->Sectionsd->getEventsServiceKey(channel_id);
 	CChannelEventList::iterator eventIterator;
     for( eventIterator = Parent->eList.begin(); eventIterator != Parent->eList.end(); eventIterator++, pos++ )
 	{
-		sprintf(buffer, "%llu %ld %d %s\n", eventIterator->eventID, eventIterator->startTime, eventIterator->duration, eventIterator->description.c_str());
-		request->SocketWrite(buffer);
+		request->printf("%llu %ld %d %s\n", eventIterator->eventID, eventIterator->startTime, eventIterator->duration, eventIterator->description.c_str());
 	}
-	delete[] buffer;
 }
 //-------------------------------------------------------------------------
 
 void CControlAPI::SendBouquets(CWebserverRequest *request)
 {
-char *buffer = new char[500];
 
 	for(unsigned int i = 0; i < Parent->BouquetList.size();i++)
 	{
-		sprintf(buffer,"%u %s\n", (Parent->BouquetList[i].bouquet_nr) + 1, Parent->BouquetList[i].name);
-		request->SocketWrite(buffer);
+		request->printf("%u %s\n", (Parent->BouquetList[i].bouquet_nr) + 1, Parent->BouquetList[i].name);
 	}
-	delete[] buffer;
 };
 //-------------------------------------------------------------------------
 void CControlAPI::SendBouquet(CWebserverRequest *request,int BouquetNr)
 {
-char *buffer = new char[500];
 
 	for(unsigned int i = 0; i < Parent->BouquetsList[BouquetNr].size();i++)
 	{ 
-		sprintf(buffer,"%u %u %s\n",(Parent->BouquetsList[BouquetNr])[i].nr, Parent->BouquetsList[BouquetNr][i].channel_id, Parent->BouquetsList[BouquetNr][i].name);
-		request->SocketWrite(buffer);
+		request->printf("%u %u %s\n",(Parent->BouquetsList[BouquetNr])[i].nr, Parent->BouquetsList[BouquetNr][i].channel_id, Parent->BouquetsList[BouquetNr][i].name);
 	}
-	delete[] buffer;
 };
 //-------------------------------------------------------------------------
 void CControlAPI::SendChannelList(CWebserverRequest *request)
 {
-char *buffer = new char[500];
-
 	for(unsigned int i = 0; i < Parent->ChannelList.size();i++)
 	{
-		sprintf(buffer,"%u %s\n",Parent->ChannelList[i].channel_id, Parent->ChannelList[i].name);
-		request->SocketWrite(buffer);
+		request->printf("%u %s\n",Parent->ChannelList[i].channel_id, Parent->ChannelList[i].name);
 	}
-	delete[] buffer;
 };
 
 //-------------------------------------------------------------------------
@@ -656,12 +629,9 @@ void CControlAPI::SendStreamInfo(CWebserverRequest* request)
 {
 
 	int bitInfo[10];
-	char buf[100];
 	Parent->GetStreamInfo(bitInfo);
-	sprintf((char*) buf, "%d\n%d\n", bitInfo[0], bitInfo[1] );
-	request->SocketWrite(buf); //Resolution x y
-	sprintf((char*) buf, "%d\n", bitInfo[4]*50);
-	request->SocketWrite(buf); //Bitrate bit/sec
+	request->printf("%d\n%d\n", bitInfo[0], bitInfo[1] );	//Resolution x y
+	request->printf("%d\n", bitInfo[4]*50);					//Bitrate bit/sec
 	
 	switch ( bitInfo[2] ) //format
 	{
@@ -695,10 +665,7 @@ void CControlAPI::SendcurrentVAPid(CWebserverRequest* request)
 CZapitClient::responseGetPIDs pids;
 	Parent->Zapit->getPIDS(pids);
 
-	char *buf = new char[300];
-	sprintf(buf, "%u\n%u\n", pids.PIDs.vpid, pids.APIDs[0].pid);
-	request->SocketWrite(buf);
-	delete buf;
+	printf("%u\n%u\n", pids.PIDs.vpid, pids.APIDs[0].pid);
 }
 
 //-------------------------------------------------------------------------
@@ -711,7 +678,6 @@ void CControlAPI::SendSettings(CWebserverRequest* request)
 
 void CControlAPI::SendTimers(CWebserverRequest* request)
 {
-	char *buffer = new char[300];
 	CTimerd::TimerList timerlist;             // List of bouquets
 
 	timerlist.clear();
@@ -757,10 +723,8 @@ void CControlAPI::SendTimers(CWebserverRequest* request)
             break;
          default:{}
 		}
-		sprintf(buffer,"%d %d %d %d %d %d %s\n",timer->eventID,(int)timer->eventType,
+		request->printf("%d %d %d %d %d %d %s\n",timer->eventID,(int)timer->eventType,
              (int)timer->eventRepeat,(int)timer->announceTime,
              (int)timer->alarmTime,(int)timer->stopTime,zAddData);
-		request->SocketWrite(buffer);
 	}
-	delete[] buffer;
 }
