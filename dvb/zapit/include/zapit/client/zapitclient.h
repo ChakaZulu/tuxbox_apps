@@ -225,7 +225,7 @@ class CZapitClient:public CBasicClient
 
 	/* gets all bouquets */
 	/* bouquets are numbered starting at 0 */
-	void getBouquets( BouquetList& bouquets, bool emptyBouquetsToo = false);
+	void getBouquets( BouquetList& bouquets, const bool emptyBouquetsToo = false, const bool utf_encoded = false);
 
 	/* gets all channels that are in specified bouquet */
 	/* bouquets are numbered starting at 0 */

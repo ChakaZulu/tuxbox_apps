@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.256 2002/10/08 20:19:10 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.257 2002/10/09 19:58:54 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1016,7 +1016,7 @@ int main (int argc, char **argv)
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.256 2002/10/08 20:19:10 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.257 2002/10/09 19:58:54 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1237,7 +1237,7 @@ void sendBouquets(bool emptyBouquetsToo)
 			{
 				CZapitClient::responseGetBouquets msgBouquet;
 
-				strncpy(msgBouquet.name, Utf8_to_Latin1(bouquetManager->Bouquets[i]->Name).c_str(), 30);
+				strncpy(msgBouquet.name, bouquetManager->Bouquets[i]->Name.c_str(), 30);
 				msgBouquet.bouquet_nr = i;
 				msgBouquet.locked     = bouquetManager->Bouquets[i]->bLocked;
 				msgBouquet.hidden     = bouquetManager->Bouquets[i]->bHidden;

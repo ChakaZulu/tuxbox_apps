@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.61 2002/10/04 17:56:01 thegoodguy Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.62 2002/10/09 19:58:54 thegoodguy Exp $ *
  *
  * Client-Interface für zapit - DBoxII-Project
  *
@@ -32,6 +32,25 @@
 #include "include/zapitclient.h"
 #include "msgtypes.h"
 
+std::string Utf8_to_Latin1(const std::string s)
+{
+	std::string r;
+	unsigned int i;
+	for (i = 0; i < s.length(); i++)
+	{
+		if ((i < s.length() - 3) && ((s[i] & 0xf0) == 0xf0))      // skip (can't be encoded in Latin1)
+			i += 3;
+		else if ((i < s.length() - 2) && ((s[i] & 0xe0) == 0xe0)) // skip (can't be encoded in Latin1)
+			i += 2;
+		else if ((i < s.length() - 1) && ((s[i] & 0xc0) == 0xc0))
+		{
+			r += ((s[i] & 3) << 6) | (s[i + 1] & 0x3f);
+			i++;
+		}
+		else r += s[i];
+	}
+	return r;
+}
 
 inline bool CZapitClient::zapit_connect()
 {
@@ -238,8 +257,10 @@ void CZapitClient::getPIDS( responseGetPIDs& pids )
 
 /* gets all bouquets */
 /* bouquets are numbered starting at 0 */
-void CZapitClient::getBouquets(BouquetList& bouquets, bool emptyBouquetsToo)
+void CZapitClient::getBouquets(BouquetList& bouquets, const bool emptyBouquetsToo, const bool utf_encoded)
 {
+	char buffer[30 + 1];
+
 	CZapitMessages::commandGetBouquets msg;
 
 	msg.emptyBouquetsToo = emptyBouquetsToo;
@@ -248,7 +269,15 @@ void CZapitClient::getBouquets(BouquetList& bouquets, bool emptyBouquetsToo)
 
 	responseGetBouquets response;
 	while (CBasicClient::receive_data((char*)&response, sizeof(responseGetBouquets)))
+	{
+		if (!utf_encoded)
+		{
+			buffer[30] = (char) 0x00;
+			strncpy(buffer, response.name, 30);
+			strncpy(response.name, Utf8_to_Latin1(std::string(buffer)).c_str(), 30);
+		}
 		bouquets.push_back(response);
+	}
 
 	zapit_close();
 }

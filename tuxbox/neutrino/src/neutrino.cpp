@@ -770,7 +770,7 @@ void CNeutrinoApp::channelsInit()
 	bouquetList = new CBouquetList( "bouquetlist.head" );
 	bouquetList->orgChannelList = channelList;
 	CZapitClient::BouquetList zapitBouquets;
-	g_Zapit->getBouquets(zapitBouquets, false);
+	g_Zapit->getBouquets(zapitBouquets, false, true); // UTF-8
 	for (uint i=0; i<zapitBouquets.size(); i++)
 	{
 		bouquetList->addBouquet( zapitBouquets[i].name, zapitBouquets[i].bouquet_nr, zapitBouquets[i].locked);
@@ -3095,7 +3095,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.337 2002/10/09 19:51:47 Zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.338 2002/10/09 19:58:53 thegoodguy Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

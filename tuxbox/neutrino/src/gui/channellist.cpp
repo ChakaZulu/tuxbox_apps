@@ -198,7 +198,7 @@ int CChannelList::show()
 		//evtl. anzeige dass keine kanalliste....
 		return res;
 	}
-	g_lcdd->setMode(CLcddClient::MODE_MENU, g_Locale->getText(name) );
+	g_lcdd->setMode(CLcddClient::MODE_MENU_UTF8, g_Locale->getText(name));
 
 	theight= g_Fonts->menu_title->getHeight();
 	fheight= g_Fonts->channellist->getHeight();
@@ -371,7 +371,7 @@ int CChannelList::show()
 			res = -2;
 	}
 
-	g_lcdd->setMode(CLcddClient::MODE_TVRADIO, g_Locale->getText(name) );
+	g_lcdd->setMode(CLcddClient::MODE_TVRADIO);
 
 	if(zapOnExit)
 	{
@@ -873,7 +873,7 @@ void CChannelList::paintItem(int pos)
 
 void CChannelList::paintHead()
 {
-	string strCaption = g_Locale->getText(name).c_str();
+	string strCaption = g_Locale->getText(name);
 
 /*	if (strCaption == "")
 	{
@@ -881,7 +881,7 @@ void CChannelList::paintHead()
 	}
 */
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width- 65, strCaption.c_str(), COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width- 65, strCaption.c_str(), COL_MENUHEAD, 0, true); // UTF-8
 
 	frameBuffer->paintIcon("help.raw", x+ width- 30, y+ 5 );
 	if (bouquetList!=NULL)

@@ -359,7 +359,7 @@ void CBouquetList::paintItem(int pos)
 		int numpos = x+5+numwidth- g_Fonts->channellist_number->getRenderWidth(tmp);
 		g_Fonts->channellist_number->RenderString(numpos,ypos+fheight, numwidth+5, tmp, color, fheight);
 
-		g_Fonts->channellist->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, bouq->channelList->getName().c_str(), color);
+		g_Fonts->channellist->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, bouq->channelList->getName().c_str(), color, 0, true); // UTF-8
 	}
 }
 
