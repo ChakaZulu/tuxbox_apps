@@ -1,21 +1,23 @@
 <form name="hddconfig">
-	<table border=0 cellspacing=0 cellpadding=0>
+	<table border=0 cellspacing=5 cellpadding=0>
 		<tr>
-			<td><input type="checkbox" name="swaphdd" value="on"></td>
-			<td>&nbsp;Use HDD Swap File:&nbsp;</td>
-			<td><input name="swaphddfile" type="text" size="50" maxlength="50" value="/hdd/swapfile"></td>
+			<td><input type="checkbox" name="swaphdd" value="on" #SWAPHDD#></td>
+			<td>Use HDD Swap File:</td>
+			<td><input name="swaphddfile" type="text" size="50" maxlength="50" value="#HDDSWAPFILE#"></td>
 		</tr>
+		<!--
 		<tr>
-			<td><input type="checkbox" name="boothdd" value="on"></td>
-			<td>&nbsp;Boot HDD Image:&nbsp;</td>
+			<td><input type="checkbox" name="boothdd" value="on" #BOOTHDD#></td>
+			<td>Boot HDD Image:</td>
 			<td>
 				<select name="boothddimage" size="1">
-					<option>/hdd/Image1</option>
-					<option>/hdd/Image2</option>
-					<option>/hdd/Image3</option>
+					<option #IMAGE1#>/hdd/Image1</option>
+					<option #IMAGE2#>/hdd/Image2</option>
+					<option #IMAGE3#>/hdd/Image3</option>
 				</select>
 			</td>
 		</tr>
+		-->
 	</table>
 	<br>
 	<input type="button" style="width:100px; height:22px; color:#000000;" value="Configure" onClick="javascript:configHDD()">

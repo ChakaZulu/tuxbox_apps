@@ -1637,13 +1637,20 @@ static eString getDiskInfo(void)
 
 static eString getConfigHDD(void)
 {
-	std::stringstream result;
-	result  << "<table border=0 cellspacing=0 cellpadding=0>"
-		<< getDiskInfo()
-		<< "</table>"
-		<< "<br>"
-		<< readFile(TEMPLATE_DIR + "configHDD.tmp");
-	return result.str();
+	eString result;
+	result = "<table border=0 cellspacing=0 cellpadding=0>"
+		 + getDiskInfo()
+		 + "</table>"
+		 + "<br>"
+		 + readFile(TEMPLATE_DIR + "configHDD.tmp");
+		 
+	int swapfile = 0;
+	eConfig::getInstance()->getKey("/extras/swapfile", swapfile);
+	char *swapfilename;
+	eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename);
+	result.strReplace("#SWAPHDD#", (swapfile == 2) ? "checked" : "");
+	result.strReplace("#HDDSWAPFILE#", (swapfile == 2) ? eString(swapfilename) : "none");
+	return result;
 }
 
 static eString getUSBInfo(void)
@@ -1681,15 +1688,38 @@ static eString getUSBInfo(void)
 	return result.str();
 }
 
+void activateSwapFile(eString swapFile)
+{
+	eString cmd;
+	cmd = "mkswap" + swapFile;
+	system(cmd.c_str());
+	cmd = "swapon" + swapFile;
+	system(cmd.c_str());
+}
+
+void deactivateSwapFile(eString swapFile)
+{
+	eString cmd;
+	cmd = "swapoff" + swapFile;
+	system(cmd.c_str());
+}
+
 static eString getConfigUSB(void)
 {
-	std::stringstream result;
-	result  << "<table border=0 cellspacing=0 cellpadding=0>"
-		<< getUSBInfo()
-		<< "</table>"
-		<< "<br>"
-		<< readFile(TEMPLATE_DIR + "configUSB.tmp");
-	return result.str();
+	eString result;
+	result = "<table border=0 cellspacing=0 cellpadding=0>"
+		 + getUSBInfo()
+		 + "</table>"
+		 + "<br>"
+		 + readFile(TEMPLATE_DIR + "configUSB.tmp");
+		 
+	int swapfile = 0;
+	eConfig::getInstance()->getKey("/extras/swapfile", swapfile);
+	char *swapfilename;
+	eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename);
+	result.strReplace("#SWAPUSB#", (swapfile == 1) ? "checked" : "");
+	result.strReplace("#USBSWAPFILE#", (swapfile == 1) ? eString(swapfilename) : "none");
+	return result;
 }
 
 static eString setConfigUSB(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -1699,9 +1729,42 @@ static eString setConfigUSB(eString request, eString dirpath, eString opts, eHTT
 	eString swapUSBFile = opt["swapusbfile"];
 	eString bootUSB = opt["bootUSB"];
 	eString bootUSBImage = opt["bootusbimage"];
+	
+	int swapfile = 0;
+	eConfig::getInstance()->getKey("/extras/swapfile", swapfile);
+	char *swapfilename;
+	eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename);
+	
+	if (swapUSB == "on")
+	{
+		switch(swapfile)
+		{
+			case 0: //no swap file active
+				activateSwapFile(swapUSBFile);
+				break;
+			case 1: //usb swap file active
+				//noop
+				break;
+			case 2: //hdd swap file active
+				deactivateSwapFile(eString(swapfilename));
+				activateSwapFile(swapUSBFile);
+				break;
+		}
+	}
+	else
+	{
+		if (swapfile == 1)
+		{
+			deactivateSwapFile(swapUSBFile);
+			swapfile = 0;
+		}
+	}
+	
+	eConfig::getInstance()->setKey("/extras/swapfile", swapfile);
+	eConfig::getInstance()->setKey("/extras/swapfilename", swapUSBFile.c_str());
 
-	content->code=204;
-	content->code_descr="No Content";
+	content->code = 204;
+	content->code_descr = "No Content";
 	return NOCONTENT;
 }
 
@@ -1712,6 +1775,39 @@ static eString setConfigHDD(eString request, eString dirpath, eString opts, eHTT
 	eString swapHDDFile = opt["swaphddfile"];
 	eString bootHDD = opt["bootHDD"];
 	eString bootHDDImage = opt["boothddimage"];
+	
+	int swapfile = 0;
+	eConfig::getInstance()->getKey("/extras/swapfile", swapfile);
+	char *swapfilename;
+	eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename);
+	
+	if (swapHDD == "on")
+	{
+		switch(swapfile)
+		{
+			case 0: //no swap file active
+				activateSwapFile(swapHDDFile);
+				break;
+			case 1: //usb swap file active
+				deactivateSwapFile(eString(swapfilename));
+				activateSwapFile(swapHDDFile);
+				break;
+			case 2: //hdd swap file active
+				//noop
+				break;
+		}
+	}
+	else
+	{
+		if (swapfile == 2)
+		{
+			deactivateSwapFile(swapHDDFile);
+			swapfile = 0;
+		}
+	}
+	
+	eConfig::getInstance()->setKey("/extras/swapfile", swapfile);
+	eConfig::getInstance()->setKey("/extras/swapfilename", swapHDDFile.c_str());
 
 	content->code=204;
 	content->code_descr="No Content";

@@ -1,21 +1,23 @@
 <form name="usbconfig">
-	<table border=0 cellspacing=0 cellpadding=0>
+	<table border=0 cellspacing=5 cellpadding=0>
 		<tr>
-			<td><input type="checkbox" name="swapusb" value="on"></td>
-			<td>&nbsp;Use USB Swap File:&nbsp;</td>
-			<td><input name="swapusbfile" type="text" size="50" maxlength="50" value="/USB/swapfile"></td>
+			<td><input type="checkbox" name="swapusb" value="on" #SWAPUSB#></td>
+			<td>Use USB Swap File:</td>
+			<td><input name="swapusbfile" type="text" size="50" maxlength="50" value="#USBSWAPFILE#"></td>
 		</tr>
+		<!--
 		<tr>
-			<td><input type="checkbox" name="bootusb" value="on"></td>
-			<td>&nbsp;Boot USB Image:&nbsp;</td>
+			<td><input type="checkbox" name="bootusb" value="on" #BOOTUSB#></td>
+			<td>Boot USB Image:</td>
 			<td>
 				<select name="bootusbimage" size="1">
-					<option>/USB/Image1</option>
-					<option>/USB/Image2</option>
-					<option>/USB/Image3</option>
+					<option #IMAGE1#>/USB/Image1</option>
+					<option #IMAGE2#>/USB/Image2</option>
+					<option #IMAGE3#>/USB/Image3</option>
 				</select>
 			</td>
 		</tr>
+		-->
 	</table>
 	<br>
 	<input type="button" style="width:100px; height:22px; color:#000000;" value="Configure" onClick="javascript:configUSB()">
