@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.157 2002/04/21 22:06:52 obi Exp $
+ * $Id: zapit.cpp,v 1.158 2002/04/21 22:09:59 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1554,6 +1554,7 @@ void parse_command ()
 			}
 			case CZapitClient::CMD_SCANSETSCANSATLIST:
 				CZapitClient::commandSetScanSatelliteList sat;
+				scanProviders.clear();
 				while (read(connfd, &sat, sizeof(sat)))
 				{
 					printf("[zapit] adding %s (diseqc %d)\n", sat.satName, sat.diseqc);
@@ -1883,7 +1884,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.157 2002/04/21 22:06:52 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.158 2002/04/21 22:09:59 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
