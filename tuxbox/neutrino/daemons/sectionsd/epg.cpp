@@ -1,5 +1,5 @@
 //
-// $Id: epg.cpp,v 1.6 2001/05/13 12:37:11 fnbrd Exp $
+// $Id: epg.cpp,v 1.7 2001/05/13 12:42:00 fnbrd Exp $
 //
 // Beispiel zur Benutzung der SI class lib (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: epg.cpp,v $
+// Revision 1.7  2001/05/13 12:42:00  fnbrd
+// Unnoetiges Zeug entfernt.
+//
 // Revision 1.6  2001/05/13 12:37:11  fnbrd
 // Noch etwas verbessert.
 //
@@ -55,29 +58,6 @@
 #include <ost/dmx.h>
 
 #include "Section.hpp"
-
-inline int readNbytes(int fd, char *buf, int n)
-{
-int j;
-  for(j=0; j<n;) {
-    int r=read (fd, buf, n-j);
-    if(r<=0) {
-      perror ("read");
-      return -1;
-    }
-    j+=r;
-    buf+=r;
-  }
-  return j;
-}
-
-/*
-struct sID {
-  unsigned tableID;
-  unsigned serviceID;
-  unsigned sectionNr;
-};
-*/
 
 int main(int argc, char **argv)
 {
