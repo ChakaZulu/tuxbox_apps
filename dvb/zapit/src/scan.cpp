@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.146 2005/01/30 17:29:27 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.147 2005/02/01 18:16:06 thegoodguy Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -595,7 +595,6 @@ void *start_scanthread(void *scanmode)
 {
 	FILE * fd;
 	char providerName[32] = "";
-	char providerName2[32] = "";
 	const char * frontendType;
 	uint8_t diseqc_pos = 0;
 	bool scan_success = false;
@@ -634,8 +633,6 @@ void *start_scanthread(void *scanmode)
 		for (spI = scanProviders.begin(); spI != scanProviders.end(); spI++)
 			if (!strcmp(spI->second.c_str(), providerName))
 			{
-				strncpy(providerName2, providerName, 30);
-
 				/* increase sat counter */
 				curr_sat++;
 
@@ -659,7 +656,6 @@ void *start_scanthread(void *scanmode)
 		/*
 		 * now write all the stuff
 		 */
-		search = xmlDocGetRootElement(scanInputParser)->xmlChildrenNode;
 		if (!(fd = fopen(SERVICES_XML, "w")))
 		{
 			WARN("unable to open %s for writing", SERVICES_XML);
@@ -667,22 +663,29 @@ void *start_scanthread(void *scanmode)
 		}
 		write_xml_header(fd);
 
-		while ((search = xmlGetNextOccurence(search, frontendType)) != NULL)
+		if (frontend->getInfo()->type == FE_QPSK)
 		{
-			/* write services */
-			if (write_provider(fd, frontendType, xmlGetAttribute(search, "name")))
-				scan_success = true;
+			search = xmlDocGetRootElement(scanInputParser)->xmlChildrenNode;
+
+			while ((search = xmlGetNextOccurence(search, frontendType)) != NULL)
+			{
+				/* write services */
+				if (write_provider(fd, frontendType, xmlGetAttribute(search, "name")))
+					scan_success = true;
 			
-			/* go to next satellite */
-			search = search->xmlNextNode;
+				/* go to next satellite */
+				search = search->xmlNextNode;
+			}
 		}
+		else
+			scan_success = write_provider(fd, frontendType, providerName);
 	
 		write_xml_footer(fd);
 		chmod(SERVICES_XML, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
 		/* write bouquets if transponders were found */
 		if (scan_success)
-			write_bouquets(providerName2);
+			write_bouquets(providerName);
 	}
 
  abort_scan:

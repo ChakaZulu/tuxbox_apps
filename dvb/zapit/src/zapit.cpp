@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.365 2005/01/30 18:14:13 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.366 2005/02/01 18:16:06 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1761,7 +1761,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.365 2005/01/30 18:14:13 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.366 2005/02/01 18:16:06 thegoodguy Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
@@ -1796,6 +1796,7 @@ int main(int argc, char **argv)
 				"lastChannelRadio" ", "
 				"lastChannelTV" ", "
 				"lastSatellitePosition" ", "
+				"writeChannelsNames" ", "
 				"makeRemainingChannelsBouquet" ", "
 			        "diseqcRepeats" ", "
 				"diseqcType" ", "
