@@ -1408,7 +1408,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 	service.addItem(GenericMenuSeparator);
 	service.addItem(GenericMenuBack);
 	service.addItem(GenericMenuSeparatorLine);
-	service.addItem( new CMenuForwarder(LOCALE_BOOKMARKMANAGER_NAME, true, NULL, new CBEBouquetWidget()));
+	service.addItem( new CMenuForwarder(LOCALE_BOUQUETEDITOR_NAME, true, NULL, new CBEBouquetWidget()));
 	service.addItem( new CMenuForwarder("servicemenu.scants", true, NULL, &scanSettings ) );
 	service.addItem( new CMenuForwarder("servicemenu.reload", true, NULL, this, "reloadchannels" ) );
 	service.addItem( new CMenuForwarder("servicemenu.ucodecheck", true, NULL, UCodeChecker ) );
