@@ -267,7 +267,7 @@ int eNumber::keyDown(int key)
 			number[active]=nn;
 			invalidate(getNumberRect(active));
 			digit++;
-			if ((digit>=maxdigits) || (nn==0))
+			if ((digit>=maxdigits) || (nn==0) || ((digit+1==maxdigits) && (nn*10>max)))
 			{        
 				active++;
 				invalidate(getNumberRect(active-1));
