@@ -46,7 +46,11 @@ void eDVBSettings::addDVBBouquet(const BAT *bat)
 			{
 				const ServiceListDescriptor *s=(ServiceListDescriptor*)*i;
 				for (ePtrList<ServiceListDescriptorEntry>::const_iterator a(s->entries); a != s->entries.end(); ++a)
-					bouquet->add(be->transport_stream_id, be->original_network_id, a->service_id);
+					bouquet->add(
+						eServiceReference(
+							eTransportStreamID(be->transport_stream_id), 
+							eOriginalNetworkID(be->original_network_id), 
+							eServiceID(a->service_id), -1));
 			}
 }
 
@@ -122,11 +126,13 @@ int eDVBSettings::getUnusedBouquetID(int range)
 
 void eDVBSettings::revalidateBouquets()
 {
+#if 0
 	eDebug("revalidating bouquets");
 	if (transponderlist)
 		for (ePtrList<eBouquet>::iterator i(bouquets); i != bouquets.end(); i++)
-			for (ServiceReferenceIterator service = i->list.begin(); service != i->list.end(); service++)
-				service->service=transponderlist->searchService(service->original_network_id, service->service_id);
+			for (ServiceReferenceIterator service = i->list.begin(); service != i->list.end(); ++service)
+				service->service=transponderlist->searchService(service);
+#endif
 	/*emit*/ dvb.bouquetListChanged();
 }
 
@@ -171,7 +177,7 @@ struct sortinChannel: public std::unary_function<const eService&, void>
 				add=" [Data]";
 		}
 		eBouquet *b = edvb.createBouquet(0, beautifyBouquetName(service.service_provider.c_str())+add);
-		b->add(service.transport_stream_id, service.original_network_id, service.service_id);
+		b->add(eServiceReference(service.transport_stream_id, service.original_network_id, service.service_id, service.service_type));
 	}
 };
 
@@ -193,7 +199,7 @@ struct saveService: public std::unary_function<const eService&, void>
 	}
 	void operator()(eService& s)
 	{
-		fprintf(f, "%04x:%04x:%04x:%d:%d\n", s.service_id, s.transport_stream_id,s.original_network_id, s.service_type, s.service_number);
+		fprintf(f, "%04x:%04x:%04x:%d:%d\n", s.service_id.get(), s.transport_stream_id.get(), s.original_network_id.get(), s.service_type, s.service_number);
 		fprintf(f, "%s\n", s.service_name.c_str());
 		fprintf(f, "%s\n", s.service_provider.c_str());
 	}
@@ -308,7 +314,12 @@ void eDVBSettings::loadServices()
 
 		int service_id=-1, transport_stream_id=-1, original_network_id=-1, service_type=-1, service_number=-1;
 		sscanf(line, "%04x:%04x:%04x:%d:%d", &service_id, &transport_stream_id, &original_network_id, &service_type, &service_number);
-		eService &s=transponderlist->createService(transport_stream_id, original_network_id, service_id, service_number);
+		eService &s=transponderlist->createService(
+				eServiceReference(
+						eTransportStreamID(transport_stream_id), 
+						eOriginalNetworkID(original_network_id), 
+						eServiceID(service_id),
+						service_type), service_number);
 		count++;
 		s.service_type=service_type;
 		fgets(line, 256, f);
@@ -341,7 +352,7 @@ void eDVBSettings::saveBouquets()
 		fprintf(f, "%0d\n", b->bouquet_id);
 		fprintf(f, "%s\n", b->bouquet_name.c_str());
 		for (ServiceReferenceIterator s = b->list.begin(); s != b->list.end(); s++)
-			fprintf(f, "%04x:%04x:%04x\n", s->service_id, s->transport_stream_id, s->original_network_id);
+			fprintf(f, "%04x:%04x:%04x:%d\n", s->service_id.get(), s->transport_stream_id.get(), s->original_network_id.get(), s->service_type);
 		fprintf(f, "/\n");
 	}
 	fprintf(f, "end\n");
@@ -390,9 +401,14 @@ void eDVBSettings::loadBouquets()
 			fgets(line, 256, f);
 			if (!strcmp(line, "/\n"))
 				break;
-			int service_id=-1, transport_stream_id=-1, original_network_id=-1;
-			sscanf(line, "%04x:%04x:%04x", &service_id, &transport_stream_id, &original_network_id);
-			bouquet->add(transport_stream_id, original_network_id, service_id);
+			int service_id=-1, transport_stream_id=-1, original_network_id=-1, service_type=-1;
+			sscanf(line, "%04x:%04x:%04x:%d", &service_id, &transport_stream_id, &original_network_id, &service_type);
+			bouquet->add(
+				eServiceReference(
+					eTransportStreamID(transport_stream_id), 
+					eOriginalNetworkID(original_network_id), 
+					eServiceID(service_id), 
+					service_type));
 		}
 	}
 

@@ -15,10 +15,10 @@ class eListBoxEntryService: public eListBoxEntry
 	eString sort;
 	eString short_name;
 public:
-	eService *service;
-	eBouquet *bouquet;
+	eServiceReference service;
+	eBouquet *bouquet;		/// buggy!!! :)
 	eString getText(int col=0) const;
-	eListBoxEntryService(eListBox<eListBoxEntryService> *lb, eService *service);
+	eListBoxEntryService(eListBox<eListBoxEntryService> *lb, const eServiceReference &service);
 	eListBoxEntryService(eListBox<eListBoxEntryService> *lb, eBouquet *bouquet);
 	~eListBoxEntryService();
 	
@@ -32,7 +32,8 @@ protected:
 
 class eServiceSelector: public eWindow
 {
-	eService *result, *selected;
+	const eServiceReference *result;
+	eServiceReference selected;
 	
 	eListBox<eListBoxEntryService> *services;
 
@@ -53,9 +54,9 @@ public:
 	eServiceSelector();
 	~eServiceSelector();
 	void useBouquet(eBouquet *bouquet);
-	eService *choose(eService *current=0, int irc=-1);
-	eService *next();
-	eService *prev();
+	const eServiceReference *choose(const eServiceReference *current=0, int irc=-1);
+	const eServiceReference *next();
+	const eServiceReference *prev();
 };
 
 #endif

@@ -44,9 +44,8 @@ public:
 	eTransponder *currentTransponder;
 	int currentTransponderState;
 		/* current service */
-	eService *service;	// meta-service
+	eServiceReference service;	// meta-service
 	eTransponder *transponder;
-	int original_network_id, transport_stream_id, service_id, service_type;	// tunedIn only in idle-state. raw services.
 	int pmtpid;
 	int service_state;
 	MHWEIT *tMHWEIT;
@@ -83,8 +82,7 @@ public:
 	~eDVBServiceController();
 	void handleEvent(const eDVBEvent &event);
 
-	int switchService(eService *service); /** -> eventServiceSwitched */
-	int switchService(int nservice_id, int noriginal_network_id, int ntransport_stream_id, int nservice_type); /** -> stateServiceSwitched */
+	int switchService(const eServiceReference &service); /** -> eventServiceSwitched */
 };
 
 #endif

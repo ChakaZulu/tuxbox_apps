@@ -20,6 +20,9 @@ void eDVBRecorder::gotMessage(const eDVBRecorderMessage &msg)
 	case eDVBRecorderMessage::mRemovePID:
 		s_removePID(msg.pid);
 		break;
+	case eDVBRecorderMessage::mRemoveAllPIDs:
+		s_removeAllPIDs();
+		break;
 	case eDVBRecorderMessage::mClose:
 		s_close();
 		break;
@@ -52,14 +55,20 @@ void eDVBRecorder::s_addPID(int pid)
 
 void eDVBRecorder::s_removePID(int pid)
 {
-//	pids.remove(pid);
+	pids.erase(pid);
 	eDebug("eDVBRecorder::s_removePID(0x%x)", pid);
+}
+
+void eDVBRecorder::s_removeAllPIDs()
+{
+	pids.clear();
+	eDebug("eDVBRecorder::s_removeAllPIDs()");
 }
 
 void eDVBRecorder::s_start()
 {
-/*	for (std::set<int>::iterator i(pids.begin()); i != pids.end(); ++i)
-		printf("opening pidfilter for pid %d\n", i); */
+	for (std::set<int>::iterator i(pids.begin()); i != pids.end(); ++i)
+		printf("opening pidfilter for pid %d\n", *i);
 	eDebug("eDVBRecorder::s_start();");
 }
 

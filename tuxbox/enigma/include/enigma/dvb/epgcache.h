@@ -15,24 +15,25 @@
 #define ZAP_DELAY 4000          // 4 sek
 
 class eventData;
+class eServiceReference;
 
 #define eventMap std::map<int, eventData*>
 
 #if defined(__GNUC__) && __GNUC__ >= 3 && __GNUC_MINOR__ >= 1  // check if gcc version >= 3.1
-	#define eventCache __gnu_cxx::hash_map<sref, eventMap >
-	#define updateMap __gnu_cxx::hash_map<sref, time_t >
+	#define eventCache __gnu_cxx::hash_map<eServiceReference, eventMap, __gnu_cxx::hash<eServiceReference>, eServiceReference::equalONIDSID>
+	#define updateMap __gnu_cxx::hash_map<eServiceReference, time_t, __gnu_cxx::hash<eServiceReference>, eServiceReference::equalONIDSID >
 	namespace __gnu_cxx
 #else																													// for older gcc use following
-	#define eventCache std::hash_map<sref, eventMap >
-	#define updateMap std::hash_map<sref, time_t >
+	#define eventCache std::hash_map<eServiceReference, eventMap, std::hash<eServiceReference>, eServiceReference::equalONIDSID >
+	#define updateMap std::hash_map<eServiceReference, time_t, std::hash<eServiceReference>, eServiceReference::equalONIDSID >
 	namespace std
 #endif
 {
-struct hash<sref>
+struct hash<eServiceReference>
 {
-	inline size_t operator()(const sref &x) const
+	inline size_t operator()(const eServiceReference &x) const
 	{
-		int v=(x.first^x.second);
+		int v=(x.original_network_id.get()^x.service_id.get());
 		v^=v>>8;
 		return v&0xFF;
 	}
@@ -74,7 +75,7 @@ public:
 class eEPGCache: public eSection
 {
 private:
-	eService* current_service;
+	eServiceReference current_service;
 	int current_sid;
 	int firstEventId;
 	int isRunning;
@@ -89,28 +90,27 @@ private:
 	eTimer zapTimer;
 public:
 	inline void startEPG();
-	inline void stopEPG(eService* e = 0);
-	inline void enterService(eService*, int);
+	inline void stopEPG(const eServiceReference &);
+	inline void enterService(const eServiceReference &, int);
 	void cleanLoop();
 	void timeUpdated();
 public:
 	eEPGCache();
 	~eEPGCache();
 	static eEPGCache *getInstance() { return instance; }
-//	EITEvent *lookupEvent(int original_network_id, int service_id, int event_id);
-	EITEvent *lookupCurrentEvent(int original_network_id, int service_id);
-	inline const eventMap* eEPGCache::getEventMap(int original_network_id, int service_id);
+//	EITEvent *lookupEvent(const eServiceReference &service, int event_id);
+	EITEvent *lookupCurrentEvent(const eServiceReference &service);
+	inline const eventMap* eEPGCache::getEventMap(const eServiceReference &service);
 
 	Signal1<void, bool> EPGAvail;
 };
 
-inline void eEPGCache::enterService(eService* service, int err)
+inline void eEPGCache::enterService(const eServiceReference &service, int err)
 {
 	current_service = service;
 	firstEventId = 0;
 
-	sref SREF = sref(service->original_network_id,service->service_id);
-	updateMap::iterator It = serviceLastUpdated.find(SREF);
+	updateMap::iterator It = serviceLastUpdated.find(service);
 
 	int update;
 
@@ -128,7 +128,7 @@ inline void eEPGCache::enterService(eService* service, int err)
 			eDebug("[EPGC] next update in %i sec", update/1000);
 	}
 
-	if (It != serviceLastUpdated.end() && !eventDB[SREF].empty())
+	if (It != serviceLastUpdated.end() && !eventDB[service].empty())
 	{
 		eDebug("[EPGC] service has EPG");
 		/*emit*/ EPGAvail(1);
@@ -157,7 +157,7 @@ inline void eEPGCache::startEPG()
 	}
 }
 
-inline void eEPGCache::stopEPG(eService*)
+inline void eEPGCache::stopEPG(const eServiceReference&)
 {
 	zapTimer.stop();
 	if (isRunning)
@@ -168,9 +168,9 @@ inline void eEPGCache::stopEPG(eService*)
 	}
 }
 
-inline const eventMap* eEPGCache::getEventMap(int original_network_id, int service_id)
+inline const eventMap* eEPGCache::getEventMap(const eServiceReference &service)
 {
-	eventCache::iterator It = eventDB.find(sref(original_network_id,service_id));
+	eventCache::iterator It = eventDB.find(service);
 	return (It != eventDB.end())?(&(It->second)):0;
 }
 

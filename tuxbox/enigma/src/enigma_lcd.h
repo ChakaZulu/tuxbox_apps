@@ -10,6 +10,7 @@ class eService;
 class eZapLCDMain;
 class eZapLCDMenu;
 class eZapLCDScart;
+class eServiceReference;
 
 class eZapLCD: public eWidget
 {
@@ -31,7 +32,7 @@ class eZapLCDMain: public eWidget
 private:
 	void clockUpdate();
 	void volumeUpdate(int);
-	void serviceChanged(eService *, int);
+	void serviceChanged(const eServiceReference &, int);
 public:
 	eLabel *ServiceName;
 	eZapLCDMain(eWidget *parent);

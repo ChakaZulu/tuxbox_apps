@@ -96,12 +96,12 @@ static eString switchService(eString request, eString path, eString opt, eHTTPCo
 	
 	if ((service_id!=-1) && (original_network_id!=-1) && (transport_stream_id!=-1) && (service_type!=-1))
 	{
-		eService *meta=0;
-		meta=eDVB::getInstance()->settings->getTransponders()->searchService(original_network_id, service_id);
-		if (meta)
-			sapi->switchService(meta);
-		else
-			sapi->switchService(service_id, original_network_id, transport_stream_id, service_type);
+			sapi->switchService(
+				eServiceReference(
+					eTransportStreamID(transport_stream_id), 
+					eOriginalNetworkID(original_network_id),
+					eServiceID(service_id),
+					service_type));
 		result+="OK\n";
 	} else
 	{
@@ -110,7 +110,7 @@ static eString switchService(eString request, eString path, eString opt, eHTTPCo
 	return result;
 }
 
-struct listService: public std::unary_function<std::pair<sref,eService>&,void>
+struct listService: public std::unary_function<std::pair<eServiceReference,eService>&,void>
 {
 	eString &result;
 	const eString &search;
@@ -122,7 +122,7 @@ struct listService: public std::unary_function<std::pair<sref,eService>&,void>
 		if (search && (service.service_name.find(search)==eString::npos))
 			return;
 		eString sc;
-		sc.sprintf("%x:%x:%x:%x", service.service_id, service.transport_stream_id, service.original_network_id, service.service_type);
+		sc.sprintf("%x:%x:%x:%x", service.service_id.get(), service.transport_stream_id.get(), service.original_network_id.get(), service.service_type);
 		result+="<tr><td><a href=\"/cgi-bin/switchService?service=" + sc + "\">" + service.service_name.c_str() + "</a></td>"
 						"<td>" + eString().setNum(service.service_type, 0x10) + "</td></tr>\n";
 	}
@@ -228,9 +228,11 @@ static eString channels_getcurrent(eString request, eString path, eString opt, e
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (!sapi)
 		return "-1";
+		
+	eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
 	
-	if (sapi->service)
-		result+=eString().sprintf("%d", sapi->service->service_number);
+	if (service)
+		result+=eString().sprintf("%d", service->service_number);
 	else
 		result+="-1";
 	return result+"\r\n";
@@ -419,12 +421,15 @@ static eString getWatchContent(eString mode, int bouquetid)
 		esref=act->list;
 		for(std::list<eServiceReference>::iterator j = esref.begin(); j != esref.end() ; j++)
 		{
-			es=j->service;
 			result+="<option value=\"";
-			tmp.sprintf("%x:%x:%x:%x", es->service_id, es->transport_stream_id, es->original_network_id, es->service_type);
+			tmp.sprintf("%x:%x:%x:%x", j->service_id.get(), j->transport_stream_id.get(), j->original_network_id.get(), j->service_type);
 			result+=tmp;
 			result+="\">";
-			result+=filter_string(es->service_name.c_str());
+			es=eDVB::getInstance()->settings->getTransponders()->searchService(*j);
+			if (es)
+				result+=filter_string(es->service_name.c_str());
+			else
+				result+="...";
 			result+="</option>";
 		}
 		result+="</select>";
@@ -455,12 +460,15 @@ static eString getWatchContent(eString mode, int bouquetid)
 		esref=act->list;
 		for(std::list<eServiceReference>::iterator j = esref.begin(); j != esref.end() ; j++)
 		{
-			es=j->service;
 			result+="<option value=\"";
-			tmp.sprintf("%x:%x:%x:%x", es->service_id, es->transport_stream_id, es->original_network_id, es->service_type);
+			tmp.sprintf("%x:%x:%x:%x", j->service_id.get(), j->transport_stream_id.get(), j->original_network_id.get(), j->service_type);
 			result+=tmp;
 			result+="\">";
-			result+=filter_string(es->service_name.c_str());
+			es=eDVB::getInstance()->settings->getTransponders()->searchService(*j);
+			if (es)
+				result+=filter_string(es->service_name.c_str());
+			else
+				result+="...";
 			result+="</option>";
 		}
 		result+="</select>";
@@ -491,8 +499,7 @@ static eString getCurService()
 	if (!sapi)
 		return "not available";
 	
-	eService *current;
-	current=sapi->service;
+	eService *current=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
 	if(current)
 		return current->service_name.c_str();
 	else
@@ -760,14 +767,14 @@ static eString switchServiceWeb(eString request, eString path, eString opt, eHTT
 	
 	if ((service_id!=-1) && (original_network_id!=-1) && (transport_stream_id!=-1) && (service_type!=-1))
 	{
-		eService *meta=0;
-
-		meta=eDVB::getInstance()->settings->getTransponders()->searchService(original_network_id, service_id);
-
-		if (meta)
-			sapi->switchService(meta);
-		else
-			sapi->switchService(service_id, original_network_id, transport_stream_id, service_type);
+		sapi->switchService(
+			eServiceReference(
+				eTransportStreamID(transport_stream_id), 
+				eOriginalNetworkID(original_network_id),
+				eServiceID(service_id),
+				service_type
+				)
+			);
 		result+="<script language=\"javascript\">window.close();</script>";
 	} else
 	{
@@ -804,10 +811,9 @@ static eString getbouq(eString request, eString path, eString opt, eHTTPConnecti
 
 	for(ePtrList<eBouquet>::iterator i(*bouquets); i != bouquets->end(); ++i)
 	{
-			tmp=eString(i->bouquet_name.c_str());
-			result+=eString(i->bouquet_name.c_str());
+		tmp=eString(i->bouquet_name.c_str());
+		result+=eString(i->bouquet_name.c_str());
 	}
-
 	
 	return result;
 }
@@ -824,7 +830,7 @@ static eString getcurepg(eString request, eString path, eString opt, eHTTPConnec
 	if (!sapi)
 		return "not available";
 
-	current=sapi->service;
+	current=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
 	if(!current)
 		return eString("epg not ready yet");
 
@@ -834,7 +840,7 @@ static eString getcurepg(eString request, eString path, eString opt, eHTTPConnec
 	result+=eString("</span>");
 	result+=eString("<br>\n");
 
-	const eventMap* evt=eEPGCache::getInstance()->getEventMap(current->original_network_id, current->service_id);
+	const eventMap* evt=eEPGCache::getInstance()->getEventMap(sapi->service);
 	if(!evt)
 		return eString("epg not ready yet");
 
@@ -881,7 +887,7 @@ static eString getsi(eString request, eString path, eString opt, eHTTPConnection
 	if (!sapi)
 		return "not available";
 
-	eService *service=sapi->service;
+	eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
 	if (service)
 	{
 		name=service->service_name.c_str();
@@ -891,9 +897,9 @@ static eString getsi(eString request, eString path, eString opt, eHTTPConnection
 	apid=eString().sprintf("%04xh (%dd)", Decoder::parms.apid, Decoder::parms.apid);
 	pcrpid=eString().sprintf("%04xh (%dd)", Decoder::parms.pcrpid, Decoder::parms.pcrpid);
 	tpid=eString().sprintf("%04xh (%dd)", Decoder::parms.tpid, Decoder::parms.tpid);
-	tsid=eString().sprintf("%04xh", sapi->transport_stream_id);
-	onid=eString().sprintf("%04xh", sapi->original_network_id);
-	sid=eString().sprintf("%04xh", sapi->service_id);
+	tsid=eString().sprintf("%04xh", sapi->service.transport_stream_id.get());
+	onid=eString().sprintf("%04xh", sapi->service.original_network_id.get());
+	sid=eString().sprintf("%04xh", sapi->service.service_id.get());
 
 	FILE *bitstream=0;
 	

@@ -18,17 +18,17 @@ static eBouquet *getBouquetByID(const char *id)
 	return 0;
 }
 
-static eService *getServiceByID(const char *id)
+static eServiceReference getServiceByID(const char *id)
 {
 	eTransponderList *tl=eDVB::getInstance()->settings->getTransponders();
 	if (!tl)
-		return 0;
-	int original_network_id, transport_stream_id, service_id;
-	if (sscanf(id, "S:%x:%x:%x", &original_network_id, &transport_stream_id, &service_id)!=3)
-		if (sscanf(id, "E:%x:%x:%x", &original_network_id, &transport_stream_id, &service_id)!=3)
-			return 0;
+		return eServiceReference();
+	int original_network_id, transport_stream_id, service_id, service_type;
+	if (sscanf(id, "S:%x:%x:%x:%x", &original_network_id, &transport_stream_id, &service_id, &service_type)!=4)
+		if (sscanf(id, "E:%x:%x:%x:%x", &original_network_id, &transport_stream_id, &service_id, &service_type)!=4)
+			return eServiceReference();
 
-	return tl->searchService(original_network_id, service_id);
+	return eServiceReference(eTransportStreamID(transport_stream_id), eOriginalNetworkID(original_network_id), eServiceID(service_id), service_type);
 }
 
 static int testrpc(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant> &result)
@@ -107,7 +107,7 @@ static int getList(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant>
 
 			for (std::list<eServiceReference>::iterator s = b->list.begin(); s != b->list.end(); s++)
 			{
-				eService *service=s->service;
+				eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(*s);
 				if (!service)
 					continue;
 				std::map<eString, eXMLRPCVariant*> *s=new std::map<eString, eXMLRPCVariant*>;
@@ -121,11 +121,13 @@ static int getList(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant>
 				s->INSERT(s1, new eXMLRPCVariant(new eString(g)));
 				static eString bs("S:");
 				eString handle=bs;
-				handle+=eString().setNum(service->original_network_id, 16);
+				handle+=eString().setNum(service->original_network_id.get(), 16);
 				handle+=':';
-				handle+=eString().setNum(service->transport_stream_id, 16);
+				handle+=eString().setNum(service->transport_stream_id.get(), 16);
 				handle+=':';
-				handle+=eString().setNum(service->service_id, 16);
+				handle+=eString().setNum(service->service_id.get(), 16);
+				handle+=':';
+				handle+=eString().setNum(service->service_type, 16);
 				s->INSERT(s2, new eXMLRPCVariant(new eString(handle)));
 				s->INSERT(s3, new eXMLRPCVariant(new bool(1)));
 				l.push_back(new eXMLRPCVariant(s));
@@ -139,12 +141,7 @@ static int getList(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant>
 		}
 	} else if (param[0]=='S')
 	{
-		eService *service=getServiceByID(param.c_str());
-		if (!service)
-		{
-			xmlrpc_fault(result, 3, "invalid handle");
-			return 0;
-		}
+		eServiceReference service=getServiceByID(param.c_str());
 		if (sapi->service != service)
 		{
 			xmlrpc_fault(result, 4, "service currently not tuned in");
@@ -194,11 +191,13 @@ static int getList(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant>
 			s->INSERT(s1, new eXMLRPCVariant(new eString(g)));
 			static eString bs("E:");
 			eString handle=bs;
-			handle+=eString().setNum(service->original_network_id, 16);
+			handle+=eString().setNum(service.original_network_id.get(), 16);
 			handle+=':';
-			handle+=eString().setNum(service->transport_stream_id, 16);
+			handle+=eString().setNum(service.transport_stream_id.get(), 16);
 			handle+=':';
-			handle+=eString().setNum(service->service_id, 16);
+			handle+=eString().setNum(service.service_id.get(), 16);
+			handle+=':';
+			handle+=eString().setNum(service.service_type, 16);
 			handle+=':';
 			handle+=eString().setNum(event->event_id, 16);
 
@@ -235,11 +234,8 @@ static int zapTo(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant> &
 
 	eDebug("zapTo(%s);", param.c_str());
 	
-	eService *s=getServiceByID(param.c_str());
-	if (!s)
-		xmlrpc_fault(result, 3, "invalid handle");
-	else
-		sapi->switchService(s);
+	eServiceReference s=getServiceByID(param.c_str());
+	sapi->switchService(s);
 	return 0;
 }
 
@@ -259,8 +255,6 @@ static int getInfo(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant>
 		return 0;
 	}
 	
-	eService *service=0;
-	
 	if (!param.length())    // currently running
 	{
 			// mal gucken
@@ -268,12 +262,8 @@ static int getInfo(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant>
   {
 		std::map<eString, eXMLRPCVariant*> *s=new std::map<eString, eXMLRPCVariant*>;
 
-		eService *service=getServiceByID(param.c_str());
-		if (!service)
-		{
-			xmlrpc_fault(result, 3, "invalid handle");
-			return 0;
-		}
+		eServiceReference service=getServiceByID(param.c_str());
+		
 		if (sapi->service != service)
 		{
 			xmlrpc_fault(result, 4, "service currently not tuned in");
@@ -290,7 +280,9 @@ static int getInfo(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant>
 		s->INSERT(s1, new eXMLRPCVariant(new eString(g)));
 
 		static eString s0("caption");
-		s->INSERT(s0, new eXMLRPCVariant(new eString(service->service_name.c_str())));
+
+		eService *ser=eDVB::getInstance()->settings->getTransponders()->searchService(service);
+		s->INSERT(s0, new eXMLRPCVariant(new eString(ser?ser->service_name.c_str():"")));
 		
 		static eString s2("parentHandle");
 		static eString g2("NA");

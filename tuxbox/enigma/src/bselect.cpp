@@ -16,9 +16,7 @@ void eBouquetSelector::fillBouquetList()
 			int usable=0;
 			for (std::list<eServiceReference>::iterator s = i->list.begin(); (!usable) && s != i->list.end(); s++)
 			{
-				if (!s->service)
-					continue;
-				int st=s->service->service_type;
+				int st=s->service_type;
 				if ((st==1) || (st==2) || (st==4))
 					usable=1;
 			}

@@ -18,6 +18,7 @@ class PMT;
 class PMTEntry;
 class eNumber;
 class gPainter;
+class NVODReferenceEntry;
 
 class NVODStream: public eListBoxEntryTextStream
 {
@@ -26,8 +27,8 @@ class NVODStream: public eListBoxEntryTextStream
 private:
 	void EITready(int error);
 public:
-	NVODStream(eListBox<NVODStream> *listbox, int transport_stream_id, int original_network_id, int service_id, int type);
-	int transport_stream_id, original_network_id, service_id;
+	NVODStream(eListBox<NVODStream> *listbox, const NVODReferenceEntry *ref, int type);
+	eServiceReference service;
 	EIT eit;
 };
 
@@ -76,9 +77,9 @@ class SubService: public eListBoxEntryText
 {
 	friend class eListBox<SubService>;
 	friend class eSubServiceSelector;
-	int transport_stream_id, original_network_id, service_id;
 public:
-	SubService(eListBox<SubService> *listbox, LinkageDescriptor *descr);
+	SubService(eListBox<SubService> *listbox, const LinkageDescriptor *descr);
+	eServiceReference service;
 };
 
 class eSubServiceSelector: public eListBoxWindow<SubService>
@@ -87,7 +88,7 @@ class eSubServiceSelector: public eListBoxWindow<SubService>
 public:
 	eSubServiceSelector();
 	void clear();
-	void add(LinkageDescriptor *ref);
+	void add(const LinkageDescriptor *ref);
 };
 
 class eServiceNumberWidget: public eWindow
@@ -162,12 +163,12 @@ class eZapMain: public eWidget
 protected:
 	int eventHandler(const eWidgetEvent &event);
 private:
-	void serviceChanged(eService *, int);
+	void serviceChanged(const eServiceReference &, int);
 	void gotEIT(EIT *, int);
 	void gotSDT(SDT *);
 	void gotPMT(PMT *);
 	void timeOut();
-	void leaveService(eService *);
+	void leaveService(const eServiceReference &);
 	void clockUpdate();
 	void updateVolume(int vol);
 	void set16_9Logo(int aspect);

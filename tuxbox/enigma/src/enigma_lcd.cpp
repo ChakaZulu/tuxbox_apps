@@ -55,8 +55,10 @@ void eZapLCDMain::volumeUpdate(int vol)
 	Volume->setPerc((63-vol)*100/63);
 }
 
-void eZapLCDMain::serviceChanged(eService *service, int)
+void eZapLCDMain::serviceChanged(const eServiceReference &sref, int)
 {
+  eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(sref);
+  
 	if (service)
 		ServiceName->setText(service->service_name.c_str());
 	else

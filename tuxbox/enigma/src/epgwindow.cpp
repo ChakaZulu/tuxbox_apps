@@ -32,9 +32,11 @@ eListBoxEntryEPG::eListBoxEntryEPG(const eit_event_struct* evt, eListBox<eListBo
 
 void eEPGWindow::fillEPGList()
 {
-	setText(eString("EPG - ")+current->service_name);
-	eDebug("get EventMap for onid: %02x, sid: %02x\n", current->original_network_id, current->service_id);
-	const eventMap* evt = eEPGCache::getInstance()->getEventMap(current->original_network_id, current->service_id);
+  eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(current);
+  if (service)
+		setText(eString("EPG - ")+service->service_name);
+ 	eDebug("get EventMap for onid: %02x, sid: %02x\n", current.original_network_id.get(), current.service_id.get());
+	const eventMap* evt = eEPGCache::getInstance()->getEventMap(current);
 	eventMap::const_iterator It;
 	for (It = evt->begin(); It != evt->end(); It++)
 		new eListBoxEntryEPG(*It->second, &list);
@@ -53,7 +55,8 @@ void eEPGWindow::entrySelected(eListBoxEntryEPG *entry)
 		eZapLCD* pLCD = eZapLCD::getInstance();
 		pLCD->lcdMain->hide();
 		pLCD->lcdMenu->show();
-		eEventDisplay ei(sapi->service->service_name.c_str(), 0, &entry->event);
+	  eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
+		eEventDisplay ei(service ? service->service_name.c_str() : "", 0, &entry->event);
 		ei.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 		ei.show();
 		while((ret = ei.exec()))
@@ -77,7 +80,7 @@ void eEPGWindow::entrySelected(eListBoxEntryEPG *entry)
 	}
 }
 
-eEPGWindow::eEPGWindow(eService* service)
+eEPGWindow::eEPGWindow(const eServiceReference &service)
 	:eListBoxWindow<eListBoxEntryEPG>("Select Service...", 16, 600), current(service)
 {
 	move(ePoint(50, 50));

@@ -15,12 +15,12 @@ public:
 
 class eEPGWindow: public eListBoxWindow<eListBoxEntryEPG>
 {
-	eService* current;
+	eServiceReference current;
 private:
 	void fillEPGList();
 	void entrySelected(eListBoxEntryEPG *entry);
 public:
-	eEPGWindow(eService* service);
+	eEPGWindow(const eServiceReference &service);
 	inline ~eEPGWindow(){};
 };
 

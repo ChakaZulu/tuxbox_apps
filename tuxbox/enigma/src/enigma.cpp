@@ -160,12 +160,10 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 
 	if ((!(e = eConfig::getInstance()->getKey("/ezap/ui/lastChannel", lastchannel))) && (eDVB::getInstance()->settings->getTransponders()))
 	{
-		eService *t = eDVB::getInstance()->settings->getTransponders()->searchService(lastchannel >> 16, lastchannel & 0xFFFF);
-		if (t)
-		{
-			if (eDVB::getInstance()->getServiceAPI())
-				eDVB::getInstance()->getServiceAPI()->switchService(t);
-		}
+		const eServiceReference *ref=eDVB::getInstance()->settings->getTransponders()->searchService(eOriginalNetworkID(lastchannel>>16), eServiceID(lastchannel&0xFFFF));
+		
+		if (ref && eDVB::getInstance()->getServiceAPI())
+			eDVB::getInstance()->getServiceAPI()->switchService(*ref);
 	}
 	init->setRunlevel(10);
 }
@@ -173,11 +171,11 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 eZap::~eZap()
 {
 	if (eDVB::getInstance()->getServiceAPI() &&
-			eDVB::getInstance()->getServiceAPI()->service)
+			eDVB::getInstance()->getServiceAPI()->service != eServiceReference())
 	{
 		eConfig::getInstance()->setKey("/ezap/ui/lastChannel", 
-			(__u32)((eDVB::getInstance()->getServiceAPI()->original_network_id << 16) 
-				|  eDVB::getInstance()->getServiceAPI()->service_id));
+			(__u32)((eDVB::getInstance()->getServiceAPI()->service.original_network_id.get() << 16) 
+				|  eDVB::getInstance()->getServiceAPI()->service.service_id.get()));
 	}
 
 	eDebug("[ENIGMA] beginning clean shutdown");

@@ -107,13 +107,13 @@ int eTransponder::satellite::tune(eTransponder *trans)
 	return eFrontend::fe()->tune_qpsk(trans, frequency, polarisation, symbol_rate, fec, inv, lnb);
 }
 
-eService::eService(int transport_stream_id, int original_network_id, int service_id, int service_number):
+eService::eService(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, eServiceID service_id, int service_number):
 		transport_stream_id(transport_stream_id), original_network_id(original_network_id), service_id(service_id), service_number(service_number)
 {
 	clearCache();
 }
 
-eService::eService(int transport_stream_id, int original_network_id, const SDTEntry *sdtentry, int service_number):
+eService::eService(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, const SDTEntry *sdtentry, int service_number):
 		transport_stream_id(transport_stream_id), original_network_id(original_network_id), service_number(service_number)
 {
 	clearCache();
@@ -122,14 +122,14 @@ eService::eService(int transport_stream_id, int original_network_id, const SDTEn
 }
 
 
-void eBouquet::add(int transport_stream_id, int original_network_id, int service_id)
+void eBouquet::add(const eServiceReference &service)
 {
-	list.push_back(eServiceReference(transport_stream_id, original_network_id, service_id));
+	list.push_back(service);
 }
 
-int eBouquet::remove(int transport_stream_id, int original_network_id, int service_id)
+int eBouquet::remove(const eServiceReference &service)
 {
-	list.remove(eServiceReference(transport_stream_id, original_network_id, service_id));
+	list.remove(service);
 	return 0;
 }
 
@@ -200,9 +200,9 @@ int eTransponder::isValid()
 
 void eService::update(const SDTEntry *sdtentry)
 {
-	if (sdtentry->service_id != service_id)
+	if (eServiceID(sdtentry->service_id) != service_id)
 	{
-		eDebug("tried to update sid %x with sdt-sid %x", service_id, sdtentry->service_id);
+		eDebug("tried to update sid %x with sdt-sid %x", service_id.get(), sdtentry->service_id);
 		return;
 	}
 	service_name="unknown";
@@ -240,16 +240,16 @@ eTransponder &eTransponderList::createTransponder(int transport_stream_id, int o
 	return (*i).second;
 }
 
-eService &eTransponderList::createService(int transport_stream_id, int original_network_id, int service_id, int chnum, bool* newService)
+eService &eTransponderList::createService(const eServiceReference &service, int chnum, bool *newService)
 {
-	std::map<sref,eService>::iterator i=services.find(sref(original_network_id,service_id));
+	std::map<eServiceReference,eService>::iterator i=services.find(service);
 	if ( i == services.end() )
 	{
 		if (newService)
 			*newService=true;
 
 		if (chnum==-1)
-			chnum=beautifyChannelNumber(transport_stream_id, original_network_id, service_id);
+			chnum=beautifyChannelNumber(service.transport_stream_id.get(), service.original_network_id.get(), service.service_id.get());
 		
 		if (chnum==-1)
 		{
@@ -266,10 +266,11 @@ eService &eTransponderList::createService(int transport_stream_id, int original_
 		while (channel_number.find(chnum)!=channel_number.end())
 			chnum++;
 
-		eService *n=&services.insert(	
-				std::pair<sref,eService>
-					( sref(original_network_id,service_id),	eService(transport_stream_id, original_network_id, service_id, chnum) )	).first->second;
-
+		eService *n=&services.insert(
+					std::pair<eServiceReference,eService>
+						(service,
+						eService(service.transport_stream_id, service.original_network_id, service.service_id, chnum))
+					).first->second;
 		channel_number.insert(std::pair<int,eService*>(chnum,n));
 		
 		return *n;
@@ -297,22 +298,38 @@ void eTransponderList::updateStats(int &numtransponders, int &scanned, int &nser
 
 int eTransponderList::handleSDT(const SDT *sdt)
 {
-		// todo: remove dead services (clean up current transport_stream)
-	std::set<int> s;
+	std::set<eServiceID> s;
 	int changed=0;
 	bool newAdded;
 	for (ePtrList<SDTEntry>::const_iterator i(sdt->entries); i != sdt->entries.end(); ++i)
 	{
-		eService &service=createService(sdt->transport_stream_id, sdt->original_network_id, i->service_id, -1, &newAdded);
-		service.update(*i);
-		s.insert(i->service_id);
+		int service_type=-1;
+		for (ePtrList<Descriptor>::const_iterator d(i->descriptors); d != i->descriptors.end(); ++d)
+			if (d->Tag()==DESCR_SERVICE)
+			{
+				const ServiceDescriptor *nd=(ServiceDescriptor*)*d;
+				service_type=nd->service_type;
+			}
+		if (service_type == -1)
+			continue;
+		
+		eServiceReference sref=
+				eServiceReference(
+					eTransportStreamID(sdt->transport_stream_id), 
+					eOriginalNetworkID(sdt->original_network_id), 
+					eServiceID(i->service_id),
+					service_type);
 
-		/*emit*/ service_found(&service, newAdded);
+		eService &service=createService(sref, newAdded);
+		service.update(*i);
+		s.insert(eServiceID(i->service_id));
+
+		/*emit*/ service_found(sref, newAdded);
 	}
-	for (std::map<sref,eService>::iterator i(services.begin()); i != services.end(); ++i)
-		if ((i->first.first == sdt->original_network_id)	&& // if service on this on
+	for (std::map<eServiceReference,eService>::iterator i(services.begin()); i != services.end(); ++i)
+		if ((i->first.original_network_id == sdt->original_network_id)	&& // if service on this on
 				(i->second.transport_stream_id == sdt->transport_stream_id) && 	// and on this transponder
-				(!s.count(i->first.second))) // but does not exist
+				(!s.count(i->first.service_id))) // but does not exist
 			{
 				services.erase(i->first);
 				for (std::map<int,eService*>::iterator m(channel_number.begin()); m != channel_number.end(); ++m)
@@ -327,7 +344,7 @@ int eTransponderList::handleSDT(const SDT *sdt)
 	return changed;
 }
 
-eTransponder *eTransponderList::searchTS(int original_network_id, int transport_stream_id)
+eTransponder *eTransponderList::searchTS(eOriginalNetworkID original_network_id, eTransportStreamID transport_stream_id)
 {
 	std::map<tsref,eTransponder>::iterator i=transponders.find(tsref(original_network_id,transport_stream_id));
 	if (i==transponders.end())
@@ -335,12 +352,21 @@ eTransponder *eTransponderList::searchTS(int original_network_id, int transport_
 	return &i->second;
 }
 
-eService *eTransponderList::searchService(int original_network_id, int service_id)
+eService *eTransponderList::searchService(const eServiceReference &service)
 {
-	std::map<sref,eService>::iterator i=services.find(sref(original_network_id,service_id));
+	std::map<eServiceReference,eService>::iterator i=services.find(service);
 	if (i==services.end())
 		return 0;
 	return &i->second;
+}
+
+const eServiceReference *eTransponderList::searchService(eOriginalNetworkID original_network_id, eServiceID service_id)
+{
+	for (std::map<eServiceReference,eService>::iterator i(services.begin()); i != services.end(); ++i)
+		if ((i->first.original_network_id == original_network_id) &&
+				(i->first.service_id == service_id))
+					return &i->first;
+	return 0;
 }
 
 eService *eTransponderList::searchServiceByNumber(int chnum)

@@ -199,7 +199,7 @@ void NVODStream::EITready(int error)
 		}
 	}
 	else
-		text << "Service " << std::setw(4) << std::hex << service_id;
+		text << "Service " << std::setw(4) << std::hex << service.service_id.get();
 
 	((eListBox<NVODStream>*)listbox)->sort(); // <<< without explicit cast the compiler nervs ;)
 
@@ -208,9 +208,10 @@ void NVODStream::EITready(int error)
 
 }
 
-NVODStream::NVODStream(eListBox<NVODStream> *listbox, int transport_stream_id, int original_network_id, int service_id, int type)
-	: eListBoxEntryTextStream((eListBox<eListBoxEntryTextStream>*)listbox), transport_stream_id(transport_stream_id), original_network_id(original_network_id),
-		service_id(service_id), eit(EIT::typeNowNext, service_id, type)
+NVODStream::NVODStream(eListBox<NVODStream> *listbox, const NVODReferenceEntry *ref, int type)
+	: eListBoxEntryTextStream((eListBox<eListBoxEntryTextStream>*)listbox), 
+		service(eTransportStreamID(ref->transport_stream_id), eOriginalNetworkID(ref->original_network_id),
+			eServiceID(ref->service_id), 5), eit(EIT::typeNowNext, ref->service_id, type)
 {
 	CONNECT(eit.tableReady, NVODStream::EITready);
 	eit.start();
@@ -220,7 +221,7 @@ void eNVODSelector::selected(NVODStream* nv)
 {
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (sapi && nv)
-		sapi->switchService(nv->service_id, nv->original_network_id, nv->transport_stream_id, 5);	// faked service_type
+		sapi->switchService(nv->service);
 	close(0);
 }
 
@@ -242,9 +243,9 @@ void eNVODSelector::add(NVODReferenceEntry *ref)
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (!sapi)
 		return;
-	int type= ((sapi->transport_stream_id==ref->transport_stream_id)
-			&&	(sapi->original_network_id==ref->original_network_id)) ? EIT::tsActual:EIT::tsOther;
-	new NVODStream(&list, ref->transport_stream_id, ref->original_network_id, ref->service_id, type);
+	int type= ((sapi->service.transport_stream_id==eTransportStreamID(ref->transport_stream_id))
+			&&	(sapi->service.original_network_id==eOriginalNetworkID(ref->original_network_id))) ? EIT::tsActual:EIT::tsOther;
+	new NVODStream(&list, ref, type);
 }
 
 AudioStream::AudioStream(eListBox<AudioStream> *listbox, PMTEntry *stream)
@@ -331,13 +332,13 @@ void eAudioSelector::add(PMTEntry *pmt)
 	new AudioStream(&list, pmt);
 }
 
-SubService::SubService(eListBox<SubService> *listbox, LinkageDescriptor *descr)
-	:eListBoxEntryText((eListBox<eListBoxEntryText>*) listbox)
+SubService::SubService(eListBox<SubService> *listbox, const LinkageDescriptor *descr)
+	:eListBoxEntryText((eListBox<eListBoxEntryText>*) listbox),
+		service(eTransportStreamID(descr->transport_stream_id), 
+			eOriginalNetworkID(descr->original_network_id),
+			eServiceID(descr->service_id), 5)
 {
 	text=(const char*)descr->private_data;
-	transport_stream_id=descr->transport_stream_id;
-	original_network_id=descr->original_network_id;
-	service_id=descr->service_id;
 }
 
 eSubServiceSelector::eSubServiceSelector()
@@ -351,7 +352,7 @@ void eSubServiceSelector::selected(SubService *ss)
 {
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (sapi && ss)
-		sapi->switchService(ss->service_id, ss->original_network_id, ss->transport_stream_id, 5);	// faked service_type
+		sapi->switchService(ss->service);
 	close(0);
 }
 
@@ -360,7 +361,7 @@ void eSubServiceSelector::clear()
 	list.clearList();
 }
 
-void eSubServiceSelector::add(LinkageDescriptor *ref)
+void eSubServiceSelector::add(const LinkageDescriptor *ref)
 {
 	new SubService(&list, ref);
 }
@@ -694,7 +695,11 @@ void eZapMain::handleNVODService(SDTEntry *sdtentry)
 				nvodsel.add(*e);
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (sapi)
-		nvodsel.setText(sapi->service->service_name.c_str());
+	{
+		eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
+		if (service)
+			nvodsel.setText(service->service_name.c_str());
+	}
 }
 
 void eZapMain::showServiceSelector(int dir)
@@ -705,15 +710,15 @@ void eZapMain::showServiceSelector(int dir)
 	pLCD->lcdMenu->show();
 	eServiceSelector *e = eZap::getInstance()->getServiceSelector();
 	e->setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
-	eService* service = e->choose(0, dir);
+	const eServiceReference *service = e->choose(0, dir);
 	pLCD->lcdMain->show();
 	pLCD->lcdMenu->hide();
 	if (!service)
 		return;
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (sapi && service)
-		if (sapi->switchService(service))
-			serviceChanged(service, -EAGAIN);
+		if (sapi->switchService(*service))
+			serviceChanged(*service, -EAGAIN);
 }
 
 void eZapMain::nextService()
@@ -722,13 +727,12 @@ void eZapMain::nextService()
 	if (!sapi)
 		return;
 		
-	eService *service=eZap::getInstance()->getServiceSelector()->next();
-	eDebug("nextService: %x", service);
+	const eServiceReference *service=eZap::getInstance()->getServiceSelector()->next();
 	if (!service)
 		return;
 	if (service)
-		if (sapi->switchService(service))
-			serviceChanged(service, -EAGAIN);	
+		if (sapi->switchService(*service))
+			serviceChanged(*service, -EAGAIN);	
 }
 
 void eZapMain::prevService()
@@ -737,12 +741,12 @@ void eZapMain::prevService()
 	if (!sapi)
 		return;
 		
-	eService *service=eZap::getInstance()->getServiceSelector()->prev();
+	const eServiceReference *service=eZap::getInstance()->getServiceSelector()->prev();
 	if (!service)
 		return;
 	if (service)
-		if (sapi->switchService(service))
-			serviceChanged(service, -EAGAIN);
+		if (sapi->switchService(*service))
+			serviceChanged(*service, -EAGAIN);
 }
 
 void eZapMain::volumeUp()
@@ -765,49 +769,6 @@ void eZapMain::toggleMute()
 {
 	eDVB::getInstance()->changeVolume(2, 1);
 }
-
-/*
-	case eRCInput::RC_0 ... eRCInput::RC_9:
-	{
-		if (!eDVB::getInstance()->getTransponders())
-			break;
-	
-		if (isVisible())
-			hide();
-
-		eZapLCD* pLCD = eZapLCD::getInstance();				
-		eServiceNumberWidget *w=new eServiceNumberWidget(code-eRCInput::RC_0);
-		w->setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
-		pLCD->lcdMain->hide();
-		pLCD->lcdMenu->show();
-
-//		eDebug("w is %p", w);
-		w->show();
-		int chnum=w->exec();
-		w->hide();
-
-		pLCD->lcdMenu->hide();
-		pLCD->lcdMain->show();
-
-		if (chnum!=-1)
-		{
-			eService *service=eDVB::getInstance()->getTransponders()->searchServiceByNumber(chnum);
-			if (!service)
-				break;
-			eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-			if (sapi && service)
-				if (sapi->switchService(service))
-					serviceChanged(service, -EAGAIN);
-		}
-		delete w;
-
-		break;
-	}
-	default:
-		return 0;
-	}
-	return 1;
-} */
 
 void eZapMain::showMainMenu()
 {
@@ -945,7 +906,7 @@ void eZapMain::showEPG()
 	if (!sapi)
 		return;
 
-	eService* service = sapi->service;
+	eService* service = eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
 
 	if (!service)
 		return;
@@ -1055,11 +1016,13 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 	return eWidget::eventHandler(event);
 }
 
-void eZapMain::serviceChanged(eService *service, int err)
+void eZapMain::serviceChanged(const eServiceReference &serviceref, int err)
 {
 	isVT = Decoder::parms.tpid != -1;
 
 	setVTButton(isVT);
+	
+	eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(serviceref);
 
 	if (!service)
 		return;
@@ -1159,14 +1122,14 @@ void eZapMain::gotSDT(SDT *sdt)
 	if (!sapi)
 		return;
 
-	switch (sapi->service_type)
+	switch (sapi->service.service_type)
 	{
 	case 0x4:	// nvod reference
 	{
 		for (ePtrList<SDTEntry>::iterator i(sdt->entries); i != sdt->entries.end(); ++i)
 		{
 			SDTEntry *entry=*i;
-			if (entry->service_id==sapi->service_id)
+			if (eServiceID(entry->service_id)==sapi->service.service_id)
 				handleNVODService(entry);
 		}
 		break;
@@ -1216,7 +1179,7 @@ void eZapMain::timeOut()
 		hide();
 }
 
-void eZapMain::leaveService(eService *service)
+void eZapMain::leaveService(const eServiceReference &service)
 {
 	eDebug("leaving service");
 
@@ -1241,7 +1204,7 @@ void eZapMain::clockUpdate()
 {
 	time_t c=time(0)+eDVB::getInstance()->time_difference;
 	tm *t=localtime(&c);
-	if (t)
+	if (t && eDVB::getInstance()->time_difference)
 	{
 		eString s;
 		s.sprintf("%02d:%02d", t->tm_hour, t->tm_min);

@@ -68,7 +68,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 			dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceFailed));
 			return;
 		}
-		eTransponder *n=dvb.settings->transponderlist->searchTS(original_network_id, transport_stream_id);
+		eTransponder *n=dvb.settings->transponderlist->searchTS(service.original_network_id, service.transport_stream_id);
 		if (!n)
 		{
 			dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceTuneFailed));
@@ -115,19 +115,19 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 
 		/*emit*/ dvb.enterTransponder(transponder);
 		dvb.tSDT.start(new SDT());
-		switch (service_type)
+		switch (service.service_type)
 		{
 		case 1:	// digital television service
 		case 2:	// digital radio service
 		case 3:	// teletext service
-			dvb.tEIT.start(new EIT(EIT::typeNowNext, service_id, EIT::tsActual));
+			dvb.tEIT.start(new EIT(EIT::typeNowNext, service.service_id.get(), EIT::tsActual));
 		case 5:	// NVOD time shifted service
 			dvb.setState(eDVBServiceState(eDVBServiceState::stateServiceGetPAT));
 			dvb.tPAT.get();
 			break;
 		case 4:	// NVOD reference service
 			dvb.setState(eDVBServiceState(eDVBServiceState::stateServiceGetSDT));
-			dvb.tEIT.start(new EIT(EIT::typeNowNext, service_id, EIT::tsActual));
+			dvb.tEIT.start(new EIT(EIT::typeNowNext, service.service_id.get(), EIT::tsActual));
 			break;
 		case 6:	// mosaic service
 			dvb.setState(eDVBServiceState(eDVBServiceState::stateServiceGetPAT));
@@ -155,7 +155,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 
 		eDebug("eventServiceGotPAT");
 		PAT *pat=dvb.tPAT.getCurrent();
-		PATEntry *pe=pat->searchService(service_id);
+		PATEntry *pe=pat->searchService(service.service_id.get());
 		if (!pe)
 		{
 			pmtpid=-1;
@@ -170,7 +170,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 			return;
 		}
 		dvb.setState(eDVBServiceState(eDVBServiceState::stateServiceGetPMT));
-		dvb.tPMT.start(new PMT(pmtpid, service_id));
+		dvb.tPMT.start(new PMT(pmtpid, service.service_id.get()));
 		break;
 	}	
 	case eDVBServiceEvent::eventServiceGotPMT:
@@ -203,7 +203,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 			dvb.setState(eDVBServiceState(eDVBServiceState::stateIdle));
 			/*emit*/ dvb.gotSDT(sdt);
 			sdt->unlock();
-			if (service_type==4)
+			if (service.service_type==4)
 				service_state=ENVOD;
 			dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceSwitched));
 		} else
@@ -270,22 +270,13 @@ void eDVBServiceController::TDTready(int error)
 	}
 }
 
-int eDVBServiceController::switchService(eService *newservice)
+int eDVBServiceController::switchService(const eServiceReference &newservice)
 {
-	if (newservice==service)
+	if (newservice == service)
 		return 0;
 	/*emit*/ dvb.leaveService(service);
 	service=newservice;
-	return switchService(service->service_id, service->original_network_id, service->transport_stream_id, service->service_type);
-}
 
-int eDVBServiceController::switchService(int nservice_id, int noriginal_network_id, int ntransport_stream_id, int nservice_type)
-{
-	original_network_id=noriginal_network_id;
-	transport_stream_id=ntransport_stream_id;
-	service_id=nservice_id;
-	service_type=nservice_type;
-	
 	dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceSwitch));
 	eDebug("<--- switch service event");
 	return 1;
@@ -353,8 +344,8 @@ void eDVBServiceController::scanPMT()
 					MHWDataDescriptor *mhwd=(MHWDataDescriptor*)*i;
 					if (!strncmp(mhwd->type, "PILOTE", 6))
 					{
-						eDebug("starting MHWEIT on pid %x, sid %x", pe->elementary_PID, service_id);
-						tMHWEIT=new MHWEIT(pe->elementary_PID, service_id);
+						eDebug("starting MHWEIT on pid %x, sid %x", pe->elementary_PID, service.service_id.get());
+						tMHWEIT=new MHWEIT(pe->elementary_PID, service.service_id.get());
 						CONNECT(tMHWEIT->ready, eDVBServiceController::MHWEITready);
 						tMHWEIT->start();
 						break;
@@ -445,8 +436,8 @@ void eDVBServiceController::MHWEITready(int error)
 		e->type=EIT::typeNowNext;
 		e->version_number=0;
 		e->current_next_indicator=0;
-		e->transport_stream_id=transport_stream_id;
-		e->original_network_id=original_network_id;
+		e->transport_stream_id=service.transport_stream_id.get();
+		e->original_network_id=service.original_network_id.get();
 		
 		for (int i=0; i<2; i++)
 		{

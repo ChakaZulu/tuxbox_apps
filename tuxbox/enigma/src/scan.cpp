@@ -575,9 +575,10 @@ void tsScan::updateTime()
 			timeleft->setText(eString().sprintf("%02i seconds left", sek ));
 }
 
-void tsScan::serviceFound(eService* s, bool newService)
+void tsScan::serviceFound(const eServiceReference &service, bool newService)
 {
 	servicesScanned++;
+	eService *s=eDVB::getInstance()->settings->getTransponders()->searchService(service);
 	service_name->setText(s->service_name);
 	service_provider->setText(s->service_provider);
 

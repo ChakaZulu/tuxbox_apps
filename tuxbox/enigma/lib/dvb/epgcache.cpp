@@ -39,28 +39,28 @@ int eEPGCache::sectionRead(__u8 *data)
 		eventData::TYP type = (*data < 0x60)?eventData::FULL:eventData::SHORT;*/
 
 		eit_t *eit = (eit_t*) data;
-		int service_id=HILO(eit->service_id);
-		int original_network_id=HILO(eit->original_network_id);
+		eServiceID service_id(HILO(eit->service_id));
+		eOriginalNetworkID original_network_id(HILO(eit->original_network_id));
 		int len=HILO(eit->section_length)-1;//+3-4;
 		int ptr=EIT_SIZE;
 		eit_event_struct* eit_event = (eit_event_struct*) (data+ptr);
 		int eit_event_size;
 		int duration;
-		sref SREF = sref(original_network_id,service_id);
+		eServiceReference service(-1, original_network_id, service_id, -1);
 		time_t TM;
 		updateMap::iterator It;
 		
 /*		if (type == eventData::FULL)  // only sections with full descr update in 60 min	
 		{*/
-			It = temp.find(SREF);
+			It = temp.find(service);
 	
 			if (It == temp.end())
-			  temp[SREF] = time(0)+eDVB::getInstance()->time_difference;
+			  temp[service] = time(0)+eDVB::getInstance()->time_difference;
 //		}
 
 		if (firstEventId == HILO( eit_event->event_id ) )  // EPGCache around....
 		{
-			stopEPG();
+			stopEPG(*(eServiceReference*)0);
 			zapTimer.start(UPDATE_INTERVAL, 1);
 			eDebug("[EPGC] next update in %i min", UPDATE_INTERVAL / 60000);
 			
@@ -69,7 +69,7 @@ int eEPGCache::sectionRead(__u8 *data)
 			while (It != temp.end())
 				serviceLastUpdated.insert(*(It++));
 
-			if (!eventDB[sref(current_service->original_network_id, current_service->service_id)].empty())
+			if (!eventDB[current_service].empty())
 		  	/*emit*/ EPGAvail(1);
 
 			return -1;
@@ -88,12 +88,12 @@ int eEPGCache::sectionRead(__u8 *data)
 			{
 				// hier wird immer eine eventMap zurück gegeben.. entweder eine vorhandene..
 				// oder eine durch [] erzeugte
-				eventMap &service = eventDB[SREF];
+				eventMap &servicemap = eventDB[service];
 				
-				eventMap::iterator It = service.find(TM);
+				eventMap::iterator It = servicemap.find(TM);
 
-				if (It == service.end())   // event still not cached
-					eventDB[SREF][TM]=new eventData(eit_event, eit_event_size/*, type*/);
+				if (It == servicemap.end())   // event still not cached
+					eventDB[service][TM]=new eventData(eit_event, eit_event_size/*, type*/);
 /*				else
 					if (type == eventData::FULL && It->second->type == eventData::SHORT)
 					{   // old cached SHORT event should now updated to FULL Event
@@ -147,18 +147,18 @@ eEPGCache::~eEPGCache()
 			delete It->second;
 }
 
-/*EITEvent *eEPGCache::lookupEvent(int original_network_id, int service_id, int event_id)
+/*EITEvent *eEPGCache::lookupEvent(const eServiceReference &service, int event_id)
 {
-	eventMap &service=eventDB[sref(original_network_id,service_id)];
+	eventMap &service=eventDB[service];
 	eventMap::iterator event=service.find(event_id);
 	if (event==service.end())
 		return 0;
 	return new EITEvent(*event->second);
 } */
 
-EITEvent *eEPGCache::lookupCurrentEvent(int original_network_id, int service_id)
+EITEvent *eEPGCache::lookupCurrentEvent(const eServiceReference &service)
 {
-	eventCache::iterator It =	eventDB.find(sref(original_network_id,service_id));
+	eventCache::iterator It =	eventDB.find(service);
 	if (It != eventDB.end())
 		return It->second.empty()? 0 : new EITEvent ( *It->second.begin()->second );
 	else

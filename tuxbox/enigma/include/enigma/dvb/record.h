@@ -23,7 +23,7 @@ class eDVBRecorder: private eThread, eMainloop, public Object
 	{
 		enum eCode
 		{
-			mOpen, mAddPID, mRemovePID, mClose, mStart, mStop, mExit
+			mOpen, mAddPID, mRemovePID, mRemoveAllPIDs, mClose, mStart, mStop, mExit
 		} code;
 		union
 		{
@@ -45,6 +45,7 @@ class eDVBRecorder: private eThread, eMainloop, public Object
 	void s_open(const char *filename);
 	void s_addPID(int pid);
 	void s_removePID(int pid);
+	void s_removeAllPIDs();
 	void s_close();
 	void s_start();
 	void s_stop();
@@ -87,6 +88,16 @@ public:
 	}
 	
 	/**
+	 * \brief Removes a PID.
+	 *
+	 * This asynchrounus call will remove all pids.
+	 */
+	void removeAllPIDs()
+	{
+		messagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::mRemoveAllPIDs));
+	}
+	
+	/**
 	 * \brief Start recording.
 	 *
 	 * This asynchronous call will start the recording. You can stop it with \c stop().
@@ -100,7 +111,7 @@ public:
 	/**
 	 * \brief Stop recording.
 	 *
-	 * This asynchrounous call will stop the recoridng. You can restart it (and append data) with \c start again.
+	 * This asynchrounous call will stop the recording. You can restart it (and append data) with \c start again.
 	 */
 	void stop()
 	{
