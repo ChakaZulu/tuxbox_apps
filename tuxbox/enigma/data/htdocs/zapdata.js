@@ -11,7 +11,6 @@ function init()
 {	
 	#CHANNELS#
 	#CHANNELREFS#
-	);
 					
 	loadBouquets();
 	loadChannels(0);
