@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.35 2001/10/09 21:09:23 fnbrd Exp $
+// $Id: infoviewer.cpp,v 1.36 2001/10/10 17:17:13 field Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.36  2001/10/10 17:17:13  field
+// zappen auf onid_sid umgestellt
+//
 // Revision 1.35  2001/10/09 21:09:23  fnbrd
 // Fixed small bug.
 //
@@ -236,7 +239,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
     }
 
     pthread_cond_signal( &epg_cond );
-    pthread_cond_signal( &lang_cond );
+//    pthread_cond_signal( &lang_cond );
 
     usleep(50);
 
@@ -248,13 +251,14 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
         {
             key = g_RCInput->getKey( intShowDuration* 5 );
 
-            if ( key == CRCInput::RC_blue )
+// Auskommentiert - wird von Hauptschleife aufgerufen...?
+/*            if ( key == CRCInput::RC_blue )
             {
                 g_StreamInfo->exec(NULL, "");
                 key = CRCInput::RC_timeout;
             }
-// Auskommentiert - wird von Hauptschleife aufgerufen...?
-/*            else if ( key == CRCInput::RC_yellow )
+
+            else if ( key == CRCInput::RC_yellow )
             {
                 killTitle();
                 g_EventList->exec(Channel);
@@ -328,16 +332,18 @@ void CInfoViewer::showData()
 	
 
 	//percent
-	int posy = BoxStartY+12;
-	int height2= 20;//int( g_Fonts->infobar_channame->getHeight()/1.7);
 
-	
-//	g_FrameBuffer->paintBox(BoxEndX-130, BoxStartY, BoxEndX, ChanNameY+2, COL_INFOBAR+1); //bounding box (off)
+    if ( ShowInfo_Info )
+    {
+    	int posy = BoxStartY+12;
+    	int height2= 20;//int( g_Fonts->infobar_channame->getHeight()/1.7);
 
-	g_FrameBuffer->paintBoxRel(BoxEndX-114, posy,   2+100+2, height2, COL_INFOBAR_SHADOW); //border
-	g_FrameBuffer->paintBoxRel(BoxEndX-112, posy+2, runningPercent+2, height2-4, COL_INFOBAR+7);//fill(active)
-	g_FrameBuffer->paintBoxRel(BoxEndX-112+runningPercent, posy+2, 100-runningPercent, height2-4, COL_INFOBAR+3);//fill passive
+    //	g_FrameBuffer->paintBox(BoxEndX-130, BoxStartY, BoxEndX, ChanNameY+2, COL_INFOBAR+1); //bounding box (off)
 
+    	g_FrameBuffer->paintBoxRel(BoxEndX-114, posy,   2+100+2, height2, COL_INFOBAR_SHADOW); //border
+    	g_FrameBuffer->paintBoxRel(BoxEndX-112, posy+2, runningPercent+2, height2-4, COL_INFOBAR+7);//fill(active)
+    	g_FrameBuffer->paintBoxRel(BoxEndX-112+runningPercent, posy+2, 100-runningPercent, height2-4, COL_INFOBAR+3);//fill passive
+    }
 
 	//info running
 //	int start1width      = g_Fonts->infobar_info->getRenderWidth(runningStart);
@@ -387,6 +393,8 @@ void CInfoViewer::killTitle()
 
 void * CInfoViewer::LangViewerThread (void *arg)
 {
+    char to_compare[50];
+
 	CInfoViewer* InfoViewer = (CInfoViewer*) arg;
 	while(1)
 	{
@@ -396,7 +404,13 @@ void * CInfoViewer::LangViewerThread (void *arg)
         if ( ( InfoViewer->is_visible ) && ( InfoViewer->ShowInfo_Info ) )
         {
             g_RemoteControl->CopyAPIDs();
-            if ( strcmp(g_RemoteControl->audio_chans.name, InfoViewer->CurrentChannel.c_str() )== 0 )
+
+            if ( g_settings.epg_byname == 0 )
+                snprintf( to_compare, 10, "%x", InfoViewer->Current_onid_tsid );
+            else
+                strcpy( to_compare, InfoViewer->CurrentChannel.c_str() );
+
+            if ( strcmp(g_RemoteControl->audio_chans.name, to_compare )== 0 )
             {
                 InfoViewer->showButtons();
             }

@@ -1,7 +1,10 @@
 //
-// $Id: remotecontrol.cpp,v 1.15 2001/10/10 14:58:09 fnbrd Exp $
+// $Id: remotecontrol.cpp,v 1.16 2001/10/10 17:17:13 field Exp $
 //
 // $Log: remotecontrol.cpp,v $
+// Revision 1.16  2001/10/10 17:17:13  field
+// zappen auf onid_sid umgestellt
+//
 // Revision 1.15  2001/10/10 14:58:09  fnbrd
 // Angepasst an neuen sectionsd
 //
@@ -83,7 +86,7 @@ static void getNVODs(unsigned onidSid)
 	unsigned onidsid2=*(unsigned *)p;
 	printf("onid_sid: 0x%x\n", onidsid2);
 	p+=4;
-	unsigned short tsid=*(unsigned short *)p;
+    unsigned short tsid=*(unsigned short *)p;
 	printf("tsid: 0x%x\n", tsid);
 	p+=2;
 	unsigned char numberOfTimes=*p;
@@ -160,8 +163,16 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 //                printf("Received %d bytes\n", bytes_recvd);
 //                printf("That was returned: %s\n", return_buf);
 	
+                int ZapReturned;
+                char ZapStatus = return_buf[1];
+
                 do_immediatly = false;
-                switch (atoi(return_buf))
+
+                sscanf(&return_buf[2], "%x", (uint *) &ZapReturned);
+                if ( return_buf[0] == '-' )
+                    ZapReturned*= -1;
+
+                switch ( ZapReturned )
                 {
                     case 0: printf("Unknown error reported from zapper\n");
 //                            exit(-1);
@@ -220,9 +231,18 @@ void * CRemoteControl::RemoteControlThread (void *arg)
                             break;
                     case -7: printf("Could not change to TV-Mode\n");
                             break;
-                    case 8: {
+                    case 8:
+                    case 0x0d: {
+                                if (ZapReturned == 0x0d)
+                                {
+                                    // 0x0d... result
+                                    printf("Zapped with onid_sid\n");
+                                    printf("Status: %hhx\n", ZapStatus);
+
+                                    strcpy( RemoteControl->audio_chans_int.name, r_msg.param3 );
+                                };
+
 //                                printf("Got a pid-description\n");
-                                // printf("should not be done in remotecontrol.cpp.\n");
 
                                 struct  pids    apid_return_buf;
                                 memset(&apid_return_buf, 0, sizeof(apid_return_buf));
@@ -232,8 +252,7 @@ void * CRemoteControl::RemoteControlThread (void *arg)
                                 // PIDs emfangen, ueberpruefen, ob wir die Audio-PIDs uebernehmen sollen...
 
                                     pthread_mutex_trylock( &RemoteControl->send_mutex );
-                                    if ( //( remotemsg.cmd== 8 ) &&
-                                         ( strlen( RemoteControl->audio_chans_int.name )!= 0 ) )
+                                    if ( strlen( RemoteControl->audio_chans_int.name )!= 0 )
                                     {
                                         // noch immer der gleiche Kanal
 
@@ -265,6 +284,9 @@ void * CRemoteControl::RemoteControlThread (void *arg)
                             break;
                     case -9: printf("Could not change apid\n");
                             break;
+                    case -0x0d: printf("Could not zap with onid_sid\n");
+                            break;
+
                     default: printf("Unknown return-code\n");
 //                            exit(-1);
                 }
@@ -334,7 +356,22 @@ void CRemoteControl::setAPID(int APID)
 }
 
 
-void CRemoteControl::zapTo(int, string chnlname )
+void CRemoteControl::zapTo_onid_sid( unsigned int onid_sid )
+{
+    pthread_mutex_lock( &send_mutex );
+
+    remotemsg.version=1;
+    remotemsg.cmd= 'd';
+    snprintf( (char*) &remotemsg.param3, 10, "%x", onid_sid);
+
+    memset(&audio_chans_int, 0, sizeof(audio_chans_int));
+
+    pthread_mutex_unlock( &send_mutex );
+
+	send();
+}
+
+void CRemoteControl::zapTo(string chnlname )
 {
     pthread_mutex_lock( &send_mutex );
 //    getNVODs(0x850001); // Cinedom 1 fest zum testen
@@ -386,12 +423,4 @@ void  CRemoteControl::shutdown()
 
     send();
 }
-
-
-
-
-
-
-
-
 

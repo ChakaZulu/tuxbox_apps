@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.59 2001/10/10 01:20:09 McClean Exp $
+        $Id: neutrino.cpp,v 1.60 2001/10/10 17:17:13 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.60  2001/10/10 17:17:13  field
+  zappen auf onid_sid umgestellt
+
   Revision 1.59  2001/10/10 01:20:09  McClean
   menue changed
 
@@ -991,7 +994,14 @@ static char* copyStringto(const char* from, char* to, int len, char delim)
 void CNeutrinoApp::SelectAPID()
 {
     g_RemoteControl->CopyAPIDs();
-    if ( ( strcmp(g_RemoteControl->audio_chans.name, channelList->getActiveChannelName().c_str() )== 0 ) &&
+
+    char to_compare[50];
+    if ( g_settings.epg_byname == 0 )
+        snprintf( to_compare, 10, "%x", channelList->getActiveChannelOnid_sid() );
+    else
+        strcpy( to_compare, channelList->getActiveChannelName().c_str() );
+
+    if ( ( strcmp(g_RemoteControl->audio_chans.name, to_compare )== 0 ) &&
          ( g_RemoteControl->audio_chans.count_apids> 1 ) )
     {
         // wir haben APIDs für diesen Kanal!
@@ -1501,7 +1511,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.59 2001/10/10 01:20:09 McClean Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.60 2001/10/10 17:17:13 field Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;

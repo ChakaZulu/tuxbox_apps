@@ -1,9 +1,12 @@
 #ifndef __channellist__
 #define __channellist__
 //
-// $Id: channellist.h,v 1.15 2001/10/02 17:56:33 McClean Exp $
+// $Id: channellist.h,v 1.16 2001/10/10 17:17:13 field Exp $
 //
 // $Log: channellist.h,v $
+// Revision 1.16  2001/10/10 17:17:13  field
+// zappen auf onid_sid umgestellt
+//
 // Revision 1.15  2001/10/02 17:56:33  McClean
 // time in infobar (thread probs?) and "0" quickzap added
 //

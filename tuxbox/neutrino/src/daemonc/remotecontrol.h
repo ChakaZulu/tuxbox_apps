@@ -68,7 +68,8 @@ class CRemoteControl
         st_audio_info   audio_chans;
 
 		CRemoteControl();
-		void zapTo(int key,  string chnlname );
+        void zapTo_onid_sid( unsigned int onid_sid );
+		void zapTo( string chnlname );
         void queryAPIDs();
         void setAPID(int APID);
 		void shutdown();
