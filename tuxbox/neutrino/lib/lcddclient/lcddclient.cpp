@@ -232,7 +232,7 @@ bool CLcddClient::getInverse()
 
 void CLcddClient::shutdown()
 {
-	setMode(CLcddClient::MODE_SHUTDOWN, "");
+	setMode(CLcddTypes::MODE_SHUTDOWN, "");
 
 	send(CLcddMsg::CMD_SHUTDOWN);
 
