@@ -845,7 +845,7 @@ static eString getLeftNavi(eString mode, eString path)
 			result += button(110, "Other Sites", LEFTNAVICOLOR, "?mode=helpOtherSites");
 			result += "<br>";
 		}
-		result += button(110, "Forums", LEFTNAVICOLOR, "?mode=helpForums");
+		result += button(110, "Boards", LEFTNAVICOLOR, "?mode=helpForums");
 		result += "<br>";
 	}
 
@@ -2907,7 +2907,14 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
 		result.strReplace("#TOPBALK#", "topbalk.png");
 	else
+	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Nokia)
 		result.strReplace("#TOPBALK#", "topbalk2.png");
+	else
+	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Sagem)
+		result.strReplace("#TOPBALK#", "topbalk3.png");
+	else
+//	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Philips)
+		result.strReplace("#TOPBALK#", "topbalk4.png");
 
 	return result;
 }
