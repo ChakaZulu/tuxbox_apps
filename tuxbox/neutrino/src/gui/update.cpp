@@ -79,12 +79,12 @@ CFlashUpdate::CFlashUpdate()
 		char buf2[1000];
 		if(fgets(buf,sizeof(buf),fd)!=NULL)
 		{
-			sscanf(buf, "basepath: %s\n", &buf2);
+			sscanf(buf, "basepath: %s\n", buf2);
 		}
 		BasePath = buf2;
 		if(fgets(buf,sizeof(buf),fd)!=NULL)
 		{
-			sscanf(buf, "imagefile: %s\n", &buf2);
+			sscanf(buf, "imagefile: %s\n", buf2);
 			if (strlen(buf2)> 0)
 			{
 				ImageFile = buf2;
@@ -92,7 +92,7 @@ CFlashUpdate::CFlashUpdate()
 
 			if(fgets(buf,sizeof(buf),fd)!=NULL)
 			{
-				sscanf(buf, "versionfile: %s\n", &buf2);
+				sscanf(buf, "versionfile: %s\n", buf2);
 				if (strlen(buf2)> 0)
 				{
 					VersionFile = buf2;
