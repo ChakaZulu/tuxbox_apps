@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.46 2003/02/21 19:23:49 dirch Exp $
+	$Id: webdbox.cpp,v 1.47 2003/03/03 03:40:05 obi Exp $
 
 	License: GPL
 
@@ -163,9 +163,10 @@ bool CWebDbox::GetStreamInfo(int bitInfo[10])
 	int value, pos=0;
 
 	FILE* fd = fopen("/proc/bus/bitstream", "rt");
+
 	if (fd==NULL)
 	{
-		aprintf("error while opening proc-bitstream\n" );
+		dprintf("error while opening proc-bitstream\n" );
 		return false;
 	}
 
