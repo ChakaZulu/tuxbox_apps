@@ -3263,7 +3263,7 @@ int eZapMain::recordDVR(int onoff, int user, time_t evtime, const char *timer_de
 void eZapMain::startSkip(int dir)
 {
 	eServiceHandler *handler=NULL;
-	
+
 	if(!skipping) // first call?
 	{ 
 		skipcounter=0;
@@ -3280,18 +3280,25 @@ void eZapMain::startSkip(int dir)
 					break;
 			}
 
-			if(!eServiceInterface::getInstance()->service.path && (state & stateRecording)
-				&& eDVB::getInstance()->recorder && eDVB::getInstance()->recorder->recRef == eServiceInterface::getInstance()->service )
+			if(!eServiceInterface::getInstance()->service.path)
 			{
-				if(dir!=skipForward)
-				{ // necessary to enable skipmode, because file end
-					handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,-2000));
-					usleep(100*1000);
-					handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,-2000));
-					usleep(100*1000);
-					handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,-2000));
+				if (state & stateRecording && eDVB::getInstance()->recorder
+					&& eDVB::getInstance()->recorder->recRef == eServiceInterface::getInstance()->service )
+				{
+					if (!timeshift && dir!=skipForward)
+					{ // necessary to enable skipmode, because file end
+						handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,-2000));
+						usleep(100*1000);
+						handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,-2000));
+						usleep(100*1000);
+						handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,-2000));
+						timeshift=1;
+					}
+					else if (!timeshift)
+						return;
 				}
-				timeshift=1;
+				else
+					return;
 			}
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekBegin, 0));
 			seekstart=handler->getPosition(eServiceHandler::posQueryCurrent); // Startpunkt für Zeitausgabe
@@ -3444,6 +3451,8 @@ void eZapMain::repeatSkip(int dir)
 
 	if (skipping) 
 		endSkip();	// break skipping, if active
+	else
+		return;
 
 	if(aktiv) 
 		return;		// not more...
