@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.22 2003/03/03 03:43:58 obi Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.23 2003/03/31 20:22:19 thegoodguy Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -180,7 +180,8 @@ char * DMX::getSection(const unsigned timeoutInMSeconds, int &timeouts)
 	
 	rc = read((char *) &initial_header, 3, timeoutInMSeconds);
 	
-	if (rc <= 0)
+	if (rc != 3)
+	//	if (rc <= 0)
 	{
 		unlock();
 		if (rc == 0)
@@ -215,7 +216,8 @@ char * DMX::getSection(const unsigned timeoutInMSeconds, int &timeouts)
 	if (section_length > 0)
 		rc = read(buf + 3, section_length, timeoutInMSeconds);
 	
-	if (rc <= 0)
+	//	if (rc <= 0)
+	if (rc != section_length)
 	{
 		unlock();
 		delete[] buf;
