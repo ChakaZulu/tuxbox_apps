@@ -11,5 +11,7 @@ libfx2.so: $(OBJS)
 	$(CC) -o libfx2.so -shared -Wl,-soname,libfx2.so $(OBJS)
 	$(STRIP) libfx2.so
 
+InstallMultipleFlags(libfx2.so,../../../lib,-m 755)
+
 clean::
 	rm -f libfx2.so

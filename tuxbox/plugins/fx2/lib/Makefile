@@ -735,6 +735,15 @@ libfx2.so: $(OBJS)
 	$(CC) -o libfx2.so -shared -Wl,-soname,libfx2.so $(OBJS)
 	$(STRIP) libfx2.so
 
+install:: libfx2.so
+	@if [ -d $(DESTDIR)../../../lib ]; then set +x; \
+	else (set -x; $(MKDIRHIER) $(DESTDIR)../../../lib); fi
+	@for flag in ${MAKEFLAGS} ''; do \
+	case "$$flag" in *=*) ;; *[i]*) set +e;; esac; done; \
+	for i in libfx2.so; do \
+	(set -x; $(INSTALL) $(INSTALLFLAGS) -m 755 $$i $(DESTDIR)../../../lib); \
+	done
+
 clean::
 	rm -f libfx2.so
 
