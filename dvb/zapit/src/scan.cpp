@@ -33,10 +33,11 @@ typedef std::multimap<std::string, bouquet_mulmap>::iterator sbiterator;
 std::string curr_chan;
 #endif
 std::string services_xml = "/var/zapit/services.xml";
-int fake_pat(std::map<int,transpondermap> *tmap, int freq, int sr);
+std::string logfile = "/tmp/zapit_scan.log";
+int fake_pat(std::map<int,transpondermap> *tmap, int freq, int sr, FILE *logfd);
 int finaltune(int freq, int symbolrate, int polarity, int fec,int diseq);
-int nit(int diseqc);
-int sdt(uint osid, bool scan_mode);
+int nit(int diseqc, FILE *logfd);
+int sdt(uint osid, bool scan_mode, FILE *logfd);
 int prepare_channels();
 short scan_runs;     	
 short curr_sat;
@@ -45,17 +46,17 @@ int issatbox()
 	return atoi(getenv("fe"));
 }
 
-void get_nits(int freq, int symbolrate, int polarity, int fec,int diseq)
+void get_nits(int freq, int symbolrate, int polarity, int fec,int diseq, FILE *logfd)
 {
   if (finaltune(freq,symbolrate,polarity,fec,diseq)>0)
-  	nit(diseq);
+  	nit(diseq,logfd);
   else
   {
     printf("No signal found on transponder\n");
     }
 }
 
-void get_sdts()
+void get_sdts(FILE *logfd)
 {
 	
   for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
@@ -66,12 +67,17 @@ void get_sdts()
         //if (pat(tI->second.freq,tI->second.symbolrate) >0)
 	//{
 	  printf("GETTING SDT FOR TSID: %04x\n",tI->second.tsid);
-	  while (sdt(tI->second.tsid,true) == -2 && sdt_tries != 5)
+	  fprintf(logfd, "Got lock on transponder %x, freq: %d, SR: %d, Pol: %d, Fec: %d, Diseqc: %d\n",tI->second.tsid, tI->second.freq,tI->second.symbolrate,tI->second.polarization,tI->second.fec_inner,tI->second.diseqc);
+	  fprintf(logfd,"GETTING SDT FOR TSID: %04x\n",tI->second.tsid);
+	  while (sdt(tI->second.tsid,true,logfd) == -2 && sdt_tries != 5)
 	  	sdt_tries++;
 	//}
 	}
 	else
+	{
     		printf("No signal found on transponder\n");
+    		fprintf(logfd, "No signal found transponder %x, freq: %d, SR: %d, Pol: %d, Fec: %d, Diseqc: %d\n",tI->second.tsid , tI->second.freq,tI->second.symbolrate,tI->second.polarization,tI->second.fec_inner,tI->second.diseqc);
+    	}
     }
 }
 
@@ -238,12 +244,25 @@ void *start_scanthread(void *param)
 {
   FILE *fd = NULL;
   std::string transponder;
+  FILE *logfd = fopen(logfile.c_str(), "w");
+  
+  if (logfd == NULL)
+  {
+  	perror("Could not create logfile. Please check if /tmp exists and space is available\nCancelling scan");
+  	scan_runs = 1; //start_scan is waiting till scan_runs = 1
+  	usleep(500);
+  	scan_runs = 0;
+  	pthread_exit(0);
+  }
+  setlinebuf(logfd);
   
   unsigned short do_diseqc = *(unsigned short *) (param);
 
   scan_runs = 1;
   if (!issatbox())
     {
+    	fprintf(logfd, "Scanning cable\n");
+    	
     	curr_sat = 0;
       int symbolrate = 6900;
       for (int freq = 3300; freq<=4600; freq +=80)
@@ -252,17 +271,47 @@ void *start_scanthread(void *param)
 	  //printf("get_nits() done\n");
 	  //printf("scanning cable\n");
 	  if (finaltune(freq,symbolrate,0,0,0)>0)
-    	  	fake_pat(&scantransponders, freq, symbolrate);
+	  {
+	  	fprintf(logfd, "Tuning to Freq: %d, SR: %d was succesfull\n", freq*100, symbolrate*1000);
+	  	
+    	  	fake_pat(&scantransponders, freq, symbolrate, logfd);
+    	}
   	  else
+  	  {
     		printf("No signal found on transponder\n"); 
+    		fprintf(logfd, "Tuning to Freq: %d, SR: %d was UNsuccesfull\n", freq*100, symbolrate*1000);
+    		
+    	  }
+    	
 	}
 	if (finaltune(3300,6875,0,0,0)>0)
-    	  	fake_pat(&scantransponders, 3300,6875);
+	{
+		fprintf(logfd, "Tuning to Freq: 330000, SR: 6875000 was succesfull\n");
+		
+    	  	fake_pat(&scantransponders, 3300,6875, logfd);
+    	}
+    	else
+    	{
+    		fprintf(logfd, "Tuning to Freq: 330000, SR: 6875000 was UNsuccesfull\n");
+    		
+    	}
     	
-	get_sdts();
+    	
+	get_sdts(logfd);
+	fprintf(logfd, "Writing cable-tranponders and channels now\n");
+	
       if (!scantransponders.empty())
       {
       	fd = fopen(services_xml.c_str(), "w" );
+      	
+      	if (fd == NULL)
+      	{
+      		perror("Could not create /var/zapit/services.xml. Please check if /var/zapit exists and space is available\nCancelling scan");
+      		fclose(logfd);
+      		scan_runs = 0;
+  		pthread_exit(0);
+  	}
+  	
         fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
       fprintf(fd,"<ZAPIT>\n<cable>\n");
       for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
@@ -272,36 +321,54 @@ void *start_scanthread(void *param)
 	  fprintf(fd, "</transponder>\n");
 	}
       fprintf(fd,"</cable>\n");
-	}
+      }
+      fprintf(logfd, "Wrote all cable-transponders and channels\n");
+      
       scantransponders.clear();
       scanchannels.clear();
+      fprintf(logfd, "Cleared all cable-transponders and channels\n");
+      
     }
   else
     {
-      
+      fprintf(logfd, "scanning-mode: %d\n", do_diseqc);
       if (do_diseqc & 1)
       {
       	curr_sat = 1;
       printf("---------------------------\nSCANNING ASTRA\n---------------------------\n");
-      //printf("This is a sat-box\n");
-      get_nits(11797, 27500, 0, 0, 0);
-      //printf("\n\nNext base-transponder\n\n");
-      get_nits(12551, 22000, 1, 5, 0);
-      //printf("\n\nNext base-transponder\n\n");
-      get_nits(12168, 27500, 1, 3, 0);
-      //printf("\n\nNext base-transponder\n\n");
-      get_nits(12692, 22000, 0, 5, 0);
-      get_nits(11913,27500,0,3,0);
-      get_nits(11954,27500,0,3,0);
-      get_nits(12051,27500,1,3,0);
+      fprintf(logfd, "---------------------------\nSCANNING ASTRA\n---------------------------\n");
+      
+      fprintf(logfd, "get_nits(11797, 27500, 0, 0, 0, logfd);\n");
+      get_nits(11797, 27500, 0, 0, 0, logfd);
+      fprintf(logfd, "get_nits(12551, 22000, 1, 5, 0, logfd);\n");
+      get_nits(12551, 22000, 1, 5, 0, logfd);
+      fprintf(logfd, "get_nits(12168, 27500, 1, 3, 0, logfd);\n");
+      get_nits(12168, 27500, 1, 3, 0, logfd);
+      fprintf(logfd, "get_nits(12692, 22000, 0, 5, 0, logfd);\n");
+      get_nits(12692, 22000, 0, 5, 0, logfd);
+      fprintf(logfd, "get_nits(11913,27500,0,3,0, logfd);\n");
+      get_nits(11913,27500,0,3,0, logfd);
+      fprintf(logfd, "get_nits(11954,27500,0,3,0, logfd);\n");
+      get_nits(11954,27500,0,3,0, logfd);
+      fprintf(logfd, "get_nits(12051,27500,1,3,0, logfd);\n");
+      get_nits(12051,27500,1,3,0, logfd);
 
-      get_sdts();
+      fprintf(logfd, "Got alle Nits\n");
+      get_sdts(logfd);
 
       if (!scantransponders.empty())
 	{
 	  if (fd == NULL)
 	  {
 	  	fd = fopen(services_xml.c_str(), "w" );
+	  	if (fd == NULL)
+      		{
+      			perror("Could not create /var/zapit/services.xml. Please check if /var/zapit exists and space is available\nCancelling scan");
+      			fclose(logfd);
+      			scan_runs = 0;
+  			pthread_exit(0);
+  		}
+  		
 	  	fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
       	  	fprintf(fd,"<ZAPIT>\n");
       	  }
@@ -320,31 +387,54 @@ void *start_scanthread(void *param)
 
       scanchannels.clear();
       scantransponders.clear();
+      fprintf(logfd,"Scanning Astra ready\n");
 	}
 
       if (do_diseqc & 2)
       {
       	curr_sat = 2;
       printf("---------------------------\nSCANNING HOTBIRD\n---------------------------\n");
-      			
-      get_nits(12692,27500,0,3,1);
-      get_nits(12539,27500,0,3,1);
-      get_nits(11746,27500,0,3,1);
-      get_nits(12168,27500,0,3,1);
-      get_nits(12034,27500,1,3,1);
-      get_nits(11919,27500,1,2,1);
-      get_nits(11804,27500,1,2,1);
-      get_nits(12169,27500,0,3,1);
-      get_nits(12539,27500,0,3,1);
-      get_nits(12111,27500,1,3,1);
-      get_nits(12168,27500,0,3,1);
-      get_sdts();
+      	fprintf(logfd,	"---------------------------\nSCANNING HOTBIRD\n---------------------------\n");
+      	
+      fprintf(logfd,"get_nits(12692,27500,0,3,1, logfd);\n");
+      get_nits(12692,27500,0,3,1, logfd);
+      fprintf(logfd,	"get_nits(12539,27500,0,3,1, logfd);\n");
+      get_nits(12539,27500,0,3,1, logfd);
+      fprintf(logfd,	"get_nits(11746,27500,0,3,1, logfd);\n");
+      get_nits(11746,27500,0,3,1, logfd);
+      fprintf(logfd,	"get_nits(12168,27500,0,3,1, logfd);\n");
+      get_nits(12168,27500,0,3,1, logfd);
+      fprintf(logfd,	"get_nits(12034,27500,1,3,1, logfd);\n");
+      get_nits(12034,27500,1,3,1, logfd);
+      fprintf(logfd,	"get_nits(11919,27500,1,2,1, logfd);\n");
+      get_nits(11919,27500,1,2,1, logfd);
+      fprintf(logfd,	"get_nits(11804,27500,1,2,1, logfd);\n");
+      get_nits(11804,27500,1,2,1, logfd);
+      fprintf(logfd,	"get_nits(12169,27500,0,3,1, logfd);\n");
+      get_nits(12169,27500,0,3,1, logfd);
+      fprintf(logfd,	"get_nits(12539,27500,0,3,1, logfd);\n");
+      get_nits(12539,27500,0,3,1, logfd);
+      fprintf(logfd,	"get_nits(12111,27500,1,3,1, logfd);\n");
+      get_nits(12111,27500,1,3,1, logfd);
+      fprintf(logfd,	"get_nits(12168,27500,0,3,1, logfd);\n");
+      get_nits(12168,27500,0,3,1, logfd);
+      
+      fprintf(logfd, "Got alle Nits\n");
+      get_sdts(logfd);
       
       if (!scantransponders.empty())
 	{
 	if (fd == NULL)
 	  {
 	  	fd = fopen(services_xml.c_str(), "w" );
+	  	if (fd == NULL)
+      		{
+      			perror("Could not create /var/zapit/services.xml. Please check if /var/zapit exists and space is available\nCancelling scan");
+      			fclose(logfd);
+      			scan_runs = 0;
+  			pthread_exit(0);
+  		}
+  		
 	  	fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
       	 	fprintf(fd,"<ZAPIT>\n");
       	}
@@ -360,21 +450,35 @@ void *start_scanthread(void *param)
 
       scanchannels.clear();
       scantransponders.clear();
+      fprintf(logfd,"Scanning Hotbird ready\n");
       }
 	
       if (do_diseqc & 4)
       {
       	curr_sat = 4;
       printf("---------------------------\nSCANNING KOPERNIKUS\n---------------------------\n");
-      get_nits(12655,27500,1,3,2);
-      get_nits(12521,27500,1,3,2);
-      get_sdts();
+      fprintf(logfd,"---------------------------\nSCANNING KOPERNIKUS\n---------------------------\n");
+      
+      fprintf(logfd,"get_nits(12655,27500,1,3,2, logfd);\n");
+      get_nits(12655,27500,1,3,2, logfd);
+      fprintf(logfd,"get_nits(12521,27500,1,3,2, logfd);\n");
+      get_nits(12521,27500,1,3,2, logfd);
+      
+      fprintf(logfd, "Got alle Nits\n");
+      get_sdts(logfd);
 
        if (!scantransponders.empty())
 	{
 		if (fd == NULL)
 	  {
 	  	fd = fopen(services_xml.c_str(), "w" );
+	  	if (fd == NULL)
+      		{
+      			perror("Could not create /var/zapit/services.xml. Please check if /var/zapit exists and space is available\nCancelling scan");
+      			fclose(logfd);
+      			scan_runs = 0;
+  			pthread_exit(0);
+  		}
 	  	fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
       	  	fprintf(fd,"<ZAPIT>\n");
       	}
@@ -389,6 +493,7 @@ void *start_scanthread(void *param)
 	}
        scanchannels.clear();
        scantransponders.clear();
+       fprintf(logfd,"Scanning Kopernikus ready\n");
        }
       
       
@@ -396,36 +501,68 @@ void *start_scanthread(void *param)
       {
       	curr_sat = 8;
       printf("---------------------------\nSCANNING TÜRKSAT\n---------------------------\n");
-      get_nits(10985,23420,0,3,3);
-      get_nits(11015,41790,0,3,3);
-      get_nits(11028,35720,0,5,3);
-      get_nits(11037,23420,0,5,3);
-      get_nits(11054,70000,1,3,3);
-      get_nits(11088,56320,1,3,3);
-      get_nits(11100,56320,1,3,3);
-      get_nits(11110,56320,1,3,3);
-      get_nits(11117,56320,1,3,3);
-      get_nits(11117,30550,1,3,3);
-      get_nits(11133,45550,1,5,3);
-      get_nits(11134,26000,0,7,3);
-      get_nits(11137,31500,0,5,3);
-      get_nits(11156,21730,1,5,3);
-      get_nits(11160,21730,1,5,3);
-      get_nits(11162,21730,1,5,3);
-      get_nits(11166,56320,1,5,3);
-      get_nits(11168,21730,1,5,3);
-      get_nits(11172,21730,1,5,3);
-      get_nits(11193,54980,1,5,3);
-      get_nits(11453,19830,0,7,3);
-      get_nits(11567,20000,0,3,3);
-          
-      get_sdts();
+      fprintf(logfd,"Scanning Kopernikus ready\n");
+      
+      fprintf(logfd,"get_nits(10985,23420,0,3,3, logfd);\n");
+      get_nits(10985,23420,0,3,3, logfd);
+      fprintf(logfd,"get_nits(11015,41790,0,3,3, logfd);\n");
+      get_nits(11015,41790,0,3,3, logfd);
+      fprintf(logfd,"get_nits(11028,35720,0,5,3, logfd);\n");
+      get_nits(11028,35720,0,5,3, logfd);
+      fprintf(logfd,"get_nits(11037,23420,0,5,3, logfd);\n");
+      get_nits(11037,23420,0,5,3, logfd);
+      fprintf(logfd,"get_nits(11054,70000,1,3,3, logfd);\n");
+      get_nits(11054,70000,1,3,3, logfd);
+      fprintf(logfd,"get_nits(11088,56320,1,3,3, logfd);\n");
+      get_nits(11088,56320,1,3,3, logfd);
+      fprintf(logfd,"get_nits(11100,56320,1,3,3, logfd);\n");
+      get_nits(11100,56320,1,3,3, logfd);
+      fprintf(logfd,"get_nits(11110,56320,1,3,3, logfd);\n");
+      get_nits(11110,56320,1,3,3, logfd);
+      fprintf(logfd,"get_nits(11117,56320,1,3,3, logfd);\n");
+      get_nits(11117,56320,1,3,3, logfd);
+      fprintf(logfd,"get_nits(11117,30550,1,3,3, logfd);\n");
+      get_nits(11117,30550,1,3,3, logfd);
+      fprintf(logfd,"get_nits(11133,45550,1,5,3, logfd);\n");
+      get_nits(11133,45550,1,5,3, logfd);
+      fprintf(logfd,"get_nits(11134,26000,0,7,3, logfd);\n");
+      get_nits(11134,26000,0,7,3, logfd);
+      fprintf(logfd,"get_nits(11137,31500,0,5,3, logfd);\n");
+      get_nits(11137,31500,0,5,3, logfd);
+      fprintf(logfd,"get_nits(11156,21730,1,5,3, logfd);\n");
+      get_nits(11156,21730,1,5,3, logfd);
+      fprintf(logfd,"get_nits(11160,21730,1,5,3, logfd);\n");
+      get_nits(11160,21730,1,5,3, logfd);
+      fprintf(logfd,"get_nits(11162,21730,1,5,3, logfd);\n");
+      get_nits(11162,21730,1,5,3, logfd);
+      fprintf(logfd,"get_nits(11166,56320,1,5,3, logfd);\n");
+      get_nits(11166,56320,1,5,3, logfd);
+      fprintf(logfd,"get_nits(11168,21730,1,5,3, logfd);\n");
+      get_nits(11168,21730,1,5,3, logfd);
+      fprintf(logfd,"get_nits(11172,21730,1,5,3, logfd);\n");
+      get_nits(11172,21730,1,5,3, logfd);
+      fprintf(logfd,"get_nits(11193,54980,1,5,3, logfd);\n");
+      get_nits(11193,54980,1,5,3, logfd);
+      fprintf(logfd,"get_nits(11453,19830,0,7,3, logfd);\n");
+      get_nits(11453,19830,0,7,3, logfd);
+      fprintf(logfd,"get_nits(11567,20000,0,3,3, logfd);\n");
+      get_nits(11567,20000,0,3,3, logfd);
+      
+      fprintf(logfd, "Got alle Nits\n");    
+      get_sdts(logfd);
 
        if (!scantransponders.empty())
 	{
 		if (fd == NULL)
 	  {
 	  	fd = fopen(services_xml.c_str(), "w" );
+	  	if (fd == NULL)
+      		{
+      			perror("Could not create /var/zapit/services.xml. Please check if /var/zapit exists and space is available\nCancelling scan");
+      			fclose(logfd);
+      			scan_runs = 0;
+  			pthread_exit(0);
+  		}
 	  	fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
       	  	fprintf(fd,"<ZAPIT>\n");
       	}
@@ -440,6 +577,7 @@ void *start_scanthread(void *param)
 	}
        scanchannels.clear();
        scantransponders.clear();
+       fprintf(logfd,"Scanning Türksat ready\n");
        }
        
       }
@@ -447,6 +585,7 @@ void *start_scanthread(void *param)
   fprintf(fd,"</ZAPIT>\n"); 
   if (fd != NULL)
   	fclose(fd);
+  fprintf(logfd, "Writing bouquets now\n");
   
   write_bouquets(do_diseqc);   	
   if (prepare_channels() <0) 
@@ -455,6 +594,10 @@ void *start_scanthread(void *param)
     exit(-1);
    }
   printf("Channels have been loaded succesfully\n");
+  
+  fprintf(logfd, "Scan ended\n");
+  
+  fclose(logfd);
   
   scan_runs = 0;
   pthread_exit(0);

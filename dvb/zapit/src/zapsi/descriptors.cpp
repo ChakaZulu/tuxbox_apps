@@ -14,24 +14,24 @@ std::string curr_chan_name;
 int found_transponders;
 int found_channels;
 
-int stuffing_desc(char *buffer)
+int stuffing_desc(char *buffer, FILE *logfd)
 {
 	return buffer[1]+2;
 }
 
-int linkage_desc(char *buffer)
+int linkage_desc(char *buffer, FILE *logfd)
 {
 	//printf("Linkange-descriptor to be implemented\n");
 	return buffer[1]+2;
 }
 
-int priv_data_desc(char *buffer)
+int priv_data_desc(char *buffer, FILE *logfd)
 {
 	//printf("Private data descriptor\n");
 	return buffer[1]+2;
 }
 
-int network_name_desc(char *buffer)
+int network_name_desc(char *buffer, FILE *logfd)
 {
 	int len = buffer[1];
 	/*int i;
@@ -45,7 +45,7 @@ int network_name_desc(char *buffer)
 	return len+2;
 }
 
-int service_list_desc(char *buffer)
+int service_list_desc(char *buffer, FILE *logfd)
 {
 	int len = buffer[1];
 	/*int current = 1;
@@ -62,7 +62,7 @@ int service_list_desc(char *buffer)
 	return len+2;
 }
 
-int cable_deliv_system_desc(char *buffer, int tsid)
+int cable_deliv_system_desc(char *buffer, int tsid, FILE *logfd)
 {
   int len = buffer[1];
   int freq = (((buffer[2] & 0xf0) >> 4) * 10000) + ((buffer[2] & 0xf) * 1000) + (((buffer[3] & 0xf0) >> 4) * 100) + ((buffer[3] & 0xf)*10) + (((buffer[4]&0xf0)>>4)) ;
@@ -84,12 +84,13 @@ int cable_deliv_system_desc(char *buffer, int tsid)
 	printf("Symbolrate: %d\n", symbolrate);
 	printf("FEC_inner: %d\n",fec_inner);*/
       	scantransponders.insert(std::pair<int,transpondermap>(tsid, transpondermap(tsid,freq,symbolrate,fec_inner)));
+      	fprintf(logfd, "Inserted transponder %04x, Freq: %d, SR: %d, FEC: %d\n", tsid,freq,symbolrate,fec_inner);
       }
 
   return len+2;
 }
 
-int sat_deliv_system_desc(char *buffer, int tsid,int diseqc)
+int sat_deliv_system_desc(char *buffer, int tsid,int diseqc, FILE *logfd)
 {
   int len = buffer[1];
   int freq = (((buffer[2] & 0xf0) >> 4) * 100000) + ((buffer[2] & 0xf) * 10000) + (((buffer[3] & 0xf0) >> 4) * 1000) + ((buffer[3] & 0xf)*100) + (((buffer[4]&0xf0)>>4)*10) + (buffer[4]&0xf);
@@ -107,26 +108,26 @@ int sat_deliv_system_desc(char *buffer, int tsid,int diseqc)
 	  printf("Symbolrate: %d\n", symbolrate);
 	  printf("FEC_inner: %d\n",fec_inner);*/
 	  scantransponders.insert(std::pair<int,transpondermap>(tsid, transpondermap(tsid,freq,symbolrate,fec_inner,polarization,diseqc)));
-
+	  fprintf(logfd, "Inserted transponder %04x, Freq: %d, SR: %d, FEC: %d, Pol: %d, Diseqc: %d\n", tsid,freq,symbolrate,fec_inner,polarization,diseqc);
 	}
 	
 	return len+2;
 }
 
-int terr_deliv_system_desc(char *buffer)
+int terr_deliv_system_desc(char *buffer, FILE *logfd)
 {
 	printf("Anyone has a DVB-T Dbox?\n");
 	return buffer[1]+2;
 }
 
-int multilingual_network_name_desc(char *buffer)
+int multilingual_network_name_desc(char *buffer, FILE *logfd)
 {
 	//printf("Multilingual network name descriptor\n");
 	
 	return buffer[1]+2;
 }
 
-int freq_list_desc(char *buffer)
+int freq_list_desc(char *buffer, FILE *logfd)
 {
 	int len = buffer[1];
 	/*int current = 3;
@@ -139,25 +140,25 @@ int freq_list_desc(char *buffer)
 	return len+2;
 }
 
-int cell_list_desc(char *buffer)
+int cell_list_desc(char *buffer, FILE *logfd)
 {
 	//printf("Cell-list-descriptor\nWho has a DVB-T Dbox?\n");
 	return buffer[1]+2;
 }
 
-int cell_freq_list_desc(char *buffer)
+int cell_freq_list_desc(char *buffer, FILE *logfd)
 {
 	//printf("Cell-list-descriptor\nWho has a DVB-T Dbox?\n");
 	return buffer[1]+2;
 }
 
-int announcement_support_desc(char *buffer)
+int announcement_support_desc(char *buffer, FILE *logfd)
 {
 	//printf("No announcements\n");
 	return buffer[1]+2;
 }
 
-int service_name_desc(char *buffer, int sid, int tsid, int onid,bool scan_mode)
+int service_name_desc(char *buffer, int sid, int tsid, int onid,bool scan_mode, FILE *logfd)
 {
 	int len = buffer[1];
 	int i=0; 
@@ -263,6 +264,8 @@ int service_name_desc(char *buffer, int sid, int tsid, int onid,bool scan_mode)
 	printf("provider: %s\n",provname.c_str());
 	printf("service: %s\n",servicename.c_str());
 	
+	fprintf(logfd, "provider: %s\n",provname.c_str());
+	fprintf(logfd, "service: %s\n",servicename.c_str());
 	if (scan_mode)
 	{
 #ifdef NVOD_HACK	
@@ -290,7 +293,7 @@ int service_name_desc(char *buffer, int sid, int tsid, int onid,bool scan_mode)
 	return len+2;
 }
 
-int bouquet_name_desc(char *buffer)
+int bouquet_name_desc(char *buffer, FILE *logfd)
 {
 	int len = buffer[1];
 	/*int i = 0;
@@ -306,14 +309,14 @@ int bouquet_name_desc(char *buffer)
 
 
 
-int country_availability_desc(char *buffer)
+int country_availability_desc(char *buffer, FILE *logfd)
 {
   //printf("country_availability_desc to be implemented\n");
   return buffer[1]+2;
 }
 	
 
-int nvod_ref_desc(char *buffer,int tsid,bool scan_mode)
+int nvod_ref_desc(char *buffer,int tsid,bool scan_mode, FILE *logfd)
 {
 	int len = buffer[1];
 	std::string servicename;
@@ -361,37 +364,37 @@ int nvod_ref_desc(char *buffer,int tsid,bool scan_mode)
 	return len+2;
 }
 
-int time_shift_service_desc(char *buffer)
+int time_shift_service_desc(char *buffer, FILE *logfd)
 {
   //printf("Time-shifted service descriptor\n");
   return buffer[1]+2;
 }
 
-int mosaic_desc(char *buffer)
+int mosaic_desc(char *buffer, FILE *logfd)
 {
   //printf("mosaic-descriptor\n");
   return buffer[1]+2;
 }
 
-int ca_ident_desc(char *buffer)
+int ca_ident_desc(char *buffer, FILE *logfd)
 {
   //printf("ca-identifier descriptor\n");
   return buffer[1]+2;
 }
 
-int telephone_desc(char *buffer)
+int telephone_desc(char *buffer, FILE *logfd)
 {
   //printf("Telephone descriptor\n");
   return buffer[1]+2;
 }
 
-int multilingual_service_name_desc(char *buffer)
+int multilingual_service_name_desc(char *buffer, FILE *logfd)
 {
   //printf("Multilingual service name descriptor\nGerman should be enough for us.\n");
   return buffer[1]+2;
 }
 
-int data_broadcast_desc(char *buffer)
+int data_broadcast_desc(char *buffer, FILE *logfd)
 {
   //printf("Data descriptor\n");
   return buffer[1]+2;

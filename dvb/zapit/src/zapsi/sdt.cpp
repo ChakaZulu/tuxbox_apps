@@ -18,7 +18,7 @@
 
 extern std::string curr_chan_name;
 
-int sdt(uint osid, bool scan_mode)
+int sdt(uint osid, bool scan_mode, FILE *logfd)
 {
   struct dmxSctFilterParams flt;
   int demux,pt;
@@ -29,14 +29,17 @@ int sdt(uint osid, bool scan_mode)
   int network_id, tsid;
   int step = 0;
   
+  fprintf(logfd, "Start reading sdt\n");
   while (step < 10)
     {
       step++;
       printf("Reading SDT step %d\n", step);
+      fprintf(logfd, "Reading SDT step %d\n", step);
       
       demux=open(DEMUX_DEV, O_RDWR);
       if (demux<0) {
 	perror("/dev/ost/demux0");
+	fprintf(logfd, "Error opening demux\n");
 	return -1;
       }
       
@@ -72,6 +75,7 @@ int sdt(uint osid, bool scan_mode)
       
       if ((r=read(demux, buffer, 3))<=0)  {
 	perror("[zapit] read sdt");
+	fprintf(logfd, "Error reading first 3 bytes of SDT\n");
 	close(demux);
 	continue;
 	//exit(0);
@@ -83,6 +87,7 @@ int sdt(uint osid, bool scan_mode)
       
       if ((r=read(demux, buffer+3, sec_len))<=0)  {
 	perror("[zapit] read sdt");
+	fprintf(logfd, "Error reading %d bytes of SDT\n", sec_len);
 	close(demux);
 	//exit(0);
 	continue;
@@ -93,13 +98,17 @@ int sdt(uint osid, bool scan_mode)
     }
   
   if (step == 10)
+  {
+  	fprintf(logfd, "To many tries reading SDT. Cancelling.\n");
     return -1;
+    }
   
   tsid = (buffer[3]<<8) | buffer[4];
   printf("TSid: %04x\n",tsid);
   if (scan_mode && tsid !=(int) osid)
     {	
       printf("We are looking for another TSid.. Why does this happen?\n");
+      fprintf(logfd, "Wrong TSID found: %d. Returning -2\n",tsid);
       return -2;
     }
   
@@ -124,52 +133,55 @@ int sdt(uint osid, bool scan_mode)
       if ((int) osid == sid || scan_mode)
 	{
 	  printf("service_id: %x\n", sid); 
+	  fprintf(logfd, "service_id: %x\n", sid); 
+	  
 	  while (desc_tot < desc_len)
 	    {
 	      switch (buffer[current_i+desc_tot])
 		{
 		case 0x42:
-		  desc_tot += stuffing_desc(&buffer[current_i+desc_tot]);
+		  desc_tot += stuffing_desc(&buffer[current_i+desc_tot],logfd);
 		  break;
 		case 0x47:
-		  desc_tot += bouquet_name_desc(&buffer[current_i+desc_tot]);
+		  desc_tot += bouquet_name_desc(&buffer[current_i+desc_tot],logfd);
 		  break;
 		case 0x48: 
-		  desc_tot += service_name_desc(&buffer[current_i+desc_tot],sid,tsid,network_id,scan_mode);
+		  desc_tot += service_name_desc(&buffer[current_i+desc_tot],sid,tsid,network_id,scan_mode,logfd);
 		  break;
 		case 0x49:
-		  desc_tot += country_availability_desc(&buffer[current_i+desc_tot]);
+		  desc_tot += country_availability_desc(&buffer[current_i+desc_tot],logfd);
 		  break;
 		case 0x4a: 
-		  desc_tot += linkage_desc(&buffer[current_i+desc_tot]);
+		  desc_tot += linkage_desc(&buffer[current_i+desc_tot],logfd);
 		  break;
 		case 0x4b:
-		  desc_tot += nvod_ref_desc(&buffer[current_i+desc_tot],tsid,scan_mode);
+		  desc_tot += nvod_ref_desc(&buffer[current_i+desc_tot],tsid,scan_mode,logfd);
 		  break;
 		case 0x4c:
-		  desc_tot += time_shift_service_desc(&buffer[current_i+desc_tot]);
+		  desc_tot += time_shift_service_desc(&buffer[current_i+desc_tot],logfd);
 		  break;
 		case 0x51:
-		  desc_tot += mosaic_desc(&buffer[current_i+desc_tot]);
+		  desc_tot += mosaic_desc(&buffer[current_i+desc_tot],logfd);
 		  break;
 		case 0x53:
-		  desc_tot += ca_ident_desc(&buffer[current_i+desc_tot]);
+		  desc_tot += ca_ident_desc(&buffer[current_i+desc_tot],logfd);
 		  break;
 		case 0x57:
-		  desc_tot += telephone_desc(&buffer[current_i+desc_tot]);
+		  desc_tot += telephone_desc(&buffer[current_i+desc_tot],logfd);
 		  break;
 		case 0x5d:
-		  desc_tot += multilingual_service_name_desc(&buffer[current_i+desc_tot]);
+		  desc_tot += multilingual_service_name_desc(&buffer[current_i+desc_tot],logfd);
 		  break;
 		case 0x5f:
-		  desc_tot += priv_data_desc(&buffer[current_i+desc_tot]);
+		  desc_tot += priv_data_desc(&buffer[current_i+desc_tot],logfd);
 		  break;
 		case 0x64:
-		  desc_tot += data_broadcast_desc(&buffer[current_i+desc_tot]);
+		  desc_tot += data_broadcast_desc(&buffer[current_i+desc_tot],logfd);
 		  break;
 		default:
 		  printf("The descriptor-tag was %02x\n", buffer[current_i+desc_tot]);
 		  desc_tot += buffer[current_i+desc_tot+1]+2;
+		  fprintf(logfd, "Unknown descriptor found: %x\n", buffer[current_i+desc_tot]);
 		}
 	      //printf("Bytes read in description-loop %d\n", desc_tot);
 	    }
@@ -178,5 +190,6 @@ int sdt(uint osid, bool scan_mode)
     }
 
 close(demux);
+fprintf(logfd, "SDT ended\n");
 return 23;
 }

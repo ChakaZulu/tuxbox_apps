@@ -22,12 +22,13 @@ map<uint,channel>::iterator cI;
 extern int found_transponders;
 
 
-int fake_pat(std::map<int,transpondermap> *tmap, int freq, int sr)
+int fake_pat(std::map<int,transpondermap> *tmap, int freq, int sr, FILE *logfd)
 {
 	struct dmxSctFilterParams flt;
 	int demux, pt;
 	struct pollfd dmx_fd;
 	
+	fprintf(logfd, "Starting fake_pat\n");
 	demux=open(DEMUX_DEV, O_RDWR);
   	if (demux<0) {
     		perror("/dev/ost/demux0");
@@ -68,6 +69,7 @@ int fake_pat(std::map<int,transpondermap> *tmap, int freq, int sr)
   		
 		if ((r=read(demux, buffer, 3))<=0)  {
    			perror("[zapit] read Pat");
+   			fprintf(logfd ,"Error reading first 3 bytes from Pat\n");
     			close(demux);
     			return -1;
     		}
@@ -76,6 +78,7 @@ int fake_pat(std::map<int,transpondermap> *tmap, int freq, int sr)
 
     		if ((r=read(demux, buffer+3, sec_len))<=0)  {
     			perror("[zapit] read Pat");
+    			fprintf(logfd ,"Error reading %d bytes from Pat\n", sec_len);
     			close(demux);
     			return -1;
 		}
@@ -85,9 +88,11 @@ int fake_pat(std::map<int,transpondermap> *tmap, int freq, int sr)
 		tsid = (buffer[3]<<8)|buffer[4];
 		//printf("TSID: %04x\n", tsid);
 		(*tmap).insert(std::pair<int,transpondermap>(tsid,transpondermap(tsid, freq, sr, 0)));
+		fprintf(logfd ,"Adding Transponder %x to list\n",tsid);
 		found_transponders++;
 		
 //	}
+	fprintf(logfd ,"Fake_Pat ended\n");
 	return 23;
 }
 

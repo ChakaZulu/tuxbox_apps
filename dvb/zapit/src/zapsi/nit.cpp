@@ -18,7 +18,7 @@
 
 using namespace std;
 
-void nit(int diseqc)
+void nit(int diseqc, FILE *logfd)
 {
 	struct dmxSctFilterParams flt;
 	struct pollfd dmx_fd;
@@ -28,14 +28,17 @@ void nit(int diseqc)
   	int current, sec_len;
   	int step = 0;
   	
+  	fprintf(logfd, "Starting NIT\n");
   	while (step < 10)
   	{
   	step++;
   	printf("Reading NIT step %d\n", step);
+  	fprintf(logfd, "Reading NIT step %d\n", step);
   	
 	demux=open(DEMUX_DEV, O_RDWR);
   	if (demux<0) {
     		perror("/dev/ost/demux0");
+    		fprintf(logfd, "Error opening demux\n");
     		return;
   	}
 
@@ -70,6 +73,7 @@ void nit(int diseqc)
   	
   	if ((r=read(demux, buffer, 3))<=0)  {
    		perror("[zapit] read NIT.");
+   		fprintf(logfd, "Error reading first 3 bytes.\n");
     		close(demux);
     		continue;
     	}
@@ -79,6 +83,7 @@ void nit(int diseqc)
   	
     	if ((r=read(demux, buffer+3, sec_len))<=0)  {
     		perror("[zapit] read NIT.");
+    		fprintf(logfd, "Error reading %d bytes.\n",sec_len);
     		close(demux);
     		continue;
 	}
@@ -88,13 +93,19 @@ void nit(int diseqc)
 	};
 
 	if (step == 10)
+	{
+		fprintf(logfd, "Two many steps reading NIT. Cancelling\n");
 		return;
+	}
+	
 	/*
 	printf("<NIT>\n");
 	printf("Network-ID %04x\n", (buffer[3]<<8)|buffer[4]);
 	printf("section-number: %04x\n", buffer[6]);
 	printf("last section-number: %04x\n", buffer[7]);
 	*/
+	fprintf(logfd, "Network-ID %04x\n", (buffer[3]<<8)|buffer[4]);
+	
 	{
 		int desc_len, loop_len;
 		int tsid = 0;
@@ -108,46 +119,47 @@ void nit(int diseqc)
 			switch (buffer[current])
 			{
 				case 0x40:
-					current += network_name_desc(&buffer[current]);
+					current += network_name_desc(&buffer[current],logfd);
 					break;
 				case 0x41:
-					current += service_list_desc(&buffer[current]);
+					current += service_list_desc(&buffer[current],logfd);
 					break;
 				case 0x42:
-					current += stuffing_desc(&buffer[current]);
+					current += stuffing_desc(&buffer[current],logfd);
 					break;
 				case 0x43:
-					current += sat_deliv_system_desc(&buffer[current],tsid,diseqc);
+					current += sat_deliv_system_desc(&buffer[current],tsid,diseqc,logfd);
 					break;
 				case 0x44:
-					current += cable_deliv_system_desc(&buffer[current],tsid);
+					current += cable_deliv_system_desc(&buffer[current],tsid,logfd);
 					break;
 				case 0x4a:
-					current += linkage_desc(&buffer[current]);
+					current += linkage_desc(&buffer[current],logfd);
 					break;
 				case 0x5a:
-					current += terr_deliv_system_desc(&buffer[current]);
+					current += terr_deliv_system_desc(&buffer[current],logfd);
 					break;
 				case 0x5b:
-					current += multilingual_network_name_desc(&buffer[current]);
+					current += multilingual_network_name_desc(&buffer[current],logfd);
 					break;
 				case 0x5f:
-					current += priv_data_desc(&buffer[current]);
+					current += priv_data_desc(&buffer[current],logfd);
 					break;
 				case 0x62:
-					current += freq_list_desc(&buffer[current]);
+					current += freq_list_desc(&buffer[current],logfd);
 					break;
 				case 0x6c:
-					current += cell_list_desc(&buffer[current]);
+					current += cell_list_desc(&buffer[current],logfd);
 					break;
 				case 0x6d:
-					current += cell_freq_list_desc(&buffer[current]);
+					current += cell_freq_list_desc(&buffer[current],logfd);
 					break;
 				case 0x6e:
-					current += announcement_support_desc(&buffer[current]);
+					current += announcement_support_desc(&buffer[current],logfd);
 					break;
 				default:
 					printf("The descriptor tag was: %02x\n",buffer[current]);
+					fprintf(logfd, "Unknown descriptor found: %x\n", buffer[current]);
 					current += buffer[current+1]+2;
 				}
 			}
@@ -167,6 +179,9 @@ void nit(int diseqc)
 				printf("TS-ID: %x\n",tsid);
 				printf("Original network-id: %x\n", onid);
 				
+				fprintf(logfd, "TS-ID: %x\n",tsid);
+				fprintf(logfd, "Original network-id: %x\n", onid);
+				
 				desc_len = ((buffer[++current]&0xF)<<8)|buffer[++current];
 				//printf("transport_descriptors_length = %d bytes\n",desc_len);
 				++current;
@@ -178,46 +193,47 @@ void nit(int diseqc)
 					switch (buffer[current+desc_tot])
 					  {
 					  case 0x40:
-					    desc_tot += network_name_desc(&buffer[current+desc_tot]);
+					    desc_tot += network_name_desc(&buffer[current+desc_tot],logfd);
 					    break;
 					  case 0x41:
-					    desc_tot += service_list_desc(&buffer[current+desc_tot]);
+					    desc_tot += service_list_desc(&buffer[current+desc_tot],logfd);
 					    break;
 					  case 0x42:
-					    desc_tot += stuffing_desc(&buffer[current+desc_tot]);
+					    desc_tot += stuffing_desc(&buffer[current+desc_tot],logfd);
 					    break;
 					  case 0x43:
-					    desc_tot += sat_deliv_system_desc(&buffer[current+desc_tot],tsid,diseqc);
+					    desc_tot += sat_deliv_system_desc(&buffer[current+desc_tot],tsid,diseqc,logfd);
 					    break;
 					  case 0x44:
-					    desc_tot += cable_deliv_system_desc(&buffer[current+desc_tot],tsid);
+					    desc_tot += cable_deliv_system_desc(&buffer[current+desc_tot],tsid,logfd);
 					    break;
 					  case 0x4a:
-					    desc_tot += linkage_desc(&buffer[current+desc_tot]);
+					    desc_tot += linkage_desc(&buffer[current+desc_tot],logfd);
 					    break;
 					  case 0x5a:
-					    desc_tot += terr_deliv_system_desc(&buffer[current+desc_tot]);
+					    desc_tot += terr_deliv_system_desc(&buffer[current+desc_tot],logfd);
 					    break;
 					  case 0x5b:
-					    desc_tot += multilingual_network_name_desc(&buffer[current+desc_tot]);
+					    desc_tot += multilingual_network_name_desc(&buffer[current+desc_tot],logfd);
 					    break;
 					  case 0x5f:
-					    desc_tot += priv_data_desc(&buffer[current+desc_tot]);
+					    desc_tot += priv_data_desc(&buffer[current+desc_tot],logfd);
 					    break;
 					  case 0x62:
-					    desc_tot += freq_list_desc(&buffer[current+desc_tot]);
+					    desc_tot += freq_list_desc(&buffer[current+desc_tot],logfd);
 					    break;
 					  case 0x6c:
-					    desc_tot += cell_list_desc(&buffer[current+desc_tot]);
+					    desc_tot += cell_list_desc(&buffer[current+desc_tot],logfd);
 					    break;
 					  case 0x6d:
-					    desc_tot += cell_freq_list_desc(&buffer[current+desc_tot]);
+					    desc_tot += cell_freq_list_desc(&buffer[current+desc_tot],logfd);
 					    break;
 					  case 0x6e:
-					    desc_tot += announcement_support_desc(&buffer[current+desc_tot]);
+					    desc_tot += announcement_support_desc(&buffer[current+desc_tot],logfd);
 					    break;
 					  default:
 					    printf("The descriptor tag was: %02x\n",buffer[current+desc_tot]);
+					    fprintf(logfd, "Unknown descriptor found: %x\n", buffer[current+desc_tot]);
 					    current += buffer[current+1+desc_tot]+2;
 					  }
 					//printf("read %d bytes\n",desc_tot);
@@ -234,4 +250,5 @@ void nit(int diseqc)
 	
 	
 	//printf("</NIT>\n");
+	fprintf(logfd, "NIT ended\n");
 }

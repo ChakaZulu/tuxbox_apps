@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.51 2001/12/20 14:31:22 obi Exp $
+  $Id: zapit.cpp,v 1.52 2001/12/22 18:44:25 faralla Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -92,6 +92,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.52  2001/12/22 18:44:25  faralla
+  scanning-log added (in /tmp/zapit_scan.log)
+
   Revision 1.51  2001/12/20 14:31:22  obi
   code for new tuning api can now be used if OLD_TUNER_API is undefined
   in zapit.h and tune.cpp
@@ -1575,7 +1578,7 @@ void start_scan(unsigned short do_diseqc)
     }
 
   ioctl(vid, VIDEO_STOP, false);
-
+	close(vid);
   if ( video>= 0 )
     {
       ioctl(video,DMX_STOP,0);
@@ -1590,7 +1593,7 @@ void start_scan(unsigned short do_diseqc)
       audio = -1;
     }
 
-  close(vid);
+  
 
   if (pthread_create(&scan_thread, 0, start_scanthread,&do_diseqc))
   {
@@ -1598,7 +1601,8 @@ void start_scan(unsigned short do_diseqc)
   	exit(0);
 }
 
-  while (scan_runs == 0);
+  while (scan_runs == 0)
+  	printf("[zapit] waiting for scan to start\n");
 
 }
 
@@ -1998,9 +2002,10 @@ void parse_command()
         start_scan(rmsg.param2);
 
       	status = "00g";
+      	//dprintf("[zapit] sending back a staus %s\n", status);
       	if (send(connfd, status, strlen(status),0) == -1) {
-	perror("[zapit] could not send any return\n");
-	return;
+		perror("[zapit] could not send any return\n");
+		return;
 	}
       break;
       case 'h':
@@ -2009,10 +2014,10 @@ void parse_command()
       	else
       		status = "-0h";
       	if (send(connfd, status, strlen(status),0) == -1) {
-	perror("[zapit] could not send any return\n");
-	return;
+		perror("[zapit] could not send any return\n");
+		return;
 	}
-	if (send(connfd, &curr_sat, sizeof(short),0) == -1)
+		if (send(connfd, &curr_sat, sizeof(short),0) == -1)
 		{
 		perror("[zapit] could not send any return\n");
 		return;
@@ -2307,7 +2312,7 @@ int main(int argc, char **argv) {
 
   system("/usr/bin/killall camd");
   system("cp /var/zapit/last_chan /tmp/zapit_last_chan");
-  printf("Zapit $Id: zapit.cpp,v 1.51 2001/12/20 14:31:22 obi Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.52 2001/12/22 18:44:25 faralla Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
