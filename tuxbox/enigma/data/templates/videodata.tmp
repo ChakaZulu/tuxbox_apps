@@ -9,9 +9,9 @@ function update()
 </head>
 <body onLoad="update()">
 <script>
-	var videoTime = "#VIDEOTIME#";
-	var videoPosition = #VIDEOPOSITION#;
-	var playStatus = "#PLAYSTATUS#";
+	var videoTime = "#PROGRESSMESSAGE1#";
+	var videoTime = "#PROGRESSMESSAGE2#";
+	var videoPosition = #PROGRESSCOMPLETION#;
 </script>
 </body>
 </html>
