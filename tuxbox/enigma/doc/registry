@@ -37,3 +37,6 @@
          repeatDelay
       osd/
           useBigOSD
+      lcd/
+	  brightness
+          contrast
