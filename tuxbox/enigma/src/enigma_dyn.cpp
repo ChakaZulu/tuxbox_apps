@@ -523,14 +523,12 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 	eString command = opt["command"];
 	if (command == "rewind")
 	{
-		// not working... different solution required
-		// eZapMain::getInstance()->startSkip(eZapMain::skipReverse);
+		eZapMain::getInstance()->startSkip(eZapMain::skipReverse);
 	}
 	else
 	if (command == "forward")
 	{
-		// not working... different solution required
-		// eZapMain::getInstance()->startSkip(eZapMain::skipForward);
+		eZapMain::getInstance()->startSkip(eZapMain::skipForward);
 	}
 	else
 	if (command == "stop")
@@ -983,7 +981,7 @@ static eString getLeftNavi(eString mode, bool javascript)
 #endif
 #endif
 #ifdef ENABLE_DYN_ROTOR
-		result += button(110, "Rotor", LEFTNAVICOLOR, pre + "?mode=configRotorConfig" + post);
+		result += button(110, "Rotor", LEFTNAVICOLOR, pre + "?mode=configRotor" + post);
 #endif
 	}
 	else
@@ -2539,6 +2537,14 @@ static eString getContent(eString mode, eString path, eString opts)
 	}
 	else
 #endif
+#endif
+#if ENABLE_DYN_ROTOR
+	if (mode == "configRotor")
+	{
+		result = getTitle("CONFIG: Rotor");
+		result += getConfigRotor();
+	}
+	else
 #endif
 	if (mode == "help")
 	{

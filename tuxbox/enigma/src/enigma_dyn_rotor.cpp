@@ -43,7 +43,7 @@
 
 using namespace std;
 
-eString getRotorConfig(void)
+eString getConfigRotor(void)
 {
 	eString result = readFile(TEMPLATE_DIR + "rotor.tmp");
 	eString tmp;

@@ -4,7 +4,7 @@
 
 class eHTTPDynPathResolver;
 void ezapRotorInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb);
-eString getRotorConfig(void);
+eString getConfigRotor(void);
 
 #endif /* __enigma_dyn_rotor_h */
 #endif
