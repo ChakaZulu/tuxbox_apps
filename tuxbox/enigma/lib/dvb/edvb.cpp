@@ -18,7 +18,6 @@
 #include <qfile.h>
 #include <dbox/info.h>
 #include "eavswitch.h"
-#include "streamwd.h"
 #include "init.h"
 #include "config.h"
 #include <algorithm>
@@ -975,7 +974,6 @@ eDVB::eDVB()
 	changeVolume(1, vol);
 	changeVolume(3, m);
 	
-	streamwd=new eStreamWatchdog();
 	tMHWEIT=0;
 	
 	qDebug("eDVB::eDVB done.");
@@ -983,7 +981,6 @@ eDVB::eDVB()
 
 eDVB::~eDVB()
 {
-	delete streamwd;
 	delete eAVSwitch::getInstance();
 	config.setKey("/elitedvb/audio/volume", volume);
 	config.setKey("/elitedvb/audio/mute", mute);

@@ -8,6 +8,7 @@
 
 #include "ost/video.h"
 #include "edvb.h"
+#include "init.h"
 
 eStreamWatchdog *eStreamWatchdog::instance;
 
@@ -114,3 +115,4 @@ void eStreamWatchdog::reloadSettings()
 	checkstate();
 }
 
+eAutoInitP0<eStreamWatchdog> eStreamWatchdog_init(4, "stream watchdog");

@@ -75,8 +75,6 @@ protected:
 	
 	TDT *tdt;
 	
-	eStreamWatchdog *streamwd;
-	
 public:
 		/** current service */
 	eService *service;	// meta-service
