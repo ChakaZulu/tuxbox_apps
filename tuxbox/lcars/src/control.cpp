@@ -2037,4 +2037,5 @@ void *control::startlistening(void *object)
 		if (c->subAvailable(sub))
 			c->runSub(sub);
 	}
+	return 0;
 }

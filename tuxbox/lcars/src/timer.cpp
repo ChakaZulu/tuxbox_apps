@@ -15,6 +15,11 @@
  ***************************************************************************/
 /*
 $Log: timer.cpp,v $
+Revision 1.10  2002/10/14 01:19:15  woglinde
+
+
+mostly compiler warnings, but I got not all
+
 Revision 1.9  2002/06/02 14:23:36  TheDOC
 some fixes and changes
 
@@ -90,6 +95,7 @@ void* timer::start_timer( void * this_ptr )
 		t->runTimer();
 		sleep(5);
 	}
+	return 0;
 }
 
 void timer::addTimer(time_t starttime, int type, std::string comment, int duration, int channel, std::string audio)

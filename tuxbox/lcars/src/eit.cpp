@@ -15,6 +15,11 @@
  ***************************************************************************/
 /*
 $Log: eit.cpp,v $
+Revision 1.13  2002/10/14 01:19:15  woglinde
+
+
+mostly compiler warnings, but I got not all
+
 Revision 1.12  2002/09/18 17:31:03  TheDOC
 replaced O_RDONLY with O_RDWR on demux-device-open, stupid me
 
@@ -98,6 +103,7 @@ void* eit::start_eitqueue( void * this_ptr )
 		e->executeQueue();
 		next_time = time(0) + 5;
 	}
+	return 0;
 }
 
 eit::eit(settings *s, osd *o, variables *v)

@@ -15,6 +15,11 @@
  ***************************************************************************/
 /*
 $Log: network.cpp,v $
+Revision 1.17  2002/10/14 01:19:15  woglinde
+
+
+mostly compiler warnings, but I got not all
+
 Revision 1.16  2002/06/15 02:33:03  TheDOC
 some changes + bruteforce-channelscan for cable
 
@@ -385,7 +390,7 @@ void *network::startlistening(void *object)
 					}
 					else if (path[2].substr(0, 3) == "epg")
 					{
-						int number = atoi(path[2].substr(4).c_str());
+						//int number = atoi(path[2].substr(4).c_str());
 						write(inbound_connection, headertextok.c_str(), headertextok.length());
 
 						event tmp_event = n->eit_obj->waitForNow();
