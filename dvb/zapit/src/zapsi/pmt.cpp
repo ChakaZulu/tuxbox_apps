@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.39 2004/04/04 20:20:45 obi Exp $
+ * $Id: pmt.cpp,v 1.40 2004/04/04 20:46:17 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -194,6 +194,7 @@ unsigned short parse_ES_info(const unsigned char * const buffer, CZapitChannel *
 	case 0x01:
 	case 0x02:
 		channel->setVideoPid(esInfo->elementary_PID);
+		descramble = true;
 		break;
 
 	case 0x03:
