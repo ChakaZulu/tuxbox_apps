@@ -69,6 +69,7 @@
 #include "driver/fontrenderer.h"
 #include "driver/rcinput.h"
 #include "driver/vcrcontrol.h"
+#include "driver/irsend.h"
 
 #include "gui/widget/menue.h"
 #include "gui/widget/messagebox.h"
@@ -2662,6 +2663,9 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	}
 	else if( msg == NeutrinoMessages::SLEEPTIMER)
 	{
+		CIRSend irs("sleep");
+		irs.Send();
+
 		if(g_settings.shutdown_real)
 			ExitRun();
 		else
@@ -3250,7 +3254,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.362 2002/11/20 17:57:14 Zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.363 2002/11/24 19:55:56 Zwen Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

@@ -64,6 +64,17 @@ den Shutdown abzubrechen.<br>
 </b>Der Sleeptimer fährt die Box je nach Einstellung in den Standby oder
 Deep-Standby.<br>
 1 min. vor dem Runterfahren erfolgt eine Einblendung,<br>
+Existiert die Datei /var/tuxbox/config/sleep.lirc so werden die darin enthaltenen 
+lirc-Kommandos gesendet (z.B. zum Auschalten des TV). Dazu muss lirc gestartet 
+und konfiguriert sein (siehe VCR Recording doku).
+Syntax der sleep.lirc Datei (pro Zeile ein Kommando, es sind mehrere Kommandos möglich):
+<PRE><device_name> <ir_code> (<dauer_in_ms>)
+device_name: Name der Fernsteuerung im lirc-config file
+ir_code: Name der Taste im lirc-config file
+dauer_in_ms: Dauer in ms (1/1000 sec), die das Signal gesendet werden soll, optional, 
+             falls nicht vorhanden, wird das Signal 1 mal gesendet
+Bsp.: sony_tv standby 500
+      grundig power</pre>
 <br>
 <b>REMINDER </b>(Erinnerung)<b>:</b><br>
 Dieser Timer blendet einen frei wählbaren Hinweistext auf dem Bildschirm
