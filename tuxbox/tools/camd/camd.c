@@ -1,5 +1,5 @@
 /*
- * $Id: camd.c,v 1.3 2002/07/15 13:14:12 obi Exp $
+ * $Id: camd.c,v 1.4 2002/07/17 02:14:37 obi Exp $
  *
  * (C) 2001, 2002 by gillem, Hunz, kwon, tmbinc, TripleDES, obi
  *
@@ -515,7 +515,12 @@ int parse_ca_pmt (const unsigned char * buffer, const unsigned int length)
 		{
 			pmt->program_info->descriptor->descriptor_length = buffer[i + 8];
 			pmt->program_info->descriptor->ca_system_id = (buffer[i + 9] << 8) | buffer[i + 10];
-			pmt->program_info->descriptor->ca_pid = (buffer[i + 11] << 8) | buffer[i + 12];
+			pmt->program_info->descriptor->ca_pid = ((buffer[i + 11] & 0x1F) << 8)| buffer[i + 12];
+
+#if 0
+			printf("ca_system_id: %04x\n", pmt->program_info->descriptor->ca_system_id);
+			printf("ca_pid: %04x\n", pmt->program_info->descriptor->ca_pid);
+#endif
 
 			for (j = 0; j < caid_count; j++)
 			{
@@ -569,14 +574,19 @@ int parse_ca_pmt (const unsigned char * buffer, const unsigned int length)
 			{
 				pmt->es_info->program_info->descriptor->descriptor_length = buffer[i + j + 7];
 				pmt->es_info->program_info->descriptor->ca_system_id = (buffer[i + j + 8] << 8) | buffer[i + j + 9];
-				pmt->es_info->program_info->descriptor->ca_pid = (buffer[i + j + 10] << 8) | buffer[i + j + 11];
+				pmt->es_info->program_info->descriptor->ca_pid = ((buffer[i + j + 10] & 0x1F) << 8) | buffer[i + j + 11];
+
+#if 0
+				printf("ca_system_id: %04x\n", pmt->es_info->program_info->descriptor->ca_system_id);
+				printf("ca_pid: %04x\n", pmt->es_info->program_info->descriptor->ca_pid);
+#endif
 
 				for (k = 0; k < caid_count; k++)
 				{
-					if (caid[k] == pmt->program_info->descriptor->ca_system_id)
+					if (caid[k] == pmt->es_info->program_info->descriptor->ca_system_id)
 					{
-						service.caID = pmt->program_info->descriptor->ca_system_id;
-						service.ecmPID = pmt->program_info->descriptor->ca_pid;
+						service.caID = pmt->es_info->program_info->descriptor->ca_system_id;
+						service.ecmPID = pmt->es_info->program_info->descriptor->ca_pid;
 						break;
 					}
 				}
@@ -723,7 +733,14 @@ void handlesockmsg (unsigned char * buffer, ssize_t len, int connfd)
 				// ca_pmt
 				else if (buffer[2] == 0x32)
 				{
-					parse_ca_pmt(buffer + 3 + get_length_field_size(length), length);
+					if ((3 + get_length_field_size(length) + length) == len)
+					{
+						parse_ca_pmt(buffer + 3 + get_length_field_size(length), length);
+					}
+					else
+					{
+						printf("[camd] ca_pmt: invalid length\n");
+					}
 				}
 
 				else

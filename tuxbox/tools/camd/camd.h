@@ -1,5 +1,5 @@
 /*
- * $Id: camd.h,v 1.1 2002/07/15 13:14:12 obi Exp $
+ * $Id: camd.h,v 1.2 2002/07/17 02:14:37 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -41,7 +41,8 @@ typedef struct ca_descriptor_s
 	unsigned char descriptor_tag		: 8;
 	unsigned char descriptor_length		: 8;
 	unsigned short ca_system_id		: 16;
-	unsigned short ca_pid			: 16;
+	unsigned char reserved			: 3;
+	unsigned short ca_pid			: 13;
 	unsigned char * private_data_byte;
 } __attribute__ ((packed)) ca_descriptor;
 
