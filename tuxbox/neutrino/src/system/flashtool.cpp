@@ -37,6 +37,7 @@
 
 #include <dbox/fp.h>
 
+#include <driver/encoding.h>
 #include <global.h>
 
 
