@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.335 2003/11/21 19:46:11 alexw Exp $
+ * $Id: zapit.cpp,v 1.336 2003/11/21 19:59:11 alexw Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -21,8 +21,6 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  */
-
-#define UPDATE_PMT 1
 
 /* system headers */
 #include <csignal>
@@ -1549,7 +1547,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.335 2003/11/21 19:46:11 alexw Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.336 2003/11/21 19:59:11 alexw Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
