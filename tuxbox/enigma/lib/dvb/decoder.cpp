@@ -422,6 +422,12 @@ int Decoder::Set()
 	return 0;
 }
 
+void Decoder::setVideoFormat( int format )
+{
+	if (ioctl(fd.video, VIDEO_SET_DISPLAY_FORMAT, format))
+		perror("VIDEO SET DISPLAY FORMAT:");
+}
+
 void Decoder::addCADescriptor(__u8 *descriptor)
 {
 	memcpy(parms.descriptors+parms.descriptor_length, descriptor, descriptor[1]+2);

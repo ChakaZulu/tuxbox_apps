@@ -33,6 +33,7 @@ public:
 	static void addCADescriptor(__u8 *descriptor);
 	static int Set();
 	static void flushBuffer() { parms.flushbuffer=1; }
+	static void setVideoFormat( int format );
 };
 
 #endif

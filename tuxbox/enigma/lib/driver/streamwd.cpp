@@ -92,13 +92,6 @@ void eStreamWatchdog::reloadSettings()
 	eDebug("Aratio changed");			
 		/*emit*/ AspectRatioChanged(isanamorph);
 
-	int fd;
-	if ((fd = open("/dev/dvb/card0/video0",O_RDWR)) <= 0)
-	{
-		perror("open");
-		return;
-	}
-
 	int videoDisplayFormat=VIDEO_LETTER_BOX;
 	int doanamorph=0;
 	unsigned int pin8;
@@ -119,12 +112,7 @@ void eStreamWatchdog::reloadSettings()
 		break;
 	}
 
-	if (ioctl(fd, VIDEO_SET_DISPLAY_FORMAT, videoDisplayFormat))
-	{
-		perror("VIDEO SET DISPLAY FORMAT:");
-		return;
-	}
-	close(fd);
+	Decoder::setVideoFormat( videoDisplayFormat );
 
 	eAVSwitch::getInstance()->setAspectRatio(doanamorph?r169:r43);
 }
