@@ -75,6 +75,7 @@ lib/gdi/Makefile
 lib/gui/Makefile
 lib/socket/Makefile
 lib/system/Makefile
+lib/picviewer/Makefile
 po/Makefile
 src/Makefile
 ])
