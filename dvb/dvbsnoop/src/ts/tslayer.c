@@ -1,12 +1,22 @@
 /*
-$Id: tslayer.c,v 1.4 2003/10/24 22:17:24 rasc Exp $
+$Id: tslayer.c,v 1.5 2003/11/24 23:52:18 rasc Exp $
 
    -- Transport Stream Decode/Table section
 
-   (c) rasc
+   
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2003   Rainer.Scherg@gmx.de
+
+
+
 
 
 $Log: tslayer.c,v $
+Revision 1.5  2003/11/24 23:52:18  rasc
+-sync option, some TS and PES stuff;
+dsm_addr inactive, may be wrong - due to missing ISO 13818-6
+
 Revision 1.4  2003/10/24 22:17:24  rasc
 code reorg...
 
@@ -60,11 +70,18 @@ void decodeTS_buf (u_char *b, int len, int pid)
  TS_PackLayer  t;
  int           n;
 
+
+
+ t.sync_byte 			 = b[0];
+
+ if (t.sync_byte != 0x47) {
+     out_nl (3," SyncByte is wrong (= no TS)!!!\n");
+     return;
+ }
  if (len != 188) {
-   out_nl (3,"Should the TS packet length not be 188?\n");
+   out_nl (3,"Fixed packet length is wrong (not 188)!!!\n");
  }
  
- t.sync_byte 			 = b[0];
  t.transport_error_indicator	 = getBits (b, 0, 8, 1);
  t.payload_unit_start_indicator	 = getBits (b, 0, 9, 1);
  t.transport_priority		 = getBits (b, 0,10, 1);
@@ -72,6 +89,7 @@ void decodeTS_buf (u_char *b, int len, int pid)
  t.transport_scrambling_control	 = getBits (b, 0,24, 2);
  t.adaption_field_control	 = getBits (b, 0,26, 2);
  t.continuity_counter		 = getBits (b, 0,28, 4);
+
 
 
  out_SB_NL (3,"Sync-Byte: ",t.sync_byte);

@@ -1,15 +1,23 @@
 /*
-$Id: dmx_pes.c,v 1.9 2003/10/24 22:45:05 rasc Exp $
+$Id: dmx_pes.c,v 1.10 2003/11/24 23:52:16 rasc Exp $
 
- -- (c) 2001 rasc
  -- PE Streams
  --  For more information please see:
  --  ISO 13818 (-1) and ETSI 300 468
 
- -- Verbose Level >= 1
+
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2003   Rainer.Scherg@gmx.de
+
+
 
 
 $Log: dmx_pes.c,v $
+Revision 1.10  2003/11/24 23:52:16  rasc
+-sync option, some TS and PES stuff;
+dsm_addr inactive, may be wrong - due to missing ISO 13818-6
+
 Revision 1.9  2003/10/24 22:45:05  rasc
 code reorg...
 
@@ -55,6 +63,12 @@ dvbsnoop v0.7  -- Commit to CVS
 
 #define PES_BUF_SIZE  (256 * 1024)
 #define READ_BUF_SIZE (2 * 64 * 1024)  // larger as 64KB !!
+
+
+
+
+static long pes_UnsyncRead (int fd, u_char *buf, long len);
+static long pes_SyncRead   (int fd, u_char *buf, long len, long *skipped_bytes);
 
 
 
@@ -128,22 +142,18 @@ int  doReadPES (OPTION *opt)
 
   count = 0;
   while (1) {
-    long    n,n1;
-    long    l;
+    long    n;
+    long    skipped_bytes = 0;
 
 
-   /*
-     -- read first 6 bytes to get length of Packet
-     -- read rest ...
-   */
+    /*
+      -- Read PES packet
+     */
 
-    n = read(fd,buf,6);
-    if (n == 6) {
-        l = (buf[4]<<8) + buf[5];
-	if (l > 0) {
-           n1 = read(fd, buf+6, (unsigned int) l );
-           n = (n1 < 0) ? n1 : 6+n1;
-	}
+    if (opt->packet_header_sync) {
+    	n = pes_SyncRead(fd,buf,sizeof(buf), &skipped_bytes);
+    } else {
+    	n = pes_UnsyncRead(fd,buf,sizeof(buf));
     }
 
 
@@ -172,6 +182,9 @@ int  doReadPES (OPTION *opt)
        out_nl (1,"PES-Packet: %08ld   PID: %u (0x%04x), Length: %d (0x%04x)",
 		count, opt->pid,opt->pid,n,n);
        out_receive_time (1, opt);
+       if (skipped_bytes) {
+	       out_nl (1,"Syncing PES... (%ld bytes skipped)",skipped_bytes);
+       }
        out_nl (1,"---------------------------------------------------------");
 
 
@@ -218,6 +231,96 @@ int  doReadPES (OPTION *opt)
 }
 
 
+
+
+/*
+  -- read PES packet (unsynced)
+  -- return: len // read()-return code
+*/
+
+static long pes_UnsyncRead (int fd, u_char *buf, long len)
+
+{
+    long    n,n1;
+    long    l;
+
+
+    /*
+     -- read first 6 bytes to get length of Packet
+     -- read rest ...
+    */
+
+    n = read(fd,buf,6);
+    if (n == 6) {
+        l = (buf[4]<<8) + buf[5];		// PES packet size...
+
+	if (l > 0) {
+           if ( (l+6) > len) return -1;		// prevent buffer overflow
+
+           n1 = read(fd, buf+6, (unsigned int) l );
+           n = (n1 < 0) ? n1 : 6+n1;
+	}
+    }
+
+
+    return n;
+}
+
+
+
+
+/*
+  -- read PES packet (Synced)
+  -- return: len // read()-return code
+*/
+
+static long pes_SyncRead (int fd, u_char *buf, long len, long *skipped_bytes)
+
+{
+    long    n,n1;
+    long    l;
+
+    
+
+    // -- simple PES sync... seek for 0x000001 (PES_SYNC_BYTE)
+    // -- $$$ Q: has this to be byteshifted or bit shifted???
+    // -- $$$ to be improved:
+
+    *skipped_bytes = 0;
+    buf[0] = 0xff;				// illegal bytes
+    buf[1] = 0xff;
+    while (1) {
+    	n = read(fd,buf+2,1);
+	if (n <= 0) return n;			// error or strange, abort
+
+	// -- sync found ? 0x000001
+	if (buf[0] == 0x00 && buf[1] == 0x00 && buf[2] == 0x01) break;
+
+	buf[0] = buf[1];			//  -- shift buffer  (byte-shifter)
+	buf[1] = buf[2];
+	(*skipped_bytes)++;			// sync skip counter
+    }
+
+
+    // -- Sync found!
+    // -- read more 3 bytes (streamID and packet length)
+    // -- read rest ...
+
+    n = read(fd,buf+3,3);
+    if (n == 3) {
+        l = (buf[4]<<8) + buf[5];		// PES packet size...
+
+	if (l > 0) {
+           if ( (l+6) > len) return -1;		// prevent buffer overflow
+
+           n1 = read(fd, buf+6, (unsigned int) l );
+           n = (n1 < 0) ? n1 : 6+n1;		// we already read 3+3 bytes
+	}
+    }
+
+
+    return n;
+}
 
 
 

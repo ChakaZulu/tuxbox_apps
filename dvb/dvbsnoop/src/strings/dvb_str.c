@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.25 2003/11/24 14:16:07 obi Exp $
+$Id: dvb_str.c,v 1.26 2003/11/24 23:52:18 rasc Exp $
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -15,6 +15,10 @@ $Id: dvb_str.c,v 1.25 2003/11/24 14:16:07 obi Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.26  2003/11/24 23:52:18  rasc
+-sync option, some TS and PES stuff;
+dsm_addr inactive, may be wrong - due to missing ISO 13818-6
+
 Revision 1.25  2003/11/24 14:16:07  obi
 - corrected transport scrambling control bits according to ETSI ETR 289
 - fixed lots of broken strings
@@ -163,7 +167,10 @@ char *dvbstrTableID (u_int id)
      {  0x01, 0x01,  "conditional_access_section" },
      {  0x02, 0x02,  "program_map_section" },
      {  0x03, 0x03,  "transport_stream_description_section" },
-      {  0x04, 0x38,  "ITU-T Rec. H.222.0|ISO/IEC13818 reserved" },
+     {  0x04, 0x04,  "ISO_IEC_14496_scene_description_section" },	/* $$$ TODO */
+     {  0x05, 0x05,  "ISO_IEC_14496_object_description_section" },	/* $$$ TODO */
+      {  0x06, 0x37,  "ITU-T Rec. H.222.0|ISO/IEC13818 reserved" },
+      {  0x38, 0x38,  "DSM-CC - reserved " },				/* $$$ ??? TODO */
       {  0x39, 0x39,  "DSM-CC - addressable sections" },		/* $$$ ??? TODO */
       {  0x3a, 0x3a,  "DSM-CC - multiprotocol encapsulated data" },		/* $$$ ??? TODO */
       {  0x3b, 0x3b,  "DSM-CC - U-N messages (DSI or DII)" },
@@ -563,7 +570,7 @@ char *dvbstrStream_TYPE (u_int flag)
 
   STR_TABLE  Table[] = {
 	  // -- updated 2003-10-17  from H.220
-	  // -- updated 2003-11-04  from ATSC Code_Point
+	  // -- updated 2003-11-04  from ATSC / ISO13818-6AMD1-2000
      {  0x00, 0x00,  "ITU-T | ISO-IE Reserved" },
      {  0x01, 0x01,  "ISO/IEC 11172 Video" },
      {  0x02, 0x02,  "ITU-T Rec. H.262 | ISO/IEC 13818-2 Video | ISO/IEC 11172-2 constr. parameter video stream" },
@@ -1883,14 +1890,17 @@ char *dvbstrPESstream_ID (u_int i)
 
 /*
   -- PES Scrambling CTRL   ISO 13818-1  2.4.3.7
-*/
+  --  --> ETR 289  5.1
+ */
 
 char *dvbstrPESscrambling_ctrl_TYPE (u_int i)
 
 {
   STR_TABLE  Table[] = {
      {  0x00, 0x00,  "not scrambled" },
-     {  0x01, 0x03,  "user defined (scrambled?)" },
+     {  0x01, 0x01,  "Reserved for future DVB use" },
+     {  0x02, 0x02,  "PES packet scrambled with Even Key" },
+     {  0x03, 0x03,  "PES packet scrambled with Odd Key" },
      {  0,0, NULL }
   };
 

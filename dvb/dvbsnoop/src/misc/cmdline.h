@@ -3,7 +3,7 @@
  -- (c) 2001 rasc
 
 
-$Id: cmdline.h,v 1.4 2003/11/01 17:05:46 rasc Exp $
+$Id: cmdline.h,v 1.5 2003/11/24 23:52:17 rasc Exp $
 
 
 */
@@ -20,10 +20,11 @@ enum TIME_MODE    {NO_TIME, FULL_TIME, DELTA_TIME};
 
 typedef struct _OPTIONS {
   int         packet_mode;
+  int         packet_header_sync;	// Try to do a softsync of packet sync bytes
   int         printhex;
   int         printdecode;
   int         binary_out;
-  char        *inpPidFile;	// read from file instead of dmux if not NULL
+  char        *inpPidFile;		// read from file instead of dmux if not NULL
   int         help;
   char        *devDemux;
   char        *devDvr;

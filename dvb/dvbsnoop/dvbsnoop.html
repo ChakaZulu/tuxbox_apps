@@ -183,6 +183,16 @@ make
 		  <TD>No CRC check when reading 'sec' [-nocrc]</TD> 
 		</TR> 
 		<TR> 
+		  <TD> -sync[-nosnyc]</TD> 
+		  <TD>&nbsp;</TD> 
+		  <TD>Simple packet header sync when reading 'ts' or 'pes' </TD> 
+		</TR> 
+		<TR> 
+		  <TD> -nosync</TD> 
+		  <TD>&nbsp;</TD> 
+		  <TD>No header sync when reading 'ts' or 'pes' [-nosnyc]</TD> 
+		</TR> 
+		<TR> 
 		  <TD>-n count</TD> 
 		  <TD></TD> 
 		  <TD>receive count packets (0=no limit) [-n 0]</TD> 
@@ -222,6 +232,11 @@ make
 		  <TD>-t[n|d|f]</TD> 
 		  <TD>&nbsp;</TD> 
 		  <TD>print timestamp (no, delta, full) [-tf] </TD> 
+		</TR> 
+		<TR> 
+		  <TD>-HCP</TD> 
+		  <TD>&nbsp;</TD> 
+		  <TD>hide copyright and program info header at program start</TD> 
 		</TR> 
 	 </TABLE> 
 	 <P>(default values are in square brackets...)</P> 
@@ -397,6 +412,122 @@ Current_next_indicator: 1 (0x01)
 		</TR> 
 	 </TABLE> 
 	 <P></P> 
+	 <H4>dvbsnoop -n 1 -nph 0x12</H4> 
+	 <TABLE CELLPADDING="10"> 
+		<TR> 
+		  <TD BGCOLOR="#e0e0e0"> 
+			 <PRE>~/bin &gt; ./dvbsnoop -n 1 -nph 0x12
+dvbsnoop  Vers. 1.1.7   -- http://dvbsnoop.sourceforge.net/ 
+
+---------------------------------------------------------
+SECT-Packet: 00000001   PID: 18 (0x0012), Length: 185 (0x00b9)
+Time received: Tue 2003-11-11  00:02:22.485
+---------------------------------------------------------
+PID:  18 (0x0012)
+EIT-decoding....
+Table_ID: 79 (0x4f)  [= event_information_section - other transport stream, present/following]
+section_syntax_indicator: 1 (0x01)
+reserved_1: 1 (0x01)
+reserved_2: 3 (0x03)
+Section_length: 182 (0x00b6)
+Service_ID: 28206 (0x6e2e)  [=  --&gt; refers to PMS program_number]
+reserved_3: 3 (0x03)
+Version_number: 15 (0x0f)
+Current_next_indicator: 1 (0x01)
+Section_number: 1 (0x01)
+Last_Section_number: 1 (0x01)
+Transport_stream_ID: 1073 (0x0431)
+Original_network_ID: 1 (0x0001)  [= Astra Satellite Network 19,2&deg;E | Soci&eacute;t&eacute; Europ&eacute;enne des Satellites]
+Segment_last_Section_number: 1 (0x01)
+Last_table_id: 79 (0x4f)  [= event_information_section - other transport stream, present/following]
+    
+    Event_ID: 25605 (0x6405)
+    Start_time: 0xceda010500 (=2003-11-11 01:05:00 [UTC])
+    Duration: 0x0003000 (= 00:30:00 [UTC])
+    Running_status: 1 (0x01)  [= not running]
+    Free_CA_mode: 0 (0x00)  [= unscrambled]
+    Descriptors_loop_length: 155 (0x9b)
+        
+        DVB-DescriptorTag: 77 (0x4d)  [= short_event_descriptor]
+        Descriptor_length: 16 (0x10)
+          ISO639_2_language_code:  deu
+        Event_name_length: 11 (0x0b)
+        Event_name: "Abendschau"  -- Charset: Latin alphabet no. 5
+        Text_length: 0 (0x00)
+        Text: ""
+        
+        DVB-DescriptorTag: 80 (0x50)  [= component_descriptor]
+        Descriptor_length: 6 (0x06)
+        reserved_1: 15 (0x0f)
+        Stream_content: 1 (0x01)
+        Component_type: 1 (0x01)
+           == Content&amp;Component: (= video, 4:3  aspect ratio, 25 Hz)
+        Component_tag: 1 (0x01)
+        ISO639_2_language_code:  deu
+        Component-Description: ""
+        
+        DVB-DescriptorTag: 80 (0x50)  [= component_descriptor]
+        Descriptor_length: 6 (0x06)
+        reserved_1: 15 (0x0f)
+        Stream_content: 2 (0x02)
+        Component_type: 3 (0x03)
+           == Content&amp;Component: (= audio, stereo (2 channels))
+        Component_tag: 2 (0x02)
+        ISO639_2_language_code:  deu
+        Component-Description: ""
+        
+        DVB-DescriptorTag: 84 (0x54)  [= content_descriptor]
+        Descriptor_length: 6 (0x06)
+            Content_nibble_level_1: 2 (0x02)
+            Content_nibble_level_2: 0 (0x00)
+               [= news/current affairs (general)]
+            User_nibble_1: 0 (0x00)
+            User_nibble_2: 0 (0x00)
+            
+            Content_nibble_level_1: 8 (0x08)
+            Content_nibble_level_2: 0 (0x00)
+               [= social/political issues/economics (general)]
+            User_nibble_1: 0 (0x00)
+            User_nibble_2: 0 (0x00)
+            
+            Content_nibble_level_1: 11 (0x0b)
+            Content_nibble_level_2: 15 (0x0f)
+               [= user defined]
+            User_nibble_1: 2 (0x02)
+            User_nibble_2: 0 (0x00)
+            
+            
+        DVB-DescriptorTag: 78 (0x4e)  [= extended_event_descriptor]
+        Descriptor_length: 85 (0x55)
+        Descriptor_number: 0 (0x00)
+        Last_descriptor_number: 0 (0x00)
+        ISO639_2_language_code:  deu
+        Length_of_items: 0 (0x00)
+            
+        Text_length: 79 (0x4f)
+        Text: "* Sondersitzung Abgeordnetenhauses&lt;br&gt;* Untreue im Amt&lt;br&gt;* S-Bahnhof Kolonnenstra&szlig;e"  -- Charset: Latin alphabet no. 5
+        
+        DVB-DescriptorTag: 105 (0x69)  [= PDC_descriptor]
+        Descriptor_length: 3 (0x03)
+        reserved_1: 15 (0x0f)
+        Programme_identification_label: 0x5d805 [= month=11  day=11   hour=0  min=5]
+        
+        DVB-DescriptorTag: 95 (0x5f)  [= private_data_specifier_descriptor]
+        Descriptor_length: 4 (0x04)
+        PrivateDataSpecifier: 5 (0x00000005)  [= ARD, ZDF, ORF]
+        
+        DVB-DescriptorTag: 130 (0x82)  [= User defined]
+        Descriptor_length: 13 (0x0d)
+        Descriptor-Data:
+          0000:   0  0  :  0  5  1  1  .  1  1  #  0  0 
+          0000:  30 30 3a 30 35 31 31 2e 31 31 23 30 30 
+CRC: 3952000829 (0xeb8ebf3d)
+==========================================================
+
+</PRE> </TD> 
+		</TR> 
+	 </TABLE> 
+	 <P></P> 
 	 <H4>dvbsnoop -n 200 -s ts -b 0x00 &gt; ts-stream.pid0x1000.file</H4> 
 	 <P>Dump 200 packets of PID 0x00 in transport stream mode to an image
 		file.<BR>The raw datastream will be dumped in the specified stream mode (PES,
@@ -410,15 +541,17 @@ Current_next_indicator: 1 (0x01)
 	 <P><B>dvbsnoop tries to decode every data it gets....</B><BR>E.g. if you
 		try to decode a video or audio stream in section mode - dvbsnoop may assume a
 		section table and will decode wrong data. In this case the decoding will be
-		garbage! Using the -crc option should prevent this (if supported at
-		hardware/driver level).<BR><BR><B>Bugs and wrong decoding:</B><BR>Currently I
-		do not have the ISO 13818-6 (DSM-CC), so I try to get these information out of
-		other documents, which are freely available. Unfortunatly these document are
-		describing only a certain parts of the data carousel, so missunderstandings by
-		me may be possible - If you see any odd output, <B>please report</B> this. If
-		you have the ISO 13818-6:1998 to spare, I would be glad to have a look on it.
-		(340 CHF at www.iso.ch is very expensive for a small open source
-		project...).<BR></P>
+		garbage! Using the '-crc' option should prevent this (if supported at
+		hardware/driver level). Also the '-sync' option is very helpfull, when using
+		'-s pes' or '-s ts'. The '-sync' option tries to find TS or PES packet start
+		sync bytes before decoding...<BR><BR><B>Bugs and wrong
+		decoding:</B><BR>Currently I do not have the ISO 13818-6 (DSM-CC), so I try to
+		get these information out of other documents, which are freely available.
+		Unfortunatly these document are describing only a certain parts of the data
+		carousel, so missunderstandings by me may be possible - If you see any odd
+		output, <B>please report</B> this. If you have the ISO 13818-6:1998 to spare, I
+		would be glad to have a look on it. (340 CHF at www.iso.ch is very expensive
+		for a small open source project...).<BR></P> 
 	 <P><BR><BR><BR></P> 
 	 <H2>Related Topic and Links</H2> 
 	 <P>Please visit the following websites for more information:</P> 
@@ -444,8 +577,8 @@ Current_next_indicator: 1 (0x01)
 			 HREF="http://www.tuxbox.org">http://www.tuxbox.org</A></TD> 
 		  <TD>&nbsp;</TD> 
 		  <TD>Website for linux on a <B><I>dbox2</I></B> (a set top box mainly
-			 sold in Europe or provided by the German pay tv provider "Premiere").<BR> Here
-			 you will also find a support forum for linux@dbox2.</TD> 
+			 sold/"provided" in Europe).<BR> Here you will also find a support forum for
+			 linux@dbox2.</TD> 
 		</TR> 
 		<TR> 
 		  <TD VALIGN="TOP"><B><A
@@ -480,7 +613,12 @@ Current_next_indicator: 1 (0x01)
 		<TR> 
 		  <TD><A HREF="http://www.etsi.org">http://www.etsi.org</A></TD> 
 		  <TD>&nbsp;</TD> 
-		  <TD>Standards documents</TD> 
+		  <TD>Standards documents: e.g. EN 300 468</TD> 
+		</TR> 
+		<TR> 
+		  <TD><A HREF="http://www.iso.ch">http://www.iso.ch</A></TD> 
+		  <TD>&nbsp;</TD> 
+		  <TD>Standards documents: e.g. ISO/IEC 13818-1, ISO/IEC 13818-6</TD> 
 		</TR> 
 		<TR> 
 		  <TD VALIGN="TOP">irc:#dbox2</TD> 
@@ -509,12 +647,13 @@ Current_next_indicator: 1 (0x01)
 		  <TD>&nbsp;</TD> 
 		  <TD>dvbsak is a general-purpose Digital Video Broadcasting library with
 			 tools. </TD> 
-		</TR>
-		<TR>
+		</TR> 
+		<TR> 
 		  <TD VALIGN="TOP"><A
 			 HREF="http://ardmore.net/~thepaces/vk_tools/">http://ardmore.net/~thepaces/vk_tools/</A></TD>
-		  <TD>&nbsp;</TD>
-		  <TD>MPEG analyzing tool</TD>
+		  
+		  <TD>&nbsp;</TD> 
+		  <TD>MPEG analyzing tool</TD> 
 		</TR> 
 		<TR> 
 		  <TD VALIGN="TOP"><A
@@ -535,17 +674,25 @@ Current_next_indicator: 1 (0x01)
 		cvs.berlios.de (German sourceforge clone) to <B><A
 		HREF="http://cvs.tuxbox.org/">cvs.tuxbox.org</A></B>! This was necessary due to
 		uptime problems at <A HREF="http://www.berlios.de">berlios.de</A>.</P> 
-	 <P><BR></P> 
+	 <P><BR><BR></P> 
 	 <H2>Thanks...</H2> 
 	 <P><B>Thanks</B> a lot to all the members and developers of the
 		tuxbox@dbox2 project!!!<BR>These heros do great support and also bugfixing -
-		see the history information in the source!! ;-)<BR></P> 
+		see the history information in the source!! Special thanks to obi...
+		;-)<BR></P> 
 	 <P><BR><BR></P> 
 	 <H2>Where to send bugreports, requests?</H2> 
 	 <P>Please send bugreports with a detailed description to: &nbsp;&nbsp;
 		<A
 		 HREF="mailto:rasc@users.sourceforge.net?DVBSNOOP - Bugreport...">rasc@users.sourceforge.net</A><BR>Do
 		NOT send saved stream files or large files without permission via email!</P> 
-	 <P></P> 
-	 <P><BR><BR><BR>(c) 2001-2003 Rainer Scherg<BR></P> </BODY>
+	 <P><BR><BR></P>
+	 <H2>Some keywords...</H2>
+	 <P>DVB stream analyzer, mpeg stream analyzer, ts stream analyzer, MPEG,
+		MPG, descriptor, digital television, satellite TV, cable TV, dvb-c, dvb-s,
+		dvb-t, MHP, DSM-CC, SI, PES, TOT, PAT, PMT, SDT, EIT, NIT, TDST, RST, SIT, DIT,
+		BAT, EMM, ECM, SI Tables, SSU, datagram, sections, transport stream analyzer,
+		packet elementary stream, DEMUX, ISO/IEC 13818-1, ISO/IEC 13818-6, ETSI EN 300
+		468, ETSI EN 301 162, ETSI TR 102 006, ITU-T H.220,</P> 
+	 <P><BR><BR><BR><BR>(c) 2001-2003 Rainer Scherg<BR><BR></P> </BODY>
 </HTML>

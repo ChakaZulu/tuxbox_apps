@@ -1,5 +1,5 @@
 /*
-$Id: datagram.c,v 1.8 2003/11/09 22:54:16 rasc Exp $
+$Id: datagram.c,v 1.9 2003/11/24 23:52:15 rasc Exp $
 
    DATAGRAM section
    DSM-CC Data Carousel  EN 301 192 
@@ -8,6 +8,10 @@ $Id: datagram.c,v 1.8 2003/11/09 22:54:16 rasc Exp $
 
 
 $Log: datagram.c,v $
+Revision 1.9  2003/11/24 23:52:15  rasc
+-sync option, some TS and PES stuff;
+dsm_addr inactive, may be wrong - due to missing ISO 13818-6
+
 Revision 1.8  2003/11/09 22:54:16  rasc
 no message
 
@@ -38,6 +42,15 @@ Revision 1.1  2003/10/19 22:22:58  rasc
 #include "misc/hexprint.h"
 #include "misc/output.h"
 
+
+
+
+/*
+ * $$$$ TODO  The following is complete GAGA! 
+ *  ATSC says tableID 0x3F EN
+ *  The following is a private_indicator == 0x01
+ *    DATAGRAM (private Data) section!!! ????
+ */
 
 
 

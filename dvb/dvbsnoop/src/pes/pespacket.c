@@ -1,12 +1,21 @@
 /*
-$Id: pespacket.c,v 1.10 2003/11/09 20:48:35 rasc Exp $
+$Id: pespacket.c,v 1.11 2003/11/24 23:52:17 rasc Exp $
 
    -- PES Decode/Table section
 
-   (c) rasc
+
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2003   Rainer.Scherg@gmx.de
+
+
 
 
 $Log: pespacket.c,v $
+Revision 1.11  2003/11/24 23:52:17  rasc
+-sync option, some TS and PES stuff;
+dsm_addr inactive, may be wrong - due to missing ISO 13818-6
+
 Revision 1.10  2003/11/09 20:48:35  rasc
 pes data packet (DSM-CC)
 
@@ -59,7 +68,7 @@ void PES_data_packet (u_char *b, int len);
 
 
 
-void decodePES_buf (u_char *b, int len, int pid)
+void decodePES_buf (u_char *b, u_int len, int pid)
 {
  /* IS13818-1  2.4.3.6  */
 
@@ -86,8 +95,14 @@ void decodePES_buf (u_char *b, int len, int pid)
 
 
  if (p.packet_start_code_prefix != 0x000001) {
-    out_nl (3," Packet_Start_CODE is wrong (= no PES)!  Following (wrong!?) decoded:\n");
+    out_nl (3," Packet_Start_CODE is wrong (= no PES)!!!\n");
+    return;
  }
+ if (len < 6) {
+    out_nl (3," Packet length  too short (= no PES)!!!\n");
+    return;
+ }
+
 
  out_nl     (3,"Packet_start_code_prefix: %06lx",p.packet_start_code_prefix);
  out_S2B_NL (3,"Stream_id: ",p.stream_id,dvbstrPESstream_ID(p.stream_id));
@@ -544,7 +559,7 @@ void PES_data_packet (u_char *b, int len)
    out_SB_NL  (6,"reserved_1: ", p.reserved);
    out_SB_NL  (3,"PES_data_packet_header_length: ", p.PES_data_packet_header_length);
 
-   if (p.PTS_extension_flag = 0x01) {
+   if (p.PTS_extension_flag == 0x01) {
    	out_nl (3,"PTS_extension:");
 	indent (+1);
 	out_SB_NL  (6,"reserved: ", getBits (b, 0,  0,  7) );
@@ -588,4 +603,6 @@ void PES_data_packet (u_char *b, int len)
 
 
 
+
+/* $$$ TODO   PES DSM-CC Control, etc.  e.g. from ITU-T H.222.0 */
 

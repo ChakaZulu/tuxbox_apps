@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.16 2003/11/09 20:48:34 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.17 2003/11/24 23:52:16 rasc Exp $ 
 
 
   dvbsnoop
@@ -14,6 +14,10 @@ $Id: dvb_descriptor.c,v 1.16 2003/11/09 20:48:34 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.17  2003/11/24 23:52:16  rasc
+-sync option, some TS and PES stuff;
+dsm_addr inactive, may be wrong - due to missing ISO 13818-6
+
 Revision 1.16  2003/11/09 20:48:34  rasc
 pes data packet (DSM-CC)
 
@@ -1825,7 +1829,7 @@ void descriptorDVB_Teletext (u_char *b)
     len -= 5;
 
     out_nl     (4,"ISO639_language_code:  %3.3s", d2.ISO_639_language_code);
-    out_S2B_NL (4,"Teletext_tye: ", d2.teletext_type,
+    out_S2B_NL (4,"Teletext_type: ", d2.teletext_type,
 	dvbstrTeletext_TYPE (d2.teletext_type));
 
     out_SB_NL (4,"Teletext_magazine_number: ",d2.teletext_magazine_number);

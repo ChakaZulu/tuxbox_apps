@@ -1,5 +1,5 @@
 /*
-$Id: sectables.c,v 1.12 2003/11/09 22:54:16 rasc Exp $
+$Id: sectables.c,v 1.13 2003/11/24 23:52:17 rasc Exp $
 
  --  For more information please see: ISO 13818 (-1) and ETSI 300 468
  -- Verbose Level >= 2
@@ -7,6 +7,10 @@ $Id: sectables.c,v 1.12 2003/11/09 22:54:16 rasc Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.13  2003/11/24 23:52:17  rasc
+-sync option, some TS and PES stuff;
+dsm_addr inactive, may be wrong - due to missing ISO 13818-6
+
 Revision 1.12  2003/11/09 22:54:16  rasc
 no message
 
@@ -218,7 +222,7 @@ static TABLE_ID_FUNC table_id_func[] = {
      {  0x02, 0x02,  decode_PMT	},
      {  0x03, 0x03,  decode_TSDT },
      /* res. */
-     {  0x3e, 0x3e,  decode_DSMCC_ADDR },
+   // $$$  {  0x3e, 0x3e,  decode_DSMCC_ADDR },
      {  0x40, 0x41,  decode_NIT	},
      {  0x42, 0x42,  decode_SDT	},
      /* res. */
