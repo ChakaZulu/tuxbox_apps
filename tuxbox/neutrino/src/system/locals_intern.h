@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.1 2004/06/06 21:52:53 thegoodguy Exp $
+ * $Id: locals_intern.h,v 1.2 2004/06/06 22:29:51 thegoodguy Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -446,7 +446,7 @@ const char * locale_real_names[] =
 	"miscsettings.shutdown_real",
 	"miscsettings.shutdown_real_rcdelay",
 	"miscsettings.sptsmode",
-	"miscsettings.startbhdriver"                      /* only for HAVE_DVB_API_VERSION == 1 */
+	"miscsettings.startbhdriver",                     /* only for HAVE_DVB_API_VERSION == 1 */
 	"motorcontrol.head",
 	"movieplayer.bookmark",
 	"movieplayer.bookmarkname",
@@ -548,9 +548,9 @@ const char * locale_real_names[] =
 	"parentallock.prompt",
 	"pictureviewer.defdir",
 	"pictureviewer.head",
-	"pictureviewer.resize.simple" 
-	"pictureviewer.resize.color_average" 
-	"pictureviewer.resize.none" 
+	"pictureviewer.resize.simple",
+	"pictureviewer.resize.color_average",
+	"pictureviewer.resize.none",
 	"pictureviewer.scaling",
 	"pictureviewer.show",
 	"pictureviewer.slide_time",
@@ -654,7 +654,7 @@ const char * locale_real_names[] =
 	"streaminfo.not_available",
 //	"streaminfo.not_crypted"                          /* FIXME: unused */
 	"streaminfo.resolution",
-	"streaminfo.signal"                               // streaminfo2.cpp
+	"streaminfo.signal",                              // streaminfo2.cpp
 	"streaming.buffer_overflow",
 	"streaming.busy",
 	"streaming.dir_not_writable",
