@@ -31,7 +31,7 @@ class eFrontend: public Object
 	enum { stateIdle, stateTuning };
 	int state;
 	eTransponder *transponder;
-	eFrontend(int type, const char *demod="/dev/ost/frontend0", const char *sec="/dev/ost/sec0");
+	eFrontend(int type, const char *demod="/dev/dvb/card0/frontend0", const char *sec="/dev/dvb/card0/sec0");
 	static eFrontend *frontend;
 	eTimer *timer;
 	int tries;

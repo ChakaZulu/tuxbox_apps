@@ -46,7 +46,7 @@ eAVSwitch::eAVSwitch()
 
 	fd=open("/dev/dbox/avs0", O_RDWR);
 
-	fdost=open("/dev/ost/audio0", O_RDWR);
+	fdost=open("/dev/dvb/card0/audio0", O_RDWR);
 
 	saafd=open("/dev/dbox/saa0", O_RDWR);
 }

@@ -72,10 +72,10 @@ void eDVBRecorder::s_open(const char *filename)
 	}
 	delete[] filename;
 
-	dvrfd=::open("/dev/ost/dvr1", O_RDONLY|O_NONBLOCK);
+	dvrfd=::open("/dev/dvb/card0/dvr1", O_RDONLY|O_NONBLOCK);
 	if (dvrfd < 0)
 	{
-		eDebug("failed to open /dev/ost/dvr1 (%m)");
+		eDebug("failed to open /dev/dvb/card0/dvr1 (%m)");
 		::close(outfd);
 		outfd=-1;
 		return;
@@ -92,7 +92,7 @@ void eDVBRecorder::s_addPID(int pid)
 {
 	pid_t p;
 	p.pid=pid;
-	p.fd=::open("/dev/ost/demux1", O_RDWR);
+	p.fd=::open("/dev/dvb/card0/demux1", O_RDWR);
 	if (p.fd < 0)
 	{
 		eDebug("failed to open demux1");

@@ -1,7 +1,7 @@
 #ifdef DBOX
-#define VIDEO_DEV "/dev/ost/video0"
-#define AUDIO_DEV "/dev/ost/audio0"
-#define DEMUX_DEV "/dev/ost/demux0"
+#define VIDEO_DEV "/dev/dvb/card0/video0"
+#define AUDIO_DEV "/dev/dvb/card0/audio0"
+#define DEMUX_DEV "/dev/dvb/card0/demux0"
 #else
 #define DEMUX_DEV "/dev/demuxapi0"
 #define VIDEO_DEV "/dev/vdec_dev"

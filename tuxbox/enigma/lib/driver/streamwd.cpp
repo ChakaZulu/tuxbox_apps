@@ -93,7 +93,7 @@ void eStreamWatchdog::reloadSettings()
 		/*emit*/ AspectRatioChanged(isanamorph);
 
 	int fd;
-	if ((fd = open("/dev/ost/video0",O_RDWR)) <= 0)
+	if ((fd = open("/dev/dvb/card0/video0",O_RDWR)) <= 0)
 	{
 		perror("open");
 		return;

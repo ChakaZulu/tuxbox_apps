@@ -12,7 +12,7 @@
 #include <core/base/eerror.h>
 
 #ifdef DBOX
-	#define DEMUX "/dev/ost/demux0"
+	#define DEMUX "/dev/dvb/card0/demux0"
 #else
 	#define DEMUX "/dev/demuxapi0"
 #endif
