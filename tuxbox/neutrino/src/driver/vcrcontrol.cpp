@@ -454,12 +454,10 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 
 	int repeatcount=0;
 	int actmode=g_Zapit->PlaybackState(); // get actual decoder mode
-	bool sptsmode=false;
-	if ((actmode == -1) || !g_settings.recording_in_spts_mode) // no aviaEXT loaded or switchoption not set
-	{
-		sptsmode = g_settings.misc_spts;
-	}
-	else if ((actmode != 1) && g_settings.recording_in_spts_mode) // actual mode is not SPTS and switchoption is set
+	bool sptsmode=g_settings.misc_spts;   // take default from settings
+
+	// aviaEXT is loaded, actual mode is not SPTS and switchoption is set
+	if ((actmode != -1) && (actmode != 1) && g_settings.recording_in_spts_mode)
 	{
 		g_Zapit->PlaybackSPTS();
 		while ((repeatcount++ < 10) && (g_Zapit->PlaybackState() != 1)) {
