@@ -1393,6 +1393,7 @@ void CAudioPlayerGui::savePlaylist() {
 		path = "/";
 	
 	// let user select target directory
+	this->hide();
 	if (browser.exec(path)) {
 		// refresh view
 		this->paint();
@@ -1421,6 +1422,7 @@ void CAudioPlayerGui::savePlaylist() {
 			snprintf(filename, name.size(), "%s", name.c_str());
 		} else if (file->getType() == CFile::FILE_DIR) {
 			// query for filename
+			this->hide();
 			CStringInputSMS filenameInput(LOCALE_AUDIOPLAYER_PLAYLIST_NAME,
 						      filename,
 						      filenamesize-1,
