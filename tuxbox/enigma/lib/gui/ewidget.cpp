@@ -343,13 +343,13 @@ int eWidget::eventHandler(const eWidgetEvent &evt)
 	{
 	case eWidgetEvent::evtAction:
 		if (evt.action == &i_focusActions->up)
-			focusNext(focusDirN);
+			focusNext(focusDirPrev);
 		else if (evt.action == &i_focusActions->down)
-			focusNext(focusDirS);
+			focusNext(focusDirNext);
 		else if (evt.action == &i_focusActions->left)
-			focusNext(focusDirW);
+			focusNext(focusDirPrev);
 		else if (evt.action == &i_focusActions->right)
-			focusNext(focusDirE);
+			focusNext(focusDirNext);
 		else
 			return 0;
 		return 1;
@@ -488,6 +488,9 @@ void eWidget::eraseBackground(gPainter *target, const eRect &clip)
 
 void eWidget::focusNext(int dir)
 {
+	if (parent)
+		return getTLW()->focusNext(dir);
+
 	if (!_focusList.current())
 		_focusList.first();
 	if (!_focusList.current())
@@ -499,29 +502,36 @@ void eWidget::focusNext(int dir)
 	switch (dir)
 	{
 	case focusDirNext:
-	{
-		if (_focusList.current() == _focusList.end())
-			_focusList.first();
-		else
-			while (_focusList.current() != _focusList.end())
-			{
-				_focusList.next();
-				if (_focusList.current()->isVisible())
-					break;
-			}
-		break;
-	}
 	case focusDirPrev:
 	{
-		if (_focusList.current() == _focusList.begin())
-			_focusList.last();
-		else
-			while (_focusList.current() != _focusList.begin())
+		int tries=2;
+		while (tries)
+		{
+			if (dir == focusDirNext)
 			{
-				_focusList.prev();
-				if (_focusList.current()->isVisible())
-					break;
+				_focusList.next();
+				if (!_focusList.current())
+				{
+					_focusList.first();
+					tries--;
+				}
+			} else if (dir == focusDirPrev)
+			{
+				if (_focusList.current() == _focusList.begin())
+				{
+					_focusList.last();
+					tries--;
+				} else
+					_focusList.prev();
 			}
+			if (_focusList.current() && _focusList.current()->isVisible())
+				break;
+		}
+		if (!tries)
+		{
+			setFocus(0);
+			return;
+		}
 		break;
 	}
 	case focusDirN:
@@ -544,7 +554,35 @@ void eWidget::focusNext(int dir)
 			
 			int xd=m1.x()-m2.x();
 			int yd=m1.y()-m2.y();
+			int dif=xd*xd+yd*yd;
+			int eff=0;
+#if 0
+			switch (dir)
+			{
+			case focusDirN:
+				yd=-yd;
+			case focusDirS:
+				if (yd > 0)
+					eff=dif/yd;
+				else
+					eff=1<<30;
+				break;
+			case focusDirW:
+				xd=-xd;
+			case focusDirE:
+				if (xd > 0)
+					eff=dif/xd;
+				else
+					eff=1<<30;
+				break;
+			}
 			
+			if (eff < difference)
+			{
+				difference=eff;
+				nearest=*i;
+			}
+#else
 			int ldir=focusDirN;
 			int mydiff=0;
 			
@@ -577,6 +615,8 @@ void eWidget::focusNext(int dir)
 					nearest=*i;
 				}
 			}
+#endif
+
 		}
 		_focusList.setCurrent(nearest);
 		break;
