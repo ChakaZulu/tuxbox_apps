@@ -8,8 +8,8 @@ master_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
 install-exec-local:
 	install -d $(PLUGINDIR)
-	install .libs/master.so $(PLUGINDIR)
-	install -m 0644  master.cfg $(PLUGINDIR)
+	$(LIBTOOL) install master.la $(PLUGINDIR)
+	install -m 0644 $(srcdir)/master.cfg $(PLUGINDIR)
 
 uninstall-local:
 	-rm $(PLUGINDIR)/master.so

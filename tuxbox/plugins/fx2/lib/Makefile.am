@@ -8,7 +8,7 @@ libfx2_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
 install-exec-local:
 	install -d $(PLUGINDIR)
-	install .libs/libfx2.so ${PLUGINDIR}/libfx2.so
+	$(LIBTOOL) install libfx2.la $(PLUGINDIR)
 
 uninstall-local:
 	-rm $(PLUGINDIR)/libfx2.so

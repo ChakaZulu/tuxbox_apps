@@ -9,9 +9,9 @@ tetris_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 install-exec-local:
 	install -d $(PLUGINDIR)
 	install -d $(CONFIGDIR)
-	install .libs/tetris.so $(PLUGINDIR)
-	install -m 0644  tetris.cfg $(PLUGINDIR)
-	install -m 0644  games.cfg $(CONFIGDIR)
+	$(LIBTOOL) install tetris.la $(PLUGINDIR)
+	install -m 0644 $(srcdir)/tetris.cfg $(PLUGINDIR)
+	install -m 0644 $(srcdir)/games.cfg $(CONFIGDIR)
 
 uninstall-local:
 	-rm $(CONFIGDIR)/games.cfg

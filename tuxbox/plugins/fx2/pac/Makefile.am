@@ -8,8 +8,8 @@ pacman_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
 install-exec-local:
 	install -d $(PLUGINDIR)
-	install .libs/pacman.so $(PLUGINDIR)
-	install -m 0644  pacman.cfg $(PLUGINDIR)
+	$(LIBTOOL) install pacman.la $(PLUGINDIR)
+	install -m 0644 $(srcdir)/pacman.cfg $(PLUGINDIR)
 
 uninstall-local:
 	-rm $(PLUGINDIR)/pacman.so

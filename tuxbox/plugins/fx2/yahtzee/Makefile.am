@@ -8,8 +8,8 @@ yahtzee_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
 install-exec-local:
 	install -d $(PLUGINDIR)
-	install .libs/yahtzee.so $(PLUGINDIR)
-	install -m 0644  yahtzee.cfg $(PLUGINDIR)
+	$(LIBTOOL) install yahtzee.la $(PLUGINDIR)
+	install -m 0644 $(srcdir)/yahtzee.cfg $(PLUGINDIR)
 
 uninstall-local:
 	-rm $(PLUGINDIR)/yahtzee.so

@@ -8,8 +8,8 @@ tank_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
 install-exec-local:
 	install -d $(PLUGINDIR)
-	install .libs/tank.so $(PLUGINDIR)
-	install -m 0644  tank.cfg $(PLUGINDIR)
+	$(LIBTOOL) install tank.la $(PLUGINDIR)
+	install -m 0644 $(srcdir)/tank.cfg $(PLUGINDIR)
 
 uninstall-local:
 	-rm $(PLUGINDIR)/tank.so

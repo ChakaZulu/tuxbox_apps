@@ -18,6 +18,6 @@ install-exec-local:
 	install -d $(PLUGINDIR)
 	install -d $(CONFIGDIR)
 	install -d $(CONFIGDIR)/tuxtxt
-	install .libs/tuxtxt.so $(PLUGINDIR)
-	install -m 0644 tuxtxt.cfg $(PLUGINDIR)
-	install -m 0644 tuxtxt.conf $(CONFIGDIR)/tuxtxt
+	$(LIBTOOL) install tuxtxt.la $(PLUGINDIR)
+	install -m 0644 $(srcdir)/tuxtxt.cfg $(PLUGINDIR)
+	install -m 0644 $(srcdir)/tuxtxt.conf $(CONFIGDIR)/tuxtxt

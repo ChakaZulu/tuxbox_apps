@@ -8,8 +8,8 @@ mines_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
 install-exec-local:
 	install -d $(PLUGINDIR)
-	install .libs/mines.so $(PLUGINDIR)
-	install -m 0644  mines.cfg $(PLUGINDIR)
+	$(LIBTOOL) install mines.la $(PLUGINDIR)
+	install -m 0644 $(srcdir)/mines.cfg $(PLUGINDIR)
 
 uninstall-local:
 	-rm $(PLUGINDIR)/mines.so
