@@ -1,28 +1,41 @@
 function channelChange()
 {
-	var channel = "";
-	var j = document.channelselector.channel.selectedIndex;
-	currentChannel = j;
-	if (j >= 0)
+	currentChannel = document.channelselector.channel.selectedIndex;
+	if (currentChannel >= 0)
 	{
-		channel = document.channelselector.channel.options[j].value;
+		var channel = document.channelselector.channel.options[currentChannel].value;
 		switchChannel(channel, currentBouquet, currentChannel);
 	}
 }
+function zapChannelForward()
+{
+	currentChannel = currentChannel + 1;
+	if (currentChannel >= channels[currentBouquet].length)
+		currentChannel = 0;
+	document.channelselector.channel.selectedIndex = currentChannel;
+	var channel = document.channelselector.channel.options[currentChannel].value;
+	switchChannel(channel, currentBouquet, currentChannel);
+}
+function zapChannelBackward()
+{
+	currentChannel = currentChannel - 1;
+	if (currentChannel < 0)
+		currentChannel = channels[currentBouquet].length - 1;
+	document.channelselector.channel.selectedIndex = currentChannel;
+	var channel = document.channelselector.channel.options[currentChannel].value;
+	switchChannel(channel, currentBouquet, currentChannel);
+}
 function bouquetChange()
 {
-	var i = document.channelselector.bouquet.selectedIndex;
-	currentBouquet = i;
+	currentBouquet = document.channelselector.bouquet.selectedIndex;
 	currentChannel = -1;
-	loadChannels(i, currentChannel);
+	loadChannels(currentBouquet, currentChannel);
 }
 function epg()
 {
-	var channel = "";
-	var j = document.channelselector.channel.selectedIndex;
-	if (j >= 0)
+	if (currentChannel >= 0)
 	{
-		channel = document.channelselector.channel.options[j].value;
+		var channel = document.channelselector.channel.options[currentChannel].value;
 		openEPG(channel);
 	}
 	else
@@ -30,8 +43,7 @@ function epg()
 }
 function mepg()
 {
-	var i = document.channelselector.bouquet.selectedIndex;
-	var bouquet = document.channelselector.bouquet.options[i].value;
+	var bouquet = document.channelselector.bouquet.options[currentBouquet].value;
 	openMultiEPG(bouquet);
 }
 function loadChannels(bouquet, channel)
