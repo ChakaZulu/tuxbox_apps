@@ -30,11 +30,14 @@
 */
 
 /*
-$Id: menue.cpp,v 1.27 2001/12/12 19:11:32 McClean Exp $
+$Id: menue.cpp,v 1.28 2001/12/25 03:28:42 McClean Exp $
 
 
 History:
  $Log: menue.cpp,v $
+ Revision 1.28  2001/12/25 03:28:42  McClean
+ better pushback-handling
+
  Revision 1.27  2001/12/12 19:11:32  McClean
  prepare timing setup...
 
@@ -179,19 +182,40 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 			key = CRCInput::RC_timeout;
 			break;
 
-		case (CRCInput::RC_left):
 		case (CRCInput::RC_right):
+			break;
+
+		case (CRCInput::RC_left):
 			key = CRCInput::RC_timeout;
 			break;
 
 		case (CRCInput::RC_timeout):
 			break;
 
+		//close menue on dbox-key
+		case (CRCInput::RC_setup):
+			key = CRCInput::RC_timeout;
+ 			retval = CMenuItem::RETURN_EXIT_ALL;
+			break;
+
+		//pushback only these Keys
+		case (CRCInput::RC_spkr):
+		case (CRCInput::RC_plus):
+		case (CRCInput::RC_minus):
+		case (CRCInput::RC_red):
+		case (CRCInput::RC_green):
+		case (CRCInput::RC_yellow):
+		case (CRCInput::RC_blue):
+			g_RCInput->pushbackKey (key);
+			key = CRCInput::RC_timeout;
+			break;
+		/*
 		default:
 			// unknown Key, push it back... and leave
 			g_RCInput->pushbackKey (key);
 			key = CRCInput::RC_timeout;
 			break;
+		*/
         }
 
    } while ( key!=CRCInput::RC_timeout );

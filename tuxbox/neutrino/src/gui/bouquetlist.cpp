@@ -176,7 +176,11 @@ int CBouquetList::show()
 		{
 			zapOnExit = true;
 			loop=false;
-		} else {
+		} 
+                else if( (key==CRCInput::RC_spkr) || (key==CRCInput::RC_plus) || (key==CRCInput::RC_minus)
+                        || (key==CRCInput::RC_red) || (key==CRCInput::RC_green) || (key==CRCInput::RC_yellow) || (key==CRCInput::RC_blue)
+                        || (CRCInput::isNumeric(key)) )
+		{
 			selected = oldselected;
 			g_RCInput->pushbackKey (key);
 			loop=false;

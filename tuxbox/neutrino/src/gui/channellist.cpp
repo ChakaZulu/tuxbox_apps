@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.46 2001/12/22 19:34:58 Simplex Exp $
+// $Id: channellist.cpp,v 1.47 2001/12/25 03:28:42 McClean Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.47  2001/12/25 03:28:42  McClean
+// better pushback-handling
+//
 // Revision 1.46  2001/12/22 19:34:58  Simplex
 // - selected channel in bouquetlist is correct after numzap and quickzap
 // - dbox-key in channellist shows bouquetlist
@@ -481,12 +484,16 @@ int CChannelList::show()
 			zapOnExit = true;
 			loop=false;
 		}
-		else if (key==CRCInput::RC_setup)
+		else if ((key==CRCInput::RC_setup) && (bouquetList!=NULL))
 		{
 			bShowBouquetList = true;
 			loop=false;
-		} else {
-            selected = oldselected;
+		} 
+		else if( (key==CRCInput::RC_spkr) || (key==CRCInput::RC_plus) || (key==CRCInput::RC_minus)
+			|| (key==CRCInput::RC_red) || (key==CRCInput::RC_green) || (key==CRCInput::RC_yellow) || (key==CRCInput::RC_blue)
+			|| (CRCInput::isNumeric(key)) )
+		{	//pushback key if...
+			selected = oldselected;
 			g_RCInput->pushbackKey (key);
 			loop=false;
 		}

@@ -30,12 +30,15 @@
 */
 
 /*
-$Id: rcinput.h,v 1.9 2001/11/26 02:34:04 McClean Exp $
+$Id: rcinput.h,v 1.10 2001/12/25 03:28:42 McClean Exp $
 
  Module  RemoteControle Handling
 
 History:
  $Log: rcinput.h,v $
+ Revision 1.10  2001/12/25 03:28:42  McClean
+ better pushback-handling
+
  Revision 1.9  2001/11/26 02:34:04  McClean
  include (.../../stuff) changed - correct unix-formated files now
 
@@ -125,11 +128,12 @@ class CRCInput
 		void stopInput();
 		void restartInput();
 
-        int repeat_block;
+		int repeat_block;
 		CRCInput();      //constructor - opens rc-device and starts needed threads
 		~CRCInput();     //destructor - closes rc-device
 
 		
+		static bool isNumeric(int key);
 		int  getKey(int Timeout=-1);     //get key from the input-device
 		int  pushbackKey (int key);      // push key back in buffer (like ungetc)
 		void clear (void);
