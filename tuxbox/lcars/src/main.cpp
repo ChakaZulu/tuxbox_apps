@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: main.cpp,v $
+Revision 1.14  2002/04/22 19:11:12  obi
+sync vbi header with drivers
+
 Revision 1.13  2002/03/03 23:06:51  TheDOC
 update-fix
 
@@ -63,7 +66,7 @@ Revision 1.6  2001/11/15 00:43:45  TheDOC
 #include <string>
 #include <stdio.h>
 
-#include <dbox/avia_vbi.h>
+#include <dbox/avia_gt_vbi.h>
 #include <dbox/fp.h>
 //#include <dbox/event.h>
 

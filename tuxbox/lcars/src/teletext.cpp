@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: teletext.cpp,v $
+Revision 1.5  2002/04/22 19:13:04  obi
+sync vbi header with drivers
+
 Revision 1.4  2002/03/03 22:56:27  TheDOC
 lcars 0.20
 
@@ -39,7 +42,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <sys/ioctl.h>
 #include <memory.h>
 #include <stdio.h>
-#include <dbox/avia_vbi.h>
+#include <dbox/avia_gt_vbi.h>
 
 #include <ost/dmx.h>
 
