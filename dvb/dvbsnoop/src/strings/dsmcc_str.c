@@ -1,14 +1,25 @@
 /*
-$Id: dsmcc_str.c,v 1.5 2003/11/01 21:40:27 rasc Exp $
+$Id: dsmcc_str.c,v 1.6 2003/11/26 23:54:49 rasc Exp $
 
-  dvbsnoop
-  (c) Rainer Scherg 2001-2003
 
-  DSM-CC -Strings
+ DVBSNOOP
+
+ a dvb sniffer  and mpeg2 stream analyzer tool
+ mainly for me to learn about dvb streams, mpeg2, mhp, dsm-cc, ...
+
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2003   Rainer.Scherg@gmx.de
+
+
+ -- DSM-CC -Strings
 
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.6  2003/11/26 23:54:49  rasc
+-- bugfixes on Linkage descriptor
+
 Revision 1.5  2003/11/01 21:40:27  rasc
 some broadcast/linkage descriptor stuff
 
@@ -382,6 +393,28 @@ char *dsmccStrHigherProtocol_ID (u_int id)
 	{ 0x01, 0x01,   "dGNSS data" },
 	{ 0x02, 0x02,   "TPEG" },
 	{ 0x03, 0x0F,   "reserved" },
+      	{  0,0, NULL }
+  };
+
+
+  return findTableID (TableIDs, id);
+}
+
+
+
+/*
+  --  Update Type Table    TR 102 006
+*/
+
+char *dsmccStrUpdateType_ID (u_int id)
+
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x00, 0x00,   "proprietary update solution" },
+	{ 0x01, 0x01,   "standard update carousel via broadcast" },
+	{ 0x02, 0x02,   "system software update with notification table (UNT) via broadcast" },
+	{ 0x03, 0x03,   "system software update using return channel with UNT" },
+	{ 0x04, 0x0F,   "reserved" },
       	{  0,0, NULL }
   };
 

@@ -1,5 +1,5 @@
 /*
-$Id: ints.h,v 1.3 2003/11/26 19:52:12 rasc Exp $
+$Id: ints.h,v 1.4 2003/11/26 23:54:46 rasc Exp $
 
 
  DVBSNOOP
@@ -19,7 +19,7 @@ $Id: ints.h,v 1.3 2003/11/26 19:52:12 rasc Exp $
 #define __INTS_H 1
 
 
-void  decode_INT_DSMCC (u_char *b, int len);
+void  decode_DSMCC_INT (u_char *b, int len);
 int   pto_descriptor_loop (u_char *name, u_char *b);
 
 

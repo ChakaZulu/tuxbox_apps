@@ -1,13 +1,26 @@
 /*
-$Id: datagram.c,v 1.11 2003/11/26 20:31:50 rasc Exp $
+$Id: datagram.c,v 1.12 2003/11/26 23:54:46 rasc Exp $
 
-   DATAGRAM section
-   DSM-CC Data Carousel  EN 301 192 
 
-   (c) rasc
+ DVBSNOOP
+
+ a dvb sniffer  and mpeg2 stream analyzer tool
+ mainly for me to learn about dvb streams, mpeg2, mhp, dsm-cc, ...
+
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2003   Rainer.Scherg@gmx.de
+
+
+ --  DATAGRAM section
+ --  DSM-CC Data Carousel  EN 301 192 
+
 
 
 $Log: datagram.c,v $
+Revision 1.12  2003/11/26 23:54:46  rasc
+-- bugfixes on Linkage descriptor
+
 Revision 1.11  2003/11/26 20:31:50  rasc
 no message
 

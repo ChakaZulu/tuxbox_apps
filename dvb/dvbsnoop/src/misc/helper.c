@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.12 2003/11/26 16:27:46 rasc Exp $
+$Id: helper.c,v 1.13 2003/11/26 23:54:48 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: helper.c,v 1.12 2003/11/26 16:27:46 rasc Exp $
 
 
 $Log: helper.c,v $
+Revision 1.13  2003/11/26 23:54:48  rasc
+-- bugfixes on Linkage descriptor
+
 Revision 1.12  2003/11/26 16:27:46  rasc
 - mpeg4 descriptors
 - simplified bit decoding and output function
@@ -87,10 +90,12 @@ u_long outBit_Sx (int verbosity, char *text, u_char *buf, int startbit, int bitl
 
    value =  getBits(buf,0,startbit,bitlen);
 
-   if (bitlen <= 9) {
+   if (bitlen <= 8) {
 	 out_SB (verbosity,text,(int)value);
-   } else if (bitlen <=16) {
+   } else if (bitlen <= 16) {
 	 out_SW (verbosity,text,(int)value);
+   } else if (bitlen <= 24) {
+	 out_ST (verbosity,text,(int)value);
    } else {
 	 out_SL (verbosity,text,value);
    }
@@ -120,10 +125,12 @@ u_long outBit_S2x_NL (int verbosity, char *text, u_char *buf, int startbit, int 
 
    value =  getBits(buf,0,startbit,bitlen);
 
-   if (bitlen <= 9) {
+   if (bitlen <= 8) {
 	 out_S2B_NL (verbosity,text,(int)value, (*f)(value));
-   } else if (bitlen <=16) {
+   } else if (bitlen <= 16) {
 	 out_S2W_NL (verbosity,text,(int)value, (*f)(value));
+   } else if (bitlen <= 24) {
+	 out_S2T_NL (verbosity,text,(int)value, (*f)(value));
    } else {
 	 out_S2L_NL (verbosity,text,     value, (*f)(value));
    }

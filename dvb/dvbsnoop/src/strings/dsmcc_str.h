@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.h,v 1.6 2003/11/26 19:55:34 rasc Exp $ 
+$Id: dsmcc_str.h,v 1.7 2003/11/26 23:54:49 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dsmcc_str.h,v 1.6 2003/11/26 19:55:34 rasc Exp $
 
 
 $Log: dsmcc_str.h,v $
+Revision 1.7  2003/11/26 23:54:49  rasc
+-- bugfixes on Linkage descriptor
+
 Revision 1.6  2003/11/26 19:55:34  rasc
 no message
 
@@ -62,6 +65,7 @@ char *dsmccStrMultiProtEncapsMACAddrRangeField (u_int i);
 char *dsmccStrPlatform_ID (u_int id);
 char *dsmccStrCarouselType_ID (u_int id);
 char *dsmccStrHigherProtocol_ID (u_int id);
+char *dsmccStrUpdateType_ID (u_int id);
 
 
 #endif

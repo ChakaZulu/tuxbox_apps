@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.18 2003/11/26 16:27:45 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.19 2003/11/26 23:54:47 rasc Exp $ 
 
 
  DVBSNOOP
@@ -20,6 +20,9 @@ $Id: dvb_descriptor.c,v 1.18 2003/11/26 16:27:45 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.19  2003/11/26 23:54:47  rasc
+-- bugfixes on Linkage descriptor
+
 Revision 1.18  2003/11/26 16:27:45  rasc
 - mpeg4 descriptors
 - simplified bit decoding and output function
@@ -814,19 +817,14 @@ void descriptorDVB_Linkage (u_char *b)
     if (d.linkage_type == 0x08) {		/* EN 300 468 */
         sub_descriptorDVB_Linkage0x08 (b, len);
     } else if (d.linkage_type == 0x09) {	/* TR 102 006  DSM-CC */
-//        sub_descriptorDVB_Linkage0x09 (b, len);
-//        $$$ TODO 
-    	printhexdump_buf (4, b,len);
-
+        sub_descriptorDVB_Linkage0x09 (b, len);
     } else if (d.linkage_type == 0x0A) {	/* TR 102 006  DSM-CC */
-
 	/* SSU SCAN Linkage */
  	u_int table_id;
 
 	table_id			= getBits (b, 0,  0, 8);
 	out_S2W_NL  (4,"Table_id: ",table_id,
 			dsmccStrLinkage0CTable_TYPE(table_id));
-
     } else if (d.linkage_type == 0x0B) {	/* EN 301 192  DSM-CC */
         sub_descriptorDVB_Linkage0x0B (b, len);
     } else if (d.linkage_type == 0x0C) {	/* EN 301 192  DSM-CC */
@@ -905,6 +903,51 @@ void sub_descriptorDVB_Linkage0x08 (u_char *b, int len)
 
 
 /*
+ * DVB Linkage Subdescriptor  0x09
+ */
+
+void sub_descriptorDVB_Linkage0x09 (u_char *b, int len)
+{
+ /* ETSI TR 102 006   6.1 */
+
+    int      OUI_data_length;
+    u_long   OUI;
+    int      selector_length;
+
+
+    OUI_data_length = outBit_Sx_NL (4,"OUI_data_length: ", b,0,8);
+    b++;
+    len --;
+
+    while (OUI_data_length > 0) {
+    	OUI             = outBit_Sx_NL (4,"OUI: ", 		b, 0,24);
+	b += 3;
+	OUI_data_length -= 3;
+	len -= 3;
+
+	// the following is special to Premiere DSM-CC to prevent segfaults
+	// Premiere seems to set short OUI_data_length
+	if (OUI_data_length <= 0) continue;
+
+    	selector_length = outBit_Sx_NL (4,"selector_length: ",  b, 0, 8);
+	out_nl (4,"Selector Bytes:");
+        	printhexdump_buf (4, b+1,selector_length);
+		b 		+= (selector_length +1);	// +1 = length byte
+		OUI_data_length -= (selector_length +1);
+		len 		-= (selector_length +1);
+    }
+
+    if (len > 0) {
+      // private data 
+	out_nl (4,"Private data:"); 
+	printhexdump_buf (4, b,len);
+    }
+
+}
+
+
+
+/*
  * -- as defined as private data for DSM-CC  
  * -- in EN 301 192
  */
@@ -949,7 +992,7 @@ void sub_descriptorDVB_Linkage0x0B (u_char *b, int len)			 /* $$$ TODO */
 	b += 4;
 	len -= 4;
 
-        out_S2L_NL  (4,"Platform_id: ",d.platform_id,
+        out_S2T_NL  (4,"Platform_id: ",d.platform_id,
 			dsmccStrPlatform_ID (d.platform_id));
         out_SB_NL  (4,"Platform_name_loop_length: ",d.platform_name_loop_length);
 
@@ -2710,7 +2753,7 @@ void descriptorDVB_DataBroadcast (u_char *b)
 
     u_int      data_broadcast_id;
     u_int      component_tag;
-    u_int      selector_length;
+    int        selector_length;
 
     // N   bytes
 
@@ -2850,7 +2893,7 @@ void descriptorDVB_DataBroadcast (u_char *b)
 
 		while (len1 > 0) {
     			u_char     ISO639_2_language_code[4];
-			u_int      object_name_length;
+			int        object_name_length;
 
  			getISO639_3 (ISO639_2_language_code, b1);
 			object_name_length		 = getBits (b1, 0, 24, 8);
@@ -2893,8 +2936,53 @@ void descriptorDVB_DataBroadcast (u_char *b)
 
  } else if (d.data_broadcast_id == 0x000A) {
 	 /* $$$ TODO TR 102 006 */
- 			out_nl    (4,"TODO Software_update_info:");
-		 	printhexdump_buf (4,  b, d.selector_length);
+
+ 		typedef struct  _descSUI {
+    		   int      OUI_data_length;
+		   u_long   OUI;
+		   u_int    updt_type;
+		   int      selector_length2;
+		} descSUI;
+
+		descSUI  s;
+		int      len2;
+
+
+		out_nl    (4,"Software_update_info:");
+		s.OUI_data_length = outBit_Sx_NL (4,"OUI_data_length: ", b,0,8);
+    		b++;
+
+   		while (s.OUI_data_length > 0) {
+    		   outBit_Sx_NL (4,"OUI: ", 			b,0,24);	// $$$ TODO Table OUI
+    		   outBit_Sx_NL (6,"reserved: ", 		b,24, 4);
+    		   s.updt_type = outBit_S2x_NL (4,"update_type: ",b,28, 4,
+				   (char *(*)(u_int))dsmccStrUpdateType_ID);
+    		   outBit_Sx_NL (6,"reserved: ", 		b,32, 2);
+    		   outBit_Sx_NL (4,"update_versioning_flag: ", 	b,34, 1);
+    		   outBit_Sx    (4,"update_version: ", 		b,35, 5);
+		   	if (s.updt_type == 0x02 || s.updt_type == 0x03) {
+		   		out (4, "  [--> refers to UNT version number]");
+		   	}
+		   	out_NL (4);
+
+
+		   s.selector_length2 = outBit_Sx_NL (4,"selector_length: ", b,40, 8);
+		   b += 6;
+		   s.OUI_data_length -= 6;
+		   out_nl (4,"Selector Bytes:");
+        		printhexdump_buf (4, b,s.selector_length2);
+			b += s.selector_length2;
+			s.OUI_data_length -= s.selector_length2;
+    		}
+
+		len2 = d.selector_length - s.OUI_data_length -1;
+    		if (len2 > 0) {
+      		   // private data 
+	 	   out_nl (4,"Private data:"); 
+		  printhexdump_buf (4, b,len2);
+    		}
+
+
  } else {
  	out_nl    (4,"Selector-Bytes:");
  	printhexdump_buf (4,  b, d.selector_length);
@@ -2994,7 +3082,7 @@ void descriptorDVB_DataBroadcastID  (u_char *b)
 
 	 {
  		typedef struct  _descIPMAC_NOTIF_TABLE {
-			u_int	platform_id_data_length;
+			int	platform_id_data_length;
 			// inner loop
 			u_long	platform_id;
 			u_int	action_type;
@@ -3027,7 +3115,7 @@ void descriptorDVB_DataBroadcastID  (u_char *b)
 		   len -= 5;
 		   len2 -= 5;
 
- 		   out_S2L_NL  (5,"Platform_id: ",d.platform_id,
+ 		   out_S2T_NL  (5,"Platform_id: ",d.platform_id,
 				   dsmccStrPlatform_ID (d.platform_id));
  		   out_S2B_NL  (5,"Action_type: ",d.action_type,
 				   dsmccStrAction_Type(d.action_type));
@@ -3348,10 +3436,28 @@ void descriptorDVB_CellList  (u_char *b)
 void descriptorDVB_CellFrequencyLink  (u_char *b)
 
 {
- // $$$$ todo 300468  6.2.6
+ // $$$$ TODO 300468  6.2.6
  //
  descriptorDVB_any (b);
  out_nl (4," ==> ERROR: CellFrequencyLink descriptor not implemented, Report!");
+
+
+/*
+cell_frequency_link_descriptor(){
+	descriptor_tag 8 uimsbf
+	descriptor_length 8 uimsbf
+	for (i=0;i<N;i++){
+		cell_id 16 uimsbf
+		frequency 32 uimsbf
+		subcell_info_loop_length 8 uimsbf
+		for (i=0;i<N;i++){
+			cell_id_extension 8 uimsbf
+			transposer_frequency 32 uimsbf
+		}
+	}
+}
+
+*/
 
 }
 
@@ -3607,8 +3713,11 @@ void descriptorDVB_ServiceIdentifier (u_char *b)
  b   += 2;
  len = d.descriptor_length - 0;
 
-//$$$
+//$$$ TODO 
  out_nl (4,"Service Identifier:  [no encoding known ToDo, Report!] ");
+
+ descriptorDVB_any (b);
+
 
 
 }

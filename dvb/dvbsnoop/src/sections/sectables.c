@@ -1,5 +1,5 @@
 /*
-$Id: sectables.c,v 1.14 2003/11/26 19:55:34 rasc Exp $
+$Id: sectables.c,v 1.15 2003/11/26 23:54:48 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: sectables.c,v 1.14 2003/11/26 19:55:34 rasc Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.15  2003/11/26 23:54:48  rasc
+-- bugfixes on Linkage descriptor
+
 Revision 1.14  2003/11/26 19:55:34  rasc
 no message
 
@@ -242,7 +245,7 @@ static TABLE_ID_FUNC table_id_func[] = {
      {  0x46, 0x46,  decode_SDT	},
      /* res. */
      {  0x4A, 0x4A,  decode_BAT	},
-     {  0x4C, 0x4C,  decode_INT_DSMCC },
+     {  0x4C, 0x4C,  decode_DSMCC_INT },
      {  0x4E, 0x6E,  decode_EIT	},  /*  4 different types */
      {  0x70, 0x70,  decode_TDT },
      {  0x71, 0x71,  decode_RST },
