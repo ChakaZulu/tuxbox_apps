@@ -1,24 +1,24 @@
 #ifndef __multipage_h_
 #define __multipage_h_
 
-#include "qlist.h"
+#include <core/base/eptrlist.h>
 class eWidget;
 
 class eMultipage
 {
+	ePtrList<eWidget> list;
 public:
 	eMultipage();
 	
 	int prev();
 	int next();
+	void set(eWidget *page);
 	void first();
 	void addPage(eWidget *page);
-	eWidget *current() { return pages.current(); }
+	eWidget *getCurrent() { return list.current(); }
 	
-	int count() { return pages.count(); }
-	int at() { return pages.at(); }
-
-	QList<eWidget> pages;
+	int count() { return list.size(); }
+	int at();
 };
 
 #endif

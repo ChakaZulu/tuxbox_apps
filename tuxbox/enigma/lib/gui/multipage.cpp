@@ -8,39 +8,59 @@ eMultipage::eMultipage()
 
 int eMultipage::prev()
 {
-	if (pages.current()==pages.getFirst())
+	if (list.current() == list.begin())
 		return -ENOENT;
-	if (!pages.current())
-		return -ENOENT;
-	pages.current()->hide();
-	pages.prev();
-	pages.current()->show();
+	if (list.current() != list.end())
+		list.current()->hide();
+	list.prev();
+	list.current()->show();
 	return 0;
 }
 
 int eMultipage::next()
 {
-	if (pages.current()==pages.getLast())
+	if (list.current() == *--list.end())
 		return -ENOENT;
-	if (!pages.current())
-		return -ENOENT;
-	pages.current()->hide();
-	pages.next();
-	pages.current()->show();
+	list.current()->hide();
+	list.next();
+	if (list.current() == list.end())
+		return 0;
+	list.current()->show();
 	return 0;
+}
+
+void eMultipage::set(eWidget *widget)
+{
+	if (list.current() == widget)
+		return;
+	if (list.current() != list.end())
+		list.current()->hide();
+	list.setCurrent(widget);
+	if (list.current() != list.end())
+		list.current()->show();
 }
 
 void eMultipage::first()
 {
-	if (pages.current()==pages.getFirst())
+	if (list.current() == list.begin())
 		return;
-	if (pages.current())
-		pages.current()->hide();
-	pages.first();
-	pages.current()->show();
+	if (list.current() != list.end())
+		list.current()->hide();
+	list.first();
+	if (list.current() != list.end())
+		list.current()->show();
+}
+
+int eMultipage::at()
+{
+	int num=0;
+	for (ePtrList<eWidget>::iterator i(list.begin()); (i != list.end()) && (i != list.current()); ++i, ++num)	;
+	return num;
 }
 
 void eMultipage::addPage(eWidget *page)
 {
-	pages.append(page);
+	eDebug("adding %x", page);
+	list.push_back(page);
 }
+
