@@ -133,12 +133,10 @@ int main(int argc, char **argv)
 	int listenfd, connfd;
 	dprintf("startup\n\n");
 
-	/*
 	if (fork() != 0)
 	{
 		return 0;
 	}
-	*/
 
 	struct sockaddr_un servaddr;
 	int clilen;
