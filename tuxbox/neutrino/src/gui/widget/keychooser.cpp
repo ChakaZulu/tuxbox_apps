@@ -31,6 +31,8 @@
 
 #include "keychooser.h"
 #include "../global.h"
+#include "../neutrino.h"
+
 
 CKeyChooser::CKeyChooser( int* Key, string title, string Icon )
 		: CMenuWidget(title, Icon)
@@ -107,7 +109,7 @@ int CKeyChooserItem::exec(CMenuTarget* parent, string)
 				doLoop = false;
 				*key = msg;
 			}
-			else if ( neutrino->handleMsg( msg, data ) & messages_return::cancel_all )
+			else if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
 			{
 				res = menu_return::RETURN_EXIT_ALL;
 				doLoop = false;

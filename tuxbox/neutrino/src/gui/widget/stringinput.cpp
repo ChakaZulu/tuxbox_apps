@@ -31,6 +31,8 @@
 
 #include "stringinput.h"
 #include "../global.h"
+#include "../neutrino.h"
+
 
 CStringInput::CStringInput(string Name, char* Value, int Size,  string Hint_1, string Hint_2, char* Valid_Chars, CChangeObserver* Observ, string Icon )
 {
@@ -234,7 +236,7 @@ int CStringInput::exec( CMenuTarget* parent, string )
 			}
 			else if ( r & messages_return::unhandled )
 			{
-				if ( neutrino->handleMsg( msg, data ) & messages_return::cancel_all )
+				if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
 				{
 					loop = false;
 					res = menu_return::RETURN_EXIT_ALL;
@@ -507,7 +509,7 @@ int CPINInput::exec( CMenuTarget* parent, string )
 			}
 			else if ( r & messages_return::unhandled )
 			{
-				if ( neutrino->handleMsg( msg, data ) & ( messages_return::cancel_all | messages_return::cancel_info ) )
+				if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & ( messages_return::cancel_all | messages_return::cancel_info ) )
 				{
 					loop = false;
 					res = menu_return::RETURN_EXIT_ALL;
@@ -545,7 +547,7 @@ int CPLPINInput::handleOthers( uint msg, uint data )
 	if ( msg == NeutrinoMessages::EVT_PROGRAMLOCKSTATUS )
 	{
 		// trotzdem handlen
-		neutrino->handleMsg( msg, data );
+		CNeutrinoApp::getInstance()->handleMsg( msg, data );
 
 		if ( data != fsk )
 			res = messages_return::cancel_info;

@@ -31,6 +31,7 @@
 
 #include "update.h"
 #include "../global.h"
+#include "../neutrino.h"
 
 #define gTmpPath "/var/tmp/"
 #define gUserAgent "neutrino/softupdater 1.0"
@@ -385,7 +386,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, string)
 			doLoop = false;
 		else
 		{
-			int mr = neutrino->handleMsg( msg, data );
+			int mr = CNeutrinoApp::getInstance()->handleMsg( msg, data );
 
 			if ( mr & messages_return::cancel_all )
 			{
@@ -650,7 +651,7 @@ void CFlashUpdate::paint()
 
 	showStatusMessage( g_Locale->getText("flashupdate.ready") );
 
-	neutrino->exec(NULL, "savesettings");
+	CNeutrinoApp::getInstance()->exec(NULL, "savesettings");
 
 	sleep(2);
 

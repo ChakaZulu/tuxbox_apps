@@ -32,6 +32,7 @@
 
 #include "messagebox.h"
 #include "../global.h"
+#include "../neutrino.h"
 
 #define borderwidth 4
 
@@ -279,7 +280,7 @@ int CMessageBox::exec(CMenuTarget* parent, string actionKey)
 			}
 			loop=false;
 		}
-		else if ( neutrino->handleMsg( msg, data ) & messages_return::cancel_all )
+		else if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
 		{
 			loop = false;
 			res = menu_return::RETURN_EXIT_ALL;

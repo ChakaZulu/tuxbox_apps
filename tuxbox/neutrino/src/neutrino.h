@@ -90,12 +90,9 @@
 using namespace std;
 
 
-#define SA struct sockaddr
-#define SAI struct sockaddr_in
 
 #define widest_number "1"
 
-class CNeutrinoApp;
 
 struct messages_return {
 	enum
@@ -257,12 +254,14 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 
         long long last_profile_call;
 
-	public:
-		CChannelList				*channelList;
-
 		CNeutrinoApp();
 		~CNeutrinoApp();
 
+	public:
+		CChannelList				*channelList;
+
+		static CNeutrinoApp* getInstance();
+		
 		void channelsInit();
 		int run(int argc, char **argv);
 		//callback stuff only....

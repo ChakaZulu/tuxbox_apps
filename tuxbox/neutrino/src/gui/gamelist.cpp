@@ -31,6 +31,7 @@
 
 #include "gamelist.h"
 #include "../global.h"
+#include "../neutrino.h"
 
 #include <strstream.h>
 #include <sstream>
@@ -551,7 +552,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 			g_RCInput->postMsg( msg, data );
 			loop=false;
 		}
-		else if ( neutrino->handleMsg( msg, data ) & messages_return::cancel_all )
+		else if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
 		{
 			loop = false;
 			res = menu_return::RETURN_EXIT_ALL;

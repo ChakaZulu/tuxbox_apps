@@ -31,16 +31,24 @@
 
 #include "menue.h"
 #include "../global.h"
+#include "../neutrino.h"
+
+
+bool isDigit(const char ch)
+{
+	if((ch>'0') && (ch<'9'))
+		return true;
+	else return false;
+}
 
 bool isNumber(const string& str)
 {
 	for (string::const_iterator i = str.begin(); i != str.end(); i++)
 	{
-		if (!isdigit(*i)) return false;
+		if (!isDigit(*i)) return false;
 	}
 	return true;
 }
-
 
 
 CMenuWidget::CMenuWidget(string Name, string Icon, int mwidth, int mheight, bool Localizing)
@@ -208,7 +216,7 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 					break;
 */
 				default:
-					if ( neutrino->handleMsg( msg, data ) & messages_return::cancel_all )
+					if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
 					{
 						retval = menu_return::RETURN_EXIT_ALL;
 						msg = CRCInput::RC_timeout;

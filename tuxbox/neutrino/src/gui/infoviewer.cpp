@@ -31,6 +31,7 @@
 
 #include "infoviewer.h"
 #include "../global.h"
+#include "../neutrino.h"
 
 #define COL_INFOBAR_BUTTONS				COL_INFOBAR_SHADOW+ 1
 #define COL_INFOBAR_BUTTONS_GRAY		COL_INFOBAR_SHADOW+ 1
@@ -124,7 +125,7 @@ void CInfoViewer::paintTime( bool show_dot, bool firstPaint )
 
 void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid, bool calledFromNumZap )
 {
-
+	CNeutrinoApp *neutrino = CNeutrinoApp::getInstance();
         CurrentChannel = Channel;
         current_onid_sid = onid_sid;
         showButtonBar = !calledFromNumZap;

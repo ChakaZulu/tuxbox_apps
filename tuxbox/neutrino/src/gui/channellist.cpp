@@ -31,8 +31,11 @@
 
 #include "channellist.h"
 #include "../global.h"
+#include "../neutrino.h"
 
 #define info_height 60
+
+
 
 CChannelList::CChannel::CChannel()
 {
@@ -307,7 +310,7 @@ int CChannelList::show()
 		}
 		else
 		{
-			if ( neutrino->handleMsg( msg, data ) == messages_return::cancel_all )
+			if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) == messages_return::cancel_all )
 			{
 				loop = false;
 				res = - 2;
@@ -563,7 +566,7 @@ int CChannelList::numericZap(int key)
 			doZap = false;
 			break;
 		}
-		else if ( neutrino->handleMsg( msg, data ) & messages_return::cancel_all )
+		else if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
 		{
 			doZap = false;
 			res = menu_return::RETURN_EXIT_ALL;

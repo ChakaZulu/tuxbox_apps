@@ -78,6 +78,7 @@ int CFavorites::addChannelToFavorites()
 		g_Zapit->reinitChannels();
 
 		// -- same to Neutrino (keep current channel!)
+		CNeutrinoApp *neutrino = CNeutrinoApp::getInstance();
 		neutrino->channelsInit();
 		neutrino->channelList->zapToOnidSid(onid_sid);
 	}

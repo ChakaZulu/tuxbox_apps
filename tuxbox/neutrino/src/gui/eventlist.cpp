@@ -31,6 +31,7 @@
 
 #include "eventlist.hpp"
 #include "../global.h"
+#include "../neutrino.h"
 
 
 EventList::EventList()
@@ -218,7 +219,7 @@ int EventList::exec(unsigned onidSid, const std::string& channelname)
 		}
 		else
 		{
-			if ( neutrino->handleMsg( msg, data ) & messages_return::cancel_all )
+			if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
 			{
 				loop = false;
 				res = menu_return::RETURN_EXIT_ALL;

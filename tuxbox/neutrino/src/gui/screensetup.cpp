@@ -31,7 +31,7 @@
 
 #include "screensetup.h"
 #include "../global.h"
-
+#include "../neutrino.h"
 
 
 CScreenSetup::CScreenSetup()
@@ -144,7 +144,7 @@ int CScreenSetup::exec( CMenuTarget* parent, string )
 				}
 
 			default:
-				if ( neutrino->handleMsg( msg, data ) & messages_return::cancel_all )
+				if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
 				{
 					loop = false;
 					res = menu_return::RETURN_EXIT_ALL;

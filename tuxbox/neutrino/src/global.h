@@ -32,7 +32,6 @@
 
 //#define USEACTIONLOG
 
-#include "neutrino.h"
 #include "controldclient.h"
 #include "lcddclient.h"
 #include "zapitclient.h"
@@ -42,7 +41,6 @@
 
 #include "driver/fontrenderer.h"
 #include "driver/rcinput.h"
-#include "driver/framebuffer.h"
 
 #include "helpers/epgdata.h"
 #include "helpers/infoviewer.h"
@@ -64,7 +62,6 @@
 
 NEUTRINO_CPP int		NeutrinoMode;
 
-NEUTRINO_CPP  CNeutrinoApp        *neutrino;
 NEUTRINO_CPP  SNeutrinoSettings   g_settings;
 
 NEUTRINO_CPP  CLcddClient		*g_lcdd;

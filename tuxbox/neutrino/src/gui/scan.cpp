@@ -31,6 +31,7 @@
 
 #include "scan.h"
 #include "../global.h"
+#include "../neutrino.h"
 
 
 CScanTs::CScanTs()

@@ -35,6 +35,8 @@
 #include "hintbox.h"
 #include "bouqueteditor_channels.h"
 #include "../global.h"
+#include "../neutrino.h"
+
 
 CBEBouquetWidget::CBEBouquetWidget()
 {
@@ -323,7 +325,7 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 		}
 		else
 		{
-			neutrino->handleMsg( msg, data );
+			CNeutrinoApp::getInstance()->handleMsg( msg, data );
 			// kein canceling...
 		}
 	}

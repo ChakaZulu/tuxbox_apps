@@ -31,6 +31,7 @@
 
 #include "streaminfo.h"
 #include "../global.h"
+#include "../neutrino.h"
 
 CStreamInfo::CStreamInfo()
 {
@@ -66,7 +67,7 @@ int CStreamInfo::exec(CMenuTarget* parent, string)
 			doLoop = false;
 		else
 		{
-			int mr = neutrino->handleMsg( msg, data );
+			int mr = CNeutrinoApp::getInstance()->handleMsg( msg, data );
 
 			if ( mr & messages_return::cancel_all )
 			{

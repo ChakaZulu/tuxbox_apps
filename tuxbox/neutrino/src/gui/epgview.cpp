@@ -31,14 +31,16 @@
 
 #include "epgdata.h"
 #include "../global.h"
+#include "../neutrino.h"
+
 
 CEpgData::CEpgData()
 {
+	frameBuffer = CFrameBuffer::getInstance();
 }
 
 void CEpgData::start()
 {
-	frameBuffer = CFrameBuffer::getInstance();
 	ox = 540;
     sx = (((g_settings.screen_EndX-g_settings.screen_StartX) -ox) / 2) + g_settings.screen_StartX;
     oy = 320;
@@ -278,7 +280,7 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 
 		uint msg; uint data;
 		g_RCInput->getMsg( &msg, &data, 20 );
-		neutrino->handleMsg( msg, data );
+		CNeutrinoApp::getInstance()->handleMsg( msg, data );
 
 		frameBuffer->paintBackgroundBoxRel(sx, sy, ox, height+10);
 		return res;
@@ -444,7 +446,7 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 						loop = false;
 					else
 					{
-						if ( neutrino->handleMsg( msg, data ) & messages_return::cancel_all )
+						if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
 						{
 							loop = false;
 							res = menu_return::RETURN_EXIT_ALL;

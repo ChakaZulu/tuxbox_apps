@@ -31,6 +31,7 @@
 
 #include "setting_helpers.h"
 #include "../global.h"
+#include "../neutrino.h"
 
 extern "C" int pinghost( const char *hostname );
 
@@ -207,6 +208,8 @@ int CAPIDChangeExec::exec(CMenuTarget* parent, string actionKey)
 void showSubchan(string subChannelName)
 {
 	CFrameBuffer *frameBuffer = CFrameBuffer::getInstance();
+	CNeutrinoApp *neutrino = CNeutrinoApp::getInstance();
+
 	if(subChannelName!="")
 	{
 		int dx = g_Fonts->infobar_info->getRenderWidth(subChannelName.c_str()) + 20;

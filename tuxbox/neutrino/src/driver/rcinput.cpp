@@ -32,6 +32,7 @@
 
 #include "rcinput.h"
 #include "../global.h"
+#include "../neutrino.h"
 
 
 void printbin( int a)

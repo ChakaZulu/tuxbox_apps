@@ -1,7 +1,4 @@
 /*
-$Id: bouqueteditor_chanselect.cpp,v 1.13 2002/04/20 00:09:50 McClean Exp $
-
-
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -30,21 +27,12 @@ $Id: bouqueteditor_chanselect.cpp,v 1.13 2002/04/20 00:09:50 McClean Exp $
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-
-$Log: bouqueteditor_chanselect.cpp,v $
-Revision 1.13  2002/04/20 00:09:50  McClean
-framebuffer - singleton Umbau (code cleanup)
-
-Revision 1.12  2002/04/05 01:14:43  rasc
--- Favorites Bouquet handling (Easy Add Channels)
-
-
-
 */
 
 #include "bouqueteditor_chanselect.h"
 #include "../global.h"
+#include "../neutrino.h"
+
 
 CBEChannelSelectWidget::CBEChannelSelectWidget(string Caption, unsigned int Bouquet, CZapitClient::channelsMode Mode)
 {
@@ -236,7 +224,7 @@ int CBEChannelSelectWidget::exec(CMenuTarget* parent, string actionKey)
 		}*/
 		else
 		{
-			neutrino->handleMsg( msg, data );
+			CNeutrinoApp::getInstance()->handleMsg( msg, data );
 			// kein canceling...
 		}
 	}

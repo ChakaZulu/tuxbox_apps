@@ -30,6 +30,8 @@
 */
 
 #include "../global.h"
+#include "../neutrino.h"
+
 
 CBouquetList::CBouquetList( const std::string &Name )
 {
@@ -304,7 +306,7 @@ int CBouquetList::show()
 		}
 		else
 		{
-			if ( neutrino->handleMsg( msg, data ) & messages_return::cancel_all )
+			if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
 			{
 				loop = false;
 				res = -2;

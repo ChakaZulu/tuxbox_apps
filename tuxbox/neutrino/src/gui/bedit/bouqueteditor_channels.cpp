@@ -32,6 +32,8 @@
 #include "bouqueteditor_channels.h"
 #include "bouqueteditor_chanselect.h"
 #include "../global.h"
+#include "../neutrino.h"
+
 
 CBEChannelWidget::CBEChannelWidget(string Caption, unsigned int Bouquet)
 {
@@ -294,7 +296,7 @@ int CBEChannelWidget::exec(CMenuTarget* parent, string actionKey)
 		}
 		else
 		{
-			neutrino->handleMsg( msg, data );
+			CNeutrinoApp::getInstance()->handleMsg( msg, data );
 			// kein canceling...
 		}
 	}

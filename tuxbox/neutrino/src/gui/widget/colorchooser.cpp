@@ -31,6 +31,7 @@
 
 #include "colorchooser.h"
 #include "../global.h"
+#include "../neutrino.h"
 
 CColorChooser::CColorChooser(string Name, unsigned char *R, unsigned char *G, unsigned char *B, unsigned char* Alpha, CChangeObserver* Observer)
 {
@@ -252,7 +253,7 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 				break;
 
 			default:
-				if ( neutrino->handleMsg( msg, data ) & messages_return::cancel_all )
+				if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
 				{
 					loop = false;
 					res = menu_return::RETURN_EXIT_ALL;
