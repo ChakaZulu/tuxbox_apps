@@ -3340,6 +3340,8 @@ void eZapMain::startSkip(int dir)
 		skipLabel1->setText(s);
 	}
 	showInfobar();
+	if ( timeout.isActive() )
+		timeout.stop();
 }
 
 void eZapMain::skipLoop()
