@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.75 2003/01/30 17:21:16 obi Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.76 2003/02/14 15:19:31 thegoodguy Exp $ *
  *
  * Client-Interface für zapit - DBoxII-Project
  *
@@ -426,7 +426,9 @@ delivery_system_t CZapitClient::getDeliverySystem(void)
 	send(CZapitMessages::CMD_GET_DELIVERY_SYSTEM, 0, 0);
 
 	CZapitMessages::responseDeliverySystem response;
-	CBasicClient::receive_data((char* )&response, sizeof(response));
+
+	if (!CBasicClient::receive_data((char* )&response, sizeof(response)))
+		response.system = DVB_S;  // return DVB_S if communication fails
 
 	close_connection();
 
