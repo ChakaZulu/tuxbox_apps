@@ -31,7 +31,6 @@ fbClass::fbClass(const char *fb)
 
 	int state=0;
 	eConfig::getInstance()->getKey("/ezap/osd/showConsoleOnFB", state);
-	showConsole(state);
 
 	fd=open(fb, O_RDWR);
 	if (fd<0)
@@ -72,12 +71,12 @@ nolfb:
 
 int fbClass::showConsole(int state)
 {
-	int fd=open("/dev/console", O_RDWR);
+	int fd=open("/dev/vc/0", O_RDWR);
 	if(fd>=0)
 	{
 		if(ioctl(fd, KDSETMODE, state?KD_TEXT:KD_GRAPHICS)<0)
 		{
-			eDebug("setting /dev/console status failed.");
+			eDebug("setting /dev/vc/0 status failed.");
 		}
 		close(fd);
 	}
