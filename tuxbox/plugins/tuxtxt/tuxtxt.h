@@ -149,7 +149,7 @@ struct fb_fix_screeninfo fix_screeninfo;
 FT_Library	library;
 FT_Face		face;
 
-int dmx, rc, fb, extrc;
+int dmx, rc, fb;
 
 int PosX, PosY, StartX,	StartY, sx, sy, ex, ey;
 
@@ -163,7 +163,7 @@ int Page = 0x100, PageInput = 0, PageInputCount = 2, update = 1, visible = 1, sh
 int packet, current_page = -1, vtxtpid;
 
 unsigned char *pagebuffer;
-unsigned char  pagetable[0x8FF];
+unsigned char  pagetable[0x899];
 unsigned char  backbuffer[720*576];
 unsigned char  timestring[8];
 unsigned char  page_char[40*24];
@@ -190,4 +190,3 @@ unsigned char dehamming[]=
 	0xFF, 0x0C, 0x0F, 0xFF, 0x04, 0xFF, 0xFF, 0x09, 0x0F, 0xFF, 0x0F, 0x0F, 0xFF, 0x0E, 0x0F, 0xFF, 
 	0x08, 0xFF, 0xFF, 0x05, 0xFF, 0x0E, 0x0D, 0xFF, 0xFF, 0x0E, 0x0F, 0xFF, 0x0E, 0x0E, 0xFF, 0x0E
 };
-

@@ -5,6 +5,7 @@
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
+ *    V1.4 (LazyT): skip not received pages on +/-10, some mods               *
  *    V1.3 (LazyT): segfault fixed                                            *
  *    V1.2 (trh)  : made it work under enigma                                 *
  *    V1.1 (LazyT): added tuxtxt to cvs                                       *
@@ -18,12 +19,9 @@
 
 void plugin_exec(PluginParam *par)
 {
-		rc=0;
-		extrc=0;
-	
 	//show versioninfo
 
-		printf("\nTuxTxt [1.3]\n\n");
+		printf("\nTuxTxt [1.4]\n\n");
 
 	//get params
 
@@ -32,6 +30,10 @@ void plugin_exec(PluginParam *par)
 			if(!strcmp(par->id, P_ID_FBUFFER))
 			{
 				fb = atoi(par->val);
+			}
+			else if (!strcmp(par->id, P_ID_RCINPUT))
+			{
+				rc = atoi(par->val);
 			}
 			else if (!strcmp(par->id, P_ID_VTXTPID))
 			{
@@ -52,10 +54,6 @@ void plugin_exec(PluginParam *par)
 			else if (!strcmp(par->id, P_ID_END_Y))
 			{
 				ey = atoi(par->val);
-			}
-			else if (!strcmp(par->id, P_ID_RCINPUT))
-			{
-				extrc = atoi(par->val);
 			}
 		}
 
@@ -82,7 +80,8 @@ void plugin_exec(PluginParam *par)
 			{
 				switch(RCCode)
 				{
-					case RC_0:		//direct page number or page 100
+					case RC_0:	//direct page number or page 100
+
 									if(PageInputCount == 2)
 									{
 										PageInput = 0;
@@ -97,55 +96,64 @@ void plugin_exec(PluginParam *par)
 									}
 									break;
 
-					case RC_1:		//direct page number
+					case RC_1:	//direct page number
+
 									RenderPageNumber('1');
 									PageInput |= 1 << PageInputCount*4;
 									PageInputCount--;
 									break;
 
-					case RC_2:		//direct page number
+					case RC_2:	//direct page number
+
 									RenderPageNumber('2');
 									PageInput |= 2 << PageInputCount*4;
 									PageInputCount--;
 									break;
 
-					case RC_3:		//direct page number
+					case RC_3:	//direct page number
+
 									RenderPageNumber('3');
 									PageInput |= 3 << PageInputCount*4;
 									PageInputCount--;
 									break;
 
-					case RC_4:		//direct page number
+					case RC_4:	//direct page number
+
 									RenderPageNumber('4');
 									PageInput |= 4 << PageInputCount*4;
 									PageInputCount--;
 									break;
 
-					case RC_5:		//direct page number
+					case RC_5:	//direct page number
+
 									RenderPageNumber('5');
 									PageInput |= 5 << PageInputCount*4;
 									PageInputCount--;
 									break;
 
-					case RC_6:		//direct page number
+					case RC_6:	//direct page number
+
 									RenderPageNumber('6');
 									PageInput |= 6 << PageInputCount*4;
 									PageInputCount--;
 									break;
 
-					case RC_7:		//direct page number
+					case RC_7:	//direct page number
+
 									RenderPageNumber('7');
 									PageInput |= 7 << PageInputCount*4;
 									PageInputCount--;
 									break;
 
-					case RC_8:		//direct page number
+					case RC_8:	//direct page number
+
 									RenderPageNumber('8');
 									PageInput |= 8 << PageInputCount*4;
 									PageInputCount--;
 									break;
 
-					case RC_9:		//direct page number
+					case RC_9:	//direct page number
+
 									if(PageInputCount == 2)
 									{
 									  break;
@@ -155,12 +163,15 @@ void plugin_exec(PluginParam *par)
 										RenderPageNumber('9');
 										PageInput |= 9 << PageInputCount*4;
 									}
+
 									PageInputCount--;
 									break;
 
-					case RC_UP:		//page +1
+					case RC_UP:	//page +1
+
 									PageInput = 0;
 									PageInputCount = 2;
+
 									if(Page < 0x899)
 									{
 										Page++;
@@ -180,10 +191,11 @@ void plugin_exec(PluginParam *par)
 										Page = 0x100;
 									}
 
-									//skip not received pages
+								//skip not received pages
+
 									if(pagetable[Page] == 0)
 									{
-										for( ; Page <= 0x899; Page++)
+										for( ; Page < 0x899; Page++)
 										{
 											if(pagetable[Page] == 1)
 											{
@@ -191,12 +203,23 @@ void plugin_exec(PluginParam *par)
 											}
 										}
 									}
+
+								//feedback
+
+									PosX = StartX + 8*fontwidth;
+									PosY = StartY;
+									RenderCharFB('+', white);
+									RenderCharFB('0', white);
+									RenderCharFB('1', white);
+
 									update = 1;
 									break;
 
-					case RC_DOWN:	//page -1
+					case RC_DOWN://page -1
+
 									PageInput = 0;
 									PageInputCount = 2;
+
 									if(Page > 0x100)
 									{
 										Page--;
@@ -216,10 +239,11 @@ void plugin_exec(PluginParam *par)
 										Page = 0x899;
 									}
 
-									//skip not received pages
+								//skip not received pages
+
 									if(pagetable[Page] == 0)
 									{
-										for( ; Page >= 0x100; Page--)
+										for( ; Page > 0x100; Page--)
 										{
 											if(pagetable[Page] == 1)
 											{
@@ -227,13 +251,24 @@ void plugin_exec(PluginParam *par)
 											}
 										}
 									}
+
+								//feedback
+
+									PosX = StartX + 8*fontwidth;
+									PosY = StartY;
+									RenderCharFB('-', white);
+									RenderCharFB('0', white);
+									RenderCharFB('1', white);
+
 									update = 1;
 									break;
 
-					case RC_RIGHT:	//page +10
+					case RC_RIGHT://page +10
+
 									PageInput = 0;
 									PageInputCount = 2;
 									Page &= 0xFF0;
+
 									if((Page & 0x0F0) == 0x90)
 									{
 										Page += 0x70;
@@ -242,16 +277,41 @@ void plugin_exec(PluginParam *par)
 									{
 										Page += 0x10;
 									}
+
 									if(Page == 0x900)
 									{
 										Page = 0x100;
 									}
+
+								//skip not received pages
+
+									if(pagetable[Page] == 0)
+									{
+										for( ; Page < 0x890; Page+=0x10)
+										{
+											if(pagetable[Page] == 1)
+											{
+												break;
+											}
+										}
+									}
+
+								//feedback
+
+									PosX = StartX + 8*fontwidth;
+									PosY = StartY;
+									RenderCharFB('+', white);
+									RenderCharFB('1', white);
+									RenderCharFB('0', white);
+
 									update = 1;
 									break;
 
-					case RC_LEFT:	//page -10
+					case RC_LEFT://page -10
+
 									PageInput = 0;
 									PageInputCount = 2;
+
 									if((Page & 0x00F) == 0)
 									{
 										Page -= 0x10;
@@ -260,19 +320,44 @@ void plugin_exec(PluginParam *par)
 									{
 										Page &= 0xFF0;
 									}
+
 									if((Page & 0x0F0) == 0xF0)
 									{
 										Page &= 0xFF0;
 										Page -= 0x60;
 									}
+
 									if(Page == 0x090)
 									{
 										Page = 0x890;
 									}
+
+								//skip not received pages
+
+									if(pagetable[Page] == 0)
+									{
+										for( ; Page > 0x110; Page-=0x10)
+										{
+											if(pagetable[Page] == 1)
+											{
+												break;
+											}
+										}
+									}
+
+								//feedback
+
+									PosX = StartX + 8*fontwidth;
+									PosY = StartY;
+									RenderCharFB('-', white);
+									RenderCharFB('1', white);
+									RenderCharFB('0', white);
+
 									update = 1;
 									break;
 
-					case RC_OK:		//show or hide videotext
+					case RC_OK:	//show or hide videotext
+
 									if(visible)
 									{
 									  ClearFramebuffer(transp);
@@ -283,6 +368,8 @@ void plugin_exec(PluginParam *par)
 									  visible = 1;
 									  update = 1;
 									}
+
+									show_string = 1;
 									break;
 				}
 
@@ -292,6 +379,7 @@ void plugin_exec(PluginParam *par)
 					PageInput = 0;
 					PageInputCount = 2;
 					update = 1;
+					show_string = 1;
 				}
 			}
 
@@ -318,9 +406,6 @@ void plugin_exec(PluginParam *par)
 
 		close(dmx);
 
-		if(!extrc)
-			close(rc);
-
 		FT_Done_FreeType(library);
 
 		munmap(lfb, fix_screeninfo.smem_len);
@@ -344,21 +429,9 @@ int Init()
 			return 0;
 		}
 
-	//open rc
+	//setup rc
 
-		if(!extrc)
-		{
-			if((rc = open("/dev/dbox/rc0", O_RDONLY | O_NONBLOCK)) == -1)
-			{
-				perror("open remotecontrol failed");
-				return 0;
-			}
-		}
-		else
-		{
-			rc = extrc;
-		}
-
+		fcntl(rc, F_SETFL, O_NONBLOCK);
 		ioctl(rc, RC_IOCTL_BCODES, 1);
 
 	//allocate pagebuffer & init all buffers
@@ -656,15 +729,14 @@ void RenderString()
 
 	//set pagenumber
 
-		message_2[8] = (Page >> 8) | '0';
-		message_2[9] = (Page & 0x0F0)>>4 | '0';
+		message_2[ 8] = (Page >> 8) | '0';
+		message_2[ 9] = (Page & 0x0F0)>>4 | '0';
 		message_2[10] = (Page & 0x00F) | '0';
 
-	//render string to framebuffer
+	//render strings to framebuffer
 
 		PosX = StartX + fontwidth/2;
 		PosY = StartY + fontheight*11;
-
 		for(x = 0; x < 39; x++)
 		{
 			RenderCharFB(message_1[x], 1<<6 | red<<3 | white);
@@ -672,7 +744,6 @@ void RenderString()
 
 		PosX = StartX + fontwidth/2;
 		PosY = StartY + fontheight*12;
-
 		RenderCharFB(message_2[0], 1<<6 | red<<3 | white);
 		for(x = 1; x < 38; x++)
 		{
@@ -682,7 +753,6 @@ void RenderString()
 
 		PosX = StartX + fontwidth/2;
 		PosY = StartY + fontheight*13;
-
 		for(x = 0; x < 39; x++)
 		{
 			RenderCharFB(message_3[x], 1<<6 | red<<3 | white);
