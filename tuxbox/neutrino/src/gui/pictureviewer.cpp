@@ -220,10 +220,7 @@ int CPictureViewerGui::show()
 		{
 			if(m_state!=MENU)
 			{
-				unsigned int next=selected-1;
-				if(next < 0)
-					next = 0;
-				view(next);
+				view((selected == 0) ? (playlist.size() - 1) : (selected - 1));
 			}
 		}
 		else if( msg == CRCInput::RC_right)
@@ -421,6 +418,8 @@ int CPictureViewerGui::show()
 				  msg == NeutrinoMessages::SLEEPTIMER)
 		{
 			// Exit for Record/Zapto Timers
+			if (m_state != MENU)
+				endView();
 			loop = false;
 			g_RCInput->postMsg(msg, data);
 		}
