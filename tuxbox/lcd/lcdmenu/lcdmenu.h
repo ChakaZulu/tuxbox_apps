@@ -1,5 +1,5 @@
 /*
- * $Id: lcdmenu.h,v 1.9 2001/12/15 12:43:56 obi Exp $
+ * $Id: lcdmenu.h,v 1.10 2002/01/03 17:18:59 obi Exp $
  *
  * Copyright (C) 2001 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,85 +19,91 @@
  *
  */
 
-#ifndef __LCDMENU_H_
-#define __LCDMENU_H_
+#ifndef __LCDMENU_H__
+#define __LCDMENU_H__
 
-#include <config.h>
 #include <crypt.h>
-#include <liblcddisplay.h>
-#include <dbox/fp.h>
-#include "configManager.h"
+#include <signal.h>
+#include <unistd.h>
 
-#ifndef X86_BUILD
-#include "rcinput.h"
-#endif /* X86_BUILD */
+#include <dbox/fp.h>
+#include <liblcddisplay.h>
 
 #include <string>
 #include <vector>
 using namespace std;
+
+#include "configManager.h"
+#include "rcinput.h"
+#include "config.h"
 
 #define LEFTALIGNED	0
 #define CENTERED	1
 
 class CLCDMenu : public CLCDDisplay
 {
-    public:
+	public:
+		static CLCDMenu *getInstance()
+		{
+			if (instance == NULL)
+				instance = new CLCDMenu(CONFIGDIR "/lcdmenu.conf");
+			return instance;
+		}
 
-	CLCDMenu();
-	~CLCDMenu();
+		void addEntry(string);
+		bool selectEntry(int);
+		int getDefaultEntry() { return defaultEntry; }
+		int getSelectedEntry() { return selectedEntry; }
+		void addNumberPrefix();
 
-	void addEntry(string);
-	bool selectEntry(int);
-	int getDefaultEntry() { return defaultEntry; }
-	int getSelectedEntry() { return selectedEntry; }
-	void addNumberPrefix();
+		bool drawMenu();
+		bool drawString(string, int, int, int);
+		int getTextAlign() { return textAlign; } /* 0=left, 1=centered */
 
-	bool drawMenu();
-	bool drawString(string, int, int, int);
-	int getTextAlign() { return textAlign; } /* 0=left, 1=centered */
+		CRCInput *getRc()  { return rc; }
+		bool rcLoop();
 
-#ifndef X86_BUILD
-	CRCInput *getRc()  { return rc; }
-#endif /* X86_BUILD */
-	bool rcLoop();
+		string pinScreen(string, bool);
+		bool changePin();
+		bool checkPin(string);
+		bool isPinProtected(int);
+		void addPinProtection(int);
 
-	string pinScreen(string, bool);
-	bool changePin();
-	bool checkPin(string);
-	bool isPinProtected(int);
-	void addPinProtection(int);
-
-	const char *getCurrentSalt();
-	char *getNewSalt();
+		const char *getCurrentSalt();
+		char *getNewSalt();
 	
-	void poweroff();
+		void poweroff();
 
-	CConfigManager *getConfig() { return config; }
+		CConfigManager *getConfig() { return config; }
 
-    private:
+	protected:
+		CLCDMenu(string); /* configuration filename */
+		~CLCDMenu();
+		
+	private:
+		static CLCDMenu *instance;
+		static void timeout(int);
 	
-	CConfigManager *config;
+		CConfigManager *config;
+		CRCInput *rc;
+		fontRenderClass *fontRenderer;
+		Font *menuFont;
 
-#ifndef X86_BUILD
-	CRCInput *rc;
-#endif /* X86_BUILD */
+		int fontSize;
+		int lineSpacing;
+		int textAlign;
+		bool showNumbers;
 
-	fontRenderClass *fontRenderer;
-	Font *menuFont;
-	int fontSize;
-	int lineSpacing;
-	int textAlign;
-	bool showNumbers;
+		int selectedEntry;
+		int entryCount;
+		int defaultEntry;
 
-	int selectedEntry;
-	int entryCount;
-	int defaultEntry;
-	vector<string> entries;
-	vector<int> pinEntries;
+		vector<string> entries;
+		vector<int> pinEntries;
 
-	int pinFailures;
-	string cryptedPin;
-	char *newSalt;
+		int pinFailures;
+		string cryptedPin;
+		char *newSalt;
 };
 
-#endif /* __LCDMENU_H_ */
+#endif /* __LCDMENU_H__ */
