@@ -468,12 +468,12 @@ void	DrawInfo( int what )
 	if ( what & 1 )
 	{
 		sprintf(text,"OUT %d  ",in_level);
-		FBDrawString(257,354,30,text,GREEN,STEELBLUE);
+		FBDrawString(120,354,30,text,GREEN,STEELBLUE);
 	}
 	if ( what & 2 )
 	{
 		sprintf(text,"IN %d%%   ",lem_in*100/lem_cnt);
-		FBDrawString(400,354,30,text,GREEN,STEELBLUE);
+		FBDrawString(260,354,30,text,GREEN,STEELBLUE);
 	}
 }
 
