@@ -17,10 +17,16 @@
 class eventData;
 
 #define eventMap std::map<int, eventData*>
-#define eventCache __gnu_cxx::hash_map<sref, eventMap >
-#define updateMap __gnu_cxx::hash_map<sref, time_t >
 
-namespace __gnu_cxx
+#if defined(__GNUC__) && __GNUC__ >= 3 && __GNUC_MINOR__ >= 1  // check if gcc version >= 3.1
+	#define eventCache __gnu_cxx::hash_map<sref, eventMap >
+	#define updateMap __gnu_cxx::hash_map<sref, time_t >
+	namespace __gnu_cxx
+#else																													// for older gcc use following
+	#define eventCache std::hash_map<sref, eventMap >
+	#define updateMap std::hash_map<sref, time_t >
+	namespace std
+#endif
 {
 struct hash<sref>
 {

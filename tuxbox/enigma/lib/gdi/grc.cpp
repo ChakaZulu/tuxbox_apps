@@ -18,7 +18,7 @@ gRC *gRC::instance=0;
 
 gRC::gRC(): queuelock(MAXSIZE)
 {
-//	ASSERT(!instance);
+	ASSERT(!instance);
 	instance=this;
 	queuelock.lock(MAXSIZE);
 	eDebug(pthread_create(&the_thread, 0, thread_wrapper, this)?"RC thread couldn't be created":"RC thread createted successfully");
@@ -71,7 +71,7 @@ gPainter::gPainter(gDC &dc, eRect rect): dc(dc), rc(gRC::getInstance()), foregro
 {
 	if (rect.isNull())
 		rect=eRect(ePoint(0, 0), dc.getSize());
-//	ASSERT(!gPainter_instances);
+	ASSERT(!gPainter_instances);
 	gPainter_instances++;
 	begin(rect);
 }

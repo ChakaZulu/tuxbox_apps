@@ -93,7 +93,7 @@ int eTransponderWidget::setTransponder(eTransponder *transponder)
 		else
 			fec->setCurrent(fecEntry[0]);
 
-		polarity->setCurrent(polarityEntry[0]);
+		polarity->setCurrent(polarityEntry[!transponder->satellite.polarisation]);
 		symbolrate->setNumber(transponder->satellite.symbol_rate/1000);
 		
 		inversion->setCheck(transponder->satellite.inversion);
