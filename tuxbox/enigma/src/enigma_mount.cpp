@@ -194,20 +194,23 @@ int eMountPoint::mount()
 					case 0:	/* NFS */
 						if (fileSystemIsSupported("nfs"))
 						{
+							eString options = mp.options;
 							cmd = "mount -t nfs ";
 							cmd += ip + ":" + mp.mountDir + " " + mp.localDir;
-							cmd += " -o" + mp.options;
+							
 							if (mp.rsize != -1)
 							{
-								cmd += eString().sprintf("rsize=%d", mp.rsize);
-								cmd += (mp.options) ? "," : "";
+								options += (options) ? "," : "";
+								options += eString().sprintf("rsize=%d", mp.rsize);
 							}
 							if (mp.wsize != -1)
 							{
-								cmd += eString().sprintf(",wsize=%d", mp.wsize);
-								cmd += (mp.options) ? "," : "";
+								options += (options) ? "," : "";
+								options += eString().sprintf(",wsize=%d", mp.wsize);
 							}
-							cmd += (mp.ownOptions) ? mp.ownOptions : "";
+							options += (options && mp.ownOptions) ? "," : "";
+							options += mp.ownOptions;
+							cmd += " -o " + options;
 						}
 						else
 							rc = -4; //NFS filesystem not supported
@@ -223,7 +226,7 @@ int eMountPoint::mount()
 							cmd += ",unc=//" + ip + "/" + mp.mountDir;
 							cmd += (mp.options) ? "," : "";
 							cmd += mp.options;
-							cmd += (mp.ownOptions) ? "," : "";
+							cmd += (mp.ownOptions && mp.options) ? "," : "";
 							cmd += mp.ownOptions;
 						}
 						else
