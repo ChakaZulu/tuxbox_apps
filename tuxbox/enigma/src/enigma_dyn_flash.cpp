@@ -177,16 +177,15 @@ int eFlashOperationsHandler::writeFlash(eString mtd, eString filename)
 	for (erase.start = 0; erase.start < meminfo.size; erase.start += meminfo.erasesize)
 	{
 		progressComplete = erase.start * 100 / meminfo.size;
-#if 0
+#if 1
 		if (ioctl(fd2, MEMERASE, &erase) != 0)
 		{
 			close(fd1);
 			close(fd2);
 			return -8;
 		}
-#else
-		sleep(1);
 #endif
+		sleep(1);
 	}
 
 	progressMessage2 = "Writing " + filename + " to flash partition " + mtddev + "...";
@@ -199,11 +198,10 @@ int eFlashOperationsHandler::writeFlash(eString mtd, eString filename)
 		if (block > (long)sizeof(buf))
 			block = sizeof(buf);
 		read(fd1, buf, block);
-#if 0
+#if 1
 		write(fd2, buf, block);
-#else
-		sleep(1);
 #endif
+		sleep(1);
 		fsize -= block;
 		progressComplete = ((filesize - fsize) * 100) / filesize;
 	}
