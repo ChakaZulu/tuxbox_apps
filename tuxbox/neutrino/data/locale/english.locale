@@ -271,3 +271,8 @@ bouqueteditor.rename Rename
 bouqueteditor.newbouquetname New name of bouquets
 bouqueteditor.bouquetname Name of bouquets
 
+bouqueteditor.savechanges? Do you want to save the changes?
+
+messagebox.yes Yes
+messagebox.no No
+messagebox.cancel Cancel

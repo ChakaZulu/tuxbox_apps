@@ -266,4 +266,8 @@ bouqueteditor.move Verschieben
 bouqueteditor.rename Umbenennen
 bouqueteditor.newbouquetname Neuer Name des Bouquets
 bouqueteditor.bouquetname Name des Bouquets
+bouqueteditor.savechanges? Sollen die Änderungen gespeichert werden?
 
+messagebox.yes Ja
+messagebox.no Nein
+messagebox.cancel Abbrechen
