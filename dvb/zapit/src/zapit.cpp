@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.315 2003/05/28 18:51:55 digi_casi Exp $
+ * $Id: zapit.cpp,v 1.316 2003/05/28 19:05:33 digi_casi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -113,6 +113,7 @@ extern short scan_runs;
 CZapitClient::bouquetMode bouquetMode = CZapitClient::BM_CREATEBOUQUETS;
 
 extern std::map <string, uint8_t> motorPositions;
+extern std::map <string, int32_t> satellitePositions;
 
 bool standby = true;
 
@@ -1500,7 +1501,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.315 2003/05/28 18:51:55 digi_casi Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.316 2003/05/28 19:05:33 digi_casi Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
