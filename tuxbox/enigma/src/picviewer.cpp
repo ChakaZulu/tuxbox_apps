@@ -1,3 +1,5 @@
+#ifdef PICVIEWER
+
 #include <algorithm>
 #include <list>
 
@@ -96,3 +98,5 @@ void ePicViewerStyleSelector::entrySelected(eListBoxEntryText* e)
 	}
 	close(-1);
 }
+#endif
+
