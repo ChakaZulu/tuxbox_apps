@@ -731,6 +731,11 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 			 				dont_delete_p = true;
 */
 			 			}
+			 			if (emsg.eventID==CTimerdClient::EVT_SHUTDOWN)
+			 			{
+			 				*msg = NeutrinoMessages::SHUTDOWN;
+			 				*data = 0;
+			 			}
 			 		}
 			 		else
 			 			printf("[neutrino] event - unknown initiatorID 0x%x\n",  emsg.initiatorID);
