@@ -689,6 +689,7 @@ void eUpgrade::flashImage(int checkmd5)
 						close(fd);
 					}
 					eZap::getInstance()->getDesktop(eZap::desktopFB)->makeRoot();
+					fbClass::getInstance()->lock();
 				}
 				else
 				{
