@@ -357,7 +357,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 	showGlobalStatus(60);
 
 	//flash it...
-	if(!ft.program(filename, 80, 100))
+	if(!ft.program(std::string(gTmpPath local_cramfs_filename), 80, 100))
 	{
 		hide();
 		ShowHintUTF("messagebox.error", ft.getErrorMessage().c_str()); // UTF-8
