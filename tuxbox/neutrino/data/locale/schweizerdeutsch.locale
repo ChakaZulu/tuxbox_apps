@@ -106,6 +106,7 @@ recordingmenu.vcr Videorecorder
 recordingmenu.server_wakeup Uffnahmesörfer WOL
 recordingmenu.server_mac Mac Adräss
 recordingmenu.setupnow Iinsdellige jetz überneh
+recordingmenu.no_scart  Scart-Umschaldig underdrugge
 
 ping.ok isch erreichbar (ping)
 ping.unreachable isch nidd erreichbar (unreachable)
@@ -592,9 +593,12 @@ timerlist.modeselect Modus Usswahl
 timerlist.modetv TV-Kanäl
 timerlist.moderadio Radio-Kanäl
 timersettings.separator Timeriischdellige
-timersettings.record_safety_time Uufnahmekorrektur
-timersettings.record_safety_time.hint_1 Korrekturziit in Min. (00=aus), die biem Start
-timersettings.record_safety_time.hint_2 des jewilige Timers abzoge wärde
+timersettings.record_safety_time_before Uffnahmestart-Korrekdur
+timersettings.record_safety_time_before.hint_1 Korregdurzit in Min. (00=aus), die bim Start
+timersettings.record_safety_time_before.hint_2 vom jewilige Timer abzoge wärde
+timersettings.record_safety_time_after Uffnahmeänd-Korrekdur
+timersettings.record_safety_time_after.hint_1 Korrekdurzit in Min. (00=aus), die uff'd End-
+timersettings.record_safety_time_after.hint_2 zit vom jewilige Timer dezuezellt wird
 
 fontsize.menu Menutext
 fontsize.menu_title Menu Titel
@@ -616,12 +620,15 @@ fontsize.infobar_number Infobar Nummere
 fontsize.infobar_channame Infobar Kanal
 fontsize.infobar_info Infobar Info
 fontsize.infobar_small Infobar chlei
+fontsize.gamelist_itemLarge gross
+fontsize.gamelist_itemSmall chlei
 
 fontmenu.head Schriftgrössen Iischdellige
 fontmenu.channellist Kanallischde
 fontmenu.eventlist Eventlist
 fontmenu.epg EPG
 fontmenu.infobar Infobar
+fontmenu.gamelist Gameliste
 
 colormenu.gtx_alpha Transparänz (GTX)
 gtxalpha.alpha1 Alpha 1
