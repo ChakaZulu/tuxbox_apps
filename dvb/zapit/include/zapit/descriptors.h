@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.h,v 1.12 2002/09/04 11:52:56 obi Exp $
+ * $Id: descriptors.h,v 1.13 2002/09/11 20:24:03 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -53,7 +53,7 @@ uint8_t FmxBufferSize_descriptor (uint8_t *buffer);
 uint8_t MultiplexBuffer_descriptor (uint8_t *buffer);
 uint8_t FlexMuxTiming_descriptor (uint8_t *buffer);
 uint8_t network_name_descriptor (uint8_t *buffer);
-uint8_t service_list_descriptor (uint8_t *buffer, unsigned short transport_stream_id);
+uint8_t service_list_descriptor (uint8_t *buffer, uint16_t original_network_id);
 uint8_t stuffing_descriptor (uint8_t *buffer);
 uint8_t satellite_delivery_system_descriptor (uint8_t *buffer, uint16_t transport_stream_id, uint16_t original_network_id, uint8_t DiSEqC);
 uint8_t cable_delivery_system_descriptor (uint8_t *buffer, uint16_t transport_stream_id, uint16_t original_network_id);

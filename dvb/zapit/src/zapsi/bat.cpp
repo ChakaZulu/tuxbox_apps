@@ -1,5 +1,5 @@
 /*
- * $Id: bat.cpp,v 1.7 2002/09/10 18:34:26 obi Exp $
+ * $Id: bat.cpp,v 1.8 2002/09/11 20:24:03 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -128,7 +128,7 @@ int parse_bat (int demux_fd)
 				switch (buffer[pos3])
 				{
 				case 0x41:
-					service_list_descriptor(buffer + pos3, transport_stream_id);
+					service_list_descriptor(buffer + pos3, original_network_id);
 					break;
 
 				case 0x42:

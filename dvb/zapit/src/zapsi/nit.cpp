@@ -1,5 +1,5 @@
 /*
- * $Id: nit.cpp,v 1.25 2002/09/10 18:34:26 obi Exp $
+ * $Id: nit.cpp,v 1.26 2002/09/11 20:24:03 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -146,7 +146,7 @@ int parse_nit (unsigned char DiSEqC)
 					switch (buffer[pos2])
 					{
 					case 0x41:
-						service_list_descriptor(buffer + pos2, transport_stream_id);
+						service_list_descriptor(buffer + pos2, original_network_id);
 						break;
 
 					case 0x43:
