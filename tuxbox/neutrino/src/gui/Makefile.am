@@ -24,7 +24,7 @@ libneutrino_gui_a_SOURCES = \
 #	ch_mosaic.cpp
 
 libneutrino_gui2_a_SOURCES = \
-	streaminfo.cpp alphasetup.cpp motorcontrol.cpp 
+	alphasetup.cpp motorcontrol.cpp 
 
 libtimerlist_a_SOURCES = \
 	timerlist.cpp

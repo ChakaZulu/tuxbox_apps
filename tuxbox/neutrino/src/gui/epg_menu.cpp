@@ -42,7 +42,7 @@
 #include <gui/eventlist.h>
 #include <gui/infoviewer.h>
 #include <gui/epgplus.h>
-#include <gui/streaminfo.h>
+#include <gui/streaminfo2.h>
 
 
 
@@ -78,7 +78,7 @@ int CEPGMenuHandler::doMenu ()
 	EPGSelector.addItem(new CMenuForwarder(LOCALE_EPGMENU_EVENTLIST , true, NULL, new CEventListHandler(), "", CRCInput::RC_red   , NEUTRINO_ICON_BUTTON_RED   ), false);
 	EPGSelector.addItem(new CMenuForwarder(LOCALE_EPGMENU_EPGPLUS   , true, NULL, new CEPGplusHandler()  , "", CRCInput::RC_green , NEUTRINO_ICON_BUTTON_GREEN ), false);
 	EPGSelector.addItem(new CMenuForwarder(LOCALE_EPGMENU_EVENTINFO , true, NULL, new CEPGDataHandler()  , "", CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW), false);
-	EPGSelector.addItem(new CMenuForwarder(LOCALE_EPGMENU_STREAMINFO, true, NULL, new CStreamInfo()      , "", CRCInput::RC_blue  , NEUTRINO_ICON_BUTTON_BLUE  ), false);
+	EPGSelector.addItem(new CMenuForwarder(LOCALE_EPGMENU_STREAMINFO, true, NULL, new CStreamInfo2()     , "", CRCInput::RC_blue  , NEUTRINO_ICON_BUTTON_BLUE  ), false);
 
 	EPGSelector.addItem(GenericMenuSeparator);
 

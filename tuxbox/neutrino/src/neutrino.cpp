@@ -2663,8 +2663,6 @@ void CNeutrinoApp::ShowStreamFeatures()
 	// -- Experimental Code
 	// -- rasc (2003-12)
 
-	StreamFeatureSelector.addItem(new CMenuForwarderNonLocalized("experimental", true, NULL, new CStreamInfo2(), "", CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE), false);
-
 
 	// StreamFeatureSelector.addItem(new CMenuForwarderNonLocalized("experimental", true, NULL, new CChMosaicHandler(), id, CRCInput::RC_nokey, ""), false);
 

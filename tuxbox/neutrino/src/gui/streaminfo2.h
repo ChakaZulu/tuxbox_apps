@@ -58,13 +58,29 @@ class CStreamInfo2 : public CMenuTarget
 		int   sigBox_w;
 		int   sigBox_h;
 		int   sigBox_pos;
+		int   sig_text_y;
+		int   sig_text_ber_x;
+		int   sig_text_sig_x;
+		int   sig_text_snr_x;
+
+		struct feSignal {
+			int	ber, old_ber;
+			int	sig, old_sig;
+			int	snr, old_snr;
+			// int	has_lock;
+			// int	has_signal;
+		} signal;
 
 
+
+		int  doSignalStrengthLoop();
 		void paint();
 		void paint_pig(int x, int y, int w, int h);
 		void paint_techinfo(int x, int y);
 		void paint_signal_fe_box(int x, int y, int w, int h);
-		void paint_signal_fe(long ber, long snr, long sig );
+		void paint_signal_fe(struct feSignal s);
+		int  y_signal_fe(int value, int max_range, int max_y);
+		void SignalRenderStr (int value, int x, int y);
 
 
 

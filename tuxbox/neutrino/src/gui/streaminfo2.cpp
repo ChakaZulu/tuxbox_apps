@@ -74,7 +74,7 @@ CStreamInfo2::CStreamInfo2()
 	frameBuffer->paletteSetColor(COL_WHITE,   0x00FFFFFF, 0);
 	frameBuffer->paletteSetColor(COL_RED,     0x00FF0000, 0);
 	frameBuffer->paletteSetColor(COL_GREEN,   0x0000FF00, 0);
-	frameBuffer->paletteSetColor(COL_BLUE,    0x000000FF, 0);
+	frameBuffer->paletteSetColor(COL_BLUE,    0x002020FF, 0);
 	frameBuffer->paletteSetColor(COL_YELLOW,  0x0000FFFF, 0);
 	frameBuffer->paletteSetColor(COL_BLACK,   0x00000000, 0);
 
@@ -98,18 +98,75 @@ CStreamInfo2::~CStreamInfo2()
 
 int CStreamInfo2::exec(CMenuTarget* parent, const std::string &)
 {
+   int res; 
+
 	if (parent)
 	{
 		parent->hide();
 	}
 	paint();
 
-	int res = g_RCInput->messageLoop();
+	doSignalStrengthLoop ();
 
 	hide();
 
         res = menu_return::RETURN_EXIT_ALL;
 	return res;
+}
+
+
+
+
+int CStreamInfo2::doSignalStrengthLoop ()
+{
+	neutrino_msg_t      msg;
+	CZapitClient::responseFESignal s;
+
+
+	signal.old_sig = -1;
+	signal.old_snr = -1;
+	signal.old_ber = -1;
+	
+
+	while (1) {
+		neutrino_msg_data_t data;
+
+		unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd_MS(100);
+		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+
+
+		// -- read signal from Frontend
+
+
+		g_Zapit->getFESignal(s);
+
+		signal.sig = s.sig & 0xFFFF;
+		signal.snr = s.snr & 0xFFFF;
+		signal.ber = s.ber & 0xFFFF;
+
+		paint_signal_fe(signal);
+
+		signal.old_sig = signal.sig;
+		signal.old_snr = signal.snr;
+		signal.old_ber = signal.ber;
+
+
+
+		// -- any key --> abort
+		if (msg <= CRCInput::RC_MaxRC) {
+			break;
+		}
+
+
+		// -- push other events
+		if ( msg >  CRCInput::RC_MaxRC && msg != CRCInput::RC_timeout) {
+			CNeutrinoApp::getInstance()->handleMsg( msg, data ); 
+		}
+
+
+	}
+
+	return msg;
 }
 
 
@@ -152,18 +209,22 @@ void CStreamInfo2::paint_signal_fe_box(int x, int y, int w, int h)
 	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, x+2+xd*0 , y1- 20 );
 	g_Font[font_small]->RenderString(x+25+xd*0 , y1, 50, "BER", COL_MENUCONTENT, 0, true);
 
-	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x+2+xd*1  , y1- 20 );
+	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_BLUE, x+2+xd*1  , y1- 20 );
 	g_Font[font_small]->RenderString(x+25+xd*1, y1, 50, "SNR", COL_MENUCONTENT, 0, true);
 
 	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_GREEN, x+2+xd*2  , y1- 20 );
 	g_Font[font_small]->RenderString(x+25+xd*2,y1, 50, "SIG", COL_MENUCONTENT, 0, true);
 
+	sig_text_y = y1 - iheight;
+	sig_text_ber_x = x+15+xd*0;
+	sig_text_snr_x = x+15+xd*1;
+	sig_text_sig_x = x+15+xd*2;
 
+
+	//  first draw of dummy signal
 	{
-	  int i;  // test
-	  for (i=0; i++ < 1000; ) {
-		paint_signal_fe(200,30000,4444 );
-	  }
+		struct feSignal s = {0,0,  0,0,   0,0 };
+		paint_signal_fe(s);
 	}
 
 }
@@ -171,9 +232,11 @@ void CStreamInfo2::paint_signal_fe_box(int x, int y, int w, int h)
 
 
 
-void CStreamInfo2::paint_signal_fe(long ber, long snr, long sig )
+void CStreamInfo2::paint_signal_fe(struct feSignal  s)
 {
    int   x_now = sigBox_pos;
+   int   y = sig_text_y;
+   int   yd;
 
 
 	sigBox_pos = (++sigBox_pos) % sigBox_w;
@@ -182,14 +245,49 @@ void CStreamInfo2::paint_signal_fe(long ber, long snr, long sig )
 	frameBuffer->paintVLine(sigBox_x+x_now,sigBox_y,sigBox_y+sigBox_h,COL_BLACK);
 
 
+	if (s.ber != s.old_ber) {
+		SignalRenderStr (s.ber,sig_text_ber_x,y);
+	}
+	yd = y_signal_fe (s.ber, 2000, sigBox_h);
+	frameBuffer->paintPixel(sigBox_x+x_now,sigBox_y+sigBox_h-yd,COL_RED);
 
-	// test
-frameBuffer->paintLine(sigBox_x+10, sigBox_y+20, sigBox_w+sigBox_x-10, sigBox_h+sigBox_y, COL_BLUE);
-x_now = ber+snr+sig;
+
+	if (s.sig != s.old_sig) {
+		SignalRenderStr (s.sig,sig_text_sig_x,y);
+	}
+	yd = y_signal_fe (s.sig, 65000, sigBox_h);
+	frameBuffer->paintPixel(sigBox_x+x_now,sigBox_y+sigBox_h-yd,COL_GREEN);
+
+
+	if (s.snr != s.old_snr) {
+		SignalRenderStr (s.snr,sig_text_snr_x,y);
+	}
+	yd = y_signal_fe (s.snr, 65000, sigBox_h);
+	frameBuffer->paintPixel(sigBox_x+x_now,sigBox_y+sigBox_h-yd,COL_BLUE);
 
 
 }
 
+
+// -- calc y from max_range and max_y
+int CStreamInfo2::y_signal_fe(int value, int max_value, int max_y)
+{
+	long  l;
+
+    	l = ((long) max_y * (long) value ) / (long) max_value;
+	if (l > max_y) l = max_y;
+
+	return (int) l;
+}
+
+void CStreamInfo2::SignalRenderStr (int value, int x, int y)
+{
+	char str[30];
+
+	frameBuffer->paintBoxRel(x, y-iheight+1, 50, iheight-1, COL_MENUHEAD_PLUS_0);
+	sprintf(str,"%5d",value);
+	g_Font[font_small]->RenderString(x, y, 50, str, COL_MENUCONTENT, 0, true);
+}
 
 
 

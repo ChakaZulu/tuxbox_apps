@@ -20,6 +20,8 @@
 */
 
 
+#warning " Module replaced by streaminfo2 "
+
 #ifndef __streaminfo__
 #define __streaminfo__
 
