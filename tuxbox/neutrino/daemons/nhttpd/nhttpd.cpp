@@ -136,7 +136,7 @@ int main(int argc, char **argv)
 		{
 			if (webserver->Start())
 			{
-				printf("httpd gestartet\n");
+//				printf("httpd gestartet\n");
 				webserver->DoLoop();
 				webserver->Stop();
 			}
