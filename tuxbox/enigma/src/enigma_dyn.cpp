@@ -3970,6 +3970,8 @@ static eString editTimerEvent(eString request, eString dirpath, eString opts, eH
 	time_t eventStart = atoi(eventStartTime.c_str());
 	time_t eventEnd = eventStart + atoi(eventDuration.c_str());
 	tm start = *localtime(&eventStart);
+	if (eventEnd % 5 > 0)
+		eventEnd = eventEnd / 5 * 5 + 5;
 	tm end = *localtime(&eventEnd);
 	int evType = atoi(eventType.c_str());
 
@@ -3995,17 +3997,8 @@ static eString editTimerEvent(eString request, eString dirpath, eString opts, eH
 
 	result.strReplace("#EDAYOPTS#", genOptions(1, 31, 1, end.tm_mday));
 	result.strReplace("#EMONTHOPTS#", genOptions(1, 12, 1, end.tm_mon + 1));
-	int endMin = end.tm_min / 5 * 5;
-	int endHour = end.tm_hour;
-	if (end.tm_min % 5 > 0)
-		endMin += 5;
-	if (endMin == 60)
-	{
-		endMin = 0;
-		endHour++;
-	}
-	result.strReplace("#EHOUROPTS#", genOptions(0, 23, 1, endHour));
-	result.strReplace("#EMINOPTS#", genOptions(0, 55, 5, endMin));
+	result.strReplace("#EHOUROPTS#", genOptions(0, 23, 1, end.tm_hour));
+	result.strReplace("#EMINOPTS#", genOptions(0, 55, 5, end.tm_min));
 	result.strReplace("#CHANNEL#", channel);
 	result.strReplace("#DESCRIPTION#", description);
 	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
