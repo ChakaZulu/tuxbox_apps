@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.83 2002/03/03 20:39:57 Simplex Exp $
+  $Id: zapit.cpp,v 1.84 2002/03/11 17:15:17 Simplex Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -2492,7 +2492,7 @@ int main (int argc, char **argv)
 	}
 
 	system("cp " CONFIGDIR "/zapit/last_chan /tmp/zapit_last_chan");
-	printf("Zapit $Id: zapit.cpp,v 1.83 2002/03/03 20:39:57 Simplex Exp $\n\n");
+	printf("Zapit $Id: zapit.cpp,v 1.84 2002/03/11 17:15:17 Simplex Exp $\n\n");
 	scan_runs = 0;
 	found_transponders = 0;
 	found_channels = 0;
@@ -2630,7 +2630,8 @@ void sendBouquets(bool emptyBouquetsToo)
 			// we'll send name and i+1 as bouquet number
 			strncpy(msgBouquet.name, g_BouquetMan->Bouquets[i]->Name.c_str(),30);
 			msgBouquet.bouquet_nr = i+1;
-
+			msgBouquet.locked = g_BouquetMan->Bouquets[i]->bLocked;
+			msgBouquet.hidden = g_BouquetMan->Bouquets[i]->bHidden;
 			if (send(connfd, &msgBouquet, sizeof(msgBouquet),0) == -1)
 			{
 				perror("[zapit] could not send any return\n");
