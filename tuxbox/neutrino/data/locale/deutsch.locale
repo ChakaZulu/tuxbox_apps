@@ -104,7 +104,7 @@ recordingmenu.stopsectionsd Sectionsd anhalten
 recordingmenu.vcr_devicename VCR Name (lirc)
 recordingmenu.off aus
 recordingmenu.server Server
-recordingmenu.vcr Video Rekorder
+recordingmenu.vcr Videorecorder
 recordingmenu.server_wakeup Aufnahmeserver WOL
 recordingmenu.server_mac Mac Adresse
 recordingmenu.setupnow Einstellungen jetzt übernehmen
