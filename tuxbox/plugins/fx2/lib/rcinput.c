@@ -14,7 +14,7 @@ static	int				kbfd = -1;
 		unsigned short	realcode=0xee;
 		unsigned short	actcode=0xee;
 		int				doexit=0;
-		int				debug=1;
+		int				debug=0;
 
 #define Debug	if(debug)printf
 
@@ -155,7 +155,7 @@ int	RcInitialize( int extfd )
 {
 	char	buf[32];
 
-	KbInitialize();
+	//KbInitialize();
 	if ( extfd == -1 )
 	{
 		fd_is_ext = 0;
@@ -234,7 +234,8 @@ static  unsigned short cw=0;
 		x = read( fd, buf, 32 );
 	if ( x < 2 )
 	{
-		KbGetActCode();
+		//KbGetActCode();
+		realcode=0xee;
 		if ( realcode == 0xee )
 		{
 			if ( cw == 1 )
