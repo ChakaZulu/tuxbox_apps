@@ -1,5 +1,5 @@
 /*
-$Id: descriptor.c,v 1.9 2003/07/08 19:59:50 rasc Exp $
+$Id: descriptor.c,v 1.10 2003/10/13 23:27:35 rasc Exp $
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -13,6 +13,9 @@ $Id: descriptor.c,v 1.9 2003/07/08 19:59:50 rasc Exp $
 
 
 $Log: descriptor.c,v $
+Revision 1.10  2003/10/13 23:27:35  rasc
+Bugfix, verbose < 4 segfaulted, tnx to 'mws'  for reporting.
+
 Revision 1.9  2003/07/08 19:59:50  rasc
 restructuring... some new, some fixes,
 trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18313-1 to spare?
@@ -59,12 +62,12 @@ int  descriptor  (u_char *b)
  int id;
 
 
-
-  // nothing to print here?
-  if (getVerboseLevel() < 4) return len;
-
   id  =  (int)b[0];  
   len = ((int)b[1]) + 2;
+
+  // nothing to print here? 
+  // well, I guess all descriptors need a verbosity >=4...
+  if (getVerboseLevel() < 4) return len;
 
   indent (+1);
 
