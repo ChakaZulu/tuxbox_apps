@@ -1,4 +1,7 @@
-INCLUDES = -I$(DRIVER)/lcd
+INCLUDES = \
+	-I$(DRIVER)/lcd \
+	-I$(top_srcdir)/edvb/miniqt \
+	-I$(top_srcdir)/enigma/src/core/system
 
 noinst_LIBRARIES = libgdi.a
 

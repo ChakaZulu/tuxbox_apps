@@ -968,13 +968,13 @@ int XmlUtf16Encode(int charNum, unsigned short *buf)
   return 0;
 }
 
-struct unknown_encoding {
+typedef struct unknown_encoding {
   struct normal_encoding normal;
   int (*convert)(void *userData, const char *p);
   void *userData;
   unsigned short utf16[256];
   char utf8[256][4];
-};
+} unknown_encoding;
 
 int XmlSizeOfUnknownEncoding()
 {

@@ -7,12 +7,11 @@ extern "C"
 	time_t my_mktime (struct tm *tp);
 }
 #define HILO(x) (x##_hi << 8 | x##_lo) 
-#include "si/dvb.h"
-#include "si/pat.h"
-#include "si/sdt.h"
-#include "si/tdt.h"
-
-#include "si/decode.h"
+#include "lowlevel/decode.h"
+#include "lowlevel/dvb.h"
+#include "lowlevel/pat.h"
+#include "lowlevel/sdt.h"
+#include "lowlevel/tdt.h"
 
 static QString qHex(int v)
 {

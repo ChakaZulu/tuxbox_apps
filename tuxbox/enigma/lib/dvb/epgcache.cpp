@@ -2,7 +2,7 @@
 #include "epgcache.h"
 
 #define HILO(x) (x##_hi << 8 | x##_lo) 
-#include "si/dvb.h"
+#include "lowlevel/dvb.h"
 
 eCachedEvent::eCachedEvent(int service_id, int transport_stream_id, int original_network_id, eit_event_struct *event)
 	: EITEvent(event), service_id(service_id), transport_stream_id(transport_stream_id), original_network_id(original_network_id)

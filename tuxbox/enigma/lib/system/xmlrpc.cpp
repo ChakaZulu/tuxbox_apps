@@ -1,6 +1,6 @@
 #include <time.h>
 #include <qmap.h>
-#include "xml/xmltree.h"
+#include "xmltree.h"
 #include "ezap.h"
 #include "http_dyn.h"
 #include "dvb.h"

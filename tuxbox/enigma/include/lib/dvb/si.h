@@ -3,13 +3,13 @@
 
 #include "esection.h"
 #include <qlist.h>
-#include "si/sdt.h"
-#include "si/descr.h"
-#include "si/ca.h"
-#include "si/pmt.h"
-#include "si/nit.h"
-#include "si/eit.h"
-#include "si/bat.h"
+#include "lowlevel/sdt.h"
+#include "lowlevel/descr.h"
+#include "lowlevel/ca.h"
+#include "lowlevel/pmt.h"
+#include "lowlevel/nit.h"
+#include "lowlevel/eit.h"
+#include "lowlevel/bat.h"
 
 class Descriptor: public QObject
 {

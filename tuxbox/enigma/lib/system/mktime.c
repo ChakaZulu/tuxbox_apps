@@ -1,6 +1,3 @@
-extern "C"
-{
-
 /* Convert a `struct tm' to a time_t value.
    Copyright (C) 1993, 94, 95, 96, 97, 98, 99 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
@@ -529,4 +526,3 @@ Local Variables:
 compile-command: "gcc -DDEBUG -DHAVE_LIMITS_H -DSTDC_HEADERS -Wall -W -O -g mktime.c -o mktime"
 End:
 */
-}
