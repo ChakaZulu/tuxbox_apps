@@ -7,6 +7,7 @@ install_DATA = \
 	ch-berndeutsch.locale \
 	deutsch.locale \
 	english.locale \
+	francais.locale \
 	italiano.locale \
 	nederlands.locale \
 	polski.locale \
