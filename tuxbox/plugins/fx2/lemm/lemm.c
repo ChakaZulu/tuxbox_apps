@@ -987,6 +987,15 @@ unsigned long	otype;
 				DrawNumber( 106+afunc*32, 389, portfolio[afunc] );
 			}
 		}
+		else if ( afunc == 0 )	// CLIMB
+		{
+			if ( !( s->type & TYP_CLIMB ) )
+			{
+				s->type |= TYP_CLIMB;
+				portfolio[ afunc ]--;
+				DrawNumber( 106+afunc*32, 389, portfolio[afunc] );
+			}
+		}
 		else
 		{
 			switch( afunc )
