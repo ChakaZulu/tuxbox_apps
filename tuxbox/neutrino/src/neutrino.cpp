@@ -2204,8 +2204,7 @@ void CNeutrinoApp::SelectAPID()
 		{
 			char apid[5];
 			sprintf(apid, "%d", count);
-			APIDSelector.addItem( new CMenuForwarder(g_RemoteControl->current_PIDs.APIDs[count].desc, true,
-																  "", APIDChanger, apid, false, (count<9)? (count+1) : CRCInput::RC_nokey ), (count == g_RemoteControl->current_PIDs.PIDs.selected_apid) );
+			APIDSelector.addItem(new CMenuForwarder(g_RemoteControl->current_PIDs.APIDs[count].desc, true, NULL, APIDChanger, apid, false, (uint)(CRCInput::convertDigitToKey(count + 1))), (count == g_RemoteControl->current_PIDs.PIDs.selected_apid));
 		}
 		APIDSelector.exec(NULL, "");
 	}
