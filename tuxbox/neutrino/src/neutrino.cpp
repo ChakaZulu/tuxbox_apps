@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.52 2001/10/02 23:16:48 McClean Exp $
+        $Id: neutrino.cpp,v 1.53 2001/10/04 19:28:43 fnbrd Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.53  2001/10/04 19:28:43  fnbrd
+  Eventlist benutzt ID bei zapit und laesst sich per rot wieder schliessen.
+
   Revision 1.52  2001/10/02 23:16:48  McClean
   game interface
 
@@ -131,7 +134,7 @@
   works with zapit again
 
   Revision 1.18  2001/08/22 00:03:24  ge0rg
-  verständliche Fehlermeldungen
+  verst„ndliche Fehlermeldungen
 
   Revision 1.17  2001/08/21 18:30:15  ge0rg
   added power down LCD logo
@@ -1038,7 +1041,7 @@ void CNeutrinoApp::SelectAPID()
     if ( ( strcmp(g_RemoteControl->audio_chans.name, channelList->getActiveChannelName().c_str() )== 0 ) &&
          ( g_RemoteControl->audio_chans.count_apids> 1 ) )
     {
-        // wir haben APIDs fr diesen Kanal!
+        // wir haben APIDs für diesen Kanal!
 
     	CMenuWidget APIDSelector("apidselector.head", "audio.raw");
 
@@ -1058,7 +1061,7 @@ void CNeutrinoApp::SelectAPID()
 
             if ( strlen( g_RemoteControl->audio_chans.apids[count].name ) == 3 )
             {
-                // unaufgelöste Sprache...
+                // unaufgel÷ste Sprache...
                 strcpy( g_RemoteControl->audio_chans.apids[count].name, getISO639Description( g_RemoteControl->audio_chans.apids[count].name ) );
             }
 
@@ -1211,7 +1214,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainSettings)
 			else if (key==CRCInput::RC_red)
 			{	// eventlist
                 g_InfoViewer->killTitle();
-                g_EventList->exec(channelList->getActiveChannelName());
+                g_EventList->exec(channelList->getActiveChannelOnid_sid(), channelList->getActiveChannelName());
 			}
 			else if (key==CRCInput::RC_blue)
 			{	// streaminfo
@@ -1547,7 +1550,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.52 2001/10/02 23:16:48 McClean Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.53 2001/10/04 19:28:43 fnbrd Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;

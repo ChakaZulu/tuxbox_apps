@@ -1,9 +1,12 @@
 #ifndef EVENTLIST_HPP
 #define EVENTLIST_HPP
 //
-// $Id: eventlist.h,v 1.7 2001/09/21 14:33:39 field Exp $
+// $Id: eventlist.h,v 1.8 2001/10/04 19:28:44 fnbrd Exp $
 //
 // $Log: eventlist.h,v $
+// Revision 1.8  2001/10/04 19:28:44  fnbrd
+// Eventlist benutzt ID bei zapit und laesst sich per rot wieder schliessen.
+//
 // Revision 1.7  2001/09/21 14:33:39  field
 // Eventlist - ok/? vertauscht, epg-Breite flexibel
 //
@@ -57,7 +60,7 @@ class EventList
     };
 
     void removeAllEvents(void);
-    void readEvents(const std::string& channelname); // I really don't like handling names
+    void readEvents(unsigned onidSid, const std::string& channelname); // I really don't like handling names
     unsigned int		selected;
     unsigned int                current_event;
     unsigned int		liststart;
@@ -83,7 +86,7 @@ class EventList
   public:
     EventList();
     ~EventList();
-    void exec(const string& channelname);
+    void exec(unsigned onidSid, const string& channelname);
 };
 
 

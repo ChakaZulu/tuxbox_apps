@@ -1,7 +1,10 @@
 //
-// $Id: eventlist.cpp,v 1.12 2001/09/26 09:57:03 field Exp $
+// $Id: eventlist.cpp,v 1.13 2001/10/04 19:28:44 fnbrd Exp $
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.13  2001/10/04 19:28:44  fnbrd
+// Eventlist benutzt ID bei zapit und laesst sich per rot wieder schliessen.
+//
 // Revision 1.12  2001/09/26 09:57:03  field
 // Tontraeger-Auswahl ok (bei allen Chans. auf denen EPG geht)
 //
@@ -57,7 +60,7 @@ static char* copyStringto(const char* from, char* to, int len, char delim)
 }
 
 // quick'n dirty
-void EventList::readEvents(const std::string& channelname)
+void EventList::readEvents(unsigned onidSid, const std::string& channelname)
 {
   char rip[]="127.0.0.1";
 
@@ -73,13 +76,20 @@ void EventList::readEvents(const std::string& channelname)
     return;
   }
   sectionsd::msgRequestHeader req;
-  req.version = 2;
-  req.command = sectionsd::allEventsChannelName;
-  req.dataLength = strlen(channelname.c_str())+1;
-//  req.dataLength = 0;
-  write(sock_fd, &req, sizeof(req));
-  write(sock_fd, channelname.c_str(), req.dataLength);
-
+  if(zapit) {
+    req.version = 2;
+    req.command = sectionsd::allEventsChannelID;
+    req.dataLength = 4;
+    write(sock_fd, &req, sizeof(req));
+    write(sock_fd, &onidSid, req.dataLength);
+  }
+  else {
+    req.version = 2;
+    req.command = sectionsd::allEventsChannelName;
+    req.dataLength = strlen(channelname.c_str())+1;
+    write(sock_fd, &req, sizeof(req));
+    write(sock_fd, channelname.c_str(), req.dataLength);
+  }
   sectionsd::msgResponseHeader resp;
   memset(&resp, 0, sizeof(resp));
   if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0) {
@@ -205,12 +215,12 @@ EventList::~EventList()
   removeAllEvents();
 }
 
-void EventList::exec(const std::string& channelname)
+void EventList::exec(unsigned onidSid, const std::string& channelname)
 {
   int key;
   name = channelname;
   paintHead();
-  readEvents(channelname);
+  readEvents(onidSid, channelname);
   paint();
 	
 	int oldselected = selected;
@@ -279,6 +289,9 @@ void EventList::exec(const std::string& channelname)
 		else if (key==CRCInput::RC_ok)
 		{
             loop= false;
+		}
+                else if (key==CRCInput::RC_red) {
+                  loop= false;
 		}
    		else if (key==CRCInput::RC_help)
 		{
