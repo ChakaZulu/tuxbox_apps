@@ -696,6 +696,7 @@ mp3player.title_artist pjesma, pjevač
 mp3player.display_order redoslijed
 mp3player.follow izabjere ovu pjesmu
 mp3player.screensaver_timeout štititi ekran (min, 0=ugašeno)
+mp3player.defdir unset
 
 movieplayer.name promatrač filmova
 movieplayer.head promatrač filmova
@@ -709,6 +710,7 @@ movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
 movieplayer.pleasewait unset
 movieplayer.nostreamingserver unset
+movieplayer.defdir unset
 
 filebrowser.head pretraživač datoteka
 filebrowser.filter.active upaljen filter

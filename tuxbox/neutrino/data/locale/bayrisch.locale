@@ -696,6 +696,7 @@ mp3player.title_artist Interpret
 mp3player.display_order Ozoagn
 mp3player.follow aktuelle Liad
 mp3player.screensaver_timeout Buidschirmschona (minutn, 0=aus)
+mp3player.defdir unset
 
 movieplayer.name Fuimspuia
 movieplayer.head Fuimspuia
@@ -708,7 +709,8 @@ movieplayer.bookmark Vormerka
 movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
 movieplayer.pleasewait Oan Moment, de Verbindung\nzum Streamingserva werd hergsteaid 
-movieplayer.nostreamingserver Koa Vabindung\nzum Streamingserva möglich.
+movieplayer.nostreamingserver Koa Vabindung\nzum Streamingserva mï¿½ch.
+movieplayer.defdir unset
 
 filebrowser.head Datiesucha
 filebrowser.filter.active Fuita o
@@ -730,7 +732,7 @@ nfs.mounttimeout Mount-Fehla: Timeout
 nfs.umount NFS/CIFS Verzeichnis freigem
 nfs.umounterror FÃ¤hla beim Freigem
 nfs.alreadymounted Verzeichnis is scho gmounted
-nfs.mount_options NFS Mount-Optionen
+nfs.mount_options Mount-Optionen
 nfs.type Typ
 nfs.type_nfs NFS
 nfs.type_cifs CIFS

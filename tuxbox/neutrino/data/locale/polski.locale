@@ -696,6 +696,7 @@ mp3player.title_artist Tytul, Interpretacja
 mp3player.display_order Kolejnosc
 mp3player.follow Auto-wybór biezacy
 mp3player.screensaver_timeout wygaszacz za:(min, 0=off)
+mp3player.defdir unset
 
 movieplayer.name Odtwarzacz filmów
 movieplayer.head Odtwarzacz filmów 
@@ -709,6 +710,7 @@ movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
 movieplayer.pleasewait Poczekaj.\nLaczenie do streaming serwera...
 movieplayer.nostreamingserver Sreaming serwer nieosiagalny.
+movieplayer.defdir unset
 
 filebrowser.head Przegladarka
 filebrowser.filter.active Filtr wlaczony
@@ -730,7 +732,7 @@ nfs.mounttimeout Przekroczony czas
 nfs.umount Odmontuj volumin NFS/CIFS
 nfs.umounterror blad odmontowania voluminu
 nfs.alreadymounted katalog juz zamontowny
-nfs.mount_options parametry NFS
+nfs.mount_options parametry
 nfs.type Typ
 nfs.type_nfs NFS
 nfs.type_cifs CIFS

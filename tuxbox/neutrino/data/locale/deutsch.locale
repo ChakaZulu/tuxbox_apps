@@ -741,10 +741,6 @@ nfs.password CIFS Passwort
 nfs.mounterror_notsup Dateisystem-Typ wird nicht unterstütz
 nfsmenu.head NFS/CIFS Einstellungen
 
-nfs.defdirs.mp3 MP3-Player Startverz.
-nfs.defdirs.picture Bildbetrachter Startverz.
-nfs.defdirs.movie Movie-Player Startverz.
-
 apids.hint_1 Geben Sie die zu streamenden APIDs ein,
 apids.hint_2 getrennt durch ' ' in hexadezimaler Form
 

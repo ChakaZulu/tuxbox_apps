@@ -696,6 +696,7 @@ mp3player.title_artist Titel, Interpret
 mp3player.display_order Anzeig'
 mp3player.follow Selektiere akt. Track
 mp3player.screensaver_timeout Bildschirmschoner (min, 0=aus)
+mp3player.defdir unset
 
 movieplayer.name Movieplayer
 movieplayer.head Movieplayer
@@ -709,6 +710,7 @@ movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
 movieplayer.pleasewait Bitte warde.\nD'Verbindig zuem Streamingserver wird herg'stellt.
 movieplayer.nostreamingserver Es het kei Verbindig\nzuem Streamingserver herg'stellt werde chönne.
+movieplayer.defdir unset
 
 filebrowser.head Filebrowser
 filebrowser.filter.active Filter aah
@@ -730,7 +732,7 @@ nfs.mounttimeout Mount-Fehler: Timeout
 nfs.umount NFS/CIFS Verzeichniss abhänge
 nfs.umounterror Abhäng-Fehler
 nfs.alreadymounted Verzeichnis bereits a'ghängt
-nfs.mount_options NFS Mount-Optionen
+nfs.mount_options Mount-Optionen
 nfs.type Typ
 nfs.type_nfs NFS
 nfs.type_cifs CIFS

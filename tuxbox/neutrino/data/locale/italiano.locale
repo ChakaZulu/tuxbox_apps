@@ -696,6 +696,7 @@ mp3player.title_artist Titolo, Artista
 mp3player.display_order Visore
 mp3player.follow Selezionare Track attuale
 mp3player.screensaver_timeout Salvaschermo_Timeout
+mp3player.defdir unset
 
 movieplayer.name movieplayer
 movieplayer.head movieplayer
@@ -709,6 +710,7 @@ movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
 movieplayer.pleasewait Uspostavlja se veza sa streamingserverom.\nCekajte molim ...
 movieplayer.nostreamingserver Nije bilo moguce\nuspostaviti vezu sa streamingserverom.
+movieplayer.defdir unset
 
 filebrowser.head filebrowser
 filebrowser.filter.active Filtro on

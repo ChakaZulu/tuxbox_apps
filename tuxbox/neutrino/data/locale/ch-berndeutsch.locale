@@ -131,11 +131,11 @@ recordingmenu.server_mac Mac Adrässi
 recordingmenu.setupnow Ischtöuigä jetzt übernää
 recordingmenu.no_scart Ungerdrücke Scart-Umschautig
 
-streamingmenu.head Movieplayer Iischt�uige
-streamingmenu.streaming_type Streamings�rver
-streamingmenu.server_ip Streamings�rver IP
-streamingmenu.server_port Streamings�rver Port
-streamingmenu.streaming_server_cddrive DVD Loufw�rch
+streamingmenu.head Movieplayer Iischt�e
+streamingmenu.streaming_type Streamings�r
+streamingmenu.server_ip Streamings�r IP
+streamingmenu.server_port Streamings�r Port
+streamingmenu.streaming_server_cddrive DVD Loufw㱣h
 streamingmenu.streaming_videorate Daterate Video
 streamingmenu.streaming_audiorate Daterate Audio
 streamingmenu.off Deaktiviert
@@ -696,6 +696,7 @@ mp3player.title_artist Titu, Interpret
 mp3player.display_order Azeig
 mp3player.follow Selektiere akt. Track
 mp3player.screensaver_timeout Böudschirmschoner (min, 0=us)
+mp3player.defdir unset
 
 movieplayer.name Movieplayer
 movieplayer.head Movieplayer
@@ -709,6 +710,7 @@ movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
 movieplayer.pleasewait Bitte warte.\nd'Verbindig zum Streamingsörver wird härgschtöut.
 movieplayer.nostreamingserver Verbindig zum\n Streamingsörver fäugschlage.
+movieplayer.defdir unset
 
 filebrowser.head Filebrowser
 filebrowser.filter.active Föuter a
