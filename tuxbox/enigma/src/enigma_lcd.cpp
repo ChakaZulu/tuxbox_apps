@@ -3,6 +3,7 @@
 #include <time.h>
 
 #include <core/dvb/edvb.h>
+#include <core/driver/eavswitch.h>
 #include <core/dvb/dvb.h>
 #include <core/gdi/lcd.h>
 #include <core/gdi/font.h>
@@ -62,7 +63,7 @@ eZapLCDMain::eZapLCDMain(eWidget *parent): eWidget(parent, 0), clocktimer(eApp)
 	
 	CONNECT(clocktimer.timeout, eZapLCDMain::clockUpdate);
 	CONNECT(eDVB::getInstance()->timeUpdated, eZapLCDMain::clockUpdate);
-	CONNECT(eDVB::getInstance()->volumeChanged, eZapLCDMain::volumeUpdate);
+	CONNECT(eAVSwitch::getInstance()->volumeChanged, eZapLCDMain::volumeUpdate);
 	CONNECT(eDVB::getInstance()->switchedService, eZapLCDMain::serviceSwitched);
 	CONNECT(eDVB::getInstance()->leaveService, eZapLCDMain::leaveService);
 	clockUpdate();
