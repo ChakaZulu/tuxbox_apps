@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.60 2001/10/10 17:17:13 field Exp $
+        $Id: neutrino.cpp,v 1.61 2001/10/11 20:59:35 rasc Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.61  2001/10/11 20:59:35  rasc
+  clearbuffer() fuer RC-Input bei Start
+
   Revision 1.60  2001/10/10 17:17:13  field
   zappen auf onid_sid umgestellt
 
@@ -1262,6 +1265,9 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	g_Locale = new CLocaleManager;
     g_RCInput = new CRCInput;
+    // -- eat all RC keys, start Neutrino clean!  (rasc 2001-10-11)
+    g_RCInput->clear();
+
     g_lcdd = new CLCDD;
     g_Controld = new CControld;
     g_RemoteControl = new CRemoteControl;
@@ -1511,7 +1517,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.60 2001/10/10 17:17:13 field Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.61 2001/10/11 20:59:35 rasc Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;
