@@ -879,6 +879,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
                                 CMenuWidget &networkSettings, CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings,
                                 CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &service)
 {
+	dprintf(DEBUG_DEBUG, "init mainmenue\n");
 	mainMenu.addItem( new CMenuSeparator() );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.tvmode", true, "", this, "tv", true, CRCInput::RC_red, "rot.raw"), true );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.radiomode", true, "", this, "radio", true, CRCInput::RC_green, "gruen.raw") );
@@ -921,6 +922,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 
 void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 {
+	dprintf(DEBUG_DEBUG, "init scansettings\n");
 	CMenuOptionChooser* ojBouquets = new CMenuOptionChooser("scants.bouquet", &((int)(scanSettings.bouquetMode)), true );
 	ojBouquets->addOption( CZapitClient::BM_DELETEBOUQUETS, "scants.bouquet_erase");
 	ojBouquets->addOption( CZapitClient::BM_CREATEBOUQUETS, "scants.bouquet_create");
@@ -1030,6 +1032,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 
 void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSettings)
 {
+	dprintf(DEBUG_DEBUG, "init serviceSettings\n");
 	service.addItem( new CMenuSeparator() );
 	service.addItem( new CMenuForwarder("menu.back") );
 	service.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
@@ -1127,14 +1130,11 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		service.addItem( new CMenuForwarder("servicemenu.update", true, "", updateSettings ) );
 
 	}
-
-
-
-
 }
 
 void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 {
+	dprintf(DEBUG_DEBUG, "init miscsettings\n");
 	miscSettings.addItem( new CMenuSeparator() );
 	miscSettings.addItem( new CMenuForwarder("menu.back") );
 	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "miscsettings.general" ) );
@@ -1219,6 +1219,7 @@ void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
 
 void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNotifier* audioSetupNotifier)
 {
+	dprintf(DEBUG_DEBUG, "init audiosettings\n");
 	audioSettings.addItem( new CMenuSeparator() );
 	audioSettings.addItem( new CMenuForwarder("menu.back") );
 	audioSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
@@ -1237,11 +1238,10 @@ void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNoti
 
 void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNotifier* videoSetupNotifier)
 {
+	dprintf(DEBUG_DEBUG, "init videosettings\n");
 	videoSettings.addItem( new CMenuSeparator() );
 	videoSettings.addItem( new CMenuForwarder("menu.back") );
 	videoSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-
-
 
 	CMenuOptionChooser* oj = new CMenuOptionChooser("videomenu.videosignal", &g_settings.video_Signal, true, videoSetupNotifier);
 	oj->addOption(1, "videomenu.videosignal_rgb");
@@ -1273,6 +1273,7 @@ void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNoti
 
 void CNeutrinoApp::InitParentalLockSettings(CMenuWidget &parentallockSettings)
 {
+	dprintf(DEBUG_DEBUG, "init parentallocksettings\n");
 	parentallockSettings.addItem( new CMenuSeparator() );
 	parentallockSettings.addItem( new CMenuForwarder("menu.back") );
 	parentallockSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
@@ -1296,6 +1297,7 @@ void CNeutrinoApp::InitParentalLockSettings(CMenuWidget &parentallockSettings)
 
 void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 {
+	dprintf(DEBUG_DEBUG, "init networksettings\n");
 	networkSettings.addItem( new CMenuSeparator() );
 	networkSettings.addItem( new CMenuForwarder("menu.back") );
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
@@ -1361,6 +1363,7 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 
 void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings)
 {
+	dprintf(DEBUG_DEBUG, "init colorsettings\n");
 	colorSettings.addItem( new CMenuSeparator() );
 	colorSettings.addItem( new CMenuForwarder("menu.back") );
 	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
@@ -1390,6 +1393,7 @@ void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings)
 
 void CNeutrinoApp::InitColorThemesSettings(CMenuWidget &colorSettings_Themes)
 {
+	dprintf(DEBUG_DEBUG, "init themesettings\n");
 	colorSettings_Themes.addItem( new CMenuSeparator() );
 	colorSettings_Themes.addItem( new CMenuForwarder("menu.back") );
 	colorSettings_Themes.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
@@ -1399,6 +1403,7 @@ void CNeutrinoApp::InitColorThemesSettings(CMenuWidget &colorSettings_Themes)
 
 void CNeutrinoApp::InitColorSettingsMenuColors(CMenuWidget &colorSettings_menuColors)
 {
+	dprintf(DEBUG_DEBUG, "init colormenuesettings\n");
 	colorSettings_menuColors.addItem( new CMenuSeparator() );
 	colorSettings_menuColors.addItem( new CMenuForwarder("menu.back") );
 
@@ -1434,6 +1439,7 @@ void CNeutrinoApp::InitColorSettingsMenuColors(CMenuWidget &colorSettings_menuCo
 
 void CNeutrinoApp::InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_statusbarColors)
 {
+	dprintf(DEBUG_DEBUG, "init colorstatusbarsettings\n");
 	colorSettings_statusbarColors.addItem( new CMenuSeparator() );
 
 	colorSettings_statusbarColors.addItem( new CMenuForwarder("menu.back") );
@@ -1450,8 +1456,8 @@ void CNeutrinoApp::InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_s
 
 void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 {
+	dprintf(DEBUG_DEBUG, "init keysettings\n");
 	keySettings.addItem( new CMenuSeparator() );
-
 	keySettings.addItem( new CMenuForwarder("menu.back") );
 
 	CKeyChooser*	keySettings_tvradio_mode = new CKeyChooser(&g_settings.key_tvradio_mode, "keybindingmenu.tvradiomode_head", "settings.raw");
@@ -2539,7 +2545,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_DEBUG);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.270 2002/05/11 21:58:24 McClean Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.271 2002/05/11 22:05:46 McClean Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
