@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.20 2002/09/24 21:10:42 Zwen Exp $
+	$Id: timerdclient.cpp,v 1.21 2002/09/25 18:36:43 Zwen Exp $
 
 	License: GPL
 
@@ -156,7 +156,9 @@ int CTimerdClient::getSleeptimerID()
 	timerd_connect();
 	send((char*)&msg, sizeof(msg));
 	CTimerd::responseGetSleeptimer response;
-	receive((char*)&response, sizeof(CTimerd::responseGetSleeptimer));
+	if (!receive((char*)&response, sizeof(CTimerd::responseGetSleeptimer)))
+		response.eventID =0;
+	timerd_close();	
 	return response.eventID;
 }
 //-------------------------------------------------------------------------
@@ -168,7 +170,10 @@ int CTimerdClient::getSleepTimerRemaining()
 	{
 		CTimerd::responseGetTimer timer;
 		getTimer( timer, timerID);
-		return (timer.alarmTime - time(NULL)) / 60;
+		int min=(((timer.alarmTime + 1 - time(NULL)) / 60)+1); //aufrunden auf nächst größerere Min.
+		if(min <1)
+			min=1;
+		return min;
 	}
 	else
 		return 0;
@@ -362,14 +367,16 @@ bool CTimerdClient::isTimerdAvailable()
 	{
 		send((char*)&msg, sizeof(msg));
 		CTimerd::responseAvailable response;
-		return (receive((char*)&response, sizeof(response)));
+		bool ret=receive((char*)&response, sizeof(response));
+		timerd_close();
+		return ret;
 	}
 	catch (...)
 	{
 		printf("[timerdclient] isTimerdAvailable() caught exception");
+		timerd_close();
 		return false;
 	}
-	timerd_close();
 }
 //-------------------------------------------------------------------------
 bool CTimerdClient::shutdown()

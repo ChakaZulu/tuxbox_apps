@@ -4,7 +4,7 @@
    Copyright (C) 2001 Steffen Hehn 'McClean'
    Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timerd.cpp,v 1.19 2002/09/24 21:10:42 Zwen Exp $
+   $Id: timerd.cpp,v 1.20 2002/09/25 18:36:43 Zwen Exp $
 
    License: GPL
 
@@ -204,6 +204,10 @@ void loadTimersFromConfig()
       }
    }
    delete config;
+	char cmd[80];
+	sprintf(cmd,"cp /var/tuxbox/config/timerd.conf /var/tuxbox/config/timerd.conf.%d",
+			  (int) time(NULL));
+	system(cmd);
    CTimerManager::getInstance()->saveEventsToConfig();
 }
 
@@ -238,10 +242,15 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
          {
             if(events.size() > 0)
             {
-               for(pos = events.begin();(pos != events.end()) && (pos->second->eventType != CTimerEvent::TIMER_SLEEPTIMER) ;pos++)
+               for(pos = events.begin();(pos != events.end());pos++)
+					{
                   printf("ID: %u type: %u\n",pos->second->eventID,pos->second->eventType);
-               if(pos->second->eventType == CTimerEvent::TIMER_SLEEPTIMER)
-                  rspGetSleeptimer.eventID = pos->second->eventID;
+						if(pos->second->eventType == CTimerEvent::TIMER_SLEEPTIMER)
+						{
+							rspGetSleeptimer.eventID = pos->second->eventID;
+							break;
+						}
+					}
             }
          }
          write( connfd, &rspGetSleeptimer, sizeof(rspGetSleeptimer));
@@ -481,6 +490,7 @@ int main(int argc, char **argv)
    struct sockaddr_un servaddr;
    int clilen;
    bool do_fork = true;
+	bool no_wait = false;
 	doLoop=true;
 
    dprintf("startup!!!\n\n");
@@ -493,6 +503,10 @@ int main(int argc, char **argv)
          {
             do_fork = false;
          }
+         else if(strncmp(argv[i], "-w", 2) == 0)
+         {
+				no_wait=true;
+			}
       }
    }
 
@@ -515,6 +529,10 @@ int main(int argc, char **argv)
       }
    }
 
+	if(!no_wait)
+	{
+		sleep(60);
+	}
    loadTimersFromConfig();
 
    memset(&servaddr, 0, sizeof(struct sockaddr_un));
