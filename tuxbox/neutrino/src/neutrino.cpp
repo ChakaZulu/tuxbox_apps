@@ -645,7 +645,7 @@ void CNeutrinoApp::saveSetup()
 
 		if(fd != NULL)
 		{
-			char buffer[10];
+			const char * buffer;
 			g_settings.uboot_console_bak    = g_settings.uboot_console;
 			g_settings.uboot_lcd_inverse	= g_settings.lcd_inverse;
 			g_settings.uboot_lcd_contrast	= g_settings.lcd_contrast;
@@ -653,19 +653,16 @@ void CNeutrinoApp::saveSetup()
 			switch(g_settings.uboot_console)
 			{
 			case 1:
-				strcpy( buffer, "ttyS0" );
+				buffer = "ttyS0";
 				break;
 			case 2:
-				strcpy( buffer, "tty" );
+				buffer = "tty";
 				break;
 			default:
-				strcpy( buffer, "null" );
+				buffer = "null";
 				break;
 			}
-			fprintf( fd, "console=%s\n", buffer );
-			fprintf( fd, "lcd_inverse=%d\n", g_settings.uboot_lcd_inverse );
-			fprintf( fd, "lcd_contrast=%d\n", g_settings.uboot_lcd_contrast );
-
+			fprintf(fd, "console=%s\n" "lcd_inverse=%d\n" "lcd_contrast=%d\n", buffer, g_settings.uboot_lcd_inverse, g_settings.uboot_lcd_contrast);
 			fclose(fd);
 		}
 		else
@@ -952,7 +949,6 @@ void CNeutrinoApp::channelsInit()
 	{
 		channelList->addChannel(zapitChannels[i].nr, zapitChannels[i].nr, zapitChannels[i].name, zapitChannels[i].satellitePosition, zapitChannels[i].channel_id); // UTF-8
 	}
-	dprintf(DEBUG_DEBUG, "got channels\n");
 
 	delete bouquetList;
 	bouquetList = new CBouquetList();
@@ -963,7 +959,6 @@ void CNeutrinoApp::channelsInit()
 	{
 		bouquetList->addBouquet( zapitBouquets[i].name, zapitBouquets[i].bouquet_nr, zapitBouquets[i].locked);
 	}
-	dprintf(DEBUG_DEBUG, "got bouquets\n");
 
 	for( uint i=0; i< bouquetList->Bouquets.size(); i++ )
 	{
@@ -1373,18 +1368,13 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 
 		dprintf(DEBUG_INFO, "current flash-version: %s\n", versionString);
 
-		CFlashVersionInfo versionInfo(versionString);
-		static char date[50];
-		strcpy(date, versionInfo.getDate());
-		updateSettings->addItem( new CMenuForwarder("flashupdate.currentversiondate", false, (char*) &date, NULL ));
-		static char time[50];
-		strcpy(time, versionInfo.getTime());
-		updateSettings->addItem( new CMenuForwarder("flashupdate.currentversiontime", false, (char*) &time, NULL ));
-		static char baseimage[50];
-		strcpy(baseimage, versionInfo.getBaseImageVersion());
-		updateSettings->addItem( new CMenuForwarder("flashupdate.currentversionbaseversion", false, (char*) &baseimage, NULL ));
+		static CFlashVersionInfo versionInfo(versionString);
+
+		updateSettings->addItem(new CMenuForwarder("flashupdate.currentversiondate", false, versionInfo.getDate()));
+		updateSettings->addItem(new CMenuForwarder("flashupdate.currentversiontime", false, versionInfo.getTime()));
+		updateSettings->addItem(new CMenuForwarder("flashupdate.currentversionbaseversion", false, versionInfo.getBaseImageVersion()));
 		/* versionInfo.getType() returns const char * which is never deallocated */
-		updateSettings->addItem(new CMenuForwarder("flashupdate.currentversionsnapshot", false, versionInfo.getType(), NULL));
+		updateSettings->addItem(new CMenuForwarder("flashupdate.currentversionsnapshot", false, versionInfo.getType()));
 
 		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "flashupdate.proxyserver_sep") );
 
@@ -1406,8 +1396,6 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 
 void CNeutrinoApp::InitMp3PicSettings(CMenuWidget &mp3PicSettings)
 {
-	dprintf(DEBUG_DEBUG, "init mp3_pic_settings\n");
-
 	mp3PicSettings.addItem(GenericMenuSeparator);
 	mp3PicSettings.addItem(GenericMenuBack);
 	
@@ -1520,8 +1508,7 @@ void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
 	//		printf("scanning locale dir now....(perhaps)\n");
 
 	char *pfad[] = {DATADIR "/neutrino/locale","/var/tuxbox/config/locale"};
-	std::string filen, locale;
-	int pos;
+	char * locale;	
 
 	for(int p = 0;p < 2;p++)
 	{
@@ -1534,12 +1521,12 @@ void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
 		{
 			for(int count=0;count<n;count++)
 			{
-				filen = namelist[count]->d_name;
-				pos = filen.find(".locale");
-				if(pos!=-1)
+				locale = namelist[count]->d_name;
+				char * pos = strstr(locale, ".locale");
+				if(pos != NULL)
 				{
-					locale = filen.substr(0,pos);
-					oj->addOption( locale );
+					*pos = '\0';
+					oj->addOption(locale);
 				}
 				free(namelist[count]);
 			}
@@ -1637,7 +1624,7 @@ void CNeutrinoApp::InitParentalLockSettings(CMenuWidget &parentallockSettings)
 	oj->addOption(18, "parentallock.lockage18");
 	parentallockSettings.addItem( oj );
 
-	CPINChangeWidget * pinChangeWidget = new CPINChangeWidget("parentallock.changepin", g_settings.parentallock_pincode, 4, "parentallock.changepin_hint1", NULL);
+	CPINChangeWidget * pinChangeWidget = new CPINChangeWidget("parentallock.changepin", g_settings.parentallock_pincode, 4, "parentallock.changepin_hint1");
 	parentallockSettings.addItem( new CMenuForwarder("parentallock.changepin", true, g_settings.parentallock_pincode, pinChangeWidget));
 }
 
@@ -1994,7 +1981,7 @@ void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fo
 		colorSettings.addItem( oj );
 	} else {
 		//alpha-werte nur einstellen wenn gtx-chip
-		CAlphaSetup* chAlphaSetup = new CAlphaSetup("colormenu.gtx_alpha", &g_settings.gtx_alpha1, &g_settings.gtx_alpha2, NULL);
+		CAlphaSetup* chAlphaSetup = new CAlphaSetup("colormenu.gtx_alpha", &g_settings.gtx_alpha1, &g_settings.gtx_alpha2);
 		colorSettings.addItem( new CMenuForwarder("colormenu.gtx_alpha", true, NULL, chAlphaSetup));
 	}
 }
@@ -2232,7 +2219,7 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 
 void CNeutrinoApp::SelectNVOD()
 {
-	if( g_RemoteControl->subChannels.size()> 0 )
+	if (!(g_RemoteControl->subChannels.empty()))
 	{
 		// NVOD/SubService- Kanal!
 		CMenuWidget NVODSelector( g_RemoteControl->are_subchannels?"nvodselector.subservice":"nvodselector.head", "video.raw", 350);
@@ -2700,7 +2687,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			{
 				int bouqMode = g_settings.bouquetlist_mode;//bsmChannels;
 
-				if((bouquetList!=NULL) && (bouquetList->Bouquets.size() == 0 ))
+				if((bouquetList!=NULL) && (bouquetList->Bouquets.empty()))
 				{
 					dprintf(DEBUG_DEBUG, "bouquets are empty\n");
 					bouqMode = bsmAllChannels;

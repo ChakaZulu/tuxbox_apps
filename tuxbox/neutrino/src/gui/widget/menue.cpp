@@ -539,9 +539,9 @@ CMenuOptionStringChooser::~CMenuOptionStringChooser()
 	options.clear();
 }
 
-void CMenuOptionStringChooser::addOption( const std::string & value)
+void CMenuOptionStringChooser::addOption(const char * const value)
 {
-	options.push_back(value);
+	options.push_back(std::string(value));
 }
 
 int CMenuOptionStringChooser::exec(CMenuTarget*)

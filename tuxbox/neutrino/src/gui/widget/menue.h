@@ -230,7 +230,7 @@ class CMenuOptionStringChooser : public CMenuItem
 		CMenuOptionStringChooser(const char * const OptionName, char* OptionValue, bool Active = false, CChangeObserver* Observ = NULL, bool Localizing= true);
 		~CMenuOptionStringChooser();
 
-		void addOption(const std::string & value);
+		void addOption(const char * value);
 		int paint(bool selected);
 		int getHeight(void) const
 		{
