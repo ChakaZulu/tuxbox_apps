@@ -211,7 +211,7 @@ flashupdate.getupdatefile getting update
 flashupdate.getupdatefileerror can't get update
 flashupdate.cantopenfile can't open file
 flashupdate.fileis0bytes the filesize is 0 Bytes
-flashupdate.eraseingflash eraseing flash
+flashupdate.eraseingflash erasing flash
 flashupdate.programmingflash programming flash
 flashupdate.cantopenmtd can't open mtd-device
 flashupdate.ready ready
