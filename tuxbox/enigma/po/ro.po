@@ -223,7 +223,7 @@ msgstr "sfirsit inregistrare"
 
 #: default.esml:716 src/timer.cpp:2060
 msgid "Friday"
-msgstr "Friday"
+msgstr "Vineri"
 
 #: default.esml:437
 msgid "Use motor input power for running detection.. else use timeout"
@@ -4173,9 +4173,9 @@ msgid ""
 "'root.cramfs' and press ok.In the upcomming list select 'manual update' and "
 "follow the instructions."
 msgstr ""
-"Upload your Image via FTP or Samba to the '/tmp' folder.Then rename it to "
-"'root.cramfs' and press ok.In the upcomming list select 'manual update' and "
-"follow the instructions."
+"Introduceti firmware via FTP sau Samba in fisierul '/tmp'.Redenumiti in "
+"'root.cramfs' si apasati ok.In lista ce apare selectati 'manual update' si "
+"faceti update conform lista afisata."
 
 #: src/software_update.cpp:57
 msgid "Manual update"
@@ -4647,7 +4647,7 @@ msgstr "Transponderi nu pot fi salvati in file!"
 
 #: src/tpeditwindow.cpp:266
 msgid "Write Error"
-msgstr "Write Error"
+msgstr "Eroare gasita"
 
 #: src/tpeditwindow.cpp:447
 msgid "new Satellite"
@@ -4680,7 +4680,7 @@ msgstr "downloading changelog..."
 
 #: src/upgrade.cpp:259
 msgid "downloading image..."
-msgstr "downloading image..."
+msgstr "downloading imagine..."
 
 #: src/upgrade.cpp:317
 msgid "Please select version to upgrade or LAME! to abort"
@@ -4688,7 +4688,7 @@ msgstr "Selectati vers upgrade sau parasiti menu"
 
 #: src/upgrade.cpp:436 src/upgrade.cpp:509 src/upgrade.cpp:523
 msgid "Error!"
-msgstr "Error!"
+msgstr "Eroare!"
 
 #: src/upgrade.cpp:492
 msgid "Download aborted."
@@ -4853,11 +4853,11 @@ msgstr "deschide LCD settings"
 
 #: src/system_settings.cpp:118
 msgid "sorry, no harddisks found!"
-msgstr "sorry, no harddisks found!"
+msgstr "scuze, nu aveti placa de date!"
 
 #: src/system_settings.cpp:118
 msgid "Harddisk setup..."
-msgstr "Harddisk setup..."
+msgstr "Placa de date setup..."
 
 #: src/time_settings.cpp:35
 msgid "Timezone Configuration"
