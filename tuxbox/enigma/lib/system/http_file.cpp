@@ -98,7 +98,7 @@ reread:
 			{
 				close(fd);
 				++slice;
-				fd=open((filename+eString().sprintf(".%03d", slice)).c_str(), O_RDONLY, 0644);
+				fd=open((filename+eString().sprintf(".%03d", slice)).c_str(), O_RDONLY|O_LARGEFILE, 0644);
 				if ( fd < 0 )
 				{
 					eDebug("file not exist.. but %d bytes left.. abort transfer!!", size);
@@ -260,7 +260,7 @@ eHTTPDataSource *eHTTPFilePathResolver::getDataSource(eString request, eString p
 				}
 			}
 
-			int fd=open(newpath.c_str(), (method==eHTTPFile::methodGET)?O_RDONLY:(O_WRONLY|O_CREAT|O_TRUNC), 0644);
+			int fd=open(newpath.c_str(), (method==eHTTPFile::methodGET)?O_RDONLY|O_LARGEFILE:(O_WRONLY|O_CREAT|O_TRUNC|O_LARGEFILE), 0644);
 			if (fd==-1)
 			{
 				switch (errno)

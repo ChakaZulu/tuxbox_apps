@@ -988,7 +988,7 @@ eService *eServiceHandlerDVB::createService(const eServiceReference &node)
 			l=convertLatin1UTF8(l);
 		if (node.descr)
 			l=node.descr;
-		int fd=open(node.path.c_str(), O_RDONLY);
+		int fd=open(node.path.c_str(), O_RDONLY|O_LARGEFILE);
 		if (fd < 0)
 			return 0;
 		__u8 packet[188];
