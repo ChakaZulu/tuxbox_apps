@@ -1,7 +1,10 @@
 //
-// $Id: channellist.cpp,v 1.13 2001/09/06 12:04:10 McClean Exp $
+// $Id: channellist.cpp,v 1.14 2001/09/06 19:13:21 McClean Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.14  2001/09/06 19:13:21  McClean
+// no changes
+//
 // Revision 1.13  2001/09/06 12:04:10  McClean
 // fix neutrino-crash (no chanlist)
 //
@@ -406,11 +409,12 @@ void CChannelList::paintItem(CFrameBuffer* frameBuffer, int pos)
                 sprintf((char*) tmp, "%d", chan->number);
 		int numpos = x+5+numwidth-fonts->channellist_number->getRenderWidth(tmp);
 		fonts->channellist_number->RenderString(numpos,ypos+fheight, numwidth+5, tmp, color, fheight);
-		if(strlen(chan->currentEvent.c_str())) {
-    		  // name + description
-		  char nameAndDescription[100];
-		  snprintf(nameAndDescription, sizeof(nameAndDescription), "%s - %s", chan->name.c_str(), chan->currentEvent.c_str());
-		  fonts->channellist->RenderString(x+5+numwidth+10,ypos+fheight, width-numwidth-20, nameAndDescription, color);
+		if(strlen(chan->currentEvent.c_str()))
+		{
+    			// name + description
+			char nameAndDescription[100];
+			snprintf(nameAndDescription, sizeof(nameAndDescription), "%s - %s", chan->name.c_str(), chan->currentEvent.c_str());
+			fonts->channellist->RenderString(x+5+numwidth+10,ypos+fheight, width-numwidth-20, nameAndDescription, color);
                 }
 		else
 		  //name
