@@ -163,27 +163,29 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 					}
 				}
 #endif
+				int lnb=transponder->satellite.lnb;
 				for (ePtrList<NITEntry>::iterator i(nit->entries); i != nit->entries.end(); ++i)
 				{
-					eTransponder &transponder=dvb.settings->transponderlist->createTransponder(i->transport_stream_id, i->original_network_id);
+					eTransponder &transp=dvb.settings->transponderlist->createTransponder(i->transport_stream_id, i->original_network_id);
 					int found=0;
 					for (std::list<eTransponder>::iterator n(knownTransponder.begin()); (!found) && n != knownTransponder.end(); ++n)
-						if (*n == transponder)
+						if (*n == transp)
 							found++;
 					for (ePtrList<Descriptor>::iterator d(i->transport_descriptor); d != i->transport_descriptor.end(); ++d)
 					{
 						switch (d->Tag())
 						{
 						case DESCR_SAT_DEL_SYS:
-							transponder.setSatellite((SatelliteDeliverySystemDescriptor*)*d);
+							transp.setSatellite((SatelliteDeliverySystemDescriptor*)*d);
+							transp.satellite.lnb=lnb; // on same diseqc position as source
 							break;
 						case DESCR_CABLE_DEL_SYS:
-							transponder.setCable((CableDeliverySystemDescriptor*)*d);
+							transp.setCable((CableDeliverySystemDescriptor*)*d);
 							break;
 						}
 					}
 					if (!found)
-						knownTransponder.push_back(transponder);
+						knownTransponder.push_back(transp);
 				}
 			}
 			nit->unlock();
