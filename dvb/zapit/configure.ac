@@ -57,6 +57,7 @@ include/zapit/zapci/Makefile
 include/zapit/zapost/Makefile
 include/zapit/zapsi/Makefile
 lib/Makefile
+lib/include/Makefile
 src/Makefile
 src/zapci/Makefile
 src/zapost/Makefile
