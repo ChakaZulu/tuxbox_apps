@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.27 2004/11/03 18:01:02 thegoodguy Exp $
+ * $Id: locals_intern.h,v 1.28 2004/11/03 20:28:03 zwen Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -412,6 +412,7 @@ const char * locale_real_names[] =
 	"infoviewer.selecttime",
 	"infoviewer.streaminfo",
 	"infoviewer.subservice",
+	"infoviewer.subchan_disp_pos",
 	"infoviewer.waittime",
 	"ipsetup.hint_1",
 	"ipsetup.hint_2",
@@ -733,6 +734,10 @@ const char * locale_real_names[] =
 	"settings.help",
 	"settings.missingoptionsconffile",
 	"settings.noconffile",
+	"settings.pos_bottom_left",
+	"settings.pos_bottom_right",
+	"settings.pos_top_left",
+	"settings.pos_top_right",
 	"shutdowntimer.announce",
 	"sleeptimerbox.announce",
 	"sleeptimerbox.hint1",

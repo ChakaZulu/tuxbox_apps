@@ -539,6 +539,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.shutdown_real         = configfile.getBool("shutdown_real"        , true );
 	g_settings.shutdown_real_rcdelay = configfile.getBool("shutdown_real_rcdelay", true );
 	g_settings.infobar_sat_display   = configfile.getBool("infobar_sat_display"  , true );
+	g_settings.infobar_subchan_disp_pos = configfile.getInt32("infobar_subchan_disp_pos"  , 0 );
 
 	//audio
 	g_settings.audio_AnalogMode = configfile.getInt32( "audio_AnalogMode", 0 );
@@ -857,6 +858,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setBool("shutdown_real"        , g_settings.shutdown_real        );
 	configfile.setBool("shutdown_real_rcdelay", g_settings.shutdown_real_rcdelay);
 	configfile.setBool("infobar_sat_display"  , g_settings.infobar_sat_display  );
+	configfile.setInt32("infobar_subchan_disp_pos"  , g_settings.infobar_subchan_disp_pos  );
 
 	//audio
 	configfile.setInt32( "audio_AnalogMode", g_settings.audio_AnalogMode );
@@ -1363,16 +1365,16 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	if(g_settings.parentallock_prompt)
 		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_PARENTALLOCK_PARENTALLOCK, g_settings.parentallock_pincode, true, true, NULL, &parentallockSettings, NULL, CRCInput::RC_3));
 	else
-		mainSettings.addItem(new CMenuForwarder(LOCALE_PARENTALLOCK_PARENTALLOCK, true, NULL, &parentallockSettings, NULL, CRCInput::RC_4));
-	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_NETWORK   , true, NULL, &networkSettings  , NULL, CRCInput::RC_5));
-	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_RECORDING , true, NULL, &recordingSettings, NULL, CRCInput::RC_6));
-	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_STREAMING , true, NULL, &streamingSettings, NULL, CRCInput::RC_7));
-	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_LANGUAGE  , true, NULL, &languageSettings , NULL, CRCInput::RC_8));
-	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_COLORS    , true, NULL, &colorSettings    , NULL, CRCInput::RC_9));
-	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_LCD       , true, NULL, &lcdSettings      , NULL, CRCInput::RC_0));
-	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_KEYBINDING, true, NULL, &keySettings      , NULL, CRCInput::RC_blue  , NEUTRINO_ICON_BUTTON_BLUE  ));
-	mainSettings.addItem(new CMenuForwarder(LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL , true, NULL, &audiopl_picSettings   , NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
-	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_MISC      , true, NULL, &miscSettings     , NULL, CRCInput::RC_green , NEUTRINO_ICON_BUTTON_GREEN ));
+		mainSettings.addItem(new CMenuForwarder(LOCALE_PARENTALLOCK_PARENTALLOCK, true, NULL, &parentallockSettings, NULL, CRCInput::RC_3));
+	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_NETWORK   , true, NULL, &networkSettings  , NULL, CRCInput::RC_4));
+	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_RECORDING , true, NULL, &recordingSettings, NULL, CRCInput::RC_5));
+	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_STREAMING , true, NULL, &streamingSettings, NULL, CRCInput::RC_6));
+	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_LANGUAGE  , true, NULL, &languageSettings , NULL, CRCInput::RC_7));
+	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_COLORS    , true, NULL, &colorSettings    , NULL, CRCInput::RC_8));
+	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_LCD       , true, NULL, &lcdSettings      , NULL, CRCInput::RC_9));
+	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_KEYBINDING, true, NULL, &keySettings      , NULL, CRCInput::RC_0));
+	mainSettings.addItem(new CMenuForwarder(LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL , true, NULL, &audiopl_picSettings   , NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
+	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_MISC      , true, NULL, &miscSettings     , NULL, CRCInput::RC_yellow , NEUTRINO_ICON_BUTTON_YELLOW ));
 }
 
 #define SCANTS_BOUQUET_OPTION_COUNT 5
@@ -1742,6 +1744,15 @@ const misc_setting_files_struct_t misc_setting_files[MISC_SETTING_FILES_COUNT] =
 	{LOCALE_MISCSETTINGS_PMTUPDATE    , "/var/etc/.pmt_update" , OPTIONS_OFF0_ON1_OPTIONS }
 };
 
+#define INFOBAR_SUBCHAN_DISP_POS_OPTIONS_COUNT 4
+const CMenuOptionChooser::keyval  INFOBAR_SUBCHAN_DISP_POS_OPTIONS[INFOBAR_SUBCHAN_DISP_POS_OPTIONS_COUNT]=
+{
+	{ 0 , LOCALE_SETTINGS_POS_TOP_RIGHT },
+	{ 1 , LOCALE_SETTINGS_POS_TOP_LEFT },
+	{ 2 , LOCALE_SETTINGS_POS_BOTTOM_LEFT },
+	{ 3 , LOCALE_SETTINGS_POS_BOTTOM_RIGHT }
+};
+
 void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 {
 	dprintf(DEBUG_DEBUG, "init miscsettings\n");
@@ -1757,6 +1768,8 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_INFOBAR_SAT_DISPLAY, &g_settings.infobar_sat_display, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true));
 
+	miscSettings.addItem(new CMenuOptionChooser(LOCALE_INFOVIEWER_SUBCHAN_DISP_POS, &g_settings.infobar_subchan_disp_pos, INFOBAR_SUBCHAN_DISP_POS_OPTIONS, INFOBAR_SUBCHAN_DISP_POS_OPTIONS_COUNT, true));
+	
 	miscSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_DRIVER_BOOT));
 	for (int i = 0; i < MISC_SETTING_FILES_COUNT; i++)
 	{

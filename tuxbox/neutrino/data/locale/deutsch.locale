@@ -385,6 +385,7 @@ infoviewer.notavailable Kanal (zur Zeit) nicht verfügbar.
 infoviewer.selecttime Startzeiten
 infoviewer.streaminfo Features
 infoviewer.subservice Bildregie
+infoviewer.subchan_disp_pos Unterkanalanzeige
 infoviewer.waittime Warte auf Uhrzeit...
 ipsetup.hint_1 Benutzen Sie 0..9 oder hoch/runter
 ipsetup.hint_2 OK speichert, Home bricht ab
@@ -706,6 +707,10 @@ servicemenu.update Software-Aktualisierung
 settings.help Hilfe
 settings.missingoptionsconffile Die Neutrino-Einstellungen wurden erweitert.\nDie neuen Werte werden auf Standard gesetzt.
 settings.noconffile Die Neutrino-Einstellungen wurden nicht\ngefunden. Es werden Standardwerte benutzt.
+settings.pos_bottom_left unten links
+settings.pos_bottom_right unten rechts
+settings.pos_top_left oben links
+settings.pos_top_right oben rechts
 shutdowntimer.announce Die Box wird in 1 min runtergefahren.\nShutdown abbrechen?
 sleeptimerbox.announce Sleeptimer in 1 min
 sleeptimerbox.hint1 Ausschaltzeit in Min. (000=aus)

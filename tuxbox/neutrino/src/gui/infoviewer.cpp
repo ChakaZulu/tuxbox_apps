@@ -481,8 +481,31 @@ void CInfoViewer::showSubchan()
 		else
 			dy= dy +5;
 
-		int x = g_settings.screen_EndX - dx -10;
-		int y = g_settings.screen_StartY + 10;
+		int x=0,y=0;
+		if( g_settings.infobar_subchan_disp_pos == 0 )
+		{
+			// Rechts-Oben
+			x = g_settings.screen_EndX - dx - 10;
+			y = g_settings.screen_StartY + 10;
+		}
+		else if( g_settings.infobar_subchan_disp_pos == 1 )
+		{
+			// Links-Oben
+			x = g_settings.screen_StartX + 10;
+			y = g_settings.screen_StartY + 10;
+		}
+		else if( g_settings.infobar_subchan_disp_pos == 2 )
+		{
+			// Links-Unten
+			x = g_settings.screen_StartX + 10;
+			y = g_settings.screen_EndY - dy - 10;
+		}
+		else if( g_settings.infobar_subchan_disp_pos == 3 )
+		{
+			// Rechts-Unten
+			x = g_settings.screen_EndX - dx - 10;
+			y = g_settings.screen_EndY - dy - 10;
+		}
 
 		fb_pixel_t pixbuf[(dx+ 2* borderwidth) * (dy+ 2* borderwidth)];
 		frameBuffer->SaveScreen(x- borderwidth, y- borderwidth, dx+ 2* borderwidth, dy+ 2* borderwidth, pixbuf);

@@ -50,6 +50,7 @@ struct SNeutrinoSettings
 	char record_safety_time_before[3];
 	char record_safety_time_after[3];
 	int infobar_sat_display;
+	int infobar_subchan_disp_pos;
 
 	//audio
 	int audio_AnalogMode;

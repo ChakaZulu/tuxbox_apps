@@ -347,6 +347,7 @@ infoviewer.notavailable Channel not available
 infoviewer.selecttime Timeselection
 infoviewer.streaminfo Features
 infoviewer.subservice Subservices
+infoviewer.subchan_disp_pos Subchannel display
 infoviewer.waittime Waiting for time...
 ipsetup.hint_1 Use 0..9, or use Up/Down,
 ipsetup.hint_2 OK saves, Home aborts
@@ -668,6 +669,10 @@ servicemenu.update Software Update
 settings.help Help
 settings.missingoptionsconffile The neutrino-settings have been updated.\nNew Options will be set to default.
 settings.noconffile No neutrino-settings found.\nUsing defaults.
+settings.pos_bottom_left bottom left
+settings.pos_bottom_right bottom right
+settings.pos_top_left oben top left
+settings.pos_top_right oben top right
 shutdowntimer.announce Box will shutdown in 1 min.\nCancel Sutdown ?
 sleeptimerbox.announce Sleeptimer in 1 min
 sleeptimerbox.hint1 Shutdown time in min. (000=off)
