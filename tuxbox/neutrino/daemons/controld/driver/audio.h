@@ -33,15 +33,8 @@ class audioControl
 
 	public:
 
-		enum 
-		{	
-			STEREO = AUDIO_STEREO,
-			MONO_LEFT = AUDIO_MONO_LEFT,
-			MONO_RIGHT = AUDIO_MONO_RIGHT
-		};
-
-		static void setVolume(char volume);
-		static void setMute(bool mute);
+		static void setVolume(const unsigned char volume);
+		static void setMute(const bool mute);
 
 };
 

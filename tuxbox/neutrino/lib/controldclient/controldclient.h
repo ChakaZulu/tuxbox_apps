@@ -75,9 +75,11 @@ class CControldClient:private CBasicClient
 		/*
 			setVolume(char) : Setzten der Lautstärke
 			Parameter: 0..100 - 0=leise 100=laut
+			           avs == true : mute avs device
+			           avs == false: mute audio device
 		*/
-		void setVolume(char volume );
-		char getVolume();
+		void setVolume(const char volume, const bool avs = true);
+		char getVolume(const bool avs = true);
 
 		/*
 			setMute(bool, bool) : setzen von Mute

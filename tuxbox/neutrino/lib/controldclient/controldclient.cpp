@@ -96,22 +96,28 @@ void CControldClient::setScartMode(bool mode)
 	close_connection();
 }
 
-void CControldClient::setVolume(char volume )
+void CControldClient::setVolume(const char volume, const bool avs)
 {
 	CControld::commandVolume msg2;
 
 	msg2.volume = volume;
 
-	send(CControld::CMD_SETVOLUME_AVS, (char*)&msg2, sizeof(msg2));
+	if (avs)
+		send(CControld::CMD_SETVOLUME_AVS, (char*)&msg2, sizeof(msg2));
+	else
+		send(CControld::CMD_SETVOLUME, (char*)&msg2, sizeof(msg2));
 
 	close_connection();
 }
 
-char CControldClient::getVolume()
+char CControldClient::getVolume(const bool avs)
 {
 	CControld::responseVolume rmsg;
 
-	send(CControld::CMD_GETVOLUME_AVS);
+	if (avs)
+		send(CControld::CMD_GETVOLUME_AVS);
+	else
+		send(CControld::CMD_GETVOLUME);
 
 	receive_data((char*)&rmsg, sizeof(rmsg));
 

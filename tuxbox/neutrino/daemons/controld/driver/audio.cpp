@@ -35,30 +35,11 @@
 #include <math.h>
 
 
-void audioControl::setVolume(char volume)
+void audioControl::setVolume(const unsigned char volume)
 {
 	int fd;
 
-	int i;
-
-	if (volume != 0)
-	{
-		i = lrint(64 - 32 * log(volume/13.5)) & 0xFFFFFFFF;
-	}
-	else
-	{
-		i = 63;
-	}
-
-	//printf("sndctl: %d\n", i);
-	if (i < 0)
-	{
-		i=0;
-	}
-	else if (i > 63)
-	{
-		i=63;
-	}
+	int i = volume;
 
 	if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
 	{
@@ -74,14 +55,11 @@ void audioControl::setVolume(char volume)
 	close(fd);
 }
 
-void audioControl::setMute(bool mute)
+void audioControl::setMute(const bool mute)
 {
 	int fd, a;
 	
-	if(mute)
-		a=AVS_MUTE;
-	else
-		a=AVS_UNMUTE;
+	a = mute ? AVS_MUTE : AVS_UNMUTE;
 
 	if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
 	{
