@@ -1,5 +1,5 @@
 /*
- * $Id: configfile.cpp,v 1.14 2003/01/11 20:05:36 obi Exp $
+ * $Id: configfile.cpp,v 1.15 2003/01/17 16:07:10 obi Exp $
  *
  * configuration object for the d-box 2 linux project
  *
@@ -29,11 +29,12 @@
 #include <sstream>
 #include <string>
 
-CConfigFile::CConfigFile(const char p_delimiter)
+CConfigFile::CConfigFile(const char p_delimiter, const bool p_saveDefaults)
 {
 	modifiedFlag = false;
 	unknownKeyQueryedFlag = false;
 	delimiter = p_delimiter;
+	saveDefaults = p_saveDefaults;
 }
 
 void CConfigFile::clear()
@@ -141,8 +142,13 @@ bool CConfigFile::getBool(const std::string key, const bool defaultVal)
 {
 	if (configData.find(key) == configData.end())
 	{
-		unknownKeyQueryedFlag = true;
-		storeBool(key, defaultVal);
+		if (saveDefaults) {
+			unknownKeyQueryedFlag = true;
+			storeBool(key, defaultVal);
+		}
+		else {
+			return defaultVal;
+		}
 	}
 
 	return !((configData[key] == "false") || (configData[key] == "0"));
@@ -152,8 +158,14 @@ int32_t CConfigFile::getInt32(const std::string key, const int32_t defaultVal)
 {
 	if (configData.find(key) == configData.end())
 	{
-		unknownKeyQueryedFlag = true;
-		storeInt32(key, defaultVal);
+		if (saveDefaults) {
+			unknownKeyQueryedFlag = true;
+			storeInt32(key, defaultVal);
+		}
+		else {
+			std::cout << "returning defaultVal " << defaultVal << std::endl;
+			return defaultVal;
+		}
 	}
 
 	return atoi(configData[key].c_str());
@@ -163,8 +175,13 @@ int64_t CConfigFile::getInt64(const std::string key, const int64_t defaultVal)
 {
 	if (configData.find(key) == configData.end())
 	{
-		unknownKeyQueryedFlag = true;
-		storeInt64(key, defaultVal);
+		if (saveDefaults) {
+			unknownKeyQueryedFlag = true;
+			storeInt64(key, defaultVal);
+		}
+		else {
+			return defaultVal;
+		}
 	}
 
 	return atoll(configData[key].c_str());
@@ -174,8 +191,13 @@ std::string CConfigFile::getString(const std::string key, const std::string defa
 {
 	if (configData.find(key) == configData.end())
 	{
-		unknownKeyQueryedFlag = true;
-		storeString(key, defaultVal);
+		if (saveDefaults) {
+			unknownKeyQueryedFlag = true;
+			storeString(key, defaultVal);
+		}
+		else {
+			return defaultVal;
+		}
 	}
 
 	return configData[key];

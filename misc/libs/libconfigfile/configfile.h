@@ -1,5 +1,5 @@
 /*
- * $Id: configfile.h,v 1.9 2002/12/11 16:37:34 thegoodguy Exp $
+ * $Id: configfile.h,v 1.10 2003/01/17 16:07:10 obi Exp $
  *
  * Copyright (C) 2001, 2002 Andreas Oberritter <obi@tuxbox.org>,
  *                          thegoodguy  <thegoodguy@tuxbox.org>
@@ -39,6 +39,7 @@ class CConfigFile
 
 	ConfigDataMap configData;
 	char delimiter;
+	bool saveDefaults;
 	bool modifiedFlag;
 	bool unknownKeyQueryedFlag;
 
@@ -48,7 +49,7 @@ class CConfigFile
 	void storeString(const std::string key, const std::string val);
 
  public:
-	CConfigFile(const char p_delimiter);
+	CConfigFile(const char p_delimiter, const bool p_saveDefaults = true);
 
 	const bool loadConfig(const std::string filename);
 	const bool saveConfig(const std::string filename);
