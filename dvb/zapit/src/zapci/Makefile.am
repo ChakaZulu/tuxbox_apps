@@ -1,9 +1,7 @@
-INCLUDES = \
-	-I$(top_srcdir)/include
+INCLUDES = -I$(top_srcdir)/include
 
-noinst_LIBRARIES = libzapci.a
+noinst_LTLIBRARIES = libzapci.la
 
-libzapci_a_SOURCES = cam.cpp ci.cpp
+libzapci_la_SOURCES = cam.cpp ci.cpp
 
 AM_CXXFLAGS = -fno-rtti -fno-exceptions
-

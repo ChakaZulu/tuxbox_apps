@@ -1,10 +1,7 @@
-INCLUDES = \
-	-I$(top_srcdir)/include \
-	-I$(top_srcdir)/lib
+INCLUDES = -I$(top_srcdir)/include
 
-noinst_LIBRARIES = libzapsi.a
+noinst_LTLIBRARIES = libzapsi.la
 
-libzapsi_a_SOURCES = bat.cpp descriptors.cpp nit.cpp pat.cpp pmt.cpp sdt.cpp
+libzapsi_la_SOURCES = bat.cpp descriptors.cpp nit.cpp pat.cpp pmt.cpp sdt.cpp
 
 AM_CXXFLAGS = -fno-rtti -fno-exceptions
-

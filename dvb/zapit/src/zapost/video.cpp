@@ -1,5 +1,5 @@
 /*
- * $Id: video.cpp,v 1.6 2002/11/18 00:27:57 obi Exp $
+ * $Id: video.cpp,v 1.7 2002/12/17 23:07:50 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -91,10 +91,9 @@ int CVideo::setCroppingMode (video_displayformat_t format)
 
 int CVideo::setSource (video_stream_source_t source)
 {
-#ifndef ALWAYS_DO_VIDEO_SELECT_SOURCE
 	if (status.stream_source == source)
 		return 0;
-#endif
+
 	if (status.play_state != VIDEO_STOPPED)
 		return -1;
 

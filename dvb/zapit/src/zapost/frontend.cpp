@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.37 2002/12/17 22:02:37 obi Exp $
+ * $Id: frontend.cpp,v 1.38 2002/12/17 23:07:50 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -471,19 +471,16 @@ void CFrontend::setDiseqcType (diseqc_t newDiseqcType)
 }
 
 const bool
-CFrontend::tuneChannel (CZapitChannel *channel)
+CFrontend::tuneTsidOnid (uint32_t tsid_onid)
 {
 	std::map <uint32_t, transponder>::iterator transponder;
 
-	if (!channel)
-		return false;
-
-	transponder = transponders.find(channel->getTsidOnid());
+	transponder = transponders.find(tsid_onid);
 
 	if (transponder == transponders.end())
 		return false;
 
-	currentTsidOnid = channel->getTsidOnid();
+	currentTsidOnid = tsid_onid;
 
 	return tuneFrequency(&(transponder->second.feparams), transponder->second.polarization, transponder->second.DiSEqC);
 }

@@ -1,11 +1,7 @@
-INCLUDES = \
-	-I$(top_srcdir)/include
+INCLUDES = -I$(top_srcdir)/include
 
-noinst_LIBRARIES = libzapost.a
+noinst_LTLIBRARIES = libzapost.la
 
-libzapost_a_SOURCES = audio.cpp dmx.cpp frontend.cpp video.cpp
-
-AM_CPPFLAGS = -DALWAYS_SELECT_VIDEO_SOURCE
+libzapost_la_SOURCES = audio.cpp dmx.cpp frontend.cpp video.cpp
 
 AM_CXXFLAGS = -fno-rtti -fno-exceptions
-
