@@ -36,11 +36,11 @@
 #include "driver/fontrenderer.h"
 #include "driver/rcinput.h"
 
+#include "gui/widget/progressstatus.h"
 #include "gui/widget/menue.h"
 #include "gui/color.h"
-#include "gui/progressstatus.h"
-#include "libmd5sum/libmd5sum.h"
 
+#include "libmd5sum/libmd5sum.h"
 #include "dbox/fp.h"
 
 

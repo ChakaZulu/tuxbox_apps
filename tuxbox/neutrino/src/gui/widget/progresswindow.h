@@ -4,14 +4,6 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	Kommentar:
-
-	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
-	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
-	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
-	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-
-
 	License: GPL
 
 	This program is free software; you can redistribute it and/or modify
@@ -29,31 +21,17 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __httptool__
-#define __httptool__
+#ifndef __progresswindow__
+#define __progresswindow__
+
+#include "driver/framebuffer.h"
+#include "gui/widget/menue.h"
 
 #include <string>
-#include "gui/widget/progressstatus.h"
 
 using namespace std;
 
 
-class CHTTPTool
-{
-	private:
-		string userAgent;
-
-		CProgress_StatusViewer*	statusViewer;
-		static int show_progress( void *clientp, size_t dltotal, size_t dlnow, size_t ultotal, size_t ulnow);
-
-	public:
-		CHTTPTool();
-		void setStatusViewer( CProgress_StatusViewer* statusview );
-
-		bool downloadFile( string URL, string downloadTarget );
-
-};
 
 
 #endif
-

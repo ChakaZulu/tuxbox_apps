@@ -34,7 +34,7 @@
 
 #include <string>
 #include <vector>
-#include "gui/progressstatus.h"
+#include "gui/widget/progressstatus.h"
 
 using namespace std;
 
