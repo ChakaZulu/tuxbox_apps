@@ -591,6 +591,18 @@ static eString getNavi(eString mode, eString path)
 	return result;
 }
 
+static eString getTopNavi(eString mode, eString path)
+{
+	eString result;
+	result += button(100, "ZAP", BBLUE, "?mode=zap");
+	result += button(100, "CONTROL", BBLUE, "?mode=menu");
+	result += button(100, "LINKS", BBLUE, "?mode=links");
+	result += button(100, "UPDATES", BBLUE, "?mode=updates");
+	result += button(100, "ABOUT", BBLUE, "?mode=about");
+	
+	return result;
+}
+
 #ifndef DISABLE_FILE
 extern int freeRecordSpace(void);  // implemented in enigma_main.cpp
 
@@ -1355,9 +1367,9 @@ static eString getContent(eString mode, eString path)
 		result = getTitle("Control > Timer List");
 		result += genTimerListBody();
 		result += "<br>";
-		result += button(100, "Cleanup", "12259E", "javascript:cleanupTimerList()");
+		result += button(100, "Cleanup", BLUE, "javascript:cleanupTimerList()");
 		result += "&nbsp;&nbsp;&nbsp;";
-		result += button(100, "Clear", "CB0303", "javascript:clearTimerList()");
+		result += button(100, "Clear", RED, "javascript:clearTimerList()");
 	}
 	else
 	if (mode == "updates")
@@ -1979,6 +1991,7 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 	result = read_file(TEMPLATE_DIR+"index.tmp");
 	result.strReplace("#COP#", getContent(mode, spath));
 	result.strReplace("#HEADER#", getEITC2());
+	result.strReplace("#TOPNAVI#", getTopNavi(mode, spath));
 	result.strReplace("#NAVI#", getNavi(mode, spath));
 
 	return result;
