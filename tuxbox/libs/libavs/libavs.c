@@ -21,6 +21,9 @@
  *
  *
  *   $Log: libavs.c,v $
+ *   Revision 1.4  2002/08/21 09:14:52  obi
+ *   no more compile warnings
+ *
  *   Revision 1.3  2002/03/06 14:00:35  gillem
  *   - more work on avslib
  *
@@ -33,16 +36,17 @@
  *
  *
  *
- *   $Revision: 1.3 $
+ *   $Revision: 1.4 $
  *
  */
 
-#include <stdio.h>
 #include <fcntl.h>
+#include <stdio.h>
 #include <sys/ioctl.h>
+#include <unistd.h>
 
-#include "dbox/avs_core.h"
-#include "dbox/saa7126_core.h"
+#include <dbox/avs_core.h>
+#include <dbox/saa7126_core.h>
 
 #include "libavs.h"
 
@@ -158,13 +162,13 @@ int avsSetLevel( eLevel level )
 
 	switch(level)
 	{
-		elOFF:
+		case elOFF:
 			videolevel = 0;
 			break;
-		el4X3:
+		case el4X3:
 			videolevel = 3;
 			break;
-		el16X9:
+		case el16X9:
 			switch(avs_type)
 			{
 				case CXA2092:
@@ -205,10 +209,11 @@ int avsSetLevel( eLevel level )
 int avsSetRoute( ePort port, eSource source, eMode mode )
 {
 	int ret = -1;
-	int videoport,audioport;
+	int videoport = 0;
+	int audioport = 0;
 	int videosource,audiosource;
-	int video;
-	int audio;
+	int video = 0;
+	int audio = 0;
 	int videomode;
 	int videofblk;
 

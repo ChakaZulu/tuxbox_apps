@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "libavs.h"
 
 int main()
@@ -13,4 +15,6 @@ int main()
 	}
 
 	avsDeInit();
+
+	return 0;
 }

@@ -1,7 +1,10 @@
 /*
-  $Id: libucodes.c,v 1.15 2002/05/16 11:53:23 derget Exp $
+  $Id: libucodes.c,v 1.16 2002/08/21 09:18:58 obi Exp $
   
   $Log: libucodes.c,v $
+  Revision 1.16  2002/08/21 09:18:58  obi
+  no more compile warnings
+
   Revision 1.15  2002/05/16 11:53:23  derget
   erst lesen dann commiten :)
 
@@ -41,29 +44,29 @@ struct Sucode
 
 static struct Sucode ucodes[] = 
 {
-"fece1d3324e0917b921d814490d8a824","avia500v093",
-"7373f3934263b3c3ea1d0f500f0044a5","avia500v110",
-"da492146ba7e177883feadaa0cf89aa5","avia600vb017",
-"6a748fb28000738cafeb9e27443ac623","avia600vb022",
-"d4c12df0d4ce8ba9eb858509d832df65","ucode",
-"ff6fafbd2aa1f29afe232a72fac57870","cam_01_01_001D",
-"c42d6753794dd95146eac31f2a65b516","cam_01_01_004D",
-"be4b0f38557c416ce04e7fa3fa634f95","cam_01_01_005D",
-"1905390636e70c966574a3298a1b89c3","cam_01_02_002D",
-"f27eda698c202d17af7b9bab83973e8c","cam_01_02_105D",
-"7b9b72786623e3750335c79af044e718","cam_01_01_001E",
-"be7f1beb1bb437b7f7c99f8e5a968882","cam_01_01_002E",
-"a8689d88e0d2df12a15732c98f865b11","cam_01_01_003E",
-"4336e7d3fed43c9e063210bcdc95d23e","cam_01_01_004E",
-"997b1f858f1efee525e6842558edbe3c","cam_01_01_005E",
-"7f56e693a916b39a6e2734dc9b5aab7a","cam_01_02_002E",
-"bac1970b0e865c00015b3d78a209b5bf","cam_01_02_105E",
-"c734207ddea7b8ceafa2505f1360f3bf","cam_01_01_004F",
-"a5984825ff554ea530efc4733ffd7473","cam_01_01_005F",
-"704cb8d9965babbdc7d4e7cae6e5584e","cam_01_02_002F",
-"c51074b2edf6c14e0bb99ee3ed8b9c47","cam_01_02_105F",
-"16c5e1eba0cfe63f2bbc648e1644c883","cam_NOKIA_PRODTEST2",
-"420baf447bfd529a794bb36ef80f1652","cam_STREAMHACK"
+	{"fece1d3324e0917b921d814490d8a824","avia500v093"},
+	{"7373f3934263b3c3ea1d0f500f0044a5","avia500v110"},
+	{"da492146ba7e177883feadaa0cf89aa5","avia600vb017"},
+	{"6a748fb28000738cafeb9e27443ac623","avia600vb022"},
+	{"d4c12df0d4ce8ba9eb858509d832df65","ucode"},
+	{"ff6fafbd2aa1f29afe232a72fac57870","cam_01_01_001D"},
+	{"c42d6753794dd95146eac31f2a65b516","cam_01_01_004D"},
+	{"be4b0f38557c416ce04e7fa3fa634f95","cam_01_01_005D"},
+	{"1905390636e70c966574a3298a1b89c3","cam_01_02_002D"},
+	{"f27eda698c202d17af7b9bab83973e8c","cam_01_02_105D"},
+	{"7b9b72786623e3750335c79af044e718","cam_01_01_001E"},
+	{"be7f1beb1bb437b7f7c99f8e5a968882","cam_01_01_002E"},
+	{"a8689d88e0d2df12a15732c98f865b11","cam_01_01_003E"},
+	{"4336e7d3fed43c9e063210bcdc95d23e","cam_01_01_004E"},
+	{"997b1f858f1efee525e6842558edbe3c","cam_01_01_005E"},
+	{"7f56e693a916b39a6e2734dc9b5aab7a","cam_01_02_002E"},
+	{"bac1970b0e865c00015b3d78a209b5bf","cam_01_02_105E"},
+	{"c734207ddea7b8ceafa2505f1360f3bf","cam_01_01_004F"},
+	{"a5984825ff554ea530efc4733ffd7473","cam_01_01_005F"},
+	{"704cb8d9965babbdc7d4e7cae6e5584e","cam_01_02_002F"},
+	{"c51074b2edf6c14e0bb99ee3ed8b9c47","cam_01_02_105F"},
+	{"16c5e1eba0cfe63f2bbc648e1644c883","cam_NOKIA_PRODTEST2"},
+	{"420baf447bfd529a794bb36ef80f1652","cam_STREAMHACK"}
 };
 
 
