@@ -334,11 +334,11 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channe
 		char tmp[40];
 		std::string apids10;
 		const char * extCommand;
-		std::string ext_channel_name = "unknown";
+		std::string ext_channel_name;
 //		std::string extAudioPID= "error";
 		std::string extEPGTitle= "not available";
 
-		std::string extMessage = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n\n<neutrino commandversion=\"1\">\n    <record command=\"";
+		std::string extMessage = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n\n<neutrino commandversion=\"1\">\n\t<record command=\"";
 		switch(command)
 		{
 		case CMD_VCR_RECORD:
@@ -363,8 +363,9 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channe
 		}
 
 		extMessage += extCommand;
-		extMessage += "\">\n";
-		extMessage += "        <channelname>";
+		extMessage += 
+			"\">\n"
+			"\t\t<channelname>";
 
 //		sprintf(tmp,"%u", g_RemoteControl->current_PIDs.PIDs.vpid );
 		CZapitClient::responseGetPIDs pids;
@@ -399,17 +400,9 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channe
 			}
 		}
 
-		CZapitClient::BouquetChannelList channellist;     
-		g_Zapit->getChannels(channellist);
-		CZapitClient::BouquetChannelList::iterator channel = channellist.begin();
-		for(; channel != channellist.end();channel++)
-		{
-			if(channel->channel_id==channel_id)
-			{
-				ext_channel_name=channel->name;
-				break;
-			}
-		}
+		ext_channel_name = g_Zapit->getChannelName(channel_id);
+		if (ext_channel_name.empty())
+			ext_channel_name = "unknown";
 
 //		CSectionsdClient::responseGetCurrentNextInfoChannelID current_next;
 		if(epgid!=0)
@@ -423,21 +416,21 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channe
 		}
 		
 		extMessage += ext_channel_name;
-		extMessage += "</channelname>\n        <epgtitle>";
+		extMessage += "</channelname>\n\t\t<epgtitle>";
 		extMessage += extEPGTitle;
-		extMessage += "</epgtitle>\n        <onidsid>";
+		extMessage += "</epgtitle>\n\t\t<onidsid>";
 		sprintf(tmp, "%u", channel_id);
 		extMessage += tmp;
-		extMessage += "</onidsid>\n        <epgid>";
+		extMessage += "</onidsid>\n\t\t<epgid>";
 		sprintf(tmp, "%llu", epgid);
 		extMessage += tmp;
-		extMessage += "</epgid>\n        <mode>";
+		extMessage += "</epgid>\n\t\t<mode>";
 		sprintf(tmp, "%d", g_Zapit->getMode());
 		extMessage += tmp;
-		extMessage += "</mode>\n        <videopid>";
+		extMessage += "</mode>\n\t\t<videopid>";
 		sprintf(tmp, "%u", si.vdid);
 		extMessage += tmp;
-		extMessage += "</videopid>\n        <audiopids selected=\"";
+		extMessage += "</videopid>\n\t\t<audiopids selected=\"";
 		extMessage += apids10;
 		extMessage += "\">\n";
 		// super hack :-), der einfachste weg an die apid descriptions ranzukommen
@@ -446,12 +439,12 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channe
 //		bool apidFound=false;
 		for(unsigned int i= 0; i< pids.APIDs.size(); i++)
 		{
-			extMessage += "            <audio pid=\"";
+			extMessage += "\t\t\t<audio pid=\"";
 			sprintf(tmp, "%u", pids.APIDs[i].pid);
 			extMessage += tmp;
 			extMessage += "\" name=\"";
 			extMessage += g_RemoteControl->current_PIDs.APIDs[i].desc;
-			extMessage += "\">\n";
+			extMessage += "\"/>\n";
 /*			if(pids.APIDs[i].pid==apid)
 				apidFound=true;*/
 		}
@@ -460,7 +453,10 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channe
 			// add spec apid to available
 			extMessage +="            <audio pid=\"" + extAudioPID + "\" name=\"" + extAudioPID  + "\"/>\n";
 		}*/
-		extMessage += "        </audiopids>\n    </record>\n</neutrino>\n";
+		extMessage += 
+			"\t\t</audiopids>\n"
+			"\t</record>\n"
+			"</neutrino>\n";
 
 		printf("sending to vcr-client:\n\n%s\n", extMessage.c_str());
 		write(sock_fd, extMessage.c_str() , extMessage.length() );
