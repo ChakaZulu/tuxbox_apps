@@ -4,6 +4,9 @@
 <wml>
 	<card id="c40" title="Timers">
 		<p>
+			<a href="/wap?mode=cleanupTimerList">Cleanup</a><br/>
+			<a href="/wap?mode=clearTimerList">Clear></a>
+		<p>
 			#BODY#	
 		</p>
 	</card>
