@@ -142,7 +142,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 				delete (unsigned char*) data;
 			}
 			else
-			if ( msg == NeutrinoMessages::EVT_SCAN_COMPLETE )
+			  if ((msg == NeutrinoMessages::EVT_SCAN_COMPLETE) || (msg == NeutrinoMessages::EVT_SCAN_FAILED))
 			{
 				finish= true;
 				msg = CRCInput::RC_timeout;

@@ -2223,9 +2223,9 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_Sectionsd->registerEvent(CSectionsdClient::EVT_GOT_CN_EPG, 222, NEUTRINO_UDS_NAME);
 
 	dprintf( DEBUG_NORMAL, "zapit event register\n");
-	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_FAILED, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_COMPLETE, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_COMPLETE_IS_NVOD, 222, NEUTRINO_UDS_NAME);
+	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_FAILED, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_SUB_COMPLETE, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_SUB_FAILED, 222, NEUTRINO_UDS_NAME);
 #ifndef SKIP_CA_STATUS
@@ -2233,13 +2233,14 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_CA_LOCK, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_CA_FTA, 222, NEUTRINO_UDS_NAME);
 #endif
+	g_Zapit->registerEvent(CZapitClient::EVT_RECORDMODE_ACTIVATED, 222, NEUTRINO_UDS_NAME);
+	g_Zapit->registerEvent(CZapitClient::EVT_RECORDMODE_DEACTIVATED, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_COMPLETE, 222, NEUTRINO_UDS_NAME);
+	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_FAILED, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_NUM_TRANSPONDERS, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_SATELLITE, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_NUM_CHANNELS, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_PROVIDER, 222, NEUTRINO_UDS_NAME);
-	g_Zapit->registerEvent(CZapitClient::EVT_RECORDMODE_ACTIVATED, 222, NEUTRINO_UDS_NAME);
-	g_Zapit->registerEvent(CZapitClient::EVT_RECORDMODE_DEACTIVATED, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_BOUQUETS_CHANGED, 222, NEUTRINO_UDS_NAME);
 
 	dprintf( DEBUG_NORMAL, "timerd event register\n");
@@ -3367,7 +3368,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.413 2003/02/17 14:28:55 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.414 2003/02/17 14:37:25 thegoodguy Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

@@ -879,8 +879,12 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 									*data = *(unsigned*) p;
 								break;
 #endif
-							default :
-								printf("[neutrino] event INITID_ZAPIT - unknown eventID 0x%x\n",  emsg.eventID );
+						case CZapitClient::EVT_SCAN_FAILED:
+							*msg  = NeutrinoMessages::EVT_SCAN_FAILED;
+							*data = 0;
+							break;
+						default:
+							printf("[neutrino] event INITID_ZAPIT - unknown eventID 0x%x\n",  emsg.eventID );
 						}
 			 		}
 			 		else if ( emsg.initiatorID == CEventServer::INITID_TIMERD )

@@ -84,10 +84,10 @@ struct NeutrinoMessages {
 		EVT_ZAP_GOTAPIDS	=	CRCInput::RC_Events + 12,
 		EVT_ZAP_FAILED		=	CRCInput::RC_Events + 13,
 		EVT_ZAP_ISNVOD		=	CRCInput::RC_Events + 14,
-		EVT_ZAP_SUB_COMPLETE =	CRCInput::RC_Events + 15,
-		EVT_SCAN_COMPLETE	=	CRCInput::RC_Events + 16,
-		EVT_SCAN_NUM_TRANSPONDERS =	CRCInput::RC_Events + 17,
-		EVT_SCAN_NUM_CHANNELS =	CRCInput::RC_Events + 18,
+		EVT_ZAP_SUB_COMPLETE      = CRCInput::RC_Events + 15,
+		EVT_SCAN_COMPLETE         = CRCInput::RC_Events + 16,
+		EVT_SCAN_NUM_TRANSPONDERS = CRCInput::RC_Events + 17,
+		EVT_SCAN_NUM_CHANNELS     = CRCInput::RC_Events + 18,
 		EVT_SHUTDOWN		=	CRCInput::RC_Events + 19,
 		EVT_TIMER			=	CRCInput::RC_Events + 20,
 		EVT_NEXTPROGRAM		=	CRCInput::RC_Events + 21,
@@ -100,6 +100,7 @@ struct NeutrinoMessages {
 		EVT_ZAP_CA_LOCK		=	CRCInput::RC_Events + 27,
 		EVT_ZAP_CA_FTA		=	CRCInput::RC_Events + 28,
 #endif
+		EVT_SCAN_FAILED           = CRCInput::RC_Events + 29,
 
 		EVT_CURRENTEPG 		=	CRCInput::RC_WithData + 1,
 		EVT_SCAN_SATELLITE	=	CRCInput::RC_WithData + 2,
