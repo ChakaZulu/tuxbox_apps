@@ -54,6 +54,7 @@ using namespace std;
 #define WEBXFACEVERSION "1.4.0"
 
 int pdaScreen = 0;
+int screenWidth = 1024;
 
 int currentBouquet = 0;
 int currentChannel = -1;
@@ -1727,6 +1728,10 @@ static eString getZap(eString mode, eString path)
 		}
 #endif
 		eString tmp = readFile(TEMPLATE_DIR + "zap.tmp");
+		if (screenWidth > 1024)
+			tmp.strReplace("#SELSIZE#", "30");
+		else
+			tmp.strReplace("#SELSIZE#", "15");
 		tmp.strReplace("#ZAPDATA#", getZapContent2(mode, path));
 		result += tmp;
 	}
@@ -3389,6 +3394,7 @@ static eString pda_root(eString request, eString dirpath, eString opts, eHTTPCon
 	eString result;
 
 	pdaScreen = 1;
+	screenWidth = 240;
 	eConfig::getInstance()->setKey("/ezap/webif/pdaScreen", pdaScreen);
 
 	std::map<eString,eString> opt = getRequestOptions(opts, '&');
@@ -3414,7 +3420,7 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 	if (opts.find("screenWidth") != eString::npos)
 	{
 		eString sWidth = opt["screenWidth"];
-		int screenWidth = atoi(sWidth.c_str());
+		screenWidth = atoi(sWidth.c_str());
 		pdaScreen = (screenWidth < 800) ? 1 : 0;
 		eConfig::getInstance()->setKey("/ezap/webif/pdaScreen", pdaScreen);
 	}
