@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.74 2004/02/09 17:12:20 gagga Exp $
+  $Id: movieplayer.cpp,v 1.75 2004/02/09 18:36:58 zwen Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -46,6 +46,7 @@
 #include <gui/infoviewer.h>
 #include <gui/nfs.h>
 #include <gui/bookmarkmanager.h>
+#include <gui/timeosd.h>
 
 #include <gui/widget/buttons.h>
 #include <gui/widget/icons.h>
@@ -99,6 +100,13 @@
 #define MAXREADSIZE 348*188
 #define MINREADSIZE 348*188
 
+//TODO: calculate offset for jumping 1 minute forward/backwards in stream
+// needs to be a multiplier of 188
+// do a VERY shitty approximation here...
+//long long minuteoffset = 557892632/2;
+//long long minuteoffset = 8807424;
+#define MINUTEOFFSET 30898176
+	
 
 static CMoviePlayerGui::state playstate;
 static bool isTS, isPES, isBookmark;
@@ -143,9 +151,11 @@ CMoviePlayerGui::CMoviePlayerGui()
 	pesfilefilter.addFilter ("mpv");
 	filebrowser->Filter = &tsfilefilter;
 	if (strlen (g_settings.network_nfs_moviedir) != 0)
-		Path = g_settings.network_nfs_moviedir;
+		Path_local = g_settings.network_nfs_moviedir;
 	else
-		Path = "/";
+		Path_local = "/";
+	Path_vlc  = "vlc://";
+	Path_vlc += g_settings.streaming_server_startdir;
 }
 
 //------------------------------------------------------------------------
@@ -388,6 +398,27 @@ bool VlcRequestStream(int  transcodeVideo, int transcodeAudio)
 	return true; // TODO error checking
 }
 //------------------------------------------------------------------------
+bool VlcGetStreamTime(std::string& stream_time)
+{
+	// TODO calculate REAL position as position returned by VLC does not take the ringbuffer into consideration
+	std::string positionurl = "http://";
+	positionurl += g_settings.streaming_server_ip;
+	positionurl += ':';
+	positionurl += g_settings.streaming_server_port;
+	positionurl += "/admin/dboxfiles.html?stream_time=true";
+	printf("[movieplayer.cpp] positionurl=%s\n",positionurl.c_str());
+	std::string response = "";
+	CURLcode httpres = sendGetRequest(positionurl, response);
+	printf("[movieplayer.cpp] httpres=%d, response.length()=%d, stream_time = %s\n",httpres,response.length(),response.c_str());
+	if(httpres== 0 && response.length() > 0)
+	{
+		stream_time = response;
+		return true;
+	}
+	else
+		return false;
+}
+//------------------------------------------------------------------------
 void *
 ReceiveStreamThread (void *mrl)
 {
@@ -626,7 +657,7 @@ PlayStreamThread (void *mrl)
 	bool failed = false;
 	// use global pida and pidv
 	pida = 0, pidv = 0, ac3 = -1;
-	int done, dmxa, dmxv = -1, dvr = -1, adec = -1, vdec = -1;
+	int done, dmxa=-1 , dmxv = -1, dvr = -1, adec = -1, vdec = -1;
 
 	ringbuf = ringbuffer_create (RINGBUFFERSIZE);
 	printf ("[movieplayer.cpp] ringbuffer created\n");
@@ -759,14 +790,16 @@ PlayStreamThread (void *mrl)
 				break;
 			case CMoviePlayerGui::SKIP:
 			{
-				//skipurl   = baseurl + "?control=seek&seek_value=%2B05%3A30";
 				skipurl = baseurl;
 				skipurl += "?control=seek&seek_value=";
 				char * tmp = curl_escape(skipvalue.c_str(), 0);
 				skipurl += tmp;
 				curl_free(tmp);
 				printf("[movieplayer.cpp] skipping URL(enc) : %s\n",skipurl.c_str());
-	            httpres = sendGetRequest(skipurl, response);
+				int bytes = (ringbuffer_read_space(ringbuf) / 188) * 188;
+				ringbuffer_read_advance(ringbuf, bytes);
+				httpres = sendGetRequest(skipurl, response);
+//				playstate = CMoviePlayerGui::RESYNC;
 				playstate = CMoviePlayerGui::PLAY;
 			}
 			break;
@@ -1084,7 +1117,7 @@ PlayFileThread (void *filename)
 	bool failed = false;
 	unsigned char buf[384 * 188 * 2];
 	unsigned short pida = 0, pidv = 0, ac3=0;
-	int done, fd, dmxa, dmxv = -1, dvr = -1, adec = -1, vdec = -1;
+	int done, fd=-1, dmxa=-1, dmxv = -1, dvr = -1, adec = -1, vdec = -1;
 	ssize_t wr = 0;
 	ssize_t cache = sizeof (buf);
 	size_t r = 0;
@@ -1137,14 +1170,6 @@ PlayFileThread (void *filename)
 	if (ioctl (dmxv, DMX_SET_PES_FILTER, &p) < 0)
 		failed = true;
 	
-	//TODO: calculate offset for jumping 1 minute forward/backwards in stream
-	// needs to be a multiplier of 188
-	// do a VERY shitty approximation here...
-	//long long minuteoffset = 557892632/2;
-	//long long minuteoffset = 8807424;
-	long long minuteoffset = 30898176;
-	
-
 	fileposition = startposition;
 	lseek (fd, fileposition, SEEK_SET);
 	if (isTS && !failed)
@@ -1179,8 +1204,8 @@ PlayFileThread (void *filename)
 			case CMoviePlayerGui::JF:
 			case CMoviePlayerGui::JB:
 				ioctl (dmxa, DMX_STOP);
-                lseek (fd, jumpminutes * minuteoffset, SEEK_CUR);
-                fileposition += jumpminutes * minuteoffset;
+                lseek (fd, jumpminutes * MINUTEOFFSET, SEEK_CUR);
+                fileposition += jumpminutes * MINUTEOFFSET;
                 playstate = CMoviePlayerGui::SOFTRESET;
                 skipwriting = true;
                 break;
@@ -1300,6 +1325,7 @@ void updateLcd(const std::string & sel_filename)
 }
 
 //------------------------------------------------------------------------
+#define SKIPPING_DURATION 3
 void
 CMoviePlayerGui::PlayStream (int streamtype)
 {
@@ -1308,9 +1334,9 @@ CMoviePlayerGui::PlayStream (int streamtype)
 
 	std::string sel_filename;
 	bool update_info = true, start_play = false, exit =
-		false, open_filebrowser = true, skipping = false;
+		false, open_filebrowser = true;
 	char mrl[200];
-	CHintBox skipBox("messagebox.info", g_Locale->getText("movieplayer.skipping"));
+	CTimeOSD StreamTime;
 
 	if (streamtype == STREAMTYPE_DVD)
 	{
@@ -1378,14 +1404,10 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		{
 			open_filebrowser = false;
 			filename = NULL;
-			char startDir[40 + 6];
-			strcpy (startDir, "vlc://");
-			strcat (startDir, g_settings.streaming_server_startdir);
-			printf ("[movieplayer.cpp] Startdir: %s\n", startDir);
 			filebrowser->Filter = &vlcfilefilter;
-			if (filebrowser->exec (startDir))
+			if (filebrowser->exec (Path_vlc))
 			{
-				Path = filebrowser->getCurrentDir ();
+				Path_vlc = filebrowser->getCurrentDir ();
 				CFile * file;
 				if ((file = filebrowser->getSelectedFile()) != NULL)
 				{
@@ -1439,15 +1461,12 @@ CMoviePlayerGui::PlayStream (int streamtype)
 			playstate = CMoviePlayerGui::SOFTRESET;
 		}
 
-		g_RCInput->getMsg (&msg, &data, 100);	// 10 secs..
-		if(skipping)
+		g_RCInput->getMsg (&msg, &data, 10);	// 1 secs..
+		if(StreamTime.IsVisible())
 		{
-			skipBox.hide();
-			skipping=false;
-			// resync 10 sec after skip
-			playstate = CMoviePlayerGui::RESYNC;
+			StreamTime.update();
 		}
-		else if (msg == CRCInput::RC_home || msg == CRCInput::RC_red)
+		if (msg == CRCInput::RC_home || msg == CRCInput::RC_red)
 		{
 			//exit play
 			exit = true;
@@ -1456,27 +1475,21 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		{
 			update_info = true;
 			playstate = (playstate == CMoviePlayerGui::PAUSE) ? CMoviePlayerGui::SOFTRESET : CMoviePlayerGui::PAUSE;
+			StreamTime.hide();
 		}
 		else if (msg == CRCInput::RC_green)
 		{
 			if (playstate == CMoviePlayerGui::PLAY) playstate = CMoviePlayerGui::RESYNC;
+			StreamTime.hide();
 		}
 		else if (msg == CRCInput::RC_blue)
 		{
-			if (bookmarkmanager->getBookmarkCount() < bookmarkmanager->getMaxBookmarkCount()) {
-    			std::string bookmarkurl = filename;
-    			std::string positionurl = "http://";
-            	positionurl += g_settings.streaming_server_ip;
-            	positionurl += ':';
-            	positionurl += g_settings.streaming_server_port;
-            	positionurl += "/admin/dboxfiles.html?stream_time=true";
-    			printf("[movieplayer.cpp] positionurl=%s\n",positionurl.c_str());
-    			std::string response = "";
-    			CURLcode httpres = sendGetRequest(positionurl, response);
-    			printf("[movieplayer.cpp] httpres=%d, response.length()=%d, stream_time = %s\n",httpres,response.length(),response.c_str());
-    			if (httpres == 0 && response.length()>0) {
-        			// TODO calculate REAL position as position returned by VLC does not take the ringbuffer into consideration
-        			bookmarkmanager->createBookmark(bookmarkurl, response);
+			if (bookmarkmanager->getBookmarkCount() < bookmarkmanager->getMaxBookmarkCount()) 
+			{
+				std::string stream_time;
+    			if (VlcGetStreamTime(stream_time))
+				{
+					bookmarkmanager->createBookmark(filename, stream_time);
     			}
     			else {
         			DisplayErrorMessage(g_Locale->getText("movieplayer.wrongvlcversion")); // UTF-8
@@ -1491,45 +1504,39 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		
 		else if (msg == CRCInput::RC_1)
 		{
-			skipBox.paint();
 			skipvalue = "-00:01:00";
-			skipping=true;
 			playstate = CMoviePlayerGui::SKIP;
+			StreamTime.hide();
 		}
 		else if (msg == CRCInput::RC_3)
 		{
-			skipBox.paint();
 			skipvalue = "+00:01:00";
-			skipping=true;
 			playstate = CMoviePlayerGui::SKIP;
+			StreamTime.hide();
 		}
 		else if (msg == CRCInput::RC_4)
 		{
-			skipBox.paint();
 			skipvalue = "-00:05:00";
-			skipping=true;
 			playstate = CMoviePlayerGui::SKIP;
+			StreamTime.hide();
 		}
 		else if (msg == CRCInput::RC_6)
 		{
-			skipBox.paint();
 			skipvalue = "+00:05:00";
-			skipping=true;
 			playstate = CMoviePlayerGui::SKIP;
+			StreamTime.hide();
 		}
 		else if (msg == CRCInput::RC_7)
 		{
-			skipBox.paint();
 			skipvalue = "-00:10:00";
-			skipping=true;
 			playstate = CMoviePlayerGui::SKIP;
+			StreamTime.hide();
 		}
 		else if (msg == CRCInput::RC_9)
 		{
-			skipBox.paint();
 			skipvalue = "+00:10:00";
-			skipping=true;
 			playstate = CMoviePlayerGui::SKIP;
+			StreamTime.hide();
 		}
 		else if (msg == CRCInput::RC_down)
 		{
@@ -1543,15 +1550,29 @@ CMoviePlayerGui::PlayStream (int streamtype)
 				skipvalue = tmp;
 				if(skipvalue[0]== '=')
 					skipvalue = skipvalue.substr(1);
-				skipBox.paint();
-				skipping=true;
 				playstate = CMoviePlayerGui::SKIP;
+				StreamTime.hide();
 			}
 		}
+		else if (msg == CRCInput::RC_setup)
+ 		{
+			if(StreamTime.IsVisible())
+			{
+				StreamTime.hide();
+			}
+			else
+			{
+				std::string stream_time;
+				if (VlcGetStreamTime(stream_time))
+				{
+					StreamTime.show(atoi(stream_time.c_str()));
+				}
+			}
+ 		}
 		else if (msg == CRCInput::RC_help)
  		{
      		std::string helptext = g_Locale->getText("movieplayer.vlchelp");
-     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.74 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.75 $\n\nMovieplayer (c) 2003, 2004 by gagga";
      		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -1582,6 +1603,7 @@ CMoviePlayerGui::PlayFile (void)
 	neutrino_msg_data_t data;
 
 	std::string sel_filename;
+	CTimeOSD FileTime;
 	bool update_lcd = true, open_filebrowser =
 		true, start_play = false, exit = false;
 	playstate = CMoviePlayerGui::STOPPED;
@@ -1630,9 +1652,9 @@ CMoviePlayerGui::PlayFile (void)
         			filebrowser->Filter = &pesfilefilter;
     			}
 			}
-			if (filebrowser->exec(g_settings.network_nfs_moviedir))
+			if (filebrowser->exec(Path_local))
 			{
-				Path = filebrowser->getCurrentDir();
+				Path_local = filebrowser->getCurrentDir();
 				CFile * file;
 				if ((file = filebrowser->getSelectedFile()) != NULL)
 				{
@@ -1685,7 +1707,11 @@ CMoviePlayerGui::PlayFile (void)
 			playstate = CMoviePlayerGui::SOFTRESET;
 		}
 
-		g_RCInput->getMsg (&msg, &data, 100);	// 10 secs..
+		g_RCInput->getMsg (&msg, &data, 10);	// 1 secs..
+		if(FileTime.IsVisible())
+		{
+			FileTime.update();
+		}
 		if (msg == CRCInput::RC_red || msg == CRCInput::RC_home)
 		{
 			//exit play
@@ -1718,8 +1744,19 @@ CMoviePlayerGui::PlayFile (void)
  		else if (msg == CRCInput::RC_help)
  		{
 			std::string fullhelptext = g_Locale->getText("movieplayer.tshelp");
-			fullhelptext += "\nVersion: $Revision: 1.74 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			fullhelptext += "\nVersion: $Revision: 1.75 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+ 		}
+ 		else if (msg == CRCInput::RC_setup)
+ 		{
+			if(FileTime.IsVisible())
+			{
+				FileTime.hide();
+			}
+			else
+			{
+				FileTime.show(fileposition / (MINUTEOFFSET/60));
+			}
  		}
 		else if (msg == CRCInput::RC_left)
 		{
@@ -1730,6 +1767,7 @@ CMoviePlayerGui::PlayFile (void)
 			speed *= (speed > 1 ? -1 : 1);
 			playstate = CMoviePlayerGui::REW;
 			update_lcd = true;
+			FileTime.hide();
 		}
 		else if (msg == CRCInput::RC_right)
 		{
@@ -1739,6 +1777,7 @@ CMoviePlayerGui::PlayFile (void)
 			speed *= 2;
 			playstate = CMoviePlayerGui::FF;
 			update_lcd = true;
+			FileTime.hide();
 		}
 		else if (msg == CRCInput::RC_1)
 		{
@@ -1746,6 +1785,7 @@ CMoviePlayerGui::PlayFile (void)
 			jumpminutes = -1;
 			playstate = CMoviePlayerGui::JB;
 			update_lcd = true;
+			FileTime.hide();
 		}
 		else if (msg == CRCInput::RC_3)
 		{
@@ -1753,6 +1793,7 @@ CMoviePlayerGui::PlayFile (void)
 			jumpminutes = 1;
 			playstate = CMoviePlayerGui::JF;
 			update_lcd = true;
+			FileTime.hide();
 		}
 		else if (msg == CRCInput::RC_4)
 		{
@@ -1760,6 +1801,7 @@ CMoviePlayerGui::PlayFile (void)
 			jumpminutes = -5;
 			playstate = CMoviePlayerGui::JB;
 			update_lcd = true;
+			FileTime.hide();
 		}
 		else if (msg == CRCInput::RC_6)
 		{
@@ -1767,6 +1809,7 @@ CMoviePlayerGui::PlayFile (void)
 			jumpminutes = 5;
 			playstate = CMoviePlayerGui::JF;
 			update_lcd = true;
+			FileTime.hide();
 		}
 		else if (msg == CRCInput::RC_7)
 		{
@@ -1774,6 +1817,7 @@ CMoviePlayerGui::PlayFile (void)
 			jumpminutes = -10;
 			playstate = CMoviePlayerGui::JB;
 			update_lcd = true;
+			FileTime.hide();
 		}
 		else if (msg == CRCInput::RC_9)
 		{
@@ -1781,14 +1825,11 @@ CMoviePlayerGui::PlayFile (void)
 			jumpminutes = 10;
 			playstate = CMoviePlayerGui::JF;
 			update_lcd = true;
+			FileTime.hide();
 		}
 		else if (msg == CRCInput::RC_up || msg == CRCInput::RC_down)
 		{
 			// todo: next/prev file
-		}
-		else if (msg == CRCInput::RC_help)
-		{
-			// todo: infobar
 		}
 		else if (msg == CRCInput::RC_ok)
 		{

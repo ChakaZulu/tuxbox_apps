@@ -738,8 +738,8 @@ movieplayer.pesplayback PES Abspielen (Experimentell)
 movieplayer.fileplayback Datei via VLC
 movieplayer.dvdplayback DVD
 movieplayer.vcdplayback (S)VCD
-movieplayer.tshelp ROT/Home Stop\nGRÜN Resync\nGELB Pause/Weiter\nBLAU Bookmark setzen\n1 ca. 1 Minute zurück\n3 ca. 1 Minute vor\n4 ca. 5 Minuten zurück\n6 ca. 5 Minuten vor\n7 ca. 10 Minuten zurück\n9 ca. 10 Minuten vor\nHilfe: http://www.giggo.de/dbox2/movieplayer.html\n
-movieplayer.vlchelp ROT/Home Stop\nGRÜN Resync\nGELB Pause/Weiter\nBLAU Bookmark setzen\n1 ca. 1 Minute zurück\n3 ca. 1 Minute vor\n4 ca. 5 Minuten zurück\n6 ca. 5 Minuten vor\n7 ca. 10 Minuten zurück\n9 ca. 10 Minuten vor\nHilfe: http://www.giggo.de/dbox2/movieplayer.html\n
+movieplayer.tshelp ROT/Home Stop\nGRÜN Resync\nGELB Pause/Weiter\nBLAU Bookmark setzen\nd-box Zeit einblenden\n1 ca. 1 Minute zurück\n3 ca. 1 Minute vor\n4 ca. 5 Minuten zurück\n6 ca. 5 Minuten vor\n7 ca. 10 Minuten zurück\n9 ca. 10 Minuten vor\nHilfe: http://www.giggo.de/dbox2/movieplayer.html\n
+movieplayer.vlchelp ROT/Home Stop\nGRÜN Resync\nGELB Pause/Weiter\nBLAU Bookmark setzen\nd-box Zeit einblenden\nv Sprung\n1 ca. 1 Minute zurück\n3 ca. 1 Minute vor\n4 ca. 5 Minuten zurück\n6 ca. 5 Minuten vor\n7 ca. 10 Minuten zurück\n9 ca. 10 Minuten vor\nHilfe: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.toomanybookmarks Sie haben bereits zu viele Bookmarks angelegt.\nEs muß erst ein anderes gelöscht werden.
 movieplayer.bookmarkname Bookmark Name
 movieplayer.bookmarkname_hint1 Geben Sie den Namen für das neue Bookmark ein

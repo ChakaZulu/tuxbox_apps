@@ -72,7 +72,8 @@ class CMoviePlayerGui : public CMenuTarget
 	int            m_LastMode;	
 	const char     *filename;
 
-	std::string Path;
+	std::string Path_local;
+	std::string Path_vlc;
 	CFileBrowser * filebrowser;
 	CBookmarkManager * bookmarkmanager;
 
