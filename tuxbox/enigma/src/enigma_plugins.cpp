@@ -317,7 +317,30 @@ void ePluginThread::start()
 		}
 		else
 		{
-			eDebug("would exec plugin %s", sopath.c_str());
+// this is ugly code.. but i have no other idea to detect enigma plugins..
+			bool isEnigmaPlugin=false;
+			int fd = open(sopath.c_str(), O_RDONLY);
+			if ( fd >= 0 )
+			{
+				char buf[8192];
+				while(!isEnigmaPlugin)
+				{
+					int rd = ::read(fd, buf, 8192);
+					for (int i=0; i < rd-15; ++i )
+					{
+						if (!strcmp(buf+i, "_ZN7eWidgetD0Ev")||!strcmp(buf+i)
+							isEnigmaPlugin=true;
+					}
+					if ( rd < 8192 )
+						break;
+				}
+				close(fd);
+			}
+
+			eDebug("would exec (%s) plugin %s", 
+				isEnigmaPlugin ? "ENIGMA" : "NORMAL",
+				sopath.c_str());
+
 			PluginExec execPlugin = (PluginExec) dlsym(libhandle[i-1], "plugin_exec");
 			if (!execPlugin)
 				// show messagebox.. and close after 5 seconds...
@@ -381,17 +404,16 @@ void ePluginThread::start()
 					printf("%p\n", par->next);
 				}*/
 
-				if (!dlsym(libhandle[i-1], "_ZN7eWidgetD0Ev") &&
-						!dlsym(libhandle[i-1], "_ZN11eDecoWidgetD0Ev") )
-				{
-					eDebug("start plugin thread...");
-					run();  // start thread
-				}
-				else      
+				if ( isEnigmaPlugin )
 				{
 					eDebug("start plugin in current thread");
 					thread();
 					thread_finished();
+				}
+				else
+				{
+					eDebug("start plugin thread...");
+					run();  // start thread
 				}
 			}
 		}
