@@ -448,6 +448,7 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.streaming_server_cddrive, configfile.getString("streaming_server_cddrive", "D:").c_str() );
 	strcpy( g_settings.streaming_videorate,  configfile.getString("streaming_videorate", "1000").c_str() );
 	strcpy( g_settings.streaming_audiorate, configfile.getString("streaming_audiorate", "192").c_str() );
+	strcpy( g_settings.streaming_server_startdir, configfile.getString("streaming_server_startdir", "C:\\Movies").c_str() );
 	
 	//rc-key configuration
 	g_settings.key_tvradio_mode = configfile.getInt32( "key_tvradio_mode", CRCInput::RC_nokey );
@@ -702,6 +703,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString( "streaming_server_cddrive", g_settings.streaming_server_cddrive );
 	configfile.setString ( "streaming_videorate", g_settings.streaming_videorate );
 	configfile.setString ( "streaming_audiorate", g_settings.streaming_audiorate );
+	configfile.setString( "streaming_server_startdir", g_settings.streaming_server_startdir );
 	
 	//rc-key configuration
 	configfile.setInt32( "key_tvradio_mode", g_settings.key_tvradio_mode );
@@ -1716,15 +1718,17 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
  	CStringInputSMS*  cddriveInput = new CStringInputSMS("streamingmenu.streaming_server_cddrive", g_settings.streaming_server_cddrive, 20,"", "","abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-:");
 	CStringInput*  streamingSettings_videorate= new CStringInput("streamingmenu.streaming_videorate", g_settings.streaming_videorate, 5, "ipsetup.hint_1", "ipsetup.hint_2","0123456789 ");
 	CStringInput*  streamingSettings_audiorate= new CStringInput("streamingmenu.streaming_audiorate", g_settings.streaming_audiorate, 5, "ipsetup.hint_1", "ipsetup.hint_2","0123456789 ");
+	CStringInputSMS*  startdirInput = new CStringInputSMS("streamingmenu.streaming_server_startdir", g_settings.streaming_server_startdir, 30,"", "","abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-:");
 
 	CMenuForwarder* mf1 = new CMenuForwarder("streamingmenu.server_ip", (g_settings.streaming_type==1), g_settings.streaming_server_ip,streamingSettings_server_ip);
 	CMenuForwarder* mf2 = new CMenuForwarder("streamingmenu.server_port", (g_settings.streaming_type==1), g_settings.streaming_server_port,streamingSettings_server_port);
 	CMenuForwarder* mf3 = new CMenuForwarder("streamingmenu.streaming_server_cddrive", (g_settings.streaming_type==1), g_settings.streaming_server_cddrive,cddriveInput);
 	CMenuForwarder* mf4 = new CMenuForwarder("streamingmenu.streaming_videorate", (g_settings.streaming_type==1), g_settings.streaming_videorate,streamingSettings_videorate);
 	CMenuForwarder* mf5 = new CMenuForwarder("streamingmenu.streaming_audiorate", (g_settings.streaming_type==1), g_settings.streaming_audiorate,streamingSettings_audiorate);
+	CMenuForwarder* mf6 = new CMenuForwarder("streamingmenu.streaming_server_startdir", (g_settings.streaming_type==1), g_settings.streaming_server_startdir,startdirInput);
 
 	CStreamingNotifier *StreamingNotifier =
-		new CStreamingNotifier(mf1,mf2,mf3,mf4,mf5);
+		new CStreamingNotifier(mf1,mf2,mf3,mf4,mf5,mf6);
 
         CMenuOptionChooser* oj1 = new CMenuOptionChooser("streamingmenu.streaming_type", &g_settings.streaming_type,
                                                     true, StreamingNotifier);
@@ -1742,6 +1746,7 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 	streamingSettings.addItem( mf3);
 	streamingSettings.addItem( mf4);
 	streamingSettings.addItem( mf5);
+	streamingSettings.addItem( mf6);
 	streamingSettings.addItem( new CMenuForwarder("movieplayer.defdir", true, g_settings.network_nfs_moviedir, 
 															 this, "moviedir"));
 

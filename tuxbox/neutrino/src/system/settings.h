@@ -162,6 +162,7 @@ struct SNeutrinoSettings
         char streaming_server_cddrive[20];
 	char streaming_videorate[5];
 	char streaming_audiorate[5];
+	char streaming_server_startdir[40];
 
 	//key configuration
 	int key_tvradio_mode;

@@ -65,9 +65,9 @@ class CDHCPNotifier : public CChangeObserver
 class CStreamingNotifier : public CChangeObserver
 {
 	private:
-		CMenuItem* toDisable[5];
+		CMenuItem* toDisable[6];
 	public:
-		CStreamingNotifier( CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem* );
+		CStreamingNotifier( CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem* );
 		bool changeNotify(string OptionName, void*);
 };
 class CRecordingNotifier : public CChangeObserver

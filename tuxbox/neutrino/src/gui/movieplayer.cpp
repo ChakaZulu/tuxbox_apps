@@ -4,7 +4,7 @@
 	Movieplayer (c) 2003 by gagga
 	Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-        $Id: movieplayer.cpp,v 1.29 2003/08/28 12:35:13 alexw Exp $
+        $Id: movieplayer.cpp,v 1.30 2003/09/01 00:15:09 gagga Exp $
 
 	Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -83,6 +83,8 @@
 #include <curl/types.h>
 #include <curl/easy.h>
 
+#include <poll.h>
+
 #define ADAP	"/dev/dvb/adapter0"
 #define ADEC	ADAP "/audio0"
 #define VDEC	ADAP "/video0"
@@ -105,6 +107,7 @@
 
 #define STREAMTYPE_DVD	1
 #define STREAMTYPE_SVCD	2
+#define STREAMTYPE_FILE	3
 
 #define ConnectLineBox_Width	15
 
@@ -323,6 +326,7 @@ ReceiveStreamThread (void *mrl)
 // TODO: Better way to detect if http://<server>:8080/dboxstream is already alive. For example repetitive checking for HTTP 404.
 // Unfortunately HTTP HEAD requests are not supported by VLC :(
 // vlc 0.6.3 and up will support HTTP HEAD requests.
+  printf ("Sleeping for 5 seconds\n");
   sleep (5);
 
 // Open HTTP connection to VLC
@@ -392,11 +396,18 @@ ReceiveStreamThread (void *mrl)
     }
 
   printf ("Read sockets created\n");
+  printf ("Buffering approx. 3 seconds\n");
 
   int done;
   int size;
   streamingrunning = 1;
   int fd = open ("/tmp/tmpts", O_CREAT | O_WRONLY);
+  
+  struct pollfd poller[0];
+  poller[0].fd = skt;
+  poller[0].events = POLLIN | POLLPRI;
+  int pollret;
+  
   while (streamingrunning == 1)
     {
       while ((size = ringbuffer_write_space (ringbuf)) == 0)
@@ -409,7 +420,7 @@ ReceiveStreamThread (void *mrl)
 	    {
 	      // find apid and vpid. Easiest way to do that is to write the TS to a file 
 	      // and use the usuasl find_avpids function. This is not even overhead as the
-	      // buffer needs to be prefilles anyway
+	      // buffer needs to be prefilled anyway
 	      close (fd);
 	      fd = open ("/tmp/tmpts", O_RDONLY);
 	      //Use global pida, pidv
@@ -423,7 +434,46 @@ ReceiveStreamThread (void *mrl)
 	  firstbufferfilled = 1;
 	}
       //printf("ringbuf write space:%d\n",size);
-      len = recv (skt, buf, size, 0);
+      
+      
+      //len = recv (skt, buf, size, 0);
+      	  if (playstate == STOPPED)
+	    {
+	      pthread_exit (NULL);
+	    }
+	    
+      len = 0;
+      pollret = poll (poller, (unsigned long) 1, -1);
+
+	  if (pollret < 0)
+	    {
+	    	perror ("Error while polling()");
+      		playstate = STOPPED;
+      		pthread_exit (NULL);
+	    }
+
+	  if (((poller[0].revents & POLLHUP) == POLLHUP) ||
+	      ((poller[0].revents & POLLERR) == POLLERR) ||
+	      ((poller[0].revents & POLLNVAL) == POLLNVAL))
+	    {
+	    	perror ("Error while polling()");
+      		playstate = STOPPED;
+      		pthread_exit (NULL);
+	    }
+
+
+	  if ((poller[0].revents & POLLIN) == POLLIN)
+	    {
+	      len = recv (poller[0].fd, buf, size, 0);
+	      //printf ("[%d POLLIN bytes read]\n", wr);
+	    }
+	  if ((poller[0].revents & POLLPRI) == POLLPRI)
+	    {
+	      len = recv (poller[0].fd, buf, size, 0);
+	      //printf ("[%d POLLPRI bytes read]\n", wr);
+	    }
+	    
+	    //--------------------
       if (len > 0)
 	{
 	  //printf ("bytes received:%d\n", len);
@@ -550,7 +600,7 @@ PlayStreamThread (void *mrl)
 	      ioctl (dmxv, DMX_START);
 	      ioctl (dmxa, DMX_START);
 	      fprintf (stdout,
-		       "[movieplayer.cpp] PlayStreamthread: Driver successfully set up");
+		       "[movieplayer.cpp] PlayStreamthread: Driver successfully set up\n");
 	      hintBox->hide ();
 	      delete hintBox;
 
@@ -655,6 +705,9 @@ PlayStreamThread (void *mrl)
   curl_easy_setopt (curl, CURLOPT_URL, url);
   httpres = curl_easy_perform (curl);
   curl_easy_cleanup (curl);
+  printf("Waiting for RCST to stop\n");
+  pthread_join (rcst, NULL);
+  printf("Seems that RCST was stopped succesfully\n");
   pthread_exit (NULL);
 }
 
@@ -802,21 +855,29 @@ CMoviePlayerGui::PlayStream (int streamtype)
 {
   uint msg, data;
   string sel_filename;
-  bool update_info = true, start_play = true, exit = false;
+  bool update_info = true, start_play = false, exit = false, open_filebrowser=true;
   char mrl[200];
   if (streamtype == STREAMTYPE_DVD)
     {
       strcpy (mrl, "dvdsimple:");
+      strcat (mrl, g_settings.streaming_server_cddrive);
+      strcat (mrl, "@1:1");
+      printf ("Generated MRL: %s\n", mrl);
       sel_filename = "DVD";
+      open_filebrowser=false; 
+      start_play=true;
     }
-  else
+  else if (streamtype == STREAMTYPE_SVCD)
     {
       strcpy (mrl, "vcd:");
+      strcat (mrl, g_settings.streaming_server_cddrive);
+      strcat (mrl, "@1:1");
+      printf ("Generated MRL: %s\n", mrl);
       sel_filename = "(S)VCD";
+      open_filebrowser=false; 
+      start_play=true;
+
     }
-  strcat (mrl, g_settings.streaming_server_cddrive);
-  strcat (mrl, "@1:1");
-  printf ("Generated MRL: %s\n", mrl);
 
   playstate = STOPPED;
   /* playstate == STOPPED         : stopped
@@ -838,6 +899,43 @@ CMoviePlayerGui::PlayStream (int streamtype)
 	      playstate = STOPPED;
 	      break;
 	    }
+	}
+
+      if (open_filebrowser)
+	{
+	  open_filebrowser = false;
+	  filename = NULL;
+	  char startDir[40+6];
+	  strcpy(startDir,"vlc://");
+	  strcat(startDir,g_settings.streaming_server_startdir);
+	  printf("Startdir: %s\n",startDir);
+	  //if (filebrowser->exec ("vlc://C:/TestMovies"))
+	  if (filebrowser->exec (startDir))
+	    {
+	      Path = filebrowser->getCurrentDir ();
+	      if ((filename =
+		   filebrowser->getSelectedFile ()->Name.c_str ()) != NULL)
+		{
+		  sel_filename =
+		    filebrowser->getSelectedFile ()->getFileName ();
+		  printf("sel_filename: %s\n",filename);
+		  //strcpy (mrl, "c:\\TestMovies\\dolby.mpg");
+		  int namepos = filebrowser->getSelectedFile ()->Name.rfind("vlc://");
+	          string mrl_str = filebrowser->getSelectedFile ()->Name.substr(namepos + 6);
+	          strcpy (mrl,mrl_str.c_str());
+      		  printf ("Generated FILE MRL: %s\n", mrl);
+		  
+		  update_info = true;
+		  start_play = true;
+		}
+	    }
+	  else
+	    {
+	      if (playstate == STOPPED)
+		break;
+	    }
+
+	  CLCD::getInstance ()->setMode (CLCD::MODE_TVRADIO);
 	}
 
       if (update_info)
@@ -1199,6 +1297,13 @@ CMoviePlayerGui::show ()
 	{
 	  // do nothing
 	}
+//------------ RED --------------------
+      else if (msg == CRCInput::RC_red)
+	{
+	  hide ();
+	  PlayStream (STREAMTYPE_FILE);
+	  paint ();
+	}
 //------------ GREEN --------------------
       else if (msg == CRCInput::RC_green)
 	{
@@ -1361,6 +1466,10 @@ CMoviePlayerGui::paintFoot ()
 			  y + (height - info_height - 2 * buttonHeight) + 4);
   g_Fonts->infobar_small->RenderString (x + 0 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText ("movieplayer.bookmark").c_str (), COL_INFOBAR, 0, true);	// UTF-8
 */
+  frameBuffer->paintIcon ("rot.raw", x + 0 * ButtonWidth + 10,
+			  y + (height - info_height - 2 * buttonHeight) + 4);
+  g_Fonts->infobar_small->RenderString (x + 0 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText ("movieplayer.choosestreamfile").c_str (), COL_INFOBAR, 0, true);	// UTF-8
+
   frameBuffer->paintIcon ("gruen.raw", x + 1 * ButtonWidth + 10,
 			  y + (height - info_height - 2 * buttonHeight) + 4);
   g_Fonts->infobar_small->RenderString (x + 1 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText ("movieplayer.choosets").c_str (), COL_INFOBAR, 0, true);	// UTF-8

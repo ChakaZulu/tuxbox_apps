@@ -96,13 +96,14 @@ bool CDHCPNotifier::changeNotify(string OptionName, void* data)
 	return true;
 }
 
-CStreamingNotifier::CStreamingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem* i3, CMenuItem* i4, CMenuItem* i5)
+CStreamingNotifier::CStreamingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem* i3, CMenuItem* i4, CMenuItem* i5, CMenuItem* i6)
 {
    toDisable[0]=i1;
    toDisable[1]=i2;
    toDisable[2]=i3;
    toDisable[3]=i4;
    toDisable[4]=i5;
+   toDisable[5]=i6;
 
 }
 

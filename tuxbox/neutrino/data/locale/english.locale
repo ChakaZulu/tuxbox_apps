@@ -136,6 +136,7 @@ streamingmenu.streaming_type Streamingserver
 streamingmenu.server_ip Streamingserver IP
 streamingmenu.server_port Streamingserver Port
 streamingmenu.streaming_server_cddrive DVD Drive
+streamingmenu.streaming_server_startdir Directory (VLC)
 streamingmenu.streaming_videorate Datarate Video
 streamingmenu.streaming_audiorate Datarate Audio
 streamingmenu.off Off
@@ -709,7 +710,8 @@ movieplayer.choosepes Play PES
 movieplayer.bookmark Bookmarks
 movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
-movieplayer.pleasewait Please wait.\nConnecting to the streaming server...
+movieplayer.choosestreamfile File via VLC
+movieplayer.pleasewait Please wait.\nConnecting to the streaming server...\nThis could take up to 30 seconds!
 movieplayer.nostreamingserver The streaming server could not be reached.
 movieplayer.defdir start dir.
 

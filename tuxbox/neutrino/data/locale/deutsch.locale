@@ -136,6 +136,7 @@ streamingmenu.streaming_type Streamingserver
 streamingmenu.server_ip Streamingserver IP
 streamingmenu.server_port Streamingserver Port
 streamingmenu.streaming_server_cddrive DVD Laufwerk
+streamingmenu.streaming_server_startdir Verzeichnis (VLC)
 streamingmenu.streaming_videorate Datenrate Video
 streamingmenu.streaming_audiorate Datenrate Audio
 streamingmenu.off Deaktiviert
@@ -709,7 +710,8 @@ movieplayer.choosepes PES Abspielen
 movieplayer.bookmark Bookmarks
 movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
-movieplayer.pleasewait Bitte warten Sie.\nDie Verbindung zum Streamingserver wird hergestellt.
+movieplayer.choosestreamfile Datei via VLC
+movieplayer.pleasewait Bitte warten Sie.\nDie Verbindung zum Streamingserver wird hergestellt.\nDies kann bis zu 30 Sekunden dauern!
 movieplayer.nostreamingserver Es konnte keine Verbindung\nzum Streamingserver hergestellt werden.
 movieplayer.defdir Start-Verz.
 
