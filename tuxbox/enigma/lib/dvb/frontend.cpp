@@ -1846,7 +1846,7 @@ send:
 #else
 	front.inversion=(Inversion == 2 ? INVERSION_AUTO :
 		(Inversion?INVERSION_ON:INVERSION_OFF) );
-	front.u.qpsk.fec_inner=getFEC(FEC_inner)
+	front.u.qpsk.fec_inner=getFEC(FEC_inner);
 	front.u.qpsk.symbol_rate=SymbolRate;
 #endif
 
