@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.36 2002/09/11 09:23:48 thegoodguy Exp $
+ * $Id: bouquets.h,v 1.37 2002/09/11 14:41:20 thegoodguy Exp $
  */
 
 #ifndef __bouquets_h__
@@ -24,10 +24,10 @@
 
 using namespace std;
 
-//typedef map <uint32_t, CZapitChannel> tallchans;                      // Key: (original_network_id << 16) | service_id
-//typedef map<uint32_t, CZapitChannel>::iterator tallchans_iterator;
-typedef __gnu_cxx::hash_map<uint32_t, CZapitChannel> tallchans;                      // Key: (original_network_id << 16) | service_id
-typedef __gnu_cxx::hash_map<uint32_t, CZapitChannel>::iterator tallchans_iterator;
+typedef uint32_t t_channel_id;             // channel_id: (original_network_id << 16) | service_id
+
+typedef __gnu_cxx::hash_map<t_channel_id, CZapitChannel> tallchans;
+typedef __gnu_cxx::hash_map<t_channel_id, CZapitChannel>::iterator tallchans_iterator;
 
 typedef vector<CZapitChannel*> ChannelList;
 
@@ -51,18 +51,18 @@ class CBouquet
 		ChannelList radioChannels;
 		ChannelList tvChannels;
 
-		CBouquet(const string name) { Name=name; bHidden = false; bLocked = false; }
+		CBouquet(const string name) { Name = name; bHidden = false; bLocked = false; }
 
-		void addService (CZapitChannel* newChannel);
+		void addService(CZapitChannel* newChannel);
 
-		void removeService (CZapitChannel* oldChannel);
-		void removeService (unsigned int onidSid, unsigned char serviceType = 0)			{removeService( getChannelByOnidSid( onidSid, serviceType));}
+		void removeService(CZapitChannel* oldChannel);
+		void removeService(const t_channel_id channel_id, unsigned char serviceType = 0) { removeService(getChannelByChannelID(channel_id, serviceType)); }
 
 		void moveService (const unsigned int oldPosition, const unsigned int newPosition, const unsigned char serviceType);
 
 		int recModeRadioSize( unsigned int);
 		int recModeTVSize( unsigned int);
-		CZapitChannel* getChannelByOnidSid(unsigned int onidSid, unsigned char serviceType = 0);
+		CZapitChannel* getChannelByChannelID(const t_channel_id channel_id, const unsigned char serviceType = 0);
 };
 
 typedef vector<CBouquet*> BouquetList;
@@ -90,7 +90,7 @@ class CBouquetManager
 				ChannelIterator operator ++(int);
 				CZapitChannel* operator *();
 				ChannelIterator FindChannelNr(const unsigned int channel);
-				int getLowestChannelNumberWithOnidSid(const uint32_t onid_sid);
+				int getLowestChannelNumberWithChannelID(const t_channel_id channel_id);
 				int getNrofFirstChannelofBouquet(const unsigned int bouquet_nr);
 				bool EndOfChannels() { return (c == -2); };
 		};
@@ -111,11 +111,11 @@ class CBouquetManager
 		void deleteBouquet(const CBouquet* bouquet);
 		int  existsBouquet( string name);
 		void moveBouquet(const unsigned int oldId, const unsigned int newId);
-		bool existsChannelInBouquet( unsigned int bq_id, unsigned int onid_sid);
+		bool existsChannelInBouquet( unsigned int bq_id, const t_channel_id channel_id);
 
 		void clearAll();
 
-		CZapitChannel* findChannelByOnidSid(const unsigned int onid_sid);
+		CZapitChannel* findChannelByChannelID(const t_channel_id channel_id);
 
 };
 

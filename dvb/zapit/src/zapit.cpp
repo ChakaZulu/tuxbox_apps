@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.220 2002/09/11 09:23:48 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.221 2002/09/11 14:41:20 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -228,8 +228,8 @@ void save_settings (bool write)
 	{
 		config->setInt32("lastChannelMode", (currentMode & RADIO_MODE) ? 1 : 0);
 
-		// now save the lowest channel number with the current OnidSid
-		int c = ((currentMode & RADIO_MODE) ? bouquetManager->radioChannelsBegin() : bouquetManager->tvChannelsBegin()).getLowestChannelNumberWithOnidSid(channel->getOnidSid());
+		// now save the lowest channel number with the current channel_id
+		int c = ((currentMode & RADIO_MODE) ? bouquetManager->radioChannelsBegin() : bouquetManager->tvChannelsBegin()).getLowestChannelNumberWithChannelID(channel->getOnidSid());
 		if (c >= 0)
 			config->setInt32((currentMode & RADIO_MODE) ? "lastChannelRadio" : "lastChannelTV", c + 1);
 	}
@@ -269,7 +269,7 @@ channel_msg load_settings()  // ATTENTION: output_msg.name is returned undefined
  * return -1 otherwise
  *
  */
-int zapit (uint32_t onid_sid, bool in_nvod)
+int zapit(const t_channel_id channel_id, bool in_nvod)
 {
 	bool transponder_change;
 	tallchans_iterator cit;
@@ -278,10 +278,10 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 	{
 		current_is_nvod = true;
 
-		cit = nvodchannels.find(onid_sid);
+		cit = nvodchannels.find(channel_id);
 		if (cit == nvodchannels.end())
 		{
-			debug("[zapit] onid_sid %08x not found\n", onid_sid);
+			debug("[zapit] channel_id %08x not found\n", channel_id);
 			return -1;
 		}
 	}
@@ -289,13 +289,13 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 	{
 		current_is_nvod = false;
 
-		cit = allchans.find(onid_sid);
+		cit = allchans.find(channel_id);
 
 		if (currentMode & RADIO_MODE)
 		{
 			if ((cit == allchans.end()) || (cit->second.getServiceType() != DIGITAL_RADIO_SOUND_SERVICE))
 			{
-				debug("[zapit] onid_sid %08x not found\n", onid_sid);
+				debug("[zapit] channel_id %08x not found\n", channel_id);
 				return -1;
 			}
 		}
@@ -303,7 +303,7 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 		{
 			if (cit == allchans.end() || (cit->second.getServiceType() == DIGITAL_RADIO_SOUND_SERVICE))
 			{
-				debug("[zapit] onid_sid %08x not found\n", onid_sid);
+				debug("[zapit] channel_id %08x not found\n", channel_id);
 				return -1;
 			}
 			nvodname = cit->second.getName();
@@ -313,7 +313,7 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 	stopPlayBack();
 
 	/* store the new channel */
-	if ((channel == NULL) || (onid_sid != channel->getOnidSid()))
+	if ((channel == NULL) || (channel_id != channel->getOnidSid()))
 	{
 		channel = &(cit->second);
 	}
@@ -652,7 +652,7 @@ void parse_command (CZapitClient::commandHead &rmsg)
 				CZapitClient::commandZaptoServiceID msgZaptoServiceID;
 				CZapitClient::responseZapComplete msgResponseZapComplete;
 				read(connfd, &msgZaptoServiceID, sizeof(msgZaptoServiceID));
-				msgResponseZapComplete.zapStatus = zapTo_Onid_Sid(msgZaptoServiceID.serviceID, (rmsg.cmd == CZapitClient::CMD_ZAPTO_SUBSERVICEID));
+				msgResponseZapComplete.zapStatus = zapTo_ChannelID(msgZaptoServiceID.serviceID, (rmsg.cmd == CZapitClient::CMD_ZAPTO_SUBSERVICEID));
 				send(connfd, &msgResponseZapComplete, sizeof(msgResponseZapComplete), 0);
 				break;
 			}
@@ -661,7 +661,7 @@ void parse_command (CZapitClient::commandHead &rmsg)
 			{
 				CZapitClient::commandZaptoServiceID msgZaptoServiceID2;
 				read(connfd, &msgZaptoServiceID2, sizeof(msgZaptoServiceID2));
-				zapTo_Onid_Sid(msgZaptoServiceID2.serviceID, (rmsg.cmd == CZapitClient::CMD_ZAPTO_SUBSERVICEID_NOWAIT));
+				zapTo_ChannelID(msgZaptoServiceID2.serviceID, (rmsg.cmd == CZapitClient::CMD_ZAPTO_SUBSERVICEID_NOWAIT));
 				break;
 			}
 			case CZapitClient::CMD_GET_LAST_CHANNEL:
@@ -1079,7 +1079,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.220 2002/09/11 09:23:48 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.221 2002/09/11 14:41:20 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1271,21 +1271,21 @@ int main (int argc, char **argv)
 /*								*/
 /****************************************************************/
 
-void addChannelToBouquet(unsigned int bouquet, unsigned int onid_sid)
+void addChannelToBouquet(unsigned int bouquet, const t_channel_id channel_id)
 {
-	printf("addChannelToBouquet(%d, %d)\n", bouquet, onid_sid);
-	CZapitChannel* chan = bouquetManager->findChannelByOnidSid( onid_sid);
+	printf("addChannelToBouquet(%d, %d)\n", bouquet, channel_id);
+	CZapitChannel* chan = bouquetManager->findChannelByChannelID(channel_id);
 	if (chan != NULL)
 		bouquetManager->Bouquets[bouquet-1]->addService(chan);
 	else
-		printf("onid_sid not found in channellist!\n");
+		printf("channel_id not found in channellist!\n");
 }
 
-void removeChannelFromBouquet(unsigned int bouquet, unsigned int onid_sid)
+void removeChannelFromBouquet(unsigned int bouquet, const t_channel_id channel_id)
 {
-	printf("removing %d in bouquet %d \n", onid_sid, bouquet);
-	bouquetManager->Bouquets[bouquet-1]->removeService( onid_sid);
-	printf("removing %d in bouquet %d done\n", onid_sid, bouquet);
+	printf("removing %d in bouquet %d \n", channel_id, bouquet);
+	bouquetManager->Bouquets[bouquet-1]->removeService(channel_id);
+	printf("removing %d in bouquet %d done\n", channel_id, bouquet);
 }
 
 void sendBouquets(bool emptyBouquetsToo)
@@ -1557,16 +1557,16 @@ unsigned zapTo (unsigned int bouquet, unsigned int channel)
 		return CZapitClient::ZAP_INVALID_PARAM;
 	}
 
-	return zapTo_Onid_Sid((*channels)[channel - 1]->getOnidSid(), false);
+	return zapTo_ChannelID((*channels)[channel - 1]->getOnidSid(), false);
 }
 
-unsigned int zapTo_Onid_Sid (unsigned int onidSid, bool isSubService)
+unsigned int zapTo_ChannelID(t_channel_id channel_id, bool isSubService)
 {
 	unsigned int result = 0;
 
-	if (zapit(onidSid, isSubService) < 0)
+	if (zapit(channel_id, isSubService) < 0)
 	{
-		eventServer->sendEvent((isSubService ? CZapitClient::EVT_ZAP_SUB_FAILED : CZapitClient::EVT_ZAP_FAILED), CEventServer::INITID_ZAPIT, &onidSid, sizeof(onidSid));
+		eventServer->sendEvent((isSubService ? CZapitClient::EVT_ZAP_SUB_FAILED : CZapitClient::EVT_ZAP_FAILED), CEventServer::INITID_ZAPIT, &channel_id, sizeof(channel_id));
 		return result;
 	}
 
@@ -1574,26 +1574,24 @@ unsigned int zapTo_Onid_Sid (unsigned int onidSid, bool isSubService)
 
 	if (isSubService)
 	{
-		eventServer->sendEvent(CZapitClient::EVT_ZAP_SUB_COMPLETE, CEventServer::INITID_ZAPIT, &onidSid, sizeof(onidSid));
+		eventServer->sendEvent(CZapitClient::EVT_ZAP_SUB_COMPLETE, CEventServer::INITID_ZAPIT, &channel_id, sizeof(channel_id));
 	}
 	else if (current_is_nvod)
 	{
-		eventServer->sendEvent(CZapitClient::EVT_ZAP_COMPLETE_IS_NVOD, CEventServer::INITID_ZAPIT, &onidSid, sizeof(onidSid));
+		eventServer->sendEvent(CZapitClient::EVT_ZAP_COMPLETE_IS_NVOD, CEventServer::INITID_ZAPIT, &channel_id, sizeof(channel_id));
 		result |= CZapitClient::ZAP_IS_NVOD;
 	}
 	else
-	{
-		eventServer->sendEvent(CZapitClient::EVT_ZAP_COMPLETE, CEventServer::INITID_ZAPIT, &onidSid, sizeof(onidSid));
-	}
+		eventServer->sendEvent(CZapitClient::EVT_ZAP_COMPLETE, CEventServer::INITID_ZAPIT, &channel_id, sizeof(channel_id));
 
 	return result;
 }
 
-unsigned zapTo (unsigned int channel)
+unsigned zapTo(const unsigned int channel)
 {
 	CBouquetManager::ChannelIterator cit = ((currentMode & RADIO_MODE) ? bouquetManager->radioChannelsBegin() : bouquetManager->tvChannelsBegin()).FindChannelNr(channel - 1);
 	if (!(cit.EndOfChannels()))
-		return zapTo_Onid_Sid((*cit)->getOnidSid(), false);
+		return zapTo_ChannelID((*cit)->getOnidSid(), false);
 	else
 		return 0;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.56 2002/09/11 09:23:48 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.57 2002/09/11 14:41:20 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -38,7 +38,7 @@ extern tallchans allchans;   //  defined in zapit.cpp
 // -- servicetype 0 queries TV and Radio Channels
 //
 
-CZapitChannel* CBouquet::getChannelByOnidSid (unsigned int onidSid, unsigned char serviceType)
+CZapitChannel* CBouquet::getChannelByChannelID(const t_channel_id channel_id, const unsigned char serviceType)
 {
 	CZapitChannel* result = NULL;
 
@@ -59,20 +59,20 @@ CZapitChannel* CBouquet::getChannelByOnidSid (unsigned int onidSid, unsigned cha
 	}
 
 	unsigned int i;
-	for (i=0; (i<channels->size()) && ((*channels)[i]->getOnidSid() != onidSid); i++);
+	for (i=0; (i<channels->size()) && ((*channels)[i]->getOnidSid() != channel_id); i++);
 
 	if (i<channels->size())
 		result = (*channels)[i];
 
 	if ((serviceType == RESERVED) && (result == NULL))
 	{
-		result = getChannelByOnidSid(onidSid, 2);
+		result = getChannelByChannelID(channel_id, 2);
 	}
 
 	return result;
 }
 
-void CBouquet::addService (CZapitChannel* newChannel)
+void CBouquet::addService(CZapitChannel* newChannel)
 {
 	switch (newChannel->getServiceType())
 	{
@@ -88,7 +88,7 @@ void CBouquet::addService (CZapitChannel* newChannel)
 	}
 }
 
-void CBouquet::removeService (CZapitChannel* oldChannel)
+void CBouquet::removeService(CZapitChannel* oldChannel)
 {
 	if (oldChannel != NULL)
 	{
@@ -272,7 +272,7 @@ void CBouquetManager::parseBouquetsXml(const XMLTreeNode *root)
 				sscanf(channel_node->GetAttributeValue("serviceID"), "%x", &sid);
 				sscanf(channel_node->GetAttributeValue("onid"), "%x", &onid);
 
-				CZapitChannel* chan = findChannelByOnidSid( (onid << 16) + sid);
+				CZapitChannel* chan = findChannelByChannelID( (onid << 16) + sid);
 
 				if (chan != NULL)
 					newBouquet->addService(chan);
@@ -392,7 +392,7 @@ void CBouquetManager::makeRemainingChannelsBouquet()
 	sort(unusedChannels.begin(), unusedChannels.end(), CmpChannelByChName());
 
 	for (ChannelList::iterator it = unusedChannels.begin(); it != unusedChannels.end(); it++)
-		remainChannels->addService(findChannelByOnidSid((*it)->getOnidSid()));
+		remainChannels->addService(findChannelByChannelID((*it)->getOnidSid()));
 
 	if ((remainChannels->tvChannels.size() == 0) && (remainChannels->radioChannels.size() == 0))
 	{
@@ -450,14 +450,14 @@ int CBouquetManager::existsBouquet( string name)
 // -- Check if channel exists in BQ   (2002-04-05 rasc)
 // -- Return: True/false
 //
-bool CBouquetManager::existsChannelInBouquet( unsigned int bq_id, unsigned int onid_sid)
+bool CBouquetManager::existsChannelInBouquet( unsigned int bq_id, const t_channel_id channel_id)
 {
 	bool     status = false;
 	CZapitChannel  *ch = NULL;
 
 	if (bq_id >= 0 && bq_id <= Bouquets.size()) {
 		// query TV-Channels  && Radio channels
-		ch = Bouquets[bq_id]->getChannelByOnidSid (onid_sid, 0);
+		ch = Bouquets[bq_id]->getChannelByChannelID(channel_id, 0);
 		if (ch)  status = true;
 	}
 
@@ -490,9 +490,9 @@ void CBouquetManager::clearAll()
 	remainChannels = NULL;
 }
 
-CZapitChannel* CBouquetManager::findChannelByOnidSid(const unsigned int onid_sid)
+CZapitChannel* CBouquetManager::findChannelByChannelID(const t_channel_id channel_id)
 {
-	tallchans_iterator itChannel = allchans.find(onid_sid);
+	tallchans_iterator itChannel = allchans.find(channel_id);
 	if (itChannel != allchans.end())
 		return &(itChannel->second);
 
@@ -551,13 +551,13 @@ CBouquetManager::ChannelIterator CBouquetManager::ChannelIterator::FindChannelNr
 	return (*this);
 }
 
-int CBouquetManager::ChannelIterator::getLowestChannelNumberWithOnidSid(const uint32_t onid_sid)
+int CBouquetManager::ChannelIterator::getLowestChannelNumberWithChannelID(const t_channel_id channel_id)
 {
 	int i = 0;
 
 	for (b = 0; b < Owner->Bouquets.size(); b++)
 		for (c = 0; (unsigned int) c < getBouquet()->size(); c++, i++)
-			if ((**this)->getOnidSid() == onid_sid)
+			if ((**this)->getOnidSid() == channel_id)
 			    return i;
 	return -1; // not found
 }
