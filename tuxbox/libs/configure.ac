@@ -21,6 +21,6 @@ libtuxbox/Makefile
 tuxbox-avs.pc
 tuxbox-lcddisplay.pc
 tuxbox-lircdclient.pc
-tuxbox-tuxbox.pc
+tuxbox.pc
 ])
 
