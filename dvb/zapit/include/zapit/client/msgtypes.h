@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.21 2004/04/08 07:19:00 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.22 2004/05/06 10:22:40 thegoodguy Exp $
  *
  * types used for clientlib <-> zapit communication - d-box2 linux project
  *
@@ -42,84 +42,84 @@ class CZapitMessages
 
 	enum commands
 		{
-			CMD_SHUTDOWN		 = 1,
+			CMD_SHUTDOWN		           =  1,
 
-			CMD_REGISTEREVENTS,
-			CMD_UNREGISTEREVENTS,
+			CMD_REGISTEREVENTS                 =  2,
+			CMD_UNREGISTEREVENTS               =  3,
 
-			CMD_ZAPTO,
-			CMD_ZAPTO_CHANNELNR,
-			CMD_ZAPTO_SERVICEID,
-			CMD_ZAPTO_SUBSERVICEID,
-			CMD_ZAPTO_SERVICEID_NOWAIT,
-			CMD_ZAPTO_SUBSERVICEID_NOWAIT,
+			CMD_ZAPTO                          =  4,
+			CMD_ZAPTO_CHANNELNR                =  5,
+			CMD_ZAPTO_SERVICEID                =  6,
+			CMD_ZAPTO_SUBSERVICEID             =  7,
+			CMD_ZAPTO_SERVICEID_NOWAIT         =  8,
+			CMD_ZAPTO_SUBSERVICEID_NOWAIT      =  9,
 
-			CMD_STOP_VIDEO,					// not supported yet
-			CMD_SET_MODE,
-			CMD_GET_MODE,
-			CMD_GET_LAST_CHANNEL,
-			CMD_GET_APID_VPID,				// not supported yet
-			CMD_GET_VTXT_PID,				// not supported yet
-			CMD_GET_NVOD_CHANNELS,				// not supported yet
-			CMD_REINIT_CHANNELS,
-			CMD_GET_CHANNELS,
-			CMD_GET_BOUQUETS,
-			CMD_GET_BOUQUET_CHANNELS,
-			CMD_GET_CA_INFO,					// not supported yet
-			CMD_GET_CURRENT_SERVICEID,
-			CMD_GET_CURRENT_SERVICEINFO,
-			CMD_GET_DELIVERY_SYSTEM,
-			CMD_GET_CURRENT_SATELLITE_POSITION,
-			CMD_GET_CURRENT_TP,
+			CMD_STOP_VIDEO                     = 10,		// not supported yet
+			CMD_SET_MODE                       = 11,
+			CMD_GET_MODE                       = 12,
+			CMD_GET_LAST_CHANNEL               = 13,
+			CMD_GET_APID_VPID                  = 14,		// not supported yet
+			CMD_GET_VTXT_PID                   = 15,		// not supported yet
+			CMD_GET_NVOD_CHANNELS              = 16,		// not supported yet
+			CMD_REINIT_CHANNELS                = 17,
+			CMD_GET_CHANNELS                   = 18,
+			CMD_GET_BOUQUETS                   = 19,
+			CMD_GET_BOUQUET_CHANNELS           = 20,
+			CMD_GET_CA_INFO                    = 21,		// not supported yet
+			CMD_GET_CURRENT_SERVICEID          = 22,
+			CMD_GET_CURRENT_SERVICEINFO        = 23,
+			CMD_GET_DELIVERY_SYSTEM            = 24,
+			CMD_GET_CURRENT_SATELLITE_POSITION = 25,
+			CMD_GET_CURRENT_TP                 = 26,
 
-			CMD_SCANSTART,
-			CMD_SCAN_TP,
-			CMD_SCANREADY,
-			CMD_SCANGETSATLIST,
-			CMD_SCANSETSCANSATLIST,
-			CMD_SCANSETSCANMOTORPOSLIST,
-			CMD_SCANSETDISEQCTYPE,
-			CMD_SCANSETDISEQCREPEAT,
-			CMD_SCANSETBOUQUETMODE,
+			CMD_SCANSTART                      = 27,
+			CMD_SCAN_TP                        = 28,
+			CMD_SCANREADY                      = 29,
+			CMD_SCANGETSATLIST                 = 30,
+			CMD_SCANSETSCANSATLIST             = 31,
+			CMD_SCANSETSCANMOTORPOSLIST        = 32,
+			CMD_SCANSETDISEQCTYPE              = 33,
+			CMD_SCANSETDISEQCREPEAT            = 34,
+			CMD_SCANSETBOUQUETMODE             = 35,
 
-			CMD_BQ_ADD_BOUQUET,
-			CMD_BQ_MOVE_BOUQUET,
-			CMD_BQ_MOVE_CHANNEL,
-			CMD_BQ_DELETE_BOUQUET,
-			CMD_BQ_RENAME_BOUQUET,
-			CMD_BQ_EXISTS_BOUQUET,					// Check if BouquetName existiert
-			CMD_BQ_SET_LOCKSTATE,
-			CMD_BQ_SET_HIDDENSTATE,
-			CMD_BQ_ADD_CHANNEL_TO_BOUQUET,
-			CMD_BQ_EXISTS_CHANNEL_IN_BOUQUET,			// Check if Channel already in BQ
-			CMD_BQ_REMOVE_CHANNEL_FROM_BOUQUET,
-			CMD_BQ_RENUM_CHANNELLIST,
-			CMD_BQ_RESTORE,
-			CMD_BQ_COMMIT_CHANGE,
-			CMD_BQ_SAVE_BOUQUETS,
+			CMD_BQ_ADD_BOUQUET                 = 36,
+			CMD_BQ_MOVE_BOUQUET                = 37,
+			CMD_BQ_MOVE_CHANNEL                = 38,
+			CMD_BQ_DELETE_BOUQUET              = 39,
+			CMD_BQ_RENAME_BOUQUET              = 40,
+			CMD_BQ_EXISTS_BOUQUET              = 41,
+			CMD_BQ_SET_LOCKSTATE               = 42,
+			CMD_BQ_SET_HIDDENSTATE             = 43,
+			CMD_BQ_ADD_CHANNEL_TO_BOUQUET      = 44,
+			CMD_BQ_EXISTS_CHANNEL_IN_BOUQUET   = 45,
+			CMD_BQ_REMOVE_CHANNEL_FROM_BOUQUET = 46,
+			CMD_BQ_RENUM_CHANNELLIST           = 47,
+			CMD_BQ_RESTORE                     = 48,
+			CMD_BQ_COMMIT_CHANGE               = 49,
+			CMD_BQ_SAVE_BOUQUETS               = 50,
 
-			CMD_SET_RECORD_MODE,
-			CMD_GET_RECORD_MODE,
-			CMD_SB_START_PLAYBACK,
-			CMD_SB_STOP_PLAYBACK,
-			CMD_SB_GET_PLAYBACK_ACTIVE,
-			CMD_SET_DISPLAY_FORMAT,
-			CMD_SET_AUDIO_MODE,
-			CMD_READY,
-			CMD_GETPIDS,
-			CMD_SETSUBSERVICES,
-			CMD_SET_AUDIOCHAN,
-			CMD_MUTE,
-			CMD_SET_VOLUME,
-			CMD_SET_STANDBY,
-			CMD_SET_PAL,
-			CMD_SET_NTSC,			
+			CMD_SET_RECORD_MODE                = 51,
+			CMD_GET_RECORD_MODE                = 52,
+			CMD_SB_START_PLAYBACK              = 53,
+			CMD_SB_STOP_PLAYBACK               = 54,
+			CMD_SB_GET_PLAYBACK_ACTIVE         = 55,
+			CMD_SET_DISPLAY_FORMAT             = 56,
+			CMD_SET_AUDIO_MODE                 = 57,
+			CMD_READY                          = 58,
+			CMD_GETPIDS                        = 59,
+			CMD_SETSUBSERVICES                 = 60,
+			CMD_SET_AUDIOCHAN                  = 61,
+			CMD_MUTE                           = 62,
+			CMD_SET_VOLUME                     = 63,
+			CMD_SET_STANDBY                    = 64,
+			CMD_SET_PAL                        = 65,
+			CMD_SET_NTSC                       = 66,
 
-			CMD_NVOD_SUBSERVICE_NUM,
-			CMD_SEND_MOTOR_COMMAND,
+			CMD_NVOD_SUBSERVICE_NUM            = 67,
+			CMD_SEND_MOTOR_COMMAND             = 68,
 
-			CMD_GET_CHANNEL_NAME,
-			CMD_IS_TV_CHANNEL
+			CMD_GET_CHANNEL_NAME               = 69,
+			CMD_IS_TV_CHANNEL                  = 70
 		};
 
 	struct commandBoolean
