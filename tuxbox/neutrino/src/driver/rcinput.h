@@ -32,7 +32,6 @@
 #ifndef __MOD_rcinput__
 #define __MOD_rcinput__
 
-#include <string>
 #include <vector>
 #include <linux/input.h>
 
@@ -56,7 +55,7 @@
 #define KEY_BLUE         0x191
 #endif
 
-/* SAGEM FBs have the following additional keys */
+/* SAGEM remote controls have the following additional keys */
 
 #ifndef KEY_TOPLEFT
 #define KEY_TOPLEFT      0x1a2
@@ -178,9 +177,10 @@ class CRCInput
 
 		static bool isNumeric(const unsigned int key);
 		static int getNumericValue(const unsigned int key);
+		static unsigned int convertDigitToKey(const unsigned int digit);
 		static int getUnicodeValue(const unsigned int key);
 
-		static std::string getKeyName(int);
+		static const char * getKeyName(const unsigned int key);
 
 		int addTimer(unsigned long long Interval, bool oneshot= true, bool correct_time= true );
 		int addTimer(struct timeval Timeout);

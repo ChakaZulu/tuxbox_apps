@@ -33,7 +33,7 @@
 #include <config.h>
 #endif
 
-#include "rcinput.h"
+#include <driver/rcinput.h>
 
 #include <dbox/fp.h>
 #include <stdio.h>
@@ -1237,6 +1237,17 @@ int CRCInput::getNumericValue(const unsigned int key)
 }
 
 /**************************************************************************
+*       convertDigitToKey - return key representing digit or RC_nokey
+*
+**************************************************************************/
+static const unsigned int digit_to_key[10] = {CRCInput::RC_0, CRCInput::RC_1, CRCInput::RC_2, CRCInput::RC_3, CRCInput::RC_4, CRCInput::RC_5, CRCInput::RC_6, CRCInput::RC_7, CRCInput::RC_8, CRCInput::RC_9};
+
+unsigned int CRCInput::convertDigitToKey(const unsigned int digit)
+{
+	return (digit < 10) ? digit_to_key[digit] : RC_nokey;
+}
+
+/**************************************************************************
 *       getUnicodeValue - return unicode value of the key or -1
 *
 **************************************************************************/
@@ -1255,12 +1266,12 @@ int CRCInput::getUnicodeValue(const unsigned int key)
 }
 
 /**************************************************************************
-*       transforms the rc-key to std::string
+*       transforms the rc-key to const char *
 *
 **************************************************************************/
-std::string CRCInput:: getKeyName(int code)
+const char * CRCInput::getKeyName(const unsigned int key)
 {
-	switch(code)
+	switch(key)
 	{
 			case RC_standby:
 			return "standby";
