@@ -1571,6 +1571,8 @@ void eServiceSelector::bouquetSelChanged( eListBoxEntryService *entry)
 
 void eServiceSelector::actualize()
 {
+	if ( movemode & 2 )
+		return;
 	if (style == styleCombiColumn)
 	{
 		bouquets->beginAtomic();

@@ -262,7 +262,8 @@ void eServiceDVB::update(const SDTEntry *sdtentry)
 		eDebug("tried to update sid %x with sdt-sid %x", service_id.get(), sdtentry->service_id);
 		return;
 	}
-	service_name="unknown";
+	if ( !(dxflags & dxHoldName) )
+		service_name="unknown";
 	service_provider="unknown";
 	service_type=0;
 	service_id=sdtentry->service_id;
@@ -271,11 +272,13 @@ void eServiceDVB::update(const SDTEntry *sdtentry)
 		{
 			const ServiceDescriptor *nd=(ServiceDescriptor*)*d;
 
-			service_name=nd->service_name;
+			if ( !(dxflags & dxHoldName) )
+				service_name=nd->service_name;
+
 			if (!nd->service_provider.empty())
 				service_provider=nd->service_provider;
 
-			if (!service_name)
+			if (!service_name && !(dxflags & dxHoldName) )
 				service_name="unnamed service";
 
 			service_type=nd->service_type;
@@ -819,6 +822,12 @@ eServiceDVB &eTransponderList::createService(const eServiceReferenceDVB &service
 void eTransponderList::leaveService( const eServiceReferenceDVB& )
 {
 	leaveTransponder(0);
+}
+
+void eTransponderList::removeService( const eServiceReferenceDVB& service )
+{
+	/*emit*/ service_removed(service);
+	services.erase(service);
 }
 
 void eTransponderList::leaveTransponder( eTransponder* )

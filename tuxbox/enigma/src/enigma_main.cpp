@@ -3369,9 +3369,65 @@ void eZapMain::renameService( eServiceSelector *sel )
 {
 	eServiceReference ref=sel->getSelected();
 	eServiceReference path=sel->getPath().current();
-	ePlaylist *p=(ePlaylist*)eServiceInterface::getInstance()->addRef(path);
+	ePlaylist *p=0;
+	if ( path.type == eServicePlaylistHandler::ID )
+		p=(ePlaylist*) eServicePlaylistHandler::getInstance()->addRef(path);
 	if ( !p )
+	{
+		if ( ref.type == eServiceReference::idDVB && !ref.path )
+		{
+			eServiceDVB *service = eTransponderList::getInstance()->searchService(ref);
+			if ( service )
+			{
+				eString old = service->service_name;
+				if (!old)
+					old="";
+				TextEditWindow wnd(_("Enter new name:"));
+				wnd.setText(_("Rename entry"));
+				wnd.show();
+				wnd.setEditText(old);
+				int ret = wnd.exec();
+				wnd.hide();
+				if ( !ret )
+				{
+					eString New = wnd.getEditText();
+					if ( old != New )
+					{
+						if ( New )
+						{
+							service->service_name=New;
+							service->dxflags |= eServiceDVB::dxHoldName;
+						}
+						else
+						{
+							service->dxflags &= ~eServiceDVB::dxHoldName;
+							service->service_name="unknown service";
+  // get original name from SDT
+							eServiceHandler *sapi=eServiceInterface::getInstance()->getService();
+							if (sapi)
+							{
+								SDT *sdt=sapi->getSDT();
+								if (sdt)
+								{
+									for (ePtrList<SDTEntry>::iterator i(sdt->entries); i != sdt->entries.end(); ++i)
+									{
+										if (eServiceID(i->service_id)==((eServiceReferenceDVB&)ref).getServiceID())
+										{
+											service->update(*i);
+											break;
+										}
+									}
+									sdt->unlock();
+								}
+							}
+						}
+						sel->invalidateCurrent(ref);
+					}
+				}
+			}
+		}
 		return;
+	}
 
 	std::list<ePlaylistEntry>::iterator it=std::find(p->getList().begin(), p->getList().end(), ref);
 	if (it == p->getList().end())
@@ -3443,6 +3499,15 @@ void eZapMain::deleteService( eServiceSelector *sel )
 		pl =(ePlaylist*)eServicePlaylistHandler::getInstance()->addRef(path);
 	if (!pl)
 	{
+		if ( ref.type == eServiceReference::idDVB && !ref.path )
+		{
+			sel->removeCurrent(true);
+			int oldmovemode = sel->movemode;
+			sel->movemode |= 2;
+			eTransponderList::getInstance()->removeService((eServiceReferenceDVB&)ref);
+			sel->movemode &= ~2;
+			return;
+		}
 		eMessageBox box(_("Sorry, you cannot delete this service."), _("delete service"), eMessageBox::iconWarning|eMessageBox::btOK );
 		box.show();
 		box.exec();
@@ -5034,7 +5099,9 @@ int eZapMain::switchToNum( int num, bool onlyBouquets )
 			for ( std::list<ePlaylistEntry>::const_iterator it ( p->getConstList().begin() );
 				it != p->getConstList().end() && num; ++it)
 			{
-				ePlaylist *pl = (ePlaylist*)eServiceInterface::getInstance()->addRef( it->service );
+				ePlaylist *pl=0;
+				if ( it->service.type == eServicePlaylistHandler::ID )
+					pl = (ePlaylist*)eServiceInterface::getInstance()->addRef( it->service );
 				if ( pl )
 				{
 					for (std::list<ePlaylistEntry>::const_iterator i(pl->getConstList().begin());
@@ -6501,6 +6568,9 @@ eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eSe
 		else if ( ref.type == eServiceReference::idDVB && !ref.path )
 		{
 			prev = new eListBoxEntryText(&list, _("add to specific bouquet"), (void*)4, 0, _("add the selected service to a selectable bouquet"));
+			prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+			prev = new eListBoxEntryText(&list, _("rename"), (void*)9, 0, _("rename the current selected service/movie"));
+			prev = new eListBoxEntryText(&list, _("delete"), (void*)1, 0, _("delete the current selected service/movie"));
 			b=false;
 		}
 #ifndef DISABLE_FILE
@@ -6513,6 +6583,7 @@ eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eSe
 			prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 			prev = new eListBoxEntryText(&list, _("delete file"), (void*)14, 0, _("delete the selected file (and all corresponding ts files"));
 			prev = new eListBoxEntryText(&list, _("rename file"), (void*)15, 0, _("rename the selected file (and all corresponding ts files"));
+			prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 		}
 #endif
 	}

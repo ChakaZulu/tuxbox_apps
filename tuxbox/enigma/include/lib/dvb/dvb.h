@@ -375,7 +375,8 @@ public:
 	{
 		dxNoDVB=1,
 		dxDontshow=2,
-		dxNoPMT=4
+		dxNoPMT=4,
+		dxHoldName=8
 	};
 	int dxflags;
 
@@ -825,7 +826,7 @@ public:
 
 	void clearAllServices()	{	services.clear(); }
 	void clearAllTransponders()	{	transponders.clear(); }
-	
+	void removeService( const eServiceReferenceDVB& );
 	void removeOrbitalPosition(int orbital_position);
 
 	static eTransponderList* getInstance()	{ return instance; }
