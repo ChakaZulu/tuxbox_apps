@@ -619,12 +619,15 @@ fontsize.infobar_number Infobar Nummer
 fontsize.infobar_channame Infobar Kanal
 fontsize.infobar_info Infobar Info
 fontsize.infobar_small Infobar klein
+fontsize.gamelist_itemLarge gross
+fontsize.gamelist_itemSmall klein
 
 fontmenu.head Schriftgrössen Einstellungen
 fontmenu.channellist Kanalliste
 fontmenu.eventlist Eventlist
 fontmenu.epg EPG
 fontmenu.infobar Infobar
+fontmenu.gamelist Gameliste
 
 colormenu.gtx_alpha Transparenz (GTX)
 gtxalpha.alpha1 Alpha 1
