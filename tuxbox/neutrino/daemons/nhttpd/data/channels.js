@@ -1,9 +1,7 @@
 function fertig()
 {
-	for (i=channels.achannels.length-1; i >= 0 ; i--) {
-		if (channels.achannels.options[i].selected==true) {
-			channels.achannels.options[i] = null;
-		}
+	for (i=channels.bchannels.length-1; i >= 0 ; i--) {
+		channels.bchannels.options[i].selected=true;
 	}
 	channels.submit();
 }
