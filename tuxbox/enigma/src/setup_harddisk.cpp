@@ -19,7 +19,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_harddisk.cpp,v 1.17 2004/06/23 08:34:33 ghostrider Exp $
+ * $Id: setup_harddisk.cpp,v 1.18 2004/08/27 13:53:28 ghostrider Exp $
  */
 
 #include <setup_harddisk.h>
@@ -633,8 +633,20 @@ void ePartitionCheck::getData( eString str )
 		fsck->write("y",1);
 	else if ( str.find("[N/Yes]") != eString::npos )
 		fsck->write("Yes",3);
+	eString tmp = lState->getText();
+	tmp+=str;
 
-	lState->setText(str);
+	eSize size=lState->getSize();
+	int height = size.height();
+	size.setHeight(height*2);
+	eLabel l(this);
+	l.hide();
+	l.resize(size);
+	l.setText(tmp);
+	if ( l.getExtend().height() > height )
+		tmp=str;
+
+	lState->setText(tmp);
 }
 
 #endif // DISABLE_FILE
