@@ -4,13 +4,13 @@
 		<link rel="stylesheet" type="text/css" href="webif.css">
 	</head>
 	<body>
-		<form name="audioselector" action="cgi-bin/setAudio">
+		<form name="audioselector" action="/cgi-bin/setAudio">
 			<table border="0" cellpadding="0" cellspacing="10">
 			<tr>
 				<td>Left:</td>
-				<td><input type="radio" name="channel" value="1" #1#></td>
-				<td>Stereo:</td>
 				<td><input type="radio" name="channel" value="0" #0#></td>
+				<td>Stereo:</td>
+				<td><input type="radio" name="channel" value="1" #1#></td>
 				<td>Right:</td>
 				<td><input type="radio" name="channel" value="2" #2#></td>
 			</tr>

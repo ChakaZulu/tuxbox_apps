@@ -579,7 +579,7 @@ static eString setAudio(eString request, eString dirpath, eString opts, eHTTPCon
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	int apid = -1;
 	sscanf(opt["language"].c_str(), "0x%04x", &apid);
-	
+
 	eString channel = opt["channel"];
 	eAVSwitch::getInstance()->selectAudioChannel(atoi(channel.c_str()));
 
@@ -630,7 +630,7 @@ static eString selectAudio(eString request, eString dirpath, eString opts, eHTTP
 	result.strReplace("#LANGUAGES#", audioChannels);
 	
 	int channel = eAVSwitch::getInstance()->getAudioChannel();
-	result.strReplace(eString().sprintf("#%d#", channel).c_str(), eString("selected"));
+	result.strReplace(eString().sprintf("#%d#", channel).c_str(), eString("checked"));
 	result.strReplace("#0#", "");
 	result.strReplace("#1#", "");
 	result.strReplace("#2#", "");
