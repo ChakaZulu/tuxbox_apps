@@ -33,7 +33,7 @@
 #ifndef __remotecontrol__
 #define __remotecontrol__
 
-#include <zapit/client/zapittypes.h>
+#include <zapit/client/zapitclient.h>
 
 #include <vector>
 #include <string>

@@ -38,14 +38,14 @@
 #include "gui/widget/menue.h"
 #include "gui/filebrowser.h"
 
-using namespace std;
+#include <string>
 
 class CPicture
 {
 public:
-	string Filename;
-	string Name;
-	string Type;
+	std::string Filename;
+	std::string Name;
+	std::string Type;
 	time_t Date;
 };
 
@@ -83,7 +83,7 @@ class CPictureViewerGui : public CMenuTarget
 		SortOrder      m_sort;
 
 		CViewList			playlist;
-		string				Path;
+		std::string			Path;
 
 		int 			width;
 		int 			height;
@@ -110,7 +110,7 @@ class CPictureViewerGui : public CMenuTarget
 		CPictureViewerGui();
 		~CPictureViewerGui();
 		int  show();
-		int  exec(CMenuTarget* parent, string actionKey);
+		int  exec(CMenuTarget* parent, std::string actionKey);
 };
 
 

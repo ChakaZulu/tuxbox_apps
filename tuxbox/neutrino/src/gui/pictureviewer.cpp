@@ -30,6 +30,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "pictureviewer.h"
+
 #include <global.h>
 #include <neutrino.h>
 
@@ -40,7 +42,6 @@
 #include <algorithm>
 #include <sys/time.h>
 
-#include "pictureviewer.h"
 #include "nfs.h"
 
 #include "widget/menue.h"
