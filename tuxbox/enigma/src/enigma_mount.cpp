@@ -377,6 +377,7 @@ void eMountMgr::automountMountPoints(void)
 eString eMountMgr::listMountPoints(eString skelleton)
 {
 	eString result, mountStatus, action;
+	init();
 	if (mountPoints.size() > 0)
 		for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
 		{
@@ -623,11 +624,9 @@ void eMountMgr::init()
 	for (int i = 0; i < MAX_NFS_ENTRIES; i++)
 	{
 		int itmp = 0;
-		eString cmd = eString().sprintf("/elitedvb/network/nfs%d/", i);
-		eConfig::getInstance()->getKey((cmd + "automount").c_str(), itmp);
-		if (itmp)
+		t_mount mp = loadMPFromConfig(i);
+		if (mp.mountDir && mp.localDir)
 		{
-			t_mount mp = loadMPFromConfig(i);
 			for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
 			{
 				if ((mp_it->mp.localDir == mp.localDir) && (mp_it->mp.mountDir == mp.mountDir))

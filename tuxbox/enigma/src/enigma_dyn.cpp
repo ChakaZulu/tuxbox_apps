@@ -1085,7 +1085,7 @@ static eString setVideo(eString request, eString dirpath, eString opts, eHTTPCon
 			int skipTime = ((total * vid) / 20) - current;
 
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekBegin));
-			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip, skipTime * 380));
+			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip, skipTime * 376));
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekEnd));
 		}
 	}
