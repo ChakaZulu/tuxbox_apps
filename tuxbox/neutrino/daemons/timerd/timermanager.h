@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.h,v 1.35 2004/02/20 22:21:21 thegoodguy Exp $
+	$Id: timermanager.h,v 1.36 2004/02/26 20:07:15 thegoodguy Exp $
 
 	License: GPL
 
@@ -142,7 +142,7 @@ class CTimerEvent_Zapto : public CTimerEvent_Record
 			  CTimerd::CChannelMode mode = CTimerd::MODE_TV,
 			  CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE):
 		CTimerEvent_Record(announceTime, alarmTime, (time_t) 0, channel_id, epgID, epg_starttime, "", mode, evrepeat)
-		{};
+		{eventType = getEventType();};
 	CTimerEvent_Zapto(CConfigFile *config, int iId):
 		CTimerEvent_Record(config, iId)
 		{};
