@@ -28,6 +28,9 @@
 #include <rcinput.h>
 
 #include <plugin.h>
+
+#include <fx2math.h>
+
 extern	int	doexit;
 extern	unsigned short	actcode;
 
