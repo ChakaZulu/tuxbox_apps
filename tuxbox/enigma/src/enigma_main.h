@@ -42,13 +42,13 @@ public:
 	{
 	}
 
-	const eString & getCaption() { return caption; }
-	const eString & getBody() { return body; }
+	const eString & getCaption() const { return caption; }
+	const eString & getBody() const { return body; }
 	void setTimeout(int _timeout)
 	{
 		timeout=_timeout;
 	}
-	int getTimeout()
+	int getTimeout() const
 	{
 		return timeout;
 	}
