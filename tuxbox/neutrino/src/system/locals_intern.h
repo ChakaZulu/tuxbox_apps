@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.11 2004/07/13 11:12:08 gagga Exp $
+ * $Id: locals_intern.h,v 1.12 2004/07/14 17:42:09 thegoodguy Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -263,6 +263,7 @@ const char * locale_real_names[] =
 	"favorites.menueadd",
 	"favorites.nobouquets",
 	"filebrowser.delete",
+	"filebrowser.denydirectoryleave",
 	"filebrowser.dodelete1",
 	"filebrowser.dodelete2",
 	"filebrowser.filter.active",
@@ -814,6 +815,5 @@ const char * locale_real_names[] =
 	"videomenu.videosignal_yuv_c",
 	"videomenu.videosignal_yuv_v",
 	"zaptotimer.announce",
-	"filebrowser.denydirectoryleave"
 };
 #endif
