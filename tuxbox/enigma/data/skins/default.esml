@@ -86,4 +86,24 @@
 			<eButton text="abort" name="reject" position="0:150" size="100:30" />
 		</eSkinSetup>
 	</object>
+	
+	<object name="transpondersettings.satellite">
+		<eTranspondersettings position="0:0" size="e:e" >
+			<eLabel text="Frequency:" position="10:10" size="140:30" />
+			<eNumber name="frequency" position="150:10:" size="e-150:30" />
+			<eLabel text="MHz" position="e-150:10" size="e:30" />
+
+			<eLabel text="Polarity:" position="10:40" size="140:30" />
+			<eListbox name="polarity" position="150:40:" size="e-150:30" />
+
+			<eLabel text="FEC:" position="10:70" size="140:30" />
+			<eListbox name="fec" position="150:70:" size="e-150:30" />
+
+			<eLabel text="Symbolrate:" position="10:100" size="140:30" />
+			<eNumber name="symbolrate" position="150:100:" size="e-150:30" />
+			<eLabel text="KSymb/s" position="e-150:100" size="e:30" />
+
+		</eTranspondersettings>
+	</object>
+
 </eskin>

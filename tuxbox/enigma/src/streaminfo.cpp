@@ -8,6 +8,7 @@
 #include <core/gui/multipage.h>
 #include <core/gui/eskin.h>
 #include <core/gui/guiactions.h>
+#include <core/dvb/dvbwidgets.h>
 
 int eStreaminfo::eventHandler(const eWidgetEvent &event)
 {
@@ -350,5 +351,15 @@ eStreaminfo::eStreaminfo(int mode, decoderParameters *parms): eWindow(1)
 	w->hide();
 
 	mp.addPage(w);
+	
+	eTransponderWidget *t=new eTransponderWidget(this, 0, eTransponderWidget::deliverySatellite);
+	t->move(ePoint(0, 0));
+	t->resize(clientrect.size());
+	t->hide();
+	t->load();
+	t->setTransponder(eDVB::getInstance()->transponder);
+	
+	mp.addPage(t);
+	
 	mp.first();
 }
