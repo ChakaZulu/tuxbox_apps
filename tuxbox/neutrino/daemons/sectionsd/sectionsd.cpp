@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.75 2001/10/25 12:24:29 field Exp $
+//  $Id: sectionsd.cpp,v 1.76 2001/10/29 17:57:09 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.76  2001/10/29 17:57:09  field
+//  Problem, dass Events mit hoeherer Nummer vorgehen, behoben
+//
 //  Revision 1.75  2001/10/25 12:24:29  field
 //  verbeserte Behandlung von unvollstaendigen EPGs
 //
@@ -359,7 +362,8 @@ struct OrderFirstEndTimeServiceIDEventUniqueKey
   bool operator()(const SIeventPtr &p1, const SIeventPtr &p2) {
     return
       p1->times.begin()->startzeit + (long)p1->times.begin()->dauer == p2->times.begin()->startzeit + (long)p2->times.begin()->dauer ?
-      ( p1->serviceID == p2->serviceID ? p1->uniqueKey() < p2->uniqueKey() : p1->serviceID < p2->serviceID )
+//      ( p1->serviceID == p2->serviceID ? p1->uniqueKey() < p2->uniqueKey() : p1->serviceID < p2->serviceID )
+      ( p1->serviceID == p2->serviceID ? p1->uniqueKey() > p2->uniqueKey() : p1->serviceID < p2->serviceID )
         :
 	    ( p1->times.begin()->startzeit + (long)p1->times.begin()->dauer < p2->times.begin()->startzeit + (long)p2->times.begin()->dauer ) ;
   }
@@ -975,7 +979,7 @@ static const SIevent& findActualSIeventForServiceUniqueKey(const unsigned servic
 {
     time_t azeit=time(NULL);
     // Event (serviceid) suchen
-//    int serviceIDfound=0;
+/*    int serviceIDfound=0;
 
     // Hier sollte man nicht jedesmal von vorne Anfangen, sondern den Anfang
     // des entsprechenden Services irgendwie schneller finden
@@ -983,7 +987,7 @@ static const SIevent& findActualSIeventForServiceUniqueKey(const unsigned servic
     // Man kann aber auch die Liste nach Start- oder Endzeit sortiert durchgehen sollte
     // eigentlich auch schneller sein.
     // Oder man nimmt fuer jeden Service eine eigene Menge, ist auch eine Ueberlegung wert.
-/*
+
     for(MySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey::iterator e=mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.begin(); e!=mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.end(); e++)
         if(SIservice::makeUniqueKey(e->first->originalNetworkID, e->first->serviceID)==serviceUniqueKey)
         {
@@ -999,6 +1003,9 @@ static const SIevent& findActualSIeventForServiceUniqueKey(const unsigned servic
             break; // sind nach serviceID und startzeit sortiert, daher weiteres Suchen unnoetig
 */
     // schnellere Variante? - ich glaub schon...
+    // weil normalerweise ist der cache nach hinten kürzer als nach vorne... :)
+    // deswegen sollten die meisten events am anfang zu finden sein
+
     for(MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator e=mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin(); e!=mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end(); e++)
         if(SIservice::makeUniqueKey(e->first->originalNetworkID, e->first->serviceID)==serviceUniqueKey)
         {
@@ -1008,7 +1015,8 @@ static const SIevent& findActualSIeventForServiceUniqueKey(const unsigned servic
                     zeit=*t;
                     return *(e->first);
                 }
-        };
+        }
+
     return nullEvt;
 }
 
@@ -1322,7 +1330,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.75 2001/10/25 12:24:29 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.76 2001/10/29 17:57:09 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -2747,6 +2755,7 @@ const unsigned timeoutInSeconds=1;
                     // Nicht alle Events speichern
                     for(SIevents::iterator e=eit.events().begin(); e!=eit.events().end(); e++)
                     {
+                        if(e->eventID!= 47){
                         if(e->times.size()>0)
                         {
                             if( e->times.begin()->startzeit < zeit+secondsToCache &&
@@ -2776,6 +2785,7 @@ const unsigned timeoutInSeconds=1;
                             {
                                 unlockServices();
                             }
+                        }
                         }
                     } // for
                 } // if serviceID
@@ -2905,7 +2915,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.75 2001/10/25 12:24:29 field Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.76 2001/10/29 17:57:09 field Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
