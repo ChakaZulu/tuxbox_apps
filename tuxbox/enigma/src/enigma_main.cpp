@@ -932,6 +932,7 @@ void eSubServiceSelector::prev()
 
 void eServiceNumberWidget::selected(int *res)
 {
+	timer->stop();
 	if (!res)
 	{
 		close(-1);
@@ -965,7 +966,7 @@ eServiceNumberWidget::eServiceNumberWidget(int initial)
 	CONNECT(number->numberChanged, eServiceNumberWidget::numberChanged );
 	
 	timer=new eTimer(eApp);
-	timer->start(2000);
+	timer->start(2000,true);
 	CONNECT(timer->timeout, eServiceNumberWidget::timeout);	
 }
 
@@ -977,7 +978,7 @@ eServiceNumberWidget::~eServiceNumberWidget()
 
 void eServiceNumberWidget::numberChanged()
 {
-	timer->start(2000);
+	timer->start(2000,true);
 }
 
 eZapMain *eZapMain::instance;
@@ -1637,8 +1638,15 @@ void eZapMain::handleMMIMessage( const eMMIMessage &msg )
 				eZap::getInstance()->focus == this ) )
 			postMessage(eZapMessage(0,"Common Interface",_("please wait while initializing Common Interface ..."),8),0);
 	}
-	else if ( !p->handleMMIMessage( msg.data ) )
-		return;
+	else
+	{
+		eServiceHandler *handler = eServiceInterface::getInstance()->getService();
+		if ( handler && handler->getFlags() & eServiceHandler::flagIsScrambled )
+		{
+			if ( !p->handleMMIMessage( msg.data ) )
+			return;
+		}
+	}
 
 	delete [] msg.data;
 }
@@ -1815,7 +1823,7 @@ void eZapMain::setSmartcardLogo(bool b)
 
 void eZapMain::setEIT(EIT *eit)
 {
-	eDebug("eZapMain::setEIT");
+//	eDebug("eZapMain::setEIT");
 	cur_event_text="";
 
 	if (eit)
@@ -1829,10 +1837,10 @@ void eZapMain::setEIT(EIT *eit)
 			EITEvent *event=*i;
 			eServiceReferenceDVB &ref=(eServiceReferenceDVB&)eServiceInterface::getInstance()->service;
 
-			eDebug("event->running_status=%d, p=%d", event->running_status, p );
+//			eDebug("event->running_status=%d, p=%d", event->running_status, p );
 			if ((event->running_status>=2) || ((!p) && (!event->running_status)))
 			{
-				eDebug("set cur_event_id to %d", event->event_id);
+//				eDebug("set cur_event_id to %d", event->event_id);
 				cur_event_id=event->event_id;
 				cur_start=event->start_time;
 				cur_duration=event->duration;
@@ -2758,6 +2766,7 @@ void eZapMain::startSkip(int dir)
 
 void eZapMain::repeatSkip(int dir)
 {
+#if 1
 	if (!skipping)
 	{
 		skipcounter++;
@@ -2771,6 +2780,7 @@ void eZapMain::repeatSkip(int dir)
 		eServiceHandler *handler=eServiceInterface::getInstance()->getService();
 		if (handler)
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip, (dir == skipForward)?time:-time));
+#endif
 		updateProgress();
 	}
 }
@@ -4192,6 +4202,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 			eServiceNumberWidget s(num);
 			s.show();
 			num = s.exec();
+			s.hide();
 			if (num != -1)
 			{
 				if (num < 200)	// < 200 is in favourite list
@@ -4218,10 +4229,8 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 								continue;
 							else if (!--num)
 								break;
-
 						if (!num)
 							playService( it->service, 0);
-
 						eServiceInterface::getInstance()->removeRef( p->getList().front().service );
 					}
 				}
@@ -4330,7 +4339,7 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 		break;
 	case eServiceEvent::evtGotEIT:
 	{
-		eDebug("enigma_main::handleServiceEvent.. evtGotEIT");
+//		eDebug("enigma_main::handleServiceEvent.. evtGotEIT");
 		gotEIT();
 		break;
 	}
@@ -4637,7 +4646,7 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 
 void eZapMain::gotEIT()
 {
-	eDebug("eZapMain::gotEIT");
+//	eDebug("eZapMain::gotEIT");
 	eServiceHandler *sapi=eServiceInterface::getInstance()->getService();
 	if (!sapi)
 	{
@@ -4646,11 +4655,11 @@ void eZapMain::gotEIT()
 	}
 
 	EIT *eit=sapi->getEIT();
-	eDebug("eit = %p", eit);
+//	eDebug("eit = %p", eit);
 	int old_event_id=cur_event_id;
-	eDebug("old_event_id = %d...call setEIT", cur_event_id);
+//	eDebug("old_event_id = %d...call setEIT", cur_event_id);
 	setEIT(eit);
-	eDebug("cur_event_id = %d", cur_event_id);
+//	eDebug("cur_event_id = %d", cur_event_id);
 	if (eit)
 	{
 		int state=0;
@@ -4665,7 +4674,7 @@ void eZapMain::gotEIT()
 					timeout.start((sapi->getState() == eServiceHandler::statePlaying)?10000:2000, 1);
 			}
 		}
-		eDebug("unlock eit");
+//		eDebug("unlock eit");
 		eit->unlock();
 	}
 	else
@@ -4929,7 +4938,10 @@ void eZapMain::gotMessage(const int &c)
 #ifndef DISABLE_FILE
 	else if ( c == eZapMain::messageNoRecordSpaceLeft )
 	{
-		eTimerManager::getInstance()->abortEvent( ePlaylistEntry::errorNoSpaceLeft );
+		if ( state & stateInTimerMode && state & stateRecording )
+			eTimerManager::getInstance()->abortEvent( ePlaylistEntry::errorNoSpaceLeft );
+		else
+			eDebug("noSpaceLeft message.. but not in TimerMode");
 		return;
 	}
 #endif
