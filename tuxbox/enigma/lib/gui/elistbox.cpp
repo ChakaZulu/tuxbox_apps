@@ -29,6 +29,8 @@ void eListbox::redrawWidget(gPainter *target, const eRect &where)
 void eListbox::gotFocus()
 {
 	have_focus++;
+	if (!top)
+		return;
 	QListIterator<eListboxEntry> entry(*top);
 	for (int i=0; i<entries; i++, ++entry)
 		if (entry.current()==current->current())
@@ -38,6 +40,8 @@ void eListbox::gotFocus()
 void eListbox::lostFocus()
 {	
 	have_focus--;
+	if (!top)
+		return;
 	QListIterator<eListboxEntry> entry(*top);
 	if (isVisible())
 	{
@@ -220,9 +224,17 @@ void eListbox::setCurrent(eListboxEntry *c)
 		current->toFirst();
 	if (bottom && top && entries)
 	{
-		*top=*current;
-		*bottom=*top;
-		(*bottom)+=entries;
+		QListIterator<eListboxEntry> it(*top);
+		int i;
+		for (i=0; i<entries; ++i, ++it)
+			if (*it == *current)
+				break;
+		if (i == entries)
+		{
+			*top=*current;
+			*bottom=*top;
+			(*bottom)+=entries;
+		}
 	}
 }
 
