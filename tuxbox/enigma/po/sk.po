@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxbox-enigma 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-10-03 22:02+0200\n"
-"PO-Revision-Date: Fri Oct 3 21:56:52 CEST 2003\n"
+"POT-Creation-Date: 2003-10-31 23:37+0100\n"
+"PO-Revision-Date: Fri Oct 31 22:36:40 CET 2003\n"
 "Last-Translator: unknown\n"
 "Language-Team: Slovakian / Michal Harajda <root@unlockers.sk>\n"
 "MIME-Version: 1.0\n"
@@ -320,9 +320,8 @@ msgid "close motor setup"
 msgstr "zanechaj nastavenie motora"
 
 #: default.esml:508 default.esml:519
-#, fuzzy
 msgid "add only unscrambled services"
-msgstr "Nezobrazuj zamknuté kanály"
+msgstr "pridaj iba dekódovatelné kanály"
 
 #: default.esml:573 default.esml:585
 msgid "KSymb/s"
@@ -649,9 +648,8 @@ msgid "goto prev page (LNB)"
 msgstr "predch.str (LNB)"
 
 #: default.esml:542
-#, fuzzy
 msgid "press ok to change"
-msgstr "Ok pre zmenu smeru"
+msgstr "Ok pre zmenu"
 
 #: default.esml:840
 msgid "Transponders"
@@ -713,7 +711,7 @@ msgstr "SR:"
 msgid "Transponder:"
 msgstr "Transpondér:"
 
-#: default.esml:744 default.esml:756 default.esml:768 src/enigma_main.cpp:5747
+#: default.esml:744 default.esml:756 default.esml:768 src/enigma_main.cpp:5765
 msgid "set"
 msgstr "nastav"
 
@@ -989,7 +987,7 @@ msgstr "Pondelok"
 
 #: default.esml:496 default.esml:508 default.esml:519
 msgid "only Free"
-msgstr ""
+msgstr "iba volné"
 
 #: default.esml:703 src/timer.cpp:1993
 msgid "Saturday"
@@ -1028,11 +1026,10 @@ msgid "Help"
 msgstr "Pomoc"
 
 #: default.esml:496
-#, fuzzy
 msgid "add only not scrambled services"
-msgstr "Nezobrazuj zamknuté kanály"
+msgstr "pridaj iba nekódované kanály"
 
-#: lib/dvb/dvbci.cpp:106 lib/dvb/dvbci.cpp:118 lib/dvb/dvbci.cpp:1105
+#: lib/dvb/dvbci.cpp:103 lib/dvb/dvbci.cpp:115 lib/dvb/dvbci.cpp:1132
 msgid "no module"
 msgstr "ziadny modul"
 
@@ -1045,7 +1042,7 @@ msgid "horizontal"
 msgstr "horizontálny"
 
 #: lib/dvb/service.cpp:192 lib/dvb/service.cpp:222 src/enigma_bouquet.cpp:203
-#: src/enigma_main.cpp:3259 src/enigma_main.cpp:3271 src/parentallock.cpp:123
+#: src/enigma_main.cpp:3275 src/enigma_main.cpp:3287 src/parentallock.cpp:123
 #: src/parentallock.cpp:155 src/timer.cpp:1772
 msgid "parental"
 msgstr "Rodicovské"
@@ -1127,7 +1124,7 @@ msgstr "Súborový mód"
 msgid "TV/Radio"
 msgstr "TV/Rádio"
 
-#: lib/dvb/servicestructure.cpp:17 src/enigma_main.cpp:5646
+#: lib/dvb/servicestructure.cpp:17 src/enigma_main.cpp:5664
 #: src/sselect.cpp:368
 msgid "Bouquets"
 msgstr "Pakety"
@@ -1144,7 +1141,7 @@ msgstr "Áno"
 msgid "No"
 msgstr "Nie"
 
-#: lib/gui/listbox.cpp:679 src/enigma_main.cpp:2588
+#: lib/gui/listbox.cpp:679 src/enigma_main.cpp:2602
 msgid "no description available"
 msgstr "Popis nie je k dispozícii"
 
@@ -1823,7 +1820,7 @@ msgstr "prerus prehrávanie"
 msgid "resume playback"
 msgstr "obnov prehrávanie"
 
-#: src/enigma_main.cpp:112 src/enigma_main.cpp:2578
+#: src/enigma_main.cpp:112 src/enigma_main.cpp:2592
 msgid "record"
 msgstr "nahrávaj"
 
@@ -1943,88 +1940,88 @@ msgstr "pridaj do paketu"
 msgid "disable quickzap"
 msgstr "zakáz quickzap"
 
-#: src/enigma_main.cpp:951
+#: src/enigma_main.cpp:952
 msgid "Channel"
 msgstr "Kanál"
 
-#: src/enigma_main.cpp:956
+#: src/enigma_main.cpp:957
 msgid "Channel:"
 msgstr "Kanál:"
 
-#: src/enigma_main.cpp:1031
+#: src/enigma_main.cpp:1032
 #, c-format
 msgid "Please wait while the motor is turning to %d.%d%c ...."
 msgstr "Cakajte kým sa motor presunie na %d.%d%c ...."
 
-#: src/enigma_main.cpp:1031
+#: src/enigma_main.cpp:1032
 msgid "Message"
 msgstr "Oznam"
 
-#: src/enigma_main.cpp:1124
+#: src/enigma_main.cpp:1125
 msgid "recorded movies"
 msgstr "nahrané filmy"
 
-#: src/enigma_main.cpp:1210
+#: src/enigma_main.cpp:1211
 msgid "Bouquets (TV)"
 msgstr "TV pakety"
 
-#: src/enigma_main.cpp:1222
+#: src/enigma_main.cpp:1223
 msgid "Bouquets (Radio)"
 msgstr "Pakety rádia"
 
-#: src/enigma_main.cpp:1261
+#: src/enigma_main.cpp:1262
 msgid "Favourites (TV)"
 msgstr "Oblúbené (TV)"
 
-#: src/enigma_main.cpp:1266
+#: src/enigma_main.cpp:1267
 msgid "Favourites (Radio)"
 msgstr "Oblúbené (Rádia)"
 
-#: src/enigma_main.cpp:1638
+#: src/enigma_main.cpp:1643
 msgid "please wait while initializing Common Interface ..."
 msgstr "Cakajte kým pripravím CI modul"
 
-#: src/enigma_main.cpp:1926
+#: src/enigma_main.cpp:1940
 msgid "no EPG available"
 msgstr "EPG nedostupná"
 
-#: src/enigma_main.cpp:2413
+#: src/enigma_main.cpp:2427
 msgid "ShutdownTimer"
 msgstr "Casovac vypnutia"
 
-#: src/enigma_main.cpp:2413
+#: src/enigma_main.cpp:2427
 msgid "SleepTimer"
 msgstr "Casovac spánku"
 
-#: src/enigma_main.cpp:2578
+#: src/enigma_main.cpp:2592
 msgid "Sorry, you cannot record this service."
 msgstr "Prepácte, ale toto nemozete nahrat"
 
-#: src/enigma_main.cpp:2734
+#: src/enigma_main.cpp:2748
 msgid "Show recorded movies?"
 msgstr "Zobrazit nahrávky ?"
 
-#: src/enigma_main.cpp:2734
+#: src/enigma_main.cpp:2748
 msgid "recording finished"
 msgstr "nahrávanie je ukoncené"
 
-#: src/enigma_main.cpp:2908
+#: src/enigma_main.cpp:2924
 msgid "Enter new name:"
 msgstr "Zadajte nové meno:"
 
-#: src/enigma_main.cpp:2909
+#: src/enigma_main.cpp:2925
 msgid "Rename entry"
 msgstr "Premenuj polozku"
 
-#: src/enigma_main.cpp:2964
+#: src/enigma_main.cpp:2980
 msgid "Sorry, you cannot delete this service."
 msgstr "Prepácte, ale toto nemozete zmazat"
 
-#: src/enigma_main.cpp:2964
+#: src/enigma_main.cpp:2980
 msgid "delete service"
 msgstr "Zmaz nahrávku"
 
-#: src/enigma_main.cpp:2989
+#: src/enigma_main.cpp:3005
 msgid ""
 "This is a recorded stream!\n"
 "Really delete?"
@@ -2032,11 +2029,11 @@ msgstr ""
 "Toto su nahrané sat. údaje.\n"
 "Naozaj to zmazat?"
 
-#: src/enigma_main.cpp:2989
+#: src/enigma_main.cpp:3005
 msgid "Delete recorded stream"
 msgstr "Zmaz nahraný záznam"
 
-#: src/enigma_main.cpp:3008
+#: src/enigma_main.cpp:3024
 msgid ""
 "This is a complete Bouquet!\n"
 "Really delete?"
@@ -2044,51 +2041,51 @@ msgstr ""
 "Toto je celý paket programov.\n"
 "Naozaj to zmazat?"
 
-#: src/enigma_main.cpp:3009
+#: src/enigma_main.cpp:3025
 msgid "Delete bouquet"
 msgstr "Premenuj paket"
 
-#: src/enigma_main.cpp:3051
+#: src/enigma_main.cpp:3067
 msgid "Enter new name for the bouquet:"
 msgstr "Zadaj meno pre paket:"
 
-#: src/enigma_main.cpp:3052
+#: src/enigma_main.cpp:3068
 msgid "Rename bouquet"
 msgstr "Premenuj paket"
 
-#: src/enigma_main.cpp:3078
+#: src/enigma_main.cpp:3094
 msgid "Enter name for the new bouquet:"
 msgstr "Zadaj meno nového paketu:"
 
-#: src/enigma_main.cpp:3079
+#: src/enigma_main.cpp:3095
 msgid "Add new bouquet"
 msgstr "Pridaj nový paket"
 
-#: src/enigma_main.cpp:3120
+#: src/enigma_main.cpp:3136
 msgid "unnamed"
 msgstr "bez mena"
 
-#: src/enigma_main.cpp:3121
+#: src/enigma_main.cpp:3137
 msgid "Enter marker name:"
 msgstr "Zadajte meno zálozky"
 
-#: src/enigma_main.cpp:3122
+#: src/enigma_main.cpp:3138
 msgid "create marker"
 msgstr "vytvor zálozku"
 
-#: src/enigma_main.cpp:3161
+#: src/enigma_main.cpp:3177
 msgid "unnamed bouquet"
 msgstr "paket bez mena"
 
-#: src/enigma_main.cpp:3436 src/enigma_main.cpp:3437
+#: src/enigma_main.cpp:3452 src/enigma_main.cpp:3453
 msgid "This directory doesn't contain anything playable!"
 msgstr "Tento adresár nemoze obsahovat nic prehratelné!"
 
-#: src/enigma_main.cpp:3437
+#: src/enigma_main.cpp:3453
 msgid "Play"
 msgstr "Prehraj"
 
-#: src/enigma_main.cpp:3781
+#: src/enigma_main.cpp:3797
 msgid ""
 "A timer based digital recording is currently in progress!\n"
 "This stops the timer, and digital recording!"
@@ -2096,7 +2093,7 @@ msgstr ""
 "Práve prebieha načasované nahrávanie!\n"
 "Tento Vás krok zastaví casovac, a samozrejme aj nahrávanie!"
 
-#: src/enigma_main.cpp:3791
+#: src/enigma_main.cpp:3807
 msgid ""
 "A digital recording is currently in progress!\n"
 "This stops the digital recording!"
@@ -2104,7 +2101,7 @@ msgstr ""
 "Práve prebieha nahrávanie!.\n"
 "Tento vás krok nahrávanie zastaví!"
 
-#: src/enigma_main.cpp:3803
+#: src/enigma_main.cpp:3819
 msgid ""
 "A timer event is currently in progress!\n"
 "This stops the timer event!"
@@ -2112,201 +2109,201 @@ msgstr ""
 "Práve prebieha nacasovaná úloha!\n"
 "Tento vás krok ju prerusí!"
 
-#: src/enigma_main.cpp:3811
+#: src/enigma_main.cpp:3827
 msgid "Really do this?"
 msgstr "Ste si istý ?"
 
-#: src/enigma_main.cpp:4523 src/enigma_main.cpp:4524
+#: src/enigma_main.cpp:4538 src/enigma_main.cpp:4539
 msgid "One moment please..."
 msgstr "Momentík..."
 
-#: src/enigma_main.cpp:4524 src/enigma_main.cpp:4529 src/enigma_main.cpp:4539
-#: src/enigma_main.cpp:4547 src/enigma_main.cpp:4554 src/enigma_main.cpp:4559
-#: src/enigma_main.cpp:4565 src/timer.cpp:1645
+#: src/enigma_main.cpp:4539 src/enigma_main.cpp:4544 src/enigma_main.cpp:4554
+#: src/enigma_main.cpp:4562 src/enigma_main.cpp:4569 src/enigma_main.cpp:4574
+#: src/enigma_main.cpp:4580 src/timer.cpp:1645
 msgid "switch"
 msgstr "prepni"
 
-#: src/enigma_main.cpp:4528 src/enigma_main.cpp:4529
+#: src/enigma_main.cpp:4543 src/enigma_main.cpp:4544
 msgid "Service could not be found !"
 msgstr "Kanál nenájdený!"
 
-#: src/enigma_main.cpp:4538 src/enigma_main.cpp:4539
+#: src/enigma_main.cpp:4553 src/enigma_main.cpp:4554
 msgid "This service could not be descrambled"
 msgstr "Kanál nemoze byt dekódovaný!"
 
-#: src/enigma_main.cpp:4546 src/enigma_main.cpp:4547
+#: src/enigma_main.cpp:4561 src/enigma_main.cpp:4562
 msgid "This service doesn't currently send a signal"
 msgstr "Tento kanál momentálne nevysiela"
 
-#: src/enigma_main.cpp:4552 src/enigma_main.cpp:4554
+#: src/enigma_main.cpp:4567 src/enigma_main.cpp:4569
 msgid "This content could not be displayed"
 msgstr "Toto nemozem zobrazit"
 
-#: src/enigma_main.cpp:4557 src/enigma_main.cpp:4559
+#: src/enigma_main.cpp:4572 src/enigma_main.cpp:4574
 msgid "NVOD Service - please select a starttime"
 msgstr "NVOD kanál - zadajde cas zaciatku sledovania"
 
-#: src/enigma_main.cpp:4563 src/enigma_main.cpp:4565
+#: src/enigma_main.cpp:4578 src/enigma_main.cpp:4580
 msgid "Unknown error!!"
 msgstr "Prapodivná chyba!!"
 
-#: src/enigma_main.cpp:5025 src/sselect.cpp:374
+#: src/enigma_main.cpp:5043 src/sselect.cpp:374
 msgid "Playlist"
 msgstr "Playlist"
 
-#: src/enigma_main.cpp:5027
+#: src/enigma_main.cpp:5045
 msgid "History"
 msgstr "história"
 
-#: src/enigma_main.cpp:5298
+#: src/enigma_main.cpp:5316
 msgid "Service Menu"
 msgstr "Servisné menu"
 
-#: src/enigma_main.cpp:5311 src/sselect.cpp:111
+#: src/enigma_main.cpp:5329 src/sselect.cpp:111
 msgid "add service to playlist"
 msgstr "zarad do playlistu"
 
-#: src/enigma_main.cpp:5320
+#: src/enigma_main.cpp:5338
 msgid "create new bouquet"
 msgstr "vytvor nový paket"
 
-#: src/enigma_main.cpp:5331
+#: src/enigma_main.cpp:5349
 msgid "duplicate bouquet"
 msgstr "Skopíruj paket"
 
-#: src/enigma_main.cpp:5334 src/enigma_main.cpp:5369
+#: src/enigma_main.cpp:5352 src/enigma_main.cpp:5387
 msgid "add to specific bouquet"
 msgstr "pridaj do zadaného paketu"
 
-#: src/enigma_main.cpp:5336
+#: src/enigma_main.cpp:5354
 msgid "add marker"
 msgstr "pridaj zálozku"
 
-#: src/enigma_main.cpp:5343 src/enigma_main.cpp:5347 src/sselect.cpp:353
+#: src/enigma_main.cpp:5361 src/enigma_main.cpp:5365 src/sselect.cpp:353
 msgid "rename"
 msgstr "premenuj"
 
-#: src/enigma_main.cpp:5350 src/sselect.cpp:351
+#: src/enigma_main.cpp:5368 src/sselect.cpp:351
 msgid "delete"
 msgstr "vymaz"
 
-#: src/enigma_main.cpp:5357
+#: src/enigma_main.cpp:5375
 msgid "disable move mode"
 msgstr "zakáz mód pohybu"
 
-#: src/enigma_main.cpp:5359
+#: src/enigma_main.cpp:5377
 msgid "enable move mode"
 msgstr "povol mód pohybu"
 
-#: src/enigma_main.cpp:5375
+#: src/enigma_main.cpp:5393
 msgid "copy to bouquet list"
 msgstr "Prekopíruj do prehladu paketov"
 
-#: src/enigma_main.cpp:5386
+#: src/enigma_main.cpp:5404
 msgid "disable edit mode"
 msgstr "zakáz mód editácie"
 
-#: src/enigma_main.cpp:5388
+#: src/enigma_main.cpp:5406
 msgid "enable edit mode"
 msgstr "povol mód editácie"
 
-#: src/enigma_main.cpp:5398
+#: src/enigma_main.cpp:5416
 msgid "unlock"
 msgstr "odomkni"
 
-#: src/enigma_main.cpp:5400
+#: src/enigma_main.cpp:5418
 msgid "lock"
 msgstr "zámok"
 
-#: src/enigma_main.cpp:5404
+#: src/enigma_main.cpp:5422
 msgid "disable parental lock"
 msgstr "zakáz rodicovský zámok"
 
-#: src/enigma_main.cpp:5406
+#: src/enigma_main.cpp:5424
 msgid "enable parental lock"
 msgstr "povol rodicovský zámok"
 
-#: src/enigma_main.cpp:5424
+#: src/enigma_main.cpp:5442
 msgid "Shutdown/Standby Menu"
 msgstr "Menu vypnutia/spánku"
 
-#: src/enigma_main.cpp:5431
+#: src/enigma_main.cpp:5449
 msgid "reboot now"
 msgstr "Restartuj !"
 
-#: src/enigma_main.cpp:5434
+#: src/enigma_main.cpp:5452
 msgid "shutdown now"
 msgstr "vypnut !"
 
-#: src/enigma_main.cpp:5435
+#: src/enigma_main.cpp:5453
 msgid "restart"
 msgstr "restart"
 
-#: src/enigma_main.cpp:5438
+#: src/enigma_main.cpp:5456
 msgid "goto standby"
 msgstr "standby"
 
-#: src/enigma_main.cpp:5439
+#: src/enigma_main.cpp:5457
 msgid "set sleeptimer"
 msgstr "nastavenie rezimu spánku"
 
-#: src/enigma_main.cpp:5540
+#: src/enigma_main.cpp:5558
 msgid "Record Menu"
 msgstr "Menu nahrávania"
 
-#: src/enigma_main.cpp:5546
+#: src/enigma_main.cpp:5564
 msgid "stop record now"
 msgstr "zastav nahrávanie!"
 
-#: src/enigma_main.cpp:5548
+#: src/enigma_main.cpp:5566
 msgid "set record duration"
 msgstr "zadajte dlzku nahrávania"
 
-#: src/enigma_main.cpp:5549
+#: src/enigma_main.cpp:5567
 msgid "set record stop time"
 msgstr "zadajte cas konca nahrávania"
 
-#: src/enigma_main.cpp:5623
+#: src/enigma_main.cpp:5641
 msgid "press ok to start edit mode"
 msgstr "OK pre mód editácie"
 
-#: src/enigma_main.cpp:5671 src/time_settings.cpp:36
+#: src/enigma_main.cpp:5689 src/time_settings.cpp:36
 msgid "Time Correction"
 msgstr "korekcia casu"
 
-#: src/enigma_main.cpp:5678
+#: src/enigma_main.cpp:5696
 msgid "Transponder Time:"
 msgstr "Cas na Transpondéry:"
 
-#: src/enigma_main.cpp:5687
+#: src/enigma_main.cpp:5705
 msgid "Transponder Date:"
 msgstr "Dátum na trasnpondéry:"
 
-#: src/enigma_main.cpp:5694
+#: src/enigma_main.cpp:5712
 msgid "New Time:"
 msgstr "Nový cas:"
 
-#: src/enigma_main.cpp:5707
+#: src/enigma_main.cpp:5725
 msgid "enter correct time here"
 msgstr "Zadajte správny cas"
 
-#: src/enigma_main.cpp:5713
+#: src/enigma_main.cpp:5731
 msgid "New Date:"
 msgstr "Nový dátum:"
 
-#: src/enigma_main.cpp:5722
+#: src/enigma_main.cpp:5740
 msgid "press ok to select another day"
 msgstr "Ok pre nastavenie iného dna"
 
-#: src/enigma_main.cpp:5728
+#: src/enigma_main.cpp:5746
 msgid "press ok to select another month"
 msgstr "Ok pre nastavenie iného mesiaca"
 
-#: src/enigma_main.cpp:5737
+#: src/enigma_main.cpp:5755
 msgid "press ok to select another year"
 msgstr "Ok pre nastavenie iného roku"
 
-#: src/enigma_main.cpp:5753
+#: src/enigma_main.cpp:5771
 msgid "set new time and close window"
 msgstr "nastav cas a zatvor okno"
 
@@ -2340,7 +2337,7 @@ msgstr "Vypnút"
 msgid "Setup"
 msgstr "Nastavenia"
 
-#: src/enigma_mainmenu.cpp:66 src/enigma_plugins.cpp:122
+#: src/enigma_mainmenu.cpp:66 src/enigma_plugins.cpp:117
 msgid "Games"
 msgstr "Hry"
 
@@ -2361,29 +2358,29 @@ msgstr "Menu"
 msgid "setup"
 msgstr "Nastavenie"
 
-#: src/enigma_plugins.cpp:122
+#: src/enigma_plugins.cpp:117
 msgid "Plugins"
 msgstr "Plugins"
 
-#: src/enigma_plugins.cpp:127
+#: src/enigma_plugins.cpp:122
 msgid "select plugin and press ok"
 msgstr "vyberte plugin (ok)"
 
-#: src/enigma_plugins.cpp:146
+#: src/enigma_plugins.cpp:141
 #, c-format
 msgid "Couldn't read plugin directory %s"
 msgstr "Nemozem cítat plugins adresár %s"
 
-#: src/enigma_plugins.cpp:150
+#: src/enigma_plugins.cpp:145
 msgid "Error"
 msgstr "Chyba"
 
-#: src/enigma_plugins.cpp:216
+#: src/enigma_plugins.cpp:211
 #, c-format
 msgid "plugin '%s' not found"
 msgstr "plugin '%s' sa nenasiel"
 
-#: src/enigma_plugins.cpp:219
+#: src/enigma_plugins.cpp:214
 msgid "no name given"
 msgstr "nazadané meno"
 
@@ -2416,9 +2413,8 @@ msgid "open automatic transponder scan"
 msgstr "Automatické vyhladávanie kanálov"
 
 #: src/enigma_scan.cpp:54
-#, fuzzy
 msgid "Automatic Multisat Scan"
-msgstr "Automatické vyhladávanie kanálov"
+msgstr "Automatické vyhladávanie na druziciach"
 
 #: src/enigma_scan.cpp:56
 msgid "Manual Transponder Scan"
@@ -3292,15 +3288,15 @@ msgstr "este %02i sekúnd"
 
 #: src/scan.cpp:640
 msgid "[only free]"
-msgstr ""
+msgstr "[iba volne]"
 
 #: src/scan.cpp:641
 msgid "[all]"
-msgstr ""
+msgstr "[vsetko]"
 
 #: src/scan.cpp:641
 msgid "[nothing]"
-msgstr ""
+msgstr "[nic]"
 
 #: src/scan.cpp:743
 msgid "Transponder Scan"
@@ -3914,12 +3910,11 @@ msgstr "namiesto NTSC pouzi PAL-M"
 
 #: src/setupvideo.cpp:112
 msgid "Auto VCR switching"
-msgstr ""
+msgstr "Automatické prepínanie VCR"
 
 #: src/setupvideo.cpp:115
-#, fuzzy
 msgid "auto switch to VCR connector"
-msgstr "prepni do módu TV"
+msgstr "Automaticky prepni na VCR konektor"
 
 #: src/software_update.cpp:33
 msgid "Internet Update"
@@ -4092,11 +4087,11 @@ msgstr "Root"
 msgid "Movies"
 msgstr "Filmy"
 
-#: src/sselect.cpp:742
+#: src/sselect.cpp:747
 msgid "Select No or press Abort to lock/unlock the complete directory"
 msgstr "Vyberte NIE alebo stlacte LAME pre za/odomknutie celého adresára"
 
-#: src/sselect.cpp:742
+#: src/sselect.cpp:747
 msgid "Enter Directory"
 msgstr "Zadajte adresár"
 
@@ -4655,9 +4650,3 @@ msgstr ""
 #: src/time_settings.cpp:82
 msgid "time correction change error"
 msgstr "chyba pri korigovaní casu"
-
-#~ msgid "clear list before"
-#~ msgstr "najprv vymaz"
-
-#~ msgid "remove all services before scan"
-#~ msgstr "najprv vymaz kanály"

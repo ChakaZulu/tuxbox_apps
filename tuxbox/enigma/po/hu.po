@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxbox-enigma 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-10-03 22:02+0200\n"
-"PO-Revision-Date: Fri Oct 3 21:56:52 CEST 2003\n"
+"POT-Creation-Date: 2003-10-31 23:37+0100\n"
+"PO-Revision-Date: Fri Oct 31 22:36:40 CET 2003\n"
 "Last-Translator: unknown\n"
 "Language-Team: Hungarian / lbalogh@mediavox.hu\n"
 "MIME-Version: 1.0\n"
@@ -320,9 +320,8 @@ msgid "close motor setup"
 msgstr "Rotor beállítások menü becsukása"
 
 #: default.esml:508 default.esml:519
-#, fuzzy
 msgid "add only unscrambled services"
-msgstr "Zárolt csatornák elrejtése"
+msgstr "Csak a kódolatlan csatornákat adja hozzá"
 
 #: default.esml:573 default.esml:585
 msgid "KSymb/s"
@@ -650,9 +649,8 @@ msgid "goto prev page (LNB)"
 msgstr "Pattanjunk az elözö oldalra (LNB-hez)"
 
 #: default.esml:542
-#, fuzzy
 msgid "press ok to change"
-msgstr "Ok-val megváltoztadhatod az irányt"
+msgstr "Ok-val változtatható meg"
 
 #: default.esml:840
 msgid "Transponders"
@@ -714,7 +712,7 @@ msgstr "Symbolrate:"
 msgid "Transponder:"
 msgstr "Transzponder:"
 
-#: default.esml:744 default.esml:756 default.esml:768 src/enigma_main.cpp:5747
+#: default.esml:744 default.esml:756 default.esml:768 src/enigma_main.cpp:5765
 msgid "set"
 msgstr "beállítás"
 
@@ -989,7 +987,7 @@ msgstr "Hétfö"
 
 #: default.esml:496 default.esml:508 default.esml:519
 msgid "only Free"
-msgstr ""
+msgstr "csak az FTA-k"
 
 #: default.esml:703 src/timer.cpp:1993
 msgid "Saturday"
@@ -1028,11 +1026,10 @@ msgid "Help"
 msgstr "Segítség"
 
 #: default.esml:496
-#, fuzzy
 msgid "add only not scrambled services"
-msgstr "Zárolt csatornák elrejtése"
+msgstr "Csak a szabadon fogható csatornákat adja hozzá"
 
-#: lib/dvb/dvbci.cpp:106 lib/dvb/dvbci.cpp:118 lib/dvb/dvbci.cpp:1105
+#: lib/dvb/dvbci.cpp:103 lib/dvb/dvbci.cpp:115 lib/dvb/dvbci.cpp:1132
 msgid "no module"
 msgstr "nincs modul"
 
@@ -1045,7 +1042,7 @@ msgid "horizontal"
 msgstr "horizontális"
 
 #: lib/dvb/service.cpp:192 lib/dvb/service.cpp:222 src/enigma_bouquet.cpp:203
-#: src/enigma_main.cpp:3259 src/enigma_main.cpp:3271 src/parentallock.cpp:123
+#: src/enigma_main.cpp:3275 src/enigma_main.cpp:3287 src/parentallock.cpp:123
 #: src/parentallock.cpp:155 src/timer.cpp:1772
 msgid "parental"
 msgstr "gyermekzár"
@@ -1127,7 +1124,7 @@ msgstr "FÁJL MÓD"
 msgid "TV/Radio"
 msgstr "TV/Rádió"
 
-#: lib/dvb/servicestructure.cpp:17 src/enigma_main.cpp:5646
+#: lib/dvb/servicestructure.cpp:17 src/enigma_main.cpp:5664
 #: src/sselect.cpp:368
 msgid "Bouquets"
 msgstr "Bouquet-ek"
@@ -1144,7 +1141,7 @@ msgstr "Igen"
 msgid "No"
 msgstr "Nem"
 
-#: lib/gui/listbox.cpp:679 src/enigma_main.cpp:2588
+#: lib/gui/listbox.cpp:679 src/enigma_main.cpp:2602
 msgid "no description available"
 msgstr "nincs adatom"
 
@@ -1824,7 +1821,7 @@ msgstr "lejátszás szüneteltetése"
 msgid "resume playback"
 msgstr "lejátszás folytatása"
 
-#: src/enigma_main.cpp:112 src/enigma_main.cpp:2578
+#: src/enigma_main.cpp:112 src/enigma_main.cpp:2592
 msgid "record"
 msgstr "felvétel"
 
@@ -1944,88 +1941,88 @@ msgstr "hozzáadás a Bouquet-hez"
 msgid "disable quickzap"
 msgstr "Gyors-ZAP tiltása"
 
-#: src/enigma_main.cpp:951
+#: src/enigma_main.cpp:952
 msgid "Channel"
 msgstr "Csatorna"
 
-#: src/enigma_main.cpp:956
+#: src/enigma_main.cpp:957
 msgid "Channel:"
 msgstr "Csatorna:"
 
-#: src/enigma_main.cpp:1031
+#: src/enigma_main.cpp:1032
 #, c-format
 msgid "Please wait while the motor is turning to %d.%d%c ...."
 msgstr "Kérlek várj, míg forgatom az antennádat a(z) %d.%d%c -re...."
 
-#: src/enigma_main.cpp:1031
+#: src/enigma_main.cpp:1032
 msgid "Message"
 msgstr "Üzenet"
 
-#: src/enigma_main.cpp:1124
+#: src/enigma_main.cpp:1125
 msgid "recorded movies"
 msgstr "Felvett müsorok"
 
-#: src/enigma_main.cpp:1210
+#: src/enigma_main.cpp:1211
 msgid "Bouquets (TV)"
 msgstr "Bouquet (TV)"
 
-#: src/enigma_main.cpp:1222
+#: src/enigma_main.cpp:1223
 msgid "Bouquets (Radio)"
 msgstr "Bouquet (Rádió)"
 
-#: src/enigma_main.cpp:1261
+#: src/enigma_main.cpp:1262
 msgid "Favourites (TV)"
 msgstr "Zsánerek (TV)"
 
-#: src/enigma_main.cpp:1266
+#: src/enigma_main.cpp:1267
 msgid "Favourites (Radio)"
 msgstr "Zsánerek (Rádió)"
 
-#: src/enigma_main.cpp:1638
+#: src/enigma_main.cpp:1643
 msgid "please wait while initializing Common Interface ..."
 msgstr "kérlek várj, míg inicializálom a CI-t"
 
-#: src/enigma_main.cpp:1926
+#: src/enigma_main.cpp:1940
 msgid "no EPG available"
 msgstr "sajna, de nincs elérhetö EPG"
 
-#: src/enigma_main.cpp:2413
+#: src/enigma_main.cpp:2427
 msgid "ShutdownTimer"
 msgstr "Kikapcsolási idözítö"
 
-#: src/enigma_main.cpp:2413
+#: src/enigma_main.cpp:2427
 msgid "SleepTimer"
 msgstr "Elalvás kapcsoló"
 
-#: src/enigma_main.cpp:2578
+#: src/enigma_main.cpp:2592
 msgid "Sorry, you cannot record this service."
 msgstr "Diéta van, ezt a csatit nem veheted fel"
 
-#: src/enigma_main.cpp:2734
+#: src/enigma_main.cpp:2748
 msgid "Show recorded movies?"
 msgstr "Mutassan a felvett anyagokat?"
 
-#: src/enigma_main.cpp:2734
+#: src/enigma_main.cpp:2748
 msgid "recording finished"
 msgstr "felvétel befejezve"
 
-#: src/enigma_main.cpp:2908
+#: src/enigma_main.cpp:2924
 msgid "Enter new name:"
 msgstr "Új név megadása:"
 
-#: src/enigma_main.cpp:2909
+#: src/enigma_main.cpp:2925
 msgid "Rename entry"
 msgstr "Bejegyzés átnevezése"
 
-#: src/enigma_main.cpp:2964
+#: src/enigma_main.cpp:2980
 msgid "Sorry, you cannot delete this service."
 msgstr "Sajnos nem engedhetem meg hogy ezt a csatit töröld"
 
-#: src/enigma_main.cpp:2964
+#: src/enigma_main.cpp:2980
 msgid "delete service"
 msgstr "csatorna törlése"
 
-#: src/enigma_main.cpp:2989
+#: src/enigma_main.cpp:3005
 msgid ""
 "This is a recorded stream!\n"
 "Really delete?"
@@ -2033,11 +2030,11 @@ msgstr ""
 "Ez egy felvett anyag!\n"
 "Biztos törölni akarod? (nekem mind1)"
 
-#: src/enigma_main.cpp:2989
+#: src/enigma_main.cpp:3005
 msgid "Delete recorded stream"
 msgstr "Felvett anyag törlése :("
 
-#: src/enigma_main.cpp:3008
+#: src/enigma_main.cpp:3024
 msgid ""
 "This is a complete Bouquet!\n"
 "Really delete?"
@@ -2045,51 +2042,51 @@ msgstr ""
 "Ez egy kész Bouquet!\n"
 "Biztos törölni akarod?"
 
-#: src/enigma_main.cpp:3009
+#: src/enigma_main.cpp:3025
 msgid "Delete bouquet"
 msgstr "Bouquet törlése"
 
-#: src/enigma_main.cpp:3051
+#: src/enigma_main.cpp:3067
 msgid "Enter new name for the bouquet:"
 msgstr "Adj meg egy új nevet a csomagnak:"
 
-#: src/enigma_main.cpp:3052
+#: src/enigma_main.cpp:3068
 msgid "Rename bouquet"
 msgstr "Csomag átnevezése"
 
-#: src/enigma_main.cpp:3078
+#: src/enigma_main.cpp:3094
 msgid "Enter name for the new bouquet:"
 msgstr "Adj meg egy nevet az új csomagnak:"
 
-#: src/enigma_main.cpp:3079
+#: src/enigma_main.cpp:3095
 msgid "Add new bouquet"
 msgstr "Új Bouquet hozzádása"
 
-#: src/enigma_main.cpp:3120
+#: src/enigma_main.cpp:3136
 msgid "unnamed"
 msgstr "névtelen"
 
-#: src/enigma_main.cpp:3121
+#: src/enigma_main.cpp:3137
 msgid "Enter marker name:"
 msgstr "Add meg a jelölés nevét:"
 
-#: src/enigma_main.cpp:3122
+#: src/enigma_main.cpp:3138
 msgid "create marker"
 msgstr "Jelölés létrehozása"
 
-#: src/enigma_main.cpp:3161
+#: src/enigma_main.cpp:3177
 msgid "unnamed bouquet"
 msgstr "Névtelen csomag"
 
-#: src/enigma_main.cpp:3436 src/enigma_main.cpp:3437
+#: src/enigma_main.cpp:3452 src/enigma_main.cpp:3453
 msgid "This directory doesn't contain anything playable!"
 msgstr "Ebben a könyvtárban semmi nincs amivel tudnék valamit is kezdeni!"
 
-#: src/enigma_main.cpp:3437
+#: src/enigma_main.cpp:3453
 msgid "Play"
 msgstr "Lejátszás"
 
-#: src/enigma_main.cpp:3781
+#: src/enigma_main.cpp:3797
 msgid ""
 "A timer based digital recording is currently in progress!\n"
 "This stops the timer, and digital recording!"
@@ -2097,7 +2094,7 @@ msgstr ""
 "Éppen fut egy az idözítö által indított felvétel!\n"
 "Megállítsam az idözítöt és a felvételt?"
 
-#: src/enigma_main.cpp:3791
+#: src/enigma_main.cpp:3807
 msgid ""
 "A digital recording is currently in progress!\n"
 "This stops the digital recording!"
@@ -2105,7 +2102,7 @@ msgstr ""
 "Éppen fut egy digitális felvétel!\n"
 "Megállítsam a felvételt?"
 
-#: src/enigma_main.cpp:3803
+#: src/enigma_main.cpp:3819
 msgid ""
 "A timer event is currently in progress!\n"
 "This stops the timer event!"
@@ -2113,201 +2110,201 @@ msgstr ""
 "Éppen fut egy idözítés!\n"
 "Leállítsam?"
 
-#: src/enigma_main.cpp:3811
+#: src/enigma_main.cpp:3827
 msgid "Really do this?"
 msgstr "Tutira ezt akarod?"
 
-#: src/enigma_main.cpp:4523 src/enigma_main.cpp:4524
+#: src/enigma_main.cpp:4538 src/enigma_main.cpp:4539
 msgid "One moment please..."
 msgstr "Picike türelmet kérek, dolgom van..."
 
-#: src/enigma_main.cpp:4524 src/enigma_main.cpp:4529 src/enigma_main.cpp:4539
-#: src/enigma_main.cpp:4547 src/enigma_main.cpp:4554 src/enigma_main.cpp:4559
-#: src/enigma_main.cpp:4565 src/timer.cpp:1645
+#: src/enigma_main.cpp:4539 src/enigma_main.cpp:4544 src/enigma_main.cpp:4554
+#: src/enigma_main.cpp:4562 src/enigma_main.cpp:4569 src/enigma_main.cpp:4574
+#: src/enigma_main.cpp:4580 src/timer.cpp:1645
 msgid "switch"
 msgstr "kapcsolás"
 
-#: src/enigma_main.cpp:4528 src/enigma_main.cpp:4529
+#: src/enigma_main.cpp:4543 src/enigma_main.cpp:4544
 msgid "Service could not be found !"
 msgstr "Ajjaj! Nem találom a csatornát!"
 
-#: src/enigma_main.cpp:4538 src/enigma_main.cpp:4539
+#: src/enigma_main.cpp:4553 src/enigma_main.cpp:4554
 msgid "This service could not be descrambled"
 msgstr "Ezt a csatit nem tudom dekódolni"
 
-#: src/enigma_main.cpp:4546 src/enigma_main.cpp:4547
+#: src/enigma_main.cpp:4561 src/enigma_main.cpp:4562
 msgid "This service doesn't currently send a signal"
 msgstr "A csati pillanatnyilag ki van kapcsolva. Nincs jel."
 
-#: src/enigma_main.cpp:4552 src/enigma_main.cpp:4554
+#: src/enigma_main.cpp:4567 src/enigma_main.cpp:4569
 msgid "This content could not be displayed"
 msgstr "A tartalmat nem tudom megmutatni"
 
-#: src/enigma_main.cpp:4557 src/enigma_main.cpp:4559
+#: src/enigma_main.cpp:4572 src/enigma_main.cpp:4574
 msgid "NVOD Service - please select a starttime"
 msgstr "NVOD csati - kérlek válassz egy idöpontot"
 
-#: src/enigma_main.cpp:4563 src/enigma_main.cpp:4565
+#: src/enigma_main.cpp:4578 src/enigma_main.cpp:4580
 msgid "Unknown error!!"
 msgstr "Waffankúló! Ismeretlen hiba!!"
 
-#: src/enigma_main.cpp:5025 src/sselect.cpp:374
+#: src/enigma_main.cpp:5043 src/sselect.cpp:374
 msgid "Playlist"
 msgstr "Playlista"
 
-#: src/enigma_main.cpp:5027
+#: src/enigma_main.cpp:5045
 msgid "History"
 msgstr "Történelem"
 
-#: src/enigma_main.cpp:5298
+#: src/enigma_main.cpp:5316
 msgid "Service Menu"
 msgstr "Csatorna menü"
 
-#: src/enigma_main.cpp:5311 src/sselect.cpp:111
+#: src/enigma_main.cpp:5329 src/sselect.cpp:111
 msgid "add service to playlist"
 msgstr "szolgáltatás hozzáadása a playlistához"
 
-#: src/enigma_main.cpp:5320
+#: src/enigma_main.cpp:5338
 msgid "create new bouquet"
 msgstr "új Bouquet létrehozása"
 
-#: src/enigma_main.cpp:5331
+#: src/enigma_main.cpp:5349
 msgid "duplicate bouquet"
 msgstr "Bouquet duplikálása"
 
-#: src/enigma_main.cpp:5334 src/enigma_main.cpp:5369
+#: src/enigma_main.cpp:5352 src/enigma_main.cpp:5387
 msgid "add to specific bouquet"
 msgstr "hozzáadás egy adott Bouquet-hoz"
 
-#: src/enigma_main.cpp:5336
+#: src/enigma_main.cpp:5354
 msgid "add marker"
 msgstr "jelölés megadása"
 
-#: src/enigma_main.cpp:5343 src/enigma_main.cpp:5347 src/sselect.cpp:353
+#: src/enigma_main.cpp:5361 src/enigma_main.cpp:5365 src/sselect.cpp:353
 msgid "rename"
 msgstr "átnevez"
 
-#: src/enigma_main.cpp:5350 src/sselect.cpp:351
+#: src/enigma_main.cpp:5368 src/sselect.cpp:351
 msgid "delete"
 msgstr "törlés"
 
-#: src/enigma_main.cpp:5357
+#: src/enigma_main.cpp:5375
 msgid "disable move mode"
 msgstr "mozgatás mód kikapcsolása"
 
-#: src/enigma_main.cpp:5359
+#: src/enigma_main.cpp:5377
 msgid "enable move mode"
 msgstr "mozgatás mód bekapcsolása"
 
-#: src/enigma_main.cpp:5375
+#: src/enigma_main.cpp:5393
 msgid "copy to bouquet list"
 msgstr "másolás a Bouquet listába"
 
-#: src/enigma_main.cpp:5386
+#: src/enigma_main.cpp:5404
 msgid "disable edit mode"
 msgstr "javítási mód kikapcsolása"
 
-#: src/enigma_main.cpp:5388
+#: src/enigma_main.cpp:5406
 msgid "enable edit mode"
 msgstr "javítási mód bekapcsolása"
 
-#: src/enigma_main.cpp:5398
+#: src/enigma_main.cpp:5416
 msgid "unlock"
 msgstr "engedélyez"
 
-#: src/enigma_main.cpp:5400
+#: src/enigma_main.cpp:5418
 msgid "lock"
 msgstr "zárol"
 
-#: src/enigma_main.cpp:5404
+#: src/enigma_main.cpp:5422
 msgid "disable parental lock"
 msgstr "gyermekzár kikapcsolása"
 
-#: src/enigma_main.cpp:5406
+#: src/enigma_main.cpp:5424
 msgid "enable parental lock"
 msgstr "gyermekzár engedélyezése"
 
-#: src/enigma_main.cpp:5424
+#: src/enigma_main.cpp:5442
 msgid "Shutdown/Standby Menu"
 msgstr "Kikpacsolási menü"
 
-#: src/enigma_main.cpp:5431
+#: src/enigma_main.cpp:5449
 msgid "reboot now"
 msgstr "újraindítás most!"
 
-#: src/enigma_main.cpp:5434
+#: src/enigma_main.cpp:5452
 msgid "shutdown now"
 msgstr "Kikapcsolás most!"
 
-#: src/enigma_main.cpp:5435
+#: src/enigma_main.cpp:5453
 msgid "restart"
 msgstr "újraindítás"
 
-#: src/enigma_main.cpp:5438
+#: src/enigma_main.cpp:5456
 msgid "goto standby"
 msgstr "lekapcsolás készenléti állapotba"
 
-#: src/enigma_main.cpp:5439
+#: src/enigma_main.cpp:5457
 msgid "set sleeptimer"
 msgstr "Alváskapcsoló beállítása"
 
-#: src/enigma_main.cpp:5540
+#: src/enigma_main.cpp:5558
 msgid "Record Menu"
 msgstr "Felvételi menü"
 
-#: src/enigma_main.cpp:5546
+#: src/enigma_main.cpp:5564
 msgid "stop record now"
 msgstr "Felvétel azonnali megállítása"
 
-#: src/enigma_main.cpp:5548
+#: src/enigma_main.cpp:5566
 msgid "set record duration"
 msgstr "add meg a felvétel hosszát"
 
-#: src/enigma_main.cpp:5549
+#: src/enigma_main.cpp:5567
 msgid "set record stop time"
 msgstr "add meg a felvétel végének az idöpontját"
 
-#: src/enigma_main.cpp:5623
+#: src/enigma_main.cpp:5641
 msgid "press ok to start edit mode"
 msgstr "Nyomd meg az OK-t a javítási módhoz"
 
-#: src/enigma_main.cpp:5671 src/time_settings.cpp:36
+#: src/enigma_main.cpp:5689 src/time_settings.cpp:36
 msgid "Time Correction"
 msgstr "Idö korrekció:"
 
-#: src/enigma_main.cpp:5678
+#: src/enigma_main.cpp:5696
 msgid "Transponder Time:"
 msgstr "Transzponder idö:"
 
-#: src/enigma_main.cpp:5687
+#: src/enigma_main.cpp:5705
 msgid "Transponder Date:"
 msgstr "Transzponder dátum:"
 
-#: src/enigma_main.cpp:5694
+#: src/enigma_main.cpp:5712
 msgid "New Time:"
 msgstr "Új idö:"
 
-#: src/enigma_main.cpp:5707
+#: src/enigma_main.cpp:5725
 msgid "enter correct time here"
 msgstr "add meg itt a pontos idöt"
 
-#: src/enigma_main.cpp:5713
+#: src/enigma_main.cpp:5731
 msgid "New Date:"
 msgstr "Új dátum:"
 
-#: src/enigma_main.cpp:5722
+#: src/enigma_main.cpp:5740
 msgid "press ok to select another day"
 msgstr "OK-val választhatsz más napot"
 
-#: src/enigma_main.cpp:5728
+#: src/enigma_main.cpp:5746
 msgid "press ok to select another month"
 msgstr "OK-val választhatsz más hónapot"
 
-#: src/enigma_main.cpp:5737
+#: src/enigma_main.cpp:5755
 msgid "press ok to select another year"
 msgstr "OK-val választhatsz más évet"
 
-#: src/enigma_main.cpp:5753
+#: src/enigma_main.cpp:5771
 msgid "set new time and close window"
 msgstr "Add meg az új idöt aztán ablakot becsukni"
 
@@ -2341,7 +2338,7 @@ msgstr "KIKAPCSOLÁS"
 msgid "Setup"
 msgstr "Beállítások"
 
-#: src/enigma_mainmenu.cpp:66 src/enigma_plugins.cpp:122
+#: src/enigma_mainmenu.cpp:66 src/enigma_plugins.cpp:117
 msgid "Games"
 msgstr "JÁTÉKOK"
 
@@ -2362,29 +2359,29 @@ msgstr "Fömenü"
 msgid "setup"
 msgstr "Beállítások"
 
-#: src/enigma_plugins.cpp:122
+#: src/enigma_plugins.cpp:117
 msgid "Plugins"
 msgstr "Plugin-ek"
 
-#: src/enigma_plugins.cpp:127
+#: src/enigma_plugins.cpp:122
 msgid "select plugin and press ok"
 msgstr "Válassz plugin-t és taposs az OK-ra"
 
-#: src/enigma_plugins.cpp:146
+#: src/enigma_plugins.cpp:141
 #, c-format
 msgid "Couldn't read plugin directory %s"
 msgstr "Nem tudom beolvasni a %s plugin könyvtárat!"
 
-#: src/enigma_plugins.cpp:150
+#: src/enigma_plugins.cpp:145
 msgid "Error"
 msgstr "HIBA"
 
-#: src/enigma_plugins.cpp:216
+#: src/enigma_plugins.cpp:211
 #, c-format
 msgid "plugin '%s' not found"
 msgstr "nem találom a '%s' plugin-t"
 
-#: src/enigma_plugins.cpp:219
+#: src/enigma_plugins.cpp:214
 msgid "no name given"
 msgstr "nem adtál meg nevet"
 
@@ -2417,9 +2414,8 @@ msgid "open automatic transponder scan"
 msgstr "automata TP keresö megnyitása"
 
 #: src/enigma_scan.cpp:54
-#, fuzzy
 msgid "Automatic Multisat Scan"
-msgstr "Automatikus transzponder keresés"
+msgstr "Automatikus multisat keresés"
 
 #: src/enigma_scan.cpp:56
 msgid "Manual Transponder Scan"
@@ -3296,15 +3292,15 @@ msgstr "Már csak %02i mp van hátra! Mindjárt kész!"
 
 #: src/scan.cpp:640
 msgid "[only free]"
-msgstr ""
+msgstr "[csak szabad]"
 
 #: src/scan.cpp:641
 msgid "[all]"
-msgstr ""
+msgstr "[összes]"
 
 #: src/scan.cpp:641
 msgid "[nothing]"
-msgstr ""
+msgstr "[semmi]"
 
 #: src/scan.cpp:743
 msgid "Transponder Scan"
@@ -3926,12 +3922,11 @@ msgstr "valós NTSC helyett használjon PAL-M jelet"
 
 #: src/setupvideo.cpp:112
 msgid "Auto VCR switching"
-msgstr ""
+msgstr "Automatikus VCR kapcsolás"
 
 #: src/setupvideo.cpp:115
-#, fuzzy
 msgid "auto switch to VCR connector"
-msgstr "átkapcsolás TV módra"
+msgstr "automatikusan átkapcsol a VCR csatlakozóra"
 
 #: src/software_update.cpp:33
 msgid "Internet Update"
@@ -4104,12 +4099,12 @@ msgstr "Gyökér"
 msgid "Movies"
 msgstr "Mozik"
 
-#: src/sselect.cpp:742
+#: src/sselect.cpp:747
 msgid "Select No or press Abort to lock/unlock the complete directory"
 msgstr ""
 "A Mégsem vagy Megszakítás választásával zárolható/nyitható a teljes könyvtár"
 
-#: src/sselect.cpp:742
+#: src/sselect.cpp:747
 msgid "Enter Directory"
 msgstr "Add meg a könyvtárat"
 
@@ -4667,9 +4662,3 @@ msgstr "Ha be akarod állítani az idöt elöbb kapcsolj egy élö tp-re"
 #: src/time_settings.cpp:82
 msgid "time correction change error"
 msgstr "Idökorrekciós változási hiba"
-
-#~ msgid "clear list before"
-#~ msgstr "elötte lista törlése"
-
-#~ msgid "remove all services before scan"
-#~ msgstr "Keresés elött a csatornák törlése"

@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxbox-enigma 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-10-03 22:02+0200\n"
-"PO-Revision-Date: Fri Oct 3 21:56:55 CEST 2003\n"
+"POT-Creation-Date: 2003-10-31 23:37+0100\n"
+"PO-Revision-Date: Fri Oct 31 22:36:44 CET 2003\n"
 "Last-Translator: unknown\n"
 "Language-Team: Danish / sjat@tabascoweb.net\n"
 "MIME-Version: 1.0\n"
@@ -322,9 +322,8 @@ msgid "close motor setup"
 msgstr "afbryd motor opsætning"
 
 #: default.esml:508 default.esml:519
-#, fuzzy
 msgid "add only unscrambled services"
-msgstr "Skjul låste kanaler"
+msgstr "Tilføj kun ukodede kanaler"
 
 #: default.esml:573 default.esml:585
 msgid "KSymb/s"
@@ -651,9 +650,8 @@ msgid "goto prev page (LNB)"
 msgstr "tilbage til forrige side (LNB)"
 
 #: default.esml:542
-#, fuzzy
 msgid "press ok to change"
-msgstr "tryk ok for at skifte retning"
+msgstr "tryk ok for at skifte"
 
 #: default.esml:840
 msgid "Transponders"
@@ -715,7 +713,7 @@ msgstr "Symbol Rate:"
 msgid "Transponder:"
 msgstr "Transponder:"
 
-#: default.esml:744 default.esml:756 default.esml:768 src/enigma_main.cpp:5747
+#: default.esml:744 default.esml:756 default.esml:768 src/enigma_main.cpp:5765
 msgid "set"
 msgstr "indstil"
 
@@ -989,7 +987,7 @@ msgstr "Mandag"
 
 #: default.esml:496 default.esml:508 default.esml:519
 msgid "only Free"
-msgstr ""
+msgstr "Kun gratis programmer"
 
 #: default.esml:703 src/timer.cpp:1993
 msgid "Saturday"
@@ -1028,11 +1026,10 @@ msgid "Help"
 msgstr "Hjælp"
 
 #: default.esml:496
-#, fuzzy
 msgid "add only not scrambled services"
-msgstr "Skjul låste kanaler"
+msgstr "tilføj ku ikke kodede kanaler"
 
-#: lib/dvb/dvbci.cpp:106 lib/dvb/dvbci.cpp:118 lib/dvb/dvbci.cpp:1105
+#: lib/dvb/dvbci.cpp:103 lib/dvb/dvbci.cpp:115 lib/dvb/dvbci.cpp:1132
 msgid "no module"
 msgstr "ingen modul"
 
@@ -1045,7 +1042,7 @@ msgid "horizontal"
 msgstr "horosontial"
 
 #: lib/dvb/service.cpp:192 lib/dvb/service.cpp:222 src/enigma_bouquet.cpp:203
-#: src/enigma_main.cpp:3259 src/enigma_main.cpp:3271 src/parentallock.cpp:123
+#: src/enigma_main.cpp:3275 src/enigma_main.cpp:3287 src/parentallock.cpp:123
 #: src/parentallock.cpp:155 src/timer.cpp:1772
 msgid "parental"
 msgstr "forældre"
@@ -1127,7 +1124,7 @@ msgstr "Fil Mode"
 msgid "TV/Radio"
 msgstr "TV/Radio"
 
-#: lib/dvb/servicestructure.cpp:17 src/enigma_main.cpp:5646
+#: lib/dvb/servicestructure.cpp:17 src/enigma_main.cpp:5664
 #: src/sselect.cpp:368
 msgid "Bouquets"
 msgstr "Kanallister"
@@ -1144,7 +1141,7 @@ msgstr "Ja"
 msgid "No"
 msgstr "Nej"
 
-#: lib/gui/listbox.cpp:679 src/enigma_main.cpp:2588
+#: lib/gui/listbox.cpp:679 src/enigma_main.cpp:2602
 msgid "no description available"
 msgstr "ingen beskrivelse tilgængelig"
 
@@ -1824,7 +1821,7 @@ msgstr "pause afspilning"
 msgid "resume playback"
 msgstr "genoptag afspilning"
 
-#: src/enigma_main.cpp:112 src/enigma_main.cpp:2578
+#: src/enigma_main.cpp:112 src/enigma_main.cpp:2592
 msgid "record"
 msgstr "indspil"
 
@@ -1944,88 +1941,88 @@ msgstr "tilføj til kanalliste"
 msgid "disable quickzap"
 msgstr "deaktiver hurtigzap"
 
-#: src/enigma_main.cpp:951
+#: src/enigma_main.cpp:952
 msgid "Channel"
 msgstr "kanal"
 
-#: src/enigma_main.cpp:956
+#: src/enigma_main.cpp:957
 msgid "Channel:"
 msgstr "kanal:"
 
-#: src/enigma_main.cpp:1031
+#: src/enigma_main.cpp:1032
 #, c-format
 msgid "Please wait while the motor is turning to %d.%d%c ...."
 msgstr "Vent venligst - motoren derejer til %d.%d%c...."
 
-#: src/enigma_main.cpp:1031
+#: src/enigma_main.cpp:1032
 msgid "Message"
 msgstr "besked"
 
-#: src/enigma_main.cpp:1124
+#: src/enigma_main.cpp:1125
 msgid "recorded movies"
 msgstr "indspillede film"
 
-#: src/enigma_main.cpp:1210
+#: src/enigma_main.cpp:1211
 msgid "Bouquets (TV)"
 msgstr "Kanallister (TV)"
 
-#: src/enigma_main.cpp:1222
+#: src/enigma_main.cpp:1223
 msgid "Bouquets (Radio)"
 msgstr "Kanallister (Radio)"
 
-#: src/enigma_main.cpp:1261
+#: src/enigma_main.cpp:1262
 msgid "Favourites (TV)"
 msgstr "favoritter (TV)"
 
-#: src/enigma_main.cpp:1266
+#: src/enigma_main.cpp:1267
 msgid "Favourites (Radio)"
 msgstr "Favoritter (Radio)"
 
-#: src/enigma_main.cpp:1638
+#: src/enigma_main.cpp:1643
 msgid "please wait while initializing Common Interface ..."
 msgstr "Vent medens Common Interface initialiseres..."
 
-#: src/enigma_main.cpp:1926
+#: src/enigma_main.cpp:1940
 msgid "no EPG available"
 msgstr "ingen EPG tilgængelig"
 
-#: src/enigma_main.cpp:2413
+#: src/enigma_main.cpp:2427
 msgid "ShutdownTimer"
 msgstr "Afslut timer"
 
-#: src/enigma_main.cpp:2413
+#: src/enigma_main.cpp:2427
 msgid "SleepTimer"
 msgstr "SleepTimer"
 
-#: src/enigma_main.cpp:2578
+#: src/enigma_main.cpp:2592
 msgid "Sorry, you cannot record this service."
 msgstr "Du kan ikke indspille denne kanal"
 
-#: src/enigma_main.cpp:2734
+#: src/enigma_main.cpp:2748
 msgid "Show recorded movies?"
 msgstr "Vis indspillede film?"
 
-#: src/enigma_main.cpp:2734
+#: src/enigma_main.cpp:2748
 msgid "recording finished"
 msgstr "indspilning afsluttet"
 
-#: src/enigma_main.cpp:2908
+#: src/enigma_main.cpp:2924
 msgid "Enter new name:"
 msgstr "Indtast nyt navn:"
 
-#: src/enigma_main.cpp:2909
+#: src/enigma_main.cpp:2925
 msgid "Rename entry"
 msgstr "Omdøb indgang"
 
-#: src/enigma_main.cpp:2964
+#: src/enigma_main.cpp:2980
 msgid "Sorry, you cannot delete this service."
 msgstr "Du kan ikke slette denne kanal."
 
-#: src/enigma_main.cpp:2964
+#: src/enigma_main.cpp:2980
 msgid "delete service"
 msgstr "slet kanal"
 
-#: src/enigma_main.cpp:2989
+#: src/enigma_main.cpp:3005
 msgid ""
 "This is a recorded stream!\n"
 "Really delete?"
@@ -2033,11 +2030,11 @@ msgstr ""
 "Dette er en indspilning!\n"
 "Vil du virkelig slette?"
 
-#: src/enigma_main.cpp:2989
+#: src/enigma_main.cpp:3005
 msgid "Delete recorded stream"
 msgstr "Slet indspilning"
 
-#: src/enigma_main.cpp:3008
+#: src/enigma_main.cpp:3024
 msgid ""
 "This is a complete Bouquet!\n"
 "Really delete?"
@@ -2045,51 +2042,51 @@ msgstr ""
 "Dette er en komplet kanalliste!\n"
 "Vil du virkelig slette?"
 
-#: src/enigma_main.cpp:3009
+#: src/enigma_main.cpp:3025
 msgid "Delete bouquet"
 msgstr "Slet kanalliste"
 
-#: src/enigma_main.cpp:3051
+#: src/enigma_main.cpp:3067
 msgid "Enter new name for the bouquet:"
 msgstr "Indtast nyt navn til kanallisten:"
 
-#: src/enigma_main.cpp:3052
+#: src/enigma_main.cpp:3068
 msgid "Rename bouquet"
 msgstr "Omdøb kanalliste"
 
-#: src/enigma_main.cpp:3078
+#: src/enigma_main.cpp:3094
 msgid "Enter name for the new bouquet:"
 msgstr "Indtast navn til den nye kanalliste"
 
-#: src/enigma_main.cpp:3079
+#: src/enigma_main.cpp:3095
 msgid "Add new bouquet"
 msgstr "Tilføj en ny kanalliste"
 
-#: src/enigma_main.cpp:3120
+#: src/enigma_main.cpp:3136
 msgid "unnamed"
 msgstr "anonym"
 
-#: src/enigma_main.cpp:3121
+#: src/enigma_main.cpp:3137
 msgid "Enter marker name:"
 msgstr "Vælg markør navn:"
 
-#: src/enigma_main.cpp:3122
+#: src/enigma_main.cpp:3138
 msgid "create marker"
 msgstr "indsæt markør"
 
-#: src/enigma_main.cpp:3161
+#: src/enigma_main.cpp:3177
 msgid "unnamed bouquet"
 msgstr "unavngiven kanalliste"
 
-#: src/enigma_main.cpp:3436 src/enigma_main.cpp:3437
+#: src/enigma_main.cpp:3452 src/enigma_main.cpp:3453
 msgid "This directory doesn't contain anything playable!"
 msgstr "Denne mappe indeholder ikke noget der kan afspilles!"
 
-#: src/enigma_main.cpp:3437
+#: src/enigma_main.cpp:3453
 msgid "Play"
 msgstr "Afspil"
 
-#: src/enigma_main.cpp:3781
+#: src/enigma_main.cpp:3797
 msgid ""
 "A timer based digital recording is currently in progress!\n"
 "This stops the timer, and digital recording!"
@@ -2097,13 +2094,13 @@ msgstr ""
 "en timerbaseret indpilning er i øjeblikket aktiv!\n"
 "Dette vil standse timeren og indspilningen"
 
-#: src/enigma_main.cpp:3791
+#: src/enigma_main.cpp:3807
 msgid ""
 "A digital recording is currently in progress!\n"
 "This stops the digital recording!"
 msgstr "En digital indspilning er i gang!n Dette afbryder indspilningen!"
 
-#: src/enigma_main.cpp:3803
+#: src/enigma_main.cpp:3819
 msgid ""
 "A timer event is currently in progress!\n"
 "This stops the timer event!"
@@ -2111,201 +2108,201 @@ msgstr ""
 "En timer begivenhed er under afvikling!\n"
 "Dette afbryder timeren!"
 
-#: src/enigma_main.cpp:3811
+#: src/enigma_main.cpp:3827
 msgid "Really do this?"
 msgstr "Ønsker du virkelig det ?"
 
-#: src/enigma_main.cpp:4523 src/enigma_main.cpp:4524
+#: src/enigma_main.cpp:4538 src/enigma_main.cpp:4539
 msgid "One moment please..."
 msgstr "Et øjeblik......"
 
-#: src/enigma_main.cpp:4524 src/enigma_main.cpp:4529 src/enigma_main.cpp:4539
-#: src/enigma_main.cpp:4547 src/enigma_main.cpp:4554 src/enigma_main.cpp:4559
-#: src/enigma_main.cpp:4565 src/timer.cpp:1645
+#: src/enigma_main.cpp:4539 src/enigma_main.cpp:4544 src/enigma_main.cpp:4554
+#: src/enigma_main.cpp:4562 src/enigma_main.cpp:4569 src/enigma_main.cpp:4574
+#: src/enigma_main.cpp:4580 src/timer.cpp:1645
 msgid "switch"
 msgstr "punkt"
 
-#: src/enigma_main.cpp:4528 src/enigma_main.cpp:4529
+#: src/enigma_main.cpp:4543 src/enigma_main.cpp:4544
 msgid "Service could not be found !"
 msgstr "Kanalen kunne ikke findes !"
 
-#: src/enigma_main.cpp:4538 src/enigma_main.cpp:4539
+#: src/enigma_main.cpp:4553 src/enigma_main.cpp:4554
 msgid "This service could not be descrambled"
 msgstr "Denne kanal kan ikke afkodes"
 
-#: src/enigma_main.cpp:4546 src/enigma_main.cpp:4547
+#: src/enigma_main.cpp:4561 src/enigma_main.cpp:4562
 msgid "This service doesn't currently send a signal"
 msgstr "Denne kanal sender i øjeblikket ingen signal"
 
-#: src/enigma_main.cpp:4552 src/enigma_main.cpp:4554
+#: src/enigma_main.cpp:4567 src/enigma_main.cpp:4569
 msgid "This content could not be displayed"
 msgstr "Dette indhold kan ikke vises"
 
-#: src/enigma_main.cpp:4557 src/enigma_main.cpp:4559
+#: src/enigma_main.cpp:4572 src/enigma_main.cpp:4574
 msgid "NVOD Service - please select a starttime"
 msgstr "NVOD Kanal - Vælg starttid"
 
-#: src/enigma_main.cpp:4563 src/enigma_main.cpp:4565
+#: src/enigma_main.cpp:4578 src/enigma_main.cpp:4580
 msgid "Unknown error!!"
 msgstr "Ukendt fejl !!"
 
-#: src/enigma_main.cpp:5025 src/sselect.cpp:374
+#: src/enigma_main.cpp:5043 src/sselect.cpp:374
 msgid "Playlist"
 msgstr "Afspilningsliste"
 
-#: src/enigma_main.cpp:5027
+#: src/enigma_main.cpp:5045
 msgid "History"
 msgstr "Historie"
 
-#: src/enigma_main.cpp:5298
+#: src/enigma_main.cpp:5316
 msgid "Service Menu"
 msgstr "Kanal Menu"
 
-#: src/enigma_main.cpp:5311 src/sselect.cpp:111
+#: src/enigma_main.cpp:5329 src/sselect.cpp:111
 msgid "add service to playlist"
 msgstr "Tilføj kanal til afspilningslisten"
 
-#: src/enigma_main.cpp:5320
+#: src/enigma_main.cpp:5338
 msgid "create new bouquet"
 msgstr "opret en ny kanalliste"
 
-#: src/enigma_main.cpp:5331
+#: src/enigma_main.cpp:5349
 msgid "duplicate bouquet"
 msgstr "Kopier kanalliste"
 
-#: src/enigma_main.cpp:5334 src/enigma_main.cpp:5369
+#: src/enigma_main.cpp:5352 src/enigma_main.cpp:5387
 msgid "add to specific bouquet"
 msgstr "tilføj til bestemt kanalliste"
 
-#: src/enigma_main.cpp:5336
+#: src/enigma_main.cpp:5354
 msgid "add marker"
 msgstr "tilføj markør"
 
-#: src/enigma_main.cpp:5343 src/enigma_main.cpp:5347 src/sselect.cpp:353
+#: src/enigma_main.cpp:5361 src/enigma_main.cpp:5365 src/sselect.cpp:353
 msgid "rename"
 msgstr "omdøb"
 
-#: src/enigma_main.cpp:5350 src/sselect.cpp:351
+#: src/enigma_main.cpp:5368 src/sselect.cpp:351
 msgid "delete"
 msgstr "slet"
 
-#: src/enigma_main.cpp:5357
+#: src/enigma_main.cpp:5375
 msgid "disable move mode"
 msgstr "deaktiver flyt"
 
-#: src/enigma_main.cpp:5359
+#: src/enigma_main.cpp:5377
 msgid "enable move mode"
 msgstr "aktiver flyt"
 
-#: src/enigma_main.cpp:5375
+#: src/enigma_main.cpp:5393
 msgid "copy to bouquet list"
 msgstr "kopier til kanalliste"
 
-#: src/enigma_main.cpp:5386
+#: src/enigma_main.cpp:5404
 msgid "disable edit mode"
 msgstr "deaktiver redigering"
 
-#: src/enigma_main.cpp:5388
+#: src/enigma_main.cpp:5406
 msgid "enable edit mode"
 msgstr "aktiver redigering"
 
-#: src/enigma_main.cpp:5398
+#: src/enigma_main.cpp:5416
 msgid "unlock"
 msgstr "åbn"
 
-#: src/enigma_main.cpp:5400
+#: src/enigma_main.cpp:5418
 msgid "lock"
 msgstr "lås"
 
-#: src/enigma_main.cpp:5404
+#: src/enigma_main.cpp:5422
 msgid "disable parental lock"
 msgstr "deaktiver forældrelås"
 
-#: src/enigma_main.cpp:5406
+#: src/enigma_main.cpp:5424
 msgid "enable parental lock"
 msgstr "aktiver forældrelås"
 
-#: src/enigma_main.cpp:5424
+#: src/enigma_main.cpp:5442
 msgid "Shutdown/Standby Menu"
 msgstr "sluk/standby Menu"
 
-#: src/enigma_main.cpp:5431
+#: src/enigma_main.cpp:5449
 msgid "reboot now"
 msgstr "reboot"
 
-#: src/enigma_main.cpp:5434
+#: src/enigma_main.cpp:5452
 msgid "shutdown now"
 msgstr "sluk nu"
 
-#: src/enigma_main.cpp:5435
+#: src/enigma_main.cpp:5453
 msgid "restart"
 msgstr "genstart"
 
-#: src/enigma_main.cpp:5438
+#: src/enigma_main.cpp:5456
 msgid "goto standby"
 msgstr "gå til standby"
 
-#: src/enigma_main.cpp:5439
+#: src/enigma_main.cpp:5457
 msgid "set sleeptimer"
 msgstr "indstil sleeptimer"
 
-#: src/enigma_main.cpp:5540
+#: src/enigma_main.cpp:5558
 msgid "Record Menu"
 msgstr "Indspilningsmenu"
 
-#: src/enigma_main.cpp:5546
+#: src/enigma_main.cpp:5564
 msgid "stop record now"
 msgstr "stop indspilning"
 
-#: src/enigma_main.cpp:5548
+#: src/enigma_main.cpp:5566
 msgid "set record duration"
 msgstr "Indstil optagelsens varighed"
 
-#: src/enigma_main.cpp:5549
+#: src/enigma_main.cpp:5567
 msgid "set record stop time"
 msgstr "indstil sluttid for indspilning"
 
-#: src/enigma_main.cpp:5623
+#: src/enigma_main.cpp:5641
 msgid "press ok to start edit mode"
 msgstr "tryk ok for at redigere"
 
-#: src/enigma_main.cpp:5671 src/time_settings.cpp:36
+#: src/enigma_main.cpp:5689 src/time_settings.cpp:36
 msgid "Time Correction"
 msgstr "Tids korrektion"
 
-#: src/enigma_main.cpp:5678
+#: src/enigma_main.cpp:5696
 msgid "Transponder Time:"
 msgstr "Transponder tid:"
 
-#: src/enigma_main.cpp:5687
+#: src/enigma_main.cpp:5705
 msgid "Transponder Date:"
 msgstr "Transponder Dato:"
 
-#: src/enigma_main.cpp:5694
+#: src/enigma_main.cpp:5712
 msgid "New Time:"
 msgstr "Ny tid:"
 
-#: src/enigma_main.cpp:5707
+#: src/enigma_main.cpp:5725
 msgid "enter correct time here"
 msgstr "Indtast korrekt tid her:"
 
-#: src/enigma_main.cpp:5713
+#: src/enigma_main.cpp:5731
 msgid "New Date:"
 msgstr "Ny Dato:"
 
-#: src/enigma_main.cpp:5722
+#: src/enigma_main.cpp:5740
 msgid "press ok to select another day"
 msgstr "tryk ok for at vælge en anden dag"
 
-#: src/enigma_main.cpp:5728
+#: src/enigma_main.cpp:5746
 msgid "press ok to select another month"
 msgstr "tryk ok for at vælge en anden måned"
 
-#: src/enigma_main.cpp:5737
+#: src/enigma_main.cpp:5755
 msgid "press ok to select another year"
 msgstr "tryk ok for at vælge år"
 
-#: src/enigma_main.cpp:5753
+#: src/enigma_main.cpp:5771
 msgid "set new time and close window"
 msgstr "indstil tid og luk vinduet"
 
@@ -2339,7 +2336,7 @@ msgstr "Afslut"
 msgid "Setup"
 msgstr "Opsætning"
 
-#: src/enigma_mainmenu.cpp:66 src/enigma_plugins.cpp:122
+#: src/enigma_mainmenu.cpp:66 src/enigma_plugins.cpp:117
 msgid "Games"
 msgstr "Spil"
 
@@ -2360,29 +2357,29 @@ msgstr "Hovedmenu"
 msgid "setup"
 msgstr "opsætning"
 
-#: src/enigma_plugins.cpp:122
+#: src/enigma_plugins.cpp:117
 msgid "Plugins"
 msgstr "Plugins"
 
-#: src/enigma_plugins.cpp:127
+#: src/enigma_plugins.cpp:122
 msgid "select plugin and press ok"
 msgstr "Vælg plugin og tryk ok"
 
-#: src/enigma_plugins.cpp:146
+#: src/enigma_plugins.cpp:141
 #, c-format
 msgid "Couldn't read plugin directory %s"
 msgstr "Plugin mappen kunne ikke læses %s"
 
-#: src/enigma_plugins.cpp:150
+#: src/enigma_plugins.cpp:145
 msgid "Error"
 msgstr "Fejl"
 
-#: src/enigma_plugins.cpp:216
+#: src/enigma_plugins.cpp:211
 #, c-format
 msgid "plugin '%s' not found"
 msgstr "plugin '%s' ikke fundet"
 
-#: src/enigma_plugins.cpp:219
+#: src/enigma_plugins.cpp:214
 msgid "no name given"
 msgstr "ikke navngivet"
 
@@ -2415,9 +2412,8 @@ msgid "open automatic transponder scan"
 msgstr "åbn automatisk transponder søg"
 
 #: src/enigma_scan.cpp:54
-#, fuzzy
 msgid "Automatic Multisat Scan"
-msgstr "Automatisk Transponder Søgning"
+msgstr "Automatisk Multisat Søgning"
 
 #: src/enigma_scan.cpp:56
 msgid "Manual Transponder Scan"
@@ -3294,15 +3290,15 @@ msgstr "%02i sekunder tilbage"
 
 #: src/scan.cpp:640
 msgid "[only free]"
-msgstr ""
+msgstr "[kun ukodet]"
 
 #: src/scan.cpp:641
 msgid "[all]"
-msgstr ""
+msgstr "[alle]"
 
 #: src/scan.cpp:641
 msgid "[nothing]"
-msgstr ""
+msgstr "[intet]"
 
 #: src/scan.cpp:743
 msgid "Transponder Scan"
@@ -3794,7 +3790,7 @@ msgstr "WAN(PPPoE)"
 
 #: src/setupnetwork.cpp:334 src/setupnetwork.cpp:341
 msgid "Communicate to the Internet via DSL"
-msgstr "Kommunkerer med Internet via DSL"
+msgstr "Kommunikerer med Internet via DSL"
 
 #: src/setupnetwork.cpp:350
 msgid "T-Online User press ok here"
@@ -3922,12 +3918,11 @@ msgstr "brug PAL-M i stedet for ægte NTSC"
 
 #: src/setupvideo.cpp:112
 msgid "Auto VCR switching"
-msgstr ""
+msgstr "auto skift til video"
 
 #: src/setupvideo.cpp:115
-#, fuzzy
 msgid "auto switch to VCR connector"
-msgstr "skift til TV mode"
+msgstr "automatisk skift til video tilslutning"
 
 #: src/software_update.cpp:33
 msgid "Internet Update"
@@ -4100,11 +4095,11 @@ msgstr "Root"
 msgid "Movies"
 msgstr "Film"
 
-#: src/sselect.cpp:742
+#: src/sselect.cpp:747
 msgid "Select No or press Abort to lock/unlock the complete directory"
 msgstr "Vælg Nej eller tryk på Afbryd for at låse/åbne hele mappen"
 
-#: src/sselect.cpp:742
+#: src/sselect.cpp:747
 msgid "Enter Directory"
 msgstr "Vælg mappe"
 
@@ -4663,9 +4658,3 @@ msgstr "For at ændre tidsindstilling må du skifte til en anden transponder"
 #: src/time_settings.cpp:82
 msgid "time correction change error"
 msgstr "fejl ved ændring af tidsindstilling"
-
-#~ msgid "clear list before"
-#~ msgstr "dlet liste inden"
-
-#~ msgid "remove all services before scan"
-#~ msgstr "slet alle kanaler før søgning"

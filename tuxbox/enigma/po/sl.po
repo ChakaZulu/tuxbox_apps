@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxbox-enigma 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-10-03 22:02+0200\n"
-"PO-Revision-Date: Fri Oct 3 21:56:51 CEST 2003\n"
+"POT-Creation-Date: 2003-10-31 23:37+0100\n"
+"PO-Revision-Date: Fri Oct 31 22:36:39 CET 2003\n"
 "Last-Translator: unknown\n"
 "Language-Team: Slovenian / Iskra Technics d.o.o. Izola <iskrat@email.si>\n"
 "MIME-Version: 1.0\n"
@@ -718,7 +718,7 @@ msgstr "Symbol Rate:"
 msgid "Transponder:"
 msgstr "Transponder:"
 
-#: default.esml:744 default.esml:756 default.esml:768 src/enigma_main.cpp:5747
+#: default.esml:744 default.esml:756 default.esml:768 src/enigma_main.cpp:5765
 msgid "set"
 msgstr "nastavi"
 
@@ -1039,7 +1039,7 @@ msgstr "Pomoč"
 msgid "add only not scrambled services"
 msgstr "zbrii program"
 
-#: lib/dvb/dvbci.cpp:106 lib/dvb/dvbci.cpp:118 lib/dvb/dvbci.cpp:1105
+#: lib/dvb/dvbci.cpp:103 lib/dvb/dvbci.cpp:115 lib/dvb/dvbci.cpp:1132
 #, fuzzy
 msgid "no module"
 msgstr "čakam na modul"
@@ -1053,7 +1053,7 @@ msgid "horizontal"
 msgstr "horizontalno/a"
 
 #: lib/dvb/service.cpp:192 lib/dvb/service.cpp:222 src/enigma_bouquet.cpp:203
-#: src/enigma_main.cpp:3259 src/enigma_main.cpp:3271 src/parentallock.cpp:123
+#: src/enigma_main.cpp:3275 src/enigma_main.cpp:3287 src/parentallock.cpp:123
 #: src/parentallock.cpp:155 src/timer.cpp:1772
 msgid "parental"
 msgstr ""
@@ -1141,7 +1141,7 @@ msgstr "DATOTEČNI NAČIN"
 msgid "TV/Radio"
 msgstr "TV/RADIO"
 
-#: lib/dvb/servicestructure.cpp:17 src/enigma_main.cpp:5646
+#: lib/dvb/servicestructure.cpp:17 src/enigma_main.cpp:5664
 #: src/sselect.cpp:368
 msgid "Bouquets"
 msgstr "Programski Paketi"
@@ -1158,7 +1158,7 @@ msgstr "Da"
 msgid "No"
 msgstr "Ne"
 
-#: lib/gui/listbox.cpp:679 src/enigma_main.cpp:2588
+#: lib/gui/listbox.cpp:679 src/enigma_main.cpp:2602
 msgid "no description available"
 msgstr "opis ni navoljo"
 
@@ -1846,7 +1846,7 @@ msgstr "pausa"
 msgid "resume playback"
 msgstr "zacni znova predvajanje"
 
-#: src/enigma_main.cpp:112 src/enigma_main.cpp:2578
+#: src/enigma_main.cpp:112 src/enigma_main.cpp:2592
 msgid "record"
 msgstr "snemaj"
 
@@ -1970,92 +1970,92 @@ msgstr "dodaj program med priljubljene"
 msgid "disable quickzap"
 msgstr "onemogoci hitro obracanje programov"
 
-#: src/enigma_main.cpp:951
+#: src/enigma_main.cpp:952
 msgid "Channel"
 msgstr "Kanal"
 
-#: src/enigma_main.cpp:956
+#: src/enigma_main.cpp:957
 msgid "Channel:"
 msgstr "kanal:"
 
-#: src/enigma_main.cpp:1031
+#: src/enigma_main.cpp:1032
 #, fuzzy, c-format
 msgid "Please wait while the motor is turning to %d.%d%c ...."
 msgstr "Prosim pocakaj dokler se motor vrti na %d.%d%c ...."
 
-#: src/enigma_main.cpp:1031
+#: src/enigma_main.cpp:1032
 msgid "Message"
 msgstr "Sporocilo"
 
-#: src/enigma_main.cpp:1124
+#: src/enigma_main.cpp:1125
 msgid "recorded movies"
 msgstr "posnet film"
 
-#: src/enigma_main.cpp:1210
+#: src/enigma_main.cpp:1211
 msgid "Bouquets (TV)"
 msgstr "DVB - paketi (TV)"
 
-#: src/enigma_main.cpp:1222
+#: src/enigma_main.cpp:1223
 msgid "Bouquets (Radio)"
 msgstr "DVB - paketi (radio)"
 
-#: src/enigma_main.cpp:1261
+#: src/enigma_main.cpp:1262
 msgid "Favourites (TV)"
 msgstr "Priljubljeni (TV)"
 
-#: src/enigma_main.cpp:1266
+#: src/enigma_main.cpp:1267
 msgid "Favourites (Radio)"
 msgstr "Priljubljeni (Radio)"
 
-#: src/enigma_main.cpp:1638
+#: src/enigma_main.cpp:1643
 #, fuzzy
 msgid "please wait while initializing Common Interface ..."
 msgstr ""
 "prosim pocakaj...zagon trdega diska je v teku.\n"
 "Postopek lahko traja nekaj minut.\n"
 
-#: src/enigma_main.cpp:1926
+#: src/enigma_main.cpp:1940
 msgid "no EPG available"
 msgstr "EPG ni mozen"
 
-#: src/enigma_main.cpp:2413
+#: src/enigma_main.cpp:2427
 msgid "ShutdownTimer"
 msgstr "Izklop Timer-ja"
 
-#: src/enigma_main.cpp:2413
+#: src/enigma_main.cpp:2427
 #, fuzzy
 msgid "SleepTimer"
 msgstr "TIMER"
 
-#: src/enigma_main.cpp:2578
+#: src/enigma_main.cpp:2592
 msgid "Sorry, you cannot record this service."
 msgstr "Zal, ne mores snemati tega programa"
 
-#: src/enigma_main.cpp:2734
+#: src/enigma_main.cpp:2748
 msgid "Show recorded movies?"
 msgstr "Prikazi posnete  filme?"
 
-#: src/enigma_main.cpp:2734
+#: src/enigma_main.cpp:2748
 msgid "recording finished"
 msgstr "snemanje koncano"
 
-#: src/enigma_main.cpp:2908
+#: src/enigma_main.cpp:2924
 msgid "Enter new name:"
 msgstr "Vstavite novo ime:"
 
-#: src/enigma_main.cpp:2909
+#: src/enigma_main.cpp:2925
 msgid "Rename entry"
 msgstr "Preimenuj vhod"
 
-#: src/enigma_main.cpp:2964
+#: src/enigma_main.cpp:2980
 msgid "Sorry, you cannot delete this service."
 msgstr "Zal, ne mores zbrisati tega programa"
 
-#: src/enigma_main.cpp:2964
+#: src/enigma_main.cpp:2980
 msgid "delete service"
 msgstr "zbrii program"
 
-#: src/enigma_main.cpp:2989
+#: src/enigma_main.cpp:3005
 msgid ""
 "This is a recorded stream!\n"
 "Really delete?"
@@ -2063,11 +2063,11 @@ msgstr ""
 "Posnet dogodek!\n"
 "Zbrisem?  "
 
-#: src/enigma_main.cpp:2989
+#: src/enigma_main.cpp:3005
 msgid "Delete recorded stream"
 msgstr "Zbrii posnetek"
 
-#: src/enigma_main.cpp:3008
+#: src/enigma_main.cpp:3024
 #, fuzzy
 msgid ""
 "This is a complete Bouquet!\n"
@@ -2076,54 +2076,54 @@ msgstr ""
 "Posnet dogodek!\n"
 "Zbrisem?  "
 
-#: src/enigma_main.cpp:3009
+#: src/enigma_main.cpp:3025
 #, fuzzy
 msgid "Delete bouquet"
 msgstr "Preimenuj uporabniski paket"
 
-#: src/enigma_main.cpp:3051
+#: src/enigma_main.cpp:3067
 msgid "Enter new name for the bouquet:"
 msgstr "Vstavi novo ime za uporabniski paket:"
 
-#: src/enigma_main.cpp:3052
+#: src/enigma_main.cpp:3068
 msgid "Rename bouquet"
 msgstr "Preimenuj uporabniski paket"
 
-#: src/enigma_main.cpp:3078
+#: src/enigma_main.cpp:3094
 msgid "Enter name for the new bouquet:"
 msgstr "Vpisi ime za nov paket:"
 
-#: src/enigma_main.cpp:3079
+#: src/enigma_main.cpp:3095
 msgid "Add new bouquet"
 msgstr "Dodaj nov uporabniski paket"
 
-#: src/enigma_main.cpp:3120
+#: src/enigma_main.cpp:3136
 #, fuzzy
 msgid "unnamed"
 msgstr "Paket brez imena"
 
-#: src/enigma_main.cpp:3121
+#: src/enigma_main.cpp:3137
 #, fuzzy
 msgid "Enter marker name:"
 msgstr "Vstavite novo ime:"
 
-#: src/enigma_main.cpp:3122
+#: src/enigma_main.cpp:3138
 msgid "create marker"
 msgstr ""
 
-#: src/enigma_main.cpp:3161
+#: src/enigma_main.cpp:3177
 msgid "unnamed bouquet"
 msgstr "Paket brez imena"
 
-#: src/enigma_main.cpp:3436 src/enigma_main.cpp:3437
+#: src/enigma_main.cpp:3452 src/enigma_main.cpp:3453
 msgid "This directory doesn't contain anything playable!"
 msgstr "Direktorij brez podatov za predvajanje!"
 
-#: src/enigma_main.cpp:3437
+#: src/enigma_main.cpp:3453
 msgid "Play"
 msgstr "Predvajaj"
 
-#: src/enigma_main.cpp:3781
+#: src/enigma_main.cpp:3797
 msgid ""
 "A timer based digital recording is currently in progress!\n"
 "This stops the timer, and digital recording!"
@@ -2131,7 +2131,7 @@ msgstr ""
 "Digitalno snemanje z TIMER-jem je v teku!\n"
 "Snemanje in TIMER bosta prekinjena."
 
-#: src/enigma_main.cpp:3791
+#: src/enigma_main.cpp:3807
 msgid ""
 "A digital recording is currently in progress!\n"
 "This stops the digital recording!"
@@ -2139,7 +2139,7 @@ msgstr ""
 "Digitalno snemanje je trenutno v teku!\n"
 " To bo zaustavilo digitalno snemanje!"
 
-#: src/enigma_main.cpp:3803
+#: src/enigma_main.cpp:3819
 msgid ""
 "A timer event is currently in progress!\n"
 "This stops the timer event!"
@@ -2147,207 +2147,207 @@ msgstr ""
 "V teku je dogodek, ki je bil dodan v TIMER!\n"
 " To bo prekinilo snemanje dogodka!"
 
-#: src/enigma_main.cpp:3811
+#: src/enigma_main.cpp:3827
 msgid "Really do this?"
 msgstr "Resnicno napravim to?"
 
-#: src/enigma_main.cpp:4523 src/enigma_main.cpp:4524
+#: src/enigma_main.cpp:4538 src/enigma_main.cpp:4539
 msgid "One moment please..."
 msgstr "Trenutek prosim..."
 
-#: src/enigma_main.cpp:4524 src/enigma_main.cpp:4529 src/enigma_main.cpp:4539
-#: src/enigma_main.cpp:4547 src/enigma_main.cpp:4554 src/enigma_main.cpp:4559
-#: src/enigma_main.cpp:4565 src/timer.cpp:1645
+#: src/enigma_main.cpp:4539 src/enigma_main.cpp:4544 src/enigma_main.cpp:4554
+#: src/enigma_main.cpp:4562 src/enigma_main.cpp:4569 src/enigma_main.cpp:4574
+#: src/enigma_main.cpp:4580 src/timer.cpp:1645
 msgid "switch"
 msgstr "obrni"
 
-#: src/enigma_main.cpp:4528 src/enigma_main.cpp:4529
+#: src/enigma_main.cpp:4543 src/enigma_main.cpp:4544
 msgid "Service could not be found !"
 msgstr "Programa ne najde!"
 
-#: src/enigma_main.cpp:4538 src/enigma_main.cpp:4539
+#: src/enigma_main.cpp:4553 src/enigma_main.cpp:4554
 msgid "This service could not be descrambled"
 msgstr "Tega programa ne more odkodirati"
 
-#: src/enigma_main.cpp:4546 src/enigma_main.cpp:4547
+#: src/enigma_main.cpp:4561 src/enigma_main.cpp:4562
 msgid "This service doesn't currently send a signal"
 msgstr "Ta program trenutno nima signala"
 
-#: src/enigma_main.cpp:4552 src/enigma_main.cpp:4554
+#: src/enigma_main.cpp:4567 src/enigma_main.cpp:4569
 msgid "This content could not be displayed"
 msgstr "Ta vsebina ne bo prikazana"
 
-#: src/enigma_main.cpp:4557 src/enigma_main.cpp:4559
+#: src/enigma_main.cpp:4572 src/enigma_main.cpp:4574
 msgid "NVOD Service - please select a starttime"
 msgstr "NVOD Program - prosim izberite cas pricetka"
 
-#: src/enigma_main.cpp:4563 src/enigma_main.cpp:4565
+#: src/enigma_main.cpp:4578 src/enigma_main.cpp:4580
 msgid "Unknown error!!"
 msgstr "Neznana napaka!!!"
 
-#: src/enigma_main.cpp:5025 src/sselect.cpp:374
+#: src/enigma_main.cpp:5043 src/sselect.cpp:374
 msgid "Playlist"
 msgstr "Seznam nazadnje gledanih programov"
 
-#: src/enigma_main.cpp:5027
+#: src/enigma_main.cpp:5045
 msgid "History"
 msgstr "Zgodovina"
 
-#: src/enigma_main.cpp:5298
+#: src/enigma_main.cpp:5316
 msgid "Service Menu"
 msgstr "Meni programov"
 
-#: src/enigma_main.cpp:5311 src/sselect.cpp:111
+#: src/enigma_main.cpp:5329 src/sselect.cpp:111
 msgid "add service to playlist"
 msgstr "dodaj program seznamu nazadnje gledanih programov"
 
-#: src/enigma_main.cpp:5320
+#: src/enigma_main.cpp:5338
 #, fuzzy
 msgid "create new bouquet"
 msgstr "odpri nov Uporabniski Paket"
 
-#: src/enigma_main.cpp:5331
+#: src/enigma_main.cpp:5349
 #, fuzzy
 msgid "duplicate bouquet"
 msgstr "Paket brez imena"
 
-#: src/enigma_main.cpp:5334 src/enigma_main.cpp:5369
+#: src/enigma_main.cpp:5352 src/enigma_main.cpp:5387
 #, fuzzy
 msgid "add to specific bouquet"
 msgstr "dodaj program med priljubljene"
 
-#: src/enigma_main.cpp:5336
+#: src/enigma_main.cpp:5354
 msgid "add marker"
 msgstr ""
 
-#: src/enigma_main.cpp:5343 src/enigma_main.cpp:5347 src/sselect.cpp:353
+#: src/enigma_main.cpp:5361 src/enigma_main.cpp:5365 src/sselect.cpp:353
 msgid "rename"
 msgstr "preimenuj"
 
-#: src/enigma_main.cpp:5350 src/sselect.cpp:351
+#: src/enigma_main.cpp:5368 src/sselect.cpp:351
 msgid "delete"
 msgstr "izbrii "
 
-#: src/enigma_main.cpp:5357
+#: src/enigma_main.cpp:5375
 msgid "disable move mode"
 msgstr "onemogoci prelaganje programov"
 
-#: src/enigma_main.cpp:5359
+#: src/enigma_main.cpp:5377
 msgid "enable move mode"
 msgstr "omogoci  prelaganje programov"
 
-#: src/enigma_main.cpp:5375
+#: src/enigma_main.cpp:5393
 #, fuzzy
 msgid "copy to bouquet list"
 msgstr "Dodaj kanal med Uporabniske Pakete"
 
-#: src/enigma_main.cpp:5386
+#: src/enigma_main.cpp:5404
 msgid "disable edit mode"
 msgstr "onemogoci urejanje"
 
-#: src/enigma_main.cpp:5388
+#: src/enigma_main.cpp:5406
 msgid "enable edit mode"
 msgstr "omogoci  urejanje"
 
-#: src/enigma_main.cpp:5398
+#: src/enigma_main.cpp:5416
 msgid "unlock"
 msgstr "odkleni"
 
-#: src/enigma_main.cpp:5400
+#: src/enigma_main.cpp:5418
 msgid "lock"
 msgstr "zakleni"
 
-#: src/enigma_main.cpp:5404
+#: src/enigma_main.cpp:5422
 #, fuzzy
 msgid "disable parental lock"
 msgstr "onemogoci urejanje"
 
-#: src/enigma_main.cpp:5406
+#: src/enigma_main.cpp:5424
 #, fuzzy
 msgid "enable parental lock"
 msgstr "open parental setup"
 
-#: src/enigma_main.cpp:5424
+#: src/enigma_main.cpp:5442
 msgid "Shutdown/Standby Menu"
 msgstr "Izklop/Pripravljenost Menu"
 
-#: src/enigma_main.cpp:5431
+#: src/enigma_main.cpp:5449
 msgid "reboot now"
 msgstr "ponovni zagon"
 
-#: src/enigma_main.cpp:5434
+#: src/enigma_main.cpp:5452
 msgid "shutdown now"
 msgstr "izklop"
 
-#: src/enigma_main.cpp:5435
+#: src/enigma_main.cpp:5453
 msgid "restart"
 msgstr "ponovni zagon"
 
-#: src/enigma_main.cpp:5438
+#: src/enigma_main.cpp:5456
 msgid "goto standby"
 msgstr "pojdi v pripravljenost "
 
-#: src/enigma_main.cpp:5439
+#: src/enigma_main.cpp:5457
 msgid "set sleeptimer"
 msgstr "Nastavi cas izklopa(sleeptimer)"
 
-#: src/enigma_main.cpp:5540
+#: src/enigma_main.cpp:5558
 msgid "Record Menu"
 msgstr "Snemalni menu"
 
-#: src/enigma_main.cpp:5546
+#: src/enigma_main.cpp:5564
 msgid "stop record now"
 msgstr "ustavi snemanje sedaj"
 
-#: src/enigma_main.cpp:5548
+#: src/enigma_main.cpp:5566
 msgid "set record duration"
 msgstr "nastavi dolzino snemanja"
 
-#: src/enigma_main.cpp:5549
+#: src/enigma_main.cpp:5567
 msgid "set record stop time"
 msgstr "nastavi cas zaustavitve snemanja"
 
-#: src/enigma_main.cpp:5623
+#: src/enigma_main.cpp:5641
 msgid "press ok to start edit mode"
 msgstr "pritisni ok za pricetek urejanja"
 
-#: src/enigma_main.cpp:5671 src/time_settings.cpp:36
+#: src/enigma_main.cpp:5689 src/time_settings.cpp:36
 msgid "Time Correction"
 msgstr "Casovne Popravke"
 
-#: src/enigma_main.cpp:5678
+#: src/enigma_main.cpp:5696
 msgid "Transponder Time:"
 msgstr "Ura transponderja:"
 
-#: src/enigma_main.cpp:5687
+#: src/enigma_main.cpp:5705
 msgid "Transponder Date:"
 msgstr "Datum transponderja:"
 
-#: src/enigma_main.cpp:5694
+#: src/enigma_main.cpp:5712
 msgid "New Time:"
 msgstr "Novi cas:"
 
-#: src/enigma_main.cpp:5707
+#: src/enigma_main.cpp:5725
 msgid "enter correct time here"
 msgstr "vnesi tocno uro"
 
-#: src/enigma_main.cpp:5713
+#: src/enigma_main.cpp:5731
 msgid "New Date:"
 msgstr "Novi datum:"
 
-#: src/enigma_main.cpp:5722
+#: src/enigma_main.cpp:5740
 msgid "press ok to select another day"
 msgstr "pritisni ok za izbiro drugega dneva"
 
-#: src/enigma_main.cpp:5728
+#: src/enigma_main.cpp:5746
 msgid "press ok to select another month"
 msgstr "pritisni ok za izbiro meseca"
 
-#: src/enigma_main.cpp:5737
+#: src/enigma_main.cpp:5755
 msgid "press ok to select another year"
 msgstr "pritisni ok za izbiro leta"
 
-#: src/enigma_main.cpp:5753
+#: src/enigma_main.cpp:5771
 msgid "set new time and close window"
 msgstr "nastavi uro snemanja in zapri okno (ok)"
 
@@ -2381,7 +2381,7 @@ msgstr "IZKLOP"
 msgid "Setup"
 msgstr "NASTAVITVE"
 
-#: src/enigma_mainmenu.cpp:66 src/enigma_plugins.cpp:122
+#: src/enigma_mainmenu.cpp:66 src/enigma_plugins.cpp:117
 msgid "Games"
 msgstr "IGRE"
 
@@ -2402,29 +2402,29 @@ msgstr "GLAVNI MENU"
 msgid "setup"
 msgstr "NASTAVITVE"
 
-#: src/enigma_plugins.cpp:122
+#: src/enigma_plugins.cpp:117
 msgid "Plugins"
 msgstr "Dodatki (Plugins)"
 
-#: src/enigma_plugins.cpp:127
+#: src/enigma_plugins.cpp:122
 msgid "select plugin and press ok"
 msgstr "izberi vhodni priključek in pritisni ok"
 
-#: src/enigma_plugins.cpp:146
+#: src/enigma_plugins.cpp:141
 #, c-format
 msgid "Couldn't read plugin directory %s"
 msgstr "Ni možno odčitati plugin datoteke %s"
 
-#: src/enigma_plugins.cpp:150
+#: src/enigma_plugins.cpp:145
 msgid "Error"
 msgstr "Napaka"
 
-#: src/enigma_plugins.cpp:216
+#: src/enigma_plugins.cpp:211
 #, c-format
 msgid "plugin '%s' not found"
 msgstr "plugin  '%s'  ni najden"
 
-#: src/enigma_plugins.cpp:219
+#: src/enigma_plugins.cpp:214
 msgid "no name given"
 msgstr "ime ni dodeljeno"
 
@@ -4184,11 +4184,11 @@ msgstr "Izvor"
 msgid "Movies"
 msgstr "Filmi"
 
-#: src/sselect.cpp:742
+#: src/sselect.cpp:747
 msgid "Select No or press Abort to lock/unlock the complete directory"
 msgstr ""
 
-#: src/sselect.cpp:742
+#: src/sselect.cpp:747
 msgid "Enter Directory"
 msgstr ""
 
@@ -4749,9 +4749,3 @@ msgstr ""
 #: src/time_settings.cpp:82
 msgid "time correction change error"
 msgstr "napaka pri casovni izravnavi"
-
-#~ msgid "clear list before"
-#~ msgstr "najprej zbrisi seznam"
-
-#~ msgid "remove all services before scan"
-#~ msgstr "odstrani vse programe pred iskanjem"
