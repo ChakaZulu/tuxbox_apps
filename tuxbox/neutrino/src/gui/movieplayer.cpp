@@ -1,10 +1,10 @@
 /*
   Neutrino-GUI  -   DBoxII-Project
 
-  Movieplayer (c) 2003 by gagga
+  Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.62 2004/01/17 23:40:54 zwen Exp $
+  $Id: movieplayer.cpp,v 1.63 2004/01/21 21:55:32 gagga Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -114,7 +114,7 @@
 
 
 static CMoviePlayerGui::state playstate;
-static bool isTS;
+static bool isTS, isPES;
 int speed = 1;
 static long fileposition;
 ringbuffer_t *ringbuf;
@@ -144,14 +144,15 @@ CMoviePlayerGui::CMoviePlayerGui() : bookmarkfile('\t')
 	filebrowser = new CFileBrowser ();
 	filebrowser->Multi_Select = false;
 	filebrowser->Dirs_Selectable = false;
-	videofilefilter.addFilter ("ts");
-	videofilefilter.addFilter ("ps");
-	videofilefilter.addFilter ("mpg");
-	videofilefilter.addFilter ("mpeg");
-	videofilefilter.addFilter ("m2p");
-	videofilefilter.addFilter ("avi");
-	videofilefilter.addFilter ("vob");
-	filebrowser->Filter = &videofilefilter;
+	tsfilefilter.addFilter ("ts");
+	//videofilefilter.addFilter ("ps");
+	vlcfilefilter.addFilter ("mpg");
+	vlcfilefilter.addFilter ("mpeg");
+	vlcfilefilter.addFilter ("m2p");
+	vlcfilefilter.addFilter ("avi");
+	vlcfilefilter.addFilter ("vob");
+	pesfilefilter.addFilter ("mpv");
+	filebrowser->Filter = &tsfilefilter;
 	if (strlen (g_settings.network_nfs_moviedir) != 0)
 		Path = g_settings.network_nfs_moviedir;
 	else
@@ -261,6 +262,12 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 	}
 	else if (actionKey=="tsplayback") {
         isTS=true;
+        isPES=false;
+        PlayFile();
+	}
+	else if (actionKey=="pesplayback") {
+        isTS=false;
+        isPES=true;
         PlayFile();
 	}
 	
@@ -851,6 +858,216 @@ PlayStreamThread (void *mrl)
 
 //------------------------------------------------------------------------
 void *
+PlayPESFileThread (void *filename)
+{
+	struct pollfd pfd[2];
+	unsigned char abuf[188 * 188], vbuf[188 * 188];
+	const char *afilename, *vfilename;
+	int adec, vdec, afile, vfile;
+	ssize_t awr, vwr;
+	size_t ar = 0, vr = 0;
+	int adone = 0, vdone = 0;
+	unsigned int acaps, vcaps;
+
+	vfilename = (const char*) filename;
+	
+    std::string afilenametmp = vfilename;
+    afilenametmp = afilenametmp.substr(0,afilenametmp.length()-3);
+    afilenametmp += "mp2";
+    afilename = afilenametmp.c_str();
+	//afilename = "/mnt/movies/testfilm.mp2";
+	
+	printf("[movieplayer.cpp] Starting PES Playback\n");
+	printf("[movieplayer.cpp] vfile=%s\n",vfilename);
+	printf("[movieplayer.cpp] afile=%s\n",afilename);
+	
+	if ((adec = open(ADEC, O_WRONLY | O_NONBLOCK)) < 0) {
+		perror(ADEC);
+		playstate = CMoviePlayerGui::STOPPED;
+		pthread_exit (NULL);
+	}
+
+	if ((vdec = open(VDEC, O_WRONLY)) < 0) {
+		perror(VDEC);
+		playstate = CMoviePlayerGui::STOPPED;
+		pthread_exit (NULL);
+	}
+
+	if ((afile = open(afilename, O_RDONLY)) < 0) {
+		perror(afilename);
+		playstate = CMoviePlayerGui::STOPPED;
+		pthread_exit (NULL);
+	}
+
+	if ((vfile = open(vfilename, O_RDONLY)) < 0) {
+		perror(vfilename);
+		playstate = CMoviePlayerGui::STOPPED;
+		pthread_exit (NULL);
+	}
+
+	if (ioctl(adec, AUDIO_GET_CAPABILITIES, &acaps) < 0) {
+		perror("AUDIO_GET_CAPABILITIES");
+		playstate = CMoviePlayerGui::STOPPED;
+		pthread_exit (NULL);
+	}
+
+	if (ioctl(vdec, VIDEO_GET_CAPABILITIES, &vcaps) < 0) {
+		perror("VIDEO_GET_CAPABILITIES");
+		playstate = CMoviePlayerGui::STOPPED;
+		pthread_exit (NULL);
+	}
+
+	if (!(acaps & AUDIO_CAP_MP2)) {
+		fprintf(stderr, "audio decoder does not support mpeg2 pes\n");
+		playstate = CMoviePlayerGui::STOPPED;
+		pthread_exit (NULL);
+	}
+
+	if (!(vcaps & VIDEO_CAP_MPEG2)) {
+		fprintf(stderr, "video decoder does not support mpeg2 pes\n");
+		playstate = CMoviePlayerGui::STOPPED;
+		pthread_exit (NULL);
+	}
+
+	if (ioctl(adec, AUDIO_SELECT_SOURCE, AUDIO_SOURCE_MEMORY) < 0) {
+		perror("AUDIO_SELECT_SOURCE");
+		playstate = CMoviePlayerGui::STOPPED;
+		pthread_exit (NULL);
+	}
+
+	if (ioctl(vdec, VIDEO_SELECT_SOURCE, VIDEO_SOURCE_MEMORY) < 0) {
+		perror("VIDEO_SELECT_SOURCE");
+		playstate = CMoviePlayerGui::STOPPED;
+		pthread_exit (NULL);
+	}
+
+	if (ioctl(adec, AUDIO_SET_STREAMTYPE, AUDIO_CAP_MP2) < 0) {
+		perror("AUDIO_SET_STREAMTYPE");
+		playstate = CMoviePlayerGui::STOPPED;
+		pthread_exit (NULL);
+	}
+
+	if (ioctl(vdec, VIDEO_SET_STREAMTYPE, VIDEO_CAP_MPEG2) < 0) {
+		perror("VIDEO_SET_STREAMTYPE");
+		playstate = CMoviePlayerGui::STOPPED;
+		pthread_exit (NULL);
+	}
+
+	if (ioctl(adec, AUDIO_PLAY) < 0) {
+		perror("AUDIO_PLAY");
+		playstate = CMoviePlayerGui::STOPPED;
+		pthread_exit (NULL);
+	}
+
+	if (ioctl(vdec, VIDEO_PLAY) < 0) {
+		perror("VIDEO_PLAY");
+		playstate = CMoviePlayerGui::STOPPED;
+		pthread_exit (NULL);
+	}
+		
+	printf("[movieplayer.cpp] Starting PES Playback. All preparations done.\n");
+	
+	pfd[0].fd = afile;
+	pfd[0].events = POLLOUT;
+	pfd[1].fd = vfile;
+	pfd[1].events = POLLOUT;
+
+	while (playstate >= CMoviePlayerGui::PLAY) {
+    		switch (playstate)
+			{
+			case CMoviePlayerGui::PAUSE:
+				while (playstate == CMoviePlayerGui::PAUSE)
+				{
+					usleep(100000); // no busy wait
+				}
+				break;
+			// ignore playstates.
+			// TODO: implement them
+			case CMoviePlayerGui::PREPARING:
+			case CMoviePlayerGui::STREAMERROR:
+			case CMoviePlayerGui::RESYNC:
+		    case CMoviePlayerGui::FF:
+			case CMoviePlayerGui::REW:
+			case CMoviePlayerGui::SOFTRESET:
+                playstate = CMoviePlayerGui::PLAY;
+				break;
+			case CMoviePlayerGui::PLAY:
+			case CMoviePlayerGui::STOPPED:
+			    break;
+			}
+
+    	
+		if (ar <= 0) {
+			if ((ar = read(afile, abuf, sizeof(abuf))) < 0) {
+				perror("audio read");
+				playstate = CMoviePlayerGui::STOPPED;
+				break;
+			}
+			adone = 0;
+			printf("[movieplayer.cpp] adone=0\n");
+		}
+		if (vr <= 0) {
+			if ((vr = read(vfile, vbuf, sizeof(vbuf))) < 0) {
+				perror("video read");
+				playstate = CMoviePlayerGui::STOPPED;
+				break;
+			}
+			vdone = 0;
+			printf("[movieplayer.cpp] vdone=0\n");
+		}
+
+		if ((ar == 0) && (vr == 0)) {
+            playstate = CMoviePlayerGui::STOPPED;
+            break;
+        }
+        printf("[movieplayer.cpp] vr=%d, ar=%d\n",vr,ar);
+        
+		if (poll(pfd, 2, 0)) {
+			if (pfd[0].revents & POLLOUT) {
+				if ((awr = write(adec, &abuf[adone], ar)) < 0) {
+					if (errno != EAGAIN)
+						perror("audio write");
+				}
+				else {
+					ar -= awr;
+					adone += awr;
+				}
+			}
+			if (pfd[1].revents & POLLOUT) {
+				if ((vwr = write(vdec, &vbuf[vdone], vr)) < 0) {
+					perror("video write");
+				}
+				else {
+					vr -= vwr;
+					vdone += vwr;
+				}
+			}
+		}
+	}
+
+	ioctl(vdec, VIDEO_STOP);
+	ioctl(adec, AUDIO_STOP);
+	close(vfile);
+	close(afile);
+	close(vdec);
+	close(adec);
+	
+	printf("[movieplayer.cpp] Stopped PES Playback\n");
+		
+	if (playstate != CMoviePlayerGui::STOPPED)
+	{
+		playstate = CMoviePlayerGui::STOPPED;
+		g_RCInput->postMsg (CRCInput::RC_red, 0);	// for faster exit in PlayStream(); do NOT remove!
+	}
+
+	pthread_exit (NULL);
+	
+
+}
+
+	
+//------------------------------------------------------------------------
+void *
 PlayFileThread (void *filename)
 {
 	bool failed = false;
@@ -861,6 +1078,7 @@ PlayFileThread (void *filename)
 	ssize_t wr = 0;
 	ssize_t cache = sizeof (buf);
 	size_t r = 0;
+	
 	if ((char *) filename == NULL)
 	{
 		playstate = CMoviePlayerGui::STOPPED;
@@ -1102,6 +1320,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 			strcpy (startDir, "vlc://");
 			strcat (startDir, g_settings.streaming_server_startdir);
 			printf ("[movieplayer.cpp] Startdir: %s\n", startDir);
+			filebrowser->Filter = &vlcfilefilter;
 			if (filebrowser->exec (startDir))
 			{
 				Path = filebrowser->getCurrentDir ();
@@ -1176,7 +1395,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		else if (msg == CRCInput::RC_help)
  		{
      		std::string helptext = g_Locale->getText("movieplayer.help");
-     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.62 $\n\nMovieplayer (c) 2003 by gagga";
+     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.63 $\n\nMovieplayer (c) 2003, 2004 by gagga";
      		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -1231,6 +1450,16 @@ CMoviePlayerGui::PlayFile (void)
 		{
 			open_filebrowser = false;
 			filename = NULL;
+			if (isTS)
+			{
+			    filebrowser->Filter = &tsfilefilter;
+		    }
+			else 
+			{
+    			if (isPES) {
+        			filebrowser->Filter = &pesfilefilter;
+    			}
+			}
 			if (filebrowser->exec(g_settings.network_nfs_moviedir))
 			{
 				Path = filebrowser->getCurrentDir();
@@ -1260,18 +1489,31 @@ CMoviePlayerGui::PlayFile (void)
 
 		if (start_play)
 		{
-			start_play = false;
+			printf("Startplay\n");
+    		start_play = false;
 			if (playstate >= CMoviePlayerGui::PLAY)
 			{
 				playstate = CMoviePlayerGui::STOPPED;
 				pthread_join (rct, NULL);
 			}
 
-			if (pthread_create
-			    (&rct, 0, PlayFileThread, (void *) filename) != 0)
-			{
-				break;
+			printf("Startplay1\n");
+			if (isTS) {
+			    if (pthread_create
+			        (&rct, 0, PlayFileThread, (void *) filename) != 0)
+			    {
+				    break;
+			    }
 			}
+			    
+			else {
+    			printf("Startplay\n");
+			    if (isPES && pthread_create
+			        (&rct, 0, PlayPESFileThread, (void *) filename) != 0)
+			    {
+				    break;
+			    }
+		    }
 			playstate = CMoviePlayerGui::SOFTRESET;
 		}
 
@@ -1299,7 +1541,7 @@ CMoviePlayerGui::PlayFile (void)
  		else if (msg == CRCInput::RC_help)
  		{
      		std::string helptext = g_Locale->getText("movieplayer.help");
-     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.62 $\n\nMovieplayer (c) 2003 by gagga";
+     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.63 $\n\nMovieplayer (c) 2003, 2004 by gagga";
      		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
         else if (msg == CRCInput::RC_left)

@@ -734,6 +734,7 @@ movieplayer.nostreamingserver Es konnte keine Verbindung\nzum Streamingserver he
 movieplayer.defdir Start-Verz.
 movieplayer.buffering Puffern...
 movieplayer.tsplayback TS Abspielen
+movieplayer.pesplayback PES Abspielen (Experimentell)
 movieplayer.fileplayback Datei via VLC
 movieplayer.dvdplayback DVD
 movieplayer.vcdplayback (S)VCD

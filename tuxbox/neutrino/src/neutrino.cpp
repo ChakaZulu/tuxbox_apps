@@ -1185,6 +1185,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	moviePlayer.addItem(GenericMenuBack);
 	moviePlayer.addItem(GenericMenuSeparatorLine);
 	moviePlayer.addItem(new CMenuForwarder("movieplayer.tsplayback", true, NULL, new CMoviePlayerGui(), "tsplayback", true, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
+	moviePlayer.addItem(new CMenuForwarder("movieplayer.pesplayback", true, NULL, new CMoviePlayerGui(), "pesplayback", true));
 	moviePlayer.addItem(new CMenuForwarder("movieplayer.bookmark", false, NULL, new CMoviePlayerGui(), "bookmarkplayback"));
 	moviePlayer.addItem(GenericMenuSeparator);
 	moviePlayer.addItem(new CMenuForwarder("movieplayer.fileplayback", true, NULL, new CMoviePlayerGui(), "fileplayback", true, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));

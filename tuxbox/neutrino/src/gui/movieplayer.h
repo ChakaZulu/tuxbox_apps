@@ -110,7 +110,9 @@ class CMoviePlayerGui : public CMenuTarget
 	void paintFoot();
 	void hide();
 
-	CFileFilter videofilefilter;
+	CFileFilter tsfilefilter;
+	CFileFilter vlcfilefilter;
+	CFileFilter pesfilefilter;
 
  public:
 	CMoviePlayerGui();
