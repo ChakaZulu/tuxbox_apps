@@ -6,7 +6,7 @@
 #include "ebutton.h"
 #include "echeckbox.h"
 #include "rc.h"
-#include "ezap.h"
+#include "enigma.h"
 
 static void unpack(__u32 l, int *t)
 {

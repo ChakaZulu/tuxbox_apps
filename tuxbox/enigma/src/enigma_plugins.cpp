@@ -1,11 +1,11 @@
 #include <dlfcn.h>
 #include <dirent.h>
-#include "ezap_plugins.h"
+#include "enigma_plugins.h"
 #include "rc.h"
 #include "elistbox.h"
 #include "ewindow.h"
 #include "edvb.h"
-#include "ezap.h"
+#include "enigma.h"
 #include "emessage.h"
 
 typedef int     (*PluginInfoProc)( struct SPluginInfo *info );

@@ -1,4 +1,4 @@
-#include "ezap_setup.h"
+#include "enigma_setup.h"
 #include "setupaudio.h"
 #include "setupnetwork.h"
 #include "setupvideo.h"
@@ -6,7 +6,7 @@
 #include "elistbox.h"
 #include "ewindow.h"
 #include "edvb.h"
-#include "ezap.h"
+#include "enigma.h"
 
 eZapSetup::eZapSetup()
 {

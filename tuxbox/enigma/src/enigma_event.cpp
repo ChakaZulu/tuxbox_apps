@@ -1,9 +1,9 @@
 #include <time.h>
-#include "ezap_event.h"
+#include "enigma_event.h"
 #include "rc.h"
 #include "font.h"
 #include "elabel.h"
-#include "ezap.h"
+#include "enigma.h"
 
 
 void eEventDisplay::keyDown(int rc)

@@ -1,13 +1,13 @@
 #include <time.h>
 #include <errno.h>
-#include "ezap_main.h"
+#include "enigma_main.h"
 #include "elistbox.h"
 #include "iso639.h"
 #include "edvb.h"
-#include "ezap.h"
+#include "enigma.h"
 #include "elabel.h"
 #include "eprogress.h"
-#include "ezap_event.h"
+#include "enigma_event.h"
 #include "sselect.h"
 #include "enumber.h"
 #include "eskin.h"

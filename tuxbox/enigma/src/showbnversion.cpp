@@ -3,7 +3,7 @@
 #include "edvb.h"
 #include "elabel.h"
 #include "si.h"
-#include "ezap.h"
+#include "enigma.h"
 
 /*
 	was hier fehlt: parsen der BAT (batid: 5001) auf 0001:0085. daher wird 0001:0085:0F03 assumed.

@@ -5,7 +5,7 @@
 #include "ebutton.h"
 #include "echeckbox.h"
 #include "rc.h"
-#include "ezap.h"
+#include "enigma.h"
 #include "eskin.h"
 #include "eavswitch.h"
 #include "streamwd.h"

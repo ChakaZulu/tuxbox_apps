@@ -1,6 +1,6 @@
 #include <time.h>
 #include "edvb.h"
-#include "ezap_lcd.h"
+#include "enigma_lcd.h"
 #include "elabel.h"
 #include "dvb.h"
 #include "lcd.h"
