@@ -3347,7 +3347,13 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 			;
 		}
 		if ((* (stream2file_status_t *) data) != STREAM2FILE_STATUS_IDLE)
-			changeNotify("mainmenu.recording_stop", NULL);
+		{
+			/* 
+			 * note that changeNotify does not distinguish between "mainmenu.recording_start" and "mainmenu.recording_stop"
+			 * instead it checks the state of the variable recordingstatus
+			 */ 
+			changeNotify("mainmenu.recording_start", NULL);
+		}
 
 		delete (unsigned char*) data;
 		return messages_return::handled;
