@@ -30,12 +30,15 @@
 */
 
 /*
- $Id: rcinput.cpp,v 1.34 2002/02/28 22:59:38 McClean Exp $
+ $Id: rcinput.cpp,v 1.35 2002/02/28 23:40:36 McClean Exp $
 
  Module for Remote Control Handling
 
 History:
  $Log: rcinput.cpp,v $
+ Revision 1.35  2002/02/28 23:40:36  McClean
+ reverse frontpanelcode
+
  Revision 1.34  2002/02/28 22:59:38  McClean
  nokia frontpanel-fix
 
@@ -280,30 +283,8 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 		{
 			status = read(fd_rc, &rc_key, sizeof(rc_key));
 			if (status==2)
-			{	
-				bool doParse = true;
-				switch (g_settings.box_Type)
-				{
-					case 1: //nokia
-						switch (rc_key)
-						{
-							case 0xff9d:
-								*msg = RC_standby;
-								return;
-							case 0xffc7:
-								*msg = RC_up;
-								return;
-							case 0xffab:
-								*msg = RC_down;
-								return;
-							case 0x5cfe: //alter nokialoslasscode
-							case 0xff9f:
-							case 0xffcf:
-							case 0xffaf:
-								doParse = false;
-						}			
-				}
-				if(doParse)
+			{
+				if(rc_key!=0x5cfe)
 				{
 					printf("got key native key: %04x %04x\n", rc_key, rc_key&0x1f );
 					long long now_pressed;
