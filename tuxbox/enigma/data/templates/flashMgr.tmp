@@ -1,11 +1,11 @@
 <script>
 function writeMenu(xy)
 {
-	NewWindow('cgi-bin/showWriteMenu?mtd=' + xy, 'flashMenu', '780', '370', 'no');
+	NewWindow('cgi-bin/showWriteMenu?mtd=' + xy, 'flashMenu', '500', '200', 'no');
 }
 function saveMenu(xy)
 {
-	NewWindow('cgi-bin/showReadMenu?mtd=' + xy, 'saveMenu', '780', '370', 'no');
+	NewWindow('cgi-bin/showReadMenu?mtd=' + xy, 'saveMenu', '500', '200', 'no');
 }
 </script>
 <table border="1" cellspacing="0" cellpadding="5">

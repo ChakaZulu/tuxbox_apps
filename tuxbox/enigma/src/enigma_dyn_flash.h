@@ -39,6 +39,7 @@ public:
 	~eFlashOperationsHandler();
 	void readPartition(const char * mtd, const char * filename);
 	void writePartition(const char * mtd, const char * filename);
+	void quitFlashOps();
 	eString getProgressMessage1() { return progressMessage1; }
 	eString getProgressMessage2() { return progressMessage2; }
 	int getProgressComplete() { return progressComplete; }

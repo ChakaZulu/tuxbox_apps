@@ -3,29 +3,12 @@
 		<link rel="stylesheet" type="text/css" href="webif.css">
 		<script language="javascript" type="text/javascript" src="dhtml.js"></script>
 		<script>
-		function init()
-		{
-			var w = 500;
-			var h = 200;
-			var winl = (screen.width - w) / 2;
-			var wint = (screen.height - h) / 2;
-			if (document.all)
-			{
-				top.window.resizeTo(w, h);
-			}
-			else
-			{
-				top.window.outerHeight = h;
-				top.window.outerWidth = w;
-			}
-			top.window.moveTo(winl, wint);
-			top.window.focus();
-			setTimeout("update()", 5000);
-		}
+		var stopTimer = 0;
+		var updateTimer = setTimeout("update()", 5000);
 		function update()
 		{
 			videoData.location.reload();
-			setTimeout("update()", 5000);
+			updateTimer = setTimeout("update()", 5000);
 		}
 		function updateVideoBar(progress1, progress2, completion)
 		{
@@ -39,10 +22,18 @@
 			}
 			getElem("id", "progress1", null).firstChild.nodeValue = progress1;
 			getElem("id", "progress2", null).firstChild.nodeValue = progress2;
+			if (stopTimer == 1)
+				clearTimeout(updateTimer);
+			if (completion >= 20)
+				stopTimer = 1;
+		}
+		function kill()
+		{
+			document.location = "/cgi-bin/killFlashOps";
 		}
 		</script>
 	</head>
-	<body onLoad="init()" style="padding: 10px; background-color: #F4F4F4" leftmargin=0 topmargin=0 marginwidth=0 marginheight=0 id="contentcell">
+	<body onUnLoad="kill()" style="padding: 10px; background-color: #F4F4F4" leftmargin=0 topmargin=0 marginwidth=0 marginheight=0 id="contentcell">
 		<table style="table-layout: fixed" id="videocontrol" width="630px" height="50px" border="0" cellspacing="0" cellpadding="0">
 		<tr>
 			<td id="progress1" valign="center">&nbsp;</td>
@@ -56,7 +47,7 @@
 				<tr>
 					<td width="40px">&nbsp;</td>
 					<td valign="middle">
-						<table border="0" cellspacing="0" cellpadding="0">
+						<table border="1" cellspacing="0" cellpadding="0">
 						<tr>
 							<td><img id="vid1" border="0" src="led_off.gif"></td>
 							<td><img id="vid2" border="0" src="led_off.gif"></td>

@@ -80,6 +80,16 @@ void eFlashOperationsHandler::writePartition(const char *mtd, const char *filena
 	messages.send(Message(Message::write, mtd?strdup(mtd):0, filename?strdup(filename):0));
 }
 
+void eFlashOperationsHandler::quitFlashOps()
+{
+	sleep(1);
+	messages.send(Message::quit);
+	if (thread_running())
+		kill();
+	if (instance == this)
+		instance = 0;
+}
+
 void eFlashOperationsHandler::gotMessage(const Message &msg )
 {
 	switch (msg.type)
@@ -192,7 +202,7 @@ int eFlashOperationsHandler::writeFlash(eString mtd, eString filename)
 #if 0
 		write(fd2, buf, block);
 #else
-		usleep(5000);
+		sleep(1);
 #endif
 		fsize -= block;
 		progressComplete = ((filesize - fsize) * 100) / filesize;
@@ -218,12 +228,17 @@ int eFlashOperationsHandler::readFlash(eString mtd, eString filename)
 	long filesize;
 	mtd_info_t meminfo;
 	
+	filename = "/tmp/" + filename;
+	
 	progressMessage1 = progressMessage2 = "";
 	progressComplete = 0;
 	
 	int mtdno = -1;
 	sscanf(mtd.c_str(), "mtd%d", &mtdno);
 	eString mtddev = "/dev/mtd/" + eString().sprintf("%d", mtdno);
+	
+	if (access(filename.c_str(), W_OK) == 0)
+		unlink(filename.c_str());
 
 	if ((fd1 = open(mtddev.c_str(), O_RDONLY)) < 0)
 	{
@@ -289,7 +304,7 @@ eFlashMgr::eFlashMgr()
 	tmp >> h1 >> h2 >> h3 >> h4;
 	h1.left(h1.length() - 1);
 	tmp >> mtd.dev;
-	mtd.dev.left(mtd.dev.length() - 1);
+	mtd.dev.left(mtd.dev.length() - 2);
 	while (tmp)
 	{
 		mtd.size = mtd.erasesize = mtd.name = "";
@@ -301,7 +316,7 @@ eFlashMgr::eFlashMgr()
 			mtd.name += t + " ";
 			tmp >> t;
 		}
-		mtd.name.left(mtd.name.length() - 1);
+		mtd.name.left(mtd.name.length() - 2);
 		mtd.name.strReplace("\"", "");
 		mtds.push_back(mtd);
 		mtd.dev = t;
@@ -381,6 +396,15 @@ eString flashProgressData(eString request, eString dirpath, eString opts, eHTTPC
 	return result;
 }
 
+eString killFlashOps(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	eFlashOperationsHandler::getInstance()->quitFlashOps();
+	content->code = 204;
+	content->code_descr = "No Content";
+	return "";
+}
+
 eString showWriteMenu(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
@@ -433,6 +457,7 @@ void ezapFlashInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 {
 	dyn_resolver->addDyn("GET", "/cgi-bin/showWriteMenu", showWriteMenu, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/showReadMenu", showReadMenu, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/killFlashOps", killFlashOps, lockWeb);
 	dyn_resolver->addDyn("GET", "/writeFlashPartition", writeFlashPartition, lockWeb);
 	dyn_resolver->addDyn("GET", "/readFlashPartition", readFlashPartition, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/flashProgressData", flashProgressData, lockWeb);
