@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.19 2003/10/26 23:00:43 rasc Exp $
+$Id: dvb_str.c,v 1.20 2003/10/27 22:43:50 rasc Exp $
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -15,6 +15,9 @@ $Id: dvb_str.c,v 1.19 2003/10/26 23:00:43 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.20  2003/10/27 22:43:50  rasc
+carousel info descriptor and more
+
 Revision 1.19  2003/10/26 23:00:43  rasc
 fix
 
@@ -126,6 +129,10 @@ static char *findTableID (STR_TABLE *t, u_int id)
 /*
   --  Table IDs (stream)
  ETSI EN 468   5.2
+ EN 301 192
+ TR 102 006
+ RE 101 202
+ ISO 13818-1
 */
 
 char *dvbstrTableID (u_int id)
@@ -137,11 +144,12 @@ char *dvbstrTableID (u_int id)
      {  0x01, 0x01,  "conditional_access_section" },
      {  0x02, 0x02,  "program_map_section" },
      {  0x03, 0x03,  "transport_stream_description_section" },
- //    {  0x04, 0x3F,  "ITU-T Rec. H.222.0|ISO/IEC13818 reserved" },
- //
  // $$$ TODO DSM-CC  anyone a ISO 13818-6 tp spare???
       {  0x04, 0x3d,  "ITU-T Rec. H.222.0|ISO/IEC13818 reserved" },
-      {  0x3e, 0x3e,  "DSM-CC section with private data|ISO/IEC1381-6" },
+      {  0x3b, 0x3b,  "DSM-CC - DSI or DII (DownloadServerInitiate or -InfoIndication" },
+      {  0x3c, 0x3c,  "DSM-CC - DDB (DownloadDataBlock)" },    /* TR 101 202 */
+      {  0x3d, 0x3d,  "reserved" },
+      {  0x3e, 0x3e,  "DSM-CC - Datagram" },
       {  0x3f, 0x3f,  "ITU-T Rec. H.222.0|ISO/IEC13818 reserved" },
 
      {  0x40, 0x40,  "network_information_section - actual network" },
@@ -151,9 +159,8 @@ char *dvbstrTableID (u_int id)
      {  0x46, 0x46,  "service_description_section - other transport stream" },
      {  0x47, 0x49,  "reserved" },
      {  0x4A, 0x4A,  "bouquet_association_section" },
-//     {  0x4B, 0x4D,  "reserved" },
-     {  0x4B, 0x4B,  "reserved" },
-     {  0x4C, 0x4C,  "IP/MAC Notification Table [EN 301 192]" },
+     {  0x4B, 0x4B,  "update notification table" },	/* TR 102 006 */
+     {  0x4C, 0x4C,  "IP/MAC notification table [EN 301 192]" },  /* EN 192 */
      {  0x4D, 0x4D,  "reserved" },
 
      {  0x4E, 0x4E,  "event_information_section - actual transport stream, present/following" },

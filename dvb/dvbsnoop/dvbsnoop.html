@@ -13,7 +13,8 @@
 	  CONTENT="dvbsnoop - dvbsnoop is a simple analyzing and monitoring tool for DVB data transmission streams and related data streams. ">
 	 <META NAME="Author" CONTENT="Rainer Scherg"> 
   </HEAD> 
-  <BODY> 
+  <BODY>
+	 <P>t</P> 
 	 <H1>dvbsnoop - A DVB Stream Analyzer Tool</H1> 
 	 <P>Get the source at: <A
 		HREF="http://cvs.tuxbox.org/">http://cvs.tuxbox.org/</A><BR><BR><BR></P> 
@@ -95,7 +96,22 @@ make
 	 <P><B>Important:</B> Currently I only work with a dbox2 (I own no dvb card
 		for my linux server) - so I do not know if dvbsnoop is compiling on a linux
 		based PC smoothly. Feedback or Makefile.am patches would be nice, if there is
-		any problem...</P> 
+		any problem...</P>
+	 <H3> on a PC/linux (i386)</H3>
+	 <TABLE> 
+		<TR> 
+		  <TD>&nbsp;</TD> 
+		  <TD BGCOLOR="#c0c0c0"> 
+			 <PRE>cp Makefile.simple Makefile
+vi Makefile
+(do some adaption stuff...)
+make
+</PRE></TD> 
+		</TR> 
+	 </TABLE> 
+	 <P>Basically, you have to compile all .c-files into one executable. Include
+		pathes have to be set to the dvbsnoop/src directory and to the DVB-API base
+		include directory...</P> 
 	 <P><BR><BR><BR></P> 
 	 <H2>How to use dvbsnoop?</H2> 
 	 <P>dvbsnoop is a commandline tool.<BR>To tune in a transponder, use a
@@ -383,12 +399,13 @@ Current_next_indicator: 1 (0x01)
 	 <H2>Related Topic and Links</H2> 
 	 <P>Please visit the following websites for more information:</P> 
 	 <TABLE> 
-		<TR>
+		<TR> 
 		  <TD VALIGN="TOP"><A
 			 HREF="http://dvbsnoop.sourceforge.net/">http://dvbsnoop.sourceforge.net/</A></TD>
-		  <TD>&nbsp;</TD>
-		  <TD>This page, dvbsnoop homepage.</TD>
-		</TR>
+		  
+		  <TD>&nbsp;</TD> 
+		  <TD>This page, dvbsnoop homepage.</TD> 
+		</TR> 
 		<TR> 
 		  <TD VALIGN="TOP"><A
 			 HREF="http://sourceforge.net/projects/dvbsnoop">http://sourceforge.net/projects/dvbsnoop</A></TD>

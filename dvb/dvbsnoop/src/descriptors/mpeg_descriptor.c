@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.c,v 1.7 2003/10/26 19:06:27 rasc Exp $
+$Id: mpeg_descriptor.c,v 1.8 2003/10/27 22:43:49 rasc Exp $
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -9,6 +9,9 @@ $Id: mpeg_descriptor.c,v 1.7 2003/10/26 19:06:27 rasc Exp $
 
 
 $Log: mpeg_descriptor.c,v $
+Revision 1.8  2003/10/27 22:43:49  rasc
+carousel info descriptor and more
+
 Revision 1.7  2003/10/26 19:06:27  rasc
 no message
 
@@ -96,8 +99,13 @@ int  descriptorMPEG  (u_char *b)
      case 0x10:  descriptorMPEG_SmoothingBuf  (b);  break; 
      case 0x11:  descriptorMPEG_STD  (b);  break; 
      case 0x12:  descriptorMPEG_IBP  (b);  break; 
-     /* 0x13 - 0x1A  DSM-CC ISO13818-6 */
 
+     /* 0x13 - 0x1A  DSM-CC ISO13818-6,  TR 102 006 */
+     case 0x13:  descriptorMPEG_Carousel_Identifier (b);  break; 
+     case 0x14:  descriptorMPEG_Association_tag (b);  break; 
+     case 0x15:  descriptorMPEG_Deferred_Association_tags (b);  break; 
+
+     /* MPEG 4 */
      case 0x1B:  descriptorMPEG_MPEG4_video (b);  break; 
      case 0x1C:  descriptorMPEG_MPEG4_audio (b);  break; 
      case 0x1D:  descriptorMPEG_IOD (b);  break; 
@@ -954,6 +962,293 @@ void descriptorMPEG_IBP  (u_char *b)
 
 
 /*
+ * ------------------------------------------------------------
+ *
+ * -- DSM-CC  Descriptors  ISO 13818-6  TR 102 006
+ *
+ */
+
+
+/*
+  0x13  Carousel Identifier  descriptor 
+  ISO 13818-6  / TR 102 006
+*/
+
+void descriptorMPEG_Carousel_Identifier (u_char *b)
+
+{
+
+ typedef struct  _descCarouselIdentifier {
+    u_int      descriptor_tag;
+    u_int      descriptor_length;		
+
+    u_long     carousel_id;
+    u_int      format_id;
+
+    // -- optional
+    // FormatSpecifier
+    u_int      module_version;
+    u_int      module_id;
+    u_int      block_size;
+    u_int      module_size;
+    u_long     CompressionMethod;
+    u_int      original_size;
+    u_long     timeout;
+    u_int      object_key_length;
+       // N...
+    u_int      object_key_data;
+
+    // private data
+ } descCarouselIdentifier;
+
+
+ descCarouselIdentifier d;
+ int			len;
+
+
+
+ d.descriptor_tag		 = b[0];
+ d.descriptor_length       	 = b[1];
+
+ d.carousel_id			 = getBits (b, 0, 16, 32);
+ d.format_id			 = getBits (b, 0, 48,  8);
+ b  += 7;
+ len = d.descriptor_length - 5;
+
+
+ out_SL_NL (4,"Carousel_id: ",d.carousel_id);
+ out_SB_NL (4,"format_id: ",d.format_id);		/* $$$$ ??? */
+
+
+ indent (+1);
+ if (d.format_id == 0x01) {
+	/* -- TR 102 006   4.7.xx */
+	
+	d.module_version		 = getBits (b, 0,  0,  8);
+	d.module_id			 = getBits (b, 0,  8, 16);
+	d.block_size			 = getBits (b, 0, 24, 16);
+	d.module_size			 = getBits (b, 0, 40, 32);
+	d.CompressionMethod		 = getBits (b, 0, 72,  8);
+	d.original_size			 = getBits (b, 0, 80, 32);
+	d.timeout 			 = getBits (b, 0,112,  8);
+	d.object_key_length		 = getBits (b, 0,120,  8);
+	b   += 16;
+	len -= 16;
+
+ 	out_SB_NL (4,"Module_version: ",d.module_version);		/* $$$$ Tables? */
+ 	out_SW_NL (4,"Module_id: ",d.module_version);
+ 	out_SW_NL (4,"Block_size: ",d.block_size);
+ 	out_SL_NL (4,"Module_size: ",d.module_size);
+ 	out_SB_NL (4,"Compression_method: ",d.CompressionMethod);
+ 	out_SL_NL (4,"Original_size: ",d.original_size);
+ 	out_SB_NL (4,"Timeout: ",d.timeout);
+ 	out_SB_NL (4,"Object_key_length: ",d.object_key_length);
+ 	out_nl (4,"Object_key_data:");
+		indent (+1);
+ 		printhexdump_buf (5, b, d.object_key_length);
+		indent (-1);
+		b   += d.object_key_length;
+		len -= d.object_key_length;
+ }
+ indent (-1);
+
+
+ /* -- private data */
+ out_nl (4,"Private data bytes:");
+ indent (+1);
+ printhexdump_buf (4, b, len);
+ indent (-1);
+
+}
+
+
+
+
+
+/*
+  0x14  association tag  descriptor 
+  ISO 13818-6  / TR 102 006
+*/
+
+void descriptorMPEG_Association_tag (u_char *b)
+
+{
+
+ typedef struct  _descAssociationTag {
+    u_int      descriptor_tag;
+    u_int      descriptor_length;		
+
+    u_int      association_tag;
+    u_int      use;
+
+    u_int      selector_length;
+    // -- optional
+    //         selector_length;
+    u_long     transaction_id;
+    u_long     timeout;
+
+    // -- optional
+    //         selector_length;
+
+    // -- optional
+    //         selector_length;
+    //         selector_bytes;
+
+ } descAssociationTag;
+
+
+ descAssociationTag  d;
+ int                 len;
+
+
+
+ d.descriptor_tag		 = b[0];
+ d.descriptor_length       	 = b[1];
+
+ d.association_tag		 = getBits (b, 0, 16, 16);
+ d.use                           = getBits (b, 0, 32, 16);
+ d.selector_length		 = getBits (b, 0, 40,  8); /* normally in the opt branches... */
+ b  += 7;
+ len = d.descriptor_length - 5;
+
+
+ out_SW_NL (4,"Association_tag: ",d.association_tag);		/* $$$$ Tables? */
+ out_SW_NL (4,"Use: ",d.use);
+ out_SB_NL (4,"Selector_length: ",d.selector_length);
+
+ if (d.use == 0x0000) {
+
+ 	d.transaction_id 	 = getBits (b, 0,  0, 32);
+ 	d.timeout		 = getBits (b, 0, 32, 32);
+	b   += 8;
+	len -= 8;
+ 	out_SL_NL (4,"Transaction_ID: ",d.transaction_id);
+ 	out_SL_NL (4,"Timeout: ",d.timeout);
+
+ } else if (d.use == 0x0001) {
+
+	 /* selector length == 0x00; */
+
+ } else {
+
+ 	out_nl (4,"Selector bytes:");
+	indent (+1);
+	printhexdump_buf (4, b, d.selector_length);
+	indent (-1);
+
+
+ }
+
+
+ /* -- private data */
+ out_nl (4,"Private data bytes:");
+ indent (+1);
+ printhexdump_buf (4, b, len);
+ indent (-1);
+
+}
+
+
+
+
+
+
+
+/*
+  0x15  deferred association tag  descriptor 
+  ISO 13818-6  / TR 102 006
+*/
+
+void descriptorMPEG_Deferred_Association_tags (u_char *b)
+
+{
+
+ typedef struct  _descDefAssocTags {
+    u_int      descriptor_tag;
+    u_int      descriptor_length;		
+
+    u_int      association_tags_loop_length;
+    // association tag loop
+    u_int	association_tag;
+
+    u_int      transport_stream_id;
+    u_int      program_number;
+    u_int      org_network_id;
+
+    // private bytes
+
+ } descDefAssocTags;
+
+
+ descDefAssocTags  d;
+ int               len,i;
+
+
+
+ d.descriptor_tag		 = b[0];
+ d.descriptor_length       	 = b[1];
+
+ d.association_tags_loop_length	 = getBits (b, 0, 16,  8);
+ b  += 3;
+ len = d.descriptor_length - 1;
+
+
+ out_SW_NL (4,"Association_tags_loop_length: ",d.association_tags_loop_length);
+
+ /* -- association tags */
+ out_nl (4,"Association tag loop:");
+ 	indent (+1);
+	for (i=0; i < d.association_tags_loop_length; ) {
+ 		d.association_tag	 = getBits (b, 0, i,  16);
+ 		out_SW_NL (4,"Association_tag: ",d.association_tag);
+		i += 2;
+	}
+	indent (-1);
+	b   += d.association_tags_loop_length;
+	len -= d.association_tags_loop_length;
+
+
+ d.transport_stream_id			= getBits (b, 0,  0,  16);
+ d.program_number			= getBits (b, 0, 16,  16);
+ d.org_network_id			= getBits (b, 0, 32,  16);
+ b   += 6;
+ len -= 6;
+
+ out_SW_NL  (4,"Transport_stream_ID: ",d.transport_stream_id);
+ out_S2W_NL (4,"Original_network_ID: ",d.org_network_id,
+	dvbstrOriginalNetwork_ID(d.org_network_id));
+
+
+
+ /* -- private data */
+ out_nl (4,"Private data bytes:");
+ indent (+1);
+ printhexdump_buf (4, b, len);
+ indent (-1);
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
   0x1B  MPEG4 video  descriptor 
   ISO 13818-1  
 */
@@ -1022,16 +1317,16 @@ void descriptorMPEG_MPEG4_audio (u_char *b)
 
 
 
+/* ... TODO ... */
 
-
-void descriptorMPEG_IOD (u_char *b)	 { out_nl (4," ... $$$ To do"); descriptorMPEG_any (b); }
-void descriptorMPEG_SL (u_char *b)	 { out_nl (4," ... $$$ To do"); }
-void descriptorMPEG_FMC (u_char *b)	 { out_nl (4," ... $$$ To do"); }
-void descriptorMPEG_External_ES_ID (u_char *b)	 { out_nl (4," ... $$$ To do"); }
-void descriptorMPEG_MuxCode (u_char *b)	 { out_nl (4," ... $$$ To do"); }
-void descriptorMPEG_FMXBufferSize (u_char *b)	 { out_nl (4," ... $$$ To do"); }
-void descriptorMPEG_MultiplexBuffer (u_char *b)	 { out_nl (4," ... $$$ To do"); }
-void descriptorMPEG_FlexMuxTiming (u_char *b)	 { out_nl (4," ... $$$ To do"); }
+void descriptorMPEG_IOD (u_char *b)	 { out_nl (4," ... $$$ Todo"); descriptorMPEG_any (b); }
+void descriptorMPEG_SL (u_char *b)	 { out_nl (4," ... $$$ Todo"); }
+void descriptorMPEG_FMC (u_char *b)	 { out_nl (4," ... $$$ Todo"); }
+void descriptorMPEG_External_ES_ID (u_char *b)	 { out_nl (4," ... $$$ Todo"); }
+void descriptorMPEG_MuxCode (u_char *b)	 { out_nl (4," ... $$$ Todo"); }
+void descriptorMPEG_FMXBufferSize (u_char *b)	 { out_nl (4," ... $$$ Todo"); }
+void descriptorMPEG_MultiplexBuffer (u_char *b)	 { out_nl (4," ... $$$ Todo"); }
+void descriptorMPEG_FlexMuxTiming (u_char *b)	 { out_nl (4," ... $$$ Todo"); }
 
 
 
