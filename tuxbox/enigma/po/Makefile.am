@@ -63,6 +63,7 @@ $(DOMAIN).pot-update: $(POTFILES) $(srcdir)/POTFILES.in
 	  --add-comments=TRANSLATORS: $(XGETTEXT_OPTIONS) \
 	  --files-from=$(srcdir)/POTFILES.in \
 	  --copyright-holder='$(COPYRIGHT_HOLDER)' \
+	  --from-code=utf-8 \
 	  --join-existing
 	test ! -f $(DOMAIN).po || { \
 	  if test -f $(srcdir)/$(DOMAIN).pot; then \
