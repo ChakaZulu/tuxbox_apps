@@ -770,10 +770,10 @@ bool CPINProtection::check()
 
 bool CZapProtection::check()
 {
+
 	int res;
 	char cPIN[5] = "";
 	string hint2;
-
 	do
 	{
 		strcpy( cPIN, "" );
@@ -795,14 +795,13 @@ bool CZapProtection::check()
 int CLockedMenuForwarder::exec(CMenuTarget* parent)
 {
 	Parent = parent;
-	if (check())
-	{
-		Parent = NULL;
-		return CMenuForwarder::exec(parent);
-	}
-	else
-	{
-		Parent = NULL;
-		return menu_return::RETURN_REPAINT;
-	}
+	if( g_settings.parentallock_prompt || AlwaysAsk )
+		if (!check())
+		{
+			Parent = NULL;
+			return menu_return::RETURN_REPAINT;
+		}
+
+	Parent = NULL;
+	return CMenuForwarder::exec(parent);
 }

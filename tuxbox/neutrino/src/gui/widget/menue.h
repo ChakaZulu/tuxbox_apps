@@ -329,17 +329,18 @@ class CZapProtection : public CPINProtection
 class CLockedMenuForwarder : public CMenuForwarder, public CPINProtection
 {
 	CMenuTarget* Parent;
+	bool AlwaysAsk;
 
 	protected:
 		virtual CMenuTarget* getParent(){ return Parent;};
 	public:
-		CLockedMenuForwarder(string Text, char* validPIN, bool Active=true, char *Option=NULL,
+		CLockedMenuForwarder(string Text, char* validPIN, bool alwaysAsk=false, bool Active=true, char *Option=NULL,
 		                     CMenuTarget* Target=NULL, string ActionKey="", bool Localizing= true,
 		                     uint DirectKey= CRCInput::RC_nokey, string IconName= "")
 
 		                     : CMenuForwarder(Text, Active, Option, Target, ActionKey, Localizing,
 		                     DirectKey, IconName) ,
-		                       CPINProtection( validPIN){};
+		                       CPINProtection( validPIN){AlwaysAsk = alwaysAsk;};
 
 		virtual int exec(CMenuTarget* parent);
 };

@@ -1024,7 +1024,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainMenu.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
 	mainMenu.addItem( new CMenuForwarder("mainmenu.settings", true, "", &mainSettings) );
-	mainMenu.addItem( new CMenuForwarder("mainmenu.service", true, "", &service) );
+	mainMenu.addItem( new CLockedMenuForwarder("mainmenu.service", g_settings.parentallock_pincode, false, true, "", &service) );
 //	mainMenu.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 //	mainMenu.addItem( new CMenuForwarder("mainmenu.info", true, "", new CDBoxInfoWidget, "",true) );
 
@@ -1036,7 +1036,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.video", true, "", &videoSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.audio", true, "", &audioSettings) );
-	mainSettings.addItem( new CLockedMenuForwarder("parentallock.parentallock", g_settings.parentallock_pincode, true, "", &parentallockSettings) );
+	mainSettings.addItem( new CLockedMenuForwarder("parentallock.parentallock", g_settings.parentallock_pincode, true, true, "", &parentallockSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.network", true, "", &networkSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.recording", true, "", &recordingSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.language", true, "", &languageSettings ) );
@@ -3341,7 +3341,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.395 2003/01/29 15:04:56 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.396 2003/02/02 16:00:56 dirch Exp $\n\n");
 	//LCD-Init
 	CLCD::getInstance()->init();
 
