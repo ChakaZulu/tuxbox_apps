@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.5 2002/03/18 15:08:50 field Exp $
+  $Id: sectionsdclient.cpp,v 1.6 2002/03/20 21:42:30 McClean Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: sectionsdclient.cpp,v $
+  Revision 1.6  2002/03/20 21:42:30  McClean
+  add channel-event functionality
+
   Revision 1.5  2002/03/18 15:08:50  field
   Updates...
 
@@ -200,3 +203,70 @@ void CSectionsdClient::setServiceChanged( unsigned ServiceKey, bool requestEvent
 	readResponse();
 	sectionsd_close();
 }
+
+
+CChannelEventList CSectionsdClient::getChannelEvents()
+{
+	CChannelEventList eList;
+
+	sectionsd::msgRequestHeader req;
+	req.version = 2;
+
+	req.command = sectionsd::actualEventListTVshortIDs;
+	req.dataLength = 0;
+	send((char*)&req, sizeof(req));
+
+
+	sectionsd::msgResponseHeader resp;
+	memset(&resp, 0, sizeof(resp));
+
+	if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0)
+	{
+		sectionsd_close();
+		return eList;
+	}
+	if(resp.dataLength<=0)
+	{
+		sectionsd_close();
+		return eList;
+	}
+
+	char* pData = new char[resp.dataLength] ;
+	if ( recv(sock_fd, pData, resp.dataLength, MSG_WAITALL)!= resp.dataLength )
+	{
+		delete[] pData;
+		sectionsd_close();
+		return eList;
+	}
+	sectionsd_close();
+
+	char *actPos = pData;
+	while(actPos<pData+resp.dataLength)
+	{
+		CChannelEvent aEvent;
+
+		aEvent.serviceID = (unsigned) *actPos;
+		actPos+=4;
+
+		aEvent.eventID = (unsigned long long) *actPos;
+		actPos+=8;
+
+		aEvent.startTime = (time_t) *actPos;
+		actPos+=4;
+
+		aEvent.duration = (unsigned) *actPos;
+		actPos+=4;
+
+		aEvent.description= actPos;
+		actPos+=strlen(actPos)+1;
+
+		aEvent.text= actPos;
+		actPos+=strlen(actPos)+1;
+
+		eList.insert(eList.end(), aEvent);
+	}
+
+	delete[] pData;
+	return eList;
+}
+

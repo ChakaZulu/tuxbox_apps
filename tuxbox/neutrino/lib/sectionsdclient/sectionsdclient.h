@@ -18,11 +18,26 @@
 
 
 #include <string>
+#include <vector>
 
 #include "../sectionsdMsg.h"
 #include "eventserver.h"
 
 using namespace std;
+
+
+class CChannelEvent
+{
+	public:
+		unsigned 			serviceID;
+		unsigned long long	eventID;
+		string				description;
+		string				text;
+		time_t				startTime;
+		unsigned			duration;
+};
+
+typedef vector<CChannelEvent> CChannelEventList;
 
 class CSectionsdClient
 {
@@ -45,6 +60,9 @@ class CSectionsdClient
 		void setPauseScanning( bool doPause );
 
 		void setServiceChanged( unsigned ServiceKey, bool requestEvent );
+
+
+		CChannelEventList getChannelEvents();
 
 		/*
 			ein beliebiges Event anmelden
