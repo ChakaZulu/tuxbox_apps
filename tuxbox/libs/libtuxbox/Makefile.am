@@ -1,7 +1,7 @@
 lib_LTLIBRARIES = libtuxbox.la
 
 tuxboxincludedir = ${includedir}/tuxbox
-tuxboxinclude_HEADERS = libtuxbox.h
+tuxboxinclude_HEADERS = tuxbox.h
 
-libtuxbox_la_SOURCES = libtuxbox.c
+libtuxbox_la_SOURCES = tuxbox.c
 

@@ -1,33 +1,25 @@
 /*
-
-  $Id: tuxbox.h,v 1.4 2003/02/19 16:17:23 waldi Exp $
- 
-  $Log: tuxbox.h,v $
-  Revision 1.4  2003/02/19 16:17:23  waldi
-  revert and change kernel header
-
-  Revision 1.2  2003/02/18 18:42:13  obi
-  #include <tuxbox/tuxbox.h>
-
-  Revision 1.1  2003/01/04 23:38:46  waldi
-  move libtuxbox
-
-  Revision 1.4  2003/01/03 11:13:09  Jolt
-  - Added tag defines
-  - Renamed *manufacturer* to *vendor*
-  - Added some caps
-
-  Revision 1.3  2003/01/01 22:14:51  Jolt
-  - Renamed files
-  - Merged in tuxbox.h
-
-  Revision 1.2  2003/01/01 22:00:02  Jolt
-  Whooops ;)
-
-  Revision 1.1  2003/01/01 21:30:10  Jolt
-  Tuxbox info lib
-
-*/
+ * tuxbox.h - TuxBox hardware info
+ *
+ * Copyright (C) 2003 Florian Schirmer <jolt@tuxbox.org>
+ *                    Bastian Blank <waldi@tuxbox.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *
+ * $Id: tuxbox.h,v 1.5 2003/02/19 16:41:02 waldi Exp $
+ */
 
 #ifndef TUXBOX_H
 #define TUXBOX_H
@@ -38,12 +30,13 @@
 extern "C" {
 #endif
 
-unsigned int tuxbox_get_capabilities(void);
-unsigned int tuxbox_get_vendor(void);
-char *tuxbox_get_vendor_str(void);
-unsigned int tuxbox_get_model(void);
-char *tuxbox_get_model_str(void);
-unsigned int tuxbox_get_version(void);
+tuxbox_capabilities_t tuxbox_get_capabilities (void);
+tuxbox_model_t tuxbox_get_model (void);
+const char *tuxbox_get_model_str (void);
+tuxbox_submodel_t tuxbox_get_submodel (void);
+const char *tuxbox_get_submodel_str (void);
+tuxbox_vendor_t tuxbox_get_vendor (void);
+const char *tuxbox_get_vendor_str (void);
 
 #ifdef __cplusplus
 }
