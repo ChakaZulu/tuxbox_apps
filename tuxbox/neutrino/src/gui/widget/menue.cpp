@@ -80,11 +80,11 @@ CMenuWidget::~CMenuWidget()
 	page_end.clear();
 }
 
-void CMenuWidget::addItem(CMenuItem* menuItem, bool defaultselected)
+void CMenuWidget::addItem(CMenuItem* menuItem, const bool defaultselected)
 {
 	if (defaultselected)
 		selected = items.size();
-	items.insert(items.end(), menuItem);
+	items.push_back(menuItem);
 }
 
 void CMenuWidget::setOnPaintNotifier( COnPaintNotifier* nf )
@@ -283,7 +283,7 @@ void CMenuWidget::paint()
 	int heightCurrPage=0;
 	page_end.clear();
 	page_start.clear();
-	page_start.insert(page_start.end(), 0);
+	page_start.push_back(0);
 	total_pages=1;
 	for (unsigned int i= 0; i< items.size(); i++)
 	{
@@ -292,13 +292,13 @@ void CMenuWidget::paint()
 		heightCurrPage+=item_height;
 		if(heightCurrPage > (height-hheight))
 		{
-			page_end.insert(page_end.end(), i-1);
-			page_start.insert(page_start.end(), i);
+			page_end.push_back(i - 1);
+			page_start.push_back(i);
 			total_pages++;
 			heightCurrPage=item_height;
 		}
 	}
-	page_end.insert(page_end.end(), items.size()-1);
+	page_end.push_back(items.size() - 1);
 
 	iconOffset= 0;
 	for (unsigned int i= 0; i< items.size(); i++)
@@ -528,7 +528,7 @@ CMenuOptionStringChooser::~CMenuOptionStringChooser()
 
 void CMenuOptionStringChooser::addOption( std::string value)
 {
-	options.insert(options.end(), value);
+	options.push_back(value);
 }
 
 int CMenuOptionStringChooser::exec(CMenuTarget*)

@@ -73,7 +73,7 @@ CBouquet* CBouquetList::addBouquet(const std::string& name, int BouquetKey, bool
 		BouquetKey= Bouquets.size();
 
 	CBouquet* tmp = new CBouquet( BouquetKey, name, locked );
-	Bouquets.insert(Bouquets.end(), tmp);
+	Bouquets.push_back(tmp);
 	return(tmp);
 }
 

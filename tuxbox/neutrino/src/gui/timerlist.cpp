@@ -810,9 +810,9 @@ int CTimerList::newTimer()
 	for(; bouquet != bouquetlist.end();bouquet++)
 	{
 		CMenuWidget* mwtv = new CMenuWidget("timerlist.channelselect", "settings.raw");
-		toDelete.insert(toDelete.end(), mwtv);
+		toDelete.push_back(mwtv);
 		CMenuWidget* mwradio = new CMenuWidget("timerlist.channelselect", "settings.raw");
-		toDelete.insert(toDelete.end(), mwradio);
+		toDelete.push_back(mwradio);
 		CZapitClient::BouquetChannelList subchannellist;
 		zapit.getBouquetChannels(bouquet->bouquet_nr,subchannellist,CZapitClient::MODE_TV, true); // UTF-8
 		CZapitClient::BouquetChannelList::iterator channel = subchannellist.begin();

@@ -103,7 +103,7 @@ void EventList::readEvents(const t_channel_id channel_id)
 
 		evt.description= g_Locale->getText("epglist.noevents") ;
 		evt.eventID = 0;
-		evtlist.insert(evtlist.end(), evt);
+		evtlist.push_back(evt);
 
 	}
 	if (current_event == (unsigned int)-1)

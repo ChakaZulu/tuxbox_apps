@@ -97,7 +97,7 @@ std::string fname;
 			parseCfg(&new_plugin);
 			if(!plugin_exists(new_plugin.filename))
 			{
-				plugin_list.insert(plugin_list.end(), new_plugin);
+				plugin_list.push_back(new_plugin);
 				number_of_plugins++;
 			}
 		}

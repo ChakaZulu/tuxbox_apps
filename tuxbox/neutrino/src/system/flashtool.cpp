@@ -470,7 +470,7 @@ void CMTDInfo::getPartitionInfo()
 				tmp->name = tmpstr.substr( tmpstr.find("\"")+1, tmpstr.rfind("\"")-tmpstr.find("\"")-1);
 				sprintf((char*) &buf, "/dev/mtd/%d", mtdnr);
 				tmp->filename = buf;
-			mtdData.insert( mtdData.end(), tmp);
+			mtdData.push_back(tmp);
 		}
 	}
 	fclose(fd);

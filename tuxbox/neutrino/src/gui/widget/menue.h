@@ -77,10 +77,7 @@ class CMenuTarget
 		CMenuTarget(){}
 		virtual ~CMenuTarget(){}
 		virtual void hide(){}
-		virtual int exec(CMenuTarget* parent, std::string actionKey)
-		{
-			return 0;
-		}
+		virtual int exec(CMenuTarget* parent, std::string actionKey) = 0;
 };
 
 
@@ -288,20 +285,12 @@ class CMenuWidget : public CMenuTarget
 		CMenuWidget(const char * const Name, const std::string Icon = "", const int mwidth = 400, const int mheight = 576, const bool Localizing = true);
 		~CMenuWidget();
 
-		virtual void addItem(CMenuItem* menuItem, bool defaultselected=false);
+		virtual void addItem(CMenuItem* menuItem, const bool defaultselected = false);
 		virtual void paint();
 		virtual void hide();
 		virtual int exec(CMenuTarget* parent, std::string actionKey);
 
 		void setOnPaintNotifier( COnPaintNotifier* );
-		void setName(std::string Name)
-		{
-			name=Name;
-		}
-		void setIcon(std::string Icon)
-		{
-			iconfile=Icon;
-		}
 };
 
 class CPINProtection

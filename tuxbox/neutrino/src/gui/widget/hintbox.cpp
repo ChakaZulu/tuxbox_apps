@@ -55,7 +55,7 @@ CHintBox::CHintBox(const char * const Caption, std::string Text, std::string Ico
 		pos = Text.find_first_of("\n");
 		if ( pos!=-1 )
 		{
-			text.insert( text.end(), Text.substr( 0, pos ) );
+			text.push_back(Text.substr( 0, pos));
 			Text= Text.substr( pos+ 1, uint(-1) );
 		}
 	} while ( ( pos != -1 ) );

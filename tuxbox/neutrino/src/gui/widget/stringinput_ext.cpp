@@ -73,7 +73,7 @@ CExtendedInput::CExtendedInput(const char * const Name, char* Value, const char 
 
 void CExtendedInput::addInputField( CExtendedInput_Item* fld )
 {
-	inputFields.insert(inputFields.end(), fld);
+	inputFields.push_back(fld);
 }
 
 

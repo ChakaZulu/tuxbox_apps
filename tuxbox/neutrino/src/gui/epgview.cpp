@@ -61,7 +61,7 @@ void CEpgData::start()
 
 }
 
-void CEpgData::addTextToArray( string text  )
+void CEpgData::addTextToArray(std::string text)
 {
 	//printf("line: >%s<\n", text.c_str() );
 	if (text==" ")
@@ -69,13 +69,13 @@ void CEpgData::addTextToArray( string text  )
 		emptyLineCount ++;
 		if(emptyLineCount<2)
 		{
-			epgText.insert(epgText.end(), text );
+			epgText.push_back(text);
 		}
 	}
 	else
 	{
 		emptyLineCount = 0;
-		epgText.insert(epgText.end(), text );
+		epgText.push_back(text);
 	}
 }
 
