@@ -768,9 +768,9 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
             else
             {
                ev->key = iev.code;
-               if(iev.value == 1) //KEY RELEASE
+               if(iev.value == 1) // key pressed event
                   retval = FBVNC_EVENT_BTN_DOWN;
-               else // KEY PRESS
+               else // key released event
                   retval=FBVNC_EVENT_BTN_UP;
             }
 
