@@ -261,6 +261,8 @@ int main(int argc, char **argv)
 	printf("Network LCD-Driver 0.1\n\n");
 
 	fontRenderer = new fontRenderClass( &display );
+	fontRenderer->AddFont(FONTDIR "/Arial.ttf");
+	fontRenderer->InitFontCache();
 	fonts.channelname=fontRenderer->getFont("Arial", "Regular", 15);
 	fonts.time=fontRenderer->getFont("Arial", "Regular", 14);
 	fonts.menutitle=fontRenderer->getFont("Arial", "Regular", 15);
