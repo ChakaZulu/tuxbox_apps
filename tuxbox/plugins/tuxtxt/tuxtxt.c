@@ -5,6 +5,7 @@
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
+ *    V1.16: colorkeys fixed                                                  *
  *    V1.15: added colorkeys                                                  *
  *    V1.14: use videoformat-settings                                         *
  *    V1.13: some fixes                                                       *
@@ -32,7 +33,7 @@ void plugin_exec(PluginParam *par)
 {
 	//show versioninfo
 
-		printf("\nTuxTxt 1.15 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
+		printf("\nTuxTxt 1.16 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
 
 	//get params
 
@@ -201,11 +202,10 @@ int Init()
 
 	//open pig
 
-		pig = -1;
-
 		if((pig = open("/dev/dbox/pig0", O_RDWR)) == -1)
 		{
 			perror("TuxTxt <open /dev/dbox/pig0>");
+			return 0;
 		}
 
 	//open avs
@@ -725,6 +725,7 @@ void Prev100()
 
 	lastpage = page;
 	page = prev_100;
+	subpage = subpagetable[page];
 	pageupdate = 1;
 
 	printf("TuxTxt <Prev100 => %.3X>\n", page);
@@ -740,6 +741,7 @@ void Prev10()
 
 	lastpage = page;
 	page = prev_10;
+	subpage = subpagetable[page];
 	pageupdate = 1;
 
 	printf("TuxTxt <Prev10 => %.3X>\n", page);
@@ -755,6 +757,7 @@ void Next10()
 
 	lastpage = page;
 	page = next_10;
+	subpage = subpagetable[page];
 	pageupdate = 1;
 
 	printf("TuxTxt <Next10 => %.3X>\n", page);
@@ -770,6 +773,7 @@ void Next100()
 
 	lastpage = page;
 	page = next_100;
+	subpage = subpagetable[page];
 	pageupdate = 1;
 
 	printf("TuxTxt <Next100 => %.3X>\n", page);
@@ -1017,52 +1021,49 @@ void SwitchScreenMode()
 {
 	int error;
 
-	if(pig != -1)
-	{
-		//reset transparency mode
+	//reset transparency mode
 
-			if(transpmode) transpmode = 0;
+		if(transpmode) transpmode = 0;
 
-		//toggle mode
+	//toggle mode
 
-			screenmode++;
-			screenmode &= 1;
+		screenmode++;
+		screenmode &= 1;
 
-			printf("TuxTxt <SwitchScreenMode => %d>\n", screenmode);
+		printf("TuxTxt <SwitchScreenMode => %d>\n", screenmode);
 
-		//update page
+	//update page
 
-			pageupdate = 1;
+		pageupdate = 1;
 
-		//clear backbuffer
+	//clear backbuffer
 
-			memset(&backbuffer, black, sizeof(backbuffer));
+		memset(&backbuffer, black, sizeof(backbuffer));
 
-		//set mode
+	//set mode
 
-			if(screenmode)
-			{
-				fontwidth  =  8;
-				fontheight = 21;
+		if(screenmode)
+		{
+			fontwidth  =  8;
+			fontheight = 21;
 
-				avia_pig_set_pos(pig, (StartX+322-55), StartY);
-				avia_pig_set_size(pig, 320, 526);
-				avia_pig_set_stack(pig, 1);
-				avia_pig_show(pig);
-			}
-			else
-			{
-				fontwidth  = 16;
-				fontheight = 22;
+			avia_pig_set_pos(pig, (StartX+322-55), StartY);
+			avia_pig_set_size(pig, 320, 526);
+			avia_pig_set_stack(pig, 1);
+			avia_pig_show(pig);
+		}
+		else
+		{
+			fontwidth  = 16;
+			fontheight = 22;
 
-				avia_pig_hide(pig);
-			}
+			avia_pig_hide(pig);
+		}
 
-			if((error = FT_Set_Pixel_Sizes(face, fontwidth, fontheight)) != 0)
-			{
-				printf("TuxTxt <FT_Set_Pixel_Sizes => 0x%.2X>", error);
-			}
-	}
+		if((error = FT_Set_Pixel_Sizes(face, fontwidth, fontheight)) != 0)
+		{
+			printf("TuxTxt <FT_Set_Pixel_Sizes => 0x%.2X>", error);
+		}
 }
 
 /******************************************************************************
