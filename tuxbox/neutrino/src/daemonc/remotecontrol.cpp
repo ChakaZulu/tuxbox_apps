@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: remotecontrol.cpp,v 1.31 2001/11/21 20:31:58 field Exp $
+// $Id: remotecontrol.cpp,v 1.32 2001/11/22 12:54:39 field Exp $
 //
 // $Log: remotecontrol.cpp,v $
+// Revision 1.32  2001/11/22 12:54:39  field
+// Kleinere Bugfixes (CDs und Infoviewer)
+//
 // Revision 1.31  2001/11/21 20:31:58  field
 // Perspektiven gefixt
 //
@@ -119,6 +122,7 @@ void CRemoteControl::send()
 
 void CRemoteControl::getNVODs( char *channel_name )
 {
+    static const int max_retry= 20;
     char rip[]="127.0.0.1";
     int rep_cnt= 0;
     CSubServiceListSorted   nvod_list;
@@ -130,10 +134,10 @@ void CRemoteControl::getNVODs( char *channel_name )
     {
         pthread_mutex_unlock( &send_mutex );
         rep_cnt++;
-        if (rep_cnt> 1 )
+        if ( rep_cnt> 1 )
         {
             usleep(200000);
-            printf("CRemoteControl - getNVODs - try #%d\n", rep_cnt);
+            printf("CRemoteControl - retrying getNVODs\n");
         }
 
         int sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -188,11 +192,18 @@ void CRemoteControl::getNVODs( char *channel_name )
                 }
                 delete[] pData;
             }
+
+            if ( ( nvod_list.size()> 0 ) && ( rep_cnt> 1 ) && ( rep_cnt< ( max_retry- 1) ) )
+            {
+                nvod_list.clear();
+                rep_cnt= max_retry- 1;
+            }
+
             close(sock_fd);
         }
         pthread_mutex_trylock( &send_mutex );
 
-    } while ( ( nvod_list.size()== 0 ) && ( rep_cnt< 20) && ( strlen( audio_chans_int.name )!= 0 ) );
+    } while ( ( nvod_list.size()== 0 ) && ( rep_cnt< max_retry ) && ( strcmp(remotemsg.param3, channel_name )== 0 ) );
 
     subChannels_internal.clear( channel_name );
     subChannels_internal.are_subchannels= false;

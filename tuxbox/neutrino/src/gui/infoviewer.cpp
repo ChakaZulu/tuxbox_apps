@@ -30,11 +30,11 @@
 */
 
 //
-// $Id: infoviewer.cpp,v 1.48 2001/11/21 20:20:09 field Exp $
+// $Id: infoviewer.cpp,v 1.49 2001/11/22 12:54:39 field Exp $
 //
 // $Log: infoviewer.cpp,v $
-// Revision 1.48  2001/11/21 20:20:09  field
-// Perspektiven gefixt
+// Revision 1.49  2001/11/22 12:54:39  field
+// Kleinere Bugfixes (CDs und Infoviewer)
 //
 // Revision 1.47  2001/11/15 11:42:41  McClean
 // gpl-headers added
@@ -470,7 +470,7 @@ void CInfoViewer::showData()
                 if (runningPercent>100)
                     runningPercent=0;
 
-                 Flag|=4;
+                 Flag|= sectionsd::epg_has_current;
                 //printf("%s %s %d\n", runningDuration, runningStart, runningPercent);
             }
         }
@@ -489,13 +489,13 @@ void CInfoViewer::showData()
     	int height2= 20;//int( g_Fonts->infobar_channame->getHeight()/1.7);
 
     //	g_FrameBuffer->paintBox(BoxEndX-130, BoxStartY, BoxEndX, ChanNameY+2, COL_INFOBAR+1); //bounding box (off)
-        if (Flag&4)
+        if ( Flag & sectionsd::epg_has_current)
         {
         	g_FrameBuffer->paintBoxRel(BoxEndX-114, posy,   2+100+2, height2, COL_INFOBAR_SHADOW); //border
         	g_FrameBuffer->paintBoxRel(BoxEndX-112, posy+2, runningPercent+2, height2-4, COL_INFOBAR+7);//fill(active)
         	g_FrameBuffer->paintBoxRel(BoxEndX-112+runningPercent, posy+2, 100-runningPercent, height2-4, COL_INFOBAR+3);//fill passive
         }
-        if (Flag&1)
+        if ( Flag & sectionsd::epg_has_anything )
         {
             g_FrameBuffer->paintIcon("rot.raw", BoxEndX- 4* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
             g_Fonts->infobar_small->RenderString(BoxEndX- 4* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.eventlist").c_str(), COL_INFOBAR);
@@ -513,7 +513,7 @@ void CInfoViewer::showData()
     if ( is_nvod )
         g_FrameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR);
 
-    if (Flag&8)
+    if ( Flag & sectionsd::epg_not_broadcast )
     {
         // kein EPG verfügbar
         ChanInfoY += height;
@@ -523,7 +523,7 @@ void CInfoViewer::showData()
     else
     {
         // irgendein EPG gefunden
-        if ( (Flag&2) && (!(Flag&4)) )
+        if ( ( Flag & sectionsd::epg_has_later ) && ( !( Flag & sectionsd::epg_has_current )) )
         {
             // spätere Events da, aber kein aktuelles...
             ChanInfoY += height;
@@ -649,11 +649,14 @@ void * CInfoViewer::InfoViewerThread (void *arg)
 //                printf("CInfoViewer::InfoViewerThread getEPGData for %s\n", query.c_str());
 
                 gotEPG = InfoViewer->getEPGData(query, query_onid_tsid);
-                gotEPG = gotEPG && (InfoViewer->Flag&12);
-                if (InfoViewer->Flag&2)
+                gotEPG = gotEPG && (InfoViewer->Flag & ( sectionsd::epg_not_broadcast | sectionsd::epg_has_current ) );
+                if ( ( InfoViewer->Flag & sectionsd::epg_has_later ) && (!gotEPG) )
                 {
                     if (repCount> 4)
+                    {
                         repCount= 4;
+                        printf("CInfoViewer::InfoViewerThread epg_has_later -> repCount set to 4\n");
+                    }
                     else
                     if (repCount== 1)
                         gotEPG= true;
