@@ -3502,7 +3502,6 @@ void eZapMain::deleteService( eServiceSelector *sel )
 		if ( ref.type == eServiceReference::idDVB && !ref.path )
 		{
 			sel->removeCurrent(true);
-			int oldmovemode = sel->movemode;
 			sel->movemode |= 2;
 			eTransponderList::getInstance()->removeService((eServiceReferenceDVB&)ref);
 			sel->movemode &= ~2;
