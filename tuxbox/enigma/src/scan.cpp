@@ -280,11 +280,13 @@ int tsTryLock::eventHandler(const eWidgetEvent &e)
 			setFocus(b_abort);
 			break;
 		case eWidgetEvent::wantClose:
-			if (!inProgress)
-				break;
-			else
-				ret=e.parameter;
-			return 1;
+			inProgress=0;
+			if ( e.parameter == 1 ) // globalCancel
+			{
+				eWidgetEvent ev = e;
+				ev.parameter=-1;
+				return eWidget::eventHandler(ev);
+			}
 		default:
 			break;
 	}
@@ -1070,7 +1072,12 @@ int TransponderScan::Exec()
 			showScanPic();
 			Decoder::locked=1;
 			if ( !service )
+			{
 				service = eServiceInterface::getInstance()->service;
+				// must stop running TS Playback ( demux source memory )
+				if ( service && service.path && service.type == eServiceReference::idDVB )
+					eServiceInterface::getInstance()->stop();
+			}
 
 			eTransponder transponder(*eDVB::getInstance()->settings->getTransponders());
 			eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
@@ -1138,7 +1145,12 @@ int TransponderScan::Exec()
 			Decoder::locked=1;
 
 			if ( !service )
+			{
 				service = eServiceInterface::getInstance()->service;
+				// must stop running TS Playback ( demux source memory )
+				if ( service && service.path && service.type == eServiceReference::idDVB )
+					eServiceInterface::getInstance()->stop();
+			}
 
 			tsAutomatic automatic_scan(this);
 #ifndef DISABLE_LCD
@@ -1192,7 +1204,12 @@ int TransponderScan::Exec()
 			Decoder::locked=1;
 
 			if ( !service )
+			{
 				service = eServiceInterface::getInstance()->service;
+				// must stop running TS Playback ( demux source memory )
+				if ( service && service.path && service.type == eServiceReference::idDVB )
+					eServiceInterface::getInstance()->stop();
+			}
 
 			while ( toScan.size() )
 			{
@@ -1328,7 +1345,12 @@ int TransponderScan::Exec()
 				if ( sapi )
 					last_orbital_pos = sapi->getOrbitalPosition();
 				if ( !service )
+				{
 					service = eServiceInterface::getInstance()->service;
+					// must stop running TS Playback ( demux source memory )
+					if ( service && service.path && service.type == eServiceReference::idDVB )
+						eServiceInterface::getInstance()->stop();
+				}
 			}
 
 			tsScan scan(this);

@@ -66,7 +66,6 @@ class eDVBScanController: public eDVBController, public Object
 
 	void freeCheckFinished();
 	Signal0<void> freeCheckFinishedCallback;
-	int cancel;
 public:
 	bool abort();
 	enum

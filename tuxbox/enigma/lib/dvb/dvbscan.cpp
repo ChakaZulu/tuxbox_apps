@@ -31,14 +31,20 @@ eDVBNamespace eTransponder::buildNamespace(eOriginalNetworkID onid, eTransportSt
 
 bool eDVBScanController::abort()
 {
-	if (!knownTransponder.size())
-		return false;
-	dvb.tPAT.abort();
-	dvb.tSDT.abort();
-	dvb.tNIT.abort();
-	dvb.tONIT.abort();
-	dvb.tBAT.abort();
-	cancel=1;
+	if ( dvb.getState() == eDVBScanState::stateScanWait )
+	{
+		dvb.tSDT.abort();
+		dvb.tNIT.abort();
+		dvb.tONIT.abort();
+		dvb.tBAT.abort();
+	}
+	if ( dvb.getState() == eDVBScanState::stateScanGetPAT )
+		dvb.tPAT.abort();
+	if ( dvb.getState() != eDVBState::stateIdle )
+	{
+		dvb.setState(eDVBState(eDVBState::stateIdle));
+		dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanCompleted));
+	}
 	return true;
 }
 
@@ -46,7 +52,6 @@ bool eDVBScanController::abort()
 eDVBScanController::eDVBScanController(eDVB &dvb)
 	: eDVBController(dvb), transponder(0)
 {
-	cancel=0;
 	CONNECT(dvb.tPAT.tableReady, eDVBScanController::PATready);
 	CONNECT(dvb.tSDT.tableReady, eDVBScanController::SDTready);
 	CONNECT(dvb.tNIT.tableReady, eDVBScanController::NITready);
@@ -62,6 +67,7 @@ eDVBScanController::eDVBScanController(eDVB &dvb)
 	fprintf( out, "Begin Transponderscan\n");
 	fclose(out);
 #endif
+	dvb.setState(eDVBState(eDVBState::stateIdle));
 }
 
 eDVBScanController::~eDVBScanController()
@@ -105,7 +111,7 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 
 		eTransponder* next = 0;
 
-		while ( !cancel && current != knownTransponder.end() && !next )
+		while ( current != knownTransponder.end() && !next )
 		{
 			if ( current->state == eTransponder::stateToScan )
 				next = &(*current);
@@ -114,11 +120,7 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 		}
 
 		if (!next)
-		{
-			if ( cancel )
-				cancel=0;
 			dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanCompleted));
-		}
 		else
 		{
 			transponder=next;
@@ -327,32 +329,57 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 
 void eDVBScanController::PATready(int error)
 {
-	eDebug("[SCAN] PATready %d", error);
-	dvb.event(eDVBScanEvent(error?eDVBScanEvent::eventScanError:eDVBScanEvent::eventScanGotPAT));
+	if ( dvb.getState() == eDVBScanState::stateScanGetPAT )
+	{
+		eDebug("[SCAN] PATready %d", error);
+		dvb.event(eDVBScanEvent(error?eDVBScanEvent::eventScanError:eDVBScanEvent::eventScanGotPAT));
+	}
+	else
+		eDebug("[SCAN] PATready but state not stateScanGetPAT... ignore");
 }
 
 void eDVBScanController::SDTready(int error)
 {
-	eDebug("[SCAN] SDTready %d", error);
-	dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanGotSDT));
+	if ( dvb.getState() == eDVBScanState::stateScanWait )
+	{
+		eDebug("[SCAN] SDTready %d", error);
+		dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanGotSDT));
+	}
+	else
+		eDebug("[SCAN] SDTready but not stateScanWait... ignore");
 }
 
 void eDVBScanController::NITready(int error)
 {
-	eDebug("[SCAN] NITready %d", error);
-	dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanGotNIT));
+	if ( dvb.getState() == eDVBScanState::stateScanWait )
+	{
+		eDebug("[SCAN] NITready %d", error);
+		dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanGotNIT));
+	}
+	else
+		eDebug("[SCAN] NITready but not stateScanWait... ignore");
 }
 
 void eDVBScanController::ONITready(int error)
 {
-	eDebug("[SCAN] ONITready %d", error);
-	dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanGotONIT));
+	if ( dvb.getState() == eDVBScanState::stateScanWait )
+	{
+		eDebug("[SCAN] ONITready %d", error);
+		dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanGotONIT));
+	}
+	else
+		eDebug("[SCAN] ONITready but not stateScanWait... ignore");
 }
 
 void eDVBScanController::BATready(int error)
 {
-	eDebug("[SCAN] BATready %d", error);
-	dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanGotBAT));
+	if ( dvb.getState() == eDVBScanState::stateScanWait )
+	{
+		eDebug("[SCAN] BATready %d", error);
+		dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanGotBAT));
+	}
+	else
+		eDebug("[SCAN] BATready but not stateScanWait... ignore");
 }
 
 void eDVBScanController::handleSDT(const SDT *sdt)
