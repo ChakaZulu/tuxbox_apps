@@ -59,6 +59,7 @@
 #include <global.h>
 #include <neutrino.h>
 
+#define OLD_RC_API 1
 #ifdef OLD_RC_API
 #define RC_EVENT_DEVICE "/dev/dbox/rc0"
 #define RC_standby_release (KEY_MAX + 1)
@@ -468,7 +469,7 @@ void CRCInput::getMsgAbsoluteTimeout(uint *msg, uint* data, unsigned long long *
 
 void CRCInput::getMsg(uint *msg, uint *data, int Timeout, bool bAllowRepeatLR)
 {
-	getMsg_us( msg, (uint *)data, (unsigned long long) Timeout * 100* 1000, bAllowRepeatLR );
+	getMsg_us( msg, data, (unsigned long long) Timeout * 100* 1000, bAllowRepeatLR );
 }
 
 void CRCInput::getMsg_ms(uint *msg, uint *data, int Timeout, bool bAllowRepeatLR)
@@ -925,10 +926,14 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 									*data = *(unsigned*) p;
 								break;
 #endif
-						case CZapitClient::EVT_SCAN_FAILED:
-							*msg  = NeutrinoMessages::EVT_SCAN_FAILED;
-							*data = 0;
-							break;
+							case CZapitClient::EVT_SCAN_FAILED:
+									*msg  = NeutrinoMessages::EVT_SCAN_FAILED;
+									*data = 0;
+								break;
+							case CZapitClient::EVT_ZAP_MOTOR:
+									*msg = NeutrinoMessages::EVT_ZAP_MOTOR;
+									*data = *(unsigned*) p;
+								break;
 						default:
 							printf("[neutrino] event INITID_ZAPIT - unknown eventID 0x%x\n",  emsg.eventID );
 						}

@@ -541,6 +541,20 @@ void CInfoViewer::showFailure()
 	ShowHint ( "messagebox.error", g_Locale->getText("infoviewer.notavailable"), "info.raw", 430 );
 }
 
+void CInfoViewer::showMotorMoving(int duration)
+{
+	char text[256];
+	char buffer[10];
+	
+	sprintf(buffer, "%d", duration);
+	strcpy(text, g_Locale->getText("infoviewer.motor_moving").c_str());
+	strcat(text, " (");
+	strcat(text, buffer);
+	strcat(text, " s)");
+	
+	ShowHint( "messagebox.info", text, "info.raw", g_Fonts->menu->getRenderWidth(text) + 10, duration);
+}
+
 int CInfoViewer::handleMsg(uint msg, uint data)
 {
     if ( ( msg == NeutrinoMessages::EVT_CURRENTNEXT_EPG ) ||
@@ -634,6 +648,11 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 			#endif
 		}
 	    return messages_return::handled;
+	}
+	else if ( msg == NeutrinoMessages::EVT_ZAP_MOTOR)
+	{
+         	showMotorMoving(data);
+         	return messages_return::handled;
 	}
     else if ( msg == NeutrinoMessages::EVT_MODECHANGED )
 	{
