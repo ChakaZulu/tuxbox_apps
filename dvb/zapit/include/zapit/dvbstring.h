@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/dvbstring.h,v 1.1 2002/10/06 22:18:25 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/dvbstring.h,v 1.2 2002/10/07 23:36:27 thegoodguy Exp $
  *
  * Strings conforming to the DVB Standard - d-box2 linux project
  *
@@ -26,38 +26,51 @@
 
 #include <string>
 
+#include "xmlinterface.h"
+
 class CDVBString
 {
-	private:
-		std::string content;
+ private:
+	std::string content;
 
-	public:
-		CDVBString(const char * the_content, const int size)
+ public:
+	CDVBString(const char * the_content, const int size)
+		{
+			int i;
+
+			for (i = 0; i < size; i++)                            // skip initial encoding information
+				if (((unsigned char)the_content[i]) >= 0x20)
+					break;
+
+			if (size - i == 0)
+				content = "";
+			else
 			{
-				int i;
+				std::string s;
+				while(i < size)
+				{
+					i++;
+					// skip characters 0x00 - 0x1F & 0x80 - 0x9F
+					if ((((unsigned char)the_content[i]) & 0x60) != 0)
+						s += the_content[i];
+				}
+				content = convert_to_UTF8(s);
+			}
+//					content = convert_to_UTF8(std::string(&(the_content[i]), size - i));
+		};
 
-				for (i = 0; i < size; i++)                            // skip initial encoding information
-					if (((unsigned char)the_content[i]) >= 0x20)
-						break;
-
-				if (size - i == 0)
-					content = "";
-				else
-					content = std::string(&(the_content[i]), size - i);
-			};
-
-		bool operator== (const CDVBString s)
-			{
-				return (this->content == s.content);
-			};
+	bool operator== (const CDVBString s)
+		{
+			return (this->content == s.content);
+		};
 
 
-		bool operator!= (const CDVBString s)
-			{
-				return !(operator==(s));
-			};
+	bool operator!= (const CDVBString s)
+		{
+			return !(operator==(s));
+		};
 
-		std::string           getContent()           { return content; };
+	std::string           getContent()           { return content; };
 // TODO:
 // getEncoding()
 };

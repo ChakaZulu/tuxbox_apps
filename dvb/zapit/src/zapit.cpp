@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.254 2002/10/05 15:25:32 obi Exp $
+ * $Id: zapit.cpp,v 1.255 2002/10/07 23:36:27 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -820,7 +820,7 @@ bool parse_command (CZapitMessages::commandHead &rmsg)
 				CZapitMessages::commandRenameBouquet msgRenameBouquet;
 				read(connfd, &msgRenameBouquet, sizeof(msgRenameBouquet)); // bouquet & channel number are already starting at 0!
 				if (msgRenameBouquet.bouquet < bouquetManager->Bouquets.size())
-					bouquetManager->Bouquets[msgRenameBouquet.bouquet]->Name = msgRenameBouquet.name;
+					bouquetManager->Bouquets[msgRenameBouquet.bouquet]->Name = convert_to_UTF8(std::string(msgRenameBouquet.name));
 				break;
 			}
 			case CZapitMessages::CMD_BQ_EXISTS_BOUQUET:
@@ -1016,7 +1016,7 @@ int main (int argc, char **argv)
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.254 2002/10/05 15:25:32 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.255 2002/10/07 23:36:27 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1237,7 +1237,7 @@ void sendBouquets(bool emptyBouquetsToo)
 			{
 				CZapitClient::responseGetBouquets msgBouquet;
 
-				strncpy(msgBouquet.name, bouquetManager->Bouquets[i]->Name.c_str(), 30);
+				strncpy(msgBouquet.name, Utf8_to_Latin1(bouquetManager->Bouquets[i]->Name).c_str(), 30);
 				msgBouquet.bouquet_nr = i;
 				msgBouquet.locked     = bouquetManager->Bouquets[i]->bLocked;
 				msgBouquet.hidden     = bouquetManager->Bouquets[i]->bHidden;
@@ -1259,7 +1259,7 @@ void internalSendChannels(ChannelList* channels, const unsigned int first_channe
 			continue;
 
 		CZapitClient::responseGetBouquetChannels response;
-		strncpy(response.name, (*channels)[i]->getName().c_str(),30);
+		strncpy(response.name, Utf8_to_Latin1((*channels)[i]->getName()).c_str(),30);
 		response.channel_id = (*channels)[i]->getChannelID();
 		response.nr = first_channel_nr + i;
 

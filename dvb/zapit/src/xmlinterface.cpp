@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.8 2002/10/07 22:16:04 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.9 2002/10/07 23:36:27 thegoodguy Exp $
  *
  * xmlinterface for zapit - d-box2 linux project
  *
@@ -27,7 +27,14 @@
 #include <stdio.h>
 
 
-std::string convertForXML(const std::string s)
+std::string Unicode_Character_to_UTF8(const int character)
+{
+	char buf[4];
+	int length = XmlUtf8Encode(character, buf);
+	return std::string(buf, length);
+}
+
+std::string convert_UTF8_To_UTF8_XML(const std::string s)
 {
 	std::string r;
 	unsigned int i;
@@ -51,25 +58,28 @@ std::string convertForXML(const std::string s)
 			r += "&apos;";
 			break;
 		default:
-			// skip characters which are not part of ISO-8859-1
-			// 0x00 - 0x1F & 0x80 - 0x9F
-			// cf. http://czyborra.com/charsets/iso8859.html
-			//
-			// reason: sender name contain 0x86, 0x87 and characters below 0x20
-			if ((((unsigned char)s[i]) & 0x60) != 0)
-				r += s[i];
+			r += s[i];     // all UTF8 chars with more than one byte are >= 0x80 !
+/*
+  default:
+  // skip characters which are not part of ISO-8859-1
+  // 0x00 - 0x1F & 0x80 - 0x9F
+  // cf. http://czyborra.com/charsets/iso8859.html
+  //
+  // reason: sender name contain 0x86, 0x87 and characters below 0x20
+  if ((((unsigned char)s[i]) & 0x60) != 0)
+  r += s[i];
+*/
 		}
 	}
 	return r;
 }
 
-std::string convert_to_UTF8_XML(const std::string s)
+std::string convert_to_UTF8(std::string s)
 {
 	std::string r;
-	std::string t = convertForXML(s);
 	
-	for (std::string::iterator it = t.begin(); it != t.end(); it++)
-		r += Unicode_Character_to_Utf8((unsigned char)*it);
+	for (std::string::iterator it = s.begin(); it != s.end(); it++)
+		r += Unicode_Character_to_UTF8((const unsigned char)*it);
 		
 	return r;
 }
@@ -94,13 +104,6 @@ std::string Utf8_to_Latin1(const std::string s)
 	return r;
 }
 
-std::string Unicode_Character_to_Utf8(const int character)
-{
-    char buf[4];
-    int length = XmlUtf8Encode(character, buf);
-    return std::string(buf, length);
-}
-
 XMLTreeParser* parseXmlFile(const std::string filename)
 {
 	char buffer[2048];
@@ -119,7 +122,7 @@ XMLTreeParser* parseXmlFile(const std::string filename)
 
 //	tree_parser = new XMLTreeParser("ISO-8859-1"); // old encoding
 	tree_parser = new XMLTreeParser(NULL);
-//	tree_parser = new XMLTreeParser("UTF-8");      // new encoding;
+//	tree_parser = new XMLTreeParser("UTF-8");      // new encoding
 
 	do
 	{

@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.78 2002/10/07 22:49:13 obi Exp $
+ * $Id: scan.cpp,v 1.79 2002/10/07 23:36:27 thegoodguy Exp $
  */
 
 #include <fcntl.h>
@@ -288,7 +288,7 @@ void write_transponder(FILE *fd, t_transport_stream_id transport_stream_id, t_or
 				fprintf(fd,
 					"\t\t\t<channel service_id=\"%04x\" name=\"%s\" service_type=\"%02x\"/>\n",
 					cI->second.getServiceId(),
-					convert_to_UTF8_XML(cI->second.getName()).c_str(),
+					convert_UTF8_To_UTF8_XML(cI->second.getName()).c_str(),
 					cI->second.getServiceType());
 			}
 		}

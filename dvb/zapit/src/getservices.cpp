@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.51 2002/09/23 13:31:15 thegoodguy Exp $
+ * $Id: getservices.cpp,v 1.52 2002/10/07 23:36:27 thegoodguy Exp $
  */
 
 #include <stdio.h>
@@ -91,7 +91,7 @@ void ParseChannels (XMLTreeNode *node, t_transport_stream_id transport_stream_id
 	while ((node != NULL) && (!strcmp(node->GetType(), "channel")))
 	{
 		sscanf(node->GetAttributeValue("service_id"), "%hx", &service_id);
-		name = Utf8_to_Latin1(node->GetAttributeValue("name"));
+		name = node->GetAttributeValue("name");
 		sscanf(node->GetAttributeValue("service_type"), "%hhx", &service_type);
 
 		switch (service_type)
