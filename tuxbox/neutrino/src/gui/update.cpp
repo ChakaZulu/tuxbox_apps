@@ -121,7 +121,7 @@ bool CFlashUpdate::selectHttpImage(void)
 		if (httpTool.downloadFile(url, gTmpPath cramfs_list_filename, 20))
 		{
 			std::ifstream in(gTmpPath cramfs_list_filename);
-			while (in >> url >> version)
+			while (in >> url >> version >> std::ws)
 			{
 				urls.push_back(url);
 				versions.push_back(version);
