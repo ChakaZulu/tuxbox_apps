@@ -238,8 +238,9 @@ void CExtendedInput::hide()
 void CExtendedInput::paint()
 {
 	frameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x, y + hheight, width, height - hheight, COL_MENUCONTENT);
+
 	g_Fonts->menu_title->RenderString(x+ 10, y+ hheight, width- 10, localizing ? g_Locale->getText(name) : name, COL_MENUHEAD, 0, true); // UTF-8
-	frameBuffer->paintBoxRel(x, y+ hheight, width, height-hheight, COL_MENUCONTENT);
 
 	if (hint_1.length() > 0)
 	{

@@ -107,7 +107,7 @@ class CFrameBuffer
 		//paint functions
 		void paintPixel(int x, int y, unsigned char col);
 
-		void paintBoxRel(int x, int y, int dx, int dy, unsigned char col);
+		void paintBoxRel(const int x, const int y, const int dx, const int dy, const unsigned char col);
 		inline void paintBox(int xa, int ya, int xb, int yb, unsigned char col) { paintBoxRel(xa, ya, xb - xa, yb - ya, col); }
 
 		void paintLine(int xa, int ya, int xb, int yb, unsigned char col);
@@ -121,6 +121,7 @@ class CFrameBuffer
 
 		void setIconBasePath(const std::string & iconPath);
 
+		bool paintIcon (const char * const filename, const int x, const int y, const unsigned char offset = 1);
 		bool paintIcon (const std::string & filename, const int x, const int y, const unsigned char offset = 1);
 		bool paintIcon8(const std::string & filename, const int x, const int y, const unsigned char offset = 0);
 		void loadPal   (const std::string & filename, const unsigned char offset = 0, const unsigned char endidx = 255);

@@ -335,13 +335,13 @@ void CFrameBuffer::paletteSet(struct fb_cmap *map)
 }
 
 
-void CFrameBuffer::paintBoxRel(int x, int y, int dx, int dy, unsigned char col)
+void CFrameBuffer::paintBoxRel(const int x, const int y, const int dx, const int dy, const unsigned char col)
 {
 	if (!getActive())
 		return;
 
-	unsigned char* pos = getFrameBufferPointer() + x + stride*y;
-	for(int count=0;count<dy;count++)
+	unsigned char * pos = getFrameBufferPointer() + x + stride * y;
+	for(int count = 0; count < dy; count++)
 	{
 		memset(pos, col, dx);
 		pos += stride;
@@ -499,6 +499,12 @@ bool CFrameBuffer::paintIcon(const std::string & filename, const int x, const in
 	close(fd);
 	return true;
 }
+
+bool CFrameBuffer::paintIcon(const char * const filename, const int x, const int y, const unsigned char offset)
+{
+	return paintIcon(std::string(filename), x, y, offset);
+}
+
 void CFrameBuffer::loadPal(const std::string & filename, const unsigned char offset, const unsigned char endidx)
 {
 	if (!getActive())

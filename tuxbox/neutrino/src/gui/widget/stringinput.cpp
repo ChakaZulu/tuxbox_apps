@@ -186,7 +186,7 @@ int CStringInput::exec( CMenuTarget* parent, std::string )
 	paint();
 
 	uint msg; uint data;
-	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_menu );
+	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing_menu);
 
 	bool loop=true;
 	while (loop)
@@ -258,15 +258,10 @@ int CStringInput::exec( CMenuTarget* parent, std::string )
 		else
 		{
 			int r = handleOthers( msg, data );
-			if ( r&messages_return::cancel_all )
-        	{
-            	loop = false;
-				res = menu_return::RETURN_EXIT_ALL;
-			}
-			else if ( r & messages_return::cancel_info )
-        	{
-            	loop = false;
-				res = menu_return::RETURN_EXIT;
+			if (r & (messages_return::cancel_all | messages_return::cancel_info))
+			{
+				res = (r & messages_return::cancel_all) ? menu_return::RETURN_EXIT_ALL : menu_return::RETURN_EXIT;
+				loop = false;
 			}
 			else if ( r & messages_return::unhandled )
 			{
@@ -312,17 +307,20 @@ void CStringInput::hide()
 
 void CStringInput::paint()
 {
+	int iconoffset;
+
 	frameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x, y + hheight, width, height - hheight, COL_MENUCONTENT);
 
-	int iconoffset= (iconfile!="")?28:0;
+	if (!(iconfile.empty()))
+	{
+		frameBuffer->paintIcon(iconfile, x + 8, y + 5);
+		iconoffset = 28;
+	}
+	else
+		iconoffset = 0;
+
 	g_Fonts->menu_title->RenderString(x+ 10+ iconoffset, y+ hheight, width- 10- iconoffset, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
-	if ( iconoffset> 0 )
-		frameBuffer->paintIcon(iconfile.c_str(),x+8,y+5);
-
-	frameBuffer->paintBoxRel(x, y+ hheight, width, height- hheight, COL_MENUCONTENT);
-
-
-
 
 	if ( hint_1.length()> 0 )
 	{
@@ -523,15 +521,10 @@ int CPINInput::exec( CMenuTarget* parent, std::string )
 		else
 		{
 			int r = handleOthers( msg, data );
-			if ( r & messages_return::cancel_all )
-        	{
-            	loop = false;
-				res = menu_return::RETURN_EXIT_ALL;
-			}
-			else if ( r & messages_return::cancel_info )
-        	{
-            	loop = false;
-				res = menu_return::RETURN_EXIT;
+			if (r & (messages_return::cancel_all | messages_return::cancel_info))
+			{
+				res = (r & messages_return::cancel_all) ? menu_return::RETURN_EXIT_ALL : menu_return::RETURN_EXIT;
+				loop = false;
 			}
 			else if ( r & messages_return::unhandled )
 			{
