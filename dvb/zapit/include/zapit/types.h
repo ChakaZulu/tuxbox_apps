@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/types.h,v 1.7 2005/01/21 21:50:29 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/types.h,v 1.8 2005/01/23 19:29:24 thegoodguy Exp $
  *
  * zapit's types - d-box2 linux project
  * these types are used by the clientlib and zapit itself
@@ -35,5 +35,7 @@ typedef uint64_t transponder_id_t;
 #define GET_ORIGINAL_NETWORK_ID_FROM_TRANSPONDER_ID(transponder_id) ((t_original_network_id)(transponder_id      ))
 #define GET_TRANSPORT_STREAM_ID_FROM_TRANSPONDER_ID(transponder_id) ((t_transport_stream_id)(transponder_id >> 16))
 #define GET_SATELLITEPOSITION_FROM_TRANSPONDER_ID(transponder_id)   ((t_satellite_position )(transponder_id >> 32))
+
+#define SATELLITE_POSITION_OF_NON_SATELLITE_SOURCE (360*10)
 
 #endif /* __zapit__types_h__ */

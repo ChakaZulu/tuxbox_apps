@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.68 2005/01/21 21:50:30 thegoodguy Exp $
+ * $Id: descriptors.cpp,v 1.69 2005/01/23 19:29:25 thegoodguy Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -380,7 +380,7 @@ void bouquet_name_descriptor(const unsigned char * const)
 }
 
 /* 0x48 */
-void service_descriptor(const unsigned char * const buffer, const t_service_id service_id, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id, const uint8_t DiSEqC)
+void service_descriptor(const unsigned char * const buffer, const t_service_id service_id, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id, const t_satellite_position satellite_position, const uint8_t DiSEqC)
 {
 	tallchans_iterator I = allchans.find(CREATE_CHANNEL_ID);
 
@@ -392,8 +392,6 @@ void service_descriptor(const unsigned char * const buffer, const t_service_id s
 
 	std::string providerName((const char*)&(buffer[4]), service_provider_name_length);
 	std::string serviceName;
-	std::string satelliteName = "unknown";
-	int32_t satellitePosition = 0;
 
 	bool in_blacklist = false;
 
@@ -449,7 +447,7 @@ void service_descriptor(const unsigned char * const buffer, const t_service_id s
 				original_network_id,
 				service_type,
 				DiSEqC,
-				satellitePosition
+				satellite_position
 			)
 		)
 	);
@@ -505,7 +503,7 @@ void service_descriptor(const unsigned char * const buffer, const t_service_id s
  		lastServiceName = serviceName;
  		eventServer->sendEvent(CZapitClient::EVT_SCAN_SERVICENAME, CEventServer::INITID_ZAPIT, (void *) lastServiceName.c_str(), lastServiceName.length() + 1);
 
-		bouquet->addService(new CZapitChannel(serviceName, service_id, transport_stream_id, original_network_id, service_type, 0, satellitePosition));
+		bouquet->addService(new CZapitChannel(serviceName, service_id, transport_stream_id, original_network_id, service_type, 0, satellite_position));
 
  // thegoodguy schau dir das hier mal an
  //		scaninfo  test;

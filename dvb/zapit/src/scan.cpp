@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.141 2005/01/21 21:50:30 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.142 2005/01/23 19:29:25 thegoodguy Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -78,7 +78,6 @@ TP_map_t TP_scanmap;
 
 void write_xml_header(FILE * fd);
 void write_xml_footer(FILE * fd);
-int write_provider(FILE *fd, const char *frontendType, const char *provider_name, const uint8_t DiSEqC);
 
 t_satellite_position driveMotorToSatellitePosition(const char * const providerName)
 {
@@ -112,7 +111,7 @@ t_satellite_position driveMotorToSatellitePosition(const char * const providerNa
 		}
 	}
 	else
-		satellite_position = 0;
+		satellite_position = SATELLITE_POSITION_OF_NON_SATELLITE_SOURCE;
 
 	return satellite_position;
 }
@@ -267,7 +266,7 @@ int get_nits(struct dvb_frontend_parameters *feparams, uint8_t polarization, con
 	return status;
 }
 
-int get_sdts(char * frontendType)
+int get_sdts(const t_satellite_position satellite_position, char * frontendType)
 {
 	uint32_t TsidOnid;
 
@@ -296,11 +295,11 @@ int get_sdts(char * frontendType)
 			tI->second.original_network_id = TsidOnid &0xFFFF;
 
 			INFO("parsing SDT (tsid:onid %04x:%04x)", tI->second.transport_stream_id, tI->second.original_network_id);
- 			parse_sdt(tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC);
+ 			parse_sdt(satellite_position, tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC);
 		}
 		else {
 			INFO("parsing SDT (tsid:onid %04x:%04x)", tI->second.transport_stream_id, tI->second.original_network_id);
-			status = parse_sdt(tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC);
+			status = parse_sdt(satellite_position, tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC);
 		
 			if (status == -1)
 			{
@@ -313,7 +312,7 @@ int get_sdts(char * frontendType)
 					tI->second.original_network_id = TsidOnid &0xFFFF;
 
 					INFO("parsing SDT (tsid:onid %04x:%04x)", tI->second.transport_stream_id, tI->second.original_network_id);
-					parse_sdt(tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC);
+					parse_sdt(satellite_position, tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC);
 				}
 			}
 		}
@@ -348,62 +347,61 @@ void write_bouquets(const char * const providerName)
 		scanBouquetManager->saveBouquets(bouquetMode, providerName);
 }
 
-void write_transponder(FILE *fd, const transponder & transponder)
+void write_transponder(FILE *fd, const transponder_id_t transponder_id, const transponder & transponder)
 {
-	static bool emptyTransponder = false;
-	switch (frontend->getInfo()->type) {
-	case FE_QAM: /* cable */
-		fprintf(fd,
-			"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" modulation=\"%hu\">\n",
-
-			transponder.transport_stream_id,
-			transponder.original_network_id,
-			transponder.feparams.frequency,
-			transponder.feparams.inversion,
-			transponder.feparams.u.qam.symbol_rate,
-			transponder.feparams.u.qam.fec_inner,
-			transponder.feparams.u.qam.modulation);
-		break;
-
-	case FE_QPSK: /* satellite */
-		emptyTransponder = true;
-		break;
-
-	case FE_OFDM: /* terrestrial */
-		fprintf(fd,
-			"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" bandwidth=\"%hu\" code_rate_HP=\"%hu\" code_rate_LP=\"%hu\" constellation=\"%hu\" transmission_mode=\"%hu\" guard_interval=\"%hu\" hierarchy_information=\"%hu\">\n",
-			transponder.transport_stream_id,
-			transponder.original_network_id,
-			transponder.feparams.frequency,
-			transponder.feparams.inversion,
-			transponder.feparams.u.ofdm.bandwidth,
-			transponder.feparams.u.ofdm.code_rate_HP,
-			transponder.feparams.u.ofdm.code_rate_LP,
-			transponder.feparams.u.ofdm.constellation,
-			transponder.feparams.u.ofdm.transmission_mode,
-			transponder.feparams.u.ofdm.guard_interval,
-			transponder.feparams.u.ofdm.hierarchy_information);
-		break;
-
-	default:
-		return;
-	}
+	bool emptyTransponder = true;
 
 	for (tallchans::const_iterator cI = allchans.begin(); cI != allchans.end(); cI++)
-		if ((cI->second.getTransportStreamId() == transponder.transport_stream_id) && (cI->second.getOriginalNetworkId() == transponder.original_network_id)) {
-			if(emptyTransponder){
+		if (cI->second.getTransponderId() == transponder_id)
+		{
+			if (emptyTransponder)
+			{
+				switch (frontend->getInfo()->type)
+				{
+				case FE_QAM: /* cable */
 					fprintf(fd,
-			"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" polarization=\"%hu\">\n",
+						"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" modulation=\"%hu\">\n",
+						transponder.transport_stream_id,
+						transponder.original_network_id,
+						transponder.feparams.frequency,
+						transponder.feparams.inversion,
+						transponder.feparams.u.qam.symbol_rate,
+						transponder.feparams.u.qam.fec_inner,
+						transponder.feparams.u.qam.modulation);
+					break;
 
-			one_flag ? one_tpid : transponder.transport_stream_id,
-			one_flag ? one_onid : transponder.original_network_id,
-			
-			transponder.feparams.frequency,
-			transponder.feparams.inversion,
-			transponder.feparams.u.qpsk.symbol_rate,
-			transponder.feparams.u.qpsk.fec_inner,
-			transponder.polarization);
-			emptyTransponder = false;
+				case FE_QPSK: /* satellite */
+					fprintf(fd,
+						"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" polarization=\"%hu\">\n",
+						one_flag ? one_tpid : transponder.transport_stream_id,
+						one_flag ? one_onid : transponder.original_network_id,
+						transponder.feparams.frequency,
+						transponder.feparams.inversion,
+						transponder.feparams.u.qpsk.symbol_rate,
+						transponder.feparams.u.qpsk.fec_inner,
+						transponder.polarization);
+					break;
+
+				case FE_OFDM: /* terrestrial */
+					fprintf(fd,
+						"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" bandwidth=\"%hu\" code_rate_HP=\"%hu\" code_rate_LP=\"%hu\" constellation=\"%hu\" transmission_mode=\"%hu\" guard_interval=\"%hu\" hierarchy_information=\"%hu\">\n",
+						transponder.transport_stream_id,
+						transponder.original_network_id,
+						transponder.feparams.frequency,
+						transponder.feparams.inversion,
+						transponder.feparams.u.ofdm.bandwidth,
+						transponder.feparams.u.ofdm.code_rate_HP,
+						transponder.feparams.u.ofdm.code_rate_LP,
+						transponder.feparams.u.ofdm.constellation,
+						transponder.feparams.u.ofdm.transmission_mode,
+						transponder.feparams.u.ofdm.guard_interval,
+						transponder.feparams.u.ofdm.hierarchy_information);
+					break;
+
+				default:
+					return;
+				}
+				emptyTransponder = false;
 			}
 			if (cI->second.getName().empty())
 				fprintf(fd,
@@ -418,10 +416,9 @@ void write_transponder(FILE *fd, const transponder & transponder)
 					convert_UTF8_To_UTF8_XML(cI->second.getName().c_str()).c_str(),
 					cI->second.getServiceType());
 		}
-	if(!emptyTransponder){
-	fprintf(fd, "\t\t</transponder>\n");
-	}
-	return;
+
+	if (!emptyTransponder)
+		fprintf(fd, "\t\t</transponder>\n");
 }
 
 int write_provider(FILE *fd, const char *frontendType, const char *provider_name, const uint8_t DiSEqC)
@@ -445,7 +442,7 @@ int write_provider(FILE *fd, const char *frontendType, const char *provider_name
 		/* channels */
 		for (stiterator tI = transponders.begin(); tI != transponders.end(); tI++)
 		{
-			write_transponder(fd, tI->second);
+			write_transponder(fd, tI->first, tI->second);
 		}
 
 		/* end tag */
@@ -530,7 +527,7 @@ void scan_provider(xmlNodePtr search, char * providerName, uint8_t diseqc_pos, c
 	 * bouquet association table,
 	 * network information table
 	 */
-	status = get_sdts(frontendType);
+	status = get_sdts(satellite_position, frontendType);
 
 	/*
 	 * channels from PAT do not have service_type set.
@@ -789,7 +786,7 @@ int scan_transponder(TP_params *TP)
 	satellite_position = driveMotorToSatellitePosition(providerName);
 
 	get_nits(&(TP->feparams), TP->polarization, satellite_position, diseqc_pos);
-	status = get_sdts(frontendType);
+	status = get_sdts(satellite_position, frontendType);
 
 	if(allchans.empty())
 	{
@@ -823,7 +820,7 @@ int scan_transponder(TP_params *TP)
 	{
 		/* channels */
 		for (stiterator tI = transponders.begin(); tI != transponders.end(); tI++)
-			write_transponder(fd, tI->second);
+			write_transponder(fd, tI->first, tI->second);
 		fprintf(fd, "\t</%s>\n", frontendType);
 		allchans.clear();
 		transponders.clear();
