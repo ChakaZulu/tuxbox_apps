@@ -64,7 +64,7 @@ extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 int info_height = 0;
 
 
-CChannelList::CChannel::CChannel(const int _key, const int _number, const std::string& _name, const t_satellite_position& _satellitePosition, const t_channel_id ids)
+CChannelList::CChannel::CChannel(const int _key, const int _number, const std::string& _name, const t_satellite_position _satellitePosition, const t_channel_id ids)
 {
 	key                 = _key;
 	number              = _number;
@@ -136,7 +136,7 @@ void CChannelList::updateEvents(void)
 			}
 }
 
-void CChannelList::addChannel(int key, int number, const std::string& name, const t_satellite_position& satellitePosition, t_channel_id ids)
+void CChannelList::addChannel(int key, int number, const std::string& name, const t_satellite_position satellitePosition, t_channel_id ids)
 {
 	chanlist.push_back(new CChannel(key, number, name, satellitePosition, ids));
 }
