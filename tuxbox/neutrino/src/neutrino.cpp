@@ -1388,7 +1388,7 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 	oj->addOption(1, "options.on");
 	streamingSettings.addItem( oj );
 
-	CStringInput*	streamingSettings_streamingserver= new CStringInput("streamingmenu.streamingserver", g_settings.network_streamingserver, 24, "ipsetup.hint_1", "ipsetup.hint_2");
+	CIPInput*	streamingSettings_streamingserver= new CIPInput("streamingmenu.streamingserver",  g_settings.network_streamingserver, "ipsetup.hint_1", "ipsetup.hint_2");
 	CStringInput*	streamingSettings_streamingserverport= new CStringInput("streamingmenu.streamingserverport", g_settings.network_streamingserverport, 6, "ipsetup.hint_1", "ipsetup.hint_2","1234567890 ");
 
 	streamingSettings.addItem( new CMenuForwarder("streamingmenu.streamingserver", true, g_settings.network_streamingserver,streamingSettings_streamingserver));
@@ -2728,7 +2728,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.298 2002/07/07 17:41:25 dirch Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.299 2002/07/10 15:54:52 dirch Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
