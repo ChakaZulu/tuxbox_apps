@@ -394,8 +394,7 @@ flashupdate.versioncheck checking version
 flashupdate.nonewversion no new version available
 flashupdate.md5check checking image
 flashupdate.md5sumerror image has errors
-flashupdate.cramfs_list_host image server
-flashupdate.cramfs_list_file cramfs list
+flashupdate.url_file config file
 flashupdate.proxyserver_sep Proxyserver
 flashupdate.proxyserver Hostname
 flashupdate.proxyserver_hint1 enter proxyserver name or ip, use host:port

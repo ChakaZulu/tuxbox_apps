@@ -394,8 +394,7 @@ flashupdate.versioncheck Versionsüberprüfung
 flashupdate.nonewversion keine neue Version verfügbar
 flashupdate.md5check Imageprüfung
 flashupdate.md5sumerror Das Image ist fehlerhaft
-flashupdate.cramfs_list_host Imageserver
-flashupdate.cramfs_list_file Cramfsliste
+flashupdate.url_file Configfile
 flashupdate.proxyserver_sep Proxyserver
 flashupdate.proxyserver Proxyname
 flashupdate.proxyserver_hint1 Geben Sie den Proxynamen oder IP ein (Host:Port)

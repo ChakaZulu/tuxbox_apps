@@ -107,48 +107,57 @@ bool CFlashUpdate::selectHttpImage(void)
 {
 	CHTTPTool httpTool;
 	std::string url;
+	std::string name;
+	std::string version;
+	std::vector<std::string> urls, names, versions;
 
 	httpTool.setStatusViewer(this);
 	showStatusMessageUTF(g_Locale->getText("flashupdate.getinfofile")); // UTF-8
 
-	url = "http://";
-	url += g_settings.softupdate_cramfs_list_host;
-	url += '/';
-	url += g_settings.softupdate_cramfs_list_file;
+	std::ifstream urlFile(g_settings.softupdate_url_file);
 
-	if (!httpTool.downloadFile(url, gTmpPath cramfs_list_filename, 20))
+	while (urlFile >> url)
 	{
-		hide();
-		ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.getinfofileerror")); // UTF-8
-		return false;
+		if (httpTool.downloadFile(url, gTmpPath cramfs_list_filename, 20))
+		{
+			std::ifstream in(gTmpPath cramfs_list_filename);
+			while (in >> url >> version)
+			{
+				urls.push_back(url);
+				versions.push_back(version);
+				std::getline(in, name);
+				names.push_back(name);
+			}
+		}
 	}
+
 	hide();
 
-	std::vector<std::string> urls, names, versions;
-	std::string name, version;
-	std::ifstream in(gTmpPath cramfs_list_filename);
-	while (in >> url >> version)
-	{
-		urls.push_back(url);
-		versions.push_back(version);
-		std::getline(in, name);
-		names.push_back(name);
-	}
 	if (urls.empty())
 	{
 		ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.getinfofileerror")); // UTF-8
 		return false;
 	}
-
+		
 	CMenuWidget SelectionWidget("flashupdate.selectimage", "softupdate.raw");
-
+	
 	SelectionWidget.addItem(GenericMenuSeparator);
 	SelectionWidget.addItem(GenericMenuBack);
 	SelectionWidget.addItem(GenericMenuSeparatorLine);
-
+		
 	int selected = -1;
 	for (unsigned int i = 0; i < urls.size(); i++)
-		SelectionWidget.addItem(new CMenuForwarder(names[i].c_str(), true, "", new CUpdateMenuTarget(i, &selected)));
+	{
+		CFlashVersionInfo versionInfo(versions[i]);
+
+		std::string description = versionInfo.getType();
+		description += ' ';
+		description += versionInfo.getDate();
+		description += ' ';
+		description += versionInfo.getTime();
+
+		SelectionWidget.addItem(new CMenuForwarder(names[i].c_str(), true, description, new CUpdateMenuTarget(i, &selected)));
+	}
 
 	SelectionWidget.exec(NULL, "");
 
