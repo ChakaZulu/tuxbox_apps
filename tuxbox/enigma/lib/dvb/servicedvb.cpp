@@ -145,7 +145,7 @@ int eDVRPlayerThread::openFile(int slice)
 				if (slicesize <= 0)
 				{
 					int tmp=1024*1024;
-					eConfig::getInstance()->getKey("/extra/record_splitsize", tmp);
+					eConfig::getInstance()->getKey("/extras/record_splitsize", tmp);
 					slicesize=tmp*1024;
 				}
 				lseek64(sourcefd, 0, SEEK_SET);
@@ -153,7 +153,7 @@ int eDVRPlayerThread::openFile(int slice)
 			else
 			{
 				int tmp=1024*1024;
-				eConfig::getInstance()->getKey("/extra/record_splitsize", tmp);
+				eConfig::getInstance()->getKey("/extras/record_splitsize", tmp);
 				slicesize=tmp*1024;
 			}
 		}
