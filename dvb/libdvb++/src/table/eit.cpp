@@ -1,5 +1,5 @@
 /*
- * $Id: eit.cpp,v 1.2 2003/08/20 22:47:35 obi Exp $
+ * $Id: eit.cpp,v 1.3 2003/10/13 18:11:23 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -93,9 +93,9 @@ uint16_t EventInformationTable::getOriginalNetworkId(void) const
 	return originalNetworkId;
 }
 
-uint8_t EventInformationTable::getLastSectionNumber(void) const
+uint8_t EventInformationTable::getSegmentLastSectionNumber(void) const
 {
-	return lastSectionNumber;
+	return segmentLastSectionNumber;
 }
 
 uint8_t EventInformationTable::getLastTableId(void) const

@@ -1,5 +1,5 @@
 /*
- * $Id: eit.h,v 1.1 2003/07/17 01:07:36 obi Exp $
+ * $Id: eit.h,v 1.2 2003/10/13 18:11:23 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -71,7 +71,7 @@ class EventInformationTable : public LongCrcTable
 
 		uint16_t getTransportStreamId(void) const;
 		uint16_t getOriginalNetworkId(void) const;
-		uint8_t getLastSectionNumber(void) const;
+		uint8_t getSegmentLastSectionNumber(void) const;
 		uint8_t getLastTableId(void) const;
 		const EventVector *getEvents(void) const;
 };
