@@ -149,7 +149,7 @@ void write_transponder(int tsid, FILE *fd)
 
 void *start_scanthread(void *)
 {
-  FILE *fd;
+  FILE *fd = NULL;
   std::string transponder;
   
   
@@ -166,10 +166,10 @@ void *start_scanthread(void *)
     		printf("No signal found on transponder\n"); 
 	}
 	get_sdts();
-      if (scantransponders.size() >0)
+      if (!scantransponders.empty())
       {
       	fd = fopen(services_xml.c_str(), "w" );
-      fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
+        fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
       fprintf(fd,"<ZAPIT>\n<cable>\n");
       for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
 	{	  
@@ -209,7 +209,7 @@ void *start_scanthread(void *)
 	  	fd = fopen(services_xml.c_str(), "w" );
 	  	fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
       	  	fprintf(fd,"<ZAPIT>\n");
-      	}
+      	  }
       		
 	  fprintf(fd, "<satellite name=\"Astra 19.2E\" diseqc=\"0\">\n");
 	  for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)

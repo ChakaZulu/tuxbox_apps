@@ -148,7 +148,7 @@ int pat(uint oonid,std::map<uint,channel> *cmap)
 		close(demux);
 		
 		tsid = (buffer[3]<<8)|buffer[4];
-		printf("TSID: %04x\n", tsid);
+		//printf("TSID: %04x\n", tsid);
 		current = 8;
 		
 		while (current < sec_len-1)
@@ -156,12 +156,12 @@ int pat(uint oonid,std::map<uint,channel> *cmap)
 			int p_nr = (buffer[current]<<8) | buffer[current+1];
 			int pid = ((buffer[current+2]&0x1f)<<8) | buffer[current+3];
 			
-			printf("P-Nr: %04x: %04x\n",p_nr,pid);
+			//printf("P-Nr: %04x: %04x\n",p_nr,pid);
 			if ((*cmap).count((oonid<<16)|p_nr) >0)
 			{
 			  cI = (*cmap).find((oonid<<16)|p_nr);
 			  cI->second.pmt = pid;
-			  printf("found p_nr: %04x\npmt: %04x\n", p_nr, pid);
+			  //printf("found p_nr: %04x\npmt: %04x\n", p_nr, pid);
 			}
 			else
 			{
