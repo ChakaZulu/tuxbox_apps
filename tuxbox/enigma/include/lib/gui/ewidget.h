@@ -1,15 +1,15 @@
 #ifndef __ewidget_h
 #define __ewidget_h
 
-//#include <qobject.h>
-#include <ebase.h>
-#include "epoint.h"
-#include "esize.h"
-#include "erect.h"
-#include <qlist.h>
-#include "grc.h"
-#include <list>
-#include <libsig_comp.h>
+#include <core/base/ebase.h>
+#include <core/base/estring.h>
+#include <core/base/epoint.h>
+#include <core/base/esize.h>
+#include <core/base/erect.h>
+#include <core/base/eptrlist.h>
+#include <include/libsig_comp.h>
+#include <core/gdi/grc.h>
+
 
 class eWidgetEvent
 {
@@ -64,17 +64,15 @@ public:// slots:
 	 * \sa eWidget::close
 	 */
 	void reject();
-	
-	std::list<eWidget*> childlist;
-	
+	ePtrList<eWidget> childlist;
 protected:
 	eWidget *parent;
-	QString name;
+	eString name;
 	ePoint position;
 	eSize size;
 	eRect clientrect;
 	eRect clientclip;
-	QList<eWidget> _focusList;
+	ePtrList<eWidget> _focusList;
 	eWidget *oldfocus;
 	int takefocus;
 	int state;
@@ -120,7 +118,7 @@ protected:
 
 			// generic properties
 	gFont font;
-	QString text;
+	eString text;
 	gColor backgroundColor, foregroundColor;
 	
 	gPixmap *pixmap;
@@ -164,7 +162,7 @@ public:
 	 * The focus list is the list of childs which have the \c takefocus flag set.
 	 * This list is only maintained for TLWs.
 	 */
-	QList<eWidget> *focusList() { return &_focusList; }
+	ePtrList<eWidget> *focusList() { return &_focusList; }
 
 	/**
 	 * \brief Resizes the widget.
@@ -300,9 +298,9 @@ public:
 	 *
 	 * \param label The text to assign to the widget.
 	 */
-	void setText(const QString &label);
+	void setText(const eString &label);
 	
-	const	QString& getText() { return text; }
+	const	eString& getText() { return text; }
 	void setBackgroundColor(gColor color);
 	void setForegroundColor(gColor color);
 	void setPixmap(gPixmap *pmap);
@@ -339,9 +337,9 @@ public:
 	 * \param prop The property to be set.
 	 * \param value The value to be set.
 	 */
-	virtual int setProperty(const QString &prop, const QString &value);
+	virtual int setProperty(const eString &prop, const eString &value);
 	
-	eWidget *search(const QString &name);
+	eWidget *search(const eString &name);
 };
 
 #endif

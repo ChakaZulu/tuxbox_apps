@@ -29,7 +29,7 @@ public:
 	 * \param string The string displayed inside the messagebox.
 	 * \param caption The title of the messagebox.
 	 */
-	eMessageBox(QString string, QString caption);
+	eMessageBox(eString string, eString caption);
 	~eMessageBox();
 };
 

@@ -19,14 +19,15 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include "decoder.h"
+#include <eerror.h>
 
-QString getInfo(const char *file, const char *info)
+eString getInfo(const char *file, const char *info)
 {
 	FILE *f=fopen(file, "rt");
 	if (!f)
 		return 0;
 
-	QString result(0);
+	eString result(0);
 
 	char buffer[128];
 
@@ -37,7 +38,7 @@ QString getInfo(const char *file, const char *info)
 
 		if (strstr(buffer, info))
 		{
-  		result=QString(buffer).mid(strlen(info)+1, strlen(buffer)-strlen(info+1));
+  		result=eString(buffer).mid(strlen(info)+1, strlen(buffer)-strlen(info+1));
 			break;
 		}
 	}	
@@ -76,10 +77,10 @@ ePlugin::ePlugin(eListbox *parent, const char *cfgfile): eListboxEntry(parent)
 		return;
 	}
 
-	qDebug(cfgfile);
+	eDebug(cfgfile);
 	name=getInfo(cfgfile, "name");
 	if (!name)
-		name="(" + QString(cfgfile) + " is invalid)";
+		name="(" + eString(cfgfile) + " is invalid)";
 		
 	desc=getInfo(cfgfile, "desc");
 	if (!desc)
@@ -87,7 +88,7 @@ ePlugin::ePlugin(eListbox *parent, const char *cfgfile): eListboxEntry(parent)
 
 	depend=getInfo(cfgfile, "depend");
 
-	QString atype=getInfo(cfgfile, "type"),
+	eString atype=getInfo(cfgfile, "type"),
 			apluginVersion=getInfo(cfgfile, "pluginversion"),
 			aneedfb=getInfo(cfgfile, "needfb"),
 			aneedrc=getInfo(cfgfile, "needrc"),
@@ -105,12 +106,12 @@ ePlugin::ePlugin(eListbox *parent, const char *cfgfile): eListboxEntry(parent)
 	showpig=(apigon.isNull()?false:atoi(apigon));
 
 	isback=0;
-	sopath=QString(cfgfile).left(strlen(cfgfile)-4)+".so";	// uarg
-	pluginname=QString(cfgfile).mid(QString(cfgfile).findRev('/')+1);
+	sopath=eString(cfgfile).left(strlen(cfgfile)-4)+".so";	// uarg
+	pluginname=eString(cfgfile).mid(eString(cfgfile).rfind('/')+1);
 	pluginname=pluginname.left(pluginname.length()-4);
 }
 
-QString ePlugin::getText(int t) const
+eString ePlugin::getText(int t) const
 {
 	if (t)
 		return 0;
@@ -131,14 +132,14 @@ eZapPlugins::eZapPlugins(eWidget* lcdTitle, eWidget* lcdElement)
 
 int eZapPlugins::exec()
 {
-	const QString PluginPath = PLUGINDIR "/";
+	const eString PluginPath = PLUGINDIR "/";
 	struct dirent **namelist;
 
 	int n = scandir(PluginPath, &namelist, 0, alphasort);
 
 	if (n < 0)
 	{
-		qDebug("Error Read Plugin Directory\n");
+		eDebug("Error Read Plugin Directory\n");
 		eMessageBox msg("Error Read Plugin Directory", "Error");
 		msg.show();
 		msg.exec();
@@ -150,8 +151,8 @@ int eZapPlugins::exec()
 
 	for(int count=0; count<n; count++)
 	{       	
-		QString	FileName = namelist[count]->d_name;
-		if (FileName.contains(".cfg"))
+		eString	FileName = namelist[count]->d_name;
+		if (FileName.find(".cfg"))
 			nPlugins++;
 	}
 
@@ -159,9 +160,9 @@ int eZapPlugins::exec()
 	{
 		for(int count=0;count<n;count++)
 		{
-			QString	FileName = namelist[count]->d_name;
-			if (FileName.contains(".cfg"))
-				new ePlugin(window->list, PluginPath+FileName);		
+			eString	FileName = namelist[count]->d_name;
+			if (FileName.find(".cfg"))
+				new ePlugin(window->list, (PluginPath+FileName).c_str());		
 
 			free(namelist[count]);
 	  }
@@ -181,7 +182,7 @@ eZapPlugins::~eZapPlugins()
 
 void eZapPlugins::execPluginByName(const char* name)
 {
-	QString PluginPath = PLUGINDIR "/";
+	eString PluginPath = PLUGINDIR "/";
 	PluginPath+=name;
 	ePlugin p(0, PluginPath);
 	execPlugin(&p);
@@ -191,7 +192,7 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 {
 	void *libhandle[20];
 	int argc=0;
-	QString argv[20];
+	eString argv[20];
 
 	if (plugin->depend)
 	{
@@ -208,7 +209,7 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 			if ( np )
 				*np=0;
 			argv[ argc++ ] = (*p == '/') ?
-				QString(p) : PLUGINDIR "/" + QString(p);
+				eString(p) : eString(PLUGINDIR "/" + eString(p));
 			p=np?np+1:0;
 		}
 	}
@@ -216,7 +217,7 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 	argv[argc++]=plugin->sopath;
 
 	int i;
-	qDebug("pluginname is %s", (const char*)plugin->pluginname);
+	eDebug("pluginname is %s", (const char*)plugin->pluginname);
 
 	if (plugin->needfb)
 		MakeParam(P_ID_FBUFFER, fbClass::getInstance()->lock());
@@ -238,12 +239,12 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
  	if (plugin->needvtxtpid)
  	{
 		// versuche, den gtx/enx_vbi zu stoppen	
-		qDebug("try to stop gtx/enx_vbi");
+		eDebug("try to stop gtx/enx_vbi");
 		MakeParam(P_ID_VTXTPID, Decoder::parms.tpid);
 		int fd = open("/dev/dbox/vbi0", O_RDWR);
 		if (fd > 0)
 		{
-			qDebug("stop gtx/enx_vbi");
+			eDebug("stop gtx/enx_vbi");
 			ioctl(fd, AVIA_VBI_STOP_VTXT, 0);
 			close(fd);
 		}
@@ -258,12 +259,12 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 
 	for (i=0; i<argc; i++)
 	{
-		qDebug("loading %s" ,(const char*)argv[i]);
+		eDebug("loading %s" ,(const char*)argv[i]);
 		libhandle[i]=dlopen(argv[i], RTLD_NOW|RTLD_GLOBAL);
 		if (!libhandle[i])
 		{
 			const char *de=dlerror();
-			qDebug(de);
+			eDebug(de);
 			eMessageBox msg(de, "plugin loading failed");
 			msg.show();
 			msg.exec();
@@ -274,7 +275,7 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 	
 	if (i==argc)
 	{
-		qDebug("would exec plugin %s", (const char*)plugin->sopath);
+		eDebug("would exec plugin %s", (const char*)plugin->sopath);
 
 		PluginExec execPlugin = (PluginExec) dlsym(libhandle[i-1], "plugin_exec");
 		if (!execPlugin)
@@ -316,7 +317,7 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
  	if (plugin->needvtxtpid)
  	{
 		// versuche, den gtx/enx_vbi wieder zu starten
-		qDebug("try to restart gtx/enx_vbi");
+		eDebug("try to restart gtx/enx_vbi");
  		int fd = open("/dev/dbox/vbi0", O_RDWR);
 		if (fd > 0)
 		{

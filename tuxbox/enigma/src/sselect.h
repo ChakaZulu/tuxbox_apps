@@ -10,11 +10,11 @@ class eBouquet;
 
 class eListboxEntryService: public eListboxEntry
 {
-	QString sort;
+	eString sort;
 public:
 	eService *service;
 	eBouquet *bouquet;
-	QString getText(int col=0) const;
+	eString getText(int col=0) const;
 	eListboxEntryService(eService *service, eListbox *listbox);
 	eListboxEntryService(eBouquet *bouquet, eListbox *listbox);
 	~eListboxEntryService();
@@ -22,12 +22,11 @@ public:
 
 class eServiceSelector: public eLBWindow
 {
-//	Q_OBJECT
 	eService *result, *selected;
 	eBouquetSelector* pbs;
 protected:
 	int eventFilter(const eWidgetEvent &event);
-private:// slots:
+private:
 	void fillServiceList();
 	void entrySelected(eListboxEntry *entry);
 	void selchanged(eListboxEntry *entry);

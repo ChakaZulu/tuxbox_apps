@@ -8,19 +8,16 @@
 
 class eStreamWatchdog: public Object
 {
-//	Q_OBJECT
 	eSocketNotifier* sn;
 	int handle;
 	static eStreamWatchdog *instance;
-private:// slots:
+private:
 	void check(int);
 public:
 	void reloadSettings();
 	eStreamWatchdog();
 	~eStreamWatchdog();
 	static eStreamWatchdog *getInstance();
-/*signals:
-	void AspectRatioChanged(int);*/
 	Signal1<void, int> AspectRatioChanged;
 };
 

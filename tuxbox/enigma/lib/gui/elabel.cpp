@@ -82,7 +82,7 @@ eSize eLabel::getExtend()
 	return para->getExtend();
 }
 
-int eLabel::setProperty(const QString &prop, const QString &value)
+int eLabel::setProperty(const eString &prop, const eString &value)
 {
 	if (prop=="wrap")
 		setFlags(RS_WRAP);

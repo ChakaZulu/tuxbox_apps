@@ -3,11 +3,12 @@
 
 #include <asm/types.h>
 #include <qfile.h>
-#include <qlist.h>
+#include <eptrlist.h>
 #include <ebase.h>
 #include <qserversocket.h>
 #include <map>
-#include <string>
+#include <estring.h>
+#include <eerror.h>
 
 class eHTTPConnection;
 class eHTTPDataSource;
@@ -16,7 +17,7 @@ class eHTTPD;
 class eHTTPGarbage: public Object
 {
 	eTimer garbage;
-	QList<eHTTPConnection> *conn;
+	ePtrList<eHTTPConnection> *conn;
 	static eHTTPGarbage *instance;
 public:
 	void doGarbage();
@@ -31,7 +32,7 @@ class eHTTPPathResolver
 {
 public:
 	virtual ~eHTTPPathResolver() {}; 
-	virtual eHTTPDataSource *getDataSource(QString request, QString path, eHTTPConnection *conn)=0;
+	virtual eHTTPDataSource *getDataSource(eString request, eString path, eHTTPConnection *conn)=0;
 };
 
 class eHTTPDataSource
@@ -50,7 +51,7 @@ class eHTTPError: public eHTTPDataSource
 	int errcode;
 public:
 	eHTTPError(eHTTPConnection *c, int errcode);
-	~eHTTPError() { } 
+	~eHTTPError() { }
 	void haveData();
 	int doWrite(int bytes);
 };
@@ -59,7 +60,7 @@ class eHTTPConnection: public QSocket
 {
 	void doError(int error);
 	
-	int getLine(QString &line);
+	int getLine(eString &line);
 	
 	int processLocalState();
 	int processRemoteState();
@@ -86,7 +87,7 @@ public:
 		< Data
 		> 200 OK HTTP/1.0
 		> Content-Type: text/html
-		> 
+		>
 		> Data
 		*/
 	
@@ -102,13 +103,13 @@ public:
 	~eHTTPConnection();
 	
 		// stateRequest
-	QString request, requestpath, httpversion;
+	eString request, requestpath, httpversion;
 	int is09;
 	
 		// stateResponse
 	
 	int code;
-	QString code_descr;
+	eString code_descr;
 	
 	std::map<std::string,std::string> remote_header, local_header;
 	
@@ -119,14 +120,14 @@ public:
 class eHTTPD: public QServerSocket, public Object
 {
 	friend class eHTTPConnection;
-	QList<eHTTPPathResolver> resolver;
+	ePtrList<eHTTPPathResolver> resolver;
 private:// slots:
 	void oneConnectionClosed();
 public:
 	eHTTPD(Q_UINT16 port, int backlog=0, QObject *parent=0, const char *name=0);
 	void newConnection(int socket);
 
-	void addResolver(eHTTPPathResolver *r) { resolver.append(r); }
+	void addResolver(eHTTPPathResolver *r) { resolver.push_back(r); }
 	void removeResolver(eHTTPPathResolver *r) { resolver.remove(r); }
 };
 

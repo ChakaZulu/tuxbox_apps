@@ -1,5 +1,5 @@
-#include "download.h"
-#include "eskin.h"
+#include <core/system/download.h>
+#include <core/gui/eskin.h>
 
 int eDownloadWindow::eventFilter(const eWidgetEvent &event)
 {

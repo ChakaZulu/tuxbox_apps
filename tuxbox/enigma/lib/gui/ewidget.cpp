@@ -1,15 +1,15 @@
-#include "enigma.h"
-#include "ewidget.h"
 #include <errno.h>
-#include <qobjectlist.h>
-#include "gfbdc.h"
-#include "epng.h"
-#include "eskin.h"
-#include "init.h"
+
+#include "enigma.h"
+#include <core/base/eerror.h>
+#include <core/gui/ewidget.h>
+#include <core/gdi/gfbdc.h>
+#include <core/gdi/epng.h>
+#include <core/gui/eskin.h>
+#include <core/system/init.h>
 
 eWidget::eWidget(eWidget *parent, int takefocus):
-//	QObject(parent),
-	parent(parent), 
+	parent(parent),
 	takefocus(takefocus), 
 	font(parent?parent->font:gFont("NimbusSansL-Regular Sans L Regular", eSkin::getActive()->queryValue("fontsize", 20))),
 	backgroundColor(parent?gColor(-1):gColor(0x20)),
@@ -25,7 +25,7 @@ eWidget::eWidget(eWidget *parent, int takefocus):
  	pixmap=0;
 	if (takefocus)
 	{
-		getTLW()->focusList()->append(this);
+		getTLW()->focusList()->push_back(this);
 		checkFocus();
 	}
 
@@ -125,14 +125,14 @@ void eWidget::redraw(eRect area)		// area bezieht sich nicht auf die clientarea
 		{
 			area.moveBy(-clientrect.x(), -clientrect.y());		// ab hier jetzt schon.
 
-			std::list<eWidget*>::iterator It = childlist.begin();
+			ePtrList<eWidget>::iterator It(childlist);
 			while (It != childlist.end())
 			{
 				eRect cr=area&eRect((*It)->position, (*It)->size);
 				if (!cr.isEmpty())
 				{
-					cr.moveBy(-(*It)->position.x(), -(*It)->position.y());
-					(*It)->redraw(cr);
+					cr.moveBy(-It->position.x(), -It->position.y());
+					It->redraw(cr);
 				}
 				It++;				
 			}
@@ -208,7 +208,7 @@ void eWidget::event(const eWidgetEvent &event)
 int eWidget::exec()
 {
 	if (in_loop)
-		qFatal("double exec");
+		eFatal("double exec");
 	in_loop=-1;	// hey, exec hat angefangen aber noch nicht in der mainloop
 
 	event(eWidgetEvent(eWidgetEvent::execBegin));	// hat jemand was dagegen einzuwenden?
@@ -258,7 +258,7 @@ void eWidget::close(int res)
 	} else
 	{
 		if (in_loop==0)
-			qFatal("attempt to close non-execing widget");
+			eFatal("attempt to close non-execing widget");
 		if (in_loop==1)	// nur wenn das ne echte loop ist
 			eApp->exit_loop();
 		result=res;
@@ -295,10 +295,10 @@ void eWidget::willShowChildren()
 		_willShow();
 		if (!childlist.empty())
 		{
-			std::list<eWidget*>::iterator It = childlist.begin();
+			ePtrList<eWidget>::iterator It(childlist);
 			while(It != childlist.end())
 			{
-				(*It)->willShowChildren();
+				It->willShowChildren();
 				It++;
 			}
 		}
@@ -321,10 +321,10 @@ void eWidget::willHideChildren()
 	_willHide();
 		if (!childlist.empty())
 		{
-			std::list<eWidget*>::iterator It = childlist.begin();
+			ePtrList<eWidget>::iterator It(childlist);
 			while(It != childlist.end())
 			{
-				(*It)->willHideChildren();
+				It->willHideChildren();
 				It++;
 			}
 		}
@@ -373,14 +373,17 @@ void eWidget::recalcClip()
 
 void eWidget::checkFocus()
 {
-	QList<eWidget> *l=getTLW()->focusList();
+	ePtrList<eWidget> *l=getTLW()->focusList();
 	if (!(l->current() && (l->current()->isVisible())))
 	{
 		if (l->current())
 			l->current()->event(eWidgetEvent(eWidgetEvent::lostFocus));
+
 		l->first();
+
 		while (l->current() && !(l->current()->isVisible()))
 			l->next();
+
 		if (l->current())
 			l->current()->event(eWidgetEvent(eWidgetEvent::gotFocus));
 	}
@@ -403,13 +406,17 @@ void eWidget::focusNext(int dir)
 {
 	if (_focusList.current())
 		_focusList.current()->event(eWidgetEvent(eWidgetEvent::lostFocus));
+
 	do
 	{
 		if (dir)
 			_focusList.prev();
 		else
 			_focusList.next();
-	} while (_focusList.current() && !(_focusList.current()->state&stateShow));
+	
+	}
+	while (_focusList.current() && !(_focusList.current()->state&stateShow));
+
 	if (!_focusList.current())
 	{
 		if (dir)
@@ -419,6 +426,7 @@ void eWidget::focusNext(int dir)
 	}
 	while (focusList()->current() && !(focusList()->current()->state&stateShow))
 		focusList()->next();
+
 	if (_focusList.current())
 		_focusList.current()->event(eWidgetEvent(eWidgetEvent::gotFocus));
 }
@@ -429,7 +437,7 @@ void eWidget::setFont(const gFont &fnt)
 	event(eWidgetEvent(eWidgetEvent::changedFont));
 }
 
-void eWidget::setText(const QString &label)
+void eWidget::setText(const eString &label)
 {
 	if (label != text)	// ein compare ist immer weniger arbeit als ein unnoetiges redraw
 	{
@@ -520,7 +528,7 @@ static int parse(const char *p, int *v, int *e, int max)
 	return 0;
 }
 
-int eWidget::setProperty(const QString &prop, const QString &value)
+int eWidget::setProperty(const eString &prop, const eString &value)
 {
 	if (prop=="position")
 	{
@@ -583,8 +591,8 @@ int eWidget::setProperty(const QString &prop, const QString &value)
 		resize(eSize(v[0], v[1]));
 	} else if (prop=="text")
 	{
-		QString text;
-		const QChar *v=value.unicode();
+		eString text;
+		const char *v=value.c_str();
 		for (unsigned int i=0; i<value.length(); i++, v++)
 		{
 			if (*v=='\\')
@@ -617,14 +625,14 @@ int eWidget::setProperty(const QString &prop, const QString &value)
 		setText(text);
 	} else if (prop=="font")
 	{
-		QString family=value;
-		int sem=value.findRev(';', -1);
+		eString family=value;
+		int sem=value.rfind(';');
 		int size=16;
 		if (sem!=-1)
 		{
 			family=family.left(sem);
-			QString r=value.mid(sem+1);
-			size=r.toUInt();
+			eString r=value.mid(sem+1);
+			size=atoi(r);
 			if (size<=0)
 				size=16;
 		}
@@ -639,13 +647,13 @@ int eWidget::setProperty(const QString &prop, const QString &value)
 		setBackgroundColor(eSkin::getActive()->queryColor(value));
 	else
 	{
-		qFatal("skin property %s does not exist", (const char*)prop);
+		eFatal("skin property %s does not exist", (const char*)prop);
 		return -ENOENT;
 	}
 	return 0;
 }
 
-eWidget *eWidget::search(const QString &sname)
+eWidget *eWidget::search(const eString &sname)
 {
 	if (name==sname)
 		return this;

@@ -13,9 +13,9 @@ extern "C"
 #include "lowlevel/sdt.h"
 #include "lowlevel/tdt.h"
 
-static QString qHex(int v)
+static eString qHex(int v)
 {
-	return QString().sprintf("%04x", v);
+	return eString().sprintf("%04x", v);
 }
 
 int fromBCD(int bcd)
@@ -132,13 +132,13 @@ UnknownDescriptor::~UnknownDescriptor()
 	delete data;
 }
 
-QString UnknownDescriptor::toString()
+eString UnknownDescriptor::toString()
 {
-	QString res;
-	res="UnknownDescriptor: "+ QString(decode_descr(data[0])) + " (" + qHex(data[0])+")\n";
+	eString res;
+	res="UnknownDescriptor: "+ eString(decode_descr(data[0])) + " (" + qHex(data[0])+")\n";
 	res+="	rawData:";
 	for (int i=0; i<len; i++)
-		res+=QString().sprintf(" %02x", data[i]);
+		res+=eString().sprintf(" %02x", data[i]);
 	res+="\n";
 	return res;
 }
@@ -161,11 +161,11 @@ ServiceDescriptor::~ServiceDescriptor()
 	delete service_name;
 }
 
-QString ServiceDescriptor::toString()
+eString ServiceDescriptor::toString()
 {
-	QString res="ServiceDescriptor\n	service_type: " + qHex(service_type) + " (" + decode_service_type(service_type) + ")";
-	res+="	service_provider: " + QString(service_provider) + "\n";
-	res+="	service_name: " + QString(service_name) + "\n";
+	eString res="ServiceDescriptor\n	service_type: " + qHex(service_type) + " (" + decode_service_type(service_type) + ")";
+	res+="	service_provider: " + eString(service_provider) + "\n";
+	res+="	service_name: " + eString(service_name) + "\n";
 	return res;
 }
 
@@ -177,9 +177,9 @@ CAIdentifierDescriptor::CAIdentifierDescriptor(descr_gen_t *descr): Descriptor(D
 		CA_system_id[i]=(((__u8*)(descr+1))[i*2]<<8)|(((__u8*)(descr+1))[i*2+1]);
 }
 
-QString CAIdentifierDescriptor::toString()
+eString CAIdentifierDescriptor::toString()
 {
-	QString res="CAIdentifier\n	CA_system_id:";
+	eString res="CAIdentifier\n	CA_system_id:";
 	for (int i=0; i<CA_system_ids; i++)
 		res+=" "+qHex(CA_system_id[i]);
 	res+="\n";
@@ -241,9 +241,9 @@ LinkageDescriptor::~LinkageDescriptor()
 		delete[] private_data;
 }
 
-QString LinkageDescriptor::toString()
+eString LinkageDescriptor::toString()
 {
-	QString res="LinkageDescriptor\n";
+	eString res="LinkageDescriptor\n";
 	res+="	transport_stream_id: "+qHex(transport_stream_id)+"\n";
 	res+="	original_network_id: "+qHex(original_network_id)+"\n";
 	res+="	service_id: "+qHex(service_id)+"\n";
@@ -262,7 +262,7 @@ QString LinkageDescriptor::toString()
 	{
 		res+="	private data:";
 		for (int i=0; i<priv_len; i++)
-			res+=QString().sprintf(" %02x", private_data[i]);
+			res+=eString().sprintf(" %02x", private_data[i]);
 		res+="\n";
 	}
 	return res;
@@ -290,9 +290,9 @@ NVODReferenceDescriptor::~NVODReferenceDescriptor()
 {
 }
 
-QString NVODReferenceDescriptor::toString()
+eString NVODReferenceDescriptor::toString()
 {
-	QString res;
+	eString res;
 	res="NVODReferenceDescriptor\n";
 	for (ePtrList<NVODReferenceEntry>::iterator i(entries); i != entries.end(); ++i)
 	{
@@ -309,9 +309,9 @@ TimeShiftedServiceDescriptor::TimeShiftedServiceDescriptor(descr_time_shifted_se
 	reference_service_id=HILO(descr->reference_service_id);
 }
 
-QString TimeShiftedServiceDescriptor::toString()
+eString TimeShiftedServiceDescriptor::toString()
 {
-	QString res="TimeShiftedServiceDescriptor\n";
+	eString res="TimeShiftedServiceDescriptor\n";
 	res+="	reference_service_id: " + qHex(reference_service_id) + "\n";
 	return res;
 }
@@ -321,9 +321,9 @@ StreamIdentifierDescriptor::StreamIdentifierDescriptor(descr_stream_identifier_s
 	component_tag=descr->component_tag;
 }
 
-QString StreamIdentifierDescriptor::toString()
+eString StreamIdentifierDescriptor::toString()
 {
-	QString res="StreamIdentifierDescriptor\n";
+	eString res="StreamIdentifierDescriptor\n";
 	res+="	component_tag: " + qHex(component_tag) + "\n";
 	return res;
 }
@@ -341,9 +341,9 @@ CADescriptor::~CADescriptor()
 	delete[] data;
 }
 
-QString CADescriptor::toString()
+eString CADescriptor::toString()
 {
-	QString res="CADescriptor\n";
+	eString res="CADescriptor\n";
 	res+="	CA_system_ID: "+qHex(CA_system_ID)+"\n";
 	res+="	CA_PID: "+qHex(CA_PID)+"\n";
 	return res;
@@ -362,10 +362,10 @@ NetworkNameDescriptor::~NetworkNameDescriptor()
 	delete network_name;
 }
 
-QString NetworkNameDescriptor::toString()
+eString NetworkNameDescriptor::toString()
 {
-	QString res="NetworkNameDescriptor\n";
-	res+="  network_name: " + QString(network_name) + "\n";
+	eString res="NetworkNameDescriptor\n";
+	res+="  network_name: " + eString(network_name) + "\n";
 	return res;
 }
 
@@ -395,14 +395,14 @@ CableDeliverySystemDescriptor::~CableDeliverySystemDescriptor()
 {
 }
 
-QString CableDeliverySystemDescriptor::toString()
+eString CableDeliverySystemDescriptor::toString()
 {
-	QString res="CableDeliverySystemDescriptor\n";
-	res+=QString().sprintf("  frequency: %d\n", frequency);
-	res+=QString().sprintf("  FEC_outer: %d\n", FEC_outer);
-	res+=QString().sprintf("  modulation: QAM%d\n", 8<<modulation);
-	res+=QString().sprintf("  symbol_rate: %d\n", symbol_rate);
-	res+=QString().sprintf("  FEC_inner: %d\n", FEC_inner);
+	eString res="CableDeliverySystemDescriptor\n";
+	res+=eString().sprintf("  frequency: %d\n", frequency);
+	res+=eString().sprintf("  FEC_outer: %d\n", FEC_outer);
+	res+=eString().sprintf("  modulation: QAM%d\n", 8<<modulation);
+	res+=eString().sprintf("  symbol_rate: %d\n", symbol_rate);
+	res+=eString().sprintf("  FEC_inner: %d\n", FEC_inner);
 	return res;
 }
 
@@ -437,23 +437,23 @@ SatelliteDeliverySystemDescriptor::~SatelliteDeliverySystemDescriptor()
 {
 }
 
-QString SatelliteDeliverySystemDescriptor::toString()
+eString SatelliteDeliverySystemDescriptor::toString()
 {
-	QString res;
-	res+=QString().sprintf("SatelliteDeliverySystemDescriptor\n");
-	res+=QString().sprintf("  frequency: %d\n", frequency);
-	res+=QString().sprintf("  orbital_position: %3d.%d%c\n", orbital_position/10, orbital_position%10, west_east_flag?'E':'W');
+	eString res;
+	res+=eString().sprintf("SatelliteDeliverySystemDescriptor\n");
+	res+=eString().sprintf("  frequency: %d\n", frequency);
+	res+=eString().sprintf("  orbital_position: %3d.%d%c\n", orbital_position/10, orbital_position%10, west_east_flag?'E':'W');
 	res+="  polarisation: ";
 	switch (polarisation)
 	{
-	case 0: res+=QString().sprintf("linear - horizontal\n"); break;
-	case 1: res+=QString().sprintf("linear - vertical\n"); break;
-	case 2: res+=QString().sprintf("circular - left (*cool*)\n"); break;
-	case 3: res+=QString().sprintf("circular - right (*cool*)\n"); break;
+	case 0: res+=eString().sprintf("linear - horizontal\n"); break;
+	case 1: res+=eString().sprintf("linear - vertical\n"); break;
+	case 2: res+=eString().sprintf("circular - left (*cool*)\n"); break;
+	case 3: res+=eString().sprintf("circular - right (*cool*)\n"); break;
   }
-	res+=QString().sprintf("  modulation: %d\n", modulation);
-	res+=QString().sprintf("  symbol_rate: %d\n", symbol_rate);
-	res+=QString().sprintf("  FEC_inner: %d/%d\n", FEC_inner, FEC_inner+1);
+	res+=eString().sprintf("  modulation: %d\n", modulation);
+	res+=eString().sprintf("  symbol_rate: %d\n", symbol_rate);
+	res+=eString().sprintf("  FEC_inner: %d/%d\n", FEC_inner, FEC_inner+1);
 	return res;
 }
 
@@ -479,14 +479,14 @@ ServiceListDescriptor::~ServiceListDescriptor()
 {
 }
 
-QString ServiceListDescriptor::toString()
+eString ServiceListDescriptor::toString()
 {
-	QString res="ServiceListDescriptor\n";
+	eString res="ServiceListDescriptor\n";
 	for (ePtrList<ServiceListDescriptorEntry>::iterator i(entries); i != entries.end(); ++i)
 	{
-		res+=QString().sprintf("	ServiceListDescriptorEntry\n");
-		res+=QString().sprintf("		service_id: %04x\n", i->service_id);
-		res+=QString().sprintf("		service_type: %04x\n", i->service_type);
+		res+=eString().sprintf("	ServiceListDescriptorEntry\n");
+		res+=eString().sprintf("		service_id: %04x\n", i->service_id);
+		res+=eString().sprintf("		service_type: %04x\n", i->service_type);
 	}
 	return res;
 }
@@ -514,11 +514,11 @@ ShortEventDescriptor::ShortEventDescriptor(descr_gen_t *descr): Descriptor(DESCR
 		text+=data[ptr++];
 }
 
-QString ShortEventDescriptor::toString()
+eString ShortEventDescriptor::toString()
 {
-	QString res="ShortEventDescriptor\n";
-	res+=QString().sprintf("  event_name: %s\n", (const char*)event_name);
-	res+=QString().sprintf("  text: %s\n", (const char*)text);
+	eString res="ShortEventDescriptor\n";
+	res+=eString().sprintf("  event_name: %s\n", (const char*)event_name);
+	res+=eString().sprintf("  text: %s\n", (const char*)text);
 	return res;
 }
 
@@ -529,12 +529,12 @@ ISO639LanguageDescriptor::ISO639LanguageDescriptor(descr_gen_t *descr): Descript
 	audio_type=data[5];
 }
 
-QString ISO639LanguageDescriptor::toString()
+eString ISO639LanguageDescriptor::toString()
 {
-	QString res;
-	res+=QString().sprintf("ISO639LangugageDescriptor\n");
-	res+=QString().sprintf("  language_code: %c%c%c\n", language_code[0], language_code[1], language_code[2]);
-	res+=QString().sprintf("  audio_type: %d\n", audio_type);
+	eString res;
+	res+=eString().sprintf("ISO639LangugageDescriptor\n");
+	res+=eString().sprintf("  language_code: %c%c%c\n", language_code[0], language_code[1], language_code[2]);
+	res+=eString().sprintf("  audio_type: %d\n", audio_type);
 	return res;
 }
 
@@ -561,17 +561,17 @@ AC3Descriptor::AC3Descriptor(descr_gen_t *descr): Descriptor(DESCR_AC3)
 		asvc=-1;
 }
 
-QString AC3Descriptor::toString()
+eString AC3Descriptor::toString()
 {
-	QString res="AC3Descriptor\n";
+	eString res="AC3Descriptor\n";
 	if (AC3_type!=-1)
-		res+=QString().sprintf("  AC3_type: %d", AC3_type);
+		res+=eString().sprintf("  AC3_type: %d", AC3_type);
 	if (bsid!=-1)
-		res+=QString().sprintf("  bsid: %d", bsid);
+		res+=eString().sprintf("  bsid: %d", bsid);
 	if (mainid!=-1)
-		res+=QString().sprintf("  mainid: %d", mainid);
+		res+=eString().sprintf("  mainid: %d", mainid);
 	if (asvc!=-1)
-		res+=QString().sprintf("  asvc: %d", asvc);
+		res+=eString().sprintf("  asvc: %d", asvc);
 	return res;
 }
 
@@ -585,9 +585,9 @@ BouquetNameDescriptor::BouquetNameDescriptor(descr_gen_t *descr): Descriptor(DES
 		name+=*data++;
 }
 
-QString BouquetNameDescriptor::toString()
+eString BouquetNameDescriptor::toString()
 {
-	QString res="BouquetNameDescriptor\n";
+	eString res="BouquetNameDescriptor\n";
 	res+="  name: "+name+"\n";
 	return res;
 }
@@ -608,12 +608,12 @@ ExtendedEventDescriptor::ExtendedEventDescriptor(descr_gen_t *descr): Descriptor
 		item_description+=data[ptr++];
 }
 
-QString ExtendedEventDescriptor::toString()
+eString ExtendedEventDescriptor::toString()
 {
-	QString res="ExtendedEventDescriptor\n";
-	res+=QString().sprintf("  language_code: %c%c%c\n", language_code[0], language_code[1], language_code[2]);
-	res+=QString().sprintf("  descriptor %i / %i\n", descriptor_number, last_descriptor_number);
-	res+=QString().sprintf("  description length: %i\n", item_description_length);
+	eString res="ExtendedEventDescriptor\n";
+	res+=eString().sprintf("  language_code: %c%c%c\n", language_code[0], language_code[1], language_code[2]);
+	res+=eString().sprintf("  descriptor %i / %i\n", descriptor_number, last_descriptor_number);
+	res+=eString().sprintf("  description length: %i\n", item_description_length);
 	res+="  description : "+item_description+"\n";
 	return res;
 }
@@ -634,13 +634,13 @@ ComponentDescriptor::ComponentDescriptor(descr_component_struct *descr): Descrip
 		text+=*p++;
 }
 
-QString ComponentDescriptor::toString()
+eString ComponentDescriptor::toString()
 {
-	QString res="ComponentDescriptor\n";
-	res+=QString().sprintf("  stream_content: %d\n", stream_content);
-	res+=QString().sprintf("  component_type: %d\n", component_type);
-	res+=QString().sprintf("  component_tag: %d\n", component_tag);
-	res+=QString().sprintf("  text: %s\n", (const char*)text);
+	eString res="ComponentDescriptor\n";
+	res+=eString().sprintf("  stream_content: %d\n", stream_content);
+	res+=eString().sprintf("  component_type: %d\n", component_type);
+	res+=eString().sprintf("  component_tag: %d\n", component_tag);
+	res+=eString().sprintf("  text: %s\n", (const char*)text);
 	return res;
 }
 
@@ -655,11 +655,11 @@ LesRadiosDescriptor::LesRadiosDescriptor(descr_lesradios_struct *descr): Descrip
 		name+=*lname++;
 }
 
-QString LesRadiosDescriptor::toString()
+eString LesRadiosDescriptor::toString()
 {
-	QString res;
+	eString res;
 	res="LesRadioDescriptor\n";
-	res+=QString().sprintf("  id: %d\n", id);
+	res+=eString().sprintf("  id: %d\n", id);
 	res+="  name";
 	res+=name;
 	res+="\n";
@@ -672,9 +672,9 @@ MHWDataDescriptor::MHWDataDescriptor(descr_mhw_data_struct *descr)
 	memcpy(type, descr->type, 8);
 }
 
-QString MHWDataDescriptor::toString()
+eString MHWDataDescriptor::toString()
 {
-	QString res;
+	eString res;
 	res="MHWDataDescriptor\n  ";
 	for (int i=0; i<8; i++)
 		res+=type[i];
@@ -904,7 +904,7 @@ int TDT::data(__u8 *data)
 		return 1;
 	} else
 	{
-		qFatal("invalide TDT::data");
+		eFatal("invalide TDT::data");
 		UTC_time=-1;
 		return -1;
 	}

@@ -1,6 +1,6 @@
 #include "http_dyn.h"
 
-eHTTPDyn::eHTTPDyn(eHTTPConnection *c, QString result): eHTTPDataSource(c), result(result)
+eHTTPDyn::eHTTPDyn(eHTTPConnection *c, eString result): eHTTPDataSource(c), result(result)
 {
 	wptr=0;
 	char buffer[10];
@@ -21,7 +21,7 @@ int eHTTPDyn::doWrite(int hm)
 		tw=hm;
 	if (tw<=0)
 		return -1;
-	connection->writeBlock(((const char*)result.latin1())+wptr, tw);
+	connection->writeBlock(result.c_str()+wptr, tw);
 	wptr+=tw;
 	return tw;
 }
@@ -31,14 +31,14 @@ eHTTPDynPathResolver::eHTTPDynPathResolver()
 	dyn.setAutoDelete(true);
 }
 
-void eHTTPDynPathResolver::addDyn(QString request, QString path, QString (*function)(QString, QString, QString, eHTTPConnection*))
+void eHTTPDynPathResolver::addDyn(eString request, eString path, eString (*function)(eString, eString, eString, eHTTPConnection*))
 {
-	dyn.append(new eHTTPDynEntry(request, path, function));
+	dyn.push_back(new eHTTPDynEntry(request, path, function));
 }
 
-eHTTPDataSource *eHTTPDynPathResolver::getDataSource(QString request, QString path, eHTTPConnection *conn)
+eHTTPDataSource *eHTTPDynPathResolver::getDataSource(eString request, eString path, eHTTPConnection *conn)
 {
-	QString p, opt;
+	eString p, opt;
 	if (path.find('?')!=-1)
 	{
 		p=path.left(path.find('?'));
@@ -48,12 +48,14 @@ eHTTPDataSource *eHTTPDynPathResolver::getDataSource(QString request, QString pa
 		p=path;
 		opt="";
 	}
-	for (QListIterator<eHTTPDynEntry> i(dyn); i.current(); ++i)
-		if ((i.current()->path==p) && (i.current()->request==request))
+	for (ePtrList<eHTTPDynEntry>::iterator i(dyn); i != dyn.end(); ++i)
+		if ((i->path==p) && (i->request==request))
 		{
-			QString s=i.current()->function(request, path, opt, conn);
+			eString s=i->function(request, path, opt, conn);
+
 			if (s)
 				return new eHTTPDyn(conn, s);
+
 			return new eHTTPError(conn, 500);
 		}
 	return 0;

@@ -17,17 +17,17 @@ class eHTTPFilePathResolver: public eHTTPPathResolver
 {
 	struct eHTTPFilePath
 	{
-		QString path;
-		QString root;
-		eHTTPFilePath(QString path, QString root): path(path), root(root)
+		eString path;
+		eString root;
+		eHTTPFilePath(eString path, eString root): path(path), root(root)
 		{
 		}
 	};
-	QList<eHTTPFilePath> translate;
+	ePtrList<eHTTPFilePath> translate;
 public:
 	eHTTPFilePathResolver();
-	eHTTPDataSource *getDataSource(QString request, QString path, eHTTPConnection *conn);
-	void addTranslation(QString path, QString root);
+	eHTTPDataSource *getDataSource(eString request, eString path, eHTTPConnection *conn);
+	void addTranslation(eString path, eString root);
 };
 
 #endif

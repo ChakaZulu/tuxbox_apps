@@ -84,7 +84,7 @@ int eEPGCache::sectionRead(__u8 *data)
 
 			if ( (time(0)+eDVB::getInstance()->time_difference) <= (TM+duration))  // old events should not be cached
 			{
-				// hier wird entweder eine eventMap zurück gegeben.. entweder eine vorhandene..
+				// hier wird immer eine eventMap zurück gegeben.. entweder eine vorhandene..
 				// oder eine durch [] erzeugte
 				eventMap &service = eventDB[SREF];
 				

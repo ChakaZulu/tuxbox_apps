@@ -18,7 +18,7 @@ gRC *gRC::instance=0;
 
 gRC::gRC(): queuelock(MAXSIZE)
 {
-	ASSERT(!instance);
+//	ASSERT(!instance);
 	instance=this;
 	queuelock.lock(MAXSIZE);
 	pthread_create(&the_thread, 0, thread_wrapper, this);
@@ -71,7 +71,7 @@ gPainter::gPainter(gDC &dc, eRect rect): dc(dc), rc(gRC::getInstance()), foregro
 {
 	if (rect.isNull())
 		rect=eRect(ePoint(0, 0), dc.getSize());
-	ASSERT(!gPainter_instances);
+//	ASSERT(!gPainter_instances);
 	gPainter_instances++;
 	begin(rect);
 }
@@ -110,7 +110,7 @@ void gPainter::setFont(const gFont &mfont)
 	font=mfont;
 }
 
-void gPainter::renderText(const eRect &pos, const QString &string, int flags)
+void gPainter::renderText(const eRect &pos, const eString &string, int flags)
 {
 	eRect area=pos;
 	area.moveBy(logicalZero.x(), logicalZero.y());
@@ -118,7 +118,7 @@ void gPainter::renderText(const eRect &pos, const QString &string, int flags)
 	gOpcode o;
 	o.dc=&dc;
 	o.opcode=gOpcode::renderText;
-	o.parm.renderText.text=new QString(string);
+	o.parm.renderText.text=new eString(string);
 	o.parm.renderText.area=new eRect(area);
 	o.parm.renderText.font=new gFont(font);
 	o.flags=flags;
@@ -336,7 +336,7 @@ void gPixmapDC::exec(gOpcode *o)
 	case gOpcode::flush:
 		break;
 	default:
-		qFatal("illegal opcode %d. expect memory leak!", o->opcode);
+		eFatal("illegal opcode %d. expect memory leak!", o->opcode);
 	}
 }
 

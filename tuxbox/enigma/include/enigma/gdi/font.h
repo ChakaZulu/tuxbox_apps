@@ -12,9 +12,8 @@
 #include <esize.h>
 #include <epoint.h>
 #include <erect.h>
-#include <qlist.h>
 #include <vector>
-#include <qstring.h>
+#include <estring.h>
 
 class FontRenderClass;
 class Font;
@@ -106,7 +105,7 @@ public:
 	eTextPara *grab();
 
 	void setFont(const gFont &font);
-	int renderString(const QString &string, int flags=0);
+	int renderString(const eString &string, int flags=0);
 
 	void clear();
 

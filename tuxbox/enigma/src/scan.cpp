@@ -14,7 +14,7 @@
 
 #include <core/base/i18n.h>
 
-tsText::tsText(QString sheadline, QString sbody, eWidget *parent): eWidget(parent, 1)
+tsText::tsText(eString sheadline, eString sbody, eWidget *parent): eWidget(parent, 1)
 {
 	headline=new eLabel(this);
 	headline->setText(sheadline);
@@ -257,7 +257,7 @@ void tsDoScan::eventOccured(int event)
 		break;
 	case eDVB::eventScanCompleted:
 	{
-		qDebug("SCAN HAS COMPLETED");
+		eDebug("SCAN HAS COMPLETED");
 		close(0);
 	}
 	}
@@ -281,7 +281,7 @@ void tsDoScan::updateETA()
 	if (left<0)
 		left=0;
 		
-	eta->setText(QString().sprintf(_("%d minutes and %02d seconds left"), (int)left/60, (int)left%60));
+	eta->setText(eString().sprintf(_("%d minutes and %02d seconds left"), (int)left/60, (int)left%60));
 }
 
 tsDoScan::tsDoScan(tsFindInit *init, eWidget *parent): eWidget(parent, 1), init(init), etatimer(eApp)
@@ -334,9 +334,9 @@ void tsDoScan::updateStats()
 {
 	int transponders, scanned, services;
 	eDVB::getInstance()->getTransponders()->updateStats(transponders, scanned, services);
-	transp_found->setText(QString().sprintf(_("%d\ttransponders found"), transponders));
-	transp_scanned->setText(QString().sprintf(_("%d\ttransponders scanned"), scanned));
-	known_services->setText(QString().sprintf(_("%d\tknown services"), services));
+	transp_found->setText(eString().sprintf(_("%d\ttransponders found"), transponders));
+	transp_scanned->setText(eString().sprintf(_("%d\ttransponders scanned"), scanned));
+	known_services->setText(eString().sprintf(_("%d\tknown services"), services));
 	if (transponders)
 		bar->setPerc(scanned*100/transponders);
 }
@@ -410,7 +410,7 @@ int TransponderScan::exec()
 	{
 		int n=mp.at();
 		int total=mp.count();
-		progress_text->setText(QString().sprintf("%d/%d", n+1, total));
+		progress_text->setText(eString().sprintf("%d/%d", n+1, total));
 		if (total<2)
 			total=2;
 		total--;

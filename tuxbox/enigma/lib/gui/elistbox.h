@@ -9,9 +9,8 @@
 class eListbox;
 #include <qsortedlist.h>
 
-class eListboxEntry: public /*Q*/Object
+class eListboxEntry: public Object
 {
-//	Q_OBJECT
 	friend class eListbox;
 protected:
 	eListbox *listbox;
@@ -23,24 +22,22 @@ public:
 	virtual int operator<(const eListboxEntry &) const;
 	virtual int operator==(const eListboxEntry &) const;
 	virtual ~eListboxEntry();
-	virtual QString getText(int col=0) const =0;
+	virtual eString getText(int col=0) const =0;
 	virtual void renderInto(gPainter *rc, eRect rect) const;
 };
 
 class eListboxEntryText: public eListboxEntry
 {
-	QString text, sort;
+	eString text, sort;
 public:
-	QString getText(int col=0) const; 
-	void setText(const QString t) { text=t; }
-	eListboxEntryText(eListbox *listbox, QString text, QString sort=0, void *data=0);
+	eString getText(int col=0) const; 
+	void setText(const eString t) { text=t; }
+	eListboxEntryText(eListbox *listbox, const char* text, const char* sort=0, void *data=0);
 	~eListboxEntryText();
 };
 
 class eListbox: public eWidget
 {
-//	Q_OBJECT
-	
 	friend class eListboxEntry;
 	void redrawWidget(gPainter *target, const eRect &area);
 	QSortedList<eListboxEntry> childs;
@@ -61,9 +58,6 @@ class eListbox: public eWidget
 public:
 	void keyDown(int rc);
 	void keyUp(int rc);
-/*signals:
-	void selected(eListboxEntry *lbe);
-	void selchanged(eListboxEntry *lbe);*/
 	Signal1<void, eListboxEntry*> selected;
 	Signal1<void, eListboxEntry*> selchanged;
 public:
@@ -74,7 +68,7 @@ public:
 	void sort();
 	eListboxEntry *goNext();
 	eListboxEntry *goPrev();
-	int setProperty(const QString &prop, const QString &value);
+	int setProperty(const eString &prop, const eString &value);
 	enum
 	{
 		tBorder, tLitebar
@@ -100,12 +94,12 @@ inline eListboxEntry::~eListboxEntry()
 
 inline int eListboxEntry::operator<(const eListboxEntry &o) const
 {
-	return qstricmp(getText(-1), o.getText(-1))<0;
+	return stricmp( getText(-1).c_str(), o.getText(-1).c_str() ) < 0;
 }
 
 inline int eListboxEntry::operator==(const eListboxEntry &o) const
 {
-	return !qstricmp(getText(-1), o.getText(-1));
+	return !stricmp( getText(-1).c_str(), o.getText(-1).c_str() );
 }
 
 inline void eListboxEntry::renderInto(gPainter *rc, eRect area) const
@@ -115,8 +109,8 @@ inline void eListboxEntry::renderInto(gPainter *rc, eRect area) const
 	rc->flush();
 }
 
-inline eListboxEntryText::eListboxEntryText(eListbox *listbox, QString text, QString sort, void *data)
-:eListboxEntry(listbox, data) , text(text), sort(sort)
+inline eListboxEntryText::eListboxEntryText(eListbox *listbox, const char* text, const char* sort, void *data)
+:eListboxEntry(listbox, data), text(text), sort(sort)
 {
 }
 
@@ -124,7 +118,7 @@ inline eListboxEntryText::~eListboxEntryText()
 {
 }
 
-inline QString eListboxEntryText::getText(int col) const
+inline eString eListboxEntryText::getText(int col) const
 {
 	switch (col)
 	{
@@ -196,7 +190,7 @@ inline eListbox::~eListbox()
 		delete current;
 }
 
-inline int eListbox::setProperty(const QString &prop, const QString &value)
+inline int eListbox::setProperty(const eString &prop, const eString &value)
 {
 	if (prop=="col_active")
 		col_active=eSkin::getActive()->queryScheme(value);

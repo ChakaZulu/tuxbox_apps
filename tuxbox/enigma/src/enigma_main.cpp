@@ -89,7 +89,7 @@ public:
 
 */
 
-static QString getISO639Description(char *iso)
+static eString getISO639Description(char *iso)
 {
 	for (unsigned int i=0; i<sizeof(iso639)/sizeof(*iso639); ++i)
 	{
@@ -98,21 +98,21 @@ static QString getISO639Description(char *iso)
 		if (!strnicmp(iso639[i].iso639int, iso, 3))
 			return iso639[i].description1;
 	}
-	return QString()+iso[0]+iso[1]+iso[2];
+	return eString()+iso[0]+iso[1]+iso[2];
 }
 
 
 void NVODStream::EITready(int error)
 {
-	qDebug("NVOD eit ready: %d", error);
+	eDebug("NVOD eit ready: %d", error);
 	listbox->sort();
 	if (listbox && listbox->isVisible())
 		listbox->invalidate();
 }
 
 NVODStream::NVODStream(eListbox *listbox, int transport_stream_id, int original_network_id, int service_id)
-	: eListboxEntry(listbox), transport_stream_id(transport_stream_id), original_network_id(original_network_id), 
-		service_id(service_id), eit(EIT::typeNowNext, service_id, 
+	: eListboxEntry(listbox), transport_stream_id(transport_stream_id), original_network_id(original_network_id),
+		service_id(service_id), eit(EIT::typeNowNext, service_id,
 		(			(eDVB::getInstance()->transport_stream_id==transport_stream_id)
 			&&	(eDVB::getInstance()->original_network_id==original_network_id))?EIT::tsActual:EIT::tsOther		)
 {
@@ -120,33 +120,33 @@ NVODStream::NVODStream(eListbox *listbox, int transport_stream_id, int original_
 	eit.start();
 }
 
-QString NVODStream::getText(int col=0) const
+eString NVODStream::getText(int col=0) const
 {
 	if (eit.ready && !eit.error)
 	{
 		for (ePtrList<EITEvent>::const_iterator i(eit.events); i != eit.events.end(); ++i)		// always take the first one
 		{
-			QString s="--:--";
+			eString s="--:--";
 			EITEvent *event=*i;
 			if (col==-1)
-				return QString().sprintf("%08x", (unsigned int)event->start_time);
+				return eString().sprintf("%08x", (unsigned int)event->start_time);
 			tm *begin=event->start_time!=-1?localtime(&event->start_time):0;
 			if (begin)
 				s.sprintf("%02d:%02d", begin->tm_hour, begin->tm_min);
 			time_t endtime=event->start_time+event->duration;
 			tm *end=event->start_time!=-1?localtime(&endtime):0;
 			if (end)
-				s+=QString().sprintf(" bis %02d:%02d", end->tm_hour, end->tm_min);
+				s+=eString().sprintf(" bis %02d:%02d", end->tm_hour, end->tm_min);
 			time_t now=time(0)+eDVB::getInstance()->time_difference;
 			if ((event->start_time <= now) && (now < endtime))
 			{
 				int perc=(now-event->start_time)*100/event->duration;
-				s+=+" ("+QString().sprintf("%d%%, %d.%02d Euro lost)", perc, perc*3/100, (perc*3)%100);
+				s+=+" ("+eString().sprintf("%d%%, %d.%02d Euro lost)", perc, perc*3/100, (perc*3)%100);
 			}
 			return s;
 		}
 	}
-	QString s;
+	eString s;
 	s.sprintf("Service %04x", service_id);
 	return s;
 }
@@ -184,10 +184,10 @@ AudioStream::AudioStream(eListbox *listbox, PMTEntry *stream): eListboxEntry(lis
 {
 }
 
-QString AudioStream::getText(int col=0) const
+eString AudioStream::getText(int col=0) const
 {
 	int isAC3=0;
-	QString language;
+	eString language;
 	int component_tag=-1;
 	language.sprintf("PID %04x", stream->elementary_PID);
 	for (ePtrList<Descriptor>::iterator i(stream->ES_info); i != stream->ES_info.end(); ++i)
@@ -201,7 +201,7 @@ QString AudioStream::getText(int col=0) const
 			component_tag=((StreamIdentifierDescriptor*)c)->component_tag;
 		else if (c->Tag()==DESCR_LESRADIOS)
 		{
-			language=QString().sprintf("%d.) ", (((LesRadiosDescriptor*)c)->id));
+			language=eString().sprintf("%d.) ", (((LesRadiosDescriptor*)c)->id));
 			language+=((LesRadiosDescriptor*)c)->name;
 		}
 	}
@@ -257,13 +257,13 @@ void eAudioSelector::add(PMTEntry *pmt)
 
 SubService::SubService(eListbox *listbox, LinkageDescriptor *descr): eListboxEntry(listbox)
 {
-	name=QString((const char*)descr->private_data);
+	name=eString((const char*)descr->private_data);
 	transport_stream_id=descr->transport_stream_id;
 	original_network_id=descr->original_network_id;
 	service_id=descr->service_id;
 }
 
-QString SubService::getText(int col=0) const
+eString SubService::getText(int col=0) const
 {
 	return name;
 }
@@ -330,7 +330,7 @@ eServiceNumberWidget::eServiceNumberWidget(int initial)
 
 	CONNECT(number->selected, eServiceNumberWidget::selected);
 	
-/*	timer=new QTimer(eApp);
+/*	timer=new eTimer(eApp);
 	timer->start(2000);
 	CONNECT(timer->timeout, eServiceNumberWidget::timeout);	
 */
@@ -354,11 +354,11 @@ eZapMain::eZapMain(): eWidget(0, 1), timeout(eApp), clocktimer(eApp)
 	isVT=0;
 	eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "ezap_main"))
-		qFatal("skin load of \"ezap_main\" failed");
+		eFatal("skin load of \"ezap_main\" failed");
 
-	qDebug("[PROFILE] eZapMain");
+	eDebug("[PROFILE] eZapMain");
 	lcdmain.show();
-	qDebug("<-- show lcd.");
+	eDebug("<-- show lcd.");
 
 	ASSIGN(ChannelNumber, eLabel, "ch_number");
 	ASSIGN(ChannelName, eLabel, "ch_name");
@@ -444,9 +444,9 @@ eZapMain::eZapMain(): eWidget(0, 1), timeout(eApp), clocktimer(eApp)
 
 	actual_eventDisplay=0;
 
-	qDebug("...");
+	eDebug("...");
 	clockUpdate();	
-	qDebug("<-- clockUpdate");
+	eDebug("<-- clockUpdate");
 }
 
 eZapMain::~eZapMain()
@@ -529,7 +529,7 @@ void eZapMain::setEIT(EIT *eit)
 	
 	if (eit)
 	{
-		QString nowtext, nexttext, nowtime="", nexttime="", descr;
+		eString nowtext, nexttext, nowtime="", nexttime="", descr;
 		int val=0;
 		int p=0;
 		
@@ -572,10 +572,10 @@ void eZapMain::setEIT(EIT *eit)
 				}
 			}
 			tm *t=event->start_time!=-1?localtime(&event->start_time):0;
-			QString start="";
+			eString start="";
 			if (t && event->duration)
 				start.sprintf("%02d:%02d", t->tm_hour, t->tm_min);
-			QString duration;
+			eString duration;
 			if (event->duration>0)
 				duration.sprintf("%d min", event->duration/60);
 			else
@@ -718,7 +718,7 @@ void eZapMain::keyDown(int code)
 		pLCD->lcdMain->hide();
 		pLCD->lcdMenu->show();
 
-//		qDebug("w is %p", w);
+//		eDebug("w is %p", w);
 		w->show();
 		int chnum=w->exec();
 		w->hide();
@@ -943,7 +943,7 @@ void eZapMain::serviceChanged(eService *service, int err)
 		break;
 	}
 	
-	ChannelNumber->setText(QString().sprintf("%d", service->service_number));
+	ChannelNumber->setText(eString().sprintf("%d", service->service_number));
 	
 	if (flags&(ENIGMA_NVOD|ENIGMA_SUBSERVICES))
 	{
@@ -1008,7 +1008,7 @@ void eZapMain::gotSDT(SDT *sdt)
 void eZapMain::gotPMT(PMT *pmt)
 {
 	bool isAc3 = false;
-	qDebug("got pmt");
+	eDebug("got pmt");
 	int numaudio=0;
 	audiosel.clear();
 	for (ePtrList<PMTEntry>::iterator i(pmt->streams); i != pmt->streams.end(); ++i)
@@ -1049,7 +1049,7 @@ void eZapMain::timeOut()
 
 void eZapMain::leaveService(eService *service)
 {
-	qDebug("leaving service");
+	eDebug("leaving service");
 
 	flags=0;
 	
@@ -1074,7 +1074,7 @@ void eZapMain::clockUpdate()
 	tm *t=localtime(&c);
 	if (t)
 	{
-		QString s;
+		eString s;
 		s.sprintf("%02d:%02d", t->tm_hour, t->tm_min);
 		clocktimer.start((70-t->tm_sec)*1000);
 		Clock->setText(s);
@@ -1099,7 +1099,7 @@ void eZapMain::clockUpdate()
 
 void eZapMain::updateVolume(int vol)
 {
-	qDebug("setting volbar to %d", (63-vol)*100/63);
+	eDebug("setting volbar to %d", (63-vol)*100/63);
 	VolumeBar->setPerc((63-vol)*100/63);
 }
 

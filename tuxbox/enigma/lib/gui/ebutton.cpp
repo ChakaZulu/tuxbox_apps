@@ -3,8 +3,8 @@
 #include "rc.h"
 #include "init.h"
 
-eButton::eButton(eWidget *parent, eLabel* descr, int takefocus):
-	eLabel(parent, 0, takefocus), descr(descr?descr->getText():""), tmpDescr(0)
+eButton::eButton(eWidget *parent, eLabel* desc, int takefocus):
+	eLabel(parent, 0, takefocus), descr(desc?desc->getText():""), tmpDescr(0)
 {
 	focus=eSkin::getActive()->queryScheme("focusedColor");
 	normal=eSkin::getActive()->queryScheme("fgColor");
@@ -19,7 +19,7 @@ void eButton::keyUp(int key)
 		
 		if (parent && parent->LCDElement)
 		{
-			QString txt(text=="\x19"?"[X]":text=="\x18"?"[  ]":text);
+			eString txt(text=="\x19"?"[X]":text=="\x18"?"[  ]":text);
 			if (LCDTmp)
 				LCDTmp->setText(txt);
 			else
@@ -32,7 +32,7 @@ void eButton::gotFocus()
 {
 	if (parent && parent->LCDElement)
 	{
-		QString txt(text=="\x19"?"[X]":text=="\x18"?"[  ]":text);
+		eString txt(text=="\x19"?"[X]":text=="\x18"?"[  ]":text);
 		int chkbx = (text=="\x19" || text=="\x18")?1:0;
 		if (descr != "")
 		{

@@ -1,15 +1,13 @@
 #ifndef __enigma_setup_h
 #define __enigma_setup_h
 
-#include "ewidget.h"
-#include "elbwindow.h"
+#include <core/gui/elbwindow.h>
 
 class eListboxEntry;
 
 class eZapSetup: public eLBWindow
 {
-//	Q_OBJECT
-private:// slots:
+private:
 	void sel_close(eListboxEntry *);
 	void sel_bouquet(eListboxEntry *);
 	void sel_network(eListboxEntry *);

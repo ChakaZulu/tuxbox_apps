@@ -23,7 +23,7 @@ public:
 
 	void redrawWidget(gPainter *target, const eRect &area);
 	void setFlags(int flag);
-	int setProperty(const QString &prop, const QString &value);
+	int setProperty(const eString &prop, const eString &value);
 
 	eSize getExtend();
 };

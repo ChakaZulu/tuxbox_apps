@@ -17,17 +17,17 @@ protected:
 	int eventFilter(const eWidgetEvent &event);
 public:
 	void redrawWidget();
-	tsText(QString headline, QString body, eWidget *parent);
+	tsText(eString headline, eString body, eWidget *parent);
 };
 
 class tpPacket
 {
 public:
-	tpPacket(QString name, int scanflags): name(name), scanflags(scanflags)	
+	tpPacket(eString name, int scanflags): name(name), scanflags(scanflags)	
 	{
 		possibleTransponders.setAutoDelete(true);	
 	}
-	QString name;
+	eString name;
 	int scanflags;
 	ePtrList<eTransponder> possibleTransponders;
 };

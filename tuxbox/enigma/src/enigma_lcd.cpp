@@ -1,12 +1,14 @@
-#include <time.h>
-#include "edvb.h"
 #include "enigma_lcd.h"
-#include "dvb.h"
-#include "lcd.h"
-#include "glcddc.h"
-#include "font.h"
-#include "emessage.h"
-#include "eskin.h"
+
+#include <time.h>
+
+#include <core/dvb/edvb.h>
+#include <core/dvb/dvb.h>
+#include <core/gdi/lcd.h>
+#include <core/gdi/glcddc.h>
+#include <core/gdi/font.h>
+#include <core/gui/emessage.h>
+#include <core/gui/eskin.h>
 
 eZapLCD* eZapLCD::instance;
 
@@ -37,7 +39,7 @@ void eZapLCDMain::clockUpdate()
 	tm *t=localtime(&c);
 	if (t)
 	{
-		QString s;
+		eString s;
 		s.sprintf("%02d:%02d", t->tm_hour, t->tm_min);
 		clocktimer.start((70-t->tm_sec)*1000);
 		Clock->setText(s);

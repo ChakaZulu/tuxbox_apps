@@ -8,9 +8,10 @@
 #include "glcddc.h"
 #include "epng.h"
 #include <config.h>
+#include <eerror.h>
 
 
-QMap<QString,tWidgetCreator> eSkin::widget_creator;
+QMap<eString,tWidgetCreator> eSkin::widget_creator;
 
 eSkin *eSkin::active;
 
@@ -31,12 +32,12 @@ void eSkin::clear()
 	parser=0;
 }
 
-void eSkin::addWidgetCreator(const QString &name, tWidgetCreator creator)
+void eSkin::addWidgetCreator(const eString &name, tWidgetCreator creator)
 {
 	widget_creator.insert(name, creator);
 }
 
-void eSkin::removeWidgetCreator(const QString &name, tWidgetCreator creator)
+void eSkin::removeWidgetCreator(const eString &name, tWidgetCreator creator)
 {
 	widget_creator.remove(name);
 }
@@ -48,7 +49,7 @@ int eSkin::parseColor(const char *name, const char *color, gRGB &col)
 		unsigned long vcol=0;
 		if (sscanf(color+1, "%lx", &vcol)!=1)
 		{
-			qDebug("invalid color named \"%s\" (value: %s)", name, color+1);
+			eDebug("invalid color named \"%s\" (value: %s)", name, color+1);
 			return -1;
 		}
 		col.r=(vcol>>16)&0xFF;
@@ -60,7 +61,7 @@ int eSkin::parseColor(const char *name, const char *color, gRGB &col)
 		eNamedColor *n=searchColor(color);
 		if (!n)
 		{
-			qDebug("invalid color named \"%s\" (alias to: \"%s\")", name, color);
+			eDebug("invalid color named \"%s\" (alias to: \"%s\")", name, color);
 			return -1;
 		}
 		col=n->value;
@@ -81,7 +82,7 @@ int eSkin::parseColors(XMLTreeNode *xcolors)
 	{
 		if (strcmp(node->GetType(), "color"))
 		{
-			qDebug("junk found in colorsection (%s)", node->GetType());
+			eDebug("junk found in colorsection (%s)", node->GetType());
 			continue;
 		}
 		
@@ -89,7 +90,7 @@ int eSkin::parseColors(XMLTreeNode *xcolors)
 
 		if (!color || !name)
 		{
-			qDebug("no color/name specified");
+			eDebug("no color/name specified");
 			continue;
 		}
 
@@ -108,7 +109,7 @@ int eSkin::parseColors(XMLTreeNode *xcolors)
 		
 		if ((col->size>1) && (!end))
 		{
-			qDebug("no end specified in \"%s\" but is gradient", name);
+			eDebug("no end specified in \"%s\" but is gradient", name);
 			delete col;
 			continue;
 		}
@@ -188,16 +189,16 @@ int eSkin::parseScheme(XMLTreeNode *xscheme)
 	{
 		if (strcmp(node->GetType(), "map"))
 		{
-			qDebug("illegal scheme entry found: %s", node->GetType());
+			eDebug("illegal scheme entry found: %s", node->GetType());
 			return -1;
 		}
 		char *name=node->GetAttributeValue("name"), *color=node->GetAttributeValue("color");
 		if (!name || !color)
 		{
-			qDebug("no name or color specified in colorscheme");
+			eDebug("no name or color specified in colorscheme");
 			return -1;
 		}
-		QString base=color;
+		eString base=color;
 		int offset=0, p;
 		if ((p=base.find('+'))!=-1)
 		{
@@ -207,8 +208,8 @@ int eSkin::parseScheme(XMLTreeNode *xscheme)
 		eNamedColor *n=searchColor(base);
 		if (!n)
 		{
-			qDebug("illegal color \"%s\" specified", (const char*)base);
-			return -1; 
+			eDebug("illegal color \"%s\" specified", (const char*) base);
+			return -1;
 		}
 		scheme.insert(name, new gColor(n->index+offset));
 	}
@@ -217,7 +218,7 @@ int eSkin::parseScheme(XMLTreeNode *xscheme)
 
 int eSkin::parseImages(XMLTreeNode *inode)
 {
-	QString basepath= QString(DATADIR) + QString("/enigma/pictures/") + inode->GetAttributeValue("basepath");
+	eString basepath= eString(DATADIR) + eString("/enigma/pictures/") + inode->GetAttributeValue("basepath");
 	if (!basepath)
 		basepath="";
 	if (basepath[basepath.length()-1]!='/')
@@ -227,26 +228,26 @@ int eSkin::parseImages(XMLTreeNode *inode)
 	{
 		if (strcmp(node->GetType(), "img"))
 		{
-			qDebug("illegal image entry found: %s", node->GetType());
+			eDebug("illegal image entry found: %s", node->GetType());
 			continue;
 		}
 		const char *name=node->GetAttributeValue("name");
 		if (!name)
 		{
-			qDebug("illegal <img> entry: no name");
+			eDebug("illegal <img> entry: no name");
 			continue;
 		}
 		const char *src=node->GetAttributeValue("src");
 		if (!src)
 		{
-			qDebug("image/img=\"%s\" no src given", name);
+			eDebug("image/img=\"%s\" no src given", name);
 			continue;
 		}
-		QString filename=basepath + QString(src);
+		eString filename=basepath + eString(src);
 		gPixmap *image=loadPNG(filename);
 		if (!image)
 		{
-			qDebug("image/img=\"%s\" - %s: file not found", name, (const char*)filename);
+			eDebug("image/img=\"%s\" - %s: file not found", name, (const char*)filename);
 			continue;
 		}
 		if (paldummy && !node->GetAttributeValue("nomerge"))
@@ -266,19 +267,19 @@ int eSkin::parseValues(XMLTreeNode *xvalues)
 	{
 		if (strcmp(node->GetType(), "value"))
 		{
-			qDebug("illegal values entry %s", node->GetType());
+			eDebug("illegal values entry %s", node->GetType());
 			continue;
 		}
 		const char *name=node->GetAttributeValue("name");
 		if (!name)
 		{
-			qDebug("values entry has no name");
+			eDebug("values entry has no name");
 			continue;
 		}
 		const char *value=node->GetAttributeValue("value");
 		if (!value)
 		{
-			qDebug("values entry has no value");
+			eDebug("values entry has no value");
 			continue;
 		}
 		values.insert(name, new int(atoi(value)));
@@ -297,16 +298,16 @@ gDC *eSkin::getDCbyName(const char *name)
 
 int eSkin::build(eWidget *widget, XMLTreeNode *node)
 {
-	// qDebug("building a %s", node->GetType());
+	// eDebug("building a %s", node->GetType());
 	// if (widget->getType() != node->GetType())
 	//		return -1;
 	
 	for (XMLAttribute *attrib=node->GetAttributes(); attrib; attrib=attrib->GetNext())
 	{
-//		qDebug("setting %s := %s", attrib->GetName(), attrib->GetValue());
+//		eDebug("setting %s := %s", attrib->GetName(), attrib->GetValue());
 		if (widget->setProperty(attrib->GetName(), attrib->GetValue()))
 		{
-			qDebug("failed");
+			eDebug("failed");
 			return -1;
 		}
 	}
@@ -320,14 +321,14 @@ int eSkin::build(eWidget *widget, XMLTreeNode *node)
 		{
 			if (!widget_creator.contains(c->GetType()))
 			{
-				qDebug("widget class %s does not exist", c->GetType());
+				eDebug("widget class %s does not exist", c->GetType());
 				return -ENOENT;
 			}
 			w=widget_creator[c->GetType()](widget);
 		}
 		if (!w)
 		{
-			// qDebug("failed.");
+			// eDebug("failed.");
 			return -EINVAL;
 		}
 		int err;
@@ -375,7 +376,7 @@ int eSkin::load(const char *filename)
 		done=len<sizeof(buf);
 		if (!parser->Parse(buf, len, done))
 		{
-			qDebug("parse error: %s at line %d", 
+			eDebug("parse error: %s at line %d",
 				parser->ErrorString(parser->GetErrorCode()),
 				parser->GetCurrentLineNumber());
 			delete parser;
@@ -391,7 +392,7 @@ int eSkin::load(const char *filename)
 		return -1;
 	if (strcmp(root->GetType(), "eskin"))
 	{
-		qDebug("not an eskin");
+		eDebug("not an eskin");
 		return -1;
 	}
 	
@@ -427,7 +428,7 @@ int eSkin::build(eWidget *widget, const char *name)
 		}
 		node=node->GetNext();
 	}
-	qDebug("didn't found it");
+	eDebug("didn't found it");
 	return -ENOENT;
 }
 
@@ -440,7 +441,7 @@ void eSkin::setPalette(gPixmapDC *pal)
 	}
 }
 
-gColor eSkin::queryColor(const QString &name) const
+gColor eSkin::queryColor(const eString& name) const
 {
 	char *end;
 	int numcol=strtol(name, &end, 10);
@@ -449,7 +450,7 @@ gColor eSkin::queryColor(const QString &name) const
 	eNamedColor *col=searchColor(name);
 	if (!col)
 	{
-		qDebug("requested color %s does not exist", (const char*)name);
+		eDebug("requested color %s does not exist", (const char*)name);
 		return gColor(0);
 	} else
 		return col->index;
@@ -467,32 +468,32 @@ void eSkin::makeActive()
 	active=this;
 }
 
-gColor eSkin::queryScheme(const QString &name) const
+gColor eSkin::queryScheme(const eString& name) const
 {
-	QString base=name;
+	eString base=name;
 	int offset=0, p;
 	if ((p=base.find('+'))!=-1)
 	{
 		base=name.left(p);
 		offset=atoi(name.mid(p));
 	}
-	gColor *n=scheme[name];
+	gColor *n=scheme.find((const char*)name);
 	if (!n)
 	{
-		qDebug("%s does not exist", (const char*)name);
+		eDebug("%s does not exist", (const char*)name);
 		return gColor(0);
 	} else
 		return *n;
 }
 
-gPixmap *eSkin::queryImage(const QString &name) const
+gPixmap *eSkin::queryImage(const eString& name) const
 {
-	return images[name];
+	return images.find((const char*)name);
 }
 
-int eSkin::queryValue(const QString &name, int d) const
+int eSkin::queryValue(const eString& name, int d) const
 {
-	int *v=values[name];
+	int *v=values.find((const char*)name);
 	if (v)
 		return *v;
 	else

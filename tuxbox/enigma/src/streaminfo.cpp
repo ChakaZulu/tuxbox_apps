@@ -31,9 +31,9 @@ void eStreaminfo::keyDown(int code)
 	}
 }
 
-static QString getCAName(int casysid)
+static eString getCAName(int casysid)
 {
-	QString system, subsystem="";
+	eString system, subsystem="";
 	switch (casysid&0xFF00)
 	{
 	case 0x0100: system="Seca/Mediaguard (Canal+)"; break;
@@ -58,7 +58,7 @@ static QString getCAName(int casysid)
 	case 0x1400: system="HRT"; break;
 	case 0x1500: system="IBM"; break;
 	case 0x1600: system="Nera"; break;
-	case 0x1700: system="Betacrypt (Beta Technik)"; 
+	case 0x1700: system="Betacrypt (Beta Technik)";
 		switch (casysid)
 		{
 		case 0x1702: subsystem=" (C)"; break;
@@ -129,7 +129,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	
 	vpid[1]=new eLabel(this);
 	vpid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
-	vpid[1]->setText((parms.vpid==-1)?QString("keine"):QString().sprintf("%04xh  (%dd)", parms.vpid, parms.vpid));
+	vpid[1]->setText((parms.vpid==-1)?eString("keine"):eString().sprintf("%04xh  (%dd)", parms.vpid, parms.vpid));
 	vpid[1]->move(ePoint(185, yOffs+2));
 	vpid[1]->resize(eSize(260, fs+5));
 	yOffs+=fs+5;
@@ -140,7 +140,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	apid[0]->resize(eSize(140, fs+5));
 	
 	apid[1]=new eLabel(this);
-	apid[1]->setText((parms.apid==-1)?QString("keine"):QString().sprintf("%04xh  (%dd)", parms.apid, parms.apid));
+	apid[1]->setText((parms.apid==-1)?eString("keine"):eString().sprintf("%04xh  (%dd)", parms.apid, parms.apid));
 	apid[1]->move(ePoint(185, yOffs+2));
 	apid[1]->resize(eSize(260, fs+5));
 	apid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
@@ -152,7 +152,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	pcrpid[0]->resize(eSize(140, fs+5));
 	
 	pcrpid[1]=new eLabel(this);
-	pcrpid[1]->setText((parms.pcrpid==-1)?QString("keine"):QString().sprintf("%04xh  (%dd)", parms.pcrpid, parms.pcrpid));
+	pcrpid[1]->setText((parms.pcrpid==-1)?eString("keine"):eString().sprintf("%04xh  (%dd)", parms.pcrpid, parms.pcrpid));
 	pcrpid[1]->move(ePoint(185, yOffs+2));
 	pcrpid[1]->resize(eSize(260, fs+5));
 	pcrpid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
@@ -164,13 +164,13 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	tpid[0]->resize(eSize(140, fs+5));
 	
 	tpid[1]=new eLabel(this);
-	tpid[1]->setText((parms.tpid==-1)?QString("keine"):QString().sprintf("%04xh  (%dd)", parms.tpid, parms.tpid));
+	tpid[1]->setText((parms.tpid==-1)?eString("keine"):eString().sprintf("%04xh  (%dd)", parms.tpid, parms.tpid));
 	tpid[1]->move(ePoint(185, yOffs+2));
 	tpid[1]->resize(eSize(260, fs+5));
 	tpid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
 	yOffs+=fs+5;
 	
-	QString vformat="n/a";
+	eString vformat="n/a";
 	FILE *bitstream=0;
 	
 	if (parms.vpid!=-1)
@@ -221,7 +221,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	tsid[0]->resize(eSize(230, fs+5));
 
 	tsid[1]=new eLabel(this);
-	tsid[1]->setText(QString().sprintf("%04xh", eDVB::getInstance()->transport_stream_id));
+	tsid[1]->setText(eString().sprintf("%04xh", eDVB::getInstance()->transport_stream_id));
 	tsid[1]->move(ePoint(280, yOffs));
 	tsid[1]->resize(eSize(130, fs+5));
 	tsid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
@@ -233,7 +233,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	onid[0]->resize(eSize(210, fs+5));
 
 	onid[1]=new eLabel(this);
-	onid[1]->setText(QString().sprintf("%04xh", eDVB::getInstance()->original_network_id));
+	onid[1]->setText(eString().sprintf("%04xh", eDVB::getInstance()->original_network_id));
 	onid[1]->move(ePoint(280, yOffs));
 	onid[1]->resize(eSize(130, fs+5));
 	onid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
@@ -245,7 +245,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	sid[0]->resize(eSize(185, fs+5));
 
 	sid[1]=new eLabel(this);
-	sid[1]->setText(QString().sprintf("%04xh", eDVB::getInstance()->service_id));
+	sid[1]->setText(eString().sprintf("%04xh", eDVB::getInstance()->service_id));
 	sid[1]->move(ePoint(280, yOffs));
 	sid[1]->resize(eSize(130, fs+5));
 	sid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
@@ -273,7 +273,7 @@ siCA::siCA(eWidget *parent): eWidget(parent)
 	availca[0]->resize(eSize(420, fs+5));
 	yOffs+=fs+5;
 
-	QString availcas="keine";
+	eString availcas="keine";
 	
 	int numsys=0;
 	std::list<int>& availCA = eDVB::getInstance()->availableCASystems;
@@ -286,7 +286,7 @@ siCA::siCA(eWidget *parent): eWidget(parent)
 			availcas+="...\n";
 			break;
 		}
-		availcas+= QString().sprintf( "%04xh:  %s\n", *i, (const char*) getCAName(*i));
+		availcas+= eString().sprintf( "%04xh:  %s\n", *i, (const char*) getCAName(*i));
 	}
 	if (!numsys)
 		numsys++;
@@ -303,7 +303,7 @@ siCA::siCA(eWidget *parent): eWidget(parent)
 	usedca[0]->move(ePoint(10, y));
 	usedca[0]->resize(eSize(420, fs));
 
-	QString usedcas="keines";
+	eString usedcas="keines";
 	
 	numsys=0;
 
@@ -318,7 +318,7 @@ siCA::siCA(eWidget *parent): eWidget(parent)
 			usedcas+="...\n";
 			break;
 		}
-		usedcas+=QString().sprintf("%04xh:  ", (*i)->casysid)+getCAName((*i)->casysid) + "\n";
+		usedcas+=eString().sprintf("%04xh:  ", (*i)->casysid)+getCAName((*i)->casysid) + "\n";
 	}
 	
 	if (!numsys)

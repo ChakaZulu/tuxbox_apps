@@ -13,7 +13,7 @@ protected:
 	int width;
 public:
 	eListbox *list;
-	eLBWindow(QString Title="", int LBtype=0, int Entrys=0, int FontSize=0, int width=400);
+	eLBWindow(eString Title="", int LBtype=0, int Entrys=0, int FontSize=0, int width=400);
 	~eLBWindow();
 };
 

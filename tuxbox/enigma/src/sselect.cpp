@@ -1,30 +1,32 @@
+#include <algorithm>
+#include <list>
+
 #include "sselect.h"
 #include "bselect.h"
-#include "elbwindow.h"
-#include "edvb.h"
-#include "dvb.h"
-#include "rc.h"
-#include "eskin.h"
-#include "epgcache.h"
-#include <algorithm>
 #include "epgwindow.h"
-#include <list>
+
+#include <core/gui/elbwindow.h>
+#include <core/gui/eskin.h>
+#include <core/dvb/edvb.h>
+#include <core/dvb/dvb.h>
+#include <core/dvb/epgcache.h>
+#include <core/driver/rc.h>
 
 eListboxEntryService::eListboxEntryService(eService *service, eListbox *listbox): eListboxEntry(listbox), service(service)
 {
 	bouquet=0;
 #if 0
-	sort=QString().sprintf("%06d", service->service_number);
+	sort=eString().sprintf("%06d", service->service_number);
 #else
 	sort="";
 	for (unsigned p=0; p<service->service_name.length(); p++)
 	{
-		QChar ch=service->service_name[p];
-		if (ch.unicode()<32)
+		char ch=service->service_name[p];
+		if (ch<32)
 			continue;
-		if (ch.unicode()==0x86)
+		if (ch==0x86)
 			continue;
-		if (ch.unicode()==0x87)
+		if (ch==0x87)
 			continue;
 		sort+=ch;
 	}
@@ -41,7 +43,7 @@ eListboxEntryService::~eListboxEntryService()
 {
 }
 
-QString eListboxEntryService::getText(int col=0) const
+eString eListboxEntryService::getText(int col=0) const
 {
 	switch (col)
 	{
@@ -51,15 +53,15 @@ QString eListboxEntryService::getText(int col=0) const
 	{
 		if (service)
 		{
-			QString sname;
+			eString sname;
 			for (unsigned p=0; p<service->service_name.length(); p++)
 			{
-				QChar ch=service->service_name[p];
-				if (ch.unicode()<32)
+				char ch=service->service_name[p];
+				if (ch<32)
 					continue;
-				if (ch.unicode()==0x86)
+				if (ch==0x86)
 					continue;
-				if (ch.unicode()==0x87)
+				if (ch==0x87)
 					continue;
 				sname+=ch;
 			}
@@ -84,7 +86,7 @@ QString eListboxEntryService::getText(int col=0) const
 		}
 		if (bouquet)
 		{
-			return bouquet->bouquet_name.c_str();
+			return bouquet->bouquet_name;
 		}
 		return 0;
 	}
@@ -211,9 +213,6 @@ eServiceSelector::eServiceSelector()
 	move(ePoint(70, 60));
 	list->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight"));
 	fillServiceList();
-/*	connect(list, SIGNAL(selected(eListboxEntry*)), SLOT(entrySelected(eListboxEntry*)));
-	connect(list, SIGNAL(selchanged(eListboxEntry*)), SLOT(selchanged(eListboxEntry*)));
-	connect(eDVB::getInstance(), SIGNAL(serviceListChanged()), SLOT(fillServiceList()));*/
 	CONNECT(list->selected, eServiceSelector::entrySelected);
 	CONNECT(list->selchanged, eServiceSelector::selchanged);
 	CONNECT(eDVB::getInstance()->serviceListChanged, eServiceSelector::fillServiceList);
@@ -230,8 +229,8 @@ void eServiceSelector::useBouquet(eBouquet *bouquet)
 	list->clearList();
 	if (bouquet)
 	{
-		setText(bouquet->bouquet_name.c_str());
-		for (std::list<eServiceReference>::iterator i = bouquet->list.begin(); i != bouquet->list.end(); i++)
+		setText(bouquet->bouquet_name);
+		for (std::list<eServiceReference>::iterator i(bouquet->list.begin()); i != bouquet->list.end(); i++)
 		{
 			if (!i->service)
 				continue;

@@ -10,21 +10,20 @@ class ePlugin: eListboxEntry
 {
 public:
 	int version;
-	QString name, desc;
-	QString depend, sopath, pluginname;
+	eString name, desc;
+	eString depend, sopath, pluginname;
 	bool needfb, needrc, needlcd, needvtxtpid, needoffsets, showpig;
 	int posx, posy, sizex, sizey;
 	int isback;
 	ePlugin(eListbox *parent, const char *cfgfile);
-	QString getText(int t) const;
+	eString getText(int t) const;
 };
 
-class eZapPlugins: public /*Q*/Object
+class eZapPlugins: public Object
 {
-//	Q_OBJECT
 	eLBWindow *window;
 
-private:// slots:
+private:
 	void selected(eListboxEntry *);
 public:
 	eZapPlugins(eWidget* lcdTitle=0, eWidget* lcdElement=0);

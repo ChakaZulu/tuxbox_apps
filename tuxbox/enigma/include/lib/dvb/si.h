@@ -2,7 +2,8 @@
 #define __si_h
 
 #include "esection.h"
-#include <qstring.h>
+#include <estring.h>
+#include <eerror.h>
 #include <eptrlist.h>
 #include <vector>
 #include "lowlevel/sdt.h"
@@ -24,7 +25,7 @@ public:
 
 	static Descriptor *create(descr_gen_t *data);
 	int Tag() { return tag; }
-	virtual QString toString()=0;
+	virtual eString toString()=0;
 
 	int tag;
 };
@@ -36,18 +37,18 @@ public:
   int len;
   UnknownDescriptor(descr_gen_t *descr);
   ~UnknownDescriptor();                                     	
-  QString toString();
+  eString toString();
 };
 
 class ServiceDescriptor: public Descriptor
 {
 public:
-  int service_type; 
+  int service_type;
   char *service_provider, *service_name;
   static const int CTag() { return DESCR_SERVICE; }
   ServiceDescriptor(sdt_service_desc *descr);
   ~ServiceDescriptor();
-  QString toString();
+  eString toString();
 };
 
 class CAIdentifierDescriptor: public Descriptor
@@ -57,7 +58,7 @@ public:
   int CA_system_ids;
   CAIdentifierDescriptor(descr_gen_t *descr);
   ~CAIdentifierDescriptor();
-  QString toString();
+  eString toString();
 };
 
 class LinkageDescriptor: public Descriptor
@@ -76,10 +77,10 @@ public:
 
   int network_id;
   int initial_service_id;
-  
+
   LinkageDescriptor(descr_linkage_struct *descr);
   ~LinkageDescriptor();
-  QString toString();
+  eString toString();
 };
 
 class NVODReferenceEntry
@@ -95,8 +96,8 @@ class NVODReferenceDescriptor: public Descriptor
 public:
   NVODReferenceDescriptor(descr_gen_t *descr);
   ~NVODReferenceDescriptor();
-  QString toString();
-  
+  eString toString();
+
   ePtrList<NVODReferenceEntry> entries;
 };
 
@@ -105,7 +106,7 @@ class TimeShiftedServiceDescriptor: public Descriptor
 public:
   int reference_service_id;
   TimeShiftedServiceDescriptor(descr_time_shifted_service_struct *descr);
-  QString toString();
+  eString toString();
 };
 
 class StreamIdentifierDescriptor: public Descriptor
@@ -113,7 +114,7 @@ class StreamIdentifierDescriptor: public Descriptor
 public:
   int component_tag;
   StreamIdentifierDescriptor(descr_stream_identifier_struct *descr);
-  QString toString();
+  eString toString();
 };
 
 class CADescriptor: public Descriptor
@@ -123,7 +124,7 @@ public:
   __u8 *data;
   CADescriptor(ca_descr_t *descr);
   ~CADescriptor();
-  QString toString();
+  eString toString();
 };
 
 class NetworkNameDescriptor: public Descriptor
@@ -132,7 +133,7 @@ public:
 	char *network_name;
   NetworkNameDescriptor(descr_gen_t *descr);
   ~NetworkNameDescriptor();
-  QString toString();
+  eString toString();
 };
 
 class CableDeliverySystemDescriptor: public Descriptor
@@ -142,7 +143,7 @@ public:
   int FEC_outer, modulation, symbol_rate, FEC_inner;
   CableDeliverySystemDescriptor(descr_cable_delivery_system_struct *descr);
   ~CableDeliverySystemDescriptor();
-  QString toString();
+  eString toString();
 };
 
 class SatelliteDeliverySystemDescriptor: public Descriptor
@@ -157,7 +158,7 @@ public:
   int FEC_inner;
   SatelliteDeliverySystemDescriptor(descr_satellite_delivery_system_struct *descr);
   ~SatelliteDeliverySystemDescriptor();
-  QString toString();
+  eString toString();
 };
 
 class ServiceListDescriptorEntry
@@ -175,8 +176,8 @@ class ServiceListDescriptor: public Descriptor
 public:
   ServiceListDescriptor(descr_gen_t *descr);
   ~ServiceListDescriptor();
-  QString toString();
-  
+  eString toString();
+
   ePtrList<ServiceListDescriptorEntry> entries;
 };
 
@@ -185,17 +186,17 @@ class ShortEventDescriptor: public Descriptor
 public:
 	ShortEventDescriptor(descr_gen_t *descr);
 	ShortEventDescriptor(): Descriptor(DESCR_SHORT_EVENT) { };
-	QString toString();
+	eString toString();
 	char language_code[3];
-	QString event_name;
-	QString text;
+	eString event_name;
+	eString text;
 };
 
 class ISO639LanguageDescriptor: public Descriptor
 {
 public:
 	ISO639LanguageDescriptor(descr_gen_t *descr);
-	QString toString();
+	eString toString();
 	char language_code[3];
 	int audio_type;
 };
@@ -204,7 +205,7 @@ class AC3Descriptor: public Descriptor
 {
 public:
 	AC3Descriptor(descr_gen_t *descr);
-	QString toString();
+	eString toString();
 	int AC3_type, bsid, mainid, asvc;
 };
 
@@ -212,48 +213,48 @@ class BouquetNameDescriptor: public Descriptor
 {
 public:
 	BouquetNameDescriptor(descr_gen_t *descr);
-	QString toString();
-	QString name;
+	eString toString();
+	eString name;
 };
 
 class ExtendedEventDescriptor: public Descriptor
 {
 public:
 	ExtendedEventDescriptor(descr_gen_t *descr);
-	QString toString();
+	eString toString();
 	int descriptor_number;
 	int last_descriptor_number;
 	char language_code[3];
 	int item_description_length;
-	QString item_description;
+	eString item_description;
 };
 
 class ComponentDescriptor: public Descriptor
 {
 public:
 	ComponentDescriptor(descr_component_struct *descr);
-	QString toString();
+	eString toString();
 
 	int stream_content, component_type, component_tag;
 	char language_code[3];
-	QString text;
+	eString text;
 };
 
 class LesRadiosDescriptor: public Descriptor
 {
 public:
 	LesRadiosDescriptor(descr_lesradios_struct *descr);
-	QString toString();
+	eString toString();
 	
 	int id;
-	QString name;
+	eString name;
 };
 
 class MHWDataDescriptor: public Descriptor
 {
 public:
 	MHWDataDescriptor(descr_mhw_data_struct *desrc);
-	QString toString();
+	eString toString();
 	
 	char type[8];
 };
@@ -431,9 +432,9 @@ public:
 	int service_id;
 	int starttime;
 	int duration;
-	QString event_name;
-	QString short_description;
-	QString extended_description;
+	eString event_name;
+	eString short_description;
+	eString extended_description;
 	int flags;
 };
 

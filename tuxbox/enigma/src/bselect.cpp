@@ -1,10 +1,11 @@
-#include "bselect.h"
-#include "elbwindow.h"
-#include "elistbox.h"
-#include "edvb.h"
-#include "dvb.h"
-#include "eskin.h"
 #include <list>
+
+#include "bselect.h"
+
+#include <core/gui/elbwindow.h>
+#include <core/gui/eskin.h>
+#include <core/dvb/edvb.h>
+#include <core/dvb/dvb.h>
 
 void eBouquetSelector::fillBouquetList()
 {
@@ -24,8 +25,9 @@ void eBouquetSelector::fillBouquetList()
 			}
 			if (!usable)
 				continue;
+
 			eBouquet *c=*i;
-			eListboxEntry *l=new eListboxEntryText(list, c->bouquet_name.c_str(), 0, c);
+			eListboxEntry *l=new eListboxEntryText(list, c->bouquet_name.c_str(), "", c);
 			if (c==result)
 				list->setCurrent(l);
 		}

@@ -9,7 +9,7 @@ class eListboxEntryEPG: public eListboxEntry
 {
 public:
 	EITEvent* event;
-	QString getText(int col=0) const;
+	eString getText(int col=0) const;
 	inline eListboxEntryEPG(EITEvent* evt, eListbox *listbox): eListboxEntry(listbox), event(evt)	{	}
 	inline ~eListboxEntryEPG(){ delete event; }
 	inline int operator<(const eListboxEntry& q) const;

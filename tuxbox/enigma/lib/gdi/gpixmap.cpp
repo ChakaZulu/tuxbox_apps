@@ -22,7 +22,7 @@ void gPixmap::fill(const eRect &area, const gColor &color)
 void gPixmap::blit(const gPixmap &src, ePoint pos, const eRect &clip)
 {
 	if (bpp != src.bpp)
-		qFatal("cannot blit %dbpp from %dbpp", bpp, src.bpp);
+		eFatal("cannot blit %dbpp from %dbpp", bpp, src.bpp);
 	
 	eRect area=eRect(pos, src.getSize());
 	if (!clip.isNull())

@@ -5,10 +5,10 @@
 
 class eHTTPDyn: public eHTTPDataSource
 {
-	QString result;
+	eString result;
 	int wptr, size;
 public:
-	eHTTPDyn(eHTTPConnection *c, QString result);
+	eHTTPDyn(eHTTPConnection *c, eString result);
 	~eHTTPDyn();
 	int doWrite(int);
 };
@@ -17,18 +17,18 @@ class eHTTPDynPathResolver: public eHTTPPathResolver
 {
 	struct eHTTPDynEntry
 	{
-		QString request, path;
-		QString (*function)(QString request, QString path, QString opt, eHTTPConnection *content);
+		eString request, path;
+		eString (*function)(eString request, eString path, eString opt, eHTTPConnection *content);
 		
-		eHTTPDynEntry(QString request, QString path, QString (*function)(QString, QString, QString, eHTTPConnection *)): request(request), path(path), function(function)
+		eHTTPDynEntry(eString request, eString path, eString (*function)(eString, eString, eString, eHTTPConnection *)): request(request), path(path), function(function)
 		{
 		}
 	};
-	QList<eHTTPDynEntry> dyn;
+	ePtrList<eHTTPDynEntry> dyn;
 public:
-	void addDyn(QString request, QString path, QString (*function)(QString, QString, QString, eHTTPConnection *conn));
+	void addDyn(eString request, eString path, eString (*function)(eString, eString, eString, eHTTPConnection *conn));
 	eHTTPDynPathResolver();
-	eHTTPDataSource *getDataSource(QString request, QString path, eHTTPConnection *conn);
+	eHTTPDataSource *getDataSource(eString request, eString path, eHTTPConnection *conn);
 };
 
 #endif

@@ -13,9 +13,8 @@ class eRCKey;
 
 class eZap: public eApplication
 {
-//	Q_OBJECT
 	static eZap *instance;
-private:// slots:
+private:
 	void keyEvent(const eRCKey &key);
 	void keyUp(int);
 	void keyDown(int);

@@ -5,10 +5,10 @@
 #include "edvb.h"
 #include "enigma_event.h"
 
-QString eListboxEntryEPG::getText(int col=0) const
+eString eListboxEntryEPG::getText(int col=0) const
 {
 		tm* t = localtime(&event->start_time);
-		QString DateTime;
+		eString DateTime;
 		DateTime.sprintf("%2d.%d, %02d:%02d   ", t->tm_mday, t->tm_mon+1, t->tm_hour, t->tm_min);
 		for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
 		{
@@ -19,13 +19,13 @@ QString eListboxEntryEPG::getText(int col=0) const
 				return DateTime+ss->event_name;
 			}
 		}
-		return QString("no_name");
+		return eString("no_name");
 }
 
 void eEPGWindow::fillEPGList()
 {
-	setText(QString("EPG - ")+current->service_name.c_str());
-	qDebug("get EventMap for onid: %02x, sid: %02x\n", current->original_network_id, current->service_id);
+	setText(eString("EPG - ")+current->service_name.c_str());
+	eDebug("get EventMap for onid: %02x, sid: %02x\n", current->original_network_id, current->service_id);
 	const eventMap* evt = eEPGCache::getInstance()->getEventMap(current->original_network_id, current->service_id);
 	eventMap::const_iterator It;
 	for (It = evt->begin(); It != evt->end(); It++)

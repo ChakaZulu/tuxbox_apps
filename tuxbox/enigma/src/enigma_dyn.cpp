@@ -14,14 +14,14 @@
 #include <config.h>
 #include <core/system/econfig.h>
 
-#define TEMPLATE_DIR DATADIR+QString("/enigma/templates/")
+#define TEMPLATE_DIR DATADIR+eString("/enigma/templates/")
 
 
-static QMap<QString,QString> getRequestOptions(QString opt)
+static QMap<eString,eString> getRequestOptions(eString opt)
 {
-	QMap<QString,QString> result;
+	QMap<eString,eString> result;
 	
-	if (opt[0]=='?')
+	if (opt.at(0)=='?')
 		opt=opt.mid(1);
 	while (opt.length())
 	{
@@ -31,18 +31,18 @@ static QMap<QString,QString> getRequestOptions(QString opt)
 		int a=opt.find("&", e);
 		if (a==-1)
 			a=opt.length();
-		QString n=opt.left(e);
-		QString r=opt.mid(e+1, opt.find("&", e+1)-e-1);
+		eString n=opt.left(e);
+		eString r=opt.mid(e+1, opt.find("&", e+1)-e-1);
 		result.insert(n, r);
 		opt=opt.mid(a+1);
 	}
 	return result;
 }
 
-static QString doStatus(QString request, QString path, QString opt, eHTTPConnection *content)
+static eString doStatus(eString request, eString path, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html";
-	QString result;
+	eString result;
 	time_t atime;
 	time(&atime);
 	atime+=eDVB::getInstance()->time_difference;
@@ -54,14 +54,14 @@ static QString doStatus(QString request, QString path, QString opt, eHTTPConnect
 		"<body>\n"
 		"<h1>EliteDVB status</h1>\n"
 		"<table>\n"
-		"<tr><td>current time:</td><td>" + QString(ctime(&atime)) + "</td></tr>\n"
+		"<tr><td>current time:</td><td>" + eString(ctime(&atime)) + "</td></tr>\n"
 		"</table>\n"
 		"</body>\n"
 		"</html>\n";
 	return result;
 }
 
-static QString switchService(QString request, QString path, QString opt, eHTTPConnection *content)
+static eString switchService(eString request, eString path, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html";
 	int service_id=-1, original_network_id=-1, transport_stream_id=-1, service_type=-1;
@@ -69,7 +69,7 @@ static QString switchService(QString request, QString path, QString opt, eHTTPCo
 		opt=opt.mid(opt.find("=")+1);
 	if (opt.length())
 		sscanf(opt, "%x:%x:%x:%x", &service_id, &transport_stream_id, &original_network_id, &service_type);
-	QString result="";
+	eString result="";
 	
 	if ((service_id!=-1) && (original_network_id!=-1) && (transport_stream_id!=-1) && (service_type!=-1))
 	{
@@ -89,28 +89,28 @@ static QString switchService(QString request, QString path, QString opt, eHTTPCo
 
 struct listService: public std::unary_function<std::pair<sref,eService>&,void>
 {
-	QString &result;
-	const QString &search;
-	listService(QString &result, const QString &search): result(result), search(search)
+	eString &result;
+	const eString &search;
+	listService(eString &result, const eString &search): result(result), search(search)
 	{
 	}
 	void operator()(eService &service)
 	{
 		if (search && (service.service_name.find(search)==-1))
 			return;
-		QString sc;
+		eString sc;
 		sc.sprintf("%x:%x:%x:%x", service.service_id, service.transport_stream_id, service.original_network_id, service.service_type);
 		result+="<tr><td><a href=\"/cgi-bin/switchService?service=" + sc + "\">" + service.service_name.c_str() + "</a></td>"
-						"<td>" + QString().setNum(service.service_type, 0x10) + "</td></tr>\n";
+						"<td>" + eString().setNum(service.service_type, 0x10) + "</td></tr>\n";
 	}
 };
 
-static QString listServices(QString request, QString path, QString opts, eHTTPConnection *content)
+static eString listServices(eString request, eString path, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html";
-	QString result;
-	QMap<QString,QString> opt=getRequestOptions(opts);
-	QString search=opt["search"];
+	eString result;
+	QMap<eString,eString> opt=getRequestOptions(opts);
+	eString search=opt["search"];
 	result="<html>\n"
 		"<head>\n"
 		"  <title>elitedvb service list</title>\n"
@@ -127,11 +127,11 @@ static QString listServices(QString request, QString path, QString opts, eHTTPCo
 	return result;
 }
 
-static QString admin(QString request, QString path, QString opts, eHTTPConnection *content)
+static eString admin(eString request, eString path, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html";
-	QMap<QString,QString> opt=getRequestOptions(opts);
-	QString command=opt["command"];
+	QMap<eString,eString> opt=getRequestOptions(opts);
+	eString command=opt["command"];
 	if (command && command=="shutdown")
 	{
 		eZap::getInstance()->quit();
@@ -140,47 +140,47 @@ static QString admin(QString request, QString path, QString opts, eHTTPConnectio
 		return "<html><head><title>Error</title></head><body>Unknown admin command.</body></html>\n";
 }
 
-static QString audio(QString request, QString path, QString opts, eHTTPConnection *content)
+static eString audio(eString request, eString path, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html";
-	QMap<QString,QString> opt=getRequestOptions(opts);
-	QString result="";
-	QString volume=opt["volume"];
+	QMap<eString,eString> opt=getRequestOptions(opts);
+	eString result="";
+	eString volume=opt["volume"];
 	if (volume)
 	{
 		int vol=atoi(volume);
 		eDVB::getInstance()->changeVolume(1, vol);
 		result+="Volume set.<br>\n";
 	}
-	QString mute=opt["mute"];
+	eString mute=opt["mute"];
 	if (mute)
 	{
 		int m=atoi(mute);
 		eDVB::getInstance()->changeVolume(3, m);
 		result+="mute set<br>\n";
 	}
-	result+=QString().sprintf("volume: %d<br>\nmute: %d<br>\n", eDVB::getInstance()->volume, eDVB::getInstance()->mute);
+	result+=eString().sprintf("volume: %d<br>\nmute: %d<br>\n", eDVB::getInstance()->volume, eDVB::getInstance()->mute);
 	return result;
 }
 
-static QString getPMT(QString request, QString path, QString opt, eHTTPConnection *content)
+static eString getPMT(eString request, eString path, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="x-application/PMT";
 	PMT *pmt=eDVB::getInstance()->getPMT();
 	if (!pmt)
 		return "result=ERROR\n";
-	QString res="result=OK\n";
-	res+="PMT"+QString().sprintf("(%04x)\n", pmt->pid);
-	res+="program_number="+QString().sprintf("%04x\n", pmt->program_number);
-	res+="PCR_PID="+QString().sprintf("%04x\n", pmt->PCR_PID);
+	eString res="result=OK\n";
+	res+="PMT"+eString().sprintf("(%04x)\n", pmt->pid);
+	res+="program_number="+eString().sprintf("%04x\n", pmt->program_number);
+	res+="PCR_PID="+eString().sprintf("%04x\n", pmt->PCR_PID);
 	res+="program_info\n";
 	for (ePtrList<Descriptor>::iterator d(pmt->program_info); d != pmt->program_info.end(); ++d)
 		res+=d->toString();
 	for (ePtrList<PMTEntry>::iterator s(pmt->streams); s != pmt->streams.end(); ++s)
 	{
 		res+="PMTEntry\n";
-		res+="stream_type="+QString().sprintf("%02x\n", s->stream_type);
-		res+="elementary_PID="+QString().sprintf("%04x\n", s->elementary_PID);
+		res+="stream_type="+eString().sprintf("%02x\n", s->stream_type);
+		res+="elementary_PID="+eString().sprintf("%04x\n", s->elementary_PID);
 		res+="ES_info\n";
 		for (ePtrList<Descriptor>::iterator d(s->ES_info); d != s->ES_info.end(); ++d)
 			res+=d->toString();
@@ -189,20 +189,20 @@ static QString getPMT(QString request, QString path, QString opt, eHTTPConnectio
 	return res;
 }
 
-static QString version(QString request, QString path, QString opt, eHTTPConnection *content)
+static eString version(eString request, eString path, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/plain";
-	QString result;
+	eString result;
 	result.sprintf("EliteDVB Version : %s\r\n, eZap Version : doof\r\n",eDVB::getInstance()->getVersion().c_str());
 	return result;
 }
 
-static QString channels_getcurrent(QString request, QString path, QString opt, eHTTPConnection *content)
+static eString channels_getcurrent(eString request, eString path, eString opt, eHTTPConnection *content)
 {
-	QString result="";
+	eString result="";
 	content->local_header["Content-Type"]="text/plain";
 	if (eDVB::getInstance()->service)
-		result+=QString().sprintf("%d", eDVB::getInstance()->service->service_number);
+		result+=eString().sprintf("%d", eDVB::getInstance()->service->service_number);
 	else
 		result+="-1";
 	return result+"\r\n";
@@ -215,22 +215,22 @@ static void unpack(__u32 l, int *t)
 		*t++=(l>>((3-i)*8))&0xFF;
 }
 
-static QString getVolume()
+static eString getVolume()
 {
-	return QString().setNum((63-eDVB::getInstance()->volume)*100/63, 10);
+	return eString().setNum((63-eDVB::getInstance()->volume)*100/63, 10);
 }
 
-static QString setVolume(QString request, QString path, QString opts, eHTTPConnection *content)
+static eString setVolume(eString request, eString path, eString opts, eHTTPConnection *content)
 {
-	QMap<QString,QString> opt=getRequestOptions(opts);
-	QString mute="0";
-	QString volume;
-	QString result="";
+	QMap<eString,eString> opt=getRequestOptions(opts);
+	eString mute="0";
+	eString volume;
+	eString result="";
 	int mut=0, vol=0;
 
 	content->local_header["Content-Type"]="text/html";
 
-	result+="<script language=\"javascript\">window.close();</script>"; 
+	result+="<script language=\"javascript\">window.close();</script>";
 	mute=opt["mute"];
 	volume=opt["volume"];
 
@@ -261,46 +261,46 @@ static QString setVolume(QString request, QString path, QString opts, eHTTPConne
 	return result;
 }
 
-static QString read_file(QString filename)
+static eString read_file(eString filename)
 {
 #define BLOCKSIZE 8192
 	int fd;
 	fd=open(filename, O_RDONLY);
 	if(!fd)
-		return QString("file: "+filename+" not found\n");
+		return eString("file: "+filename+" not found\n");
 	
 	int size=0;
 
 	char tempbuf[BLOCKSIZE+200];
-	QString result("");
+	eString result("");
 
 	while((size=read(fd, tempbuf, BLOCKSIZE))>0)
 	{
 		tempbuf[size]=0;
-		result+=QString(tempbuf);
+		result+=eString(tempbuf);
 	}
 	return result;
 }
 
-static QString getIP()
+static eString getIP()
 {
-	QString tmp;
+	eString tmp;
 	int ip[4];
 	memset(&ip, 0, sizeof(ip));
 	tmp=read_file("/proc/net/tcp");
 	
 	if(sscanf(tmp, "%02x%02x%02x%02x:0050", &ip[0], &ip[1], &ip[2], &ip[3])==4) {
-		return QString().sprintf("%d.%d.%d.%d", ip);
+		return eString().sprintf("%d.%d.%d.%d", ip);
 	}
 	return "?.?.?.?";
 }
 
 
-static QString filter_string(QString string)
+static eString filter_string(eString string)
 {
-	string=string.replace(QRegExp("\x86"), "");
-	string=string.replace(QRegExp("\x87"), "");
-	string=string.replace(QRegExp("\x05"), "");
+	string=string.removeChars('\x86');
+	string=string.removeChars('\x87');
+	string=string.removeChars('\x05');
 	return string;
 }
 
@@ -318,9 +318,9 @@ eBouquet *getBouquet(int bouquet_id)
 }
 
 
-static QString getVolBar()
+static eString getVolBar()
 {
-	QString result="";
+	eString result="";
 	int volume=atoi(getVolume());
 
 	result+="<table cellspacing=\"0\" cellpadding=\"0\" border=\"0\">";
@@ -329,18 +329,18 @@ static QString getVolBar()
 	for(int i=1;i<=(volume/10);i++)
 	{
 		result+="<td><a class=\"volgreen\" href=\"javascript:setVol(";
-		result+=QString().setNum(i, 10);
-		result+=")\">||</a></span></td>";  
+		result+=eString().setNum(i, 10);
+		result+=")\">||</a></span></td>";
 	}
 	for(int i=(volume/10)+1;i<=(100/10);i++)
 	{
 		result+="<td><a class=\"volnot\" href=\"javascript:setVol(";
-		result+=QString().setNum(i, 10);
-		result+=")\">||</a></span></td>";  
+		result+=eString().setNum(i, 10);
+		result+=")\">||</a></span></td>";
 	}
 
 	result+="<td>";
- 
+
 	if(eDVB::getInstance()->mute==1) {
 		result+="<a class=\"mute\" href=\"javascript:unMute()\">";
 		result+="unmute";
@@ -355,16 +355,16 @@ static QString getVolBar()
 }
 
 
-static QString getContent(QString mode, int bouquetid)
+static eString getContent(eString mode, int bouquetid)
 {
-	QString result="";
-	QString tmp="";
+	eString result="";
+	eString tmp="";
 	ePtrList<eBouquet>* bouquets;
 	std::list<eServiceReference> esref;
 	eService *es;
 
 	bouquets=eDVB::getInstance()->getBouquets();
- 
+
 	bouquets->sort();
 
 	if(mode=="tv")
@@ -376,12 +376,12 @@ static QString getContent(QString mode, int bouquetid)
 			tmp=filter_string(i->bouquet_name.c_str());
 			if(tmp.find("[TV]")>-1)
 			{
-				result+="<option value=\"" + QString().setNum(i->bouquet_id, 10) + "\"";
+				result+="<option value=\"" + eString().setNum(i->bouquet_id, 10) + "\"";
 				if(i->bouquet_id==bouquetid)
 				{
 					result+=" selected";
 				}
-				result+=">" + QString(i->bouquet_name.c_str()) + "</option>";
+				result+=">" + eString(i->bouquet_name.c_str()) + "</option>";
 			}
 		}
 		result+="</select>";
@@ -412,12 +412,12 @@ static QString getContent(QString mode, int bouquetid)
 			tmp=filter_string(i->bouquet_name.c_str());
 			if(tmp.find("[RADIO]")>-1)
 			{
-				result+="<option value=\"" + QString().setNum(i->bouquet_id, 10) + "\"";
+				result+="<option value=\"" + eString().setNum(i->bouquet_id, 10) + "\"";
 				if(i->bouquet_id==bouquetid)
 				{
 					result+=" selected";
 				}
-				result+=">" + QString(i->bouquet_name.c_str()) + "</option>";
+				result+=">" + eString(i->bouquet_name.c_str()) + "</option>";
 			}
 			result+="</select>";
 			result+="<select name=\"channel\" size=\"1\" onChange=\"javascript:switchtoChannel(this.form.channel.options[this.form.channel.options.selectedIndex].value)\"><option>-----</option>";
@@ -444,7 +444,7 @@ static QString getContent(QString mode, int bouquetid)
 	return result;
 }
 
-static QString getCurService()
+static eString getCurService()
 {
 	eService *current;
 	current=eDVB::getInstance()->service;
@@ -454,14 +454,14 @@ static QString getCurService()
 		return "no channel selected";
 }
 
-static QString web_root(QString request, QString path, QString opts, eHTTPConnection *content)
+static eString web_root(eString request, eString path, eString opts, eHTTPConnection *content)
 {
-	QString result="";
-	QMap<QString,QString> opt=getRequestOptions(opts);
+	eString result="";
+	QMap<eString,eString> opt=getRequestOptions(opts);
 	content->local_header["Content-Type"]="text/html";
 
-	QString mode=opt["mode"];
-	QString bid="0";
+	eString mode=opt["mode"];
+	eString bid="0";
 
 	if(opt["bouquetid"])
 		bid=opt["bouquetid"];
@@ -469,30 +469,30 @@ static QString web_root(QString request, QString path, QString opts, eHTTPConnec
 	int bouquetid=atoi(bid);
 
 	result+=read_file(TEMPLATE_DIR+"index.tmp");
- 
-	QString radioc, tvc, aboutc, linksc, updatesc;
-	QString cop;
-	QString navi;
-	QString stats;
-	QString tmp;
+
+	eString radioc, tvc, aboutc, linksc, updatesc;
+	eString cop;
+	eString navi;
+	eString stats;
+	eString tmp;
 	__u32 myipp=0;
 	int myip[4];
 	int bootcount=0;
 	
 	stats+="<span class=\"white\">";
 	int sec=atoi(read_file("/proc/uptime"));
-	stats+=QString().sprintf("%d:%02dm up", sec/3600, (sec%3600)/60);
+	stats+=eString().sprintf("%d:%02dm up", sec/3600, (sec%3600)/60);
 	stats+="</span> | ";
 
 	tmp=read_file("/proc/mounts");
 	if(!tmp.find("cramfs"))
 	{
 		stats+="<span class=\"white\">running from flash</span>";
-	} 
+	}
 	else
 	{
 		stats+="<span class=\"white\">running via net</span>";
-	} 
+	}
 	stats+=" | ";
 
 	eConfig::getInstance()->getKey("/elitedvb/system/bootCount", bootcount);
@@ -541,15 +541,15 @@ static QString web_root(QString request, QString path, QString opts, eHTTPConnec
 
 	cop=getContent(mode, bouquetid);
 
-	QString eitc;
+	eString eitc;
 
 	EIT *eit=eDVB::getInstance()->getEIT();
 	
 	if(eit)
 	{
-		QString now_time="", now_duration="", now_text="", now_longtext="";
-		QString next_time="", next_duration="", next_text="", next_longtext="";
- 
+		eString now_time="", now_duration="", now_text="", now_longtext="";
+		eString next_time="", next_duration="", next_text="", next_longtext="";
+
 		int p=0;
 
 		for(ePtrList<EITEvent>::iterator event(eit->events); event != eit->events.end(); ++event)
@@ -608,17 +608,17 @@ static QString web_root(QString request, QString path, QString opts, eHTTPConnec
 				p++;
 		 	}
 		}
-  
+
 		if(now_time!="") {
 			eitc+=read_file(TEMPLATE_DIR+"eit.tmp");
-			eitc.replace(QRegExp("#NOWT#"), now_time);
-			eitc.replace(QRegExp("#NOWD#"), now_duration);
-			eitc.replace(QRegExp("#NOWST#"), now_text);
-			eitc.replace(QRegExp("#NOWLT#"), filter_string(now_longtext));
-			eitc.replace(QRegExp("#NEXTT#"), next_time);
-			eitc.replace(QRegExp("#NEXTD#"), next_duration);
-			eitc.replace(QRegExp("#NEXTST#"), next_text);
-			eitc.replace(QRegExp("#NEXTLT#"), filter_string(next_longtext));
+			eitc.strReplace("#NOWT#", now_time);
+			eitc.strReplace("#NOWD#", now_duration);
+			eitc.strReplace("#NOWST#", now_text);
+			eitc.strReplace("#NOWLT#", filter_string(now_longtext));
+			eitc.strReplace("#NEXTT#", next_time);
+			eitc.strReplace("#NEXTD#", next_duration);
+			eitc.strReplace("#NEXTST#", next_text);
+			eitc.strReplace("#NEXTLT#", filter_string(next_longtext));
 		} else {
 			eitc+"eit undefined";
 		}	
@@ -629,24 +629,24 @@ static QString web_root(QString request, QString path, QString opts, eHTTPConnec
 		eitc+="no eit";
 	}
 
-	result.replace(QRegExp("#STATS#"), stats);
-	result.replace(QRegExp("#NAVI#"), navi);
-	result.replace(QRegExp("#MODE#"), tmp);
-	result.replace(QRegExp("#COP#"), cop);
+	result.strReplace("#STATS#", stats);
+	result.strReplace("#NAVI#", navi);
+	result.strReplace("#MODE#", tmp);
+	result.strReplace("#COP#", cop);
 	if((mode=="tv")||
            (mode=="radio"))
-		result.replace(QRegExp("#SERVICENAME#"), filter_string(getCurService()));
+		result.strReplace("#SERVICENAME#", filter_string(getCurService()));
 	else
-		result.replace(QRegExp("#SERVICENAME#"), "");
-	result.replace(QRegExp("#VOLBAR#"), getVolBar());
+		result.strReplace("#SERVICENAME#", "");
+	result.strReplace("#VOLBAR#", getVolBar());
 	if(mode=="tv"||mode=="radio")
-		result.replace(QRegExp("#EIT#"), eitc);
+		result.strReplace("#EIT#", eitc);
 	else
-		result.replace(QRegExp("#EIT#"), QString(""));
+		result.strReplace("#EIT#", "");
 	return result;
 }
 
-static QString switchServiceWeb(QString request, QString path, QString opt, eHTTPConnection *content)
+static eString switchServiceWeb(eString request, eString path, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html";
 	int service_id=-1, original_network_id=-1, transport_stream_id=-1, service_type=-1;
@@ -654,7 +654,7 @@ static QString switchServiceWeb(QString request, QString path, QString opt, eHTT
 		opt=opt.mid(opt.find("=")+1);
 	if(opt)
 		sscanf(opt, "%x:%x:%x:%x", &service_id, &transport_stream_id, &original_network_id, &service_type);
-	QString result="";
+	eString result="";
 	
 	if ((service_id!=-1) && (original_network_id!=-1) && (transport_stream_id!=-1) && (service_type!=-1))
 	{
@@ -674,10 +674,10 @@ static QString switchServiceWeb(QString request, QString path, QString opt, eHTT
 	return result;
 }
 
-static QString audiopls(QString request, QString path, QString opt, eHTTPConnection *content)
+static eString audiopls(eString request, eString path, eString opt, eHTTPConnection *content)
 {
-	QString result;
-	QString tmp;
+	eString result;
+	eString tmp;
 
 	content->local_header["Content-Type"]="audio/x-scpls";
 	result="[playlist]\n";

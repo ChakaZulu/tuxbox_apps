@@ -1,6 +1,6 @@
 #include "elbwindow.h"
 
-eLBWindow::eLBWindow(QString Title, int LBType, int Entrys, int FontSize, int width)
+eLBWindow::eLBWindow(eString Title, int LBType, int Entrys, int FontSize, int width)
 	: eWindow(0), Entrys(Entrys), width(width)
 {
 	setText(Title);

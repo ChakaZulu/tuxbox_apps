@@ -8,7 +8,7 @@
 */
 
 #include <pthread.h>
-#include <qstring.h>
+#include <estring.h>
 #include <erect.h>
 #include "elock.h"
 #include "gpixmap.h"
@@ -60,7 +60,7 @@ struct gOpcode
 		{
 			gFont *font;
 			eRect *area;
-			QString *text;
+			eString *text;
 		} renderText;
 
 		struct
@@ -145,7 +145,7 @@ public:
 	void setForegroundColor(const gColor &color);
 
 	void setFont(const gFont &font);
-	void renderText(const eRect &position, const QString &string, int flags=0);
+	void renderText(const eRect &position, const eString &string, int flags=0);
 	void renderPara(eTextPara &para);
 
 	void fill(const eRect &area);

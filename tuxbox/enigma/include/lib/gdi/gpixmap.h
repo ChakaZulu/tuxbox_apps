@@ -2,7 +2,7 @@
 #define __gpixmap_h
 
 #include <pthread.h>
-#include <qstring.h>
+#include <estring.h>
 #include <erect.h>
 #include "fb.h"
 #include "elock.h"
@@ -48,7 +48,7 @@ struct gPalette
  */
 struct gFont
 {
-	QString family;
+	eString family;
 	int pointSize;
 	
 	/**
@@ -56,7 +56,7 @@ struct gFont
 	 * \param family The name of the font, for example "NimbusSansL-Regular Sans L Regular".
 	 * \param pointSize the size of the font in PIXELS.
 	 */
-	gFont(const QString &family, int pointSize):
+	gFont(const eString &family, int pointSize):
 			family(family), pointSize(pointSize)
 	{
 	}

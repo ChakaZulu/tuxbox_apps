@@ -35,7 +35,7 @@ public:
 	 * \arg \c border, the size of the border (in pixels)
 	 * \sa eWidget::setProperty
 	 */
-	int setProperty(const QString &prop, const QString &value);
+	int setProperty(const eString &prop, const eString &value);
 };
 
 #endif

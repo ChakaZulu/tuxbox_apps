@@ -116,19 +116,19 @@ inline void eEPGCache::enterService(eService* service, int err)
 
 		zapTimer.start(update, 1);
 		if (update >= 60000)
-			qDebug("[EPGC] next update in %i min", update/60000);
+			eDebug("[EPGC] next update in %i min", update/60000);
 		else if (update >= 1000)
-			qDebug("[EPGC] next update in %i sec", update/1000);
+			eDebug("[EPGC] next update in %i sec", update/1000);
 	}
 
 	if (It != serviceLastUpdated.end() && !eventDB[SREF].empty())
 	{
-		qDebug("[EPGC] service has EPG");
+		eDebug("[EPGC] service has EPG");
 		/*emit*/ EPGAvail(1);
 	}
 	else
 	{
-		qDebug("[EPGC] service has no EPG");
+		eDebug("[EPGC] service has no EPG");
 		/*emit*/ EPGAvail(0);
 	}
 }
@@ -138,14 +138,14 @@ inline void eEPGCache::startEPG()
 	if (eDVB::getInstance()->time_difference)	
 	{
 		temp.clear();
-		qDebug("[EPGC] start caching events");
+		eDebug("[EPGC] start caching events");
 		firstEventId=0;
 		start();
 		isRunning=1;
 	}
 	else
 	{
-		qDebug("[EPGC] wait for clock update");
+		eDebug("[EPGC] wait for clock update");
 		zapTimer.start(1000, 1); // restart Timer
 	}
 }
@@ -157,7 +157,7 @@ inline void eEPGCache::stopEPG(eService*)
 	{
 		abort();
 		isRunning=0;
-		qDebug("[EPGC] stop caching events");
+		eDebug("[EPGC] stop caching events");
 	}
 }
 

@@ -6,7 +6,7 @@
 #include "edvb.h"
 #include "xmlrpc.h"
 
-static QMap<QString, int (*)(const QVector<eXMLRPCVariant>&, QList<eXMLRPCVariant>&)> rpcproc;
+static QMap<eString, int (*)(const QVector<eXMLRPCVariant>&, QList<eXMLRPCVariant>&)> rpcproc;
 
 void eXMLRPCVariant::zero()
 {
@@ -20,7 +20,7 @@ void eXMLRPCVariant::zero()
 	_base64=0;
 }
 
-eXMLRPCVariant::eXMLRPCVariant(QMap<QString,eXMLRPCVariant*> *__struct)
+eXMLRPCVariant::eXMLRPCVariant(QMap<eString,eXMLRPCVariant*> *__struct)
 {
 	zero();
 	_struct=__struct;
@@ -45,7 +45,7 @@ eXMLRPCVariant::eXMLRPCVariant(bool *__boolean)
 	_boolean=__boolean;
 }
 
-eXMLRPCVariant::eXMLRPCVariant(QString *__string)
+eXMLRPCVariant::eXMLRPCVariant(eString *__string)
 {
 	zero();
 	_string=__string;
@@ -73,7 +73,7 @@ eXMLRPCVariant::~eXMLRPCVariant()
 {
 	if (_struct)
 	{
-		for (QMap<QString,eXMLRPCVariant*>::Iterator i=_struct->begin(); i!=_struct->end(); ++i)
+		for (QMap<eString,eXMLRPCVariant*>::Iterator i=_struct->begin(); i!=_struct->end(); ++i)
 			delete i.data();
 		delete _struct;
 	}
@@ -93,7 +93,7 @@ eXMLRPCVariant::~eXMLRPCVariant()
 		delete _base64;
 }
 
-QMap<QString,eXMLRPCVariant*> *eXMLRPCVariant::getStruct()
+QMap<eString,eXMLRPCVariant*> *eXMLRPCVariant::getStruct()
 {
 	return _struct;
 }
@@ -113,7 +113,7 @@ bool *eXMLRPCVariant::getBoolean()
 	return _boolean;
 }
 
-QString *eXMLRPCVariant::getString()
+eString *eXMLRPCVariant::getString()
 {
 	return _string;
 }
@@ -133,61 +133,61 @@ QByteArray *eXMLRPCVariant::getBase64()
 	return _base64;
 }
 
-void eXMLRPCVariant::toXML(QString &result)
+void eXMLRPCVariant::toXML(eString &result)
 {
 	if (getArray())
 	{
-		static QString s1("<value><array><data>");
+		static eString s1("<value><array><data>");
 		result+=s1;
 		for (unsigned int i=0; i<getArray()->count(); i++)
 		{
-			static QString s("  ");
+			static eString s("  ");
 			result+=s;
 			(*getArray())[i]->toXML(result);
-			static QString s1("\n");
+			static eString s1("\n");
 			result+=s1;
 		}
-		static QString s2("</data></aray></value>\n");
+		static eString s2("</data></aray></value>\n");
 		result+=s2;
 	} else if (getStruct())
 	{
-		static QString s1("<value><struct>");
+		static eString s1("<value><struct>");
 		result+=s1;
-		for (QMap<QString,eXMLRPCVariant*>::Iterator i=_struct->begin(); i!=_struct->end(); ++i)
+		for (QMap<eString,eXMLRPCVariant*>::Iterator i=_struct->begin(); i!=_struct->end(); ++i)
 		{
-			static QString s1("  <member><name>");
+			static eString s1("  <member><name>");
 			result+=s1;
 			result+=i.key();
-			static QString s2("</name>");
+			static eString s2("</name>");
 			result+=s2;
 			i.data()->toXML(result);
-			static QString s3("</member>\n");
+			static eString s3("</member>\n");
 			result+=s3;
 		}
-		static QString s2("</struct></value>\n");
+		static eString s2("</struct></value>\n");
 		result+=s2;
 	} else if (getI4())
 	{
-		static QString s1("<value><i4>"); 
+		static eString s1("<value><i4>");
 		result+=s1;
-		result+=QString().setNum(*getI4());
-		static QString s2("</i4></value>");
+		result+=eString().setNum(*getI4());
+		static eString s2("</i4></value>");
 		result+=s2;
 	} else if (getBoolean())
 	{
-		static QString s0("<value><boolean>0</boolean></value>");
-		static QString s1("<value><boolean>1</boolean></value>");
+		static eString s0("<value><boolean>0</boolean></value>");
+		static eString s1("<value><boolean>1</boolean></value>");
 		result+=(*getBoolean())?s1:s0;
 	} else if (getString())
 	{
-		static QString s1("<value><string>");
-		static QString s2("</string></value>");
+		static eString s1("<value><string>");
+		static eString s2("</string></value>");
 		result+=s1;
 		result+=*getString();
 		result+=s2;
 	} else if (getDouble())
 	{
-		result.append(QString().sprintf("<value><double>%lf</double></value>", *getDouble()));
+		result.append(eString().sprintf("<value><double>%lf</double></value>", *getDouble()));
 	}	else
 		qFatal("couldn't append");
 }
@@ -205,11 +205,11 @@ static eXMLRPCVariant *fromXML(XMLTreeNode *n)
 	else if (!strcmp(n->GetType(), "boolean"))
 		return new eXMLRPCVariant(new bool(atoi(data)));
 	else if (!strcmp(n->GetType(), "string"))
-		return new eXMLRPCVariant(new QString(data));
+		return new eXMLRPCVariant(new eString(data));
 	else if (!strcmp(n->GetType(), "double"))
 		return new eXMLRPCVariant(new double(atof(data)));
 	else if (!strcmp(n->GetType(), "struct")) {
-		QMap<QString,eXMLRPCVariant*> *s=new QMap<QString,eXMLRPCVariant*>;
+		QMap<eString,eXMLRPCVariant*> *s=new QMap<eString,eXMLRPCVariant*>;
 		for (n=n->GetChild(); n; n=n->GetNext())
 		{
 			if (strcmp(data, "member"))
@@ -217,12 +217,12 @@ static eXMLRPCVariant *fromXML(XMLTreeNode *n)
 				delete s;
 				return 0;
 			}
-			QString name=0;
+			eString name=0;
 			eXMLRPCVariant *value;
 			for (XMLTreeNode *v=n->GetChild(); v; v=v->GetNext())
 			{
 				if (!strcmp(v->GetType(), "name"))
-					name=QString(v->GetData());
+					name=eString(v->GetData());
 				else if (!strcmp(v->GetType(), "value"))
 					value=fromXML(v);
 			}
@@ -257,7 +257,7 @@ static eXMLRPCVariant *fromXML(XMLTreeNode *n)
 	return 0;
 }
 
-eXMLRPCResponse::eXMLRPCResponse(eHTTPConnection *c): 
+eXMLRPCResponse::eXMLRPCResponse(eHTTPConnection *c):
 	eHTTPDataSource(c), parser("ISO-8859-1")
 {
 	// size etc. setzen aber erst NACH data-phase
@@ -273,7 +273,7 @@ int eXMLRPCResponse::doCall()
 	qDebug("doing call");
 	result="";
 		// get method name
-	QString methodName=0;
+	eString methodName=0;
 	
 	if (connection->remote_header["Content-Type"]!="text/xml")
 	{
@@ -299,7 +299,7 @@ int eXMLRPCResponse::doCall()
 	for (XMLTreeNode *c=methodCall->GetChild(); c; c=c->GetNext())
 	{
 		if (!strcmp(c->GetType(), "methodName"))
-			methodName=QString(c->GetData());
+			methodName=eString(c->GetData());
 		else if (!strcmp(c->GetType(), "params"))
 		{
 			for (XMLTreeNode *p=c->GetChild(); p; p=p->GetNext())
@@ -375,7 +375,7 @@ int eXMLRPCResponse::doWrite(int hm)
 		tw=hm;
 	if (tw<=0)
 		return -1;
-	connection->writeBlock(((const char*)result.latin1())+wptr, tw);
+	connection->writeBlock(result.c_str()+wptr, tw);
 	wptr+=tw;
 	return tw;
 }
@@ -416,30 +416,30 @@ void xmlrpc_initialize(eHTTPD *httpd)
 	httpd->addResolver(new eHTTPXMLRPCResolver);
 }
 
-void xmlrpc_addMethod(QString methodName, int (*proc)(const QVector<eXMLRPCVariant>&, QList<eXMLRPCVariant>&))
+void xmlrpc_addMethod(eString methodName, int (*proc)(const QVector<eXMLRPCVariant>&, QList<eXMLRPCVariant>&))
 {
 	rpcproc.insert(methodName, proc);
 }
 
-void xmlrpc_fault(QList<eXMLRPCVariant> &res, int faultCode, QString faultString)
+void xmlrpc_fault(QList<eXMLRPCVariant> &res, int faultCode, eString faultString)
 {
-	QMap<QString,eXMLRPCVariant*> *s=new QMap<QString,eXMLRPCVariant*>;
+	QMap<eString,eXMLRPCVariant*> *s=new QMap<eString,eXMLRPCVariant*>;
 	s->insert("faultCode", new eXMLRPCVariant(new __s32(faultCode)));
-	s->insert("faultString", new eXMLRPCVariant(new QString(faultString)));
+	s->insert("faultString", new eXMLRPCVariant(new eString(faultString)));
 	res.append(new eXMLRPCVariant(s));
 }
 
-int xmlrpc_checkArgs(QString args, const QVector<eXMLRPCVariant> &parm, QList<eXMLRPCVariant> &res)
+int xmlrpc_checkArgs(eString args, const QVector<eXMLRPCVariant> &parm, QList<eXMLRPCVariant> &res)
 {
 	if (parm.count() != args.length())
 	{
-	 	xmlrpc_fault(res, -500, QString().sprintf("parameter count mismatch (found %d, expected %d)", parm.count(), args.length()));
+	 	xmlrpc_fault(res, -500, eString().sprintf("parameter count mismatch (found %d, expected %d)", parm.count(), args.length()));
 		return 1;
 	}
 	
 	for (unsigned int i=0; i<args.length(); i++)
 	{
-		switch (args[i].latin1())
+		switch (args[i])
 		{
 		case 'i':
 			if (parm[i]->getI4())
@@ -474,7 +474,7 @@ int xmlrpc_checkArgs(QString args, const QVector<eXMLRPCVariant> &parm, QList<eX
 				continue;
 			break;
 		}
-		xmlrpc_fault(res, -501, QString().sprintf("parameter type mismatch, expected %c as #%d", args[i].latin1(), i));
+		xmlrpc_fault(res, -501, eString().sprintf("parameter type mismatch, expected %c as #%d", args[i], i));
 		return 1;
 	}
 	return 0;
@@ -484,7 +484,7 @@ eHTTPXMLRPCResolver::eHTTPXMLRPCResolver()
 {
 }
 
-eHTTPDataSource *eHTTPXMLRPCResolver::getDataSource(QString request, QString path, eHTTPConnection *conn)
+eHTTPDataSource *eHTTPXMLRPCResolver::getDataSource(eString request, eString path, eHTTPConnection *conn)
 {
 	if ((path=="/RPC2") && (request=="POST"))
 		return new eXMLRPCResponse(conn);

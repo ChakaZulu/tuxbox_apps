@@ -2,6 +2,7 @@
 #define __FB_H
 
 #include <linux/fb.h>
+#include <eerror.h>
 
 class fbClass
 {

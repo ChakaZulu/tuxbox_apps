@@ -5,7 +5,7 @@
 #include "font.h"
 #include "eskin.h"
 
-eMessageBox::eMessageBox(QString message, QString caption): eWindow(0)
+eMessageBox::eMessageBox(eString message, eString caption): eWindow(0)
 {
 	int fontsize=eSkin::getActive()->queryValue("fontsize", 20);
 	setText(caption);

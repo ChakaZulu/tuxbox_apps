@@ -76,7 +76,7 @@ eDBoxLCD::eDBoxLCD(): eLCD(eSize(120, 64))
 	lcdfd=-1;
 #endif
 	if (lcdfd<0)
-		qWarning("couldn't open LCD - load lcd.o!");
+		eDebug("couldn't open LCD - load lcd.o!");
 	else
 	{
 		int i=LCD_MODE_BIN;

@@ -9,7 +9,7 @@ gFBDC::gFBDC()
 	fb=new fbClass;
 
 	if (!fb->Available())
-		qFatal("no framebuffer available");
+		eFatal("no framebuffer available");
 
 	fb->SetMode(720, 576, 8);
 	for (int y=0; y<576; y++)																		 // make whole screen transparent

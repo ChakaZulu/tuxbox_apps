@@ -1,16 +1,15 @@
 #ifndef __bselect_h
 #define __bselect_h
 
-#include "elbwindow.h"
+#include <core/gui/elbwindow.h>
 
 class eBouquet;
 class eLBWindow;
 
 class eBouquetSelector: public eLBWindow
 {
-//	Q_OBJECT
 	eBouquet *result;
-private:/* slots:*/
+private:
 	void fillBouquetList();
 	void entrySelected(eListboxEntry *entry);
 public:

@@ -1,3 +1,4 @@
+#include <eerror.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -163,7 +164,7 @@ Font *fontRenderClass::getFont(const char *face, int size, int tabwidth)
 {
 	FTC_FaceID id=getFaceID(face);
 	if (!id)
-		qFatal("face %s does not exist!", face);
+		printf("face %s does not exist!\n", face);
 	if (!id)
 		return 0;
 	return new Font(this, id, size, tabwidth);
@@ -288,7 +289,7 @@ eTextPara::~eTextPara()
 {
 	clear();
 	if (refcnt>=0)
-		qFatal("verdammt man der war noch gelockt :/"); 
+		eFatal("verdammt man der war noch gelockt :/\n");
 }
 
 void eTextPara::destroy()
@@ -308,14 +309,14 @@ eTextPara *eTextPara::grab()
 void eTextPara::setFont(const gFont &font)
 {
 	if (refcnt)
-		qFatal("mod. after lock");
-	setFont(fontRenderClass::getInstance()->getFont(font.family, font.pointSize));
+		eFatal("mod. after lock");
+	setFont(fontRenderClass::getInstance()->getFont(font.family.c_str(), font.pointSize));
 }
 
 void eTextPara::setFont(Font *fnt)
 {
 	if (refcnt)
-		qFatal("mod. after lock");
+		eFatal("mod. after lock");
 	if (!fnt)
 		return;
 	if (current_font && !current_font->ref)
@@ -336,15 +337,16 @@ void eTextPara::setFont(Font *fnt)
 	use_kerning=FT_HAS_KERNING(current_face);
 }
 
-int eTextPara::renderString(const QString &qstring, int rflags)
+int eTextPara::renderString(const eString &qstring, int rflags)
 {
 	eLocker lock(ftlock);
 	
 	if (refcnt)
-		qFatal("mod. after lock");
+		eFatal("mod. after lock");
 	if (!current_font)
 		return -1;
-	const QChar *string=qstring.unicode();
+
+	const char *string=qstring.c_str();
 	
 	int len=qstring.length();
 
@@ -353,16 +355,17 @@ int eTextPara::renderString(const QString &qstring, int rflags)
 	while (len--)
 	{
 		int isprintable=1;
-		int uc=string->unicode();
+
 		int flags=0;
+		
 		if (rflags&RS_WRAP)
 			 flags|=GS_MYWRAP;
+		
 		if (rflags&RS_DIRECT)
-	  {
 			isprintable=1;
-		} else
+		else
 		{
-			switch (uc)
+			switch (*string)
 			{
 			case '\t':
 				isprintable=0;
@@ -383,16 +386,16 @@ int eTextPara::renderString(const QString &qstring, int rflags)
 				break;
 			}
 		}
-		string++;
 		if (isprintable)
 		{
 			FT_UInt index;
-			index=(rflags&RS_DIRECT)?uc:FT_Get_Char_Index(current_face, uc);
+			index=(rflags&RS_DIRECT)?*string:FT_Get_Char_Index(current_face, *string);
 			if (!index)
 				; // qDebug("unicode %d ('%c') not present", uc, uc);
 			else
 				appendGlyph(index, flags);
 		}
+		string++;
 	}
 	return 0;
 }
@@ -404,7 +407,7 @@ void eTextPara::blit(gPixmapDC &dc, const ePoint &offset)
 	gPixmap &target=dc.getPixmap();
 
 	if (target.bpp != 8)
-		qFatal("eTextPara::blit - can't render into %d bpp buffer", target.bpp);
+		eFatal("eTextPara::blit - can't render into %d bpp buffer", target.bpp);
 		
 	register int shift=target.clut?4:0, opcode=0;	// in grayscale modes use 8bit, else 4bit
 	

@@ -18,7 +18,7 @@ void eNumber::redrawNumber(gPainter *p, int n, const eRect &area)
 	p->setForegroundColor((have_focus && n==active)?cursor:normal);
 	p->fill(pos);
 	p->setFont(font);
-	p->renderText(pos, QString().sprintf("%s%d", n?".":"", number[n]));
+	p->renderText(pos, eString().sprintf("%s%d", n?".":"", number[n]));
 	p->flush();
 }
 

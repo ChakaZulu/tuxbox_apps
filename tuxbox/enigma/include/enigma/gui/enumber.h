@@ -18,7 +18,7 @@ private:
 	gColor cursor, normal;
 	int have_focus;
 	int min, max, digit, maxdigits, isactive;
-	QString descr;
+	eString descr;
 	eLabel* tmpDescr; // used for description Label in LCD
 /*signals:
 	void selected(int *number);*/

@@ -2,7 +2,7 @@
 #define __eskin_h
 
 #include <xmltree.h>
-#include <qstring.h>
+#include <estring.h>
 #include <qmap.h>
 #include <qdict.h>
 #include <qlist.h>
@@ -14,7 +14,7 @@ typedef eWidget *(*tWidgetCreator)(eWidget *parent);
 
 struct eNamedColor
 {
-	QString name;
+	eString name;
 	gRGB value, end;
 	int index;
 	int size;
@@ -37,7 +37,7 @@ class eSkin
 	int numcolors;
 	gImage *paldummy;
 	
-	static QMap<QString,tWidgetCreator> eSkin::widget_creator;
+	static QMap<eString,tWidgetCreator> eSkin::widget_creator;
 	int build(eWidget *widget, XMLTreeNode *rootwidget);
 	
 	QList<eNamedColor> colors;
@@ -52,18 +52,18 @@ public:
 	eSkin();
 	~eSkin();
 
-	static void addWidgetCreator(const QString &name, tWidgetCreator creator);
-	static void removeWidgetCreator(const QString &name, tWidgetCreator creator);
+	static void addWidgetCreator(const eString &name, tWidgetCreator creator);
+	static void removeWidgetCreator(const eString &name, tWidgetCreator creator);
 
 	int load(const char *filename);
 	
 	int build(eWidget *widget, const char *name);
 	void setPalette(gPixmapDC *pal);
 
-	gColor queryColor(const QString &name) const;
-	gColor queryScheme(const QString &name) const;
-	gPixmap *queryImage(const QString &name) const;
-	int queryValue(const QString &name, int d) const;
+	gColor queryColor(const eString &name) const;
+	gColor queryScheme(const eString &name) const;
+	gPixmap *queryImage(const eString &name) const;
+	int queryValue(const eString &name, int d) const;
 	
 	void makeActive();
 	

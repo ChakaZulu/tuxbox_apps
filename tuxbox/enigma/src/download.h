@@ -1,17 +1,15 @@
 #ifndef __download_h
 #define __download_h
 
-#include "httpd.h"
-#include "ewindow.h"
-#include "qobject.h"
-
+#include <core/system/httpd.h>
+#include <core/gui/ewindow.h>
+	
 class eDownloadWindow: public eWindow
 {
-//	Q_OBJECT
 	eHTTPConnection *c;
 	std::string url;
 	int eventFilter(const eWidgetEvent &event);
-private:// slots:
+private:
 	void httpDone();
 public:
 	eDownloadWindow(const char *url);

@@ -34,7 +34,7 @@ static int testrpc(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 	if (xmlrpc_checkArgs("ii", params, result))
 		return 1;
 	
-	QMap<QString, eXMLRPCVariant*> *s=new QMap<QString, eXMLRPCVariant*>;
+	QMap<eString, eXMLRPCVariant*> *s=new QMap<eString, eXMLRPCVariant*>;
 	s->insert("sum", new eXMLRPCVariant(new __s32(*params[0]->getI4()+*params[1]->getI4())));
 	s->insert("difference", new eXMLRPCVariant(new __s32(*params[0]->getI4()-*params[1]->getI4())));
 	
@@ -49,8 +49,8 @@ static int getList(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 {
 	if (xmlrpc_checkArgs("s", params, result))
 		return 1;
-	      
-	QString &param=*params[0]->getString();
+	
+	eString &param=*params[0]->getString();
 	
 	qDebug("getList(%s);", (const char*)param);
 	
@@ -63,19 +63,19 @@ static int getList(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 			for (ePtrList<eBouquet>::iterator i(*pBouquets); i != pBouquets->end(); ++i)
 			{
 				eBouquet *b=*i;
-				QMap<QString, eXMLRPCVariant*> *s=new QMap<QString, eXMLRPCVariant*>;
-				static QString s0("caption");
-				static QString s1("type");
-				static QString s2("handle");
-				static QString s3("zappable");
+				QMap<eString, eXMLRPCVariant*> *s=new QMap<eString, eXMLRPCVariant*>;
+				static eString s0("caption");
+				static eString s1("type");
+				static eString s2("handle");
+				static eString s3("zappable");
 				
-				s->insert(s0, new eXMLRPCVariant(new QString(b->bouquet_name.c_str())));
-				static QString g("Group");
-				s->insert(s1, new eXMLRPCVariant(new QString(g)));
-				static QString bs("B:");
-				QString handle=bs;
-				handle+=QString().setNum(b->bouquet_id, 16);
-				s->insert(s2, new eXMLRPCVariant(new QString(handle)));
+				s->insert(s0, new eXMLRPCVariant(new eString(b->bouquet_name.c_str())));
+				static eString g("Group");
+				s->insert(s1, new eXMLRPCVariant(new eString(g)));
+				static eString bs("B:");
+				eString handle=bs;
+				handle+=eString().setNum(b->bouquet_id, 16);
+				s->insert(s2, new eXMLRPCVariant(new eString(handle)));
 				s->insert(s3, new eXMLRPCVariant(new bool(0)));
 				l.append(new eXMLRPCVariant(s));
 			}
@@ -85,7 +85,7 @@ static int getList(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 		nv->resize(l.count());
 		l.toVector(nv);
 		result.append(new eXMLRPCVariant(nv));
-	} else if (param[0]=='B')
+	} else if (param.at(0)=='B')
 	{
 		eBouquet *b=getBouquetByID(param);
 		if (!b)
@@ -99,23 +99,23 @@ static int getList(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 				eService *service=s->service;
 				if (!service)
 					continue;
-				QMap<QString, eXMLRPCVariant*> *s=new QMap<QString, eXMLRPCVariant*>;
-				static QString s0("caption");
-				static QString s1("type");
-				static QString s2("handle");
-				static QString s3("zappable");
+				QMap<eString, eXMLRPCVariant*> *s=new QMap<eString, eXMLRPCVariant*>;
+				static eString s0("caption");
+				static eString s1("type");
+				static eString s2("handle");
+				static eString s3("zappable");
 
-				s->insert(s0, new eXMLRPCVariant(new QString(service->service_name.c_str())));
-				static QString g("Service");
-				s->insert(s1, new eXMLRPCVariant(new QString(g)));
-				static QString bs("S:");
-				QString handle=bs;
-				handle+=QString().setNum(service->original_network_id, 16);
+				s->insert(s0, new eXMLRPCVariant(new eString(service->service_name.c_str())));
+				static eString g("Service");
+				s->insert(s1, new eXMLRPCVariant(new eString(g)));
+				static eString bs("S:");
+				eString handle=bs;
+				handle+=eString().setNum(service->original_network_id, 16);
 				handle+=':';
-				handle+=QString().setNum(service->transport_stream_id, 16);
+				handle+=eString().setNum(service->transport_stream_id, 16);
 				handle+=':';
-				handle+=QString().setNum(service->service_id, 16);
-				s->insert(s2, new eXMLRPCVariant(new QString(handle)));
+				handle+=eString().setNum(service->service_id, 16);
+				s->insert(s2, new eXMLRPCVariant(new eString(handle)));
 				s->insert(s3, new eXMLRPCVariant(new bool(1)));
 				l.append(new eXMLRPCVariant(s));
 			}
@@ -125,7 +125,7 @@ static int getList(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 			l.toVector(nv);
 			result.append(new eXMLRPCVariant(nv));
 		}
-	} else if (param[0]=='S')
+	} else if (param.at(0)=='S')
 	{
 		eService *service=getServiceByID(param);
 		if (!service)
@@ -156,7 +156,7 @@ static int getList(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 		{
 			EITEvent *event=*i;
 
-			QString event_name=0;
+			eString event_name=0;
 
 			for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
 			{
@@ -171,26 +171,26 @@ static int getList(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 			if (!event_name)
 				continue;
 
-			QMap<QString, eXMLRPCVariant*> *s=new QMap<QString, eXMLRPCVariant*>;
-			static QString s0("caption");
-			static QString s1("type");
-			static QString s2("handle");
-			static QString s3("zappable");
+			QMap<eString, eXMLRPCVariant*> *s=new QMap<eString, eXMLRPCVariant*>;
+			static eString s0("caption");
+			static eString s1("type");
+			static eString s2("handle");
+			static eString s3("zappable");
 
-			s->insert(s0, new eXMLRPCVariant(new QString(event_name)));
-			static QString g("Event");
-			s->insert(s1, new eXMLRPCVariant(new QString(g)));
-			static QString bs("E:");
-			QString handle=bs;
-			handle+=QString().setNum(service->original_network_id, 16);
+			s->insert(s0, new eXMLRPCVariant(new eString(event_name)));
+			static eString g("Event");
+			s->insert(s1, new eXMLRPCVariant(new eString(g)));
+			static eString bs("E:");
+			eString handle=bs;
+			handle+=eString().setNum(service->original_network_id, 16);
 			handle+=':';
-			handle+=QString().setNum(service->transport_stream_id, 16);
+			handle+=eString().setNum(service->transport_stream_id, 16);
 			handle+=':';
-			handle+=QString().setNum(service->service_id, 16);
+			handle+=eString().setNum(service->service_id, 16);
 			handle+=':';
-			handle+=QString().setNum(event->event_id, 16);
+			handle+=eString().setNum(event->event_id, 16);
 
-			s->insert(s2, new eXMLRPCVariant(new QString(handle)));
+			s->insert(s2, new eXMLRPCVariant(new eString(handle)));
 			s->insert(s3, new eXMLRPCVariant(new bool(1)));
 			l.append(new eXMLRPCVariant(s));
 		}
@@ -211,7 +211,7 @@ static int zapTo(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> &r
 	if (xmlrpc_checkArgs("s", params, result))
 		return 1;
 
-	QString &param=*params[0]->getString();
+	eString &param=*params[0]->getString();
 
 	qDebug("zapTo(%s);", (const char*)param);
 	
@@ -228,7 +228,7 @@ static int getInfo(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 	if (xmlrpc_checkArgs("s", params, result))
 		return 1;
 
-	QString &param=*params[0]->getString();
+	eString &param=*params[0]->getString();
 
 	qDebug("getInfo(%s);", (const char*)param);
 	
@@ -237,9 +237,9 @@ static int getInfo(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 	if (!param.length())    // currently running
 	{
 			// mal gucken
-  } else if (param[0]=='S')
+  } else if (param.at(0)=='S')
   {
-		QMap<QString, eXMLRPCVariant*> *s=new QMap<QString, eXMLRPCVariant*>;
+		QMap<eString, eXMLRPCVariant*> *s=new QMap<eString, eXMLRPCVariant*>;
 
 		eService *service=getServiceByID(param);
 		if (!service)
@@ -258,16 +258,16 @@ static int getInfo(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 			return 0;
 		}
 		
-		static QString s1("type");
-		static QString g("Service");
-		s->insert(s1, new eXMLRPCVariant(new QString(g)));
+		static eString s1("type");
+		static eString g("Service");
+		s->insert(s1, new eXMLRPCVariant(new eString(g)));
 
-		static QString s0("caption");
-		s->insert(s0, new eXMLRPCVariant(new QString(service->service_name.c_str())));
+		static eString s0("caption");
+		s->insert(s0, new eXMLRPCVariant(new eString(service->service_name.c_str())));
 		
-		static QString s2("parentHandle");
-		static QString g2("NA");
-		s->insert(s2, new eXMLRPCVariant(new QString(g2)));
+		static eString s2("parentHandle");
+		static eString g2("NA");
+		s->insert(s2, new eXMLRPCVariant(new eString(g2)));
 		
 		PMT *pmt=eDVB::getInstance()->getPMT();
 		if (!pmt)
@@ -291,7 +291,7 @@ static int getInfo(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 		
 		if (v)
 		{
-			static QString s2("videoPid");
+			static eString s2("videoPid");
 			s->insert(s2, new eXMLRPCVariant(new int(v->elementary_PID)));
 		}
 
@@ -323,17 +323,17 @@ static int getInfo(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 			}
 			if (isaudio)
 			{
-				QMap<QString, eXMLRPCVariant*> *a=new QMap<QString, eXMLRPCVariant*>;
-				static QString s1("audioPid"), s2("handle"), s3("type"), s4("language"), s5("mpeg"), s6("ac3");
+				QMap<eString, eXMLRPCVariant*> *a=new QMap<eString, eXMLRPCVariant*>;
+				static eString s1("audioPid"), s2("handle"), s3("type"), s4("language"), s5("mpeg"), s6("ac3");
 				
 				a->insert(s1, new eXMLRPCVariant(new int(pe->elementary_PID)));
-				a->insert(s2, new eXMLRPCVariant(new QString("A")));	// nyi
-				a->insert(s3, new eXMLRPCVariant(new QString(isAC3?s6:s5)));
+				a->insert(s2, new eXMLRPCVariant(new eString("A")));	// nyi
+				a->insert(s3, new eXMLRPCVariant(new eString(isAC3?s6:s5)));
 
 				asl.append(new eXMLRPCVariant(a));
 			}
 		}
-		static QString as("audioPids");
+		static eString as("audioPids");
 
 		QVector<eXMLRPCVariant> *nv=new QVector<eXMLRPCVariant>;
 		nv->setAutoDelete(true);
@@ -344,7 +344,7 @@ static int getInfo(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 		
 		result.append(new eXMLRPCVariant(s));
 		
-		QString res="";
+		eString res="";
 		result.first()->toXML(res);
 		qDebug("%s", (const char*)res);
 	} else

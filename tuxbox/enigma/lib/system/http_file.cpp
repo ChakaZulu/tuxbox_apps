@@ -18,7 +18,7 @@ eHTTPFile::eHTTPFile(eHTTPConnection *c, int _fd, const char *mime): eHTTPDataSo
 
 int eHTTPFile::doWrite(int bytes)
 {
-	qDebug("doWrite(%d)", bytes);
+	eDebug("doWrite(%d)", bytes);
 	char buff[bytes];
 	if (!size)
 		return -1;
@@ -42,25 +42,26 @@ eHTTPFilePathResolver::eHTTPFilePathResolver()
 	translate.setAutoDelete(true);
 }
 
-eHTTPDataSource *eHTTPFilePathResolver::getDataSource(QString request, QString path, eHTTPConnection *conn)
+eHTTPDataSource *eHTTPFilePathResolver::getDataSource(eString request, eString path, eHTTPConnection *conn)
 {
 	if (path.find("../")!=-1)		// evil hax0r
 		return new eHTTPError(conn, 403);
-	if (path[0]!='/')		// prepend '/'
-		path.prepend('/');
-	if (path[path.length()-1]=='/')
+	if (path.at(0) != '/')		// prepend '/'
+		path.insert(0,"/");
+	if (path.at(path.length()-1)=='/')
 		path+="index.html";
 	eHTTPDataSource *data=0;
-	for (QListIterator<eHTTPFilePath> i(translate); i.current(); ++i)
+	for (ePtrList<eHTTPFilePath>::iterator i(translate); i != translate.end(); ++i)
 	{
-		if (i.current()->root==path.left(i.current()->root.length()))
+		if (i->root==path.left(i->root.length()))
 		{
-			QString newpath=i.current()->path+path.mid(i.current()->root.length());
+			eString newpath=i->path+path.mid(i->root.length());
 			if (newpath.find('?'))
 				newpath=newpath.left(newpath.find('?'));
-			qDebug("translated %s to %s", (const char*)path, (const char*)newpath);
+			eDebug("translated %s to %s", (const char*)path, (const char*)newpath);
 
 			int fd=open(newpath, O_RDONLY);
+
 			if (fd==-1)
 			{
 				switch (errno)
@@ -78,7 +79,7 @@ eHTTPDataSource *eHTTPFilePathResolver::getDataSource(QString request, QString p
 				break;
 			}
 			
-			QString ext=path.mid(path.findRev('.'));
+			eString ext=path.mid(path.rfind('.'));
 			const char *mime="text/unknown";
 			if ((ext==".html") || (ext==".htm"))
 				mime="text/html";
@@ -96,11 +97,11 @@ eHTTPDataSource *eHTTPFilePathResolver::getDataSource(QString request, QString p
 	return data;
 }
 
-void eHTTPFilePathResolver::addTranslation(QString path, QString root)
+void eHTTPFilePathResolver::addTranslation(eString path, eString root)
 {
 	if (path[path.length()-1]!='/')
 		path+='/';
 	if (root[root.length()-1]!='/')
 		root+='/';
-	translate.append(new eHTTPFilePath(path, root));
+	translate.push_back(new eHTTPFilePath(path, root));
 }

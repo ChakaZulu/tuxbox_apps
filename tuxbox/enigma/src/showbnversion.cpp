@@ -17,22 +17,22 @@ class BNDirectory: public eSection
 	int sectionRead(__u8 *d);
 	void sectionFinish(int err);
 	eLabel *result;
-	QString text;
+	eString text;
 public:
-	BNDirectory(int pid, QString text, eLabel *res);
+	BNDirectory(int pid, eString text, eLabel *res);
 };
 
 int BNDirectory::sectionRead(__u8 *d)
 {
 	d+=0x117;
-	QString versions=text;
+	eString versions=text;
 	int first=1;
 	while (1)
 	{
 		int l=*d++;
 		if (l>0x10)	// ugly
 			break;
-		QString dst="", file="", dst2="", version="";
+		eString dst="", file="", dst2="", version="";
 		while (l--)
 			dst+=*d++;
 		l=*d++;
@@ -46,7 +46,7 @@ int BNDirectory::sectionRead(__u8 *d)
 		while (l--)
 			version+=*d++;
 		d+=17;
-		qDebug("%s/%s/%s/%s", (const char*)dst, (const char*)file, (const char*)dst2, (const char*)version);
+		eDebug("%s/%s/%s/%s", (const char*)dst, (const char*)file, (const char*)dst2, (const char*)version);
 		if (versions.find(version)==-1)
 		{
 			if (!first)
@@ -63,7 +63,7 @@ void BNDirectory::sectionFinish(int err)
 {
 }
 
-BNDirectory::BNDirectory(int pid, QString text, eLabel *res): eSection(pid, 0x80, -1, -1, 0), result(res), text(text)
+BNDirectory::BNDirectory(int pid, eString text, eLabel *res): eSection(pid, 0x80, -1, -1, 0), result(res), text(text)
 {
 }
 

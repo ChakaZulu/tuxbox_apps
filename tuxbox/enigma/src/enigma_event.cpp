@@ -5,6 +5,7 @@
 #include "elabel.h"
 #include "enigma.h"
 #include "eskin.h"
+#include <eerror.h>
 
 void eEventDisplay::keyDown(int rc)
 {
@@ -41,7 +42,8 @@ void eEventDisplay::keyUp(int rc)
 	}
 }
 
-eEventDisplay::eEventDisplay(QString service, const ePtrList<EITEvent>* e, EITEvent* evt): eWindow(1), service(service)
+eEventDisplay::eEventDisplay(eString service, const ePtrList<EITEvent>* e, EITEvent* evt)
+: eWindow(1), service(service)
 	/*
 			kleine anmerkung:
 			
@@ -62,9 +64,8 @@ eEventDisplay::eEventDisplay(QString service, const ePtrList<EITEvent>* e, EITEv
 
 	eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "eventview"))
-		qFatal("skin load of \"eventview\" failed");
-
-
+		eFatal("skin load of \"eventview\" failed");
+	eDebug("Hier sind wir noch ?");
 	ASSIGN(long_description, eLabel, "epg_description");
 	long_description->setFlags(RS_WRAP);
 	ASSIGN(title, eLabel, "title");
@@ -88,27 +89,27 @@ eEventDisplay::~eEventDisplay()
 {
 	delete events;
 	delete eventlist;
-}
+}                                       	
 
 void eEventDisplay::setEvent(EITEvent *event)
 {
 	if (event)
 	{
-		QString _title=0, _long_description="";
-		QString _eventDate="";
-		QString _eventTime="";
+		eString _title=0, _long_description="";
+		eString _eventDate="";
+		eString _eventTime="";
 
 		tm *begin=event->start_time!=-1?localtime(&event->start_time):0;
 		if (begin)
 		{
 			_eventTime.sprintf("%02d:%02d", begin->tm_hour, begin->tm_min);
-			_eventDate=QString().sprintf("%d.%d.%4d", begin->tm_mday, begin->tm_mon+1, begin->tm_year+1900);
+			_eventDate=eString().sprintf("%d.%d.%4d", begin->tm_mday, begin->tm_mon+1, begin->tm_year+1900);
 		}
 		time_t endtime=event->start_time+event->duration;
 		tm *end=event->start_time!=-1?localtime(&endtime):0;
 		if (end)
 		{
-			_eventTime+=QString().sprintf(" - %02d:%02d", end->tm_hour, end->tm_min);
+			_eventTime+=eString().sprintf(" - %02d:%02d", end->tm_hour, end->tm_min);
 		}
 
 		for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)

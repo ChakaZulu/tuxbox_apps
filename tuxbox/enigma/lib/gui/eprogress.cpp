@@ -44,14 +44,14 @@ void eProgress::redrawWidget(gPainter *target, const eRect &area)
 	target->fill(eRect(border+dh, border, size.width()-border*2-dh, size.height()-border*2));
 }
 
-int eProgress::setProperty(const QString &prop, const QString &value)
+int eProgress::setProperty(const eString &prop, const eString &value)
 {
 	if (prop=="leftColor")
 		left=eSkin::getActive()->queryColor(value);
 	else if (prop=="rightColor")
 		right=eSkin::getActive()->queryColor(value);
 	else if (prop=="border")
-		border=atoi(value);
+		border=atoi(value.c_str());
 	else
 		return eWidget::setProperty(prop, value);
 	return 0;

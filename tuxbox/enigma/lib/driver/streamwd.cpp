@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#include <eerror.h>
 
 #include "ost/video.h"
 #include "edvb.h"
@@ -25,7 +26,7 @@ eStreamWatchdog::eStreamWatchdog()
 
 	if (handle<0)
 	{
-		qDebug("failed to open %s", EVENT_DEVICE);
+		eDebug("failed to open %s", EVENT_DEVICE);
 		sn=0;
 	}
 	else
@@ -88,7 +89,7 @@ void eStreamWatchdog::reloadSettings()
 		}
 	}
 	
-	qDebug("Aratio changed\n");			
+	eDebug("Aratio changed\n");			
 		/*emit*/ AspectRatioChanged(isanamorph);
 
 	int fd;

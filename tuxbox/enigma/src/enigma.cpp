@@ -6,32 +6,26 @@
 #include <fcntl.h>
 #include <stdlib.h>
 
-#include "enigma.h"
-#include "dvb.h"
-#include "edvb.h"
-
-#include "httpd.h"
-#include "http_file.h"
-#include "http_dyn.h"
-#include "xmlrpc.h"
-#include "enigma_dyn.h"
-#include "enigma_xmlrpc.h"
-
-#include "enigma_main.h"
-
-#include "emessage.h"
-
-#include "actions.h"
+#include <config.h>
 
 #include <core/base/i18n.h>
-
-#include <core/driver/rc.h>
+#include <core/dvb/dvb.h>
+#include <core/dvb/edvb.h>
+#include <core/system/httpd.h>
+#include <core/system/http_file.h>
+#include <core/system/http_dyn.h>
+#include <core/system/xmlrpc.h>
 #include <core/system/econfig.h>
-
 #include <core/system/init.h>
+#include <core/gui/emessage.h>
+#include <core/gui/actions.h>
+#include <core/driver/rc.h>
 
-#include <config.h>
-#include <sselect.h>
+#include "enigma.h"
+#include "enigma_dyn.h"
+#include "enigma_xmlrpc.h"
+#include "enigma_main.h"
+#include "sselect.h"
 
 eZap *eZap::instance;
 
@@ -82,7 +76,7 @@ void eZap::keyEvent(const eRCKey &key)
 	
 	const eAction *action=enigmaActions->map.findAction(key);
 	if (action == &enigmaActions->up)
-		qDebug("action: UP !!!");
+		eDebug("action: UP !!!");
 
 	if (c != -1)
 	{
@@ -149,14 +143,14 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 	CONNECT(eRCInput::getInstance()->keyEvent, eZap::keyEvent);
 
 	eDVB::getInstance()->configureNetwork();
-	qDebug("<-- network");
+	eDebug("<-- network");
 
 	main = new eZapMain();
 
 	pLCD = eZapLCD::getInstance();
 	serviceSelector = new eServiceSelector();
 	serviceSelector->setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
-	qDebug("<-- service selector");
+	eDebug("<-- service selector");
 
 	dyn_resolver = new eHTTPDynPathResolver();
 	ezapInitializeDyn(dyn_resolver);
@@ -165,13 +159,13 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 	fileresolver->addTranslation(DATADIR "/enigma/htdocs", "/");
 	fileresolver->addTranslation("/var/tuxbox/htdocs", "/www"); /* TODO: make user configurable */
 
-	qDebug("[ENIGMA] starting httpd");
+	eDebug("[ENIGMA] starting httpd");
 	httpd = new eHTTPD(80);
 	ezapInitializeXMLRPC(httpd);
 	httpd->addResolver(dyn_resolver);
 	httpd->addResolver(fileresolver);
 
-	qDebug("[ENIGMA] ok, beginning mainloop");
+	eDebug("[ENIGMA] ok, beginning mainloop");
 
 	if (eConfig::getInstance()->getKey("/elitedvb/system/bootCount", bootcount))
 	{
@@ -205,12 +199,12 @@ eZap::~eZap()
 		eConfig::getInstance()->setKey("/ezap/ui/lastChannel", (__u32)((eDVB::getInstance()->original_network_id << 16) | eDVB::getInstance()->service_id));
 	}
 
-	qDebug("[ENIGMA] beginning clean shutdown");
-	qDebug("[ENIGMA] main");
+	eDebug("[ENIGMA] beginning clean shutdown");
+	eDebug("[ENIGMA] main");
 	delete main;
-	qDebug("[ENIGMA] serviceSelector");
+	eDebug("[ENIGMA] serviceSelector");
 	delete serviceSelector;
-	qDebug("[ENIGMA] fertig");
+	eDebug("[ENIGMA] fertig");
 	init->setRunlevel(-1);
 	delete init;
 	instance = 0;
@@ -220,7 +214,7 @@ int main(int argc, char **argv)
 {
 	time_t t=0;
 	stime(&t);
-	fprintf(stderr, "%s", copyright);
+	eDebug("%s", copyright);
 
 	setlocale (LC_ALL, "");
 	bindtextdomain ("tuxbox-enigma", "/share/locale");

@@ -26,7 +26,7 @@ private:
 	void EITready(int error);
 public:
 	NVODStream(eListbox *listbox, int transport_stream_id, int original_network_id, int service_id);
-	QString getText(int col=0) const;
+	eString getText(int col=0) const;
 	int transport_stream_id, original_network_id, service_id;
 	EIT eit;
 };
@@ -52,7 +52,7 @@ public:
 		audioMPEG, audioAC3
 	};
 	AudioStream(eListbox *listbox, PMTEntry *stream);
-	QString getText(int col=0) const;
+	eString getText(int col=0) const;
 	PMTEntry *stream;
 };
 
@@ -73,10 +73,10 @@ class SubService: public eListboxEntry
 {
 public:
 	SubService(eListbox *listbox, LinkageDescriptor *descr);
-	QString getText(int col=0) const;
+	eString getText(int col=0) const;
 
 	int transport_stream_id, original_network_id, service_id;
-	QString name;
+	eString name;
 };
 
 class eSubServiceSelector: public eWindow

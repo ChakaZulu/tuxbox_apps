@@ -12,7 +12,7 @@ class eButton: public eLabel
 	gColor focus, normal;
 	eLabel*	tmpDescr; // used for LCD with description
 protected:
-	QString descr;
+	eString descr;
 	void keyUp(int key);
 	void gotFocus();
 	void lostFocus();

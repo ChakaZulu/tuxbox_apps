@@ -1,16 +1,15 @@
 #ifndef __enigma_mainmenu_h
 #define __enigma_mainmenu_h
 
-#include "elbwindow.h"
-#include <libsig_comp.h>
+#include <core/gui/elbwindow.h>
+#include <include/libsig_comp.h>
 
 class eListBoxEntry;
 
-class eMainMenu: public /*Q*/Object
+class eMainMenu: public Object
 {
-//	Q_OBJECT;
 	eLBWindow* window;
-private:// slots:
+private:
 	void sel_close(eListboxEntry *);
 	void sel_vcr(eListboxEntry *);
 	void sel_scan(eListboxEntry *);
