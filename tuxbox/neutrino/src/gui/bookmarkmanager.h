@@ -110,8 +110,8 @@ class CBookmarkManager
 	int createBookmark(std::string name, std::string url, std::string time);
 	int createBookmark(std::string url, std::string time);
 	int createBookmark(CBookmark bookmark);
-	void removeBookmark(int index);
-	void renameBookmark(int index);
+	void removeBookmark(unsigned int index);
+	void renameBookmark(unsigned int index);
 	int getBookmarkCount();
 	int getMaxBookmarkCount();
 	void flush();

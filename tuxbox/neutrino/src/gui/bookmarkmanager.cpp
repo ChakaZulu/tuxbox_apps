@@ -4,7 +4,7 @@
   Part of Movieplayer (c) 2003, 2004 by gagga
   Based on code by Zwen. Thanks.
 
-  $Id: bookmarkmanager.cpp,v 1.3 2004/02/09 17:12:20 gagga Exp $
+  $Id: bookmarkmanager.cpp,v 1.4 2004/02/10 15:57:25 gagga Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -126,7 +126,7 @@ int CBookmarkManager::createBookmark (std::string url, std::string time) {
 
 //------------------------------------------------------------------------
 
-void CBookmarkManager::removeBookmark (int index) {
+void CBookmarkManager::removeBookmark (unsigned int index) {
     printf ("remove bookmark\n");
     std::vector<CBookmark>::iterator p = bookmarks.begin()+index;
 	bookmarks.erase(p);
@@ -136,7 +136,8 @@ void CBookmarkManager::removeBookmark (int index) {
 
 //------------------------------------------------------------------------
 
-void CBookmarkManager::renameBookmark (int index) {
+void CBookmarkManager::renameBookmark (unsigned int index) {
+    if (bookmarks.size() == 0 || index>bookmarks.size()) return;
     CBookmark & theBookmark = bookmarks[index];
 	char bookmarkname[26];
 	strncpy (bookmarkname, theBookmark.getName().c_str(), 25);
@@ -204,39 +205,6 @@ CBookmarkManager::CBookmarkManager() : bookmarkfile ('\t')
     bookmarks.clear();
     readBookmarkFile();
     
-/*    frameBuffer = CFrameBuffer::getInstance();
-	visible = false;
-	selected = 0;
-	// Max
-	width = 720;
-	//height = 320;
-	if(g_settings.screen_EndX-g_settings.screen_StartX < width)
-		width=g_settings.screen_EndX-g_settings.screen_StartX-10;
-	buttonHeight = 25;
-	theight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
-	fheight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
-	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
-	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-( height+ info_height) ) / 2) + g_settings.screen_StartY;
-	listmaxshow = (height-theight-0)/(fheight*2);
-	liststart = 0;
-	//skipEventID=0;
-	
-	height = (g_settings.screen_EndY-g_settings.screen_StartY)-(info_height+50);
-	listmaxshow = (height-theight-0)/(fheight*2);
-	height = theight+0+listmaxshow*fheight*2;	// recalc height
-	if(bookmarks.size() < listmaxshow)
-	{
-		listmaxshow=bookmarks.size();
-		height = theight+0+listmaxshow*fheight*2;	// recalc height
-	}
-	if(selected==bookmarks.size() && !(bookmarks.empty()))
-	{
-		selected=bookmarks.size()-1;
-		liststart = (selected/listmaxshow)*listmaxshow;
-	}
-	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
-	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-( height+ info_height) ) / 2) + g_settings.screen_StartY;
-*/
 }
 
 //------------------------------------------------------------------------
@@ -306,18 +274,6 @@ CBookmark * CBookmarkManager::getBookmark(CMenuTarget* parent)
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-( height+ info_height) ) / 2) + g_settings.screen_StartY;
 
 
-/*	int ret = show();
-
-	if (ret >=0 && ret < bookmarks.size()) return &bookmarks[ret];
-	else return NULL;
-}
-
-//------------------------------------------------------------------------
-
-int CBookmarkManager::show()
-{
-*/	printf("[bookmarkmanager.cpp] show()\n");
-
 	int res = -1;
 
 	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_menu );
@@ -330,7 +286,6 @@ int CBookmarkManager::show()
 		if(update)
 		{
 			hide();
-			//updateEvents();
 			update=false;
 			paint();
 		}
@@ -392,7 +347,7 @@ int CBookmarkManager::show()
 			removeBookmark(selected);
 			update=true;
 		}
-		else if(msg==CRCInput::RC_yellow)
+		else if((msg==CRCInput::RC_yellow) && !(bookmarks.empty()))
 		{
 			renameBookmark(selected);
 			update=true;
@@ -477,8 +432,6 @@ void CBookmarkManager::hide()
 //------------------------------------------------------------------------
 void CBookmarkManager::paintHead()
 {   
-	printf("[bookmarkmanager.cpp] x=%d,y=%d,width=%d,theight=%d\n",x,y,width,theight+0);
-	
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
 	frameBuffer->paintIcon("bookmarkmanager.raw",x+5,y+4);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+35,y+theight+0, width- 45, g_Locale->getText("bookmarkmanager.name"), COL_MENUHEAD, 0, true); // UTF-8
@@ -498,8 +451,10 @@ void CBookmarkManager::paintFoot()
 	frameBuffer->paintBoxRel(x,y+height, width,buttonHeight, COL_MENUHEAD);
 	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW);
 
-	if (bookmarks.empty())
-		::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + ButtonWidth + 10, y + height + 4, ButtonWidth, 2, &(BookmarkmanagerButtons[1]));
+	if (bookmarks.empty()) {
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, x+width- 1* ButtonWidth + 10, y+height);
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+width-1 * ButtonWidth + 38, y+height+24 - 2, ButtonWidth- 28, g_Locale->getText("bookmarkmanager.select"), COL_INFOBAR, 0, true); // UTF-8
+    }    	
 	else
 	{
 		::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 10, y + height + 4, ButtonWidth, 2, BookmarkmanagerButtons);
