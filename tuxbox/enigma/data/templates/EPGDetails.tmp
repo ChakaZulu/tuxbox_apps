@@ -1,0 +1,23 @@
+<html>
+<head>
+	<title>EPG Details</title>
+	<link rel="stylesheet" type="text/css" href="/epgview.css">
+</head>
+<body bgcolor="#ffffff">
+	<span style="width: 100%; background-color: #93A198">
+	<font style="font-family: Verdana; font-size: 14pt; font-weight: bold">#SERVICENAME#</font>
+	</SPAN>
+	<br>
+	<span style="width: 100%; background-color: #DEE6D6">
+	<table width="100%" cellspacing="0" cellpadding="0" border="0">
+	<tr>
+		<td width="100%"><span class="epgzeit">#NOWT#</span> <span class="epgdur">#NOWD#min</span>
+		<span class="epgname"><b>#NOWST#</b></span></td>
+	</tr>
+	<tr>
+		<td width="100%"><span class="epgdesc">#NOWLT#</span></td>
+	</tr>
+	</table>
+</SPAN>
+</body>
+</html>

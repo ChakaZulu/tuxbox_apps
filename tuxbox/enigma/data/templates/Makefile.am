@@ -1,4 +1,4 @@
-EXTRA_DIST = eit.tmp index.tmp aboutDMM.tmp linksOfficialSites.tmp linksOtherSites.tmp linksForums.tmp EPG.tmp header.tmp timerList.tmp
+EXTRA_DIST = eit.tmp index.tmp aboutDMM.tmp linksOfficialSites.tmp linksOtherSites.tmp linksForums.tmp EPG.tmp header.tmp timerList.tmp EPGDetails.tmp
 
 install-data-local:
 	install -d $(DATADIR)/enigma/templates
