@@ -175,7 +175,6 @@ gImage::gImage(QSize size, int _bpp)
 gImage::~gImage()
 {
 	finalLock();
-	qDebug("deleting data at %p", data);
 	delete[] clut;
 	delete[] (char*)data;
 }
