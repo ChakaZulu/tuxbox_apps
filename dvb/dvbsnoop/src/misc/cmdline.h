@@ -1,4 +1,5 @@
 /*
+$Id: cmdline.h,v 1.7 2003/11/26 19:55:33 rasc Exp $
 
 
  DVBSNOOP
@@ -11,12 +12,14 @@
  (c) 2001-2003   Rainer.Scherg@gmx.de
 
 
-$Id: cmdline.h,v 1.6 2003/11/26 16:27:46 rasc Exp $
 
 
 */
 
 
+
+#ifndef __CMDLINE_H
+#define __CMDLINE_H 1
 
 
 /*
@@ -53,5 +56,7 @@ typedef struct _OPTIONS {
 int  cmdline_options (int argc, char **argv, OPTION *opt);
 
 
+
+#endif
 
 

@@ -10,7 +10,14 @@
  (c) 2001-2003   Rainer.Scherg@gmx.de
 
 
- */
+*/
+
+#ifndef __TEST0X1D_H
+#define __TEST0X1D_H 1
 
 void decode_TESTDATA (u_char *b, int len);
+
+#endif
+
+
 

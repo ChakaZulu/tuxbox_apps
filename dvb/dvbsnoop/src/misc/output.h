@@ -1,5 +1,5 @@
 /*
-$Id: output.h,v 1.5 2003/11/26 16:27:46 rasc Exp $
+$Id: output.h,v 1.6 2003/11/26 19:55:33 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: output.h,v 1.5 2003/11/26 16:27:46 rasc Exp $
 
 
 $Log: output.h,v $
+Revision 1.6  2003/11/26 19:55:33  rasc
+no message
+
 Revision 1.5  2003/11/26 16:27:46  rasc
 - mpeg4 descriptors
 - simplified bit decoding and output function
@@ -27,6 +30,11 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 
 
 */
+
+
+#ifndef __OUTPUT_H
+#define __OUTPUT_H 1
+
 
 void indent (int v);
 void setVerboseLevel (int v);
@@ -63,5 +71,9 @@ void print_indent(void);
 #define out_S2W_NL(v,str,hex,str2)   out_nl((v),"%s%u (0x%04x)  [= %s]",(str),(hex),(hex),(str2))
 #define out_S2B_NL(v,str,hex,str2)   out_nl((v),"%s%u (0x%02x)  [= %s]",(str),(hex),(hex),(str2))
 
+
+
+
+#endif
 
 

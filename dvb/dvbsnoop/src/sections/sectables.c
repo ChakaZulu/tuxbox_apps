@@ -1,12 +1,25 @@
 /*
-$Id: sectables.c,v 1.13 2003/11/24 23:52:17 rasc Exp $
+$Id: sectables.c,v 1.14 2003/11/26 19:55:34 rasc Exp $
 
- --  For more information please see: ISO 13818 (-1) and ETSI 300 468
- -- Verbose Level >= 2
-  (c) rasc
+
+ DVBSNOOP
+
+ a dvb sniffer  and mpeg2 stream analyzer tool
+ mainly for me to learn about dvb streams, mpeg2, mhp, dsm-cc, ...
+
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2003   Rainer.Scherg@gmx.de
+
+
+ -- For more information please see: ISO 13818 (-1) and ETSI 300 468
+
 
 
 $Log: sectables.c,v $
+Revision 1.14  2003/11/26 19:55:34  rasc
+no message
+
 Revision 1.13  2003/11/24 23:52:17  rasc
 -sync option, some TS and PES stuff;
 dsm_addr inactive, may be wrong - due to missing ISO 13818-6
@@ -70,7 +83,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "eit.h"
 #include "emm_ecm.h"
 #include "userdef.h"
-#include "datacarousel/dsmcc_addr.h"
+#include "datacarousel/datagram.h"
 #include "datacarousel/ints.h"
 #include "testdata/test0x1d.h"
 
@@ -222,7 +235,7 @@ static TABLE_ID_FUNC table_id_func[] = {
      {  0x02, 0x02,  decode_PMT	},
      {  0x03, 0x03,  decode_TSDT },
      /* res. */
-   // $$$  {  0x3e, 0x3e,  decode_DSMCC_ADDR },
+     {  0x3e, 0x3e,  decode_DSMCC_DATAGRAM },
      {  0x40, 0x41,  decode_NIT	},
      {  0x42, 0x42,  decode_SDT	},
      /* res. */

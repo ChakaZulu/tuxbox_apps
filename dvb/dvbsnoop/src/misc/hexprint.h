@@ -12,10 +12,14 @@
 
 */
 
+#ifndef __HEXPRINT_H
+#define __HEXPRINT_H 1
 
 void setHexPrintMode (int i);
 void printhex_buf (int verbose, u_char *buf, int len);
 void printhexdump_buf (int verbose, u_char *buf, int len);
 void printhexline_buf (int verbose, u_char *buf, int len);
 void printasciiline_buf (int verbose, u_char *buf, int len);
+
+#endif
 

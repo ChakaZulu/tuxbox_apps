@@ -1,14 +1,27 @@
 /*
-$Id: tsdt.c,v 1.6 2003/11/01 17:05:47 rasc Exp $
+$Id: tsdt.c,v 1.7 2003/11/26 19:55:34 rasc Exp $
+
+
+ DVBSNOOP
+
+ a dvb sniffer  and mpeg2 stream analyzer tool
+ mainly for me to learn about dvb streams, mpeg2, mhp, dsm-cc, ...
+
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2003   Rainer.Scherg@gmx.de
+
 
    -- TSDT section
    -- Transport Stream Description Section
    -- ISO 13818
 
-   (c) rasc
 
 
 $Log: tsdt.c,v $
+Revision 1.7  2003/11/26 19:55:34  rasc
+no message
+
 Revision 1.6  2003/11/01 17:05:47  rasc
 no message
 
@@ -53,7 +66,7 @@ void decode_TSDT (u_char *b, int len)
 
 
  TDST   t;
- int	len;
+ int	len1;
 
 
  
@@ -69,7 +82,7 @@ void decode_TSDT (u_char *b, int len)
  t.last_section_number 		 = getBits (b, 0, 56, 8);
 
  b   += 8;
- len = t.section_length - 5;
+ len1 = t.section_length - 5;
 
 
 
@@ -92,12 +105,12 @@ void decode_TSDT (u_char *b, int len)
 
 
 
- while (len > 4) {
+ while (len1 > 4) {
    int x;
 
    x = descriptor (b);
    b   += x;
-   len -= x;
+   len1 -= x;
  }
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.27 2003/11/25 00:17:11 rasc Exp $
+$Id: dvb_str.c,v 1.28 2003/11/26 19:55:34 rasc Exp $
 
 
  http://dvbsnoop.sourceforge.net/
@@ -18,6 +18,9 @@ $Id: dvb_str.c,v 1.27 2003/11/25 00:17:11 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.28  2003/11/26 19:55:34  rasc
+no message
+
 Revision 1.27  2003/11/25 00:17:11  rasc
 -sync option, some TS and PES stuff;
 dsm_addr inactive, may be wrong - due to missing ISO 13818-6
@@ -177,8 +180,7 @@ char *dvbstrTableID (u_int id)
      {  0x04, 0x04,  "ISO_IEC_14496_scene_description_section" },	/* $$$ TODO */
      {  0x05, 0x05,  "ISO_IEC_14496_object_description_section" },	/* $$$ TODO */
       {  0x06, 0x37,  "ITU-T Rec. H.222.0|ISO/IEC13818 reserved" },
-      {  0x38, 0x38,  "DSM-CC - reserved " },				/* $$$ ??? TODO */
-      {  0x39, 0x39,  "DSM-CC - addressable sections" },		/* $$$ ??? TODO */
+      {  0x38, 0x39,  "DSM-CC - reserved " },				/* $$$ ??? TODO */
       {  0x3a, 0x3a,  "DSM-CC - multiprotocol encapsulated data" },		/* $$$ ??? TODO */
       {  0x3b, 0x3b,  "DSM-CC - U-N messages (DSI or DII)" },
       {  0x3c, 0x3c,  "DSM-CC - Download Data Messages (DDB)" },    /* TR 101 202 */

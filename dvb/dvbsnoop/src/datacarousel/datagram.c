@@ -1,5 +1,5 @@
 /*
-$Id: datagram.c,v 1.9 2003/11/24 23:52:15 rasc Exp $
+$Id: datagram.c,v 1.10 2003/11/26 19:55:31 rasc Exp $
 
    DATAGRAM section
    DSM-CC Data Carousel  EN 301 192 
@@ -8,6 +8,9 @@ $Id: datagram.c,v 1.9 2003/11/24 23:52:15 rasc Exp $
 
 
 $Log: datagram.c,v $
+Revision 1.10  2003/11/26 19:55:31  rasc
+no message
+
 Revision 1.9  2003/11/24 23:52:15  rasc
 -sync option, some TS and PES stuff;
 dsm_addr inactive, may be wrong - due to missing ISO 13818-6
@@ -36,7 +39,8 @@ Revision 1.1  2003/10/19 22:22:58  rasc
 
 
 #include "dvbsnoop.h"
-#include "dsmcc_addr.h"
+#include "datagram.h"
+#include "llc_snap.h"
 #include "strings/dvb_str.h"
 #include "strings/dsmcc_str.h"
 #include "misc/hexprint.h"
@@ -54,7 +58,7 @@ Revision 1.1  2003/10/19 22:22:58  rasc
 
 
 
-void decode_DSMCC_ADDR (u_char *b, int len)
+void decode_DSMCC_DATAGRAM (u_char *b, int len)
 {
  /* EN 301 192 7.x */
 
@@ -166,19 +170,19 @@ void decode_DSMCC_ADDR (u_char *b, int len)
 
  if (d.LLC_SNAP_flag == 0x01) {
 	 /*  ISO/IEC 8802-2   */
-	 /* $$$ TODO   ...... */
-	 out_nl (3, "LLC_SNAP data:");
-	 indent (+1);
-	 printhexdump_buf (4,b,len1-2);
-	 indent (-1);
+	 int k;
+	 k = llc_snap (4,b);
+	 if ((len1-2) != k) {
+		 out_nl (4,"$$$$TODO  something missing here (report!!)");	// $$$ 
+	 }
  } else {
 	 out_nl (3, "IP_datagram_bytes:");
 	 indent (+1);
 	 printhexdump_buf (4,b,len1-2);
 	 indent (-1);
  }
-
  b += (len1 - 2);
+
 
 
 
