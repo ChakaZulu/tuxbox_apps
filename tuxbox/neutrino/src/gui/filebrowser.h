@@ -33,6 +33,16 @@
 #ifndef __FILEBROWSER_HPP__
 #define __FILEBROWSER_HPP__
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#include <features.h> /* make sure off_t has size 8 in __USE_FILE_OFFSET64 mode */
+
+#ifndef __USE_FILE_OFFSET64
+#warning not using 64 bit file offsets
+#endif
+
 #include <driver/framebuffer.h>
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
@@ -49,6 +59,8 @@
 #include <vector>
 
 #include <string.h>
+
+#include <unistd.h> /* off_t */
 
 
 #define VLC_URI "vlc://"
