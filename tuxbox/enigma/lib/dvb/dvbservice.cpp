@@ -1430,7 +1430,18 @@ void eDVBServiceController::startTDT()
 	tdt=0;
 	tdt=new TDT();
 	CONNECT(tdt->tableReady, eDVBServiceController::TDTready);
-	tdt->start();
+	if ( (Decoder::locked == 2 && !dvb.recorder) || 
+		(dvb.recorder && eSystemInfo::getInstance()->canTimeshift() 
+		&& eServiceInterface::getInstance()->service.path ) )
+	{
+		tdt->start(DEMUX1_DEV);
+		eDebug("start TDT on demux1");
+	}
+	else
+	{
+		tdt->start();
+		eDebug("start TDT on demux0");
+	}
 }
 
 /*
