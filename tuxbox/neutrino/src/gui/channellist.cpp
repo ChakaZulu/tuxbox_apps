@@ -470,12 +470,12 @@ bool CChannelList::zapToOnidSid (unsigned int onid_sid)
     return false;
 }
 
-void CChannelList::adjustToOnidSid (unsigned int onid_sid)
+bool CChannelList::adjustToChannelID(const t_channel_id channel_id)
 {
 	unsigned int i;
 
 	for (i=0; i<chanlist.size(); i++) {
-		if (chanlist[i]->onid_sid == onid_sid)
+		if (chanlist[i]->onid_sid == channel_id)
 		{
 			selected= i;
 //			CChannel* chan = chanlist[selected];
@@ -484,9 +484,10 @@ void CChannelList::adjustToOnidSid (unsigned int onid_sid)
 			tuned = i;
 			if (bouquetList != NULL)
 				bouquetList->adjustToChannel( getActiveChannelNumber());
-			break;
+			return true;
 		}
 	}
+	return false;
 }
 
 void CChannelList::zapTo(int pos)

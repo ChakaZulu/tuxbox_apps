@@ -102,7 +102,7 @@ int CRemoteControl::handleMsg(uint msg, uint data)
 				needs_nvods = ( msg == NeutrinoMessages:: EVT_ZAP_ISNVOD );
 
 				g_Sectionsd->setServiceChanged( current_onid_sid, true );
-				CNeutrinoApp::getInstance()->channelList->adjustToOnidSid( current_onid_sid );
+				CNeutrinoApp::getInstance()->channelList->adjustToChannelID( current_onid_sid );
 				if ( g_InfoViewer->is_visible )
 					g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR , 0 );
 			}

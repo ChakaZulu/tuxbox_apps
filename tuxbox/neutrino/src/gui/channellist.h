@@ -111,7 +111,7 @@ class CChannelList
 		CChannel* getChannelFromOnidSid(unsigned int onidSid);
 		void zapTo(int pos);
 		bool zapToOnidSid(unsigned int onid_sid);
-		void adjustToOnidSid (unsigned int onid_sid);
+		bool adjustToChannelID(const t_channel_id channel_id);
 		bool showInfo(int pos);
 		void updateEvents(void);
 		int numericZap(int key);
