@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_int_unt_descriptor.c,v 1.17 2004/04/15 03:38:50 rasc Exp $ 
+$Id: dsmcc_int_unt_descriptor.c,v 1.18 2004/08/04 21:58:41 rasc Exp $ 
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: dsmcc_int_unt_descriptor.c,v 1.17 2004/04/15 03:38:50 rasc Exp $
 
 
 $Log: dsmcc_int_unt_descriptor.c,v $
+Revision 1.18  2004/08/04 21:58:41  rasc
+BugFix: IPv6 (INT) descriptor display, got wrong values
+
 Revision 1.17  2004/04/15 03:38:50  rasc
 new: TransportStream sub-decoding (ts2PES, ts2SEC)  [-tssubdecode]
 checks for continuity errors, etc. and decode in TS enclosed sections/pes packets
@@ -500,7 +503,7 @@ void descriptorDSMCC_target_IPv6_address (u_char *b)
  // descriptor_tag	= b[0];
  len			= b[1];
 
- _getIPv6Addr (b, &x);
+ _getIPv6Addr (b+2, &x);
  out (4,"IPv6_addr_mask: %08lx%08lx%08lx%08lx [= ",
 		 x.ip[0], x.ip[1], x.ip[2], x.ip[3] );
   	displ_IPv6_addr (4, &x);

@@ -1,4 +1,4 @@
-
+ - BugFix: IPv6 (INT) descriptor display
  - Bugfix: UNT/INT table mixup  (tnx to Karsten Siebert)
  - Update: misc. tables
  - New: resolution_authority/provider_notification_section (TS 102 323)
