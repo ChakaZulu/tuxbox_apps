@@ -783,6 +783,8 @@ void CTimerList::newTimer()
 		CZapitClient::BouquetChannelList::iterator channel = subchannellist.begin();
 		for(; channel != subchannellist.end();channel++)
 		{
+			if (channel == subchannellist.begin())
+				mctv->addItem(new CMenuForwarder(bouquet->name, true, "",mwtv));
 			char cChannelId[11];
 			sprintf(cChannelId,"%010u",channel->channel_id);
 			mwtv->addItem(new CMenuForwarder(channel->name, true, "", this, string("SCT:")+string(cChannelId)+string(channel->name)));
@@ -792,12 +794,12 @@ void CTimerList::newTimer()
 		channel = subchannellist.begin();
 		for(; channel != subchannellist.end();channel++)
 		{
+			if (channel == subchannellist.begin())
+				mcradio->addItem(new CMenuForwarder(bouquet->name, true, "",mwradio));
 			char cChannelId[11];
 			sprintf(cChannelId,"%010u",channel->channel_id);
 			mwradio->addItem(new CMenuForwarder(channel->name, true, "", this, string("SCR:")+string(cChannelId)+string(channel->name)));
 		}
-		mctv->addItem(new CMenuForwarder(bouquet->name, true, "",mwtv));
-		mcradio->addItem(new CMenuForwarder(bouquet->name, true, "",mwradio));
 	}
 	CMenuWidget* mm = new CMenuWidget("timerlist.modeselect", "settings.raw");
 	mm->addItem(new CMenuForwarder("timerlist.modetv", true, "", mctv));
