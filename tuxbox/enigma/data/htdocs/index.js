@@ -1,36 +1,32 @@
 function setVol(xy)
 {
-	win=window.open("/setVolume?volume="+xy, "switchStatus","width=50,height=20,left=0,top=0");
-	win.focus();
+	document.location = "/setVolume?volume="+xy;
 	parent.setTimeout("reload()", 100);
 }
 
 function setVid(xy)
 {
-	win=window.open("/setVideo?position="+xy, "switchStatus", "width=50,height=20,left=0,top=0");
-	win.focus();
+	document.location = "/setVideo?position="+xy;
 	parent.setTimeout("reload()", 100);
 }	
 
 function Mute(xy)
 {
-	win=window.open("/setVolume?mute="+xy, "switchStatus","width=1,height=1,left=0,top=0");
-	win.focus();
+	document.location = "/setVolume?mute="+xy;
 	parent.setTimeout("reload()", 100);
 }
 
 function switchChannel(xy, bouquet, channel)
 {
-	win=window.open("/?path="+xy+"&curBouquet="+bouquet+"&curChannel="+channel, "switchStatus","width=1,height=1,left=0,top=0");
-	win.focus();
-	parent.setTimeout("reload()", 3000);
+	document.location = "/cgi-bin/zapTo?path="+xy+"&curBouquet="+bouquet+"&curChannel="+channel;
+	parent.setTimeout("reload()", 2000);
 }
 
 function deleteMovie(xy)
 {
 	if (confirmAction('Do you really want to delete this movie?'))
 	{
-		win=window.open("/cgi-bin/deleteMovie?ref="+xy, "switchStatus","width=1,height=1,left=0,top=0");
+		document.location = "/cgi-bin/deleteMovie?ref="+xy;
 		parent.setTimeout("reload()", 3000);
 	}
 }
@@ -52,8 +48,7 @@ function admin(xy)
 
 function vcontrol(xy)
 {
-	win=window.open("/cgi-bin/videocontrol?command="+xy, "vcontrol", "width=50, height=20, left=0, top=0");
-	win.focus();
+	document.location = "/cgi-bin/videocontrol?command="+xy;
 }
 
 function openSI()
@@ -69,12 +64,12 @@ function DVRrecord(xy)
 
 function startPlugin(xy)
 {
-	win=window.open("/cgi-bin/startPlugin?requester=webif&name="+xy, "switchStatus","width=1,height=1,left=0,top=0");
+	document.location = "/cgi-bin/startPlugin?requester=webif&name="+xy;
 }
 
 function stopPlugin()
 {
-	win=window.open("/cgi-bin/stopPlugin?requester=webif", "switchStatus","width=1,height=1,left=0,top=0");
+	document.location = "/cgi-bin/stopPlugin?requester=webif";
 }
 
 function sendMessage2TV()

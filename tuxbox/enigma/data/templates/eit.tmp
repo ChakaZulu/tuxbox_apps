@@ -12,7 +12,9 @@
 		<td width=100% bgcolor="#d9e0e7">#NOWT# #NOWD# <B>#NOWST#</B></td>
 	</tr>
 	<tr>
-		<td width=100%>#NOWLT#</td>
+		<td width=100%>
+			<textarea name="nowlt" rows=3 cols=78 readonly>#NOWLT#</textarea>
+		</td>
 	</tr>
 	<tr>
 		<td>&nbsp;</td>
@@ -21,9 +23,8 @@
 		<td width=100% bgcolor="#d9e0e7">#NEXTT# #NEXTD#<B>#NEXTST#</B></td>
 	</tr>
 	<tr>
-		<td width=100%>#NEXTLT#</td>
-	</tr>
-	<tr>
-		<td>&nbsp;</td>
+		<td width=100%>
+			<textarea name="nextlt" rows=3 cols=78 readonly>#NEXTLT#</textarea>
+		</td>
 	</tr>
 </table>

@@ -1,14 +1,12 @@
 function cleanupTimerList()
 {
-	win=window.open("/cleanupTimerList", "switchStatus", "width=1, height=1, left=0, top=0");
-	win.focus();
+	document.location = "/cleanupTimerList";
 	parent.setTimeout("reload()", 500);
 }
 
 function clearTimerList()
 {
-	win=window.open("/clearTimerList", "switchStatus", "width=1, height=1, left=0, top=0");
-	win.focus();
+	document.location = "/clearTimerList";
 	parent.setTimeout("reload()", 500);
 }
 
@@ -19,7 +17,6 @@ function editTimerEvent(xy)
 
 function deleteTimerEvent(xy)
 {
-	win=window.open("/deleteTimerEvent?"+xy, "switchStatus", "width=1, height=1, left=0, top=0");
-	win.focus();
+	document.location = "/deleteTimerEvent?"+xy;
 	parent.setTimeout("reload()", 500);
 }

@@ -61,10 +61,21 @@ using namespace std;
 #define TOPNAVICOLOR "#D9E0E7"
 #define OCKER "#FFCC33"
 
+#define NOCONTENT "<? header(\"HTTP/1.0 204 No Content\"); ?>"
+
 #define WEBXFACEVERSION "0.9"
 
 static int currentBouquet = 0;
 static int currentChannel = -1;
+
+#define zapModeTV "TV";
+#define zapPathTV ";0:7:1:0:0:0:0:0:0:0:"
+#define zapModeRadio "Radio";
+#define zapPathRadio ";0:7:2:0:0:0:0:0:0:0:"
+#define zapModeData "Data";
+#define zapPathData ";0:7:6:0:0:0:0:0:0:0:"
+static eString zapMode = zapModeTV;
+static eString zapPathes[4];
 
 extern eString getRight(const eString&, char); // implemented in timer.cpp
 extern eString getLeft(const eString&, char);  // implemented in timer.cpp
@@ -542,7 +553,9 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 		eZapMain::getInstance()->play();
 	}
 
-	return "<script language=\"javascript\">window.close();</script>";
+	content->code=204;
+	content->code_descr="No Content";
+	return NOCONTENT;
 }
 #endif
 
@@ -570,7 +583,6 @@ static eString audio(eString request, eString dirpath, eString opts, eHTTPConnec
 
 static eString setAudio(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString> opt = getRequestOptions(opts);
 	int apid=-1;
 	sscanf(opt["audio"].c_str(), "0x%04x", &apid);
@@ -590,7 +602,9 @@ static eString setAudio(eString request, eString dirpath, eString opts, eHTTPCon
 			}
 	}
 
-	return "<script language=\"javascript\">window.close();</script>";
+	content->code=204;
+	content->code_descr="No Content";
+	return NOCONTENT;
 }
 
 static eString selectAudio(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -714,8 +728,6 @@ static eString setVolume(eString request, eString dirpath, eString opts, eHTTPCo
 	eString mute = opt["mute"];
 	eString volume = opt["volume"];
 
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-
 	if (mute)
 		eAVSwitch::getInstance()->toggleMute();
 
@@ -732,15 +744,15 @@ static eString setVolume(eString request, eString dirpath, eString opts, eHTTPCo
 		eAVSwitch::getInstance()->changeVolume(1, 63 - vol);
 	}
 
-	return "<script language=\"javascript\">window.close();</script>";
+	content->code=204;
+	content->code_descr="No Content";
+	return NOCONTENT;
 }
 
 static eString setVideo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString,eString> opt = getRequestOptions(opts);
 	eString video = opt["position"];
-
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
 	if (video)
 	{
@@ -760,7 +772,9 @@ static eString setVideo(eString request, eString dirpath, eString opts, eHTTPCon
 		}
 	}
 
-	return "<script language=\"javascript\">window.close();</script>";
+	content->code=204;
+	content->code_descr="No Content";
+	return NOCONTENT;
 }
 
 eString ref2string(const eServiceReference &r)
@@ -969,12 +983,12 @@ static eString getChannelStats()
 		result << "<img src=\"crypt_off.png\" border=0>";
 
 	result << "&nbsp;";
-		
+
 	if (eZapMain::getInstance()->get16_9Logo())
 		result << "<img src=\"format_on.png\" border=0>";
 	else
 		result << "<img src=\"format_off.png\" border=0>";
-		
+
 	return result.str();
 }
 
@@ -1258,8 +1272,6 @@ static eString deleteMovie(eString request, eString dirpath, eString opts, eHTTP
 	std::map<eString, eString> opt = getRequestOptions(opts);
 	eString sref;
 
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-
 	sref = opt["ref"];
 	eServiceReference ref = string2ref(sref);
 	ePlaylist *recordings = eZapMain::getInstance()->getRecordings();
@@ -1292,7 +1304,9 @@ static eString deleteMovie(eString request, eString dirpath, eString opts, eHTTP
 			::unlink(eString().sprintf("%s.eit", getLeft(ref.path, '.').c_str()).c_str());
 		}
 	}
-	return "<script language=\"javascript\">window.close();</script>";
+	content->code=204;
+	content->code_descr="No Content";
+	return NOCONTENT;
 }
 #endif
 
@@ -1553,6 +1567,53 @@ static eString getZapContent2(eString mode, eString path)
 	return result;
 }
 
+static void getZapContent3(eString mode, eString path)
+{
+	eString result1, result2;
+	eString tpath;
+	std::stringstream tmp;
+
+	unsigned int pos = 0, lastpos = 0, temp = 0;
+
+	if ((path.find(";", 0)) == eString::npos)
+		path = ";" + path;
+
+	while ((pos = path.find(";", lastpos)) != eString::npos)
+	{
+		lastpos = pos + 1;
+		if ((temp = path.find(";", lastpos)) != eString::npos)
+			tpath = path.mid(lastpos, temp - lastpos);
+		else
+			tpath = path.mid(lastpos, strlen(path.c_str()) - lastpos);
+
+		eServiceReference current_service = string2ref(tpath);
+		eServiceInterface *iface = eServiceInterface::getInstance();
+
+		eWebNavigatorListDirectory2 navlist(result1, result2, path, tpath, *iface);
+		Signal1<void, const eServiceReference&> signal;
+		signal.connect(slot(navlist, &eWebNavigatorListDirectory2::addEntry));
+		iface->enterDirectory(current_service, signal);
+		eDebug("entered");
+		tmp.str(result1.left(result1.length() - 1));
+		iface->leaveDirectory(current_service);
+		eDebug("exited");
+	}
+
+	int i = 0;
+	while(tmp)
+	{
+		tmp >> tpath;
+		if (tpath)
+		{
+			printf("[GETZAPCONTENT3] processing bouquet: tpath = %s", tpath.c_str());
+			tpath = tpath.mid(1, tpath.length() - 3);
+			printf("[GETZAPCONTENT3] processing bouquet: tpath = %s", tpath.c_str());
+			zapPathes[i] = tpath;
+			i++;
+		}
+	}
+}
+
 static eString getZap(eString mode, eString path)
 {
 	eString result;
@@ -1569,7 +1630,11 @@ static eString getZap(eString mode, eString path)
 	if (path == ";4097:7:0:6:0:0:0:0:0:0:")
 		zap_result += getZapContent2(mode, path);
 	else
+	{
 		zap_result += getZapContent(mode, path);
+		if (zap_result == NOCONTENT)
+			return zap_result;
+	}
 
 	result += getEITC();
 	eString curService = filter_string(getCurService());
@@ -1718,27 +1783,32 @@ static eString getConfigUSB(void)
 
 static eString setConfigUSB(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString> opt = getRequestOptions(opts);
 	eString swapUSB = opt["swapusb"];
 	eString swapUSBFile = opt["swapusbfile"];
 	eString bootUSB = opt["bootUSB"];
 	eString bootUSBImage = opt["bootusbimage"];
 
-	return getMsgWindow("Info", "Function is not supported by installed flash image.");
+	content->code=204;
+	content->code_descr="No Content";
+	return NOCONTENT;
+//	return getMsgWindow("Info", "Function is not supported by installed flash image.");
 //	return "<script language=\"javascript\">window.close();</script>";
 }
 
 static eString setConfigHDD(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
+//	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString> opt = getRequestOptions(opts);
 	eString swapHDD = opt["swaphdd"];
 	eString swapHDDFile = opt["swaphddfile"];
 	eString bootHDD = opt["bootHDD"];
 	eString bootHDDImage = opt["boothddimage"];
 
-	return getMsgWindow("Info", "Function is not supported by installed flash image.");
+	content->code=204;
+	content->code_descr="No Content";
+	return NOCONTENT;
+//	return getMsgWindow("Info", "Function is not supported by installed flash image.");
 //	return "<script language=\"javascript\">window.close();</script>";
 }
 
@@ -2015,7 +2085,7 @@ static eString getControlScreenShot(void)
 static eString getContent(eString mode, eString path)
 {
 	eString result;
-	
+
 	if (mode == "zap")
 	{
 		result = getTitle("ZAP");
@@ -2708,7 +2778,11 @@ static eString startPlugin(eString request, eString dirpath, eString opt, eHTTPC
 
 	result = plugins.execPluginByName((path + opts["name"]).c_str());
 	if (requester == "webif")
-		result = "<script language=\"javascript\">window.close();</script>";
+	{
+		content->code=204;
+		content->code_descr="No Content";
+		result = NOCONTENT;
+	}
 
 	return result;
 }
@@ -2728,8 +2802,12 @@ static eString stopPlugin(eString request, eString dirpath, eString opt, eHTTPCo
 		result = "E: no plugin is running";
 		
 	if (requester == "webif")
-		result = "<script language=\"javascript\">window.close();</script>";
-		
+	{
+		content->code=204;
+		content->code_descr="No Content";
+		result = NOCONTENT;
+	}
+
 	return result;
 }
 
@@ -2820,6 +2898,29 @@ static eString save_userBouquets(eString request, eString dirpath, eString opt, 
 {
 	eZapMain::getInstance()->saveUserBouquets();
 	return "+ok";
+}
+
+static eString zapTo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	std::map<eString,eString> opt = getRequestOptions(opts);
+
+	eString mode = opt["mode"];
+	eString spath = opt["path"];
+	eString curBouquet = opt["curBouquet"];
+	eString curChannel = opt["curChannel"];
+	if (opts.find("curBouquet") != eString::npos)
+		currentBouquet = atoi(curBouquet.c_str());
+	if (opts.find("curChannel") != eString::npos)
+		currentChannel = atoi(curChannel.c_str());
+
+	eServiceReference current_service = string2ref(spath);
+
+	if (!(current_service.flags&eServiceReference::isDirectory))	// is playable
+		eZapMain::getInstance()->playService(current_service, eZapMain::psSetMode|eZapMain::psDontAdd);
+
+	content->code=204;
+	content->code_descr="No Content";
+	return NOCONTENT;
 }
 
 #if 0
@@ -3207,22 +3308,22 @@ static eString neutrino_suck_getchannellist(eString request, eString dirpath, eS
 
 static eString cleanupTimerList(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	eString result;
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	result += "<script language=\"javascript\">window.close();</script>";
 	eTimerManager::getInstance()->cleanupEvents();
 	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
-	return result;
+	content->code=204;
+	content->code_descr="No Content";
+	return NOCONTENT;
 }
 
 static eString clearTimerList(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	eString result;
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	result += "<script language=\"javascript\">window.close();</script>";
 	eTimerManager::getInstance()->clearEvents();
 	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
-	return result;
+	content->code=204;
+	content->code_descr="No Content";
+	return NOCONTENT;
 }
 
 static eString addTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -3264,9 +3365,6 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 
 static eString deleteTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	eString result;
-
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString> opt = getRequestOptions(opts);
 	eString serviceRef = opt["ref"];
 	eString eventID = opt["ID"];
@@ -3284,7 +3382,9 @@ static eString deleteTimerEvent(eString request, eString dirpath, eString opts, 
 	eServiceReference ref = string2ref(serviceRef);
 	eTimerManager::getInstance()->deleteEventFromTimerList(&ref, &evt);
 	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
-	return "<script language=\"javascript\">window.close();</script>";
+	content->code=204;
+	content->code_descr="No Content";
+	return NOCONTENT;
 }
 
 static eString genOptions(int start, int end, int delta, int selected)
@@ -3487,6 +3587,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/tvMessageWindow", tvMessageWindow);
 	dyn_resolver->addDyn("GET", "/cgi-bin/status", doStatus);
 	dyn_resolver->addDyn("GET", "/cgi-bin/switchService", switchService);
+	dyn_resolver->addDyn("GET", "/cgi-bin/zapTo", zapTo);
 	dyn_resolver->addDyn("GET", "/cgi-bin/admin", admin);
 	dyn_resolver->addDyn("GET", "/cgi-bin/audio", audio);
 	dyn_resolver->addDyn("GET", "/cgi-bin/selectAudio", selectAudio);
