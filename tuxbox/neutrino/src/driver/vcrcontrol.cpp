@@ -299,7 +299,7 @@ bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode,
 		g_Sectionsd->setPauseScanning(false);
 		g_Zapit->setRecordMode( false );
 
-		ShowMsgUTF("messagebox.info", g_Locale->getText("streamingserver.noconnect"), CMessageBox::mbrBack, CMessageBox::mbBack, "error.raw"); // UTF-8
+		DisplayErrorMessage(g_Locale->getText("streamingserver.noconnect")); // UTF-8
 
 		return false;
 	}

@@ -345,3 +345,8 @@ int ShowMsgUTF(const char * const Caption, std::string Text, const uint Default,
 	
 	return res;
 }
+
+void DisplayErrorMessage(const char * const ErrorMsg)
+{
+	ShowMsgUTF("messagebox.error", ErrorMsg, CMessageBox::mbrCancel, CMessageBox::mbCancel, "error.raw");
+}

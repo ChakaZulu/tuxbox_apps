@@ -358,7 +358,7 @@ bool CFileBrowser::readDir_vlc(std::string dirname, CFileList* flist)
 	{
 		cout << "Error reading vlc dir" << endl;
 		/* since all CURL error messages use only US-ASCII characters, when can safely print them as if they were UTF-8 encoded */
-		ShowMsgUTF("messagebox.error", error, CMessageBox::mbrCancel, CMessageBox::mbCancel, "error.raw"); // UTF-8
+		DisplayErrorMessage(error); // UTF-8
 		CFile file;
 		file.Name = dirname + "..";
 		file.Mode = S_IFDIR + 0777;

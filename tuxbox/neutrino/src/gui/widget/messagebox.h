@@ -103,6 +103,9 @@ class CMessageBox
 };
 
 // Text & Caption are always UTF-8 encoded
-int ShowMsgUTF(const char * const Caption, std::string Text, const uint Default, const uint ShowButtons, const char * const Icon = NULL, const int Width = 450, const int timeout = -1);
+int ShowMsgUTF(const char * const Caption, std::string Text, const uint Default, const uint ShowButtons, const char * const Icon = NULL, const int Width = 450, const int timeout = -1); // UTF-8
+
+// Text is UTF-8 encoded
+void DisplayErrorMessage(const char * const ErrorMsg); // UTF-8
 
 #endif

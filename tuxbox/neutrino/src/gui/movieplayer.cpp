@@ -4,7 +4,7 @@
 	Movieplayer (c) 2003 by gagga
 	Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-        $Id: movieplayer.cpp,v 1.41 2003/09/10 21:26:49 thegoodguy Exp $
+        $Id: movieplayer.cpp,v 1.42 2003/09/10 22:16:27 thegoodguy Exp $
 
 	Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -289,7 +289,7 @@ ReceiveStreamThread (void *mrl)
 	printf ("[movieplayer.cpp] HTTP Result (emptyurl): %d\n", httpres);
 	if (httpres != 0)
 	{
-		ShowMsgUTF("messagebox.error", g_Locale->getText("movieplayer.nostreamingserver"), CMessageBox::mbrCancel, CMessageBox::mbCancel, "error.raw"); // UTF-8
+		DisplayErrorMessage(g_Locale->getText("movieplayer.nostreamingserver")); // UTF-8
 		playstate = STOPPED;
 		pthread_exit (NULL);
 		// Assume safely that all succeeding HTTP requests are successful

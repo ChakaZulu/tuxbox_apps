@@ -499,7 +499,7 @@ void CChannelList::zapTo(int pos)
 {
 	if (chanlist.size() == 0)
 	{
-		ShowMsgUTF("messagebox.error", g_Locale->getText("channellist.nonefound"), CMessageBox::mbrCancel, CMessageBox::mbCancel, "error.raw"); // UTF-8
+		DisplayErrorMessage(g_Locale->getText("channellist.nonefound")); // UTF-8
 		return;
 	}
 	if ( (pos >= (signed int) chanlist.size()) || (pos< 0) )
@@ -528,7 +528,7 @@ int CChannelList::numericZap(int key)
 
 	if(chanlist.size()==0)
 	{
-		ShowMsgUTF("messagebox.error", g_Locale->getText("channellist.nonefound"), CMessageBox::mbrCancel, CMessageBox::mbCancel, "error.raw"); // UTF-8
+		DisplayErrorMessage(g_Locale->getText("channellist.nonefound")); // UTF-8
 		return res;
 	}
 
