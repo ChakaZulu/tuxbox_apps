@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.60 2005/01/03 21:36:46 chakazulu Exp $
+	$Id: webapi.cpp,v 1.61 2005/01/12 20:07:48 chakazulu Exp $
 
 	License: GPL
 
@@ -1299,7 +1299,7 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 	request->SocketWrite("</TD></TR>\n");
 	//plugin name
 	request->SocketWrite("<tr id=\"PluginNameRow\" style=\"visibility:hidden\"><TD colspan=2>\n");
-	request->printf("Plugin <INPUT TYPE=\"text\" name=\"PluginName\" value=\"\" size=20 maxlength=%d>\n",EXEC_PLUGIN_MESSAGE_MAXLEN-1);
+	request->printf("Plugin <INPUT TYPE=\"text\" name=\"PluginName\" value=\"\" size=20 maxlength=%d>\n",EXEC_PLUGIN_NAME_MAXLEN-1);
 	request->SocketWrite("</TD></TR>\n");
 	// Buttons
 	request->SocketWrite("<TD align=\"center\"><INPUT TYPE=\"submit\" value=\"OK\"></form>\n"
@@ -1417,9 +1417,9 @@ void CWebAPI::doNewTimer(CWebserverRequest *request)
 	}
 	else if(type==CTimerd::TIMER_EXEC_PLUGIN)
 	{
-		char msg[EXEC_PLUGIN_MESSAGE_MAXLEN];
+		char msg[EXEC_PLUGIN_NAME_MAXLEN];
 		memset(msg, 0, sizeof(msg));
-		strncpy(msg, request->ParameterList["PluginName"].c_str(),EXEC_PLUGIN_MESSAGE_MAXLEN-1);
+		strncpy(msg, request->ParameterList["PluginName"].c_str(),EXEC_PLUGIN_NAME_MAXLEN-1);
 		data=msg;
 	}
 	Parent->Timerd->addTimerEvent(type,data,announceTimeT,alarmTimeT,stopTimeT,rep,repCount);
