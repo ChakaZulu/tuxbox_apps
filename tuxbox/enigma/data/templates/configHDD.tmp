@@ -3,7 +3,7 @@
 		<tr>
 			<td><input type="checkbox" name="swaphdd" value="on" #SWAPHDD#></td>
 			<td>Use HDD Swap File:</td>
-			<td><input name="swaphddfile" type="text" size="50" maxlength="50" value="#HDDSWAPFILE#"></td>
+			<td><input style="color: #000000" name="swaphddfile" type="text" size="50" maxlength="50" value="#HDDSWAPFILE#"></td>
 		</tr>
 		<!--
 		<tr>

@@ -3,7 +3,7 @@
 		<tr>
 			<td><input type="checkbox" name="swapusb" value="on" #SWAPUSB#></td>
 			<td>Use USB Swap File:</td>
-			<td><input name="swapusbfile" type="text" size="50" maxlength="50" value="#USBSWAPFILE#"></td>
+			<td><input style="color: #000000" name="swapusbfile" type="text" size="50" maxlength="50" value="#USBSWAPFILE#"></td>
 		</tr>
 		<!--
 		<tr>
