@@ -3,7 +3,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.h,v 1.28 2004/02/13 14:36:19 thegoodguy Exp $
+  $Id: sectionsdclient.h,v 1.29 2004/02/13 14:39:09 thegoodguy Exp $
 
   License: GPL
 
@@ -50,7 +50,7 @@ class CEPGData;
 class CChannelEvent
 {
  public:
-	t_channel_id       get_channel_id(void) const { return eventID >> 16; }
+	t_channel_id       get_channel_id(void) const { return GET_CHANNEL_ID_FROM_EVENT_ID(eventID); }
 	event_id_t         eventID;
 	std::string        description;
 	std::string        text;
