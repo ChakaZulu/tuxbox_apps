@@ -91,8 +91,8 @@ static enum mad_flow output(void *data,
     /* output sample(s) in 16-bit signed little-endian PCM */
 
     sample = scale(*left_ch++);
-    fputc((sample >> 0) & 0xff);
-    fputc((sample >> 8) & 0xff);
+    fputc((sample >> 0) & 0xff,soundfd);
+    fputc((sample >> 8) & 0xff,soundfd);
 
     if (nchannels == 2) {
       sample = scale(*right_ch++);
