@@ -1,10 +1,13 @@
 /*
- $Id: rcinput.cpp,v 1.11 2001/10/27 11:54:08 field Exp $
+ $Id: rcinput.cpp,v 1.12 2001/10/29 16:49:00 field Exp $
 
  Module for Remote Control Handling
 
 History:
  $Log: rcinput.cpp,v $
+ Revision 1.12  2001/10/29 16:49:00  field
+ Kleinere Bug-Fixes (key-input usw.)
+
  Revision 1.11  2001/10/27 11:54:08  field
  Tastenwiederholblocker entruempelt
 
@@ -43,7 +46,6 @@ CRCInput::CRCInput()
 		exit(-1);
 	}
 	ioctl(fd, RC_IOCTL_BCODES, 1);
-	timeout=-1;
 	prevrccode = 0xffff;
 	start();
 
@@ -69,7 +71,7 @@ void CRCInput::stopInput()
 {
 	printf("rcstop requested....\n");
 	pthread_cancel(thrInput);
-	pthread_cancel(thrTimer);
+    sem_close(&waitforkey);
 }
 
 
@@ -98,7 +100,6 @@ void CRCInput::restartInput()
 **************************************************************************/
 int CRCInput::getKey(int Timeout)
 {
-
       // -- something pushed back ?
 	if (LIFObuffer.available()) {
 		return LIFObuffer.pop();
@@ -109,15 +110,28 @@ int CRCInput::getKey(int Timeout)
 		return ringbuffer.read();
 	}
 
-	sem_init (&waitforkey, 0, 0);
-	timeout=Timeout;
-	sem_wait (&waitforkey);
-	timeout=-1;
-	if (ringbuffer.available())
-	{
-		return ringbuffer.read();
-	}
-	return RC_timeout;
+    if(Timeout> 0)
+    {
+        struct timespec abs_wait;
+        struct timeval now;
+
+        sem_init (&waitforkey, 0, 0);
+        gettimeofday(&now, NULL);
+        TIMEVAL_TO_TIMESPEC(&now, &abs_wait);
+
+        abs_wait.tv_nsec += (Timeout % 10)* 100000000;
+        abs_wait.tv_sec += ((Timeout/ 10)+ (abs_wait.tv_nsec/ 1000000000));
+        abs_wait.tv_nsec %= 1000000000;
+
+    	sem_timedwait (&waitforkey, &abs_wait);
+
+    	if (ringbuffer.available())
+    	{
+    		return ringbuffer.read();
+    	}
+    }
+    return RC_timeout;
+
 }
 
 
@@ -141,15 +155,15 @@ int CRCInput::pushbackKey (int key)
 
 void CRCInput::clear (void)
 {
-  int key;
-
+    int key;
 
 	ringbuffer.clear();
 	LIFObuffer.clear();
 
-        do { 
-            key = getKey(5);
-	    printf ("DBG: clear: Eat key: %d\n",key);
+    do
+    {
+        key = getKey(1);
+        //printf ("DBG: clear: Eat key: %d\n",key);
 	} while (key != RC_timeout);
 
 	ringbuffer.clear();
@@ -331,34 +345,10 @@ void CRCInput::start()
         {
                 perror("create failed\n");
         }
-        if (pthread_create (&thrTimer, NULL, TimerThread, (void *) this) != 0 )
-        {
-                perror("create failed\n");
-        }
+        sem_init (&waitforkey, 0, 0);
+        clear();
 }
 
-
-/**************************************************************************
-*	Timer Thread for key-timeout - internal use only!
-*
-**************************************************************************/
-void * CRCInput::TimerThread (void *arg)
-{
-        CRCInput* RCInput = (CRCInput*) arg;
-        while(1)
-        {
-			usleep(100000);
-			if(RCInput->timeout>0)
-			{
-				RCInput->timeout--;
-				if(RCInput->timeout==0)
-				{
-					sem_post (&RCInput->waitforkey);
-				}
-			}
-        }
-        return NULL;
-}
 
 /**************************************************************************
 *	Input Thread for key-input (blocking read) - internal use only!
@@ -373,7 +363,7 @@ void * CRCInput::InputThread (void *arg)
 			if(key!=-1)
 			{
 				RCInput->ringbuffer.add(key);
-				sem_post (&RCInput->waitforkey);
+    			sem_post (&RCInput->waitforkey);
 			}
         }
 		printf("rcinput endend.....\n");

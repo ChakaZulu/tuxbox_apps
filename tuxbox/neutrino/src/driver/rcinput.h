@@ -1,10 +1,13 @@
 /*
-$Id: rcinput.h,v 1.6 2001/10/11 21:00:56 rasc Exp $
+$Id: rcinput.h,v 1.7 2001/10/29 16:49:00 field Exp $
 
  Module  RemoteControle Handling
 
 History:
  $Log: rcinput.h,v $
+ Revision 1.7  2001/10/29 16:49:00  field
+ Kleinere Bug-Fixes (key-input usw.)
+
  Revision 1.6  2001/10/11 21:00:56  rasc
  clearbuffer() fuer RC-Input bei Start,
  Klassen etwas erweitert...
@@ -55,9 +58,7 @@ class CRCInput
 		CRingBuffer     ringbuffer;
 		CLIFOBuffer     LIFObuffer;
 		pthread_t       thrInput;
-		pthread_t       thrTimer;
 		sem_t           waitforkey;
-		int             timeout;
 
 		struct timeval  tv_prev;
 
@@ -69,7 +70,6 @@ class CRCInput
 
 		
 		static void * InputThread (void *arg);
-		static void * TimerThread (void *arg);
 
 	public:
 		//rc-code definitions

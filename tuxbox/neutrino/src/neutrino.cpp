@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.70 2001/10/22 21:48:22 McClean Exp $
+        $Id: neutrino.cpp,v 1.71 2001/10/29 16:49:00 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.71  2001/10/29 16:49:00  field
+  Kleinere Bug-Fixes (key-input usw.)
+
   Revision 1.70  2001/10/22 21:48:22  McClean
   design-update
 
@@ -1081,13 +1084,6 @@ void CNeutrinoApp::SelectNVOD()
             char nvod_id[5];
             sprintf(nvod_id, "%d", count);
 
-/*			time_t now=time(0)+eDVB::getInstance()->time_difference;
-			if ((event->start_time <= now) && (now < endtime))
-			{
-				int perc=(now-event->start_time)*100/event->duration;
-				s+=+" ("+QString().sprintf("%d%%, %d.%02d DM lost)", perc, perc*6/100, (perc*6)%100);
-			}
-*/
             char nvod_time_a[50];
             char nvod_time_e[50];
             char nvod_time_x[50];
@@ -1286,6 +1282,10 @@ void CNeutrinoApp::InitZapper()
 
 void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 {
+    // display volume...
+    char volume = g_Controld->getVolume();
+    g_Controld->setVolume(volume);
+
 	while(nRun)
 	{
 		int key = g_RCInput->getKey();
@@ -1398,9 +1398,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	g_Locale = new CLocaleManager;
     g_RCInput = new CRCInput;
-    // -- eat all RC keys, start Neutrino clean!  (rasc 2001-10-11)
-    g_RCInput->clear();
-
     g_lcdd = new CLCDD;
     g_Controld = new CControld;
     g_RemoteControl = new CRemoteControl;
@@ -1414,7 +1411,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 //    printf("\nCNeutrinoApp::run - objects initialized...\n\n");
 	g_Locale->loadLocale(g_settings.language);
-
 
 	colorSetupNotifier = new CColorSetupNotifier;
 	audioSetupNotifier = new CAudioSetupNotifier;
@@ -1654,7 +1650,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.70 2001/10/22 21:48:22 McClean Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.71 2001/10/29 16:49:00 field Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;

@@ -1,11 +1,14 @@
 //
-// $Id: eventlist.cpp,v 1.18 2001/10/22 15:24:48 McClean Exp $
+// $Id: eventlist.cpp,v 1.19 2001/10/29 16:49:00 field Exp $
 //
 //  -- EPG Event List // Vorschau 
 //
 //
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.19  2001/10/29 16:49:00  field
+// Kleinere Bug-Fixes (key-input usw.)
+//
 // Revision 1.18  2001/10/22 15:24:48  McClean
 // small designupdate
 //
@@ -365,8 +368,9 @@ void EventList::exec(unsigned onidSid, const std::string& channelname)
 
     			g_EpgData->show("", 0, evt->epg.id, &evt->epg.startzeit);
 
-                key = g_RCInput->getKey(100);
-                if (key!=CRCInput::RC_red)
+                key = g_RCInput->getKey(0);
+                if ((key!=CRCInput::RC_red) &&
+                    (key!=CRCInput::RC_timeout))
                     g_RCInput->pushbackKey(key);
 
     			paintHead();
