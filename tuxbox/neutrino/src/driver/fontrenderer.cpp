@@ -30,11 +30,14 @@
 */
 
 /*
-$Id: fontrenderer.cpp,v 1.22 2002/02/10 14:17:34 McClean Exp $
+$Id: fontrenderer.cpp,v 1.23 2002/02/14 00:02:15 field Exp $
 
 -- misc font / text rendering functions
 
 $Log: fontrenderer.cpp,v $
+Revision 1.23  2002/02/14 00:02:15  field
+Cache verbessert ?!
+
 Revision 1.22  2002/02/10 14:17:34  McClean
 simplify usage (part 2)
 
@@ -114,10 +117,10 @@ fontRenderClass::fontRenderClass()
 	AddFont( FONTDIR "/Arial_Italic.ttf");
 	AddFont( FONTDIR "/Arial_Black.ttf");
 
-	int maxbytes=4*1024*1024;
+	int maxbytes= 4 *1024*1024;
 	printf("[FONT] Intializing font cache, using max. %dMB...", maxbytes/1024/1024);
 	fflush(stdout);
-	if (FTC_Manager_New(library, 0, 0, maxbytes, myFTC_Face_Requester, this, &cacheManager))
+	if (FTC_Manager_New(library, 10, 20, maxbytes, myFTC_Face_Requester, this, &cacheManager))
 	{
 		printf(" manager failed!\n");
 		return;
@@ -132,11 +135,11 @@ fontRenderClass::fontRenderClass()
 		printf(" sbit failed!\n");
 		return;
 	}
-	if (FTC_Image_Cache_New(cacheManager, &imageCache))
+/*	if (FTC_ImageCache_New(cacheManager, &imageCache))
 	{
 		printf(" imagecache failed!\n");
 	}
-
+*/
 	pthread_mutex_init( &render_mutex, NULL );
 
 	printf("\n");
@@ -362,12 +365,16 @@ void Font::RenderString(int x, int y, int width, const char *text, unsigned char
 		__u8 *d=g_FrameBuffer->lfb + g_FrameBuffer->Stride()*ry + rx;
 		__u8 *s=glyph->buffer;
 
-		//color=((color+ 2)>>3)*8- 2;
 		int coff=(color+ 2)%8;
-		for (int ay=0; ay<glyph->height; ay++)
+
+		int w =	glyph->width;
+		int h =	glyph->height;
+		int stride= g_FrameBuffer->Stride();
+		int pitch = glyph->pitch;
+		for (int ay=0; ay<h; ay++)
 		{
 			__u8 *td=d;
-			int w=glyph->width;
+
 			int ax;
 			for (ax=0; ax<w; ax++)
 			{
@@ -376,8 +383,8 @@ void Font::RenderString(int x, int y, int width, const char *text, unsigned char
 					c= 0;
 				*td++=color + c;   // we use color as "base color" plus 7 consecutive colors for anti-aliasing
 			}
-			s+=glyph->pitch-ax;
-			d+=g_FrameBuffer->Stride();
+			s+= pitch- ax;
+			d+= stride;
 		}
 		x+=glyph->xadvance+1;
 		if(pen1>x)
@@ -385,6 +392,8 @@ void Font::RenderString(int x, int y, int width, const char *text, unsigned char
 		pen1=x;
 		lastindex=index;
 	}
+
+    //printf("RenderStat: %d %d %d \n", renderer->cacheManager->num_nodes, renderer->cacheManager->num_bytes, renderer->cacheManager->max_bytes);
 	pthread_mutex_unlock( &renderer->render_mutex );
 }
 

@@ -30,10 +30,13 @@
 */
 
 /*
-$Id: fontrenderer.h,v 1.19 2002/02/10 14:17:34 McClean Exp $
+$Id: fontrenderer.h,v 1.20 2002/02/14 00:02:15 field Exp $
 
 
 $Log: fontrenderer.h,v $
+Revision 1.20  2002/02/14 00:02:15  field
+Cache verbessert ?!
+
 Revision 1.19  2002/02/10 14:17:34  McClean
 simplify usage (part 2)
 
@@ -104,7 +107,7 @@ class fontRenderClass
 		*font;
 
 		FT_Library	library;
-		FTC_Manager	cacheManager;        /* the cache manager               */
+		FTC_Manager	cacheManager;       	 /* the cache manager               */
 		FTC_Image_Cache	imageCache;          /* the glyph image cache           */
 		FTC_SBit_Cache	sbitsCache;          /* the glyph small bitmaps cache   */
 
