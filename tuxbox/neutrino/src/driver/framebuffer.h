@@ -42,7 +42,6 @@ class CFrameBuffer
 	private:
 
 		CFrameBuffer();
-		~CFrameBuffer();
 
 		struct rgbData
 		{
@@ -65,9 +64,9 @@ class CFrameBuffer
 		int			fd, tty;
 		unsigned char	*lfb;
 		int		available;
-		unsigned char	*background;
+		uint8_t *       background;
 		int			backgroundColor;
-		std::string			backgroundFilename;
+		std::string     backgroundFilename;
 		bool			useBackgroundPaint;
 		unsigned int	xRes, yRes, stride, bpp;
 		t_fb_var_screeninfo screeninfo, oldscreen;
@@ -82,6 +81,8 @@ class CFrameBuffer
 		static	void switch_signal (int);
 
 	public:
+
+		~CFrameBuffer();
 
 		static CFrameBuffer* getInstance();
 
@@ -119,16 +120,18 @@ class CFrameBuffer
 		void paintHLineRel(int x, int dx, int y, unsigned char col);
 
 
-		bool paintIcon(std::string filename, int x, int y, unsigned char offset=1);
-		bool paintIcon8(std::string filename, int x, int y, unsigned char offset=0);
-		void loadPal(std::string filename, unsigned char offset=0, unsigned char endidx=255 );
 		void setIconBasePath(std::string);
 
-		bool loadPicture2Mem(std::string filename, unsigned char* memp);
-		bool savePictureFromMem(std::string filename, unsigned char* memp);
+		bool paintIcon (const std::string filename, int x, int y, unsigned char offset=1);
+		bool paintIcon8(const std::string filename, int x, int y, unsigned char offset=0);
+		void loadPal   (const std::string filename, unsigned char offset=0, unsigned char endidx=255 );
+
+		bool loadPicture2Mem   (const std::string filename, uint8_t * memp);
+		bool loadPictureToMem  (const std::string filename, const uint16_t width, const uint16_t height, uint8_t * memp);
+		bool savePictureFromMem(const std::string filename, uint8_t * memp);
 
 		void setBackgroundColor(int color);
-		bool loadBackground(std::string filename, unsigned char col = 0);
+		bool loadBackground(const std::string filename, const unsigned char col = 0);
 		void useBackground(bool);
 
 		void paintBackgroundBox(int xa, int ya, int xb, int yb);

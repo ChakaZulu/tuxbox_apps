@@ -388,31 +388,27 @@ void CFrameBuffer::setIconBasePath(std::string iconPath)
 	iconBasePath = iconPath;
 }
 
-bool CFrameBuffer::paintIcon8(std::string filename, int x, int y, unsigned char offset)
+bool CFrameBuffer::paintIcon8(const std::string filename, int x, int y, unsigned char offset)
 {
 	if (!active)
 		return false;
 
-	short width, height;
-	unsigned char tr;
+	struct rawHeader header;
+	uint16_t         width, height;
+	int              fd;
 
-	int fd;
-	filename = iconBasePath + filename;
-
-	fd = open(filename.c_str(), O_RDONLY );
+	fd = open((iconBasePath + filename).c_str(), O_RDONLY);
 
 	if (fd == -1)
 	{
-		printf("error while loading icon: %s\n", filename.c_str() );
+		printf("error while loading icon: %s%s\n", iconBasePath.c_str(), filename.c_str());
 		return false;
 	}
 
-	read(fd, &width,  2 );
-	read(fd, &height, 2 );
-	read(fd, &tr, 1 );
+	read(fd, &header, sizeof(struct rawHeader));
 
-	width= ((width & 0xff00) >> 8) | ((width & 0x00ff) << 8);
-	height=((height & 0xff00) >> 8) | ((height & 0x00ff) << 8);
+	width  = (header.width_hi  << 8) | header.width_lo;
+	height = (header.height_hi << 8) | header.height_lo;
 
 	unsigned char pixbuf[768];
 	unsigned char *d = lfb + x +stride*y;
@@ -425,7 +421,7 @@ bool CFrameBuffer::paintIcon8(std::string filename, int x, int y, unsigned char 
 		for (int count2=0; count2<width; count2 ++ )
 		{
 			unsigned char color = *pixpos;
-			if (color!=tr)
+			if (color != header.transp)
 			{
 				*d2 = color + offset;
 			}
@@ -438,31 +434,27 @@ bool CFrameBuffer::paintIcon8(std::string filename, int x, int y, unsigned char 
 	return true;
 }
 
-bool CFrameBuffer::paintIcon(std::string filename, int x, int y, unsigned char offset)
+bool CFrameBuffer::paintIcon(const std::string filename, int x, int y, unsigned char offset)
 {
 	if (!active)
 		return false;
 
-	short width, height;
-	unsigned char tr;
+	struct rawHeader header;
+	uint16_t         width, height;
+	int              fd;
 
-	int fd;
-	filename = iconBasePath + filename;
-
-	fd = open(filename.c_str(), O_RDONLY );
+	fd = open((iconBasePath + filename).c_str(), O_RDONLY);
 
 	if (fd == -1)
 	{
-		printf("error while loading icon: %s\n", filename.c_str() );
+		printf("error while loading icon: %s%s\n", iconBasePath.c_str(), filename.c_str());
 		return false;
 	}
 
-	read(fd, &width,  2 );
-	read(fd, &height, 2 );
-	read(fd, &tr, 1 );
+	read(fd, &header, sizeof(struct rawHeader));
 
-	width= ((width & 0xff00) >> 8) | ((width & 0x00ff) << 8);
-	height=((height & 0xff00) >> 8) | ((height & 0x00ff) << 8);
+	width  = (header.width_hi  << 8) | header.width_lo;
+	height = (header.height_hi << 8) | header.height_lo;
 
 	unsigned char pixbuf[768];
 	unsigned char *d = lfb + x +stride*y;
@@ -478,12 +470,12 @@ bool CFrameBuffer::paintIcon(std::string filename, int x, int y, unsigned char o
 			unsigned char pix1 = (compressed & 0xf0) >> 4;
 			unsigned char pix2 = (compressed & 0x0f);
 
-			if (pix1 != tr)
+			if (pix1 != header.transp)
 			{
 				*d2 = pix1 + offset;
 			}
 			d2++;
-			if (pix2 != tr)
+			if (pix2 != header.transp)
 			{
 				*d2 = pix2 + offset;
 			}
@@ -496,20 +488,19 @@ bool CFrameBuffer::paintIcon(std::string filename, int x, int y, unsigned char o
 	close(fd);
 	return true;
 }
-void CFrameBuffer::loadPal(std::string filename, unsigned char offset, unsigned char endidx )
+void CFrameBuffer::loadPal(const std::string filename, unsigned char offset, unsigned char endidx )
 {
 	if (!active)
 		return;
 
-	int fd;
 	struct rgbData rgbdata;
-	filename = iconBasePath + filename;
+	int            fd;
 
-	fd = open(filename.c_str(), O_RDONLY );
+	fd = open((iconBasePath + filename).c_str(), O_RDONLY);
 
 	if (fd == -1)
 	{
-		printf("error while loading palette: %s", filename.c_str() );
+		printf("error while loading palette: %s%s\n", iconBasePath.c_str(), filename.c_str());
 		return;
 	}
 
@@ -629,70 +620,73 @@ void CFrameBuffer::setBackgroundColor(int color)
 	backgroundColor = color;
 }
 
-bool CFrameBuffer::loadPicture2Mem(std::string filename, unsigned char* memp)
-{
-	short width, height;
-	unsigned char tr;
-	int fd;
-	filename = iconBasePath + filename;
-
-	fd = open(filename.c_str(), O_RDONLY );
-
-	if (fd==-1)
-	{
-		printf("error while loading icon: %s\n", filename.c_str() );
-		return false;
-	}
-
-	read(fd, &width,  2 );
-	read(fd, &height, 2 );
-	read(fd, &tr, 1 );
-
-	width= ((width & 0xff00) >> 8) | ((width & 0x00ff) << 8);
-	height=((height & 0xff00) >> 8) | ((height & 0x00ff) << 8);
-
-	read(fd, memp, width*height);
-
-	close(fd);
-	return true;
-}
-
-bool CFrameBuffer::savePictureFromMem(std::string filename, unsigned char* memp)
-{
-	short width = 720;
-	short height = 576;
-	unsigned char tr = 0;
-	int fd;
-	filename = iconBasePath + filename;
-
-	fd = open(filename.c_str(), O_WRONLY | O_CREAT);
-
-	if (fd==-1)
-	{
-		printf("error while saving icon: %s", filename.c_str() );
-		return false;
-	}
-
-	width= ((width & 0xff00) >> 8) | ((width & 0x00ff) << 8);
-	height=((height & 0xff00) >> 8) | ((height & 0x00ff) << 8);
-
-	write(fd, &width,  2 );
-	write(fd, &height, 2 );
-	write(fd, &tr, 1 );
-
-	write(fd, memp, 720*576);
-
-	close(fd);
-	return true;
-}
-
-bool CFrameBuffer::loadBackground(std::string filename, unsigned char col)
+bool CFrameBuffer::loadPictureToMem(const std::string filename, const uint16_t width, const uint16_t height, uint8_t * memp)
 {
 	struct rawHeader header;
-	short            width, height;
 	int              fd;
 
-	if (backgroundFilename == filename)
+	fd = open((iconBasePath + filename).c_str(), O_RDONLY );
+
+	if (fd == -1)
+	{
+		printf("error while loading icon: %s%s\n", iconBasePath.c_str(), filename.c_str());
+		return false;
+	}
+
+	read(fd, &header, sizeof(struct rawHeader));
+
+	if ((width  != ((header.width_hi  << 8) | header.width_lo)) ||
+	    (height != ((header.height_hi << 8) | header.height_lo)))
+	{
+		printf("error while loading icon: %s - invalid resolution = %hux%hu\n", filename.c_str(), width, height);
+		return false;
+	}
+
+	read(fd, memp, width * height);
+
+	close(fd);
+	return true;
+}
+
+bool CFrameBuffer::loadPicture2Mem(const std::string filename, uint8_t * memp)
+{
+	return loadPictureToMem(filename, 720, 576, memp);
+}
+
+bool CFrameBuffer::savePictureFromMem(const std::string filename, uint8_t * memp)
+{
+	struct rawHeader header;
+	uint16_t         width, height;
+	int              fd;
+	
+	width = 720;
+	height = 576;
+
+	header.width_lo  = width  &  0xFF;
+	header.width_hi  = width  >>    8;
+	header.height_lo = height &  0xFF;
+	header.height_hi = height >>    8;
+	header.transp    =              0;
+
+	fd = open((iconBasePath + filename).c_str(), O_WRONLY | O_CREAT);
+
+	if (fd==-1)
+	{
+		printf("error while saving icon: %s%s", iconBasePath.c_str(), filename.c_str() );
+		return false;
+	}
+
+	write(fd, &header, sizeof(struct rawHeader));
+
+	write(fd, memp, width * height);
+
+	close(fd);
+	return true;
+}
+
+bool CFrameBuffer::loadBackground(const std::string filename, const unsigned char col)
+{
+	if ((backgroundFilename == filename) && (background))
 	{
 		// loaded previously
 		return true;
@@ -703,30 +697,13 @@ bool CFrameBuffer::loadBackground(std::string filename, unsigned char col)
 		delete[] background;
 	}
 
-	filename = iconBasePath + filename;
+	background = new uint8_t[720*576];
 
-	fd = open(filename.c_str(), O_RDONLY );
-
-	if (fd==-1)
+	if (!loadPictureToMem(filename, 720, 576, background))
 	{
-		printf("error while loading icon: %s\n", filename.c_str() );
+		delete[] background;
 		return false;
 	}
-
-	read(fd, &header, sizeof(struct rawHeader));
-
-	width  = (header.width_hi  << 8) | header.width_lo;
-	height = (header.height_hi << 8) | header.height_lo;
-
-	if ((width != 720) || (height != 576))
-	{
-		printf("error while loading icon: %s - invalid resulution = %hdx%hd\n", filename.c_str(), width, height );
-		return false;
-	}
-
-	background = new unsigned char[720*576];
-
-	read(fd, background, 720*576);
 
 	if(col!=0)//pic-offset
 	{
@@ -739,9 +716,10 @@ bool CFrameBuffer::loadBackground(std::string filename, unsigned char col)
 			pos--;
 		}
 	}
+
 	backgroundFilename = filename;
-	close(fd);
-	return false;
+
+	return true;
 }
 
 void CFrameBuffer::useBackground(bool ub)
@@ -788,14 +766,13 @@ void CFrameBuffer::paintBackground()
 	if (!active)
 		return;
 
-	if(!useBackgroundPaint)
+	if (useBackgroundPaint && (background != NULL))
 	{
-		memset(lfb, 255, stride*576);
+		for (int i = 0; i < 576; i++)
+			memcpy(lfb + i * stride, background + i * 720, 720);
 	}
 	else
-	{
-		memcpy(lfb, background, stride*576);
-	}
+		memset(lfb, 255, stride*576);
 }
 
 void CFrameBuffer::SaveScreen(int x, int y, int dx, int dy, unsigned char* memp)
