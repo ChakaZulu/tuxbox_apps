@@ -10,4 +10,5 @@ install_DATA = \
 	italiano.locale \
 	nederlands.locale \
 	polski.locale \
+	portugues.locale \
 	russkij.locale
