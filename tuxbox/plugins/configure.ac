@@ -50,6 +50,12 @@ tuxtxt/font/Makefile
 tuxcom/Makefile
 vncviewer/Makefile
 vncviewer/rfb/Makefile
+enigma/Makefile
+enigma/demo/Makefile
+enigma/ngrabstart/Makefile
+enigma/ngrabstop/Makefile
+enigma/dslconnect/Makefile
+enigma/dsldisconnect/Makefile
 tuxbox-plugins.pc
 ])
 
