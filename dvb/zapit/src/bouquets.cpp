@@ -1,7 +1,7 @@
 /*
   BouquetManager für zapit  -   DBoxII-Project
 
-  $Id: bouquets.cpp,v 1.9 2002/01/29 20:44:07 Simplex Exp $
+  $Id: bouquets.cpp,v 1.10 2002/01/30 22:41:00 Simplex Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: bouquets.cpp,v $
+  Revision 1.10  2002/01/30 22:41:00  Simplex
+  prevent deleting special bouquet
+
   Revision 1.9  2002/01/29 20:44:07  Simplex
   made some Bouquetmanager-stuff "hot"
 
@@ -546,7 +549,7 @@ CBouquet* CBouquetManager::addBouquet( string name)
 void CBouquetManager::deleteBouquet( uint id)
 {
 	printf ("Deleting bouquet %d\n", id);
-	if (id < Bouquets.size())
+	if (id < Bouquets.size() && Bouquets[id] != remainChannels)
 	{
 		CBouquet* bouquet = Bouquets[id];
 		printf ("bouquet %s\n", bouquet->Name.c_str());
