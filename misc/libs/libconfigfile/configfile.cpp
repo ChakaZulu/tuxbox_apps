@@ -1,5 +1,5 @@
 /*
- * $Id: configfile.cpp,v 1.12 2002/12/11 16:37:34 thegoodguy Exp $
+ * $Id: configfile.cpp,v 1.13 2002/12/11 16:39:34 thegoodguy Exp $
  *
  * configuration object for the d-box 2 linux project
  *
@@ -99,7 +99,7 @@ const bool CConfigFile::saveConfig(const std::string filename)
 	}
 	else
 	{
-		std::cerr << "ConfigFile] Unable to open file " << filename << "for writing." << std::endl;
+		std::cerr << "[ConfigFile] Unable to open file " << filename << "for writing." << std::endl;
 		return false;
 	}
 }

@@ -1,7 +1,8 @@
 /*
- * $Id: configfile.h,v 1.8 2002/08/31 22:29:01 obi Exp $
+ * $Id: configfile.h,v 1.9 2002/12/11 16:37:34 thegoodguy Exp $
  *
- * Copyright (C) 2001, 2002 Andreas Oberritter <obi@tuxbox.org>
+ * Copyright (C) 2001, 2002 Andreas Oberritter <obi@tuxbox.org>,
+ *                          thegoodguy  <thegoodguy@tuxbox.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,75 +23,76 @@
 #ifndef __configfile_h__
 #define __configfile_h__
 
-#include <cstdio>
-#include <fstream>
-#include <iostream>
+
+#include <stdint.h>
+
 #include <map>
 #include <string>
 #include <vector>
 
+
 class CConfigFile
 {
-	private:
+ private:
 
-		typedef std::map <std::string, std::string> ConfigDataMap;
+	typedef std::map<std::string, std::string> ConfigDataMap;
 
-		ConfigDataMap configData;
-		char delimiter;
-		bool modifiedFlag;
-		bool unknownKeyQueryedFlag;
+	ConfigDataMap configData;
+	char delimiter;
+	bool modifiedFlag;
+	bool unknownKeyQueryedFlag;
 
-		void storeBool (const std::string key, const bool val);
-		void storeInt32 (const std::string key, const int32_t val);
-		void storeInt64 (const std::string key, const int64_t val);
-		void storeString (const std::string key, const std::string val);
+	void storeBool(const std::string key, const bool val);
+	void storeInt32(const std::string key, const int32_t val);
+	void storeInt64(const std::string key, const int64_t val);
+	void storeString(const std::string key, const std::string val);
 
-	public:
-		CConfigFile (const char p_delimiter);
+ public:
+	CConfigFile(const char p_delimiter);
 
-		const bool loadConfig (const std::string filename);
-		const bool saveConfig (const std::string filename);
+	const bool loadConfig(const std::string filename);
+	const bool saveConfig(const std::string filename);
 
-		void clear();
+	void clear();
 
-		//
-		// strings
-		//
-		std::string getString (const std::string key, const std::string defaultVal = "");
-		void setString (const std::string key, const std::string val);
+	//
+	// strings
+	//
+	std::string getString(const std::string key, const std::string defaultVal = "");
+	void setString(const std::string key, const std::string val);
 
-		//
-		// 32, 64 bit int
-		//
-		int32_t getInt32 (const std::string key, const int32_t defaultVal = 0);
-		void setInt32 (const std::string key, const int32_t val);
+	//
+	// 32, 64 bit int
+	//
+	int32_t getInt32(const std::string key, const int32_t defaultVal = 0);
+	void setInt32(const std::string key, const int32_t val);
 
-		int64_t getInt64 (const std::string key, const int64_t defaultVal = 0);
-		void setInt64 (const std::string key, const int64_t val);
+	int64_t getInt64(const std::string key, const int64_t defaultVal = 0);
+	void setInt64(const std::string key, const int64_t val);
 
-		//
-		// boolean
-		//
-		bool getBool (const std::string key, const bool defaultVal = false);
-		void setBool (const std::string key, const bool val);
+	//
+	// boolean
+	//
+	bool getBool(const std::string key, const bool defaultVal = false);
+	void setBool(const std::string key, const bool val);
 
-		//
-		// vectors
-		//
-		std::vector <std::string> getStringVector (const std::string key);
-		void setStringVector (const std::string key, const std::vector <std::string> vec);
+	//
+	// vectors
+	//
+	std::vector <std::string> getStringVector(const std::string key);
+	void setStringVector(const std::string key, const std::vector<std::string> vec);
 
-		std::vector <int32_t> getInt32Vector (const std::string key);
-		void setInt32Vector (const std::string key, const std::vector <int32_t> vec);
+	std::vector <int32_t> getInt32Vector(const std::string key);
+	void setInt32Vector(const std::string key, const std::vector<int32_t> vec);
 
-		//
-		// flags
-		//
-		const bool getModifiedFlag () { return modifiedFlag; }
-		void setModifiedFlag (const bool val) { modifiedFlag = val; }
+	//
+	// flags
+	//
+	const bool getModifiedFlag() const { return modifiedFlag; }
+	void setModifiedFlag(const bool val) { modifiedFlag = val; }
 
-		const bool getUnknownKeyQueryedFlag () { return unknownKeyQueryedFlag; }
-		void setUnknownKeyQueryedFlag (const bool val) { unknownKeyQueryedFlag = val; }
+	const bool getUnknownKeyQueryedFlag() const { return unknownKeyQueryedFlag; }
+	void setUnknownKeyQueryedFlag(const bool val) { unknownKeyQueryedFlag = val; }
 
 };
 
