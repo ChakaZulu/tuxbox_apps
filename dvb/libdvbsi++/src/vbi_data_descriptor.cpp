@@ -1,5 +1,5 @@
 /*
- * $Id: vbi_data_descriptor.cpp,v 1.1 2004/02/13 15:27:47 obi Exp $
+ * $Id: vbi_data_descriptor.cpp,v 1.2 2004/06/18 19:10:43 sestegra Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -51,7 +51,7 @@ VbiDataService::VbiDataService(const uint8_t * const buffer)
 	case 0x05:
 	case 0x06:
 	case 0x07:
-		for (i = 0; i < dataServiceDescriptorLength; ++i);
+		for (i = 0; i < dataServiceDescriptorLength; ++i)
 			vbiDataLines.push_back(new VbiDataLine(&buffer[i + 2]));
 		break;
 
