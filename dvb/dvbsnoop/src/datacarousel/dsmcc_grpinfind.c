@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_grpinfind.c,v 1.1 2004/02/24 23:14:35 rasc Exp $
+$Id: dsmcc_grpinfind.c,v 1.2 2004/03/06 22:33:11 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dsmcc_grpinfind.c,v 1.1 2004/02/24 23:14:35 rasc Exp $
 
 
 $Log: dsmcc_grpinfind.c,v $
+Revision 1.2  2004/03/06 22:33:11  rasc
+no message
+
 Revision 1.1  2004/02/24 23:14:35  rasc
 DSI:: DSMCC::GroupInfoIndication
 
@@ -45,13 +48,24 @@ DSI:: DSMCC::GroupInfoIndication
  */
 
 
-int dsmcc_GroupInfoIndication (int v, u_char *b, u_int len)
+int dsmcc_GroupInfoIndication (int v, u_char *b, u_int len_org)
 {
-   int   	len_org = len;
+   int   	len = len_org;
    int		n_groups;
    int 		i;
    int		len2;
 
+
+
+   	// -- due to some misbehavior of some service providers
+   	// -- we do a simple plausi check for group_counts_min_bytes > len
+	i = getBits (b, 0, 0, 16);	// group_counts
+	i = i * 8  + 2;
+
+	if (i > len_org) {	// this is no  GroupInfo
+		print_databytes (v,"Data Bytes (non-standard):", b, len_org);
+		return len_org;
+	}
 
 
 
@@ -63,6 +77,11 @@ int dsmcc_GroupInfoIndication (int v, u_char *b, u_int len)
 
 		for (i=0; i < n_groups; i++) {
 			out_NL (v);
+			if (len <= 0) {
+				out_nl (v, "... => strange len <= 0  and still group count > 0  (abort)");
+				break;
+			}
+
 			out_nl (v, "Group (%d):",i);
 			indent (+1);
 

@@ -1,5 +1,5 @@
 /*
-$Id: biop_modinfo.c,v 1.4 2004/02/29 23:49:28 rasc Exp $
+$Id: biop_modinfo.c,v 1.5 2004/03/06 22:33:10 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: biop_modinfo.c,v 1.4 2004/02/29 23:49:28 rasc Exp $
 
 
 $Log: biop_modinfo.c,v $
+Revision 1.5  2004/03/06 22:33:10  rasc
+no message
+
 Revision 1.4  2004/02/29 23:49:28  rasc
 no message
 
@@ -100,7 +103,7 @@ int BIOP_ModuleInfo (int v, u_char *b, u_int len_org)
 
 		out_NL (v);
 		if (len <= 0) {
-			out_nl (4, "... => strange len <= 0  and still tapcount > 0  (abort)");
+			out_nl (v, "... => strange len <= 0  and still tapcount > 0  (abort)");
 			break;
 		}
 

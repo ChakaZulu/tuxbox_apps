@@ -1,5 +1,5 @@
 /*
-$Id: fe_signal.c,v 1.7 2004/02/28 12:13:03 rasc Exp $
+$Id: fe_signal.c,v 1.8 2004/03/06 22:33:11 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: fe_signal.c,v 1.7 2004/02/28 12:13:03 rasc Exp $
 
 
 $Log: fe_signal.c,v $
+Revision 1.8  2004/03/06 22:33:11  rasc
+no message
+
 Revision 1.7  2004/02/28 12:13:03  rasc
 minor stuff
 
@@ -311,3 +314,9 @@ static void out_status_detail (int v,fe_status_t s)
 
 
 
+//
+// -- read FrontEndInfo
+//
+
+// $$$ TODO
+// static int read_FEInfo(int f, struct dvb_frontend_info *fi);
