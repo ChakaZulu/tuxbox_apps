@@ -152,7 +152,7 @@ void *start_scanthread(void *)
   FILE *fd;
   std::string transponder;
   
-  fd = fopen(services_xml.c_str(), "w" );
+  
   
   scan_runs = 1;
   if (!issatbox())
@@ -166,7 +166,9 @@ void *start_scanthread(void *)
     		printf("No signal found on transponder\n"); 
 	}
 	get_sdts();
-      
+      if (scantransponders.size() >0)
+      {
+      	fd = fopen(services_xml.c_str(), "w" );
       fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
       fprintf(fd,"<ZAPIT>\n<cable>\n");
       for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
@@ -176,14 +178,14 @@ void *start_scanthread(void *)
 	  fprintf(fd, "</transponder>\n");
 	}
       fprintf(fd,"</cable>\n");
+	}
 
       scanchannels.clear();
       scantransponders.clear();
     }
   else
     {
-      fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
-      fprintf(fd,"<ZAPIT>\n");
+      
       
       printf("---------------------------\nSCANNING ASTRA\n---------------------------\n");
       //printf("This is a sat-box\n");
@@ -202,6 +204,13 @@ void *start_scanthread(void *)
 
       if (!scantransponders.empty())
 	{
+	  if (fd == NULL)
+	  {
+	  	fd = fopen(services_xml.c_str(), "w" );
+	  	fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
+      	  	fprintf(fd,"<ZAPIT>\n");
+      	}
+      		
 	  fprintf(fd, "<satellite name=\"Astra 19.2E\" diseqc=\"0\">\n");
 	  for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
 	    {
@@ -230,6 +239,12 @@ void *start_scanthread(void *)
       
       if (!scantransponders.empty())
 	{
+	if (fd == NULL)
+	  {
+	  	fd = fopen(services_xml.c_str(), "w" );
+	  	fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
+      	 	fprintf(fd,"<ZAPIT>\n");
+      	}
 	fprintf(fd, "<satellite name=\"Hotbird 13.0E\" diseqc=\"0\">\n");
 	  for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
 	    {
@@ -250,6 +265,12 @@ void *start_scanthread(void *)
 
        if (!scantransponders.empty())
 	{
+		if (fd == NULL)
+	  {
+	  	fd = fopen(services_xml.c_str(), "w" );
+	  	fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
+      	  	fprintf(fd,"<ZAPIT>\n");
+      	}
 	fprintf(fd, "<satellite name=\"Kopernikus\" diseqc=\"0\">\n");
 	  for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
 	    {
