@@ -1,7 +1,12 @@
 //
-// $Id: channellist.cpp,v 1.32 2001/10/13 00:46:48 McClean Exp $
+// $Id: channellist.cpp,v 1.33 2001/10/16 18:34:13 rasc Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.33  2001/10/16 18:34:13  rasc
+// -- QuickZap to last channel verbessert.
+// -- Standard Kanal muss ca. 2-3 Sekunden aktiv sein fuer LastZap Speicherung.
+// -- eigene Klasse fuer die Channel History...
+//
 // Revision 1.32  2001/10/13 00:46:48  McClean
 // nstreamzapd-support broken - repaired
 //
@@ -244,7 +249,6 @@ CChannelList::CChannelList(int Key=-1, const std::string &Name)
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
 	liststart = 0;
 	tuned=0xfffffff;
-	lasttuned = 0xfffffff;
 }
 
 CChannelList::~CChannelList()
@@ -402,11 +406,11 @@ void CChannelList::zapTo(int pos)
 	}
 	selected= pos;
   	channel* chan = chanlist[selected];
+	lastChList.store (selected);
+
 	if ( pos!=(int)tuned )
 	{
-		lasttuned = tuned;
 		tuned = pos;
-
 
 		if (!g_RemoteControl->getZapper())
 		{
@@ -433,12 +437,15 @@ void CChannelList::numericZap(int key)
     }
  
 	//schneller zap mit "0" taste zwischen den letzten beiden sendern...
-	if(key==0)
-	{
-		if((tuned!=lasttuned) && (lasttuned!=0xfffffff))
-		{
-			printf("quicknumtune(0)\n");
-			zapTo(lasttuned);
+	if(key==0) {
+	  	int  ch;
+
+		if( (ch=lastChList.getlast(1)) != -1) {
+			if ((unsigned int)ch != tuned) {
+				printf("quicknumtune(0)\n");
+				lastChList.clear_storedelay (); // ignore store delay
+				zapTo(ch);		        // zap to last
+			}
 		}
 		return;
 	}

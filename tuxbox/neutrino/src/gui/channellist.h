@@ -1,9 +1,14 @@
 #ifndef __channellist__
 #define __channellist__
 //
-// $Id: channellist.h,v 1.16 2001/10/10 17:17:13 field Exp $
+// $Id: channellist.h,v 1.17 2001/10/16 18:34:13 rasc Exp $
 //
 // $Log: channellist.h,v $
+// Revision 1.17  2001/10/16 18:34:13  rasc
+// -- QuickZap to last channel verbessert.
+// -- Standard Kanal muss ca. 2-3 Sekunden aktiv sein fuer LastZap Speicherung.
+// -- eigene Klasse fuer die Channel History...
+//
 // Revision 1.16  2001/10/10 17:17:13  field
 // zappen auf onid_sid umgestellt
 //
@@ -58,6 +63,10 @@
 #include <string>
 #include <vector>
 
+#include "../channels/lastchannel.h"
+
+
+
 using namespace std;
 
 class CChannelList
@@ -73,15 +82,15 @@ class CChannelList
 
 	unsigned int		selected;
 	unsigned int		tuned;
-	unsigned int		lasttuned;
+	CLastChannel            lastChList;
 	unsigned int		liststart;
 	unsigned int		listmaxshow;
 	unsigned int		numwidth;
-	int					fheight; // Fonthoehe Channellist-Inhalt
-	int					theight; // Fonthoehe Channellist-Titel
+	int			fheight; // Fonthoehe Channellist-Inhalt
+	int			theight; // Fonthoehe Channellist-Titel
 
-	int					key;
-	string				name;
+	int			key;
+	string			name;
 	vector<channel*>	chanlist;
 
 	int 			width;
