@@ -12,6 +12,7 @@
 #include <string.h>
 #include <vector>
 #include <lib/base/estring.h>
+#include <lib/gui/enumber.h>
 #include <configfile.h>
 #include <enigma_dyn_utils.h>
 #include <enigma_mount.h>
@@ -69,7 +70,7 @@ void eMountPoint::save(FILE *out, int pid)
 	fprintf(out,"--------------------------------------\n");
 }
 
-bool eMountPoint::fileSystemIsSupported(eString fsname)
+bool fileSystemAvailable(eString fsname)
 {
 	eString s;
 	fsname = fsname.upper();
@@ -84,16 +85,31 @@ bool eMountPoint::fileSystemIsSupported(eString fsname)
 		}
 	}
 	in.close();
+	return false;
+}
 
+bool eMountPoint::fileSystemIsSupported(eString fsname)
+{
+	if (fileSystemAvailable(fsname))
+		return true;
+		
 	if (fsname == "NFS")
 	{
 		if (access("/bin/modprobe", X_OK) || access("/sbin/modprobe", X_OK))
+		{
 			system("modprobe nfs");
+			sleep(2);
+			if (fileSystemAvailable(fsname))
+				return true;
+		}
 		else
 		{
 			system("insmod sunrpc");
 			system("insmod lockd");
 			system("insmod nfs");
+			sleep(2);
+			if (fileSystemAvailable(fsname))
+				return true;
 		}
 	}
 	else
@@ -101,11 +117,12 @@ bool eMountPoint::fileSystemIsSupported(eString fsname)
 	{
 		system("insmod cifs");
 		system("insmod /lib/modules/`uname -r`/kernel/fs/cifs/cifs.ko");
+		sleep(2);
+		if (fileSystemAvailable(fsname))
+			return true;
 	}
 	else
 		eDebug("[enigma_mount] filesystem %s not supported.", fsname.c_str());
-
-	sleep(2);
 
 	return false;
 }
@@ -500,6 +517,93 @@ void eMountMgr::addMountedFileSystems()
 	in.close();
 }
 
+t_mount loadMPFromConfig(int i)
+{
+	t_mount mp;
+	__u32 sip = ntohl(0x0a000061);
+	char *ctmp  = 0;
+	int itmp = 0;
+	eString cmd = eString().sprintf("/elitedvb/network/nfs%d/", i);
+
+	eConfig::getInstance()->getKey((cmd + "ip").c_str(), sip);
+	eNumber::unpack(sip, mp.ip);
+
+	eConfig::getInstance()->getKey((cmd + "fstype").c_str(), mp.fstype);
+
+	if (!eConfig::getInstance()->getKey((cmd + "sdir").c_str(), ctmp))
+	{
+		mp.mountDir = eString(ctmp);
+		free(ctmp);
+	}
+
+	if (!eConfig::getInstance()->getKey((cmd + "ldir").c_str(), ctmp))
+	{
+		mp.localDir = eString(ctmp);
+		free(ctmp);
+	}
+
+	if (!mp.localDir)
+		mp.localDir = "/mnt";
+
+	itmp = 0;
+	eConfig::getInstance()->getKey((cmd + "options").c_str(), itmp);
+	switch (itmp)
+	{
+		case 1: mp.options = "ro"; break;
+		case 2: mp.options = "rw"; break;
+		case 3: mp.options = "ro,nolock"; break;
+		case 4: mp.options = "rw,nolock"; break;
+		case 5: mp.options = "ro,soft"; break;
+		case 6: mp.options = "rw,soft"; break;
+		case 7: mp.options = "ro,soft,nolock";  break;
+		case 8: mp.options = "rw,soft,nolock"; break;
+		case 9: mp.options = "ro,udp,nolock"; break;
+		case 10: mp.options = "rw,udp,nolock"; break;
+		case 11: mp.options = "ro,soft,udp"; break;
+		case 12: mp.options = "rw,soft,udp,nolock"; break;
+		case 13: mp.options = "ro,soft,udp,nolock"; break;
+		case 14: mp.options = "rw,soft,udp,nolock"; break;
+		default: mp.options = "";
+	}
+
+	if (!eConfig::getInstance()->getKey((cmd + "extraoptions").c_str(), ctmp))
+	{
+		if (strstr(ctmp, "rsize") == 0)
+			sscanf(ctmp, "%*srsize=%d%*s", &mp.rsize);
+		if (strstr(ctmp, "wsize") == 0)
+			sscanf(ctmp, "%*swsize=%d%*s", &mp.wsize);
+		mp.ownOptions = eString(ctmp);
+		free(ctmp);
+	}
+	else 
+	if (!itmp)
+	{
+		mp.ownOptions = "nolock";
+		mp.rsize = 8192;
+		mp.wsize = 8192;
+	}
+
+	if (!eConfig::getInstance()->getKey((cmd + "username").c_str(), ctmp))
+	{
+		mp.userName = eString(ctmp);
+		free(ctmp);
+	}
+
+	if (!eConfig::getInstance()->getKey((cmd + "password").c_str(), ctmp))
+	{
+		mp.password = eString(ctmp);
+		free(ctmp);
+	}
+
+	itmp = 0;
+	eConfig::getInstance()->getKey((cmd + "automount").c_str(), itmp);
+	mp.automount = itmp;
+	
+	return mp;
+}
+
+#define MAX_NFS_ENTRIES 8
+
 void eMountMgr::init()
 {
 	mountPoints.clear();
@@ -515,6 +619,28 @@ void eMountMgr::init()
 		}
 	}
 	delete config;
+	
+	for (int i = 0; i < MAX_NFS_ENTRIES; i++)
+	{
+		int itmp = 0;
+		eString cmd = eString().sprintf("/elitedvb/network/nfs%d/", i);
+		eConfig::getInstance()->getKey((cmd + "automount").c_str(), itmp);
+		if (itmp)
+		{
+			t_mount mp = loadMPFromConfig(i);
+			for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
+			{
+				if ((mp_it->mp.localDir == mp.localDir) && (mp_it->mp.mountDir == mp.mountDir))
+					break;
+				else
+				{
+					addMountPoint(mp);
+					break;
+				}
+			}
+		}
+	}
+	
 	addMountedFileSystems();
 }
 
