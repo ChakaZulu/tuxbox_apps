@@ -59,7 +59,7 @@
 #include <neutrino.h>
 
 
-CAlphaSetup::CAlphaSetup(const char * const Name, unsigned char* Alpha1, unsigned char* Alpha2, CChangeObserver* Observer)
+CAlphaSetup::CAlphaSetup(const neutrino_locale_t Name, unsigned char* Alpha1, unsigned char* Alpha2, CChangeObserver* Observer)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	observer = Observer;
@@ -191,7 +191,7 @@ int CAlphaSetup::exec(CMenuTarget* parent, const std::string &)
 			case CRCInput::RC_home:
 				if ((*alpha1 != alpha1_alt) || (*alpha2 != alpha2_alt))
 				{
-					if (ShowMsgUTF(name.c_str(), g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel) == CMessageBox::mbrCancel) // UTF-8
+					if (ShowMsgUTF(name, g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel) == CMessageBox::mbrCancel) // UTF-8
 					{
 						break;
 					}

@@ -34,6 +34,7 @@
 #define __colorchooser__
 
 #include <driver/framebuffer.h>
+#include <system/localize.h>
 #include <gui/widget/menue.h>
 
 #include <string>
@@ -50,17 +51,17 @@ class CColorChooser : public CMenuTarget
 
 		unsigned char * value[4]; // r, g, b, alpha
 
-		std::string	name;
+		neutrino_locale_t name;
 
 		CChangeObserver* observer;
 
 		void paint();
 		void setColor();
-		void paintSlider(int x, int y, unsigned char *spos, const char * const text, const std::string & iconname, const bool selected);
+		void paintSlider(int x, int y, unsigned char *spos, const neutrino_locale_t text, const char * const iconname, const bool selected);
 
 	public:
 
-		CColorChooser(const char * const Name, unsigned char *R, unsigned char *G, unsigned char *B, unsigned char* Alpha, CChangeObserver* Observer = NULL); // UTF-8
+		CColorChooser(const neutrino_locale_t Name, unsigned char *R, unsigned char *G, unsigned char *B, unsigned char* Alpha, CChangeObserver* Observer = NULL); // UTF-8
 
 		void hide();
 		int exec(CMenuTarget* parent, const std::string & actionKey);

@@ -154,7 +154,7 @@ CLocaleManager::loadLocale_ret_t CLocaleManager::loadLocale(const char * const l
 		) ? UNICODE_FONT : ISO_8859_1_FONT;
 }
 
-const char * CLocaleManager::getText(const char * const keyName) const
+const char * CLocaleManager::getText(const neutrino_locale_t keyName) const
 {
 	mapLocaleData::const_iterator it = localeData.find(keyName);
 	if (it == localeData.end())
@@ -171,3 +171,42 @@ const char * CLocaleManager::getText(const std::string & keyName) const
 	else
 		return (it->second).c_str();
 }
+
+static const neutrino_locale_t locale_weekday[7] =
+{
+	LOCALE_DATE_SUN,
+	LOCALE_DATE_MON,
+	LOCALE_DATE_TUE,
+	LOCALE_DATE_WED,
+	LOCALE_DATE_THU,
+	LOCALE_DATE_FRI,
+	LOCALE_DATE_SAT
+};
+
+static const neutrino_locale_t locale_month[12] =
+{
+	LOCALE_DATE_JAN,
+	LOCALE_DATE_FEB,
+	LOCALE_DATE_MAR,
+	LOCALE_DATE_APR,
+	LOCALE_DATE_MAY,
+	LOCALE_DATE_JUN,
+	LOCALE_DATE_JUL,
+	LOCALE_DATE_AUG,
+	LOCALE_DATE_SEP,
+	LOCALE_DATE_OCT,
+	LOCALE_DATE_NOV,
+	LOCALE_DATE_DEC
+};
+
+
+neutrino_locale_t CLocaleManager::getMonth(const struct tm * struct_tm_p)
+{
+	return locale_month[struct_tm_p->tm_mon];
+}
+
+neutrino_locale_t CLocaleManager::getWeekday(const struct tm * struct_tm_p)
+{
+	return locale_weekday[struct_tm_p->tm_wday];
+}
+

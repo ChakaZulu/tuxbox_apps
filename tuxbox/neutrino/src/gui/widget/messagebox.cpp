@@ -41,7 +41,7 @@
 #include <neutrino.h>
 
 
-CMessageBox::CMessageBox(const char * const Caption, const char * const Text, const int Width, const char * const Icon, const CMessageBox::result_ Default, const uint ShowButtons) : CHintBox(Caption, Text, Width, Icon)
+CMessageBox::CMessageBox(const neutrino_locale_t Caption, const char * const Text, const int Width, const char * const Icon, const CMessageBox::result_ Default, const uint ShowButtons) : CHintBox(Caption, Text, Width, Icon)
 {
 	height += (fheight << 1);
 
@@ -208,7 +208,7 @@ int CMessageBox::exec(int timeout)
 	return res;
 }
 
-int ShowMsgUTF(const char * const Caption, const char * const Text, const CMessageBox::result_ Default, const uint ShowButtons, const char * const Icon, const int Width, const int timeout)
+int ShowMsgUTF(const neutrino_locale_t Caption, const char * const Text, const CMessageBox::result_ Default, const uint ShowButtons, const char * const Icon, const int Width, const int timeout)
 {
    	CMessageBox* messageBox = new CMessageBox(Caption, Text, Width, Icon, Default, ShowButtons);
 	messageBox->exec(timeout);
@@ -218,7 +218,7 @@ int ShowMsgUTF(const char * const Caption, const char * const Text, const CMessa
 	return res;
 }
 
-int ShowMsgUTF(const char * const Caption, const std::string & Text, const CMessageBox::result_ Default, const uint ShowButtons, const char * const Icon, const int Width, const int timeout)
+int ShowMsgUTF(const neutrino_locale_t Caption, const std::string & Text, const CMessageBox::result_ Default, const uint ShowButtons, const char * const Icon, const int Width, const int timeout)
 {
 	return ShowMsgUTF(Caption, Text.c_str(), Default, ShowButtons, Icon, Width, timeout);
 }

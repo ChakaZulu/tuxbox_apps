@@ -50,7 +50,7 @@
 #define CSYNCFACTOR 0.31
 
 
-CRGBCSyncControler::CRGBCSyncControler(const char * const Name, unsigned char* Csync, CChangeObserver* Observer)
+CRGBCSyncControler::CRGBCSyncControler(const neutrino_locale_t Name, unsigned char* Csync, CChangeObserver* Observer)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	hheight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
@@ -119,7 +119,7 @@ int CRGBCSyncControler::exec(CMenuTarget* parent, const std::string &)
 
 			case CRCInput::RC_home:
 				if ( ( (*csync != csync_alt) ) &&
-				     (ShowMsgUTF(name.c_str(), g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel) == CMessageBox::mbrCancel)) // UTF-8
+				     (ShowMsgUTF(name, g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel) == CMessageBox::mbrCancel)) // UTF-8
 					break;
 
 				// sonst abbruch...

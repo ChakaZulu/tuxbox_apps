@@ -49,14 +49,22 @@
 #define VALUE_B     2
 #define VALUE_ALPHA 3
 
-static const std::string iconnames[4] = {
+static const char * const iconnames[4] = {
 	"red",
 	"green",
 	"blue",
 	"alpha"
 };
 
-CColorChooser::CColorChooser(const char * const Name, unsigned char *R, unsigned char *G, unsigned char *B, unsigned char* Alpha, CChangeObserver* Observer) // UTF-8
+static const neutrino_locale_t colorchooser_names[4] =
+{
+	LOCALE_COLORCHOOSER_RED  ,
+	LOCALE_COLORCHOOSER_GREEN,
+	LOCALE_COLORCHOOSER_BLUE ,
+	LOCALE_COLORCHOOSER_ALPHA
+};
+
+CColorChooser::CColorChooser(const neutrino_locale_t Name, unsigned char *R, unsigned char *G, unsigned char *B, unsigned char* Alpha, CChangeObserver* Observer) // UTF-8
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	hheight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
@@ -103,13 +111,6 @@ int CColorChooser::exec(CMenuTarget* parent, const std::string &)
 	unsigned char b_alt= *value[VALUE_B];
 	unsigned char a_alt = (value[VALUE_ALPHA]) ? (*(value[VALUE_ALPHA])) : 0;
 
-	const char * names[4] = {
-		g_Locale->getText("colorchooser.red"),
-		g_Locale->getText("colorchooser.green"),
-		g_Locale->getText("colorchooser.blue"),
-		g_Locale->getText("colorchooser.alpha")
-	};
-
 	setColor();
 	paint();
 	setColor();
@@ -132,9 +133,9 @@ int CColorChooser::exec(CMenuTarget* parent, const std::string &)
 		{
 			if (selected < ((value[VALUE_ALPHA]) ? 3 : 2))
 			{
-				paintSlider(x + 10, y + hheight + mheight * selected, value[selected], names[selected], iconnames[selected], false);
+				paintSlider(x + 10, y + hheight + mheight * selected, value[selected], colorchooser_names[selected], iconnames[selected], false);
 				selected++;
-				paintSlider(x + 10, y + hheight + mheight * selected, value[selected], names[selected], iconnames[selected], true);
+				paintSlider(x + 10, y + hheight + mheight * selected, value[selected], colorchooser_names[selected], iconnames[selected], true);
 			}
 			break;
 			
@@ -143,9 +144,9 @@ int CColorChooser::exec(CMenuTarget* parent, const std::string &)
 		{
 			if (selected > 0)
 			{
-				paintSlider(x + 10, y + hheight + mheight * selected, value[selected], names[selected], iconnames[selected], false);
+				paintSlider(x + 10, y + hheight + mheight * selected, value[selected], colorchooser_names[selected], iconnames[selected], false);
 				selected--;
-				paintSlider(x + 10, y + hheight + mheight * selected, value[selected], names[selected], iconnames[selected], true);
+				paintSlider(x + 10, y + hheight + mheight * selected, value[selected], colorchooser_names[selected], iconnames[selected], true);
 			}
 			break;
 		}
@@ -158,7 +159,7 @@ int CColorChooser::exec(CMenuTarget* parent, const std::string &)
 				else
 					(*value[selected]) = 100;
 				
-				paintSlider(x + 10, y + hheight + mheight * selected, value[selected], names[selected], iconnames[selected], true);
+				paintSlider(x + 10, y + hheight + mheight * selected, value[selected], colorchooser_names[selected], iconnames[selected], true);
 				setColor();
 			}
 			break;
@@ -172,14 +173,14 @@ int CColorChooser::exec(CMenuTarget* parent, const std::string &)
 				else
 					(*value[selected]) = 0;
 				
-				paintSlider(x + 10, y + hheight + mheight * selected, value[selected], names[selected], iconnames[selected], true);
+				paintSlider(x + 10, y + hheight + mheight * selected, value[selected], colorchooser_names[selected], iconnames[selected], true);
 				setColor();
 			}
 			break;
 		}
 		case CRCInput::RC_home:
 			if (((*value[VALUE_R] != r_alt) || (*value[VALUE_G] != g_alt) || (*value[VALUE_B] != b_alt) || ((value[VALUE_ALPHA]) && (*(value[VALUE_ALPHA]) != a_alt))) &&
-			    (ShowMsgUTF(name.c_str(), g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel) == CMessageBox::mbrCancel)) // UTF-8
+			    (ShowMsgUTF(name, g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel) == CMessageBox::mbrCancel)) // UTF-8
 				break;
 
 				// sonst abbruch...
@@ -222,14 +223,8 @@ void CColorChooser::paint()
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+hheight, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT_PLUS_0);
 
-	const char * names[4] = {
-		g_Locale->getText("colorchooser.red"),
-		g_Locale->getText("colorchooser.green"),
-		g_Locale->getText("colorchooser.blue"),
-		g_Locale->getText("colorchooser.alpha")
-	};
 	for (int i = 0; i < 4; i++)
-		paintSlider(x + 10, y + hheight + mheight * i, value[i], names[i], iconnames[i], (i == 0));
+		paintSlider(x + 10, y + hheight + mheight * i, value[i], colorchooser_names[i], iconnames[i], (i == 0));
 
 	//color preview
 	frameBuffer->paintBoxRel(x+220,y+hheight+5,    mheight*4,   mheight*4-10, COL_MENUHEAD_PLUS_0);
@@ -239,7 +234,7 @@ void CColorChooser::paint()
 	frameBuffer->paintBoxRel(x+222,y+hheight+2+5,  mheight*4-4 ,mheight*4-4-10, 254);
 }
 
-void CColorChooser::paintSlider(int x, int y, unsigned char *spos, const char * const text, const std::string & iconname, const bool selected)
+void CColorChooser::paintSlider(int x, int y, unsigned char *spos, const neutrino_locale_t text, const char * const iconname, const bool selected)
 {
 	if (!spos)
 		return;
@@ -251,5 +246,5 @@ void CColorChooser::paintSlider(int x, int y, unsigned char *spos, const char * 
 	iconfile +=".raw";
 	frameBuffer->paintIcon(iconfile,x+73+(*spos),y+mheight/4);
 
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x,y+mheight, width, text, COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x,y+mheight, width, g_Locale->getText(text), COL_MENUCONTENT, 0, true); // UTF-8
 }

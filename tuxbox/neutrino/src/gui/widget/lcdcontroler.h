@@ -34,6 +34,7 @@
 #define __lcdcontroler__
 
 #include <driver/framebuffer.h>
+#include <system/localize.h>
 
 #include "menue.h"
 
@@ -54,7 +55,7 @@ class CLcdControler : public CMenuTarget
 		unsigned char brightnessstandby;
 
 
-		std::string	name;
+		neutrino_locale_t name;
 
 		CChangeObserver* observer;
 
@@ -64,7 +65,7 @@ class CLcdControler : public CMenuTarget
 
 	public:
 
-		CLcdControler(const char * const Name, CChangeObserver* Observer=NULL); // UTF-8
+		CLcdControler(const neutrino_locale_t Name, CChangeObserver* Observer=NULL); // UTF-8
 
 		void hide();
 		int exec(CMenuTarget* parent, const std::string & actionKey);

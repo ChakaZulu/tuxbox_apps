@@ -359,7 +359,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 
 	if (epgData.title.empty()) /* no epg info found */
 	{
-		ShowHintUTF("messagebox.info", g_Locale->getText("epgviewer.notfound")); // UTF-8
+		ShowHintUTF("messagebox.info", g_Locale->getText(LOCALE_EPGVIEWER_NOTFOUND)); // UTF-8
 		return res;
 	}
 
@@ -398,7 +398,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 
 	//scan epg-data - sort to list
 	if ((epgData.info2.empty()) && (info1_lines == 0))
-		processTextToArray(g_Locale->getText("epgviewer.nodetailed")); // UTF-8
+		processTextToArray(g_Locale->getText(LOCALE_EPGVIEWER_NODETAILED)); // UTF-8
 	else
 		processTextToArray(Latin1_to_UTF8(epgData.info2));
 
@@ -417,7 +417,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 	// -- display more screenings on the same channel
 	// -- 2002-05-03 rasc
 	processTextToArray("\n"); // UTF-8
-	processTextToArray(std::string(g_Locale->getText("epgviewer.More_Screenings")) + ':'); // UTF-8
+	processTextToArray(std::string(g_Locale->getText(LOCALE_EPGVIEWER_MORE_SCREENINGS)) + ':'); // UTF-8
 	FollowScreenings(channel_id, epgData.title);
 
 
@@ -716,15 +716,13 @@ int CEpgData::FollowScreenings (const t_channel_id channel_id, const std::string
 
 			screening_dates = "    ";
 
-			strftime(tmpstr, sizeof(tmpstr), "date.%a", tmStartZeit );
-			screening_dates += g_Locale->getText(tmpstr);
+			screening_dates += g_Locale->getText(CLocaleManager::getWeekday(tmStartZeit));
 			screening_dates += '.';
 
 			strftime(tmpstr, sizeof(tmpstr), "  %d.", tmStartZeit );
 			screening_dates += tmpstr;
 
-			strftime(tmpstr,sizeof(tmpstr), "date.%b", tmStartZeit );
-			screening_dates += g_Locale->getText(tmpstr);
+			screening_dates += g_Locale->getText(CLocaleManager::getMonth(tmStartZeit));
 
 			strftime(tmpstr, sizeof(tmpstr), ".  %H:%M ", tmStartZeit );
 			screening_dates += tmpstr;

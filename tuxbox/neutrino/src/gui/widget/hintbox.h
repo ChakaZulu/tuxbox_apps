@@ -34,6 +34,7 @@
 #define __hintbox__
 
 #include <driver/fb_window.h>
+#include <system/localize.h>
 
 #include <string>
 #include <vector>
@@ -49,22 +50,22 @@ class CHintBox
 
 	int                      fheight;
 	int                      theight;
-	std::string              caption;
+	neutrino_locale_t        caption;
 	char *                   message;
 	std::vector<char *>      line;
 	std::string              iconfile;
 	
  public:
-	// Caption and Text are UTF-8 encoded
-	CHintBox(const char * const Caption, const char * const Text, const int Width = 450, const char * const Icon = "info.raw");
+	// Text is UTF-8 encoded
+	CHintBox(const neutrino_locale_t Caption, const char * const Text, const int Width = 450, const char * const Icon = "info.raw");
 	~CHintBox(void);
 
 	void paint(void);
 	void hide(void);
 };
 
-// Caption and Text are UTF-8 encoded
-int ShowHintUTF(const char * const Caption, const char * const Text, const int Width = 450, int timeout = -1);
+// Text is UTF-8 encoded
+int ShowHintUTF(const neutrino_locale_t Caption, const char * const Text, const int Width = 450, int timeout = -1);
 
 
 #endif

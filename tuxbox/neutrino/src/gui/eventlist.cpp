@@ -118,7 +118,8 @@ void EventList::readEvents(const t_channel_id channel_id)
 	{
 		CChannelEvent evt;
 
-		evt.description = ZapitTools::UTF8_to_Latin1(g_Locale->getText("epglist.noevents"));
+		evt.description = ZapitTools::UTF8_to_Latin1(g_Locale->getText(LOCALE_EPGLIST_NOEVENTS));
+#warning FIXME: evtlist should be utf8-encoded
 		evt.eventID = 0;
 		evtlist.push_back(evt);
 
@@ -390,8 +391,7 @@ void EventList::paintItem(unsigned int pos)
 			struct tm *tmStartZeit = localtime(&evtlist[liststart+pos].startTime);
 
 
-			strftime(tmpstr, sizeof(tmpstr), "date.%a", tmStartZeit );
-			datetime1_str = g_Locale->getText(tmpstr);
+			datetime1_str = g_Locale->getText(CLocaleManager::getWeekday(tmStartZeit));
 
 			strftime(tmpstr, sizeof(tmpstr), ". %H:%M, ", tmStartZeit );
 			datetime1_str += tmpstr;
@@ -399,8 +399,7 @@ void EventList::paintItem(unsigned int pos)
 			strftime(tmpstr, sizeof(tmpstr), " %d. ", tmStartZeit );
 			datetime2_str = tmpstr;
 
-			strftime(tmpstr,sizeof(tmpstr), "date.%b", tmStartZeit );
-			datetime2_str += g_Locale->getText(tmpstr);
+			datetime2_str += g_Locale->getText(CLocaleManager::getMonth(tmStartZeit));
 
 			datetime2_str += '.';
 
@@ -430,7 +429,7 @@ void EventList::paintItem(unsigned int pos)
 void EventList::paintHead()
 {
 	char l_name[100];
-	snprintf(l_name, sizeof(l_name), g_Locale->getText("epglist.head"), name.c_str()); // UTF-8
+	snprintf(l_name, sizeof(l_name), g_Locale->getText(LOCALE_EPGLIST_HEAD), name.c_str()); // UTF-8
 
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0);
 	g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_TITLE]->RenderString(x+10,y+theight+1, width, l_name, COL_MENUHEAD, 0, true); // UTF-8
@@ -501,7 +500,7 @@ void  EventList::showFunctionBar (bool show)
 #warning FIXME: display other icons depending on g_settings.key_channelList_addrecord
 	    if (g_settings.key_channelList_addrecord == CRCInput::RC_red)
 		    frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, bx+8+cellwidth*pos, by+h_offset);
-	    g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos, by+bh-h_offset, bw-30, g_Locale->getText("eventlistbar.recordevent"), COL_INFOBAR, 0, true); // UTF-8
+	    g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos, by+bh-h_offset, bw-30, g_Locale->getText(LOCALE_EVENTLISTBAR_RECORDEVENT), COL_INFOBAR, 0, true); // UTF-8
     }
 
     // Button: Timer Channelswitch
@@ -511,7 +510,7 @@ void  EventList::showFunctionBar (bool show)
 #warning FIXME: display other icons depending on g_settings.key_channelList_addremind
 	    if (g_settings.key_channelList_addremind == CRCInput::RC_yellow)
 		    frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, bx+8+cellwidth*pos, by+h_offset );
-	    g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos, by+bh-h_offset, bw-30, g_Locale->getText("eventlistbar.channelswitch"), COL_INFOBAR, 0, true); // UTF-8
+	    g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos, by+bh-h_offset, bw-30, g_Locale->getText(LOCALE_EVENTLISTBAR_CHANNELSWITCH), COL_INFOBAR, 0, true); // UTF-8
     }
 
     // Button: Event Re-Sort
@@ -521,7 +520,7 @@ void  EventList::showFunctionBar (bool show)
 #warning FIXME: display other icons depending on g_settings.key_channelList_sort value
 	    if (g_settings.key_channelList_sort == CRCInput::RC_blue)
 		    frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_BLUE, bx+8+cellwidth*pos, by+h_offset );
-	    g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos, by+bh-h_offset, bw-30, g_Locale->getText("eventlistbar.eventsort"), COL_INFOBAR, 0, true); // UTF-8
+	    g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos, by+bh-h_offset, bw-30, g_Locale->getText(LOCALE_EVENTLISTBAR_EVENTSORT), COL_INFOBAR, 0, true); // UTF-8
     }
 }
 

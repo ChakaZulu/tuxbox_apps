@@ -217,7 +217,7 @@ int CChannelList::show()
 		//evtl. anzeige dass keine kanalliste....
 		return res;
 	}
-	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, g_Locale->getText(name));
+	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, name.c_str());
 
 	int buttonHeight = 7 + std::min(16, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getHeight());
 	theight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
@@ -516,9 +516,9 @@ bool CChannelList::adjustToChannelID(const t_channel_id channel_id)
 
 void CChannelList::zapTo(int pos)
 {
-	if (chanlist.size() == 0)
+	if (chanlist.empty())
 	{
-		DisplayErrorMessage(g_Locale->getText("channellist.nonefound")); // UTF-8
+		DisplayErrorMessage(g_Locale->getText(LOCALE_CHANNELLIST_NONEFOUND)); // UTF-8
 		return;
 	}
 	if ( (pos >= (signed int) chanlist.size()) || (pos< 0) )
@@ -548,9 +548,9 @@ int CChannelList::numericZap(int key)
 
 	int res = menu_return::RETURN_REPAINT;
 
-	if(chanlist.size()==0)
+	if (chanlist.empty())
 	{
-		DisplayErrorMessage(g_Locale->getText("channellist.nonefound")); // UTF-8
+		DisplayErrorMessage(g_Locale->getText(LOCALE_CHANNELLIST_NONEFOUND)); // UTF-8
 		return res;
 	}
 
@@ -757,7 +757,7 @@ void CChannelList::paintDetails(int index)
 
 		struct		tm *pStartZeit = localtime(&chanlist[index]->currentEvent.startTime);
 		unsigned 	seit = ( time(NULL) - chanlist[index]->currentEvent.startTime ) / 60;
-		sprintf( cSeit, g_Locale->getText("channellist.since"), pStartZeit->tm_hour, pStartZeit->tm_min); //, seit );
+		sprintf( cSeit, g_Locale->getText(LOCALE_CHANNELLIST_SINCE), pStartZeit->tm_hour, pStartZeit->tm_min); //, seit );
 		int seit_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->getRenderWidth(cSeit, true); // UTF-8
 
 		int noch = ( chanlist[index]->currentEvent.startTime + chanlist[index]->currentEvent.duration - time(NULL)   ) / 60;
@@ -936,7 +936,7 @@ const struct button_label CChannelListButtons[1] =
 void CChannelList::paintHead()
 {
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0);
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+theight+0, width- 65, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+theight+0, width- 65, name, COL_MENUHEAD, 0, true); // UTF-8
 
 	int ButtonWidth = (width - 20) / 4;
 	int buttonHeight = 7 + std::min(16, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getHeight());

@@ -68,7 +68,7 @@ int CFavorites::addChannelToFavorites()
 	if (!bouquetList) return status;
 
 	// -- get Favorites Bouquetname  from Locales
-	fav_bouquetname = g_Locale->getText("favorites.bouquetname");
+	fav_bouquetname = g_Locale->getText(LOCALE_FAVORITES_BOUQUETNAME);
 
 	//
 	// -- check if Favorite Bouquet exists: if not, create it.
@@ -115,12 +115,12 @@ int CFavorites::exec(CMenuTarget* parent, const std::string &)
 		parent->hide();
 	
 	if (!bouquetList) {
-		ShowMsgUTF("favorites.bouquetname", g_Locale->getText("favorites.nobouquets"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+		ShowMsgUTF(LOCALE_FAVORITES_BOUQUETNAME, g_Locale->getText(LOCALE_FAVORITES_NOBOUQUETS), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 		return res;
 	}
 
 
-	CHintBox* hintBox = new CHintBox("favorites.bouquetname", g_Locale->getText("favorites.addchannel"), 380); // UTF-8
+	CHintBox* hintBox = new CHintBox(LOCALE_FAVORITES_BOUQUETNAME, g_Locale->getText(LOCALE_FAVORITES_ADDCHANNEL), 380); // UTF-8
 	hintBox->paint();
 
 	status = addChannelToFavorites();
@@ -131,13 +131,13 @@ int CFavorites::exec(CMenuTarget* parent, const std::string &)
 	// -- Display result
 
 	str = "";
-	if (status & 1)  str += g_Locale->getText("favorites.bqcreated");
-	if (status & 2)  str += g_Locale->getText("favorites.chadded");
-	else             str += g_Locale->getText("favorites.chalreadyinbq");
+	if (status & 1)  str += g_Locale->getText(LOCALE_FAVORITES_BQCREATED);
+	if (status & 2)  str += g_Locale->getText(LOCALE_FAVORITES_CHADDED);
+	else             str += g_Locale->getText(LOCALE_FAVORITES_CHALREADYINBQ);
 
-	if (status) str +=  g_Locale->getText("favorites.finalhint");
+	if (status) str +=  g_Locale->getText(LOCALE_FAVORITES_FINALHINT);
 
-	ShowMsgUTF("favorites.bouquetname", str, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+	ShowMsgUTF(LOCALE_FAVORITES_BOUQUETNAME, str, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 
 //	if (status) {
 //		g_RCInput->postMsg( NeutrinoMessages::EVT_BOUQUETSCHANGED, 0 );

@@ -65,15 +65,15 @@ class CMessageBox : CHintBox
 		} buttons;
 	
 	// Text & Caption are always UTF-8 encoded
-	CMessageBox(const char * const Caption, const char * const Text, const int Width = 500, const char * const Icon = NULL, const CMessageBox::result_ Default = mbrYes, const uint ShowButtons = mbAll);
+	CMessageBox(const neutrino_locale_t Caption, const char * const Text, const int Width = 500, const char * const Icon = NULL, const CMessageBox::result_ Default = mbrYes, const uint ShowButtons = mbAll);
 
 	int exec(int timeout = -1);
 	
 };
 
-// Text & Caption are always UTF-8 encoded
-int ShowMsgUTF(const char * const Caption, const char * const Text, const CMessageBox::result_ Default, const uint ShowButtons, const char * const Icon = NULL, const int Width = 450, const int timeout = -1); // UTF-8
-int ShowMsgUTF(const char * const Caption, const std::string & Text, const CMessageBox::result_ Default, const uint ShowButtons, const char * const Icon = NULL, const int Width = 450, const int timeout = -1); // UTF-8
+// Text is always UTF-8 encoded
+int ShowMsgUTF(const neutrino_locale_t Caption, const char * const Text, const CMessageBox::result_ Default, const uint ShowButtons, const char * const Icon = NULL, const int Width = 450, const int timeout = -1); // UTF-8
+int ShowMsgUTF(const neutrino_locale_t Caption, const std::string & Text, const CMessageBox::result_ Default, const uint ShowButtons, const char * const Icon = NULL, const int Width = 450, const int timeout = -1); // UTF-8
 
 void DisplayErrorMessage(const char * const ErrorMsg); // UTF-8
 

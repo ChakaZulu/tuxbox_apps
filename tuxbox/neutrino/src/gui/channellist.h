@@ -79,7 +79,7 @@ class CChannelList
 		int			fheight; // Fonthoehe Channellist-Inhalt
 		int			theight; // Fonthoehe Channellist-Titel
 
-		std::string		name;
+		std::string             name;
 		std::vector<CChannel*>	chanlist;
 		CZapProtection* 	zapProtection;
 
@@ -103,8 +103,8 @@ class CChannelList
 		void addChannel(CChannel* chan);
 		CChannel* getChannel( int number);
 		CChannel* operator[]( uint index) { if (chanlist.size() > index) return chanlist[index]; else return NULL;};
-		const std::string getName() const { return name; };
 		int getKey(int);
+		const char * const getName() const { return name.c_str(); };
 		std::string getActiveChannelName(); // UTF-8
 		t_satellite_position getActiveSatellitePosition();
 		int getActiveChannelNumber();

@@ -34,6 +34,7 @@
 #define __rgbcsynccontroler__
 
 #include <driver/framebuffer.h>
+#include <system/localize.h>
 
 #include "menue.h"
 
@@ -51,7 +52,7 @@ class CRGBCSyncControler : public CMenuTarget
 
 		unsigned char* csync;
 
-		std::string	name;
+		neutrino_locale_t name;
 
 		CChangeObserver* observer;
 
@@ -61,7 +62,7 @@ class CRGBCSyncControler : public CMenuTarget
 
 	public:
 
-		CRGBCSyncControler(const char * const Name, unsigned char* Csync, CChangeObserver* Observer=NULL); // UTF-8
+		CRGBCSyncControler(const neutrino_locale_t Name, unsigned char* Csync, CChangeObserver* Observer=NULL); // UTF-8
 
 		void hide();
 		int exec(CMenuTarget* parent, const std::string & actionKey);

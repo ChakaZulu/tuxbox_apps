@@ -42,7 +42,7 @@
 #define borderwidth 4
 
 
-CHintBox::CHintBox(const char * const Caption, const char * const Text, const int Width, const char * const Icon)
+CHintBox::CHintBox(const neutrino_locale_t Caption, const char * const Text, const int Width, const char * const Icon)
 {
 	char * begin;
 	char * pos;
@@ -150,7 +150,7 @@ void CHintBox::hide(void)
 	}
 }
 
-int ShowHintUTF(const char * const Caption, const char * const Text, const int Width, int timeout)
+int ShowHintUTF(const neutrino_locale_t Caption, const char * const Text, const int Width, int timeout)
 {
 	neutrino_msg_t msg;
 	neutrino_msg_data_t data;

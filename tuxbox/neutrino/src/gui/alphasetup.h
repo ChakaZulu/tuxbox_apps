@@ -37,6 +37,7 @@
 #include "widget/menue.h"
 
 #include <driver/framebuffer.h>
+#include <system/localize.h>
 
 #include <string>
 
@@ -55,7 +56,7 @@ class CAlphaSetup : public CMenuTarget
 		unsigned char *alpha2;
 
 
-		std::string name;
+		neutrino_locale_t name;
 
 		CChangeObserver* observer;
 
@@ -65,7 +66,7 @@ class CAlphaSetup : public CMenuTarget
 
 	public:
 
-		CAlphaSetup(const char * const Name, unsigned char* Alpha1, unsigned char* Alpha2, CChangeObserver* Observer = NULL); // UTF-8
+		CAlphaSetup(const neutrino_locale_t Name, unsigned char* Alpha1, unsigned char* Alpha2, CChangeObserver* Observer = NULL); // UTF-8
 
 		void hide();
 		int exec(CMenuTarget* parent, const std::string & actionKey);
