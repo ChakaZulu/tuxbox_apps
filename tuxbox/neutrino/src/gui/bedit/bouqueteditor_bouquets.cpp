@@ -36,6 +36,7 @@
 
 #include <driver/fontrenderer.h>
 #include <gui/bedit/bouqueteditor_channels.h>
+#include <gui/widget/buttons.h>
 #include <gui/widget/hintbox.h>
 #include <gui/widget/icons.h>
 #include <gui/widget/messagebox.h>
@@ -129,34 +130,37 @@ void CBEBouquetWidget::paintHead()
 	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width, "Bouquets" /*g_Locale->getText(name).c_str()*/, COL_MENUHEAD);
 }
 
+const struct button_label CBEBouquetWidgetButtons[3] =
+{
+	{ NEUTRINO_ICON_BUTTON_RED   , "bouqueteditor.delete" },
+	{ NEUTRINO_ICON_BUTTON_GREEN , "bouqueteditor.add"    },
+	{ NEUTRINO_ICON_BUTTON_YELLOW, "bouqueteditor.move"   }
+};
+
 void CBEBouquetWidget::paintFoot()
 {
-	int ButtonWidth = (width-28) / 4;
+	struct button_label Button[4];
+	Button[0] = CBEBouquetWidgetButtons[0];
+	Button[1] = CBEBouquetWidgetButtons[1];
+	Button[2] = CBEBouquetWidgetButtons[2];
+	Button[3].button = NEUTRINO_ICON_BUTTON_BLUE;
+
 	frameBuffer->paintBoxRel(x,y+height, width,ButtonHeight, COL_MENUHEAD);
 	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW);
 
-	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, x+width- 4* ButtonWidth - 20, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- 4* ButtonWidth, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.delete"), COL_INFOBAR, 0, true); // UTF-8
-
-	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_GREEN, x+width- 3* ButtonWidth - 30, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.add"), COL_INFOBAR, 0, true); // UTF-8
-
-	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x+width- 2* ButtonWidth - 30, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- 2* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.move"), COL_INFOBAR, 0, true); // UTF-8
-
-	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_BLUE, x+width- ButtonWidth - 30, y+height+4);
 	switch( blueFunction)
 	{
 		case beRename:
-			g_Fonts->infobar_small->RenderString(x+width- ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 10, g_Locale->getText("bouqueteditor.rename"), COL_INFOBAR, 0, true); // UTF-8
+			Button[3].locale = "bouqueteditor.rename";
 		break;
 		case beHide:
-			g_Fonts->infobar_small->RenderString(x+width- ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 10, g_Locale->getText("bouqueteditor.hide"), COL_INFOBAR, 0, true); // UTF-8
+			Button[3].locale = "bouqueteditor.hide";
 		break;
 		case beLock:
-			g_Fonts->infobar_small->RenderString(x+width- ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 10, g_Locale->getText("bouqueteditor.lock"), COL_INFOBAR, 0, true); // UTF-8
+			Button[3].locale = "bouqueteditor.lock";
 		break;
 	}
+	::paintButtons(frameBuffer, g_Fonts->infobar_small, g_Locale, x + 5, y + height + 4, (width - 28 - 10) / 4, 4, Button);
 	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_DBOX, x+width - 28, y+height);
 }
 
