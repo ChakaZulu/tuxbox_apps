@@ -64,6 +64,7 @@ typedef enum {
 int listenfd, connfd;
 socklen_t clilen;
 SAI cliaddr, servaddr;
+int EMMPID=0; 
 
 struct rmsg {
   		unsigned char version;
@@ -79,7 +80,8 @@ struct rmsg {
 
 
 extern chanptr LoadServices(int serv_mode);
-
+/*
 void *start_camd(void *args);
 void end_cam();
 int descriptor(char *buffer, int len, int ca_system_id);
+*/

@@ -12,6 +12,9 @@ typedef struct channelstruct {
 	ushort Polarity;
 	ushort Diseqc;
 	ushort Fec;
+	uint ecmpid;
+	uint onid;
+	uint tsid;
 	chanptr next;
 	chanptr prev;
 } channel;
@@ -31,4 +34,5 @@ typedef struct pids{
 	char *apid2_desc;
 	char *apid3_desc;
 	char *apid4_desc;
+	uint ecmpid;
 }pids;
