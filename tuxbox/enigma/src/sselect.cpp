@@ -1516,7 +1516,7 @@ void eServiceSelector::showMultiEPG()
 	epg.move(ePoint(50, 50));
 	epg.resize(eSize(620, 470));
 
-	int direction = 1;
+	int direction = 2;
 	epg.show();
 	do
 	{

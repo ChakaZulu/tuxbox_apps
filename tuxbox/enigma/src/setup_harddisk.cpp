@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_harddisk.cpp,v 1.7 2003/09/07 00:03:58 ghostrider Exp $
+ * $Id: setup_harddisk.cpp,v 1.8 2003/09/10 20:21:10 ghostrider Exp $
  */
 
 #include <setup_harddisk.h>
@@ -474,7 +474,7 @@ eHarddiskMenu::eHarddiskMenu(int dev): dev(dev)
 }
 
 ePartitionCheck::ePartitionCheck( int dev )
-:dev(dev), fsck(0)
+:eWindow(1), dev(dev), fsck(0)
 {
 	lState = new eLabel(this);
 	lState->setName("state");
@@ -516,6 +516,7 @@ int ePartitionCheck::eventHandler( const eWidgetEvent &e )
 			}
 			if ( fs == "ext3" )
 			{
+				eWindow::globalCancel(eWindow::OFF);
 				fsck = new eConsoleAppContainer( eString().sprintf("/sbin/fsck.ext3 -f /dev/ide/host%d/bus%d/target%d/lun0/%s", host, bus, target, part.c_str()) );
 
 				if ( !fsck->running() )
@@ -538,6 +539,7 @@ int ePartitionCheck::eventHandler( const eWidgetEvent &e )
 			}
 			else if ( fs == "reiserfs" )
 			{
+				eWindow::globalCancel(eWindow::OFF);
 				fsck = new eConsoleAppContainer( eString().sprintf("/sbin/reiserfsck --fix-fixable /dev/ide/host%d/bus%d/target%d/lun0/%s", host, bus, target, part.c_str()) );
 
 				if ( !fsck->running() )
@@ -574,6 +576,7 @@ int ePartitionCheck::eventHandler( const eWidgetEvent &e )
 		break;
 
 		case eWidgetEvent::execDone:
+			eWindow::globalCancel(eWindow::ON);
 			if (fsck)
 				delete fsck;
 		break;
@@ -613,12 +616,13 @@ void ePartitionCheck::fsckClosed(int state)
 
 void ePartitionCheck::getData( eString str )
 {
-	lState->setText(str);
-	
+	str.removeChars('\x8');
 	if ( str.find("<y>") != eString::npos )
 		fsck->write("y");
 	else if ( str.find("[N/Yes]") != eString::npos )
 		fsck->write("Yes");
+
+	lState->setText(str);
 }
 
 #endif // DISABLE_FILE

@@ -320,9 +320,11 @@ void enigmaMMI::handleMMIMessage(const char *data)
 
 		eMMIEnqWindow wnd(text, nrcount, blind );
 		int ret = wnd.exec();
-		unsigned char buf[2+nrcount];
-		buf[0] = 1+nrcount;  // length
+
+		unsigned char buf[ret == -1 ? 2 : 2 + nrcount];
 		buf[1] = ret == -1 ? 0 : 1; // answer ok.. or user canceled
+		buf[0] = buf[1] ? nrcount : 1;  // length
+		// when user have cancelled only one byte is answered to the ci
 
 		eString atext = wnd.getAnswer();  // get Answer from number
 
@@ -420,10 +422,6 @@ void enigmaMMI::handleMMIMessage(const char *data)
 		else
 			ci->messages.send( eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_menuansw,wnd.getSelected()));
 		showWaitForCIAnswer(ret);
-/*			char buf[5];
-			memcpy(buf, "\x9f\x88\x0B\x1", 4);
-			buf[4] = ret == -1 ? 0 : wnd.getSelected();
-			send_to_sock( buf, 5 ); */
 	}
 	else if(memcmp(data+rp,TAG_MMI_MENU_MORE,TAG_LENGTH)==0)
 		eDebug("mmi_menu_more.. unhandled yet");
@@ -536,6 +534,7 @@ eMMIListWindow::eMMIListWindow(eString titleTextT, eString subtitleTextT, eStrin
 	{
 		newHeight+=10;
 		title = new eLabel(this);
+		title->setFlags( RS_WRAP );
 		title->setAlign(eTextPara::dirCenter);
 		title->move(ePoint(0,10));
 		title->resize(eSize(getClientSize().width(), 100));
@@ -554,6 +553,7 @@ eMMIListWindow::eMMIListWindow(eString titleTextT, eString subtitleTextT, eStrin
 	{
 		newHeight+=10;
 		subtitle = new eLabel(this);
+		subtitle->setFlags( RS_WRAP );
 		subtitle->setAlign(eTextPara::dirCenter);
 		if ( title )
 		{
@@ -579,6 +579,7 @@ eMMIListWindow::eMMIListWindow(eString titleTextT, eString subtitleTextT, eStrin
 	{
 		newHeight += 10;
 		bottomText = new eLabel(this);
+		bottomText->setFlags( RS_WRAP );
 		bottomText->setAlign(eTextPara::dirCenter);
 		bottomText->move(ePoint(0,list.getPosition().y()+list.getSize().height()+10));
 		bottomText->resize(eSize(getClientSize().width(), 100));
