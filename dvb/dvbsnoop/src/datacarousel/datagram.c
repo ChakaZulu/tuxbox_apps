@@ -1,5 +1,5 @@
 /*
-$Id: datagram.c,v 1.14 2004/01/01 20:09:16 rasc Exp $
+$Id: datagram.c,v 1.15 2004/01/04 22:03:21 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: datagram.c,v 1.14 2004/01/01 20:09:16 rasc Exp $
 
 
 $Log: datagram.c,v $
+Revision 1.15  2004/01/04 22:03:21  rasc
+time for a version leap
+
 Revision 1.14  2004/01/01 20:09:16  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -72,19 +75,11 @@ Revision 1.1  2003/10/19 22:22:58  rasc
 
 
 
-/*
- * $$$$ TODO  The following is complete GAGA! 
- * $$$$ CHECK CHECK CHECK !!!
- *  ATSC says tableID 0x3F EN
- *  The following is a private_indicator == 0x01
- *    DATAGRAM (private Data) section!!! ????
- */
-
-
 
 void decode_DSMCC_DATAGRAM (u_char *b, int len)
 {
  /* EN 301 192 7.x */
+// $$$ TODO this differs from ISO/IEC 13818-6:1998 AMD_1_2000_Cor_1_2002
 
  typedef struct  _DATAGRAM {
     u_int      table_id;
@@ -130,7 +125,7 @@ void decode_DSMCC_DATAGRAM (u_char *b, int len)
 
  d.table_id 			 = b[0];
  d.section_syntax_indicator	 = getBits (b, 0, 8, 1);
- d.private_indicator		 = getBits (b, 0, 9, 1);
+ d.private_indicator		 = getBits (b, 0, 9, 1);   // $$$ TODO error indicator
  d.reserved_1 			 = getBits (b, 0, 10, 2);
  d.section_length		 = getBits (b, 0, 12, 12);
 
@@ -196,29 +191,13 @@ void decode_DSMCC_DATAGRAM (u_char *b, int len)
 	 /*  ISO/IEC 8802-2   */
 	 int k;
 	 k = llc_snap (4,b);
-	 if ((len1-2) != k) {
-		 out_nl (4,"$$$$TODO  something missing here (report!!)");	// $$$ 
-	 }
  } else {
-	 out_nl (3, "IP_datagram_bytes:");
-	 indent (+1);
-	 printhexdump_buf (4,b,len1-2);
-	 indent (-1);
+ 	 print_databytes (4, "IP_datagram_bytes", b, len1-4);
  }
- b += (len1 - 2);
-
-
-
-
-  
- // $$$$ unknown TODO
- //    how do i distinguish between N1  datagram bytes and N2 stuffing bytes?
- //    is there an else clause in specs missing????
-
+ b += (len1 - 4);
 
 
  d.crc_checksum		 = getBits (b, 0, 0, 32);
-
  if (d.section_syntax_indicator) {
      out_SB_NL (5,"CRC: ",d.crc_checksum);
  } else {

@@ -1,5 +1,5 @@
 /*
-$Id: sectables.c,v 1.18 2004/01/01 20:09:31 rasc Exp $
+$Id: sectables.c,v 1.19 2004/01/04 22:03:22 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: sectables.c,v 1.18 2004/01/01 20:09:31 rasc Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.19  2004/01/04 22:03:22  rasc
+time for a version leap
+
 Revision 1.18  2004/01/01 20:09:31  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -256,7 +259,7 @@ static TABLE_ID_FUNC table_id_func[] = {
      {  0x02, 0x02,  decode_PMT	},
      {  0x03, 0x03,  decode_TSDT },
      /* res. */
-     {  0x3a, 0x3d,  decode_DSMCC_section },  // $$$ TODO Datagram - where?
+     {  0x3a, 0x3d,  decode_DSMCC_section },
      {  0x3e, 0x3e,  decode_DSMCC_DATAGRAM },
      {  0x40, 0x41,  decode_NIT	},
      {  0x42, 0x42,  decode_SDT	},

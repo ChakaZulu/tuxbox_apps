@@ -1,5 +1,5 @@
 /*
-$Id: fe_signal.c,v 1.2 2004/01/03 16:40:12 rasc Exp $
+$Id: fe_signal.c,v 1.3 2004/01/04 22:03:21 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: fe_signal.c,v 1.2 2004/01/03 16:40:12 rasc Exp $
 
 
 $Log: fe_signal.c,v $
+Revision 1.3  2004/01/04 22:03:21  rasc
+time for a version leap
+
 Revision 1.2  2004/01/03 16:40:12  rasc
 no message
 
@@ -109,7 +112,7 @@ int  do_SignalStrength (OPTION *opt)
 
 
    indent (0);
-   out_nl (2,"");
+   out_NL (2);
    out_nl (2,"---------------------------------------------------------");
    out_nl (2,"Transponder/Frequency signal strength statistics...");
    if (opt->packet_count > 0) {
@@ -156,12 +159,12 @@ int  do_SignalStrength (OPTION *opt)
 
 	    // & 0xFFFF necessary, due to interface transformations??
 	if (has.strength)  out (1,"Sig: %u  ", s.strength & 0xFFFFL);
-	if (has.snr)	   out (1,"SNR: %u  ", s.snr & 0xFFFFL);
-	if (has.ber)	   out (1,"BER: %lu ",s.ber);
-	if (has.ublocks)   out (2,"UBLK: %lu  ",s.ublocks);
+	if (has.snr)	   out (2,"SNR: %u  ", s.snr & 0xFFFFL);
+	if (has.ber)	   out (3,"BER: %lu  ",s.ber);
+	if (has.ublocks)   out (4,"UBLK: %lu  ",s.ublocks);
 	if (has.status) {
-		out (2,"Stat: 0x%02x ",s.status);
-		out_status_detail (3,s.status);
+		out (4,"Stat: 0x%02x ",s.status);
+		out_status_detail (5,s.status);
 	}
 	out_NL(1);
 
