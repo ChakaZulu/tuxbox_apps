@@ -257,6 +257,7 @@ static	void	rekSel( int x, int y )
 	if ( num )
 		return;
 
+#if 0
 	p -= (MAZEW+1);
 	if ( *p == 'n' )
 		rekSel( x-1,y-1 );
@@ -273,7 +274,7 @@ static	void	rekSel( int x, int y )
 	p++;
 	if ( *p == 'n' )
 		rekSel( x+1,y );
-	p+=(MAZEW-3);
+	p+=(MAZEW-2);
 	if ( *p == 'n' )
 		rekSel( x-1,y+1 );
 	p++;
@@ -282,6 +283,20 @@ static	void	rekSel( int x, int y )
 	p++;
 	if ( *p == 'n' )
 		rekSel( x+1,y+1 );
+#else
+	p -= (MAZEW);
+	if ( *p == 'n' )
+		rekSel( x,y-1 );
+	p+=(MAZEW-1);
+	if ( *p == 'n' )
+		rekSel( x-1,y );
+	p+=2;
+	if ( *p == 'n' )
+		rekSel( x+1,y );
+	p+=(MAZEW-1);
+	if ( *p == 'n' )
+		rekSel( x,y+1 );
+#endif
 }
 
 static	void	SelectField( int x, int y )
