@@ -63,6 +63,7 @@ fbClass::fbClass(const char *fb)
 		goto nolfb;
 	}
 
+	showConsole(state);
 	return;
 nolfb:
 	printf("framebuffer not available.\n");
@@ -74,7 +75,10 @@ int fbClass::showConsole(int state)
 	int fd=open("/dev/console", O_RDWR);
 	if(fd>=0)
 	{
-		ioctl(fd, KDSETMODE, state?KD_TEXT:KD_GRAPHICS);
+		if(ioctl(fd, KDSETMODE, state?KD_TEXT:KD_GRAPHICS)<0)
+		{
+			eDebug("setting /dev/console status failed.");
+		}
 		close(fd);
 	}
 	return 0;
