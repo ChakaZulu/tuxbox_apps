@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.h,v 1.52 2003/05/01 19:33:08 digi_casi Exp $
+ * $Id: getservices.h,v 1.53 2003/05/07 18:28:09 digi_casi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -37,8 +37,8 @@
 #define NONE 0x0000
 #define INVALID 0x1FFF
 
-void ParseTransponders(xmlNodePtr xmltransponder, const unsigned char DiSEqC, std::string satellite);
-void ParseChannels    (xmlNodePtr node, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id, const unsigned char DiSEqC, std::string satellite);
+void ParseTransponders(xmlNodePtr xmltransponder, const unsigned char DiSEqC, std::string satellite, int32_t satellitePosition);
+void ParseChannels    (xmlNodePtr node, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id, const unsigned char DiSEqC, std::string satellite, int32_t satellitePosition);
 void FindTransponder  (xmlNodePtr root);
 void LoadSortList     ();
 int LoadServices      ();

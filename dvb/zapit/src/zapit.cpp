@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.307 2003/05/01 19:33:09 digi_casi Exp $
+ * $Id: zapit.cpp,v 1.308 2003/05/07 18:28:10 digi_casi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -258,7 +258,8 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 	else {
 		thisChannel = new CZapitChannel(channel->getName(),
 					channel_id & 0xffff, (tsid_onid >> 16) & 0xffff,
-					tsid_onid & 0xffff, 1, frontend->getDiseqcPosition(), channel->getSatelliteName());
+					tsid_onid & 0xffff, 1, frontend->getDiseqcPosition(), 
+					channel->getSatelliteName(), channel->getSatellitePosition());
 	}
 
 	/* search pids if they are unknown */
@@ -950,7 +951,8 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 					    original_network_id,
 					    1,
 					    channel->getDiSEqC(),
-					    channel->getSatelliteName()
+					    channel->getSatelliteName(),
+					    channel->getSatellitePosition()
 					)
 				)
 			);
@@ -1428,7 +1430,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.307 2003/05/01 19:33:09 digi_casi Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.308 2003/05/07 18:28:10 digi_casi Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {

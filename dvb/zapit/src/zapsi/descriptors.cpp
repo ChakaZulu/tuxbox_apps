@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.59 2003/05/05 08:33:24 mws Exp $
+ * $Id: descriptors.cpp,v 1.60 2003/05/07 18:28:10 digi_casi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -388,6 +388,7 @@ void service_descriptor(const unsigned char * const buffer, const t_service_id s
 	std::string providerName((const char*)&(buffer[4]), service_provider_name_length);
 	std::string serviceName;
 	std::string satelliteName = "unknown";
+	int32_t satellitePosition = 0;
 
 	bool in_blacklist = false;
 
@@ -443,7 +444,8 @@ void service_descriptor(const unsigned char * const buffer, const t_service_id s
 				original_network_id,
 				service_type,
 				DiSEqC,
-				satelliteName
+				satelliteName, 
+				satellitePosition
 			)
 		)
 	);
@@ -499,7 +501,7 @@ void service_descriptor(const unsigned char * const buffer, const t_service_id s
  		lastServiceName = serviceName;
  		eventServer->sendEvent(CZapitClient::EVT_SCAN_SERVICENAME, CEventServer::INITID_ZAPIT, (void *) lastServiceName.c_str(), lastServiceName.length() + 1);
 
-		bouquet->addService(new CZapitChannel(serviceName, service_id, transport_stream_id, original_network_id, service_type, 0, satelliteName));
+		bouquet->addService(new CZapitChannel(serviceName, service_id, transport_stream_id, original_network_id, service_type, 0, satelliteName, satellitePosition));
 
  // thegoodguy schau dir das hier mal an
  //		scaninfo  test;
