@@ -42,9 +42,10 @@ int fake_pat(std::map<int,transpondermap> *tmap, int freq, int sr, FILE *logfd)
   	flt.timeout=1000;
   	flt.flags=DMX_CHECK_CRC;
   	
-  	if (ioctl(demux, DMX_SET_FILTER, &flt)<0)  {
+  	if (ioctl(demux, DMX_SET_FILTER, &flt)<0)
+	{
     		perror("DMX_SET_FILTER");
-  		}
+  	}
   
   	ioctl(demux, DMX_START, 0);
 /*
@@ -102,7 +103,7 @@ int pat(uint oonid,std::map<uint,channel> *cmap)
 	int demux, pt;
 	struct pollfd dmx_fd;
 	int section = 0;
-	char buffer[1024];
+	unsigned char buffer[1024];
 	
 	demux=open(DEMUX_DEV, O_RDWR);
   	if (demux<0) {
@@ -115,13 +116,15 @@ int pat(uint oonid,std::map<uint,channel> *cmap)
   	flt.pid=0;
     	flt.filter.mask[0]  =0xFF;
   	flt.timeout=1000;
-  	flt.flags=DMX_CHECK_CRC;
+  	flt.flags=DMX_CHECK_CRC | DMX_IMMEDIATE_START;
   	
-  	if (ioctl(demux, DMX_SET_FILTER, &flt)<0)  {
+  	if (ioctl(demux, DMX_SET_FILTER, &flt)<0)
+	{
     		perror("DMX_SET_FILTER");
-  		}
+		close(demux);
+		return -1;
+  	}
   
-  	ioctl(demux, DMX_START, 0);
 /*  
   	dmx_fd.fd = demux;
   	dmx_fd.events = POLLIN;
@@ -159,23 +162,19 @@ int pat(uint oonid,std::map<uint,channel> *cmap)
     			return -1;
 		}
 		
-		close(demux);
-		
 		tsid = (buffer[3]<<8)|buffer[4];
-		//printf("TSID: %04x\n", tsid);
+		printf("TSID: %04x\n", tsid);
 		current = 8;
 		
 		while (current < sec_len-1)
 		{
-			int p_nr = (buffer[current]<<8) | buffer[current+1];
-			int pid = ((buffer[current+2]&0x1f)<<8) | buffer[current+3];
+			unsigned int p_nr = (buffer[current]<<8) | buffer[current+1];
+			unsigned int pid = ((buffer[current+2]&0x1f)<<8) | buffer[current+3];
 			
-			//printf("P-Nr: %04x: %04x\n",p_nr,pid);
 			if ((*cmap).count((oonid<<16)|p_nr) >0)
 			{
 			  cI = (*cmap).find((oonid<<16)|p_nr);
 			  cI->second.pmt = pid;
-			  //printf("found p_nr: %04x\npmt: %04x\n", p_nr, pid);
 			}
 			else
 			{
@@ -198,6 +197,7 @@ int pat(uint oonid,std::map<uint,channel> *cmap)
 		}
 //	}
 	} while (buffer[7] != section++);
+
 	close(demux);
 	return 1;
 }
