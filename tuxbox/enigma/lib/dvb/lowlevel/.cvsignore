@@ -1,0 +1,4 @@
+*.moc.*
+Makefile
+Makefile.in
+.deps

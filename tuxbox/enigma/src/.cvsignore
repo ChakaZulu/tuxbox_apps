@@ -1,0 +1,6 @@
+*.moc.*
+Makefile
+Makefile.in
+.deps
+.libs
+enigma
