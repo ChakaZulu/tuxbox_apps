@@ -1,5 +1,5 @@
 /*
-$Id: dmx_tspidscan.c,v 1.1 2003/12/07 23:36:13 rasc Exp $
+$Id: dmx_tspidscan.c,v 1.2 2003/12/09 18:27:48 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dmx_tspidscan.c,v 1.1 2003/12/07 23:36:13 rasc Exp $
 
 
 $Log: dmx_tspidscan.c,v $
+Revision 1.2  2003/12/09 18:27:48  rasc
+pidscan on transponder
+
 Revision 1.1  2003/12/07 23:36:13  rasc
 pidscan on transponder
 - experimental(!)
@@ -60,6 +63,30 @@ pidscan on transponder
 #define TS_LEN			188
 #define TS_SYNC_BYTE		0x47
 #define TS_BUF_SIZE		(TS_LEN * 2048)
+
+
+static struct {
+	int	pid;
+	int	timeout;
+} specialPids[] = {
+	{ 0x00,	  2000 },	// PAT
+	{ 0x01,	  2000 },	// CAT
+	{ 0x02,	 10100 },	// TSDT
+	{ 0x10,	 10100 },	// NIT, etc
+	{ 0x11,	 10100 },	// BAT, etc
+	{ 0x12,	 10100 },	// EIT, etc.
+	{ 0x13,	 10100 },	// RST, etc.
+	{ 0x14,	 30100 },	// TOT, etc.
+	{ 0x15,	  2100 },	// 
+	{ 0x1C,	  2100 },	// 
+	{ 0x1D,	  2100 },	// 
+	{ 0x1E,	  2100 },	// 
+	{ 0x1F,	  2100 },	// DIT
+	{ 0x1FFC, 10100 },	// ATSC
+	{ 0x1FFD, 10100 },	// ATSC
+	{ 0x1FFF, 10100 },	// ATSC
+	{-1,	 0 }		// ende
+};
 
 
 
@@ -148,7 +175,7 @@ int ts_pidscan (OPTION *opt)
 		flt.input = DMX_IN_FRONTEND;
 		flt.output = DMX_OUT_TS_TAP;
 		flt.pes_type = DMX_PES_OTHER;
-		flt.flags = DMX_IMMEDIATE_START;
+		flt.flags = DMX_IMMEDIATE_START|DMX_ONESHOT;
 		if (ioctl(dmxfd[i], DMX_SET_PES_FILTER, &flt) < 0) {
 			perror("DMX_SET_PES_FILTER");
 			break;
