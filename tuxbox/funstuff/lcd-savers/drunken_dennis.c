@@ -53,6 +53,11 @@ int main(int argc, char **argv) {
   lcdfd=open("/dev/dbox/lcd0",O_RDWR);
   rndfd=open("/dev/urandom",O_RDONLY);
   
+  i=LCD_MODE_ASC;
+  ioctl(lcdfd,LCD_IOCTL_ASC_MODE,&i);
+  ioctl(lcdfd,LCD_IOCTL_CLEAR);
+  write(lcdfd,"\nLet's see if\ndrunken Dennis\ncan find his\nway home...\n\n\n",strlen("\nLet's see if\ndrunken Dennis\ncan find his\nway home...\n\n\n"));
+  sleep(5);
   i=LCD_MODE_BIN;
   ioctl(lcdfd,LCD_IOCTL_ASC_MODE,&i);
   ioctl(lcdfd,LCD_IOCTL_CLEAR);
@@ -107,6 +112,9 @@ int main(int argc, char **argv) {
     */
     usleep(delay);
   }
+  i=LCD_MODE_ASC;
+  ioctl(lcdfd,LCD_IOCTL_ASC_MODE,&i);
+  ioctl(lcdfd,LCD_IOCTL_CLEAR);
   close(rndfd);
   close(lcdfd);
   return 0;
