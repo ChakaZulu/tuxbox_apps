@@ -220,6 +220,9 @@ int Font::getHeight(void)
 
 void Font::RenderString(int x, int y, int width, const char *text, unsigned char color, int boxheight)
 {
+	if (!frameBuffer->getActive())
+		return;
+
 	pthread_mutex_lock( &renderer->render_mutex );
 
 	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)

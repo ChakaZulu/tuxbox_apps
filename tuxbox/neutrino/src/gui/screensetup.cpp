@@ -217,6 +217,8 @@ void CScreenSetup::paintCoords()
 
 void CScreenSetup::paint()
 {
+	if (!frameBuffer->getActive())
+		return;
 	memset(frameBuffer->getFrameBufferPointer(), 7, frameBuffer->getStride()*576);
 
 	for(int count=0;count<576;count+=15)

@@ -53,6 +53,9 @@ CScanTs::CScanTs()
 
 int CScanTs::exec(CMenuTarget* parent, string)
 {
+	if (!frameBuffer->getActive())
+		return menu_return::RETURN_EXIT_ALL;
+
 	frameBuffer->loadPal("scan.pal", 37, COL_MAXFREE);
 	frameBuffer->loadPicture2Mem("scan.raw", frameBuffer->getFrameBufferPointer());
 

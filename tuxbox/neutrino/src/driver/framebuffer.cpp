@@ -28,13 +28,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <sys/mman.h>
 #include <memory.h>
+#include <linux/kd.h>
 
 
 CFrameBuffer::CFrameBuffer()
+: active ( true )
 {
 	iconBasePath = "";
 	available=0;
@@ -49,6 +52,7 @@ CFrameBuffer::CFrameBuffer()
 	background = NULL;
 	backgroundFilename = "";
 	fd = 0;
+	tty = 0;
 }
 
 CFrameBuffer* CFrameBuffer::getInstance()
@@ -101,6 +105,52 @@ void CFrameBuffer::init(string fbDevice)
 		goto nolfb;
 	}
 
+	if ((tty=open("/dev/vc/0", O_RDWR))<0)
+	{
+		perror("open (tty)");
+		goto nolfb;
+	}
+
+	struct sigaction act;
+
+	memset(&act,0,sizeof(act));
+	act.sa_handler  = switch_signal;
+	sigemptyset(&act.sa_mask);
+	sigaction(SIGUSR1,&act,NULL);
+	sigaction(SIGUSR2,&act,NULL);
+
+	struct vt_mode mode;
+
+	if (-1 == ioctl(tty,KDGETMODE, &kd_mode)) {
+		perror("ioctl KDGETMODE");
+		goto nolfb;
+	}
+
+	if (-1 == ioctl(tty,VT_GETMODE, &vt_mode)) {
+      		perror("ioctl VT_GETMODE");
+		goto nolfb;
+	}
+
+	if (-1 == ioctl(tty,VT_GETMODE, &mode)) {
+      		perror("ioctl VT_GETMODE");
+		goto nolfb;
+	}
+
+	mode.mode   = VT_PROCESS;
+	mode.waitv  = 0;
+	mode.relsig = SIGUSR1;
+	mode.acqsig = SIGUSR2;
+
+	if (-1 == ioctl(tty,VT_SETMODE, &mode)) {
+		perror("ioctl VT_SETMODE");
+		goto nolfb;
+	}
+
+	if (-1 == ioctl(tty,KDSETMODE, KD_GRAPHICS)) {
+		perror("ioctl KDSETMODE");
+		goto nolfb;
+	}
+
 	return;
 
 nolfb:
@@ -115,6 +165,12 @@ CFrameBuffer::~CFrameBuffer()
 	{
 		delete[] background;
 	}
+
+	if (-1 == ioctl(tty,KDSETMODE, kd_mode))
+	  perror("ioctl KDSETMODE");
+
+	if (-1 == ioctl(tty,VT_SETMODE, &vt_mode))
+		perror("ioctl VT_SETMODE");
 
 	/*
 	if (available)
@@ -139,12 +195,15 @@ unsigned char* CFrameBuffer::getFrameBufferPointer()
 	return lfb;
 }
 
+bool CFrameBuffer::getActive()
+{
+	return active;
+}
+
 int CFrameBuffer::setMode(unsigned int nxRes, unsigned int nyRes, unsigned int nbpp)
 {
-	if (!available)
-	{
+	if (!available&&!active)
 		return -1;
-	}
 
 	screeninfo.xres_virtual=screeninfo.xres=nxRes;
 	screeninfo.yres_virtual=screeninfo.yres=nyRes;
@@ -196,6 +255,9 @@ void CFrameBuffer::paletteFade(int i, __u32 rgb1, __u32 rgb2, int level)
 
 void CFrameBuffer::setTransparency( int tr )
 {
+	if (!active)
+		return;
+
 	if (tr> 8)
 		tr= 8;
 
@@ -233,6 +295,9 @@ void CFrameBuffer::paletteSetColor(int i, __u32 rgb, int tr)
 
 void CFrameBuffer::paletteSet()
 {
+	if (!active)
+		return;
+
 	ioctl(fd, FBIOPUTCMAP, &cmap);
 }
 
@@ -249,6 +314,9 @@ void CFrameBuffer::paintBoxRel(int x, int y, int dx, int dy, unsigned char col)
 
 void CFrameBuffer::paintBox(int xa, int ya, int xb, int yb, unsigned char col)
 {
+	if (!active)
+		return;
+
 	unsigned char* pos = lfb + xa + stride*ya;
 	int dx = xb-xa;
 	int dy = yb-ya;
@@ -261,6 +329,9 @@ void CFrameBuffer::paintBox(int xa, int ya, int xb, int yb, unsigned char col)
 
 void CFrameBuffer::paintVLine(int x, int ya, int yb, unsigned char col)
 {
+	if (!active)
+		return;
+
 	unsigned char* pos = lfb + x + stride*ya;
 	int dy = yb-ya;
 	for(int count=0;count<dy;count++)
@@ -272,6 +343,9 @@ void CFrameBuffer::paintVLine(int x, int ya, int yb, unsigned char col)
 
 void CFrameBuffer::paintVLineRel(int x, int y, int dy, unsigned char col)
 {
+	if (!active)
+		return;
+
 	unsigned char* pos = lfb + x + stride*y;
 	for(int count=0;count<dy;count++)
 	{
@@ -282,6 +356,9 @@ void CFrameBuffer::paintVLineRel(int x, int y, int dy, unsigned char col)
 
 void CFrameBuffer::paintHLine(int xa, int xb, int y, unsigned char col)
 {
+	if (!active)
+		return;
+
 	unsigned char* pos = lfb + xa + stride*y;
 	int dx = xb -xa;
 	memset(pos, col, dx);
@@ -289,6 +366,9 @@ void CFrameBuffer::paintHLine(int xa, int xb, int y, unsigned char col)
 
 void CFrameBuffer::paintHLineRel(int x, int dx, int y, unsigned char col)
 {
+	if (!active)
+		return;
+
 	unsigned char* pos = lfb + x + stride*y;
 	memset(pos, col, dx);
 }
@@ -300,6 +380,9 @@ void CFrameBuffer::setIconBasePath(string iconPath)
 
 bool CFrameBuffer::paintIcon8(string filename, int x, int y, unsigned char offset)
 {
+	if (!active)
+		return false;
+
 	short width, height;
 	unsigned char tr;
 
@@ -347,6 +430,9 @@ bool CFrameBuffer::paintIcon8(string filename, int x, int y, unsigned char offse
 
 bool CFrameBuffer::paintIcon(string filename, int x, int y, unsigned char offset)
 {
+	if (!active)
+		return false;
+
 	short width, height;
 	unsigned char tr;
 
@@ -402,6 +488,9 @@ bool CFrameBuffer::paintIcon(string filename, int x, int y, unsigned char offset
 }
 void CFrameBuffer::loadPal(string filename, unsigned char offset, unsigned char endidx )
 {
+	if (!active)
+		return;
+
 	int fd;
 	struct rgbData rgbdata;
 	filename = iconBasePath + filename;
@@ -432,12 +521,18 @@ void CFrameBuffer::loadPal(string filename, unsigned char offset, unsigned char 
 
 void CFrameBuffer::paintPixel(int x, int y, unsigned char col)
 {
+	if (!active)
+		return;
+
 	unsigned char* pos = lfb + x + stride*y;
 	*pos = col;
 }
 
 void CFrameBuffer::paintLine(int xa, int ya, int xb, int yb, unsigned char col)
 {
+	if (!active)
+		return;
+
 	int dx = abs (xa - xb);
 	int	dy = abs (ya - yb);
 	int	x;
@@ -654,6 +749,9 @@ void CFrameBuffer::paintBackgroundBox(int xa, int ya, int xb, int yb)
 
 void CFrameBuffer::paintBackgroundBoxRel(int x, int y, int dx, int dy)
 {
+	if (!active)
+		return;
+
 	if(!useBackgroundPaint)
 	{
 		paintBoxRel(x, y, dx, dy, backgroundColor);
@@ -678,6 +776,9 @@ void CFrameBuffer::paintBackgroundBoxRel(CPoint origin, CDimension dimension)
 
 void CFrameBuffer::paintBackground()
 {
+	if (!active)
+		return;
+
 	if(!useBackgroundPaint)
 	{
 		memset(lfb, 255, stride*576);
@@ -690,6 +791,9 @@ void CFrameBuffer::paintBackground()
 
 void CFrameBuffer::SaveScreen(int x, int y, int dx, int dy, unsigned char* memp)
 {
+	if (!active)
+		return;
+
     unsigned char *fbpos = lfb + x + stride*y;
 	unsigned char *bkpos = memp;
 	for(int count=0;count<dy;count++)
@@ -703,6 +807,9 @@ void CFrameBuffer::SaveScreen(int x, int y, int dx, int dy, unsigned char* memp)
 
 void CFrameBuffer::RestoreScreen(int x, int y, int dx, int dy, unsigned char* memp)
 {
+	if (!active)
+		return;
+
 	unsigned char *fbpos = lfb + x + stride*y;
 	unsigned char *bkpos = memp;
 	for(int count=0;count<dy;count++)
@@ -713,4 +820,20 @@ void CFrameBuffer::RestoreScreen(int x, int y, int dx, int dy, unsigned char* me
 	}
 }
 
+void CFrameBuffer::switch_signal (int signal)
+{
+	CFrameBuffer * thiz = CFrameBuffer::getInstance();
+	if (signal == SIGUSR1) {
+		ioctl(thiz->tty, VT_RELDISP, 1);
+		thiz->active = false;
+		printf ("release display\n");
+	}
+	else if (signal == SIGUSR2) {
+		ioctl(thiz->tty, VT_RELDISP, VT_ACKACQ);
+		thiz->active = true;
+		printf ("ackquire display\n");
+		thiz->paletteSet();
+		memset(thiz->lfb, 0, thiz->stride*thiz->yRes);
+	}
+}
 

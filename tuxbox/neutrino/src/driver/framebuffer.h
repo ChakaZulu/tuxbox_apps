@@ -29,6 +29,7 @@
 #include "gui/widget/component.h"
 
 #include <linux/fb.h>
+#include <linux/vt.h>
 #include "dbox/fb.h"
 
 #include <string>
@@ -53,7 +54,7 @@ class CFrameBuffer
 
 		string			iconBasePath;
 
-		int				fd;
+		int				fd, tty;
 		unsigned char	*lfb;
 		int				available;
 		unsigned char	*background;
@@ -67,6 +68,11 @@ class CFrameBuffer
 
 		void paletteFade(int i, __u32 rgb1, __u32 rgb2, int level);
 
+		int kd_mode;
+		struct vt_mode vt_mode;
+		bool active;
+		static void switch_signal (int);
+
 	public:
 
 		static CFrameBuffer* getInstance();
@@ -79,6 +85,7 @@ class CFrameBuffer
 
 		unsigned char* getFrameBufferPointer(); //pointer to framebuffer
 		unsigned int getStride(); //stride (anzahl bytes die eine Zeile im Framebuffer belegt)
+		bool getActive(); //is framebuffer active
 
 		void setTransparency( int tr = 0 );
 
