@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.h,v 1.14 2004/01/02 16:40:43 rasc Exp $ 
+$Id: dsmcc_str.h,v 1.15 2004/01/02 22:25:39 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: dsmcc_str.h,v 1.14 2004/01/02 16:40:43 rasc Exp $
 
 
 $Log: dsmcc_str.h,v $
+Revision 1.15  2004/01/02 22:25:39  rasc
+DSM-CC  MODULEs descriptors complete
+
 Revision 1.14  2004/01/02 16:40:43  rasc
 DSM-CC  INT/UNT descriptors complete
 minor changes and fixes
@@ -74,8 +77,8 @@ some updates to dvbsnoop...
 #define __DSMCC_H 1
 
 
-
-char *dsmccStrDSMCC_DescriptorTAG (u_int i);
+char *dsmccStrDSMCC_STREAM_DescriptorTAG (u_int i);
+char *dsmccStrDSMCC_MODULE_DescriptorTAG (u_int i);
 char *dsmccStrDSMCC_INT_UNT_DescriptorTAG (u_int i);
 
 char *dsmccStrMHPOrg (u_int id);
@@ -103,6 +106,8 @@ char *dsmccStr_UpdateFlag (u_int id);
 char *dsmccStr_UpdateMethod (u_int id);
 char *dsmccStr_TimeUnits (u_int id);
 
+char *dsmccStr_GroupModuleLinkPosition (u_int id);
+char *dsmccStr_compression_method (u_int id);
 
 
 

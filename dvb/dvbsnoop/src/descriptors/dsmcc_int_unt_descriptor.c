@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_int_unt_descriptor.c,v 1.11 2004/01/02 16:40:34 rasc Exp $ 
+$Id: dsmcc_int_unt_descriptor.c,v 1.12 2004/01/02 22:25:35 rasc Exp $ 
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: dsmcc_int_unt_descriptor.c,v 1.11 2004/01/02 16:40:34 rasc Exp $
 
 
 $Log: dsmcc_int_unt_descriptor.c,v $
+Revision 1.12  2004/01/02 22:25:35  rasc
+DSM-CC  MODULEs descriptors complete
+
 Revision 1.11  2004/01/02 16:40:34  rasc
 DSM-CC  INT/UNT descriptors complete
 minor changes and fixes
@@ -132,7 +135,7 @@ int  descriptorDSMCC_INT_UNT_Private  (u_char *b)
      case 0x08:  descriptorDSMCC_target_serial_number (b); break;
      case 0x09:  descriptorDSMCC_target_IP_address (b); break;
      case 0x0A:  descriptorDSMCC_target_IPv6_address (b); break;
-     case 0x0B:  descriptorDSMCC_ssu_subgroup_association_descriptor (b); break;
+     case 0x0B:  descriptorDSMCC_ssu_subgroup_association (b); break;
      case 0x0C:  descriptorDSMCC_IP_MAC_platform_name (b); break;
      case 0x0D:  descriptorDSMCC_IP_MAC_platform_provider_name (b); break;
      case 0x0E:  descriptorDSMCC_target_MAC_address_range (b); break;
@@ -141,7 +144,7 @@ int  descriptorDSMCC_INT_UNT_Private  (u_char *b)
      case 0x11:  descriptorDSMCC_target_IPv6_slash (b); break;
      case 0x12:  descriptorDSMCC_target_IPv6_source_slash (b); break;
      case 0x13:  descriptorDSMCC_IP_MAC_StreamLocation (b); break;
-     case 0x14:  descriptorDSMCC_ISP_access_mode_descriptor (b); break;
+     case 0x14:  descriptorDSMCC_ISP_access_mode (b); break;
      // DVB SI scope...
      case 0x57:  descriptorDVB_Telephone (b);  break;
      case 0x5F:  descriptorDVB_PrivateDataSpecifier (b);  break;
@@ -521,11 +524,11 @@ static struct IPv6ADDR *_getIPv6Addr (u_char *b, struct IPv6ADDR *x)
 
 
 /*
-  0x0B - ssu_subgroup_association_descriptor
+  0x0B - ssu_subgroup_association
   ETSI EN 301 192  (ISO 13818-6)
 */
 
-void descriptorDSMCC_ssu_subgroup_association_descriptor (u_char *b)
+void descriptorDSMCC_ssu_subgroup_association (u_char *b)
 {
 
  // descriptor_tag	= b[0];
@@ -552,7 +555,7 @@ void descriptorDSMCC_ssu_subgroup_association_descriptor (u_char *b)
 
 
 /*
-  0x0C - IP/MAC_platform_name_descriptor
+  0x0C - IP/MAC_platform_name
   ETSI EN 301 192  (ISO 13818-6)
 */
 
@@ -576,7 +579,7 @@ void descriptorDSMCC_IP_MAC_platform_name (u_char *b)
 
 
 /*
-  0x0D - IP/MAC_platform_provider_name_descriptor
+  0x0D - IP/MAC_platform_provider_name
   ETSI EN 301 192  (ISO 13818-6)
 */
 
@@ -816,11 +819,11 @@ void descriptorDSMCC_IP_MAC_StreamLocation (u_char *b)
 
 
 /*
-  0x14 - ISP_access_mode_descriptor
+  0x14 - ISP_access_mode
   ETSI EN 301 192  (ISO 13818-6)
 */
 
-void descriptorDSMCC_ISP_access_mode_descriptor (u_char *b)
+void descriptorDSMCC_ISP_access_mode (u_char *b)
 {
 
  // descriptor_tag	= b[0];

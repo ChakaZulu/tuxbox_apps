@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.16 2004/01/02 16:40:43 rasc Exp $
+$Id: dsmcc_str.c,v 1.17 2004/01/02 22:25:39 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dsmcc_str.c,v 1.16 2004/01/02 16:40:43 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.17  2004/01/02 22:25:39  rasc
+DSM-CC  MODULEs descriptors complete
+
 Revision 1.16  2004/01/02 16:40:43  rasc
 DSM-CC  INT/UNT descriptors complete
 minor changes and fixes
@@ -113,14 +116,37 @@ static char *findTableID (STR_TABLE *t, u_int id)
 /* -----------------------------------------  */
 
 
-
 /*
-  -- DSM-CC  Descriptors
-  -- Private Tag Space  (DII, DSI)
-  -- see EN 192
+  -- DSM-CC STREAM Descriptors
+  -- Private Tag Space  (PES, Section)
+  -- see ISO 13818-6
  */
 
-char *dsmccStrDSMCC_DescriptorTAG (u_int i)
+char *dsmccStrDSMCC_STREAM_DescriptorTAG (u_int i)
+
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "ISO/IEC 13818-6 reserved" },
+     {  0x01, 0x01,  "NPT_Reference_descriptor" },
+     {  0x02, 0x02,  "NPT_Endpoint_descriptor" },
+     {  0x03, 0x03,  "Stream_Mode_descriptor" },
+     {  0x04, 0x04,  "Stream_Event_descriptor" },
+     {  0x05, 0xFF,  "ISO/IEC 13818-6 reserved" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+/*
+  -- DSM-CC MODULE Descriptors
+  -- Private Tag Space  (DII, DSI)
+  -- see  EN 301 192 
+ */
+
+char *dsmccStrDSMCC_MODULE_DescriptorTAG (u_int i)
 
 {
   STR_TABLE  Table[] = {
@@ -150,7 +176,7 @@ char *dsmccStrDSMCC_DescriptorTAG (u_int i)
 /*
   -- DSM-CC  INT (UNT, SSU-UNT) Descriptors
   -- Private INT, UNT, SSU-UNT Tag Space
-  -- see EN 192
+  -- see  EN 301 192 // TS 102 006
  */
 
 char *dsmccStrDSMCC_INT_UNT_DescriptorTAG (u_int i)
@@ -681,31 +707,37 @@ char *dsmccStr_TimeUnits (u_int id)
 
 
 
+/*
+  -- DSM-CC  Module Link Position
+  --  e.g. from ISO 13818-6 // EN 301 192
+  --  
+*/
+
+char *dsmccStr_GroupModuleLinkPosition (u_int id)
+
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x00, 0x00,   "first in list" },
+	{ 0x01, 0x01,   "intermediate in list" },
+	{ 0x02, 0x02,   "last in list" },
+      	{  0,0, NULL }
+  };
+
+  return findTableID (TableIDs, id);
+}
 
 
+/*
+  -- DSM-CC  compression_method
+  --  e.g. from ISO 13818-6 // EN 301 192
+  --  
+*/
 
+char *dsmccStr_compression_method (u_int id)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+{
+    return (char *) "compression method used, see: RFC 1950";
+}
 
 
 

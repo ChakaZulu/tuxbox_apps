@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_misc.c,v 1.4 2004/01/02 16:40:33 rasc Exp $
+$Id: dsmcc_misc.c,v 1.5 2004/01/02 22:25:34 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: dsmcc_misc.c,v 1.4 2004/01/02 16:40:33 rasc Exp $
 
 
 $Log: dsmcc_misc.c,v $
+Revision 1.5  2004/01/02 22:25:34  rasc
+DSM-CC  MODULEs descriptors complete
+
 Revision 1.4  2004/01/02 16:40:33  rasc
 DSM-CC  INT/UNT descriptors complete
 minor changes and fixes
@@ -40,9 +43,9 @@ DSM-CC  UNT section
 
 #include "dvbsnoop.h"
 #include "dsmcc_misc.h"
+#include "descriptors/descriptor.h"
 #include "strings/dvb_str.h"
 #include "strings/dsmcc_str.h"
-#include "descriptors/dsm_int_unt_descriptor.h"
 #include "misc/output.h"
 #include "misc/hexprint.h"
 
@@ -80,7 +83,7 @@ int dsmcc_pto_descriptor_loop (u_char *name, u_char *b)
 
      indent (+1);
      while (len > 0) {
-	 i   = descriptorDSMCC_INT_UNT_Private (b);
+	 i   = descriptor (b, DSMCC_INT_UNT);
 	 b   += i;
 	 len -= i;
 	

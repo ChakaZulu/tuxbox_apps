@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.19 2004/01/02 16:40:37 rasc Exp $
+$Id: helper.c,v 1.20 2004/01/02 22:25:38 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: helper.c,v 1.19 2004/01/02 16:40:37 rasc Exp $
 
 
 $Log: helper.c,v $
+Revision 1.20  2004/01/02 22:25:38  rasc
+DSM-CC  MODULEs descriptors complete
+
 Revision 1.19  2004/01/02 16:40:37  rasc
 DSM-CC  INT/UNT descriptors complete
 minor changes and fixes
@@ -293,6 +296,24 @@ void print_name2 (int v, u_char *b, u_int len)
   
 
 }
+
+
+void print_std_ascii (int v, u_char *b, u_int len)
+
+{
+  int    i;
+  u_char c;
+ 
+  out (v,"\"");
+  for (i=0; i<len; i++) {
+    c = b[i];
+    if (!isprint (c)) c = '.';
+    out (v, "%c", c);
+  } 
+  out (v,"\"");
+
+}
+
 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: dmx_sect.c,v 1.15 2004/01/02 00:00:37 rasc Exp $
+$Id: dmx_sect.c,v 1.16 2004/01/02 22:25:37 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dmx_sect.c,v 1.15 2004/01/02 00:00:37 rasc Exp $
 
 
 $Log: dmx_sect.c,v $
+Revision 1.16  2004/01/02 22:25:37  rasc
+DSM-CC  MODULEs descriptors complete
+
 Revision 1.15  2004/01/02 00:00:37  rasc
 error output for buffer overflow
 
@@ -259,5 +262,13 @@ static long  sect_read (int fd, u_char *buf, long buflen)
 
 
 
+/*
+  Annotation:
+    We could also do a soft-CRC32 check here.
+    But to do this properly, we have to do this "read" byte shifted, because
+    we do not know, when a payload_unit_start is indicated in TS.
+    Also this would be necessary, when reading from playback stream files.
+    so: currently we only offer hardware supported crc check...
+ */
 
 

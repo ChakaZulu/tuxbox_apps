@@ -1,5 +1,5 @@
 /*
-$Id: descriptor.h,v 1.6 2004/01/01 20:09:19 rasc Exp $ 
+$Id: descriptor.h,v 1.7 2004/01/02 22:25:35 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: descriptor.h,v 1.6 2004/01/01 20:09:19 rasc Exp $
 
 
 $Log: descriptor.h,v $
+Revision 1.7  2004/01/02 22:25:35  rasc
+DSM-CC  MODULEs descriptors complete
+
 Revision 1.6  2004/01/01 20:09:19  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -38,7 +41,10 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 
 
 // Descriptor tag space/scope...
-typedef enum {MPEG, DVB_SI, DSMCC, DSMCC_INT_UNT, MHP} DTAG_SCOPE;
+typedef enum {
+	MPEG, DVB_SI,
+	DSMCC_STREAM, DSMCC_MODULE, DSMCC_INT_UNT, MHP
+} DTAG_SCOPE;
 
 
 int   descriptor (u_char *b, DTAG_SCOPE s);

@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc.c,v 1.4 2004/01/02 16:40:33 rasc Exp $
+$Id: dsmcc.c,v 1.5 2004/01/02 22:25:34 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dsmcc.c,v 1.4 2004/01/02 16:40:33 rasc Exp $
 
 
 $Log: dsmcc.c,v $
+Revision 1.5  2004/01/02 22:25:34  rasc
+DSM-CC  MODULEs descriptors complete
+
 Revision 1.4  2004/01/02 16:40:33  rasc
 DSM-CC  INT/UNT descriptors complete
 minor changes and fixes
@@ -46,7 +49,7 @@ dsmcc section tables
 #include "dsmcc.h"
 #include "llc_snap.h"
 
-#include "descriptors/dsm_descriptor.h"
+#include "descriptors/descriptor.h"
 #include "strings/dsmcc_str.h"
 #include "strings/dvb_str.h"
 
@@ -55,6 +58,8 @@ dsmcc section tables
 
 
 
+
+static void DSMCC_descriptor_list (u_char *b, int len);
 
 
 
@@ -99,7 +104,7 @@ void decode_DSMCC_section (u_char *b, int len)
 
 
  b += 8;
- len1 = section_length - 5;
+ len1 = section_length - 5 - 4;	    // -4 == CRC/Checksum
 
 
  if (table_id == 0x3A) {
@@ -112,7 +117,7 @@ void decode_DSMCC_section (u_char *b, int len)
 	// $$$ TODO
 	out_nl (1,"$$$ TODO...");
 	indent (+1);
-	printhexdump_buf (4, b, len1-4);	// -4 == CRC/Checksum
+	printhexdump_buf (4, b, len1);
 	indent (-1);
 
  } else if (table_id == 0x3C) {
@@ -121,27 +126,21 @@ void decode_DSMCC_section (u_char *b, int len)
 	// $$$ TODO
 	out_nl (1,"$$$ TODO...");
 	indent (+1);
-	printhexdump_buf (4, b, len1-4);	// -4 == CRC/Checksum
+	printhexdump_buf (4, b, len1);
 	indent (-1);
 
  } else if (table_id == 0x3D) {
 
-	// dsmcc_descriptor_list()
-	// $$$ TODO
-	out_nl (1,"$$$ TODO...");
-	indent (+1);
-	printhexdump_buf (4, b, len1-4);	// -4 == CRC/Checksum
-	indent (-1);
+	DSMCC_descriptor_list (b,len1);
 
  } else if (table_id == 0x3E) {
 
-	 // $$$ Remark: DVB defines 0x3E as datagram!!
-
-	 print_private_data (4, b, len1-4);	// -4 == CRC/Checksum
+	 // $$$ Remark: DVB defines 0x3E as datagram!!   $$$ TODO ??
+	 print_private_data (4, b, len1);
 
  }
 
- b += len1-4;
+ b += len1;
 
 
  if (section_syntax_indicator) {
@@ -161,4 +160,22 @@ NOTE 1: The DownloadServerInitiate message, the DownloadInfoIndication message, 
 DownloadCancel message are in the userNetworkMessage class.
 NOTE 2: The DownloadDataBlock message is within the downloadMessage class.
 */
+
+
+
+static void DSMCC_descriptor_list (u_char *b, int len)
+{
+   int x;
+
+   while (len > 0) {
+	  x = descriptor (b, DSMCC_STREAM);
+	  b += x;
+	  len -= x;
+   }
+}
+
+
+
+
+
 

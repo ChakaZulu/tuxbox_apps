@@ -1,5 +1,5 @@
 /*
-$Id: dsm_int_unt_descriptor.h,v 1.9 2004/01/02 02:18:34 rasc Exp $ 
+$Id: dsm_int_unt_descriptor.h,v 1.10 2004/01/02 22:25:35 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: dsm_int_unt_descriptor.h,v 1.9 2004/01/02 02:18:34 rasc Exp $
 
 
 $Log: dsm_int_unt_descriptor.h,v $
+Revision 1.10  2004/01/02 22:25:35  rasc
+DSM-CC  MODULEs descriptors complete
+
 Revision 1.9  2004/01/02 02:18:34  rasc
 more DSM-CC  INT/UNT descriptors
 
@@ -67,7 +70,7 @@ void descriptorDSMCC_target_MAC_address (u_char *b);
 void descriptorDSMCC_target_serial_number (u_char *b);
 void descriptorDSMCC_target_IP_address (u_char *b);
 void descriptorDSMCC_target_IPv6_address (u_char *b);
-void descriptorDSMCC_ssu_subgroup_association_descriptor (u_char *b);
+void descriptorDSMCC_ssu_subgroup_association (u_char *b);
 void descriptorDSMCC_IP_MAC_platform_name (u_char *b);
 void descriptorDSMCC_IP_MAC_platform_provider_name (u_char *b);
 void descriptorDSMCC_target_MAC_address_range (u_char *b);
@@ -76,7 +79,7 @@ void descriptorDSMCC_target_IP_source_slash (u_char *b);
 void descriptorDSMCC_target_IPv6_slash (u_char *b);
 void descriptorDSMCC_target_IPv6_source_slash (u_char *b);
 void descriptorDSMCC_IP_MAC_StreamLocation (u_char *b);
-void descriptorDSMCC_ISP_access_mode_descriptor (u_char *b);
+void descriptorDSMCC_ISP_access_mode (u_char *b);
 
 
 #endif
