@@ -42,6 +42,7 @@ neutrino_LDADD = \
 	@PNG_LIBS@ \
 	@MAD_LIBS@ \
 	@ID3TAG_LIBS@ \
+	@MPEGTOOLS_LIBS@ \
 	-ljpeg \
 	-lpthread
 
