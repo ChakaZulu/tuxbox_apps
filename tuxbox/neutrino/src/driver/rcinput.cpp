@@ -854,6 +854,10 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 									*msg = NeutrinoMessages::EVT_SCAN_NUM_TRANSPONDERS;
 									*data = *(unsigned*) p;
 								break;
+							case CZapitClient::EVT_SCAN_REPORT_NUM_SCANNED_TRANSPONDERS :
+									*msg = NeutrinoMessages::EVT_SCAN_REPORT_NUM_SCANNED_TRANSPONDERS;
+									*data = *(unsigned*) p;
+								break;
 							case CZapitClient::EVT_SCAN_NUM_CHANNELS :
 									*msg = NeutrinoMessages::EVT_SCAN_NUM_CHANNELS;
 									*data = *(unsigned*) p;
