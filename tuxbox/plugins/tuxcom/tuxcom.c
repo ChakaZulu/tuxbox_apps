@@ -548,6 +548,7 @@ void plugin_exec(PluginParam *par)
 	curframe = 0;
 	cursort = SORT_UP;
 	curvisibility = 0;
+	textuppercase = 0;
 	commandsize =sysconf(_SC_ARG_MAX )-100;
 	szCommand = (char*)malloc(commandsize);
 	szCommand [0]= 0x00;
@@ -1782,8 +1783,30 @@ int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, in
 						else szdst[pos] = *((char*)pch+1);
 					}
 					break;
+				case RC_0:
+				case RC_1:
+				case RC_2:
+				case RC_3:
+				case RC_4:
+				case RC_5:
+				case RC_6:
+				case RC_7:
+				case RC_8:
+				case RC_9:
+					pch = strchr(numberchars[rccode],tolower(szdst[pos]));
+					if (pch == NULL) szdst[pos] = (textuppercase == 0 ? numberchars[rccode][0] : toupper(numberchars[rccode][0]));
+					else
+					{
+						if (pch == &(numberchars[rccode][strlen(numberchars[rccode])-1])) szdst[pos] = numberchars[rccode][0];
+						else szdst[pos] = (textuppercase == 0 ? *((char*)pch+1) : toupper(*((char*)pch+1)));
+					}
+					break;
 				case RC_RED:
 					szdst[0] = 0x00;
+					break;
+				case RC_YELLOW:
+					textuppercase = 1-textuppercase;
+					szdst[pos] = (textuppercase == 0 ? tolower(szdst[pos]) : toupper(szdst[pos]));
 					break;
 				case RC_HOME:
 					rccode = -1;

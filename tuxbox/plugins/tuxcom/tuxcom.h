@@ -25,6 +25,7 @@
 #include <locale.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -62,7 +63,7 @@
 #define RIGHTFRAME   1
 
 #define DEFAULT_PATH "/"
-#define charset " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%&?()=<>+-_,."
+#define charset " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@!#$%&?/\()=<>+-_,.;:"
 
 #define FILEBUFFER_SIZE 100 * 1024 // Edit files up to 100k
 
@@ -197,6 +198,7 @@ int curframe, cursort, curvisibility;
 int tool[MENUITEMS*2];
 int colortool[COLORBUTTONS];
 int overwriteall, skipall;
+int textuppercase;
 
 int framerows;
 int viewx;
@@ -284,6 +286,17 @@ enum {INFO_COPY   ,
       INFO_MOVE   ,
       INFO_EXEC   ,
       INFO_MARKER };
+
+char *numberchars[] = { "0@!#$%&?/\() ",
+                 		 "1<>+-_,.;:=" ,
+                 		 "abc2",
+                 		 "def3",
+                 		 "ghi4",
+                 		 "jkl5",
+                 		 "mno6",
+                 		 "pqrs7",
+                 		 "tuv8",
+                 		 "wxyz9" };
 
 char *info[]   = { "(select 'hidden' to copy in background)"   ,"('versteckt' wählen zum Kopieren im Hintergrund)"   ,
                    "(select 'hidden' to move in background)"   ,"('versteckt' wählen zum Verschieben im Hintergrund)",
