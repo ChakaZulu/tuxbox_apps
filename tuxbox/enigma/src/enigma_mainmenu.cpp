@@ -9,6 +9,7 @@
 #include "showbnversion.h"
 #include "enigma_lcd.h"
 #include "elabel.h"
+#include "epgcache.h"
 
 eMainMenu::eMainMenu()
 {
@@ -29,9 +30,13 @@ eMainMenu::eMainMenu()
 
 int eMainMenu::exec()
 {
+	qDebug("Stop EPGCache");
+	eEPGCache::getInstance()->leaveService();
 	window->show();
 	int res=window->exec();
 	window->hide();
+	eEPGCache::getInstance()->startEPG();
+	qDebug("Restart EPGCache");
 	return res;
 }
 

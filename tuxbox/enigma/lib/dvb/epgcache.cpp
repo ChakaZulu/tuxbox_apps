@@ -14,13 +14,13 @@ eEPGCache *eEPGCache::instance;
 eEPGCache::eEPGCache():eSection(0x12, 0x50, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xF0)
 {
 	qDebug("[EPGC] Initialized EPGCache");
-	zapTimer.stop();
+	isRunning=0;
 	IdleTimer.start(0);
-	connect(eDVB::getInstance(), SIGNAL(enterTransponder(eTransponder*)), SLOT(enterTransponder()));
-	connect(eDVB::getInstance(), SIGNAL(leaveTransponder(eTransponder*)), SLOT(leaveTransponder()));
+	connect(eDVB::getInstance(), SIGNAL(enterService(eService*)), SLOT(enterService()));
+	connect(eDVB::getInstance(), SIGNAL(leaveService(eService*)), SLOT(leaveService()));
 	connect(eDVB::getInstance(), SIGNAL(timeUpdated()), SLOT(timeUpdated()));	
+	connect(&zapTimer, SIGNAL(timeout()), SLOT(startEPG()));
 	connect(&IdleTimer, SIGNAL(timeout()), SLOT(cleanLoop()));	
-	connect(&zapTimer, SIGNAL(timeout()), SLOT(ZapDelay()));
 	instance=this;
 }
 
@@ -68,37 +68,43 @@ int eEPGCache::sectionRead(__u8 *data)
 
 void eEPGCache::timeUpdated()
 {
-	qDebug("[EPGC] time is now valid... start caching events");
-	start();
+	if (!isRunning && zapTimer.isActive())
+	{
+		isRunning=1;
+		qDebug("[EPGC] time is now valid... start caching events");
+		start();
+	}
 }
 
-void eEPGCache::enterTransponder()
+void eEPGCache::startEPG()
 {
-// Set Two Seconds Delay for fast Zapping
-	if (zapTimer.isActive())
-		zapTimer.stop();
-	
-	zapTimer.start(2000, true);
+	if (eDVB::getInstance()->time_difference && !isRunning)	
+	{
+		isRunning=1;
+		qDebug("[EPGC] zapping finished.. restart caching events");
+		start();
+	}
 }
 
-void eEPGCache::leaveTransponder()
+void eEPGCache::enterService()
+{
+	zapTimer.stop();
+	zapTimer.start(3000, 1);
+}
+
+void eEPGCache::leaveService()
 {
 	if (eDVB::getInstance()->time_difference)
-		abort();
-}
-
-void eEPGCache::ZapDelay()
-{
-	if (eDVB::getInstance()->time_difference)	
 	{
-		qDebug("[EPGC] zap delay is over... start caching events");
-		start();
+		qDebug("[EPGC] zapping ... stop caching events");
+		abort();
+		isRunning=0;
 	}
 }
 
 void eEPGCache::cleanLoop()
 {
-	if ( !eventDB.empty() )   // Elements in EPGCache ?
+	if ( !eventDB.empty() && isRunning )   // Elements in EPGCache ?
 	{
 		static eventCache::iterator DBIt = eventDB.begin();  // change to first onid/sid map
 		static eventMap::iterator It=DBIt->second.begin();  // start on first onid/sid

@@ -49,7 +49,6 @@ void eEPGWindow::entrySelected(eListboxEntry *entry)
 	ei.exec();
 	ei.hide();
 	show();
-//	close(0);     MACHE ICH HIER DAS CLOSE SCHLIESST DAS FENSTER EINWANDFREI...
 }
 
 int eEPGWindow::eventFilter(const eWidgetEvent &event)
@@ -60,12 +59,8 @@ int eEPGWindow::eventFilter(const eWidgetEvent &event)
 		switch (event.parameter)
 		{
 			case eRCInput::RC_HOME:
-			case eRCInput::RC_DBOX:
-			case eRCInput::RC_HELP:
-			case eRCInput::RC_RED:
-			{
-   			close(0); /// UND HIER CRASHT ES VOLL AB !
-			}
+ 			close(0);
+			break;
 		}
 	}
 	return 0;

@@ -69,14 +69,14 @@ private:
 	int sectionRead(__u8 *data);
 	static eEPGCache *instance;
 	eventCache eventDB;
-	QTimer zapTimer;
 	QTimer IdleTimer;
+	QTimer zapTimer;
 public slots:
-	void enterTransponder();
-	void leaveTransponder();
+	void enterService();
+	void leaveService();
 	void timeUpdated();
-	void ZapDelay();
 	void cleanLoop();
+	void startEPG();
 public:
 	eEPGCache();
 	~eEPGCache();

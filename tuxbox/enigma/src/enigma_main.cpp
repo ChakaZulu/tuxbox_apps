@@ -751,8 +751,12 @@ void eZapMain::keyUp(int code)
 	{
 		if (isVT)
 		{
+			qDebug("Stop EPGCache");
+			eEPGCache::getInstance()->leaveService();
 			eZapPlugins plugins;
 			plugins.execPluginByName("tuxtxt.cfg");
+			qDebug("Restart EPGCache");
+			eEPGCache::getInstance()->startEPG();
 		}
 		break;
 	}
