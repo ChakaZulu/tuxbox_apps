@@ -1,9 +1,9 @@
 /*
- * $Id: pmt.cpp,v 1.4 2002/04/10 18:36:21 obi Exp $
+ * $Id: pmt.cpp,v 1.5 2002/04/15 15:31:01 field Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -60,7 +60,7 @@ uint16_t parse_ES_info(uint8_t *buffer, pids *ret_pids, uint16_t ca_system_id)
 
 	if ((stream_type == 0x03 || stream_type == 0x04 || stream_type == 0x06) && ap_count < max_num_apids)
 	{
-		ret_pids->apids[ap_count].component_tag = 0;
+		ret_pids->apids[ap_count].component_tag = 0xFF;	// indikator für "kein c_tag"
 		ret_pids->apids[ap_count].is_ac3 = false;
 		ret_pids->apids[ap_count].desc[0] = 0;
 	}
@@ -183,10 +183,10 @@ uint16_t parse_ES_info(uint8_t *buffer, pids *ret_pids, uint16_t ca_system_id)
 			default:
 				{
 					int i;
-					printf("stream type %#x descriptor tag: %#x\n", stream_type, descriptor_tag);
-					printf("data: ");
-					for (i = 0; i < descriptor_length + 2; i++) printf("%02x ", buffer[descr_pos + i]);
-					printf("\n");
+					//printf("stream type %#x descriptor tag: %#x\n", stream_type, descriptor_tag);
+					//printf("data: ");
+					//for (i = 0; i < descriptor_length + 2; i++) printf("%02x ", buffer[descr_pos + i]);
+					//printf("\n");
 				}
 				break;
 		}
