@@ -171,18 +171,27 @@ void eSatfind::tunedIn(eTransponder *, int error )
 
 void eSatfind::update()
 {                    
-	int snr=fe->SNR()*100/65535,
-			agc=fe->SignalStrength()*100/65535,
+	int snr=fe->SNR(),
+			agc=fe->SignalStrength(),
 			ber=fe->BER();
-	p_agc->setPerc(agc);
-	p_snr->setPerc(snr);
+	p_agc->setPerc(agc*100/65535);
+	p_snr->setPerc(snr*100/65535);
 	p_ber->setPerc((int)log2(ber));
-	lsnr_num->setText(eString().sprintf("%d%%",snr));
-	lsync_num->setText(eString().sprintf("%d%%",agc));
+	lsnr_num->setText(eString().sprintf("%d%%",snr*100/65535));
+	lsync_num->setText(eString().sprintf("%d%%",agc*100/65535));
 	lber_num->setText(eString().sprintf("%d",ber));
 	status=fe->Status();
 	c_lock->setCheck(!!(status & FE_HAS_LOCK));
 	c_sync->setCheck(!!(status & FE_HAS_SYNC));
+	eDebug("[Satfind] SNR %d(%s) AGC %d(%s) BER %d(%s) %s %s",
+		snr,
+		lsnr_num->getText().c_str(),
+		agc,
+		lsync_num->getText().c_str(),
+		ber,
+		lber_num->getText().c_str(),
+		c_lock->isChecked()?"LOCK":"NOLOCK",
+		c_sync->isChecked()?"SYNC":"NOSYNC");
 #ifndef DISABLE_LCD
 	eZapLCD::getInstance()->lcdSatfind->update(snr,agc);
 #endif
