@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-
+	$Id: timermanager.h,v 1.7 2002/05/14 23:10:36 dirch Exp $
 
 	License: GPL
 
@@ -33,6 +33,7 @@
 #include <string>
 
 #include "timerdclient.h"
+#include "clientlib/zapitclient.h"
 #include "eventserver.h"
 
 using namespace std;
@@ -47,6 +48,7 @@ class CTimerManager
 	private:
 		int					eventID;
 		CEventServer		*eventServer;
+		CZapitClient		*zapitClient;	
 		CTimerEventMap		events;
 		pthread_t			thrTimer;
 
@@ -58,9 +60,14 @@ class CTimerManager
 		static CTimerManager* getInstance();
 
 		CEventServer* getEventServer() {return eventServer;};
+		CZapitClient* getZapitClient() {return zapitClient;};
 		int addEvent(CTimerEvent*);
 		void removeEvent(int eventID);
 		CTimerEvent* getNextEvent();
+		CTimerEventMap getEvents(){return events;};
+		void listEvents(CTimerEventMap &Events);
+
+
 };
 
 
@@ -77,7 +84,7 @@ class CTimerEvent
 		inline int time();
 		bool operator <= ( CTimerEvent&);
 		bool operator >= ( CTimerEvent&);
-
+		void printEvent(void);
 		static CTimerEvent now();
 
 		virtual void fireEvent(){};
@@ -91,16 +98,31 @@ class CTimerEvent_Shutdown : public CTimerEvent
 		virtual void fireEvent();
 };
 
+
+class CTimerEvent_Standby : public CTimerEvent
+{
+	public:
+		bool standby_on;
+
+		CTimerEvent_Standby( int mon = 0, int day = 0, int hour = 0, int min = 0) :
+			CTimerEvent(mon, day, hour, min, CTimerdClient::TIMER_STANDBY){};
+		virtual void fireEvent();
+};
+
+class CTimerEvent_Record : public CTimerEvent
+{
+	public:
+
+		CTimerEvent_Record( int mon = 0, int day = 0, int hour = 0, int min = 0) :
+			CTimerEvent(mon, day, hour, min, CTimerdClient::TIMER_RECORD){};
+		virtual void fireEvent();
+};
+
 class CTimerEvent_NextProgram : public CTimerEvent
 {
 	public:
-		struct EventInfo
-		{
-			int      uniqueKey;
-			int      onidSid;
-			char     name[50];
-			int      fsk;
-		} eventInfo;
+
+		CTimerd::EventInfo eventInfo;
 
 		typedef map< int, CTimerEvent_NextProgram*> EventMap;
 		static EventMap events;

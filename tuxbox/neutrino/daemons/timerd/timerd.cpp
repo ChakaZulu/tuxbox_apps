@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-
+	$Id: timerd.cpp,v 1.8 2002/05/14 23:10:36 dirch Exp $
 
 	License: GPL
 
@@ -53,7 +53,8 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
 		return;
 	}
 
-	CTimerEvent_NextProgram::EventMap::iterator it = NULL;
+//	CTimerEvent_NextProgram::EventMap::iterator it = NULL;
+	CTimerEventMap events;
 	switch (rmessage->cmd)
 	{
 
@@ -65,6 +66,28 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
 			CTimerManager::getInstance()->getEventServer()->unRegisterEvent( connfd );
 		break;
 
+		case CTimerd::CMD_GETTIMER:
+			CTimerd::commandGetTimer msgGetTimer;
+			read(connfd,&msgGetTimer, sizeof(msgGetTimer));
+			CTimerd::responseGetTimer rspGetTimer;
+
+		break;
+
+		case CTimerd::CMD_GETTIMERLIST:
+			CTimerManager::getInstance()->listEvents(events);
+			for(CTimerEventMap::iterator pos = events.begin();pos != events.end();pos++)
+			{
+				CTimerd::responseGetTimer event;
+				event.month = pos->second->alarmtime.tm_mon;
+				event.day = pos->second->alarmtime.tm_mday;
+				event.hour = pos->second->alarmtime.tm_hour;
+				event.min = pos->second->alarmtime.tm_min;
+				event.eventType = pos->second->eventType;
+				event.eventID = pos->second->eventID;
+				write( connfd, &event, sizeof(CTimerd::responseGetTimer));
+			}
+		break;
+
 		case CTimerd::CMD_ADDTIMER:
 			CTimerd::commandAddTimer msgAddTimer;
 			read(connfd,&msgAddTimer, sizeof(msgAddTimer));
@@ -73,6 +96,18 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
 			CTimerEvent* event;
 			switch (msgAddTimer.evType)
 			{
+
+				case CTimerdClient::TIMER_STANDBY :
+					CTimerd::commandSetStandby standby;
+					read( connfd, &standby, sizeof(CTimerd::commandSetStandby));
+					event = new CTimerEvent_Standby(
+						msgAddTimer.month, msgAddTimer.day,
+						msgAddTimer.hour, msgAddTimer.min);
+
+					static_cast<CTimerEvent_Standby*>(event)->standby_on = standby.standby_on;
+					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
+				break;
+
 				case CTimerdClient::TIMER_SHUTDOWN :
 					event = new CTimerEvent_Shutdown(
 						msgAddTimer.month, msgAddTimer.day,
@@ -80,8 +115,25 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
 					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
 				break;
 
+				case CTimerdClient::TIMER_RECORD :
+					event = new CTimerEvent_Record(
+						msgAddTimer.month, msgAddTimer.day,
+						msgAddTimer.hour, msgAddTimer.min);
+					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
+				break;
+
 				case CTimerdClient::TIMER_NEXTPROGRAM :
-					CTimerEvent_NextProgram::EventInfo evInfo;
+					CTimerd::EventInfo evInfo;
+					read( connfd, &evInfo, sizeof(CTimerd::EventInfo));
+					if(evInfo.onidSid > 0)
+					{
+						event = new CTimerEvent_NextProgram(
+							msgAddTimer.month, msgAddTimer.day,
+							msgAddTimer.hour, msgAddTimer.min);
+						static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.onidSid = evInfo.onidSid;
+						rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
+					}
+/*					CTimerEvent_NextProgram::EventInfo evInfo;
 					read( connfd, &evInfo, sizeof(CTimerEvent_NextProgram::EventInfo));
 
 					it = CTimerEvent_NextProgram::events.find( evInfo.uniqueKey);
@@ -104,25 +156,29 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
 						event->alarmtime.tm_min  = msgAddTimer.min;
 						rspAddTimer.eventID = event->eventID;
 					}
+*/
 				break;
 				default:
 					event = new CTimerEvent(
 						msgAddTimer.month, msgAddTimer.day,
 						msgAddTimer.hour, msgAddTimer.min,
 						msgAddTimer.evType);
+					rspAddTimer.eventID = event->eventID;
 			}
 
 			write( connfd, &rspAddTimer, sizeof(rspAddTimer));
 
 			break;
 		case CTimerd::CMD_REMOVETIMER:
+			CTimerd::commandRemoveTimer msgRemoveTimer;
+			read(connfd,&msgRemoveTimer, sizeof(msgRemoveTimer));
+			CTimerManager::getInstance()->removeEvent( msgRemoveTimer.eventID);
 			break;
 
 		case CTimerd::CMD_TIMERDAVAILABLE:
 			CTimerd::responseAvailable rspAvailable;
 			rspAvailable.available = true;
 			write( connfd, &rspAvailable, sizeof(rspAvailable));
-
 			break;
 		default:
 			dprintf("unknown command\n");
@@ -134,24 +190,42 @@ int main(int argc, char **argv)
 	int listenfd, connfd;
 	struct sockaddr_un servaddr;
 	int clilen;
+	bool do_fork = true;
 
 	dprintf("startup\n\n");
-
-	switch (fork())
+	if (argc > 1)
 	{
-	case -1:
-		perror("[timerd] fork");
-		return -1;
-	case 0:
-		break;
-	default:
-		return 0;
+		for(int i = 1; i < argc; i++)
+		{
+
+			if (strncmp(argv[i], "-d", 2) == 0)
+			{
+				debug = 1;
+			}
+			else if (strncmp(argv[i], "-f", 2) == 0)
+			{
+				do_fork = false;
+			}
+		}
 	}
 
-	if (setsid() == -1)
+	if(do_fork)
 	{
-		perror("[timerd] setsid");
-		return -1;
+		switch (fork())
+		{
+		case -1:
+			perror("[timerd] fork");
+			return -1;
+		case 0:
+			break;
+		default:
+			return 0;
+		}
+		if (setsid() == -1)
+		{
+			perror("[timerd] setsid");
+			return -1;
+		}
 	}
 
 	memset(&servaddr, 0, sizeof(struct sockaddr_un));
