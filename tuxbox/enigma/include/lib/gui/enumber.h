@@ -19,6 +19,7 @@ private:
 	int have_focus;
 	int min, max, digit, maxdigits, isactive;
 	QString descr;
+	eLabel* tmpDescr; // used for description Label in LCD
 signals:
 	void selected(int *number);
 protected:

@@ -40,15 +40,12 @@ int eNumber::eventFilter(const eWidgetEvent &event)
 }
 
 eNumber::eNumber(eWidget *parent, int len, int min, int max, int maxdigits, int *init, int isactive, eLabel* descr, int grabfocus)
-	:eWidget(parent, grabfocus), len(len), min(min), max(max), maxdigits(maxdigits), isactive(isactive), descr(descr?descr->getText():"")
+	:eWidget(parent, grabfocus), len(len), min(min), max(max), maxdigits(maxdigits), isactive(isactive), descr(descr?descr->getText():""),
+	active(0), digit(isactive),have_focus(0), cursor(cursor=eSkin::getActive()->queryScheme("focusedColor")),	normal(eSkin::getActive()->queryScheme("fgColor")),
+	tmpDescr(0)
 {
-	active=0;
-	digit=isactive;
 	for (int i=0; i<len; i++)
 		number[i]=init[i];
-	have_focus=0;
-	cursor=eSkin::getActive()->queryScheme("focusedColor");
-	normal=eSkin::getActive()->queryScheme("fgColor");
 }
 
 eNumber::~eNumber()
@@ -139,7 +136,10 @@ void eNumber::gotFocus()
 			QSize s = parent->LCDElement->getSize();
 			LCDTmp->move(QPoint(0,s.height()/2));
 			LCDTmp->resize(QSize(s.width(), s.height()/2));
-	  	parent->LCDElement->setText(descr);
+			tmpDescr = new eLabel(parent->LCDElement);
+			tmpDescr->move(QPoint(0,0));
+			tmpDescr->resize(QSize(s.width(), s.height()/2));
+			tmpDescr->setText(descr);
 		}
 		else
 		{
@@ -164,6 +164,12 @@ void eNumber::lostFocus()
 	{
 		delete LCDTmp;
 		LCDTmp=0;
+		if (tmpDescr)
+		{
+			delete tmpDescr;
+			tmpDescr=0;
+		}
+
 	}
 
 	have_focus--;

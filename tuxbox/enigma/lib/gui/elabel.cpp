@@ -51,9 +51,12 @@ void eLabel::setFlags(int flag)
 
 void eLabel::redrawWidget(gPainter *target, const QRect &area)
 {
-	validate();
-	target->setFont(font);
-	target->renderPara(*para);
+	if (isVisible())
+	{
+		validate();
+		target->setFont(font);
+		target->renderPara(*para);
+	}
 }
 
 int eLabel::eventFilter(const eWidgetEvent &event)

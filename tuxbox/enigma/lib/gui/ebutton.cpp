@@ -33,6 +33,9 @@ void eButton::gotFocus()
 
 void eButton::lostFocus()
 {
+	if (parent && parent->LCDElement)
+		parent->LCDElement->setText("");
+
 	setBackgroundColor(normal);
 	redraw();
 }

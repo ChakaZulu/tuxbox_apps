@@ -170,8 +170,8 @@ int eWindow::eventFilter(const eWidgetEvent &event)
 
 void eWindow::willShow()
 {
-	if (LCDTitle)
-		LCDTitle->setText(text);
+/*	if (LCDTitle)
+		LCDTitle->setText(text);*/
 }
 
 void eWindow::willHide()
