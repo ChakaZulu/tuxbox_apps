@@ -63,6 +63,8 @@ class CNFSMountGui : public CMenuTarget
 	int menuEntry(int nr);
 
 	char       m_entry[4][200];
+ 	char       ISO_8859_1_entry[4][200];
+
 	FS_Support m_nfs_sup;
 	FS_Support m_cifs_sup;
 

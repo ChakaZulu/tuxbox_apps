@@ -192,7 +192,7 @@ const char * nfs_entry_printf_string[2] =
 
 int CNFSMountGui::exec( CMenuTarget* parent, const std::string & actionKey )
 {
-//	printf("exec: %s\n", actionKey.c_str());
+	//printf("exec: %s\n", actionKey.c_str());
 	int returnval = menu_return::RETURN_REPAINT;
 	
 	if (m_nfs_sup == CNFSMountGui::FS_UNPROBED)
@@ -239,6 +239,7 @@ int CNFSMountGui::exec( CMenuTarget* parent, const std::string & actionKey )
 				g_settings.network_nfs_local_dir[i],
 #endif
 				g_Locale->getText(g_settings.network_nfs_automount[i] ? LOCALE_MESSAGEBOX_YES : LOCALE_MESSAGEBOX_NO));
+			sprintf(ISO_8859_1_entry[i],ZapitTools::UTF8_to_Latin1(m_entry[i]).c_str());
 		}
 	}
 	else if(actionKey.substr(0,7)=="domount")
@@ -270,14 +271,13 @@ int CNFSMountGui::menu()
 	mountMenuW.addItem(GenericMenuSeparator);
 	mountMenuW.addItem(GenericMenuBack);
 	mountMenuW.addItem(GenericMenuSeparatorLine);
-	std::string ISO_8859_1_entry[4];
 	char s2[12];
 
 	for(int i=0 ; i < 4 ; i++)
 	{
 		sprintf(s2,"mountentry%d",i);
-		ISO_8859_1_entry[i] = ZapitTools::UTF8_to_Latin1(m_entry[i]); 
-		mountMenuW.addItem(new CMenuForwarderNonLocalized("", true, ISO_8859_1_entry[i].c_str(), this, s2));
+		sprintf(ISO_8859_1_entry[i],ZapitTools::UTF8_to_Latin1(m_entry[i]).c_str()); 
+		mountMenuW.addItem(new CMenuForwarderNonLocalized("", true, ISO_8859_1_entry[i], this, s2));
 	}
 	int ret=mountMenuW.exec(this,"");
 	return ret;
