@@ -65,7 +65,7 @@ class CEpgData
 		unsigned long long 	next_id;
 		time_t 			next_zeit;
 
-		int			ox, oy, sx, sy, toph;
+		int			ox, oy, sx, sy, toph, sb;
 		int			emptyLineCount, info1_lines;
 		int         		textCount;
 		std::vector<std::string> epgText;

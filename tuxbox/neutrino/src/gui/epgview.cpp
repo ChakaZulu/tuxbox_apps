@@ -57,6 +57,7 @@ void CEpgData::start()
 	botboxheight=botheight+6;
 	medlineheight=g_Fonts->epg_info1->getHeight();
 	medlinecount=(oy- botboxheight)/medlineheight;
+	sb = medlinecount* medlineheight;
 
 	oy = botboxheight+medlinecount*medlineheight; // recalculate
 	sy = (((g_settings.screen_EndY-g_settings.screen_StartY)-(oy- topboxheight) ) / 2) + g_settings.screen_StartY;
@@ -139,12 +140,10 @@ void CEpgData::showText( int startPos, int ypos )
 
 	int textCount = epgText.size();
 	int y=ypos;
-	int linecount=medlinecount;
-	int sb = linecount* medlineheight;
 
 	frameBuffer->paintBoxRel(sx, y, ox- 15, sb, COL_MENUCONTENT);
 
-	for(int i=startPos; i<textCount && i<startPos+linecount; i++,y+=medlineheight)
+	for(int i=startPos; i<textCount && i<startPos+medlinecount; i++,y+=medlineheight)
 	{
 		if ( i< info1_lines )
 			g_Fonts->epg_info1->RenderString(sx+10, y+medlineheight, ox- 15- 15, epgText[i], COL_MENUCONTENT, 0, true); // UTF-8
@@ -154,9 +153,9 @@ void CEpgData::showText( int startPos, int ypos )
 
 	frameBuffer->paintBoxRel(sx+ ox- 15, ypos, 15, sb,  COL_MENUCONTENT+ 1);
 
-	int sbc= ((textCount- 1)/ linecount)+ 1;
+	int sbc= ((textCount- 1)/ medlinecount)+ 1;
 	float sbh= (sb- 4)/ sbc;
-	int sbs= (startPos+ 1)/ linecount;
+	int sbs= (startPos+ 1)/ medlinecount;
 
 	frameBuffer->paintBoxRel(sx+ ox- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
 }
@@ -254,9 +253,16 @@ std::string GetGenre(const char contentClassification) // UTF-8
 }
 
 
-int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t* startzeit, bool doLoop )
+int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_t* a_startzeit, bool doLoop )
 {
 	int res = menu_return::RETURN_REPAINT;
+	static unsigned long long id;
+	static time_t startzeit;
+	 
+
+	if(a_startzeit)
+		startzeit=*a_startzeit;
+	id=a_id;
 
 	int height;
 	height = g_Fonts->epg_date->getHeight();
@@ -266,7 +272,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 		g_Fonts->epg_date->RenderString(g_settings.screen_StartX+10, g_settings.screen_StartY+height, 40, "-@-", COL_INFOBAR);
 	}
 
-	GetEPGData(channel_id, id, startzeit );
+	GetEPGData(channel_id, id, &startzeit );
 	if (doLoop)
 	{
 		evtlist = g_Sectionsd->getEventsServiceKey(channel_id);
@@ -498,7 +504,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 						g_Fonts->epg_info1->setSize((int)(g_Fonts->epg_info1->getSize() / BIG_FONT_FAKTOR));
 						g_Fonts->epg_info2->setSize((int)(g_Fonts->epg_info2->getSize() / BIG_FONT_FAKTOR));
 					}
-					show(channel_id, id, startzeit, false);
+					show(channel_id, id, &startzeit, false);
 					showPos=0;
 					break;
 
