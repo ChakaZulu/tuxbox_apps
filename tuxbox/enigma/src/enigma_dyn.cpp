@@ -63,10 +63,10 @@ using namespace std;
 
 #define WEBIFVERSION "2.8.2"
 
-#define KEYBOARDNORMAL 0
+#define KEYBOARDTV 0
 #define KEYBOARDVIDEO 1
 
-int keyboardMode = KEYBOARDNORMAL;
+int keyboardMode = KEYBOARDTV;
 
 int pdaScreen = 0;
 int screenWidth = 1024;
@@ -114,14 +114,6 @@ eString firmwareLevel(eString verid)
 		else
 			result = eString().sprintf("%s %c.%d. %s", typea[type%3], ver[0], atoi(eString().sprintf("%c%c", ver[1], ver[2]).c_str()), (date.mid(6, 2) + "." + date.mid(4, 2) + "." + date.left(4)).c_str());
 	}
-	return result;
-}
-
-eString getMsgWindow(eString title, eString msg)
-{
-	eString result = readFile(TEMPLATE_DIR + "msgWindow.tmp");
-	result.strReplace("#TITLE#", title);
-	result.strReplace("#MSG#", msg);
 	return result;
 }
 
@@ -1699,15 +1691,6 @@ static eString getUSBInfo(void)
 	return result.str();
 }
 #endif
-
-static eString msgWindow(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	eString title = opt["title"];
-	eString msg = opt["msg"];
-	return getMsgWindow(title, msg);
-}
 
 static eString aboutDreambox(void)
 {
@@ -4626,7 +4609,6 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 	return result;
 }
 
-
 void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 {
 	int lockWebIf = 1;
@@ -4663,7 +4645,6 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cleanupTimerList", cleanupTimerList, lockWeb);
 	dyn_resolver->addDyn("GET", "/clearTimerList", clearTimerList, lockWeb);
 	dyn_resolver->addDyn("GET", "/EPGDetails", EPGDetails, lockWeb);
-	dyn_resolver->addDyn("GET", "/msgWindow", msgWindow, lockWeb);
 	dyn_resolver->addDyn("GET", "/tvMessageWindow", tvMessageWindow, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/status", doStatus, true); //always pw protected for dreamtv
 	dyn_resolver->addDyn("GET", "/cgi-bin/switchService", switchService, lockWeb);
