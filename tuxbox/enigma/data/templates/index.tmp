@@ -24,6 +24,15 @@
 					<td height=22>
 						<table width=100% border=0 cellpadding=0 cellspacing=0>
 							<tr>
+								<td id="channavi">#CHANNAVI#</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td height=22>
+						<table width=100% border=0 cellpadding=0 cellspacing=0>
+							<tr>
 								<td id="topnavi">#TOPNAVI#</td>
 							</tr>
 						</table>
