@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.100 2004/04/07 19:33:21 thegoodguy Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.101 2004/04/07 20:52:08 mws Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -518,7 +518,7 @@ bool CZapitClient::isScanReady(unsigned int &satellite,  unsigned int &processed
 	CBasicClient::receive_data((char* )&response, sizeof(response));
 
 	satellite = response.satellite;
-	processed_transponder = response.processed_transponder+1;
+	processed_transponder = response.processed_transponder;
 	transponder = response.transponder;
 	services = response.services;
 
