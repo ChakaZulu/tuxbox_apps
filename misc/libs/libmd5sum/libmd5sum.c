@@ -8,9 +8,11 @@
 
 #include "md5.h"
 #include "getline.h"
-#include "system.h"
+#include <errno.h>
 #include "error.h"
 #include <string.h>
+
+#define STREQ(a, b) (strcmp ((a), (b)) == 0)
 
 static int have_read_stdin;
 
