@@ -90,6 +90,7 @@ CHintBox::CHintBox(const char * const Caption, const char * const Text, const in
 		if (nw > width )
 			width = nw;
 	}
+	window = NULL;
 }
 
 CHintBox::~CHintBox(void)
