@@ -629,7 +629,6 @@ int CEpgData::FollowScreenings (const t_channel_id channel_id, const std::string
   time_t		curtime;
   struct  tm		*tmStartZeit;
   std::string		screening_dates;
-  std::string		datetime_str;
   int			count;
   char			tmpstr[256];
 
@@ -647,25 +646,25 @@ int CEpgData::FollowScreenings (const t_channel_id channel_id, const std::string
 			count++;
 			tmStartZeit = localtime(&(e->startTime));
 
+			screening_dates += "    ";
+
 			strftime(tmpstr, sizeof(tmpstr), "date.%a", tmStartZeit );
-			datetime_str = g_Locale->getText(tmpstr);
-			datetime_str += '.';
+			screening_dates = g_Locale->getText(tmpstr);
+			screening_dates += '.';
 
 			strftime(tmpstr, sizeof(tmpstr), "  %d.", tmStartZeit );
-			datetime_str += tmpstr;
+			screening_dates += tmpstr;
 
 			strftime(tmpstr,sizeof(tmpstr), "date.%b", tmStartZeit );
-			datetime_str += g_Locale->getText(tmpstr);
+			screening_dates += g_Locale->getText(tmpstr);
 
 			strftime(tmpstr, sizeof(tmpstr), ".  %H:%M ", tmStartZeit );
-			datetime_str += tmpstr;
-			screening_dates += "    ";
-			screening_dates += datetime_str;
-			screening_dates += '\n';
+			screening_dates += tmpstr;
+
+			processTextToArray(count ? screening_dates : "---\n"); // UTF-8
 		}
 	}
 
-	processTextToArray(count ? screening_dates : "---\n"); // UTF-8
 
 	return count;
 }
