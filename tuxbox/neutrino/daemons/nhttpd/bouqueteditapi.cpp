@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: bouqueteditapi.cpp,v 1.14 2003/09/16 10:16:40 thegoodguy Exp $
+	$Id: bouqueteditapi.cpp,v 1.15 2003/11/06 22:32:31 thegoodguy Exp $
 
 	License: GPL
 
@@ -366,7 +366,7 @@ bool CBouqueteditAPI::changeBouquet(CWebserverRequest* request)
 		}
 		std::string bchannels = request->ParameterList["bchannels"];
 		int pos;
-		while ((pos = bchannels.find(',')) >= 0) {
+		while ((pos = bchannels.find(',')) != std::string::npos) {
 			std::string bchannel = bchannels.substr(0, pos);
 			bchannels = bchannels.substr(pos+1, bchannels.length());
 			Parent->Zapit->addChannelToBouquet(selected - 1, atoi(bchannel.c_str()));
