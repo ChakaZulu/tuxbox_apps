@@ -286,7 +286,8 @@ struct SNeutrinoSettings
 	int   audioplayer_highprio;
 	int   audioplayer_select_title_by_name;
 	int   audioplayer_repeat_on;
-  int   audioplayer_show_playlist;
+	int   audioplayer_show_playlist;
+	int   audioplayer_enable_sc_metadata;
 
 	//Filebrowser
 	int filebrowser_showrights;

@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.20 2004/09/12 22:41:53 chakazulu Exp $
+ * $Id: locals_intern.h,v 1.21 2004/09/15 21:02:56 zwen Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -173,6 +173,7 @@ const char * locale_real_names[] =
 	"audioplayer.delete",
 	"audioplayer.deleteall",
 	"audioplayer.display_order",
+	"audioplayer.enable_sc_metadata",
 	"audioplayer.fastforward",
 	"audioplayer.follow",
 	"audioplayer.head",

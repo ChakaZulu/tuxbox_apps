@@ -36,9 +36,7 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <dbox/avs_core.h>
-#ifdef INCLUDE_UNUSED_STUFF
 #include <driver/audioplay.h> // for ShoutcastCallback()
-#endif /* INCLUDE_UNUSED_STUFF */
 #ifdef DBOX
 #include <driver/aviaext.h>
 #endif
@@ -47,13 +45,10 @@
 
 unsigned int CBaseDec::mSamplerate=0;
 
-#ifdef INCLUDE_UNUSED_STUFF
-/* see comment on sc_callback() in audioplay.cpp */
 void ShoutcastCallback(void *arg)
 {
 	CAudioPlayer::getInstance()->sc_callback(arg);
 }
-#endif /* INCLUDE_UNUSED_STUFF */
 
 CBaseDec::RetCode CBaseDec::DecoderBase(CAudiofile* const in,
 										const int OutputFd, State* const state,
@@ -79,19 +74,28 @@ CBaseDec::RetCode CBaseDec::DecoderBase(CAudiofile* const in,
 
 	if ( Status == OK )
 	{
-		if( in->FileType == CFile::FILE_MP3 ||
-			in->FileType == CFile::STREAM_MP3 )
+		if( in->FileType == CFile::STREAM_AUDIO )
 		{
-#ifdef INCLUDE_UNUSED_STUFF
-			/* add callback function for shoutcast */
-			if ( in->FileType == CFile::STREAM_MP3 &&
-				 fstatus( fp, ShoutcastCallback ) < 0 )
+			if ( fstatus( fp, ShoutcastCallback ) < 0 )
 			{
 				fprintf( stderr, "Error adding shoutcast callback: %s",
 						 err_txt );
 			}
-#endif /* INCLUDE_UNUSED_STUFF */
-
+			if(ftype(fp, "ogg"))
+			{
+				Status = COggDec::getInstance()->Decoder( fp, OutputFd, state,
+																		&in->MetaData, t,
+																		secondsToSkip );
+			}
+			else
+			{
+				Status = CMP3Dec::getInstance()->Decoder( fp, OutputFd, state,
+																		&in->MetaData, t,
+																		secondsToSkip );
+			}
+		}
+		else if( in->FileType == CFile::FILE_MP3)
+		{
 			Status = CMP3Dec::getInstance()->Decoder( fp, OutputFd, state,
 													  &in->MetaData, t,
 													  secondsToSkip );

@@ -93,7 +93,7 @@
 |                                                                              |
 \******************************************************************************/
 #include "netfile.h"
-
+#include "global.h"
 /*
 TODO:
 	- ICECAST support
@@ -175,8 +175,7 @@ void getOpts()
   if(strstr(buf, "debug=1"))
     debug = 1;
 
-  if(strstr(buf, "enable meta"))
-    enable_metadata = 1;
+  enable_metadata = g_settings.audioplayer_enable_sc_metadata;
 
   if((ptr = strstr(buf, "cachesize=")))
     cache_size = atoi(strchr(ptr, '=') + 1);

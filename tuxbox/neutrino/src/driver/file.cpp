@@ -53,7 +53,7 @@ const CFile::FileType file_type_list[] =
 	CFile::FILE_PICTURE  , CFile::FILE_CDR      , CFile::FILE_PICTURE  , CFile::FILE_PICTURE  , CFile::STREAM_PICTURE,
 	CFile::FILE_PICTURE  , CFile::FILE_PICTURE  , CFile::FILE_MP3      , CFile::FILE_PLAYLIST , CFile::FILE_MP3      ,
 	CFile::FILE_MP3      , CFile::FILE_MP3      , CFile::FILE_OGG      , CFile::FILE_PICTURE  , CFile::FILE_TEXT     ,
-	CFile::FILE_TEXT     , CFile::STREAM_MP3    , CFile::FILE_WAV      ,
+	CFile::FILE_TEXT     , CFile::STREAM_AUDIO    , CFile::FILE_WAV      ,
 };
 
 int mycasecmp(const void * a, const void * b)

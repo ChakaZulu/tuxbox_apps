@@ -2,7 +2,7 @@
 #define __locals__
 
 /*
- * $Id: locals.h,v 1.18 2004/09/12 22:41:53 chakazulu Exp $
+ * $Id: locals.h,v 1.19 2004/09/15 21:02:56 zwen Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -173,6 +173,7 @@ typedef enum
 	LOCALE_AUDIOPLAYER_DELETE,
 	LOCALE_AUDIOPLAYER_DELETEALL,
 	LOCALE_AUDIOPLAYER_DISPLAY_ORDER,
+	LOCALE_AUDIOPLAYER_ENABLE_SC_METADATA,
 	LOCALE_AUDIOPLAYER_FASTFORWARD,
 	LOCALE_AUDIOPLAYER_FOLLOW,
 	LOCALE_AUDIOPLAYER_HEAD,

@@ -476,9 +476,9 @@ int CAudioPlayerGui::show()
 												  files->getType() );
 							playlist.push_back(audiofile);
 						}
-						if(files->getType() == CFile::STREAM_MP3)
+						if(files->getType() == CFile::STREAM_AUDIO)
 						{
-							CAudiofile mp3( files->Name, CFile::STREAM_MP3 );
+							CAudiofile mp3( files->Name, CFile::STREAM_AUDIO );
 							mp3.MetaData.artist = "Shoutcast";
 							std::string tmp = mp3.Filename.substr(mp3.Filename.rfind('/')+1);
 							tmp = tmp.substr(0,tmp.length()-4);	//remove .url
@@ -524,7 +524,7 @@ int CAudioPlayerGui::show()
 
 										if(strcasecmp(filename.substr(filename.length()-3,3).c_str(), "url")==0)
 										{
-											CAudiofile mp3( filename, CFile::STREAM_MP3 );
+											CAudiofile mp3( filename, CFile::STREAM_AUDIO );
 											mp3.MetaData.artist = "Shoutcast";
 											std::string tmp = mp3.Filename.substr(mp3.Filename.rfind('/')+1);
 											tmp = tmp.substr(0,tmp.length()-4);	//remove .url
@@ -554,7 +554,7 @@ int CAudioPlayerGui::show()
 			}
 			else if (key_level==1)
 			{
-				if(curr_audiofile.FileType != CFile::STREAM_MP3)
+				if(curr_audiofile.FileType != CFile::STREAM_AUDIO)
 					rev();
 			} else { // key_level == 2
 
@@ -625,7 +625,7 @@ int CAudioPlayerGui::show()
 			}
 			else if (key_level == 1)
 			{
-				if(curr_audiofile.FileType != CFile::STREAM_MP3)
+				if(curr_audiofile.FileType != CFile::STREAM_AUDIO)
 					ff();
 			} else // key_level == 2
 			{
@@ -657,7 +657,7 @@ int CAudioPlayerGui::show()
 			{
 				// jumping in streams not supported
 				if ( key_level==2 &&
-					 curr_audiofile.FileType == CFile::STREAM_MP3 )
+					 curr_audiofile.FileType == CFile::STREAM_AUDIO )
 				{
 					key_level=0;
 				}
@@ -847,7 +847,7 @@ void CAudioPlayerGui::paintItem(int pos)
 
 	if ((pos + liststart) < playlist.size())
 	{
-		if ( playlist[pos + liststart].FileType != CFile::STREAM_MP3 &&
+		if ( playlist[pos + liststart].FileType != CFile::STREAM_AUDIO &&
 			 !playlist[pos + liststart].MetaData.bitrate )
 		{
 			// id3tag noch nicht geholt
@@ -973,7 +973,7 @@ void CAudioPlayerGui::paintFoot()
 	}
 	else if (key_level == 1)
 	{
-		if ( curr_audiofile.FileType != CFile::STREAM_MP3 )
+		if ( curr_audiofile.FileType != CFile::STREAM_AUDIO )
 		{
 			::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 10, top + 4, ButtonWidth, 4, AudioPlayerButtons[0]);
 		}
@@ -1032,27 +1032,27 @@ void CAudioPlayerGui::paintInfo()
 		// second line (Artist/Title...)
 		if (!playlist.empty() && current >=0)
 		{
-			if ( playlist[current].FileType != CFile::STREAM_MP3 &&
-				 !playlist[current].MetaData.bitrate )
+			if ( curr_audiofile.FileType != CFile::STREAM_AUDIO &&
+				 curr_audiofile.MetaData.bitrate )
 			{
-				GetMetaData(&playlist[current]);
+				GetMetaData(&curr_audiofile);
 			}
 
-			if (playlist[current].MetaData.title.empty())
-				tmp = playlist[current].MetaData.artist;
-			else if (playlist[current].MetaData.artist.empty())
-				tmp = playlist[current].MetaData.title;
+			if (curr_audiofile.MetaData.title.empty())
+				tmp = curr_audiofile.MetaData.artist;
+			else if (curr_audiofile.MetaData.artist.empty())
+				tmp = curr_audiofile.MetaData.title;
 			else if (g_settings.audioplayer_display == TITLE_ARTIST)
 			{
-				tmp = playlist[current].MetaData.title;
+				tmp = curr_audiofile.MetaData.title;
 				tmp += " / ";
-				tmp += playlist[current].MetaData.artist;
+				tmp += curr_audiofile.MetaData.artist;
 			}
 			else //if(g_settings.audioplayer_display == ARTIST_TITLE)
 			{
-				tmp = playlist[current].MetaData.artist;
+				tmp = curr_audiofile.MetaData.artist;
 				tmp += " / ";
-				tmp += playlist[current].MetaData.title;
+				tmp += curr_audiofile.MetaData.title;
 			}
 			w = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(tmp, true); // UTF-8
 			xstart=(width-w)/2;
@@ -1288,7 +1288,7 @@ void CAudioPlayerGui::play(int pos)
 		}
 	}
 
-	if ( playlist[pos].FileType != CFile::STREAM_MP3 &&
+	if ( playlist[pos].FileType != CFile::STREAM_AUDIO &&
 		 !playlist[pos].MetaData.bitrate )
 	{
 		// id3tag noch nicht geholt
@@ -1385,12 +1385,10 @@ void CAudioPlayerGui::updateMetaData()
 			updateLcd=true;
 		}
 	}
-#ifdef INCLUDE_UNUSED_STUFF
 	if (CAudioPlayer::getInstance()->getScBuffered()!=0)
 	{
 		updateLcd=true;
 	}
-#endif /* INCLUDE_UNUSED_STUFF */
 	if(updateLcd)
 		paintLCD();
 	if(updateScreen)
@@ -1521,7 +1519,7 @@ void CAudioPlayerGui::paintLCD()
 	case CAudioPlayerGui::PLAY:
 		CLCD::getInstance()->showAudioPlayMode(CLCD::AUDIO_MODE_PLAY);
 		CLCD::getInstance()->showAudioTrack(curr_audiofile.MetaData.artist, curr_audiofile.MetaData.title, curr_audiofile.MetaData.album);
-		if(curr_audiofile.FileType != CFile::STREAM_MP3)
+		if(curr_audiofile.FileType != CFile::STREAM_AUDIO)
 			CLCD::getInstance()->showAudioProgress((int)(100.0 * m_time_played / m_time_total), CNeutrinoApp::getInstance()->isMuted());
 #ifdef INCLUDE_UNUSED_STUFF
 		else

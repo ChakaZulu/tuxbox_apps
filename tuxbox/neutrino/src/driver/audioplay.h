@@ -36,9 +36,7 @@ class CAudioPlayer
 {
 private:
 	time_t m_played_time;
-#ifdef INCLUDE_UNUSED_STUFF
 	int  m_sc_buffered;
-#endif /* INCLUDE_UNUSED_STUFF */
 	FILE		*soundfd;
 	pthread_t	thrPlay;
 	FILE		*fp;
@@ -64,10 +62,8 @@ public:
 	bool readMetaData(CAudiofile* const, const bool);
 	time_t getTimePlayed(){return m_played_time;}
 	time_t getTimeTotal(){return m_Audiofile.MetaData.total_time;}
-#ifdef INCLUDE_UNUSED_STUFF
 	int getScBuffered(){return m_sc_buffered;}
 	void sc_callback(void *arg); // see comment in .cpp
-#endif /* INCLUDE_UNUSED_STUFF */
 	CBaseDec::State getState(){return state;}
 
 	CAudioPlayer();

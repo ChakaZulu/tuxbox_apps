@@ -146,6 +146,7 @@ audioplayer.defdir Start-Verz.
 audioplayer.delete Löschen
 audioplayer.deleteall Alle löschen
 audioplayer.display_order Anzeige
+audioplayer.enable_sc_metadata Aktiviere Shoutcast Meta-Daten Parsing
 audioplayer.fastforward schneller Vorl.
 audioplayer.follow Selektiere akt. Track
 audioplayer.head Audio Playlist

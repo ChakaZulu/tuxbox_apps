@@ -108,6 +108,7 @@ audioplayer.defdir start dir.
 audioplayer.delete Delete
 audioplayer.deleteall delete all
 audioplayer.display_order display order
+audioplayer.enable_sc_metadata enable shoutcast meta data parsing
 audioplayer.fastforward fast forw.
 audioplayer.follow auto select current
 audioplayer.head Audio Playlist

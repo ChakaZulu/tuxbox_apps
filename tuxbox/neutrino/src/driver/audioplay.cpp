@@ -41,6 +41,7 @@
 
 #include <neutrino.h>
 #include <driver/audioplay.h>
+#include <driver/audiodec/netfile.h>
 
 void CAudioPlayer::stop()
 {
@@ -162,11 +163,6 @@ void CAudioPlayer::init()
 	state = CBaseDec::STOP;
 }
 
-#ifdef INCLUDE_UNUSED_STUFF
-/* Currently commented out because I could not find a stream where
- * request_file() from netfile.cpp set meta_int to a value > 0,
- * which is necessary for adding the Shoutcast callback.
- */
 void CAudioPlayer::sc_callback(void *arg)
 {
   bool changed=false;
@@ -199,15 +195,12 @@ void CAudioPlayer::sc_callback(void *arg)
   m_Audiofile.MetaData.changed = changed;
   //printf("Callback %s %s %s %d\n",stat->artist, stat->title, stat->station, stat->buffered);
 }
-#endif /* INCLUDE_UNUSED_STUFF */
 
 void CAudioPlayer::clearFileData()
 {
 	m_Audiofile.clear();
 	m_played_time=0;
-#ifdef INCLUDE_UNUSED_STUFF
 	m_sc_buffered=0;
-#endif /* INCLUDE_UNUSED_STUFF */
 }
 
 CAudioMetaData CAudioPlayer::getMetaData()
