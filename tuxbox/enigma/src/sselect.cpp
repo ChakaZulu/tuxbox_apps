@@ -426,6 +426,11 @@ void eServiceSelector::resetBouquet()
 		selectCurrentService();
 }
 
+int eServiceSelector::getCurrentBouquet()
+{
+	return eZap::getInstance()->getMode()?lastRadioBouquet:lastTvBouquet;
+}
+
 eServiceSelector::~eServiceSelector()
 {
 	eConfig::getInstance()->setKey("/ezap/ui/lastTvBouquet", lastTvBouquet);

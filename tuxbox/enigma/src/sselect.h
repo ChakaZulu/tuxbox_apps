@@ -69,6 +69,7 @@ public:
 	const eServiceReference *choose(int irc=-1);
 	const eServiceReference *next();
 	const eServiceReference *prev();
+	int getCurrentBouquet();
 };
 
 #endif
