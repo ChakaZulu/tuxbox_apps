@@ -312,7 +312,7 @@ int main(int argc, char **argv)
 
 eMainMenu::eMainMenu()
 {
-	window=new eLBWindow("31337DVB " __DATE__ , eListbox::tBorder, 12, eZap::FontSize, 240);
+	window=new eLBWindow("enigma 0.1" , eListbox::tBorder, 12, eZap::FontSize, 240);
 	window->move(QPoint(70, 150));
 	connect(new eListboxEntryText(window->list, "TV Mode"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_close(eListboxEntry*)));
 	connect(new eListboxEntryText(window->list, "VCR Mode"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_vcr(eListboxEntry*)));
