@@ -2729,6 +2729,7 @@ void CNeutrinoApp::setupRecordingDevice(void)
 		unsigned int splitsize;
 		sscanf(g_settings.recording_splitsize, "%u", &splitsize);
 		info->SplitSize = splitsize;
+		info->Use_O_Sync = g_settings.recording_use_o_sync;
 		info->Directory = g_settings.network_nfs_recordingdir;
 		info->StopPlayBack = (g_settings.recording_stopplayback == 1);
 		info->StopSectionsd = (g_settings.recording_stopsectionsd == 1);
