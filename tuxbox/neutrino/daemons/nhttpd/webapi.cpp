@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.53 2004/03/07 02:46:11 thegoodguy Exp $
+	$Id: webapi.cpp,v 1.54 2004/03/07 09:51:44 thegoodguy Exp $
 
 	License: GPL
 
@@ -879,7 +879,7 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 			case CTimerd::TIMER_ZAPTO :
 			case CTimerd::TIMER_RECORD :
 			{
-				sAddData = Parent->Zapit->getChannelName(timer->channel_id);
+				sAddData = CZapitClient::Utf8_to_Latin1(Parent->Zapit->getChannelName(timer->channel_id));
 				if (sAddData.empty())
 					sAddData = Parent->Zapit->isChannelTVChannel(timer->channel_id) ? "Unbekannter TV-Kanal" : "Unbekannter Radiokanal";
 
