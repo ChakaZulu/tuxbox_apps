@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.106 2003/05/05 20:13:19 diemade Exp $
+ * $Id: scan.cpp,v 1.107 2003/05/05 21:04:17 diemade Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -366,9 +366,13 @@ int scan_transponder(xmlNodePtr transponder, bool satfeed, uint8_t diseqc_pos, c
 void scan_provider(xmlNodePtr search, char * providerName, bool satfeed, uint8_t diseqc_pos, char * type)
 {
 	xmlNodePtr transponder = NULL;
-	
+	char myprovider[32];
+
+	memset(myprovider, 0, sizeof(myprovider));
+	strncpy(myprovider, providerName, 31);
+
 	/* send sat name to client */
-	eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &providerName, strlen(providerName) + 1);
+	eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &myprovider, strlen(myprovider) + 1);
 	transponder = search->xmlChildrenNode;
 
 	/* read all transponders */
