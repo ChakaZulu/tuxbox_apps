@@ -787,6 +787,7 @@ nfs.type_cifs CIFS
 nfs.username CIFS Benutzername
 nfs.password CIFS Passwort
 nfs.mounterror_notsup Dateisystem-Typ wird nicht unterstützt.
+nfs.remount Verzeichnisse erneut mounten
 nfsmenu.head NFS/CIFS Einstellungen
 
 apids.hint_1 Geben Sie die zu streamenden APIDs ein,

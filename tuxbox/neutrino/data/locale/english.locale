@@ -782,6 +782,7 @@ nfs.type_cifs CIFS
 nfs.username CIFS username
 nfs.password CIFS password
 nfs.mounterror_notsup filesystem type not supported
+nfs.remount remount directories
 nfsmenu.head NFS/CIFS settings
 
 apids.hint_1 Enter APIDs to be streamed

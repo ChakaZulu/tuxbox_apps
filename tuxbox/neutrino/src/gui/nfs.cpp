@@ -554,13 +554,29 @@ void CNFSUmountGui::umount(const char * const dir)
 
 int CNFSSmallMenu::exec( CMenuTarget* parent, const std::string & actionKey )
 {
-	CMenuWidget menu("nfsmenu.head", "network.raw");
-	CNFSMountGui mountGui;
-	CNFSUmountGui umountGui;
-	menu.addItem(GenericMenuSeparator);
-	menu.addItem(GenericMenuBack);
-	menu.addItem(GenericMenuSeparatorLine);
-	menu.addItem(new CMenuForwarder("nfs.mount", true, NULL, &mountGui));
-	menu.addItem(new CMenuForwarder("nfs.umount", true, NULL, &umountGui));
-	return menu.exec(parent, actionKey);
+	if (actionKey.empty())
+	{
+		CMenuWidget menu("nfsmenu.head", "network.raw");
+		CNFSMountGui mountGui;
+		CNFSUmountGui umountGui;
+		menu.addItem(GenericMenuSeparator);
+		menu.addItem(GenericMenuBack);
+		menu.addItem(GenericMenuSeparatorLine);
+		menu.addItem(new CMenuForwarder("nfs.remount", true, NULL, this, "remount"));
+		menu.addItem(new CMenuForwarder("nfs.mount", true, NULL, &mountGui));
+		menu.addItem(new CMenuForwarder("nfs.umount", true, NULL, &umountGui));
+		return menu.exec(parent, actionKey);
+	}
+	else if(actionKey.substr(0,7) == "remount")
+	{
+		//umount automount dirs
+		for(int i = 0; i < 4; i++)
+		{
+			if(g_settings.network_nfs_automount[i])
+				umount2(g_settings.network_nfs_local_dir[i],MNT_FORCE);
+		}
+		CNFSMountGui::automount();
+		return menu_return::RETURN_REPAINT;
+	}
+	return menu_return::RETURN_REPAINT;
 }

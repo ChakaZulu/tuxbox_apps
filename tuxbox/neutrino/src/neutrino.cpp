@@ -1184,15 +1184,17 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	moviePlayer.addItem(GenericMenuSeparator);
 	moviePlayer.addItem(GenericMenuBack);
 	moviePlayer.addItem(GenericMenuSeparatorLine);
-	moviePlayer.addItem(new CMenuForwarder("movieplayer.tsplayback", true, NULL, new CMoviePlayerGui(), "tsplayback", true, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
-	moviePlayer.addItem(new CMenuForwarder("movieplayer.pesplayback", true, NULL, new CMoviePlayerGui(), "pesplayback", true));
-	moviePlayer.addItem(new CMenuForwarder("movieplayer.bookmark", true, NULL, new CMoviePlayerGui(), "bookmarkplayback"));
+	CMoviePlayerGui* moviePlayerGui = new CMoviePlayerGui();
+	moviePlayer.addItem(new CMenuForwarder("movieplayer.tsplayback", true, NULL, moviePlayerGui, "tsplayback", true, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
+	moviePlayer.addItem(new CMenuForwarder("movieplayer.pesplayback", true, NULL, moviePlayerGui, "pesplayback", true));
+	moviePlayer.addItem(new CMenuForwarder("movieplayer.bookmark", true, NULL, moviePlayerGui, "bookmarkplayback"));
 	moviePlayer.addItem(GenericMenuSeparator);
-	moviePlayer.addItem(new CMenuForwarder("movieplayer.fileplayback", true, NULL, new CMoviePlayerGui(), "fileplayback", true, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
-	moviePlayer.addItem(new CMenuForwarder("movieplayer.dvdplayback", true, NULL, new CMoviePlayerGui(), "dvdplayback", true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
-	moviePlayer.addItem(new CMenuForwarder("movieplayer.vcdplayback", true, NULL, new CMoviePlayerGui(), "vcdplayback", true, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
+	moviePlayer.addItem(new CMenuForwarder("movieplayer.fileplayback", true, NULL, moviePlayerGui, "fileplayback", true, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
+	moviePlayer.addItem(new CMenuForwarder("movieplayer.dvdplayback", true, NULL, moviePlayerGui, "dvdplayback", true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
+	moviePlayer.addItem(new CMenuForwarder("movieplayer.vcdplayback", true, NULL, moviePlayerGui, "vcdplayback", true, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 	moviePlayer.addItem(GenericMenuSeparatorLine);
-	moviePlayer.addItem(new CMenuForwarder("mainmenu.settings", true, NULL, &streamingSettings));
+	moviePlayer.addItem(new CMenuForwarder("mainmenu.settings", true, NULL, &streamingSettings, NULL, true, CRCInput::RC_help, NEUTRINO_ICON_BUTTON_HELP_SMALL));
+	moviePlayer.addItem(new CMenuForwarder("nfsmenu.head", true, NULL, new CNFSSmallMenu(), NULL, true, CRCInput::RC_setup, NEUTRINO_ICON_BUTTON_DBOX));
 #endif
 
 	mainMenu.addItem(new CMenuForwarder("mainmenu.pictureviewer", true, NULL, new CPictureViewerGui(), NULL, true, CRCInput::RC_3));
@@ -2437,9 +2439,12 @@ void CNeutrinoApp::ShowStreamFeatures()
 
 
 	// -- Stream Info
-	StreamFeatureSelector.addItem(new CMenuForwarder("streamfeatures.info", true, NULL, StreamFeaturesChanger, id, true, CRCInput::RC_help, "help_small.raw"), false);
+	StreamFeatureSelector.addItem(new CMenuForwarder("streamfeatures.info", true, NULL, StreamFeaturesChanger, id, true, CRCInput::RC_help, NEUTRINO_ICON_BUTTON_HELP_SMALL), false);
 
 	StreamFeatureSelector.exec(NULL, "");
+
+	// restore mute symbol
+	AudioMute(current_muted, true);
 }
 
 
@@ -2759,6 +2764,8 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			else if( msg == CRCInput::RC_setup )
 			{
 				mainMenu.exec(NULL, "");
+				// restore mute symbol
+				AudioMute(current_muted, true);
 			}
 			if( msg == CRCInput::RC_ok)
 			{
