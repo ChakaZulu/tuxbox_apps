@@ -8,17 +8,17 @@
  * change as you need.                                                  *
  ************************************************************************/
 
-#include <pthread.h>
 #include <fcntl.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <string.h>
+#include <pthread.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
+#include <unistd.h>
 
-#include <lcd-ks0713.h>
 #include <dbox/avia_gt_capture.h>
+#include <lcd-ks0713.h>
 
 
 typedef unsigned char screen_t[LCD_BUFFER_SIZE];
@@ -62,6 +62,8 @@ inline int compute(int l, int d)
 		return l-8;
 	case 15:
 		return l-2;
+	default:
+		return 0;
 	}
 }
 
@@ -161,8 +163,7 @@ void *update_thread(void*dummy)
 int main(int argc, char *argv[])
 {
 	screen_t screen;
-	int curscreen;
-	int x, y, i;
+	int x, y;
 //	int D=atoi(argv[1]);
 #define D	3
 	// try other values
@@ -180,7 +181,7 @@ int main(int argc, char *argv[])
 
 	while (1)
 	{
-		int x, y, yy, pix, dither;
+		int x, y, yy, pix;
 		for (y=0; y<LCD_ROWS; y++) {
 			for (x=0; x<LCD_COLS; x++) {
 				pix = 0;

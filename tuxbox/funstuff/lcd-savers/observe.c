@@ -1,14 +1,16 @@
+
 #include <fcntl.h>
-#include <stdlib.h>
+#include <netdb.h>
+#include <netinet/in.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
-#include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-#include "lcd-ks0713.h"
+#include <lcd-ks0713.h>
 
 void error(char *errormsg)
 {
@@ -20,7 +22,7 @@ int main(int argc, char *argv[])
 {
 	int lcdfd;
 	int i;
-	int sockfd, portno;
+	int sockfd;
 	struct sockaddr_in serv_addr;
 	struct hostent *server;
 	char text[32768];
@@ -57,7 +59,7 @@ int main(int argc, char *argv[])
 	serv_addr.sin_family=AF_INET;
 	bcopy((char*)server->h_addr,(char*)&serv_addr.sin_addr.s_addr, server->h_length);
 	serv_addr.sin_port=htons(6667);
-	if(connect(sockfd, &serv_addr, sizeof(serv_addr)) < 0)
+	if(connect(sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0)
 		error("ERROR: connect");
 	sprintf(buffer, "USER %s dbox dbox dbox2_lcd-screensaver\nNICK %s\n", argv[1], argv[1]);
 	write(sockfd, buffer, strlen(buffer));

@@ -8,16 +8,16 @@
 */
 
 #include <fcntl.h>
-#include <time.h>
-#include <sys/timeb.h>
-#include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
+#include <sys/timeb.h>
 #include <sys/types.h>
+#include <time.h>
+#include <unistd.h>
 
-#include "lcd-ks0713.h"
+#include <lcd-ks0713.h>
 
 typedef unsigned char screen_t[LCD_BUFFER_SIZE];
 
@@ -61,7 +61,7 @@ static unsigned char led[2][2][16] =
 
 
 void render_nibble(int row, int val, screen_t s) {
-	int x, y, b, bit;
+	int x, b, bit;
 	for (b=0; b<4; b++) {
 		bit = ((val & (1<<(3-b)))!=0);
 		for (x=0; x<16; x++) {
@@ -72,7 +72,6 @@ void render_nibble(int row, int val, screen_t s) {
 }
 
 void render_clock(screen_t s) {
-        char timestr[50];
         struct timeb tb;
         struct tm *t;
         ftime(&tb);

@@ -8,14 +8,14 @@
 */
 
 #include <fcntl.h>
-#include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
+#include <unistd.h>
 
-#include "lcd-ks0713.h"
+#include <lcd-ks0713.h>
 
 
 #define DOT_SIZE 1
@@ -121,7 +121,6 @@ void draw_gol(field f, screen_t s) {
 int main(int argc, char *args[]) {
 	screen_t screen;
 	field *f1, *f2, *tmp;
-	int x, y;
 
 	f1 = malloc(sizeof(field));
 	f2 = malloc(sizeof(field));

@@ -4,15 +4,16 @@
 */
 
 #include <fcntl.h>
-#include <time.h>
-#include <sys/timeb.h>
-#include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
+#include <sys/timeb.h>
 #include <sys/types.h>
-#include "lcd-ks0713.h"
+#include <time.h>
+#include <unistd.h>
+
+#include <lcd-ks0713.h>
 
 
 
@@ -179,10 +180,9 @@ void init() {
 
 
 int main(int argc, char *args[]) {
-	screen_t screen, back;
+	screen_t screen;
  
 
-char timestr[50];
         struct timeb tb;
         struct tm *t;
 	

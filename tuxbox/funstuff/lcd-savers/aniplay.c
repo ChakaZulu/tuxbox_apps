@@ -5,14 +5,15 @@
  ***********************************************************************/
 
 #include <fcntl.h>
-#include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
+#include <unistd.h>
 
-#include "lcd-ks0713.h"
+#include <lcd-ks0713.h>
+
 #include "ani.h"
 
 typedef unsigned char screen_t[LCD_BUFFER_SIZE];
@@ -47,7 +48,7 @@ void draw_screen(screen_t s) {
 }
 
 
-int main(int argc, char *args[]) {
+int main(int argc, char **argv) {
 	FILE *f;
 	struct ani_header ah;
 	screen_t *ani;
@@ -55,13 +56,13 @@ int main(int argc, char *args[]) {
 
 	if (argc < 2) {
 		printf("aniplay (C) 2001 Ge0rG\n");
-		printf("	%s <file.ani> [<loopcount>]\n");
+		printf("	%s <file.ani> [<loopcount>]\n", argv[0]);
 		exit(1);
 	}
 	loopcount=0;
-	if (argc==3) loopcount=atoi(args[2]);
+	if (argc==3) loopcount=atoi(argv[2]);
 
-	f = fopen(args[1], "r");
+	f = fopen(argv[1], "r");
 	fread(&ah, 1, sizeof(ah), f);
 	ani = malloc(sizeof(screen_t)*ah.count);
 	fread(ani, sizeof(screen_t), ah.count, f);

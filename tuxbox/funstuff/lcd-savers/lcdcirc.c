@@ -15,14 +15,15 @@
 
 #include <fcntl.h>
 #include <math.h>
-#include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
+#include <unistd.h>
 
-#include "lcd-ks0713.h"
+#include <lcd-ks0713.h>
+
 #include "sinus.h"
 
 typedef unsigned char screen_t[LCD_BUFFER_SIZE];

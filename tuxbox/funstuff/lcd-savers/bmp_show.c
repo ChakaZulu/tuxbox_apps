@@ -1,20 +1,22 @@
 
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/types.h>
+#include <sys/ioctl.h>
 #include <sys/stat.h>
-#include <fcntl.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+#include <lcd-ks0713.h>
 
 #include "bmp.h"
 #include "raw.h"
-
-#include "lcd-ks0713.h"
 
 #define swap32bits(i) (i>>24) | (i<<24) | ((i>>8) & 0x00f0) | ((i<<8) & 0x0f00)
 #define swap16bits(i) (i>>8) | (i<<8)
 
 int main(int argc, char **argv) {
-	FILE *fbmp, *fraw;
+	FILE *fbmp;
 
 	struct bmp_header bh;
 	struct bmp_color *colors;
@@ -97,4 +99,5 @@ int main(int argc, char **argv) {
         }
 	write(lcd_fd, &s, LCD_BUFFER_SIZE);
 	close(lcd_fd);
+	return 0;
 }

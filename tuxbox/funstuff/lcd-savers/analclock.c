@@ -7,16 +7,17 @@
 */
 
 #include <fcntl.h>
-#include <time.h>
-#include <sys/timeb.h>
-#include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
+#include <sys/timeb.h>
 #include <sys/types.h>
+#include <time.h>
+#include <unistd.h>
 
 #include <lcd-ks0713.h>
+
 #include "sinus.h"
 
 #define SQRT 64*64+1
@@ -162,7 +163,6 @@ void render_line(int x1, int y1, int x2, int y2, int color, int space, screen_t 
 
 
 void render_clock(screen_t back, screen_t s) {
-        char timestr[50];
         struct timeb tb;
         struct tm *t;
 	int bla, x, y, si, co;
