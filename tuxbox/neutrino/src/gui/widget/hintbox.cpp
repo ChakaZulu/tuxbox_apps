@@ -177,6 +177,11 @@ void CHintBox::refresh(void)
 	}
 }
 
+bool CHintBox::has_scrollbar(void)
+{
+	return (entries_per_page < line.size());
+}
+
 void CHintBox::scroll_up(void)
 {
 	if (current_page > 0)
@@ -229,13 +234,12 @@ int ShowHintUTF(const neutrino_locale_t Caption, const char * const Text, const 
 		{
 				res = messages_return::cancel_info;
 		}
-		else if (msg == CRCInput::RC_up)
+		else if ((hintBox->has_scrollbar()) && ((msg == CRCInput::RC_up) || (msg == CRCInput::RC_down)))
 		{
-			hintBox->scroll_up();
-		}
-		else if (msg == CRCInput::RC_down)
-		{
-			hintBox->scroll_down();
+			if (msg == CRCInput::RC_up)
+				hintBox->scroll_up();
+			else
+				hintBox->scroll_down();
 		}
 		else
 		{

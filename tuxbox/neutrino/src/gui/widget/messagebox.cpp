@@ -182,13 +182,12 @@ int CMessageBox::exec(int timeout)
 
 			paintButtons();
 		}
-		else if (msg == CRCInput::RC_up)
+		else if (has_scrollbar() && ((msg == CRCInput::RC_up) || (msg == CRCInput::RC_down)))
 		{
-			scroll_up();
-		}
-		else if (msg == CRCInput::RC_down)
-		{
-			scroll_down();
+			if (msg == CRCInput::RC_up)
+				scroll_up();
+			else
+				scroll_down();
 		}
 		else if(msg==CRCInput::RC_left)
 		{

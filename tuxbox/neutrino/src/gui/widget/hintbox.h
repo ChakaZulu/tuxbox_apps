@@ -65,6 +65,7 @@ class CHintBox
 	CHintBox(const neutrino_locale_t Caption, const char * const Text, const int Width = 450, const char * const Icon = "info.raw");
 	~CHintBox(void);
 
+	bool has_scrollbar(void);
 	void scroll_up(void);
 	void scroll_down(void);
 
