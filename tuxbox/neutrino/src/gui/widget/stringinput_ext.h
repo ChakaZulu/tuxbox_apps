@@ -133,6 +133,7 @@ class CExtendedInput_Item_Char : public CExtendedInput_Item
 
 	public:
 		CExtendedInput_Item_Char(string Chars="", bool Selectable=true );
+		virtual ~CExtendedInput_Item_Char(){};
 		void setAllowedChars( string );
 		virtual void init(int &x, int &y);
 		virtual void paint(int x, int y, bool focusGained);

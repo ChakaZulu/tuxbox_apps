@@ -213,7 +213,7 @@ void CStreamInfo::paint()
 	else
 	{
 		sprintf((char*) buf, "%s: ", "apid(s)" );
-		for (int i= 0; i< g_RemoteControl->current_PIDs.APIDs.size(); i++)
+		for (unsigned int i= 0; i< g_RemoteControl->current_PIDs.APIDs.size(); i++)
 		{
 			sprintf((char*) buf2, " 0x%04x",  g_RemoteControl->current_PIDs.APIDs[i].pid );
 

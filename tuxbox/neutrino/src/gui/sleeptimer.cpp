@@ -24,7 +24,7 @@
 int CSleepTimerWidget::exec(CMenuTarget* parent, string)
 {
 	int    res = menu_return::RETURN_EXIT_ALL;
-	int    shutdown_min, t;
+	int    shutdown_min;
 	char   value[16];
 	CStringInput  *inbox;
 

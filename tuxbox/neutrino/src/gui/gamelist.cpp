@@ -130,7 +130,7 @@ void CPlugins::setvtxtpid(int fd)
 
 void CPlugins::parseCfg(plugin *plugin_data)
 {
-	FILE *fd;
+//	FILE *fd;
 
 	std::ifstream inFile;
 	std::string line[20];
@@ -467,7 +467,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 
 	g_PluginList->loadPlugins();
 
-	for(unsigned int count=0;count<g_PluginList->getNumberOfPlugins();count++)
+	for(unsigned int count=0;count < (unsigned int)g_PluginList->getNumberOfPlugins();count++)
 	{
     	if ( g_PluginList->getType(count)== 1 )
     	{
@@ -493,11 +493,11 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
 
 		if ( ( msg == CRCInput::RC_timeout ) ||
-			 ( msg == g_settings.key_channelList_cancel ) )
+			 ( msg == (uint) g_settings.key_channelList_cancel ) )
 		{
 			loop=false;
 		}
-		else if ( msg == g_settings.key_channelList_pageup )
+		else if ( msg == (uint) g_settings.key_channelList_pageup )
 		{
 			selected+=listmaxshow;
 			if (selected>gamelist.size()-1)
@@ -505,7 +505,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paint();
 		}
-		else if ( msg == g_settings.key_channelList_pagedown )
+		else if ( msg == (uint) g_settings.key_channelList_pagedown )
 		{
 			if ((int(selected)-int(listmaxshow))<0)
 				selected=gamelist.size()-1;

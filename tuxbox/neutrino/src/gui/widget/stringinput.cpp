@@ -563,7 +563,7 @@ int CPLPINInput::handleOthers( uint msg, uint data )
 		// trotzdem handlen
 		CNeutrinoApp::getInstance()->handleMsg( msg, data );
 
-		if ( data != fsk )
+		if ( data != (uint) fsk )
 			res = messages_return::cancel_info;
 	}
 

@@ -96,7 +96,7 @@ void CMenuWidget::setOnPaintNotifier( COnPaintNotifier* nf )
 int CMenuWidget::exec(CMenuTarget* parent, string)
 {
 	int pos;
-	int i;
+	unsigned int i;
 
 	if (parent)
 		parent->hide();
@@ -271,7 +271,7 @@ void CMenuWidget::paint()
 	}
 
 	iconOffset= 0;
-	for (int i= 0; i< items.size(); i++)
+	for (unsigned int i= 0; i< items.size(); i++)
 	{
 		if ( (items[i]->iconName!= "") ||
 			 ((items[i]->directKey>= CRCInput::RC_0) && (items[i]->directKey<= CRCInput::RC_9)) )

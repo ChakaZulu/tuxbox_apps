@@ -91,7 +91,7 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 	unsigned char r_alt= *r;
 	unsigned char g_alt= *g;
 	unsigned char b_alt= *b;
-	unsigned char a_alt;
+	unsigned char a_alt = 0;
 	if (alpha)
 		a_alt= *alpha;
 

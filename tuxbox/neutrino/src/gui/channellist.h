@@ -108,7 +108,7 @@ class CChannelList
 		int getActiveChannelNumber();
 		unsigned int CChannelList::getActiveChannelOnid_sid();
 		const string getActiveChannelID();
-		CChannel* getChannelFromOnidSid(int onidSid);
+		CChannel* getChannelFromOnidSid(unsigned int onidSid);
 		void zapTo(int pos);
 		bool zapToOnidSid(unsigned int onid_sid);
 		void adjustToOnidSid (unsigned int onid_sid);

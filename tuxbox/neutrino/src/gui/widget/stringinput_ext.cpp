@@ -87,7 +87,7 @@ void CExtendedInput::calculateDialog()
 	int maxX = 0;
 	int maxY = 0;
 	selectedChar = -1;
-	for(int i=0; i<inputFields.size();i++)
+	for(unsigned int i=0; i<inputFields.size();i++)
 	{
 		inputFields[i]->init( ix, iy);
 		inputFields[i]->setDataPointer( &value[i] );
@@ -170,7 +170,7 @@ int CExtendedInput::exec( CMenuTarget* parent, string )
 			{
 				bool found = false;
 				int oldSelectedChar = selectedChar;
-				for(int i=selectedChar+1; i<inputFields.size();i++)
+				for(unsigned int i=selectedChar+1; i<inputFields.size();i++)
 				{
 					if ((!found) && (inputFields[i]->isSelectable()))
 					{
@@ -266,7 +266,7 @@ void CExtendedInput::paint()
 		}
 	}
 
-	for(int i=0; i<inputFields.size();i++)
+	for(unsigned int i=0; i<inputFields.size();i++)
 	{
 		inputFields[i]->paint( x+20, y+hheight +20, (i==selectedChar) );
 	}
@@ -320,7 +320,7 @@ void CExtendedInput_Item_Char::paint(int x, int y, bool focusGained )
 
 bool CExtendedInput_Item_Char::isAllowedChar( char ch )
 {
-	return (allowedChars.find(ch)!=-1);
+	return (allowedChars.find(ch) != -1);
 }
 
 int CExtendedInput_Item_Char::getCharID( char ch )
@@ -338,7 +338,7 @@ void CExtendedInput_Item_Char::keyPressed( int key )
 	}
 	else
 	{
-		int pos = getCharID( *data );
+		unsigned int pos = getCharID( *data );
 		if (key==CRCInput::RC_up)
 		{
 			if(pos<allowedChars.size()-1)

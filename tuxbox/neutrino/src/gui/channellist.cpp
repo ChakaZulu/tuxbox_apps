@@ -222,12 +222,12 @@ int CChannelList::show()
 			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_chanlist );
 
 		if ( ( msg == CRCInput::RC_timeout ) ||
-			 ( msg == g_settings.key_channelList_cancel) )
+			 ( msg == (uint) g_settings.key_channelList_cancel) )
 		{
 			selected = oldselected;
 			loop=false;
 		}
-		else if ( msg == g_settings.key_channelList_pageup )
+		else if ( msg == (uint) g_settings.key_channelList_pageup )
 		{
 			selected+=listmaxshow;
 			if (selected>chanlist.size()-1)
@@ -235,7 +235,7 @@ int CChannelList::show()
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paint();
 		}
-		else if ( msg == g_settings.key_channelList_pagedown )
+		else if ( msg == (uint) g_settings.key_channelList_pagedown )
 		{
 			if ((int(selected)-int(listmaxshow))<0)
 				selected=chanlist.size()-1;
@@ -281,7 +281,7 @@ int CChannelList::show()
 				paintItem(selected - liststart);
 			}
 		}
-		else if ( ( msg == g_settings.key_bouquet_up ) && ( bouquetList != NULL ) )
+		else if ( ( msg == (uint) g_settings.key_bouquet_up ) && ( bouquetList != NULL ) )
 		{
 			if (bouquetList->Bouquets.size() > 0)
 			{
@@ -291,7 +291,7 @@ int CChannelList::show()
 				loop = false;
 			}
 		}
-		else if ( ( msg == g_settings.key_bouquet_down ) && ( bouquetList != NULL ) )
+		else if ( ( msg == (uint) g_settings.key_bouquet_down ) && ( bouquetList != NULL ) )
 		{
 			if (bouquetList->Bouquets.size() > 0)
 			{
@@ -411,7 +411,7 @@ int CChannelList::handleMsg(uint msg, uint data)
 				zapProtection->fsk = data;
 			else
 			{
-				if ( data>= g_settings.parentallock_lockage )
+				if ( data>= (uint) g_settings.parentallock_lockage )
 				{
 					if ( ( chanlist[selected]->last_unlocked_EPGid != g_RemoteControl->current_EPGid ) ||
 						 ( g_RemoteControl->current_EPGid == 0 ) )
@@ -449,7 +449,7 @@ int CChannelList::handleMsg(uint msg, uint data)
 //
 bool CChannelList::zapToOnidSid (unsigned int onid_sid)
 {
-	for (int i=0; i<chanlist.size(); i++) {
+	for (unsigned int i=0; i<chanlist.size(); i++) {
 		if (chanlist[i]->onid_sid == onid_sid) {
 			zapTo (i);
 			return true;
@@ -461,13 +461,13 @@ bool CChannelList::zapToOnidSid (unsigned int onid_sid)
 
 void CChannelList::adjustToOnidSid (unsigned int onid_sid)
 {
-	int i;
+	unsigned int i;
 
 	for (i=0; i<chanlist.size(); i++) {
 		if (chanlist[i]->onid_sid == onid_sid)
 		{
 			selected= i;
-			CChannel* chan = chanlist[selected];
+//			CChannel* chan = chanlist[selected];
 			lastChList.store (selected);
 
 			tuned = i;
@@ -593,7 +593,7 @@ int CChannelList::numericZap(int key)
 			}
 			break;
 		}
-		else if ( msg == g_settings.key_quickzap_down )
+		else if ( msg == (uint) g_settings.key_quickzap_down )
 		{
 			if ( chn == 1 )
 				chn = chanlist.size();
@@ -605,7 +605,7 @@ int CChannelList::numericZap(int key)
 					chn = (int)chanlist.size();
 			}
 		}
-		else if ( msg == g_settings.key_quickzap_up )
+		else if ( msg == (uint) g_settings.key_quickzap_up )
 		{
 			chn++;
 
@@ -843,8 +843,8 @@ void CChannelList::paintItem(int pos)
 			char nameAndDescription[100];
 			snprintf(nameAndDescription, sizeof(nameAndDescription), "%s · ", chan->name.c_str());
 
-			int ch_name_len= g_Fonts->channellist->getRenderWidth(nameAndDescription);
-			int ch_desc_len= g_Fonts->channellist_descr->getRenderWidth(chan->currentEvent.description.c_str());
+			unsigned int ch_name_len= g_Fonts->channellist->getRenderWidth(nameAndDescription);
+			unsigned int ch_desc_len= g_Fonts->channellist_descr->getRenderWidth(chan->currentEvent.description.c_str());
 
 			if ( (width- numwidth- 20- 15- ch_name_len)< ch_desc_len )
 				ch_desc_len = (width- numwidth- 20- 15- ch_name_len);
@@ -919,7 +919,7 @@ void CChannelList::paint()
 	g_Sectionsd->setPauseSorting( false );
 }
 
-CChannelList::CChannel* CChannelList::getChannelFromOnidSid(int onidSid)
+CChannelList::CChannel* CChannelList::getChannelFromOnidSid(unsigned int onidSid)
 {
 	for (uint i=0; i< chanlist.size();i++)
 	{

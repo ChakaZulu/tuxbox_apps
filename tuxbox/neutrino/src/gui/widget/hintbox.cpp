@@ -66,7 +66,7 @@ CHintBox::CHintBox( string Caption, string Text, string Icon, int Width )
 	if ( nw> width )
 		width= nw;
 
-	for (int i= 0; i< text.size(); i++)
+	for (unsigned int i= 0; i< text.size(); i++)
 	{
 		int nw= g_Fonts->menu->getRenderWidth( text[i].c_str() ) + 20;
 		if ( nw> width )
@@ -104,7 +104,7 @@ void CHintBox::paint( bool saveScreen )
 		g_Fonts->menu_title->RenderString(x+10, y+theight+0, width- 10, g_Locale->getText(caption).c_str(), COL_MENUHEAD);
 
 	frameBuffer->paintBoxRel(x,y+theight+0, width,height - theight + 0, COL_MENUCONTENT);
-	for (int i= 0; i< text.size(); i++)
+	for (unsigned int i= 0; i< text.size(); i++)
 		g_Fonts->menu->RenderString(x+10,y+ theight+ (fheight>>1)+ fheight* (i+ 1), width, text[i].c_str(), COL_MENUCONTENT);
 }
 
@@ -156,5 +156,6 @@ int ShowHint ( string Caption, string Text, string Icon, int Width, int timeout 
 
 	hintBox->hide();
 	delete hintBox;
+	return 1;
 }
 
