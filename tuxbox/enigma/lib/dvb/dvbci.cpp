@@ -195,7 +195,7 @@ void eDVBCI::createCAPMT(int type,unsigned char *data)
 	switch(type)
 	{
 		case 0:				//flush
-			memcpy(CAPMT,"\x90\x2\x0\x3\x9f\x80\x32\x0\x3\x0\x0\x0",12);
+			memcpy(CAPMT,"\x90\x2\x0\x4\x9f\x80\x32\x0\x3\x0\x0\x0",12);
 			CAPMTlen=14;
 			CAPMTpos=14;
 			CAPMT[7]=0;
@@ -362,19 +362,21 @@ void eDVBCI::ca_manager(unsigned int session)
     case 0:
       {
         unsigned char buffer[12];
+        sessions[session].internal_state=1;
+
+				::ioctl(fd,CI_TS_ACTIVATE);	
+
 				clearCAIDs();
         eDebug("[DVBCI] [CA MANAGER] up to now nothing happens -> ca_info_enq");
 
         memcpy(buffer,"\x90\x2\x0\x3\x9f\x80\x30\x0",9);
-        sendTPDU(0xA0,8,sessions[session].tc_id,buffer);
+        sendTPDU(0xA0,9,sessions[session].tc_id,buffer);
 
-        sessions[session].internal_state=1;
         break;
       }
     case 1:
       {
         eDebug("[DVBCI] [CA MANAGER] send ca_pmt\n");
-				::ioctl(fd,CI_TS_ACTIVATE);	
 
 				sendCAPMT();
         sessions[session].internal_state=2;
@@ -388,10 +390,10 @@ void eDVBCI::ca_manager(unsigned int session)
 
 void eDVBCI::handle_session(unsigned char *data,int len)
 {
-	printf("session:");
-	for(int i=0;i<len;i++)
-		printf("%02x ",data[i]);
-	printf("\n");	
+	//printf("session:");
+	//for(int i=0;i<len;i++)
+	//	printf("%02x ",data[i]);
+	//printf("\n");	
 
 	if(data[4]==0x9f && data[5]==0x80 && data[6]==0x11)
 		help_manager(1);
@@ -425,8 +427,7 @@ void eDVBCI::handle_session(unsigned char *data,int len)
 			eDebug("[DVBCI] [CA MANAGER] add CAID: %04x",data[i]<<8|data[i+1]);
 			addCAID(data[i]<<8|data[i+1]);
 		}	
-		ca_manager(3);
-
+		ca_manager(4);
 	}
 
 	if(data[4]==0x9f && data[5]==0x88 && data[6]==0x01)
@@ -437,10 +438,20 @@ void eDVBCI::handle_session(unsigned char *data,int len)
 		sendTPDU(0xA0,10,1,buffer);
 	}
 
+	if(data[4]==0x9f && data[5]==0x84 && data[6]==0x40)
+	{
+		unsigned char buffer[20];
+		eDebug("[DVBCI] [DATE TIME ENQ]");
+		memcpy(buffer,"\x90\x2\x0\x5\x9f\x88\x41\x5\xcd\x64\x1\x51\x40",13);
+		sendTPDU(0xA0,13,1,buffer);
+	}
+
+
 	if(data[4]==0x9f && data[5]==0x88)
 	{
 		char buffer[len+1];
 		eDebug("[DVBCI] [APPLICATION MANAGER] -> mmi_menu");
+		eDebug("mmi len:%d",len);
 		memcpy(buffer+1,data,len);
 		buffer[0]=(len&0xff);
 		ci_mmi_progress(buffer);
@@ -558,22 +569,65 @@ void eDVBCI::incoming(unsigned char *buffer,int len)
 	int tpdu_tc_id;
 	int x=0;
 	
+	//for(int i=0;i<len;i++)
+	//	printf("%02x ",buffer[i]);
+	//printf("\n");	
+	
 	tc_id=buffer[x++];
 	m_l=buffer[x++];
-	while(x<len)
+
+	if(m_l && ml_bufferlen==0)			//first fragment
 	{
+		int y;
 		tpdu_tag=buffer[x++];
-		tpdu_len=buffer[x++]-1;
+		tpdu_len=y=buffer[x++];
+		if(y&0x80)						//aua fix me
+		{
+			//eDebug("y & 0x80 %x",tpdu_len);
+			x++;
+			tpdu_len=buffer[x++];
+			//eDebug("len:%d\n",tpdu_len);
+		}
+		tpdu_len--;
 		tpdu_tc_id=buffer[x++];
 		
-		if(tpdu_len==0x81)				//find the mistake
+		memcpy(ml_buffer,buffer+x,len-7);
+		ml_bufferlen=len-7;
+		ml_buffersize=tpdu_len;	
+	}
+	else if(!m_l && ml_bufferlen)		//last fragment
+	{
+		memcpy(ml_buffer+ml_bufferlen,buffer+2,len-2);
+		receiveTPDU(0xA0,ml_buffersize,1,ml_buffer);
+		ml_bufferlen=0;
+	}
+	else														//not fragmented
+	{
+		while(x<len)
 		{
-			tpdu_len=buffer[x++]-1;
+			int y;
+			tpdu_tag=buffer[x++];
+			tpdu_len=y=buffer[x++];
+			if(y&0x80)						//aua fix me
+			{
+				//eDebug("y & 0x80 %x",tpdu_len);
+				x++;
+				tpdu_len=buffer[x++];
+				//eDebug("len:%d\n",tpdu_len);
+			}
+			tpdu_len--;
+			if(tpdu_len>(len-6))
+				tpdu_len=len-6;
 			tpdu_tc_id=buffer[x++];
+
+			//printf("tpdu:");
+			//for(int i=0;i<tpdu_len;i++)
+			//	printf("%02x ",buffer[x+i]);
+			//printf("\n");	
+
+			receiveTPDU(tpdu_tag,tpdu_len,tpdu_tc_id,buffer+x);
+			x+=tpdu_len;
 		}	
-		
-		receiveTPDU(tpdu_tag,tpdu_len,tpdu_tc_id,buffer+x);
-		x+=tpdu_len;
 	}	
 }
 
@@ -609,8 +663,9 @@ void eDVBCI::dataAvailable(int what)
 			sessions[i].state=STATE_FREE;
 
 		::read(fd,&buffer,0);	
+
+		::ioctl(fd,CI_TS_ACTIVATE);
 	
-		::ioctl(fd,CI_ACTIVATE);	
 		if(::ioctl(fd,CI_RESET)!=0)
 		{
 			ci_state=0;
@@ -625,14 +680,18 @@ void eDVBCI::dataAvailable(int what)
 	//eDebug("READ:%d",size);	
 
 	if(size>0)
+	{
 		incoming(buffer,size);			
+		pollTimer.start(250);
+		return;
+	}	
 	
 	if(ci_state==1)
 	{
 		sendTPDU(0x82,0,1,0);	
 		ci_state=2;
 	}
-	pollTimer.start(200);
+	pollTimer.start(250);
 }
 
 void eDVBCI::poll()

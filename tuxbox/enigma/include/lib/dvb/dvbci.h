@@ -31,7 +31,10 @@ class eDVBCI: private eThread, public eMainloop, public Object
 	int CAPMTstate;
 	int CAPMTdescrpos;
 	int CAPMTdescrlen;
-		
+	unsigned char ml_buffer[1024];
+	int ml_bufferlen;
+	int ml_buffersize;
+			
 	void createCAPMT(int type,unsigned char *data);
 	void sendCAPMT();
 	void clearCAIDs();

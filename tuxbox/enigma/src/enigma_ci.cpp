@@ -32,13 +32,13 @@ enigmaCImmi::enigmaCImmi(): eWindow(0)
 	stt->setAlign(eTextPara::dirCenter);
 	stt->setText("-- sub title text --");
 	stt->move(ePoint(20,40));
-	stt->resize(eSize(360,fd+4));
+	stt->resize(eSize(460,fd+4));
 		
 	bt=new eLabel(this);
 	bt->setAlign(eTextPara::dirCenter);
 	bt->setText("-- bottom text --");
 	bt->move(ePoint(20,220));
-	bt->resize(eSize(360,fd+4));
+	bt->resize(eSize(460,fd+4));
 
 	cistate=new eLabel(this);
 	cistate->setText("ci-status: waitung for module");
@@ -91,21 +91,24 @@ void enigmaCImmi::getmmi(const char *data)
 {
 	eDebug("new mmi message received");
 	
-	for(int i=1;i<data[0];i++)
-		printf("%02x ",data[i]);
-	printf("\n");
+	//for(int i=1;i<data[0];i++)
+	//	printf("%02x ",data[i]);
+	//printf("\n");
 
 	if(data[5] == 0x9F && data[6] == 0x88)
 	{
 		int menupos=0;
 		if(data[7]== 0x09 || data[7]==0xC)		//t_menu_last
 		{
-			int pos=12;
+			int pos=10;
 			int len=data[8];
 			int choice=data[8];
-
-			if(data[7]==0xc)
-				pos=10;
+			
+			if(len&0x80)
+			{
+				len=data[10];
+				pos=12;
+			}
 			
 			eDebug("entering t_menu_last");
 			
