@@ -1,9 +1,12 @@
 /*
-$Id: menue.cpp,v 1.23 2001/11/03 23:23:51 McClean Exp $
+$Id: menue.cpp,v 1.24 2001/11/07 23:48:55 field Exp $
 
 
 History:
  $Log: menue.cpp,v $
+ Revision 1.24  2001/11/07 23:48:55  field
+ Kleiner Bugfix (Sprachenmenue)
+
  Revision 1.23  2001/11/03 23:23:51  McClean
  radiomode background paint - bugfix
 
@@ -170,8 +173,11 @@ void CMenuWidget::paint()
     string  l_name = g_Locale->getText(name);
     g_lcdd->setMode(LCDM_MENU, l_name);
 
-	x=((720-width)>>1) -20;
+//	x=((720-width)>>1) -20;
 	y=(576-height)>>1;
+    x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
+//	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
+
 
 	int hheight = g_Fonts->menu_title->getHeight();
 	g_FrameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD);
@@ -194,7 +200,7 @@ void CMenuWidget::paint()
 			ypos = item->paint(selected==((signed int) count) );
 		}
 	}
-	height = ypos - y;
+//	height = ypos - y;
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------
