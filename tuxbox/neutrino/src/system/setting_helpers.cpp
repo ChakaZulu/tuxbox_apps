@@ -362,17 +362,44 @@ bool CAudioSetupNotifier::changeNotify(const std::string & OptionName, void*)
 
 	if(OptionName=="audiomenu.avs_control")
 	{
-		int vol = g_Controld->getVolume(g_settings.audio_avs_Control);
-		g_Controld->setVolume(vol,!g_settings.audio_avs_Control);
-		g_Controld->setVolume(100,g_settings.audio_avs_Control);
+		if (g_settings.audio_DolbyDigital && g_settings.audio_avs_Control == 2)   //lirc
+			g_Controld->setVolume(100 - atoi(g_settings.audio_PCMOffset), 0);
+		else
+			g_Controld->setVolume(100, g_settings.audio_avs_Control);
+
 		return true;
 	}
+
+	if(OptionName=="audiomenu.PCMOffset")
+	{
+		if (g_settings.audio_avs_Control == 2)   //lirc
+			g_Controld->setVolume(100 - atoi(g_settings.audio_PCMOffset), 0);
+
+		return true;
+	}
+
 	if(OptionName=="audiomenu.analogout")
 	{
 		g_Zapit->setAudioMode(g_settings.audio_AnalogMode);
 		return true;
 	}
-	return false;
+}
+
+CAudioSetupNotifier2::CAudioSetupNotifier2( CMenuItem* i1)
+{
+   toDisable[0]=i1;
+}
+
+bool CAudioSetupNotifier2::changeNotify(const std::string & OptionName, void*)
+{
+	toDisable[0]->setActive(g_settings.audio_DolbyDigital==1);
+
+	if (g_settings.audio_DolbyDigital && g_settings.audio_avs_Control == 2)   
+		g_Controld->setVolume(100 - atoi(g_settings.audio_PCMOffset), 0);
+	else if (g_settings.audio_avs_Control == 2)
+		g_Controld->setVolume(100, 0);
+ 
+	return true;
 }
 
 bool CVideoSetupNotifier::changeNotify(const std::string & OptionName, void*)

@@ -89,6 +89,7 @@ audiomenu.avs_control Volume Schtüürig avs/ost
 audiomenu.avs avs
 audiomenu.ost ost
 audiomenu.lirc lirc
+audiomenu.PCMOffset Lautstärkeabsenkung PCM
 
 videomenu.head Video-Ischtöuigä
 videomenu.screensetup Böudbeeich ischtöuä

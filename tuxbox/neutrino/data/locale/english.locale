@@ -89,6 +89,7 @@ audiomenu.avs_control Volume Control avs/ost
 audiomenu.avs avs
 audiomenu.ost ost
 audiomenu.lirc lirc
+audiomenu.PCMOffset Volume Decrease PCM
 
 videomenu.head Video Settings
 videomenu.screensetup Screen Setup

@@ -383,6 +383,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.audio_AnalogMode = configfile.getInt32( "audio_AnalogMode", 0 );
 	g_settings.audio_DolbyDigital = configfile.getInt32( "audio_DolbyDigital", 0 );
 	g_settings.audio_avs_Control = configfile.getInt32( "audio_avs_Control", true );
+	strcpy( g_settings.audio_PCMOffset, configfile.getString( "audio_PCMOffset", "0" ).c_str() );
 
 
 	//vcr
@@ -699,6 +700,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "audio_AnalogMode", g_settings.audio_AnalogMode );
 	configfile.setInt32( "audio_DolbyDigital", g_settings.audio_DolbyDigital );
 	configfile.setInt32( "audio_avs_Control", g_settings.audio_avs_Control );
+	configfile.setString( "audio_PCMOffset", g_settings.audio_PCMOffset );
 
 	//vcr
 	configfile.setInt32( "vcr_AutoSwitch", g_settings.vcr_AutoSwitch );
@@ -1453,8 +1455,8 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 			fclose(fd);
 		}
 		oj = new CMenuOptionChooser("miscsettings.bootinfo", &dummy, true, new CShowBootInfoNotifier );
-		oj->addOption(0, "options.on");
-		oj->addOption(1, "options.off");
+		oj->addOption(0, "options.off");
+		oj->addOption(1, "options.on");
 		miscSettings.addItem( oj );
 
 #if HAVE_DVB_API_VERSION == 1
@@ -1551,10 +1553,17 @@ void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNoti
 	oj->addOption(2, "audiomenu.monoright");
 
 	audioSettings.addItem( oj );
-	oj = new CMenuOptionChooser("audiomenu.dolbydigital", &g_settings.audio_DolbyDigital, true, audioSetupNotifier);
+
+	CStringInput * audio_PCMOffset = new CStringInput("audiomenu.PCMOffset", g_settings.audio_PCMOffset, 2, NULL, NULL, "0123456789 ", audioSetupNotifier);
+	CMenuForwarder *mf = new CMenuForwarder("audiomenu.PCMOffset", true, g_settings.audio_PCMOffset, audio_PCMOffset );
+	CAudioSetupNotifier2 *AudioSetupNotifier2 = new CAudioSetupNotifier2(mf);
+
+	oj = new CMenuOptionChooser("audiomenu.dolbydigital", &g_settings.audio_DolbyDigital, true, AudioSetupNotifier2);
 	oj->addOption(0, "options.off");
 	oj->addOption(1, "options.on");
 	audioSettings.addItem( oj );
+
+	audioSettings.addItem( mf);
 
 	oj = new CMenuOptionChooser("audiomenu.avs_control", &g_settings.audio_avs_Control, true, audioSetupNotifier);
 	oj->addOption(0, "audiomenu.ost");

@@ -144,6 +144,15 @@ class CAudioSetupNotifier : public CChangeObserver
 		bool changeNotify(const std::string & OptionName, void*);
 };
 
+class CAudioSetupNotifier2 : public CChangeObserver
+{
+	private:
+		CMenuItem* toDisable[1];
+	public:
+		CAudioSetupNotifier2( CMenuItem* );
+		bool changeNotify(const std::string & OptionName, void*);
+};
+
 class CVideoSetupNotifier : public CChangeObserver
 {
 	public:

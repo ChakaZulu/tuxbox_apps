@@ -89,6 +89,7 @@ audiomenu.avs_control upravljanje glasnosti avs/ost
 audiomenu.avs avs
 audiomenu.ost ost
 audiomenu.lirc lirc
+audiomenu.PCMOffset Volume Decrease PCM
 
 videomenu.head namjestiti video
 videomenu.screensetup namjestiti ekran

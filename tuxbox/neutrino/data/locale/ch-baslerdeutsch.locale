@@ -89,6 +89,7 @@ audiomenu.avs_control Luutstärgi Stüürig avs/os
 audiomenu.avs avs
 audiomenu.ost ost
 audiomenu.lirc lirc
+audiomenu.PCMOffset Lautstärkeabsenkung PCM
 
 videomenu.head Video-Iischdellige
 videomenu.screensetup Bildbereich ischelle
