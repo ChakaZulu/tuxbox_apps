@@ -4,6 +4,7 @@ function channelChange()
 	if (currentChannel >= 0)
 	{
 		var channel = document.channelselector.channel.options[currentChannel].value;
+		currentBouquet = document.channelselector.bouquet.selectedIndex;
 		switchChannel(channel, currentBouquet, currentChannel);
 	}
 }
