@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdclient.h,v 1.6 2002/05/14 23:07:25 dirch Exp $
+	$Id: timerdclient.h,v 1.7 2002/05/15 16:00:31 field Exp $
 
 	License: GPL
 
@@ -74,7 +74,9 @@ class CTimerdClient
 			EVT_SHUTDOWN = 1,
 			EVT_NEXTPROGRAM,
 			EVT_STANDBY,
-			EVT_RECORD
+			EVT_RECORD,
+			EVT_STANDBY_ON,
+			EVT_STANDBY_OFF
 		};
 
 		CTimerdClient::CTimerdClient();
