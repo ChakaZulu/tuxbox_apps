@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.23 2001/10/18 21:09:51 field Exp $
+//  $Id: sectionsdMsg.h,v 1.24 2001/10/21 13:04:40 field Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -25,6 +25,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsdMsg.h,v $
+//  Revision 1.24  2001/10/21 13:04:40  field
+//  nvod-zeiten funktionieren
+//
 //  Revision 1.23  2001/10/18 21:09:51  field
 //  neuer Befehl fuer EPGPrev/Next
 //
@@ -300,10 +303,8 @@ struct sectionsd {
 //     for every (sub-)channel
 //       channelID (4 byte, onid<<16+sid)
 //       transportStreamID (2 byte)
-//       number of start times (1 byte)
-//       start time 1 (4 bytes ctime)
-//       ...
-//       start time n (4 bytes ctime)
+//       start time (4 bytes ctime)
+//       duration (4 bytes unsigned)
 //
 //  getEPGPrevNext
 //   data of request:
