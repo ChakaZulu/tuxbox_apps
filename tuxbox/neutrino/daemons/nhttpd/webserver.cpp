@@ -20,8 +20,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-	// Revision 1.1  11.02.2002 20:20  dirch
-	// Revision 1.2  22.03.2002 20:20  dirch
+	$ID$
 
 */
 
@@ -115,7 +114,7 @@ bool TWebserver::Start()
 void * WebThread(void * request)
 {
 static int ThreadsCount = 0;
-TWebserverRequest *req = (TWebserverRequest *)request;
+CWebserverRequest *req = (CWebserverRequest *)request;
 	ThreadsCount++;
 	while(ThreadsCount > 15)
 	{
@@ -151,7 +150,7 @@ void TWebserver::DoLoop()
 {
 socklen_t			clilen;
 SAI					cliaddr;
-TWebserverRequest	*req;
+CWebserverRequest	*req;
 int sock_connect;
 int thread_num =0;
 pthread_t Threads[10];
@@ -169,7 +168,7 @@ pthread_t Threads[10];
         }
         if(DEBUG) printf("nhttpd: got connection from %s\n", inet_ntoa(cliaddr.sin_addr));
             
-		req = new TWebserverRequest(this);
+		req = new CWebserverRequest(this);
 		memcpy(&(req->cliaddr),&cliaddr,sizeof(cliaddr));
 		if(req->GetRawRequest(sock_connect))
 		{

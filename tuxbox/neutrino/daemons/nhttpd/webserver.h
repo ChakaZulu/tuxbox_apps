@@ -60,7 +60,7 @@ public:
 
 	int SocketConnect(Tmconnect * con,int Port);
 
-	friend class TWebserverRequest;
+	friend class CWebserverRequest;
 	friend class TWebDbox;
 };
 

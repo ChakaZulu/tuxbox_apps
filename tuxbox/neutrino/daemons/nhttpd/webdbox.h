@@ -28,7 +28,7 @@ using namespace std;
 
 
 class TWebserver;
-class TWebserverRequest;
+class CWebserverRequest;
 class CWebserverCGI;
 
 //-------------------------------------------------------------------------
@@ -52,11 +52,11 @@ public:
 
 	CChannelEventList eList;
 
-	bool ExecuteCGI(TWebserverRequest* request);
+	bool ExecuteCGI(CWebserverRequest* request);
 
 // get functions to collect data
 	void GetChannelEvents();
-	void GetEventList(TWebserverRequest* request, unsigned onidSid, bool cgi = false);
+	void GetEventList(CWebserverRequest* request, unsigned onidSid, bool cgi = false);
 	char* GetServiceName(int onid_sid);
 
 	bool GetBouquets(void)
@@ -83,20 +83,21 @@ public:
 
 
 // send functions for ExecuteCGI (controld api)
-	void SendcurrentVAPid(TWebserverRequest* request);
-	void SendSettings(TWebserverRequest* request);
-	void SendStreaminfo(TWebserverRequest* request);
-	void SendBouquets(TWebserverRequest *request);
-	void SendBouquet(TWebserverRequest *request,int BouquetNr);
-	void SendChannelList(TWebserverRequest *request);
+	void SendcurrentVAPid(CWebserverRequest* request);
+	void SendSettings(CWebserverRequest* request);
+	void SendStreaminfo(CWebserverRequest* request);
+	void SendBouquets(CWebserverRequest *request);
+	void SendBouquet(CWebserverRequest *request,int BouquetNr);
+	void SendChannelList(CWebserverRequest *request);
 
 
-	bool Execute(TWebserverRequest* request);
+	bool Execute(CWebserverRequest* request);
 // show functions for Execute (web api)
-	void ShowChannelList(TWebserverRequest* request,CZapitClient::BouquetChannelList channellist);
-	void ShowBouquet(TWebserverRequest *request,int BouquetNr);
-	void ShowBouquets(TWebserverRequest *request);
-	void ShowControlpanel(TWebserverRequest* request);
+//	void ShowChannelList(CWebserverRequest* request,int BouquetNr = -1);
+	void ShowBouquet(CWebserverRequest *request,int BouquetNr = -1);
+	void ShowBouquets(CWebserverRequest *request);
+	void ShowControlpanel(CWebserverRequest* request);
+	void ShowSettings(CWebserverRequest *request);
 
 // support functions
 	void ZapTo(char* target);
@@ -104,7 +105,7 @@ public:
 
 
 // alt
-	void GetEPG(TWebserverRequest *request,unsigned long long epgid, time_t *,bool cgi=false);
+	void GetEPG(CWebserverRequest *request,unsigned long long epgid, time_t *,bool cgi=false);
 };
 
 #endif

@@ -1,10 +1,9 @@
 /*
 	webserver  -   DBoxII-Project
 
-	Copyright (C) 2001 Steffen Hehn 'McClean'
-	Homepage: http://dbox.cyberphoria.org/
+	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-
+	$ID$
 
 	License: GPL
 
@@ -22,7 +21,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-	// Revision 1.1  11.02.2002 20:20  dirch
+
 
 */
 
@@ -34,37 +33,38 @@
 
 
 //-------------------------------------------------------------------------
-TWebserverRequest::TWebserverRequest(TWebserver *server) 
+CWebserverRequest::CWebserverRequest(TWebserver *server) 
 {
 	Parent = server;
 	Method = M_UNKNOWN; 
-	URL = NULL;
-	Filename = NULL;
-	FileExt = NULL;
-	Path = NULL;
-	Param_String=NULL;
-	ContentType = NULL;
+	URL = "";
+	Filename = "";
+	FileExt = "";
+	Path = "";
+	Param_String="";
+	ContentType = "";
 	Boundary = NULL;
 	Upload = NULL;
 	HttpStatus = 0;
 
-	ParameterList= new TParameterList; 
+//	ParameterList= new TParameterList; 
 	HeaderList = new TParameterList;
 }
 
 //-------------------------------------------------------------------------
-TWebserverRequest::~TWebserverRequest() 
+CWebserverRequest::~CWebserverRequest() 
 {
-
 	if(Upload) delete Upload;
+/*
 	if(URL != NULL) delete URL;
 	if(Path) delete Path;
 	if(Filename) delete Filename;
 	if(Param_String) delete Param_String;
-	if(ParameterList) delete ParameterList;
+//	if(ParameterList) delete ParameterList;
 	if(FileExt) delete FileExt;
 	if(ContentType) delete ContentType;
 	if(Boundary) delete Boundary;
+*/
 	if(HeaderList) delete HeaderList;
 	if(rawbuffer) 
 	{
@@ -77,7 +77,7 @@ TWebserverRequest::~TWebserverRequest()
 }
 
 //-------------------------------------------------------------------------
-bool TWebserverRequest::GetRawRequest(int socket)
+bool CWebserverRequest::GetRawRequest(int socket)
 {
 	char buffer[1024];
 	int anzahl_bytes = 0;
@@ -98,31 +98,136 @@ bool TWebserverRequest::GetRawRequest(int socket)
 	return false;
 }
 //-------------------------------------------------------------------------
-bool TWebserverRequest::ParseParams(char *param_string)
+void CWebserverRequest::SplitParameter(string param_str)
 {
-char * anfang;
-char * ende;
-	if(Parent->DEBUG) printf("param_string: %s\n",param_string);
-	if(strlen(param_string) < 1)
-		return false;
+	if(param_str.length() > 0)
+	{
+		int pos = param_str.find('=');
+		if(pos != -1)
+		{
+			ParameterList[param_str.substr(0,pos)] = param_str.substr(pos+1,param_str.length() - (pos+1));
+			if(Parent->DEBUG) printf("Parameter[%s] = '%s'\n",param_str.substr(0,pos).c_str(),param_str.substr(pos+1,param_str.length() - (pos+1)).c_str());
+		}
+		else
+		{
+			ParameterList["1"] = param_str;
+			if(Parent->DEBUG) printf("Parameter[1] = '%s'\n",param_str.c_str());
+		}
+	}
+/*
+TString *Name,*Value;
+	if(Parent->DEBUG) printf("Splitte Parameter\n");
+	if( (strlen(parameter) > 0) )
+	{
+	int i;
+	char *t;
 
-	if(!ParameterList)
-		ParameterList = new TParameterList;
+		if(len == 0)								// Wenn keine Länge angegeben dann ganzer String
+			len = strlen(parameter);
+
+		if(parameter[len] == '\n')				// Wenn letztes Zeichen \n dann abschneiden
+			len--;
+
+		t = strchr(parameter,seperator);						//Nach Trennzeichen suchen
+		if( t && (t < parameter + len) )
+		{												// Wenn Trennzeichen gefunden			
+			Name = new TString(parameter,t - parameter);
+			char *start = t+1;
+			int laenge = parameter + len - t;
+			for(;*start == ' ';start++,laenge--);
+			for(;(start[laenge] == ' ') || (start[laenge] == '\n');laenge--);
+			Value = new TString(start,laenge);
+			if(Name && Parent->DEBUG)
+				printf("Name: '%s' Value '%s'\n",Name->c_str(),Value->c_str());
+		}
+		else 
+		{												// Wenn kein Trennzeichen dann nur Namen mit " " speichern
+			if(Parent->DEBUG) printf("[nhttpd] Kein Trennzeichen '%c' gefunden\n",seperator);
+			int laenge = len+1;
+			char *start = parameter;
+			if(Parent->DEBUG) printf("start[laenge] '%c' start[laenge-1]: '%c'\n",start[laenge],start[laenge-1]);
+			while(*start == ' ')
+			{
+				start++;
+				laenge--;
+			};
+			while( (start[laenge-1] == ' ') || (start[laenge-1] == '\n') || (start[laenge-1] == 0) )
+			{
+				laenge--;
+			};
+			Value = new TString(start,laenge);
+			Name = new TString("1");
+			if(Parent->DEBUG) printf("Name: '%s' Value '%s'\n",Name->c_str(),Value->c_str());
+
+		}
+		sprintf("Parameter: name= '%s' value= '%s'\n",Name->c_str(),Value->c_str());
+		ParameterList[Name->c_str()] = Value->c_str();
+//		printf("TParameter: %x\n",this);
+		
+	}
+*/
+}
+//-------------------------------------------------------------------------
+
+bool CWebserverRequest::ParseParams(string param_string)
+{
+//char * anfang;
+//char * ende;
+string name,value,param;
+string param_str;
+int pos;
+bool ende = false;
+
+	if(Parent->DEBUG) printf("param_string: %s\n",param_string.c_str());
+	if(param_string.length() <= 0)
+		return false;
+//	for(int i = strlen(
+	param_str = param_string;
+	while(!ende)
+	{
+		pos = param_str.find_first_of("&");
+		if(pos > 0)
+		{
+			param = param_str.substr(0,pos);	
+			param_str = param_str.substr(pos+1,param_str.length() - (pos+1));
+		}
+		else
+		{
+			param = param_str;
+			ende = true;
+		}
+		printf("param: '%s' param_str: '%s'\n",param.c_str(),param_str.c_str());
+		SplitParameter(param);
+	}
+/*	
 	anfang = param_string;
 	do{
 		ende = strchr(anfang,'&');
-
+		if(Parent->DEBUG) printf("anfang: %X ende: %X\n",anfang,ende);
 		if(!ende)
-			ParameterList->Add(anfang, param_string + strlen(param_string) - anfang);
+		{
+//			ParameterList->Add(anfang, param_string + strlen(param_string) - anfang);
+			SplitParameter(anfang, param_string + strlen(param_string) - anfang);
+//			name = anfang;
+//			value = param_string + strlen(param_string) - anfang;
+//			ParameterList.insert(value_type(t,s));
+		}
 		else
-			ParameterList->Add(anfang, ende - anfang -1);
+		{
+//			ParameterList->Add(anfang, ende - anfang -1);
+			SplitParameter(anfang, ende - anfang -1);
+//			name = anfang;
+//			value =  ende - anfang -1;
+		}
+
 		anfang = ende + 1;
 	}while(ende);
+*/
 	return true;
 };
 //-------------------------------------------------------------------------
 
-void TWebserverRequest::ParseHeader(char * t, int len)
+void CWebserverRequest::ParseHeader(char * t, int len)
 {
 	if(!HeaderList)
 		HeaderList = new TParameterList;
@@ -131,10 +236,10 @@ void TWebserverRequest::ParseHeader(char * t, int len)
 }
 
 
-bool TWebserverRequest::ParseFirstLine(char * zeile, int len)
+bool CWebserverRequest::ParseFirstLine(char * zeile, int len)
 {
 char *ende, *anfang, *t;
-	
+
 	if(strncmp("POST",zeile,4) == 0)
 		Method = M_POST;
 	if(strncmp("GET",zeile,3) == 0)
@@ -153,57 +258,59 @@ char *ende, *anfang, *t;
 	ende = strchr(anfang,' ');
 	if( ((t = strchr(anfang,'?')) != 0) && (t < ende) )
 	{
-		Param_String= new TString(t+1,ende - t);
-		URL = new TString(anfang,t - anfang);
+		Param_String = string(t+1,ende - (t+1));
+		URL = string(anfang,t - anfang);
 		// URL in Path und Filename aufsplitten
 
-		if(Parent->DEBUG) printf("URL: %s\nParams: %s\n",URL->c_str(),Param_String->c_str());
-		if(ParseParams(Param_String->c_str()))
+		if(Parent->DEBUG) printf("URL: '%s'\nParams: '%s'\n",URL.c_str(),Param_String.c_str());
+		if(ParseParams(Param_String))
 			return true;
+		else
+			return false;
 
 	}
 	else
 	{
-		URL = new TString(anfang,ende - anfang);
-		if(Parent->DEBUG) printf("URL: %s\n",URL->c_str());
+		 URL = string(anfang,ende - anfang);
+		if(Parent->DEBUG) printf("URL: %s\n",URL.c_str());
 		return true;
 	}
 	return true;
 }
 
 //-------------------------------------------------------------------------
-bool TWebserverRequest::ParseRequest()
+bool CWebserverRequest::ParseRequest()
 {
 int i = 0,zeile2_offset = 0;
 char *zeile;
-char *ende,*anfang;
-
+int ende;
+string buffer;
 	if(rawbuffer && (rawbuffer_len > 0) )
 	{
+		buffer= string(rawbuffer);
 		if(Parent->DEBUG) printf("Parse jetzt Request . . .\n");
-		anfang=rawbuffer;
-		if(!(ende = strchr(rawbuffer,'\n')))
+		if((ende = buffer.find('\n')) == 0)
 		{
 			printf("Kein Zeilenende gefunden\n");
 			Send500Error();
 			return false;
 		}
-		
-		int len  = ((int) ende - (int) anfang) -1;
-		zeile = new char[len];
-		strncpy(zeile,anfang,len);
-		zeile[len] = 0;
-		if(ParseFirstLine(zeile,len))
+		string zeile1 = buffer.substr(0,ende-1);
+		if(Parent->DEBUG) printf("zeile1: '%s'\n",zeile1.c_str());
+
+		if(ParseFirstLine((char *) zeile1.c_str(),zeile1.length()))
 		{
-			
-			anfang = ende + 1;
-			if(anfang >= (rawbuffer + rawbuffer_len))
+			int headerende = buffer.find("\n\n");
+
+			if(headerende == 0)
 			{
 				printf("Keine Header gefunden\n");
 				Send500Error();
 				return false;
 			}
-
+			string header = buffer.substr(ende+1,headerende-2 -(ende+1));
+			if(Parent->DEBUG) printf("Alle Header: %s\n",header.c_str());
+/*			
 			if(Parent->DEBUG) printf("Und jetzt die Header :\n");
 			do{
 				ende = strchr(anfang,'\n');
@@ -211,16 +318,17 @@ char *ende,*anfang;
 					ParseHeader(anfang, ende - anfang);
 				anfang = ende + 1;
 			}while( (ende[2] != '\n') && (ende < (rawbuffer + rawbuffer_len)) );
-			
+*/
+/*			
 			if(Method == M_POST) // TODO: Und testen ob content = formdata
 			{
 				if( (ende + 3) < rawbuffer + rawbuffer_len)
 				{
 //					Parent->Debug("Post Parameter vorhanden\n");
 					anfang = ende + 3;
-					Param_String = new TString(anfang,rawbuffer + rawbuffer_len - anfang);
-					if(Parent->DEBUG) printf("Post Param_String: %s\n",Param_String->c_str());
-					ParseParams(Param_String->c_str());
+					Param_String = string(anfang,rawbuffer + rawbuffer_len - anfang);
+					if(Parent->DEBUG) printf("Post Param_String: %s\n",Param_String.c_str());
+					ParseParams(Param_String);
 				}
 				if(HeaderList->GetIndex("Content-Type") != -1)
 				{
@@ -244,6 +352,7 @@ char *ende,*anfang;
 					}					
 				}
 			}
+*/
 		}
 		return true;
 	}
@@ -255,7 +364,7 @@ char *ende,*anfang;
 }
 //-------------------------------------------------------------------------
 
-void TWebserverRequest::PrintRequest()
+void CWebserverRequest::PrintRequest()
 {
 	char method[6] = {0};
 	if(Method == M_GET)
@@ -264,11 +373,11 @@ void TWebserverRequest::PrintRequest()
 		sprintf(method,"POST");
 
 
-	printf("%s %3d %-6s %-35s %-20s %-25s %-10s %s\n",inet_ntoa(cliaddr.sin_addr),HttpStatus,method,Path?Path->c_str():"",Filename?Filename->c_str():"",URL?URL->c_str():"",ContentType?ContentType->c_str():"",Param_String?Param_String->c_str():"");
+	printf("%s %3d %-6s %-35s %-20s %-25s %-10s %s\n",inet_ntoa(cliaddr.sin_addr),HttpStatus,method,Path.c_str(),Filename.c_str(),URL.c_str(),ContentType.c_str(),Param_String.c_str());
 }
 
 //-------------------------------------------------------------------------
-void TWebserverRequest::SendHTMLHeader(char * Titel)
+void CWebserverRequest::SendHTMLHeader(char * Titel)
 {
 	SocketWrite("<html>\n<head><title>");
 	SocketWrite(Titel);
@@ -277,12 +386,12 @@ void TWebserverRequest::SendHTMLHeader(char * Titel)
 }
 
 //-------------------------------------------------------------------------
-void TWebserverRequest::SendHTMLFooter()
+void CWebserverRequest::SendHTMLFooter()
 {
 	SocketWriteLn("</body></html>");
 }
 //-------------------------------------------------------------------------
-void TWebserverRequest::Send404Error()
+void CWebserverRequest::Send404Error()
 {
 	SocketWrite("HTTP/1.0 404 Not Found\n");		//404 - file not found
 	SocketWrite("Content-Type: text/plain\n\n");
@@ -291,7 +400,7 @@ void TWebserverRequest::Send404Error()
 	if(Parent->DEBUG) printf("Sende 404 Error\n");
 }
 //-------------------------------------------------------------------------
-void TWebserverRequest::Send500Error()
+void CWebserverRequest::Send500Error()
 {
 	SocketWrite("HTTP/1.0 500 InternalError\n");		//500 - internal error
 	SocketWrite("Content-Type: text/plain\n\n");
@@ -301,7 +410,7 @@ void TWebserverRequest::Send500Error()
 }
 //-------------------------------------------------------------------------
 
-void TWebserverRequest::SendPlainHeader(char *contenttype = NULL)
+void CWebserverRequest::SendPlainHeader(char *contenttype = NULL)
 {
 	SocketWrite("HTTP/1.0 200 OK\nContent-Type: ");
 	if(contenttype)
@@ -313,35 +422,35 @@ void TWebserverRequest::SendPlainHeader(char *contenttype = NULL)
 }
 
 //-------------------------------------------------------------------------
-void TWebserverRequest::RewriteURL()
+void CWebserverRequest::RewriteURL()
 {
 
 	if(Parent->DEBUG) printf("Schreibe URL um\n");
 
-	char* a= URL->c_str();
-
-	if(Parent->DEBUG) printf("Vor split URL:'%s'\n",a);
+//	if(  (URL[URL.length()] == ' ') || (URL[URL.length()] == '\n') )
+//		URL = URL.substr(1,URL.length() - 1);
+	if(Parent->DEBUG) printf("Vor split URL:'%s'\n",URL.c_str());
 	
-	if(a[strlen(a)-1] == '/' )		// Wenn letztes Zeichen ein / ist dann index.html anhängen
+	if(( URL.length() == 1) && (URL[URL.length()-1] == '/' ))		// Wenn letztes Zeichen ein / ist dann index.html anhängen
 	{
-		Path = new TString(a);
-		Filename = new TString("index.html");
+		Path = URL;
+		Filename = "index.html";
 	}
 	else
 	{		// Sonst aufsplitten
 //		if(strchr(a,'/') != strrchr(a,'/'))
 		{
-			char* split = strrchr(a,'/');
+			int split = URL.rfind('/') + 1;
 
-			if(split > a)
-				Path = new TString(a,split - a);
+			if(split > 0)
+				Path = URL.substr(0,split);
 			else
-				Path = new TString("/");
+				Path = "/";
 
 
-			if(split < (a + strlen(a)))
+			if(split < URL.length())
 			{
-				Filename = new TString(split+1,strlen(a) - (split - a) -1);
+				Filename= URL.substr(split,URL.length()- split);
 			}
 			else
 				printf("[nhttpd] Kein Dateiname !\n");
@@ -349,24 +458,24 @@ void TWebserverRequest::RewriteURL()
 		
 	}
 	
-	if(Parent->DEBUG) printf("Path: '%s'\n",Path->c_str());
-	if(Parent->DEBUG) printf("Filename: '%s'\n",Filename->c_str());
+	if(Parent->DEBUG) printf("Path: '%s'\n",Path.c_str());
+	if(Parent->DEBUG) printf("Filename: '%s'\n",Filename.c_str());
 
-	if( (strncmp(Path->c_str(),"/fb",3) != 0) && (strncmp(Path->c_str(),"/control",8) != 0) )	// Nur umschreiben wenn nicht mit /fb/ anfängt
+	if( (strncmp(Path.c_str(),"/fb",3) != 0) && (strncmp(Path.c_str(),"/control",8) != 0) )	// Nur umschreiben wenn nicht mit /fb/ anfängt
 	{
 		char urlbuffer[255]={0};
 		if(Parent->DEBUG) printf("Umschreiben\n");
-		sprintf(urlbuffer,"%s%s\0",Parent->PublicDocumentRoot->c_str(),Path->c_str());
-		delete Path;
-		Path = new TString(urlbuffer);
+		sprintf(urlbuffer,"%s%s\0",Parent->PublicDocumentRoot->c_str(),Path.c_str());
+		Path = urlbuffer;
 	}
 	else
-		if(Parent->DEBUG) printf("FB oder control, URL nicht umgeschrieben\n",Path->c_str());
-
-	if(strchr(Filename->c_str(),'%'))	// Wenn Sonderzeichen im Dateinamen sind
+		if(Parent->DEBUG) printf("FB oder control, URL nicht umgeschrieben\n",Path.c_str());
+	
+	if(Parent->DEBUG) printf("Auf Sonderzeichen prüfen\n");
+	if(strchr(Filename.c_str(),'%'))	// Wenn Sonderzeichen im Dateinamen sind
 	{
 		char filename[255]={0};
-		char * str = Filename->c_str();
+		char * str = (char *) Filename.c_str();
 		if(Parent->DEBUG) printf("Mit Sonderzeichen: '%s'\n",str);
 		for (int i = 0,n = 0; i < strlen(str) ;i++ )
 		{
@@ -384,30 +493,28 @@ void TWebserverRequest::RewriteURL()
 				filename[n++] = str[i];
 		}
 		if(Parent->DEBUG) printf("Ohne Sonderzeichen: '%s'\n",filename);
-		delete Filename;
-		Filename = new TString(filename);
-
-
+		Filename = filename;
 	}
-
-	char * fileext = NULL;
-	
-	if((fileext = strrchr(Filename->c_str(),'.')) == NULL)		// Dateiendung
+	if(Parent->DEBUG) printf("Auf FileExtension prüfen: ");
+	FileExt = "";
+	if(Filename.length() > 0) 
 	{
-		if(Parent->DEBUG) printf("Keine Dateiendung gefunden !\n");
-//			return false;
-	}
-	else
-	{
-		if(Parent->DEBUG) printf("FileExt = %s\n",fileext);
-//			fileext++;
-		FileExt = new TString(++fileext);
-	}
+		int fileext = Filename.rfind('.');
 
+		if(fileext == -1)		// Dateiendung
+		{
+			if(Parent->DEBUG) printf("Keine Dateiendung gefunden !\n");
+		}
+		else
+		{
+			FileExt = Filename.substr(fileext,Filename.length()-fileext);
+			if(Parent->DEBUG) printf("FileExt = %s\n",FileExt.c_str());
+		}
+	}
 }		
 
 //-------------------------------------------------------------------------
-bool TWebserverRequest::SendResponse()
+bool CWebserverRequest::SendResponse()
 {
 int file;
 
@@ -415,13 +522,13 @@ int file;
 
 	RewriteURL();		// Erst mal die URL umschreiben
 
-	if(strncmp(Path->c_str(),"/control",8) == 0)
+	if(strncmp(Path.c_str(),"/control",8) == 0)
 	{
 		if(Parent->DEBUG) printf("Web api\n");
 		Parent->WebDbox->ExecuteCGI(this);
 		return true;
 	}
-	if(strcmp(Path->c_str(),"/fb") == 0)
+	if(strncmp(Path.c_str(),"/fb",3) == 0)
 	{
 		if(Parent->DEBUG) printf("Browser api\n");
 		Parent->WebDbox->Execute(this);
@@ -431,34 +538,34 @@ int file;
 	{
 	// Normale Datei
 		if(Parent->DEBUG) printf("Normale Datei\n");
-		if( (file = OpenFile(Path->c_str(),Filename->c_str()) ) != -1 )		// Testen ob Datei auf Platte geöffnet werden kann
+		if( (file = OpenFile(Path.c_str(),Filename.c_str()) ) != -1 )		// Testen ob Datei auf Platte geöffnet werden kann
 		{											// Wenn Datei geöffnet werden konnte
 			SocketWrite("HTTP/1.0 200 OK\n");		
 			HttpStatus = 200;
-			if( (!FileExt) )		// Anhand der Dateiendung den Content bestimmen
-				ContentType = new TString("text/html");
+			if( FileExt != "" )		// Anhand der Dateiendung den Content bestimmen
+				ContentType = "text/html";
 			else
 			{
 				
-				if( (strcasecmp(FileExt->c_str(),"html") == 0) || (strcasecmp(FileExt->c_str(),"htm") == 0) )
+				if( (strcasecmp(FileExt.c_str(),"html") == 0) || (strcasecmp(FileExt.c_str(),"htm") == 0) )
 				{
-					ContentType = new TString("text/html");
+					ContentType = "text/html";
 				}
-				else if(strcasecmp(FileExt->c_str(),"gif") == 0)
+				else if(strcasecmp(FileExt.c_str(),"gif") == 0)
 				{
-					ContentType = new TString("image/gif");
+					ContentType = "image/gif";
 				}
-				else if(strcasecmp(FileExt->c_str(),"jpg") == 0)
+				else if(strcasecmp(FileExt.c_str(),"jpg") == 0)
 				{
-					ContentType = new TString("image/jpeg");
+					ContentType = "image/jpeg";
 				}
 				else
-					ContentType = new TString("text/plain");
+					ContentType = "text/plain";
 
 			}
-			SocketWrite("Content-Type: ");SocketWrite(ContentType->c_str());SocketWrite("\n\n");
+			SocketWrite("Content-Type: ");SocketWrite((char *)ContentType.c_str());SocketWrite("\n\n");
 
-			if(Parent->DEBUG) printf("content-type: %s - %s\n", ContentType->c_str(),Filename->c_str());
+			if(Parent->DEBUG) printf("content-type: %s - %s\n", ContentType.c_str(),Filename.c_str());
 			SendOpenFile(file);
 		}
 		else
@@ -470,7 +577,7 @@ int file;
 	}
 }
 //-------------------------------------------------------------------------
-bool TWebserverRequest::EndRequest()
+bool CWebserverRequest::EndRequest()
 {
 	if(Socket)
 	{
@@ -481,24 +588,24 @@ bool TWebserverRequest::EndRequest()
 	return true;
 }
 //-------------------------------------------------------------------------
-void TWebserverRequest::SocketWrite(char *text)
+void CWebserverRequest::SocketWrite(char *text)
 {
 	write(Socket, text, strlen(text) );
 }
 //-------------------------------------------------------------------------
-void TWebserverRequest::SocketWriteLn(char *text)
+void CWebserverRequest::SocketWriteLn(char *text)
 {
 	write(Socket, text, strlen(text) );
 	write(Socket,"\n",1);
 }
 //-------------------------------------------------------------------------
-void TWebserverRequest::SocketWriteData( char* data, long length )
+void CWebserverRequest::SocketWriteData( char* data, long length )
 {
 	write(Socket, data, length );
 }
 //-------------------------------------------------------------------------
 
-bool TWebserverRequest::SendFile(char *path,char *filename)
+bool CWebserverRequest::SendFile(char *path,char *filename)
 {
 int file;
 	if( (file = OpenFile(path,filename) ) != -1 )		// Testen ob Datei auf Platte geöffnet werden kann
@@ -510,7 +617,7 @@ int file;
 		return false;
 }
 //-------------------------------------------------------------------------
-void TWebserverRequest::SendOpenFile(int file)
+void CWebserverRequest::SendOpenFile(int file)
 {
 	long filesize = lseek( file, 0, SEEK_END);
 	lseek( file, 0, SEEK_SET);
@@ -532,7 +639,7 @@ void TWebserverRequest::SendOpenFile(int file)
 	if(Parent->DEBUG) printf("Datei gesendet\n");
 }
 //-------------------------------------------------------------------------
-int TWebserverRequest::OpenFile(char *path, char *filename)
+int CWebserverRequest::OpenFile(const char *path, const char *filename)
 {
 int file = 0;
 	char *fname = new char[strlen(path) + strlen(filename)+1];

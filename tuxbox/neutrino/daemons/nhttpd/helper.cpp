@@ -47,6 +47,7 @@ TParameter::TParameter(char * parameter,int len)
 }
 //-------------------------------------------------------------------------
 */
+
 TParameter::TParameter(char *name,char *value)
 {
 	Name = new TString(name);
