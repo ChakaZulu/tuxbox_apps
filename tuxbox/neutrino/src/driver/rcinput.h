@@ -1,10 +1,14 @@
 /*
-$Id: rcinput.h,v 1.5 2001/10/01 20:41:08 McClean Exp $
+$Id: rcinput.h,v 1.6 2001/10/11 21:00:56 rasc Exp $
 
  Module  RemoteControle Handling
 
 History:
  $Log: rcinput.h,v $
+ Revision 1.6  2001/10/11 21:00:56  rasc
+ clearbuffer() fuer RC-Input bei Start,
+ Klassen etwas erweitert...
+
  Revision 1.5  2001/10/01 20:41:08  McClean
  plugin interface for games - beta but nice.. :)
 
@@ -49,7 +53,7 @@ class CRCInput
 
 		int             fd;
 		CRingBuffer     ringbuffer;
-            CLIFOBuffer     LIFObuffer;
+		CLIFOBuffer     LIFObuffer;
 		pthread_t       thrInput;
 		pthread_t       thrTimer;
 		sem_t           waitforkey;
@@ -90,8 +94,8 @@ class CRCInput
 
 		
 		int  getKey(int Timeout=-1);     //get key from the input-device
-		int  pushbackKey (int key);	   // push key back in buffer (like ungetc)
-//$$		void addKey2Buffer(int);
+		int  pushbackKey (int key);      // push key back in buffer (like ungetc)
+		void clear (void);
 		static string getKeyName(int);
 };
 

@@ -1,10 +1,14 @@
 /*
- $Id: rcinput.cpp,v 1.9 2001/10/01 20:41:08 McClean Exp $
+ $Id: rcinput.cpp,v 1.10 2001/10/11 21:00:56 rasc Exp $
 
  Module for Remote Control Handling
 
 History:
  $Log: rcinput.cpp,v $
+ Revision 1.10  2001/10/11 21:00:56  rasc
+ clearbuffer() fuer RC-Input bei Start,
+ Klassen etwas erweitert...
+
  Revision 1.9  2001/10/01 20:41:08  McClean
  plugin interface for games - beta but nice.. :)
 
@@ -113,15 +117,6 @@ int CRCInput::getKey(int Timeout)
 	return RC_timeout;
 }
 
-/**************************************************************************
-*	addKey2Buffer  add a rc-key to the buffer
-*
-**************************************************************************/
-//$$ canceled, replaced by FIFO pushbackKey
-//void CRCInput::addKey2Buffer(int key)
-//{
-//	ringbuffer.add(key);
-//}
 
 
 //
@@ -133,6 +128,31 @@ int CRCInput::pushbackKey (int key)
 {
 	return LIFObuffer.push(key);
 } 
+
+
+//
+// -- clear
+// -- get rid of all buffered keys (Hard/Software buffer)...
+// -- 2001-10-11  rasc
+//
+
+void CRCInput::clear (void)
+{
+  int key;
+
+
+	ringbuffer.clear();
+	LIFObuffer.clear();
+
+        do { 
+            key = getKey(5);
+	    printf ("DBG: clear: Eat key: %d\n",key);
+	} while (key != RC_timeout);
+
+	ringbuffer.clear();
+	LIFObuffer.clear();
+
+}
 
 
 
