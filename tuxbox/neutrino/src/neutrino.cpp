@@ -1924,8 +1924,8 @@ void CNeutrinoApp::InitParentalLockSettings(CMenuWidget &parentallockSettings)
 
 	parentallockSettings.addItem(new CMenuOptionChooser(LOCALE_PARENTALLOCK_LOCKAGE, &g_settings.parentallock_lockage, PARENTALLOCK_LOCKAGE_OPTIONS, PARENTALLOCK_LOCKAGE_OPTION_COUNT, !parentallocked));
 
-	CPINChangeWidget * pinChangeWidget = new CPINChangeWidget(LOCALE_PATENTALLOCK_CHANGEPIN, g_settings.parentallock_pincode, 4, LOCALE_PARENTALLOCK_CHANGEPIN_HINT1);
-	parentallockSettings.addItem( new CMenuForwarder(LOCALE_PATENTALLOCK_CHANGEPIN, true, g_settings.parentallock_pincode, pinChangeWidget));
+	CPINChangeWidget * pinChangeWidget = new CPINChangeWidget(LOCALE_PARENTALLOCK_CHANGEPIN, g_settings.parentallock_pincode, 4, LOCALE_PARENTALLOCK_CHANGEPIN_HINT1);
+	parentallockSettings.addItem( new CMenuForwarder(LOCALE_PARENTALLOCK_CHANGEPIN, true, g_settings.parentallock_pincode, pinChangeWidget));
 }
 
 void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
@@ -2009,11 +2009,11 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	sprintf(g_settings.record_safety_time_before, "%02d", pre/60);
 	sprintf(g_settings.record_safety_time_after, "%02d", post/60);
 	CRecordingSafetyNotifier *RecordingSafetyNotifier = new CRecordingSafetyNotifier;
-	CStringInput * timerSettings_record_safety_time_before = new CStringInput(LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIMER_BEFORE, g_settings.record_safety_time_before, 2, LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIMER_BEFORE_HINT_1, LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIMER_BEFORE_HINT_2,"0123456789 ", RecordingSafetyNotifier);
-	CMenuForwarder *mf5 = new CMenuForwarder(LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIMER_BEFORE, true, g_settings.record_safety_time_before, timerSettings_record_safety_time_before );
+	CStringInput * timerSettings_record_safety_time_before = new CStringInput(LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIME_BEFORE, g_settings.record_safety_time_before, 2, LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIME_BEFORE_HINT_1, LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIME_BEFORE_HINT_2,"0123456789 ", RecordingSafetyNotifier);
+	CMenuForwarder *mf5 = new CMenuForwarder(LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIME_BEFORE, true, g_settings.record_safety_time_before, timerSettings_record_safety_time_before );
 
-	CStringInput * timerSettings_record_safety_time_after = new CStringInput(LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIMER_AFTER, g_settings.record_safety_time_after, 2, LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIMER_AFTER_HINT_1, LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIMER_AFTER_HINT_2,"0123456789 ", RecordingSafetyNotifier);
-	CMenuForwarder *mf6 = new CMenuForwarder(LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIMER_AFTER, true, g_settings.record_safety_time_after, timerSettings_record_safety_time_after );
+	CStringInput * timerSettings_record_safety_time_after = new CStringInput(LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIME_AFTER, g_settings.record_safety_time_after, 2, LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIME_AFTER_HINT_1, LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIME_AFTER_HINT_2,"0123456789 ", RecordingSafetyNotifier);
+	CMenuForwarder *mf6 = new CMenuForwarder(LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIME_AFTER, true, g_settings.record_safety_time_after, timerSettings_record_safety_time_after );
 
 	// for direct recording
 	CMenuForwarder* mf7 = new CMenuForwarder(LOCALE_RECORDINGMENU_DEFDIR, (g_settings.recording_type == RECORDING_FILE), g_settings.network_nfs_recordingdir,this,"recordingdir");
