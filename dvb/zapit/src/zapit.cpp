@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.60 2002/01/09 13:24:33 faralla Exp $
+  $Id: zapit.cpp,v 1.61 2002/01/12 22:05:32 Simplex Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -92,6 +92,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.61  2002/01/12 22:05:32  Simplex
+  Command for zapping with bouquet and channel
+
   Revision 1.60  2002/01/09 13:24:33  faralla
   cosmetics
 
@@ -2176,10 +2179,22 @@ void parse_command()
 		printf("command version 2\n");
 		switch( rmsg.cmd)
 		{
+			case CZapitClient::CMD_ZAPTO :
+				CZapitClient::commandZapto msgZapto;
+				read( connfd, &msgZapto, sizeof(msgZapto));
+				zapTo(msgZapto.bouquet, msgZapto.channel);
+			break;
+
 			case CZapitClient::CMD_GET_BOUQUETS :
 				CZapitClient::commandGetBouquets msgGetBouquets;
 				read( connfd, &msgGetBouquets, sizeof(msgGetBouquets));
 				sendBouquets(msgGetBouquets.emptyBouquetsToo);
+			break;
+
+			case CZapitClient::CMD_GET_BOUQUET_CHANNELS :
+				CZapitClient::commandGetBouquetChannels msgGetBouquetChannels;
+				read( connfd, &msgGetBouquets, sizeof(msgGetBouquets));
+				sendBouquetChannels(msgGetBouquetChannels.bouquet);
 			break;
 
 			case CZapitClient::CMD_BQ_ADD_BOUQUET :
@@ -2410,7 +2425,7 @@ int main(int argc, char **argv) {
     }
 
   system("cp " CONFIGDIR "/zapit/last_chan /tmp/zapit_last_chan");
-  printf("Zapit $Id: zapit.cpp,v 1.60 2002/01/09 13:24:33 faralla Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.61 2002/01/12 22:05:32 Simplex Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
@@ -2525,7 +2540,7 @@ void sendBouquets(bool emptyBouquetsToo)
 			 (Radiomode_on) && (g_BouquetMan->Bouquets[i]->radioChannels.size()> 0) ||
 			!(Radiomode_on) && (g_BouquetMan->Bouquets[i]->tvChannels.size()> 0))
 		{
-			CZapitClient::responseGetBouquet msgBouquet;
+			CZapitClient::responseGetBouquets msgBouquet;
 			// we'll send name and i+1 as bouquet number
 			strncpy(msgBouquet.name, g_BouquetMan->Bouquets[i]->Name.c_str(),30);
 			msgBouquet.bouquet_nr = i+1;
@@ -2539,6 +2554,44 @@ void sendBouquets(bool emptyBouquetsToo)
 	}
 }
 
+void sendBouquetChannels(unsigned int bouquet)
+{
+	bouquet--;
+	if (bouquet < 0 || bouquet>g_BouquetMan->Bouquets.size())
+	{
+		printf("[zapit] invalid bouquet number: %d",bouquet);
+		return;
+	}
+
+	ChannelList channels;
+	if (Radiomode_on)
+		channels = g_BouquetMan->Bouquets[bouquet]->radioChannels;
+	else
+		channels = g_BouquetMan->Bouquets[bouquet]->tvChannels;
+
+	if (!channels.empty())
+	{
+		for (uint i = 0; i < channels.size();i++)
+		{
+			CZapitClient::responseGetBouquetChannels response;
+			strncpy(response.name, channels[i]->name.c_str(),30);
+			response.onid_sid = (channels[i]->onid<<16)|channels[i]->sid;
+			response.nr = channels[i]->chan_nr;
+
+			if (send(connfd, &response, sizeof(response),0) == -1)
+			{
+				perror("[zapit] could not send any return\n");
+				return;
+			}
+		}
+	}
+	else
+	{
+		printf("[zapit] channel list of bouquet %d is empty\n", bouquet + 1);
+		return;
+	}
+}
+
 void startPlayBack()
 {
 	zapit( curr_onid_sid, current_is_nvod);
@@ -2547,5 +2600,18 @@ void startPlayBack()
 void stopPlayBack()
 {
 	endzap();
+}
+
+void zapTo(unsigned int bouquet, unsigned int channel)
+{
+	g_BouquetMan->saveAsLast( bouquet-1, channel-1);
+
+	ChannelList channels;
+	if (Radiomode_on)
+		channels = g_BouquetMan->Bouquets[bouquet]->radioChannels;
+	else
+		channels = g_BouquetMan->Bouquets[bouquet]->tvChannels;
+
+	zapit( (channels[channel-1]->onid<<16)|channels[channel-1]->sid , false);
 }
 

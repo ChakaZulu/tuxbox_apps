@@ -97,6 +97,8 @@ int get_caver();
 void addChannelToBouquet(unsigned int bouquet, unsigned int onid_sid);
 void removeChannelFromBouquet(unsigned int bouquet, unsigned int onid_sid);
 void sendBouquets(bool emptyBouquetsToo);
+void sendBouquetChannels(unsigned int bouquet);
 void startPlayBack();
 void stopPlayBack();
+void zapTo(unsigned int bouquet, unsigned int channel);
 
