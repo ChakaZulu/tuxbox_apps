@@ -1,5 +1,5 @@
 /*
-$Id: fe_info.c,v 1.1 2004/03/21 00:38:45 rasc Exp $
+$Id: fe_info.c,v 1.2 2004/03/21 00:40:40 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: fe_info.c,v 1.1 2004/03/21 00:38:45 rasc Exp $
 
 
 $Log: fe_info.c,v $
+Revision 1.2  2004/03/21 00:40:40  rasc
+no message
+
 Revision 1.1  2004/03/21 00:38:45  rasc
 Query FrontEnd Info  (option: -s feinfo)
 
@@ -123,7 +126,7 @@ int  do_FE_Info (OPTION *opt)
 	case FE_OFDM:	s = "OFDM (DVB-T)"; break;
 	default:	s = "unkonwn"; break;
      }
-     out_nl (1,"Frontend-type: %s", s);
+     out_nl (1,"Frontend-type:       %s", s);
 
 
      out_nl (1,"Frequency (min):     %d.%d %s", fi.frequency_min/d, fi.frequency_min%d, sf);
@@ -135,9 +138,9 @@ int  do_FE_Info (OPTION *opt)
    }
 
 
-   out_nl (1,"Symbol rate (min) : %d", fi.symbol_rate_min);
-   out_nl (1,"Symbol rate (max) : %d", fi.symbol_rate_max);
-   out_nl (1,"Symbol rate tolerance : %d ppm", fi.symbol_rate_tolerance);
+   out_nl (1,"Symbol rate (min):     %d", fi.symbol_rate_min);
+   out_nl (1,"Symbol rate (max):     %d", fi.symbol_rate_max);
+   out_nl (1,"Symbol rate tolerance: %d ppm", fi.symbol_rate_tolerance);
    
 
    out_nl (1,"Notifier delay: %d ms", fi.notifier_delay);
