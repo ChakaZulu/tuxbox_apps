@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxbox-enigma 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-06-24 20:52+0200\n"
-"PO-Revision-Date: Thu Jun 24 20:48:35 CEST 2004\n"
+"POT-Creation-Date: 2004-06-25 13:01+0200\n"
+"PO-Revision-Date: Sat Jun 5 16:30:53 CEST 2004\n"
 "Last-Translator: unknown\n"
 "Language-Team: German / Felix Domke <tmbinc@gmx.net>\n"
 "MIME-Version: 1.0\n"
@@ -93,9 +93,8 @@ msgid "increased voltage"
 msgstr "Spannung erhöhen"
 
 #: default.esml:419 default.esml:629
-#, fuzzy
 msgid "LOCK"
-msgstr "OK"
+msgstr "LOCK"
 
 #: default.esml:511
 msgid "enable/disable use BAT for scan (if exists)"
@@ -146,9 +145,8 @@ msgid "save changes and return"
 msgstr "Änderungen speichern und Fenster schließen"
 
 #: default.esml:535
-#, fuzzy
 msgid "aborts the transponder scan"
-msgstr "Startet die Sendersuche"
+msgstr "Bricht die Sendersuche ab"
 
 #: default.esml:467 default.esml:712 default.esml:872 default.esml:909
 msgid "remove"
@@ -325,7 +323,7 @@ msgstr "Benutze gotoXX Funktion"
 
 #: default.esml:869
 msgid "vol+"
-msgstr "vol+"
+msgstr ""
 
 #: default.esml:724
 msgid "for a multiple event enable this"
@@ -336,9 +334,8 @@ msgid "press ok to select another event"
 msgstr "OK drücken um ein anderes Event auszuwählen"
 
 #: default.esml:771 default.esml:783 default.esml:795
-#, fuzzy
 msgid "shutdown  "
-msgstr "Jetzt herunterfahren"
+msgstr "Herunterfahren"
 
 #: default.esml:434 default.esml:482
 msgid "Transponder:"
@@ -501,9 +498,8 @@ msgid "starts the transponder scan"
 msgstr "Startet die Sendersuche"
 
 #: default.esml:906
-#, fuzzy
 msgid "sat"
-msgstr "setzen"
+msgstr "Sat"
 
 #: default.esml:363
 msgid "Voltage"
@@ -535,7 +531,6 @@ msgid "Tue"
 msgstr "Di"
 
 #: chk_blue2.esml:314
-#, fuzzy
 msgid "Play "
 msgstr "Wiedergabe"
 
@@ -600,9 +595,8 @@ msgid "Skins:"
 msgstr "Skins:"
 
 #: default.esml:760
-#, fuzzy
 msgid "ok"
-msgstr "Sperren"
+msgstr "OK"
 
 #: default.esml:593
 msgid "choose polarity (left, right)"
@@ -621,9 +615,8 @@ msgid "enter LNB lowband offset frequency (0..9, ok)"
 msgstr "LNB 'lowband' Ausgleichsfrequenz eingeben (0..9, OK)"
 
 #: chk_blue2.esml:318
-#, fuzzy
 msgid "Record "
-msgstr "VCR-Aufnahme"
+msgstr "Aufnahme"
 
 #: default.esml:730 src/timer.cpp:2425
 msgid "Friday"
@@ -634,9 +627,8 @@ msgid "&#49;"
 msgstr ""
 
 #: default.esml:726
-#, fuzzy
 msgid "select what todo after event"
-msgstr "OK drücken um ein anderes Event auszuwählen"
+msgstr "Auswählen, was nach dem Ereignis passieren soll"
 
 #: default.esml:460 src/tpeditwindow.cpp:71
 msgid "Orbital Position:"
@@ -699,7 +691,6 @@ msgid "save changes"
 msgstr "Änderungen speichern"
 
 #: stone.esml:465 silver.esml:472
-#, fuzzy
 msgid "plugins"
 msgstr "Plugins"
 
@@ -851,34 +842,31 @@ msgstr "Festplatte:"
 
 #: default.esml:759
 msgid "FP Version:"
-msgstr "Frontprozessor Software Version:"
+msgstr "FP Version:"
 
 #: default.esml:810
 msgid "status:"
 msgstr "Status:"
 
 #: default.esml:511
-#, fuzzy
 msgid "use BAT"
-msgstr "BAT verwenden"
+msgstr "verwende BAT"
 
 #: default.esml:609
 msgid "Symbolrate:"
 msgstr "Symbolrate:"
 
 #: default.esml:779
-#, fuzzy
 msgid "Set Sleeptimer"
-msgstr "'Sleep-Timer' setzen"
+msgstr "Sleeptimer setzen"
 
 #: default.esml:568
 msgid "press ok to change"
 msgstr "zum Ändern OK drücken"
 
 #: chk_blue2.esml:313
-#, fuzzy
 msgid "FR "
-msgstr "FF"
+msgstr "FR"
 
 #: default.esml:903
 msgid "Transponders"
@@ -1069,10 +1057,9 @@ msgstr ""
 
 #: default.esml:871
 msgid "vol-"
-msgstr "vol-"
+msgstr ""
 
 #: default.esml:513
-#, fuzzy
 msgid "network search"
 msgstr "Netzwerksuche"
 
@@ -1085,7 +1072,6 @@ msgid "no module"
 msgstr "Kein Modul"
 
 #: lib/dvb/dvbwidgets.cpp:53
-#, fuzzy
 msgid "vertical"
 msgstr "Vertikal"
 
@@ -1093,7 +1079,7 @@ msgstr "Vertikal"
 msgid "horizontal"
 msgstr "Horizontal"
 
-#: lib/dvb/service.cpp:202 lib/dvb/service.cpp:232 src/enigma_bouquet.cpp:212
+#: lib/dvb/service.cpp:202 lib/dvb/service.cpp:232 src/enigma_bouquet.cpp:215
 #: src/enigma_main.cpp:3876 src/enigma_main.cpp:3888 src/parentallock.cpp:123
 #: src/parentallock.cpp:155 src/timer.cpp:2147
 msgid "parental"
@@ -1166,12 +1152,10 @@ msgid "TV mode"
 msgstr "TV-Modus"
 
 #: lib/dvb/servicestructure.cpp:12
-#, fuzzy
 msgid "Radio Mode"
 msgstr "Radio-Modus"
 
 #: lib/dvb/servicestructure.cpp:14
-#, fuzzy
 msgid "File Mode"
 msgstr "Datei-Modus"
 
@@ -1201,9 +1185,8 @@ msgid "No"
 msgstr "Nein"
 
 #: lib/gui/listbox.cpp:785 src/enigma_main.cpp:3010
-#, fuzzy
 msgid "no description available"
-msgstr "Keine Beschreibung verfügbar"
+msgstr "es ist keine Beschreibung verfügbar"
 
 #: lib/gui/textinput.cpp:19
 msgid "enable/disable capslock"
@@ -1608,7 +1591,6 @@ msgid "Service Organising"
 msgstr "Senderverwaltung"
 
 #: src/enigma_bouquet.cpp:42
-#, fuzzy
 msgid "Create new bouquet"
 msgstr "Neues Bouquet erstellen"
 
@@ -1632,11 +1614,11 @@ msgstr "Bouquets bearbeiten"
 msgid "sort,rename,delete services/bouquets "
 msgstr "Sender/Bouquets sortieren,umbennen,löschen"
 
-#: src/enigma_bouquet.cpp:48
+#: src/enigma_bouquet.cpp:51
 msgid "Lock/Unlock Services"
 msgstr "Sender sperren/entsperren"
 
-#: src/enigma_bouquet.cpp:48
+#: src/enigma_bouquet.cpp:51
 msgid "lock,unlock services (parental locking)"
 msgstr "Sender sperren,entsperren (Jugendschutz)"
 
@@ -1692,27 +1674,27 @@ msgstr "Common Interface Modul - mmi"
 msgid "waiting for CI answer..."
 msgstr "Warte auf CI-Antwort..."
 
-#: src/enigma_dyn.cpp:1916
+#: src/enigma_dyn.cpp:1918
 msgid "No channel available"
 msgstr "Keine Kanal verfügbar"
 
-#: src/enigma_dyn.cpp:1920 src/enigma_dyn.cpp:3476 src/enigma_dyn.cpp:3836
+#: src/enigma_dyn.cpp:1922 src/enigma_dyn.cpp:3484 src/enigma_dyn.cpp:3844
 msgid "No description available"
 msgstr "Keine Beschreibung verfügbar"
 
-#: src/enigma_dyn.cpp:1996
+#: src/enigma_dyn.cpp:1998
 msgid "No timer events available"
 msgstr "Keine Timer Einträge vorhanden"
 
-#: src/enigma_dyn.cpp:2014
+#: src/enigma_dyn.cpp:2016
 msgid "No regular timer events available"
 msgstr "Keine Timer Einträge vorhanden"
 
-#: src/enigma_dyn.cpp:2023
+#: src/enigma_dyn.cpp:2025
 msgid "No repeating timer events available"
 msgstr "Keine wiederholenden Timer Einträge vorhanden"
 
-#: src/enigma_dyn.cpp:3493 src/enigma_dyn.cpp:3708
+#: src/enigma_dyn.cpp:3501 src/enigma_dyn.cpp:3716
 msgid ""
 "Timer event could not be added because time of the event overlaps with an "
 "already existing event."
@@ -1720,30 +1702,28 @@ msgstr ""
 "Der Timer konnte nicht hinzugefügt werden, weil dieser sich mit einem "
 "anderen Eintrag überlappt"
 
-#: src/enigma_dyn.cpp:3495 src/enigma_dyn.cpp:3711
+#: src/enigma_dyn.cpp:3503 src/enigma_dyn.cpp:3719
 msgid "Timer event was created successfully."
 msgstr "Timer Eintrag wurde erfolgreich hinzugefügt"
 
-#: src/enigma_dyn.cpp:3725 src/timer.cpp:1931
-#, fuzzy
+#: src/enigma_dyn.cpp:3733 src/timer.cpp:1931
 msgid "Nothing"
-msgstr "[nichts]"
+msgstr "Nichts"
 
-#: src/enigma_dyn.cpp:3731 src/timer.cpp:1932
-#, fuzzy
+#: src/enigma_dyn.cpp:3739 src/timer.cpp:1932
 msgid "Standby"
-msgstr "Standby:"
+msgstr "Standby"
 
-#: src/enigma_dyn.cpp:3737 src/enigma_mainmenu.cpp:69
+#: src/enigma_dyn.cpp:3745 src/enigma_mainmenu.cpp:69
 #: src/enigma_mainmenu.cpp:200 src/timer.cpp:1934
 msgid "Shutdown"
 msgstr "Herunterfahren"
 
-#: src/enigma_dyn.cpp:3770 src/enigma_dyn.cpp:3807
+#: src/enigma_dyn.cpp:3778 src/enigma_dyn.cpp:3815
 msgid "After Event:"
-msgstr ""
+msgstr "Nach dem Ereignis:"
 
-#: src/enigma_dyn.cpp:3870
+#: src/enigma_dyn.cpp:3878
 msgid "No detailed description available"
 msgstr "Keine detailierte Beschreibung verfügbar"
 
@@ -1807,7 +1787,6 @@ msgstr "Tuner: Terrestrisch"
 #: src/enigma_info.cpp:225 src/streaminfo.cpp:271 src/streaminfo.cpp:282
 #: src/streaminfo.cpp:294 src/streaminfo.cpp:306 src/streaminfo.cpp:318
 #: src/streaminfo.cpp:470 src/streaminfo.cpp:509
-#, fuzzy
 msgid "none"
 msgstr "Keine"
 
@@ -2157,19 +2136,16 @@ msgid "recording finished"
 msgstr "Aufnahme beendet"
 
 #: src/enigma_main.cpp:3301
-#, fuzzy
 msgid "Shutdown your Receiver now?"
-msgstr "Ihre Dreambox abschalten"
+msgstr "Ihren Receiver abschalten"
 
 #: src/enigma_main.cpp:3301 src/enigma_main.cpp:3317
-#, fuzzy
 msgid "Timer Message"
-msgstr "Mitteilung"
+msgstr "Timer Nachricht"
 
 #: src/enigma_main.cpp:3317
-#, fuzzy
 msgid "Go to Standby now?"
-msgstr "In den Standby gehen (OK)"
+msgstr "Die Box jetzt in Standby schalten?"
 
 #: src/enigma_main.cpp:3376
 msgid "Enter new name:"
@@ -2213,18 +2189,16 @@ msgid "Delete bouquet"
 msgstr "Bouquet löschen"
 
 #: src/enigma_main.cpp:3545
-#, fuzzy
 msgid "Delete File"
-msgstr "Datei löschen"
+msgstr "Lösche Datei"
 
 #: src/enigma_main.cpp:3600
 msgid "Enter new Filename:"
 msgstr "Neuen Dateinamen eingeben:"
 
 #: src/enigma_main.cpp:3601
-#, fuzzy
 msgid "Rename File"
-msgstr "Datei Umbennenen"
+msgstr "Datei umbenennen"
 
 #: src/enigma_main.cpp:3664
 msgid "Enter new name for the bouquet:"
@@ -2300,7 +2274,6 @@ msgstr ""
 "Bitte warten, bis der Timer die Aufnahme gestartet hat (max. 10 Sekunden)"
 
 #: src/enigma_main.cpp:4589
-#, fuzzy
 msgid "information"
 msgstr "Informationen"
 
@@ -2548,7 +2521,7 @@ msgstr "Ihre Dreambox neu starten"
 
 #: src/enigma_main.cpp:6555
 msgid "restart your receiver"
-msgstr "Receiver jetzt neu starten"
+msgstr "Ihren Receiver neu starten"
 
 #: src/enigma_main.cpp:6559 src/enigma_main.cpp:6563
 msgid "shutdown now"
@@ -2651,9 +2624,8 @@ msgstr "Informationen"
 #: src/enigma_mainmenu.cpp:72 src/enigma_mainmenu.cpp:88
 #: src/enigma_mainmenu.cpp:196 src/enigma_mainmenu.cpp:206
 #: src/enigma_setup.cpp:36
-#, fuzzy
 msgid "Setup"
-msgstr "Setup"
+msgstr "Einstellungen"
 
 #: src/enigma_mainmenu.cpp:75 src/enigma_mainmenu.cpp:197
 #: src/enigma_plugins.cpp:120
@@ -2820,7 +2792,6 @@ msgid "open common interface menu"
 msgstr "Common Interface Menü öffnen"
 
 #: src/enigma_setup.cpp:48
-#, fuzzy
 msgid "Parental Lock"
 msgstr "Jugendschutz"
 
@@ -2835,6 +2806,30 @@ msgstr "Experten"
 #: src/enigma_setup.cpp:50
 msgid "open expert setup"
 msgstr "Experten-Einstellungen öffnen"
+
+#: src/epgactions.h:14
+msgid "EPG selector"
+msgstr "EPG Auswahl"
+
+#: src/epgactions.h:15
+msgid "add this event as DVR Event to timer list"
+msgstr "Ereignis als DVR-Timer zur Timerliste hinzufügen"
+
+#: src/epgactions.h:16
+msgid "add this event as NGRAB Event to timer list"
+msgstr "Ereignis als NGRAB-Timer zur Timerliste hinzufügen"
+
+#: src/epgactions.h:17
+msgid "add this event as simple Switch Event to timer list"
+msgstr "Ereignis als Umschalt-Timer zur Timerliste hinzufügen"
+
+#: src/epgactions.h:18
+msgid "remove this event from timer list"
+msgstr "Diesen Eintrag aus der Timerliste löschen"
+
+#: src/epgactions.h:19
+msgid "show extended event information"
+msgstr "Erweiterte Ereignis Informationen anzeigen"
 
 #: src/epgwindow.cpp:115 src/timer.cpp:181
 msgid "Sun"
@@ -3581,7 +3576,7 @@ msgstr "Manueller Suchlauf.."
 
 #: src/scan.cpp:220
 msgid "Waiting for tuner lock on:"
-msgstr ""
+msgstr "Warte auf Signal:"
 
 #: src/scan.cpp:353
 msgid ""
@@ -3660,9 +3655,8 @@ msgid "Transponder Scan"
 msgstr "Sendersuche"
 
 #: src/scan.cpp:1230
-#, fuzzy
 msgid "Waiting for tuner lock... please wait"
-msgstr "Suche läuft... bitte warten"
+msgstr "Suche gültigen Transponder... bitte warten"
 
 #: src/scan.cpp:1278 src/scan.cpp:1326
 msgid "Scan is in progress... please wait"
@@ -3679,10 +3673,10 @@ msgid ""
 "%i Transponders within %i Services scanned."
 msgstr ""
 "Der Suchlauf ist beendet. Es wurden\n"
-"%i neue Transponder,\n"
-"%i neue TV-Sender,\n"
-"%i neue Radio-Sender\n"
-"%i neue Datensender gefunden.\n"
+"%i Transponder,\n"
+"%i TV-Sender,\n"
+"%i Radio-Sender\n"
+"%i Datensender gefunden.\n"
 "%i Transponder mit %i Sendern wurden durchsucht."
 
 #: src/scan.cpp:1342
@@ -3719,7 +3713,6 @@ msgid "Scan finished"
 msgstr "Suche beendet"
 
 #: src/setup_extra.cpp:45
-#, fuzzy
 msgid "Communication Setup"
 msgstr "Kommunikation"
 
@@ -3753,11 +3746,11 @@ msgstr "Fernbedienungseinstellungen öffnen"
 
 #: src/setup_extra.cpp:52 src/setup_extra.cpp:150
 msgid "Factory reset"
-msgstr ""
+msgstr "Werkseinstellung"
 
 #: src/setup_extra.cpp:52
 msgid "all settings will set to factory defaults"
-msgstr ""
+msgstr "Alle Einstellungen auf Werkseinstellung setzen"
 
 #: src/setup_extra.cpp:54
 msgid "Serviceselector help buttons"
@@ -3801,11 +3794,11 @@ msgstr "Restzeit des Events in der Infobar anzeigen"
 
 #: src/setup_extra.cpp:59
 msgid "Use http authentification"
-msgstr ""
+msgstr "Benutze http Anmeldung"
 
 #: src/setup_extra.cpp:59
 msgid "enables the http (user/password) authentification"
-msgstr ""
+msgstr "Aktiviert die http Anmeldung (Benutzername/Passwort)"
 
 #: src/setup_extra.cpp:60
 msgid "Don't open serial port"
@@ -3830,7 +3823,7 @@ msgstr "Schnelles Umschalten"
 
 #: src/setup_extra.cpp:64
 msgid "enables faster zapping.. but with visible sync"
-msgstr "schaltet schnelles Umschalten an (mit sichtbarem Sync)"
+msgstr "aktiviert schnelles Umschalten (mit sichtbarem sync)"
 
 #: src/setup_extra.cpp:146
 msgid ""
@@ -3840,10 +3833,16 @@ msgid ""
 "\n"
 "Really do factory reset?"
 msgstr ""
+"Beim zurücksetzen der Box auf Werkseinstellung gehen ALLE Einstellungen "
+"verloren (einschliesslich Bouquets, Kanälen, Satelliten Daten, ...)\n"
+"Nach dem zurücksetzen auf Werkseinstellung startet Ihr Receiver automatisch "
+"neu!\n"
+"\n"
+"Wirklich auf Werkseinstellung setzen?"
 
 #: src/setup_extra.cpp:165
 msgid "Factory reset..."
-msgstr ""
+msgstr "Werkseinstellung..."
 
 #: src/setup_harddisk.cpp:184
 msgid "Harddisk Setup"
@@ -4472,7 +4471,7 @@ msgstr "Test"
 
 #: src/setupvideo.cpp:183
 msgid "show testpicture"
-msgstr "Testbilder anzeigen"
+msgstr "Testbilder anzeigen... wechseln mit den Nummerntasten"
 
 #: src/setupvideo.cpp:358
 msgid "TV System Wizard"
@@ -4487,21 +4486,12 @@ msgid "open internet update"
 msgstr "Internet Update öffnen"
 
 #: src/software_update.cpp:35
-#, fuzzy
 msgid "Manual Update"
 msgstr "Manuelles Update"
 
 #: src/software_update.cpp:35
 msgid "open manual update"
 msgstr "Manuelles Update öffnen"
-
-#: src/software_update.cpp:36
-msgid "Expert Flash Save/Restore"
-msgstr "Experten Flashtool"
-
-#: src/software_update.cpp:36
-msgid "open expert flash tool"
-msgstr "Experten Flash-tool öffnen"
 
 #: src/software_update.cpp:57
 msgid ""
@@ -4737,7 +4727,6 @@ msgid "Timerlist"
 msgstr "Timerliste"
 
 #: src/timer.cpp:1333
-#, fuzzy
 msgid ""
 "You would delete the running event..\n"
 "this stops the timer mode (recording)!"
@@ -4746,7 +4735,6 @@ msgstr ""
 "(Aufnahme)!"
 
 #: src/timer.cpp:1334
-#, fuzzy
 msgid "Delete the event from the timer list"
 msgstr "Das Event aus der Timerliste löschen"
 
@@ -4755,7 +4743,6 @@ msgid "Really delete this event?"
 msgstr "Dieses Event wirklich löschen?"
 
 #: src/timer.cpp:1339
-#, fuzzy
 msgid ""
 "You would update the running event.. \n"
 "this stops the timer mode (recording)!"
@@ -4764,9 +4751,8 @@ msgstr ""
 "angehalten (Aufnahme)!"
 
 #: src/timer.cpp:1340
-#, fuzzy
 msgid "Update event in timer list"
-msgstr "Aktualisiert das Event in der Timerliste"
+msgstr "Aktualisiere Event in Timerliste"
 
 #: src/timer.cpp:1341 src/timer.cpp:2246
 msgid "Really update this event?"
@@ -4883,19 +4869,16 @@ msgid "December"
 msgstr "Dezember"
 
 #: src/timer.cpp:1931
-#, fuzzy
 msgid "do nothing"
-msgstr "[nichts]"
+msgstr "nichts machen"
 
 #: src/timer.cpp:1932
-#, fuzzy
 msgid "put box into standby"
-msgstr "In 'Standby' gehen"
+msgstr "die Box in den Standby mode setzen"
 
 #: src/timer.cpp:1934
-#, fuzzy
 msgid "put box into deep standby"
-msgstr "die Box in den Deepstandby herunterfahren (OK)"
+msgstr "die Box in den Deepstandby setzen"
 
 #: src/timer.cpp:2031
 msgid "record DVR"
@@ -5173,6 +5156,34 @@ msgstr "In diesem Release wurden keine neuen Funktionen hinzugefügt."
 msgid "The following new features were added in this release:\n"
 msgstr "Folgende neue Funktionen wurden in diesem Release hinzugefügt:\n"
 
+#: src/wizard_fpupdate.cpp:13
+msgid ""
+"New Software for the frontprocessor is avail.\n"
+"Your Dreambox must upgrade now!\n"
+"DO NOT TURN OFF THE POWER DURING UPDATE !!!."
+msgstr ""
+"Neue Software für den Frontprozessor verfügbar.\n"
+"Ihre Dreambox wird nun auf diese neue Version updaten.\n"
+"WÄHREND DES UPDATES BITTE DIE BOX NICHT ABSCHALTEN !!!."
+
+#: src/wizard_fpupdate.cpp:16
+msgid "New software avail"
+msgstr "Neue Software verfügbar"
+
+#: src/wizard_fpupdate.cpp:24
+msgid ""
+"Upgrading frontprocessor...\n"
+"DO NOT TURN OFF THE POWER!\n"
+"THE DREAMBOX WILL AUTOMATICALLY REBOOT!\n"
+msgstr ""
+"Update den Frontprozessor...\n"
+"BITTE DIE BOX NICHT ABSCHALTEN!\n"
+"NACH DEM UPDATE REBOOTET DIE BOX AUTOMATISCH!\n"
+
+#: src/wizard_fpupdate.cpp:27
+msgid "Upgrade in process..."
+msgstr "Update läuft..."
+
 #: src/wizard_language.cpp:157
 msgid "Choose your language..."
 msgstr "Wählen Sie Ihre Sprache..."
@@ -5227,7 +5238,7 @@ msgstr "Tastatur"
 
 #: src/system_settings.cpp:56
 msgid "open keyboard setup"
-msgstr "Tastatureinstellungen öffnen"
+msgstr "Tastatur Einstellungen öffnen"
 
 #: src/system_settings.cpp:59
 msgid "open on screen display settings"
@@ -5279,14 +5290,68 @@ msgstr ""
 msgid "time correction change error"
 msgstr "Fehler beim Ändern der Zeitkorrektur"
 
-#~ msgid "/sec"
-#~ msgstr "°/sek"
+#~ msgid "No detailed information available"
+#~ msgstr "Keine detailierten Informationen verfügbar"
 
 #~ msgid "motor drive speed, in degrees per second"
 #~ msgstr "Motor Geschwindigkeit in Grad pro Sekunde"
 
-#~ msgid "press left or right to change"
-#~ msgstr "links oder rechts drücken zum ändern"
+#~ msgid "/sec"
+#~ msgstr "°/sek"
 
 #~ msgid "Upgrade FP"
 #~ msgstr "Update FP"
+
+#~ msgid "press left or right to change"
+#~ msgstr "links oder rechts drücken zum ändern"
+
+#~ msgid ""
+#~ "To finalize the factory reset your receiver must be restarted. All "
+#~ "changes from now to next restart will going lost!\n"
+#~ "\n"
+#~ "Restart now?"
+#~ msgstr ""
+#~ "Um das setzen auf Werkseinstellung abzuschliessen, muss die Box neu "
+#~ "gestartet werden. Alle Einstellungen die bis zum Neustart gemacht werden "
+#~ "gehen verloren.\n"
+#~ "\n"
+#~ "Jetzt neu starten?"
+
+#~ msgid "Expert Flash Save/Restore"
+#~ msgstr "Experten Flashtool"
+
+#~ msgid "open expert flash tool"
+#~ msgstr "Experten Flash-tool öffnen"
+
+#~ msgid "Automatically adjust clock for daylight saving changes"
+#~ msgstr "Uhr automatisch auf Sommerzeit stellen"
+
+#~ msgid "enter correct time here"
+#~ msgstr "Richtige Zeit hier eintragen"
+
+#~ msgid "New Date:"
+#~ msgstr "Neues Datum:"
+
+#~ msgid "New Time:"
+#~ msgstr "Neue Zeit:"
+
+#~ msgid "press ok to select another day"
+#~ msgstr "OK drücken um einen anderen Tag zu wählen"
+
+#~ msgid "press ok to select another month"
+#~ msgstr "OK drücken um einen anderen Monat zu wählen"
+
+#~ msgid "press ok to select another year"
+#~ msgstr "OK drücken um ein anderes Jahr zu wählen"
+
+#~ msgid "set new time and close window"
+#~ msgstr "Neue Zeit speichern und Fenster schließen (ok)"
+
+#~ msgid "Transponder Date:"
+#~ msgstr "Transponderdatum:"
+
+#~ msgid "Transponder Time:"
+#~ msgstr "Transponderzeit:"
+
+#~ msgid "use automatically daylight saving time"
+#~ msgstr "Automatisch Sommerzeit benutzen"
