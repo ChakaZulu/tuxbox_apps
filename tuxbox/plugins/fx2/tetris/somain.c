@@ -179,7 +179,10 @@ static	void	SaveGame( void )
 	if ( x == 8 )
 		return;
 
-	FBDrawString( 150,230,64,"Inet-Send Highscore ? (OK/BLUE)",GREEN,0);
+	FBDrawString( 100,230,64,"Inet-Send Highscore ? (OK/BLUE)",GREEN,0);
+#ifdef USEX
+	FBFlushGrafic();
+#endif
 
 	while( realcode != 0xee )
 		RcGetActCode();
