@@ -7,10 +7,10 @@ AC_PROG_RANLIB
 AC_CHECK_HEADER([linux/dvb/dmx.h])
 AC_CHECK_HEADER([ost/dmx.h])
 
-if test "$ac_cv_header_linux_dvb_dmx_h" = yes; then
-	AC_DEFINE([HAVE_LINUX_DVB_DMX_H])
-elif test "$ac_cv_header_ost_dmx_h" = yes; then
+if test "$ac_cv_header_ost_dmx_h" = yes; then
 	AC_DEFINE([HAVE_OST_DMX_H])
+elif test "$ac_cv_header_linux_dvb_dmx_h" = yes; then
+	AC_DEFINE([HAVE_LINUX_DVB_DMX_H])
 else
 	AC_MSG_ERROR([linux dvb api headers are required to build dvbsnoop])
 fi

@@ -1,5 +1,5 @@
 /*
- * $Id: streamts.c,v 1.13 2003/05/29 07:33:13 obi Exp $
+ * $Id: streamts.c,v 1.14 2005/02/04 17:27:56 ghostrider Exp $
  * 
  * inetd style daemon for streaming avpes, ps and ts
  * 
@@ -45,10 +45,33 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
+#include <config.h>
 
-#include <linux/dvb/dmx.h>
-#include <transform.h>
+#if HAVE_DVB_API_VERSION < 3
+    #include <ost/dmx.h>
+    #define dmx_pes_filter_params dmxPesFilterParams
+    #define pes_type pesType
+    #ifdef HAVE_DREAMBOX_HARDWARE
+	#define DMXDEV "/dev/dvb/card0/demux1"
+	#define DVRDEV "/dev/dvb/card0/dvr1"
+	#undef TRANSFORM
+    #else
+	#define DMXDEV "/dev/dvb/card0/demux0"
+	#define DMXDEV "/dev/dvb/card0/dvr0"
+    #endif
+#else
+    #define DMXDEV "/dev/dvb/adapter0/demux0"
+    #define DVRDEV "/dev/dvb/adapter0/dvr0"
+    #include <linux/dvb/dmx.h>
+    #define TRANSFORM
+#endif
 
+#ifdef TRANSFORM
+    #include <transform.h>
+#else
+    #include <string.h>
+    #define TS_SIZE 188
+#endif
 
 /* conversion buffer sizes */
 #define IN_SIZE		(TS_SIZE * 362)
@@ -62,10 +85,6 @@
 
 /* tcp packet data size */
 #define PACKET_SIZE	1448
-
-/* devices */
-#define DMXDEV	"/dev/dvb/adapter0/demux0"
-#define DVRDEV	"/dev/dvb/adapter0/dvr0"
 
 unsigned char * buf;
 
@@ -192,6 +211,7 @@ packet_stdout (unsigned char * buf, int count, void * p) {
 }
 
 
+#ifdef TRANSFORM
 static int
 dvr_to_ps (const int dvr_fd, const unsigned short audio_pid, const unsigned short video_pid, const unsigned char ps) {
 
@@ -289,6 +309,7 @@ dvr_to_ps (const int dvr_fd, const unsigned short audio_pid, const unsigned shor
 	return 0;
 }
 
+#endif // TRANSFORM
 
 static int
 setPesFilter (const unsigned short pid)
@@ -335,11 +356,14 @@ main (int argc, char ** argv) {
 
 	if (argc != 2)
 		return EXIT_FAILURE;
+#ifdef TRANSFORM
 	if (!strncmp(argv[1], "-pes", 4))
 		mode = 0;
 	else if (!strncmp(argv[1], "-ps", 3))
 		mode = 1;
-	else if (!strncmp(argv[1], "-ts", 3))
+	else 
+#endif	
+	if (!strncmp(argv[1], "-ts", 3))
 		mode = 2;
 	else
 		return EXIT_FAILURE;
@@ -392,12 +416,15 @@ main (int argc, char ** argv) {
 	}
 	while ((bp = strchr(bp, ',')) && (bp++) && (demuxfd_count < MAXPIDS));
 
+#ifdef TRANSFORM
 	/* convert transport stream and write to stdout */
 	if (((mode == 0) || (mode == 1)) && (demuxfd_count == 2))
 		dvr_to_ps(dvrfd, pids[0], pids[1], mode);
 
 	/* write raw transport stream to stdout */
-	else if (mode == 2) {
+	else 
+#endif	
+	if (mode == 2) {
 
 		int offset;
 

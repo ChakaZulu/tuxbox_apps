@@ -2,6 +2,12 @@
 ** initial coding by fx2
 */
 
+#ifdef HAVE_DREAMBOX_HARDWARE
+    #undef HAVE_CURL
+#else
+    #define HAVE_CURL
+#endif
+
 #include <fcntl.h>
 #include <signal.h>
 #include <stdio.h>
@@ -20,9 +26,11 @@
 #include <plugin.h>
 #include <rcinput.h>
 
+#ifdef HAVE_CURL
 #include <curl/curl.h>
 #include <curl/types.h>
 #include <curl/easy.h>
+#endif
 
 #include <config.h>
 
@@ -32,17 +40,22 @@ extern	unsigned short	actcode;
 extern	unsigned short	realcode;
 extern	long			score;
 
+
+#ifdef HAVE_CURL
 static	char			*proxy_addr=0;
 static	char			*proxy_user=0;
+#endif
 static	char			*hscore=0;
 static	char			isalloc=0;
 static	int				localuser=-1;
 
-#ifndef TRUE
-#define TRUE (!0)
-#endif
-#ifndef FALSE
-#define FALSE (0)
+#ifndef HAVE_DREAMBOX_HARDWARE
+    #ifndef TRUE
+	#define TRUE (!0)
+    #endif
+    #ifndef FALSE
+	#define FALSE (0)
+    #endif
 #endif
 
 typedef struct _HScore
@@ -52,8 +65,10 @@ typedef struct _HScore
 } HScore;
 
 static	HScore	hsc[8];
+#ifdef HAVE_CURL
 static	HScore	ihsc[8];
 static	int		use_ihsc=0;
+#endif
 
 unsigned long BuildCheck( char *user, long score )
 {
@@ -69,6 +84,7 @@ unsigned long BuildCheck( char *user, long score )
 	return ret ^ score;
 }
 
+#ifdef HAVE_CURL
 static	void	LoadHScore( void )
 {
 	CURL			*curl;
@@ -138,6 +154,7 @@ static	void	LoadHScore( void )
 	fclose(fp);
 	unlink("/var/tmp/trash");
 }
+#endif  // HAVE_CURL
 
 static	void	LocalSave( void )
 {
@@ -175,6 +192,7 @@ static	void	LocalSave( void )
 
 static	void	SaveGame( void )
 {
+#ifdef HAVE_CURL
 	CURL		*curl;
 	CURLcode	res;
 	FILE		*fp;
@@ -188,10 +206,12 @@ static	void	SaveGame( void )
 	unsigned long	chk=0;
 
 	doexit=0;
+#endif // HAVE_CURL
 
 	if ( score < 31 )
 		return;
 
+#ifdef HAVE_CURL
 	LocalSave();
 
 	if ( !use_ihsc )
@@ -297,6 +317,7 @@ static	void	SaveGame( void )
 	LoadHScore();
 
 	return;
+#endif  // HAVE_CURL
 }
 
 static	void	ShowHScore( HScore *g )
@@ -307,9 +328,11 @@ static	void	ShowHScore( HScore *g )
 
 	FBFillRect( 0, 0, 720, 576, BLACK );
 
+#ifdef HAVE_CURL
 	if ( g==ihsc )
 		FBDrawString( 190, 32, 64, "Internet HighScore", RED, BLACK );
 	else
+#endif
 		FBDrawString( 220, 32, 64, "HighScore", RED, BLACK );
 	for( i=0; i < 8; i++ )
 	{
@@ -325,6 +348,7 @@ static	void	ShowHScore( HScore *g )
 		RcGetActCode();
 }
 
+#ifdef HAVE_CURL
 static	void	ShowIHScore( void )
 {
 	int				i = 50;
@@ -341,6 +365,7 @@ static	void	ShowIHScore( void )
 		i--;
 	}
 }
+#endif // HAVE_CURL
 
 static	void	setup_colors(void)
 {
@@ -458,8 +483,10 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 	{
 		line=malloc(128);
 		isalloc=1;
+#ifdef HAVE_CURL
 		proxy_addr=0;
 		proxy_user=0;
+#endif
 		hscore=0;
 		while( fgets( line, 128, fp ) )
 		{
@@ -475,12 +502,14 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 				continue;
 			*p=0;
 			p++;
+#ifdef HAVE_CURL
 			if ( !strcmp(line,"proxy") )
 				proxy_addr=strdup(p);
 			else if ( !strcmp(line,"proxy_user") )
 				proxy_user=strdup(p);
 			else if ( !strcmp(line,"hscore") )
 				hscore=strdup(p);
+#endif
 		}
 		fclose(fp);
 	}
@@ -501,19 +530,25 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 		close(fd);
 	}
 
+#ifdef HAVE_CURL
 	if ( hscore )
 	{
 		LoadHScore();
 	}
+#endif
 
+#ifndef HAVE_DREAMBOX_HARDWARE
 	Fx2ShowPig( 480, 400, 176, 144 );
+#endif
 
 	while( doexit != 3 )
 	{
 		BoardInitialize();
 		DrawBoard( );	/* 0 = all */
 		NextItem();
-
+#ifdef HAVE_DREAMBOX_HARDWARE
+		Fx2ShowPig(480, 400, 176, 144 );
+#endif
 		doexit=0;
 		while( !doexit )
 		{
@@ -552,8 +587,10 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 #endif
 			SaveGame();
 			doexit=0;
+#ifdef HAVE_CURL
 			if ( use_ihsc )
 				ShowIHScore();
+#endif
 			ShowHScore(hsc);
 			Fx2PigPause();
 
@@ -583,6 +620,7 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 
 	Fx2StopPig();
 
+#ifndef HAVE_DREAMBOX_HARDWARE
 /* fx2 */
 /* buffer leeren, damit neutrino nicht rumspinnt */
 	realcode = RC_0;
@@ -593,6 +631,7 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 		x = select( 0, 0, 0, 0, &tv );		/* 300ms pause */
 		RcGetActCode( );
 	}
+#endif
 
 	RcClose();
 	FBClose();
@@ -607,10 +646,12 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 
 	if ( isalloc )
 	{
+#ifdef HAVE_CURL
 		if ( proxy_addr )
 			free ( proxy_addr );
 		if ( proxy_user )
 			free ( proxy_user );
+#endif
 		if ( hscore )
 			free ( hscore );
 	}
@@ -631,12 +672,16 @@ int plugin_exec( PluginParam *par )
 			fd_rc=_atoi(par->val);
 		else if ( !strcmp(par->id,P_ID_NOPIG) )
 			fx2_use_pig=!_atoi(par->val);
+#ifdef HAVE_CURL
 		else if ( !strcmp(par->id,P_ID_PROXY) && par->val && *par->val )
 			proxy_addr=par->val;
+#endif
 		else if ( !strcmp(par->id,P_ID_HSCORE) && par->val && *par->val )
 			hscore=par->val;
+#ifdef HAVE_CURL
 		else if ( !strcmp(par->id,P_ID_PROXY_USER) && par->val && *par->val )
 			proxy_user=par->val;
+#endif
 	}
 	return tetris_exec( fd_fb, fd_rc, -1, 0 );
 }

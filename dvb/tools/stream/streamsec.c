@@ -6,17 +6,21 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include "config.h"
+#include <config.h>
 
 #define BSIZE		4096
 
 #ifdef HAVE_OST_DMX_H
-#include <ost/dmx.h>
-#define DMXDEV	"/dev/dvb/card0/demux0"
-#define dmx_sct_filter_params dmxSctFilterParams
+	#include <ost/dmx.h>
+	#ifdef HAVE_DREAMBOX_HARDWARE
+		#define DMXDEV  "/dev/dvb/card0/demux1"
+	#else
+		#define DMXDEV	"/dev/dvb/card0/demux0"
+	#endif
+	#define dmx_sct_filter_params dmxSctFilterParams
 #else
-#include <linux/dvb/dmx.h>
-#define DMXDEV	"/dev/dvb/adapter0/demux0"
+	#include <linux/dvb/dmx.h>
+	#define DMXDEV	"/dev/dvb/adapter0/demux0"
 #endif
 
 int main(void)

@@ -9,6 +9,10 @@
 #include <termios.h>
 #include <unistd.h>
 
+#ifdef HAVE_DREAMBOX_HARDWARE
+	static int fd_is_ext = 0;
+#endif
+
 #include "draw.h"
 #include "rcinput.h"
 
@@ -148,6 +152,25 @@ void	KbClose( void )
 
 int	RcInitialize( int extfd )
 {
+#ifdef HAVE_DREAMBOX_HARDWARE
+	char	buf[32];
+	if ( extfd == -1 )
+	{
+		fd_is_ext = 0;
+		fd = open("/dev/dbox/rc0", O_RDONLY );
+		if ( fd == -1 )
+			return kbfd;
+		fcntl(fd, F_SETFL, O_NONBLOCK );
+	}
+	else
+	{
+		fd_is_ext = 1;
+		fd = extfd;
+		fcntl(fd, F_SETFL, O_NONBLOCK );
+	}
+/* clear rc-buffer */
+	read( fd, buf, 32 );
+#else
 	//KbInitialize();
 	fd = open( "/dev/input/event0", O_RDONLY );
 	if ( fd == -1 )
@@ -155,30 +178,94 @@ int	RcInitialize( int extfd )
 		return kbfd;
 	}
 	fcntl(fd, F_SETFL, O_NONBLOCK );
-
+#endif
 	return 0;
 }
+
+#ifdef HAVE_DREAMBOX_HARDWARE
+static unsigned short translate( unsigned short code )
+{
+	if ((code&0xFF00)==0x5C00)
+	{
+		switch (code&0xFF)
+		{
+		case 0x0C: return RC_STANDBY;
+		case 0x20: return RC_HOME;
+		case 0x27: return RC_SETUP;
+		case 0x00: return RC_0;
+		case 0x01: return RC_1;
+		case 0x02: return RC_2;
+		case 0x03: return RC_3;
+		case 0x04: return RC_4;
+		case 0x05: return RC_5;
+		case 0x06: return RC_6;
+		case 0x07: return RC_7;
+		case 0x08: return RC_8;
+		case 0x09: return RC_9;
+		case 0x3B: return RC_BLUE;
+		case 0x52: return RC_YELLOW;
+		case 0x55: return RC_GREEN;
+		case 0x2D: return RC_RED;
+		case 0x54: return RC_PAGE_UP;
+		case 0x53: return RC_PAGE_DOWN;
+		case 0x0E: return RC_UP;
+		case 0x0F: return RC_DOWN;
+		case 0x2F: return RC_LEFT;
+		case 0x2E: return RC_RIGHT;
+		case 0x30: return RC_OK;
+		case 0x16: return RC_PLUS;
+		case 0x17: return RC_MINUS;
+		case 0x28: return RC_SPKR;
+		case 0x82: return RC_HELP;
+		default:
+			//perror("unknown old rc code");
+			return 0xee;
+		}
+	} else if (!(code&0x00))
+		return code&0x3F;
+	return 0xee;
+}
+#endif
+
 
 void		RcGetActCode( void )
 {
 	int				x=0;
 	unsigned short	code = 0;
-static  unsigned short cw=0;
+	static  unsigned short cw=0;
+#ifdef HAVE_DREAMBOX_HARDWARE
+	char buf[32];
+	if ( fd != -1 )
+		x = read( fd, buf, 32 );
+	if ( x < 2 )
+	{
+		realcode=0xee;
+		if  ( cw == 1 )
+			cw = 0;
+		return;
+	}
+	x -= 2;
+	memcpy(&code,buf+x,2);
+	code=translate(code);
+	realcode=code;
+	if ( code == 0xee )
+		return;
+#else
 	struct input_event ev;
 
 	if ( fd != -1 ) {
 
-		do {	
-		
+		do {
+
 			x = read(fd, &ev, sizeof(struct input_event));
-			
+
 			if ((x == sizeof(struct input_event)) && ((ev.value == 1)||(ev.value == 2)))
 				break;
 
 		} while (x == sizeof(struct input_event));
-		
+
 	}
-		
+
 	if ( x % sizeof(struct input_event) )
 	{
 		//KbGetActCode();
@@ -191,6 +278,7 @@ static  unsigned short cw=0;
 	realcode=code=ev.code;
 
 	Debug("code=%04x\n",code);
+#endif
 
 	if ( cw == 2 )
 	{
@@ -218,6 +306,7 @@ static  unsigned short cw=0;
 	case RC_HOME:
 		doexit=3;
 		break;
+#ifndef HAVE_DREAMBOX_HARDWARE
 	case KEY_1:
 		actcode = 1;
 		break;
@@ -248,6 +337,7 @@ static  unsigned short cw=0;
 	case KEY_0:
 		actcode = 0;
 		break;
+#endif
 #if 0
 	case RC_UP:
 	case RC_DOWN:
@@ -269,5 +359,8 @@ void	RcClose( void )
 	KbClose();
 	if ( fd == -1 )
 		return;
+#ifdef HAVE_DREAMBOX_HARDWARE
+	if ( !fd_is_ext )
+#endif
 	close(fd);
 }

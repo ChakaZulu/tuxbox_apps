@@ -491,7 +491,11 @@ void eUpgrade::abortDownload()
 
 bool erase(char mtd[30], const char *titleText);
 
-static int flashext=0; 
+#ifdef USE_EXTERNAL_FLASHTOOL
+static int flashext=1;
+#else
+static int flashext=0;
+#endif
 // when you will use the external flashtool you must set this here to 1
 
 void eUpgrade::flashImage(int checkmd5)

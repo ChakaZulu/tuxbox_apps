@@ -1,5 +1,5 @@
 /*
- * $Id: udpstreamts.c,v 1.1 2002/11/29 12:10:28 obi Exp $
+ * $Id: udpstreamts.c,v 1.2 2005/02/04 17:27:56 ghostrider Exp $
  *
  * a lightweight videolan server replacement
  *
@@ -35,9 +35,9 @@
  *
  */
 
+#include <config.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
-#include <linux/dvb/dmx.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <stdio.h>
@@ -49,15 +49,27 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-
-#define DVR "/dev/dvb/adapter0/dvr0"
-#define DMX "/dev/dvb/adapter0/demux0"
+#if HAVE_DVB_API_VERSION < 3
+	#include <ost/dmx.h>
+	#define dmx_pes_filter_params dmxPesFilterParams
+	#define pes_type pesType
+	#ifdef HAVE_DREAMBOX_HARDWARE
+		#define DVR "/dev/dvb/card0/dvr1"
+		#define DMX "/dev/dvb/card0/demux1"
+	#else
+		#define DVR "/dev/dvb/card0/dvr0"
+		#define DMX "/dev/dvb/card0/demux0"
+	#endif
+#else
+	#include <linux/dvb/dmx.h>
+	#define DVR "/dev/dvb/adapter0/dvr0"
+	#define DMX "/dev/dvb/adapter0/demux0"
+#endif
 
 #define TS_SYNC_BYTE (0x47)
 #define TS_PACKET_SIZE (188)
 #define UDP_PACKET_SIZE (TS_PACKET_SIZE * 7)
 #define READ_BUFFER_SIZE (UDP_PACKET_SIZE * 32)
-
 
 static int
 dmx_pid_filter_start(unsigned short pid)

@@ -1,5 +1,5 @@
 /*
- * $Id: streampes.c,v 1.8 2003/01/30 13:56:46 gandalfx Exp $
+ * $Id: streampes.c,v 1.9 2005/02/04 17:27:56 ghostrider Exp $
  *
  * Copyright (C) 2001 by tmbinc
  * Copyright (C) 2001 by kwon
@@ -38,8 +38,21 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
+#include <config.h>
 
-#include <linux/dvb/dmx.h>
+#if HAVE_DVB_API_VERSION < 3
+	#include <ost/dmx.h>
+	#define dmx_pes_filter_params dmxPesFilterParams
+	#define pes_type pesType
+	#ifdef HAVE_DREAMBOX_HARDWARE
+		#define DEMUX_DEV "/dev/dvb/card0/demux1"
+	#else
+		#define DEMUX_DEV "/dev/dvb/card0/demux0"
+	#endif
+#else
+	#include <linux/dvb/dmx.h>
+	#define DEMUX_DEV "/dev/dvb/adapter0/demux0"
+#endif
 
 #define BSIZE					 1024*16
 void send_udp(int fd, int port);
@@ -74,10 +87,10 @@ int main(int argc, char **argv)
 
 	fflush(stdout);
 
-	fd = open("/dev/dvb/adapter0/demux0", O_RDWR);
+	fd = open(DEMUX_DEV, O_RDWR);
 
 	if (fd < 0) {
-		perror("/dev/dvb/adapter0/demux0");
+		perror(DEMUX_DEV);
 		return -fd;
 	}
 

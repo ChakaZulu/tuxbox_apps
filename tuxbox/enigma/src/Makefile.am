@@ -34,14 +34,17 @@ enigma_LDADD_WHOLE = \
 
 enigma_LDADD = \
 	@FREETYPE_LIBS@ \
-	@CONFIGFILE_LIBS@ \
 	@ID3TAG_LIBS@ \
 	@MAD_LIBS@ \
 	@MD5SUM_LIBS@ \
 	@PNG_LIBS@ \
 	@SIGC_LIBS@ \
 	@XMLTREE_LIBS@ \
-	-ldl -lpthread -lcrypt -lresolv -ltuxbox -ljpeg -lungif
+	-ldl -lpthread -lcrypt -lresolv -ljpeg -lungif
+
+if BOXTYPE_DBOX2
+	enigma_LDADD = $enigma_LDADD @TUXBOX_LIBS@ @CONFIGFILE_LIBS@
+endif
 
 enigma$(EXEEXT): $(enigma_OBJECTS) $(enigma_DEPENDENCIES) $(enigma_LDADD_WHOLE)
 	@rm -f enigma$(EXEEXT)

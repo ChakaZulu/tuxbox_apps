@@ -2,19 +2,32 @@ SUBDIRS = font
 
 noinst_LTLIBRARIES = tuxtxt.la
 
+if BOXTYPE_DREAMBOX
+tuxtxt_la_CFLAGS = -DDREAMBOX
+
 AM_CPPFLAGS = \
-	 @TUXBOX_CFLAGS@ \
-	 @FREETYPE_CFLAGS@ \
+	@FREETYPE_CFLAGS@ \
 	-I$(top_srcdir)/include
 
-#tuxtxt_la_CFLAGS = -DDREAMBOX
+tuxtxt_la_LIBADD = \
+	@FREETYPE_LIBS@ \
+	-lpthread
 
-tuxtxt_la_SOURCES = tuxtxt.c
+else
+
+AM_CPPFLAGS = \
+	@TUXBOX_CFLAGS@ \
+	@FREETYPE_CFLAGS@ \
+	-I$(top_srcdir)/include
 
 tuxtxt_la_LIBADD = \
-	 @TUXBOX_LIBS@  \
-	 @FREETYPE_LIBS@ \
+	@TUXBOX_LIBS@  \
+	@FREETYPE_LIBS@ \
 	-lpthread
+
+endif
+
+tuxtxt_la_SOURCES = tuxtxt.c
 
 tuxtxt_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 

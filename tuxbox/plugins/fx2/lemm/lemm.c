@@ -811,6 +811,7 @@ static	int		lastc=0;
 	if (!s)
 		return;
 	switch (actcode){
+#ifdef KEY_TOPLEFT
 	case KEY_TOPLEFT:
 		umove=1;lmove=1;break;
 	case KEY_TOPRIGHT:
@@ -819,6 +820,7 @@ static	int		lastc=0;
 		dmove=1;lmove=1;break;
 	case KEY_BOTTOMRIGHT:
 		dmove=1;rmove=1;break;
+#endif
 	case RC_UP:
 		umove=1;break;
 	case RC_DOWN:
@@ -882,10 +884,12 @@ void	RunKey( void )
 
 	switch( actcode )
 	{
+#ifdef KEY_TOPLEFT
 	case KEY_TOPLEFT:
 	case KEY_TOPRIGHT:
 	case KEY_BOTTOMLEFT:
 	case KEY_BOTTOMRIGHT:
+#endif
 	case RC_LEFT :
 	case RC_RIGHT :
 	case RC_UP :

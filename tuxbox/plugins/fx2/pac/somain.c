@@ -65,7 +65,11 @@ int pacman_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 		while( !doexit )
 		{
 			tv.tv_sec = 0;
+#ifdef HAVE_DREAMBOX_HARDWARE
+			tv.tv_usec = 8000;
+#else
 			tv.tv_usec = 1000;
+#endif
 			x = select( 0, 0, 0, 0, &tv );		/* 10ms pause */
 	
 			MovePac( );

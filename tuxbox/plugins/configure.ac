@@ -9,6 +9,13 @@ AC_PROG_CXX
 AC_DISABLE_STATIC
 AM_PROG_LIBTOOL
 
+AC_ARG_WITH(boxtype,
+	[  --with-boxtype=NAME dreambox/dbox2 [[dbox2,dreambox]]],
+	[BOXTYPE="$withval"],[BOXTYPE="dbox2"])
+AC_SUBST(BOXTYPE)
+AM_CONDITIONAL(BOXTYPE_DREAMBOX,test "$BOXTYPE" != "dbox2")
+AM_CONDITIONAL(BOXTYPE_DBOX2,test "$BOXTYPE" = "dbox2")
+
 TUXBOX_APPS_DVB
 TUXBOX_APPS_DRIVER
 

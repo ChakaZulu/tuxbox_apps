@@ -1,6 +1,7 @@
+#ifdef ENABLE_FLASHTOOL
 /**********************************************
 *
-*	$Revision: 1.6 $
+*	$Revision: 1.7 $
 *
 **********************************************/
 
@@ -569,3 +570,5 @@ char* eFlashtoolSource::getDestination()
 eFlashtoolSource::~eFlashtoolSource()
 {
 }
+
+#endif // ENABLE_FLASHTOOL

@@ -4,10 +4,14 @@ noinst_LTLIBRARIES = tetris.la
 
 tetris_la_SOURCES = board.c somain.c
 
+if BOXTYPE_DREAMBOX
+tetris_la_LIBADD =	\
+	../lib/libfx2.la
+else
 tetris_la_LIBADD =       \
 	../lib/libfx2.la \
 	@CURL_LIBS@
-
+endif
 
 tetris_la_LDFLAGS = -rpath $(PLUGINDIR) -R$(TARGET_PLUGINDIR) -module -avoid-version
 
