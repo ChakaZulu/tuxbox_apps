@@ -56,7 +56,8 @@ class CEventServer
 		enum initiators
 		{
 			INITID_CONTROLD,
-			INITID_SECTIONSD
+			INITID_SECTIONSD,
+			INITID_ZAPIT
 		};
 
 		struct commandRegisterEvent
