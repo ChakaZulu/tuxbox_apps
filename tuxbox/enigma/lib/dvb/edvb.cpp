@@ -214,7 +214,9 @@ void eDVB::scanEvent(int event)
 		for (ePtrList<eTransponder>::const_iterator i(initialTransponders->begin()); i != initialTransponders->end(); ++i)
 		{
 			eTransponder &t=transponderlist->createTransponder(i->transport_stream_id, i->original_network_id);
-			t.set(i);  //(*(*i));
+			t=i;
+			t.transport_stream_id=i->transport_stream_id;
+			t.original_network_id=i->original_network_id;
 		}
 		currentONID=-1;
 		knownNetworks.clear();
@@ -1168,7 +1170,7 @@ struct saveTransponder: public std::unary_function<const eTransponder&, void>
 		if (t.cable.valid)
 			fprintf(f, "\tc %d:%d\n", t.cable.frequency, t.cable.symbol_rate);
 		if (t.satellite.valid)
-			fprintf(f, "\ts %d:%d:%d:%d:%d\n", t.satellite.frequency, t.satellite.symbol_rate, t.satellite.polarisation, t.satellite.fec, t.satellite.sat);
+			fprintf(f, "\ts %d:%d:%d:%d:%d\n", t.satellite.frequency, t.satellite.symbol_rate, t.satellite.polarisation, t.satellite.fec, t.satellite.lnb);
 		fprintf(f, "/\n");
 	}
 	~saveTransponder()

@@ -102,6 +102,12 @@
 			<eLabel text="Symbolrate:" position="10:100" size="140:30" />
 			<eNumber name="symbolrate" position="150:100:" size="e-150:30" />
 			<eLabel text="KSymb/s" position="e-150:100" size="e:30" />
+			
+			<eLabel text="Inversion:" position="10:130" size="140:30" />
+			<eCheckbox name="inversion" position="150:130" size="30:30" />
+			
+			<eLabel text="LNB:" position="190:130" size="100:30" />
+			<eNumber name="lnb" position="290:130" size="50:30" />
 
 		</eTranspondersettings>
 	</object>

@@ -2,12 +2,13 @@
 #include <core/gui/eskin.h>
 #include <core/gui/enumber.h>
 #include <core/gui/eListBox.h>
+#include <core/gui/echeckbox.h>
 #include "dvb.h"
 
 eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type): eWidget(parent, edit), edit(edit), type(type)
 {
-	int init=12345;
-	frequency=new eNumber(this, 1, 0, 15000, 5, &init, 0, 0, edit);
+	int init[5]={1,2,3,4,5};
+	frequency=new eNumber(this, 5, 0, 9, 1, init, 0, 0, edit);
 	frequency->setName("frequency");
 	
 	fec=new eListBox<eListBoxEntryText>(this);
@@ -24,8 +25,14 @@ eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type): eWi
 	polarityEntry[1]=new eListBoxEntryText(polarity, _("horizontal"), (void*)1);
 	polarity->setName("polarity");
 	
-	symbolrate=new eNumber(this, 1, 0, 36000, 5, &init, 0, 0, edit);
+	symbolrate=new eNumber(this, 5, 0, 9, 1, init, 0, 0, edit);
 	symbolrate->setName("symbolrate");
+	
+	inversion=new eCheckbox(this);
+	inversion->setName("inversion");
+	
+	lnb=new eNumber(this, 1, 0, 3, 1, init, 0, 0, edit);
+	lnb->setName("lnb");
 }
 
 int eTransponderWidget::load()
@@ -59,7 +66,7 @@ int eTransponderWidget::setTransponder(eTransponder *transponder)
 	{
 		if (!transponder->satellite.valid)
 			return -1;
-		frequency->setNumber(0, transponder->satellite.frequency/1000);
+		frequency->setNumber(transponder->satellite.frequency/1000);
 
 		if (transponder->satellite.fec >= 0 && transponder->satellite.fec < 6)
 			fec->setCurrent(fecEntry[transponder->satellite.fec]);
@@ -67,7 +74,10 @@ int eTransponderWidget::setTransponder(eTransponder *transponder)
 			fec->setCurrent(fecEntry[0]);
 
 		polarity->setCurrent(polarityEntry[0]);
-		symbolrate->setNumber(0, transponder->satellite.symbol_rate/1000);
+		symbolrate->setNumber(transponder->satellite.symbol_rate/1000);
+		
+		inversion->setCheck(transponder->satellite.inversion);
+		lnb->setNumber(transponder->satellite.lnb);
 		
 		break;
 	}

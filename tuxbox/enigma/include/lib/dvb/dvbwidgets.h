@@ -6,10 +6,12 @@
 
 class eNumber;
 class eTransponder;
+class eCheckbox;
 
 class eTransponderWidget: public eWidget
 {
-	eNumber *frequency, *symbolrate;
+	eNumber *frequency, *symbolrate, *lnb;
+	eCheckbox *inversion;
 	int type, edit;
 	eListBoxEntryText *fecEntry[6], *polarityEntry[4];
 	
