@@ -82,8 +82,8 @@ void parse_command()
 
 void show_channelname( char * name)
 {
-	display.draw_fill_rect (0,24,120,50, CLCDDisplay::PIXEL_OFF);
-	fonts.channelname->RenderString(1,40, 130, name, CLCDDisplay::PIXEL_ON);
+	display.draw_fill_rect (0,26,120,50, CLCDDisplay::PIXEL_OFF);
+	fonts.channelname->RenderString(1,42, 130, name, CLCDDisplay::PIXEL_ON);
 	display.update();
 }
 
@@ -120,9 +120,15 @@ int main(int argc, char **argv)
 	fonts.time=fontRenderer->getFont("Arial", "Regular", 8);
 	display.setIconBasePath("/usr/lib/icons/");
 
+	if(!display.isAvailable())
+	{
+		printf("exit...(no lcd-support)\n");
+		exit(-1);
+	}
+
 	if (!display.paintIcon("neutrino_lcd.raw",0,0,0))
 	{
-		printf("exit...\n");
+		printf("exit...(no icon)\n");
 		exit(-1);
 	}
 
