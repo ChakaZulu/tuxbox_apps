@@ -1262,16 +1262,34 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_MISC      , true, NULL, &miscSettings     , NULL, true, CRCInput::RC_green , NEUTRINO_ICON_BUTTON_GREEN ));
 }
 
+#define SCANTS_BOUQUET_OPTION_COUNT 5
+const CMenuOptionChooser::keyval SCANTS_BOUQUET_OPTIONS[SCANTS_BOUQUET_OPTION_COUNT] =
+{
+	{ CZapitClient::BM_DELETEBOUQUETS        , LOCALE_SCANTS_BOUQUET_ERASE     },
+	{ CZapitClient::BM_CREATEBOUQUETS        , LOCALE_SCANTS_BOUQUET_CREATE    },
+	{ CZapitClient::BM_DONTTOUCHBOUQUETS     , LOCALE_SCANTS_BOUQUET_LEAVE     },
+	{ CZapitClient::BM_UPDATEBOUQUETS        , LOCALE_SCANTS_BOUQUET_UPDATE    },
+	{ CZapitClient::BM_CREATESATELLITEBOUQUET, LOCALE_SCANTS_BOUQUET_SATELLITE }
+};
+
+#define SATSETUP_DISEQC_OPTION_COUNT 6
+const CMenuOptionChooser::keyval SATSETUP_DISEQC_OPTIONS[SATSETUP_DISEQC_OPTION_COUNT] =
+{
+	{ NO_DISEQC          , LOCALE_SATSETUP_NODISEQC    },
+	{ MINI_DISEQC        , LOCALE_SATSETUP_MINIDISEQC  },
+	{ DISEQC_1_0         , LOCALE_SATSETUP_DISEQC10    },
+	{ DISEQC_1_1         , LOCALE_SATSETUP_DISEQC11    },
+	{ DISEQC_1_2         , LOCALE_SATSETUP_DISEQC12    },
+	{ SMATV_REMOTE_TUNING, LOCALE_SATSETUP_SMATVREMOTE }
+
+};
 
 void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 {
 	dprintf(DEBUG_DEBUG, "init scansettings\n");
 	CMenuOptionChooser* ojBouquets = new CMenuOptionChooser(LOCALE_SCANTS_BOUQUET, (int *)&scanSettings.bouquetMode, true);
-	ojBouquets->addOption(CZapitClient::BM_DELETEBOUQUETS        , LOCALE_SCANTS_BOUQUET_ERASE    );
-	ojBouquets->addOption(CZapitClient::BM_CREATEBOUQUETS        , LOCALE_SCANTS_BOUQUET_CREATE   );
-	ojBouquets->addOption(CZapitClient::BM_DONTTOUCHBOUQUETS     , LOCALE_SCANTS_BOUQUET_LEAVE    );
-	ojBouquets->addOption(CZapitClient::BM_UPDATEBOUQUETS        , LOCALE_SCANTS_BOUQUET_UPDATE   );
-	ojBouquets->addOption(CZapitClient::BM_CREATESATELLITEBOUQUET, LOCALE_SCANTS_BOUQUET_SATELLITE);
+	for (int i = 0; i < SCANTS_BOUQUET_OPTION_COUNT; i++)
+		ojBouquets->addOption(SCANTS_BOUQUET_OPTIONS[i].key, SCANTS_BOUQUET_OPTIONS[i].value);
 
 	//sat-lnb-settings
 	if(g_info.delivery_system == DVB_S)
@@ -1345,12 +1363,8 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		}
 
 		CMenuOptionChooser* ojDiseqc = new CMenuOptionChooser(LOCALE_SATSETUP_DISEQC, (int *)&scanSettings.diseqcMode, true, new CSatDiseqcNotifier( ojSat, ojExtSatSettings, ojExtMotorSettings, ojDiseqcRepeats));
-		ojDiseqc->addOption(NO_DISEQC          , LOCALE_SATSETUP_NODISEQC   );
-		ojDiseqc->addOption(MINI_DISEQC        , LOCALE_SATSETUP_MINIDISEQC );
-		ojDiseqc->addOption(DISEQC_1_0         , LOCALE_SATSETUP_DISEQC10   );
-		ojDiseqc->addOption(DISEQC_1_1         , LOCALE_SATSETUP_DISEQC11   );
-		ojDiseqc->addOption(DISEQC_1_2         , LOCALE_SATSETUP_DISEQC12   );
-		ojDiseqc->addOption(SMATV_REMOTE_TUNING, LOCALE_SATSETUP_SMATVREMOTE);
+		for (int i = 0; i < SATSETUP_DISEQC_OPTION_COUNT; i++)
+			ojDiseqc->addOption(SATSETUP_DISEQC_OPTIONS[i].key, SATSETUP_DISEQC_OPTIONS[i].value);
 
 		settings.addItem( ojDiseqc );
 		settings.addItem( ojBouquets );
@@ -1626,6 +1640,22 @@ void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
 	languageSettings.addItem( oj );
 }
 
+#define AUDIOMENU_ANALOGOUT_OPTION_COUNT 3
+const CMenuOptionChooser::keyval AUDIOMENU_ANALOGOUT_OPTIONS[AUDIOMENU_ANALOGOUT_OPTION_COUNT] =
+{
+	{ 0, LOCALE_AUDIOMENU_STEREO    },
+	{ 1, LOCALE_AUDIOMENU_MONOLEFT  },
+	{ 2, LOCALE_AUDIOMENU_MONORIGHT }
+};
+
+#define AUDIOMENU_AVS_CONTROL_OPTION_COUNT 3
+const CMenuOptionChooser::keyval AUDIOMENU_AVS_CONTROL_OPTIONS[AUDIOMENU_AVS_CONTROL_OPTION_COUNT] =
+{
+	{ CControld::TYPE_OST , LOCALE_AUDIOMENU_OST  },
+	{ CControld::TYPE_AVS , LOCALE_AUDIOMENU_AVS  },
+	{ CControld::TYPE_LIRC, LOCALE_AUDIOMENU_LIRC }
+};
+
 void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNotifier* audioSetupNotifier)
 {
 	audioSettings.addItem(GenericMenuSeparator);
@@ -1633,9 +1663,8 @@ void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNoti
 	audioSettings.addItem(GenericMenuSeparatorLine);
 
 	CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_AUDIOMENU_ANALOGOUT, &g_settings.audio_AnalogMode, true, audioSetupNotifier);
-	oj->addOption(0, LOCALE_AUDIOMENU_STEREO);
-	oj->addOption(1, LOCALE_AUDIOMENU_MONOLEFT);
-	oj->addOption(2, LOCALE_AUDIOMENU_MONORIGHT);
+	for (int i = 0; i < AUDIOMENU_ANALOGOUT_OPTION_COUNT; i++)
+		oj->addOption(AUDIOMENU_ANALOGOUT_OPTIONS[i].key, AUDIOMENU_ANALOGOUT_OPTIONS[i].value);
 
 	audioSettings.addItem( oj );
 
@@ -1649,9 +1678,8 @@ void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNoti
 	CAudioSetupNotifier2 *audioSetupNotifier2 = new CAudioSetupNotifier2(mf);
 
 	oj = new CMenuOptionChooser(LOCALE_AUDIOMENU_AVS_CONTROL, &g_settings.audio_avs_Control, true, audioSetupNotifier2);
-	oj->addOption(CControld::TYPE_OST, LOCALE_AUDIOMENU_OST);
-	oj->addOption(CControld::TYPE_AVS, LOCALE_AUDIOMENU_AVS);
-	oj->addOption(CControld::TYPE_LIRC, LOCALE_AUDIOMENU_LIRC);
+	for (int i = 0; i < AUDIOMENU_AVS_CONTROL_OPTION_COUNT; i++)
+		oj->addOption(AUDIOMENU_AVS_CONTROL_OPTIONS[i].key, AUDIOMENU_AVS_CONTROL_OPTIONS[i].value);
 	audioSettings.addItem(oj);
 	audioSettings.addItem(mf);
 }
@@ -1672,6 +1700,25 @@ class CVideoSettings : public CMenuWidget
 		};
 };
 
+#define VIDEOMENU_VIDEOSIGNAL_OPTION_COUNT 5
+const CMenuOptionChooser::keyval VIDEOMENU_VIDEOSIGNAL_OPTIONS[VIDEOMENU_VIDEOSIGNAL_OPTION_COUNT] =
+{
+	{ 1, LOCALE_VIDEOMENU_VIDEOSIGNAL_RGB       },
+	{ 2, LOCALE_VIDEOMENU_VIDEOSIGNAL_SVIDEO    },
+	{ 3, LOCALE_VIDEOMENU_VIDEOSIGNAL_YUV_V     },
+	{ 4, LOCALE_VIDEOMENU_VIDEOSIGNAL_YUV_C     },
+	{ 0, LOCALE_VIDEOMENU_VIDEOSIGNAL_COMPOSITE }
+};
+
+#define VIDEOMENU_VIDEOFORMAT_OPTION_COUNT 4
+const CMenuOptionChooser::keyval VIDEOMENU_VIDEOFORMAT_OPTIONS[VIDEOMENU_VIDEOFORMAT_OPTION_COUNT] =
+{
+	{ 2, LOCALE_VIDEOMENU_VIDEOFORMAT_43         },
+	{ 3, LOCALE_VIDEOMENU_VIDEOFORMAT_431        },
+	{ 1, LOCALE_VIDEOMENU_VIDEOFORMAT_169        },
+	{ 0, LOCALE_VIDEOMENU_VIDEOFORMAT_AUTODETECT }
+};
+
 void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings)
 {
 	videoSettings.addItem(GenericMenuSeparator);
@@ -1684,20 +1731,15 @@ void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings)
 	
 	CVideoSetupNotifier * videoSetupNotifier = new CVideoSetupNotifier(scf);
 	CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_VIDEOMENU_VIDEOSIGNAL, &g_settings.video_Signal, true, videoSetupNotifier);
-	oj->addOption(1, LOCALE_VIDEOMENU_VIDEOSIGNAL_RGB      );
-	oj->addOption(2, LOCALE_VIDEOMENU_VIDEOSIGNAL_SVIDEO   );
-	oj->addOption(3, LOCALE_VIDEOMENU_VIDEOSIGNAL_YUV_V    );
-	oj->addOption(4, LOCALE_VIDEOMENU_VIDEOSIGNAL_YUV_C    );
-	oj->addOption(0, LOCALE_VIDEOMENU_VIDEOSIGNAL_COMPOSITE);
+	for (int i = 0; i < VIDEOMENU_VIDEOSIGNAL_OPTION_COUNT; i++)
+		oj->addOption(VIDEOMENU_VIDEOSIGNAL_OPTIONS[i].key, VIDEOMENU_VIDEOSIGNAL_OPTIONS[i].value);
 	videoSettings.addItem( oj );
 
 	videoSettings.addItem(scf);
 
 	oj = new CMenuOptionChooser(LOCALE_VIDEOMENU_VIDEOFORMAT, &g_settings.video_Format, true, videoSetupNotifier);
-	oj->addOption(2, LOCALE_VIDEOMENU_VIDEOFORMAT_43        );
-	oj->addOption(3, LOCALE_VIDEOMENU_VIDEOFORMAT_431       );
-	oj->addOption(1, LOCALE_VIDEOMENU_VIDEOFORMAT_169       );
-	oj->addOption(0, LOCALE_VIDEOMENU_VIDEOFORMAT_AUTODETECT);
+	for (int i = 0; i < VIDEOMENU_VIDEOFORMAT_OPTION_COUNT; i++)
+		oj->addOption(VIDEOMENU_VIDEOFORMAT_OPTIONS[i].key, VIDEOMENU_VIDEOFORMAT_OPTIONS[i].value);
 
 	if (g_settings.video_Format == CControldClient::VIDEOFORMAT_AUTO)
 	{
@@ -1715,6 +1757,14 @@ void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings)
 	videoSettings.addItem(new CMenuForwarder(LOCALE_VIDEOMENU_SCREENSETUP, true, NULL, new CScreenSetup()));
 }
 
+#define PARENTALLOCK_LOCKAGE_OPTION_COUNT 3
+const CMenuOptionChooser::keyval PARENTALLOCK_LOCKAGE_OPTIONS[PARENTALLOCK_LOCKAGE_OPTION_COUNT] =
+{
+	{ 12, LOCALE_PARENTALLOCK_LOCKAGE12 },
+	{ 16, LOCALE_PARENTALLOCK_LOCKAGE16 },
+	{ 18, LOCALE_PARENTALLOCK_LOCKAGE18 }
+};
+
 void CNeutrinoApp::InitParentalLockSettings(CMenuWidget &parentallockSettings)
 {
 	parentallockSettings.addItem(GenericMenuSeparator);
@@ -1729,9 +1779,8 @@ void CNeutrinoApp::InitParentalLockSettings(CMenuWidget &parentallockSettings)
 	parentallockSettings.addItem( oj );
 
 	oj = new CMenuOptionChooser(LOCALE_PARENTALLOCK_LOCKAGE, &g_settings.parentallock_lockage, !parentallocked);
-	oj->addOption(12, LOCALE_PARENTALLOCK_LOCKAGE12);
-	oj->addOption(16, LOCALE_PARENTALLOCK_LOCKAGE16);
-	oj->addOption(18, LOCALE_PARENTALLOCK_LOCKAGE18);
+	for (int i = 0; i < PARENTALLOCK_LOCKAGE_OPTION_COUNT; i++)
+		oj->addOption(PARENTALLOCK_LOCKAGE_OPTIONS[i].key, PARENTALLOCK_LOCKAGE_OPTIONS[i].value);
 	parentallockSettings.addItem( oj );
 
 	CPINChangeWidget * pinChangeWidget = new CPINChangeWidget(LOCALE_PATENTALLOCK_CHANGEPIN, g_settings.parentallock_pincode, 4, LOCALE_PARENTALLOCK_CHANGEPIN_HINT1);
@@ -1790,6 +1839,15 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	networkSettings.addItem(new CMenuForwarder(LOCALE_NFS_UMOUNT, true, NULL, new CNFSUmountGui()));
 }
 
+#define RECORDINGMENU_RECORDING_TYPE_OPTION_COUNT 4
+const CMenuOptionChooser::keyval RECORDINGMENU_RECORDING_TYPE_OPTIONS[RECORDINGMENU_RECORDING_TYPE_OPTION_COUNT] =
+{
+	{ CNeutrinoApp::RECORDING_OFF   , LOCALE_RECORDINGMENU_OFF    },
+	{ CNeutrinoApp::RECORDING_SERVER, LOCALE_RECORDINGMENU_SERVER },
+	{ CNeutrinoApp::RECORDING_VCR   , LOCALE_RECORDINGMENU_VCR    },
+	{ CNeutrinoApp::RECORDING_FILE  , LOCALE_RECORDINGMENU_FILE   }
+};
+
 void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 {
 	CIPInput * recordingSettings_server_ip = new CIPInput(LOCALE_RECORDINGMENU_SERVER_IP, g_settings.recording_server_ip, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
@@ -1841,10 +1899,8 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	CRecordingNotifier *RecordingNotifier = new CRecordingNotifier(mf1,mf2,oj2,mf3,oj3,oj4,oj5,mf7,mf8,oj6);
 
 	CMenuOptionChooser* oj1 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_RECORDING_TYPE, &g_settings.recording_type, true, RecordingNotifier);
-	oj1->addOption(RECORDING_OFF   , LOCALE_RECORDINGMENU_OFF   );
-	oj1->addOption(RECORDING_SERVER, LOCALE_RECORDINGMENU_SERVER);
-	oj1->addOption(RECORDING_VCR   , LOCALE_RECORDINGMENU_VCR   );
-	oj1->addOption(RECORDING_FILE  , LOCALE_RECORDINGMENU_FILE  );
+	for (int i = 0; i < RECORDINGMENU_RECORDING_TYPE_OPTION_COUNT; i++)
+		oj1->addOption(RECORDINGMENU_RECORDING_TYPE_OPTIONS[i].key, RECORDINGMENU_RECORDING_TYPE_OPTIONS[i].value);
 
 	recordingSettings.addItem(GenericMenuSeparator);
 	recordingSettings.addItem(GenericMenuBack);
@@ -1870,6 +1926,15 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 
 	recordingstatus = 0;
 }
+
+#define STREAMINGMENU_STREAMING_RESOLUTION_OPTION_COUNT 4
+const CMenuOptionChooser::keyval STREAMINGMENU_STREAMING_RESOLUTION_OPTIONS[STREAMINGMENU_STREAMING_RESOLUTION_OPTION_COUNT] =
+{
+	{ 0, LOCALE_STREAMINGMENU_352x288 },
+	{ 1, LOCALE_STREAMINGMENU_352x576 },
+	{ 2, LOCALE_STREAMINGMENU_480x576 },
+	{ 3, LOCALE_STREAMINGMENU_704x576 }
+};
 
 void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 {
@@ -1906,12 +1971,10 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 	oj4->addOption(1, LOCALE_STREAMINGMENU_MPEG2);
 
 	CMenuOptionChooser* oj5 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_RESOLUTION           , &g_settings.streaming_resolution           , true);
-	oj5->addOption(0, LOCALE_STREAMINGMENU_352x288);
-	oj5->addOption(1, LOCALE_STREAMINGMENU_352x576);
-	oj5->addOption(2, LOCALE_STREAMINGMENU_480x576);
-	oj5->addOption(3, LOCALE_STREAMINGMENU_704x576);
+	for (int i = 0; i < STREAMINGMENU_STREAMING_RESOLUTION_OPTION_COUNT; i++)
+		oj5->addOption(STREAMINGMENU_STREAMING_RESOLUTION_OPTIONS[i].key, STREAMINGMENU_STREAMING_RESOLUTION_OPTIONS[i].value);
 
-  CStreamingNotifier *StreamingNotifier = new CStreamingNotifier(mf1,mf2,mf3,mf4,mf5,mf6,mf7,oj1,oj2,oj3,oj4,oj5);
+	CStreamingNotifier *StreamingNotifier = new CStreamingNotifier(mf1,mf2,mf3,mf4,mf5,mf6,mf7,oj1,oj2,oj3,oj4,oj5);
 	CMenuOptionChooser* oj0 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_TYPE                 , &g_settings.streaming_type                 , true, StreamingNotifier);
 	oj0->addOption(0, LOCALE_STREAMINGMENU_OFF);
 	oj0->addOption(1, LOCALE_STREAMINGMENU_ON );
@@ -2197,6 +2260,14 @@ void CNeutrinoApp::InitColorSettingsTiming(CMenuWidget &colorSettings_timing)
 	colorSettings_timing.addItem(new CMenuForwarder(LOCALE_OPTIONS_DEFAULT, true, NULL, this, "osd.def"));
 }
 
+#define LCDMENU_STATUSLINE_OPTION_COUNT 3
+const CMenuOptionChooser::keyval LCDMENU_STATUSLINE_OPTIONS[LCDMENU_STATUSLINE_OPTION_COUNT] =
+{
+	{ 0, LOCALE_LCDMENU_STATUSLINE_PLAYTIME },
+	{ 1, LOCALE_LCDMENU_STATUSLINE_VOLUME   },
+	{ 2, LOCALE_LCDMENU_STATUSLINE_BOTH     }
+};
+
 void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
 {
 	lcdSettings.addItem(GenericMenuSeparator);
@@ -2232,11 +2303,18 @@ void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
 
 	lcdSettings.addItem(GenericMenuSeparatorLine);
 	oj = new CMenuOptionChooser(LOCALE_LCDMENU_STATUSLINE, &g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME], true);
-	oj->addOption(0, LOCALE_LCDMENU_STATUSLINE_PLAYTIME);
-	oj->addOption(1, LOCALE_LCDMENU_STATUSLINE_VOLUME  );
-	oj->addOption(2, LOCALE_LCDMENU_STATUSLINE_BOTH    );
+	for (int i = 0; i < LCDMENU_STATUSLINE_OPTION_COUNT; i++)
+		oj->addOption(LCDMENU_STATUSLINE_OPTIONS[i].key, LCDMENU_STATUSLINE_OPTIONS[i].value);
 	lcdSettings.addItem( oj );
 }
+
+#define KEYBINDINGMENU_BOUQUETHANDLING_OPTION_COUNT 3
+const CMenuOptionChooser::keyval KEYBINDINGMENU_BOUQUETHANDLING_OPTIONS[KEYBINDINGMENU_BOUQUETHANDLING_OPTION_COUNT] =
+{
+	{ 0, LOCALE_KEYBINDINGMENU_BOUQUETCHANNELS_ON_OK },
+	{ 1, LOCALE_KEYBINDINGMENU_BOUQUETLIST_ON_OK     },
+	{ 2, LOCALE_KEYBINDINGMENU_ALLCHANNELS_ON_OK     }
+};
 
 enum keynames {
 	KEY_TV_RADIO_MODE,
@@ -2319,11 +2397,12 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 	keySettings.addItem(new CMenuForwarder(keydescription[KEY_TV_RADIO_MODE], true, NULL, keychooser[KEY_TV_RADIO_MODE]));
 
 	keySettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_KEYBINDINGMENU_CHANNELLIST));
+
 	CMenuOptionChooser *oj = new CMenuOptionChooser(LOCALE_KEYBINDINGMENU_BOUQUETHANDLING, &g_settings.bouquetlist_mode, true );
-	oj->addOption(0, LOCALE_KEYBINDINGMENU_BOUQUETCHANNELS_ON_OK);
-	oj->addOption(1, LOCALE_KEYBINDINGMENU_BOUQUETLIST_ON_OK    );
-	oj->addOption(2, LOCALE_KEYBINDINGMENU_ALLCHANNELS_ON_OK    );
+	for (int i = 0; i < KEYBINDINGMENU_BOUQUETHANDLING_OPTION_COUNT; i++)
+		oj->addOption(KEYBINDINGMENU_BOUQUETHANDLING_OPTIONS[i].key, KEYBINDINGMENU_BOUQUETHANDLING_OPTIONS[i].value);
 	keySettings.addItem( oj );
+
 	for (int i = KEY_PAGE_UP; i <= KEY_ADD_REMIND; i++)
 		keySettings.addItem(new CMenuForwarder(keydescription[i], true, NULL, keychooser[i]));
 
