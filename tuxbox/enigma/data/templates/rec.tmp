@@ -16,7 +16,7 @@
 <table border=0 cellpadding=0 cellspacing=0>
 	<tr>
 		<td style="width: 210px">
-			<input type="button" name="delete" style="width: 100px; background-color: #CB0303" value="DELETE" onClick=javascript:deleteMovie()>
+			<input type="button" name="delete" style="width: 100px; height: 22px; background-color: #CB0303" value="DELETE" onClick=javascript:deleteMovie()>
 		</td>
 		<td style="width: 450px" align=center>
 			<a href="javascript:zapChannelBackward()"><img src="up.gif" border="0"></a>
