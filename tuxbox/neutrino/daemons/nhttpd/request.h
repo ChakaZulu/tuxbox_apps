@@ -31,7 +31,6 @@ class TWebserverRequest
 private:
 	char * rawbuffer;
 	int rawbuffer_len;
-
 	void ParseHeader(char * t, int len);
 	void RewriteURL();
 
@@ -42,6 +41,7 @@ private:
 public:
  	int sock_fd;
 	SAI servaddr;
+	SAI	cliaddr;
 	int Socket;
 
 	void SocketWrite( char* text);

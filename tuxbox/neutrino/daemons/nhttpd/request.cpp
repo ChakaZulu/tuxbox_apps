@@ -260,7 +260,7 @@ void TWebserverRequest::PrintRequest()
 		sprintf(method,"POST");
 
 
-	printf("%3d %-6s %-30s %-20s %-25s %-25s %-12s\n",HttpStatus,method,Path?Path->c_str():"",Filename?Filename->c_str():"",URL?URL->c_str():"",ContentType?ContentType->c_str():"",Param_String?Param_String->c_str():"");
+	printf("%X %3d %-6s %-30s %-20s %-25s %-25s %-12s\n",cliaddr.sin_addr,HttpStatus,method,Path?Path->c_str():"",Filename?Filename->c_str():"",URL?URL->c_str():"",ContentType?ContentType->c_str():"",Param_String?Param_String->c_str():"");
 	if(Parent->DEBUG) printf("Requestlänge: %ld\n",rawbuffer_len);
 	if(Parent->DEBUG) printf("Buffer:\n%s\n",rawbuffer);
 
