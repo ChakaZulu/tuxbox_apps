@@ -90,6 +90,7 @@ void CEventWatchDog::vcrModeChanged( int nNewVCRMode )
 
 void* CEventWatchDog::watchdogThread (void *arg)
 {
+	//printf("[controld] watchdogThread-pid: %d\n", getpid());
 	try
 	{
 

@@ -266,6 +266,9 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 			case 3 :
 				format= 1;
 				break;
+			default:
+				format= 2;
+				// damits nicht ausgeht beim starten :)
 		}
 	}
 
@@ -799,11 +802,13 @@ void sig_catch(int)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.48 2002/03/07 18:32:34 field Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.49 2002/03/12 18:11:16 field Exp $\n\n");
 
+	//printf("[controld] mainThread-pid: %d\n", getpid());
 	if (fork() != 0)
 		return 0;
 
+    //printf("[controld] forkedThread-pid: %d\n", getpid());
 	eventServer = new CEventServer;
 
 	struct sockaddr_un servaddr;
