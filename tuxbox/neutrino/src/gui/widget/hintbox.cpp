@@ -50,7 +50,7 @@ CHintBox::CHintBox( CMenuWidget* Parent, string Caption, string Text, int Width 
 		pos = Text.find_first_of("\n");
 		if ( pos!=-1 )
 		{
-			text.insert( text.end(), Text.substr( 0, pos- 1 ) );
+			text.insert( text.end(), Text.substr( 0, pos ) );
 			Text= Text.substr( pos+ 1, uint(-1) );
 		}
 	} while ( ( pos != -1 ) );
@@ -66,7 +66,7 @@ CHintBox::CHintBox( CMenuWidget* Parent, string Caption, string Text, int Width 
 	}
 
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
-	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
+	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 3) + g_settings.screen_StartY;
 
 	parent = Parent;
 	pixbuf= NULL;

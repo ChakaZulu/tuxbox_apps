@@ -51,13 +51,13 @@ class CMessageBoxNotifier
 };
 
 
-	
-class CMessageBox : CMenuWidget
+
+class CMessageBox
 {
 
 	private:
 
-		CFrameBuffer	*frameBuffer;
+		CFrameBuffer			*frameBuffer;
 		int						width;
 		int						height;
 		int						x;
@@ -97,10 +97,10 @@ class CMessageBox : CMenuWidget
 		} buttons;
 
 		CMessageBox( string Caption, string Text, CMessageBoxNotifier* Notifier, int Width = 500, uint Default= mbrYes, uint ShowButtons= mbAll );
-		int exec(CMenuTarget* parent, string actionKey);
+		int exec(int timeout = -1);
 
 };
 
-int ShowMsg ( string Caption, string Text, uint Default, uint ShowButtons, int Width = 450 );
+int ShowMsg ( string Caption, string Text, uint Default, uint ShowButtons, int Width = 450, int timeout = -1 );
 
 #endif

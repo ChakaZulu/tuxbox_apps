@@ -177,7 +177,7 @@ void CMessageBox::hide()
 	frameBuffer->paintBackgroundBoxRel(x,y, width,height);
 }
 
-int CMessageBox::exec(CMenuTarget* parent, string actionKey)
+int CMessageBox::exec(int timeout)
 {
 	int res = menu_return::RETURN_REPAINT;
     unsigned char pixbuf[(width+ 2* borderwidth) * (height+ 2* borderwidth)];
@@ -192,11 +192,16 @@ int CMessageBox::exec(CMenuTarget* parent, string actionKey)
 	paintHead();
 	paintButtons();
 
+	if ( timeout == -1 )
+		timeout = g_settings.timing_epg ;
+
+	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( timeout );
+
 	bool loop=true;
 	while (loop)
 	{
 		uint msg; uint data;
-		g_RCInput->getMsg( &msg, &data, g_settings.timing_epg );
+		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 
 		if ( ( (msg==CRCInput::RC_timeout) ||
 			   (msg==g_settings.key_channelList_cancel) ) &&
@@ -292,10 +297,10 @@ int CMessageBox::exec(CMenuTarget* parent, string actionKey)
 	return res;
 }
 
-int ShowMsg ( string Caption, string Text, uint Default, uint ShowButtons, int Width )
+int ShowMsg ( string Caption, string Text, uint Default, uint ShowButtons, int Width, int timeout )
 {
    	CMessageBox* messageBox = new CMessageBox( Caption, Text, NULL, Width, Default, ShowButtons );
-	messageBox->exec( NULL, "");
+	messageBox->exec( timeout );
 	int res= messageBox->result;
 	delete messageBox;
 

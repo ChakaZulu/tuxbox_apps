@@ -80,6 +80,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 
 		string				fontName;
 		string				fontFile;
+		int					fontsSizeOffset;
 
 		int				    mode;
 

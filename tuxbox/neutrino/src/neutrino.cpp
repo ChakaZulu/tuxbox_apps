@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.242 2002/04/23 14:37:30 field Exp $
+        $Id: neutrino.cpp,v 1.243 2002/04/24 13:06:58 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -644,6 +644,7 @@ void CNeutrinoApp::CmdParser(int argc, char **argv)
 
 	fontName = FONTNAME;
 	fontFile = FONTDIR "/" FONTFILE;
+	fontsSizeOffset = 0;
 
 	for(int x=1; x<argc; x++)
 	{
@@ -668,16 +669,17 @@ void CNeutrinoApp::CmdParser(int argc, char **argv)
 		}
 		else if ( !strcmp(argv[x], "-font"))
 		{
-			if ( ( x + 2 ) < argc )
+			if ( ( x + 3 ) < argc )
 			{
 				fontFile = argv[x+ 1];
 				fontName = argv[x+ 2];
+				fontsSizeOffset = atoi(argv[x+ 3]);
 			}
-            x=x+ 2;
+            x=x+ 3;
 		}
 		else
 		{
-			printf("Usage: neutrino [-su][-font \fontdir\fontfile fontname]\n");
+			printf("Usage: neutrino [-su][-font /fontdir/fontfile fontname fontsize]\n");
 			exit(0);
 		}
 	}
@@ -702,6 +704,7 @@ void CNeutrinoApp::SetupFonts()
 {
     printf("FontFile: %s\n", (fontFile+ ".ttf").c_str() );
 	printf("FontName: %s\n", fontName.c_str() );
+	printf("FontSize: %d\n", fontsSizeOffset );
 
 	g_fontRenderer->AddFont((fontFile+ ".ttf").c_str() );
 	g_fontRenderer->AddFont((fontFile+ "_bold.ttf").c_str() );
@@ -711,31 +714,32 @@ void CNeutrinoApp::SetupFonts()
 	g_Fonts->menu_title =   g_fontRenderer->getFont(fontName.c_str(), "Bold", 30);
 	g_Fonts->menu_info =    g_fontRenderer->getFont(fontName.c_str(), "Regular", 16);
 
-	g_Fonts->epg_title =    g_fontRenderer->getFont(fontName.c_str(), "Regular", 25);
+	g_Fonts->epg_title =    g_fontRenderer->getFont(fontName.c_str(), "Regular", 25+ fontsSizeOffset );
 
-	g_Fonts->epg_info1 =	g_fontRenderer->getFont(fontName.c_str(), "Italic", 17); // info1 must be same size as info2, but italic
-	g_Fonts->epg_info2 =	g_fontRenderer->getFont(fontName.c_str(), "Regular", 17);
+	g_Fonts->epg_info1 =	g_fontRenderer->getFont(fontName.c_str(), "Italic", 17 + 2* fontsSizeOffset );
+	g_Fonts->epg_info2 =	g_fontRenderer->getFont(fontName.c_str(), "Regular", 17+ 2* fontsSizeOffset );
 
-	g_Fonts->epg_date =		g_fontRenderer->getFont(fontName.c_str(), "Regular", 15);
+	g_Fonts->epg_date =		g_fontRenderer->getFont(fontName.c_str(), "Regular", 15+ 2* fontsSizeOffset );
 	g_Fonts->alert =		g_fontRenderer->getFont(fontName.c_str(), "Regular", 100);
 
 	g_Fonts->eventlist_title =		g_fontRenderer->getFont(fontName.c_str(), "Regular", 30);
-	g_Fonts->eventlist_itemLarge =	g_fontRenderer->getFont(fontName.c_str(), "Bold", 20);
-	g_Fonts->eventlist_itemSmall =	g_fontRenderer->getFont(fontName.c_str(), "Regular", 14);
-	g_Fonts->eventlist_datetime =	g_fontRenderer->getFont(fontName.c_str(), "Regular", 16);
+	g_Fonts->eventlist_itemLarge =	g_fontRenderer->getFont(fontName.c_str(), "Bold", 20+ fontsSizeOffset );
+	g_Fonts->eventlist_itemSmall =	g_fontRenderer->getFont(fontName.c_str(), "Regular", 14+ fontsSizeOffset );
+	g_Fonts->eventlist_datetime =	g_fontRenderer->getFont(fontName.c_str(), "Regular", 16+ fontsSizeOffset );
 
-	g_Fonts->gamelist_itemLarge =	g_fontRenderer->getFont(fontName.c_str(), "Bold", 20);
-	g_Fonts->gamelist_itemSmall =	g_fontRenderer->getFont(fontName.c_str(), "Regular", 16);
+	g_Fonts->gamelist_itemLarge =	g_fontRenderer->getFont(fontName.c_str(), "Bold", 20+ fontsSizeOffset );
+	g_Fonts->gamelist_itemSmall =	g_fontRenderer->getFont(fontName.c_str(), "Regular", 16+ fontsSizeOffset );
 
-	g_Fonts->channellist =			g_fontRenderer->getFont(fontName.c_str(), "Bold", 20);
-	g_Fonts->channellist_descr =	g_fontRenderer->getFont(fontName.c_str(), "Regular", 20);
-	g_Fonts->channellist_number =	g_fontRenderer->getFont(fontName.c_str(), "Bold", 14);
+	g_Fonts->channellist =			g_fontRenderer->getFont(fontName.c_str(), "Bold", 20+ fontsSizeOffset );
+	g_Fonts->channellist_descr =	g_fontRenderer->getFont(fontName.c_str(), "Regular", 20+ fontsSizeOffset );
+	g_Fonts->channellist_number =	g_fontRenderer->getFont(fontName.c_str(), "Bold", 14+ 2* fontsSizeOffset );
 	g_Fonts->channel_num_zap =		g_fontRenderer->getFont(fontName.c_str(), "Bold", 40);
 
 	g_Fonts->infobar_number =	g_fontRenderer->getFont(fontName.c_str(), "Bold", 50);
 	g_Fonts->infobar_channame =	g_fontRenderer->getFont(fontName.c_str(), "Bold", 30);
-	g_Fonts->infobar_info =		g_fontRenderer->getFont(fontName.c_str(), "Regular", 20);
-	g_Fonts->infobar_small =	g_fontRenderer->getFont(fontName.c_str(), "Regular", 14);
+	g_Fonts->infobar_info =		g_fontRenderer->getFont(fontName.c_str(), "Regular", 20+ fontsSizeOffset );
+	g_Fonts->infobar_small =	g_fontRenderer->getFont(fontName.c_str(), "Regular", 14+ fontsSizeOffset );
+
 }
 
 
@@ -1584,6 +1588,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_COMPLETE, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_COMPLETE_IS_NVOD, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_SUB_COMPLETE, 222, NEUTRINO_UDS_NAME);
+	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_SUB_FAILED, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_COMPLETE, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_NUM_TRANSPONDERS, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_SATELLITE, 222, NEUTRINO_UDS_NAME);
@@ -1924,20 +1929,13 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		AudioMute( (bool)data, true );
 		return messages_return::handled;
 	}
-	else if ( msg == NeutrinoMessages::EVT_RECORDMODE_ACTIVATED )
+	else if ( msg == NeutrinoMessages::EVT_RECORDMODE )
 	{
-		printf("neutino - recordmode on\n");
-		if(!g_InfoViewer->is_visible)
-		{
-			g_RCInput->postMsg( CRCInput::RC_help, 0 );
-		}
-		g_InfoViewer->setRecordMode(true);
-		channelsInit();
-	}
-	else if ( msg == NeutrinoMessages::EVT_RECORDMODE_DEACTIVATED )
-	{
-		printf("neutino - recordmode off\n");
-		g_InfoViewer->setRecordMode(false);
+		printf("neutino - recordmode %s\n", ( data ) ? "on":"off" );
+
+		if ( ( !g_InfoViewer->is_visible ) && data )
+			g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
+
 		channelsInit();
 	}
 	else if ( ( msg == NeutrinoMessages::EVT_BOUQUETSCHANGED ) ||
@@ -2350,7 +2348,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.242 2002/04/23 14:37:30 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.243 2002/04/24 13:06:58 field Exp $\n\n");
 	tzset();
 	initGlobals();
 

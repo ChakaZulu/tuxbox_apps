@@ -32,6 +32,7 @@
 #include "infoviewer.h"
 #include "../global.h"
 #include "../neutrino.h"
+#include "widget/hintbox.h"
 
 #define COL_INFOBAR_BUTTONS				COL_INFOBAR_SHADOW+ 1
 #define COL_INFOBAR_BUTTONS_GRAY		COL_INFOBAR_SHADOW+ 1
@@ -143,6 +144,7 @@ void CInfoViewer::showRecordIcon( bool show )
 void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid, bool calledFromNumZap )
 {
 	CNeutrinoApp *neutrino = CNeutrinoApp::getInstance();
+
         CurrentChannel = Channel;
         current_onid_sid = onid_sid;
         showButtonBar = !calledFromNumZap;
@@ -163,7 +165,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid,
  		if ( !gotTime )
  			gotTime = g_Sectionsd->getIsTimeSet();
 
-		getEPG( current_onid_sid );
+		info_CurrentNext = getEPG( current_onid_sid );
 
         if ( fadeIn )
         {
@@ -238,20 +240,17 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid,
 			showButton_SubServices();
 			showIcon_16_9();
 			showIcon_VTXT();
-
-			if ( ( ( info_CurrentNext.flags & sectionsd::epgflags::has_next ) &&
-				   ( info_CurrentNext.flags & ( sectionsd::epgflags::has_current | sectionsd::epgflags::has_no_current ) ) ) ||
-				 ( info_CurrentNext.flags & sectionsd::epgflags::not_broadcast ) )
-			{
-				// alles was nötig ist, ist da!
-				g_Sectionsd->setServiceChanged( onid_sid, false );
-			}
-			else
-			{
-				// EVENT anfordern!
-				g_Sectionsd->setServiceChanged( onid_sid, true );
-			}
         }
+
+        if ( ( g_RemoteControl->current_onid_sid == current_onid_sid ) &&
+             !( ( ( info_CurrentNext.flags & sectionsd::epgflags::has_next ) &&
+				    ( info_CurrentNext.flags & ( sectionsd::epgflags::has_current | sectionsd::epgflags::has_no_current ) ) ) ||
+				    ( info_CurrentNext.flags & sectionsd::epgflags::not_broadcast ) ) )
+
+        {
+			// EVENT anfordern!
+			g_Sectionsd->setServiceChanged( onid_sid, true );
+		}
 
 		// Schatten
         frameBuffer->paintBox(BoxEndX, ChanNameY+ SHADOW_OFFSET, BoxEndX+ SHADOW_OFFSET, BoxEndY, COL_INFOBAR_SHADOW);
@@ -340,7 +339,8 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid,
 				}
 				else if ( ( msg == g_settings.key_quickzap_up ) ||
                	 	 	  ( msg == g_settings.key_quickzap_down ) ||
-               	 	 	  ( msg == CRCInput::RC_0 ) )
+               	 	 	  ( msg == CRCInput::RC_0 ) ||
+               	 	 	  ( msg == NeutrinoMessages::SHOW_INFOBAR ) )
 				{
 					hideIt = false;
 					g_RCInput->postMsg( msg, data );
@@ -405,26 +405,71 @@ void CInfoViewer::showIcon_VTXT()
 		frameBuffer->paintIcon("vtxt_gray.raw", BoxEndX- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 }
 
+void CInfoViewer::showFailure()
+{
+	CHintBox* hintBox= new CHintBox(NULL, "messagebox.error", g_Locale->getText("infoviewer.notavailable"), 430 );
+	hintBox->paint();
+
+	uint msg; uint data;
+	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_infobar >> 1 );
+
+	int res = messages_return::none;
+
+	while ( ! ( res & ( messages_return::cancel_info | messages_return::cancel_all ) ) )
+	{
+    	g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+
+
+        res = CNeutrinoApp::getInstance()->handleMsg( msg, data );
+
+        if ( res == messages_return::unhandled )
+        {
+        	//printf(" g_RCInput->getMsgAbsoluteTimeout %x %x\n", msg, data);
+
+        	// raus hier und darüber behandeln...
+        	g_RCInput->postMsg(  msg, data );
+			res = messages_return::cancel_info;
+		}
+	}
+
+	hintBox->hide();
+	delete hintBox;
+}
+
 int CInfoViewer::handleMsg(uint msg, uint data)
 {
     if ( ( msg == NeutrinoMessages::EVT_CURRENTNEXT_EPG ) ||
 		 ( msg == NeutrinoMessages::EVT_NEXTPROGRAM ) )
 	{
-		getEPG( data );
+		sectionsd::CurrentNextInfo info = getEPG( data );
 
 		if ( ( is_visible ) && ( data == current_onid_sid ) )
+		{
+			info_CurrentNext = info;
 			show_Data( true );
+		}
 
 	    return messages_return::handled;
 	}
-	else if ( ( msg == NeutrinoMessages::EVT_TIMER ) && ( data == fadeTimer ) )
+	else if ( msg == NeutrinoMessages::EVT_TIMER )
 	{
-		// hierher kann das event nur dann kommen, wenn ein anderes Fenster im Vordergrund ist!
-		g_RCInput->killTimer(fadeTimer);
-        frameBuffer->setAlphaFade(COL_INFOBAR, 8, convertSetupAlpha2Alpha(g_settings.infobar_alpha) );
-        frameBuffer->setAlphaFade(COL_INFOBAR_SHADOW, 8, convertSetupAlpha2Alpha(g_settings.infobar_alpha) );
-        frameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(0) );
-		frameBuffer->paletteSet();
+		if ( data == fadeTimer )
+		{
+			// hierher kann das event nur dann kommen, wenn ein anderes Fenster im Vordergrund ist!
+			g_RCInput->killTimer(fadeTimer);
+        	frameBuffer->setAlphaFade(COL_INFOBAR, 8, convertSetupAlpha2Alpha(g_settings.infobar_alpha) );
+	        frameBuffer->setAlphaFade(COL_INFOBAR_SHADOW, 8, convertSetupAlpha2Alpha(g_settings.infobar_alpha) );
+    	    frameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(0) );
+			frameBuffer->paletteSet();
+
+			return messages_return::handled;
+		}
+		else if ( data == sec_timer_id )
+			return messages_return::handled;
+	}
+	else if ( msg == NeutrinoMessages::EVT_RECORDMODE )
+	{
+		recordModeActive = data;
 	}
     else if ( msg == NeutrinoMessages::EVT_ZAP_GOTAPIDS )
 	{
@@ -468,6 +513,8 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 		{
 			// show failure..!
 			printf("zap failed!\n");
+           	showFailure();
+
 			#ifdef USEACTIONLOG
 				g_ActionLog->println("channel unavailable");
 			#endif
@@ -485,6 +532,7 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 	else if ( msg == NeutrinoMessages::EVT_TIMESET )
 	{
 		gotTime = true;
+		return messages_return::handled;
 	}
 
 	return messages_return::unhandled;
@@ -507,18 +555,22 @@ void CInfoViewer::showButton_SubServices()
 	}
 }
 
-void CInfoViewer::getEPG( unsigned int onid_sid )
+sectionsd::CurrentNextInfo CInfoViewer::getEPG( unsigned int onid_sid )
 {
-	g_Sectionsd->getCurrentNextServiceKey( onid_sid, info_CurrentNext );
+	sectionsd::CurrentNextInfo info;
 
-	if ( info_CurrentNext.flags & ( sectionsd::epgflags::has_current | sectionsd::epgflags::has_next ) )
+	g_Sectionsd->getCurrentNextServiceKey( onid_sid, info );
+
+	if ( info.flags & ( sectionsd::epgflags::has_current | sectionsd::epgflags::has_next ) )
 	{
 		sectionsd::CurrentNextInfo*	_info = new sectionsd::CurrentNextInfo;
-		*_info = info_CurrentNext;
-		g_RCInput->postMsg( ( info_CurrentNext.flags & ( sectionsd::epgflags::has_current ) )? NeutrinoMessages::EVT_CURRENTEPG : NeutrinoMessages::EVT_NEXTEPG, (unsigned) _info, false );
+		*_info = info;
+		g_RCInput->postMsg( ( info.flags & ( sectionsd::epgflags::has_current ) )? NeutrinoMessages::EVT_CURRENTEPG : NeutrinoMessages::EVT_NEXTEPG, (unsigned) _info, false );
 	}
 	else
 		g_RCInput->postMsg( NeutrinoMessages::EVT_NOEPG_YET, onid_sid, false );
+
+	return info;
 }
 
 

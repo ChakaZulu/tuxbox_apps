@@ -601,13 +601,13 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 			 			//printf("[neutrino] event - from ZAPIT %x %x\n", emsg.eventID, *(unsigned*) p);
 			 			if (emsg.eventID==CZapitClient::EVT_RECORDMODE_ACTIVATED)
 			 			{
-			 				*msg = NeutrinoMessages::EVT_RECORDMODE_ACTIVATED;
-			 				*data = 0;
+			 				*msg = NeutrinoMessages::EVT_RECORDMODE;
+			 				*data = true;
 			 			}
 			 			else if (emsg.eventID==CZapitClient::EVT_RECORDMODE_DEACTIVATED)
 			 			{
-			 				*msg = NeutrinoMessages::EVT_RECORDMODE_DEACTIVATED;
-			 				*data = 0;
+			 				*msg = NeutrinoMessages::EVT_RECORDMODE;
+			 				*data = false;
 			 			}
 						else if (emsg.eventID==CZapitClient::EVT_ZAP_COMPLETE)
 			 			{
@@ -617,6 +617,11 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 			 			else if (emsg.eventID==CZapitClient::EVT_ZAP_FAILED)
 			 			{
 			 				*msg = NeutrinoMessages::EVT_ZAP_FAILED;
+			 				*data = *(unsigned*) p;
+			 			}
+			 			else if (emsg.eventID==CZapitClient::EVT_ZAP_SUB_FAILED)
+			 			{
+			 				*msg = NeutrinoMessages::EVT_ZAP_SUB_FAILED;
 			 				*data = *(unsigned*) p;
 			 			}
 			 			else if (emsg.eventID==CZapitClient::EVT_ZAP_COMPLETE_IS_NVOD)

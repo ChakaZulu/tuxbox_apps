@@ -175,9 +175,9 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 			{
 				if (bouquetsChanged)
 				{
-					CMessageBox* messageBox = new CMessageBox( "bouqueteditor.name", g_Locale->getText("bouqueteditor.savechanges?"), NULL, 480 );
-					messageBox->exec( this, "");
-					switch( messageBox->result)
+					int result = ShowMsg ( "bouqueteditor.name", g_Locale->getText("bouqueteditor.savechanges?"), CMessageBox::mbrYes, CMessageBox::mbAll );
+
+					switch( result )
 					{
 						case CMessageBox::mbrYes :
 							loop=false;
@@ -193,7 +193,6 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 							paintFoot();
 						break;
 					}
-					delete messageBox;
 				}
 				else
 				{

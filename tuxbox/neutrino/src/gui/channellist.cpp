@@ -433,6 +433,24 @@ void CChannelList::zapToOnidSid (unsigned int onid_sid)
 
 }
 
+void CChannelList::adjustToOnidSid (unsigned int onid_sid)
+{
+	int i;
+
+	for (i=0; i<chanlist.size(); i++) {
+		if (chanlist[i]->onid_sid == onid_sid)
+		{
+			selected= i;
+			CChannel* chan = chanlist[selected];
+			lastChList.store (selected);
+
+			tuned = i;
+			if (bouquetList != NULL)
+				bouquetList->adjustToChannel( getActiveChannelNumber());
+			break;
+		}
+	}
+}
 
 void CChannelList::zapTo(int pos)
 {
@@ -446,11 +464,6 @@ void CChannelList::zapTo(int pos)
 		pos = 0;
 	}
 
-/*	if (!handleLockage( chanlist[pos]))
-	{
-		return;
-	}
-*/
 	selected= pos;
 	CChannel* chan = chanlist[selected];
 	lastChList.store (selected);

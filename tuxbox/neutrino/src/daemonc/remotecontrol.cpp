@@ -38,7 +38,9 @@ CRemoteControl::CRemoteControl()
 {
 	current_onid_sid = 0;
 	current_sub_onid_sid = 0;
+
 	zap_completion_timeout = 0;
+
 	current_EPGid= 0;
 	next_EPGid= 0;
 	memset(&current_PIDs.PIDs, 0, sizeof(current_PIDs.PIDs) );
@@ -53,6 +55,7 @@ int CRemoteControl::handleMsg(uint msg, uint data)
 {
 	if ( zap_completion_timeout != 0 )
 	{
+		// warte auf Meldung vom ZAPIT
     	if ( ( msg == NeutrinoMessages::EVT_ZAP_COMPLETE ) ||
     		 ( msg == NeutrinoMessages:: EVT_ZAP_FAILED ) ||
     		 ( msg == NeutrinoMessages:: EVT_ZAP_ISNVOD ) )
@@ -60,6 +63,8 @@ int CRemoteControl::handleMsg(uint msg, uint data)
 			if ( data != current_onid_sid )
 			{
 				g_Zapit->zapTo_serviceID_NOWAIT( current_onid_sid );
+				g_Sectionsd->setServiceChanged( current_onid_sid, false );
+
 				zap_completion_timeout = getcurrenttime() + 2 * (long long) 1000000;
 
 				return messages_return::handled;
@@ -68,6 +73,53 @@ int CRemoteControl::handleMsg(uint msg, uint data)
 				zap_completion_timeout = 0;
 		}
 	}
+	else
+	{
+        if ( ( msg == NeutrinoMessages::EVT_ZAP_COMPLETE ) ||
+    		 ( msg == NeutrinoMessages:: EVT_ZAP_FAILED ) ||
+    		 ( msg == NeutrinoMessages:: EVT_ZAP_ISNVOD ) )
+    	{
+    		// warte auf keine Meldung vom ZAPIT -> jemand anderer hat das zappen ausgelöst...
+    		if ( data != current_onid_sid )
+    		{
+    			current_onid_sid = data;
+				is_video_started= true;
+
+				current_EPGid = 0;
+				next_EPGid = 0;
+
+				memset(&current_PIDs.PIDs, 0, sizeof(current_PIDs.PIDs) );
+
+				current_PIDs.APIDs.clear();
+				has_ac3 = false;
+
+				subChannels.clear();
+				selected_subchannel = -1;
+				needs_nvods = ( msg == NeutrinoMessages:: EVT_ZAP_ISNVOD );
+
+				g_Sectionsd->setServiceChanged( current_onid_sid, true );
+				CNeutrinoApp::getInstance()->channelList->adjustToOnidSid( current_onid_sid );
+				if ( g_InfoViewer->is_visible )
+					g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR , 0 );
+			}
+    	}
+    	else
+	    if ( ( msg == NeutrinoMessages::EVT_ZAP_SUB_COMPLETE ) ||
+        	 ( msg == NeutrinoMessages:: EVT_ZAP_SUB_FAILED ) )
+        {
+    		if ( data != current_sub_onid_sid )
+    		{
+				current_sub_onid_sid = data;
+
+				for( int i= 0; i< subChannels.size(); i++)
+					if ( subChannels[i].onid_sid == data )
+					{
+						selected_subchannel = i;
+						break;
+					}
+			}
+        }
+    }
 
     if ( msg == NeutrinoMessages::EVT_CURRENTEPG )
 	{
@@ -164,7 +216,15 @@ int CRemoteControl::handleMsg(uint msg, uint data)
 		    needs_nvods = true;
 
 			if ( current_EPGid != 0)
+			{
 				getNVODs();
+				if ( subChannels.size() == 0 )
+					g_Sectionsd->setServiceChanged( current_onid_sid, true );
+			}
+			else
+				// EVENT anfordern!
+				g_Sectionsd->setServiceChanged( current_onid_sid, true );
+
 		}
 	    return messages_return::handled;
 	}
@@ -236,7 +296,7 @@ void CRemoteControl::getNVODs()
 
             if ( selected_subchannel == -1 )
             {
-            	// beim ersten Holen letzen NVOD-Kanal setzen!
+            	// beim ersten Holen letzten NVOD-Kanal setzen!
 				setSubChannel( subChannels.size()- 1 );
 			}
 			else
@@ -444,7 +504,10 @@ void CRemoteControl::zapTo_onid_sid( unsigned int onid_sid, string channame, boo
 	if ( zap_completion_timeout < now )
 	{
 		//printf("[remotecontrol]: doing zap to %x\n", onid_sid);
+
 		g_Zapit->zapTo_serviceID_NOWAIT( onid_sid );
+		g_Sectionsd->setServiceChanged( current_onid_sid, false );
+
 		zap_completion_timeout = now + 2 * (long long) 1000000;
 		if ( current_programm_timer != 0 )
 		{

@@ -101,8 +101,6 @@ class CInfoViewer
 		int	 	sec_timer_id;
 		int 	fadeTimer;
 
-		void getEPG( unsigned int onid_sid );
-
 		void show_Data( bool calledFromEvent = false );
 		void paintTime( bool show_dot, bool firstPaint );
 
@@ -113,6 +111,8 @@ class CInfoViewer
 		void showIcon_16_9();
 		void showIcon_VTXT();
 		void showRecordIcon( bool show );
+
+		void showFailure();
 	public:
 
 		bool	is_visible;
@@ -121,9 +121,9 @@ class CInfoViewer
 
 		void start();
 
-		void setRecordMode(bool active){recordModeActive=active;};
 		void showTitle( int ChanNum, string Channel, unsigned int onid_sid = 0, bool calledFromNumZap = false );
 		void killTitle();
+		sectionsd::CurrentNextInfo getEPG( unsigned int onid_sid );
 
 		int handleMsg(uint msg, uint data);
 };
