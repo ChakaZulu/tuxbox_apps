@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.31 2002/05/30 19:48:17 dirch Exp $
+	$Id: webdbox.cpp,v 1.32 2002/05/31 20:29:01 dirch Exp $
 
 	License: GPL
 
@@ -109,6 +109,7 @@ TWebDbox::TWebDbox(CWebserver *server)
 	TimerEventNames[CTimerEvent::TIMER_STANDBY] = "Standby";
 	TimerEventNames[CTimerEvent::TIMER_RECORD] = "Record";
 	TimerEventNames[CTimerEvent::TIMER_ZAPTO] = "Zapto";
+	TimerEventNames[CTimerEvent::TIMER_SLEEPTIMER] = "Sleeptimer";
 
 	TimerEventStateNames[CTimerEvent::TIMERSTATE_SCHEDULED]="wartet";
 	TimerEventStateNames[CTimerEvent::TIMERSTATE_PREANNOUNCE]="announced";

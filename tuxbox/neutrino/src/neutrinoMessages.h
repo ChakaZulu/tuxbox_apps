@@ -65,6 +65,7 @@ struct NeutrinoMessages {
 		RECORD_START =				CRCInput::RC_Messages + 11,
 		RECORD_STOP	=				CRCInput::RC_Messages + 12,
 		ANNOUNCE_SLEEPTIMER =		CRCInput::RC_Messages + 13,
+		SLEEPTIMER =				CRCInput::RC_Messages + 14,
 
 
 		EVT_VOLCHANGED 	= 			CRCInput::RC_Events + 1,

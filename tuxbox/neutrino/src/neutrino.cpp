@@ -1797,6 +1797,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_Timerd->registerEvent(CTimerdClient::EVT_RECORD_STOP, 222, NEUTRINO_UDS_NAME);
 	g_Timerd->registerEvent(CTimerdClient::EVT_ANNOUNCE_ZAPTO, 222, NEUTRINO_UDS_NAME);
 	g_Timerd->registerEvent(CTimerdClient::EVT_ZAPTO, 222, NEUTRINO_UDS_NAME);
+	g_Timerd->registerEvent(CTimerdClient::EVT_SLEEPTIMER, 222, NEUTRINO_UDS_NAME);
 	g_Timerd->registerEvent(CTimerdClient::EVT_ANNOUNCE_SLEEPTIMER, 222, NEUTRINO_UDS_NAME);
 
 	//ucodes testen
@@ -1842,35 +1843,39 @@ bool CNeutrinoApp::setExternalRecording(int nstreamstatus )
 	#ifdef USEACTIONLOG
 		g_ActionLog->println("setExternalRecording");
 	#endif
-	printf("setExternalRecording: %d\n",nstreamstatus);
-
-#define SA struct sockaddr
-#define SAI struct sockaddr_in
-
-	int port = 0;
-	sscanf(g_settings.network_streamingserverport, "%d", &port);
-
-	printf("streamstatus : %d\n", streamstatus);
-	printf("server: %s:%d\n",g_settings.network_streamingserver, port);
-
-	int sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	SAI servaddr;
-	memset(&servaddr,0,sizeof(servaddr));
-	servaddr.sin_family=AF_INET;
-	servaddr.sin_port=htons(port);
-	inet_pton(AF_INET, g_settings.network_streamingserver, &servaddr.sin_addr);
-
-	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
+	if(g_settings.network_streaming_use)
 	{
-		perror("[neutrino] -  cannot connect to streamingserver\n");
-		return false;
+		printf("setExternalRecording: %d\n",nstreamstatus);
+
+	#define SA struct sockaddr
+	#define SAI struct sockaddr_in
+
+		int port = 0;
+		sscanf(g_settings.network_streamingserverport, "%d", &port);
+
+		printf("streamstatus : %d\n", streamstatus);
+		printf("server: %s:%d\n",g_settings.network_streamingserver, port);
+
+		int sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+		SAI servaddr;
+		memset(&servaddr,0,sizeof(SAI));
+		servaddr.sin_family=AF_INET;
+		servaddr.sin_port=htons(port);
+		inet_pton(AF_INET, g_settings.network_streamingserver, &servaddr.sin_addr);
+
+
+		if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
+		{
+			perror("[neutrino] -  cannot connect to streamingserver\n");
+			return false;
+		}
+		externalCommand rmsg;
+		rmsg.version=1;
+		rmsg.command = nstreamstatus;
+		write(sock_fd, &rmsg, sizeof(rmsg));
+		close(sock_fd);
+		streamstatus = nstreamstatus;
 	}
-	externalCommand rmsg;
-	rmsg.version=1;
-	rmsg.command = nstreamstatus;
-	write(sock_fd, &rmsg, sizeof(rmsg));
-	close(sock_fd);
-	streamstatus = nstreamstatus;
 	return true;
 }
 
@@ -1915,7 +1920,15 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 		}
 		if ( msg == NeutrinoMessages::ANNOUNCE_SLEEPTIMER)
 		{
-			ShowHint ( "messagebox.info", "Sleeptimer löst gleich aus");
+			ShowHint ( "messagebox.info", g_Locale->getText("sleeptimerbox.announce") );
+		}
+		if ( msg == NeutrinoMessages::SLEEPTIMER)
+		{
+			printf("sleeptimer\n");
+			if(g_settings.shutdown_real)
+				ExitRun();
+			else
+				standbyMode( true );
 		}
 		else if ( msg == NeutrinoMessages::STANDBY_ON )
 		{
@@ -2645,7 +2658,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.287 2002/05/30 19:55:26 dirch Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.288 2002/05/31 20:33:29 dirch Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

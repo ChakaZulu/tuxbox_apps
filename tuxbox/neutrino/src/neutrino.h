@@ -48,7 +48,7 @@ using namespace std;
 
 #define widest_number "1"
 
-
+#define ANNOUNCETIME (1 * 60)
 
 /**************************************************************************************
 *                                                                                     *
