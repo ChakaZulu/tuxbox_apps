@@ -84,8 +84,8 @@ class CNeutrinoApp : public CMenuTarget
 {
 	enum
 	{
-		mode_tv = 0,
-		mode_radio = 1
+		mode_tv = 1,
+		mode_radio = 2
 	};
 
 	string				settingsFile;
@@ -137,12 +137,14 @@ class CNeutrinoApp : public CMenuTarget
 	void InitColorSettingsMenuColors(CMenuWidget &, CMenuWidget &);
 	void InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNotifier &audioSetupNotifier);
 	void InitColorSettings(CMenuWidget &);
+	void InitLanguageSettings(CMenuWidget &);
 	void InitColorThemesSettings(CMenuWidget &);
 	void InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_menuColors, CMenuWidget &);
 	void InitNetworkSettings(CMenuWidget &networkSettings, CNetworkSetupNotifier &networkSetupNotifier);
 	void InitScreenSettings(CMenuWidget &);
 	void InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNotifier &videoSetupNotifier);
-	void InitMainSettings(CMenuWidget &mainSettings, CMenuWidget &audioSettings, CMenuWidget &networkSettings, CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings);
+	void InitMainSettings(CMenuWidget &mainSettings, CMenuWidget &audioSettings, CMenuWidget &networkSettings,
+			CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings);
 	void ClearFrameBuffer();
 	void SetupFonts();
 	void SetupFrameBuffer();

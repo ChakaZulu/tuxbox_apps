@@ -1,7 +1,10 @@
 //
-// $Id: epgview.cpp,v 1.9 2001/09/14 16:18:46 field Exp $
+// $Id: epgview.cpp,v 1.10 2001/09/16 03:38:44 McClean Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.10  2001/09/16 03:38:44  McClean
+// i18n + small other fixes
+//
 // Revision 1.9  2001/09/14 16:18:46  field
 // Umstellung auf globale Variablen...
 //
@@ -149,14 +152,14 @@ void CEpgData::show( string channelName )
 	if(strlen(epgData.title)==0)
 	{
 		//no epg-data found :(
-		char *text = "no epg found";
+		char *text = (char*) g_Locale->getText("epgviewer.notfound").c_str();
 		int oy = 30;
 		int ox = g_Fonts->epg_info2->getRenderWidth(text)+30;
 		int sx = (((g_settings.screen_EndX- g_settings.screen_StartX)-ox) / 2) + g_settings.screen_StartX;
 		int sy = (((g_settings.screen_EndY- g_settings.screen_StartY)-oy) / 2) + g_settings.screen_StartY;
 		height = g_Fonts->epg_info2->getHeight();
-		g_FrameBuffer->paintBoxRel(sx, sy, ox, height+10, COL_MENUHEAD);
-		g_Fonts->epg_info2->RenderString(sx+15, sy+height+5, ox-15, text, COL_MENUHEAD);
+		g_FrameBuffer->paintBoxRel(sx, sy, ox, height+10, COL_MENUCONTENT);
+		g_Fonts->epg_info2->RenderString(sx+15, sy+height+5, ox-15, text, COL_MENUCONTENT);
 		g_RCInput->getKey(20);
 		g_FrameBuffer->paintBoxRel(sx, sy, ox, height+10, COL_BACKGROUND);
 		return;

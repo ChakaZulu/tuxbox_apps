@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.27 2001/09/16 02:27:22 McClean Exp $
+        $Id: neutrino.cpp,v 1.28 2001/09/16 03:38:44 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.28  2001/09/16 03:38:44  McClean
+  i18n + small other fixes
+
   Revision 1.27  2001/09/16 02:27:22  McClean
   make neutrino i18n
 
@@ -246,7 +249,7 @@ CNeutrinoApp::CNeutrinoApp()
     g_FrameBuffer = new CFrameBuffer;
 	g_FrameBuffer->setIconBasePath("/usr/lib/icons/");
 	settingsFile = "/var/neutrino.conf";
-	mode = mode_tv;
+	mode = 0;
 }
 
 /*-------------------------------------------------------------------------------------
@@ -410,6 +413,9 @@ void CNeutrinoApp::setupColors_classic()
 **************************************************************************************/
 void CNeutrinoApp::setupDefaults()
 {
+	//language
+	g_settings.language = 0;
+
 	//video
 	g_settings.video_Signal = 0;
 	g_settings.video_Format = 0;
@@ -761,14 +767,14 @@ void CNeutrinoApp::ClearFrameBuffer()
 }
 
 void CNeutrinoApp::InitMainSettings(CMenuWidget &mainSettings, CMenuWidget &audioSettings, CMenuWidget &networkSettings,
-				     CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings)
+				     CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings)
 {
 	mainSettings.addItem( new CMenuSeparator() );
 	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, g_Locale->getText("mainmenu.runmode")) );
 	mainSettings.addItem( new CMenuForwarder(g_Locale->getText("mainmenu.shutdown"), true, "", this, "shutdown") );
 	mainSettings.addItem( new CMenuForwarder(g_Locale->getText("mainmenu.tvmode"), true, "", this, "tv"), true );
 	mainSettings.addItem( new CMenuForwarder(g_Locale->getText("mainmenu.radiomode"), (zapit), "", this, "radio") );
-	mainSettings.addItem( new CMenuForwarder(g_Locale->getText("mainmenu.mp3player"), false, "", this, "mp3") );
+	//mainSettings.addItem( new CMenuForwarder(g_Locale->getText("mainmenu.mp3player"), false, "", this, "mp3") );
 	mainSettings.addItem( new CMenuForwarder(g_Locale->getText("mainmenu.splayback"), false, "", this, "playback") );
 
 	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING,g_Locale->getText("mainmenu.info")) );
@@ -776,13 +782,24 @@ void CNeutrinoApp::InitMainSettings(CMenuWidget &mainSettings, CMenuWidget &audi
 	mainSettings.addItem( new CMenuForwarder(g_Locale->getText("mainmenu.streaminfo"), true, "", g_StreamInfo ) );
 
 	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, g_Locale->getText("mainmenu.settings")) );
-	mainSettings.addItem( new CMenuForwarder("Video", true, "", &videoSettings) );
-
+	mainSettings.addItem( new CMenuForwarder(g_Locale->getText("mainmenu.language"), true, "", &languageSettings ) );
+	mainSettings.addItem( new CMenuForwarder(g_Locale->getText("mainmenu.video"), true, "", &videoSettings) );
 	mainSettings.addItem( new CMenuForwarder(g_Locale->getText("mainmenu.screensetup"), true, "", g_ScreenSetup ) );
 	mainSettings.addItem( new CMenuForwarder(g_Locale->getText("mainmenu.audio"), true, "", &audioSettings) );
 	mainSettings.addItem( new CMenuForwarder(g_Locale->getText("mainmenu.network"), true, "", &networkSettings) );
 	mainSettings.addItem( new CMenuForwarder(g_Locale->getText("mainmenu.colors"), true,"", &colorSettings) );
 	mainSettings.addItem( new CMenuForwarder(g_Locale->getText("mainmenu.keybinding"), true,"", &keySettings) );
+}
+
+void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
+{
+	languageSettings.addItem( new CMenuSeparator() );
+	languageSettings.addItem( new CMenuForwarder(g_Locale->getText("menu.back")) );
+	languageSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	CMenuOptionChooser* oj = new CMenuOptionChooser(g_Locale->getText("languagesetup.select"), &g_settings.language, true);
+		oj->addOption(0, g_Locale->getText("options.off"));
+		oj->addOption(1, g_Locale->getText("options.on"));
+	languageSettings.addItem( oj );
 }
 
 void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNotifier &audioSetupNotifier)
@@ -1078,6 +1095,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	//Main settings
 	CMenuWidget mainSettings(g_Locale->getText("mainmenu.head"), "settings.raw");
+	CMenuWidget languageSettings(g_Locale->getText("languagesetup.head"), "settings.raw");
 	CMenuWidget videoSettings(g_Locale->getText("videomenu.head"), "video.raw");
 	CMenuWidget audioSettings(g_Locale->getText("audiomenu.head"), "audio.raw");
 	CMenuWidget networkSettings(g_Locale->getText("networkmenu.head"), "settings.raw");
@@ -1085,8 +1103,11 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget keySettings(g_Locale->getText("keybindingmenu.head"), "settings.raw");
 //	CMenuWidget screenSettings("",fonts,"");
 
-	InitMainSettings(mainSettings, audioSettings, networkSettings, colorSettings, keySettings, videoSettings);
+	InitMainSettings(mainSettings, audioSettings, networkSettings, colorSettings, keySettings, videoSettings, languageSettings);
 
+	//language Setup
+	InitLanguageSettings(languageSettings);
+	
 	//audio Setup
 	InitAudioSettings(audioSettings, audioSetupNotifier);
 
@@ -1194,6 +1215,10 @@ void CNeutrinoApp::setVolume(int key)
 
 void CNeutrinoApp::tvMode()
 {
+	if(mode==mode_tv)
+	{
+		return;
+	}
 	mode = mode_tv;
 
 	memset(g_FrameBuffer->lfb, 255, g_FrameBuffer->Stride()*576);
@@ -1209,6 +1234,10 @@ void CNeutrinoApp::tvMode()
 
 void CNeutrinoApp::radioMode()
 {
+	if(mode==mode_radio)
+	{
+		return;
+	}
 	mode = mode_radio;
 
 	g_FrameBuffer->loadPal("dboxradio.pal", 18, 199);
