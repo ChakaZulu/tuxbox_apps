@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.80 2001/11/23 13:48:35 faralla Exp $
+        $Id: neutrino.cpp,v 1.81 2001/11/23 16:58:41 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.81  2001/11/23 16:58:41  McClean
+  update-functions
+
   Revision 1.80  2001/11/23 13:48:35  faralla
   check if card fits camalpha.bin
 
@@ -344,12 +347,12 @@ void CNeutrinoApp::setupColors_neutrino()
 
 	g_settings.menu_Head_Text_alpha = 0x00;
 	g_settings.menu_Head_Text_red   = 0x5f;
-	g_settings.menu_Head_Text_green = 0x41;
+	g_settings.menu_Head_Text_green = 0x46;
 	g_settings.menu_Head_Text_blue  = 0x00;
 
 	g_settings.menu_Content_alpha = 0x14;
 	g_settings.menu_Content_red   = 0x00;
-	g_settings.menu_Content_green = 0x14;
+	g_settings.menu_Content_green = 0x0f;
 	g_settings.menu_Content_blue  = 0x23;
 
 	g_settings.menu_Content_Text_alpha = 0x00;
@@ -359,7 +362,7 @@ void CNeutrinoApp::setupColors_neutrino()
 
 	g_settings.menu_Content_Selected_alpha = 0x14;
 	g_settings.menu_Content_Selected_red   = 0x19;
-	g_settings.menu_Content_Selected_green = 0x3c;
+	g_settings.menu_Content_Selected_green = 0x37;
 	g_settings.menu_Content_Selected_blue  = 0x64;
 
 	g_settings.menu_Content_Selected_Text_alpha  = 0x00;
@@ -369,7 +372,7 @@ void CNeutrinoApp::setupColors_neutrino()
 
 	g_settings.menu_Content_inactive_alpha = 0x14;
 	g_settings.menu_Content_inactive_red   = 0x00;
-	g_settings.menu_Content_inactive_green = 0x14;
+	g_settings.menu_Content_inactive_green = 0x0f;
 	g_settings.menu_Content_inactive_blue  = 0x23;
 
 	g_settings.menu_Content_inactive_Text_alpha  = 0x00;
@@ -379,7 +382,7 @@ void CNeutrinoApp::setupColors_neutrino()
 
 	g_settings.infobar_alpha = 0x14;
 	g_settings.infobar_red   = 0x00;
-	g_settings.infobar_green = 0x14;
+	g_settings.infobar_green = 0x0e;
 	g_settings.infobar_blue  = 0x23;
 
 	g_settings.infobar_Text_alpha = 0x00;
@@ -498,6 +501,10 @@ void CNeutrinoApp::setupDefaults()
 	g_settings.screen_StartY=23;
 	g_settings.screen_EndX=668;
 	g_settings.screen_EndY=555;
+
+	//Soft-Update
+	g_settings.softupdate_mode=1; //internet
+
 }
 
 
@@ -892,19 +899,23 @@ void CNeutrinoApp::channelsInit()
 
 void CNeutrinoApp::CmdParser(int argc, char **argv)
 {
-	if (argc > 1) {
-		if (! strcmp(argv[1], "-z")) {
+ 	zapit = false;
+
+	for(int x=1; x<argc; x++)
+	{
+		if (! strcmp(argv[x], "-z")) {
 			printf("Using zapit\n");
 			zapit = true;
 		}
+		else if (! strcmp(argv[x], "-su"))
+		{
+			printf("Software update enabled\n");
+			softupdate = true;
+		}
 		else {
-			printf("Usage: neutrino [-z]\n");
+			printf("Usage: neutrino [-z] [-su]\n");
 			exit(0);
 		}
-	}
-	else {
-		printf("Using nstreamzapd\n");
-	 	zapit = false;
 	}
 }
 
@@ -1015,6 +1026,49 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainSettings.addItem( new CMenuForwarder("mainsettings.colors", true,"", &colorSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.keybinding", true,"", &keySettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.misc", true, "", &miscSettings ) );
+	if (softupdate)
+	{
+		printf("init soft-update-stuff\n");
+		CMenuWidget* updateSettings = new CMenuWidget("mainsettings.update", "mainmenue.raw");
+		updateSettings->addItem( new CMenuSeparator() );
+		updateSettings->addItem( new CMenuForwarder("menu.back") );
+		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+		
+		//get current flash-version
+		FILE* fd = fopen("/var/etc/version", "r");
+		strcpy(g_settings.softupdate_currentversion, "1.0.0");
+
+		if(!fd)
+		{
+			perror("cannot read flash-versioninfo");
+		}
+		else
+		{
+			if(fgets(g_settings.softupdate_currentversion,90,fd)==NULL)
+			fclose(fd);
+			for (unsigned int x=0;x<strlen(g_settings.softupdate_currentversion);x++)
+			{
+				if( (g_settings.softupdate_currentversion[x]!='.') && ((g_settings.softupdate_currentversion[x]>'9') || (g_settings.softupdate_currentversion[x]<'0') ) )
+				{
+					g_settings.softupdate_currentversion[x]=0;
+				}
+			}
+		}
+		printf("current flash-version: %s\n", g_settings.softupdate_currentversion);
+
+		updateSettings->addItem( new CMenuForwarder("flashupdate.currentversion", false, (char*) &g_settings.softupdate_currentversion, NULL ));
+
+		CMenuOptionChooser *oj = new CMenuOptionChooser("flashupdate.updatemode", &g_settings.softupdate_mode,true);
+			oj->addOption(0, "flashupdate.updatemode_manual");
+			oj->addOption(1, "flashupdate.updatemode_internet");
+		updateSettings->addItem( oj );
+		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+		updateSettings->addItem( new CMenuForwarder("flashupdate.checkupdate", true, "", g_Update ) );		
+
+		mainSettings.addItem( new CMenuForwarder("mainsettings.update", true, "", updateSettings ) );		
+		printf("ready - soft-update-stuff\n");
+	}
+
 }
 
 
@@ -1665,6 +1719,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_UcodeCheck = new CUCodeCheck;
     g_ScreenSetup = new CScreenSetup;
     g_EventList = new EventList;
+	g_Update = new CFlashUpdate;
 
 
 //    printf("\nCNeutrinoApp::run - objects initialized...\n\n");
@@ -1909,7 +1964,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.80 2001/11/23 13:48:35 faralla Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.81 2001/11/23 16:58:41 McClean Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;

@@ -203,4 +203,17 @@ flashupdate.programmingflash programmiere Flash
 flashupdate.cantopenmtd kann das MTD-Device nicht öffen
 flashupdate.ready fertig
 flashupdate.reboot Bitte restarten sie ihre DBox
+flashupdate.updatemode Updatemodus
+flashupdate.updatemode_manual manuell (ftp)
+flashupdate.updatemode_internet internet
+flashupdate.currentversion Installierte Version
+flashupdate.checkupdate nach neuer Version suchen
+flashupdate.versioncheck Versionsüberprüfung
+flashupdate.majorversiondiffer1 Die Hauptversion weicht ab
+flashupdate.majorversiondiffer2 Bitte neues Image installieren
+flashupdate.providerversiondiffer1 Die ProviderID weicht ab
+flashupdate.providerversiondiffer2 Bitte neues Image installieren
+flashupdate.nonewversion1 keine neue Version verfügbar
+flashupdate.nonewversion2   
+flashupdate.md5sumerror Das Image ist fehlerhaft
 

@@ -126,6 +126,10 @@ struct SNeutrinoSettings
 	int	screen_StartY;
 	int	screen_EndX;
 	int	screen_EndY;
+
+	//Software-update
+	int softupdate_mode;
+	char softupdate_currentversion[20];
 };
 
 #endif

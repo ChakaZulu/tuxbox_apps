@@ -206,3 +206,29 @@ flashupdate.programmingflash programming flash
 flashupdate.cantopenmtd can't open mtd-device
 flashupdate.ready ready
 flashupdate.reboot Please reboot your DBox
+flashupdate.updatemode Updatemode
+flashupdate.updatemode_manual manual (ftp)
+flashupdate.updatemode_internet internet
+flashupdate.currentversion Current version
+flashupdate.checkupdate search for new version
+flashupdate.versioncheck checking version
+flashupdate.majorversiondiffer1 the major version differs
+flashupdate.majorversiondiffer2 please install new flashimage
+flashupdate.providerversiondiffer1 the provider id differs
+flashupdate.providerversiondiffer2 please install new flashimage
+flashupdate.nonewversion1 no new version available
+flashupdate.nonewversion2   
+flashupdate.md5sumerror image has errors
+flashupdate.updatemode Updatemode
+flashupdate.updatemode_manual manual (ftp)
+flashupdate.updatemode_internet internet
+flashupdate.currentversion Current version
+flashupdate.checkupdate search for new version
+flashupdate.versioncheck checking version
+flashupdate.majorversiondiffer1 the major version differs
+flashupdate.majorversiondiffer2 please install new flashimage
+flashupdate.providerversiondiffer1 the provider id differs
+flashupdate.providerversiondiffer2 please install new flashimage
+flashupdate.nonewversion1 no new version available
+flashupdate.nonewversion2   
+flashupdate.md5sumerror image has errors

@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.31 2001/11/23 13:47:37 faralla Exp $
+//  $Id: neutrino.h,v 1.32 2001/11/23 16:58:41 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.32  2001/11/23 16:58:41  McClean
+//  update-functions
+//
 //  Revision 1.31  2001/11/23 13:47:37  faralla
 //  check if card fits camalpha.bin
 //
@@ -160,6 +163,7 @@ class CNeutrinoApp : public CMenuTarget
 	bool				nRun;
 	int				    mode;
 	bool				mute;
+	bool				softupdate;
 
     channel_msg         firstchannel;
 	st_rmsg				sendmessage;
