@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.77 2001/11/19 22:53:33 Simplex Exp $
+        $Id: neutrino.cpp,v 1.78 2001/11/20 23:23:10 Simplex Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.78  2001/11/20 23:23:10  Simplex
+  Fix for unassigned bouquetList
+
   Revision 1.77  2001/11/19 22:53:33  Simplex
   Neutrino can handle bouquets now.
   There are surely some bugs and todo's but it works :)
@@ -1404,7 +1407,8 @@ void CNeutrinoApp::InitZapper()
 		channelList->zapTo(0);
         mode = mode_tv;
     }
-	bouquetList->adjustToChannel( channelList->getActiveChannelNumber());
+	if (bouquetList!=NULL)
+		bouquetList->adjustToChannel( channelList->getActiveChannelNumber());
 }
 
 void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
@@ -1437,16 +1441,16 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 //				TODO: get Value from options, whether to show bouquetlist
 //				or channellist
 
-				if (bouquetList->Bouquets.size() == 0 )
+				if ((bouquetList!=NULL) && (bouquetList->Bouquets.size() == 0 ))
 				{
 					printf("bouquets are empty\n");
 					bouqMode = bsmAllChannels;
                 }
-				if (bouqMode == bsmBouquets)
+				if ((bouquetList!=NULL) && (bouqMode == bsmBouquets))
 				{
 					bouquetList->exec(true);
 				}
-				else if (bouqMode == bsmChannels)
+				else if ((bouquetList!=NULL) && (bouqMode == bsmChannels))
 				{
 					int nNewChannel = bouquetList->Bouquets[bouquetList->getActiveBouquetNumber()]->channelList->show();
 					if (nNewChannel>-1)
@@ -1460,7 +1464,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 					channelList->exec();
 				}
 			}
-			else if (key==CRCInput::RC_right)
+			else if ((key==CRCInput::RC_right) && (bouquetList!=NULL))
 			{
 				if (bouquetList->Bouquets.size() > 0)
 				{
@@ -1471,7 +1475,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 
 				}
 			}
-			else if (key==CRCInput::RC_left)
+			else if ((key==CRCInput::RC_left) && (bouquetList!=NULL))
 			{
 				if (bouquetList->Bouquets.size() > 0)
 				{
@@ -1502,7 +1506,8 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			{
 				//quickzap
 				channelList->quickZap( key );
-				bouquetList->adjustToChannel( channelList->getActiveChannelNumber());
+				if (bouquetList!=NULL)
+					bouquetList->adjustToChannel( channelList->getActiveChannelNumber());
 			}
 			else if (key==CRCInput::RC_help)
 			{	//epg
@@ -1524,7 +1529,8 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			else if ((key>=0) && (key<=9))
 			{ //numeric zap
 				channelList->numericZap( key );
-				bouquetList->adjustToChannel( channelList->getActiveChannelNumber());
+				if (bouquetList!=NULL)
+					bouquetList->adjustToChannel( channelList->getActiveChannelNumber());
 			}
 			else if (key==CRCInput::RC_spkr)
 			{	//mute
@@ -1830,7 +1836,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.77 2001/11/19 22:53:33 Simplex Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.78 2001/11/20 23:23:10 Simplex Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;
