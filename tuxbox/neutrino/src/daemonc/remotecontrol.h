@@ -33,14 +33,10 @@
 #ifndef __remotecontrol__
 #define __remotecontrol__
 
+#include <zapit/client/zapittypes.h>
+
 #include <vector>
-#include <set>
 #include <string>
-
-#include <zapit/client/zapitclient.h>
-
-
-using namespace std;
 
 struct st_rmsg
 {
@@ -54,7 +50,7 @@ struct st_rmsg
 class CSubService
 {
 public:
-	CSubService(const t_service_id &aservice_id, const t_transport_stream_id &atransport_stream_id, const t_original_network_id &aoriginal_network_id, const string &asubservice_name)
+	CSubService(const t_service_id &aservice_id, const t_transport_stream_id &atransport_stream_id, const t_original_network_id &aoriginal_network_id, const std::string &asubservice_name)
 	{
 		original_network_id = aoriginal_network_id;
 		service_id          = aservice_id;
@@ -78,7 +74,7 @@ public:
 	t_original_network_id original_network_id;
 	time_t                startzeit;
 	unsigned              dauer;
-	string                subservice_name;
+	std::string           subservice_name;
 };
 
 typedef std::vector<CSubService> CSubServiceListSorted;
@@ -86,18 +82,18 @@ typedef std::vector<CSubService> CSubServiceListSorted;
 class CRemoteControl
 {
 	unsigned int            current_programm_timer;
-	unsigned long long         zap_completion_timeout;
+	unsigned long long      zap_completion_timeout;
+	std::string             current_channel_name;
+	t_channel_id            current_sub_channel_id;
 
 	void getNVODs();
 	void getSubChannels();
 	void copySubChannelsToZapit();
 
 public:
-	string               current_channel_name;
 	t_channel_id            current_channel_id;
-	t_channel_id            current_sub_channel_id;
-	unsigned long long         current_EPGid;
-	unsigned long long         next_EPGid;
+	unsigned long long      current_EPGid;
+	unsigned long long      next_EPGid;
 	CZapitClient::responseGetPIDs    current_PIDs;
 
 	// APID - Details
@@ -116,15 +112,15 @@ public:
 	unsigned int            zapCount;
 
 	CRemoteControl();
-	void zapTo_ChannelID(const t_channel_id channel_id, string channame, bool start_video = true );
+	void zapTo_ChannelID(const t_channel_id channel_id, const std::string channame, const bool start_video = true);
 	void startvideo();
 	void stopvideo();
 	void queryAPIDs();
 	void setAPID(uint APID);
 	void processAPIDnames();
-	string setSubChannel(unsigned numSub, bool force_zap = false );
-	string subChannelUp();
-	string subChannelDown();
+	std::string setSubChannel(unsigned numSub, bool force_zap = false );
+	std::string subChannelUp();
+	std::string subChannelDown();
 
 	void radioMode();
 	void tvMode();

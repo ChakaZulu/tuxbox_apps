@@ -223,7 +223,7 @@ int CRemoteControl::handleMsg(uint msg, uint data)
 		if ( data == current_channel_id )
 		{
 		    needs_nvods = true;
-			CLCD::getInstance()->showServicename(string("["+current_channel_name+"]"));
+			CLCD::getInstance()->showServicename(std::string("["+current_channel_name+"]"));
 			if ( current_EPGid != 0)
 			{
 				getNVODs();
@@ -437,7 +437,7 @@ void CRemoteControl::setAPID( uint APID )
 	#endif
 }
 
-string CRemoteControl::setSubChannel(unsigned numSub, bool force_zap )
+std::string CRemoteControl::setSubChannel(unsigned numSub, bool force_zap )
 {
 	if ((numSub < 0) || (numSub >= subChannels.size()))
 		return "";
@@ -453,7 +453,7 @@ string CRemoteControl::setSubChannel(unsigned numSub, bool force_zap )
 
 	g_Zapit->zapTo_subServiceID_NOWAIT( current_sub_channel_id );
 
-	string perspectiveName = subChannels[numSub].subservice_name;
+	std::string perspectiveName = subChannels[numSub].subservice_name;
 
 	#ifdef USEACTIONLOG
 		char buf[1000];
@@ -474,12 +474,12 @@ string CRemoteControl::setSubChannel(unsigned numSub, bool force_zap )
 	return perspectiveName;
 }
 
-string CRemoteControl::subChannelUp()
+std::string CRemoteControl::subChannelUp()
 {
 	return setSubChannel( (selected_subchannel + 1) % subChannels.size());
 }
 
-string CRemoteControl::subChannelDown()
+std::string CRemoteControl::subChannelDown()
 {
 	if (selected_subchannel == 0 )
 	{
@@ -491,7 +491,7 @@ string CRemoteControl::subChannelDown()
 	}
 }
 
-void CRemoteControl::zapTo_ChannelID(t_channel_id channel_id, string channame, bool start_video )
+void CRemoteControl::zapTo_ChannelID(const t_channel_id channel_id, const std::string channame, const bool start_video)
 {
 	current_channel_id = channel_id;
 	current_channel_name = channame;
