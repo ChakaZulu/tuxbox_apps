@@ -362,7 +362,7 @@ int main(int argc, char **argv) {
       draw_signal(&signal_quality,&old_signal,screen);
       draw_screen(screen,lcd_fd);
     }
-    printf("%s %d %d %d [%c%c]\n",network_name,signal_quality.ber,signal_quality.snr,signal_quality.strength,signal_quality.status&FE_HAS_SIGNAL? 'S':' ',signal_quality.status&FE_HAS_LOCK? 'L':' ');
+    printf("%s %u %u %u [%c%c]\n",network_name,signal_quality.ber,signal_quality.snr,signal_quality.strength,signal_quality.status&FE_HAS_SIGNAL? 'S':' ',signal_quality.status&FE_HAS_LOCK? 'L':' ');
   }
 
   /* close devices */
