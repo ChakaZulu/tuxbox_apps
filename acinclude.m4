@@ -18,7 +18,7 @@ AC_ARG_WITH(debug,
 	[DEBUG="$withval"],[DEBUG="yes"])
 
 if test "$DEBUG" = "yes"; then
-	DEBUG_CFLAGS="-g3"
+	DEBUG_CFLAGS="-g3 -ggdb"
 	AC_DEFINE(DEBUG,1,[Enable debug messages])
 fi
 
