@@ -496,6 +496,7 @@ void	BoardInitialize( void )
 	score=0;
 	puz_x = 6;
 	puz_y = 0;
+	level = 1;
 }
 
 void	DrawGameOver( void )
