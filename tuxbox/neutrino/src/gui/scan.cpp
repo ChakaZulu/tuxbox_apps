@@ -69,7 +69,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 	CNeutrinoApp::getInstance()->getScanSettings().toSatList( satList);
 	g_Zapit->setScanSatelliteList( satList);
 
-	g_Zapit->startScan();
+	bool finish = !(g_Zapit->startScan());
 
 	paint();
 
@@ -91,7 +91,6 @@ int CScanTs::exec(CMenuTarget* parent, string)
 
 	frameBuffer->loadPal("radar.pal", 17, 37);
 	int pos = 0;
-	bool finish = false;
 
 	ypos= y+ hheight + (mheight >>1);
 
@@ -154,7 +153,6 @@ int CScanTs::exec(CMenuTarget* parent, string)
 
 
 	hide();
-//	g_RCInput->postMsg( NeutrinoMessages::EVT_SERVICESCHANGED, 0 );  // instead: NeutrinoMessages::EVT_BOUQUETSCHANGED send by zapit
 	g_Zapit->reinitChannels();  // reload services & bouquets
 	g_Sectionsd->setPauseScanning( false );
 	ShowMsg ( "messagebox.info", g_Locale->getText("scants.finished"), CMessageBox::mbBack, CMessageBox::mbBack, "info.raw" );
