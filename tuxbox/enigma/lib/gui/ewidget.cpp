@@ -564,7 +564,6 @@ int eWidget::setProperty(const QString &prop, const QString &value)
 		{
 			e[0]=parent->clientrect.width();
 			e[1]=parent->clientrect.height();
-			qDebug("e(pos) is %d, %d", e[0], e[1]);
 		}
 		int err=parse(value, v, e, 2);
 		if (err)
@@ -578,7 +577,6 @@ int eWidget::setProperty(const QString &prop, const QString &value)
 		{
 			e[0]=parent->clientrect.width();
 			e[1]=parent->clientrect.height();
-			qDebug("e(size) is %d, %d", e[0], e[1]);
 		}
 		int err=parse(value, v, e, 2);
 		if (err)
