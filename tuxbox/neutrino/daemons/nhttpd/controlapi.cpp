@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.6 2002/10/07 18:44:19 dirch Exp $
+	$Id: controlapi.cpp,v 1.7 2002/10/10 15:44:14 dirch Exp $
 
 	License: GPL
 
@@ -200,7 +200,7 @@ bool CControlAPI::StandbyCGI(CWebserverRequest *request)
 }
 //-------------------------------------------------------------------------
 
-bool CControlAPI::GetTimeCGI(CWebserverRequest *request)
+bool CControlAPI::GetDateCGI(CWebserverRequest *request)
 {
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
 	if (request->ParameterList.size()==0)
@@ -221,7 +221,7 @@ bool CControlAPI::GetTimeCGI(CWebserverRequest *request)
 }
 //-------------------------------------------------------------------------
 
-bool CControlAPI::GetDateCGI(CWebserverRequest *request)
+bool CControlAPI::GetTimeCGI(CWebserverRequest *request)
 {
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
 	if (request->ParameterList.size()==0)
