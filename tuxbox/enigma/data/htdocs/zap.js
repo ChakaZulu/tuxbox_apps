@@ -1,55 +1,63 @@
 function zapBouquetKeyUp()
 {
-	var key = window.event.keyCode;
-	if (key == 33 || key == 38)
+	switch(window.event.keyCode)
 	{
-		bouquetBackward();
-		document.channelselector.bouquet.focus();
+		case 33:
+		case 38:
+			bouquetBackward();
+			document.channelselector.bouquet.focus();
+			break;
+		case 34:
+		case 40:
+			bouquetForward();
+			document.channelselector.bouquet.focus();
+			break;
+		case 39:
+			document.channelselector.channel.focus();
+			break;
+		default:
 	}
-	else
-	if (key == 34 || key == 40)
-	{
-		bouquetForward();
-		document.channelselector.bouquet.focus();
-	}
-	else 
-	if (key == 39)
-		document.channelselector.channel.focus();
 }
 function zapChannelKeyUp()
 {
-	var key = window.event.keyCode;
-	if (key == 13)
-		channelChange();
-	else
-	if (key == 37)
-		document.channelselector.bouquet.focus();
-	else
-	if (key == 38)
+	switch(window.event.keyCode)
 	{
-		if ((document.channelselector.channel.selectedIndex == 0) && (autoBouquetChange == 1))
-		{
-			if (currentChannel == 0)
-				bouquetBackward();
-		}
-		channelChange();
+		case 13:
+			channelChange();
+			break;
+		case 37:
+			document.channelselector.bouquet.focus();
+			break;
+		case 38:
+			if (document.channelselector.channel.selectedIndex == 0)
+			{
+				if (autoBouquetChange == 0)
+					document.channelselector.channel.selectedIndex = channels[currentBouquet].length - 1;
+				else
+					if (currentChannel == 0)
+						bouquetBackward();
+			}
+			channelChange();
+			break;
+		case 40:
+			if (document.channelselector.channel.selectedIndex >= channels[currentBouquet].length - 1)
+			{
+				if (autoBouquetChange == 0)
+					document.channelselector.channel.selectedIndex = 0;
+				else
+					if (currentChannel == channels[currentBouquet].length - 1)
+						bouquetForward();
+			}
+			channelChange();
+			break;
+		case 33:
+			bouquetBackward();
+			break;
+		case 34:
+			bouquetForward();
+			break;
+		default:
 	}
-	else
-	if (key == 40)
-	{
-		if ((document.channelselector.channel.selectedIndex >= channels[currentBouquet].length - 1) && (autoBouquetChange == 1))
-		{
-			if (currentChannel == channels[currentBouquet].length - 1)
-				bouquetForward();
-		}
-		channelChange();
-	}
-	else
-	if (key == 33)
-		bouquetBackward();
-	else
-	if (key == 34)
-		bouquetForward();
 }
 function zapHeaderReload()
 {
@@ -62,7 +70,6 @@ function channelChange()
 	if (currentChannel >= 0)
 	{
 		var channel = document.channelselector.channel.options[currentChannel].value;
-		currentBouquet = document.channelselector.bouquet.selectedIndex;
 		switchChannel(channel, currentBouquet, currentChannel);
 	}
 }
@@ -70,7 +77,10 @@ function zapChannelForward()
 {
 	currentChannel = currentChannel + 1;
 	if (currentChannel >= channels[currentBouquet].length)
-		currentChannel = 0;
+		if (autoBouquetChange == 0)
+			currentChannel = 0;
+		else
+			bouquetForward();
 	document.channelselector.channel.selectedIndex = currentChannel;
 	var channel = document.channelselector.channel.options[currentChannel].value;
 	switchChannel(channel, currentBouquet, currentChannel);
@@ -88,7 +98,10 @@ function zapChannelBackward()
 {
 	currentChannel = currentChannel - 1;
 	if (currentChannel < 0)
-		currentChannel = channels[currentBouquet].length - 1;
+		if (autoBouquetChange == 0)
+			currentChannel = channels[currentBouquet].length - 1;
+		else
+			bouquetBackward();
 	document.channelselector.channel.selectedIndex = currentChannel;
 	var channel = document.channelselector.channel.options[currentChannel].value;
 	switchChannel(channel, currentBouquet, currentChannel);
@@ -114,17 +127,13 @@ function epg()
 {
 	var selChannel = document.channelselector.channel.selectedIndex;
 	if (selChannel >= 0)
-	{
-		var channel = document.channelselector.channel.options[selChannel].value;
-		openEPG(channel);
-	}
+		openEPG(document.channelselector.channel.options[selChannel].value);
 	else
 		alert("No Channel selected");
 }
 function mepg()
 {
-	var bouquet = document.channelselector.bouquet.options[currentBouquet].value;
-	openMultiEPG(bouquet);
+	openMultiEPG(document.channelselector.bouquet.options[currentBouquet].value);
 }
 function loadChannels(bouquet, channel)
 {
@@ -145,7 +154,7 @@ function deleteChannelOptions()
 {
 	var j = document.channelselector.channel.options.length;
 	for (var i = j - 1 ; i >= 0; i--)
-		document.channelselector.channel.options[i] = null;
+		delete document.channelselector.channel.options[i];
 }
 function loadBouquets(bouquet)
 {
