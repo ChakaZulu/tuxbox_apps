@@ -48,6 +48,7 @@
 using namespace std;
 
 #define TEMPLATE_DIR DATADIR+eString("/enigma/templates/")
+#define HTDOCS_DIR DATADIR+eString("/enigma/htdocs/")
 #define CHARSETMETA "<META http-equiv=Content-Type content=\"text/html; charset=UTF-8\">\n"
 
 #define BLUE "#12259E"
@@ -813,6 +814,8 @@ static eString getLeftNavi(eString mode, eString path)
 		result += button(110, "Harddisk", LEFTNAVICOLOR, "?path=;2:47:0:0:0:0:%2fhdd%2f");
 		result += "<br>";
 		result += button(110, "Recordings", LEFTNAVICOLOR, "?path=;4097:7:0:1:0:0:0:0:0:0:");
+		result += "<br>";
+		result += button(110, "Bouquets", LEFTNAVICOLOR, "?path=;4097:7:0:6:0:0:0:0:0:0:");
 #endif
 	}
 	else
@@ -1401,12 +1404,12 @@ public:
 		}
 #endif
 		eString serviceRef = ref2string(e);
-		
-		result1 += "\"" + serviceRef + "\",";
+
+		result1 += "\"" + serviceRef + "\", ";
 		eService *service = iface.addRef(e);
 		if (service)
 		{
-			result2 += "\"" + filter_string(service->service_name) + "\",";
+			result2 += "\"" + filter_string(service->service_name) + "\", ";
 			iface.removeRef(e);
 		}
 	}
@@ -1460,6 +1463,7 @@ static eString getZapContent2(eString mode, eString path)
 	eString result, result1, result2;
 	eString tpath;
 	eString bouquets, bouquetrefs, channels, channelrefs;
+	std::stringstream tmp;
 
 	unsigned int pos = 0, lastpos = 0, temp = 0;
 
@@ -1482,42 +1486,56 @@ static eString getZapContent2(eString mode, eString path)
 		Signal1<void, const eServiceReference&> signal;
 		signal.connect(slot(navlist, &eWebNavigatorListDirectory2::addEntry));
 		iface->enterDirectory(current_service, signal);
-		bouquetrefs = result1;
-		bouquets = result2;
+		tmp.str(result1.left(result1.length() - 1));
+		bouquetrefs = result1.left(result1.length() - 2);
+		bouquets = result2.left(result2.length() - 2);
 		eDebug("entered");
 		iface->leaveDirectory(current_service);
 		eDebug("exited");
+		printf("[GETZAPCONTENT2] collected bouquetrefs: %s", bouquetrefs.c_str());
+		printf("[GETZAPCONTENT2] collected bouquets: %s", bouquets.c_str());
 		
 		// go thru all bouquets to get the channels
 		int i = 0;
-		eString tmp = bouquetrefs;
-		while (tmp.length() > 0)
+		while (tmp)
 		{
-			sscanf(tmp.c_str(), "\"%s\",%s", tpath, tmp);
-			printf("[GETZAPCONTENT2] tpath = %s", tpath.c_str());
-			eServiceReference current_service = string2ref(tpath);
+			result1 = ""; result2 ="";
+			tmp >> tpath;
+			if (tpath)
+			{
+				printf("[GETZAPCONTENT2] processing bouquet: tpath = %s", tpath.c_str());
+				tpath = tpath.mid(1, tpath.length() - 3);
+				printf("[GETZAPCONTENT2] processing bouquet: tpath = %s", tpath.c_str());
+				eServiceReference current_service = string2ref(tpath);
 
-			eWebNavigatorListDirectory2 navlist(result1, result2, path, tpath, *iface);
-			Signal1<void, const eServiceReference&> signal;
-			signal.connect(slot(navlist, &eWebNavigatorListDirectory2::addEntry));
-			channels += "channels[";
-			channels += eString().sprintf("%d", i);
-			channels += "] = new Array(";
-			channelrefs += "channelrefs[";
-			channelrefs += eString().sprintf("%d", i);
-			channelrefs += "] = new Array(";
-			iface->enterDirectory(current_service, signal);
-			channels += result2.left(result2.length() - 1);
-			channels += ");";
-			channelrefs += result1.left(result1.length() - 1);
-			channelrefs += ");";
-			eDebug("entered");
-			iface->leaveDirectory(current_service);
-			eDebug("exited");
-			i++;
+				eWebNavigatorListDirectory2 navlist(result1, result2, tpath, tpath, *iface);
+				Signal1<void, const eServiceReference&> signal;
+				signal.connect(slot(navlist, &eWebNavigatorListDirectory2::addEntry));
+
+				channels += "channels[";
+				channels += eString().sprintf("%d", i);
+				channels += "] = new Array(";
+				channelrefs += "channelRefs[";
+				channelrefs += eString().sprintf("%d", i);
+				channelrefs += "] = new Array(";
+
+				iface->enterDirectory(current_service, signal);
+
+				channels += result2.left(result2.length() - 2);
+				channels += ");";
+				channelrefs += result1.left(result1.length() - 2);
+				channelrefs += ");";
+				
+				eDebug("entered");
+				iface->leaveDirectory(current_service);
+				eDebug("exited");
+				i++;
+			}
 		}
+		printf("[GETZAPCONTENT2] collected channelrefs: %s", channelrefs.c_str());
+		printf("[GETZAPCONTENT2] collected channels: %s", channels.c_str());
 		
-		eString tmpFile = readFile(TEMPLATE_DIR + "zapdata.js");
+		eString tmpFile = readFile(HTDOCS_DIR + "zapdata.js");
 		tmpFile.strReplace("#BOUQUETS#", bouquets);
 		tmpFile.strReplace("#BOUQUETREFS#", bouquetrefs);
 		tmpFile.strReplace("#CHANNELS#", channels);
@@ -1543,14 +1561,18 @@ static eString getZap(eString mode, eString path)
 		result += tmpFile;
 	}
 #endif
-	zap_result += getZapContent(mode, path);
+	if (path == ";4097:7:0:6:0:0:0:0:0:0:")
+		zap_result += getZapContent2(mode, path);
+	else
+		zap_result += getZapContent(mode, path);
+
 	result += getEITC();
 	eString curService = filter_string(getCurService());
 	if (curService == "n/a")
-		curService = 
+		curService =
 #ifndef DISABLE_FILE
-			eZapMain::getInstance()->dvrActive() ? 
-				"Digital Video Recorder" : 
+			eZapMain::getInstance()->dvrActive() ?
+				"Digital Video Recorder" :
 #endif
 				"&nbsp;";
 	result.strReplace("#SERVICENAME#", curService);
@@ -2937,6 +2959,9 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 	else
 //	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Philips)
 		result.strReplace("#TOPBALK#", "topbalk4.png");
+
+	if (spath == ";4097:7:0:6:0:0:0:0:0:0:")
+		result.strReplace("#ONLOAD#", "onLoad=init()");
 
 	return result;
 }
