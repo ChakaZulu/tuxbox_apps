@@ -48,7 +48,7 @@ int eSectionReader::open(int pid, __u8 *data, __u8 *mask, int len, int _flags)
 		return -errno;
 	}
 	else
-	  ioctl (handle,DMX_SET_BUFFER_SIZE, 64*1024);
+	  ioctl (handle,DMX_SET_BUFFER_SIZE, 128*1024);
 
 	secFilterParams.pid=pid;
 
