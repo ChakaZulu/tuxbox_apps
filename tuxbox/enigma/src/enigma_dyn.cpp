@@ -845,7 +845,7 @@ static eString getRecordingStat()
 	std::stringstream result;
 
 	if (eZapMain::getInstance()->isRecording())
-		result << "<img src=\"red_blinking.gif\" border=0>";
+		result << "<img src=\"blinking_red.gif\" border=0>";
 	else
 		result << "&nbsp;";
 		
