@@ -58,6 +58,7 @@ class CControldClient
 			EVT_VOLUMECHANGED,
 			EVT_MUTECHANGED,
 			EVT_MODECHANGED,
+			EVT_VCRCHANGED
 		};
 
 		//VideoFormat
@@ -69,7 +70,7 @@ class CControldClient
 		static const char VIDEOOUTPUT_COMPOSITE = 0;
 		static const char VIDEOOUTPUT_SVIDEO    = 2;
 		static const char VIDEOOUTPUT_RGB       = 1;
-	
+
 		//mute
 		static const bool VOLUME_MUTE = true;
 		static const bool VOLUME_UNMUTE = false;
@@ -78,7 +79,7 @@ class CControldClient
 		static const char BOXTYPE_NOKIA   = 1;
 		static const char BOXTYPE_SAGEM   = 2;
 		static const char BOXTYPE_PHILIPS = 3;
-	
+
 		//scartmode
 		static const char SCARTMODE_ON  = 1;
 		static const char SCARTMODE_OFF = 0;
@@ -136,7 +137,7 @@ class CControldClient
 			Parameter: BOXTYPE_NOKIA   = nokia dbox
 			           BOXTYPE_SAGEM   = sagem
 			           BOXTYPE_PHILIPS = philips
-	
+
 		*/
 		void setBoxType(char);
 		char getBoxType();
@@ -146,7 +147,7 @@ class CControldClient
 			Parameter: SCARTMODE_ON  = auf scartinput schalten
 			           SCARTMODE_OFF = wieder dvb anzeigen
 
-	
+
 		*/
 		void setScartMode(bool);
 

@@ -30,15 +30,18 @@
 #include <string>
 #include <vector>
 #include <map>
+#include "eventserver.h"
+#include "controldclient.h"
 
 using namespace std;
+
+extern  CEventServer        *eventServer;
 
 #define EVENT_DEVICE "/dev/dbox/event0"
 
 // Events which can occur
 #define WDE_VIDEOMODE 		(uint)1		// Videomode changed from 4:3 to 16:9 or from 16:9 to 4:3
-//#define WDE_PARENTALLOCK	2		// parental lock changed from on to off or from off to on
-
+#define WDE_VCRONOFF 		(uint)2		// VCR turned on or off
 
 class CEventWatchdogNotifier
 {
@@ -49,31 +52,33 @@ typedef vector<CEventWatchdogNotifier*> EventWatchdogNotifiers;
 class CAspectRatioNotifier : public CEventWatchdogNotifier
 {
 	public:
-		virtual void aspectRatioChanged( int newAspectRatio) = NULL;
+		virtual void aspectRatioChanged( int newAspectRatio ) = NULL;
+};
+
+class CVideoModeNotifier : public CEventWatchdogNotifier
+{
+	public:
+		virtual void VCRModeChanged( bool newVCRMode ) = NULL;
 };
 
 class CEventWatchDog
 {
   private :
-	int lastParentalLock;
-
-	bool bCheckVideoMode;
-	bool bCheckParentalLock;
-
 	bool				bThreadRunning;
 	pthread_mutex_t 	wd_mutex;
 	pthread_t       	thrSender;
 
 	map<uint, EventWatchdogNotifiers*>	Notifiers;
 
-	int getVideoMode(bool bWaitForEvent = true);
-	int getParentalLock();
+	int getVideoMode();
+	bool getVCRMode();
 	void startThread();
-//	void stopThread();
-	void videoModeChanged( int nNewVideoMode);
+	void videoModeChanged( int nNewVideoMode );
+	void vcrModeChanged( bool bBNewVCRMode );
 
   public :
-	int lastVideoMode;
+	int 	lastVideoMode;
+	bool    lastVCRMode;
 	CEventWatchDog();
 
 	static void * watchdogThread (void *arg);

@@ -57,8 +57,7 @@
 
 CLcddClient		lcdd;
 CZapitClient	zapit;
-CEventServer	eventServer;
-
+CEventServer    *eventServer;
 
 struct Ssettings
 {
@@ -630,7 +629,7 @@ void setVolume(char volume)
 
 
 	lcdd.setVolume(volume);
-	eventServer.sendEvent( CControldClient::EVT_VOLUMECHANGED, 0, &volume, sizeof(volume) );
+	eventServer->sendEvent( CControldClient::EVT_VOLUMECHANGED, 0, &volume, sizeof(volume) );
 }
 
 void Mute()
@@ -654,7 +653,7 @@ void Mute()
 	close(fd);
 
 	lcdd.setMute(true);
-	eventServer.sendEvent(CControldClient::EVT_MUTECHANGED, 0, &settings.mute, sizeof(settings.mute));
+	eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, 0, &settings.mute, sizeof(settings.mute));
 }
 
 void UnMute()
@@ -678,7 +677,7 @@ void UnMute()
 	close(fd);
 
 	lcdd.setMute(false);
-	eventServer.sendEvent(CControldClient::EVT_MUTECHANGED, 0, &settings.mute, sizeof(settings.mute));
+	eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, 0, &settings.mute, sizeof(settings.mute));
 }
 
 
@@ -776,10 +775,10 @@ void parse_command(int connfd, CControld::commandHead* rmessage)
 			break;
 
 		case CControld::CMD_REGISTEREVENT:
-			eventServer.registerEvent(connfd);
+			eventServer->registerEvent(connfd);
 			break;
 		case CControld::CMD_UNREGISTEREVENT:
-			eventServer.unRegisterEvent(connfd);
+			eventServer->unRegisterEvent(connfd);
 			break;
 
 		default:
@@ -798,10 +797,12 @@ void sig_catch(int)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.42 2002/03/05 17:33:47 field Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.43 2002/03/05 19:58:49 field Exp $\n\n");
 
 	if (fork() != 0)
 		return 0;
+
+	eventServer = new CEventServer;
 
 	struct sockaddr_un servaddr;
 	int clilen;
