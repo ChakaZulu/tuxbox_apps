@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: zapitclient.cpp,v 1.22 2002/04/05 15:12:13 rasc Exp $
+  $Id: zapitclient.cpp,v 1.23 2002/04/08 20:51:19 Simplex Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapitclient.cpp,v $
+  Revision 1.23  2002/04/08 20:51:19  Simplex
+  cmd for getting satellite list
+
   Revision 1.22  2002/04/05 15:12:13  rasc
   -- existsChannelInBouquet  (True/False)
 
@@ -485,6 +488,29 @@ bool CZapitClient::isScanReady(unsigned int &satellite, unsigned int &transponde
 	return response.scanReady;
 }
 
+/***********************************************/
+/*                                             */
+/*  Scanning stuff                             */
+/*                                             */
+/***********************************************/
+/* query possible sattelits*/
+void CZapitClient::getScanSatteliteList( SatteliteList& satteliteList )
+{
+	commandHead msgHead;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_SCANGETSATLIST;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+
+	responseGetSatteliteList response;
+	while ( receive((char*)&response, sizeof(responseGetSatteliteList)))
+		satteliteList.insert( satteliteList.end(), response);
+
+	zapit_close();
+
+}
+
 
 /***********************************************/
 /*                                             */
@@ -548,7 +574,7 @@ unsigned int CZapitClient::existsBouquet( string name)
         zapit_close();
 	return (unsigned int) response.number;
 }
- 
+
 
 //
 // -- check if Channel already is in Bouquet (2002-04-02 rasc)
@@ -574,7 +600,7 @@ bool CZapitClient::existsChannelInBouquet( unsigned int bouquet, unsigned int on
         zapit_close();
 	return (unsigned int) response.status;
 }
- 
+
 
 
 /* moves a channel of a bouquet from one position to another, channel lists begin at position=1*/
