@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.41 2003/11/06 22:32:05 thegoodguy Exp $
+	$Id: request.cpp,v 1.42 2004/01/05 19:25:08 thegoodguy Exp $
 
 	License: GPL
 
@@ -111,7 +111,7 @@ bool CWebserverRequest::CheckAuth()
 
 bool CWebserverRequest::GetRawRequest()
 {
-#define bufferlen 1024
+#define bufferlen 16384
 	char *buffer = new char[bufferlen+1];
 
 	if ((rawbuffer_len = read(Socket,buffer,bufferlen)) < 1)
