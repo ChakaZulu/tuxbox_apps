@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.32 2002/11/02 22:24:37 obi Exp $
+ * $Id: frontend.cpp,v 1.33 2002/11/05 21:33:43 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -25,8 +25,8 @@
 #include <sys/ioctl.h>
 #include <sys/poll.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <sys/time.h>
+#include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -256,28 +256,36 @@ const dvb_frontend_parameters *CFrontend::getFrontend ()
 	return feparams;
 }
 
+#define TIMEOUT_MAX_MS 3000
 
 struct dvb_frontend_event CFrontend::getEvent ()
 {
 	struct dvb_frontend_event event;
-	struct pollfd pfd[1];
+	struct pollfd pfd;
+	struct timeval tv, tv2;
 
-	pfd[0].fd = fd;
-	pfd[0].events = POLLIN;
+	int msec = TIMEOUT_MAX_MS;
 
-	switch (poll(pfd, 1, 5000)) {
-	case -1:
-		perror("poll");
-		failed = true;
-		break;
+	pfd.fd = fd;
+	pfd.events = POLLIN;
 
-	case 0:
-		std::cerr << __PRETTY_FUNCTION__ << ": timeout" << std::endl;
-		failed = true;
-		break;
+	gettimeofday(&tv, NULL);
 
-	default:
-		if (pfd[0].revents & POLLIN) {
+	while (msec > 0) {
+
+		int res = poll(&pfd, 1, msec);
+
+		if (res <= 0) {
+			failed = true;
+			break;
+		}
+
+		gettimeofday(&tv2, NULL);
+		msec -= ((tv2.tv_sec - tv.tv_sec) * 1000) + ((tv2.tv_usec - tv.tv_usec) / 1000);
+
+		if (pfd.revents & POLLIN) {
+
+			std::cout << __PRETTY_FUNCTION__ << ": event after " << TIMEOUT_MAX_MS - msec << " milliseconds:" << std::endl;
 
 			DVB_IOCTL(FE_GET_EVENT, &event);
 
@@ -285,6 +293,7 @@ struct dvb_frontend_event CFrontend::getEvent ()
 				currentFrequency = event.parameters.frequency;
 				std::cout << __PRETTY_FUNCTION__ << ": FE_HAS_LOCK: freq " << currentFrequency << std::endl;
 				tuned = true;
+				break;
 			}
 
 			else {
@@ -293,9 +302,9 @@ struct dvb_frontend_event CFrontend::getEvent ()
 		}
 
 		else {
-			std::cerr << __PRETTY_FUNCTION__ << ": pfd[0].revents: " << pfd[0].revents << std::endl;
+			std::cerr << __PRETTY_FUNCTION__ << ": pfd[0].revents: " << pfd.revents << std::endl;
 		}
-		break;
+
 	}
 
 	if (!tuned) {
