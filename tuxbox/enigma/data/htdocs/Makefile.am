@@ -4,7 +4,7 @@ EXTRA_DIST = \
 	index.js epg.js trash.gif dm7000.jpg blinking_red.gif \
 	format_on.png format_off.png dolby_on.png dolby_off.png \
 	crypt_on.png crypt_off.png mountMgr.js rc_small.jpg rc_big.jpg \
-	bg.png but_grey.png rc_dbox2.jpg dhtml.js data.js \
+	bg.png rc_dbox2.jpg dhtml.js data.js \
 	mepg_grad.png edit.gif timer.js window.js topbalk2.png topbalk3.png \
 	topbalk4.png zap.js zapdata.js up.gif down.gif topbalk_small.png \
 	webif_small.css topbalk2_small.png topbalk3_small.png \
