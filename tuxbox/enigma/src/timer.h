@@ -113,6 +113,7 @@ private:
 	void selectEvent( ePlaylistEntry* e );
 	void addPressed();
 	void erasePressed();
+  void focusChanged( const eWidget* );
 	void focusNext(int*)
 	{
 		eWidget::focusNext(eWidget::focusDirNext);
@@ -120,7 +121,6 @@ private:
 	bool getData( time_t& beginTime, int& duration );
 public:
 	eTimerView(ePlaylistEntry* e=0);
-	~eTimerView(){};
 };
 
 #endif

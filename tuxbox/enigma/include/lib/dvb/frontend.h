@@ -29,10 +29,10 @@ class eFrontend: public Object
 	int type;
 	int fd, secfd;
 
-  int lastcsw,
-      lastRotorCmd,
-      lastSmatvFreq,
-      curRotorPos;    // current Orbital Position
+	int lastcsw,
+			lastRotorCmd,
+			lastSmatvFreq,
+			curRotorPos;    // current Orbital Position
       
 	enum { stateIdle, stateTuning };
 	int state;
@@ -47,13 +47,13 @@ class eFrontend: public Object
 			SpectralInversion Inversion, eSatellite* sat, Modulation QAM);
 
 	void timeout();
-  int RotorUseTimeout(secCmdSequence& seq, int newPos );
-  int RotorUseInputPower(secCmdSequence& seq, void *commands, int seqRepeat );
+	int RotorUseTimeout(secCmdSequence& seq, int newPos );
+	int RotorUseInputPower(secCmdSequence& seq, void *commands, int seqRepeat );
 public:
-  int sendDiSEqCCmd( int addr, int cmd, eString params="", int frame=0xE0 );
+	int sendDiSEqCCmd( int addr, int cmd, eString params="", int frame=0xE0 );
 
-  Signal0<void> rotorRunning, rotorStopped, rotorTimeout;
-  Signal2<void, eTransponder*, int> tunedIn;
+	Signal0<void> rotorRunning, rotorStopped, rotorTimeout;
+	Signal2<void, eTransponder*, int> tunedIn;
 	~eFrontend();
 
 	enum
@@ -69,8 +69,8 @@ public:
 	
 	int Status();
 	int Locked() { return Status()&FE_HAS_LOCK; }
-  void Reset();
-  void readInputPower();
+	void Reset();
+	void readInputPower();
      	
 	uint32_t BER();
 	/**
@@ -98,7 +98,7 @@ public:
 			uint32_t SymbolRate, 		// symbolrate in symbols/s (e.g. 27500000)
 			uint8_t FEC_inner,			// FEC_inner according to ETSI (-1 for none, 0 for auto, but please don't use that)
 			int Inversion,					// spectral invesion on(1)/off(0)
-      eSatellite &sat);       // complete satellite data... diseqc.. lnb ..switch
+			eSatellite &sat);       // complete satellite data... diseqc.. lnb ..switch
 
 	int tune_qam(eTransponder *transponder,
 			uint32_t Frequency, 		// absolute frequency in kHz

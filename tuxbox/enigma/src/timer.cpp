@@ -728,8 +728,6 @@ void eTimerView::fillTimerList()
 	eTimerManager::getInstance()->forEachEntry( addToView(events) );
 	events->sort();
 	events->endAtomic();
-  if (!events->getCount())
-    setFocus(byear);
 }
 
 const unsigned char monthdays[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
@@ -818,6 +816,7 @@ eTimerView::eTimerView( ePlaylistEntry* e)
 	CONNECT(eyear->selchanged_id, eTimerView::comboBoxClosed);
 	CONNECT(emonth->selchanged_id, eTimerView::comboBoxClosed);
 	CONNECT(eday->selchanged_id, eTimerView::comboBoxClosed);
+	CONNECT(eWidget::focusChanged, eTimerView::focusChanged);
 
 	fillTimerList();
 
@@ -1028,9 +1027,14 @@ void eTimerView::updateDay( eComboBox* dayCombo, int year, int month, int day )
 	days += (days == 28 && __isleap( year ) );
 	for ( int i = wday; i < wday+days; i++ )
 		new eListBoxEntryText( *dayCombo, eString().sprintf("%s, %02d", dayStr[i%7], i-wday+1), (void*) (i-wday+1) );
-  dayCombo->setCurrent( day>days ? 0 : (void*) day );
+	dayCombo->setCurrent( day>days ? 0 : (void*) day );
 }
 
+void eTimerView::focusChanged( const eWidget *focus)
+{
+	if ( byear && focus && focus == events && !events->getCount())
+		setFocus( byear );
+}
 
 int eTimerView::eventHandler(const eWidgetEvent &event)
 {

@@ -1223,6 +1223,9 @@ void eZapMain::standbyRepeat()
 
 void eZapMain::standbyRelease()
 {
+	if ( standbyTime == -1) // we come from standby ?
+		return;
+
 	int diff = time(0) - standbyTime;
 	standbyTime=-1;
 	if (diff > 2)
@@ -1239,7 +1242,7 @@ void eZapMain::standbyRelease()
 		standby.exec();
 		standby.hide();
 		state &= ~stateSleeping;
-  }
+	}
 }
 
 void eZapMain::showInfobar()

@@ -493,8 +493,8 @@
 			<eLabel name="bus" position="160:70" size="e:30" />
 			<eLabel text="status:" position="10:110" size="70:30" />
 			<eLabel name="status" position="80:110" size="e:30" />
-			<eButton name="close" text="close" position="10:170" size="150:30" loadDeco="" />
-			<eButton name="format" text="format" position="160:170" size="150:30" loadDeco="" />
+			<eButton name="close" text="close" position="10:170" size="170:30" loadDeco="" />
+			<eButton name="format" text="format" position="200:170" size="170:30" loadDeco="" />
 		</eHarddiskMenu>
 	</object>
 </eskin>
