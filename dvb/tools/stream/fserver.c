@@ -15,7 +15,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 program: fserver by Axel Buehning <mail at diemade.de>
 
-$Id: fserver.c,v 1.2 2004/04/26 10:02:11 diemade Exp $
+$Id: fserver.c,v 1.3 2004/04/27 20:16:03 diemade Exp $
 
 */
 
@@ -36,6 +36,7 @@ $Id: fserver.c,v 1.2 2004/04/26 10:02:11 diemade Exp $
 #define LISTENPORT 4000
 
 int AnalyzeXMLRequest(char *szXML, RecordingData   *rdata);
+char *UTF8_to_Latin1(char *s);
 
 void clean_exit(int signal);
 
@@ -62,7 +63,7 @@ int main(int argc, char * argv[])
 	struct sockaddr_in cliaddr;
 	socklen_t clilen = sizeof(cliaddr);
 
-	printf("[fserver.c] fserver version $Id: fserver.c,v 1.2 2004/04/26 10:02:11 diemade Exp $\n");
+	printf("[fserver.c] fserver version $Id: fserver.c,v 1.3 2004/04/27 20:16:03 diemade Exp $\n");
 	
 	// set signal handler for clean termination
 	signal(SIGTERM, clean_exit);
@@ -341,6 +342,7 @@ int AnalyzeXMLRequest(char *szXML, RecordingData   *rdata)
 				{
 				memcpy(szchannelname,p3,p1-p3);
 				szchannelname[p1-p3]=0;
+				strcpy(szchannelname, UTF8_to_Latin1(szchannelname));
 				hr=1;
 				}
 			}
@@ -357,6 +359,7 @@ int AnalyzeXMLRequest(char *szXML, RecordingData   *rdata)
 				{
 				memcpy(szepgtitle,p3,p1-p3);
 				szepgtitle[p1-p3]=0;
+				strcpy(szepgtitle, UTF8_to_Latin1(szepgtitle));
 				hr=1;
 				}
 			}
@@ -425,3 +428,73 @@ int AnalyzeXMLRequest(char *szXML, RecordingData   *rdata)
 
 	return(hr);
 }
+
+// TODO: rename to something more meaningfull
+// converts XML UTF-8 back to Latin1
+char *UTF8_to_Latin1(char *s)
+{
+	static char r[1024];
+	int i=0;
+	char c;
+
+	while ((*s) != 0)
+	{
+		if (((*s) & 0xf0) == 0xf0)      /* skip (can't be encoded in Latin1) */
+		{
+			s++;
+			if ((*s) == 0)
+				goto end_while;
+			s++;
+			if ((*s) == 0)
+				goto end_while;
+			s++;
+			if ((*s) == 0)
+				goto end_while;
+		}
+		else if (((*s) & 0xe0) == 0xe0) /* skip (can't be encoded in Latin1) */
+		{
+			s++;
+			if ((*s) == 0)
+				goto end_while;
+			s++;
+			if ((*s) == 0)
+				goto end_while;
+		}
+		else if (((*s) & 0xc0) == 0xc0)
+		{
+			c = (((*s) & 3) << 6);
+			s++;
+			if ((*s) == 0)
+				goto end_while;
+			r[i++] = (c | ((*s) & 0x3f));
+			r[i+1] = 0x00;
+		}
+		else 
+		{
+			r[i++] = *s;
+			r[i+1] = 0x00;
+		}
+		s++;
+	}
+	end_while:
+/*
+			case '<':           
+				r += "&lt;";
+				break;
+			case '>':
+				r += "&gt;";
+				break;
+			case '&':
+				r += "&amp;";
+				break;
+			case '\"':
+				r += "&quot;";
+				break;
+			case '\'':
+				r += "&apos;";
+				break;
+
+*/
+	return r;
+}
+

@@ -1,5 +1,5 @@
 /*
- * $Id: streamfile.c,v 1.3 2004/04/26 15:17:14 diemade Exp $
+ * $Id: streamfile.c,v 1.4 2004/04/27 20:16:03 diemade Exp $
  * 
  * streaming ts to file/disc
  * 
@@ -79,6 +79,8 @@ int fd2 = -1;
 int silent = 0;
 #define dprintf(fmt, args...) {if(!silent) printf( "[streamfile] " fmt, ## args);}
 
+unsigned int limit=2;
+
 void clean_exit(int signal);
 
 static int
@@ -136,10 +138,8 @@ void *FileThread (void *v_arg)
 	ssize_t written;
 	unsigned long long filesize = 0;
 	unsigned int filecount = 0;
-	// TODO: add splitsize as argument to main()
-	//unsigned int splitsize=1*1024*1024*1024; // 1GB
 	unsigned long long splitsize=1024*1024*1024; // 1GB
-	splitsize = 8 * splitsize; // 8GB
+	splitsize = limit * splitsize; // (lmit)GB
 	char filename[512];
 	time_t timer1 = 0;
 	unsigned long long filesize2 = 0;
@@ -147,7 +147,7 @@ void *FileThread (void *v_arg)
 
 	struct pollfd pfd[1];
 	
-	for (;;)
+	while (!exit_flag)
 	{
 		readsize=ringbuffer_read_space(ringbuf);
 		if ( readsize ) {
@@ -162,8 +162,8 @@ void *FileThread (void *v_arg)
 				sprintf(filename, "%s.%3.3d.ts", (char *)v_arg, ++filecount);
 				if (fd2 != -1 )
 					close(fd2);
-				//if ((fd2 = open(filename, O_SYNC | O_WRONLY | O_CREAT | O_TRUNC | O_EXCL | O_LARGEFILE, S_IRUSR | S_IWUSR)) < 0) {
 				if ((fd2 = open(filename, O_WRONLY | O_CREAT | O_NONBLOCK | O_TRUNC | O_EXCL | O_LARGEFILE, S_IRUSR | S_IWUSR)) < 0) {
+					perror("error opening outfile");
 					pthread_exit (NULL);
 				}
 				pfd[0].fd = fd2;
@@ -233,8 +233,11 @@ main (int argc, char ** argv) {
 	}
 
 	i = 1;
-	if (!strcmp(argv[i], "-s")) {
-		silent = 1;
+	while (argv[i][0] == '-') {
+		if (!strcmp(argv[i], "-s"))
+			silent = 1;
+		if (!strcmp(argv[i], "-l"))
+			sscanf(argv[++i], "%d", &limit);
 		i++;
 	}
 
@@ -296,13 +299,6 @@ main (int argc, char ** argv) {
 
 		todo = r - offset;
 
-/*
-		r = ringbuffer_write_space (ringbuf);
-		if (todo > r) {
-			dprintf("PANIC: ringbuffer overflow, free %d, to_write %d\n", r, todo);
-			return EXIT_FAILURE;
-		}
-*/
 		written = ringbuffer_write(ringbuf, buf, todo);
 		//dprintf("wrote %d bytes to ringbuffer\n", written);
 
