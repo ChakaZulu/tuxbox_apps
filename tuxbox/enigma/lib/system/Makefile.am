@@ -7,11 +7,11 @@ INCLUDES = \
 	-I$(top_srcdir)/enigma/src/core/gdi \
 	-I$(top_srcdir)/enigma/src/core/gui
 
-noinst_LIBRARIES = libsystem.a
+lib_LTLIBRARIES = libsystem.la
 
-libsystem_a_SOURCES = \
-	elock.cpp http_dyn.cpp http_file.cpp httpd.cpp httpd.moc.cpp \
-	mktime.c nconfig.cpp nxml.cpp qserversocket.cpp xmlrpc.cpp
+libsystem_la_SOURCES = \
+	init.cpp elock.cpp http_dyn.cpp http_file.cpp httpd.cpp httpd.moc.cpp \
+	mktime.c nconfig.cpp nxml.cpp qserversocket.cpp xmlrpc.cpp 
 
 AM_CXXFLAGS = $(LIBFREETYPE_CFLAGS)
 

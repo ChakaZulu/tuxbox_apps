@@ -1,4 +1,4 @@
-noinst_LIBRARIES = liblowlevel.a
+lib_LTLIBRARIES = liblowlevel.la
 
-liblowlevel_a_SOURCES = decode.cpp
+liblowlevel_la_SOURCES = decode.cpp
 
