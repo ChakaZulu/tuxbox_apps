@@ -133,11 +133,13 @@ static  unsigned short cw=0;
 
 	switch(code)
 	{
+#if 0
 	case RC_HELP:
 		if ( !cw )
 			FBPrintScreen();
 		cw=1;
 		break;
+#endif
 	case RC_SPKR:
 		if ( !cw )
 		{
