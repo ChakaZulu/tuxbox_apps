@@ -31,6 +31,8 @@ eServiceHandlerJPG::~eServiceHandlerJPG()
 void eServiceHandlerJPG::addFile(void *node, const eString &filename)
 {
 	if (filename.right(4).upper() == ".JPG" ||
+	    filename.right(4).upper() == ".JPEG" ||
+	    filename.right(4).upper() == ".CRW" ||
 	    filename.right(4).upper() == ".GIF" ||
 	    filename.right(4).upper() == ".PNG" ||
 	    filename.right(4).upper() == ".BMP")
@@ -47,7 +49,7 @@ void eServiceHandlerJPG::addFile(void *node, const eString &filename)
 
 int eServiceHandlerJPG::play(const eServiceReference &service, int workaround )
 {
-	// we never more use this
+	// we never use this
 	return 0;
 }
 
