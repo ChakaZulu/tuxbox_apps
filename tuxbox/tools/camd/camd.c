@@ -1,5 +1,5 @@
 /*
- * $Id: camd.c,v 1.12 2003/08/14 01:13:05 obi Exp $
+ * $Id: camd.c,v 1.13 2003/10/06 19:22:23 obi Exp $
  *
  * (C) 2001, 2002, 2003 by gillem, Hunz, kwon, tmbinc, TripleDES, obi
  *
@@ -538,55 +538,25 @@ int parse_ca_pmt(const unsigned char *buffer, const unsigned int length)
 	return -1;
 }
 
-unsigned int parse_length_field (unsigned char * buffer)
+struct length_field {
+	unsigned int val;
+	unsigned int size;
+};
+
+void parse_length_field (unsigned char * buffer, struct length_field *length_field)
 {
-	unsigned char size_indicator = (buffer[0] >> 7) & 0x01;
-	unsigned int length_value = 0;
+	unsigned int i;
 
-	if (size_indicator == 0)
-	{
-		length_value = buffer[0] & 0x7F;
+	if (buffer[0] & 0x80) {	/* size_indicator == 1 */
+		length_field->val = 0;
+		length_field->size = buffer[0] & 0x7F;
+		for (i = 0; i < length_field->size; i++)
+			length_field->val = (length_field->val << 8) | buffer[i + 1];
+		length_field->size++;
 	}
-
-	else if (size_indicator == 1)
-	{
-		unsigned char length_field_size = buffer[0] & 0x7F;
-		unsigned int i;
-
-		for (i = 0; i < length_field_size; i++)
-		{
-			length_value = (length_value << 8) | buffer[i + 1];
-		}
-	}
-
-	return length_value;
-}
-
-unsigned char get_length_field_size (unsigned int length)
-{
-	if (length < 0x80)
-	{
-		return 0x01;
-	}
-
-	if (length < 0x100)
-	{
-		return 0x02;
-	}
-
-	if (length < 0x10000)
-	{
-		return 0x03;
-	}
-
-	if (length < 0x1000000)
-	{
-		return 0x04;
-	}
-
-	else
-	{
-		return 0x05;
+	else {
+		length_field->val = buffer[0] & 0x7F;
+		length_field->size = 1;
 	}
 }
 
@@ -604,7 +574,9 @@ void handlesockmsg (unsigned char * buffer, ssize_t len, int connfd)
 	{
 		case 0x9F:
 		{
-			unsigned int length = parse_length_field(buffer + 3);
+			struct length_field length_field;
+			
+			parse_length_field(buffer + 3, &length_field);
 
 			// resource manager, application info, ca support
 			if (buffer[1] == 0x80)
@@ -614,7 +586,7 @@ void handlesockmsg (unsigned char * buffer, ssize_t len, int connfd)
 				{
 					unsigned char reply[4 + (caid_count << 1)];
 
-					if (length != 0)
+					if (length_field.val != 0)
 					{
 						printf("[camd] warning: invalid length for ca_info_enq\n");
 					}
@@ -640,9 +612,9 @@ void handlesockmsg (unsigned char * buffer, ssize_t len, int connfd)
 				// ca_pmt
 				else if (buffer[2] == 0x32)
 				{
-					if ((3 + get_length_field_size(length) + length) == len)
+					if ((3 + length_field.size + length_field.val) == len)
 					{
-						parse_ca_pmt(buffer + 3 + get_length_field_size(length), length);
+						parse_ca_pmt(buffer + 3 + length_field.size, length_field.val);
 					}
 					else
 					{
