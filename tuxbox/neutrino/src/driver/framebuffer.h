@@ -106,6 +106,7 @@ class CFrameBuffer
 		bool getActive() const;                     // is framebuffer active?
 
 		void setTransparency( int tr = 0 );
+		void setBlendLevel(int blev1, int blev2);
 
 		//Palette stuff
 		void setAlphaFade(int in, int num, int tr);

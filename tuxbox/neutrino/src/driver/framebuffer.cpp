@@ -297,6 +297,15 @@ void CFrameBuffer::setTransparency( int tr )
 	if (ioctl(fd, AVIA_GT_GV_SET_BLEV, val ))
 		perror("AVIA_GT_GV_SET_BLEV");
 }
+void CFrameBuffer::setBlendLevel(int blev1, int blev2)
+{
+	unsigned int c;
+
+	c=(blev2 & 0x0F) <<8 | (blev1 & 0x0F);
+
+	if (ioctl(fd,AVIA_GT_GV_SET_BLEV, c) < 0)
+		perror("AVIA_GT_GV_SET_BLEV:");
+}
 
 void CFrameBuffer::setAlphaFade(int in, int num, int tr)
 {

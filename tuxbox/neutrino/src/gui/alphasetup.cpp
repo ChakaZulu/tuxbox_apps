@@ -73,27 +73,7 @@ CAlphaSetup::CAlphaSetup(const char * const Name, unsigned char* Alpha1, unsigne
 
 	alpha1 = Alpha1;
 	alpha2 = Alpha2;
-	setAlpha();
-}
-
-void CAlphaSetup::setAlpha()
-{
-	int fd, c;
-
-	c=(*alpha2)<<8 | (*alpha1);
-
-	if ((fd = open("/dev/fb/0",O_RDWR)) <= 0)
-	{
-		perror("open");
-		return;
-	}
-
-	if (ioctl(fd,AVIA_GT_GV_SET_BLEV, c) < 0)
-	{
-		perror("AVIA_GT_GV_SET_BLEV:");
-		return;
-	}
-	close(fd);
+	frameBuffer->setBlendLevel(*alpha1, *alpha2);
 }
 
 int CAlphaSetup::exec(CMenuTarget* parent, const std::string &)
@@ -109,7 +89,7 @@ int CAlphaSetup::exec(CMenuTarget* parent, const std::string &)
 	unsigned char alpha1_alt= *alpha1;
 	unsigned char alpha2_alt= *alpha2;
 
-	setAlpha();
+	frameBuffer->setBlendLevel(*alpha1, *alpha2);
 	paint();
 
 	int selected = 0;
@@ -172,7 +152,7 @@ int CAlphaSetup::exec(CMenuTarget* parent, const std::string &)
 						{
 							*alpha1+=1;
 							paintSlider(x+10, y+hheight, alpha1,g_Locale->getText("gtxalpha.alpha1"),"red", true);
-							setAlpha();
+							frameBuffer->setBlendLevel(*alpha1, *alpha2);
 						}
 						break;
 					case 1:
@@ -180,7 +160,7 @@ int CAlphaSetup::exec(CMenuTarget* parent, const std::string &)
 						{
 							*alpha2+=1;
 							paintSlider(x+10, y+hheight+mheight, alpha2,g_Locale->getText("gtxalpha.alpha2"),"green", true);
-							setAlpha();
+							frameBuffer->setBlendLevel(*alpha1, *alpha2);
 						}
 						break;
 				}
@@ -194,7 +174,7 @@ int CAlphaSetup::exec(CMenuTarget* parent, const std::string &)
 						{
 							*alpha1-=1;
 							paintSlider(x+10, y+hheight, alpha1,g_Locale->getText("gtxalpha.alpha1"),"red", true);
-							setAlpha();
+							frameBuffer->setBlendLevel(*alpha1, *alpha2);
 						}
 						break;
 					case 1:
@@ -202,7 +182,7 @@ int CAlphaSetup::exec(CMenuTarget* parent, const std::string &)
 						{
 							*alpha2-=1;
 							paintSlider(x+10, y+hheight+mheight, alpha2,g_Locale->getText("gtxalpha.alpha2"),"green", true);
-							setAlpha();
+							frameBuffer->setBlendLevel(*alpha1, *alpha2);
 						}
 						break;
 				}

@@ -236,7 +236,7 @@ inline unsigned short make16color(uint32_t r, uint32_t g, uint32_t b,
 											 uint32_t tl, uint32_t to)
 {
     return (
-		 ((0xFF >> (8 - tl)) << to) |
+//		 ((0xFF >> (8 - tl)) << to) |
 	    ((r    >> (8 - rl)) << ro) |
 	    ((g    >> (8 - gl)) << go) |
 	    ((b    >> (8 - bl)) << bo));
