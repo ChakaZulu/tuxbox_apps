@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicserver.cpp,v 1.3 2002/10/18 11:55:09 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicserver.cpp,v 1.4 2002/10/23 18:16:00 thegoodguy Exp $
  *
  * Basic Server Class (Neutrino) - DBoxII-Project
  *
@@ -78,7 +78,7 @@ void CBasicServer::run(bool (parse_command)(CBasicMessage::Header &rmsg, int con
 	struct sockaddr_un servaddr;
 	int clilen = sizeof(servaddr);
 
-	bool parse_another_command;
+	bool parse_another_command = true;
 
 	do
 	{
