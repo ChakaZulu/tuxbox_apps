@@ -61,7 +61,7 @@ and combinations of this -->
 	<sat name="Sirius 5.0E" flags="5" position="50">
 		<transponder frequency="11376000" symbol_rate="2170000" polarization="1" fec_inner="3"/>
 	</sat>
-	<sat name="Thor 0.8W" flags="5" position="8">
+	<sat name="Thor 0.8W" flags="5" position="-8">
 		<transponder frequency="10966000" symbol_rate="2963000" polarization="1" fec_inner="3"/>
 	</sat>
 	<sat name="Tuerksat 42.0E" flags="5" position="420">
