@@ -40,7 +40,7 @@ eHTTPError::eHTTPError(eHTTPConnection *c, int errcode): eHTTPDataSource(c), err
 	}
 	connection->code_descr=error;
 	connection->code=errcode;
-	
+
 	connection->local_header["Content-Type"]=eString("text/html");
 }
 
@@ -428,7 +428,7 @@ int eHTTPConnection::processRemoteState()
 				remotestate=stateData;
 				done=0;
 				httpversion="HTTP/1.0";
-				content_length_remaining=content_length_remaining=0;
+				content_length=content_length_remaining=0;
 				data=new eHTTPError(this, 400);	// bad request - not supporting version 0.9 yet
 			} else
 				remotestate=stateHeader;
