@@ -114,6 +114,18 @@ eString getTitle(eString title)
 	return result.str();
 }
 
+#ifndef DISABLE_FILE
+eString getDVRRecordingControls(void)
+{
+	eString result;
+	result += button(100, "Record", RED, "javascript:DVRrecord('start')");
+	result += "&nbsp;&nbsp;&nbsp;";
+	result += button(100, "Stop", BLUE, "javascript:DVRrecord('stop')");
+	result += "<br><br>";
+	return result;
+}
+#endif
+
 static int getHex(int c)
 {
 	c=toupper(c);
@@ -264,6 +276,39 @@ static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConn
 		"</body>\n"
 		"</html>\n";
 	return result;
+}
+
+static eString pause(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	eZapMain::getInstance()->pause();
+	return "+ok";
+}
+
+static eString play(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	eZapMain::getInstance()->play();
+	return "+ok";
+}
+
+static eString stop(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	eZapMain::getInstance()->stop();
+	return "+ok";
+}
+
+static eString record(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	std::map<eString,eString> opt=getRequestOptions(opts);
+	eString command=opt["command"];
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	eZapMain::getInstance()->record();
+	if (command == "start")
+		return "<html>" CHARSETMETA "<head><title>Record</title></head><body>Recording started...</body></html>";
+	else
+		return "<html>" CHARSETMETA "<head><title>Record</title></head><body>Recording stopped.</body></html>";
 }
 
 static eString switchService(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -1011,7 +1056,10 @@ struct getEntryString
 
 		if (se->type & ePlaylistEntry::stateFinished)
 			result << "<tr><td align=center><img src=\"on.gif\"></td>";
-		else if (se->type & ePlaylistEntry::stateError)
+		else if (se->type & (ePlaylistEntry::errorNoSpaceLeft |
+				ePlaylistEntry::errorUserAborted |
+				ePlaylistEntry::errorZapFailed|
+				ePlaylistEntry::errorOutdated))
 			result << "<td align=center><img src=\"off.gif\"></td>";
 		else
 			result << "<td>&nbsp;</td>";
@@ -1240,6 +1288,9 @@ static eString getContent(eString mode, eString path)
 	if (mode == "zap")
 	{
 		result = getTitle("Zap");
+#ifndef DISABLE_FILE
+		result += getDVRRecordingControls();
+#endif
 		zap_result += getZapContent(mode, path);
 		result += getEITC();
 		result.strReplace("#SERVICENAME#", filter_string(getCurService()));
@@ -2364,7 +2415,12 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/rm", removeFile, true);
 	dyn_resolver->addDyn("GET", "/cgi-bin/mv", moveFile, true);
 	dyn_resolver->addDyn("GET", "/cgi-bin/ln", createSymlink, true);
-
+#ifndef DISABLE_FILE
+	dyn_resolver->addDyn("GET", "/cgi-bin/stop", stop);
+	dyn_resolver->addDyn("GET", "/cgi-bin/pause", pause);
+	dyn_resolver->addDyn("GET", "/cgi-bin/play", play);
+	dyn_resolver->addDyn("GET", "/cgi-bin/record", record);
+#endif
 	dyn_resolver->addDyn("GET", "/setVolume", setVolume);
 	dyn_resolver->addDyn("GET", "/showTimerList", showTimerList);
 	dyn_resolver->addDyn("GET", "/addTimerEvent", addTimerEvent);
