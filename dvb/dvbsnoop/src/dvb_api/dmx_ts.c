@@ -1,5 +1,5 @@
 /*
-$Id: dmx_ts.c,v 1.5 2003/01/07 00:43:58 obi Exp $
+$Id: dmx_ts.c,v 1.6 2003/05/28 01:35:01 obi Exp $
 
  -- (c) 2001 rasc
  -- Transport Streams
@@ -9,6 +9,9 @@ $Id: dmx_ts.c,v 1.5 2003/01/07 00:43:58 obi Exp $
  -- Verbose Level >= 1
 
 $Log: dmx_ts.c,v $
+Revision 1.6  2003/05/28 01:35:01  obi
+fixed read() return code handling
+
 Revision 1.5  2003/01/07 00:43:58  obi
 set buffer size to 256kb
 
@@ -115,10 +118,11 @@ int  doReadTS (OPTION *opt)
       -- error ?
     */
 
-    if (n <= 0) {
-        fprintf (stderr,"Error on read: %ld\n",n);
+    if (n == -1)
+	perror("read");
+
+    if (n <= 0)
         continue;
-    }
 
 
 
