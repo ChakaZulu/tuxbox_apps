@@ -31,6 +31,7 @@ fx2/snake/Makefile
 fx2/tetris/Makefile
 fx2/lcdcirc/Makefile
 fx2/satfind/Makefile
+fx2/vierg/Makefile
 tuxtxt/Makefile
 tuxtxt/font/Makefile
 tuxbox-plugins.pc
