@@ -107,7 +107,7 @@
 										<tr>
 											<td id="nowt" class="epgzeit_bold" width="50px" align=left>&nbsp;</td>
 											<td id="nowd" class="epgdur" width="40px" align=left>&nbsp;</td>
-											<td id="nowst" class="epgname_bold" width="350px" align=left>&nbsp;</td>
+											<td id="nowst" class="epgname_bold" width="350px" height="20px" align=left>&nbsp;</td>
 
 										</tr>
 										</table>
@@ -137,7 +137,7 @@
 										<tr>
 											<td id="nextt" class="epgzeit_bold" width="50px" align=left>&nbsp;</td>
 											<td id="nextd" class="epgdur" width="40px" align=left>&nbsp;</td>
-											<td id="nextst" class="epgname_bold" width="350px" align=left>&nbsp;</td>
+											<td id="nextst" class="epgname_bold" width="350px" height="20px" align=left>&nbsp;</td>
 
 										</tr>
 										</table>
