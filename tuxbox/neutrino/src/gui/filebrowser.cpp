@@ -669,7 +669,7 @@ void CFileBrowser::paintFoot()
 		if(Filter != NULL)
 		{
 			frameBuffer->paintIcon("blau.raw", x + (3 * dx), by);
-			g_Fonts->infobar_small->RenderString(x + 25 + (3 * dx), ty, dx - 25, use_filter?g_Locale->getText("filebrowser.filter.active").c_str():g_Locale->getText("filebrowser.filter.inactive").c_str(), COL_INFOBAR, 0, true); // UTF-8
+			g_Fonts->infobar_small->RenderString(x + 25 + (3 * dx), ty, dx - 25, use_filter?g_Locale->getText("filebrowser.filter.inactive").c_str():g_Locale->getText("filebrowser.filter.active").c_str(), COL_INFOBAR, 0, true); // UTF-8
 		}
 	}
 }
