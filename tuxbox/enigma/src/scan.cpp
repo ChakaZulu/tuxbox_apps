@@ -311,16 +311,17 @@ void tsAutomatic::dvbEvent(const eDVBEvent &event)
 		case eDVBScanEvent::eventScanCompleted:
 			eDebug("tsAutomatic eventScanCompleted");
 			close(ret);
-			break;
+			break;            
 		case eDVBScanEvent::eventTunedIn:
-			eDebug("tunedIn");
+			if ( event.err != -2 ) // skiped in nextTransponder
+				eDebug("tunedIn");
 			inProgress=0;
 			if (ret)
 				close(ret);
 			else if (event.err)
 			{
-					inProgress=1;
-					tuneNext(1);
+				inProgress=1;
+				tuneNext(1);
 			}
 			else
 			{
@@ -355,14 +356,14 @@ int tsAutomatic::loadNetworks()
 
 int tsAutomatic::nextNetwork(int first)
 {
-	eDebug("next network");
+//	eDebug("next network");
 
 	if (first != -1)
 		l_network->moveSelection(first ? eListBox<eListBoxEntryText>::dirFirst : eListBox<eListBoxEntryText>::dirDown);
-		
+
 	tpPacket *pkt=(tpPacket*)(l_network->getCurrent() -> getKey());
-	
-	eDebug("pkt: %p", pkt);
+
+//	eDebug("pkt: %p", pkt);
 
 	if (!pkt)
 		return -1;
@@ -386,6 +387,24 @@ int tsAutomatic::nextTransponder(int next)
 	if ( c_nocircular && c_nocircular->isChecked() )
 		current_tp->satellite.polarisation&=1;   // CEDR
 
+	eLNB *lnb=0;
+	if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )
+	{
+		eSatellite *sat = eTransponderList::getInstance()->findSatellite( current_tp->satellite.orbital_position );
+		if ( sat )
+			lnb = sat->getLNB();
+	}
+
+	if ( lnb )
+	{
+		// filter not tuneable transponders
+		if ( abs(lnb->getLOFHi() - current_tp->satellite.frequency) > 2000000 &&
+				 abs(lnb->getLOFLo() - current_tp->satellite.frequency) > 2000000 )
+		{
+			dvbEvent( eDVBScanEvent( eDVBScanEvent::eventTunedIn, -2, &(*current_tp) ) );
+			return 0;
+		}
+	}
 	return current_tp->tune();
 }
 
