@@ -20,7 +20,7 @@ deutsch.locale is considered being the most recent locale file.
 
 Useful tools:
 -------------
-- emacs (add '(file-coding-system-alist (quote (("\\.locale\\'" . utf-8-unix) ("" undecided)))) to .emacs)
+- emacs (add '(file-coding-system-alist (quote (("\\.locale\\'" . utf-8-unix) ("" undecided)))) to .emacs or use "C-x <RET> c utf-8 <RET> C-x C-f deutsch.locale")
 - iconv
 - sort
 - uxterm

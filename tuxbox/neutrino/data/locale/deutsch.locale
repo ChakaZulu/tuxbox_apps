@@ -3,54 +3,50 @@ EPGMenu.eventinfo Info zur Sendung
 EPGMenu.eventlist Vorschau aktuelles Programm
 EPGMenu.head EPG - Programm Information
 EPGMenu.streaminfo technische Information
+EPGPlus.actions Aktionen
+EPGPlus.bybouquet_mode bouquetweise
+EPGPlus.bypage_mode seitenweise
+EPGPlus.change_font_size Schriftgröße ändern
+EPGPlus.change_font_style Schriftstil
+EPGPlus.change_size Größe ändern
+EPGPlus.channelentry_font Kanäle
+EPGPlus.channelentry_separationlineheight Höhe Line zwischen Kanaleinträgen
+EPGPlus.channelentry_width Breite der Kanalnamen
+EPGPlus.channelevententry_font Sendungen
+EPGPlus.edit_fonts Schriften einstellen
+EPGPlus.edit_sizes Abmessungen einstellen
+EPGPlus.font_style_bold Fett
+EPGPlus.font_style_italic Kursiv
+EPGPlus.font_style_regular Normal
+EPGPlus.footer_fontbouquetchannelname Selektierter Bouquet~/Kanalname
+EPGPlus.footer_fontbuttons Buttons
+EPGPlus.footer_fonteventdescription Titel 1 selekt. Sendung
+EPGPlus.footer_fonteventshortdescription Titel 2 selekt. Sendung
 EPGPlus.head Vorschau Übersicht (EPG Plus)
+EPGPlus.header_font Menütitel
+EPGPlus.horgap1_height Höhe hor. Lücke 1
+EPGPlus.horgap2_height Höhe hor. Lücke 2
+EPGPlus.next_bouquet Bouquet vor
+EPGPlus.options Optionen
+EPGPlus.page_down Seite zurück
+EPGPlus.page_up Seite vor
+EPGPlus.prev_bouquet Bouquet zurück
 EPGPlus.record Aufnahme
 EPGPlus.refresh_epg Aktualisieren
 EPGPlus.remind Vormerken
-EPGPlus.scroll_mode Scroll Mode
-EPGPlus.stretch_mode Stretch Mode
-
-EPGPlus.actions Aktionen
-EPGPlus.page_down Seite zurück
-EPGPlus.page_up Seite vor
-EPGPlus.options Optionen
-EPGPlus.settings Einstellungen
-EPGPlus.save_settings Einstellungen speichern
 EPGPlus.reset_settings Einstellungen zurücksetzen
-EPGPlus.edit_fonts Schriften einstellen
+EPGPlus.save_settings Einstellungen speichern
+EPGPlus.scroll_mode Scroll Mode
 EPGPlus.select_font_name Schrift wählen
-EPGPlus.change_font_size Schriftgröße ändern
-EPGPlus.change_font_style Schriftstil
-EPGPlus.font_style_regular Normal
-EPGPlus.font_style_bold Fett
-EPGPlus.font_style_italic Kursiv
-EPGPlus.edit_sizes Abmessungen einstellen
-EPGPlus.change_size Größe ändern
-EPGPlus.prev_bouquet Bouquet zurück
-EPGPlus.next_bouquet Bouquet vor
-EPGPlus.bypage_mode seitenweise
-EPGPlus.bybouquet_mode bouquetweise
-EPGPlus.view_mode Modus
-EPGPlus.swap_mode Blättern
-
-EPGPlus.header_font Menütitel
-EPGPlus.timeline_fonttime Zeitscala Zeit
-EPGPlus.timeline_fontdate Zeitscala Datum
-EPGPlus.channelentry_font Kanäle
-EPGPlus.channelevententry_font Sendungen
-EPGPlus.footer_fontbouquetchannelname Selektierter Bouquet~/Kanalname
-EPGPlus.footer_fonteventdescription Titel 1 selekt. Sendung
-EPGPlus.footer_fonteventshortdescription Titel 2 selekt. Sendung
-EPGPlus.footer_fontbuttons Buttons
-
-EPGPlus.channelentry_width Breite der Kanalnamen
-EPGPlus.channelentry_separationlineheight Höhe Line zwischen Kanaleinträgen
+EPGPlus.settings Einstellungen
 EPGPlus.slider_width Breite des Sliders
-EPGPlus.horgap1_height Höhe hor. Lücke 1
-EPGPlus.horgap2_height Höhe hor. Lücke 2
+EPGPlus.stretch_mode Stretch Mode
+EPGPlus.swap_mode Blättern
+EPGPlus.timeline_fontdate Zeitscala Datum
+EPGPlus.timeline_fonttime Zeitscala Zeit
 EPGPlus.vergap1_width Breite ver. Lücke 1
 EPGPlus.vergap2_width Breite ver. Lücke 2
-
+EPGPlus.view_mode Modus
 GENRE.ARTS.0 Kunst / Kultur
 GENRE.ARTS.1 Darstellende Künste
 GENRE.ARTS.10 Kunst-/Kultur-Magazin
@@ -797,4 +793,3 @@ videomenu.videosignal_svideo S-Video
 videomenu.videosignal_yuv_c YUV + CVBS
 videomenu.videosignal_yuv_v YUV + VBS
 zaptotimer.announce In einer Minute wird umgeschaltet.
-
