@@ -70,8 +70,8 @@ class CControldClient:private CBasicClient
 			{
 				TUXBOX_MAKER_UNKNOWN			= 0,
 				TUXBOX_MAKER_NOKIA			= 1,
-				TUXBOX_MAKER_SAGEM			= 2,
-				TUXBOX_MAKER_PHILIPS			= 3,
+				TUXBOX_MAKER_PHILIPS			= 2,
+				TUXBOX_MAKER_SAGEM			= 3,
 				TUXBOX_MAKER_DREAM_MM			= 4,
 				TUXBOX_MAKER_TECHNOTREND		= 5,
 			}
