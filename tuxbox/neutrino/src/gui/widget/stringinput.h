@@ -10,7 +10,7 @@
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-	
+
 
 	License: GPL
 
@@ -23,7 +23,7 @@
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -46,22 +46,30 @@ using namespace std;
 
 class CStringInput : public CMenuTarget
 {
-	int x;
-	int y;
-	int width;
-	int height;
-	int hheight, mheight, iheight; // head/menu font height
-	
-	string	name;
-    string  hint_1, hint_2;
-    char*   validchars;
-	char*	value;
-	int		size;
-	int		selected;
-    CChangeObserver*   observ;
+	protected:
+		int x;
+		int y;
+		int width;
+		int height;
+		int hheight, mheight, iheight; // head/menu font height
 
-    void paint();
-    void paintChar(int pos);
+		string	name;
+		string  hint_1, hint_2;
+		char*   validchars;
+		char*	value;
+		int		size;
+		int		selected;
+		CChangeObserver*   observ;
+
+		virtual void paint();
+		void paintChar(int pos);
+
+		virtual void key0_9Pressed(int key);
+		virtual void keyRedPressed();
+		virtual void keyUpPressed();
+		virtual void keyDownPressed();
+		virtual void keyLeftPressed();
+		virtual void keyRightPressed();
 
 	public:
 
@@ -71,6 +79,27 @@ class CStringInput : public CMenuTarget
 		int exec( CMenuTarget* parent, string actionKey );
 
 };
+
+class CStringInputSMS : public CStringInput
+{
+	bool	capsMode;
+	int 	arraySizes[10];
+	char*	Chars[10];
+
+	int keyCounter;
+	int lastKey;
+
+	virtual void key0_9Pressed(int key);
+	virtual void keyRedPressed();
+	virtual void keyUpPressed();
+	virtual void keyDownPressed();
+	virtual void keyLeftPressed();
+	virtual void keyRightPressed();
+
+	public:
+		CStringInputSMS(string Name, char* Value, int Size, string Hint_1 = "", string Hint_2 = "", char* Valid_Chars= "", CChangeObserver* Observ = NULL) ;
+};
+
 
 
 #endif

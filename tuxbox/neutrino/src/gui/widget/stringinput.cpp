@@ -10,7 +10,7 @@
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-	
+
 
 	License: GPL
 
@@ -23,7 +23,7 @@
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -65,6 +65,77 @@ CStringInput::CStringInput(string Name, char* Value, int Size,  string Hint_1, s
 	selected = 0;
 }
 
+void CStringInput::key0_9Pressed(int key)
+{
+	value[selected]=validchars[key];
+	paintChar(selected);
+
+	if (selected < (size- 1))
+		selected++;
+	paintChar(selected-1);
+	paintChar(selected);
+}
+
+void CStringInput::keyRedPressed()
+{
+	if ( strstr(validchars, " ")!=NULL )
+	{
+		value[selected]=' ';
+		paintChar(selected);
+
+		if (selected < (size- 1))
+			selected++;
+		paintChar(selected-1);
+		paintChar(selected);
+	}
+}
+
+void CStringInput::keyUpPressed()
+{
+	int npos = 0;
+	for(int count=0;count<(int)strlen(validchars);count++)
+		if(value[selected]==validchars[count])
+			npos = count;
+	npos++;
+	if(npos>=(int)strlen(validchars))
+		npos = 0;
+	value[selected]=validchars[npos];
+	paintChar(selected);
+}
+
+void CStringInput::keyDownPressed()
+{
+	int npos = 0;
+	for(int count=0;count<(int)strlen(validchars);count++)
+		if(value[selected]==validchars[count])
+			npos = count;
+	npos--;
+	if(npos<0)
+		npos = strlen(validchars)-1;
+	value[selected]=validchars[npos];
+	paintChar(selected);
+}
+
+void CStringInput::keyLeftPressed()
+{
+	if(selected>0)
+	{
+		selected--;
+		paintChar(selected+1);
+		paintChar(selected);
+	}
+}
+
+void CStringInput::keyRightPressed()
+{
+	if(selected<(int)strlen(value)-1)
+	{
+		selected++;
+		paintChar(selected-1);
+		paintChar(selected);
+	}
+}
+
 
 int CStringInput::exec( CMenuTarget* parent, string )
 {
@@ -80,7 +151,7 @@ int CStringInput::exec( CMenuTarget* parent, string )
 
 	for(int count=strlen(value)-1;count<size-1;count++)
 		strcat(value, " ");
-	
+
 	paint();
 
 	bool loop = true;
@@ -92,41 +163,19 @@ int CStringInput::exec( CMenuTarget* parent, string )
 		key = g_RCInput->getKey(300);
 		if (key==CRCInput::RC_left)
 		{
-			if(selected>0)
-			{
-				selected--;
-				paintChar(selected+1);
-				paintChar(selected);
-			}
+			keyLeftPressed();
 		}
 		else if (key==CRCInput::RC_right)
 		{
-			if(selected<(int)strlen(value)-1)
-			{
-				selected++;
-				paintChar(selected-1);
-				paintChar(selected);
-			}
+			keyRightPressed();
 		}
         else if ( ( key>= 0 ) && ( key<= 9) )
 		{
-            value[selected]=validchars[key];
-			paintChar(selected);
-
-            if (selected < (size- 1))
-                selected++;
-            paintChar(selected-1);
-			paintChar(selected);
+			key0_9Pressed( key);
 		}
-        else if ( (key==CRCInput::RC_red) && ( strstr(validchars, " ")!=NULL ) )
+        else if (key==CRCInput::RC_red)
 		{
-            value[selected]=' ';
-			paintChar(selected);
-
-            if (selected < (size- 1))
-                selected++;
-            paintChar(selected-1);
-			paintChar(selected);
+			keyRedPressed();
 		}
         else if ( (key==CRCInput::RC_green) && ( strstr(validchars, ".")!=NULL ) )
 		{
@@ -140,27 +189,11 @@ int CStringInput::exec( CMenuTarget* parent, string )
 		}
 		else if (key==CRCInput::RC_up)
 		{
-			int npos = 0;
-			for(int count=0;count<(int)strlen(validchars);count++)
-				if(value[selected]==validchars[count])
-					npos = count;
-			npos++;
-			if(npos>=(int)strlen(validchars))
-				npos = 0;
-			value[selected]=validchars[npos];
-			paintChar(selected);
+			keyUpPressed();
 		}
 		else if (key==CRCInput::RC_down)
 		{
-			int npos = 0;
-			for(int count=0;count<(int)strlen(validchars);count++)
-				if(value[selected]==validchars[count])
-					npos = count;
-			npos--;
-			if(npos<0)
-				npos = strlen(validchars)-1;
-			value[selected]=validchars[npos];
-			paintChar(selected);
+			keyDownPressed();
 		}
 		else if (key==CRCInput::RC_ok)
 		{
@@ -172,7 +205,7 @@ int CStringInput::exec( CMenuTarget* parent, string )
 			loop=false;
         }
 	}
-	
+
 	hide();
 
 	for(int count=size-1;count>=0;count--)
@@ -240,4 +273,70 @@ void CStringInput::paintChar(int pos)
 	g_Fonts->menu->RenderString(xfpos,ypos+ys, width, ch.c_str(), color);
 }
 
+CStringInputSMS::CStringInputSMS(string Name, char* Value, int Size, string Hint_1 = "", string Hint_2 = "", char* Valid_Chars= "", CChangeObserver* Observ = NULL)
+	: CStringInput(Name, Value, Size, Hint_1, Hint_2, Valid_Chars, Observ)
+{
+	Chars[1] = "1.,:!?";
+	Chars[2] = "abc2ä";
+	Chars[3] = "def3";
+	Chars[4] = "ghi4";
+	Chars[5] = "jkl5";
+	Chars[6] = "mno6ö";
+	Chars[7] = "pqrs7ß";
+	Chars[8] = "tuv8ü";
+	Chars[9] = "wxyz9";
+	Chars[0] = "0 -/()<>=";
+
+	for(int i=0; i<10; i++)
+	{
+		arraySizes[i] = strlen(Chars[i]);
+	}
+}
+
+
+void CStringInputSMS::key0_9Pressed(int key)
+{
+	if (lastKey != key)
+	{
+		keyCounter = 0;
+	}
+	keyCounter = keyCounter % strlen(Chars[key]);
+	value[selected] = Chars[key][keyCounter];
+	paintChar(selected);
+	keyCounter++;
+	lastKey = key;
+}
+
+void CStringInputSMS::keyRedPressed()
+{
+	if ((value[selected]>='a') && (value[selected]<='z'))
+	{
+		value[selected] -= 32;
+	}
+	else if ((value[selected]>='A') && (value[selected]<='Z'))
+	{
+		value[selected] += 32;
+	}
+	paintChar(selected);
+}
+
+void CStringInputSMS::keyUpPressed()
+{
+}
+
+void CStringInputSMS::keyDownPressed()
+{
+}
+
+void CStringInputSMS::keyLeftPressed()
+{
+	keyCounter=0;
+	CStringInput::keyLeftPressed();
+}
+
+void CStringInputSMS::keyRightPressed()
+{
+	keyCounter=0;
+	CStringInput::keyRightPressed();
+}
 
