@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.43 2003/03/14 07:31:51 obi Exp $
+ * $Id: pzapit.cpp,v 1.44 2003/05/15 20:09:55 digi_casi Exp $
  *
  * simple commandline client for zapit
  *
@@ -56,6 +56,7 @@ int usage (std::string basename)
 	std::cout << "shutdown zapit: " << basename << " -kill" << std::endl;
 	std::cout << "enter standby: " << basename << " -esb" << std::endl;
 	std::cout << "leave standby: " << basename << " -lsb" << std::endl;
+	std::cout << "send diseqc 1.2 motor command: " << basename << "-m <cmdtype> <cmd> <addr> <number of parameters> <parameter 1> <parameter 2>" << std::endl;
 	return -1;
 }
 
@@ -89,7 +90,15 @@ int main (int argc, char** argv)
 	bool killzapit = false;
 	bool enterStandby = false;
 	bool leaveStandby = false;
+	bool sendMotorCommand = false;
+	uint8_t motorCmdType = 0;
+	uint8_t motorCmd = 0;
+	uint8_t motorNumParameters = 0;
+	uint8_t motorParam1 = 0;
+	uint8_t motorParam2 = 0;
+	uint8_t motorAddr = 0;
 	uint32_t diseqc[5];
+	int tmp = 0;
 
 	/* command line */
 	for (i = 1; i < argc; i++)
@@ -147,6 +156,32 @@ int main (int argc, char** argv)
 		else if (!strncmp(argv[i], "-lsb", 4))
 		{
 			leaveStandby = true;
+			continue;
+		}
+		else if (!strncmp(argv[i], "-m", 2))
+		{
+			sendMotorCommand = true;
+			if (i < argc - 6)
+			{
+				sscanf(argv[++i], "%x", &tmp);
+				motorCmdType = tmp;
+				sscanf(argv[++i], "%x", &tmp);
+				motorCmd = tmp;
+				sscanf(argv[++i], "%x", &tmp);
+				motorAddr = tmp;
+				sscanf(argv[++i], "%x", &tmp);
+				motorNumParameters = tmp;
+				sscanf(argv[++i], "%x", &tmp);
+				motorParam1 = tmp;
+				sscanf(argv[++i], "%x", &tmp);
+				motorParam2 = tmp;
+				printf("[pzapit] motor command = %d %d %d %d %d %d\n", motorCmdType, motorCmd, motorAddr, motorNumParameters, motorParam1, motorParam2);
+				continue;
+			}
+			else
+			{
+				return usage(argv[0]);
+			}
 			continue;
 		}
 		else if (!strncmp(argv[i], "-rn", 3))
@@ -273,6 +308,12 @@ int main (int argc, char** argv)
 	std::vector<CZapitClient::responseGetBouquets> bouquets;
 	std::vector<CZapitClient::responseGetBouquetChannels> channels;
 
+	/* send diseqc 1.2 motor command */
+	if (sendMotorCommand)
+	{
+		zapit.sendMotorCommand(motorCmdType, motorCmd, motorAddr, motorNumParameters, motorParam1, motorParam2);
+	}
+	
 	/* kill zapit*/
 	if (killzapit)
 	{

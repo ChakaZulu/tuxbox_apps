@@ -293,6 +293,9 @@ class CZapitClient:public CBasicClient
 	delivery_system_t getDeliverySystem(void);
 
 	void zaptoNvodSubService(int num);
+	
+	/* send diseqc 1.2 motor command */
+	void sendMotorCommand(uint8_t cmdtype, uint8_t cmd, uint8_t address, uint8_t num_parameters, uint8_t param1, uint8_t param2);
 
 	/****************************************/
 	/*					*/
