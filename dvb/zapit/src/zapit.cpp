@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.308 2003/05/07 18:28:10 digi_casi Exp $
+ * $Id: zapit.cpp,v 1.309 2003/05/10 09:42:34 digi_casi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -108,6 +108,8 @@ extern short curr_sat;
 extern short scan_runs;
 CZapitClient::bouquetMode bouquetMode = CZapitClient::BM_CREATEBOUQUETS;
 
+extern std::map <int32_t, uint8_t> motorPositions;
+
 bool standby = true;
 
 void saveSettings(bool write)
@@ -208,6 +210,14 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 	}
 
 	stopPlayBack();
+	
+	/* position diseqc 1.2 motor if required */
+	if ((frontend->getDiseqcType() == DISEQC_1_2) && (channel->getSatellitePosition() != frontend->getCurrentSatellitePosition()))
+	{
+		printf("[zapit] need to position satellite dish from satellite %d to %d\n", frontend->getCurrentSatellitePosition(), channel->getSatellitePosition());
+		frontend->positionMotor(motorPositions[channel->getSatellitePosition()]);
+		frontend->setCurrentSatellitePosition(channel->getSatellitePosition());
+	}
 
 	/* if channel's transponder does not match the transponder tuned before ... */
 	if (current_transponder_id != tuned_transponder_id) {
@@ -410,7 +420,7 @@ void unsetRecordMode(void)
 	eventServer->sendEvent(CZapitClient::EVT_RECORDMODE_DEACTIVATED, CEventServer::INITID_ZAPIT );
 }
 
-int prepare_channels(void)
+int prepare_channels(uint32_t diseqctype)
 {
 	// for the case this function is NOT called for the first time (by main())
 	// we clear all cannel lists, they are refilled
@@ -418,7 +428,7 @@ int prepare_channels(void)
 	transponders.clear();
 	bouquetManager->clearAll();
 	allchans.clear();  // <- this invalidates all bouquets, too!
-	if (LoadServices() < 0)
+	if (LoadServices(diseqctype) < 0)
 		return -1;
 
 	INFO("LoadServices: success");
@@ -648,7 +658,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	case CZapitMessages::CMD_REINIT_CHANNELS:
 	{
 		CZapitMessages::responseCmd response;
-		prepare_channels();
+		prepare_channels(config.getInt32("diseqcType", NO_DISEQC));
 		response.cmd = CZapitMessages::CMD_READY;
 		CBasicServer::send_data(connfd, &response, sizeof(response));
 		eventServer->sendEvent(CZapitClient::EVT_BOUQUETS_CHANGED, CEventServer::INITID_ZAPIT);
@@ -1430,7 +1440,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.308 2003/05/07 18:28:10 digi_casi Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.309 2003/05/10 09:42:34 digi_casi Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
@@ -1472,7 +1482,7 @@ int main(int argc, char **argv)
 	else
 		setTVMode();
 
-	if (prepare_channels() < 0)
+	if (prepare_channels(config.getInt32("diseqcType", NO_DISEQC)) < 0)
 		WARN("error parsing services");
 	else
 		INFO("channels have been loaded succesfully");

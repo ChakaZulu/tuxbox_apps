@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.112 2003/05/10 06:56:03 digi_casi Exp $
+ * $Id: scan.cpp,v 1.113 2003/05/10 09:42:34 digi_casi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -59,6 +59,7 @@ extern CFrontend *frontend;
 extern xmlDocPtr scanInputParser;
 extern std::map <uint8_t, std::string> scanProviders;
 extern std::map <string, int32_t> satellitePositions;
+extern std::map <int32_t, uint8_t> motorPositions;
 extern CZapitClient::bouquetMode bouquetMode;
 extern CEventServer *eventServer;
 
@@ -472,6 +473,8 @@ void *start_scanthread(void *)
  	found_tv_chans = 0;
  	found_radio_chans = 0;
  	found_data_chans = 0;
+ 	int32_t currentSatellitePosition = 0;
+ 	int32_t satellitePosition = 0;
 
 
 	curr_sat = 0;
@@ -529,10 +532,12 @@ void *start_scanthread(void *)
 					diseqc_pos = spI->first;
 				
 				/* position satellite dish if provider is on a different satellite */
-				if ((frontend->getDiseqcType() == DISEQC_1_2) && (frontend->getCurrentSatellitePosition() != satellitePositions[providerName]))
+				currentSatellitePosition = frontend->getCurrentSatellitePosition();
+				satellitePosition = satellitePositions[providerName];
+				if ((frontend->getDiseqcType() == DISEQC_1_2) && (currentSatellitePosition != satellitePosition))
 				{
-					printf("[scan] start_scanthread: moving satellite dish from satellite position %d to %d\n", frontend->getCurrentSatellitePosition(), satellitePositions[providerName]);
-					frontend->positionMotor(diseqc_pos);
+					printf("[scan] start_scanthread: moving satellite dish from satellite position %d to %d\n", currentSatellitePosition, satellitePosition);
+					frontend->positionMotor(motorPositions[satellitePosition]);
 				}
 						
 				scan_provider(search, providerName, satfeed, diseqc_pos);
