@@ -827,9 +827,7 @@ static eString getLeftNavi(eString mode, eString path)
 	else
 	if (mode.find("help") == 0)
 	{
-		result += button(110, "DMM", LEFTNAVICOLOR, "?mode=helpDMM");
-		result += "<br>";
-		result += button(110, "DMM Sites", LEFTNAVICOLOR, "?mode=helpOfficialSites");
+		result += button(110, "DMM Sites", LEFTNAVICOLOR, "?mode=helpDMMSites");
 		result += "<br>";
 		result += button(110, "Other Sites", LEFTNAVICOLOR, "?mode=helpOtherSites");
 		result += "<br>";
@@ -1944,16 +1942,10 @@ static eString getContent(eString mode, eString path)
 		result += aboutDreambox();
 	}
 	else
-	if (mode == "helpDMM")
-	{
-		result = getTitle("HELP: DMM");
-		result += readFile(TEMPLATE_DIR + "helpDMM.tmp");
-	}
-	else
-	if (mode == "helpOfficialSites")
+	if (mode == "helpDMMSites")
 	{
 		result = getTitle("HELP: Official Sites");
-		result += readFile(TEMPLATE_DIR + "helpOfficialSites.tmp");
+		result += readFile(TEMPLATE_DIR + "helpDMMSites.tmp");
 	}
 	else
 	if (mode == "helpOtherSites")
