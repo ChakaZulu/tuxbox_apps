@@ -568,6 +568,7 @@ nfs.ip Server IP
 nfs.localdir lokales Verzeichnis
 nfs.mount Netzwerk Verzeichnis mounten
 nfs.mount_options Mount-Optionen
+nfs.mountok Mount erfolgreich
 nfs.mounterror Mount-Fehler
 nfs.mounterror_notsup Dateisystem-Typ wird nicht unterstützt.
 nfs.mountnow Jetzt mounten
@@ -652,9 +653,11 @@ rclock.lockmsg Die Fernbedienung der dbox2 wird gesperrt.\nUm die Sperre aufzuhe
 rclock.menueadd FB sperren 
 rclock.title Fernbedienung sperren
 rclock.unlockmsg Fernbedienung reaktiviert...
+recordingmenu.choose_direct_rec_dir Bei Sofortaufn. Verzeichnisauswahl
 recordingmenu.defdir Aufnahmeverzeichnis
+recordingmenu.epg_for_filename lange Dateinamen (mit EPG-Daten)
 recordingmenu.file Direkt (Datei)
-recordingmenu.filesettingsseparator Direktaufnahme
+recordingmenu.filesettings Direktaufnahme Einstellungen
 recordingmenu.head Aufnahme Einstellungen
 recordingmenu.help Aufnahmegeräte:\n-----------------------\nServer:\nauf PC mit Hilfe eines Streaming-Programmes\n\n(analoger) Videorekorder:\nüber VCR-Ausgang\n\nDirekt (Datei):\nauf ein per NFS gemountetes Verzeichnis\noder eine interne Festplatte\nTS: SPTS-Mode Treiber laden\nPES: SPTS-Mode Treiber nicht laden\n\n\nMaximale Dateigröße:\n----------------------\nNFS V2: 2 GB (2048 MB)\nNFS V3: fast unendlich (0 MB)\nFAT: 2 GB (2048 MB)\nFAT32: 4 GB (4096 MB)
 recordingmenu.no_scart Unterdrücke Scart-Umschaltung
@@ -810,6 +813,7 @@ timerlist.name Timerliste
 timerlist.new Neuer Timer
 timerlist.plugin Plugin
 timerlist.program.unknown Programm unbekannt
+timerlist.recording_dir Aufnahmeverzeichnis
 timerlist.reload Aktualisieren
 timerlist.repeat Wiederholung
 timerlist.repeat.biweekly 2-wöchentlich
