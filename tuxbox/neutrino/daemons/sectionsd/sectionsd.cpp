@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.119 2002/04/18 10:43:56 field Exp $
+//  $Id: sectionsd.cpp,v 1.120 2002/04/18 13:09:53 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.120  2002/04/18 13:09:53  field
+//  Sectionsd auf clientlib umgestellt :)
+//
 //  Revision 1.119  2002/04/18 10:43:56  field
 //  Clientlib
 //
@@ -1631,7 +1634,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.119 2002/04/18 10:43:56 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.120 2002/04/18 13:09:53 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -2837,7 +2840,7 @@ static void *connectionThread(void *conn)
 
 	try
 	{
-		dprintf("Connection from %s\n", inet_ntoa(client->clientAddr.sin_addr));
+		dprintf("Connection from UDS\n");
 
 		if(fcntl(client->connectionSocket, F_SETFL, O_NONBLOCK))
 		{
@@ -2895,7 +2898,7 @@ static void *connectionThread(void *conn)
 				dputs("Unknow format or version of request!");
 		}
 		close(client->connectionSocket);
-		dprintf("Connection from %s closed!\n", inet_ntoa(client->clientAddr.sin_addr));
+		dprintf("Connection closed!\n");
 		delete client;
 
 	} // try
@@ -3802,9 +3805,8 @@ int main(int argc, char **argv)
 {
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
-	struct sockaddr_in serverAddr;
 
-	printf("$Id: sectionsd.cpp,v 1.119 2002/04/18 10:43:56 field Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.120 2002/04/18 13:09:53 field Exp $\n");
 	try
 	{
 
@@ -3856,22 +3858,33 @@ int main(int argc, char **argv)
 		for(int x=0;x<32;x++)
 			signal(x,signalHandler);
 
-		// den Port fuer die Clients oeffnen
-		listenSocket = socket(AF_INET, SOCK_STREAM, 0);
-		memset( &serverAddr, 0, sizeof(serverAddr) );
-		serverAddr.sin_family = AF_INET;
-		serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-		serverAddr.sin_port = htons(sectionsd::portNumber);
-		if(bind(listenSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr) ))
+		struct sockaddr_un servaddr;
+		int clilen;
+		memset(&servaddr, 0, sizeof(struct sockaddr_un));
+		servaddr.sun_family = AF_UNIX;
+		strcpy(servaddr.sun_path, SECTIONSD_UDS_NAME);
+		clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
+		unlink(SECTIONSD_UDS_NAME);
+
+	    //network-setup
+		if ((listenSocket = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
 		{
-			perror("[sectionsd] bind");
-			return 2;
+			perror("socket");
 		}
-		if(listen(listenSocket, 5))
-		{ // max. 5 Clients
-			perror("[sectionsd] listen");
-			return 3;
+
+		if ( bind(listenSocket, (struct sockaddr*) &servaddr, clilen) <0 )
+		{
+			perror("sectionsd] bind failed...\n");
+			exit(-1);
 		}
+
+
+		if (listen(listenSocket, 5) !=0)
+		{
+			perror("[sectionsd] listen failed...\n");
+			exit( -1 );
+		}
+
 
 		eventServer = new CEventServer;
 		timerdClient = new CTimerdClient;
@@ -3921,7 +3934,7 @@ int main(int argc, char **argv)
 
   		// Unsere Endlosschliefe
 
-		socklen_t clientInputLen = sizeof(serverAddr);
+		socklen_t clientInputLen = sizeof(servaddr);
 		for(;listenSocket;)
 		{
 			// wir warten auf eine Verbindung
@@ -3933,6 +3946,7 @@ int main(int argc, char **argv)
 				client->connectionSocket = accept(listenSocket, (struct sockaddr *)&(client->clientAddr), &clientInputLen);
 			} while(client->connectionSocket == -1);
 
+/*
 			pthread_t threadConnection;
 			rc = pthread_create(&threadConnection, &conn_attrs, connectionThread, client);
 			if(rc)
@@ -3940,6 +3954,10 @@ int main(int argc, char **argv)
 				fprintf(stderr, "[sectionsd] failed to create connection-thread (rc=%d)\n", rc);
 				return 4;
 			}
+*/
+			// VERSUCH OHNE CONNECTION-THREAD!
+			// spart die thread-creation-zeit, und die Locks lassen ohnehin nur ein cmd gleichzeitig zu
+            connectionThread(client);
 		}
 
 	} // try

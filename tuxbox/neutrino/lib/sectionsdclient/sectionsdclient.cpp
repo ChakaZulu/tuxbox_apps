@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.16 2002/04/18 12:25:09 field Exp $
+  $Id: sectionsdclient.cpp,v 1.17 2002/04/18 13:09:53 field Exp $
 
   License: GPL
 
@@ -20,8 +20,8 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: sectionsdclient.cpp,v $
-  Revision 1.16  2002/04/18 12:25:09  field
-  Vereinfachungen, neue cmds
+  Revision 1.17  2002/04/18 13:09:53  field
+  Sectionsd auf clientlib umgestellt :)
 
   Revision 1.14  2002/04/17 15:58:24  field
   Anpassungen
@@ -76,18 +76,22 @@ CSectionsdClient::CSectionsdClient()
 
 bool CSectionsdClient::sectionsd_connect()
 {
-	sockaddr_in servaddr;
-	char rip[]="127.0.0.1";
-	memset(&servaddr,0,sizeof(servaddr));
-	servaddr.sin_family=AF_INET;
+	struct sockaddr_un servaddr;
+	int clilen;
+	memset(&servaddr, 0, sizeof(struct sockaddr_un));
+	servaddr.sun_family = AF_UNIX;
+	strcpy(servaddr.sun_path, SECTIONSD_UDS_NAME);
+	clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
 
-	inet_pton(AF_INET, rip, &servaddr.sin_addr);
-	sock_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-
-	servaddr.sin_port=htons(sectionsd::portNumber);
-	if(connect(sock_fd, (sockaddr *)&servaddr, sizeof(servaddr))==-1)
+	if ((sock_fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
 	{
-		perror("[sectionsdclient] couldn't connect to sectionsd!");
+		perror("[sectionsdclient] socket");
+		return false;
+	}
+
+	if(connect(sock_fd, (struct sockaddr*) &servaddr, clilen) <0 )
+	{
+  		perror("[sectionsdclient] connect");
 		return false;
 	}
 	return true;

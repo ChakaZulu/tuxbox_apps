@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.35 2002/04/18 10:43:56 field Exp $
+//  $Id: sectionsdMsg.h,v 1.36 2002/04/18 13:09:53 field Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -25,6 +25,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsdMsg.h,v $
+//  Revision 1.36  2002/04/18 13:09:53  field
+//  Sectionsd auf clientlib umgestellt :)
+//
 //  Revision 1.35  2002/04/18 10:43:56  field
 //  Clientlib
 //
@@ -123,10 +126,10 @@
 
 using namespace std;
 
+#define SECTIONSD_UDS_NAME "/tmp/sectionsd.sock"
+
 struct sectionsd
 {
-	static const unsigned short portNumber=1600;
-
 	struct epgflags {
 		enum
 		{
