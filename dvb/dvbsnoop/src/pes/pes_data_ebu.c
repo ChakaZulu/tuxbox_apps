@@ -1,5 +1,5 @@
 /*
-$Id: pes_data_ebu.c,v 1.3 2004/03/09 20:59:23 rasc Exp $
+$Id: pes_data_ebu.c,v 1.4 2004/03/10 21:05:53 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: pes_data_ebu.c,v 1.3 2004/03/09 20:59:23 rasc Exp $
 
 
 $Log: pes_data_ebu.c,v $
+Revision 1.4  2004/03/10 21:05:53  rasc
+WSS (Wide Screen Signalling)  data decoding
+
 Revision 1.3  2004/03/09 20:59:23  rasc
 VPS decoding (someone check the NPP & PTY code output please...)
 
@@ -43,6 +46,7 @@ Revision 1.1  2004/02/02 23:41:23  rasc
 #include "strings/dvb_str.h"
 #include "ebu/teletext.h"
 #include "ebu/vps.h"
+#include "ebu/wss.h"
 #include "ebu/ebu_misc.h"
 #include "misc/helper.h"
 #include "misc/hexprint.h"
@@ -181,7 +185,7 @@ static int vps_data_field (int v, u_char *b, int len)
 {
    int  v1 = v+1;
 
-   out_nl (v,"VPS (video programme system) data:");
+   out_nl (v,"VPS (Video Programming System) data:");
    indent (+1);
 
    	ebu_rfl_out (v1,b);
@@ -201,14 +205,13 @@ static int wss_data_field (int v, u_char *b, int len)
 {
    int  v1 = v+1;
 
-   out_nl (v,"WSS (wide screen signalling) data:");
+   out_nl (v,"WSS (Wide Screen Signalling) data:");
    indent (+1);
 
    	ebu_rfl_out (v1,b);
-
-   	outBit_Sx (v1,"wss_data_block: ",	b, 8,14);
-	  out_nl (v1, "  [= see EN 300 294]");		// $$$ TODO ?
-   	outBit_Sx_NL (6,"reserved: ",		b,22, 2);
+	b++;
+	print_wss_decode (v1, b);		// 14 bit
+   	outBit_Sx_NL (v1,"reserved: ",		b,14, 2);
 
    indent (-1);
    return 3;
@@ -225,7 +228,7 @@ static int closed_caption_data_field (int v, u_char *b, int len)
 {
    int  v1 = v+1;
 
-   out_nl (v,"WSS (wide screen signalling) data:");
+   out_nl (v,"CC (Closed Caption) data:");
    indent (+1);
 
    	ebu_rfl_out (v1,b);

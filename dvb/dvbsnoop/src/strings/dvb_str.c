@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.46 2004/03/09 20:59:23 rasc Exp $
+$Id: dvb_str.c,v 1.47 2004/03/10 21:05:53 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.46 2004/03/09 20:59:23 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.47  2004/03/10 21:05:53  rasc
+WSS (Wide Screen Signalling)  data decoding
+
 Revision 1.46  2004/03/09 20:59:23  rasc
 VPS decoding (someone check the NPP & PTY code output please...)
 
@@ -1303,9 +1306,9 @@ char *dvbstrDataService_ID (u_int i)
      {  0x01, 0x01,  "EBU teletext" },
      {  0x02, 0x02,  "inverted teletext" },
      {  0x03, 0x03,  "reserved" },
-     {  0x04, 0x04,  "VPS" },
-     {  0x05, 0x05,  "WSS" },
-     {  0x06, 0x06,  "Closed Caption" },
+     {  0x04, 0x04,  "VPS (Video Programming System)" },
+     {  0x05, 0x05,  "WSS (Wide Screen Signalling)" },
+     {  0x06, 0x06,  "CC (Closed Caption)" },
      {  0x07, 0x07,  "monochrome 4:2:2 samples" },
      {  0x08, 0xFF,  "reserved" },
      {  0,0, NULL }
@@ -2517,9 +2520,9 @@ char *dvbstrPES_EBUDataUnitID (u_int i)
 	{ 0x80, 0xBE,   "user defined" },
 	{ 0xC0, 0xC0,   "inverted teletext" },
 	{ 0xC1, 0xC2,   "reserved" },
-	{ 0xC3, 0xC3,   "VPS" },
-	{ 0xC4, 0xC4,   "WSS" },
-	{ 0xC5, 0xC5,   "closed caption" },
+	{ 0xC3, 0xC3,   "VPS (Video Programming System)" },
+	{ 0xC4, 0xC4,   "WSS (Wide Screen Signalling)" },
+	{ 0xC5, 0xC5,   "CC (Closed Caption)" },
 	{ 0xC6, 0xC6,   "monochrome 4:2:2 samples" },
 	{ 0xC7, 0xFE,   "reserved" },
 	{ 0xFF, 0xFF,   "data_unit for stuffing" },
@@ -2625,7 +2628,7 @@ char *dvbstrVPS_cni_countrycode (u_int i)
   char *s = "";
 
   // $$$ TODO  check if b_1_4 start really at "1"
-  char  *table[6][16] = {
+  char  *t[6][16] = {
 //	  0     1     2     3     4     5     6     7     8     9     A     B     C     D     E      F
 /*0*/	{ "",   "",   "",   "",   "",   "",   "",   "",   "",   "",   "",   "",   "",   "",   "",    ""  },
 /*1*/	{ "",   "",   "DZ", "AD", "IL", "IT", "BE", "BY", "AZR","AL", "AT", "HU", "MT", "DE", "CNR","EG" },
@@ -2639,7 +2642,7 @@ char *dvbstrVPS_cni_countrycode (u_int i)
   b_5_8 = (i >> 4) & 0x0F; 
 
   if (b_1_4 < 5) {
-	  s = table[b_1_4][b_5_8];
+	  s = t[b_1_4][b_5_8];
   }
 
   return s;
@@ -2682,6 +2685,176 @@ char *dvbstrVPS_npp (u_int i)
 
   return findTableID (Table, i);
 }
+
+
+
+
+/*
+  -- WSS Aspect Ratio  b0..b3 
+  -- Warning!  Bitvalues are reversed due to lsb...msb issue
+  -- values includes parity bit!
+  -- see: ETSI EN 300 294  
+*/
+
+char *dvbstrWSS_aspect_ratio (u_int i)
+{
+  STR_TABLE  Table[] = {
+	{ 0x01, 0x01,   "4:3 // full format // pos. not applicable // active lines: 576" },
+	{ 0x02, 0x02,   "16:9 // letterbox // top // active lines: 430" },
+	{ 0x04, 0x04,   "14:9 // letterbox // top // active lines: 504" },
+	{ 0x07, 0x07,   "14:9 // full format // center // active lines: 576" },
+	{ 0x08, 0x08,   "14:9 // letterbox // center // active lines: 504" },
+	{ 0x0B, 0x0B,   ">16:9 // letterbox // center // active lines: not defined" },
+	{ 0x0D, 0x0D,   "16:9 // letterbox // center // active lines: 430" },
+	{ 0x0E, 0x0E,   "16:9 // full format (anamorphic) // pos. not applicable // active lines: 576" },
+     	{  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+/*
+  -- WSS  film bit
+  -- ETSI EN 300 294  
+*/
+
+char *dvbstrWSS_film_bit (u_int i)
+{
+  STR_TABLE  Table[] = {
+	{ 0x00, 0x00,   "camera mode" },
+	{ 0x01, 0x01,   "film mode" },
+     	{  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+/*
+  -- WSS  color coding bit
+  -- ETSI EN 300 294  
+*/
+
+char *dvbstrWSS_color_coding_bit (u_int i)
+{
+  STR_TABLE  Table[] = {
+	{ 0x00, 0x00,   "standard coding" },
+	{ 0x01, 0x01,   "Motion Adaptive Color Plus" },
+     	{  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+/*
+  -- WSS  helper bit
+  -- ETSI EN 300 294  
+*/
+
+char *dvbstrWSS_helper_bit (u_int i)
+{
+  STR_TABLE  Table[] = {
+	{ 0x00, 0x00,   "no helper" },
+	{ 0x01, 0x01,   "Modulated helper" },
+     	{  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+/*
+  -- WSS  subtitles within teletext bit
+  -- ETSI EN 300 294  
+*/
+
+char *dvbstrWSS_subtitleTeletext_bit (u_int i)
+{
+  STR_TABLE  Table[] = {
+	{ 0x00, 0x00,   "no subtitles within teletext" },
+	{ 0x01, 0x01,   "subtitles within Teletext" },
+     	{  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+/*
+  -- WSS  subtitling mode
+  -- ETSI EN 300 294  
+*/
+
+char *dvbstrWSS_subtitling_mode (u_int i)
+{
+  STR_TABLE  Table[] = {
+	{ 0x00, 0x00,   "no open subtitles" },
+	{ 0x01, 0x01,   "subtitles out of active image area" },
+	{ 0x02, 0x02,   "subtitles in active image area" },
+	{ 0x03, 0x03,   "reserved" },
+     	{  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+/*
+  -- WSS  surround bit
+  -- ETSI EN 300 294  
+*/
+
+char *dvbstrWSS_surround_bit (u_int i)
+{
+  STR_TABLE  Table[] = {
+	{ 0x00, 0x00,   "no surround sound information" },
+	{ 0x01, 0x01,   "surround sound mode" },
+     	{  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+/*
+  -- WSS  copyright bit
+  -- ETSI EN 300 294  
+*/
+
+char *dvbstrWSS_copyright_bit (u_int i)
+{
+  STR_TABLE  Table[] = {
+	{ 0x00, 0x00,   "no copyright asserted or status unknown" },
+	{ 0x01, 0x01,   "copyright asserted" },
+     	{  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+/*
+  -- WSS  copyright generation bit
+  -- ETSI EN 300 294  
+*/
+
+char *dvbstrWSS_copy_generation_bit (u_int i)
+{
+  STR_TABLE  Table[] = {
+	{ 0x00, 0x00,   "copying not restricted" },
+	{ 0x01, 0x01,   "copying restricted" },
+     	{  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.h,v 1.18 2004/03/09 20:59:23 rasc Exp $ 
+$Id: dvb_str.h,v 1.19 2004/03/10 21:05:53 rasc Exp $ 
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dvb_str.h,v 1.18 2004/03/09 20:59:23 rasc Exp $
 
 
 $Log: dvb_str.h,v $
+Revision 1.19  2004/03/10 21:05:53  rasc
+WSS (Wide Screen Signalling)  data decoding
+
 Revision 1.18  2004/03/09 20:59:23  rasc
 VPS decoding (someone check the NPP & PTY code output please...)
 
@@ -144,6 +147,16 @@ char *dvbstrVPS_pcs_audio (u_int i);
 char *dvbstrVPS_cni_countrycode (u_int i);
 char *dvbstrVPS_pty (u_int i);
 char *dvbstrVPS_npp (u_int i);
+
+char *dvbstrWSS_aspect_ratio (u_int i);
+char *dvbstrWSS_film_bit (u_int i);
+char *dvbstrWSS_color_coding_bit (u_int i);
+char *dvbstrWSS_helper_bit (u_int i);
+char *dvbstrWSS_subtitleTeletext_bit (u_int i);
+char *dvbstrWSS_subtitling_mode (u_int i);
+char *dvbstrWSS_surround_bit (u_int i);
+char *dvbstrWSS_copyright_bit (u_int i);
+char *dvbstrWSS_copy_generation_bit (u_int i);
 
 
 /* -- Div Stuff */
