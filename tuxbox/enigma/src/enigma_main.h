@@ -321,7 +321,7 @@ class eZapMain: public eWidget
 public:
 	enum { modeTV, modeRadio, modeFile, modeEnd };
 	enum { stateSleeping=2, stateInTimerMode=4, stateRecording=8, recDVR=16, recVCR=32, recNgrab=64, statePaused=128 };
-	enum { messageGoSleep=2, messageShutdown, messageNoRecordSpaceLeft, messageWakeUp };
+	enum { messageGoSleep=2, messageShutdown, messageNoRecordSpaceLeft, messageWakeUp, messageCheckVCR };
 	enum { pathBouquets=1, pathProvider=2, pathRecordings=4, pathPlaylist=8, pathAll=16, pathRoot=32, pathSatellites=64 };
 	enum { listAll, listSatellites, listProvider, listBouquets };
 private:

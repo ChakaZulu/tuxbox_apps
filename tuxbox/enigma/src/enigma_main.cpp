@@ -1798,7 +1798,6 @@ eZapMain::eZapMain()
 	dvrInfoBar->zOrderRaise();
 	dvbInfoBar->zOrderRaise();
 	CONNECT( eStreamWatchdog::getInstance()->VCRActivityChanged, eZapMain::toggleScart );
-	eStreamWatchdog::getInstance()->reloadSettings();
 #ifndef DISABLE_CI
 	CONNECT( mmi_messages.recv_msg, eZapMain::handleMMIMessage );
 	if ( eDVB::getInstance()->DVBCI )
@@ -1815,6 +1814,7 @@ eZapMain::eZapMain()
 		else if ( modeLast[mode].current() )
 			playService( modeLast[mode].current() ,0 );  // then play the last service
 	}
+	message_notifier.send(eZapMain::messageCheckVCR);
 }
 
 #ifndef DISABLE_CI
@@ -6325,63 +6325,63 @@ void eZapMain::postMessage(const eZapMessage &message, int clear)
 
 void eZapMain::gotMessage(const int &c)
 {
-	if ( c == eZapMain::messageGoSleep )
+	switch (c)
 	{
-		if (!eZapStandby::getInstance())
-		{
+		case eZapMain::messageGoSleep:
+			if (!eZapStandby::getInstance())
+			{
 	// close all open windows before goto standby
 				if(eApp->looplevel() > 1)
+				{
+					eApp->exit_loop();
+					message_notifier.send(c);
+					return;
+				}
+				eDebug("goto Standby (sleep)");
+				standbyPress(0);
+				standbyRelease();
+			}
+			return;
+		case eZapMain::messageWakeUp:
+			if ( eZapStandby::getInstance() )
+				eZapStandby::getInstance()->wakeUp(0);
+			else if ( enigmaVCR::getInstance() )
+				enigmaVCR::getInstance()->switchBack();
+			return;
+		case eZapMain::messageCheckVCR:
+			eStreamWatchdog::getInstance()->reloadSettings();
+			return;
+#ifndef DISABLE_FILE
+		case eZapMain::messageNoRecordSpaceLeft:
+			if (state & stateInTimerMode)
 			{
-				eApp->exit_loop();
+			 	if (state & stateRecording)
+					eTimerManager::getInstance()->abortEvent( ePlaylistEntry::errorNoSpaceLeft );
+				else
+					eDebug("no state Recording!");
+			}
+			else
+				eWarning("noSpaceLeft message.. but not in TimerMode");
+			return;
+#endif
+		default:
+			if ((!c) && pMsg) // noch eine gueltige message vorhanden
+				return;
+			if ((!isVisible()) && currentFocus)
+			{
+				pauseMessages();
 				message_notifier.send(c);
 				return;
 			}
-			eDebug("goto Standby (sleep)");
-			standbyPress(0);
-			standbyRelease();
-		}
-		return;
+			pauseMessages();
+			while (!messages.empty())
+			{
+				nextMessage();
+				if (pMsg)
+					break;
+			}
+			startMessages();
 	}
-	else if ( c == eZapMain::messageWakeUp )
-	{
-		if ( eZapStandby::getInstance() )
-			eZapStandby::getInstance()->wakeUp(0);
-		else if ( enigmaVCR::getInstance() )
-			enigmaVCR::getInstance()->switchBack();
-		return;
-	}
-#ifndef DISABLE_FILE
-	else if ( c == eZapMain::messageNoRecordSpaceLeft )
-	{
-		if (state & stateInTimerMode)
-		{
-		 	if (state & stateRecording)
-				eTimerManager::getInstance()->abortEvent( ePlaylistEntry::errorNoSpaceLeft );
-			else
-				eDebug("no state Recording!");
-		} else
-			eWarning("noSpaceLeft message.. but not in TimerMode");
-		return;
-	}
-#endif
-	if ((!c) && pMsg) // noch eine gueltige message vorhanden
-	{
-		return;
-	}
-	if ((!isVisible()) && currentFocus)
-	{
-		pauseMessages();
-		message_notifier.send(c);
-		return;
-	}
-	pauseMessages();
-	while (!messages.empty())
-	{
-		nextMessage();
-		if (pMsg)
-			break;
-	}
-	startMessages();
 }
 
 void eZapMain::nextMessage()
