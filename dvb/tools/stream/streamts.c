@@ -1,5 +1,5 @@
 /*
- * $Id: streamts.c,v 1.11 2003/01/07 00:43:59 obi Exp $
+ * $Id: streamts.c,v 1.12 2003/05/21 17:26:50 obi Exp $
  * 
  * inetd style daemon for streaming avpes, ps and ts
  * 
@@ -58,7 +58,7 @@
 #define DMX_BUFFER_SIZE (256 * 1024)
 
 /* maximum number of pes pids */
-#define MAXPIDS		8
+#define MAXPIDS		64
 
 /* tcp packet data size */
 #define PACKET_SIZE	1448
