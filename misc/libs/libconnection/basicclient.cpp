@@ -1,9 +1,9 @@
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicclient.cpp,v 1.10 2002/12/08 19:52:52 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicclient.cpp,v 1.11 2003/02/24 14:05:02 thegoodguy Exp $
  *
- * Basic Client Class (Neutrino) - DBoxII-Project
+ * Basic Client Class - The Tuxbox Project
  *
- * (C) 2002 by thegoodguy <thegoodguy@berlios.de>
+ * (C) 2002-2003 by thegoodguy <thegoodguy@berlios.de>
  *
  * License: GPL
  *
@@ -23,15 +23,17 @@
  *
  */
 
-#include <stdio.h>
-#include <unistd.h>
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-
 #include "basicclient.h"
 #include "basicmessage.h"
+#include "basicsocket.h"
+
+#include <stdio.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <unistd.h>
+
+#define TIMEOUT_SEC  2
+#define TIMEOUT_USEC 0
 
 CBasicClient::CBasicClient()
 {
@@ -79,16 +81,19 @@ void CBasicClient::close_connection()
 
 bool CBasicClient::send_data(const char* data, const size_t size)
 {
-	if (sock_fd == -1)
-	    return false;
+	timeval timeout;
 
-	if (::send(sock_fd, data, size, MSG_NOSIGNAL) < 0) // better: == -1
+	if (sock_fd == -1)
+		return false;
+	
+	timeout.tv_sec  = TIMEOUT_SEC;
+	timeout.tv_usec = TIMEOUT_USEC;
+	
+	if (::send_data(sock_fd, data, size, timeout) == false)
 	{
 		printf("[CBasicClient] send failed.\n");
-		perror(getSocketName());
 		return false;
 	}
-	
 	return true;
 }
 

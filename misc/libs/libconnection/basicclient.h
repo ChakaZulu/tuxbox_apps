@@ -1,9 +1,9 @@
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicclient.h,v 1.4 2002/12/08 10:46:10 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicclient.h,v 1.5 2003/02/24 14:05:02 thegoodguy Exp $
  *
- * Basic Client Class (Neutrino) - DBoxII-Project
+ * Basic Client Class - The Tuxbox Project
  *
- * (C) 2002 by thegoodguy <thegoodguy@berlios.de>
+ * (C) 2002-2003 by thegoodguy <thegoodguy@berlios.de>
  *
  * License: GPL
  *
@@ -25,6 +25,9 @@
 
 #ifndef __basicclient__
 #define __basicclient__
+
+#include <malloc.h>
+#include <sys/types.h>
 
 class CBasicClient
 {
