@@ -4,6 +4,16 @@
  *             (c) dbluelle 2004 (dbluelle@blau-weissoedingen.de)             *
  ******************************************************************************
 
+	25.07.2004 Version 1.4
+	 - Taskmanager added (on Info-Button)
+	 - scrolling back/forward possible when executing commands or scripts
+	 - scrolling back/forward in viewer not limited to 100k anymore
+	 - remember current selected file on plugin exit
+	 - Support for DMM-Keyboard installed
+	 - delay for pressed button
+	 - Bugfix: workaround for button-press bug from enigma
+	 - create link (Button 0): display current filename as name.
+
 	21.06.2004 Version 1.3
 	 - FTP-Client added
 	 - minor bugfixes in editor
@@ -104,14 +114,15 @@
 #define DEFAULT_PATH "/"
 #define charset " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#!$%&?*()@\\/=<>+-_,.;:"
 
-#define FILEBUFFER_SIZE 100 * 1024 // Edit files up to 100k
+#define FILEBUFFER_SIZE (100 * 1024) // Edit files up to 100k
 
-#define MSG_VERSION    "Tuxbox Commander Version 1.3\n"
+#define MSG_VERSION    "Tuxbox Commander Version 1.4\n"
 #define MSG_COPYRIGHT  "© dbluelle 2004"
 //rc codes
 
 //rc codes
 #if TUXCOM_DBOX_VERSION < 3
+
 #define KEY_0		0x5C00
 #define KEY_1		0x5C01
 #define KEY_2		0x5C02
@@ -165,6 +176,7 @@
 #define	RC_HELP		0x17
 #define	RC_DBOX		0x18
 #define	RC_HOME		0x1F
+
 
 //freetype stuff
 
@@ -228,11 +240,12 @@ struct input_event ev;
 #endif
 
 unsigned short rccode;
+char kbcode;
 
 //some data
 
 int avs, saa, fnc_old, saa_old, screenmode;
-int rc, fb;
+int rc, fb, kb;
 int sx, ex, sy, ey;
 int PosX, PosY, StartX, StartY, FrameWidth, NameWidth, SizeWidth;
 int curframe, cursort, curvisibility;
@@ -280,6 +293,7 @@ int language;
 #define ACTION_CLEAR     7
 #define ACTION_UPPERCASE 8
 #define ACTION_LOWERCASE 9
+#define ACTION_KILLPROC  10
 
 
 
@@ -303,6 +317,7 @@ int language;
 #define SHOW_NO_OUTPUT  0
 #define SHOW_OUTPUT     1
 
+#define REPEAT_TIMER 3
 
 #define INI_VERSION 1
 
@@ -333,7 +348,12 @@ enum {MSG_EXEC              ,
       MSG_FTP_NOCONN        ,
       MSG_FTP_CONN          ,
       MSG_FTP_ERROR         ,
-      MSG_FTP_READDIR       };
+      MSG_FTP_READDIR       ,
+      MSG_KILLPROC          ,
+      MSG_KILLPROC2         ,
+      MSG_PROCESSID         ,
+      MSG_PROCESSUSER       ,
+      MSG_PROCESSNAME       };
 
 enum {INFO_COPY   ,
       INFO_MOVE   ,
@@ -376,13 +396,18 @@ char *msg[]   = { "Execute '%s' ?"                             ,"'%s' ausführen 
 				  "execute linux command"                      ,"Linux-Kommando ausführen"                        ,
 				  "save changes to '%s' ?"                     ,"Änderungen an '%s' speichern ?"                  ,
 				  "file '%s' already exists"                   ,"Datei '%s' existiert bereits"                    ,
-				  "line %d of %d"                              ,"Zeile %d von %d"                                 ,
+				  "line %d of %d%s"                            ,"Zeile %d von %d%s"                               ,
 				  "reading archive directory..."               ,"Lese Archiv-Verzeichnis..."                      ,
 				  "extracting from file '%s'..."               ,"Entpacke aus Datei '%s'"                         ,
 				  "no connection to"                           ,"Keine Verbindung zu"                             ,
 				  "connecting to"                              ,"Verbinde mit"                                    ,
 				  "error in ftp command '%s%s'"                ,"Fehler bei FTP-Kommando '%s%s'"                  ,
-				  "reading directory"                          ,"Lese Verzeichnis"                                };
+				  "reading directory"                          ,"Lese Verzeichnis"                                ,
+				  "Warning: killing a process can make your box unstable!","Warnung: Prozesse beenden kann die Box instabil werden lassen!",
+				  "Do you really want to kill process '%s'?"              ,"Wollen sie wirklich den Prozess '%s' beenden?"                 ,
+				  "Prozess ID"                                            ,"process id"                                                    ,
+				  "Besitzer"                                              ,"owner"                                                         ,
+				  "Prozess"                                               ,"process"                                                       };
 
 char *menuline[]  = { ""      , ""           ,
                       "rights", "Rechte"     ,
@@ -404,7 +429,8 @@ char *colorline[] = { ""               , "" ,
                       "insert line"    , "Zeile einfügen"           ,
                       "clear input"    , "Eingabe löschen"          ,
                       "set uppercase"  , "Grossbuchstaben"          ,
-                      "set lowercase"  , "Kleinbuchstaben"          };
+                      "set lowercase"  , "Kleinbuchstaben"          ,
+                      "kill process"   , "Prozess beenden"          };
 char *mbox[]     = { "OK"           , "OK"                ,
                      "Cancel"       , "Abbrechen"         ,
                      "Hidden"       , "Versteckt"         ,
@@ -472,6 +498,7 @@ void 	          	RenderFrame(int frame);
 void 	          	RenderMenuLine(int highlight, int refresh);
 void 	          	FillDir(int frame, int selmode);
 struct fileentry* 	GetSelected(int frame);
+void 				SetSelected(int frame, const char* szFile);
 void 	          	GetSizeString(char* sizeString, unsigned long long size);
 int 	          	MessageBox(char* msg1,char* msg2, int mode);
 int 	          	GetInputString(int width, int maxchars, char* str, char * msg);
@@ -489,7 +516,8 @@ void 				DoCopy(struct fileentry* pfe, int typ);
 void 				DoZipCopyEnd();
 void 				DoMove(char* szFile, int typ);
 void	          	DoViewFile();
-void	          	DoEditFile(char* szFile, int writable);
+void	          	DoEditFile(char* szFile, char* szTitle, int writable);
+void	          	DoTaskManager();
 int               	DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, int back);
 int 	          	ShowProperties();
 void 		 	  	RenderButtons(int he, int mode);

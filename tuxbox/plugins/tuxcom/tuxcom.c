@@ -30,7 +30,7 @@
 
 int GetRCCode(int scrollmode)
 {
-
+	static int count = 0;
 #if TUXCOM_DBOX_VERSION < 3
 	static unsigned short LastKey = -1;
 #else
@@ -39,174 +39,123 @@ int GetRCCode(int scrollmode)
 #endif
 	//get code
 #if TUXCOM_DBOX_VERSION < 3
+	int bytesavail = 0;
+	kbcode = 0;
 	if(read(rc, &rccode, 2) == 2)
 	{
-		if (rccode != LastKey)
+		// Tastaturabfrage
+		ioctl(kb, FIONREAD, &bytesavail);
+		if (bytesavail>0)
 		{
-			LastKey = rccode;
-
-			if ((rccode & 0xFF00) == 0x5C00)
+			int i;
+			for (i =0; i < bytesavail; i++) 	read(kb,&kbcode,1);
+/*
+			char tmsg[100];
+			sprintf(tmsg,"KeyboardCode:%x, avail:%d, char:%c, rccode:%x",kbcode,bytesavail,kbcode,rccode);
+			MessageBox(tmsg,"",NOBUTTON);
+*/
+			if (kbcode >= '0' && kbcode <= '9')
 			{
-				switch(rccode)
+				// SMS-Style verhindern
+				count = 0;
+				LastKey = -1;
+				rccode = -1;
+				return 1;
+			}
+		}
+		if (rccode == LastKey)
+		{
+			if (count < REPEAT_TIMER)
+			{
+				count++;
+				rccode = -1;
+				return 1;
+			}
+		}
+		else
+			count = 0;
+		LastKey = rccode;
+		if ((rccode & 0xFF00) == 0x5C00)
+		{
+			kbcode = 0;
+			switch(rccode)
 #else
 	if(read(rc, &ev, sizeof(ev)) == sizeof(ev))
 	{
 		if(ev.value)
 		{
-			if(ev.code != rc_last_key)
+			if(ev.code == rc_last_key)
 			{
-				rc_last_key = ev.code;
-				switch(ev.code)
-#endif
+				if (count < REPEAT_TIMER)
 				{
-
-					case KEY_UP:
-// modification to allow keeping button pressed
-#if TUXCOM_DBOX_VERSION < 3
-										if (LastKey == rccode) LastKey = -1;
-#else
-										if (rc_last_key == ev.code) rc_last_key = KEY_RESERVED;
-#endif
-										rccode = RC_UP;
-										break;
-
-					case KEY_DOWN:
-// modification to allow keeping button pressed
-#if TUXCOM_DBOX_VERSION < 3
-										if (LastKey == rccode) LastKey = -1;
-#else
-										if (rc_last_key == ev.code) rc_last_key = KEY_RESERVED;
-#endif
-										rccode = RC_DOWN;
-										break;
-
-					case KEY_LEFT:		if (scrollmode != NOSCROLL_LEFTRIGHT)
-					                    {
-// modification to allow keeping button pressed
-#if TUXCOM_DBOX_VERSION < 3
-											if (LastKey == rccode) LastKey = -1;
-#else
-											if (rc_last_key == ev.code) rc_last_key = KEY_RESERVED;
-#endif
-										}
-										rccode = RC_LEFT;
-										break;
-
-					case KEY_RIGHT:		if (scrollmode != NOSCROLL_LEFTRIGHT)
-					                    {
-// modification to allow keeping button pressed
-#if TUXCOM_DBOX_VERSION < 3
-											if (LastKey == rccode) LastKey = -1;
-#else
-											if (rc_last_key == ev.code) rc_last_key = KEY_RESERVED;
-#endif
-										}
-										rccode = RC_RIGHT;
-										break;
-
-					case KEY_OK:		rccode = RC_OK;
-										break;
-
-					case KEY_0:			rccode = RC_0;
-										break;
-
-					case KEY_1:			rccode = RC_1;
-										break;
-
-					case KEY_2:			rccode = RC_2;
-										break;
-
-					case KEY_3:			rccode = RC_3;
-										break;
-
-					case KEY_4:			rccode = RC_4;
-										break;
-
-					case KEY_5:			rccode = RC_5;
-										break;
-
-					case KEY_6:			rccode = RC_6;
-										break;
-
-					case KEY_7:			rccode = RC_7;
-										break;
-
-					case KEY_8:			rccode = RC_8;
-										break;
-
-					case KEY_9:			rccode = RC_9;
-										break;
-
-					case KEY_RED:		rccode = RC_RED;
-										break;
-
-					case KEY_GREEN:		if (scrollmode == SCROLL_GREEN)
-					                    {
-// modification to allow keeping button pressed
-#if TUXCOM_DBOX_VERSION < 3
-											if (LastKey == rccode) LastKey = -1;
-#else
-											if (rc_last_key == ev.code) rc_last_key = KEY_RESERVED;
-#endif
-										}
-										rccode = RC_GREEN;
-										break;
-
-					case KEY_YELLOW:	rccode = RC_YELLOW;
-										break;
-
-					case KEY_BLUE:		rccode = RC_BLUE;
-										break;
-
-					case KEY_VOLUMEUP:
-// modification to allow keeping button pressed
-#if TUXCOM_DBOX_VERSION < 3
-										if (LastKey == rccode) LastKey = -1;
-#else
-										if (rc_last_key == ev.code) rc_last_key = KEY_RESERVED;
-#endif
-										rccode = RC_PLUS;
-										break;
-
-					case KEY_VOLUMEDOWN:
-// modification to allow keeping button pressed
-#if TUXCOM_DBOX_VERSION < 3
-										if (LastKey == rccode) LastKey = -1;
-#else
-										if (rc_last_key == ev.code) rc_last_key = KEY_RESERVED;
-#endif
-										rccode = RC_MINUS;
-										break;
-
-					case KEY_MUTE:		rccode = RC_MUTE;
-										break;
-
-					case KEY_HELP:		rccode = RC_HELP;
-										break;
-
-					case KEY_SETUP:		rccode = RC_DBOX;
-										break;
-
-					case KEY_HOME:		rccode = RC_HOME;
-										break;
-
-					case KEY_POWER:		rccode = RC_STANDBY;
+					count++;
+					rccode = -1;
+					return 1;
 				}
-				return 1;
 			}
-#if TUXCOM_DBOX_VERSION < 3
 			else
-			{
-				rccode &= 0x003F;
-			}
+				count = 0;
+			rc_last_key = ev.code;
+			switch(ev.code)
 #endif
+			{
+				case KEY_UP:		rccode = RC_UP;			break;
+				case KEY_DOWN:		rccode = RC_DOWN;		break;
+				case KEY_LEFT:		rccode = RC_LEFT;		break;
+				case KEY_RIGHT:		rccode = RC_RIGHT;		break;
+				case KEY_OK:		rccode = RC_OK;			break;
+				case KEY_0:			rccode = RC_0;			break;
+				case KEY_1:			rccode = RC_1;			break;
+				case KEY_2:			rccode = RC_2;			break;
+				case KEY_3:			rccode = RC_3;			break;
+				case KEY_4:			rccode = RC_4;			break;
+				case KEY_5:			rccode = RC_5;			break;
+				case KEY_6:			rccode = RC_6;			break;
+				case KEY_7:			rccode = RC_7;			break;
+				case KEY_8:			rccode = RC_8;			break;
+				case KEY_9:			rccode = RC_9;			break;
+				case KEY_RED:		rccode = RC_RED;		break;
+				case KEY_GREEN:		rccode = RC_GREEN;		break;
+				case KEY_YELLOW:	rccode = RC_YELLOW;		break;
+				case KEY_BLUE:		rccode = RC_BLUE;		break;
+				case KEY_VOLUMEUP:	rccode = RC_PLUS;		break;
+				case KEY_VOLUMEDOWN:rccode = RC_MINUS;		break;
+				case KEY_MUTE:		rccode = RC_MUTE;		break;
+				case KEY_HELP:		rccode = RC_HELP;		break;
+				case KEY_SETUP:		rccode = RC_DBOX;		break;
+				case KEY_HOME:		rccode = RC_HOME;		break;
+				case KEY_POWER:		rccode = RC_STANDBY;	break;
+/*
+#if TUXCOM_DBOX_VERSION < 3
+				case KEY_TV			:rccode = RC_TV			;break;
+				case KEY_BOUQUP		:rccode = RC_BOUQUP		;break;
+				case KEY_BOUQDOWN	:rccode = RC_BOUQDOWN	;break;
+				case KEY_AUDIO		:rccode = RC_AUDIO		;break;
+				case KEY_VIDEO		:rccode = RC_VIDEO		;break;
+				case KEY_INFO		:rccode = RC_INFO		;break;
+				case KEY_TEXT		:rccode = RC_TEXT		;break;
+				case KEY_NEXT		:rccode = RC_NEXT		;break;
+				case KEY_PREV		:rccode = RC_PREV		;break;
+				case KEY_RADIO		:rccode = RC_RADIO		;break;
+				case 0xff: return 0;
+#endif
+				default:
+				{
+					char tmsg[100];
+					sprintf(tmsg,"unknown Code:%x",rccode);
+					MessageBox(tmsg,"",NOBUTTON);
+				}
+*/
+			}
+			return 1;
 		}
+
 #if TUXCOM_DBOX_VERSION < 3
 		else
 		{
-			rccode = -1;
+			rccode &= 0x003F;
 		}
-		return 1;
+		return 0;
 #else
 		else
 		{
@@ -461,13 +410,18 @@ void plugin_exec(PluginParam *par)
 		else if	(!strcmp(par->id, P_ID_OFF_Y))   sy = atoi(par->val);
 		else if	(!strcmp(par->id, P_ID_END_Y))   ey = atoi(par->val);
 	}
+#if TUXCOM_DBOX_VERSION < 3
+//	fclose (stdin);
+//	stdin = fopen("/dev/vc/0", "r");
+//	rc=open("/dev/rawir2", O_RDONLY);
+	kb=open("/dev/vc/0", O_RDONLY);
+#endif
 
 	if(fb == -1 || rc == -1 || sx == -1 || ex == -1 || sy == -1 || ey == -1)
 	{
 		printf("TuxCom <missing Param(s)>\n");
 		return;
 	}
-
 	//init framebuffer
 
 	if(ioctl(fb, FBIOGET_FSCREENINFO, &fix_screeninfo) == -1)
@@ -597,11 +551,9 @@ void plugin_exec(PluginParam *par)
 
 	memset(&finfo[0], 0, sizeof(finfo[0]));
 	memset(&finfo[1], 0, sizeof(finfo[0]));
-	ReadSettings();
 	ioctl(saa, SAAIOGWSS, &saa_old);
 	ioctl(saa, SAAIOSWSS, &saamodes[screenmode]);
 
-	printf("Settings read\n");
 
 	// center output on screen
 	StartX = sx;
@@ -618,10 +570,11 @@ void plugin_exec(PluginParam *par)
 	SizeWidth = (FrameWidth / 3 ) - 3* BORDERSIZE;
 
 	if (strncmp(setlocale( LC_ALL, NULL ),"de",2) == 0) language=LANG_DE; else language=LANG_INT;
-	// setup screen
-	FillDir(1-curframe,SELECT_NOCHANGE);
-	FillDir(  curframe,SELECT_NOCHANGE);
 
+	ReadSettings();
+	printf("Settings read\n");
+
+	// setup screen
 	RenderFrame(LEFTFRAME);
 	RenderFrame(RIGHTFRAME);
 	memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
@@ -629,7 +582,8 @@ void plugin_exec(PluginParam *par)
 
 	fcntl(rc, F_SETFL, fcntl(rc, F_GETFL) &~ O_NONBLOCK);
 
-	struct fileentry *pfe;
+	int firstentry = 1;
+ 	struct fileentry *pfe;
 	char action[256];
 	char szSel [256];
 	int pos, check;
@@ -637,10 +591,15 @@ void plugin_exec(PluginParam *par)
 		overwriteall = 0;
 		skipall = 0;
 		GetRCCode(SCROLL_GREEN);
+
+		// hack to ignore the first OK press (from starting the plugin)
+		if (firstentry == 1 && rccode == RC_OK) continue;
+		firstentry = 0;
+
 		switch(rccode)
 		{
 				case RC_HELP:
-					MessageBox(MSG_VERSION,MSG_COPYRIGHT,OK);
+					DoTaskManager();
 					break;
 				case RC_OK:
 					pfe = GetSelected(curframe);
@@ -832,7 +791,7 @@ void plugin_exec(PluginParam *par)
 						RenderMenuLine(ACTION_EDIT-1, YES);
 						pfe = GetSelected(curframe);
 						sprintf(action,"%s%s",finfo[curframe].path, pfe->name);
-						DoEditFile(action, YES);
+						DoEditFile(action, action, YES);
 						FillDir(1-curframe,SELECT_NOCHANGE);
 						FillDir(  curframe,SELECT_NOCHANGE);
 					}
@@ -1079,8 +1038,8 @@ void plugin_exec(PluginParam *par)
 					{
 						RenderMenuLine(ACTION_MKLINK-1, YES);
 						char szDir[FILENAME_MAX];
-						szDir[0] = 0x00;
 						pfe = GetSelected(curframe);
+						strcpy(szDir,pfe->name);
 						char szMsg[356];
 						sprintf(szMsg,msg[MSG_MKLINK*NUM_LANG+language], finfo[curframe].path, pfe->name, finfo[1-curframe].path);
 						switch (GetInputString(400,255,szDir,szMsg))
@@ -1172,15 +1131,18 @@ void plugin_exec(PluginParam *par)
 
  	fcntl(rc, F_SETFL, O_NONBLOCK);
 
+	WriteSettings();
 	ClearEntries   (LEFTFRAME );
 	ClearEntries   (RIGHTFRAME);
 	ClearMarker    (LEFTFRAME );
 	ClearMarker    (RIGHTFRAME);
 	ClearZipEntries(LEFTFRAME );
 	ClearZipEntries(RIGHTFRAME);
-	WriteSettings();
 	free(szCommand);
 	free(szZipCommand);
+#if TUXCOM_DBOX_VERSION < 3
+	if (kb != -1) close(kb);
+#endif
 	return;
 }
 
@@ -1803,6 +1765,39 @@ int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, in
 
 	do{
 		GetRCCode(SCROLL_NORMAL);
+#if TUXCOM_DBOX_VERSION < 3
+		if (kbcode != 0)
+		{
+			if (kbcode == 0x7f) // backspace
+			{
+				if (pos > 0)
+				{
+					if (pos== strlen(szdst)-1) // remove last char when at end of line
+					{
+						szdst[pos-1] = 0x00;
+					}
+					else if (szdst[pos] != 0x00)
+					{
+						strcpy(szbuf,(char*)(szdst+pos));
+						strcpy((char*)(szdst+pos-1),szbuf);
+					}
+					pos--;
+				}
+			}
+			else if (kbcode >= 0x20)
+			{
+				if (szdst[pos] != 0x00)
+				{
+					strcpy(szbuf,(char*)(szdst+pos));
+					szdst[pos] = kbcode;
+					strcpy((char*)(szdst+pos+1),szbuf);
+				}
+				pos++;
+			}
+			prev_key = -1;
+			rccode = -1;
+		}
+#endif
 		switch(rccode)
 		{
 				case RC_OK:
@@ -1903,8 +1898,6 @@ int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, in
 				case RC_HOME:
 					rccode = -1;
 					return RC_HOME;
-				default:
-					continue;
 		}
 		if (pos <  0            ) pos = 0;
 		if (pos >= strlen(szdst))
@@ -2002,6 +1995,30 @@ struct fileentry* getfileentry(int frame, int pos)
 struct fileentry* GetSelected(int frame)
 {
 	return &finfo[frame].flist[finfo[frame].selected];
+}
+/******************************************************************************
+ * SetSelected                                                                *
+ ******************************************************************************/
+
+void SetSelected(int frame, const char* szFile)
+{
+	int i;
+	for (i = 0; i < finfo[frame].count; i++)
+	{
+		if (strcmp(finfo[frame].flist[i].name,szFile) == 0)
+		{
+			finfo[frame].selected = i;
+			if (finfo[frame].selected  < 0)
+				finfo[frame].selected  = 0;
+			if (finfo[frame].selected >= finfo[frame].count)
+				finfo[frame].selected  = finfo[frame].count -1;
+			if (finfo[frame].first     > finfo[frame].selected)
+				finfo[frame].first     = finfo[frame].selected;
+			if (finfo[frame].selected >= finfo[frame].first + framerows)
+				finfo[frame].first     = finfo[frame].selected - framerows+1;
+			break;
+		}
+	}
 }
 /******************************************************************************
  * FindFile                                                                   *
@@ -2605,9 +2622,9 @@ void DoMove(char* szFile, int typ)
 void DoViewFile()
 {
 	char action[4000];
-	FILE* pFile;
+//	FILE* pFile;
 	struct fileentry* pfe = GetSelected(curframe);
-	if (pfe->fentry.st_size >= FILEBUFFER_SIZE)
+/*	if (pfe->fentry.st_size >= FILEBUFFER_SIZE)
 	{
 		if (finfo[curframe].zipfile[0] != 0x00)
 		{
@@ -2626,44 +2643,63 @@ void DoViewFile()
 		}
 	}
 	else
+*/
 	{
 		if (finfo[curframe].zipfile[0] != 0x00)
 		{
 			sprintf(action,"tar  -x%cO -f \"%s%s\"  \"%s%s\" > /tmp/tuxcom.out",finfo[curframe].ziptype == GZIP ? 'z' :'j',finfo[curframe].path,finfo[curframe].zipfile,(char*)(finfo[curframe].zippath+1),pfe->name);
 			DoExecute(action, SHOW_NO_OUTPUT);
-			DoEditFile("/tmp/tuxcom.out",NO);
+			DoEditFile("/tmp/tuxcom.out",pfe->name,NO);
+
 		}
 		else
 		{
 			sprintf(action,"%s%s",finfo[curframe].path, pfe->name);
-			DoEditFile(action,NO);
+			DoEditFile(action,action,NO);
 		}
 	}
 
 }
+
 /******************************************************************************
  * DoEditFile                                                                 *
  ******************************************************************************/
 
-void DoEditFile(char* szFile, int writable)
+void DoEditFile(char* szFile, char* szTitle,  int writable)
 {
 	FILE* pFile = fopen(szFile,"r");
-	char *p = szFileBuffer, *p1, *pcur = szFileBuffer;
+	char *p = szFileBuffer, *p1, *pcur = szFileBuffer, *pStart = szFileBuffer, *pStop = NULL;
 	char szInputBuffer[1001];
 	char szLineNumber[20];
-	int count = 0;
+	int count = 0, curcount = 0, totalcount = 0;
 	int changed = 0;
+	int readall = NO;
+	int offset;
+	long filepos = 0;
 
+	struct stat st;
+
+	offset = 0;
 	memset(szFileBuffer,0,FILEBUFFER_SIZE);
-	while( fgets( p, FILEBUFFER_SIZE, pFile ) )
+	while( fgets( p, FILEBUFFER_SIZE - offset, pFile ) )
 	{
-	  p = (char*)(p+strlen(p));
+	  offset+=strlen(p);
 	  count++;
+	  if (offset >= FILEBUFFER_SIZE ) break;
+	  p = (char*)(p+strlen(p));
 	}
-	fclose(pFile);
-	if (strlen(szFileBuffer) > 0 && szFileBuffer[strlen(szFileBuffer)-1] == '\n') count++;
+	lstat(szFile,&st);
 
-	int i,row = 0, sel = 0, strsize;
+	if (st.st_size < FILEBUFFER_SIZE && strlen(szFileBuffer) > 0 && szFileBuffer[strlen(szFileBuffer)-1] == '\n') count++;
+	totalcount = count;
+
+
+	if (st.st_size < FILEBUFFER_SIZE)
+	{
+		readall = YES;
+	}
+
+	int i,row = 0, sel = 0, presel=0, strsize;
 
 
 
@@ -2678,10 +2714,75 @@ void DoEditFile(char* szFile, int writable)
 		RenderBox(               0, viewy-BORDERSIZE- MENUSIZE , viewx     , viewy-MENUSIZE             , FILL, WHITE);
 
 		p = szFileBuffer;
+
+		if (st.st_size >= FILEBUFFER_SIZE) // File is to big to fit in Buffer, we have to read next/previous part
+		{
+			if (sel+framerows >= count  && !feof(pFile)) // read next part
+			{
+				sel = sel-presel;
+				row = sel;
+				curcount += presel;
+				filepos = ftell(pFile);
+				filepos-= (long)((szFileBuffer+FILEBUFFER_SIZE-pStart)-1);
+				fseek(pFile,filepos,SEEK_SET);
+				count = 0;
+				p = szFileBuffer;
+				pcur = szFileBuffer;
+				memset(szFileBuffer,0,FILEBUFFER_SIZE);
+				offset = 0;
+				while( fgets( p, FILEBUFFER_SIZE-offset, pFile ) )
+				{
+				  offset+=strlen(p);
+				  count++;
+				  if (offset >= FILEBUFFER_SIZE ) break;
+				  p = (char*)(p+strlen(p));
+				}
+				if (readall == NO) totalcount = curcount + count;
+				if (feof(pFile)) // EOF reached
+					readall = YES;
+
+			}
+			if ((sel < 0 ) && (curcount > 0)) // read previous part
+			{
+				filepos = ftell(pFile);
+				filepos-= (long)(strlen(szFileBuffer)+((szFileBuffer+FILEBUFFER_SIZE)-pStop));
+
+				if (filepos < 0 ) filepos = 0;
+
+				fseek(pFile,filepos,SEEK_SET);
+				if (filepos > 0)  fgets( szFileBuffer, FILEBUFFER_SIZE, pFile ); // ignore first (probably incomplete) line
+				count = 0;
+				p = szFileBuffer;
+				pcur = szFileBuffer;
+				memset(szFileBuffer,0,FILEBUFFER_SIZE);
+				offset = 0;
+				while( fgets( p, FILEBUFFER_SIZE-offset, pFile ) )
+				{
+				  offset+=strlen(p);
+				  count++;
+				  if (offset >= FILEBUFFER_SIZE ) break;
+				  p = (char*)(p+strlen(p));
+				}
+				if (filepos == 0)
+				{
+					sel = curcount + sel ;
+					curcount = 0;
+				}
+				else
+				{
+					sel = count + sel - framerows -1;
+					curcount -= (count - framerows);
+				}
+			}
+		}
+
+
+
 		if (sel < 0 ) sel = 0;
 		if (sel >= count) sel = count-1;
 		if (sel < row) row = sel;
 		if (sel > row+(framerows-2)) row = sel-(framerows-2);
+		presel = sel;
 		if (writable == NO) row = sel;
 		for (i =0; i < row; i++)
 		{
@@ -2689,13 +2790,14 @@ void DoEditFile(char* szFile, int writable)
           if (p1 == NULL) break;
           p= p1+1;
 		}
-		sprintf(szLineNumber,msg[MSG_LINE*NUM_LANG+language],sel+1, count);
+		sprintf(szLineNumber,msg[MSG_LINE*NUM_LANG+language],curcount+sel+1, totalcount,(readall == YES ? "":"+"));
 		strsize = GetStringLen(szLineNumber, BIG);
-		RenderString(szFile      ,2*BORDERSIZE               , BORDERSIZE+FONTHEIGHT_BIG-FONT_OFFSET_BIG  , viewx-5*BORDERSIZE-strsize, LEFT, BIG, WHITE);
+		RenderString(szTitle     ,2*BORDERSIZE               , BORDERSIZE+FONTHEIGHT_BIG-FONT_OFFSET_BIG  , viewx-5*BORDERSIZE-strsize, LEFT, BIG, WHITE);
 		RenderString(szLineNumber,viewx-2*BORDERSIZE-strsize , BORDERSIZE+FONTHEIGHT_BIG-FONT_OFFSET_BIG  , strsize+BORDERSIZE        , RIGHT, BIG, WHITE);
 
 		if ( p )
 		{
+			pStart = p;
 			for (i =0; i < framerows; i++)
 			{
 				if ((sel == row + i)&& writable==YES)
@@ -2717,8 +2819,9 @@ void DoEditFile(char* szFile, int writable)
 				}
 	            p = p1+1;
 			}
+			pStop = p;
 			memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
-			GetRCCode(SCROLL_NORMAL);
+			while (GetRCCode(SCROLL_NORMAL) == 0);
 			switch (rccode)
 			{
 				case RC_HOME :
@@ -2776,9 +2879,26 @@ void DoEditFile(char* szFile, int writable)
 					break;
 				case RC_PLUS:
 					sel = 0;
+					if (curcount >0)
+					{
+						fseek(pFile,0,SEEK_SET);
+						count = 0;
+						p = szFileBuffer;
+						pcur = szFileBuffer;
+						memset(szFileBuffer,0,FILEBUFFER_SIZE);
+						offset = 0;
+						while( fgets( p, FILEBUFFER_SIZE-offset, pFile ) )
+						{
+						  offset+=strlen(p);
+						  count++;
+						  if (offset >= FILEBUFFER_SIZE ) break;
+						  p = (char*)(p+strlen(p));
+						}
+						curcount = 0;
+					}
 					break;
 				case RC_MINUS:
-					sel = count;
+					sel = totalcount;
 					break;
 				case RC_RED:
 					if (writable == YES)
@@ -2822,18 +2942,203 @@ void DoEditFile(char* szFile, int writable)
 							}
 
 							rccode = -1;
+							fclose(pFile);
 							return;
 						case NO:
 							rccode = -1;
+							fclose(pFile);
 							return;
 					}
 				}
 				else
 				{
 					rccode = -1;
+					fclose(pFile);
 					return;
 				}
 
+			}
+		}
+	}
+	rccode = -1;
+	fclose(pFile);
+}
+/******************************************************************************
+ * DoTaskManager                                                              *
+ ******************************************************************************/
+
+void DoTaskManager()
+{
+	FILE* pFile = OpenPipe("ps -aux");
+	char *p = szFileBuffer, *p1, *p2, *pcur = szFileBuffer;
+	char szMsg[2000], procname[256], prid[20]="",uid[100]="";
+	int offset = 0, count = 0;
+	if (pFile == NULL)
+	{
+		MessageBox(MSG_VERSION,MSG_COPYRIGHT,OK);
+		return;
+	}
+	memset(szFileBuffer,0,FILEBUFFER_SIZE);
+	while( fgets( p, FILEBUFFER_SIZE - offset, pFile ) )
+	{
+	  if (offset == 0) // ignore first line
+	  {
+		  offset+=strlen(p);
+		  continue;
+	  }
+
+
+	  count++;
+	  offset+=strlen(p);
+	  if (offset >= FILEBUFFER_SIZE ) break;
+	  p = (char*)(p+strlen(p));
+	}
+	fclose(pFile);
+
+
+	int i,row = 0, sel = 0, strsize;
+
+	colortool[0] = ACTION_KILLPROC;
+	colortool[1] = ACTION_NOACTION;
+	colortool[2] = ACTION_NOACTION;
+	colortool[3] = ACTION_NOACTION;
+	memset(tool, ACTION_NOACTION, sizeof(tool));
+
+	RenderMenuLine(-1, NO);
+
+
+	while( 1 )
+	{
+		// Render output window
+		RenderBox(               0, 0                          , viewx     , viewy-MENUSIZE             , FILL, trans_map[curvisibility]);
+		RenderBox(               0, 0                          , BORDERSIZE, viewy-MENUSIZE             , FILL, WHITE);
+		RenderBox(viewx-BORDERSIZE, 0                          , viewx     , viewy-MENUSIZE             , FILL, WHITE);
+		RenderBox(               0, 0                          , viewx     , BORDERSIZE                 , FILL, WHITE);
+		RenderBox(               0, BORDERSIZE+FONTHEIGHT_BIG  , viewx     , 2*BORDERSIZE+FONTHEIGHT_BIG, FILL, WHITE);
+		RenderBox(               0, viewy-BORDERSIZE- MENUSIZE , viewx     , viewy-MENUSIZE             , FILL, WHITE);
+
+		p = szFileBuffer;
+
+		if (sel < 0 ) sel = 0;
+		if (sel >= count) sel = count-1;
+		if (sel < row) row = sel;
+		if (sel > row+(framerows-4)) row = sel-(framerows-4);
+		for (i =0; i < row; i++)
+		{
+          p1=strchr(p,'\n');
+          if (p1 == NULL) break;
+          p= p1+1;
+		}
+		strsize = GetStringLen(MSG_COPYRIGHT, BIG);
+		RenderString(MSG_VERSION  ,2*BORDERSIZE               , BORDERSIZE+FONTHEIGHT_BIG-FONT_OFFSET_BIG  , viewx-5*BORDERSIZE-strsize, LEFT, BIG, WHITE);
+		RenderString(MSG_COPYRIGHT,viewx-2*BORDERSIZE-strsize , BORDERSIZE+FONTHEIGHT_BIG-FONT_OFFSET_BIG  , strsize+BORDERSIZE        , RIGHT, BIG, WHITE);
+		RenderString(msg[MSG_PROCESSID  *NUM_LANG+language]   , 2*BORDERSIZE               , 2*BORDERSIZE+FONTHEIGHT_BIG+FONTHEIGHT_SMALL-FONT_OFFSET, viewx/6, RIGHT, SMALL, WHITE);
+		RenderString(msg[MSG_PROCESSUSER*NUM_LANG+language]   , 5*BORDERSIZE + viewx/6     , 2*BORDERSIZE+FONTHEIGHT_BIG+FONTHEIGHT_SMALL-FONT_OFFSET, viewx/6, LEFT , SMALL, WHITE);
+		RenderString(msg[MSG_PROCESSNAME*NUM_LANG+language]   ,                viewx/3     , 2*BORDERSIZE+FONTHEIGHT_BIG+FONTHEIGHT_SMALL-FONT_OFFSET, viewx/3, LEFT , SMALL, WHITE);
+		RenderBox(               0, BORDERSIZE+FONTHEIGHT_BIG + 2*FONTHEIGHT_SMALL-FONT_OFFSET  , viewx     , 2*BORDERSIZE+FONTHEIGHT_BIG + 2*FONTHEIGHT_SMALL-FONT_OFFSET, FILL, WHITE);
+
+		if ( p )
+		{
+			for (i =0; i < framerows-2; i++)
+			{
+				if (sel == row + i)
+				{
+					pcur = p;
+					RenderBox(BORDERSIZE, 2*BORDERSIZE+FONTHEIGHT_BIG+2*FONTHEIGHT_SMALL+i*FONTHEIGHT_SMALL , viewx- BORDERSIZE , 2*BORDERSIZE+FONTHEIGHT_BIG+2*FONTHEIGHT_SMALL+(i+1)*FONTHEIGHT_SMALL, FILL, BLUE2);
+				}
+
+				sscanf(p,"%s%s",prid,uid);
+
+				strncpy(procname,(char*)(p+26),255);
+          		p2=strchr(procname,'\n');
+          		if (p2 != NULL) *p2 = 0x00;
+          		RenderString(    prid,2*BORDERSIZE           , 2*BORDERSIZE+FONTHEIGHT_BIG+2*FONTHEIGHT_SMALL+(i+1)*FONTHEIGHT_SMALL -FONT_OFFSET, viewx/6 , RIGHT, SMALL, WHITE);
+          		RenderString(     uid,5*BORDERSIZE+  viewx/6 , 2*BORDERSIZE+FONTHEIGHT_BIG+2*FONTHEIGHT_SMALL+(i+1)*FONTHEIGHT_SMALL -FONT_OFFSET, viewx/6 , LEFT , SMALL, WHITE);
+          		RenderString(procname,               viewx/3 , 2*BORDERSIZE+FONTHEIGHT_BIG+2*FONTHEIGHT_SMALL+(i+1)*FONTHEIGHT_SMALL -FONT_OFFSET, viewx/3 , LEFT , SMALL, WHITE);
+          		p1=strchr(p,'\n');
+	            if (p1 == NULL)
+	            {
+					i++;
+					if (sel == row + i)
+					{
+						pcur+=strlen(pcur);
+						RenderBox(BORDERSIZE, 2*BORDERSIZE+FONTHEIGHT_BIG+2*FONTHEIGHT_SMALL+i*FONTHEIGHT_SMALL , viewx- BORDERSIZE , 2*BORDERSIZE+FONTHEIGHT_BIG+2*FONTHEIGHT_SMALL+(i+1)*FONTHEIGHT_SMALL, FILL, BLUE2);
+					}
+					break;
+				}
+	            p = p1+1;
+			}
+			RenderBox(  viewx/6 +3*BORDERSIZE, BORDERSIZE+FONTHEIGHT_BIG  ,   viewx/6 + 4*BORDERSIZE, viewy-MENUSIZE             , FILL, WHITE);
+			RenderBox(  viewx/3 -2*BORDERSIZE, BORDERSIZE+FONTHEIGHT_BIG  ,   viewx/3 -   BORDERSIZE, viewy-MENUSIZE             , FILL, WHITE);
+			memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
+			while (GetRCCode(SCROLL_NORMAL) == 0);
+			switch (rccode)
+			{
+				case RC_HOME :
+					break;
+				case RC_UP:
+					sel--;
+					break;
+				case RC_DOWN:
+					sel++;
+					break;
+				case RC_LEFT:
+					sel-= framerows-3;
+					if (sel >= 0) row = sel;
+					break;
+				case RC_RIGHT:
+					sel+= framerows-3;
+					if (sel < count) row = sel;
+					break;
+				case RC_PLUS:
+					sel = 0;
+					break;
+				case RC_MINUS:
+					sel = count;
+					break;
+				case RC_RED:
+					sscanf(pcur,"%s%s",prid,uid);
+					strncpy(procname,(char*)(pcur+26),255);
+	          		p2=strchr(procname,'\n');
+	          		if (p2 != NULL) *p2 = 0x00;
+					sprintf(szMsg,msg[MSG_KILLPROC2*NUM_LANG+language],procname);
+					if (MessageBox(msg[MSG_KILLPROC*NUM_LANG+language],szMsg,OKCANCEL) == OK)
+					{
+						char szCmd[2000];
+						sprintf(szCmd,"kill -9 %s", prid);
+						system(szCmd);
+						FILE* pFile = OpenPipe("ps -aux");
+						if (pFile == NULL)
+						{
+							MessageBox(MSG_VERSION,MSG_COPYRIGHT,OK);
+							return;
+						}
+						sel = 0;
+						p = szFileBuffer;
+						count = 0;
+						memset(szFileBuffer,0,FILEBUFFER_SIZE);
+						while( fgets( p, FILEBUFFER_SIZE - offset, pFile ) )
+						{
+						  count++;
+						  if (offset == 0) // ignore first line
+						  {
+							  offset+=strlen(p);
+							  continue;
+						  }
+						  offset+=strlen(p);
+						  count++;
+						  if (offset >= FILEBUFFER_SIZE ) break;
+						  p = (char*)(p+strlen(p));
+						}
+						fclose(pFile);
+					}
+					break;
+
+			}
+			if (rccode == RC_HOME)
+			{
+				rccode = -1;
+				return;
 			}
 		}
 	}
@@ -2867,8 +3172,9 @@ void DoExecute(char* szAction, int showoutput)
 
 			return;
 		}
-		ShowFile(pipe, szAction);
+//		ShowFile(pipe, szAction);
 		fclose(pipe);
+		DoEditFile("/tmp/tuxcom.out", szAction ,NO);
 	}
 	rccode = -1;
 }
@@ -3289,14 +3595,15 @@ void ShowFile(FILE* pipe, char* szAction)
 FILE* OpenPipe(char* szAction)
 {
 	FILE *pipe;
-#if TUXCOM_DBOX_VERSION == 3
+//#if TUXCOM_DBOX_VERSION == 3
 	char szCommand[4000];
+	system("rm -f /tmp/tuxcom.out");
 	sprintf(szCommand,"%s > /tmp/tuxcom.out",szAction);
 	system(szCommand);
 	pipe = fopen("/tmp/tuxcom.out","r");
-#else
-	pipe = popen(szAction,"r");
-#endif
+//#else
+//	pipe = popen(szAction,"r");
+//#endif
 	return pipe;
 }
 
@@ -3330,6 +3637,10 @@ void ReadSettings()
 	FILE *fp;
 	char *p;
 	char line[256];
+	char lfile[256] = "";
+	char rfile[256] = "";
+	int  lfirst = 0;
+	int  rfirst = 0;
 
 	printf("tuxcom: reading settings \n");
 
@@ -3392,9 +3703,32 @@ void ReadSettings()
 			{
 				screenmode = atoi(p)%2;
 			}
+			else if ( !strcmp(line,"lfile") )
+			{
+				strcpy(lfile, p);
+			}
+			else if ( !strcmp(line,"rfile") )
+			{
+				strcpy(rfile, p);
+			}
+			else if ( !strcmp(line,"lfirst") )
+			{
+				lfirst = atoi(p);
+			}
+			else if ( !strcmp(line,"rfirst") )
+			{
+				rfirst = atoi(p);
+			}
 		}
 		fclose(fp);
 	}
+	FillDir(1-curframe,SELECT_NOCHANGE);
+	FillDir(  curframe,SELECT_NOCHANGE);
+	if (lfirst < finfo[LEFTFRAME ].count) finfo[LEFTFRAME ].first = lfirst;
+	if (rfirst < finfo[RIGHTFRAME].count) finfo[RIGHTFRAME].first = rfirst;
+	SetSelected(LEFTFRAME ,lfile);
+	SetSelected(RIGHTFRAME ,rfile);
+
 }
 /******************************************************************************
  * WriteSettings                                                              *
@@ -3421,6 +3755,10 @@ void WriteSettings()
 		fprintf(fp,"lsort=%d\n",finfo[LEFTFRAME ].sort);
 		fprintf(fp,"rsort=%d\n",finfo[RIGHTFRAME].sort);
 		fprintf(fp,"screenmode=%d\n",screenmode);
+		fprintf(fp,"lfile=%s\n",GetSelected(LEFTFRAME )->name);
+		fprintf(fp,"rfile=%s\n",GetSelected(RIGHTFRAME)->name);
+		fprintf(fp,"lfirst=%lu\n",finfo[LEFTFRAME ].first);
+		fprintf(fp,"rfirst=%lu\n",finfo[RIGHTFRAME].first);
 		fclose(fp);
 	}
 }
