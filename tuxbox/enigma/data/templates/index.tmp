@@ -50,6 +50,11 @@ function openEPG(xy)
 	NewWindow('/cgi-bin/getcurrentepg2?ref='+xy, 'EPG', '600', '700', 'yes');
 }
 
+function openMultiEPG(xy)
+{
+	NewWindow('/cgi-bin/getMultiEPG?ref='+xy, 'MultiEPG', '1000', '800', 'yes');
+}
+
 function admin(xy)
 {
 	NewWindow(xy+'&requester=webif', 'admin', '200', '100', 'no');

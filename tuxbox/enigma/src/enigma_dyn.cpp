@@ -712,7 +712,7 @@ static eString getDiskSpace(void)
 		if (min < 60)
 			result += eString().sprintf("~%d min", min);
 		else
-			result += eString().sprintf("~%d h%02d min", min/60, min%60);
+			result += eString().sprintf("~%d h %02d min", min/60, min%60);
 	}
 	else
 		result += "unknown";
@@ -818,14 +818,11 @@ public:
 			result += LIGHTGREY;
 		else
 			result += DARKGREY;
+
 		result += "\">";
-		if (!(e.flags & eServiceReference::isDirectory))
-		{
-			result += "<a href=\'javascript:openEPG(\"" + ref2string(e) + "\")\'>[EPG]</a>";
-			result += "<a href=\'javascript:switchChannel(\"" + ref2string(e) + "\")\'>[PLAY]</a> ";
-		}
-		else
-			result+=eString("<a href=\"/")+ "?path=" + ref2string(e) + "\">";
+		result += button(50, "EPG", GREEN, "javascript:openMultiEPG('" + ref2string(e) + "')");
+		result += eString("<a href=\"/") + "?path=" + ref2string(e) + "\">";
+		result += "&nbsp;&nbsp;&nbsp;";
 
 		eService *service=iface.addRef(e);
 		if (!service)
@@ -836,10 +833,8 @@ public:
 			iface.removeRef(e);
 		}
 
-		if (e.flags & eServiceReference::isDirectory)
-			result += "</a>";
-
-		result+="</td></tr>\n";
+		result += "</a>";
+		result += "</td></tr>\n";
 		num++;
 	}
 };
@@ -1592,6 +1587,25 @@ static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPCon
 	}
 	result+="</body></html>";
 	return result;
+}
+
+void callbackFunction(const eServiceReference& s)
+{
+	printf("[ENIGMA_DYN] fetching EPG %s\n", ref2string(s).c_str());
+}
+
+static eString getMultiEPG(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	eString result;
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	std::map<eString, eString>opt = getRequestOptions(opts);
+	eString refs = opt["ref"];
+	eServiceReference bouquetRef = string2ref(refs);
+	Signal1<void, const eServiceReference&> cbSignal;
+	cbSignal.connect(slot(callbackFunction));
+	eServiceInterface::getInstance()->enterDirectory(bouquetRef, cbSignal);
+	eServiceInterface::getInstance()->leaveDirectory(bouquetRef);
+	return "<html>" CHARSETMETA "<head><title>Multi-EPG</title></head><body>Coming soon...</body></html>";
 }
 
 static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -2457,6 +2471,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/version", version);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg", getcurepg);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg2", getcurepg2);
+	dyn_resolver->addDyn("GET", "/cgi-bin/getMultiEPG", getMultiEPG);
 	dyn_resolver->addDyn("GET", "/cgi-bin/streaminfo", getsi);
 	dyn_resolver->addDyn("GET", "/channels/getcurrent", channels_getcurrent);
 	dyn_resolver->addDyn("GET", "/cgi-bin/reloadSettings", reload_settings);
