@@ -165,21 +165,9 @@ int eAVSwitch::setVolume(int vol)
 #else
 		audio_mixer_t mix;
 #endif
-		int tmp=1;
-		if ( eConfig::getInstance()->getKey("/ezap/audio/outputLeft", tmp) )
-			eConfig::getInstance()->setKey("/ezap/audio/outputLeft", tmp);
-		if ( tmp )
-			mix.volume_left=(vol*vol)/64;
-		else
-			mix.volume_left=63;  // mute
+		mix.volume_left=(vol*vol)/64;
 
-		tmp=1;
-		if ( eConfig::getInstance()->getKey("/ezap/audio/outputRight", tmp) )
-			eConfig::getInstance()->setKey("/ezap/audio/outputRight", tmp);
-		if (tmp)
-			mix.volume_right=(vol*vol)/64;
-		else
-			mix.volume_right=63;
+		mix.volume_right=(vol*vol)/64;
 
 		int fd = Decoder::getAudioDevice();
 
@@ -251,7 +239,6 @@ void eAVSwitch::changeVCRVolume(int abs, int vol)
 	/*emit*/ volumeChanged(mute, VCRVolume);
 }
 
-
 void eAVSwitch::muteOstAudio(bool b)
 {
 	int fd = Decoder::getAudioDevice();
@@ -275,6 +262,18 @@ void eAVSwitch::sendVolumeChanged()
 
 void eAVSwitch::toggleMute()
 {
+	if ( input == 1 ) //Scart 
+	{
+		switch ( eSystemInfo::getInstance()->getHwType() )
+		{
+			case eSystemInfo::dbox2Nokia:
+			case eSystemInfo::dbox2Sagem:
+			case eSystemInfo::dbox2Philips:
+				break;
+			default:
+				return;
+		}
+	}
 	if (mute)
 	{
 		if ( useOst )
@@ -298,6 +297,18 @@ void eAVSwitch::toggleMute()
 
 void eAVSwitch::muteAvsAudio(bool m)
 {
+	if ( input == 1 ) //Scart 
+	{
+		switch ( eSystemInfo::getInstance()->getHwType() )
+		{
+			case eSystemInfo::dbox2Nokia:
+			case eSystemInfo::dbox2Sagem:
+			case eSystemInfo::dbox2Philips:
+				break;
+			default:
+				return;
+		}
+	}
 	int a;
 
 	if(m)
@@ -367,9 +378,7 @@ int eAVSwitch::setColorFormat(eAVColorFormat c)
 }
 
 int eAVSwitch::setInput(int v)
-{	
-	input = v;
-
+{
 	eDebug("[eAVSwitch] setInput %d, avsfd=%d", v, avsfd);
 	switch (v)
 	{
@@ -390,8 +399,10 @@ int eAVSwitch::setInput(int v)
 			sendVolumeChanged();
 		}
 		reloadSettings();						// reload ColorSettings
+		input=v;
 		break;
 	case 1:   // Switch to VCR
+		input=v;
 		v = (Type == SAGEM)? 0 : 2;
 		ioctl(avsfd, AVSIOSFBLK, &v);
 		ioctl(avsfd, AVSIOSVSW1, scart);
@@ -408,7 +419,6 @@ int eAVSwitch::setInput(int v)
 				muteAvsAudio(0);
 		}
 		changeVCRVolume(1, VCRVolume);
-		break;
 	}
 	return 0;
 }
