@@ -1,5 +1,5 @@
 /*
-$Id: fe_signal.c,v 1.5 2004/01/06 20:06:36 rasc Exp $
+$Id: fe_signal.c,v 1.6 2004/01/06 20:35:14 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: fe_signal.c,v 1.5 2004/01/06 20:06:36 rasc Exp $
 
 
 $Log: fe_signal.c,v $
+Revision 1.6  2004/01/06 20:35:14  rasc
+no message
+
 Revision 1.5  2004/01/06 20:06:36  rasc
 revert a change for -s signal + small adaptions
 (frontend.h uses enums instead of #defines, so committ didn't work...)
@@ -269,7 +272,6 @@ static void out_status_detail (int v,fe_status_t s)
         if (s & FE_HAS_SIGNAL)  out (v,"SIG ");
         if (s & FE_HAS_LOCK)    out (v,"LOCK ");
         if (s & FE_SPECTRUM_INV)out (v,"INV ");
-        if (s & TUNER_HAS_LOCK) out (v,"TLCK ");
 #else
         if (s & FE_HAS_SIGNAL)  out (v,"SIG ");
         if (s & FE_HAS_CARRIER) out (v,"CARR ");
