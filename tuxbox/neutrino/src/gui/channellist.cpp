@@ -161,7 +161,7 @@ int CChannelList::getKey(int id)
 	return chanlist[id]->key;
 }
 
-const std::string& CChannelList::getActiveChannelName()
+string CChannelList::getActiveChannelName()
 {
 	if (selected< chanlist.size())
 		return chanlist[selected]->name;
