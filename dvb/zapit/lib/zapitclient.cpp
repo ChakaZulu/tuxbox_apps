@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: zapitclient.cpp,v 1.17 2002/03/24 22:42:26 McClean Exp $
+  $Id: zapitclient.cpp,v 1.18 2002/03/25 00:07:45 McClean Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapitclient.cpp,v $
+  Revision 1.18  2002/03/25 00:07:45  McClean
+  use UDS - add getLastChannel
+
   Revision 1.17  2002/03/24 22:42:26  McClean
   add getServiceID for clientlib
 
@@ -86,23 +89,25 @@ bool CZapitClient::zapit_connect()
 {
 	zapit_close();
 
-	sockaddr_in servaddr;
-	char rip[]="127.0.0.1";
-	memset(&servaddr,0,sizeof(servaddr));
-	servaddr.sin_family=AF_INET;
-#ifdef HAS_SIN_LEN
-	servaddr.sin_len = sizeof(servaddr); // needed ???
-#endif
-	inet_pton(AF_INET, rip, &servaddr.sin_addr);
-	sock_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	struct sockaddr_un servaddr;
+	int clilen;
+	memset(&servaddr, 0, sizeof(struct sockaddr_un));
+	servaddr.sun_family = AF_UNIX;
+	strcpy(servaddr.sun_path, ZAPIT_UDS_NAME);
+	clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
 
-	servaddr.sin_port=htons(1505);
-	if(connect(sock_fd, (sockaddr *)&servaddr, sizeof(servaddr))==-1)
+	if ((sock_fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
 	{
-		perror("[zapitclient] couldn't connect to  zapit!");
-		return( false);
+		perror("zapitclient: socket");
+		return false;
 	}
 
+	if(connect(sock_fd, (struct sockaddr*) &servaddr, clilen) <0 )
+	{
+  		perror("zapitclient: connect");
+		return false;
+	}
+	return true;
 }
 
 bool CZapitClient::zapit_close()
@@ -180,6 +185,24 @@ unsigned int CZapitClient::getCurrentServiceID()
 	zapit_close();
 
 	return response.serviceID;
+}
+
+void CZapitClient::getLastChannel( string &channame, unsigned int &channumber, char &mode)
+{
+	commandHead msgHead;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_GET_LAST_CHANNEL;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+
+	responseGetLastChannel response;
+	receive((char* )&response, sizeof(response));
+	channame = response.channelName;
+	channumber = response.channelNumber;
+	mode = response.mode;
+
+	zapit_close();
 }
 
 void CZapitClient::setAudioChannel( unsigned channel )
