@@ -55,7 +55,7 @@ void gPixmap::blit(const gPixmap &src, ePoint pos, const eRect &clip, int flag)
 					src++;
 					dst++;
 				} else
-					*src++=*dst++;
+					*dst++=*src++;
 		} else
 			memcpy(dstptr, srcptr, area.width()*bypp); 
 		srcptr+=src.stride;
