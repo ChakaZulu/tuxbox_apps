@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.10 2001/08/22 11:29:31 McClean Exp $
+// $Id: infoviewer.cpp,v 1.11 2001/09/05 21:21:16 McClean Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.11  2001/09/05 21:21:16  McClean
+// design-fix
+//
 // Revision 1.10  2001/08/22 11:29:31  McClean
 // infoviewer designfix
 //
@@ -96,7 +99,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, bool reshow )
 	frameBuffer->paintBox(ChanNameX, ChanNameY, BoxEndX, BoxEndY, COL_INFOBAR);
 	
 	// ... with channel name
-	int height=fonts->infobar_channame->getHeight();
+	int height=fonts->infobar_channame->getHeight()+5;
 	fonts->infobar_channame->RenderString(ChanNameX+15, ChanNameY+height, BoxEndX-ChanNameX-135, Channel.c_str(), COL_INFOBAR);
 
 	int ChanInfoX = BoxStartX + (ChanWidth >>1);
@@ -118,7 +121,7 @@ void CInfoViewer::showData()
 	int ChanWidth = fonts->infobar_number->getRenderWidth("000")+10;
 	int ChanHeight = fonts->infobar_number->getHeight()*9/8;
 
-	int ChanNameY = BoxStartY + (ChanHeight>>1);
+	int ChanNameY = BoxStartY + (ChanHeight>>1)+3;
 
 	int ChanInfoX = BoxStartX + (ChanWidth >>1);
 	int ChanInfoY = BoxStartY + ChanHeight+15; //+10
@@ -128,7 +131,7 @@ void CInfoViewer::showData()
 	height=fonts->infobar_channame->getHeight()/3;
 	int height2= int( fonts->infobar_channame->getHeight()/1.5);
 	frameBuffer->paintBoxRel(BoxEndX-114, ChanNameY+height,   2+100+2, height2, COL_INFOBAR+7);
-    frameBuffer->paintBoxRel(BoxEndX-112, ChanNameY+height+2, runningPercent+2, height2-4, COL_INFOBAR+5);
+	frameBuffer->paintBoxRel(BoxEndX-112, ChanNameY+height+2, runningPercent+2, height2-4, COL_INFOBAR+5);
 	frameBuffer->paintBoxRel(BoxEndX-112+runningPercent, ChanNameY+height+2, 100-runningPercent, height2-4, COL_INFOBAR+2);
 
 	//info running
