@@ -17,20 +17,21 @@ void eServiceHandlerDVB::scrambledStatusChanged(bool scrambled)
 	else
 		flags&=~flagIsScrambled;
 	if (oldflags != flags)
-		serviceEvent(eServiceEvent(eServiceEvent::evtFlagsChanged));
+		serviceEvent(eServiceEvent(eServiceEvent::evtFlagsChanged) );
 }
 
 void eServiceHandlerDVB::switchedService(const eServiceReference &, int err)
 {
 	int oldstate=state;
-	if (err)
+	error = err;
+	if (error)
 		state=stateError;
 	else
 		state=statePlaying;
 	if (state != oldstate)
 		serviceEvent(eServiceEvent(eServiceEvent::evtStateChanged));
 
-	serviceEvent(eServiceEvent(eServiceEvent::evtStart, (void*)err));
+	serviceEvent(eServiceEvent(eServiceEvent::evtStart));
 }
 
 void eServiceHandlerDVB::gotEIT(EIT *, int)
@@ -122,17 +123,22 @@ EIT *eServiceHandlerDVB::getEIT()
 
 int eServiceHandlerDVB::getFlags()
 {
-	return 0;
+	return flags;
 }
 
 int eServiceHandlerDVB::getAspectRatio()
 {
-	return 0;
+	return aspect;
 }
 
 int eServiceHandlerDVB::getState()
 {
-	return 0;
+	return state;
+}
+
+int eServiceHandlerDVB::getErrorInfo()
+{
+	return error;
 }
 
 int eServiceHandlerDVB::stop()

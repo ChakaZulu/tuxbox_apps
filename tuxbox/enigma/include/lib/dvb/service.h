@@ -25,7 +25,7 @@ class eServiceReference;
 class eServiceEvent
 {
 public:
-	eServiceEvent(int type, void* data=0): type(type), data(data)
+	eServiceEvent(int type): type(type)
 	{
 	}
 	enum
@@ -44,7 +44,6 @@ public:
 		evtAspectChanged		
 	};
 	int type;
-	void* data;
 };
 
 class PMTEntry;
@@ -93,6 +92,8 @@ public:
 	
 		// get visual flags
 	virtual int getAspectRatio()=0;
+
+	virtual int getErrorInfo()=0;
 	
 	virtual int stop()=0;
 

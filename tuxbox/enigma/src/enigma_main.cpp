@@ -434,7 +434,7 @@ void eZapMain::eraseBackground(gPainter *painter, const eRect &where)
 {
 }
 
-eZapMain::eZapMain(): eWidget(0, 1), timeout(eApp), clocktimer(eApp), pMsg(0)
+eZapMain::eZapMain(): eWidget(0, 1), timeout(eApp), pMsg(0), clocktimer(eApp)
 {
 	isVT=0;
 	eSkin *skin=eSkin::getActive();
@@ -1071,9 +1071,26 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 {
 	switch (event.type)
 	{
-	case eServiceEvent::evtStart:
-		startService(eServiceInterface::getInstance()->service, (int)event.data);
+	case eServiceEvent::evtStateChanged:
 		break;
+	case eServiceEvent::evtFlagsChanged:
+	{
+		int fl = eServiceInterface::getInstance()->getService()->getFlags();
+		setSmartcardLogo( fl & eServiceHandler::flagIsScrambled );
+		break;
+	}
+	case eServiceEvent::evtAspectChanged:
+	{
+		int aspect = eServiceInterface::getInstance()->getService()->getAspectRatio();
+		set16_9Logo(aspect);
+		break;
+	}
+	case eServiceEvent::evtStart:
+	{
+		int err = eServiceInterface::getInstance()->getService()->getErrorInfo();
+		startService(eServiceInterface::getInstance()->service, err);
+		break;
+	}
 	case eServiceEvent::evtStop:
 		leaveService();
 		break;

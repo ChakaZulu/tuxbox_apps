@@ -12,7 +12,7 @@ class eServiceHandlerDVB: public eServiceHandler
 	void gotPMT(PMT *pmt);
 	void leaveService(const eServiceReference &);
 	void aspectRatioChanged(int ratio);
-	int flags, state, aspect;
+	int flags, state, aspect, error;
 public:
 	int getID() const;
 	eServiceHandlerDVB();
@@ -34,6 +34,7 @@ public:
 	int getFlags();
 	int getAspectRatio();
 	int getState();
+	int getErrorInfo();
 
 	int stop();
 };

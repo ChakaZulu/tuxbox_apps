@@ -233,6 +233,12 @@
 		</eServiceSelector>
 	</object>
 
+	<object name="eServiceSelectorStatusbar">
+		<eServiceSelectorStatusbar cposition="0:0" size="e:e">
+			<eLabel name="short_descr" position="0:0" size="e-200:30" />
+		</eServiceSelectorStatusbar>
+	</object>
+
 	<object name="eBouquetSelector">
 		<eBouquetSelector cposition="100:90" csize="500:450" text="Bouquets">
 			<eListbox name="bouquets" position="0:0" size="e:e" />
