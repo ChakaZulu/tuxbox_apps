@@ -6,6 +6,8 @@ bin_PROGRAMS = \
 	setpid \
 	video \
 	test_clip \
+	test_clip_vls \
+	stream_to_ts \
 	test_clip_pes \
 	test_sections \
 	test_sec_ne \
