@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.36 2004/01/06 14:06:10 rasc Exp $
+$Id: dvb_str.c,v 1.37 2004/01/11 22:49:41 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.36 2004/01/06 14:06:10 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.37  2004/01/11 22:49:41  rasc
+PES restructured
+
 Revision 1.36  2004/01/06 14:06:10  rasc
 no message
 
@@ -1923,9 +1926,12 @@ char *dvbstrPESstream_ID (u_int i)
 {
   STR_TABLE  Table[] = {
      // on changes:  adapt dmx_pes.c!!! etc. (search for PESstream_ID)
-     {  0x00, 0xBB,  "!!!unknown or PES stream not in sync... (!!!)" },
-     // --  0xB9 = PS_END
-     // --  0xBA = PS_START
+     {  0x00, 0xB8,  "!!!unknown or PES stream not in sync... (!!!)" },
+     // special PS_stream_IDs (these are not PES stream IDs)
+     {  0xB9, 0xB9,  "MPEG_program_stream_end" },
+     {  0xBA, 0xBA,  "MPEG_pack_start" },
+     {  0xBB, 0xBB,  "MPEG_system_header_start" },
+     // PES_stream_IDs
      {  0xBC, 0xBC,  "program_stream_map" },
      {  0xBD, 0xBD,  "private_stream_1" },
      {  0xBE, 0xBE,  "padding_stream" },

@@ -1,5 +1,5 @@
 /*
-$Id: dmx_pes.c,v 1.22 2004/01/06 14:06:08 rasc Exp $
+$Id: dmx_pes.c,v 1.23 2004/01/11 22:49:40 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dmx_pes.c,v 1.22 2004/01/06 14:06:08 rasc Exp $
 
 
 $Log: dmx_pes.c,v $
+Revision 1.23  2004/01/11 22:49:40  rasc
+PES restructured
+
 Revision 1.22  2004/01/06 14:06:08  rasc
 no message
 
@@ -347,7 +350,13 @@ static long pes_SyncRead (int fd, u_char *buf, u_long len, u_long *skipped_bytes
 
 	c = buf[3];
 	sync = (sync << 8) | c;
-	if ( ((sync & 0xFFFFFF00) == 0x00000100) && (c >= 0xBC) ) break;
+	if ( (sync & 0xFFFFFF00) == 0x00000100 ) {
+		if (c >= 0xBC)  break;	
+		// $$$ TODO
+		// if (c == 0xBB)  ; // system_header_start
+		// if (c == 0xBA)  ; // pack_header_start
+		// if (c == 0xB9)  ; // MPEG_program_end
+	}
 
 	(*skipped_bytes)++;			// sync skip counter
     }
@@ -369,6 +378,7 @@ static long pes_SyncRead (int fd, u_char *buf, u_long len, u_long *skipped_bytes
     if (n1 == 2) {
         l = (buf[4]<<8) + buf[5];		// PES packet size...
 	n1 = 6; 				// 4+2 bytes read
+	// $$$ TODO    if len == 0, special unbound length
 
 	if (l > 0) {
            n2 = read(fd, buf+6, (unsigned int) l );
