@@ -495,6 +495,8 @@ static eString web_root(eString request, eString path, eString opts, eHTTPConnec
 
 	result+=read_file(TEMPLATE_DIR+"index.tmp");
 
+	eString apid, vpid;
+	int iapid, ivpid;
 	eString radioc, tvc, aboutc, linksc, updatesc;
 	eString cop;
 	eString navi;
@@ -528,7 +530,17 @@ static eString web_root(eString request, eString path, eString opts, eHTTPConnec
 	tmp.sprintf("<span class=\"white\">booted enigma %d times</span><br>", bootcount);
 	stats+=tmp;
 
-	tmp.sprintf("<span class=\"white\">vpid: 0x%x</span> | <a class=\"audio\" href=\"/audio.m3u\">apid: 0x%x</a>", Decoder::parms.vpid, Decoder::parms.apid);
+	ivpid=Decoder::parms.vpid;
+	iapid=Decoder::parms.apid;
+	if(ivpid==0xffffffff)
+		vpid="none";
+	else
+		vpid.sprintf("0x%x", ivpid);
+	if(iapid==0xffffffff)
+		apid="none";
+	else
+		apid.sprintf("0x%x", iapid);
+	tmp.sprintf("<span class=\"white\">vpid: %s</span> | <a class=\"audio\" href=\"/audio.m3u\">apid: %s</a>", vpid.c_str(), apid.c_str());
 	stats+=tmp;
 	tvc="normal";
 	radioc="normal";
