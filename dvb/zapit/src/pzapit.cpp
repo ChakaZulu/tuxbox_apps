@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.32 2002/10/07 22:16:04 thegoodguy Exp $
+ * $Id: pzapit.cpp,v 1.33 2002/10/08 13:51:59 obi Exp $
  *
  * simple commandline client for zapit
  *
@@ -421,7 +421,7 @@ int main (int argc, char** argv)
 	{
 		/* read channel list */
 		if (bouquet)
-			zapit.getBouquetChannels(bouquet, channels);
+			zapit.getBouquetChannels(bouquet - 1, channels);
 
 		/* display bouquet list */
 		else
@@ -430,7 +430,7 @@ int main (int argc, char** argv)
 
 			std::vector<CZapitClient::responseGetBouquets>::iterator b_resp;
 			for (b_resp = bouquets.begin(); b_resp < bouquets.end(); b_resp++)
-				std::cout << b_resp->bouquet_nr << ": " << b_resp->name << std::endl;
+				std::cout << b_resp->bouquet_nr + 1 << ": " << b_resp->name << std::endl;
 			return 0;
 		}
 
