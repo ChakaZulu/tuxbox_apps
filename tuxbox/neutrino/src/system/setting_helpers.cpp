@@ -111,7 +111,12 @@ bool CColorSetupNotifier::changeNotify(string OptionName, void*)
 
 bool CAudioSetupNotifier::changeNotify(string OptionName, void*)
 {
-	//printf("notify: %s\n", OptionName.c_str() );
+//	printf("notify: %s\n", OptionName.c_str() );
+
+/*	NUR ZU TESTZWECKEN!!!
+	if(OptionName=="audiomenu.stereo")
+		g_Sectionsd->setPauseScanning( g_settings.audio_Stereo == false );
+*/
 	return false;
 }
 

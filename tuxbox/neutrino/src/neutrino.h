@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.63 2002/03/07 18:32:34 field Exp $
+//  $Id: neutrino.h,v 1.64 2002/03/12 16:12:02 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.64  2002/03/12 16:12:02  field
+//  Kleinere Bugfixes (Key-support killed...)
+//
 //  Revision 1.63  2002/03/07 18:32:34  field
 //  Bugfix, weitere Umstellungen ;)
 //
@@ -308,7 +311,6 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 			char command;
 		};
 
-		//    EventList *eventlist;
 		string				settingsFile;
 
 		int				    mode;
@@ -324,20 +326,18 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		char				current_volume;
 		bool				current_muted;
 
-		CColorSetupNotifier		*colorSetupNotifier;
-		CAudioSetupNotifier		*audioSetupNotifier;
-		CVideoSetupNotifier		*videoSetupNotifier;
-		CLanguageSetupNotifier  *languageSetupNotifier;
-		CKeySetupNotifier       *keySetupNotifier;
-		CAPIDChangeExec         *APIDChanger;
-		CNVODChangeExec         *NVODChanger;
-		CUCodeCheckExec			*UCodeChecker;
+		CColorSetupNotifier			*colorSetupNotifier;
+		CAudioSetupNotifier			*audioSetupNotifier;
+		CVideoSetupNotifier			*videoSetupNotifier;
+		CLanguageSetupNotifier  	*languageSetupNotifier;
+		CKeySetupNotifier       	*keySetupNotifier;
+		CAPIDChangeExec         	*APIDChanger;
+		CNVODChangeExec         	*NVODChanger;
+		CUCodeCheckExec				*UCodeChecker;
 		CStreamFeaturesChangeExec	*StreamFeaturesChanger;
-		CIPChangeNotifier		*MyIPChanger;
+		CIPChangeNotifier			*MyIPChanger;
 
-		CChannelList		*channelList;
-
-		void PluginDemo(); //demo only --- remove!
+		CChannelList				*channelList;
 
 		void isCamValid();
 		void firstChannel();

@@ -188,7 +188,7 @@ void CScreenSetup::paintCoords()
 	sprintf((char*) &xpos, "SX: %d",x_coord[0] );
 	sprintf((char*) &ypos, "SY: %d", y_coord[0] );
 	sprintf((char*) &xepos, "EX: %d", x_coord[1] );
-	sprintf((char*) &yepos, "EY: %d", y_coord[2] );
+	sprintf((char*) &yepos, "EY: %d", y_coord[1] );
 
 	g_Fonts->menu->RenderString(x+10,y+30, 200, xpos, COL_MENUCONTENT);
 	g_Fonts->menu->RenderString(x+10,y+50, 200, ypos, COL_MENUCONTENT);

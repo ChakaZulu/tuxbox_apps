@@ -42,40 +42,6 @@ CScanTs::CScanTs()
 	y=(576-height)>>1;
 }
 
-void CScanTs::sectionsdPauseScanning(int PauseIt)
-{
-	char rip[]="127.0.0.1";
-
-	int sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	SAI servaddr;
-	memset(&servaddr,0,sizeof(servaddr));
-	servaddr.sin_family=AF_INET;
-	servaddr.sin_port=htons(sectionsd::portNumber);
-	inet_pton(AF_INET, rip, &servaddr.sin_addr);
-
-	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
-	{
-		perror("CScanTs - PauseScanning - couldn't connect to sectionsd!\n");
-	}
-	else
-	{
-		sectionsd::msgRequestHeader req;
-		req.version = 2;
-		req.command = sectionsd::pauseScanning;
-		req.dataLength = 4;
-		write(sock_fd, &req, sizeof(req));
-		write(sock_fd, &PauseIt, req.dataLength);
-		sectionsd::msgResponseHeader resp;
-		memset(&resp, 0, sizeof(resp));
-		if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0)
-		{
-			close(sock_fd);
-			return;
-		}
-		close(sock_fd);
-	}
-}
-
 bool CScanTs::scanReady(short* sat, int *ts, int *services)
 {
 	int sock_fd;
@@ -198,7 +164,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 	g_FrameBuffer->loadPal("scan.pal", 37, COL_MAXFREE);
 	g_FrameBuffer->loadPicture2Mem("scan.raw", g_FrameBuffer->lfb);
 
-	sectionsdPauseScanning(1);
+	g_Sectionsd->setPauseScanning( true );
 	startScan();
 
 	paint();
@@ -298,7 +264,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 
 	hide();
 	neutrino->channelsInit();
-	sectionsdPauseScanning(0);
+	g_Sectionsd->setPauseScanning( false );
 	return menu_return::RETURN_REPAINT;
 }
 

@@ -82,8 +82,8 @@ class CInfoViewer
 		};
 
 	private:
-		int		intShowDuration;
 		bool		KillShowEPG;
+		bool		gotTime;
 
 		pthread_t	thrViewer;
 		pthread_cond_t	epg_cond;
@@ -142,7 +142,6 @@ class CInfoViewer
 		void showTitle( int ChanNum, string Channel, unsigned int onid_tsid = 0, bool CalledFromNumZap = false );
 		void killTitle();
 
-		void setDuration( int Duration );
 		const std::string getActiveChannelID();
 
 		int handleMsg(uint msg, uint data);

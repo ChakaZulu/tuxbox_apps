@@ -235,10 +235,10 @@
 
 CInfoViewer::CInfoViewer()
 {
-        intShowDuration = g_settings.timing_infobar;
         BoxStartX= BoxStartY= BoxEndX= BoxEndY=0;
-        is_visible=false;
-        showButtonBar=false;
+        is_visible		= false;
+        showButtonBar	= false;
+        gotTime 		= g_Sectionsd->getIsTimeSet();
 
         strcpy( running, "");
         strcpy( next, "");
@@ -288,11 +288,6 @@ void CInfoViewer::start()
 
         aspectRatio = g_Controld->getAspectRatio();
 
-}
-
-void CInfoViewer::setDuration( int Duration )
-{
-        intShowDuration = Duration;
 }
 
 const std::string CInfoViewer::getActiveChannelID()
@@ -355,7 +350,9 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
         ftime(&tm);
         strftime((char*) &timestr, 20, "%H:%M", localtime(&tm.time) );
         int timewidth = g_Fonts->infobar_channame->getRenderWidth(timestr);
-        g_Fonts->infobar_channame->RenderString(BoxEndX-timewidth-10, ChanNameY+height, timewidth+ 5, timestr, COL_INFOBAR);
+
+        if ( gotTime )
+        	g_Fonts->infobar_channame->RenderString(BoxEndX-timewidth-10, ChanNameY+height, timewidth+ 5, timestr, COL_INFOBAR);
 
 		// ... with channel name
         g_Fonts->infobar_channame->RenderString(ChanNameX+ 10, ChanNameY+height, BoxEndX- (ChanNameX+ 20)- timewidth- 15, Channel.c_str(), COL_INFOBAR);
@@ -399,6 +396,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 
                 g_RemoteControl->CopyPIDs();
                 showButtonAudio();
+                show16_9();
         }
 
 		// Schatten
@@ -418,10 +416,8 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 
         if ( !CalledFromNumZap )
         {
-        	show16_9();
-
        		bool hideIt = true;
-			long long timeoutEnd = g_RCInput->calcTimeoutEnd( intShowDuration >> 1 );
+			long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_infobar >> 1 );
 
 			int res = messages_return::none;
 
@@ -448,6 +444,9 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 				}
 				else if ( msg == messages::EVT_TIMESET )
 				{
+					// Handle anyway!
+					neutrino->handleMsg( msg, data );
+
         			g_RCInput->pushbackMsg( messages::SHOW_INFOBAR, 0 );
 					res = messages_return::cancel_info;
 				}
@@ -483,6 +482,11 @@ int CInfoViewer::handleMsg(uint msg, uint data)
         aspectRatio = data;
 		show16_9();
         return messages_return::handled;
+	}
+	else if ( msg == messages::EVT_TIMESET )
+	{
+		gotTime = true;
+		return messages_return::unhandled;
 	}
 	else
 		return messages_return::unhandled;
