@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.27 2002/09/21 20:20:05 thegoodguy Exp $
+ * $Id: frontend.cpp,v 1.28 2002/10/07 22:50:22 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -21,6 +21,7 @@
 
 /* system c */
 #include <fcntl.h>
+#include <stdio.h>
 #include <sys/ioctl.h>
 #include <sys/poll.h>
 #include <sys/stat.h>
@@ -47,6 +48,10 @@ CFrontend::CFrontend ()
 {
 	failed = false;
 	tuned = false;
+	currentToneMode = 0;
+	currentVoltage = 0;
+	currentFrequency = 0;
+	currentTsidOnid = 0;
 	diseqcRepeats = 0;
 	diseqcType = NO_DISEQC;
 
@@ -314,8 +319,6 @@ void CFrontend::setFrontend (FrontendParameters *feparams)
 {
 	FrontendEvent *event = new FrontendEvent();
 
-	tuned = false;
-
 	std::cout << "[CFrontend::setFrontend] freq " << feparams->Frequency << std::endl;
 
 	/* clear old events */
@@ -534,6 +537,7 @@ const bool CFrontend::tuneChannel (CZapitChannel *channel)
 const bool CFrontend::tuneFrequency (FrontendParameters feparams, uint8_t polarization, uint8_t diseqc)
 {
 	bool secChanged = false;
+	tuned = false;
 
 	/* sec */
 	if (info->type == FE_QPSK)
