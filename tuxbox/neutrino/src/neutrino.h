@@ -127,8 +127,6 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void setupNetwork( bool force= false );
 		void setupNFS();
 		void setupRecordingDevice(void);
-		void testNetwork();
-		void showNetwork();
 		
 		void startNextRecording();
 
@@ -205,8 +203,6 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		int getMode() {return mode;}
 		int getLastMode() {return lastMode;}
 		bool isMuted() {return current_muted;}
-
-	friend class CNeutrinoBouquetEditorEvents;
 };
 
 
