@@ -125,14 +125,14 @@ void FindTransponder(XMLTreeNode *root)
   }
   while (search) {
     if (!(strcmp(search->GetType(), "cable"))) {
-      //printf("Scanning a cable section\n");
+      printf("Scanning a cable section\n");
       while (strcmp(search->GetType(), "transponder")){
 	search = search->GetChild();
-      }
+	}
       ParseRoot(search);
       search = search->GetParent();
     } else if (!(strcmp(search->GetType(), "satellite"))) {
-      //printf("Scanning a satellite section\n");
+      printf("Scanning a satellite section\n");
       while (!(strcmp(search->GetType(), "satellite"))) {
 	sscanf(search->GetAttributeValue("diseqc"),"%i",&curr_diseqc);
 	printf("Going to parse Satellite %s\n", search->GetAttributeValue("name"));
@@ -157,10 +157,10 @@ chanptr LoadServices(int mode)
   curr_diseqc = 0;
   
   XMLTreeParser *parser=new XMLTreeParser("ISO-8859-1");
-  FILE *in=fopen("/etc/services.xml", "r");
+  FILE *in=fopen("/var/zapit/services.xml", "r");
   if (!in)
     {
-      perror("/etc/services.xml");
+      perror("/var/zapit/services.xml");
       return NULL;
     }
   
