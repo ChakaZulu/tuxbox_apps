@@ -21,8 +21,6 @@ servicemenu.update aktualizovat software
 servicemenu.scants hladat kanaly
 servicemenu.ucodecheck preskusat UCodes
 
-cablesetup.spectralInversion use spectral inversion
-cablesetup.spectralInversionWarning nastartujte znovu Vas dbox, aby ste aktivovali zmeny
 cablesetup.provider cable provider
 
 satsetup.disqeqc DiSEqC

@@ -894,7 +894,7 @@ void CNeutrinoApp::ClearFrameBuffer()
 }
 
 void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings,  CMenuWidget &audioSettings, CMenuWidget &parentallockSettings,
-                                CMenuWidget &networkSettings, CMenuWidget &streamingSettings, CMenuWidget &colorSettings, CMenuWidget &lcdSettings, 
+                                CMenuWidget &networkSettings, CMenuWidget &streamingSettings, CMenuWidget &colorSettings, CMenuWidget &lcdSettings,
 								CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &service)
 {
 	dprintf(DEBUG_DEBUG, "init mainmenue\n");
@@ -1010,7 +1010,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		settings.addItem( new CMenuForwarder("menu.back") );
 		settings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
-		static int dummy = 0;
+/*		static int dummy = 0;
 		FILE* fd = fopen("/var/etc/.specinv", "r");
 		if(fd)
 		{
@@ -1023,7 +1023,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 
 		CZapitClient::SatelliteList providerList;
 		g_Zapit->getScanSatelliteList(providerList);
-/*		static int cableProvider = 0;
+		static int cableProvider = 0;
 		for ( uint i=0; i<providerList.size(); i++)
 		{
 			if( !strcmp( providerList[i].satName, scanSettings.satellites[0].name))
@@ -1082,14 +1082,14 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		mtdexpert->addItem( new CMenuForwarder("flashupdate.readflashmtd", true, "", fe, "readflashmtd") );
 		mtdexpert->addItem( new CMenuForwarder("flashupdate.writeflashmtd", true, "", fe, "writeflashmtd") );
 		updateSettings->addItem( new CMenuForwarder("flashupdate.expertfunctions", true, "", mtdexpert ) );
-		
+
 		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 		CMenuOptionChooser *oj = new CMenuOptionChooser("flashupdate.updatemode", &g_settings.softupdate_mode,true);
 			oj->addOption(0, "flashupdate.updatemode_manual");
 			oj->addOption(1, "flashupdate.updatemode_internet");
 		updateSettings->addItem( oj );
-		
-		
+
+
 		//get current flash-version SBBBYYYYMMTTHHMM -- formatsting
 		CConfigFile configfile('\t');
 		if(!configfile.loadConfig("/.version"))
@@ -1361,12 +1361,12 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	if(g_settings.network_streaming_use)
 	{
 		networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-		
+
 		oj = new CMenuOptionChooser("networkmenu.usestreamserver", &g_settings.network_streaming_use, true);
 		oj->addOption(0, "options.off");
 		oj->addOption(1, "options.on");
 		networkSettings.addItem( oj );
-	
+
 		CStringInput*	networkSettings_streamingserver= new CStringInput("networkmenu.streamingserver", g_settings.network_streamingserver, 24, "ipsetup.hint_1", "ipsetup.hint_2");
 		CStringInput*	networkSettings_streamingserverport= new CStringInput("networkmenu.streamingserverport", g_settings.network_streamingserverport, 6, "ipsetup.hint_1", "ipsetup.hint_2","1234567890 ");
 
@@ -1403,7 +1403,7 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 
 	oj = new CMenuOptionChooser("streamingmenu.stopsectionsd", &g_settings.network_streaming_stopsectionsd, true);
 	oj->addOption(0, "options.off");
-	oj->addOption(1, "options.on");	
+	oj->addOption(1, "options.on");
 	streamingSettings.addItem( oj );
 }
 
@@ -1518,12 +1518,12 @@ void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
 	oj->addOption(0, "options.off");
 	oj->addOption(1, "options.on");
 	lcdSettings.addItem( oj );
-	
+
 	oj = new CMenuOptionChooser("lcdmenu.power", &lcdpower, true, lcdnotifier );
 	oj->addOption(0, "options.off");
 	oj->addOption(1, "options.on");
 	lcdSettings.addItem( oj );
-	
+
 	lcdSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	lcdSettings.addItem( new CMenuForwarder("lcdmenu.lcdcontroler", true, "", lcdsliders ));
 }
@@ -1787,7 +1787,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	setupNetwork();
 
-	// setup streaming server 
+	// setup streaming server
 	if(g_settings.network_streaming_use)
 	{
 		CVCRControl::CServerDeviceInfo * info = new CVCRControl::CServerDeviceInfo;
@@ -1814,7 +1814,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget parentallockSettings("parentallock.parentallock", "lock.raw", 500);
 	CMenuWidget networkSettings("networkmenu.head", "network.raw");
 	CMenuWidget streamingSettings("streamingmenu.head", "streaming.raw");
-	CMenuWidget colorSettings("colormenu.head", "colors.raw");	
+	CMenuWidget colorSettings("colormenu.head", "colors.raw");
 	CMenuWidget lcdSettings("lcdmenu.head", "lcd.raw");
 	CMenuWidget keySettings("keybindingmenu.head", "keybinding.raw", 400, 460);
 	CMenuWidget miscSettings("miscsettings.head", "settings.raw");
@@ -2024,11 +2024,11 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 		else if ( msg == NeutrinoMessages::EVT_POPUP )
 		{
 			ShowHint ( "messagebox.info", string((char *) data) );
-		}		
+		}
 		else if ( msg == NeutrinoMessages::EVT_EXTMSG )
 		{
 			ShowMsg ( "messagebox.info", string((char *) data) , CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw" );
-		}		
+		}
 		else if ( msg == NeutrinoMessages::VCR_ON )
 		{
 			if  ( mode != mode_scart )
@@ -2694,7 +2694,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 
 	if(CVCRControl::getInstance()->registeredDevices() > 0)
 	{
-		if(streamstatus == 1)	
+		if(streamstatus == 1)
 		{
 			eventinfo.onidSid = g_RemoteControl->current_onid_sid;
 			eventinfo.epgID = g_RemoteControl->current_EPGid;
@@ -2728,7 +2728,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.299 2002/07/10 15:54:52 dirch Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.300 2002/07/12 23:44:01 Homar Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

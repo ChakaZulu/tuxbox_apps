@@ -60,12 +60,13 @@ class CDHCPNotifier : public CChangeObserver
 		void startStopDhcp();
 };
 
+/*
 class CCableSpectalInversionNotifier : public CChangeObserver
 {
 	public:
 		bool changeNotify(string OptionName, void*);
 };
-
+*/
 class CLcdNotifier : public CChangeObserver
 {
 	private:

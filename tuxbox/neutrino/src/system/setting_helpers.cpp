@@ -126,6 +126,7 @@ bool CLcdNotifier::changeNotify(string OptionName, void*)
 }
 
 
+/*
 bool CCableSpectalInversionNotifier::changeNotify(string OptionName, void* Data)
 {
 	static bool messageShowed = false;
@@ -152,7 +153,7 @@ bool CCableSpectalInversionNotifier::changeNotify(string OptionName, void* Data)
 	}
 	return true;
 }
-
+*/
 bool CStartNeutrinoDirectNotifier::changeNotify(string OptionName, void* Data)
 {
 	if( *((int*) Data)!=0)

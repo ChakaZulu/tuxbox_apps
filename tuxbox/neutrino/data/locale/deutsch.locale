@@ -21,8 +21,6 @@ servicemenu.update Software-Aktualisierung
 servicemenu.scants Kanalsuche
 servicemenu.ucodecheck UCodes überprüfen
 
-cablesetup.spectralInversion Spectrale Inversion
-cablesetup.spectralInversionWarning Sie müssen rebooten, um die Änderungen zu aktivieren!
 cablesetup.provider Kabelanbieter
 
 satsetup.disqeqc DiSEqC

@@ -21,8 +21,6 @@ servicemenu.update Software Update
 servicemenu.scants Servicescan
 servicemenu.ucodecheck Check ucodes
 
-cablesetup.spectralInversion use spectral inversion
-cablesetup.spectralInversionWarning You have to reboot to activate changes
 cablesetup.provider cable provider
 
 satsetup.disqeqc DiSEqC
