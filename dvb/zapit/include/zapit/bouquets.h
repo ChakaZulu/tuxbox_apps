@@ -69,6 +69,7 @@ class CBouquetManager
 		CBouquet* remainChannels;
 		void makeRemainingChannelsBouquet(unsigned int tvChanNr, unsigned int radioChanNr, string strTitle);
 		void parseBouquetsXml(XMLTreeNode *root);
+		string convertForXML( string s);
 	public:
 		class tvChannelIterator
 		{

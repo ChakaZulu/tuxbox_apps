@@ -1,7 +1,7 @@
 /*
   BouquetManager für zapit  -   DBoxII-Project
 
-  $Id: bouquets.cpp,v 1.11 2002/01/31 22:52:48 Simplex Exp $
+  $Id: bouquets.cpp,v 1.12 2002/02/04 23:22:51 Simplex Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: bouquets.cpp,v $
+  Revision 1.12  2002/02/04 23:22:51  Simplex
+  fixed bug saving bouquets.xml
+
   Revision 1.11  2002/01/31 22:52:48  Simplex
   bugfix
 
@@ -224,7 +227,39 @@ void CBouquet::moveService(  uint oldPosition, uint newPosition, uint serviceTyp
 	}
 }
 
+
 /**** class CBouquetManager *************************************************/
+
+string CBouquetManager::convertForXML( string s)
+{
+	string r;
+	uint i;
+	for (i=0; i<s.length(); i++)
+	{
+		switch (s[i])
+		{
+		  case '&':
+			r += "&amp;";
+		  break;
+		  case '<':
+			r += "&lt;";
+		  break;
+		  case '\"':
+			r += "&quot;";
+		  break;
+		  default:
+			if ((s[i]>=32) && (s[i]<128))
+				r += s[i];
+			else if (s[i] > 128)
+			{
+				char val[5];
+				sprintf(val, "%d", s[i]);
+				r = r + "&#" + val + ";";
+			}
+		}
+	}
+	return(r);
+}
 
 void CBouquetManager::saveBouquets()
 {
@@ -243,23 +278,23 @@ void CBouquetManager::saveBouquets()
 	{
 		if (Bouquets[i] != remainChannels)
 		{
-			fprintf(bouq_fd, "\t<Bouquet name=\"%s\">\n", Bouquets[i]->Name.c_str());
+			fprintf(bouq_fd, "\t<Bouquet name=\"%s\">\n", convertForXML(Bouquets[i]->Name).c_str());
 			for ( uint j=0; j<Bouquets[i]->tvChannels.size(); j++)
 			{
 				fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" onid=\"%04x\"/>\n",
 						Bouquets[i]->tvChannels[j]->sid,
-						Bouquets[i]->tvChannels[j]->name.c_str(),
+						convertForXML(Bouquets[i]->tvChannels[j]->name).c_str(),
 						Bouquets[i]->tvChannels[j]->onid);
 			}
 			for ( uint j=0; j<Bouquets[i]->radioChannels.size(); j++)
 			{
 				fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" onid=\"%04x\"/>\n",
 						Bouquets[i]->radioChannels[j]->sid,
-						Bouquets[i]->radioChannels[j]->name.c_str(),
+						convertForXML(Bouquets[i]->radioChannels[j]->name).c_str(),
 						Bouquets[i]->radioChannels[j]->onid);
 			}
+			fprintf(bouq_fd, "\t</Bouquet>\n");
 		}
-		fprintf(bouq_fd, "\t</Bouquet>\n");
 	}
 	fprintf(bouq_fd, "</ZAPIT>\n");
 	fclose(bouq_fd);
@@ -329,6 +364,7 @@ void CBouquetManager::parseBouquetsXml(XMLTreeNode *root)
 	printf("\n[zapit] Found %d bouquets.\n", Bouquets.size());
 
 }
+
 void CBouquetManager::loadBouquets(bool ignoreBouquetFile = false)
 {
 	FILE* in;
@@ -383,6 +419,10 @@ void CBouquetManager::makeRemainingChannelsBouquet( unsigned int tvChanNr, unsig
 	ChannelList numberedChannels;
 	ChannelList unnumberedChannels;
 
+	if (remainChannels != NULL)
+	{
+		deleteBouquet(strTitle);
+	}
 	remainChannels = addBouquet(strTitle);
 
 	for ( map<uint, channel>::iterator it=allchans_tv.begin(); it!=allchans_tv.end(); it++)
@@ -460,6 +500,7 @@ void CBouquetManager::makeRemainingChannelsBouquet( unsigned int tvChanNr, unsig
 	if ((remainChannels->tvChannels.size() == 0) && (remainChannels->radioChannels.size() == 0))
 	{
 		deleteBouquet(strTitle);
+		remainChannels = NULL;
 	}
 }
 
