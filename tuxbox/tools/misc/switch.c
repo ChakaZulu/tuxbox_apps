@@ -21,6 +21,9 @@
  *
  *
  *   $Log: switch.c,v $
+ *   Revision 1.11  2002/02/23 20:22:29  woglinde
+ *   fixing compiler warnings mulitple-literal strings
+ *
  *   Revision 1.10  2001/07/23 16:19:56  gillem
  *   - add get type
  *
@@ -49,7 +52,7 @@
  *
  *
  *
- *   $Revision: 1.10 $
+ *   $Revision: 1.11 $
  *
  */
 
@@ -87,23 +90,23 @@ char srcs_aux[8][4]={"DE1","VM1","VCR","AUX","DE2","VM2","VM3","VM4"};
 void help (char *prog_name) {
   printf("Version %s\n",VERSION);
   printf("Usage: %s <switches>\n\n",prog_name);
-  printf("Switches:\n
-   -h,  --help                                   help
-   -s,  --show                                   show current settings
-   -v,  --volume <vol>                           set TV volume (0-63, 0 loudest)
-   -m,  --mute                                   mute TV volume
-   -u,  --unmute                                 unmute TV volume
-  -rv,  --route-video <dest> <src>               route VIDEO
-  -ra,  --route-audio <dest> <src>               route AUDIO
- -zcd,  --zero-cross-detector <on/off>           set ZCD
- -fnc,  --video-function-switch-control <0/1/2/3 set FNC
- -ycm,  --y-c-mix <0/1>                          set Y/C Mix (only cxa2092)
--fblk,  --video-fast-blanking-control <0/1/2/3>  set FBLK
--log1,  --logic1 <0/1>                           set logic output 1
--log2,  --logic2 <0/1>                           set logic output 2
--log3,  --logic3 <0/1>                           set logic output 3
--log4,  --logic4 <0/1>                           set logic output 4
- -ttv,  --trash-my-tv                            trashes your tv\n\n");
+  printf("Switches:\n"
+  "-h,     --help            help\n"
+  "-s,     --show            show current settings\n"
+  "-v,     --volume <vol>    set TV volume (0-63, 0 loudest)\n"
+  "-m,     --mute            mute TV volume\n"
+  "-u,     --unmute          unmute TV volume\n"
+  "-rv,    --route-video <dest> <src>               route VIDEO\n"
+  "-ra,    --route-audio <dest> <src>               route AUDIO\n"
+  "-zcd,   --zero-cross-detector <on/off>           set ZCD\n"
+  "-fnc,   --video-function-switch-control <0/1/2/3 set FNC\n"
+  "-ycm,   --y-c-mix <0/1>                          set Y/C Mix (only cxa2092)\n"
+  "-fblk,  --video-fast-blanking-control <0/1/2/3>  set FBLK\n"
+  "-log1,  --logic1 <0/1>                           set logic output 1\n"
+  "-log2,  --logic2 <0/1>                           set logic output 2\n"
+  "-log3,  --logic3 <0/1>                           set logic output 3\n"
+  "-log4,  --logic4 <0/1>                           set logic output 4\n"
+  "-ttv,  --trash-my-tv                            trashes your tv\n\n");
   exit(0);
 }
 

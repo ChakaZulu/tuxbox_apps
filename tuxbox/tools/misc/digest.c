@@ -18,14 +18,14 @@
 void help(char *prog_name) {
   printf("Version %s\n",VERSION);
   printf("Usage: %s <switches> <number/name/keyword>\n\n",prog_name);
-  printf("Switches:\n
-      -h, --help             help
-      -p, --pan-scan         pan scan mode
-      -l, --letter-box       letter box mode
-      -c, --center-cut-out   center cut out mode
-      -1                     4:3 mode
-      -2                     16:9 mode
-      -3                     20:9 mode\n");
+  printf("Switches:\n"
+      "-h, --help             help\n"
+      "-p, --pan-scan         pan scan mode\n"
+      "-l, --letter-box       letter box mode\n"
+      "-c, --center-cut-out   center cut out mode\n"
+      "-1                     4:3 mode\n"
+      "-2                     16:9 mode\n"
+      "-3                     20:9 mode\n");
   exit(0);
 }
 

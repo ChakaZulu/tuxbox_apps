@@ -15,25 +15,24 @@
 void help(char *prog_name) {
   printf("Version %s\n",VERSION);
   printf("Usage: %s <options>\n\n",prog_name);
-  printf("Switches:\n
-      -h, --help            help
-      -o, --power-save <X>  power save mode
-                            none get power save state
-                            0    power save off
-                            1    power save on
-      -r, --rgb             rgb mode
-      -f, --fbas            fbas mode
-      -s, --svideo          svideo mode
-      -p, --pal             pal mode
-      -n, --ntsc            ntsc mode
-      -i, --input <X>       input control
-                            MP1      = 1
-                            MP2      = 2
-                            CSYNC    = 4
-                            DEMOFF   = 8
-                            SYMP     = 16
-                            COLORBAR = 128
-\n");
+  printf("Switches:\n"
+     "-h, --help            help\n"
+     "-o, --power-save <X>  power save mode\n"
+     "                      none get power save state\n"
+     "                      0    power save off\n"
+     "                      1    power save on\n"
+     "-r, --rgb             rgb mode\n"
+     "-f, --fbas            fbas mode\n"
+     "-s, --svideo          svideo mode\n"
+     "-p, --pal             pal mode\n"
+     "-n, --ntsc            ntsc mode\n"
+     "-i, --input <X>       input control\n"
+     "                      MP1      = 1\n"
+     "                      MP2      = 2\n"
+     "                      CSYNC    = 4\n"
+     "                      DEMOFF   = 8\n"
+     "                      SYMP     = 16\n"
+     "                      COLORBAR = 128\n");
   exit(0);
 }
 
