@@ -92,6 +92,7 @@ CPictureViewerGui::CPictureViewerGui()
 	picture_filter.addFilter("jpg");
 	picture_filter.addFilter("jpeg");
 	picture_filter.addFilter("gif");
+	picture_filter.addFilter("crw");
 	m_filebrowser->Filter = &picture_filter;
    if(strlen(g_settings.network_nfs_picturedir)!=0)
       Path = g_settings.network_nfs_picturedir;

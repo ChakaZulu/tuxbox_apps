@@ -33,6 +33,11 @@ extern unsigned char * color_average_resize(unsigned char * orgin,int ox,int oy,
     extern int fh_bmp_load(const char *,unsigned char *,int,int);
     extern int fh_bmp_id(const char *);
 #endif
+#ifdef FBV_SUPPORT_CRW
+    extern int fh_crw_getsize(const char *,int *,int*,int,int);
+    extern int fh_crw_load(const char *,unsigned char *,int,int);
+    extern int fh_crw_id(const char *);
+#endif
 
 void CPictureViewer::add_format(int (*picsize)(const char *,int *,int*,int,int ),int (*picread)(const char *,unsigned char *,int,int), int (*id)(const char*))
 {
@@ -58,6 +63,9 @@ void CPictureViewer::init_handlers(void)
 #endif
 #ifdef FBV_SUPPORT_BMP
     add_format(fh_bmp_getsize,fh_bmp_load,fh_bmp_id);
+#endif
+#ifdef FBV_SUPPORT_CRW
+    add_format(fh_crw_getsize,fh_crw_load,fh_crw_id);
 #endif
 }
 
