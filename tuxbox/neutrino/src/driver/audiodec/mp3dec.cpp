@@ -2,6 +2,8 @@
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2002 Bjoern Kalkbrenner <terminar@cyberphoria.org>
+   (C) 2002,2003,2004 Zwen <Zwen@tuxbox.org>
+   
 	libmad MP3 low-level core
 	Homepage: http://www.cyberphoria.org/
 
@@ -38,12 +40,40 @@
 #include <string.h>
 #include <errno.h>
 #include <mad.h>
-#include <id3tag.h>
 #include <sstream>
 #include <driver/audiodec/mp3dec.h>
 #include <driver/netfile.h>
 #include <linux/soundcard.h>
 #include <assert.h>
+
+#include <id3tag.h>
+
+/* libid3tag extension: This is neccessary in order to call fclose
+   on the file. Normally libid3tag closes the file implicit.
+   For the netfile extension to work properly netfiles fclose must be called.
+   To close an id3 file (usually by calling id3_file_close) without fclosing it,
+   call following i3_finish_file function. It's just a copy of libid3tags
+   finish_file function. */
+extern "C"
+{
+void id3_tag_addref(struct id3_tag *);
+void id3_tag_delref(struct id3_tag *);
+struct filetag {
+	struct id3_tag *tag;
+	unsigned long location;
+	id3_length_t length;
+};
+struct id3_file {
+	FILE *iofile;
+	enum id3_file_mode mode;
+	char *path;
+	int flags;
+	struct id3_tag *primary;
+	unsigned int ntags;
+	struct filetag *tags;
+};
+void id3_finish_file(struct id3_file* file);
+}
 
 // Frames to skip in ff/rev mode
 #define FRAMES_TO_SKIP 75 
@@ -55,6 +85,7 @@
 /****************************************************************************
  * Global variables.														*
  ****************************************************************************/
+
 /****************************************************************************
  * Return an error string associated with a mad error code.					*
  ****************************************************************************/
@@ -888,7 +919,8 @@ bool CMP3Dec::GetID3(FILE* in, CAudioMetaData* m)
 		else
 			printf("error open id3 tag\n");
 
-		id3_file_close(id3file);
+		fclose(in);
+		id3_finish_file(id3file);
 		return true;
 	}
 	return false;
@@ -899,4 +931,34 @@ bool CMP3Dec::GetID3(FILE* in, CAudioMetaData* m)
 		return false;
 	}
 }
+
+// this is a copy of static libid3tag function "finish_file"
+// which cannot be called from outside
+void id3_finish_file(struct id3_file* file)
+{
+	unsigned int i;
+	
+	if (file->path)
+		free(file->path);
+
+	if (file->primary) {
+		id3_tag_delref(file->primary);
+		id3_tag_delete(file->primary);
+	}
+	
+	for (i = 0; i < file->ntags; ++i) {
+		struct id3_tag *tag;
+		
+		tag = file->tags[i].tag;
+		if (tag) {
+			id3_tag_delref(tag);
+			id3_tag_delete(tag);
+		}
+	}
+	
+	if (file->tags)
+		free(file->tags);
+	
+	free(file);
+}	
 
