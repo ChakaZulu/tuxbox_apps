@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.cpp,v 1.36 2002/10/03 13:02:00 Zwen Exp $
+	$Id: timermanager.cpp,v 1.37 2002/10/04 12:39:51 Zwen Exp $
 
 	License: GPL
 
@@ -518,7 +518,7 @@ CTimerEvent(TIMER_STANDBY, config, iId)
    stringstream ostr;
    ostr << iId;
    string id=ostr.str();
-   standby_on = config->getInt64("STANDBY_ON_"+id);
+   standby_on = config->getBool("STANDBY_ON_"+id);
 }
 //------------------------------------------------------------
 
