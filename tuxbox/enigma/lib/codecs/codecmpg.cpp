@@ -54,7 +54,7 @@ void eMPEGDemux::syncBits()
 }
 
 eMPEGDemux::eMPEGDemux(eIOBuffer &input, eIOBuffer &video, eIOBuffer &audio)
-	: input(input), video(video), audio(audio), minFrameLength(4096)
+	: input(input), video(video), audio(audio), minFrameLength(4096), mpegtype(-1)
 {
 	remaining=0;
 	memset(&pcmsettings, 0, sizeof(pcmsettings));
@@ -131,7 +131,7 @@ a:
 							break;
 					}
 					mpegtype=type;
-					eDebug("type = %d", type);
+					eDebug("set %s", type == 1 ? "MPEG-2" : "MPEG-1" );
 				}
 				if (type != 1)
 				{

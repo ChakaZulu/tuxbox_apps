@@ -5,10 +5,6 @@
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
 
-#ifdef HAVE_TUXBOX_H
-#include <tuxbox.h>
-#endif
-
 #if HAVE_DVB_API_VERSION == 3
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -16,6 +12,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <lib/dvb/frontend.h>
+#include <tuxbox.h>
 #endif
 
 eSystemInfo *eSystemInfo::instance;
@@ -67,7 +64,7 @@ eSystemInfo::eSystemInfo()
 			fetype=feSatellite;
 	}
 #endif
-#ifdef HAVE_TUXBOX_H
+#if HAVE_DVB_API_VERSION==3
 	switch (tuxbox_get_submodel())
 	{
 		case TUXBOX_SUBMODEL_DREAMBOX_DM7000:
