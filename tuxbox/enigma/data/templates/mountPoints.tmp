@@ -5,9 +5,9 @@
 		<th>Action</td>
 		<th>&nbsp;</th>
 		<th>&nbsp;</th>
-		<th>Type</th>
-		<th>Mount</th>
-		<th>Server/Device</th>
+		<th align="left">Type</th>
+		<th align="left">Mount</th>
+		<th align="left">Server/Device</th>
 		<th>Auto</th>
 	</thead>
 	#BODY#	
