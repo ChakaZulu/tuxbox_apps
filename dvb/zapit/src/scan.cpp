@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.55 2002/08/24 14:20:35 obi Exp $
+ * $Id: scan.cpp,v 1.56 2002/08/27 16:02:23 obi Exp $
  */
 
 #include <clientlib/zapitclient.h>
@@ -132,9 +132,10 @@ int get_nits (uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, uint
 	}
 	else
 	{
-		printf("No signal found on transponder\n");
+		printf("\n****************\nNo signal found on transponder (%u %u %hhu)\n****************\n\n", frequency, symbol_rate, polarization);
 		status = -1;
 	}
+
 	return status;
 }
 
@@ -165,7 +166,7 @@ int get_sdts()
 		}
 		else
 		{
-			printf("[scan.cpp] No signal found on transponder\n");
+			printf("\n****************\nNo signal found on transponder (%u %u %hhu)\n****************\n\n", tI->second.feparams.Frequency, tI->second.feparams.u.qpsk.SymbolRate, tI->second.polarization);
 			status = -1;
 		}
 	}
