@@ -993,8 +993,7 @@ static eString getLeftNavi(eString mode, bool javascript)
 	else
 	if (mode.find("help") == 0)
 	{
-		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000
-			|| eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7020)
+		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
 		{
 			result += button(110, "DMM Sites", LEFTNAVICOLOR, pre + "?mode=helpDMMSites" + post);
 			result += "<br>";
@@ -3381,8 +3380,7 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 			result.strReplace("#BOX#", "Dreambox");
 		else
 			result.strReplace("#BOX#", "dBox");
-		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000
-			|| eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7020)
+		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
 			result.strReplace("#TOPBALK#", "topbalk.png");
 		else
 		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Nokia)

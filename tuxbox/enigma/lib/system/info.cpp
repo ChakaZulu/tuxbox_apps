@@ -110,7 +110,7 @@ eSystemInfo::eSystemInfo()
 		case 9:
 			manufactstr="Dream-Multimedia-TV";
 			helpstr="dreambox";
-			canupdateTransponder=1;
+			canupdateTransponder=haskeyboard=1;
 			caids.insert(0x4a70);
 			switch(mid)
 			{
@@ -118,7 +118,7 @@ eSystemInfo::eSystemInfo()
 					midstr="5";
 					modelstr="DM7000";
 					cpustr="STB04500, 252MHz";
-					haskeyboard = hashdd = haslcd = canmeasurelnbcurrent = hasci
+					hashdd = haslcd = canmeasurelnbcurrent = hasci
 					= canrecordts = cantimeshift = 1;
 					hwtype = DM7000;
 					defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR;
@@ -172,7 +172,7 @@ eSystemInfo::eSystemInfo()
 					midstr="9";
 					modelstr="DM7020";
 					cpustr="STB04500, 252MHz";
-					haskeyboard = hasrfmod = hashdd = haslcd = hasci
+					hasrfmod = hashdd = haslcd = hasci
 					= canrecordts = hasstandbywakeuptimer = cantimeshift = 1;
 					// check if the box revision is new enough to measure
 					// lnb power with > 13V ( revisions with lnbp21 can this )
@@ -230,7 +230,7 @@ eSystemInfo::eSystemInfo()
 			alphaincrement=25;
 			defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recNgrab;
 			canshutdown=0;
-			canupdateTransponder=1;
+			haskeyboard=canupdateTransponder=1;
 			hwtype = TR_DVB272S;
 			caids.insert(0x4a70);
 			hasci=2;
