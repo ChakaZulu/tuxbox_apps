@@ -1218,11 +1218,8 @@ static eString getcurepg2(eString request, eString dirpath, eString opt, eHTTPCo
 	if(!current)
 		return eString("epg not ready yet");
 
-	result+=eString("<html>" CHARSETMETA "<head><title>epgview</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/epgview.css\"></head><body bgcolor=#000000>");
-	result+=eString("<span class=\"title\">");
-	result+=filter_string(current->service_name);
-	result+=eString("</span>");
-	result+=eString("<br>\n");
+	eString tmp2 = read_file(TEMPLATE_DIR+"EPG.tmp");
+	tmp2.strReplace("#CHANNEL#", filter_string(current->service_name));
 
 	const timeMap* evt=ref ?
 		eEPGCache::getInstance()->getTimeMap((eServiceReferenceDVB&)ref)
@@ -1230,30 +1227,35 @@ static eString getcurepg2(eString request, eString dirpath, eString opt, eHTTPCo
 		eEPGCache::getInstance()->getTimeMap(sapi->service);
 
 	if(!evt)
-		return eString("epg not ready yet");
-
-	timeMap::const_iterator It;
-
-	for(It=evt->begin(); It!= evt->end(); It++)
 	{
-		EITEvent event(*It->second);
-		for(ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
-		{
-			Descriptor *descriptor=*d;
-			if(descriptor->Tag()==DESCR_SHORT_EVENT)
-			{
-				tm* t = localtime(&event.start_time);
-				result+=eString().sprintf("<!-- ID: %04x -->", event.event_id);
-				tmp.sprintf("<u><a href=\"javascript:record()\">Record</a></u>&nbsp;<span class=\"epg\"><a  href=\"javascript:EPGDetails()\">%02d.%02d - %02d:%02d ", t->tm_mday, t->tm_mon+1, t->tm_hour, t->tm_min);
-				result+=tmp;
-				result+=((ShortEventDescriptor*)descriptor)->event_name;
-				result+="</span></a></u><br>\n";
-			}
-		}
-
+		result = "EPG is not yet available.";
 	}
-	result+="</body></html>";
-	return result;
+	else
+	{
+		timeMap::const_iterator It;
+
+		for(It=evt->begin(); It!= evt->end(); It++)
+		{
+			EITEvent event(*It->second);
+			for(ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
+			{
+				Descriptor *descriptor=*d;
+				if(descriptor->Tag()==DESCR_SHORT_EVENT)
+				{
+					tm* t = localtime(&event.start_time);
+					result+=eString().sprintf("<!-- ID: %04x -->", event.event_id);
+					tmp.sprintf("<u><a href=\"javascript:record()\">Record</a></u>&nbsp;&nbsp;<span class=\"epg\"><a  href=\"javascript:EPGDetails()\">%02d.%02d - %02d:%02d ", t->tm_mday, t->tm_mon+1, t->tm_hour, t->tm_min);
+					result+=tmp;
+					result+=((ShortEventDescriptor*)descriptor)->event_name;
+					result+="</span></a></u><br>\n";
+				}
+			}
+
+		}
+	}
+
+	tmp2.strReplace("#BODY#", result);
+	return tmp2;
 }
 
 static eString record(eString request, eString dirpath, eString opt, eHTTPConnection *content)
