@@ -351,7 +351,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.video_Format = configfile.getInt32( "video_Format", 2 ); //4:3
 
 	//misc
-	g_settings.shutdown_real = configfile.getInt32( "shutdown_real", 1 );
+	g_settings.shutdown_real = configfile.getInt32( "shutdown_real", true );
 	g_settings.shutdown_showclock = configfile.getInt32( "shutdown_showclock", 1 );
 	g_settings.show_camwarning = configfile.getInt32( "show_camwarning", 1 );
 	strcpy(g_settings.record_safety_time, configfile.getString( "record_safety_time", "00").c_str());
@@ -359,7 +359,7 @@ int CNeutrinoApp::loadSetup()
 	//audio
 	g_settings.audio_AnalogMode = configfile.getInt32( "audio_AnalogMode", 0 );
 	g_settings.audio_DolbyDigital = configfile.getInt32( "audio_DolbyDigital", 0 );
-	g_settings.audio_avs_ost_Control = configfile.getInt32( "audio_avs_ost_Control", 1 );
+	g_settings.audio_avs_Control = configfile.getInt32( "audio_avs_Control", true );
 
 
 	//vcr
@@ -555,7 +555,7 @@ void CNeutrinoApp::saveSetup()
 	//audio
 	configfile.setInt32( "audio_AnalogMode", g_settings.audio_AnalogMode );
 	configfile.setInt32( "audio_DolbyDigital", g_settings.audio_DolbyDigital );
-	configfile.setInt32( "audio_avs_ost_Control", g_settings.audio_avs_ost_Control );
+	configfile.setInt32( "audio_avs_Control", g_settings.audio_avs_Control );
 
 	//vcr
 	configfile.setInt32( "vcr_AutoSwitch", g_settings.vcr_AutoSwitch );
@@ -1348,7 +1348,7 @@ void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNoti
 	oj->addOption(1, "options.on");
 	audioSettings.addItem( oj );
 
-	oj = new CMenuOptionChooser("audiomenu.avs_ost_control", &g_settings.audio_avs_ost_Control, true);
+	oj = new CMenuOptionChooser("audiomenu.avs_control", &g_settings.audio_avs_Control, true, audioSetupNotifier);
 	oj->addOption(0, "audiomenu.ost");
 	oj->addOption(1, "audiomenu.avs");
 	audioSettings.addItem( oj );
@@ -2137,8 +2137,8 @@ int CNeutrinoApp::run(int argc, char **argv)
 	//keySettings
 	InitKeySettings(keySettings);
 
-	current_volume= g_Controld->getVolume(g_settings.audio_avs_ost_Control==1);
-	AudioMute( g_Controld->getMute(g_settings.audio_avs_ost_Control==1), true );
+	current_volume= g_Controld->getVolume(g_settings.audio_avs_Control);
+	AudioMute( g_Controld->getMute(g_settings.audio_avs_Control), true );
 
 	//load Pluginlist
 	g_PluginList->loadPlugins();
@@ -2685,9 +2685,9 @@ void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
 		if( !isEvent )
 		{
 			if( current_muted )
-				g_Controld->Mute((g_settings.audio_avs_ost_Control==1));
+				g_Controld->Mute((g_settings.audio_avs_Control));
 			else
-				g_Controld->UnMute((g_settings.audio_avs_ost_Control==1));
+				g_Controld->UnMute((g_settings.audio_avs_Control));
 		}
 	}
 
@@ -2737,7 +2737,7 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 			{
 				current_volume += 5;
 			}
-			g_Controld->setVolume(current_volume,(g_settings.audio_avs_ost_Control==1));
+			g_Controld->setVolume(current_volume,(g_settings.audio_avs_Control));
 		}
 		else if(msg==CRCInput::RC_minus)
 		{
@@ -2745,7 +2745,7 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 			{
 				current_volume -= 5;
 			}
-			g_Controld->setVolume(current_volume,(g_settings.audio_avs_ost_Control==1));
+			g_Controld->setVolume(current_volume,(g_settings.audio_avs_Control));
 		}
 		else
 		{
@@ -3068,7 +3068,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.350 2002/10/25 13:37:33 alexw Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.351 2002/10/26 16:55:45 dirch Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

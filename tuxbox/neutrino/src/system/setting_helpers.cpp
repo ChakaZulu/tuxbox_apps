@@ -282,9 +282,17 @@ bool CAudioSetupNotifier::changeNotify(string OptionName, void*)
 {
 	//printf("notify: %s\n", OptionName.c_str() );
 
+	if(OptionName=="audiomenu.avs_control")
+	{
+		int vol = g_Controld->getVolume(g_settings.audio_avs_Control);
+		g_Controld->setVolume(vol,!g_settings.audio_avs_Control);
+		g_Controld->setVolume(100,g_settings.audio_avs_Control);
+		return true;
+	}
 	if(OptionName=="audiomenu.analogout")
 	{
 		g_Controld->setAnalogOutput(g_settings.audio_AnalogMode);
+		return true;
 	}
 	return false;
 }
