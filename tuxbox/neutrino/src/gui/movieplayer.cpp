@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.77 2004/02/10 16:59:50 gagga Exp $
+  $Id: movieplayer.cpp,v 1.78 2004/02/10 17:56:31 gagga Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -267,7 +267,7 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 }
 
 //------------------------------------------------------------------------
-CURLcode sendGetRequest (const std::string & url, std::string & response) {
+CURLcode sendGetRequest (const std::string & url, std::string & response, bool useAuthorization) {
 	CURL *curl;
 	CURLcode httpres;
   
@@ -275,6 +275,7 @@ CURLcode sendGetRequest (const std::string & url, std::string & response) {
 	curl_easy_setopt (curl, CURLOPT_URL, url.c_str());
 	curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, CurlDummyWrite);
 	curl_easy_setopt (curl, CURLOPT_FILE, (void *)&response);
+	if (useAuthorization) curl_easy_setopt (curl, CURLOPT_USERPWD, "admin:admin"); /* !!! make me customizable */
 	curl_easy_setopt (curl, CURLOPT_FAILONERROR, true); 
 	httpres = curl_easy_perform (curl);
 	//printf ("[movieplayer.cpp] HTTP Result: %d\n", httpres);
@@ -295,7 +296,7 @@ bool VlcSendPlaylist(char* mrl)
 	// empty playlist
 	std::string emptyurl = baseurl + "?control=empty";
 	std::string response ="";
-	httpres = sendGetRequest(emptyurl, response);
+	httpres = sendGetRequest(emptyurl, response, false);
 	printf ("[movieplayer.cpp] HTTP Result (emptyurl): %d\n", httpres);
 	if (httpres != 0)
 	{
@@ -312,7 +313,7 @@ bool VlcSendPlaylist(char* mrl)
 	   - SVCD: vcd:D:@1:1
 	*/
 	std::string addurl = baseurl + "?control=add&mrl=" + (char*) mrl;
-	httpres = sendGetRequest(addurl, response);
+	httpres = sendGetRequest(addurl, response, false);
 	return (httpres==0);
 }
 #define TRANSCODE_VIDEO_OFF 0
@@ -394,11 +395,11 @@ bool VlcRequestStream(int  transcodeVideo, int transcodeAudio)
 	std::string url = baseurl + "?sout=" + tmp;
 	curl_free(tmp);
 	std::string response ="";
-	httpres = sendGetRequest(url, response);
+	httpres = sendGetRequest(url, response, false);
 
 	// play MRL
 	std::string playurl = baseurl + "?control=play&item=0";
-	httpres = sendGetRequest(playurl, response);
+	httpres = sendGetRequest(playurl, response, false);
 
 	return true; // TODO error checking
 }
@@ -413,7 +414,7 @@ bool VlcGetStreamTime(std::string& stream_time)
 	positionurl += "/admin/dboxfiles.html?stream_time=true";
 	printf("[movieplayer.cpp] positionurl=%s\n",positionurl.c_str());
 	std::string response = "";
-	CURLcode httpres = sendGetRequest(positionurl, response);
+	CURLcode httpres = sendGetRequest(positionurl, response, true);
 	printf("[movieplayer.cpp] httpres=%d, response.length()=%d, stream_time = %s\n",httpres,response.length(),response.c_str());
 	if(httpres== 0 && response.length() > 0)
 	{
@@ -781,7 +782,7 @@ PlayStreamThread (void *mrl)
 				ioctl (dmxa, DMX_STOP);
 
 				// pause VLC
-	            httpres = sendGetRequest(pauseurl, response);
+	            httpres = sendGetRequest(pauseurl, response, false);
 
 				while (playstate == CMoviePlayerGui::PAUSE)
 				{
@@ -790,7 +791,7 @@ PlayStreamThread (void *mrl)
 					usleep(100000); // no busy wait
 				}
 				// unpause VLC
-				httpres = sendGetRequest(unpauseurl, response);
+				httpres = sendGetRequest(unpauseurl, response, false);
 				speed = 1;
 				break;
 			case CMoviePlayerGui::SKIP:
@@ -803,7 +804,7 @@ PlayStreamThread (void *mrl)
 				printf("[movieplayer.cpp] skipping URL(enc) : %s\n",skipurl.c_str());
 				int bytes = (ringbuffer_read_space(ringbuf) / 188) * 188;
 				ringbuffer_read_advance(ringbuf, bytes);
-				httpres = sendGetRequest(skipurl, response);
+				httpres = sendGetRequest(skipurl, response, false);
 //				playstate = CMoviePlayerGui::RESYNC;
 				playstate = CMoviePlayerGui::PLAY;
 			}
@@ -887,7 +888,7 @@ PlayStreamThread (void *mrl)
 
 	// stop VLC
 	std::string stopurl = baseurl + "?control=stop";
-	httpres = sendGetRequest(stopurl, response);
+	httpres = sendGetRequest(stopurl, response, false);
 
 	printf ("[movieplayer.cpp] Waiting for RCST to stop\n");
 	pthread_join (rcst, NULL);
@@ -1577,7 +1578,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		else if (msg == CRCInput::RC_help)
  		{
      		std::string helptext = g_Locale->getText("movieplayer.vlchelp");
-     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.77 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.78 $\n\nMovieplayer (c) 2003, 2004 by gagga";
      		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -1749,7 +1750,7 @@ CMoviePlayerGui::PlayFile (void)
  		else if (msg == CRCInput::RC_help)
  		{
 			std::string fullhelptext = g_Locale->getText("movieplayer.tshelp");
-			fullhelptext += "\nVersion: $Revision: 1.77 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			fullhelptext += "\nVersion: $Revision: 1.78 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
  		else if (msg == CRCInput::RC_setup)
