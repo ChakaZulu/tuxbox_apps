@@ -2530,9 +2530,17 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	{
 		if( mode == mode_standby )
 		{
-			//turn off lcd
-			g_lcdd->setPower( !(g_lcdd->getPower()?1:0) );
-			g_lcdd->update();
+			//switch lcd off/on
+			if ( g_lcdd->getPower() == 1 )
+			{
+				g_lcdd->setPower(0);
+				g_lcdd->update();
+			}
+			else
+			{
+				g_lcdd->setPower(1);
+				g_lcdd->setMode(CLcddTypes::MODE_STANDBY);
+			}
 		}
 		else
 		{
@@ -3081,7 +3089,7 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 	{
 		// STANDBY AUS
 
-		g_lcdd->setPower(&lcdpower);
+		g_lcdd->setPower(lcdpower);
 		g_lcdd->setMode(CLcddTypes::MODE_TVRADIO);
 		g_Controld->videoPowerDown(false);
 
@@ -3282,7 +3290,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.371 2002/12/07 14:03:09 alexw Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.372 2002/12/07 23:09:13 alexw Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
