@@ -21,6 +21,9 @@
  *
  *
  *   $Log: switch.c,v $
+ *   Revision 1.8  2001/04/25 07:36:58  fnbrd
+ *   Fixed mute/unmute.
+ *
  *   Revision 1.7  2001/04/01 10:30:15  gillem
  *   - fix volume
  *
@@ -43,7 +46,7 @@
  *
  *
  *
- *   $Revision: 1.7 $
+ *   $Revision: 1.8 $
  *
  */
 
@@ -216,8 +219,10 @@ void volume_show() {
   if (ioctl(fd,AVSIOGMUTE,&i)< 0) {
     perror("AVSIOGMUTE:");
   }
-  if (i == 0) printf(" (muted)",i);
-  else printf(" (unmuted)",i);
+  if (i)
+    printf(" (muted)",i);
+  else
+    printf(" (unmuted)",i);
   printf("\n");
 }
 
@@ -232,8 +237,8 @@ void volume_set(int i) {
 
 void volume_mute() {
   int i;
-  
-  i=1; //AVS_MUTE_IM;
+
+  i=AVS_MUTE; //AVS_MUTE_IM;
   if (ioctl(fd,AVSIOSMUTE,&i)< 0) {
     perror("AVSIOSMUTE:");
   }
@@ -241,8 +246,8 @@ void volume_mute() {
 
 void volume_unmute() {
   int i;
-  
-  i=0; //AVS_UNMUTE_IM;
+
+  i=AVS_UNMUTE; //AVS_UNMUTE_IM;
   if (ioctl(fd,AVSIOSMUTE,&i)< 0) {
     perror("AVSIOSMUTE:");
   }
@@ -331,7 +336,7 @@ int main (int argc, char **argv) {
 
   if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0) {
     perror("open");
-    return -1;                                                      
+    return -1;
   }
 
   for(count=1;count<argc;count++) {
