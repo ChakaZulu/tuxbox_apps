@@ -40,6 +40,7 @@
 #include <ost/frontend.h>
 #include <liblcddisplay.h>
 #include "lcddclient.h"
+#include "bigclock.h"
 
 #include "config.h"
 
@@ -159,8 +160,14 @@ void show_time()
 		}
 		else
 		{
-			display.draw_fill_rect (0,0,120,64, CLCDDisplay::PIXEL_OFF);
+			//big clock
+			struct tm *t = localtime(&tm.time);
+			
+			display.draw_fill_rect (-1,0,120,64, CLCDDisplay::PIXEL_OFF);
+			showBigClock(&display, t->tm_hour,t->tm_min);
+			/*
 			fonts.menutitle->RenderString(60,62, 60, timestr, CLCDDisplay::PIXEL_ON);
+			*/
 		}
 		display.update();
 	}
