@@ -54,7 +54,7 @@
 #include "widget/stringinput.h"
 #include "widget/screensetup.h"
 
-#include "../../zapit/getservices.h"
+#include "../zapit/getservices.h"
 
 #include "daemonc/remotecontrol.h"
 #include "daemonc/controld.h"
@@ -94,6 +94,7 @@ class CNeutrinoApp : public CMenuTarget
 		
 		st_rmsg				sendmessage;
 		channel_msg			zapitchannel;
+		channel_msg			firstchannel;
 		bool				zapit;
 
 		CRCInput			rcInput;
@@ -109,6 +110,7 @@ class CNeutrinoApp : public CMenuTarget
 		CInfoViewer			infoViewer;
 		CEpgData			epgData;
 
+		void firstChannel();
 		void channelsInit();
 		void setupDefaults(SNeutrinoSettings* settings);
 		void setupColors_classic(SNeutrinoSettings* settings);

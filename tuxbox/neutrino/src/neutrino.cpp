@@ -384,6 +384,66 @@ void CNeutrinoApp::saveSetup(SNeutrinoSettings* settings)
 	close(fd);
 }
 
+/**************************************************************************************
+*                                                                                     *
+*          CNeutrinoApp -  firstChannel, get the initial channel                      *
+*                                                                                     *
+**************************************************************************************/
+
+void CNeutrinoApp::firstChannel()
+{
+	int sock_fd;
+	SAI servaddr;
+	char rip[]="127.0.0.1";
+	char *return_buf;
+	
+	sendmessage.version=1;
+	sendmessage.cmd = 'a';
+
+	sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	memset(&servaddr,0,sizeof(servaddr));
+	servaddr.sin_family=AF_INET;
+	servaddr.sin_port=htons(1505);
+	inet_pton(AF_INET, rip, &servaddr.sin_addr);
+
+	#ifdef HAS_SIN_LEN
+ 		servaddr.sin_len = sizeof(servaddr); // needed ???
+	#endif
+
+
+	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
+	{
+  		perror("Couldn't connect to server!");
+		exit(-1);
+	}
+
+	write(sock_fd, &sendmessage, sizeof(sendmessage));
+	return_buf = (char*) malloc(4);
+	
+	if (recv(sock_fd, return_buf, 3,0) <= 0 ) {
+		perror("Nothing could be received\n");
+		exit(-1);
+	}
+	
+	printf("That was returned: %s\n", return_buf);
+	
+	if (strncmp(return_buf,"00a",3))
+	{
+		
+		printf("Wrong Command was send for firstChannel(). Exiting.\n");
+		return;
+	}
+	
+	
+	memset(&firstchannel, 0, sizeof(firstchannel));
+	if (recv(sock_fd, &firstchannel, sizeof(firstchannel),0) <= 0 ) {
+		perror("Nothing could be received\n");
+		exit(-1);
+	}
+	//firstchannel.chan_nr = ((firstchannel.chan_nr & 0x00ff) << 8) | ((firstchannel.chan_nr & 0xff00) >> 8);
+	
+
+}
 
 /**************************************************************************************
 *                                                                                     *
@@ -424,7 +484,6 @@ void CNeutrinoApp::channelsInit()
 
 	write(sock_fd, &sendmessage, sizeof(sendmessage));
 	return_buf = (char*) malloc(4);
-	
 	if (recv(sock_fd, return_buf, 3,0) <= 0 ) {
 		perror("Nothing could be received\n");
 		exit(-1);
@@ -781,13 +840,29 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	//init programm
 	remoteControl.setZapper(zapit);
-	if (zapit)
-		remoteControl.tvMode();
 	volume = 100;
-	channelsInit();
+	if (!zapit)
+		channelsInit();
+		
 	infoViewer.start(&frameBuffer, &fonts, &settings);
-	epgData.start(&frameBuffer, &fonts, &rcInput, &settings);
-	channelList->zapTo(&remoteControl, &infoViewer,  0);
+	epgData.start(&frameBuffer, &fonts, &rcInput, &settings);	
+		
+	if (zapit) {
+		firstChannel();
+		if (firstchannel.mode == 't') {
+			//remoteControl.tvMode();
+			tvMode();
+		}
+		else
+		{
+			//remoteControl.radioMode();
+			radioMode();
+		}
+	}
+	
+	
+	if (!zapit)
+		channelList->zapTo(&remoteControl, &infoViewer,  0);
 	mute = false;
 	while(nRun)
 	{
@@ -956,7 +1031,7 @@ void CNeutrinoApp::tvMode()
 	{
 		remoteControl.tvMode();
 		channelsInit();
-		channelList->zapTo(&remoteControl, &infoViewer,  0);
+		channelList->zapTo(&remoteControl, &infoViewer,  firstchannel.chan_nr -1);
 	}
 }
 
@@ -971,6 +1046,7 @@ void CNeutrinoApp::radioMode()
 
 	if (zapit)
 	{
+		firstChannel();
 		remoteControl.radioMode();
 		channelsInit();
 		channelList->zapTo(&remoteControl, &infoViewer,  0);
