@@ -409,7 +409,7 @@ bool CFileBrowser::exec(std::string Dirname)
 	bool res = false;
 
 	m_baseurl = "http://" + g_settings.streaming_server_ip +
-	            ":" + g_settings.streaming_server_port + "/admin/dboxfiles.html?dir=";
+	            ':' + g_settings.streaming_server_port + "/admin/dboxfiles.html?dir=";
 	for( unsigned int pos=Dirname.find('\\'); pos!=std::string::npos ; pos=Dirname.find('\\'))
 		Dirname[pos]='/';
 	name = Dirname;
@@ -634,7 +634,7 @@ void CFileBrowser::addRecursiveDir(CFileList * re_filelist, std::string rpath, b
 		
 	if(rpath[rpath.length()-1]!='/')
 	{
-		rpath = rpath + "/";
+		rpath += '/';
 	}
 
 	CFileList tmplist;

@@ -29,13 +29,13 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <gui/streaminfo.h>
+
 #include <global.h>
 #include <neutrino.h>
 
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
-
-#include "streaminfo.h"
 
 #include <daemonc/remotecontrol.h>
 extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
@@ -53,7 +53,7 @@ CStreamInfo::CStreamInfo()
 }
 
 
-int CStreamInfo::exec(CMenuTarget* parent, string)
+int CStreamInfo::exec(CMenuTarget* parent, std::string)
 {
 	if (parent)
 	{

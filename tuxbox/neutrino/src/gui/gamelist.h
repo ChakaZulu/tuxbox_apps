@@ -32,23 +32,16 @@
 #ifndef __gamelist__
 #define __gamelist__
 
+#include <gui/widget/menue.h>
+
+#include <driver/framebuffer.h>
+
+#include <plugin.h>
+
 #include <string>
 #include <vector>
 #include <map>
 
-#include <plugin.h>
-
-#include <driver/framebuffer.h>
-#include <driver/fontrenderer.h>
-#include <driver/rcinput.h>
-#include <daemonc/remotecontrol.h>
-#include <system/settings.h>
-
-#include "color.h"
-#include "widget/menue.h"
-
-
-using namespace std;
 
 class CPlugins
 {

@@ -33,15 +33,12 @@
 #ifndef __streaminfo__
 #define __streaminfo__
 
-#include <string>
+#include <gui/widget/menue.h>
 
 #include <driver/framebuffer.h>
 
-#include "color.h"
-#include "widget/menue.h"
+#include <string>
 
-
-using namespace std;
 
 class CStreamInfo : public CMenuTarget
 {
@@ -61,7 +58,7 @@ class CStreamInfo : public CMenuTarget
 		CStreamInfo();
 
 		void hide();
-		int exec( CMenuTarget* parent, string actionKey );
+		int exec( CMenuTarget* parent, std::string actionKey );
 
 };
 
