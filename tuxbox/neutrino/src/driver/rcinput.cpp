@@ -30,12 +30,15 @@
 */
 
 /*
- $Id: rcinput.cpp,v 1.18 2002/01/06 03:04:04 McClean Exp $
+ $Id: rcinput.cpp,v 1.19 2002/01/08 03:08:20 McClean Exp $
  
  Module for Remote Control Handling
  
 History:
  $Log: rcinput.cpp,v $
+ Revision 1.19  2002/01/08 03:08:20  McClean
+ improve input-handling
+
  Revision 1.18  2002/01/06 03:04:04  McClean
  busybox 0.60 workarround
 
@@ -99,18 +102,28 @@ void printbin( int a)
 **************************************************************************/
 CRCInput::CRCInput()
 {
-	fd=open("/dev/dbox/rc0", O_RDONLY);
+	open();
+}
+
+void CRCInput::open()
+{
+	close();
+	fd=::open("/dev/dbox/rc0", O_RDONLY);
 	if (fd<0)
 	{
 		perror("/dev/dbox/rc0");
 		exit(-1);
 	}
 	ioctl(fd, RC_IOCTL_BCODES, 1);
-	prevrccode = 0xffff;
-	start();
+	fcntl(fd, F_SETFL, O_NONBLOCK );
+}
 
-	tv_prev.tv_sec = 0;
-	repeat_block = 0;
+void CRCInput::close()
+{
+	if(fd)
+	{
+		::close(fd);
+	}
 }
 
 /**************************************************************************
@@ -119,8 +132,106 @@ CRCInput::CRCInput()
 **************************************************************************/
 CRCInput::~CRCInput()
 {
-	if (fd>=0)
-		close(fd);
+	close();
+}
+
+/**************************************************************************
+*	stopInput - stop reading rcin for plugins
+*
+**************************************************************************/
+void CRCInput::stopInput()
+{
+	close();
+}
+
+
+/**************************************************************************
+*	restartInput - restart reading rcin after calling plugins
+*
+**************************************************************************/
+void CRCInput::restartInput()
+{
+	open();
+}
+
+/**************************************************************************
+*	get rc-key - timeout can be specified
+*
+**************************************************************************/
+int CRCInput::getKey(int Timeout)
+{
+	static unsigned long long last_keypress=0;
+	static __u16 rc_last_key = 0;
+	__u16 rc_key;
+	bool exit=false;
+
+	//es ist ein key im pushback-Buffer - diesen zurückgeben
+	if(pb_keys.available())
+	{
+		//printf("resonse pb-key\n");
+		return pb_keys.read();
+	}
+
+	while(!exit)
+	{
+		int status = read(fd, &rc_key, sizeof(rc_key));
+		if (status==2)
+		{
+			//printf("got key native key: %04x %04x\n", rc_key, rc_key&0x1f );
+			struct timeval tv;
+			unsigned long long now_pressed;
+			bool keyok = true;
+
+			gettimeofday( &tv, NULL );
+			now_pressed = (unsigned long long) tv.tv_usec + (unsigned long long)((unsigned long long) tv.tv_sec * (unsigned long long) 1000000);
+			//printf("diff: %lld - %lld = %lld should: %d\n", now_pressed, last_keypress, now_pressed-last_keypress, repeat_block);
+			
+			//test auf wiederholenden key (gedrückt gehalten)
+			if (rc_key == rc_last_key)
+			{
+				//nur diese tasten sind wiederholbar 
+				int trkey = translate(rc_key);
+				if ((trkey!= RC_up) && (trkey!= RC_down) && (trkey!= RC_plus) && (trkey!= RC_minus))
+				{
+					keyok = false;
+				}
+			}
+			rc_last_key = rc_key;
+
+			if(now_pressed-last_keypress>repeat_block)
+			{
+				last_keypress = now_pressed;
+				if(keyok)
+				{
+					return translate(rc_key);
+				}
+			}
+			//printf("!!!!!!!eat  native key: %04x %04x\n", rc_key, rc_key&0x1f );
+		}
+		Timeout--;
+		if (Timeout==-1)
+		{
+			return RC_timeout;
+		}
+		usleep(100000);
+	}
+	return rc_key;
+}
+
+
+
+int CRCInput::pushbackKey (int key)
+{
+	pb_keys.add( key );
+	return 0;
+}
+
+
+
+void CRCInput::clear (void)
+{
+	while (getKey(0)!=RC_timeout)
+	{}
 }
 
 /**************************************************************************
@@ -133,187 +244,6 @@ bool CRCInput::isNumeric(int key)
 		return true;
 	else
 		return false;
-}
-
-/**************************************************************************
-*	stopInput - stop reading rcin for plugins
-*
-**************************************************************************/
-void CRCInput::stopInput()
-{
-	printf("rcstop requested....\n");
-	pthread_cancel(thrInput);
-	sem_close(&waitforkey);
-}
-
-
-/**************************************************************************
-*	restartInput - restart reading rcin after calling plugins
-*
-**************************************************************************/
-void CRCInput::restartInput()
-{
-	if (fd>=0)
-		close(fd);
-
-	fd=open("/dev/dbox/rc0", O_RDONLY);
-	if (fd<0)
-	{
-		perror("/dev/dbox/rc0");
-		exit(-1);
-	}
-	ioctl(fd, RC_IOCTL_BCODES, 1);
-	start();
-}
-
-/**************************************************************************
-*	get rc-key - timeout can be specified
-*
-**************************************************************************/
-int CRCInput::getKey(int Timeout)
-{
-	// -- something pushed back ?
-	if (LIFObuffer.available())
-	{
-		return LIFObuffer.pop();
-	}
-
-	// a key already pressed?
-	if (ringbuffer.available())
-	{
-		return ringbuffer.read();
-	}
-
-	if(Timeout> 0)
-	{
-		struct timespec abs_wait;
-		struct timeval now;
-
-		sem_init (&waitforkey, 0, 0);
-		gettimeofday(&now, NULL);
-		TIMEVAL_TO_TIMESPEC(&now, &abs_wait);
-
-		abs_wait.tv_nsec += (Timeout % 10)* 100000000;
-		abs_wait.tv_sec += ((Timeout/ 10)+ (abs_wait.tv_nsec/ 1000000000));
-		abs_wait.tv_nsec %= 1000000000;
-
-		sem_timedwait (&waitforkey, &abs_wait);
-
-		if (ringbuffer.available())
-		{
-			return ringbuffer.read();
-		}
-	}
-	return RC_timeout;
-
-}
-
-
-
-//
-// -- push back a key into the buffer
-// -- 2001-09-21  rasc
-//
-
-int CRCInput::pushbackKey (int key)
-{
-	return LIFObuffer.push(key);
-}
-
-
-//
-// -- clear
-// -- get rid of all buffered keys (Hard/Software buffer)...
-// -- 2001-10-11  rasc
-//
-
-void CRCInput::clear (void)
-{
-	int key;
-
-	ringbuffer.clear();
-	LIFObuffer.clear();
-
-	do
-	{
-		key = getKey(1);
-		//printf ("DBG: clear: Eat key: %d\n",key);
-	}
-	while (key != RC_timeout);
-
-	ringbuffer.clear();
-	LIFObuffer.clear();
-
-}
-
-
-
-/**************************************************************************
-*	get rc-key from the rcdevice - internal use only!
-*
-**************************************************************************/
-int CRCInput::getKeyInt()
-{
-	struct timeval tv;
-	long long td;
-	__u16 rccode;
-	bool repeat = true;
-	int	erg = RC_nokey;
-	while (repeat)
-	{
-		if (read(fd, &rccode, 2)!=2)
-		{
-			printf("key: empty\n");
-			//return -1; error!!!
-		}
-		else
-		{
-			gettimeofday( &tv, NULL );
-
-			td = ( tv.tv_usec - tv_prev.tv_usec );
-			td+= ( tv.tv_sec - tv_prev.tv_sec )* 1000000;
-
-			//printf("got key native key: %04x %04x ", rccode, rccode&0x1f );
-			//printbin( rccode );
-
-			if ( ( ( prevrccode&0x1F ) != ( rccode&0x1F ) ) ||
-			        ( td > repeat_block ) )
-			{
-				tv_prev = tv;
-				//                printf("got key native key: %04x %d\n", rccode, tv.tv_sec );
-
-				if( prevrccode==rccode )
-				{
-					//key-repeat - cursors and volume are ok
-					int tkey = translate(rccode);
-					if ((tkey==RC_up) || (tkey==RC_down) || (tkey==RC_left) || (tkey==RC_right) ||
-					        (tkey==RC_plus) || (tkey==RC_minus))
-					{//repeat is ok!
-						erg = tkey;
-						repeat = false;
-					}
-				}
-				else
-				{
-					erg = translate(rccode);
-					prevrccode=rccode;
-					if(erg!=RC_nokey)
-					{
-						repeat=false;
-						//printf("native key: %04x   tr: %04x   name: %s\n", rccode, erg, getKeyName(erg).c_str() );
-					}
-				}
-
-			}
-			else
-			{
-				//printf("key ignored %lld\n", td);
-			}
-
-		}
-
-	}
-	return erg;
 }
 
 /**************************************************************************
@@ -476,41 +406,3 @@ int CRCInput::translate(int code)
 	//perror("unknown rc code");
 	return RC_nokey;
 }
-
-/**************************************************************************
-*	start the threads - internal use only!
-*
-**************************************************************************/
-void CRCInput::start()
-{
-	if (pthread_create (&thrInput, NULL, InputThread, (void *) this) != 0 )
-	{
-		perror("create failed\n");
-	}
-	sem_init (&waitforkey, 0, 0);
-	clear();
-}
-
-
-/**************************************************************************
-*	Input Thread for key-input (blocking read) - internal use only!
-*
-**************************************************************************/
-void * CRCInput::InputThread (void *arg)
-{
-	CRCInput* RCInput = (CRCInput*) arg;
-	while(1)
-	{
-		int key = RCInput->getKeyInt();
-		if(key!=-1)
-		{
-			RCInput->ringbuffer.add(key);
-			sem_post (&RCInput->waitforkey);
-		}
-	}
-	printf("rcinput endend.....\n");
-	return NULL;
-}
-
-
-

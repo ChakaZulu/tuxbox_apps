@@ -1,6 +1,6 @@
 /*
  
-        $Id: neutrino.cpp,v 1.122 2002/01/08 00:03:21 McClean Exp $
+        $Id: neutrino.cpp,v 1.123 2002/01/08 03:08:20 McClean Exp $
  
 	Neutrino-GUI  -   DBoxII-Project
  
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  
   $Log: neutrino.cpp,v $
+  Revision 1.123  2002/01/08 03:08:20  McClean
+  improve input-handling
+
   Revision 1.122  2002/01/08 00:03:21  McClean
   not working
 
@@ -641,7 +644,8 @@ void CNeutrinoApp::setupDefaults()
 	g_settings.key_bouquet_up = CRCInput::RC_right;
 	g_settings.key_bouquet_down = CRCInput::RC_left;
 
-	strcpy(g_settings.repeat_blocker, "0");
+	strcpy(g_settings.repeat_blocker, "25");
+	strcpy(g_settings.repeat_genericblocker, "0");
 
 	//screen settings
 	g_settings.screen_StartX=37;
@@ -2261,7 +2265,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.122 2002/01/08 00:03:21 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.123 2002/01/08 03:08:20 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

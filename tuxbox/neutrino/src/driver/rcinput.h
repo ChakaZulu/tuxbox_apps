@@ -30,12 +30,15 @@
 */
 
 /*
-$Id: rcinput.h,v 1.11 2002/01/03 20:03:20 McClean Exp $
+$Id: rcinput.h,v 1.12 2002/01/08 03:08:20 McClean Exp $
  
  Module  RemoteControle Handling
  
 History:
  $Log: rcinput.h,v $
+ Revision 1.12  2002/01/08 03:08:20  McClean
+ improve input-handling
+
  Revision 1.11  2002/01/03 20:03:20  McClean
  cleanup
 
@@ -83,11 +86,8 @@ History:
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include "pthread.h"
-#include "semaphore.h"
 
 #include "ringbuffer.h"
-#include "lifobuffer.h"
 
 #include <string>
 
@@ -96,23 +96,12 @@ using namespace std;
 class CRCInput
 {
 	private:
+		int         fd;
+		CRingBuffer pb_keys;
 
-		int             fd;
-		CRingBuffer     ringbuffer;
-		CLIFOBuffer     LIFObuffer;
-		pthread_t       thrInput;
-		sem_t           waitforkey;
-
-		struct timeval  tv_prev;
-
-		__u16           prevrccode;
-
+		void open();
+		void close();
 		int translate(int code);
-		int getKeyInt();	//don't use!
-		void start();
-
-
-		static void * InputThread (void *arg);
 
 	public:
 		//rc-code definitions
@@ -125,13 +114,13 @@ class CRCInput
 		    RC_left=0xB, RC_right=0xA, RC_ok=0xE, RC_plus=0x15, RC_minus=0x16,
 		    RC_spkr=0xF, RC_help=0x17, RC_top_left=27, RC_top_right=28, RC_bottom_left=29, RC_bottom_right=30,
 		    RC_timeout=-1, RC_nokey=-2
-	};
+		};
 
+		//only used for plugins (games) !!
 		int getFileHandle()
 		{
 			return fd;
 		}
-		; //only used for plugins (games) !!
 		void stopInput();
 		void restartInput();
 

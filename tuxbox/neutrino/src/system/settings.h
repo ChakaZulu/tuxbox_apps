@@ -143,6 +143,7 @@ struct SNeutrinoSettings
 	int key_bouquet_down;
 
 	char repeat_blocker[4];
+	char repeat_genericblocker[4];
 
 	//screen configuration
 	int	screen_StartX;

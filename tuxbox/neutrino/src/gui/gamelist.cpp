@@ -28,9 +28,12 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  
-$Id: gamelist.cpp,v 1.23 2002/01/03 20:03:20 McClean Exp $
+$Id: gamelist.cpp,v 1.24 2002/01/08 03:08:20 McClean Exp $
  
 $Log: gamelist.cpp,v $
+Revision 1.24  2002/01/08 03:08:20  McClean
+improve input-handling
+
 Revision 1.23  2002/01/03 20:03:20  McClean
 cleanup
 
@@ -393,7 +396,6 @@ void CGameList::runGame(int selected )
 			//should unload libs!
 			break;
 		}
-		g_RCInput->stopInput();
 		printf("try exec...\n");
 		execPlugin(g_FrameBuffer->getFileHandle(),
 		           g_RCInput->getFileHandle(), -1,
