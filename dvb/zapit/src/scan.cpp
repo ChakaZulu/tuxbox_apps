@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.128 2003/09/18 15:57:19 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.129 2003/11/24 06:15:38 obi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -610,6 +610,8 @@ void *start_scanthread(void *)
 	
 	if  (!strcmp(frontendType, "cable"))
 		write_xml_footer(fd);
+
+	chmod(SERVICES_XML, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
 	/* clean up - should this be done before every xmlNextNode ? */
 	delete transponder;

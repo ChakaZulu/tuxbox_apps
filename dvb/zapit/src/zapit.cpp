@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.336 2003/11/21 19:59:11 alexw Exp $
+ * $Id: zapit.cpp,v 1.337 2003/11/24 06:15:38 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -823,6 +823,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 				fprintf(fd, "%d %d\n", mpos_it->first, mpos_it->second);
 			}
 			fclose(fd);
+			chmod(MOTORCONFIGFILE, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 		}
 		break;
 	}
@@ -1547,7 +1548,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.336 2003/11/21 19:59:11 alexw Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.337 2003/11/24 06:15:38 obi Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
