@@ -126,13 +126,13 @@ void eHTTPStream::haveData(void *vdata, int len)
 
 eMP3Decoder::eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *handler)
 : handler(handler), input(8*1024), output(256*1024),
-	output2(256*1024), skipping(false), type(type), outputbr(0), audio_tracks(0),
-	messages(this, 1)
+	output2(256*1024), skipping(false), type(type), outputbr(0)
+	,inputsn(0), audio_tracks(0), messages(this, 1)
 {
 	state=stateInit;
-	
+
 	http=0;
-	
+
 //	filename="http://205.188.209.193:80/stream/1003";
 
 //	filename="http://sik1.oulu.fi:8002/";
@@ -187,7 +187,7 @@ eMP3Decoder::eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *han
 	{
 		pcmsettings.reconfigure=1;
 		dspfd[1]=-1;
-	
+
 		dspfd[0]=::open("/dev/sound/dsp", O_WRONLY|O_NONBLOCK);
 		if (dspfd[0]<0)
 		{
@@ -245,14 +245,12 @@ eMP3Decoder::eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *han
 		break;
 	}
 
-
 	if (sourcefd >= 0)
 	{
 		inputsn=new eSocketNotifier(this, sourcefd, eSocketNotifier::Read, 0);
 		CONNECT(inputsn->activated, eMP3Decoder::decodeMore);
-	} else
-		inputsn=0;
-	
+	}
+
 	CONNECT(messages.recv_msg, eMP3Decoder::gotMessage);
 	
 	if (type == codecMPG)
@@ -591,6 +589,9 @@ void eMP3Decoder::decodeMore(int what)
 
 eMP3Decoder::~eMP3Decoder()
 {
+	messages.send(eMP3DecoderMessage(eMP3DecoderMessage::exit));
+	kill(); // wait for thread exit.
+
 	int fd = Decoder::getAudioDevice();
 	bool wasOpen = fd != -1;
 	if (!wasOpen)
@@ -600,14 +601,9 @@ eMP3Decoder::~eMP3Decoder()
 	if (!wasOpen)
 		close(fd);
 
-	kill(); // wait for thread exit.
-
-	if (inputsn)
-		delete inputsn;
-	if (outputsn[0])
-		delete outputsn[0];
-	if (outputsn[1])
-		delete outputsn[1];
+	delete inputsn;
+	delete outputsn[0];
+	delete outputsn[1];
 	if (dspfd[0] >= 0)
 		close(dspfd[0]);
 	if (dspfd[1] >= 0)
@@ -1037,7 +1033,6 @@ int eServiceHandlerMP3::stop( int workaround )
 {
 	if ( decoder && !workaround )
 	{
-		decoder->messages.send(eMP3Decoder::eMP3DecoderMessage(eMP3Decoder::eMP3DecoderMessage::exit));
 		delete decoder;
 		removeRef(runningService);
 		runningService=eServiceReference();

@@ -67,9 +67,6 @@ eDVBCI::eDVBCI()
 	}
 
 	run();
-
-	while ( !thread_running() )  // wait for thread running
-		usleep(1000);
 }
 
 void eDVBCI::thread()
@@ -1214,7 +1211,7 @@ void eDVBCI::dataAvailable(int what)
 
 	if(present == 2 || present != 1) 
 	{
-		eDebug("[DVBCI] module removed");	
+		eDebug("[DVBCI] module removed");
 
 		// clear receive lpdu queues
 		ptrlpduQueueElem curElem, lastElem;

@@ -32,7 +32,8 @@
 #include <lib/dvb/record.h>
 
 eDVRPlayerThread::eDVRPlayerThread(const char *_filename, eServiceHandlerDVB *handler, int livemode )
-	:handler(handler), buffer(64*1024), livemode(livemode), liveupdatetimer(this), lock(), messages(this, 1)
+	:handler(handler), buffer(64*1024), livemode(livemode), liveupdatetimer(this)
+	,inputsn(0), outputsn(0), lock(), messages(this, 1)
 {
 	state=stateInit;
 
@@ -59,17 +60,17 @@ eDVRPlayerThread::eDVRPlayerThread(const char *_filename, eServiceHandlerDVB *ha
 		break;
 	}
 	while( dvrfd < 0 );
-	
+
 	outputsn=new eSocketNotifier(this, dvrfd, eSocketNotifier::Write, 0);
 	CONNECT(outputsn->activated, eDVRPlayerThread::outputReady);
-	
+
 	CONNECT(liveupdatetimer.timeout, eDVRPlayerThread::updatePosition);
-	
+
 	filename=_filename;
-	
+
 	sourcefd=-1;
 	inputsn=0;
-	
+
 	slice=0;
 	struct stat s;
 	filelength=0;
@@ -78,13 +79,21 @@ eDVRPlayerThread::eDVRPlayerThread(const char *_filename, eServiceHandlerDVB *ha
 		filelength+=s.st_size/1880;
 		slice++;
 	}
-		
+
 	if (openFile(slice=0))
 	{
 		state=stateError;
 		eDebug("error opening %s (%m)", filename.c_str());
 	}
-	
+
+	CONNECT(messages.recv_msg, eDVRPlayerThread::gotMessage);
+
+	maxBufferSize=256*1024;
+
+	speed=1;
+
+	run();
+
 	if (livemode)
 	{
 		int fileend;
@@ -95,14 +104,6 @@ eDVRPlayerThread::eDVRPlayerThread(const char *_filename, eServiceHandlerDVB *ha
 		if ( livemode == 1 )
 			messages.send(eDVRPlayerThread::eDVRPlayerThreadMessage(eDVRPlayerThread::eDVRPlayerThreadMessage::seekreal, fileend));
 	}
-
-	CONNECT(messages.recv_msg, eDVRPlayerThread::gotMessage);
-	
-	maxBufferSize=256*1024;
-	
-	speed=1;
-
-	run();
 }
 
 int eDVRPlayerThread::openFile(int slice)
@@ -256,6 +257,10 @@ void eDVRPlayerThread::readMore(int what)
 
 eDVRPlayerThread::~eDVRPlayerThread()
 {
+	messages.send(eDVRPlayerThreadMessage(eDVRPlayerThreadMessage::exit));
+	lock.lock();	// wait for message loop exit
+	kill(); 			// join the thread
+
 	int fd = Decoder::getAudioDevice();
 	bool wasOpen = fd != -1;
 	if (!wasOpen)
@@ -265,11 +270,7 @@ eDVRPlayerThread::~eDVRPlayerThread()
 	if (!wasOpen)
 		close(fd);
 
-	lock.lock();		// wait for message loop exit
-	kill(); // join the thread
-
-	if (inputsn)
-		delete inputsn;
+	delete inputsn;
 	delete outputsn;
 	if (dvrfd >= 0)
 		::close(dvrfd);
@@ -487,7 +488,6 @@ void eServiceHandlerDVB::stopPlayback( int waslivemode )
 		else
 			flags&=~(flagIsSeekable|flagSupportPosition);
 		serviceEvent(eServiceEvent(eServiceEvent::evtFlagsChanged) );
-		decoder->messages.send(eDVRPlayerThread::eDVRPlayerThreadMessage(eDVRPlayerThread::eDVRPlayerThreadMessage::exit));
 		delete decoder;
 		decoder=0;
 		if ( waslivemode )

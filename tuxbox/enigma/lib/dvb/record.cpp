@@ -358,8 +358,6 @@ void eDVBRecorder::start()
 		eDebug("run thread");
 		run();
 	}
-	while(!thread_running() )
-		usleep(1000);
 
 	for (std::set<pid_t>::iterator i(pids.begin()); i != pids.end(); ++i)
 	{
