@@ -744,7 +744,6 @@ movieplayer.toomanybookmarks Sie haben bereits zu viele Bookmarks angelegt.\nEs 
 movieplayer.bookmarkname Bookmark Name
 movieplayer.bookmarkname_hint1 Geben Sie den Namen für das neue Bookmark ein
 movieplayer.bookmarkname_hint2 
-movieplayer.skipping Neupositionierung - bitte warten
 movieplayer.goto Springe zu ...
 movieplayer.goto.h1 = -> absoluter Sprung
 movieplayer.goto.h2 +,- -> relativer Sprung

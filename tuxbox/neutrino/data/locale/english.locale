@@ -737,7 +737,6 @@ movieplayer.tsplayback Play TS
 movieplayer.fileplayback File via VLC
 movieplayer.dvdplayback DVD
 movieplayer.vcdplayback (S)VCD
-movieplayer.skipping skipping - please wait
 movieplayer.goto Jump to ...
 movieplayer.goto.h1 = -> absolute jump
 movieplayer.goto.h2 +,- -> relative jump
