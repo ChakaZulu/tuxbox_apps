@@ -1,9 +1,9 @@
 //
-// $Id: epgview.cpp,v 1.17 2001/10/18 14:37:55 field Exp $
+// $Id: epgview.cpp,v 1.18 2001/10/18 17:14:08 field Exp $
 //
 // $Log: epgview.cpp,v $
-// Revision 1.17  2001/10/18 14:37:55  field
-// scrollbars (die zweite)
+// Revision 1.18  2001/10/18 17:14:08  field
+// bugfix
 //
 // Revision 1.15  2001/10/11 21:04:58  rasc
 // - EPG:
@@ -62,7 +62,7 @@ CEpgData::CEpgData()
 
 void CEpgData::start()
 {
-	oy = 290;
+	oy = 350;
 
 	topheight= g_Fonts->epg_title->getHeight();
 	topboxheight=topheight+6;
@@ -191,8 +191,10 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
 		int sx = (((g_settings.screen_EndX- g_settings.screen_StartX)-ox) / 2) + g_settings.screen_StartX;
 		int sy = (((g_settings.screen_EndY- g_settings.screen_StartY)-oy) / 2) + g_settings.screen_StartY;
 		height = g_Fonts->epg_info2->getHeight();
-		g_FrameBuffer->paintBoxRel(sx, sy, ox, height+10, COL_MENUCONTENT);
-		g_Fonts->epg_info2->RenderString(sx+15, sy+height+5, ox-15, text, COL_MENUCONTENT);
+        g_FrameBuffer->paintBoxRel(sx, sy, ox, height+ 10, COL_INFOBAR_SHADOW); //border
+		g_FrameBuffer->paintBoxRel(sx+ 1, sy+ 1, ox- 2, height+ 8, COL_MENUCONTENT);
+		g_Fonts->epg_info2->RenderString(sx+15, sy+height+5, ox-30, text, COL_MENUCONTENT);
+
 		g_RCInput->getKey(20);
 		g_FrameBuffer->paintBoxRel(sx, sy, ox, height+10, COL_BACKGROUND);
 		return;
@@ -257,8 +259,8 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
 		int key = g_RCInput->getKey(40);
 
 		scrollCount = medlinecount;
-		if(showPos==0)	//titleinfo exists
-			scrollCount--;
+//		if(showPos==0)	//titleinfo exists
+//			scrollCount--;
 
 		if (key==CRCInput::RC_down)
 		{
