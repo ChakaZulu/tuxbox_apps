@@ -386,6 +386,7 @@ static eString getContent(eString mode, int bouquetid)
 	eService *es;
 
 	bouquets=eDVB::getInstance()->getBouquets();
+
 	if(mode=="tv")
 	{
 		result+="<form action=\"/?mode=tv\" method=\"get\" name=\"bouquetsel\">";
@@ -406,7 +407,10 @@ static eString getContent(eString mode, int bouquetid)
 		result+="</select>";
 		result+="<select name=\"channel\" size=\"1\" onChange=\"javascript:switchtoChannel(this.form.channel.options[this.form.channel.options.selectedIndex].value)\"><option>-----</option>";
 		eBouquet *act;
+
 		act=getBouquet(bouquetid);
+		if(!act)
+			return eString("no bouquets");
 		esref=act->list;
 		for(std::list<eServiceReference>::iterator j = esref.begin(); j != esref.end() ; j++)
 		{
@@ -457,6 +461,7 @@ static eString getContent(eString mode, int bouquetid)
 		result+="</select>";
 		result+="</form>";
 	}
+
 	if(result.length()<3)
 		result="not ready yet";
 
