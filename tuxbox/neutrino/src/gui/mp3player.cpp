@@ -259,7 +259,7 @@ int CMP3PlayerGui::show()
 		}
 		else if( msg == CRCInput::RC_home)
 		{ 
-			if (key_level==1)
+			if (m_state != CMP3PlayerGui::STOP)
 				stop();        
 			else
 				loop=false;
