@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_misc.c,v 1.13 2004/02/24 23:03:04 rasc Exp $
+$Id: dsmcc_misc.c,v 1.14 2004/02/29 20:42:55 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: dsmcc_misc.c,v 1.13 2004/02/24 23:03:04 rasc Exp $
 
 
 $Log: dsmcc_misc.c,v $
+Revision 1.14  2004/02/29 20:42:55  rasc
+no message
+
 Revision 1.13  2004/02/24 23:03:04  rasc
 private data of DSMCC::DSI
 BIOP::ServiceGatewayInformation()
@@ -79,6 +82,7 @@ DSM-CC  UNT section
 #include "strings/dsmcc_str.h"
 #include "misc/output.h"
 #include "misc/hexprint.h"
+#include "pes/pes_misc.h"
 
 
 
@@ -326,7 +330,16 @@ int dsmcc_AdaptationHeader (int v, u_char *b, int len)
 		case 0x02: 		// user ID
 			dsmcc_UserID (v, b, len);
 			break;
-			// $$$ TODO  0x03 (arib)  and 0x04  (ATSC a91)
+
+		case 0x03: 		// DIImsgNumber (ISO 13818-6:1998 AMD)
+			outBit_Sx_NL  (v,"DIImsgNumber: ", 	b, 0,  8);
+			break;
+
+		case 0x04: 		// pts (ATSC a91)
+			outBit_Sx_NL  (v,"reserved: ", 			b,  0, 16);
+			outBit_Sx_NL  (v,"byte-aligning ('0010'): ", 	b, 16,  4);
+			print_xTS_field (v,"PTS", 			b, 20);
+			break;
 
 		default:
   			print_databytes (v,"adaptationDataByte:", b, len);
@@ -545,3 +558,5 @@ timeout period to be used to time out the acquisition of the DownloadInfoIndicat
 field are microseconds. Refer to the clause 11, U-U Object Carousel, for further information.
 
 */
+
+
