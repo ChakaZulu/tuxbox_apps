@@ -1,5 +1,5 @@
 /*
- * $Id: bat.cpp,v 1.3 2002/05/13 17:17:05 obi Exp $
+ * $Id: bat.cpp,v 1.4 2002/08/24 11:10:53 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -38,7 +38,6 @@
 int parse_bat (int demux_fd)
 {
 	unsigned char buffer[1024];
-	unsigned char section = 0;
 
 	/* position in buffer */
 	unsigned short pos;
@@ -54,13 +53,24 @@ int parse_bat (int demux_fd)
 	unsigned short original_network_id;
 	unsigned short transport_descriptors_length;
 
-	if (setDmxSctFilter(demux_fd, 0x0011, 0x4A) < 0)
-	{
-		return -1;
-	}
+	unsigned char filter[DMX_FILTER_SIZE];
+	unsigned char mask[DMX_FILTER_SIZE];
+
+	memset(filter, 0x00, DMX_FILTER_SIZE);
+	memset(mask, 0x00, DMX_FILTER_SIZE);
+
+	filter[0] = 0x4A;
+	filter[4] = 0x00;
+	mask[0] = 0xFF;
+	mask[4] = 0xFF;
 
 	do
 	{
+		if (setDmxSctFilter(demux_fd, 0x0011, filter, mask) < 0)
+		{
+			return -1;
+		}
+
 		if (read(demux_fd, buffer, sizeof(buffer)) < 0)
 		{
 			perror("[bat.cpp] read");
@@ -128,7 +138,7 @@ int parse_bat (int demux_fd)
 			}
 		}
 	}
-	while (section++ != buffer[7]);
+	while (filter[4]++ != buffer[7]);
 
 	return 0;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: nit.cpp,v 1.20 2002/07/22 01:57:19 Homar Exp $
+ * $Id: nit.cpp,v 1.21 2002/08/24 11:10:53 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -42,7 +42,6 @@ int parse_nit (unsigned char DiSEqC)
 {
 	int demux_fd;
 	unsigned char buffer[1024];
-	unsigned char section = 0;
 
 	/* position in buffer */
 	unsigned short pos;
@@ -56,19 +55,31 @@ int parse_nit (unsigned char DiSEqC)
 	unsigned short transport_stream_id;
 	unsigned short original_network_id;
 
+	unsigned char filter[DMX_FILTER_SIZE];
+	unsigned char mask[DMX_FILTER_SIZE];
+
+	memset(filter, 0x00, DMX_FILTER_SIZE);
+	memset(mask, 0x00, DMX_FILTER_SIZE);
+
+	filter[0] = 0x40;
+	filter[4] = 0x00;
+	mask[0] = 0xFF;
+	mask[4] = 0xFF;
+
 	if ((demux_fd = open(DEMUX_DEV, O_RDWR)) < 0)
 	{
 		perror("[nit.cpp] " DEMUX_DEV);
 		return -1;
 	}
 
-	if (setDmxSctFilter(demux_fd, 0x0010, 0x40) < 0)
-	{
-		return -1;
-	}
-
 	do
 	{
+		if (setDmxSctFilter(demux_fd, 0x0010, filter, mask) < 0)
+		{
+			close(demux_fd);
+			return -1;
+		}
+
 		if ((read(demux_fd, buffer, sizeof(buffer))) < 0)
 		{
 			perror("[nit.cpp] read");
@@ -159,8 +170,9 @@ int parse_nit (unsigned char DiSEqC)
 			}
 		}
 	}
-	while (section++ != buffer[7]);
+	while (filter[4]++ != buffer[7]);
 
 	close(demux_fd);
 	return 0;
 }
+

@@ -1,5 +1,5 @@
 /*
- * $Id: dmx.cpp,v 1.2 2002/07/17 03:28:28 obi Exp $
+ * $Id: dmx.cpp,v 1.3 2002/08/24 11:10:53 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -25,16 +25,13 @@
 
 #include "dmx.h"
 
-int setDmxSctFilter (int fd, dvb_pid_t pid, uint8_t filter0, uint8_t filter1, uint8_t filter2)
+int setDmxSctFilter (int fd, unsigned short pid, unsigned char * filter, unsigned char * mask)
 {
 	dmxSctFilterParams sctFilterParams;
 
-	memset(&sctFilterParams.filter.filter, 0x00, DMX_FILTER_SIZE);
-	memset(&sctFilterParams.filter.mask, 0x00, DMX_FILTER_SIZE);
+	memcpy(&sctFilterParams.filter.filter, filter, DMX_FILTER_SIZE);
+	memcpy(&sctFilterParams.filter.mask, mask, DMX_FILTER_SIZE);
 
-	sctFilterParams.filter.filter[0] = filter0;
-	sctFilterParams.filter.filter[1] = filter1;
-	sctFilterParams.filter.filter[2] = filter2;
 	sctFilterParams.pid = pid;
 
 	switch (sctFilterParams.pid)
@@ -109,24 +106,18 @@ int setDmxSctFilter (int fd, dvb_pid_t pid, uint8_t filter0, uint8_t filter1, ui
 	switch (sctFilterParams.filter.filter[0])
 	{
 	case 0x00: /* program_association_section */
-		sctFilterParams.filter.mask[0] = 0xFF;
 		sctFilterParams.timeout = 2000;
 		break;
 
 	case 0x01: /* conditional_access_section */
-		sctFilterParams.filter.mask[0] = 0xFF;
 		sctFilterParams.timeout = 6000;
 		break;
 
 	case 0x02: /* program_map_section */
-		sctFilterParams.filter.mask[0] = 0xFF;
-		sctFilterParams.filter.mask[1] = 0xFF;
-		sctFilterParams.filter.mask[2] = 0xFF;
 		sctFilterParams.timeout = 1500;
 		break;
 
 	case 0x03: /* transport_stream_description_section */
-		sctFilterParams.filter.mask[0] = 0xFF;
 		sctFilterParams.timeout = 10000;
 		break;
 
@@ -134,17 +125,14 @@ int setDmxSctFilter (int fd, dvb_pid_t pid, uint8_t filter0, uint8_t filter1, ui
 		return -1;
 
 	case 0x40: /* network_information_section - actual_network */
-		sctFilterParams.filter.mask[0] = 0xFF;
 		sctFilterParams.timeout = 10000;
 		break;
 
 	case 0x41: /* network_information_section - other_network */
-		sctFilterParams.filter.mask[0] = 0xFF;
 		sctFilterParams.timeout = 10000;
 		break;
 
 	case 0x42: /* service_description_section - actual_transport_stream */
-		sctFilterParams.filter.mask[0] = 0xFF;
 		sctFilterParams.timeout = 10000;
 		break;
 
@@ -152,7 +140,6 @@ int setDmxSctFilter (int fd, dvb_pid_t pid, uint8_t filter0, uint8_t filter1, ui
 		return -1;
 
 	case 0x46: /* service_description_section - other_transport_stream */
-		sctFilterParams.filter.mask[0] = 0xFF;
 		sctFilterParams.timeout = 10000;
 		break;
 
@@ -160,7 +147,6 @@ int setDmxSctFilter (int fd, dvb_pid_t pid, uint8_t filter0, uint8_t filter1, ui
 		return -1;
 
 	case 0x4A: /* bouquet_association_section */
-		sctFilterParams.filter.mask[0] = 0xFF;
 		sctFilterParams.timeout = 10000;
 		break;
 
@@ -168,42 +154,34 @@ int setDmxSctFilter (int fd, dvb_pid_t pid, uint8_t filter0, uint8_t filter1, ui
 		return -1;
 
 	case 0x4E: /* event_information_section - actual_transport_stream, present/following */
-		sctFilterParams.filter.mask[0] = 0xFF;
 		sctFilterParams.timeout = 2000;
 		break;
 
 	case 0x4F: /* event_information_section - other_transport_stream, present/following */
-		sctFilterParams.filter.mask[0] = 0xFF;
 		sctFilterParams.timeout = 10000;
 		break;
 
 	case 0x50 ... 0x5F: /* event_information_section - actual_transport_stream, schedule */
-		sctFilterParams.filter.mask[0] = 0xF0;
 		sctFilterParams.timeout = 10000;
 		break;
 
 	case 0x60 ... 0x6F: /* event_information_section - other_transport_stream, schedule */
-		sctFilterParams.filter.mask[0] = 0xF0;
 		sctFilterParams.timeout = 10000;
 		break;
 
 	case 0x70: /* time_date_section */
-		sctFilterParams.filter.mask[0] = 0xFF;
 		sctFilterParams.timeout = 30000;
 		break;
 
 	case 0x71: /* running_status_section */
-		sctFilterParams.filter.mask[0] = 0xFF;
 		sctFilterParams.timeout = 0;
 		break;
 
 	case 0x72: /* stuffing_section */
-		sctFilterParams.filter.mask[0] = 0xFF;
 		sctFilterParams.timeout = 0;
 		break;
 
 	case 0x73: /* time_offset_section */
-		sctFilterParams.filter.mask[0] = 0xFF;
 		sctFilterParams.timeout = 30000;
 		break;
 
@@ -211,17 +189,14 @@ int setDmxSctFilter (int fd, dvb_pid_t pid, uint8_t filter0, uint8_t filter1, ui
 		return -1;
 
 	case 0x7E: /* discontinuity_information_section */
-		sctFilterParams.filter.mask[0] = 0xFF;
 		sctFilterParams.timeout = 0;
 		break;
 
 	case 0x7F: /* selection_information_section */
-		sctFilterParams.filter.mask[0] = 0xFF;
 		sctFilterParams.timeout = 0;
 		break;
 
 	case 0x80 ... 0x8F: /* ca_message_section */
-		sctFilterParams.filter.mask[0] = 0xF0;
 		sctFilterParams.timeout = 1000;
 		break;
 
@@ -241,7 +216,7 @@ int setDmxSctFilter (int fd, dvb_pid_t pid, uint8_t filter0, uint8_t filter1, ui
 	return 0;
 }
 
-int setDmxPesFilter (int fd, dmxOutput_t output, dmxPesType_t pesType, dvb_pid_t pid)
+int setDmxPesFilter (int fd, dmxOutput_t output, dmxPesType_t pesType, unsigned short pid)
 {
 	dmxPesFilterParams pesFilterParams;
 

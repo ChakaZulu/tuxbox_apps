@@ -1,10 +1,11 @@
 /*
- * $Id: sdt.cpp,v 1.25 2002/07/22 01:57:19 Homar Exp $
+ * $Id: sdt.cpp,v 1.26 2002/08/24 11:10:53 obi Exp $
  */
 
 /* system c */
 #include <fcntl.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -24,13 +25,22 @@ unsigned int get_sdt_TsidOnid ()
 	uint16_t transport_stream_id;
 	uint16_t original_network_id;
 
+	unsigned char filter[DMX_FILTER_SIZE];
+	unsigned char mask[DMX_FILTER_SIZE];
+
+	memset(filter, 0x00, DMX_FILTER_SIZE);
+	memset(mask, 0x00, DMX_FILTER_SIZE);
+
+	filter[0] = 0x42;
+	mask[0] = 0xFF;
+	
 	if ((demux_fd = open(DEMUX_DEV, O_RDWR)) < 0)
 	{
 		perror("[sdt.cpp] " DEMUX_DEV);
 		return 0;
 	}
 
-	if (setDmxSctFilter(demux_fd, 0x0011, 0x42) < 0)
+	if (setDmxSctFilter(demux_fd, 0x0011, filter, mask) < 0)
 	{
 		close(demux_fd);
 		return 0;
@@ -55,7 +65,6 @@ int parse_sdt ()
 {
 	int demux_fd;
 	unsigned char buffer[1024];
-	unsigned char section = 0;
 
 	/* position in buffer */
 	unsigned short pos;
@@ -68,20 +77,31 @@ int parse_sdt ()
 	unsigned short service_id;
 	unsigned short descriptors_loop_length;
 
+	unsigned char filter[DMX_FILTER_SIZE];
+	unsigned char mask[DMX_FILTER_SIZE];
+
+	memset(filter, 0x00, DMX_FILTER_SIZE);
+	memset(mask, 0x00, DMX_FILTER_SIZE);
+
+	filter[0] = 0x42;
+	filter[4] = 0x00;
+	mask[0] = 0xFF;
+	mask[4] = 0xFF;
+
 	if ((demux_fd = open(DEMUX_DEV, O_RDWR)) < 0)
 	{
 		perror("[sdt.cpp] " DEMUX_DEV);
 		return -1;
 	}
 
-	if (setDmxSctFilter(demux_fd, 0x0011, 0x42) < 0)
-	{
-		close(demux_fd);
-		return -1;
-	}
-
 	do
 	{
+		if (setDmxSctFilter(demux_fd, 0x0011, filter, mask) < 0)
+		{
+			close(demux_fd);
+			return -1;
+		}
+
 		if (read(demux_fd, buffer, sizeof(buffer)) < 0)
 		{
 			perror("[sdt.cpp] read");
@@ -194,7 +214,7 @@ int parse_sdt ()
 			}
 		}
 	}
-	while (section++ != buffer[7]);
+	while (filter[4]++ != buffer[7]);
 
 	close(demux_fd);
 	return 0;
