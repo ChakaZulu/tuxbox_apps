@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.39 2004/03/07 02:46:11 thegoodguy Exp $
+	$Id: controlapi.cpp,v 1.40 2004/11/10 11:07:05 zwen Exp $
 
 	License: GPL
 
@@ -143,6 +143,11 @@ bool CControlAPI::TimerCGI(CWebserverRequest *request)
 			if (request->ParameterList["action"] == "new")
 			{
 				Parent->WebAPI->doNewTimer(request);
+				request->SendOk();
+			}
+			else if (request->ParameterList["action"] == "modify")
+			{
+				Parent->WebAPI->doModifyTimer(request);
 				request->SendOk();
 			}
 		}
