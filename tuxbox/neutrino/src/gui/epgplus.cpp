@@ -583,8 +583,8 @@ EpgPlus::EpgPlus()
 
 	// this->usableScreenWidth  = 580;
 	// this->usableScreenHeight = 480;
-	this->usableScreenWidth  = w_max (580,10);
-	this->usableScreenHeight = h_max (480,10);
+	this->usableScreenWidth  = w_max (g_settings.screen_EndX , 4);
+	this->usableScreenHeight = h_max (g_settings.screen_EndY , 4);
 
 	this->headerHeight  = g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_TITLE]->getHeight();
 
