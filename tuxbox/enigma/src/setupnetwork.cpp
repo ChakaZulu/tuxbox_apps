@@ -115,7 +115,7 @@ eZapNetworkSetup::~eZapNetworkSetup()
 
 void eZapNetworkSetup::fieldSelected(int *number)
 {
-	focusNext(0);
+	focusNext(eWidget::focusDirNext);
 }
 
 
@@ -160,19 +160,42 @@ void eZapNetworkSetup::abortPressed()
 
 int eZapNetworkSetup::eventFilter(const eWidgetEvent &event)
 {
+	// work around for sucking event priority
+	int ineNumber=0;
+	eWidget *current=getTLW()->focusList()->current();
+	if (current == ip)
+		ineNumber = 1;
+	else if (current == netmask)
+		ineNumber = 1;
+	else if (current == dns)
+		ineNumber = 1;
+	else if (current == gateway)
+		ineNumber = 1;
 	switch (event.type)
 	{
 	case eWidgetEvent::keyDown:
 		switch(event.parameter)
 		{
 		case eRCInput::RC_DOWN:
-			focusNext(0);
+			focusNext(eWidget::focusDirS);
 			return 1;
+		case eRCInput::RC_LEFT:
+			if (!ineNumber)
+			{
+				focusNext(eWidget::focusDirW);
+				return 1;
+			}
+			break;
+		case eRCInput::RC_RIGHT:
+			if (!ineNumber)
+			{
+				focusNext(eWidget::focusDirE);
+				return 1;
+			}
 			break;
 		case eRCInput::RC_UP:
-			focusNext(1);
+			focusNext(eWidget::focusDirN);
 			return 1;
-			break;
 		}
 	}
 	return 0;

@@ -293,11 +293,19 @@ public:
 	int isVisible() { return (state&stateShow) && ((!parent) || parent->isVisible()); }
 	
 	/**
+	 * \brief Possible focus directions.
+	 */
+	enum focusDirection
+	{
+		focusDirNext, focusDirPrev, focusDirN, focusDirE, focusDirS, focusDirW
+	};
+
+	/**
 	 * \brief changes the focused widget.
 	 *
 	 * Focuses the next or previous widget of the \c focuslist. An \c gotFocus and \c lostFocus event will be
 	 * generated.
-	 * \param dir The direction. 0 is forward, 1 is backward.
+	 * \param dir The direction, \c focusDirection.
 	 */
 	void focusNext(int dir=0);
 	

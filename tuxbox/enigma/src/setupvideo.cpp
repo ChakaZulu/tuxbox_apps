@@ -170,15 +170,17 @@ int eZapVideoSetup::eventFilter(const eWidgetEvent &event)
 		switch(event.parameter)
 		{
 		case eRCInput::RC_RIGHT:
+			focusNext(eWidget::focusDirE);
+			return 1;
 		case eRCInput::RC_DOWN:
-			focusNext(0);
+			focusNext(eWidget::focusDirS);
 			return 1;
-			break;
 		case eRCInput::RC_LEFT:
-		case eRCInput::RC_UP:
-			focusNext(1);
+			focusNext(eWidget::focusDirW);
 			return 1;
-			break;
+		case eRCInput::RC_UP:
+			focusNext(eWidget::focusDirN);
+			return 1;
 		}
 	}
 	return 0;

@@ -1,4 +1,4 @@
-#include <errno.h>
+	#include <errno.h>
 
 #include "enigma.h"
 #include <core/base/eerror.h>
@@ -148,8 +148,6 @@ void eWidget::redraw(eRect area)		// area bezieht sich nicht auf die clientarea
 				}
 				It++;				
 			}
-		
-		
 		}
 	}
 }
@@ -416,29 +414,100 @@ void eWidget::eraseBackground(gPainter *target, const eRect &clip)
 
 void eWidget::focusNext(int dir)
 {
-	if (_focusList.current())
-		_focusList.current()->event(eWidgetEvent(eWidgetEvent::lostFocus));
+	eWidget *old=_focusList.current();
 
-	do
+	if (old)
 	{
-		if (dir)
-			_focusList.prev();
-		else
-			_focusList.next();
-	
+		switch (dir)
+		{
+		case focusDirNext:
+		case focusDirPrev:
+		{
+			do
+			{
+				if (dir)
+					_focusList.prev();
+				else
+					_focusList.next();
+			} while (_focusList.current() && !(_focusList.current()->state&stateShow));
+			break;
+		}
+		case focusDirN:
+		case focusDirE:
+		case focusDirS:
+		case focusDirW:
+		{
+			eWidget *nearest=old;
+			int difference=1<<30;
+			for (ePtrList<eWidget>::iterator i(_focusList.begin()); i != _focusList.end(); ++i)
+			{
+				if (old == *i)
+					continue;
+				if (!(focusList()->current()->state&stateShow))
+					continue;
+				ePoint m1=i->getPosition();
+				m1+=ePoint(i->getSize().width()/2, i->getSize().height()/2);
+				ePoint m2=old->getPosition();
+				m2+=ePoint(old->getSize().width()/2, old->getSize().height()/2);
+				
+				int xd=m1.x()-m2.x();
+				int yd=m1.y()-m2.y();
+				
+				int ldir=focusDirN;
+				int mydiff=0;
+				
+				if (xd > mydiff)	// rechts
+				{
+					mydiff=xd;
+					ldir=focusDirE;
+				}
+				if ((-xd) > mydiff) // links
+				{
+					mydiff=-xd;
+					ldir=focusDirW;
+				}
+				if (yd > mydiff)		// unten
+				{
+					mydiff=yd;
+					ldir=focusDirS;
+				}
+				if ((-yd) > mydiff)	// oben
+				{
+					mydiff=-yd;
+					ldir=focusDirN;
+				}
+				if (dir == ldir)	// nur elemente beruecksichtigen die in der richtung liegen...
+				{
+					int entf=xd*xd+yd*yd;
+					if (entf < difference)
+					{
+						difference=entf;
+						nearest=*i;
+					}
+				}
+			}
+			_focusList.first();
+			while (_focusList.current() && (_focusList.current()!=nearest))
+				_focusList.next();
+			break;
+		}
+		}
 	}
-	while (_focusList.current() && !(_focusList.current()->state&stateShow));
 
 	if (!_focusList.current())
 	{
-		if (dir)
+		if (dir==focusDirPrev)	// wrap around
 			_focusList.last();
 		else
 			_focusList.first();
+		if (!old)
+			old=_focusList.current();
 	}
-	while (focusList()->current() && !(focusList()->current()->state&stateShow))
-		focusList()->next();
 
+	if (old == _focusList.current())
+		return;
+	if (old)
+		old->event(eWidgetEvent(eWidgetEvent::lostFocus));
 	if (_focusList.current())
 		_focusList.current()->event(eWidgetEvent(eWidgetEvent::gotFocus));
 }

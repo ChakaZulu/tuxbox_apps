@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_language.cpp,v 1.1 2002/05/03 23:59:31 waldi Exp $
+ * $Id: setup_language.cpp,v 1.2 2002/05/12 03:30:26 tmbinc Exp $
  */
 
 #include "setup_language.h"
@@ -118,15 +118,17 @@ int eZapLanguageSetup::eventFilter(const eWidgetEvent &event)
 		switch(event.parameter)
 		{
 		case eRCInput::RC_RIGHT:
+			focusNext(eWidget::focusDirE);
+			return 1;
 		case eRCInput::RC_DOWN:
-			focusNext(0);
+			focusNext(eWidget::focusDirS);
 			return 1;
-			break;
 		case eRCInput::RC_LEFT:
-		case eRCInput::RC_UP:
-			focusNext(1);
+			focusNext(eWidget::focusDirW);
 			return 1;
-			break;
+		case eRCInput::RC_UP:
+			focusNext(eWidget::focusDirN);
+			return 1;
 		}
 	}
 	return 0;
