@@ -1015,8 +1015,8 @@ Deaktiviert den Iec
 http://dbox/control/system?setAViAExtIec=off
 ok
 
-Parameter: getAViAExtPlayback
-Rückgabe: Gibt zurück, in welchem Modus der Demux laeuft
+Parameter: getAViAExtPlayBack
+Rückgabe: Gibt zurück, in welchem Dekoder-Modus der Avia laeuft
 
 0 = PES
 1 = SPTS
@@ -1026,7 +1026,7 @@ http://dbox/control/system?getAViAExtPlayBack
 1
 
 
-Parameter: getAViAExtPlayback=pes
+Parameter: getAViAExtPlayBack=pes
 Rückgabe: ok
 
 Aktiviert den PES-Modus
@@ -1035,7 +1035,7 @@ http://dbox/control/system?setAViAExtPlayBack=pes
 ok
 
 
-Parameter: getAViAExtPlayback=spts
+Parameter: getAViAExtPlayBack=spts
 Rückgabe: ok
 
 Aktiviert den SPTS-Modus
