@@ -321,14 +321,8 @@ void eZapEPG::buildService(serviceentry &service)
 			CONNECT( e->redrawed, eZapEPG::drawTimeLines );
 			service.entries.push_back(e);
 
-			for (ePtrList<Descriptor>::const_iterator d(ev->descriptor); d != ev->descriptor.end(); ++d)
-				if (d->Tag()==DESCR_SHORT_EVENT)
-				{
-					const ShortEventDescriptor *s=(const ShortEventDescriptor*)*d;
-					e->title=s->event_name;
-					description=s->text;
-					break;
-				}
+			LocalEventData led;
+			led.getLocalData(ev, &e->title, &description);
 			tm *begin=localtime(&ev->start_time);
 			while ( description[0] == ' ' )
 				description.erase(0);

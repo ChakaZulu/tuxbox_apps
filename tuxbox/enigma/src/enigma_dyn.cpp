@@ -57,6 +57,7 @@
 #include <enigma_dyn_xml.h>
 #include <enigma_streamer.h>
 #include <enigma_processutils.h>
+#include <epgwindow.h>
 
 using namespace std;
 
@@ -1470,18 +1471,11 @@ public:
 					//tm start = *localtime(&now);
 					if ((now >= event.start_time) && (now <= event.start_time + event.duration))
 					{
-						for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
-						{
-							Descriptor *descriptor=*d;
-							if (descriptor->Tag() == DESCR_SHORT_EVENT)
-							{
-								short_description = ((ShortEventDescriptor*)descriptor)->event_name;
-								tm t = *localtime(&event.start_time);
-								event_start = eString().sprintf("%02d:%02d", t.tm_hour, t.tm_min);
-								event_duration = eString().sprintf("%d", event.duration / 60);
-								break; /* we have everything we wanted */
-							}
-						}
+						LocalEventData led;
+						led.getLocalData(&event, &short_description);
+						tm t = *localtime(&event.start_time);
+						event_start = eString().sprintf("%02d:%02d", t.tm_hour, t.tm_min);
+						event_duration = eString().sprintf("%d", event.duration / 60);
 					}
 				}
 			}
@@ -2448,34 +2442,15 @@ eString getEITC(eString result)
 						next_duration.sprintf("%d", (int)(event->duration / 60));
 					}
 				}
-				for (ePtrList<Descriptor>::iterator descriptor(event->descriptor); descriptor != event->descriptor.end(); ++descriptor)
+				LocalEventData led;
+				switch(p)
 				{
-					if (descriptor->Tag() == DESCR_SHORT_EVENT)
-					{
-						ShortEventDescriptor *ss = (ShortEventDescriptor*)*descriptor;
-						switch(p)
-						{
-							case 0:
-								now_text = filter_string(ss->event_name);
-								break;
-							case 1:
-								next_text = filter_string(ss->event_name);
-								break;
-						}
-					}
-					if (descriptor->Tag() == DESCR_EXTENDED_EVENT)
-					{
-						ExtendedEventDescriptor *ss = (ExtendedEventDescriptor*)*descriptor;
-						switch(p)
-						{
-							case 0:
-								now_longtext += filter_string(ss->text);
-								break;
-							case 1:
-								next_longtext += filter_string(ss->text);
-								break;
-						}
-					}
+				case 0:
+					led.getLocalData(event, &now_text, 0, &now_longtext);
+					break;
+				case 1:
+					led.getLocalData(event, &next_text, 0, &next_longtext);
+					break;
 				}
 				p++;
 		 	}
@@ -2619,15 +2594,11 @@ public:
 						eString genre;
 						int genreCategory = 0; //none
 						EITEvent event(*It->second);
+						LocalEventData led;
+						led.getLocalData(&event, &short_description, 0, &ext_description);
 						for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
 						{
 							Descriptor *descriptor = *d;
-							if (descriptor->Tag() == DESCR_SHORT_EVENT)
-								short_description = ((ShortEventDescriptor *)descriptor)->event_name;
-							else
-							if (descriptor->Tag() == DESCR_EXTENDED_EVENT)
-								ext_description += ((ExtendedEventDescriptor *)descriptor)->text;
-							else
 							if (descriptor->Tag() == DESCR_CONTENT)
 							{
 								genre = "";
@@ -2876,15 +2847,12 @@ static eString getcurepg(eString request, eString dirpath, eString opts, eHTTPCo
 		{
 			ext_description = "";
 			EITEvent event(*It->second);
+			LocalEventData led;
+			led.getLocalData(&event, &description, 0, &ext_description);
+
 			for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
 			{
 				Descriptor *descriptor = *d;
-				if (descriptor->Tag() == DESCR_EXTENDED_EVENT)
-					ext_description += ((ExtendedEventDescriptor*)descriptor)->text;
-				else
-				if (descriptor->Tag() == DESCR_SHORT_EVENT)
-					description = ((ShortEventDescriptor*)descriptor)->event_name;
-				else
 				if (descriptor->Tag() == DESCR_CONTENT)
 				{
 					genre = "";
@@ -4520,19 +4488,8 @@ static eString EPGDetails(eString request, eString dirpath, eString opts, eHTTPC
 			EITEvent *event = eEPGCache::getInstance()->lookupEvent((eServiceReferenceDVB&)ref, eventid);
 			if (event)
 			{
-				for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
-				{
-					if (d->Tag() == DESCR_SHORT_EVENT)
-					{
-						description = ((ShortEventDescriptor*)*d)->event_name;
-						eDebug("[ENIGMA_DYN] getEPGDetails: found description = %s", description.c_str());
-					}
-					if (d->Tag() == DESCR_EXTENDED_EVENT)
-					{
-						ext_description += ((ExtendedEventDescriptor*)*d)->text;
-						eDebug("[ENIGMA_DYN] getEPGDetails: found extended description = %s", ext_description.c_str());
-					}
-				}
+				LocalEventData led;
+				led.getLocalData(event, &description, &ext_description);
 				delete event;
 			}
 		}

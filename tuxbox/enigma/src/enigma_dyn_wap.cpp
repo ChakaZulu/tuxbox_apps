@@ -274,13 +274,8 @@ static eString wapEPG(int page)
 			if ((i >= page * 25) && (i < (page + 1) * 25))
 			{
 				EITEvent event(*It->second);
-				for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
-				{
-					Descriptor *descriptor = *d;
-					if (descriptor->Tag() == DESCR_SHORT_EVENT)
-						description = ((ShortEventDescriptor*)descriptor)->event_name;
-				}
-
+				LocalEventData led;
+				led.getLocalData(&event, &description);
 				tm* t = localtime(&event.start_time);
 
 				result	<< std::setw(2) << t->tm_mday << '.'
@@ -370,19 +365,8 @@ static eString wapEPGDetails(eString serviceRef, eString eventID)
 			EITEvent *event = eEPGCache::getInstance()->lookupEvent((eServiceReferenceDVB&)ref, eventid);
 			if (event)
 			{
-				for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
-				{
-					if (d->Tag() == DESCR_SHORT_EVENT)
-					{
-						description = ((ShortEventDescriptor*)*d)->event_name;
-						eDebug("[ENIGMA_DYN] getEPGDetails: found description = %s", description.c_str());
-					}
-					if (d->Tag() == DESCR_EXTENDED_EVENT)
-					{
-						ext_description += ((ExtendedEventDescriptor*)*d)->text;
-						eDebug("[ENIGMA_DYN] getEPGDetails: found extended description = %s", ext_description.c_str());
-					}
-				}
+				LocalEventData led;
+				led.getLocalData(event, &description, 0, &ext_description);
 				if (!ext_description)
 					ext_description = "No detailed information available";
 #ifndef DISABLE_FILE

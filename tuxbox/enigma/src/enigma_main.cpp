@@ -2087,27 +2087,20 @@ void eZapMain::setEIT(EIT *eit)
 					subservicesel.selectCurrent();
 				}
 			}
-			for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
+			LocalEventData led;
+			switch(p)
 			{
-				Descriptor *descriptor=*d;
-				if (descriptor->Tag()==DESCR_SHORT_EVENT)
-				{
-					ShortEventDescriptor *ss=(ShortEventDescriptor*)descriptor;
-
-					switch (p)
-					{
-					case 0:
-						nowtext=ss->event_name;
-						cur_event_text=ss->event_name;
+				case 0:
+					led.getLocalData(event, &nowtext, &descr);
+					cur_event_text=nowtext;
+					if (!nowtext.isNull())
 						val|=1;
-						descr=ss->text;
-						break;
-					case 1:
-						nexttext=ss->event_name;
+					break;
+				case 1:
+					led.getLocalData(event, &nexttext);
+					if (!nexttext.isNull())
 						val|=2;
-						break;
-					}
-				}
+					break;
 			}
 
 			tm *t=event->start_time!=-1?localtime(&event->start_time):0;

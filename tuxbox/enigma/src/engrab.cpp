@@ -15,6 +15,7 @@
 //#define TMP_NgrabXML "/var/tmp/e-ngrab.xml"
 #include <lib/gui/enumber.h>
 #include <lib/gui/statusbar.h>
+#include <epgwindow.h>
 
 static eString getServiceName()
 {
@@ -39,17 +40,11 @@ static eString getEPGTitle()
 
 	if(tmp)
 	{
-		for (ePtrList<Descriptor>::const_iterator d(tmp->descriptor); d != tmp->descriptor.end(); ++d)
-		{
-			if ( d->Tag() == DESCR_SHORT_EVENT)
-			{
-				ShortEventDescriptor *s=(ShortEventDescriptor*)*d;
-				descr=s->event_name;
-				if ((s->text.length() > 0) && (s->text!=descr))
-					descr+=" - "+s->text;
-				break;
-			}
-		}
+		LocalEventData led;
+		eString text;
+		led.getLocalData(tmp, &descr, &text, 0);
+		if ((text.length() > 0) && (text != descr))
+			descr += " - "+text;
 		delete tmp;
 	}
 	return descr;

@@ -47,4 +47,20 @@ public:
 	Signal3<bool, eEPGSelector*, eServiceReference*, EITEvent *> removeEventFromTimerList;
 };
 
+class LocalEventData
+{
+	eString country;
+	eString ShortEventName;
+	eString ShortEventText;
+	eString ExtendedEventText;
+public:
+	LocalEventData();
+	inline ~LocalEventData(){};
+	eString primary_language;
+	eString secondary_language;
+	/* Search first for primary, then secondary or finally any other language descriptors */
+	void getLocalData(EITEvent *, eString * a=0, eString *b=0, eString *c=0); // return short event name, short event text, and extended text
+	bool language_exists(EITEvent *, eString);
+};
+
 #endif

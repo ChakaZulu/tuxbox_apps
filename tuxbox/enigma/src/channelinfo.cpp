@@ -10,6 +10,7 @@
 #include <lib/system/info.h>
 #include <sys/stat.h>
 #include <time.h>
+#include <epgwindow.h>
 
 eChannelInfo::eChannelInfo( eWidget* parent, const char *deco)
 	:eDecoWidget(parent, 0, deco),
@@ -144,19 +145,14 @@ void eChannelInfo::ParseEITInfo(EITEvent *e)
 
 		if (e->free_CA_mode )
 			cflags |= cflagScrambled;
-		
+
+		LocalEventData led;
+		led.getLocalData(e, &name, &descr, 0);
+
 		for (ePtrList<Descriptor>::iterator d(e->descriptor); d != e->descriptor.end(); ++d)
 		{
-//			eDebug(d->toString().c_str());
 			Descriptor *descriptor=*d;
-			if (descriptor->Tag()==DESCR_SHORT_EVENT)
-			{
-				ShortEventDescriptor *ss=(ShortEventDescriptor*)descriptor;
-				name = ss->event_name;
-				descr += ss->text;
-				if( (!descr.isNull()) && (descr.c_str()[0])) descr += " ";
-			}
-      else if (descriptor->Tag()==DESCR_COMPONENT)
+			if (descriptor->Tag()==DESCR_COMPONENT)
 			{
 				ComponentDescriptor *cd=(ComponentDescriptor*)descriptor;
 				

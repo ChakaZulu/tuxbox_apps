@@ -3,6 +3,7 @@
 #include <lib/dvb/epgcache.h>
 #include <lib/dvb/dvb.h>
 #include <lib/dvb/servicemp3.h>
+#include <epgwindow.h>
 
 extern eString httpUnescape(const eString &string);
 extern eString httpEscape(const eString &string);
@@ -312,24 +313,45 @@ static eString erc_services(eString request, eString dirpath, eString opt, eHTTP
 static void processEvent(eString &res, EITEvent *ev, const eString &search, int wantext)
 {
 	eString title;
-	
-	for (ePtrList<Descriptor>::const_iterator d(ev->descriptor); d != ev->descriptor.end(); ++d)
-		if (d->Tag()==DESCR_SHORT_EVENT)
-		{
-			const ShortEventDescriptor *s=(const ShortEventDescriptor*)*d;
-			title = s->event_name;
-			break;
-		}
+
+	LocalEventData led;
+	led.getLocalData(ev, &title);
 
 	if (title.find(search) != eString::npos)
 	{
-    res += "I: ";
-    res += eString().setNum(ev->event_id, 0x10);
-   	res += "\nB: ";
+		res += "I: ";
+		res += eString().setNum(ev->event_id, 0x10);
+		res += "\nB: ";
 		res += eString().setNum(ev->start_time);
-    	res += "\nD: ";
+		res += "\nD: ";
 		res += eString().setNum(ev->duration);
 		res += "\nN: " + title + "\n";
+		LocalEventData led;
+		eString tmpname,tmptext;
+		if (!wantext)
+		{
+			led.getLocalData(ev, &tmpname);
+			if (!tmpname.isNull())
+			{
+				res += "T: ";
+				res += tmpname;
+				res += "\n";
+			}
+		} 
+		else
+		{
+			led.getLocalData(ev, &tmpname, 0, &tmptext);
+			if (!tmptext.isNull())
+			{
+				res += "T: ";
+				res += tmpname;
+				res += "\n";
+				res += "E: ";
+				tmptext.strReplace("\n", eString("\\n"));
+				res += tmptext;
+				res +=" \n";
+			}
+		}
 		for (ePtrList<Descriptor>::const_iterator d(ev->descriptor); d != ev->descriptor.end(); ++d)
 		{
 			if (d->Tag()==DESCR_SHORT_EVENT)

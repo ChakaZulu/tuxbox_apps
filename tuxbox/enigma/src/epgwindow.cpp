@@ -59,15 +59,16 @@ int eListBoxEntryEPG::getEntryHeight()
 void eListBoxEntryEPG::build()
 {
 	start_time = *localtime(&event.start_time);
+     
+	LocalEventData led;
+	led.getLocalData(&event, &descr);
+
+	if (descr)
+		return;
 	for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
 	{
 		Descriptor *descriptor=*d;
-		if (descriptor->Tag()==DESCR_SHORT_EVENT)
-		{
-			descr = ((ShortEventDescriptor*)descriptor)->event_name;
-			return;
-		}
-		else if (descriptor->Tag()==DESCR_TIME_SHIFTED_EVENT)
+		if (descriptor->Tag()==DESCR_TIME_SHIFTED_EVENT)
 		{
 			// build parent Service Reference
 			eServiceReferenceDVB nvodService(
@@ -78,20 +79,13 @@ void eListBoxEntryEPG::build()
 			EITEvent* evt = eEPGCache::getInstance()->lookupEvent(nvodService, ((TimeShiftedEventDescriptor*)descriptor)->reference_event_id );
 			if (evt)
 			{
-				for (ePtrList<Descriptor>::iterator d(evt->descriptor); d != evt->descriptor.end(); ++d)
-				{
-					if (d->Tag()==DESCR_SHORT_EVENT)
-					{
-						descr = ((ShortEventDescriptor*)descriptor)->event_name;
-						break;
-					}
-				}
+				led.getLocalData(evt, &descr);
 				delete evt;
 				return;
 			}
 		}
 	}
-	descr = "no event data avail";
+	descr = "no event data available";
 }
 
 eListBoxEntryEPG::eListBoxEntryEPG(const eit_event_struct* evt, eListBox<eListBoxEntryEPG> *listbox, eServiceReference &ref)
@@ -146,13 +140,13 @@ const eString &eListBoxEntryEPG::redraw(gPainter *rc, const eRect& rect, gColor 
 	if ( (p = eTimerManager::getInstance()->findEvent( &service, &event )) )
 		if ( p->type & ePlaylistEntry::SwitchTimerEntry )
 		{
-	  	int ypos = (rect.height() - inTimer->y) / 2;
+			int ypos = (rect.height() - inTimer->y) / 2;
 			rc->blit( *inTimer, ePoint( xpos, rect.top()+ypos ), eRect(), gPixmap::blitAlphaTest);		
 			xpos+=paraTime->getBoundBox().height()+inTimer->x;
 		}
 		else if ( p->type & ePlaylistEntry::RecTimerEntry )
 		{
-	  	int ypos = (rect.height() - inTimerRec->y) / 2;
+			int ypos = (rect.height() - inTimerRec->y) / 2;
 			rc->blit( *inTimerRec, ePoint( xpos, rect.top()+ypos ), eRect(), gPixmap::blitAlphaTest);		
 			xpos+=paraTime->getBoundBox().height()+inTimerRec->x;
 		}
@@ -366,4 +360,95 @@ int eEPGSelector::eventHandler(const eWidgetEvent &event)
 			break;
 	}
 	return eWindow::eventHandler(event);
+}
+    
+/* search for the presence of language from given EIT event descriptors*/
+bool LocalEventData::language_exists(EITEvent *event, eString lang)
+{
+	ShortEventName=ExtendedEventText=ShortEventText="";
+	bool retval=0;
+	for (ePtrList<Descriptor>::iterator descriptor(event->descriptor); descriptor != event->descriptor.end(); ++descriptor)
+	{
+		if (descriptor->Tag() == DESCR_SHORT_EVENT)
+		{
+			ShortEventDescriptor *ss = (ShortEventDescriptor*)*descriptor;
+			if (!lang || !strncmp(lang.c_str(), ss->language_code, 3) )
+			{
+				ShortEventName=ss->event_name;
+				ShortEventText=ss->text;
+				retval=1;
+			}
+		}
+		else if (descriptor->Tag() == DESCR_EXTENDED_EVENT)
+		{
+			ExtendedEventDescriptor *ss = (ExtendedEventDescriptor*)*descriptor;
+			if (!lang || !strncmp(lang.c_str(), ss->language_code, 3) )
+			{
+				ExtendedEventText += ss->text;
+				retval=1;
+			}
+		}
+	}
+	return retval;
+}
+
+const char MAX_LANG = 14;
+/* OSD language (see /share/locales/locales) to iso639 conversion table */    
+eString ISOtbl[MAX_LANG][2] =
+{
+	{"fi_FI","fin"},
+	{"C","eng"},
+	{"de_DE","deu"},     /* also 'ger' is valid iso639 code!! */
+	{"de_DE","ger"},
+	{"da_DK","dan"},
+	{"sv_SE","swe"},
+	{"no_NO","nor"},
+	{"fr_FR","fra"},
+	{"es_ES","esl"},     /* also 'spa' is ok */
+	{"es_ES","spa"},
+	{"it_IT","ita"},
+	{"cs_CZ","ces"},     /* or 'cze' */
+	{"cs_CZ","cze"},
+	{"hu_HU","hun"}
+};
+
+LocalEventData::LocalEventData()
+{
+	secondary_language=ISOtbl[1][1];  // one language is always english
+	char *str=0;
+	eConfig::getInstance()->getKey("/elitedvb/language", str); // fetch selected OSD country
+	if (!str)
+	{
+		primary_language=secondary_language;
+		eDebug("No OSD-language found!");
+	}
+	else
+	{
+		country=str;
+		free(str);
+		for (int i=0; i < MAX_LANG; i++)
+			if (country==ISOtbl[i][0])
+				primary_language=ISOtbl[i][1];
+		if (!primary_language)
+			primary_language=secondary_language;
+	}
+	if (primary_language==secondary_language)
+		secondary_language=0;
+//	eDebug("Country = %s",country.c_str());
+//	eDebug("Primary Language = %s",primary_language.c_str());
+//	eDebug("Secondary Language = %s",secondary_language.c_str());
+}
+
+/* short event name, short event text and extended event text */
+void LocalEventData::getLocalData(EITEvent *event, eString *name, eString *desc, eString *text)
+{
+	if (!language_exists(event,primary_language))
+		if (!language_exists(event,secondary_language))
+			language_exists(event,0);
+	if ( name )
+		*name=ShortEventName;
+	if ( desc )
+		*desc=ShortEventText;
+	if ( text )
+		*text=ExtendedEventText;
 }

@@ -11,6 +11,7 @@
 #include <lib/gui/eprogress.h>
 #include <lib/gui/guiactions.h>
 #include <lib/system/init_num.h>
+#include <epgwindow.h>
 
 struct enigmaEventViewActions
 {
@@ -243,34 +244,46 @@ void eEventDisplay::setEvent(EITEvent *event)
 			}
 		}
 
+		LocalEventData led;
+		eString lang=0;
+		if (led.language_exists(event,led.primary_language))
+			lang=led.primary_language;
+		else if (led.language_exists(event,led.secondary_language))
+			lang=led.secondary_language;
+
 		for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
 		{
 			if (d->Tag()==DESCR_SHORT_EVENT)
 			{
 				ShortEventDescriptor *s=(ShortEventDescriptor*)*d;
+                
 				valid |= 4;
-				_title=s->event_name;
+
+				if (!lang || !strncmp(lang.c_str(), s->language_code, 3))
+				{
+					_title=s->event_name;
 #ifndef DISABLE_LCD	
-				if (LCDElement)
+					if (LCDElement)
 					LCDElement->setText(s->text);
 #endif
-				if ((s->text.length() > 0) && (s->text!=_title))
-				{
-					valid |= 8;
-					_long_description+=s->text;
-					_long_description+="\n\n";
-				}
-			} else if (d->Tag()==DESCR_EXTENDED_EVENT)
+					if ((s->text.length() > 0) && (s->text!=_title))
+					{
+						valid |= 8;
+						_long_description+=s->text;
+						_long_description+="\n\n";
+					}
+				} 
+			}
+			else if (d->Tag()==DESCR_EXTENDED_EVENT)
 			{
-				valid |= 16;
 				ExtendedEventDescriptor *ss=(ExtendedEventDescriptor*)*d;
-				_long_description+=ss->text;
+				valid |= 16;
+				if (!lang || !strncmp(lang.c_str(), ss->language_code, 3))
+					_long_description+=ss->text;
 			}
 		}
-
 		if (!_title)
 			_title = _("no information is available");
-
 		if ( !ref.path )
 			channel->setText(service);
 
