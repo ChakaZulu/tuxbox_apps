@@ -593,3 +593,7 @@ fontmenu.channellist Kanalliste
 fontmenu.eventlist Eventlist
 fontmenu.epg EPG
 fontmenu.infobar Infobar
+
+colormenu.gtx_alpha Transparenz
+gtxalpha.alpha1 tr1
+gtxalpha.alpha1 tr2

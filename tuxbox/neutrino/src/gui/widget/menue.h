@@ -130,8 +130,9 @@ class CMenuItem
 		}
 		virtual void setActive( bool Active)
 		{
+			printf("set active ..\n");
 			active = Active;
-			paint();
+			//paint();
 		};
 };
 

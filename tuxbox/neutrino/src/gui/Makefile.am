@@ -18,7 +18,7 @@ libneutrino_gui_a_SOURCES = \
 	epgview.cpp infoviewer.cpp scan.cpp update.cpp dboxinfo.cpp
 
 libneutrino_gui2_a_SOURCES = \
-	streaminfo.cpp
+	streaminfo.cpp alphasetup.cpp
 
 libtimerlist_a_SOURCES = \
 	timerlist.cpp
