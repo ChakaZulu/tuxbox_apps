@@ -300,12 +300,15 @@ public:
 	enum { messageGoSleep=2, messageShutdown, messageNoRecordSpaceLeft };
 	enum { pathBouquets=1, pathProvider=2, pathRecordings=4, pathPlaylist=8, pathAll=16, pathRoot=32, pathSatellites=64 };
 	enum { listAll, listSatellites, listProvider, listBouquets };
+#ifndef DISABLE_FILE
+	ePlaylist *recordings;
+#endif
 private:
 	eLabel 	*ChannelNumber, *ChannelName, *Clock,
 		*EINow, *EINext, *EINowDuration, *EINextDuration,
 		*EINowTime, *EINextTime, *Description, *fileinfos,
-		*ButtonRedEn, *ButtonRedDis, 
-		*ButtonGreenEn, *ButtonGreenDis, 
+		*ButtonRedEn, *ButtonRedDis,
+		*ButtonGreenEn, *ButtonGreenDis,
 		*ButtonYellowEn, *ButtonYellowDis,
 		*ButtonBlueEn, *ButtonBlueDis,
 		*DolbyOn, *DolbyOff, *CryptOn, *CryptOff, *WideOn, *WideOff, *recstatus,
@@ -344,7 +347,7 @@ private:
 
 	int cur_start, cur_duration, cur_event_id;
 	eString cur_event_text;
-	
+
 	eNVODSelector nvodsel;
 	eSubServiceSelector subservicesel;
 	ePSAudioSelector audioselps;
@@ -352,14 +355,14 @@ private:
 	eVideoSelector videosel;
 	eEventDisplay *actual_eventDisplay;
 	eServiceReferenceDVB refservice;
-	
+
 	ePlaylist *playlist; // history / current playlist entries
 	eServiceReference playlistref;
 
 #ifndef DISABLE_FILE
-	ePlaylist *recordings;
+//	ePlaylist *recordings;
 	eServiceReference recordingsref;
-#endif 
+#endif
 
 	ePlaylist *userTVBouquets;
 	eServiceReference userTVBouquetsRef;
