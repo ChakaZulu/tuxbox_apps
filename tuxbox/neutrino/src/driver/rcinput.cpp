@@ -1,10 +1,13 @@
 /*
- $Id: rcinput.cpp,v 1.10 2001/10/11 21:00:56 rasc Exp $
+ $Id: rcinput.cpp,v 1.11 2001/10/27 11:54:08 field Exp $
 
  Module for Remote Control Handling
 
 History:
  $Log: rcinput.cpp,v $
+ Revision 1.11  2001/10/27 11:54:08  field
+ Tastenwiederholblocker entruempelt
+
  Revision 1.10  2001/10/11 21:00:56  rasc
  clearbuffer() fuer RC-Input bei Start,
  Klassen etwas erweitert...
@@ -163,7 +166,7 @@ void CRCInput::clear (void)
 int CRCInput::getKeyInt()
 {
     struct timeval tv;
-    int td;
+    long long td;
 	__u16 rccode;
 	bool repeat = true;
 	int	erg = RC_nokey;
@@ -178,13 +181,8 @@ int CRCInput::getKeyInt()
 		{
             gettimeofday( &tv, NULL );
 
-            if ( ( tv.tv_sec - tv_prev.tv_sec ) > 1 )
-                td = 1000000;
-            else
-            {
-                td = ( tv.tv_usec - tv_prev.tv_usec );
-                td+= ( tv.tv_sec - tv_prev.tv_sec )* 1000000;
-            };
+            td = ( tv.tv_usec - tv_prev.tv_usec );
+            td+= ( tv.tv_sec - tv_prev.tv_sec )* 1000000;
 
             if ( ( ( prevrccode&0x1F ) != ( rccode&0x1F ) ) ||
                  ( td > repeat_block ) )
@@ -217,7 +215,7 @@ int CRCInput::getKeyInt()
             }
             else
             {
-//                printf("key ignored %d", tv.tv_sec);
+                //printf("key ignored %lld\n", td);
             }
 
 		}
