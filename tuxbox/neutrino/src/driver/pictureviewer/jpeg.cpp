@@ -106,7 +106,7 @@ int fh_jpeg_load(const char *filename,unsigned char *buffer,int x,int y)
 	return(FH_ERROR_OK);
 }
 
-int fh_jpeg_getsize(const char *filename,int *x,int *y, int wanted_width)
+int fh_jpeg_getsize(const char *filename,int *x,int *y, int wanted_width, int wanted_height)
 {
 //	dbout("fh_jpeg_getsize {\n");
 	struct jpeg_decompress_struct cinfo;
@@ -135,11 +135,14 @@ int fh_jpeg_getsize(const char *filename,int *x,int *y, int wanted_width)
 	jpeg_read_header(ciptr,TRUE);
 	ciptr->out_color_space=JCS_RGB;
 	// should be more flexible...
-	if((int)ciptr->image_width/8 >= wanted_width)
+	if((int)ciptr->image_width/8 >= wanted_width ||
+      (int)ciptr->image_height/8 >= wanted_height)
 		ciptr->scale_denom=8;
-	else if((int)ciptr->image_width/4 >= wanted_width)
+	else if((int)ciptr->image_width/4 >= wanted_width ||
+      (int)ciptr->image_height/4 >= wanted_height)
 		ciptr->scale_denom=4;
-	else if((int)ciptr->image_width/2 >= wanted_width)
+	else if((int)ciptr->image_width/2 >= wanted_width ||
+           (int)ciptr->image_height/2 >= wanted_height)
 		ciptr->scale_denom=2;
 	else
 		ciptr->scale_denom=1;

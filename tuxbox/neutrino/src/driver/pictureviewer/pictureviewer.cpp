@@ -19,27 +19,27 @@ extern unsigned char * color_average_resize(unsigned char * orgin,int ox,int oy,
 
 
 #ifdef FBV_SUPPORT_GIF
-    extern int fh_gif_getsize(const char *,int *,int*,int);
+    extern int fh_gif_getsize(const char *,int *,int*,int,int);
     extern int fh_gif_load(const char *,unsigned char *,int,int);
     extern int fh_gif_id(const char *);
 #endif
 #ifdef FBV_SUPPORT_JPEG
-    extern int fh_jpeg_getsize(const char *,int *,int*,int);
+    extern int fh_jpeg_getsize(const char *,int *,int*,int,int);
     extern int fh_jpeg_load(const char *,unsigned char *,int,int);
     extern int fh_jpeg_id(const char *);
 #endif
 #ifdef FBV_SUPPORT_PNG
-    extern int fh_png_getsize(const char *,int *,int*,int);
+    extern int fh_png_getsize(const char *,int *,int*,int,int);
     extern int fh_png_load(const char *,unsigned char *,int,int);
     extern int fh_png_id(const char *);
 #endif
 #ifdef FBV_SUPPORT_BMP
-    extern int fh_bmp_getsize(const char *,int *,int*,int);
+    extern int fh_bmp_getsize(const char *,int *,int*,int,int);
     extern int fh_bmp_load(const char *,unsigned char *,int,int);
     extern int fh_bmp_id(const char *);
 #endif
 
-void CPictureViewer::add_format(int (*picsize)(const char *,int *,int*,int ),int (*picread)(const char *,unsigned char *,int,int), int (*id)(const char*))
+void CPictureViewer::add_format(int (*picsize)(const char *,int *,int*,int,int ),int (*picread)(const char *,unsigned char *,int,int), int (*id)(const char*))
 {
     CFormathandler *fhn;
     fhn=(CFormathandler *) malloc(sizeof(CFormathandler));
@@ -66,13 +66,13 @@ void CPictureViewer::init_handlers(void)
 #endif
 }
 
-CPictureViewer::CFormathandler * CPictureViewer::fh_getsize(const char *name,int *x,int *y, int width_wanted)
+CPictureViewer::CFormathandler * CPictureViewer::fh_getsize(const char *name,int *x,int *y, int width_wanted, int height_wanted)
 {
 	CFormathandler *fh;
     for(fh=fh_root;fh!=NULL;fh=fh->next)
     {
 	if(fh->id_pic(name))
-	    if(fh->get_size(name,x,y,width_wanted)==FH_ERROR_OK) return(fh);
+	    if(fh->get_size(name,x,y,width_wanted, height_wanted)==FH_ERROR_OK) return(fh);
     }
     return(NULL);
 }
@@ -88,7 +88,7 @@ bool CPictureViewer::DecodeImage(std::string name, int startx, int endx, int sta
 		showBusy(startx+3,starty+3,10,0xff,00,00);
    
 	CFormathandler *fh;
-   if((fh=fh_getsize(name.c_str(),&x,&y,endx-startx)))
+   if((fh=fh_getsize(name.c_str(),&x,&y,endx-startx,endy-starty)))
    {
       if(m_Pic_Buffer!=NULL)
       {
