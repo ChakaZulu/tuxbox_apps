@@ -31,20 +31,20 @@ eMountPoint::~eMountPoint()
 
 eMountPoint::eMountPoint(CConfigFile *config, int i)
 {
-	mp.localDir   = config->getString(eString().sprintf("localdir_%d", i));
-	mp.fstype     = config->getInt32(eString().sprintf("fstype_%d", i));
-	mp.password   = config->getString(eString().sprintf("password_%d", i));
-	mp.userName   = config->getString(eString().sprintf("username_%d", i));
-	mp.mountDir   = config->getString(eString().sprintf("mountdir_%d", i));
-	mp.automount  = config->getInt32(eString().sprintf("automount_%d", i));
-	mp.rsize      = config->getInt32(eString().sprintf("rsize_%d",i), 4096);
-	mp.wsize      = config->getInt32(eString().sprintf("wsize_%d",i), 4096);
-	mp.options    = config->getString(eString().sprintf("options_%d", i));
+	mp.localDir = config->getString(eString().sprintf("localdir_%d", i));
+	mp.fstype = config->getInt32(eString().sprintf("fstype_%d", i));
+	mp.password = config->getString(eString().sprintf("password_%d", i));
+	mp.userName = config->getString(eString().sprintf("username_%d", i));
+	mp.mountDir = config->getString(eString().sprintf("mountdir_%d", i));
+	mp.automount = config->getInt32(eString().sprintf("automount_%d", i));
+	mp.rsize = config->getInt32(eString().sprintf("rsize_%d",i), 4096);
+	mp.wsize = config->getInt32(eString().sprintf("wsize_%d",i), 4096);
+	mp.options = config->getString(eString().sprintf("options_%d", i));
 	mp.ownOptions = config->getString(eString().sprintf("ownoptions_%d", i));
 	eString sip = config->getString(eString().sprintf("ip_%d", i));
 	sscanf(sip.c_str(), "%d.%d.%d.%d", &mp.ip[0], &mp.ip[1], &mp.ip[2], &mp.ip[3]);
-	mp.mounted    = isMounted();
-	mp.id         = i;
+	mp.mounted = isMounted();
+	mp.id = i;
 }
 
 eMountPoint::eMountPoint(t_mount pmp)
@@ -121,7 +121,7 @@ bool eMountPoint::isMounted()
 
 	bool found = false;
 	in.open("/proc/mounts", std::ifstream::in);
-	while(getline(in, buffer, '\n'))
+	while (getline(in, buffer, '\n'))
 	{
 		mountDev = mountOn = mountType = "";
 		tmp.str(buffer);
@@ -176,14 +176,13 @@ int eMountPoint::mount()
 				if (useoptions[useoptions.length() - 1] == ',') //remove?
 					useoptions = useoptions.left(useoptions.length() - 1); //remove?
 				ip.sprintf("%d.%d.%d.%d", mp.ip[0], mp.ip[1], mp.ip[2], mp.ip[3]);
-				switch(mp.fstype)
+				switch (mp.fstype)
 				{
 					case 0:	/* NFS */
-						cmd = "mount -t ";
-						cmd += mp.fstype ? "cifs //" : "nfs ";
 						if (fileSystemIsSupported("nfs"))
 						{
-							cmd = ip + ":" + mp.mountDir + " " + mp.localDir + " -o ";
+							cmd = "mount -t nfs ";
+							cmd += ip + ":" + mp.mountDir + " " + mp.localDir + " -o ";
 							cmd += eString().sprintf("rsize=%d,wsize=%d", mp.rsize, mp.wsize);
 							if (useoptions)
 								cmd += "," + useoptions;
@@ -192,11 +191,10 @@ int eMountPoint::mount()
 							rc = -4; //NFS filesystem not supported
 						break;
 					case 1: /* CIFS */
-						cmd = "mount -t ";
-						cmd += mp.fstype ? "cifs //" : "nfs ";
 						if(fileSystemIsSupported("cifs"))
 						{
-							cmd = ip + "/" + mp.mountDir + " " + mp.localDir + " -o user=";
+							cmd = "mount -t cifs //";
+							cmd += ip + "/" + mp.mountDir + " " + mp.localDir + " -o user=";
 							cmd += (mp.userName != "") ? mp.userName : "anonymous";
 							if (mp.password != "")
 								cmd += "pass=" + mp.password;
