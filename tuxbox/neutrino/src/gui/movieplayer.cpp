@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.85 2004/04/05 19:39:16 thegoodguy Exp $
+  $Id: movieplayer.cpp,v 1.86 2004/05/02 18:52:53 thegoodguy Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -542,12 +542,10 @@ ReceiveStreamThread (void *mrl)
 
 	printf ("[movieplayer.cpp] Server: %s\n", server);
 	printf ("[movieplayer.cpp] Port: %d\n", port);
-	char buf[RINGBUFFERSIZE];
 	int len;
 
 	while (true)
 	{
-
 		//printf ("[movieplayer.cpp] Trying to call socket\n");
 		skt = socket (AF_INET, SOCK_STREAM, 0);
 
@@ -575,7 +573,9 @@ ReceiveStreamThread (void *mrl)
 
 		// Skip HTTP Header
 		int found = 0;
+		char buf[2];
 		char line[200];
+		buf[0] = buf[1] = '\0';
 		strcpy (line, "");
 		while (true)
 		{
@@ -615,17 +615,30 @@ ReceiveStreamThread (void *mrl)
 	poller[0].fd = skt;
 	poller[0].events = POLLIN | POLLPRI;
 	int pollret;
+	ringbuffer_data_t vec[2];
 
 	while (streamingrunning == 1)
 	{
-		while ((size = ringbuffer_write_space (ringbuf)) == 0)
+		if (playstate == CMoviePlayerGui::STOPPED)
 		{
-			if (playstate == CMoviePlayerGui::STOPPED)
+			close(skt);
+			pthread_exit (NULL);
+		}
+
+		ringbuffer_get_write_vector(ringbuf, &(vec[0]));
+		/* vec[0].len is not the total empty size of the buffer! */
+		/* but vec[0].len = 0 if and only if the buffer is full! */
+		if ((size = vec[0].len) == 0)
+		{
+			if (avpids_found)
 			{
-				close(skt);
-				pthread_exit (NULL);
+				if (bufferfilled)
+				{
+					/* do not waste cpu cycles if there is nothing to do */
+					usleep(1000);
+				}
 			}
-			if (!avpids_found)
+			else
 			{
 				printf("[movieplayer.cpp] Searching for vpid and apid\n");
 				// find apid and vpid. Easiest way to do that is to write the TS to a file 
@@ -643,65 +656,60 @@ ReceiveStreamThread (void *mrl)
 					pida, pidv, ac3);
 				avpids_found = true;
 			}
-			if (!bufferfilled) {
+			if (!bufferfilled)
+			{
 				bufferingBox->hide ();
 				//TODO reset drivers?
 				bufferfilled = true;
 			}
 		}
-		//printf("[movieplayer.cpp] ringbuf write space:%d\n",size);
-
-		if (playstate == CMoviePlayerGui::STOPPED)
-		{
-			close(skt);
-			pthread_exit (NULL);
-		}
-
-		pollret = poll (poller, (unsigned long) 1, -1);
-
-		if ((pollret < 0) ||
-		    ((poller[0].revents & (POLLHUP | POLLERR | POLLNVAL)) != 0))
-		{
-			perror ("Error while polling()");
-			playstate = CMoviePlayerGui::STOPPED;
-			close(skt);
-			pthread_exit (NULL);
-		}
-
-
-		if ((poller[0].revents & (POLLIN | POLLPRI)) != 0)
-			{
-			len = recv (poller[0].fd, buf, size, 0);
-		    }
 		else
-			len = 0;
-
-		if (len > 0)
 		{
-			nothingreceived = 0;
-			//printf ("[movieplayer.cpp] bytes received:%d\n", len);
-			if (!avpids_found)
+			//printf("[movieplayer.cpp] ringbuf write space:%d\n",size);
+
+			pollret = poll (poller, (unsigned long) 1, -1);
+
+			if ((pollret < 0) ||
+			    ((poller[0].revents & (POLLHUP | POLLERR | POLLNVAL)) != 0))
 			{
-				write (fd, buf, len);
+				perror ("Error while polling()");
+				playstate = CMoviePlayerGui::STOPPED;
+				close(skt);
+				pthread_exit (NULL);
 			}
-		}
-		else {
-			if (playstate == CMoviePlayerGui::PLAY) {
-				nothingreceived++;
-				if (nothingreceived > (buffer_time + 3)*100) // wait at least buffer time secs +3 to play buffer when stream ends
-			   {
-					printf ("[movieplayer.cpp] ReceiveStreamthread: Didn't receive for a while. Stopping.\n");
-					playstate = CMoviePlayerGui::STOPPED;	
-				}
-				usleep(10000); //sleep 10 ms
-			}
-		}
-      
-		while (len > 0)
-		{
-			len -= ringbuffer_write (ringbuf, buf, len);
-		}
 
+
+			if ((poller[0].revents & (POLLIN | POLLPRI)) != 0)
+			{
+				len = recv(poller[0].fd, vec[0].buf, size, 0);
+			}
+			else
+				len = 0;
+
+			if (len > 0)
+			{
+				ringbuffer_write_advance(ringbuf, len);
+
+				nothingreceived = 0;
+				//printf ("[movieplayer.cpp] bytes received:%d\n", len);
+				if (!avpids_found)
+				{
+					write (fd, vec[0].buf, len);
+				}
+			}
+			else
+			{
+				if (playstate == CMoviePlayerGui::PLAY) {
+					nothingreceived++;
+					if (nothingreceived > (buffer_time + 3)*100) // wait at least buffer time secs +3 to play buffer when stream ends
+					{
+						printf ("[movieplayer.cpp] ReceiveStreamthread: Didn't receive for a while. Stopping.\n");
+						playstate = CMoviePlayerGui::STOPPED;	
+					}
+					usleep(10000); //sleep 10 ms
+				}
+			}
+		}
 	}
 	close(skt);
 	pthread_exit (NULL);
@@ -1668,7 +1676,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		else if (msg == CRCInput::RC_help)
  		{
 			std::string fullhelptext = g_Locale->getText("movieplayer.vlchelp");
-			fullhelptext += "\nVersion: $Revision: 1.85 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			fullhelptext += "\nVersion: $Revision: 1.86 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -1840,7 +1848,7 @@ CMoviePlayerGui::PlayFile (void)
  		else if (msg == CRCInput::RC_help)
  		{
 			std::string fullhelptext = g_Locale->getText("movieplayer.tshelp");
-			fullhelptext += "\nVersion: $Revision: 1.85 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			fullhelptext += "\nVersion: $Revision: 1.86 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
  		else if (msg == CRCInput::RC_setup)
