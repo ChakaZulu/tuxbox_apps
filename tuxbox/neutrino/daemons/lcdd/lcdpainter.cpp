@@ -225,12 +225,13 @@ bool CLCDPainter::set_mode(CLcddClient::mode m, char *title)
 			display.update();
 			break;
 		case CLcddClient::MODE_MENU:
+		case CLcddClient::MODE_MENU_UTF8:
 			setlcdparameter(lcd_brightness, lcd_contrast, lcd_power, lcd_inverse);
 			//printf("[lcdd] mode: menu\n");
 			mode = m;
 			showclock = false;
 			display.load_screen(&icon_setup);
-			fonts.menutitle->RenderString(-1,28, 140, title, CLCDDisplay::PIXEL_ON);
+			fonts.menutitle->RenderString(-1,28, 140, title, CLCDDisplay::PIXEL_ON, 0, m == CLcddClient::MODE_MENU_UTF8);
 			display.update();
 			break;
 		case CLcddClient::MODE_SHUTDOWN:
