@@ -158,7 +158,7 @@ bool CFlashUpdate::selectHttpImage(void)
 
 		descriptions.push_back(description); /* workaround since CMenuForwarder does not store the Option String itself */
 
-		SelectionWidget.addItem(new CMenuForwarder(names[i].c_str(), true, descriptions[i], new CUpdateMenuTarget(i, &selected)));
+		SelectionWidget.addItem(new CMenuForwarder(names[i].c_str(), true, descriptions[i].c_str(), new CUpdateMenuTarget(i, &selected)));
 	}
 
 	SelectionWidget.exec(NULL, "");
