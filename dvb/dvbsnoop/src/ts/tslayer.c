@@ -1,5 +1,5 @@
 /*
-$Id: tslayer.c,v 1.6 2003/11/26 16:27:48 rasc Exp $
+$Id: tslayer.c,v 1.7 2003/12/07 23:36:13 rasc Exp $
 
    -- Transport Stream Decode/Table section
 
@@ -13,6 +13,10 @@ $Id: tslayer.c,v 1.6 2003/11/26 16:27:48 rasc Exp $
 
 
 $Log: tslayer.c,v $
+Revision 1.7  2003/12/07 23:36:13  rasc
+pidscan on transponder
+- experimental(!)
+
 Revision 1.6  2003/11/26 16:27:48  rasc
 - mpeg4 descriptors
 - simplified bit decoding and output function
@@ -417,7 +421,7 @@ int ts_adaption_field_extension (u_char  *b)
      b   += 5;
      len -= 5;
 
-//$$$ To do types display ??
+//$$$ TODO types display ??
      out_SB_NL (3,"splice_type: ",a.splice_type);
      out_SB_NL (3,"DTS_next_AU[32..30]: ",a.DTS_next_AU32_30);
      out_SB_NL (3,"maker_bit: ",a.marker_bit1);

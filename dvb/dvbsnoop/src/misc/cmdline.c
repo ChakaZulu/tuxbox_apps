@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.9 2003/12/03 20:06:35 obi Exp $
+$Id: cmdline.c,v 1.10 2003/12/07 23:36:13 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,10 @@ $Id: cmdline.c,v 1.9 2003/12/03 20:06:35 obi Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.10  2003/12/07 23:36:13  rasc
+pidscan on transponder
+- experimental(!)
+
 Revision 1.9  2003/12/03 20:06:35  obi
 - reduced auto* to minimal required checks, obsoletes acinclude.m4
 - added version number to configure.ac, removed it from version.h
@@ -130,6 +134,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
          if (!strcmp (s,"sec")) opt->packet_mode = SECT;
          else if (!strcmp (s,"ts")) opt->packet_mode = TS;
          else if (!strcmp (s,"pes")) opt->packet_mode = PES;
+         else if (!strcmp (s,"pidscan")) opt->packet_mode = PIDSCAN;
          else opt->help = 1;
      } else if (isdigit (argv[i][0])) {
        /* PID */   
@@ -154,7 +159,20 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
    -- help ?  (and return abort)
   */
 
-  if (argc==1 || opt->help || opt->pid == 0xFFFF) {
+  if (argc==1 || opt->help || opt->pid > 0x1FFF) {
+    usage ();
+    return(0); 
+  } 
+
+
+ return 1;
+}
+
+
+
+void usage (void)
+{
+
     printf("dvbsnoop  - a dvb/mpeg2 stream analyzer tool\n");
     printf("Version: %s  (%s %s)\n",PACKAGE_VERSION,__DATE__,__TIME__);
     printf("         %s  \n",DVBSNOOP_URL);
@@ -164,14 +182,13 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
     printf("DVB/Mpeg2 streams... Tnx to all the guys of the linux-dbox2\n");
     printf("project for their help.  Please report errors!\n");
     printf("\n");
-    printf("Use on your own risk - Miss-use is prohibited...\n");
-    printf("\n");
     printf("Usage\n");
     printf(" dvbsnoop [opts] pid \n\n");
     printf(" Options:  \n");
     printf("   -demux device:      demux device [%s]\n",DEMUX_DEVICE);
     printf("   -dvr device:        dvr device [%s]\n",DVR_DEVICE);
-    printf("   -s [sec|ts|pes]:    stream type [-s sec]\n");
+    printf("   -s [sec|ts|pes|pidscan]:  snoop type  [-s sec]\n");
+    printf("                 stream type or pidscan\n");
     printf("   -f filter:    filtervalue for 'sec' demux [-f 0]\n");
     printf("   -m mask:      maskvalue for 'sec' demux [-m 0]\n");
     printf("   -crc:         CRC check when reading 'sec'\n");
@@ -190,11 +207,9 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
     printf("   -HCP:         hide copyright and program info header at program start\n");
     printf("\n");
     
-    return(0); 
-  } 
 
-
- return 1;
+ return;
 }
+
 
 

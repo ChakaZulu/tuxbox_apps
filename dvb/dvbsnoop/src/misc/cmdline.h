@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.h,v 1.7 2003/11/26 19:55:33 rasc Exp $
+$Id: cmdline.h,v 1.8 2003/12/07 23:36:13 rasc Exp $
 
 
  DVBSNOOP
@@ -26,7 +26,7 @@ $Id: cmdline.h,v 1.7 2003/11/26 19:55:33 rasc Exp $
  -- defs...
 */
 
-enum PACKET_MODE  {SECT, TS, PES};
+enum PACKET_MODE  {SECT, TS, PES, PIDSCAN};
 enum TIME_MODE    {NO_TIME, FULL_TIME, DELTA_TIME};
 
 typedef struct _OPTIONS {
@@ -45,7 +45,7 @@ typedef struct _OPTIONS {
   int         crc;
   long        packet_count;
   int         time_mode;
-  int         hide_copyright;  // suppress message at prog start
+  int         hide_copyright;  	// suppress message at prog start
 } OPTION;
 
 
@@ -54,7 +54,7 @@ typedef struct _OPTIONS {
 */
 
 int  cmdline_options (int argc, char **argv, OPTION *opt);
-
+void usage (void);
 
 
 #endif

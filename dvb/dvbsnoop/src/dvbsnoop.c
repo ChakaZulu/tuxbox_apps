@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.c,v 1.14 2003/12/03 20:06:33 obi Exp $
+$Id: dvbsnoop.c,v 1.15 2003/12/07 23:36:12 rasc Exp $
 
  DVBSNOOP
 
@@ -16,6 +16,10 @@ $Id: dvbsnoop.c,v 1.14 2003/12/03 20:06:33 obi Exp $
 
 
 $Log: dvbsnoop.c,v $
+Revision 1.15  2003/12/07 23:36:12  rasc
+pidscan on transponder
+- experimental(!)
+
 Revision 1.14  2003/12/03 20:06:33  obi
 - reduced auto* to minimal required checks, obsoletes acinclude.m4
 - added version number to configure.ac, removed it from version.h
@@ -100,17 +104,21 @@ int main(int argc, char **argv)
   setHexPrintMode (opt.printhex);
 
 
+
   indent (0);
   if (! opt.binary_out) {
      if (! opt.hide_copyright) {
         out_nl (1, "%s -- %s ", PACKAGE_VERSION, DVBSNOOP_URL);
      }
+
      out_nl (9, "   PID   : %d (0x%04x)",opt.pid,opt.pid);
      out_nl (9, "   Filter: %d (0x%04x)",opt.filter,opt.filter);
      out_nl (9, "   Mask  : %d (0x%04x)",opt.mask,opt.mask);
+     
      out_nl (9, "   DEMUX : %s",opt.devDemux);
      out_nl (9, "   DVR   : %s",opt.devDvr);
   }
+
 
 
   init_receive_time ();
@@ -127,6 +135,10 @@ int main(int argc, char **argv)
 
 		case TS:
 			err = doReadTS (&opt);
+			break;
+
+		case PIDSCAN:
+			err = ts_pidscan (&opt);
 			break;
 
 		default:
