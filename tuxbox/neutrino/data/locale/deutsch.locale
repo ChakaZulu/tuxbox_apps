@@ -498,6 +498,7 @@ miscsettings.head Diverse Einstellungen
 miscsettings.hwsections HW-Sections verwenden
 miscsettings.infobar_sat_display Infobar Satellitenanzeige
 miscsettings.noaviawatchdog AVIA-Watchdog aktivieren
+miscsettings.noenxwatchdog eNX-Watchdog aktivieren
 miscsettings.pmtupdate PMT Update verwenden
 miscsettings.shutdown_real Standbymodus
 miscsettings.shutdown_real_rcdelay Verzögerter Shutdown

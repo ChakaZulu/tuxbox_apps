@@ -1750,15 +1750,16 @@ typedef struct misc_setting_files_t
 
 const misc_setting_files_struct_t misc_setting_files[MISC_SETTING_FILES_COUNT] =
 {
-	{LOCALE_MISCSETTINGS_SPTSMODE      , "/var/etc/.spts_mode"  , OPTIONS_OFF0_ON1_OPTIONS }, /* cf. #define MISC_SETTING_SPTS_MODE 0 (settings.h) */
-	{LOCALE_MISCSETTINGS_BOOTMENU      , "/var/etc/.neutrino"   , OPTIONS_OFF1_ON0_OPTIONS },
-	{LOCALE_MISCSETTINGS_BOOTINFO      , "/var/etc/.boot_info"  , OPTIONS_OFF0_ON1_OPTIONS },
+	{LOCALE_MISCSETTINGS_SPTSMODE      , "/var/etc/.spts_mode"     , OPTIONS_OFF0_ON1_OPTIONS }, /* cf. #define MISC_SETTING_SPTS_MODE 0 (settings.h) */
+	{LOCALE_MISCSETTINGS_BOOTMENU      , "/var/etc/.neutrino"      , OPTIONS_OFF1_ON0_OPTIONS },
+	{LOCALE_MISCSETTINGS_BOOTINFO      , "/var/etc/.boot_info"     , OPTIONS_OFF0_ON1_OPTIONS },
 #if HAVE_DVB_API_VERSION == 1
-	{LOCALE_MISCSETTINGS_STARTBHDRIVER , "/var/etc/.bh"         , OPTIONS_OFF0_ON1_OPTIONS },
+	{LOCALE_MISCSETTINGS_STARTBHDRIVER , "/var/etc/.bh"            , OPTIONS_OFF0_ON1_OPTIONS },
 #endif
-	{LOCALE_MISCSETTINGS_HWSECTIONS    , "/var/etc/.hw_sections", OPTIONS_OFF1_ON0_OPTIONS },
-	{LOCALE_MISCSETTINGS_NOAVIAWATCHDOG, "/var/etc/.no_watchdog", OPTIONS_OFF1_ON0_OPTIONS },
-	{LOCALE_MISCSETTINGS_PMTUPDATE     , "/var/etc/.pmt_update" , OPTIONS_OFF0_ON1_OPTIONS }
+	{LOCALE_MISCSETTINGS_HWSECTIONS    , "/var/etc/.hw_sections"   , OPTIONS_OFF1_ON0_OPTIONS },
+	{LOCALE_MISCSETTINGS_NOAVIAWATCHDOG, "/var/etc/.no_watchdog"   , OPTIONS_OFF1_ON0_OPTIONS },
+	{LOCALE_MISCSETTINGS_NOENXWATCHDOG , "/var/etc/.no_enxwatchdog", OPTIONS_OFF1_ON0_OPTIONS },
+	{LOCALE_MISCSETTINGS_PMTUPDATE     , "/var/etc/.pmt_update"    , OPTIONS_OFF0_ON1_OPTIONS }
 };
 
 #define INFOBAR_SUBCHAN_DISP_POS_OPTIONS_COUNT 4
