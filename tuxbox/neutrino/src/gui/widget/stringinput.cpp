@@ -84,7 +84,7 @@ CStringInput::CStringInput(const char * const Name, char* Value, int Size, const
 	selected = 0;
 }
 
-void CStringInput::NormalKeyPressed(const unsigned int key)
+void CStringInput::NormalKeyPressed(const neutrino_msg_t key)
 {
 	if (CRCInput::isNumeric(key))
 	{
@@ -415,7 +415,7 @@ CStringInputSMS::CStringInputSMS(const char * const Name, char* Value, int Size,
 }
 
 
-void CStringInputSMS::NormalKeyPressed(const unsigned int key)
+void CStringInputSMS::NormalKeyPressed(const neutrino_msg_t key)
 {
 	if (CRCInput::isNumeric(key))
 	{
