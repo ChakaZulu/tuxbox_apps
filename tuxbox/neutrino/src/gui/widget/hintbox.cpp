@@ -258,3 +258,9 @@ int ShowHintUTF(const neutrino_locale_t Caption, const char * const Text, const 
 	delete hintBox;
 	return 1;
 }
+
+int ShowLocalizedHint(const neutrino_locale_t Caption, const neutrino_locale_t Text, const int Width, int timeout, const char * const Icon)
+{
+	return ShowHintUTF(Caption, g_Locale->getText(Text),Width,timeout,Icon);
+}
+

@@ -35,6 +35,7 @@
 
 #include <driver/fb_window.h>
 #include <system/localize.h>
+#include <gui/widget/icons.h>
 
 #include <string>
 #include <vector>
@@ -74,7 +75,8 @@ class CHintBox
 };
 
 // Text is UTF-8 encoded
-int ShowHintUTF(const neutrino_locale_t Caption, const char * const Text, const int Width = 450, int timeout = -1, const char * const Icon = "info.raw");
+int ShowHintUTF(const neutrino_locale_t Caption, const char * const Text, const int Width = 450, int timeout = -1, const char * const Icon = NEUTRINO_ICON_INFO);
+int ShowLocalizedHint(const neutrino_locale_t Caption, const neutrino_locale_t Text, const int Width = 450, int timeout = -1, const char * const Icon = NEUTRINO_ICON_INFO);
 
 
 #endif
