@@ -248,13 +248,9 @@ void CRCInput::getMsgAbsoluteTimeout(uint *msg, uint* data, long long *TimeoutEn
 		// recalculate timeout....
 		gettimeofday( &tv, NULL );
 		timeNow = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
+		*TimeoutEnd= *TimeoutEnd + timeNow - *(long long*) *data;
 
-		timeval* old_time = (timeval*) data;
-		long long timeOld = (long long) old_time->tv_usec + (long long)((long long) old_time->tv_sec * (long long) 1000000);
-
-		*TimeoutEnd= *TimeoutEnd - timeOld + timeNow;
-
-		printf("EVT_TIMESET - recalculate timeout\n%llx - %llx - %llx\n", timeNow, timeOld, *TimeoutEnd );
+//		printf("[getMsgAbsoluteTimeout]: EVT_TIMESET - recalculate timeout\n%llx - %llx - %llx\n", timeNow, *(long long*) *data, *TimeoutEnd );
 	}
 }
 

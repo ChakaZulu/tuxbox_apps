@@ -134,6 +134,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 			if ( msg == messages::EVT_SCAN_COMPLETE )
 			{
 				finish= true;
+				msg = CRCInput::RC_timeout;
 			}
 			else
 			if ( ( msg>= CRCInput::RC_WithData ) && ( msg< CRCInput::RC_WithData+ 0x10000000 ) )

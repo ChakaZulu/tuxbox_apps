@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.219 2002/04/10 16:39:19 field Exp $
+        $Id: neutrino.cpp,v 1.220 2002/04/12 15:28:52 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1480,6 +1480,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	g_Timerd->registerEvent(CTimerdClient::EVT_SHUTDOWN, 222, NEUTRINO_UDS_NAME);
 	g_Timerd->registerEvent(CTimerdClient::EVT_NEXTPROGRAM, 222, NEUTRINO_UDS_NAME);
+
 	//init programm
 	InitZapper();
 
@@ -2253,7 +2254,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.219 2002/04/10 16:39:19 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.220 2002/04/12 15:28:52 field Exp $\n\n");
 	tzset();
 	initGlobals();
 
