@@ -23,7 +23,7 @@ typedef map<string,string> CStringList;
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
 
-enum Method_Typ {M_UNKNOWN=0,M_POST = 1,M_GET = 2,M_PUT = 3};
+enum Method_Typ {M_UNKNOWN=0,M_POST = 1,M_GET = 2,M_PUT = 3,M_HEAD = 4};
 
 
 class CWebserverRequest

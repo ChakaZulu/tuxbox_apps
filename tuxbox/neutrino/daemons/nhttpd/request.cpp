@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.21 2002/06/13 08:26:20 dirch Exp $
+	$Id: request.cpp,v 1.22 2002/07/20 20:06:48 wjoost Exp $
 
 	License: GPL
 
@@ -25,7 +25,10 @@
 
 */
 #include <arpa/inet.h> 
-
+#include <sys/sendfile.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "request.h"
 #include "webdbox.h"
@@ -63,7 +66,7 @@ bool CWebserverRequest::Authenticate()			// check if authentication is required
 		{
 			if(Parent->DEBUG) printf("Authenticate\n");
 			SocketWriteLn("HTTP/1.0 401 Unauthorized");
-			SocketWriteLn("WWW-Authenticate: Basic realm=\"dbox\"\n\n");
+			SocketWriteLn("WWW-Authenticate: Basic realm=\"dbox\"\r\n\r\n");
 			SocketWriteLn("Access denied\n");
 			return false;
 		}
@@ -194,6 +197,8 @@ int ende, anfang, t;
 			Method = M_GET;
 		else if(method.compare("PUT") == 0)
 			Method = M_PUT;
+		else if(method.compare("HEAD") == 0)
+			Method = M_HEAD;
 		else
 		{
 			aprintf("Ungültige Methode oder fehlerhaftes Packet");
@@ -362,8 +367,16 @@ int ende;
 				}
 			}
 */
+			return true;
 		}
-		return true;
+		else {
+			SocketWrite("HTTP/1.0 501 Not implemented\r\n");
+			SocketWrite("Content-Type: text/plain\r\n\r\n");
+			SocketWrite("501 : Request-Method not implemented.\n");
+			HttpStatus = 501;
+			if(Parent->DEBUG) printf("501 : Request-Method not implemented.\n");
+			return false;
+		}
 	}
 }
 //-------------------------------------------------------------------------
@@ -420,8 +433,10 @@ void CWebserverRequest::PrintRequest()					// for debugging and verbose output
 	char method[6] = {0};
 	if(Method == M_GET)
 		sprintf(method,"GET");
-	if(Method == M_POST)
+	else if(Method == M_POST)
 		sprintf(method,"POST");
+	else if(Method == M_HEAD)
+		sprintf(method,"HEAD");
 	printf("%04lu %s %3d %-6s %-35s %-20s %-25s %-10s %s\n",RequestNumber,Client_Addr.c_str(),HttpStatus,method,Path.c_str(),Filename.c_str(),URL.c_str(),ContentType.c_str(),Param_String.c_str());
 }
 
@@ -449,11 +464,14 @@ void CWebserverRequest::Send302(char *URI)
 	SocketWrite("HTTP/1.0 302 Moved Permanently\r\n");
 	SocketWrite("Location: ");
 	SocketWrite(URI);
-	SocketWrite("\n");
-	SocketWrite("Content-Type: text/plain\r\n\r\n");
-	SocketWrite("302 : Object moved\n\nIf you dont get redirected click <a href=\"");
-	SocketWrite(URI);
-	SocketWrite("\">here</a>\n");
+	SocketWrite("\r\n");
+	SocketWrite("Content-Type: text/html\r\n\r\n");
+	if (Method != M_HEAD) {
+		SocketWrite("<html><head><title>Object moved</title></head><body>");
+		SocketWrite("302 : Object moved.<brk>If you dont get redirected click <a href=\"");
+		SocketWrite(URI);
+		SocketWrite("\">here</a></body></html>\n");
+	}
 	HttpStatus = 302;
 }
 //-------------------------------------------------------------------------
@@ -462,7 +480,9 @@ void CWebserverRequest::Send404Error()
 	if(Parent->DEBUG) printf("Sende 404 Error\n");
 	SocketWrite("HTTP/1.0 404 Not Found\r\n");		//404 - file not found
 	SocketWrite("Content-Type: text/plain\r\n\r\n");
-	SocketWrite("404 : File not found\n\nThe requested file was not found on this dbox ;)\n");
+	if (Method != M_HEAD) {
+		SocketWrite("404 : File not found\n\nThe requested file was not found on this dbox ;)\n");
+	}
 	HttpStatus = 404;
 }
 //-------------------------------------------------------------------------
@@ -470,7 +490,9 @@ void CWebserverRequest::Send500Error()
 {
 	SocketWrite("HTTP/1.0 500 InternalError\r\n");		//500 - internal error
 	SocketWrite("Content-Type: text/plain\r\n\r\n");
-	SocketWrite("500 : InternalError\n\nPerhaps some parameters missing ? ;)");
+	if (Method != M_HEAD) {
+		SocketWrite("500 : InternalError\n\n\Perhaps some parameters missing ? ;)");
+	}
 	HttpStatus = 500;
 	if(Parent->DEBUG) printf("500 : InternalError\n");
 }
@@ -478,7 +500,7 @@ void CWebserverRequest::Send500Error()
 
 void CWebserverRequest::SendPlainHeader(string contenttype)
 {
-	SocketWrite("HTTP/1.0 200 OK\nContent-Type: " + contenttype + "\r\n\r\n");
+	SocketWrite("HTTP/1.0 200 OK\r\nContent-Type: " + contenttype + "\r\n\r\n");
 	HttpStatus = 200;
 }
 
@@ -614,8 +636,13 @@ bool CWebserverRequest::SendResponse()
 					ContentType = "text/plain";
 
 			}
-			SocketWrite("Content-Type: " + ContentType + "\n\n");
-			SendOpenFile(tmpint);
+			SocketWrite("Content-Type: " + ContentType + "\r\n\r\n");
+			if (Method != M_HEAD) {
+				SendOpenFile(tmpint);
+			}
+			else {
+				close(tmpint);
+			}
 		}
 		else
 		{											// Wenn Datei nicht geöffnet werden konnte
@@ -666,33 +693,20 @@ bool CWebserverRequest::SendFile(string path,string filename)
 //-------------------------------------------------------------------------
 void CWebserverRequest::SendOpenFile(int file)
 {
-#define BUFSIZE 1024
+	off_t start = 0;
+	off_t end = lseek(file,0,SEEK_END);
 	if(Parent->DEBUG) printf("SendOpenFile\n");
-	tmplong  = lseek( file, 0, SEEK_END);
-	lseek( file, 0, SEEK_SET);
-
-	char *buf = new char[BUFSIZE+1] ;
-	while(tmplong > 0)
-	{
-		long block = tmplong;
-		if(block>BUFSIZE)
-		{
-			block = BUFSIZE;
-		}
-		read( file, buf, block);
-		SocketWriteData(buf, block);
-		tmplong -= block;
-	}
+	sendfile(Socket,file,&start,end);
 	close(file);
-	delete[] buf;
 	if(Parent->DEBUG) printf("Datei gesendet\n");
 }
 //-------------------------------------------------------------------------
 int CWebserverRequest::OpenFile(string path, string filename)
 {
+	struct stat statbuf;
 //tmpint als file und
 //tmpstring als pathfilename missbraucht
-	tmpint = 0;
+	tmpint = -1;
 	if(Parent->DEBUG) printf("OpenFile: %s %s\n",path.c_str(),filename.c_str());
 	if(path[path.length()-1] != '/')
 		tmpstring = path + "/" + filename;
@@ -705,7 +719,12 @@ int CWebserverRequest::OpenFile(string path, string filename)
 		{
 			printf("cannot open file %s\n", tmpstring.c_str());
 			dperror("");
-		}	
+		}
+		fstat(tmpint,&statbuf);
+		if (!S_ISREG(statbuf.st_mode)) {
+			close(tmpint);
+			tmpint = -1;
+		}
 	}
 	return tmpint;
 }
