@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.114 2002/04/15 12:33:44 field Exp $
+//  $Id: sectionsd.cpp,v 1.115 2002/04/16 11:23:50 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.115  2002/04/16 11:23:50  field
+//  Timeout-Handling umgestellt
+//
 //  Revision 1.114  2002/04/15 12:33:44  field
 //  Wesentlich verbessertes Paket-Handling (CPU-Last sollte viel besser sein
 //  *g*)
@@ -1568,7 +1571,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.114 2002/04/15 12:33:44 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.115 2002/04/16 11:23:50 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -3040,6 +3043,7 @@ static void *timeThread(void *)
 	unsigned timeoutInSeconds= 31;
 	char *buf;
 	struct timeval tv;
+	long long timeDiff;
 
 	dmxTOT.addfilter(0x73, 0xff);
 	dmxTOT.addfilter(0x70, (0xff- 0x03));
@@ -3108,6 +3112,13 @@ static void *timeThread(void *)
       					}
                         else
                         {
+                        	struct timeval tv_n;
+        					gettimeofday( &tv_n, NULL );
+
+        					long long timeNew = (long long) tv_n.tv_usec + (long long)((long long) tv_n.tv_sec * (long long) 1000000);
+        					long long timeOld = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
+        					timeDiff = timeNew - timeOld;
+
 	      					timeset=1;
     	  					time_t t=time(NULL);
       						dprintf("TDT/TOT: local time: %s", ctime(&t));
@@ -3121,13 +3132,7 @@ static void *timeThread(void *)
 			}
   		} while (timeset!=1);
 
-		long long timeOld = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
-        struct timeval tv_n;
-        gettimeofday( &tv_n, NULL );
-        long long timeN = (long long) tv_n.tv_usec + (long long)((long long) tv_n.tv_sec * (long long) 1000000);
-
-		printf("\n[sectionsd]: timeold\n%llx - %llx, pdata= %x\n", timeN, timeOld, (unsigned) &timeOld );
-  		eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD, &timeOld, sizeof(timeOld) );
+  		eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD, &timeDiff, sizeof(timeDiff) );
 
 		dmxTOT.closefd();
 		dprintf("dmxTOT: changing from TDT/TOT to TOT.\n");
@@ -3731,7 +3736,7 @@ int main(int argc, char **argv)
 	int rc;
 	struct sockaddr_in serverAddr;
 
-	printf("$Id: sectionsd.cpp,v 1.114 2002/04/15 12:33:44 field Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.115 2002/04/16 11:23:50 field Exp $\n");
 	try
 	{
 
