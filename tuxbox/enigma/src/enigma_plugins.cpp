@@ -54,15 +54,14 @@ eString getInfo(const char *file, const char *info)
 
 PluginParam *first=0, *tmp=0;
 
-void MakeParam(char* id, int val)
+void MakeParam(const char * const id, int val)
 {
 	PluginParam* p = new PluginParam;
 
 	if (tmp)
 		tmp->next = p;
 
-	p->id = new char[strlen(id)+1];
-	strcpy(p->id, id);
+	p->id = id;
 	char buf[10];
 	sprintf(buf, "%i", val);
 	p->val = new char[strlen(buf)+1];
@@ -441,6 +440,7 @@ void ePluginThread::thread_finished()
 	while (first)  // Parameter Liste freigegeben
 	{
 		tmp = first->next;
+		delete [] first->val;
 		delete first;
 		first = tmp;
 	}
