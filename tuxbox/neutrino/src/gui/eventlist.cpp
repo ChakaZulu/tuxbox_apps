@@ -234,7 +234,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 									 evtlist[selected].eventID, evtlist[selected].startTime,
 									 evtlist[selected].startTime - (ANNOUNCETIME + 120),
 									 "", true );
-					ShowMsgUTF("timer.eventrecord.title", g_Locale->getText("timer.eventrecord.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+					ShowMsgUTF(LOCALE_TIMER_EVENTRECORD_TITLE, g_Locale->getText(LOCALE_TIMER_EVENTRECORD_MSG), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 				}
 				else
 					printf("timerd not available\n");
@@ -250,7 +250,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 								evtlist[selected].startTime - ANNOUNCETIME, 0,
 								evtlist[selected].eventID, evtlist[selected].startTime,
 								"");
-				ShowMsgUTF("timer.eventtimed.title", g_Locale->getText("timer.eventtimed.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+				ShowMsgUTF(LOCALE_TIMER_EVENTTIMED_TITLE, g_Locale->getText(LOCALE_TIMER_EVENTTIMED_MSG), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 			}
 			else
 				printf("timerd not available\n");

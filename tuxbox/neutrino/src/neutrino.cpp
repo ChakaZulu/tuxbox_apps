@@ -1994,11 +1994,11 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	sprintf(g_settings.record_safety_time_before, "%02d", pre/60);
 	sprintf(g_settings.record_safety_time_after, "%02d", post/60);
 	CRecordingSafetyNotifier *RecordingSafetyNotifier = new CRecordingSafetyNotifier;
-	CStringInput * timerSettings_record_safety_time_before = new CStringInput("timersettings.record_safety_time_before", g_settings.record_safety_time_before, 2, "timersettings.record_safety_time_before.hint_1", "timersettings.record_safety_time_before.hint_2","0123456789 ", RecordingSafetyNotifier);
-	CMenuForwarder *mf5 = new CMenuForwarder("timersettings.record_safety_time_before", true, g_settings.record_safety_time_before, timerSettings_record_safety_time_before );
+	CStringInput * timerSettings_record_safety_time_before = new CStringInput(LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIMER_BEFORE, g_settings.record_safety_time_before, 2, LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIMER_BEFORE_HINT_1, LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIMER_BEFORE_HINT_2,"0123456789 ", RecordingSafetyNotifier);
+	CMenuForwarder *mf5 = new CMenuForwarder(LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIMER_BEFORE, true, g_settings.record_safety_time_before, timerSettings_record_safety_time_before );
 
-	CStringInput * timerSettings_record_safety_time_after = new CStringInput("timersettings.record_safety_time_after", g_settings.record_safety_time_after, 2, "timersettings.record_safety_time_after.hint_1", "timersettings.record_safety_time_after.hint_2","0123456789 ", RecordingSafetyNotifier);
-	CMenuForwarder *mf6 = new CMenuForwarder("timersettings.record_safety_time_after", true, g_settings.record_safety_time_after, timerSettings_record_safety_time_after );
+	CStringInput * timerSettings_record_safety_time_after = new CStringInput(LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIMER_AFTER, g_settings.record_safety_time_after, 2, LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIMER_AFTER_HINT_1, LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIMER_AFTER_HINT_2,"0123456789 ", RecordingSafetyNotifier);
+	CMenuForwarder *mf6 = new CMenuForwarder(LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIMER_AFTER, true, g_settings.record_safety_time_after, timerSettings_record_safety_time_after );
 
 	// for direct recording
 	CMenuForwarder* mf7 = new CMenuForwarder(LOCALE_RECORDINGMENU_DEFDIR, (g_settings.recording_type == RECORDING_FILE), g_settings.network_nfs_recordingdir,this,"recordingdir");
@@ -2025,7 +2025,7 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	recordingSettings.addItem( oj4);
 	recordingSettings.addItem(GenericMenuSeparatorLine);
 	recordingSettings.addItem( oj5);
-	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "timersettings.separator") );
+	recordingSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_TIMERSETTINGS_SEPARATOR));
 	recordingSettings.addItem( mf5);
 	recordingSettings.addItem( mf6);
 	recordingSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_RECORDINGMENU_FILESETTINGSSEPARATOR));
@@ -2607,7 +2607,7 @@ const CMenuOptionChooser::keyval MAINMENU_RECORDING_OPTIONS[MAINMENU_RECORDING_O
 
 void CNeutrinoApp::ShowStreamFeatures()
 {
-	CMenuWidget StreamFeatureSelector("streamfeatures.head", "features.raw", 350);
+	CMenuWidget StreamFeatureSelector(LOCALE_STREAMFEATURES_HEAD, "features.raw", 350);
 	StreamFeatureSelector.addItem(GenericMenuSeparator);
 
 	char id[5];
@@ -2645,7 +2645,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 		StreamFeatureSelector.addItem(new CMenuOptionChooser(LOCALE_MAINMENU_RECORDING, &recordingstatus, MAINMENU_RECORDING_OPTIONS, MAINMENU_RECORDING_OPTION_COUNT, true, this, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
 	}
 	// -- Timer Liste
-	StreamFeatureSelector.addItem(new CMenuForwarder("timerlist.name", true, NULL, new CTimerList(), id, true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW), false);
+	StreamFeatureSelector.addItem(new CMenuForwarder(LOCALE_TIMERLIST_NAME, true, NULL, new CTimerList(), id, true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW), false);
 
 	StreamFeatureSelector.addItem(GenericMenuSeparatorLine);
 
@@ -2659,7 +2659,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 
 	// -- Stream Info
 	// -- !! obsolete (rasc 2004-03-06) 
-	// StreamFeatureSelector.addItem(new CMenuForwarder("streamfeatures.info", true, NULL, StreamFeaturesChanger, id, true, CRCInput::RC_help, NEUTRINO_ICON_BUTTON_HELP_SMALL), false);
+	// StreamFeatureSelector.addItem(new CMenuForwarder(LOCALE_STREAMFEATURES_INFO, true, NULL, StreamFeaturesChanger, id, true, CRCInput::RC_help, NEUTRINO_ICON_BUTTON_HELP_SMALL), false);
 
 
 	// ------
@@ -3490,16 +3490,16 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 	{
 		if (mode != mode_scart)
 		{
-			const char * msgbody;
+			neutrino_locale_t msgbody;
 			
 			if ((* (stream2file_status_t *) data) == STREAM2FILE_STATUS_IDLE)
-				msgbody = "streaming.success";
+				msgbody = LOCALE_STREAMING_SUCCESS;
 			else if ((* (stream2file_status_t *) data) == STREAM2FILE_STATUS_BUFFER_OVERFLOW)
-				msgbody = "streaming.buffer_overflow";
+				msgbody = LOCALE_STREAMING_BUFFER_OVERFLOW;
 			else if ((* (stream2file_status_t *) data) == STREAM2FILE_STATUS_WRITE_OPEN_FAILURE)
-				msgbody = "streaming.write_error_open";
+				msgbody = LOCALE_STREAMING_WRITE_ERROR_OPEN;
 			else if ((* (stream2file_status_t *) data) == STREAM2FILE_STATUS_WRITE_FAILURE)
-				msgbody = "streaming.write_error";
+				msgbody = LOCALE_STREAMING_WRITE_ERROR;
 			else
 				goto skip_message;
 

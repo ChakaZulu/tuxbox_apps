@@ -324,7 +324,7 @@ int CTimerList::show()
 //			if (timerlist.empty())
 //			{
 				//evtl. anzeige dass keine kanalliste....
-				/* ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText("timerlist.empty")); // UTF-8
+				/* ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_TIMERLIST_EMPTY));
 				 return -1;*/
 //			}
 			paint();
@@ -581,7 +581,7 @@ void CTimerList::paintHead()
 {
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0);
 	frameBuffer->paintIcon("timer.raw",x+5,y+4);
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+35,y+theight+0, width- 45, g_Locale->getText("timerlist.name"), COL_MENUHEAD, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+35,y+theight+0, width- 45, g_Locale->getText(LOCALE_TIMERLIST_NAME), COL_MENUHEAD, 0, true); // UTF-8
 
 	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ width- 30, y+ 5 );
 /*	if (bouquetList!=NULL)
@@ -590,7 +590,7 @@ void CTimerList::paintHead()
 
 const struct button_label TimerListButtons[3] =
 {
-	{ NEUTRINO_ICON_BUTTON_RED   , "timerlist.delete" },
+	{ NEUTRINO_ICON_BUTTON_RED   , LOCALE_TIMERLIST_DELETE },
 	{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_TIMERLIST_NEW    },
 	{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_TIMERLIST_RELOAD }
 };
@@ -608,7 +608,7 @@ void CTimerList::paintFoot()
 		::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 10, y + height + 4, ButtonWidth, 3, TimerListButtons);
 
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, x+width- 1* ButtonWidth + 10, y+height);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+width-1 * ButtonWidth + 38, y+height+24 - 2, ButtonWidth- 28, g_Locale->getText("timerlist.modify"), COL_INFOBAR, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+width-1 * ButtonWidth + 38, y+height+24 - 2, ButtonWidth- 28, g_Locale->getText(LOCALE_TIMERLIST_MODIFY), COL_INFOBAR, 0, true); // UTF-8
 	}
 }
 
@@ -617,7 +617,7 @@ void CTimerList::paint()
 	unsigned int page_nr = (listmaxshow == 0) ? 0 : (selected / listmaxshow);
 	liststart = page_nr * listmaxshow;
 
-	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, g_Locale->getText("timerlist.name"));
+	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, g_Locale->getText(LOCALE_TIMERLIST_NAME));
 
 	paintHead();
 	for(unsigned int count=0;count<listmaxshow;count++)
@@ -749,7 +749,7 @@ const CMenuOptionChooser::keyval TIMERLIST_TYPE_OPTIONS[TIMERLIST_TYPE_OPTION_CO
 int CTimerList::modifyTimer()
 {
 	CTimerd::responseGetTimer* timer=&timerlist[selected];
-	CMenuWidget timerSettings("timerlist.menumodify", NEUTRINO_ICON_SETTINGS);
+	CMenuWidget timerSettings(LOCALE_TIMERLIST_MENUMODIFY, NEUTRINO_ICON_SETTINGS);
 	timerSettings.addItem(GenericMenuSeparator);
 	timerSettings.addItem(GenericMenuBack);
 	timerSettings.addItem(GenericMenuSeparatorLine);
@@ -759,8 +759,8 @@ int CTimerList::modifyTimer()
 	CMenuForwarder *m0 = new CMenuForwarder(LOCALE_TIMERLIST_TYPE, false, type);
 	timerSettings.addItem( m0);
 
-	CDateInput timerSettings_alarmTime("timerlist.alarmtime", &timer->alarmTime , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
-	CMenuForwarder *m1 = new CMenuForwarder("timerlist.alarmtime", true, timerSettings_alarmTime.getValue (), &timerSettings_alarmTime );
+	CDateInput timerSettings_alarmTime(LOCALE_TIMERLIST_ALARMTIME, &timer->alarmTime , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
+	CMenuForwarder *m1 = new CMenuForwarder(LOCALE_TIMERLIST_ALARMTIME, true, timerSettings_alarmTime.getValue (), &timerSettings_alarmTime );
 	timerSettings.addItem( m1);
 
 	CDateInput timerSettings_stopTime(LOCALE_TIMERLIST_STOPTIME, &timer->stopTime , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
@@ -780,10 +780,10 @@ int CTimerList::modifyTimer()
 	timerSettings.addItem(m3);
 	timerSettings.addItem(m4);
 
-	CStringInput timerSettings_apids("timerlist.apids", timer->apids , 25, LOCALE_APIDS_HINT_1, LOCALE_APIDS_HINT_2, "0123456789ABCDEF ");
+	CStringInput timerSettings_apids(LOCALE_TIMERLIST_APIDS, timer->apids , 25, LOCALE_APIDS_HINT_1, LOCALE_APIDS_HINT_2, "0123456789ABCDEF ");
 	if(timer->eventType ==  CTimerd::TIMER_RECORD)
 	{
-		CMenuForwarder *m5 = new CMenuForwarder("timerlist.apids", true, timer->apids, &timerSettings_apids );
+		CMenuForwarder *m5 = new CMenuForwarder(LOCALE_TIMERLIST_APIDS, true, timer->apids, &timerSettings_apids );
 		timerSettings.addItem( m5);
 	}
 	timerSettings.addItem(new CMenuForwarder(LOCALE_TIMERLIST_SAVE, true, NULL, this, "modifytimer"));
@@ -803,13 +803,13 @@ int CTimerList::newTimer()
 	strcpy(timerNew.message, "");
 	timerNew_standby_on =false;
 
-	CMenuWidget timerSettings("timerlist.menunew", NEUTRINO_ICON_SETTINGS);
+	CMenuWidget timerSettings(LOCALE_TIMERLIST_MENUNEW, NEUTRINO_ICON_SETTINGS);
 	timerSettings.addItem(GenericMenuSeparator);
 	timerSettings.addItem(GenericMenuBack);
 	timerSettings.addItem(GenericMenuSeparatorLine);
 
-	CDateInput timerSettings_alarmTime("timerlist.alarmtime", &(timerNew.alarmTime) , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
-	CMenuForwarder *m1 = new CMenuForwarder("timerlist.alarmtime", true, timerSettings_alarmTime.getValue (), &timerSettings_alarmTime );
+	CDateInput timerSettings_alarmTime(LOCALE_TIMERLIST_ALARMTIME, &(timerNew.alarmTime) , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
+	CMenuForwarder *m1 = new CMenuForwarder(LOCALE_TIMERLIST_ALARMTIME, true, timerSettings_alarmTime.getValue (), &timerSettings_alarmTime );
 
 	CDateInput timerSettings_stopTime(LOCALE_TIMERLIST_STOPTIME, &(timerNew.stopTime) , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
 	CMenuForwarder *m2 = new CMenuForwarder(LOCALE_TIMERLIST_STOPTIME, false, timerSettings_stopTime.getValue (), &timerSettings_stopTime );
@@ -824,13 +824,13 @@ int CTimerList::newTimer()
 	CZapitClient::BouquetList bouquetlist;
 	zapit.getBouquets(bouquetlist, false, true); // UTF-8
 	CZapitClient::BouquetList::iterator bouquet = bouquetlist.begin();
-	CMenuWidget mctv("timerlist.bouquetselect", NEUTRINO_ICON_SETTINGS);
-	CMenuWidget mcradio("timerlist.bouquetselect", NEUTRINO_ICON_SETTINGS);
+	CMenuWidget mctv(LOCALE_TIMERLIST_BOUQUETSELECT, NEUTRINO_ICON_SETTINGS);
+	CMenuWidget mcradio(LOCALE_TIMERLIST_BOUQUETSELECT, NEUTRINO_ICON_SETTINGS);
 	for(; bouquet != bouquetlist.end();bouquet++)
 	{
-		CMenuWidget* mwtv = new CMenuWidget("timerlist.channelselect", NEUTRINO_ICON_SETTINGS);
+		CMenuWidget* mwtv = new CMenuWidget(LOCALE_TIMERLIST_CHANNELSELECT, NEUTRINO_ICON_SETTINGS);
 		toDelete.push_back(mwtv);
-		CMenuWidget* mwradio = new CMenuWidget("timerlist.channelselect", NEUTRINO_ICON_SETTINGS);
+		CMenuWidget* mwradio = new CMenuWidget(LOCALE_TIMERLIST_CHANNELSELECT, NEUTRINO_ICON_SETTINGS);
 		toDelete.push_back(mwradio);
 		CZapitClient::BouquetChannelList subchannellist;
 		zapit.getBouquetChannels(bouquet->bouquet_nr,subchannellist,CZapitClient::MODE_TV, true); // UTF-8
@@ -863,16 +863,16 @@ int CTimerList::newTimer()
 		if (!subchannellist.empty())
 			mcradio.addItem(new CMenuForwarder(bouquet->name, true, NULL, mwradio));
 	}
-	CMenuWidget mm("timerlist.modeselect", NEUTRINO_ICON_SETTINGS);
-	mm.addItem(new CMenuForwarder("timerlist.modetv", true, NULL, &mctv));
-	mm.addItem(new CMenuForwarder("timerlist.moderadio", true, NULL, &mcradio));
+	CMenuWidget mm(LOCALE_TIMERLIST_MODESELECT, NEUTRINO_ICON_SETTINGS);
+	mm.addItem(new CMenuForwarder(LOCALE_TIMERLIST_MODETV, true, NULL, &mctv));
+	mm.addItem(new CMenuForwarder(LOCALE_TIMERLIST_MODERADIO, true, NULL, &mcradio));
 	strcpy(timerNew_channel_name,"---");
-	CMenuForwarder* m5 = new CMenuForwarder("timerlist.channel", false, timerNew_channel_name, &mm); 
+	CMenuForwarder* m5 = new CMenuForwarder(LOCALE_TIMERLIST_CHANNEL, false, timerNew_channel_name, &mm); 
 
 	CMenuOptionChooser* m6 = new CMenuOptionChooser(LOCALE_TIMERLIST_STANDBY, &timerNew_standby_on, TIMERLIST_STANDBY_OPTIONS, TIMERLIST_STANDBY_OPTION_COUNT, false); 
 
-	CStringInputSMS timerSettings_msg("timerlist.message", timerNew.message, 30, NULL, NULL, "abcdefghijklmnopqrstuvwxyz0123456789-.,:!?/ ");
-	CMenuForwarder *m7 = new CMenuForwarder("timerlist.message", false, NULL, &timerSettings_msg );
+	CStringInputSMS timerSettings_msg(LOCALE_TIMERLIST_MESSAGE, timerNew.message, 30, NULL, NULL, "abcdefghijklmnopqrstuvwxyz0123456789-.,:!?/ ");
+	CMenuForwarder *m7 = new CMenuForwarder(LOCALE_TIMERLIST_MESSAGE, false, NULL, &timerSettings_msg );
 
 	CTimerListNewNotifier notifier2((int *)&timerNew.eventType,
 											  &timerNew.stopTime,m2,m5,m6,m7,

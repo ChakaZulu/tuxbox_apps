@@ -540,7 +540,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 																		epgData.eventID, epgData.epg_times.startzeit,
 																		epgData.epg_times.startzeit - (ANNOUNCETIME + 120 ),
 																		"", true );
-							ShowMsgUTF("timer.eventrecord.title", g_Locale->getText("timer.eventrecord.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+							ShowMsgUTF(LOCALE_TIMER_EVENTRECORD_TITLE, g_Locale->getText(LOCALE_TIMER_EVENTRECORD_MSG), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 						}
 						else
 							printf("timerd not available\n");
@@ -558,7 +558,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 																  epgData.epg_times.startzeit - ANNOUNCETIME, 0,
 																  epgData.eventID, epgData.epg_times.startzeit,
 																  "");
-						ShowMsgUTF("timer.eventtimed.title", g_Locale->getText("timer.eventtimed.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+						ShowMsgUTF(LOCALE_TIMER_EVENTTIMED_TITLE, g_Locale->getText(LOCALE_TIMER_EVENTTIMED_MSG), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 					}
 					else
 						printf("timerd not available\n");
@@ -772,12 +772,12 @@ void CEpgData::showTimerEventBar (bool show)
 	{
 		pos = 0;
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, x+8+cellwidth*pos, y+h_offset );
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+29+cellwidth*pos, y+h-h_offset, w-30, g_Locale->getText("timerbar.recordevent"), COL_INFOBAR, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+29+cellwidth*pos, y+h-h_offset, w-30, g_Locale->getText(LOCALE_TIMERBAR_RECORDEVENT), COL_INFOBAR, 0, true); // UTF-8
 	}
     // Button: Timer Channelswitch
     pos = 2;
     frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x+8+cellwidth*pos, y+h_offset );
-    g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+29+cellwidth*pos, y+h-h_offset, w-30, g_Locale->getText("timerbar.channelswitch"), COL_INFOBAR, 0, true); // UTF-8
+    g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+29+cellwidth*pos, y+h-h_offset, w-30, g_Locale->getText(LOCALE_TIMERBAR_CHANNELSWITCH), COL_INFOBAR, 0, true); // UTF-8
 }
 
 

@@ -996,13 +996,7 @@ int EpgPlus::exec ( CChannelList* channelList , int selectedChannelIndex) // UTF
 							, ""
 							, true
 							);
-						ShowMsgUTF
-							( "timer.eventrecord.title"
-							, g_Locale->getText("timer.eventrecord.msg")
-							, CMessageBox::mbrBack
-							, CMessageBox::mbBack
-							, "info.raw"
-							); // UTF-8
+						ShowMsgUTF(LOCALE_TIMER_EVENTRECORD_TITLE, g_Locale->getText(LOCALE_TIMER_EVENTRECORD_MSG), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 					}
 					else
 						printf("timerd not available\n");
@@ -1032,13 +1026,7 @@ int EpgPlus::exec ( CChannelList* channelList , int selectedChannelIndex) // UTF
 							, ""
 							);
 
-						ShowMsgUTF
-							( "timer.eventtimed.title"
-							, g_Locale->getText("timer.eventtimed.msg")
-							, CMessageBox::mbrBack
-							, CMessageBox::mbBack
-							, "info.raw"
-							); // UTF-8
+						ShowMsgUTF(LOCALE_TIMER_EVENTTIMED_TITLE, g_Locale->getText(LOCALE_TIMER_EVENTTIMED_MSG), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 					}
 					else
 						printf("timerd not available\n");

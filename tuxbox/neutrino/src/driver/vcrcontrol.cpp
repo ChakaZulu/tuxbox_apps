@@ -657,9 +657,9 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 		printf("[vcrcontrol] stream2file error code: %d\n", error_msg);
 #warning FIXME: Use better error message
 		DisplayErrorMessage(g_Locale->getText(
-						      error_msg == STREAM2FILE_BUSY ? "streaming.busy" :
-						      error_msg == STREAM2FILE_INVALID_DIRECTORY ? "streaming.dir_not_writable" :
-						      "streamingserver.noconnect"
+						      error_msg == STREAM2FILE_BUSY ? LOCALE_STREAMING_BUSY :
+						      error_msg == STREAM2FILE_INVALID_DIRECTORY ? LOCALE_STREAMING_DIR_NOT_WRITABLE :
+						      LOCALE_STREAMINGSERVER_NOCONNECT
 						      )); // UTF-8
 
 		return false;
@@ -700,7 +700,7 @@ bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode,
 	{
 		RestoreNeutrino();
 
-		DisplayErrorMessage(g_Locale->getText("streamingserver.noconnect")); // UTF-8
+		DisplayErrorMessage(g_Locale->getText(LOCALE_STREAMINGSERVER_NOCONNECT));
 
 		return false;
 	}

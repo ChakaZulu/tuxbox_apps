@@ -526,10 +526,10 @@ void CStringInputSMS::keyRightPressed()
 
 const struct button_label CStringInputSMSButtons[2] =
 {
-	{ NEUTRINO_ICON_BUTTON_RED   , "stringinput.caps"   },
-//	{ NEUTRINO_ICON_BUTTON_GREEN , ""},
-	{ NEUTRINO_ICON_BUTTON_YELLOW, "stringinput.clear" }
-//	{ NEUTRINO_ICON_BUTTON_BLUE  , ""}
+	{ NEUTRINO_ICON_BUTTON_RED   , LOCALE_STRINGINPUT_CAPS  },
+//	{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_XXX               },
+	{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_STRINGINPUT_CLEAR }
+//	{ NEUTRINO_ICON_BUTTON_BLUE  , LOCALE_XXX               }
 };
 
 void CStringInputSMS::paint()

@@ -73,7 +73,7 @@ void CStreamInfo::paint()
 	const char * head_string;
 	int ypos;
 
-	head_string = g_Locale->getText("streaminfo.head");
+	head_string = g_Locale->getText(LOCALE_STREAMINFO_HEAD);
 
 	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, head_string);
 	
@@ -117,12 +117,12 @@ void CStreamInfo::paint()
 
 	//paint msg...
 	ypos+= mheight;
-	sprintf((char*) buf, "%s: %dx%d", g_Locale->getText("streaminfo.resolution"), (int)bitInfo[0], (int)bitInfo[1] );
+	sprintf((char*) buf, "%s: %dx%d", g_Locale->getText(LOCALE_STREAMINFO_RESOLUTION), (int)bitInfo[0], (int)bitInfo[1] );
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 
 	ypos += mheight;
-	sprintf((char*) buf, "%s: %d bits/sec", g_Locale->getText("streaminfo.bitrate"), (int)bitInfo[4]*50);
+	sprintf((char*) buf, "%s: %d bits/sec", g_Locale->getText(LOCALE_STREAMINFO_BITRATE), (int)bitInfo[4]*50);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 
@@ -130,16 +130,16 @@ void CStreamInfo::paint()
 	switch (bitInfo[2])
 	{
 	case 2:
-		sprintf((char*) buf, "%s: 4:3", g_Locale->getText("streaminfo.aratio"));
+		sprintf((char*) buf, "%s: 4:3", g_Locale->getText(LOCALE_STREAMINFO_ARATIO));
 		break;
 	case 3:
-		sprintf((char*) buf, "%s: 16:9", g_Locale->getText("streaminfo.aratio"));
+		sprintf((char*) buf, "%s: 16:9", g_Locale->getText(LOCALE_STREAMINFO_ARATIO));
 		break;
 	case 4:
-		sprintf((char*) buf, "%s: 2.21:1", g_Locale->getText("streaminfo.aratio"));
+		sprintf((char*) buf, "%s: 2.21:1", g_Locale->getText(LOCALE_STREAMINFO_ARATIO));
 		break;
 	default:
-		strncpy(buf, g_Locale->getText("streaminfo.aratio_unknown"), sizeof(buf));
+		strncpy(buf, g_Locale->getText(LOCALE_STREAMINFO_ARATIO_UNKNOWN), sizeof(buf));
 	}
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
@@ -149,19 +149,19 @@ void CStreamInfo::paint()
 	switch ( bitInfo[3] )
 	{
 			case 3:
-			sprintf((char*) buf, "%s: 25fps", g_Locale->getText("streaminfo.framerate"));
+			sprintf((char*) buf, "%s: 25fps", g_Locale->getText(LOCALE_STREAMINFO_FRAMERATE));
 			break;
 			case 6:
-			sprintf((char*) buf, "%s: 50fps", g_Locale->getText("streaminfo.framerate"));
+			sprintf((char*) buf, "%s: 50fps", g_Locale->getText(LOCALE_STREAMINFO_FRAMERATE));
 			break;
 			default:
-			strncpy(buf, g_Locale->getText("streaminfo.framerate_unknown"), sizeof(buf));
+			strncpy(buf, g_Locale->getText(LOCALE_STREAMINFO_FRAMERATE_UNKNOWN), sizeof(buf));
 	}
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 
 
-	if (!bitInfo[7]) strncpy(buf, g_Locale->getText("streaminfo.audiotype_unknown"), sizeof(buf));
+	if (!bitInfo[7]) strncpy(buf, g_Locale->getText(LOCALE_STREAMINFO_AUDIOTYPE_UNKNOWN), sizeof(buf));
 	else {
 		const char* layernames[4]={"res","III","II","I"};
 		const char* sampfreqnames[4]={"44,1k","48k","32k","res"};
@@ -174,7 +174,7 @@ void CStreamInfo::paint()
 		unsigned char mode =	(header>> 6)&3;
 		unsigned char copy =	(header>> 3)&1;
 
-		sprintf((char*) buf, "%s: %s (%s/%s) %s", g_Locale->getText("streaminfo.audiotype"),
+		sprintf((char*) buf, "%s: %s (%s/%s) %s", g_Locale->getText(LOCALE_STREAMINFO_AUDIOTYPE),
 								modenames[mode],
 								sampfreqnames[sampfreq],
 								layernames[layer],
@@ -209,7 +209,7 @@ void CStreamInfo::paint()
 	//vpid
 	ypos+= mheight;
 	if ( g_RemoteControl->current_PIDs.PIDs.vpid == 0 )
-		sprintf((char*) buf, "%s: %s", "vpid", g_Locale->getText("streaminfo.not_available"));
+		sprintf((char*) buf, "%s: %s", "vpid", g_Locale->getText(LOCALE_STREAMINFO_NOT_AVAILABLE));
 	else
 		sprintf((char*) buf, "%s: 0x%04x", "vpid", g_RemoteControl->current_PIDs.PIDs.vpid );
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
@@ -217,7 +217,7 @@ void CStreamInfo::paint()
 	//apid	
 	ypos+= mheight;
 	if (g_RemoteControl->current_PIDs.APIDs.empty())
-		sprintf((char*) buf, "%s: %s", "apid(s)", g_Locale->getText("streaminfo.not_available"));
+		sprintf((char*) buf, "%s: %s", "apid(s)", g_Locale->getText(LOCALE_STREAMINFO_NOT_AVAILABLE));
 	else
 	{
 		sprintf((char*) buf, "%s: ", "apid(s)" );
@@ -238,7 +238,7 @@ void CStreamInfo::paint()
 
 	//vtxtpid
 	if ( g_RemoteControl->current_PIDs.PIDs.vtxtpid == 0 )
-        	sprintf((char*) buf, "%s: %s", "vtxtpid", g_Locale->getText("streaminfo.not_available"));
+        	sprintf((char*) buf, "%s: %s", "vtxtpid", g_Locale->getText(LOCALE_STREAMINFO_NOT_AVAILABLE));
 	else
         	sprintf((char*) buf, "%s: 0x%04x", "vtxtpid", g_RemoteControl->current_PIDs.PIDs.vtxtpid );
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, ypos+ mheight, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
