@@ -46,66 +46,66 @@ eZapNetworkSetup::eZapNetworkSetup():
 
 	eLabel *l=new eLabel(this);
 	l->setText("IP:");
-	l->move(ePoint(10, 0));
+	l->move(ePoint(10, 20));
 	l->resize(eSize(150, fd+4));
 
 	unpack(sip, de);
 	ip=new eNumber(this, 4, 0, 255, 3, de, 0, l);
-	ip->move(ePoint(160, 0));
-	ip->resize(eSize(200, fd+4));
+	ip->move(ePoint(160, 20));
+	ip->resize(eSize(200, fd+10));
 	ip->setFlags(eNumber::flagDrawPoints);
 
 	l=new eLabel(this);
 	l->setText("Netmask:");
-	l->move(ePoint(10, 40));
+	l->move(ePoint(10, 60));
 	l->resize(eSize(150, fd+4));
 
 	unpack(snetmask, de);
 	netmask=new eNumber(this, 4, 0, 255, 3, de, 0, l);
-	netmask->move(ePoint(160, 40));
-	netmask->resize(eSize(200, fd+4));
+	netmask->move(ePoint(160, 60));
+	netmask->resize(eSize(200, fd+10));
 	netmask->setFlags(eNumber::flagDrawPoints);
 	
 	l=new eLabel(this);
 	l->setText("Nameserver:");
-	l->move(ePoint(10, 80));
+	l->move(ePoint(10, 100));
 	l->resize(eSize(150, fd+4));
 
 	unpack(sdns, de);
 	dns=new eNumber(this, 4, 0, 255, 3, de, 0, l);
-	dns->move(ePoint(160, 80));
-	dns->resize(eSize(200, fd+4));
+	dns->move(ePoint(160, 100));
+	dns->resize(eSize(200, fd+10));
 	dns->setFlags(eNumber::flagDrawPoints);
 
 	l=new eLabel(this);
 	l->setText("Gateway:");
-	l->move(ePoint(10, 120));
+	l->move(ePoint(10, 140));
 	l->resize(eSize(150, fd+4));
 
 	unpack(sgateway, de);
 	gateway=new eNumber(this, 4, 0, 255, 3, de, 0, l);
-	gateway->move(ePoint(160, 120));
-	gateway->resize(eSize(200, fd+4));
+	gateway->move(ePoint(160, 140));
+	gateway->resize(eSize(200, fd+10));
 	gateway->setFlags(eNumber::flagDrawPoints);
 
 	CONNECT(ip->selected, eZapNetworkSetup::fieldSelected);
 
 	dosetup=new eCheckbox(this, sdosetup, 1, fd);
 	dosetup->setText("Configure Network");
-	dosetup->move(ePoint(100, 163));
+	dosetup->move(ePoint(100, 183));
 	dosetup->resize(eSize(fd+4+240, fd+4));
 
 	ok=new eButton(this);
-	ok->setText("[OK]");
-	ok->move(ePoint(160, 200));
+	ok->setText(_("save"));
+	ok->move(ePoint(20, 230));
 	ok->resize(eSize(90, fd+4));
 	
 	CONNECT(ok->selected, eZapNetworkSetup::okPressed);
 
 	abort=new eButton(this);
-	abort->setText("[ABORT]");
-	abort->move(ePoint(270, 200));
-	abort->resize(eSize(120, fd+4));
+	abort->setText(_("abort"));
+	abort->move(ePoint(140, 230));
+	abort->resize(eSize(100, fd+4));
 
 	CONNECT(abort->selected, eZapNetworkSetup::abortPressed);
 }

@@ -5,7 +5,7 @@
 #include <core/gui/eskin.h>
 
 eCheckbox::eCheckbox(eWidget *parent, int checked, int takefocus, int Size):
-	eButton(parent, 0, takefocus)
+	eButton(parent, 0, takefocus, false)
 {
 	ischecked = -1;
 	setCheck(checked);

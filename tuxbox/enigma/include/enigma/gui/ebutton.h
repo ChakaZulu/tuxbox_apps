@@ -3,6 +3,7 @@
 
 #include <core/gui/elabel.h>
 #include <core/gdi/grc.h>
+#include <core/gui/decoration.h>
 
 /**
  * \brief A widget which acts like a button.
@@ -11,8 +12,9 @@ class eButton: public eLabel
 {
 	eLabel*	tmpDescr; // used for LCD with description
 protected:
+	eDecoration deco, deco_selected;
+	eRect crect, crect_selected;    // this eRects holds the real client sizes when decoration is used
 	gColor focusB, focusF, normalB, normalF;
-	int isActive;
 	eString descr;
 	int eventHandler(const eWidgetEvent &event);
 	void gotFocus();
@@ -32,7 +34,7 @@ public:
 	 *
 	 * \param descr is for use with lcd
 	 */
-	eButton(eWidget *parent, eLabel* descr=0, int takefocus=1);
+	eButton(eWidget *parent, eLabel* descr=0, int takefocus=1, bool loadDeco=true);
 
 	void redrawWidget(gPainter *target, const eRect &area);
 };

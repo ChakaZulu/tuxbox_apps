@@ -28,7 +28,7 @@ eSatelliteConfigurationManager::eSatelliteConfigurationManager()
 			eButton* b = new eButton(w_buttons);
 			b->setText(eString().sprintf("%i", lnb) );
 			b->move(ePoint(x,y));
-			b->resize(eSize(150, 30));
+			b->resize(eSize(100, 30));
 			CONNECT(b->selected_id, eSatelliteConfigurationManager::lnbSelected);
 			y+=40;
 			lnb++;

@@ -5,58 +5,25 @@
 #include <core/driver/eavswitch.h>
 #include <core/driver/rc.h>
 #include <core/driver/streamwd.h>
-#include <core/dvb/edvb.h>
 #include <core/gui/elabel.h>
-#include <core/gui/enumber.h>
 #include <core/gui/ebutton.h>
-#include <core/gui/echeckbox.h>
 #include <core/gui/eskin.h>
 #include <core/system/econfig.h>
 
-void eZapVideoSetup::setPin8(int w)
-{
-	switch (w)
-	{
-	case 0:
-		pin8->setText("4:3 Letterbox");
-		break;
-	case 1:
-		pin8->setText("4:3 Panscan");
-		break;
-	case 2:
-		pin8->setText("16:9 (PIN8)");
-		break;
-	}
-}
-
-void eZapVideoSetup::setColorFormat(eAVColorFormat w)
-{
-	switch (w)
-	{
-	case cfCVBS:
-		colorformat->setText("FBAS");
-		break;
-	case cfRGB:
-		colorformat->setText("RGB");
-		break;
-	case cfYC:
-		colorformat->setText("SVideo");
-		break;
-	default:
-		colorformat->setText("Null");
-	}
-}
 
 eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 {
 /*	eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "setup.video"))
-		qFatal("skin load of \"setup.video\" failed");
+		qFatal("skin load of \"setup.video\" failed");*/
 
-	ASSIGN(colorformat, eButton, "colorformat");
-	ASSIGN(pin8, eButton, "pin8");
-	ASSIGN(colorformat, eButton, "colorformat");
-	ASSIGN(abort, eButton, "abort");*/
+	if (eConfig::getInstance()->getKey("/elitedvb/video/colorformat", v_colorformat))
+		v_colorformat = 1;
+
+	if (eConfig::getInstance()->getKey("/elitedvb/video/pin8", v_pin8))
+		v_pin8 = 0;
+
+	eDebug("v_pin8 = %i, colorformat = %i", v_pin8, v_colorformat );
 
 	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 
@@ -67,56 +34,46 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	eLabel *l=new eLabel(this);
 	l->setText("Colorformat:");
 	l->move(ePoint(10, 20));
-	l->resize(eSize(150, fd+4));
-	
-	colorformat=new eButton(this, l);
-	colorformat->setText("[color]");
+	l->resize(eSize(200, fd+4));
+
+	colorformat=new eListBox<eListBoxEntryText>(this);
+	colorformat->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement  | eListBox<eListBoxEntryText>::flagLoadDeco);
 	colorformat->move(ePoint(160, 20));
-	colorformat->resize(eSize(85, fd+4));
-//	connect(colorformat, SIGNAL(selected()), SLOT(toggleColorformat()));
-	CONNECT(colorformat->selected, eZapVideoSetup::toggleColorformat);
+	colorformat->resize(eSize(120, 35));
+	eListBoxEntryText* entrys[3];
+	entrys[0]=new eListBoxEntryText(colorformat, _("FBAS"), (void*)1);
+	entrys[1]=new eListBoxEntryText(colorformat, _("RGB"), (void*)2);
+	entrys[2]=new eListBoxEntryText(colorformat, _("SVideo"), (void*)3);
+	colorformat->setCurrent(entrys[v_colorformat-1]);
 
   l=new eLabel(this);
 	l->setText("Aspect Ratio:");
-	l->move(ePoint(10, 55));
-	l->resize(eSize(170, fd+4));
+	l->move(ePoint(10, 65));
+	l->resize(eSize(150, fd+4));
+	
+	pin8=new eListBox<eListBoxEntryText>(this);
+	pin8->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement | eListBox<eListBoxEntryText>::flagLoadDeco);
+	pin8->move(ePoint(160, 65));
+	pin8->resize(eSize(170, 35));
 
-	pin8=new eButton(this, l);
-	pin8->setText("[Pin8]");
-	pin8->move(ePoint(160, 55));
-	pin8->resize(eSize(140, fd+4));
-//	connect(pin8, SIGNAL(selected()), SLOT(togglePin8()));
-	CONNECT(pin8->selected, eZapVideoSetup::togglePin8);
+	entrys[0]=new eListBoxEntryText(pin8, _("4:3 letterbox"), (void*)0);
+	entrys[1]=new eListBoxEntryText(pin8, _("4:3 panscan"), (void*)1);
+	entrys[2]=new eListBoxEntryText(pin8, _("16:9 (PIN8)"), (void*)2);
+	pin8->setCurrent(entrys[v_pin8]);
 
 	ok=new eButton(this);
-	ok->setText(_("[OK]"));
-	ok->move(ePoint(10, 150));
-	ok->resize(eSize(50, fd+4));
-//  connect(ok, SIGNAL(selected()), SLOT(okPressed()));
-	CONNECT(ok->selected, eZapVideoSetup::okPressed);	
+	ok->setText(_("save"));
+	ok->move(ePoint(20, 135));
+	ok->resize(eSize(90, fd+4));
+
+	CONNECT(ok->selected, eZapVideoSetup::okPressed);		
 
 	abort=new eButton(this);
-	abort->setText(_("[ABORT]"));
-	abort->move(ePoint(80, 150));
+	abort->setText(_("abort"));
+	abort->move(ePoint(140, 135));
 	abort->resize(eSize(100, fd+4));
-//	connect(abort, SIGNAL(selected()), SLOT(abortPressed()));
+
 	CONNECT(abort->selected, eZapVideoSetup::abortPressed);
-
-
-	unsigned int temp;
-	v_colorformat=cfCVBS;
-	v_pin8=0;
-	if (eConfig::getInstance()->getKey("/elitedvb/video/colorformat", temp))
-		temp=cfCVBS;
-	eDebug("colorformat: %i", temp);
-	v_colorformat=(eAVColorFormat)temp;
-	if (v_colorformat==cfNull)
-		v_colorformat=cfCVBS;
-
-	eConfig::getInstance()->getKey("/elitedvb/video/pin8", v_pin8);
-	eDebug("Pin8: %i", v_pin8);	
-	setColorFormat(v_colorformat);
-	setPin8(v_pin8);
 }
 
 eZapVideoSetup::~eZapVideoSetup()
@@ -125,8 +82,20 @@ eZapVideoSetup::~eZapVideoSetup()
 
 void eZapVideoSetup::okPressed()
 {
-	eConfig::getInstance()->setKey("/elitedvb/video/colorformat", (unsigned int)v_colorformat);
-	eConfig::getInstance()->setKey("/elitedvb/video/pin8", v_pin8);
+	v_colorformat = (int) colorformat->getCurrent()->getKey();
+	eDebug("v_colorformat = %i", v_colorformat);
+	v_pin8 = (int) pin8->getCurrent()->getKey();
+	eDebug("v_pin8 = %i", v_pin8 );
+	if ( eConfig::getInstance()->setKey("/elitedvb/video/colorformat", v_colorformat ))
+	{
+		eConfig::getInstance()->delKey("/elitedvb/video/colorformat");
+		eDebug("Write v_colorformat with error %i", eConfig::getInstance()->setKey("/elitedvb/video/colorformat", v_colorformat ) );
+	}
+	if ( eConfig::getInstance()->setKey("/elitedvb/video/pin8", v_pin8 ))
+	{
+		eConfig::getInstance()->delKey("/elitedvb/video/pin8");
+		eDebug("Write v_pin8 with error %i", eConfig::getInstance()->setKey("/elitedvb/video/pin8", v_pin8 ));
+	}
 	eAVSwitch::getInstance()->reloadSettings();
 	eStreamWatchdog::getInstance()->reloadSettings();
 	close(1);
@@ -137,28 +106,4 @@ void eZapVideoSetup::abortPressed()
 	close(0);
 }
 
-void eZapVideoSetup::toggleColorformat()
-{
-	switch (v_colorformat)
-	{
-	case cfCVBS:
-		v_colorformat=cfRGB;
-		break;
-	case cfRGB:
-		v_colorformat=cfYC;
-		break;
-	case cfYC:
-	default:
-		v_colorformat=cfCVBS;
-		break;
-	}
-	setColorFormat(v_colorformat);
-}
 
-void eZapVideoSetup::togglePin8()
-{
-	v_pin8++;
-	if (v_pin8>2)
-		v_pin8=0;
-	setPin8(v_pin8);
-}

@@ -117,7 +117,7 @@
   		<eLabel text="Sat/Position" position="140:10" size="280:30" align="center"/>
 			<eLabel text="LNB" position="420:10" size="80:30" align="center"/>
 			<eWidget name="buttons" position="60:55" size="e-10:e-10" />
-			<eButton name="close" position="10:e-40" size="50:30" text="[OK]"/>
+			<eButton name="close" position="10:e-40" size="50:30" text="close"/>
 		</eSatelliteConfigurationManager>
 	</object>
 
@@ -143,8 +143,8 @@
 	
 	<object name="tsAutomatic">
 		<tsAutomatic position="0:0" size="e:350">
-			<eLabel position="10:40" size="200:30" text="Netzwerk:" />
-			<eListbox name="network" position="210:40" size="e-10:32" />
+			<eLabel position="10:40" size="150:30" text="Network:" />
+			<eListbox name="network" position="160:40" size="e-70:35" loadDeco="on" />
 			<eFEStatus name="festatus" position="0:100" size="400:85" />
 			<eLabel name="status" position="10:190" size="e-10:e-30" />
   		<eButton text="start scan" name="start" position="10:e-30" size="200:30" align="center" />
@@ -169,34 +169,35 @@
 	
 	<object name="setup.skins">
 		<eSkinSetup cposition="100:100" csize="400:300" text="Skin Setup">
-			<eLabel text="Skins:" position="0:0" size="100:30" />
-			<eListbox name="skins" position="100:0" size="e-10:e-10" />
-			<eButton text="ok" name="accept" position="0:100" size="100:30" />
-			<eButton text="abort" name="reject" position="0:150" size="100:30" />
+			<eLabel text="Skins:" position="20:10" size="100:30" />
+			<eListbox name="skins" position="120:10" size="e-10:e-10" loadDeco="on" />
+			<eButton text="save" name="accept" position="10:e-80" size="80:30" />
+			<eButton text="abort" name="reject" position="10:e-40" size="80:30" />
 		</eSkinSetup>
 	</object>
 	
 	<object name="transpondersettings.satellite">
 		<eTranspondersettings position="0:0" size="400:160">
-			<eLabel text="Frequency:" position="10:10" size="140:32" />
-			<eNumber name="frequency" position="150:10" size="e-150:32" />
-			<eLabel text="MHz" position="e-150:10" size="e:32" />
+			<eLabel text="Satellite:" position="10:10" size="140:35" />
+			<eListbox name="sat" position="150:10" size="e-10:35" loadDeco="on" />
 
-			<eLabel text="Polarity:" position="10:40" size="140:32" />
-			<eListbox name="polarity" position="150:40" size="e-150:32" />
+			<eLabel text="Frequency:" position="10:50" size="140:32" />
+			<eNumber name="frequency" position="150:49" size="e-150:32" />
+			<eLabel text="MHz" position="e-145:50" size="40:32" />
 
-			<eLabel text="FEC:" position="10:70" size="140:32" />
-			<eListbox name="fec" position="150:70" size="60:32" />
+			<eLabel text="Inv:" position="320:50" size="70:32" />
+			<eCheckbox name="inversion" position="e-40:49" size="e-10:32" />
 
-			<eLabel text="Inversion:" position="250:70" size="140:32" />
-			<eCheckbox name="inversion" position="370:70" size="30:32" />
+			<eLabel text="Polarity:" position="10:86" size="140:32" />
+			<eListbox name="polarity" position="150:85" size="e-140:35" loadDeco="on" />
 
-			<eLabel text="Symbolrate:" position="10:100" size="140:32" />
-			<eNumber name="symbolrate" position="150:100:" size="e-150:32" />
-			<eLabel text="KSymb/s" position="e-150:100" size="e:32" />
+			<eLabel text="FEC:" position="e-120:86" size="60:32" />
+			<eListbox name="fec" position="e-70:85" size="e-10:35" loadDeco="on" />
+
+			<eLabel text="Symbolrate:" position="10:124" size="140:32" />
+			<eNumber name="symbolrate" position="150:124:" size="e-150:32" />
+			<eLabel text="KSymb/s" position="e-145:125" size="e:32" />
 			
-			<eLabel text="Satellite:" position="10:130" size="140:32" />
-			<eListbox name="sat" position="150:130" size="e-10:32" />
 		</eTranspondersettings>
 	</object>
 

@@ -89,7 +89,8 @@ struct gOpcode
 			gPixmap *pixmap;
 			ePoint position;
 			eRect clip;
-			pblit(gPixmap *pixmap, const ePoint &position, const eRect &clip): pixmap(pixmap), position(position), clip(clip) { }
+			pblit(gPixmap *pixmap, const ePoint &position, const eRect &clip)
+				: pixmap(pixmap), position(position), clip(clip) { }
 		} *blit;
 
 		struct pmergePalette

@@ -1,5 +1,5 @@
 // for debugging use: 
-#define SYNC_PAINT
+// #define SYNC_PAINT
 #include "grc.h"
 
 #include <unistd.h>
@@ -169,7 +169,6 @@ void gPainter::blit(gPixmap &pixmap, ePoint pos, eRect clip, int flags)
 	pos+=logicalZero;
 	clip.moveBy(logicalZero.x(), logicalZero.y());
 	o.parm.blit=new gOpcode::para::pblit(pixmap.lock(), pos, clip);
-
 	o.flags=flags;
 	rc.submit(o);
 }

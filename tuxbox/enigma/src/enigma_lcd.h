@@ -37,7 +37,7 @@ class eZapLCDMain: public eWidget
 private:
 	void clockUpdate();
 	void volumeUpdate(int);
-	void serviceChanged(const eServiceReference &, int);
+	void serviceEntered(const eServiceReference &);
 	void leaveService(const eServiceReference &service);
 public:
 	eLabel *ServiceName;

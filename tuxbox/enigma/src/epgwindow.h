@@ -11,8 +11,7 @@ class eListBoxEntryEPG:public eListBoxEntry
 public:
 	static gFont TimeFont;
 	static gFont DescrFont;
-	static int TimeYOffs, TimeFontHeight;
-	ePoint TimeOffs, DescrOffs;
+	int TimeYOffs, DescrXOffs, DescrYOffs;
 	eTextPara *paraTime, *paraDescr;
 	eString descr;
 	std::stringstream time;

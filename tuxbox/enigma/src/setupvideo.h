@@ -2,6 +2,7 @@
 #define __setupvideo_h
 
 #include <core/gui/ewindow.h>
+#include <core/gui/listbox.h>
 #include <core/driver/eavswitch.h>
 
 class eNumber;
@@ -10,19 +11,14 @@ class eCheckbox;
 
 class eZapVideoSetup: public eWindow
 {
-	eButton *colorformat, *pin8, *abort, *ok;
-	
-	unsigned int v_pin8; 		// 0: 4:3 Letterboxed, 1: 4:3 panscan, 2: 16:9 w/ pin8 signal
-	eAVColorFormat v_colorformat;		// eColorFormat ...
-	void setPin8(int w);
-	void setColorFormat(eAVColorFormat w);
+	eButton *abort, *ok;
+	eListBox<eListBoxEntryText> *colorformat, *pin8;
 
+	unsigned int v_colorformat, v_pin8;
 private:
 	void okPressed();
 	void abortPressed();
-	
-	void toggleColorformat();
-	void togglePin8();
+
 public:
 	eZapVideoSetup();
 	~eZapVideoSetup();

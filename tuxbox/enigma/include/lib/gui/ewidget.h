@@ -99,6 +99,7 @@ protected:
 	static eWidget *root;
 	eWidget *parent;
 	eString name;
+	eString helptext;
 	ePoint position;
 	eSize size;
 	eRect clientrect;

@@ -14,6 +14,7 @@
 #include <core/base/i18n.h>
 #include <core/system/init.h>
 #include <core/system/econfig.h>
+#include <core/dvb/servicedvb.h>
 #include <core/dvb/epgcache.h>
 #include <core/dvb/esection.h>
 #include <core/dvb/decoder.h>
@@ -30,19 +31,6 @@
 #include <core/driver/eavswitch.h>
 #include <core/dvb/dvbservice.h>
 #include <core/gdi/lcd.h>
-
-#include "enigma_main.h"
-#include "enigma_mainmenu.h"
-#include "enigma_event.h"
-#include "sselect.h"
-#include <core/gui/eskin.h>
-#include "enigma.h"
-#include "enigma_lcd.h"
-#include "enigma_plugins.h"
-#include "download.h"
-#include "epgwindow.h"
-
-#include <core/dvb/servicedvb.h>
 
 struct enigmaMainActions
 {
@@ -751,8 +739,8 @@ void eZapMain::showServiceSelector(int dir)
 	if (!service)
 		return;
 	
-	if (eServiceInterface::getInstance()->play(*service))
-		startService(*service, -EAGAIN);
+/*	if (*/eServiceInterface::getInstance()->play(*service);/*)
+		startService(*service, -EAGAIN);*/
 }
 
 void eZapMain::nextService()
@@ -761,8 +749,8 @@ void eZapMain::nextService()
 	if (!service)
 		return;
 
-	if (eServiceInterface::getInstance()->play(*service))
-		startService(*service, -EAGAIN);
+	/*if (*/eServiceInterface::getInstance()->play(*service); /*)
+		startService(*service, -EAGAIN);*/
 }
 
 void eZapMain::prevService()
@@ -771,8 +759,8 @@ void eZapMain::prevService()
 	if (!service)
 		return;
 
-	if (eServiceInterface::getInstance()->play(*service))
-		startService(*service, -EAGAIN);
+/*	if (*/eServiceInterface::getInstance()->play(*service);/*)
+		startService(*service, -EAGAIN);*/
 }
 
 void eZapMain::volumeUp()
@@ -1078,7 +1066,7 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 	switch (event.type)
 	{
 	case eServiceEvent::evtStart:
-		startService(eServiceInterface::getInstance()->service, 0);
+		startService(eServiceInterface::getInstance()->service, (int)event.data);
 		break;
 	case eServiceEvent::evtStop:
 		leaveService();
@@ -1097,6 +1085,7 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 
 void eZapMain::startService(const eServiceReference &serviceref, int err)
 {
+	eDebug("---------------START SERVICE--------------------");
 	isVT = Decoder::parms.tpid != -1;
 
 	setVTButton(isVT);
@@ -1125,6 +1114,7 @@ void eZapMain::startService(const eServiceReference &serviceref, int err)
 		flags&=~ENIGMA_NVOD;
 
 	eString name="";
+
 	if (rservice)
 		name=rservice->service_name + " - ";
 	
@@ -1138,10 +1128,10 @@ void eZapMain::startService(const eServiceReference &serviceref, int err)
 		}
 
 	if (!name.length())
-		name="new service";
-	
-	ChannelName->setText(name);
-	
+		name="unknown service";
+
+	ChannelName->setText(name);		
+
 	switch (err)
 	{
 	case 0:
@@ -1149,27 +1139,34 @@ void eZapMain::startService(const eServiceReference &serviceref, int err)
 		break;
 	case -EAGAIN:
 		Description->setText(_("Einen Moment bitte..."));
+		eDebug("Einen Moment bitte...");
 		break;
 	case -ENOENT:
 		Description->setText(_("Sender konnte nicht gefunden werden."));
+		eDebug("Sender konnte nicht gefunden werden.");
 		break;
 	case -ENOCASYS:
 		Description->setText(_("Dieser Sender kann nicht entschlüsselt werden."));
+		eDebug("Dieser Sender kann nicht entschlüsselt werden.");
 		break;
 	case -ENOSTREAM:
 		Description->setText(_("Dieser Sender sendet (momentan) kein Signal."));
+		eDebug("Dieser Sender sendet (momentan) kein Signal.");
 		break;
 	case -ENOSYS:
 		Description->setText(_("Dieser Inhalt kann nicht dargestellt werden."));
+		eDebug("Dieser Inhalt kann nicht dargestellt werden.");
 		break;
 	case -ENVOD:
 		Description->setText(_("NVOD - Bitte Anfangszeit bestimmen!"));
+		eDebug("NVOD - Bitte Anfangszeit bestimmen!");
 		break;
 	default:
 		Description->setText(_("<unbekannter Fehler>"));
+		eDebug("<unbekannter Fehler>");
 		break;
 	}
-	
+
 	int num=-1;
 	
 	if (rservice)

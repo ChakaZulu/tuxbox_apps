@@ -28,7 +28,7 @@ eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type)
 	fecEntry[4]=new eListBoxEntryText(fec, "5/6", (void*)4);
 	fecEntry[5]=new eListBoxEntryText(fec, "7/8", (void*)5);
 	fec->setName("fec");
-	fec->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
+	fec->setFlags(eListBoxBase::flagNoUpDownMovement);
 	
 	symbolrate=new eNumber(this, 5, 0, 9, 1, init, 0, 0, edit);
 	symbolrate->setName("symbolrate");

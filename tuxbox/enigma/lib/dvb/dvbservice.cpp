@@ -281,8 +281,8 @@ int eDVBServiceController::switchService(const eServiceReference &newservice)
 	if (newservice == service)
 		return 0;
 	/*emit*/ dvb.leaveService(service);
-	service=newservice;
 
+	service=newservice;
 	dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceSwitch));
 	eDebug("<--- switch service event");
 	return 1;

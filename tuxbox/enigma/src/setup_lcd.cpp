@@ -90,47 +90,47 @@ eZapLCDSetup::eZapLCDSetup(): eWindow(0)
 	eConfig::getInstance()->getKey("/ezap/lcd/contrast", lcdcontrast);
 	eConfig::getInstance()->getKey("/ezap/lcd/standby", lcdstandby);
 
-	bbrightness=new eButton(this);
+	bbrightness=new eButton(this, 0, 1, false);
 	bbrightness->setText(_("Brightness:"));
-	bbrightness->move(ePoint(20, 40));
+	bbrightness->move(ePoint(20, 20));
 	bbrightness->resize(eSize(110, fd+4));
 
-	bcontrast=new eButton(this);
+	bcontrast=new eButton(this, 0, 1, false);
 	bcontrast->setText(_("Contrast:"));
-	bcontrast->move(ePoint(20, 80));
+	bcontrast->move(ePoint(20, 60));
 	bcontrast->resize(eSize(110, fd+4));
 
-	bstandby=new eButton(this);
+	bstandby=new eButton(this, 0, 1, false);
 	bstandby->setText(_("Standby:"));
-	bstandby->move(ePoint(20, 120));
+	bstandby->move(ePoint(20, 100));
 	bstandby->resize(eSize(110, fd+4));
 
 	p_brightness=new eProgress(this);
 	p_brightness->setName("brightness");
-	p_brightness->move(ePoint(140, 40));
+	p_brightness->move(ePoint(140, 20));
 	p_brightness->resize(eSize(220, fd+4));
 
 	p_contrast=new eProgress(this);
 	p_contrast->setName("contrast");
-	p_contrast->move(ePoint(140, 80));
+	p_contrast->move(ePoint(140, 60));
 	p_contrast->resize(eSize(220, fd+4));
 
 	p_standby=new eProgress(this);
 	p_standby->setName("standby");
-	p_standby->move(ePoint(140, 120));
+	p_standby->move(ePoint(140, 100));
 	p_standby->resize(eSize(220, fd+4));
 
 	update();
 
 	ok=new eButton(this);
-	ok->setText(_("[SAVE]"));
+	ok->setText(_("save"));
 	ok->move(ePoint(20, 155));
 	ok->resize(eSize(90, fd+4));
 	
 	CONNECT(ok->selected, eZapLCDSetup::okPressed);
 
 	abort=new eButton(this);
-	abort->setText(_("[ABORT]"));
+	abort->setText(_("abort"));
 	abort->move(ePoint(140, 155));
 	abort->resize(eSize(100, fd+4));
 

@@ -1,9 +1,10 @@
 #include "ebutton.h"
 #include "eskin.h"
 #include <core/system/init.h>
+#include <core/gdi/font.h>
 #include "guiactions.h"
 
-eButton::eButton(eWidget *parent, eLabel* desc, int takefocus)
+eButton::eButton(eWidget *parent, eLabel* desc, int takefocus, bool loadDeco)
 	:eLabel(parent, 0, takefocus), tmpDescr(0), 
 	focusB(eSkin::getActive()->queryScheme("global.selected.background")),
 	focusF(eSkin::getActive()->queryScheme("global.selected.foreground")),
@@ -11,8 +12,15 @@ eButton::eButton(eWidget *parent, eLabel* desc, int takefocus)
 	normalF(eSkin::getActive()->queryScheme("global.normal.foreground")),
 	descr(desc?desc->getText():"")
 {
-//	deco.load("eWindow");
-//	deco_active.load("eWindow");
+	if (!deco && loadDeco)
+	{
+		deco.load("eButton");
+		deco_selected.load("eButton.selected");
+	}
+
+	if (deco)
+		align=eTextPara::dirCenter;
+
 	addActionMap(&i_cursorActions->map);
 }
 
@@ -43,7 +51,6 @@ void eButton::gotFocus()
 
 	setBackgroundColor(focusB);
 	setForegroundColor(focusF);
-	isActive=1;
 	invalidate();
 }
 
@@ -66,33 +73,51 @@ void eButton::lostFocus()
 	}
 	setBackgroundColor(normalB);
 	setForegroundColor(normalF);
-	isActive=0;
-	invalidate();
+
+	invalidate();	
 }
 
 int eButton::eventHandler(const eWidgetEvent &event)
 {
 	switch (event.type)
 	{
-	case eWidgetEvent::evtAction:
-		if (event.action == &i_cursorActions->ok)
-		{
-			/*emit*/ selected();
-
-			if (/*emit*/ selected_id(text) )  // description changed ?
-				invalidate();										// then redraw
-		
-			if (parent && parent->LCDElement)
+		case eWidgetEvent::evtAction:
+			if (event.action == &i_cursorActions->ok)
 			{
-				if (LCDTmp)
-					LCDTmp->setText(text);
-				else
-					parent->LCDElement->setText(text);
+				/*emit*/ selected();
+
+				if (/*emit*/ selected_id(text) )  // description changed ?
+					invalidate();										// then redraw
+		
+				if (parent && parent->LCDElement)
+				{
+					if (LCDTmp)
+						LCDTmp->setText(text);
+					else
+						parent->LCDElement->setText(text);
+				}
+				return 1;
 			}
-			return 1;
-		}
 		break;
-	default:
+
+		case eWidgetEvent::changedSize:
+			if (deco)
+			{
+				crect.setLeft( deco.borderLeft );
+				crect.setTop( deco.borderTop );
+				crect.setRight( width() - deco.borderRight );
+				crect.setBottom( height() - deco.borderBottom );
+			}
+			if (deco_selected)
+			{
+				crect_selected.setLeft( deco_selected.borderLeft );
+				crect_selected.setTop( deco_selected.borderTop );
+				crect_selected.setRight( width() - deco_selected.borderRight );
+				crect_selected.setBottom( height() - deco_selected.borderBottom );
+			}
+		break;
+
+		default:
 		break;
 	}
 	return eWidget::eventHandler(event);
@@ -100,11 +125,19 @@ int eButton::eventHandler(const eWidgetEvent &event)
 
 void eButton::redrawWidget(gPainter *target, const eRect &area)
 {
-	if (isActive)
-		deco_active.drawDecoration(target, ePoint(width(), height()));
-	else
+	if (deco_selected && have_focus)
+	{
+		deco_selected.drawDecoration(target, ePoint(width(), height()));
+		eLabel::redrawWidget(target, crect_selected);
+	}
+	else if (deco)
+	{
 		deco.drawDecoration(target, ePoint(width(), height()));
-	eLabel::redrawWidget(target, area);
+		eLabel::redrawWidget(target, crect);
+	}
+	else
+		eLabel::redrawWidget(target, area);
+
 }
 
 static eWidget *create_eButton(eWidget *parent)

@@ -33,7 +33,7 @@ tsSelectType::tsSelectType(eWidget *parent): eWidget(parent)
 
 	new eListBoxEntryText(list, _("auto scan"), (void*)1);
 	new eListBoxEntryText(list, _("manual scan.."), (void*)2);
-	list->setCurrent(new eListBoxEntryText(list, _("abort"), (void*)0));
+/*	list->setCurrent(*/new eListBoxEntryText(list, _("abort"), (void*)0);// );
 
 	CONNECT(list->selected, tsSelectType::selected);
 }

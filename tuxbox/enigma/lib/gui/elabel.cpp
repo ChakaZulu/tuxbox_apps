@@ -6,12 +6,12 @@
 #include <core/gui/eskin.h>
 #include <core/system/init.h>
 
-eLabel::eLabel(eWidget *parent, int flags, int takefocus):
-	eWidget(parent, takefocus), flags(flags)
+eLabel::eLabel(eWidget *parent, int flags, int takefocus ):
+	eWidget(parent, takefocus), flags(flags), align( align )
 {
+	align=eTextPara::dirLeft;
 	para=0;
 	blitFlags=0;
-	align=eTextPara::dirLeft;
 	setForegroundColor(eSkin::getActive()->queryScheme("global.normal.foreground"));
 	pixmap_position=ePoint(0, 0);
 	text_position=ePoint(0, 0);

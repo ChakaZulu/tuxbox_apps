@@ -29,7 +29,8 @@ void eServiceHandlerDVB::switchedService(const eServiceReference &, int err)
 		state=statePlaying;
 	if (state != oldstate)
 		serviceEvent(eServiceEvent(eServiceEvent::evtStateChanged));
-	serviceEvent(eServiceEvent(eServiceEvent::evtStart));
+
+	serviceEvent(eServiceEvent(eServiceEvent::evtStart, (void*)err));
 }
 
 void eServiceHandlerDVB::gotEIT(EIT *, int)
@@ -137,8 +138,10 @@ int eServiceHandlerDVB::getState()
 int eServiceHandlerDVB::stop()
 {
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+
 	if (sapi)
 		sapi->switchService(eServiceReference());
+
 	return 0;
 }
 

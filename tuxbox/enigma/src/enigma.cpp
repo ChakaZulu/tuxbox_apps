@@ -10,6 +10,7 @@
 
 #include <core/base/i18n.h>
 #include <core/driver/rc.h>
+#include <core/dvb/service.h>
 #include <core/dvb/dvb.h>
 #include <core/dvb/edvb.h>
 #include <core/gdi/gfbdc.h>
@@ -88,7 +89,7 @@ bool eZap::setMode(int m)
 				lastTvChannel = (__u32) ( (eDVB::getInstance()->getServiceAPI()->service.original_network_id.get() << 16) | eDVB::getInstance()->getServiceAPI()->service.service_id.get() );
 
 			if (ref)			
-				eDVB::getInstance()->getServiceAPI()->switchService(*ref);
+				eServiceInterface::getInstance()->play(*ref);
 			else
 				Decoder::Flush();
 
@@ -112,7 +113,7 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 	instance = this;
 
 	init = new eInit();
-	init->setRunlevel(5);
+	init->setRunlevel(6);
 	
 #if 0
 	if(0)
@@ -209,7 +210,7 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 		currentService=eDVB::getInstance()->settings->getTransponders()->searchService(eOriginalNetworkID(channel>>16), eServiceID(channel&0xFFFF));
 
 		if (currentService && eDVB::getInstance()->getServiceAPI())
-    	eDVB::getInstance()->getServiceAPI()->switchService(*currentService);
+				eServiceInterface::getInstance()->play(*currentService);
 	}
 
 	serviceSelector = new eServiceSelector();
@@ -234,7 +235,7 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 
 	eDebug("[ENIGMA] ok, beginning mainloop");
 
-
+/*
 	{
 		eMessageBox msg("Warning:\nThis version of enigma contains incomplete code.\n"
 			"Not working are:\n - Satconfig\n - Cablescan (will be back soon)\n"
@@ -242,7 +243,7 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 		msg.show();
 		msg.exec();
 		msg.hide();
-	}
+	}*/
 
 	if (eConfig::getInstance()->getKey("/elitedvb/system/bootCount", bootcount))
 	{
@@ -259,8 +260,6 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 	eConfig::getInstance()->setKey("/elitedvb/system/bootCount", bootcount);
 
 	init->setRunlevel(10);
-
-
 }
 
 eZap::~eZap()

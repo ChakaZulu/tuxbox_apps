@@ -1,4 +1,4 @@
-#include "epgwindow.h"
+	#include "epgwindow.h"
 #include "enigma_event.h"
 
 #include <algorithm>
@@ -13,22 +13,14 @@
 
 gFont eListBoxEntryEPG::TimeFont;
 gFont eListBoxEntryEPG::DescrFont;
-int eListBoxEntryEPG::TimeYOffs(-1);
-int eListBoxEntryEPG::TimeFontHeight(-1);
 
 eListBoxEntryEPG::~eListBoxEntryEPG()
 {
 	if (paraTime)
-	{
 		paraTime->destroy();
-		paraTime = 0;
-	}
-	if (paraDescr)
-	{
-		paraDescr->destroy();
-		paraDescr = 0;
-	}
 
+	if (paraDescr)
+		paraDescr->destroy();
 }
 
 eListBoxEntryEPG::eListBoxEntryEPG(const eit_event_struct* evt, eListBox<eListBoxEntryEPG> *listbox)
@@ -39,26 +31,6 @@ eListBoxEntryEPG::eListBoxEntryEPG(const eit_event_struct* evt, eListBox<eListBo
 			DescrFont = eSkin::getActive()->queryFont("eEPGSelector.Entry.Description");
 			TimeFont = eSkin::getActive()->queryFont("eEPGSelector.Entry.DateTime");
 		}
-
-		if ( TimeYOffs == -1 && TimeFontHeight == -1)
-		{
-			eRect rect(0,0,400,50);
-			eTextPara* tmp = new eTextPara(rect);
-			tmp->setFont( TimeFont );
-			tmp->renderString("0123456789");			
-			eSize s1 = tmp->getExtend();
-			tmp->destroy();
-
-			tmp = new eTextPara(rect);
-			tmp->setFont( DescrFont );
-			tmp->renderString("ABCefg");
-			eSize s2 = tmp->getExtend();
-			tmp->destroy();
-
-			TimeFontHeight = s1.height();
-			TimeYOffs = (s2.height() - TimeFontHeight) / 2;
-		}
-
 
 		for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
 		{
@@ -97,21 +69,22 @@ void eListBoxEntryEPG::redraw(gPainter *rc, const eRect& rect, gColor coActiveB,
 
 	if (!paraTime && !paraDescr)
 	{
-		eRect r(rect);
-		r.setTop( r.top() + TimeYOffs );
-		paraTime = new eTextPara(r);
+		paraTime = new eTextPara( eRect( rect.left(), 0, rect.width(), rect.height()) );
 		paraTime->setFont( TimeFont );
 		paraTime->renderString(time.str());
-		
-		int DescrXOffs = paraTime->getExtend().width() - rect.left();
-		r = rect;
-		r.setLeft( r.left() + DescrXOffs + TimeFontHeight );
-		paraDescr = new eTextPara(r);
+		eSize s1 = paraTime->getExtend();
+		DescrXOffs = s1.width()+s1.height();
+
+		paraDescr = new eTextPara( eRect( rect.left() ,0, rect.width(), rect.height()) );
 		paraDescr->setFont( DescrFont );
 		paraDescr->renderString(descr);
+		
+		DescrYOffs = ((rect.height() - paraDescr->boundBox.height()) / 2 ) - paraDescr->boundBox.top();
+		TimeYOffs = ((rect.height() - paraTime->boundBox.height()) / 2 ) - paraTime->boundBox.top();
 	}
-	rc->renderPara(*paraTime);
-	rc->renderPara(*paraDescr);
+
+	rc->renderPara(*paraTime, ePoint( rect.left(), rect.top() + TimeYOffs ) );
+	rc->renderPara(*paraDescr, ePoint( rect.left()+DescrXOffs, rect.top() + DescrYOffs ) );
 
 	eWidget* p = listbox->getParent();			
 	if (hilited && p && p->LCDElement)

@@ -8,14 +8,20 @@
 
 eRect eNumber::getNumberRect(int n)
 {
-	return eRect(n*space, 0, space, size.height());
+	if (deco_selected && have_focus)
+		return eRect( deco_selected.borderLeft + n * space_selected, deco_selected.borderTop, space, crect_selected.height() );
+	else if (deco)
+		return eRect( deco.borderLeft + n * space, deco.borderTop, space, crect.height() );
+	else
+		return eRect( n * space, 0, space, height() );
+
 }
 
 void eNumber::redrawNumber(gPainter *p, int n, const eRect &area)
 {
-	eRect pos=eRect(n*space, 0, space, size.height());
+	eRect pos =	getNumberRect(n);
 
-	if (!area.contains(pos))
+	if (!area.contains(pos) )
 		return;
 		
 	p->setForegroundColor((have_focus && n==active)?cursorB:normalB);
@@ -39,6 +45,11 @@ void eNumber::redrawNumber(gPainter *p, int n, const eRect &area)
 
 void eNumber::redrawWidget(gPainter *p, const eRect &area)
 {
+	if (deco_selected && have_focus)
+		deco_selected.drawDecoration(p, ePoint(width(), height()));
+	else if (deco)
+		deco.drawDecoration(p, ePoint(width(), height()));
+
 	for (int i=0; i<len; i++)
 		redrawNumber(p, i, area);
 }
@@ -51,7 +62,24 @@ int eNumber::eventHandler(const eWidgetEvent &event)
 	switch (event.type)
 	{
 	case eWidgetEvent::changedSize:
-		space=(size.width()-2)/len;
+		if (deco)
+		{
+			crect.setLeft( deco.borderLeft );
+			crect.setTop( deco.borderTop );
+			crect.setBottom( height() - deco.borderBottom );
+			crect.setRight( width() - deco.borderRight );
+			space = (crect.width()-2) / len;
+		}
+		if (deco_selected)
+		{
+			crect_selected.setLeft( deco_selected.borderLeft );
+			crect_selected.setTop( deco_selected.borderTop );
+			crect_selected.setBottom( height() - deco_selected.borderBottom );
+			crect_selected.setRight( width() - deco_selected.borderRight );
+			space_selected = (crect_selected.width()-2) / len;
+		}
+		else
+			space = (size.width()-2) / len;	
 		break;
 	case eWidgetEvent::evtAction:
 		if (event.action == &i_cursorActions->left)
@@ -80,7 +108,7 @@ int eNumber::eventHandler(const eWidgetEvent &event)
 				invalidate(getNumberRect(active));
 			digit=0;
 		} else
-			break;
+				break;
 		return 1;
 	default:
 		break;
@@ -88,7 +116,7 @@ int eNumber::eventHandler(const eWidgetEvent &event)
 	return eWidget::eventHandler(event);
 }
 
-eNumber::eNumber(eWidget *parent, int _len, int _min, int _max, int _maxdigits, int *init, int isactive, eLabel* descr, int grabfocus)
+eNumber::eNumber(eWidget *parent, int _len, int _min, int _max, int _maxdigits, int *init, int isactive, eLabel* descr, int grabfocus, int loadDeco)
 	:eWidget(parent, grabfocus), 
 	active(0), 
 	cursorB(eSkin::getActive()->queryScheme("global.selected.background")),	
@@ -97,6 +125,12 @@ eNumber::eNumber(eWidget *parent, int _len, int _min, int _max, int _maxdigits, 
 	normalF(eSkin::getActive()->queryScheme("global.normal.foreground")),	
 	have_focus(0), digit(isactive), isactive(isactive), descr(descr?descr->getText():""), tmpDescr(0)
 {
+	if (loadDeco)
+	{
+		deco.load("eNumber");
+		deco_selected.load("eNumber.selected");
+	}
+
 	setNumberOfFields(_len);
 	setLimits(_min, _max);
 	setMaximumDigits(_maxdigits);
@@ -154,14 +188,20 @@ void eNumber::gotFocus()
 {
 	have_focus++;
 	digit=isactive;
-	invalidate(getNumberRect(active));
+	
+  if (deco && deco_selected)
+		invalidate();
+	else
+		invalidate(getNumberRect(active));
+
 	if (parent && parent->LCDElement)  // detect if LCD Avail
 	{
+		LCDTmp = new eNumber(parent->LCDElement, len, min, max, maxdigits, &(number[0]), isactive, 0, 0, 0);
+		LCDTmp->hide();
+		eSize s = parent->LCDElement->getSize();
+
 		if (descr != "")
 		{
-			LCDTmp = new eNumber(parent->LCDElement, len, min, max, maxdigits, &(number[0]), isactive, 0, 0);
-			LCDTmp->hide();
-			eSize s = parent->LCDElement->getSize();
 			LCDTmp->move(ePoint(0,s.height()/2));
 			LCDTmp->resize(eSize(s.width(), s.height()/2));
 			tmpDescr = new eLabel(parent->LCDElement);
@@ -173,9 +213,6 @@ void eNumber::gotFocus()
 		}
 		else
 		{
-			LCDTmp = new eNumber(parent->LCDElement, len, min, max, maxdigits, &(number[0]), isactive, 0, 0);
-			LCDTmp->hide();
-			eSize s = parent->LCDElement->getSize();
 			LCDTmp->resize(s);
 			LCDTmp->move(ePoint(0,0));
 		}
@@ -203,13 +240,18 @@ void eNumber::lostFocus()
 		}
 	}
 	have_focus--;
-	invalidate(getNumberRect(active));
+
+	if (deco && deco_selected)
+		invalidate();
+	else
+		invalidate(getNumberRect(active));
 }
 
 void eNumber::setNumber(int f, int n)
 {
 	if ((f>=0) && (f<len))
 		number[f]=n;
+
 	invalidate(getNumberRect(f));
 }
 
@@ -261,4 +303,5 @@ int eNumber::getNumber()
 		n+=number[i];
 	}
 	return n;
+
 }

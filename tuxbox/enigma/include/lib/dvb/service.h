@@ -25,7 +25,7 @@ class eServiceReference;
 class eServiceEvent
 {
 public:
-	eServiceEvent(int type): type(type)
+	eServiceEvent(int type, void* data=0): type(type), data(data)
 	{
 	}
 	enum
@@ -44,6 +44,7 @@ public:
 		evtAspectChanged		
 	};
 	int type;
+	void* data;
 };
 
 class PMTEntry;

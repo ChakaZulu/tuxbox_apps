@@ -24,8 +24,8 @@ void eServiceInterface::handleServiceEvent(const eServiceEvent &evt)
 
 int eServiceInterface::switchServiceHandler(int id)
 {
-/*	if (currentServiceHandler && (currentServiceHandler->getID() == id))
-		return 0;   */
+	if (currentServiceHandler && (currentServiceHandler->getID() == id))
+		return 0;
 	stop();
 	eServiceHandler *handler=getServiceHandler(id);
 	if (!handler)
@@ -85,7 +85,6 @@ eService *eServiceInterface::lookupService(const eServiceReference &service)
 
 int eServiceInterface::play(const eServiceReference &s)
 {
-
 	if (switchServiceHandler(s.type))
 	{
 		eWarning("couldn't play service type %d\n", s.type);

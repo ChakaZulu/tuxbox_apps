@@ -36,14 +36,14 @@
 /*
  * Error codes
  */
-#define NC_ERR_OK		  0		// Everything is OK
+#define NC_ERR_OK		  	0		// Everything is OK
 #define NC_ERR_TYPE		 -1		// Type mismatch
 #define NC_ERR_NDIR		 -2		// Key is not a directory
 #define NC_ERR_PERM		 -3		// Operation is not allowed
 #define NC_ERR_NMEM		 -4		// Not enough memory to complete operation
 #define NC_ERR_NEXIST	 -5		// Key does not exist
 #define NC_ERR_NFILE	 -6		// No file is assigned/open
-#define NC_ERR_CORRUPT	 -7		// File is corrupted
+#define NC_ERR_CORRUPT -7		// File is corrupted
 #define NC_ERR_NVAL		 -8		// Invalid value
 #define NC_ERR_RDONLY	 -9		// File is open in read-only mode
 #define NC_ERR_NOSUPPORT -10	// Support is not compiled-in

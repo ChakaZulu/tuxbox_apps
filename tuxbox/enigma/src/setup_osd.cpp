@@ -29,15 +29,15 @@ eZapOsdSetup::eZapOsdSetup(): eWindow(0)
 	showConsoleOnFB->resize(eSize(fd+4+300, fd+4));
 
 	ok=new eButton(this);
-	ok->setText(_("[SAVE]"));
-	ok->move(ePoint(20, 125));
+	ok->setText(_("save"));
+	ok->move(ePoint(20, 135));
 	ok->resize(eSize(90, fd+4));
 	
 	CONNECT(ok->selected, eZapOsdSetup::okPressed);
 
 	abort=new eButton(this);
-	abort->setText(_("[ABORT]"));
-	abort->move(ePoint(140, 125));
+	abort->setText(_("abort"));
+	abort->move(ePoint(140, 135));
 	abort->resize(eSize(100, fd+4));
 
 	CONNECT(abort->selected, eZapOsdSetup::abortPressed);

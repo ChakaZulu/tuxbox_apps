@@ -286,6 +286,14 @@ int eTextPara::appendGlyph(FT_UInt glyphIndex, int flags)
 		kern=delta.x>>6;
 	}
 
+	int tmp = cursor.y() - glyph->top;	// this calcs the Top of the boundbox
+	if ( tmp < boundBox.top() || boundBox.isNull() )
+		boundBox.setTop(tmp);
+
+	tmp = boundBox.top() + glyph->height;
+	if ( tmp > boundBox.bottom() )
+		boundBox.setBottom(tmp);
+
 	pGlyph ng;
 	ng.x=cursor.x()+kern;
 	xadvance+=kern;

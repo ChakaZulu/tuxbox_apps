@@ -228,7 +228,6 @@ int eSkin::parseFontAlias(XMLTreeNode *xscheme)
 			continue;
 		}
 		fontAlias[name]=gFont(i->second, atoi(size));
-		eDebug("Make Font Alias %s for Font %s with size %i", name, font, fontAlias[name].pointSize );
 	}
 	return 0;
 }
@@ -285,28 +284,35 @@ int eSkin::parseImages(XMLTreeNode *inode)
 	return 0;
 }
 
-int eSkin::parseValues(XMLTreeNode *xvalues)
+int eSkin::parseImageAlias(XMLTreeNode *xvalues)
 {
 	for (XMLTreeNode *node=xvalues->GetChild(); node; node=node->GetNext())
 	{
-		if (strcmp(node->GetType(), "value"))
+		if (strcmp(node->GetType(), "map"))
 		{
 			eDebug("illegal values entry %s", node->GetType());
 			continue;
 		}
-		const char *name=node->GetAttributeValue("name");
-		if (!name)
+		const char *name=node->GetAttributeValue("name"),
+							 *img=node->GetAttributeValue("img");
+		if (!name || !img)
 		{
-			eDebug("values entry has no name");
+			eDebug("map entry has no name or img");
 			continue;
 		}
-		const char *value=node->GetAttributeValue("value");
-		if (!value)
+		std::map<eString, eString>::iterator it = imageAlias.find(name);
+		if (it != imageAlias.end())
 		{
-			eDebug("values entry has no value");
+			eDebug("imagealias %s does exist, skip make alias for image %s", name, img);
 			continue;
 		}
-		values[name]=atoi(value);
+		std::map<eString, gPixmap*>::iterator i = images.find(img);
+		if (i == images.end())
+		{
+			eDebug("image %s not found, skip make alias %s", img , name);
+			continue;
+		}
+		imageAlias[name]=img;
 	}
 	return 0;
 }
@@ -346,6 +352,32 @@ int eSkin::parseFonts(XMLTreeNode *xfonts)
 			continue;
 		}
 		fonts[name]=fontRenderClass::getInstance()->AddFont((basepath+eString(file)).c_str());
+	}
+	return 0;
+}
+
+int eSkin::parseValues(XMLTreeNode *xvalues)
+{
+	for (XMLTreeNode *node=xvalues->GetChild(); node; node=node->GetNext())
+	{
+		if (strcmp(node->GetType(), "value"))
+		{
+			eDebug("illegal values entry %s", node->GetType());
+			continue;
+		}
+		const char *name=node->GetAttributeValue("name");
+		if (!name)
+		{
+			eDebug("values entry has no name");
+			continue;
+		}
+		const char *value=node->GetAttributeValue("value");
+		if (!value)
+		{
+			eDebug("values entry has no value");
+			continue;
+		}
+		values[name]=atoi(value);
 	}
 	return 0;
 }
@@ -533,6 +565,16 @@ void eSkin::parseSkins()
 		XMLTreeNode *node=it->RootNode();
 	
 		for (node=node->GetChild(); node; node=node->GetNext())
+			if (!strcmp(node->GetType(), "imagealias"))
+				parseImageAlias(node);
+
+	 }
+
+	for (ePtrList<XMLTreeParser>::iterator it(parsers); it != parsers.end(); it++)
+	{
+		XMLTreeNode *node=it->RootNode();
+	
+		for (node=node->GetChild(); node; node=node->GetNext())
 			if (!strcmp(node->GetType(), "values"))
 				parseValues(node);
 	}
@@ -606,7 +648,16 @@ gColor eSkin::queryScheme(const eString& name) const
 
 gPixmap *eSkin::queryImage(const eString& name) const
 {
-	std::map<eString, gPixmap*>::const_iterator it = images.find(name);
+	eString img;
+
+	std::map<eString, eString>::const_iterator i = imageAlias.find(name);
+		
+	if (i != imageAlias.end())
+		img = i->second;
+	else
+		img = name;
+
+	std::map<eString, gPixmap*>::const_iterator it = images.find(img);
 
 	if (it != images.end())
 		return it->second;

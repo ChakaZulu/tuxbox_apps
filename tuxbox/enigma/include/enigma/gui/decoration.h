@@ -12,9 +12,11 @@ class eDecoration
 			*iBottomLeft, *iBottom, *iBottomRight;
 			
 public:
+	operator bool() { return iTopLeft || iTop || iTopRight || iLeft || iRight || iBottomLeft || iBottom || iBottomRight; }
+	
 	eDecoration();
 	void load(const char *basename);
-	
+
 	void drawDecoration(gPainter *target, ePoint size);
 	int borderTop, borderLeft, borderBottom, borderRight;
 };

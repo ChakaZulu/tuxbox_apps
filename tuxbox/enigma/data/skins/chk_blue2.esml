@@ -59,6 +59,9 @@
 		<color name="shadow_yellow" color="#586D88" end="#ffff03" size="16" />
 		<color name="shadow_blue" color="#586D88" end="#0303ff" size="16" />
 		<color name="shadow_gray" color="#586D88" end="#282828" size="16" />
+
+		<!--color name="button_border_dark" color=#1a636c72" />
+		<color name="button_border_light" color=#1FFFFFF" /-->
 	</colors>
 	
 	<colorscheme>
@@ -94,40 +97,80 @@
 		<value name="fontsize" value="23" />
 	</values>
 
-	<images basepath="" target="fb">
-		<img name="button_red" src="button_red.png" />
-		<img name="button_green" src="button_green.png" />
-		<img name="button_yellow" src="button_yellow.png" />
-		<img name="button_blue" src="button_blue.png" />
-		<img name="button_gray" src="button_gray.png" />
-		<img name="osd_crypt_on" src="chk_v2/crypt_on.png" />
-		<img name="osd_format_on" src="chk_v2/format_on.png" />
-		<img name="osd_dolby_on" src="chk_v2/dolby_on.png" />
-		<img name="osd_dolby_off" src="chk_v2/dolby_off.png" />
-		<img name="osd_crypt_off" src="chk_v2/crypt_off.png" />
-		<img name="osd_format_off" src="chk_v2/format_off.png" />
-		<img name="br" src="chk_v2/br2.png" />
-		<img name="bl" src="chk_v2/bl2.png" />
-		<img name="lcd_enigma_logo" src="chk_v2/logo.png" nomerge="yes" />
-		<img name="lcd_menu" src="chk_v2/lcdmenu.png" nomerge="yes" />
-		<img name="lcd_scart" src="video.png" nomerge="yes" />
-		<img name="speaker" src="chk_v2/speaker.png" nomerge="yes" />
+	<images basepath="chk_v2" target="fb">
+		<img name="eCheckbox.checked" src="checked.png" />
+		<img name="eCheckbox.unchecked" src="unchecked.png" />
+		<img name="button_red" src="../button_red.png" />
+		<img name="button_green" src="../button_green.png" />
+		<img name="button_yellow" src="../button_yellow.png" />
+		<img name="button_blue" src="../button_blue.png" />
+		<img name="button_gray" src="../button_gray.png" />
+		<img name="osd_crypt_on" src="crypt_on.png" />
+		<img name="osd_format_on" src="format_on.png" />
+		<img name="osd_dolby_on" src="dolby_on.png" />
+		<img name="osd_dolby_off" src="dolby_off.png" />
+		<img name="osd_crypt_off" src="crypt_off.png" />
+		<img name="osd_format_off" src="format_off.png" />
+		<img name="br" src="br2.png" />
+		<img name="bl" src="bl2.png" />
+		<img name="lcd_enigma_logo" src="logo.png" nomerge="yes" />
+		<img name="lcd_menu" src="lcdmenu.png" nomerge="yes" />
+		<img name="lcd_scart" src="../video.png" nomerge="yes" />
+		<img name="speaker" src="speaker.png" nomerge="yes" />
 
-		<img name="eListBox.arrow.updown" src="chk_v2/lbarrow.png" />
-		<img name="eListBox.arrow.left" src="chk_v2/lbarrow_left.png" />
-		<img name="eListBox.arrow.right" src="chk_v2/lbarrow_right.png" />
-		<img name="eListBox.arrow.up" src="chk_v2/lbarrow_up.png" />
-		<img name="eListBox.arrow.down" src="chk_v2/lbarrow_down.png" />
+		<img name="eListBox.arrow.updown" src="lbarrow.png" />
+		<img name="eListBox.arrow.left" src="lbarrow_left.png" />
+		<img name="eListBox.arrow.right" src="lbarrow_right.png" />
+		<img name="eListBox.arrow.up" src="lbarrow_up.png" />
+		<img name="eListBox.arrow.down" src="lbarrow_down.png" />
 
-		<img name="eWindow.top" src="chk_v2/t.png" />
-		<img name="eWindow.topLeft" src="chk_v2/tl.png" />
-		<img name="eWindow.topRight" src="chk_v2/tr.png" />
+		<img name="eWindow.top" src="t.png" />
+		<img name="eWindow.topLeft" src="tl.png" />
+		<img name="eWindow.topRight" src="tr.png" />
 		<!--<img name="eWindow.left" src="chk_v2/blind.png" />
 		<img name="eWindow.right" src="chk_v2/blind.png" />-->
-		<img name="eWindow.bottomLeft" src="chk_v2/bl.png" />
-		<img name="eWindow.bottom" src="chk_v2/b.png" />
-		<img name="eWindow.bottomRight" src="chk_v2/br.png" />
+		<img name="eWindow.bottomLeft" src="bl.png" />
+		<img name="eWindow.bottom" src="b.png" />
+		<img name="eWindow.bottomRight" src="br.png" />
+		<img name="3DBorder.unselected.corner.light" src="3D_border_unselected_corner_light.png" />
+		<img name="3DBorder.unselected.corner.dark" src="3D_border_unselected_corner_dark.png" />
+		<img name="3DBorder.unselected.corner.lightDark" src="3D_border_unselected_corner_lightDark.png" />
+		<img name="3DBorder.unselected.corner.darkLight" src="3D_border_unselected_corner_darkLight.png" />
+		<img name="3DBorder.unselected.hor.dark" src="3D_border_unselected_hor_dark.png" />
+		<img name="3DBorder.unselected.hor.light" src="3D_border_unselected_hor_light.png" />
+		<img name="3DBorder.unselected.ver.dark" src="3D_border_unselected_ver_dark.png" />		
+		<img name="3DBorder.unselected.ver.light" src="3D_border_unselected_ver_light.png" />
 	</images>
+
+	<imagealias>
+		<map name="eButton.top" img="3DBorder.unselected.hor.light" />
+		<map name="eButton.left" img="3DBorder.unselected.ver.light" />
+		<map name="eButton.topLeft" img="3DBorder.unselected.corner.light" />
+		<map name="eButton.bottom" img="3DBorder.unselected.hor.dark" />
+		<map name="eButton.right" img="3DBorder.unselected.ver.dark" />
+		<map name="eButton.bottomRight" img="3DBorder.unselected.corner.dark" />		
+		<map name="eButton.topRight" img="3DBorder.unselected.corner.lightDark" />
+		<map name="eButton.bottomLeft" img="3DBorder.unselected.corner.lightDark" />		
+
+		<map name="eNumber.top" img="3DBorder.unselected.hor.dark" />
+		<map name="eNumber.left" img="3DBorder.unselected.ver.dark" />
+		<map name="eNumber.topLeft" img="3DBorder.unselected.corner.dark" />
+		<map name="eNumber.bottom" img="3DBorder.unselected.hor.light" />
+		<map name="eNumber.right" img="3DBorder.unselected.ver.light" />
+		<map name="eNumber.bottomRight" img="3DBorder.unselected.corner.light" />		
+		<map name="eNumber.topRight" img="3DBorder.unselected.corner.darkLight" />
+		<map name="eNumber.bottomLeft" img="3DBorder.unselected.corner.darkLight" />		
+
+		<map name="eListBox.top" img="3DBorder.unselected.hor.dark" />
+		<map name="eListBox.left" img="3DBorder.unselected.ver.dark" />
+		<map name="eListBox.topLeft" img="3DBorder.unselected.corner.dark" />
+		<map name="eListBox.bottom" img="3DBorder.unselected.hor.light" />
+		<map name="eListBox.right" img="3DBorder.unselected.ver.light" />
+		<map name="eListBox.bottomRight" img="3DBorder.unselected.corner.light" />		
+		<map name="eListBox.topRight" img="3DBorder.unselected.corner.darkLight" />
+		<map name="eListBox.bottomLeft" img="3DBorder.unselected.corner.darkLight" />		
+
+	</imagealias>
 	
 	<object name="enigma_lcd_main">
 		<eZapLCDMain position="0:0" size="120:64">

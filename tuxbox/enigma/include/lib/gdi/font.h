@@ -94,6 +94,7 @@ class eTextPara
 	void newLine();
 	void setFont(Font *font);
 public:
+	eRect boundBox;
 	eTextPara(eRect area, ePoint start=ePoint(-1, -1))
 		: area(area), cursor(start), maximum(0, 0), left(start.x())
 	{

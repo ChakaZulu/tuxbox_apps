@@ -31,6 +31,7 @@ class eSkin
 	int parseColors(XMLTreeNode *colors);
 	int parseScheme(XMLTreeNode *scheme);
 	int parseImages(XMLTreeNode *images);
+	int parseImageAlias(XMLTreeNode *images);
 	int parseValues(XMLTreeNode *values);
 	int parseFonts(XMLTreeNode *fonts);
 	int parseFontAlias(XMLTreeNode *fonts);
@@ -51,6 +52,7 @@ class eSkin
 	std::map<eString, int> values;
 	std::map<eString, eString> fonts;
 	std::map<eString, gFont> fontAlias;
+	std::map<eString, eString> imageAlias;
 
 	eNamedColor *searchColor(const eString &name);
 
