@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.25 2001/07/19 10:33:52 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.26 2001/07/19 14:12:30 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.26  2001/07/19 14:12:30  fnbrd
+//  Noch ein paar Kleinigkeiten verbessert.
+//
 //  Revision 1.25  2001/07/19 10:33:52  fnbrd
 //  Beschleunigt, interne Strukturen geaendert, Ausgaben sortiert.
 //
@@ -142,8 +145,6 @@ static int debug=0;
 #define dprintf(fmt, args...) {if(debug) printf(fmt, ## args);}
 #define dputs(str) {if(debug) puts(str);}
 
-static SIservices services; // die Menge mit den services (aus der sdt)
-
 static pthread_mutex_t eventsLock=PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge events geschrieben und gelesen wird
 static pthread_mutex_t servicesLock=PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge services geschrieben und gelesen wird
 static pthread_mutex_t dmxEITlock=PTHREAD_MUTEX_INITIALIZER;
@@ -168,7 +169,6 @@ typedef SmartPtr<class SIevent, RefCounted, DisallowConversion, AssertCheckStric
 typedef map<unsigned short, SIeventPtr, less<unsigned short> > MySIeventsOrderEventID;
 MySIeventsOrderEventID mySIeventsOrderEventID;
 
-// Key ist timet (startzeit), data ist ein SIeventPtr
 struct OrderServiceIDFirstStartTimeEventID
 {
     bool operator()(const SIeventPtr &p1, const SIeventPtr &p2) {
@@ -184,7 +184,7 @@ struct OrderServiceIDFirstStartTimeEventID
 typedef map<const SIeventPtr, SIeventPtr, OrderServiceIDFirstStartTimeEventID > MySIeventsOrderServiceIDFirstStartTimeEventID;
 MySIeventsOrderServiceIDFirstStartTimeEventID mySIeventsOrderServiceIDFirstStartTimeEventID;
 
-// Key ist timet (startzeit), data ist ein SIeventPtr
+
 struct OrderFirstEndTimeServiceIDEventID
 {
     bool operator()(const SIeventPtr &p1, const SIeventPtr &p2) {
@@ -237,6 +237,60 @@ static void removeOldEvents(long seconds)
   return;
 }
 
+typedef SmartPtr<class SIservice, RefCounted, DisallowConversion, AssertCheckStrict>
+  SIservicePtr;
+
+// Key ist unsigned short (Sevice-ID), data ist ein SIservicePtr
+typedef map<unsigned short, SIservicePtr, less<unsigned short> > MySIservicesOrderServiceID;
+MySIservicesOrderServiceID mySIservicesOrderServiceID;
+
+struct OrderServiceName
+{
+  // Evtl. waere es schneller die Controlcodes beim einfuegen zu loeschen
+  bool operator()(const SIservicePtr &p1, const SIservicePtr &p2) {
+/*
+    // Erst mal die Controlcodes entfernen
+    char servicename1[50];
+    strncpy(servicename1, p1->serviceName.c_str(), sizeof(servicename1)-1);
+    servicename1[sizeof(servicename1)-1]=0;
+    removeControlCodes(servicename1);
+    char servicename2[50];
+    strncpy(servicename2, p2->serviceName.c_str(), sizeof(servicename2)-1);
+    servicename2[sizeof(servicename2)-1]=0;
+    removeControlCodes(servicename2);
+    return strcasecmp(servicename1, servicename2) < 0;
+*/
+    return strcasecmp(p1->serviceName.c_str(), p2->serviceName.c_str()) < 0;
+  }
+};
+
+typedef map<const SIservicePtr, SIservicePtr, OrderServiceName > MySIservicesOrderServiceName;
+MySIservicesOrderServiceName mySIservicesOrderServiceName;
+
+/*
+// Loescht ein Event aus allen Mengen
+static void deleteService(const unsigned short serviceID)
+{
+  MySIservicesOrderServiceID::iterator s=mySIservicesOrderServiceID.find(serviceID);
+  if(s!=mySIservicesOrderServiceID.end()) {
+    mySIservicesOrderServiceName.erase(s->second);
+    mySIservicesOrderServiceID.erase(serviceID);
+  }
+}
+*/
+// Fuegt ein Event in alle Mengen ein
+static void addService(const SIservice &s)
+{
+  SIservicePtr sptr(new SIservice(s));
+  // Controlcodes entfernen
+  char servicename[50];
+  strncpy(servicename, sptr->serviceName.c_str(), sizeof(servicename)-1);
+  servicename[sizeof(servicename)-1]=0;
+  removeControlCodes(servicename);
+  sptr->serviceName=servicename;
+  mySIservicesOrderServiceID.insert(make_pair(s.serviceID, sptr));
+  mySIservicesOrderServiceName.insert(make_pair(sptr, SIservicePtr(sptr)));
+}
 
 //------------------------------------------------------------
 // other stuff
@@ -366,17 +420,13 @@ static int stopDMXeitNVOD(void)
 // 0 bei Misserfolg
 static unsigned short findServiceIDforServiceName(const char *serviceName)
 {
-  for(SIservices::iterator s=services.begin(); s!=services.end(); s++) {
-    // Erst mal die Controlcodes entfernen
-    char servicename[50];
-    strncpy(servicename, s->serviceName.c_str(), sizeof(servicename)-1);
-    servicename[sizeof(servicename)-1]=0;
-    removeControlCodes(servicename);
-    // Jetz pruefen ob der Servicename der gewuenschte ist
-    dprintf("testing '%s'\n", servicename);
-    if(!strcasecmp(servicename, serviceName))
-      return s->serviceID;
-  }
+  SIservicePtr s(new SIservice((unsigned short)0));
+  s->serviceName=serviceName;
+  dprintf("Search for Service '%s'\n", serviceName);
+  MySIservicesOrderServiceName::iterator si=mySIservicesOrderServiceName.find(s);
+  if(si!=mySIservicesOrderServiceName.end())
+    return si->first->serviceID;
+  dputs("Service not found");
   return 0;
 }
 
@@ -531,7 +581,8 @@ char stati[1024];
   unsigned anzEvents=mySIeventsOrderEventID.size();
   pthread_mutex_unlock(&eventsLock);
   pthread_mutex_lock(&servicesLock);
-  unsigned anzServices=services.size();
+  unsigned anzServices=mySIservicesOrderServiceID.size();
+//  unsigned anzServices=services.size();
   pthread_mutex_unlock(&servicesLock);
   struct mallinfo speicherinfo=mallinfo();
   time_t zeit=time(NULL);
@@ -540,7 +591,7 @@ char stati[1024];
     "Hours to cache: %d\n"
     "Events are old %dmin after their end time\n"
     "Number of cached services: %u\n"
-    "Number of cached Events: %u\n"
+    "Number of cached events: %u\n"
     "Total size of memory occupied by chunks handed out by malloc: %d\n"
     "Total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %.2fMB)\n",
     ctime(&zeit),
@@ -699,10 +750,10 @@ static void commandEventListTV(struct connectionData *client, char *data, unsign
   }
   pthread_mutex_lock(&servicesLock);
   pthread_mutex_lock(&eventsLock);
-  for(SIservices::iterator s=services.begin(); s!=services.end(); s++)
-    if(s->serviceTyp==0x01) { // TV
-      const SIevent &evt=findActualSIeventForServiceID(s->serviceID);
-      strcat(evtList, s->serviceName.c_str());
+  for(MySIservicesOrderServiceName::iterator s=mySIservicesOrderServiceName.begin(); s!=mySIservicesOrderServiceName.end(); s++)
+    if(s->first->serviceTyp==0x01) { // TV
+      const SIevent &evt=findActualSIeventForServiceID(s->first->serviceID);
+      strcat(evtList, s->first->serviceName.c_str());
       strcat(evtList, "\n");
       if(evt.serviceID!=0)
         //Found
@@ -813,15 +864,10 @@ const unsigned timeoutInSeconds=2;
     if(header.current_next_indicator) {
       // Wir wollen nur aktuelle sections
       SIsectionSDT sdt(SIsection(sizeof(header)+header.section_length-5, buf));
-//      SIsection section(sizeof(header)+header.section_length-5, buf);
-//      SIsectionSDT sdt(section);
-//      printf("Section read\n");
       pthread_mutex_lock(&servicesLock);
-//      printf("Services: %d\n", sdt.services().size());
-      services.insert(sdt.services().begin(), sdt.services().end());
-//      printf("Services over all: %d\n", services.size());
+      for(SIservices::iterator s=sdt.services().begin(); s!=sdt.services().end(); s++)
+        addService(*s);
       pthread_mutex_unlock(&servicesLock);
-//      printf("Services inserted\n");
     } // if
     else
       delete[] buf;
@@ -1253,7 +1299,8 @@ static void *houseKeepingThread(void *)
     pthread_mutex_unlock(&eventsLock);
     if(debug) {
       pthread_mutex_lock(&servicesLock);
-      dprintf("Number of services: %u\n", services.size());
+      dprintf("Number of services: %u\n", mySIservicesOrderServiceID.size());
+//      dprintf("Number of services: %u\n", services.size());
       pthread_mutex_unlock(&servicesLock);
     }
     if(startDMXeit())
@@ -1283,7 +1330,7 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.25 2001/07/19 10:33:52 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.26 2001/07/19 14:12:30 fnbrd Exp $\n");
 
   if(argc!=1 && argc!=2) {
     printHelp();
