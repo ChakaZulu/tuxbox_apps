@@ -57,12 +57,12 @@
 
 
 //------------------------------------------------------------------------
-bool sortByDate (const CPicture& a, const CPicture& b)
+bool comparePictureByDate (const CPicture& a, const CPicture& b)
 {
 	return a.Date < b.Date ;
 }
 //------------------------------------------------------------------------
-bool sortByFilename (const CPicture& a, const CPicture& b)
+bool comparePictureByFilename (const CPicture& a, const CPicture& b)
 {
 	return a.Filename < b.Filename ;
 }
@@ -337,9 +337,9 @@ int CPictureViewerGui::show()
 							printf("Wrong Filetype %s:%d\n",files->Name.c_str(), files->getType());
 						
 						if(m_sort==FILENAME)
-							std::sort(playlist.begin(),playlist.end(),sortByFilename);
+							std::sort(playlist.begin(),playlist.end(),comparePictureByFilename);
 						else if(m_sort==DATE)
-							std::sort(playlist.begin(),playlist.end(),sortByDate);
+							std::sort(playlist.begin(),playlist.end(),comparePictureByDate);
 					}
 				}
 	//				CLCD::getInstance()->setMode(CLCD::MODE_MP3);
@@ -369,12 +369,12 @@ int CPictureViewerGui::show()
 			if(m_sort==FILENAME)
 			{
 				m_sort=DATE;
-				sort(playlist.begin(),playlist.end(),sortByDate);
+				std::sort(playlist.begin(),playlist.end(),comparePictureByDate);
 			}
 			else if(m_sort==DATE)
 			{
 				m_sort=FILENAME;
-				sort(playlist.begin(),playlist.end(),sortByFilename);
+				std::sort(playlist.begin(),playlist.end(),comparePictureByFilename);
 			}
 			update=true;
 		}
