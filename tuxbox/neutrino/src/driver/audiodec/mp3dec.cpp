@@ -38,10 +38,12 @@
 #include <string.h>
 #include <errno.h>
 #include <mad.h>
-
+#include <id3tag.h>
+#include <sstream>
 #include <driver/audiodec/mp3dec.h>
 #include <driver/netfile.h>
 #include <linux/soundcard.h>
+#include <assert.h>
 
 // Frames to skip in ff/rev mode
 #define FRAMES_TO_SKIP 75 
@@ -225,11 +227,13 @@ void CMP3Dec::CreateInfo()
    else
       Vbr="";
 
-	CAudioPlayer::getInstance()->m_MetaData.type = CAudioPlayer::MP3;
+	CAudioPlayer::getInstance()->m_MetaData.type = CAudioPlayer::MetaData::MP3;
 	CAudioPlayer::getInstance()->m_MetaData.bitrate = m_bitrate;
 	CAudioPlayer::getInstance()->m_MetaData.samplerate = m_samplerate;
 	CAudioPlayer::getInstance()->m_MetaData.total_time = m_filesize * 8 / m_bitrate;
-	snprintf(CAudioPlayer::getInstance()->m_MetaData.type_info, 99, "MPEG Layer %s / %s", Layer, Mode);
+	std::stringstream ss;
+	ss << "MPEG Layer " << Layer << " / " << Mode;
+	CAudioPlayer::getInstance()->m_MetaData.type_info = ss.str();
 	CAudioPlayer::getInstance()->m_MetaData.changed=true;
 }
 
@@ -619,6 +623,7 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 	}
 
 	/* That's the end of the world (in the H. G. Wells way). */
+	fclose(InputFp);
 	return(Status);
 }
 
@@ -630,5 +635,265 @@ CMP3Dec* CMP3Dec::getInstance()
 		MP3Dec = new CMP3Dec();
 	}
 	return MP3Dec;
+}
+
+bool CMP3Dec::GetMetaData(FILE *in, bool nice)
+{
+	GetMP3Info(in, nice);
+	GetID3(in);
+	fclose(in);
+	return true;
+}
+
+#define BUFFER_SIZE 2100
+void CMP3Dec::GetMP3Info(FILE* in, bool nice)
+{
+	struct mad_stream	Stream;
+	struct mad_header	Header;
+	unsigned char		InputBuffer[BUFFER_SIZE];
+	int ReadSize;
+	int filesize;
+
+	ReadSize=fread(InputBuffer,1,BUFFER_SIZE,in);
+
+	if(nice)
+		usleep(15000);
+	bool foundSyncmark=true;
+	// Check for sync mark (some encoder produce data befor 1st frame in mp3 stream)
+	if(InputBuffer[0]!=0xff || (InputBuffer[1]&0xe0)!=0xe0)
+	{
+		foundSyncmark=false;
+		//skip to first sync mark
+		int n=0,j=0;
+		while((InputBuffer[n]!=0xff || (InputBuffer[n+1]&0xe0)!=0xe0) && ReadSize > 1)
+		{
+			n++;
+			j++;
+			if(n > ReadSize-2)
+			{
+				j--;
+				n=0;
+				fseek(in, -1, SEEK_CUR);
+				ReadSize=fread(InputBuffer,1,BUFFER_SIZE,in);
+				if(nice)
+					usleep(15000);
+			}
+		}
+		if(ReadSize > 1)
+		{
+			fseek(in, j, SEEK_SET);
+			ReadSize=fread(InputBuffer,1,BUFFER_SIZE,in);
+			if(nice)
+				usleep(15000);
+			foundSyncmark=true;
+		}
+	}
+	if(foundSyncmark)
+	{
+//      printf("found syncmark...\n");
+		mad_stream_init(&Stream);
+		mad_stream_buffer(&Stream,InputBuffer,ReadSize);
+		mad_header_decode(&Header,&Stream);
+
+		CAudioPlayer::getInstance()->m_MetaData.vbr=false;
+
+		if(nice)
+			usleep(15000);
+		mad_stream_finish(&Stream);
+		// filesize
+		fseek(in, 0, SEEK_END);
+		filesize=ftell(in);
+
+		CAudioPlayer::getInstance()->m_MetaData.total_time=filesize*8/Header.bitrate;
+	}
+	else
+	{
+		CAudioPlayer::getInstance()->m_MetaData.total_time=0;
+	}
+}
+
+
+//------------------------------------------------------------------------
+void CMP3Dec::GetID3(FILE* in)
+{
+	unsigned int i;
+	struct id3_frame const *frame;
+	id3_ucs4_t const *ucs4;
+	id3_utf8_t *utf8;
+	char const spaces[] = "          ";
+	
+	struct 
+		{
+		char const *id;
+		char const *name;
+	} const info[] = 
+		{
+			{ ID3_FRAME_TITLE,  "Title"},
+			{ "TIT3",           0},	 /* Subtitle */
+			{ "TCOP",           0,},  /* Copyright */
+			{ "TPRO",           0,},  /* Produced */
+			{ "TCOM",           "Composer"},
+			{ ID3_FRAME_ARTIST, "Artist"},
+			{ "TPE2",           "Orchestra"},
+			{ "TPE3",           "Conductor"},
+			{ "TEXT",           "Lyricist"},
+			{ ID3_FRAME_ALBUM,  "Album"},
+			{ ID3_FRAME_YEAR,   "Year"},
+			{ ID3_FRAME_TRACK,  "Track"},
+			{ "TPUB",           "Publisher"},
+			{ ID3_FRAME_GENRE,  "Genre"},
+			{ "TRSN",           "Station"},
+			{ "TENC",           "Encoder"}
+		};
+
+	/* text information */
+
+	struct id3_file *id3file = id3_file_fdopen(fileno(in), ID3_FILE_MODE_READONLY);
+	if(id3file == 0)
+		printf("error open id3 file\n");
+	else
+	{
+		id3_tag *tag=id3_file_tag(id3file);
+		if(tag)
+		{
+			for(i = 0; i < sizeof(info) / sizeof(info[0]); ++i)
+			{
+				union id3_field const *field;
+				unsigned int nstrings, namelen, j;
+				char const *name;
+
+				frame = id3_tag_findframe(tag, info[i].id, 0);
+				if(frame == 0)
+					continue;
+
+				field    = &frame->fields[1];
+				nstrings = id3_field_getnstrings(field);
+
+				name = info[i].name;
+				namelen = name ? strlen(name) : 0;
+				assert(namelen < sizeof(spaces));
+
+				for(j = 0; j < nstrings; ++j)
+				{
+					ucs4 = id3_field_getstrings(field, j);
+					assert(ucs4);
+
+					if(strcmp(info[i].id, ID3_FRAME_GENRE) == 0)
+						ucs4 = id3_genre_name(ucs4);
+
+					utf8 = id3_ucs4_utf8duplicate(ucs4);
+					if (utf8 == NULL)
+						goto fail;
+
+					if (j == 0 && name)
+					{
+						if(strcmp(name,"Title") == 0)
+							CAudioPlayer::getInstance()->m_MetaData.title = (char *) utf8;
+						if(strcmp(name,"Artist") == 0)
+							CAudioPlayer::getInstance()->m_MetaData.artist = (char *) utf8;
+						if(strcmp(name,"Year") == 0)
+							CAudioPlayer::getInstance()->m_MetaData.date = (char *) utf8;
+						if(strcmp(name,"Album") == 0)
+							CAudioPlayer::getInstance()->m_MetaData.album = (char *) utf8;
+						if(strcmp(name,"Genre") == 0)
+							CAudioPlayer::getInstance()->m_MetaData.genre = (char *) utf8;
+					}
+					else
+					{
+						if(strcmp(info[i].id, "TCOP") == 0 || strcmp(info[i].id, "TPRO") == 0)
+						{
+							//printf("%s  %s %s\n", spaces, (info[i].id[1] == 'C') ? ("Copyright (C)") : ("Produced (P)"), latin1);
+						}
+						//else
+						//printf("%s  %s\n", spaces, latin1);
+					}
+
+					free(utf8);
+				}
+			}
+
+#ifdef INCLUDE_UNUSED_STUFF
+			/* comments */
+
+			i = 0;
+			while((frame = id3_tag_findframe(tag, ID3_FRAME_COMMENT, i++)))
+			{
+				id3_utf8_t *ptr, *newline;
+				int first = 1;
+
+				ucs4 = id3_field_getstring(&frame->fields[2]);
+				assert(ucs4);
+
+				if(*ucs4)
+					continue;
+
+				ucs4 = id3_field_getfullstring(&frame->fields[3]);
+				assert(ucs4);
+
+				utf8 = id3_ucs4_utf8duplicate(ucs4);
+				if (utf8 == 0)
+					goto fail;
+
+				ptr = utf8;
+				while(*ptr)
+				{
+					newline = (id3_utf8_t *) strchr((char*)ptr, '\n');
+					if(newline)
+						*newline = 0;
+
+					if(strlen((char *)ptr) > 66)
+					{
+						id3_utf8_t *linebreak;
+
+						linebreak = ptr + 66;
+
+						while(linebreak > ptr && *linebreak != ' ')
+							--linebreak;
+
+						if(*linebreak == ' ')
+						{
+							if(newline)
+								*newline = '\n';
+
+							newline = linebreak;
+							*newline = 0;
+						}
+					}
+
+					if(first)
+					{
+						char const *name;
+						unsigned int namelen;
+
+						name    = "Comment";
+						namelen = strlen(name);
+						assert(namelen < sizeof(spaces));
+						mp3->Comment = (char *) ptr;
+						//printf("%s%s: %s\n", &spaces[namelen], name, ptr);
+						first = 0;
+					}
+					else
+						//printf("%s  %s\n", spaces, ptr);
+
+						ptr += strlen((char *) ptr) + (newline ? 1 : 0);
+				}
+
+				free(utf8);
+				break;
+			}
+#endif
+			id3_tag_delete(tag);
+		}
+		else
+			printf("error open id3 tag\n");
+
+		id3_file_close(id3file);
+	}
+
+	if(0)
+	{
+	fail:
+		printf("id3: not enough memory to display tag");
+	}
 }
 

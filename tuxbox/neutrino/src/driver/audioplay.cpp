@@ -105,9 +105,8 @@ void* CAudioPlayer::PlayThread(void * filename)
 			else
 			{
 				Status = CMP3Dec::getInstance()->Decoder(fp,soundfd,&CAudioPlayer::getInstance()->state);
-				fclose(fp);
 			}
-
+			// DECODER CLOSES STREAM
 			if(Status > 0)
 				fprintf(stderr,"Error %d occured during decoding.\n",Status);
 	
@@ -162,19 +161,24 @@ void CAudioPlayer::sc_callback(void *arg)
 {
   bool changed=false;
   CSTATE *stat = (CSTATE*)arg;
-  if(strcmp(m_MetaData.artist, stat->artist))
+  if(m_MetaData.artist ==stat->artist)
   {
-	  strncpy(m_MetaData.artist, stat->artist,99);
+	  m_MetaData.artist = stat->artist;
 	  changed=true;
   }
-  if (strcmp(m_MetaData.title, stat->title))
+  if (m_MetaData.title == stat->title)
   {
-	  strncpy(m_MetaData.title, stat->title,99);
+	  m_MetaData.title = stat->title;
 	  changed=true;
   }
-  if (strcmp(m_MetaData.sc_station,stat->station))
+  if (m_MetaData.sc_station == stat->station)
   {
-	  strncpy(m_MetaData.sc_station, stat->station,99);
+	  m_MetaData.sc_station == stat->station;
+	  changed=true;
+  }
+  if (m_MetaData.genre == stat->genre)
+  {
+	  m_MetaData.genre = stat->genre;
 	  changed=true;
   }
   if(changed)
@@ -188,19 +192,49 @@ void CAudioPlayer::sc_callback(void *arg)
 
 void CAudioPlayer::clearMetaData()
 {
-	memset(&m_MetaData, 0, sizeof(MetaData));
+	m_MetaData.clear();
 	m_played_time=0;
 	m_sc_buffered=0;
-	m_MetaData.changed = false;
 }
 
-void CAudioPlayer::getMetaData(MetaData* m)
+CAudioPlayer::MetaData CAudioPlayer::getMetaData()
 {
-	bool changed=m_MetaData.changed;
+	MetaData m = m_MetaData;
 	m_MetaData.changed=false;
-	memcpy(m , &m_MetaData, sizeof(MetaData));
-	m->changed=changed;
+	return m;
 }
 
+CAudioPlayer::MetaData CAudioPlayer::readMetaData(const char* filename, bool nice)
+{
+	FILE* fp;
+	clearMetaData();
+	fp = ::fopen((char *)filename,"r");
+	if (fp!=NULL)
+	{
+		/* add callback function for shoutcast */
+		if (fstatus(fp, ShoutcastCallback) < 0)
+		{
+			fprintf(stderr,"Error adding shoutcast callback!\n%s",err_txt);
+		}
 
+		/* Decode stdin to stdout. */
+		bool Status;
+		if(ftype(fp, "ogg"))
+		{
+			Status = COggDec::getInstance()->GetMetaData(fp, nice);
+		}
+		else
+		{
+			Status = CMP3Dec::getInstance()->GetMetaData(fp, nice);
+		}
+
+		if(!Status)
+			fprintf(stderr,"Error occured during meta data reading.\n");
+
+	}
+	else
+		fprintf(stderr,"Error opening file %s\n",(char *) filename);
+	
+	return m_MetaData;
+}
 

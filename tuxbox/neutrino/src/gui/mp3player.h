@@ -135,6 +135,7 @@ class CMP3PlayerGui : public CMenuTarget
 	void ff();
 	void rev();
 	int getNext();
+	void GetMetaData(CAudiofile *File);
 	void updateMetaData();
 	void updateTimes(const bool force = false);
 	void showMetaData();

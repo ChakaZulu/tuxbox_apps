@@ -59,9 +59,6 @@
 
 #include <system/settings.h>
 
-#include <id3tag.h>
-
-#include <assert.h>
 #include <algorithm>
 #include <sys/time.h>
 #include <fstream>
@@ -718,8 +715,7 @@ void CMP3PlayerGui::paintItem(int pos)
 		if (playlist[pos + liststart].Title.empty())
 		{
 			// id3tag noch nicht geholt
-			get_id3(&playlist[pos + liststart]);
-			get_mp3info(&playlist[pos + liststart]);
+			GetMetaData(&playlist[pos + liststart]);
 			if(m_state!=CMP3PlayerGui::STOP && !g_settings.mp3player_highprio)
 				usleep(100*1000);
 		}
@@ -924,334 +920,6 @@ void CMP3PlayerGui::paint()
 }
 
 //------------------------------------------------------------------------
-#define BUFFER_SIZE 2100
-void CMP3PlayerGui::get_mp3info(CAudiofile *mp3)
-{
-//   printf("get_mp3info %s\n",mp3->Filename.c_str());
-	if(mp3->FileType!=CFile::FILE_MP3)
-	{
-		mp3->Duration=0;
-		return;
-	}
-	FILE* in;
-	struct mad_stream	Stream;
-	struct mad_header	Header;
-	unsigned char		InputBuffer[BUFFER_SIZE];
-	int ReadSize;
-	int filesize;
-	in = fopen(mp3->Filename.c_str(),"r");
-	if(in==NULL)
-		return;
-
-	ReadSize=fread(InputBuffer,1,BUFFER_SIZE,in);
-
-	if(m_state!=CMP3PlayerGui::STOP && !g_settings.mp3player_highprio)
-		usleep(15000);
-	bool foundSyncmark=true;
-	// Check for sync mark (some encoder produce data befor 1st frame in mp3 stream)
-	if(InputBuffer[0]!=0xff || (InputBuffer[1]&0xe0)!=0xe0)
-	{
-		foundSyncmark=false;
-		//skip to first sync mark
-		int n=0,j=0;
-		while((InputBuffer[n]!=0xff || (InputBuffer[n+1]&0xe0)!=0xe0) && ReadSize > 1)
-		{
-			n++;
-			j++;
-			if(n > ReadSize-2)
-			{
-				j--;
-				n=0;
-				fseek(in, -1, SEEK_CUR);
-				ReadSize=fread(InputBuffer,1,BUFFER_SIZE,in);
-				if(m_state!=CMP3PlayerGui::STOP)
-					usleep(15000 && !g_settings.mp3player_highprio);
-			}
-		}
-		if(ReadSize > 1)
-		{
-			fseek(in, j, SEEK_SET);
-			ReadSize=fread(InputBuffer,1,BUFFER_SIZE,in);
-			if(m_state!=CMP3PlayerGui::STOP)
-				usleep(15000 && !g_settings.mp3player_highprio);
-			foundSyncmark=true;
-		}
-	}
-	if(foundSyncmark)
-	{
-//      printf("found syncmark...\n");
-		mad_stream_init(&Stream);
-		mad_stream_buffer(&Stream,InputBuffer,ReadSize);
-		mad_header_decode(&Header,&Stream);
-
-		mp3->VBR=false;
-
-		if(m_state!=CMP3PlayerGui::STOP && !g_settings.mp3player_highprio)
-			usleep(15000);
-		mad_stream_finish(&Stream);
-		// filesize
-		fseek(in, 0, SEEK_END);
-		filesize=ftell(in);
-		fclose(in);
-
-#ifdef INCLUDE_UNUSED_STUFF
-		char tmp[20];
-		sprintf(tmp,"%lu kbps",Header.bitrate / 1000);
-		mp3->Bitrate=tmp;
-		sprintf(tmp,"%u kHz",Header.samplerate / 1000);
-		mp3->Samplerate=tmp;
-#endif
-		mp3->Duration=filesize*8/Header.bitrate;
-#ifdef INCLUDE_UNUSED_STUFF
-		/* Convert the layer number to it's printed representation. */
-		switch(Header.layer)
-		{
-		case MAD_LAYER_I:
-			mp3->Layer="layer I";
-			break;
-		case MAD_LAYER_II:
-			mp3->Layer="layer II";
-			break;
-		case MAD_LAYER_III:
-			mp3->Layer="layer III";
-			break;
-		}
-		/* Convert the audio mode to it's printed representation. */
-		switch(Header.mode)
-		{
-		case MAD_MODE_SINGLE_CHANNEL:
-			mp3->ChannelMode="single channel";
-			break;
-		case MAD_MODE_DUAL_CHANNEL:
-			mp3->ChannelMode="dual channel";
-			break;
-		case MAD_MODE_JOINT_STEREO:
-			mp3->ChannelMode="joint stereo";
-			break;
-		case MAD_MODE_STEREO:
-			mp3->ChannelMode="normal stereo";
-			break;
-		}
-#endif
-	}
-	else
-	{
-		mp3->Duration=0;
-	}
-}
-
-
-//------------------------------------------------------------------------
-void CMP3PlayerGui::get_id3(CAudiofile *mp3)
-{
-	unsigned int i;
-	struct id3_frame const *frame;
-	id3_ucs4_t const *ucs4;
-	id3_utf8_t *utf8;
-	char const spaces[] = "          ";
-
-	struct 
-	{
-		char const *id;
-		char const *name;
-	} const info[] = 
-		{
-			{ ID3_FRAME_TITLE,  "Title"},
-			{ "TIT3",           0},	 /* Subtitle */
-			{ "TCOP",           0,},  /* Copyright */
-			{ "TPRO",           0,},  /* Produced */
-			{ "TCOM",           "Composer"},
-			{ ID3_FRAME_ARTIST, "Artist"},
-			{ "TPE2",           "Orchestra"},
-			{ "TPE3",           "Conductor"},
-			{ "TEXT",           "Lyricist"},
-			{ ID3_FRAME_ALBUM,  "Album"},
-			{ ID3_FRAME_YEAR,   "Year"},
-			{ ID3_FRAME_TRACK,  "Track"},
-			{ "TPUB",           "Publisher"},
-			{ ID3_FRAME_GENRE,  "Genre"},
-			{ "TRSN",           "Station"},
-			{ "TENC",           "Encoder"}
-		};
-
-	/* text information */
-
-	struct id3_file *id3file = id3_file_open(mp3->Filename.c_str(), ID3_FILE_MODE_READONLY);
-	if(id3file == 0)
-		printf("error open id3 file\n");
-	else
-	{
-		id3_tag *tag=id3_file_tag(id3file);
-		if(tag)
-		{
-			for(i = 0; i < sizeof(info) / sizeof(info[0]); ++i)
-			{
-				union id3_field const *field;
-				unsigned int nstrings, namelen, j;
-				char const *name;
-
-				frame = id3_tag_findframe(tag, info[i].id, 0);
-				if(frame == 0)
-					continue;
-
-				field    = &frame->fields[1];
-				nstrings = id3_field_getnstrings(field);
-
-				name = info[i].name;
-				namelen = name ? strlen(name) : 0;
-				assert(namelen < sizeof(spaces));
-
-				for(j = 0; j < nstrings; ++j)
-				{
-					ucs4 = id3_field_getstrings(field, j);
-					assert(ucs4);
-
-					if(strcmp(info[i].id, ID3_FRAME_GENRE) == 0)
-						ucs4 = id3_genre_name(ucs4);
-
-					utf8 = id3_ucs4_utf8duplicate(ucs4);
-					if (utf8 == NULL)
-						goto fail;
-
-					if (j == 0 && name)
-					{
-						if(strcmp(name,"Title") == 0)
-							mp3->Title = (char *) utf8;
-						if(strcmp(name,"Artist") == 0)
-							mp3->Artist = (char *) utf8;
-						if(strcmp(name,"Year") == 0)
-							mp3->Year = (char *) utf8;
-						if(strcmp(name,"Album") == 0)
-							mp3->Album = (char *) utf8;
-						if(strcmp(name,"Genre") == 0)
-							mp3->Genre = (char *) utf8;
-						//printf("%s%s: %s\n", &spaces[namelen], name, latin1);
-					}
-					else
-					{
-						if(strcmp(info[i].id, "TCOP") == 0 || strcmp(info[i].id, "TPRO") == 0)
-						{
-							//printf("%s  %s %s\n", spaces, (info[i].id[1] == 'C') ? ("Copyright (C)") : ("Produced (P)"), latin1);
-						}
-						//else
-						//printf("%s  %s\n", spaces, latin1);
-					}
-
-					free(utf8);
-				}
-			}
-
-#ifdef INCLUDE_UNUSED_STUFF
-			/* comments */
-
-			i = 0;
-			while((frame = id3_tag_findframe(tag, ID3_FRAME_COMMENT, i++)))
-			{
-				id3_utf8_t *ptr, *newline;
-				int first = 1;
-
-				ucs4 = id3_field_getstring(&frame->fields[2]);
-				assert(ucs4);
-
-				if(*ucs4)
-					continue;
-
-				ucs4 = id3_field_getfullstring(&frame->fields[3]);
-				assert(ucs4);
-
-				utf8 = id3_ucs4_utf8duplicate(ucs4);
-				if (utf8 == 0)
-					goto fail;
-
-				ptr = utf8;
-				while(*ptr)
-				{
-					newline = (id3_utf8_t *) strchr((char*)ptr, '\n');
-					if(newline)
-						*newline = 0;
-
-					if(strlen((char *)ptr) > 66)
-					{
-						id3_utf8_t *linebreak;
-
-						linebreak = ptr + 66;
-
-						while(linebreak > ptr && *linebreak != ' ')
-							--linebreak;
-
-						if(*linebreak == ' ')
-						{
-							if(newline)
-								*newline = '\n';
-
-							newline = linebreak;
-							*newline = 0;
-						}
-					}
-
-					if(first)
-					{
-						char const *name;
-						unsigned int namelen;
-
-						name    = "Comment";
-						namelen = strlen(name);
-						assert(namelen < sizeof(spaces));
-						mp3->Comment = (char *) ptr;
-						//printf("%s%s: %s\n", &spaces[namelen], name, ptr);
-						first = 0;
-					}
-					else
-						//printf("%s  %s\n", spaces, ptr);
-
-						ptr += strlen((char *) ptr) + (newline ? 1 : 0);
-				}
-
-				free(utf8);
-				break;
-			}
-#endif
-			id3_tag_delete(tag);
-		}
-		else
-			printf("error open id3 tag\n");
-
-		id3_file_close(id3file);
-	}
-
-	if (mp3->Artist.empty() && mp3->Title.empty())
-	{
-		//Set from Filename
-		std::string tmp = mp3->Filename.substr(mp3->Filename.rfind('/')+1);
-		tmp = tmp.substr(0,tmp.length()-4);	//remove extension (.mp3)
-		unsigned int i = tmp.rfind(" - ");
-		if(i != std::string::npos)
-		{ // Trennzeiche " - " gefunden
-			mp3->Artist = tmp.substr(0, i);
-			mp3->Title = tmp.substr(i+3);
-		}
-		else
-		{
-			i = tmp.rfind('-');
-			if(i != std::string::npos)
-			{ //Trennzeichen "-"
-				mp3->Artist = tmp.substr(0, i);
-				mp3->Title = tmp.substr(i+1);
-			}
-			else
-				mp3->Title	= tmp;
-		}
-#ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
-		mp3->Artist = Latin1_to_UTF8(mp3->Artist);
-		mp3->Title = Latin1_to_UTF8(mp3->Title);
-#endif
-	}
-	if(0)
-	{
-	fail:
-		printf("id3: not enough memory to display tag");
-	}
-}
 
 void CMP3PlayerGui::clearItemID3DetailsLine ()
 {
@@ -1437,8 +1105,7 @@ void CMP3PlayerGui::play(int pos)
 	if (playlist[pos].Title.empty())
 	{
 		// id3tag noch nicht geholt
-		get_id3(&playlist[pos]);
-		get_mp3info(&playlist[pos]);
+		GetMetaData(&playlist[pos]);
 	}
 	m_metainfo="";
 	m_time_played=0;
@@ -1474,8 +1141,7 @@ void CMP3PlayerGui::updateMetaData()
 
 	if(m_state!=CMP3PlayerGui::STOP)
 	{
-		CAudioPlayer::MetaData metaData;
-		CAudioPlayer::getInstance()->getMetaData(&metaData);
+		CAudioPlayer::MetaData metaData = CAudioPlayer::getInstance()->getMetaData();
 		if(metaData.changed || m_metainfo.empty())
 		{
 			std::string info = metaData.type_info;
@@ -1501,22 +1167,22 @@ void CMP3PlayerGui::updateMetaData()
 				updateMeta=true;
 			}
 			
-			if (strlen(metaData.artist) > 0  &&
-				 strcmp(metaData.artist, curr_audiofile.Artist.c_str())!=0)
+			if (!metaData.artist.empty()  &&
+				 metaData.artist != curr_audiofile.Artist)
 			{
 				curr_audiofile.Artist = metaData.artist;
 				updateScreen=true;
 				updateLcd=true;
 			}
-			if (strlen(metaData.title) > 0  &&
-				 strcmp(metaData.title, curr_audiofile.Title.c_str())!=0)
+			if (!metaData.title.empty() &&
+				 metaData.title != curr_audiofile.Title)
 			{
 				curr_audiofile.Title = metaData.title;
 				updateScreen=true;
 				updateLcd=true;
 			}
-			if (strlen(metaData.sc_station) > 0  &&
-				 strcmp(metaData.sc_station, curr_audiofile.Album.c_str())!=0)
+			if (!metaData.sc_station.empty()  &&
+				 metaData.sc_station != curr_audiofile.Album)
 			{
 				curr_audiofile.Album = metaData.sc_station;
 				updateLcd=true;
@@ -1640,4 +1306,45 @@ void CMP3PlayerGui::screensaver(bool on)
 	}
 }
 
+void CMP3PlayerGui::GetMetaData(CAudiofile *File)
+{
+	CAudioPlayer::MetaData m=CAudioPlayer::getInstance()->readMetaData(File->Filename.c_str(), 
+																							  m_state!=CMP3PlayerGui::STOP && 
+																							  !g_settings.mp3player_highprio);
+
+	File->Title = m.title;
+	File->Artist = m.artist;
+	File->Album = m.album;
+	File->Year = m.date;
+	File->Duration = m.total_time;
+	File->Genre = m.genre;
+	
+	if (File->Artist.empty() && File->Title.empty())
+	{
+		//Set from Filename
+		std::string tmp = File->Filename.substr(File->Filename.rfind('/')+1);
+		tmp = tmp.substr(0,tmp.length()-4);	//remove extension (.mp3)
+		unsigned int i = tmp.rfind(" - ");
+		if(i != std::string::npos)
+		{ // Trennzeiche " - " gefunden
+			File->Artist = tmp.substr(0, i);
+			File->Title = tmp.substr(i+3);
+		}
+		else
+		{
+			i = tmp.rfind('-');
+			if(i != std::string::npos)
+			{ //Trennzeichen "-"
+				File->Artist = tmp.substr(0, i);
+				File->Title = tmp.substr(i+1);
+			}
+			else
+				File->Title	= tmp;
+		}
+#ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
+		File->Artist = Latin1_to_UTF8(File->Artist);
+		File->Title = Latin1_to_UTF8(File->Title);
+#endif
+	}
+}
 

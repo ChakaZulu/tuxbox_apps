@@ -58,10 +58,13 @@ class CMP3Dec : public CBaseDec
 	const char*  MadErrorString(const struct mad_stream *Stream);
 	signed short MadFixedToSShort(const mad_fixed_t Fixed);
 	void			 CreateInfo();
+	void         GetMP3Info(FILE* in, bool nice);
+	void         GetID3(FILE* in);
 
 public:
 	static CMP3Dec* getInstance();
 	virtual int Decoder(FILE *InputFp,int OutputFd, State* state);
+	bool GetMetaData(FILE *in, bool nice);
 	CMP3Dec(){};
 
 };

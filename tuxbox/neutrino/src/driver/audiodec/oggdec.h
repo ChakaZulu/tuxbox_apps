@@ -35,6 +35,8 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <driver/audioplay.h>
+#include <tremor/ogg.h>
+#include <tremor/ivorbisfile.h>
 
 class COggDec : public CBaseDec
 {
@@ -42,7 +44,12 @@ class COggDec : public CBaseDec
 public:
 	static COggDec* getInstance();
 	virtual int Decoder(FILE *,int , State* );
+	bool GetMetaData(FILE *in, bool nice);
 	COggDec(){};
+private:
+	void ParseUserComments(vorbis_comment*);
+	bool Open(FILE* , OggVorbis_File*);
+	void SetMetaData(OggVorbis_File*);
 };
 
 
