@@ -3,7 +3,7 @@ nhttpd /control api doku
 
 
 Der Neutrino HTTP-Server laeuft auf Port 80.
-Die Steuerfunktionen fuer externe Programme sind unter dem Context /control/ zu finden. 
+Die Steuerfunktionen fuer externe Programme sind unter dem Context /control/ oder /cgi-bin/ zu finden. 
 Bei Problem oder Fragen Mail an derdirch@web.de oder Dirch in #dbox2
 
 1. Die Kanalliste			http://dbox/control/channellist
@@ -24,7 +24,7 @@ Bei Problem oder Fragen Mail an derdirch@web.de oder Dirch in #dbox2
 16. Bouquet abfragen			http://dbox/control/getbouquet
 17. Fenster in neutrino			http://dbox/control/message
 18. Timerd Interface			http://dbox/control/timer
-
+19. Shellscript ausführen               http://dbox/cgi-bin/exec
 
 **********************************************************************************************
 1. Die Kanalliste
@@ -948,3 +948,21 @@ Beispiel:
 
 >>>http://dbox/control/timer?action=new&alarm=1034309576&stop=1034284376&announce=1034309576&type=1&rep=1&channel_id=16dcb
 ok
+
+**********************************************************************************************
+19. Shellscript ausführen
+**********************************************************************************************
+
+Handler: http://dbox/cgi-bin/exec
+
+Parameter: <Scriptname>
+Rückgabe: Ausgabe des Scripts
+
+Führt das Shellscript aus und liefert die Ausgabe an den Client zurück
+Beispiel:
+
+buli.sh gibt einen RSS-Feed zurück, der vom Newsticker angezeigt wird. In newsticker.list
+muss dann der Aufruf folgendermassen aussehen:
+
+http://dbox/cgi-bin/exec?buli.sh
+
