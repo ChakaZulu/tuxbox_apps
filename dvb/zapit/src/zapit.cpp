@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.204 2002/08/29 13:36:18 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.205 2002/08/29 21:57:10 dirch Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -783,6 +783,7 @@ void parse_command (CZapitClient::commandHead &rmsg)
 				{
 					msgCurrentServiceInfo.polarisation = 2;
 				}
+				msgCurrentServiceInfo.diseqc = channel->getDiSEqC();
 				send(connfd, &msgCurrentServiceInfo, sizeof(msgCurrentServiceInfo), 0);
 				break;
 			}
@@ -1135,7 +1136,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.204 2002/08/29 13:36:18 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.205 2002/08/29 21:57:10 dirch Exp $\n\n");
 
 	if (argc > 1)
 	{

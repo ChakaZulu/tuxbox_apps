@@ -160,6 +160,7 @@ CZapitClient::CCurrentServiceInfo CZapitClient::getCurrentServiceInfo()
 	erg.pcrpid = response.pcrpid;
 	erg.tsfrequency = response.tsfrequency;
 	erg.polarisation = response.polarisation;
+	erg.diseqc = response.diseqc;
 
 	zapit_close();
 	return erg;
