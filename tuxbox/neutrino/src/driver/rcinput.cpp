@@ -1051,6 +1051,7 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 						{
 							*msg  = NeutrinoMessages::EVT_RECORDING_ENDED;
 							*data = (neutrino_msg_data_t) p;
+							dont_delete_p = true;
 						}
 					}
 					else if (emsg.initiatorID == CEventServer::INITID_GENERIC_INPUT_EVENT_PROVIDER)
