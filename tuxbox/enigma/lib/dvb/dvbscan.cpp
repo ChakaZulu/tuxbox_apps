@@ -95,10 +95,6 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 		if (flags & flagUseBAT)
 			dvb.settings->removeDVBBouquets();
 
-//		/*emit*/ dvb.serviceListChanged();
-
-		currentONID=-1;
-		knownNetworks.clear();
 		current=knownTransponder.begin();
 
 		dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanNext));
@@ -121,7 +117,6 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 		{
 			if ( cancel )
 				cancel=0;
-			knownNetworks.clear();
 			dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanCompleted));
 		}
 		else
@@ -196,14 +191,7 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 		SDT *sdt=dvb.tSDT.ready()?dvb.tSDT.getCurrent():0;
 		if (sdt)
 		{
-			if (handleSDT(sdt))
-			{
-				if (flags&flagSkipKnownNIT)
-				{
-					dvb.tNIT.abort();
-					dvb.tONIT.abort();
-				}
-			}
+			handleSDT(sdt);
 			sdt->unlock();
 			if ( flags & flagOnlyFree )
 			{
@@ -226,10 +214,6 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 		NIT *nit=(event.type==eDVBScanEvent::eventScanGotNIT)?(dvb.tNIT.ready()?dvb.tNIT.getCurrent():0):(dvb.tONIT.ready()?dvb.tONIT.getCurrent():0);
 		if (nit)
 		{
-			if (event.type==eDVBScanEvent::eventScanGotNIT)
-				if (currentONID!=-1)
-					knownNetworks.insert(currentONID);
-
 			if (flags & flagNetworkSearch)
 			{
 #if 0
@@ -371,7 +355,7 @@ void eDVBScanController::BATready(int error)
 	dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanGotBAT));
 }
 
-int eDVBScanController::handleSDT(const SDT *sdt)
+void eDVBScanController::handleSDT(const SDT *sdt)
 {
 	eTransponder *old=0;
 // update tsid / onid
@@ -420,19 +404,10 @@ int eDVBScanController::handleSDT(const SDT *sdt)
 				it->state=eTransponder::stateError;
 			}
 
-	currentONID=onid.get();
-
-	int known=0;
-
-	if (knownNetworks.count(onid.get()))
-		known=1;
-
 	if ( flags & flagOnlyFree )
 		dvb.settings->getTransponders()->handleSDT(sdt,dvb_namespace,onid,tsid,&freeCheckFinishedCallback );
 	else
 		dvb.settings->getTransponders()->handleSDT(sdt,dvb_namespace,onid,tsid);
-
-	return known;
 }
 
 #if DEBUG_TO_FILE
@@ -551,14 +526,6 @@ void eDVBScanController::setClearList(int clearlist)
 		flags|=flagClearList;
 	else
 		flags&=~flagClearList;
-}
-
-void eDVBScanController::setSkipKnownNIT(int skip)
-{
-	if (skip)
-		flags|=flagSkipKnownNIT;
-	else
-		flags&=~flagSkipKnownNIT;
 }
 
 void eDVBScanController::setSkipOtherOrbitalPositions(int skipOtherOP)

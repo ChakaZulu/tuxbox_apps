@@ -398,7 +398,6 @@ int existNetworks::saveNetworks()
 		"1\t->\tNetwork Scan\n"
 		"2\t->\tuse BAT\n"
 		"4\t->\tuse ONIT\n"
-		"8\t->\tskip NITs of known networks\n"
 		"and combinations of this.-->\n\n"
 		"<satellites>\n";
 	for (std::list<tpPacket>::iterator p( networks.begin() ); p != networks.end(); ++p )

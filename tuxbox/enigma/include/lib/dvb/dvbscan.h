@@ -47,10 +47,9 @@ class eDVBScanController: public eDVBController, public Object
 	int flags;
 	
 	int scanOK;	// 1 SDT, 2 NIT, 4 BAT, 8 oNIT
-	int currentONID, scanflags;
+	int scanflags;
 			// der aktuelle gescannte transponder
 	eTransponder *transponder;
-	std::set<int> knownNetworks;
 
 	void PATready(int error);
 	void SDTready(int error);
@@ -63,7 +62,7 @@ class eDVBScanController: public eDVBController, public Object
 	std::list<eTransponder> changedTransponder;
 	std::list<eTransponder>::iterator current;
 
-	int handleSDT(const SDT *sdt);
+	void handleSDT(const SDT *sdt);
 
 	void freeCheckFinished();
 	Signal0<void> freeCheckFinishedCallback;
@@ -76,7 +75,6 @@ public:
 		flagNetworkSearch=1,
 		flagUseBAT=2,
 		flagUseONIT=4,
-		flagSkipKnownNIT=8,
 		flagClearList=16,
 		flagSkipOtherOrbitalPositions=32,
 		flagNoCircularPolarization=64,
@@ -96,7 +94,6 @@ public:
 	void setUseBAT(int usebat);
 	void setNetworkSearch(int networksearch);
 	void setClearList(int clearlist);
-	void setSkipKnownNIT(int skip);
 	void setSkipOtherOrbitalPositions(int skipOtherOP);
 	void setNoCircularPolarization(int nocircular);
 	void setOnlyFree(int onlyFree);

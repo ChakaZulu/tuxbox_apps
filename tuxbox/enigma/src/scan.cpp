@@ -399,7 +399,6 @@ void tsAutomatic::start()
 		}
 
 		// scanflags auswerten
-		sapi->setSkipKnownNIT(pkt->scanflags & 8);
 		sapi->setUseONIT(pkt->scanflags & 4);
 		sapi->setUseBAT(pkt->scanflags & 2);
 		sapi->setNetworkSearch(pkt->scanflags & 1);
@@ -1269,7 +1268,6 @@ int TransponderScan::Exec()
 					}
 
 					// scanflags auswerten
-					sapi->setSkipKnownNIT(pkt->scanflags & 8);
 					sapi->setUseONIT(pkt->scanflags & 4);
 					sapi->setUseBAT(pkt->scanflags & 2);
 					sapi->setNetworkSearch(pkt->scanflags & 1);
