@@ -213,8 +213,22 @@
 		<transponder frequency="401975000" symbol_rate="6875000" fec_inner="0" modulation="3"/>
 		<transponder frequency="393975000" symbol_rate="6875000" fec_inner="0" modulation="3"/>
 	</cable>
-	<cable name="Cottbus FastSearch" flags="9">
+	<cable name="Kabel Deutschland" flags="9">
+		<transponder frequency="113000000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
+		<transponder frequency="121000000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
 		<transponder frequency="346000000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
+		<transponder frequency="354000000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
+		<transponder frequency="362000000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
+		<transponder frequency="370000000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
+		<transponder frequency="378000000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
+		<transponder frequency="386000000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
+		<transponder frequency="394000000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
+		<transponder frequency="402000000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
+		<transponder frequency="410000000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
+		<transponder frequency="426000000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
+		<transponder frequency="434000000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
+		<transponder frequency="442000000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
+		<transponder frequency="466000000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
 	</cable>
 	<cable name="Kabelnetz Guben" satfeed="true" flags="9">
 		<transponder frequency="322000000" symbol_rate="6875000" fec_inner="9" modulation="6"/>
