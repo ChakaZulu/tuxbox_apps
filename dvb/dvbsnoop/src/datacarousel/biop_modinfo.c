@@ -1,5 +1,5 @@
 /*
-$Id: biop_modinfo.c,v 1.1 2004/02/20 22:21:57 rasc Exp $
+$Id: biop_modinfo.c,v 1.2 2004/02/20 23:13:17 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: biop_modinfo.c,v 1.1 2004/02/20 22:21:57 rasc Exp $
 
 
 $Log: biop_modinfo.c,v $
+Revision 1.2  2004/02/20 23:13:17  rasc
+BIOP:  TapUse
+
 Revision 1.1  2004/02/20 22:21:57  rasc
 DII complete (hopefully)
 BIOP::ModuleInfo  (damned, who is spreading infos over several standards???)
@@ -35,9 +38,13 @@ some minor changes...
 #include "dvbsnoop.h"
 #include "biop_modinfo.h"
 #include "dsmcc_misc.h"
+#include "descriptors/descriptor.h"
+
 #include "misc/output.h"
 #include "misc/hexprint.h"
 
+#include "strings/dsmcc_str.h"
+#include "strings/dvb_str.h"
 
 
 
@@ -75,7 +82,9 @@ int biop_ModuleInfo (int v, u_char *b, u_int len)
 		out_NL (v);
 
 		outBit_Sx_NL (v,"Id: ",				b,  0, 16);
-		outBit_Sx_NL (v,"Use: ",			b, 16, 16);  /// $$$ TODO table!  BIOP_OBJECT_USE
+		outBit_S2x_NL(v,"Use: ",			b, 16, 16,
+					(char *(*)(u_long))dsmccStrBIOP_TabUse );
+
 		outBit_Sx_NL (v,"association_tag: ",		b, 32, 16);
 		n2 = outBit_Sx_NL (v,"selector_length: ",	b, 48,  8);
 		b += 7;
@@ -88,6 +97,8 @@ int biop_ModuleInfo (int v, u_char *b, u_int len)
 		// $$$ TODO  selector type ATSC
 		// 0x0001 Message selector (defined in [DSM-CC]).    a_95  (where in DSM-CC defined?)
 		// 0x109 TSFS selector (defined in this standard).   a_95
+		//
+		// ISO 13818-6:2000  5.6.1.1 Selector
 
 
 		b += n2;

@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_misc.c,v 1.11 2004/02/20 22:18:38 rasc Exp $
+$Id: dsmcc_misc.c,v 1.12 2004/02/20 23:13:17 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: dsmcc_misc.c,v 1.11 2004/02/20 22:18:38 rasc Exp $
 
 
 $Log: dsmcc_misc.c,v $
+Revision 1.12  2004/02/20 23:13:17  rasc
+BIOP:  TapUse
+
 Revision 1.11  2004/02/20 22:18:38  rasc
 DII complete (hopefully)
 BIOP::ModuleInfo  (damned, who is spreading infos over several standards???)
@@ -511,3 +514,27 @@ int dsmcc_CarouselDescriptor_Loop (const char *s, u_char *b, int len)
 
 
 
+
+
+
+
+
+/* $$$ TODO
+ * see also ATSC
+
+module DSM {
+typedef u_short SelectorType;
+// SelectorType 0 is ISO/IEC reserved
+const SelectorType MESSAGE = 1;
+struct MessageSelector {
+u_long transactionId;
+u_long timeout;
+};
+};
+SelectorType MESSAGE identifies a MessageSelector. It is used by the Object Carousel. It contains a transactionId
+field and a timeout field. The value of the transactionId field shall be set to the transactionId of the
+DownloadInfoIndication message that contains the module delivery parameters. The timeout field shall indicate the
+timeout period to be used to time out the acquisition of the DownloadInfoIndication message. The units of the timeout
+field are microseconds. Refer to the clause 11, U-U Object Carousel, for further information.
+
+*/

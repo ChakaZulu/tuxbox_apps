@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.30 2004/02/20 22:18:42 rasc Exp $
+$Id: dsmcc_str.c,v 1.31 2004/02/20 23:13:17 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dsmcc_str.c,v 1.30 2004/02/20 22:18:42 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.31  2004/02/20 23:13:17  rasc
+BIOP:  TapUse
+
 Revision 1.30  2004/02/20 22:18:42  rasc
 DII complete (hopefully)
 BIOP::ModuleInfo  (damned, who is spreading infos over several standards???)
@@ -1015,6 +1018,28 @@ char *dsmccStrMHP_storage_property (u_int id)
 
 
 
+/*
+  -- DSM-CC  MHP caching transparency level
+  -- ISO/IEC 13816-6
+  -- TS 102 812  v1.2.1 B.2.7
+*/
+
+char *dsmccStrMHP_caching_transparency_level (u_int id)
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x00, 0x00,   "reserved" },
+	{ 0x01, 0x01,   "transparent caching" },
+	{ 0x02, 0x02,   "semi-transparent caching" },
+	{ 0x03, 0x03,   "static chaching" },
+	{ 0x04, 0xFF,   "reserved" },
+      	{  0,0, NULL }
+  };
+
+  return findTableID (TableIDs, id);
+}
+
+
+
 
 
 
@@ -1111,26 +1136,44 @@ char *dsmccStr_transactionID_originator (u_int id)
 
 
 
+
 /*
-  -- DSM-CC  MHP caching transparency level
+  -- DSM-CC  BIOP tap use
   -- ISO/IEC 13816-6
-  -- TS 102 812  v1.2.1 B.2.7
 */
 
-char *dsmccStrMHP_caching_transparency_level (u_int id)
+char *dsmccStrBIOP_TabUse (u_int id)
 {
   STR_TABLE  TableIDs[] = {
-	{ 0x00, 0x00,   "reserved" },
-	{ 0x01, 0x01,   "transparent caching" },
-	{ 0x02, 0x02,   "semi-transparent caching" },
-	{ 0x03, 0x03,   "static chaching" },
-	{ 0x04, 0xFF,   "reserved" },
+	{ 0x0000, 0x0000,   "UNKNOWN" },
+	{ 0x0001, 0x0001,   "MPEG_TS_UP_USE" },
+	{ 0x0002, 0x0002,   "MPEG_TS_DOWN_USE" },
+	{ 0x0003, 0x0003,   "MPEG_ES_UP_USE" },
+	{ 0x0004, 0x0004,   "MPEG_ES_DOWN_USE" },
+	{ 0x0005, 0x0005,   "DOWNLOAD_CTRL_USE" },
+	{ 0x0006, 0x0006,   "DOWNLOAD_CTRL_UP_USE" },
+	{ 0x0007, 0x0007,   "DOWNLOAD_CTRL_DOWN_USE" },
+	{ 0x0008, 0x0008,   "DOWNLOAD_DATA_USE" },
+	{ 0x0009, 0x0009,   "DOWNLOAD_DATA_UP_USE" },
+	{ 0x000A, 0x000A,   "DOWNLOAD_DATA_DOWN_USE" },
+	{ 0x000B, 0x000B,   "STR_NPT_USE" },
+	{ 0x000C, 0x000C,   "STR_STATUS_AND_EVENT_USE" },
+	{ 0x000D, 0x000D,   "STR_EVENT_USE" },
+	{ 0x000E, 0x000E,   "STR_STATUS_USE" },
+	{ 0x000F, 0x000F,   "RPC_USE" },
+	{ 0x0010, 0x0010,   "IP_USE" },
+	{ 0x0011, 0x0011,   "SDB_CTRL_USE" },
+	{ 0x0012, 0x0015,   "T120_TAP reserved" },
+	{ 0x0016, 0x0016,   "BIOP_DELIVERY_PARA_USE" },
+	{ 0x0017, 0x0017,   "BIOP_OBJECT_USE" },
+	{ 0x0018, 0x0018,   "BIOP_ES_USE" },
+	{ 0x0019, 0x0019,   "BIOP_PROGRAM_USE" },
+	{ 0x001A, 0x001A,   "BIOP_DNL_CTRL_USE" },
       	{  0,0, NULL }
   };
 
   return findTableID (TableIDs, id);
 }
-
 
 
 
