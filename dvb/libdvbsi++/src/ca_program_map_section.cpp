@@ -1,5 +1,5 @@
 /*
- * $Id: ca_program_map_section.cpp,v 1.1 2004/02/13 15:27:46 obi Exp $
+ * $Id: ca_program_map_section.cpp,v 1.2 2004/02/13 17:51:08 obi Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,11 +19,8 @@
  *
  */
 
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
 #include <dvbsi++/ca_program_map_section.h>
+#include <dvbsi++/compat.h>
 #include <dvbsi++/descriptor_tag.h>
 
 CaLengthField::CaLengthField(const uint32_t length)

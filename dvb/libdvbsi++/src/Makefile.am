@@ -2,6 +2,9 @@ AM_CPPFLAGS = -I$(top_srcdir)/include
 
 lib_LTLIBRARIES = libdvbsi++.la
 
+libdvbsi___la_LDFLAGS = \
+	-release $(LT_RELEASE)
+
 libdvbsi___la_SOURCES = \
 	ac3_descriptor.cpp \
 	ancillary_data_descriptor.cpp \

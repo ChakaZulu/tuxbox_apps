@@ -1,5 +1,5 @@
 /*
- * $Id: short_crc_section.cpp,v 1.1 2004/02/13 15:27:47 obi Exp $
+ * $Id: short_crc_section.cpp,v 1.2 2004/02/13 17:51:08 obi Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,8 +19,8 @@
  *
  */
 
+#include <dvbsi++/byte_stream.h>
 #include <dvbsi++/short_crc_section.h>
-#include "byte_stream.h"
 
 ShortCrcSection::ShortCrcSection(const uint8_t * const buffer) : ShortSection(buffer)
 {

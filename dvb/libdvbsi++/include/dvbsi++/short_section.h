@@ -1,5 +1,5 @@
 /*
- * $Id: short_section.h,v 1.1 2004/02/13 15:27:38 obi Exp $
+ * $Id: short_section.h,v 1.2 2004/02/13 17:51:07 obi Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -22,8 +22,7 @@
 #ifndef __short_section_h__
 #define __short_section_h__
 
-#include <inttypes.h>
-#include <vector>
+#include "compat.h"
 #include "packet_id.h"
 #include "table_id.h"
 

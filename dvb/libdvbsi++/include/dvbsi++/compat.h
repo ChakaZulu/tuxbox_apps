@@ -1,5 +1,5 @@
 /*
- * $Id: long_crc_section.cpp,v 1.2 2004/02/13 17:51:08 obi Exp $
+ * $Id: compat.h,v 1.1 2004/02/13 17:51:07 obi Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,16 +19,26 @@
  *
  */
 
-#include <dvbsi++/byte_stream.h>
-#include <dvbsi++/long_crc_section.h>
+#ifndef __compat_h__
+#define __compat_h__
 
-LongCrcSection::LongCrcSection(const uint8_t * const buffer) : LongSection(buffer)
-{
-	crc32 = UINT32(&buffer[sectionLength - 1]);
-}
+#ifdef HAVE_BYTESWAP_H
+#include <byteswap.h>
+#endif
+#ifdef HAVE_ENDIAN_H
+#include <endian.h>
+#endif
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
-uint32_t LongCrcSection::getCrc32(void) const
-{
-	return crc32;
-}
+#include <string>
+#include <vector>
 
+#endif /* __compat_h__ */

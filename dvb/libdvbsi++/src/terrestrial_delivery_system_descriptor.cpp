@@ -1,5 +1,5 @@
 /*
- * $Id: terrestrial_delivery_system_descriptor.cpp,v 1.1 2004/02/13 15:27:47 obi Exp $
+ * $Id: terrestrial_delivery_system_descriptor.cpp,v 1.2 2004/02/13 17:51:08 obi Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,7 +19,7 @@
  *
  */
 
-#include "byte_stream.h"
+#include <dvbsi++/byte_stream.h>
 #include <dvbsi++/terrestrial_delivery_system_descriptor.h>
 
 TerrestrialDeliverySystemDescriptor::TerrestrialDeliverySystemDescriptor(const uint8_t * const buffer) : Descriptor(buffer)

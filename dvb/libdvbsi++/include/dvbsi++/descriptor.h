@@ -1,5 +1,5 @@
 /*
- * $Id: descriptor.h,v 1.1 2004/02/13 15:27:37 obi Exp $
+ * $Id: descriptor.h,v 1.2 2004/02/13 17:51:07 obi Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -22,9 +22,7 @@
 #ifndef __descriptor_h__
 #define __descriptor_h__
 
-#include <inttypes.h>
-#include <string>
-#include <vector>
+#include "compat.h"
 
 class Descriptor
 {

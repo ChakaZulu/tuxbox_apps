@@ -1,5 +1,5 @@
 /*
- * $Id: announcement_support_descriptor.cpp,v 1.1 2004/02/13 15:27:46 obi Exp $
+ * $Id: announcement_support_descriptor.cpp,v 1.2 2004/02/13 17:51:07 obi Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -20,7 +20,7 @@
  */
 
 #include <dvbsi++/announcement_support_descriptor.h>
-#include "byte_stream.h"
+#include <dvbsi++/byte_stream.h>
 
 Announcement::Announcement(const uint8_t * const buffer)
 {
