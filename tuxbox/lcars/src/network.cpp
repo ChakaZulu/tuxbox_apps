@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: network.cpp,v $
+Revision 1.12  2002/06/02 22:05:53  TheDOC
+http-network-stuff again
+
 Revision 1.11  2002/06/02 21:25:33  TheDOC
 http-network-stuff again
 
@@ -347,6 +350,8 @@ void *network::startlistening(void *object)
 						}
 						else
 						{
+							std::string header = "HTTP/1.1 200 OK\nConnection: close\nAccept-Ranges: bytes\nContent-Type: application/octet-stream\n\r\n";
+							write(inbound_connection, header.c_str(), header.length());
 							char c;
 							while(read(fd, &c, 1))
 								write(inbound_connection, &c, 1);
@@ -400,11 +405,11 @@ void *network::startlistening(void *object)
 					{
 						std::string header = "HTTP/1.1 200 OK\nConnection: close\nAccept-Ranges: bytes\nContent-Type: application/octet-stream\n\r\n";
 						write(inbound_connection, header.c_str(), header.length());
-						for (int count = 0; count < (*n->channels_obj).numberChannels(); count++)
-						{
-							dvbchannel tmp_chan = (*n->channels_obj).getDVBChannel(count);
-							write(inbound_connection, &tmp_chan, sizeof(dvbchannel));
-						}
+						int fd = open(CONFIGDIR "/lcars/lcars.dvb", O_RDONLY);
+						char c;
+						while(read(fd, &c, 1))
+							write(inbound_connection, &c, 1);
+						close(fd);
 					}
 					else if (path[2] == "scan")
 					{
