@@ -145,7 +145,7 @@ int eSectionReader::read(__u8 *buf)
 eSection::eSection(int _pid, int _tableid, int _tableidext, int _version, int _flags, int _tableidmask)
 	:context(eApp), notifier(0), pid(_pid), tableid(_tableid)
 	,tableidext(_tableidext), tableidmask(_tableidmask), maxsec(0)
-	,section(0), flags(_flags), prevSection(0), count(0)
+	,section(0), flags(_flags), prevSection(-1)
 	,timer(new eTimer(context)), lockcount(0), version(_version)
 {
 	CONNECT(timer->timeout, eSection::timeout);
@@ -153,8 +153,8 @@ eSection::eSection(int _pid, int _tableid, int _tableidext, int _version, int _f
 
 eSection::eSection()
 	:context(eApp), notifier(0), pid(0), tableid(0), tableidext(0)
-	,tableidmask(0), maxsec(0), section(0), flags(0), prevSection(0)
-	,count(0), timer(new eTimer(context)), lockcount(0), version(0)
+	,tableidmask(0), maxsec(0), section(0), flags(0), prevSection(-1)
+	,timer(new eTimer(context)), lockcount(0), version(0)
 {
 }
 
@@ -252,8 +252,13 @@ void eSection::data(int socket)
 	{
 		if (lockcount)
 			eDebug("eSection::data on locked section!");
-		if (timer)
+
+		if (timer && prevSection == -1)
+		{
+			prevSection=0;
 			timer->start(10000, true);
+		}
+
 		if (reader.read(buf))
 			break;
 
@@ -261,38 +266,27 @@ void eSection::data(int socket)
 
 		//  printf("%d/%d, we want %d  | service_id %04x | version %04x\n", buf[6], maxsec, section, (buf[3]<<8)|buf[4], buf[5]);
 
-		if ( flags&SECREAD_INORDER )
-		{
-			version=buf[5];
-			if ( section == buf[6] )
-				goto doit;   // YES .. GOTO
-			else if ( timer->isActive() && count > (maxsec*4) )
-			{
-				eDebug("incomplete section... abort!");
-				timer->start(0,true);
+		if ( flags&SECREAD_INORDER && section != buf[6] )
 				break;
-			}
-			else if ( prevSection == section )
-				count++;
-		}
-		else
-		{
-doit:
-			count=0;
-			prevSection=section;
-			int err;
-			if ((err=sectionRead(buf)))
-			{
-				if (err>0)
-					err=0;
-				closeFilter();
-				sectionFinish(err);
-				return;
-			}
-			section=buf[6]+1;
-		}
 
-		if (section > maxsec && flags&SECREAD_INORDER)// last section?
+		version=buf[5];
+
+		// get new valid data restart timeout
+		timer->start(10000,true);
+		prevSection=section;
+		int err;
+		if ((err=sectionRead(buf)))
+		{
+			if (err>0)
+				err=0;
+			closeFilter();
+			sectionFinish(err);
+			return;
+		}
+		section=buf[6]+1;
+
+		if ( flags&SECREAD_INORDER && section > maxsec )
+			// last section?
 		{
 			closeFilter();										// stop feeding
 			sectionFinish(0);

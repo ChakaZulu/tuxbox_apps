@@ -20,7 +20,8 @@
 	</script>
 </head>
 <body bgcolor="#ffffff">
-#BODY#
+#BODY_NORMAL#
+#BODY_REPEATED#
 <br><br>
 <u><a href="javascript:cleanupTimerList()">Delete completed/failed timer events</a></u>
 <br>

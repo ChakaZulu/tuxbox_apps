@@ -940,6 +940,26 @@ static eString deleteMovie(eString request, eString dirpath, eString opts, eHTTP
 	return "<script language=\"javascript\">window.close();</script>";
 }
 
+struct countDVBServices: public Object
+{
+	int &count;
+	countDVBServices(const eServiceReference &bouquetRef, int &count )
+		:count(count)
+	{
+		Signal1<void, const eServiceReference&> cbSignal;
+		CONNECT( cbSignal, countDVBServices::countFunction );
+		eServiceInterface::getInstance()->enterDirectory(bouquetRef, cbSignal );
+		eServiceInterface::getInstance()->leaveDirectory(bouquetRef);
+	}
+	void countFunction( const eServiceReference& ref )
+	{
+		if ( ref.path
+			|| ref.flags & eServiceReference::isDirectory
+			|| ref.type != eServiceReference::idDVB )
+			return;
+		++count;
+	}
+};
 
 class eWebNavigatorListDirectory: public Object
 {
@@ -963,32 +983,37 @@ public:
 					 return;
 		}
 #endif
-		result += "<tr><td bgcolor=\"";
+		result += "<tr bgcolor=\"";
 		if (num & 1)
 			result += LIGHTGREY;
 		else
 			result += DARKGREY;
-		result += "\">";
+		result += "\"><td width=50>";
 
 		eString serviceRef = ref2string(e);
 		if (!(e.flags & eServiceReference::isDirectory))
 		{
-			result += button(50, "EPG", GREEN, "javascript:openEPG('" + serviceRef + "')");
-			result += "&nbsp;&nbsp;";
-			if (serviceRef.find("%2fhdd%2fmovie%2f") != eString::npos)
+			if (!e.path)
+				result += button(50, "EPG", GREEN, "javascript:openEPG('" + serviceRef + "')");
+			else if (serviceRef.find("%2fhdd%2fmovie%2f") != eString::npos)
 			{
 				result += "<a href=\"javascript:deleteMovie('";
 				result += serviceRef;
 				result += "')\"><img src=\"edittrash.png\" border=0></a>";
-				result += "&nbsp;&nbsp;";
 			}
-			result += "<a href=\'javascript:switchChannel(\"" + serviceRef + "\")\'>";
+			else
+				result += "&#160;";
+			result += "</td><td><a href=\'javascript:switchChannel(\"" + serviceRef + "\")\'>";
 		}
 		else
 		{
-			result += button(50, "EPG", GREEN, "javascript:openMultiEPG('" + serviceRef + "')");
-			result += "&nbsp;&nbsp;";
-			result += eString("<a href=\"/")+ "?path=" + serviceRef + "\">";
+			int count=0;
+			countDVBServices bla(e, count);
+			if ( count )
+				result += button(50, "EPG", GREEN, "javascript:openMultiEPG('" + serviceRef + "')");
+			else
+				result += "&#160;";
+			result += eString("</td><td><a href=\"/")+ "?path=" + serviceRef + "\">";
 		}
 
 		eService *service=iface.addRef(e);
@@ -1038,7 +1063,7 @@ static eString getZapContent(eString mode, eString path)
 			eWebNavigatorListDirectory navlist(result, path, tpath, *iface);
 			Signal1<void,const eServiceReference&> signal;
 			signal.connect(slot(navlist, &eWebNavigatorListDirectory::addEntry));
-				result+="<table width=\"100%\">\n";
+				result+="<table width=\"100%\" cellspacing=\"2\" cellpadding=\"1\" border=\"0\">\n";
 			iface->enterDirectory(current_service, signal);
 				result+="</table>\n";
 			eDebug("entered");
@@ -1156,16 +1181,42 @@ static eString getCurService()
 		return "n/a";
 }
 
+struct countTimer
+{
+	int &count;
+	bool repeating;
+	countTimer(int &count,bool repeating)
+		:count(count), repeating(repeating)
+	{
+	}
+	void operator()(ePlaylistEntry *se)
+	{
+		if ( se->type&ePlaylistEntry::isRepeating )
+		{
+			if ( repeating )
+				++count;
+		}
+		else if (!repeating)
+			++count;
+	}
+};
+
 struct getEntryString
 {
 	std::stringstream &result;
+	bool repeating;
 
-	getEntryString(std::stringstream &result): result(result)
+	getEntryString(std::stringstream &result, bool repeating)
+		:result(result), repeating(repeating)
 	{
 	}
 
 	void operator()(ePlaylistEntry* se)
 	{
+		if ( !repeating && se->type & ePlaylistEntry::isRepeating )
+			return;
+		if ( repeating && !(se->type & ePlaylistEntry::isRepeating) )
+			return;
 		tm startTime = *localtime(&se->time_begin);
 		time_t time_end = se->time_begin + se->duration;
 		tm endTime = *localtime(&time_end);
@@ -1186,29 +1237,52 @@ struct getEntryString
 			description = _("No description available");
 
 		if (se->type & ePlaylistEntry::stateFinished)
-			result << "<tr><td align=center><img src=\"on.gif\"></td>";
+			result << "<tr><td align=center><img src=\"on.gif\"></td><td>";
 		else if (se->type & ePlaylistEntry::stateError)
-			result << "<td align=center><img src=\"off.gif\"></td>";
+			result << "<tr><td align=center><img src=\"off.gif\"></td><td>";
 		else
-			result << "<td>&nbsp;</td>";
+			result << "<tr><td>&nbsp;</td><td>";
 
-		result  << "<td>"
-						<< std::setw(2) << startTime.tm_mday << '.'
-						<< std::setw(2) << startTime.tm_mon+1 << " - "
-						<< std::setw(2) << startTime.tm_hour << ':'
-						<< std::setw(2) << startTime.tm_min
-						<< "</td><td>"
-						<< std::setw(2) << endTime.tm_mday << '.'
-						<< std::setw(2) << endTime.tm_mon+1 << " - "
-						<< std::setw(2) << endTime.tm_hour << ':'
-						<< std::setw(2) << endTime.tm_min
-						<< "</td><td>" << channel
-						<< "</td><td>" << description
-						<< "</td></tr>";
+		if ( se->type & ePlaylistEntry::isRepeating )
+		{
+			if (se->type & ePlaylistEntry::Su)
+				result << "Su ";
+			if (se->type & ePlaylistEntry::Mo)
+				result << "Mo ";
+			if (se->type & ePlaylistEntry::Tue)
+				result << "Tue ";
+			if (se->type & ePlaylistEntry::Wed)
+				result << "Wed ";
+			if (se->type & ePlaylistEntry::Thu)
+				result << "Thu ";
+			if (se->type & ePlaylistEntry::Fr)
+				result << "Fr ";
+			if (se->type & ePlaylistEntry::Sa)
+				result << "Sa";
+			result << "</td><td>"
+							<< std::setw(2) << startTime.tm_hour << ':'
+							<< std::setw(2) << startTime.tm_min << " - ";
+		}
+		else
+		{
+			result 	<< std::setw(2) << startTime.tm_mday << '.'
+							<< std::setw(2) << startTime.tm_mon+1 << " - "
+							<< std::setw(2) << startTime.tm_hour << ':'
+							<< std::setw(2) << startTime.tm_min
+							<< "</td><td>"
+							<< std::setw(2) << endTime.tm_mday << '.'
+							<< std::setw(2) << endTime.tm_mon+1 << " - ";
+		}
+
+		result 	<< std::setw(2) << endTime.tm_hour << ':'
+							<< std::setw(2) << endTime.tm_min
+							<< "</td><td>" << channel
+							<< "</td><td>" << description
+							<< "</td></tr>";
 	}
 };
 
-static eString genTimerListBody(void)
+static eString genTimerListBody(int type)
 {
 	std::stringstream result;
 	result << std::setfill('0');
@@ -1219,14 +1293,14 @@ static eString genTimerListBody(void)
 		result << "<table width=100% border=1 rules=all>"
 							"<thead>"
 							"<th align=\"left\">"
-							"Status"
+							"State"
 							"</th>"
 							"<th align=\"left\">"
-							"Start Time"
-							"</th>"
+							<< (type ? "Days" : "Start Time")
+							<< "</th>"
 							"<th align=\"left\">"
-							"End Time"
-							"</th>"
+							<< (type ? "From - To" : "End Time")
+							<< "</th>"
 							"<th align=\"left\">"
 							"Channel"
 							"</th>"
@@ -1235,21 +1309,38 @@ static eString genTimerListBody(void)
 							"</th>"
 							"</thead>"
 							"<tbody>";
-		eTimerManager::getInstance()->forEachEntry(getEntryString(result));
+		eTimerManager::getInstance()->forEachEntry(getEntryString(result,type));
 		result << "</tbody>"
 							"</table>";
 	}
 	return result.str();
 }
 
+// for what this is needed ????
+// when not needed ..please remove.. (and the template file)
 static eString showTimerList(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	eString result;
 	eString tmpFile;
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	result = genTimerListBody();
 	tmpFile += read_file(TEMPLATE_DIR + "timerList.tmp");
-	tmpFile.strReplace("#BODY#", result);
+	int count=0;
+	eTimerManager::getInstance()->forEachEntry(countTimer(count,false));
+	if (count)
+	{
+		count=0;
+		tmpFile.strReplace("#BODY_NORMAL#", genTimerListBody(0));
+		tmpFile += "<br>";
+	}
+	else
+		tmpFile.strReplace("#BODY_NORMAL#", "&nbsp;");
+	eTimerManager::getInstance()->forEachEntry(countTimer(count,false));
+	if (count)
+	{
+		tmpFile.strReplace("#BODY_REPEATED#", genTimerListBody(1));
+		tmpFile += "<br>";
+	}
+	else
+		tmpFile.strReplace("#BODY_REPEATED#", "&nbsp;");
 	return tmpFile;
 }
 
@@ -1278,16 +1369,16 @@ static eString getEITC()
 					} else {
 						now_time="";
 					}
-					now_duration.sprintf("%d", (int)(event->duration/60));
+					now_duration.sprintf("&nbsp;(%d&nbsp;min)&nbsp;", (int)(event->duration/60));
 				}
 				if (p==1)
 				{
 					if (event->start_time!=0) {
  						next_time.sprintf("%s", ctime(&event->start_time));
 						next_time=next_time.mid(10,6);
-						next_duration.sprintf("%d", (int)(event->duration/60));
+						next_duration.sprintf("&nbsp;(%d&nbsp;min)&nbsp;", (int)(event->duration/60));
 					} else {
-						now_time="";
+						next_time="";
 					}
 				}
 				for(ePtrList<Descriptor>::iterator descriptor(event->descriptor); descriptor != event->descriptor.end(); ++descriptor)
@@ -1524,8 +1615,20 @@ static eString getContent(eString mode, eString path)
 	if (mode == "menuTimerList")
 	{
 		result = getTitle("Control > Timer List");
-		result += genTimerListBody();
-		result += "<br>";
+		int count=0;
+		eTimerManager::getInstance()->forEachEntry(countTimer(count,false));
+		if (count)
+		{
+			result += genTimerListBody(0);
+			count=0;
+			result += "<br>";
+		}
+		eTimerManager::getInstance()->forEachEntry(countTimer(count,true));
+		if (count)
+		{
+			result += genTimerListBody(1);
+			result += "<br>";
+		}
 		result += button(100, "Cleanup", BLUE, "javascript:cleanupTimerList()");
 		result += "&nbsp;&nbsp;&nbsp;";
 		result += button(100, "Clear", RED, "javascript:clearTimerList()");
@@ -2769,7 +2872,10 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 #endif
 	dyn_resolver->addDyn("GET", "/setVolume", setVolume);
 	dyn_resolver->addDyn("GET", "/setVideo", setVideo);
+
+// is this needed by anyone? when not.. please remove..
 	dyn_resolver->addDyn("GET", "/showTimerList", showTimerList, true);
+
 	dyn_resolver->addDyn("GET", "/addTimerEvent", addTimerEvent, true);
 	dyn_resolver->addDyn("GET", "/cleanupTimerList", cleanupTimerList, true);
 	dyn_resolver->addDyn("GET", "/clearTimerList", clearTimerList, true);

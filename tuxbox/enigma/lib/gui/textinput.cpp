@@ -308,6 +308,9 @@ void eTextInputField::setState(int enable, int cancel)
 		editLabel->hide();
 		if (!cancel)
 			setText(editLabel->getText());
+		else
+			setText(oldText);
+
 		delete editLabel;
 		editLabel=0;
 
@@ -317,7 +320,9 @@ void eTextInputField::setState(int enable, int cancel)
 			text.erase( text.length()-1 );
 
 		editMode=false;
-		/* emit */ selected();
+
+		if (!cancel)
+			/* emit */ selected();
 
 		eRCInput::getInstance()->setKeyboardMode(eRCInput::kmNone);
 		eWindow::globalCancel(eWindow::ON);
