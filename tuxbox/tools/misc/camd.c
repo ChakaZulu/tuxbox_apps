@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <ost/dmx.h>
@@ -34,6 +35,21 @@ int camfd;
 
 */
 
+#define __DEBUG__
+
+void DebugOut(const char* fmt, ...)
+{
+#ifdef __DEBUG__
+	static char buf[1024];
+	va_list ap;
+	va_start(ap, fmt);
+	vsnprintf(buf, 1024, fmt, ap);
+	va_end(ap);
+	fprintf(stderr, "%s",buf );
+#endif // __DEBUG__
+}
+
+
 void _writecam(int cmd, unsigned char *data, int len)
 {
 	char buffer[128];
@@ -53,10 +69,10 @@ void _writecam(int cmd, unsigned char *data, int len)
 		perror("ioctl");
 	}
 
-	printf("%03d >",len);
+	DebugOut("%03d >",len);
 	for (i=0; i<len; i++)
-		printf(" %02x", buffer[i]);
-	printf("\n");
+		DebugOut(" %02x", buffer[i]);
+	DebugOut("\n");
 }
 
 void writecam(unsigned char *data, int len)
@@ -199,11 +215,11 @@ int find_emmpid(int ca_system_id) {
 	r=((buffer[1]&0x0F)<<8)|buffer[2];
 
 	//for(count=0;count<r-1;count++)
-	//	printf("%02d: %02X\n",count,buffer[count]);
+	//	DebugOut("%02d: %02X\n",count,buffer[count]);
 
 	count=8;
 	while(count<r-1) {
-		//printf("CAID %04X EMM: %04X\n",((buffer[count+2]<<8)|buffer[count+3]),((buffer[count+4]<<8)|buffer[count+5])&0x1FFF);
+		//DebugOut("CAID %04X EMM: %04X\n",((buffer[count+2]<<8)|buffer[count+3]),((buffer[count+4]<<8)|buffer[count+5])&0x1FFF);
 		if ((((buffer[count+2]<<8)|buffer[count+3]) == ca_system_id) && (buffer[count+2] == ((0x18|0x27)&0xD7)))
 			return (((buffer[count+4]<<8)|buffer[count+5])&0x1FFF);
 			count+=buffer[count+1]+2;
@@ -285,7 +301,7 @@ int find_ecmpid(int pid,int ca_system_id) {
 		{
 			int epid, esinfo;
 			buffer[dp++];
-			//printf("stream type: %x\n", buffer[dp]);
+			//DebugOut("stream type: %x\n", buffer[dp]);
 			epid=(buffer[dp++]&0x1F)<<8;
 			epid|=buffer[dp++];
 			descramble_pid[descramble_pids++]=epid;
@@ -359,7 +375,7 @@ int main(int argc, char **argv)
 
 		if ((buffer[0]!=0x6F) || (buffer[1]!=0x50))
 		{
-			printf("out of sync! %02x %02x %02x %02x\n", buffer[0], buffer[1], buffer[2], buffer[3]);
+			DebugOut("out of sync! %02x %02x %02x %02x\n", buffer[0], buffer[1], buffer[2], buffer[3]);
 			break;
 		}
 		len=buffer[2]&0x7F;
@@ -375,16 +391,16 @@ int main(int argc, char **argv)
 			csum^=buffer[i];
 		if (csum)
 		{
-			printf("checksum failed. packet was:");
+			DebugOut("checksum failed. packet was:");
 			for (i=0; i<len+4; i++)
-				printf(" %02x", buffer[i]);
-			printf("\n");
+				DebugOut(" %02x", buffer[i]);
+			DebugOut("\n");
 			continue;
 		}
-		printf("%03d <",len+4);
+		DebugOut("%03d <",len+4);
 		for (i=0; i<len+4; i++)
-			printf(" %02x", buffer[i]);
-		printf("\n");
+			DebugOut(" %02x", buffer[i]);
+		DebugOut("\n");
 		if (buffer[3]==0x23)
 		{
 			switch ((unsigned)buffer[4])
@@ -393,28 +409,28 @@ int main(int argc, char **argv)
 			case 5:
 			case 6:
 			case 7:
-				printf("keep-alive(%d) %x casys %04x\n", buffer[4], buffer[5], (buffer[6]<<8)|buffer[7]);
+				DebugOut("keep-alive(%d) %x casys %04x\n", buffer[4], buffer[5], (buffer[6]<<8)|buffer[7]);
 				break;
 			case 0x89:
 	{
 		if (caid == 0) break;
-		printf("status89: %02x\n", buffer[5]);
+		DebugOut("status89: %02x\n", buffer[5]);
 		if (EMMPID == 0) {
-			printf("searching EMM-pid for ca_system_ID %04X\n",caid);
+			DebugOut("searching EMM-pid for ca_system_ID %04X\n",caid);
 			EMMPID=find_emmpid(caid);
 			if (EMMPID == 0) {
-				printf("no EMM-pid found for ca_system_ID %04X\n",caid);
-				//printf("press enter to exit\n");
+				DebugOut("no EMM-pid found for ca_system_ID %04X\n",caid);
+				//DebugOut("press enter to exit\n");
 				//getchar();
 				//exit(0);
 			}
 			else
-				printf("EMM-pid found: %04X\n",EMMPID);
+				DebugOut("EMM-pid found: %04X\n",EMMPID);
 		}
 		if (EMMPID == 0) break;
 		setemm(0x104, caid, EMMPID);
 		if (ECMPID == 0) {
-			printf("searching ECM-pid for ca_system_ID %04X\n",caid);
+			DebugOut("searching ECM-pid for ca_system_ID %04X\n",caid);
 			if (argc == 4)
 			{
 				ECMPID=find_ecmpid(pmt,caid);
@@ -428,13 +444,13 @@ int main(int argc, char **argv)
 			}
 
 			if (ECMPID == 0) {
-				printf("no ECM-pid found for ca_system_ID %04X\n",caid);
-				//printf("press enter to exit\n");
+				DebugOut("no ECM-pid found for ca_system_ID %04X\n",caid);
+				//DebugOut("press enter to exit\n");
 				//getchar();
 				//exit(0);
 			}
 			else
-				printf("ECM-pid found: %04X\n",ECMPID);
+				DebugOut("ECM-pid found: %04X\n",ECMPID);
 		}
 		if (ECMPID == 0) break;
 		descramble(ONID, SID, 0x104, caid, ECMPID, descramble_pids, descramble_pid);
@@ -449,7 +465,7 @@ int main(int argc, char **argv)
 	}
 				if (newcaid!=caid)
 				{
-		printf("CAID is: %04X\n",newcaid);
+		DebugOut("CAID is: %04X\n",newcaid);
 					caid=newcaid;
 		reset();
 				}
@@ -457,42 +473,42 @@ int main(int argc, char **argv)
 			}
 			case 0x8D:
 			{
-				printf("descramble_answer\n");
+				DebugOut("descramble_answer\n");
 				start(SID);
 				break;
 			}
 			case 0x8F:
 			{
-				printf("descramble_answer (special)\n");
+				DebugOut("descramble_answer (special)\n");
 				start(SID);
 				break;
 			}
 			case 0x9F:
 			{
-				printf("cardslot %02x %02x\n", buffer[5], buffer[6]);
+				DebugOut("cardslot %02x %02x\n", buffer[5], buffer[6]);
 		if( buffer[5]&0x01 )
 		{
 			// no card in slot 0
-			printf("no card in slot 0 (KARTE2)\n");
+			DebugOut("no card in slot 0 (KARTE2)\n");
 			cardslot0=0;
 		}
 		else
 		{
 			// card in slot 0
-			printf("card found in slot 0 (KARTE2)\n");
+			DebugOut("card found in slot 0 (KARTE2)\n");
 			cardslot0=1;
 		}
 
 		if( buffer[6]&0x01 )
 		{
 			// no card in slot 0
-			printf("no card in slot 1 (KARTE1)\n");
+			DebugOut("no card in slot 1 (KARTE1)\n");
 			cardslot1=0;
 		}
 		else
 		{
 			// card in slot 0
-			printf("card found in slot 1 (KARTE1)\n");
+			DebugOut("card found in slot 1 (KARTE1)\n");
 //			if (cardslot1==0)
 //				initok=0;
 			cardslot1=1;
@@ -512,49 +528,49 @@ int main(int argc, char **argv)
 				char tb[14];
 				memcpy(tb, buffer+5, 13);
 				tb[13]=0;
-				printf("card-data: %s %02x %02x\n", tb, buffer[18], buffer[19]);
+				DebugOut("card-data: %s %02x %02x\n", tb, buffer[18], buffer[19]);
 				break;
 			}
 			case 0xB9:
 			{
-				printf("statusB9: %02x\n", buffer[5]);
+				DebugOut("statusB9: %02x\n", buffer[5]);
 				break;
 			}
 			case 0xBD:
 			{
-				printf("status(%02x): service-id: %04x", buffer[7], (buffer[5]<<8)|buffer[6]);
+				DebugOut("status(%02x): service-id: %04x", buffer[7], (buffer[5]<<8)|buffer[6]);
 				for (i=4; i<len-1; i+=3)
-					printf(", pid %x:=%x", (buffer[4+i]<<8)|buffer[i+5], buffer[i+6]);
-				printf("\n");
+					DebugOut(", pid %x:=%x", (buffer[4+i]<<8)|buffer[i+5], buffer[i+6]);
+				DebugOut("\n");
 				break;
 			}
 			default:
-				printf("unknown command. packet was:");
+				DebugOut("unknown command. packet was:");
 				for (i=0; i<len+4; i++)
-					printf(" %02x", buffer[i]);
-				printf("\n");
+					DebugOut(" %02x", buffer[i]);
+				DebugOut("\n");
 			}
 		} else if (buffer[3]==0xE0)
 		{
-			printf("cam init complete event.\n");
+			DebugOut("cam init complete event.\n");
 			set_key();
 		} else if (buffer[3]==0xE1)
 		{
 			char tb[32];
 			memcpy(tb, buffer+4, len-1);
 			tb[len-1]=0;
-			printf("cam-revision: %s\n", tb, len);
+			DebugOut("cam-revision: %s\n", tb, len);
 			if (EMMPID == 0) {
-						printf("searching EMM-pid for ca_system_ID %04X\n",caid);
+						DebugOut("searching EMM-pid for ca_system_ID %04X\n",caid);
 						EMMPID=find_emmpid(caid);
 						if (EMMPID == 0) {
-							printf("no EMM-pid found for ca_system_ID %04X\n",caid);
-							//printf("press enter to exit\n");
+							DebugOut("no EMM-pid found for ca_system_ID %04X\n",caid);
+							//DebugOut("press enter to exit\n");
 							//getchar();
 							//exit(0);
 						}
 						else
-						 printf("EMM-pid found: %04X\n",EMMPID);
+						DebugOut("EMM-pid found: %04X\n",EMMPID);
 			}
 			if (EMMPID == 0) break;
 			setemm(0x104, caid, EMMPID);
@@ -562,7 +578,7 @@ int main(int argc, char **argv)
 
 		} else 
 		{
-			printf("unknown command class %02x\n", buffer[3]);
+			DebugOut("unknown command class %02x\n", buffer[3]);
 		}
 	}
 	
