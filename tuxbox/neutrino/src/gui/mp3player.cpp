@@ -38,6 +38,7 @@
 #include <daemonc/remotecontrol.h>
 #include <system/settings.h>
 #include <algorithm>
+#include <sys/time.h>
 
 #include "eventlist.h"
 #include "mp3player.h"
