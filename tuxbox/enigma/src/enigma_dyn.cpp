@@ -15,6 +15,7 @@
 
 #include <config.h>
 #include <core/system/econfig.h>
+#include <core/gdi/fb.cpp>
 
 #include <stdio.h>
 #include <sys/socket.h>
@@ -870,6 +871,14 @@ static eString getsi(eString request, eString path, eString opt, eHTTPConnection
 	return result;
 }
 
+static eString neutrino_suck_zapto(eString request, eString path, eString opt, eHTTPConnection *content)
+{
+	if(opt!="getpids")
+		return(eString("ok\n"));
+	else
+		return(eString().sprintf("%u\n%u\n", Decoder::parms.vpid, Decoder::parms.apid));
+}
+
 void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 {
 	dyn_resolver->addDyn("GET", "/", web_root);
@@ -889,6 +898,9 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg", getcurepg);
 	dyn_resolver->addDyn("GET", "/cgi-bin/streaminfo", getsi);
 	dyn_resolver->addDyn("GET", "/channels/getcurrent", channels_getcurrent);
+
+
+	dyn_resolver->addDyn("GET", "/control/zapto", neutrino_suck_zapto);
 
 /*	dyn_resolver->addDyn("GET", "/channels/numberchannels", channels_numberchannels);
 	dyn_resolver->addDyn("GET", "/channels/gethtmlchannels", channels_gethtmlchannels);

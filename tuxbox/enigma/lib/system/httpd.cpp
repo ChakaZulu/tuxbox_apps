@@ -298,9 +298,9 @@ int eHTTPConnection::processLocalState()
 				writeString(cur->first.c_str());
 				writeString(": ");
 				writeString(cur->second.c_str());
-				writeString("\r\n");
+				writeString("\n");
 			}
-			writeString("\r\n");
+			writeString("\n");
 			if (request=="HEAD")
 				localstate=stateDone;
 			else
