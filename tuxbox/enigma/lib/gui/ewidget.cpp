@@ -181,15 +181,13 @@ void eWidget::event(const eWidgetEvent &event)
 			break;
 
 		case eWidgetEvent::changedSize:
-			redraw();
-			break;
 		case eWidgetEvent::changedText:
 		case eWidgetEvent::changedFont:
 		case eWidgetEvent::changedForegroundColor:
 		case eWidgetEvent::changedBackgroundColor:
 		case eWidgetEvent::changedPosition:
 		case eWidgetEvent::changedPixmap:
-			getNonTransparentBackground()->redraw();
+			invalidate();
 			break;
 		}
 	}
