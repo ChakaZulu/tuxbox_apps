@@ -1,7 +1,10 @@
 //
-// $Id: eventlist.cpp,v 1.6 2001/09/18 20:20:26 field Exp $
+// $Id: eventlist.cpp,v 1.7 2001/09/19 00:11:57 McClean Exp $
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.7  2001/09/19 00:11:57  McClean
+// dont add events with "" Text
+//
 // Revision 1.6  2001/09/18 20:20:26  field
 // Eventlist in den Infov. verschoben (gelber Knopf), Infov.-Anzeige auf Knoepfe
 // vorbereitet
@@ -133,7 +136,8 @@ void EventList::readEvents(const std::string& channelname)
 //            printf("id: %s - name: %s\n", epgID, evt->name.c_str());
 //    tmp->number=number;
 //    tmp->name=name;
-            evtlist.insert(evtlist.end(), evt);
+            if(evt->name !="")
+		evtlist.insert(evtlist.end(), evt);
         }
 
         delete[] pData;
