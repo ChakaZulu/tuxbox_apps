@@ -11,6 +11,7 @@
 #include <core/gui/guiactions.h>
 #include <core/system/init.h>
 
+std::list<eWidget*> eWidget::toplevel;
 
 eWidget::eWidget(eWidget *parent, int takefocus):
 	parent(parent),
@@ -36,7 +37,7 @@ eWidget::eWidget(eWidget *parent, int takefocus):
 
 	if (parent)
 		parent->childlist.push_back(this);
-
+		
 	just_showing=0;
 }
 
@@ -259,6 +260,12 @@ void eWidget::clear()
 		p->setBackgroundColor(gColor(0));
 		p->clear();
 		delete p;
+		if (eWidget *n=toplevel.back())
+		{
+			eRect me(position, size);
+			me.moveBy(-n->position.x(), -n->position.y());
+			toplevel.back()->invalidate(me);
+		}
 	}
 }
 
@@ -279,6 +286,9 @@ void eWidget::show()
 	ASSERT(!(state&stateVisible));
 
 	state|=stateShow;
+
+	if (!parent)
+		toplevel.push_back(this);
 
 	if (!parent || (parent->state&stateVisible))
 	{
@@ -325,6 +335,14 @@ void eWidget::hide()
 	if (state&stateVisible)
 	{
 		willHideChildren();
+
+		if (!parent)
+		{
+			if (toplevel.back() != this)
+				eFatal("wrong order while closing windows!");
+			toplevel.pop_back();
+		}
+
 		clear();	// hide -> immer erasen. dieses Hide ist IMMER explizit.
 		checkFocus();
 	}

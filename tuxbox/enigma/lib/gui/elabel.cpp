@@ -74,6 +74,8 @@ int eLabel::eventFilter(const eWidgetEvent &event)
 	case eWidgetEvent::changedText:
 		invalidate();
 		break;
+	default:
+		break;
 	}
 	return 0;
 }

@@ -14,8 +14,11 @@ void eEventDisplay::nextEvent()
 		*events = eventlist->begin();
 	else
 		++(*events);
-   	
-	setEvent(**events);
+
+	if (*events != eventlist->end())
+		setEvent(**events);
+	else
+		setEvent(0);
 }
 
 void eEventDisplay::prevEvent()
@@ -25,7 +28,10 @@ void eEventDisplay::prevEvent()
  	else
 		--(*events);	
   	
-	setEvent(**events);
+	if (*events != eventlist->end())
+		setEvent(**events);
+	else
+		setEvent(0);
 }
 
 int eEventDisplay::eventHandler(const eWidgetEvent &event)
@@ -93,7 +99,7 @@ eEventDisplay::eEventDisplay(eString service, const ePtrList<EITEvent>* e, EITEv
 	eventDate->setText("");
 	eventTime->setText("");
 	channel->setText("");
-
+	
 	if (e)
 		setList(*e);
 	else if (evt)
@@ -176,6 +182,9 @@ void eEventDisplay::setList(const ePtrList<EITEvent> &e)
 		delete events;
 	eventlist=new ePtrList<EITEvent>(e);
 	events=new ePtrList<EITEvent>::iterator(*eventlist);
-	setEvent(**events);
+	if (*events != eventlist->end())
+		setEvent(**events);
+	else
+		setEvent(0);
 }
 

@@ -910,7 +910,7 @@ void eZapMain::showEPG()
 
 	if (!service)
 		return;
-
+		
 	if (isVisible())
 	{
 		timeout.stop();
@@ -918,6 +918,7 @@ void eZapMain::showEPG()
 	}
 
 #ifdef USE_CACHED_EPG
+#error no
 	const eventMap* pMap = eEPGCache::getInstance()->getEventMap(service->original_network_id, service->service_id);
 
 	if (pMap && isEPG)  // EPG vorhanden

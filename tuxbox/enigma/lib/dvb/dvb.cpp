@@ -74,6 +74,11 @@ static std::string escape(const std::string s)
 
 void eTransponder::cable::set(const CableDeliverySystemDescriptor *descriptor)
 {
+			// reject <100Mhz, >1000Mhz
+	if (descriptor->frequency < 100*1000)
+		return;
+	if (descriptor->frequency > 1000*1000)
+		return;
 	frequency=descriptor->frequency;
 	symbol_rate=descriptor->symbol_rate;
 	modulation=descriptor->modulation;
@@ -86,25 +91,39 @@ int eTransponder::cable::tune(eTransponder *trans)
 {
 	eDebug("[TUNE] tuning to %d/%d", frequency, symbol_rate);
 	int inv=0;
-	return eFrontend::fe()->tune_qam(trans, frequency, symbol_rate, fec_inner, inv, modulation);
+	return eFrontend::getInstance()->tune_qam(trans, frequency, symbol_rate, fec_inner, inv, modulation);
 }
 
 void eTransponder::satellite::set(const SatelliteDeliverySystemDescriptor *descriptor)
 {
+	if (descriptor->frequency < 7000*1000)		// ACHTUNG wegen C-Band
+		return;
 	frequency=descriptor->frequency;
 	symbol_rate=descriptor->symbol_rate;
 	polarisation=descriptor->polarisation;
 	fec=descriptor->FEC_inner;
-	lnb=0;	// TODO: lookupSatellite(descr->orbital_position, descr->west_east_flag);
+	orbital_position=descriptor->orbital_position;
+	if (!descriptor->west_east_flag)
+		orbital_position=-orbital_position;
+	eDebug("%d %d", descriptor->orbital_position, descriptor->west_east_flag);
 	inversion=0;
 	valid=1;
 }
 
 int eTransponder::satellite::tune(eTransponder *trans)
 {
-	eDebug("[TUNE] tuning to %d/%d/%s/%d@%d\n", frequency, symbol_rate, polarisation?"V":"H", fec, lnb);
+	eDebug("[TUNE] tuning to %d/%d/%s/%d@%d\n", frequency, symbol_rate, polarisation?"V":"H", fec, orbital_position);
 	int inv=0;
-	return eFrontend::fe()->tune_qpsk(trans, frequency, polarisation, symbol_rate, fec, inv, lnb);
+	eSatellite *sat=trans->tplist.findSatellite(orbital_position);
+	if (!sat)
+	{
+		eDebug("couldn't find sat %d..", orbital_position);
+		return -ENOENT;
+	}
+	
+	eLNB &lnb=sat->getLNB();
+	
+	return eFrontend::getInstance()->tune_qpsk(trans, frequency, polarisation, symbol_rate, fec, inv, lnb);
 }
 
 eService::eService(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, eServiceID service_id, int service_number):
@@ -133,27 +152,27 @@ int eBouquet::remove(const eServiceReference &service)
 	return 0;
 }
 
-eTransponder::eTransponder(int transport_stream_id, int original_network_id):
-	transport_stream_id(transport_stream_id), original_network_id(original_network_id)
+eTransponder::eTransponder(eTransponderList &tplist, eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id):
+	tplist(tplist), transport_stream_id(transport_stream_id), original_network_id(original_network_id)
 {
 	cable.valid=0;
 	satellite.valid=0;
 	state=stateToScan;
 }
 
-eTransponder::eTransponder(): transport_stream_id(-1), original_network_id(-1)
+eTransponder::eTransponder(eTransponderList &tplist): tplist(tplist), transport_stream_id(-1), original_network_id(-1)
 {
 	cable.valid=satellite.valid=0;
 	state=stateToScan;
 }
 
-void eTransponder::setSatellite(int frequency, int symbol_rate, int polarisation, int fec, int lnb, int inversion)
+void eTransponder::setSatellite(int frequency, int symbol_rate, int polarisation, int fec, int orbital_position, int inversion)
 {
 	satellite.frequency=frequency;
 	satellite.symbol_rate=symbol_rate;
 	satellite.polarisation=polarisation;
 	satellite.fec=fec;
-	satellite.lnb=lnb;
+	satellite.orbital_position=orbital_position;
 	satellite.valid=1;
 	satellite.inversion=inversion;
 }
@@ -168,7 +187,7 @@ void eTransponder::setCable(int frequency, int symbol_rate, int inversion)
 
 int eTransponder::tune()
 {
-	switch (eFrontend::fe()->Type())
+	switch (eFrontend::getInstance()->Type())
 	{
 	case eFrontend::feCable:
 		if (cable.isValid())
@@ -187,7 +206,7 @@ int eTransponder::tune()
 
 int eTransponder::isValid()
 {
-	switch (eFrontend::fe()->Type())
+	switch (eFrontend::getInstance()->Type())
 	{
 	case eFrontend::feCable:
 		return cable.isValid();
@@ -220,19 +239,64 @@ void eService::update(const SDTEntry *sdtentry)
 //	printf("%04x:%04x %02x %s", transport_stream_id, service_id, service_type, (const char*)service_name);
 }
 
-eTransponderList::eTransponderList()
+eSatellite::eSatellite(eTransponderList &tplist, int orbital_position, eLNB &lnb):
+		tplist(tplist), orbital_position(orbital_position), lnb(lnb)
 {
+	tpiterator=tplist.satellites.insert(std::pair<int,eSatellite*>(orbital_position,this)).first;
 }
 
-eTransponder &eTransponderList::createTransponder(int transport_stream_id, int original_network_id)
+eSatellite::~eSatellite()
 {
-	std::map<tsref,eTransponder>::iterator i=transponders.find(tsref(original_network_id,transport_stream_id));
+	tplist.satellites.erase(tpiterator);
+}
+
+eSatellite *eLNB::addSatellite(int orbital_position)
+{
+	satellites.push_back(new eSatellite(tplist, orbital_position, *this));
+	return satellites.back();
+}
+
+void eLNB::deleteSatellite(eSatellite *satellite)
+{
+	satellites.remove(satellite);
+}
+
+eTransponderList::eTransponderList()
+{
+	{
+		lnbs.push_back(eLNB(*this));
+		eLNB &lnb=lnbs.back();
+	
+		lnb.setLOFHi(10600000);
+		lnb.setLOFLo(9750000);
+		lnb.setLOFThreshold(11700000);
+		lnb.getDiSEqC().sat=0;
+	
+		lnb.addSatellite(192)->setDescription("Astra 19.2E");
+	}
+
+	{
+		lnbs.push_back(eLNB(*this));
+		eLNB &lnb=lnbs.back();
+	
+		lnb.setLOFHi(10600000);
+		lnb.setLOFLo(9750000);
+		lnb.setLOFThreshold(11700000);
+		lnb.getDiSEqC().sat=1;
+		
+		lnb.addSatellite(130)->setDescription("Eutelsat 13.0E");
+	} 
+}
+
+eTransponder &eTransponderList::createTransponder(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id)
+{
+	std::map<tsref,eTransponder>::iterator i=transponders.find(tsref(transport_stream_id, original_network_id));
 	if (i==transponders.end())
 	{
 		i=transponders.insert(
 				std::pair<tsref,eTransponder>
-					(tsref(original_network_id, transport_stream_id),
-						eTransponder(original_network_id,transport_stream_id)
+					(tsref(transport_stream_id, original_network_id),
+						eTransponder(*this, transport_stream_id, original_network_id)
 					)
 			).first;
 		/*emit*/ transponder_added(&(*i).second);
@@ -261,11 +325,10 @@ eService &eTransponderList::createService(const eServiceReference &service, int 
 				--i;
 				chnum=i->first+1;	// letzte kanalnummer +1
 			}
+			while (channel_number.find(chnum)!=channel_number.end())
+				chnum++;
 		}
 		
-		while (channel_number.find(chnum)!=channel_number.end())
-			chnum++;
-
 		eService *n=&services.insert(
 					std::pair<eServiceReference,eService>
 						(service,
@@ -288,7 +351,7 @@ void eTransponderList::updateStats(int &numtransponders, int &scanned, int &nser
 		eTransponder &t=i->second;
 		if (!t.isValid())
 			continue;
-		if (t.transport_stream_id==-1)
+		if (t.transport_stream_id.get()==-1)
 			continue;
 		numtransponders++;
 		if (t.state==eTransponder::stateOK)
@@ -344,9 +407,9 @@ int eTransponderList::handleSDT(const SDT *sdt)
 	return changed;
 }
 
-eTransponder *eTransponderList::searchTS(eOriginalNetworkID original_network_id, eTransportStreamID transport_stream_id)
+eTransponder *eTransponderList::searchTS(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id)
 {
-	std::map<tsref,eTransponder>::iterator i=transponders.find(tsref(original_network_id,transport_stream_id));
+	std::map<tsref,eTransponder>::iterator i=transponders.find(tsref(transport_stream_id, original_network_id));
 	if (i==transponders.end())
 		return 0;
 	return &i->second;
@@ -385,3 +448,11 @@ eTransponder *eTransponderList::getFirstTransponder(int state)
 	return 0;
 }
 
+eSatellite *eTransponderList::findSatellite(int orbital_position)
+{
+	eDebug("findSatellite: %d items", satellites.size());
+	std::map<int,eSatellite*>::iterator i=satellites.find(orbital_position);
+	if (i == satellites.end())
+		return 0;
+	return i->second;
+}

@@ -39,31 +39,11 @@ eFrontend::eFrontend(int type, const char *demod, const char *sec): type(type)
 	} else
 		secfd=-1;
 		
-	if (eConfig::getInstance()->getKey("/elitedvb/frontend/freqOffset", freq_offset))
-	{
-		freq_offset = 0;
-		eConfig::getInstance()->setKey("/elitedvb/frontend/freqOffset", freq_offset);
-	}
-
-	eDebug("FreqOffset = %d", freq_offset);
-
-	if (type==feCable)
-	{
-		lnbfreq_low=lnbfreq_hi=threshold=do_sec=0;
-	} else
-	{
-		lnbfreq_low= 9750000;
-		lnbfreq_hi= 10600000;
-		threshold=	11700000;
-		do_sec=1;
-	}
-	
 	lastcsw=0;
 }
 
 void eFrontend::timeout()
 {
-	eDebug("status %x lock %d", Status(), Locked());
 	if (Locked())
 	{
 	  eDebug("+");
@@ -200,7 +180,7 @@ int eFrontend::tune(eTransponder *trans,
 		uint32_t SymbolRate, 		// symbolrate in symbols/s (e.g. 27500000)
 		CodeRate FEC_inner,			// FEC_inner api
 		SpectralInversion Inversion,	// spectral inversion, INVERSION_OFF / _ON / _AUTO (but please...)
-		int sat,								// diseqc satellite, &1 -> SAT_A/B, &2 -> OPT_A/B
+		eLNB *lnb,
 		Modulation QAM)					// Modulation, QAM_xx
 {
 	FrontendParameters front;
@@ -223,81 +203,82 @@ int eFrontend::tune(eTransponder *trans,
 		return -EBUSY;
 	transponder=trans;
 
-	diseqc.addr=0x10;
-	diseqc.cmd=0x38;
-	diseqc.numParams=1;
-	cmd.type=SEC_CMDTYPE_DISEQC;
+	if (lnb)
+	{
+		diseqc.addr=0x10;
+		diseqc.cmd=0x38;
+		diseqc.numParams=1;
+		cmd.type=SEC_CMDTYPE_DISEQC;
 	
-	if (Frequency>threshold)
-	{
-		front.Frequency=Frequency-lnbfreq_hi;
-		seq.continuousTone = SEC_TONE_ON;
-		hi=1;
-	} else
-	{
-		front.Frequency=Frequency-lnbfreq_low;
-		seq.continuousTone = SEC_TONE_OFF;
-		hi=0;
-	}
-	
-//	front.Frequency+=freq_offset;
-	if ((sat == 0) && (seq.continuousTone == SEC_TONE_ON))	// astra lnb hi
-		front.Frequency-=7000;
-	front.Inversion=Inversion;
+		if (Frequency > lnb->getLOFThreshold())
+		{
+			front.Frequency=Frequency-lnb->getLOFHi();
+			seq.continuousTone = SEC_TONE_ON;
+			hi=1;
+		} else
+		{
+			front.Frequency=Frequency-lnb->getLOFLo();
+			seq.continuousTone = SEC_TONE_OFF;
+			hi=0;
+		}
 
-	diseqc.params[0]=0xF0;
+		diseqc.params[0]=0xF0;
 
-	if (polarisation==polVert)
-	{
-		seq.voltage=SEC_VOLTAGE_13;
-	} else if (polarisation==polHor)
-	{
-		diseqc.params[0]|=2;
-		seq.voltage=SEC_VOLTAGE_18;
-	} else
-		eDebug("BLA was ist dass denn fuer eine pol.");
-	
-	if (hi)
-		diseqc.params[0]|=1;
-	diseqc.params[0]|=sat<<2;
-	
-	cmd.u.diseqc=diseqc;
-	seq.miniCommand=SEC_MINI_NONE;
+		if (polarisation==polVert)
+		{
+			seq.voltage=SEC_VOLTAGE_13;
+		} else if (polarisation==polHor)
+		{
+			diseqc.params[0]|=2;
+			seq.voltage=SEC_VOLTAGE_18;
+		} else
+			eDebug("BLA was ist dass denn fuer eine pol.");
 
-	ioctl(fd, FE_SET_POWER_STATE, FE_POWER_ON);
+		if (hi)
+			diseqc.params[0]|=1;
+		diseqc.params[0]|=lnb->getDiSEqC().sat<<2;
 
-	if ((diseqc.params[0]^lastcsw))		// only when changing satellites or pol.
-	{
+		cmd.u.diseqc=diseqc;
+		seq.miniCommand=SEC_MINI_NONE;
+
+		ioctl(fd, FE_SET_POWER_STATE, FE_POWER_ON);
+
+		if ((diseqc.params[0]^lastcsw))		// only when changing satellites or pol.
+		{
 #ifdef SPAUN_NOT_WORKING_BUT_FASTER_ZAP
-		int changelnb=(diseqc.params[0]^lastcsw)&~3;
+			int changelnb=(diseqc.params[0]^lastcsw)&~3;
 #else
-		int changelnb=1;
+			int changelnb=1;
 #endif
 		
-		lastcsw=diseqc.params[0];
+			lastcsw=diseqc.params[0];
 		
 #if 0
-		if (changelnb)
-		{
-			if (sat==0)
-				seq.miniCommand=SEC_MINI_A;
-			else if (sat==1)
-				seq.miniCommand=SEC_MINI_B;
-		} else
+			if (changelnb)
+			{
+				if (sat==0)
+					seq.miniCommand=SEC_MINI_A;
+				else if (sat==1)
+					seq.miniCommand=SEC_MINI_B;
+			} else
 #endif
-
 			seq.miniCommand=SEC_MINI_NONE;
 
-		seq.numCommands=changelnb?1:0;
-		seq.commands=&cmd;
-		eDebug("%d %d sending sequence... %x", do_sec, secfd, SEC_SEND_SEQUENCE);
-		if (do_sec)
+			seq.numCommands=changelnb?1:0;
+			seq.commands=&cmd;
 			if (ioctl(secfd, SEC_SEND_SEQUENCE, &seq)<0)
 			{
 				perror("SEC_SEND_SEQUENCE");
 				return -1;
 			}
+		}
+	} else
+	{
+		eDebug("no lnb");
+		front.Frequency=Frequency;
 	}
+
+	front.Inversion=Inversion;
 
 	switch (type)
 	{
@@ -311,19 +292,14 @@ int eFrontend::tune(eTransponder *trans,
 		front.u.qpsk.FEC_inner=FEC_inner;
 		break;
 	}
-	eDebug("IF: %d %d", front.Frequency, seq.continuousTone);
-
-	eDebug("ok, sec etc. done");
 	if (ioctl(fd, FE_SET_FRONTEND, &front)<0)
 	{
 		perror("FE_SET_FRONTEND");
 		return -1;
 	}
-	eDebug("<--- FE_SET_FRONTEND");
 	state=stateTuning;
 	tries=10; // 1.0 second timeout
 	timer->start(50, true);
-	eDebug("<-- tuned");
 	return 0;
 }
 
@@ -333,9 +309,9 @@ int eFrontend::tune_qpsk(eTransponder *transponder,
 		uint32_t SymbolRate, 		// symbolrate in symbols/s (e.g. 27500000)
 		uint8_t FEC_inner,			// FEC_inner (-1 for none, 0 for auto, but please don't use that)
 		int Inversion,	// spectral inversion, INVERSION_OFF / _ON / _AUTO (but please...)
-		int sat)								// diseqc satellite, &1 -> SAT_A/B, &2 -> OPT_A/B
+		eLNB &lnb)								// diseqc satellite, &1 -> SAT_A/B, &2 -> OPT_A/B
 {
-	return tune(transponder, Frequency, polarisation, SymbolRate, getFEC(FEC_inner), Inversion?INVERSION_ON:INVERSION_OFF, sat, QPSK);
+	return tune(transponder, Frequency, polarisation, SymbolRate, getFEC(FEC_inner), Inversion?INVERSION_ON:INVERSION_OFF, &lnb, QPSK);
 }
 
 int eFrontend::tune_qam(eTransponder *transponder, 

@@ -220,11 +220,11 @@ struct saveTransponder: public std::unary_function<const eTransponder&, void>
 	{
 		if (t.state!=eTransponder::stateOK)
 			return;
-		fprintf(f, "%04x:%04x %d\n", t.transport_stream_id, t.original_network_id, t.state);
+		fprintf(f, "%04x:%04x %d\n", t.transport_stream_id.get(), t.original_network_id.get(), t.state);
 		if (t.cable.valid)
 			fprintf(f, "\tc %d:%d:%d\n", t.cable.frequency, t.cable.symbol_rate, t.cable.inversion);
 		if (t.satellite.valid)
-			fprintf(f, "\ts %d:%d:%d:%d:%d:%d\n", t.satellite.frequency, t.satellite.symbol_rate, t.satellite.polarisation, t.satellite.fec, t.satellite.lnb, t.satellite.inversion);
+			fprintf(f, "\ts %d:%d:%d:%d:%d:%d\n", t.satellite.frequency, t.satellite.symbol_rate, t.satellite.polarisation, t.satellite.fec, t.satellite.orbital_position, t.satellite.inversion);
 		fprintf(f, "/\n");
 	}
 	~saveTransponder()
@@ -275,7 +275,7 @@ void eDVBSettings::loadServices()
 			break;
 		int transport_stream_id=-1, original_network_id=-1, state=-1;
 		sscanf(line, "%04x:%04x %d", &transport_stream_id, &original_network_id, &state);
-		eTransponder &t=transponderlist->createTransponder(transport_stream_id, original_network_id);
+		eTransponder &t=transponderlist->createTransponder(eTransportStreamID(transport_stream_id), eOriginalNetworkID(original_network_id));
 		t.state=state;
 		while (!feof(f))
 		{

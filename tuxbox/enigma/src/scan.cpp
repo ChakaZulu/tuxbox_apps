@@ -20,10 +20,6 @@
 
 #include <string>
 
-#define USE_NETWORK 1
-#define USE_BAT			2
-#define USE_ONIT		4
-
 tsSelectType::tsSelectType(eWidget *parent): eWidget(parent)
 {
 	list=new eListBox<eListBoxEntryText>(this);
@@ -53,7 +49,7 @@ void tsSelectType::selected(eListBoxEntryText *entry)
 tsManual::tsManual(eWidget *parent, const eTransponder &transponder): eWidget(parent), transponder(transponder)
 {
 	int ft=0;
-	switch (eFrontend::fe()->Type())
+	switch (eFrontend::getInstance()->Type())
 	{
 	case eFrontend::feSatellite:
 		ft=eTransponderWidget::deliverySatellite;
@@ -70,7 +66,7 @@ tsManual::tsManual(eWidget *parent, const eTransponder &transponder): eWidget(pa
 	transponder_widget->load();
 	transponder_widget->setName("transponder");
 	
-	festatus_widget=new eFEStatusWidget(this, eFrontend::fe());
+	festatus_widget=new eFEStatusWidget(this, eFrontend::getInstance());
 	festatus_widget->setName("festatus");
 
 	c_useonit=new eCheckbox(this);
@@ -158,7 +154,7 @@ tsAutomatic::tsAutomatic(eWidget *parent): eWidget(parent)
 	l_network->setName("network");
 	l_network->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
 
-	eFEStatusWidget *festatus_widget=new eFEStatusWidget(this, eFrontend::fe());
+	eFEStatusWidget *festatus_widget=new eFEStatusWidget(this, eFrontend::getInstance());
 	festatus_widget->setName("festatus");
 	
 	l_status=new eLabel(this, RS_WRAP);
@@ -217,10 +213,17 @@ void tsAutomatic::start()
 	{
 		tpPacket *pkt=(tpPacket*)(l_network->getCurrent() -> getKey());
 		for (std::list<eTransponder>::iterator i(pkt->possibleTransponders.begin()); i != pkt->possibleTransponders.end(); ++i)
+		{
+#if 0
+			if (i->satellite.valid)
+				i->satellite.lnb=(int)l_lnb->getCurrent()->getKey();
+#endif
 			sapi->addTransponder(*i);
+		}
 
 		// scanflags auswerten
 		eDebug("ScanFlags = %i", pkt->scanflags);
+		sapi->setSkipKnownNIT(pkt->scanflags & 8);
 		sapi->setUseONIT(pkt->scanflags & 4);
 		sapi->setUseBAT(pkt->scanflags & 2);
 		sapi->setNetworkSearch(pkt->scanflags & 1);
@@ -271,7 +274,7 @@ void tsAutomatic::dvbEvent(const eDVBEvent &event)
 
 int tsAutomatic::loadNetworks()
 {
-	int fetype=eFrontend::fe()->Type();
+	int fetype=eFrontend::getInstance()->Type();
 
 	XMLTreeParser parser("ISO-8859-1");
 	
@@ -357,10 +360,16 @@ int tsAutomatic::addNetwork(tpPacket &packet, XMLTreeNode *node, int type)
 		packet.scanflags=atoi(flags);
 	else
 		packet.scanflags=1; // default use Network ??
+	
+	const char *position=node->GetAttributeValue("position");
+	if (!position)
+		position="0";
+
+	int orbital_position=atoi(position);
 
 	for (node=node->GetChild(); node; node=node->GetNext())
 	{
-		eTransponder t;
+		eTransponder t(*eDVB::getInstance()->settings->getTransponders());
 		switch (type)
 		{
 		case eFrontend::feCable:
@@ -397,7 +406,7 @@ int tsAutomatic::addNetwork(tpPacket &packet, XMLTreeNode *node, int type)
 				ainversion="0";
 			int frequency=atoi(afrequency), symbol_rate=atoi(asymbol_rate), 
 					polarisation=atoi(apolarisation), fec_inner=atoi(afec_inner), inversion=atoi(ainversion);
-			t.setSatellite(frequency, symbol_rate, polarisation, fec_inner, 0, inversion);
+			t.setSatellite(frequency, symbol_rate, polarisation, fec_inner, orbital_position, inversion);
 			break;
 		}
 		default:
@@ -435,8 +444,10 @@ int tsAutomatic::nextTransponder(int next, int lnb)
 	if (current_tp == last_tp)
 		return 1;
 
+#if 0
 	if (current_tp->satellite.valid)
 		current_tp->satellite.lnb=lnb;
+#endif
 	return current_tp->tune();
 }
 
@@ -731,14 +742,14 @@ int TransponderScan::exec()
 		}
 		case stateManual:
 		{
-			eTransponder transponder;
+			eTransponder transponder(*eDVB::getInstance()->settings->getTransponders());
 
 			eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 
 			if (sapi && sapi->transponder)
 				transponder=*sapi->transponder;
 			else
-				switch (eFrontend::fe()->Type())
+				switch (eFrontend::getInstance()->Type())
 				{
 				case eFrontend::feCable:
 					transponder.setCable(402000, 6900000, 0);	// some cable transponder

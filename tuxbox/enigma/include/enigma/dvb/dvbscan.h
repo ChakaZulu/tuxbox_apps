@@ -47,10 +47,12 @@ class eDVBScanController: public eDVBController, public Object
 	
 	enum
 	{
+			// not compatible to xml-flags!
 		flagUseONIT=1,
 		flagUseBAT=2,
 		flagNetworkSearch=4,
-		flagClearList=8
+		flagSkipKnownNIT=8,
+		flagClearList=16,
 	};
 	
 	int scanOK;	// 1 SDT, 2 NIT, 4 BAT, 8 oNIT
@@ -89,6 +91,7 @@ public:
 	void setUseBAT(int usebat);
 	void setNetworkSearch(int networksearch);
 	void setClearList(int clearlist);
+	void setSkipKnownNIT(int skip);
 	
 	void start();
 };

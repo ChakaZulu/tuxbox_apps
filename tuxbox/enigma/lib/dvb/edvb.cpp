@@ -92,7 +92,7 @@ eDVB::eDVB(): state(eDVBState::stateIdle)
 
 	settings = new eDVBSettings(*this);
 		// tuned-in handling
-	CONNECT(eFrontend::fe()->tunedIn, eDVB::tunedIn);
+	CONNECT(eFrontend::getInstance()->tunedIn, eDVB::tunedIn);
 
 		// decoder init
 	Decoder::Initialize();

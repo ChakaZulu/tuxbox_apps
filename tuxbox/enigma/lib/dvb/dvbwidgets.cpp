@@ -120,8 +120,8 @@ int eTransponderWidget::setTransponder(const eTransponder *transponder)
 		symbolrate->setNumber(transponder->satellite.symbol_rate/1000);
 		
 		inversion->setCheck(transponder->satellite.inversion);
-		lnb->setNumber(transponder->satellite.lnb);
-		
+		lnb->setNumber(transponder->satellite.orbital_position);
+
 		break;
 	}
 	default:

@@ -80,6 +80,8 @@ int eButton::eventHandler(const eWidgetEvent &event)
 			return 1;
 		}
 		break;
+	default:
+		break;
 	}
 	return eWidget::eventHandler(event);
 }

@@ -15,6 +15,7 @@
 #include <core/base/ebase.h>
 
 class eTransponder;
+class eLNB;
 
 /**
  * \brief A frontend, delivering TS.
@@ -23,8 +24,7 @@ class eTransponder;
  */
 class eFrontend: public Object
 {
-	uint32_t lnbfreq_low, lnbfreq_hi, threshold;
-	int do_sec, type;
+	int type;
 	int fd, secfd;
 	int lastcsw;
 	enum { stateIdle, stateTuning };
@@ -37,7 +37,7 @@ class eFrontend: public Object
 	int tune(eTransponder *transponder, 
 			uint32_t Frequency, int polarisation,
 			uint32_t SymbolRate, CodeRate FEC_inner,
-			SpectralInversion Inversion, int sat,
+			SpectralInversion Inversion, eLNB *lnb,
 			Modulation QAM);
 private:
 	void timeout();
@@ -52,7 +52,7 @@ public:
 
 	static int open(int type) { if (!frontend) frontend=new eFrontend(type); if (frontend->fd<0) { close(); return frontend->fd; } return 0; }
 	static void close() { delete frontend; }
-	static eFrontend *fe() { return frontend; }
+	static eFrontend *getInstance() { return frontend; }
 	
 	int Type() { return type; }
 	
@@ -85,7 +85,7 @@ public:
 			uint32_t SymbolRate, 		// symbolrate in symbols/s (e.g. 27500000)
 			uint8_t FEC_inner,			// FEC_inner according to ETSI (-1 for none, 0 for auto, but please don't use that)
 			int Inversion,					// spectral invesion on(1)/off(0)
-			int sat);								// diseqc satellite, &1 -> SAT_A/B, &2 -> OPT_A/B
+			eLNB &lnb);
 	int tune_qam(eTransponder *transponder, 
 			uint32_t Frequency, 		// absolute frequency in kHz
 			uint32_t SymbolRate, 		// symbolrate in symbols/s (e.g. 6900000)

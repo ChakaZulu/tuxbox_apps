@@ -12,6 +12,8 @@
 #include <core/driver/rc.h>
 #include <core/gui/actions.h>
 
+#include <list>
+
 class eWidgetEvent
 {
 public:
@@ -66,6 +68,8 @@ class eWidget: public Object
 		/// Widget is visible on screen. Implies stateShow.
 		stateVisible=2
 	};
+	
+	static std::list<eWidget*> toplevel;
 
 public:
 	/**

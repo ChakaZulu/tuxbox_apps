@@ -389,7 +389,7 @@ eStreaminfo::eStreaminfo(int mode, decoderParameters *parms): eWindow(1)
 		t->setTransponder(sapi->transponder);
 	}
 
-	eWidget *fe=new eFEStatusWidget(n, eFrontend::fe());
+	eWidget *fe=new eFEStatusWidget(n, eFrontend::getInstance());
 	fe->move(ePoint(0, 200));
 	fe->resize(eSize(clientrect.width(), 100));
 	

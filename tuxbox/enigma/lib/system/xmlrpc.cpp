@@ -373,6 +373,7 @@ int eXMLRPCResponse::doCall()
 	connection->code=200;
 	connection->code_descr="OK";
 	connection->localstate=eHTTPConnection::stateResponse;
+	return 0;
 }
 
 int eXMLRPCResponse::doWrite(int hm)

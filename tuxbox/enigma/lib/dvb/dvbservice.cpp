@@ -64,13 +64,15 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 	{
 		if (!dvb.settings->transponderlist)
 		{
+			eDebug("no tranponderlist");
 			service_state=ENOENT;
 			dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceFailed));
 			return;
 		}
-		eTransponder *n=dvb.settings->transponderlist->searchTS(service.original_network_id, service.transport_stream_id);
+		eTransponder *n=dvb.settings->transponderlist->searchTS(service.transport_stream_id, service.original_network_id);
 		if (!n)
 		{
+			eDebug("no transponder %x %x", service.original_network_id.get(), service.transport_stream_id.get());
 			dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceTuneFailed));
 			break;
 		}
@@ -91,8 +93,10 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 			/*emit*/ dvb.leaveTransponder(transponder);
 			transponder=n;
 			if (n->tune())
+			{
+				eDebug("tune failed");
 				dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceTuneFailed));
-			else
+			} else
 				dvb.setState(eDVBServiceState(eDVBServiceState::stateServiceTune));
 		}
 		eDebug("<-- tuned");

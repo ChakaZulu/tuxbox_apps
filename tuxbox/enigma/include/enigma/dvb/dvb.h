@@ -14,8 +14,14 @@ class eDVB;
 #include <utility>
 #include <functional>
 #include <string>
+#include <set>
 
-#define ServiceReferenceIterator std::list<eServiceReference>::iterator
+class eTransponderList;
+class eServiceReference;
+class eLNB;
+class eSatellite;
+
+typedef std::list<eServiceReference>::iterator ServiceReferenceIterator;
 
 		// bitte KEINE operator int() definieren, sonst bringt das ganze nix!
 struct eTransportStreamID
@@ -60,25 +66,26 @@ public:
 	bool operator > (const eOriginalNetworkID &c) const { return v > c.v; }
 };
 
-struct tsref: public std::pair<eOriginalNetworkID,eTransportStreamID>
+struct tsref: public std::pair<eTransportStreamID,eOriginalNetworkID>
 {
 	bool operator<(const tsref &c)
 	{
-		if (first < c.first)
+		if (second < c.second)
 			return 1;
-		else if (first == c.first)
-			if (second < c.second)
+		else if (second == c.second)
+			if (first < c.first)
 				return 1;
 		return 0;
 	}
-	tsref(eOriginalNetworkID a, eTransportStreamID b): std::pair<eOriginalNetworkID,eTransportStreamID>(a,b)
+	tsref(eTransportStreamID tsid, eOriginalNetworkID onid): std::pair<eTransportStreamID,eOriginalNetworkID>(tsid,onid)
 	{
 	}
 };
 
-
 class eTransponder
 {
+	eTransponderList &tplist;
+//	friend struct eTransponder::satellite;
 public:
 	struct cable
 	{
@@ -109,7 +116,7 @@ public:
 	struct satellite
 	{
 		int valid;
-		int frequency, symbol_rate, polarisation, fec, inversion, lnb;
+		int frequency, symbol_rate, polarisation, fec, inversion, orbital_position;
 		void set(const SatelliteDeliverySystemDescriptor *descriptor);
 		int tune(eTransponder *);
 		int isValid() { return valid; }
@@ -127,16 +134,16 @@ public:
 				return 0;
 			if (inversion != c.inversion)
 				return 0;
-			if (lnb != c.lnb)
+			if (orbital_position != c.orbital_position)
 				return 0;
 			return 1;
 		}
 	} satellite;
-	eTransponder(int transport_stream_id, int original_network_id);
-	eTransponder();
+	eTransponder(eTransponderList &tplist, eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id);
+	eTransponder(eTransponderList &tplist);
 	void setSatellite(SatelliteDeliverySystemDescriptor *descr) { satellite.set(descr); }
 	void setCable(CableDeliverySystemDescriptor *descr) { cable.set(descr); }
-	void setSatellite(int frequency, int symbol_rate, int polarisation, int fec, int lnb, int inversion);
+	void setSatellite(int frequency, int symbol_rate, int polarisation, int fec, int orbital_position, int inversion);
 	void setCable(int frequency, int symbol_rate, int inversion);
 	
 	eTransponder &operator=(const eTransponder &ref)
@@ -151,7 +158,8 @@ public:
 	int tune();
 	int isValid(); 
 		
-	int transport_stream_id, original_network_id;
+	eTransportStreamID transport_stream_id;
+	eOriginalNetworkID original_network_id;
 	enum
 	{
 		stateToScan, stateError, stateOK
@@ -337,24 +345,108 @@ public:
 	}
 };
 
+class eSatellite
+{
+	eTransponderList &tplist;
+	int orbital_position;
+	eString description;
+	eLNB &lnb;
+	friend class eLNB;
+	std::map<int,eSatellite*>::iterator tpiterator;
+public:
+	eSatellite(eTransponderList &tplist, int orbital_position, eLNB &lnb);
+	~eSatellite();
+	
+	const eString &getDescription() const
+	{
+		return description;
+	}
+	
+	void setDescription(const eString &description)
+	{
+		this->description=description;
+	}
+	
+	int getOrbitalPosition() const
+	{
+		return orbital_position;
+	}
+	
+	eLNB &getLNB() const
+	{
+		return lnb;
+	}
+	
+	void setOrbitalPosition(int orbital_position)
+	{
+		this->orbital_position=orbital_position;
+	}
+	
+	bool operator<(const eSatellite &sat) const
+	{
+		return orbital_position < sat.orbital_position;
+	}
+
+	bool operator==(const eSatellite &sat) const
+	{
+		return orbital_position == sat.orbital_position;
+	}
+};
+
+struct eDiSEqCParameter
+{
+	int sat;
+};
+
+class eLNB
+{
+	unsigned int lof_hi, lof_lo, lof_threshold;
+	ePtrList<eSatellite> satellites;
+	eDiSEqCParameter diseqc;
+	eTransponderList &tplist;
+public:
+	eLNB(eTransponderList &tplist): tplist(tplist)
+	{
+		satellites.setAutoDelete(true);
+	}
+	
+	void setLOFHi(unsigned int lof_hi) { this->lof_hi=lof_hi; }
+	void setLOFLo(unsigned int lof_lo) { this->lof_lo=lof_lo; }
+	void setLOFThreshold(unsigned int lof_threshold) { this->lof_threshold=lof_threshold; }
+	unsigned int getLOFHi() const { return lof_hi; }
+	unsigned int getLOFLo() const { return lof_lo; }
+	unsigned int getLOFThreshold() const { return lof_threshold; }
+	eDiSEqCParameter &getDiSEqC() { return diseqc; }
+	
+	eSatellite *addSatellite(int orbital_position);
+	void deleteSatellite(eSatellite *satellite);
+
+	ePtrList<eSatellite> &getSatelliteList() { return satellites; }
+};
+
 class eTransponderList
 {
 	std::map<tsref,eTransponder> transponders;
 	std::map<eServiceReference,eService> services;
 	std::map<int,eService*> channel_number;
+	
+	std::list<eLNB> lnbs;
+	std::map<int,eSatellite*> satellites;
+	friend class eLNB;
+	friend class eSatellite;
 
 public:
 	eTransponderList();
-
+	
 	void updateStats(int &transponders, int &scanned, int &services);
-	eTransponder &createTransponder(int transport_stream_id, int original_network_id);
+	eTransponder &createTransponder(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id);
 	eService &createService(const eServiceReference &service, int service_number=-1, bool *newService=0);
 	int handleSDT(const SDT *sdt);
 	Signal1<void, eTransponder*> transponder_added;
 	Signal2<void, const eServiceReference &, bool> service_found;
 
 	void serialize(FILE *out, int ind);
-	eTransponder *searchTS(eOriginalNetworkID original_network_id, eTransportStreamID transport_stream_id);
+	eTransponder *searchTS(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id);
 	eService *searchService(const eServiceReference &service);
 	const eServiceReference *searchService(eOriginalNetworkID original_network_id, eServiceID service_id);
 	eService *searchServiceByNumber(int channel_number);
@@ -383,6 +475,7 @@ public:
 	}
 
 	eTransponder *getFirstTransponder(int state);
+	eSatellite *findSatellite(int orbital_position);
 };
 
 #endif

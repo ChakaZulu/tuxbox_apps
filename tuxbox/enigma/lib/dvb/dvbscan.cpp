@@ -117,11 +117,11 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 		{
 			if (handleSDT(transponder, sdt))
 			{
-/*				if (scanflags&SCAN_SKIP)
+				if (flags&flagSkipKnownNIT)
 				{
 					dvb.tNIT.abort();
 					dvb.tONIT.abort();
-				}*/
+				}
 			}
 			sdt->unlock();
 		}
@@ -163,8 +163,15 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 #endif
 				for (ePtrList<NITEntry>::iterator i(nit->entries); i != nit->entries.end(); ++i)
 				{
-					eTransponder &transponder=dvb.settings->transponderlist->createTransponder(i->transport_stream_id, i->original_network_id);
+					// eTransponder &transponder=dvb.settings->transponderlist->createTransponder(eTransportStreamID(i->transport_stream_id), eOriginalNetworkID(i->original_network_id));
 
+					// schon bekannte transponder nicht nochmal scannen
+					if (dvb.settings->transponderlist->searchTS(eTransportStreamID(i->transport_stream_id), eOriginalNetworkID(i->original_network_id)))
+						continue;
+
+					eTransponder transponder(*dvb.settings->transponderlist, eTransportStreamID(i->transport_stream_id), eOriginalNetworkID(i->original_network_id));
+					eDebug("tsid: %d, onid: %d", i->transport_stream_id, i->original_network_id);
+					
 					for (ePtrList<Descriptor>::iterator d(i->transport_descriptor); d != i->transport_descriptor.end(); ++d)
 					{
 						switch (d->Tag())
@@ -182,7 +189,7 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 
 					for (std::list<eTransponder>::iterator n(knownTransponder.begin()); !found && n != knownTransponder.end(); ++n)
 						if (*n == transponder)
-							found++;								
+							found++;
 					
 					if (!found)
 					{
@@ -275,7 +282,7 @@ int eDVBScanController::handleSDT(eTransponder *&transponder, const SDT *sdt)
 	transponder->original_network_id=sdt->original_network_id;
 
 		// ok we found the transponder, it seems to be valid
-	eTransponder &real=dvb.settings->transponderlist->createTransponder(sdt->transport_stream_id, sdt->original_network_id);
+	eTransponder &real=dvb.settings->transponderlist->createTransponder(eTransportStreamID(sdt->transport_stream_id), eOriginalNetworkID(sdt->original_network_id));
 	real=*transponder;
 	
 		// and we continue working on that
@@ -325,6 +332,14 @@ void eDVBScanController::setClearList(int clearlist)
 		flags|=flagClearList;
 	else
 		flags&=~flagClearList;
+}
+
+void eDVBScanController::setSkipKnownNIT(int skip)
+{
+	if (skip)
+		flags|=flagSkipKnownNIT;
+	else
+		flags&=~flagSkipKnownNIT;
 }
 
 void eDVBScanController::start()
