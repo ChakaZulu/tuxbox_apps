@@ -1,4 +1,4 @@
-SUBDIRS = mainmenu chk_stone chk_silver chk_v2 neutrino shortcut countries keypics small
+SUBDIRS = mainmenu chk_stone chk_silver chk_v2 neutrino shortcut countries keypics small carbon
 
 installdir = $(TUXBOXDATADIR)/enigma/pictures
 
