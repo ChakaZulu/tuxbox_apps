@@ -199,7 +199,7 @@ int eSection::setFilter(int pid, int tableid, int tableidext, int version)
 	reader.close();
 	__u8 data[4], mask[4];
 	data[0]=tableid; mask[0]=tableidmask;
-	data[1]=0; mask[1]=0;									// das hier basiert auf einem bug im treibe. normalerweise sind die offsets anders!!
+	data[1]=0; mask[1]=0;
 	data[2]=0; mask[2]=0;
 	data[3]=0; mask[3]=0;
 	if (tableidext!=-1)
