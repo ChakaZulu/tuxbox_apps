@@ -1,9 +1,10 @@
 INCLUDES = \
 	@ZAPIT_CFLAGS@ \
-	-I$(top_srcdir)/lib/include \
 	-I$(top_srcdir)/src \
 	@EVENTSERVER_CFLAGS@ \
-	-I@DRIVER@
+	-I@DRIVER@ \
+	-I$(top_srcdir)/lib/include
+
 
 bin_PROGRAMS = nhttpd
 

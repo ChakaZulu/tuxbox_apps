@@ -33,14 +33,14 @@
 #ifndef __neutrino__
 #define __neutrino__
 
-#include "zapitclient.h"
+#include <string>
+#include <configfile.h>
+#include <zapit/zapitclient.h>
 
 #include "neutrinoMessages.h"
 #include "driver/framebuffer.h"
 #include "system/setting_helpers.h"
-#include <configfile.h>
 #include "driver/vcrcontrol.h"
-#include <string>
 
 using namespace std;
 

@@ -8,7 +8,7 @@ INCLUDES = \
 	@EVENTSERVER_CFLAGS@ \
 	@FREETYPE_CFLAGS@ \
 	@NET_CFLAGS@ \
-	@ZAPITCLIENT_CFLAGS@
+	@ZAPIT_CFLAGS@
 
 noinst_LIBRARIES = libneutrino_gui.a libneutrino_gui2.a
 

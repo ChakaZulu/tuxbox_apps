@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.cpp,v 1.39 2002/10/10 22:32:52 Zwen Exp $
+	$Id: timermanager.cpp,v 1.40 2002/10/13 08:34:16 woglinde Exp $
 
 	License: GPL
 
@@ -27,12 +27,12 @@
 #include <sys/ioctl.h>
 #include <sstream>
 
-#include "dbox/fp.h"
+#include <dbox/fp.h>
 
-#include "timermanager.h"
-#include "debug.h"
-#include "clientlib/timerdclient.h"
-#include "sectionsdclient.h"
+#include <timermanager.h>
+#include <debug.h>
+#include <timerdclient.h>
+#include <sectionsdclient.h>
 
 //CTimerEvent_NextProgram::EventMap CTimerEvent_NextProgram::events;
 

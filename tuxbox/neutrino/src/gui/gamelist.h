@@ -32,6 +32,8 @@
 #ifndef __gamelist__
 #define __gamelist__
 
+#include <plugin.h>
+
 #include "driver/framebuffer.h"
 #include "driver/fontrenderer.h"
 #include "driver/rcinput.h"
@@ -42,13 +44,12 @@
 #include "gui/widget/menue.h"
 #include "gui/color.h"
 
-using namespace std;
-
-#include <include/plugin.h>
-
 #include <string>
 #include <vector>
 #include <map>
+
+using namespace std;
+
 
 class CPlugins
 {

@@ -32,15 +32,15 @@
 #ifndef __epgview__
 #define __epgview__
 
+#include <sectionsdMsg.h>
+#include <sectionsdclient.h>
+
 #include "driver/framebuffer.h"
 #include "driver/rcinput.h"
 #include "driver/fontrenderer.h"
 
 #include "gui/color.h"
 #include "system/settings.h"
-
-#include "sections/sectionsdMsg.h"
-#include "sectionsdclient.h"
 
 #include <vector>
 #include <string>

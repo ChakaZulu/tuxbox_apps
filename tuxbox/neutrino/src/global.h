@@ -32,9 +32,10 @@
 
 //#define USEACTIONLOG
 
+#include <zapit/zapitclient.h>
+
 #include "controldclient.h"
 #include "lcddclient.h"
-#include "zapitclient.h"
 #include "sectionsdclient.h"
 #include "timerdclient.h"
 #include "daemonc/remotecontrol.h"

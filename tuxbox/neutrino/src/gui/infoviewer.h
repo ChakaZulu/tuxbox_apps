@@ -32,14 +32,14 @@
 #ifndef __infoview__
 #define __infoview__
 
+#include <sectionsdMsg.h>
+
 #include "driver/rcinput.h"
 #include "driver/framebuffer.h"
 #include "driver/fontrenderer.h"
 
 #include "gui/color.h"
 #include "system/settings.h"
-
-#include "sections/sectionsdMsg.h"
 
 
 using namespace std;

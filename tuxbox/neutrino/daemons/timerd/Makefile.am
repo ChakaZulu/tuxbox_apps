@@ -1,14 +1,16 @@
 INCLUDES = \
-	-I$(top_srcdir)/lib \
+	-I$(top_srcdir)/lib/include \
 	@EVENTSERVER_CFLAGS@ \
-	@ZAPITCLIENT_CFLAGS@
+	@ZAPIT_CFLAGS@
 
 bin_PROGRAMS = timerd
 
 timerd_SOURCES = timerd.cpp timermanager.cpp
 
 timerd_LDADD = \
+	$(top_builddir)/lib/sectionsdclient/libsectionsdclient.la \
+	@CONFIGFILE_LIBS@ \
 	@EVENTSERVER_LIBS@ \
-	@ZAPITCLIENT_LIBS@ \
+	@ZAPIT_LIBS@ \
 	-lpthread
 

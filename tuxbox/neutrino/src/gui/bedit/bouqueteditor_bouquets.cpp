@@ -29,6 +29,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "zapit/zapitclient.h"
+
 #include "global.h"
 
 #include "neutrino.h"
@@ -40,9 +42,6 @@
 #include "gui/widget/messagebox.h"
 #include "gui/widget/hintbox.h"
 #include "gui/widget/stringinput.h"
-
-#include "zapitclient.h"
-
 
 
 CBEBouquetWidget::CBEBouquetWidget()

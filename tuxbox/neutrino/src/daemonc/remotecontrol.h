@@ -32,14 +32,15 @@
 #ifndef __remotecontrol__
 #define __remotecontrol__
 
+#include <zapit/zapitclient.h>
 
-#include "sections/sectionsdMsg.h"
-#include "zapitclient.h"
+#include <sectionsdMsg.h>
 
 using namespace std;
 #include <vector>
 #include <set>
 #include <string>
+
 
 struct st_rmsg
 {
