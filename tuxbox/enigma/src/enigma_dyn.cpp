@@ -164,7 +164,7 @@ public:
 					 << "</td><td>"
 					 << plugin.name
 					 << "</td><td>"
-					 << (plugin.desc ? plugin.desc : _("(no description)"))
+					 << (plugin.desc ? plugin.desc : "(no description)")
 					 << "</td><td>";
 		return false; // must return false in order to continue for_each loop
 	}
@@ -931,7 +931,15 @@ static eString getLeftNavi(eString mode, eString path)
 			|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
 		{
 			result += "<br>";
-			result += button(110, "Remote Control", LEFTNAVICOLOR, "javascript:remoteControl()");
+			result += button(110, "Remote Control", LEFTNAVICOLOR, "javascript:remoteControl('dreambox')");
+		}
+		else
+		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Nokia
+		 || eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Sagem
+		 || eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Philips)
+		{
+			result += "<br>";
+			result += button(110, "Remote Control", LEFTNAVICOLOR, "javascript:remoteControl('dbox2')");
 		}
 	}
 	else
@@ -3269,17 +3277,7 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 static eString getstreaminfo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::stringstream result;
-	eString name,
-		provider,
-		vpid,
-		apid,
-		pcrpid,
-		tpid,
-		vidform("n/a"),
-		tsid,
-		onid,
-		sid,
-		pmt;
+	eString name, provider, vpid, apid, pcrpid, tpid, vidform("n/a"), tsid, onid, sid, pmt;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
@@ -3617,13 +3615,13 @@ eString getPDAContent(eString mode, eString spath)
 	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
 		result.strReplace("#TOPBALK#", "topbalk_small.png");
 	else
-	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Nokia)
+	if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Nokia)
 		result.strReplace("#TOPBALK#", "topbalk2_small.png");
 	else
-	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Sagem)
+	if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Sagem)
 		result.strReplace("#TOPBALK#", "topbalk3_small.png");
 	else
-//	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Philips)
+//	if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Philips)
 		result.strReplace("#TOPBALK#", "topbalk4_small.png");
 	return result;
 }
@@ -3914,7 +3912,12 @@ static eString showRemoteControl(eString request, eString dirpath, eString opts,
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
 	if (pdaScreen == 0)
-		result = readFile(TEMPLATE_DIR + "remoteControl.tmp");
+		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Nokia
+		 || eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Sagem
+		 || eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Philips)
+			result = readFile(TEMPLATE_DIR + "remoteControlDbox2.tmp");
+		else
+			result = readFile(TEMPLATE_DIR + "remoteControl.tmp");
 	else
 		result = readFile(TEMPLATE_DIR + "pdaRemoteControl.tmp");
 
@@ -4770,6 +4773,9 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 	std::map<eString,eString> opt=getRequestOptions(opts, '&');
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
+	int previousZapMode = zapMode;
+	int previousZapSubMode = zapSubMode;
+
 	eString mode = opt["mode"];
 	if (!mode)
 		mode = "zap";
@@ -4817,6 +4823,12 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 				break;
 			}
 		}
+	}
+
+	if (zapMode != previousZapMode || zapSubMode != previousZapSubMode)
+	{
+		currentBouquet = 0;
+		currentChannel = -1;
 	}
 
 	result = readFile(TEMPLATE_DIR + "index2.tmp");
