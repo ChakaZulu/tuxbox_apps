@@ -1660,25 +1660,28 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 				Descriptor *descriptor=*d;
 				if (descriptor->Tag() == DESCR_SHORT_EVENT)
 				{
+					eString rec = "javascript:record(\"ref=";
+						rec += serviceRef;
+						rec += "&ID=";
+						rec += eString().sprintf("%d", event.event_id);
+						rec += "&start=";
+						rec += eString().sprintf("%d", event.start_time);
+						rec += "&duration=";
+						rec += eString().sprintf("%d", event.duration);
+						rec += "\")";
 					tm* t = localtime(&event.start_time);
-					result << "<span class=\"epg\">"
+					result << "<span class=\"epg\">";
 #ifndef DISABLE_FILE
-						"<u><a href=\'"
-						"javascript:record(\"ref=" << serviceRef
-						<< "&ID=" << event.event_id
-						<< "&start=" << event.start_time
-						<< "&duration=" << event.duration
-						<< "\")\'>Record"
-						"</a></u>&nbsp;&nbsp;"
+					result << button(50, "REC", RED, rec);
+					result << "&nbsp;&nbsp;"
 #endif
-						"<a href=\'"
-						"javascript:EPGDetails(\"ref=" << serviceRef
-						<< "&ID=" << event.event_id
-						<< "\")\'>"
 						<< std::setw(2) << t->tm_mday << '.'
 						<< std::setw(2) << t->tm_mon+1 << ". - "
 						<< std::setw(2) << t->tm_hour << ':'
 						<< std::setw(2) << t->tm_min << ' '
+						<< "<a href=\'javascript:EPGDetails(\"ref=" << serviceRef
+						<< "&ID=" << event.event_id
+						<< "\")\'>"
 						<< ((ShortEventDescriptor*)descriptor)->event_name
 						<< "</a></span></u><br>\n";
 				}
