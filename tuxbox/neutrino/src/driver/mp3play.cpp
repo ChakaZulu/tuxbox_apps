@@ -268,12 +268,12 @@ int CMP3Player::MpegAudioDecoder(FILE *InputFp,int OutputFd)
 	state = PLAY;
 	do
 	{
-      if(state==PAUSE)
-      {
-         // in pause mode do nothing
-         usleep(100000);
-         continue;
-      }
+		if(state==PAUSE)
+		{
+			// in pause mode do nothing
+			usleep(100000);
+			continue;
+		}
 		/* The input bucket must be filled if it becomes empty or if
 		 * it's the first execution of the loop.
 		 */
@@ -367,7 +367,7 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 		 * skip the faulty part and re-sync to the next frame.
 		 */
 		// decode 'FRAMES_TO_PLAY' frames each 'FRAMES_TO_SKIP' frames in ff/rev mode 
-      if( (state!=FF && state!=REV) || FrameCount % FRAMES_TO_SKIP < FRAMES_TO_PLAY )
+		if( (state!=FF && state!=REV) || FrameCount % FRAMES_TO_SKIP < FRAMES_TO_PLAY )
 			ret=mad_frame_decode(&Frame,&Stream);
 		else if(state==FF) // in FF mode just decode the header, this sets bufferptr to next frame and also gives stats about the frame for totals
 			ret=mad_header_decode(&Frame.header,&Stream);
@@ -410,60 +410,61 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 			continue;
 		}
 
-       if(ret)
-       {
-          if(MAD_RECOVERABLE(Stream.error))
-          {
-				 // no errrors in FF mode
-				 if(state!=FF && state!=REV)
-				 {
-					 fprintf(stderr,"%s: recoverable frame level error (%s)\n",
-								ProgName,MadErrorString(&Stream));
-					 fflush(stderr);
+		if(ret)
+		{
+			if(MAD_RECOVERABLE(Stream.error))
+			{
+				// no errrors in FF mode
+				if(state!=FF && state!=REV)
+				{
+					fprintf(stderr,"%s: recoverable frame level error (%s)\n",
+						ProgName,MadErrorString(&Stream));
+					fflush(stderr);
 				 }
-             continue;
-          }
-          else
-             if(Stream.error==MAD_ERROR_BUFLEN)
-                continue;
-             else
-             {
-                fprintf(stderr,"%s: unrecoverable frame level error (%s).\n",
-                        ProgName,MadErrorString(&Stream));
-                Status=1;
-               break;
-             }
-       }
+				continue;
+			}
+			else
+				if(Stream.error==MAD_ERROR_BUFLEN)
+					continue;
+				else
+				{
+					fprintf(stderr,"%s: unrecoverable frame level error (%s).\n",
+						ProgName,MadErrorString(&Stream));
+					Status=1;
+					break;
+				}
+		}
 
 		/* On first frame set DSP & save header info
 		 * The first frame is representative of the entire
 		 * stream.
 		 */
-		if(FrameCount==0)
+		FrameCount++;
+		if (FrameCount == 1)
 		{
 			if (SetDSP(OutputFd, &Frame.header))
 			{
 				Status=1;
 				break;
 			}
-         m_samplerate=Frame.header.samplerate;
-         m_bitrate=Frame.header.bitrate;
-         m_mode=Frame.header.mode;
-         m_layer=Frame.header.layer;
-         m_emphasis=Frame.header.emphasis;
-         m_vbr=false;
-         CreateInfo();
-      }
-      else
-      {
-         if(m_bitrate!=Frame.header.bitrate)
-         {
-            m_vbr=true;
-            double fract = (double)FrameCount/(FrameCount+1);
-            m_bitrate= (int)((double)m_bitrate*fract + ((double)Frame.header.bitrate)/(FrameCount+1));
-            CreateInfo();
-         }
-      }
+			m_samplerate=Frame.header.samplerate;
+			m_bitrate=Frame.header.bitrate;
+			m_mode=Frame.header.mode;
+			m_layer=Frame.header.layer;
+			m_emphasis=Frame.header.emphasis;
+			m_vbr=false;
+			CreateInfo();
+		}
+		else
+		{
+			if (m_bitrate != Frame.header.bitrate)
+			{
+				m_vbr = true;
+				m_bitrate -= m_bitrate / FrameCount;
+				m_bitrate += Frame.header.bitrate / FrameCount;
+				CreateInfo();
+			}
+		}
 
 		/* Accounting. The computed frame duration is in the frame
 		 * header structure. It is expressed as a fixed point number
@@ -474,7 +475,6 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 		 * some functions of mad's timer module receive some of their
 		 * mad_timer_t arguments by value!
 		 */
-		FrameCount++;
 		mad_timer_add(&Timer,Frame.header.duration);
 		mad_timer_string(Timer,m_timePlayed,"%lu:%02lu",
                        MAD_UNITS_MINUTES,MAD_UNITS_MILLISECONDS,0);
