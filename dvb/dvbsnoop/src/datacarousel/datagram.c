@@ -1,5 +1,5 @@
 /*
-$Id: datagram.c,v 1.6 2003/11/09 22:26:11 rasc Exp $
+$Id: datagram.c,v 1.7 2003/11/09 22:50:32 rasc Exp $
 
    DATAGRAM section
    DSM-CC Data Carousel  EN 301 192 
@@ -8,6 +8,9 @@ $Id: datagram.c,v 1.6 2003/11/09 22:26:11 rasc Exp $
 
 
 $Log: datagram.c,v $
+Revision 1.7  2003/11/09 22:50:32  rasc
+no message
+
 Revision 1.6  2003/11/09 22:26:11  rasc
 filename change
 
@@ -26,7 +29,7 @@ Revision 1.1  2003/10/19 22:22:58  rasc
 
 
 #include "dvbsnoop.h"
-#include "datagram.h"
+#include "dsmcc_addr.h"
 #include "strings/dvb_str.h"
 #include "strings/dsmcc_str.h"
 #include "misc/hexprint.h"
