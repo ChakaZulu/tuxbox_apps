@@ -1,5 +1,6 @@
 #include <setup_timezone.h>
 
+#include <config.h>
 #include <lib/gui/slider.h>
 #include <lib/gui/ebutton.h>
 #include <lib/gui/elabel.h>
@@ -10,6 +11,10 @@
 #include <lib/gui/actions.h>
 #include <lib/system/econfig.h>
 #include <enigma_main.h>
+
+#ifndef ZONEINFODIR
+#define ZONEINFODIR "/share/zoneinfo"
+#endif
 
 eZapTimeZoneSetup::eZapTimeZoneSetup(bool showHint)
 	:eWindow(0), showHint(showHint)
@@ -100,7 +105,7 @@ void eZapTimeZoneSetup::setTimeZone()
 	char *ctimeZone=cmdTimeZones();
 	if ( system(
 		eString().sprintf(
-			"cp /share/zoneinfo/%s /var/etc/localtime",
+			"cp " ZONEINFODIR "/%s /var/etc/localtime",
 			ctimeZone).c_str() ) >> 8)
 		eDebug("couldn't set timezone");
 	free(ctimeZone);
