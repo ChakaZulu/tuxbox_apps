@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.17 2004/01/02 22:25:39 rasc Exp $
+$Id: dsmcc_str.c,v 1.18 2004/01/05 02:12:20 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dsmcc_str.c,v 1.17 2004/01/02 22:25:39 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.18  2004/01/05 02:12:20  rasc
+no message
+
 Revision 1.17  2004/01/02 22:25:39  rasc
 DSM-CC  MODULEs descriptors complete
 
@@ -120,6 +123,10 @@ static char *findTableID (STR_TABLE *t, u_int id)
   -- DSM-CC STREAM Descriptors
   -- Private Tag Space  (PES, Section)
   -- see ISO 13818-6
+  // $$$ TODO   yek!!!! this number are old due to an old
+  // $$$ TODO   ISO 13818-6 standard.
+  // $$$ TODO   ATSC ref shows this in MPEG descriptor range!!!!
+  // $$$ TODO   to be checked and may be I have to get rid of these here...
  */
 
 char *dsmccStrDSMCC_STREAM_DescriptorTAG (u_int i)
@@ -144,6 +151,7 @@ char *dsmccStrDSMCC_STREAM_DescriptorTAG (u_int i)
   -- DSM-CC MODULE Descriptors
   -- Private Tag Space  (DII, DSI)
   -- see  EN 301 192 
+  -- ATSC ref. shows this in DVB-descriptor lower ranges
  */
 
 char *dsmccStrDSMCC_MODULE_DescriptorTAG (u_int i)
