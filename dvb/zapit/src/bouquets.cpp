@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.78 2002/12/22 23:52:39 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.79 2002/12/23 02:19:41 obi Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -216,12 +216,8 @@ void CBouquetManager::parseBouquetsXml(const xmlNodePtr root)
 
 	if (search)
 	{
-		unsigned int original_network_id, service_id;
-/*
-  DO NOT USE THE FOLLOWING DECLARATION DUE TO THE USE OF THE VARIABLES IN sscanf BELOW! OTHERWISE ZAPIT CRASHES!
 		t_original_network_id original_network_id;
 		t_service_id          service_id;
-*/
 
 		INFO("reading bouquets");
 
@@ -236,8 +232,8 @@ void CBouquetManager::parseBouquetsXml(const xmlNodePtr root)
 
 			while ((channel_node = xmlGetNextOccurence(channel_node, "channel")) != NULL)
 			{
-				sscanf(xmlGetAttribute(channel_node, "serviceID"), "%x", &service_id);
-				sscanf(xmlGetAttribute(channel_node, "onid"), "%x", &original_network_id);
+				sscanf(xmlGetAttribute(channel_node, "serviceID"), "%hx", &service_id);
+				sscanf(xmlGetAttribute(channel_node, "onid"), "%hx", &original_network_id);
 
 				CZapitChannel* chan = findChannelByChannelID(CREATE_CHANNEL_ID);
 
