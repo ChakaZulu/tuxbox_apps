@@ -50,6 +50,7 @@
 #define BLUE "12259E"
 #define RED "CB0303"
 #define OCKER "FFCC33"
+#define BBLUE "316183"
 
 extern eString getRight(const eString&, char );  // implemented in timer.cpp
 extern eString getLeft( const eString&, char );  // implemented in timer.cpp
@@ -532,47 +533,47 @@ static eString getNavi(eString mode, eString path)
 	eString result;
 	if (mode.find("zap") == 0)
 	{
-		result += button(110, "TV", OCKER, "?path=;0:7:1:0:0:0:0:0:0:0:");
+		result += button(110, "TV", BBLUE, "?path=;0:7:1:0:0:0:0:0:0:0:");
 		result += "<br>";
-		result += button(110, "Radio", OCKER, "?path=;0:7:2:0:0:0:0:0:0:0:");
+		result += button(110, "Radio", BBLUE, "?path=;0:7:2:0:0:0:0:0:0:0:");
 		result += "<br>";
-		result += button(110, "Data", OCKER, "?path=;0:7:6:0:0:0:0:0:0:0:");
+		result += button(110, "Data", BBLUE, "?path=;0:7:6:0:0:0:0:0:0:0:");
 		result += "<br>";
-		result += button(110, "Root", OCKER, "?path=;2:47:0:0:0:0:%2f");
+		result += button(110, "Root", BBLUE, "?path=;2:47:0:0:0:0:%2f");
 #ifndef DISABLE_FILE
 		result += "<br>";
-		result += button(110, "Harddisk", OCKER, "?path=;2:47:0:0:0:0:%2fhdd%2f");
+		result += button(110, "Harddisk", BBLUE, "?path=;2:47:0:0:0:0:%2fhdd%2f");
 		result += "<br>";
-		result += button(110, "Recordings", OCKER, "?path=;4097:7:0:1:0:0:0:0:0:0:");
+		result += button(110, "Recordings", BBLUE, "?path=;4097:7:0:1:0:0:0:0:0:0:");
 #endif
 	}
 	else
 	if (mode.find("menu") == 0)
 	{
-		result += button(110, "Shutdown", OCKER, "?mode=menuShutdown");
+		result += button(110, "Shutdown", BBLUE, "?mode=menuShutdown");
 		result += "<br>";
-		result += button(110, "Restart", OCKER, "?mode=menuRestart");
+		result += button(110, "Restart", BBLUE, "?mode=menuRestart");
 		result += "<br>";
-		result += button(110, "Reboot", OCKER, "?mode=menuReboot");
+		result += button(110, "Reboot", BBLUE, "?mode=menuReboot");
 		result += "<br>";
-		result += button(110, "Standby", OCKER, "?mode=menuStandby");
+		result += button(110, "Standby", BBLUE, "?mode=menuStandby");
 		result += "<br>";
-		result += button(110, "Wakeup", OCKER, "?mode=menuWakeup");
+		result += button(110, "Wakeup", BBLUE, "?mode=menuWakeup");
 		result += "<br>";
-		result += button(110, "Frameshot", OCKER, "?mode=menuFBShot");
+		result += button(110, "Frameshot", BBLUE, "?mode=menuFBShot");
 		result += "<br>";
-		result += button(110, "Screenshot", OCKER, "?mode=menuScreenShot");
+		result += button(110, "Screenshot", BBLUE, "?mode=menuScreenShot");
 		result += "<br>";
-		result += button(110, "Timer List", OCKER, "?mode=menuTimerList");
+		result += button(110, "Timer List", BBLUE, "?mode=menuTimerList");
 	}
 	else
 	if (mode.find("links") == 0)
 	{
-		result += button(110, "DMM Sites", OCKER, "?mode=linksOfficialSites");
+		result += button(110, "DMM Sites", BBLUE, "?mode=linksOfficialSites");
 		result += "<br>";
-		result += button(110, "Other Sites", OCKER, "?mode=linksOtherSites");
+		result += button(110, "Other Sites", BBLUE, "?mode=linksOtherSites");
 		result += "<br>";
-		result += button(110, "Forums", OCKER, "?mode=linksForums");
+		result += button(110, "Forums", BBLUE, "?mode=linksForums");
 		result += "<br>";
 	}
 	else
@@ -582,9 +583,9 @@ static eString getNavi(eString mode, eString path)
 	else
 	if (mode.find("about") == 0)
 	{
-		result += button(110, "Receiver", OCKER, "?mode=aboutDreambox");
+		result += button(110, "Receiver", BBLUE, "?mode=aboutDreambox");
 		result += "<br>";
-		result += button(110, "DMM", OCKER, "?mode=aboutDMM");
+		result += button(110, "DMM", BBLUE, "?mode=aboutDMM");
 	}
 
 	return result;
