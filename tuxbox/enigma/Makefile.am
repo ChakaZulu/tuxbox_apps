@@ -16,6 +16,8 @@ install-data-local:
 	install -m 0644 pictures/*.png $(DATADIR)/enigma/pictures
 	install -d $(DATADIR)/enigma/pictures/decoration
 	install -m 0644 pictures/decoration/*.png $(DATADIR)/enigma/pictures/decoration
+	install -d $(DATADIR)/enigma/pictures/chk
+	install -m 0644 pictures/chk/*.png $(DATADIR)/enigma/pictures/chk
 	install -d $(DATADIR)/enigma/templates
 	install -m 0644 templates/*.tmp $(DATADIR)/enigma/templates
 	install -d $(DATADIR)/enigma/htdocs
