@@ -30,11 +30,11 @@
 */
 
 //
-// $Id: infoviewer.cpp,v 1.49 2001/11/22 12:54:39 field Exp $
+// $Id: infoviewer.cpp,v 1.50 2001/11/22 13:18:18 field Exp $
 //
 // $Log: infoviewer.cpp,v $
-// Revision 1.49  2001/11/22 12:54:39  field
-// Kleinere Bugfixes (CDs und Infoviewer)
+// Revision 1.50  2001/11/22 13:18:18  field
+// Infoviewer update
 //
 // Revision 1.47  2001/11/15 11:42:41  McClean
 // gpl-headers added
@@ -523,12 +523,24 @@ void CInfoViewer::showData()
     else
     {
         // irgendein EPG gefunden
-        if ( ( Flag & sectionsd::epg_has_later ) && ( !( Flag & sectionsd::epg_has_current )) )
+        if ( ( Flag & sectionsd::epg_has_next ) && ( !( Flag & sectionsd::epg_has_current )) )
         {
             // spätere Events da, aber kein aktuelles...
-            ChanInfoY += height;
+//            ChanInfoY += height;
             g_FrameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height, COL_INFOBAR);
             g_Fonts->infobar_info->RenderString(xStart,  ChanInfoY+height, BoxEndX- xStart, g_Locale->getText("infoviewer.nocurrent").c_str(), COL_INFOBAR);
+
+
+            ChanInfoY += height;
+
+    	   //info next
+            g_FrameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR);
+
+            int duration2Width   = g_Fonts->infobar_info->getRenderWidth(nextDuration);
+            int duration2TextPos = BoxEndX-duration2Width-10;
+            g_Fonts->infobar_info->RenderString(ChanInfoX+10,                ChanInfoY+height, 100, nextStart, COL_INFOBAR);
+            g_Fonts->infobar_info->RenderString(BoxStartX + ChanWidth + 30,  ChanInfoY+height, duration1TextPos- (BoxStartX + ChanWidth + 40)-10, next, COL_INFOBAR);
+            g_Fonts->infobar_info->RenderString(duration2TextPos,            ChanInfoY+height, duration2Width, nextDuration, COL_INFOBAR);
         }
         else
         {
@@ -541,7 +553,7 @@ void CInfoViewer::showData()
     	   //info next
             g_FrameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR);
 
-            if ( ( !is_nvod ) && (strcmp(next, "")!= 0) )
+            if ( ( !is_nvod ) && ( Flag & sectionsd::epg_has_next ) )
             {
             	int duration2Width   = g_Fonts->infobar_info->getRenderWidth(nextDuration);
             	int duration2TextPos = BoxEndX-duration2Width-10;
@@ -652,10 +664,10 @@ void * CInfoViewer::InfoViewerThread (void *arg)
                 gotEPG = gotEPG && (InfoViewer->Flag & ( sectionsd::epg_not_broadcast | sectionsd::epg_has_current ) );
                 if ( ( InfoViewer->Flag & sectionsd::epg_has_later ) && (!gotEPG) )
                 {
-                    if (repCount> 4)
+                    if (repCount> 3)
                     {
-                        repCount= 4;
-                        printf("CInfoViewer::InfoViewerThread epg_has_later -> repCount set to 4\n");
+                        repCount= 3;
+                        printf("CInfoViewer::InfoViewerThread epg_has_later -> repCount set to %d\n", repCount);
                     }
                     else
                     if (repCount== 1)
