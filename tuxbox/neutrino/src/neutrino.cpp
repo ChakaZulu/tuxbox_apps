@@ -1,6 +1,6 @@
 /*
  
-        $Id: neutrino.cpp,v 1.121 2002/01/07 00:16:24 McClean Exp $
+        $Id: neutrino.cpp,v 1.122 2002/01/08 00:03:21 McClean Exp $
  
 	Neutrino-GUI  -   DBoxII-Project
  
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  
   $Log: neutrino.cpp,v $
+  Revision 1.122  2002/01/08 00:03:21  McClean
+  not working
+
   Revision 1.121  2002/01/07 00:16:24  McClean
   standby-mode
 
@@ -2161,11 +2164,27 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 	{
 		if(!g_settings.shutdown_real)
 		{
+			/*
+			int timeout = 0;
+			sscanf(g_settings.repeat_blocker, "%d", &timeout);
+			printf("timeout: %d\n",  timeout);
+			timeout = int(timeout/100.0)+10;
+			printf("timeout: %d\n",  timeout);
+			struct timeval tv;
+			gettimeofday( &tv, NULL );
+			long long starttime = (tv.tv_sec*1000000) + tv.tv_usec;
+			while(g_RCInput->getKey(timeout)==CRCInput::RC_standby)
+			{}
+			gettimeofday( &tv, NULL );
+			long long endtime = (tv.tv_sec*1000000) + tv.tv_usec;
+			printf("diff: %d\n",  int((endtime-starttime)/1000000. ));
+			*/
+
 			g_lcdd->setMode(CLcddClient::MODE_STANDBY);
 			g_Controld->videoPowerDown(true);
+			printf("standby-loop\n");
 			while(g_RCInput->getKey(1)!= CRCInput::RC_timeout)
 			{}
-			printf("standby-loop\n");
 			while (g_RCInput->getKey(100)!=CRCInput::RC_standby)
 			{}
 			printf("standby-loopended\n");
@@ -2242,10 +2261,9 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.121 2002/01/07 00:16:24 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.122 2002/01/08 00:03:21 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;
 	return neutrino->run(argc, argv);
 }
-
