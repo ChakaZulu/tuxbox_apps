@@ -45,7 +45,7 @@ mainsettings.video Video
 mainsettings.network Netzwerk
 mainsettings.recording Streamingserva
 mainsettings.colors Forbn / Themes
-mainsettings.plugins unset
+mainsettings.plugins Plugins Eistellunga
 mainsettings.lcd LC-Disbläi
 mainsettings.keybinding Tasdn-Eistellunga
 mainsettings.misc No a boar Eistellunga
@@ -147,7 +147,7 @@ timing.menu Menu
 timing.chanlist Kanalliste
 timing.epg Epg
 timing.infobar Infobar
-timing.filebrowser unset
+timing.filebrowser Filebrausa
 timing.hint_1 Einblendzeit in Sek., die das OSD
 timing.hint_2 auf dem TV angezeigt wird
 
@@ -589,18 +589,18 @@ timerlist.reload akualisiern
 timerlist.modify ändan
 timerlist.message Nochricht
 timerlist.apid Audio PID
-timerlist.bouquetselect unset
-timerlist.channelselect unset
-timerlist.modeselect unset
-timerlist.modetv unset
-timerlist.moderadio unset
+timerlist.bouquetselect Bouquet auswäihn
+timerlist.channelselect Senda auswäihn
+timerlist.modeselect Modus auswäihn
+timerlist.modetv Ferhsegn
+timerlist.moderadio Radio hern
 timersettings.separator Timer Eistellunga
 timersettings.record_safety_time Aufnemma - Korrekturzeid
 timersettings.record_safety_time.hint_1 De Zeid in Minutn (00=aus) werd beim Startn
 timersettings.record_safety_time.hint_2 vom Timer obzogn
-timersettings.record_safety_time_after unset
-timersettings.record_safety_time_after.hint_1 unset
-timersettings.record_safety_time_after.hint_2 unset
+timersettings.record_safety_time_after Aufnahmeend Korretua
+timersettings.record_safety_time_after.hint_1 Korrekturzeid in Minutn (00=aus), de aufd
+timersettings.record_safety_time_after.hint_2 Endzeid vom jeweilign Timer aufigrechent werd
 
 fontsize.menu Menutext
 fontsize.menu_title Menutitl
@@ -630,9 +630,9 @@ fontmenu.channellist Kanallistn
 fontmenu.eventlist Eventlistn
 fontmenu.epg EPG
 fontmenu.infobar Infoleistn
-fontmenu.gamelist unset
+fontmenu.gamelist Spuilistn
 
-colormenu.gtx_alpha unset
+colormenu.gtx_alpha Alpha überblendunga
 gtxalpha.alpha1 tr1
 gtxalpha.alpha2 tr2
 
@@ -643,12 +643,12 @@ mp3player.add dazuadoa
 mp3player.delete löschn
 mp3player.stop stopn
 mp3player.playall olle obspuin
-mp3player.shuffle unset
-mp3player.deleteall unset
-mp3player.title unset
-mp3player.artist unset
-mp3player.playing unset
-mp3player.id3scan unset
+mp3player.shuffle wias kumt
+mp3player.deleteall olle löschn
+mp3player.title Titl
+mp3player.artist Sänga
+mp3player.playing Spuin
+mp3player.id3scan ID3-Tags durchsuacha
 
 filebrowser.head Datiesucha
 filebrowser.filter Fuita
