@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.32 2004/01/05 23:22:00 thegoodguy Exp $
+        $Id: settings.cpp,v 1.33 2004/04/20 22:14:30 rasc Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -164,7 +164,7 @@ void CScanSettings::useDefaults(const delivery_system_t _delivery_system)
 	switch (delivery_system)
 	{
 	case DVB_C:
-		strcpy(satNameNoDiseqc, "Telekom/Ish");
+		strcpy(satNameNoDiseqc, "Kabel Deutschland");
 		break;
 	case DVB_S:
 		strcpy(satNameNoDiseqc, "Astra 19.2E");
