@@ -1,0 +1,26 @@
+
+zapit's list of known bugs
+--------------------------
+
+There are lots of bugs in zapit, and I don't know and don't remember all of
+them. So this list is not complete and will never be. However, if someone
+wants to improve zapit and does not know where to start, this list might be
+an entry point.
+
+- Incorrect section filtering:
+
+  DVB Tables like PAT, PMT are broadcasted as so called sections which are
+  usually limited to 1024 bytes size. Therefore large tables are split into
+  multiple parts. Each part is called a section. When reading a table, filters
+  are set up to read all sections, one by one, starting at section 0, ending
+  at section n, where n is the last_section_number, which is present in every
+  section header of sections with section_syntax_indicator = 1. This is a bug,
+  because filter timeouts will occur, even if data would be available. The
+  filtering scheme must be changed, so that zapit does not filter by
+  section_number, but keeps a list of already received sections, which is
+  expanded until no more new sections are received for a given timeout. This
+  bug applies to every file in src/zapsi.
+
+Have fun,
+obi
+
