@@ -123,6 +123,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		/*emit*/ dvb.enterTransponder(event.transponder);
 		int nopmt=0;
 
+		int spSID=-1;
 		// do we haved fixed or cached PID values?
 		eService *sp=eServiceInterface::getInstance()->addRef(service);
 		if (sp)
@@ -154,21 +155,29 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 				if ( tmp != -1 && !service.path.length() )
 					Decoder::parms.pcrpid=tmp;
 // start yet...
+				eDebug("Set");
 				Decoder::Set();
 
 				if (sp->dvb->dxflags & eServiceDVB::dxNoPMT)
 					nopmt=1;
 
-				if ( !service.getServiceID().get() && sp->dvb->service_id.get() )
-				{
-					service.data[1] = sp->dvb->service_id.get();
-					dvb.setState(eDVBServiceState(eDVBServiceState::stateServiceGetPAT));
-					dvb.tPAT.start(new PAT());
-					eServiceInterface::getInstance()->removeRef(service);
-					break;
-				}
+				spSID=sp->dvb->service_id.get();
 			}
 			eServiceInterface::getInstance()->removeRef(service);
+		}
+
+		if ( service.path )  // replay ?
+		{
+			if ( !service.getServiceID().get() && spSID != -1 )
+				service.data[1] = spSID;
+
+			if ( service.getServiceID().get() )
+			{
+				dvb.setState(eDVBServiceState(eDVBServiceState::stateServiceGetPAT));
+				dvb.tPAT.start(new PAT());
+				eServiceInterface::getInstance()->removeRef(service);
+				break;
+			}
 		}
 
 		if (!nopmt && service.getServiceID().get() ) // if not a dvb service, don't even try to search a PAT, PMT etc.

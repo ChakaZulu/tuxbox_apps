@@ -188,7 +188,10 @@ void eEPGCache::cleanLoop()
 		eDebug("[EPGC] start cleanloop");
 		const eit_event_struct* cur_event;
 		int duration;
-		time_t TM;
+
+		time_t TM,
+					 now = time(0)+eDVB::getInstance()->time_difference;
+
 		tmpMap temp;
 
 		for (eventCache::iterator DBIt = eventDB.begin(); DBIt != eventDB.end(); DBIt++)
@@ -199,7 +202,6 @@ void eEPGCache::cleanLoop()
 
 				duration = fromBCD( cur_event->duration_1)*3600 + fromBCD(cur_event->duration_2)*60 + fromBCD(cur_event->duration_3);
 				TM = (*It->second).getStartTime();
-				time_t now = time(0)+eDVB::getInstance()->time_difference;
 
 				if ( TM == 3599 )  // check if NVOD Entry valid..
 				{ 

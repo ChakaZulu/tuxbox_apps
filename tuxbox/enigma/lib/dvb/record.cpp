@@ -268,6 +268,7 @@ void eDVBRecorder::s_start()
 
 void eDVBRecorder::s_stop()
 {
+	eDebug("eDVBRecorder::s_stop();");
 	for (std::set<pid_t>::iterator i(pids.begin()); i != pids.end(); ++i)
 		if (i->fd >= 0)
 			::ioctl(i->fd, DMX_STOP, 0);
@@ -275,8 +276,6 @@ void eDVBRecorder::s_stop()
 	state = stateStopped;
 
 	buffer.tofile(outfd,buffer.size());
-
-	eDebug("eDVBRecorder::s_stop();");
 }
 
 void eDVBRecorder::s_close()
