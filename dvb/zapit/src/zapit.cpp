@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.197 2002/08/24 15:59:26 obi Exp $
+ * $Id: zapit.cpp,v 1.198 2002/08/25 14:21:27 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -938,7 +938,6 @@ void parse_command (CZapitClient::commandHead &rmsg)
 			{
 				CZapitClient::commandRenameBouquet msgRenameBouquet;
 				read(connfd, &msgRenameBouquet, sizeof(msgRenameBouquet));
-				bouquetManager->addBouquet(msgRenameBouquet.name);
 				bouquetManager->Bouquets[msgRenameBouquet.bouquet - 1]->Name = msgRenameBouquet.name;
 				break;
 			}
@@ -1123,7 +1122,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.197 2002/08/24 15:59:26 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.198 2002/08/25 14:21:27 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
