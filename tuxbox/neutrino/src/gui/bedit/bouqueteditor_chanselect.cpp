@@ -35,7 +35,7 @@ void CBEChannelSelectWidget::paintItem(int pos)
 	}
 	if( isChannelInBouquet( liststart+pos))
 	{
-		g_FrameBuffer->paintIcon("gelb.raw", x+8, ypos+4);
+		g_FrameBuffer->paintIcon("gruen.raw", x+8, ypos+4);
 	}
 	else
 	{
@@ -89,8 +89,12 @@ void CBEChannelSelectWidget::paintFoot()
 	g_FrameBuffer->paintBoxRel(x,y+height, width,ButtonHeight, COL_MENUHEAD);
 	g_FrameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW);
 
-	g_FrameBuffer->paintIcon("gelb.raw", x+width- 3* ButtonWidth+ 8, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth+ 29, y+height+24 - 2, width, g_Locale->getText("bouqueteditor.switch").c_str(), COL_INFOBAR);
+	g_FrameBuffer->paintIcon("ok.raw", x+width- 3* ButtonWidth+ 8, y+height+1);
+	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth+ 38, y+height+24 - 2, width, g_Locale->getText("bouqueteditor.switch").c_str(), COL_INFOBAR);
+
+	g_FrameBuffer->paintIcon("home.raw", x+width- 2* ButtonWidth+ 8, y+height+1);
+	g_Fonts->infobar_small->RenderString(x+width- 2* ButtonWidth+ 38, y+height+24 - 2, width, g_Locale->getText("bouqueteditor.return").c_str(), COL_INFOBAR);
+
 }
 
 void CBEChannelSelectWidget::hide()
@@ -123,7 +127,7 @@ int CBEChannelSelectWidget::exec(CMenuTarget* parent, string actionKey)
 	while (loop)
 	{
 		int key = g_RCInput->getKey();
-		if ((key==CRCInput::RC_timeout) || (key==g_settings.key_channelList_cancel) || (key==CRCInput::RC_ok))
+		if ((key==g_settings.key_channelList_cancel) || (key==CRCInput::RC_home))
 		{
 			loop = false;
 		}
@@ -181,10 +185,12 @@ int CBEChannelSelectWidget::exec(CMenuTarget* parent, string actionKey)
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paint();
 		}
-		else if(key==CRCInput::RC_yellow)
+		else if(key==CRCInput::RC_ok)
 		{
 			switchChannel();
 		}
+		//kein pushback - wenn man versehentlich wo draufkommt is die edit-arbeit umsonst
+		/*
 		else if( (key==CRCInput::RC_spkr) || (key==CRCInput::RC_plus) || (key==CRCInput::RC_minus)
 		         || (key==CRCInput::RC_standby)
 		         || (CRCInput::isNumeric(key)) )
@@ -192,7 +198,7 @@ int CBEChannelSelectWidget::exec(CMenuTarget* parent, string actionKey)
 			selected = oldselected;
 			g_RCInput->pushbackKey (key);
 			loop=false;
-		}
+		}*/
 	}
 	hide();
 	return RETURN_REPAINT;

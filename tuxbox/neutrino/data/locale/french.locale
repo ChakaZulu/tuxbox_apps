@@ -276,6 +276,7 @@ bouqueteditor.savingchanges Saving changes. Please wait ...
 bouqueteditor.discardingchanges Discarding changes. Please wait ..
 bouqueteditor.switch channel add/remove
 bouqueteditor.switchmode TV/Radio
+bouqueteditor.return ready
 
 messagebox.yes Oui
 messagebox.no Non

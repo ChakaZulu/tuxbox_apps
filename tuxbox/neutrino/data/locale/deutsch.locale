@@ -271,6 +271,7 @@ bouqueteditor.savingchanges Änderungen werden gespeichert. Bitte warten ...
 bouqueteditor.discardingchanges Änderungen werden verworfen. Bitte warten ...
 bouqueteditor.switch Kanal aufnehmen/entfernen
 bouqueteditor.switchmode TV/Radio
+bouqueteditor.return fertig
 
 messagebox.yes Ja
 messagebox.no Nein
