@@ -1,5 +1,5 @@
 /*
- * $Id: test_clip_vls.c,v 1.1 2003/06/27 14:57:03 gagga Exp $
+ * $Id: test_clip_vls.c,v 1.2 2003/06/28 23:40:17 gagga Exp $
  *
  * (C) 2003 gagga
  * Parts by obi
@@ -96,38 +96,39 @@ main (int argc, char **argv)
       shutdown (skt_serv, 2);
       exit (-1);
     }
-
+  fcntl(skt_serv, O_NONBLOCK);
+  
   // Setup drivers
   int dmxa, dmxv, dvr, adec, vdec, ts;
   struct dmx_pes_filter_params p;
   ssize_t wr;
   size_t r;
 
-  if ((dmxa = open (DMX, O_RDWR || O_NONBLOCK)) < 0)
+  if ((dmxa = open (DMX, O_RDWR | O_NONBLOCK)) < 0)
     {
       perror (DMX);
       return 1;
     }
 
-  if ((dmxv = open (DMX, O_RDWR || O_NONBLOCK)) < 0)
+  if ((dmxv = open (DMX, O_RDWR | O_NONBLOCK)) < 0)
     {
       perror (DMX);
       return 1;
     }
 
-  if ((dvr = open (DVR, O_WRONLY || O_NONBLOCK)) < 0)
+  if ((dvr = open (DVR, O_WRONLY | O_NONBLOCK)) < 0)
     {
       perror (DVR);
       return 1;
     }
 
-  if ((adec = open (ADEC, O_RDWR || O_NONBLOCK)) < 0)
+  if ((adec = open (ADEC, O_RDWR | O_NONBLOCK)) < 0)
     {
       perror (ADEC);
       return 1;
     }
 
-  if ((vdec = open (VDEC, O_RDWR || O_NONBLOCK)) < 0)
+  if ((vdec = open (VDEC, O_RDWR | O_NONBLOCK)) < 0)
     {
       perror (VDEC);
       return 1;
@@ -224,7 +225,7 @@ main (int argc, char **argv)
 	  if ((poller[0].revents & POLLIN) == POLLIN)
 	    {
 	      len = read (poller[0].fd, buf, packetsize);
-	      printf ("[%d POLLIN bytes read]\n", wr);
+	      //printf ("[%d POLLIN bytes read]\n", wr);
 	    }
 	  if ((poller[0].revents & POLLPRI) == POLLPRI)
 	    {
@@ -239,7 +240,7 @@ main (int argc, char **argv)
 		  //if ((wr = write(dvr, &buf[done], len)) <= 0)
 		  //      continue;
 		  wr = write (dvr, &buf[done], len);
-		  printf ("[%d POLLOUT bytes written]\n", wr);
+		  //printf ("[%d POLLOUT bytes written]\n", wr);
 		  len -= wr;
 		  done += wr;
 		}
@@ -267,12 +268,12 @@ main (int argc, char **argv)
 	      perror ("recv()");
 	      break;
 	    }
-	  printf ("[%d bytes received]\n", len);
+	  //printf ("[%d bytes received]\n", len);
 	  done = 0;
 	  while (len > 0)
 	    {
 	      wr = write (dvr, &buf[done], len);
-	      printf ("[%d bytes written]\n", wr);
+	      //printf ("[%d bytes written]\n", wr);
 	      len -= wr;
 	      done += wr;
 	    }
