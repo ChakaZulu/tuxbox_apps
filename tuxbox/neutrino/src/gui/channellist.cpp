@@ -30,9 +30,13 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.45 2001/12/14 17:03:40 faralla Exp $
+// $Id: channellist.cpp,v 1.46 2001/12/22 19:34:58 Simplex Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.46  2001/12/22 19:34:58  Simplex
+// - selected channel in bouquetlist is correct after numzap and quickzap
+// - dbox-key in channellist shows bouquetlist
+//
 // Revision 1.45  2001/12/14 17:03:40  faralla
 // forgot debug-output
 //
@@ -386,6 +390,7 @@ int CChannelList::show()
 
 	int oldselected = selected;
 	int zapOnExit = false;
+	bool bShowBouquetList = false;
 	bool loop=true;
 	while (loop)
 	{
@@ -475,6 +480,11 @@ int CChannelList::show()
 		{
 			zapOnExit = true;
 			loop=false;
+		}
+		else if (key==CRCInput::RC_setup)
+		{
+			bShowBouquetList = true;
+			loop=false;
 		} else {
             selected = oldselected;
 			g_RCInput->pushbackKey (key);
@@ -482,6 +492,11 @@ int CChannelList::show()
 		}
 	}
 	hide();
+	if (bShowBouquetList)
+	{
+		bouquetList->exec( true);
+		return(-1);
+	}
 	if(zapOnExit)
 	{
 		return(selected);
@@ -657,14 +672,20 @@ void CChannelList::quickZap(int key)
     zapTo( selected );
 }
 
-bool CChannelList::hasChannel(int nChannelNr)
+int CChannelList::hasChannel(int nChannelNr)
 {
 	for (uint i=0;i<chanlist.size();i++)
 	{
 		if (getKey(i) == nChannelNr)
-			return(true);
+			return(i);
 	}
-	return(false);
+	return(-1);
+}
+
+// for adjusting bouquet's channel list after numzap or quickzap
+void CChannelList::setSelected( int nChannelNr)
+{
+	selected = nChannelNr;
 }
 
 void CChannelList::paintItem(int pos)

@@ -68,10 +68,11 @@ void CBouquetList::adjustToChannel( int nChannelNr)
 {
 	for (uint i=0; i<Bouquets.size(); i++)
 	{
-		if (Bouquets[i]->channelList->hasChannel(nChannelNr))
+		int nChannelPos = Bouquets[i]->channelList->hasChannel(nChannelNr);
+		if (nChannelPos > -1)
 		{
 			selected = i;
-			// TODO: adjust bouquet channel list to master channel list
+			Bouquets[i]->channelList->setSelected(nChannelPos);
 			return;
 		}
 	}
