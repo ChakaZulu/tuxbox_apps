@@ -57,12 +57,14 @@ int is_dec(int i)
 
 int next_hex(int i) /* return next existing non-decimal page number */
 {
+	int startpage = i;
+	
 	do
 	{
 		i++;
 		if (i > 0x8FF)
 			i = 0x10F;
-	} while ((subpagetable[i] == 0xFF) || is_dec(i));
+	} while (((subpagetable[i] == 0xFF) || is_dec(i)) && (startpage != i));
 	return i;
 }
 
@@ -411,7 +413,7 @@ void ClearB(int color)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.69 $", versioninfo[16];
+	char cvs_revision[] = "$Revision: 1.70 $", versioninfo[16];
 
 	/* show versioninfo */
 	sscanf(cvs_revision, "%*s %s", versioninfo);
@@ -493,7 +495,7 @@ void plugin_exec(PluginParam *par)
 
 					if (--vendor < 3)	/* scart-parameters only known for 3 dboxes, FIXME: order must be like in info.h */
 					{
-						for (i=0; i < 7; i++)
+						for (i=0; i < 6; i++) /* FIXME: FBLK seems to cause troubles */
 						{
 							n = avstable_scart[vendor][i];
 							if ((ioctl(avs, avstable_ioctl[i], &n)) < 0)
@@ -503,7 +505,7 @@ void plugin_exec(PluginParam *par)
 						while (GetRCCode() != 1) /* wait for any key */
 							UpdateLCD();
 
-						for (i=0; i < 7; i += ((RCCode == RC_HELP) ? 2 : 1)) /* exit with ?: just restore video, leave audio */
+						for (i=0; i < 6; i += ((RCCode == RC_HELP) ? 2 : 1)) /* exit with ?: just restore video, leave audio */
 						{
 							n = avstable_dvb[vendor][i];
 							if ((ioctl(avs, avstable_ioctl[i], &n)) < 0)
@@ -713,8 +715,8 @@ int Init()
 	typettf.font.pix_height = (FT_UShort) fontheight;
 #if HAVE_DVB_API_VERSION >= 3
 	typettf.flags = FT_LOAD_MONOCHROME;
-#else
-	typettf.image_type = ftc_image_mono;
+#else 
+	typettf.image_type = ftc_image_mono; 
 #endif
 	if ((error = FTC_Manager_Lookup_Face(manager, TUXTXTTTF, &face)))
 	{
@@ -792,8 +794,8 @@ int Init()
 	       var_screeninfo.yoffset);
 #endif
 
-	/* "correct" semi-transparent for Nokia (GTX only allows 2(?) levels of transparency) */
 #ifndef DREAMBOX
+	/* "correct" semi-transparent for Nokia (GTX only allows 2(?) levels of transparency) */
 	if (tuxbox_get_vendor() == TUXBOX_VENDOR_NOKIA)
 	{
 		tr1[transp2-1] = 0xFFFF;
@@ -938,6 +940,7 @@ int Init()
 void CleanUp()
 {
 	int i, n;
+	
 	/* hide pig */
 	if (screenmode)
 		SwitchScreenMode(0); /* turn off divided screen */
@@ -947,8 +950,7 @@ void CleanUp()
 	ioctl(saa, SAAIOSWSS, &saa_old);
 
 #ifndef DREAMBOX
-	int vendor = tuxbox_get_vendor();
-	if (--vendor < 3)	/* scart-parameters only known for 3 dboxes, FIXME: order must be like in info.h */
+	if (tuxbox_get_vendor() - 1 < 3)	/* scart-parameters only known for 3 dboxes, FIXME: order must be like in info.h */
 	{
 		for (i = 1; i < 6; i += 2) /* restore dvb audio */
 		{
@@ -3131,10 +3133,10 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 		return;
 	}
 
-#ifdef DREAMBOX
-	if ((error = FTC_SBit_Cache_Lookup(cache, &typettf, glyph, &sbit)) != 0)
-#else
+#ifndef DREAMBOX
 	if ((error = FTC_SBitCache_Lookup(cache, &typettf, glyph, &sbit, NULL)) != 0)
+#else
+	if ((error = FTC_SBitCache_Lookup(cache, &typettf, glyph, &sbit)) != 0)
 #endif
 	{
 #if DEBUG
@@ -3350,10 +3352,10 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 	if (pt == pt2)
 		Char += national_subset*13 + 1;
 
-#ifdef DREAMBOX
-	if ((error = FTC_SBit_Cache_Lookup(cache, pt, Char, &sbit)) != 0)
-#else
+#ifndef DREAMBOX
 	if ((error = FTC_SBitCache_Lookup(cache, pt, Char, &sbit, NULL)) != 0)
+#else
+	if ((error = FTC_SBit_Cache_Lookup(cache, pt, Char, &sbit)) != 0)
 #endif
 	{
 #if DEBUG

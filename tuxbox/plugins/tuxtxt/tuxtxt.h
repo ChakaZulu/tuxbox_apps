@@ -5,6 +5,9 @@
  ******************************************************************************/
 
 #include <config.h>
+#ifndef DREAMBOX
+#include <tuxbox.h>
+#endif
 #include <fcntl.h>
 #include <pthread.h>
 #include <stdio.h>
@@ -32,7 +35,6 @@
 #include <dbox/fp.h>
 #include <plugin.h>
 #include <dbox/lcd-ks0713.h>
-#include <tuxbox.h>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
