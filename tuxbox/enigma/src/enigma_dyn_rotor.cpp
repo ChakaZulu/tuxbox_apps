@@ -57,7 +57,7 @@ eString getRotorConfig(void)
 			result += "<td>" + eString().sprintf("%d", s->getOrbitalPosition()) + "</td>";
 			int motorPosition = it->getDiSEqC().RotorTable[s->getOrbitalPosition()];
 			result += "<td>" + eString().sprintf("%d", motorPosition) + "</td>";
-			result += "<tr>";
+			result += "</tr>";
 		}
 	}
 
