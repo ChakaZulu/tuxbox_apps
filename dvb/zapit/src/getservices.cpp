@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.83 2003/12/09 19:39:24 thegoodguy Exp $
+ * $Id: getservices.cpp,v 1.84 2003/12/09 21:12:28 thegoodguy Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -30,8 +30,7 @@
 extern std::map <uint32_t, transponder> transponders;
 extern tallchans allchans;
 
-std::map<string, t_satellite_position> satellitePositions; //satellite position as specified in satellites.xml
-std::map<string, t_satellite_position>::iterator spos_it;
+std::map<std::string, t_satellite_position> satellitePositions; //satellite position as specified in satellites.xml
 
 std::map<t_satellite_position, uint8_t> motorPositions; //stored satellitepositions in diseqc 1.2 motor
 std::map<t_satellite_position, uint8_t>::iterator mpos_it;
@@ -159,7 +158,6 @@ void ParseChannels(xmlNodePtr node, const t_transport_stream_id transport_stream
 void FindTransponder(xmlNodePtr search)
 {
 	uint8_t DiSEqC;
-	string satellite = "None";
 	t_satellite_position satellitePosition = 0;
 
 	while (search)
@@ -170,8 +168,7 @@ void FindTransponder(xmlNodePtr search)
 		else if (!(strcmp(xmlGetName(search), "sat")))
 		     {	
 			DiSEqC = xmlGetNumericAttribute(search, "diseqc", 0);
-			satellite = xmlGetAttribute(search, "name");
-			satellitePosition = satellitePositions[satellite];
+			satellitePosition = satellitePositions[xmlGetAttribute(search, "name")];
 		     }
 
 		else if (!(strcmp(xmlGetName(search), "terrestrial")))

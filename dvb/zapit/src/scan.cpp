@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.130 2003/11/27 00:32:07 homar Exp $
+ * $Id: scan.cpp,v 1.131 2003/12/09 21:12:28 thegoodguy Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -63,7 +63,6 @@ extern std::map<t_satellite_position, uint8_t> motorPositions;
 extern std::map<t_satellite_position, uint8_t>::iterator mpos_it;
 
 extern std::map<string, t_satellite_position> satellitePositions;
-extern std::map<string, t_satellite_position>::iterator spos_it;
 
 extern CZapitClient::bouquetMode bouquetMode;
 extern CEventServer *eventServer;
@@ -74,7 +73,7 @@ TP_map_t TP_scanmap;
 
 void write_xml_header(FILE * fd);
 void write_xml_footer(FILE * fd);
-int write_provider(FILE *fd, const char *frontendType, const char *provider_name, const uint8_t DiSEqC, t_satellite_position satellitePosition);
+int write_provider(FILE *fd, const char *frontendType, const char *provider_name, const uint8_t DiSEqC);
 
 t_satellite_position driveMotorToSatellitePosition(char * providerName)
 {
@@ -118,7 +117,7 @@ void copy_to_satellite(FILE * fd, FILE * fd1, char * providerName)
 	char buffer[256] = "";
 
 	//look for sat to be scanned... or end of file
-	fgets(buffer, 255, fd);
+	fgets(buffer, 255, fd1);
 	while(!feof(fd1) && !((strstr(buffer, "sat name") && strstr(buffer, providerName)) || strstr(buffer, "</zapit>")))
 	{
 		fputs(buffer, fd);
@@ -175,7 +174,7 @@ int append_service(char* providerName, TP_params* TP)
 		satellitePosition = driveMotorToSatellitePosition(providerName);
 
 	/* write services */
-	int scan_status = write_provider(fd, frontendType, providerName, TP->diseqc, satellitePosition);
+	int scan_status = write_provider(fd, frontendType, providerName, TP->diseqc);
 
 	if (fd1)
 		copy_to_end(fd, fd1, providerName);
@@ -516,7 +515,7 @@ void write_transponder(FILE *fd, t_transport_stream_id transport_stream_id, t_or
 	return;
 }
 
-int write_provider(FILE *fd, const char *frontendType, const char *provider_name, const uint8_t DiSEqC, t_satellite_position satellitePosition)
+int write_provider(FILE *fd, const char *frontendType, const char *provider_name, const uint8_t DiSEqC)
 {
 	int status = -1;
 
@@ -531,7 +530,7 @@ int write_provider(FILE *fd, const char *frontendType, const char *provider_name
 		/* satellite tag */
 		else
 		{
-			fprintf(fd, "\t<%s name=\"%s\" diseqc=\"%hd\" position=\"%hd\">\n", frontendType, provider_name, DiSEqC, satellitePosition);
+			fprintf(fd, "\t<%s name=\"%s\" diseqc=\"%hd\">\n", frontendType, provider_name, DiSEqC);
 		}
 
 		/* channels */
@@ -671,7 +670,6 @@ void *start_scanthread(void *)
  	found_tv_chans = 0;
  	found_radio_chans = 0;
  	found_data_chans = 0;
- 	t_satellite_position satellitePosition = 0;
 
 	curr_sat = 0;
 
@@ -722,7 +720,11 @@ void *start_scanthread(void *)
 				/* copy services.xml to /tmp directory */
 				cp(SERVICES_XML, SERVICES_TMP);
 
-				fd = fopen(SERVICES_XML, "w");
+				if (!(fd = fopen(SERVICES_XML, "w")))
+				{
+					WARN("unable to open %s for writing", SERVICES_XML);
+					goto abort_scan;
+				}
 				if ((fd1 = fopen(SERVICES_TMP, "r")))
 					copy_to_satellite(fd, fd1, providerName);
 				else
@@ -736,12 +738,12 @@ void *start_scanthread(void *)
 				diseqc_pos = 0;
 
 			if (!strcmp(frontendType, "sat") && (frontend->getDiseqcType() == DISEQC_1_2))
-				satellitePosition = driveMotorToSatellitePosition(providerName);
+				driveMotorToSatellitePosition(providerName);
 
 			scan_provider(search, providerName, satfeed, diseqc_pos, frontendType);
 
 			/* write services */
-			scan_status = write_provider(fd, frontendType, providerName, diseqc_pos, satellitePosition);
+			scan_status = write_provider(fd, frontendType, providerName, diseqc_pos);
 
 			if (!strcmp(frontendType, "sat"))
 			{
@@ -761,6 +763,7 @@ void *start_scanthread(void *)
 
 	chmod(SERVICES_XML, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
+	abort_scan:
 	/* clean up - should this be done before every xmlNextNode ? */
 	delete transponder;
 	delete search;
