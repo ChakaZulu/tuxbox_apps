@@ -58,10 +58,11 @@ using namespace std;
 #define YELLOW "#F5FF3C"
 #define LIGHTGREY "#F4F4EC"
 #define DARKGREY "#D9E0E7"
-#define LEFTNAVICOLOR "#D9E0E7"
-#define TOPNAVICOLOR "#D9E0E7"
+#define LEFTNAVICOLOR ""
+#define TOPNAVICOLOR ""
 #define OCKER "#FFCC33"
 #define PINK "#95077C"
+#define NOCOLOR ""
 
 #define NOCONTENT "<? header(\"HTTP/1.0 204 No Content\"); ?>"
 
@@ -163,6 +164,28 @@ eString button(int width, eString buttonText, eString buttonColor, eString butto
 		ref1 = "\"self.location.href='";
 		ref2 = "'\"";
 	}
+	result << "<input name=\"" << buttonText << "\""
+		"type=\"button\" style='width: " << width <<
+		"px; height: 22px;";
+	if (buttonColor != "")
+		result << "background-color: " << buttonColor;
+	result << "' value=\"" << buttonText <<
+		"\" onclick=" << ref1 << buttonRef <<
+		ref2 << ">";
+	return result.str();
+}
+
+#if 0
+eString button(int width, eString buttonText, eString buttonColor, eString buttonRef)
+{
+	eString ref1, ref2;
+
+	std::stringstream result;
+	if (buttonRef.find("javascript") == eString::npos)
+	{
+		ref1 = "\"self.location.href='";
+		ref2 = "'\"";
+	}
 	result << "<button name=\"" << buttonText << "\""
 		"type=\"button\" style='width: " << width <<
 		"px; height: 22px; background-color: " << buttonColor <<
@@ -172,6 +195,7 @@ eString button(int width, eString buttonText, eString buttonColor, eString butto
 		"</span></button>";
 	return result.str();
 }
+#endif
 
 eString getTitle(eString title)
 {
