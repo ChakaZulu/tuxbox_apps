@@ -1059,7 +1059,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		{
 			CMenuOptionChooser* oj = new CMenuOptionChooser( satList[i].satName, scanSettings.diseqscOfSat( satList[i].satName), true/*, new CSatelliteNotifier*/);
 			oj->addOption( -1, "options.off");
-			for( int j=0; j<=3; j++)
+			for( int j=0; j<=63; j++)
 			{
 				char jj[2];
 				sprintf( jj, "%d", j);
@@ -3301,7 +3301,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.387 2003/01/04 17:21:03 Zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.388 2003/01/11 17:32:31 rasc Exp $\n\n");
 	//LCD-Init
 	CLCD::getInstance()->init();
 
