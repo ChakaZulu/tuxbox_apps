@@ -61,6 +61,22 @@ public:
 		void set(const CableDeliverySystemDescriptor *descriptor);
 		int tune(eTransponder *);
 		int isValid() { return valid; }
+		bool operator == (const cable &c) const
+		{
+			if (valid != c.valid)
+				return 0;
+			if (frequency != c.frequency)
+				return 0;
+			if (symbol_rate != c.symbol_rate)
+				return 0;
+			if (modulation != c.modulation)
+				return 0;
+			if (inversion != c.inversion)
+				return 0;
+			if (fec_inner != c.fec_inner)
+				return 0;
+			return 1;
+		}
 	} cable;
 	struct satellite
 	{
@@ -69,6 +85,24 @@ public:
 		void set(const SatelliteDeliverySystemDescriptor *descriptor);
 		int tune(eTransponder *);
 		int isValid() { return valid; }
+		bool operator == (const satellite &c) const
+		{
+			if (valid != c.valid)
+				return 0;
+			if (frequency != c.frequency)
+				return 0;
+			if (symbol_rate != c.symbol_rate)
+				return 0;
+			if (polarisation != c.polarisation)
+				return 0;
+			if (fec != c.fec)
+				return 0;
+			if (inversion != c.inversion)
+				return 0;
+			if (lnb != c.lnb)
+				return 0;
+			return 1;
+		}
 	} satellite;
 	eTransponder(int transport_stream_id, int original_network_id);
 	eTransponder();
@@ -102,6 +136,14 @@ public:
 			return 0;
 		if (transport_stream_id != c.transport_stream_id)
 			return 0;
+		if ((original_network_id == -1) && (transport_stream_id == -1))	// yet unnamed transponder. compare settings.
+		{
+			if (satellite.valid && c.satellite.valid)
+				return satellite == c.satellite;
+			if (cable.valid && c.cable.valid)
+				return cable == c.cable;
+			return 1;
+		}
 		return 1;
 	}
 
