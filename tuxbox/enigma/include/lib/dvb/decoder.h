@@ -20,7 +20,7 @@ class Decoder
 {
 	static struct fd
 	{
-		static int video, demux_video, demux_audio;
+		static int video, audio, demux_video, demux_audio, demux_pcr;
 	} fd;
 	static decoderParameters current;
 public:
