@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.27 2001/10/15 17:27:19 field Exp $
+//  $Id: neutrino.h,v 1.28 2001/10/31 12:35:39 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.28  2001/10/31 12:35:39  field
+//  sectionsd stoppen waehrend scan
+//
 //  Revision 1.27  2001/10/15 17:27:19  field
 //  nvods (fast) implementiert (umschalten funkt noch nicht)
 //
@@ -163,7 +166,6 @@ class CNeutrinoApp : public CMenuTarget
 	void PluginDemo(); //demo only --- remove!
 
 	void firstChannel();
-	void channelsInit();
 	void setupDefaults();
 	void setupColors_classic();
 	void setupColors_neutrino();
@@ -206,6 +208,7 @@ class CNeutrinoApp : public CMenuTarget
 	CNeutrinoApp();
 	~CNeutrinoApp();
 
+    void channelsInit();
 	int run(int argc, char **argv);
 	//callback stuff only....
 	int exec(CMenuTarget* parent, string actionKey);

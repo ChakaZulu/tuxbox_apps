@@ -1,11 +1,14 @@
 //
-// $Id: eventlist.cpp,v 1.19 2001/10/29 16:49:00 field Exp $
+// $Id: eventlist.cpp,v 1.20 2001/10/31 12:35:39 field Exp $
 //
 //  -- EPG Event List // Vorschau 
 //
 //
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.20  2001/10/31 12:35:39  field
+// sectionsd stoppen waehrend scan
+//
 // Revision 1.19  2001/10/29 16:49:00  field
 // Kleinere Bug-Fixes (key-input usw.)
 //
@@ -219,7 +222,7 @@ void EventList::readEvents(unsigned onidSid, const std::string& channelname)
     }
     close(sock_fd);
 
-    if ( current_event == (unsigned)-1 )
+    if ( evtlist.size() == 0 )
     {
         event* evt = new event();
 
@@ -414,10 +417,6 @@ void EventList::paintItem(unsigned int pos)
 
 //		printf("Rendering '%s'\n", evt->name.c_str());
 //		printf("date time duration '%s'\n", evt->datetimeduration.c_str());
-
-
-//$$$ RASC: das color +1 ist falsch hier (Absicht, damit man sieht hier muss was getan werden)
-//Behoben der Fontrenderer kommt jetzt damit zurecht
 
 //$$$ auch sollten wg. der besseren Darstellung andere Fontmappings benutzt werden...
 

@@ -30,7 +30,7 @@ class CScanTs : public CMenuTarget
 	public:
 
 		CScanTs();
-
+        void sectionsdPauseScanning(int PauseIt);
 		void hide();
 		int exec( CMenuTarget* parent, string actionKey );
 
