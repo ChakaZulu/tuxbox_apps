@@ -59,14 +59,11 @@ int CMotorControl::exec(CMenuTarget* parent, string)
 	uint data;
 	bool istheend = false;
 	
-	
-	//frameBuffer->loadPal("satellites.pal", 0, 255);
-	//frameBuffer->loadPicture2FrameBuffer("satellites.raw");
-	//frameBuffer->loadPal("radiomode.pal", 18, COL_MAXFREE);
-	
-	
 	if (!frameBuffer->getActive())
 		return menu_return::RETURN_EXIT_ALL;
+	
+	if (parent)
+		parent->hide();
 		
 	paint();
 	paintMenu();
@@ -86,6 +83,7 @@ int CMotorControl::exec(CMenuTarget* parent, string)
 			{
 				switch(msg)
 				{
+					case CRCInput::RC_ok:
 					case CRCInput::RC_0:
 						printf("[motorcontrol] 0 key received... goto userMenue\n");
 						installerMenue = false;
@@ -94,7 +92,7 @@ int CMotorControl::exec(CMenuTarget* parent, string)
 						break;
 						
 					case CRCInput::RC_1:
-					case CRCInput::RC_left:
+					case CRCInput::RC_right:
 						printf("[motorcontrol] left/1 key received... drive/Step motor west, stepMode: %d\n", stepMode);
 						if (stepMode)
 						{
@@ -113,7 +111,7 @@ int CMotorControl::exec(CMenuTarget* parent, string)
 						break;
 
 					case CRCInput::RC_3:
-					case CRCInput::RC_right:
+					case CRCInput::RC_left:
 						printf("[motorcontrol] right/3 key received... drive/Step motor east, stepMode: %d\n", stepMode);
 						if (stepMode)
 						{
@@ -191,6 +189,7 @@ int CMotorControl::exec(CMenuTarget* parent, string)
 			{
 				switch(msg)
 				{
+					case CRCInput::RC_ok:
 					case CRCInput::RC_0:
 						printf("[motorcontrol] 0 key received... goto installerMenue\n");
 						installerMenue = true;
@@ -199,7 +198,7 @@ int CMotorControl::exec(CMenuTarget* parent, string)
 						break;
 						
 					case CRCInput::RC_1:
-					case CRCInput::RC_left:
+					case CRCInput::RC_right:
 						printf("[motorcontrol] left/1 key received... drive/Step motor west, stepMode: %d\n", stepMode);
 						if (stepMode)
 						{
@@ -218,7 +217,7 @@ int CMotorControl::exec(CMenuTarget* parent, string)
 						break;
 
 					case CRCInput::RC_3:
-					case CRCInput::RC_right:
+					case CRCInput::RC_left:
 						printf("[motorcontrol] right/3 key received... drive/Step motor east, stepMode: %d\n", stepMode);
 						if (stepMode)
 						{
@@ -303,9 +302,9 @@ void CMotorControl::hide()
 
 void CMotorControl::paintLine(char * txt, char * icon)
 {
-	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUCONTENT);
-	g_Fonts->menu->RenderString(x + 10, ypos + mheight, width, txt, COL_MENUCONTENT);
 	ypos += mheight;
+	frameBuffer->paintBoxRel(x, ypos - mheight, width, hheight, COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x + 10, ypos, width - 10, txt, COL_MENUCONTENT);
 }
 
 void CMotorControl::paintStatus()
@@ -316,30 +315,33 @@ void CMotorControl::paintStatus()
 	ypos = ypos_status;
 	paintLine("------ Motor Control Settings ------", NULL);
 	
-	buf[0] = '\0';
+	buf[0] = buf2[0] = 0;
 	strcat(buf, "Motor Position: ");
 	sprintf(buf2, "%d", motorPosition);
 	strcat(buf, buf2);
 	paintLine(buf, NULL);
 	
-	buf[0] = '\0';
+	buf[0] = buf2[0] = 0;
 	strcat(buf, "Satellite Position: ");
 	sprintf(buf2, "%d", satellitePosition);
 	strcat(buf, buf2);
 	paintLine(buf, NULL);
 	
-	buf[0] = '\0';
-	strcat(buf, "Step Size: ");
-	sprintf(buf2, "%d", stepSize);
-	strcat(buf, buf2);
-	paintLine(buf, NULL);
-	
-	buf[0] = '\0';
+	buf[0] = buf2[0] = 0;
 	strcat(buf, "Movement: ");
 	if (stepMode)
 		strcat(buf, "Step Mode");
 	else
 		strcat(buf, "Drive Mode");
+	paintLine(buf, NULL);
+	
+	buf[0] = buf2[0] = 0;
+	strcat(buf, "Step Size: ");
+	if (stepMode)
+		sprintf(buf2, "%d", stepSize);
+	else
+		strcpy(buf2, "don't care");
+	strcat(buf, buf2);
 	paintLine(buf, NULL);
 }
 
@@ -350,7 +352,7 @@ void CMotorControl::paint()
 	g_Fonts->menu_title->RenderString(x + 10, ypos + hheight + 1, width, g_Locale->getText("motorcontrol.head").c_str(), COL_MENUHEAD);
 	frameBuffer->paintBoxRel(x, ypos + hheight, width, height - hheight, COL_MENUCONTENT);
 
-	ypos += hheight + (mheight >> 1);
+	ypos += hheight + (mheight >> 1) - 10;
 	ypos_menue = ypos;
 }
 
@@ -360,10 +362,10 @@ void CMotorControl::paintMenu()
 	
 	if (installerMenue)
 	{
-		paintLine("(0) User Menue", NULL);
-		paintLine("(1/left)) Step/Drive Motor West", NULL);
+		paintLine("(0/OK) User Menue", NULL);
+		paintLine("(1/right)) Step/Drive Motor West", NULL);
 		paintLine("(2/red) Halt Motor", NULL);
-		paintLine("(3/right) Step/Drive Motor East", NULL);
+		paintLine("(3/left) Step/Drive Motor East", NULL);
 		paintLine("(4) Set West (soft) Limit", NULL);
 		paintLine("(5) Disable (soft) Limits", NULL);
 		paintLine("(6) Set East (soft) Limit", NULL);
@@ -376,10 +378,10 @@ void CMotorControl::paintMenu()
 	}
 	else
 	{
-		paintLine("(0) Installer Menue", NULL);
-		paintLine("(1/left)) Step/Drive Motor West", NULL);
+		paintLine("(0/OK) Installer Menue", NULL);
+		paintLine("(1/right)) Step/Drive Motor West", NULL);
 		paintLine("(2/red) Halt Motor", NULL);
-		paintLine("(3/right) Step/Drive Motor East", NULL);
+		paintLine("(3/left) Step/Drive Motor East", NULL);
 		paintLine("(4) not defined", NULL);
 		paintLine("(5/green) Store Motor Position", NULL);
 		paintLine("(6) Increase Step Size", NULL);
