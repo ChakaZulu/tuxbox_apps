@@ -30,12 +30,15 @@
 */
 
 /*
-$Id: streaminfo.cpp,v 1.21 2002/03/22 17:34:04 field Exp $
+$Id: streaminfo.cpp,v 1.22 2002/04/10 19:56:19 obi Exp $
 
 Module StreamInfo
 
 History:
  $Log: streaminfo.cpp,v $
+ Revision 1.22  2002/04/10 19:56:19  obi
+ changed pid defines
+
  Revision 1.21  2002/03/22 17:34:04  field
  Massive Umstellungen - NVODs/SubChannels=KAPUTT!
  Infoviewer tw. kaputt! NON-STABLE!
@@ -280,10 +283,10 @@ void CStreamInfo::paint()
 	sprintf((char*) buf, "%s: ", "ecm_pid");
 	switch ( g_RemoteControl->current_PIDs.PIDs.ecmpid )
 	{
-		case no_ecmpid_found :
+		case NONE :
 			strcat((char*) buf, g_Locale->getText("streaminfo.not_crypted").c_str() );
 			break;
-		case invalid_ecmpid_found :
+		case INVALID :
 			strcat((char*) buf, g_Locale->getText("streaminfo.ecm_invalid").c_str() );
 			break;
 		default:
