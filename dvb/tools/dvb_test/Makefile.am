@@ -6,6 +6,7 @@ bin_PROGRAMS = \
 	setpid \
 	video \
 	test_clip \
+	test_clip_pes \
 	test_sections \
 	test_sec_ne \
 	test_pes \
@@ -20,6 +21,7 @@ setvoltage_SOURCES = setvoltage.c
 setpid_SOURCES = setpid.c
 video_SOURCES = video.c
 test_clip_SOURCES = test_clip.c
+test_clip_pes_SOURCES = test_clip_pes.c
 test_sections_SOURCES = test_sections.c hex_dump.c
 test_sec_ne_SOURCES = test_sec_ne.c hex_dump.c
 test_pes_SOURCES = test_pes.c hex_dump.c
