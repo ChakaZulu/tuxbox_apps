@@ -480,7 +480,7 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 					if(timerdclient->isTimerdAvailable())
 					{
 						timerdclient->addZaptoTimerEvent(onid_sid, epgData.eventID, epgData.epg_times.startzeit, epgData.epg_times.startzeit - ANNOUNCETIME, 0);
-						printf("Added ZaptoTimerEvent for onidsid: %u epgID: %lu\n",onid_sid,epgData.eventID);
+						printf("Added ZaptoTimerEvent for onidsid: %u epgID: %llu\n",onid_sid,epgData.eventID);
 						ShowMsg ( "timer.eventtimed.title", g_Locale->getText("timer.eventtimed.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 					}
 					else
