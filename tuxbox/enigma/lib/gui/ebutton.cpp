@@ -10,7 +10,7 @@ eButton::eButton(eWidget *parent, eLabel* desc, int takefocus, const char *deco)
 	focusF(eSkin::getActive()->queryScheme("global.selected.foreground")),
 	normalB(eSkin::getActive()->queryScheme("global.normal.background")),
 	normalF(eSkin::getActive()->queryScheme("global.normal.foreground")),
-	descr(desc?desc->getText():"")
+	descr(desc)
 {
 	align=eTextPara::dirCenter;
 	flags |= eLabel::flagVCenter;
@@ -21,7 +21,7 @@ void eButton::gotFocus()
 {
 	if (parent && parent->LCDElement)
 	{
-		if (descr != "")
+		if (descr)
 		{
 			LCDTmp = new eLabel(parent->LCDElement);
 			LCDTmp->hide();
@@ -35,7 +35,7 @@ void eButton::gotFocus()
 			tmpDescr->hide();
 			tmpDescr->move(ePoint(0,0));
 			tmpDescr->resize(eSize(s.width(), s.height()/2));
-			tmpDescr->setText(descr);
+			tmpDescr->setText(descr->getText());
 			tmpDescr->show();
 		}
 		else

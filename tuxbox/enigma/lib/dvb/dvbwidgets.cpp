@@ -175,7 +175,8 @@ int eTransponderWidget::setTransponder(const eTransponder *transponder)
 		
 		inversion->setCheck(transponder->satellite.inversion);
 
-		sat->forEachEntry(selectSat(transponder, sat));
+		if ( sat->forEachEntry(selectSat(transponder, sat)) != eListBoxBase::OK )
+			sat->setCurrent(0);
 
 		break;
 	}

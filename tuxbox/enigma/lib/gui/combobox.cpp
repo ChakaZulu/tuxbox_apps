@@ -101,7 +101,7 @@ void eComboBox::onSelChanged(eListBoxEntryText* le)
 {
 	if (flags & flagShowEntryHelp )	
 		setHelpText( le->getHelpText() );
-	if ( parent )
+	if ( parent->getFocus() == &listbox )
 	{
 		if ( LCDTmp )
 			LCDTmp->setText( le->getText() );

@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_scan.cpp,v 1.9 2002/10/15 23:31:29 Ghostrider Exp $
+ * $Id: enigma_scan.cpp,v 1.10 2002/10/16 02:21:33 Ghostrider Exp $
  */
 
 #include <enigma_scan.h>
@@ -32,7 +32,7 @@
 #include <lib/base/i18n.h>
 
 eZapScan::eZapScan()
-	:eListBoxWindow<eListBoxEntryMenu>(_("Channels"), 4, 220)
+	:eListBoxWindow<eListBoxEntryMenu>(_("Channels"), 5, 220)
 {
 	move(ePoint(150, 136));
 	CONNECT((new eListBoxEntryMenu(&list, _("[back]")))->selected, eZapScan::sel_close);

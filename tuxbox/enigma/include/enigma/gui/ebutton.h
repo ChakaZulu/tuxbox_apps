@@ -12,7 +12,7 @@ class eButton: public eLabel
 	eLabel*	tmpDescr; // used for LCD with description
 protected:
 	gColor focusB, focusF, normalB, normalF;
-	eString descr;
+	eLabel *descr;
 	int eventHandler(const eWidgetEvent &event);
 	void gotFocus();
 	void lostFocus();

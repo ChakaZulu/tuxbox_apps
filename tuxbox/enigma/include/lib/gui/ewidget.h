@@ -455,6 +455,8 @@ public:
 	virtual int setProperty(const eString &prop, const eString &value);
 	
 	eWidget *search(const eString &name);
+
+	eWidget* getFocus() { return focus; }
 	
 	void makeRoot();
 	

@@ -204,13 +204,16 @@ void eSatelliteConfigurationManager::closePressed()
 void eSatelliteConfigurationManager::addSatellite( eSatellite *s )
 {
 	SatelliteEntry sat;
-	eComboBox* c = new eComboBox(w_buttons, 6);
+
+	eLabel *l = new eLabel(this);
+	l->setName("lSatPos");
+	eComboBox* c = new eComboBox(w_buttons, 6, l);
 	sat.sat=c;
 	c->loadDeco();
 //			c->move(ePoint(sx,y));
 	c->resize(eSize(190, 30));
 	c->setHelpText( _("press ok to select another satellite, or delete this satellite"));
-			
+
 	new eListBoxEntryText( *c, _("*delete*"), (void*) 0 );   // this is to delete an satellite
 	for (std::list<tpPacket>::const_iterator i(networks.begin()); i != networks.end(); ++i)
 		if ( i->possibleTransponders.size() )
@@ -222,7 +225,9 @@ void eSatelliteConfigurationManager::addSatellite( eSatellite *s )
 			c->setCurrent( new eListBoxEntryText( *c, s->getDescription(), (void*) s->getOrbitalPosition() ) );
 	CONNECT( c->selchanged_id, eSatelliteConfigurationManager::satChanged );
 
-	eButton* b = new eButton(w_buttons);
+	l = new eLabel(this);
+	l->setName("lLnb");
+	eButton* b = new eButton(w_buttons, l);
 	sat.lnb=b;
 	b->loadDeco();
 //			b->move(ePoint(lx, y));
@@ -230,7 +235,9 @@ void eSatelliteConfigurationManager::addSatellite( eSatellite *s )
 	b->setHelpText( _("press ok to goto LNB config"));
 	CONNECT(b->selected_id, eSatelliteConfigurationManager::lnbSelected);
 
-	c = new eComboBox(w_buttons,3);
+	l = new eLabel(this);
+	l->setName("l22khz");
+	c = new eComboBox(w_buttons, 3, l);
 	sat.hilo=c;
 	c->loadDeco();
 //			c->move( ePoint( hx, y ) );
@@ -242,7 +249,9 @@ void eSatelliteConfigurationManager::addSatellite( eSatellite *s )
 	c->setCurrent( (void*) (int) s->getSwitchParams().HiLoSignal );
 	CONNECT( c->selchanged_id, eSatelliteConfigurationManager::hiloChanged);
 
-	c = new eComboBox(w_buttons,3);
+	l = new eLabel(this);
+	l->setName("lVoltage");
+	c = new eComboBox(w_buttons, 3, l	);
 	sat.voltage=c;
 	c->loadDeco();
 //			c->move( ePoint( vx, y ) );
@@ -368,13 +377,17 @@ eLNBSelitor::eLNBSelitor( eSatellite* sat )
 	l->setName("lThreshold");
 	threshold = new eNumber(this, 5, 0 ,9, 1, 0, 0, l, 1);
 	threshold->setName("threshold");
-	DiSEqCMode = new eComboBox( this, 3 );
+	l = new eLabel(this);
+	l->setName("lDiSEqCMode");
+	DiSEqCMode = new eComboBox( this, 3, l );
 	DiSEqCMode->setName("DiSEqCMode");
 	// *DiSEqCMode... here we use the operator eListBox* from eComboBox !
 	new eListBoxEntryText( *DiSEqCMode, "Mini-DiSEqC", (void*)eDiSEqC::MINI, 0, _("Use Mini DiSEqC Mode (for simple switches)") );
 	new eListBoxEntryText( *DiSEqCMode, "Version 1.0", (void*)eDiSEqC::V1_0, 0, _("Use DiSEqC Version 1.0") );
 //	new eListBoxEntryText( *DiSEqCMode, "Version 1.1", (void*)eDiSEqC::V1_1, 0, _("Use DiSEqC Version 1.1") );
-	DiSEqCParam = new eComboBox( this, 4 );
+	l = new eLabel(this);
+	l->setName("lDiSEqCParam");
+	DiSEqCParam = new eComboBox( this, 4, l );
 	DiSEqCParam->setName("DiSEqCParam");
 
 	cancel = new eButton(this);

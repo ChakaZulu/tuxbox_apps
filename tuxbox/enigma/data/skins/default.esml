@@ -208,10 +208,10 @@
 
 	<object name="eSatelliteConfigurationManager">
 		<eSatelliteConfigurationManager position="80:40" size="570:470" text="Satelliteconfiguration">
-  		<eLabel text="Sat/Position" position="100:10" size="190:30" align="center"/>
-			<eLabel text="LNB" position="300:10" size="60:30" align="center"/>
-			<eLabel text="22Khz" position="370:10" size="90:30" align="center"/>
-			<eLabel text="Voltage" position="470:10" size="90:30" align="center"/>
+  		<eLabel text="Sat/Position" name="lSatPos" position="100:10" size="190:30" align="center"/>
+			<eLabel text="LNB" name="lLnb" position="300:10" size="60:30" align="center"/>
+			<eLabel text="22Khz" name="l22khz" position="370:10" size="90:30" align="center"/>
+			<eLabel text="Voltage" name="lVoltage" position="470:10" size="90:30" align="center"/>
 			<eWidget name="buttons" position="100:50" size="e-10:e-10" />
 			<eButton name="new" position="10:e-110" size="80:30" text="new" helptext="add a new Satellite" loadDeco="" />
 			<eButton name="close" position="10:e-70" size="80:30" text="close" helptext="close Satelliteconfiguration" loadDeco="" />

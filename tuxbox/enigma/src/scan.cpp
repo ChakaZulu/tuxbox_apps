@@ -193,6 +193,8 @@ tsAutomatic::tsAutomatic(eWidget *parent): eWidget(parent)
 	if (loadNetworks())
 		eFatal("loading networks failed");
 
+	l_network->setCurrent( 0 );	
+
 	switch (eFrontend::getInstance()->Type())
 	{
 		case eFrontend::feSatellite:

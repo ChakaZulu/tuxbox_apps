@@ -590,7 +590,10 @@ inline int eListBox<T>::moveSelection(int dir)
 	}
 
 	if (flags & flagShowEntryHelp)
+	{
+		eDebug("showEntryHelp");
 		setHelpText( current != childs.end() ? current->getHelpText():eString(_("no description available")));
+	}
 
 	if (isVisible())
 	{

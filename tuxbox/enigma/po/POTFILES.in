@@ -5,6 +5,7 @@ lib/dvb/epgcache.cpp
 lib/dvb/edvb.cpp
 lib/dvb/dvbservice.cpp
 lib/dvb/dvb.cpp
+lib/dvb/dvbci.cpp
 lib/dvb/servicemp3.cpp
 lib/dvb/esection.cpp
 lib/dvb/decoder.cpp
@@ -100,3 +101,4 @@ src/enigma_main.cpp
 src/download.cpp
 src/setupnetwork.cpp
 src/setup_lcd.cpp
+src/setup_harddisk.cpp
