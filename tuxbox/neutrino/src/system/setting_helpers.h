@@ -33,7 +33,7 @@
 #define __setting_helpers__
 
 #include "gui/widget/menue.h"
-
+#include "gui/widget/stringinput_ext.h"
 
 class CSatDiseqcNotifier : public CChangeObserver
 {
@@ -47,6 +47,17 @@ class CSatDiseqcNotifier : public CChangeObserver
 		CSatDiseqcNotifier( CMenuItem* SatMenu, CMenuItem* ExtMenu, CMenuItem* RepeatMenu) : CChangeObserver()
 		{ satMenu = SatMenu; extMenu = ExtMenu; repeatMenu = RepeatMenu;};
 		bool changeNotify(string OptionName, void*);
+};
+
+class CDHCPNotifier : public CChangeObserver
+{
+	private:
+		int dhcppid;
+		CMenuForwarder* toDisable[6];
+	public:
+		CDHCPNotifier( CMenuForwarder*, CMenuForwarder*, CMenuForwarder*, CMenuForwarder*, CMenuForwarder*, CMenuForwarder* );
+		bool changeNotify(string OptionName, void*);
+		void startStopDhcp();
 };
 
 class CCableSpectalInversionNotifier : public CChangeObserver

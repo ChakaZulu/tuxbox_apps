@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.256 2002/04/29 00:17:36 McClean Exp $
+        $Id: neutrino.cpp,v 1.257 2002/05/01 01:18:58 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -182,16 +182,19 @@ void CNeutrinoApp::setupNetwork(bool force)
 {
 	if((g_settings.networkSetOnStartup) || (force))
 	{
-		printf("doing network setup...\n");
-		//setup network
-		setNetworkAddress(g_settings.network_ip, g_settings.network_netmask, g_settings.network_broadcast);
-		if(strcmp(g_settings.network_nameserver, "000.000.000.000")!=0)
+		if(!g_settings.network_dhcp)
 		{
-			setNameServer(g_settings.network_nameserver);
-		}
-		if(strcmp(g_settings.network_defaultgateway, "000.000.000.000")!=0)
-		{
-			setDefaultGateway(g_settings.network_defaultgateway);
+			printf("doing network setup...\n");
+			//setup network
+			setNetworkAddress(g_settings.network_ip, g_settings.network_netmask, g_settings.network_broadcast);
+			if(strcmp(g_settings.network_nameserver, "000.000.000.000")!=0)
+			{
+				setNameServer(g_settings.network_nameserver);
+			}
+			if(strcmp(g_settings.network_defaultgateway, "000.000.000.000")!=0)
+			{
+				setDefaultGateway(g_settings.network_defaultgateway);
+			}
 		}
 	}
 }
@@ -419,8 +422,8 @@ int CNeutrinoApp::loadSetup()
 	g_settings.infobar_Text_blue = configfile.getInt( "infobar_Text_blue", 0x64 );
 
 	//network
-	g_settings.networkSetOnStartup = configfile.getInt( "networkSetOnStartup", 0 );
-	g_settings.network_dhcp = configfile.getInt( "network_dhcp", 0);
+	g_settings.networkSetOnStartup = configfile.getInt( "networkSetOnStartup", fromflash==true?1:0 );
+	g_settings.network_dhcp = configfile.getInt( "network_dhcp", 1);
 	strcpy( g_settings.network_ip, configfile.getString( "network_ip", "10.10.10.100" ).c_str() );
 	strcpy( g_settings.network_netmask, configfile.getString( "network_netmask", "255.255.255.0" ).c_str() );
 	strcpy( g_settings.network_broadcast, configfile.getString( "network_broadcast", "10.10.10.255" ).c_str() );
@@ -1293,7 +1296,8 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 
 	networkSettings.addItem( oj );
 	networkSettings.addItem( new CMenuForwarder("networkmenu.test", true, "", this, "networktest") );
-	networkSettings.addItem( new CMenuForwarder("networkmenu.setupnow", true, "", this, "network") );
+	CMenuForwarder *m0 = new CMenuForwarder("networkmenu.setupnow", g_settings.network_dhcp==0, "", this, "network");
+	networkSettings.addItem( m0 );
 
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
@@ -1303,14 +1307,30 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	CIPInput*	networkSettings_Gateway= new CIPInput("networkmenu.gateway", g_settings.network_defaultgateway, "ipsetup.hint_1", "ipsetup.hint_2");
 	CIPInput*	networkSettings_NameServer= new CIPInput("networkmenu.nameserver", g_settings.network_nameserver, "ipsetup.hint_1", "ipsetup.hint_2");
 
-	networkSettings.addItem( new CMenuForwarder("networkmenu.ipaddress", true, g_settings.network_ip, networkSettings_NetworkIP ));
-	networkSettings.addItem( new CMenuForwarder("networkmenu.netmask", true, g_settings.network_netmask, networkSettings_NetMask ));
-	networkSettings.addItem( new CMenuForwarder("networkmenu.broadcast", true, g_settings.network_broadcast, networkSettings_Broadcast ));
+	CMenuForwarder *m1 = new CMenuForwarder("networkmenu.ipaddress", g_settings.network_dhcp==0, g_settings.network_ip, networkSettings_NetworkIP );
+	CMenuForwarder *m2 = new CMenuForwarder("networkmenu.netmask", g_settings.network_dhcp==0, g_settings.network_netmask, networkSettings_NetMask );
+	CMenuForwarder *m3 = new CMenuForwarder("networkmenu.broadcast", g_settings.network_dhcp==0, g_settings.network_broadcast, networkSettings_Broadcast );
+	CMenuForwarder *m4 = new CMenuForwarder("networkmenu.gateway", g_settings.network_dhcp==0, g_settings.network_defaultgateway, networkSettings_Gateway );
+	CMenuForwarder *m5 = new CMenuForwarder("networkmenu.nameserver", g_settings.network_dhcp==0, g_settings.network_nameserver, networkSettings_NameServer );
+
+	CDHCPNotifier* dhcpNotifier = new CDHCPNotifier(m1,m2,m3,m4,m5, m0);
+	if(g_settings.networkSetOnStartup)
+	{
+		dhcpNotifier->startStopDhcp();
+	}
+	oj = new CMenuOptionChooser("dhcp", &g_settings.network_dhcp, true, dhcpNotifier);
+		oj->addOption(0, "options.off");
+		oj->addOption(1, "options.on");
+	networkSettings.addItem( oj );
+	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	
+	networkSettings.addItem( m1);
+	networkSettings.addItem( m2);
+	networkSettings.addItem( m3);
 
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	networkSettings.addItem( new CMenuForwarder("networkmenu.gateway", true, g_settings.network_defaultgateway, networkSettings_Gateway ));
-	networkSettings.addItem( new CMenuForwarder("networkmenu.nameserver", true, g_settings.network_nameserver, networkSettings_NameServer ));
-
+	networkSettings.addItem( m4);
+	networkSettings.addItem( m5);
 
 	if(g_settings.network_streaming_use)
 	{
@@ -2501,7 +2521,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.256 2002/04/29 00:17:36 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.257 2002/05/01 01:18:58 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 
