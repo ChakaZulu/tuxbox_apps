@@ -1165,6 +1165,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/audio", audio);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getPMT", getPMT);
 	dyn_resolver->addDyn("GET", "/cgi-bin/message", message);
+	dyn_resolver->addDyn("GET", "/control/message", message);
 	dyn_resolver->addDyn("GET", "/cgi-bin/xmessage", xmessage);
 
 	dyn_resolver->addDyn("GET", NAVIGATOR_PATH, navigator);
