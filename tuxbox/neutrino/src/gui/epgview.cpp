@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: epgview.cpp,v 1.26 2001/11/26 02:34:04 McClean Exp $
+// $Id: epgview.cpp,v 1.27 2001/12/12 11:33:57 McClean Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.27  2001/12/12 11:33:57  McClean
+// major epg-fixes
+//
 // Revision 1.26  2001/11/26 02:34:04  McClean
 // include (.../../stuff) changed - correct unix-formated files now
 //
@@ -424,11 +427,7 @@ void CEpgData::GetEPGData( string channelName, unsigned int onid_tsid, unsigned 
 		return;
 	}
 
-	#ifdef EPG_SECTIONSD
-		//use new sectionsd-daemon
-
-    if ( (( onid_tsid != 0 ) && ( g_settings.epg_byname == 0 ) )||
-         ( id!= 0 ) )
+    if ( (( onid_tsid != 0 )  ) || ( id!= 0 ) )
     {
         if ( id!= 0 )
         {
@@ -504,101 +503,6 @@ void CEpgData::GetEPGData( string channelName, unsigned int onid_tsid, unsigned 
 			delete[] pData;
 		}
     }
-    else
-    {
-		sectionsd::msgRequestHeader req;
-		req.version = 2;
-		req.command = sectionsd::actualEPGchannelName;
-		req.dataLength = channelName.length()+1;
-		write(sock_fd,&req,sizeof(req));
-
-		char chanName[50];
-		strcpy(chanName, channelName.c_str());
-		for(int count=strlen(chanName)-1;count>=0;count--)
-		{
-			if((chanName[count]==' ') || (chanName[count]==0))
-			{
-				chanName[count]=0;
-			}
-			else
-				break;
-		}
-		printf("query epg for >%s<\n", chanName);
-		write(sock_fd, chanName, strlen(chanName)+1);
-
-		sectionsd::msgResponseHeader resp;
-		memset(&resp, 0, sizeof(resp));
-		read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader));
-
-		int nBufSize = resp.dataLength;
-		if(nBufSize>0)
-		{
-//			printf("neutrino nBufsize: %d\n", nBufSize);
-			char* pData = new char[nBufSize] ;
-			read(sock_fd, pData, nBufSize);
-//			printf("neutrino epgdata: \n%s\n", pData);
-
-			char tmp[20];
-			char *pos = ocopyStringto( pData, tmp, sizeof(tmp));
-//			printf("id: %s\n", tmp);
-			pos = ocopyStringto( pos, epgData.title, sizeof(epgData.title));
-//			printf("title: %s\n", epgData.title);
-			pos = ocopyStringto( pos, epgData.info1, sizeof(epgData.info1) );
-			pos = ocopyStringto( pos, epgData.info2, sizeof(epgData.info2));
-			pos = ocopyStringto( pos, epgData.date, sizeof(epgData.date));
-			pos = ocopyStringto( pos, epgData.start, sizeof(epgData.start));
-			pos = ocopyStringto( pos, epgData.end, sizeof(epgData.end));
-			pos = ocopyStringto( pos, epgData.done, sizeof(epgData.done));
-
-			delete[] pData;
-//			printf("copied\n");
-		}
-    }
-	#else
-		//for old epgd users
-		struct  msgEPGRequest
-		{
-		    char version;
-		    char cmd;
-		    char Name[50];
-		} req;
-
-		req.version = 1;
-		req.cmd     = 1;
-		strcpy( req.Name, channelName.c_str() );
-
-		write(sock_fd,&req,sizeof(req));
-
-		struct msgEPGResponse
-		{
-				char version;
-				char sizeOfBuffer[6];
-				char pEventBuffer[1];
-		} rep;
-
-		read(sock_fd, &rep, sizeof(rep.version)+sizeof(rep.sizeOfBuffer));
-		int nBufSize = atol(rep.sizeOfBuffer);
-		char* pData = new char[nBufSize+1] ;
-
-		read(sock_fd, pData, nBufSize);
-
-//		printf("neutrino epgdata: %i: %s\n", rep.version, rep.sizeOfBuffer);
-
-		if( nBufSize > 0 )
-		{
-			printf("%s",pData);
-			char *pos = ocopyStringto( pData, epgData.title, sizeof(epgData.title));
-			pos = ocopyStringto( pos, epgData.info1, sizeof(epgData.info1) );
-			pos = ocopyStringto( pos, epgData.info2, sizeof(epgData.info2));
-			pos = ocopyStringto( pos, epgData.date, sizeof(epgData.date));
-			pos = ocopyStringto( pos, epgData.start, sizeof(epgData.start));
-			pos = ocopyStringto( pos, epgData.end, sizeof(epgData.end));
-			pos = ocopyStringto( pos, epgData.done, sizeof(epgData.done));
-		}
-		delete[] pData;
-	#endif
-
-	//printf("exit epg-get\n\n");
 	close(sock_fd);
 }
 

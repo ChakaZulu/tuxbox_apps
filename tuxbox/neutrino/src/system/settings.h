@@ -40,7 +40,6 @@ struct SNeutrinoSettings
 	int video_Format;
 
 	//misc
-    int epg_byname;
 	int box_Type;
 
 	//audio

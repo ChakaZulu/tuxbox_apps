@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.40 2001/12/12 01:47:17 McClean Exp $
+// $Id: channellist.cpp,v 1.41 2001/12/12 11:33:57 McClean Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.41  2001/12/12 11:33:57  McClean
+// major epg-fixes
+//
 // Revision 1.40  2001/12/12 01:47:17  McClean
 // cleanup
 //
@@ -338,14 +341,9 @@ const std::string& CChannelList::getActiveChannelName()
 const std::string CChannelList::getActiveChannelID()
 {
     string  id;
-    if ( g_settings.epg_byname == 0 )
-    {
-        char anid[10];
-        snprintf( anid, 10, "%x", getActiveChannelOnid_sid() );
-        id= anid;
-    }
-    else
-        id= chanlist[selected]->name;
+    char anid[10];
+    snprintf( anid, 10, "%x", getActiveChannelOnid_sid() );
+    id= anid;
     return id;
 }
 

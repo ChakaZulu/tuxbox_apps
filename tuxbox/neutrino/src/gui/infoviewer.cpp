@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: infoviewer.cpp,v 1.52 2001/11/26 02:34:04 McClean Exp $
+// $Id: infoviewer.cpp,v 1.53 2001/12/12 11:33:57 McClean Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.53  2001/12/12 11:33:57  McClean
+// major epg-fixes
+//
 // Revision 1.52  2001/11/26 02:34:04  McClean
 // include (.../../stuff) changed - correct unix-formated files now
 //
@@ -228,15 +231,11 @@ void CInfoViewer::setDuration( int Duration )
 const std::string CInfoViewer::getActiveChannelID()
 {
     string  s_id;
-    if ( g_settings.epg_byname == 0 )
-    {
-        char anid[10];
-        snprintf( anid, 10, "%x", Current_onid_tsid );
-        s_id= anid;
-    }
-    else
-        s_id= CurrentChannel;
-    return s_id;
+    char anid[10];
+    snprintf( anid, 10, "%x", Current_onid_tsid );
+    s_id= anid;
+
+	return s_id;
 }
 
 void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid, bool CalledFromNumZap )
@@ -731,7 +730,6 @@ char* copyStringto( char* from, char* to, int len)
 
 bool CInfoViewer::getEPGData( string channelName, unsigned int onid_tsid )
 {
-	#ifdef EPG_SECTIONSD
 		int sock_fd;
 		SAI servaddr;
 		char rip[]="127.0.0.1";
@@ -765,7 +763,7 @@ bool CInfoViewer::getEPGData( string channelName, unsigned int onid_tsid )
 			return false;
 		}
 
-        if ( ( onid_tsid != 0 ) && ( g_settings.epg_byname == 0 ) )
+        if ( ( onid_tsid != 0 ) )
         {
             // query mit onid_tsid...
 
@@ -850,78 +848,8 @@ bool CInfoViewer::getEPGData( string channelName, unsigned int onid_tsid )
 
             }
         }
-        else
-        {
-    		sectionsd::msgRequestHeader req;
-    		req.version = 2;
-    		req.command = sectionsd::currentNextInformation;
-    		req.dataLength = channelName.length()+1;
-    		write(sock_fd,&req,sizeof(req));
-
-    		char chanName[50];
-    		strcpy(chanName, channelName.c_str());
-    		for(int count=strlen(chanName)-1;count>=0;count--)
-    		{
-    			if((chanName[count]==' ') || (chanName[count]==0))
-    			{
-    				chanName[count]=0;
-    			}
-    			else
-    				break;
-    		}
-    		printf("query epg for >%s<\n", chanName);
-    		write(sock_fd, chanName, strlen(chanName)+1);
-
-        	sectionsd::msgResponseHeader resp;
-        	memset(&resp, 0, sizeof(resp));
-        	read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader));
-
-        	int nBufSize = resp.dataLength;
-        	if(nBufSize>0)
-            {
-     
-        		char* pData = new char[nBufSize+1] ;
-        		read(sock_fd, pData, nBufSize);
-    //			printf("data: %s\n\n", pData);
-        		char tmpPercent[10];
-        		char tmp[20];
-
-        		char * pos = copyStringto( pData, tmp, sizeof(tmp));
-        		pos = copyStringto( pos, running, sizeof(running));
-        		pos = copyStringto( pos, runningStart, sizeof(runningStart));
-        		pos = copyStringto( pos, runningDuration, sizeof(runningDuration));
-        		pos = copyStringto( pos, tmpPercent, sizeof(tmpPercent));
-        		pos = copyStringto( pos, tmp, sizeof(tmp));
-        		pos = copyStringto( pos, next, sizeof(next));
-        		pos = copyStringto( pos, nextStart, sizeof(nextStart));
-        		pos = copyStringto( pos, nextDuration, sizeof(nextDuration));
-
-        		runningPercent = atoi(tmpPercent);
-
-        		int val = atoi(runningDuration);
-        		sprintf((char*) &runningDuration, "%d min", val);
-        		val = atoi(nextDuration);
-        		sprintf((char*) &nextDuration, "%d min", val);
-
-        		delete[] pData;
-        		retval = true;
-        	}
-        }
-
-    	// printf("exit epg-get\n\n");
     	close(sock_fd);
     	return retval;
-	#endif
-	#ifndef EPG_SECTIONSD
-		strcpy( running, "");
-		strcpy( next, "");
-		strcpy( runningStart, "");
-		strcpy( nextStart, "");
-		strcpy( runningDuration, "");
-		strcpy( nextDuration, "");
-		runningPercent = 0;
-		return true;
-	#endif
 }
 
 
