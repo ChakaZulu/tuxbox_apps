@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: network.cpp,v $
+Revision 1.10  2002/06/02 21:06:27  TheDOC
+http-network-stuff
+
 Revision 1.9  2002/06/02 14:23:36  TheDOC
 some fixes and changes
 
@@ -119,10 +122,10 @@ std::string network::replace_vars(std::string tmp_string)
 				std::string var = work_string.substr(0, pos);
 				if (var == "%CHANNELLIST")
 				{
-					std::string http1 = getfile(CONFIGDIR "/lcars/http/channels1.htm");
-					std::string http2 = getfile(CONFIGDIR "/lcars/http/channels2.htm");
-					std::string http3 = getfile(CONFIGDIR "/lcars/http/channels3.htm");
-					std::string http4 = getfile(CONFIGDIR "/lcars/http/channels4.htm");
+					std::string http1 = getfile(DATADIR "/lcars/http/channels1.htm");
+					std::string http2 = getfile(DATADIR "/lcars/http/channels2.htm");
+					std::string http3 = getfile(DATADIR "/lcars/http/channels3.htm");
+					std::string http4 = getfile(DATADIR "/lcars/http/channels4.htm");
 					std::stringstream iss;
 					for (int count = 0; count < channels_obj->numberChannels(); count++)
 					{
@@ -290,7 +293,7 @@ void *network::startlistening(void *object)
 				if (path[1] == "" && counter2 == 2)
 				{
 					//printf("GET root\n");
-					write(inbound_connection, headerok.c_str(), headerok.length());
+					/*write(inbound_connection, headerok.c_str(), headerok.length());
 					write(inbound_connection, (*n->setting).getVersion().c_str(), (*n->setting).getVersion().length());
 					strcpy(writebuffer, "<br><br><a href=\"/channels/gethtmlchannels\">Channellist</a>");
 					write(inbound_connection, writebuffer, strlen(writebuffer));
@@ -299,18 +302,20 @@ void *network::startlistening(void *object)
 					n->writetext("<br><br><a href=\"/epg/now\">EPG Now</a>");
 					n->writetext("<br><br><a href=\"/epg/next\">EPG Next</a>");
 					strcpy(writebuffer, "<br><br><a href=\"/channels/lcars.dvb\">Channellist in DVB2000-format</a>");
-					write(inbound_connection, writebuffer, strlen(writebuffer));
+					write(inbound_connection, writebuffer, strlen(writebuffer));*/
+					path[1] = "file";
+					path[2] = "start.htm";
 				}
-				else if (path[1] == "command")
+				if (path[1] == "command")
 				{
-					std::string response = "<html><body><form action=\"http://192.168.40.4/command\" method=post><input type=text name=command size=80><br><input type=submit name=submit value=\"Befehl ausfuehren\"><br></form><form action=\"http://192.168.40.4/command\" method=post><input type=text name=sub size=80><br><input type=submit name=submit value=\"Sub starten\"></form></body></html>";
+					std::string response = "<html><body><form action=\"/command\" method=post><input type=text name=command size=80><br><input type=submit name=submit value=\"Befehl ausfuehren\"><br></form><form action=\"http://192.168.40.4/command\" method=post><input type=text name=sub size=80><br><input type=submit name=submit value=\"Sub starten\"></form></body></html>";
 					write(inbound_connection, headerok.c_str(), headerok.length());
 					write(inbound_connection, response.c_str(), response.length());
 				}
-				else if (path[1] == "file")
+				else if (path[1] == "file" && counter2 > 3)
 				{
 					std::string ending = path[2].substr(path[2].find("."));
-					std::string filename = CONFIGDIR "/lcars/http/" + path[2];
+					std::string filename = DATADIR "/lcars/http/" + path[2];
 					if (ending == ".htm" || ending == ".html" || ending == ".css")
 					{
 						std::ifstream inFile;
@@ -333,7 +338,9 @@ void *network::startlistening(void *object)
 					{
 						int fd = open(filename.c_str(), O_RDONLY);
 						if (fd == -1)
+						{
 							write(inbound_connection, headerfailed.c_str(), headerfailed.length());
+						}
 						else
 						{
 							char c;

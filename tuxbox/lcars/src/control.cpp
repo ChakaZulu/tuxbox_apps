@@ -787,13 +787,13 @@ int control::runCommand(command_class command, bool val)
 					if (command.args[i] == "HSIZE")
 					{
 						char text[11];
-						sprintf(text, "H_SIZE: %04d", hardware_obj->getVideoSizeX());
+						sprintf(text, "H_SIZE: %d", hardware_obj->getVideoSizeX());
 						osd_obj->addMenuEntry(++counter, text);
 					}
 					else if (command.args[i] == "VSIZE")
 					{
 						char text[11];
-						sprintf(text, "V_SIZE: %04d", hardware_obj->getVideoSizeY());
+						sprintf(text, "V_SIZE: %d", hardware_obj->getVideoSizeY());
 						osd_obj->addMenuEntry(++counter, text);
 					}
 					else if (command.args[i] == "ARATIO")
@@ -805,20 +805,20 @@ int control::runCommand(command_class command, bool val)
 						else if (value == 3)
 							sprintf(text, "A_RATIO: 16:9");
 						else
-							sprintf(text, "A_RATIO: %04d", value);
+							sprintf(text, "A_RATIO: %d", value);
 						osd_obj->addMenuEntry(++counter, text);
 					}
 					else if (command.args[i] == "ATYPE")
 					{
 						char text[11];
-						sprintf(text, "A_TYPE: %04d", hardware_obj->getAudioType());
-						/*int value = hardware_obj->getAudioType();
-						if (value == "3")
+						//sprintf(text, "A_TYPE: %04d", hardware_obj->getAudioType());
+						int value = hardware_obj->getAudioType();
+						if (value == 3)
 							sprintf(text, "A_TYPE: MPEG");
-						else if (value == "3")
-							sprintf(text, "A_RATIO: 16:9");
+						else if (value == 2)
+							sprintf(text, "A_TYPE: Dolby Digital");
 						else
-							sprintf(text, "A_RATIO: %04d", value);*/
+							sprintf(text, "A_TYPE: %d", value);
 						osd_obj->addMenuEntry(++counter, text);
 					}
 				}
