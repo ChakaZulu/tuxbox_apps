@@ -164,6 +164,123 @@ int eAVSwitchNokia::setInput(int v)
 	return 0;
 }
 
+
+eAVSwitchPhilips::eAVSwitchPhilips()
+{
+	fd=open("/dev/dbox/avs0", O_RDWR);
+	saafd=open("/dev/dbox/saa0", O_RDWR);
+	active=0;
+        
+	reloadSettings();
+}
+
+eAVSwitchPhilips::~eAVSwitchPhilips()
+{
+	if (fd>=0)
+		close(fd);
+	if (saafd>=0)
+		close(saafd);
+}
+
+int eAVSwitchPhilips::setVolume(int vol)
+{
+	vol=63-vol/(65536/64);
+	if (vol<0)
+		vol=0;
+	if (vol>63)
+		vol=63;
+	return ioctl(fd, AVSIOSVOL, &vol);
+}
+
+int eAVSwitchPhilips::setTVPin8(int vol)
+{
+	int fnc;
+	switch (vol)
+	{
+	case 0:
+		fnc=2;
+		break;
+	case 6:
+		fnc=1;
+		break;
+	case 12:
+		fnc=0;
+		break;
+	 default:
+		fnc=2;
+		break;
+	}
+	return ioctl(fd, AVSIOSFNC, &fnc);
+}
+
+int eAVSwitchPhilips::setColorFormat(eAVColorFormat c)
+{
+	int arg=0;
+	switch (c)
+	{
+	case cfNull:
+		return -1;
+	case cfCVBS:
+		arg=SAA_MODE_FBAS;
+		break;
+	case cfRGB:
+		arg=SAA_MODE_RGB;
+		break;
+	case cfYC:
+		arg=SAA_MODE_SVIDEO;
+		break;
+	}
+	return ioctl(saafd, SAAIOSMODE, &arg);
+}
+
+int eAVSwitchPhilips::setAspectRatio(eAVAspectRatio as)
+{
+	aspect=as;
+	return setTVPin8(active?0:((aspect==r169)?6:12));
+}
+
+int eAVSwitchPhilips::isVCRActive()
+{
+	return 0;
+}
+
+int eAVSwitchPhilips::setActive(int a)
+{
+	active=a;
+	return setTVPin8(active?0:((aspect==r169)?6:12));
+}
+
+int eAVSwitchPhilips::setInput(int v)
+{
+	qDebug("setInput %d, fd=%d", v, fd);
+
+	switch (v)
+	{
+	case 0:
+		v=1;
+		ioctl(fd, AVSIOSVSW1, &v);
+		v=1;
+		ioctl(fd, AVSIOSASW1, &v);
+		v=1;
+		ioctl(fd, AVSIOSVSW2, &v);
+		v=0;
+		ioctl(fd, AVSIOSFBLK, &v);
+		break;
+	case 1:
+		v=2;
+		ioctl(fd, AVSIOSVSW1, &v);
+		v=2;
+		ioctl(fd, AVSIOSASW1, &v);
+		v=3;
+		ioctl(fd, AVSIOSVSW2, &v);
+		v=2;
+		ioctl(fd, AVSIOSFBLK, &v);
+		break;
+	}
+	return 0;
+}
+
+
 eAVSwitchSagem::eAVSwitchSagem()
 {
 	fd=open("/dev/dbox/avs0", O_RDWR);

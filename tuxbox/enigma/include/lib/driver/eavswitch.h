@@ -50,6 +50,25 @@ public:
 	int setInput(int v);	// 0: dbox, 1: vcr
 };
 
+class eAVSwitchPhilips: public eAVSwitch
+{
+	int fd, saafd;
+	int setTVPin8(int vol);
+	
+	int active;
+	eAVAspectRatio aspect;
+public:
+	eAVSwitchPhilips();
+	~eAVSwitchPhilips();
+
+	int setVolume(int vol);	// 0..65535
+	int setColorFormat(eAVColorFormat cf);
+	int setAspectRatio(eAVAspectRatio as);
+	int isVCRActive();
+	int setActive(int active); 
+	int setInput(int v);	// 0: dbox, 1: vcr
+};
+
 class eAVSwitchSagem: public eAVSwitch
 {
 	int fd, saafd;
