@@ -56,12 +56,10 @@ class CSatDiseqcNotifier : public CChangeObserver
 class CDHCPNotifier : public CChangeObserver
 {
 	private:
-		int dhcppid;
-		CMenuForwarder* toDisable[6];
+		CMenuForwarder* toDisable[5];
 	public:
-		CDHCPNotifier( CMenuForwarder*, CMenuForwarder*, CMenuForwarder*, CMenuForwarder*, CMenuForwarder*, CMenuForwarder* );
+		CDHCPNotifier( CMenuForwarder*, CMenuForwarder*, CMenuForwarder*, CMenuForwarder*, CMenuForwarder*);
 		bool changeNotify(string OptionName, void*);
-		void startStopDhcp();
 };
 class CRecordingNotifier : public CChangeObserver
 {

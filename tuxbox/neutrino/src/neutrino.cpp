@@ -1446,7 +1446,7 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	networkSettings.addItem( oj );
 	networkSettings.addItem( new CMenuForwarder("networkmenu.test", true, "", this, "networktest") );
 	networkSettings.addItem( new CMenuForwarder("networkmenu.show", true, "", this, "networkshow") );
-	CMenuForwarder *m0 = new CMenuForwarder("networkmenu.setupnow", networkConfig.inet_static, "", this, "network");
+	CMenuForwarder *m0 = new CMenuForwarder("networkmenu.setupnow", true, "", this, "network");
 	networkSettings.addItem( m0 );
 
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
@@ -1463,11 +1463,8 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	CMenuForwarder *m4 = new CMenuForwarder("networkmenu.gateway", networkConfig.inet_static, networkConfig.gateway, networkSettings_Gateway );
 	CMenuForwarder *m5 = new CMenuForwarder("networkmenu.nameserver", networkConfig.inet_static, networkConfig.nameserver, networkSettings_NameServer );
 
-	CDHCPNotifier* dhcpNotifier = new CDHCPNotifier(m1,m2,m3,m4,m5, m0);
-	if (networkConfig.automatic_start)
-	{
-		dhcpNotifier->startStopDhcp();
-	}
+	CDHCPNotifier* dhcpNotifier = new CDHCPNotifier(m1,m2,m3,m4,m5);
+
 	network_dhcp = networkConfig.inet_static ? 0 : 1;
 	oj = new CMenuOptionChooser("dhcp", &network_dhcp, true, dhcpNotifier);
 	oj->addOption(0, "options.off");
@@ -3220,6 +3217,8 @@ int CNeutrinoApp::exec(CMenuTarget* parent, std::string actionKey)
 	{
 		networkConfig.automatic_start = (network_automatic_start == 1);
 		networkConfig.commitConfig();
+		networkConfig.stopNetwork();
+		networkConfig.startNetwork();
 	}
 	else if(actionKey=="networktest")
 	{
@@ -3318,10 +3317,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.423 2003/03/05 17:13:25 thegoodguy Exp $\n\n");
-
-	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
-	system("killall -9 udhcpc >/dev/null 2>/dev/null");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.424 2003/03/10 21:22:37 thegoodguy Exp $\n\n");
 
 	tzset();
 	initGlobals();

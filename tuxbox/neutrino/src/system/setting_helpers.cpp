@@ -68,52 +68,20 @@ bool CSatDiseqcNotifier::changeNotify(string OptionName, void* Data)
 	return true;
 }
 
-CDHCPNotifier::CDHCPNotifier( CMenuForwarder* a1, CMenuForwarder* a2, CMenuForwarder* a3, CMenuForwarder* a4, CMenuForwarder* a5, CMenuForwarder* a6)
+CDHCPNotifier::CDHCPNotifier( CMenuForwarder* a1, CMenuForwarder* a2, CMenuForwarder* a3, CMenuForwarder* a4, CMenuForwarder* a5)
 {
-	dhcppid = -1;
 	toDisable[0] = a1;
 	toDisable[1] = a2;
 	toDisable[2] = a3;
 	toDisable[3] = a4;
 	toDisable[4] = a5;
-	toDisable[5] = a6;
-}
-
-
-void CDHCPNotifier::startStopDhcp()
-{
-	if (!(CNeutrinoApp::getInstance()->networkConfig.inet_static))
-	{
-		switch ((dhcppid = fork()))
-		{
-			case -1:
-				perror("[neutrino] fork (dhcp)");
-				break;
-			case 0:
-				if (execlp("/bin/udhcpc", "udhcpc", "-f", NULL) < 0)
-				{
-					perror("[neutrino] execlp (dhcp)");
-					exit(0);
-				}
-				break;
-		}
-	}
-	else
-	{
-		if (dhcppid != -1)
-		{
-			kill(dhcppid, SIGTERM);
-			waitpid(dhcppid, 0, 0);
-		}
-	}
 }
 
 
 bool CDHCPNotifier::changeNotify(string OptionName, void* data)
 {
 	CNeutrinoApp::getInstance()->networkConfig.inet_static = ((*(int*)(data)) == 0);
-	startStopDhcp();
-	for(int x=0;x<6;x++)
+	for(int x=0;x<5;x++)
 		toDisable[x]->setActive(CNeutrinoApp::getInstance()->networkConfig.inet_static);
 	return true;
 }
