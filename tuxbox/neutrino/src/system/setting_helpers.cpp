@@ -444,9 +444,19 @@ int CStreamFeaturesChangeExec::exec(CMenuTarget* parent, const std::string & act
 	// } else
 	if (sel>=0)
 	{
-		g_PluginList->startPlugin(sel);
+		g_PluginList->startPlugin(sel,0);
 	}
 
+	return menu_return::RETURN_EXIT;
+}
+int CMoviePluginChangeExec::exec(CMenuTarget* parent, const std::string & actionKey)
+{
+	int sel= atoi(actionKey.c_str());
+	parent->hide();
+	if (sel>=0)
+	{
+			g_settings.movieplayer_plugin=g_PluginList->getName(sel);
+	}
 	return menu_return::RETURN_EXIT;
 }
 

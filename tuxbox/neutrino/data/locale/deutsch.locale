@@ -509,6 +509,7 @@ movieplayer.bookmarkname_hint1 Geben Sie den Namen
 movieplayer.bookmarkname_hint2 für das neue Bookmark ein
 movieplayer.buffering Puffern...
 movieplayer.defdir Start-Verz.
+movieplayer.defplugin Start-Plugin
 movieplayer.dvdplayback DVD
 movieplayer.fileplayback Datei via VLC
 movieplayer.goto Springe zu ...

@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.33 2004/12/18 17:46:28 chakazulu Exp $
+ * $Id: locals_intern.h,v 1.34 2004/12/18 19:11:20 lucgas Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -536,6 +536,7 @@ const char * locale_real_names[] =
 	"movieplayer.bookmarkname_hint2",
 	"movieplayer.buffering",
 	"movieplayer.defdir",
+	"movieplayer.defplugin",
 	"movieplayer.dvdplayback",
 	"movieplayer.fileplayback",
 	"movieplayer.goto",

@@ -124,6 +124,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		CNVODChangeExec         	*NVODChanger;
 		CUCodeCheckExec			*UCodeChecker;
 		CStreamFeaturesChangeExec	*StreamFeaturesChanger;
+		CMoviePluginChangeExec 		*MoviePluginChanger;
 		CIPChangeNotifier		*MyIPChanger;
 //		CVCRControl			*vcrControl;
 		CConsoleDestChangeNotifier	*ConsoleDestinationChanger;

@@ -667,7 +667,10 @@ int CNeutrinoApp::loadSetup()
 	g_settings.streaming_transcode_video_codec = configfile.getInt32( "streaming_transcode_video_codec", 0 );
 	g_settings.streaming_force_avi_rawaudio = configfile.getInt32( "streaming_force_avi_rawaudio", 0 );
 	g_settings.streaming_resolution = configfile.getInt32( "streaming_resolution", 0 );
-	
+
+	// default plugin for movieplayer
+	g_settings.movieplayer_plugin = configfile.getString( "movieplayer_plugin", "Teletext" );
+
 	//rc-key configuration
 	g_settings.key_tvradio_mode = configfile.getInt32( "key_tvradio_mode", CRCInput::RC_nokey );
 
@@ -986,7 +989,10 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32 ( "streaming_force_transcode_video", g_settings.streaming_force_transcode_video );
 	configfile.setInt32 ( "streaming_transcode_video_codec", g_settings.streaming_transcode_video_codec );
 	configfile.setInt32 ( "streaming_resolution", g_settings.streaming_resolution );
-	
+
+	// default plugin for movieplayer
+	configfile.setString ( "movieplayer_plugin", g_settings.movieplayer_plugin );
+
 	//rc-key configuration
 	configfile.setInt32( "key_tvradio_mode", g_settings.key_tvradio_mode );
 
@@ -2193,7 +2199,7 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 	CMenuForwarder* mf5 = new CMenuForwarder(LOCALE_STREAMINGMENU_STREAMING_AUDIORATE      , (g_settings.streaming_type==1), g_settings.streaming_audiorate      , streamingSettings_audiorate);
 	CMenuForwarder* mf6 = new CMenuForwarder(LOCALE_STREAMINGMENU_STREAMING_SERVER_STARTDIR, (g_settings.streaming_type==1), g_settings.streaming_server_startdir, startdirInput);
 	CMenuForwarder* mf7 = new CMenuForwarder(LOCALE_MOVIEPLAYER_DEFDIR, true, g_settings.network_nfs_moviedir,this,"moviedir");
- 
+ 	CMenuForwarder* mf8 = new CMenuForwarder(LOCALE_MOVIEPLAYER_DEFPLUGIN, true, g_settings.movieplayer_plugin,this,"movieplugin");
 	CMenuOptionChooser* oj1 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_TRANSCODE_AUDIO      , &g_settings.streaming_transcode_audio      , MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true);
                                              
 	CMenuOptionChooser* oj2 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_FORCE_AVI_RAWAUDIO   , &g_settings.streaming_force_avi_rawaudio   , MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true);
@@ -2224,6 +2230,8 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 	streamingSettings.addItem( oj2);                          
 	streamingSettings.addItem(GenericMenuSeparatorLine);
 	streamingSettings.addItem( mf7);                          //default dir
+	streamingSettings.addItem(GenericMenuSeparatorLine);
+	streamingSettings.addItem( mf8);				//default movieplugin
 }
 
 
@@ -2930,6 +2938,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	UCodeChecker              = new CUCodeCheckExec;
 	NVODChanger               = new CNVODChangeExec;
 	StreamFeaturesChanger     = new CStreamFeaturesChangeExec;
+	MoviePluginChanger     = new CMoviePluginChangeExec;
 	MyIPChanger               = new CIPChangeNotifier;
 	ConsoleDestinationChanger = new CConsoleDestChangeNotifier;
 
@@ -4273,7 +4282,30 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 			strncpy(g_settings.network_nfs_recordingdir, b.getSelectedFile()->Name.c_str(), sizeof(g_settings.network_nfs_recordingdir)-1);
 		return menu_return::RETURN_REPAINT;
 	}
+	else if(actionKey == "movieplugin")
+	{
+	parent->hide();
+	CMenuWidget MoviePluginSelector(LOCALE_MOVIEPLAYER_DEFPLUGIN, "features.raw", 350);
+	MoviePluginSelector.addItem(GenericMenuSeparator);
 
+	char id[5];
+	int cnt = 0;
+	int enabled_count = 0;
+		for(unsigned int count=0;count < (unsigned int) g_PluginList->getNumberOfPlugins();count++)
+		{
+			if (g_PluginList->getType(count)== PLUGIN_TYPE_TOOL && !g_PluginList->isHidden(count))
+			{
+				// zB vtxt-plugins
+				sprintf(id, "%d", count);
+				enabled_count++;
+				MoviePluginSelector.addItem(new CMenuForwarderNonLocalized(g_PluginList->getName(count), true, NULL, MoviePluginChanger, id, CRCInput::convertDigitToKey(count)), (cnt == 0));
+				cnt++;
+			}
+		}
+
+		MoviePluginSelector.exec(NULL, "");
+ 		return menu_return::RETURN_REPAINT;
+	}
 	return returnval;
 }
 

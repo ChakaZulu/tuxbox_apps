@@ -260,11 +260,22 @@ PluginParam * CPlugins::makeParam(const char * const id, const int value, Plugin
 	return makeParam(id, aval, next);
 }
 
+void CPlugins::start_plugin_by_name(const std::string & filename,int param)
+{
+	for(int i = 0; i <  (int) plugin_list.size();i++)
+	{
+ 		if(filename.compare(g_PluginList->getName(i))==0)
+		{
+			startPlugin(i,param);
+		}
+	}
+}
+
 void CPlugins::startPlugin(const char * const name)
 {
 	int pluginnr = find_plugin(name);
 	if (pluginnr > -1)
-		startPlugin(pluginnr);
+		startPlugin(pluginnr,0);
 	else 
 		printf("[CPlugins] could not find %s\n", name);
 
@@ -298,7 +309,7 @@ void CPlugins::startScriptPlugin(int number)
 }
 
 
-void CPlugins::startPlugin(int number)
+void CPlugins::startPlugin(int number,int param)
 {
 	// always delete old output
 	delScriptOutput();
@@ -361,6 +372,8 @@ void CPlugins::startPlugin(int number)
 			close(fd);
 		}
 #endif
+		if(param>0)
+			vtpid=param;
 		startparam = makeParam(P_ID_VTXTPID, vtpid, startparam);
 	}
 	if (plugin_list[number].needoffset)

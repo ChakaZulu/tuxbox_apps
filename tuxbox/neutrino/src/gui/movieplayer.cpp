@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.101 2004/12/10 15:39:30 gmo18t Exp $
+  $Id: movieplayer.cpp,v 1.102 2004/12/18 19:11:19 lucgas Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -41,6 +41,9 @@
 #include <daemonc/remotecontrol.h>
 extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 #include <system/settings.h>
+#include <gui/plugins.h>
+extern CPlugins       * g_PluginList;
+
 
 #include <gui/eventlist.h>
 #include <gui/color.h>
@@ -118,7 +121,7 @@ static off_t g_fileposition;
 ringbuffer_t *ringbuf;
 bool bufferfilled;
 int streamingrunning;
-unsigned short pida, pidv;
+unsigned short pida, pidv,pidt;
 short ac3;
 CHintBox *hintBox;
 CHintBox *bufferingBox;
@@ -1331,12 +1334,19 @@ static void mp_freezeAV(MP_CTX *ctx)
 static void mp_unfreezeAV(MP_CTX *ctx)
 {
 	//-- continue AV playback immediate --
-	ioctl(ctx->vdec, VIDEO_CONTINUE);
-	ioctl(ctx->adec, AUDIO_CONTINUE);
+	ctx->p.pid      = ctx->pida;
+	ctx->p.pes_type = DMX_PES_AUDIO;
 
-	//-- workaround: switch on decoder bypass for AC3 audio -- 
+	ioctl (ctx->dmxa, DMX_SET_PES_FILTER, &(ctx->p));
 	if(ctx->ac3 == 1)
-		ioctl(ctx->adec, AUDIO_SET_BYPASS_MODE, 0UL);
+		ioctl(ctx->adec, AUDIO_SET_BYPASS_MODE,0UL);	// bypass on
+
+	ioctl (ctx->dmxa, DMX_START);
+
+	ioctl(ctx->adec, AUDIO_PLAY);					// audio
+	
+	ioctl(ctx->vdec, VIDEO_PLAY);					// video
+	ioctl(ctx->adec, AUDIO_SET_AV_SYNC, 1UL);	// needs sync !
 }
 
 //== mp_startDMX ==
@@ -1378,7 +1388,7 @@ static void mp_checkEvent(MP_CTX *ctx)
 			//-- will initialize all devices again,     --
 			//-- but demuxer will be started later.     --
 			//-- (refilling of input buffer not needed) --
-			mp_softReset(ctx, false);
+			mp_unfreezeAV(ctx);
 			break;
 
 			//-- next item of program/play-list   --
@@ -2178,7 +2188,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 			CMenuWidget APIDSelector(LOCALE_APIDSELECTOR_HEAD, "audio.raw", 300);
 			APIDSelector.addItem(GenericMenuSeparator);
 			apidchanged = 0;
-
+			pidt=0;
 			CAPIDSelectExec *APIDChanger = new CAPIDSelectExec;
 
 			for( unsigned int count=0; count<numpida; count++ )
@@ -2192,7 +2202,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				if(ac3flags[count] == 2) 
 				{
 					apidtitle.append(" (Teletext)");
-
+					pidt=apids[count];
 					APIDSelector.addItem
 					(
 					new CMenuForwarderNonLocalized
@@ -2252,7 +2262,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 		{
 			//-- terminate player --
 			case CRCInput::RC_red:
-				requestStop = true;
+				g_PluginList->start_plugin_by_name(g_settings.movieplayer_plugin.c_str(),pidt);
 				break;
 
 				//-- stop playback + start filebrowser --
@@ -2814,7 +2824,7 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.101 $");
+	helpbox.addLine("Version: $Revision: 1.102 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
@@ -2835,7 +2845,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.101 $");
+	helpbox.addLine("Version: $Revision: 1.102 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);

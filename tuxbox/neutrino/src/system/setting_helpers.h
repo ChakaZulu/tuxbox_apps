@@ -196,6 +196,12 @@ class CStreamFeaturesChangeExec : public CMenuTarget
 		int exec(CMenuTarget* parent, const std::string & actionKey);
 };
 
+class CMoviePluginChangeExec : public CMenuTarget
+{
+	public:
+		int exec(CMenuTarget* parent, const std::string & actionKey);
+};
+
 class CUCodeCheckExec : public CMenuTarget
 {
 	public:

@@ -182,7 +182,9 @@ struct SNeutrinoSettings
 	int streaming_resolution;
 
 	int filesystem_is_utf8;
-    
+	// default plugin for ts-movieplayer (red button)
+	std::string movieplayer_plugin;
+
 	//key configuration
 	int key_tvradio_mode;
 

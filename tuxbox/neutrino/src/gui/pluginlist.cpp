@@ -347,7 +347,7 @@ void CPluginList::paintItems()
 
 CPluginList::result_ CPluginList::pluginSelected()
 {
-	g_PluginList->startPlugin(pluginlist[selected]->number);
+	g_PluginList->startPlugin(pluginlist[selected]->number,0);
 	if (!g_PluginList->getScriptOutput().empty())
 	{
 		hide();
