@@ -10,7 +10,8 @@ class eCheckbox;
 
 class eZapNetworkSetup: public eWindow
 {
-	eNumber *ip, *netmask, *dns, *gateway;
+	eButton *type;
+	eNumber *inet_address, *inet_netmask, *nameserver, *inet_gateway;
 	eButton *ok, *abort;
 	eCheckbox *dosetup;
 	eStatusBar *statusbar;

@@ -140,9 +140,6 @@ eZap::eZap(int argc, char **argv)
 	setlocale(LC_ALL, language);
 	free(language);
 
-	eDVB::getInstance()->configureNetwork();
-	eDebug("<-- network");
-
 	// build Service Selector
 	serviceSelector = new eServiceSelector();
 	eDebug("<-- service selector");	
