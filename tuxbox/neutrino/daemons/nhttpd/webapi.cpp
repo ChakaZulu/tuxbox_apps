@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.40 2003/11/07 18:11:11 thegoodguy Exp $
+	$Id: webapi.cpp,v 1.41 2003/11/29 14:31:44 zwen Exp $
 
 	License: GPL
 
@@ -534,9 +534,10 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 //	request->SendHTMLHeader("DBOX2-Neutrino Kanalliste");
 //	request->SocketWriteLn(
 	request->printf(
-		"<!DOCTYPE html\n"
-		"     PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"\n"
-		"     \"DTD/xhtml1-strict.dtd\">\n"
+// QITH THIS DOCTYPE PAGE IS NOT WORKING WITH MOZILLA 1.5 FIXME!!!
+//		"<!DOCTYPE html\n"
+//		"     PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"\n"
+//		"     \"DTD/xhtml1-strict.dtd\">\n"
 		"<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"de\" lang=\"de\">\n"
 		"<head>\n"
 		"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\" />\n"
@@ -634,17 +635,17 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 			prozent = 100 * (time(NULL) - event->startTime) / event->duration;
 			timeString(event->startTime, timestr);
 			request->printf("<tr><td align=\"left\" width=\"31\" class=\"%cepg\">",classname);
-			request->printf("<table border=\"0\" rules=none heigth=\"10\" width=\"30\" cellspacing=\"0\" cellpadding=\"0\">"
+			request->printf("<table border=\"0\" rules=none height=\"10\" width=\"30\" cellspacing=\"0\" cellpadding=\"0\">"
 					"<tr>"
 					"<td rowspan=\"3\" bgcolor=#000000><img src=\"/images/blank.gif\" width=\"1\" height=\"1\" /></td>"
 					"<td bgcolor=#000000 colspan=\"2\"><img src=\"/images/blank.gif\" width=\"1\" height=\"1\" /></td>"
-					"<td rowspam=\"3\" bgcolor=#000000><img src=\"/images/blank.gif\" width=\"1\" height=\"1\" /></td>"
+					"<td rowspan=\"3\" bgcolor=#000000><img src=\"/images/blank.gif\" width=\"1\" height=\"1\" /></td>"
 					"</tr>");
 			request->printf("<tr><td bgcolor=\"#2211FF\" height=\"10\" width=\"%d\">"
 					"<img src=\"/images/blank.gif\" width=\"1\" height=\"1\" /></td>"
-					"<td bgcolor=\"#EAEBFF\" heigth=\"10\" width=\"%d\">"
+					"<td bgcolor=\"#EAEBFF\" height=\"10\" width=\"%d\">"
 					"<img src=\"/images/blank.gif\" width=\"1\" height=\"1\" /></td></tr>"
-					"<tr><td BGCOLOR=#000000 COLSPAN=\"2\"><img src=\"/images/blank.gif\" width=\"1\" height=\"1\" /></td>"
+					"<tr><td bgcolor=#000000 colspan=\"2\"><img src=\"/images/blank.gif\" width=\"1\" height=\"1\" /></td>"
 					"</tr></table></td>",
 					(prozent / 10) * 3,(10 - (prozent / 10))*3);
 			request->printf("<td class=\"%cepg\">",classname);
