@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: xmlrpc.cpp,v $
+Revision 1.4  2002/05/18 04:31:02  TheDOC
+Warningelimination
+
 Revision 1.3  2002/05/18 02:55:24  TheDOC
 LCARS 0.21TP7
 
@@ -107,7 +110,7 @@ void xmlrpc_value::getXML(std::stringstream *ostr)
 	case ARRAY:
 		std::cout << "Array" << std::endl;
 		*ostr << "<array><data>" << std::endl;
-		for (int i = 0; i < array_value.size(); i++)
+		for (int i = 0; (unsigned int) i < array_value.size(); i++)
 		{
 			array_value[i]->getXML(ostr);
 		}
@@ -137,7 +140,6 @@ time_t xmlrpc_value::date_from_ISO8601 (const char *text)
 	struct tm tm;
 	int n;
 	int i;
-	time_t t;
 	char buf[18];
 
 	if (strchr (text, '-')) {
@@ -420,7 +422,7 @@ void xmlrpc_params::getXML(std::stringstream *ostr)
 	{
 		*ostr << "<params>" << std::endl;
 
-		for (int i = 0; i < params.size(); i++)
+		for (int i = 0; (unsigned int) i < params.size(); i++)
 		{
 			*ostr << "<param>" << std::endl;
 			params[i]->getXML(ostr);
@@ -639,6 +641,7 @@ int xmlrpc_parse::parseXML()
 		type = FAILED;
 		return -1;
 	}
+	return 0;
 }
 
 std::string handle::makeHandle(int type, int count,  ...)

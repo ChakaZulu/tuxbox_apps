@@ -19,7 +19,7 @@ class ir
 {
 	int fd;
 	std::string device;
-	int writeCommand(std::string);
+	void writeCommand(std::string);
 public:	
 	ir();
 	void setDevice(std::string dev) { device = dev; }

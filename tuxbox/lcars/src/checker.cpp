@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: checker.cpp,v $
+Revision 1.5  2002/05/18 04:31:02  TheDOC
+Warningelimination
+
 Revision 1.4  2002/05/18 02:55:24  TheDOC
 LCARS 0.21TP7
 
@@ -114,7 +117,7 @@ void* checker::startEventChecker(void* object)
 		perror("open");
 		return false;
 	}
-	int old_vcr_mode;
+	int old_vcr_mode = c->get_16_9_mode();
 
 	while(1)
 	{

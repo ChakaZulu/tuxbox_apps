@@ -5,7 +5,7 @@ ir::ir()
 
 }
 
-int ir::writeCommand(std::string cmd)
+void ir::writeCommand(std::string cmd)
 {
 	write(fd, cmd.c_str(), cmd.length());	
 }

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: main.cpp,v $
+Revision 1.16  2002/05/18 04:31:02  TheDOC
+Warningelimination
+
 Revision 1.15  2002/05/18 02:55:24  TheDOC
 LCARS 0.21TP7
 
@@ -106,8 +109,8 @@ int main(int argc, char **argv)
 	variables variables;
 	ir ir;
 	
-	int cramfs = 6;
-	bool update_enabled = false;
+	//int cramfs = 6;
+	//bool update_enabled = false;
 	
 	int key = -1;
 	int number = -1;	
@@ -245,7 +248,7 @@ int main(int argc, char **argv)
 
 	}
 	
-	teletext teletext(&fb, &rc);
+	//teletext teletext(&fb, &rc);
 	
 	channels.loadDVBChannels();
 	channels.loadTS();
@@ -278,11 +281,11 @@ int main(int argc, char **argv)
 	timer.start_thread();
 	tot.start_thread();
 	
-	int mode = 0; // 0 = Main Menu
-	int ipmode;
+	//int mode = 0; // 0 = Main Menu
+	//int ipmode;
 
-	int final_number;
-	bool finish;
+	//int final_number;
+	//bool finish;
 
 	int channelnumber;
 	int old_channel;
@@ -297,7 +300,7 @@ int main(int argc, char **argv)
 		old_channel = atoi(argv[1]);
 	}
 
-	int apid = 0;
+	/*int apid = 0;
 	linkage perspective[10];
 	int number_perspectives = 0;
 	int position;
@@ -321,7 +324,7 @@ int main(int argc, char **argv)
 	bool leave = false;
 	bool schedule_read = false;
 	char text[20];
-	int txtfd;
+	int txtfd;*/
 
 	hardware.setOutputMode(settings.getOutputFormat());
 	rc.start_thread();

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: scan.cpp,v $
+Revision 1.11  2002/05/18 04:31:02  TheDOC
+Warningelimination
+
 Revision 1.10  2002/05/18 02:55:24  TheDOC
 LCARS 0.21TP7
 
@@ -214,7 +217,8 @@ channels scan::scanChannels(bool full, int start_frequency, int start_symbol, in
 		int start_fe[20];
 		int start_dis[20];	// start diseq 0..3, -1 = auto
 		FILE *fp;
-		int dis, dis_start, dis_end;
+		int dis_start, dis_end;
+		char tmp[100];
 
 
 
@@ -231,19 +235,19 @@ channels scan::scanChannels(bool full, int start_frequency, int start_symbol, in
 			sscanf (text,"%i,%i,%i,%i,%i %s\n",
 				&start_frq[co], &start_sym[co],
 				&start_pol[co], &start_fe[co],
-				&start_dis[co]);
+				&start_dis[co], tmp);
 			printf ("Scandat: Freq:%d, SymR:%d, Pol:%d, FEC:%d DiSeqc:%d\n",
 				start_frq[co], start_sym[co],
 				start_pol[co], start_fe[co],
 				start_dis[co]);
 			co++;
-			if (co >= (sizeof(start_fe)/sizeof(start_fe[0])) )
+			if ((unsigned int) co >= (sizeof(start_fe)/sizeof(start_fe[0])) )
 				break;
 		}
 		max_chans = co;
 
 
-		printf("Diseqc: %d\n", dis);		
+		//printf("Diseqc: %d\n", dis);		
 		int i = 0;
 
 		int old = channels.numberTransponders();

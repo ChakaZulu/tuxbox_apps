@@ -321,7 +321,7 @@ int control::runCommand(command_class command, bool val)
 		break;
 	}
 
-	for (int i = 0; i < command.var.size(); i++)
+	for (int i = 0; (unsigned int) i < command.var.size(); i++)
 	{
 		command.args[command.var[i]] = vars->getvalue(command.args[command.var[i]]);
 		std::cout << "Getting value again " << command.args[command.var[i]] << std::endl;
@@ -681,7 +681,7 @@ int control::runCommand(command_class command, bool val)
 				int counter = 0;
 				if (channels_obj->getCurrentChannelNumber() != -1)
 				{
-					for (int i = 1; i < command.args.size(); i++)
+					for (int i = 1; (unsigned int)i < command.args.size(); i++)
 					{
 						if (command.args[i] == "VPID")
 						{
@@ -1037,12 +1037,8 @@ void control::loadModes()
 	inFile.close();
 	
 	int i = 0;
-	while (i < line.size() - 1)
+	while ((unsigned int) i < line.size() - 1)
 	{
-		bool is_numbers = false;
-		int start_number = 0;
-		int end_number = 0;
-
 		std::istringstream iss(line[i]);
 		std::cout << "std::endline: " << line[i] << std::endl;
 		if (line[i++] != "------")
@@ -1082,7 +1078,7 @@ void control::loadModes()
 			else if (line[i] == "Actions:")
 			{
 				i++;
-				while(line[i] != "+++" && line[i] != "------" && i < line.size() )
+				while(line[i] != "+++" && line[i] != "------" && (unsigned int) i < line.size() )
 				{
 					int val;
 
@@ -1144,12 +1140,8 @@ void control::loadSubs()
 	inFile.close();
 	
 	int i = 0;
-	while (i < line.size() - 1)
+	while ((unsigned int) i < line.size() - 1)
 	{
-		bool is_numbers = false;
-		int start_number = 0;
-		int end_number = 0;
-
 		std::istringstream iss(line[i]);
 		std::cout << "std::endline: " << line[i] << std::endl;
 		if (line[i++] != "------")
@@ -1201,7 +1193,7 @@ void control::runSub(std::string name)
 	std::cout << "Running Sub " << name << std::endl;
 	commandlist tmp_commands;
 	tmp_commands = subs.find(name)->second;
-	for (int i = 0; i < tmp_commands.size(); i++)
+	for (int i = 0; (unsigned int) i < tmp_commands.size(); i++)
 	{
 		runCommand(tmp_commands[i]);
 	}
@@ -1230,7 +1222,7 @@ void control::runMode()
 
 		if (mode.init_commands.size() > 0)
 		{
-			for (int i = 0; i < mode.init_commands.size(); i++)
+			for (int i = 0; (unsigned int) i < mode.init_commands.size(); i++)
 			{
 				std::cout << "Init" << std::endl;
 				runCommand(mode.init_commands[i]);
@@ -1248,7 +1240,7 @@ void control::runMode()
 				{
 					std::cout << "Found key!" << std::endl;
 					commandlist commands = mode.keys.find(key)->second;
-					for (int i = 0; i < commands.size(); i++)
+					for (int i = 0; (unsigned int) i < commands.size(); i++)
 					{
 						runCommand(commands[i]);
 					}
@@ -1277,7 +1269,7 @@ void control::loadMenus()
 	inFile.close();
 	
 	int i = 0;
-	while (i < line.size() - 1)
+	while ((unsigned int) i < line.size() - 1)
 	{
 		std::istringstream iss(line[i]);
 		std::cout << "std::endline: " << line[i] << std::endl;
@@ -1319,7 +1311,7 @@ void control::loadMenus()
 				i++;
 				int title_count = -200;
 				menu.sort.clear();
-				while((i < (line.size() - 1)) && line[i] != "+++")
+				while(((unsigned int) i < (line.size() - 1)) && line[i] != "+++")
 				{
 					std::string value;
 					std::string description;
@@ -1388,7 +1380,7 @@ void control::loadMenus()
 			else if (line[i] == "Actions:")
 			{
 				i++;
-				while(line[i] != "+++" && line[i] != "------" && i < line.size() )
+				while(line[i] != "+++" && line[i] != "------" && (unsigned int) i < line.size() )
 				{
 					int val = atoi(line[i].c_str());
 					commandlist tmp_commands;
@@ -1416,7 +1408,7 @@ void control::loadMenus()
 			else if (line[i] == "Values:")
 			{
 				i++;
-				while(line[i] != "+++" && line[i] != "------" && i < line.size() )
+				while(line[i] != "+++" && line[i] != "------" && (unsigned int) i < line.size() )
 				{
 					int val = atoi(line[i].c_str());
 					string_commandlist tmp_commands;
@@ -1465,23 +1457,23 @@ void control::getMenu(int menuNumber)
 	osd_obj->setMenuTitle(tmp_menu.title);
 
 	
-	for (int i = 0; i < tmp_menu.sort.size(); i++)
+	for (int i = 0; (unsigned int) i < tmp_menu.sort.size(); i++)
 	{
 		std::map<int, menu_entry>::iterator it = tmp_menu.entries.find(tmp_menu.sort[i]);
 		osd_obj->addMenuEntry(it->first, it->second.description, it->second.type);
 		if (it->second.type == 2)
 		{
 			std::cout << "Size: " << it->second.switches.size() << std::endl;
-			for (int j = 0; j < it->second.switches.size(); j++)
+			for (int j = 0; (unsigned int) j < it->second.switches.size(); j++)
 			{
 				std::cout << "Value: " << it->second.switches[j] << std::endl;
 				osd_obj->addSwitchParameter(i, it->second.switches[j]);
 			}
 			bool set = false;
-			if (it->second.value_commands.size() > 0)
+			if ((int) it->second.value_commands.size() > 0)
 			{
 				
-				for (int j = 0; j < it->second.value_commands.size(); j++)
+				for (int j = 0; (unsigned int)j < it->second.value_commands.size(); j++)
 				{
 					//std::cout << it->second.value_commands[j] << " is value" << std::endl;
 					if (checkSetting(it->second.value_commands[j]))
@@ -1510,7 +1502,7 @@ void control::openMenu(int menuNumber)
 
 	getMenu(menuNumber);
 
-	for (int i = 0; i < tmp_menu.init_commands.size(); i++)
+	for (int i = 0; (unsigned int) i < tmp_menu.init_commands.size(); i++)
 	{
 		std::cout << "Init" << std::endl;
 		runCommand(tmp_menu.init_commands[i]);
@@ -1550,7 +1542,7 @@ void control::openMenu(int menuNumber)
 				{
 					bool found = false;
 					int i = 0;
-					for (i = 0; i < tmp_menu.sort.size(); i++)
+					for (i = 0; (unsigned int) i < tmp_menu.sort.size(); i++)
 					{
 						if (tmp_menu.sort[i] == number)
 						{
@@ -1565,7 +1557,7 @@ void control::openMenu(int menuNumber)
 					{
 						int selected = osd_obj->getSelected(i);
 						selected++;
-						if (selected == it->second.switches.size())
+						if ((unsigned int)selected == it->second.switches.size())
 							selected = 0;
 							
 						osd_obj->setSelected(i, selected);
@@ -1588,7 +1580,7 @@ void control::openMenu(int menuNumber)
 					int old_menu = osd_obj->menuSelectedIndex();
 					osd_obj->addCommand("HIDE menu");
 					std::cout << it->second.action_commands.size() << std::endl;
-					for (int j = 0; j < it->second.action_commands.size(); j++)
+					for (int j = 0; (unsigned int) j < it->second.action_commands.size(); j++)
 					{
 						//std::cout << "Mark1" << std::endl;
 						//std::cout << it->second.action_commands[j] << std::endl;

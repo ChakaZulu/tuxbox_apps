@@ -16,6 +16,9 @@
 /*
 
 $Log: tuner.cpp,v $
+Revision 1.12  2002/05/18 04:31:02  TheDOC
+Warningelimination
+
 Revision 1.11  2002/05/18 02:55:24  TheDOC
 LCARS 0.21TP7
 
@@ -92,8 +95,7 @@ int tuner::tune(int frequ, int symbol, int polarization, int fec, int dis)
 	struct secCmdSequence seq;
 	struct secCommand cmd;
 	FrontendParameters frontp;
-	int i, status;
-	long state1,state2;
+	int status;
 
 	if (setting->boxIsSat())
 	{

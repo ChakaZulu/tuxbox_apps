@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: channels.cpp,v $
+Revision 1.8  2002/05/18 04:31:02  TheDOC
+Warningelimination
+
 Revision 1.7  2002/05/18 02:55:24  TheDOC
 LCARS 0.21TP7
 
@@ -267,7 +270,7 @@ void channels::zapCurrentChannel()
 	{
 		number_last_chans = atoi(vars->getvalue("%NUMBERLASTCHANNELS").c_str());
 	}
-	if (last_channels.size() > number_last_chans)
+	if (last_channels.size() > (unsigned int) number_last_chans)
 	{
 		last_channels.pop();
 	}

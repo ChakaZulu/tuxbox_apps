@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: plugins.cpp,v $
+Revision 1.7  2002/05/18 04:31:02  TheDOC
+Warningelimination
+
 Revision 1.6  2002/05/18 02:55:24  TheDOC
 LCARS 0.21TP7
 
@@ -122,8 +125,6 @@ void plugins::setvtxtpid(int fd)
 
 void plugins::parseCfg(plugin *plugin_data)
 {
-	FILE *fd;
-
 	std::ifstream inFile;
 	std::string line[20];
 	int linecount = 0;
@@ -290,12 +291,12 @@ void plugins::startPlugin(int number)
 		startparam = makeParam(P_ID_VTXTPID, startparam);
 	}
 
-	PluginParam *par = startparam;
-	for( ; par; par=par->next )
+	//PluginParam *par = startparam;
+	/*for( ; par; par=par->next )
 	{
 		printf ("id: %s - val: %s\n", par->id, par->val);
 		printf("%d\n", par->next);
-	}
+	}*/
 
 	std::cout << "Mark-2" << std::endl;
 

@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <memory.h>
 #include <iostream>
-#include <png.h>
+//#include <png.h>
 
 #include <string>
 #include <sstream>
