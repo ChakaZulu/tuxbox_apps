@@ -1,5 +1,5 @@
 /*
-$Id: tslayer.c,v 1.8 2003/12/17 23:15:06 rasc Exp $
+$Id: tslayer.c,v 1.9 2003/12/17 23:21:35 rasc Exp $
 
    -- Transport Stream Decode/Table section
 
@@ -13,6 +13,9 @@ $Id: tslayer.c,v 1.8 2003/12/17 23:15:06 rasc Exp $
 
 
 $Log: tslayer.c,v $
+Revision 1.9  2003/12/17 23:21:35  rasc
+PES DSM-CC  ack and control commands  according ITU H.222.0 Annex B
+
 Revision 1.8  2003/12/17 23:15:06  rasc
 PES DSM-CC  ack and control commands  according ITU H.222.0 Annex B
 
@@ -433,7 +436,7 @@ int ts_adaption_field_extension (u_char  *b)
      out_SB_NL (4,"DTS_next_AU[14..0]: ",a.DTS_next_AU14_0);
      out_SB_NL (4,"marker_bit: ",a.marker_bit3);
      out_SL_NL (3," ==> DTS_next_AU: ",
-		     (long)a.DTS_next_AU32_30<<30 + a.DTS_next_AU_29_15<<15 +a.DTS_next_AU14_0);
+		     (long)(a.DTS_next_AU32_30<<30) + (a.DTS_next_AU29_15<<15) +a.DTS_next_AU14_0);
   }
 
 
