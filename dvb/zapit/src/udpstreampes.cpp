@@ -132,6 +132,8 @@ void * UdpSender( void * Ptr )
    unsigned u;
    unsigned char *ReadPtr;
 
+   (void)Ptr;
+
  //  fd_set wfds;
  //  struct timespec ts;
  //  FD_ZERO(&wfds);
@@ -300,6 +302,8 @@ void * TcpReceiver( void * Ptr )
 {
    char TcpString[STRING_SIZE], PacketString[STRING_SIZE];
    unsigned SPktBuf, u;
+
+   (void)Ptr;
 
    while(true) {
       ReadLine( TcpString );

@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.131 2003/12/09 21:12:28 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.132 2003/12/24 13:55:46 obi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -131,7 +131,7 @@ void copy_to_satellite(FILE * fd, FILE * fd1, char * providerName)
 			fgets(buffer, 255, fd1);
 }
 
-void copy_to_end(FILE * fd, FILE * fd1, char * providerName)
+void copy_to_end(FILE * fd, FILE * fd1)
 {
 	//copies the services from previous services.xml file from the end of sat being scanned to the end of the file...
 	char buffer[256] ="";
@@ -177,7 +177,7 @@ int append_service(char* providerName, TP_params* TP)
 	int scan_status = write_provider(fd, frontendType, providerName, TP->diseqc);
 
 	if (fd1)
-		copy_to_end(fd, fd1, providerName);
+		copy_to_end(fd, fd1);
 
 	write_xml_footer(fd);
 
@@ -269,38 +269,6 @@ void get_transponder (TP_params *TP)
 	memcpy(TP,frontend->getParameters(),sizeof(TP_params));
 	return;
 }
-/*
-struct dvb_frontend_event* set_transponder(TP_params *TP)
-{
-	return frontend->setParametersResponse(TP);
-}
-*/
-void set_channel(CH_params *CH)
-{
-}
-
-void add_channel(CH_params *CH)
-{
-/*	eventServer->sendEvent
-	(
-		CZapitClient::EVT_SCAN_NUM_CHANNELS,
-		CEventServer::INITID_ZAPIT,
-		&found_channels,
-		sizeof(found_channels)
-	);
-
-	allchans.insert
-	(
-		std::pair <t_channel_id, CZapitChannel>
-		(
-			CREATE_CHANNEL_ID,
-			CZapitChannel
-			(
-				CH
-			)
-		)
-	);
-*/}
 
 int get_nit(TP_params* TP)
 {
@@ -315,7 +283,7 @@ int get_nit(TP_params* TP)
 	return status;
 }
 
-int get_sdt(TP_params* TP)
+int get_sdt(void)
 {
 	uint32_t TsidOnid;
 	TP_iterator tI;
@@ -333,10 +301,10 @@ int get_sdt(TP_params* TP)
 
 void scan_transponder(TP_params *TP)
 {
-/* only for testing, please remove */
+/* only for testing, please remove <- wtf? */
 	add_transponder(TP);
 	get_nit(TP);
-	get_sdt(TP);
+	get_sdt();
 	append_service("Test", TP);
 	TP_scanmap.clear();
 }
@@ -551,7 +519,7 @@ int write_provider(FILE *fd, const char *frontendType, const char *provider_name
 	return status;
 }
 
-int scan_transponder(xmlNodePtr transponder, bool satfeed, uint8_t diseqc_pos)
+int scan_transponder(xmlNodePtr transponder, uint8_t diseqc_pos)
 {
 	uint8_t polarization = 0;
 	struct dvb_frontend_parameters feparams;
@@ -595,7 +563,7 @@ int scan_transponder(xmlNodePtr transponder, bool satfeed, uint8_t diseqc_pos)
 	return 0;
 }
 
-void scan_provider(xmlNodePtr search, char * providerName, bool satfeed, uint8_t diseqc_pos, char * frontendType)
+void scan_provider(xmlNodePtr search, char * providerName, uint8_t diseqc_pos, char * frontendType)
 {
 	xmlNodePtr transponder = NULL;
 
@@ -606,7 +574,7 @@ void scan_provider(xmlNodePtr search, char * providerName, bool satfeed, uint8_t
 	/* read all transponders */
 	while ((transponder = xmlGetNextOccurence(transponder, "transponder")) != NULL)
 	{
-		scan_transponder(transponder, satfeed, diseqc_pos);
+		scan_transponder(transponder, diseqc_pos);
 
 		/* next transponder */
 		transponder = transponder->xmlNextNode;
@@ -662,7 +630,6 @@ void *start_scanthread(void *)
 	char providerName2[32] = "";
 	char *frontendType = NULL;
 	uint8_t diseqc_pos = 0;
-	bool satfeed = false;
 	int scan_status = -1;
 
 	scanBouquetManager = new CBouquetManager();
@@ -706,12 +673,6 @@ void *start_scanthread(void *)
 		{
 			strncpy(providerName2, providerName, 30);
 
-			/* Special mode for cable-users with sat-feed */
-			if (frontend->getInfo()->type == FE_QAM)
-				if (!strcmp(frontendType, "cable") && xmlGetAttribute(search, "satfeed"))
-					if (!strcmp(xmlGetAttribute(search, "satfeed"), "true"))
-						satfeed = true;
-
 			/* increase sat counter */
 			curr_sat++;
 
@@ -740,7 +701,7 @@ void *start_scanthread(void *)
 			if (!strcmp(frontendType, "sat") && (frontend->getDiseqcType() == DISEQC_1_2))
 				driveMotorToSatellitePosition(providerName);
 
-			scan_provider(search, providerName, satfeed, diseqc_pos, frontendType);
+			scan_provider(search, providerName, diseqc_pos, frontendType);
 
 			/* write services */
 			scan_status = write_provider(fd, frontendType, providerName, diseqc_pos);
@@ -748,7 +709,7 @@ void *start_scanthread(void *)
 			if (!strcmp(frontendType, "sat"))
 			{
 				if (fd1)
-					copy_to_end(fd, fd1, providerName);
+					copy_to_end(fd, fd1);
 
 				write_xml_footer(fd);
 			}
