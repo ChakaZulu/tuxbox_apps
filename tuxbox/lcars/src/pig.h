@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: pig.h,v $
+Revision 1.4  2002/04/22 19:11:26  obi
+sync pig header with drivers
+
 Revision 1.3  2002/03/03 22:57:59  TheDOC
 lcars 0.20
 
@@ -32,7 +35,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
-#include <dbox/avia_pig.h>
+#include <dbox/avia_gt_pig.h>
 
 class pig
 {

@@ -7,7 +7,7 @@
 #include <stropts.h>
 
 #ifndef i386
-#include <dbox/avia_pig.h>
+#include <dbox/avia_gt_pig.h>
 
 static	int			fd = -1;
 static	int			l_x = 0;
