@@ -1,5 +1,5 @@
 /*
- * $Id: streamfile.c,v 1.9 2004/04/29 13:57:57 diemade Exp $
+ * $Id: streamfile.c,v 1.10 2004/04/29 18:32:32 thegoodguy Exp $
  * 
  * streaming ts to file/disc
  * 
@@ -229,7 +229,6 @@ main (int argc, char ** argv) {
 
 	int pid;
 	int pids[MAXPIDS];
-	unsigned char *bp;
 	char *fname;
 	ssize_t written;
 	int i;
@@ -287,9 +286,6 @@ main (int argc, char ** argv) {
 	fdatasync(fd);
 	close(fd);
 	unlink(buf);
-	memset(buf, 0x00, IN_SIZE);
-
-	bp = buf;
 
 	if ((dvrfd = open(DVRDEV, O_RDONLY)) < 0) {
 		free(buf);
@@ -303,39 +299,71 @@ main (int argc, char ** argv) {
 	/* write raw transport stream */
 	int offset;
 
-	ssize_t pos;
-	ssize_t r = 0;
+	ringbuffer_data_t vec[2];
+	ssize_t r;
 	ssize_t todo;
+	ssize_t todo2;
 
-	while (!exit_flag) {
-		pos = 0;
-		todo = IN_SIZE;
+	while (!exit_flag)
+	{
+		r = read(dvrfd, buf, IN_SIZE);
+		if (r > 0)
+		{
+			offset = sync_byte_offset(buf, r);
+			if (offset != -1)
+				break;
+		}
+	}
 
-		while ((!exit_flag) && (todo)) {
-			r = read(dvrfd, buf + pos, todo);
+	written = ringbuffer_write(ringbuf, buf + offset, r - offset);
+	// TODO: Retry
+	if (written != todo) {
+		dprintf("PANIC: wrote less than requested to ringbuffer, written %d, requested %d\n", written, r - offset);
+		exit_flag = 1;
+	}
+	todo = IN_SIZE - (r - offset);
 
-			if (r > 0) {
-				pos += r;
-				todo -= r;
+	while (!exit_flag)
+	{
+		ringbuffer_get_write_vector(ringbuf, &(vec[0]));
+		todo2 = todo - vec[0].len;
+		if (todo2 < 0)
+		{
+			todo2 = 0;
+		}
+		else
+		{
+			if (todo2 > vec[1].len)
+			{
+				dprintf("PANIC: not enough space in ringbuffer, available %d, needed %d\n", vec[0].len + vec[1].len, todo + todo2);
+				exit_flag = 1;
+			}
+			todo = vec[0].len;
+		}
+
+		while ((!exit_flag) && (todo))
+		{
+			r = read(dvrfd, vec[0].buf, todo);
+			
+			if (r > 0)
+			{
+				if (todo == r)
+				{
+					todo = todo2;
+					todo2 = 0;
+					vec[0].buf = vec[1].buf;
+				}
+				else
+				{
+					vec[0].buf += r;
+					todo -= r;
+				}
+
+				ringbuffer_write_advance(ringbuf, r);
 			}
 		}
 
-		/* make sure to start with a ts header */
-		offset = sync_byte_offset(buf, TS_SIZE);
-
-		if (offset == -1)
-			continue;
-
-		todo = r - offset;
-
-		written = ringbuffer_write(ringbuf, buf, todo);
-		//dprintf("wrote %d bytes to ringbuffer\n", written);
-
-		// TODO: Retry
-		if (written != todo) {
-			dprintf("PANIC: wrote less than requested to ringbuffer, written %d, requested %d\n", written, todo);
-			exit_flag = 1;
-		}
+		todo = IN_SIZE;
 	}
 	exit_flag = 1;
 	//sleep(1); // give FileThread some time to write remaining content of ringbuffer to file
