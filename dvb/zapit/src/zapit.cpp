@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.44 2001/12/13 19:42:06 faralla Exp $
+  $Id: zapit.cpp,v 1.45 2001/12/17 19:11:48 faralla Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -90,6 +90,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.45  2001/12/17 19:11:48  faralla
+  diseqc-stuff
+
   Revision 1.44  2001/12/13 19:42:06  faralla
   moved last_chan to /tmp. Make sure it exists!
 
@@ -298,6 +301,7 @@ boolean caid_set = false;
 pthread_t scan_thread;
 extern int found_transponders;
 extern int found_channels;
+extern short curr_sat;
 extern short scan_runs;
 
 void start_scan();
@@ -1331,6 +1335,16 @@ int changeapid(ushort pid_nr)
 
 void endzap()
 {
+  int vid;
+
+  if ( ( vid = open(VIDEO_DEV, O_RDWR) ) < 0)
+    {
+      printf("[zapit] Cannot open video device \"%s\"\n",FRONT_DEV);
+      exit(1);
+    }
+
+  ioctl(vid, VIDEO_STOP, false);
+  	
   if ( video>= 0 )
     {
       close(video);
@@ -1462,7 +1476,7 @@ int prepare_channels()
   return 23;
 }
 
-void start_scan()
+void start_scan(unsigned short do_diseqc)
 {
   transponders.clear();
   namechans_tv.clear();
@@ -1507,7 +1521,7 @@ void start_scan()
 
   close(vid);
 
-  if (pthread_create(&scan_thread, 0, start_scanthread,0))
+  if (pthread_create(&scan_thread, 0, start_scanthread,&do_diseqc))
   {
   	perror("[zapit] pthread_create: scan_thread");
   	exit(0);
@@ -1910,7 +1924,8 @@ void parse_command()
 	}
       break;
       case 'g':
-        start_scan();
+        //start_scan(rmsg.param2);
+        start_scan(2);
 
       	status = "00g";
       	if (send(connfd, status, strlen(status),0) == -1) {
@@ -1927,8 +1942,11 @@ void parse_command()
 	perror("[zapit] could not send any return\n");
 	return;
 	}
-	if (scan_runs>0)
-	{
+	if (send(connfd, &curr_sat, sizeof(short),0) == -1)
+		{
+		perror("[zapit] could not send any return\n");
+		return;
+		}
 		if (send(connfd, &found_transponders, sizeof(int),0) == -1)
 		{
 		perror("[zapit] could not send any return\n");
@@ -1937,7 +1955,6 @@ void parse_command()
 		if (send(connfd, &found_channels, sizeof(int),0) == -1) {
 		perror("[zapit] could not send any return\n");
 		return;
-	}
 	}
 	break;
        case 'i':
@@ -2203,12 +2220,13 @@ int main(int argc, char **argv) {
 
   system("/usr/bin/killall camd");
   system("cp /var/zapit/last_chan /tmp/zapit_last_chan");
-  printf("Zapit $Id: zapit.cpp,v 1.44 2001/12/13 19:42:06 faralla Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.45 2001/12/17 19:11:48 faralla Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
   found_channels = 0;
-
+  curr_sat = -1;
+  
   testmsg = load_settings();
 
   if (testmsg.mode== 'r')

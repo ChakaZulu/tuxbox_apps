@@ -39,7 +39,7 @@ int nit(int diseqc);
 int sdt(uint osid, bool scan_mode);
 int prepare_channels();
 short scan_runs;     	
-
+short curr_sat;
 int issatbox()
 {
 	return atoi(getenv("fe"));
@@ -202,16 +202,17 @@ void write_transponder(int tsid, FILE *fd)
   fprintf(fd,"%s\n",transponder.c_str()); 
 }
 
-void *start_scanthread(void *)
+void *start_scanthread(void *param)
 {
   FILE *fd = NULL;
   std::string transponder;
   
-  
-  
+  unsigned short *do_diseqc = (unsigned short *) (param);
+
   scan_runs = 1;
   if (!issatbox())
     {
+    	curr_sat = 0;
       int symbolrate = 6900;
       for (int freq = 3300; freq<=4600; freq +=80)
 	{
@@ -246,7 +247,9 @@ void *start_scanthread(void *)
   else
     {
       
-      
+      if (*do_diseqc & 1)
+      {
+      	curr_sat = 1;
       printf("---------------------------\nSCANNING ASTRA\n---------------------------\n");
       //printf("This is a sat-box\n");
       get_nits(11797, 27500, 0, 0, 0);
@@ -285,8 +288,13 @@ void *start_scanthread(void *)
 
       scanchannels.clear();
       scantransponders.clear();
-      
+	}
+
+      if (*do_diseqc & 2)
+      {
+      	curr_sat = 2;
       printf("---------------------------\nSCANNING HOTBIRD\n---------------------------\n");
+      			
       get_nits(12692,27500,0,3,1);
       get_nits(12539,27500,0,3,1);
       get_nits(11746,27500,0,3,1);
@@ -297,6 +305,7 @@ void *start_scanthread(void *)
       get_nits(12169,27500,0,3,1);
       get_nits(12539,27500,0,3,1);
       get_nits(12111,27500,1,3,1);
+      get_nits(12168,27500,0,3,1);
       get_sdts();
       
       if (!scantransponders.empty())
@@ -319,7 +328,11 @@ void *start_scanthread(void *)
 
       scanchannels.clear();
       scantransponders.clear();
-
+      }
+	
+      if (*do_diseqc & 4)
+      {
+      	curr_sat = 4;
       printf("---------------------------\nSCANNING KOPERNIKUS\n---------------------------\n");
       get_nits(12655,27500,1,3,2);
       get_nits(12521,27500,1,3,2);
@@ -333,7 +346,7 @@ void *start_scanthread(void *)
 	  	fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
       	  	fprintf(fd,"<ZAPIT>\n");
       	}
-	fprintf(fd, "<satellite name=\"Kopernikus\" diseqc=\"3\">\n");
+	fprintf(fd, "<satellite name=\"Kopernikus\" diseqc=\"2\">\n");
 	  for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
 	    {
 	    fprintf(fd, "<transponder transportID=\"%d\" networkID=\"0\">\n", tI->second.tsid); 
@@ -344,6 +357,59 @@ void *start_scanthread(void *)
 	}
        scanchannels.clear();
        scantransponders.clear();
+       }
+      
+      
+      if (*do_diseqc & 8)
+      {
+      	curr_sat = 8;
+      printf("---------------------------\nSCANNING TÜRKSAT\n---------------------------\n");
+      get_nits(10985,23420,0,3,3);
+      get_nits(11015,41790,0,3,3);
+      get_nits(11028,35720,0,5,3);
+      get_nits(11037,23420,0,5,3);
+      get_nits(11054,70000,1,3,3);
+      get_nits(11088,56320,1,3,3);
+      get_nits(11100,56320,1,3,3);
+      get_nits(11110,56320,1,3,3);
+      get_nits(11117,56320,1,3,3);
+      get_nits(11117,30550,1,3,3);
+      get_nits(11133,45550,1,5,3);
+      get_nits(11134,26000,0,7,3);
+      get_nits(11137,31500,0,5,3);
+      get_nits(11156,21730,1,5,3);
+      get_nits(11160,21730,1,5,3);
+      get_nits(11162,21730,1,5,3);
+      get_nits(11166,56320,1,5,3);
+      get_nits(11168,21730,1,5,3);
+      get_nits(11172,21730,1,5,3);
+      get_nits(11193,54980,1,5,3);
+      get_nits(11453,19830,0,7,3);
+      get_nits(11567,20000,0,3,3);
+          
+      get_sdts();
+
+       if (!scantransponders.empty())
+	{
+		if (fd == NULL)
+	  {
+	  	fd = fopen(services_xml.c_str(), "w" );
+	  	fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
+      	  	fprintf(fd,"<ZAPIT>\n");
+      	}
+	fprintf(fd, "<satellite name=\"Türksat\" diseqc=\"3\">\n");
+	  for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
+	    {
+	    fprintf(fd, "<transponder transportID=\"%d\" networkID=\"0\">\n", tI->second.tsid); 
+	      write_transponder(tI->second.tsid,fd);
+	      fprintf(fd,"</transponder>\n");
+	    }
+	  fprintf(fd, "</satellite>\n");
+	}
+       scanchannels.clear();
+       scantransponders.clear();
+       }
+       
       }
       write_fake_bouquets(fd);
   fprintf(fd,"</ZAPIT>\n"); 
