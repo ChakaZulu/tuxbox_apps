@@ -954,7 +954,7 @@ static eString getRecordingStat()
 	else
 #endif
 		result << "&nbsp;";
-		
+
 	return result.str();
 }
 
@@ -980,8 +980,8 @@ static eString getEITC()
 
 	if (eit)
 	{
-		eString now_time, now_duration, now_text, now_longtext;
-		eString next_time, next_duration, next_text, next_longtext;
+		eString now_time = "&nbsp;", now_duration = "&nbsp;", now_text = "&nbsp;", now_longtext = "&nbsp;";
+		eString next_time = "&nbsp;", next_duration = "&nbsp;", next_text = "&nbsp;", next_longtext = "&nbsp;";
 
 		int p = 0;
 
@@ -991,27 +991,22 @@ static eString getEITC()
 			{
 				if (p == 0)
 				{
-					if (event->start_time != 0) 
+					if (event->start_time != 0)
 					{
 						now_time.sprintf("%s", ctime(&event->start_time));
 						now_time=now_time.mid(10, 6);
-					} 
-					else 
-						now_time = "";
+					}
 
 					now_duration.sprintf("&nbsp;(%d&nbsp;min)&nbsp;", (int)(event->duration/60));
 				}
 				if (p == 1)
 				{
-					if (event->start_time != 0) 
+					if (event->start_time != 0)
 					{
  						next_time.sprintf("%s", ctime(&event->start_time));
 						next_time=next_time.mid(10,6);
 						next_duration.sprintf("&nbsp;(%d&nbsp;min)&nbsp;", (int)(event->duration/60));
 					}
-					else 
-						next_time="";
-
 				}
 				for (ePtrList<Descriptor>::iterator descriptor(event->descriptor); descriptor != event->descriptor.end(); ++descriptor)
 				{
@@ -1519,7 +1514,7 @@ static eString getZap(eString mode, eString path)
 {
 	eString result;
 	eString zap_result;
-	
+
 #ifndef DISABLE_FILE
 	if (path == ";4097:7:0:1:0:0:0:0:0:0:")
 	{
@@ -1530,7 +1525,11 @@ static eString getZap(eString mode, eString path)
 #endif
 	zap_result += getZapContent(mode, path);
 	result += getEITC();
-	result.strReplace("#SERVICENAME#", filter_string(getCurService()));
+	eString curService = filter_string(getCurService());
+	if (curService == "n/a")
+		curService = eZapMain::getInstance()->dvrActive() ? "Digital Video Recorder" : "&nbsp;";
+	result.strReplace("#SERVICENAME#", curService);
+
 
 	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
 
@@ -2097,9 +2096,7 @@ static eString getEITC2()
 						now_time.sprintf("%s", ctime(&event->start_time));
 						now_time = now_time.mid(10, 6);
 					}
-					else
-						now_time = "";
-						
+
 					now_duration.sprintf("%d", (int)(event->duration/60));
 				}
 				if (p == 1)
@@ -2110,8 +2107,6 @@ static eString getEITC2()
 						next_time = next_time.mid(10,6);
 						next_duration.sprintf("%d", (int)(event->duration/60));
 					}
-					else
-						now_time = "";
 				}
 				for (ePtrList<Descriptor>::iterator descriptor(event->descriptor); descriptor != event->descriptor.end(); ++descriptor)
 				{

@@ -413,7 +413,8 @@ public:
 	void stopSkip(int dir);
 	enum { skipForward, skipReverse };
 	int isRecording() {return state & stateRecording;}
-	void setFakeRecordingState(int on) {if (on) state |= stateRecording; else state &= ~stateRecording;} 
+	void setFakeRecordingState(int on) {if (on) state |= stateRecording; else state &= ~stateRecording;}
+	int dvrActive(void) {return dvrfunctions;}
 #endif
 private:
 	void nextService(int add=0);
