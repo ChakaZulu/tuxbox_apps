@@ -472,6 +472,6 @@ sleeptimerbox.hint2 Die dbox2 schaltet sich nach dieser Zeit aus.
 timerbar.channelswitch Vormerken
 timerbar.recordevent Aufnehmen
 timer.eventtimed.title Sendung vormerken
-timer.eventtimed.msg Die Sendung wurde vorgemerkt.\nDie dbox2 wird automatisch umschalten.
+timer.eventtimed.msg Die Sendung wurde vorgemerkt.\nDie dbox2 wird sich zum Startzeitpunkt automatisch ein- \nund auf die Sendung umschalten.
 timer.eventrecord.title Aufnahme vormerken
 timer.eventrecord.msg   Noch nicht implementiert!
