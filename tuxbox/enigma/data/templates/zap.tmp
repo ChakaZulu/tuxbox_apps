@@ -3,15 +3,14 @@
 
 <table border=0 cellpadding=0 cellspacing=0>
 	<tr>
-		<td style="width: 200px" align=center>
-			<button name="mepg" style="width: 80px;" value="MEPG" onClick=javascript:mepg()>Multi-EPG</button>
-			&nbsp;&nbsp;
-			<button name="epg" style="width: 80px;" value="EPG" onClick=javascript:epg()>EPG</button>
+		<td style="width: 210px">
+			<button name="mepg" style="width: 100px; background-color: #CB0303" value="MEPG" onClick=javascript:mepg()><span class="button">Multi-EPG</span></button>
+			<button name="epg" style="width: 100px; background-color: #12259E" value="EPG" onClick=javascript:epg()><span class="button">EPG</span></button>
 		</td>
 		<td style="width: 450px" align=center>
-			<a href="javascript:zapChannelBackward()"><img src="player_rew.png" border="0"></a>
+			<a href="javascript:zapChannelBackward()"><img src="up.gif" border="0"></a>
 			&nbsp;&nbsp;
-			<a href="javascript:zapChannelForward()"><img src="player_fwd.png" border="0"></a>
+			<a href="javascript:zapChannelForward()"><img src="down.gif" border="0"></a>
 		</td>
 	</tr>
 </table>
@@ -19,10 +18,10 @@
 	<table border=0 cellpadding=0 cellspacing=0>
 		<tr>
 			<td>
-				<select style="width: 200px; font-weight: bold;" onChange=bouquetChange() name="bouquet" size=30></select>
+				<select style="width: 210px; font-weight: bold;" onChange=bouquetChange() name="bouquet" size=30></select>
 			</td>
 			<td>
-				<select style="width: 450px; font-weight: bold;" onChange=channelChange() name="channel" size=30></select>
+				<select style="width: 440px; font-weight: bold;" onChange=channelChange() name="channel" size=30></select>
 			</td>
 		</tr>
 	</table>
