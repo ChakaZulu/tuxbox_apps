@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.144 2005/01/24 23:52:29 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.145 2005/01/27 22:37:55 thegoodguy Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -669,7 +669,8 @@ void *start_scanthread(void *scanmode)
 		while ((search = xmlGetNextOccurence(search, frontendType)) != NULL)
 		{
 			/* write services */
-			scan_success = scan_success || write_provider(fd, frontendType, xmlGetAttribute(search, "name"));
+			if (write_provider(fd, frontendType, xmlGetAttribute(search, "name")))
+				scan_success = true;
 			
 			/* go to next satellite */
 			search = search->xmlNextNode;
