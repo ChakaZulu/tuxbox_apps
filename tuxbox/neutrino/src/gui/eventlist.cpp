@@ -138,7 +138,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 	bool loop=true;
 	while (loop)
 	{
-		g_RCInput->getMsgAbsoluteTimeout( &msg, &(uint)data, &timeoutEnd );
+		g_RCInput->getMsgAbsoluteTimeout( &msg, (uint*) (&data), &timeoutEnd );
 
 		if ( msg <= CRCInput::RC_MaxRC )
 			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_chanlist );
