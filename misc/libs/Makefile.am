@@ -2,5 +2,6 @@ AUTOMAKE_OPTIONS = gnu
 
 SUBDIRS = libeventserver
 
-pkgconfig_DATA = libeventserver.pc.in
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = libeventserver.pc
 

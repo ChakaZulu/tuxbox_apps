@@ -7,8 +7,6 @@ AC_PROG_CC
 AC_PROG_CXX
 AM_PROG_LIBTOOL
 
-TUXBOX_APPS_DVB
-
 AC_OUTPUT([
 Makefile
 libeventserver/Makefile
