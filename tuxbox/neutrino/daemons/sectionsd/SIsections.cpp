@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.5 2001/05/21 22:44:44 fnbrd Exp $
+// $Id: SIsections.cpp,v 1.6 2001/05/21 22:45:43 fnbrd Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.cpp,v $
+// Revision 1.6  2001/05/21 22:45:43  fnbrd
+// Debugausgaben raus.
+//
 // Revision 1.5  2001/05/21 22:44:44  fnbrd
 // Timeout verbessert.
 //
@@ -296,7 +299,7 @@ int SIsections :: readSections(unsigned short pid, unsigned char filter, unsigne
 
   time_t szeit=time(NULL);
 
-  printf("reading first\n");
+//  printf("reading first\n");
   // Erstes Segment lesen
   do {
     if(time(NULL)>szeit+(long)timeoutInSeconds) {
@@ -330,7 +333,7 @@ int SIsections :: readSections(unsigned short pid, unsigned char filter, unsigne
   // Die restlichen Segmente lesen
 
   szeit=time(NULL);
-  printf("reading next\n");
+//  printf("reading next\n");
 
   for(;;) {
     if(time(NULL)>szeit+(long)timeoutInSeconds)
@@ -417,7 +420,7 @@ int SIsections :: readSections(unsigned short pid, unsigned char filter, unsigne
 #endif // DEBUG
 
   time_t starttime=time(NULL);
-  printf("reading missing\n");
+//  printf("reading missing\n");
 
   if ((fd = open("/dev/ost/demux0", O_RDWR)) == -1) {
     perror ("/dev/ost/demux0");
