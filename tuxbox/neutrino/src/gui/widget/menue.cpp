@@ -606,12 +606,28 @@ int CMenuOptionStringChooser::paint( bool selected )
 
 
 //-------------------------------------------------------------------------------------------------------------------------------
-CMenuForwarder::CMenuForwarder(string Text, bool Active, char* Option, CMenuTarget* Target, string ActionKey, bool Localizing, uint DirectKey, string IconName)
+CMenuForwarder::CMenuForwarder(string Text, bool Active, const char * const Option, CMenuTarget* Target, string ActionKey, bool Localizing, uint DirectKey, string IconName)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	height=g_Fonts->menu->getHeight();
 	text=Text;
 	option = Option;
+	option_string = NULL;
+	active = Active;
+	jumpTarget = Target;
+	actionKey = ActionKey;
+	localizing = Localizing;
+	directKey = DirectKey;
+	iconName = IconName;
+}
+
+CMenuForwarder::CMenuForwarder(string Text, bool Active, const std::string &Option, CMenuTarget* Target, string ActionKey, bool Localizing, uint DirectKey, string IconName)
+{
+	frameBuffer = CFrameBuffer::getInstance();
+	height=g_Fonts->menu->getHeight();
+	text=Text;
+	option = NULL;
+	option_string = &Option;
 	active = Active;
 	jumpTarget = Target;
 	actionKey = ActionKey;
@@ -651,7 +667,10 @@ int CMenuForwarder::paint(bool selected)
 		if (option)
 			CLCD::getInstance()->showMenuText(1, option);
 		else
-			CLCD::getInstance()->showMenuText(1, "");
+			if (option_string)
+				CLCD::getInstance()->showMenuText(1, *option_string);
+			else
+				CLCD::getInstance()->showMenuText(1, "");
 	}
 
 	unsigned char color = COL_MENUCONTENT;
@@ -676,12 +695,19 @@ int CMenuForwarder::paint(bool selected)
 		g_Fonts->channellist_number->RenderString(x + 10, y+ height, height, tmp, color, height);
 	}
 
-	if(option)
+	if (option)
 	{
 		int stringwidth = g_Fonts->menu->getRenderWidth(option);
 		int stringstartposOption = x + dx - stringwidth - 10; //+ offx
 
 		g_Fonts->menu->RenderString(stringstartposOption, y+height,dx- (stringstartposOption- x),  option, color);
+	}
+	else if (option_string != NULL)
+	{
+		int stringwidth = g_Fonts->menu->getRenderWidth(*option_string);
+		int stringstartposOption = x + dx - stringwidth - 10; //+ offx
+
+		g_Fonts->menu->RenderString(stringstartposOption, y+height,dx- (stringstartposOption- x), *option_string, color);
 	}
 
 	return y+ height;

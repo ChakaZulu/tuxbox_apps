@@ -166,13 +166,15 @@ class CMenuForwarder : public CMenuItem
 {
 		int		height;
 		string		text;
-		char*		option;
+		const char *        option;
+		const std::string * option_string;
 		CMenuTarget*	jumpTarget;
 		string		actionKey;
 		bool		localizing;
 	public:
 
-		CMenuForwarder(string Text, bool Active=true, char *Option=NULL, CMenuTarget* Target=NULL, string ActionKey="", bool Localizing= true, uint DirectKey= CRCInput::RC_nokey, string IconName= "");
+		CMenuForwarder(string Text, bool Active=true, const char * const Option=NULL, CMenuTarget* Target=NULL, string ActionKey="", bool Localizing= true, uint DirectKey= CRCInput::RC_nokey, string IconName= "");
+		CMenuForwarder(string Text, bool Active, const std::string &Option, CMenuTarget* Target=NULL, string ActionKey="", bool Localizing= true, uint DirectKey= CRCInput::RC_nokey, string IconName= "");
 		int paint(bool selected=false);
 		int getHeight()
 		{
