@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.10 2001/07/25 11:39:42 fnbrd Exp $
+//  $Id: sectionsdMsg.h,v 1.11 2001/07/25 16:46:46 fnbrd Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -25,6 +25,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsdMsg.h,v $
+//  Revision 1.11  2001/07/25 16:46:46  fnbrd
+//  Added unique-keys to all commands.
+//
 //  Revision 1.10  2001/07/25 11:39:42  fnbrd
 //  Added Port number
 //
@@ -98,7 +101,7 @@ enum sectionsdCommands {
 //     -
 //   data of response:
 //     is a string (c-string) with all cached actual events,
-//     2 lines per service, first line service name, second line event name
+//     3 lines per service, first line unique-event-key, second line service name, third line event name
 //
 // currentNextInformation:
 //   data of request:
@@ -117,7 +120,7 @@ enum sectionsdCommands {
 //     is channel name with trailing 0 (c-string)
 //   data of response:
 //     is a string (c-string) describing the cached events for the requestet channel
-//     1 line per event format DD.MM HH:MM durationInMinutes Event name
+//     1 line per event format: uniqueEventKey DD.MM HH:MM durationInMinutes Event name
 //
 // setHoursToCache
 //   data of request:
@@ -137,7 +140,7 @@ enum sectionsdCommands {
 //   data of response:
 //     is a string (c-string) with all cached services
 //     3 lines per service
-//     1. line: service-ID, service-type, eitScheduleFlag (bool),
+//     1. line: unique-service-key, service-ID, service-type, eitScheduleFlag (bool),
 //              eitPresentFollowingFlag (bool), runningStatus (bool),
 //              freeCAmode (bool), number of nvod services
 //     2. line: service name
@@ -148,6 +151,6 @@ enum sectionsdCommands {
 //     -
 //   data of response:
 //     is a string (c-string) with all cached actual events,
-//     2 lines per service, first line service name, second line event name
+//     3 lines per service, first line unique-event-key, second line service name, third line event name
 //
 #endif // SECTIONSDMSG_H

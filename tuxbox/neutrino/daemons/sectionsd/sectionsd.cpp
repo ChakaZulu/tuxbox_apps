@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.38 2001/07/25 15:53:21 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.39 2001/07/25 16:46:46 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,8 +23,8 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
-//  Revision 1.38  2001/07/25 15:53:21  fnbrd
-//  Neues Antwort-Format bei current/next
+//  Revision 1.39  2001/07/25 16:46:46  fnbrd
+//  Added unique-keys to all commands.
 //
 //  Revision 1.37  2001/07/25 15:06:18  fnbrd
 //  Added exception-handlers for better bug hunting.
@@ -792,7 +792,8 @@ static void commandDumpAllServices(struct connectionData *client, char *data, co
   lockServices();
   char daten[200];
   for(MySIservicesOrderServiceName::iterator s=mySIservicesOrderServiceName.begin(); s!=mySIservicesOrderServiceName.end(); s++) {
-    sprintf(daten, "%hu %hhu %d %d %d %d %u ",
+    sprintf(daten, "%08x %hu %hhu %d %d %d %d %u ",
+      s->first->uniqueKey(),
       s->first->serviceID, s->first->serviceTyp,
       s->first->eitScheduleFlag(), s->first->eitPresentFollowingFlag(),
       s->first->runningStatus(), s->first->freeCAmode(),
@@ -868,6 +869,8 @@ static void commandAllEventsChannelName(struct connectionData *client, char *dat
       if(SIservice::makeUniqueKey(e->first->originalNetworkID, e->first->serviceID)==serviceUniqueKey) {
         serviceIDfound=1;
         char strZeit[50];
+        sprintf(strZeit, "%012llx ", e->first->uniqueKey());
+        strcat(evtList, strZeit);
         struct tm *tmZeit;
         tmZeit=localtime(&(e->first->times.begin()->startzeit));
         sprintf(strZeit, "%02d.%02d %02d:%02d %u ",
@@ -1038,7 +1041,9 @@ static void commandActualEPGchannelName(struct connectionData *client, char *dat
   unlockServices();
   if(evt.serviceID!=0) { //Found
     dprintf("EPG found.\n");
-    nResultDataSize=strlen(evt.name.c_str())+1+		//Name + del
+    nResultDataSize=
+      12+1+					// Unique-Key + del
+      strlen(evt.name.c_str())+1+		//Name + del
       strlen(evt.text.c_str())+1+		//Text + del
       strlen(evt.extendedText.c_str())+1+	//ext + del
       3+3+4+1+					//dd.mm.yyyy + del
@@ -1056,7 +1061,8 @@ static void commandActualEPGchannelName(struct connectionData *client, char *dat
 
     unsigned nProcentagePassed=(unsigned)((float)(time(NULL)-zeitEvt.startzeit)/(float)zeitEvt.dauer*100.);
 
-    sprintf(pResultData, "%s\xFF%s\xFF%s\xFF%02d.%02d.%04d\xFF%02d:%02d\xFF%02d:%02d\xFF%03u\xFF",
+    sprintf(pResultData, "%012llx\xFF%s\xFF%s\xFF%s\xFF%02d.%02d.%04d\xFF%02d:%02d\xFF%02d:%02d\xFF%03u\xFF",
+      evt.uniqueKey(),
       evt.name.c_str(),
       evt.text.c_str(),
       evt.extendedText.c_str(), nSDay, nSMon, nSYear, nSH, nSM, nFH, nFM, nProcentagePassed );
@@ -1097,22 +1103,20 @@ static void sendEventList(struct connectionData *client, const unsigned char ser
     if(s->first->serviceTyp==serviceTyp1 || (serviceTyp2 && s->first->serviceTyp==serviceTyp2)) {
       SItime zeit(0, 0);
       const SIevent &evt=findActualSIeventForServiceUniqueKey(s->first->uniqueKey(), zeit);
-/*
       if(evt.serviceID!=0) {
-        char id[100];
-        sprintf(id, "%llx ", evt.uniqueKey());
+        char id[20];
+        sprintf(id, "%012llx\n", evt.uniqueKey());
         strcat(evtList, id);
       }
       else
-        strcat(evtList, "0 ");
-*/
+        strcat(evtList, "0\n");
       strcat(evtList, s->first->serviceName.c_str());
       strcat(evtList, "\n");
       if(evt.serviceID!=0)
         //Found
         strcat(evtList, evt.name.c_str());
       strcat(evtList, "\n");
-    } // if TV
+    } // if ==serviceTyp
   unlockEvents();
   unlockServices();
   dmxEIT.unpause(); // -> unlock
@@ -1692,7 +1696,7 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.38 2001/07/25 15:53:21 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.39 2001/07/25 16:46:46 fnbrd Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
