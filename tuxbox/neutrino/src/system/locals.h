@@ -2,7 +2,7 @@
 #define __locals__
 
 /*
- * $Id: locals.h,v 1.3 2004/06/07 07:14:33 thegoodguy Exp $
+ * $Id: locals.h,v 1.4 2004/06/13 10:57:57 rasc Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -36,6 +36,48 @@ typedef enum
 	LOCALE_EPGPLUS_REMIND                                 ,
 	LOCALE_EPGPLUS_SCROLL_MODE                            ,
 	LOCALE_EPGPLUS_STRETCH_MODE                           ,
+
+	LOCALE_EPGPLUS_ACTIONS                                ,
+	LOCALE_EPGPLUS_PAGE_DOWN                              ,
+	LOCALE_EPGPLUS_PAGE_UP                                ,
+	LOCALE_EPGPLUS_OPTIONS                                ,
+	LOCALE_EPGPLUS_SETTINGS                               ,
+	LOCALE_EPGPLUS_SAVE_SETTINGS                          ,
+	LOCALE_EPGPLUS_RESET_SETTINGS                         ,
+	LOCALE_EPGPLUS_EDIT_FONTS                             ,
+	LOCALE_EPGPLUS_SELECT_FONT_NAME                       ,
+	LOCALE_EPGPLUS_CHANGE_FONT_SIZE                       ,
+	LOCALE_EPGPLUS_CHANGE_FONT_STYLE                      ,
+	LOCALE_EPGPLUS_FONT_STYLE_REGULAR                     ,
+	LOCALE_EPGPLUS_FONT_STYLE_BOLD                        ,
+	LOCALE_EPGPLUS_FONT_STYLE_ITALIC                      ,
+	LOCALE_EPGPLUS_EDIT_SIZES                             ,
+	LOCALE_EPGPLUS_CHANGE_SIZE                            ,
+	LOCALE_EPGPLUS_PREV_BOUQUET                           ,
+	LOCALE_EPGPLUS_NEXT_BOUQUET                           ,
+	LOCALE_EPGPLUS_BY_PAGE                                ,
+	LOCALE_EPGPLUS_BY_BOUQUET                             ,
+	LOCALE_EPGPLUS_VIEWMODE                               ,
+	LOCALE_EPGPLUS_SWAPMODE                               ,
+
+  LOCALE_EPGPLUS_HEADER_FONT                            ,                      
+  LOCALE_EPGPLUS_TIMELINE_FONTTIME                      ,                
+  LOCALE_EPGPLUS_TIMELINE_FONTDATE                      ,                
+  LOCALE_EPGPLUS_CHANNELENTRY_FONT                      ,                
+  LOCALE_EPGPLUS_CHANNELEVENTENTRY_FONT                 ,           
+  LOCALE_EPGPLUS_FOOTER_FONTBOUQUETCHANNELNAME          ,    
+  LOCALE_EPGPLUS_FOOTER_FONTEVENTDESCRIPTION            ,      
+  LOCALE_EPGPLUS_FOOTER_FONTEVENTSHORTDESCRIPTION       , 
+  LOCALE_EPGPLUS_FOOTER_FONTBUTTONS                     ,               
+
+  LOCALE_EPGPLUS_CHANNELENTRY_WIDTH                     ,               
+  LOCALE_EPGPLUS_CHANNELENTRY_SEPARATIONLINEHEIGHT      ,
+  LOCALE_EPGPLUS_SLIDER_WIDTH                           ,                     
+  LOCALE_EPGPLUS_HORGAP1_HEIGHT                         ,                   
+  LOCALE_EPGPLUS_HORGAP2_HEIGHT                         ,                   
+  LOCALE_EPGPLUS_VERGAP1_WIDTH                          ,                    
+  LOCALE_EPGPLUS_VERGAP2_WIDTH                          ,                    
+
 	LOCALE_GENRE_ARTS_0                                   ,
 	LOCALE_GENRE_ARTS_1                                   ,
 	LOCALE_GENRE_ARTS_10                                  ,

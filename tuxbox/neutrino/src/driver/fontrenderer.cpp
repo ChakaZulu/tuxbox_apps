@@ -183,6 +183,17 @@ Font *FBFontRenderClass::getFont(const char * const family, const char * const s
 	return new Font(this, id, size, (strcmp(((fontListEntry *)id)->style, style) == 0) ? Font::Regular : Font::Embolden);
 }
 
+std::string FBFontRenderClass::getFamily(const char * const filename) const
+{
+	for (fontListEntry *f=font; f; f=f->next)
+	{
+		if (!strcmp(f->filename, filename))
+			return f->family;
+	}
+
+  return "";
+}
+
 Font::Font(FBFontRenderClass *render, FTC_FaceID faceid, const int isize, const fontmodifier _stylemodifier)
 {
 	stylemodifier           = _stylemodifier;

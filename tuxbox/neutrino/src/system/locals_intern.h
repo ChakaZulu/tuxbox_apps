@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.4 2004/06/07 07:14:33 thegoodguy Exp $
+ * $Id: locals_intern.h,v 1.5 2004/06/13 10:57:57 rasc Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -36,6 +36,48 @@ const char * locale_real_names[] =
 	"EPGPlus.remind",
 	"EPGPlus.scroll_mode",
 	"EPGPlus.stretch_mode",
+
+  "EPGPlus.actions",
+  "EPGPlus.page_down",
+  "EPGPlus.page_up",
+	"EPGPlus.options",
+	"EPGPlus.settings",
+	"EPGPlus.save_settings",
+	"EPGPlus.reset_settings",
+	"EPGPlus.edit_fonts",
+	"EPGPlus.select_font_name",
+	"EPGPlus.change_font_size",
+	"EPGPlus.change_font_style",
+	"EPGPlus.font_style_regular",
+	"EPGPlus.font_style_bold",
+	"EPGPlus.font_style_italic",
+	"EPGPlus.edit_sizes",
+	"EPGPlus.change_size",
+	"EPGPlus.prev_bouquet",
+	"EPGPlus.next_bouquet",
+	"EPGPlus.bypage_mode",
+	"EPGPlus.bybouquet_mode",
+	"EPGPlus.view_mode",
+	"EPGPlus.swap_mode",
+
+  "EPGPlus.header_font",                          
+  "EPGPlus.timeline_fonttime",                
+  "EPGPlus.timeline_fontdate",                
+  "EPGPlus.channelentry_font",                
+  "EPGPlus.channelevententry_font",           
+  "EPGPlus.footer_fontbouquetchannelname",    
+  "EPGPlus.footer_fonteventdescription",      
+  "EPGPlus.footer_fonteventshortdescription", 
+  "EPGPlus.footer_fontbuttons",               
+
+  "EPGPlus.channelentry_width",                      
+  "EPGPlus.channelentry_separationlineheight",
+  "EPGPlus.slider_width",                                  
+  "EPGPlus.horgap1_height",                              
+  "EPGPlus.horgap2_height",                              
+  "EPGPlus.vergap1_width",                                
+  "EPGPlus.vergap2_width",                                
+
 	"GENRE.ARTS.0",
 	"GENRE.ARTS.1",
 	"GENRE.ARTS.10",
