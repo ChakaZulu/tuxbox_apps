@@ -1,13 +1,13 @@
 all:: mines mines.so
 
-PREF=powerpc-linux-
+#PREF=powerpc-linux-
 CC=$(PREF)gcc
 STRIP=$(PREF)strip
-CDEBUGFLAGS=-g -O2 -Wall -pedantic
+CDEBUGFLAGS=-g -O2 -Wall -pedantic -DUSEX
 INCLUDES=-I. -I../lib
 OBJS=board.o
 
-SingleProgramTarget(mines,main.o $(OBJS),,-L../lib -lfx2)
+SingleProgramTarget(mines,main.o $(OBJS),,-L../lib -lfx2 -lX11)
 
 board.o: pics.h
 

@@ -10,7 +10,6 @@
 #include <rcinput.h>
 #include <colors.h>
 #include <pics.h>
-#include <text.h>
 
 #define	STATUS_X		80
 #define STATUS_Y		50
@@ -30,18 +29,10 @@ static	int		failflags=0;
 static	long	score = 0;
 static	int		mouse_x = 3;
 static	int		mouse_y = 3;
-static	int		ww[10] = {	NO_0_WIDTH, NO_1_WIDTH, NO_2_WIDTH, NO_3_WIDTH,
-						NO_4_WIDTH, NO_5_WIDTH, NO_6_WIDTH, NO_7_WIDTH,
-						NO_8_WIDTH, NO_9_WIDTH };
-static	unsigned char	*nn[10] = {
-						data_no0, data_no1, data_no2, data_no3,
-						data_no4, data_no5, data_no6, data_no7,
-						data_no8, data_no9 };
 
-static	int		ww2[9] = {	0, WI1, WI2, WI3,
-						WI4, WI5, WI6, WI7, WI8 };
-static	unsigned char	*nn2[9] = { 0, d1, d2, d3, d4, d5, d6, d7, d8 };
 static	struct timeval starttv;
+
+static	int		ww2[10] = { 0, 5, 10, 9, 10, 9, 9, 9, 9, 9 };
 
 static	int		myrand( int idx )
 {
@@ -54,9 +45,6 @@ static	int		myrand( int idx )
 void	DrawScore( void )
 {
 	char			tscore[ 64 ];
-	char			*p=tscore;
-	int				x = 190;
-	int				h;
 	struct timeval tv;
 	gettimeofday(&tv,0);
 
@@ -67,16 +55,9 @@ void	DrawScore( void )
 
 	score = 37000 - score;
 
-	FBCopyImage( 190, 210, SC_WIDTH, 64, data_score );
 	sprintf(tscore,"%ld",score);
-
-	for( ; *p; p++ )
-	{
-		h = (*p - 48);
-		FBCopyImage( x, 210 + 80, ww[h], 64, nn[h] );
-		x += ww[h];
-	}
-	FBFillRect( x, 210 + 80, 20, 64, BLACK );
+	FBDrawString( 190, 210, 64, "Score", WHITE, 0 );
+	FBDrawString( 190, 290, 64, tscore, WHITE, 0 );
 }
 
 static	void	DrawMouse( void )
@@ -93,6 +74,7 @@ static	int	DrawField( int x, int y )
 	int				vy;
 	int				num;
 	int				r;
+	char			cnum[2] = { 48, 0 };
 
 	switch ( *p )
 	{
@@ -123,7 +105,8 @@ static	int	DrawField( int x, int y )
 			r = 16 - (ww2[num] / 2);
 			if ( r < 0 )
 				r=0;
-			FBCopyImage( x*32+r, y*32, ww2[num], 32, nn2[num] );
+			cnum[0]=num+48;
+			FBDrawString( x*32+r, y*32, 32, cnum, BLACK, 0 );
 		}
 		return num;
 	}
@@ -171,7 +154,7 @@ void	DrawBoard( int rbomb )
 	}
 	FBDrawRect( 3*32-3, 3*32-3, 10*32+5, 10*32+5, WHITE );
 	FBDrawRect( 3*32-6, 3*32-6, 10*32+11, 10*32+11, WHITE );
-	FBCopyImage( LOGO_X, LOGO_Y, FX_WIDTH, 64, data_fx2 );
+	FBDrawFx2Logo( LOGO_X, LOGO_Y );
 	gettimeofday(&starttv,0);
 
 	DrawMouse();
@@ -255,7 +238,7 @@ void	BoardInitialize( void )
 void	DrawGameOver( void )
 {
 	DrawBoard(1);
-	FBCopyImage( 500, 210, GO_WIDTH, 64, data_gameover );
+	FBDrawString( 500, 210, 64, "Game Over", RED, 0 );
 }
 
 static	void	rekSel( int x, int y )

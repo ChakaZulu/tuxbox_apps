@@ -1,15 +1,15 @@
 all:: pacman.so pac
 
-PREF=powerpc-linux-
+#PREF=powerpc-linux-
 CC=$(PREF)gcc
 STRIP=$(PREF)strip
-CDEBUGFLAGS=-g -O2 -Wall -pedantic
+CDEBUGFLAGS=-g -O2 -Wall -pedantic -DUSEX
 INCLUDES=-I. -I../lib
 OBJS=maze.o
 
-SingleProgramTarget(pac,main.o $(OBJS),,-L../lib -lfx2)
+SingleProgramTarget(pac,main.o $(OBJS),,-L../lib -lfx2 -lX11)
 
-maze.o: pics.h text.h level.h
+maze.o: pics.h level.h
 
 pacman.so: somain.o $(OBJS)
 	$(CC) -o pacman.so -shared -Wl,-soname,pacman.so somain.o $(OBJS)

@@ -1,15 +1,15 @@
 all:: tetris tetris.so
 
-PREF=powerpc-linux-
+#PREF=powerpc-linux-
 CC=$(PREF)gcc
 STRIP=$(PREF)strip
-CDEBUGFLAGS=-g -O2 -Wall -pedantic
+CDEBUGFLAGS=-g -O2 -Wall -pedantic -DUSEX
 INCLUDES=-I. -I../lib
 OBJS=board.o
 
-SingleProgramTarget(tetris,main.o $(OBJS),,-L../lib -lfx2)
+SingleProgramTarget(tetris,main.o $(OBJS),,-L../lib -lfx2 -lX11)
 
-board.o: pics.h text.h
+board.o: pics.h
 
 tetris.so: somain.o $(OBJS)
 	$(CC) -o tetris.so -shared -Wl,-soname,tetris.so somain.o $(OBJS)

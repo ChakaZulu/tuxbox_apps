@@ -10,7 +10,6 @@
 #include <rcinput.h>
 #include <colors.h>
 #include <pics.h>
-#include <text.h>
 #include <pig.h>
 #include <level.h>
 
@@ -33,7 +32,7 @@ int				level = 0;
 int				score = 0;
 static	int		timeleft=0;
 
-static	int		piccs[] = { 133, 125, 125, 133 };
+static	int		piccs[] = { 133, 126, 125, 133 };
 
 typedef struct _Ghost
 {
@@ -133,7 +132,7 @@ void	DrawMaze( void )
 			p++;
 		}
 	}
-	FBCopyImage( LOGO_X, LOGO_Y, FX_WIDTH, 64, data_fx2 );
+	FBDrawFx2Logo( LOGO_X, LOGO_Y );
 }
 
 void	MazeInitialize( void )
@@ -584,34 +583,17 @@ void	DrawFill( void )
 
 void	DrawGameOver( void )
 {
-	FBCopyImage( 250, 200, GO_WIDTH, 64, data_gameover );
+	FBDrawString( 250, 200, 64, "Game Over", RED, 0 );
 }
 
 void	DrawScore( void )
 {
-	int		ww[10] = {	NO_0_WIDTH, NO_1_WIDTH, NO_2_WIDTH, NO_3_WIDTH,
-						NO_4_WIDTH, NO_5_WIDTH, NO_6_WIDTH, NO_7_WIDTH,
-						NO_8_WIDTH, NO_9_WIDTH };
-	unsigned char	*nn[10] = {
-						data_no0, data_no1, data_no2, data_no3,
-						data_no4, data_no5, data_no6, data_no7,
-						data_no8, data_no9 };
+	char	cscore[64];
+	int		x;
 
-	char	cscore[ 64 ];
-	char	*p=cscore;
-	int		x = 250 + SC_WIDTH + 18;
-	int		h;
-
-	sprintf(cscore,"%d",score*100);
-	FBFillRect( 250,264, SC_WIDTH + 19, 64, BLACK );
-	FBCopyImage( 250, 264, SC_WIDTH, 64, data_score );
-
-	for( ; *p; p++ )
-	{
-		h = (*p - 48);
-		FBCopyImage( x, 264, ww[h], 64, nn[h] );
-		x += ww[h];
-	}
+	sprintf(cscore,"%d",score);
+	x=FBDrawString(250,264,64,"Score",WHITE,0);
+	FBDrawString(250+x+18,264,64,cscore,WHITE,0);
 }
 
 void	InitLevel( void )

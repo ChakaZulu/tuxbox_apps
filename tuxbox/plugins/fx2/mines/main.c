@@ -25,7 +25,6 @@ static	void	setup_colors( void )
 {
 	FBSetColor( YELLOW, 255, 255, 0 );
 	FBSetColor( GREEN, 0, 255, 0 );
-	FBSetColor( RED, 255, 0, 0 );
 	FBSetColor( STEELBLUE, 0, 0, 180 );
 	FBSetColor( BLUE, 130, 130, 255 );
 	FBSetColor( GRAY, 130, 130, 130 );
@@ -85,6 +84,9 @@ int main( int argc, char ** argv )
 	
 			RcGetActCode( );
 			MoveMouse();
+#ifdef USEX
+			FBFlushGrafic();
+#endif
 		}
 
 		if ( doexit != 3 )
@@ -94,6 +96,9 @@ int main( int argc, char ** argv )
 				DrawScore();
 			else
 				DrawGameOver();
+#ifdef USEX
+			FBFlushGrafic();
+#endif
 			doexit=0;
 			while(( actcode != RC_OK ) && !doexit )
 			{

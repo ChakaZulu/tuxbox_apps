@@ -11,7 +11,6 @@
 #include <malloc.h>
 #include <colors.h>
 #include <pics.h>
-#include <text.h>
 
 #define	STATUS_X		80
 #define STATUS_Y		50
@@ -103,29 +102,12 @@ static	void	InitSnake( void )
 
 static	void	DrawScore( void )
 {
-	int		ww[10] = {	WI0, WI1, WI2, WI3,
-						WI4, WI5, WI6, WI7,
-						WI8, WI9 };
-	unsigned char	*nn[10] = {
-						d0, d1, d2, d3,
-						d4, d5, d6, d7,
-						d8, d9 };
-
 	char	cscore[ 64 ];
-	char	*p=cscore;
-	int		x = 250;
-	int		h;
+	int		x;
 
 	sprintf(cscore,"%d",score);
-
-	for( ; *p; p++ )
-	{
-		h = (*p - 48);
-		FBCopyImage( x, 56, ww[h], 32, nn[h] );
-		x += ww[h];
-	}
-	FBFillRect(x,56,16,24,BLACK);
-	FBFillRect(x,80,16,8,STEELBLUE);
+	x=FBDrawString(250,48,32,cscore,WHITE,BLACK);
+	FBFillRect(250+x,48,32,32,BLACK);
 }
 
 void	DrawSnake( void )
@@ -282,7 +264,7 @@ void	DrawMaze( void )
 			p++;
 		}
 	}
-	FBCopyImage( LOGO_X, LOGO_Y, FX_WIDTH, 64, data_fx2 );
+	FBDrawFx2Logo( LOGO_X, LOGO_Y );
 
 	SetNewGoodi();
 	DrawSnake();
@@ -291,32 +273,15 @@ void	DrawMaze( void )
 
 void	DrawGameOver( void )
 {
-	FBCopyImage( 250, 200, GO_WIDTH, 64, data_gameover );
+	FBDrawString(250,200,64,"Game Over",RED,0);
 }
 
 void	DrawFinalScore( void )
 {
-	int		ww[10] = {	NO_0_WIDTH, NO_1_WIDTH, NO_2_WIDTH, NO_3_WIDTH,
-						NO_4_WIDTH, NO_5_WIDTH, NO_6_WIDTH, NO_7_WIDTH,
-						NO_8_WIDTH, NO_9_WIDTH };
-	unsigned char	*nn[10] = {
-						data_no0, data_no1, data_no2, data_no3,
-						data_no4, data_no5, data_no6, data_no7,
-						data_no8, data_no9 };
-
 	char	cscore[ 64 ];
-	char	*p=cscore;
-	int		x = 250 + SC_WIDTH + 18;
-	int		h;
+	int		x;
 
 	sprintf(cscore,"%d",score);
-	FBFillRect( 250,264, SC_WIDTH + 19, 64, BLACK );
-	FBCopyImage( 250, 264, SC_WIDTH, 64, data_score );
-
-	for( ; *p; p++ )
-	{
-		h = (*p - 48);
-		FBCopyImage( x, 264, ww[h], 64, nn[h] );
-		x += ww[h];
-	}
+	x=FBDrawString(250,264,64,"Score",WHITE,0);
+	FBDrawString(250+x+18,264,64,cscore,WHITE,0);
 }

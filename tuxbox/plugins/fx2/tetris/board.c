@@ -10,7 +10,6 @@
 #include <rcinput.h>
 #include <colors.h>
 #include <pics.h>
-#include <text.h>
 
 #if 0
 #define	STATUS_X		5
@@ -60,28 +59,12 @@ static	unsigned char	puzc[] = { 30, 80, 50, 60, 40, 70, 90 };
 
 static	void	DrawScore( void )
 {
-	int		ww[10] = {	NO_0_WIDTH, NO_1_WIDTH, NO_2_WIDTH, NO_3_WIDTH,
-						NO_4_WIDTH, NO_5_WIDTH, NO_6_WIDTH, NO_7_WIDTH,
-						NO_8_WIDTH, NO_9_WIDTH };
-	unsigned char	*nn[10] = {
-						data_no0, data_no1, data_no2, data_no3,
-						data_no4, data_no5, data_no6, data_no7,
-						data_no8, data_no9 };
-
 	char	tscore[ 64 ];
-	char	*p=tscore;
-	int		x = LOGO_X;
-	int		h;
+	int		x;
 
 	sprintf(tscore,"%ld",score);
-
-	for( ; *p; p++ )
-	{
-		h = (*p - 48);
-		FBCopyImage( x, 300 + 80, ww[h], 64, nn[h] );
-		x += ww[h];
-	}
-	FBFillRect( x, 300 + 80, 20, 64, BLACK );
+	x=FBDrawString( LOGO_X-5, 340, 64, tscore, WHITE, BLACK );
+	FBFillRect( LOGO_X+x-5, 340, 20, 64, BLACK );
 }
 
 static	void	DrawNextPuz( void )
@@ -131,8 +114,8 @@ void	DrawBoard( void )
 			}
 		}
 	}
-	FBCopyImage( LOGO_X, LOGO_Y, FX_WIDTH, 64, data_fx2 );
-	FBCopyImage( LOGO_X, 300, SC_WIDTH, 64, data_score );
+	FBDrawFx2Logo(LOGO_X,LOGO_Y);
+	FBDrawString(LOGO_X-5,280,64,"Score",WHITE,0);
 	DrawNextPuz();
 }
 
@@ -511,5 +494,5 @@ void	BoardInitialize( void )
 
 void	DrawGameOver( void )
 {
-	FBCopyImage( 190, 290, GO_WIDTH, 64, data_gameover );
+	FBDrawString( 190, 290, 64, "Game Over", RED, 0 );
 }

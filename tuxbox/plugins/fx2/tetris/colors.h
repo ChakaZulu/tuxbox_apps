@@ -1,7 +1,6 @@
 
-#define	YELLOW			3
-#define	GREEN			4
-#define	RED				5
+#define	YELLOW			4
+#define	GREEN			5
 #define	STEELBLUE		6
 #define	BLUE			7
 #define	GRAY			8
