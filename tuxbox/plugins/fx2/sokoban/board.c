@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <board.h>
 #include <draw.h>
-#include <rcinput2.h>
+#include <rcinput.h>
 #include <colors.h>
 #include <pics.h>
 #include <string.h>

@@ -8,7 +8,7 @@
 #include <signal.h>
 #include <sys/time.h>
 
-#include <rcinput2.h>
+#include <rcinput.h>
 #include <draw.h>
 #include <board.h>
 #include <colors.h>
