@@ -106,6 +106,18 @@ void eWidget::move(ePoint nposition)
 	recalcClip();
 }
 
+void eWidget::cresize(eSize nsize)
+{
+	recalcClientRect();
+	resize(eSize(nsize.width()+size.width()-clientrect.width(), nsize.height()+size.height()-clientrect.height()));
+}
+
+void eWidget::cmove(ePoint nposition)
+{
+	recalcClientRect();
+	move(ePoint(nposition.x()-clientrect.x(), nposition.y()-clientrect.y()));
+}
+
 void eWidget::redraw(eRect area)		// area bezieht sich nicht auf die clientarea
 {
 	if (getTLW()->just_showing)
@@ -555,11 +567,7 @@ int eWidget::setProperty(const eString &prop, const eString &value)
 		if (err)
 			return err;
 
-		recalcClientRect();
-		v[0]-=clientrect.x();
-		v[1]-=clientrect.y();
-		
-		move(ePoint(v[0], v[1]));
+		cmove(ePoint(v[0], v[1]));
 	} else if (prop=="size")
 	{
 		int v[2], e[2];
@@ -585,10 +593,7 @@ int eWidget::setProperty(const eString &prop, const eString &value)
 		int err=parse(value, v, e, 2);
 		if (err)
 			return err;
-		recalcClientRect();
-		v[0]+=size.width()-clientrect.width();
-		v[1]+=size.height()-clientrect.height();
-		resize(eSize(v[0], v[1]));
+		cresize(eSize(v[0], v[1]));
 	} else if (prop=="text")
 	{
 		eString text;

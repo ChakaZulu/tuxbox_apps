@@ -14,9 +14,9 @@
 eMainMenu::eMainMenu()
 {
 	eZapLCD *pLCD=eZapLCD::getInstance();
-	window=new eLBWindow("enigma" , eListbox::tBorder, 12, eSkin::getActive()->queryValue("fontsize", 20), 400);
+	window=new eLBWindow("enigma" , eListbox::tBorder, 7, eSkin::getActive()->queryValue("fontsize", 20), 200);
 	window->setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
-	window->move(ePoint(70, 150));
+	window->cmove(ePoint(150, 150));
 //	CONNECT((new eListboxEntryText(window->list, _("TV mode")))->selected, eMainMenu::sel_close);
 	CONNECT((new eListboxEntryText(window->list, _("[back]")))->selected, eMainMenu::sel_close);
 	CONNECT((new eListboxEntryText(window->list, _("VCR mode")))->selected, eMainMenu::sel_vcr);

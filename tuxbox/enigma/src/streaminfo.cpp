@@ -337,19 +337,19 @@ void siCA::redrawWidget()
 eStreaminfo::eStreaminfo(int mode, decoderParameters *parms): eWindow(1)
 {
 	setText(mode?"Record mode - read manual":"Streaminfo");
-	move(ePoint(100, 80));
-	resize(eSize(450, 450));
+	cmove(ePoint(100, 80));
+	cresize(eSize(450, 450));
 	
 	eWidget *w=new siPID(parms?*parms:Decoder::parms, this);
-	w->move(ePoint(2, 40));
-	w->resize(eSize(size.width()-4, size.height()-40));
+	w->move(ePoint(0, 0));
+	w->resize(clientrect.size());
 	w->hide();
 
 	mp.addPage(w);
 
 	w=new siCA(this);
-	w->move(ePoint(2, 40));
-	w->resize(eSize(size.width()-4, size.height()-40));
+	w->move(ePoint(0, 0));
+	w->resize(clientrect.size());
 	w->hide();
 
 	mp.addPage(w);
