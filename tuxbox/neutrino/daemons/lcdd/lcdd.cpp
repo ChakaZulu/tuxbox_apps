@@ -17,7 +17,7 @@
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -42,6 +42,11 @@
 
 #include "config.h"
 
+class FontsDef
+{
+        public:
+                Font *channelname; Font* time; Font *menutitle; Font *menu;
+};
 
 CLCDDisplay		display;
 fontRenderClass	*fontRenderer;
@@ -101,15 +106,15 @@ void parse_command(int connfd, CLcddClient::commandHead rmsg)
 			read(connfd, &msg5, sizeof(msg5));
 			show_menu(msg5.position, msg5.text, msg5.highlight);
 			break;
-		default: 
+		default:
 			printf("unknown command %i\n", rmsg.cmd);
 	}
 }
 
 void show_servicename( string name )
 {
-	if (mode!=CLcddClient::MODE_TVRADIO) 
-	{	
+	if (mode!=CLcddClient::MODE_TVRADIO)
+	{
 		return;
 	}
 	display.draw_fill_rect (0,14,120,48, CLCDDisplay::PIXEL_OFF);
@@ -236,7 +241,7 @@ void set_mode(CLcddClient::mode m, char *title)
 			printf("[lcdd] Unknown mode: %i\n", m);
 			return;
 	}
-} 
+}
 
 
 void * TimeThread (void *)
