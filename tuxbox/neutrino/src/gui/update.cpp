@@ -109,15 +109,38 @@ bool CFlashUpdate::selectHttpImage(void)
 	std::string url;
 	std::string name;
 	std::string version;
-	std::vector<std::string> urls, names, versions, descriptions;
+	std::vector<std::string> cramfs_lists, urls, names, versions, descriptions;
+	int selected = -1;
 
 	httpTool.setStatusViewer(this);
 	showStatusMessageUTF(g_Locale->getText("flashupdate.getinfofile")); // UTF-8
 
+	CMenuWidget SelectionWidget("flashupdate.selectimage", "softupdate.raw");
+	SelectionWidget.addItem(GenericMenuSeparator);
+	SelectionWidget.addItem(GenericMenuBack);
+
 	std::ifstream urlFile(g_settings.softupdate_url_file);
 
+	unsigned int i = 0;
 	while (urlFile >> url)
 	{
+		std::string::size_type startpos, endpos;
+
+		/* extract domain name */
+		startpos = url.find("//");
+		if (startpos == std::string::npos)
+		{
+			startpos = 0;
+			endpos   = std::string::npos;
+		}
+		else
+		{
+			endpos = url.find('/', startpos + 1);
+		}
+		cramfs_lists.push_back(url.substr(startpos, endpos));
+
+		SelectionWidget.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, cramfs_lists.rbegin()->c_str()));
+		
 		if (httpTool.downloadFile(url, gTmpPath cramfs_list_filename, 20))
 		{
 			std::ifstream in(gTmpPath cramfs_list_filename);
@@ -127,6 +150,19 @@ bool CFlashUpdate::selectHttpImage(void)
 				versions.push_back(version);
 				std::getline(in, name);
 				names.push_back(name);
+
+				CFlashVersionInfo versionInfo(versions[i]);
+
+				std::string description = versionInfo.getType();
+				description += ' ';
+				description += versionInfo.getDate();
+				description += ' ';
+				description += versionInfo.getTime();
+				
+				descriptions.push_back(description); /* workaround since CMenuForwarder does not store the Option String itself */
+
+				SelectionWidget.addItem(new CMenuForwarder(names[i].c_str(), true, descriptions[i].c_str(), new CUpdateMenuTarget(i, &selected)));
+				i++;
 			}
 		}
 	}
@@ -139,28 +175,6 @@ bool CFlashUpdate::selectHttpImage(void)
 		return false;
 	}
 		
-	CMenuWidget SelectionWidget("flashupdate.selectimage", "softupdate.raw");
-	
-	SelectionWidget.addItem(GenericMenuSeparator);
-	SelectionWidget.addItem(GenericMenuBack);
-	SelectionWidget.addItem(GenericMenuSeparatorLine);
-		
-	int selected = -1;
-	for (unsigned int i = 0; i < urls.size(); i++)
-	{
-		CFlashVersionInfo versionInfo(versions[i]);
-
-		std::string description = versionInfo.getType();
-		description += ' ';
-		description += versionInfo.getDate();
-		description += ' ';
-		description += versionInfo.getTime();
-
-		descriptions.push_back(description); /* workaround since CMenuForwarder does not store the Option String itself */
-
-		SelectionWidget.addItem(new CMenuForwarder(names[i].c_str(), true, descriptions[i].c_str(), new CUpdateMenuTarget(i, &selected)));
-	}
-
 	SelectionWidget.exec(NULL, "");
 
 	if (selected == -1)
@@ -284,6 +298,14 @@ bool CFlashUpdate::checkVersion4Update()
 		ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.wrongbase")); // UTF-8
 		return false;
 	}
+
+	if ((strcmp("Release", versionInfo->getType()) != 0) &&
+	    (ShowMsgUTF("messagebox.info", "flashupdate.experimentalimage", CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw") != CMessageBox::mbrYes)) // UTF-8
+	{
+		delete versionInfo;
+		return false;
+	}
+
 	delete versionInfo;
 	return (ShowMsgUTF("messagebox.info", msg, CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw") == CMessageBox::mbrYes); // UTF-8
 }
