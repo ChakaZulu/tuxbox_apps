@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.324 2003/06/11 19:12:17 digi_casi Exp $
+ * $Id: zapit.cpp,v 1.325 2003/06/13 10:50:47 digi_casi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1514,7 +1514,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.324 2003/06/11 19:12:17 digi_casi Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.325 2003/06/13 10:50:47 digi_casi Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
@@ -1559,6 +1559,7 @@ int main(int argc, char **argv)
 	if (!frontend)
 		frontend = new CFrontend();
 
+	diseqcType = (diseqc_t)config.getInt32("diseqcType", NO_DISEQC);
 	if (prepare_channels(frontend->getInfo()->type, diseqcType) < 0)
 		WARN("error parsing services");
 	else
