@@ -1229,7 +1229,7 @@ void eServicePath::setString( const eString& str )
 	}
 }
 
-std::set<eServiceReference> eServiceReference::locked;
+std::set<eServiceReference,eServiceReference::Parental_Compare> eServiceReference::locked;
 bool eServiceReference::lockedListChanged=false;
 
 void eServiceReference::loadLockedList( const char* filename )

@@ -246,8 +246,7 @@ void eHelpWindow::updateScrollbar()
 	int start=curPage*visible->height()*100/total;
 	int vis=visible->getSize().height()*100/total;
 //	eDebug("total=%d, start = %d, vis = %d", total, start, vis);
-	scrollbar->setStart(start);
-	scrollbar->setPerc(vis);
+	scrollbar->setParams(start,vis);
 	scrollbar->show();
 }
 

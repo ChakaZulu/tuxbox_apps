@@ -62,7 +62,10 @@ int eComboBox::setProperty( const eString& prop, const eString& val )
 	else if (prop == "openEntries" )
 		entries = atoi( val.c_str() );
 	else if (prop == "showEntryHelp" )
+	{
 		flags |= flagShowEntryHelp;
+		listbox.setFlags(eListBoxBase::flagShowEntryHelp);
+	}
 	else if (prop == "openWidth" )
 	{
 		int width=listbox.getSize().width();
@@ -122,11 +125,12 @@ int eComboBox::moveSelection ( int dir, bool sendSelChanged )
 
 void eComboBox::onEntrySelected( eListBoxEntryText* e)
 {
-	listbox.hide();
-	if (flags & flagShowEntryHelp)
+	if ( parent->getFocus() == &listbox && (flags & flagShowEntryHelp) )
 		setHelpText( oldHelpText );
 
-	if (e && button.getText() != e->getText() )
+	listbox.hide();
+
+	if (e && text != e->getText() )
 	{
 		setText(e->getText());
 		setFocus( this );
@@ -146,11 +150,11 @@ void eComboBox::onEntrySelected( eListBoxEntryText* e)
 
 void eComboBox::onSelChanged(eListBoxEntryText* le)
 {
-	if (flags & flagShowEntryHelp )
-		setHelpText( le->getHelpText() );
 #ifndef DISABLE_LCD
 	if ( parent->getFocus() == &listbox )
 	{
+		if (flags & flagShowEntryHelp)
+			setHelpText( listbox.getHelpText() );
 		if ( LCDTmp )
 			LCDTmp->setText( le->getText() );
 		else if ( parent->LCDElement )

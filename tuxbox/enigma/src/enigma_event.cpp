@@ -210,8 +210,7 @@ void eEventDisplay::updateScrollbar()
 
 	int start=-long_description->getPosition().y()*100/total;
 	int vis=descr->getSize().height()*100/total;
-	scrollbar->setStart(start);
-	scrollbar->setPerc(vis);
+	scrollbar->setParams(start, vis);
 	scrollbar->show();
 	if (pages == 1)
 		total=0;

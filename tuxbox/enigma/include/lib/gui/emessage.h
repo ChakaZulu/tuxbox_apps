@@ -4,14 +4,17 @@
 #include <lib/gui/ewindow.h>
 
 class eLabel;
+class eTimer;
 
 /**
  * \brief A (modal) messagebox.
  */
 class eMessageBox: public eWindow
 {
+	eTimer *timer;
 	eLabel *text, *icon;
 	eWidget *def;
+	int timeout;
 public:
 	void pressedOK();
 	void pressedCancel();
@@ -35,7 +38,7 @@ public:
 	 * \param string The string displayed inside the messagebox.
 	 * \param caption The title of the messagebox.
 	 */
-	eMessageBox(eString string, eString caption, int flags=btOK, int def=btOK );
+	eMessageBox(eString string, eString caption, int flags=btOK, int def=btOK, int timeout=0 );
 };
 
 #endif

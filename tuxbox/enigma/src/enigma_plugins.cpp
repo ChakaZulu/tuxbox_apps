@@ -320,7 +320,7 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 			const char *de=dlerror();
 			eDebug(de);
 			hide();
-			eMessageBox msg(de, "plugin loading failed");
+			eMessageBox msg(de, "plugin loading failed", eMessageBox::btOK, eMessageBox::btOK, 5 );
 			msg.show();
 			msg.exec();
 			msg.hide();
@@ -336,7 +336,7 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 		if (!execPlugin)
 		{
 			hide();
-			eMessageBox msg("The symbol plugin_exec was not found. sorry.", "plugin executing failed");
+			eMessageBox msg("The symbol plugin_exec was not found. sorry.", "plugin executing failed", eMessageBox::btOK, eMessageBox::btOK, 5 );
 			msg.show();
 			msg.exec();
 			msg.hide();

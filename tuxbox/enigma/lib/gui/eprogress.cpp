@@ -24,6 +24,18 @@ eProgress::~eProgress()
 {
 }
 
+bool eProgress::setParams( int _start, int _perc )
+{
+	if ( perc != _perc || start != _start )
+	{
+		perc = _perc;
+		start = _start;
+		invalidate();
+		return true;
+	}
+	return false;
+}
+
 void eProgress::setPerc(int p)
 {
 	if (perc != p)
@@ -44,7 +56,7 @@ void eProgress::setStart(int p)
 
 void eProgress::redrawWidget(gPainter *target, const eRect &area)
 {
-		// border malen
+	// border malen
 	target->setForegroundColor(getForegroundColor());
 	target->fill(eRect(0, 0, size.width(), border));
 	target->fill(eRect(0, border, border, size.height()-border));

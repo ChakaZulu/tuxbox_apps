@@ -40,6 +40,8 @@
 
 // #include <mcheck.h>
 
+eWidget *currentFocus=0;
+
 eZap *eZap::instance;
 
 static char copyright[]="enigma, Copyright (C) dbox-Project\n"
@@ -56,8 +58,8 @@ eZap *eZap::getInstance()
 
 void eZap::keyEvent(const eRCKey &key)
 {
-	if (focus)
-		focus->event(eWidgetEvent(eWidgetEvent::evtKey, key));
+	if (currentFocus)
+		currentFocus->event(eWidgetEvent(eWidgetEvent::evtKey, key));
 	else if (main)
 		main->event(eWidgetEvent(eWidgetEvent::evtKey, key));
 }
@@ -97,6 +99,7 @@ eZap::eZap(int argc, char **argv)
 			if (!filename)
 				break;
 			eDebug("%s", filename);
+			filename[strlen(filename)]=0;
 			void *handle=dlopen(filename, RTLD_NOW);
 			if (!handle)
 				eWarning("[PLUGIN] load(%s) failed: %s", filename, dlerror());
@@ -108,7 +111,6 @@ eZap::eZap(int argc, char **argv)
 	
 	init->setRunlevel(eAutoInitNumbers::osd);
 
-	focus = 0;
 	CONNECT(eRCInput::getInstance()->keyEvent, eZap::keyEvent);
 
 	desktop_fb=new eWidget();

@@ -70,7 +70,7 @@ eSatEditDialog::eSatEditDialog( tpPacket *tp )
 	l->resize( eSize(250, 35) );
 	l->setText(_("Orbital Position:"));
 	OrbitalPos = new eNumber( this, 1, 0, 3600, 4, 0, 0, l);
-	OrbitalPos->setHelpText(_("enter orbital position without dot (19.2\xB0 = 192)"));
+	OrbitalPos->setHelpText(_("enter orbital position without dot (19.2\xC2\xB0 = 192)"));
 	OrbitalPos->move( ePoint(270, 55) );
 	OrbitalPos->resize( eSize(70, 35) );
 	OrbitalPos->loadDeco();

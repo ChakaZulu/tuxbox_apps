@@ -50,25 +50,27 @@ public:
 
 class enigmaMMI : public eWindow
 {
-	eDVBCI *ci;
+protected:
 	eFixedMessagePump<eMMIMsg> mmi_messages;
 	eWidget *open;
 	Connection conn;
 	eLabel *lText;
 	eTimer responseTimer, delayTimer, closeTimer;
 	const char *scheduledData;
-	static std::map<eDVBCI*,enigmaMMI*> exist;
 	void closeMMI();
+	enum AnswerType { ENQAnswer, MENUAnswer, LISTAnswer };
+	enigmaMMI();
 public:
-	enigmaMMI(eDVBCI *ci);
 	bool connected() { return conn.connected(); }
-	static enigmaMMI* getInstance( eDVBCI* ci );
 	int eventHandler( const eWidgetEvent &e );
-	bool handleMMIMessage(const char *data);
+	virtual bool handleMMIMessage(const char *data);
 	void gotMMIData(const char* data, int);
 	void handleMessage( const eMMIMsg &msg );
-	void showWaitForCIAnswer(int ret);
-	void hideWaitForCIAnswer();
+	void showWaitForAnswer(int ret);
+	void hideWaitForAnswer();
+	virtual void beginExec() { }
+	virtual void endExec() { }
+	virtual void sendAnswer( AnswerType ans, int param, unsigned char *data )=0;
 	void haveScheduledData();
 };
 
@@ -94,6 +96,17 @@ private:
 public:
 	enigmaCI();
 	~enigmaCI();
+};
+
+class enigmaCIMMI : public enigmaMMI
+{
+	eDVBCI *ci;
+	static std::map<eDVBCI*,enigmaCIMMI*> exist;
+	void beginExec();
+	void sendAnswer( AnswerType ans, int param, unsigned char *data );
+public:
+	static enigmaCIMMI* getInstance( eDVBCI* ci );
+	enigmaCIMMI(eDVBCI *ci);
 };
 
 #endif

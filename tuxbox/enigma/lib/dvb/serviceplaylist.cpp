@@ -285,8 +285,6 @@ void eServicePlaylistHandler::removeRef(const eServiceReference &service)
 
 void eServicePlaylistHandler::enterDirectory(const eServiceReference &dir, Signal1<void,const eServiceReference&> &callback)
 {
-//	int pLockActive = eConfig::getInstance()->pLockActive();
-
 	if (dir.type == id)
 	{
 		ePlaylist *service=(ePlaylist*)addRef(dir);
@@ -294,20 +292,14 @@ void eServicePlaylistHandler::enterDirectory(const eServiceReference &dir, Signa
 			return;
 	
 		for (std::list<ePlaylistEntry>::const_iterator i(service->getConstList().begin()); i != service->getConstList().end(); ++i)
-		{
-/*			if ( (pLockActive & 2) && i->service.isLocked() )
-				continue;*/
 			callback(*i);
-		}
-	
+
 		removeRef(dir);
 	}
 	std::pair<std::multimap<eServiceReference,eServiceReference>::const_iterator,std::multimap<eServiceReference,eServiceReference>::const_iterator>
 		range=playlists.equal_range(dir);
 	while (range.first != range.second)
 	{
-/*		if ( (pLockActive & 2) && range.first->second.isLocked() )
-			continue;*/
 		callback(range.first->second);
 		++range.first;
 	}

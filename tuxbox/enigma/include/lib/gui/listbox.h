@@ -287,16 +287,16 @@ template <class T>
 inline eListBoxWindow<T>::eListBoxWindow(eString Title, int Entrys, int width, bool sbar)
 	: eWindow(0), Entrys(Entrys), width(width), list(this), statusbar(sbar?new eStatusBar(this):0)
 {
-	list.setFlags( eListBoxBase::flagShowEntryHelp );
 	setText(Title);
-	cresize( eSize(width, (sbar?40:10)+Entrys*T::getEntryHeight() ) );
+	cresize( eSize(width, (sbar?60:10)+Entrys*T::getEntryHeight() ) );
+	list.setFlags( eListBoxBase::flagShowEntryHelp );
 	list.move(ePoint(10, 5));
 	list.resize(eSize(getClientSize().width()-20, getClientSize().height()-(sbar?35:5) ));
 	if (sbar)
 	{
 		statusbar->setFlags(eStatusBar::flagVCenter);
-		statusbar->move( ePoint(0, getClientSize().height()-30) );
-		statusbar->resize( eSize( getClientSize().width(), 30) );
+		statusbar->move( ePoint(0, getClientSize().height()-50) );
+		statusbar->resize( eSize( getClientSize().width(), 50) );
 		statusbar->loadDeco();
 		statusbar->show();
 	}

@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_scan.cpp,v 1.18 2003/10/26 00:41:17 ghostrider Exp $
+ * $Id: enigma_scan.cpp,v 1.19 2003/11/05 13:33:37 ghostrider Exp $
  */
 
 #include <enigma_scan.h>
@@ -46,14 +46,14 @@ eZapScan::eZapScan()
 	if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )  // only when a sat box is avail we shows a satellite config
 	{
 		CONNECT((new eListBoxEntryMenu(&list, _("Satellite Configuration"), eString().sprintf("(%d) %s", ++entry, _("open satellite config"))))->selected, eZapScan::sel_satconfig);
-		CONNECT((new eListBoxEntryMenu(&list, _("Satfind"), eString().sprintf("(%d) %s", ++entry, _("shows the satfinder"))))->selected, eZapScan::sel_satfind);
-		CONNECT((new eListBoxEntryMenu(&list, _("Motor Setup"), eString().sprintf("(%d) %s", ++entry, _("goto Motor Setup"))))->selected, eZapScan::sel_rotorConfig);
-		CONNECT((new eListBoxEntryMenu(&list, _("Transponder Edit"), eString().sprintf("(%d) %s", ++entry, _("for automatic transponder scan"))))->selected, eZapScan::sel_transponderEdit);
+		CONNECT((new eListBoxEntryMenu(&list, _("Satfind"), eString().sprintf("(%d) %s", ++entry, _("open the satfinder"))))->selected, eZapScan::sel_satfind);
+		CONNECT((new eListBoxEntryMenu(&list, _("Motor Setup"), eString().sprintf("(%d) %s", ++entry, _("open Motor Setup"))))->selected, eZapScan::sel_rotorConfig);
+		CONNECT((new eListBoxEntryMenu(&list, _("Transponder Edit"), eString().sprintf("(%d) %s", ++entry, _("for automatic scan"))))->selected, eZapScan::sel_transponderEdit);
 		new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 	}
 	CONNECT((new eListBoxEntryMenu(&list, _("Automatic Transponder Scan"), eString().sprintf("(%d) %s", ++entry, _("open automatic transponder scan"))))->selected, eZapScan::sel_autoScan);
 	if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )  // only when a sat box is avail we shows a satellite config
-		CONNECT((new eListBoxEntryMenu(&list, _("Automatic Multisat Scan"), eString().sprintf("(%d) %s", ++entry, _("open automatic transponder scan"))))->selected, eZapScan::sel_multiScan);
+		CONNECT((new eListBoxEntryMenu(&list, _("Automatic Multisat Scan"), eString().sprintf("(%d) %s", ++entry, _("open automatic multisat transponder scan"))))->selected, eZapScan::sel_multiScan);
 
 	CONNECT((new eListBoxEntryMenu(&list, _("Manual Transponder Scan"), eString().sprintf("(%d) %s", ++entry, _("open manual transponder scan"))))->selected, eZapScan::sel_manualScan);
 }
@@ -132,7 +132,7 @@ eLNB* eZapScan::getRotorLNB(int silent)
 	}
 	if ( c > 1 )  // we have more than one LNBs with DiSEqC 1.2
 	{
-		eMessageBox mb( _("More than one LNB have DiSEqC 1.2 enabled, please select the LNB where the motor is connected"), _("Info"), eMessageBox::iconWarning|eMessageBox::btOK );
+		eMessageBox mb(_("DiSEqC 1.2 is enabled on more than one LNB, please select the LNB the motor is connected to"), _("Info"), eMessageBox::iconWarning|eMessageBox::btOK );
 		mb.show();
 		mb.exec();
 		mb.hide();
@@ -191,8 +191,6 @@ eLNBSelector::eLNBSelector()
 	:eListBoxWindow<eListBoxEntryText>(_("Select LNB"), 5, 300, true)
 {
 	move(ePoint(140, 156));
-	new eListBoxEntryText(&list, _("back"), 0, 0, _("go to prev menu") );
-	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 	int cnt=0;
 	for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin()); it != eTransponderList::getInstance()->getLNBs().end(); it++, cnt++ )
 	{

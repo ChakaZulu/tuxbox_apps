@@ -60,14 +60,14 @@ eZapRCSetup::eZapRCSetup(): eWindow(0)
 	srrate->setName("rrate");
 	srrate->move(ePoint(200, 20));
 	srrate->resize(eSize(220, fd+4));
-	srrate->setHelpText(_("set RC repeat rate ( left / right )"));
+	srrate->setHelpText(_("change remote control repeat rate\nleft => less, right => more (... repeats)"));
 	CONNECT( srrate->changed, eZapRCSetup::repeatChanged );
 	
 	srdelay=new eSlider(this, lrdelay, 0, 1000 );
 	srdelay->setName("rdelay");
 	srdelay->move(ePoint(200, 60));
 	srdelay->resize(eSize(220, fd+4));
-	srdelay->setHelpText(_("set RC repeat delay ( left / right )"));
+	srdelay->setHelpText(_("change remote control repeat delay\nleft => shorter, right => longer (...delay)"));
 	CONNECT( srdelay->changed, eZapRCSetup::delayChanged );
 
 	lrcStyle=new eLabel(this);
@@ -108,7 +108,7 @@ eZapRCSetup::eZapRCSetup(): eWindow(0)
 	NextCharTimeout->move(ePoint(335,180));
 	NextCharTimeout->resize(eSize(65,35));
 	NextCharTimeout->loadDeco();
-	NextCharTimeout->setHelpText(_("Cursor to next char timeout(msek) in textinputfields)"));
+	NextCharTimeout->setHelpText(_("cursor to next char timeout(msek) in textinputfields"));
 	NextCharTimeout->setNumber(t);
 	CONNECT(NextCharTimeout->selected, eZapRCSetup::nextField);
 

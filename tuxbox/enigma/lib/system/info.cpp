@@ -1,6 +1,5 @@
 #include <lib/system/info.h>
 
-#include <config.h>
 #include <lib/base/estring.h>
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>

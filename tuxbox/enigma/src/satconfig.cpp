@@ -36,28 +36,29 @@ eSatelliteConfigurationManager::eSatelliteConfigurationManager()
 	scrollbar->setStart(0);
 	scrollbar->setPerc(100);
 
+	button_close=new eButton(this);
+	button_close->setName("close");
+	CONNECT(button_close->selected, eSatelliteConfigurationManager::closePressed);
+
 	button_new=new eButton(this);
 	button_new->setName("new");
 	button_new->hide();
 	CONNECT(button_new->selected, eSatelliteConfigurationManager::newPressed);
 
-	button_erase=new eButton(this);
+	button_erase=new eButton(this,0,0);
 	button_erase->setName("erase");
 	button_erase->hide();
 	CONNECT(button_erase->selected, eSatelliteConfigurationManager::erasePressed);
 
-	button_close=new eButton(this);
-	button_close->setName("close");
-	CONNECT(button_close->selected, eSatelliteConfigurationManager::closePressed);
-  	
 	buttonWidget=new eWidget(this);
 	buttonWidget->setName("buttons");	
-	
-	combo_type=new eComboBox(this, 6);
+
+	combo_type=new eComboBox(this, 7);
 	combo_type->setName("type");
 	CONNECT(combo_type->selchanged, eSatelliteConfigurationManager::typeChanged);
 	new eListBoxEntryText( *combo_type, _("one single satellite"), (void*)0, 0, _("one directly connected LNB"));
-	new eListBoxEntryText( *combo_type, _("2 satellites via Toneburst"), (void*)5, 0, _("2 LNBs via DiSEqC"));
+	new eListBoxEntryText( *combo_type, _("2 satellites via Toneburst"), (void*)5, 0, _("2 LNBs via Toneburst Signal"));
+	new eListBoxEntryText( *combo_type, _("2 satellites via 22Khz (only Highband)"), (void*)6, 0, _("2 LNBs via 22Khz Signal.. special for old analog switches"));
 	new eListBoxEntryText( *combo_type, _("2 satellites via DiSEqC A/B"), (void*)1, 0, _("2 LNBs via DiSEqC"));
 	new eListBoxEntryText( *combo_type, _("4 satellites via DiSEqC OPT A/B"), (void*)2, 0, _("4 LNBs via DiSEqC"));
 	new eListBoxEntryText( *combo_type, _("many satellites via DiSEqC Rotor"), (void*)3, 0, _("1 LNB with DiSEqC Rotor"));
@@ -82,7 +83,7 @@ eSatelliteConfigurationManager::eSatelliteConfigurationManager()
 	combo_type->setCurrent( (void*)complexity, true );
 
 	for ( int i = 0; i < 13; i++ )
-		pageEnds.push_back( i * 240 );
+		pageEnds.push_back( i * 200 );
 
 	curScrollPos = pageEnds.begin();
 
@@ -111,7 +112,7 @@ void eSatelliteConfigurationManager::focusChanged( const eWidget* focus )
 		if ( curScrollPos != old )
 		{
 			w_buttons->move( ePoint(0, -(*curScrollPos)) );
-			updateScrollbar(complexity > 2 && complexity != 5);
+			updateScrollbar(complexity > 2 && complexity < 5);
 		}
 	}
 }
@@ -122,9 +123,9 @@ void eSatelliteConfigurationManager::typeChanged(eListBoxEntryText* newtype)
   if ( newcomplexity == complexity )
 		return;
 	// check if the new type is less complex than our current setup...
-	int newComp = newcomplexity == 5 ? 1 : newcomplexity;
+	int newComp = newcomplexity > 4 ? 1 : newcomplexity;
 	int oldComp = checkComplexity();
-	if ( oldComp == 5 )
+	if ( oldComp > 4 )
 		oldComp=1;
 	if ( oldComp > newComp )
 	{
@@ -158,19 +159,26 @@ void eSatelliteConfigurationManager::setComplexity(int complexity)
 	switch (complexity)
 	{
 	case 0:
+	{
 		deleteSatellitesAbove(1);
 		while (eTransponderList::getInstance()->getLNBs().size() < 1)
 			createSatWidgets( createSatellite() );
 		for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); ++it, ++i)
 			setSimpleDiseqc(it->getSatelliteList().first(), i);
 		break;
+	}
 	case 5:
+	case 6:
 	case 1:
 		deleteSatellitesAbove(2);
 		while (eTransponderList::getInstance()->getLNBs().size() < 2)
 			createSatWidgets( createSatellite() );
 		for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); ++it, ++i)
+		{
 			setSimpleDiseqc( it->getSatelliteList().first(), i);
+			if ( complexity == 6 )
+				entryMap[it->getSatelliteList().first()].hilo->setCurrent(2-i);
+		}
 		break;
 	case 2:
 		deleteSatellitesAbove(4);
@@ -205,7 +213,7 @@ void eSatelliteConfigurationManager::setComplexity(int complexity)
 
 int eSatelliteConfigurationManager::checkComplexity()
 {
-	int c=0, comp=0;
+	int c=0, comp=0, rcomp=0;
 	for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
 	{
 		if (it->getSatelliteList().size() != 1)
@@ -221,7 +229,8 @@ int eSatelliteConfigurationManager::checkComplexity()
 		} else
 			++c;
 		int dc=checkDiseqcComplexity(it->getSatelliteList().first());
-		int tmp = dc == 5 ? 2 : dc;
+		rcomp=dc;
+		int tmp = dc > 4 ? 2 : dc;
 		eDebug("LNB %d has %d", c, dc);
 		if (tmp > comp)
 			comp=tmp;
@@ -234,12 +243,12 @@ int eSatelliteConfigurationManager::checkComplexity()
 		comp=1;
 
 	updateButtons(comp);
-	return comp;
+	return rcomp>4?rcomp:comp;
 }
 
 void eSatelliteConfigurationManager::updateButtons(int comp)
 {
-	if (comp < 3 || comp == 5)
+	if (comp < 3 || comp > 4)
 	{
 		lLNB->hide();
 		l22Khz->hide();
@@ -269,6 +278,22 @@ int eSatelliteConfigurationManager::checkDiseqcComplexity(eSatellite *s)
 	
 	if (entryMap.count(s))
 		se=&entryMap[s];
+
+	if (s->getLNB()->getDiSEqC().DiSEqCMode == eDiSEqC::NONE &&
+		s->getLNB()->getDiSEqC().MiniDiSEqCParam == eDiSEqC::NO &&
+		s->getSwitchParams().HiLoSignal == eSwitchParameter::ON )
+	{
+		se->description->setText("22Khz On");
+		return 6;
+	}
+
+	if (s->getLNB()->getDiSEqC().DiSEqCMode == eDiSEqC::NONE &&
+		s->getLNB()->getDiSEqC().MiniDiSEqCParam == eDiSEqC::NO &&
+		s->getSwitchParams().HiLoSignal == eSwitchParameter::OFF )
+	{
+		se->description->setText("22Khz Off");
+		return 6;
+	}
 
 	if (  s->getLNB()->getLOFHi() != 10600000 ||
 				s->getLNB()->getLOFLo() != 9750000 ||
@@ -376,10 +401,21 @@ start:
 
 void eSatelliteConfigurationManager::setSimpleDiseqc(eSatellite *s, int diseqcnr)
 {
-	s->getSwitchParams().HiLoSignal=eSwitchParameter::HILO;
+	eDebug("setSimpleDiSEqC %d", complexity );
 	s->getSwitchParams().VoltageMode=eSwitchParameter::HV;
 	eLNB *lnb=s->getLNB();
 	lnb->setDefaultOptions();
+	if ( complexity == 6 )
+	{
+		lnb->setLOFLo(10600000);
+		if ( diseqcnr )
+			s->getSwitchParams().HiLoSignal=eSwitchParameter::ON;
+		else
+			s->getSwitchParams().HiLoSignal=eSwitchParameter::OFF;
+	}
+	else
+		s->getSwitchParams().HiLoSignal=eSwitchParameter::HILO;
+
 	lnb->getDiSEqC().MiniDiSEqCParam=eDiSEqC::NO;
 	switch (complexity) // if we have diseqc at all
 	{
@@ -388,6 +424,7 @@ void eSatelliteConfigurationManager::setSimpleDiseqc(eSatellite *s, int diseqcnr
 				lnb->getDiSEqC().MiniDiSEqCParam=eDiSEqC::B;
 			else
 				lnb->getDiSEqC().MiniDiSEqCParam=eDiSEqC::A;
+		case 6:
 		case 0:
 			lnb->getDiSEqC().DiSEqCParam=0;
 			lnb->getDiSEqC().DiSEqCMode=eDiSEqC::NONE;
@@ -498,7 +535,7 @@ void eSatelliteConfigurationManager::repositionWidgets()
 	int count=0, y=POS_Y;
 
 	int tmp = complexity;
-	if (tmp == 5)
+	if (tmp > 4)
 		tmp=1;
 
 	eWidget *old = focus;
@@ -678,7 +715,7 @@ eComboBox* eSatelliteConfigurationManager::createSatWidgets( eSatellite *s )
 
 	newSat->loadDeco();
 	newSat->resize(eSize(250, 30));
-	newSat->setHelpText( _("press ok to select another satellite, or delete this satellite"));
+	newSat->setHelpText( _("press ok to select another satellite"));
 
 /*	if (complexity == 3)
 		new eListBoxEntryText( *c, _("*delete*"), (void*) 0 );   // this is to delete an satellite*/
@@ -793,7 +830,7 @@ eSatellite *eSatelliteConfigurationManager::createSatellite()
 			// if not in user-defined mode,
 
 	int tmp = complexity;
-	if (tmp == 5)
+	if (tmp > 4)
 		tmp=1;
 
 	if ( (tmp < 3) || !eTransponderList::getInstance()->getLNBs().size() )  // lnb list is empty ?
@@ -831,8 +868,7 @@ void eSatelliteConfigurationManager::updateScrollbar(int show)
 		total=1;
 	int start=-w_buttons->getPosition().y()*100/total;
 	int vis=buttonWidget->getSize().height()*100/total;
-	scrollbar->setStart(start);
-	scrollbar->setPerc(vis);
+	scrollbar->setParams(start,vis);
 	scrollbar->show();
 }
 
@@ -856,8 +892,7 @@ int eSatelliteConfigurationManager::eventHandler(const eWidgetEvent &event)
 			focusNext(eWidget::focusDirS);
 		else
 			return eWindow::eventHandler(event);
-	break;
-
+		break;
 	default:
 		return eWindow::eventHandler(event);
 		break;
@@ -1150,11 +1185,11 @@ eDiSEqCPage::eDiSEqCPage( eWidget *parent, eSatellite *sat)
 	SeqRepeat = new eCheckbox(this);
 	SeqRepeat->setName("SeqRepeat");
 
-	SwapCmds = new eCheckbox(this);
-	SwapCmds->setName("SwapCmds");
-
 	FastDiSEqC = new eCheckbox(this);
 	FastDiSEqC->setName("FastDiSEqC");
+
+	SwapCmds = new eCheckbox(this);
+	SwapCmds->setName("SwapCmds");
 
 /*	next = new eButton(this);
 	next->setName("next");*/

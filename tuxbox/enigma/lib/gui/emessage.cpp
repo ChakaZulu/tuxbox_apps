@@ -6,9 +6,14 @@
 #include <lib/gdi/font.h>
 #include <lib/base/i18n.h>
 
-eMessageBox::eMessageBox(eString message, eString caption, int flags, int def)
-	:eWindow(0), icon(0), def(0)
+eMessageBox::eMessageBox(eString message, eString caption, int flags, int def, int timeout )
+	:eWindow(0), icon(0), def(0), timeout(timeout)
 {
+	if ( timeout )
+	{
+		timer = new eTimer(eApp);
+		CONNECT( timer->timeout, eMessageBox::pressedCancel );
+	}
 	setText(caption);
 	int fontsize=eSkin::getActive()->queryValue("fontsize", 20);
 	int posx = eSkin::getActive()->queryValue("eMessageBox.pos.x", 100);
@@ -137,6 +142,8 @@ int eMessageBox::eventHandler( const eWidgetEvent &e )
 				setFocus(def);
 				return 1;
 			}
+			if ( timeout )
+				timer->start(timeout);
 		default:
 			break;
 	}

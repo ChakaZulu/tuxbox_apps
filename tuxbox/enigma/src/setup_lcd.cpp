@@ -47,8 +47,8 @@ void eZapLCDSetup::update(int brightness, int contrast)
 eZapLCDSetup::eZapLCDSetup(): eWindow(0)
 {
 	setText(_("LC-Display Setup"));
-	move(ePoint(150, 136));
-	cresize(eSize(400, 280));
+	move(ePoint(150, 126));
+	cresize(eSize(400, 290));
 
 	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 
@@ -107,15 +107,15 @@ eZapLCDSetup::eZapLCDSetup(): eWindow(0)
 	ok->setText(_("save"));
 	ok->setShortcut("green");
 	ok->setShortcutPixmap("green");
-	ok->move(ePoint(20, 195));
+	ok->move(ePoint(20, 190));
 	ok->resize(eSize(220, 40));
 	ok->setHelpText(_("save changes and return"));
 	ok->loadDeco();
 	CONNECT(ok->selected, eZapLCDSetup::okPressed);
 
 	statusbar=new eStatusBar(this);
-	statusbar->move( ePoint(0, clientrect.height()-30 ) );
-	statusbar->resize( eSize( clientrect.width(), 30) );
+	statusbar->move( ePoint(0, clientrect.height()-50 ) );
+	statusbar->resize( eSize( clientrect.width(), 50) );
 	statusbar->loadDeco();
 
 	p_brightness->setValue(lcdbrightness);

@@ -15,6 +15,8 @@ class eRCKey;
 class eHTTPD;
 class eHTTPConnection;
 
+extern eWidget *currentFocus;
+
 class eZap: public eApplication, public Object
 {
 	eHotplug hotplug;
@@ -60,7 +62,6 @@ public:
 		}
 	}
 	static eZap *getInstance();
-	eWidget *focus;
 	eServiceSelector *getServiceSelector()
 	{
 		ASSERT(serviceSelector);

@@ -1,6 +1,5 @@
 #include <errno.h>
 
-#include <enigma.h>
 #include <lib/base/eptrlist.h>
 #include <lib/base/eerror.h>
 #include <lib/gdi/gfbdc.h>
@@ -11,6 +10,8 @@
 #include <lib/gui/guiactions.h>
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
+
+extern eWidget *currentFocus;
 
 eWidget *eWidget::root;
 Signal2< void, ePtrList<eAction>*, int >eWidget::showHelp;
@@ -70,8 +71,8 @@ void eWidget::takeFocus()
 	
 	if (!have_focus)
 	{
-		oldTLfocus=eZap::getInstance()->focus;
-		eZap::getInstance()->focus=this;
+		oldTLfocus=currentFocus;
+		currentFocus=this;
 /*		if (oldTLfocus)
 		{
 			eDebug("focus problem");
@@ -96,8 +97,8 @@ void eWidget::releaseFocus()
 		if (!have_focus)
 		{
 			removeActionMap(&i_focusActions->map);
-			if (eZap::getInstance()->focus==this)	// if we don't have lost the focus, ...
-				eZap::getInstance()->focus=oldTLfocus;	// give it back
+			if (currentFocus==this)	// if we don't have lost the focus, ...
+				currentFocus=oldTLfocus;	// give it back
 			else
 				eFatal("someone has stolen the focus");
 		}
@@ -141,9 +142,11 @@ void eWidget::setPalette()
 
 void eWidget::resize(const eSize& nsize)
 {
+	bool b = size != nsize;
 	size=nsize;
 	recalcClientRect();
-	event(eWidgetEvent(eWidgetEvent::changedSize));
+	if ( b )
+		event(eWidgetEvent(eWidgetEvent::changedSize));
 	recalcClip();
 }
 
@@ -156,10 +159,12 @@ void eWidget::recalcAbsolutePosition()
 
 void eWidget::move(const ePoint& nposition)
 {
+	bool b = position != nposition;
 	position=nposition;
-	recalcClip();
 	recalcAbsolutePosition();
-	event(eWidgetEvent(eWidgetEvent::changedPosition));
+	recalcClip();
+	if ( b )
+		event(eWidgetEvent(eWidgetEvent::changedPosition));
 }
 
 void eWidget::cresize(const eSize& nsize)
@@ -178,6 +183,7 @@ void eWidget::redraw(eRect area)		// area bezieht sich nicht auf die clientarea
 {
 	if (getTLW()->just_showing)
 		return;
+
 	if (state & stateVisible )
 	{
 		if (area.isNull())
@@ -310,7 +316,7 @@ void eWidget::show()
 	ASSERT(!(state&stateVisible));
 
 	state|=stateShow;
-	
+
 	if (!parent || (parent->state&stateVisible))
 	{
 		++getTLW()->just_showing;
@@ -421,7 +427,7 @@ int eWidget::eventHandler(const eWidgetEvent &evt)
 	{
 	case eWidgetEvent::childChangedHelpText:
 		/* emit */ focusChanged(focus);  // faked focusChanged Signal to the Statusbar
-	break;
+		break;
 	case eWidgetEvent::evtAction:
 		if (evt.action == shortcut && isVisible())
 			(shortcutFocusWidget?shortcutFocusWidget:this)->
@@ -531,22 +537,24 @@ void eWidget::lostFocus()
 
 void eWidget::recalcClientRect()
 {
-	clientrect=eRect(0, 0, size.width(), size.height());
+	clientrect.setWidth(size.width());
+	clientrect.setHeight(size.height());
 }
 
 void eWidget::recalcClip()
 {
 	eWidget *t=this;
-	eRect rect=eRect(0, 0, size.width(), size.height());
+	clientclip=eRect(0, 0, size.width(), size.height());
 	while (t)
 	{
-		rect&=t->clientrect;
-		rect.moveBy(t->position.x(), t->position.y());
+		clientclip&=t->clientrect;
+		clientclip.moveBy(t->position.x(), t->position.y());
 		t=t->parent;
 		if (t)
-			rect.moveBy(t->clientrect.x(), t->clientrect.y());
+			clientclip.moveBy(t->clientrect.x(), t->clientrect.y());
 	}
-	clientclip=rect;
+	for (ePtrList<eWidget>::iterator it( childlist ); it != childlist.end(); ++it )
+		it->recalcClip();
 }
 
 void eWidget::checkFocus()

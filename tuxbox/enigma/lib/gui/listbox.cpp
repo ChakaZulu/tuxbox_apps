@@ -662,6 +662,9 @@ int eListBoxBase::moveSelection(int dir, bool sendSelected)
 		}
 	}
 
+	if (flags & flagShowEntryHelp)
+		setHelpText( current != childs.end() ? current->getHelpText():eString(_("no description available")));
+
 	if (!in_atomic)
 	{
 		/*emit*/ SendSelChanged(*current);
@@ -674,9 +677,6 @@ int eListBoxBase::moveSelection(int dir, bool sendSelected)
 		if ( sendSelected )
 			atomic_selected=1;
 	}
-
-	if (flags & flagShowEntryHelp)
-		setHelpText( current != childs.end() ? current->getHelpText():eString(_("no description available")));
 
 	if (isVisible())
 	{

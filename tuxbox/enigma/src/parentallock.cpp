@@ -43,8 +43,8 @@ eParentalSetup::eParentalSetup():
 	eWindow(0)
 {
 	setText(_("Parental setup"));
-	cmove(ePoint(170, 186));
-	cresize(eSize(400, 260));
+	cmove(ePoint(170, 136));
+	cresize(eSize(400, 280));
 
 	loadSettings();
 
@@ -104,8 +104,8 @@ eParentalSetup::eParentalSetup():
 	CONNECT(ok->selected, eParentalSetup::okPressed);
 
 	statusbar=new eStatusBar(this);
-	statusbar->move( ePoint(0, clientrect.height()-30 ) );
-	statusbar->resize( eSize( clientrect.width(), 30) );
+	statusbar->move( ePoint(0, clientrect.height()-50 ) );
+	statusbar->resize( eSize( clientrect.width(), 50) );
 	statusbar->loadDeco();
 
 	setHelpID(93);

@@ -646,7 +646,7 @@ void eVideoSelector::selected(VideoStream *l)
 eVideoSelector::eVideoSelector()
 	:eListBoxWindow<VideoStream>(_("Video"), 10, 330)
 {
-	move(ePoint(100, 100));
+	move(ePoint(200, 120));
 	CONNECT(list.selected, eVideoSelector::selected);
 }
 
@@ -755,7 +755,7 @@ void eAudioSelector::selected(AudioStream *l)
 eAudioSelector::eAudioSelector()
 	:eListBoxWindow<AudioStream>(_("Audio"), 10, 330)
 {
-	move(ePoint(100, 100));
+	move(ePoint(200, 120));
 	CONNECT(list.selected, eAudioSelector::selected);
 }
 
@@ -1029,7 +1029,8 @@ void eZapMain::onRotorStart( int newPos )
 {
 	if (!pRotorMsg)
 	{
-		pRotorMsg = new eMessageBox( eString().sprintf(_("Please wait while the motor is turning to %d.%d\xB0%c ...."),abs(newPos)/10,abs(newPos)%10,newPos<0?'W':'E'), _("Message"), 0);
+		pRotorMsg = new eMessageBox( eString().sprintf(_("Please wait while the motor is turning to %d.%d\xC2\xB0%c ...."),abs(newPos)/10,abs(newPos)%10,newPos<0?'W':'E'), _("Message"), 0);
+		pRotorMsg->zOrderRaise();
 		pRotorMsg->show();
 	}
 }
@@ -1052,7 +1053,7 @@ void eZapMain::onRotorTimeout()
 		delete pRotorMsg;
 		pRotorMsg=0;
 	}
-/*	pRotorMsg = new eMessageBox( _("Rotor has timeouted... check your LNB Cable, or if you use rotor drive speed for running detection then decrease the °/sec value")
+/*	pRotorMsg = new eMessageBox( _("Rotor has timeouted... check your LNB Cable, or if you use rotor drive speed for running detection then decrease the \xC2\xB0/sec value")
 									, _("Message"),
 									eMessageBox::btOK|eMessageBox::iconInfo);
 	pRotorMsg->show();
@@ -1601,7 +1602,7 @@ eZapMain::eZapMain()
 #ifndef DISABLE_CI
 void eZapMain::receiveMMIMessageCI1( const char* data, int len )
 {
-	if ( !enigmaMMI::getInstance( eDVB::getInstance()->DVBCI)->connected() )
+	if ( !enigmaCIMMI::getInstance( eDVB::getInstance()->DVBCI)->connected() )
 	{
 		char *dest = new char[len];
 		memcpy( dest, data, len );
@@ -1613,7 +1614,7 @@ void eZapMain::receiveMMIMessageCI1( const char* data, int len )
 
 void eZapMain::receiveMMIMessageCI2( const char* data, int len )
 {
-	if ( !enigmaMMI::getInstance( eDVB::getInstance()->DVBCI2)->connected() )
+	if ( !enigmaCIMMI::getInstance( eDVB::getInstance()->DVBCI2)->connected() )
 	{
 		char *dest = new char[len];
 		memcpy( dest, data, len );
@@ -1626,16 +1627,14 @@ void eZapMain::receiveMMIMessageCI2( const char* data, int len )
 void eZapMain::handleMMIMessage( const eMMIMessage &msg )
 {
 	eDebug("eZapMain::handleMMIMessage");
-	enigmaMMI *p = enigmaMMI::getInstance(msg.from);
+	enigmaMMI *p = enigmaCIMMI::getInstance(msg.from);
 
 	if ( !memcmp( msg.data, "\x9f\x88\x00", 3 ) )
 		postMessage(eZapMessage(0), 1);
 
 	if ( !strncmp( msg.data, "INIT", 4 ) )
 	{
-		if ( eApp->looplevel() == 1 && (
-				!eZap::getInstance()->focus ||
-				eZap::getInstance()->focus == this ) )
+		if ( eApp->looplevel() == 1 && ( !currentFocus || currentFocus == this ) )
 			postMessage(eZapMessage(0,"Common Interface",_("please wait while initializing Common Interface ..."),8),0);
 	}
 	else
@@ -1644,10 +1643,9 @@ void eZapMain::handleMMIMessage( const eMMIMessage &msg )
 		if ( handler && handler->getFlags() & eServiceHandler::flagIsScrambled )
 		{
 			if ( !p->handleMMIMessage( msg.data ) )
-			return;
+				return;
 		}
 	}
-
 	delete [] msg.data;
 }
 #endif
@@ -2304,7 +2302,7 @@ void eZapMain::playlistNextService()
 void eZapMain::volumeUp()
 {
 	eAVSwitch::getInstance()->changeVolume(0, -2);
-	if ((!eZap::getInstance()->focus) || (eZap::getInstance()->focus == this))
+	if ((!currentFocus) || (currentFocus == this))
 	{
 		volume.show();
 		volumeTimer.start(2000, true);
@@ -2314,7 +2312,7 @@ void eZapMain::volumeUp()
 void eZapMain::volumeDown()
 {
 	eAVSwitch::getInstance()->changeVolume(0, +2);
-	if ((!eZap::getInstance()->focus) || (eZap::getInstance()->focus == this))
+	if ((!currentFocus) || (currentFocus == this))
 	{
 		volume.show();
 		volumeTimer.start(2000, true);
@@ -2463,8 +2461,8 @@ void eZapMain::showInfobar()
 {
 	if ( !isVisible() && eApp->looplevel() == 1 &&
 			(
-				!eZap::getInstance()->focus ||
-				eZap::getInstance()->focus == this
+				!currentFocus ||
+				currentFocus == this
 			)
 		 )
 	show();
@@ -3586,7 +3584,7 @@ void eZapMain::showSubserviceMenu()
 		int ret = subservicesel.exec();
 		subservicesel.hide();
 		eServiceReferenceDVB *ref=0;
-		if ( !ret && ( ref = subservicesel.getSelected() ) )
+		if ( !ret && ( ref = subservicesel.getSelected() ) && handleState() )
 			eServiceInterface::getInstance()->play(*ref);
 	}
 	else if (flags&ENIGMA_VIDEO)
@@ -3788,8 +3786,8 @@ bool eZapMain::handleState(int justask)
 		if ( state & stateInTimerMode )
 		{
 			if (state & recDVR )
-				text=_("A timer based digital recording is currently in progress!\n"
-							"This stops the timer, and digital recording!");
+				text=_("A timer based recording is currently in progress!\n"
+							"This stops the timer, and recording!");
 			else
 				return true; // we wouldn't destroy the VCR Recording *g*
 /*				text=_("Currently an timer based VCR recording is in progress!\n"
@@ -3798,8 +3796,8 @@ bool eZapMain::handleState(int justask)
 		else
 		{
 			if (state & recDVR )
-				text=_("A digital recording is currently in progress!\n"
-							"This stops the digital recording!");
+				text=_("A recording is currently in progress!\n"
+							"This stops the recording!");
 			else
 				return true; // we wouldn't destroy the VCR Recording *g*
 /*				text=_("Currently an VCR recording is in progress!\n"
@@ -4286,12 +4284,9 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 		serviceFlags = eServiceInterface::getInstance()->getService()->getFlags();
 		setSmartcardLogo( serviceFlags & eServiceHandler::flagIsScrambled );
 		if (serviceFlags & eServiceHandler::flagSupportPosition)
-		{
 			progresstimer.start(1000);
-		} else
-		{
+		else
 			progresstimer.stop();
-		}
 		updateProgress();
 		showServiceInfobar(serviceFlags & eServiceHandler::flagIsSeekable);
 		break;
@@ -4383,7 +4378,6 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 		eServiceHandler *sapi=eServiceInterface::getInstance()->getService();
 		if (!sapi)
 			return;
-		eDebug("evtStatus");
 		showServiceInfobar(0);
 		fileinfos->setText(sapi->getInfo(0));
 		break;
@@ -4513,7 +4507,7 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 				opos = refservice.data[4]>>16;
 			else
 				opos = serviceref.data[4]>>16;
-			name+=eString().sprintf(" (%d.%d\xB0%c)", abs(opos / 10), abs(opos % 10), opos>0?'E':'W');
+			name+=eString().sprintf(" (%d.%d\xC2\xB0%c)", abs(opos / 10), abs(opos % 10), opos>0?'E':'W');
 //			name+=eString().sprintf("(%04x)",((eServiceReferenceDVB&)_serviceref).getServiceID().get() );
 		}
 		ChannelName->setText(name);
@@ -4790,7 +4784,7 @@ void eZapMain::timeOut()
 		delete pRotorMsg;
 		pRotorMsg=0;
 	}
-	else if ((eZap::getInstance()->focus==this) && ((state == 1) || (stateOSD == 0)))
+	else if ((currentFocus==this) && ((state == 1) || (stateOSD == 0)))
 		hide();
 }
 
@@ -4876,7 +4870,7 @@ void eZapMain::clockUpdate()
 
 void eZapMain::updateVolume(int mute_state, int vol)
 {
-	//int show=(!eZap::getInstance()->focus) || (eZap::getInstance()->focus == this);
+	//int show=(!currentFocus) || (currentFocus == this);
 
 	if (mute_state)
 	{
@@ -4949,7 +4943,7 @@ void eZapMain::gotMessage(const int &c)
 	{
 		return;
 	}
-	if ((!isVisible()) && eZap::getInstance()->focus)
+	if ((!isVisible()) && currentFocus)
 	{
 		pauseMessages();
 		message_notifier.send(c);
@@ -5307,7 +5301,7 @@ void eZapMain::stopNGrabRecord()
 #endif
 
 eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eServiceReference &path, eWidget *lcdTitle, eWidget *lcdElement)
-: eListBoxWindow<eListBoxEntryText>(_("Service Menu"), 14), ref(ref)
+: eListBoxWindow<eListBoxEntryText>(_("Service Menu"), 12, 400, true), ref(ref)
 {
 #ifndef DISABLE_LCD
 	setLCD(lcdTitle,lcdElement);
@@ -5316,11 +5310,10 @@ eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eSe
 
 	eListBoxEntry *prev=0;
 
-	if ( (ref.flags & eServiceReference::isDirectory)
+	if ( (!(ref.flags & eServiceReference::isDirectory))
 		&& (ref != eServiceReference()) && ( ref.type == 0x1000 // mp3
-		|| ( ref.flags & eServiceReference::mustDescent )
 		|| ( ref.type == eServiceReference::idDVB && ref.path ) ) )
-			prev = new eListBoxEntryText(&list, _("add service to playlist"), (void*)3);
+			prev = new eListBoxEntryText(&list, _("add service to playlist"), (void*)3, 0, _("add selected service to the playlist"));
 
 	eListBoxEntryText *sel=0;
 	/* i think it is not so good to rename normal providers
@@ -5329,7 +5322,7 @@ eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eSe
 
 	// create new bouquet
 	if ( eZapMain::getInstance()->getMode() != eZapMain::modeFile )
-		prev = new eListBoxEntryText(&list, _("create new bouquet"), (void*)6);
+		prev = new eListBoxEntryText(&list, _("create new bouquet"), (void*)6, 0, _("select to create a new bouquet"));
 
 	if (path.type == eServicePlaylistHandler::ID)
 	{
@@ -5340,35 +5333,35 @@ eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eSe
 			{
 				// copy complete provider to bouquets
 				if ( ref.flags & eServiceReference::flagDirectory )
-					prev = new eListBoxEntryText(&list, _("duplicate bouquet"), (void*)8);
+					prev = new eListBoxEntryText(&list, _("duplicate bouquet"), (void*)8, 0, _("duplicate the complete bouquet with all content"));
 				else // add dvb service to specific bouquet
 				{
-					prev = new eListBoxEntryText(&list, _("add to specific bouquet"), (void*)4);
+					prev = new eListBoxEntryText(&list, _("add to specific bouquet"), (void*)4, 0, _("add the selected service to another bouquet"));
 					if ( path.type == eServicePlaylistHandler::ID )
-						prev = new eListBoxEntryText(&list, _("add marker"), (void*)13);
+						prev = new eListBoxEntryText(&list, _("add marker"), (void*)13, 0, _("create a new marker in the current bouquet"));
 				}
 				prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 			}
 
 			// rename bouquet
 			if ( (ref.type == eServicePlaylistHandler::ID) )
-				prev = new eListBoxEntryText(&list, _("rename"), (void*)7);
+				prev = new eListBoxEntryText(&list, _("rename"), (void*)7, 0, _("rename the current selected bouquet"));
 
 			// rename dvb service
 			if ( ref.type == eServiceReference::idDVB )
-				prev = new eListBoxEntryText(&list, _("rename"), (void*)9);
+				prev = new eListBoxEntryText(&list, _("rename"), (void*)9, 0, _("rename the current selected service/movie"));
 
 			// all what contain in a playlists is deleteable
-				prev = new eListBoxEntryText(&list, _("delete"), (void*)1);
+				prev = new eListBoxEntryText(&list, _("delete"), (void*)1, 0, _("delete the current selected service/movie"));
 
 			prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 		}
 
 		// move mode in playlists
 		if ( eZap::getInstance()->getServiceSelector()->movemode )
-			prev = sel = new eListBoxEntryText(&list, _("disable move mode"), (void*)2);
+			prev = sel = new eListBoxEntryText(&list, _("disable move mode"), (void*)2, 0, _("switch move mode off"));
 		else
-			prev = new eListBoxEntryText(&list, _("enable move mode"), (void*)2);
+			prev = new eListBoxEntryText(&list, _("enable move mode"), (void*)2, 0, _("activate mode to simply change the entry order"));
 	}
 	else if (ref) // not in a playlist
 	{
@@ -5378,13 +5371,13 @@ eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eSe
 			// add current service to favourite
 			if ( !(ref.flags & eServiceReference::flagDirectory) )
 			{
-				prev = new eListBoxEntryText(&list, _("add to specific bouquet"), (void*)4);
+				prev = new eListBoxEntryText(&list, _("add to specific bouquet"), (void*)4, 0, _("add the selected service to a selectable bouquet"));
 				prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 			}
 			// copy provider to bouquet list
 			else if (ref.data[0] == -2 || ref.data[0] == -3 )
 			{
-				prev = new eListBoxEntryText(&list, _("copy to bouquet list"), (void*)8);
+				prev = new eListBoxEntryText(&list, _("copy to bouquet list"), (void*)8, 0, _("copy the selected provider to the bouquet list"));
 				prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 			}
 		}
@@ -5395,9 +5388,9 @@ eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eSe
 	{
 		// edit Mode ( simple add services to any bouquet(playlist)
 		if ( eZap::getInstance()->getServiceSelector()->editMode )
-			prev = sel = new eListBoxEntryText(&list, _("disable edit mode"), (void*)5);
+			prev = sel = new eListBoxEntryText(&list, _("disable edit mode"), (void*)5, 0, _("disable the edit mode"));
 		else
-			prev = new eListBoxEntryText(&list, _("enable edit mode"), (void*)5);
+			prev = new eListBoxEntryText(&list, _("enable edit mode"), (void*)5, 0, _("activate mode to simply add many services to a selectable bouquet"));
 	}
 	// options for activated parental locking
 	if ( eConfig::getInstance()->getParentalPin() )
@@ -5407,15 +5400,15 @@ eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eSe
 			if ( prev && prev->isSelectable() )
 				new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 			if ( ref.isLocked() )
-				new eListBoxEntryText(&list, _("unlock"), (void*)11);
+				new eListBoxEntryText(&list, _("unlock"), (void*)11, 0, _("do parental-unlock the selected service or file"));
 			else
-				new eListBoxEntryText(&list, _("lock"), (void*)10);
+				new eListBoxEntryText(&list, _("lock"), (void*)10, 0, _("do parentallock the selected service or file"));
 		}
 
 		if ( eConfig::getInstance()->pLockActive() )
-			new eListBoxEntryText(&list, _("disable parental lock"), (void*)12 );
+			new eListBoxEntryText(&list, _("disable parental lock"), (void*)12, 0, _("temporary disable the parental locking") );
 		else
-			new eListBoxEntryText(&list, _("enable parental lock"), (void*)12 );
+			new eListBoxEntryText(&list, _("enable parental lock"), (void*)12, 0, _("re-enable the parental locking"));
 	}
 
 	if ( sel )
@@ -5433,22 +5426,22 @@ void eServiceContextMenu::entrySelected(eListBoxEntryText *test)
 }
 
 eSleepTimerContextMenu::eSleepTimerContextMenu( eWidget* lcdTitle, eWidget *lcdElement )
-	: eListBoxWindow<eListBoxEntryText>(_("Shutdown/Standby Menu"), 7)
+	: eListBoxWindow<eListBoxEntryText>(_("Shutdown/Standby Menu"), 6, 400, true)
 {
 #ifndef DISABLE_LCD
 	setLCD(lcdTitle, lcdElement);
 #endif
-	move(ePoint(150, 200));
+	move(ePoint(150, 130));
 	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5600 )
-		new eListBoxEntryText(&list, _("reboot now"), (void*)1);		//use this type to reboot (with complete unmount)
+		new eListBoxEntryText(&list, _("reboot now"), (void*)1, 0, _("restart your dreambox"));		//use this type to reboot (with complete unmount)
 	else
 	{
-		new eListBoxEntryText(&list, _("shutdown now"), (void*)1);
-		new eListBoxEntryText(&list, _("restart"), (void*)4);
+		new eListBoxEntryText(&list, _("shutdown now"), (void*)1, 0, _("shutdown your dreambox"));
+		new eListBoxEntryText(&list, _("restart"), (void*)4, 0, _("restart your dreambox"));
 	}
 	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
-	new eListBoxEntryText(&list, _("goto standby"), (void*)2);
-	new eListBoxEntryText(&list, _("set sleeptimer"), (void*)3);
+	new eListBoxEntryText(&list, _("goto standby"), (void*)2, 0, _("goto standby mode") );
+	new eListBoxEntryText(&list, _("set sleeptimer"), (void*)3, 0, _("set a sleep timer"));
 	CONNECT(list.selected, eSleepTimerContextMenu::entrySelected);
 	setHelpID(50);
 }
@@ -5531,7 +5524,25 @@ eTimerInput::eTimerInput()
 	l->setName("lrec_duration");
 	num->setDescr(l);
 	num->setName("rec_duration");
-	num->setNumber(10);
+
+	int min=10;
+	EIT *eit=eDVB::getInstance()->getEIT();
+	if (eit)
+	{
+		for (ePtrList<EITEvent>::iterator e(eit->events); e != eit->events.end(); ++e)
+		{
+			if ((e->running_status>=2)||(!e->running_status)) // currently running service
+			{
+				time_t stime = e->start_time;
+				time_t now = time(0)+eDVB::getInstance()->time_difference;
+				min = (e->duration - (now - stime)) / 60;
+				break;
+			}
+		}
+		eit->unlock();
+	}
+
+	num->setNumber(min);
 	if (eSkin::getActive()->build(this, "recording_duration"))
 		eFatal("skin load of \"recording_duration\" failed");
 	CONNECT( set->selected, eTimerInput::setPressed );
@@ -5549,16 +5560,16 @@ void eTimerInput::setPressed()
 }
 
 eRecordContextMenu::eRecordContextMenu( eWidget *LCDTitle, eWidget *LCDElement )
-	: eListBoxWindow<eListBoxEntryText>(_("Record Menu"), 7)
+	: eListBoxWindow<eListBoxEntryText>(_("Record Menu"), 6, 400, true)
 {
 #ifndef DISABLE_LCD
 	setLCD(LCDTitle, LCDElement);
 #endif
-	move(ePoint(150, 200));
-	new eListBoxEntryText(&list, _("stop record now"), (void*)1);
+	move(ePoint(150, 130));
+	new eListBoxEntryText(&list, _("stop record now"), (void*)1, 0, _("immediate stop the recording"));
 	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
-	new eListBoxEntryText(&list, _("set record duration"), (void*)2);
-	new eListBoxEntryText(&list, _("set record stop time"), (void*)3);
+	new eListBoxEntryText(&list, _("set record duration"), (void*)2, 0, _("set the recording time (in minutes)"));
+	new eListBoxEntryText(&list, _("set record stop time"), (void*)3, 0, _("set the recording end time") );
 	CONNECT(list.selected, eRecordContextMenu::entrySelected);
 }
 
@@ -5579,8 +5590,25 @@ eRecTimeInput::eRecTimeInput()
 	num->setName("rec_end_time");
 	num->setFlags( eNumber::flagFillWithZeros|eNumber::flagTime );
 
-	time_t now = time(0)+eDVB::getInstance()->time_difference;
-	struct tm *t = localtime( &now );
+	time_t tmp=0;
+
+	EIT *eit=eDVB::getInstance()->getEIT();
+	if (eit)
+	{
+		for (ePtrList<EITEvent>::iterator e(eit->events); e != eit->events.end(); ++e)
+		{
+			if ((e->running_status>=2)||(!e->running_status)) // currently running service
+			{
+				tmp = e->start_time+e->duration;
+				break;
+			}
+		}
+		eit->unlock();
+	}
+	else
+		tmp = time(0)+eDVB::getInstance()->time_difference;
+
+	struct tm *t = localtime( &tmp );
 	num->setNumber(0, t->tm_hour);
 	num->setNumber(1, t->tm_min);
 
@@ -5682,7 +5710,7 @@ eTimeCorrectionEditWindow::eTimeCorrectionEditWindow( tsref tp )
 {
 	setText(_("Time Correction"));
 	move( ePoint(100,100) );
-	cresize( eSize(440,270 ) );
+	cresize( eSize(440,290 ) );
 
 	eLabel *l = new eLabel(this);
 	l->move( ePoint(10,10) );
@@ -5760,15 +5788,15 @@ eTimeCorrectionEditWindow::eTimeCorrectionEditWindow( tsref tp )
 	bSet->setShortcut("green");
 	bSet->setShortcutPixmap("green");
 
-	bSet->move(ePoint(10, clientrect.height()-80));
+	bSet->move(ePoint(10, clientrect.height()-100));
 	bSet->resize(eSize(220,40));
 	bSet->setHelpText(_("set new time and close window"));
 	bSet->loadDeco();
 	CONNECT(bSet->selected, eTimeCorrectionEditWindow::savePressed);
 
 	sbar = new eStatusBar(this);
-	sbar->move( ePoint(0, clientrect.height()-30) );
-	sbar->resize( eSize( clientrect.width(), 30) );
+	sbar->move( ePoint(0, clientrect.height()-50) );
+	sbar->resize( eSize( clientrect.width(), 50) );
 	sbar->loadDeco();
 	CONNECT( updateTimer.timeout, eTimeCorrectionEditWindow::updateTPTimeDate );
 }
@@ -5786,7 +5814,6 @@ void eTimeCorrectionEditWindow::savePressed()
 	TPTime.tm_year = (int)cyear->getCurrent()->getKey();
 	time_t newTPTime = mktime(&TPTime);
 	int diff = newTPTime - nowTP;
-	eDebug("diff = %d", diff );
 	eDVB::getInstance()->time_difference+=diff;
 	eTransponderList::getInstance()->TimeOffsetMap[transponder]=
 		diff;
@@ -5820,7 +5847,6 @@ int eTimeCorrectionEditWindow::eventHandler( const eWidgetEvent &event )
 			{
 			// not in map... we set 0 as correction
 				map[transponder]=0;
-				eDebug("SET 0");
 			}
 			break;
 		}

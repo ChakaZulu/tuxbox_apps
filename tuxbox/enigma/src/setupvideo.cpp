@@ -42,7 +42,7 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 
 	setText(_("A/V Settings"));
 	move(ePoint(160, 90));
-	cresize(eSize(390, 340));
+	cresize(eSize(390, 350));
 
 	eLabel *l=new eLabel(this);
 	l->setText(_("Color Format:"));
@@ -68,14 +68,14 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 
   l=new eLabel(this);
 	l->setText(_("Aspect Ratio:"));
-	l->move(ePoint(20, 65));
+	l->move(ePoint(20, 60));
 	l->resize(eSize(150, fd+4));
 	
 	pin8=new eListBox<eListBoxEntryText>(this, l);
 	pin8->loadDeco();	
 	pin8->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
 	
-	pin8->move(ePoint(180, 65));
+	pin8->move(ePoint(180, 60));
 	pin8->resize(eSize(170, 35));
 	pin8->setHelpText(_("choose aspect ratio ( left, right )"));
 	entrys[0]=new eListBoxEntryText(pin8, _("4:3 letterbox"), (void*)0);
@@ -85,7 +85,7 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	CONNECT( pin8->selchanged, eZapVideoSetup::VPin8Changed );
 
 	c_disableWSS = new eCheckbox(this, v_disableWSS, 1);
-	c_disableWSS->move(ePoint(20,105));
+	c_disableWSS->move(ePoint(20,100));
 	c_disableWSS->resize(eSize(350,30));
 	c_disableWSS->setText(_("Disable WSS on 4:3"));
 	c_disableWSS->setHelpText(_("don't send WSS signal when A-ratio is 4:3"));
@@ -96,21 +96,21 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 
 	ac3default=new eCheckbox(this, sac3default, 1);
 	ac3default->setText(_("AC3 default output"));
-	ac3default->move(ePoint(20, 140));
+	ac3default->move(ePoint(20, 135));
 	ac3default->resize(eSize(350, 30));
 	ac3default->setHelpText(_("enable/disable ac3 default output (ok)"));
 	CONNECT( ac3default->checked, eZapVideoSetup::ac3defaultChanged );
 
 	palM=new eCheckbox(this, v_palM, 1);
 	palM->setText(_("use PAL-M for NTSC"));
-	palM->move(ePoint(20, 175));
+	palM->move(ePoint(20, 170));
 	palM->resize(eSize(350, 30));
 	palM->setHelpText(_("use PAL-M instead of real NTSC"));
 	CONNECT( palM->checked, eZapVideoSetup::palMChanged );
 
 	VCRSwitching=new eCheckbox(this, v_VCRSwitching, 1);
 	VCRSwitching->setText(_("Auto VCR switching"));
-	VCRSwitching->move(ePoint(20, 210));
+	VCRSwitching->move(ePoint(20, 205));
 	VCRSwitching->resize(eSize(350, 30));
 	VCRSwitching->setHelpText(_("auto switch to VCR connector"));
 	CONNECT( VCRSwitching->checked, eZapVideoSetup::VCRChanged );
@@ -119,7 +119,7 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	ok->setText(_("save"));
 	ok->setShortcut("green");
 	ok->setShortcutPixmap("green");
-	ok->move(ePoint(20, 245));
+	ok->move(ePoint(20, 250));
 	ok->resize(eSize(220, 40));
 	ok->setHelpText(_("save changes and return"));
 	ok->loadDeco();
@@ -127,8 +127,8 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	CONNECT(ok->selected, eZapVideoSetup::okPressed);		
 
 	status = new eStatusBar(this);	
-	status->move( ePoint(0, clientrect.height()-30) );
-	status->resize( eSize( clientrect.width(), 30) );
+	status->move( ePoint(0, clientrect.height()-50) );
+	status->resize( eSize( clientrect.width(), 50) );
 	status->loadDeco();
 	setHelpID(86);
 }

@@ -122,7 +122,7 @@ void eHTTPDownloadXML::haveData(void *data, int len)
 	}
 }
 
-eUpgrade::eUpgrade()
+eUpgrade::eUpgrade(bool manual)
 :http(0), changelog(0)
 {
 	status = new eStatusBar(this);
@@ -183,7 +183,7 @@ eUpgrade::eUpgrade()
 
 	eString caturl=getVersionInfo("catalog");
 
-	if (caturl.length())
+	if (caturl.length() && !manual )
 		loadCatalog(caturl.c_str());
 
 	ourversion=getVersionInfo("version");

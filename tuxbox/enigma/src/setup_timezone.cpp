@@ -15,7 +15,7 @@ eZapTimeZoneSetup::eZapTimeZoneSetup() : eWindow(0)
 {
 	setText(_("Time Zone Setup"));
 	cmove(ePoint(110, 146));
-	cresize(eSize(530, 250));
+	cresize(eSize(530, 270));
 
 	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 
@@ -48,15 +48,15 @@ eZapTimeZoneSetup::eZapTimeZoneSetup() : eWindow(0)
 	ok->setText(_("save"));
 	ok->setShortcut("green");
 	ok->setShortcutPixmap("green");
-	ok->move(ePoint(20, clientrect.height()-80));
+	ok->move(ePoint(20, clientrect.height()-100));
 	ok->resize(eSize(220, 40));
 	ok->setHelpText(_("save changes and return"));
 	ok->loadDeco();
 	CONNECT(ok->selected, eZapTimeZoneSetup::okPressed);
 
 	statusbar=new eStatusBar(this);
-	statusbar->move( ePoint(0, clientrect.height()-30 ) );
-	statusbar->resize( eSize( clientrect.width(), 30) );
+	statusbar->move( ePoint(0, clientrect.height()-50 ) );
+	statusbar->resize( eSize( clientrect.width(), 50) );
 	statusbar->loadDeco();
 
 	setHelpID(90);

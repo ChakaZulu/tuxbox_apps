@@ -868,8 +868,6 @@ struct eServiceHandlerDVB_addService
 	}
 	void operator()(const eServiceReference &service)
 	{
-/*		if ( (pLockActive & 2) && service.isLocked() )
-			return;*/
 		eService *s = eTransponderList::getInstance()->searchService( service );
 		if ( !s )  // dont show "removed services"
 			return;

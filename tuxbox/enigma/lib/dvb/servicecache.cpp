@@ -14,11 +14,7 @@ void eServiceCacheBase::enterDirectory(const eServiceReference &parent, Signal1<
 		node=&i->second;
 	node->addRef();
 	for (std::list<eServiceReference>::iterator i(node->content.begin()); i != node->content.end(); ++i)
-	{
-/*		if ( (pLockActive & 2) && i->isLocked() )
-			continue;*/
 		callback(*i);
-	}
 }
 
 void eServiceCacheBase::leaveDirectory(const eServiceReference &parent)

@@ -45,6 +45,34 @@ bool eDecoration::load(const eString& base)
 			borderRight = iRight->x;
 		if (iBottom)
 			borderBottom = iBottom->y;
+		if (iTopLeft)
+		{
+			if ( iTopLeft->y > borderTop)
+				borderTop = iTopLeft->y;
+			if ( iTopLeft->x > borderLeft )
+				borderLeft = iTopLeft->x;
+		}
+		if (iTopRight)
+		{
+			if ( iTopRight->y > borderTop)
+				borderTop = iTopRight->y;
+			if ( iTopLeft->x > borderRight )
+				borderRight = iTopRight->x;
+		}
+		if (iBottomLeft)
+		{
+			if ( iBottomLeft->y > borderBottom )
+				borderBottom = iBottomLeft->y;
+			if ( iBottomLeft->x > borderLeft )
+				borderLeft = iBottomLeft->x;
+		}
+		if (iBottomRight)
+		{
+			if ( iBottomRight->y > borderBottom )
+				borderBottom = iBottomRight->y;
+			if ( iBottomRight->x > borderRight )
+				borderRight = iBottomRight->x;
+		}
 	}
 	return operator bool();
 }

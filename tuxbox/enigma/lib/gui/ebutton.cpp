@@ -102,7 +102,8 @@ int eButton::eventHandler(const eWidgetEvent &event)
 				return eLabel::eventHandler(event);
 		break;
 		case eWidgetEvent::evtShortcut:
-			parent->setFocus(this);
+			if ( takefocus )
+				parent->setFocus(this);
 			/*emit*/ selected();
 			/*emit*/ selected_id(this);
 			return 0;

@@ -26,6 +26,7 @@ public:
 	 */
 	void setPerc(int perc);
 	void setStart(int perc);
+	bool setParams( int _start, int _perc );
 	void redrawWidget(gPainter *target, const eRect &area);
 	
 	/**

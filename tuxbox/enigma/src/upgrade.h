@@ -95,7 +95,7 @@ class eUpgrade: public eWindow
 
 	void displayChangelog(eString oldversion, eString newversion, eString mid);
 public:
-	eUpgrade();
+	eUpgrade(bool manual);
 	~eUpgrade();
 };
 

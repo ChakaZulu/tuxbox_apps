@@ -752,8 +752,8 @@ TransponderScan::TransponderScan( eWidget *LCDTitle, eWidget *LCDElement)
 
 	statusbar=new eStatusBar(this);
 	statusbar->loadDeco();
-	statusbar->move(ePoint(0, getClientSize().height()-30) );
-	statusbar->resize( eSize( getClientSize().width(), 30 ) );
+	statusbar->move(ePoint(0, getClientSize().height()-50) );
+	statusbar->resize( eSize( getClientSize().width(), 50 ) );
 }
 
 TransponderScan::~TransponderScan()
@@ -874,6 +874,12 @@ int TransponderScan::exec(tState initial)
 
 			showScanPic();
 
+			eSize s = statusbar->getSize();
+			ePoint pos = statusbar->getPosition();
+			statusbar->hide();
+			statusbar->resize( eSize( s.width(), s.height()-20 ) );
+			statusbar->move( ePoint( pos.x(), pos.y()+20) );
+			statusbar->show();
 #ifndef DISABLE_LCD
 			tsManual manual_scan(this, transponder, LCDTitle, LCDElement);
 #else
@@ -894,6 +900,10 @@ int TransponderScan::exec(tState initial)
 				break;
 			}
 			manual_scan.hide();
+			statusbar->hide();
+			statusbar->resize( s );
+			statusbar->move( pos );
+			statusbar->show();
 			current=0;
 			oldTp=manual_scan.getTransponder();
 			break;

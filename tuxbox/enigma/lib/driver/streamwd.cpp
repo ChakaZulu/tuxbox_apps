@@ -160,7 +160,8 @@ void eStreamWatchdog::reloadSettings()
 	}
 	unsigned int auto_vcr_switching=1;
 	eConfig::getInstance()->getKey("/elitedvb/video/vcr_switching", auto_vcr_switching );
-	/*emit*/VCRActivityChanged( auto_vcr_switching?getVCRActivity():0 );
+	if ( auto_vcr_switching )
+		/*emit*/VCRActivityChanged( getVCRActivity() );
 }
 
 int eStreamWatchdog::isAnamorph()

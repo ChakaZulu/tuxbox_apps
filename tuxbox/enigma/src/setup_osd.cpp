@@ -179,8 +179,8 @@ eZapOsdSetup::eZapOsdSetup()
 	:eWindow(0)
 {
 	setText(_("OSD Settings"));
-	cmove(ePoint(140, 160));
-	cresize(eSize(460, 290));
+	cmove(ePoint(140, 150));
+	cresize(eSize(460, 300));
 
 	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 
@@ -252,7 +252,7 @@ eZapOsdSetup::eZapOsdSetup()
 	ok->setText(_("save"));
 	ok->setShortcut("green");
 	ok->setShortcutPixmap("green");
-	ok->move(ePoint(20, 205));
+	ok->move(ePoint(20, 200));
 	ok->resize(eSize(205, 40));
 	ok->setHelpText(_("save changes and return"));
 	ok->loadDeco();
@@ -260,8 +260,8 @@ eZapOsdSetup::eZapOsdSetup()
 	CONNECT(ok->selected, eZapOsdSetup::okPressed);
 
 	statusbar=new eStatusBar(this);
-	statusbar->move( ePoint(0, clientrect.height()-30 ) );
-	statusbar->resize( eSize( clientrect.width(), 30) );
+	statusbar->move( ePoint(0, clientrect.height()-50 ) );
+	statusbar->resize( eSize( clientrect.width(), 50) );
 	statusbar->loadDeco();
 	setHelpID(83);
 }

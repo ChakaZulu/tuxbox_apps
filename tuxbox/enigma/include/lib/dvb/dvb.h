@@ -369,7 +369,18 @@ public:
 
 class eServiceReference
 {
-	static std::set<eServiceReference> locked;
+public:
+	struct Parental_Compare
+	{
+		bool operator()(const eServiceReference &s1, const eServiceReference &s2) const
+		{
+			if ( s1.path && s2.path )
+				return s1.path < s2.path;
+			return s1 < s2;
+		}
+	};
+private:
+	static std::set<eServiceReference,Parental_Compare> locked;
 	static bool lockedListChanged;
 public:
 	static void loadLockedList( const char* filename );
@@ -488,7 +499,7 @@ public:
 
 		if (type > c.type)
 			return 0;
-			
+
 /*		if (flags < c.flags)
 			return 1;
 		if (flags > c.flags)

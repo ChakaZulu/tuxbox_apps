@@ -27,8 +27,8 @@ public:
 	eTOnlineDialog( eString Login )
 	{
 		setText("T - Online");
-		cmove(ePoint(140,150));
-		cresize(eSize(450,250));
+		cmove(ePoint(140,140));
+		cresize(eSize(450,270));
 
 		eLabel *l = new eLabel(this);
 		l->move(ePoint(10,10));
@@ -83,8 +83,8 @@ public:
 		CONNECT(ok->selected, eWidget::accept);
 
 		sbar = new eStatusBar(this);
-		sbar->move( ePoint(0, clientrect.height()-30) );
-		sbar->resize( eSize( clientrect.width(), 30) );
+		sbar->move( ePoint(0, clientrect.height()-50) );
+		sbar->resize( eSize( clientrect.width(), 50) );
 		sbar->loadDeco();
 
 		if (Login)
@@ -327,18 +327,19 @@ eZapNetworkSetup::eZapNetworkSetup():
 	combo_type->resize(eSize(200, fd+10));
 	combo_type->loadDeco();
 	combo_type->setHelpText(_("press ok to change connection type"));
+	((eZapNetworkSetup*)combo_type)->setProperty("showEntryHelp", "");
 	if ( !connectionType )
 	{
-		sel = new eListBoxEntryText( *combo_type, _("LAN"), (void*)0, 0, _("Communicate to Local Area Network"));
+		sel = new eListBoxEntryText( *combo_type, _("LAN"), (void*)0, 0, _("communicate to Local Area Network"));
 #ifdef ENABLE_PPPOE
-		new eListBoxEntryText( *combo_type, _("WAN(PPPoE)"), (void*)1, 0, _("Communicate to the Internet via DSL"));		
+		new eListBoxEntryText( *combo_type, _("WAN(PPPoE)"), (void*)1, 0, _("communicate to the Internet via DSL"));
 #endif
 	}
 #ifdef ENABLE_PPPOE
 	else
 	{
-		new eListBoxEntryText( *combo_type, _("LAN"), (void*)0, 0, _("Communicate to Local Area Network"));
-		sel = new eListBoxEntryText( *combo_type, _("WAN(PPPoE)"), (void*)1, 0, _("Communicate to the Internet via DSL"));
+		new eListBoxEntryText( *combo_type, _("LAN"), (void*)0, 0, _("communicate to Local Area Network"));
+		sel = new eListBoxEntryText( *combo_type, _("WAN(PPPoE)"), (void*)1, 0, _("communicate to the Internet via DSL"));
 	}
 	CONNECT(combo_type->selchanged, eZapNetworkSetup::typeChanged);
 	tdsl = new eButton(this);

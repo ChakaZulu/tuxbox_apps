@@ -9,7 +9,6 @@
 #include <lib/system/init_num.h>
 #include <lib/system/econfig.h>
 #include <lib/gdi/font.h>
-#include <enigma_main.h>
 
 struct texteditActions
 {
@@ -17,8 +16,8 @@ struct texteditActions
 	eAction capslock, swapnum, insertchar, deletechar;
 	texteditActions():
 		map("textedit", "enigma global"),
-		capslock(map, "capslock", _("enable capslock"), eAction::prioDialog),
-		swapnum(map, "swapnum", _("swap number before/after characters"), eAction::prioDialog),
+		capslock(map, "capslock", _("enable/disable capslock"), eAction::prioDialog),
+		swapnum(map, "swapnum", _("put numbers before/after characters"), eAction::prioDialog),
 		insertchar(map, "insertchar", _("insert blank at cursor position"), eAction::prioDialog),
 		deletechar(map, "deletechar", _("remove the character at the cursor position"), eAction::prioDialog)
 	{
@@ -31,7 +30,7 @@ std::map< eString, std::vector<std::pair< eString,eString > > > eTextInputField:
 
 eTextInputField::eTextInputField( eWidget *parent, eLabel *descr, eTextInputFieldHelpWidget *hlp, const char *deco )
 	:eButton( parent, descr, 1, deco), maxChars(0), lastKey(-1), editMode(false),
-	editHelpText(_("press ok to leave edit mode\nyellow=capslock, blue=swap numbers")), nextCharTimer(eApp),
+	editHelpText(_("ok=leave edit mode, yellow=enable/disable capslock, blue=put numbers before/after chars")), nextCharTimer(eApp),
 	useableChars("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ˆ¸"
 	"–—“”‘’÷◊ÿŸ⁄€‹›ﬁﬂ‡·‚„‰ÂÊÁËÈÍÎÏÌÓÔ∞±≤≥¥µ∂∑∏π∫ªºΩæø¿¡¬√ƒ≈∆«»… ÀÃÕŒœ"
 	" +-.,:?!\"';_*/()<=>%#@&"), capslock(false), swapNum(false), editLabel(0), helpwidget(hlp)
@@ -48,11 +47,17 @@ eTextInputField::eTextInputField( eWidget *parent, eLabel *descr, eTextInputFiel
 
 void eTextInputField::loadKeyMappings()
 {
-	char *filename=DATADIR "/enigma/resources/keymappings.xml";
-	FILE *in=fopen(filename, "rt");
+	FILE *in=0;
+	char *filename=CONFIGDIR "/enigma/resources/keymappings.xml";
+	in=fopen(filename, "rt");
 	if (!in)
 	{
-		eDebug("cannot open %s", filename);
+		char *filename=DATADIR "/enigma/resources/keymappings.xml";
+		in=fopen(filename, "rt");
+	}
+	if (!in)
+	{
+		eDebug("cannot open keymappings.xml");
 		return;
 	}
 
