@@ -634,8 +634,15 @@ colormenu.gtx_alpha Transparenz (GTX)
 gtxalpha.alpha1 Alpha 1
 gtxalpha.alpha2 Alpha 2
 
-mp3player.name Mp3 Player
+mp3player.head Mp3 Playlist
 mp3player.play abspielen
 mp3player.add hinzufuegen
 mp3player.delete loeschen
 mp3player.stop stop
+mp3player.playall alle abspielen
+
+filebrowser.head Filebrowser
+filebrowser.filter Filter
+filebrowser.select auswaehlen
+filebrowser.mark markieren
+filebrowser.scan Durchsuche Verzeichnisse
