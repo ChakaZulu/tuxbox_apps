@@ -1,7 +1,7 @@
 SUBDIRS = stylesheets
 
 EXTRA_DIST = \
-	epgview.css knop_0.gif  \
+	epgview.css filler.png  \
 	led_aan.gif led_uit.gif on.gif off.gif si.css \
 	speak_off.gif speak_on.gif topbalk.png trans.gif squ.png
 
