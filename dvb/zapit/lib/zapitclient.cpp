@@ -28,11 +28,6 @@
 #include <sys/un.h>
 
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/in_systm.h>
-#include <netinet/ip.h>
-#include <netdb.h>
-#include <arpa/inet.h>
 
 CZapitClient::CZapitClient()
 {

@@ -29,7 +29,6 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
-#include <arpa/inet.h>
 #include <signal.h>
 
 
@@ -164,7 +163,7 @@ void CLCDD::sig_catch(int)
 int CLCDD::main(int argc, char **argv)
 {
 	debugoutput = true;
-	printf("Network LCD-Driver $Id: lcdd.cpp,v 1.48 2002/05/15 23:32:12 McClean Exp $\n\n");
+	printf("Network LCD-Driver $Id: lcdd.cpp,v 1.49 2002/06/03 23:04:23 obi Exp $\n\n");
 
 	loadConfig();
 
