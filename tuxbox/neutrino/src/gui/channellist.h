@@ -88,6 +88,8 @@ class CChannelList
 		int 			x;
 		int 			y;
 
+		bool historyMode;
+
 		void paintDetails(int index);
 		void clearItem2DetailsLine ();
 		void paintItem2DetailsLine (int pos, int ch_index);
@@ -97,7 +99,7 @@ class CChannelList
 		void hide();
 
 	public:
-		CChannelList(const char * const Name);
+		CChannelList(const char * const Name, bool historyMode = false );
 		~CChannelList();
 		void addChannel(int key, int number, const std::string& name, const t_satellite_position& satellitePosition, t_channel_id ids = 0); // UTF-8
 		void addChannel(CChannel* chan);
@@ -111,7 +113,7 @@ class CChannelList
 		t_channel_id CChannelList::getActiveChannel_ChannelID();
 //		const std::string getActiveChannelID();
 		CChannel* getChannelFromChannelID(const t_channel_id channel_id);
-		void zapTo(int pos);
+		void zapTo(int pos, bool forceStoreToLastChannels = false);
 		bool zapTo_ChannelID(const t_channel_id channel_id);
 		bool adjustToChannelID(const t_channel_id channel_id);
 		bool showInfo(int pos);

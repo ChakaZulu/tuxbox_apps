@@ -3084,13 +3084,18 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				g_InfoViewer->showTitle(channelList->getActiveChannelNumber(), channelList->getActiveChannelName(), channelList->getActiveSatellitePosition(), channelList->getActiveChannel_ChannelID()); // UTF-8
 			}
 			else if (CRCInput::isNumeric(msg))
-			{ //numeric zap
+			{ //numeric zap  && "0"-quickzap
 				if( g_RemoteControl->director_mode )
 				{
 					g_RemoteControl->setSubChannel(CRCInput::getNumericValue(msg));
 					g_InfoViewer->showSubchan();
 				}
 				else
+					channelList->numericZap( msg );
+			}
+			else if( msg == CRCInput::RC_home )
+			{
+					// Home -> Zap-History "Bouquet"
 					channelList->numericZap( msg );
 			}
 			else if( msg == (neutrino_msg_t) g_settings.key_subchannel_up )

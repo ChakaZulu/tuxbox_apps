@@ -76,7 +76,7 @@ CChannelList::CChannel::CChannel(const int _key, const int _number, const std::s
 }
 
 
-CChannelList::CChannelList(const char * const Name)
+CChannelList::CChannelList(const char * const Name, bool historyMode)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	name = Name;
@@ -87,6 +87,7 @@ CChannelList::CChannelList(const char * const Name)
 	liststart = 0;
 	tuned=0xfffffff;
 	zapProtection = NULL;
+  this->historyMode = historyMode;
 }
 
 CChannelList::~CChannelList()
@@ -337,6 +338,24 @@ int CChannelList::show()
 			bShowBouquetList = true;
 			loop=false;
 		}
+		else if (this->historyMode && CRCInput::isNumeric(msg))
+		{ //numeric zap
+		      switch (msg)
+      			{
+			        case CRCInput::RC_0:selected = 0;break;
+			        case CRCInput::RC_1:selected = 1;break;
+			        case CRCInput::RC_2:selected = 2;break;
+			        case CRCInput::RC_3:selected = 3;break;
+			        case CRCInput::RC_4:selected = 4;break;
+			        case CRCInput::RC_5:selected = 5;break;
+			        case CRCInput::RC_6:selected = 6;break;
+			        case CRCInput::RC_7:selected = 7;break;
+			        case CRCInput::RC_8:selected = 8;break;
+			        case CRCInput::RC_9:selected = 9;break;
+		        };
+		      zapOnExit = true;
+		      loop = false;
+    		}
 		else if( (msg==CRCInput::RC_green) ||
 			 (msg==CRCInput::RC_yellow) ||
 			 (msg==CRCInput::RC_blue) ||
@@ -503,7 +522,7 @@ bool CChannelList::adjustToChannelID(const t_channel_id channel_id)
 		{
 			selected= i;
 //			CChannel* chan = chanlist[selected];
-			lastChList.store (selected);
+			lastChList.store (selected, channel_id, false);
 
 			tuned = i;
 			if (bouquetList != NULL)
@@ -514,7 +533,7 @@ bool CChannelList::adjustToChannelID(const t_channel_id channel_id)
 	return false;
 }
 
-void CChannelList::zapTo(int pos)
+void CChannelList::zapTo(int pos, bool forceStoreToLastChannels)
 {
 	if (chanlist.empty())
 	{
@@ -528,7 +547,7 @@ void CChannelList::zapTo(int pos)
 
 	selected= pos;
 	CChannel* chan = chanlist[selected];
-	lastChList.store (selected);
+  lastChList.store (selected, chan->channel_id, forceStoreToLastChannels);
 
 	if ( pos!=(int)tuned )
 	{
@@ -541,6 +560,8 @@ void CChannelList::zapTo(int pos)
 		bouquetList->adjustToChannel( getActiveChannelNumber());
 }
 
+
+
 int CChannelList::numericZap(int key)
 {
 	neutrino_msg_t      msg;
@@ -548,15 +569,16 @@ int CChannelList::numericZap(int key)
 
 	int res = menu_return::RETURN_REPAINT;
 
-	if (chanlist.empty())
-	{
+	if (chanlist.empty()) {
 		DisplayErrorMessage(g_Locale->getText(LOCALE_CHANNELLIST_NONEFOUND)); // UTF-8
 		return res;
 	}
 
-	//schneller zap mit "0" taste zwischen den letzten beiden sendern...
-	if (key == CRCInput::RC_0)
-	{
+
+	// -- quickzap "0" to last seen channel...
+	// -- (remains for those who want to avoid the channel history menue)
+	// -- (--> girl friend complained about the history menue, so be it...)
+	if (key == CRCInput::RC_0) {
 		int  ch;
 
 		if( (ch=lastChList.getlast(1)) != -1)
@@ -570,6 +592,38 @@ int CChannelList::numericZap(int key)
 		}
 		return res;
 	}
+
+	// -- zap history bouquet, similar to "0" quickzap,
+	// -- but shows a menue of last channels
+	if (key == CRCInput::RC_home) {
+
+	    if (this->lastChList.size() > 1) {
+		CChannelList channelList("Zapping history", true);
+
+		for ( unsigned int i = 1 ; i < this->lastChList.size() ; ++i) {
+		        int channelnr = this->lastChList.getlast(i);
+		        if (channelnr < int(this->chanlist.size())) {
+		          CChannel* channel = new CChannel(*this->chanlist[channelnr]);
+		          channelList.addChannel(channel);
+        		}
+      		}
+
+		if (channelList.getSize() != 0) {
+			this->frameBuffer->paintBackground();
+			int newChannel = channelList.show() ;
+
+			if (newChannel > -1) {
+				int lastChannel(this->lastChList.getlast(newChannel + 1));
+				if (lastChannel > -1) this->zapTo(lastChannel, true);
+			}
+		}
+	    }
+
+	    return res;
+	}
+
+
+
 
 	int ox=300;
 	int oy=200;
@@ -890,7 +944,7 @@ void CChannelList::paintItem(int pos)
 		CChannel* chan = chanlist[liststart+pos];
 		//number
 		char tmp[10];
-		sprintf((char*) tmp, "%d", chan->number);
+    sprintf((char*) tmp, "%d", this->historyMode?pos:chan->number);
 
 		if (liststart+pos==selected)
 		{
@@ -903,7 +957,11 @@ void CChannelList::paintItem(int pos)
 		if (!(chan->currentEvent.description.empty()))
 		{
 			char nameAndDescription[100];
-			snprintf(nameAndDescription, sizeof(nameAndDescription), "%s · ", ZapitTools::UTF8_to_Latin1(chan->name.c_str()).c_str());
+
+      if (this->historyMode)
+        snprintf(nameAndDescription, sizeof(nameAndDescription), ": %d %s · ", chan->number, ZapitTools::UTF8_to_Latin1(chan->name.c_str()).c_str());
+      else
+        snprintf(nameAndDescription, sizeof(nameAndDescription), "%s · ", ZapitTools::UTF8_to_Latin1(chan->name.c_str()).c_str());
 
 			unsigned int ch_name_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getRenderWidth(nameAndDescription);
 			unsigned int ch_desc_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->getRenderWidth(chan->currentEvent.description);

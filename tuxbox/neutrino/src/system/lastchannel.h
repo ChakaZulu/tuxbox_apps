@@ -23,6 +23,8 @@ nicht gespeichert werden.
 #ifndef SEEN_LastChannel
 #define SEEN_LastChannel
 
+#include <zapit/client/zapitclient.h>
+#include <list>
 
 class CLastChannel
 {
@@ -32,23 +34,24 @@ class CLastChannel
 		{
 			int             channel;
 			unsigned long   timestamp;
-		}
-		lastchannels[8];
-		int            pos;
+      t_channel_id channel_id;
+		};
+
+    std::list<_LastCh> lastChannels;
+
 		unsigned long  secs_diff_before_store;
-
-#define  size_LASTCHANNELS 	(sizeof(lastchannels)/sizeof(struct _LastCh))
-
+    unsigned int maxSize;
+    bool shallRemoveEqualChannel;
 
 	public:
 		CLastChannel  (void);
 		void clear   (void);
-		void store   (int channelnr);
+		void store   (int channelnr, t_channel_id channel_id, bool forceStoreToLastChannels = false);
 		int  getlast (int n);
+    unsigned int size () const;
 		void clear_storedelay (void);
 		void set_store_difftime (int secs);
-		int  get_store_difftime (void);
-
+		int  get_store_difftime (void) const;
 };
 
 

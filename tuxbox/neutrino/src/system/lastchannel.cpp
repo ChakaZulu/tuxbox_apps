@@ -27,14 +27,14 @@ nicht gespeichert werden.
 
 
 //
-//  -- Init Class vi Contructor
+//  -- Init Class  Contructor
 //
 
 CLastChannel::CLastChannel (void)
-
+: secs_diff_before_store(3)
+, maxSize(11)
+, shallRemoveEqualChannel(true)
 {
-	clear ();
-	set_store_difftime (3);
 }
 
 
@@ -45,16 +45,7 @@ CLastChannel::CLastChannel (void)
 void CLastChannel::clear (void)
 
 {
-	int i;
-
-
-	for (i=0; i < (int)size_LASTCHANNELS; i++)
-	{
-		lastchannels[i].channel   = -1;
-		lastchannels[i].timestamp = 0;
-	}
-
-	pos = 0;
+  this->lastChannels.clear();
 }
 
 
@@ -65,7 +56,7 @@ void CLastChannel::clear (void)
 // -- and time store delay is large enough
 //
 
-void CLastChannel::store (int channel)
+void CLastChannel::store (int channel, t_channel_id channel_id, bool forceStoreToLastChannels)
 
 {
 	struct timeval  tv;
@@ -73,19 +64,59 @@ void CLastChannel::store (int channel)
 
 	gettimeofday (&tv, NULL);
 
-	if (    ((tv.tv_sec - lastchannels[pos].timestamp) > secs_diff_before_store)
-	        && (lastchannels[pos].channel != channel) )
+  int           lastChannel(-1);
+  t_channel_id  lastChannel_id(0);
+  unsigned long lastTimestamp(0);
+
+  if (!this->lastChannels.empty())
+  {
+    lastChannel    = this->lastChannels.front().channel;
+    lastChannel_id = this->lastChannels.front().channel_id;
+    lastTimestamp  = this->lastChannels.front().timestamp;
+  }
+
+  if (    ( (forceStoreToLastChannels || (tv.tv_sec - lastTimestamp) > secs_diff_before_store))
+	        && (lastChannel != channel) )
 	{
+    if (this->shallRemoveEqualChannel && (this->lastChannels.size() > 1))
+    {
+      std::list<_LastCh>::iterator It = this->lastChannels.begin();
+      ++It;
+      for (
+          ; It != this->lastChannels.end()
+          ; ++It
+          )
+      {
+        if (lastChannel_id == It->channel_id)
+        {
+
+          this->lastChannels.erase(It);
+          break;
+        }
+      }
+    }
 
 		// -- store channel on next pos (new channel)
-		pos = (pos + 1) % size_LASTCHANNELS;
-
+   _LastCh newChannel = {channel, channel_id, tv.tv_sec};
+    this->lastChannels.push_front(newChannel);
+    if (this->lastChannels.size() > this->maxSize)
+    {
+      this->lastChannels.pop_back();
+    }
 	}
 
-	// -- remember time (secs)
-	lastchannels[pos].channel    = channel;
-	lastchannels[pos].timestamp  = tv.tv_sec;
+  // -- remember time (secs)
+  if (!this->lastChannels.empty())
+  {
+    this->lastChannels.front().channel    = channel;
+    this->lastChannels.front().channel_id = channel_id;
+    this->lastChannels.front().timestamp  = tv.tv_sec;
+  }
+}
 
+unsigned int CLastChannel::size () const
+{
+  return this->lastChannels.size();
 }
 
 
@@ -99,7 +130,10 @@ void CLastChannel::store (int channel)
 void CLastChannel::clear_storedelay (void)
 
 {
-	lastchannels[pos].timestamp = 0;
+  if (!this->lastChannels.empty())
+  {
+    this->lastChannels.front().timestamp = 0;
+  }
 }
 
 
@@ -114,19 +148,18 @@ void CLastChannel::clear_storedelay (void)
 int CLastChannel::getlast (int n)
 
 {
-	int lastpos;
+  if ( (n < int(this->lastChannels.size()))
+     &&(n > -1)
+     &&(!this->lastChannels.empty())
+     )
+  {
+    std::list<_LastCh>::const_iterator It = this->lastChannels.begin();
+    std::advance(It, n);
 
+    return It->channel;
+  }
 
-	// too large anyway
-	if (n > (int)size_LASTCHANNELS)
-		return -1;
-
-	// get correct buffer pos
-	lastpos = (pos - n);
-	if (lastpos < 0)
-		lastpos += size_LASTCHANNELS;
-
-	return lastchannels[lastpos].channel;
+  return -1;
 }
 
 
@@ -141,8 +174,9 @@ void CLastChannel::set_store_difftime (int secs)
 	secs_diff_before_store = secs;
 }
 
-int CLastChannel::get_store_difftime (void)
+int CLastChannel::get_store_difftime (void) const
 
 {
 	return    secs_diff_before_store;
 }
+
