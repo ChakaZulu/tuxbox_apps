@@ -102,6 +102,8 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 			ci_progress("no module");	
 		ci_state=0;
 		clearCAIDs();
+		::ioctl(fd,CI_RESET);
+		dataAvailable(0);
 		break;
 	case eDVBCIMessage::init:
 		eDebug("[DVBCI] got init message..");
@@ -230,18 +232,37 @@ void eDVBCI::createCAPMT(int type, unsigned char *data)
 			CAPMTlen=14;
 			CAPMTpos=14;
 			CAPMT[7]=0;
+			CAPMTfirst=1;
 			break;
 		case 1:				//descriptor
+		{
+			int y=0;
 			eDebug("descr:%x",data[0]);
-			CAPMT[CAPMTpos++]=0x1;
+			if(CAPMTfirst)
+			{
+					CAPMT[CAPMTpos++]=0x1;
+					CAPMTfirst=0;
+					y=1;
+			}		
 			memcpy(CAPMT+CAPMTpos,data,data[1]+2);
 			CAPMTpos+=(data[1]+2);
-			CAPMTlen+=(data[1]+3);
-			CAPMTdescrlen+=(data[1]+3);
+			if(y==1)
+			{
+				CAPMTdescrlen+=(data[1]+3);
+				CAPMTlen+=(data[1]+3);
+			}	
+			else
+			{
+				CAPMTdescrlen+=(data[1]+2);
+				CAPMTlen+=(data[1]+2);
+			}	
+				
 			break;
+		}	
 		case 2:				//mode es
 			CAPMT[12]=((CAPMTlen-14)<<8);
 			CAPMT[13]=((CAPMTlen-14) & 0xff);
+			CAPMTfirst=1;
 			break;
 	}		
 }
@@ -249,10 +270,10 @@ void eDVBCI::createCAPMT(int type, unsigned char *data)
 void eDVBCI::sendCAPMT()
 {
 	int i;
-	//printf("CA-PMT:");
-	//for(i=0;i<CAPMTlen;i++)
-	//	printf("%02x ",CAPMT[i]);
-	//printf("\n");	
+	printf("CA-PMT:");
+	for(i=0;i<CAPMTlen;i++)
+		printf("%02x ",CAPMT[i]);
+	printf("\n");	
 	
 	if(CAPMTlen>0)
 		sendTPDU(0xA0,CAPMTlen,1,CAPMT);
