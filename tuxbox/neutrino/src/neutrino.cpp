@@ -1041,7 +1041,6 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 	{
 		settings.addItem( new CMenuSeparator() );
 		settings.addItem( new CMenuForwarder("menu.back") );
-		settings.addItem( new CMenuForwarder("mainsettings.savesettingsnow", true, "", this, "savesettings") );
 		settings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
 		CZapitClient::SatelliteList satList;
@@ -1105,7 +1104,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		ojDiseqc->addOption( MINI_DISEQC, "satsetup.minidiseqc");
 		ojDiseqc->addOption( DISEQC_1_0,  "satsetup.diseqc10");
 		ojDiseqc->addOption( DISEQC_1_1,  "satsetup.diseqc11");
-		//ojDiseqc->addOption( DISEQC_1_2,  "satsetup.diseqc12");
+		ojDiseqc->addOption( DISEQC_1_2,  "satsetup.diseqc12");
 		ojDiseqc->addOption( SMATV_REMOTE_TUNING,  "satsetup.smatvremote");
 
 		settings.addItem( ojDiseqc );
@@ -1113,7 +1112,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		settings.addItem( ojSat);
 		settings.addItem( ojDiseqcRepeats );
 		settings.addItem( ojExtSatSettings);
-		//settings.addItem( ojExtMotorSettings);
+		settings.addItem( ojExtMotorSettings);
 
 	}
 	else
@@ -1136,8 +1135,8 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		settings.addItem( oj);
 	}
 
-	//settings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	//settings.addItem( new CMenuForwarder("scants.motorcontrol", (scanSettings.diseqcMode == DISEQC_1_2), "", new CMotorControl() ) );
+	settings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	settings.addItem( new CMenuForwarder("scants.motorcontrol", (scanSettings.diseqcMode == DISEQC_1_2), "", new CMotorControl() ) );
 	settings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	settings.addItem( new CMenuForwarder("scants.startnow", true, "", new CScanTs() ) );
 
@@ -3377,7 +3376,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.448 2003/05/18 11:51:08 alexw Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.449 2003/05/18 14:50:51 digi_casi Exp $\n\n");
 
 	tzset();
 	initGlobals();
