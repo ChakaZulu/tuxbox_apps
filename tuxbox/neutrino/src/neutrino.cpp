@@ -2589,7 +2589,20 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	{
 		CTimerd::EventInfo * eventinfo; 
 		eventinfo = (CTimerd::EventInfo *) data;
-		channelList->zapTo_ChannelID(eventinfo->channel_id);
+		if(recordingstatus==0)
+		{
+			if(eventinfo->mode==CTimerd::MODE_RADIO && mode!=mode_radio)
+			{
+				radioMode(false);
+				channelsInit();
+			}
+			else if(eventinfo->mode==CTimerd::MODE_TV && mode!=mode_tv)
+			{
+				tvMode(false);
+				channelsInit();
+			}
+			channelList->zapTo_ChannelID(eventinfo->channel_id);  
+		}
 		delete (unsigned char*) data;
 		return messages_return::handled;
 	}
@@ -3213,7 +3226,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.359 2002/11/10 20:07:02 Zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.360 2002/11/13 20:44:44 Zwen Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

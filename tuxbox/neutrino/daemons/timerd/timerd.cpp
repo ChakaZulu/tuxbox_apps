@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerd.cpp,v 1.33 2002/11/08 09:25:22 Zwen Exp $
+	$Id: timerd.cpp,v 1.34 2002/11/13 20:44:43 Zwen Exp $
 
 	License: GPL
 
@@ -291,6 +291,8 @@ void parse_command(int connfd, CBasicMessage::Header * rmessage)
 					{
 						resp.epgID = static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.epgID;
 						resp.channel_id = static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.channel_id;
+						resp.apid = static_cast<CTimerEvent_Record*>(event)->eventInfo.apid;
+						resp.mode = static_cast<CTimerEvent_Record*>(event)->eventInfo.mode;
 					}
 					else if(event->eventID == CTimerd::TIMER_RECORD)
 					{
@@ -304,6 +306,7 @@ void parse_command(int connfd, CBasicMessage::Header * rmessage)
 						resp.epgID = static_cast<CTimerEvent_Zapto*>(event)->eventInfo.epgID;
 						resp.channel_id = static_cast<CTimerEvent_Zapto*>(event)->eventInfo.channel_id;
 						resp.mode = static_cast<CTimerEvent_Zapto*>(event)->eventInfo.mode;
+						resp.apid = static_cast<CTimerEvent_Record*>(event)->eventInfo.apid;
 					}
 					else if(event->eventID == CTimerd::TIMER_REMIND)
 					{
@@ -337,6 +340,8 @@ void parse_command(int connfd, CBasicMessage::Header * rmessage)
 					{
 						resp.epgID = static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.epgID;
 						resp.channel_id = static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.channel_id;
+						resp.apid = static_cast<CTimerEvent_Record*>(event)->eventInfo.apid;
+						resp.mode = static_cast<CTimerEvent_Record*>(event)->eventInfo.mode;
 					}
 					else if(event->eventType == CTimerd::TIMER_RECORD)
 					{
@@ -350,6 +355,7 @@ void parse_command(int connfd, CBasicMessage::Header * rmessage)
 						resp.epgID = static_cast<CTimerEvent_Zapto*>(event)->eventInfo.epgID;
 						resp.channel_id = static_cast<CTimerEvent_Zapto*>(event)->eventInfo.channel_id;
 						resp.mode = static_cast<CTimerEvent_Zapto*>(event)->eventInfo.mode;
+						resp.apid = static_cast<CTimerEvent_Record*>(event)->eventInfo.apid;
 					}
 					else if(event->eventType == CTimerd::TIMER_REMIND)
 					{

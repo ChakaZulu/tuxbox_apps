@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.53 2002/11/10 20:07:02 Zwen Exp $
+   $Id: timermanager.cpp,v 1.54 2002/11/13 20:44:44 Zwen Exp $
 
 	License: GPL
 
@@ -741,6 +741,7 @@ CTimerEvent(CTimerd::TIMER_ZAPTO, announceTime, alarmTime, (time_t) 0, evrepeat)
 	eventInfo.epgID = epgID;
 	eventInfo.channel_id = channel_id;
 	eventInfo.mode = mode;
+	eventInfo.apid = 0;
 }
 //------------------------------------------------------------
 CTimerEvent_Zapto::CTimerEvent_Zapto(CConfigFile *config, int iId):
@@ -751,6 +752,7 @@ CTimerEvent(CTimerd::TIMER_ZAPTO, config, iId)
 	string id=ostr.str();
 	eventInfo.epgID = config->getInt64("EVENT_INFO_EPG_ID_"+id);
 	eventInfo.channel_id = config->getInt32("EVENT_INFO_ONID_SID_"+id);
+	eventInfo.apid = config->getInt32("EVENT_INFO_APID_"+id);
 	eventInfo.mode = (CTimerd::CChannelMode) config->getInt32("EVENT_INFO_CHANNEL_MODE_"+id);
 }
 //------------------------------------------------------------
@@ -783,6 +785,7 @@ void CTimerEvent_Zapto::saveToConfig(CConfigFile *config)
 	config->setInt64("EVENT_INFO_EPG_ID_"+id,eventInfo.epgID);
 	config->setInt32("EVENT_INFO_ONID_SID_"+id,eventInfo.channel_id);
 	config->setInt32("EVENT_INFO_CHANNEL_MODE_"+id, (int) eventInfo.mode);
+	config->setInt32("EVENT_INFO_APID_"+id,eventInfo.apid);
 }
 //------------------------------------------------------------
 void CTimerEvent_Zapto::Reschedule()
@@ -811,6 +814,8 @@ CTimerEvent(CTimerd::TIMER_NEXTPROGRAM, config, iId)
 	string id=ostr.str();
 	eventInfo.epgID = config->getInt64("EVENT_INFO_EPG_ID_"+id);
 	eventInfo.channel_id = config->getInt32("EVENT_INFO_ONID_SID_"+id);
+	eventInfo.apid = config->getInt32("EVENT_INFO_APID_"+id);
+	eventInfo.mode = (CTimerd::CChannelMode) config->getInt32("EVENT_INFO_CHANNEL_MODE_"+id);
 }
 //------------------------------------------------------------
 
@@ -844,6 +849,8 @@ void CTimerEvent_NextProgram::saveToConfig(CConfigFile *config)
 	string id=ostr.str();
 	config->setInt64("EVENT_INFO_EPG_ID_"+id,eventInfo.epgID);
 	config->setInt32("EVENT_INFO_ONID_SID_"+id,eventInfo.channel_id);
+	config->setInt32("EVENT_INFO_APID_"+id,eventInfo.apid);
+	config->setInt32("EVENT_INFO_CHANNEL_MODE_"+id, (int) eventInfo.mode);
 }
 //------------------------------------------------------------
 void CTimerEvent_NextProgram::Reschedule()

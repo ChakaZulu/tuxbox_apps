@@ -484,7 +484,6 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 
 				// 31.05.2002 dirch		zapto timer
 				case CRCInput::RC_yellow:
-					// $$ EPG ID muss noch mit rein...
 					timerdclient = new CTimerdClient;
 					if(timerdclient->isTimerdAvailable())
 					{

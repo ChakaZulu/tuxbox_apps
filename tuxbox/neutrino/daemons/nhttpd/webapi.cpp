@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.20 2002/11/10 20:07:01 Zwen Exp $
+	$Id: webapi.cpp,v 1.21 2002/11/13 20:44:43 Zwen Exp $
 
 	License: GPL
 
@@ -666,8 +666,10 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 	Parent->Timerd->getTimerList(timerlist);
 	sort(timerlist.begin(), timerlist.end());
 
-	CZapitClient::BouquetChannelList channellist;     
-	channellist.clear();
+	CZapitClient::BouquetChannelList channellist_tv;     
+	CZapitClient::BouquetChannelList channellist_radio;     
+	channellist_tv.clear();
+	channellist_radio.clear();
 
 	request->SendHTMLHeader("TIMERLISTE");
 	request->SocketWrite("<center>\n<TABLE CLASS=\"timer\" border=0>\n<TR>\n");
@@ -700,7 +702,6 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 			strftime(zStopTime,20,"%d.%m. %H:%M",stopTime);     
 		}
 
-		// request->printf("<TR><TD CLASS=\"%ctimer\" align=center>%d</TD>",classname, timer->eventID);
 		request->printf("<TR><TD CLASS=\"%ctimer\" align=center>%s</TD>", classname, zAlarmTime);
 		request->printf("<TD CLASS=\"%ctimer\" align=center>%s</TD>", classname, zStopTime);
 		char zRep[20+1];
@@ -718,22 +719,45 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 			case CTimerd::TIMER_ZAPTO :
 			case CTimerd::TIMER_RECORD :
 			{
-				if(channellist.size()==0)
-				{
-					Parent->Zapit->getChannels(channellist);
-				}
-				CZapitClient::BouquetChannelList::iterator channel = channellist.begin();
-				for(; channel != channellist.end();channel++)
-				{
-					if (channel->channel_id == timer->channel_id)
+				if(timer->mode == CTimerd::MODE_RADIO)
+				{ // Radiokanal
+					if(channellist_radio.size()==0)
 					{
-						strncpy(zAddData, channel->name, 20);
-						zAddData[20]=0;
-						break;
+						Parent->Zapit->getChannels(channellist_radio,CZapitClient::MODE_RADIO);
 					}
+					CZapitClient::BouquetChannelList::iterator channel = channellist_radio.begin();
+					for(; channel != channellist_radio.end();channel++)
+					{
+						if (channel->channel_id == timer->channel_id)
+						{
+							strncpy(zAddData, channel->name, 20);
+							zAddData[20]=0;
+							break;
+						}
+					}
+					if(channel == channellist_radio.end())
+						strcpy(zAddData,"Unbekannter Radiokanal");
 				}
-				if(channel == channellist.end())
-					strcpy(zAddData,"Unbekannt");
+				else
+				{ //TV Kanal
+					if(channellist_tv.size()==0)
+					{
+						Parent->Zapit->getChannels(channellist_tv, CZapitClient::MODE_TV);
+					}
+					CZapitClient::BouquetChannelList::iterator channel = channellist_tv.begin();
+					for(; channel != channellist_tv.end();channel++)
+					{
+						if (channel->channel_id == timer->channel_id)
+						{
+							strncpy(zAddData, channel->name, 20);
+							zAddData[20]=0;
+							break;
+						}
+					}
+					if(channel == channellist_tv.end())
+						strcpy(zAddData,"Unbekannter TV-Kanal");
+				}
+
 			}
 			break;
 			case CTimerd::TIMER_STANDBY :
@@ -1035,12 +1059,22 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 	request->SocketWrite("<select name=\"channel_id\">\n");
 	CZapitClient::BouquetChannelList channellist;     
 	channellist.clear();
-	Parent->Zapit->getChannels(channellist);
+	Parent->Zapit->getChannels(channellist,CZapitClient::MODE_TV);
 	t_channel_id current_channel = Parent->Zapit->getCurrentServiceID();
 	CZapitClient::BouquetChannelList::iterator channel = channellist.begin();
 	for(; channel != channellist.end();channel++)
 	{
-		request->printf("<option value=\"%u\"",channel->channel_id);
+		request->printf("<option value=\"T%u\"",channel->channel_id);
+		if(channel->channel_id == current_channel)
+			request->SocketWrite(" selected");
+		request->printf(">%s\n",channel->name);
+	}
+	channellist.clear();
+	Parent->Zapit->getChannels(channellist,CZapitClient::MODE_RADIO);
+	channel = channellist.begin();
+	for(; channel != channellist.end();channel++)
+	{
+		request->printf("<option value=\"R%u\"",channel->channel_id);
 		if(channel->channel_id == current_channel)
 			request->SocketWrite(" selected");
 		request->printf(">%s\n",channel->name);
@@ -1143,7 +1177,11 @@ time_t	announceTimeT = 0,
 	bool standby_on = (request->ParameterList["sbon"]=="1");
 	CTimerd::EventInfo eventinfo;
 	eventinfo.epgID      = 0;
-	eventinfo.channel_id = atoi(request->ParameterList["channel_id"].c_str());
+	if(request->ParameterList["channel_id"].substr(0,1)=="R")
+		eventinfo.mode = CTimerd::MODE_RADIO;
+	else
+		eventinfo.mode = CTimerd::MODE_TV;
+	sscanf(request->ParameterList["channel_id"].substr(1).c_str(),"%u",&eventinfo.channel_id);
 	void *data=NULL;
 	if(type == CTimerd::TIMER_STANDBY)
 		data=&standby_on;
@@ -1157,12 +1195,6 @@ time_t	announceTimeT = 0,
 		strncpy(msg, request->ParameterList["msg"].c_str(),REMINDER_MESSAGE_MAXLEN-1);
 		data=msg;
 	}
-/*   
-	if(type!=CTimerd::TIMER_RECORD)
-   {
-      stopTimeT=0;
-   }
-*/
 	Parent->Timerd->addTimerEvent(type,data,announceTimeT,alarmTimeT,stopTimeT,rep);
 }
 
