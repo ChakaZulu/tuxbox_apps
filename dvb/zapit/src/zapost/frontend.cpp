@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.42 2003/02/25 12:50:36 obi Exp $
+ * $Id: frontend.cpp,v 1.43 2003/02/28 19:41:14 obi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -171,8 +171,11 @@ void CFrontend::setFrontend(struct dvb_frontend_parameters *feparams)
 {
 	struct dvb_frontend_event event;
 
+	if (errno != 0)
+		errno = 0;
+
 	while ((errno == 0) || (errno == EOVERFLOW))
-		fop(ioctl, FE_GET_EVENT, &event);
+		quiet_fop(ioctl, FE_GET_EVENT, &event);
 
 	fop(ioctl, FE_SET_FRONTEND, feparams);
 }
@@ -186,7 +189,7 @@ struct dvb_frontend_parameters CFrontend::getFrontend(void)
 	return feparams;
 }
 
-#define TIMEOUT_MAX_MS 5000
+#define TIMEOUT_MAX_MS 3000
 
 struct dvb_frontend_event CFrontend::getEvent(void)
 {
@@ -212,7 +215,11 @@ struct dvb_frontend_event CFrontend::getEvent(void)
 		msec -= ((tv2.tv_sec - tv.tv_sec) * 1000) + ((tv2.tv_usec - tv.tv_usec) / 1000);
 
 		if (pfd.revents & POLLIN) {
-
+#if 0
+			/* ignore too fast events - tuning in 0 msec is not possible */
+			if ((TIMEOUT_MAX_MS - msec) == 0)
+				continue;
+#endif
 			INFO("event after %d milliseconds", TIMEOUT_MAX_MS - msec);
 
 			memset(&event, 0, sizeof(struct dvb_frontend_event));
