@@ -23,6 +23,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/wait.h>
 #include <global.h>
 #include <neutrino.h>
 
@@ -38,12 +39,15 @@
 
 CMotorControl::CMotorControl()
 {
+	satfindpid = -1;
+	
 	frameBuffer = CFrameBuffer::getInstance();
 	
 	width = 420;
 	hheight = g_Fonts->menu_title->getHeight();
 	mheight = g_Fonts->menu->getHeight();
-	height = hheight + (18 * mheight);
+	height = hheight + (19 * mheight);
+	if (height > 576) height = 576;
 	x = ((720 - width) >> 1);
 	y = (576 - height) >> 1;
 	
@@ -52,6 +56,7 @@ CMotorControl::CMotorControl()
 	installerMenue = false;
 	motorPosition = 1;
 	satellitePosition = 0;
+	stepDelay = 10;
 }
 
 int CMotorControl::exec(CMenuTarget* parent, string)
@@ -65,6 +70,8 @@ int CMotorControl::exec(CMenuTarget* parent, string)
 	
 	if (parent)
 		parent->hide();
+		
+	startSatFind();
 		
 	paint();
 	paintMenu();
@@ -285,7 +292,7 @@ void CMotorControl::motorStepWest(void)
 			break;
 		case STEP_MODE_TIMED:
 			g_Zapit->sendMotorCommand(0xE0, 0x31, 0x69, 1, 40, 0);
-			usleep(stepSize * 100 * 1000);
+			usleep(stepSize * stepDelay * 1000);
 			g_Zapit->sendMotorCommand(0xE0, 0x31, 0x60, 0, 0, 0); //halt motor
 			satellitePosition += stepSize;
 			break;
@@ -305,7 +312,7 @@ void CMotorControl::motorStepEast(void)
 			break;
 		case STEP_MODE_TIMED:
 			g_Zapit->sendMotorCommand(0xE0, 0x31, 0x68, 1, 40, 0);
-			usleep(stepSize * 100 * 1000);
+			usleep(stepSize * stepDelay * 1000);
 			g_Zapit->sendMotorCommand(0xE0, 0x31, 0x60, 0, 0, 0); //halt motor
 			satellitePosition -= stepSize;
 			break;
@@ -317,6 +324,7 @@ void CMotorControl::motorStepEast(void)
 void CMotorControl::hide()
 {
 	frameBuffer->paintBackgroundBoxRel(x, y, width, height + 20);
+	stopSatFind();
 }
 
 void CMotorControl::paintLine(char * txt, char * icon)
@@ -335,19 +343,13 @@ void CMotorControl::paintStatus()
 	paintLine("------ Motor Control Settings ------", NULL);
 	
 	buf[0] = buf2[0] = 0;
-	strcat(buf, "Motor Position: ");
+	strcat(buf, "(a) Motor Position: ");
 	sprintf(buf2, "%d", motorPosition);
 	strcat(buf, buf2);
 	paintLine(buf, NULL);
 	
 	buf[0] = buf2[0] = 0;
-	strcat(buf, "Satellite Position: ");
-	sprintf(buf2, "%d", satellitePosition);
-	strcat(buf, buf2);
-	paintLine(buf, NULL);
-	
-	buf[0] = buf2[0] = 0;
-	strcat(buf, "Movement: ");
+	strcat(buf, "(b) Movement: ");
 	switch(stepMode)
 	{
 		case STEP_MODE_ON:
@@ -363,7 +365,7 @@ void CMotorControl::paintStatus()
 	paintLine(buf, NULL);
 	
 	buf[0] = buf2[0] = 0;
-	strcat(buf, "Step Size: ");
+	strcat(buf, "(c) Step Size: ");
 	switch(stepMode)
 	{
 		case STEP_MODE_ON:
@@ -373,12 +375,20 @@ void CMotorControl::paintStatus()
 			strcpy(buf2, "don't care");
 			break;
 		case STEP_MODE_TIMED:
-			sprintf(buf2, "%d", stepSize * 100);
+			sprintf(buf2, "%d", stepSize * stepDelay);
 			strcat(buf2, " milliseconds");
 			break;
 	}
 	strcat(buf, buf2);
 	paintLine(buf, NULL);
+	
+	paintLine("---------------- Status ---------------", NULL);
+	buf[0] = buf2[0] = 0;
+	strcat(buf, "Satellite Position (Step Mode): ");
+	sprintf(buf2, "%d", satellitePosition);
+	strcat(buf, buf2);
+	paintLine(buf, NULL);
+	
 }
 
 void CMotorControl::paint()
@@ -399,37 +409,72 @@ void CMotorControl::paintMenu()
 	if (installerMenue)
 	{
 		paintLine("(0/OK) User Menue", NULL);
-		paintLine("(1/right)) Step/Drive Motor West", NULL);
+		paintLine("(1/right)) Step/Drive Motor West (b,c)", NULL);
 		paintLine("(2/red) Halt Motor", NULL);
-		paintLine("(3/left) Step/Drive Motor East", NULL);
+		paintLine("(3/left) Step/Drive Motor East (b,c)", NULL);
 		paintLine("(4) Set West (soft) Limit", NULL);
 		paintLine("(5) Disable (soft) Limits", NULL);
 		paintLine("(6) Set East (soft) Limit", NULL);
 		paintLine("(7) Goto Reference Position", NULL);
 		paintLine("(8) Enable (soft) Limits", NULL);
 		paintLine("(9) (Re)-Calculate Positions", NULL);
-		paintLine("(+/up) Increase Motor Position", NULL);
-		paintLine("(-/down) Decrease Motor Position", NULL);
-		paintLine("(blue) Switch Step/Drive Mode", NULL);
+		paintLine("(+/up) Increase Motor Position (a)", NULL);
+		paintLine("(-/down) Decrease Motor Position (a)", NULL);
+		paintLine("(blue) Switch Step/Drive Mode (b)", NULL);
 	}
 	else
 	{
 		paintLine("(0/OK) Installer Menue", NULL);
-		paintLine("(1/right)) Step/Drive Motor West", NULL);
+		paintLine("(1/right)) Step/Drive Motor West (b,c)", NULL);
 		paintLine("(2/red) Halt Motor", NULL);
-		paintLine("(3/left) Step/Drive Motor East", NULL);
+		paintLine("(3/left) Step/Drive Motor East (b,c)", NULL);
 		paintLine("(4) not defined", NULL);
-		paintLine("(5/green) Store Motor Position", NULL);
-		paintLine("(6) Increase Step Size", NULL);
-		paintLine("(7/yellow) Goto Motor Position", NULL);
+		paintLine("(5/green) Store Motor Position (a)", NULL);
+		paintLine("(6) Increase Step Size (c)", NULL);
+		paintLine("(7/yellow) Goto Motor Position (a)", NULL);
 		paintLine("(8) not defined", NULL);
-		paintLine("(9) Decrease Step Size", NULL);
-		paintLine("(+/up) Increase Motor Position", NULL);
-		paintLine("(-/down) Decrease Motor Position", NULL);
-		paintLine("(blue) Switch Step/Drive Mode", NULL);	
+		paintLine("(9) Decrease Step Size (c)", NULL);
+		paintLine("(+/up) Increase Motor Position (a)", NULL);
+		paintLine("(-/down) Decrease Motor Position (a)", NULL);
+		paintLine("(blue) Switch Step/Drive Mode (b)", NULL);	
 	}
 	
 	ypos_status = ypos;
+}
+
+void CMotorControl::startSatFind(void)
+{
+	
+		if (satfindpid != -1)
+		{
+			kill(satfindpid, SIGKILL);
+			waitpid(satfindpid, 0, 0);
+			satfindpid = -1;
+		}
+		
+		switch ((satfindpid = fork()))
+		{
+		case -1:
+			printf("[motorcontrol] fork");
+			break;
+		case 0:
+			printf("[motorcontrol] starting satfind...\n");
+			if (execlp("/bin/satfind", "satfind", NULL) < 0)
+				printf("[motorcontrol] execlp satfind failed.\n");		
+			break;
+		} /* switch */
+}
+
+void CMotorControl::stopSatFind(void)
+{
+	
+	if (satfindpid != -1)
+	{
+		printf("[motorcontrol] killing satfind...\n");
+		kill(satfindpid, SIGKILL);
+		waitpid(satfindpid, 0, 0);
+		satfindpid = -1;
+	}
 }
 
 

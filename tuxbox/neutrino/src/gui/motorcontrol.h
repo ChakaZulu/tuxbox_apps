@@ -59,10 +59,12 @@ class CMotorControl : public CMenuTarget
 		int ypos_menue;
 		
 		int8_t stepSize;
+		int32_t stepDelay;
 		int stepMode;
 		bool installerMenue;
 		uint8_t motorPosition;
 		int32_t satellitePosition;
+		int satfindpid;
 
 		void paint();
 		void paintMenu(void);
@@ -70,6 +72,8 @@ class CMotorControl : public CMenuTarget
 		void paintLine(char * txt, char * icon);
 		void motorStepEast(void);
 		void motorStepWest(void);
+		void startSatFind(void);
+		void stopSatFind(void);
 
 	public:
 
