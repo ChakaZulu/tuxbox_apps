@@ -184,7 +184,7 @@ int CBouquetList::show()
 	int pos= maxpos;
 
 	uint msg; uint data;
-	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_chanlist );
+	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_chanlist );
 
 	bool loop=true;
 	while (loop)
@@ -192,7 +192,7 @@ int CBouquetList::show()
 		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 
 		if ( msg <= CRCInput::RC_MaxRC )
-			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_chanlist );
+			timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_chanlist );
 
 		if ( ( msg == CRCInput::RC_timeout ) ||
 			 ( msg == (uint) g_settings.key_channelList_cancel ) )

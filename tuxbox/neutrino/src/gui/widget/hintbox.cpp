@@ -132,7 +132,7 @@ int ShowHintUTF(const char * const Caption, const char * const Text, const int W
 		timeout = g_settings.timing_infobar ;
 
 	uint msg; uint data;
-	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( timeout );
+	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( timeout );
 
 	int res = messages_return::none;
 

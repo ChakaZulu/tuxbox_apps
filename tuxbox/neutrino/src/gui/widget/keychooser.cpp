@@ -29,7 +29,7 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "keychooser.h"
+#include <gui/widget/keychooser.h>
 
 #include <global.h>
 #include <neutrino.h>
@@ -50,8 +50,8 @@ CKeyChooser::CKeyChooser( int* Key, const char * const title, std::string Icon )
 	addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	addItem( new CMenuForwarder("menu.back") );
 	addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	addItem( new CMenuForwarder("keychoosermenu.setnew", true, "", keyChooser) );
-	addItem( new CMenuForwarder("keychoosermenu.setnone", true, "", keyDeleter) );
+	addItem(new CMenuForwarder("keychoosermenu.setnew", true, NULL, keyChooser) );
+	addItem(new CMenuForwarder("keychoosermenu.setnone", true, NULL, keyDeleter) );
 }
 
 
@@ -100,7 +100,7 @@ int CKeyChooserItem::exec(CMenuTarget* parent, std::string)
 	g_RCInput->clearRCMsg();
 
 	uint msg; uint data;
-	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
+	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_menu );
 
 	bool loop=true;
 	while (loop)

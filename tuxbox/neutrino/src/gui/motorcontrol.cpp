@@ -83,7 +83,7 @@ int CMotorControl::exec(CMenuTarget* parent, std::string)
 	while (!istheend)
 	{
 
-		unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd_MS(250);
+		unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd_MS(250);
 		msg = CRCInput::RC_nokey;
 
 		while (!(msg == CRCInput::RC_timeout) && (!(msg == CRCInput::RC_home)))

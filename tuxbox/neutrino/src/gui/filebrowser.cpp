@@ -423,7 +423,7 @@ bool CFileBrowser::exec(std::string Dirname)
 	#endif
 
 	uint msg; uint data;
-	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_filebrowser );
+	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_filebrowser );
 
 	bool loop=true;
 	while (loop)
@@ -431,7 +431,7 @@ bool CFileBrowser::exec(std::string Dirname)
 		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 
 		if ( msg <= CRCInput::RC_MaxRC )
-			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_filebrowser );
+			timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_filebrowser );
 
 		if ( msg == CRCInput::RC_yellow )
 		{

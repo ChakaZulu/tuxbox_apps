@@ -390,7 +390,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 		int scrollCount;
 
 		uint msg; uint data;
-		unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_epg );
+		unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_epg );
 		while(loop)
 		{
 			g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );

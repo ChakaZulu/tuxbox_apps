@@ -226,7 +226,7 @@ int CMessageBox::exec(int timeout)
 	if ( timeout == -1 )
 		timeout = g_settings.timing_epg ;
 
-	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( timeout );
+	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( timeout );
 	uint msg; uint data;
 
 	bool loop=true;

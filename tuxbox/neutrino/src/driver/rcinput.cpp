@@ -281,7 +281,7 @@ int CRCInput::messageLoop( bool anyKeyCancels, int timeout )
 	if ( timeout == -1 )
 		timeout = g_settings.timing_menu ;
 
-	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( timeout );
+	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( timeout );
 	uint msg; uint data;
 
 	while (doLoop)
@@ -309,7 +309,7 @@ int CRCInput::messageLoop( bool anyKeyCancels, int timeout )
 					if ( anyKeyCancels )
 						doLoop = false;
 					else
-						timeoutEnd = g_RCInput->calcTimeoutEnd( timeout );
+						timeoutEnd = CRCInput::calcTimeoutEnd( timeout );
 				}
 			}
 		}
@@ -417,26 +417,24 @@ int CRCInput::checkTimers()
 
 
 
-long long CRCInput::calcTimeoutEnd( int Timeout )
+long long CRCInput::calcTimeoutEnd(const int timeout_in_seconds)
 {
 	struct timeval tv;
 
-	gettimeofday( &tv, NULL );
-	unsigned long long timeNow = (unsigned long long) tv.tv_usec + (unsigned long long)((unsigned long long) tv.tv_sec * (unsigned long long) 1000000);
+	gettimeofday(&tv, NULL);
 
-	return ( timeNow + Timeout* 1000000 );
+	return (unsigned long long) tv.tv_usec + (unsigned long long)((unsigned long long) tv.tv_sec + (unsigned long long)timeout_in_seconds) * (unsigned long long) 1000000;
 }
 
-long long CRCInput::calcTimeoutEnd_MS( int Timeout )
+long long CRCInput::calcTimeoutEnd_MS(const int timeout_in_milliseconds)
 {
 	struct timeval tv;
 
-	gettimeofday( &tv, NULL );
-
+	gettimeofday(&tv, NULL);
 
 	unsigned long long timeNow = (unsigned long long) tv.tv_usec + (unsigned long long)((unsigned long long) tv.tv_sec * (unsigned long long) 1000000);
 
-	return ( timeNow + Timeout* 1000 );
+	return ( timeNow + timeout_in_milliseconds * 1000 );
 }
 
 
@@ -1269,7 +1267,7 @@ int CRCInput::getUnicodeValue(const unsigned int key)
 *       transforms the rc-key to const char *
 *
 **************************************************************************/
-const char * CRCInput::getKeyName(const unsigned int key)
+const char * CRCInput::getSpecialKeyName(const unsigned int key)
 {
 	switch(key)
 	{
@@ -1279,26 +1277,6 @@ const char * CRCInput::getKeyName(const unsigned int key)
 			return "home";
 			case RC_setup:
 			return "setup";
-			case RC_0:
-			return "0";
-			case RC_1:
-			return "1";
-			case RC_2:
-			return "2";
-			case RC_3:
-			return "3";
-			case RC_4:
-			return "4";
-			case RC_5:
-			return "5";
-			case RC_6:
-			return "6";
-			case RC_7:
-			return "7";
-			case RC_8:
-			return "8";
-			case RC_9:
-			return "9";
 			case RC_red:
 			return "red button";
 			case RC_green:
@@ -1339,6 +1317,19 @@ const char * CRCInput::getKeyName(const unsigned int key)
 	}
 }
 
+std::string CRCInput::getKeyName(const unsigned int key)
+{
+	int unicode_value = getUnicodeValue(key);
+	if (unicode_value == -1)
+		return getSpecialKeyName(key);
+	else
+	{
+		char tmp[2];
+		tmp[0] = unicode_value;
+		tmp[1] = 0;
+		return std::string(tmp);
+	}
+}
 
 /**************************************************************************
 *	transforms the rc-key to generic - internal use only!

@@ -126,7 +126,7 @@ int CExtendedInput::exec( CMenuTarget* parent, std::string )
 	paint();
 
 	uint msg; uint data;
-	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
+	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_menu );
 
 	bool loop=true;
 	while (loop)

@@ -3263,7 +3263,7 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 		do
 	  	{
 			if( msg <= CRCInput::RC_MaxRC )
-				timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_infobar/ 2 );
+				timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_infobar/ 2 );
 
 			if(msg==CRCInput::RC_plus)
 			{

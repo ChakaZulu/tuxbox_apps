@@ -300,7 +300,7 @@ int CTimerList::show()
 {
 	int res = menu_return::RETURN_REPAINT;
 
-	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
+	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_menu );
 	uint msg; uint data;
 
 	bool loop=true;
@@ -323,7 +323,7 @@ int CTimerList::show()
 		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 
 		if( msg <= CRCInput::RC_MaxRC )
-			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
+			timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_menu );
 
 		if( ( msg == CRCInput::RC_timeout ) ||
 			 ( msg == CRCInput::RC_home) )

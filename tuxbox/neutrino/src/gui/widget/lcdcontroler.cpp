@@ -92,7 +92,7 @@ int CLcdControler::exec(CMenuTarget* parent, std::string)
 	paint();
 
 	uint msg; uint data;
-	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
+	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_menu );
 
 	bool loop=true;
 	while (loop)
@@ -100,7 +100,7 @@ int CLcdControler::exec(CMenuTarget* parent, std::string)
 		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd, true );
 
 		if ( msg <= CRCInput::RC_MaxRC )
-			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
+			timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_menu );
 
 		switch ( msg )
 		{

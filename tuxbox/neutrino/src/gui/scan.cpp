@@ -109,7 +109,7 @@ int CScanTs::exec(CMenuTarget* parent, std::string)
 	{
 		paintRadar();
 
-		unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd_MS( 250 );
+		unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd_MS( 250 );
 		msg = CRCInput::RC_nokey;
 
 		while (!(msg == CRCInput::RC_timeout))

@@ -315,7 +315,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string Channel, const 
             	fadeTimer = g_RCInput->addTimer( FADE_TIME, false );
 
        		bool hideIt = true;
-			unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_infobar );
+			unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_infobar );
 
 			int res = messages_return::none;
 
@@ -378,7 +378,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string Channel, const 
     				{
                     	fadeOut = true;
                     	fadeTimer = g_RCInput->addTimer( FADE_TIME, false );
-            			timeoutEnd = g_RCInput->calcTimeoutEnd( 1 );
+            			timeoutEnd = CRCInput::calcTimeoutEnd( 1 );
     				}
     				else
     				{
@@ -493,7 +493,7 @@ void CInfoViewer::showSubchan()
         }
 
 
-		unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( 2 );
+		unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( 2 );
 		int res = messages_return::none;
 		uint msg; uint data;
 

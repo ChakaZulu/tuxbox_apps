@@ -32,8 +32,9 @@
 #ifndef __MOD_rcinput__
 #define __MOD_rcinput__
 
-#include <vector>
 #include <linux/input.h>
+#include <string>
+#include <vector>
 
 #ifndef KEY_OK
 #define KEY_OK           0x160
@@ -180,7 +181,8 @@ class CRCInput
 		static unsigned int convertDigitToKey(const unsigned int digit);
 		static int getUnicodeValue(const unsigned int key);
 
-		static const char * getKeyName(const unsigned int key);
+		static const char * getSpecialKeyName(const unsigned int key);
+		static std::string getKeyName(const unsigned int key);
 
 		int addTimer(unsigned long long Interval, bool oneshot= true, bool correct_time= true );
 		int addTimer(struct timeval Timeout);
@@ -188,8 +190,8 @@ class CRCInput
 
 		void killTimer(uint id);
 
-		long long calcTimeoutEnd( int Timeout );
-		long long calcTimeoutEnd_MS( int Timeout );
+		static long long calcTimeoutEnd_MS(const int timeout_in_milliseconds);
+		static long long calcTimeoutEnd(const int timeout_in_seconds);
 
 		void getMsgAbsoluteTimeout(uint *msg, uint* data, unsigned long long *TimeoutEnd, bool bAllowRepeatLR= false);
 		void getMsg(uint *msg, uint * data, int Timeout, bool bAllowRepeatLR= false);     //get message, timeout in 1/10 secs :)

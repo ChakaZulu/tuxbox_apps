@@ -139,7 +139,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 	#endif
 
 	uint msg; uint data;
-	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_chanlist );
+	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_chanlist );
 
 	bool loop=true;
 	while (loop)
@@ -147,7 +147,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 		g_RCInput->getMsgAbsoluteTimeout( &msg, (uint*) (&data), &timeoutEnd );
 
 		if ( msg <= CRCInput::RC_MaxRC )
-			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_chanlist );
+			timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_chanlist );
 
 		if ( msg == (uint) g_settings.key_channelList_pageup )
 		{

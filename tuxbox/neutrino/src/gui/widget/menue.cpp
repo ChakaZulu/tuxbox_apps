@@ -107,7 +107,7 @@ int CMenuWidget::exec(CMenuTarget* parent, std::string)
 	int retval = menu_return::RETURN_REPAINT;
 
 	uint msg; uint data;
-	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
+	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_menu );
 
 	do
 	{
@@ -116,7 +116,7 @@ int CMenuWidget::exec(CMenuTarget* parent, std::string)
 
 		if ( msg <= CRCInput::RC_MaxRC )
 		{
-			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
+			timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_menu );
 		}
 
 		int handled= false;
@@ -241,7 +241,7 @@ int CMenuWidget::exec(CMenuTarget* parent, std::string)
 			if ( msg <= CRCInput::RC_MaxRC )
 			{
 				// recalculate timeout für RC-Tasten
-				timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
+				timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_menu );
 			}
 		}
 

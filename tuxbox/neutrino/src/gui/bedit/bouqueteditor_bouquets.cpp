@@ -184,7 +184,7 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, std::string actionKey)
 	bouquetsChanged = false;
 
 	uint msg; uint data;
-	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_epg );
+	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_epg );
 
 	bool loop=true;
 	while (loop)
@@ -192,7 +192,7 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, std::string actionKey)
 		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 
 		if ( msg <= CRCInput::RC_MaxRC )
-			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_epg );
+			timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_epg );
 
 		if ( (msg==CRCInput::RC_timeout) ||
 			 (msg== (uint) g_settings.key_channelList_cancel))
