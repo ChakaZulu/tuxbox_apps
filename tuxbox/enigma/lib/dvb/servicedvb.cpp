@@ -40,6 +40,7 @@ eDVRPlayerThread::eDVRPlayerThread(const char *_filename, eServiceHandlerDVB *ha
 	int count=0;
 	seekbusy=0;
 	seeking=0;
+#if HAVE_DVB_API_VERSION < 3
 	do
 	{
 		dvrfd=::open("/dev/pvr", O_WRONLY|O_NONBLOCK); // TODO: change to /dev/dvb/dvr0 (but only when drivers support this!)
@@ -60,7 +61,13 @@ eDVRPlayerThread::eDVRPlayerThread(const char *_filename, eServiceHandlerDVB *ha
 		break;
 	}
 	while( dvrfd < 0 );
-
+#else
+	if ((dvrfd = ::open("/dev/dvb/adapter0/dvr0", O_WRONLY|O_NONBLOCK)) == -1) 
+	{
+		eDebug("couldn't open /dev/dvb/adapter0/dvr0 (%m)");
+		state=stateError;
+	}
+#endif
 	outputsn=new eSocketNotifier(this, dvrfd, eSocketNotifier::Write, 0);
 	CONNECT(outputsn->activated, eDVRPlayerThread::outputReady);
 
@@ -152,7 +159,7 @@ void eDVRPlayerThread::thread()
 void eDVRPlayerThread::outputReady(int what)
 {
 	(void)what;
-	seekbusy-=buffer.tofile(dvrfd, 65536);
+	seekbusy-=buffer.tofile(dvrfd, 65424);
 	if (seekbusy < 0)
 		seekbusy=0;
 	if ((state == stateBufferFull) && (buffer.size()<maxBufferSize))
@@ -192,8 +199,10 @@ void eDVRPlayerThread::outputReady(int what)
 
 void eDVRPlayerThread::dvrFlush()
 {
+#if HAVE_DVB_API_VERSION < 3
 	if ( ::ioctl(dvrfd, 0)< 0 )
 		eDebug("PVR_FLUSH_BUFFER failed (%m)");
+#endif
 	Decoder::flushBuffer();
 }
 
@@ -233,8 +242,10 @@ void eDVRPlayerThread::readMore(int what)
 					flushbuffer=1;
 		}
 	}
-	
-	if (((state == stateBuffering) && (buffer.size()>16384)) || flushbuffer)
+
+	int bla = eSystemInfo::getInstance()->getHwType() < 3 ? 65423 : 16355;
+
+	if ( (state == stateBuffering && buffer.size() > bla) || flushbuffer )
 	{
 		state=statePlaying;
 		outputsn->start();
