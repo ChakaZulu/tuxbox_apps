@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.91 2002/03/16 14:08:55 obi Exp $
+  $Id: zapit.cpp,v 1.92 2002/03/16 18:15:58 happydude Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -371,13 +371,7 @@ pids parse_pmt (uint16_t pid, uint16_t ca_system_id, uint16_t program_number)
 				vp_count++;
 				break;
 
-			case 0x03: /* ISO/IEC 11172 Audio */
-			case 0x04: /* ISO/IEC 13818-3 Audio */
 			case 0x06: /* ITU-T Rec. H.222.0 | ISO/IEC 13818-1 PES packets containing private data */
-				ret_pids.apids[ap_count].component_tag = -1;
-				ret_pids.apids[ap_count].is_ac3 = false;
-				ret_pids.apids[ap_count].desc[0] = 0;
-
 				for (descr_pos = pos + 5; descr_pos < pos + 5 + ES_info_length; descr_pos += descriptor_length + 2)
 				{
 					descriptor_tag = buffer[descr_pos];
@@ -385,40 +379,66 @@ pids parse_pmt (uint16_t pid, uint16_t ca_system_id, uint16_t program_number)
 
 					switch (descriptor_tag)
 					{
-					case 0x0A: /* ISO_639_language_descriptor */
-						if (ret_pids.apids[ap_count].desc[0] == 0)
-						{
-							buffer[descr_pos + 5] = 0; // quick'n'dirty
-							memcpy(ret_pids.apids[ap_count].desc, &(buffer[descr_pos + 2]), descriptor_length);
-						}
-						break;
-
-					case 0x52: /* stream_identifier_descriptor */
-						ret_pids.apids[ap_count].component_tag = buffer[descr_pos + 2];
-						break;
-
 					case 0x56: /* teletext_descriptor */
 						ret_pids.vtxtpid = elementary_PID;
-						break;
-
-					case 0x6A: /* AC-3_descriptor */
-						ret_pids.apids[ap_count].is_ac3 = true;
 						break;
 
 					default:
 						break;
 					}
 				}
+				break;
 
-				if ((stream_type == 3) || (stream_type == 4) || ret_pids.apids[ap_count].is_ac3)
+			case 0x03: /* ISO/IEC 11172 Audio */
+			case 0x04: /* ISO/IEC 13818-3 Audio */
+				if (ap_count < max_num_apids)
 				{
+					ret_pids.apids[ap_count].component_tag = -1;
+					ret_pids.apids[ap_count].is_ac3 = false;
+					ret_pids.apids[ap_count].desc[0] = 0;
+
+					for (descr_pos = pos + 5; descr_pos < pos + 5 + ES_info_length; descr_pos += descriptor_length + 2)
+					{
+						descriptor_tag = buffer[descr_pos];
+						descriptor_length = buffer[descr_pos + 1];
+
+						switch (descriptor_tag)
+						{
+						case 0x0A: /* ISO_639_language_descriptor */
+							if (ret_pids.apids[ap_count].desc[0] == 0)
+							{
+								buffer[descr_pos + 5] = 0; // quick'n'dirty
+								memcpy(ret_pids.apids[ap_count].desc, &(buffer[descr_pos + 2]), descriptor_length);
+							}
+							break;
+
+						case 0x52: /* stream_identifier_descriptor */
+							ret_pids.apids[ap_count].component_tag = buffer[descr_pos + 2];
+							break;
+
+						case 0x6A: /* AC-3_descriptor */
+							ret_pids.apids[ap_count].is_ac3 = true;
+							break;
+
+						case 0xC5: /* Canal+ Radio descriptor */
+							if (ret_pids.apids[ap_count].desc[0] == 0)
+							{
+								memcpy(ret_pids.apids[ap_count].desc, &(buffer[descr_pos + 3]), 0x18);
+								ret_pids.apids[ap_count].desc[24] = 0;
+							}
+							break;
+
+						default:
+							break;
+						}
+					}
+
 					if (ret_pids.apids[ap_count].desc[0] == 0)
 						sprintf(ret_pids.apids[ap_count].desc, "%02d", ap_count + 1);
 
 					ret_pids.apids[ap_count].pid = elementary_PID;
 
-					if (ap_count < max_num_apids)
-						ap_count++;
+					ap_count++;
 				}
 				break;
 
@@ -2460,7 +2480,7 @@ int main (int argc, char **argv)
 	int channelcount;
 #endif /* DEBUG */
 
-	printf("Zapit $Id: zapit.cpp,v 1.91 2002/03/16 14:08:55 obi Exp $\n\n");
+	printf("Zapit $Id: zapit.cpp,v 1.92 2002/03/16 18:15:58 happydude Exp $\n\n");
 
 	if (argc > 1)
 	{

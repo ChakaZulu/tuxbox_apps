@@ -79,12 +79,12 @@ typedef struct channel_msg_struct_2 {
 
 typedef struct apid_struct_2 {
     uint    pid;
-    char    desc[4];
+    char    desc[25];
     int     is_ac3;
     int     component_tag;
 }apid_struct;
 
-#define max_num_apids 10
+#define max_num_apids 13
 #define no_ecmpid_found 0x10000
 #define invalid_ecmpid_found 0x10001
 
