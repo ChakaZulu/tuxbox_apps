@@ -34,7 +34,7 @@
 CEventWatchDog::CEventWatchDog()
 {
 	bThreadRunning = false;
-
+	VideoMode = 0;
 	Notifiers.insert( pair<uint, EventWatchdogNotifiers*>(WDE_VIDEOMODE, new EventWatchdogNotifiers));
 	Notifiers.insert( pair<uint, EventWatchdogNotifiers*>(WDE_VCRONOFF, new EventWatchdogNotifiers));
 	startThread();
@@ -45,7 +45,7 @@ void CEventWatchDog::startThread()
 {
 	pthread_mutex_init( &wd_mutex, NULL );
 
-	if (pthread_create (&thrSender, NULL, watchdogThread, (void *) this) != 0 )
+	if (pthread_create (&thrSender, NULL, CEventWatchDog::watchdogThread, (void *) this) != 0 )
 	{
 		perror("CWatchdog: Create WatchDogThread failed\n");
 	}
@@ -170,7 +170,7 @@ void *CEventWatchDog::watchdogThread(void *arg)
 					printf("[controld] VIDEO_EVENT_SIZE_CHANGED %ux%u (%s -> %s)\n",
 							event.u.size.w,
 							event.u.size.h,
-							verb_aratio[WatchDog->VideoMode],
+							verb_aratio[WatchDog->VideoMode&3],
 							verb_aratio[event.u.size.aspect_ratio]);
 
 					// DVB AR is saved in Bites 0-7
@@ -240,4 +240,3 @@ void CEventWatchDog::unregisterNotifier( uint watchdogEvent, CEventWatchdogNotif
 	if (bThreadRunning)
 		pthread_mutex_unlock( &wd_mutex );
 }
-
