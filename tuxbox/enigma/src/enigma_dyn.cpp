@@ -454,7 +454,7 @@ static eString setAudio(eString request, eString dirpath, eString opts, eHTTPCon
 	sscanf(opt["audio"].c_str(), "0x%04x", &apid);
 
 	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
-	if ( sapi )
+	if (sapi)
 	{
 		std::list<eDVBServiceController::audioStream> &astreams(sapi->audioStreams);
 		std::list<eDVBServiceController::audioStream>::iterator it(astreams.begin());
@@ -498,13 +498,8 @@ static eString selectAudio(eString request, eString dirpath, eString opts, eHTTP
 		for (std::list<eDVBServiceController::audioStream>::iterator it(astreams.begin())
 			;it != astreams.end(); ++it )
 		{
-			if (requester == "webif")
-			{
-				if (it->pmtentry->elementary_PID == Decoder::current.apid)
-					audioChannels += eString().sprintf("<option selected value=\"0x%04x\">", it->pmtentry->elementary_PID);
-				else
-					audioChannels += eString().sprintf("<option value=\"0x%04x\">", it->pmtentry->elementary_PID);
-			}
+			if (it->pmtentry->elementary_PID == Decoder::current.apid)
+				audioChannels += eString().sprintf("<option selected value=\"0x%04x\">", it->pmtentry->elementary_PID);
 			else
 				audioChannels += eString().sprintf("<option value=\"0x%04x\">", it->pmtentry->elementary_PID);
 
