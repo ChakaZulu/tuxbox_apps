@@ -22,6 +22,73 @@
 #include "epgcache.h"
 #include "epgwindow.h"
 
+#include "ebutton.h"
+#include "esection.h"
+
+/*
+
+schoene kleine demonstration von enigma:
+
+ein fenster (eWindow) das die datenrate fuer einen sectionstream 
+(eSection(0x12, 0, -1, -1, 0, 0): pid 0x12, tid 0 tid-mask 0 (am ende), tableidext -1,
+version egal) misst und jede sekunde (eTimer::timeout) das fenster updated
+(->setText vom eLabel). das ganze ist NICHT geskinnt.
+
+das ganze demonstriert imho recht schoen die einfachheit wie man sowas machen kann.
+
+class BlaTest: public eWindow, eSection
+{
+	int recv, bytes, last;
+	eLabel *l_recv;
+	eButton *b_quit;
+	eTimer timer;
+	void update()
+	{
+		char bla[100];
+		sprintf(bla, "%d (%d kb, %d kb/s)", recv, bytes/1024, last/1024);
+		last=0;
+		l_recv->setText(bla);
+	}
+	int sectionRead(__u8 *data)
+	{
+		recv++;
+		bytes+=(data[1]&0x3F)<<8;
+		bytes+=data[2];
+		last+=(data[1]&0x3F)<<8;
+		last+=data[2];
+		return 0;
+	}
+	void quit()
+	{
+		close(0);
+	}
+public:
+	BlaTest(): eWindow(0), eSection(0x12, 0, -1, -1, 0, 0), timer(eApp)
+	{
+		setText("test");  // fenstertitel setzen
+		move(ePoint(100, 100)); // verschieben auf 100 100
+		resize(eSize(500, 400)); // vergroessern auf 500 400
+		l_recv=new eLabel(this);  // neues label erstellen
+		l_recv->move(ePoint(0, 0));  // label an 0 0 (links oben) schieben
+		l_recv->resize(eSize(clientrect.width(), 30));  // irgendwie gross machen
+		
+		b_quit=new eButton(this);    // button zum beenden machen
+		b_quit->move(ePoint(0, 30));  // groesse anpassen
+		b_quit->resize(eSize(clientrect.width(), 40));  // ""
+		b_quit->setText("oki");  // text vom button setzen
+		CONNECT(timer.timeout, BlaTest::update);  // time_out vom updatetimer (1s) auf update setzen
+		CONNECT(b_quit->selected, BlaTest::quit);  // button druecken auf quit connecten
+		timer.start(1000);  // updatetimer starten (1s)
+		recv=0;  // stats initialisieren
+		last=0;  // ""
+		bytes=0; // ""
+		
+		start(); // und section filter anmachen
+	}
+};
+
+*/
+
 static QString getISO639Description(char *iso)
 {
 	for (unsigned int i=0; i<sizeof(iso639)/sizeof(*iso639); ++i)
@@ -318,12 +385,12 @@ eZapMain::eZapMain(): eWidget(0, 1), timeout(eApp), clocktimer(eApp)
 	ASSIGN(ButtonYellowDis, eLabel, "button_yellow_disabled");
 	ASSIGN(ButtonBlueDis, eLabel, "button_blue_disabled");
 
-	ASSIGN(DolbyOn, ePixmap, "osd_dolby_on");
-	ASSIGN(CryptOn, ePixmap, "osd_crypt_on");
-	ASSIGN(WideOn, ePixmap, "osd_format_on");
-	ASSIGN(DolbyOff, ePixmap, "osd_dolby_off");
-	ASSIGN(CryptOff, ePixmap, "osd_crypt_off");
-	ASSIGN(WideOff, ePixmap, "osd_format_off");
+	ASSIGN(DolbyOn, eLabel, "osd_dolby_on");
+	ASSIGN(CryptOn, eLabel, "osd_crypt_on");
+	ASSIGN(WideOn, eLabel, "osd_format_on");
+	ASSIGN(DolbyOff, eLabel, "osd_dolby_off");
+	ASSIGN(CryptOff, eLabel, "osd_crypt_off");
+	ASSIGN(WideOff, eLabel, "osd_format_off");
 	DolbyOn->hide();
 	CryptOn->hide();
 	WideOn->hide();
@@ -600,6 +667,7 @@ void eZapMain::keyDown(int code)
 				serviceChanged(service, -EAGAIN);
 #endif
 			}
+		qDebug("bla7");
 		break;
 	}
 	case eRCInput::RC_RIGHT:
@@ -778,6 +846,10 @@ void eZapMain::keyUp(int code)
 			pLCD->lcdMenu->hide();
 			pLCD->lcdMain->show();
 		}
+/*		BlaTest bla;
+		bla.show();
+		bla.exec();
+		bla.hide(); */
 		break;
 	}
 	case eRCInput::RC_HELP:
