@@ -259,37 +259,35 @@ int CBouquetList::show()
 			zapOnExit = true;
 			loop=false;
 		}
-		else if ( ( msg >= 0 ) && ( msg <= 9 ) )
+		else if (CRCInput::isNumeric(msg))
 		{
-			//numeric
-			if ( pos==maxpos )
+			if (pos == maxpos)
 			{
-				if ( msg == 0)
+				if (msg == CRCInput::RC_0)
 				{
 					chn = firstselected;
-					pos = maxpos- 1;
+					pos = maxpos;
 				}
 				else
 				{
-					chn = msg;
-					pos = 0;
+					chn = CRCInput::getNumericValue(msg);
+					pos = 1;
 				}
 			}
 			else
 			{
-				chn = chn* 10 + msg;
+				chn = chn * 10 + CRCInput::getNumericValue(msg);
+				pos++;
 			}
 
-			if (chn> Bouquets.size())
+			if (chn > Bouquets.size())
 			{
 				chn = firstselected;
-				pos = maxpos- 1;
+				pos = maxpos;
 			}
 
-			pos++;
-
-            int prevselected=selected;
-			selected = (chn- 1)%Bouquets.size();
+			int prevselected=selected;
+			selected = (chn - 1) % Bouquets.size(); // is % necessary (i.e. can firstselected be > Bouquets.size()) ?
 			paintItem(prevselected - liststart);
 			unsigned int oldliststart = liststart;
 			liststart = (selected/listmaxshow)*listmaxshow;
