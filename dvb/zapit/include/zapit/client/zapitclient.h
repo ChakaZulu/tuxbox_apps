@@ -196,6 +196,7 @@ class CZapitClient:public CBasicClient
 	{
 		char satName[30];
 		t_satellite_position satPosition;
+		uint8_t motorPosition;
 		int satDiseqc;
 	};
 	typedef std::vector<responseGetSatelliteList> SatelliteList;

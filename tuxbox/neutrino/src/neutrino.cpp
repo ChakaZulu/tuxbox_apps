@@ -1067,6 +1067,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 			{
 				//printf("[neutrino] received %d: %s, %d\n", i, satList[i].satName, satList[i].satPosition);
 				scanSettings.satPosition[i] = satList[i].satPosition;
+				scanSettings.satMotorPos[i] = satList[i].motorPosition;
 				strcpy(scanSettings.satName[i], satList[i].satName);
 				//scanSettings.satDiseqc[i] = satList[i].satDiseqc;
 				if (satList[i].satPosition == currentSatellitePosition) 
@@ -3425,7 +3426,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.466 2003/06/06 13:50:49 digi_casi Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.467 2003/06/06 21:29:49 digi_casi Exp $\n\n");
 
 	tzset();
 	initGlobals();

@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.120 2003/06/06 21:16:54 digi_casi Exp $
+ * $Id: scan.cpp,v 1.121 2003/06/06 21:30:36 digi_casi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -564,7 +564,7 @@ void *start_scanthread(void *)
 				if (diseqc_pos == 255 /* = -1 */)
 					diseqc_pos = 0;
 				
-				if (strcmp(type, "sat") && (frontend->getDiseqcType() == DISEQC_1_2))
+				if (!strcmp(type, "sat") && (frontend->getDiseqcType() == DISEQC_1_2))
 					satellitePosition = driveMotorToSatellitePosition(providerName);
 						
 				scan_provider(search, providerName, satfeed, diseqc_pos);
