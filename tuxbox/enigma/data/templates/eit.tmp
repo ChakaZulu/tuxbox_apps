@@ -1,4 +1,8 @@
-<table width="100%" cellspacing="0" cellpadding="0" border="0"> 
+<span style="width: 100%; background-color: #93A198">
+<font style="font-family: Verdana; font-size: 14pt; font-weight: bold">#SERVICENAME#</font> #EPG# #SI#
+</SPAN><br>
+<span style="width: 100%; background-color: #DEE6D6">
+<table width="100%" cellspacing="0" cellpadding="0" border="0">
 <tr>
 <td
 width="100%"><span class="epgzeit">#NOWT#</span> <span class="epgdur">#NOWD#min</span> <span class="epgname"><b>#NOWST#</b></span></td>
@@ -13,3 +17,4 @@ width="100%"><span class="epgzeit">#NOWT#</span> <span class="epgdur">#NOWD#min<
 <td width="100%"><span class="epgdesc">#NEXTLT#</span><br><br><br></td>
 </tr>
 </table>
+</SPAN>
