@@ -61,7 +61,7 @@ eSystemInfo::eSystemInfo()
 			haslcd = canmeasurelnbcurrent =
 			hasci = 1;
 			hwtype = DM7000;
-			caids.insert(0x4a70);
+//			caids.insert(0x4a70);
 			midstr="5";
 			helpstr="dreambox";
 			modelstr="DM7000";
@@ -120,7 +120,7 @@ eSystemInfo::eSystemInfo()
 					haskeyboard = hashdd = haslcd = canmeasurelnbcurrent = hasci
 					= canrecordts = 1;
 					hwtype = DM7000;
-					caids.insert(0x4a70);
+//					caids.insert(0x4a70);
 					defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR;
 					{
 						// check if new FP Firmware is avail...
@@ -158,7 +158,7 @@ eSystemInfo::eSystemInfo()
 						modelstr="DM5620";
 						defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recNgrab;
 					}
-					caids.insert(0x4a70);
+//					caids.insert(0x4a70);
 					break;
 				case 7:
 					midstr="7";
@@ -169,7 +169,7 @@ eSystemInfo::eSystemInfo()
 					canshutdown=0;
 					canupdateTransponder=1;
 					hwtype = DM500;
-					caids.insert(0x4a70);
+//					caids.insert(0x4a70);
 					break;
 				case 9:
 				{
@@ -192,7 +192,7 @@ eSystemInfo::eSystemInfo()
 					}
 
 					hwtype = DM7020;
-					caids.insert(0x4a70);
+//					caids.insert(0x4a70);
 					defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR;
 					break;
 				}
@@ -239,7 +239,7 @@ eSystemInfo::eSystemInfo()
 			canshutdown=0;
 			canupdateTransponder=1;
 			hwtype = TR_DVB272S;
-			caids.insert(0x4a70);
+//			caids.insert(0x4a70);
 			hasci=2;
 			break;
 		default:
