@@ -225,7 +225,7 @@ static eString osdshot(eString request, eString dirpath, eString opts, eHTTPConn
 static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eString name, provider, vpid, apid, pcrpid, tpid, vidform("n/a"), tsid, onid, sid, pmt;
-	
+
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eString result;
 	time_t atime;
@@ -246,6 +246,7 @@ static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConn
 			result += "ON";
 		else
 			result += "OFF";
+	result += "</td></tr>\n";
 	result += "<tr><td>Recording:</td><td>";
 #ifndef DISABLE_FILE
 		if (eZapMain::getInstance()->isRecording())
@@ -254,8 +255,8 @@ static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConn
 #endif
 			result += "OFF";
 	result += "</td></tr>\n";
-	result += "<tr></td>Mode:</td><td>" + eString().sprintf("%d", eZapMain::getInstance()->getMode()) + "</td></tr>";
-	
+	result += "<tr><td>Mode:</td><td>" + eString().sprintf("%d", eZapMain::getInstance()->getMode()) + "</td></tr>";
+
 	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
 	if (sapi)
 	{
