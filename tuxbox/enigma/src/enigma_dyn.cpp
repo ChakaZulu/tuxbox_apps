@@ -61,7 +61,7 @@
 
 using namespace std;
 
-#define WEBIFVERSION "2.7.3"
+#define WEBIFVERSION "2.7.3.1"
 
 #define KEYBOARDNORMAL 0
 #define KEYBOARDVIDEO 1
@@ -1236,27 +1236,27 @@ static eString deleteMovie(eString request, eString dirpath, eString opts, eHTTP
 
 	if (ref.path.right(3).upper() == ".TS")
 	{
-		int slice=0;
-		eString filename=ref.path;
-		for ( std::list<ePlaylistEntry>::iterator it(recordings->getList().begin());
-			it != recordings->getList().end(); ++it )
+		for (std::list<ePlaylistEntry>::iterator it(recordings->getList().begin()); it != recordings->getList().end(); ++it) 
 		{
-			if ( it->service.path == ref.path )
+			if (it->service.path == ref.path)
 			{
 				recordings->getList().erase(it);
 				recordings->save();
 				break;
 			}
 		}
-		filename.erase(filename.length()-2,2);
-		filename+="eit";
+		eString filename = ref.path;
+		filename.erase(filename.length() - 2, 2);
+		filename += "eit";
 		::unlink(filename.c_str());
-		::unlink((ref.path+".indexmarks").c_str());
+		::unlink((ref.path + ".indexmarks").c_str());
+		
+		int slice = 0;
 		while (1)
 		{
-			filename=ref.path;
+			filename = ref.path;
 			if (slice)
-				filename+=eString().sprintf(".%03d", slice);
+				filename += eString().sprintf(".%03d", slice);
 			slice++;
 			struct stat64 s;
 			if (::stat64(filename.c_str(), &s) < 0)
@@ -1332,7 +1332,6 @@ public:
 	eString serviceName;
 	myService(eString sref, eString sname)
 	{
-//		eDebug("new Service: %s - %s", sref.c_str(), sname.c_str());
 		serviceRef = sref;
 		serviceName = sname;
 	};
@@ -1345,8 +1344,6 @@ void sortServices(bool sortList, std::list <myService> &myList, eString &service
 	std::list <myService>::iterator myIt;
 	eString serviceRef, serviceName;
 
-	eDebug("[ENIGMA_DYN] start sorting...");
-
 	if (sortList)
 		myList.sort();
 
@@ -1357,10 +1354,7 @@ void sortServices(bool sortList, std::list <myService> &myList, eString &service
 	{
 		serviceRefList += "\"" + myIt->serviceRef + "\", ";
 		serviceList += "\"" + myIt->serviceName + "\", ";
-//		eDebug("[ENIGMA_DYN] adding: %s - %s", myIt->serviceRef.c_str(), myIt->serviceName.c_str());
 	}
-
-	eDebug("[ENIGMA_DYN] sorting done.");
 }
 
 class eWebNavigatorListDirectory: public Object
@@ -1468,7 +1462,6 @@ public:
 				{
 					EITEvent event(*It->second);
 					time_t now = time(0) + eDVB::getInstance()->time_difference;
-					//tm start = *localtime(&now);
 					if ((now >= event.start_time) && (now <= event.start_time + event.duration))
 					{
 						LocalEventData led;
@@ -1523,10 +1516,10 @@ static eString getZapContent(eString mode, eString path)
 
 static eString getZapContent2(eString mode, eString path, int depth, bool addEPG, bool sortList)
 {
-	std::list <myService> myList;
+	std::list <myService> myList, myList2;
+	std::list <myService>::iterator myIt;
 	eString result, result1, result2;
 	eString bouquets, bouquetrefs, channels, channelrefs;
-	std::stringstream tmp;
 
 	eServiceReference current_service = string2ref(path);
 	eServiceInterface *iface = eServiceInterface::getInstance();
@@ -1550,24 +1543,22 @@ static eString getZapContent2(eString mode, eString path, int depth, bool addEPG
 
 		sortServices(sortList, myList, result1, result2);
 
-		tmp.str(result1.left(result1.length() - 1));
 		bouquetrefs = result1.left(result1.length() - 2);
 		bouquets = result2.left(result2.length() - 2);
 		if (depth > 1)
 		{
 			// go thru all bouquets to get the channels
 			int i = 0;
-			while (tmp)
+			for (myIt = myList.begin(); myIt != myList.end(); myIt++)
 			{
-				result1 = ""; result2 =""; path = "";
-				tmp >> path;
+				result1 = ""; result2 = "";
+				path = myIt->serviceRef;
 				if (path)
 				{
-					path = path.mid(1, path.length() - 3);
 					eServiceReference current_service = string2ref(path);
 
-					myList.clear();
-					eWebNavigatorListDirectory2 navlist(myList, path, *iface, addEPG);
+					myList2.clear();
+					eWebNavigatorListDirectory2 navlist(myList2, path, *iface, addEPG);
 					Signal1<void, const eServiceReference&> signal;
 					signal.connect(slot(navlist, &eWebNavigatorListDirectory2::addEntry));
 
@@ -1583,7 +1574,7 @@ static eString getZapContent2(eString mode, eString path, int depth, bool addEPG
 					iface->leaveDirectory(current_service);
 					eDebug("exited");
 
-					sortServices(sortList, myList, result1, result2);
+					sortServices(sortList, myList2, result1, result2);
 
 					channels += result2.left(result2.length() - 2);
 					channels += ");";
