@@ -214,6 +214,7 @@ CFileList *CFileBrowser::getSelectedFiles()
 
 void CFileBrowser::ChangeDir(std::string filename)
 {
+	std::string newpath;
 	if(filename == "..")
 	{
 		unsigned int pos;
@@ -229,39 +230,38 @@ void CFileBrowser::ChangeDir(std::string filename)
 		}
 		if(pos == std::string::npos)
 			pos = Path.length();
-		std::string newpath = Path.substr(0,pos);
+		newpath = Path.substr(0,pos);
 //		printf("path: %s filename: %s newpath: %s\n",Path.c_str(),filename.c_str(),newpath.c_str());
-		readDir(newpath);
-		name = newpath;
 	}
 	else
 	{
-		readDir( filename );
-		name = filename;
+		newpath=filename;
 	}
-	paintHead();
-	paint();
-}
-
-//------------------------------------------------------------------------
-bool CFileBrowser::readDir(std::string dirname)
-{
-	bool ret;
-	Path = dirname;
-	
+	if(newpath.rfind("/") != newpath.length()-1)
+	{
+		newpath = newpath + "/";
+	}
 	filelist.clear();
-	if(Path.rfind("/") != Path.length()-1)
+	Path = newpath;
+	name = newpath;
+	CFileList allfiles;
+	readDir(newpath, &allfiles);
+	// filter
+	CFileList::iterator file = allfiles.begin();
+	for(; file != allfiles.end() ; file++)
 	{
-		Path = Path + "/";
-	}
-	
-	if (Path.find(VLC_URI)==0)
-	{
-		ret = readDir_vlc();
-	}
-	else
-	{
-		ret = readDir_std();
+		if(Filter != NULL && (!S_ISDIR(file->Mode)) && use_filter)
+		{
+			if(!Filter->matchFilter(file->Name))
+			{
+				continue;
+			}
+		}
+		if(Dir_Mode && (!S_ISDIR(file->Mode)))
+		{
+			continue;
+		}
+		filelist.push_back(*file);
 	}
 	// sort result
 	if( smode == 0 )
@@ -270,13 +270,31 @@ bool CFileBrowser::readDir(std::string dirname)
 		sort(filelist.begin(), filelist.end(), sortByDate);
 
 	selected = 0;
+	paintHead();
+	paint();
+}
+
+//------------------------------------------------------------------------
+bool CFileBrowser::readDir(std::string dirname, CFileList* flist)
+{
+	bool ret;
+		
+	if (dirname.find(VLC_URI)==0)
+	{
+		ret = readDir_vlc(dirname, flist);
+	}
+	else
+	{
+		ret = readDir_std(dirname, flist);
+	}
 	return ret;
 }
 
-bool CFileBrowser::readDir_vlc()
+bool CFileBrowser::readDir_vlc(std::string dirname, CFileList* flist)
 {
+	printf("readDir_vlc %s\n",dirname.c_str());
 	std::string answer="";
-	std::string url = m_baseurl + Path.substr(strlen(VLC_URI));
+	std::string url = m_baseurl + dirname.substr(strlen(VLC_URI));
 	cout << "[FileBrowser] vlc URL: " << url << endl;
 	CURL *curl_handle;
 	CURLcode httpres;
@@ -313,23 +331,10 @@ bool CFileBrowser::readDir_vlc()
 				file.Mode = S_IFDIR + 0777 ;
 			else
 				file.Mode = S_IFREG + 0777 ;
-			file.Name = Path + entry.substr(entry.rfind("/")+1);
+			file.Name = dirname + entry.substr(entry.rfind("/")+1);
 			file.Size = 0;
 			file.Time = 0;
-			if(Filter != NULL && (!S_ISDIR(file.Mode)) && use_filter)
-			{
-				if(!Filter->matchFilter(file.Name))
-				{
-					start=pos+1;
-					continue;
-				}
-			}
-			if(Dir_Mode && (!S_ISDIR(file.Mode)))
-			{
-				continue;
-				start=pos+1;
-			}
-			filelist.push_back(file);
+			flist->push_back(file);
 			start=pos+1;
 		}
 		return true;
@@ -338,25 +343,27 @@ bool CFileBrowser::readDir_vlc()
 	{
       ShowMsg ( "messagebox.error", error, CMessageBox::mbrCancel, CMessageBox::mbCancel, "error.raw" );
 		CFile file;
-		file.Name = Path + "..";
+		file.Name = dirname + "..";
 		file.Mode = S_IFDIR + 0777;
 		file.Size = 0;
 		file.Time = 0;
-		filelist.push_back(file);
+		flist->push_back(file);
 	}
 	return false;
 }
 
-bool CFileBrowser::readDir_std()
+bool CFileBrowser::readDir_std(std::string dirname, CFileList* flist)
 {
+	printf("readDir_std %s\n",dirname.c_str());
 	struct stat statbuf;
 	dirent_struct **namelist;
 	int n;
 
-	n = my_scandir(Path.c_str(), &namelist, 0, my_alphasort);
+	n = my_scandir(dirname.c_str(), &namelist, 0, my_alphasort);
 	if (n < 0)
 	{
-		perror(("Filebrowser scandir: "+Path).c_str());
+		perror(("Filebrowser scandir: "+dirname).c_str());
+		dirname = "/";
 		Path = "/";
 		name = "/";
 		paintHead();
@@ -367,26 +374,14 @@ bool CFileBrowser::readDir_std()
 		CFile file;
 		if(strcmp(namelist[i]->d_name,".") != 0)
 		{
-			file.Name = Path + namelist[i]->d_name;
+			file.Name = dirname + namelist[i]->d_name;
 //			printf("file.Name: '%s', getFileName: '%s' getPath: '%s'\n",file.Name.c_str(),file.getFileName().c_str(),file.getPath().c_str());
 			if(stat((file.Name).c_str(),&statbuf) != 0)
 				perror("stat error");
 			file.Mode = statbuf.st_mode;
 			file.Size = statbuf.st_size;
 			file.Time = statbuf.st_mtime;
-
-			if(Filter != NULL && (!S_ISDIR(file.Mode)) && use_filter)
-				if(!Filter->matchFilter(file.Name))
-				{
-					free(namelist[i]);
-					continue;
-				}
-			if(Dir_Mode && (!S_ISDIR(file.Mode)))
-			{
-				free(namelist[i]);
-				continue;
-			}
-			filelist.push_back(file);
+			flist->push_back(file);
 		}
 		free(namelist[i]);
 	}
@@ -408,7 +403,7 @@ bool CFileBrowser::exec(std::string Dirname)
 		Dirname[pos]='/';
 	name = Dirname;
 	paintHead();
-	readDir(Dirname);
+	ChangeDir(Dirname);
 	paint();
 	paintFoot();
 
@@ -606,12 +601,9 @@ bool CFileBrowser::exec(std::string Dirname)
 
 void CFileBrowser::addRecursiveDir(CFileList * re_filelist, std::string rpath, bool bRootCall, CProgressWindow * progress)
 {
-struct stat statbuf;
-dirent_struct **namelist;
-
-int n;
-uint msg, data;
-CFile file;
+	printf("addRecursiveDir %s\n",rpath.c_str());
+	int n;
+	uint msg, data;
 	if (bRootCall) bCancel=false;
 	
 	g_RCInput->getMsg_us(&msg, &data, 1);
@@ -633,12 +625,14 @@ CFile file;
 		rpath = rpath + "/";
 	}
 
-	
-	n = my_scandir(rpath.c_str(), &namelist, 0, my_alphasort);
-	if (n < 0)
+	CFileList tmplist;
+	if(!readDir(rpath, &tmplist))
+	{
 		perror(("Recursive scandir: "+rpath).c_str());
+	}
 	else 
 	{
+		n = tmplist.size();
 		if(progress)
 		{
 #ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
@@ -653,31 +647,22 @@ CFile file;
 			{
 				progress->showGlobalStatus(100/n*i);
 			}
-			if( (strcmp(namelist[i]->d_name,".") != 0) && (strcmp(namelist[i]->d_name,"..") != 0) )
+			std::string basename = tmplist[i].Name.substr(tmplist[i].Name.rfind("/")+1);
+			if( basename != ".." )
 			{
-				file.Name = rpath + namelist[i]->d_name;
-				if(stat((file.Name).c_str(),&statbuf) != 0)
-					perror("stat error");
-				file.Mode = statbuf.st_mode;
-				file.Size = statbuf.st_size;
-				file.Time = statbuf.st_mtime;
-
-				if(Filter != NULL && (!S_ISDIR(file.Mode)) && use_filter)
+				if(Filter != NULL && (!S_ISDIR(tmplist[i].Mode)) && use_filter)
 				{
-					if(!Filter->matchFilter(file.Name))
+					if(!Filter->matchFilter(tmplist[i].Name))
 					{
-						free(namelist[i]);
 						continue;
 					}
 				}
-				if(!S_ISDIR(file.Mode))
-					re_filelist->push_back(file);
+				if(!S_ISDIR(tmplist[i].Mode))
+					re_filelist->push_back(tmplist[i]);
 				else
-					addRecursiveDir(re_filelist,file.Name, false, progress);
+					addRecursiveDir(re_filelist,tmplist[i].Name, false, progress);
 			}
-			free(namelist[i]);
 		}
-		free(namelist);
 	}
 }
 

@@ -110,9 +110,9 @@ class CFileBrowser
 
 		CFileList		filelist;
 		CFileList		selected_filelist;
-		bool			readDir(string dirname);
-		bool			readDir_vlc();
-		bool			readDir_std();
+		bool			readDir(string dirname, CFileList* flist);
+		bool			readDir_vlc(string dirname, CFileList* flist);
+		bool			readDir_std(string dirname, CFileList* flist);
 		void			addRecursiveDir(CFileList * re_filelist, string path, bool bRootCall, CProgressWindow * progress = NULL);
 
 		unsigned int		selected;
