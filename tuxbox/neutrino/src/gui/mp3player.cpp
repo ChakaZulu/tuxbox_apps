@@ -125,6 +125,7 @@ CMP3PlayerGui::~CMP3PlayerGui()
 //------------------------------------------------------------------------
 int CMP3PlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 {
+	CMP3Player::getInstance()->init();
 	m_state=CMP3PlayerGui::STOP;
 	current=-1;
 	selected = 0;

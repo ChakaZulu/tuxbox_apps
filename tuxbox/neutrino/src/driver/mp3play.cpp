@@ -628,16 +628,21 @@ bool  CMP3Player::SetDSP(int soundfd, struct mad_header *Header)
 		 printf("setfmt failed\n");
 	 if(::ioctl(soundfd, SNDCTL_DSP_CHANNELS, &channels))
 		 printf("channel set failed\n");
-	 // mute audio to reduce pops when changing samplerate (avia_reset)
-	 bool was_muted = avs_mute(true);
-	 if (::ioctl(soundfd, SNDCTL_DSP_SPEED, &dsp_speed))
+	 if (dsp_speed != m_samplerate)
 	 {
-		 printf("speed set failed\n");
-		 crit_error=true;
+		// mute audio to reduce pops when changing samplerate (avia_reset)
+		bool was_muted = avs_mute(true);
+		if (::ioctl(soundfd, SNDCTL_DSP_SPEED, &dsp_speed))
+		{
+			printf("speed set failed\n");
+			crit_error=true;
+	 	}
+	 	else
+	 		m_samplerate = dsp_speed;
+		usleep(400000);
+		if (!was_muted)
+			avs_mute(false);
 	 }
-	 usleep(400000);
-	 if (!was_muted)
-		 avs_mute(false);
 //		  printf("Debug: SNDCTL_DSP_RESET %d / SNDCTL_DSP_SPEED %d / SNDCTL_DSP_CHANNELS %d / SNDCTL_DSP_SETFMT %d\n",
 //					SNDCTL_DSP_RESET, SNDCTL_DSP_SPEED, SNDCTL_DSP_CHANNELS, SNDCTL_DSP_SETFMT);
 		  return crit_error;
@@ -744,6 +749,7 @@ CMP3Player::CMP3Player()
 void CMP3Player::init()
 {
 	state = STOP;
+	m_samplerate=0;
 }
 
 bool CMP3Player::avs_mute(bool mute)
