@@ -15,10 +15,10 @@ function deleteMountPoint(id)
 
 function changeMountPoint(id)
 {
-	NewWindow('/control/editMountPointWindow?id='+id, 'editMountPoint', '780', '400', 'no');
+	NewWindow('/control/mountPointWindow?action=change&id='+id, 'changeMountPoint', '780', '400', 'no');
 }
 
 function addMountPoint(id)
 {
-	NewWindow('/control/addMountPointWindow?id='+id, 'addMountPoint', '780', '400', 'no');
+	NewWindow('/control/mountPointWindow?action=add&id='+id, 'addMountPoint', '780', '400', 'no');
 }

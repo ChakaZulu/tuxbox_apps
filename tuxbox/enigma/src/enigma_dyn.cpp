@@ -1647,7 +1647,8 @@ static eString getConfigHDD(void)
 	int swapfile = 0;
 	eConfig::getInstance()->getKey("/extras/swapfile", swapfile);
 	char *swapfilename;
-	eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename);
+	if (eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename))
+		swapfilename = "";
 	result.strReplace("#SWAPHDD#", (swapfile == 2) ? "checked" : "");
 	result.strReplace("#HDDSWAPFILE#", (swapfile == 2) ? eString(swapfilename) : "none");
 	return result;
@@ -1716,7 +1717,8 @@ static eString getConfigUSB(void)
 	int swapfile = 0;
 	eConfig::getInstance()->getKey("/extras/swapfile", swapfile);
 	char *swapfilename;
-	eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename);
+	if (eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename))
+		swapfilename = "";
 	result.strReplace("#SWAPUSB#", (swapfile == 1) ? "checked" : "");
 	result.strReplace("#USBSWAPFILE#", (swapfile == 1) ? eString(swapfilename) : "none");
 	return result;
@@ -1733,7 +1735,8 @@ static eString setConfigUSB(eString request, eString dirpath, eString opts, eHTT
 	int swapfile = 0;
 	eConfig::getInstance()->getKey("/extras/swapfile", swapfile);
 	char *swapfilename;
-	eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename);
+	if (eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename))
+		swapfilename = "";
 	
 	if (swapUSB == "on")
 	{
@@ -1779,7 +1782,8 @@ static eString setConfigHDD(eString request, eString dirpath, eString opts, eHTT
 	int swapfile = 0;
 	eConfig::getInstance()->getKey("/extras/swapfile", swapfile);
 	char *swapfilename;
-	eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename);
+	if (eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename))
+		swapfilename = "";
 	
 	if (swapHDD == "on")
 	{

@@ -8,14 +8,8 @@
 
 #define	MOUNTCONFIGFILE	"/var/tuxbox/config/enigma/mount.conf"
 
-void *mountThread(void *cmd);
-
-class eMountPoint
+typedef struct
 {
-private:
-	bool fileSystemIsSupported(eString);
-	bool isMounted(void);
-public:
 	int id;			//sequential number
 	eString	userName;	//username, only for CIFS
 	eString	password;	//password, only for CIFS
@@ -29,9 +23,20 @@ public:
 	bool mounted;		//if already mounted or not
 	int rsize;		//read size
 	int wsize;		//write size
+} t_mount;
 
+void *mountThread(void *cmd);
+
+class eMountPoint
+{
+private:
+	bool fileSystemIsSupported(eString);
+	bool isMounted(void);
+public:
+	
+	t_mount mp;
 	eMountPoint(CConfigFile *, int);
-	eMountPoint(eString, int, eString, eString, eString, int, int, int, eString, eString, int, int, int, int, bool, int);
+	eMountPoint(t_mount);
 	~eMountPoint();
 	
 	void save(FILE *, int);
@@ -50,9 +55,9 @@ private:
 public:
 	eString listMountPoints(eString);
 	void removeMountPoint(int);
-	void addMountPoint(eString, int, eString, eString, eString, int, int, int, eString, eString, int, int, int, int, bool);
-	void changeMountPoint(eString, int, eString, eString, eString, int, int, int, eString, eString, int, int, int, int, int);
-	void getMountPointData(eString *, int *, eString *, eString *, eString *, int *, int *, int *, eString *, eString *, int *, int *, int *, int *, int);
+	void addMountPoint(t_mount);
+	void changeMountPoint(int, t_mount);
+	t_mount getMountPointData(int);
 	int mountMountPoint(int);
 	int unmountMountPoint(int);
 	void save();
