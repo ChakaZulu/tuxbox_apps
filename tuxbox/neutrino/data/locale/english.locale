@@ -122,6 +122,10 @@ keybindingmenu.bouquethandling Bouquet-control
 keybindingmenu.bouquetchannels_on_ok current bouquet
 keybindingmenu.bouquetlist_on_ok bouquet-list
 keybindingmenu.allchannels_on_ok all-services
+keybindingmenu.subchannelup subchannel up
+keybindingmenu.subchannelup_head key subchannel up
+keybindingmenu.subchanneldown subchannel down
+keybindingmenu.subchanneldown_head key subchannel down
 
 colorchooser.red red
 colorchooser.green green

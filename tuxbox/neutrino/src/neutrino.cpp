@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.155 2002/02/14 14:41:36 field Exp $
+        $Id: neutrino.cpp,v 1.156 2002/02/17 16:18:31 Simplex Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.156  2002/02/17 16:18:31  Simplex
+  quick updown-zap for subchannels
+
   Revision 1.155  2002/02/14 14:41:36  field
   EPG-Handling verbessert
 
@@ -737,6 +740,8 @@ void CNeutrinoApp::setupDefaults()
 	g_settings.key_quickzap_down = CRCInput::RC_down;
 	g_settings.key_bouquet_up = CRCInput::RC_right;
 	g_settings.key_bouquet_down = CRCInput::RC_left;
+	g_settings.key_subchannel_up = CRCInput::RC_nokey;
+	g_settings.key_subchannel_down = CRCInput::RC_nokey;
 
 	if ( g_settings.box_Type == 2 )
 	{
@@ -1628,6 +1633,8 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 	CKeyChooser*	keySettings_quickzap_down = new CKeyChooser(&g_settings.key_quickzap_down, "keybindingmenu.channeldown_head", "settings.raw");
 	CKeyChooser*	keySettings_bouquet_up = new CKeyChooser(&g_settings.key_bouquet_up, "keybindingmenu.bouquetup_head",   "settings.raw");
 	CKeyChooser*	keySettings_bouquet_down = new CKeyChooser(&g_settings.key_bouquet_down, "keybindingmenu.bouquetdown_head", "settings.raw");
+	CKeyChooser*	keySettings_subchannel_up = new CKeyChooser(&g_settings.key_subchannel_up, "keybindingmenu.subchannelup_head",   "settings.raw");
+	CKeyChooser*	keySettings_subchannel_down = new CKeyChooser(&g_settings.key_subchannel_down, "keybindingmenu.subchanneldown_head", "settings.raw");
 
 
 	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.RC") );
@@ -1651,7 +1658,8 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 	keySettings.addItem( new CMenuForwarder("keybindingmenu.channeldown", true, "", keySettings_quickzap_down ));
 	keySettings.addItem( new CMenuForwarder("keybindingmenu.bouquetup", true, "", keySettings_bouquet_up ));
 	keySettings.addItem( new CMenuForwarder("keybindingmenu.bouquetdown", true, "", keySettings_bouquet_down ));
-
+	keySettings.addItem( new CMenuForwarder("keybindingmenu.subchannelup", true, "", keySettings_subchannel_up ));
+	keySettings.addItem( new CMenuForwarder("keybindingmenu.subchanneldown", true, "", keySettings_subchannel_down ));
 }
 
 static char* copyStringto(const char* from, char* to, int len, char delim)
@@ -1830,7 +1838,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget audioSettings("audiomenu.head", "audio.raw");
 	CMenuWidget networkSettings("networkmenu.head", "network.raw");
 	CMenuWidget colorSettings("colormenu.head", "colors.raw");
-	CMenuWidget keySettings("keybindingmenu.head", "keybinding.raw",400,500);
+	CMenuWidget keySettings("keybindingmenu.head", "keybinding.raw",400,520);
 	CMenuWidget miscSettings("miscsettings.head", "settings.raw");
 	CMenuWidget service("servicemenu.head", "settings.raw");
 
@@ -2066,6 +2074,14 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			else if ((key==CRCInput::RC_plus) || (key==CRCInput::RC_minus))
 			{	//volume
 				setVolume( key );
+			}
+			else if (key==g_settings.key_subchannel_up)
+			{
+				g_RemoteControl->subChannelUp();
+			}
+			else if (key==g_settings.key_subchannel_down)
+			{
+				g_RemoteControl->subChannelDown();
 			}
 		}
 	}
@@ -2389,7 +2405,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.155 2002/02/14 14:41:36 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.156 2002/02/17 16:18:31 Simplex Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: remotecontrol.cpp,v 1.42 2002/02/04 14:40:29 field Exp $
+// $Id: remotecontrol.cpp,v 1.43 2002/02/17 16:16:23 Simplex Exp $
 //
 // $Log: remotecontrol.cpp,v $
+// Revision 1.43  2002/02/17 16:16:23  Simplex
+// quick updown-zap for subchannels
+//
 // Revision 1.42  2002/02/04 14:40:29  field
 // Boeser Threading-Bug behoben ;)
 //
@@ -687,7 +690,7 @@ void CRemoteControl::setAPID(int APID)
 void CRemoteControl::setSubChannel(unsigned numSub)
 {
 	pthread_mutex_lock( &send_mutex );
-	if (subChannels_internal.selected== numSub )
+	if ((subChannels_internal.selected== numSub ) || (numSub < 0) || (numSub >= subChannels_internal.list.size()))
 	{
 		pthread_mutex_unlock( &send_mutex );
 		return;
@@ -703,6 +706,22 @@ void CRemoteControl::setSubChannel(unsigned numSub)
 	send();
 }
 
+void CRemoteControl::subChannelUp()
+{
+	setSubChannel( (subChannels_internal.selected + 1) % subChannels_internal.list.size());
+}
+
+void CRemoteControl::subChannelDown()
+{
+	if (subChannels_internal.selected == 0 )
+	{
+		setSubChannel(subChannels_internal.list.size() - 1);
+	}
+	else
+	{
+		setSubChannel(subChannels_internal.selected - 1);
+	}
+}
 
 void CRemoteControl::zapTo_onid_sid( unsigned int onid_sid, string channame)
 {

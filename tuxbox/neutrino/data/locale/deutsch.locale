@@ -120,6 +120,10 @@ keybindingmenu.bouquethandling OK-Taste für
 keybindingmenu.bouquetchannels_on_ok Bouquet-Kanäle
 keybindingmenu.bouquetlist_on_ok Bouquetliste
 keybindingmenu.allchannels_on_ok Kanalliste
+keybindingmenu.subchannelup Unterkanal weiter
+keybindingmenu.subchannelup_head Unterkanal weiter
+keybindingmenu.subchanneldown Unterkanal zurück
+keybindingmenu.subchanneldown_head Unterkanal zurück
 
 colorchooser.red rot
 colorchooser.green grün
@@ -271,7 +275,7 @@ bouqueteditor.savingchanges Änderungen werden gespeichert. Bitte warten ...
 bouqueteditor.discardingchanges Änderungen werden verworfen. Bitte warten ...
 bouqueteditor.switch Kanal aufnehmen/entfernen
 bouqueteditor.switchmode TV/Radio
-bouqueteditor.return fertig
+bouqueteditor.return Fertig
 
 messagebox.yes Ja
 messagebox.no Nein
