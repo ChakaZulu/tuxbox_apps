@@ -1,3 +1,18 @@
+/*
+$Id: nit.cpp,v 1.11 2002/04/04 14:35:16 rasc Exp $
+
+
+
+$Log: nit.cpp,v $
+Revision 1.11  2002/04/04 14:35:16  rasc
+- set NIT Timout to 10 secs accoring ETSI (fix random scan results)
+
+
+
+*/
+
+
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/ioctl.h>
@@ -49,7 +64,7 @@ void nit (int diseqc)
   	flt.pid = 0x0010;
   	flt.filter.filter[0] = 0x40;
     	flt.filter.mask[0]  = 0xFF;
-  	flt.timeout = 2000;
+  	flt.timeout = 10000;		/* 10 Sec. Max. for NIT (ETSI)   (2002-04-04 rasc) */
   	flt.flags = DMX_CHECK_CRC | DMX_IMMEDIATE_START;
  
   	if (ioctl(demux_fd, DMX_SET_FILTER, &flt) < 0)
