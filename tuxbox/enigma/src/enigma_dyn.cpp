@@ -605,7 +605,7 @@ static eString getContent(eString mode, eString path)
 	else
 	if (mode == "about")
 	{
-		result = "Enigma Web Control Version 0.2a";
+		result = "Enigma Web Control<br>Version 0.2a";
 	}
 	else
 	if (mode == "aboutDreambox")
@@ -669,7 +669,20 @@ static eString getContent(eString mode, eString path)
 	else
 	if (mode == "menuFBShot")
 	{
-		result = " ";
+		gPixmap *p=0;
+		p=&gFBDC::getInstance()->getPixmap();
+
+		if (!p)
+		{
+			result = "FBShot failed";
+		}
+		else
+		{
+			if (!savePNG("/tmp/fbshot.png", p))
+			{
+				result = "<img width=\"650\" src=\"/root/tmp/fbshot.png\" border=0>";
+			}
+		}
 	}
 	else
 	if (mode == "menuScreenShot")
