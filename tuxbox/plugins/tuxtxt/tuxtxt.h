@@ -14,7 +14,7 @@
 #include <dbox/fp.h>
 #include <ost/dmx.h>
 #include <plugin.h>
-#include <../lcd/lcd-ks0713.h>
+#include <dbox/lcd-ks0713.h>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H

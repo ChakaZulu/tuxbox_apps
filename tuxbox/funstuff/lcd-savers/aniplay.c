@@ -12,7 +12,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <lcd-ks0713.h>
+#include <dbox/lcd-ks0713.h>
 
 #include "ani.h"
 

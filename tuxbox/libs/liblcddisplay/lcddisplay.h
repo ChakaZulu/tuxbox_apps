@@ -38,7 +38,7 @@
 #include <math.h>
 #include <string>
 
-#include "lcd-ks0713.h"
+#include <dbox/lcd-ks0713.h>
 
 using namespace std;
 

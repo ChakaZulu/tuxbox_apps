@@ -18,7 +18,7 @@
 #include <unistd.h>
 
 #include <dbox/avia_gt_capture.h>
-#include <lcd-ks0713.h>
+#include <dbox/lcd-ks0713.h>
 
 
 typedef unsigned char screen_t[LCD_BUFFER_SIZE];

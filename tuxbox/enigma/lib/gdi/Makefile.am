@@ -1,6 +1,5 @@
 INCLUDES = \
-	-I$(DRIVER)/lcd \
-	-I$(DRIVER)/include/dbox \
+	-I$(DRIVER)/include \
 	-I$(top_srcdir)/enigma/src
 
 lib_LTLIBRARIES = libenigma_gdi.la

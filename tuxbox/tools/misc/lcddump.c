@@ -4,7 +4,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include "lcd-ks0713.h"
+
+#include <dbox/lcd-ks0713.h>
 
 #define LCD "/dev/dbox/lcd0"
 

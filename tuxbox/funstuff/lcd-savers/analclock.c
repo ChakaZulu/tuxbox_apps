@@ -16,7 +16,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#include <lcd-ks0713.h>
+#include <dbox/lcd-ks0713.h>
 
 #include "sinus.h"
 

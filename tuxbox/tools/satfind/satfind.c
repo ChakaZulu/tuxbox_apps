@@ -30,7 +30,9 @@
 #include <sys/ioctl.h>
 #include <string.h>
 #include <errno.h>
-#include "lcd-ks0713.h"
+
+#include <dbox/lcd-ks0713.h>
+
 #include "icons.h"
 #include "font.h"
 

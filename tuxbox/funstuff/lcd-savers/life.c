@@ -15,7 +15,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <lcd-ks0713.h>
+#include <dbox/lcd-ks0713.h>
 
 
 #define DOT_SIZE 1
