@@ -2491,7 +2491,7 @@ static eString getControlSatFinder(eString opts)
 	else
 	{
 		// pda satfinder
-		result += "<table width="100%" border=\"0\" cellpadding=\"0\" cellspacing=\"0\">";
+		result += "<table width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\">";
 		eString display = opt["display"];
 		if (display == "transponders")
 			result += getTransponders(atoi(opt["sat"].c_str()));
