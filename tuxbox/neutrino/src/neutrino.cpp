@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.164 2002/02/23 17:34:28 field Exp $
+        $Id: neutrino.cpp,v 1.165 2002/02/23 19:39:04 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.165  2002/02/23 19:39:04  field
+  Version auslesen angepasst
+
   Revision 1.164  2002/02/23 17:34:28  field
   Update gefixt, Fronttasten implementiert ;)
 
@@ -1359,17 +1362,20 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service)
 		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
 		//get current flash-version
-		FILE* fd = fopen("/var/etc/version", "r");
+		FILE* fd = fopen("/version", "r");
 		strcpy(g_settings.softupdate_currentversion, "1.0.0");
 
 		if(!fd)
 		{
-			perror("cannot read flash-versioninfo");
-		}
-		else
-		{
-			if(fgets(g_settings.softupdate_currentversion,90,fd)==NULL)
-				fclose(fd);
+			fd = fopen("/var/etc/version", "r");
+			if(!fd)
+			{
+				perror("cannot read flash-versioninfo");
+			}
+			else
+			{
+				if(fgets(g_settings.softupdate_currentversion,90,fd)==NULL)
+					fclose(fd);
 			//printf("versiondata: ->%s<-\n", g_settings.softupdate_currentversion);
 /*			for (unsigned int x=0;x<strlen(g_settings.softupdate_currentversion);x++)
 			{
@@ -1379,7 +1385,15 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service)
 				}
 			}
 */
+			}
 		}
+		else
+		{
+			if(fgets(g_settings.softupdate_currentversion,90,fd)==NULL)
+				fclose(fd);
+		}
+
+
 		printf("current flash-version: %s\n", g_settings.softupdate_currentversion);
 		updateSettings->addItem( new CMenuForwarder("flashupdate.currentversion", false, (char*) &g_settings.softupdate_currentversion, NULL ));
 
@@ -2480,7 +2494,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.164 2002/02/23 17:34:28 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.165 2002/02/23 19:39:04 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;
