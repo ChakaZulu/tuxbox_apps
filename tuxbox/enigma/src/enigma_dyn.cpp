@@ -2380,7 +2380,7 @@ static eString getControlScreenShot(void)
 		result += "Original format: " + eString().sprintf("%d", xres) + "x" + eString().sprintf("%d", yres);
 		result += " (" + eString().sprintf("%d", rh) + ":" + eString().sprintf("%d", rv) + ")";
 	}
-	
+
 	return result;
 }
 
@@ -4370,10 +4370,9 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 
 	if (!spath)
 	{
-		if (zapMode == ZAPMODERECORDINGS)
-			zapMode = ZAPMODETV;
-		spath = zap[zapMode][ZAPSUBMODEBOUQUETS];
+		zapMode = ZAPMODETV;
 		zapSubMode = ZAPSUBMODEBOUQUETS;
+		spath = zap[zapMode][zapSubMode];
 	}
 	else
 	{
@@ -4382,7 +4381,16 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 			if (spath == zap[i][ZAPMODECATEGORY])
 			{
 				zapMode = i;
-				spath = zap[i][ZAPSUBMODEBOUQUETS];
+				switch(zapMode)
+				{
+					case ZAPMODETV:
+					case ZAPMODERADIO:
+						spath = zap[i][ZAPSUBMODEBOUQUETS];
+						break;
+					case ZAPMODEDATA:
+						spath = zap[i][ZAPSUBMODESATELLITES];
+						break;
+				}
 				currentBouquet = 0;
 				currentChannel = -1;
 				break;
@@ -4413,6 +4421,8 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 
 	if (mode == "zap")
 		result.strReplace("#ONLOAD#", "onLoad=init()");
+	else
+		result.strReplace("#ONLOAD#", "");
 
 	return result;
 }
