@@ -55,12 +55,10 @@ using namespace std;
 #define RED "#CB0303"
 #define GREEN "#1FCB12"
 #define YELLOW "#F5FF3C"
-#define LIGHTGREY "#DEE6D6"
-#define DARKGREY "#ABABAB"
-//#define LEFTNAVICOLOR "#316183" color is set in weif.css
-#define LEFTNAVICOLOR ""
-//#define TOPNAVICOLOR "#316183" color is set in webif.css
-#define TOPNAVICOLOR ""
+#define LIGHTGREY "#F4F4EC"
+#define DARKGREY "#D9E0E7"
+#define LEFTNAVICOLOR "#D9E0E7"
+#define TOPNAVICOLOR "#D9E0E7"
 #define OCKER "#FFCC33"
 
 extern eString getRight(const eString&, char); // implemented in timer.cpp
@@ -1572,7 +1570,7 @@ static eString getContent(eString mode, eString path)
 	eString zap_result;
 	if (mode == "zap")
 	{
-		result = getTitle("Zap");
+		result = getTitle("ZAP");
 #ifndef DISABLE_FILE
 		if (path == ";4097:7:0:1:0:0:0:0:0:0:")
 		{
@@ -1607,13 +1605,13 @@ static eString getContent(eString mode, eString path)
 	else
 	if (mode == "links")
 	{
-		result = getTitle("Links");
+		result = getTitle("LINKS");
 		result += "Select one of the link categories on the left";
 	}
 	else
 	if (mode == "linksOfficialSites")
 	{
-		result = getTitle("Links > Official Sites");
+		result = getTitle("LINKS: Official Sites");
 		result += read_file(TEMPLATE_DIR+"linksOfficialSites.tmp");
 		if (result == "")
 			result = "No links available";
@@ -1621,7 +1619,7 @@ static eString getContent(eString mode, eString path)
 	else
 	if (mode == "linksOtherSites")
 	{
-		result = getTitle("Links > Other Sites");
+		result = getTitle("LINKS: Other Sites");
 		result += read_file(TEMPLATE_DIR+"linksOtherSites.tmp");
 		if (result == "")
 			result = "No links available";
@@ -1629,7 +1627,7 @@ static eString getContent(eString mode, eString path)
 	else
 	if (mode == "linksForums")
 	{
-		result = getTitle("Links > Forums");
+		result = getTitle("LINKS: Forums");
 		result += read_file(TEMPLATE_DIR+"linksForums.tmp");
 		if (result == "")
 			result = "No links available";
@@ -1637,25 +1635,25 @@ static eString getContent(eString mode, eString path)
 	else
 	if (mode == "about")
 	{
-		result = getTitle("About");
+		result = getTitle("ABOUT");
 		result += "Enigma Web Control<br>Version 0.6";
 	}
 	else
 	if (mode == "aboutDreambox")
 	{
-		result = getTitle("About > Box");
+		result = getTitle("ABOUT: Receiver");
 		result += aboutDreambox();
 	}
 	else
 	if (mode == "aboutDMM")
 	{
-		result = getTitle("About > DMM");
+		result = getTitle("ABOUT: DMM");
 		result += read_file(TEMPLATE_DIR+"aboutDMM.tmp");
 	}
 	else
 	if (mode == "menu")
 	{
-		result = getTitle("Control");
+		result = getTitle("CONTROL");
 		result += "Control your box using the commands on the left";
 	}
 	else
@@ -1675,13 +1673,13 @@ static eString getContent(eString mode, eString path)
 #endif
 	if (mode == "menuScreenShot")
 	{
-		result = getTitle("Control > Screenshot");
+		result = getTitle("CONTROL: Screenshot");
 		result += getScreenShot();
 	}
 	else
 	if (mode == "menuTimerList")
 	{
-		result = getTitle("Control > Timer List");
+		result = getTitle("CONTROL: Timer List");
 		int count=0;
 		eTimerManager::getInstance()->forEachEntry(countTimer(count,false));
 		if (count)
@@ -1703,12 +1701,12 @@ static eString getContent(eString mode, eString path)
 	else
 	if (mode == "updates")
 	{
-		result = getTitle("Updates");
+		result = getTitle("UPDATES");
 		result += "is not available yet";
 	}
 	else
 	{
-		result = getTitle("General");
+		result = getTitle("GENERAL");
 		result += mode + " is not available yet";
 	}
 
