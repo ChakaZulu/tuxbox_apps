@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#include <errno.h>
 
 //external defines (because missing dreambox header-files in cvs)
 #define CI_RESET					0
@@ -23,7 +24,7 @@
 int eDVBCI::instance_count=0;
 
 eDVBCI::eDVBCI()
-	:pollTimer(this), deadTimer(this), caidcount(0), ml_bufferlen(0), messages(this, 1)
+	:pollTimer(this), caidcount(0), ml_bufferlen(0), messages(this, 1)
 {
 	instance_count++;
 
@@ -53,7 +54,6 @@ eDVBCI::eDVBCI()
 	}
  
 	CONNECT(pollTimer.timeout,eDVBCI::poll);
-	CONNECT(deadTimer.timeout,eDVBCI::deadReset);
 
 	CONNECT(messages.recv_msg, eDVBCI::gotMessage);
 
@@ -97,6 +97,11 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 		break;
 	case eDVBCIMessage::reset:
 //		eDebug("[DVBCI] got reset message..");
+		while(queue.size())
+		{
+			delete [] queue.top().data;
+			queue.pop();
+		}
 		if(!ci_state)
 			ci_progress(_("no module"));	
 		ci_state=0;
@@ -158,7 +163,6 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 
 void eDVBCI::mmi_begin()
 {
-	stopTimer();
 	unsigned char buffer[10];
 	
 //	eDebug("start mmi");
@@ -168,7 +172,6 @@ void eDVBCI::mmi_begin()
 
 void eDVBCI::mmi_end()
 {
-	startTimer();
 	unsigned char buffer[10];
 
 //	eDebug("stop mmi");
@@ -179,13 +182,10 @@ void eDVBCI::mmi_end()
 void eDVBCI::mmi_enqansw(unsigned char *buf)
 {
 //	eDebug("got mmi_answer");
-	unsigned char buffer[ buf[0]+8 ];
-	memcpy(buffer,"\x90\x2\x0\x4\x9f\x88\x08",7);
-	memcpy(buffer+7, buf, buf[0]+1 ); // add length byte itself..
-	sendTPDU(0xA0,buf[0]+8,1,buffer);
-	// buf[0] = length of following chars..  // done in enigma_mmi
-	// \x90\x2\x0\x4\x9f\x88\x08 = 7 bytes
-	// the length byte itself must added ... 7 + 1  =  8 :)
+	unsigned char buffer[ buf[0]+7 ];
+	memcpy(buffer,"\x90\x2\x0\x4\x9f\x88\x08",4);
+	memcpy(buffer+7, buf, buf[0] );
+	sendTPDU(0xA0,buf[0]+7,1,buffer);
 }
 
 void eDVBCI::mmi_menuansw(int val)
@@ -234,7 +234,7 @@ void eDVBCI::PMTaddDescriptor(unsigned char *data)
 
 void eDVBCI::newService()
 {
-	startTimer(true);
+	//startTimer(true);
 	//eDebug("got new %d PMT entrys",tempPMTentrys);
 	ci_progress(appName);	
 	unsigned char capmt[2048];
@@ -314,9 +314,9 @@ void eDVBCI::newService()
 	capmt[lenpos+1]=(len & 0xff);
 
 	//sendTPDU(0xA0,wp,1,capmt);
-	
+
 	create_sessionobject(capmt+4,capmt+9,wp-9,session);
-	
+
 #if 0
 	printf("CAPMT-LEN:%d\n",wp);
 	
@@ -363,7 +363,7 @@ void eDVBCI::create_sessionobject(unsigned char *tag,unsigned char *data,unsigne
 		printf("%02x ",buffer[i]);
 	printf("\n");	
 #endif
-	sendTPDU(0xA0,newlen,1,buffer);
+	sendTPDU(0xA0,newlen,1,buffer,true);
 
 }
 
@@ -400,10 +400,10 @@ void eDVBCI::pushCAIDs()
 	lock.unlock();
 }
 
-void eDVBCI::sendTPDU(unsigned char tpdu_tag,unsigned int len,unsigned char tc_id,unsigned char *data)
+void eDVBCI::sendTPDU(unsigned char tpdu_tag,unsigned int len,unsigned char tc_id,unsigned char *data,bool dontQueue)
 {
-	unsigned char buffer[len+7];
-	
+	unsigned char *buffer = new unsigned char[len+7];
+
 	buffer[0]=tc_id;
 	buffer[1]=0;
 	buffer[2]=tpdu_tag;
@@ -415,18 +415,58 @@ void eDVBCI::sendTPDU(unsigned char tpdu_tag,unsigned int len,unsigned char tc_i
 		buffer[5]=((len+1) & 0xff);
 		buffer[6]=tc_id;
 		memcpy(buffer+7,data,len);
-		sendData(tc_id,buffer+2,len+5);
+
+/*		for ( int i=0; i < len+5; i++ )
+			eDebugNoNewLine("%02x ", buffer[i+2] );
+		eDebug("");*/
+
+		if ( queue.empty() )
+		{
+//			eDebug("queue empty.. try to send data");
+
+			if ( !sendData(tc_id,buffer+2,len+5) )
+			{
+//				eDebug("CI is busy... push to queue..");
+				queue.push( queueData(tc_id, buffer, len+5) );
+			}
+			else
+				delete [] buffer;
+		}
+		else
+		{
+//			eDebug("queuesize = %d.. append new data to queue", queue.size());
+			queue.push( queueData(tc_id, buffer, len+5) );
+		}
 	}
 	else
-	{	
+	{
 		buffer[3]=len+1;
 		buffer[4]=tc_id;
 		memcpy(buffer+5,data,len);
-		sendData(tc_id,buffer+2,len+3);
+/*		for ( int i=0; i < len+3; i++ )
+			eDebugNoNewLine("%02x ", buffer[i+2] );
+		eDebug("");*/
+		if ( queue.empty() )
+		{
+//			eDebug("queue empty.. try to send data");
+			if ( !sendData(tc_id,buffer+2,len+3) )
+			{
+//				eDebug("CI is busy... push to queue..");
+				queue.push( queueData(tc_id, buffer, len+3) );
+			}
+			else
+				delete [] buffer;
+		}
+		else
+		{
+//			eDebug("queusize = %d.. append new data to queue", queue.size());
+			queue.push( queueData(tc_id, buffer, len+3) );
+		}
 	}
 }
+
 #define PAYLOAD_LEN	126				//fixme do it dynamic
-void eDVBCI::sendData(unsigned char tc_id,unsigned char *data,unsigned int len)
+bool eDVBCI::sendData(unsigned char tc_id,unsigned char *data,unsigned int len)
 {
 	unsigned int bytesleft=len;
 	unsigned char lpdu[PAYLOAD_LEN+2];
@@ -451,8 +491,10 @@ void eDVBCI::sendData(unsigned char tc_id,unsigned char *data,unsigned int len)
 			printf("\n");	
 #endif
 
-			if(write(fd,lpdu,PAYLOAD_LEN+2)<0)
+			if(write(fd,lpdu+2,PAYLOAD_LEN+2-2)<0)
 			{
+				if (errno == EBUSY)
+					return false;
 				eDebug("[DVBCI] write error");
 				ci_state=0;	
 				dataAvailable(0);
@@ -468,16 +510,19 @@ void eDVBCI::sendData(unsigned char tc_id,unsigned char *data,unsigned int len)
 				printf("%02x ",lpdu[i]);
 			printf("\n");	
 #endif
-			if(write(fd,lpdu,bytesleft+2)<0)
+			if(write(fd,lpdu+2,bytesleft+2-2)<0)
 			{
+				if (errno == EBUSY)
+					return false;
 				eDebug("[DVBCI] write error");
 				ci_state=0;	
 				dataAvailable(0);
 			}
 			bytesleft=0;	
 		}
-	}				
-
+	}
+//	startTimer(true);
+	return true;
 }
 
 void eDVBCI::help_manager(unsigned int session)
@@ -795,14 +840,15 @@ void eDVBCI::receiveTPDU(unsigned char tpdu_tag,unsigned int tpdu_len,unsigned c
 	switch(tpdu_tag)
 	{
 		case 0x80:
-			if(data[0]==0x80)
-				sendTPDU(0x81,0,tpdu_tc_id,0);
-			else
-				startTimer();
+			//if(data[0]==0x80)
+			//	sendTPDU(0x81,0,tpdu_tc_id,0);
+			//else
+			//	startTimer();
 			break;
 		case 0x83:
 			eDebug("[DVBCI] T_C_ID %d wurde erstellt",tpdu_tc_id);	
-			startTimer();
+			
+			//startTimer();
 			break;
 		case 0xA0:
 			if(tpdu_len)
@@ -810,7 +856,7 @@ void eDVBCI::receiveTPDU(unsigned char tpdu_tag,unsigned int tpdu_len,unsigned c
 				if(data[0] >= 0x90 && data[0] <= 0x96)
 				{
 					handle_spdu(tpdu_tc_id,data,tpdu_len);
-					startTimer();
+					//startTimer();
 				}
 				else
 				{
@@ -1026,7 +1072,7 @@ void eDVBCI::incoming(unsigned char *buffer,int len)
 
 		if(payloadData[length-1] == 0x80)
 		{
-			//printf("query data\n");
+			printf("query data\n");
 			sendTPDU(0x81,0,payloadData[length-2],0);
 		}
 
@@ -1056,28 +1102,19 @@ void eDVBCI::incoming(unsigned char *buffer,int len)
 
 		free(payloadData);	
 
-		startTimer();
+		//startTimer();
 	}
 }
 #endif
 
-void eDVBCI::startTimer(bool onlyDead)
+void eDVBCI::startTimer()
 {
-	if ( !onlyDead )
-		pollTimer.start(250,true);
-	deadTimer.start(2000,true);
+	pollTimer.start(250,true);
 } 
 
 void eDVBCI::stopTimer()
 {
 	pollTimer.stop();
-	deadTimer.stop();
-}
-
-void eDVBCI::deadReset()
-{
-	eDebug("CI timeoutet... do reset");
-	gotMessage(eDVBCIMessage(eDVBCIMessage::reset));
 }
 
 void eDVBCI::dataAvailable(int what)
@@ -1094,12 +1131,18 @@ void eDVBCI::dataAvailable(int what)
 
 	if(present!=1)						//CI removed
 	{
-		char *buf="REMOVE";
-		ci_mmi_progress(buf,6);
-
 		eDebug("[DVBCI] module removed");	
+
+		while(queue.size())
+		{
+			delete [] queue.top().data;
+			queue.pop();
+		}
 		memset(appName,0,sizeof(appName));
 		ci_progress(_("no module"));
+
+		char *buf="\x9f\x88\x00";
+		ci_mmi_progress(buf,3);
 
 		for(int i=0;i<MAX_SESSIONS;i++)
 			sessions[i].state=STATE_FREE;
@@ -1107,8 +1150,9 @@ void eDVBCI::dataAvailable(int what)
 		::read(fd,&buffer,0);	
 		ci_state=0;
 		clearCAIDs();
+
 		return;
-	}		
+	}
 	
 	if(ci_state==0)						//CI plugged
 	{
@@ -1144,13 +1188,34 @@ void eDVBCI::dataAvailable(int what)
 
 	if(size>0)
 	{
-#if 0
 		int i;
+#if 0
 		for(i=0;i<size;i++)
 			printf("%02x ",buffer[i]);
 		printf("\n");	
 #endif	
 		incoming(buffer,size);
+
+		if ( queue.size() )
+		{
+			queueData d = queue.top();
+			queue.pop();
+			if ( !sendData( d.tc_id, d.data+2, d.len ) )
+			{
+				// add this entry with higher priority to queue..
+				queue.push( queueData( d.tc_id, d.data, d.len, 1 ) );
+			}
+		}
+
+		if (::ioctl(fd,8,&i)<0)
+			eDebug("CI_GET failed (%m)");
+
+		if(i==4)
+		{
+			startTimer();
+		}
+		else
+			stopTimer();
 		return;
 	}	
 	
@@ -1159,12 +1224,14 @@ void eDVBCI::dataAvailable(int what)
 		sendTPDU(0x82,0,1,0);	
 		ci_state=2;
 	}
-	startTimer();
 }
 
 void eDVBCI::poll()
 {
 	int present;
+
+	stopTimer();
+
 #if 0
 	eDebug("TIMER");
 #endif
