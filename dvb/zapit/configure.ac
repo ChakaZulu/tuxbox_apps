@@ -32,8 +32,8 @@ AC_ARG_WITH(neutrino-source,
 if test $NEUTRINO_SOURCE; then
 	orig_CFLAGS=$CFLAGS
 	orig_CPPFLAGS=$CPPFLAGS
-        CFLAGS="-I$NEUTRINO_SOURCE/lib/lcddclient"
-        CPPFLAGS="-I$NEUTRINO_SOURCE/lib/lcddclient"
+        CFLAGS="-I$NEUTRINO_SOURCE/lib"
+        CPPFLAGS="-I$NEUTRINO_SOURCE/lib"
 	AC_CHECK_HEADERS(lcddclient.h,[LCDDCLIENT_CFLAGS=$CFLAGS])
 	LCDDCLIENT_SOURCE=$NEUTRINO_SOURCE/lib/lcddclient/lcddclient.cpp
 	CFLAGS="$orig_CFLAGS"
