@@ -598,7 +598,7 @@ static eString aboutDreambox(void)
 	switch (eSystemInfo::getInstance()->getHwType())
 	{
 		case eSystemInfo::dbox2Nokia:
-			result += "Box: d-Box 2";
+			result += "Model: d-Box 2";
 			result += "<br>";
 			result += "Manufacturer: Nokia";
 			result += "<br>";
@@ -606,7 +606,7 @@ static eString aboutDreambox(void)
 			result += "<br>";
 			break;
 		case eSystemInfo::dbox2Philips:
-			result += "Box: d-Box 2";
+			result += "Model: d-Box 2";
 			result += "<br>";
 			result += "Manufacturer: Philips";
 			result += "<br>";
@@ -614,7 +614,7 @@ static eString aboutDreambox(void)
 			result += "<br>";
 			break;
 		case eSystemInfo::dbox2Sagem:
-			result += "Box: d-Box 2";
+			result += "Model: d-Box 2";
 			result += "<br>";
 			result += "Manufacturer: Sagem";
 			result += "<br>";
@@ -622,7 +622,7 @@ static eString aboutDreambox(void)
 			result += "<br>";
 			break;
 		case eSystemInfo::DM5600:
-			result += "Box: DM5600";
+			result += "Model: DM5600";
 			result += "<br>";
 			result += "Manufacturer: Dream-Multimedia-TV";
 			result += "<br>";
@@ -630,15 +630,15 @@ static eString aboutDreambox(void)
 			result += "<br>";
 			break;
 		case eSystemInfo::DM5620:
-			result += "DM5620";
+			result += "Model: DM5620";
 			result += "<br>";
-			result += "Manufacturer: Box: Dream-Multimedia-TV";
+			result += "Manufacturer: Dream-Multimedia-TV";
 			result += "<br>";
 			result += "Processor: STBx25xx, 252MHz";
 			result += "<br>";
 			break;
 		case eSystemInfo::DM7000:
-			result += "Box: DM7000";
+			result += "Model: DM7000";
 			result += "<br>";
 			result += "Manufacturer: Dream-Multimedia-TV";
 			result += "<br>";
@@ -857,7 +857,7 @@ static eString getContent(eString mode, eString path)
 	else
 	if (mode == "menuScreenShot")
 	{
-		if (access("/dev/grabber", 0) == 0)
+		if (access("/dev/grabber", R_OK) == 0)
 		{
 			eString cmd("cat /dev/grabber > /tmp/screenshot.bmp");
 			system(cmd.c_str());
