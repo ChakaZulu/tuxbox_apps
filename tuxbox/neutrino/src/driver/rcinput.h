@@ -135,6 +135,7 @@ class CRCInput
 			RC_7            = KEY_7,            /* /include/linux/input.h: #define KEY_7			 8   */
 			RC_8            = KEY_8,            /* /include/linux/input.h: #define KEY_8			 9   */
 			RC_9            = KEY_9,            /* /include/linux/input.h: #define KEY_9			10   */
+			RC_backspace    = KEY_BACKSPACE,    /* /include/linux/input.h: #define KEY_BACKSPACE            14   */
 			RC_home         = KEY_HOME,         /* /include/linux/input.h: #define KEY_HOME                102   */
 			RC_up           = KEY_UP,           /* /include/linux/input.h: #define KEY_UP                  103   */
 			RC_page_up      = KEY_PAGEUP,       /* /include/linux/input.h: #define KEY_PAGEUP              104   */
