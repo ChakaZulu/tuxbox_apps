@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.21 2001/09/20 11:21:06 field Exp $
+// $Id: infoviewer.cpp,v 1.22 2001/09/20 11:37:29 fnbrd Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.22  2001/09/20 11:37:29  fnbrd
+// Fixed small bug.
+//
 // Revision 1.21  2001/09/20 11:21:06  field
 // buggy...
 //
@@ -110,7 +113,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 	CurrentChannel = Channel;
     Current_onid_tsid = onid_tsid;
 
-//  Auskommentieren, falls es euch nicht gefällt..?
+//  Auskommentieren, falls es euch nicht gef„llt..?
     ShowInfo_Info = !CalledFromNumZap;
 //    ShowInfo_Info = false;
 
@@ -223,14 +226,14 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 
 void CInfoViewer::showButtons()
 {
-    // welche Bedingung auch immer für die gelbe Taste...?
+    // welche Bedingung auch immer fr die gelbe Taste...?
     if ( false )
     {
         g_FrameBuffer->paintIcon("gelb.raw", BoxEndX- 2* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
         g_Fonts->infobar_small->RenderString(BoxEndX- 2* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.eventlist").c_str(), COL_INFOBAR);
     };
 
-    // grün, wenn mehrere APIDs
+    // grn, wenn mehrere APIDs
     if ( g_RemoteControl->apid_info.count_apids> 1 )
     {
         g_FrameBuffer->paintIcon("gruen.raw", BoxEndX- 3* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
@@ -397,7 +400,6 @@ void * CInfoViewer::InfoViewerThread (void *arg)
 	return NULL;
 }
 
-
 char* copyStringto( char* from, char* to, int len)
 {
 	while( *from != '\n' )
@@ -490,7 +492,9 @@ printf("%s", runningDuration);
 printf("%s", runningStart);
                 runningPercent=(unsigned)((float)(time(NULL)-epg_times->startzeit)/(float)epg_times->dauer*100.);
 printf("proz.: %d\n", runningPercent);
-                dp = copyStringto( dp, running, sizeof(running));
+                strncpy(running, dp, sizeof(running));
+		dp+=strlen(dp)+1;
+//                dp = copyStringto( dp, running, sizeof(running));
 printf("%s", running);
                 // next
                 tmp_id = (unsigned long long)* dp;
@@ -506,7 +510,8 @@ printf("%s", nextDuration);
                 pStartZeit = localtime(&epg_times->startzeit);
         		sprintf((char*) &nextStart, "%02d:%02d", pStartZeit->tm_hour, pStartZeit->tm_min);
 printf("%s", nextStart);
-                dp = copyStringto( dp, next, sizeof(next));
+                strncpy(next, dp, sizeof(next));
+//                dp = copyStringto( dp, next, sizeof(next));
 printf("%s", next);
         		delete[] pData;
         		retval = true;
