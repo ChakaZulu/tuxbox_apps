@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.20 2003/03/02 13:05:59 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.21 2003/03/02 23:19:15 thegoodguy Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -423,6 +423,9 @@ int DMX::change(const int new_filter_index)
 
 	if (!isOpen())
 	{
+#ifdef PAUSE_EQUALS_STOP	       
+		pthread_cond_signal(&change_cond);
+#endif
 		unlock();
 		return 1;
 	}
