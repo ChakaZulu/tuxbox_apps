@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/settings.h,v 1.10 2003/05/11 11:52:50 digi_casi Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/settings.h,v 1.11 2003/05/11 12:05:40 digi_casi Exp $
  *
  * zapit's settings - d-box2 linux project
  *
@@ -29,6 +29,7 @@
 #include                "config.h"
 #else
 #define CONFIGDIR       "/var/tuxbox/config"
+#define DATADIR		"/share/tuxbox" //for compatibiliy with rel_alexW
 #endif
 
 #define ZAPITCONFIGDIR  CONFIGDIR "/zapit"
