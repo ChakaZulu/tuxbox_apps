@@ -10,10 +10,8 @@ EXTRA_DIST = \
 	mepg_grad.png edit.gif timer.js window.js topbalk2.png topbalk3.png \
 	topbalk4.png zap.js zapdata.js up.gif down.gif topbalk_small.png \
 	webif_small.css topbalk2_small.png topbalk3_small.png \
-	topbalk4_small.png genre00.png genre01.png genre02.png genre03.png \
-	genre04.png genre05.png genre06.png genre07.png genre08.png genre09.png \
-	genre10.png genre11.png genre12.png genre13.png genre14.png genre15.png \
-	genre16.png locked.png unlocked.png
+	topbalk4_small.png  \
+	locked.png unlocked.png
 
 install-data-local:
 	install -d $(DESTDIR)$(DATADIR)/enigma/htdocs
