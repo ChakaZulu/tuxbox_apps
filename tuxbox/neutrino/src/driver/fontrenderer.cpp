@@ -178,10 +178,10 @@ FBFontRenderClass::fontListEntry::~fontListEntry()
 
 Font *FBFontRenderClass::getFont(const char * const family, const char * const style, int size)
 {
-	FTC_FaceID id=getFaceID(family, style);
+	FTC_FaceID id = getFaceID(family, style);
 	if (!id)
 		return 0;
-	return new Font(this, id, size, (std::string(((fontListEntry *)id)->style) == style) ? Font::Regular: Font::Embolden);
+	return new Font(this, id, size, (strcmp(((fontListEntry *)id)->style, style) == 0) ? Font::Regular : Font::Embolden);
 }
 
 Font::Font(FBFontRenderClass *render, FTC_FaceID faceid, const int isize, const fontmodifier _stylemodifier)
