@@ -485,6 +485,7 @@ void setScartMode(bool onoff)
 {
 	if(onoff)
 	{
+		audioControl::setMute(settings.mute_avs); // unmute AVS
 		//lcdd.setMode(CLcddTypes::MODE_SCART);
 	}
 	else
@@ -801,7 +802,7 @@ int main(int argc, char **argv)
 
 	CBasicServer controld_server;
 
-	printf("$Id: controld.cpp,v 1.107 2003/06/26 05:08:58 alexw Exp $\n\n");
+	printf("$Id: controld.cpp,v 1.108 2003/08/26 20:13:55 zwen Exp $\n\n");
 
 	for (int i = 1; i < argc; i++)
 	{
