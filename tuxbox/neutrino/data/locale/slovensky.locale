@@ -282,12 +282,7 @@ flashupdate.updatemode_internet internet
 flashupdate.currentversion Installierte Version
 flashupdate.checkupdate nach neuer Version suchen
 flashupdate.versioncheck Versionsüberprüfung
-flashupdate.majorversiondiffer1 Die Hauptversion weicht ab
-flashupdate.majorversiondiffer2 Bitte neues Image installieren
-flashupdate.providerversiondiffer1 Die ProviderID weicht ab
-flashupdate.providerversiondiffer2 Bitte neues Image installieren
-flashupdate.nonewversion1 keine neue Version verfügbar
-flashupdate.nonewversion2
+flashupdate.nonewversion keine neue Version verfügbar
 flashupdate.md5check Imageprüfung
 flashupdate.md5sumerror Das Image ist fehlerhaft
 flashupdate.proxyserver_sep Proxyserver
@@ -300,7 +295,8 @@ flashupdate.proxyusername_hint2 Ein leerer Eintrag bedeutet keine Authentifizier
 flashupdate.proxypassword Passwort
 flashupdate.proxypassword_hint1 Geben sie das Proxy-Passwort ein
 flashupdate.proxypassword_hint2
-flashupdate.msgbox Found the following new image: %d.%d.%s\nDo you want to download and install this version now?
+flashupdate.msgbox Found the following new image: %s\nDo you want to download and install this version now?
+flashupdate.msgbox_manual Found the following new image: %s\nDo you want to install this version now?
 flashupdate.expertfunctions Expert-functions
 flashupdate.readflash Read hole image
 flashupdate.writeflash Write hole image

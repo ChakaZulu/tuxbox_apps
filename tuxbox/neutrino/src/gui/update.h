@@ -51,13 +51,12 @@ class CFlashUpdate : public CProgressWindow
 		string	ImageFile;
 		string	VersionFile;
 
-		int		installed_major, installed_provider;
-		int		new_major, new_provider;
-		char	installed_minor[50], new_minor[50];
+		string	installedVersion;
+		string	newVersion;
 
 		bool getInfo();
 		bool getUpdateImage(string version);
-		bool checkVersion4Update(string &sFileName);
+		bool checkVersion4Update();
 
 	public:
 		CFlashUpdate();

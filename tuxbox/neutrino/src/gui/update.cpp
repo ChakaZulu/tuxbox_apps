@@ -66,6 +66,10 @@ CFlashUpdate::CFlashUpdate()
 	BasePath = "http://dboxupdate.berlios.de/update/";
 	ImageFile = "cdk.cramfs";
 	VersionFile = "version";
+
+	installedVersion = g_settings.softupdate_currentversion;
+	newVersion = "";
+
 	//use other path?
 	FILE* fd = fopen("/var/etc/update.conf", "r");
 	if(fd)
@@ -119,14 +123,14 @@ bool CFlashUpdate::getUpdateImage( string version )
 	CHTTPTool httpTool;
 	httpTool.setStatusViewer( this );
 
-	showStatusMessage( g_Locale->getText("flashupdate.getupdatefile")+ " v"+ version );
+	showStatusMessage( g_Locale->getText("flashupdate.getupdatefile")+ " " + version );
 	string gURL = BasePath + ImageFile;
 	string sFileName = gTmpPath+ ImageFile;
 
 	return httpTool.downloadFile( gURL, sFileName, 40 );
 }
 
-bool CFlashUpdate::checkVersion4Update(string &sFileName)
+bool CFlashUpdate::checkVersion4Update()
 {
 	if(g_settings.softupdate_mode==1) //internet-update
 	{
@@ -141,64 +145,35 @@ bool CFlashUpdate::checkVersion4Update(string &sFileName)
 		showGlobalStatus(20);
 		showStatusMessage(g_Locale->getText("flashupdate.versioncheck").c_str());
 
-		//installierte version...
-		installed_major = installed_provider = 0;
-		strcpy(installed_minor, "0");
-		sscanf(g_settings.softupdate_currentversion, "%d.%d.%s", &installed_major, &installed_provider, (char*) &installed_minor);
 
-		//neue version?
-		new_major = new_provider = 0;
-		strcpy(new_minor, "0");
+		string sFileName = gTmpPath+VersionFile;
 
-		sFileName = gTmpPath+VersionFile;
-		FILE* fd = fopen(sFileName.c_str(), "r");
-		if(!fd)
-		{
-			sFileName= sFileName+ ".txt";
-			fd = fopen(sFileName.c_str(), "r");
-		}
-
-		hide();
-		if(!fd)
+		CConfigFile configfile('\t');
+		if(!configfile.loadConfig(sFileName))
 		{
 			ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.getinfofileerror") );
 			return false;
-		}
-		char buf[100];
-		if(fgets(buf,sizeof(buf),fd)!=NULL)
-		{
-			//printf("vstr: %s\n", buf);
-			buf[28]= 0;
-			sscanf(buf, "version: %d.%d.%s\n", &new_major, &new_provider, (char*) &new_minor);
 		}
 		else
 		{
-			ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.getinfofileerror") );
-			return false;
+			newVersion = configfile.getString( "version", "" );
+			if(newVersion=="")
+			{
+				ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.getinfofileerror") );
+				return false;
+			}
 		}
-		fclose(fd);
+		printf("internet version: %s\n", newVersion.c_str());
 
-		//printf("installed - %d : %d : %s\n", installed_major, installed_provider, installed_minor);
-		//printf("new - %d : %d : %s\n", new_major, new_provider, new_minor);
-		if(installed_major!=new_major)
+		if(newVersion==installedVersion)
 		{
-			ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.majorversiondiffer1") + "\n" + g_Locale->getText("flashupdate.majorversiondiffer2") );
-			return false;
-		}
-
-		if(installed_provider!=new_provider)
-		{
-			ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.providerversiondiffer1") + "\n" + g_Locale->getText("flashupdate.providerversiondiffer2") );
-			return false;
-		}
-		if(strcmp(installed_minor,new_minor)== 0)
-		{
-			ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.nonewversion1") );
+			ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.nonewversion") );
 			return false;
 		}
 	}
 	else
 	{
+		//manuelles update -- filecheck + abfrage
 		FILE* fd = fopen((string(gTmpPath+ ImageFile)).c_str(), "r");
 		if(fd)
 		{
@@ -211,6 +186,16 @@ bool CFlashUpdate::checkVersion4Update(string &sFileName)
 			ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.cantopenfile") );
 			return false;
 		}
+		hide();
+		newVersion = "(todo)"; //vom cramfs holen!
+		char msg[250];
+		sprintf( (char*) &msg, g_Locale->getText("flashupdate.msgbox_manual").c_str(), newVersion.c_str() );
+		if ( ShowMsg ( "messagebox.info", msg, CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw" ) != CMessageBox::mbrYes )
+		{
+			return false;
+		}
+
+		return true;
 	}
 	
 	showLocalStatus(100);
@@ -218,7 +203,7 @@ bool CFlashUpdate::checkVersion4Update(string &sFileName)
 
 	hide();
 	char msg[250];
-	sprintf( (char*) &msg, g_Locale->getText("flashupdate.msgbox").c_str(), new_major, new_provider, new_minor);
+	sprintf( (char*) &msg, g_Locale->getText("flashupdate.msgbox").c_str(), newVersion.c_str());
     if ( ShowMsg ( "messagebox.info", msg, CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw" ) != CMessageBox::mbrYes )
     {
 		return false;
@@ -235,8 +220,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, string)
 	}
 	paint();
 
-	string sFileName = "";
-	if(!checkVersion4Update(sFileName))
+	if(!checkVersion4Update())
 	{
 		hide();
 		return menu_return::RETURN_REPAINT;
@@ -247,7 +231,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, string)
 
 	if(g_settings.softupdate_mode==1) //internet-update
 	{
-		if(!getUpdateImage(new_minor))
+		if(!getUpdateImage(newVersion))
 		{
 			hide();
 			ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.getupdatefileerror") );
@@ -261,8 +245,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, string)
 	ft.setMTDDevice("/dev/mtd/3");
 	ft.setStatusViewer(this);
 
-	sFileName = gTmpPath+ ImageFile;
-
+	string sFileName = gTmpPath+ ImageFile;
 
 	//image-check
 	showStatusMessage(g_Locale->getText("flashupdate.md5check") );

@@ -282,12 +282,7 @@ flashupdate.updatemode_internet internet
 flashupdate.currentversion Current version
 flashupdate.checkupdate search for new version
 flashupdate.versioncheck checking version
-flashupdate.majorversiondiffer1 the major version differs
-flashupdate.majorversiondiffer2 please install new flashimage
-flashupdate.providerversiondiffer1 the provider id differs
-flashupdate.providerversiondiffer2 please install new flashimage
-flashupdate.nonewversion1 no new version available
-flashupdate.nonewversion2
+flashupdate.nonewversion no new version available
 flashupdate.md5check checking image
 flashupdate.md5sumerror image has errors
 flashupdate.proxyserver_sep Proxyserver
@@ -300,7 +295,8 @@ flashupdate.proxyusername_hint2 a empty entry means no proxy-auth
 flashupdate.proxypassword Password
 flashupdate.proxypassword_hint1 enter the proxyserver password
 flashupdate.proxypassword_hint2
-flashupdate.msgbox Found the following new image: %d.%d.%s\nDo you want to download and install this version now?
+flashupdate.msgbox Found the following new image: %s\nDo you want to download and install this version now?
+flashupdate.msgbox_manual Found the following new image: %s\nDo you want to install this version now?
 flashupdate.expertfunctions Expert-functions
 flashupdate.readflash Read hole image
 flashupdate.writeflash Write hole image
