@@ -502,7 +502,7 @@ static eString web_root(eString request, eString path, eString opts, eHTTPConnec
 	stats+="</span> | ";
 
 	tmp=read_file("/proc/mounts");
-	if(tmp.find("cramfs")==eString::npos)
+	if(tmp.find("cramfs")!=eString::npos)
 	{
 		stats+="<span class=\"white\">running from flash</span>";
 	}
