@@ -1,5 +1,5 @@
 /*
-$Id: bouqueteditor_bouquets.cpp,v 1.20 2002/04/02 18:38:08 rasc Exp $
+$Id: bouqueteditor_bouquets.cpp,v 1.21 2002/04/02 19:59:14 rasc Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,11 @@ $Id: bouqueteditor_bouquets.cpp,v 1.20 2002/04/02 18:38:08 rasc Exp $
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 $Log: bouqueteditor_bouquets.cpp,v $
+Revision 1.21  2002/04/02 19:59:14  rasc
+-- browsing/page function for bouquet channel editor list box
+-- This enables quicker moving/sorting of your bouquet favorites.
+-- paging keys: LEFT/RIGHT  (should be improved, read remarks!)
+
 Revision 1.20  2002/04/02 18:38:08  rasc
 $id
 
@@ -211,7 +216,7 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 		}
 		// 
 		// -- For more convenience: include browsing of list (paging)  (rasc, 2002-04-02)
-		// -- The keys should be configurable. Problem is: red/green key, wich is the
+		// -- The keys should be configurable. Problem is: red/green key, which is the
 		// -- default in neutrino is used as a function key here... so use left/right
 		//
 		else if (msg==CRCInput::RC_up || msg==CRCInput::RC_left)

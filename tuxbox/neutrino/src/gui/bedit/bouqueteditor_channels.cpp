@@ -1,4 +1,6 @@
 /*
+$Id: bouqueteditor_channels.cpp,v 1.11 2002/04/02 19:59:14 rasc Exp $
+
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -27,6 +29,14 @@
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+$Log: bouqueteditor_channels.cpp,v $
+Revision 1.11  2002/04/02 19:59:14  rasc
+-- browsing/page function for bouquet channel editor list box
+-- This enables quicker moving/sorting of your bouquet favorites.
+-- paging keys: LEFT/RIGHT  (should be improved, read remarks!)
+
+
 */
 
 #include "bouqueteditor_channels.h"
@@ -169,18 +179,26 @@ int CBEChannelWidget::exec(CMenuTarget* parent, string actionKey)
 				cancelMoveChannel();
 			}
 		}
-		else if (msg==CRCInput::RC_up)
+		// 
+		// -- For more convenience: include browsing of list (paging)  (rasc, 2002-04-02)
+		// -- The keys should be configurable. Problem is: red/green key, which is the
+		// -- default in neutrino is used as a function key here... so use left/right
+		//
+		else if (msg==CRCInput::RC_up || msg==CRCInput::RC_left)
 		{
+			int step = 0;
+			int prev_selected = selected;
+
+			step = (msg == CRCInput::RC_left) ? listmaxshow : 1;  // browse or step 1
+			selected -= step;
+			if((prev_selected-step) < 0)		// because of uint
+			{
+				selected = Channels.size()-1;
+			}
+		
 			if (state == beDefault)
 			{
-				int prevselected=selected;
-				if(selected==0)
-				{
-					selected = Channels.size()-1;
-				}
-				else
-					selected--;
-				paintItem(prevselected - liststart);
+				paintItem(prev_selected - liststart);
 				unsigned int oldliststart = liststart;
 				liststart = (selected/listmaxshow)*listmaxshow;
 				if(oldliststart!=liststart)
@@ -194,16 +212,25 @@ int CBEChannelWidget::exec(CMenuTarget* parent, string actionKey)
 			}
 			else if (state == beMoving)
 			{
-				internalMoveChannel(selected, selected - 1);
+				internalMoveChannel(prev_selected, selected);
 			}
 		}
-		else if (msg==CRCInput::RC_down)
+		else if (msg==CRCInput::RC_down || msg==CRCInput::RC_right) 
 		{
+			int step = 0;
+			int prev_selected = selected;
+
+			step = (msg == CRCInput::RC_right) ? listmaxshow : 1;  // browse or step 1
+			selected += step;
+
+			if(selected >= Channels.size())
+			{
+				selected = 0;
+			}
+
 			if (state == beDefault)
 			{
-				int prevselected=selected;
-				selected = (selected+1)%Channels.size();
-				paintItem(prevselected - liststart);
+				paintItem(prev_selected - liststart);
 				unsigned int oldliststart = liststart;
 				liststart = (selected/listmaxshow)*listmaxshow;
 				if(oldliststart!=liststart)
@@ -217,7 +244,7 @@ int CBEChannelWidget::exec(CMenuTarget* parent, string actionKey)
 			}
 			else if (state == beMoving)
 			{
-				internalMoveChannel(selected, selected + 1);
+				internalMoveChannel(prev_selected, selected);
 			}
 		}
 		else if(msg==CRCInput::RC_red)
