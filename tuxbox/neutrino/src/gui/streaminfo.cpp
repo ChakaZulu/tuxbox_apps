@@ -4,8 +4,8 @@
 CStreamInfo::CStreamInfo(FontsDef *Fonts)
 {
 	fonts = Fonts;
-	width = 250;
-	height = 150;
+	width = 300;
+	height = 155;
 	x=((720-width) >> 1) -20;
 	y=(576-height)>>1;
 }
@@ -34,7 +34,7 @@ void CStreamInfo::paint(CFrameBuffer* frameBuffer)
 {
 
 	frameBuffer->paintBoxRel(x,y, width,30, COL_MENUHEAD);
-	fonts->menu_title->RenderString(x+10,y+23, width,"Streaminfo", COL_MENUHEAD);
+	fonts->menu_title->RenderString(x+10,y+30, width,"Streaminfo", COL_MENUHEAD);
 	frameBuffer->paintBoxRel(x,y+30, width,height-30, COL_MENUCONTENT);
 
 	FILE* fd = fopen("/proc/bus/bitstream", "rt");
@@ -69,11 +69,38 @@ void CStreamInfo::paint(CFrameBuffer* frameBuffer)
 	//paint msg...
 	sprintf((char*) buf, "Resolution: %dx%d", bitInfo[0], bitInfo[1] );
 	fonts->menu->RenderString(x+10,y+60, width, buf, COL_MENUCONTENT);
-	sprintf((char*) buf, "Bitrate: %d", bitInfo[4]);
+
+	sprintf((char*) buf, "Bitrate: %d bit/sec", bitInfo[4]*50);
 	fonts->menu->RenderString(x+10,y+80, width, buf, COL_MENUCONTENT);
-	sprintf((char*) buf, "Framerate: %d", bitInfo[3]);
+
+
+	switch ( bitInfo[2] )
+	{
+		case 2: strcpy(buf, "Aspect Ratio: 4:3"); break;
+		case 3: strcpy(buf, "Aspect Ratio: 16:9"); break;
+		case 4: strcpy(buf, "Aspect Ratio: 2.21:1"); break;
+		default: strcpy(buf, "Aspect Ratio: unknown");
+	}
 	fonts->menu->RenderString(x+10,y+100, width, buf, COL_MENUCONTENT);
-	sprintf((char*) buf, "Audiotype: %d", bitInfo[6]);
+
+
+	switch ( bitInfo[3] )
+	{
+		case 3: strcpy(buf, "Framerate: 25fps"); break;
+		case 6: strcpy(buf, "Framerate: 50fps"); break;
+		default: strcpy(buf, "Framerate: unknown");
+	}
 	fonts->menu->RenderString(x+10,y+120, width, buf, COL_MENUCONTENT);
+
+
+	switch ( bitInfo[6] )
+	{
+		case 1: strcpy(buf, "Audiotype:  single channel"); break;
+		case 2: strcpy(buf, "Audiotype:  dual channel"); break;
+		case 3: strcpy(buf, "Audiotype:  joint stereo"); break;
+		case 4: strcpy(buf, "Audiotype:  stereo"); break;
+		default: strcpy(buf, "Audiotype: unknown");
+	}
+	fonts->menu->RenderString(x+10,y+140, width, buf, COL_MENUCONTENT);
 }
 

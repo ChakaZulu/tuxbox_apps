@@ -20,7 +20,7 @@ class CStreamInfo : public CMenuTarget
 		int y;
 		int width;
 		int height;
-		FontsDef *fonts;
+		FontsDef *fonts;
 
 		void paint(CFrameBuffer* frameBuffer);
 
