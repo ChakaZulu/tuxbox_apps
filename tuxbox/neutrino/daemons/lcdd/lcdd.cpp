@@ -115,7 +115,7 @@ void parse_command(int connfd, CLcddClient::commandHead rmsg)
 }
 
 void show_servicename( string name )
-{
+{/*
 	if (mode!=CLcddClient::MODE_TVRADIO)
 	{
 		return;
@@ -140,7 +140,8 @@ void show_servicename( string name )
 		fonts.channelname->RenderString(1,37, 130, name.c_str(), CLCDDisplay::PIXEL_ON);
 	}
 	display.update();
-/*
+	*/
+
 	if (mode!=CLcddClient::MODE_TVRADIO)
 	{
 		return;
@@ -153,7 +154,7 @@ void show_servicename( string name )
 		string text1 = name;
     	do
     	{
-			pos = text1.find_last_of("[ -.]+");
+			pos = text1.find_last_of("[ .]+");
 			if ( pos!=-1 )
 				text1 = text1.substr( 0, pos );
 		} while ( ( pos != -1 ) && ( fonts.channelname->getRenderWidth(text1.c_str())> 120 ) );
@@ -176,7 +177,6 @@ void show_servicename( string name )
 		fonts.channelname->RenderString(1,37, 130, name.c_str(), CLCDDisplay::PIXEL_ON);
 	}
 	display.update();
-*/
 }
 
 void show_time()
