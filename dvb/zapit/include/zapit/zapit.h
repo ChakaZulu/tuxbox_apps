@@ -20,8 +20,6 @@
 #include <ost/ca.h>
 #include <ost/audio.h>
 
-#define OLD_TUNER_API
-
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/in_systm.h>
