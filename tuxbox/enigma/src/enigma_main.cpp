@@ -1955,9 +1955,12 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 			showMainMenu();
 			if (mode != oldmode)
 				showServiceSelector(-1, 0);
-		} else if (event.action == &i_enigmaMainActions->standby_press)
-    if (handleState
-			standbyPress();
+		}
+    else if (event.action == &i_enigmaMainActions->standby_press)
+    {
+      if ( handleState() )
+  			standbyPress();
+    }
 		else if (event.action == &i_enigmaMainActions->standby_repeat)
 			standbyRepeat();
 		else if (event.action == &i_enigmaMainActions->standby_release)
@@ -2019,7 +2022,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
   			showServiceSelector(eServiceSelector::dirUp, 1);
     }
 		else if (event.action == &i_enigmaMainActions->volumeUp)
-			volumeUp();
+      volumeUp();
 		else if (event.action == &i_enigmaMainActions->volumeDown)
 			volumeDown();
 		else if (event.action == &i_enigmaMainActions->toggleMute)
@@ -2089,30 +2092,35 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		{
       if ( handleState() )
         showBouquetList(0);
-		} else if (event.action == &i_enigmaMainActions->showFavourites)
+		}
+    else if (event.action == &i_enigmaMainActions->showFavourites)
 		{
       if ( handleState() )
         showFavourites();
-		} else if (event.action == &i_enigmaMainActions->modeRadio)
+		}
+    else if (event.action == &i_enigmaMainActions->modeRadio)
 		{
       if ( handleState() )
       {
         setMode(modeRadio);
   			showServiceSelector(-1, 1);
       }
-		} else if (event.action == &i_enigmaMainActions->modeTV)
+		}
+    else if (event.action == &i_enigmaMainActions->modeTV)
 		{
       if ( handleState() )
       {
         setMode(modeTV);
 	  		showServiceSelector(-1, 1);
       }
-		} else if (event.action == &i_enigmaMainActions->toggleDVRFunctions)
+		}
+    else if (event.action == &i_enigmaMainActions->toggleDVRFunctions)
 		{
 			showDVRFunctions(!dvrfunctions);
 			if (!isVisible())
 				showInfobar();
-		} else
+		}
+    else
 		{
 			startMessages();
 			break;
