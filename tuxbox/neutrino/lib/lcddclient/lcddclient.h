@@ -57,6 +57,7 @@ class CLcddClient
 		bool lcdd_close();
 
 	public:
+		static const std::string getSystemId();
 
 		static const char ACTVERSION = 4;
 

@@ -43,11 +43,16 @@ bool CLcddClient::lcdd_connect()
 	//printf("[lcddclient] try connect\n");
 	struct sockaddr_un servaddr;
 	int clilen;
+
+	std::string filename = LCDD_UDS_NAME;
+	filename += ".";
+	filename += getSystemId();
+
 	memset(&servaddr, 0, sizeof(struct sockaddr_un));
 	servaddr.sun_family = AF_UNIX;
-	strcpy(servaddr.sun_path, LCDD_UDS_NAME);
+	strcpy(servaddr.sun_path, filename.c_str());
 	clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
-	
+
 	if ((sock_fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
 	{
 		perror("lcddclient: socket");
@@ -154,3 +159,18 @@ void CLcddClient::shutdown()
 {
 	setMode(MODE_SHUTDOWN, "");
 }
+
+const std::string CLcddClient::getSystemId ()
+{
+	char *id = getenv("dsID");
+
+	if (id == NULL)
+	{
+		return "noSystemId";
+	}
+	else
+	{
+		return id;
+	}
+}
+

@@ -311,7 +311,7 @@ int main(int argc, char **argv)
 {
 	debugoutput = true;
 
-	printf("Network LCD-Driver $Id: lcdd.cpp,v 1.45 2002/04/20 20:27:41 McClean Exp $\n\n");
+	printf("Network LCD-Driver $Id: lcdd.cpp,v 1.46 2002/04/23 06:57:12 obi Exp $\n\n");
 
 	fontRenderer = new fontRenderClass( &display );
 	fontRenderer->AddFont(FONTDIR "/micron.ttf");
@@ -363,11 +363,16 @@ int main(int argc, char **argv)
 	int listenfd, connfd;
 	struct sockaddr_un servaddr;
 	int clilen;
+
+	std::string filename = LCDD_UDS_NAME;
+	filename += ".";
+	filename += CLcddClient::getSystemId();
+
 	memset(&servaddr, 0, sizeof(struct sockaddr_un));
 	servaddr.sun_family = AF_UNIX;
-	strcpy(servaddr.sun_path, LCDD_UDS_NAME);
+	strcpy(servaddr.sun_path, filename.c_str());
 	clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
-	unlink(LCDD_UDS_NAME);
+	unlink(filename.c_str());
 
 	//network-setup
 	if ((listenfd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
