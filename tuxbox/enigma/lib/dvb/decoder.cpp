@@ -701,14 +701,12 @@ int Decoder::displayIFrame(const char *frame, int len)
 	if ( ::ioctl(fd, VIDEO_PLAY) < 0 )
 		eDebug("VIDEO_PLAY failed (%m)");
 
+	for ( int i=0; i < 2; i++ )
+		write(fdv, frame, len);
+
 	unsigned char buf[128];
 	memset(&buf, 0, 128);
-	for ( int i=0; i < 2; i++ )
-	{
-		write(fdv, frame, len);
-		write(fdv, &buf, 128);
-	}
-	usleep(50*1000);
+	write(fdv, &buf, 128);
 
 	close(fd);
 
