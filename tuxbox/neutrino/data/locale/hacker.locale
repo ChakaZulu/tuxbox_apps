@@ -44,6 +44,7 @@ mainsettings.video \/!|]3*
 mainsettings.network /\/37\/\/*|2|<
 mainsettings.recording 5+|234/\/\¡|\|653|2\/3|2
 mainsettings.colors [*|*|25
+mainsettings.plugins unset
 mainsettings.lcd |[-|)¡5p14Y
 mainsettings.keybinding |<3Y $37|_|P
 mainsettings.misc /\/\!5[ $37+!/\/@5
@@ -146,6 +147,20 @@ timing.epg unset
 timing.infobar unset
 timing.hint_1 unset
 timing.hint_2 unset
+
+pluginmenu.head unset
+tuxnews.size unset
+tuxnews_size.small unset
+tuxnews_size.medium unset
+tuxnews_size.large unset
+tuxnews.speed unset
+tuxnews_speed.slow unset
+tuxnews_speed.medium unset
+tuxnews_speed.fast unset
+tuxnews.position unset
+tuxnews_position.top unset
+tuxnews_position.center unset
+tuxnews_position.bottom unset
 
 repeatblocker.hint_1 $|-|0|2'|'35+ '|'!/\/\3 (!|\| /\/\$) '|'* |23[*6|\|!z3 2 |<3y$7|20|<35
 repeatblocker.hint_2 3|\|73|2 0 70 $\/\/!+[|-| 0|= +|-|3 8|_*[|<3|2 (|23|) !$ $p4[3)
@@ -571,8 +586,11 @@ timerlist.reload unset
 timerlist.modify unset
 timerlist.message unset
 timerlist.apid unset
-timerlist.bouquetselect undef
-timerlist.channelselect undef
+timerlist.bouquetselect unset
+timerlist.channelselect unset
+timerlist.modeselect unset
+timerlist.modetv unset
+timerlist.moderadio unset
 timersettings.separator unset
 timersettings.record_safety_time unset
 timersettings.record_safety_time.hint_1 unset

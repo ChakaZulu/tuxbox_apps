@@ -44,6 +44,7 @@ mainsettings.video Video
 mainsettings.network Netzwerk
 mainsettings.recording Streamingserva
 mainsettings.colors Forbn / Themes
+mainsettings.plugins unset
 mainsettings.lcd LC-Disbläi
 mainsettings.keybinding Tasdn-Eistellunga
 mainsettings.misc No a boar Eistellunga
@@ -146,6 +147,20 @@ timing.epg Epg
 timing.infobar Infobar
 timing.hint_1 Einblendzeit in Sek., die das OSD
 timing.hint_2 auf dem TV angezeigt wird
+
+pluginmenu.head unset
+tuxnews.size unset
+tuxnews_size.small unset
+tuxnews_size.medium unset
+tuxnews_size.large unset
+tuxnews.speed unset
+tuxnews_speed.slow unset
+tuxnews_speed.medium unset
+tuxnews_speed.fast unset
+tuxnews.position unset
+tuxnews_position.top unset
+tuxnews_position.center unset
+tuxnews_position.bottom unset
 
 repeatblocker.hint_1 Mindestzeit (ms) zwischn zwoa Dasdndrucka
 repeatblocker.hint_2 0 schoitt an Blocka aus (Rot is " ")
@@ -571,8 +586,11 @@ timerlist.reload akualisiern
 timerlist.modify ändan
 timerlist.message Nochricht
 timerlist.apid Audio PID
-timerlist.bouquetselect undef
-timerlist.channelselect undef
+timerlist.bouquetselect unset
+timerlist.channelselect unset
+timerlist.modeselect unset
+timerlist.modetv unset
+timerlist.moderadio unset
 timersettings.separator Timer Eistellunga
 timersettings.record_safety_time Aufnemma - Korrekturzeid
 timersettings.record_safety_time.hint_1 De Zeid in Minutn (00=aus) werd beim Startn

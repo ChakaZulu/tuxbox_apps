@@ -44,6 +44,7 @@ mainsettings.video Video
 mainsettings.network Netzwerk 
 mainsettings.recording Sdreamingsörver 
 mainsettings.colors Farbe / Theme / Schrifd 
+mainsettings.plugins unset
 mainsettings.lcd LC-Display 
 mainsettings.keybinding Taste-Iischdellige 
 mainsettings.misc Diversi Iischdellige 
@@ -146,6 +147,20 @@ timing.epg unset
 timing.infobar unset
 timing.hint_1 unset
 timing.hint_2 unset
+
+pluginmenu.head unset
+tuxnews.size unset
+tuxnews_size.small unset
+tuxnews_size.medium unset
+tuxnews_size.large unset
+tuxnews.speed unset
+tuxnews_speed.slow unset
+tuxnews_speed.medium unset
+tuxnews_speed.fast unset
+tuxnews.position unset
+tuxnews_position.top unset
+tuxnews_position.center unset
+tuxnews_position.bottom unset
 
 repeatblocker.hint_1 Mindeschtzit (in ms) zwüsche 2 Tastedrück' 
 repeatblocker.hint_2 0 schaldet de Blocker us (Rot isch " ") 
@@ -571,9 +586,12 @@ timerlist.reload unset
 timerlist.modify unset
 timerlist.message unset
 timerlist.apid unset
+timerlist.bouquetselect unset
+timerlist.channelselect unset
+timerlist.modeselect unset
+timerlist.modetv unset
+timerlist.moderadio unset
 timersettings.separator unset
-timerlist.bouquetselect undef
-timerlist.channelselect undef
 timersettings.record_safety_time unset
 timersettings.record_safety_time.hint_1 unset
 timersettings.record_safety_time.hint_2 unset

@@ -44,6 +44,7 @@ mainsettings.video Video
 mainsettings.network Network
 mainsettings.recording Streamingserver
 mainsettings.colors Colori / Themes
+mainsettings.plugins unset
 mainsettings.lcd LC-Display
 mainsettings.keybinding Impostazioni-Tasti
 mainsettings.misc Altre Impostazioni
@@ -146,6 +147,20 @@ timing.epg unset
 timing.infobar unset
 timing.hint_1 unset
 timing.hint_2 unset
+
+pluginmenu.head unset
+tuxnews.size unset
+tuxnews_size.small unset
+tuxnews_size.medium unset
+tuxnews_size.large unset
+tuxnews.speed unset
+tuxnews_speed.slow unset
+tuxnews_speed.medium unset
+tuxnews_speed.fast unset
+tuxnews.position unset
+tuxnews_position.top unset
+tuxnews_position.center unset
+tuxnews_position.bottom unset
 
 repeatblocker.hint_1 Tempo (in ms) tra 2 premuteTasti
 repeatblocker.hint_2 0 spegne il Blocker tasti (Rosso e " ")
@@ -570,8 +585,11 @@ timerlist.reload unset
 timerlist.modify unset
 timerlist.message unset
 timerlist.apid unset
-timerlist.bouquetselect undef
-timerlist.channelselect undef
+timerlist.bouquetselect unset
+timerlist.channelselect unset
+timerlist.modeselect unset
+timerlist.modetv unset
+timerlist.moderadio unset
 timersettings.separator unset
 timersettings.record_safety_time unset
 timersettings.record_safety_time.hint_1 unset

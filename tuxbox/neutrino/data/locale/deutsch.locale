@@ -44,9 +44,9 @@ mainsettings.video Video
 mainsettings.network Netzwerk
 mainsettings.recording Aufnahme
 mainsettings.colors Farben / Themes / Schrift
-mainsettings.plugins Plugins
+mainsettings.plugins Plugin Einstellungen
 mainsettings.lcd LC-Display
-mainsettings.keybinding Tasten-Einstellungen
+mainsettings.keybinding Tasten Einstellungen
 mainsettings.misc Diverse Einstellungen
 mainsettings.scan Einstellungen Kanalsuche
 
@@ -588,6 +588,9 @@ timerlist.message Nachricht
 timerlist.apid Audio PID
 timerlist.bouquetselect Bouquet wählen
 timerlist.channelselect Kanal wählen
+timerlist.modeselect Modus-Auswahl
+timerlist.modetv TV Kanäle
+timerlist.moderadio Radio Kanäle
 timersettings.separator Timereinstellungen
 timersettings.record_safety_time Aufnahmekorrektur
 timersettings.record_safety_time.hint_1 Korrekturzeit in Min. (00=aus), die beim Start
@@ -620,6 +623,6 @@ fontmenu.eventlist Eventlist
 fontmenu.epg EPG
 fontmenu.infobar Infobar
 
-colormenu.gtx_alpha Transparenz
-gtxalpha.alpha1 tr1
-gtxalpha.alpha2 tr2
+colormenu.gtx_alpha Transparenz (GTX)
+gtxalpha.alpha1 Alpha 1
+gtxalpha.alpha2 Alpha 2

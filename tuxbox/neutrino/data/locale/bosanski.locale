@@ -44,6 +44,7 @@ mainsettings.video video
 mainsettings.network mreza
 mainsettings.recording snimanje
 mainsettings.colors boje / teme
+mainsettings.plugins unset
 mainsettings.lcd tecni kristal
 mainsettings.keybinding namjestiti tipku
 mainsettings.misc namjestiti razne stvari
@@ -146,6 +147,20 @@ timing.epg unset
 timing.infobar unset
 timing.hint_1 unset
 timing.hint_2 unset
+
+pluginmenu.head unset
+tuxnews.size unset
+tuxnews_size.small unset
+tuxnews_size.medium unset
+tuxnews_size.large unset
+tuxnews.speed unset
+tuxnews_speed.slow unset
+tuxnews_speed.medium unset
+tuxnews_speed.fast unset
+tuxnews.position unset
+tuxnews_position.top unset
+tuxnews_position.center unset
+tuxnews_position.bottom unset
 
 repeatblocker.hint_1 vrijeme (u ms) izmedu 2 pritiska tipke
 repeatblocker.hint_2 0 ugasi blokera (crveno je " ")
@@ -573,6 +588,9 @@ timerlist.message obavijest
 timerlist.apid audio pid
 timerlist.bouquetselect izabrati buket
 timerlist.channelselect izabrati kanal
+timerlist.modeselect unset
+timerlist.modetv unset
+timerlist.moderadio unset
 timersettings.separator namjescenje vremenskog brojaca
 timersettings.record_safety_time ispraviti snimanje
 timersettings.record_safety_time.hint_1 vrijeme u minutama koje se odbija od

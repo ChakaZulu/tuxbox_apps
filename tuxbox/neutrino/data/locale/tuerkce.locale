@@ -126,6 +126,20 @@ timing.infobar unset
 timing.hint_1 unset
 timing.hint_2 unset
 
+pluginmenu.head unset
+tuxnews.size unset
+tuxnews_size.small unset
+tuxnews_size.medium unset
+tuxnews_size.large unset
+tuxnews.speed unset
+tuxnews_speed.slow unset
+tuxnews_speed.medium unset
+tuxnews_speed.fast unset
+tuxnews.position unset
+tuxnews_position.top unset
+tuxnews_position.center unset
+tuxnews_position.bottom unset
+
 repeatblocker.hint_1 IKI TUS BASMA ARASI EN AZ ZAMAN (ms)
 repeatblocker.hint_2 0 ENGELI KALDIRIYOR (KIRMIZI " ")
 

@@ -44,6 +44,7 @@ mainsettings.video Vidéo
 mainsettings.network Réseau
 mainsettings.recording Streamingserver
 mainsettings.colors  Couleurs / Thèmes
+mainsettings.plugins unset
 mainsettings.lcd LC-Display
 mainsettings.keybinding Ajuster des clés
 mainsettings.misc divers ajustements
@@ -146,6 +147,20 @@ timing.epg unset
 timing.infobar unset
 timing.hint_1 unset
 timing.hint_2 unset
+
+pluginmenu.head unset
+tuxnews.size unset
+tuxnews_size.small unset
+tuxnews_size.medium unset
+tuxnews_size.large unset
+tuxnews.speed unset
+tuxnews_speed.slow unset
+tuxnews_speed.medium unset
+tuxnews_speed.fast unset
+tuxnews.position unset
+tuxnews_position.top unset
+tuxnews_position.center unset
+tuxnews_position.bottom unset
 
 repeatblocker.hint_1 Temps minimum entre 2 clés dans les millisecondes
 repeatblocker.hint_2 0 met hors circuit l' amortissement  (Rouge est " ")
@@ -571,8 +586,11 @@ timerlist.reload unset
 timerlist.modify unset
 timerlist.message unset
 timerlist.apid unset
-timerlist.bouquetselect undef
-timerlist.channelselect undef
+timerlist.bouquetselect unset
+timerlist.channelselect unset
+timerlist.modeselect unset
+timerlist.modetv unset
+timerlist.moderadio unset
 timersettings.separator unset
 timersettings.record_safety_time unset
 timersettings.record_safety_time.hint_1 unset
