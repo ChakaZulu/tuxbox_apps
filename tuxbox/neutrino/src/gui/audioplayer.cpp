@@ -493,9 +493,32 @@ int CAudioPlayerGui::show()
 												p++;
 										}
 										CAudiofile mp3;
-										mp3.FileType = CFile::FILE_MP3;
 										mp3.Filename = filename;
-										playlist.push_back(mp3);
+										if(strcasecmp(filename.substr(filename.length()-3,3).c_str(), "url")==0)
+										{
+											mp3.FileType = CFile::STREAM_MP3;
+											mp3.Artist = "Shoutcast";
+											std::string tmp = mp3.Filename.substr(mp3.Filename.rfind('/')+1);
+											tmp = tmp.substr(0,tmp.length()-4);	//remove .url
+											mp3.Title = tmp;
+											mp3.Duration = 0;
+											char url[80];
+											FILE* f=fopen(filename.c_str(), "r");
+											if(f!=NULL)
+											{
+												fgets(url, 80, f);
+												if(url[strlen(url)-1] == '\n') url[strlen(url)-1]=0;
+												if(url[strlen(url)-1] == '\r') url[strlen(url)-1]=0;
+												mp3.Album = url;
+												playlist.push_back(mp3);
+												fclose(f);
+											}
+										}
+										else
+										{
+											mp3.FileType = CFile::FILE_MP3;
+											playlist.push_back(mp3);
+										}
 									}
 									testfile.close();
 								}
