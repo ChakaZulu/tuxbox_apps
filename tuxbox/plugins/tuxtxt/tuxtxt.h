@@ -2,58 +2,8 @@
  *                      <<< TuxTxt - Teletext Plugin >>>                      *
  *                                                                            *
  *             (c) Thomas "LazyT" Loewe 2002-2003 (LazyT@gmx.net)             *
- ******************************************************************************
- * $Log: tuxtxt.h,v $
- * Revision 1.40  2004/08/31 10:34:02  alexw
- * Top-Text Support, many thanks to Roland Meier
- *
- * Changes:
- * - Sofort Anzeige des zugehrigen Videotextes, falls vorhanden; Scan erst bei erstem Aufruf des Konfigmenues
- * - TOP-Text
- *   - Anzeige Klartext-Bezeichnung fr farbige Navigationstasten
- *   - neue Belegung: letzter Block, nchste Gruppe(/Block), bernchste Gruppe(/Block), nchster Block
- *   - Strukturbersicht in geteilter 4:3-Darstellung
- *   - dafr Textfenster-Breite vergrert, TV-Bild verkleinert und besser proportioniert
- * - Favoritenliste
- *   - Taste 9 an erster Stelle luft sequentiell durch Favoritenliste (vorbelegt mit 100-303, max. 10 Eintrge)
- *   - Taste 0 an erster Stelle ruft jetzt die letzte Seite auf (wie bei zapit)
- *   - Favoritenliste Liste in Konfigurationsmenue editierbar: <> Auswahl, +- verschieben, ? Anzeige, OK lschen / aktuelle hinzufgen
- *   - Favoritenliste wird bei nderung unter der aktuellen vtxtpid gespeichert und beim Start/pid-Wechsel geladen
- *   - Konfigurationsmenue auch mit Taste dbox zu verlassen
- *   - Konfigurationsmenue wartbarer
- * - Transparent-Darstellung
- *   - Reihenfolge umgekehrt: Mute wechselt sofort zu TV-Bild, auch aus Split-Darstellung
- *   - Hintergrund Transparent-Darstellung weniger transparent (-> Text lesbar)
- *   - TV-Darstellung wird mit jeder Nav-Taste verlassen
- * - Standby beendet wie Home tuxtxt
- *
- * Revision 1.39  2004/02/06 01:59:45  ghostrider
- * tuxtxt is now ready for old and new dvb api
- *
- * Revision 1.38  2004/01/16 14:38:11  alexw
- * follow freetype changes
- *
- * Revision 1.37  2003/09/10 04:16:56  carjay
- * added error handling: "doubleheight" should not to be used in line 23 of
- * teletext but it seems this does not impress the broadcasters much
- * additionally: some optimisations and bugfixes
- *
- * Revision 1.36  2003/03/08 16:17:48  happydude
- * national subset detection for TV Romania Int
- *
- * Revision 1.35  2003/03/06 18:14:43  lazyt
- * fix error-detection and configmenu
- *
- * Revision 1.34  2003/02/21 19:18:24  happydude
- * implement parallel transmission reception - fixes some channels
- * improve auto detection of national subset
- * introduce new option in config menu to disable auto detection of nat subset
- * fix some bugs, loops, memory leaks
- *
- * Revision 1.33  2003/02/15 11:24:06  lazyt
- * port rel to head
- *
  ******************************************************************************/
+
 #include <config.h>
 #include <fcntl.h>
 #include <pthread.h>
@@ -88,9 +38,6 @@
 #include FT_CACHE_H
 #include FT_CACHE_SMALL_BITMAPS_H
 
-#include "config.h"
-
-#define DEBUG 0
 #define DEBUG_ADIP 0            /* printf to console is _really_ slow :< */
 #define DEBUG_BTT 0
 
