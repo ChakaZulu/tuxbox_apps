@@ -2,8 +2,6 @@
 #include <ctype.h>
 #include <limits.h>
 #include <lib/system/elock.h>
-#include <time.h>
-#include <sys/time.h>
 
 ///////////////////////////////////////// eString sprintf /////////////////////////////////////////////////
 eString& eString::sprintf(char *fmt, ...)
