@@ -1,5 +1,5 @@
 /*
- * $Id: streamts.c,v 1.9 2002/11/12 08:05:10 obi Exp $
+ * $Id: streamts.c,v 1.10 2002/11/23 10:28:38 obi Exp $
  * 
  * inetd style daemon for streaming avpes, ps and ts
  * 
@@ -36,6 +36,7 @@
  *      -ts    send a transport stream (MAXPIDS pids, see below)
  */
 
+
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,57 +49,142 @@
 #include <linux/dvb/dmx.h>
 #include <transform.h>
 
-/* conversion buffer sizes */
-#define IN_SIZE TS_SIZE * 10
-#define IPACKS 2048
 
-/* raw ts output buffer size */
-#define BSIZE	1024 * 16
+/* conversion buffer sizes */
+#define IN_SIZE		(TS_SIZE * 362)
+#define IPACKS		2048
+
+/* demux buffer size */
+#define DMX_BUFFER_SIZE (1024 * 1024)
 
 /* maximum number of pes pids */
-#define MAXPIDS	8
+#define MAXPIDS		8
 
+/* tcp packet data size */
+#define PACKET_SIZE	1448
+
+/* devices */
 #define DMXDEV	"/dev/dvb/adapter0/demux0"
 #define DVRDEV	"/dev/dvb/adapter0/dvr0"
 
+unsigned char * buf;
+
 int dvrfd;
 int demuxfd[MAXPIDS];
-uint8_t demuxfd_count = 0;
-uint8_t exit_flag = 0;
 
-#define PACKET_SIZE 1448
+unsigned char demuxfd_count = 0;
+unsigned char exit_flag = 0;
+unsigned int writebuf_size = 0;
+unsigned char writebuf[PACKET_SIZE];
 
-uint8_t writebuf[PACKET_SIZE];
-uint16_t writebuf_size = 0;
+static int
+sync_byte_offset (const unsigned char * buf, const unsigned int len) {
+
+	unsigned int i;
+
+	for (i = 0; i < len; i++)
+		if (buf[i] == 0x47)
+			return i;
+
+	return -1;
+}
 
 
-void ps_stdout (uint8_t * buf, int count, void * p) {
+static ssize_t
+safe_read (const int fd, void * buf, const size_t count) {
 
-	int size = 0;
-	uint8_t * bp;
+	ssize_t neof = 0;
+	size_t re = 0;
 
+	while (neof >= 0 && re < count) {
+		neof = read(fd, buf + re, count - re);
+		if (neof > 0)
+			re += neof;
+	}
+
+	return re;
+}
+
+
+void
+packet_stdout (unsigned char * buf, int count, void * p) {
+
+	unsigned int size;
+	unsigned char * bp;
+	ssize_t written;
+
+	/*
+	 * ensure, that there is always at least one complete
+	 * packet inside of the send buffer
+	 */
 	while (writebuf_size + count >= PACKET_SIZE) {
 
+		/*
+		 * how many bytes are to be sent from the input buffer?
+		 */
+		size = PACKET_SIZE - writebuf_size;
+
+		/*
+		 * send buffer is not empty, so copy from
+		 * input buffer to get a complete packet
+		 */
 		if (writebuf_size) {
-			size = PACKET_SIZE - writebuf_size;
 			memcpy(writebuf + writebuf_size, buf, size);
-			writebuf_size = 0;
 			bp = writebuf;
 		}
+
+		/*
+		 * if send buffer is empty, then do not memcopy,
+		 * but send directly from input buffer
+		 */
 		else {
-			size = PACKET_SIZE;
 			bp = buf;
 		}
 
-		if (write(STDOUT_FILENO, bp, PACKET_SIZE) != PACKET_SIZE) {
+		/*
+		 * write the packet, count the amount of really
+		 * written bytes
+		 */
+		written = write(STDOUT_FILENO, bp, PACKET_SIZE);
+
+		/*
+		 * exit on error
+		 */
+		if (written == -1) {
 			exit_flag = 1;
 			return;
 		}
 
+		/*
+		 * if the packet could not be written completely, then
+		 * how many bytes must be stored in the send buffer
+		 * until the next packet is to be sent?
+		 */
+		writebuf_size = PACKET_SIZE - written;
+
+		/*
+		 * move all bytes of the packet which were not sent
+		 * to the beginning of the send buffer
+		 */
+		if (writebuf_size)
+			memmove(writebuf, bp + written, writebuf_size);
+
+		/*
+		 * advance in the input buffer
+		 */
 		buf += size;
+
+		/*
+		 * decrease the todo size
+		 */
 		count -= size;
 	}
 
+	/*
+	 * if there are still some bytes left in the input buffer,
+	 * then store them in the send buffer and increase send
+	 * buffer size
+	 */
 	if (count) {
 		memcpy(writebuf + writebuf_size, buf, count);
 		writebuf_size += count;
@@ -106,71 +192,81 @@ void ps_stdout (uint8_t * buf, int count, void * p) {
 }
 
 
-int dvr_to_ps (int dvr_fd, uint16_t audio_pid, uint16_t video_pid, uint8_t ps) {
+static int
+dvr_to_ps (const int dvr_fd, const unsigned short audio_pid, const unsigned short video_pid, const unsigned char ps) {
 
-	uint8_t buf[IN_SIZE];
-	uint8_t mbuf[TS_SIZE];
+	unsigned char buf[IN_SIZE];
+	unsigned char mbuf[TS_SIZE];
+	unsigned char mod = 0;
 	int i;
-	int c;
-	int len;
         int count;
-	uint16_t pid;
-	uint8_t off;
-
+	unsigned short pid;
 	ipack pa, pv;
-	ipack * p;
+	ipack *p;
 
-	init_ipack(&pa, IPACKS, ps_stdout, ps);
-	init_ipack(&pv, IPACKS, ps_stdout, ps);
+	init_ipack(&pa, IPACKS, packet_stdout, ps);
+	init_ipack(&pv, IPACKS, packet_stdout, ps);
 
 	/* read 188 bytes */
-	if (save_read(dvr_fd, mbuf, TS_SIZE) < 0)
+	if (safe_read(dvr_fd, mbuf, TS_SIZE) < 0)
 		return -1;
 
 	/* find beginning of transport stream */
-	for (i = 0; i < TS_SIZE; i++) {
-		if (mbuf[i] == 0x47)
-			break;
-	}
+	i = sync_byte_offset(mbuf, TS_SIZE);
+
+	if (i == -1)
+		return -1;
 
 	/* store first part of ts packet */
 	memcpy(buf, mbuf + i, TS_SIZE - i);
 
-	/* read missing bytes of ts packet */
-	if (read(dvr_fd, mbuf, i) < 0)
-		return -1;
+	if (i != 0) {
+		/* read missing bytes of ts packet */
+		if (safe_read(dvr_fd, mbuf, i) < 0)
+			return -1;
 
-	/* store second part of ts packet */
-	memcpy(buf + TS_SIZE - i, mbuf, i);
+		/* store second part of ts packet */
+		memcpy(buf + TS_SIZE - i, mbuf, i);
+	}
 
-	len = TS_SIZE;
+	i = TS_SIZE;
 
 	while (!exit_flag) {
 
-		count = 0;
+		if (mod) {
+			memcpy(buf, mbuf, mod);
+			i = mod;
+		}
 
-		while (count < IN_SIZE - TS_SIZE)
-			if ((c = save_read(dvr_fd, buf + (len + count), IN_SIZE - (len + count))) > 0)
-				count += c;
+		count = safe_read(dvr_fd, buf + i, IN_SIZE - i) + i;
+
+		mod = count % TS_SIZE;
+
+		if (mod) {
+			memcpy(mbuf, buf + count - mod, mod);
+			count -= mod;
+		}
 
 		for (i = 0; i < count; i += TS_SIZE) {
+			unsigned char off = 0;
 
-			off = 0;
+			i += sync_byte_offset(buf, TS_SIZE);
 
-			if ((count - i) < TS_SIZE)
+			if (i == -1)
+				continue;
+
+			if (count - i < TS_SIZE)
 				break;
-
-			pid = get_pid(buf + i + 1);
 
 			if (!(buf[i + 3] & 0x10)) // no payload?
 				continue;
 
+			pid = get_pid(buf + i + 1);
+
 			if (pid == video_pid)
 				p = &pv;
-
 			else if (pid == audio_pid)
 				p = &pa;
-
 			else
 				continue;
 
@@ -187,14 +283,15 @@ int dvr_to_ps (int dvr_fd, uint16_t audio_pid, uint16_t video_pid, uint8_t ps) {
 			instant_repack(buf + 4 + off + i, TS_SIZE - 4 - off, p);
 		}
 
-		len = 0;
+		i = 0;
 	}
 
 	return 0;
 }
 
 
-int setPesFilter (uint16_t pid)
+static int
+setPesFilter (const unsigned short pid)
 {
 	int fd;
 	struct dmx_pes_filter_params flt; 
@@ -202,7 +299,7 @@ int setPesFilter (uint16_t pid)
 	if ((fd = open(DMXDEV, O_RDWR)) < 0)
 		return -1;
 
-	if (ioctl(fd, DMX_SET_BUFFER_SIZE, 1024 * 1024) < 0)
+	if (ioctl(fd, DMX_SET_BUFFER_SIZE, DMX_BUFFER_SIZE) < 0)
 		return -1;
 
 	flt.pid = pid;
@@ -221,55 +318,65 @@ int setPesFilter (uint16_t pid)
 }
 
 
-int main (int argc, char ** argv) {
+static void
+unsetPesFilter (int fd) {
+	ioctl(fd, DMX_STOP);
+	close(fd);
+}
+
+
+int
+main (int argc, char ** argv) {
 
 	int pid;
 	int pids[MAXPIDS];
-	char buffer[BSIZE];
-	char *bp;
-	uint8_t mode;
+	unsigned char *bp;
+	unsigned char mode;
 
 	if (argc != 2)
 		return EXIT_FAILURE;
-
 	if (!strncmp(argv[1], "-pes", 4))
 		mode = 0;
-
 	else if (!strncmp(argv[1], "-ps", 3))
 		mode = 1;
-
 	else if (!strncmp(argv[1], "-ts", 3))
 		mode = 2;
-
 	else
 		return EXIT_FAILURE;
 
-	bp = buffer;
+	buf = (unsigned char *) malloc(IN_SIZE);
 
-	while (bp - buffer < BSIZE) {
+	if (buf == NULL) {
+		perror("malloc");
+		return EXIT_FAILURE;
+	}
 
+	bp = buf;
+
+	/* read one line */
+	while (bp - buf < IN_SIZE) {
 		unsigned char c;
-
 		read(STDIN_FILENO, &c, 1);
-
 		if ((*bp++ = c) == '\n')
 			break;
 	}
 
 	*bp++ = 0;
+	bp = buf;
 
-	bp = buffer;
-
-	if (!strncmp(buffer, "GET /", 5)) {
+	/* send response to http client */
+	if (!strncmp(buf, "GET /", 5)) {
 		printf("HTTP/1.1 200 OK\r\nServer: d-Box network\r\n\r\n");
+		fflush(stdout);
 		bp += 5;
 	}
 
-	fflush(stdout);
-
-	if ((dvrfd = open(DVRDEV, O_RDONLY)) < 0)
+	if ((dvrfd = open(DVRDEV, O_RDONLY)) < 0) {
+		free(buf);
 		return EXIT_FAILURE;
+	}
 
+	/* parse stdin / url path, start dmx filters */
 	do {
 		sscanf(bp, "%x", &pid);
 
@@ -282,8 +389,6 @@ int main (int argc, char ** argv) {
 	}
 	while ((bp = strchr(bp, ',')) && (bp++) && (demuxfd_count < MAXPIDS));
 
-
-
 	/* convert transport stream and write to stdout */
 	if (((mode == 0) || (mode == 1)) && (demuxfd_count == 2))
 		dvr_to_ps(dvrfd, pids[0], pids[1], mode);
@@ -291,8 +396,7 @@ int main (int argc, char ** argv) {
 	/* write raw transport stream to stdout */
 	else if (mode == 2) {
 
-		uint8_t first = 1;
-		uint8_t offset;
+		int offset;
 
 		ssize_t pos;
 		ssize_t r = 0;
@@ -300,51 +404,35 @@ int main (int argc, char ** argv) {
 
 		while (!exit_flag) {
 
-			offset = 0;
 			pos = 0;
-			todo = BSIZE;
+			todo = IN_SIZE;
 
 			while ((!exit_flag) && (todo)) {
 
-				r = read(dvrfd, buffer + pos, todo);
+				r = read(dvrfd, buf + pos, todo);
 
-				switch (r) {
-				case -1:
-					exit_flag = 1;
-					first = 0;
-					r = 0;
-					break;
-
-				case 0:
-					continue;
-
-				default:
+				if (r > 0) {
 					pos += r;
 					todo -= r;
-					break;
 				}
 			}
 
 			/* make sure to start with a ts header */
-			if (first) {
+			offset = sync_byte_offset(buf, TS_SIZE);
 
-				for (; offset < TS_SIZE; offset++) {
-					if (buffer[offset] == 0x47)
-						break;
-				}
+			if (offset == -1)
+				continue;
 
-				first = 0;
-			}
-
-			if (write(STDOUT_FILENO, buffer + offset, r - offset) != r - offset)
-				break;
+			packet_stdout(buf + offset, r - offset, NULL);
 		}
 	}
 
 	while (demuxfd_count > 0)
-		close(demuxfd[--demuxfd_count]);
+		unsetPesFilter(demuxfd[--demuxfd_count]);
 
 	close(dvrfd);
+
+	free(buf);
 
 	return EXIT_SUCCESS;
 }
