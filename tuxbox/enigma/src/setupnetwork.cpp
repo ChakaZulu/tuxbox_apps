@@ -1257,9 +1257,9 @@ void eNFSSetup::mountPressed()
 			}
 			case 1: // CIFS
 			{
-				if(!user->getText() || !pass->getText())
+				if(!user->getText())
 				{
-					errorMessage("missing username and password");
+					errorMessage("missing username");
 					return;
 				}
 				opt.sprintf("/bin/mount -t cifs //bla -o user=%s,pass=%s,unc=//%d.%d.%d.%d/%s",
