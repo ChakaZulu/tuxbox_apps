@@ -3829,25 +3829,43 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	return result;
 }
 
-static eString addTVBrowserTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+static eString TVBrowserTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	eString result, result1;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	eString eventStartTime = opt["start"];
-	eString eventEndTime = opt["end"];
+	eString command = opt["command"];
+	eString sday = opt["sday"];
+	eString smonth = opt["smonth"];
+	eString shour = opt["shour"];
+	eString smin = opt["smin"];
+	eString eday = opt["eday"];
+	eString emonth = opt["emonth"];
+	eString ehour = opt["ehour"];
+	eString emin = opt["emin"];
 	eString channel = httpUnescape(opt["channel"]);
 	eString description = httpUnescape(opt["descr"]);
 	if (description == "")
 		description = "No description available";
 
-	int timeroffset = 0;
-	eConfig::getInstance()->getKey("/enigma/timeroffset", timeroffset);
+	time_t now = time(0) + eDVB::getInstance()->time_difference;
+	tm start = *localtime(&now);
+	start.tm_mday = atoi(sday.c_str());
+	start.tm_mon = atoi(smonth.c_str()) - 1;
+	start.tm_hour = atoi(shour.c_str());
+	start.tm_min = atoi(smin.c_str());
+	start.tm_sec = 0;
+	tm end = *localtime(&now);
+	end.tm_mday = atoi(eday.c_str());
+	end.tm_mon = atoi(emonth.c_str()) -1 ;
+	end.tm_hour = atoi(ehour.c_str());
+	end.tm_min = atoi(emin.c_str());
+	end.tm_sec = 0;
 
-	int start = atoi(eventStartTime.c_str()) - (timeroffset * 60);
-	int end = atoi(eventEndTime.c_str()) + (timeroffset * 60);
-	int duration = start - end;
+	time_t eventStartTime = mktime(&start);
+	time_t eventEndTime = mktime(&end);
+	int duration = eventEndTime - eventStartTime;
 
 	// determine service reference
 	eServiceInterface *iface = eServiceInterface::getInstance();
@@ -3865,14 +3883,28 @@ static eString addTVBrowserTimerEvent(eString request, eString dirpath, eString 
 
 	if (result1)
 	{
-		ePlaylistEntry entry(string2ref(result1), start, duration, -1, ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR);
-		entry.service.descr = channel + "/" + description;
+		if (command == "add")
+		{
+			ePlaylistEntry entry(string2ref(result1), eventStartTime, duration, -1, ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR);
+			entry.service.descr = channel + "/" + description;
 
-		if (eTimerManager::getInstance()->addEventToTimerList(entry) == -1)
-			result = "Timer event could not be added because time of the event overlaps with an already existing event.";
+			if (eTimerManager::getInstance()->addEventToTimerList(entry) == -1)
+				result = "Timer event could not be added because time of the event overlaps with an already existing event.";
+			else
+				result = "Timer event was created successfully.";
+			eTimerManager::getInstance()->saveTimerList();
+		}
 		else
-			result = "Timer event was created successfully.";
-		eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
+		{
+			ePlaylistEntry e(
+				string2ref(result1),
+				eventStartTime,
+				-1, -1, ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR);
+
+			eTimerManager::getInstance()->deleteEventFromTimerList(e, true);
+			eTimerManager::getInstance()->saveTimerList();
+			result = "Timer event deleted successfully.";
+		}
 	}
 	else
 		result = "Service does not exist.";
@@ -3916,46 +3948,6 @@ static eString deleteTimerEvent(eString request, eString dirpath, eString opts, 
 		result = readFile(TEMPLATE_DIR + "deleteTimerComplete.tmp");
 		eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
 	}
-
-	return result;
-}
-
-static eString deleteTVBrowserTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{
-	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	eString eventStartTime = opt["start"];
-	eString channel = httpUnescape(opt["channel"]);
-	eString result, result1;
-
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-
-	// determine service reference
-	eServiceInterface *iface = eServiceInterface::getInstance();
-	eServiceReference all_services = eServiceReference(eServiceReference::idDVB,
-		eServiceReference::flagDirectory|eServiceReference::shouldSort,
-		-2, -1, 0xFFFFFFFF);
-
-	eWebNavigatorSearchService navlist(result1, channel, *iface);
-	Signal1<void, const eServiceReference&> signal;
-	signal.connect(slot(navlist, &eWebNavigatorSearchService::addEntry));
-	iface->enterDirectory(all_services, signal);
-	eDebug("entered");
-	iface->leaveDirectory(all_services);
-	eDebug("exited");
-	
-	if (result1)
-	{
-		ePlaylistEntry e(
-			string2ref(result1),
-			atoi(eventStartTime.c_str()),
-			-1, -1, ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR);
-
-		eTimerManager::getInstance()->deleteEventFromTimerList(e, true);
-		eTimerManager::getInstance()->saveTimerList();
-		result = "Timer event deleted successfully.";
-	}
-	else
-		result = "Service does not exist.";
 
 	return result;
 }
@@ -4438,9 +4430,8 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/setVideo", setVideo, lockWeb);
 	dyn_resolver->addDyn("GET", "/addTimerEvent", addTimerEvent, lockWeb);
 	dyn_resolver->addDyn("GET", "/addTimerEvent2", addTimerEvent2, lockWeb);
-	dyn_resolver->addDyn("GET", "/addTVBrowserTimerEvent", addTVBrowserTimerEvent, lockWeb);
+	dyn_resolver->addDyn("GET", "/TVBrowserTimerEvent", TVBrowserTimerEvent, lockWeb);
 	dyn_resolver->addDyn("GET", "/deleteTimerEvent", deleteTimerEvent, lockWeb);
-	dyn_resolver->addDyn("GET", "/deleteTVBrowserTimerEvent", deleteTVBrowserTimerEvent, lockWeb);
 	dyn_resolver->addDyn("GET", "/editTimerEvent", editTimerEvent, lockWeb);
 	dyn_resolver->addDyn("GET", "/showAddTimerEventWindow", showAddTimerEventWindow, lockWeb);
 	dyn_resolver->addDyn("GET", "/changeTimerEvent", changeTimerEvent, lockWeb);
