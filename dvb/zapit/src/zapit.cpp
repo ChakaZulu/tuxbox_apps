@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.144 2002/04/20 17:39:31 McClean Exp $
+ * $Id: zapit.cpp,v 1.145 2002/04/20 17:52:40 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1872,7 +1872,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.144 2002/04/20 17:39:31 McClean Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.145 2002/04/20 17:52:40 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -2370,6 +2370,38 @@ int stopPlayBack()
 	dmx_pcr_fd = unsetPesFilter(dmx_pcr_fd);
 
 	return 0;
+}
+
+/*
+ * get current playback state
+ *
+ * -1: failure
+ *  0: stopped
+ *  1: playing
+ */
+int getPlaybackStatus ()
+{
+	videoStatus status;
+
+	if (video_fd == -1)
+	{
+		return 0;
+	}
+
+	if (ioctl(video_fd, VIDEO_GET_STATUS, &status) < 0)
+	{
+		perror("[zapit] VIDEO_GET_STATUS");
+		return -1;
+	}
+
+	if (status.playState == VIDEO_PLAYING)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 unsigned zapTo (unsigned int bouquet, unsigned int channel)
