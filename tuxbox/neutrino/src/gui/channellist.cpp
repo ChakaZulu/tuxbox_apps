@@ -40,6 +40,7 @@
 #include <gui/color.h>
 #include <gui/eventlist.h>
 #include <gui/infoviewer.h>
+#include <gui/widget/buttons.h>
 #include <gui/widget/icons.h>
 #include <gui/widget/menue.h>
 #include <gui/widget/messagebox.h>
@@ -74,16 +75,7 @@ CChannelList::CChannelList( const std::string &Name )
 	name = Name;
 	selected = 0;
 	width = 560;
-	height = 420;
-/*
-	theight= g_Fonts->menu_title->getHeight();
-	fheight= g_Fonts->channellist->getHeight();
-	listmaxshow = (height-theight-0)/fheight;
-	height = theight+0+listmaxshow*fheight; // recalc height
-	info_height = g_Fonts->channellist->getHeight() + g_Fonts->channellist_descr->getHeight() + 10;
-	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
-	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-( height+ info_height) ) / 2) + g_settings.screen_StartY;
-*/
+	height = 420 + (1 + 3 + 16 + 3);
 	liststart = 0;
 	tuned=0xfffffff;
 	zapProtection = NULL;
@@ -91,9 +83,9 @@ CChannelList::CChannelList( const std::string &Name )
 
 CChannelList::~CChannelList()
 {
-	for(unsigned int count=0;count<chanlist.size();count++)
+	for (std::vector<CChannel *>::iterator it = chanlist.begin(); it != chanlist.end(); it++)
 	{
-		delete chanlist[count];
+		delete (*it);
 	}
 	chanlist.clear();
 }
@@ -205,17 +197,18 @@ int CChannelList::show()
 {
 	int res = -1;
 
-	if(chanlist.size()==0)
+	if (chanlist.empty())
 	{
 		//evtl. anzeige dass keine kanalliste....
 		return res;
 	}
 	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, g_Locale->getText(name));
 
+	int buttonHeight = 7 + std::min(16, g_Fonts->infobar_small->getHeight());
 	theight= g_Fonts->menu_title->getHeight();
 	fheight= g_Fonts->channellist->getHeight();
-	listmaxshow = (height-theight-0)/fheight;
-	height = theight+0+listmaxshow*fheight; // recalc height
+	listmaxshow = (height - theight - buttonHeight -0)/fheight;
+	height = theight + buttonHeight + listmaxshow * fheight;
 	info_height = g_Fonts->channellist->getHeight() + g_Fonts->channellist_descr->getHeight() + 10;
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-( height+ info_height) ) / 2) + g_settings.screen_StartY;
@@ -711,14 +704,14 @@ void CChannelList::setSelected( int nChannelNr)
 
 void CChannelList::paintDetails(int index)
 {
-	if ( chanlist[index]->currentEvent.description== "" )
+	if (chanlist[index]->currentEvent.description.empty())
 	{
 		frameBuffer->paintBackgroundBoxRel(x, y+ height, width, info_height);
 	}
 	else
 	{
-		// löschen
-		frameBuffer->paintBoxRel(x, y+ height, width, info_height, COL_MENUCONTENTDARK);
+		frameBuffer->paintHLineRel(x, width, y + height, COL_INFOBAR_SHADOW);
+		frameBuffer->paintBoxRel(x, y + height + 1, width, info_height - 1, COL_MENUCONTENTDARK);
 
 		char cNoch[50]; // UTF-8
 		char cSeit[50]; // UTF-8
@@ -750,14 +743,14 @@ void CChannelList::paintDetails(int index)
 			} while ( ( pos != -1 ) && ( g_Fonts->channellist->getRenderWidth(text1) > (width - 30 - seit_len) ) );
 
 			std::string text3= chanlist[index]->currentEvent.description.substr(text1.length()+ 1);
-			if ( text2 != "" )
-				text3= text3+ " · ";
+			if (!(text2.empty()))
+				text3 += " · ";
 
 			xstart+= g_Fonts->channellist->getRenderWidth(text3);
 			g_Fonts->channellist->RenderString(x+ 10, y+ height+ 5+ 2* fheight, width - 30- noch_len, text3, COL_MENUCONTENTDARK);
 		}
 
-		if ( text2 != "" )
+		if (!(text2.empty()))
 		{
 			while ( text2.find_first_of("[ -.+*#?=!$%&/]+") == 0 )
 				text2 = text2.substr( 1 );
@@ -888,21 +881,25 @@ void CChannelList::paintItem(int pos)
 	}
 }
 
+const struct button_label CChannelListButtons[1] =
+{
+	{ NEUTRINO_ICON_BUTTON_RED, "infoviewer.eventlist"}
+};
+
 void CChannelList::paintHead()
 {
-	std::string strCaption = g_Locale->getText(name);
-
-/*	if (strCaption == "")
-	{
-		strCaption = name;
-	}
-*/
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width- 65, strCaption, COL_MENUHEAD, 0, true); // UTF-8
+	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width- 65, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
+
+	int ButtonWidth = (width - 20) / 4;
+	int buttonHeight = 7 + std::min(16, g_Fonts->infobar_small->getHeight());
+	frameBuffer->paintHLineRel(x, width, y + (height - buttonHeight), COL_INFOBAR_SHADOW);
+	frameBuffer->paintBoxRel(x, y + (height - buttonHeight) + 1, width, buttonHeight - 1, COL_MENUHEAD);
+	::paintButtons(frameBuffer, g_Fonts->infobar_small, g_Locale, x + 10, y + (height - buttonHeight) + 3, ButtonWidth, 1, CChannelListButtons);
 
 	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ width- 30, y+ 5 );
-	if (bouquetList!=NULL)
-		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_DBOX, x+ width- 60, y+ 5 );
+	if (bouquetList != NULL)
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_DBOX, x + width - 60, y + 5); // icon for bouquet list button
 }
 
 void CChannelList::paint()
@@ -943,10 +940,10 @@ void CChannelList::paint()
 
 CChannelList::CChannel* CChannelList::getChannelFromChannelID(const t_channel_id channel_id)
 {
-	for (uint i=0; i< chanlist.size();i++)
+	for (std::vector<CChannel *>::iterator it = chanlist.begin(); it != chanlist.end(); it++)
 	{
-		if (chanlist[i]->channel_id == channel_id)
-			return chanlist[i];
+		if ((*it)->channel_id == channel_id)
+			return (*it);
 	}
-	return(NULL);
+	return NULL;
 }
