@@ -81,7 +81,7 @@ int CRCInput::getKeyInt()
 		}
 		else
 		{
-			printf("got key native key: %04x\n", rccode);
+			//printf("got key native key: %04x\n", rccode);
 			if(prevrccode==rccode)
 			{
 				//key-repeat - cursors and volume are ok
@@ -100,7 +100,7 @@ int CRCInput::getKeyInt()
 				if(erg!=RC_nokey)
 				{
 					repeat=false;
-					printf("native key: %04x   tr: %04x   name: %s\n", rccode, erg, getKeyName(erg).c_str() );
+					//printf("native key: %04x   tr: %04x   name: %s\n", rccode, erg, getKeyName(erg).c_str() );
 				}
 			}
 		}
@@ -195,13 +195,13 @@ int CRCInput::translate(int code)
  		case 0x28: return RC_spkr;
  		case 0x82: return RC_help;
 		default:
-			perror("unknown old rc code");
+			//perror("unknown old rc code");
 			return RC_nokey;
 		}
 	} else if (!(code&0x00))
 		return code&0x3F;
-	else
-		perror("unknown rc code");
+	//else
+		//perror("unknown rc code");
 	return RC_nokey;
 }
 
