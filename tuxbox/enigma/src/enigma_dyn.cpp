@@ -1359,7 +1359,7 @@ static eString getContent(eString mode, eString path)
 		result += "<br>";
 		result += button(100, "Cleanup", "12259E", "javascript:cleanupTimerList()");
 		result += "&nbsp;&nbsp;&nbsp;";
-		result += button(100, "Clear", "CB0303", "javascript:ClearTimerList()");
+		result += button(100, "Clear", "CB0303", "javascript:clearTimerList()");
 	}
 	else
 	if (mode == "updates")
