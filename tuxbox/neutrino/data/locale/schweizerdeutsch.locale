@@ -186,10 +186,10 @@ keybindingmenu.cancel Kanallischde zuemache
 keybindingmenu.cancel_head Kanallischde zuemache 
 keybindingmenu.sort Sortierreihefolg ändere 
 keybindingmenu.sort_head  Sortierreihefolg ändere 
-keybindingmenu.addrecord unset
-keybindingmenu.addrecord_head unset
-keybindingmenu.addremind unset
-keybindingmenu.addremind_head unset
+keybindingmenu.addrecord Uffnahme-Timer d'züfüge
+keybindingmenu.addrecord_head Uffnahme-Timer d'züfüge
+keybindingmenu.addremind Umschald-Timer d'züfüge
+keybindingmenu.addremind_head Umschald-Timer d'züfüge
 keybindingmenu.channelup Kanal uffe 
 keybindingmenu.channelup_head Kanal uffe Taste 
 keybindingmenu.channeldown Kanal abe 
@@ -324,7 +324,7 @@ scants.bouquet Bouquets
 scants.bouquet_leave nidd ändere 
 scants.bouquet_create neu mache 
 scants.bouquet_erase lösche 
-scants.failed unset
+scants.failed Kanalsuechii fehlg'schlage!
 scants.finished Kanalsueche erfolgrich beändet! 
 
 flashupdate.head Aktualisierig 
@@ -683,12 +683,12 @@ nfsmenu.head NFS Iischdellige
 apids.hint_1 Gib z'erschd d'zschdriemendi APIDs ii,
 apids.hint_2 abdrennd durch ' ' in hexadezimaler Form
 
-mainmenu.pictureviewer unset
-pictureviewer.head unset
-pictureviewer.sortorder unset
-pictureviewer.sortorder.date unset
-pictureviewer.sortorder.filename unset
-pictureviewer.show unset
-pictureviewer.slideshow unset
-pictureviewer.slide_time unset
-pictureviewer.scaling unset
+mainmenu.pictureviewer Bildbedrachder
+pictureviewer.head Bildbedrachder
+pictureviewer.sortorder Sort.reihenf. äändere
+pictureviewer.sortorder.date (Datum)
+pictureviewer.sortorder.filename (Dateiname)
+pictureviewer.show A'zeige
+pictureviewer.slideshow Diaschau
+pictureviewer.slide_time Diaschau-A'zeigeduur
+pictureviewer.scaling Skalierig

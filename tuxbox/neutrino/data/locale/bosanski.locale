@@ -660,7 +660,7 @@ mp3player.id3scan citaj id3-tag
 mp3player.keylevel promijeniti tipke
 mp3player.fastforward brzo naprijed
 mp3player.pause pausa
-mp3player.rewind unset
+mp3player.rewind brzo natrag
 
 filebrowser.head pretrazivac datoteka
 filebrowser.filter filter
@@ -678,7 +678,7 @@ nfs.mounterror greska pri montiranju
 nfs.umount nfs direktorij sada demontirati
 nfs.umounterror greska pri demontiranju
 nfs.alreadymounted direktorij je vec montiran
-nfsmenu.head unset
+nfsmenu.head namjescenje nfsa
 
 apids.hint_1 Utipkajte heksadecimalne apids
 apids.hint_2 za streaming razdvojene sa ' '.
