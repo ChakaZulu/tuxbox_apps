@@ -3196,7 +3196,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 
 		/*
 		 * Note: CTimerd::RecordingInfo is a class!
-		 * What a brilliant idea to sent classes via the eventserver!
+		 * What a brilliant idea to send classes via the eventserver!
 		 * => typecast to avoid destructor call
 		 */
 		if (nextRecordingInfo != NULL)
@@ -3236,7 +3236,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 
 				/*
 				 * Note: CTimerd::RecordingInfo is a class!
-				 * What a brilliant idea to sent classes via the eventserver!
+				 * What a brilliant idea to send classes via the eventserver!
 				 * => typecast to avoid destructor call
 				 */
 				delete (unsigned char *) nextRecordingInfo;
@@ -3867,7 +3867,7 @@ void CNeutrinoApp::startNextRecording()
 
 		/*
 		 * Note: CTimerd::RecordingInfo is a class!
-		 * What a brilliant idea to sent classes via the eventserver!
+		 * What a brilliant idea to send classes via the eventserver!
 		 * => typecast to avoid destructor call
 		 */
 		delete (unsigned char *) nextRecordingInfo;
