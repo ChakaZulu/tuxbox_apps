@@ -2225,10 +2225,11 @@ void eZapMain::nextService(int add)
 		playlistNextService();
 	else
 	{
+		int autoBouquetChange=0;
+		eConfig::getInstance()->getKey("/elitedvb/extra/autobouquetchange", autoBouquetChange );
 		eServiceSelector *ssel = eZap::getInstance()->getServiceSelector();
 		bool ok=false;
-
-		if ( !eDVB::getInstance()->recorder
+		if ( !eDVB::getInstance()->recorder && autoBouquetChange
 			&& ssel->selectService( eServiceInterface::getInstance()->service ) )
 		{
 			eServicePath p = modeLast[mode];
@@ -2272,9 +2273,11 @@ void eZapMain::prevService()
 		playlistPrevService();
 	else
 	{
+		int autoBouquetChange=0;
+		eConfig::getInstance()->getKey("/elitedvb/extra/autobouquetchange", autoBouquetChange );
 		eServiceSelector *ssel = eZap::getInstance()->getServiceSelector();
 		bool ok=false;
-		if ( !eDVB::getInstance()->recorder
+		if ( !eDVB::getInstance()->recorder && autoBouquetChange
 			&& ssel->selectService( eServiceInterface::getInstance()->service ) )
 		{
 			eServicePath p = modeLast[mode];
@@ -4960,6 +4963,7 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 
 	eService *service=eServiceInterface::getInstance()->addRef(_serviceref);
 	
+#ifndef DISABLE_FILE
 			/* enable indices when we have something to store them. */
 	if (_serviceref.path.size())
 	{
@@ -4968,6 +4972,7 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 		indices_enabled = 1;
 	} else
 		indices_enabled = 0;
+#endif	
 
 	if (_serviceref.type == eServiceReference::idDVB )
 	{
