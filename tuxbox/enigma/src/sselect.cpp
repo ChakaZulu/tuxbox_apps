@@ -1838,7 +1838,8 @@ const eServiceReference *eServiceSelector::next()
 		s=services->goNext();
 	while ( s != cur && s &&
 			( s->flags & eListBoxEntryService::flagIsReturn ||
-				s->service.flags == eServiceReference::isMarker ) );
+				s->service.flags == eServiceReference::isMarker ||
+				s->service.flags & eServiceReference::isNotPlayable ) );
 
 	services->endAtomic();
 	if (s)
@@ -1856,7 +1857,8 @@ const eServiceReference *eServiceSelector::prev()
 		s=services->goPrev();
 	while ( s != cur && s &&
 			( s->flags & eListBoxEntryService::flagIsReturn ||
-				s->service.flags & eServiceReference::isMarker ) );
+				s->service.flags & eServiceReference::isMarker ||
+				s->service.flags & eServiceReference::isNotPlayable ) );
 
 	services->endAtomic();
 	if (s)
