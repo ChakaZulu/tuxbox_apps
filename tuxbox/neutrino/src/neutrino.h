@@ -78,8 +78,6 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		};
 
 		CConfigFile			configfile;
-		std::string			settingsFile;
-		std::string			scanSettingsFile;
 		CScanSettings			scanSettings;
 		int                             network_dhcp;
 		int                             network_automatic_start;
@@ -174,7 +172,6 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		                  CMenuWidget &colorSettings, CMenuWidget &lcdSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings,
 		                  CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &service, CMenuWidget &fontSettings,
                         	  CMenuWidget &mp3picSettings, CMenuWidget &streamingSettings);
-		void ClearFrameBuffer();
 		void SetupFonts();
 		void SetupTiming();
 		void SetupFrameBuffer();

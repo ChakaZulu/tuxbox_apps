@@ -118,6 +118,9 @@ CRemoteControl * g_RemoteControl;
 CZapitClient::SatelliteList satList;
 CZapitClient::SatelliteList::iterator satList_it;
 
+#define NEUTRINO_SETTINGS_FILE      CONFIGDIR "/neutrino.conf"
+#define NEUTRINO_SCAN_SETTINGS_FILE CONFIGDIR "/scan.conf"
+
 static void initGlobals(void)
 {
 	g_fontRenderer  = NULL;
@@ -132,7 +135,7 @@ static void initGlobals(void)
 	g_InfoViewer    = NULL;
 	g_EventList     = NULL;
 
-	g_Locale        = NULL;
+	g_Locale        = new CLocaleManager;
 	g_PluginList    = NULL;
 }
 
@@ -151,9 +154,6 @@ CNeutrinoApp::CNeutrinoApp()
 
 	g_fontRenderer = new FBFontRenderClass();
 	SetupFrameBuffer();
-
-	settingsFile = CONFIGDIR "/neutrino.conf";
-	scanSettingsFile = CONFIGDIR "/scan.conf";
 
 	mode = mode_unknown;
 	channelList = NULL;
@@ -351,7 +351,7 @@ int CNeutrinoApp::loadSetup()
 	int erg = 0;
 
 	//settings laden - und dabei Defaults setzen!
-	if(!configfile.loadConfig(settingsFile))
+	if(!configfile.loadConfig(NEUTRINO_SETTINGS_FILE))
 	{
 		//file existiert nicht
 		erg = 1;
@@ -563,7 +563,7 @@ int CNeutrinoApp::loadSetup()
 		erg = 2;
 	}
 
-	if (!scanSettings.loadSettings(scanSettingsFile, (g_info.delivery_system = g_Zapit->getDeliverySystem())))
+	if (!scanSettings.loadSettings(NEUTRINO_SCAN_SETTINGS_FILE, (g_info.delivery_system = g_Zapit->getDeliverySystem())))
 	{
 		dprintf(DEBUG_NORMAL, "Loading of scan settings failed. Using defaults.\n");
 	}
@@ -658,7 +658,7 @@ void CNeutrinoApp::saveSetup()
 	}
 
 	//scan settings
-	if(!scanSettings.saveSettings(scanSettingsFile))
+	if(!scanSettings.saveSettings(NEUTRINO_SCAN_SETTINGS_FILE))
 	{
 		dprintf(DEBUG_NORMAL, "error while saving scan-settings!\n");
 	}
@@ -863,10 +863,10 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "mp3player_follow", g_settings.mp3player_follow );
 	configfile.setString( "mp3player_screensaver", g_settings.mp3player_screensaver );
 
-   if(configfile.getModifiedFlag())
+	if (configfile.getModifiedFlag())
 	{
 		dprintf(DEBUG_INFO, "saving neutrino txt-config\n");
-		configfile.saveConfig(CONFIGDIR "/neutrino.conf");
+		configfile.saveConfig(NEUTRINO_SETTINGS_FILE);
 	}
 }
 
@@ -2096,22 +2096,80 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 	keySettings.addItem(GenericMenuSeparator);
 	keySettings.addItem(GenericMenuBack);
 
-	CKeyChooser*   keySettings_tvradio_mode = new CKeyChooser(&g_settings.key_tvradio_mode, "keybindingmenu.tvradiomode_head", NEUTRINO_ICON_SETTINGS);
-	CKeyChooser*   keySettings_channelList_pageup = new CKeyChooser(&g_settings.key_channelList_pageup, "keybindingmenu.pageup_head", NEUTRINO_ICON_SETTINGS);
-	CKeyChooser*   keySettings_channelList_pagedown = new CKeyChooser(&g_settings.key_channelList_pagedown, "keybindingmenu.pagedown_head", NEUTRINO_ICON_SETTINGS);
-	CKeyChooser*   keySettings_channelList_cancel = new CKeyChooser(&g_settings.key_channelList_cancel, "keybindingmenu.cancel_head", NEUTRINO_ICON_SETTINGS);
-	CKeyChooser*   keySettings_channelList_sort = new CKeyChooser(&g_settings.key_channelList_sort, "keybindingmenu.sort_head", NEUTRINO_ICON_SETTINGS);
-	CKeyChooser*   keySettings_channelList_addrecord = new CKeyChooser(&g_settings.key_channelList_addrecord, "keybindingmenu.addrecord_head", NEUTRINO_ICON_SETTINGS);
-	CKeyChooser*   keySettings_channelList_addremind = new CKeyChooser(&g_settings.key_channelList_addremind, "keybindingmenu.addremind_head", NEUTRINO_ICON_SETTINGS);
-	CKeyChooser*   keySettings_quickzap_up = new CKeyChooser(&g_settings.key_quickzap_up, "keybindingmenu.channelup_head", NEUTRINO_ICON_SETTINGS);
-	CKeyChooser*   keySettings_quickzap_down = new CKeyChooser(&g_settings.key_quickzap_down, "keybindingmenu.channeldown_head", NEUTRINO_ICON_SETTINGS);
-	CKeyChooser*   keySettings_bouquet_up = new CKeyChooser(&g_settings.key_bouquet_up, "keybindingmenu.bouquetup_head", NEUTRINO_ICON_SETTINGS);
-	CKeyChooser*   keySettings_bouquet_down = new CKeyChooser(&g_settings.key_bouquet_down, "keybindingmenu.bouquetdown_head", NEUTRINO_ICON_SETTINGS);
-	CKeyChooser*   keySettings_subchannel_up = new CKeyChooser(&g_settings.key_subchannel_up, "keybindingmenu.subchannelup_head", NEUTRINO_ICON_SETTINGS);
-	CKeyChooser*   keySettings_subchannel_down = new CKeyChooser(&g_settings.key_subchannel_down, "keybindingmenu.subchanneldown_head", NEUTRINO_ICON_SETTINGS);
+	enum keynames {
+		KEY_TV_RADIO_MODE,
+		KEY_PAGE_UP,
+		KEY_PAGE_DOWN,
+		KEY_CANCEL,
+		KEY_SORT,
+		KEY_ADD_RECORD,
+		KEY_ADD_REMIND,
+		KEY_CHANNEL_UP,
+		KEY_CHANNEL_DOWN,
+		KEY_BOUQUET_UP,
+		KEY_BOUQUET_DOWN,
+		KEY_SUBCHANNEL_UP,
+		KEY_SUBCHANNEL_DOWN
+	};
+
+	const char * keydescription_head[13] =
+		{
+			"keybindingmenu.tvradiomode_head",
+			"keybindingmenu.pageup_head",
+			"keybindingmenu.pagedown_head",
+			"keybindingmenu.cancel_head",
+			"keybindingmenu.sort_head",
+			"keybindingmenu.addrecord_head",
+			"keybindingmenu.addremind_head",
+			"keybindingmenu.channelup_head",
+			"keybindingmenu.channeldown_head",
+			"keybindingmenu.bouquetup_head",
+			"keybindingmenu.bouquetdown_head",
+			"keybindingmenu.subchannelup_head",
+			"keybindingmenu.subchanneldown_head"
+		};
+
+	const char * keydescription[13] =
+		{
+			"keybindingmenu.tvradiomode",
+			"keybindingmenu.pageup",
+			"keybindingmenu.pagedown",
+			"keybindingmenu.cancel",
+			"keybindingmenu.sort",
+			"keybindingmenu.addrecord",
+			"keybindingmenu.addremind",
+			"keybindingmenu.channelup",
+			"keybindingmenu.channeldown",
+			"keybindingmenu.bouquetup",
+			"keybindingmenu.bouquetdown",
+			"keybindingmenu.subchannelup",
+			"keybindingmenu.subchanneldown"
+		};
+
+	int * keyvalue_p[13] =
+		{
+			&g_settings.key_tvradio_mode,
+			&g_settings.key_channelList_pageup,
+			&g_settings.key_channelList_pagedown,
+			&g_settings.key_channelList_cancel,
+			&g_settings.key_channelList_sort,
+			&g_settings.key_channelList_addrecord,
+			&g_settings.key_channelList_addremind,
+			&g_settings.key_quickzap_up,
+			&g_settings.key_quickzap_down,
+			&g_settings.key_bouquet_up,
+			&g_settings.key_bouquet_down,
+			&g_settings.key_subchannel_up,
+			&g_settings.key_subchannel_down
+		};
+
+	CKeyChooser * keychooser[13];
+
+	for (int i = 0; i < 13; i++)
+		keychooser[i] = new CKeyChooser(keyvalue_p[i], keydescription_head[i], NEUTRINO_ICON_SETTINGS);
 
 	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.modechange") );
-	keySettings.addItem( new CMenuForwarder("keybindingmenu.tvradiomode", true, NULL, keySettings_tvradio_mode));
+	keySettings.addItem(new CMenuForwarder(keydescription[KEY_TV_RADIO_MODE], true, NULL, keychooser[KEY_TV_RADIO_MODE]));
 
 	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.channellist") );
 	CMenuOptionChooser *oj = new CMenuOptionChooser("keybindingmenu.bouquethandling" , &g_settings.bouquetlist_mode, true );
@@ -2119,19 +2177,12 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 	oj->addOption(1, "keybindingmenu.bouquetlist_on_ok");
 	oj->addOption(2, "keybindingmenu.allchannels_on_ok");
 	keySettings.addItem( oj );
-	keySettings.addItem( new CMenuForwarder("keybindingmenu.pageup", true, NULL, keySettings_channelList_pageup ));
-	keySettings.addItem( new CMenuForwarder("keybindingmenu.pagedown", true, NULL, keySettings_channelList_pagedown ));
-	keySettings.addItem( new CMenuForwarder("keybindingmenu.cancel", true, NULL, keySettings_channelList_cancel ));
-	keySettings.addItem( new CMenuForwarder("keybindingmenu.sort", true, NULL, keySettings_channelList_sort ));
-	keySettings.addItem( new CMenuForwarder("keybindingmenu.addrecord", true, NULL, keySettings_channelList_addrecord ));
-	keySettings.addItem( new CMenuForwarder("keybindingmenu.addremind", true, NULL, keySettings_channelList_addremind ));
+	for (int i = KEY_PAGE_UP; i <= KEY_ADD_REMIND; i++)
+		keySettings.addItem(new CMenuForwarder(keydescription[i], true, NULL, keychooser[i]));
+
 	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.quickzap") );
-	keySettings.addItem( new CMenuForwarder("keybindingmenu.channelup", true, NULL, keySettings_quickzap_up ));
-	keySettings.addItem( new CMenuForwarder("keybindingmenu.channeldown", true, NULL, keySettings_quickzap_down ));
-	keySettings.addItem( new CMenuForwarder("keybindingmenu.bouquetup", true, NULL, keySettings_bouquet_up ));
-	keySettings.addItem( new CMenuForwarder("keybindingmenu.bouquetdown", true, NULL, keySettings_bouquet_down ));
-	keySettings.addItem( new CMenuForwarder("keybindingmenu.subchannelup", true, NULL, keySettings_subchannel_up ));
-	keySettings.addItem( new CMenuForwarder("keybindingmenu.subchanneldown", true, NULL, keySettings_subchannel_down ));
+	for (int i = KEY_CHANNEL_UP; i <= KEY_SUBCHANNEL_DOWN; i++)
+		keySettings.addItem(new CMenuForwarder(keydescription[i], true, NULL, keychooser[i]));
 }
 
 void CNeutrinoApp::SelectNVOD()
@@ -2356,7 +2407,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	frameBuffer->ClearFrameBuffer();
 
-	g_Locale = new CLocaleManager;
 	g_RCInput = new CRCInput;
 
 	g_Sectionsd = new CSectionsdClient;
