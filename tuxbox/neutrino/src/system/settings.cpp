@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.14 2003/05/11 09:50:56 digi_casi Exp $
+        $Id: settings.cpp,v 1.15 2003/05/12 04:56:02 digi_casi Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -186,7 +186,7 @@ bool CScanSettings::loadSettings(const std::string fileName, const delivery_syst
 			for (int i=0; i<satMotorPosCount; i++)
 			{
 				char tmp[10];
-				sprintf((char*)&tmp, "SatMotorPos%d", i);
+				sprintf((char*)&tmp, "SatName%d", i);
 				strcpy( satName[i], configfile.getString( tmp, "" ).c_str() );
 				sprintf((char*)&tmp, "satMotorPos%d", i);
 				satMotorPos[i] = configfile.getInt32( tmp, -1 );
@@ -247,7 +247,7 @@ bool CScanSettings::saveSettings(const std::string fileName)
 					char tmp[10];
 					sprintf((char*)&tmp, "SatName%d", satCount);
 					configfile.setString( tmp, satName[i] );
-					sprintf((char*)&tmp, "satDiseqc%d", satCount);
+					sprintf((char*)&tmp, "satMotorPos%d", satCount);
 					configfile.setInt32( tmp, satMotorPos[i] );
 					satCount++;
 				}
