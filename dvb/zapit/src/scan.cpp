@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.126 2003/07/21 12:07:21 digi_casi Exp $
+ * $Id: scan.cpp,v 1.127 2003/08/01 09:19:31 obi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -483,12 +483,20 @@ void scan_provider(xmlNodePtr search, char * providerName, bool satfeed, uint8_t
 		{
 			if (scI->second.getServiceType() != stI->second)
 			{
-				INFO("setting service_type of channel_id " PRINTF_CHANNEL_ID_TYPE " from %02x to %02x",
-					stI->first,
-					scI->second.getServiceType(),
-					stI->second);
-						
-				scI->second.setServiceType(stI->second);
+				switch (scI->second.getServiceType()) {
+				case ST_DIGITAL_TELEVISION_SERVICE:
+				case ST_DIGITAL_RADIO_SOUND_SERVICE:
+				case ST_NVOD_REFERENCE_SERVICE:
+				case ST_NVOD_TIME_SHIFTED_SERVICE:
+					break;
+				default:
+					INFO("setting service_type of channel_id " PRINTF_CHANNEL_ID_TYPE " from %02x to %02x",
+						stI->first,
+						scI->second.getServiceType(),
+						stI->second);
+					scI->second.setServiceType(stI->second);
+					break;
+				}
 			}
 		}
 	}
