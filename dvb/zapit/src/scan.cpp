@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.93 2002/12/27 17:01:39 obi Exp $
+ * $Id: scan.cpp,v 1.94 2002/12/30 19:47:50 obi Exp $
  */
 
 #include <fcntl.h>
@@ -209,6 +209,21 @@ void write_transponder(FILE *fd, t_transport_stream_id transport_stream_id, t_or
 		break;
 
 	case FE_OFDM: /* terrestrial */
+		fprintf(fd,
+			"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" bandwidth=\"%hu\" code_rate_HP=\"%hu\" code_rate_LP=\"%hu\" constellation=\"%hu\" transmission_mode=\"%hu\" guard_interval=\"%hu\" hierarchy_information=\"%hu\">\n",
+			tI->second.transport_stream_id,
+			tI->second.original_network_id,
+			tI->second.feparams.frequency,
+			tI->second.feparams.inversion,
+			tI->second.feparams.u.ofdm.bandwidth,
+			tI->second.feparams.u.ofdm.code_rate_HP,
+			tI->second.feparams.u.ofdm.code_rate_LP,
+			tI->second.feparams.u.ofdm.constellation,
+			tI->second.feparams.u.ofdm.transmission_mode,
+			tI->second.feparams.u.ofdm.guard_interval,
+			tI->second.feparams.u.ofdm.hierarchy_information);
+		break;
+
 	default:
 		return;
 	}
