@@ -1,5 +1,5 @@
 /*
- * $Id: streamfile.c,v 1.7 2004/04/29 08:04:55 thegoodguy Exp $
+ * $Id: streamfile.c,v 1.8 2004/04/29 13:41:48 diemade Exp $
  * 
  * streaming ts to file/disc
  * 
@@ -51,7 +51,7 @@
 // TS_SIZE is 188
 #define IN_SIZE		(TS_SIZE * 362)
 
-#define RINGBUFFERSIZE IN_SIZE * 10
+#define RINGBUFFERSIZE IN_SIZE * 20
 #define MAXREADSIZE IN_SIZE
 #define MINREADSIZE IN_SIZE
 
@@ -158,7 +158,7 @@ void *FileThread (void *v_arg)
 				sprintf(filename, "%s.%3.3d.ts", (char *)v_arg, ++filecount);
 				if (fd2 != -1 )
 					close(fd2);
-				if ((fd2 = open(filename, O_WRONLY | O_CREAT | O_NONBLOCK | O_TRUNC | O_LARGEFILE, S_IRUSR | S_IWUSR)) < 0) {
+				if ((fd2 = open(filename, O_WRONLY | O_CREAT | O_NONBLOCK | O_TRUNC | O_LARGEFILE, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) < 0) {
 					perror("[streamfile]: opening outfile");
 					pthread_exit (NULL);
 				}
@@ -281,11 +281,13 @@ main (int argc, char ** argv) {
 	}
 
 	// create and delete temp-file to wakeup the disk from standby
-	fd = open(".streamfile_tmp", O_SYNC | O_WRONLY | O_CREAT | O_TRUNC | O_NONBLOCK, S_IRUSR | S_IWUSR);
+	sprintf(buf, "%s.tmp", fname);
+	fd = open(buf, O_SYNC | O_WRONLY | O_CREAT | O_TRUNC | O_NONBLOCK, S_IRUSR | S_IWUSR);
+	memset(buf, 0x00, IN_SIZE);
 	write(fd, buf, IN_SIZE);
 	fdatasync(fd);
 	close(fd);
-	unlink(".streamfile_tmp");
+	unlink(fname);
 
 	bp = buf;
 
