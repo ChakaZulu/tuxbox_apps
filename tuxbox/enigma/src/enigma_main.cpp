@@ -1326,7 +1326,11 @@ eZapMain::eZapMain()
 	,mute( eZap::getInstance()->getDesktop( eZap::desktopFB ) )
 	,volume( eZap::getInstance()->getDesktop( eZap::desktopFB ) )
 	,VolumeBar( new eProgress(&volume) ), pMsg(0), pRotorMsg(0)
-	,message_notifier(eApp, 0), mmi_messages(eApp, 1), timeout(eApp)
+	,message_notifier(eApp, 0)
+#ifndef DISABLE_CI
+	,mmi_messages(eApp, 1)
+#endif
+	,timeout(eApp)
 	,clocktimer(eApp), messagetimeout(eApp), progresstimer(eApp)
 	,volumeTimer(eApp), recStatusBlink(eApp), doubleklickTimer(eApp), delayedStandbyTimer(eApp)
 	,currentSelectedUserBouquet(0), wasSleeping(0), state(0)
@@ -1630,7 +1634,9 @@ void eZapMain::handleMMIMessage( const eMMIMessage &msg )
 
 eZapMain::~eZapMain()
 {
+#ifndef DISABLE_CI
 	mmi_messages.stop();
+#endif
 #ifndef DISABLE_FILE
 	if ( state & stateRecording )
 	{

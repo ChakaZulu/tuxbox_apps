@@ -18,6 +18,7 @@
 #include <lib/dvb/service.h>
 #include <lib/gui/eprogress.h>
 
+#ifndef DISABLE_CI
 struct eMMIMessage
 {
 	eDVBCI *from;
@@ -31,6 +32,7 @@ struct eMMIMessage
 	{
 	}
 };
+#endif
 
 class eLabel;
 class EIT;
