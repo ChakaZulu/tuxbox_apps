@@ -29,14 +29,16 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "global.h"
 
+#include "fontrenderer.h"
+
+#include "system/debug.h"
 #include <config.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "fontrenderer.h"
-#include "../global.h"
 
 // this method is recommended for FreeType >2.0.x:
 #include <ft2build.h>
@@ -54,32 +56,32 @@ FT_Error fontRenderClass::myFTC_Face_Requester(FTC_FaceID  face_id,
 
 fontRenderClass::fontRenderClass()
 {
-	printf("[FONT] initializing core...");
+	dprintf(DEBUG_DEBUG, "[FONT] initializing core...\n");
 	if (FT_Init_FreeType(&library))
 	{
-		printf("failed.\n");
+		dprintf(DEBUG_NORMAL, "[FONT] initializing core failed.\n");
 		return;
 	}
-	printf("\n[FONT] loading fonts...\n");
+	dprintf(DEBUG_DEBUG, "[FONT] loading fonts...\n");
 	fflush(stdout);
 	font=0;
 
 	int maxbytes= 4 *1024*1024;
-	printf("[FONT] Intializing font cache, using max. %dMB...", maxbytes/1024/1024);
+	dprintf(DEBUG_INFO, "[FONT] Intializing font cache, using max. %dMB...", maxbytes/1024/1024);
 	fflush(stdout);
 	if (FTC_Manager_New(library, 10, 20, maxbytes, myFTC_Face_Requester, this, &cacheManager))
 	{
-		printf(" manager failed!\n");
+		dprintf(DEBUG_NORMAL, "[FONT] manager failed!\n");
 		return;
 	}
 	if (!cacheManager)
 	{
-		printf(" error.\n");
+		dprintf(DEBUG_NORMAL, "[FONT] error.\n");
 		return;
 	}
 	if (FTC_SBit_Cache_New(cacheManager, &sbitsCache))
 	{
-		printf(" sbit failed!\n");
+		dprintf(DEBUG_NORMAL, "[FONT] sbit failed!\n");
 		return;
 	}
 /*	if (FTC_ImageCache_New(cacheManager, &imageCache))
@@ -88,8 +90,6 @@ fontRenderClass::fontRenderClass()
 	}
 */
 	pthread_mutex_init( &render_mutex, NULL );
-
-	printf("\n");
 }
 
 fontRenderClass::~fontRenderClass()
@@ -103,12 +103,12 @@ FT_Error fontRenderClass::FTC_Face_Requester(FTC_FaceID face_id, FT_Face* aface)
 	fontListEntry *font=(fontListEntry *)face_id;
 	if (!font)
 		return -1;
-	printf("[FONT] FTC_Face_Requester (%s/%s)\n", font->family, font->style);
+	dprintf(DEBUG_DEBUG, "[FONT] FTC_Face_Requester (%s/%s)\n", font->family, font->style);
 
 	int error;
 	if ((error=FT_New_Face(library, font->filename, 0, aface)))
 	{
-		printf(" failed: %i\n", error);
+		dprintf(DEBUG_NORMAL, "[FONT] FTC_Face_Requester (%s/%s) failed: %i\n", font->family, font->style, error);
 		return error;
 	}
 	return 0;
@@ -131,7 +131,6 @@ FT_Error fontRenderClass::getGlyphBitmap(FTC_Image_Desc *font, FT_ULong glyph_in
 
 int fontRenderClass::AddFont(const char *filename)
 {
-	printf("[FONT] adding font %s...", filename);
 	fflush(stdout);
 	int error;
 	fontListEntry *n=new fontListEntry;
@@ -139,7 +138,7 @@ int fontRenderClass::AddFont(const char *filename)
 	FT_Face face;
 	if ((error=FT_New_Face(library, filename, 0, &face)))
 	{
-		printf(" failed: %i\n", error);
+		dprintf(DEBUG_NORMAL, "[FONT] adding font %s, failed: %i\n", filename, error);
 		return error;
 	}
 	strcpy(n->filename=new char[strlen(filename)], filename);
@@ -148,7 +147,7 @@ int fontRenderClass::AddFont(const char *filename)
 	FT_Done_Face(face);
 
 	n->next=font;
-	printf("OK (%s/%s)\n", n->family, n->style);
+	dprintf(DEBUG_DEBUG, "[FONT] adding font %s... ok\n", filename);
 	font=n;
 	return 0;
 }
@@ -180,7 +179,7 @@ Font::Font(fontRenderClass *render, FTC_FaceID faceid, int isize)
 
 	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
 	{
-		printf("FTC_Manager_Lookup_Size failed!\n");
+		dprintf(DEBUG_NORMAL, "FTC_Manager_Lookup_Size failed!\n");
 		return;
 	}
 	// hack begin (this is a hack to get correct font metrics, didn't find any other way which gave correct values)
@@ -225,7 +224,7 @@ void Font::RenderString(int x, int y, int width, const char *text, unsigned char
 
 	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
 	{
-		printf("FTC_Manager_Lookup_Size failed!\n");
+		dprintf(DEBUG_NORMAL, "FTC_Manager_Lookup_Size failed!\n");
 		return;
 	}
 
@@ -301,7 +300,7 @@ void Font::RenderString(int x, int y, int width, const char *text, unsigned char
 			continue;
 		if (getGlyphBitmap(index, &glyph))
 		{
-			printf("failed to get glyph bitmap.\n");
+			dprintf(DEBUG_NORMAL, "failed to get glyph bitmap.\n");
 			continue;
 		}
 
@@ -371,7 +370,7 @@ int Font::getRenderWidth(const char *text)
 	int use_kerning=FT_HAS_KERNING(face);
 	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
 	{
-		printf("FTC_Manager_Lookup_Size failed!\n");
+		dprintf(DEBUG_NORMAL, "FTC_Manager_Lookup_Size failed!\n");
 		return -1;
 	}
 
@@ -388,7 +387,7 @@ int Font::getRenderWidth(const char *text)
 			continue;
 		if (getGlyphBitmap(index, &glyph))
 		{
-			printf("failed to get glyph bitmap.\n");
+			dprintf(DEBUG_NORMAL, "failed to get glyph bitmap.\n");
 			continue;
 		}
 		//kerning

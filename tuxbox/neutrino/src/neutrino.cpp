@@ -684,15 +684,16 @@ void CNeutrinoApp::channelsInit()
 {
 	dprintf(DEBUG_DEBUG, "doing channelsInit\n");
 	//deleting old channelList for mode-switching.
+
 	delete channelList;
 	channelList = new CChannelList( "channellist.head" );
-
 	CZapitClient::BouquetChannelList zapitChannels;
 	g_Zapit->getChannels( zapitChannels );
 	for (uint i=0; i<zapitChannels.size(); i++)
 	{
 		channelList->addChannel( zapitChannels[i].nr, zapitChannels[i].nr, zapitChannels[i].name, zapitChannels[i].onid_sid );
 	}
+	dprintf(DEBUG_DEBUG, "got channels\n");
 
 	delete bouquetList;
 	bouquetList = new CBouquetList( "bouquetlist.head" );
@@ -703,10 +704,10 @@ void CNeutrinoApp::channelsInit()
 	{
 		bouquetList->addBouquet( zapitBouquets[i].name, zapitBouquets[i].bouquet_nr, zapitBouquets[i].locked);
 	}
+	dprintf(DEBUG_DEBUG, "got bouquets\n");
 
 	for ( uint i=0; i< bouquetList->Bouquets.size(); i++ )
 	{
-		dprintf(DEBUG_DEBUG, ".");
 		CZapitClient::BouquetChannelList zapitChannels;
 		g_Zapit->getBouquetChannels( bouquetList->Bouquets[i]->unique_key, zapitChannels);
 		for (uint j=0; j<zapitChannels.size(); j++)
@@ -772,11 +773,18 @@ void CNeutrinoApp::CmdParser(int argc, char **argv)
 				fontName = argv[x+ 2];
 				fontsSizeOffset = atoi(argv[x+ 3]);
 			}
-            x=x+ 3;
+            x+=3;
+		}
+		else if ( !strcmp(argv[x], "-debuglevel"))
+		{
+			int dl = atoi(argv[x+ 1]);
+			dprintf(DEBUG_NORMAL, "set debuglevel: %d\n", dl);
+			setDebugLevel(dl);
+			x++;
 		}
 		else
 		{
-			dprintf(DEBUG_NORMAL, "Usage: neutrino [-su] [-flash] [-font /fontdir/fontfile fontname fontsize]\n");
+			dprintf(DEBUG_NORMAL, "Usage: neutrino [-su] [-debuglevel 0..3] [-flash] [-font /fontdir/fontfile fontname fontsize]\n");
 			exit(0);
 		}
 	}
@@ -2544,8 +2552,8 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	setDebugLevel(DEBUG_DEBUG);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.271 2002/05/11 22:05:46 McClean Exp $\n\n");
+	setDebugLevel(DEBUG_NORMAL);
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.272 2002/05/12 17:34:58 McClean Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

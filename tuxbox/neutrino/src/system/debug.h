@@ -26,14 +26,12 @@
 
 static int debug = 1;
 
-void setDebugLevel( int level )
-{
-	debug = level;
-}
 
 #define DEBUG_NORMAL	1
 #define DEBUG_INFO		2
 #define DEBUG_DEBUG		3
+
+void setDebugLevel( int level );
 
 #define dprintf(debuglevel, fmt, args...) {if(debug>=debuglevel) printf( "[neutrino] " fmt, ## args);}
 #define dperror(str) {perror("[neutrino] " str);}

@@ -506,8 +506,6 @@ void CRemoteControl::zapTo_onid_sid( unsigned int onid_sid, string channame, boo
 	long long now = getcurrenttime();
 	if ( zap_completion_timeout < now )
 	{
-		//printf("[remotecontrol]: doing zap to %x\n", onid_sid);
-
 		g_Zapit->zapTo_serviceID_NOWAIT( onid_sid );
 		g_Sectionsd->setServiceChanged( current_onid_sid, false );
 
