@@ -397,7 +397,7 @@ void CMoviePlayerGui::PlayStream( void )
 		if( update_lcd )
 		{
 			update_lcd = false;
-			char tmp[10];
+			char tmp[20];
 			string lcd;
 
 			switch( playstate )
@@ -406,11 +406,11 @@ void CMoviePlayerGui::PlayStream( void )
 				lcd = "|| (" + sel_filename + ")";
 				break;
 			case REW:
-				sprintf( tmp, "%1dx<< ", speed);
+				sprintf( tmp, "%dx<< ", speed);
 				lcd = tmp + sel_filename;
 				break;
 			case FF:
-				sprintf( tmp, "%1dx>> ", speed);
+				sprintf( tmp, "%dx>> ", speed);
 				lcd = tmp + sel_filename;
 				break;
 			default:
@@ -491,7 +491,10 @@ void CMoviePlayerGui::PlayStream( void )
 		else if( msg == CRCInput::RC_ok )
 		{
 			if (playstate > PLAY)
+			{
+		  		update_lcd = true;
 				playstate = SOFTRESET;
+			}
 			else
 				open_filebrowser = true;
 		}
