@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.180 2005/01/13 10:48:02 diemade Exp $
+//  $Id: sectionsd.cpp,v 1.181 2005/03/08 13:39:08 metallica Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1060,7 +1060,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.180 2005/01/13 10:48:02 diemade Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.181 2005/03/08 13:39:08 metallica Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -1526,7 +1526,10 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 	unsigned flag = 0;
 
 	const SIevent &evt = findActualSIeventForServiceUniqueKey(*uniqueServiceKey, zeitEvt1, 0, &flag);
-
+	if(evt.name.empty() && flag !=0)
+	{
+		dmxEIT.change( 0 );
+	}
 	if (evt.service_id == 0)
 	{
 		MySIservicesOrderUniqueKey::iterator si = mySIservicesOrderUniqueKey.end();
@@ -3489,7 +3492,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.180 2005/01/13 10:48:02 diemade Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.181 2005/03/08 13:39:08 metallica Exp $\n");
 
 	try {
 		if (argc != 1 && argc != 2) {
