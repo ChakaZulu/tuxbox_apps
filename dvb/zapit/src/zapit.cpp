@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.187 2002/05/23 22:31:52 obi Exp $
+ * $Id: zapit.cpp,v 1.188 2002/05/28 15:46:00 happydude Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1123,7 +1123,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.187 2002/05/23 22:31:52 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.188 2002/05/28 15:46:00 happydude Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1509,15 +1509,17 @@ int startPlayBack()
 	video->start();
 
 	/* set bypass mode */
-	if (channel->getAudioChannel()->isAc3)
+	if (channel->getAudioChannel())
 	{
-		audio->enableBypass();
+		if (channel->getAudioChannel()->isAc3)
+		{
+			audio->enableBypass();
+		}
+		else
+		{
+			audio->disableBypass();
+		}
 	}
-	else
-	{
-		audio->disableBypass();
-	}
-
 	audio->start();
 
 	/* start demux filters */
