@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.33 2002/10/08 13:51:59 obi Exp $
+ * $Id: pzapit.cpp,v 1.34 2002/10/08 14:14:59 thegoodguy Exp $
  *
  * simple commandline client for zapit
  *
@@ -63,7 +63,7 @@ int main (int argc, char** argv)
 	uint32_t j;
 	uint32_t k;
 
-	unsigned int bouquet = 0;
+	unsigned int bouquet = -1;
 	unsigned int channel = 0;
 	unsigned int count = 0;
 	int diseqcRepeats = -1;
@@ -420,7 +420,7 @@ int main (int argc, char** argv)
 	else /* zap by bouquet number and channel number */
 	{
 		/* read channel list */
-		if (bouquet)
+		if (bouquet != -1)
 			zapit.getBouquetChannels(bouquet - 1, channels);
 
 		/* display bouquet list */
