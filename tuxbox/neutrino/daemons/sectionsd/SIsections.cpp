@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.28 2002/08/27 19:00:45 obi Exp $
+// $Id: SIsections.cpp,v 1.29 2002/11/05 19:56:26 obi Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.cpp,v $
+// Revision 1.29  2002/11/05 19:56:26  obi
+// ported to dvb api version 3
+//
 // Revision 1.28  2002/08/27 19:00:45  obi
 // use devfs device names
 //
@@ -115,7 +118,7 @@
 #include <sys/ioctl.h>
 #include <sys/poll.h> // fuer poll()
 
-#include <ost/dmx.h>
+#include <linux/dvb/dmx.h>
 
 #include <set>
 #include <algorithm>
@@ -436,12 +439,12 @@ int SIsections :: readSections(unsigned short pid, unsigned char filter, unsigne
 {
   int fd;
   struct SI_section_header header;
-  struct dmxSctFilterParams flt;
+  struct dmx_sct_filter_params flt;
   unsigned long long firstKey=(unsigned long long)-1;
   SIsections missingSections;
   char *buf;
 
-  memset (&flt.filter, 0, sizeof (struct dmxFilter));
+  memset (&flt.filter, 0, sizeof (struct dmx_filter));
 
   flt.pid              = pid;
   flt.filter.filter[0] = filter;
@@ -450,8 +453,8 @@ int SIsections :: readSections(unsigned short pid, unsigned char filter, unsigne
 //  flt.flags            = DMX_IMMEDIATE_START;
   flt.flags            = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
 
-  if ((fd = open("/dev/dvb/card0/demux0", O_RDWR)) == -1) {
-    perror ("/dev/dvb/card0/demux0");
+  if ((fd = open("/dev/dvb/adapter0/demux0", O_RDWR)) == -1) {
+    perror ("/dev/dvb/adapter0/demux0");
     return 1;
   }
   if (ioctl (fd, DMX_SET_FILTER, &flt) == -1) {
@@ -613,8 +616,8 @@ int SIsections :: readSections(unsigned short pid, unsigned char filter, unsigne
   szeit=time(NULL);
 //  printf("reading missing\n");
 
-  if ((fd = open("/dev/dvb/card0/demux0", O_RDWR)) == -1) {
-    perror ("/dev/dvb/card0/demux0");
+  if ((fd = open("/dev/dvb/adapter0/demux0", O_RDWR)) == -1) {
+    perror ("/dev/dvb/adapter0/demux0");
     return 9;
   }
   if (ioctl (fd, DMX_SET_FILTER, &flt) == -1) {

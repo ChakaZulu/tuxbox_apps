@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.21 2002/11/03 22:26:54 thegoodguy Exp $
+// $Id: SIevents.cpp,v 1.22 2002/11/05 19:56:26 obi Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.cpp,v $
+// Revision 1.22  2002/11/05 19:56:26  obi
+// ported to dvb api version 3
+//
 // Revision 1.21  2002/11/03 22:26:54  thegoodguy
 // Use more frequently types defined in zapittypes.h(not complete), fix some warnings, some code cleanup
 //
@@ -96,7 +99,7 @@
 #include <fcntl.h>
 #include <sys/poll.h> // fuer poll()
 
-#include <ost/dmx.h>
+#include <linux/dvb/dmx.h>
 
 #include <set>
 #include <algorithm>
@@ -348,10 +351,10 @@ SIevent SIevent::readActualEvent(unsigned short serviceID, unsigned timeoutInSec
 	int fd;
 	SIevent evt; // Std-Event das bei Fehler zurueckgeliefert wird
 	struct SI_section_header header;
-	struct dmxSctFilterParams flt;
+	struct dmx_sct_filter_params flt;
 	char *buf;
 
-	memset (&flt.filter, 0, sizeof (struct dmxFilter));
+	memset (&flt.filter, 0, sizeof (struct dmx_filter));
 
 	flt.pid              = 0x12;
 	flt.filter.filter[0] = 0x4e;
@@ -359,8 +362,8 @@ SIevent SIevent::readActualEvent(unsigned short serviceID, unsigned timeoutInSec
 	flt.timeout          = 0;
 	flt.flags            = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
 
-	if ((fd = open("/dev/dvb/card0/demux0", O_RDWR)) == -1) {
-		perror ("/dev/dvb/card0/demux0");
+	if ((fd = open("/dev/dvb/adapter0/demux0", O_RDWR)) == -1) {
+		perror ("/dev/dvb/adapter0/demux0");
 		return evt;
 	}
 	if (ioctl (fd, DMX_SET_FILTER, &flt) == -1) {

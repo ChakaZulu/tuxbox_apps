@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.141 2002/11/05 06:50:19 field Exp $
+//  $Id: sectionsd.cpp,v 1.142 2002/11/05 19:56:26 obi Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -51,7 +51,7 @@
 #include <algorithm>
 #include <string>
 
-#include <ost/dmx.h>
+#include <linux/dvb/dmx.h>
 
 #include <sys/wait.h>
 #include <sys/time.h>
@@ -794,9 +794,9 @@ int DMX::start(void)
 		return 0;
 	}
 
-	if ((fd = open("/dev/dvb/card0/demux0", O_RDWR)) == -1)
+	if ((fd = open("/dev/dvb/adapter0/demux0", O_RDWR)) == -1)
 	{
-		perror ("[sectionsd] DMX: /dev/dvb/card0/demux0");
+		perror ("[sectionsd] DMX: /dev/dvb/adapter0/demux0");
 		pthread_mutex_unlock( &start_stop_mutex );
 		return 2;
 	}
@@ -810,17 +810,14 @@ int DMX::start(void)
 			return 3;
 		}
 
-	struct dmxSctFilterParams flt;
+	struct dmx_sct_filter_params flt;
 
-	memset (&flt, 0, sizeof (struct dmxSctFilterParams));
+	memset (&flt.filter, 0, sizeof (struct dmx_filter));
 
-	//  memset (&flt.filter, 0, sizeof (struct dmxFilter));
 	flt.pid = pID;
-
 	flt.filter.filter[0] = filters[filter_index].filter; // current/next
-
 	flt.filter.mask[0] = filters[filter_index].mask; // -> 4e und 4f
-
+	flt.timeout = 0;
 	flt.flags = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
 
 	if (ioctl (fd, DMX_SET_FILTER, &flt) == -1)
@@ -983,9 +980,9 @@ int DMX::change(int new_filter_index)
 //	if (new_filter_index != filter_index)
 	{
 
-		if ((fd = open("/dev/dvb/card0/demux0", O_RDWR)) == -1)
+		if ((fd = open("/dev/dvb/adapter0/demux0", O_RDWR)) == -1)
 		{
-			perror ("[sectionsd] DMX: /dev/dvb/card0/demux0");
+			perror ("[sectionsd] DMX: /dev/dvb/adapter0/demux0");
 			pthread_mutex_unlock( &start_stop_mutex );
 			return 2;
 		}
@@ -999,17 +996,14 @@ int DMX::change(int new_filter_index)
 				return 3;
 			}
 
-		struct dmxSctFilterParams flt;
+		struct dmx_sct_filter_params flt;
 
-		memset (&flt, 0, sizeof (struct dmxSctFilterParams));
+		memset (&flt.filter, 0, sizeof (struct dmx_filter));
 
 		flt.pid = pID;
-
 		flt.filter.filter[0] = filters[new_filter_index].filter;
-
 		flt.filter.mask[0] = filters[new_filter_index].mask;
-
-		//dprintf("changeDMX newfilter %x %x\n", flt.filter.filter[0], flt.filter.mask[0]);
+		flt.timeout = 0;
 		flt.flags = DMX_IMMEDIATE_START;
 
 		if ( ( new_filter_index != 0 ) && (!noCRC) )
@@ -1628,7 +1622,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.141 2002/11/05 06:50:19 field Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.142 2002/11/05 19:56:26 obi Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -4248,7 +4242,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.141 2002/11/05 06:50:19 field Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.142 2002/11/05 19:56:26 obi Exp $\n");
 
 	try
 	{
