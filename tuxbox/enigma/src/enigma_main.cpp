@@ -623,7 +623,8 @@ void ePSAudioSelector::selected(eListBoxEntryText*l)
 		eDebug("SET %02x", (int)l->getKey() );
 		service->setAudioStream((int)l->getKey());
 	}
-	close(0);
+	if ( in_loop )
+		close(0);
 }
 
 ePSAudioSelector::ePSAudioSelector()
@@ -4574,9 +4575,28 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 	case eServiceEvent::evtAddNewAudioStreamId:
 		eDebug("case eServiceEvent::evtAddNewAudioStreamId:.. %02x", event.param );
 		audioselps.add(event.param);
-		ButtonYellowDis->hide();
-		ButtonYellowEn->show();
-		flags|=ENIGMA_AUDIO_PS;
+		if ( audioselps.getCount() == 1 )
+		{
+			eServiceHandler *handler=eServiceInterface::getInstance()->getService();
+			if (!handler)
+				return;
+			if ( playlist->current != playlist->getConstList().end()
+				&& playlist->current->current_position == -1 )
+			{
+				Decoder::Pause();
+				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 0));
+				usleep(100*1000);
+				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekReal, 0));
+				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 1));
+				Decoder::Resume();
+			}
+		}
+		else if ( audioselps.getCount() > 1 )
+		{
+			ButtonYellowDis->hide();
+			ButtonYellowEn->show();
+			flags|=ENIGMA_AUDIO_PS;
+		}
 		break;
 #endif // DISABLE_FILE
 	}

@@ -45,7 +45,7 @@ class eDVBCaPMTClient
 {
 	int lastPMTVersion;
 public:
-	virtual void scanPMT(const eServiceReferenceDVB &, PMT *pmt) { }
+	virtual void handlePMT(const eServiceReferenceDVB &, PMT *pmt) { }
 	virtual void enterService(const eServiceReferenceDVB &) { }
 	virtual void leaveService(const eServiceReferenceDVB &) { }
 };
@@ -82,7 +82,7 @@ public:
 	{
 		for ( std::set<eDVBCaPMTClient*>::iterator it(capmtclients.begin());
 			it != capmtclients.end(); ++it )
-		(*it)->scanPMT(service,pmt);
+		(*it)->handlePMT(service,pmt);
 	}
 };
 
@@ -115,9 +115,12 @@ public:
 #ifndef DISABLE_CI
 	eDVBCI *DVBCI;
 	eDVBCI *DVBCI2;
+	// for CI handling
+	void handlePMT(const eServiceReferenceDVB &, PMT*);
 #endif
 
-	void scanPMT(const eServiceReferenceDVB &, PMT*);
+	// set pids... detect used ca systems
+	void scanPMT( PMT *pmt );
 
 	void PATready(int error);
 	void SDTready(int error);

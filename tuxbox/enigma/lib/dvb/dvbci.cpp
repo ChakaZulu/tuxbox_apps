@@ -115,7 +115,7 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 			ci_progress(_("no module"));	
 		break;
 	case eDVBCIMessage::go:
-		newService();
+		newService(message.sid);
 		break;
 	case eDVBCIMessage::mmi_begin:
 //		eDebug("[DVBCI] got mmi_begin message..");
@@ -159,6 +159,9 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 //		eDebug("");
 		PMTaddDescriptor(message.sid, message.data);
 		break;
+/*
+// disabled... see dvbservice.cpp for more info
+    
 	case eDVBCIMessage::enable_ts:
 	{
 		int present=0;
@@ -182,6 +185,7 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 		if ( ::ioctl(fd, CI_TS_DEACTIVATE) < 0 )
 			eDebug("CI_TS_DEACTIVATE failed (%m)");
 		break;
+*/
 	}
 }
 
@@ -266,7 +270,7 @@ void eDVBCI::PMTaddDescriptor(int sid, unsigned char *data)
 	services[sid].push_back(entry);
 }
 
-void eDVBCI::newService()
+void eDVBCI::newService(int update)
 {
 	//eDebug("got new %d PMT entrys",tempPMTentrys);
 	ci_progress(appName);	
@@ -295,11 +299,12 @@ void eDVBCI::newService()
 		capmt[3]=i;			//session_id
 		capmt[7]=0x81;
 
-		capmt[9] = services.size() > 1 ?
+		capmt[9] = update ? 0x05 /*update*/ : 0x03 /*only*/;
+/*		services.size() > 1 ?
 				cnt == 1 ? 0x01 :  // first
 				cnt < services.size() ? 0x00 : // more
 				0x02 : // last
-				0x03; // only
+				0x03; // only*/
 
 //		eDebug("ca_pmt_list_management = %d", capmt[9]);
 
@@ -623,12 +628,14 @@ void eDVBCI::ca_manager(unsigned int session)
 				unsigned char buffer[12];
 				sessions[session].internal_state=1;
 
+
+/*  // disabled.. for more info see dvbservice.cpp
 				eServiceHandler *serviceHandler =
 					eServiceInterface::getInstance()->getService();
-				if ( serviceHandler && serviceHandler->getFlags() & eServiceHandler::flagIsScrambled )
+				if ( serviceHandler && serviceHandler->getFlags() & eServiceHandler::flagIsScrambled )*/
 				{
 					if ( ::ioctl(fd,CI_TS_ACTIVATE)<0 )
-					eDebug("CI_TS_ACTIVATE failed (%m)");
+						eDebug("CI_TS_ACTIVATE failed (%m)");
 				}
 
 				clearCAIDs();

@@ -118,7 +118,7 @@ protected:
 	void PMTflush(int program);
 	void PMTaddPID(int sid, int pid,int streamtype);
 	void PMTaddDescriptor(int sid, unsigned char *data);
-	void newService();
+	void newService(int update=0);
 	void create_sessionobject(unsigned char *tag,unsigned char *data,unsigned int len,int session);
 
 	bool sendData(unsigned char tc_id,unsigned char *data,unsigned int len);	

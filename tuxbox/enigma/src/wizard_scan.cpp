@@ -129,17 +129,17 @@ class eWizardScanInit
 public:
 	eWizardScanInit()
 	{
+		int res = 0;
 		int diseqc=0;
-		if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feCable )
-			return;
-again: // gotos considered harmless.. :)
 		eConfig::getInstance()->getKey("/elitedvb/wizards/diseqc", diseqc);
-		if (diseqc < 1)
+		if (diseqc)
+			return;
+		if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )
 		{
-			int res = 0;
-
+// gotos considered harmless.. :)
+again_wizard: 
 			res=eWizardSelectDiseqc::run();
-			
+
 			if (res >= 0)
 			{
 				eSatelliteConfigurationManager satconfig;
@@ -156,37 +156,45 @@ again: // gotos considered harmless.. :)
 					satconfig.extSetComplexity(3); // diseqc 1.2
 					break;
 				}
-
-again_satconfig:
-				satconfig.show();
-				res=satconfig.exec();
-				satconfig.hide();
-				
-				if (res != 1)
-					goto again;
-
+				do
 				{
-					eLNB *l=eZapScan::getRotorLNB(1);
-					if (l)
+					satconfig.show();
+					res=satconfig.exec();
+					satconfig.hide();
+
+					if (res != 1)
+						goto again_wizard;
+
 					{
-						RotorConfig c(l);
-						c.show();
-						c.exec();
-						c.hide();
+						eLNB *l=eZapScan::getRotorLNB(1);
+						if (l)
+						{
+							RotorConfig c(l);
+							c.show();
+							c.exec();
+							c.hide();
+						}
+					}
+
+					{
+						TransponderScan scan(0, 0, TransponderScan::stateMenu);
+						res=scan.exec();
 					}
 				}
+				while (res);
 
-				{
-					TransponderScan scan(0, 0, TransponderScan::stateMenu);
-					res=scan.exec();
-				}
-				if (res)
-					goto again_satconfig;
-				eZapMain::getInstance()->showServiceSelector( eServiceSelector::dirFirst, eZapMain::pathAll );
 			}
-			diseqc=1;
-			eConfig::getInstance()->setKey("/elitedvb/wizards/diseqc", diseqc);
 		}
+		else do // cable or dvb-t
+		{
+			TransponderScan scan(0, 0, TransponderScan::stateMenu);
+			res=scan.exec();
+		}
+		while ( res );
+
+		eZapMain::getInstance()->showServiceSelector( eServiceSelector::dirFirst, eZapMain::pathAll );
+		diseqc=1;
+		eConfig::getInstance()->setKey("/elitedvb/wizards/diseqc", diseqc);
 	}
 };
 

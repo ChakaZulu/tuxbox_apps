@@ -225,9 +225,9 @@ a:
 						if ( cnt == 30 )
 						{
 							eDebug("/*emit*/ (*newastreamid)(%02x)", code);
-							/*emit*/ (*newastreamid)(code);
 							if ( !curAudioStreamID )
-								setAudioStream(code);
+								curAudioStreamID = code;
+							/*emit*/ (*newastreamid)(code);
 						}
 					}
 				}
@@ -299,9 +299,9 @@ a:
 							{
 								eDebug("found new AC3 stream subid %02x", subid);
 								eDebug("/*emit*/ (*newastreamid)(%04x)", code);
-								/*emit*/ (*newastreamid)(code);
 								if ( !curAudioStreamID )
-									setAudioStream(code);
+									curAudioStreamID = code;
+								/*emit*/ (*newastreamid)(code);
 							}
 						}
 					}

@@ -18,6 +18,7 @@
 #include <timer.h>
 #include <enigma_main.h>
 #include <enigma_plugins.h>
+#include <enigma_standby.h>
 #include <sselect.h>
 
 #include <lib/driver/eavswitch.h>
@@ -210,12 +211,41 @@ static eString admin(eString request, eString dirpath, eString opts, eHTTPConnec
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString,eString> opt=getRequestOptions(opts);
 	eString command=opt["command"];
-	if (command && command=="shutdown")
+	if (command)
 	{
-		eZap::getInstance()->quit();
-		return "<html>" CHARSETMETA "<head><title>Shutdown</title></head><body>Shutdown initiated.</body></html>\n";
-	} else
-		return "<html>" CHARSETMETA "<head><title>Error</title></head><body>Unknown admin command.</body></html>\n";
+		if ( command=="shutdown")
+		{
+			eZap::getInstance()->quit();
+			return "<html>" CHARSETMETA "<head><title>Shutdown</title></head><body>Shutdown initiated.</body></html>\n";
+		}
+		else if ( command=="reboot")
+		{
+			eZap::getInstance()->quit(4);
+			return "<html>" CHARSETMETA "<head><title>Reboot</title></head><body>Reboot initiated.</body></html>\n";
+		}
+		else if ( command=="restart")
+		{
+			eZap::getInstance()->quit(2);
+			return "<html>" CHARSETMETA "<head><title>Restart Enigma</title></head><body>Restart of enigma is initiated.</body></html>\n";
+		}
+		else if ( command=="wakeup")
+		{
+			if ( eZapStandby::getInstance() )
+			{
+				eZapStandby::getInstance()->wakeUp(0);
+				return "<html>" CHARSETMETA "<head><title>Wakeup</title></head><body>enigma is waking up.</body></html>\n";
+			}
+			return "<html>" CHARSETMETA "<head><title>Wakeup</title></head><body>enigma doesn't sleep :)</body></html>\n";
+		}
+		else if ( command=="standby" )
+		{
+			if ( eZapStandby::getInstance() )
+				return "<html>" CHARSETMETA "<head><title>Standby</title></head><body>enigma is already sleeping</body></html>\n";
+			eZapMain::getInstance()->gotoStandby();
+			return "<html>" CHARSETMETA "<head><title>Standby</title></head><body>enigma is sleeping now</body></html>\n";
+		}
+	}
+	return "<html>" CHARSETMETA "<head><title>Error</title></head><body>Unknown admin command.(valid commands are: shutdown, reboot, restart, standby, wakeup) </body></html>\n";
 }
 
 static eString audio(eString request, eString dirpath, eString opts, eHTTPConnection *content)

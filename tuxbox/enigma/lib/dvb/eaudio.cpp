@@ -35,7 +35,7 @@ void eAudio::setAC3default(int a)
 	{
 		eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 		if ( sapi )
-			eDVBCaPMTClientHandler::distribute_gotPMT( sapi->service, pmt);
+			sapi->scanPMT(pmt);
 		pmt->unlock();
 	}
 }

@@ -195,6 +195,7 @@ class ePSAudioSelector: public eListBoxWindow<eListBoxEntryText>
 {
 	void selected(eListBoxEntryText *);
 public:
+	int getCount() { return list.getCount(); }
 	ePSAudioSelector();
 	void add(unsigned int id);
 	void clear();
@@ -519,6 +520,7 @@ public:
 	void stopMessages();
 	void pauseMessages();
 	void nextMessage();
+	void gotoStandby() { message_notifier.send( messageGoSleep ); }
 	static eZapMain *getInstance() { return instance; }
 
 	enum {
