@@ -144,7 +144,7 @@ epglist.head Event-list - %s
 epglist.noevents EPG is not available...
 
 streaminfo.head Stream-Information
-streaminfo.resolution Resulution
+streaminfo.resolution Resolution
 streaminfo.bitrate Bitrate
 streaminfo.aratio Aspect Radio
 streaminfo.aratio_unknown Aspect Radio: unknown

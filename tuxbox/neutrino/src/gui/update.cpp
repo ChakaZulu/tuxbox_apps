@@ -198,7 +198,7 @@ bool CFlashTool::erase()
 
 CHTTPUpdater::CHTTPUpdater()
 {
-	BasePath = "http://mcclean.cyberphoria.org/";
+	BasePath = "http://dboxupdate.berlios.de/update/";
 	statusViewer = NULL;
 }
 
