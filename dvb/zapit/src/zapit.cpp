@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.105 2002/03/24 22:42:14 McClean Exp $
+  $Id: zapit.cpp,v 1.106 2002/03/25 00:07:26 McClean Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -2495,6 +2495,15 @@ void parse_command()
                	zapTo_ServiceID( msgZaptoServiceID2.serviceID , ( rmsg.cmd == CZapitClient::CMD_ZAPTO_SUBSERVICEID_NOWAIT ) );
 			break;
 
+			case CZapitClient::CMD_GET_LAST_CHANNEL :
+				channel_msg mysettings;
+				mysettings = load_settings();
+				CZapitClient::responseGetLastChannel responseGetLastChannel;
+				strcpy( responseGetLastChannel.channelName, mysettings.name );
+				responseGetLastChannel.channelNumber = mysettings.chan_nr;
+				responseGetLastChannel.mode = mysettings.mode;
+				send( connfd, &responseGetLastChannel, sizeof(responseGetLastChannel),0);
+			break;
 
 			case CZapitClient::CMD_SET_AUDIOCHAN :
 				CZapitClient::commandSetAudioChannel msgSetAudioChannel;
@@ -2515,23 +2524,8 @@ void parse_command()
 			case CZapitClient::CMD_GET_CURRENT_SERVICEID :
 				CZapitClient::responseGetCurrentServiceID msgCurrentSID;
 				msgCurrentSID.serviceID = curr_onid_sid;
-				send( connfd, &msgSetMode, sizeof(msgSetMode), 0);
+				send( connfd, &msgCurrentSID, sizeof(msgCurrentSID), 0);
 			break;
-
-			/*case 's':
-			status = "00s";
-			if (send(connfd, status, strlen(status),0) == -1)
-			{
-				perror("[zapit] send");
-				return;
-			}
-			if (send(connfd, &curr_onid_sid, sizeof(uint),0) == -1)
-			{
-				perror("[zapit] send");
-				return;
-			}
-			break;
-*/
 
 			case CZapitClient::CMD_GET_BOUQUETS :
 				CZapitClient::commandGetBouquets msgGetBouquets;
@@ -2807,22 +2801,29 @@ void sendChannelListOfBouquet( uint nBouquet)
 
 uint8_t network_setup()
 {
-	listenfd = socket(AF_INET, SOCK_STREAM, 0);
+	memset(&servaddr, 0, sizeof(struct sockaddr_un));
+	servaddr.sun_family = AF_UNIX;
+	strcpy(servaddr.sun_path, ZAPIT_UDS_NAME);
+	clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
+	unlink(ZAPIT_UDS_NAME);
 
-	memset(&servaddr, 0, sizeof(servaddr));
-	servaddr.sin_family = AF_INET;
-	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	servaddr.sin_port = htons(1505);
-
-	if (bind(listenfd, (SA *) &servaddr, sizeof(servaddr)) != 0)
+	//network-setup
+	if ((listenfd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
 	{
-		perror("[zapit] bind failed");
+		perror("[zapit] socket");
 		return 1;
 	}
 
-	if (listen(listenfd, 5) != 0)
+	if ( bind(listenfd, (struct sockaddr*) &servaddr, clilen) <0 )
 	{
-		perror("[zapit] listen failed");
+		perror("[zapit] bind failed...\n");
+		return 1;
+	}
+
+
+	if (listen(listenfd, 5) !=0)
+	{
+		perror("[zapit] listen failed...\n");
 		return 1;
 	}
 
@@ -2837,7 +2838,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("Zapit $Id: zapit.cpp,v 1.105 2002/03/24 22:42:14 McClean Exp $\n\n");
+	printf("Zapit $Id: zapit.cpp,v 1.106 2002/03/25 00:07:26 McClean Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -2958,8 +2959,8 @@ int main (int argc, char **argv)
 
 	while (keep_going)
 	{
-		clilen = sizeof(cliaddr);
-		connfd = accept(listenfd, (SA *) &cliaddr, &clilen);
+		connfd = accept(listenfd, (struct sockaddr*) &servaddr, (socklen_t*) &clilen);
+		//connfd = accept(listenfd, (SA *) &cliaddr, &clilen);
 		memset(&rmsg, 0, sizeof(rmsg));
 		read(connfd, &rmsg, sizeof(rmsg));
 		parse_command();
