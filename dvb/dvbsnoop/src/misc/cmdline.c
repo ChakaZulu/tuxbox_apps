@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.11 2003/12/09 21:02:31 rasc Exp $
+$Id: cmdline.c,v 1.12 2003/12/10 20:07:15 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: cmdline.c,v 1.11 2003/12/09 21:02:31 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.12  2003/12/10 20:07:15  rasc
+minor stuff
+
 Revision 1.11  2003/12/09 21:02:31  rasc
 transponder pid-scan improved (should be sufficient now)
 
@@ -179,7 +182,7 @@ void usage (void)
 {
 
     printf("dvbsnoop  - a dvb/mpeg2 stream analyzer tool\n");
-    printf("Version: %s  (%s %s)\n",PACKAGE_VERSION,__DATE__,__TIME__);
+    printf("Version: %s  (%s %s)\n",DVBSNOOP_VERSION,__DATE__,__TIME__);
     printf("         %s  \n",DVBSNOOP_URL);
     printf("         %s  \n",DVBSNOOP_COPYRIGHT);
     printf("\n");

@@ -1,5 +1,5 @@
 /*
-$Id: dmx_tspidscan.c,v 1.3 2003/12/09 20:34:23 rasc Exp $
+$Id: dmx_tspidscan.c,v 1.4 2003/12/10 20:07:15 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dmx_tspidscan.c,v 1.3 2003/12/09 20:34:23 rasc Exp $
 
 
 $Log: dmx_tspidscan.c,v $
+Revision 1.4  2003/12/10 20:07:15  rasc
+minor stuff
+
 Revision 1.3  2003/12/09 20:34:23  rasc
 transponder pid-scan improved (should be sufficient now)
 
@@ -52,12 +55,14 @@ pidscan on transponder
  * some definition
  */
 
+// min. buffer collect time before read/poll
+// has to be below timeouts!!!
+#define PID_TIME_WAIT		100
+
 // timeout in ms
 // TimoutHIGH will be used on PIDs < 0x20
-#define PID_TIMEOUT_LOW		250
-#define PID_TIMEOUT_HIGH	30100
-// buffer collect delay time
-#define PID_TIME_WAIT		50
+#define PID_TIMEOUT_LOW		(250 - PID_TIME_WAIT)
+#define PID_TIMEOUT_HIGH	(30100 - PID_TIME_WAIT)
 
 // max filters (will be checked dynamically)
 #define MAX_PID_FILTER		64
@@ -160,8 +165,7 @@ int ts_pidscan (OPTION *opt)
 			flt.input = DMX_IN_FRONTEND;
 			flt.output = DMX_OUT_TS_TAP;
 			flt.pes_type = DMX_PES_OTHER;
-			flt.flags = DMX_IMMEDIATE_START|DMX_ONESHOT;
-			// flt.flags = DMX_IMMEDIATE_START;
+			flt.flags = DMX_IMMEDIATE_START;
 			if (ioctl(dmxfd[i], DMX_SET_PES_FILTER, &flt) < 0) {
 				perror("DMX_SET_PES_FILTER");
 				break;

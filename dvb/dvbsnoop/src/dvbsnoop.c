@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.c,v 1.15 2003/12/07 23:36:12 rasc Exp $
+$Id: dvbsnoop.c,v 1.16 2003/12/10 20:07:14 rasc Exp $
 
  DVBSNOOP
 
@@ -16,6 +16,9 @@ $Id: dvbsnoop.c,v 1.15 2003/12/07 23:36:12 rasc Exp $
 
 
 $Log: dvbsnoop.c,v $
+Revision 1.16  2003/12/10 20:07:14  rasc
+minor stuff
+
 Revision 1.15  2003/12/07 23:36:12  rasc
 pidscan on transponder
 - experimental(!)
@@ -79,6 +82,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "dvb_api/dmx_sect.h"
 #include "dvb_api/dmx_pes.h"
 #include "dvb_api/dmx_ts.h"
+#include "dvb_api/dmx_tspidscan.h"
 
 
 
@@ -108,7 +112,7 @@ int main(int argc, char **argv)
   indent (0);
   if (! opt.binary_out) {
      if (! opt.hide_copyright) {
-        out_nl (1, "%s -- %s ", PACKAGE_VERSION, DVBSNOOP_URL);
+        out_nl (1, "%s -- %s ", DVBSNOOP_PROG_VERSION, DVBSNOOP_URL);
      }
 
      out_nl (9, "   PID   : %d (0x%04x)",opt.pid,opt.pid);

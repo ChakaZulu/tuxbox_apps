@@ -1,5 +1,5 @@
 /*
-$Id: version.h,v 1.15 2003/12/03 21:42:09 rasc Exp $
+$Id: version.h,v 1.16 2003/12/10 20:07:14 rasc Exp $
 
   dvbsnoop
   http://dvbsnoop.sourceforge.net/
@@ -15,6 +15,7 @@ $Id: version.h,v 1.15 2003/12/03 21:42:09 rasc Exp $
  * Version set in configure.ac
  */
 #define DVBSNOOP_VERSION     PACKAGE_VERSION
+#define DVBSNOOP_PROG_VERSION    "dvbsnoop V"PACKAGE_VERSION
 
 
 #define DVBSNOOP_URL         "http://dvbsnoop.sourceforge.net/"
