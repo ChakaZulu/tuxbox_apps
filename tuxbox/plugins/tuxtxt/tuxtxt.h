@@ -12,7 +12,7 @@
 #include <dbox/avs_core.h>
 #include <dbox/saa7126_core.h>
 #include <dbox/fp.h>
-#include <ost/dmx.h>
+#include <linux/dvb/dmx.h>
 #include <plugin.h>
 #include <dbox/lcd-ks0713.h>
 

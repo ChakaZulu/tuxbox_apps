@@ -5,6 +5,7 @@
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
+ *    V1.39: ported to dvb api v3 by obi                                      *
  *    V1.38: some mods & fixes                                                *
  *    V1.37: fixing includes by woglinde                                      *
  *    V1.36: fix lcd-support                                                  *
@@ -211,7 +212,7 @@ void plugin_exec(PluginParam *par)
 
 int Init()
 {
-	struct dmxPesFilterParams dmx_flt;
+	struct dmx_pes_filter_params dmx_flt;
 	int error;
 
 	//init data
@@ -312,9 +313,9 @@ int Init()
 
 	//open demuxer
 
-		if((dmx = open("/dev/dvb/card0/demux0", O_RDWR)) == -1)
+		if((dmx = open("/dev/dvb/adapter0/demux0", O_RDWR)) == -1)
 		{
-			perror("TuxTxt <open /dev/dvb/card0/demux0>");
+			perror("TuxTxt <open /dev/dvb/adapter0/demux0>");
 			return 0;
 		}
 
@@ -400,7 +401,7 @@ int Init()
 		dmx_flt.pid		= vtxtpid;
 		dmx_flt.input	= DMX_IN_FRONTEND;
 		dmx_flt.output	= DMX_OUT_TAP;
-		dmx_flt.pesType	= DMX_PES_OTHER;
+		dmx_flt.pes_type	= DMX_PES_OTHER;
 		dmx_flt.flags	= DMX_IMMEDIATE_START;
 
 		if(ioctl(dmx, DMX_SET_PES_FILTER, &dmx_flt) == -1)
@@ -506,7 +507,7 @@ void CleanUp()
 
 int GetVideotextPIDs()
 {
-	struct dmxSctFilterParams dmx_flt;
+	struct dmx_sct_filter_params dmx_flt;
 	int pat_scan, pmt_scan, sdt_scan, desc_scan, pid_test, byte, diff;
 
 	unsigned char PAT[1024];
@@ -519,8 +520,7 @@ int GetVideotextPIDs()
 
 	//read PAT to get all PMT's
 
-		memset(&dmx_flt.filter.filter, 0x00, DMX_FILTER_SIZE);
-		memset(&dmx_flt.filter.mask,   0x00, DMX_FILTER_SIZE);
+		memset(&dmx_flt.filter, 0x00, sizeof(struct dmx_filter));
 
 		dmx_flt.pid				= 0x0000;
 		dmx_flt.flags			= DMX_ONESHOT | DMX_CHECK_CRC | DMX_IMMEDIATE_START;
@@ -683,7 +683,7 @@ skip_pid:;
 
 void ConfigMenu(int Init)
 {
-	struct dmxPesFilterParams dmx_flt;
+	struct dmx_pes_filter_params dmx_flt;
 	int val, byte, line, menuitem = 1;
 	int current_pid = 0;
 
@@ -996,7 +996,7 @@ void ConfigMenu(int Init)
 														dmx_flt.pid		= vtxtpid;
 														dmx_flt.input	= DMX_IN_FRONTEND;
 														dmx_flt.output	= DMX_OUT_TAP;
-														dmx_flt.pesType	= DMX_PES_OTHER;
+														dmx_flt.pes_type	= DMX_PES_OTHER;
 														dmx_flt.flags	= DMX_IMMEDIATE_START;
 
 														if(ioctl(dmx, DMX_SET_PES_FILTER, &dmx_flt) == -1)
