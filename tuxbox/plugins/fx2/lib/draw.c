@@ -523,6 +523,7 @@ void	FBMove( int x, int y, int x2, int y2, int dx, int dy )
 			memcpy(back+(i*dx),lfb+f,dx);
 
 		FBCopyImage( x2, y2, dx, dy, back );
+		free( back );
 		return;
 	}
 	for( i=0; i < dy; i++, f+=stride, t+=stride )
