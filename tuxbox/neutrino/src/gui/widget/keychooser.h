@@ -54,7 +54,7 @@ class CKeyChooser : public CMenuWidget
 		CKeyChooserItemNoKey	*keyDeleter;
 
 	public:
-		CKeyChooser(int *Key, const char * const title, const std::string & Icon = ""); // title: UTF-8
+		CKeyChooser(int * const Key, const neutrino_locale_t title, const std::string & Icon = "");
 		~CKeyChooser();
 
 		void paint();

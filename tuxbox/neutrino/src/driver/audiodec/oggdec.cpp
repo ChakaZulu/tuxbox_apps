@@ -82,8 +82,7 @@ CBaseDec::RetCode COggDec::Decoder(FILE *in, int OutputFd, State* state, CAudioM
 
   SetMetaData(&vf, meta_data);
 
-  if (SetDSP(OutputFd, AFMT_S16_BE, 
-				 ov_info(&vf,0)->rate , ov_info(&vf,0)->channels))
+  if (SetDSP(OutputFd, AFMT_S16_NE, ov_info(&vf,0)->rate, ov_info(&vf,0)->channels))
   {
 	  Status=DSPSET_ERR;
 	  return Status;
@@ -130,10 +129,10 @@ CBaseDec::RetCode COggDec::Decoder(FILE *in, int OutputFd, State* state, CAudioM
 	  }
 	  bytes=0;
 	  if(mSeekable)
-		  mSlotTime[mWriteSlot]=ov_time_tell(&vf);
+		  mSlotTime[mWriteSlot] = (ogg_int64_t)(1000 * ov_time_tell(&vf));
 	  do
 	  {
-		  rval = ov_read(&vf, mPcmSlots[mWriteSlot]+bytes, mSlotSize-bytes, &bitstream);
+		  rval = ov_read(&vf, mPcmSlots[mWriteSlot]+bytes, mSlotSize-bytes, 0, 2, 1, &bitstream);
 		  bytes+=rval;
 	  } while (rval > 0 && bytes !=mSlotSize);
 	  if((*state==FF || *state==REV) && mSeekable )
@@ -246,7 +245,7 @@ void COggDec::SetMetaData(OggVorbis_File* vf, CAudioMetaData* m)
 	m->bitrate = ov_info(vf,0)->bitrate_nominal;
 	m->samplerate = ov_info(vf,0)->rate;
 	if(mSeekable)
-		m->total_time = (time_t) ov_time_total(vf, 0)/1000;
+		m->total_time = (time_t) ov_time_total(vf, 0);
 	std::stringstream ss;
 	ss << "OGG V." << ov_info(vf,0)->version << " / " <<  ov_info(vf,0)->channels << "channel(s)";
 	m->type_info = ss.str();

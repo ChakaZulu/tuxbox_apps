@@ -59,7 +59,7 @@ CMenuForwarder * const GenericMenuBack = &CGenericMenuBack;
 
 
 
-CMenuWidget::CMenuWidget(const char * const Name, const std::string & Icon, const int mwidth, const int mheight, const bool Localizing)
+CMenuWidget::CMenuWidget(const char * const Name, const std::string & Icon, const int mwidth, const int mheight)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	name = Name;
@@ -70,7 +70,6 @@ CMenuWidget::CMenuWidget(const char * const Name, const std::string & Icon, cons
 		width = g_settings.screen_EndX - g_settings.screen_StartX;
 	height = mheight; // height(menu_title)+10+...
 	wanted_height=mheight;
-	localizing = Localizing;
 	current_page=0;
 }
 
@@ -267,9 +266,9 @@ void CMenuWidget::hide()
 
 void CMenuWidget::paint()
 {
-	std::string l_name = localizing ? g_Locale->getText(name.c_str()) : name; // FIXME
+	const char * l_name = g_Locale->getText(name);
 
-	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, l_name.c_str());
+	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, l_name);
 
 	height=wanted_height;
 	if(height > (g_settings.screen_EndY - g_settings.screen_StartY))

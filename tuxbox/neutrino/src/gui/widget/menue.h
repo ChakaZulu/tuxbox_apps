@@ -262,12 +262,11 @@ class CMenuOptionStringChooser : public CMenuItem
 class CMenuWidget : public CMenuTarget
 {
 	protected:
+		neutrino_locale_t 	name;
 		CFrameBuffer		*frameBuffer;
 		std::vector<CMenuItem*>	items;
 		std::vector<unsigned int> page_start;
-		std::string			name;
 		std::string			iconfile;
-		bool			localizing;
 
 		int			width;
 		int			height;
@@ -289,8 +288,7 @@ class CMenuWidget : public CMenuTarget
 			selected=-1;
 			iconOffset= 0;
 		};
-		// Name must be UTF-8 encoded:
-		CMenuWidget(const char * const Name, const std::string & Icon = "", const int mwidth = 400, const int mheight = 576, const bool Localizing = true);
+		CMenuWidget(const neutrino_locale_t Name, const std::string & Icon = "", const int mwidth = 400, const int mheight = 576);
 		~CMenuWidget();
 
 		virtual void addItem(CMenuItem* menuItem, const bool defaultselected = false);
