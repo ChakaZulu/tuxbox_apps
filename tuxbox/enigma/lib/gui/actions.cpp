@@ -345,12 +345,18 @@ int eActionMapList::loadDevice(eRCDevice *device)
 					if (name)
 					{
 						const char *acode=k->GetAttributeValue("code");
+						int code=-1;
 						if (acode)
-						{
-							int code=0;
 							sscanf(acode, "%x", &code);
+						else
+						{
+							acode=k->GetAttributeValue("icode");
+							sscanf(acode, "%d", &code);
+						}
+						
+						if (code != -1)
 							keymap.insert(std::pair<std::string,int>(name, code));
-						} else
+						else
 							eFatal("no code specified for key %s!", name);
 					} else
 						eFatal("no name specified in keys!");
