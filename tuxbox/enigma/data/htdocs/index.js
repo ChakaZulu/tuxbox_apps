@@ -143,7 +143,9 @@ function openChannelInfo()
 function DVRrecord(xy)
 {
 	NewWindow("cgi-bin/record?command="+xy, "record", "200", "100", "no", "5000");
-	setTimeout("reload()", 2000);
+	if (parent.data.updateCycleTime)
+		parent.data.location.reload();
+	setTimeout("reload()", 500);
 }
 
 function startPlugin(xy)
