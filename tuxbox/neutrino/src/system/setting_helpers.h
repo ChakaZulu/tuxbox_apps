@@ -33,6 +33,7 @@
 #define __setting_helpers__
 
 #include "../widget/menue.h"
+#include "libnet.h"
 
 class CColorSetupNotifier : public CChangeObserver
 {

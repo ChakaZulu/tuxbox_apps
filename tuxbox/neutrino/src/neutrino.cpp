@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.107 2001/12/19 21:38:08 McClean Exp $
+        $Id: neutrino.cpp,v 1.108 2001/12/20 00:25:38 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.108  2001/12/20 00:25:38  McClean
+  use libnet
+
   Revision 1.107  2001/12/19 21:38:08  McClean
   new background
 
@@ -2012,7 +2015,7 @@ void CNeutrinoApp::scartMode()
 	printf("scartmode-loopended\n");
 	g_lcdd->setMode(LCDM_TV);
 	g_Controld->setScartMode( 0 );
-
+	g_FrameBuffer->paintBackground();
 	/*
 	if(mode==mode_scart)
 	{
@@ -2110,7 +2113,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.107 2001/12/19 21:38:08 McClean Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.108 2001/12/20 00:25:38 McClean Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;

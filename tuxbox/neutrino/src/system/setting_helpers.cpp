@@ -104,17 +104,23 @@ void setNetworkAddress(char* ip, char* netmask, char* broadcast)
 	printf("IP       : %s\n", ip);
 	printf("Netmask  : %s\n", netmask);
 	printf("Broadcast: %s\n", broadcast);
-	if(fork()==0)
+	netSetIP( "eth0", ip, netmask, broadcast);
+
+/*	if(fork()==0)
 	{
 		if (execlp("ifconfig", "ifconfig", "eth0", "up", ip, "netmask", netmask, "broadcast", broadcast, 0)<0)
 		{
 			perror("exec failed - ifconfig\n");
 		}
 	}
+*/
 }
 
 void setDefaultGateway(char* ip)
 {
+	printf("Gateway  : %s\n", ip);
+	netSetDefaultRoute( ip );
+	/*
 	if(fork()==0)
 	{
 	    if (execlp("route", "route", "add", "-net", "default", "gw", ip, 0)<0)
@@ -122,6 +128,7 @@ void setDefaultGateway(char* ip)
 			perror("exec failed - route\n");
 		}
 	}
+	*/
 }
 
 void setNameServer(char* ip)
