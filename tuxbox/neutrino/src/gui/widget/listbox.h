@@ -27,11 +27,78 @@
 
 #include "neutrinoMessages.h"
 #include "driver/framebuffer.h"
+#include "gui/widget/menue.h"
+#include "gui/widget/messagebox.h"
 
 #include <string>
 
 using namespace std;
 
+
+class CListBox : public CMenuWidget
+{
+	protected:
+		CFrameBuffer*	frameBuffer;
+		string			caption;
+		string			saveBoxCaption, saveBoxText;
+
+		int				width;
+		int				height;
+		int				x;
+		int				y;
+
+		int				fheight;
+		int				theight;
+
+		unsigned int	selected;
+		unsigned int	liststart;
+		unsigned int	listmaxshow;
+	
+		unsigned int	numwidth;
+		int 			ButtonHeight;
+
+		bool			toSave;
+
+		//----------------------------
+
+		void setTitle( string title );
+
+		virtual void paintItem(int pos);
+		virtual void paint();
+		virtual	void paintHead();
+		virtual void paintFoot();
+		virtual void hide();
+
+		
+		//------hier Methoden überschreiben-------
+
+		//------Fernbedienungsevents--------------
+		virtual void onRedKeyPressed(){};
+		virtual void onGreenKeyPressed(){};
+		virtual void onYellowKeyPressed(){};
+		virtual void onBlueKeyPressed(){};
+		virtual void onOkKeyPressed(){};
+		virtual void onOtherKeyPressed( int key ){};
+
+		//------gibt die Anzahl der Listenitems---
+		virtual int	getItemCount();
+
+		//------malen der Items-------------------
+		virtual int getItemHeight();
+		virtual void paintItem(int itemNr, int paintNr, bool selected);
+
+		//------Benutzung von setModified---------
+		void setModified( bool modified = true );
+		void setSaveDialogText(string title, string text);
+		virtual void onSaveData(){};
+
+
+
+	public:
+		//konstruktor UNBEDINGT aufrufen!
+		CListBox(); 
+		virtual int exec(CMenuTarget* parent, string actionKey);
+};
 
 
 
