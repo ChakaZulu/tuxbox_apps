@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.22 2005/01/20 21:08:58 ghostrider Exp $
+ * $Id: setup_extra.cpp,v 1.23 2005/02/04 14:59:06 ghostrider Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -57,22 +57,25 @@ eExpertSetup::eExpertSetup()
 		CONNECT((new eListBoxEntryMenu(&list, _("Factory reset"), eString().sprintf("(%d) %s", ++entry, _("all settings will set to factory defaults")) ))->selected, eExpertSetup::factory_reset);
 	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 #ifndef DISABLE_FILE
-	list.setFlags(list.getFlags()|eListBoxBase::flagNoPageMovement);
-	record_split_size = new eListBoxEntryMulti( (eListBox<eListBoxEntryMulti>*)&list, _("record split size (left, right)"));
-	record_split_size->add("         650MB        >", 650*1024);
-	record_split_size->add("<        700MB        >", 700*1024);
-	record_split_size->add("<        800MB        >", 800*1024);
-	record_split_size->add("<         1GB         >", 1024*1024);
-	record_split_size->add("<        1,5GB        >", 1536*1024);
-	record_split_size->add("<         2GB         >", 2*1024*1024);
-	record_split_size->add("<         4GB         >", 4*1024*1024);
-	record_split_size->add("<         8GB         >", 8*1024*1024);
-	record_split_size->add("<        16GB         ", 16*1024*1024);
-	int splitsize=0;
-	if (eConfig::getInstance()->getKey("/extras/record_splitsize", splitsize))
-		splitsize=1024*1024; // 1G
-	record_split_size->setCurrent(splitsize);
-	CONNECT( list.selchanged, eExpertSetup::selChanged );
+	if ( eSystemInfo::getInstance()->canRecordTS() )
+	{
+		list.setFlags(list.getFlags()|eListBoxBase::flagNoPageMovement);
+		record_split_size = new eListBoxEntryMulti( (eListBox<eListBoxEntryMulti>*)&list, _("record split size (left, right)"));
+		record_split_size->add("         650MB        >", 650*1024);
+		record_split_size->add("<        700MB        >", 700*1024);
+		record_split_size->add("<        800MB        >", 800*1024);
+		record_split_size->add("<         1GB         >", 1024*1024);
+		record_split_size->add("<        1,5GB        >", 1536*1024);
+		record_split_size->add("<         2GB         >", 2*1024*1024);
+		record_split_size->add("<         4GB         >", 4*1024*1024);
+		record_split_size->add("<         8GB         >", 8*1024*1024);
+		record_split_size->add("<        16GB         ", 16*1024*1024);
+		int splitsize=0;
+		if (eConfig::getInstance()->getKey("/extras/record_splitsize", splitsize))
+			splitsize=1024*1024; // 1G
+		record_split_size->setCurrent(splitsize);
+		CONNECT( list.selchanged, eExpertSetup::selChanged );
+	}
 #endif
 	CONNECT((new eListBoxEntryCheck((eListBox<eListBoxEntry>*)&list,_("Serviceselector help buttons"),"/ezap/serviceselector/showButtons",_("show colored help buttons in service selector")))->selected, eExpertSetup::colorbuttonsChanged );
 	new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Show Sat position"), "/extras/showSatPos", _("show sat position in the infobar"));
@@ -91,7 +94,8 @@ eExpertSetup::eExpertSetup()
 #ifndef DISABLE_FILE
 void eExpertSetup::selChanged(eListBoxEntryMenu* e)
 {
-	if ( e == (eListBoxEntryMenu*)record_split_size )
+	if ( eSystemInfo::getInstance()->canRecordTS() && 
+	    e == (eListBoxEntryMenu*)record_split_size )
 		eConfig::getInstance()->setKey("/extras/record_splitsize", (int)e->getKey());
 }
 #endif
