@@ -193,9 +193,10 @@ int eSkin::parseScheme(XMLTreeNode *xscheme)
 
 int eSkin::parseImages(XMLTreeNode *inode)
 {
-	eString basepath= eString(DATADIR) + eString("/enigma/pictures/") + inode->GetAttributeValue("basepath");
-	if (!basepath)
-		basepath="";
+	char *abasepath=inode->GetAttributeValue("basepath");
+	if (!abasepath)
+		abasepath="";
+	eString basepath=eString(DATADIR) + eString("/enigma/pictures/") + abasepath;
 	if (basepath[basepath.length()-1]!='/')
 		basepath+="/";
 
