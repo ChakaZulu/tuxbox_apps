@@ -52,36 +52,36 @@ extern "C" {
 #endif				/* __cplusplus */
 
 	typedef struct video_i{
-		u32 horizontal_size;
-		u32 vertical_size 	;
-		u32 aspect_ratio	;
+		uint32_t horizontal_size;
+		uint32_t vertical_size 	;
+		uint32_t aspect_ratio	;
 		double framerate	;
-		u32 video_format;
-		u32 bit_rate 	;
-		u32 comp_bit_rate	;
-		u32 vbv_buffer_size;
-		u32 CSPF 		;
-		u32 off;
+		uint32_t video_format;
+		uint32_t bit_rate 	;
+		uint32_t comp_bit_rate	;
+		uint32_t vbv_buffer_size;
+		uint32_t CSPF 		;
+		uint32_t off;
 	} VideoInfo; 		
 
 	typedef struct audio_i{
 		int layer;
-		u32 bit_rate;
-		u32 frequency;
-		u32 mode;
-		u32 mode_extension;
-		u32 emphasis;
-		u32 framesize;
-		u32 off;
+		uint32_t bit_rate;
+		uint32_t frequency;
+		uint32_t mode;
+		uint32_t mode_extension;
+		uint32_t emphasis;
+		uint32_t framesize;
+		uint32_t off;
 	} AudioInfo;
 
 
 
 	typedef
 	struct PTS_list_struct{
-		u32 PTS;
+		uint32_t PTS;
 		int pos;
-		u32 dts;
+		uint32_t dts;
 		int spos;
 	} PTS_List;
 
@@ -89,10 +89,10 @@ extern "C" {
 	struct frame_list_struct{
 		int type;
 		int pos;
-		u32 FRAME;
-		u32 time;
-		u32 pts;
-		u32 dts;
+		uint32_t FRAME;
+		uint32_t time;
+		uint32_t pts;
+		uint32_t dts;
 	} FRAME_List;
 
 	typedef
@@ -109,21 +109,21 @@ extern "C" {
 		int aframen;
 		long apes;
 		long vpes;
-		u32 vframe;
-		u32 aframe;
-		u32 vcframe;
-		u32 acframe;
-		u32 vpts;
-		u32 vdts;
-		u32 apts;
-		u32 vpts_old;
-		u32 apts_old;
-		u32 SCR;
-		u32 apts_off;
-		u32 vpts_off;
-		u32 apts_delay;
-		u32 vpts_delay;
-		u32 dts_delay;
+		uint32_t vframe;
+		uint32_t aframe;
+		uint32_t vcframe;
+		uint32_t acframe;
+		uint32_t vpts;
+		uint32_t vdts;
+		uint32_t apts;
+		uint32_t vpts_old;
+		uint32_t apts_old;
+		uint32_t SCR;
+		uint32_t apts_off;
+		uint32_t vpts_off;
+		uint32_t apts_delay;
+		uint32_t vpts_delay;
+		uint32_t dts_delay;
 		AudioInfo audio_info;
 		VideoInfo video_info;
 		int fin;
@@ -132,11 +132,11 @@ extern "C" {
 		long int vwrite;
 		long int aread;
 		long int vread;
-		u32 group;
-		u32 groupframe;
-		u32 muxr;
+		uint32_t group;
+		uint32_t groupframe;
+		uint32_t muxr;
 		int pack_size;
-		u32 time_off;
+		uint32_t time_off;
 	} Remux;
 
 	enum { NONE, I_FRAME, P_FRAME, B_FRAME, D_FRAME };

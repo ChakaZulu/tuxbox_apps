@@ -147,11 +147,11 @@ calc_crc32 (const uint8_t *sec, uint8_t len)
 }
 
 
-uint32_t trans_pts_dts(uint8_t *pts)
+uint64_t trans_pts_dts(uint8_t *pts)
 {
-	uint32_t wts;
+	uint64_t wts;
 	
-	wts = (((pts[0] & 0x06) << 4) | 
+	wts = ((uint64_t)((pts[0] & 0x0E) << 5) | 
 	       ((pts[1] & 0xFC) >> 2)) << 24; 
 	wts |= (((pts[1] & 0x03) << 6) |
 		((pts[2] & 0xFC) >> 2)) << 16; 
@@ -502,7 +502,7 @@ void pes_dfilt(p2p *p)
 		int c = 6+p->hlength+3*factor;
 		
 		if  ( p->flag2 & PTS_DTS ) 
-			p->vpts =  ntohl(trans_pts_dts(p->pts)); 
+			p->vpts = trans_pts_dts(p->pts); 
 		while ( !found && c+3 < p->plength+6 ){
 			if ( p->buf[c] == 0x00 && 
 			     p->buf[c+1] == 0x00 && 
@@ -523,7 +523,7 @@ void pes_dfilt(p2p *p)
 		int found = 0;
 		int c = 6+p->hlength+3*factor;
 		if  ( p->flag2 & PTS_DTS ) 
-			p->apts =  ntohl(trans_pts_dts(p->pts));  
+			p->apts = trans_pts_dts(p->pts);  
 		if (p->startv)
 			while ( !found && c+1 < p->plength+6){
 				if ( p->buf[c] == 0xFF && 
@@ -778,7 +778,7 @@ void ts_to_pes( int fdin, uint16_t pida, uint16_t pidv, int ps)
 	init_ipack(&pa, IPACKS,write_out, ps);
 	init_ipack(&pv, IPACKS,write_out, ps);
 
- 	if ((count = read(fdin,mbuf,TS_SIZE))<0)
+ 	if ((count = save_read(fdin,mbuf,TS_SIZE))<0)
 	    perror("reading");
 
 	for ( i = 0; i < 188 ; i++){
@@ -789,14 +789,14 @@ void ts_to_pes( int fdin, uint16_t pida, uint16_t pidv, int ps)
 		return;
 	} else {
 		memcpy(buf,mbuf+i,TS_SIZE-i);
-		if ((count = read(fdin,mbuf,i))<0)
+		if ((count = save_read(fdin,mbuf,i))<0)
 			perror("reading");
 		memcpy(buf+TS_SIZE-i,mbuf,i);
 		i = 188;
 	}
 	count = 1;
 	while (count > 0){
-		if ((count = read(fdin,buf+i,IN_SIZE-i)+i)<0)
+		if ((count = save_read(fdin,buf+i,IN_SIZE-i)+i)<0)
 			perror("reading");
 		
 
@@ -870,7 +870,7 @@ void insert_pat_pmt( int fdin, int fdout)
 
 	find_avpids(fdin, &pidv, &pida);
 	
- 	count = read(fdin,mbuf,TS_SIZE);
+ 	count = save_read(fdin,mbuf,TS_SIZE);
 	for ( i = 0; i < 188 ; i++){
 		if ( mbuf[i] == 0x47 ) break;
 	}
@@ -879,7 +879,7 @@ void insert_pat_pmt( int fdin, int fdout)
 		return;
 	} else {
 		memcpy(buf,mbuf+i,TS_SIZE-i);
-		count = read(fdin,mbuf,i);
+		count = save_read(fdin,mbuf,i);
 		memcpy(buf+TS_SIZE-i,mbuf,i);
 		i = 188;
 	}
@@ -903,7 +903,7 @@ void insert_pat_pmt( int fdin, int fdout)
 		write(fdout,tspid0,188);
 		write(fdout,tspid1,188);
 
-		count = read(fdin,buf+i,INN_SIZE-i);
+		count = save_read(fdin,buf+i,INN_SIZE-i);
 		
 		written = 0;
 		while (written < IN_SIZE){
@@ -1978,7 +1978,7 @@ void instant_repack (uint8_t *buf, int count, ipack *p)
 void write_out_es(uint8_t *buf, int count,void  *priv)
 {
 	ipack *p = (ipack *) priv;
-	u8 payl = buf[8]+9+p->start-1;
+	uint8_t payl = buf[8]+9+p->start-1;
 
 	write(p->fd, buf+payl, count-payl);
 	p->start = 1;
@@ -2002,7 +2002,7 @@ int64_t ts_demux(int fdin, int fdv_out,int fda_out,uint16_t pida,
 	uint16_t pid;
 	ipack pa, pv;
 	ipack *p;
-	u8 *sb;
+	uint8_t *sb;
 	int64_t apts=0;
 	int64_t vpts=0;
 	int verb = 0;
@@ -2033,7 +2033,7 @@ int64_t ts_demux(int fdin, int fdv_out,int fda_out,uint16_t pida,
 	pa.data = (void *)&pa;
 	pv.data = (void *)&pv;
 
- 	count = read(fdin,mbuf,TS_SIZE);
+ 	count = save_read(fdin,mbuf,TS_SIZE);
 	if (count) l+=count;
 	for ( i = 0; i < 188 ; i++){
 		if ( mbuf[i] == 0x47 ) break;
@@ -2043,7 +2043,7 @@ int64_t ts_demux(int fdin, int fdv_out,int fda_out,uint16_t pida,
 		return 0;
 	} else {
 		memcpy(buf,mbuf+i,TS_SIZE-i);
-		count = read(fdin,mbuf,i);
+		count = save_read(fdin,mbuf,i);
 		if (count) l+=count;
 		memcpy(buf+TS_SIZE-i,mbuf,i);
 		i = 188;
@@ -2051,7 +2051,7 @@ int64_t ts_demux(int fdin, int fdv_out,int fda_out,uint16_t pida,
 	
 	count = 1;
 	while (count > 0){
-		count = read(fdin,buf+i,IN_SIZE-i)+i;
+		count = save_read(fdin,buf+i,IN_SIZE-i)+i;
 		if (count) l+=count;
 		if (verb && perc >last_perc){
 			perc = (100*l)/length;
@@ -2093,7 +2093,7 @@ int64_t ts_demux(int fdin, int fdv_out,int fda_out,uint16_t pida,
 					int l = TS_SIZE - 13 - off - sb[8];
 					if ( pid == pidv &&   
 					     (p->start = 
-					      get_vinfo( pay, l,&p->vi,1)+1) >0
+					      get_vinfo( pay, l,&p->vi,0)+1) >0
 						){
 						vpts = trans_pts_dts(sb+9);
 						printf("vpts : %fs\n",
@@ -2101,7 +2101,7 @@ int64_t ts_demux(int fdin, int fdv_out,int fda_out,uint16_t pida,
 					}
 					if ( pid == pida && 
 					     (p->start = 
-					      get_ainfo( pay, l,&p->ai,1)+1) >0
+					      get_ainfo( pay, l,&p->ai,0)+1) >0
 						){
 						apts = trans_pts_dts(sb+9);
 						printf("apts : %fs\n",
@@ -2146,7 +2146,7 @@ void ts2es(int fdin,  uint16_t pidv)
 	p.fd = STDOUT_FILENO;
 	p.data = (void *)&p;
 
- 	count = read(fdin,mbuf,TS_SIZE);
+ 	count = save_read(fdin,mbuf,TS_SIZE);
 	if (count) l+=count;
 	for ( i = 0; i < 188 ; i++){
 		if ( mbuf[i] == 0x47 ) break;
@@ -2156,7 +2156,7 @@ void ts2es(int fdin,  uint16_t pidv)
 		return;
 	} else {
 		memcpy(buf,mbuf+i,TS_SIZE-i);
-		count = read(fdin,mbuf,i);
+		count = save_read(fdin,mbuf,i);
 		if (count) l+=count;
 		memcpy(buf+TS_SIZE-i,mbuf,i);
 		i = 188;
@@ -2164,7 +2164,7 @@ void ts2es(int fdin,  uint16_t pidv)
 	
 	count = 1;
 	while (count > 0){
-		count = read(fdin,buf+i,IN_SIZE-i)+i;
+		count = save_read(fdin,buf+i,IN_SIZE-i)+i;
 		if (count) l+=count;
 		if (verb && perc >last_perc){
 			perc = (100*l)/length;
@@ -2216,7 +2216,7 @@ void change_aspect(int fdin, int fdout, int aspect)
 		neof = read_ps(fdin,&ps);
 		write_ps(fdout,&ps);
 		for (i = 0; i < ps.npes; i++){
-			u8 *buf;
+			uint8_t *buf;
 			int c = 0;
 			int l;
 

@@ -93,14 +93,14 @@ int add_pts(PTS_List *ptsl, uint32_t pts, int pos, int spos, int nr, uint32_t dt
 
 void add_vpts(Remux *rem, uint8_t *pts)
 {
-	uint32_t PTS = ntohl(trans_pts_dts(pts));
+	uint32_t PTS = trans_pts_dts(pts);
 	rem->vptsn = add_pts(rem->vpts_list, PTS, rem->vwrite, rem->awrite,
 			     rem->vptsn, PTS);
 }
 
 void add_apts(Remux *rem, uint8_t *pts)
 {
-	uint32_t PTS = ntohl(trans_pts_dts(pts));
+	uint32_t PTS = trans_pts_dts(pts);
 	rem->aptsn = add_pts(rem->apts_list, PTS, rem->awrite, rem->vwrite,
 			     rem->aptsn, PTS);
 }
@@ -223,8 +223,8 @@ void find_vframes( Remux *rem, uint8_t *buf, int l)
 	int hour;
 	int min;
 	int sec;
-	u64 pts=0;
-	u64 dts=0;
+	uint64_t pts=0;
+	uint64_t dts=0;
 	uint32_t tempref = 0;
 
 	while ( c < l - 6){
@@ -241,7 +241,7 @@ void find_vframes( Remux *rem, uint8_t *buf, int l)
   
 			time = 3600*hour + 60*min + sec;
 			if ( rem->time_off){
-				time = (uint32_t)((u64)time - rem->time_off);
+				time = (uint32_t)((uint64_t)time - rem->time_off);
 				hour = time/3600;
 				min  = (time%3600)/60;
 				sec  = (time%3600)%60;
@@ -265,11 +265,11 @@ void find_vframes( Remux *rem, uint8_t *buf, int l)
 			
 			type = ((buf[c+1]&0x38) >>3);
 			if ( rem->video_info.framerate){
-				pts = ((u64)rem->vframe + tempref + 1 
+				pts = ((uint64_t)rem->vframe + tempref + 1 
 					- rem->groupframe ) * 90000ULL
 					    /rem->video_info.framerate 
 					+ rem->vpts_off;
-				dts = (u64)rem->vframe * 90000ULL/
+				dts = (uint64_t)rem->vframe * 90000ULL/
 					rem->video_info.framerate 
 					+ rem->vpts_off;
 			
@@ -279,7 +279,7 @@ printpts((uint32_t)pts-rem->vpts_off);
  fprintf(stderr,"   REALPTS:");
  printpts(rem->vpts_list[rem->vptsn-1].PTS-rem->vpts_off);
  fprintf(stderr,"   DIFF:");
- printpts(pts-(u64)rem->vpts_list[rem->vptsn-1].PTS);
+ printpts(pts-(uint64_t)rem->vpts_list[rem->vptsn-1].PTS);
  fprintf(stderr,"   DIST: %4d",-rem->vpts_list[rem->vptsn-1].pos+(rem->vwrite+c-4));
  //fprintf(stderr,"   ERR: %3f",(double)(-rem->vpts_list[rem->vptsn-1].PTS+pts)/(rem->vframe+1));
  fprintf(stderr,"\r");
@@ -306,7 +306,7 @@ printpts((uint32_t)pts-rem->vpts_off);
 void find_aframes( Remux *rem, uint8_t *buf, int l)
 {
  	int c = 0;
-	u64 pts = 0;
+	uint64_t pts = 0;
 	int sam;
 	uint32_t fr;
 
@@ -319,7 +319,7 @@ void find_aframes( Remux *rem, uint8_t *buf, int l)
 				sam = samples[3-rem->audio_info.layer];
 				fr = freq[rem->audio_info.frequency] ;
 		
-			  pts = ( (u64)rem->aframe * sam * 900ULL)/fr
+			  pts = ( (uint64_t)rem->aframe * sam * 900ULL)/fr
 				  + rem->apts_off;
 				
 			  /*  	  
@@ -328,7 +328,7 @@ printpts((uint32_t)pts-rem->apts_off);
  fprintf(stderr," REALPTS:");
  printpts(rem->apts_list[rem->aptsn-1].PTS-rem->apts_off);
  fprintf(stderr," DIFF:");
- printpts((uint32_t)((u64)rem->apts_list[rem->aptsn-1].PTS-pts));
+ printpts((uint32_t)((uint64_t)rem->apts_list[rem->aptsn-1].PTS-pts));
  fprintf(stderr," DIST: %4d",-rem->apts_list[rem->aptsn-1].pos+(rem->awrite+c-2));
  fprintf(stderr,"\r");
 			  */
@@ -703,7 +703,7 @@ int write_audio_pes( Remux *rem, uint8_t *buf, int *alength)
 	p = PS_HEADER_L1+PES_H_MIN;
 
 	if (rem->apts_old != rem->apts){
-		pts = (uint32_t)((u64)rem->apts + rem->apts_delay - rem->apts_off);
+		pts = (uint32_t)((uint64_t)rem->apts + rem->apts_delay - rem->apts_off);
 		p += 5;
 	}
 	if ( length+p >= rem->pack_size){
@@ -754,7 +754,7 @@ int write_video_pes( Remux *rem, uint8_t *buf, int *vlength)
 	p = PS_HEADER_L1+PES_H_MIN;
 
 	if (rem->vpts_old != rem->vpts){
-		pts = (uint32_t)((u64)rem->vpts + rem->vpts_delay - rem->vpts_off);
+		pts = (uint32_t)((uint64_t)rem->vpts + rem->vpts_delay - rem->vpts_off);
 		p += 5;
 	}
 	if ( length+p >= rem->pack_size){
@@ -804,9 +804,9 @@ void print_info( Remux *rem , int ret)
 	fprintf(stderr,"SCR:");
 	printpts(rem->SCR);
 	fprintf(stderr," VDTS:");
-	printpts((uint32_t)((u64)rem->vdts - rem->vpts_off + rem->vpts_delay));
+	printpts((uint32_t)((uint64_t)rem->vdts - rem->vpts_off + rem->vpts_delay));
 	fprintf(stderr," APTS:");
-	printpts((uint32_t)((u64)rem->apts - rem->apts_off + rem->apts_delay));
+	printpts((uint32_t)((uint64_t)rem->apts - rem->apts_off + rem->apts_delay));
 	fprintf(stderr," TIME:%2d:", time/3600);
 	fprintf(stderr,"%02d:", (time%3600)/60);
 	fprintf(stderr,"%02d", (time%3600)%60);
@@ -832,7 +832,7 @@ void remux(int fin, int fout, int pack_size, int mult)
 	PTS_List vbufl[MAX_PTS];
 	int abufn = 0;
 	int vbufn = 0;
-	u64 pts_d = 0;
+	uint64_t pts_d = 0;
 	int ok_audio; 
 	int ok_video; 
 	uint32_t apos = 0;
@@ -890,7 +890,7 @@ void remux(int fin, int fout, int pack_size, int mult)
 	r = 0;
 	while ( rem.aptsn < 2 && !r) r = refill_buffy(&rem);
 
-	//rem.vpts_delay =  (uint32_t)(2*90000ULL* (u64)pack_size/rem.muxr);
+	//rem.vpts_delay =  (uint32_t)(2*90000ULL* (uint64_t)pack_size/rem.muxr);
 	rem.vpts_delay = rem.dts_delay;
 	rem.apts_delay = rem.vpts_delay;
 
@@ -929,11 +929,11 @@ void remux(int fin, int fout, int pack_size, int mult)
 		vpack_size = vpos - rem.vread; 
 		
 
-		next_vdts = (uint32_t)((u64)rem.vdts + rem.vpts_delay 
+		next_vdts = (uint32_t)((uint64_t)rem.vdts + rem.vpts_delay 
 				  - rem.vpts_off) ;
 		ok_video = ( rem.SCR < next_vdts);
 
-		next_apts = (uint32_t)((u64)rem.apts + rem.apts_delay 
+		next_apts = (uint32_t)((uint64_t)rem.apts + rem.apts_delay 
 				  - rem.apts_off) ;
 		ok_audio = ( rem.SCR  < next_apts);
 
@@ -994,14 +994,14 @@ void remux(int fin, int fout, int pack_size, int mult)
 
 		if (rem.SCR > rem.vdts+rem.vpts_off -rem.vpts_delay) 
 			rem.SCR = rem.vdts-rem.vpts_off;
-		rem.SCR = (uint32_t)((u64) rem.SCR + SCR_inc);
+		rem.SCR = (uint32_t)((uint64_t) rem.SCR + SCR_inc);
 
 		if ( rem.apts_off + rem.SCR < rem.apts_delay ) pts_d = 0;
-		else pts_d = (u64) rem.SCR + rem.apts_off - rem.apts_delay;
+		else pts_d = (uint64_t) rem.SCR + rem.apts_off - rem.apts_delay;
 		abuf -= del_ptss( abufl, (uint32_t) pts_d, &abufn);
 
 		if ( rem.vpts_off + rem.SCR < rem.vpts_delay ) pts_d = 0;
-		else pts_d = (u64) rem.SCR + rem.vpts_off - rem.vpts_delay;
+		else pts_d = (uint64_t) rem.SCR + rem.vpts_off - rem.vpts_delay;
 		vbuf -= del_ptss( vbufl, (uint32_t) pts_d, &vbufn);
 
 		print_info( &rem, 1);
@@ -1113,7 +1113,7 @@ void remux_main(uint8_t *buf, int count, p2p *p)
 	} else {
 		pbuf->written += count;
 		if ((p->flag2 & PTS_DTS_FLAGS)){
-			uint32_t PTS = ntohl(trans_pts_dts(p->pts));
+			uint32_t PTS = trans_pts_dts(p->pts);
 			add_pts(pbuf->pts_list, PTS, pbuf->written, 
 				pbuf->written, 0, 0);
 		}

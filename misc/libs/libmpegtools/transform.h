@@ -152,7 +152,7 @@ extern "C" {
 	} p2p;
 
 	
-	uint32_t trans_pts_dts(uint8_t *pts);
+	uint64_t trans_pts_dts(uint8_t *pts);
 	int write_ts_header(uint16_t pid, uint8_t *counter, int pes_start, 
 			    uint8_t *buf, uint8_t length);
 	uint16_t get_pid(uint8_t *pid);

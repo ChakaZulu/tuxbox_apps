@@ -59,16 +59,10 @@
 extern "C" {
 #endif				/* __cplusplus */
 	
-	typedef uint8_t u8;
-	typedef uint16_t u16;
-	typedef uint32_t u32;
-	typedef uint64_t u64;
-	
-	
 	enum {PS_STREAM, TS_STREAM, PES_STREAM};
 	enum {pDUNNO, pPAL, pNTSC};
-
-	u32 trans_pts_dts(u8 *pts);
+	
+	uint64_t trans_pts_dts(uint8_t *pts);
 
 /*
   PES
@@ -135,41 +129,41 @@ extern "C" {
 
 
 	typedef struct pes_packet_{
-		u8 stream_id;
-		u8 llength[2];
+		uint8_t stream_id;
+		uint8_t llength[2];
 		uint32_t length;
-		u8 flags1;
-		u8 flags2;
-		u8 pes_hlength;
-		u8 pts[5];
-		u8 dts[5];
-		u8 escr[6];
-		u8 es_rate[3];
-		u8 trick;
-		u8 add_cpy;
-		u8 prev_pes_crc[2];
-		u8 priv_flags;
-		u8 pes_priv_data[16];
-		u8 pack_field_length;
-		u8 *pack_header;
-		u8 pck_sqnc_cntr;
-		u8 org_stuff_length;
-		u8 p_std[2];
-		u8 pes_ext_lngth;
-		u8 *pes_ext;
-		u8 *pes_pckt_data;
+		uint8_t flags1;
+		uint8_t flags2;
+		uint8_t pes_hlength;
+		uint8_t pts[5];
+		uint8_t dts[5];
+		uint8_t escr[6];
+		uint8_t es_rate[3];
+		uint8_t trick;
+		uint8_t add_cpy;
+		uint8_t prev_pes_crc[2];
+		uint8_t priv_flags;
+		uint8_t pes_priv_data[16];
+		uint8_t pack_field_length;
+		uint8_t *pack_header;
+		uint8_t pck_sqnc_cntr;
+		uint8_t org_stuff_length;
+		uint8_t p_std[2];
+		uint8_t pes_ext_lngth;
+		uint8_t *pes_ext;
+		uint8_t *pes_pckt_data;
 		int padding;
 		int mpeg;
 		int mpeg1_pad;
-		u8 *mpeg1_headr;
-		u8 stuffing;
+		uint8_t *mpeg1_headr;
+		uint8_t stuffing;
 	} pes_packet;
 
 	void init_pes(pes_packet *p);
 	void kill_pes(pes_packet *p);
 	void setlength_pes(pes_packet *p);
 	void nlength_pes(pes_packet *p);
-	int cwrite_pes(u8 *buf, pes_packet *p, long length);
+	int cwrite_pes(uint8_t *buf, pes_packet *p, long length);
 	void write_pes(int fd, pes_packet *p);
 	int read_pes(int f, pes_packet *p);
 	void cread_pes(char *buf, pes_packet *p);
@@ -206,30 +200,30 @@ extern "C" {
 #define SEAM_SPLICE    0x20
 
 	typedef struct  ts_packet_{
-		u8 pid[2];
-		u8 flags;
-		u8 count;
-		u8 data[184];
-		u8 adapt_length;
-		u8 adapt_flags;
-		u8 pcr[6];
-		u8 opcr[6];
-		u8 splice_count;
-		u8 priv_dat_len;
-		u8 *priv_dat;
-		u8 adapt_ext_len;
-		u8 adapt_eflags;
-		u8 ltw[2];
-		u8 piece_rate[3];
-		u8 dts[5];
+		uint8_t pid[2];
+		uint8_t flags;
+		uint8_t count;
+		uint8_t data[184];
+		uint8_t adapt_length;
+		uint8_t adapt_flags;
+		uint8_t pcr[6];
+		uint8_t opcr[6];
+		uint8_t splice_count;
+		uint8_t priv_dat_len;
+		uint8_t *priv_dat;
+		uint8_t adapt_ext_len;
+		uint8_t adapt_eflags;
+		uint8_t ltw[2];
+		uint8_t piece_rate[3];
+		uint8_t dts[5];
 		int rest;
-		u8 stuffing;
+		uint8_t stuffing;
 	} ts_packet;
 
 	void init_ts(ts_packet *p);
 	void kill_ts(ts_packet *p);
 	unsigned short pid_ts(ts_packet *p);
-	int cwrite_ts(u8 *buf, ts_packet *p, long length);
+	int cwrite_ts(uint8_t *buf, ts_packet *p, long length);
 	void write_ts(int fd, ts_packet *p);
 	int read_ts(int f, ts_packet *p);
 	void cread_ts (char *buf, ts_packet *p, long length);
@@ -249,16 +243,16 @@ extern "C" {
 #define PS_MAX 200
 
 	typedef struct ps_packet_{
-		u8 scr[6];
-		u8 mux_rate[3];
-		u8 stuff_length;
-		u8 *data;
-		u8 sheader_llength[2];
+		uint8_t scr[6];
+		uint8_t mux_rate[3];
+		uint8_t stuff_length;
+		uint8_t *data;
+		uint8_t sheader_llength[2];
 		int sheader_length;
-		u8 rate_bound[3];
-		u8 audio_bound;
-		u8 video_bound;
-		u8 reserved;
+		uint8_t rate_bound[3];
+		uint8_t audio_bound;
+		uint8_t video_bound;
+		uint8_t reserved;
 		int npes;
 		int mpeg;
 	} ps_packet;
@@ -266,11 +260,11 @@ extern "C" {
 	void init_ps(ps_packet *p);
 	void kill_ps(ps_packet *p);
 	void setlength_ps(ps_packet *p);
-	u32 scr_base_ps(ps_packet *p);
-	u16 scr_ext_ps(ps_packet *p);
+	uint32_t scr_base_ps(ps_packet *p);
+	uint16_t scr_ext_ps(ps_packet *p);
 	int mux_ps(ps_packet *p);
 	int rate_ps(ps_packet *p);
-	int cwrite_ps(u8 *buf, ps_packet *p, long length);
+	int cwrite_ps(uint8_t *buf, ps_packet *p, long length);
 	void write_ps(int fd, ps_packet *p);
 	int read_ps (int f, ps_packet *p);
 	void cread_ps (char *buf, ps_packet *p, long length);
@@ -283,20 +277,20 @@ extern "C" {
 		int  id;
 		int length;
 		int found;
-		u8 payload[4096+3];
+		uint8_t payload[4096+3];
 	} section;
 
 
-	typedef u32 tflags;
+	typedef uint32_t tflags;
 #define MAXFILT 32
 #define MASKL 16
 	typedef struct trans_struct {
 		int found;
-		u8 packet[188];
-		u16 pid[MAXFILT];
-		u8 mask[MAXFILT*MASKL];
-		u8 filt[MAXFILT*MASKL];
-		u8 transbuf[MAXFILT*188];
+		uint8_t packet[188];
+		uint16_t pid[MAXFILT];
+		uint8_t mask[MAXFILT*MASKL];
+		uint8_t filt[MAXFILT*MASKL];
+		uint8_t transbuf[MAXFILT*188];
 		int transcount[MAXFILT];
 		section sec[MAXFILT];
 	        tflags is_full;
@@ -308,8 +302,8 @@ extern "C" {
 
 
 	void init_trans(trans *p);
-	int set_trans_filt(trans *p, int filtn, u16 pid, u8 *mask, 
-			   u8 *filt, int pes);
+	int set_trans_filt(trans *p, int filtn, uint16_t pid, uint8_t *mask, 
+			   uint8_t *filt, int pes);
 
 	void clear_trans_filt(trans *p,int filtn);
 	int filt_is_set(trans *p, int filtn);
@@ -318,11 +312,11 @@ extern "C" {
 	int pes_is_start(trans *p, int filtn);
 	int filt_is_ready(trans *p,int filtn);
 
-	void trans_filt(u8 *buf, int count, trans *p);
+	void trans_filt(uint8_t *buf, int count, trans *p);
 	void filter(trans *p);
 	void pes_filter(trans *p, int filtn, int off);
 	void sec_filter(trans *p, int filtn, int off);
-	int get_filt_buf(trans *p, int filtn,u8 **buf); 
+	int get_filt_buf(trans *p, int filtn,uint8_t **buf); 
 	section *get_filt_sec(trans *p, int filtn); 
 
 
@@ -333,49 +327,49 @@ extern "C" {
 		int length;
 		int headr;
 		int plength;
-		u8 cid;
-		u8 flags;
-		u8 abuf[MAX_PLENGTH];
+		uint8_t cid;
+		uint8_t flags;
+		uint8_t abuf[MAX_PLENGTH];
 		int alength;
-		u8 vbuf[MAX_PLENGTH];
+		uint8_t vbuf[MAX_PLENGTH];
 		int vlength;
-	        u8 last_av_pts[4];
-		u8 av_pts[4];
-		u8 scr[4];
-		u8 pid0;
-		u8 pid1;
-		u8 pidv;
-		u8 pida;
+	        uint8_t last_av_pts[4];
+		uint8_t av_pts[4];
+		uint8_t scr[4];
+		uint8_t pid0;
+		uint8_t pid1;
+		uint8_t pidv;
+		uint8_t pida;
 	} a2p;
 
 
 
-	void get_pespts(u8 *av_pts,u8 *pts);
+	void get_pespts(uint8_t *av_pts,uint8_t *pts);
 	void init_a2p(a2p *p);
-	void av_pes_to_pes(u8 *buf,int count, a2p *p);
-	int w_pesh(u8 id,int length ,u8 *pts, u8 *obuf);
-	int w_tsh(u8 id,int length ,u8 *pts, u8 *obuf,a2p *p,int startpes);
-	void pts2pts(u8 *av_pts, u8 *pts);
-	void write_ps_headr(ps_packet *p,u8 *pts,int fd);
+	void av_pes_to_pes(uint8_t *buf,int count, a2p *p);
+	int w_pesh(uint8_t id,int length ,uint8_t *pts, uint8_t *obuf);
+	int w_tsh(uint8_t id,int length ,uint8_t *pts, uint8_t *obuf,a2p *p,int startpes);
+	void pts2pts(uint8_t *av_pts, uint8_t *pts);
+	void write_ps_headr(ps_packet *p,uint8_t *pts,int fd);
 
 	typedef struct p2t_s{
-		u8           pes[TS_SIZE];
-		u8           counter;
+		uint8_t           pes[TS_SIZE];
+		uint8_t           counter;
 		long int     pos;
 		int          frags;
-		void         (*t_out)(u8 const *buf);
+		void         (*t_out)(uint8_t const *buf);
 	} p2t_t;
 
-	void twrite(u8 const *buf);
-	void init_p2t(p2t_t *p, void (*fkt)(u8 const *buf));
-	long int find_pes_header(u8 const *buf, long int length, int *frags);
-	void pes_to_ts( u8 const *buf, long int length, u16 pid, p2t_t *p);
-	void p_to_t( u8 const *buf, long int length, u16 pid, u8 *counter, 
-		    void (*ts_write)(u8 const *));
+	void twrite(uint8_t const *buf);
+	void init_p2t(p2t_t *p, void (*fkt)(uint8_t const *buf));
+	long int find_pes_header(uint8_t const *buf, long int length, int *frags);
+	void pes_to_ts( uint8_t const *buf, long int length, uint16_t pid, p2t_t *p);
+	void p_to_t( uint8_t const *buf, long int length, uint16_t pid, 
+		     uint8_t *counter, void (*ts_write)(uint8_t const *));
 
 
-	int write_pes_header(u8 id,int length , long PTS, 
-			     u8 *obuf, int stuffing);
+	int write_pes_header(uint8_t id,int length , long PTS, 
+			     uint8_t *obuf, int stuffing);
 
 	int write_ps_header(uint8_t *buf, 
 			    uint32_t   SCR, 
@@ -399,6 +393,7 @@ extern "C" {
 	void split_mpg(char *name, uint64_t size);
 	void cut_mpg(char *name, uint64_t size);
 	int http_open (char *url);
+	ssize_t save_read(int fd, void *buf, size_t count);
 #ifdef __cplusplus
 }
 #endif				/* __cplusplus */

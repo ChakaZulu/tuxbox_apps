@@ -38,6 +38,19 @@
   
 */
 
+ssize_t save_read(int fd, void *buf, size_t count)
+{
+	ssize_t neof = 1;
+	size_t re = 0;
+	
+	while(neof >= 0 && re < count){
+		neof = read(fd, buf+re, count - re);
+		if (neof > 0) re += neof;
+	}
+
+	if (neof < 0 && re == 0) return neof;
+	else return re;
+}
 
 void init_pes(pes_packet *p){
 	p->stream_id = 0;
@@ -51,12 +64,12 @@ void init_pes(pes_packet *p){
 	p->add_cpy = 0;
 	p->priv_flags = 0;
 	p->pack_field_length = 0;
-	p->pack_header = (u8 *) NULL;
+	p->pack_header = (uint8_t *) NULL;
 	p->pck_sqnc_cntr = 0;
 	p->org_stuff_length = 0;
 	p->pes_ext_lngth = 0;
-	p->pes_ext = (u8 *) NULL;
-	p->pes_pckt_data = (u8 *) NULL;
+	p->pes_ext = (uint8_t *) NULL;
+	p->pes_pckt_data = (uint8_t *) NULL;
 	p->padding = 0;
 	p->mpeg = 2; // DEFAULT MPEG2
 	p->mpeg1_pad = 0;
@@ -85,7 +98,7 @@ void setlength_pes(pes_packet *p){
 static void setl_pes(pes_packet *p){
 	setlength_pes(p);
 	if (p->length)
-		p->pes_pckt_data = (u8 *)malloc(p->length);
+		p->pes_pckt_data = (uint8_t *)malloc(p->length);
 }
 
 void nlength_pes(pes_packet *p){
@@ -102,10 +115,10 @@ void nlength_pes(pes_packet *p){
 static void nl_pes(pes_packet *p)
 {
 	nlength_pes(p);
-	p->pes_pckt_data = (u8 *) malloc(p->length);
+	p->pes_pckt_data = (uint8_t *) malloc(p->length);
 }
 
-void pts2pts(u8 *av_pts, u8 *pts)
+void pts2pts(uint8_t *av_pts, uint8_t *pts)
 {
   
 	av_pts[0] = ((pts[0] & 0x06) << 5) | 
@@ -120,11 +133,11 @@ void pts2pts(u8 *av_pts, u8 *pts)
 }
 
 
-int cwrite_pes(u8 *buf, pes_packet *p, long length){
+int cwrite_pes(uint8_t *buf, pes_packet *p, long length){
 	int count,i;
-	u8 dummy;
+	uint8_t dummy;
 	int more = 0;
-	u8 headr[3] = { 0x00, 0x00 , 0x01};
+	uint8_t headr[3] = { 0x00, 0x00 , 0x01};
 
 	if (length <  p->length+p->pes_hlength){
 		fprintf(stderr,"Wrong buffer size in cwrite_pes\n");
@@ -275,10 +288,10 @@ int cwrite_pes(u8 *buf, pes_packet *p, long length){
 
 void write_pes(int fd, pes_packet *p){
 	long length;
-	u8 *buf;
+	uint8_t *buf;
 	int l = p->length+p->pes_hlength;
 	
-	buf = (u8 *) malloc(l);
+	buf = (uint8_t *) malloc(l);
 	length = cwrite_pes(buf,p,l);
 	write(fd,buf,length);
 	free(buf);
@@ -289,7 +302,7 @@ static unsigned int find_length(int f){
 	uint64_t start = 0;
 	uint64_t q = 0;
 	int found = 0;
-	u8 sync4[4];
+	uint8_t sync4[4];
 	int neof = 1;
 
 	start = lseek(f,0,SEEK_CUR);
@@ -297,7 +310,7 @@ static unsigned int find_length(int f){
         lseek(f,start,SEEK_SET);
 	while ( neof > 0 && !found ){
 		p = lseek(f,0,SEEK_CUR);
-		neof = read(f,&sync4,4);
+		neof = save_read(f,&sync4,4);
 		if (sync4[0] == 0x00 && sync4[1] == 0x00 && sync4[2] == 0x01) {
 			switch ( sync4[3] ) {
 				
@@ -330,7 +343,7 @@ static unsigned int find_length(int f){
 
 void cread_pes(char *buf, pes_packet *p){
 	
-	u8 count, dummy, check;
+	uint8_t count, dummy, check;
 	int i;
 	uint64_t po = 0;
 	int c=0;
@@ -433,7 +446,7 @@ void cread_pes(char *buf, pes_packet *p){
 			if (p->priv_flags & HEADER_FIELD){
 				memcpy(&p->pack_field_length,buf+c,1);
 				c++;
-				p->pack_header = (u8 *)
+				p->pack_header = (uint8_t *)
 					malloc(p->pack_field_length);
 				memcpy(p->pack_header,buf+c,
 				       p->pack_field_length);
@@ -458,7 +471,7 @@ void cread_pes(char *buf, pes_packet *p){
 			if ( p->priv_flags & PES_EXT_FLAG2){
 				memcpy(&p->pes_ext_lngth,buf+c,1);
 				c++;
-				p->pes_ext = (u8 *)
+				p->pes_ext = (uint8_t *)
 					malloc(p->pes_ext_lngth);
 				memcpy(p->pes_ext,buf+c,
 				       p->pes_ext_lngth);
@@ -499,7 +512,7 @@ void cread_pes(char *buf, pes_packet *p){
 			if (check == p->flags1){
 				p->pes_hlength = 0;
 			} else {
-				p->mpeg1_headr = (u8 *)
+				p->mpeg1_headr = (uint8_t *)
 					malloc(p->mpeg1_pad);
 				p->pes_hlength = p->mpeg1_pad;
 				memcpy(p->mpeg1_headr,buf+c,
@@ -524,7 +537,7 @@ void cread_pes(char *buf, pes_packet *p){
 				p->pes_hlength += 10;
 			}
 		} else {
-			p->mpeg1_headr = (u8 *) malloc(p->mpeg1_pad);
+			p->mpeg1_headr = (uint8_t *) malloc(p->mpeg1_pad);
 			p->pes_hlength = p->mpeg1_pad;
 			memcpy(p->mpeg1_headr,buf+c,
 			       p->mpeg1_pad);
@@ -537,16 +550,16 @@ void cread_pes(char *buf, pes_packet *p){
 
 int read_pes(int f, pes_packet *p){
 	
-	u8 sync4[4];
+	uint8_t sync4[4];
 	int found=0;
 	uint64_t po = 0;
 	int neof = 1;
-	u8 *buf;
+	uint8_t *buf;
 
 	while (neof > 0 && !found) {
 	        po = lseek(f,0,SEEK_CUR);
 		if (po < 0) return -1;
-		if ((neof = read(f,&sync4,4)) < 4) return -1;
+		if ((neof = save_read(f,&sync4,4)) < 4) return -1;
 		if (sync4[0] == 0x00 && sync4[1] == 0x00 && sync4[2] == 0x01) {
 			p->stream_id = sync4[3];
 			switch ( sync4[3] ) {
@@ -562,7 +575,7 @@ int read_pes(int f, pes_packet *p){
 			case PRIVATE_STREAM1:
 			case AUDIO_STREAM_S ... AUDIO_STREAM_E:
 			case VIDEO_STREAM_S ... VIDEO_STREAM_E:
-				if((neof = read(f,p->llength,2)) < 2)
+				if((neof = save_read(f,p->llength,2)) < 2)
 					return -1;
 				setl_pes(p);
 				if (!p->length){ 
@@ -582,8 +595,8 @@ int read_pes(int f, pes_packet *p){
 	if (!found || !p->length) return 0;
 	
 	if (p->length >0){
-		buf = (u8 *) malloc(p->length);
-		if((neof = read(f,buf,p->length))< p->length) return -1;
+		buf = (uint8_t *) malloc(p->length);
+		if((neof = save_read(f,buf,p->length))< p->length) return -1;
 		cread_pes((char *)buf,p);
 		free(buf);
 	} else return 0;
@@ -626,9 +639,9 @@ unsigned short pid_ts(ts_packet *p)
   return get_pid(p->pid);
 }
 
-int cwrite_ts(u8 *buf, ts_packet *p, long length){
+int cwrite_ts(uint8_t *buf, ts_packet *p, long length){
 	long count,i;
-	u8 sync,dummy;
+	uint8_t sync,dummy;
 
 	sync = 0x47;
 	memcpy(buf,&sync,1);
@@ -703,74 +716,74 @@ int cwrite_ts(u8 *buf, ts_packet *p, long length){
 
 void write_ts(int fd, ts_packet *p){
 	long length;
-	u8 buf[TS_SIZE];
+	uint8_t buf[TS_SIZE];
 
 	length = cwrite_ts(buf,p,TS_SIZE);
 	write(fd,buf,length);
 }
 
 int read_ts (int f, ts_packet *p){
-	u8 sync;
+	uint8_t sync;
 	int found=0;
 	uint64_t po,q;
 	int neof = 1;
 
 	sync=0;
 	while (neof > 0 && !found) {
-		neof = read(f,&sync,1);
+		neof = save_read(f,&sync,1);
 		if (sync == 0x47) 
 			found = 1;
 	}
-	neof = read(f,p->pid,2);
-	neof = read(f,&p->flags,1);
+	neof = save_read(f,p->pid,2);
+	neof = save_read(f,&p->flags,1);
 	p->count = p->flags & COUNT_MASK;
 	 
 	if (!(p->flags & ADAPT_FIELD) && (p->flags & PAYLOAD)){
 		//no adapt. field only payload
-		neof = read(f,p->data,184);
+		neof = save_read(f,p->data,184);
 		p->rest = 184;
 		return neof;
 	} 
 
 	if ( p->flags & ADAPT_FIELD ) {
 		// adaption field
-		neof = read(f,&p->adapt_length,1);
+		neof = save_read(f,&p->adapt_length,1);
 		po = lseek(f,0,SEEK_CUR);
-		neof = read(f,&p->adapt_flags,1);
+		neof = save_read(f,&p->adapt_flags,1);
 
 		if ( p->adapt_flags & PCR_FLAG )
-			neof = read(f, p->pcr,6);
+			neof = save_read(f, p->pcr,6);
 
 		if ( p->adapt_flags & OPCR_FLAG )
-			neof = read(f, p->opcr,6);
+			neof = save_read(f, p->opcr,6);
 
 		if ( p->adapt_flags & SPLICE_FLAG )
-			neof = read(f, &p->splice_count,1);
+			neof = save_read(f, &p->splice_count,1);
 
 		if( p->adapt_flags & TRANS_PRIV){
-			neof = read(f,&p->priv_dat_len,1);
-			p->priv_dat = (u8 *) malloc(p->priv_dat_len);
-			neof = read(f,p->priv_dat,p->priv_dat_len);
+			neof = save_read(f,&p->priv_dat_len,1);
+			p->priv_dat = (uint8_t *) malloc(p->priv_dat_len);
+			neof = save_read(f,p->priv_dat,p->priv_dat_len);
 		}
 			
 		if( p->adapt_flags & ADAP_EXT_FLAG){
-			neof = read(f,&p->adapt_ext_len,1);
-			neof = read(f,&p->adapt_eflags,1);
+			neof = save_read(f,&p->adapt_ext_len,1);
+			neof = save_read(f,&p->adapt_eflags,1);
 			if( p->adapt_eflags & LTW_FLAG)
-				neof = read(f,p->ltw,2);
+				neof = save_read(f,p->ltw,2);
 			
 			if( p->adapt_eflags & PIECE_RATE)
-				neof = read(f,p->piece_rate,3);
+				neof = save_read(f,p->piece_rate,3);
 			
 			if( p->adapt_eflags & SEAM_SPLICE)
-				neof = read(f,p->dts,5);
+				neof = save_read(f,p->dts,5);
 		}
 		q = lseek(f,0,SEEK_CUR);
 		p->stuffing = p->adapt_length -(q-po);
 		p->rest = 183-p->adapt_length;
 		lseek(f,q+p->stuffing,SEEK_SET);
 		if (p->flags & PAYLOAD) // payload
-			neof = read(f,p->data,p->rest);
+			neof = save_read(f,p->data,p->rest);
 		else 
 			lseek(f,q+p->rest,SEEK_SET);
 	}
@@ -778,7 +791,7 @@ int read_ts (int f, ts_packet *p){
 }
 
 void cread_ts (char *buf, ts_packet *p, long length){
-	u8 sync;
+	uint8_t sync;
 	int found=0;
 	uint64_t po,q;
 	long count=0;
@@ -826,7 +839,7 @@ void cread_ts (char *buf, ts_packet *p, long length){
 		if( p->adapt_flags & TRANS_PRIV){
 			memcpy(&p->priv_dat_len,buf+count,1);
 			count++;
-			p->priv_dat = (u8 *) malloc(p->priv_dat_len);
+			p->priv_dat = (uint8_t *) malloc(p->priv_dat_len);
 			memcpy(p->priv_dat,buf+count,p->priv_dat_len);
 			count += p->priv_dat_len;
 		}
@@ -900,13 +913,13 @@ void setlength_ps(ps_packet *p)
 static void setl_ps(ps_packet *p)
 {
 	setlength_ps(p);
-	p->data = (u8 *) malloc(p->sheader_length);
+	p->data = (uint8_t *) malloc(p->sheader_length);
 }
 
 int mux_ps(ps_packet *p)
 {
-	u32 mux = 0;
-	u8 *i = (u8 *)&mux;
+	uint32_t mux = 0;
+	uint8_t *i = (uint8_t *)&mux;
 
 	i[1] = p->mux_rate[0];
 	i[2] = p->mux_rate[1];
@@ -918,8 +931,8 @@ int mux_ps(ps_packet *p)
 
 int rate_ps(ps_packet *p)
 {
-	u32 rate=0;
-	u8 *i= (u8 *) &rate;
+	uint32_t rate=0;
+	uint8_t *i= (uint8_t *) &rate;
 
 	i[1] = p->rate_bound[0] & 0x7F;
 	i[2] = p->rate_bound[1];
@@ -931,10 +944,10 @@ int rate_ps(ps_packet *p)
 }
 
 
-u32 scr_base_ps(ps_packet *p) // only 32 bit!!
+uint32_t scr_base_ps(ps_packet *p) // only 32 bit!!
 {
-	u32 base = 0;
-	u8 *buf = (u8 *)&base;
+	uint32_t base = 0;
+	uint8_t *buf = (uint8_t *)&base;
 	
 	buf[0] |= (long int)((p->scr[0] & 0x18) << 3);
 	buf[0] |= (long int)((p->scr[0] & 0x03) << 4);
@@ -954,7 +967,7 @@ u32 scr_base_ps(ps_packet *p) // only 32 bit!!
 	return base;
 }
 
-u16 scr_ext_ps(ps_packet *p)
+uint16_t scr_ext_ps(ps_packet *p)
 {
 	short ext = 0;
 
@@ -964,12 +977,12 @@ u16 scr_ext_ps(ps_packet *p)
 	return ext;
 }
 
-int cwrite_ps(u8 *buf, ps_packet *p, long length)
+int cwrite_ps(uint8_t *buf, ps_packet *p, long length)
 {
 	long count,i;
-	u8 headr1[4] = {0x00, 0x00, 0x01, 0xBA };
-	u8 headr2[4] = {0x00, 0x00, 0x01, 0xBB };
-	u8 buffy = 0xFF;
+	uint8_t headr1[4] = {0x00, 0x00, 0x01, 0xBA };
+	uint8_t headr2[4] = {0x00, 0x00, 0x01, 0xBB };
+	uint8_t buffy = 0xFF;
 
 	
 	memcpy(buf,headr1,4);
@@ -1015,14 +1028,14 @@ int cwrite_ps(u8 *buf, ps_packet *p, long length)
 
 void write_ps(int fd, ps_packet *p){
 	long length;
-	u8 buf[PS_MAX];
+	uint8_t buf[PS_MAX];
 
 	length = cwrite_ps(buf,p,PS_MAX);
 	write(fd,buf,length);
 }
 
 int read_ps (int f, ps_packet *p){
-	u8 headr[4];
+	uint8_t headr[4];
 	pes_packet pes;
 	int i,done;
 	int found=0;
@@ -1033,7 +1046,7 @@ int read_ps (int f, ps_packet *p){
 
 	po = lseek(f,0,SEEK_CUR);
 	while (neof > 0 && !found && count < MAX_SEARCH) {
-		neof = read(f,&headr,4);
+		neof = save_read(f,&headr,4);
 		if (headr[0] == 0x00 && headr[1] == 0x00 && headr[2] == 0x01){
 			if ( headr[3] == 0xBA ) 
 				found = 1;
@@ -1045,35 +1058,35 @@ int read_ps (int f, ps_packet *p){
 	}
 	
 	if (found){
-		neof = read(f,p->scr,6);
+		neof = save_read(f,p->scr,6);
 		if (p->scr[0] & 0x40)
 			p->mpeg = 2;
 		else
 			p->mpeg = 1;
 
 		if (p->mpeg == 2){
-			neof = read(f,p->mux_rate,3);
-			neof = read(f,&p->stuff_length,1);
+			neof = save_read(f,p->mux_rate,3);
+			neof = save_read(f,&p->stuff_length,1);
 			po = lseek(f,0,SEEK_CUR);
 			lseek(f,po+(p->stuff_length & 3),SEEK_SET);
 		} else {
 			p->mux_rate[0] = p->scr[5]; //mpeg1 scr is only 5 bytes
-			neof = read(f,p->mux_rate+1,2);
+			neof = save_read(f,p->mux_rate+1,2);
 		}
 			
 		po = lseek(f,0,SEEK_CUR);
-		neof = read(f,headr,4);
+		neof = save_read(f,headr,4);
 		if (headr[0] == 0x00 && headr[1] == 0x00 && 
 		    headr[2] == 0x01 && headr[3] == 0xBB ) {
-			neof = read(f,p->sheader_llength,2);
+			neof = save_read(f,p->sheader_llength,2);
 			setl_ps(p);
 			if (p->mpeg == 2){
-				neof = read(f,p->rate_bound,3);
-				neof = read(f,&p->audio_bound,1);
-				neof = read(f,&p->video_bound,1);
-				neof = read(f,&p->reserved,1);
+				neof = save_read(f,p->rate_bound,3);
+				neof = save_read(f,&p->audio_bound,1);
+				neof = save_read(f,&p->video_bound,1);
+				neof = save_read(f,&p->reserved,1);
 			}
-			neof = read(f,p->data,p->sheader_length);
+			neof = save_read(f,p->data,p->sheader_length);
 		} else {
 			lseek(f,po,SEEK_SET);
 			p->sheader_length = 0;
@@ -1084,7 +1097,7 @@ int read_ps (int f, ps_packet *p){
 		q = lseek(f,0,SEEK_CUR);
 		do {
 			po = lseek(f,0,SEEK_CUR);
-			neof = read(f,headr,4);
+			neof = save_read(f,headr,4);
 			lseek(f,po,SEEK_SET);
 			if ( headr[0] == 0x00 && headr[1] == 0x00 
 			     && headr[2] == 0x01 && headr[3] != 0xBA){
@@ -1101,7 +1114,7 @@ int read_ps (int f, ps_packet *p){
 }
 
 void cread_ps (char *buf, ps_packet *p, long length){
-	u8 *headr;
+	uint8_t *headr;
 	pes_packet pes;
 	int i,done;
 	int found=0;
@@ -1112,7 +1125,7 @@ void cread_ps (char *buf, ps_packet *p, long length){
 	
 	po = c;
 	while ( count < length && !found && count < MAX_SEARCH) {
-		headr = (u8 *)buf+c;
+		headr = (uint8_t *)buf+c;
 		c += 4;
 		if (headr[0] == 0x00 && headr[1] == 0x00 && headr[2] == 0x01){
 			if ( headr[3] == 0xBA ) 
@@ -1146,7 +1159,7 @@ void cread_ps (char *buf, ps_packet *p, long length){
 		}
 			
 		po = c;
-		headr = (u8 *)buf+c;
+		headr = (uint8_t *)buf+c;
 		c += 4;
 		if (headr[0] == 0x00 && headr[1] == 0x00 && 
 		    headr[2] == 0x01 && headr[3] == 0xBB ) {
@@ -1174,7 +1187,7 @@ void cread_ps (char *buf, ps_packet *p, long length){
 		done = 0;
 		q = c;
 		do {
-			headr = (u8 *)buf+c;
+			headr = (uint8_t *)buf+c;
 			if ( headr[0] == 0x00 && headr[1] == 0x00 
 			     && headr[2] == 0x01 && headr[3] != 0xBA){
 				init_pes(&pes);
@@ -1219,7 +1232,7 @@ void init_trans(trans *p)
 	}	
 }
 
-int set_trans_filt(trans *p, int filtn, u16 pid, u8 *mask, u8 *filt, int pes)
+int set_trans_filt(trans *p, int filtn, uint16_t pid, uint8_t *mask, uint8_t *filt, int pes)
 {
 	int i;
 	int off;
@@ -1287,7 +1300,7 @@ int filt_is_ready(trans *p,int filtn)
 	return 0;
 }
 
-void trans_filt(u8 *buf, int count, trans *p)
+void trans_filt(uint8_t *buf, int count, trans *p)
 {
 	int c=0;
 	//fprintf(stderr,"trans_filt\n");
@@ -1318,9 +1331,9 @@ void filter(trans *p)
 {
 	int l,c;
 	int tpid;
-	u8 flag,flags;
-	u8 adapt_length = 0;
-	u8 cpid[2];
+	uint8_t flag,flags;
+	uint8_t adapt_length = 0;
+	uint8_t cpid[2];
 
 
 	//	fprintf(stderr,"filter\n");
@@ -1369,7 +1382,7 @@ void filter(trans *p)
 void pes_filter(trans *p, int filtn, int off)
 {
 	int count,c;
-	u8 *buf;
+	uint8_t *buf;
 
 	if (filtn < 0 || filtn >= MAXFILT) return; 
 
@@ -1392,7 +1405,7 @@ section *get_filt_sec(trans *p, int filtn)
 	return sec;
 }
 
-int get_filt_buf(trans *p, int filtn,u8 **buf)
+int get_filt_buf(trans *p, int filtn,uint8_t **buf)
 {
 	*buf = p->transbuf+188*filtn;
 	p->is_full &= ~((tflags) (1 << filtn) );
@@ -1407,7 +1420,7 @@ void sec_filter(trans *p, int filtn, int off)
 	int i,j;
 	int error;
 	int count,c;
-	u8 *buf, *secbuf;
+	uint8_t *buf, *secbuf;
 	section *sec;
 
 	//	fprintf(stderr,"sec_filter\n");
@@ -1475,21 +1488,21 @@ void sec_filter(trans *p, int filtn, int off)
 #define MULT 1024
 
 
-void write_ps_headr( ps_packet *p, u8 *pts,int fd)
+void write_ps_headr( ps_packet *p, uint8_t *pts,int fd)
 {
 	long  muxr = 37500;
-	u8    audio_bound = 1;
-	u8    fixed = 0;
-	u8    CSPS = 0;
-	u8    audio_lock = 1;
-	u8    video_lock = 1;
-	u8    video_bound = 1;
-	u8    stream1 = 0XC0;
-	u8    buffer1_scale = 1;
-	u32   buffer1_size = 32;
-	u8    stream2 = 0xE0;
-	u8    buffer2_scale = 1;
-	u32   buffer2_size = 230;
+	uint8_t    audio_bound = 1;
+	uint8_t    fixed = 0;
+	uint8_t    CSPS = 0;
+	uint8_t    audio_lock = 1;
+	uint8_t    video_lock = 1;
+	uint8_t    video_bound = 1;
+	uint8_t    stream1 = 0XC0;
+	uint8_t    buffer1_scale = 1;
+	uint32_t   buffer1_size = 32;
+	uint8_t    stream2 = 0xE0;
+	uint8_t    buffer2_scale = 1;
+	uint32_t   buffer2_size = 230;
                     
 	init_ps(p);
 	
@@ -1511,9 +1524,9 @@ void write_ps_headr( ps_packet *p, u8 *pts,int fd)
 	p->scr[4] = 0x04 | ((pts[3] << 3)&0xF8);
 	p->scr[5] = 0x01;
 	
-	p->mux_rate[0] = (u8)(muxr >> 14);
-	p->mux_rate[1] = (u8)(0xff & (muxr >> 6));
-	p->mux_rate[2] = (u8)(0x03 | ((muxr & 0x3f) << 2));
+	p->mux_rate[0] = (uint8_t)(muxr >> 14);
+	p->mux_rate[1] = (uint8_t)(0xff & (muxr >> 6));
+	p->mux_rate[2] = (uint8_t)(0x03 | ((muxr & 0x3f) << 2));
 
 	p->stuff_length = 0xF8;
 	
@@ -1522,24 +1535,24 @@ void write_ps_headr( ps_packet *p, u8 *pts,int fd)
 
 	setl_ps(p);
 	
-	p->rate_bound[0] = (u8)(0x80 | (muxr >>15));
-	p->rate_bound[1] = (u8)(0xff & (muxr >> 7));
-	p->rate_bound[2] = (u8)(0x01 | ((muxr & 0x7f)<<1));
+	p->rate_bound[0] = (uint8_t)(0x80 | (muxr >>15));
+	p->rate_bound[1] = (uint8_t)(0xff & (muxr >> 7));
+	p->rate_bound[2] = (uint8_t)(0x01 | ((muxr & 0x7f)<<1));
 	
 	
-	p->audio_bound = (u8)((audio_bound << 2)|(fixed << 1)|CSPS);
-	p->video_bound = (u8)((audio_lock << 7)|
+	p->audio_bound = (uint8_t)((audio_bound << 2)|(fixed << 1)|CSPS);
+	p->video_bound = (uint8_t)((audio_lock << 7)|
 			      (video_lock << 6)|0x20|video_bound);
-	p->reserved = (u8)(0xFF);
+	p->reserved = (uint8_t)(0xFF);
 	
 	p->data[0] =  stream2;
-	p->data[1] =  (u8) (0xc0 | (buffer2_scale << 5) | 
+	p->data[1] =  (uint8_t) (0xc0 | (buffer2_scale << 5) | 
 			    (buffer2_size >> 8));
-	p->data[2] =  (u8) (buffer2_size & 0xff);
+	p->data[2] =  (uint8_t) (buffer2_size & 0xff);
 	p->data[3] =  stream1;
-	p->data[4] =  (u8) (0xc0 | (buffer1_scale << 5) | 
+	p->data[4] =  (uint8_t) (0xc0 | (buffer1_scale << 5) | 
 			    (buffer1_size >> 8));
-	p->data[5] =  (u8) (buffer1_size & 0xff);
+	p->data[5] =  (uint8_t) (buffer1_size & 0xff);
 	
 	write_ps(fd, p);
 	kill_ps(p);
@@ -1547,7 +1560,7 @@ void write_ps_headr( ps_packet *p, u8 *pts,int fd)
 
 
 
-void twrite(u8 const *buf)
+void twrite(uint8_t const *buf)
 {
 	int l = TS_SIZE;
 	int c = 0;
@@ -1563,7 +1576,7 @@ void twrite(u8 const *buf)
 	}
 }
 
-void init_p2t(p2t_t *p, void (*fkt)(u8 const *buf))
+void init_p2t(p2t_t *p, void (*fkt)(uint8_t const *buf))
 {
 	memset(p->pes,0,TS_SIZE);
 	p->counter = 0;
@@ -1582,7 +1595,7 @@ void clear_p2t(p2t_t *p)
 }
 
 
-long int find_pes_header(u8 const *buf, long int length, int *frags)
+long int find_pes_header(uint8_t const *buf, long int length, int *frags)
 {
 	int c = 0;
 	int found = 0;
@@ -1627,7 +1640,7 @@ long int find_pes_header(u8 const *buf, long int length, int *frags)
 	return c;
 }
 
-void pes_to_ts( u8 const *buf, long int length, u16 pid, p2t_t *p)
+void pes_to_ts( uint8_t const *buf, long int length, uint16_t pid, p2t_t *p)
 {
 	int c,c2,l,add;
 	int check,rest;
@@ -1726,12 +1739,12 @@ void pes_to_ts( u8 const *buf, long int length, u16 pid, p2t_t *p)
 
 
 
-void p_to_t( u8 const *buf, long int length, u16 pid, u8 *counter, 
-	    void (*ts_write)(u8 const *))
+void p_to_t( uint8_t const *buf, long int length, uint16_t pid, uint8_t *counter, 
+	    void (*ts_write)(uint8_t const *))
 {
   
 	int l, pes_start;
-	u8 obuf[TS_SIZE];
+	uint8_t obuf[TS_SIZE];
 	long int c = 0;
 	pes_start = 0;
 	if ( length > 3 && 
