@@ -545,7 +545,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 								{
 									hide();
 									recDirs.exec(NULL,"");
-									show(channel_id,a_id,a_startzeit,false);
+									show(channel_id,epgData.eventID,&epgData.epg_times.startzeit,false);
 								} else
 								{
 									printf("no network devices available\n");					
@@ -582,7 +582,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 																  epgData.epg_times.startzeit - ANNOUNCETIME, 0,
 																  epgData.eventID, epgData.epg_times.startzeit,
 																  "");
-						ShowMsgUTF(LOCALE_TIMER_EVENTTIMED_TITLE, g_Locale->getText(LOCALE_TIMER_EVENTTIMED_MSG), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+						ShowLocalizedMessage(LOCALE_TIMER_EVENTTIMED_TITLE, LOCALE_TIMER_EVENTTIMED_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 					}
 					else
 						printf("timerd not available\n");
