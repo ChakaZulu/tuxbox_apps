@@ -1,0 +1,51 @@
+<html>
+	<head>
+		<title>Remote Control</title>
+		<link rel="stylesheet" type="text/css" href="webif.css">
+		<script>
+			function key(code)
+			{
+				document.location="/cgi-bin/rc?" + code;
+			}
+		</script>
+	</head>
+	<body>
+	<map id="rc">
+		<area shape="circle" coords="104, 38, 10" href="javascript:key(116)">
+		
+		<area shape="circle" coords="66, 366, 10" href="javascript:key(11)">
+		<area shape="circle" coords="34, 290, 10" href="javascript:key(2)">
+		<area shape="circle" coords="66, 290, 10" href="javascript:key(3)">
+		<area shape="circle" coords="98, 290, 10" href="javascript:key(4)">
+		
+		<area shape="circle" coords="34, 318, 10" href="javascript:key(5)">
+		<area shape="circle" coords="66, 318, 10" href="javascript:key(6)">
+		<area shape="circle" coords="98, 318, 10" href="javascript:key(7)">
+		
+		<area shape="circle" coords="34, 342, 10" href="javascript:key(8)">
+		<area shape="circle" coords="66, 342, 10" href="javascript:key(9)">
+		<area shape="circle" coords="98, 342, 10" href="javascript:key(10)">
+		
+		<area shape="circle" coords="88, 232, 15" href="javascript:key(115)">
+		<area shape="circle" coords="44, 232, 15" href="javascript:key(114)">
+		<area shape="circle" coords="28, 106, 10" href="javascript:key(138)">
+
+		<area shape="circle" coords="98, 202, 10" href="javascript:key(102)">
+		<area shape="circle" coords="104, 106, 10" href="javascript:key(141)">
+		<area shape="circle" coords="34, 202, 10" href="javascript:key(352)">
+		<area shape="circle" coords="66, 262, 10" href="javascript:key(113)">
+	
+		<area shape="circle" coords="42, 156, 15" href="javascript:key(105)">
+		<area shape="circle" coords="88, 156, 15" href="javascript:key(106)">
+		
+		<area shape="circle" coords="66, 132, 15" href="javascript:key(103)">
+		<area shape="circle" coords="66, 180, 15" href="javascript:key(108)">
+		
+		<area shape="circle" coords="28, 78, 10" href="javascript:key(398)">
+		<area shape="circle" coords="52, 64, 10" href="javascript:key(399)">
+		<area shape="circle" coords="80, 64, 10" href="javascript:key(400)">
+		<area shape="circle" coords="104, 78, 10" href="javascript:key(401)">
+	</map>
+	<img src="rc_dbox2.jpg" border="0" usemap="#rc">
+	</body>
+</html>

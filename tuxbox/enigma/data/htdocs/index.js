@@ -37,9 +37,12 @@ function logging()
 	parent.body.document.location = "/log/debug.html";
 }
 
-function remoteControl()
+function remoteControl(box)
 {
-	NewWindow("/showRemoteControl", "RC", "293", "750", "no");
+	if (box == "dbox2")
+		NewWindow("/showRemoteControl", "RC", "165", "500", "no");
+	else
+		NewWindow("/showRemoteControl", "RC", "293", "750", "no");
 }
 
 function satFinder()
