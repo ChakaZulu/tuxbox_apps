@@ -413,7 +413,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 
         usleep(50);
 
-        int key;
+        int msg; uint data;
 
         if ( !CalledFromNumZap )
         {
@@ -421,20 +421,23 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
         		{
         			g_FrameBuffer->paintIcon((GetVideoFormat() == 3)?"16_9.raw":"16_9_gray.raw", BoxEndX- 2* ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 
-					key = g_RCInput->getKey( intShowDuration>>1 ); // weil Intervall in 500ms angegeben ist,
-					if ( key != CRCInput::RC_timeout )
+
+					g_RCInput->getMsg( &msg, &data, intShowDuration>>1 ); // weil Intervall in 500ms angegeben ist
+
+					if ( msg != CRCInput::RC_timeout )
 						break;
 				}
 
 
-				if ( ( key != CRCInput::RC_timeout ) && ( key != CRCInput::RC_ok ) )
+				if ( ( msg != CRCInput::RC_timeout ) && ( msg != CRCInput::RC_ok ) )
 				{
-            		g_RCInput->pushbackKey(key);
+            		if ( neutrino->handleMsg( msg, data ) ==  CRCInput::MSG_unhandled )
+            			g_RCInput->pushbackMsg( msg, data );
 				}
 
-				if ( ( key != g_settings.key_quickzap_up ) &&
-                	 ( key != g_settings.key_quickzap_down ) &&
-                     ( key != CRCInput::RC_help ) )
+				if ( ( msg != g_settings.key_quickzap_up ) &&
+                	 ( msg != g_settings.key_quickzap_down ) &&
+                	 ( msg != CRCInput::RC_help ) )
                 {
                    	killTitle();
                 }

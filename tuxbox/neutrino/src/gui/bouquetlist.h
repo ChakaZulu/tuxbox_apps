@@ -81,12 +81,12 @@ class CBouquetList
 		CBouquet* addBouquet(const std::string& name);
 		void setName(const std::string& Name);
 		int getActiveBouquetNumber();
-		void activateBouquet( int id, bool bShowChannelList = false);
+		int activateBouquet( int id, bool bShowChannelList = false);
 		const std::string& getActiveBouquetName();
 		int show();
-		bool showChannelList( int nBouquet = -1);
+		int showChannelList( int nBouquet = -1);
 		void adjustToChannel( int nChannelNr);
-		void exec( bool bShowChannelList);
+		int exec( bool bShowChannelList);
 };
 
 

@@ -104,6 +104,7 @@ void CBEChannelSelectWidget::hide()
 
 int CBEChannelSelectWidget::exec(CMenuTarget* parent, string actionKey)
 {
+	int res = CMenuTarget::RETURN_REPAINT;
 	if (parent)
 	{
 		parent->hide();
@@ -126,12 +127,14 @@ int CBEChannelSelectWidget::exec(CMenuTarget* parent, string actionKey)
 	bool loop=true;
 	while (loop)
 	{
-		int key = g_RCInput->getKey();
-		if ((key==g_settings.key_channelList_cancel) || (key==CRCInput::RC_home))
+		int msg; uint data;
+		g_RCInput->getMsg( &msg, &data, g_settings.timing_epg );
+
+		if (( msg ==g_settings.key_channelList_cancel) || ( msg ==CRCInput::RC_home))
 		{
 			loop = false;
 		}
-		else if (key==CRCInput::RC_up)
+		else if ( msg ==CRCInput::RC_up)
 		{
 			int prevselected=selected;
 			if(selected==0)
@@ -152,11 +155,11 @@ int CBEChannelSelectWidget::exec(CMenuTarget* parent, string actionKey)
 				paintItem(selected - liststart);
 			}
 		}
-		else if (key==CRCInput::RC_down)
+		else if ( msg ==CRCInput::RC_down)
 		{
 			rcDown();
 		}
-		else if (key==g_settings.key_channelList_pageup)
+		else if ( msg ==g_settings.key_channelList_pageup)
 		{
 			selected+=listmaxshow;
 			if (selected>Channels.size()-1)
@@ -164,7 +167,7 @@ int CBEChannelSelectWidget::exec(CMenuTarget* parent, string actionKey)
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paint();
 		}
-		else if (key==g_settings.key_channelList_pagedown)
+		else if ( msg ==g_settings.key_channelList_pagedown)
 		{
 			if ((int(selected)-int(listmaxshow))<0)
 				selected=Channels.size()-1;
@@ -173,13 +176,14 @@ int CBEChannelSelectWidget::exec(CMenuTarget* parent, string actionKey)
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paint();
 		}
-		else if(key==CRCInput::RC_ok)
+		else if( msg ==CRCInput::RC_ok)
 		{
 			switchChannel();
 		}
 		else
 		{
-			neutrino->HandleKeys( key );
+			neutrino->handleMsg( msg, data );
+			// kein canceling...
 		}
 		//kein pushback - wenn man versehentlich wo draufkommt is die edit-arbeit umsonst
 		/*
@@ -193,7 +197,7 @@ int CBEChannelSelectWidget::exec(CMenuTarget* parent, string actionKey)
 		}*/
 	}
 	hide();
-	return RETURN_REPAINT;
+	return res;
 }
 
 void CBEChannelSelectWidget::switchChannel()

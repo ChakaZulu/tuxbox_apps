@@ -30,12 +30,15 @@
 */
 
 /*
- $Id: rcinput.cpp,v 1.29 2002/02/23 17:34:28 field Exp $
+ $Id: rcinput.cpp,v 1.30 2002/02/25 19:32:26 field Exp $
 
  Module for Remote Control Handling
 
 History:
  $Log: rcinput.cpp,v $
+ Revision 1.30  2002/02/25 19:32:26  field
+ Events <-> Key-Handling umgestellt! SEHR BETA!
+
  Revision 1.29  2002/02/23 17:34:28  field
  Update gefixt, Fronttasten implementiert ;)
 
@@ -208,7 +211,7 @@ void CRCInput::restartInput()
 *	get rc-key - timeout can be specified
 *
 **************************************************************************/
-int CRCInput::getKey(int Timeout, bool bAllowRepeatLR)
+int CRCInput::_getKey(int Timeout, bool bAllowRepeatLR)
 {
 	static long long last_keypress=0;
 	long long getKeyBegin;
@@ -344,18 +347,33 @@ int CRCInput::getKey(int Timeout, bool bAllowRepeatLR)
 
 
 
-int CRCInput::pushbackKey (int key)
+int CRCInput::_pushbackKey (int key)
 {
 	pb_keys.add( key );
 	return 0;
 }
 
-
-
-void CRCInput::clear (void)
+void CRCInput::getMsg(int *key, uint *data, int Timeout=-1, bool bAllowRepeatLR= false)
 {
-	while (getKey(0)!=RC_timeout)
+	*key	= _getKey( Timeout, bAllowRepeatLR );
+	*data	= 0; // einstweilen....
+}
+
+void CRCInput::pushbackMsg(int msg, uint data)
+{
+	_pushbackKey( msg );
+}
+
+
+void CRCInput::_clear (void)
+{
+	while (_getKey(0)!=RC_timeout)
 	{}
+}
+
+void CRCInput::clearMsg(int type)
+{
+	_clear();
 }
 
 /**************************************************************************

@@ -79,25 +79,44 @@ CKeyChooserItem::CKeyChooserItem(string Name, int *Key)
 
 int CKeyChooserItem::exec(CMenuTarget* parent, string)
 {
+	int res = CMenuTarget::RETURN_REPAINT;
+
 	if (parent)
 	{
 		parent->hide();
 	}
 	paint();
 
-	int rckey = g_RCInput->getKey(100);
+	g_RCInput->clearMsg( 0 );
 
-	// fraglich, ob das so toll ist - muss aber behandelt werden....
-	if ( !neutrino->HandleKeys( rckey ) )
+	bool doLoop = true;
+
+	int msg; uint data;
+	while ( doLoop )
 	{
-		if(rckey!=CRCInput::RC_timeout)
-		{//timeout, don't set the key
-			*key = rckey;
+		g_RCInput->getMsg( &msg, &data, 100 );
+
+		if ( msg == CRCInput::RC_timeout )
+			doLoop = false;
+		else
+		{
+			switch ( neutrino->handleMsg( msg, data ) )
+			{
+				case CRCInput::MSG_cancel_all:
+					res = CMenuTarget::RETURN_EXIT_ALL;
+					doLoop = false;
+					break;
+
+				case CRCInput::MSG_unhandled:
+					doLoop = false;
+					*key = msg;
+					break;
+			}
 		}
 	}
 
 	hide();
-	return CMenuTarget::RETURN_REPAINT;
+	return res;
 }
 
 void CKeyChooserItem::hide()

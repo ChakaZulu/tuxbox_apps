@@ -32,9 +32,12 @@
 #ifndef EVENTLIST_HPP
 #define EVENTLIST_HPP
 //
-// $Id: eventlist.h,v 1.12 2002/01/29 23:23:06 field Exp $
+// $Id: eventlist.h,v 1.13 2002/02/25 19:32:26 field Exp $
 //
 // $Log: eventlist.h,v $
+// Revision 1.13  2002/02/25 19:32:26  field
+// Events <-> Key-Handling umgestellt! SEHR BETA!
+//
 // Revision 1.12  2002/01/29 23:23:06  field
 // Mehr Details in Channellist (sectionsd updaten)
 //
@@ -137,7 +140,7 @@ class EventList
   public:
     EventList();
     ~EventList();
-    void exec(unsigned onidSid, const string& channelname);
+    int exec(unsigned onidSid, const string& channelname);
 };
 
 

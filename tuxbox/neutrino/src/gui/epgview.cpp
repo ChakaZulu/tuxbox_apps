@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: epgview.cpp,v 1.40 2002/02/25 01:27:33 field Exp $
+// $Id: epgview.cpp,v 1.41 2002/02/25 19:32:26 field Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.41  2002/02/25 19:32:26  field
+// Events <-> Key-Handling umgestellt! SEHR BETA!
+//
 // Revision 1.40  2002/02/25 01:27:33  field
 // Key-Handling umgestellt (moeglicherweise beta ;)
 //
@@ -348,8 +351,11 @@ string GetGenre( char contentClassification )
 }
 
 
-void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long long id, time_t* startzeit, bool doLoop )
+int CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long long id, time_t* startzeit, bool doLoop )
 {
+	int res = CMenuTarget::RETURN_REPAINT;
+
+	printf("show-epg...\n");
 	int height;
 	height = g_Fonts->epg_date->getHeight();
 	if (doLoop)
@@ -377,9 +383,13 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
 		g_FrameBuffer->paintBoxRel(sx+ 1, sy+ 1, ox- 2, height+ 8, COL_MENUCONTENT);
 		g_Fonts->epg_info2->RenderString(sx+15, sy+height+5, ox-30, text, COL_MENUCONTENT);
 
-		g_RCInput->getKey(20);
+
+		int msg; uint data;
+		g_RCInput->getMsg( &msg, &data, 20 );
+		neutrino->handleMsg( msg, data );
+
 		g_FrameBuffer->paintBackgroundBoxRel(sx, sy, ox, height+10);
-		return;
+		return res;
 	}
 
 
@@ -478,64 +488,75 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
 		int scrollCount;
 		while(loop)
 		{
-			int key = g_RCInput->getKey(g_settings.timing_epg);
+			int msg; uint data;
+			g_RCInput->getMsg( &msg, &data, g_settings.timing_epg );
 
 			scrollCount = medlinecount;
 
-			if (key==CRCInput::RC_left)
+			switch ( msg )
 			{
-				if (prev_id != 0)
-				{
-					g_FrameBuffer->paintBoxRel(sx+ 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT+ 1);
-					g_Fonts->epg_date->RenderString(sx+ 10, sy+ oy- 3, widthr, "<", COL_MENUCONTENT+ 1);
+				case CRCInput::RC_left:
+					if (prev_id != 0)
+					{
+						g_FrameBuffer->paintBoxRel(sx+ 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT+ 1);
+						g_Fonts->epg_date->RenderString(sx+ 10, sy+ oy- 3, widthr, "<", COL_MENUCONTENT+ 1);
 
-					show(channelName, onid_tsid, prev_id, &prev_zeit, false);
-				}
+						show(channelName, onid_tsid, prev_id, &prev_zeit, false);
+					}
+					break;
 
-			}
-			else if (key==CRCInput::RC_right)
-			{
-				if (next_id != 0)
-				{
-					g_FrameBuffer->paintBoxRel(sx+ ox- botboxheight+ 8- 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT+ 1);
-					g_Fonts->epg_date->RenderString(sx+ ox- botboxheight+ 8, sy+ oy- 3, widthr, ">", COL_MENUCONTENT+ 1);
+				case CRCInput::RC_right:
+					if (next_id != 0)
+					{
+						g_FrameBuffer->paintBoxRel(sx+ ox- botboxheight+ 8- 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT+ 1);
+						g_Fonts->epg_date->RenderString(sx+ ox- botboxheight+ 8, sy+ oy- 3, widthr, ">", COL_MENUCONTENT+ 1);
 
-					show(channelName, onid_tsid, next_id, &next_zeit, false);
-				}
+						show(channelName, onid_tsid, next_id, &next_zeit, false);
+					}
+					break;
 
-			}
-			else if (key==CRCInput::RC_down)
-			{
-				if(showPos+scrollCount<textCount)
-				{
-					showPos += scrollCount;
-					showText(showPos,textypos);
-				}
-			}
-			else if (key==CRCInput::RC_up)
-			{
-				showPos -= scrollCount;
-				if(showPos<0)
-					showPos = 0;
-				else
-					showText(showPos,textypos);
-			}
-			else if (key==CRCInput::RC_red)
-			{
-				g_RCInput->pushbackKey(key);
-				loop = false;
-			}
-			else if ( (key==CRCInput::RC_ok) || (key==CRCInput::RC_help)  || (key==g_settings.key_channelList_cancel) || (key==CRCInput::RC_timeout))
-			{
-				loop = false;
-			}
-			else
-			{
-				neutrino->HandleKeys( key );
+				case CRCInput::RC_down:
+					if(showPos+scrollCount<textCount)
+					{
+						showPos += scrollCount;
+						showText(showPos,textypos);
+					}
+					break;
+
+				case CRCInput::RC_up:
+					showPos -= scrollCount;
+					if(showPos<0)
+						showPos = 0;
+					else
+						showText(showPos,textypos);
+					break;
+
+				case CRCInput::RC_red:
+					g_RCInput->pushbackMsg( msg, data );
+
+				case CRCInput::RC_ok:
+				case CRCInput::RC_help:
+				case CRCInput::RC_timeout:
+					loop = false;
+					break;
+
+				default:
+					// konfigurierbare Keys handlen...
+					if ( msg == g_settings.key_channelList_cancel )
+						loop = false;
+					else
+					{
+						if ( neutrino->handleMsg( msg, data ) == CRCInput::MSG_cancel_all )
+						{
+							loop = false;
+							res = CMenuTarget::RETURN_EXIT_ALL;
+						}
+					}
 			}
 		}
 		hide();
 	}
+	return res;
 }
 
 void CEpgData::hide()

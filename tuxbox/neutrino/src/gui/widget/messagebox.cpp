@@ -86,6 +86,8 @@ void CMessageBox::hide()
 
 int CMessageBox::exec(CMenuTarget* parent, string actionKey)
 {
+	int res = CMenuTarget::RETURN_REPAINT;
+
 	if (parent)
 	{
 		parent->hide();
@@ -95,24 +97,26 @@ int CMessageBox::exec(CMenuTarget* parent, string actionKey)
 	bool loop=true;
 	while (loop)
 	{
-		int key = g_RCInput->getKey();
+		int msg; uint data;
+		g_RCInput->getMsg( &msg, &data, g_settings.timing_epg );
 
-		if ((key==CRCInput::RC_timeout) || (key==g_settings.key_channelList_cancel))
+		if ( (msg==CRCInput::RC_timeout) ||
+			 (msg==g_settings.key_channelList_cancel) )
 		{
 			cancel();
 			loop=false;
 		}
-		else if(key==CRCInput::RC_red)
+		else if(msg==CRCInput::RC_red)
 		{
 			no();
 			loop=false;
 		}
-		else if(key==CRCInput::RC_green)
+		else if(msg==CRCInput::RC_green)
 		{
 			yes();
 			loop=false;
 		}
-		else if(key==CRCInput::RC_right)
+		else if(msg==CRCInput::RC_right)
 		{
 			if(selected<2)
 			{
@@ -121,7 +125,7 @@ int CMessageBox::exec(CMenuTarget* parent, string actionKey)
 			}
 
 		}
-		else if(key==CRCInput::RC_left)
+		else if(msg==CRCInput::RC_left)
 		{
 			if(selected>0)
 			{
@@ -130,10 +134,10 @@ int CMessageBox::exec(CMenuTarget* parent, string actionKey)
 			}
 
 		}
-		else if(key==CRCInput::RC_left)
+		else if(msg==CRCInput::RC_left)
 		{
 		}
-		else if(key==CRCInput::RC_ok)
+		else if(msg==CRCInput::RC_ok)
 		{
 			//exec selected;
 			switch (selected)
@@ -147,13 +151,14 @@ int CMessageBox::exec(CMenuTarget* parent, string actionKey)
 			}
 			loop=false;
 		}
-		else
+		else if ( neutrino->handleMsg( msg, data ) == CRCInput::MSG_cancel_all )
 		{
-			neutrino->HandleKeys( key );
+			loop = false;
+			res = CMenuTarget::RETURN_EXIT_ALL;
 		}
 
 	}
 	hide();
-	return RETURN_REPAINT;
+	return res;
 }
 

@@ -123,7 +123,7 @@ class CEpgData
 
 		CEpgData();
 		void start( );
-		void show( string channelName, unsigned int onid_tsid, unsigned long long id = 0, time_t* startzeit = NULL, bool doLoop = true);
+		int show( string channelName, unsigned int onid_tsid, unsigned long long id = 0, time_t* startzeit = NULL, bool doLoop = true);
 		void hide();
 };
 

@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.64 2002/02/25 01:27:33 field Exp $
+// $Id: channellist.cpp,v 1.65 2002/02/25 19:32:26 field Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.65  2002/02/25 19:32:26  field
+// Events <-> Key-Handling umgestellt! SEHR BETA!
+//
 // Revision 1.64  2002/02/25 01:27:33  field
 // Key-Handling umgestellt (moeglicherweise beta ;)
 //
@@ -414,10 +417,12 @@ int CChannelList::getActiveChannelNumber()
 
 int CChannelList::show()
 {
+	int res = -1;
+
 	if(chanlist.size()==0)
 	{
 		//evtl. anzeige dass keine kanalliste....
-		return -1;
+		return res;
 	}
 	paintHead();
 	updateEvents();
@@ -429,13 +434,17 @@ int CChannelList::show()
 	bool loop=true;
 	while (loop)
 	{
-		int key = g_RCInput->getKey(g_settings.timing_chanlist);
-		if ((key==CRCInput::RC_timeout) || (key==g_settings.key_channelList_cancel))
+
+		int msg; uint data;
+		g_RCInput->getMsg( &msg, &data, g_settings.timing_chanlist );
+
+		if ( ( msg == CRCInput::RC_timeout ) ||
+			 ( msg == g_settings.key_channelList_cancel) )
 		{
 			selected = oldselected;
 			loop=false;
 		}
-		else if (key==g_settings.key_channelList_pageup)
+		else if ( msg == g_settings.key_channelList_pageup )
 		{
 			selected+=listmaxshow;
 			if (selected>chanlist.size()-1)
@@ -443,7 +452,7 @@ int CChannelList::show()
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paint();
 		}
-		else if (key==g_settings.key_channelList_pagedown)
+		else if ( msg == g_settings.key_channelList_pagedown )
 		{
 			if ((int(selected)-int(listmaxshow))<0)
 				selected=chanlist.size()-1;
@@ -452,7 +461,7 @@ int CChannelList::show()
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paint();
 		}
-		else if (key==CRCInput::RC_up)
+		else if ( msg == CRCInput::RC_up )
 		{
 			int prevselected=selected;
 			if(selected==0)
@@ -473,7 +482,7 @@ int CChannelList::show()
 				paintItem(selected - liststart);
 			}
 		}
-		else if (key==CRCInput::RC_down)
+		else if ( msg == CRCInput::RC_down )
 		{
 			int prevselected=selected;
 			selected = (selected+1)%chanlist.size();
@@ -489,77 +498,99 @@ int CChannelList::show()
 				paintItem(selected - liststart);
 			}
 		}
-		else if ((key==g_settings.key_bouquet_up) && (bouquetList!=NULL))
+		else if ( ( msg == g_settings.key_bouquet_up ) && ( bouquetList != NULL ) )
 		{
 			if (bouquetList->Bouquets.size() > 0)
 			{
 				int nNext = (bouquetList->getActiveBouquetNumber()+1) % bouquetList->Bouquets.size();
-				bouquetList->activateBouquet(nNext);
-				bouquetList->showChannelList();
+				bouquetList->activateBouquet( nNext );
+				res = bouquetList->showChannelList();
 				loop = false;
 
 			}
 		}
-		else if ((key==g_settings.key_bouquet_down) && (bouquetList!=NULL))
+		else if ( ( msg == g_settings.key_bouquet_down ) && ( bouquetList != NULL ) )
 		{
 			if (bouquetList->Bouquets.size() > 0)
 			{
 				int nNext = (bouquetList->getActiveBouquetNumber()+bouquetList->Bouquets.size()-1) % bouquetList->Bouquets.size();
 				bouquetList->activateBouquet(nNext);
-				bouquetList->showChannelList();
+				res = bouquetList->showChannelList();
 				loop = false;
 			}
 		}
-		else if (key==CRCInput::RC_ok)
+		else if ( msg == CRCInput::RC_ok )
 		{
 			zapOnExit = true;
 			loop=false;
 		}
-		else if ((key==CRCInput::RC_setup) && (bouquetList!=NULL))
+		else if ( ( msg == CRCInput::RC_setup ) &&
+				  ( bouquetList != NULL ) )
 		{
 			bShowBouquetList = true;
 			loop=false;
 		}
-		else if( (key==CRCInput::RC_red) || (key==CRCInput::RC_green) || (key==CRCInput::RC_yellow)
-				 || (key==CRCInput::RC_blue)
-		         || (key==CRCInput::RC_standby)
-		         || (CRCInput::isNumeric(key)) )
-		{	//pushback key if...
+		else if( (msg==CRCInput::RC_red) ||
+				 (msg==CRCInput::RC_green) ||
+				 (msg==CRCInput::RC_yellow) ||
+				 (msg==CRCInput::RC_blue) ||
+		         (msg==CRCInput::RC_standby) ||
+		         (CRCInput::isNumeric(msg)) )
+		{
+			//pushback key if...
 			selected = oldselected;
-			g_RCInput->pushbackKey (key);
+			g_RCInput->pushbackMsg( msg, data );
 			loop=false;
 		}
-		else if (key==CRCInput::RC_help)
+		else if ( msg == CRCInput::RC_help )
 		{
 			hide();
 
-			g_EventList->exec(chanlist[selected]->onid_sid, chanlist[selected]->name );
+			if ( g_EventList->exec(chanlist[selected]->onid_sid, chanlist[selected]->name ) == CMenuTarget::RETURN_EXIT_ALL )
+			{
+				res = -2;
+				loop = false;
+			}
+			else
+			{
+				g_RCInput->getMsg( &msg, &data, 0 );
 
-			key = g_RCInput->getKey(0);
-			if ((key!=CRCInput::RC_red) && (key!=CRCInput::RC_timeout))
-				g_RCInput->pushbackKey(key);
+				if ( ( msg != CRCInput::RC_red ) &&
+				     ( msg != CRCInput::RC_timeout ) )
+				{
+					// RC_red schlucken
+					g_RCInput->pushbackMsg( msg, data );
+				}
 
-			paintHead();
-			paint();
+				paintHead();
+				paint();
+			}
+
 		}
 		else
 		{
-			neutrino->HandleKeys( key );
-		};
+			if ( neutrino->handleMsg( msg, data ) == CRCInput::MSG_cancel_all )
+			{
+				loop = false;
+				res = - 2;
+			}
+		}
 	}
 	hide();
+
 	if (bShowBouquetList)
 	{
-		bouquetList->exec( true);
-		return(-1);
+		if ( bouquetList->exec( true ) == CMenuTarget::RETURN_EXIT_ALL )
+			res = -2;
 	}
+
 	if(zapOnExit)
 	{
 		return(selected);
 	}
 	else
 	{
-		return(-1);
+		return(res);
 	}
 }
 
@@ -600,16 +631,18 @@ void CChannelList::zapTo(int pos)
 		bouquetList->adjustToChannel( getActiveChannelNumber());
 }
 
-void CChannelList::numericZap(int key)
+int CChannelList::numericZap(int key)
 {
+	int res = CMenuTarget::RETURN_REPAINT;
+
 	if(chanlist.size()==0)
 	{
 		//evtl. anzeige dass keine kanalliste....
-		return;
+		return res;
 	}
 
 	//schneller zap mit "0" taste zwischen den letzten beiden sendern...
-	if(key==0)
+	if( key == 0 )
 	{
 		int  ch;
 
@@ -622,7 +655,7 @@ void CChannelList::numericZap(int key)
 				zapTo(ch);		        // zap to last
 			}
 		}
-		return;
+		return res;
 	}
 
 	int ox=300;
@@ -632,6 +665,8 @@ void CChannelList::numericZap(int key)
 	char valstr[10];
 	int chn=key;
 	int pos=1;
+	int msg; uint data;
+	bool doZap = true;
 
 	while(1)
 	{
@@ -650,25 +685,28 @@ void CChannelList::numericZap(int key)
 
 		showInfo(chn- 1);
 
-		if ( ( key=g_RCInput->getKey(30) ) == CRCInput::RC_timeout )
+
+		g_RCInput->getMsg( &msg, &data, 30 );
+
+		if ( msg == CRCInput::RC_timeout )
 		{
 			if ( ( chn > (int)chanlist.size() ) || (chn == 0) )
 				chn = tuned + 1;
 			break;
 		}
-		else if ( (key>=0) && (key<=9) )
+		else if ( ( msg >= 0 ) && ( msg <= 9 ) )
 		{ //numeric
 			if ( pos==4 )
 			{
-				chn = key;
+				chn = msg;
 				pos = 0;
 			}
 			else
-				chn = chn* 10 + key;
+				chn = chn* 10 + msg;
 
 			pos++;
 		}
-		else if (key==CRCInput::RC_ok)
+		else if ( msg == CRCInput::RC_ok )
 		{
 			if ( ( chn > (signed int) chanlist.size() ) || ( chn == 0 ) )
 			{
@@ -676,7 +714,7 @@ void CChannelList::numericZap(int key)
 			}
 			break;
 		}
-		else if (key==g_settings.key_quickzap_down)
+		else if ( msg == g_settings.key_quickzap_down )
 		{
 			if ( chn == 1 )
 				chn = chanlist.size();
@@ -688,32 +726,40 @@ void CChannelList::numericZap(int key)
 					chn = (int)chanlist.size();
 			}
 		}
-		else if (key==g_settings.key_quickzap_up)
+		else if ( msg == g_settings.key_quickzap_up )
 		{
 			chn++;
 
 			if (chn > (int)chanlist.size())
 				chn = 1;
 		}
-		else if (key==CRCInput::RC_home || key==CRCInput::RC_left || key==CRCInput::RC_right)
+		else if ( ( msg == CRCInput::RC_home ) ||
+				  ( msg == CRCInput::RC_left ) ||
+				  ( msg == CRCInput::RC_right) )
 		{
 			// Abbruch ohne Channel zu wechseln
-
-			chn = tuned + 1;
+			doZap = false;
 			break;
 		}
-		else
+		else if ( neutrino->handleMsg( msg, data ) == CRCInput::MSG_cancel_all )
 		{
-			neutrino->HandleKeys( key );
-		};
+			doZap = false;
+			res = CMenuTarget::RETURN_EXIT_ALL;
+			break;
+		}
 	}
 
 	g_FrameBuffer->paintBackgroundBoxRel(ox, oy, sx, sy);
 
-	chn--;
-	if (chn<0)
-		chn=0;
-	zapTo( chn );
+	if ( doZap )
+	{
+		chn--;
+		if (chn<0)
+			chn=0;
+		zapTo( chn );
+	}
+
+	return res;
 }
 
 void CChannelList::quickZap(int key)

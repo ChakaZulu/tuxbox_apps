@@ -30,12 +30,15 @@
 */
 
 /*
-$Id: streaminfo.cpp,v 1.16 2002/02/25 01:27:33 field Exp $
+$Id: streaminfo.cpp,v 1.17 2002/02/25 19:32:26 field Exp $
 
 Module StreamInfo
 
 History:
  $Log: streaminfo.cpp,v $
+ Revision 1.17  2002/02/25 19:32:26  field
+ Events <-> Key-Handling umgestellt! SEHR BETA!
+
  Revision 1.16  2002/02/25 01:27:33  field
  Key-Handling umgestellt (moeglicherweise beta ;)
 
@@ -87,16 +90,38 @@ CStreamInfo::CStreamInfo()
 
 int CStreamInfo::exec(CMenuTarget* parent, string)
 {
+	int res = CMenuTarget::RETURN_REPAINT;
+
 	if (parent)
 	{
 		parent->hide();
 	}
 	paint();
 
-	neutrino->HandleKeys( g_RCInput->getKey(130) );
+	bool doLoop = true;
+
+	int msg; uint data;
+	while ( doLoop )
+	{
+		g_RCInput->getMsg( &msg, &data, 130 );
+
+        if ( msg == CRCInput::RC_timeout )
+			doLoop = false;
+		else
+		{
+			switch ( neutrino->handleMsg( msg, data ) )
+			{
+				case CRCInput::MSG_cancel_all:
+					res = CMenuTarget::RETURN_EXIT_ALL;
+				case CRCInput::MSG_unhandled:
+					doLoop = false;
+			}
+		}
+
+	}
 
 	hide();
-	return CMenuTarget::RETURN_REPAINT;
+	return res;
 }
 
 void CStreamInfo::hide()

@@ -73,6 +73,7 @@ void CColorChooser::setColor()
 
 int CColorChooser::exec(CMenuTarget* parent, string)
 {
+	int res = CMenuTarget::RETURN_REPAINT;
 	if (parent)
 	{
 		parent->hide();
@@ -91,166 +92,171 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 	int selected = 0;
 	while(loop)
 	{
-		int key = g_RCInput->getKey(300, true);
-		if(key== CRCInput::RC_timeout)
-		{//timeout, close
-			loop = false;
-		}
-		else if (key==CRCInput::RC_ok)
+		int msg; uint data;
+		g_RCInput->getMsg( &msg, &data, 300, true );
+
+		switch ( msg )
 		{
-			loop=false;
-		}
-		else if (key==CRCInput::RC_home)
-		{
-			// abbruch...
-			*r = r_alt;
-			*g = g_alt;
-			*b = b_alt;
-			*alpha = a_alt;
-			loop=false;
-		}
-		else if (key==CRCInput::RC_down)
-		{
-			int max = 3;
-			if (alpha==NULL)
-			{
-				max=2;
-			}
-			if(selected<max)
-			{
-				paintSlider(x+10, y+ hheight, r, g_Locale->getText("colorchooser.red"),"red", false);
-				paintSlider(x+10, y+ hheight+ mheight, g, g_Locale->getText("colorchooser.green"),"green", false);
-				paintSlider(x+ 10, y+ hheight+ mheight* 2, b, g_Locale->getText("colorchooser.blue"),"blue", false);
-				paintSlider(x+ 10, y+ hheight+ mheight* 3, alpha,g_Locale->getText("colorchooser.alpha"),"alpha",false);
-				selected++;
+			case CRCInput::RC_down:
+				{
+					int max = 3;
+					if (alpha==NULL)
+						max=2;
+
+					if(selected<max)
+					{
+						paintSlider(x+10, y+ hheight, r, g_Locale->getText("colorchooser.red"),"red", false);
+						paintSlider(x+10, y+ hheight+ mheight, g, g_Locale->getText("colorchooser.green"),"green", false);
+						paintSlider(x+ 10, y+ hheight+ mheight* 2, b, g_Locale->getText("colorchooser.blue"),"blue", false);
+						paintSlider(x+ 10, y+ hheight+ mheight* 3, alpha,g_Locale->getText("colorchooser.alpha"),"alpha",false);
+						selected++;
+						switch (selected)
+						{
+							case 0:
+								paintSlider(x+ 10, y+ hheight, r, g_Locale->getText("colorchooser.red"),"red", true);
+								break;
+							case 1:
+								paintSlider(x+ 10, y+ hheight+ mheight, g, g_Locale->getText("colorchooser.green"),"green", true);
+								break;
+							case 2:
+								paintSlider(x+ 10, y+ hheight+ mheight* 2, b, g_Locale->getText("colorchooser.blue"),"blue", true);
+								break;
+							case 3:
+								paintSlider(x+ 10, y+ hheight+ mheight* 3, alpha, g_Locale->getText("colorchooser.alpha"),"alpha", true);
+								break;
+						}
+					}
+					break;
+    	        }
+			case CRCInput::RC_up:
+				if(selected>0)
+				{
+					paintSlider(x+10, y+hheight, r,g_Locale->getText("colorchooser.red"),"red", false);
+					paintSlider(x+10, y+hheight+mheight, g,g_Locale->getText("colorchooser.green"),"green", false);
+					paintSlider(x+10, y+hheight+mheight*2, b,g_Locale->getText("colorchooser.blue"),"blue", false);
+					paintSlider(x+10, y+hheight+mheight*3, alpha,g_Locale->getText("colorchooser.alpha"),"alpha",false);
+					selected--;
+					switch (selected)
+					{
+						case 0:
+							paintSlider(x+10, y+hheight, r,g_Locale->getText("colorchooser.red"),"red", true);
+							break;
+						case 1:
+							paintSlider(x+10, y+hheight+mheight, g,g_Locale->getText("colorchooser.green"),"green", true);
+							break;
+						case 2:
+							paintSlider(x+10, y+hheight+mheight*2, b,g_Locale->getText("colorchooser.blue"),"blue", true);
+							break;
+						case 3:
+							paintSlider(x+10, y+hheight+mheight*3, alpha,g_Locale->getText("colorchooser.alpha"),"alpha",true);
+							break;
+					}
+				}
+				break;
+
+			case CRCInput::RC_right:
 				switch (selected)
 				{
-						case 0:
-						paintSlider(x+ 10, y+ hheight, r, g_Locale->getText("colorchooser.red"),"red", true);
+					case 0:
+						if (*r<100)
+						{
+							*r+=5;
+							paintSlider(x+10, y+hheight, r,g_Locale->getText("colorchooser.red"),"red", true);
+							setColor();
+						}
 						break;
-						case 1:
-						paintSlider(x+ 10, y+ hheight+ mheight, g, g_Locale->getText("colorchooser.green"),"green", true);
+					case 1:
+						if (*g<100)
+						{
+							*g+=5;
+							paintSlider(x+10, y+hheight+mheight, g,g_Locale->getText("colorchooser.green"),"green", true);
+							setColor();
+						}
 						break;
-						case 2:
-						paintSlider(x+ 10, y+ hheight+ mheight* 2, b, g_Locale->getText("colorchooser.blue"),"blue", true);
+					case 2:
+						if (*b<100)
+						{
+							*b+=5;
+							paintSlider(x+10, y+hheight+mheight*2, b,g_Locale->getText("colorchooser.blue"),"blue", true);
+							setColor();
+						}
 						break;
-						case 3:
-						paintSlider(x+ 10, y+ hheight+ mheight* 3, alpha, g_Locale->getText("colorchooser.alpha"),"alpha", true);
+					case 3:
+						if (*alpha<100)
+						{
+							*alpha+=5;
+							paintSlider(x+10, y+hheight+mheight*3, alpha,g_Locale->getText("colorchooser.alpha"),"alpha",true);
+							setColor();
+						}
 						break;
 				}
-			}
-		}
-		else if (key==CRCInput::RC_up)
-		{
-			if(selected>0)
-			{
-				paintSlider(x+10, y+hheight, r,g_Locale->getText("colorchooser.red"),"red", false);
-				paintSlider(x+10, y+hheight+mheight, g,g_Locale->getText("colorchooser.green"),"green", false);
-				paintSlider(x+10, y+hheight+mheight*2, b,g_Locale->getText("colorchooser.blue"),"blue", false);
-				paintSlider(x+10, y+hheight+mheight*3, alpha,g_Locale->getText("colorchooser.alpha"),"alpha",false);
-				selected--;
+				break;
+
+			case CRCInput::RC_left:
 				switch (selected)
 				{
-						case 0:
-						paintSlider(x+10, y+hheight, r,g_Locale->getText("colorchooser.red"),"red", true);
+					case 0:
+						if (*r>0)
+						{
+							*r-=5;
+							paintSlider(x+10, y+hheight, r,g_Locale->getText("colorchooser.red"),"red", true);
+							setColor();
+						}
 						break;
-						case 1:
-						paintSlider(x+10, y+hheight+mheight, g,g_Locale->getText("colorchooser.green"),"green", true);
+					case 1:
+						if (*g>0)
+						{
+							*g-=5;
+							paintSlider(x+10, y+hheight+mheight, g,g_Locale->getText("colorchooser.green"),"green", true);
+							setColor();
+						}
 						break;
-						case 2:
-						paintSlider(x+10, y+hheight+mheight*2, b,g_Locale->getText("colorchooser.blue"),"blue", true);
+					case 2:
+						if (*b>0)
+						{
+							*b-=5;
+							paintSlider(x+10, y+hheight+mheight*2, b,g_Locale->getText("colorchooser.blue"),"blue", true);
+							setColor();
+						}
 						break;
-						case 3:
-						paintSlider(x+10, y+hheight+mheight*3, alpha,g_Locale->getText("colorchooser.alpha"),"alpha",true);
+					case 3:
+						if (*alpha>0)
+						{
+							*alpha-=5;
+							paintSlider(x+10, y+hheight+mheight*3, alpha,g_Locale->getText("colorchooser.alpha"),"alpha",true);
+							setColor();
+						}
 						break;
 				}
-			}
-		}
-		else if (key==CRCInput::RC_right)
-		{
-			switch (selected)
-			{
-					case 0:
-					if (*r<100)
-					{
-						*r+=5;
-						paintSlider(x+10, y+hheight, r,g_Locale->getText("colorchooser.red"),"red", true);
-						setColor();
-					}
-					break;
-					case 1:
-					if (*g<100)
-					{
-						*g+=5;
-						paintSlider(x+10, y+hheight+mheight, g,g_Locale->getText("colorchooser.green"),"green", true);
-						setColor();
-					}
-					break;
-					case 2:
-					if (*b<100)
-					{
-						*b+=5;
-						paintSlider(x+10, y+hheight+mheight*2, b,g_Locale->getText("colorchooser.blue"),"blue", true);
-						setColor();
-					}
-					break;
-					case 3:
-					if (*alpha<100)
-					{
-						*alpha+=5;
-						paintSlider(x+10, y+hheight+mheight*3, alpha,g_Locale->getText("colorchooser.alpha"),"alpha",true);
-						setColor();
-					}
-					break;
-			}
-		}
-		else if (key==CRCInput::RC_left)
-		{
-			switch (selected)
-			{
-					case 0:
-					if (*r>0)
-					{
-						*r-=5;
-						paintSlider(x+10, y+hheight, r,g_Locale->getText("colorchooser.red"),"red", true);
-						setColor();
-					}
-					break;
-					case 1:
-					if (*g>0)
-					{
-						*g-=5;
-						paintSlider(x+10, y+hheight+mheight, g,g_Locale->getText("colorchooser.green"),"green", true);
-						setColor();
-					}
-					break;
-					case 2:
-					if (*b>0)
-					{
-						*b-=5;
-						paintSlider(x+10, y+hheight+mheight*2, b,g_Locale->getText("colorchooser.blue"),"blue", true);
-						setColor();
-					}
-					break;
-					case 3:
-					if (*alpha>0)
-					{
-						*alpha-=5;
-						paintSlider(x+10, y+hheight+mheight*3, alpha,g_Locale->getText("colorchooser.alpha"),"alpha",true);
-						setColor();
-					}
-					break;
-			}
-		}
-		else
-		{
-			neutrino->HandleKeys( key );
+				break;
+
+			case CRCInput::RC_home:
+				// abbruch...
+				*r = r_alt;
+				*g = g_alt;
+				*b = b_alt;
+				*alpha = a_alt;
+
+			case CRCInput::RC_timeout:
+			case CRCInput::RC_ok:
+				loop = false;
+				break;
+
+			default:
+				if ( neutrino->handleMsg( msg, data ) == CRCInput::MSG_cancel_all )
+				{
+					loop = false;
+					res = CMenuTarget::RETURN_EXIT_ALL;
+				}
 		}
 	}
+
 	hide();
+
 	if(observer)
 		observer->changeNotify(name, NULL);
-	return CMenuTarget::RETURN_REPAINT;
+
+	return res;
 }
 
 void CColorChooser::hide()

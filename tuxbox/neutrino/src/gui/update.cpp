@@ -33,6 +33,7 @@
 #include "../global.h"
 
 #define gTmpPath "/var/tmp/"
+#define gUserAgent "neutrino/softupdater 1.0"
 
 CFlashTool::CFlashTool()
 {
@@ -270,6 +271,9 @@ bool CHTTPUpdater::getInfo()
 		curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, show_progress);
 		curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, statusViewer);
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, FALSE);
+		curl_easy_setopt(curl, CURLOPT_USERAGENT, gUserAgent);
+		//curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
+
 		if(strcmp(g_settings.softupdate_proxyserver,"")!=0)
 		{//use proxyserver
 			printf("use proxyserver\n");
@@ -297,9 +301,9 @@ bool CHTTPUpdater::getInfo()
 	return res==0;
 }
 
-bool CHTTPUpdater::getFile()
+bool CHTTPUpdater::getFile( string version )
 {
-	statusViewer->showStatusMessage( g_Locale->getText("flashupdate.getupdatefile") );
+	statusViewer->showStatusMessage( g_Locale->getText("flashupdate.getupdatefile")+ " v"+ version );
 	CURL *curl;
 	CURLcode res;
 	FILE *headerfile;
@@ -315,6 +319,8 @@ bool CHTTPUpdater::getFile()
 		curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, show_progress);
 		curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, statusViewer);
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, FALSE);
+		curl_easy_setopt(curl, CURLOPT_USERAGENT, gUserAgent);
+
 		if(strcmp(g_settings.softupdate_proxyserver,"")!=0)
 		{//use proxyserver
 			printf("use proxyserver\n");
@@ -343,7 +349,7 @@ bool CHTTPUpdater::getFile()
 
 CFlashUpdate::CFlashUpdate()
 {
-	width = 430;
+	width = 550;
 	hheight = g_Fonts->menu_title->getHeight();
 	mheight = g_Fonts->menu->getHeight();
 	height = hheight+5*mheight+20;
@@ -354,16 +360,38 @@ CFlashUpdate::CFlashUpdate()
 
 int CFlashUpdate::exec(CMenuTarget* parent, string)
 {
+		int res = CMenuTarget::RETURN_REPAINT;
+
 	if (parent)
 	{
 		parent->hide();
 	}
 	paint();
 
-	neutrino->HandleKeys( g_RCInput->getKey(190) );
+	bool doLoop = true;
+
+	int msg; uint data;
+	while ( doLoop )
+	{
+		g_RCInput->getMsg( &msg, &data, 190);
+
+		if ( msg == CRCInput::RC_timeout )
+			doLoop = false;
+		else
+		{
+			switch ( neutrino->handleMsg( msg, data ) )
+			{
+				case CRCInput::MSG_cancel_all:
+					res = CMenuTarget::RETURN_EXIT_ALL;
+				case CRCInput::MSG_unhandled:
+					doLoop = false;
+			}
+		}
+
+	}
 
 	hide();
-	return CMenuTarget::RETURN_REPAINT;
+	return res;
 }
 
 void CFlashUpdate::hide()
@@ -552,7 +580,7 @@ void CFlashUpdate::paint()
 
 	if(g_settings.softupdate_mode==1) //internet-update
 	{
-		if(!http.getFile())
+		if(!http.getFile( new_minor ))
 		{
 			showStatusMessage(g_Locale->getText("flashupdate.getupdatefileerror") );
 			close(fp_fd);

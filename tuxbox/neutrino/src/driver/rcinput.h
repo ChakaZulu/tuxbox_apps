@@ -30,12 +30,15 @@
 */
 
 /*
-$Id: rcinput.h,v 1.15 2002/02/17 15:55:56 McClean Exp $
+$Id: rcinput.h,v 1.16 2002/02/25 19:32:26 field Exp $
 
  Module  RemoteControle Handling
 
 History:
  $Log: rcinput.h,v $
+ Revision 1.16  2002/02/25 19:32:26  field
+ Events <-> Key-Handling umgestellt! SEHR BETA!
+
  Revision 1.15  2002/02/17 15:55:56  McClean
  prepare for keyboard - useless at the moment
 
@@ -127,6 +130,14 @@ class CRCInput
 		    RC_timeout=-1, RC_nokey=-2
 		};
 
+		enum
+		{
+			MSG_ignore 	= 0x00,
+			MSG_handled	= 0x01,
+			MSG_unhandled= 0x02,
+			MSG_cancel_all= 0x03
+		};
+
 		static const int RC_KeyBoard = 0x4000;
 
 		//only used for plugins (games) !!
@@ -144,10 +155,13 @@ class CRCInput
 
 
 		static bool isNumeric(int key);
-		int  getKey(int Timeout=-1, bool bAllowRepeatLR= false);     //get key from the input-device
-		int  pushbackKey (int key);      // push key back in buffer (like ungetc)
-		void clear (void);
+		int  _getKey(int Timeout=-1, bool bAllowRepeatLR= false);     //get key from the input-device
+		int  _pushbackKey (int key);      // push key back in buffer (like ungetc)
+		void _clear (void);
 		static string getKeyName(int);
+		void getMsg(int *msg, uint* data, int Timeout=-1, bool bAllowRepeatLR= false);     //get message :) (calls _getKey at the moment)
+		void pushbackMsg(int msg, uint data);     // push message back into buffer - (calls _pushbackKey at the moment)
+		void clearMsg(int type);	// bestimmte Msgs aus der Schleife löschen - löscht zZ ALLES :(
 };
 
 #endif

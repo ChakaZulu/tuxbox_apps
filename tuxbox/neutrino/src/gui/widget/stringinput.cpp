@@ -146,8 +146,8 @@ void CStringInput::keyRightPressed()
 
 int CStringInput::exec( CMenuTarget* parent, string )
 {
+	int res = CMenuTarget::RETURN_REPAINT;
 	char oldval[size];
-	int key;
 
 	strcpy(oldval, value);
 
@@ -162,29 +162,31 @@ int CStringInput::exec( CMenuTarget* parent, string )
 	paint();
 
 	bool loop = true;
+	int msg; uint data;
 
-	//int selected = 0;
 	while(loop)
 	{
 		g_lcdd->setMenuText(1, value, selected+1);
-		key = g_RCInput->getKey(300);
-		if (key==CRCInput::RC_left)
+
+		g_RCInput->getMsg( &msg, &data, 300 );
+
+		if (msg==CRCInput::RC_left)
 		{
 			keyLeftPressed();
 		}
-		else if (key==CRCInput::RC_right)
+		else if (msg==CRCInput::RC_right)
 		{
 			keyRightPressed();
 		}
-		else if ( ( key>= 0 ) && ( key<= 9) )
+		else if ( ( msg>= 0 ) && ( msg<= 9) )
 		{
-			key0_9Pressed( key);
+			key0_9Pressed( msg );
 		}
-		else if (key==CRCInput::RC_red)
+		else if (msg==CRCInput::RC_red)
 		{
 			keyRedPressed();
 		}
-		else if ( (key==CRCInput::RC_green) && ( strstr(validchars, ".")!=NULL ) )
+		else if ( (msg==CRCInput::RC_green) && ( strstr(validchars, ".")!=NULL ) )
 		{
 			value[selected]='.';
 			paintChar(selected);
@@ -194,26 +196,27 @@ int CStringInput::exec( CMenuTarget* parent, string )
 			paintChar(selected-1);
 			paintChar(selected);
 		}
-		else if (key==CRCInput::RC_up)
+		else if (msg==CRCInput::RC_up)
 		{
 			keyUpPressed();
 		}
-		else if (key==CRCInput::RC_down)
+		else if (msg==CRCInput::RC_down)
 		{
 			keyDownPressed();
 		}
-		else if (key==CRCInput::RC_ok)
+		else if (msg==CRCInput::RC_ok)
 		{
 			loop=false;
 		}
-		else if ( (key==CRCInput::RC_home) || (key==CRCInput::RC_timeout) )
+		else if ( (msg==CRCInput::RC_home) || (msg==CRCInput::RC_timeout) )
 		{
 			strcpy(value, oldval);
 			loop=false;
 		}
-		else
+		else if ( neutrino->handleMsg( msg, data ) == CRCInput::MSG_cancel_all )
 		{
-			neutrino->HandleKeys( key );
+			loop = false;
+			res = CMenuTarget::RETURN_EXIT_ALL;
 		}
 	}
 
@@ -230,12 +233,12 @@ int CStringInput::exec( CMenuTarget* parent, string )
 	}
 	value[size]=0;
 
-	if ( (observ) && (key==CRCInput::RC_ok) )
+	if ( (observ) && (msg==CRCInput::RC_ok) )
 	{
 		observ->changeNotify( name, value );
 	}
 
-	return CMenuTarget::RETURN_REPAINT;
+	return res;
 }
 
 void CStringInput::hide()

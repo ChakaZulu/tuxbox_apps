@@ -156,7 +156,9 @@ int CNVODChangeExec::exec(CMenuTarget* parent, string actionKey)
 	//    printf("CNVODChangeExec exec: %s\n", actionKey.c_str());
 	unsigned sel= atoi(actionKey.c_str());
 	g_RemoteControl->setSubChannel(sel);
-	g_RCInput->pushbackKey(CRCInput::RC_help);
+
+	g_RCInput->pushbackMsg( CRCInput::RC_help, 0 );
+
 	return RETURN_EXIT;
 }
 

@@ -49,7 +49,7 @@ int CBouquetList::getActiveBouquetNumber()
 	return selected;
 }
 
-bool CBouquetList::showChannelList( int nBouquet = -1)
+int CBouquetList::showChannelList( int nBouquet = -1 )
 {
 	if (nBouquet == -1)
 		nBouquet = selected;
@@ -59,9 +59,9 @@ bool CBouquetList::showChannelList( int nBouquet = -1)
 	{
 		selected = nBouquet;
 		orgChannelList->zapTo(Bouquets[selected]->channelList->getKey(nNewChannel)-1);
-		return(true);
 	}
-	return(false);
+
+	return nNewChannel;
 }
 
 void CBouquetList::adjustToChannel( int nChannelNr)
@@ -79,31 +79,57 @@ void CBouquetList::adjustToChannel( int nChannelNr)
 }
 
 
-void CBouquetList::activateBouquet( int id, bool bShowChannelList = false)
+int CBouquetList::activateBouquet( int id, bool bShowChannelList = false )
 {
+	int res = CMenuTarget::RETURN_REPAINT;
+
 	selected = id;
 	if (bShowChannelList)
 	{
 		int nNewChannel = Bouquets[selected]->channelList->show();
 
 		if (nNewChannel > -1)
+		{
 			orgChannelList->zapTo(Bouquets[selected]->channelList->getKey(nNewChannel)-1);
+		}
+		else if ( nNewChannel = -2 )
+		{
+			// -2 bedeutet EXIT_ALL
+			res = CMenuTarget::RETURN_EXIT_ALL;
+		}
 	}
+
+	return res;
 }
 
-void CBouquetList::exec( bool bShowChannelList)
+int CBouquetList::exec( bool bShowChannelList)
 {
-	if (show() > -1)
+    int res= show();
+
+	if ( res > -1)
 	{
-		activateBouquet( selected, bShowChannelList);
+		return activateBouquet( selected, bShowChannelList );
 	}
+	else if ( res = -1)
+	{
+		// -1 bedeutet nur REPAINT
+		return CMenuTarget::RETURN_REPAINT;
+	}
+	else
+	{
+		// -2 bedeutet EXIT_ALL
+		return CMenuTarget::RETURN_EXIT_ALL;
+	}
+
+	return res;
 }
 
 int CBouquetList::show()
 {
+	int res = -1;
 	if(Bouquets.size()==0)
 	{
-		return -1;
+		return res;
 	}
 
 	maxpos= 1;
@@ -123,7 +149,10 @@ int CBouquetList::show()
 	int pos= maxpos;
 	while (loop)
 	{
-		int key = g_RCInput->getKey(g_settings.timing_chanlist);
+
+		int msg; uint data;
+		g_RCInput->getMsg( &msg, &data, g_settings.timing_chanlist );
+
 		if ((key==CRCInput::RC_timeout) || (key==g_settings.key_channelList_cancel))
 		{
 			selected = oldselected;
@@ -189,7 +218,8 @@ int CBouquetList::show()
 			loop=false;
 		}
 		else if ( (key>=0) && (key<=9) )
-		{ //numeric
+		{
+			//numeric
 			if ( pos==maxpos )
 			{
 				if (key== 0)
@@ -231,17 +261,23 @@ int CBouquetList::show()
 			}
 
 		}
-		else if( (key==CRCInput::RC_red) || (key==CRCInput::RC_green) || (key==CRCInput::RC_yellow) || (key==CRCInput::RC_blue)
-		         || (key==CRCInput::RC_standby)
-		         /*|| (CRCInput::isNumeric(key) ) */ )
+		else if( (key==CRCInput::RC_red) ||
+				 (key==CRCInput::RC_green) ||
+				 (key==CRCInput::RC_yellow) ||
+				 (key==CRCInput::RC_blue) ||
+				 (key==CRCInput::RC_standby) )
 		{
 			selected = oldselected;
-			g_RCInput->pushbackKey (key);
+			g_RCInput->pushbackMsg( msg, data );
 			loop=false;
 		}
 		else
 		{
-			neutrino->HandleKeys( key );
+			if ( neutrino->handleMsg( msg, data ) == CRCInput::MSG_cancel_all )
+			{
+				loop = false;
+				res = -2;
+			}
 		};
 	}
 	hide();
@@ -251,7 +287,7 @@ int CBouquetList::show()
 	}
 	else
 	{
-		return (-1);
+		return (res);
 	}
 }
 

@@ -107,6 +107,8 @@ void CBEBouquetWidget::hide()
 
 int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 {
+	int res = CMenuTarget::RETURN_REPAINT;
+
 	if (parent)
 	{
 		parent->hide();
@@ -124,8 +126,11 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 	bool loop=true;
 	while (loop)
 	{
-		int key = g_RCInput->getKey();
-		if ((key==CRCInput::RC_timeout) || (key==g_settings.key_channelList_cancel))
+		int msg; uint data;
+		g_RCInput->getMsg( &msg, &data, g_settings.timing_epg );
+
+		if ( (msg==CRCInput::RC_timeout) ||
+			 (msg==g_settings.key_channelList_cancel))
 		{
 			if (state == beDefault)
 			{
@@ -161,7 +166,7 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 				cancelMoveBouquet();
 			}
 		}
-		else if (key==CRCInput::RC_up)
+		else if (msg==CRCInput::RC_up)
 		{
 			if (state == beDefault)
 			{
@@ -189,7 +194,7 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 				internalMoveBouquet(selected, selected - 1);
 			}
 		}
-		else if (key==CRCInput::RC_down)
+		else if (msg==CRCInput::RC_down)
 		{
 			if (state == beDefault)
 			{
@@ -212,29 +217,29 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 				internalMoveBouquet(selected, selected + 1);
 			}
 		}
-		else if(key==CRCInput::RC_red)
+		else if(msg==CRCInput::RC_red)
 		{
 			if (state == beDefault)
 				deleteBouquet();
 		}
-		else if(key==CRCInput::RC_green)
+		else if(msg==CRCInput::RC_green)
 		{
 			if (state == beDefault)
 				addBouquet();
 		}
-		else if(key==CRCInput::RC_yellow)
+		else if(msg==CRCInput::RC_yellow)
 		{
 			liststart = (selected/listmaxshow)*listmaxshow;
 			if (state == beDefault)
 				beginMoveBouquet();
 			paintItem(selected - liststart);
 		}
-		else if(key==CRCInput::RC_blue)
+		else if(msg==CRCInput::RC_blue)
 		{
 			if (state == beDefault)
 				renameBouquet();
 		}
-		else if(key==CRCInput::RC_ok)
+		else if(msg==CRCInput::RC_ok)
 		{
 			if (state == beDefault)
 			{
@@ -252,8 +257,8 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 				finishMoveBouquet();
 			}
 		}
-		else if( (key==CRCInput::RC_standby)
-		         || (CRCInput::isNumeric(key)) )
+		else if( (msg==CRCInput::RC_standby) ||
+		         (CRCInput::isNumeric(msg)) )
 		{
 			if (state == beDefault)
 			{
@@ -269,11 +274,12 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 		}
 		else
 		{
-			neutrino->HandleKeys( key );
+			neutrino->handleMsg( msg, data );
+			// kein canceling...
 		}
 	}
 	hide();
-	return RETURN_REPAINT;
+	return res;
 }
 
 void CBEBouquetWidget::deleteBouquet()

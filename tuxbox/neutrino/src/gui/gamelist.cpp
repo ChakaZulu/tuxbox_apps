@@ -28,9 +28,12 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-$Id: gamelist.cpp,v 1.33 2002/02/25 01:27:33 field Exp $
+$Id: gamelist.cpp,v 1.34 2002/02/25 19:32:26 field Exp $
 
 $Log: gamelist.cpp,v $
+Revision 1.34  2002/02/25 19:32:26  field
+Events <-> Key-Handling umgestellt! SEHR BETA!
+
 Revision 1.33  2002/02/25 01:27:33  field
 Key-Handling umgestellt (moeglicherweise beta ;)
 
@@ -395,7 +398,7 @@ void CPlugins::startPlugin(int number)
 		if (!plugin_list[number].rc)
 		{
     		g_RCInput->restartInput();
-    		g_RCInput->clear();
+    		g_RCInput->_clear();
     	}
 
     	if (plugin_list[number].fb)
@@ -467,6 +470,8 @@ CGameList::~CGameList()
 
 int CGameList::exec(CMenuTarget* parent, string actionKey)
 {
+	int res = CMenuTarget::RETURN_REPAINT;
+
 	if (parent)
 	{
 		parent->hide();
@@ -504,12 +509,15 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 	bool loop=true;
 	while (loop)
 	{
-		int key = g_RCInput->getKey(g_settings.timing_menu);
-		if ((key==CRCInput::RC_timeout) || (key==g_settings.key_channelList_cancel))
+		int msg; uint data;
+		g_RCInput->getMsg( &msg, &data, g_settings.timing_menu );
+
+		if ( ( msg == CRCInput::RC_timeout ) ||
+			 ( msg == g_settings.key_channelList_cancel ) )
 		{
 			loop=false;
 		}
-		else if (key==g_settings.key_channelList_pageup)
+		else if ( msg == g_settings.key_channelList_pageup )
 		{
 			selected+=listmaxshow;
 			if (selected>gamelist.size()-1)
@@ -517,7 +525,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paint();
 		}
-		else if (key==g_settings.key_channelList_pagedown)
+		else if ( msg == g_settings.key_channelList_pagedown )
 		{
 			if ((int(selected)-int(listmaxshow))<0)
 				selected=gamelist.size()-1;
@@ -526,7 +534,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paint();
 		}
-		else if (key==CRCInput::RC_up)
+		else if ( msg == CRCInput::RC_up )
 		{
 			int prevselected=selected;
 			if(selected==0)
@@ -547,7 +555,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 				paintItem(selected - liststart);
 			}
 		}
-		else if (key==CRCInput::RC_down)
+		else if ( msg == CRCInput::RC_down )
 		{
 			int prevselected=selected;
 			selected = (selected+1)%(gamelist.size());
@@ -563,7 +571,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 				paintItem(selected - liststart);
 			}
 		}
-		else if (key==CRCInput::RC_ok)
+		else if ( msg == CRCInput::RC_ok )
 		{
 			if(selected==0)
 			{
@@ -574,20 +582,24 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 				runGame( selected );
 			}
 		}
-		else if( (key==CRCInput::RC_red) || (key==CRCInput::RC_green) || (key==CRCInput::RC_yellow) || (key==CRCInput::RC_blue)
-		         || (key==CRCInput::RC_standby)
-		         || (CRCInput::isNumeric(key)) )
+		else if( (msg== CRCInput::RC_red) ||
+				 (msg==CRCInput::RC_green) ||
+				 (msg==CRCInput::RC_yellow) ||
+				 (msg==CRCInput::RC_blue)  ||
+		         (msg==CRCInput::RC_standby) ||
+		         (CRCInput::isNumeric(msg)) )
 		{
-			g_RCInput->pushbackKey (key);
+			g_RCInput->pushbackMsg( msg, data );
 			loop=false;
 		}
-		else
+		else if ( neutrino->handleMsg( msg, data ) == CRCInput::MSG_cancel_all )
 		{
-			neutrino->HandleKeys( key );
-		};
+			loop = false;
+			res = CMenuTarget::RETURN_EXIT_ALL;
+		}
 	}
 	hide();
-	return RETURN_REPAINT;
+	return res;
 }
 
 void CGameList::hide()

@@ -48,11 +48,14 @@ using namespace std;
 class CScreenSetup : public CMenuTarget
 {
 		int	selected;
+        int x_coord[2];
+        int y_coord[2];
 
 		void paint();
 		void paintBorderUL();
 		void paintBorderLR();
 		void paintCoords();
+		void paintBorder( int selected );
 	public:
 
 		void hide();

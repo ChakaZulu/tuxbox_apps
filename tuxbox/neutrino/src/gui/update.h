@@ -112,7 +112,7 @@ class CHTTPUpdater
 		void setStatusViewer( CFlashTool_StatusViewer* statusview );
 
 		bool getInfo();
-		bool getFile();
+		bool getFile( string version );
 
 };
 

@@ -30,13 +30,16 @@
 */
 
 //
-// $Id: eventlist.cpp,v 1.36 2002/02/25 01:27:33 field Exp $
+// $Id: eventlist.cpp,v 1.37 2002/02/25 19:32:26 field Exp $
 //
 //  -- EPG Event List // Vorschau
 //
 //
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.37  2002/02/25 19:32:26  field
+// Events <-> Key-Handling umgestellt! SEHR BETA!
+//
 // Revision 1.36  2002/02/25 01:27:33  field
 // Key-Handling umgestellt (moeglicherweise beta ;)
 //
@@ -347,9 +350,10 @@ EventList::~EventList()
 	removeAllEvents();
 }
 
-void EventList::exec(unsigned onidSid, const std::string& channelname)
+int EventList::exec(unsigned onidSid, const std::string& channelname)
 {
-	int key;
+	int res = CMenuTarget::RETURN_REPAINT;
+
 	name = channelname;
 	paintHead();
 	readEvents(onidSid, channelname);
@@ -364,15 +368,13 @@ void EventList::exec(unsigned onidSid, const std::string& channelname)
 		g_ActionLog->println(buf);
 	#endif
 
+
 	while (loop)
 	{
-		key = g_RCInput->getKey(g_settings.timing_chanlist);
-		if ((key==CRCInput::RC_timeout) || (key==g_settings.key_channelList_cancel))
-		{
-			selected = oldselected;
-			loop=false;
-		}
-		else if (key==g_settings.key_channelList_pageup)
+		int msg; uint data;
+		g_RCInput->getMsg( &msg, &data, g_settings.timing_chanlist );
+
+		if ( msg == g_settings.key_channelList_pageup )
 		{
 			selected+=listmaxshow;
 			if (selected>evtlist.size()-1)
@@ -380,7 +382,7 @@ void EventList::exec(unsigned onidSid, const std::string& channelname)
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paint();
 		}
-		else if (key==g_settings.key_channelList_pagedown)
+		else if ( msg == g_settings.key_channelList_pagedown )
 		{
 			if ((int(selected)-int(listmaxshow))<0)
 				selected=evtlist.size()-1;
@@ -389,7 +391,7 @@ void EventList::exec(unsigned onidSid, const std::string& channelname)
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paint();
 		}
-		else if (key==CRCInput::RC_up)
+		else if ( msg == CRCInput::RC_up )
 		{
 			int prevselected=selected;
 			if(selected==0)
@@ -410,7 +412,7 @@ void EventList::exec(unsigned onidSid, const std::string& channelname)
 				paintItem(selected - liststart);
 			}
 		}
-		else if (key==CRCInput::RC_down)
+		else if ( msg == CRCInput::RC_down )
 		{
 			int prevselected=selected;
 			selected = (selected+1)%evtlist.size();
@@ -426,44 +428,60 @@ void EventList::exec(unsigned onidSid, const std::string& channelname)
 				paintItem(selected - liststart);
 			}
 		}
-		else if (key==CRCInput::RC_ok)
+		else if ( ( msg == CRCInput::RC_timeout ) ||
+			 	  ( msg == g_settings.key_channelList_cancel ) )
+		{
+			selected = oldselected;
+			loop=false;
+		}
+
+		else if ( ( msg == CRCInput::RC_ok ) ||
+				  ( msg == CRCInput::RC_left ) ||
+				  ( msg == CRCInput::RC_red ) )
 		{
 			loop= false;
 		}
-		else if (key==CRCInput::RC_left)
-		{
-			loop= false;
-		}
-		else if (key==CRCInput::RC_red)
-		{
-			loop= false;
-		}
-		else if (key==CRCInput::RC_help || key==CRCInput::RC_right)
+		else if (msg==CRCInput::RC_help || msg==CRCInput::RC_right)
 		{
 			event* evt = evtlist[selected];
 			if ( evt->epg.id != 0 )
 			{
 				hide();
 
-				g_EpgData->show(channelname, onidSid, evt->epg.id, &evt->epg.startzeit);
+				res = g_EpgData->show(channelname, onidSid, evt->epg.id, &evt->epg.startzeit);
+                if ( res == CMenuTarget::RETURN_EXIT_ALL )
+                {
+                	loop = false;
+                }
+                else
+                {
+                	g_RCInput->getMsg( &msg, &data, 0 );
 
-				key = g_RCInput->getKey(0);
-				if ((key!=CRCInput::RC_red) &&
-				        (key!=CRCInput::RC_timeout))
-					g_RCInput->pushbackKey(key);
+					if ( ( msg != CRCInput::RC_red ) &&
+				         ( msg != CRCInput::RC_timeout ) )
+					{
+						// RC_red schlucken
+						g_RCInput->pushbackMsg( msg, data );
+					}
 
-				paintHead();
-				paint();
+					paintHead();
+					paint();
+				}
 			}
 		}
 		else
 		{
-			neutrino->HandleKeys( key );
-		};
+			if ( neutrino->handleMsg( msg, data ) == CRCInput::MSG_cancel_all )
+			{
+				loop = false;
+				res = CMenuTarget::RETURN_EXIT_ALL;
+			}
+		}
 	}
 
 	hide();
 
+	return res;
 }
 
 void EventList::hide()

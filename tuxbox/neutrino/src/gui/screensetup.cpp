@@ -34,141 +34,111 @@
 
 int CScreenSetup::exec( CMenuTarget* parent, string )
 {
+	int res = CMenuTarget::RETURN_REPAINT;
+
 	if (parent)
 	{
 		parent->hide();
 	}
 
+	x_coord[0] = g_settings.screen_StartX;
+    x_coord[1] = g_settings.screen_EndX;
+    y_coord[0] = g_settings.screen_StartY;
+    y_coord[1] = g_settings.screen_EndY;
+
 	paint();
 
 	bool loop = true;
-	selected = 1;
+	selected = 0;
+
 	while(loop)
 	{
-		int key = g_RCInput->getKey(300, true);
-		if (key==CRCInput::RC_timeout)
-		{//timeout, close
-			loop = false;
-		}
-		else if ( (key==CRCInput::RC_ok) || (key==CRCInput::RC_home) )
+		int msg; uint data;
+		g_RCInput->getMsg( &msg, &data, 300, true );
+
+		switch ( msg )
 		{
-			loop=false;
-		}
-		else if ( (key==CRCInput::RC_red) || (key==CRCInput::RC_green) )
-		{
-			if (key==CRCInput::RC_green)
-				selected = 2;
-			else
-				selected = 1;
+			case CRCInput::RC_ok:
+				// abspeichern
+				g_settings.screen_StartX = x_coord[0];
+    			g_settings.screen_EndX = x_coord[1];
+    			g_settings.screen_StartY = y_coord[0];
+    			g_settings.screen_EndY = y_coord[1];
 
-			int x=15*5;
-			int y=15*24;
+			case CRCInput::RC_timeout:
+			case CRCInput::RC_home:
+				loop = false;
+				break;
 
-			g_Fonts->menu->RenderString(x+30,y+29, 15*23, g_Locale->getText("screensetup.upperleft").c_str(), (selected == 1)?COL_MENUHEAD:COL_MENUCONTENT);
-			g_Fonts->menu->RenderString(x+30,y+49, 15*23, g_Locale->getText("screensetup.lowerright").c_str(), (selected == 2)?COL_MENUHEAD:COL_MENUCONTENT);
+			case CRCInput::RC_red:
+			case CRCInput::RC_green:
+				{
+					selected = ( msg == CRCInput::RC_green ) ? 1 : 0 ;
 
-		}
+					int x=15*5;
+					int y=15*24;
 
+					g_Fonts->menu->RenderString(x+30,y+29, 15*23, g_Locale->getText("screensetup.upperleft").c_str(), (selected == 1)?COL_MENUHEAD:COL_MENUCONTENT);
+					g_Fonts->menu->RenderString(x+30,y+49, 15*23, g_Locale->getText("screensetup.lowerright").c_str(), (selected == 2)?COL_MENUHEAD:COL_MENUCONTENT);
+                	break;
+                }
+			case CRCInput::RC_up:
+				{
+			    	y_coord[selected]--;
 
-		if(selected==1)
-		{//upper left setup
-			if (key==CRCInput::RC_up)
-			{
-				g_settings.screen_StartY--;
-				if(g_settings.screen_StartY<0)
-				{
-					g_settings.screen_StartY=0;
+				    int min = ( selected == 0 ) ? 0 : 400;
+					if ( y_coord[selected] < min )
+						y_coord[selected] = min ;
+					else
+						paintBorder( selected );
+					break;
 				}
-				else
-					paintBorderUL();
-			}
-			else if (key==CRCInput::RC_down)
-			{
-				g_settings.screen_StartY++;
-				if(g_settings.screen_StartY>200)
+			case CRCInput::RC_down:
 				{
-					g_settings.screen_StartY=200;
+			    	y_coord[selected]++;
+
+			    	int max = ( selected == 0 ) ? 200 : 575;
+					if ( y_coord[selected] > max )
+						y_coord[selected] = max ;
+					else
+						paintBorder( selected );
+					break;
 				}
-				else
-					paintBorderUL();
-			}
-			else if (key==CRCInput::RC_left)
-			{
-				g_settings.screen_StartX--;
-				if(g_settings.screen_StartX<0)
+			case CRCInput::RC_left:
 				{
-					g_settings.screen_StartX=0;
+			    	x_coord[selected]--;
+
+				    int min = ( selected == 0 ) ? 0 : 400;
+					if ( x_coord[selected] < min )
+						x_coord[selected] = min ;
+					else
+						paintBorder( selected );
+					break;
 				}
-				else
-					paintBorderUL();
-			}
-			else if (key==CRCInput::RC_right)
-			{
-				g_settings.screen_StartX++;
-				if(g_settings.screen_StartX>200)
+			case CRCInput::RC_right:
 				{
-					g_settings.screen_StartX=200;
+			    	x_coord[selected]++;
+
+			    	int max = ( selected == 0 ) ? 200 : 719;
+					if ( y_coord[selected] > max )
+						y_coord[selected] = max ;
+					else
+						paintBorder( selected );
+					break;
 				}
-				else
-					paintBorderUL();
-			}
-			else
-			{
-				neutrino->HandleKeys( key );
-			}
-		}
-		else if(selected==2)
-		{//upper left setup
-			if (key==CRCInput::RC_up)
-			{
-				g_settings.screen_EndY--;
-				if(g_settings.screen_EndY<400)
+
+			default:
+				if ( neutrino->handleMsg( msg, data ) == CRCInput::MSG_cancel_all )
 				{
-					g_settings.screen_EndY=400;
+					loop = false;
+					res = CMenuTarget::RETURN_EXIT_ALL;
 				}
-				else
-					paintBorderLR();
-			}
-			else if (key==CRCInput::RC_down)
-			{
-				g_settings.screen_EndY++;
-				if(g_settings.screen_EndY>575)
-				{
-					g_settings.screen_EndY=575;
-				}
-				else
-					paintBorderLR();
-			}
-			else if (key==CRCInput::RC_left)
-			{
-				g_settings.screen_EndX--;
-				if(g_settings.screen_EndX<400)
-				{
-					g_settings.screen_EndX=400;
-				}
-				else
-					paintBorderLR();
-			}
-			else if (key==CRCInput::RC_right)
-			{
-				g_settings.screen_EndX++;
-				if(g_settings.screen_EndX>719)
-				{
-					g_settings.screen_EndX=719;
-				}
-				else
-					paintBorderLR();
-			}
-			else
-			{
-				neutrino->HandleKeys( key );
-			}
 		}
 
 	}
 
 	hide();
-	return CMenuTarget::RETURN_REPAINT;
+	return res;
 }
 
 void CScreenSetup::hide()
@@ -176,16 +146,24 @@ void CScreenSetup::hide()
 	g_FrameBuffer->paintBackgroundBox(0,0,720,576);
 }
 
+void CScreenSetup::paintBorder( int selected )
+{
+	if ( selected == 0 )
+		paintBorderUL();
+	else
+		paintBorderLR();
+
+	paintCoords();
+}
+
 void CScreenSetup::paintBorderUL()
 {
-	g_FrameBuffer->paintIcon("border_ul.raw", g_settings.screen_StartX, g_settings.screen_StartY);
-	paintCoords();
+	g_FrameBuffer->paintIcon( "border_ul.raw", x_coord[0], y_coord[0] );
 }
 
 void CScreenSetup::paintBorderLR()
 {
-	g_FrameBuffer->paintIcon("border_lr.raw", g_settings.screen_EndX-96, g_settings.screen_EndY-96);
-	paintCoords();
+	g_FrameBuffer->paintIcon("border_lr.raw", x_coord[1]- 96, y_coord[1]- 96 );
 }
 
 void CScreenSetup::paintCoords()
@@ -198,10 +176,10 @@ void CScreenSetup::paintCoords()
 	char xepos[30];
 	char yepos[30];
 
-	sprintf((char*) &xpos, "SX: %d", g_settings.screen_StartX);
-	sprintf((char*) &ypos, "SY: %d", g_settings.screen_StartY);
-	sprintf((char*) &xepos, "EX: %d", g_settings.screen_EndX);
-	sprintf((char*) &yepos, "EY: %d", g_settings.screen_EndY);
+	sprintf((char*) &xpos, "SX: %d",x_coord[0] );
+	sprintf((char*) &ypos, "SY: %d", y_coord[0] );
+	sprintf((char*) &xepos, "EX: %d", x_coord[1] );
+	sprintf((char*) &yepos, "EY: %d", y_coord[2] );
 
 	g_Fonts->menu->RenderString(x+10,y+30, 200, xpos, COL_MENUCONTENT);
 	g_Fonts->menu->RenderString(x+10,y+50, 200, ypos, COL_MENUCONTENT);
@@ -229,9 +207,9 @@ void CScreenSetup::paint()
 	g_Fonts->menu->RenderString(x+30,y+29, 15*23, g_Locale->getText("screensetup.upperleft").c_str(), COL_MENUHEAD);
 	g_Fonts->menu->RenderString(x+30,y+49, 15*23, g_Locale->getText("screensetup.lowerright").c_str(), COL_MENUCONTENT);
 
-
 	paintBorderUL();
 	paintBorderLR();
+	paintCoords();
 }
 
 

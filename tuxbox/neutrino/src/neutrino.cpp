@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.169 2002/02/25 01:27:33 field Exp $
+        $Id: neutrino.cpp,v 1.170 2002/02/25 19:32:26 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.170  2002/02/25 19:32:26  field
+  Events <-> Key-Handling umgestellt! SEHR BETA!
+
   Revision 1.169  2002/02/25 01:27:33  field
   Key-Handling umgestellt (moeglicherweise beta ;)
 
@@ -1776,7 +1779,7 @@ void CNeutrinoApp::SelectNVOD()
 			}
 			else
 			{
-				NVODSelector.addItem( new CMenuForwarder(subChannels.list[count].subservice_name, true, "", NVODChanger, nvod_id, false, (count<9)?(count+1):-1), (count == subChannels.selected) );
+				NVODSelector.addItem( new CMenuForwarder(subChannels.list[count].subservice_name, true, "", NVODChanger, nvod_id, false, (count<9)?(count+1):uint(-1)), (count == subChannels.selected) );
 			}
 		}
 		NVODSelector.exec(NULL, "");
@@ -2009,7 +2012,8 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 
 	while(nRun)
 	{
-		int key = g_RCInput->getKey();
+		int key; uint data;
+		g_RCInput->getMsg( &key, &data );
 
 		if (key==g_settings.key_tvradio_mode)
 		{
@@ -2048,7 +2052,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				struct timeval tv;
 				gettimeofday( &tv, NULL );
 				long long starttime = (tv.tv_sec*1000000) + tv.tv_usec;
-				while(g_RCInput->getKey(timeout)==CRCInput::RC_standby)
+				while(g_RCInput->_getKey(timeout)==CRCInput::RC_standby)
 				{
 					gettimeofday( &tv, NULL );
 					long long endtime = (tv.tv_sec*1000000) + tv.tv_usec;
@@ -2065,8 +2069,8 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				g_lcdd->setMode(CLcddClient::MODE_STANDBY);
 				g_Controld->videoPowerDown(true);
 				printf("standby-loop\n");
-				g_RCInput->clear();
-				while (g_RCInput->getKey(100)!=CRCInput::RC_standby);
+				g_RCInput->_clear();
+				while (g_RCInput->_getKey(100)!=CRCInput::RC_standby);
 				printf("standby-loopended\n");
 				g_lcdd->setMode(CLcddClient::MODE_TVRADIO);
 				g_Controld->videoPowerDown(false);
@@ -2081,7 +2085,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 					}
 
 				#endif
-				g_RCInput->clear();
+				g_RCInput->_clear();
 			}
 			else
 			{
@@ -2176,7 +2180,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			}
 			else
 			{
-				HandleKeys( key );
+				handleMsg( key, 0 );
 			}
 
 		}
@@ -2264,16 +2268,19 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 
 	char volume = g_Controld->getVolume();
 
+	int msg = key;
+	uint data;
+
 	do
 	{
-		if (key==CRCInput::RC_plus)
+		if (msg==CRCInput::RC_plus)
 		{
 			if (volume<100)
 			{
 				volume += 5;
 			}
 		}
-		else if (key==CRCInput::RC_minus)
+		else if (msg==CRCInput::RC_minus)
 		{
 			if (volume>0)
 			{
@@ -2282,10 +2289,10 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 		}
 		else
 		{
-			if ( (key!=CRCInput::RC_ok) || (key!=CRCInput::RC_home) )
-				g_RCInput->pushbackKey(key);
+			if ( (msg!=CRCInput::RC_ok) || (msg!=CRCInput::RC_home) )
+				g_RCInput->pushbackMsg( msg, data );
 
-			key= CRCInput::RC_timeout;
+			msg= CRCInput::RC_timeout;
 		}
 
 		g_Controld->setVolume(volume);
@@ -2297,13 +2304,13 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 			g_FrameBuffer->paintBoxRel(x+40, y+12, vol, 15, COL_INFOBAR+3);
         }
 
-		if ( key != CRCInput::RC_timeout )
+		if ( msg != CRCInput::RC_timeout )
 		{
-			key = g_RCInput->getKey(30);
+			g_RCInput->getMsg( &msg, &data, 30 );
 		}
 
 	}
-	while ( key != CRCInput::RC_timeout );
+	while ( msg != CRCInput::RC_timeout );
     if (bDoPaint)
 		g_FrameBuffer->RestoreScreen(x, y, dx, dy, pixbuf);
 }
@@ -2340,13 +2347,13 @@ void CNeutrinoApp::scartMode()
 	#endif
 	memset(g_FrameBuffer->lfb, 255, g_FrameBuffer->Stride()*576);
 	g_Controld->setScartMode( 1 );
-	g_RCInput->clear();
+	g_RCInput->_clear();
 	printf("scartmode-loop\n");
 
 	int key;
 	do
 	{
-		key = g_RCInput->getKey(100);
+		key = g_RCInput->_getKey(100);
 		if (key==CRCInput::RC_spkr)
 		{	//mute
 			AudioMuteToggle( false );
@@ -2373,19 +2380,20 @@ void CNeutrinoApp::scartMode()
 	}
 }
 
-bool CNeutrinoApp::HandleKeys(int key)
+int CNeutrinoApp::handleMsg(int msg, uint data)
 {
-	//printf("[CNeutrinoApp]: HandleKeys 0x%x\n", key);
-	if ((key==CRCInput::RC_plus) || (key==CRCInput::RC_minus))
+	//printf("[CNeutrinoApp]: handleMsg 0x%x\n", key);
+	if ( ( msg == CRCInput::RC_plus ) || ( msg == CRCInput::RC_minus ) )
 	{	//volume
-		setVolume( key );
-		return true;
+		setVolume( msg );
+		return CRCInput::MSG_handled;
 	}
-	else if (key==CRCInput::RC_spkr)
+	else if ( msg == CRCInput::RC_spkr )
 	{	//mute
 		AudioMuteToggle();
+		return CRCInput::MSG_handled;
 	}
-	return false;
+	return CRCInput::MSG_unhandled;
 }
 
 void CNeutrinoApp::radioMode()
@@ -2517,7 +2525,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.169 2002/02/25 01:27:33 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.170 2002/02/25 19:32:26 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

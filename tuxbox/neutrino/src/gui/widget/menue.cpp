@@ -30,11 +30,14 @@
 */
 
 /*
-$Id: menue.cpp,v 1.39 2002/02/25 01:27:33 field Exp $
+$Id: menue.cpp,v 1.40 2002/02/25 19:32:26 field Exp $
 
 
 History:
  $Log: menue.cpp,v $
+ Revision 1.40  2002/02/25 19:32:26  field
+ Events <-> Key-Handling umgestellt! SEHR BETA!
+
  Revision 1.39  2002/02/25 01:27:33  field
  Key-Handling umgestellt (moeglicherweise beta ;)
 
@@ -152,7 +155,6 @@ void CMenuWidget::setOnPaintNotifier( COnPaintNotifier* nf )
 int CMenuWidget::exec(CMenuTarget* parent, string)
 {
 	int pos;
-	int key;
 	int i;
 
 	if (parent)
@@ -163,22 +165,24 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 
 	paint();
 	int retval = CMenuItem::RETURN_REPAINT;
+	int msg; uint data;
 
 	do
 	{
-		key = g_RCInput->getKey(g_settings.timing_menu);
+
+		g_RCInput->getMsg( &msg, &data, g_settings.timing_menu );
 
 		int handled= false;
 
 		for (i= 0; i< items.size(); i++)
 		{
 			CMenuItem* titem = items[i];
-			if ( (titem->directKey!= -1) && (titem->directKey== key) )
+			if ( (titem->directKey!= -1) && (titem->directKey== msg) )
 			{
 				if (titem->isSelectable())
 				{
 					selected= i;
-					key= CRCInput::RC_ok;
+					msg= CRCInput::RC_ok;
 				}
 				else
 				{
@@ -191,7 +195,7 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 
 		if (!handled)
 		{
-			switch (key)
+			switch (msg)
 			{
 
 				case (CRCInput::RC_up) :
@@ -201,7 +205,7 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 						for (unsigned int count=1; count< items.size(); count++)
 						{
 
-							if (key==CRCInput::RC_up)
+							if (msg==CRCInput::RC_up)
 							{
 								pos = selected- count;
 								if ( pos<0 )
@@ -234,12 +238,12 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 
 						if(ret==CMenuItem::RETURN_EXIT)
 						{
-							key = CRCInput::RC_timeout;
+							msg = CRCInput::RC_timeout;
 						}
 						else if(ret==CMenuItem::RETURN_EXIT_ALL)
 						{
 							retval = CMenuItem::RETURN_EXIT_ALL;
-							key = CRCInput::RC_timeout;
+							msg = CRCInput::RC_timeout;
 						}
 						else if(ret==CMenuItem::RETURN_REPAINT)
 						{
@@ -249,14 +253,14 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 					break;
 
 				case (CRCInput::RC_home):
-					key = CRCInput::RC_timeout;
+					msg = CRCInput::RC_timeout;
 					break;
 
 				case (CRCInput::RC_right):
 					break;
 
 				case (CRCInput::RC_left):
-					key = CRCInput::RC_timeout;
+					msg = CRCInput::RC_timeout;
 					break;
 
 				case (CRCInput::RC_timeout):
@@ -265,7 +269,7 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 				//close menue on dbox-key
 				case (CRCInput::RC_setup):
 					{
-						key = CRCInput::RC_timeout;
+						msg = CRCInput::RC_timeout;
 						retval = CMenuItem::RETURN_EXIT_ALL;
 					}
 					break;
@@ -277,19 +281,21 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 				case (CRCInput::RC_blue):
 				case (CRCInput::RC_standby):
 					{
-						g_RCInput->pushbackKey (key);
-						key = CRCInput::RC_timeout;
+						g_RCInput->pushbackMsg( msg, data );
+						msg = CRCInput::RC_timeout;
 					}
 					break;
 				default:
-				{
-					neutrino->HandleKeys( key );
-				}
+					if ( neutrino->handleMsg( msg, data ) == CRCInput::MSG_cancel_all )
+					{
+						retval = CMenuTarget::RETURN_EXIT_ALL;
+						msg = CRCInput::RC_timeout;
+					}
 			}
 		}
 
 	}
-	while ( key!=CRCInput::RC_timeout );
+	while ( msg!=CRCInput::RC_timeout );
 
 	hide();
 	if(!parent)
