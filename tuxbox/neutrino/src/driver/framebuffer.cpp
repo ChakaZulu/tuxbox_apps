@@ -1,3 +1,19 @@
+/*
+
+$Id: framebuffer.cpp,v 1.8 2001/10/16 19:11:16 rasc Exp $
+
+
+
+$Log: framebuffer.cpp,v $
+Revision 1.8  2001/10/16 19:11:16  rasc
+-- CR LF --> LF in einigen Modulen
+
+
+
+
+*/
+
+
 #include "framebuffer.h"
 #include "../global.h"
 

@@ -1,9 +1,12 @@
 /* 
-$Id: fontrenderer.cpp,v 1.13 2001/10/14 15:48:16 McClean Exp $
+$Id: fontrenderer.cpp,v 1.14 2001/10/16 19:11:16 rasc Exp $
 
 -- misc font / text rendering functions
 
 $Log: fontrenderer.cpp,v $
+Revision 1.14  2001/10/16 19:11:16  rasc
+-- CR LF --> LF in einigen Modulen
+
 Revision 1.13  2001/10/14 15:48:16  McClean
 use font-cache
 
