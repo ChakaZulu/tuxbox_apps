@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: plugins.cpp,v $
+Revision 1.4  2002/01/12 21:04:35  fx2
+libfx2 is now in PLUGINDIR (moved from /lib)
+
 Revision 1.3  2001/12/11 13:38:44  TheDOC
 new cdk-path-variables, about 10 new features and stuff
 
@@ -146,7 +149,7 @@ void plugins::startPlugin(int number)
 		std::string libname = argv[i];
 		printf("try load shared lib : %s\n",argv[i]);
 		libhandle[i] = dlopen ( *argv[i] == '/' ? 
-			argv[i] : ("/lib/"+libname).c_str(),
+			argv[i] : (PLUGINDIR "/"+libname).c_str(),
 			RTLD_NOW | RTLD_GLOBAL );
 		if ( !libhandle )
 		{
