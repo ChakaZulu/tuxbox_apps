@@ -1292,8 +1292,8 @@ void eDVB::configureNetwork()
 			qDebug("'%s' failed.", (const char*)buffer);
 		else
 		{
-			system("/sbin/route del default 2> /dev/null");
-			buffer.sprintf("/sbin/route add default gw %d.%d.%d.%d", gateway[0], gateway[1], gateway[2], gateway[3]);
+			system("/bin/route del default 2> /dev/null");
+			buffer.sprintf("/bin/route add default gw %d.%d.%d.%d", gateway[0], gateway[1], gateway[2], gateway[3]);
 			if (system(buffer)>>8)
 				qDebug("'%s' failed", (const char*)buffer);
 		}
