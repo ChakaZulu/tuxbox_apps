@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.47 2005/01/03 21:34:23 chakazulu Exp $
+	$Id: controlapi.cpp,v 1.48 2005/01/12 20:06:31 chakazulu Exp $
 
 	License: GPL
 
@@ -288,7 +288,7 @@ bool CControlAPI::ExecCGI(CWebserverRequest *request)
 					std::string abscmd(pluginDirs[i].c_str());
 					abscmd += "/";
 					abscmd += script;
-					printf("[CControlApi] executing %s\n",abscmd.c_str());
+					printf("[CControlAPI] executing %s\n",abscmd.c_str());
 					FILE *f = popen(abscmd.c_str(),"r");
 					if (f != NULL)
 					{
@@ -303,19 +303,19 @@ bool CControlAPI::ExecCGI(CWebserverRequest *request)
 					} 
 					else 
 					{	
-						printf("[CControlApi] can't open %s\n",abscmd.c_str());
+						printf("[CControlAPI] can't open %s\n",abscmd.c_str());
 					}
 				} 
 				closedir(scriptdir);
 			}
 			else 
 			{
-				printf("[CControlApi] could not open: %s\n",pluginDirs[i].c_str());
+				printf("[CControlAPI] could not open: %s\n",pluginDirs[i].c_str());
 			}
 		}
 		if (!res)
 		{
-			printf("[CControlApi] script %s not found in\n",script.c_str());
+			printf("[CControlAPI] script %s not found in\n",script.c_str());
 			for (unsigned int i=0;i<2;i++) {
 				printf("%s\n",pluginDirs[i].c_str());
 			}
@@ -323,7 +323,7 @@ bool CControlAPI::ExecCGI(CWebserverRequest *request)
 	}
 	else
 	{
-		printf("No script given\n");
+		printf("[CControlAPI] no script given\n");
 	}
 	if (!res)
 	{
