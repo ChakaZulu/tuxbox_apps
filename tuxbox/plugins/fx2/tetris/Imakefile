@@ -1,0 +1,16 @@
+all:: tetris tetris.so
+
+CC=powerpc-linux-gcc
+CDEBUGFLAGS=-g -O2 -Wall -pedantic
+INCLUDES=-I.
+OBJS=rcinput.o draw.o board.o
+
+SingleProgramTarget(tetris,main.o $(OBJS),,)
+
+board.o: pics.h text.h
+
+tetris.so: somain.o $(OBJS)
+	$(CC) -o tetris.so -shared -Wl,-soname,tetris.so somain.o $(OBJS)
+
+clean::
+	rm -f tetris.so
