@@ -17,10 +17,8 @@ libeventserver/Makefile
 libmd5sum/Makefile
 libmpegtools/Makefile
 libnet/Makefile
-libtuxbox/Makefile
 libucodes/Makefile
 libxmltree/Makefile
-tuxbox.pc
 tuxbox-configfile.pc
 tuxbox-connection.pc
 tuxbox-cramfs.pc
