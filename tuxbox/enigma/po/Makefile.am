@@ -1,38 +1,14 @@
-# Usually the message domain is the same as the package name.
 DOMAIN = $(PACKAGE)
-
-# These options get passed to xgettext.
 XGETTEXT_OPTIONS = --keyword=_ --keyword=N_
-
-# This is the copyright holder that gets inserted into the header of the
-# $(DOMAIN).pot file.  Set this to the copyright holder of the surrounding
-# package.  (Note that the msgstr strings, extracted from the package's
-# sources, belong to the copyright holder of the package.)  Translators are
-# expected to transfer the copyright for their translations to this person
-# or entity, or to disclaim their copyright.  The empty string stands for
-# the public domain; in this case the translators are expected to disclaim
-# their copyright.
-COPYRIGHT_HOLDER = Free Software Foundation, Inc.
-
-# This is the list of locale categories, beyond LC_MESSAGES, for which the
-# message catalogs shall be used.  It is usually empty.
+COPYRIGHT_HOLDER = Tuxbox Project
 EXTRA_LOCALE_CATEGORIES =
 
-GMSGFMT = @GMSGFMT@
-MSGFMT = @MSGFMT@
-XGETTEXT = @XGETTEXT@
-MSGMERGE = @MSGMERGE@
-
-CATALOGS = @CATALOGS@
-POFILES = @POFILES@
-GMOFILES = @GMOFILES@
-UPDATEPOFILES = @UPDATEPOFILES@
-DUMMYPOFILES = @DUMMYPOFILES@
+localedir = $(datadir)/locale
 
 -include POTFILES
 
 POTFILES: $(srcdir)/POTFILES.in
-	@echo "POTFILES = \" > POTFILES
+	@echo "POTFILES = \\" > POTFILES
 	@sed -e "/^#/d" -e "/^[ ]*\$$/d" -e "s,.*,	$(top_srcdir)/& \\\\," -e "\$$s/\(.*\) \\\\/\1/" < $(srcdir)/POTFILES.in >> POTFILES
 
 SUFFIXES = .po .gmo .mo .sed .sin .nop .po-update
@@ -44,8 +20,8 @@ SUFFIXES = .po .gmo .mo .sed .sin .nop .po-update
 .po.gmo:
 	@lang=`echo $* | sed -e 's,.*/,,'`; \
 	test "$(srcdir)" = . && cdcmd="" || cdcmd="cd $(srcdir) && "; \
-	echo "$${cdcmd}rm -f $${lang}.gmo && $(GMSGFMT) -c --statistics -o $${lang}.gmo $${lang}.po"; \
-	cd $(srcdir) && rm -f $${lang}.gmo && $(GMSGFMT) -c --statistics -o t-$${lang}.gmo $${lang}.po && mv t-$${lang}.gmo $${lang}.gmo
+	echo "$${cdcmd}rm -f $${lang}.gmo && @GMSGFMT@ -c --statistics -o $${lang}.gmo $${lang}.po"; \
+	cd $(srcdir) && rm -f $${lang}.gmo && @GMSGFMT@ -c --statistics -o t-$${lang}.gmo $${lang}.po && mv t-$${lang}.gmo $${lang}.gmo
 
 .nop.po-update:
 	@lang=`echo $@ | sed -e 's/\.po-update$$//'`; \
@@ -53,9 +29,9 @@ SUFFIXES = .po .gmo .mo .sed .sin .nop .po-update
 	tmpdir=`pwd`; \
 	echo "$$lang:"; \
 	test "$(srcdir)" = . && cdcmd="" || cdcmd="cd $(srcdir) && "; \
-	echo "$${cdcmd}$(MSGMERGE) $$lang.po $(DOMAIN).pot -o $$lang.new.po"; \
+	echo "$${cdcmd}@MSGMERGE@ $$lang.po $(DOMAIN).pot -o $$lang.new.po"; \
 	cd $(srcdir); \
-	if $(MSGMERGE) $$lang.po $(DOMAIN).pot -o $$tmpdir/$$lang.new.po; then \
+	if @MSGMERGE@ $$lang.po $(DOMAIN).pot -o $$tmpdir/$$lang.new.po; then \
 	  if cmp $$lang.po $$tmpdir/$$lang.new.po >/dev/null 2>&1; then \
 	    rm -f $$tmpdir/$$lang.new.po; \
 	  else \
@@ -81,8 +57,8 @@ all-no:
 # otherwise packages like GCC can not be built if only parts of the source
 # have been downloaded.
 
-$(DOMAIN).pot-update: $(POTFILES) $(srcdir)/POTFILES.in
-	$(XGETTEXT) --default-domain=$(DOMAIN) --directory=$(top_srcdir) \
+$(DOMAIN).pot-update: @POTFILES@ $(srcdir)/POTFILES.in
+	@XGETTEXT@ --default-domain=$(DOMAIN) --directory=$(top_srcdir) \
 	  --add-comments=TRANSLATORS: $(XGETTEXT_OPTIONS) \
 	  --files-from=$(srcdir)/POTFILES.in \
 	  --copyright-holder='$(COPYRIGHT_HOLDER)'
@@ -104,20 +80,20 @@ $(DOMAIN).pot-update: $(POTFILES) $(srcdir)/POTFILES.in
 $(srcdir)/$(DOMAIN).pot:
 	$(MAKE) $(DOMAIN).pot-update
 
-$(POFILES): $(srcdir)/$(DOMAIN).pot
+@POFILES@: $(srcdir)/$(DOMAIN).pot
 	@lang=`echo $@ | sed -e 's,.*/,,' -e 's/\.po$$//'`; \
 	test "$(srcdir)" = . && cdcmd="" || cdcmd="cd $(srcdir) && "; \
-	echo "$${cdcmd}$(MSGMERGE_UPDATE) $${lang}.po $(DOMAIN).pot"; \
-	cd $(srcdir) && $(MSGMERGE_UPDATE) $${lang}.po $(DOMAIN).pot
+	echo "$${cdcmd}@MSGMERGE@ --update $${lang}.po $(DOMAIN).pot"; \
+	cd $(srcdir) && @MSGMERGE@ --update $${lang}.po $(DOMAIN).pot
 
-$(DUMMYPOFILES):
+@DUMMYPOFILES@:
 
 install-data-local: install-data-@USE_NLS@
 
 install-data-no: all
 install-data-yes: all
 	$(mkinstalldirs) $(DESTDIR)$(datadir)
-	@catalogs='$(CATALOGS)'; \
+	@catalogs='@CATALOGS@'; \
 	for cat in $$catalogs; do \
 	  cat=`basename $$cat`; \
 	  lang=`echo $$cat | sed -e 's/\.gmo$$//'`; \
@@ -159,7 +135,7 @@ install-data-yes: all
 uninstall-local: uninstall-@USE_NLS@
 uninstall-local-no:
 uninstall-local-yes:
-	catalogs='$(CATALOGS)'; \
+	catalogs='@CATALOGS@'; \
 	for cat in $$catalogs; do \
 	  cat=`basename $$cat`; \
 	  lang=`echo $$cat | sed -e 's/\.gmo$$//'`; \
@@ -177,7 +153,7 @@ distclean-local:
 	rm -f POTFILES *.mo
 
 maintainer-clean-local:
-	rm -f $(GMOFILES)
+	rm -f @GMOFILES@
 
 dist-local:
 	$(MAKE) update-po
@@ -197,9 +173,9 @@ dist2: $(DISTFILES)
 
 update-po: Makefile
 	$(MAKE) $(DOMAIN).pot-update
-	$(MAKE) $(UPDATEPOFILES)
+	$(MAKE) @UPDATEPOFILES@
 	$(MAKE) update-gmo
 
-update-gmo: Makefile $(GMOFILES)
+update-gmo: Makefile @GMOFILES@
 	@:
 
