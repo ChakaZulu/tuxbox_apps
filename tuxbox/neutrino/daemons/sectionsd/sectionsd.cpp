@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.82 2001/11/05 17:12:05 field Exp $
+//  $Id: sectionsd.cpp,v 1.83 2001/11/07 23:49:45 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.83  2001/11/07 23:49:45  field
+//  Current/Next Umschaltung funktioniert wieder
+//
 //  Revision 1.82  2001/11/05 17:12:05  field
 //  Versuch zu Wiederholungen
 //
@@ -1366,7 +1369,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.82 2001/11/05 17:12:05 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.83 2001/11/07 23:49:45 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1395,10 +1398,8 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   return;
 }
 
-#ifdef NO_ZAPD_NEUTRINO_HACK
-static int currentNextWasOk=0;
+static bool currentNextWasOk=false;
 static unsigned currentServiceKey=0;
-#endif
 
 // Mostly copied from epgd (something bugfixed ;) )
 static void commandCurrentNextInfoChannelName(struct connectionData *client, char *data, const unsigned dataLength)
@@ -1473,12 +1474,13 @@ static void commandCurrentNextInfoChannelName(struct connectionData *client, cha
     else
       dputs("[sectionsd] Fehler/Timeout bei write");
     delete[] pResultData;
-#ifdef NO_ZAPD_NEUTRINO_HACK
-    currentNextWasOk=1;
-#endif
+    currentNextWasOk=true;
   }
   else
+  {
     dprintf("current/next EPG not found!\n");
+    currentNextWasOk=false;
+  }
   return;
 }
 
@@ -1672,20 +1674,13 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
         else
             dputs("[sectionsd] Fehler/Timeout bei write");
         delete[] pResultData;
-#ifdef NO_ZAPD_NEUTRINO_HACK
-        currentNextWasOk=1;
-#endif
     }
     else
     {
         dprintf("current/next EPG not found!\n");
-#ifdef NO_ZAPD_NEUTRINO_HACK
-        currentNextWasOk=0;
-#endif
     }
-#ifdef NO_ZAPD_NEUTRINO_HACK
+    currentNextWasOk=(flag&4);
     currentServiceKey= *uniqueServiceKey;
-#endif
     return;
 }
 
@@ -2382,26 +2377,10 @@ struct connectionData *client=(struct connectionData *)conn;
   close(client->connectionSocket);
   dprintf("Connection from %s closed!\n", inet_ntoa(client->clientAddr.sin_addr));
   delete client;
-#ifdef NO_ZAPD_NEUTRINO_HACK
   if(header.command== sectionsd::currentNextInformationID)
   {
     if(currentNextWasOk)
     {
-    // Damit nach dem umschalten der camd/pzap usw. schneller anlaeuft.
-//    currentNextWasOk=0;
-/*    if(dmxEIT.pause()) // -> lock
-      return 0;
-    if(dmxSDT.pause()) {
-      dmxEIT.unpause(); // -> unlock
-      return 0;
-    }
-    int rc=1;
-    while(rc)
-      rc=sleep(rc);
-
-    dmxSDT.unpause();
-    dmxEIT.unpause(); // -> unlock
-*/
       if(!dmxEIT.isScheduled)
           dmxEIT.change(); // auf scheduled umschalten / current/next ist eh' schon da...
     }
@@ -2409,7 +2388,6 @@ struct connectionData *client=(struct connectionData *)conn;
       dmxEIT.change(); // auf present/following umschalten
     }
   }
-#endif
   } // try
   catch (std::exception& e) {
     fprintf(stderr, "Caught std-exception in connection-thread %s!\n", e.what());
@@ -3059,7 +3037,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.82 2001/11/05 17:12:05 field Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.83 2001/11/07 23:49:45 field Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
