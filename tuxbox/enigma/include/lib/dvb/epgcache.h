@@ -4,7 +4,7 @@
 #include <vector>
 #include <list>
 #include <ext/hash_map>
-#include <ext/stl_hash_fun.h>
+#include <ext/hash_fun.h>
 #include <errno.h>
 
 #include "si.h"
@@ -114,7 +114,7 @@ public:
 	namespace std
 #endif
 {
-struct hash<uniqueEPGKey>
+template<> struct hash<uniqueEPGKey>
 {
 	inline size_t operator()( const uniqueEPGKey &x) const
 	{

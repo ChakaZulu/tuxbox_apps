@@ -6,6 +6,7 @@
 #include <lib/gdi/grc.h>
 #include <lib/gdi/font.h>
 #include <lib/gui/guiactions.h>
+#include <math.h>
 
 void eNumber::unpack(__u32 l, int *t)
 {

@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#include <errno.h>
 
 #include <dbox/fp.h>
 #include <dbox/lcd-ks0713.h>

@@ -10,6 +10,7 @@
 #include <lib/dvb/frontend.h>
 #include <lib/dvb/dvbservice.h>
 #include <lib/dvb/dvb.h>
+#include <math.h>
 
 eSatfind::eSatfind(eFrontend *fe)
 	:eWindow(0), updateTimer(eApp), fe(fe), current(0)

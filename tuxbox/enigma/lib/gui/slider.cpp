@@ -37,7 +37,8 @@ void eSlider::setMax( int i )
 void eSlider::setValue( int i )
 {
 	if ( i >= min && i <= max )
-		setPerc( (int) round( i * (double)100/((max-min)+1) ) );
+//		setPerc( (int) round( i * (double)100/((max-min)+1) ) );
+		setPerc((i-min) * 100 / (max-min));
 	else
 		setPerc( 0 );
 }
