@@ -155,9 +155,14 @@ private slots:
 	void leaveService(eService *);
 	void clockUpdate();
 	void updateVolume(int vol);
+	void aspectRatioChanged(int aspect);
+	void scrambled(bool b);
+	void isAC3(bool b);
 public:
 	eZapMain();
 	~eZapMain();
+signals: 
+        void AC3detected(bool);
 };
 
 #endif /* __enigma_main_h */

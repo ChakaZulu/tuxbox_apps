@@ -46,10 +46,12 @@ void eStreamWatchdog::checkstate()
 		case 1:
 		case 2:
 			isanamorph=0;
+			emit AspectRatioChanged(0);
 			break;
 		case 3:
 		case 4:
 			isanamorph=1;
+			emit AspectRatioChanged(1);			
 		}
 	}
 

@@ -595,6 +595,8 @@ void eDVB::scanPMT()
 		qDebug("channel is FTA!");
 	}
 
+    	emit scrambled(isca);
+	
 	if (isca && calist.isEmpty())
 	{
 		qDebug("NO CASYS");

@@ -95,7 +95,7 @@ void eEventDisplay::setEvent(EITEvent *event)
 		tm *begin=event->start_time!=-1?localtime(&event->start_time):0;
 		time_t endtime=event->start_time+event->duration;
 		tm *end=event->start_time!=-1?localtime(&endtime):0;
-
+		qDebug("Endtime:%02d:%02d", end->tm_hour, end->tm_min);
 		if (begin)
 			_eventTime.sprintf("%02d:%02d", begin->tm_hour, begin->tm_min);
 		if (end)

@@ -11,6 +11,7 @@
 #include "sselect.h"
 #include "enumber.h"
 #include "eskin.h"
+#include "streamwd.h"
 
 static QString getISO639Description(char *iso)
 {
@@ -305,11 +306,14 @@ eZapMain::eZapMain(): eWidget(0, 1)
 	ButtonGreen=new eLabel(this);
 	ButtonYellow=new eLabel(this);
 	ButtonBlue=new eLabel(this);
-	
+
+	connect(eStreamWatchdog::getInstance(), SIGNAL(AspectRatioChanged(int)), SLOT(aspectRatioChanged(int)));
+	connect(this, SIGNAL(AC3detected(bool)), SLOT(isAC3(bool)));
 	connect(eDVB::getInstance(), SIGNAL(switchedService(eService*,int)), SLOT(serviceChanged(eService*,int)));
 	connect(eDVB::getInstance(), SIGNAL(gotEIT(EIT*,int)), SLOT(gotEIT(EIT*,int)));
 	connect(eDVB::getInstance(), SIGNAL(gotSDT(SDT*)), SLOT(gotSDT(SDT*)));
 	connect(eDVB::getInstance(), SIGNAL(gotPMT(PMT*)), SLOT(gotPMT(PMT*)));
+	connect(eDVB::getInstance(), SIGNAL(scrambled(bool)), SLOT(scrambled(bool)));
 	connect(&timeout, SIGNAL(timeout()), SLOT(timeOut()));
 	connect(&clocktimer, SIGNAL(timeout()), SLOT(clockUpdate()));
 	connect(eDVB::getInstance(), SIGNAL(leaveService(eService*)), SLOT(leaveService(eService*)));
@@ -323,6 +327,21 @@ eZapMain::eZapMain(): eWidget(0, 1)
 
 eZapMain::~eZapMain()
 {
+}
+
+void eZapMain::aspectRatioChanged(int aspect)
+{
+    qDebug("Aspect Ratio: %d", aspect);
+}
+
+void eZapMain::isAC3(bool b)
+{
+    qDebug("AC3: %s", b?"true":"false");
+}
+
+void eZapMain::scrambled(bool b)
+{
+    qDebug("Channel is %s", b?"scrambled":"FTA");
 }
 
 void eZapMain::setEIT(EIT *eit)
@@ -425,7 +444,7 @@ void eZapMain::setEIT(EIT *eit)
 	if (flags&(ENIGMA_NVOD|ENIGMA_SUBSERVICES))
 		ButtonGreen->setText("\x19");
 	else
-		ButtonGreen->setText("");
+		ButtonGreen->setText("TestText");
 	QList<EITEvent> dummy;
 	if (actual_eventDisplay)
 		actual_eventDisplay->setList(eit?eit->events:dummy);
@@ -706,6 +725,7 @@ void eZapMain::gotSDT(SDT *sdt)
 
 void eZapMain::gotPMT(PMT *pmt)
 {
+	bool isAc3 = false;
 	qDebug("got pmt");
 	int numaudio=0;
 	audiosel.clear();
@@ -721,7 +741,11 @@ void eZapMain::gotPMT(PMT *pmt)
 		{
 			for (QListIterator<Descriptor> d(pe->ES_info); d.current(); ++d)
 				if (d.current()->Tag()==DESCR_AC3)
+				{
 					isaudio++;
+					isAc3=true;
+				}
+				
 		}
 		if (isaudio)
 		{
@@ -731,6 +755,8 @@ void eZapMain::gotPMT(PMT *pmt)
 	}
 	if (numaudio>1)
 		flags|=ENIGMA_AUDIO;
+		
+	emit AC3detected(isAc3);
 }
 
 void eZapMain::timeOut()

@@ -2,6 +2,8 @@
 #define __streamwd_h
 
 #include "qtimer.h"
+#include "si.h"
+#include "dvb.h"
 
 class eStreamWatchdog: public QObject
 {
@@ -9,6 +11,7 @@ class eStreamWatchdog: public QObject
 	int last;
 	QTimer timer;
 	static eStreamWatchdog *instance;
+	PMTEntry* stream;
 private slots:
 	void checkstate();
 public:
@@ -18,6 +21,8 @@ public:
 	void reloadSettings();
 	
 	static eStreamWatchdog *getInstance();
+signals:
+	void AspectRatioChanged(int);
 };
 
 #endif

@@ -184,6 +184,7 @@ signals:
 	void gotEIT(EIT *eit, int);
 	void gotSDT(SDT *sdt);
 	void gotPMT(PMT *pmt);
+	void scrambled(bool);
 
 		/* SCAN - public */
 public:
