@@ -26,28 +26,28 @@ History:
  - text input in "sms-style" included
 
 29.05.2004 Version 1.2
-  - support for reading and extracting from "tar", "tar.Z", "tar.gz" and "tar.bz2" archives
-    does not work with many Archives in Original-Image 1..07.4 ( BusyBox-Version to old :( )
-  - display current line in editor
-  - using tuxtxt-position for display
-  - big font when editing a line
-  - change scrolling through characters in edit mode to match enigma standard (switch up/down)
-  - Version of plugin available on Info-Button
-  - confirm-messagebox when overwriting existing files.
+ - support for reading and extracting from "tar", "tar.Z", "tar.gz" and "tar.bz2" archives
+   does not work with many Archives in Original-Image 1..07.4 ( BusyBox-Version to old :( )
+ - display current line in editor
+ - using tuxtxt-position for display
+ - big font when editing a line
+ - change scrolling through characters in edit mode to match enigma standard (switch up/down)
+ - Version of plugin available on Info-Button
+ - confirm-messagebox when overwriting existing files.
 
 08.05.2004 Version 1.1a
-  - BugFix: No more spaces at the end of renamed files
+ - BugFix: No more spaces at the end of renamed files
 
 02.05.2004 version 1.1
-  - changed some colors
-  - added german language
-  - possibility to keep buttons pressed (up/down, left/right, volume+/-, green button)
-  - 3 states of transparency
-  - set markers on files -> possibility to copy/move/delete multiple files
-  - Key for transparency now mute (green button needed for setting file marker)
+ - changed some colors
+ - added german language
+ - possibility to keep buttons pressed (up/down, left/right, volume+/-, green button)
+ - 3 states of transparency
+ - set markers on files -> possibility to copy/move/delete multiple files
+ - Key for transparency now mute (green button needed for setting file marker)
   
 03.04.2004 version 1.0 : 
-  first public version
+   first public version
 
 
 Sources:
@@ -57,8 +57,8 @@ and LazyT's TuxTxt (from the CDK)
 
 Requirements:
 -------------
-- A Dreambox 7000-S ( not tested on other Models )
-- Firmware Version 1.07.x or higher ( not tested on older Versions )
+ - A Dreambox 7000-S ( not tested on other Models )
+ - Firmware Version 1.07.x or higher ( not tested on older Versions )
 
 Installation:
 -------------
@@ -91,7 +91,7 @@ red			enter linux command
 green			toggle file marker
 yellow			toggle sorting of entries in current window
 blue			refresh display
-mute                    toggle transparency
+mute			toggle transparency
 dream			toggle between 4:3 and 16:9-mode
 info			Taskmanager / version info
 
@@ -106,11 +106,11 @@ in textinput:
 left/right		change selected stringposition
 up/down			change character
 ok			confirm changes
-volume +                insert new character
+volume +		insert new character
 volume -		remove character
-red                     clear input
-yellow			cheng between uppercase/lowercase
-0..9                    select character in "sms-style" (as in enigma textinput)
+red			clear input
+yellow			change between uppercase/lowercase
+0..9			select character in "sms-style" (as in enigma textinput)
 
 in properties:
 
@@ -124,17 +124,17 @@ in Editor:
 left/right		Page back/forward
 up/down 		Line up/down
 ok			edit line
-volume +                jump to first line
+volume +		jump to first line
 volume -		jump to last line
-red                     delete line
-green                   insert line
+red			delete line
+green			insert line
 
 in Viewer:
 
 ok/right		view next page
 left/right		Page back/forward
 up/down 		Line up/down
-volume +                jump to first line
+volume +		jump to first line
 volume -		jump to last line
 
 in Taskmanager:
@@ -142,7 +142,7 @@ in Taskmanager:
 ok/right		view next page
 left/right		Page back/forward
 up/down 		Line up/down
-volume +                jump to first line
+volume +		jump to first line
 volume -		jump to last line
 red			kill process
 
@@ -177,6 +177,4 @@ pass=<password> 	(optional)
 port=<ftpport>  	(optional, default 21)
 dir=<directory>		(optional, default /)
 3.) select file and press OK . 
-you are connected to the specified adress. 
-
-
+you are connected to the specified adress.

@@ -36,20 +36,20 @@ Historie:
  - Sicherheitsabfrage, falls durch kopieren/verschieben bestehende Dateien überschrieben werden.
 
 08.05.2004 Version 1.1a
-  - BugFix: Keine angehängten Leerzeichen mehr beim Umbenennen von Dateien
+ - BugFix: Keine angehängten Leerzeichen mehr beim Umbenennen von Dateien
 
 02.05.2004 Version 1.1
-  - einige Farbänderungen
-  - Deutsche Texte eingebaut
-  - Möglichkeit, Tasten gedrückt zu halten (hoch/runter, rechts/links, volume+/-, grüne Taste)
-  - 3 Tranzparenzstufen 
-  - Dateien markieren, sodass man mehrere Dateien auf einmal kopieren/verschieben oder löschen kann
-  - Tranzparanzmodus wird jetzt durch die 'mute'- Taste gewechselt (analog zu TuxTxt) (grüne Taste wird zum Dateien markieren verwendet)
+ - einige Farbänderungen
+ - Deutsche Texte eingebaut
+ - Möglichkeit, Tasten gedrückt zu halten (hoch/runter, rechts/links, volume+/-, grüne Taste)
+ - 3 Tranzparenzstufen 
+ - Dateien markieren, sodass man mehrere Dateien auf einmal kopieren/verschieben oder löschen kann
+ - Tranzparanzmodus wird jetzt durch die 'mute'- Taste gewechselt (analog zu TuxTxt) (grüne Taste wird zum Dateien markieren verwendet)
 
 03.04.2004 Version 1.0 : 
-  erste Veröffentlichung
-  
-  
+   erste Veröffentlichung
+   
+     
   
 Quellen:
 --------
@@ -59,8 +59,8 @@ und LazyT's TuxTxt (aus dem CDK)  übernommen.
 
 Vorraussetzungen:
 -----------------
-- Eine Dreambox 7000-S ( nicht auf anderen Modellen getested)
-- Firmware Version 1.07.x oder höher ( nicht auf älteren Versionen getested)
+ - Eine Dreambox 7000-S ( nicht auf anderen Modellen getested)
+ - Firmware Version 1.07.x oder höher ( nicht auf älteren Versionen getested)
 
 Installation:
 -------------
@@ -105,11 +105,11 @@ in Texteingabe:
 links/rechts		Position wechseln
 hoch/runter		Zeichen wechseln
 ok			bestätigen
-volume +                neues Zeichen einfügen
+volume +		neues Zeichen einfügen
 volume -		Zeichen entfernen
-rot                     Eingabe löschen
+rot			Eingabe löschen
 gelb			Wechseln zwischen Gross und Kleinbuchstaben
-0..9                    Zeichenauswahl im "SMS-Stil" ( wie in der Enigma Texteingabe)
+0..9			Zeichenauswahl im "SMS-Stil" ( wie in der Enigma Texteingabe)
 
 
 in Eigenschaften:
@@ -125,17 +125,17 @@ in Editor:
 links/rechts		Seite zurück/vor
 hoch/runter		Zeile zurück/vor
 ok			Zeile bearbeiten
-volume +                Sprung zur 1. Zeile
+volume +		Sprung zur 1. Zeile
 volume -		Sprung zur letzten Zeile
-rot                     Zeile löschen
-grün                    Zeile einfügen
+rot			Zeile löschen
+grün			Zeile einfügen
 
 in Viewer:
 
 ok, rechts		nächste Seite
 links/rechts		Seite zurück/vor
 hoch/runter		Zeile zurück/vor
-volume +                Sprung zur 1. Zeile
+volume +		Sprung zur 1. Zeile
 volume -		Sprung zur letzten Zeile
 
 in Taskmanager:
@@ -143,7 +143,7 @@ in Taskmanager:
 ok, rechts		nächste Seite
 links/rechts		Seite zurück/vor
 hoch/runter		Zeile zurück/vor
-volume +                Sprung zur 1. Zeile
+volume +		Sprung zur 1. Zeile
 volume -		Sprung zur letzten Zeile
 rot			Prozess beenden 
 
@@ -178,4 +178,4 @@ pass=<password> 	(optional)
 port=<ftpport>  	(optional, standardmässig 21)
 dir=<Unterverzeichnis>	(optional, standardmässig /)
 3.) Datei auswählen und OK drücken. 
-Es wird eine FTP-Verbindung zur angegebenen Adresse aufgebaut. 
+Es wird eine FTP-Verbindung zur angegebenen Adresse aufgebaut.
