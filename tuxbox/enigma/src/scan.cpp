@@ -219,7 +219,7 @@ void tsAutomatic::start()
 //		sapi->setUseONIT(network->useONIT);
 //		sapi->setUseBAT(network->useBAT);
 		sapi->setNetworkSearch(1);
-		sapi->setClearList(1);
+		sapi->setClearList(0);
 		close(0);
 	}
 }
