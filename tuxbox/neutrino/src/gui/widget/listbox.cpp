@@ -141,7 +141,7 @@ int CListBox::getItemHeight()
 	return fheight;
 }
 
-void CListBox::paintItem(int itemNr, int paintNr, bool selected)
+void CListBox::paintItem(unsigned int itemNr, int paintNr, bool selected)
 {
 	int ypos = y+ theight + paintNr*getItemHeight();
 	int color = COL_MENUCONTENT;
