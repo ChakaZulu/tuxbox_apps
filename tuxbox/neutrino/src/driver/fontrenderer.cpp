@@ -351,10 +351,10 @@ void Font::RenderString(int x, int y, const int width, const char *text, const u
 	int pen1=-1; // "pen" positions for kerning, pen2 is "x"
 
 #ifdef FB_USE_PALETTE
-	fb_pixel_t bgcolor = color + 2;
+	fb_pixel_t bgcolor = color;
 	int fgcolor = ((int)(color | 7)) + 1;
 #else
-	fb_pixel_t bgcolor = frameBuffer->realcolor[color + 2];
+	fb_pixel_t bgcolor = frameBuffer->realcolor[color];
 	int fgcolor = frameBuffer->realcolor[color | 7];
 #endif 
 	int delta = fgcolor - bgcolor;
