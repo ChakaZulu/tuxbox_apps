@@ -44,7 +44,7 @@ mainsettings.video video
 mainsettings.network mreza
 mainsettings.recording snimanje
 mainsettings.colors boje / teme
-mainsettings.plugins unset
+mainsettings.plugins namjescenje plugina
 mainsettings.lcd tecni kristal
 mainsettings.keybinding namjestiti tipku
 mainsettings.misc namjestiti razne stvari
@@ -125,7 +125,7 @@ colormenu.background_head boja pozadine
 colormenu.textcolor boja teksta
 colormenu.textcolor_head boja teksta
 colormenu.fade izblijediti izbore
-colormenu.timing unset
+colormenu.timing osd tajm-aut
 
 colorthememenu.head izabrati teme
 colorthememenu.neutrino_theme neutrino tema
@@ -140,27 +140,27 @@ colormenusetup.menucontent_selected izabran sadrzaj prozora
 colorstatusbar.head boja statusne trake
 colorstatusbar.text statusna traka
 
-timing.head unset
-timing.menu unset
-timing.chanlist unset
-timing.epg unset
-timing.infobar unset
-timing.hint_1 unset
-timing.hint_2 unset
+timing.head osd tajm-auti
+timing.menu izbor
+timing.chanlist lista kanala
+timing.epg epg
+timing.infobar infromativna traka
+timing.hint_1 vrijeme u sekundama u kojemu
+timing.hint_2 ce biti pokazana informativna traka
 
-pluginmenu.head unset
-tuxnews.size unset
-tuxnews_size.small unset
-tuxnews_size.medium unset
-tuxnews_size.large unset
-tuxnews.speed unset
-tuxnews_speed.slow unset
-tuxnews_speed.medium unset
-tuxnews_speed.fast unset
-tuxnews.position unset
-tuxnews_position.top unset
-tuxnews_position.center unset
-tuxnews_position.bottom unset
+pluginmenu.head namjescenje plugina
+tuxnews.size velicina tuxnewsa
+tuxnews_size.small malo
+tuxnews_size.medium srednje
+tuxnews_size.large veliko
+tuxnews.speed brzina tuxnewsa
+tuxnews_speed.slow sporo
+tuxnews_speed.medium srednje
+tuxnews_speed.fast brzo
+tuxnews.position pozicija tuxnewsa
+tuxnews_position.top gore
+tuxnews_position.center sredina
+tuxnews_position.bottom dolje
 
 repeatblocker.hint_1 vrijeme (u ms) izmedu 2 pritiska tipke
 repeatblocker.hint_2 0 ugasi blokera (crveno je " ")
@@ -588,9 +588,9 @@ timerlist.message obavijest
 timerlist.apid audio pid
 timerlist.bouquetselect izabrati buket
 timerlist.channelselect izabrati kanal
-timerlist.modeselect unset
-timerlist.modetv unset
-timerlist.moderadio unset
+timerlist.modeselect izbor
+timerlist.modetv tv kanali
+timerlist.moderadio radio kanali
 timersettings.separator namjescenje vremenskog brojaca
 timersettings.record_safety_time ispraviti snimanje
 timersettings.record_safety_time.hint_1 vrijeme u minutama koje se odbija od
@@ -612,9 +612,9 @@ fontsize.channellist lista kanala
 fontsize.channellist_descr opis
 fontsize.channellist_number broj
 fontsize.channel_num_zap nemam pojma
-fontsize.infobar_number infromativne traka za broj
-fontsize.infobar_channame infromativne traka za kanal
-fontsize.infobar_info infromativne traka za informaciju
+fontsize.infobar_number infromativna traka za broj
+fontsize.infobar_channame infromativna traka za kanal
+fontsize.infobar_info infromativna traka za informaciju
 fontsize.infobar_small mala infromativna traka
 
 fontmenu.head namjescenje velicine slova
@@ -623,6 +623,6 @@ fontmenu.eventlist lista dogadjaja
 fontmenu.epg epg
 fontmenu.infobar informativna traka
 
-colormenu.gtx_alpha providnost
-gtxalpha.alpha1 a1
-gtxalpha.alpha2 a2
+colormenu.gtx_alpha providnost (gtx)
+gtxalpha.alpha1 alpha 1
+gtxalpha.alpha2 alpha 2
