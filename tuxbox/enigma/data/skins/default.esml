@@ -748,7 +748,9 @@
 			<eLabel name="harddisks" position="10:170" csize="e:60" />
 			<eLabel text="Software Version:" position="10:230" csize="e:30" />
 			<eLabel name="version" position="10:260" csize="e:60" />
+			<eLabel text="FP Version:" name="fp_version" position="10:290" csize="e:30" />
 			<eButton name="okButton" position="20:e-70" csize="100:40" text="ok" loadDeco="" shortcut="green" />
+			<eButton name="upgradeFPButton" position="130:e-70" csize="150:40" text="Upgrade FP" loadDeco="" />
 			<eLabel name="dreamlogo" pixmap="dreamlogo" position="e-160:e-105" csize="143:75" alphatest="on" />
 			<eLabel name="triaxlogo" pixmap="triaxlogo" position="e-277:e-105" csize="260:75" alphatest="on" />
 		</eAboutScreen>
