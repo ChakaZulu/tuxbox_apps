@@ -24,6 +24,8 @@ int fh_png_id(const char *name)
 
 int fh_png_load(const char *name,unsigned char *buffer,int x,int y)
 {
+	static const png_color_16 my_background = {0, 0, 0, 0, 0};
+
 	png_structp png_ptr;
 	png_infop info_ptr;
 	png_uint_32 width, height;
@@ -32,20 +34,6 @@ int fh_png_load(const char *name,unsigned char *buffer,int x,int y)
 	int number_passes,pass;
 	png_byte * fbptr;
 	FILE     * fh;
-	/*
-	libpng-1.2.5/pngrutil.c:
-
-	png_memcpy(row, png_ptr->row_buf + 1,
-	(png_size_t)((png_ptr->width *
-	png_ptr->row_info.pixel_depth + 7) >> 3));
-
-	png_ptr->row_info.pixel_depth == 32 !
-
-	hence we need a buffer of size x * 4
-
-	*/
-
-	png_byte line[x * 4];
 
 	if(!(fh=fopen(name,"rb")))	return(FH_ERROR_FILE);
 
@@ -68,20 +56,52 @@ int fh_png_load(const char *name,unsigned char *buffer,int x,int y)
 
 	png_read_info(png_ptr, info_ptr);
 	png_get_IHDR(png_ptr, info_ptr, &width, &height, &bit_depth, &color_type,&interlace_type, NULL, NULL);
-	if(color_type == PNG_COLOR_TYPE_PALETTE) png_set_expand(png_ptr);
-	if(bit_depth < 8)	png_set_packing(png_ptr);
-	if(color_type == PNG_COLOR_TYPE_GRAY || color_type== PNG_COLOR_TYPE_GRAY_ALPHA) png_set_gray_to_rgb(png_ptr);
-	if( bit_depth==16) png_set_strip_16(png_ptr);
+
+	if (color_type == PNG_COLOR_TYPE_PALETTE)
+	{
+		png_set_palette_to_rgb(png_ptr);
+		png_set_background(png_ptr, (png_color_16*)&my_background, PNG_BACKGROUND_GAMMA_SCREEN, 0, 1.0);
+		/* other possibility for png_set_background: use png_get_bKGD */
+	}
+
+	if (color_type == PNG_COLOR_TYPE_GRAY        ||
+	    color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
+	{
+		png_set_gray_to_rgb(png_ptr);
+		png_set_background(png_ptr, (png_color_16*)&my_background, PNG_BACKGROUND_GAMMA_SCREEN, 0, 1.0);
+	}
+
+	printf("MASK_ALPHA: %d (%s)\n", (color_type & PNG_COLOR_MASK_ALPHA), name);
+
+	if (color_type & PNG_COLOR_MASK_ALPHA)
+		png_set_strip_alpha(png_ptr);
+
+	if (bit_depth < 8)
+		png_set_packing(png_ptr);
+
+	if (bit_depth == 16)
+		png_set_strip_16(png_ptr);
+
+/* on Intel PC ?:
+   if (bit_depth == 16)
+   png_set_swap(png_ptr);
+*/
+
 	number_passes = png_set_interlace_handling(png_ptr);
 	png_read_update_info(png_ptr,info_ptr);
+
+	if (width * 3 != png_get_rowbytes(png_ptr, info_ptr))
+	{
+		printf("[png.cpp]: Error processing %s - please report (including image).\n", name);
+		return(FH_ERROR_FORMAT);
+	}
 
 	for(pass = 0; pass < number_passes; pass++)
 	{
 		fbptr = (png_byte *)buffer;
-		for(i=0;i<height;i++,fbptr+=width*3)
+		for (i = 0; i < height; i++, fbptr += width * 3)
 		{
-			png_read_row(png_ptr, line, NULL);
-			memcpy(fbptr, line, width * 3);
+			png_read_row(png_ptr, fbptr, NULL);
 		}
 	}
 	png_read_end(png_ptr, info_ptr);
