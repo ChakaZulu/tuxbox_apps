@@ -75,7 +75,8 @@ class CControldClient
 			CMD_GETBOXTYPE,
 			CMD_SETSCARTMODE,
 			CMD_GETSCARTMODE,
-			CMD_SHUTDOWN
+			CMD_SHUTDOWN,
+			CMD_SETVIDEOPOWERDOWN
 		};
 
 		//command structures
@@ -139,6 +140,11 @@ class CControldClient
 		struct responseScartMode
 		{
 			unsigned char mode;
+		};
+
+		struct responseVideoPowerSave
+		{
+			bool powerdown;
 		};
 
 
@@ -231,6 +237,12 @@ class CControldClient
 	
 		*/
 		void setScartMode(bool);
+
+
+		/*
+			die Dbox herunterfahren
+		*/
+		void videoPowerDown(bool);
 
 		/*
 			die Dbox herunterfahren

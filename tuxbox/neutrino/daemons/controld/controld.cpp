@@ -42,6 +42,7 @@
 #include <signal.h>
 
 #include "dbox/avs_core.h"
+#include "saa7126/saa7126_core.h"
 #include "ost/video.h"
 
 #include "eventwatchdog.h"
@@ -49,7 +50,7 @@
 #include "lcddclient.h"
 
 #define CONF_FILE CONFIGDIR "/controld.conf"
-
+#define SAA7126_DEVICE "/dev/dbox/saa0"
 
 CLcddClient lcdd;
 
@@ -338,6 +339,26 @@ void setScartMode(bool onoff)
 	switch_vcr( onoff );
 }
 
+void disableVideoOutput(bool disable)
+{
+	int arg=disable?1:0;
+    int fd;
+
+	if((fd = open(SAA7126_DEVICE,O_RDWR|O_NONBLOCK)) < 0)
+	{
+		perror("[controld] SAA DEVICE: ");
+		return;
+	}
+
+	if ( (ioctl(fd,SAAIOGPOWERSAVE,&arg) < 0))
+	{
+		perror("[controld] IOCTL: ");
+		close(fd);
+		return;
+	}
+	close(fd);
+}
+
 void setBoxType(char type)
 {
 	settings.boxtype = type;
@@ -476,6 +497,13 @@ void parse_command(int connfd, CControldClient::commandHead* rmessage)
 	  read(connfd, &msg5, sizeof(msg5));
       setScartMode(msg5.mode);
       break;
+    case CControldClient::CMD_SETVIDEOPOWERDOWN:
+      //printf("[controld] set scartmode\n");
+      CControldClient::responseVideoPowerSave msg10;
+	  read(connfd, &msg10, sizeof(msg10));
+      disableVideoOutput(msg10.powerdown);
+      break;
+
 
 	case CControldClient::CMD_GETVOLUME:
 		//printf("[controld] get volume\n");

@@ -264,3 +264,16 @@ bool CControldClient::getMute()
 	controld_close();
 	return rmsg.mute;
 }
+
+void CControldClient::videoPowerDown(bool powerdown)
+{
+	commandHead msg;
+	responseVideoPowerSave msg2;
+	msg.version=ACTVERSION;
+	msg.cmd=CMD_SETVIDEOPOWERDOWN;
+	msg2.powerdown = powerdown;
+	controld_connect();
+	send((char*)&msg, sizeof(msg));
+	send((char*)&msg2, sizeof(msg2));
+	controld_close();
+}
