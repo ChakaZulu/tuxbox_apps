@@ -1,1 +1,1 @@
-SUBDIRS = controld lcdd nhttpd sectionsd timerd
+SUBDIRS = controld nhttpd sectionsd timerd
