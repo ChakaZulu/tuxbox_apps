@@ -1,7 +1,10 @@
 //
-// $Id: channellist.cpp,v 1.27 2001/09/27 11:23:51 field Exp $
+// $Id: channellist.cpp,v 1.28 2001/09/27 17:19:21 field Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.28  2001/09/27 17:19:21  field
+// Numeric-Zap fix gefixt
+//
 // Revision 1.27  2001/09/27 11:23:51  field
 // Numzap gefixt, kleiner Bugfixes
 //
@@ -422,10 +425,8 @@ void CChannelList::numericZap(int key)
 		if ( ( key=g_RCInput->getKey(30) ) == CRCInput::RC_timeout )
         {
             if ( ( chn > (int)chanlist.size() ) || (chn == 0) )
-            {
                 chn = tuned + 1;
-    			break;
-            }
+  			break;
         }
 		else if ( (key>=0) && (key<=9) )
 		{ //numeric
