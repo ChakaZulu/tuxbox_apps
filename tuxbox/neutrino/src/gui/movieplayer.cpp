@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.86 2004/05/02 18:52:53 thegoodguy Exp $
+  $Id: movieplayer.cpp,v 1.87 2004/05/07 18:33:11 thegoodguy Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -903,6 +903,18 @@ PlayStreamThread (void *mrl)
 				while (len > 0)
 				{
 					wr = write (dvr, &buf[done], len);
+					if (wr < 0)
+					{
+						if (errno != EAGAIN)
+						{
+							perror("[movieplayer.cpp] PlayStreamThread: write failed");
+#warning I have no clue except what to do if writing fails so I just set playstate to CMoviePlayerGui::STOPPED
+							playstate = CMoviePlayerGui::STOPPED;
+							break;
+						}
+						else
+							usleep(1000);
+					}
 					//printf ("[movieplayer.cpp] [%d bytes written]\n", wr);
 					len -= wr;
 					done += wr;
@@ -1676,7 +1688,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		else if (msg == CRCInput::RC_help)
  		{
 			std::string fullhelptext = g_Locale->getText("movieplayer.vlchelp");
-			fullhelptext += "\nVersion: $Revision: 1.86 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			fullhelptext += "\nVersion: $Revision: 1.87 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -1848,7 +1860,7 @@ CMoviePlayerGui::PlayFile (void)
  		else if (msg == CRCInput::RC_help)
  		{
 			std::string fullhelptext = g_Locale->getText("movieplayer.tshelp");
-			fullhelptext += "\nVersion: $Revision: 1.86 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			fullhelptext += "\nVersion: $Revision: 1.87 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
  		else if (msg == CRCInput::RC_setup)
