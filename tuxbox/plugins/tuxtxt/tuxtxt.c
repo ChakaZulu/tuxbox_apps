@@ -5,6 +5,7 @@
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
+ *    V1.14: use videoformat-settings                                         *
  *    V1.13: some fixes                                                       *
  *    V1.12: added zoom, removed +/-10                                        *
  *    V1.11: added pagecatching, use 16:9 for text&picture mode               *
@@ -30,7 +31,7 @@ void plugin_exec(PluginParam *par)
 {
 	//show versioninfo
 
-		printf("\nTuxTxt 1.13 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
+		printf("\nTuxTxt 1.14 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
 
 	//get params
 
@@ -41,6 +42,7 @@ void plugin_exec(PluginParam *par)
 		ex = -1;
 		sy = -1;
 		ey = -1;
+		vidformat = -1;
 
 		for(; par; par = par->next)
 		{
@@ -72,9 +74,13 @@ void plugin_exec(PluginParam *par)
 			{
 				ey = atoi(par->val);
 			}
+			else if (!strcmp(par->id, P_ID_VFORMAT))
+			{
+				vidformat = atoi(par->val);
+			}
 		}
 
-		if(vtxtpid == -1 || fb == -1 || rc == -1 || sx == -1 || ex == -1 || sy == -1 || ey == -1)
+		if(vtxtpid == -1 || fb == -1 || rc == -1 || sx == -1 || ex == -1 || sy == -1 || ey == -1 || vidformat == -1)
 		{
 			printf("TuxTxt <Invalid Param(s)>\n");
 			return;
@@ -170,6 +176,7 @@ int Init()
 {
 	struct dmxPesFilterParams dmx_flt;
 	int error;
+	int fnc_169 = AVS_FNCOUT_EXT169;
 
 	//open demuxer
 
@@ -197,6 +204,8 @@ int Init()
 		}
 
 		ioctl(avs, AVSIOGSCARTPIN8, &fnc_old);
+
+		if(vidformat != 2) ioctl(avs, AVSIOSSCARTPIN8, &fnc_169);
 
 	//setup rc
 
@@ -329,14 +338,13 @@ void CleanUp()
 {
 	int clear_page, clear_subpage;
 
-	//hide pig & restore fnc
+	//hide pig
 
-		if(screenmode)
-		{
-			avia_pig_hide(pig);
+		if(screenmode) avia_pig_hide(pig);
 
-			ioctl(avs, AVSIOSSCARTPIN8, &fnc_old);
-		}
+	//restore videoformat
+
+		ioctl(avs, AVSIOSSCARTPIN8, &fnc_old);
 
 	//stop decode-thread
 
@@ -964,10 +972,7 @@ void SwitchScreenMode()
 				fontwidth  =  8;
 				fontheight = 21;
 
-				fnc_new = AVS_FNCOUT_EXT169;
-				ioctl(avs, AVSIOSSCARTPIN8, &fnc_new);
-
-				avia_pig_set_pos(pig, (StartX+267), StartY);
+				avia_pig_set_pos(pig, (StartX+321-55), StartY);
 				avia_pig_set_size(pig, 320, 504);
 				avia_pig_set_stack(pig, 1);
 				avia_pig_show(pig);
@@ -976,9 +981,6 @@ void SwitchScreenMode()
 			{
 				fontwidth  = 16;
 				fontheight = 22;
-
-				fnc_new = AVS_FNCOUT_EXT43;
-				ioctl(avs, AVSIOSSCARTPIN8, &fnc_new);
 
 				avia_pig_hide(pig);
 			}

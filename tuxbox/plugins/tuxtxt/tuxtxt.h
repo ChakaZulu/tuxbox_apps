@@ -173,7 +173,7 @@ int current_page, current_subpage, page, subpage, lastpage, pageupdate, zap_subp
 int inputcounter;
 int zoommode, screenmode, transpmode, hintmode;
 int fontwidth, fontheight;
-int fnc_old, fnc_new;
+int vidformat, fnc_old;
 int catch_row, catch_col, catched_page;
 
 pthread_t thread_id;
