@@ -39,7 +39,7 @@
 #include "daemonc/remotecontrol.h"
 #include "helpers/infoviewer.h"
 #include "helpers/settings.h"
-#include "channels/lastchannel.h"
+#include "helpers/lastchannel.h"
 #include "eventlist.hpp"
 #include "menue.h"
 #include "color.h"

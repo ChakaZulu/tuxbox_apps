@@ -33,21 +33,12 @@
 #define __bouquetlist__
 
 #include "driver/framebuffer.h"
-#include "driver/fontrenderer.h"
-#include "driver/rcinput.h"
-#include "daemonc/remotecontrol.h"
-#include "helpers/infoviewer.h"
-#include "helpers/settings.h"
-#include "eventlist.hpp"
-#include "menue.h"
-#include "color.h"
-
+#include "helpers/lastchannel.h"
 #include "channellist.h"
 
 #include <string>
 #include <vector>
 
-#include "channels/lastchannel.h"
 
 using namespace std;
 

@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.243 2002/04/24 13:06:58 field Exp $
+        $Id: neutrino.cpp,v 1.244 2002/04/25 08:15:44 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -67,7 +67,7 @@
 #include "helpers/update.h"
 #include "helpers/scan.h"
 
-#include "favorites/favorites.h"
+#include "gui/favorites.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -2348,7 +2348,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.243 2002/04/24 13:06:58 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.244 2002/04/25 08:15:44 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 

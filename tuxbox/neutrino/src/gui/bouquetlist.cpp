@@ -29,8 +29,21 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "../global.h"
-#include "../neutrino.h"
+#include "global.h"
+#include "neutrino.h"
+
+#include "bouquetlist.h"
+
+#include "driver/fontrenderer.h"
+#include "driver/rcinput.h"
+#include "daemonc/remotecontrol.h"
+#include "helpers/infoviewer.h"
+#include "helpers/settings.h"
+#include "eventlist.hpp"
+#include "menue.h"
+#include "color.h"
+
+
 
 
 CBouquetList::CBouquetList( const std::string &Name )
