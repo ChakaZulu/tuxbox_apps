@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.34 2002/04/19 14:53:29 obi Exp $
+ * $Id: getservices.cpp,v 1.35 2002/04/20 10:28:56 obi Exp $
  */
 
 #include "frontend.h"
@@ -262,11 +262,11 @@ int LoadServices(void)
 	size_t len;
 
 	XMLTreeParser *parser = new XMLTreeParser("ISO-8859-1");
-	FILE *in = fopen(CONFIGDIR "/services.xml", "r");
+	FILE *in = fopen(CONFIGDIR "/zapit/services.xml", "r");
 
 	if (!in)
 	{
-		perror("[getservices.cpp] " CONFIGDIR "/services.xml");
+		perror("[getservices.cpp] " CONFIGDIR "/zapit/services.xml");
 		return -23;
 	}
 

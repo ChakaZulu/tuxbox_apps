@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.44 2002/04/19 14:53:29 obi Exp $
+ * $Id: scan.cpp,v 1.45 2002/04/20 10:28:56 obi Exp $
  */
 
 #include "frontend.h"
@@ -231,7 +231,7 @@ FILE *write_provider(FILE *fd, const char *type, const char *provider_name, cons
 		/* create new file if needed */
 		if (fd == NULL)
 		{
-			fd = write_xml_header(CONFIGDIR "/services.xml");
+			fd = write_xml_header(CONFIGDIR "/zapit/services.xml");
 		}
 
 		/* cable tag */
