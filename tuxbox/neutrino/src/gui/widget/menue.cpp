@@ -1,9 +1,12 @@
 /*
-$Id: menue.cpp,v 1.19 2001/10/11 21:04:58 rasc Exp $
+$Id: menue.cpp,v 1.20 2001/10/15 00:24:07 McClean Exp $
 
 
 History:
  $Log: menue.cpp,v $
+ Revision 1.20  2001/10/15 00:24:07  McClean
+ lcd-optimize
+
  Revision 1.19  2001/10/11 21:04:58  rasc
  - EPG:
    Event: 2 -zeilig: das passt aber noch nicht  ganz (read comments!).
@@ -140,7 +143,8 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
    } while ( key!=CRCInput::RC_timeout );
 
    hide();
-   g_lcdd->setMode(LCDM_TV, g_Locale->getText(name));
+   if(!parent)
+	   g_lcdd->setMode(LCDM_TV, g_Locale->getText(name));
 
    return retval;
 }
