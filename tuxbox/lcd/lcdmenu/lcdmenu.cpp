@@ -1,29 +1,37 @@
 /*
- * $Id: lcdmenu.cpp,v 1.2 2001/11/14 22:42:06 obi Exp $
+ * $Id: lcdmenu.cpp,v 1.3 2001/11/15 22:37:47 obi Exp $
  *
  * A startup menu for the d-box 2 linux project
  *
  * Copyright (C) 2001 Andreas Oberritter <obi@saftware.de>
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public License
- * as published by the Free Software Foundation; either version 2.1
- * of the License, or (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
  * $Log: lcdmenu.cpp,v $
+ * Revision 1.3  2001/11/15 22:37:47  obi
+ * fix pin protection settings
+ * actually display words not dots :-)
+ *
  * Revision 1.2  2001/11/14 22:42:06  obi
  * fall back to defaults correctly
  *
- * 
+ */
+
+/*
+ * TODO - fix show_numbers has no effect when
+ *        reading options from a file
  */
 
 #include "lcdmenu.h"
@@ -33,9 +41,9 @@ CLCDMenu::CLCDMenu()
 #ifndef X86_BUILD
     rc = new CRCInput();
 #endif
+
     fontRenderer = new fontRenderClass(this);
     entryCount = 0;
-    menuFont = fontRenderer->getFont("Arial", "Bold", fontSize);
 
     config = new CConfigManager();
     if (!config->loadConfig("/var/etc/lcdmenu.conf"))
@@ -52,11 +60,11 @@ CLCDMenu::CLCDMenu()
 	addEntry("Lcars");
 	addEntry("Maintenance");
 	config->setStringVector("menu_items", entries);
-	addPinProtection(4);
+	addPinProtection(3);
 	config->setIntVector("pin_protect", pinEntries);
     }
 
-#ifdef X86_BUILD
+#ifdef DEBUG
     config->dump();
 #endif
 
@@ -78,6 +86,8 @@ CLCDMenu::CLCDMenu()
     FILE *random = fopen("/dev/urandom", "r");
     fread(&newSalt, 1, 2, random);
     fclose(random);
+
+    menuFont = fontRenderer->getFont("Arial", "Bold", fontSize);
 }
 
 CLCDMenu::~CLCDMenu()
@@ -90,7 +100,6 @@ CLCDMenu::~CLCDMenu()
     delete config;
 }
 
-// TODO: Rewrite!
 void CLCDMenu::addEntry(string title)
 {
     entryCount++;
@@ -108,7 +117,7 @@ void CLCDMenu::addEntry(string title)
 
 void CLCDMenu::addPinProtection(int index)
 {
-    pinEntries.push_back(index);
+    pinEntries.push_back(index+1);
 }
 
 bool CLCDMenu::selectEntry(int index)
@@ -127,7 +136,8 @@ bool CLCDMenu::selectEntry(int index)
 
 #ifndef X86_BUILD
 	update();
-#else
+#endif
+#ifdef DEBUG
 	cout << "selectEntry(" << index << "): " << entries[index] << endl;
 #endif
 	return true;
@@ -149,7 +159,7 @@ bool CLCDMenu::drawMenu()
 	for (i=0; i<entryCount; i++)
 	{
 	    top = border + (i+1) * fontSize + (i) * lineSpacing;
-#ifdef X86_BUILD
+#ifdef DEBUG
 	    cout << "drawString(\"" << entries[i] << "\"," << top << "," << textAlign << ",CLCDDisplay::PIXEL_ON)" << endl;
 #endif
 	    drawString(entries[i], top, textAlign, CLCDDisplay::PIXEL_ON);
@@ -170,7 +180,7 @@ bool CLCDMenu::drawString(string text, int top, int align, int color)
 {
     int left, maxWidth;
     
-    int width = menuFont->getRenderWidth(text.c_str())+5;
+    int width = menuFont->getRenderWidth(text.c_str()) + 5;
 
     if (align == 1)
     {
@@ -190,7 +200,7 @@ bool CLCDMenu::drawString(string text, int top, int align, int color)
     }
     else
     {
-#ifdef X86_BUILD
+#ifdef DEBUG
 	cout << "menufont->RenderString(" << left << "," << top << "," << width << ",\"" << text.c_str() << "\"," << color << ")" << endl;
 #endif
 	menuFont->RenderString(left, top, width, text.c_str(), color);
@@ -206,10 +216,13 @@ bool CLCDMenu::rcLoop()
 
     while (!selected)
     {
+#ifdef DEBUG
+	cout << "rc->getKey(" << timeoutValue << ")" << endl;
+#endif
+
 #ifndef X86_BUILD
 	int pressedKey = rc->getKey(timeoutValue);
 #else
-	cout << "rc->getKey(" << timeoutValue << ")" << endl;
 	int pressedKey = 4;
 #endif
 	switch (pressedKey)
@@ -264,7 +277,7 @@ bool CLCDMenu::isPinProtected(int entry)
 	unsigned int i;
 	for (i=0; i<pinEntries.size(); i++)
 	{
-		if (pinEntries[i] == entry)
+		if (pinEntries[i]-1 == entry)
 		{
 			return true;
 		}
@@ -303,7 +316,7 @@ bool CLCDMenu::changePin()
 
 string CLCDMenu::pinScreen(string title, bool isNewPin)
 {
-    string pin = "";
+    string pin;
 
     /* clear display */
     draw_fill_rect (0, 0, 119, 63, CLCDDisplay::PIXEL_OFF);
@@ -325,13 +338,15 @@ string CLCDMenu::pinScreen(string title, bool isNewPin)
 	pin += rc->getKey(300);
 #else
 	pin[i] = '0';
-	cout << "pin[" << i << "]=" << pin[i] << endl;
 #endif
 
+#ifdef DEBUG
+	cout << "pin[" << i << "]=" << pin[i] << endl;
+	cout << "menuFont->RenderString(" << left << "," << 3*fontSize << "," << fontSize << ",*,CLCDDisplay::PIXEL_ON)" << endl;
+#endif
 	menuFont->RenderString(left, 3*fontSize, fontSize, "*", CLCDDisplay::PIXEL_ON);
-#ifdef X86_BUILD
-    cout << "menuFont->RenderString(" << left << "," << 3*fontSize << "," << fontSize << ",*,CLCDDisplay::PIXEL_ON)" << endl;
-#else
+
+#ifndef X86_BUILD
 	update();
 #endif
 	left+=fontSize;
@@ -364,7 +379,7 @@ bool CLCDMenu::checkPin(string title)
 int main(int argc, char **argv)
 {
     /* print version information */
-    cout << "$Id: lcdmenu.cpp,v 1.2 2001/11/14 22:42:06 obi Exp $" << endl;
+    cout << "$Id: lcdmenu.cpp,v 1.3 2001/11/15 22:37:47 obi Exp $" << endl;
 
     /* create menu instance */
     CLCDMenu *menu = new CLCDMenu();
@@ -389,10 +404,12 @@ int main(int argc, char **argv)
 
     /* clear screen before exit */
     menu->draw_fill_rect(0, 0, 119, 63, CLCDDisplay::PIXEL_OFF);
-#ifdef X86_BUILD
+#ifdef DEBUG
     cout << "menu->draw_fill_rect(0, 0, 119, 63, CLCDDisplay::PIXEL_OFF)" << endl;
     cout << "return (" << menu->getSelectedEntry() << ")" << endl;
-#else
+#endif
+
+#ifndef X86_BUILD
     menu->update();
 #endif
 
