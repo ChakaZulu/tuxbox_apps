@@ -7,6 +7,7 @@
 #include <enigma_plugins.h>
 #include <sselect.h>
 
+#include <lib/picviewer/pictureviewer.h>
 #include <lib/base/i18n.h>
 #include <lib/driver/rc.h>
 #include <lib/dvb/edvb.h>
@@ -19,7 +20,6 @@
 #include <lib/dvb/record.h>
 #include <lib/dvb/servicemp3.h>
 #include <lib/gdi/font.h>
-#include <lib/gdi/fb.h>
 #include <lib/gui/actions.h>
 #include <lib/gui/eskin.h>
 #include <lib/gui/elabel.h>
@@ -27,7 +27,6 @@
 #include <lib/system/info.h>
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
-#include <lib/picviewer/pictureviewer.h>
 #include <enigma_streamer.h>
 
 gFont eListBoxEntryService::serviceFont;
@@ -892,6 +891,17 @@ void eServiceSelector::serviceSelected(eListBoxEntryService *entry)
 		}
 		eServiceReference ref=entry->service;
 
+		if ( ref.type == 0x2000 ) // picviewer
+		{
+			hide();
+			ePictureViewer e(ref.path);
+			e.show();
+			e.exec();
+			e.hide();
+			show();
+			return;
+		}
+
 		if (plockmode)
 		{
 			int doit=1;
@@ -1008,7 +1018,8 @@ void eServiceSelector::updateCi()
 
 void eServiceSelector::forEachServiceRef( Signal1<void,const eServiceReference&> callback, bool fromBeg )
 {
-	eListBoxEntryService *safe = services->getCurrent(), *p, *beg;
+	eListBoxEntryService *safe = services->getCurrent(),
+											 *p, *beg;
 	if ( fromBeg )
 	{
 		services->moveSelection( eListBoxBase::dirFirst );
@@ -1034,14 +1045,6 @@ void eServiceSelector::forEachServiceRef( Signal1<void,const eServiceReference&>
 int eServiceSelector::eventHandler(const eWidgetEvent &event)
 {
 	int num=0;
-	fbClass::getInstance()->unlock();
-	struct fb_var_screeninfo *screenInfo = fbClass::getInstance()->getScreenInfo();
-	if (screenInfo->bits_per_pixel != 8)
-	{
-		ePictureViewer::getInstance()->stopSlideshow();
-		fbClass::getInstance()->SetMode(screenInfo->xres, screenInfo->yres, 8);
-		fbClass::getInstance()->PutCMAP();
-	}
 	eServicePath enterPath;
 	switch (event.type)
 	{
@@ -1129,8 +1132,8 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 					eListBoxEntryService* p=0;
 					do
 						p = services->goPrev();
-					while ( p && ( p->flags&eListBoxEntryService::flagIsReturn ||
-									( p->service != last &&
+					while ( p && ( p->flags&eListBoxEntryService::flagIsReturn || 
+									( p->service != last && 
 										!(p->service.flags & eServiceReference::canDescent) &&
 										!(p->service.flags & eServiceReference::isDirectory))));
 					if (p)
@@ -1197,6 +1200,7 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 					printf("[SSELECT] calling exec() now...\n");
 					int ret = f.exec();
 					f.hide();
+#if 0
 					switch (ret)
 					{
 						case 0:
@@ -1216,6 +1220,9 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 							break;
 					}
 					close(0);
+#else
+					show();
+#endif
 				}
 				else
 				{
@@ -1786,7 +1793,7 @@ eServiceSelector::eServiceSelector()
 	if ( !eZap::getInstance()->getServiceSelector() )
 		addActionToHelpList(&i_serviceSelectorActions->modeFile);
 #endif
-
+	
 	key[0] = key[1] = key[2] = key[3] = 0;
 
 	CONNECT(eDVB::getInstance()->serviceListChanged, eServiceSelector::actualize );

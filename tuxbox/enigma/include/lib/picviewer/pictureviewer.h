@@ -1,9 +1,8 @@
 #ifndef __pictureviewer_h
 #define __pictureviewer_h
 
-#include <lib/base/thread.h>
-#include <lib/base/message.h>
 #include <lib/base/estring.h>
+#include <lib/gui/ewidget.h>
 
 #define FH_ERROR_OK 0
 #define FH_ERROR_FILE 1		/* read/access error */
@@ -13,32 +12,11 @@
 #define dbout(fmt, args...) {struct timeval tv; gettimeofday(&tv, NULL); \
         printf( "PV[%ld|%02ld] " fmt, (long)tv.tv_sec, (long)tv.tv_usec / 10000, ## args);}
 
-class ePictureViewer: public eMainloop, private eThread, public Object
+class ePictureViewer: public eWidget
 {
-	struct Message
-	{
-		int type;
-		const char *filename;
-		enum
-		{
-			display,
-			startSlideshow,
-			stopSlideshow,
-			quit
-		};
-		Message(int type = 0, const char *filename = 0)
-			:type(type), filename(filename)
-		{}
-	};
-	
 	eTimer slideshowTimer;
 	std::list<eString> slideshowList;
 	std::list<eString>::iterator myIt;
-	eFixedMessagePump<Message> messages;
-	static ePictureViewer *instance;
-	void gotMessage(const Message &message);
-	void thread();
-	
 	struct cformathandler 
 	{
 		struct cformathandler *next;
@@ -47,10 +25,11 @@ class ePictureViewer: public eMainloop, private eThread, public Object
 		int (*id_pic)(const char *);
 	};
 	typedef  struct cformathandler CFormathandler;
+	eString filename;
+	int eventHandler(const eWidgetEvent &evt);
 public:
-	ePictureViewer();
+	ePictureViewer( const eString &filename);
 	~ePictureViewer();
-	static ePictureViewer *getInstance() {return (instance) ? instance : new ePictureViewer();}
 
 	enum ScalingMode
 	{
@@ -71,11 +50,7 @@ public:
 	void Move(int dx, int dy);
 	void Cleanup();
 	void SetVisible(int startx, int endx, int starty, int endy);
-	void displayImage(eString filename);
-	void startSlideshow(eString filename);
-	void stopSlideshow();
 	void slideshowTimeout();
-
 private:
 	CFormathandler *fh_root;
 	ScalingMode m_scaling;

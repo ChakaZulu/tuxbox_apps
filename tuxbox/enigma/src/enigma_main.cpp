@@ -56,11 +56,9 @@
 #include <lib/dvb/dvbservice.h>
 #include <lib/gdi/lcd.h>
 #include <lib/gdi/glcddc.h>
-#include <lib/gdi/fb.h>
 #include <lib/system/info.h>
 #include <src/time_correction.h>
 #include <lib/driver/audiodynamic.h>
-#include <lib/picviewer/pictureviewer.h>
 
 		// bis waldi das in nen .h tut
 #define MOVIEDIR "/hdd/movie"
@@ -5096,7 +5094,6 @@ void eZapMain::blinkRecord()
 
 int eZapMain::eventHandler(const eWidgetEvent &event)
 {
-	fbClass::getInstance()->unlock();
 	// timer service change in progress...
 	if ( event.type == eWidgetEvent::evtAction && Decoder::locked == 2 )
 	{
@@ -5116,19 +5113,12 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 	case eWidgetEvent::evtAction:
 	{
 		int num=0;
-		struct fb_var_screeninfo *screenInfo = fbClass::getInstance()->getScreenInfo();
-		if (screenInfo->bits_per_pixel != 8)
-		{
-			ePictureViewer::getInstance()->stopSlideshow();
-			fbClass::getInstance()->SetMode(screenInfo->xres, screenInfo->yres, 8);
-			fbClass::getInstance()->PutCMAP();
-		}
 		stopMessages();
 
 #ifndef DISABLE_FILE
 		if (	skipping &&
 			event.action != &i_enigmaMainActions->discrete_startSkipForward
-				&& dvrfunctions && event.action != &i_enigmaMainActions->startSkipForward &&
+				&& dvrfunctions && event.action != &i_enigmaMainActions->startSkipForward && 
 			event.action != &i_enigmaMainActions->discrete_repeatSkipForward
 				&& dvrfunctions && event.action != &i_enigmaMainActions->repeatSkipForward &&
 			event.action != &i_enigmaMainActions->discrete_stopSkipForward
@@ -7077,11 +7067,13 @@ eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eSe
 			|| (ref.type == 0x2000) // picture
 		   )
 		{// deleteable file
-			prev = new eListBoxEntryText(&list, _("add to specific bouquet"), (void*)4, 0, _("add the selected file to a selectable bouquet"));
+			if ( ref.type != 0x2000 )
+				prev = new eListBoxEntryText(&list, _("add to specific bouquet"), (void*)4, 0, _("add the selected file to a selectable bouquet"));
 			prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 			prev = new eListBoxEntryText(&list, _("delete file"), (void*)14, 0, _("delete the selected file (and all corresponding ts files"));
 			prev = new eListBoxEntryText(&list, _("rename file"), (void*)15, 0, _("rename the selected file (and all corresponding ts files"));
-			prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+			if ( ref.type != 0x2000 )
+				prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 		}
 #endif
 	}
