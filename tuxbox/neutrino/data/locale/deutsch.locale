@@ -139,8 +139,8 @@ screensetup.lowerright grün = Bildrand unten, rechts
 
 channellist.head Alle Kanäle
 
-infoviewer.epgnotload EPG noch nicht geladen...
-infoviewer.epgwait Warte auf EPG...
+infoviewer.epgnotload Informationen noch nicht geladen...
+infoviewer.epgwait Warte auf EPG-Informationen...
 infoviewer.streaminfo Stream-Info
 infoviewer.eventlist Programm
 infoviewer.languages Tonauswahl
@@ -151,7 +151,7 @@ infoviewer.nocurrent Keine Info zu laufendem Programm
 infoviewer.noepg Kein EPG verfügbar
 infoviewer.subservice Bildregie
 
-epgviewer.notfound keine EPG-Informationen gefunden
+epgviewer.notfound keine Programminformationen (EPG) gefunden
 epgviewer.nodetailed Keine ausführlichen Informationen verfügbar
 epglist.head Vorschau - %s
 epglist.noevents Kein EPG verfügbar...

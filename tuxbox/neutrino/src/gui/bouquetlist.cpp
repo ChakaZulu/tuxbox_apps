@@ -105,12 +105,22 @@ int CBouquetList::show()
 	{
 		return -1;
 	}
+
+	maxpos= 1;
+	int i= Bouquets.size();
+	while ((i= i/10)!=0)
+		maxpos++;
+
 	paintHead();
 	paint();
 
 	int oldselected = selected;
+	int firstselected = selected+ 1;
 	int zapOnExit = false;
 	bool loop=true;
+
+	int chn= 0;
+	int pos= maxpos;
 	while (loop)
 	{
 		int key = g_RCInput->getKey(g_settings.timing_chanlist);
@@ -178,10 +188,53 @@ int CBouquetList::show()
 			zapOnExit = true;
 			loop=false;
 		}
+		else if ( (key>=0) && (key<=9) )
+		{ //numeric
+			if ( pos==maxpos )
+			{
+				if (key== 0)
+				{
+					chn = firstselected;
+					pos = maxpos- 1;
+				}
+				else
+				{
+					chn = key;
+					pos = 0;
+				}
+			}
+			else
+			{
+				chn = chn* 10 + key;
+			}
+
+			if (chn> Bouquets.size())
+			{
+				chn = firstselected;
+				pos = maxpos- 1;
+			}
+
+			pos++;
+
+            int prevselected=selected;
+			selected = (chn- 1)%Bouquets.size();
+			paintItem(prevselected - liststart);
+			unsigned int oldliststart = liststart;
+			liststart = (selected/listmaxshow)*listmaxshow;
+			if(oldliststart!=liststart)
+			{
+				paint();
+			}
+			else
+			{
+				paintItem(selected - liststart);
+			}
+
+		}
 		else if( (key==CRCInput::RC_spkr) || (key==CRCInput::RC_plus) || (key==CRCInput::RC_minus)
 		         || (key==CRCInput::RC_red) || (key==CRCInput::RC_green) || (key==CRCInput::RC_yellow) || (key==CRCInput::RC_blue)
 		         || (key==CRCInput::RC_standby)
-		         || (CRCInput::isNumeric(key)) )
+		         /*|| (CRCInput::isNumeric(key) ) */ )
 		{
 			selected = oldselected;
 			g_RCInput->pushbackKey (key);
@@ -218,7 +271,12 @@ void CBouquetList::paintItem(int pos)
 	if(liststart+pos<Bouquets.size())
 	{
 		CBouquet* bouq = Bouquets[liststart+pos];
-		//number
+		//number - zum direkten hinhüpfen
+		char tmp[10];
+		sprintf((char*) tmp, "%d", liststart+pos+ 1);
+
+		int numpos = x+5+numwidth- g_Fonts->channellist_number->getRenderWidth(tmp);
+		g_Fonts->channellist_number->RenderString(numpos,ypos+fheight, numwidth+5, tmp, color, fheight);
 
 		g_Fonts->channellist->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, bouq->name.c_str(), color);
 	}

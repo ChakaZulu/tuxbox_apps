@@ -229,6 +229,7 @@
 #define ICON_LARGE 30
 #define ICON_OFFSET (2*ICON_LARGE+ 5)
 #define BOTTOM_BAR_OFFSET 0
+#define SHADOW_OFFSET 6
 
 char* copyStringto( char* from, char* to, int len)
 {
@@ -407,6 +408,10 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
                 g_RemoteControl->CopyPIDs();
                 showButtonAudio();
         }
+
+        g_FrameBuffer->paintBox(BoxEndX, ChanNameY+ SHADOW_OFFSET, BoxEndX+ SHADOW_OFFSET, BoxEndY, COL_INFOBAR_SHADOW);
+        g_FrameBuffer->paintBox(ChanInfoX+ SHADOW_OFFSET, BoxEndY, BoxEndX+ SHADOW_OFFSET, BoxEndY+ SHADOW_OFFSET, COL_INFOBAR_SHADOW);
+
 
         pthread_mutex_lock( &epg_mutex );
         is_visible = true;
@@ -723,7 +728,7 @@ void CInfoViewer::killTitle()
         if (is_visible )
         {
                 is_visible = false;
-                g_FrameBuffer->paintBackgroundBox(BoxStartX, BoxStartY, BoxEndX, BoxEndY );
+                g_FrameBuffer->paintBackgroundBox(BoxStartX, BoxStartY, BoxEndX+ SHADOW_OFFSET, BoxEndY+ SHADOW_OFFSET );
         }
         pthread_mutex_unlock( &epg_mutex );
 }

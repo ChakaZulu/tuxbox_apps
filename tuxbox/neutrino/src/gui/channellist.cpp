@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.61 2002/01/31 00:33:25 field Exp $
+// $Id: channellist.cpp,v 1.62 2002/01/31 16:59:55 field Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.62  2002/01/31 16:59:55  field
+// Kleinigkeiten
+//
 // Revision 1.61  2002/01/31 00:33:25  field
 // Kosmetik
 //
@@ -316,7 +319,7 @@ void CChannelList::updateEvents(void)
 
 	//printf("\n read finished CChannelList::updateEvents \n\n");
 
-	// printf("data length: %u\n", resp.dataLength);
+	//printf("data length: %u\n", resp.dataLength);
 	while(actPos<pData+resp.dataLength)
 	{
 		unsigned* serviceID = (unsigned*) actPos;

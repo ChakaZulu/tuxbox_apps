@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.148 2002/01/31 12:41:02 field Exp $
+        $Id: neutrino.cpp,v 1.149 2002/01/31 16:59:54 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.149  2002/01/31 16:59:54  field
+  Kleinigkeiten
+
   Revision 1.148  2002/01/31 12:41:02  field
   dd-availibility, eventlist-beginnt in...
 
@@ -1717,106 +1720,6 @@ void CNeutrinoApp::SelectAPID()
 		CMenuWidget APIDSelector("apidselector.head", "audio.raw", 300);
 		APIDSelector.addItem( new CMenuSeparator() );
 
-		//        APIDSelector.addItem( new CMenuSeparator(CMenuSeparator::STRING, "apidselector.hint") );
-		//        APIDSelector.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-
-		//        APIDSelector.addItem( new CMenuForwarder("menu.back") );
-		//	    APIDSelector.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-
-		bool has_unresolved_ctags= false;
-		for(int count=0;count<g_RemoteControl->audio_chans.count_apids;count++)
-		{
-			if ( g_RemoteControl->audio_chans.apids[count].ctag != -1 )
-				has_unresolved_ctags= true;
-
-			if ( strlen( g_RemoteControl->audio_chans.apids[count].name ) == 3 )
-			{
-				// unaufgel÷ste Sprache...
-				strcpy( g_RemoteControl->audio_chans.apids[count].name, getISO639Description( g_RemoteControl->audio_chans.apids[count].name ) );
-			}
-
-			if ( g_RemoteControl->audio_chans.apids[count].is_ac3 )
-				strcat(g_RemoteControl->audio_chans.apids[count].name, " (AC3)");
-		}
-
-		unsigned int onid_tsid = channelList->getActiveChannelOnid_sid();
-
-		if ( has_unresolved_ctags && ( onid_tsid != 0 ) )
-		{
-			int sock_fd;
-			SAI servaddr;
-			char rip[]="127.0.0.1";
-			bool retval = false;
-
-			sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-			memset(&servaddr,0,sizeof(servaddr));
-			servaddr.sin_family=AF_INET;
-			servaddr.sin_port=htons(sectionsd::portNumber);
-			inet_pton(AF_INET, rip, &servaddr.sin_addr);
-
-			if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
-			{
-				perror("Couldn't connect to server!");
-			}
-			else
-			{
-				sectionsd::msgRequestHeader req;
-				req.version = 2;
-				req.command = sectionsd::CurrentComponentTagsChannelID;
-				req.dataLength = 4;
-				write(sock_fd,&req,sizeof(req));
-
-				write(sock_fd, &onid_tsid, sizeof(onid_tsid));
-				printf("query ComponentTags for onid_tsid >%x<\n", onid_tsid );
-
-				sectionsd::msgResponseHeader resp;
-				memset(&resp, 0, sizeof(resp));
-
-				read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader));
-
-				int nBufSize = resp.dataLength;
-				if(nBufSize>0)
-				{
-					char TagIDs[10];
-					char TagText[100];
-					unsigned char componentTag, componentType, streamContent;
-
-					char* pData = new char[nBufSize+1] ;
-					read(sock_fd, pData, nBufSize);
-
-					char *actPos=pData;
-
-					while(*actPos && actPos<pData+resp.dataLength)
-					{
-						*TagIDs=0;
-						actPos = copyStringto( actPos, TagIDs, sizeof(TagIDs), '\n');
-						*TagText=0;
-						actPos = copyStringto( actPos, TagText, sizeof(TagText), '\n');
-
-
-						sscanf(TagIDs, "%02hhx %02hhx %02hhx", &componentTag, &componentType, &streamContent);
-						// printf("%s - %d - %s\n", TagIDs, componentTag, TagText);
-
-						for(int count=0;count<g_RemoteControl->audio_chans.count_apids;count++)
-						{
-							if ( g_RemoteControl->audio_chans.apids[count].ctag == componentTag )
-							{
-								strcpy(g_RemoteControl->audio_chans.apids[count].name, TagText);
-								if ( g_RemoteControl->audio_chans.apids[count].is_ac3 )
-									strcat(g_RemoteControl->audio_chans.apids[count].name, " (AC3)");
-								g_RemoteControl->audio_chans.apids[count].ctag = -1;
-								break;
-							}
-						}
-					}
-
-					delete[] pData;
-					retval = true;
-				}
-				close(sock_fd);
-			}
-		}
-
 		for(int count=0;count<g_RemoteControl->audio_chans.count_apids;count++)
 		{
 			char apid[5];
@@ -2453,7 +2356,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.148 2002/01/31 12:41:02 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.149 2002/01/31 16:59:54 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

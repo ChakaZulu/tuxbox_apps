@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: remotecontrol.cpp,v 1.39 2002/01/29 17:26:51 field Exp $
+// $Id: remotecontrol.cpp,v 1.40 2002/01/31 16:59:54 field Exp $
 //
 // $Log: remotecontrol.cpp,v $
+// Revision 1.40  2002/01/31 16:59:54  field
+// Kleinigkeiten
+//
 // Revision 1.39  2002/01/29 17:26:51  field
 // Jede Menge Updates :)
 //
@@ -139,6 +142,133 @@ void CRemoteControl::send()
 	pthread_cond_signal( &send_cond );
 	usleep(10);
 	//    printf("CRemoteControl: after pthread_cond_signal (with %s)\n", remotemsg.param3);
+}
+
+static char* copyStringto(const char* from, char* to, int len, char delim)
+{
+	const char *fromend=from+len;
+	while(*from!=delim && from<fromend && *from)
+	{
+		*(to++)=*(from++);
+	}
+	*to=0;
+	return (char *)++from;
+}
+
+void CRemoteControl::getAPID_Names()
+{
+	unsigned int onid_tsid;
+	sscanf( audio_chans_int.name, "%x", &onid_tsid );
+
+	bool has_unresolved_ctags= false;
+	for(int count=0;count<audio_chans_int.count_apids;count++)
+	{
+		if (audio_chans_int.apids[count].ctag != -1 )
+			has_unresolved_ctags= true;
+
+		if ( strlen( audio_chans_int.apids[count].name ) == 3 )
+		{
+			// unaufgeloeste Sprache...
+			strcpy( audio_chans_int.apids[count].name, getISO639Description( audio_chans_int.apids[count].name ) );
+		}
+
+		if ( audio_chans_int.apids[count].is_ac3 )
+			strcat(audio_chans_int.apids[count].name, " (AC3)");
+	}
+
+	if ( has_unresolved_ctags && ( onid_tsid != 0 ) )
+	{
+		int sock_fd;
+		SAI servaddr;
+		char rip[]="127.0.0.1";
+		bool retval = false;
+
+		sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+		memset(&servaddr,0,sizeof(servaddr));
+		servaddr.sin_family=AF_INET;
+		servaddr.sin_port=htons(sectionsd::portNumber);
+		inet_pton(AF_INET, rip, &servaddr.sin_addr);
+
+		if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
+		{
+			perror("Couldn't connect to server!");
+		}
+		else
+		{
+			sectionsd::msgRequestHeader req;
+			req.version = 2;
+			req.command = sectionsd::CurrentComponentTagsChannelID;
+			req.dataLength = 4;
+			write(sock_fd,&req,sizeof(req));
+
+			write(sock_fd, &onid_tsid, sizeof(onid_tsid));
+			printf("[remotecontrol]: query ComponentTags for onid_tsid >%x<\n", onid_tsid );
+
+			sectionsd::msgResponseHeader resp;
+			memset(&resp, 0, sizeof(resp));
+
+			read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader));
+
+			int nBufSize = resp.dataLength;
+			if(nBufSize>0)
+			{
+				char TagIDs[10];
+				char TagText[100];
+				unsigned char componentTag, componentType, streamContent;
+
+				char* pData = new char[nBufSize+1] ;
+				read(sock_fd, pData, nBufSize);
+
+				char *actPos=pData;
+
+				while(*actPos && actPos<pData+resp.dataLength)
+				{
+					*TagIDs=0;
+					actPos = copyStringto( actPos, TagIDs, sizeof(TagIDs), '\n');
+					*TagText=0;
+					actPos = copyStringto( actPos, TagText, sizeof(TagText), '\n');
+
+					sscanf(TagIDs, "%02hhx %02hhx %02hhx", &componentTag, &componentType, &streamContent);
+					// printf("%s - %d - %s\n", TagIDs, componentTag, TagText);
+
+					for(int count=0;count<audio_chans_int.count_apids;count++)
+					{
+						if ( audio_chans_int.apids[count].ctag == componentTag )
+						{
+							strcpy(audio_chans_int.apids[count].name, TagText);
+							if ( audio_chans_int.apids[count].is_ac3 )
+								strcat(audio_chans_int.apids[count].name, " (AC3)");
+							audio_chans_int.apids[count].ctag = -1;
+							break;
+						}
+					}
+				}
+
+				delete[] pData;
+				retval = true;
+			}
+			close(sock_fd);
+		}
+
+		int count= 0;
+
+		while (count< audio_chans_int.count_apids)
+		{
+			if ( ( audio_chans_int.apids[count].ctag != -1 ) && ( audio_chans_int.apids[count].is_ac3 ))
+			{
+    			// AC3-Stream ohne Component-Tag = nicht ausgestrahlt -> löschen...
+
+				for (int i=(count+ 1); i< audio_chans_int.count_apids; i++)
+				{
+					memcpy(&audio_chans_int.apids[count+ 1], &audio_chans_int.apids[count], sizeof(audio_chans_int.apids[count+ 1]) );
+				}
+				audio_chans_int.count_apids--;
+    		}
+    		else
+    			count++;
+
+		}
+	}
 }
 
 void CRemoteControl::getNVODs( char *channel_name )
@@ -414,6 +544,9 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 										RemoteControl->i_ecmpid= apid_return_buf.ecmpid;
 										RemoteControl->i_vpid= apid_return_buf.vpid;
 										RemoteControl->i_vtxtpid= apid_return_buf.vtxtpid;
+
+										if (apid_return_buf.count_apids> 1)
+											RemoteControl->getAPID_Names();
 									}
 
 									pthread_cond_signal( &g_InfoViewer->cond_PIDs_available );

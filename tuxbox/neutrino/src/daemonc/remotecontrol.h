@@ -188,6 +188,7 @@ class CRemoteControl
 
 		static void * RemoteControlThread (void *arg);
 		void getNVODs( char *channel_name );
+		void getAPID_Names();
 
 	public:
 		st_audio_info       audio_chans;
