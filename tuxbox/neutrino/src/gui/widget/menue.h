@@ -5,7 +5,9 @@
 #include "../driver/framebuffer.h"
 #include "../driver/fontrenderer.h"
 #include "../driver/rcinput.h"
+#include "../daemonc/lcdd.h"
 #include "color.h"
+
 
 #include <string>
 #include <vector>

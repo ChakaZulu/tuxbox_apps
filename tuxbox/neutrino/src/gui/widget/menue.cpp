@@ -28,6 +28,7 @@ void CMenuWidget::addItem(CMenuItem* menuItem, bool defaultselected)
 
 int CMenuWidget::exec(CFrameBuffer* frameBuffer, CRCInput* rcInput, CMenuTarget* parent, string)
 {
+
 	if(parent)
 		parent->hide(frameBuffer);
 
@@ -97,16 +98,23 @@ int CMenuWidget::exec(CFrameBuffer* frameBuffer, CRCInput* rcInput, CMenuTarget*
 		}
 	}
 	hide(frameBuffer);
+
+        CLCDD lcdd;
+        lcdd.setMode(LCDM_TV, name);
+
 	return retval;
 }
 
 void CMenuWidget::hide(CFrameBuffer* frameBuffer)
 {
-		frameBuffer->paintBackgroundBoxRel(x,y, width,height );
+	frameBuffer->paintBackgroundBoxRel(x,y, width,height );
 }
 
 void CMenuWidget::paint(CFrameBuffer* frameBuffer)
 {
+        CLCDD lcdd;
+        lcdd.setMode(LCDM_MENU, name);
+
 	width = 400;
 	height = 450; // height(menu_title)+10+...
 	x=((720-width)>>1) -20;
@@ -210,8 +218,14 @@ int CMenuOptionChooser::paint(CFrameBuffer*	frameBuffer, bool selected)
 	int stringstartposOption = x + dx - stringwidth - 10;
 
 	fonts->menu->RenderString(stringstartposName,   y+height,dx,  optionName.c_str(), color);
-
 	fonts->menu->RenderString(stringstartposOption, y+height,dx,  option.c_str(), color);
+
+        if(selected)
+        {
+                CLCDD lcdd;
+                lcdd.setText(0, optionName);
+                lcdd.setText(1, option);
+        }
 
 	return y+height;
 }
@@ -244,6 +258,14 @@ int CMenuForwarder::exec(CFrameBuffer*	frameBuffer, CRCInput* rcInput, CMenuTarg
 int CMenuForwarder::paint(CFrameBuffer*	frameBuffer, bool selected)
 {
 	int stringstartposX = x+10;
+
+        if(selected)
+        {
+                CLCDD lcdd;
+                lcdd.setText(0, text);
+		if(option)
+			lcdd.setText(1, option);
+        }
 
 	unsigned char color = COL_MENUCONTENT;
 	if (selected)
@@ -288,6 +310,12 @@ CMenuSeparator::CMenuSeparator(int Type, string Text, FontsDef* Fonts)
 
 int CMenuSeparator::paint(CFrameBuffer*	frameBuffer, bool selected)
 {
+        if(selected)
+        {
+                CLCDD lcdd;
+                lcdd.setText(0, text);
+        }
+
 	frameBuffer->paintBoxRel(x,y, dx, height, COL_MENUCONTENT );
 	if(type&LINE)
 	{
