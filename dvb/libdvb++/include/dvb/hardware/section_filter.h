@@ -1,5 +1,5 @@
 /*
- * $Id: section_filter.h,v 1.3 2003/11/07 01:35:04 obi Exp $
+ * $Id: section_filter.h,v 1.4 2003/11/20 03:18:47 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -104,6 +104,11 @@ class SectionFilter : public SectionHandler
 		 */
 		std::map<uint8_t, uint8_t> sectionsCounter;
 
+		/**
+		 * Selected timeout value. Default is given by table definition
+		 */
+		time_t timeout;
+
 	public:
 		SectionFilter<T>(void);
 		virtual ~SectionFilter<T>(void);
@@ -123,6 +128,12 @@ class SectionFilter : public SectionHandler
 		 */
 		void setFilter8(const uint8_t index, const uint8_t filter, const uint8_t mask = 0xff, const bool positive = true);
 		void setFilter16(const uint8_t index, const uint16_t filter, const uint16_t mask = 0xffff, const bool positive = true);
+
+		/**
+		 * Specify a custom timeout instead of the table default.
+		 * @param timeout in milliseconds (zero for no timeout).
+		 */
+		void setTimeout(const time_t timeout);
 
 		/**
 		 * Start filtering.
@@ -204,6 +215,7 @@ void SectionFilter<T>::clear(bool doRelease, bool doDelete, bool doSetup)
 		setTableId(T::TID);
 		if (T::SYNTAX == 1)
 			setCurrentNextIndicator(1);
+		setTimeout(T::TIMEOUT);
 	}
 }
 
@@ -274,6 +286,12 @@ void SectionFilter<T>::setFilter16(const uint8_t index, const uint16_t filter, c
 {
 	setFilter8(index, (filter >> 8) & 0xff, (mask >> 8) & 0xff, positive);
 	setFilter8(index + 1, filter & 0xff, mask & 0xff, positive);
+}
+
+template <class T>
+void SectionFilter<T>::setTimeout(const time_t timeout)
+{
+	this->timeout = timeout;
 }
 
 template <class T>
@@ -388,14 +406,18 @@ bool SectionFilter<T>::isDone(void)
 template <class T>
 bool SectionFilter<T>::isTimedOut(void)
 {
-	time_t diff = time(NULL) - startTime;
+	time_t diff;
 
-	if (!startTime)
+	if ((!startTime) || (!timeout))
 		return false;
-	
-	if ((!timedOut) && (!done) && (T::TIMEOUT) && (diff) && (((diff - 1) * 1000) >= (signed)T::TIMEOUT)) {
-		DVB_INFO("diff: %ld, timeout: %u", (diff - 1) * 1000, T::TIMEOUT);
-		clear();
+
+	if (done)
+		return timedOut;
+
+	diff = (time(NULL) - startTime - 1) * 1000;
+
+	if (diff >= timeout) {
+		DVB_INFO("diff: %ld, timeout: %ld", diff, timeout);
 		timedOut = done = true;
 	}
 
