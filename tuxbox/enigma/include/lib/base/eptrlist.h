@@ -134,20 +134,17 @@ inline ePtrList<T>::~ePtrList()
 template <class T>
 inline void ePtrList<T>::remove(T* t)
 {
-	for (std::list<T*>::iterator it(std::list<T*>::begin()); it != std::list<T*>::end(); it++)
+	for (std::list<T*>::iterator it(std::list<T*>::begin()); it != std::list<T*>::end();)
 		if (*it == t)
-		{
-			printf("remove Element\n");
 			it=erase(it);
-			printf("after remove Element\n");
-		}
+		else
+			it++;
 }
 
 /////////////////// ePtrList erase(iterator) ///////////////////////
 template <class T>
 inline ePtrList<T>::iterator ePtrList<T>::erase(iterator it)
 {
-	printf("In the erase from ePtrList\n");
 	if (autoDelete && *it)
 	{
 		delete *it;
