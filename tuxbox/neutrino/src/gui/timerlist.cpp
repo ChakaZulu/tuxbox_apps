@@ -60,6 +60,7 @@
 #include <neutrino.h>
 
 #include <zapit/client/zapitclient.h>
+#include <zapit/client/zapittools.h>
 
 #include <string.h>
 
@@ -236,7 +237,7 @@ int CTimerList::exec(CMenuTarget* parent, const std::string & actionKey)
 #if 0
 		strncpy(timerNew_channel_name, &(key[3 + delta + 1]), 30);
 #else
-		strncpy(timerNew_channel_name, CZapitClient::Utf8_to_Latin1(&(key[3 + delta + 1])).c_str(), 30);
+		strncpy(timerNew_channel_name, ZapitTools::UTF8_to_Latin1(&(key[3 + delta + 1])).c_str(), 30);
 #endif
 		g_RCInput->postMsg(CRCInput::RC_timeout, 0); // leave underlying menu also
 		g_RCInput->postMsg(CRCInput::RC_timeout, 0); // leave underlying menu also
@@ -717,7 +718,7 @@ int CTimerList::modifyTimer()
 	timerSettings.addItem(GenericMenuSeparatorLine);
 
 	char type[80];
-	strcpy(type, CZapitClient::Utf8_to_Latin1(convertTimerType2String(timer->eventType)).c_str()); // UTF8, UTF8 -> Latin1
+	strcpy(type, ZapitTools::UTF8_to_Latin1(convertTimerType2String(timer->eventType)).c_str()); // UTF8, UTF8 -> Latin1
 	CMenuForwarder *m0 = new CMenuForwarder("timerlist.type", false, type);
 	timerSettings.addItem( m0);
 

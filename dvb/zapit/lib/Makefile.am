@@ -3,4 +3,4 @@ INCLUDES = \
         @CONFIGFILE_CFLAGS@
 
 lib_LTLIBRARIES = libzapitclient.la
-libzapitclient_la_SOURCES = zapitclient.cpp
+libzapitclient_la_SOURCES = zapitclient.cpp zapittools.cpp

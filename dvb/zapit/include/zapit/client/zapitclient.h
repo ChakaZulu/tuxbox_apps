@@ -377,7 +377,7 @@ class CZapitClient:public CBasicClient
 	// -- check if Bouquet-Name exists (2002-04-02 rasc)
 	// -- Return bq_id or -1
 	/* bouquets are numbered starting at 0 */
-	signed int existsBouquet(const std::string & name);
+	signed int existsBouquet(const char * name); // UTF-8 encoded
 
 
 	// -- check if Channel already in Bouquet (2002-04-05 rasc)
@@ -444,10 +444,6 @@ class CZapitClient:public CBasicClient
 	  ein beliebiges Event abmelden
 	*/
 	void unRegisterEvent(const unsigned int eventID, const unsigned int clientID);
-
-
-	// Conversion routine:
-	static std::string Utf8_to_Latin1(const std::string & s);
 };
 
 #define PAL	0

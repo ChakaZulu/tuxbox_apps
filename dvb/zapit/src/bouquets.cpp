@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.98 2004/02/26 11:38:25 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.99 2004/04/02 13:26:58 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -207,7 +207,7 @@ void CBouquetManager::writeBouquetChannels(FILE * bouq_fd, uint i)
 		{
 			fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" tsid=\"%04x\" onid=\"%04x\" sat_position=\"%hd\"/>\n",
 					Bouquets[i]->tvChannels[j]->getServiceId(),
-					convert_UTF8_To_UTF8_XML(Bouquets[i]->tvChannels[j]->getName()).c_str(),
+					convert_UTF8_To_UTF8_XML(Bouquets[i]->tvChannels[j]->getName().c_str()).c_str(),
 					Bouquets[i]->tvChannels[j]->getTransportStreamId(),
 					Bouquets[i]->tvChannels[j]->getOriginalNetworkId(),
 					Bouquets[i]->tvChannels[j]->getSatellitePosition());
@@ -216,7 +216,7 @@ void CBouquetManager::writeBouquetChannels(FILE * bouq_fd, uint i)
 		{
 			fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" tsid=\"%04x\" onid=\"%04x\" sat_position=\"%hd\"/>\n",
 					Bouquets[i]->radioChannels[j]->getServiceId(),
-					convert_UTF8_To_UTF8_XML(Bouquets[i]->radioChannels[j]->getName()).c_str(),
+					convert_UTF8_To_UTF8_XML(Bouquets[i]->radioChannels[j]->getName().c_str()).c_str(),
 					Bouquets[i]->radioChannels[j]->getTransportStreamId(),
 					Bouquets[i]->radioChannels[j]->getOriginalNetworkId(),
 					Bouquets[i]->radioChannels[j]->getSatellitePosition());
@@ -228,7 +228,7 @@ void CBouquetManager::writeBouquetChannels(FILE * bouq_fd, uint i)
 		{
 			fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" tsid=\"%04x\" onid=\"%04x\"/>\n",
 					Bouquets[i]->tvChannels[j]->getServiceId(),
-					convert_UTF8_To_UTF8_XML(Bouquets[i]->tvChannels[j]->getName()).c_str(),
+					convert_UTF8_To_UTF8_XML(Bouquets[i]->tvChannels[j]->getName().c_str()).c_str(),
 					Bouquets[i]->tvChannels[j]->getTransportStreamId(),
 					Bouquets[i]->tvChannels[j]->getOriginalNetworkId());
 		}
@@ -236,7 +236,7 @@ void CBouquetManager::writeBouquetChannels(FILE * bouq_fd, uint i)
 		{
 			fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" tsid=\"%04x\" onid=\"%04x\"/>\n",
 					Bouquets[i]->radioChannels[j]->getServiceId(),
-					convert_UTF8_To_UTF8_XML(Bouquets[i]->radioChannels[j]->getName()).c_str(),
+					convert_UTF8_To_UTF8_XML(Bouquets[i]->radioChannels[j]->getName().c_str()).c_str(),
 					Bouquets[i]->radioChannels[j]->getTransportStreamId(),
 					Bouquets[i]->radioChannels[j]->getOriginalNetworkId());
 		}
@@ -257,7 +257,7 @@ void CBouquetManager::saveBouquets(void)
 	{
 		if (Bouquets[i] != remainChannels)
 		{
-			writeBouquetHeader(bouq_fd, i, convert_UTF8_To_UTF8_XML(Bouquets[i]->Name).c_str());
+			writeBouquetHeader(bouq_fd, i, convert_UTF8_To_UTF8_XML(Bouquets[i]->Name.c_str()).c_str());
 			writeBouquetChannels(bouq_fd, i);
 			writeBouquetFooter(bouq_fd);
 		}

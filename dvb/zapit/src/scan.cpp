@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.134 2004/02/10 21:01:14 metallica Exp $
+ * $Id: scan.cpp,v 1.135 2004/04/02 13:26:58 thegoodguy Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -474,7 +474,7 @@ void write_transponder(FILE *fd, t_transport_stream_id transport_stream_id, t_or
 			tI->second.polarization);
 			emptyTransponder = false;
 			}
-			if (cI->second.getName().length() == 0)
+			if (cI->second.getName().empty())
 				fprintf(fd,
 					"\t\t\t<channel service_id=\"%04x\" name=\"%04x\" service_type=\"%02x\"/>\n",
 					cI->second.getServiceId(),
@@ -484,7 +484,7 @@ void write_transponder(FILE *fd, t_transport_stream_id transport_stream_id, t_or
 				fprintf(fd,
 					"\t\t\t<channel service_id=\"%04x\" name=\"%s\" service_type=\"%02x\"/>\n",
 					cI->second.getServiceId(),
-					convert_UTF8_To_UTF8_XML(cI->second.getName()).c_str(),
+					convert_UTF8_To_UTF8_XML(cI->second.getName().c_str()).c_str(),
 					cI->second.getServiceType());
 		}
 	if(!emptyTransponder){

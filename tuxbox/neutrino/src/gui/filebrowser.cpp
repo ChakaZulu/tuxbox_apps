@@ -58,6 +58,8 @@
 #include <curl/types.h>
 #include <curl/easy.h>
 
+#include <driver/encoding.h>
+
 #ifdef __USE_FILE_OFFSET64
 typedef struct dirent64 dirent_struct;
 #define my_alphasort alphasort64
@@ -924,12 +926,11 @@ void CFileBrowser::paintHead()
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0);
 
 #ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
-	snprintf(l_name, sizeof(l_name), "%s %s", CZapitClient::Utf8_to_Latin1(g_Locale->getText("filebrowser.head")).c_str(), name.c_str()); // ISO-8859-1
-	g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_TITLE]->RenderString(x+10,y+theight+1, width-11, l_name, COL_MENUHEAD); // ISO-8859-1
+	snprintf(l_name, sizeof(l_name), "%s %s", g_Locale->getText("filebrowser.head"), Latin1_to_UTF8(name).c_str()); // UTF-8
 #else
 	snprintf(l_name, sizeof(l_name), "%s %s", g_Locale->getText("filebrowser.head"), name.c_str()); // UTF-8
-	g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_TITLE]->RenderString(x+10,y+theight+1, width-11, l_name, COL_MENUHEAD, 0, true); // UTF-8
 #endif
+	g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_TITLE]->RenderString(x+10,y+theight+1, width-11, l_name, COL_MENUHEAD, 0, true); // UTF-8
 }
 
 //------------------------------------------------------------------------

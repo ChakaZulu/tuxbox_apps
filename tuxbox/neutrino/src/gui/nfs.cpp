@@ -48,6 +48,7 @@
 #include <global.h>
 #include <pthread.h>
 
+#include <zapit/client/zapittools.h>
 
 pthread_mutex_t g_mut;
 pthread_cond_t g_cond;
@@ -198,7 +199,7 @@ int CNFSMountGui::exec( CMenuTarget* parent, const std::string & actionKey )
 		parent->hide();
 		for(int i=0 ; i< 4; i++)
 		{
-			std::string a = CZapitClient::Utf8_to_Latin1(g_Locale->getText(g_settings.network_nfs_automount[i] ? "messagebox.yes" : "messagebox.no"));
+			std::string a = ZapitTools::UTF8_to_Latin1(g_Locale->getText(g_settings.network_nfs_automount[i] ? "messagebox.yes" : "messagebox.no"));
 			if(g_settings.network_nfs_type[i] == (int) NFS)
 			{
 				sprintf(m_entry[i],"NFS %s:%s -> %s auto: %4s",g_settings.network_nfs_ip[i].c_str(),g_settings.network_nfs_dir[i],
@@ -218,7 +219,7 @@ int CNFSMountGui::exec( CMenuTarget* parent, const std::string & actionKey )
 		returnval = menuEntry(actionKey[10]-'0');
 		for(int i=0 ; i< 4; i++)
 		{
-			std::string a = CZapitClient::Utf8_to_Latin1(g_Locale->getText(g_settings.network_nfs_automount[i] ? "messagebox.yes" : "messagebox.no"));
+			std::string a = ZapitTools::UTF8_to_Latin1(g_Locale->getText(g_settings.network_nfs_automount[i] ? "messagebox.yes" : "messagebox.no"));
 			if(g_settings.network_nfs_type[i] == (int) NFS)
 			{
 				sprintf(m_entry[i],"NFS %s:%s -> %s auto: %4s",g_settings.network_nfs_ip[i].c_str(),g_settings.network_nfs_dir[i],

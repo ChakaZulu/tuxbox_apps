@@ -49,6 +49,8 @@
 #include <global.h>
 #include <neutrino.h>
 
+#include <zapit/client/zapittools.h>
+
 /* for alexW images with old drivers: 
  * #define USE_VBI_INTERFACE 1
  */
@@ -514,7 +516,7 @@ int CGameList::exec(CMenuTarget* parent, const std::string & actionKey)
     gamelist.clear();
 
     game* tmp = new game();
-    tmp->name = CZapitClient::Utf8_to_Latin1(g_Locale->getText("menu.back"));
+    tmp->name = ZapitTools::UTF8_to_Latin1(g_Locale->getText("menu.back"));
     gamelist.push_back(tmp);
 
 	for(unsigned int count=0;count < (unsigned int)g_PluginList->getNumberOfPlugins();count++)

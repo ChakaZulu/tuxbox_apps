@@ -38,7 +38,7 @@
 #include <gui/widget/messagebox.h>
 #include <gui/channellist.h>
 
-#include <zapit/client/zapitclient.h> /* CZapitClient::Utf8_to_Latin1 */
+#include <zapit/client/zapittools.h> /* ZapitTools::UTF8_to_Latin1 */
 #include <driver/rcinput.h>
 #include <driver/screen_max.h>
 
@@ -418,7 +418,7 @@ EpgPlus::CChannelEntry::CChannelEntry ( const CChannelList::CChannel* channel , 
 		<< " "
 		<< channel->getName();
 
-	this->displayName  = CZapitClient::Utf8_to_Latin1(displayName.str());
+	this->displayName  = ZapitTools::UTF8_to_Latin1(displayName.str().c_str());
 	this->index = index;
 
 	this->frameBuffer = frameBuffer;

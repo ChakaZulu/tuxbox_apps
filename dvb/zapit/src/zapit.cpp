@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.346 2004/03/08 16:43:32 zwen Exp $
+ * $Id: zapit.cpp,v 1.347 2004/04/02 13:26:58 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -927,7 +927,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		CZapitMessages::commandExistsBouquet msgExistsBouquet;
 		CZapitMessages::responseGeneralInteger responseInteger;
 		CBasicServer::receive_data(connfd, &msgExistsBouquet, sizeof(msgExistsBouquet));
-		responseInteger.number = bouquetManager->existsBouquet(convert_to_UTF8(std::string(msgExistsBouquet.name)));
+		responseInteger.number = bouquetManager->existsBouquet(msgExistsBouquet.name);
 		CBasicServer::send_data(connfd, &responseInteger, sizeof(responseInteger)); // bouquet & channel number are already starting at 0!
 		break;
 	}
@@ -1618,7 +1618,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.346 2004/03/08 16:43:32 zwen Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.347 2004/04/02 13:26:58 thegoodguy Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {

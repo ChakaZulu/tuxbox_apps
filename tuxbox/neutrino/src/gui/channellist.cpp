@@ -56,6 +56,8 @@
 
 #include <gui/bouquetlist.h>
 #include <daemonc/remotecontrol.h>
+#include <zapit/client/zapittools.h>
+
 extern CBouquetList * bouquetList;       /* neutrino.cpp */
 extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
@@ -901,7 +903,7 @@ void CChannelList::paintItem(int pos)
 		if (!(chan->currentEvent.description.empty()))
 		{
 			char nameAndDescription[100];
-			snprintf(nameAndDescription, sizeof(nameAndDescription), "%s · ", CZapitClient::Utf8_to_Latin1(chan->name).c_str());
+			snprintf(nameAndDescription, sizeof(nameAndDescription), "%s · ", ZapitTools::UTF8_to_Latin1(chan->name.c_str()).c_str());
 
 			unsigned int ch_name_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getRenderWidth(nameAndDescription);
 			unsigned int ch_desc_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->getRenderWidth(chan->currentEvent.description);

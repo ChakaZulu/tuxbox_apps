@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.98 2004/03/06 10:41:42 thegoodguy Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.99 2004/04/02 13:26:57 thegoodguy Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -31,46 +31,7 @@
 
 #include <zapit/client/zapitclient.h>
 #include <zapit/client/msgtypes.h>
-
-std::string CZapitClient::Utf8_to_Latin1(const std::string & s)
-{
-	std::string r;
-
-	for (std::string::const_iterator it = s.begin(); it != s.end(); it++)
-	{
-		if (((*it) & 0xf0) == 0xf0)      // skip (can't be encoded in Latin1)
-		{
-			it++;
-			if (it == s.end())
-				return r;
-			it++;
-			if (it == s.end())
-				return r;
-			it++;
-			if (it == s.end())
-				return r;
-		}
-		else if (((*it) & 0xe0) == 0xe0) // skip (can't be encoded in Latin1)
-		{
-			it++;
-			if (it == s.end())
-				return r;
-			it++;
-			if (it == s.end())
-				return r;
-		}
-		else if (((*it) & 0xc0) == 0xc0)
-		{
-			char c = (((*it) & 3) << 6);
-			it++;
-			if (it == s.end())
-				return r;
-			r += (c | ((*it) & 0x3f));
-		}
-		else r += *it;
-	}
-	return r;
-}
+#include <zapit/client/zapittools.h>
 
 const unsigned char   CZapitClient::getVersion   () const
 {
@@ -327,7 +288,7 @@ void CZapitClient::getBouquets(BouquetList& bouquets, const bool emptyBouquetsTo
 		{
 			buffer[30] = (char) 0x00;
 			strncpy(buffer, response.name, 30);
-			strncpy(response.name, Utf8_to_Latin1(std::string(buffer)).c_str(), 30);
+			strncpy(response.name, ZapitTools::UTF8_to_Latin1(buffer).c_str(), 30);
 		}
 		bouquets.push_back(response);
 	}
@@ -358,7 +319,7 @@ bool CZapitClient::receive_channel_list(BouquetChannelList& channels, const bool
 			{
 				buffer[30] = (char) 0x00;
 				strncpy(buffer, response.name, 30);
-				strncpy(response.name, Utf8_to_Latin1(std::string(buffer)).c_str(), 30);
+				strncpy(response.name, ZapitTools::UTF8_to_Latin1(buffer).c_str(), 30);
 			}
 			channels.push_back(response);
 		}
@@ -695,12 +656,12 @@ void CZapitClient::renameBouquet(const unsigned int bouquet, const std::string &
 // -- check if Bouquet-Name exists
 // -- Return: Bouquet-ID  or  -1 == no Bouquet found
 /* bouquets are numbered starting at 0 */
-signed int CZapitClient::existsBouquet(const std::string & name)
+signed int CZapitClient::existsBouquet(const char * name)
 {
 	CZapitMessages::commandExistsBouquet msg;
 	CZapitMessages::responseGeneralInteger response;
 
-	strncpy( msg.name, name.c_str(), 30);
+	strncpy(msg.name, name, 30);
 
 	send(CZapitMessages::CMD_BQ_EXISTS_BOUQUET, (char*)&msg, sizeof(msg));
 

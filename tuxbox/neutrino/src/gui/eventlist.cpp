@@ -44,6 +44,8 @@
 #include <zapit/client/zapitclient.h> /* CZapitClient::Utf8_to_Latin1 */
 #include <driver/screen_max.h>
 
+#include <zapit/client/zapittools.h>
+
 #include <algorithm>
 
 // sort operators
@@ -115,7 +117,7 @@ void EventList::readEvents(const t_channel_id channel_id)
 	{
 		CChannelEvent evt;
 
-		evt.description = CZapitClient::Utf8_to_Latin1(g_Locale->getText("epglist.noevents"));
+		evt.description = ZapitTools::UTF8_to_Latin1(g_Locale->getText("epglist.noevents"));
 		evt.eventID = 0;
 		evtlist.push_back(evt);
 
