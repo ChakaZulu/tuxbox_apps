@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.48 2001/08/16 13:13:12 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.49 2001/08/17 14:33:15 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.49  2001/08/17 14:33:15  fnbrd
+//  Added a reopen of DMX connections after 15 timeouts to fix possible buffer overflows.
+//
 //  Revision 1.48  2001/08/16 13:13:12  fnbrd
 //  New commands.
 //
@@ -209,6 +212,9 @@
 
 // Timeout bei tcp/ip connections in s
 #define TIMEOUT_CONNECTIONS 2
+
+// Gibt die Anzahl Timeouts an, nach der die Verbindung zum DMX neu gestartet wird (wegen evtl. buffer overflow)
+#define RESTART_DMX_AFTER_TIMEOUTS 15
 
 // Wieviele Sekunden EPG gecached werden sollen
 static long secondsToCache=5*24*60L*60L; // 5 Tage
@@ -588,7 +594,6 @@ class DMX {
         fd=0;
       }
     }
-/*
     int stop(void) {
       if(!fd)
         return 1;
@@ -596,7 +601,6 @@ class DMX {
       closefd();
       return 0;
     }
-*/
     int pause(void); // calls lock at begin if pauseCounter = 0
     int unpause(void); // calls unlock at end  if pauseCounter = 1
     int change(void); // locks while changing
@@ -1024,7 +1028,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.48 2001/08/16 13:13:12 fnbrd Exp $\n"
+    "$Id: sectionsd.cpp,v 1.49 2001/08/17 14:33:15 fnbrd Exp $\n"
     "Current time: %s\n"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1633,15 +1637,24 @@ const unsigned timeoutInSeconds=2;
 
   try {
   dprintf("sdt-thread started.\n");
+  int timeoutsDMX=0;
   dmxSDT.lock();
   if(dmxSDT.start()) // -> unlock
     return 0;
   for(;;) {
+    if(timeoutsDMX>=RESTART_DMX_AFTER_TIMEOUTS) {
+      timeoutsDMX=0;
+      dmxSDT.stop(); // -> lock
+      if(dmxSDT.start()) // -> unlock
+        return 0;
+      dputs("dmxSDT restartet");
+    }
     dmxSDT.lock();
     int rc=dmxSDT.read((char *)&header, sizeof(header), timeoutInSeconds);
     if(!rc) {
       dmxSDT.unlock();
       dputs("dmxSDT.read timeout");
+      timeoutsDMX++;
       continue; // timeout -> kein EPG
     }
     else if(rc<0) {
@@ -1651,6 +1664,7 @@ const unsigned timeoutInSeconds=2;
       dmxSDT.unpause(); // -> unlock
       continue;
     }
+    timeoutsDMX=0;
     buf=new char[sizeof(header)+header.section_length-5];
     if(!buf) {
       dmxSDT.unlock();
@@ -1906,10 +1920,18 @@ const unsigned timeoutInSeconds=2;
 
   try {
   dprintf("eit-thread started.\n");
+  int timeoutsDMX=0;
   dmxEIT.lock();
   if(dmxEIT.start()) // -> unlock
     return 0;
   for(;;) {
+    if(timeoutsDMX>=RESTART_DMX_AFTER_TIMEOUTS) {
+      timeoutsDMX=0;
+      dmxEIT.stop(); // -> lock
+      if(dmxEIT.start()) // -> unlock
+        return 0;
+      dputs("dmxEIT restartet");
+    }
     time_t zeit=time(NULL);
     if(timeset) { // Nur wenn ne richtige Uhrzeit da ist
       if(dmxEIT.isScheduled) {
@@ -1924,6 +1946,7 @@ const unsigned timeoutInSeconds=2;
     if(!rc) {
       dmxEIT.unlock();
       dputs("dmxEIT.read timeout");
+      timeoutsDMX++;
       continue; // timeout -> kein EPG
     }
     else if(rc<0) {
@@ -1933,6 +1956,7 @@ const unsigned timeoutInSeconds=2;
       dmxEIT.unpause();
       continue;
     }
+    timeoutsDMX=0;
     buf=new char[sizeof(header)+header.section_length-5];
     if(!buf) {
       dmxEIT.closefd();
@@ -2127,7 +2151,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.48 2001/08/16 13:13:12 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.49 2001/08/17 14:33:15 fnbrd Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
