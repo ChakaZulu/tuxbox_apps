@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.206 2002/08/30 14:04:08 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.207 2002/08/30 23:48:13 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -112,8 +112,6 @@ int dmx_video_fd = -1;
 int vbi_fd = -1;
 
 /* channellists */
-std::map <uint32_t, uint32_t> allnumchannels_tv;
-std::map <uint32_t, uint32_t> allnumchannels_radio;
 std::map <std::string, uint32_t> allnamechannels_tv;
 std::map <std::string, uint32_t> allnamechannels_radio;
 
@@ -552,8 +550,6 @@ int prepare_channels ()
 	// for the case this function is NOT called for the first time (by main())
 	// we clear all cannel lists, they are refilled
 	// by LoadServices() and LoadBouquets()
-	allnumchannels_tv.clear();
-	allnumchannels_radio.clear();
 	allnamechannels_tv.clear();
 	allnamechannels_radio.clear();
 	transponders.clear();
@@ -593,8 +589,6 @@ int start_scan ()
 	namechans_radio.clear();
 	allchans_tv.clear();
 	allchans_radio.clear();
-	allnumchannels_tv.clear();
-	allnumchannels_radio.clear();
 	allnamechannels_tv.clear();
 	allnamechannels_radio.clear();
 	found_transponders = 0;
@@ -1130,7 +1124,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.206 2002/08/30 14:04:08 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.207 2002/08/30 23:48:13 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{

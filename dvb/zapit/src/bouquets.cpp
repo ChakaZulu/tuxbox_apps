@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.41 2002/08/30 15:51:44 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.42 2002/08/30 23:48:13 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -529,16 +529,12 @@ void CBouquetManager::makeRemainingChannelsBouquet( unsigned int tvChanNr, unsig
 void CBouquetManager::renumServices()
 {
 	map<unsigned int, CZapitChannel>::iterator     cit;
-	extern map<unsigned int, unsigned int> allnumchannels_tv;
 	extern map<std::string, unsigned int> allnamechannels_tv;
-	extern map<unsigned int, unsigned int> allnumchannels_radio;
 	extern map<std::string, unsigned int> allnamechannels_radio;
 	int nChNrRadio = 1;
 	int nChNrTV = 1;
 
-	allnumchannels_tv.clear();
 	allnamechannels_tv.clear();
-	allnumchannels_radio.clear();
 	allnamechannels_radio.clear();
 
 	for (unsigned int i=0; i<Bouquets.size(); i++)
@@ -548,8 +544,7 @@ void CBouquetManager::renumServices()
 			uint32_t OnidSid = Bouquets[i]->tvChannels[j]->getOnidSid();
 			Bouquets[i]->tvChannels[j]->setChannelNumber(nChNrTV);
 			cit = allchans_tv.find(OnidSid);
-			cit->second.setChannelNumber(nChNrTV);   // necessary ?
-			allnumchannels_tv.insert(std::pair<unsigned int,unsigned int>(nChNrTV++, OnidSid));
+			nChNrTV++;
 			allnamechannels_tv.insert(std::pair<std::string, unsigned int>(cit->second.getName(), OnidSid));
 		}
 		for (unsigned int j=0; j<Bouquets[i]->radioChannels.size(); j++)
@@ -557,8 +552,7 @@ void CBouquetManager::renumServices()
 			uint32_t OnidSid = Bouquets[i]->radioChannels[j]->getOnidSid();
 			Bouquets[i]->radioChannels[j]->setChannelNumber(nChNrRadio);
 			cit = allchans_radio.find(OnidSid);
-			cit->second.setChannelNumber(nChNrRadio);   // necessary ?
-			allnumchannels_radio.insert(std::pair<unsigned int, unsigned int>(nChNrRadio++, OnidSid));
+			nChNrRadio++;
 			allnamechannels_radio.insert(std::pair<std::string, unsigned int>(cit->second.getName(), OnidSid));
 		}
 	}
@@ -569,7 +563,7 @@ void CBouquetManager::renumServices()
 	{
 		cit = allchans_tv.find(nameit->second);
 		cit->second.setChannelNumber(nChNrTV);
-		allnumchannels_tv.insert(std::pair<unsigned int, unsigned int>(nChNrTV++, cit->second.getOnidSid()));
+		nChNrTV++;
 		allnamechannels_tv.insert(std::pair<std::string, unsigned int>(nameit->first, cit->second.getOnidSid()));
 	}
 	namechans_tv.clear();
@@ -578,7 +572,7 @@ void CBouquetManager::renumServices()
 	{
 		cit = allchans_radio.find(nameit->second);
 		cit->second.setChannelNumber(nChNrRadio);
-		allnumchannels_radio.insert(std::pair<unsigned int, unsigned int>(nChNrRadio++, cit->second.getOnidSid()));
+		nChNrRadio++;
 		allnamechannels_radio.insert(std::pair<std::string, unsigned int>(nameit->first, cit->second.getOnidSid()));
 	}
 	namechans_radio.clear();
