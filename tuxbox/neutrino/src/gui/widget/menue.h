@@ -112,11 +112,11 @@ class CMenuItem
 		{
 			return -1;
 		}
-		virtual int getHeight()
+		virtual int getHeight(void) const
 		{
 			return -1;
 		}
-		virtual bool isSelectable()
+		virtual bool isSelectable(void) const
 		{
 			return false;
 		}
@@ -153,7 +153,7 @@ class CMenuSeparator : public CMenuItem
 		CMenuSeparator(int Type=0, std::string Text="");
 
 		int paint(bool selected=false);
-		int getHeight()
+		int getHeight(void) const
 		{
 			return height;
 		}
@@ -173,12 +173,12 @@ class CMenuForwarder : public CMenuItem
 		CMenuForwarder(std::string Text, bool Active=true, const char * const Option=NULL, CMenuTarget* Target=NULL, std::string ActionKey="", bool Localizing= true, uint DirectKey= CRCInput::RC_nokey, std::string IconName= "");
 		CMenuForwarder(std::string Text, bool Active, const std::string &Option, CMenuTarget* Target=NULL, std::string ActionKey="", bool Localizing= true, uint DirectKey= CRCInput::RC_nokey, std::string IconName= "");
 		int paint(bool selected=false);
-		int getHeight()
+		int getHeight(void) const
 		{
 			return height;
 		}
 		int exec(CMenuTarget* parent);
-		bool isSelectable()
+		bool isSelectable(void) const
 		{
 			return active;
 		}
@@ -237,11 +237,11 @@ class CMenuOptionStringChooser : public CMenuItem
 
 		void addOption(std::string value);
 		int paint(bool selected);
-		int getHeight()
+		int getHeight(void) const
 		{
 			return height;
 		}
-		bool isSelectable()
+		bool isSelectable(void) const
 		{
 			return active;
 		}
