@@ -29,6 +29,7 @@
 #include <core/driver/streamwd.h>
 #include <core/driver/eavswitch.h>
 #include <core/dvb/dvbservice.h>
+#include <core/gdi/lcd.h>
 
 #include "enigma_main.h"
 #include "enigma_mainmenu.h"
@@ -106,10 +107,13 @@ int eZapStandby::eventHandler(const eWidgetEvent &event)
 		return 0;
 	case eWidgetEvent::execBegin:
 	{
+		eDBoxLCD::getInstance()->switchLCD(0);
 		eZapLCD *pLCD=eZapLCD::getInstance();
 		pLCD->lcdMain->hide();
 		pLCD->lcdStandby->show();
+
 		eAVSwitch::getInstance()->setInput(1);
+
 		break;
 	}
 	case eWidgetEvent::execDone:
@@ -118,6 +122,8 @@ int eZapStandby::eventHandler(const eWidgetEvent &event)
 		pLCD->lcdStandby->hide();
 		pLCD->lcdMain->show();
 		eAVSwitch::getInstance()->setInput(0);
+
+		eDBoxLCD::getInstance()->switchLCD(1);
 		break;
 	}
 	default:

@@ -39,6 +39,7 @@ class eDBoxLCD: public eLCD
 	static eDBoxLCD *instance;
 public:
 	static eDBoxLCD *getInstance();
+	int switchLCD(int state);
 	int setLCDParameter(int brightness, int contrast);
 	eDBoxLCD();
 	~eDBoxLCD();

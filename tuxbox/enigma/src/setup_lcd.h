@@ -5,17 +5,16 @@
 
 class eProgress;
 class eButton;
-class eNumber;
 
 class eZapLCDSetup: public eWindow
 {
-	eNumber *brightness, *contrast;
-	eProgress *p_brightness, *p_contrast;
-	eButton *bbrightness, *bcontrast;
+	eProgress *p_brightness, *p_contrast, *p_standby;
+	eButton *bbrightness, *bcontrast, *bstandby;
 	
 	int lcdbrightness;
 	int lcdcontrast;
-                	
+	int lcdstandby;
+	                	
 	eButton *ok, *abort;
 protected:
 	int eventHandler(const eWidgetEvent &event);

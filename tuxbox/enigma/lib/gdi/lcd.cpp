@@ -130,6 +130,26 @@ int eDBoxLCD::setLCDParameter(int brightness, int contrast)
 	return(0);
 }
 
+int eDBoxLCD::switchLCD(int state)
+{
+	int lcdbrightness, lcdcontrast, lcdstandby;
+
+	eConfig::getInstance()->getKey("/ezap/lcd/contrast", lcdcontrast);
+
+	if(state==0)
+	{
+		eConfig::getInstance()->getKey("/ezap/lcd/standby", lcdstandby);
+		setLCDParameter(lcdstandby, lcdcontrast);
+	}
+	else
+	{
+		eConfig::getInstance()->getKey("/ezap/lcd/brightness", lcdbrightness);
+		setLCDParameter(lcdbrightness, lcdcontrast);
+		
+	}
+	return(0);
+}
+
 eDBoxLCD::~eDBoxLCD()
 {
 	if (lcdfd>0)

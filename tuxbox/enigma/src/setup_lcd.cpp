@@ -14,6 +14,7 @@ void eZapLCDSetup::update()
 {
 	p_brightness->setPerc(lcdbrightness*100/LCD_BRIGHTNESS_MAX);
 	p_contrast->setPerc(lcdcontrast*100/LCD_CONTRAST_MAX);
+	p_standby->setPerc(lcdstandby*100/LCD_BRIGHTNESS_MAX);
 	eDBoxLCD::getInstance()->setLCDParameter(lcdbrightness, lcdcontrast);
 }
 
@@ -30,6 +31,12 @@ int eZapLCDSetup::eventHandler(const eWidgetEvent &event)
 				if(lcdbrightness>LCD_BRIGHTNESS_MAX)
 					lcdbrightness=LCD_BRIGHTNESS_MAX;
 			} else
+			if(this->focus==bstandby)
+			{
+				lcdstandby+=4;
+				if(lcdstandby>LCD_BRIGHTNESS_MAX)
+					lcdstandby=LCD_BRIGHTNESS_MAX;
+			} else
 			if(this->focus==bcontrast)
 			{
 				lcdcontrast+=2;
@@ -45,6 +52,12 @@ int eZapLCDSetup::eventHandler(const eWidgetEvent &event)
 				lcdbrightness-=4;
 				if(lcdbrightness<(LCD_BRIGHTNESS_MIN+1))
 					lcdbrightness=LCD_BRIGHTNESS_MIN+1;
+			} else
+			if(this->focus==bstandby)
+			{
+				lcdstandby-=4;
+				if(lcdstandby<LCD_BRIGHTNESS_MIN)
+					lcdstandby=LCD_BRIGHTNESS_MIN;
 			} else
 			if(this->focus==bcontrast)
 			{
@@ -67,45 +80,58 @@ eZapLCDSetup::eZapLCDSetup(): eWindow(0)
 {
 	setText("LCD Setup");
 	move(ePoint(150, 136));
-	resize(eSize(400, 250));
+	resize(eSize(400, 270));
 
 	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 	
+	lcdstandby=0;
+	
 	eConfig::getInstance()->getKey("/ezap/lcd/brightness", lcdbrightness);
 	eConfig::getInstance()->getKey("/ezap/lcd/contrast", lcdcontrast);
+	eConfig::getInstance()->getKey("/ezap/lcd/standby", lcdstandby);
 
 	bbrightness=new eButton(this);
 	bbrightness->setText(_("Brightness:"));
 	bbrightness->move(ePoint(20, 40));
-	bbrightness->resize(eSize(100, fd+4));
+	bbrightness->resize(eSize(110, fd+4));
 
 	bcontrast=new eButton(this);
 	bcontrast->setText(_("Contrast:"));
 	bcontrast->move(ePoint(20, 80));
-	bcontrast->resize(eSize(100, fd+4));
+	bcontrast->resize(eSize(110, fd+4));
+
+	bstandby=new eButton(this);
+	bstandby->setText(_("Standby:"));
+	bstandby->move(ePoint(20, 120));
+	bstandby->resize(eSize(110, fd+4));
 
 	p_brightness=new eProgress(this);
 	p_brightness->setName("brightness");
-	p_brightness->move(ePoint(130, 40));
-	p_brightness->resize(eSize(240, fd+4));
+	p_brightness->move(ePoint(140, 40));
+	p_brightness->resize(eSize(220, fd+4));
 
 	p_contrast=new eProgress(this);
 	p_contrast->setName("contrast");
-	p_contrast->move(ePoint(130, 80));
-	p_contrast->resize(eSize(240, fd+4));
+	p_contrast->move(ePoint(140, 80));
+	p_contrast->resize(eSize(220, fd+4));
+
+	p_standby=new eProgress(this);
+	p_standby->setName("standby");
+	p_standby->move(ePoint(140, 120));
+	p_standby->resize(eSize(220, fd+4));
 
 	update();
 
 	ok=new eButton(this);
 	ok->setText(_("[SAVE]"));
-	ok->move(ePoint(20, 125));
+	ok->move(ePoint(20, 155));
 	ok->resize(eSize(90, fd+4));
 	
 	CONNECT(ok->selected, eZapLCDSetup::okPressed);
 
 	abort=new eButton(this);
 	abort->setText(_("[ABORT]"));
-	abort->move(ePoint(140, 125));
+	abort->move(ePoint(140, 155));
 	abort->resize(eSize(100, fd+4));
 
 	CONNECT(abort->selected, eZapLCDSetup::abortPressed);
@@ -125,6 +151,7 @@ void eZapLCDSetup::okPressed()
 {
 	eConfig::getInstance()->setKey("/ezap/lcd/brightness", lcdbrightness);
 	eConfig::getInstance()->setKey("/ezap/lcd/contrast", lcdcontrast);
+	eConfig::getInstance()->setKey("/ezap/lcd/standby", lcdstandby);
 	close(1);
 }
 
