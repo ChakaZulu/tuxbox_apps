@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.96 2004/07/13 11:12:07 gagga Exp $
+  $Id: movieplayer.cpp,v 1.97 2004/07/18 00:54:52 thegoodguy Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -177,12 +177,11 @@ CMoviePlayerGui::CMoviePlayerGui()
 	Path_vlc += g_settings.streaming_server_startdir;
 	Path_vlc_settings = g_settings.streaming_server_startdir;
 
-	if (g_settings.filebrowser_denydirectoryleave == 1) {
-	    filebrowser = new CFileBrowser (Path_local);
-    }
-    else {
-        filebrowser = new CFileBrowser ();
-    }
+	if (g_settings.filebrowser_denydirectoryleave)
+		filebrowser = new CFileBrowser(Path_local.c_str());
+	else
+		filebrowser = new CFileBrowser();
+
 	filebrowser->Multi_Select = false;
 	filebrowser->Dirs_Selectable = false;
 	tsfilefilter.addFilter ("ts");
@@ -1801,7 +1800,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		else if (msg == CRCInput::RC_help)
  		{
 			std::string fullhelptext = g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP);
-			fullhelptext += "\nVersion: $Revision: 1.96 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			fullhelptext += "\nVersion: $Revision: 1.97 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -2004,7 +2003,7 @@ CMoviePlayerGui::PlayFile (void)
  		else if (msg == CRCInput::RC_help)
  		{
 			std::string fullhelptext = g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP);
-			fullhelptext += "\nVersion: $Revision: 1.96 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			fullhelptext += "\nVersion: $Revision: 1.97 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
  		else if (msg == CRCInput::RC_setup)

@@ -253,7 +253,7 @@ CFileBrowser::CFileBrowser()
 	base = "";
 }
 
-CFileBrowser::CFileBrowser(const std::string &_base)
+CFileBrowser::CFileBrowser(const char * const _base)
 {
 	commonInit();
 	base = _base;

@@ -98,14 +98,7 @@ CAudioPlayerGui::CAudioPlayerGui()
 		Path = g_settings.network_nfs_mp3dir;
 	else
 		Path = "/";
-	if (g_settings.filebrowser_denydirectoryleave == 1) {
-	    filebrowser = new CFileBrowser (Path);
-    }
-    else {
-        filebrowser = new CFileBrowser ();
-    }
-	filebrowser->Multi_Select = true;
-	filebrowser->Dirs_Selectable = true;
+
 	audiofilefilter.addFilter("cdr");
 	audiofilefilter.addFilter("mp3");
 	audiofilefilter.addFilter("m2a");
@@ -115,7 +108,6 @@ CAudioPlayerGui::CAudioPlayerGui()
 	audiofilefilter.addFilter("ogg");
 	audiofilefilter.addFilter("url");
 	audiofilefilter.addFilter("wav");
-	filebrowser->Filter = &audiofilefilter;
 }
 
 //------------------------------------------------------------------------
@@ -125,7 +117,6 @@ CAudioPlayerGui::~CAudioPlayerGui()
 	playlist.clear();
 	g_Zapit->setStandby (false);
 	g_Sectionsd->setPauseScanning (false);
-	delete filebrowser;
 }
 
 //------------------------------------------------------------------------
@@ -409,7 +400,7 @@ int CAudioPlayerGui::show()
 						current--;
 						//stop(); // Stop if song is deleted, next song will be startet automat.
 					}
-					if(selected > playlist.size()-1)
+					if(selected >= playlist.size())
 						selected = playlist.size()-1;
 					update=true;
 				}
@@ -421,14 +412,21 @@ int CAudioPlayerGui::show()
 		}
 		else if(msg==CRCInput::RC_green)
 		{
-			if(key_level==0)
+			if (key_level == 0)
 			{
+				CFileBrowser filebrowser((g_settings.filebrowser_denydirectoryleave) ? g_settings.network_nfs_mp3dir : "");
+
+				filebrowser.Multi_Select    = true;
+				filebrowser.Dirs_Selectable = true;
+				filebrowser.Filter          = &audiofilefilter;
+
 				hide();
-				if(filebrowser->exec(Path.c_str()))
+
+				if (filebrowser.exec(Path.c_str()))
 				{
-					Path=filebrowser->getCurrentDir();
-					CFileList::iterator files = filebrowser->getSelectedFiles()->begin();
-					for(; files != filebrowser->getSelectedFiles()->end();files++)
+					Path = filebrowser.getCurrentDir();
+					CFileList::iterator files = filebrowser.getSelectedFiles()->begin();
+					for(; files != filebrowser.getSelectedFiles()->end();files++)
 					{
 						if ((files->getType() == CFile::FILE_CDR) ||
 						    (files->getType() == CFile::FILE_OGG) ||

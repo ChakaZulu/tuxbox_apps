@@ -175,7 +175,7 @@ class CFileBrowser
 		CFileFilter *	Filter;
 
 		CFileBrowser();
-		CFileBrowser(const std::string &_base);
+		CFileBrowser(const char * const _base);
 		~CFileBrowser();
 
 		bool		exec(const char * const dirname);

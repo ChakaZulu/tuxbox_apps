@@ -82,7 +82,6 @@ class CAudioPlayerGui : public CMenuTarget
 
  private:
 	CFrameBuffer * frameBuffer;
-	CFileBrowser * filebrowser;
 	unsigned int   selected;
 	int            current;
 	unsigned int   liststart;

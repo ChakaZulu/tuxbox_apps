@@ -66,13 +66,11 @@ bool comparePictureByDate (const CPicture& a, const CPicture& b)
 	return a.Date < b.Date ;
 }
 //------------------------------------------------------------------------
+extern bool comparetolower(const char a, const char b); /* filebrowser.cpp */
+//------------------------------------------------------------------------
 bool comparePictureByFilename (const CPicture& a, const CPicture& b)
 {
-	std::string sa=a.Filename;
-	std::string sb=b.Filename;
-	std::transform(sa.begin(), sa.end(), sa.begin(), tolower);
-	std::transform(sb.begin(), sb.end(), sb.begin(), tolower);
-	return sa < sb;
+	return std::lexicographical_compare(a.Filename.begin(), a.Filename.end(), b.Filename.begin(), b.Filename.end(), comparetolower);
 }
 //------------------------------------------------------------------------
 
@@ -84,25 +82,17 @@ CPictureViewerGui::CPictureViewerGui()
 	selected = 0;
 	m_sort = FILENAME;
 	m_viewer = new CPictureViewer();
-    if(strlen(g_settings.network_nfs_picturedir)!=0)
-      Path = g_settings.network_nfs_picturedir;
+	if(strlen(g_settings.network_nfs_picturedir)!=0)
+		Path = g_settings.network_nfs_picturedir;
 	else
-      Path = "/";
-	if (g_settings.filebrowser_denydirectoryleave == 1) {
-	    m_filebrowser = new CFileBrowser (Path);
-    }
-    else {
-        m_filebrowser = new CFileBrowser ();
-    }
-	m_filebrowser->Multi_Select = true;
-	m_filebrowser->Dirs_Selectable = true;
+		Path = "/";
+
 	picture_filter.addFilter("png");
 	picture_filter.addFilter("bmp");
 	picture_filter.addFilter("jpg");
 	picture_filter.addFilter("jpeg");
 	picture_filter.addFilter("gif");
 	picture_filter.addFilter("crw");
-	m_filebrowser->Filter = &picture_filter;
 }
 
 //------------------------------------------------------------------------
@@ -110,7 +100,6 @@ CPictureViewerGui::CPictureViewerGui()
 CPictureViewerGui::~CPictureViewerGui()
 {
 	playlist.clear();
-	delete m_filebrowser;
 	delete m_viewer;
 }
 
@@ -331,14 +320,21 @@ int CPictureViewerGui::show()
 		}
 		else if(msg==CRCInput::RC_green)
 		{
-			if(m_state==MENU)
+			if (m_state == MENU)
 			{
+				CFileBrowser filebrowser((g_settings.filebrowser_denydirectoryleave) ? g_settings.network_nfs_picturedir : "");
+
+				filebrowser.Multi_Select    = true;
+				filebrowser.Dirs_Selectable = true;
+				filebrowser.Filter          = &picture_filter;
+
 				hide();
-				if(m_filebrowser->exec(Path.c_str()))
+
+				if (filebrowser.exec(Path.c_str()))
 				{
-					Path=m_filebrowser->getCurrentDir();
-					CFileList::iterator files = m_filebrowser->getSelectedFiles()->begin();
-					for(; files != m_filebrowser->getSelectedFiles()->end();files++)
+					Path = filebrowser.getCurrentDir();
+					CFileList::iterator files = filebrowser.getSelectedFiles()->begin();
+					for(; files != filebrowser.getSelectedFiles()->end();files++)
 					{
 						if(files->getType() == CFile::FILE_PICTURE)
 						{

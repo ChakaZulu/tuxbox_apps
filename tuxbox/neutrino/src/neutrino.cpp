@@ -740,7 +740,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.filebrowser_sortmethod = configfile.getInt32("filebrowser_sortmethod", 0);
 	if ((g_settings.filebrowser_sortmethod < 0) || (g_settings.filebrowser_sortmethod >= FILEBROWSER_NUMBER_OF_SORT_VARIANTS))
 		g_settings.filebrowser_sortmethod = 0;
-	g_settings.filebrowser_denydirectoryleave =  configfile.getInt32("filebrowser_denydirectoryleave", 0);
+	g_settings.filebrowser_denydirectoryleave = configfile.getBool("filebrowser_denydirectoryleave", false);
 		
 	if(configfile.getUnknownKeyQueryedFlag() && (erg==0))
 	{
@@ -1048,7 +1048,7 @@ void CNeutrinoApp::saveSetup()
 	//Filebrowser
 	configfile.setInt32("filebrowser_showrights", g_settings.filebrowser_showrights);
 	configfile.setInt32("filebrowser_sortmethod", g_settings.filebrowser_sortmethod);
-	configfile.setInt32("filebrowser_denydirectoryleave", g_settings.filebrowser_denydirectoryleave);
+	configfile.setBool("filebrowser_denydirectoryleave", g_settings.filebrowser_denydirectoryleave);
 
 	if (configfile.getModifiedFlag())
 	{
@@ -1723,8 +1723,8 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	miscSettings.addItem(m1);
 	
 	miscSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_FILEBROWSER_HEAD));
-	miscSettings.addItem(new CMenuOptionChooser(LOCALE_FILEBROWSER_SHOWRIGHTS , &g_settings.filebrowser_showrights, MESSAGEBOX_NO_YES_OPTIONS      , MESSAGEBOX_NO_YES_OPTION_COUNT      , true ));
-	miscSettings.addItem(new CMenuOptionChooser(LOCALE_FILEBROWSER_DENYDIRECTORYLEAVE , &g_settings.filebrowser_denydirectoryleave, MESSAGEBOX_NO_YES_OPTIONS      , MESSAGEBOX_NO_YES_OPTION_COUNT      , true ));
+	miscSettings.addItem(new CMenuOptionChooser(LOCALE_FILEBROWSER_SHOWRIGHTS        , &g_settings.filebrowser_showrights        , MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true ));
+	miscSettings.addItem(new CMenuOptionChooser(LOCALE_FILEBROWSER_DENYDIRECTORYLEAVE, &g_settings.filebrowser_denydirectoryleave, MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true ));
 
 }
 

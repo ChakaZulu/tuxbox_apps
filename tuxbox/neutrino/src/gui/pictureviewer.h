@@ -69,7 +69,6 @@ class CPictureViewerGui : public CMenuTarget
 		};
 	private:
 		CFrameBuffer		*frameBuffer;
-		CFileBrowser		*m_filebrowser;
 		CPictureViewer		*m_viewer;
 		unsigned int		selected;
 		unsigned int		liststart;
