@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.17 2002/10/28 19:50:27 dirch Exp $
+	$Id: webapi.cpp,v 1.18 2002/10/30 20:59:07 Zwen Exp $
 
 	License: GPL
 
@@ -184,13 +184,13 @@ string classname;
 	int BouquetNr = (request->ParameterList["bouquet"] != "")?atoi(request->ParameterList["bouquet"].c_str()):0;
 	bool javascript = (request->ParameterList["js"].compare("1") == 0);
 	request->SocketWriteLn("<HTML>\n<HEAD><title>DBOX2-Neutrino Bouquetliste</title><link rel=\"stylesheet\" TYPE=\"text/css\" HREF=\"../global.css\">");
-	request->SocketWrite("<SCRIPT LANGUAGE=\"JavaScript\">\n<!--\n function goto(url1, url2)\n{\n top.content.location.href = url1;\n top.bouquets.location.href = url2;\n }\n//-->\n </SCRIPT>\n</HEAD><BODY>");
+	request->SocketWrite("<SCRIPT LANGUAGE=\"JavaScript\">\n<!--\n function go_to(url1, url2)\n{\n top.content.location.href = url1;\n top.bouquets.location.href = url2;\n }\n//-->\n </SCRIPT>\n</HEAD><BODY>");
 
 	request->SocketWriteLn("<TABLE cellspacing=0 cellpadding=0 border=0 width=\"100%\">");
 	request->SocketWriteLn("<TR><TD><A CLASS=\"blist\" HREF=\"/bouquetedit/main\" TARGET=\"content\">Bouqueteditor</A></TD></TR>\n<TR><TD><HR></TD></TR>");
 	classname = (BouquetNr == 0)?" CLASS=\"bouquet\"":"";
 	if(javascript)
-		request->SocketWrite("<TR height=20"+ classname + "><TD><a CLASS=\"blist\" HREF=\"javascript:goto('/fb/channellist.dbox2#akt','/fb/bouquetlist.dbox2?bouquet=0')\">Alle Kanäle</a></TD></TR>\n");
+		request->SocketWrite("<TR height=20"+ classname + "><TD><a CLASS=\"blist\" HREF=\"javascript:go_to('/fb/channellist.dbox2#akt','/fb/bouquetlist.dbox2?bouquet=0')\">Alle Kanäle</a></TD></TR>\n");
 	else
 		request->SocketWrite("<TR height=20"+ classname + "><TD><a CLASS=\"blist\" HREF=\"/fb/channellist.dbox2#akt\" TARGET=\"content\">Alle Kanäle</a></TD></TR>\n");
 	request->SocketWrite("<TR><TD><HR></TD></TR>\n");
@@ -201,7 +201,7 @@ string classname;
 		{
 			classname = ((bouquet->bouquet_nr + 1) == (uint) BouquetNr)?" CLASS=\"bouquet\"":"";
 			if(javascript)
-				request->printf("<tr height=\"20\"%s><TD><NOBR><a CLASS=\"blist\" HREF=\"javascript:goto('/fb/channellist.dbox2?bouquet=%d#akt','/fb/bouquetlist.dbox2?js=1&bouquet=%d');\">%s</a></NOBR></TD></TR>\n",classname.c_str(),(bouquet->bouquet_nr + 1),(bouquet->bouquet_nr + 1),bouquet->name);
+				request->printf("<tr height=\"20\"%s><TD><NOBR><a CLASS=\"blist\" HREF=\"javascript:go_to('/fb/channellist.dbox2?bouquet=%d#akt','/fb/bouquetlist.dbox2?js=1&bouquet=%d');\">%s</a></NOBR></TD></TR>\n",classname.c_str(),(bouquet->bouquet_nr + 1),(bouquet->bouquet_nr + 1),bouquet->name);
 			else
 				request->printf("<tr height=\"20\"%s><TD><NOBR><a CLASS=\"blist\" HREF=\"/fb/channellist.dbox2?bouquet=%d#akt\" TARGET=\"content\">%s</a></NOBR></TD></TR>\n",classname.c_str(),(bouquet->bouquet_nr + 1),bouquet->name);
 		}
@@ -670,13 +670,13 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 	channellist.clear();
 
 	request->SendHTMLHeader("TIMERLISTE");
-	request->SocketWrite("<center>\n<TABLE border=0>\n<TR>\n");
-	request->SocketWrite("<TD CLASS=\"cepg\" align=\"center\"><b>Alarm-Zeit</TD>\n");
-	request->SocketWrite("<TD CLASS=\"cepg\" align=\"center\"><b>Stop-Zeit</TD>\n");
-	request->SocketWrite("<TD CLASS=\"cepg\" align=\"center\"><b>Wiederholung</TD>\n");
-	request->SocketWrite("<TD CLASS=\"cepg\" align=\"center\"><b>Typ</TD>\n");
-	request->SocketWrite("<TD CLASS=\"cepg\" align=\"center\"><b>Beschreibung</TD>\n");
-	request->SocketWrite("<TD CLASS=\"cepg\"><TD CLASS=\"cepg\"></TR>\n");
+	request->SocketWrite("<center>\n<TABLE CLASS=\"timer\" border=0>\n<TR>\n");
+	request->SocketWrite("<TD CLASS=\"ctimer\" align=\"center\"><b>Alarm-Zeit</TD>\n");
+	request->SocketWrite("<TD CLASS=\"ctimer\" align=\"center\"><b>Stop-Zeit</TD>\n");
+	request->SocketWrite("<TD CLASS=\"ctimer\" align=\"center\"><b>Wiederholung</TD>\n");
+	request->SocketWrite("<TD CLASS=\"ctimer\" align=\"center\"><b>Typ</TD>\n");
+	request->SocketWrite("<TD CLASS=\"ctimer\" align=\"center\"><b>Beschreibung</TD>\n");
+	request->SocketWrite("<TD CLASS=\"ctimer\"><TD CLASS=\"ctimer\"></TR>\n");
 
 	int i = 1;
 	char classname= 'a';
@@ -700,15 +700,15 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 			strftime(zStopTime,20,"%d.%m. %H:%M",stopTime);     
 		}
 
-		// request->printf("<TR><TD CLASS=\"%cepg\" align=center>%d</TD>",classname, timer->eventID);
-		request->printf("<TR><TD CLASS=\"%cepg\" align=center>%s</TD>", classname, zAlarmTime);
-		request->printf("<TD CLASS=\"%cepg\" align=center>%s</TD>", classname, zStopTime);
+		// request->printf("<TR><TD CLASS=\"%ctimer\" align=center>%d</TD>",classname, timer->eventID);
+		request->printf("<TR><TD CLASS=\"%ctimer\" align=center>%s</TD>", classname, zAlarmTime);
+		request->printf("<TD CLASS=\"%ctimer\" align=center>%s</TD>", classname, zStopTime);
 		char zRep[20+1];
 		Parent->timerEventRepeat2Str(timer->eventRepeat,zRep,sizeof(zRep)-1);
-		request->printf("<TD CLASS=\"%cepg\" align=center>%s</TD>", classname, zRep);
+		request->printf("<TD CLASS=\"%ctimer\" align=center>%s</TD>", classname, zRep);
 		char zType[20+1];
 		Parent->timerEventType2Str(timer->eventType,zType,sizeof(zType)-1);
-		request->printf("<TD CLASS=\"%cepg\" align=center>%s", classname, zType);
+		request->printf("<TD CLASS=\"%ctimer\" align=center>%s", classname, zType);
 
 		// Add Data
 		char zAddData[20+1]={0};
@@ -750,20 +750,20 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 
 			default:{}
 		}
-		request->printf("<TD CLASS=\"%cepg\" align=center>%s\n",
+		request->printf("<TD CLASS=\"%ctimer\" align=center>%s\n",
 			classname, zAddData);
-		request->printf("<TD CLASS=\"%cepg\" align=center><a HREF=\"/fb/timer.dbox2?action=remove&id=%d\">\n",
+		request->printf("<TD CLASS=\"%ctimer\" align=center><a HREF=\"/fb/timer.dbox2?action=remove&id=%d\">\n",
 			classname, timer->eventID);
 		request->SocketWrite("<img src=\"../images/remove.gif\" alt=\"Timer löschen\"></a></TD>\n");
-		request->printf("<TD CLASS=\"%cepg\" align=center><a HREF=\"/fb/timer.dbox2?action=modify-form&id=%d\">", 
+		request->printf("<TD CLASS=\"%ctimer\" align=center><a HREF=\"/fb/timer.dbox2?action=modify-form&id=%d\">", 
 			classname, timer->eventID);
-		request->printf("<img src=\"../images/modify.gif\" alt=\"Timer ändern\"></a><NOBR></TD><TR>\n");
+		request->printf("<img src=\"../images/modify.gif\" alt=\"Timer ändern\"></a><NOBR></TD></TR>\n");
 	}
 	classname = (i++&1)?'a':'b';
-	request->printf("<TR><TD CLASS=\"%cepg\" colspan=5></TD>\n<TD CLASS=\"%cepg\" align=\"center\">\n",classname,classname);
+	request->printf("<TR><TD CLASS=\"%ctimer\" colspan=5></TD>\n<TD CLASS=\"%ctimer\" align=\"center\">\n",classname,classname);
 	request->SocketWrite("<a HREF=\"javascript:location.reload()\">\n");
 	request->SocketWrite("<img src=\"../images/reload.gif\" alt=\"Aktualisieren\"></a></TD>\n");   
-	request->printf("<TD CLASS=\"%cepg\" align=\"center\">\n",classname);
+	request->printf("<TD CLASS=\"%ctimer\" align=\"center\">\n",classname);
 	request->SocketWrite("<a HREF=\"/fb/timer.dbox2?action=new-form\">\n");
 	request->SocketWrite("<img src=\"../images/new.gif\" alt=\"neuer Timer\"></a></TD></TR>\n");
 	request->SocketWrite("</TABLE>\n");

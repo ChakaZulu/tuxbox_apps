@@ -11,9 +11,9 @@
 <div align="left">Dieses Dokument soll eine kleine Übersicht über die derzeit
 in Neutrino implementierten Timer geben. Alle Timer werden im nicht flüchtigen
 Speicher gesichert, d.h. sie Überleben runterfahren, reset, Stromausfall,...
-Timer können entweder über die Timerliste in Neutrino oder über das Web-Infterace
-neu erstellt, geändert und gelöscht werden. Record (Aufnahme) und Zapt(Umschalte)
-- Timer können ebenfalls in der EPG-Anzeige erstellt werden.
+Timer können entweder über die Timerliste in Neutrino oder über das Web-Interface
+neu erstellt, geändert und gelöscht werden. Record (Aufnahme) und Zapit(Umschalt)
+- Timer können ebenfalls in der EPG-Anzeige EPG bezogen erstellt werden.
 <h3>Folgende Timertypen gibt es:</h3>
 </div>
 <div align="left"><b>ZAPTO </b>(Umschalt-Timer):<br>
@@ -26,11 +26,11 @@ Die Box bleibt nach dem Umschalten an.<br>
 Wie der Name schon sagt dient dieser Timer zur Zeitgesteuerten Aufnahme.
 Dabei hängt es vom konfigurierten Aufnahme-Device (derzeit VCR und Streamingserver)
 ab, was die Box genau tut. Auf jeden Fall wird der Kanal zur Aufnahmezeit
-umgeschalten. Bei Aufnahme-Timer ist es jetzt auch möglich eine APID (Kennung
+umgeschalten. Bei Aufnahme-Timern ist es jetzt auch möglich eine APID (Kennung
 eines Audiokanals) anzugeben (-&gt;Timer bearbeiten). <br>
 <br>
 Bei Streamingserver-Aufnahme bleibt die Box im Standby, wenn sie das vorher
-war. War sie nicht im Standby ist währen der Aufnahme nur das Umschalten
+war. War sie sich nicht im Standby befindet, ist während der Aufnahme nur das Umschalten
 auf andere Känale auf dem selben Transponder möglich.<br>
 <br>
 Bei VCR Aufnahme kommt die Box immer aus dem Standby. Während der Aufnahme
@@ -43,11 +43,11 @@ Der Scart-Mode und auch die Aufnahme können über die HOME-Taste abgebrochen
 werden. Der Timer verweilt dann noch bis zum Timer-Ende in der Timerliste
 und wird dann gelöscht, bzw. neu gestellt (periodische Timer)<br>
 <br>
-1 min. vor Aufnahmebeginn erfolgt eine visuelle Erinnerung.<br>
+Einige Minuten vor Aufnahmebeginn erfolgt eine visuelle Erinnerung.<br>
 Ein Record-Timer holt die Box aus dem Deep-Standby. Wennd er Record-Timer
 die Box aus dem Deep-Standby geholt hat, programmiert er nach Aufnahmeende
 automatisch einen Shutdown-Timer, wenn in den nächsten 10 min keine weitere
-Aufnahme(Record) oder eine Umschalten (Zapto) ansteht. <br>
+Aufnahme(Record) oder ein Umschalten (Zapto) ansteht. <br>
 <br>
 <b>SHUTDOWN</b> (Herunterfahren):<br>
 Dieser Timer fährt die Box in den Deep-Standby.<br>
@@ -90,13 +90,13 @@ Der Timer wird alle 4 Wochen am selben Wochentag zur selben Zeit ausgeführt.<br>
 MONTHLY (Monatlich):<br>
 Der Timer wird jeden Monat am selben Tag des Monats zur selben Zeit ausgeführt,<br>
 <br>
-WEEKDAYS (an best. Wochentagen) ***noch nicht implementiert***<br>
+WEEKDAYS (an best. Wochentagen)<br>
 Der Timer wird an bestimmten, vorher konfigurierten Wochentagen zur selben
 Zeit ausgeführt. (Bsp. Mo-Fr 20.00 Uhr)<br>
 <br>
 <h3>Timer und "Deep-Standby":</h3>
 Die Box wacht 3 min. vor Record oder Zapto-Timer aus dem Deep-Standby auf.
-Nach der Aufnahme wird die Box dann über einen autmatisch programmierten
+Nach der Aufnahme wird die Box dann über einen automatisch programmierten
 Shutdown-Timer wieder runtergefahren, wenn in den nächsten 10 min. keine
 weiter Aufnahme ansteht.<br>
 <br>

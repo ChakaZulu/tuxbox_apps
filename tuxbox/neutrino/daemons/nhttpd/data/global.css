@@ -123,3 +123,35 @@ a.elist:hover
 	font-size:9pt;
 	padding-left: 10px;
 }
+
+table.timer
+{
+        border-collapse: separated;
+	border-spacing: 0px 2px;    	
+}
+.atimer
+{
+	background-color:#E0E0E0;
+	font-weight:normal;
+	font-size:9pt;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+.btimer
+{
+	background-color:#C0C0C0;
+	font-weight:normal;
+	font-size:9pt;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+.ctimer
+{
+	background-color:#0099E0;
+	font-weight:normal;
+	font-size:9pt;
+	padding-left: 5px;
+	padding-right: 5px;
+}
