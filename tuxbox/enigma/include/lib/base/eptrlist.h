@@ -1,7 +1,6 @@
 #ifndef _E_PTRLIST_
 #define _E_PTRLIST_
 
-#include <lib/base/eerror.h>
 #include <list>
 #include <vector>
 

@@ -142,10 +142,18 @@ inline void DumpUnfreed()
 #endif // MEMLEAK_CHECK
 
 #else
-#define eDebug(fmt, args...)
-#define eDebugNoNewLine(fmt, args...)
-#define eWarning(fmt, args...)
-#define ASSERT(x)
+    inline void eDebug(const char* fmt, ...)
+    {
+    }
+
+    inline void eDebugNoNewLine(const char* fmt, ...)
+    {
+    }
+
+    inline void eWarning(const char* fmt, ...)
+    {
+    }
+    #define ASSERT(x) do { } while (0)
 #endif //DEBUG
 
 #endif // __E_ERROR__
