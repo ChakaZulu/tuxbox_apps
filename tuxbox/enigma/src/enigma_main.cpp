@@ -709,17 +709,32 @@ void eAudioSelector::addSubtitle(const PMTEntry *entry)
 	
 	eString description;
 	description.sprintf("PID %04x", entry->elementary_PID);
-	
+
+	// TODO : Support PIDs with more than on composition page_id..
+	// the Subtitling Descriptor is ready for this..
+	// at moment we use only the iso639 descriptor from the first entry
+	// in the entries list..
+
 	for (ePtrList<Descriptor>::const_iterator ii(entry->ES_info); ii != entry->ES_info.end(); ++ii)
 	{
 		switch (ii->Tag())
 		{
+/*
 		case DESCR_ISO639_LANGUAGE:
 			description=getISO639Description(((ISO639LanguageDescriptor*)*ii)->language_code);
+			break;*/
+		case DESCR_SUBTITLING:
+			SubtitlingDescriptor *descr = (SubtitlingDescriptor*)*ii;
+			if (descr->entries.size())
+			{
+				description=getISO639Description(descr->entries.front()->language_code);
+				goto end;
+			}
 			break;
 		}
+		
 	}
-	
+end:
 	new eListBoxEntryText(m_subtitles, description, (void*)entry );
 }
 
@@ -1983,7 +1998,10 @@ void eZapMain::setEIT(EIT *eit)
 
 				for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
 					if ( d->Tag()==DESCR_LINKAGE && ((LinkageDescriptor*)*d)->linkage_type==0xB0 )
+					{
 						subservicesel.clear();
+						break;
+					}
 
 				int cnt=0;
 				for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
@@ -5542,9 +5560,11 @@ void eZapMain::leaveService()
 	ButtonYellowDis->show();
 	ButtonYellowEn->hide();
 
+#ifndef DISABLE_FILE
 	if ( eDVB::getInstance()->recorder && eDVB::getInstance()->recorder->recRef.getServiceType() == 7 )
-		flags&=~(ENIGMA_NVOD|ENIGMA_AUDIO|ENIGMA_AUDIO_PS|ENIGMA_VIDEO);	
+		flags&=~(ENIGMA_NVOD|ENIGMA_AUDIO|ENIGMA_AUDIO_PS|ENIGMA_VIDEO);
 	else
+#endif
 		flags&=~(ENIGMA_NVOD|ENIGMA_SUBSERVICES|ENIGMA_AUDIO|ENIGMA_AUDIO_PS|ENIGMA_VIDEO);
 	
 	if (subtitle)
