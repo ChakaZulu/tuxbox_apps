@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.54 2003/11/27 00:32:05 homar Exp $
+ * $Id: frontend.cpp,v 1.55 2004/04/20 14:47:15 derget Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -503,6 +503,7 @@ int CFrontend::setParameters(TP_params *TP)
 		TP->feparams.u.qam.modulation = last_qam;
 
 	struct dvb_frontend_event event;
+	int tryagain = 0; //flame on derget for this 
 
 	do
 	{
@@ -511,6 +512,13 @@ int CFrontend::setParameters(TP_params *TP)
 			tuned = false;
 			setFrontend (&TP->feparams);
 			event = getEvent();	/* check if tuned */
+
+			if (!tuned && !tryagain)
+			{
+				tryagain = 1;
+				WARN("TUNE FAILED I TRY IT ONE TIME AGAIN");
+				continue;
+			}
 
 			if (do_auto_inversion && can_not_auto_inversion && !tuned)
 			{
