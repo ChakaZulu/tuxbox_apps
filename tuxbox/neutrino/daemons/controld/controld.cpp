@@ -87,7 +87,6 @@ int	philips_scart[7];
 int	philips_dvb[6];
 char aspectRatio;
 
-char BoxNames[4][10] = {"","Nokia", "Sagem", "Philips"};
 
 
 void sig_catch(int);
@@ -476,7 +475,7 @@ void switch_vcr( bool vcr_on)
 	if (vcr_on)
 	{
 		//turn to scart-input
-		printf("[controld]: switch to scart-input... (%s)\n", BoxNames[settings.boxtype]);
+		printf("[controld]: switch to scart-input... (%d)\n", settings.boxtype);
 		if (settings.boxtype == CControldClient::TUXBOX_MAKER_SAGEM)
 		{
 			routeVideo(sagem_scart[0], sagem_scart[1], sagem_scart[2], sagem_scart[3], sagem_scart[4], sagem_scart[5], sagem_scart[6]);
@@ -492,7 +491,7 @@ void switch_vcr( bool vcr_on)
 	}
 	else
 	{	//turn to dvb...
-		printf("[controld]: switch to dvb-input... (%s)\n", BoxNames[settings.boxtype]);
+		printf("[controld]: switch to dvb-input... (%d)\n", settings.boxtype);
 		if (settings.boxtype == CControldClient::TUXBOX_MAKER_SAGEM)
 		{
 			routeVideo( sagem_dvb[0], sagem_dvb[1], sagem_dvb[2], sagem_dvb[3], sagem_dvb[4], sagem_dvb[5], settings.videooutput);
@@ -817,7 +816,7 @@ int main(int argc, char **argv)
 {
 	CBasicServer controld_server;
 
-	printf("Controld  $Id: controld.cpp,v 1.95 2003/02/19 20:18:37 thegoodguy Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.96 2003/02/20 20:16:34 thegoodguy Exp $\n\n");
 
 	if (!controld_server.prepare(CONTROLD_UDS_NAME))
 		return -1;
