@@ -151,6 +151,14 @@ int get_signal(struct signal *signal_data, int fe_fd) {
   return 0;
 }
 
+int signal_changed(struct signal *a, struct signal *b)
+{
+	return ((a->ber != b->ber) ||
+		(a->snr != b->snr) ||
+	        (a->strength != b->strength) ||
+		(a->status != b->status));
+}
+
 void render_string(screen_t screen,int x, int y, char *string) {
   int x_count,y_count,pos;
   for(pos=0;string[pos]!=0;pos++)
@@ -358,6 +366,8 @@ int main(int argc, char **argv) {
     tv.tv_usec=10000;
 
     get_signal(&signal_quality,fe_fd);
+    if (!signal_changed(&signal_quality, &old_signal))
+	    continue;
     if (lcd) {
       draw_signal(&signal_quality,&old_signal,screen);
       draw_screen(screen,lcd_fd);
