@@ -3,6 +3,12 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.h,v $
+ * Revision 1.7  2005/02/26 10:23:49  lazyt
+ * workaround for corrupt mail-db
+ * add ADMIN=Y/N to conf (N to disable mail deletion via plugin)
+ * show versioninfo via "?" button
+ * limit display to last 100 mails (increase MAXMAIL if you need more)
+ *
  * Revision 1.6  2004/08/20 14:57:37  lazyt
  * add http-auth support for password protected webinterface
  *
@@ -48,7 +54,7 @@
 #define CFGPATH "/var/tuxbox/config/tuxmail/"
 #define CFGFILE "tuxmail.conf"
 #define SPMFILE "spamlist"
-#define SCKFILE "/tmp/tuxmaild.sock"
+#define SCKFILE "/tmp/tuxmaild.socket"
 #define LOGFILE "/tmp/tuxmaild.log"
 #define PIDFILE "/tmp/tuxmaild.pid"
 

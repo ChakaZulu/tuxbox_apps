@@ -3,6 +3,12 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.10  2005/02/26 10:23:48  lazyt
+ * workaround for corrupt mail-db
+ * add ADMIN=Y/N to conf (N to disable mail deletion via plugin)
+ * show versioninfo via "?" button
+ * limit display to last 100 mails (increase MAXMAIL if you need more)
+ *
  * Revision 1.9  2004/07/10 11:38:14  lazyt
  * use -DOLDFT for older FreeType versions
  * replaced all remove() with unlink()
@@ -35,7 +41,44 @@
 #include "tuxmail.h"
 
 /******************************************************************************
- * ControlDaemon (o=fail, 1=done)
+ * ReadConf
+ ******************************************************************************/
+
+void ReadConf()
+{
+	FILE *fd_conf;
+	char *ptr;
+	char line_buffer[256];
+
+	// open config
+
+		if(!(fd_conf = fopen(CFGPATH CFGFILE, "r")))
+		{
+			printf("TuxMail <Config not found, using defaults>\n");
+			return;
+		}
+
+	// read config
+
+		while(fgets(line_buffer, sizeof(line_buffer), fd_conf))
+		{
+			if((ptr = strstr(line_buffer, "ADMIN=")))
+			    sscanf(ptr + 6, "%c", &admin);
+		}
+
+		fclose(fd_conf);
+
+	// check config
+
+		if(admin != 'Y' && admin != 'N')
+		{
+			printf("TuxMail <ADMIN=%c invalid, set to \"Y\">\n", admin);
+			admin = 'Y';
+		}
+}
+
+/******************************************************************************
+ * ControlDaemon (0=fail, 1=done)
  ******************************************************************************/
 
 int ControlDaemon(int command)
@@ -83,16 +126,15 @@ int ControlDaemon(int command)
 	return 1;
 }
 
-#if HAVE_DVB_API_VERSION == 3
-
 /******************************************************************************
  * GetRCCode
  ******************************************************************************/
 
+#if HAVE_DVB_API_VERSION == 3
+
 int GetRCCode()
 {
 	static __u16 rc_last_key = KEY_RESERVED;
-	//get code
 
 	if(read(rc, &ev, sizeof(ev)) == sizeof(ev))
 	{
@@ -101,6 +143,7 @@ int GetRCCode()
 			if(ev.code != rc_last_key)
 			{
 				rc_last_key = ev.code;
+
 				switch(ev.code)
 				{
 					case KEY_UP:		rccode = RC_UP;
@@ -194,116 +237,110 @@ int GetRCCode()
 		}
 	}
 
-		return rccode;
+	return rccode;
 }
 
 #else
-
-/******************************************************************************
- * GetRCCode
- ******************************************************************************/
 
 int GetRCCode()
 {
 	static unsigned short LastKey = -1;
 
-	//get code
+	read(rc, &rccode, sizeof(rccode));
 
-		read(rc, &rccode, sizeof(rccode));
+	if(rccode != LastKey)
+	{
+		LastKey = rccode;
 
-		if(rccode != LastKey)
-		{
-			LastKey = rccode;
+		//translation required?
 
-			//translation required?
-
-				if((rccode & 0xFF00) == 0x5C00)
+			if((rccode & 0xFF00) == 0x5C00)
+			{
+				switch(rccode)
 				{
-					switch(rccode)
-					{
-						case RC1_UP:		rccode = RC_UP;
-									break;
+					case RC1_UP:		rccode = RC_UP;
+								break;
 
-						case RC1_DOWN:		rccode = RC_DOWN;
-									break;
+					case RC1_DOWN:		rccode = RC_DOWN;
+								break;
 
-						case RC1_LEFT:		rccode = RC_LEFT;
-									break;
+					case RC1_LEFT:		rccode = RC_LEFT;
+								break;
 
-						case RC1_RIGHT:		rccode = RC_RIGHT;
-									break;
+					case RC1_RIGHT:		rccode = RC_RIGHT;
+								break;
 
-						case RC1_OK:		rccode = RC_OK;
-									break;
+					case RC1_OK:		rccode = RC_OK;
+								break;
 
-						case RC1_0:		rccode = RC_0;
-									break;
+					case RC1_0:		rccode = RC_0;
+								break;
 
-						case RC1_1:		rccode = RC_1;
-									break;
+					case RC1_1:		rccode = RC_1;
+								break;
 
-						case RC1_2:		rccode = RC_2;
-									break;
+					case RC1_2:		rccode = RC_2;
+								break;
 
-						case RC1_3:		rccode = RC_3;
-									break;
+					case RC1_3:		rccode = RC_3;
+								break;
 
-						case RC1_4:		rccode = RC_4;
-									break;
+					case RC1_4:		rccode = RC_4;
+								break;
 
-						case RC1_5:		rccode = RC_5;
-									break;
+					case RC1_5:		rccode = RC_5;
+								break;
 
-						case RC1_6:		rccode = RC_6;
-									break;
+					case RC1_6:		rccode = RC_6;
+								break;
 
-						case RC1_7:		rccode = RC_7;
-									break;
+					case RC1_7:		rccode = RC_7;
+								break;
 
-						case RC1_8:		rccode = RC_8;
-									break;
+					case RC1_8:		rccode = RC_8;
+								break;
 
-						case RC1_9:		rccode = RC_9;
-									break;
+					case RC1_9:		rccode = RC_9;
+								break;
 
-						case RC1_RED:		rccode = RC_RED;
-									break;
+					case RC1_RED:		rccode = RC_RED;
+								break;
 
-						case RC1_GREEN:		rccode = RC_GREEN;
-									break;
+					case RC1_GREEN:		rccode = RC_GREEN;
+								break;
 
-						case RC1_YELLOW:	rccode = RC_YELLOW;
-									break;
+					case RC1_YELLOW:	rccode = RC_YELLOW;
+								break;
 
-						case RC1_BLUE:		rccode = RC_BLUE;
-									break;
+					case RC1_BLUE:		rccode = RC_BLUE;
+								break;
 
-						case RC1_PLUS:		rccode = RC_PLUS;
-									break;
+					case RC1_PLUS:		rccode = RC_PLUS;
+								break;
 
-						case RC1_MINUS:		rccode = RC_MINUS;
-									break;
+					case RC1_MINUS:		rccode = RC_MINUS;
+								break;
 
-						case RC1_MUTE:		rccode = RC_MUTE;
-									break;
+					case RC1_MUTE:		rccode = RC_MUTE;
+								break;
 
-						case RC1_HELP:		rccode = RC_HELP;
-									break;
+					case RC1_HELP:		rccode = RC_HELP;
+								break;
 
-						case RC1_DBOX:		rccode = RC_DBOX;
-									break;
+					case RC1_DBOX:		rccode = RC_DBOX;
+								break;
 
-						case RC1_HOME:		rccode = RC_HOME;
-									break;
+					case RC1_HOME:		rccode = RC_HOME;
+								break;
 
-						case RC1_STANDBY:	rccode = RC_STANDBY;
-					}
+					case RC1_STANDBY:	rccode = RC_STANDBY;
 				}
-				else rccode &= 0x003F;
-		}
-		else rccode = -1;
+			}
+			else rccode &= 0x003F;
+	}
+	else rccode = -1;
 
-		return rccode;
+	return rccode;
 }
 
 #endif
@@ -588,6 +625,8 @@ void RenderCircle(int sy, char type)
 
 void ShowMessage(int message)
 {
+    char info[32];
+
 	//layout
 
 		RenderBox(155, 178, 464, 327, FILL, BLUE1);
@@ -596,7 +635,8 @@ void ShowMessage(int message)
 
 	//message
 
-		RenderString("TuxMailD Statusinfo", 157, 213, 306, CENTER, BIG, ORANGE);
+		if(message != INFO)
+		    RenderString("TuxMail Statusinfo", 157, 213, 306, CENTER, BIG, ORANGE);
 
 		switch(message)
 		{
@@ -625,6 +665,11 @@ void ShowMessage(int message)
 					break;
 
 			case SPAMFAIL:	RenderString("Update fehlgeschlagen!", 157, 265, 306, CENTER, BIG, WHITE);
+					break;
+
+			case INFO:	sprintf(info, "TuxMail Version %s", versioninfo);
+					RenderString(info, 157, 213, 306, CENTER, BIG, ORANGE);
+					RenderString("(C) 2003-2005 Thomas \"LazyT\" Loewe", 157, 265, 306, CENTER, SMALL, WHITE);
 		}
 
 		RenderBox(285, 286, 334, 310, FILL, BLUE2);
@@ -735,18 +780,44 @@ void FillDB(int account)
 
 		while(fgets(linebuffer, sizeof(linebuffer), fd_msg))
 		{
+			char *entrystart;
+
 			maildb[account].mails++;
 
-			strncpy(maildb[account].mailinfo[line].type, (char*)strtok(linebuffer, "|"), sizeof(maildb[account].mailinfo[line].type));
-			strncpy(maildb[account].mailinfo[line].uid, (char*)strtok(NULL, "|"), sizeof(maildb[account].mailinfo[line].uid));
-			strncpy(maildb[account].mailinfo[line].date, (char*)strtok(NULL, "|"), sizeof(maildb[account].mailinfo[line].date));
-			strncpy(maildb[account].mailinfo[line].time, (char*)strtok(NULL, "|"), sizeof(maildb[account].mailinfo[line].time));
-			strncpy(maildb[account].mailinfo[line].from, (char*)strtok(NULL, "|"), sizeof(maildb[account].mailinfo[line].from));
-			strncpy(maildb[account].mailinfo[line].subj, (char*)strtok(NULL, "|"), sizeof(maildb[account].mailinfo[line].subj));
+			if((entrystart = strtok(linebuffer, "|")))
+			    strncpy(maildb[account].mailinfo[line].type, entrystart, sizeof(maildb[account].mailinfo[line].type));
+			else
+			    strcpy(maildb[account].mailinfo[line].type, "?");
+
+			if((entrystart = strtok(NULL, "|")))
+			    strncpy(maildb[account].mailinfo[line].uid, entrystart, sizeof(maildb[account].mailinfo[line].uid));
+			else
+			    strcpy(maildb[account].mailinfo[line].uid, "?");
+
+			if((entrystart = strtok(NULL, "|")))
+			    strncpy(maildb[account].mailinfo[line].date, entrystart, sizeof(maildb[account].mailinfo[line].date));
+			else
+			    strcpy(maildb[account].mailinfo[line].date, "??.???");
+
+			if((entrystart = strtok(NULL, "|")))
+			    strncpy(maildb[account].mailinfo[line].time, entrystart, sizeof(maildb[account].mailinfo[line].time));
+			else
+			    strcpy(maildb[account].mailinfo[line].time, "??:??");
+
+			if((entrystart = strtok(NULL, "|")))
+			    strncpy(maildb[account].mailinfo[line].from, entrystart, sizeof(maildb[account].mailinfo[line].from));
+			else
+			    strcpy(maildb[account].mailinfo[line].from, "TuxMail: DB-Eintrag defekt!");
+
+			if((entrystart = strtok(NULL, "|")))
+			    strncpy(maildb[account].mailinfo[line].subj, entrystart, sizeof(maildb[account].mailinfo[line].subj));
+			else
+			    strcpy(maildb[account].mailinfo[line].subj, "TuxMail: DB-Eintrag defekt!");
 
 			maildb[account].mailinfo[line].save[0] = maildb[account].mailinfo[line].type[0];
 
-			line++;
+			if(++line >= MAXMAIL)
+			    break;
 		}
 
 	fclose(fd_msg);
@@ -851,7 +922,7 @@ int Add2SpamList(int account, int mailindex)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.9 $", versioninfo[12];
+	char cvs_revision[] = "$Revision: 1.10 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
@@ -881,6 +952,10 @@ void plugin_exec(PluginParam *par)
 			printf("TuxMail <missing Param(s)>\n");
 			return;
 		}
+
+	// read config
+
+	    ReadConf();
 
 	//init framebuffer
 
@@ -1094,41 +1169,47 @@ void plugin_exec(PluginParam *par)
 						}
 						break;
 
-				case RC_OK:	if(maildb[account].mails)
+				case RC_OK:	if(admin == 'Y')
 						{
-							if(maildb[account].mailinfo[mailindex].type[0] != 'D') maildb[account].mailinfo[mailindex].type[0] = 'D';
-							else
-							{
-								maildb[account].mailinfo[mailindex].type[0] = maildb[account].mailinfo[mailindex].save[0];
-								if(maildb[account].mailinfo[mailindex].type[0] == 'D') maildb[account].mailinfo[mailindex].type[0] = 'O';
-							}
+						    if(maildb[account].mails)
+						    {
+							    if(maildb[account].mailinfo[mailindex].type[0] != 'D') maildb[account].mailinfo[mailindex].type[0] = 'D';
+							    else
+							    {
+								    maildb[account].mailinfo[mailindex].type[0] = maildb[account].mailinfo[mailindex].save[0];
+								    if(maildb[account].mailinfo[mailindex].type[0] == 'D') maildb[account].mailinfo[mailindex].type[0] = 'O';
+							    }
+						    }
 						}
 						break;
 
-				case RC_RED:	if(maildb[account].mark_green && maildb[account].mark_yellow) maildb[account].mark_red = 1;
-						else if(!maildb[account].mark_green && !maildb[account].mark_yellow) maildb[account].mark_red = 0;
-						maildb[account].mark_red++;
-						maildb[account].mark_red &= 1;
-
-						if(maildb[account].mark_red)
+				case RC_RED:	if(admin == 'Y')
 						{
-							for(loop = 0;loop < maildb[account].mails; loop++)
-							{
-								maildb[account].mailinfo[loop].type[0] = 'D';
-							}
+						    if(maildb[account].mark_green && maildb[account].mark_yellow) maildb[account].mark_red = 1;
+						    else if(!maildb[account].mark_green && !maildb[account].mark_yellow) maildb[account].mark_red = 0;
+						    maildb[account].mark_red++;
+						    maildb[account].mark_red &= 1;
 
-							maildb[account].mark_green = 1;
-							maildb[account].mark_yellow = 1;
-						}
-						else
-						{
-							for(loop = 0;loop < maildb[account].mails; loop++)
-							{
-								maildb[account].mailinfo[loop].type[0] = maildb[account].mailinfo[loop].save[0];
-							}
+						    if(maildb[account].mark_red)
+						    {
+							    for(loop = 0;loop < maildb[account].mails; loop++)
+							    {
+								    maildb[account].mailinfo[loop].type[0] = 'D';
+							    }
 
-							maildb[account].mark_green = 0;
-							maildb[account].mark_yellow = 0;
+							    maildb[account].mark_green = 1;
+							    maildb[account].mark_yellow = 1;
+						    }
+						    else
+						    {
+							    for(loop = 0;loop < maildb[account].mails; loop++)
+							    {
+								    maildb[account].mailinfo[loop].type[0] = maildb[account].mailinfo[loop].save[0];
+							    }
+
+							    maildb[account].mark_green = 0;
+							    maildb[account].mark_yellow = 0;
+						    }
 						}
 						break;
 
@@ -1216,6 +1297,9 @@ void plugin_exec(PluginParam *par)
 							fclose(fopen(RUNFILE, "w"));
 							ShowMessage(BOOTON);
 						}
+						break;
+
+				case RC_HELP:	ShowMessage(INFO);
 						break;
 
 				default:	continue;

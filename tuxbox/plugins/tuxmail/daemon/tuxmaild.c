@@ -3,6 +3,12 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.10  2005/02/26 10:23:49  lazyt
+ * workaround for corrupt mail-db
+ * add ADMIN=Y/N to conf (N to disable mail deletion via plugin)
+ * show versioninfo via "?" button
+ * limit display to last 100 mails (increase MAXMAIL if you need more)
+ *
  * Revision 1.9  2004/08/20 14:57:37  lazyt
  * add http-auth support for password protected webinterface
  *
@@ -74,6 +80,7 @@ int ReadConf()
 			fprintf(fd_conf, "SAVEDB=Y\n\n");
 			fprintf(fd_conf, "AUDIO=Y\n");
 			fprintf(fd_conf, "VIDEO=1\n\n");
+			fprintf(fd_conf, "ADMIN=Y\n\n");
 			fprintf(fd_conf, "WEBPORT=80\n");
 			fprintf(fd_conf, "WEBUSER=\n");
 			fprintf(fd_conf, "WEBPASS=\n\n");
@@ -1038,7 +1045,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.9 $", versioninfo[12];
+	char cvs_revision[] = "$Revision: 1.10 $", versioninfo[12];
 	int account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
@@ -1104,25 +1111,25 @@ int main(int argc, char **argv)
 
 		if(signal(SIGTERM, SigHandler) == SIG_ERR)
 		{
-			printf("TuxMailD <Installation of Signalhandler failed>\n");
+			printf("TuxMailD <Installation of Signalhandler for TERM failed>\n");
 			return -1;
 		}
 
 		if(signal(SIGHUP, SigHandler) == SIG_ERR)
 		{
-			printf("TuxMailD <Installation of Signalhandler failed>\n");
+			printf("TuxMailD <Installation of Signalhandler for HUP failed>\n");
 			return -1;
 		}
 
 		if(signal(SIGUSR1, SigHandler) == SIG_ERR)
 		{
-			printf("TuxMailD <Installation of Signalhandler failed>\n");
+			printf("TuxMailD <Installation of Signalhandler for USR1 failed>\n");
 			return -1;
 		}
 
 		if(signal(SIGUSR2, SigHandler) == SIG_ERR)
 		{
-			printf("TuxMailD <Installation of Signalhandler failed>\n");
+			printf("TuxMailD <Installation of Signalhandler for USR2 failed>\n");
 			return -1;
 		}
 

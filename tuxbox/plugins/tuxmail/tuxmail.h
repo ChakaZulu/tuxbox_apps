@@ -3,6 +3,12 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.h,v $
+ * Revision 1.6  2005/02/26 10:23:48  lazyt
+ * workaround for corrupt mail-db
+ * add ADMIN=Y/N to conf (N to disable mail deletion via plugin)
+ * show versioninfo via "?" button
+ * limit display to last 100 mails (increase MAXMAIL if you need more)
+ *
  * Revision 1.5  2004/07/10 11:38:14  lazyt
  * use -DOLDFT for older FreeType versions
  * replaced all remove() with unlink()
@@ -49,10 +55,12 @@
 
 #include <plugin.h>
 
-#define SCKFILE "/tmp/tuxmaild.sock"
+#define SCKFILE "/tmp/tuxmaild.socket"
 #define RUNFILE "/var/etc/.tuxmaild"
 #define CFGPATH "/var/tuxbox/config/tuxmail/"
+#define CFGFILE "tuxmail.conf"
 #define SPMFILE "spamlist"
+#define MAXMAIL 100
 
 //rc codes
 
@@ -134,11 +142,17 @@ FT_Face			face;
 FT_UInt			prev_glyphindex;
 FT_Bool			use_kerning;
 
+char versioninfo[12];
+
+// config
+
+char admin = 'Y';
+
 // mail database
 
 struct mi
 {
-	char type[2];	/* N=new, O=old, D=del*/
+	char type[2];	/* N=new, O=old, D=del */
 	char save[2];	/* save type for restore */
 	char uid[80];
 	char date[8];	/* 01.Jan */
@@ -158,7 +172,7 @@ struct
 	char time[6];	/* 00:00 */
 	char name[32];
 	char status[8];	/* 000/000 */
-	struct mi mailinfo[1000];
+	struct mi mailinfo[MAXMAIL];
 
 }maildb[10];
 
@@ -174,7 +188,7 @@ enum {GET_STATUS, SET_STATUS, RELOAD_SPAMLIST};
 
 enum {FILL, GRID};
 enum {TRANSP, WHITE, BLUE0, BLUE1, BLUE2, ORANGE, GREEN, YELLOW, RED};
-enum {NODAEMON, STARTDONE, STARTFAIL, STOPDONE, STOPFAIL, BOOTON, BOOTOFF, ADD2SPAM, SPAMFAIL};
+enum {NODAEMON, STARTDONE, STARTFAIL, STOPDONE, STOPFAIL, BOOTON, BOOTOFF, ADD2SPAM, SPAMFAIL, INFO};
 
 unsigned char *lfb = 0, *lbb = 0;
 
