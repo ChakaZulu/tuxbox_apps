@@ -4,7 +4,7 @@
 	Movieplayer (c) 2003 by gagga
 	Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-        $Id: movieplayer.cpp,v 1.28 2003/08/27 19:30:35 zwen Exp $
+        $Id: movieplayer.cpp,v 1.29 2003/08/28 12:35:13 alexw Exp $
 
 	Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -45,7 +45,6 @@
 */
 #include <config.h>
 #if HAVE_DVB_API_VERSION >= 3
-#undef _FILE_OFFSET_BITS
 #include <global.h>
 #include <neutrino.h>
 

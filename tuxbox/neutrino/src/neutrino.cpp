@@ -31,7 +31,6 @@
 */
 
 #include <config.h>
-#undef _FILE_OFFSET_BITS
 
 #define NEUTRINO_CPP
 
