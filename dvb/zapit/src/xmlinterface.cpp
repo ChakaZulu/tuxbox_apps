@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.13 2002/11/25 21:26:18 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.14 2002/11/26 09:43:46 thegoodguy Exp $
  *
  * xmlinterface for zapit - d-box2 linux project
  *
@@ -91,15 +91,33 @@ std::string Utf8_to_Latin1(const std::string s)
 	for (std::string::const_iterator it = s.begin(); it != s.end(); it++)
 	{
 		if (((*it) & 0xf0) == 0xf0)      // skip (can't be encoded in Latin1)
-			it += 3;
+		{
+			it++;
+			if (it == s.end())
+				return r;
+			it++;
+			if (it == s.end())
+				return r;
+			it++;
+			if (it == s.end())
+				return r;
+		}
 		else if (((*it) & 0xe0) == 0xe0) // skip (can't be encoded in Latin1)
-			it += 2;
+		{
+			it++;
+			if (it == s.end())
+				return r;
+			it++;
+			if (it == s.end())
+				return r;
+		}
 		else if (((*it) & 0xc0) == 0xc0)
 		{
 			char c = (((*it) & 3) << 6);
 			it++;
-			if (it != s.end())
-				r += (c | ((*it) & 0x3f));
+			if (it == s.end())
+				return r;
+			r += (c | ((*it) & 0x3f));
 		}
 		else r += *it;
 	}
