@@ -1,9 +1,12 @@
 #ifndef EVENTLIST_HPP
 #define EVENTLIST_HPP
 //
-// $Id: eventlist.h,v 1.4 2001/09/18 20:20:26 field Exp $
+// $Id: eventlist.h,v 1.5 2001/09/20 11:55:58 fnbrd Exp $
 //
 // $Log: eventlist.h,v $
+// Revision 1.5  2001/09/20 11:55:58  fnbrd
+// removed warning.
+//
 // Revision 1.4  2001/09/18 20:20:26  field
 // Eventlist in den Infov. verschoben (gelber Knopf), Infov.-Anzeige auf Knoepfe
 // vorbereitet
@@ -46,7 +49,7 @@ class EventList
     void removeAllEvents(void);
     void readEvents(const std::string& channelname); // I really don't like handling names
     unsigned int		selected;
-    int                 current_event;
+    unsigned int                current_event;
     unsigned int		liststart;
     unsigned int		listmaxshow;
     unsigned int		numwidth;
@@ -62,7 +65,7 @@ class EventList
     int 			x;
     int 			y;
 
-    void paintItem(int pos);
+    void paintItem(unsigned pos);
     void paint();
     void paintHead();
     void hide();

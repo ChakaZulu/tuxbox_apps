@@ -1,7 +1,10 @@
 //
-// $Id: eventlist.cpp,v 1.8 2001/09/20 00:36:32 field Exp $
+// $Id: eventlist.cpp,v 1.9 2001/09/20 11:55:58 fnbrd Exp $
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.9  2001/09/20 11:55:58  fnbrd
+// removed warning.
+//
 // Revision 1.8  2001/09/20 00:36:32  field
 // epg mit zaopit zum grossteil auf onid & s_id umgestellt
 //
@@ -76,7 +79,7 @@ void EventList::readEvents(const std::string& channelname)
   }
 
     removeAllEvents(); // Alle gespeicherten Events loeschen
-    current_event = -1;
+    current_event = (unsigned)-1;
 
     if ( resp.dataLength>0 )
     {
@@ -147,7 +150,7 @@ void EventList::readEvents(const std::string& channelname)
     }
     close(sock_fd);
 
-    if ( current_event == -1 )
+    if ( current_event == (unsigned)-1 )
     {
         event* evt = new event();
 
@@ -272,7 +275,7 @@ void EventList::hide()
 	g_FrameBuffer->paintBackgroundBoxRel(x,y, width,height);
 }
 
-void EventList::paintItem(int pos)
+void EventList::paintItem(unsigned int pos)
 {
     int color;
 	int ypos = y+ theight+0 + pos*fheight;
