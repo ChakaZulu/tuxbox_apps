@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_setup.cpp,v 1.39 2003/09/07 00:03:56 ghostrider Exp $
+ * $Id: enigma_setup.cpp,v 1.40 2003/09/14 15:18:16 ghostrider Exp $
  */
 
 #include <enigma_setup.h>
@@ -31,7 +31,6 @@
 #include <enigma_scan.h>
 #include <setup_extra.h>
 #include <parentallock.h>
-#include <setup_harddisk.h>
 
 eZapSetup::eZapSetup()
 	:eSetupWindow(_("Setup"), 10, 400)
@@ -45,10 +44,6 @@ eZapSetup::eZapSetup()
 #ifndef DISABLE_CI
 	if ( eSystemInfo::getInstance()->hasCI() )
 		CONNECT((new eListBoxEntryMenu(&list, _("Common Interface"), eString().sprintf("(%d) %s", ++entry, _("open common interface menu")) ))->selected, eZapSetup::common_interface);
-#endif
-#ifndef DISABLE_FILE
-	if ( eSystemInfo::getInstance()->hasHDD() )
-		CONNECT((new eListBoxEntryMenu(&list, _("Harddisc Setup"), eString().sprintf("(%d) %s", ++entry, _("open harddisc setup")) ))->selected, eZapSetup::harddisc_setup);
 #endif
 	CONNECT((new eListBoxEntryMenu(&list, _("Parental Lock"), eString().sprintf("(%d) %s", ++entry, _("open parental setup")) ))->selected, eZapSetup::parental_lock );
 	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
@@ -106,30 +101,6 @@ void eZapSetup::common_interface()
 	ci.show();
 	ci.exec();
 	ci.hide();
-	show();
-}
-#endif
-
-#ifndef DISABLE_FILE
-void eZapSetup::harddisc_setup()
-{
-	hide();
-	eHarddiskSetup setup;
-#ifndef DISABLE_LCD
-	setup.setLCD(LCDTitle, LCDElement);
-#endif
-	if (!setup.getNr())
-	{
-		eMessageBox msg(_("sorry, no harddisks found!"), _("Harddisk setup..."));
-		msg.show();
-		msg.exec();
-		msg.hide();
-	} else
-	{
-		setup.show();
-		setup.exec();
-		setup.hide();
-	}
 	show();
 }
 #endif

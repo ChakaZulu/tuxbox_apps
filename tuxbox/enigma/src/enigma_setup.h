@@ -12,9 +12,6 @@ private:
 #ifndef DISABLE_CI
 	void common_interface();
 #endif
-#ifndef DISABLE_FILE
-	void harddisc_setup();
-#endif
 	void expert_setup();
 	void parental_lock();
 public:

@@ -10,7 +10,9 @@ private:
 	void osd_language();
 	void time_settings();
 	void av_settings();
+#ifndef DISABLE_FILE
 	void harddisc_setup();
+#endif
 #ifdef ENABLE_RFMOD
 	void uhf_modulator();
 #endif
