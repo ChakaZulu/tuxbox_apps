@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.77 2002/12/22 22:56:57 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.78 2002/12/22 23:52:39 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -216,8 +216,12 @@ void CBouquetManager::parseBouquetsXml(const xmlNodePtr root)
 
 	if (search)
 	{
+		unsigned int original_network_id, service_id;
+/*
+  DO NOT USE THE FOLLOWING DECLARATION DUE TO THE USE OF THE VARIABLES IN sscanf BELOW! OTHERWISE ZAPIT CRASHES!
 		t_original_network_id original_network_id;
 		t_service_id          service_id;
+*/
 
 		INFO("reading bouquets");
 
