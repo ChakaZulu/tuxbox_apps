@@ -18,13 +18,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: tuxbox.h,v 1.5 2003/02/19 16:41:02 waldi Exp $
+ * $Id: tuxbox.h,v 1.6 2003/03/05 09:58:08 waldi Exp $
  */
 
 #ifndef TUXBOX_H
 #define TUXBOX_H
 
-#include <tuxbox/tuxbox_info.h>
+#include <tuxbox/info.h>
 
 #ifdef __cplusplus
 extern "C" {

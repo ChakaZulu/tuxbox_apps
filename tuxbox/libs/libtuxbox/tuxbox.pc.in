@@ -7,4 +7,4 @@ Name: tuxbox-tuxbox
 Description: tuxbox
 Version: @VERSION@
 Libs: -L${libdir} -ltuxbox
-Cflags: -I${includedir}/tuxbox
+Cflags: -I${includedir} -I@DRIVER@/include
