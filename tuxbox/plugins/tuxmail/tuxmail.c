@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.12  2005/03/22 13:31:46  lazyt
+ * support for english osd (OSD=G/E)
+ *
  * Revision 1.11  2005/03/22 09:35:20  lazyt
  * lcd support for daemon (LCD=Y/N, GUI should support /tmp/lcd.locked)
  *
@@ -67,6 +70,9 @@ void ReadConf()
 		{
 			if((ptr = strstr(line_buffer, "ADMIN=")))
 			    sscanf(ptr + 6, "%c", &admin);
+
+			else if((ptr = strstr(line_buffer, "OSD=")))
+			    sscanf(ptr + 4, "%c", &osd);
 		}
 
 		fclose(fd_conf);
@@ -77,6 +83,12 @@ void ReadConf()
 		{
 			printf("TuxMail <ADMIN=%c invalid, set to \"Y\">\n", admin);
 			admin = 'Y';
+		}
+
+		if(osd != 'G' && osd != 'E')
+		{
+			printf("TuxMail <OSD=%c invalid, set to \"G\">\n", osd);
+			osd = 'G';
 		}
 }
 
@@ -643,31 +655,31 @@ void ShowMessage(int message)
 
 		switch(message)
 		{
-			case NODAEMON:	RenderString("Daemon ist nicht geladen!", 157, 265, 306, CENTER, BIG, WHITE);
+			case NODAEMON:	RenderString((osd == 'G') ? "Daemon ist nicht geladen!" : "Daemon not running!", 157, 265, 306, CENTER, BIG, WHITE);
 					break;
 
-			case STARTDONE:	RenderString("Abfrage wurde gestartet.", 157, 265, 306, CENTER, BIG, WHITE);
+			case STARTDONE:	RenderString((osd == 'G') ? "Abfrage wurde gestartet." : "Polling started.", 157, 265, 306, CENTER, BIG, WHITE);
 					break;
 
-			case STARTFAIL:	RenderString("Start ist fehlgeschlagen!", 157, 265, 306, CENTER, BIG, WHITE);
+			case STARTFAIL:	RenderString((osd == 'G') ? "Start ist fehlgeschlagen!" : "Start failed!", 157, 265, 306, CENTER, BIG, WHITE);
 					break;
 
-			case STOPDONE:	RenderString("Abfrage wurde gestoppt.", 157, 265, 306, CENTER, BIG, WHITE);
+			case STOPDONE:	RenderString((osd == 'G') ? "Abfrage wurde gestoppt." : "Polling stopped.", 157, 265, 306, CENTER, BIG, WHITE);
 					break;
 
-			case STOPFAIL:	RenderString("Stop ist fehlgeschlagen!", 157, 265, 306, CENTER, BIG, WHITE);
+			case STOPFAIL:	RenderString((osd == 'G') ? "Stop ist fehlgeschlagen!" : "Stop failed!", 157, 265, 306, CENTER, BIG, WHITE);
 					break;
 
-			case BOOTON:	RenderString("Autostart aktiviert.", 157, 265, 306, CENTER, BIG, WHITE);
+			case BOOTON:	RenderString((osd == 'G') ? "Autostart aktiviert." : "Autostart enabled.", 157, 265, 306, CENTER, BIG, WHITE);
 					break;
 
-			case BOOTOFF:	RenderString("Autostart deaktiviert.", 157, 265, 306, CENTER, BIG, WHITE);
+			case BOOTOFF:	RenderString((osd == 'G') ? "Autostart deaktiviert." : "Autostart disabled.", 157, 265, 306, CENTER, BIG, WHITE);
 					break;
 
-			case ADD2SPAM:	RenderString("Spamliste wurde erweitert.", 157, 265, 306, CENTER, BIG, WHITE);
+			case ADD2SPAM:	RenderString((osd == 'G') ? "Spamliste wurde erweitert." : "Added to Spamlist.", 157, 265, 306, CENTER, BIG, WHITE);
 					break;
 
-			case SPAMFAIL:	RenderString("Update fehlgeschlagen!", 157, 265, 306, CENTER, BIG, WHITE);
+			case SPAMFAIL:	RenderString((osd == 'G') ? "Update fehlgeschlagen!" : "Update failed!", 157, 265, 306, CENTER, BIG, WHITE);
 					break;
 
 			case INFO:	sprintf(info, "TuxMail Version %s", versioninfo);
@@ -767,7 +779,7 @@ void FillDB(int account)
 
 			maildb[account].nr[0] = account | '0';
 			memcpy(maildb[account].time, "00:00", 5);
-			memcpy(maildb[account].name, "keine Info verfügbar", 20);
+			memcpy(maildb[account].name, (osd == 'G') ? "keine Info verfügbar" : "Info isn't available", 20);
 			memcpy(maildb[account].status, "000/000", 7);
 			maildb[account].mails = 0;
 			maildb[account].inactive = 1;
@@ -810,12 +822,12 @@ void FillDB(int account)
 			if((entrystart = strtok(NULL, "|")))
 			    strncpy(maildb[account].mailinfo[line].from, entrystart, sizeof(maildb[account].mailinfo[line].from));
 			else
-			    strcpy(maildb[account].mailinfo[line].from, "TuxMail: DB-Eintrag defekt!");
+			    strcpy(maildb[account].mailinfo[line].from, (osd == 'G') ? "TuxMail: DB-Eintrag defekt!" : "TuxMail: DB-Entry broken!");
 
 			if((entrystart = strtok(NULL, "|")))
 			    strncpy(maildb[account].mailinfo[line].subj, entrystart, sizeof(maildb[account].mailinfo[line].subj));
 			else
-			    strcpy(maildb[account].mailinfo[line].subj, "TuxMail: DB-Eintrag defekt!");
+			    strcpy(maildb[account].mailinfo[line].subj, (osd == 'G') ? "TuxMail: DB-Eintrag defekt!" : "TuxMail: DB-Entry broken!");
 
 			maildb[account].mailinfo[line].save[0] = maildb[account].mailinfo[line].type[0];
 
@@ -925,7 +937,7 @@ int Add2SpamList(int account, int mailindex)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.11 $";
+	char cvs_revision[] = "$Revision: 1.12 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;

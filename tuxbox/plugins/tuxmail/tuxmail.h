@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.h,v $
+ * Revision 1.8  2005/03/22 13:31:46  lazyt
+ * support for english osd (OSD=G/E)
+ *
  * Revision 1.7  2005/03/22 09:35:20  lazyt
  * lcd support for daemon (LCD=Y/N, GUI should support /tmp/lcd.locked)
  *
@@ -152,6 +155,7 @@ char versioninfo[12];
 // config
 
 char admin = 'Y';
+char osd = 'G';
 
 // mail database
 

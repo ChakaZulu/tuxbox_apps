@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.13  2005/03/22 13:31:48  lazyt
+ * support for english osd (OSD=G/E)
+ *
  * Revision 1.12  2005/03/22 09:35:21  lazyt
  * lcd support for daemon (LCD=Y/N, GUI should support /tmp/lcd.locked)
  *
@@ -85,8 +88,9 @@ int ReadConf()
 			fprintf(fd_conf, "LOGMODE=S\n\n");
 			fprintf(fd_conf, "SAVEDB=Y\n\n");
 			fprintf(fd_conf, "AUDIO=Y\n");
-			fprintf(fd_conf, "VIDEO=1\n");
-			fprintf(fd_conf, "LCD=Y\n\n");
+			fprintf(fd_conf, "VIDEO=1\n\n");
+			fprintf(fd_conf, "LCD=Y\n");
+			fprintf(fd_conf, "OSD=Y\n\n");
 			fprintf(fd_conf, "ADMIN=Y\n\n");
 			fprintf(fd_conf, "WEBPORT=80\n");
 			fprintf(fd_conf, "WEBUSER=\n");
@@ -104,7 +108,7 @@ int ReadConf()
 	//clear database
 
 		memset(account_db, 0, sizeof(account_db));
-		startdelay = intervall = pop3log = logmode = savedb = audio = video = lcd = admin = webport = webuser[0] = webpass[0] = 0;
+		startdelay = intervall = pop3log = logmode = savedb = audio = video = lcd = osd = admin = webport = webuser[0] = webpass[0] = 0;
 
 	//fill database
 
@@ -125,6 +129,8 @@ int ReadConf()
 			else if((ptr = strstr(line_buffer, "VIDEO="))) sscanf(ptr + 6, "%d", &video);
 
 			else if((ptr = strstr(line_buffer, "LCD="))) sscanf(ptr + 4, "%c", &lcd);
+
+			else if((ptr = strstr(line_buffer, "OSD="))) sscanf(ptr + 4, "%c", &osd);
 
 			else if((ptr = strstr(line_buffer, "ADMIN="))) sscanf(ptr + 6, "%c", &admin);
 
@@ -185,7 +191,7 @@ int ReadConf()
 
 	//check for update
 
-		if(!startdelay || !intervall || !pop3log || !logmode || !savedb || !audio || !video || !lcd || !admin || !webport)
+		if(!startdelay || !intervall || !pop3log || !logmode || !savedb || !audio || !video || !lcd || !osd || !admin || !webport)
 		{
 			printf("TuxMailD <missing Param(s), update Config>\n");
 
@@ -199,6 +205,7 @@ int ReadConf()
 			if(!audio) audio = 'Y';
 			if(!video) video = 1;
 			if(!lcd) lcd = 'Y';
+			if(!osd) osd = 'G';
 			if(!admin) admin = 'Y';
 			if(!webport) webport = 80;
 
@@ -208,8 +215,9 @@ int ReadConf()
 			fprintf(fd_conf, "LOGMODE=%c\n\n", logmode);
 			fprintf(fd_conf, "SAVEDB=%c\n\n", savedb);
 			fprintf(fd_conf, "AUDIO=%c\n", audio);
-			fprintf(fd_conf, "VIDEO=%d\n", video);
-			fprintf(fd_conf, "LCD=%c\n\n", lcd);
+			fprintf(fd_conf, "VIDEO=%d\n\n", video);
+			fprintf(fd_conf, "LCD=%c\n", lcd);
+			fprintf(fd_conf, "OSD=%c\n\n", osd);
 			fprintf(fd_conf, "ADMIN=%c\n\n", admin);
 			fprintf(fd_conf, "WEBPORT=%d\n", webport);
 			fprintf(fd_conf, "WEBUSER=%s\n", webuser);
@@ -277,6 +285,12 @@ int ReadConf()
 		{
 			printf("TuxMailD <LCD=%c invalid, set to \"Y\">\n", lcd);
 			lcd = 'Y';
+		}
+
+		if(osd != 'G' && osd != 'E')
+		{
+			printf("TuxMailD <OSD=%c invalid, set to \"G\">\n", osd);
+			osd = 'G';
 		}
 
 		if(admin != 'Y' && admin != 'N')
@@ -1127,10 +1141,10 @@ void NotifyUser(int mails)
 	int loop;
 	struct sockaddr_in SockAddr;
 	char http_cmd[1024], tmp_buffer[128];
-	char http_cmd1[] = "GET /cgi-bin/startPlugin?name=tuxmail.cfg HTTP/1.1\n\n";
-	char http_cmd2[] = "GET /cgi-bin/xmessage?timeout=5&caption=TuxMail%20Information&body=Neue%20Nachrichten%20liegen%20auf%20dem%20Server:%0A%0A";
-	char http_cmd3[] = "GET /control/message?nmsg=Neue%20Nachrichten%20liegen%20auf%20dem%20Server:%0A%0A";
-	char http_cmd4[] = "GET /control/message?popup=Neue%20Nachrichten%20liegen%20auf%20dem%20Server:%0A%0A";
+	char *http_cmd1 = "GET /cgi-bin/startPlugin?name=tuxmail.cfg HTTP/1.1\n\n";
+	char *http_cmd2 = (osd == 'G') ? "GET /cgi-bin/xmessage?timeout=5&caption=TuxMail%20Information&body=Neue%20Nachrichten%20liegen%20auf%20dem%20Server:%0A%0A" : "GET /cgi-bin/xmessage?timeout=5&caption=TuxMail%20Information&body=New%20Mail%20on%20the%20Server:%0A%0A";
+	char *http_cmd3 = (osd == 'G') ? "GET /control/message?nmsg=Neue%20Nachrichten%20liegen%20auf%20dem%20Server:%0A%0A" : "GET /control/message?nmsg=New%20Mail%20on%20the%20Server:%0A%0A";
+	char *http_cmd4 = (osd == 'G') ? "GET /control/message?popup=Neue%20Nachrichten%20liegen%20auf%20dem%20Server:%0A%0A" : "GET /control/message?popup=New%20Mail%20on%20the%20Server:%0A%0A";
 
 	//lcd notify
 
@@ -1235,7 +1249,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.12 $", versioninfo[12];
+	char cvs_revision[] = "$Revision: 1.13 $", versioninfo[12];
 	int account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
