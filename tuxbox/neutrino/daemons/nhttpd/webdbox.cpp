@@ -60,8 +60,6 @@
 #define SAI struct sockaddr_in
 
 //-------------------------------------------------------------------------
-
-
 void TWebDbox::Streaminfo(TWebserverRequest* request)
 {
 	int bitInfo[10];
@@ -137,11 +135,7 @@ Tmconnect con;
 		req.command = sectionsd::pauseScanning;
 		req.dataLength = 2;
 		write(sock_fd, &req, sizeof(req));
-		int stopit = 0;
-		if(off)
-		{
-			stopit=1;
-		}
+		int stopit = off?1:0;
 		write(sock_fd, &stopit, req.dataLength);
 
 		close(sock_fd);
@@ -480,9 +474,9 @@ bool TWebDbox::Execute(TWebserverRequest* request)
 	if(strcmp(request->Filename->c_str(),"test.dbox2") == 0)
 	{
 		printf("Teste nun\n");
-		request->SocketWriteLn("HTTP/1.0 200 OK");
-		request->HttpStatus = 200;
-		request->SocketWriteLn("Content-Type: text/html\n");
+
+		request->SendPlainHeader("text/html");
+
 		TParameterList *params = new TParameterList;
 		params->Add((char *) "test=15\0",7);
 		params->Add((char *) "tt=26\0",5);
@@ -562,16 +556,10 @@ bool TWebDbox::Execute(TWebserverRequest* request)
 			char volstr_off[10]={0};
 			sprintf((char*) &volstr_on, "%d", vol);
 			sprintf((char*) &volstr_off, "%d", 100-vol);
-			char filename[200]={0};
-			strcpy(filename,request->Parent->DocumentRoot->c_str());
-			strcat(filename,"/controlpanel.include1");
-			if(request->Parent->DEBUG) printf("filename1='%s'\n",filename);
-			request->SendFile(filename);
+			request->SendFile(request->Parent->PrivateDocumentRoot->c_str(),"/controlpanel.include1");
 			//muted
 			request->SocketWrite(mutestr);
-			filename[strlen(filename)-1]++;
-			if(request->Parent->DEBUG) printf("filename2='%s'\n",filename);
-			request->SendFile(filename);
+			request->SendFile(request->Parent->PrivateDocumentRoot->c_str(),"/controlpanel.include2");
 			//volume bar...
 			request->SocketWrite("<td><img src=../images/vol_flashed.jpg width=");
 			request->SocketWrite(volstr_on);
@@ -579,19 +567,15 @@ bool TWebDbox::Execute(TWebserverRequest* request)
 			request->SocketWrite("<td><img src=../images/vol_unflashed.jpg width=");
 			request->SocketWrite(volstr_off);
 			request->SocketWrite(" height=10 border=0><br></td>\n");
-			filename[strlen(filename)-1]++;
-			if(request->Parent->DEBUG) printf("filename3='%s'\n",filename);
-			request->SendFile(filename);
+			request->SendFile(request->Parent->PrivateDocumentRoot->c_str(),"/controlpanel.include3");
 			return true;
 
 		}
 		else if (strcmp(request->Filename->c_str(),"epg.dbox2") == 0)
 		{
 			if(request->ParameterList->Count > 0)
-			{
-				request->SocketWriteLn("HTTP/1.0 200 OK");
-				request->HttpStatus = 200;
-				request->SocketWriteLn("Content-Type: text/html\n");
+			{											// wenn parameter vorhanden sind
+				request->SendPlainHeader("text/html");
 				request->SocketWriteLn("<html>\n<head><title>DBOX2-Neutrino EPG</title><link rel=\"stylesheet\" type=\"text/css\" href=\"../channellist.css\"></head>");
 				//request->println("<script> function openWindow(theURL) { window.open(theURL,'Neutrino-EPG','scrollbars=no,width=100,height=100');}</script>");
 				request->SocketWriteLn("<body>");
@@ -630,7 +614,7 @@ bool TWebDbox::Execute(TWebserverRequest* request)
 
 					printf("Zur Liste hinzugefügt\n");
 
-					request->SocketWriteLn("HTTP/1.0 302 Moved Temporarily ");
+					request->SocketWriteLn("HTTP/1.0 302 Moved Temporarily");
 					request->SocketWrite("Location: switch.dbox2?eventlist=");
 					request->SocketWriteLn(request->ParameterList->GetValue(request->ParameterList->GetIndex("channel")));
 					request->SocketWriteLn("Content-Type: text/html\n");
@@ -642,9 +626,7 @@ bool TWebDbox::Execute(TWebserverRequest* request)
 			}
 			else
 			{
-				request->SocketWriteLn("HTTP/1.0 200 OK");
-				request->HttpStatus = 200;
-				request->SocketWriteLn("Content-Type: text/html\n");
+				request->SendPlainHeader("text/html");
 				ShowTimerList(request);
 //				request->SocketWriteLn("Parameter fehlen");
 			}
@@ -660,15 +642,13 @@ bool TWebDbox::Execute(TWebserverRequest* request)
 					ZapTo(request->ParameterList->GetValue(request->ParameterList->GetIndex("zapto")) );
 					request->SocketWriteLn("HTTP/1.0 302 Moved Temporarily");
 					request->SocketWriteLn("Location: channellist.dbox2#akt");
-					request->SocketWriteLn("Content-Type: text/html\n");
+//					request->SocketWriteLn("Content-Type: text/html\n");
 					return true;
 				}
  
 				if(request->ParameterList->GetIndex("eventlist") != -1)
 				{
-//					printf("Param1: %s\n",request->ParameterList->GetValue(0));
-					request->SocketWriteLn("HTTP/1.0 200 OK");
-					request->SocketWriteLn("Content-Type: text/html\n");
+					request->SendPlainHeader("text/html");
 					unsigned id = atol( request->ParameterList->GetValue(request->ParameterList->GetIndex("eventlist")) );
 					GetEventList( request, id );
 					return true;
@@ -676,9 +656,10 @@ bool TWebDbox::Execute(TWebserverRequest* request)
 				
 				if(request->ParameterList->GetIndex("shutdown") != -1)
 				{
-					request->SocketWriteLn("HTTP/1.0 200 OK");
-					request->SocketWriteLn("Content-Type: text/html\n");
-	//					request->sendFile( strcat(request->getDocBase(),"/shutdown.include"));
+					request->SendPlainHeader("text/html");
+					request->SendFile(request->Parent->PrivateDocumentRoot->c_str(),"/shutdown.include");
+					request->EndRequest();
+					sleep(1);
 					controld.shutdown();
 					return true;
 				}
@@ -740,6 +721,10 @@ TWebDbox::TWebDbox(TWebserver *server)
 	ChannelList = NULL;
 	EPGDate = 0;
 //	ChannelListEvents.clear();
+	if(!ChannelList)
+		GetChannelList();
+	GetEPGList();
+
 }
 //-------------------------------------------------------------------------
 
@@ -749,32 +734,9 @@ TWebDbox::~TWebDbox()
 		delete ChannelList;
 }
 //-------------------------------------------------------------------------
-bool TWebDbox::PublishChannelList(TWebserverRequest* request)
-{
-	if(Parent->DEBUG) printf("PublishChannelList\n");
-	if(!ChannelList)
-		if(!GetChannelList())
-			return false;
-
-	printf("Head: %ld\n",ChannelList->Head);
-	TChannel *channel = ChannelList->Head;
-	if(Parent->DEBUG) printf("Publishe ChannelList\n");
-
-	while(channel)
-	{
-		char buffer[50];
-		if(Parent->DEBUG) printf("Kanal Nr: %ld Name: %s tsid: %ld\n",channel->Number,channel->Name,channel->onid_tsid);
-		sprintf(buffer,"%s<BR>\n\0",channel->Name);
-		request->SocketWrite(buffer);
-		channel = channel->Next;
-	}
-	return true;
-}
-//-------------------------------------------------------------------------
-//-------------------------------------------------------------------------
 void TWebDbox::ShowSettings(TWebserverRequest* request)
 {
-	printf("Anfang ShowSettings\n");
+	request->SendPlainHeader("text/html");
 	char dbox_names[4][10]={"","Nokia","Sagem","Philips"};
 	char videooutput_names[3][13]={"Composite","RGB","S-Video"};
 	char videoformat_names[3][13]={"automatic","16:9","4:3"};
@@ -808,10 +770,10 @@ void TWebDbox::ShowChannelList(TWebserverRequest* request)
 	if(!ChannelList)
 		if(!GetChannelList())
 			return;
+	GetEPGList();
 
-	request->SocketWriteLn("HTTP/1.0 200 OK");
-	request->SocketWriteLn("Content-Type: text/html\n");
-
+	request->SendPlainHeader("text/html");
+	
 	//show chanlist
 	
 	request->SocketWriteLn("<html>");
@@ -968,7 +930,6 @@ Tmconnect con;
 						if(channel->ExtendedEPG) delete channel->ExtendedEPG;
 						channel->ExtendedEPG = new TString(text);
 
-//						channel->Starttime = 
 
 						delete[] pData;
 					}

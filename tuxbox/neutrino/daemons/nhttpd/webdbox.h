@@ -157,12 +157,4 @@ public:
 
 };
 
-
-class CWebserverCGI
-{
-	public:
-		virtual bool testHandler(string){return false;};
-		virtual void exec(TWebserverRequest* request){};
-};
-
 #endif

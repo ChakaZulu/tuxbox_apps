@@ -22,12 +22,8 @@ using namespace std;
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
 
-enum Method_Typ {M_POST = 1,M_GET = 2,M_PUT = 3};
-class TUpload1
-{
-	public:
-		TUpload1(){};
-};
+enum Method_Typ {M_UNKNOWN=0,M_POST = 1,M_GET = 2,M_PUT = 3};
+
 
 class TWebserverRequest
 {
@@ -39,7 +35,7 @@ private:
 	void ParseHeader(char * t, int len);
 	void RewriteURL();
 
-	int OpenFile(char *);
+	int OpenFile(char *path, char *filename);
 	void SendOpenFile(int );
 	TString *Boundary;
 
@@ -52,7 +48,7 @@ public:
 	void SocketWriteLn( char* text);
 	void SocketWriteData( char* data, long length );
 //	void SocketWriteLn( char * text);
-	bool SendFile(char *);
+	bool SendFile(char *path,char *filename);
 
 	int Method;
 	TString *URL;
@@ -73,10 +69,11 @@ public:
 	~TWebserverRequest();
 	bool GetRawRequest(int socket);
 	bool ParseRequest();
-	void ParseParams(char *param_string);
-
+	bool ParseParams(char *param_string);
+	bool ParseFirstLine(char * zeile, int len);
 	void Send404Error();
-	void SendPlainHeader();
+	void Send500Error();
+	void SendPlainHeader(char *contenttype = NULL);
 	bool HandleUpload(char * Name);
 	void PrintRequest();
 	bool SendResponse();

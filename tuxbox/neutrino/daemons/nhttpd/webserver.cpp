@@ -39,7 +39,8 @@ TWebserver::TWebserver()
 {
 	Port=0;
 	ListenSocket = 0;
-	DocumentRoot = NULL;
+	PublicDocumentRoot = NULL;
+	PrivateDocumentRoot = NULL;
 	TimerList = NULL;
 	DEBUG=false;
 }
@@ -49,11 +50,10 @@ TWebserver::~TWebserver()
 	if(ListenSocket)
 		Stop();
 
-	if(DocumentRoot)
-	{
-		delete DocumentRoot;
-		DocumentRoot = NULL;
-	}
+	if(PrivateDocumentRoot)
+		delete PrivateDocumentRoot;
+	if(PublicDocumentRoot)
+		delete PublicDocumentRoot;
 
 	if(WebDbox)
 		delete WebDbox;
@@ -61,23 +61,16 @@ TWebserver::~TWebserver()
 		delete TimerList;
 }
 //-------------------------------------------------------------------------
-bool TWebserver::Init(int port,char * documentroot,bool debug,bool threads)
+bool TWebserver::Init(int port,char * publicdocumentroot,bool debug,bool threads)
 {
 	Port=port;
 	DEBUG = debug;
 	THREADS = threads;
-	if((DocumentRoot = new TString(documentroot)) != NULL)
-	{
-		if(DEBUG) printf("docroot: %s DocRoot: %s\n",documentroot,DocumentRoot->c_str());
-		WebDbox = new TWebDbox(this);
-		if(DEBUG) printf("WebDbox initialized\n");
-		return true;
-	}
-	else
-	{
-		Ausgabe("Konnte keinen Speicher für DocumentRoot belegen !\n");
-		return false;
-	}
+	PrivateDocumentRoot = new TString(PRIVATEDOCUMENTROOT);
+	PublicDocumentRoot = new TString(publicdocumentroot);
+	WebDbox = new TWebDbox(this);
+	if(DEBUG) printf("WebDbox initialized\n");
+	return true;
 }
 //-------------------------------------------------------------------------
 

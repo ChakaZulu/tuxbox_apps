@@ -4,33 +4,33 @@
 <script language="JavaScript">
 <!--
 button= new Image();
-button.src = "images/shutdown_off.jpg";
+button.src = "/images/shutdown_off.jpg";
 button= new Image();
-button.src = "images/shutdown_on.jpg";
+button.src = "/images/shutdown_on.jpg";
 button= new Image();
-button.src = "images/volplu_off.jpg";
+button.src = "/images/volplu_off.jpg";
 button= new Image();
-button.src = "images/volplu_on.jpg";
+button.src = "/images/volplu_on.jpg";
 button= new Image();
-button.src = "images/volmin_off.jpg";
+button.src = "/images/volmin_off.jpg";
 button= new Image();
-button.src = "images/volmin_on.jpg";
+button.src = "/images/volmin_on.jpg";
 button= new Image();
-button.src = "images/mute_off.jpg";
+button.src = "/images/mute_off.jpg";
 button= new Image();
-button.src = "images/mute_on.jpg";
+button.src = "/images/mute_on.jpg";
 button= new Image();
-button.src = "images/mited_off.jpg";
+button.src = "/images/mited_off.jpg";
 button= new Image();
-button.src = "images/muted_on.jpg";
+button.src = "/images/muted_on.jpg";
 button= new Image();
-button.src = "images/tv_off.jpg";
+button.src = "/images/tv_off.jpg";
 button= new Image();
-button.src = "images/tv_on.jpg";
+button.src = "/images/tv_on.jpg";
 button= new Image();
-button.src = "images/radio_off.jpg";
+button.src = "/images/radio_off.jpg";
 button= new Image();
-button.src = "images/radio_on.jpg";
+button.src = "/images/radio_on.jpg";
 -->
 </script>
 </head>

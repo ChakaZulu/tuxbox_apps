@@ -21,6 +21,8 @@ using namespace std;
 
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
+#define PRIVATEDOCUMENTROOT "/share/tuxbox/neutrino/httpd"
+#define PUBLICDOCUMENTROOT "/var/tmp/httpd"
 
 class TWebDbox;
 class TWebserverRequest;
@@ -35,29 +37,30 @@ struct Tmconnect
 //----------------------------------------------------------------------
 class TWebserver
 {
-	int	Port;
-	int	ListenSocket;
-	TString *DocumentRoot;
+	int				Port;
+	int				ListenSocket;
+	TString			*PrivateDocumentRoot;
+	TString			*PublicDocumentRoot;
 	pthread_t		Thread1;
 	pthread_t		timerthread;
-	bool THREADS;
-	TTimerList * TimerList;
+	bool			THREADS;
+	TTimerList		*TimerList;
 
 public:
-		bool DEBUG;
+	bool			DEBUG;
+	TWebDbox		*WebDbox;
 
-		TWebDbox * WebDbox;
-		TWebserver();
-		~TWebserver();
-		
-		bool Init(int port,char * documentroot,bool debug, bool threads);
-		bool Start();
-		void DoLoop();
-		void Stop();
-		void Debug(char * text){if(DEBUG) Ausgabe(text);};
-		void Ausgabe(char *text){if(text) printf("[httpd] %s\n",text);};
-		
-		int SocketConnect(Tmconnect * con,int Port);
+	TWebserver();
+	~TWebserver();
+
+	bool Init(int port,char * publicdocumentroot,bool debug, bool threads);
+	bool Start();
+	void DoLoop();
+	void Stop();
+	void Debug(char * text){if(DEBUG) Ausgabe(text);};
+	void Ausgabe(char *text){if(text) printf("[httpd] %s\n",text);};
+
+	int SocketConnect(Tmconnect * con,int Port);
 
 	friend class TWebserverRequest;
 	friend class TWebDbox;
