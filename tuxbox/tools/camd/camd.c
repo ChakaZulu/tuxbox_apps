@@ -1,5 +1,5 @@
 /*
- * $Id: camd.c,v 1.2 2002/05/05 21:24:05 obi Exp $
+ * $Id: camd.c,v 1.3 2002/07/15 13:14:12 obi Exp $
  *
  * (C) 2001, 2002 by gillem, Hunz, kwon, tmbinc, TripleDES, obi
  *
@@ -23,6 +23,7 @@
 #include <ost/ca.h>
 #include <pthread.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
@@ -30,33 +31,17 @@
 #include <sys/un.h>
 #include <unistd.h>
 
+#include "camd.h"
 #include "cat.h"
+#include "sdt.h"
 
 #define CAMD_UDS_NAME	"/tmp/camd.socket"
-#define MAX_PIDS	4
 #define MAX_SERVICES	8
 
 int camfd;
 pthread_t camlisten;
 
-//service-descramble
-typedef struct descrambleservice_t
-{
-	unsigned char valid;
-	unsigned char started;
-	unsigned short status;
-	unsigned short onID;
-	unsigned short sID;
-	unsigned short Unkwn;
-	unsigned short caID;
-	unsigned short ecmPID;
-	unsigned char numpids;
-	unsigned short pid[MAX_PIDS];
-
-} descrambleservice_s;
-
 descrambleservice_s descrambleservice[MAX_SERVICES];
-//end service-descramble
 
 //card-status
 unsigned short caid[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -158,11 +143,22 @@ int reset (void)
 	unsigned char i;
 	unsigned char buffer[1];
 
+	unsigned short onid = parse_sdt();
+
 	for (i = 0; i < MAX_SERVICES; i++)
 	{
 		descrambleservice[i].valid = 0;
 		descrambleservice[i].onID = 0;
 		descrambleservice[i].sID = 0;
+	}
+
+	if (onid == 0)
+	{
+		printf("[camd] unable to find original network id\n");
+	}
+	else
+	{
+		current_onid = onid;
 	}
 
 	buffer[0] = 0x09;
@@ -295,12 +291,12 @@ void class_23 (unsigned char * buffer, unsigned int len)
 {
 	int i;
 
-	switch ((buffer[4] & 0x3C) >> 2)
+	switch ((buffer[4] & 0x7C) >> 2)
 	{
 	case 0x00:
 		caid_count = buffer[5];
 
-		for (i = 0; i < buffer[5]; i++)
+		for (i = 0; i < caid_count; i++)
 		{
 			caid[i] = (buffer[6 + (i << 1)] << 8) | buffer[7 + (i << 1)];
 			printf("[camd] ca system id: %04x\n", caid[i]);
@@ -364,7 +360,7 @@ void class_23 (unsigned char * buffer, unsigned int len)
 		break;
 
 	default:
-		printf("[camd] Unknown 2.CMD-Class: %02x (%02x)\n", buffer[4], (buffer[4] & 0x3C) >> 2);
+		printf("[camd] Unknown 2.CMD-Class: %02x (%02x)\n", buffer[4], (buffer[4] & 0x7C) >> 2);
 		break;
 	}
 }
@@ -477,115 +473,147 @@ void * camlistenthread (void * thread_arg)
 	return 0;
 }
 
-int parse_ca_pmt (unsigned char *buffer)
+int parse_ca_pmt (const unsigned char * buffer, const unsigned int length)
 {
-	unsigned short pos;
-	unsigned short pos2;
-
-	//unsigned char i;
-	unsigned char j;
-
-	/* ca pmt elements */
-	unsigned char lengthField = buffer[3];
-	//unsigned char caPmtListManagement = buffer[4];
-	unsigned short programNumber = (buffer[5] << 8) | buffer[6];
-	//unsigned char versionNumber = (buffer[7] >> 1) & 0x1F;
-	//unsigned char currentNextIndicator = buffer[7] & 0x01;
-	unsigned short programInfoLength = ((buffer[8] & 0x0F) << 8) | buffer[9];
-
-	//unsigned char caPmtCmdId;
-	//unsigned char descriptorTag;
-	unsigned char descriptorLength;
-	unsigned short caSystemId;
-	unsigned short caPid;
-	//unsigned char privateDataByte;
-
-	unsigned char streamType;
-	unsigned short elementaryPid;
-	unsigned short esInfoLength;
-
+	unsigned short i, j, k;
+	ca_pmt * pmt;
 	descrambleservice_s service;
 
-	service.valid = 0;
-	service.started = 0;
-	service.status = 0;
-	service.onID = current_onid;
-	service.sID = programNumber;
-	service.Unkwn = 0x0104;
-	service.caID = 0;
-	service.ecmPID = 0;
-	service.numpids = 0;
+	memset(&service, 0, sizeof(descrambleservice_s));
 
-	if (programInfoLength != 0)
+	pmt = (ca_pmt *) malloc(sizeof(ca_pmt));
+
+	pmt->ca_pmt_list_management = buffer[0];
+	pmt->program_number = (buffer[1] << 8) | buffer[2];
+	pmt->program_info_length = ((buffer[4] & 0x0F) << 8) | buffer[5];
+
+#if 0
+	printf("ca_pmt_list_management: %02x\n", pmt->ca_pmt_list_management);
+	printf("prugram number: %04x\n", pmt->program_number);
+	printf("program_info_length: %04x\n", pmt->program_info_length);
+#endif
+
+	switch (pmt->ca_pmt_list_management)
 	{
-		//caPmtCmdId = buffer[10];
+		case 0x01: /* first */
+		case 0x03: /* only */
+			reset();
+			break;
 
-		for (pos = 11; pos < programInfoLength + 10; pos += descriptorLength + 2)
+		default:
+			break;
+	}
+
+	if (pmt->program_info_length != 0)
+	{
+		pmt->program_info = (ca_pmt_program_info *) malloc(sizeof(ca_pmt_program_info));
+
+		pmt->program_info->ca_pmt_cmd_id = buffer[6];
+		pmt->program_info->descriptor = (ca_descriptor *) malloc(sizeof(ca_descriptor));
+
+		for (i = 0; i < pmt->program_info_length - 1; i += pmt->program_info->descriptor->descriptor_length + 2)
 		{
-			//descriptorTag = buffer[pos];
-			descriptorLength = buffer[pos + 1];
-			caSystemId = (buffer[pos + 2] << 8) | buffer[pos + 3];
-			caPid = ((buffer[pos + 4] & 0x1F) << 8) | buffer[pos + 5];
-
-			//for (i = 0; i < descriptorLength - 4; i++)
-			//{
-			//	privateDataByte = buffer[pos + 6 + i];
-			//}
+			pmt->program_info->descriptor->descriptor_length = buffer[i + 8];
+			pmt->program_info->descriptor->ca_system_id = (buffer[i + 9] << 8) | buffer[i + 10];
+			pmt->program_info->descriptor->ca_pid = (buffer[i + 11] << 8) | buffer[i + 12];
 
 			for (j = 0; j < caid_count; j++)
 			{
-				if (caid[j] == caSystemId)
+				if (caid[j] == pmt->program_info->descriptor->ca_system_id)
 				{
-					service.caID = caSystemId;
-					service.ecmPID = caPid;
+					service.caID = pmt->program_info->descriptor->ca_system_id;
+					service.ecmPID = pmt->program_info->descriptor->ca_pid;
+					break;
 				}
 			}
+
+			if (service.caID != 0)
+			{
+				break;
+			}
 		}
+
+		free(pmt->program_info->descriptor);
+		free(pmt->program_info);
 	}
 
-	for (pos = 10 + programInfoLength; pos < lengthField + 4; pos += esInfoLength + 5)
-	{
-		streamType = buffer[pos];
-		elementaryPid = ((buffer[pos + 1] & 0x1F) << 8) | buffer[pos + 2];
-		esInfoLength = ((buffer[pos + 3] & 0x0F) << 8) | buffer[pos + 4];
+	pmt->es_info = (ca_pmt_es_info *) malloc(sizeof(ca_pmt_es_info));
 
-		if (service.numpids < MAX_PIDS)
+	for (i = pmt->program_info_length + 6; i < length; i += pmt->es_info->es_info_length + 5)
+	{
+		if (service.numpids == MAX_PIDS)
 		{
-			service.pid[service.numpids++] = elementaryPid;
+			break;
 		}
 
-		if (esInfoLength != 0)
+		pmt->es_info->stream_type = buffer[i];
+		pmt->es_info->elementary_pid = ((buffer[i + 1] & 0x1F) << 8) | buffer[i + 2];
+		pmt->es_info->es_info_length = ((buffer[i + 3] & 0x0F) << 8) | buffer[i + 4];
+
+#if 0
+		printf("stream_type: %02x\n", pmt->es_info->stream_type);
+		printf("elementary_pid: %04x\n", pmt->es_info->elementary_pid);
+		printf("es_info_length: %04x\n", pmt->es_info->es_info_length);
+#endif
+
+		service.pid[service.numpids++] = pmt->es_info->elementary_pid;
+
+		if (pmt->es_info->es_info_length != 0)
 		{
-			//caPmtCmdId = buffer[pos + 5];
+			pmt->es_info->program_info = (ca_pmt_program_info *) malloc(sizeof(ca_pmt_program_info));
 
-			for (pos2 = pos + 6; pos2 < pos + esInfoLength + 5; pos2 += descriptorLength + 2)
+			pmt->es_info->program_info->ca_pmt_cmd_id = buffer[i + 5];
+			pmt->es_info->program_info->descriptor = malloc(sizeof(ca_descriptor));
+
+			for (j = 0; j < pmt->es_info->es_info_length - 1; j += pmt->es_info->program_info->descriptor->descriptor_length + 2)
 			{
-				//descriptorTag = buffer[pos2];
-				descriptorLength = buffer[pos2 + 1];
-				caSystemId = (buffer[pos2 + 2] << 8) | buffer[pos2 + 3];
-				caPid = ((buffer[pos2 + 4] & 0x1F) << 8) | buffer[pos2 + 5];
+				pmt->es_info->program_info->descriptor->descriptor_length = buffer[i + j + 7];
+				pmt->es_info->program_info->descriptor->ca_system_id = (buffer[i + j + 8] << 8) | buffer[i + j + 9];
+				pmt->es_info->program_info->descriptor->ca_pid = (buffer[i + j + 10] << 8) | buffer[i + j + 11];
 
-				//for (i = 0; i < descriptorLength - 4; i++)
-				//{
-				//	privateDataByte = buffer[pos2 + 6 + i];
-				//}
-
-				for (j = 0; j < caid_count; j++)
+				for (k = 0; k < caid_count; k++)
 				{
-					if (caid[j] == caSystemId)
+					if (caid[k] == pmt->program_info->descriptor->ca_system_id)
 					{
-						service.caID = caSystemId;
-						service.ecmPID = caPid;
+						service.caID = pmt->program_info->descriptor->ca_system_id;
+						service.ecmPID = pmt->program_info->descriptor->ca_pid;
+						break;
 					}
 				}
+
+				if (service.caID != 0)
+				{
+					break;
+				}
 			}
+
+			free(pmt->es_info->program_info->descriptor);
+			free(pmt->es_info->program_info);
 		}
 	}
+
+	service.sID = pmt->program_number;
+
+	free(pmt->es_info);
+	free(pmt);
 
 	if ((service.numpids != 0) && (service.caID != 0))
 	{
-		adddescrambleservicestruct(&service);
-		return 0;
+		if (current_onid == 0)
+		{
+			current_onid = parse_sdt();
+		}
+
+		if (current_onid == 0)
+		{
+			free(pmt);
+			return -1;
+		}
+
+		service.onID = current_onid;
+		service.Unkwn = 0x0104;
+
+		return adddescrambleservicestruct(&service);
 	}
 	else
 	{
@@ -593,93 +621,132 @@ int parse_ca_pmt (unsigned char *buffer)
 	}
 }
 
-void handlesockmsg (unsigned char * buffer, int len, int connfd)
+unsigned int parse_length_field (unsigned char * buffer)
+{
+	unsigned char size_indicator = (buffer[0] >> 7) & 0x01;
+	unsigned int length_value = 0;
+
+	if (size_indicator == 0)
+	{
+		length_value = buffer[0] & 0x7F;
+	}
+
+	else if (size_indicator == 1)
+	{
+		unsigned char length_field_size = buffer[0] & 0x7F;
+		unsigned int i;
+
+		for (i = 0; i < length_field_size; i++)
+		{
+			length_value = (length_value << 8) | buffer[i + 1];
+		}
+	}
+
+	return length_value;
+}
+
+unsigned char get_length_field_size (unsigned int length)
+{
+	if (length < 0x80)
+	{
+		return 0x01;
+	}
+
+	if (length < 0x100)
+	{
+		return 0x02;
+	}
+
+	if (length < 0x10000)
+	{
+		return 0x03;
+	}
+
+	if (length < 0x1000000)
+	{
+		return 0x04;
+	}
+
+	else
+	{
+		return 0x05;
+	}
+}
+
+void handlesockmsg (unsigned char * buffer, ssize_t len, int connfd)
 {
 	int i;
+
 #if 0
 	printf("handlesockmsg (%02x):", len);
 	for (i = 0; i < len; i++) printf(" %02x", buffer[i]);
 	printf("\n");
 #endif
+
 	switch (buffer[0])
 	{
-	case 0x03: //0x50 0x01 0x03
-		if (len >= 1)
+		case 0x9F:
 		{
-			unsigned char sendbuf[9];
+			unsigned int length = parse_length_field(buffer + 3);
 
-			// quick'n'dirty
-			sendbuf[0] = 0x6F;
-			sendbuf[1] = 0x50;
-			sendbuf[2] = 0x05;
-			sendbuf[3] = 0x23;
-			sendbuf[4] = 0x83;
-			sendbuf[5] = caid_count;
-			for (i = 0; i < caid_count; i++)
+			// resource manager, application info, ca support
+			if (buffer[1] == 0x80)
 			{
-				sendbuf[6 + (i << 2)] = caid[i] >> 8;
-				sendbuf[7 + (i << 2)] = caid[i];
-			}
-			sendbuf[8 + (i << 2)] = 0x8e; // TODO: calc
-
-			if (write(connfd, sendbuf, 9) < 0)
-			{
-				perror("[camd] write");
-			}
-		}
-		break;
-
-	case 0x0D: //0x50 0x11 0x0D 0x00 0x85 0x00 0x09 0x17 0x02 0x10 0x0a 0x00 0xff 0x01 0x00 0x01 0x01 0x01 0x02
-		if (len >= 11)
-		{
-			unsigned short pid[MAX_PIDS];
-			unsigned char numpids = (len - 9) >> 1;
-
-			for (i = 0; i < numpids; i++)
-			{
-				if (i == MAX_PIDS)
+				// ca_info_enq
+				if (buffer[2] == 0x30)
 				{
-					printf("[camd] too many pids received\n");
-					break;
+					unsigned char reply[4 + (caid_count << 1)];
+
+					if (length != 0)
+					{
+						printf("[camd] warning: invalid length for ca_info_enq\n");
+					}
+
+					// ca_info
+					reply[0] = 0x9F;
+					reply[1] = 0x80;
+					reply[2] = 0x31;
+					reply[3] = caid_count << 1;
+
+					for (i = 0; i < caid_count; i++)
+					{
+						reply[i + 4] = caid[i] >> 8;
+						reply[i + 5] = caid[i];
+					}
+
+					if (write(connfd, reply, sizeof(reply)) < 0)
+					{
+						perror("[camd] write");
+					}
 				}
 
-				pid[i] = (buffer[9 + (i << 1)] << 8) | buffer[10 + (i << 1)];
+				// ca_pmt
+				else if (buffer[2] == 0x32)
+				{
+					parse_ca_pmt(buffer + 3 + get_length_field_size(length), length);
+				}
+
+				else
+				{
+					printf("[camd] unknown resource manager, application info or ca support command\n");
+				}
 			}
 
-			/* add service */
-			adddescrambleservice(numpids,(buffer[1]<<8)|buffer[2],(buffer[3]<<8)|buffer[4],0x104,(buffer[5]<<8)|buffer[6],(buffer[7]<<8)|buffer[8],pid);
-		}
-		break;
+			else
+			{
+				printf("[camd] unknown apdu tag\n");
+			}
 
-	case 0x09: //0x50 0x03 0x09 0x00 0x85
-		if (len >= 3)
-		{
-			current_onid = (buffer[1] << 8) | buffer[2];
+			break;
 		}
-		reset();
-		break;
 
-	case 0x84: //0x50 0x07 0x84 0x17 0x02 0x10 0x00
-		if (len >= 5)
-		{
-			setemm(0x104, (buffer[1] << 8) | buffer[2], (buffer[3] << 8) | buffer[4]);
-		}
-		break;
-
-	case 0xCA: //0x50 0x33
-		if (len >= 15)
-		{
-			parse_ca_pmt(buffer + 1);
-		}
-		break;
-
-	default:
-		printf("[camd] unknown socket command: %02x\n", buffer[0]);
-		break;
+		default:
+			printf("[camd] unknown socket command: %02x\n", buffer[0]);
+			break;
 	}
 }
 
-int main (int argc, char **argv)
+int main (int argc, char ** argv)
 {
 	int listenfd;
 	int connfd;
@@ -706,9 +773,9 @@ int main (int argc, char **argv)
 		return -1;
 	}
 
-	if ((camfd = open("/dev/ost/ca0", O_RDWR)) < 0)
+	if ((camfd = open("/dev/dvb/card0/ca0", O_RDWR)) < 0)
 	{
-		perror("[camd] /dev/ost/ca0");
+		perror("[camd] /dev/dvb/card0/ca0");
 		return -1;
 	}
 
@@ -748,29 +815,39 @@ int main (int argc, char **argv)
 	{
 		connfd = accept(listenfd, (struct sockaddr *) &servaddr, (socklen_t *) &clilen);
 
-		switch (read(connfd, msgbuffer, 2))
+		ssize_t length = read(connfd, msgbuffer, sizeof(msgbuffer));
+
+		switch (length)
 		{
 		case -1:
 			perror("[camd] read");
 			break;
 
-		case 0 ... 1:
+		case 0 ... 3:
 			printf("[camd] too short message received\n");
 			break;
 
-		case 2:
-			if ((msgbuffer[0] == 0x50) && (msgbuffer[1] > 0))
+		default:
+			/* if message begins with an apdu_tag and is longer than three bytes */
+			if ((msgbuffer[0] == 0x9F) && ((msgbuffer[1] >> 7) == 0x01) && ((msgbuffer[2] >> 7) == 0x00))
 			{
-				read(connfd, msgbuffer + 2, msgbuffer[1]);
-				handlesockmsg(msgbuffer + 2, msgbuffer[1], connfd);
+				handlesockmsg(msgbuffer, length, connfd);
 			}
+
 			else
 			{
-				printf("[camd] unknown message received\n");
-			}
-			break;
+				unsigned int i;
 
-		default:
+				printf("[camd] invalid message received:\n");
+
+				for (i = 0; i < length; i++)
+				{
+					printf("%02x ", msgbuffer[i]);
+				}
+
+				printf("\n");
+			}
+
 			break;
 		}
 
