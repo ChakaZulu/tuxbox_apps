@@ -11,6 +11,9 @@
 #include <unistd.h>
 #include <errno.h>
 #include <dirent.h>
+#include <lib/gui/eskin.h>
+#include <lib/gui/elabel.h>
+#include <lib/gdi/font.h>
 #include <lib/picviewer/pictureviewer.h>
 #include "fb_display.h"
 
@@ -44,11 +47,21 @@ extern int fh_crw_load(const char *, unsigned char *, int, int);
 extern int fh_crw_id(const char *);
 #endif
 
-ePictureViewer::ePictureViewer( const eString &filename )
+ePictureViewer::ePictureViewer(const eString &filename)
 	:eWidget(0,1), slideshowTimer(eApp), filename(filename)
 {
-	addActionMap(&i_cursorActions->map);
 	eDebug("[PICTUREVIEWER] Constructor...");
+
+	addActionMap(&i_cursorActions->map);
+
+	move(ePoint(70, 50));
+	resize(eSize(590, 470));
+	eLabel *l = new eLabel(this);
+	l->move(ePoint(150, clientrect.height() / 2));
+	l->setFont(eSkin::getActive()->queryFont("epg.title"));
+	l->resize(eSize(clientrect.width() - 100, 30));
+	l->setText(_("Loading picture... please wait."));
+
 	fh_root = NULL;
 	m_scaling = COLOR;
 	m_aspect = 4.0 / 3;
@@ -279,15 +292,14 @@ void ePictureViewer::SetVisible(int startx, int endx, int starty, int endy)
 bool ePictureViewer::ShowImage(const std::string & filename, bool unscaled)
 {
 	eDebug("Show Image {");
-	// Wird eh ueberschrieben ,also schonmal freigeben... (wenig speicher)
-#if 0
-	if (m_CurrentPic_Buffer != NULL)
-	{
-		free(m_CurrentPic_Buffer);
-		m_CurrentPic_Buffer = NULL;
-	}
-#endif
 	DecodeImage(filename, false, unscaled);
+	struct fb_var_screeninfo *screenInfo = fbClass::getInstance()->getScreenInfo();
+	if (screenInfo->bits_per_pixel != 16)
+	{
+		fbClass::getInstance()->lock();
+		fbClass::getInstance()->SetMode(720, 576, 16);
+		fbClass::getInstance()->PutCMAP();
+	}
 	DisplayNextImage();
 	eDebug("Show Image }");
 	return true;
@@ -295,12 +307,25 @@ bool ePictureViewer::ShowImage(const std::string & filename, bool unscaled)
 
 void ePictureViewer::slideshowTimeout()
 {
+	int wrap = 1;
+	bool setTimer = true;
 	eString tmp = *myIt;
 	eDebug("[PICTUREVIEWER] slideshowTimeout: show %s", tmp.c_str());
 	ShowImage(tmp, false);
 	if (++myIt == slideshowList.end())
-		myIt = slideshowList.begin();
-	slideshowTimer.start(5000, true);
+	{
+		eConfig::getInstance()->getKey("/picviewer/slideshowwraparound", wrap);
+		if (wrap == 1)
+			myIt = slideshowList.begin();
+		else
+			setTimer = false;
+	}
+	if (setTimer)
+	{
+		int timeout = 5;
+		eConfig::getInstance()->getKey("/picviewer/slideshowtimeout", timeout);
+		slideshowTimer.start(timeout * 1000, true);
+	}
 }
 
 int ePictureViewer::eventHandler(const eWidgetEvent &evt)
@@ -309,7 +334,7 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 	switch(evt.type)
 	{
 		case eWidgetEvent::evtAction:
-			if ( evt.action == &i_cursorActions->ok ||
+			if (/* evt.action == &i_cursorActions->ok || */
 				evt.action == &i_cursorActions->cancel ||
 				evt.action == &i_cursorActions->up ||
 				evt.action == &i_cursorActions->down ||
@@ -319,14 +344,12 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 			break;
 		case eWidgetEvent::execBegin:
 		{
-			fbClass::getInstance()->SetMode(720, 576, 16);
-			fbClass::getInstance()->lock();
-			int mode=0;
+			int mode = 0;
 			eConfig::getInstance()->getKey("/ezap/lastPicViewerStyle", mode);
-			if ( mode )
-				ShowSlideshow(filename,false);
+			if (mode)
+				ShowSlideshow(filename, false);
 			else
-				ShowImage(filename,false);
+				ShowImage(filename, false);
 			break;
 		}
 		case eWidgetEvent::execDone:
@@ -358,6 +381,8 @@ bool ePictureViewer::ShowSlideshow(const std::string& filename, bool unscaled)
 			eString file(e->d_name);
 			if ((file != ".") && (file != "..") &&
 			    (file.right(4).upper() == ".JPG" ||
+			     file.right(4).upper() == ".JPEG" ||
+			     file.right(4).upper() == ".CRW" ||
 			     file.right(4).upper() == ".PNG" ||
 			     file.right(4).upper() == ".BMP" ||
 			     file.right(4).upper() == ".GIF")
@@ -384,28 +409,8 @@ bool ePictureViewer::ShowSlideshow(const std::string& filename, bool unscaled)
 bool ePictureViewer::DisplayNextImage()
 {
 	eDebug("DisplayNextImage {");
-#if 0
-	if (m_CurrentPic_Buffer != NULL)
-	{
-		free(m_CurrentPic_Buffer);
-		m_CurrentPic_Buffer = NULL;
-	}
-#endif
 	if (m_NextPic_Buffer != NULL)
 		fb_display(m_NextPic_Buffer, m_NextPic_X, m_NextPic_Y, m_NextPic_XPan, m_NextPic_YPan, m_NextPic_XPos, m_NextPic_YPos);
-	eDebug("---DisplayNextImage fb_disp done");
-#if 0
-	m_CurrentPic_Buffer = m_NextPic_Buffer;
-	m_NextPic_Buffer = NULL;
-	m_CurrentPic_Name = m_NextPic_Name;
-	m_NextPic_Name = "";
-	m_CurrentPic_X = m_NextPic_X;
-	m_CurrentPic_Y = m_NextPic_Y;
-	m_CurrentPic_XPos = m_NextPic_XPos;
-	m_CurrentPic_YPos = m_NextPic_YPos;
-	m_CurrentPic_XPan = m_NextPic_XPan;
-	m_CurrentPic_YPan = m_NextPic_YPan;
-#endif
 	eDebug("DisplayNextImage }");
 	return true;
 }

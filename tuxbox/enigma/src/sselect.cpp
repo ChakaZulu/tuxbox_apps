@@ -1187,7 +1187,6 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 					f.setLCD( LCDTitle, LCDElement );
 #endif
 					f.show();
-					printf("[SSELECT] calling exec() now...\n");
 					int ret = f.exec();
 					f.hide();
 

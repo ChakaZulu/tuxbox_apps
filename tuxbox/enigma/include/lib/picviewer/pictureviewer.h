@@ -62,6 +62,7 @@ private:
 	int m_NextPic_YPos;
 	int m_NextPic_XPan;
 	int m_NextPic_YPan;
+
 	std::string m_CurrentPic_Name;
 	unsigned char *m_CurrentPic_Buffer;
 	int m_CurrentPic_X;
@@ -70,7 +71,7 @@ private:
 	int m_CurrentPic_YPos;
 	int m_CurrentPic_XPan;
 	int m_CurrentPic_YPan;
-	
+
 	unsigned char *m_busy_buffer;
 	int m_busy_x;
 	int m_busy_y;
