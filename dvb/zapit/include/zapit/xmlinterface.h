@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/Attic/xmlinterface.h,v 1.12 2002/12/22 20:48:50 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/Attic/xmlinterface.h,v 1.13 2002/12/22 21:25:12 thegoodguy Exp $
  *
  * xmlinterface for zapit - d-box2 linux project
  *
@@ -28,9 +28,13 @@
 
 #include <xmltree/xmltree.h>
 typedef XMLTreeParser* xmlDocPtr;
-typedef XMLTreeNode* xmlNodePtr;
+typedef XMLTreeNode*   xmlNodePtr;
 #define xmlChildrenNode GetChild()
-#define xmlNextNode GetNext()
+#define xmlNextNode     GetNext()
+inline xmlNodePtr xmlDocGetRootElement(xmlDocPtr  doc)           { return doc->RootNode(); };
+inline void       xmlFreeDoc          (xmlDocPtr  doc)           { delete doc; };
+inline char*      xmlGetAttribute     (xmlNodePtr cur, char * s) { return cur->GetAttributeValue(s); };
+inline char*      xmlGetName          (xmlNodePtr cur)           { return cur->GetType();  };
 
 
 std::string Unicode_Character_to_UTF8(const int character);

@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.61 2002/12/22 20:48:50 thegoodguy Exp $
+ * $Id: getservices.cpp,v 1.62 2002/12/22 21:25:12 thegoodguy Exp $
  */
 
 #include <stdio.h>
@@ -18,7 +18,7 @@ extern tallchans allchans;
 
 #define GET_ATTR(node, name, fmt, arg)					\
 	do {								\
-		char * ptr = node->GetAttributeValue(name);		\
+		char * ptr = xmlGetAttribute(node, name);		\
 		if ((ptr == NULL) || (sscanf(ptr, fmt, &arg) <= 0))	\
 			arg = 0;					\
 	}								\
@@ -123,10 +123,10 @@ void ParseChannels(xmlNodePtr node, const t_transport_stream_id transport_stream
 	std::string  name;
 	uint8_t      service_type;
 
-	while ((node != NULL) && (!strcmp(node->GetType(), "channel")))
+	while ((node != NULL) && (!strcmp(xmlGetName(node), "channel")))
 	{
 		GET_ATTR(node, "service_id", "%hx", service_id);
-		name = node->GetAttributeValue("name");
+		name = xmlGetAttribute(node, "name");
 		GET_ATTR(node, "service_type", "%hhx", service_type);
 
 		switch (service_type) {
@@ -170,13 +170,13 @@ void FindTransponder(xmlNodePtr search)
 
 	while (search)
 	{
-		if (!(strcmp(search->GetType(), "cable")))
+		if (!(strcmp(xmlGetName(search), "cable")))
 			DiSEqC = 0xff;
 
-		else if (!(strcmp(search->GetType(), "sat")))
+		else if (!(strcmp(xmlGetName(search), "sat")))
 			GET_ATTR(search, "diseqc", "%hhu", DiSEqC);
 
-		else if (!(strcmp(search->GetType(), "terrestrial")))
+		else if (!(strcmp(xmlGetName(search), "terrestrial")))
 			DiSEqC = 0xfe;
 
 		else {
@@ -184,7 +184,7 @@ void FindTransponder(xmlNodePtr search)
 			continue;
 		}
 
-		INFO("going to parse dvb-%c provider %s", search->GetType()[0], search->GetAttributeValue("name"));
+		INFO("going to parse dvb-%c provider %s", xmlGetName(search)[0], xmlGetAttribute(search, "name"));
 		ParseTransponders(search->xmlChildrenNode, DiSEqC);
 		search = search->xmlNextNode;
 	}
@@ -192,13 +192,13 @@ void FindTransponder(xmlNodePtr search)
 
 int LoadServices(void)
 {
-	XMLTreeParser *parser = parseXmlFile(string(SERVICES_XML));
+	xmlDocPtr parser = parseXmlFile(string(SERVICES_XML));
 
 	if (parser == NULL)
 		return -1;
 
-	FindTransponder(parser->RootNode()->xmlChildrenNode);
-	delete parser;
+	FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode);
+	xmlFreeDoc(parser);
 	return 0;
 }
 

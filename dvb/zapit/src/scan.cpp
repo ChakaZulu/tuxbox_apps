@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.89 2002/12/22 20:48:50 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.90 2002/12/22 21:25:12 thegoodguy Exp $
  */
 
 #include <fcntl.h>
@@ -315,16 +315,16 @@ void *start_scanthread(void *param)
 	}
 
 	/* get first child */
-	xmlNodePtr search = scanInputParser->RootNode()->xmlChildrenNode;
+	xmlNodePtr search = xmlDocGetRootElement(scanInputParser)->xmlChildrenNode;
 	xmlNodePtr transponder = NULL;
 
 	std::map <uint8_t, std::string>::iterator spI;
 
 	/* read all sat or cable sections */
-	while ((search) && (!strcmp(search->GetType(), type)))
+	while ((search) && (!strcmp(xmlGetName(search), type)))
 	{
 		/* get name of current satellite oder cable provider */
-		strcpy(providerName, search->GetAttributeValue("name"));
+		strcpy(providerName, xmlGetAttribute(search, "name"));
 
 		/* look whether provider is wanted */
 		for (spI = scanProviders.begin(); spI != scanProviders.end(); spI++)
@@ -342,8 +342,8 @@ void *start_scanthread(void *param)
 
 		/* Special mode for cable-users with sat-feed */
 		if (frontend->getInfo()->type == FE_QAM)
-			if (!strcmp(type, "cable") && search->GetAttributeValue("satfeed"))
-				if (!strcmp(search->GetAttributeValue("satfeed"), "true"))
+			if (!strcmp(type, "cable") && xmlGetAttribute(search, "satfeed"))
+				if (!strcmp(xmlGetAttribute(search, "satfeed"), "true"))
 					satfeed = true;
 
 		/* increase sat counter */
@@ -358,37 +358,37 @@ void *start_scanthread(void *param)
 		transponder = search->xmlChildrenNode;
 
 		/* read all transponders */
-		while ((transponder) && (!strcmp(transponder->GetType(), "transponder")))
+		while ((transponder) && (!strcmp(xmlGetName(transponder), "transponder")))
 		{
 			uint8_t tmp;
 			dvb_frontend_parameters feparams;
 
-			sscanf(transponder->GetAttributeValue("frequency"), "%u", &feparams.frequency);
+			sscanf(xmlGetAttribute(transponder, "frequency"), "%u", &feparams.frequency);
 			feparams.inversion = INVERSION_AUTO;
 
 			/* cable */
 			if (frontend->getInfo()->type == FE_QAM)
 			{
-				sscanf(transponder->GetAttributeValue("symbol_rate"), "%u", &feparams.u.qam.symbol_rate);
-				sscanf(transponder->GetAttributeValue("fec_inner"), "%hhu", &tmp);
+				sscanf(xmlGetAttribute(transponder, "symbol_rate"), "%u", &feparams.u.qam.symbol_rate);
+				sscanf(xmlGetAttribute(transponder, "fec_inner"), "%hhu", &tmp);
 				feparams.u.qam.fec_inner = (fe_code_rate_t) tmp;
-				sscanf(transponder->GetAttributeValue("modulation"), "%hhu", &tmp);
+				sscanf(xmlGetAttribute(transponder, "modulation"), "%hhu", &tmp);
 				feparams.u.qam.modulation = (fe_modulation_t) tmp;
 			}
 
 			/* satellite */
 			else if (frontend->getInfo()->type == FE_QPSK)
 			{
-				sscanf(transponder->GetAttributeValue("symbol_rate"), "%u", &feparams.u.qpsk.symbol_rate);
-				sscanf(transponder->GetAttributeValue("fec_inner"), "%hhu", &tmp);
+				sscanf(xmlGetAttribute(transponder, "symbol_rate"), "%u", &feparams.u.qpsk.symbol_rate);
+				sscanf(xmlGetAttribute(transponder, "fec_inner"), "%hhu", &tmp);
 				feparams.u.qpsk.fec_inner = (fe_code_rate_t) tmp;
-				sscanf(transponder->GetAttributeValue("polarization"), "%hhu", &polarization);
+				sscanf(xmlGetAttribute(transponder, "polarization"), "%hhu", &polarization);
 			}
 
 			/* terrestrial */
 			else if (frontend->getInfo()->type == FE_OFDM)
 			{
-				sscanf(transponder->GetAttributeValue("bandwidth"), "%hhu", &tmp);
+				sscanf(xmlGetAttribute(transponder, "bandwidth"), "%hhu", &tmp);
 				feparams.u.ofdm.bandwidth = (fe_bandwidth_t) tmp;
 				feparams.u.ofdm.code_rate_HP = FEC_AUTO;
 				feparams.u.ofdm.code_rate_LP = FEC_AUTO;

@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.75 2002/12/22 20:48:50 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.76 2002/12/22 21:25:12 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -216,7 +216,7 @@ void CBouquetManager::parseBouquetsXml(const xmlNodePtr root)
 
 	if (search)
 	{
-		while (strcmp(search->GetType(), "Bouquet"))
+		while (strcmp(xmlGetName(search), "Bouquet"))
 		{
 			search = search->xmlNextNode;
 		}
@@ -225,19 +225,19 @@ void CBouquetManager::parseBouquetsXml(const xmlNodePtr root)
 
 		INFO("reading bouquets");
 
-		while ((search) && (!(strcmp(search->GetType(), "Bouquet"))))
+		while ((search) && (!(strcmp(xmlGetName(search), "Bouquet"))))
 		{
-			CBouquet* newBouquet = addBouquet(search->GetAttributeValue("name"));
-			char* hidden = search->GetAttributeValue("hidden");
-			char* locked = search->GetAttributeValue("locked");
+			CBouquet* newBouquet = addBouquet(xmlGetAttribute(search, "name"));
+			char* hidden = xmlGetAttribute(search, "hidden");
+			char* locked = xmlGetAttribute(search, "locked");
 			newBouquet->bHidden = hidden ? (strcmp(hidden, "1") == 0) : false;
 			newBouquet->bLocked = locked ? (strcmp(locked, "1") == 0) : false;
 			channel_node = search->xmlChildrenNode;
 
 			while (channel_node)
 			{
-				sscanf(channel_node->GetAttributeValue("serviceID"), "%x", &service_id);
-				sscanf(channel_node->GetAttributeValue("onid"), "%x", &original_network_id);
+				sscanf(xmlGetAttribute(channel_node, "serviceID"), "%x", &service_id);
+				sscanf(xmlGetAttribute(channel_node, "onid"), "%x", &original_network_id);
 
 				CZapitChannel* chan = findChannelByChannelID(CREATE_CHANNEL_ID);
 
@@ -265,8 +265,8 @@ void CBouquetManager::loadBouquets(bool ignoreBouquetFile)
 
 		if (parser != NULL)
 		{
-			parseBouquetsXml(parser->RootNode());
-			delete parser;
+			parseBouquetsXml(xmlDocGetRootElement(parser));
+			xmlFreeDoc(parser);
 		}
 	}
 	renumServices();
