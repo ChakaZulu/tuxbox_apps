@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicserver.cpp,v 1.7 2003/03/06 18:41:44 obi Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicserver.cpp,v 1.8 2003/08/14 02:41:28 obi Exp $
  *
  * Basic Server Class Class - The Tuxbox Project
  *
@@ -26,12 +26,13 @@
 #include "basicserver.h"
 #include "basicsocket.h"
 
-#include <stdio.h>
-#include <unistd.h>
+#include <cstdio>
 
-#include <sys/types.h>
+#include <sys/poll.h>
 #include <sys/socket.h>
+#include <sys/types.h>
 #include <sys/un.h>
+#include <unistd.h>
 
 #define RECEIVE_TIMEOUT_IN_SECONDS 5
 #define SEND_TIMEOUT_IN_SECONDS 5
@@ -91,31 +92,53 @@ bool CBasicServer::prepare(const char* socketname)
 	return true;
 }
 
-void CBasicServer::run(bool (parse_command)(CBasicMessage::Header &rmsg, int connfd), const CBasicMessage::t_version version)
+bool CBasicServer::parse(bool (parse_command)(CBasicMessage::Header &rmsg, int connfd), const CBasicMessage::t_version version)
 {
 	int conn_fd;
-
 	struct sockaddr_un servaddr;
 	int clilen = sizeof(servaddr);
-
 	bool parse_another_command = true;
 
-	do
-	{
-		CBasicMessage::Header rmsg;
-		conn_fd = accept(sock_fd, (struct sockaddr*) &servaddr, (socklen_t*) &clilen);
-		memset(&rmsg, 0, sizeof(rmsg));
-		read(conn_fd, &rmsg, sizeof(rmsg));
+	CBasicMessage::Header rmsg;
+	conn_fd = accept(sock_fd, (struct sockaddr*) &servaddr, (socklen_t*) &clilen);
+	memset(&rmsg, 0, sizeof(rmsg));
+	read(conn_fd, &rmsg, sizeof(rmsg));
 
-		if (rmsg.version == version)
-			parse_another_command = parse_command(rmsg, conn_fd);
+	if (rmsg.version == version)
+		parse_another_command = parse_command(rmsg, conn_fd);
+	else
+		printf("[%s] Command ignored: cmd version %d received - server cmd version is %d\n", name.c_str(), rmsg.version, version);
+
+	close(conn_fd);
+
+	return parse_another_command;
+}
+
+bool CBasicServer::run(bool (parse_command)(CBasicMessage::Header &rmsg, int connfd), const CBasicMessage::t_version version, bool non_blocking)
+{
+	if (non_blocking) {
+		struct pollfd pfd;
+
+		pfd.fd = sock_fd;
+		pfd.events = (POLLIN | POLLPRI);
+
+		if (poll(&pfd, 1, 0) > 0)
+			return parse(parse_command, version);
 		else
-			printf("[%s] Command ignored: cmd version %d received - server cmd version is %d\n", name.c_str(), rmsg.version, version);
-
-		close(conn_fd);
+			return true;
 	}
-	while (parse_another_command);
+	else {
+		while(parse(parse_command, version));
 
+		stop();
+
+		return false;
+	}
+}
+
+void CBasicServer::stop(void)
+{
 	close(sock_fd);
         unlink(name.c_str());
 }
+

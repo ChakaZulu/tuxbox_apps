@@ -2,7 +2,7 @@
 #define __basicserver__
 
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicserver.h,v 1.5 2003/02/25 14:05:24 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicserver.h,v 1.6 2003/08/14 02:41:28 obi Exp $
  *
  * Basic Server Class Class - The Tuxbox Project
  *
@@ -36,11 +36,22 @@ class CBasicServer
 	int sock_fd;
 	std::string name;
 
+	// used by run
+	bool parse(bool (parse_command)(CBasicMessage::Header &rmsg, int connfd), const CBasicMessage::t_version version);
+
  public:
 	static bool receive_data(int fd, void * data, const size_t size);
 	static bool send_data(int fd, const void * data, const size_t size);
 	bool prepare(const char* socketname);
-	void run(bool (parse_command)(CBasicMessage::Header &rmsg, int connfd), const CBasicMessage::t_version version);
+
+	// run the server socket
+	// if set to non-blocking, it will leave the socket open but
+	// will return immediately without parsing a command if no data
+	// is sent by a client
+	bool run(bool (parse_command)(CBasicMessage::Header &rmsg, int connfd), const CBasicMessage::t_version version, bool non_blocking = false);
+
+	// manual stop, can and should only be used in non-blocking mode
+	void stop(void);
 };
 
 #endif
