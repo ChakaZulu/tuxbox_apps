@@ -34,6 +34,7 @@
 
 #include <config.h>
 #if HAVE_DVB_API_VERSION >= 3
+#undef _FILE_OFFSET_BITS
 #include "driver/framebuffer.h"
 #include "gui/filebrowser.h"
 #include "gui/widget/menue.h"

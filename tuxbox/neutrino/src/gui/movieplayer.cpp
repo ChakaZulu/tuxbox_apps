@@ -55,6 +55,7 @@
 
 #include <config.h>
 #if HAVE_DVB_API_VERSION >= 3
+#undef _FILE_OFFSET_BITS
 #include <global.h>
 #include <neutrino.h>
 #include <zapit/debug.h>
@@ -252,13 +253,13 @@ int CMoviePlayerGui::show()
 		{
 		//INFO("Green (Play TS File");
 		hide();
-		const char *tsfilename;
+		const char *tsfilename=NULL;
 		if(filebrowser->exec(Path))
-			{
+		{
 			Path=filebrowser->getCurrentDir();
 			tsfilename = filebrowser->getSelectedFile()->Name.c_str();
 			//INFO("TS Filename %s",tsfilename);
-			}
+		}
 		unsigned char buf[384*188];
 		unsigned short pida, pidv;
 		int dmxa, dmxv, dvr, adec, vdec, ts;
@@ -384,13 +385,13 @@ int CMoviePlayerGui::show()
 		{
 		//INFO("Yellow: Play PS file");
 		hide();
-		const char *psfilename;
+		const char *psfilename=NULL;
 		if(filebrowser->exec(Path))
-			{
+		{
 			Path=filebrowser->getCurrentDir();
 			psfilename = filebrowser->getSelectedFile()->Name.c_str();
 			//INFO("PS Filename %s",psfilename);
-			}
+		}
 		unsigned short pida, pidv;
 		int dmxa, dmxv, dvr, adec, vdec, ps;
 		struct dmx_pes_filter_params p;
