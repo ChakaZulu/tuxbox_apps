@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.72 2001/10/24 17:03:42 field Exp $
+//  $Id: sectionsd.cpp,v 1.73 2001/10/24 23:41:15 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.73  2001/10/24 23:41:15  field
+//  dmxEIT restart verbessert
+//
 //  Revision 1.72  2001/10/24 17:03:42  field
 //  Deadlock behoben, Geschwindigkeit gesteigert
 //
@@ -713,8 +716,10 @@ class DMX {
       closefd();
       return 0;
     }
-    int pause(void); // calls lock at begin if pauseCounter = 0
-    int unpause(void); // calls unlock at end  if pauseCounter = 1
+    int pause(void); // increments pause_counter
+    int unpause(void); // decrements pause_counter
+    int real_pause(void); // calls lock at begin if pauseCounter = 0
+    int real_unpause(void); // calls unlock at end  if pauseCounter = 1
     int change(void); // locks while changing
     void lock(void) {
       sem_wait(&dmxsem); // Wir nehmen Semaphoren da die ueber Thread-Grenzen hinweg funktionieren
@@ -775,6 +780,49 @@ int DMX::start(void)
   return 0;
 }
 
+int DMX::real_pause(void)
+{
+  if(!fd)
+    return 1;
+  pthread_mutex_lock(&pauselock);
+  if(pauseCounter++) {
+    pthread_mutex_unlock(&pauselock);
+    return 0;
+  }
+  lock();
+//  pthread_mutex_unlock(&pauselock);
+  if (ioctl (fd, DMX_STOP, 0) == -1) {
+    closefd();
+    perror ("[sectionsd] DMX: DMX_STOP");
+    return 2;
+  }
+
+  pthread_mutex_unlock(&pauselock);
+  return 0;
+}
+
+int DMX::real_unpause(void)
+{
+  if(!fd)
+    return 1;
+  pthread_mutex_lock(&pauselock);
+  if(--pauseCounter) {
+    pthread_mutex_unlock(&pauselock);
+    return 0;
+  }
+//  pthread_mutex_unlock(&pauselock);
+  if (ioctl (fd, DMX_START, 0) == -1) {
+    closefd();
+    perror ("[sectionsd] DMX: DMX_START");
+    unlock();
+    return 2;
+  }
+
+  unlock();
+  pthread_mutex_unlock(&pauselock);
+  return 0;
+}
+
 int DMX::pause(void)
 {
   if(!fd)
@@ -784,14 +832,6 @@ int DMX::pause(void)
     pthread_mutex_unlock(&pauselock);
     return 0;
   }
-//  lock();
-//  pthread_mutex_unlock(&pauselock);
-/*  if (ioctl (fd, DMX_STOP, 0) == -1) {
-    closefd();
-    perror ("[sectionsd] DMX: DMX_STOP");
-    return 2;
-  }
-*/
   pthread_mutex_unlock(&pauselock);
   return 0;
 }
@@ -805,15 +845,6 @@ int DMX::unpause(void)
     pthread_mutex_unlock(&pauselock);
     return 0;
   }
-//  pthread_mutex_unlock(&pauselock);
-/*  if (ioctl (fd, DMX_START, 0) == -1) {
-    closefd();
-    perror ("[sectionsd] DMX: DMX_START");
-    unlock();
-    return 2;
-  }
-*/
-//  unlock();
   pthread_mutex_unlock(&pauselock);
   return 0;
 }
@@ -1109,13 +1140,13 @@ static void commandPauseScanning(struct connectionData *client, char *data, cons
   dprintf("Request of %s scanning.\n", pause ? "stop" : "continue" );
   pthread_mutex_lock(&scanningLock);
   if(scanning && pause) {
-    dmxEIT.pause();
-    dmxSDT.pause();
+    dmxEIT.real_pause();
+    dmxSDT.real_pause();
     scanning=0;
   }
   else if(!pause && !scanning) {
-    dmxSDT.unpause();
-    dmxEIT.unpause();
+    dmxSDT.real_unpause();
+    dmxEIT.real_unpause();
     scanning=1;
   }
   pthread_mutex_unlock(&scanningLock);
@@ -1288,7 +1319,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.72 2001/10/24 17:03:42 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.73 2001/10/24 23:41:15 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1319,6 +1350,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
 
 #ifdef NO_ZAPD_NEUTRINO_HACK
 static int currentNextWasOk=0;
+static unsigned currentServiceKey=0;
 #endif
 
 // Mostly copied from epgd (something bugfixed ;) )
@@ -1550,6 +1582,9 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
         currentNextWasOk=0;
 #endif
     }
+#ifdef NO_ZAPD_NEUTRINO_HACK
+    currentServiceKey= *uniqueServiceKey;
+#endif
     return;
 }
 
@@ -2212,8 +2247,10 @@ struct connectionData *client=(struct connectionData *)conn;
   dprintf("Connection from %s closed!\n", inet_ntoa(client->clientAddr.sin_addr));
   delete client;
 #ifdef NO_ZAPD_NEUTRINO_HACK
-  if((currentNextWasOk) && (header.command== sectionsd::currentNextInformationID))
+  if(header.command== sectionsd::currentNextInformationID)
   {
+    if(currentNextWasOk)
+    {
     // Damit nach dem umschalten der camd/pzap usw. schneller anlaeuft.
 //    currentNextWasOk=0;
 /*    if(dmxEIT.pause()) // -> lock
@@ -2229,11 +2266,12 @@ struct connectionData *client=(struct connectionData *)conn;
     dmxSDT.unpause();
     dmxEIT.unpause(); // -> unlock
 */
-    if(!dmxEIT.isScheduled)
-        dmxEIT.change(); // auf scheduled umschalten / current/next ist eh' schon da...
-  }
-  else if(dmxEIT.isScheduled) {
-    dmxEIT.change(); // auf present/following umschalten
+      if(!dmxEIT.isScheduled)
+          dmxEIT.change(); // auf scheduled umschalten / current/next ist eh' schon da...
+    }
+    else if(dmxEIT.isScheduled) {
+      dmxEIT.change(); // auf present/following umschalten
+    }
   }
 #endif
   } // try
@@ -2548,7 +2586,30 @@ const unsigned timeoutInSeconds=1;
             return 0;
         for(;;)
         {
-            if(timeoutsDMX>=RESTART_DMX_AFTER_TIMEOUTS)
+            if(timeoutsDMX>2)
+            {
+                lockServices();
+                MySIservicesOrderUniqueKey::iterator si=mySIservicesOrderUniqueKey.end();
+                //dprintf("timeoutsDMX %x\n",currentServiceKey);
+                if(currentServiceKey)
+                    si=mySIservicesOrderUniqueKey.find(currentServiceKey);
+
+                if(si!=mySIservicesOrderUniqueKey.end())
+                {
+                    //dprintf("timeoutsDMX -Flags: %d - %d\n", si->second->eitPresentFollowingFlag(), si->second->eitScheduleFlag());
+                    if (((!si->second->eitScheduleFlag())&&(dmxEIT.isScheduled)) ||
+                        ((!si->second->eitPresentFollowingFlag())&&(!dmxEIT.isScheduled)))
+                    {
+                        timeoutsDMX=0;
+                        dprintf("timeoutsDMX for 0x%x reset to 0\n", currentServiceKey);
+                    }
+                }
+                unlockServices();
+            }
+
+
+            //if(timeoutsDMX>=RESTART_DMX_AFTER_TIMEOUTS)
+            if(timeoutsDMX>=3)
             {
                 // sectionsd ist zu langsam, da zu viele events -> cache kleiner machen
                 timeoutsDMX=0;
@@ -2838,7 +2899,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.72 2001/10/24 17:03:42 field Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.73 2001/10/24 23:41:15 field Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
