@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: request.h,v 1.20 2002/10/18 12:51:02 thegoodguy Exp $
+        $Id: request.h,v 1.21 2002/12/09 17:59:27 dirch Exp $
 
         License: GPL
 
@@ -58,14 +58,6 @@ private:
 	string rawbuffer;
 	int rawbuffer_len;
 	char *outbuf;
-
-	void SplitParameter(string param_str);
-
-	void RewriteURL();
-
-	int OpenFile(string path, string filename);
-	void SendOpenFile(int );
-
 	string Boundary;
 	
 	long tmplong;
@@ -73,11 +65,14 @@ private:
 	string tmpstring;
 
 	bool CheckAuth();
-	
+	string GetContentType(string ext);
+	string GetFileName(string path, string filename);
+	void SplitParameter(string param_str);
+	void RewriteURL();
+	int OpenFile(string path, string filename);
+
 
 public:
-// 	int				sock_fd;
-//	SAI				servaddr;
 	string			Client_Addr;
 	int				Socket;
 	unsigned long	RequestNumber;
@@ -100,25 +95,23 @@ public:
 
 	bool Authenticate();
 
-	bool ParseFile(string file,CStringList params);
+	bool ParseFile(string filename,CStringList params);
 	string ParseLine(string line,CStringList params);
 
-
 	int Method;
+	int HttpStatus;
+
 	string Host;
 	string URL;
 	string Path;
 	string Filename;
 	string FileExt;
 	string Param_String;
-	string ContentType;
 
 	CStringList ParameterList;
 	CStringList HeaderList;
-	map<int,string> boundaries;
-
 	
-	int HttpStatus;
+	map<int,string> boundaries;
 
 	class CWebserver * Parent;
 
@@ -139,6 +132,7 @@ public:
 	bool EndRequest();
 	void SendOk();
 	void SendError();
+
 	friend class TWebDbox;
 };
 #endif

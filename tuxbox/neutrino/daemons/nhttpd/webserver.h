@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: webserver.h,v 1.18 2002/10/18 12:35:52 thegoodguy Exp $
+        $Id: webserver.h,v 1.19 2002/12/09 17:59:27 dirch Exp $
 
         License: GPL
 
@@ -41,7 +41,7 @@ using namespace std;
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
 #define PRIVATEDOCUMENTROOT "/share/tuxbox/neutrino/httpd"
-#define PUBLICDOCUMENTROOT "/var/tmp/httpd"
+#define PUBLICDOCUMENTROOT "/var/httpd"
 
 class CWebDbox;
 class TWebserverRequest;

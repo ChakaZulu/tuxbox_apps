@@ -1,10 +1,9 @@
 /*
-	Timer-Daemon  -   DBoxII-Project
+	webserver  -   DBoxII-Project
 
-	Copyright (C) 2001 Steffen Hehn 'McClean'
-	Homepage: http://dbox.cyberphoria.org/
+	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-
+	$Id: debug.h,v 1.5 2002/12/09 17:59:27 dirch Exp $
 
 	License: GPL
 

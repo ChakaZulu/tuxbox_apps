@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski
 
-	$Id: webserver.cpp,v 1.21 2002/10/25 11:18:08 dirch Exp $
+	$Id: webserver.cpp,v 1.22 2002/12/09 17:59:27 dirch Exp $
 
 	License: GPL
 
@@ -149,8 +149,7 @@ bool CWebserver::Start()
 				aprintf("bind to port %d failed...\n",Port);
 				aprintf("%d. Versuch, warte 5 Sekunden\n",i++);
 				sleep(5);
-			}while(bind(ListenSocket, (SA *) &servaddr, sizeof(servaddr)) !=0);
-//			return false;
+			}while((bind(ListenSocket, (SA *) &servaddr, sizeof(servaddr)) !=0) && i <= 10);
 	}
 
 	if (listen(ListenSocket, 5) !=0)
@@ -181,7 +180,7 @@ CWebserverRequest	*req;
 			req->EndRequest();
 		}
 		else
-			dprintf("Error while parsing request\n");
+			dperror("Error while parsing request\n");
 
 		dprintf("-- Thread 0x06%X beendet\n",(int)pthread_self());
 		delete req;
@@ -213,11 +212,11 @@ pthread_t Threads[30];
 		memset(&cliaddr, 0, sizeof(cliaddr));
 		if ((sock_connect = accept(ListenSocket, (SA *) &cliaddr, &clilen)) == -1)		// accepting requests
 		{
-                perror("Error in accept");
-                continue;
-        }
+			perror("Error in accept");
+			continue;
+		}
 		setsockopt(sock_connect,SOL_TCP,TCP_CORK,&t,sizeof(t));
-        dprintf("nhttpd: got connection from %s\n", inet_ntoa(cliaddr.sin_addr));		// request from client arrives
+		dprintf("nhttpd: got connection from %s\n", inet_ntoa(cliaddr.sin_addr));		// request from client arrives
 
 
 		if(THREADS)		
@@ -249,12 +248,10 @@ pthread_t Threads[30];
 				}
 				else
 					dperror("Error while parsing request");
-				req->EndRequest();																// end the request
-				delete req;													
-				req = NULL;
 			}
-			else
-				dperror("Unable to read request");
+			req->EndRequest();																// end the request
+			delete req;													
+			req = NULL;
 		}
 	}
 }

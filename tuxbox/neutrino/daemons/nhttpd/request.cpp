@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.33 2002/11/08 01:01:56 dirch Exp $
+	$Id: request.cpp,v 1.34 2002/12/09 17:59:27 dirch Exp $
 
 	License: GPL
 
@@ -51,11 +51,10 @@ CWebserverRequest::CWebserverRequest(CWebserver *server)
 	FileExt = "";
 	Path = "";
 	Param_String="";
-	ContentType = "";
 	HttpStatus = 0;
 	RequestCanceled = false;
 
-	outbuf = new char[OUTBUFSIZE];
+	outbuf = new char[OUTBUFSIZE +1];
 
 }
 
@@ -71,26 +70,19 @@ CWebserverRequest::~CWebserverRequest()
 //-------------------------------------------------------------------------
 bool CWebserverRequest::Authenticate()			// check if authentication is required
 {
-	if(Parent->MustAuthenticate)
-	{
-		if(!CheckAuth())
-		{
-//			dprintf("Authenticate\n");
-			SocketWriteLn("HTTP/1.0 401 Unauthorized");
-			SocketWriteLn("WWW-Authenticate: Basic realm=\"dbox\"\r\n");
-			if (Method != M_HEAD) {
-				SocketWriteLn("Access denied.");
-			}
-			return false;
-		}
-		else
-		{
-//			dprintf("Zugriff ok\n");
-			return true;
-		}
-	}
-	else
+	if(!Parent->MustAuthenticate)
 		return true;
+
+	if(CheckAuth())
+		return true;
+	else
+	{
+		SocketWriteLn("HTTP/1.0 401 Unauthorized");
+		SocketWriteLn("WWW-Authenticate: Basic realm=\"dbox\"\r\n");
+		if (Method != M_HEAD)
+			SocketWriteLn("Access denied.");
+		return false;
+	}
 }
 
 //-------------------------------------------------------------------------
@@ -103,18 +95,8 @@ bool CWebserverRequest::CheckAuth()			// check if given username an pssword are 
 	int pos = decodet.find_first_of(':');
 	string user = decodet.substr(0,pos);
 	string passwd = decodet.substr(pos + 1, decodet.length() - pos - 1);
-//	dprintf("user: '%s' passwd: '%s'\n",user.c_str(),passwd.c_str());
 
-	if(user.compare(Parent->AuthUser) == 0 && passwd.compare(Parent->AuthPassword) == 0)
-	{
-//		dprintf("passwort ok\n");
-		return true;
-	}
-	else
-	{
-//		dprintf("passwort nicht ok\n");
-		return false;
-	}
+	return (user.compare(Parent->AuthUser) == 0 && passwd.compare(Parent->AuthPassword) == 0);
 }
 
 //-------------------------------------------------------------------------
@@ -123,14 +105,14 @@ bool CWebserverRequest::GetRawRequest()
 #define bufferlen 1024
 	char *buffer;
 	buffer = new char[bufferlen+1];
-	if((rawbuffer_len = read(Socket,buffer,bufferlen)) != -1)
+	if((rawbuffer_len = read(Socket,buffer,bufferlen)) < 1)
 	{
-		rawbuffer = string(buffer,rawbuffer_len);
 		delete[] buffer;
-		return true;
+		return false;
 	}
+	rawbuffer = string(buffer,rawbuffer_len);
 	delete[] buffer;
-	return false;
+	return true;
 }
 //-------------------------------------------------------------------------
 void CWebserverRequest::SplitParameter(string param_str)
@@ -388,11 +370,15 @@ int ende;
 			SocketWrite("Content-Type: text/plain\r\n\r\n");
 			SocketWrite("501 : Request-Method not implemented.\n");
 			HttpStatus = 501;
-//			dprintf("501 : Request-Method not implemented.\n");
+			aprintf("501 : Request-Method not implemented.\n");
 			return false;
 		}
 	}
-	return false;
+	else
+	{
+		aprintf("rawbuffer_len = %ld\n",rawbuffer_len);
+		return false;
+	}
 }
 //-------------------------------------------------------------------------
 bool CWebserverRequest::HandleUpload()				// momentan broken 
@@ -474,14 +460,10 @@ void CWebserverRequest::SendHTMLFooter()
 //-------------------------------------------------------------------------
 void CWebserverRequest::Send302(char *URI)
 {
-	SocketWrite("HTTP/1.0 302 Moved Permanently\r\nLocation: ");
-	SocketWrite(URI);
-	SocketWrite("\r\nContent-Type: text/html\r\n\r\n");
+	printf("HTTP/1.0 302 Moved Permanently\r\nLocation: %s\r\nContent-Type: text/html\r\n\r\n",URI);
 	if (Method != M_HEAD) {
 		SocketWrite("<html><head><title>Object moved</title></head><body>");
-		SocketWrite("302 : Object moved.<brk>If you dont get redirected click <a href=\"");
-		SocketWrite(URI);
-		SocketWrite("\">here</a></body></html>\n");
+		printf("302 : Object moved.<brk>If you dont get redirected click <a href=\"%s\">here</a></body></html>\n",URI);
 	}
 	HttpStatus = 302;
 }
@@ -537,19 +519,6 @@ void CWebserverRequest::RewriteURL()
 		else
 			dprintf("Kein Dateiname !\n");	
 	}
-	// Nur umschreiben wenn nicht mit /fb/ oder /control/ anfängt
-	if( (strncmp(Path.c_str(),"/fb",3) != 0) && (strncmp(Path.c_str(),"/control",8) != 0) && (strncmp(Path.c_str(),"/bouquetedit",12) != 0))	
-//	if( (Path.substr(0,3).compare("/fb") > 0) && 
-//	(Path.substr(0,8).compare("/control") > 0) && 
-//	(Path.substr(0,12).compare("/bouquetedit") > 0))	
-	{
-		if(strncmp(Path.c_str(),"/public",7) == 0)							// mit /public gelangt man in den inhalt von PublicDocumentRoor
-			Path = Parent->PublicDocumentRoot + Path.substr(7,Path.length() - 7);	
-		else
-			Path = Parent->PrivateDocumentRoot + Path;
-
-	}
-	
 
 	if(Filename.find('%') > 0)	// Wenn Sonderzeichen im Dateinamen sind
 	{
@@ -589,7 +558,6 @@ void CWebserverRequest::RewriteURL()
 bool CWebserverRequest::SendResponse()
 {
 	RewriteURL();		// Erst mal die URL umschreiben
-
 	if(Path.compare("/control/") == 0)						// api for external programs
 	{
 		return Parent->WebDbox->ControlAPI->Execute(this);
@@ -603,53 +571,8 @@ bool CWebserverRequest::SendResponse()
 		return Parent->WebDbox->WebAPI->Execute(this);
 	}
 	else
-	{
-	// Normale Datei										//normal file
-		if( (tmpint = OpenFile(Path,Filename) ) != -1 )		// Testen ob Datei auf Platte geöffnet werden kann
-		{											// Wenn Datei geöffnet werden konnte
-			if (!SocketWrite("HTTP/1.0 200 OK\r\n"))
-			{
-				close(tmpint);
-				return false;
-			}
-			HttpStatus = 200;
-			if( FileExt == "" )		// Anhand der Dateiendung den Content bestimmen
-				ContentType = "text/html";
-			else
-			{
-				if(  (FileExt.compare("html") == 0) || (FileExt.compare("htm") == 0) )
-					ContentType = "text/html";
-				else if(FileExt.compare("gif") == 0)
-					ContentType = "image/gif";
-				else if((FileExt.compare("png") == 0) || (FileExt.compare("PNG") == 0) )
-					ContentType = "image/png";
-				else if( (FileExt.compare("jpg") == 0) || (FileExt.compare("JPG") == 0) )
-					ContentType = "image/jpeg";
-				else if( (FileExt.compare("css") == 0) || (FileExt.compare("CSS") == 0) )
-					ContentType = "text/css";
-				else if(FileExt.compare("xml") == 0)
-					ContentType = "text/xml";
-				else
-					ContentType = "text/plain";
-
-			}
-			if (!SocketWrite("Content-Type: " + ContentType + "\r\n\r\n"))
-			{
-				close(tmpint);
-				return false;
-			}
-			if (Method != M_HEAD) {
-				SendOpenFile(tmpint);
-			}
-			else {
-				close(tmpint);
-			}
-		}
-		else
-		{											// Wenn Datei nicht geöffnet werden konnte
-			Send404Error();							// 404 Error senden
-		}
-		return true;
+	{														//normal file
+		return SendFile(Path,Filename);
 	}
 }
 //-------------------------------------------------------------------------
@@ -676,21 +599,16 @@ void CWebserverRequest::SendError()
 //-------------------------------------------------------------------------
 void CWebserverRequest::printf ( const char *fmt, ... )
 {
-#define OUTBUFSIZE 2048
-
-char *buffer = new char[OUTBUFSIZE];
-	buffer[0] = 0;
+	bzero(outbuf,OUTBUFSIZE);
 	va_list arglist;
 	va_start( arglist, fmt );
-//	if(arglist)
-		vsnprintf( buffer,OUTBUFSIZE, fmt, arglist );
+	vsnprintf( outbuf,OUTBUFSIZE, fmt, arglist );
 	va_end(arglist);
-//	::printf(buffer);
-	SocketWriteData(buffer,strlen(buffer));
-	delete[] buffer;
+	SocketWriteData(outbuf,strlen(outbuf));
 }
 
 
+//-------------------------------------------------------------------------
 bool CWebserverRequest::SocketWrite(char *text)
 {
 	return SocketWriteData(text, strlen(text));
@@ -705,10 +623,9 @@ bool CWebserverRequest::SocketWriteLn(char *text)
 //-------------------------------------------------------------------------
 bool CWebserverRequest::SocketWriteData( char* data, long length )
 {
-//	write(Socket, data, length );
 	if(RequestCanceled)
 		return false;
-	if((write(Socket, data, length) == -1) )
+	if((send(Socket, data, length, MSG_NOSIGNAL) == -1) )
 	{
 		perror("request canceled\n");
 		RequestCanceled = true;
@@ -718,79 +635,140 @@ bool CWebserverRequest::SocketWriteData( char* data, long length )
 }
 //-------------------------------------------------------------------------
 
+string CWebserverRequest::GetContentType(string ext)
+{
+string ctype;
+		// Anhand der Dateiendung den Content bestimmen
+	if(  (ext.compare("html") == 0) || (ext.compare("htm") == 0) )
+		ctype = "text/html";
+	else if(ext.compare("gif") == 0)
+		ctype = "image/gif";
+	else if((ext.compare("png") == 0) || (ext.compare("PNG") == 0) )
+		ctype = "image/png";
+	else if( (ext.compare("jpg") == 0) || (ext.compare("JPG") == 0) )
+		ctype = "image/jpeg";
+	else if( (ext.compare("css") == 0) || (ext.compare("CSS") == 0) )
+		ctype = "text/css";
+	else if(ext.compare("xml") == 0)
+		ctype = "text/xml";
+	else
+		ctype = "text/plain";
+	return ctype;
+}
+
+//-------------------------------------------------------------------------
+
 bool CWebserverRequest::SendFile(string path,string filename)
 {
-	if( (tmpint = OpenFile(path,filename) ) != -1 )	
-	{											
-		SendOpenFile(tmpint);
+	
+	if( (tmpint = OpenFile(path, filename) ) != -1 )		
+	{											// Wenn Datei geöffnet werden konnte
+		if (!SocketWrite("HTTP/1.0 200 OK\r\n"))
+		{
+			close(tmpint);
+			return false;
+		}
+		HttpStatus = 200;
+		
+		if (!SocketWrite("Content-Type: " + GetContentType(FileExt) + "\r\n\r\n"))
+		{
+			close(tmpint);
+			return false;
+		}
+		if (Method == M_HEAD) {
+			close(tmpint);
+			return true;
+		}
+		off_t start = 0;
+		off_t end = lseek(tmpint,0,SEEK_END);
+		int written = 0;
+		if((written = sendfile(Socket,tmpint,&start,end)) == -1)
+			perror("sendfile failed");
+		close(tmpint);
 		return true;
 	}
 	else
-		return false;
-}
-//-------------------------------------------------------------------------
-void CWebserverRequest::SendOpenFile(int file)
-{
-	if(!RequestCanceled)
 	{
-		off_t start = 0;
-		off_t end = lseek(file,0,SEEK_END);
-		sendfile(Socket,file,&start,end);
+		Send404Error();
+		return false;
 	}
-	close(file);
+}
+
+//-------------------------------------------------------------------------
+
+string CWebserverRequest::GetFileName(string path, string filename)
+{
+string tmpfilename;
+	if(path[path.length()-1] != '/')
+		tmpfilename = path + "/" + filename;
+	else
+		tmpfilename = path + filename;
+
+	if( access(string(Parent->PublicDocumentRoot + tmpfilename).c_str(),4) == 0)
+			tmpfilename = Parent->PublicDocumentRoot + tmpfilename;
+	else if(access(string(Parent->PrivateDocumentRoot + tmpfilename).c_str(),4) == 0)		
+			tmpfilename = Parent->PrivateDocumentRoot + tmpfilename;
+	else
+	{
+		return "";
+	}
+	return tmpfilename;
 }
 //-------------------------------------------------------------------------
 int CWebserverRequest::OpenFile(string path, string filename)
 {
 	struct stat statbuf;
-//tmpint als file und
-//tmpstring als pathfilename missbraucht
-	tmpint = -1;
-	if(path[path.length()-1] != '/')
-		tmpstring = path + "/" + filename;
-	else
-		tmpstring = path + filename;
+	int  fd= -1;
+
+	tmpstring = GetFileName(path, filename);
+
 	if(tmpstring.length() > 0)
 	{
-		tmpint = open( tmpstring.c_str(), O_RDONLY );
-		if (tmpint<=0)
+		fd = open( tmpstring.c_str(), O_RDONLY );
+		if (fd<=0)
 		{
-			aprintf("cannot open file %s\n", tmpstring.c_str());
+			aprintf("cannot open file %s: ", filename.c_str());
 			dperror("");
 		}
-		fstat(tmpint,&statbuf);
+		fstat(fd,&statbuf);
 		if (!S_ISREG(statbuf.st_mode)) {
-			close(tmpint);
-			tmpint = -1;
+			close(fd);
+			fd = -1;
 		}
 	}
-	return tmpint;
+	return fd;
 }
 
 
 //-------------------------------------------------------------------------
-//-------------------------------------------------------------------------
 
-bool CWebserverRequest::ParseFile(string file,CStringList params)		// replace all parameters if file
+bool CWebserverRequest::ParseFile(string filename,CStringList params)		// replace all parameters if file
 {
-	FILE * f;
+	FILE * fd;
 	char zeile[1024];
 	if(RequestCanceled)
 		return false;
-	if((f = fopen(file.c_str(),"r")) == NULL)
+	tmpstring = GetFileName("/",filename);
+	if(tmpstring.length() > 0)
 	{
-		aprintf("Parse file open error: '%s'\n",file.c_str());
-		return false;
-	}
-	while(!feof(f))
-	{
-		if(fgets(zeile,sizeof(zeile),f))
+		if((fd = fopen(tmpstring.c_str(),"r")) == NULL)
 		{
-			SocketWrite(ParseLine(zeile,params));
+			perror("Parse file open error");
+			return false;
 		}
-	};
-	fclose(f);
-	return true;
+
+		while(!feof(fd))
+		{
+			if(fgets(zeile,sizeof(zeile),fd))
+			{
+				SocketWrite(ParseLine(zeile,params));
+			}
+		};
+		fclose(fd);
+		return true;
+	}
+	else
+		return false;
 }
 //-------------------------------------------------------------------------
 
@@ -817,40 +795,40 @@ string CWebserverRequest::ParseLine(string line,CStringList params)		// replaces
 // Decode URLEncoded string
 void CWebserverRequest::URLDecode(string &encodedString) 
 {
-  char *newString=NULL;
-  const char *string = encodedString.c_str();
-  int count=0;
-  char hex[3]={'\0'};
-  unsigned long iStr;
+char *newString=NULL;
+const char *string = encodedString.c_str();
+int count=0;
+char hex[3]={'\0'};
+unsigned long iStr;
 
-  count = 0;
-  if((newString = (char *)malloc(sizeof(char) * strlen(string) + 1) ) != NULL)
+	count = 0;
+	if((newString = (char *)malloc(sizeof(char) * strlen(string) + 1) ) != NULL)
 	{
 
-	  /* copy the new sring with the values decoded */
-	  while(string[count]) /* use the null character as a loop terminator */
+	/* copy the new sring with the values decoded */
+		while(string[count]) /* use the null character as a loop terminator */
 		{
-		  if (string[count] == '%')
+			if (string[count] == '%')
 			{
-			  hex[0]=string[count+1];
-			  hex[1]=string[count+2];
-			  hex[2]='\0';
-			  iStr = strtoul(hex,NULL,16); /* convert to Hex char */
-			  newString[count]=(char)iStr;
-			  count++; 
-			  string = string + 2; /* need to reset the pointer so that we don't write hex out */
+				hex[0]=string[count+1];
+				hex[1]=string[count+2];
+				hex[2]='\0';
+				iStr = strtoul(hex,NULL,16); /* convert to Hex char */
+				newString[count]=(char)iStr;
+				count++; 
+				string = string + 2; /* need to reset the pointer so that we don't write hex out */
 			}
-		  else
+			else
 			{
 				if (string[count] == '+')
 					newString[count] = ' ';
 				else
 					newString[count] = string[count];
-			  count++;
+				count++;
 			}
-	  } /* end of while loop */
+		} /* end of while loop */
 
-	  newString[count]='\0'; /* when done copying the string,need to terminate w/ null char */
+		newString[count]='\0'; /* when done copying the string,need to terminate w/ null char */
 	}
 	else
 	{

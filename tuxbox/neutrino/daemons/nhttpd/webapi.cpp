@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.22 2002/12/02 13:49:55 dirch Exp $
+	$Id: webapi.cpp,v 1.23 2002/12/09 17:59:27 dirch Exp $
 
 	License: GPL
 
@@ -262,7 +262,7 @@ int mode;
 			Parent->Controld->setVolume(vol);
 			dprintf("Volume minus: %d\n",vol);
 		}
-		else if( request->ParameterList["standby"] != "")
+		else if( request->ParameterList["1"] == "standby")
 		{
 			Parent->EventServer->sendEvent(NeutrinoMessages::STANDBY_TOGGLE, CEventServer::INITID_HTTPD);
 		}
@@ -366,7 +366,7 @@ bool CWebAPI::Switch(CWebserverRequest* request)
 			if(!request->Authenticate())
 				return false;
 			request->SendPlainHeader("text/html");
-			request->SendFile(Parent->Parent->PrivateDocumentRoot,"/shutdown.html");	// send shutdown page
+			request->SendFile("/","shutdown.html");	// send shutdown page
 			request->EndRequest();
 			sleep(1);															// wait 
 			Parent->EventServer->sendEvent(NeutrinoMessages::SHUTDOWN, CEventServer::INITID_HTTPD);
@@ -387,7 +387,7 @@ bool CWebAPI::ShowDboxMenu(CWebserverRequest* request)
 {
 	CStringList params;
 	params["BoxType"] = Parent->Dbox_Hersteller[Parent->Controld->getBoxType()];
-	request->ParseFile(Parent->Parent->PrivateDocumentRoot + "/dbox.html",params);
+	request->ParseFile("dbox.html",params);
 	return true;
 }
 
@@ -442,7 +442,7 @@ bool CWebAPI::ShowCurrentStreamInfo(CWebserverRequest* request)
 		case 4: params["AudioType"] = "stereo"; break;
 		default: params["AudioType"] = "unknown";
 	}
-	request->ParseFile(Parent->Parent->PrivateDocumentRoot + "/settings.html",params);
+	request->ParseFile("settings.html",params);
 	return true;
 }
 
@@ -451,7 +451,9 @@ bool CWebAPI::ShowEventList(CWebserverRequest *request,t_channel_id channel_id)
 {
 char classname;
 int pos = 0;
-	
+char mode;
+
+	mode = (Parent->Zapit->getMode() == CZapitClient::MODE_RADIO)?'R':'T';
 	Parent->eList = Parent->Sectionsd->getEventsServiceKey(channel_id);
 	CChannelEventList::iterator eventIterator;
 	request->SendHTMLHeader("DBOX2-Neutrino Channellist");
@@ -469,8 +471,8 @@ int pos = 0;
 		strftime(zbuffer,20,"%d.%m. %H:%M",mtime);
 		request->printf("<TR VALIGN=\"middle\" HEIGHT=\"%d\" CLASS=\"%c\">\n",(eventIterator->duration > 20 * 60)?(eventIterator->duration / 60):20 , classname);
 		request->printf("<TD><NOBR>");
-		request->printf("<A HREF=\"/fb/timer.dbox2?action=new&type=%d&alarm=%u&stop=%u&channel_id=%u\">&nbsp;<IMG SRC=\"/images/record.gif\" WIDTH=\"16\" HEIGHT=\"16\" ALT=\"Sendung aufnehmen\"></A>&nbsp;\n",CTimerd::TIMER_RECORD,(uint) eventIterator->startTime,(uint) eventIterator->startTime + eventIterator->duration,channel_id); 
-		request->printf("<A HREF=\"/fb/timer.dbox2?action=new&type=%d&alarm=%u&channel_id=%u\">&nbsp;<IMG SRC=\"/images/timer.gif\" WIDTH=\"21\" HEIGHT=\"21\" ALT=\"Timer setzen\"></A>&nbsp;\n",CTimerd::TIMER_ZAPTO,(uint) eventIterator->startTime,channel_id); 
+		request->printf("<A HREF=\"/fb/timer.dbox2?action=new&type=%d&alarm=%u&stop=%u&channel_id=%c%u\">&nbsp;<IMG SRC=\"/images/record.gif\" WIDTH=\"16\" HEIGHT=\"16\" ALT=\"Sendung aufnehmen\"></A>&nbsp;\n",CTimerd::TIMER_RECORD,(uint) eventIterator->startTime,(uint) eventIterator->startTime + eventIterator->duration,mode,channel_id); 
+		request->printf("<A HREF=\"/fb/timer.dbox2?action=new&type=%d&alarm=%u&channel_id=%c%u\">&nbsp;<IMG SRC=\"/images/timer.gif\" WIDTH=\"21\" HEIGHT=\"21\" ALT=\"Timer setzen\"></A>&nbsp;\n",CTimerd::TIMER_ZAPTO,(uint) eventIterator->startTime,mode,channel_id); 
 		request->printf("</NOBR></TD><TD><NOBR>%s&nbsp;<font size=\"-2\">(%d min)</font>&nbsp;</NOBR></TD>\n", zbuffer, eventIterator->duration / 60);
 		request->printf("<TD><A CLASS=\"elist\" HREF=epg.dbox2?eventid=%llx>%s</A></TD>\n</TR>\n", eventIterator->eventID, eventIterator->description.c_str());
 		if(eventIterator->text.length() > 0)
@@ -572,7 +574,7 @@ char volbuf[5];
 			params["MUTE_ICON1"] = " ";
 		}
 		
-		request->ParseFile(Parent->Parent->PrivateDocumentRoot + "/controlpanel.html",params);
+		request->ParseFile("controlpanel.html",params);
 	}
 	else
 	{
@@ -581,7 +583,7 @@ char volbuf[5];
 			params["MUTE"] = "mute";
 		else
 			params["MUTE"] = "muted";
-		request->ParseFile(Parent->Parent->PrivateDocumentRoot + "/controlpanel_old.html", params);
+		request->ParseFile("controlpanel_old.html", params);
 	}
 	return true;
 
@@ -594,7 +596,7 @@ bool CWebAPI::ShowEPG(CWebserverRequest *request,string Title, string Info1, str
 	params["Title"] = (Title != "")?Title:"Kein EPG vorhanden";
 	params["Info1"] = (Info1 != "")?Info1:"keine ausführlichen Informationen verfügbar";
 	params["Info2"] = (Info2 != "")?Info2:" ";
-	request->ParseFile(Parent->Parent->PrivateDocumentRoot + "/epg.html",params);
+	request->ParseFile("epg.html",params);
 	return true;
 }
 //-------------------------------------------------------------------------
@@ -618,7 +620,7 @@ bool CWebAPI::ShowEpg(CWebserverRequest *request,string EpgID,string Startzeit)
 	const char * idstr = EpgID.c_str();
 	sscanf(idstr, "%llx", &epgid);
 
-	if(Startzeit.length() > 0)							
+	if(Startzeit.length() > 0)
 	{
 		CEPGData *epg = new CEPGData;
 		const char * timestr = Startzeit.c_str();
