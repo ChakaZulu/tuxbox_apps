@@ -1,5 +1,5 @@
 /*
- * $Id: streamts.c,v 1.2 2002/03/06 05:17:21 obi Exp $
+ * $Id: streamts.c,v 1.3 2002/03/06 05:36:31 obi Exp $
  *
  * inetd style daemon for streaming transport streams
  *
@@ -40,7 +40,6 @@ int setPesFilter (int pid, dmxPesType_t type)
 
 	switch(type)
 	{
-	case DMX_PES_USER:
 	case DMX_PES_AUDIO:
 	case DMX_PES_VIDEO:
 	case DMX_PES_TELETEXT:
@@ -128,7 +127,7 @@ int main(int argc, char **argv)
 		//bp += 6;
 
 		if ((demuxfd[demuxfd_count] = setPesFilter(pid, type)) < 0)
-			return demuxfd_count;
+			return demuxfd[demuxfd_count];
 		else
 			demuxfd_count++;
 	}
