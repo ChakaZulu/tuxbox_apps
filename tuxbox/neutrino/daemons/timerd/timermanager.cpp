@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.75 2004/12/25 23:56:37 chakazulu Exp $
+   $Id: timermanager.cpp,v 1.76 2005/01/12 20:18:33 chakazulu Exp $
 
 	License: GPL
 
@@ -31,6 +31,7 @@
 
 #include <timermanager.h>
 #include <timerdclient/timerdclient.h>
+#include <timerdclient/timerdmsg.h>
 #include <debug.h>
 #include <sectionsdclient/sectionsdclient.h>
 
@@ -239,8 +240,21 @@ bool CTimerManager::listEvents(CTimerEventMap &Events)
 
 	return true;
 }
+//------------------------------------------------------------
 
-int CTimerManager::modifyEvent(int eventID, time_t announceTime, time_t alarmTime, time_t stopTime, uint repeatCount, CTimerd::CTimerEventRepeat evrepeat)
+CTimerd::CTimerEventTypes* CTimerManager::getEventType(int eventID) 
+{
+	if(events.find(eventID)!=events.end())
+	{
+		return &(events[eventID]->eventType);
+	}
+	else
+		return NULL;
+	
+}
+//------------------------------------------------------------
+
+int CTimerManager::modifyEvent(int eventID, time_t announceTime, time_t alarmTime, time_t stopTime, uint repeatCount, CTimerd::CTimerEventRepeat evrepeat, CTimerd::responseGetTimer& data)
 {
 	if(events.find(eventID)!=events.end())
 	{
@@ -255,6 +269,26 @@ int CTimerManager::modifyEvent(int eventID, time_t announceTime, time_t alarmTim
 			// Weekdays without weekday specified reduce to once
 			event->eventRepeat=CTimerd::TIMERREPEAT_ONCE;
 		event->repeatCount = repeatCount;
+		switch (event->eventType)
+		{
+			case CTimerd::TIMER_SHUTDOWN:						
+			case CTimerd::TIMER_NEXTPROGRAM:
+			case CTimerd::TIMER_ZAPTO:
+			case CTimerd::TIMER_STANDBY:
+			case CTimerd::TIMER_REMIND:
+			case CTimerd::TIMER_SLEEPTIMER:
+			case CTimerd::TIMER_EXEC_PLUGIN:
+			case CTimerd::TIMER_IMMEDIATE_RECORD:
+				break;
+			case CTimerd::TIMER_RECORD:
+			{
+				(static_cast<CTimerEvent_Record*>(event))->recordingDir = data.recordingDir;
+				break;
+			}
+			default:
+				break;
+		}
+		
 		m_saveEvents=true;
 		return eventID;
 	}
@@ -916,13 +950,14 @@ CTimerEvent_Record::CTimerEvent_Record(time_t announceTime, time_t alarmTime, ti
 				       event_id_t epgID, 
 				       time_t epg_starttime, const std::string apids,
 				       CTimerd::CTimerEventRepeat evrepeat,
-				       uint repeatcount) :
+				       uint repeatcount, const std::string recDir) :
 	CTimerEvent(getEventType(), announceTime, alarmTime, stopTime, evrepeat, repeatcount)
 {
 	eventInfo.epgID = epgID;
 	eventInfo.epg_starttime = epg_starttime;
 	eventInfo.channel_id = channel_id;
 	eventInfo.apids = apids;
+	recordingDir = recDir;
 }
 //------------------------------------------------------------
 CTimerEvent_Record::CTimerEvent_Record(CConfigFile *config, int iId):
@@ -935,12 +970,14 @@ CTimerEvent_Record::CTimerEvent_Record(CConfigFile *config, int iId):
 	eventInfo.epg_starttime = config->getInt64("EVENT_INFO_EPG_STARTTIME_"+id);
 	eventInfo.channel_id = config->getInt64("EVENT_INFO_CHANNEL_ID_"+id);
 	eventInfo.apids = config->getString("EVENT_INFO_APIDS_"+id);
+	recordingDir = config->getString("REC_DIR_"+id);
 }
 //------------------------------------------------------------
 void CTimerEvent_Record::fireEvent()
 {
 	CTimerd::RecordingInfo ri=eventInfo;
 	ri.eventID=eventID;
+	strcpy(ri.recordingDir,recordingDir.c_str());
 	CTimerManager::getInstance()->getEventServer()->sendEvent(CTimerdClient::EVT_RECORD_START,
 								  CEventServer::INITID_TIMERD,
 								  &ri,
@@ -951,7 +988,10 @@ void CTimerEvent_Record::fireEvent()
 void CTimerEvent_Record::announceEvent()
 {
 	Refresh();
-	CTimerManager::getInstance()->getEventServer()->sendEvent(CTimerdClient::EVT_ANNOUNCE_RECORD, CEventServer::INITID_TIMERD);
+	CTimerdMsg::commandRecordDir s;
+	strcpy(s.recDir,recordingDir.c_str());
+	CTimerManager::getInstance()->getEventServer()->sendEvent(CTimerdClient::EVT_ANNOUNCE_RECORD, CEventServer::INITID_TIMERD,
+								  &s,sizeof(CTimerdMsg::commandRecordDir));
 	dprintf("Record announcement\n"); 
 }
 //------------------------------------------------------------
@@ -979,6 +1019,7 @@ void CTimerEvent_Record::saveToConfig(CConfigFile *config)
 	config->setInt64("EVENT_INFO_EPG_STARTTIME_"+id, eventInfo.epg_starttime);
 	config->setInt64("EVENT_INFO_CHANNEL_ID_"+id, eventInfo.channel_id);
 	config->setString("EVENT_INFO_APIDS_"+id, eventInfo.apids);
+	config->setString("REC_DIR_"+id,recordingDir);
 }
 //------------------------------------------------------------
 void CTimerEvent_Record::Reschedule()
@@ -1136,9 +1177,9 @@ CTimerEvent(CTimerd::TIMER_REMIND, config, iId)
 void CTimerEvent_Remind::fireEvent()
 {
 	CTimerManager::getInstance()->getEventServer()->sendEvent(
-																				CTimerdClient::EVT_REMIND,
-																				CEventServer::INITID_TIMERD,
-																				message,REMINDER_MESSAGE_MAXLEN);
+		CTimerdClient::EVT_REMIND,
+		CEventServer::INITID_TIMERD,
+		message,REMINDER_MESSAGE_MAXLEN);
 }
 
 //------------------------------------------------------------
@@ -1178,7 +1219,7 @@ void CTimerEvent_ExecPlugin::fireEvent()
 	CTimerManager::getInstance()->getEventServer()->sendEvent(
 		CTimerdClient::EVT_EXEC_PLUGIN,
 		CEventServer::INITID_TIMERD,
-		name,EXEC_PLUGIN_MESSAGE_MAXLEN);
+		name,EXEC_PLUGIN_NAME_MAXLEN);
 }
 
 //------------------------------------------------------------

@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.h,v 1.41 2004/12/25 23:56:37 chakazulu Exp $
+	$Id: timermanager.h,v 1.42 2005/01/12 20:18:33 chakazulu Exp $
 
 	License: GPL
 
@@ -114,14 +114,14 @@ class CTimerEvent_Record : public CTimerEvent
 {
  public:
 	CTimerd::EventInfo eventInfo;
-
+	std::string recordingDir;
 	CTimerEvent_Record(time_t announceTime, time_t alarmTime, time_t stopTime, 
 			   t_channel_id channel_id,
 			   event_id_t epgID = 0,
 			   time_t epg_starttime = 0, 
 			   std::string apids = "",
 			   CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE,
-			   uint repeatcount = 1);
+			   uint repeatcount = 1, const std::string recDir = "");
 	CTimerEvent_Record(CConfigFile *config, int iId);
 	virtual ~CTimerEvent_Record(){};
 	virtual CTimerd::CTimerEventTypes getEventType(void) const { return CTimerd::TIMER_RECORD; };
@@ -192,7 +192,7 @@ class CTimerEvent_Remind : public CTimerEvent
 class CTimerEvent_ExecPlugin : public CTimerEvent
 {
  public:
-	char name[EXEC_PLUGIN_MESSAGE_MAXLEN];
+	char name[EXEC_PLUGIN_NAME_MAXLEN];
 
 	CTimerEvent_ExecPlugin(time_t announceTime,
 			       time_t alarmTime, 
@@ -231,7 +231,9 @@ public:
 	bool stopEvent(int eventID);
 	CTimerEvent* getNextEvent();
 	bool listEvents(CTimerEventMap &Events);
-	int modifyEvent(int eventID, time_t announceTime, time_t alarmTime, time_t stopTime, uint repeatcount, CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE);
+	CTimerd::CTimerEventTypes *getEventType(int eventID);
+//	int modifyEvent(int eventID, time_t announceTime, time_t alarmTime, time_t stopTime, uint repeatcount, CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE);
+	int modifyEvent(int eventID, time_t announceTime, time_t alarmTime, time_t stopTime, uint repeatcount, CTimerd::CTimerEventRepeat evrepeat, CTimerd::responseGetTimer& data);
 	int modifyEvent(int eventID, std::string apids);
 	int rescheduleEvent(int eventID, time_t announceTime, time_t alarmTime, time_t stopTime);
 	void saveEventsToConfig();
