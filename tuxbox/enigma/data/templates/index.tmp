@@ -17,7 +17,8 @@
  
  a.normal  { color:#ffffff; font-size:10pt; font-family: tahoma, arial; }
  a.white   { color:#ffffff; font-size:14pt; font-family: tahoma, arial; }
- 
+ a.small   { color:#ffffff; font-size:8pt; font-family: tahoma, arial; } 
+
  a:link    { text-decoration:none; }
  a:visited { text-decoration:none; }
  a:active  { text-decoration:none; }
@@ -67,6 +68,11 @@
   parent.setTimeout("reload()", 3000);
  }
  
+ function openEPG()
+ {
+  win=window.open("/cgi-bin/getcurrentepg", "epg", "width=400, height=200, left=0, top=0");
+  win.focus();
+ } 
 </script>
 </head>
 <body bgcolor="#000000" text="#c0c0c0" marginwidth="0" marginheight="0">
@@ -112,7 +118,7 @@
      <td width="100%" align="right">#MODE#</td>
      </tr>
      <tr>
-     <td width="100%" align="left">#COP#<br><span class="servicename">#SERVICENAME#</span><br>#EIT#</td>
+     <td width="100%" align="left">#COP#<br><span class="servicename">#SERVICENAME#</span> <u><a class="small" href="javascript:openEPG()">epg</a></u><br>#EIT#</td>
      </tr>
     </table>
    </td>

@@ -11,6 +11,8 @@
 #include "dvb.h"
 #include "edvb.h"
 
+#include "epgcache.h"
+
 #include <config.h>
 #include <core/system/econfig.h>
 
@@ -730,6 +732,52 @@ static eString getbouq(eString request, eString path, eString opt, eHTTPConnecti
 	return result;
 }
 
+static eString getcurepg(eString request, eString path, eString opt, eHTTPConnection *content)
+{
+	eString result("");
+	eString tmp;
+	eService* current;
+
+	content->local_header["Content-Type"]="text/html";
+
+
+	current=eDVB::getInstance()->service;
+	if(!current)
+		return eString("epg not ready yet");
+
+	result+=eString("<html><head><title>epgview</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/epgview.css\"></head><body bgcolor=#000000>");
+	result+=eString("<span class=\"title\">");
+	result+=eString(current->service_name);
+	result+=eString("</span>");
+	result+=eString("<br>\n");
+
+	const eventMap* evt=eEPGCache::getInstance()->getEventMap(current->original_network_id, current->service_id);
+	if(!evt)
+		return eString("epg not ready yet");
+
+	eventMap::const_iterator It;
+
+	for(It=evt->begin(); It!= evt->end(); It++)
+	{
+		EITEvent event(*It->second);
+		for(ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
+		{
+			Descriptor *descriptor=*d;
+			if(descriptor->Tag()==DESCR_SHORT_EVENT)
+			{
+				tm* t = localtime(&event.start_time);
+				tmp.sprintf("<span class=\"epg\">%02d.%02d - %02d:%02d ", t->tm_mday, t->tm_mon+1, t->tm_hour, t->tm_min);
+				result+=tmp;
+				result+=((ShortEventDescriptor*)descriptor)->event_name;
+				result+=eString("</span><br>\n");
+			}
+		}
+
+	}
+	result+="</body></html>";
+	return result;
+}
+
 void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 {
 	dyn_resolver->addDyn("GET", "/", web_root);
@@ -746,7 +794,9 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/audio.m3u", audiom3u);
 	dyn_resolver->addDyn("GET", "/version", version);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getbouquets", getbouq);
+	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg", getcurepg);
 	dyn_resolver->addDyn("GET", "/channels/getcurrent", channels_getcurrent);
+
 /*	dyn_resolver->addDyn("GET", "/channels/numberchannels", channels_numberchannels);
 	dyn_resolver->addDyn("GET", "/channels/gethtmlchannels", channels_gethtmlchannels);
 	dyn_resolver->addDyn("GET", "/channels/getchannels", channels_getgetchannels);
