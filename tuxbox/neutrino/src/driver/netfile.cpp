@@ -928,6 +928,7 @@ FILE *f_open(const char *filename, const char *acctype)
 			    
 			    } while(!ptr && retries > 0);
 			    
+
 			    /* extract the servers from the received playlist */
 			    if(!ptr)
 			    {
@@ -938,14 +939,17 @@ FILE *f_open(const char *filename, const char *acctype)
 			    
 			    for( i=0; ((ptr != NULL) && (i<25)); ptr = strstr(ptr, "http://") )
 			    {
-			      strncpy(servers[i], ptr, 1023);
-			      ptr2 = strchr(servers[i], '\n');
-			      if(ptr2) *ptr2 = 0;
-			      ptr = ptr2 + 1;
-			      dprintf(stderr, "server[%d]: %s\n", i, servers[i]);
-			      i++;
+					strncpy(servers[i], ptr, 1023);
+					ptr2 = strchr(servers[i], '\n');
+					if(ptr2) *ptr2 = 0;
+					// change ptr so that next strstr searches in buf and not in servers[i]
+					ptr = strchr(ptr,'\n');
+					if (ptr != NULL)
+						ptr++;
+					dprintf(stderr, "server[%d]: %s\n", i, servers[i]);
+					i++;
 			    }
-			    
+
 			    /* try to connect to all servers until we find one that */
 			    /* is willing to serve us */
 			    for(i=0, fd = NULL; ((fd == NULL) && (i<25)); i++)
