@@ -1,4 +1,22 @@
-function zapChannelKeyUP()
+function zapBouquetKeyUp()
+{
+	var key = window.event.keyCode;
+	if (key == 33 || key == 38)
+	{
+		bouquetBackward();
+		document.channelselector.bouquet.focus();
+	}
+	else
+	if (key == 34 || key == 40)
+	{
+		bouquetForward();
+		document.channelselector.bouquet.focus();
+	}
+	else 
+	if (key == 39)
+		document.channelselector.channel.focus();
+}
+function zapChannelKeyUp()
 {
 	var key = window.event.keyCode;
 	if (key == 13)
