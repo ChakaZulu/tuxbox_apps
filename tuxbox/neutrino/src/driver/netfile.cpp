@@ -139,7 +139,7 @@ magic_t known_magic[] =
 {
 	{{0xFF, 0xFF, 0xFF, 0x00}, {'I' , 'D' , '3' , 0x00}, "audio/mpeg"},
 	{{0xFF, 0xFF, 0xFF, 0x00}, {'O' , 'g' , 'g' , 0x00}, "audio/ogg" },
-	{{0xFF, 0xFF, 0x00, 0x00}, {0xFF, 0xFA, 0x00, 0x00}, "audio/mpeg"}
+	{{0xFF, 0xFE, 0x00, 0x00}, {0xFF, 0xFA, 0x00, 0x00}, "audio/mpeg"}
 };
 
 #if 0
@@ -1013,13 +1013,11 @@ FILE *f_open(const char *filename, const char *acctype)
 	  /* magic, if there is any */
 	  for (int i = 0; i < known_magic_count; i++)
 	  {
-		  for (int j = 0; j < 4; j++)
-			  if ((magic[j] & known_magic[i].mask[j]) != known_magic[i].mode[j])
-				  goto next;
-		  f_type(fd, (char *)known_magic[i].type);
-		  goto magic_found;
-	  next:
-		  ;
+		  if ((((uint32_t)magic) & (uint32_t)known_magic[i].mask) == (uint32_t)known_magic[i].mode)
+		  {
+			  f_type(fd, (char *)known_magic[i].type);
+			  goto magic_found;
+		  }
 	  }
 
 	  /* stage two: try to determine the filetype from the file name */
