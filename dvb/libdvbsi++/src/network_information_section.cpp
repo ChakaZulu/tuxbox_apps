@@ -1,5 +1,5 @@
 /*
- * $Id: network_information_section.cpp,v 1.2 2004/02/13 17:51:08 obi Exp $
+ * $Id: network_information_section.cpp,v 1.3 2004/05/31 21:21:23 obi Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -29,7 +29,7 @@ TransportStreamInfo::TransportStreamInfo(const uint8_t * const buffer)
 	transportDescriptorsLength = DVB_LENGTH(&buffer[4]);
 
 	for (size_t i = 6; i < transportDescriptorsLength + 6; i += buffer[i + 1] + 2)
-		descriptor(&buffer[i]);
+		descriptor(&buffer[i], SCOPE_SI);
 }
 
 uint16_t TransportStreamInfo::getTransportStreamId(void) const
@@ -47,7 +47,7 @@ NetworkInformationSection::NetworkInformationSection(const uint8_t * const buffe
 	networkDescriptorsLength = DVB_LENGTH(&buffer[8]);
 
 	for (size_t i = 10; i < networkDescriptorsLength + 10; i += buffer[i + 1] + 2)
-		descriptor(&buffer[i]);
+		descriptor(&buffer[i], SCOPE_SI);
 
 	transportStreamLoopLength = DVB_LENGTH(&buffer[networkDescriptorsLength + 10]);
 

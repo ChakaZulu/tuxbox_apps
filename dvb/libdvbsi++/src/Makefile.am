@@ -10,8 +10,14 @@ libdvbsi___la_SOURCES = \
 	ancillary_data_descriptor.cpp \
 	announcement_support_descriptor.cpp \
 	audio_stream_descriptor.cpp \
+	application_descriptor.cpp \
+	application_icons_descriptor.cpp \
+	application_identifier.cpp \
 	application_information_section.cpp \
+	application_name_descriptor.cpp \
+	application_profile.cpp \
 	application_signalling_descriptor.cpp \
+	application_storage_descriptor.cpp \
 	bouquet_association_section.cpp \
 	bouquet_name_descriptor.cpp \
 	ca_descriptor.cpp \
@@ -19,41 +25,64 @@ libdvbsi___la_SOURCES = \
 	ca_message_section.cpp \
 	ca_program_map_section.cpp \
 	ca_section.cpp \
-	ca_system_descriptor.cpp \
 	cable_delivery_system_descriptor.cpp \
+	caching_priority_descriptor.cpp \
+	carousel_identifier_descriptor.cpp \
 	cell_frequency_link_descriptor.cpp \
 	cell_list_descriptor.cpp \
 	component_descriptor.cpp \
+	compressed_module_descriptor.cpp \
 	content_descriptor.cpp \
+	content_type_descriptor.cpp \
 	country_availability_descriptor.cpp \
+	crc32_descriptor.cpp \
 	data_broadcast_descriptor.cpp \
 	data_broadcast_id_descriptor.cpp \
+	delegated_application_descriptor.cpp \
 	descriptor.cpp \
 	descriptor_container.cpp \
+	dii_location_descriptor.cpp \
+	dvb_html_application_boundary_descriptor.cpp \
+	dvb_html_application_descriptor.cpp \
+	dvb_html_application_location_descriptor.cpp \
+	dvb_j_application_descriptor.cpp \
+	dvb_j_application_location_descriptor.cpp \
+	est_download_time_descriptor.cpp \
 	event_information_section.cpp \
+	external_application_authorisation_descriptor.cpp \
 	extended_event_descriptor.cpp \
 	frequency_list_descriptor.cpp \
+	group_link_descriptor.cpp \
+	info_descriptor.cpp \
+	ip_signaling_descriptor.cpp \
 	iso639_language_descriptor.cpp \
+	label_descriptor.cpp \
 	linkage_descriptor.cpp \
 	local_time_offset_descriptor.cpp \
+	location_descriptor.cpp \
 	long_crc_section.cpp \
 	long_section.cpp \
+	module_link_descriptor.cpp \
 	mosaic_descriptor.cpp \
 	multilingual_bouquet_name_descriptor.cpp \
 	multilingual_component_descriptor.cpp \
 	multilingual_network_name_descriptor.cpp \
 	multilingual_service_name_descriptor.cpp \
+	name_descriptor.cpp \
 	network_information_section.cpp \
 	network_name_descriptor.cpp \
 	nvod_reference_descriptor.cpp \
 	parental_rating_descriptor.cpp \
 	pdc_descriptor.cpp \
+	plugin_descriptor.cpp \
+	prefetch_descriptor.cpp \
 	private_data_specifier_descriptor.cpp \
 	program_association_section.cpp \
 	program_map_section.cpp \
 	satellite_delivery_system_descriptor.cpp \
 	service_description_section.cpp \
 	service_descriptor.cpp \
+	service_identifier_descriptor.cpp \
 	service_list_descriptor.cpp \
 	service_move_descriptor.cpp \
 	short_crc_section.cpp \
@@ -69,6 +98,8 @@ libdvbsi___la_SOURCES = \
 	time_date_section.cpp \
 	time_offset_section.cpp \
 	time_shifted_service_descriptor.cpp \
+	transport_protocol_descriptor.cpp \
+	type_descriptor.cpp \
 	vbi_data_descriptor.cpp \
 	vbi_teletext_descriptor.cpp \
 	video_stream_descriptor.cpp \

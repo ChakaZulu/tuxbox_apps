@@ -1,5 +1,5 @@
 /*
- * $Id: packet_id.h,v 1.1 2004/02/13 15:27:38 obi Exp $
+ * $Id: packet_id.h,v 1.2 2004/05/31 21:21:22 obi Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -23,7 +23,7 @@
 #define __packet_id_h__
 
 enum PacketId {
-	/* ETSI EN 300 468 V1.5.1 (2003-01) */
+	/* ETSI EN 300 468 V1.5.1 (2003-05) */
 	PID_PAT		= 0x0000,
 	PID_CAT		= 0x0001,
 	PID_TSDT	= 0x0002,

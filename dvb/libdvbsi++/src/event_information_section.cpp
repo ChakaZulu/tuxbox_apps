@@ -1,5 +1,5 @@
 /*
- * $Id: event_information_section.cpp,v 1.2 2004/02/13 17:51:08 obi Exp $
+ * $Id: event_information_section.cpp,v 1.3 2004/05/31 21:21:23 obi Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -33,7 +33,7 @@ Event::Event(const uint8_t * const buffer)
 	descriptorsLoopLength = DVB_LENGTH(&buffer[10]);
 
 	for (size_t i = 12; i < descriptorsLoopLength + 12; i += buffer[i + 1] + 2)
-		descriptor(&buffer[i]);
+		descriptor(&buffer[i], SCOPE_SI);
 }
 
 uint16_t Event::getEventId(void) const

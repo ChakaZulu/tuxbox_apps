@@ -1,5 +1,5 @@
 /*
- * $Id: ca_section.cpp,v 1.1 2004/02/13 15:27:46 obi Exp $
+ * $Id: ca_section.cpp,v 1.2 2004/05/31 21:21:23 obi Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -24,6 +24,6 @@
 ConditionalAccessSection::ConditionalAccessSection(const uint8_t * const buffer) : LongCrcSection(buffer)
 {
 	for (size_t i = 8; i < sectionLength - 1; i += buffer[i + 1] + 2)
-		descriptor(&buffer[i]);
+		descriptor(&buffer[i], SCOPE_SI);
 }
 

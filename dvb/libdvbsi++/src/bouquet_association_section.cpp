@@ -1,5 +1,5 @@
 /*
- * $Id: bouquet_association_section.cpp,v 1.2 2004/02/13 17:51:07 obi Exp $
+ * $Id: bouquet_association_section.cpp,v 1.3 2004/05/31 21:21:23 obi Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -29,7 +29,7 @@ BouquetAssociation::BouquetAssociation(const uint8_t * const buffer)
 	transportStreamLoopLength = DVB_LENGTH(&buffer[4]);
 
 	for (size_t i = 6; i < transportStreamLoopLength + 6; i += buffer[i + 1] + 2)
-		descriptor(&buffer[i]);
+		descriptor(&buffer[i], SCOPE_SI);
 }
 
 BouquetAssociationSection::BouquetAssociationSection(const uint8_t * const buffer) : LongCrcSection(buffer)
@@ -37,7 +37,7 @@ BouquetAssociationSection::BouquetAssociationSection(const uint8_t * const buffe
 	bouquetDescriptorsLength = DVB_LENGTH(&buffer[8]);
 
 	for (size_t i = 10; i < bouquetDescriptorsLength + 10; i += buffer[i + 1] + 2)
-		descriptor(&buffer[i]);
+		descriptor(&buffer[i], SCOPE_SI);
 
 	transportStreamLoopLength = DVB_LENGTH(&buffer[bouquetDescriptorsLength + 10]);
 

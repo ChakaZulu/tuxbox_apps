@@ -1,5 +1,5 @@
 /*
- * $Id: descriptor_container.h,v 1.1 2004/02/13 15:27:37 obi Exp $
+ * $Id: descriptor_container.h,v 1.2 2004/05/31 21:21:22 obi Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -24,10 +24,19 @@
 
 #include "descriptor.h"
 
+enum DescriptorScope {
+	SCOPE_SI,
+	SCOPE_CAROUSEL,
+	SCOPE_MHP
+};
+
 class DescriptorContainer
 {
 	protected:
-		void descriptor(const uint8_t * const buffer);
+		void descriptor(const uint8_t * const buffer, const enum DescriptorScope scope);
+		void descriptorSi(const uint8_t * const buffer);
+		void descriptorCarousel(const uint8_t * const buffer);
+		void descriptorMhp(const uint8_t * const buffer);
 		DescriptorVector descriptorVector;
 
 	public:

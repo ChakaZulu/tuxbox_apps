@@ -1,5 +1,5 @@
 /*
- * $Id: table_id.h,v 1.1 2004/02/13 15:27:38 obi Exp $
+ * $Id: table_id.h,v 1.2 2004/05/31 21:21:22 obi Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -113,8 +113,6 @@ enum TableId {
 	TID_CAMT_PRIVATE_D	= 0x8F,
 
 	/* 0x90 - 0xFE: PRIVATE */
-	TID_TOC			= 0x91,
-	TID_HIT			= 0x92,
 
 	/* 0xFF: ISO RESERVED */
 	TID_RESERVED		= 0xFF

@@ -1,5 +1,5 @@
 /*
- * $Id: service_description_section.cpp,v 1.2 2004/02/13 17:51:08 obi Exp $
+ * $Id: service_description_section.cpp,v 1.3 2004/05/31 21:21:23 obi Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -32,7 +32,7 @@ ServiceDescription::ServiceDescription(const uint8_t * const buffer)
 	descriptorsLoopLength = DVB_LENGTH(&buffer[3]);
 
 	for (size_t i = 5; i < descriptorsLoopLength + 5; i += buffer[i + 1] + 2)
-		descriptor(&buffer[i]);
+		descriptor(&buffer[i], SCOPE_SI);
 }
 
 uint16_t ServiceDescription::getServiceId(void) const

@@ -1,5 +1,5 @@
 /*
- * $Id: application_information_section.h,v 1.1 2004/02/13 15:27:37 obi Exp $
+ * $Id: application_information_section.h,v 1.2 2004/05/31 21:21:22 obi Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -24,19 +24,7 @@
 
 #include "descriptor_container.h"
 #include "long_crc_section.h"
-
-class ApplicationIdentifier
-{
-	protected:
-		unsigned organisationId				: 32;
-		unsigned applicationId				: 16;
-
-	public:
-		ApplicationIdentifier(const uint8_t * const buffer);
-
-		uint32_t getOrganisationId(void) const;
-		uint16_t getApplicationId(void) const;
-};
+#include "application_identifier.h"
 
 class ApplicationInformation : public DescriptorContainer
 {
