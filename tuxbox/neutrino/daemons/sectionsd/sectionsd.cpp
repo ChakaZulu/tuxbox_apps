@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.179 2004/09/10 11:36:00 thegoodguy Exp $
+//  $Id: sectionsd.cpp,v 1.180 2005/01/13 10:48:02 diemade Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1060,7 +1060,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.179 2004/09/10 11:36:00 thegoodguy Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.180 2005/01/13 10:48:02 diemade Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -2899,7 +2899,7 @@ static void *timeThread(void *)
 
 		while(1)
 		{
-			if (scanning && getUTC(&UTC, !timeset)) /* initially: TDT (no CRC - but mandatory field), later: TOT (CRC - yet not mandatory)*/
+			if (scanning && (getUTC(&UTC, true))) // always use TDT, a lot of transponders don't provide a TOT
 			{
 				tim = changeUTCtoCtime((const unsigned char *) &UTC);
 				
@@ -2913,7 +2913,13 @@ static void *timeThread(void *)
 							pthread_exit(NULL);
 						}
 					}
-					
+
+					time_t actTime;
+					struct tm *tmTime;
+					actTime=time(NULL);
+					tmTime = localtime(&actTime);
+					printf("[%sThread] time(): %02d.%02d.%04d %02d:%02d:%02d, tim: %s", "time", tmTime->tm_mday, tmTime->tm_mon+1, tmTime->tm_year+1900, tmTime->tm_hour, tmTime->tm_min, tmTime->tm_sec, ctime(&tim));
+
 					timeset = true;
 					eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD, &tim, sizeof(tim));
 				}
@@ -2934,7 +2940,7 @@ static void *timeThread(void *)
 			else {
 				if (timeset) {
 					seconds = 60 * 30;
-					dprintf("dmxTOT: going to sleep for %d seconds.\n", seconds);
+					dprintf("[%sThread] - dmxTOT: going to sleep for %d seconds.\n", "time", seconds);
 				}
 				else if (!scanning){
 					seconds = 60;
@@ -3483,7 +3489,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.179 2004/09/10 11:36:00 thegoodguy Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.180 2005/01/13 10:48:02 diemade Exp $\n");
 
 	try {
 		if (argc != 1 && argc != 2) {
