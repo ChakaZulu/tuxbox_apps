@@ -2919,4 +2919,6 @@ SkipPacket:;
 				}
 			}
 	}
+
+	return 0;
 }

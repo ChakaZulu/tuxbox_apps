@@ -1,18 +1,19 @@
 SUBDIRS = font
 
-INCLUDES = -I$(DRIVER)/include -I$(top_srcdir)/include
+INCLUDES = \
+	@FREETYPE_CFLAGS@ \
+	-I@DRIVER@ \
+	-I$(top_srcdir)/include
 
 noinst_LTLIBRARIES = tuxtxt.la
 
 tuxtxt_la_SOURCES = tuxtxt.c
 
 tuxtxt_la_LIBADD = \
-	$(LIBFREETYPE_LIBS)
+	 @FREETYPE_LIBS@ \
 	-lpthread
 
 tuxtxt_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
-
-AM_CFLAGS = $(LIBFREETYPE_CFLAGS)
 
 install-exec-local:
 	install -d $(PLUGINDIR)
