@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.37 2002/12/02 13:41:42 thegoodguy Exp $
+	$Id: timerdclient.cpp,v 1.38 2002/12/03 11:15:11 thegoodguy Exp $
 
 	License: GPL
 
@@ -25,14 +25,14 @@
 #include <string.h>
 
 #include <eventserver.h>
+#include <timerdclient/timerdmsg.h>
 #include <timerdclient/timerdclient.h>
-#include <connection/basicmessage.h>
 
 
 bool CTimerdClient::send(const unsigned char command, char* data = NULL, const unsigned int size = 0)
 {
 	CBasicMessage::Header msgHead;
-	msgHead.version = CTimerd::ACTVERSION;
+	msgHead.version = CTimerdMsg::ACTVERSION;
 	msgHead.cmd     = command;
 
 	open_connection(TIMERD_UDS_NAME);
@@ -57,7 +57,7 @@ void CTimerdClient::registerEvent(unsigned int eventID, unsigned int clientID, s
 
 	strcpy(msg2.udsName, udsName.c_str());
 
-	send(CTimerd::CMD_REGISTEREVENT, (char*)&msg2, sizeof(msg2));
+	send(CTimerdMsg::CMD_REGISTEREVENT, (char*)&msg2, sizeof(msg2));
 
 	close_connection();
 }
@@ -70,7 +70,7 @@ void CTimerdClient::unRegisterEvent(unsigned int eventID, unsigned int clientID)
 	msg2.eventID = eventID;
 	msg2.clientID = clientID;
 
-	send(CTimerd::CMD_UNREGISTEREVENT, (char*)&msg2, sizeof(msg2));
+	send(CTimerdMsg::CMD_UNREGISTEREVENT, (char*)&msg2, sizeof(msg2));
 
 	close_connection();
 }
@@ -100,9 +100,9 @@ int CTimerdClient::setSleeptimer(time_t announcetime, time_t alarmtime, int time
 
 int CTimerdClient::getSleeptimerID()
 {
-	send(CTimerd::CMD_GETSLEEPTIMER);
-	CTimerd::responseGetSleeptimer response;
-	if(!receive_data((char*)&response, sizeof(CTimerd::responseGetSleeptimer)))
+	send(CTimerdMsg::CMD_GETSLEEPTIMER);
+	CTimerdMsg::responseGetSleeptimer response;
+	if(!receive_data((char*)&response, sizeof(CTimerdMsg::responseGetSleeptimer)))
 		response.eventID =0;
 	close_connection();  
 	return response.eventID;
@@ -128,7 +128,7 @@ int CTimerdClient::getSleepTimerRemaining()
 
 void CTimerdClient::getTimerList( CTimerd::TimerList &timerlist)
 {
-	send(CTimerd::CMD_GETTIMERLIST);
+	send(CTimerdMsg::CMD_GETTIMERLIST);
 	timerlist.clear();
 	CTimerd::responseGetTimer response;
 	while( receive_data((char*)&response, sizeof(CTimerd::responseGetTimer)))
@@ -142,7 +142,7 @@ void CTimerdClient::getTimerList( CTimerd::TimerList &timerlist)
 
 void CTimerdClient::getTimer( CTimerd::responseGetTimer &timer, unsigned timerID)
 {
-	send(CTimerd::CMD_GETTIMER, (char*)&timerID, sizeof(timerID));
+	send(CTimerdMsg::CMD_GETTIMER, (char*)&timerID, sizeof(timerID));
 
 	CTimerd::responseGetTimer response;
 	receive_data((char*)&response, sizeof(CTimerd::responseGetTimer));
@@ -156,16 +156,16 @@ bool CTimerdClient::modifyTimerEvent(int eventid, time_t announcetime, time_t al
 {
 	// set new time values for event eventid
 
-	CTimerd::commandModifyTimer msgModifyTimer;
+	CTimerdMsg::commandModifyTimer msgModifyTimer;
 	msgModifyTimer.eventID = eventid;
 	msgModifyTimer.announceTime = announcetime;
 	msgModifyTimer.alarmTime = alarmtime;
 	msgModifyTimer.stopTime = stoptime;
 	msgModifyTimer.eventRepeat = evrepeat;
 
-	send(CTimerd::CMD_MODIFYTIMER, (char*) &msgModifyTimer, sizeof(msgModifyTimer));
+	send(CTimerdMsg::CMD_MODIFYTIMER, (char*) &msgModifyTimer, sizeof(msgModifyTimer));
 
-	CTimerd::responseStatus response;
+	CTimerdMsg::responseStatus response;
 	receive_data((char*)&response, sizeof(response));
 
 	close_connection();
@@ -182,15 +182,15 @@ bool CTimerdClient::rescheduleTimerEvent(int eventid, time_t diff)
 
 bool CTimerdClient::rescheduleTimerEvent(int eventid, time_t announcediff, time_t alarmdiff, time_t stopdiff)
 {
-	CTimerd::commandModifyTimer msgModifyTimer;
+	CTimerdMsg::commandModifyTimer msgModifyTimer;
 	msgModifyTimer.eventID = eventid;
 	msgModifyTimer.announceTime = announcediff;
 	msgModifyTimer.alarmTime = alarmdiff;
 	msgModifyTimer.stopTime = stopdiff;
 
-	send(CTimerd::CMD_RESCHEDULETIMER, (char*) &msgModifyTimer, sizeof(msgModifyTimer));
+	send(CTimerdMsg::CMD_RESCHEDULETIMER, (char*) &msgModifyTimer, sizeof(msgModifyTimer));
 
-	CTimerd::responseStatus response;
+	CTimerdMsg::responseStatus response;
 	receive_data((char*)&response, sizeof(response));
 
 	close_connection();
@@ -220,7 +220,7 @@ int CTimerdClient::addTimerEvent( CTimerEventTypes evType, void* data , int min,
 int CTimerdClient::addTimerEvent( CTimerd::CTimerEventTypes evType, void* data, time_t announcetime, time_t alarmtime,time_t stoptime, CTimerd::CTimerEventRepeat evrepeat)
 {
 
-	CTimerd::commandAddTimer msgAddTimer;
+	CTimerdMsg::commandAddTimer msgAddTimer;
 	msgAddTimer.alarmTime  = alarmtime;
 	msgAddTimer.announceTime = announcetime;
 	msgAddTimer.stopTime   = stoptime;
@@ -238,22 +238,22 @@ int CTimerdClient::addTimerEvent( CTimerd::CTimerEventTypes evType, void* data, 
 	}
 	else if(evType == CTimerd::TIMER_STANDBY)
 	{
-		length = sizeof(CTimerd::commandSetStandby);
+		length = sizeof(CTimerdMsg::commandSetStandby);
 	}
 	else if(evType == CTimerd::TIMER_REMIND)
 	{
-		length = sizeof(CTimerd::commandRemind);
+		length = sizeof(CTimerdMsg::commandRemind);
 	}
 	else
 	{
 		length = 0;
 	}
 
-	send(CTimerd::CMD_ADDTIMER, (char*)&msgAddTimer, sizeof(msgAddTimer));
+	send(CTimerdMsg::CMD_ADDTIMER, (char*)&msgAddTimer, sizeof(msgAddTimer));
 	if((data != NULL) && (length > 0))
 		send_data((char*)data, length);
 
-	CTimerd::responseAddTimer response;
+	CTimerdMsg::responseAddTimer response;
 	receive_data((char*)&response, sizeof(response));
 	close_connection();
 
@@ -263,11 +263,11 @@ int CTimerdClient::addTimerEvent( CTimerd::CTimerEventTypes evType, void* data, 
 
 void CTimerdClient::removeTimerEvent( int evId)
 {
-	CTimerd::commandRemoveTimer msgRemoveTimer;
+	CTimerdMsg::commandRemoveTimer msgRemoveTimer;
 
 	msgRemoveTimer.eventID  = evId;
 
-	send(CTimerd::CMD_REMOVETIMER, (char*) &msgRemoveTimer, sizeof(msgRemoveTimer));
+	send(CTimerdMsg::CMD_REMOVETIMER, (char*) &msgRemoveTimer, sizeof(msgRemoveTimer));
 
 	close_connection();  
 }
@@ -275,10 +275,10 @@ void CTimerdClient::removeTimerEvent( int evId)
 
 bool CTimerdClient::isTimerdAvailable()
 {
-	if(!send(CTimerd::CMD_TIMERDAVAILABLE))
+	if(!send(CTimerdMsg::CMD_TIMERDAVAILABLE))
 		return false;
 
-	CTimerd::responseAvailable response;
+	CTimerdMsg::responseAvailable response;
 	bool ret=receive_data((char*)&response, sizeof(response));
 	close_connection();
 	return ret;
@@ -286,9 +286,9 @@ bool CTimerdClient::isTimerdAvailable()
 //-------------------------------------------------------------------------
 bool CTimerdClient::shutdown()
 {
-	send(CTimerd::CMD_SHUTDOWN);
+	send(CTimerdMsg::CMD_SHUTDOWN);
 
-	CTimerd::responseStatus response;
+	CTimerdMsg::responseStatus response;
 	receive_data((char*)&response, sizeof(response));
 
 	close_connection();
@@ -297,10 +297,10 @@ bool CTimerdClient::shutdown()
 //-------------------------------------------------------------------------
 void CTimerdClient::modifyTimerAPid(int eventid, uint apid)
 {
-	CTimerd::commandSetAPid data;
+	CTimerdMsg::commandSetAPid data;
 	data.eventID=eventid;
 	data.apid=apid;
-	send(CTimerd::CMD_SETAPID, (char*) &data, sizeof(data)); 
+	send(CTimerdMsg::CMD_SETAPID, (char*) &data, sizeof(data)); 
 	close_connection();
 }
 

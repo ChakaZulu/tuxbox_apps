@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerd.cpp,v 1.38 2002/12/02 22:39:54 Zwen Exp $
+	$Id: timerd.cpp,v 1.39 2002/12/03 11:15:11 thegoodguy Exp $
 
 	License: GPL
 
@@ -36,26 +36,27 @@
 #include <sectionsdclient/sectionsdclient.h>
 
 #include <connection/basicserver.h>
+#include <timerdclient/timerdmsg.h>
 
 bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 {
 //	CTimerEvent_NextProgram::EventMap::iterator it = NULL;
 	CTimerEventMap events;
-	CTimerd::commandModifyTimer msgModifyTimer;
-	CTimerd::responseGetSleeptimer rspGetSleeptimer;
+	CTimerdMsg::commandModifyTimer msgModifyTimer;
+	CTimerdMsg::responseGetSleeptimer rspGetSleeptimer;
 	CTimerEventMap::iterator pos;
 	switch (rmsg.cmd)
 	{
 		
-		case CTimerd::CMD_REGISTEREVENT :
+		case CTimerdMsg::CMD_REGISTEREVENT :
 			CTimerManager::getInstance()->getEventServer()->registerEvent( connfd );
 			break;
 
-		case CTimerd::CMD_UNREGISTEREVENT :
+		case CTimerdMsg::CMD_UNREGISTEREVENT :
 			CTimerManager::getInstance()->getEventServer()->unRegisterEvent( connfd );
 			break;
 
-		case CTimerd::CMD_GETSLEEPTIMER:
+		case CTimerdMsg::CMD_GETSLEEPTIMER:
 			rspGetSleeptimer.eventID = 0;
 			if(CTimerManager::getInstance()->listEvents(events))
 			{
@@ -75,8 +76,8 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			write( connfd, &rspGetSleeptimer, sizeof(rspGetSleeptimer));
 			break;
 
-		case CTimerd::CMD_GETTIMER:						// timer daten abfragen
-			CTimerd::commandGetTimer msgGetTimer;
+		case CTimerdMsg::CMD_GETTIMER:						// timer daten abfragen
+			CTimerdMsg::commandGetTimer msgGetTimer;
 			CTimerd::responseGetTimer resp;
 			read(connfd,&msgGetTimer, sizeof(msgGetTimer));
 			if(CTimerManager::getInstance()->listEvents(events))
@@ -125,7 +126,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			write( connfd, &resp, sizeof(CTimerd::responseGetTimer));
 			break;
 
-		case CTimerd::CMD_GETTIMERLIST:				// liste aller timer 
+		case CTimerdMsg::CMD_GETTIMERLIST:				// liste aller timer 
 			if(CTimerManager::getInstance()->listEvents(events))
 			{
 				for(CTimerEventMap::iterator pos = events.begin();pos != events.end();pos++)
@@ -173,39 +174,39 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			}
 			break;
 
-		case CTimerd::CMD_RESCHEDULETIMER:			// event nach vorne oder hinten schieben
+		case CTimerdMsg::CMD_RESCHEDULETIMER:			// event nach vorne oder hinten schieben
 			{
 				read(connfd,&msgModifyTimer, sizeof(msgModifyTimer));
 				int ret=CTimerManager::getInstance()->rescheduleEvent(msgModifyTimer.eventID,msgModifyTimer.announceTime,msgModifyTimer.alarmTime, msgModifyTimer.stopTime);
-				CTimerd::responseStatus rspStatus;
+				CTimerdMsg::responseStatus rspStatus;
 				rspStatus.status = (ret!=0);
 				write( connfd, &rspStatus, sizeof(rspStatus));
 				break;
 			}
 
-		case CTimerd::CMD_MODIFYTIMER:				// neue zeiten setzen
+		case CTimerdMsg::CMD_MODIFYTIMER:				// neue zeiten setzen
 			{
 				read(connfd,&msgModifyTimer, sizeof(msgModifyTimer));
 				int ret=CTimerManager::getInstance()->modifyEvent(msgModifyTimer.eventID,msgModifyTimer.announceTime,msgModifyTimer.alarmTime, msgModifyTimer.stopTime,
 																				  msgModifyTimer.eventRepeat );
-				CTimerd::responseStatus rspStatus;
+				CTimerdMsg::responseStatus rspStatus;
 				rspStatus.status = (ret!=0);
 				write( connfd, &rspStatus, sizeof(rspStatus));
 				break;
 			}
 
-		case CTimerd::CMD_ADDTIMER:						// neuen timer hinzufügen
-			CTimerd::commandAddTimer msgAddTimer;
+		case CTimerdMsg::CMD_ADDTIMER:						// neuen timer hinzufügen
+			CTimerdMsg::commandAddTimer msgAddTimer;
 			read(connfd,&msgAddTimer, sizeof(msgAddTimer));
 
-			CTimerd::responseAddTimer rspAddTimer;
+			CTimerdMsg::responseAddTimer rspAddTimer;
 			CTimerEvent* event;
 			CTimerd::EventInfo evInfo;
 			switch(msgAddTimer.eventType)
 			{
 				case CTimerd::TIMER_STANDBY :
-					CTimerd::commandSetStandby standby;
-					read( connfd, &standby, sizeof(CTimerd::commandSetStandby));
+					CTimerdMsg::commandSetStandby standby;
+					read( connfd, &standby, sizeof(CTimerdMsg::commandSetStandby));
 
 					event = new CTimerEvent_Standby(
 															 msgAddTimer.announceTime,
@@ -289,8 +290,8 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 */
 					break;
 				case CTimerd::TIMER_REMIND :
-					CTimerd::commandRemind remind;
-					read( connfd, &remind, sizeof(CTimerd::commandRemind));
+					CTimerdMsg::commandRemind remind;
+					read( connfd, &remind, sizeof(CTimerdMsg::commandRemind));
 					event = new CTimerEvent_Remind(msgAddTimer.announceTime,
 															 msgAddTimer.alarmTime,
 															 remind.message,
@@ -305,33 +306,33 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			write( connfd, &rspAddTimer, sizeof(rspAddTimer));
 
 			break;
-		case CTimerd::CMD_REMOVETIMER:						//	timer entfernen
+		case CTimerdMsg::CMD_REMOVETIMER:						//	timer entfernen
 			dprintf("TIMERD: command remove\n");
-			CTimerd::commandRemoveTimer msgRemoveTimer;
+			CTimerdMsg::commandRemoveTimer msgRemoveTimer;
 			read(connfd,&msgRemoveTimer, sizeof(msgRemoveTimer));
 			dprintf("TIMERD: command remove %d\n",msgRemoveTimer.eventID );
 			CTimerManager::getInstance()->removeEvent( msgRemoveTimer.eventID);
 			break;
 
-		case CTimerd::CMD_TIMERDAVAILABLE:					// testen ob server läuft ;)
+		case CTimerdMsg::CMD_TIMERDAVAILABLE:					// testen ob server läuft ;)
 			{
-				CTimerd::responseAvailable rspAvailable;
+				CTimerdMsg::responseAvailable rspAvailable;
 				rspAvailable.available = true;
 				write( connfd, &rspAvailable, sizeof(rspAvailable));
 			}
 			break;
-		case CTimerd::CMD_SHUTDOWN:
+		case CTimerdMsg::CMD_SHUTDOWN:
 			{
 				bool ret=CTimerManager::getInstance()->shutdown();
-				CTimerd::responseStatus rspStatus;
+				CTimerdMsg::responseStatus rspStatus;
 				rspStatus.status = ret;
 				write( connfd, &rspStatus, sizeof(rspStatus));
 				return false;
 			}
 			break;
-		case CTimerd::CMD_SETAPID:				  // apid setzen
+		case CTimerdMsg::CMD_SETAPID:				  // apid setzen
 			{
-				CTimerd::commandSetAPid data;
+				CTimerdMsg::commandSetAPid data;
 				read(connfd,&data, sizeof(data));
 				CTimerManager::getInstance()->modifyEvent(data.eventID , data.apid );
 			}
@@ -386,7 +387,7 @@ int main(int argc, char **argv)
 	//startup Timer
 	try
 	{
-		timerd_server.run(parse_command, CTimerd::ACTVERSION);
+		timerd_server.run(parse_command, CTimerdMsg::ACTVERSION);
 	}
 	catch(std::exception& e)
 	{
