@@ -75,6 +75,9 @@ private slots:
 	void readData();
 	void gotError();
 	void bytesWritten(int);
+	void hostConnected();
+signals:
+	void closing();
 public:
 	enum
 	{
@@ -95,6 +98,10 @@ public:
 	int localstate, remotestate;
 	
 	eHTTPConnection(int socket, eHTTPD *parent);
+	eHTTPConnection(const char *host, int port=80);
+	void die();
+	static eHTTPConnection *doRequest(const char *uri, int *error=0);
+	void start();
 	~eHTTPConnection();
 	
 		// stateRequest
