@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.37 2004/02/26 16:55:58 dirch Exp $
+	$Id: controlapi.cpp,v 1.38 2004/02/26 17:04:35 dirch Exp $
 
 	License: GPL
 
@@ -632,7 +632,7 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 				CEPGData longepg;
 				if(Parent->Sectionsd->getEPGid(epgid, starttime, &longepg))
 				{
-					request->printf("%c\n", longepg.fsk);
+					request->printf("%u\n", longepg.fsk);
 					return true;
 				}
 			}
