@@ -367,7 +367,7 @@ eHTTPDataSource *eMP3Decoder::createStreamSink(eHTTPConnection *conn)
 	stream=new eHTTPStream(conn, input);
 	CONNECT(stream->dataAvailable, eMP3Decoder::decodeMoreHTTP);
 	CONNECT(stream->metaDataUpdated, eMP3Decoder::metaDataUpdated);
-	http_status=_("playing...");
+	http_status=_("buffering...");
 	handler->messages.send(eServiceHandlerMP3::eMP3DecoderMessage(eServiceHandlerMP3::eMP3DecoderMessage::status));
 	return stream;
 }
@@ -511,9 +511,12 @@ void eMP3Decoder::checkFlow(int last)
 		}
 	}
 
-	if ((state == stateBuffering) && (o[0] > minOutputBufferSize))
+	if ( state == stateBuffering
+		&& o[0] > (inputsn?minOutputBufferSize:minOutputBufferSize*16) )
 	{
 //		eDebug("statePlaying...");
+		http_status=_("playing...");
+		handler->messages.send(eServiceHandlerMP3::eMP3DecoderMessage(eServiceHandlerMP3::eMP3DecoderMessage::status));
 		state=statePlaying;
 		outputsn[0]->start();
 		if (outputsn[1])
@@ -653,6 +656,9 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 		if (state == stateInit)
 		{
 			state=stateBuffering;
+			outputsn[0]->stop();
+			if ( outputsn[1] )
+				outputsn[1]->stop();
 			if (inputsn)
 				inputsn->start();
 			else
