@@ -423,7 +423,6 @@ void eListBoxBase::clearList()
 		atomic_new=0;
 		atomic_old=0;
 	}
-	current = top = bottom = childs.end();
 }
 
 eListBoxEntry *eListBoxBase::goNext()
