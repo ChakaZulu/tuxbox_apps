@@ -1,0 +1,13 @@
+Source: tuxbox-libs
+Priority: optional
+Maintainer: Bastian Blank <waldi@debian.org>
+Build-Depends: debhelper (>> 3.0.0), gcc-3.2, zlib1g-dev
+Standards-Version: 3.5.7
+
+Package: tuxbox-libs
+Section: devel
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
