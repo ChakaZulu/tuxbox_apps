@@ -200,6 +200,9 @@ int eServiceSelector::eventFilter(const eWidgetEvent &event)
 				}
 				return 1;
 			}
+			case eRCInput::RC_HELP:
+				close(0);
+				break;
 			}
 		break;
 	}
