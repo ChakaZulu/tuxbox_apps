@@ -480,10 +480,14 @@ bool CChannelList::showInfo(int pos)
 
 void CChannelList::zapTo(int pos)
 {
-	if ( (pos >= (signed int) chanlist.size()) || (pos< 0) )
+	if (chanlist.size() == 0)
 	{
 		ShowMsg ( "messagebox.error", g_Locale->getText("channellist.nonefound"), CMessageBox::mbrCancel, CMessageBox::mbCancel );
 		return;
+	}
+	if ( (pos >= (signed int) chanlist.size()) || (pos< 0) )
+	{
+		pos = 0;
 	}
 
 	if (chanlist[pos]->isCurrentlyLocked())
