@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
   
-  $Id: zapit.cpp,v 1.30 2001/11/08 17:34:32 field Exp $
+  $Id: zapit.cpp,v 1.31 2001/11/14 13:02:38 faralla Exp $
   
   Done 2001 by Philipp Leusmann using many parts of code from older 
   applications by the DBoxII-Project.
@@ -70,6 +70,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   $Log: zapit.cpp,v $
+  Revision 1.31  2001/11/14 13:02:38  faralla
+  threaded descrambling
+
   Revision 1.30  2001/11/08 17:34:32  field
   Auf sortierte Listen vorbereitet
 
@@ -767,6 +770,31 @@ channel_msg load_settings()
   return output_msg;
 }
 
+void *decode_thread(void *ptr)
+{
+	decode_vals *vals;
+	vals = (decode_vals *) ptr;
+	int emmpid = 0;
+	
+	dprintf("[zapit] starting decode_thread\n");
+	cam_reset();
+	descramble(vals->onid, vals->tsid, 0x104, caid, vals->ecmpid, vals->parse_pmt_pids);
+	  if (vals->do_search_emmpids)
+	    {
+	      if((emmpid = find_emmpid(caid)) != 0)
+		{
+		  dprintf("[zapit] emmpid >0x%04x< found for caid 0x%04x\n", emmpid, caid);
+		  setemm(0x104, caid, emmpid);
+		}
+	      else
+		dprintf("[zapit] no emmpid found...\n");
+	    }
+	free(vals);	    
+	
+	dprintf("[zapit] ending decode_thread\n");
+	pthread_exit(0);
+}
+
 int zapit (uint onid_sid,boolean in_nvod) {
 
   struct dmxPesFilterParams pes_filter;
@@ -778,6 +806,7 @@ int zapit (uint onid_sid,boolean in_nvod) {
   uint16_t emmpid;
   boolean do_search_emmpid;
   //std::map<uint,channel>::iterator cI;
+  pthread_t dec_thread;
  
   if (in_nvod)
     {
@@ -943,22 +972,25 @@ else
       
       
       //        descramble(0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff);
-      cam_reset();
+      
 
       if ( ( cit->second.ecmpid > 0 ) && ( cit->second.ecmpid != no_ecmpid_found ) )
 	{
-	  descramble(cit->second.onid, cit->second.tsid, 0x104, caid, cit->second.ecmpid, &parse_pmt_pids);
-	  if (do_search_emmpid)
-	    {
-	      if((emmpid = find_emmpid(caid)) != 0)
-		{
-		  dprintf("[zapit] emmpid >0x%04x< found for caid 0x%04x\n", emmpid, caid);
-		  setemm(0x104, caid, emmpid);
-		}
-	      else
-		dprintf("[zapit] no emmpid found...\n");
-	    }
-	}	
+		decode_vals *vals =(decode_vals*) malloc(sizeof(decode_vals));
+	
+		vals->onid = cit->second.onid;
+		vals->tsid = cit->second.tsid;
+		vals->ecmpid = cit->second.ecmpid;
+		vals->parse_pmt_pids = &parse_pmt_pids;
+		vals->do_search_emmpids = do_search_emmpid;
+	
+		pthread_create(&dec_thread, 0,decode_thread, (void*) vals);
+	}
+	else
+	{
+		cam_reset();
+	}
+		
 
       if ( (video = open(DEMUX_DEV, O_RDWR)) < 0)
         {
@@ -966,6 +998,7 @@ else
 	  exit(1);
         }
       
+      dprintf("[zapit] setting vpid\n");
       /* vpid */
       pes_filter.pid     = Vpid;
       pes_filter.input   = DMX_IN_FRONTEND;
@@ -981,6 +1014,7 @@ else
 	  exit(1);
         }
       
+      dprintf("[zapit] setting apid\n");
       /* apid */
       pes_filter.pid     = Apid;
       pes_filter.input   = DMX_IN_FRONTEND;
@@ -1008,11 +1042,13 @@ else
 	    }
     	}
       
+      dprintf("[zapit] starting dmx\n");
       if (ioctl(audio,DMX_START,0) < 0)
         dprintf("[zapit] \t\tATTENTION audio-ioctl not succesfull\n");
       if (ioctl(video,DMX_START,0)<0)
 	    dprintf("[zapit] \t\tATTENTION video-ioctl not succesfull\n");
       
+      dprintf("[zapit] playing\n");
       ioctl(vid, VIDEO_SELECT_SOURCE, (videoStreamSource_t)VIDEO_SOURCE_DEMUX);
       ioctl(vid, VIDEO_PLAY, 0);
       
@@ -1020,12 +1056,17 @@ else
       vid= -1;
 
 //  if (parse_pmt_pids.vtxtpid != 0)
+    dprintf("[zapit] setting vtxt\n");
     set_vtxt(parse_pmt_pids.vtxtpid);
 
       //printf("Saving settings\n");
       curr_onid_sid = onid_sid;
       if (!in_nvod)
 	save_settings();
+	
+	//wait for decode_thread to exit
+	dprintf("[zapit] waiting for decode_thread\n");
+	pthread_join(dec_thread,0);
     }
   else
     {
@@ -1941,7 +1982,7 @@ int main(int argc, char **argv) {
     }
   
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.30 2001/11/08 17:34:32 field Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.31 2001/11/14 13:02:38 faralla Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;

@@ -80,6 +80,13 @@ struct rmsg {
 
 } rmsg;
 
+typedef struct decode_struct{
+	uint onid;
+	uint tsid;
+	uint ecmpid;
+	pids *parse_pmt_pids;
+	bool do_search_emmpids;
+} decode_vals;
 
 int LoadServices();
 int get_caid();
