@@ -30,11 +30,12 @@ eFrontend* eFrontend::frontend;
 
 eFrontend::eFrontend(int type, const char *demod, const char *sec)
 :type(type), 
+	curRotorPos(10000), transponder(0), rotorTimer1(eApp), 
+	rotorTimer2(eApp), 
 #if HAVE_DVB_API_VERSION >= 3
 	timeout(eApp), 
 #endif
-	curRotorPos(10000), transponder(0), rotorTimer1(eApp), 
-	rotorTimer2(eApp), checkRotorLockTimer(eApp), checkLockTimer(eApp), 
+	checkRotorLockTimer(eApp), checkLockTimer(eApp), 
 	updateTransponderTimer(eApp), sn(0), noRotorCmd(0)
 {
 	CONNECT(rotorTimer1.timeout, eFrontend::RotorStartLoop );
@@ -44,7 +45,7 @@ eFrontend::eFrontend(int type, const char *demod, const char *sec)
 	CONNECT(updateTransponderTimer.timeout, eFrontend::updateTransponder );
 
 #if HAVE_DVB_API_VERSION >= 3
-	CONNECT(timeout->timeout, eFrontend::tuneFailed);
+	CONNECT(timeout.timeout, eFrontend::tuneFailed);
 #endif
 
 	fd=::open(demod, O_RDWR|O_NONBLOCK);
@@ -1340,7 +1341,7 @@ void eFrontend::updateTransponder()
 			eDebug("FE_GET_FRONTEND (%m)");
 		else
 		{
-//			eDebug("FE_GET_FRONTEND OK");
+			eDebug("[FE] update transponder data");
 			eSatellite * sat = eTransponderList::getInstance()->findSatellite(transponder->satellite.orbital_position);
 			if (sat)
 			{
