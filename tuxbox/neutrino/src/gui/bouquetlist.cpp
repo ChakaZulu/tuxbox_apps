@@ -18,19 +18,15 @@ CBouquetList::CBouquetList( const std::string &Name )
 
 CBouquetList::~CBouquetList()
 {
-	for(unsigned int count=0;count<Bouquets.size();count++)
-	{
-		delete Bouquets[count];
-	}
 	Bouquets.clear();
 }
 
-CBouquet* CBouquetList::addBouquet(const std::string& name, int BouquetKey )
+CBouquet* CBouquetList::addBouquet(const std::string& name, int BouquetKey, bool locked=false )
 {
 	if ( BouquetKey==-1 )
 		BouquetKey= Bouquets.size();
 
-	CBouquet* tmp = new CBouquet( BouquetKey, name );
+	CBouquet* tmp = new CBouquet( BouquetKey, name, locked );
 	Bouquets.insert(Bouquets.end(), tmp);
 	return(tmp);
 }

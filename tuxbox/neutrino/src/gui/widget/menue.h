@@ -39,7 +39,6 @@
 #include "lcddclient.h"
 #include "color.h"
 
-
 #include <string>
 #include <vector>
 
@@ -299,6 +298,15 @@ class CPINProtection
 		virtual CMenuTarget* getParent() = NULL;
 	public:
 		CPINProtection( char* validpin){ validPIN = validpin;};
+};
+
+class CZapProtection : public CPINProtection
+{
+	protected:
+		virtual CMenuTarget* getParent() { return( NULL);};
+	public:
+		CZapProtection( char* validpin) : CPINProtection(validpin){};
+		bool check();
 };
 
 class CLockedMenuForwarder : public CMenuForwarder, public CPINProtection

@@ -30,11 +30,14 @@
 */
 
 /*
-$Id: menue.cpp,v 1.46 2002/03/06 11:18:39 field Exp $
+$Id: menue.cpp,v 1.47 2002/03/11 17:25:57 Simplex Exp $
 
 
 History:
  $Log: menue.cpp,v $
+ Revision 1.47  2002/03/11 17:25:57  Simplex
+ locked bouquets work
+
  Revision 1.46  2002/03/06 11:18:39  field
  Fixes & Updates
 
@@ -724,6 +727,11 @@ bool CPINProtection::check()
 		strcpy( hint, "pinprotection.wrongcode");
 	} while ((strcmp(cPIN,validPIN) != 0) && ( string(cPIN) != ""));
 	return ( strcmp(cPIN,validPIN) == 0);
+}
+
+bool CZapProtection::check()
+{
+	return CPINProtection::check();
 }
 
 int CLockedMenuForwarder::exec(CMenuTarget* parent)

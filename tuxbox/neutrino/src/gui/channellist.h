@@ -32,9 +32,12 @@
 #ifndef __channellist__
 #define __channellist__
 //
-// $Id: channellist.h,v 1.27 2002/02/27 22:51:13 field Exp $
+// $Id: channellist.h,v 1.28 2002/03/11 17:25:57 Simplex Exp $
 //
 // $Log: channellist.h,v $
+// Revision 1.28  2002/03/11 17:25:57  Simplex
+// locked bouquets work
+//
 // Revision 1.27  2002/02/27 22:51:13  field
 // Tasten kaputt gefixt - sollte wieder gehen :)
 //
@@ -132,19 +135,46 @@ using namespace std;
 
 class CChannelList
 {
-		struct channel
+	public:
+		class CChannel
 		{
-			int         key;
-			int         number;
-			string      name;
-			unsigned int onid_sid;
-			epg_event   currentEvent;
+			private:
+				// flag if there is currently running a programm
+				// that that should be locked with the actual youth
+				// protection settings
+				// ( for internal use of isCurrentlyLocked()-method )
+				bool bLockedProgramIsRunning;
+
+			public:
+				int         key;
+				int         number;
+				string      name;
+				unsigned int onid_sid;
+				epg_event   currentEvent;
+
+				// flag that tells if channel is staticly locked by bouquet-locking
+				bool bAlwaysLocked;
+
+				// constructor
+				CChannel();
+
+				// isCurrentlyLocked returns true if the channel is locked
+				// considering youth-protection-settings, bouquet-locking
+				// and currently running program
+				bool isCurrentlyLocked();
+
+				// lockedProgramStarts should be called when a locked program starts
+				void lockedProgramStarts( uint age);
+				// lockedProgramEnds should be called when a locked program ends
+				void lockedProgramEnds();
+
+				friend class CChannelList;
 		};
 
-
+	private:
 		unsigned int		selected;
 		unsigned int		tuned;
-		CLastChannel            lastChList;
+		CLastChannel		lastChList;
 		unsigned int		liststart;
 		unsigned int		listmaxshow;
 		unsigned int		numwidth;
@@ -152,7 +182,7 @@ class CChannelList
 		int			theight; // Fonthoehe Channellist-Titel
 
 		string			name;
-		vector<channel*>	chanlist;
+		vector<CChannel*>	chanlist;
 
 		int 			width;
 		int 			height;
@@ -169,6 +199,9 @@ class CChannelList
 		CChannelList( const std::string& Name="" );
 		~CChannelList();
 		void addChannel(int key, int number, const std::string& name, unsigned int ids = 0);
+		void addChannel(CChannel* chan);
+		CChannel* getChannel( int number);
+		CChannel* operator[]( uint index) { if (chanlist.size() > index) return chanlist[index]; else return NULL;};
 		void setName(const std::string& Name);
 		int getKey(int);
 		const std::string& getActiveChannelName();

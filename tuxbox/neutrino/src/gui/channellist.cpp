@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.70 2002/03/06 11:18:39 field Exp $
+// $Id: channellist.cpp,v 1.71 2002/03/11 17:25:57 Simplex Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.71  2002/03/11 17:25:57  Simplex
+// locked bouquets work
+//
 // Revision 1.70  2002/03/06 11:18:39  field
 // Fixes & Updates
 //
@@ -232,6 +235,7 @@
 
 #include "channellist.h"
 #include "../global.h"
+#include "pincheck.h"
 
 #define info_height 60
 
@@ -245,6 +249,37 @@ static char* copyStringto(const char* from, char* to, int len)
 	*to=0;
 	return (char *)++from;
 }
+
+CChannelList::CChannel::CChannel()
+{
+	bAlwaysLocked = false;
+	bLockedProgramIsRunning = false;
+}
+
+// isCurrentlyLocked returns true if the channel is locked
+// considering youth-protection-settings, bouquet-locking
+// and currently running program
+bool CChannelList::CChannel::isCurrentlyLocked()
+{
+	printf("bAlwaysLocked: %d, bLockedProgramIsRunning %d\n",bAlwaysLocked,bAlwaysLocked );
+	return ( bAlwaysLocked || bLockedProgramIsRunning);
+}
+
+// lockedProgramStarts should be called when a locked program starts
+void CChannelList::CChannel::lockedProgramStarts( uint age)
+{
+	if ((g_settings.parentallock_prompt == PARENTALLOCK_PROMPT_ONSIGNAL) && ( age >= g_settings.parentallock_lockage))
+	{
+		bLockedProgramIsRunning = true;
+	}
+}
+
+// lockedProgramEnds should be called when a locked program ends
+void CChannelList::CChannel::lockedProgramEnds()
+{
+	bLockedProgramIsRunning = false;
+}
+
 
 CChannelList::CChannelList( const std::string &Name )
 {
@@ -398,12 +433,30 @@ void CChannelList::updateEvents(void)
 
 void CChannelList::addChannel(int key, int number, const std::string& name, unsigned int ids)
 {
-	channel* tmp = new channel();
+	CChannel* tmp = new CChannel();
 	tmp->key=key;
 	tmp->number=number;
 	tmp->name=name;
 	tmp->onid_sid=ids;
+	tmp->bAlwaysLocked = false;
+	tmp->bLockedProgramIsRunning = false;
 	chanlist.insert(chanlist.end(), tmp);
+}
+
+void CChannelList::addChannel(CChannelList::CChannel* chan)
+{
+	if (chan!=NULL)
+		chanlist.insert(chanlist.end(), chan);
+}
+
+CChannelList::CChannel* CChannelList::getChannel( int number)
+{
+	for (uint i=0; i< chanlist.size();i++)
+	{
+		if (chanlist[i]->number == number)
+			return chanlist[i];
+	}
+	return(NULL);
 }
 
 void CChannelList::setName(const std::string& Name)
@@ -624,7 +677,7 @@ bool CChannelList::showInfo(int pos)
 		return false;
 	}
 
-	channel* chan = chanlist[pos];
+	CChannel* chan = chanlist[pos];
 	g_InfoViewer->showTitle(pos+1, chan->name, chan->onid_sid, true );
 	return true;
 }
@@ -636,8 +689,21 @@ void CChannelList::zapTo(int pos)
 		ShowMsg ( "messagebox.error", g_Locale->getText("channellist.nonefound"), CMessageBox::mbrCancel, CMessageBox::mbCancel );
 		return;
 	}
+
+	if (chanlist[pos]->isCurrentlyLocked())
+	{
+		CZapProtection zapProtection( g_settings.parentallock_pincode);
+		if (!zapProtection.check())
+		{
+			if (bouquetList != NULL)
+				bouquetList->adjustToChannel( getActiveChannelNumber());
+			g_InfoViewer->killTitle(); // in case we came from numzap
+			return;
+		}
+	}
+
 	selected= pos;
-	channel* chan = chanlist[selected];
+	CChannel* chan = chanlist[selected];
 	lastChList.store (selected);
 
 	if ( pos!=(int)tuned )
@@ -800,12 +866,12 @@ void CChannelList::quickZap(int key)
                         selected = chanlist.size()-1;
                 else
                         selected--;
-                //                              channel* chan = chanlist[selected];
+                //                              CChannel* chan = chanlist[selected];
         }
         else if (key==g_settings.key_quickzap_up)
         {
                 selected = (selected+1)%chanlist.size();
-                //                      channel* chan = chanlist[selected];
+                //                      CChannel* chan = chanlist[selected];
         }
 
         zapTo( selected );
@@ -903,7 +969,7 @@ void CChannelList::paintItem(int pos)
 	g_FrameBuffer->paintBoxRel(x,ypos, width- 15, fheight, color);
 	if(liststart+pos<chanlist.size())
 	{
-		channel* chan = chanlist[liststart+pos];
+		CChannel* chan = chanlist[liststart+pos];
 		//number
 		char tmp[10];
 		sprintf((char*) tmp, "%d", chan->number);
