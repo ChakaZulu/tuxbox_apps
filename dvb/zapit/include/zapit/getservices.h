@@ -1,3 +1,6 @@
+#ifndef __getservices__
+#define __getservices__
+
 typedef struct channelstruct *chanptr;
 
 typedef struct channelstruct {
@@ -37,3 +40,6 @@ typedef struct pids{
 	char *apid4_desc;
 	uint ecmpid;
 }pids;
+
+#endif
+
