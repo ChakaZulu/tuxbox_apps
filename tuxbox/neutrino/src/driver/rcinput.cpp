@@ -571,13 +571,11 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 			 			{
 			 				*msg = NeutrinoMessages::EVT_RECORDMODE_ACTIVATED;
 			 				*data = 0;
-							printf("recorde started!!!!!!!!!!!!\n");
 			 			}
 			 			else if (emsg.eventID==CZapitClient::EVT_RECORDMODE_DEACTIVATED)
 			 			{
 			 				*msg = NeutrinoMessages::EVT_RECORDMODE_DEACTIVATED;
 			 				*data = 0;
-							printf("recorde ended!!!!!!!!!!!!\n");
 			 			}
 						else if (emsg.eventID==CZapitClient::EVT_ZAP_COMPLETE)
 			 			{
