@@ -1,5 +1,5 @@
 /*
- * $Id: dmx.cpp,v 1.6 2002/09/19 07:45:11 obi Exp $
+ * $Id: dmx.cpp,v 1.7 2002/09/22 14:58:58 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -28,6 +28,9 @@
 int setDmxSctFilter (int fd, unsigned short pid, unsigned char * filter, unsigned char * mask)
 {
 	struct dmxSctFilterParams sctFilterParams;
+
+	if (fd < 0)
+		return -1;
 
 	memset(&sctFilterParams, 0x00, sizeof(sctFilterParams));
 	memcpy(&sctFilterParams.filter.filter, filter, DMX_FILTER_SIZE);
@@ -221,10 +224,11 @@ int setDmxPesFilter (int fd, dmxOutput_t output, dmxPesType_t pesType, unsigned 
 {
 	dmxPesFilterParams pesFilterParams;
 
-	if ((pid < 0x0020) || (pid > 0x1FFB))
-	{
+	if (fd < 0)
 		return -1;
-	}
+
+	if ((pid < 0x0020) || (pid > 0x1FFB))
+		return -1;
 
 	pesFilterParams.pid = pid;
 	pesFilterParams.input = DMX_IN_FRONTEND;
@@ -243,6 +247,9 @@ int setDmxPesFilter (int fd, dmxOutput_t output, dmxPesType_t pesType, unsigned 
 
 int startDmxFilter (int fd)
 {
+	if (fd < 0)
+		return -1;
+
 	if (ioctl(fd, DMX_START) < 0)
 	{
 		perror("[dmx.cpp] DMX_START");
@@ -254,6 +261,9 @@ int startDmxFilter (int fd)
 
 int stopDmxFilter (int fd)
 {
+	if (fd < 0)
+		return -1;
+
 	if (ioctl(fd, DMX_STOP) < 0)
 	{
 		perror("[dmx.cpp] DMX_STOP");
