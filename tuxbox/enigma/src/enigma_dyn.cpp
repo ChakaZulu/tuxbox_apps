@@ -31,6 +31,7 @@
 #include <lib/dvb/dvbservice.h>
 #include <lib/dvb/service.h>
 #include <lib/dvb/record.h>
+#include <lib/dvb/serviceplaylist.h>
 #include <lib/gdi/fb.h>
 #include <lib/gdi/glcddc.h>
 #include <lib/gdi/gfbdc.h>
@@ -379,7 +380,7 @@ static eString channels_getcurrent(eString request, eString dirpath, eString opt
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (!sapi)
 		return "-1";
-		
+
 	eServiceDVB *current=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
 	if(current)
 		return current->service_name.c_str();
@@ -567,20 +568,26 @@ public:
 			result += "d0d0d0";
 		result+="\"><font color=\"#000000\">";
 		if (!(e.flags & eServiceReference::isDirectory))
-			result+="[PLAY] ";
-
-		result+=eString("<a href=\"/")+ "?path=" + ref2string(e) + "\">";
+		{
+			result += "<a href=\'javascript:openEPG(\"" + ref2string(e) + "\")\'>[EPG]</a>";
+			result += "<a href=\"/?path=" + ref2string(e) + "\">[PLAY]</a> ";
+		}
+		else
+			result+=eString("<a href=\"/")+ "?path=" + ref2string(e) + "\">";
 
 		eService *service=iface.addRef(e);
 		if (!service)
-			result+="N/A";
+			result += "N/A";
 		else
 		{
-			result+=filter_string(service->service_name);
+			result += filter_string(service->service_name);
 			iface.removeRef(e);
 		}
 
-		result+="</a></font></td></tr>\n";
+		if (e.flags & eServiceReference::isDirectory)
+			result += "</a>";
+
+		result+="</font></td></tr>\n";
 		num++;
 	}
 };
@@ -1036,22 +1043,24 @@ static eString getDiskSpace(void)
 	else
 		result += "unknown";
 
-	result += "</span><br><br>";
+	result += "</span>";
 	return result;
 }
 #endif
 
 static eString getStats()
 {
-	eString result;
+	eString result = "";
 	eString apid, vpid;
 	eString tmp;
 	int iapid=0, ivpid=0, bootcount=0;
 
-
+#ifndef DISABLE_FILE
+	result += getDiskSpace() + " | ";
+#endif
 	int sec=atoi(read_file("/proc/uptime").c_str());
 
-	result="<span class=\"white\">";
+	result+="<span class=\"white\">";
 	result+=eString().sprintf("%d:%02dh up", sec/3600, (sec%3600)/60);
 	result+="</span> | ";
 
@@ -1202,31 +1211,41 @@ static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPCon
 	return result;
 }
 
-static eString getcurepg2(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+eString genRecordString(eServiceReference ref, EITEvent event, eString description)
+{
+	eString result = "";
+	result += "javascript:record(\"ref=" + ref2string(ref);
+	result += "&ID=" + eString().sprintf("%d", event.event_id);
+	result += "&start=" + eString().sprintf("%d", event.start_time);
+	result += "&duration=" + eString().sprintf("%d", event.duration);
+	result += "\")";
+	return result;
+}
+
+static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	eString result("");
 	eString tmp;
 	eService* current;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	std::map<eString,eString> opt=getRequestOptions(opts);
+	eString serviceRef = opt["ref"];
 
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (!sapi)
-		return "not available";
+		return "sapi is not available.";
 
-	eServiceReference ref(opt);
+	eServiceReference ref = (serviceRef == "undefined") ? sapi->service : string2ref(serviceRef);
 
-	current=eDVB::getInstance()->settings->getTransponders()->searchService(ref?ref:sapi->service);
+	printf("[ENIGMA_DYN] getcurepg2: opts = %s, serviceRef = %s\n", opts.c_str(), serviceRef.c_str());
+
+	current = eDVB::getInstance()->settings->getTransponders()->searchService(ref);
+
 	if(!current)
-		return eString("epg not ready yet");
+		return eString("EPG is not yet ready.");
 
-	eString tmp2 = read_file(TEMPLATE_DIR+"EPG.tmp");
-	tmp2.strReplace("#CHANNEL#", filter_string(current->service_name));
-
-	const timeMap* evt=ref ?
-		eEPGCache::getInstance()->getTimeMap((eServiceReferenceDVB&)ref)
-			:
-		eEPGCache::getInstance()->getTimeMap(sapi->service);
+	const timeMap* evt = eEPGCache::getInstance()->getTimeMap((eServiceReferenceDVB&)ref);
 
 	if(!evt)
 	{
@@ -1239,23 +1258,29 @@ static eString getcurepg2(eString request, eString dirpath, eString opt, eHTTPCo
 		for(It=evt->begin(); It!= evt->end(); It++)
 		{
 			EITEvent event(*It->second);
-			for(ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
+			for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
 			{
 				Descriptor *descriptor=*d;
-				if(descriptor->Tag()==DESCR_SHORT_EVENT)
+				if (descriptor->Tag() == DESCR_SHORT_EVENT)
 				{
 					tm* t = localtime(&event.start_time);
-					result+=eString().sprintf("<!-- ID: %04x -->", event.event_id);
-					tmp.sprintf("<u><a href=\"javascript:record()\">Record</a></u>&nbsp;&nbsp;<span class=\"epg\"><a  href=\"javascript:EPGDetails()\">%02d.%02d - %02d:%02d ", t->tm_mday, t->tm_mon+1, t->tm_hour, t->tm_min);
-					result+=tmp;
-					result+=((ShortEventDescriptor*)descriptor)->event_name;
-					result+="</span></a></u><br>\n";
+					result += eString().sprintf("<!-- ID: %04x -->", event.event_id);
+					result += "<u><a href=\'";
+					result += genRecordString(ref, event, current->service_name);
+					result += "\'>Record</a></u>";
+					result += "&nbsp;&nbsp;";
+					result += eString().sprintf("<span class=\"epg\"><a  href=\"javascript:EPGDetails()\">%02d.%02d - %02d:%02d ", t->tm_mday, t->tm_mon+1, t->tm_hour, t->tm_min);
+					result += tmp;
+					result += ((ShortEventDescriptor*)descriptor)->event_name;
+					result += "</span></a></u><br>\n";
 				}
 			}
 
 		}
 	}
 
+	eString tmp2 = read_file(TEMPLATE_DIR+"EPG.tmp");
+	tmp2.strReplace("#CHANNEL#", filter_string(current->service_name));
 	tmp2.strReplace("#BODY#", result);
 	return tmp2;
 }
@@ -1410,7 +1435,7 @@ static eString xmessage(eString request, eString dirpath, eString opt, eHTTPConn
 
 	if (opts.find("timeout") == opts.end())
 		return "E: no timeout set";
-	
+
 	if (opts.find("caption") == opts.end())
 		return "E: no caption set";
 
@@ -1608,7 +1633,7 @@ static eString navigator(eString request, eString dirpath, eString opt, eHTTPCon
 		eNavigatorListDirectory navlist(res, spath + ";" + current + ";", *iface);
 		Signal1<void,const eServiceReference&> signal;
 		signal.connect(slot(navlist, &eNavigatorListDirectory::addEntry));
-	
+
 		res+="<table width=\"100%%\">\n";
 		iface->enterDirectory(current_service, signal);
 		res+="</table>\n";
@@ -1668,9 +1693,7 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 		DELETE(#SI#);
 		DELETE(#EIT#);
 	}
-#ifndef DISABLE_FILE
-	result.strReplace("#DISKSPACE#", getDiskSpace());
-#endif
+
 	result.strReplace("#VOLBAR#", getVolBar());
 
 	return result;
@@ -1933,6 +1956,17 @@ static eString cleanupTimerList(eString request, eString dirpath, eString opt, e
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	result+="<script language=\"javascript\">window.close();</script>";
 	eTimerManager::getInstance()->cleanupEvents();
+	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
+	return result;
+}
+
+static eString clearTimerList(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	eString result = "";
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	result+="<script language=\"javascript\">window.close();</script>";
+	eTimerManager::getInstance()->clearEvents();
+	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
 	return result;
 }
 
@@ -1942,6 +1976,7 @@ struct getEntryString: public std::unary_function<ePlaylistEntry*, void>
 {
 	eString &result;
 	eString begin;
+	eString end;
 
 	getEntryString(eString &result): result(result)
 	{
@@ -1949,29 +1984,153 @@ struct getEntryString: public std::unary_function<ePlaylistEntry*, void>
 
 	void operator()(ePlaylistEntry* se)
 	{
+		result += "<tr>";
 		begin = "";
-		tm evtTime = *localtime(&se->time_begin);
+		end = "";
+		tm startTime = *localtime(&se->time_begin);
+		time_t time_end = se->time_begin + se->duration;
+		tm endTime = *localtime(&time_end);
 //		printf(" - isRepeating event (days %s)", buildDayString(se->type).c_str());
-		begin.sprintf("%02d.%02d. - %02d:%02d", evtTime.tm_mday, evtTime.tm_mon+1, evtTime.tm_hour, evtTime.tm_min);
-//		result += eString().sprintf("%X", se->type) + ": ";
-		result += begin;
-		result += " (" + eString().sprintf("%d", se->duration / 60) + " min) ";
-		eString description = se->service.descr.mid(1, strlen(se->service.descr.c_str()));
-		result += description;
-		result += "<br>";
+		begin.sprintf("%02d.%02d.- %02d:%02d", startTime.tm_mday, startTime.tm_mon+1, startTime.tm_hour, startTime.tm_min);
+		end.sprintf("%02d.%02d.- %02d:%02d", endTime.tm_mday, endTime.tm_mon+1, endTime.tm_hour, endTime.tm_min);
+		if (se->type & ePlaylistEntry::stateFinished)
+			result += "<td><img src=\"on.gif\"></td>";
+		else
+		if (se->type & (ePlaylistEntry::errorNoSpaceLeft |
+				ePlaylistEntry::errorUserAborted |
+				ePlaylistEntry::errorZapFailed|
+				ePlaylistEntry::errorOutdated))
+			result += "<td><img src=\"off.gif\"></td>";
+		else
+			result += "<td>&nbsp;</td>";
+
+		result += "<td>" + begin + "</td>";
+//		result += " (" + eString().sprintf("%d", se->duration / 60) + " min) ";
+		result += "<td>" + end + "</td>";
+		eString description = se->service.descr;
+		if (!description)
+			description = "No description available";
+		result += "<td>" + description + "</td>";
+		result += "</tr>";
 	}
 };
 
 static eString showTimerList(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eString result = "";
+	eString tbody = "";
+	eString tmpFile = "";
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	eTimerManager::getInstance()->forEachEntry(getEntryString(result));
-	if (result == "")
+	eTimerManager::getInstance()->forEachEntry(getEntryString(tbody));
+	if (tbody == "")
 		result = "No Timer Events available";
-	eString tmp = read_file(TEMPLATE_DIR + "timerList.tmp");
-	tmp.strReplace("#BODY#", result);
-	return tmp;
+	else
+	{
+		result += "<table border=1 rules=all>";
+		result += "<thead>";
+		result += "<th align=\"left\">";
+		result += "Status";
+		result += "</th>";
+		result += "<th align=\"left\">";
+		result += "Start Time";
+		result += "</th>";
+		result += "<th align=\"left\">";
+		result += "End Time";
+		result += "</th>";
+		result += "<th align=\"left\">";
+		result += "Description";
+		result += "</th>";
+		result += "</thead>";
+		result += "<tbody>";
+		result += tbody;
+		result += "</tbody>";
+		result += "</table>";
+	}
+	tmpFile += read_file(TEMPLATE_DIR + "timerList.tmp");
+	tmpFile.strReplace("#BODY#", result);
+	return tmpFile;
+}
+
+static eString addTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	eString result = "";
+	eService* current;
+
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	std::map<eString,eString> opt=getRequestOptions(opts);
+	eString serviceRef = opt["ref"];
+	eString eventID = opt["ID"];
+	int eventid = atoi(eventID.c_str());
+	eString eventStartTime = opt["start"];
+	eString eventDuration = opt["duration"];
+	eString description = "No description available";
+
+	printf("[ENIGMA_DYN] addTimerEvent: serviceRef = %s, ID = %s, start = %s, duration = %s\n", serviceRef.c_str(), eventID.c_str(), eventStartTime.c_str(), eventDuration.c_str());
+
+	// search for the event... to get the description...
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (sapi)
+	{
+		eServiceReference ref = string2ref(serviceRef);
+
+		printf("[ENIGMA_DYN] addTimerEvent: opts = %s, serviceRef = %s\n", opts.c_str(), serviceRef.c_str());
+
+		current = eDVB::getInstance()->settings->getTransponders()->searchService(ref);
+
+		if(current)
+		{
+			printf("[ENIGMA_DYN] if current = true...\n");
+			const timeMap* evt = eEPGCache::getInstance()->getTimeMap((eServiceReferenceDVB&)ref);
+			if(evt)
+			{
+				printf("[ENIGMA_DYN] if evt = true...\n");
+				timeMap::const_iterator It;
+
+				for(It=evt->begin(); It!= evt->end(); It++)
+				{
+					EITEvent event(*It->second);
+					for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
+					{
+						Descriptor *descriptor=*d;
+						if ((descriptor->Tag() == DESCR_SHORT_EVENT) && (eventid == event.event_id))
+						{
+							// ok, we probably found the event...
+							description = ((ShortEventDescriptor*)descriptor)->event_name;
+							printf("[ENIGMA_DYN] addTimerEvent: found description = %s\n", description.c_str());
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	int timeroffset = 0;
+//	if ((eConfig::getInstance()->getKey("/enigma/timeroffset", timeroffset)) != 0)
+//		timeroffset = 0;
+
+	printf("[ENIGMA_DYN] timeroffset = %d\n", timeroffset);
+
+	int start = atoi(eventStartTime.c_str()) - (timeroffset * 60);
+	int duration = atoi(eventDuration.c_str()) + (2 * timeroffset * 60);
+
+	printf("[ENIGMA_DYN] start = %d, duration = %d\n", start, duration);
+
+	ePlaylistEntry entry(string2ref(serviceRef), start, duration, atoi(eventID.c_str()), ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR);
+	printf("[ENIGMA_DYN] description = %s\n", description.c_str());
+	entry.service.descr = description;
+
+	if (eTimerManager::getInstance()->addEventToTimerList(entry) == -1)
+	{
+		result += "Timer event could not be added because time of the event overlaps with an already existing event.";
+	}
+	else
+	{
+		result += "Timer event was created successfully.";
+	}
+
+
+	return result;
 }
 
 void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
@@ -1990,7 +2149,9 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/record", record);
 	dyn_resolver->addDyn("GET", "/EPGDetails", EPGDetails);
 	dyn_resolver->addDyn("GET", "/showTimerList", showTimerList);
+	dyn_resolver->addDyn("GET", "/addTimerEvent", addTimerEvent);
 	dyn_resolver->addDyn("GET", "/cleanupTimerList", cleanupTimerList);
+	dyn_resolver->addDyn("GET", "/clearTimerList", clearTimerList);
 	dyn_resolver->addDyn("GET", "/cgi-bin/status", doStatus);
 	dyn_resolver->addDyn("GET", "/cgi-bin/switchService", switchService);
 	dyn_resolver->addDyn("GET", "/cgi-bin/admin", admin);
