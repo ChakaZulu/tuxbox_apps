@@ -608,7 +608,7 @@ const unsigned char map_volume(const unsigned char volume, const bool to_AVS)
 }
 
 
-void parse_command(int connfd, CControld::commandHead* rmessage)
+void parse_command(int connfd, CControld::Header * rmessage)
 {
 	
 	if(rmessage->version != CControld::ACTVERSION)
@@ -781,9 +781,8 @@ void sig_catch(int signal)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.73 2002/10/17 13:52:00 thegoodguy Exp $\n\n");
-
-	//printf("[controld] mainThread-pid: %d\n", getpid());
+	printf("Controld  $Id: controld.cpp,v 1.74 2002/10/17 19:43:28 thegoodguy Exp $\n\n");
+	
 	switch (fork())
 	{
 	case -1:
@@ -794,14 +793,13 @@ int main(int argc, char **argv)
 	default:
 		return 0;
 	}
-
+	
 	if (setsid() == -1)
 	{
 		perror("[controld] setsid");
 		return -1;
 	}
 
-    //printf("[controld] forkedThread-pid: %d\n", getpid());
 	eventServer = new CEventServer;
 
 	struct sockaddr_un servaddr;
@@ -875,7 +873,7 @@ int main(int argc, char **argv)
 
 	try
 	{
-		struct CControld::commandHead rmessage;
+		struct CControld::Header rmessage;
 		while(true)
 		{
 			connfd = accept(listenfd, (struct sockaddr*) &servaddr, (socklen_t*) &clilen);

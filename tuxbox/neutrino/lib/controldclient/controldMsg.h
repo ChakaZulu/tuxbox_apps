@@ -25,10 +25,13 @@
 #define __controld__
 
 
+#include <zapit/basicmessage.h>
+
+
 #define CONTROLD_UDS_NAME "/tmp/controld.sock"
 
 
-class CControld
+class CControld : public CBasicMessage
 {
 
 	public:
@@ -79,13 +82,6 @@ class CControld
 			CMD_EVENT
 		};
 
-
-		//command structures
-		struct commandHead
-		{
-			unsigned char version;
-			unsigned char cmd;
-		};
 
 		struct commandVolume
 		{

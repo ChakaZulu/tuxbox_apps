@@ -38,7 +38,7 @@
 
 void CControldClient::send(const unsigned char command, char* data = NULL, const unsigned int size = 0)
 {
-	CControld::commandHead msgHead;
+	CControld::Header msgHead;
 	msgHead.version = CControld::ACTVERSION;
 	msgHead.cmd     = command;
 
