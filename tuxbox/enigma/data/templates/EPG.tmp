@@ -5,7 +5,7 @@
 	<script language="javascript">
 		function record(xy)
 		{
-			win=window.open("/addTimerEntry?"+xy, "switchStatus", "width=200, height=200, left=0, top=0");
+			win=window.open("/addTimerEvent?"+xy, "switchStatus", "width=200, height=200, left=0, top=0");
 			win.focus();
 			parent.setTimeout("reload()", 300);
 		}
