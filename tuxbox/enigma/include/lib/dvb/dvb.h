@@ -459,9 +459,10 @@ public:
 struct eSwitchParameter
 {
 	enum SIG22	{	HILO=0, ON=1, OFF=2	}; // 22 Khz
-	enum VMODE	{	HV=0, _14V=1, _18V=2 }; // 14/18 V
+	enum VMODE	{	HV=0, _14V=1, _18V=2, _0V=3 }; // 14/18 V
 	VMODE VoltageMode;
 	SIG22 HiLoSignal;
+  int increased_voltage;
 };
 
 class eSatellite
@@ -522,10 +523,21 @@ public:
 
 struct eDiSEqC
 {
-	enum tDiSEqCParam	{	AA=0, AB=1, BA=2, BB=3, USER=4 }; // DiSEqC Parameter
-	enum tDiSEqCMode	{	MINI=0, V1_0=1, V1_1=2, V1_2=3 }; // DiSEqC Mode
-	tDiSEqCParam DiSEqCParam;
+	enum { AA=0, AB=1, BA=3, BB=2 /* and 0xF0 .. 0xFF*/  }; // DiSEqC Parameter
+  int DiSEqCParam;
+  
+  enum tDiSEqCMode	{	NONE=0, V1_0=1, V1_1=2, V1_2=3, SMATV=4 }; // DiSEqC Mode
 	tDiSEqCMode DiSEqCMode;
+  
+  enum tMiniDiSEqCParam  { NO=0, A=1, B=2 };
+  tMiniDiSEqCParam MiniDiSEqCParam;
+  
+  int DiSEqCRepeats;      // for cascaded switches
+  int SeqRepeat;          // send the complete DiSEqC Sequence dupe...
+  int uncommitted_switch; // send to uncommited switch
+  int uncommitted_gap;    // send uncommitted switch in DiSEqC Repeat gap
+  int useGotoXX;          // Rotor Support gotoXX Position ?
+  int rotorOffset;        // Rotor Offset in °
 };
 
 class eLNB
@@ -562,7 +574,7 @@ class eTransponderList
 	std::map<tsref,eTransponder> transponders;
 	std::map<eServiceReferenceDVB,eService> services;
 	
-	std::map<int,eSatellite*> satellites;
+	std::multimap<int,eSatellite*> satellites;
 	std::list<eLNB> lnbs;
 	friend class eLNB;
 	friend class eSatellite;
@@ -620,6 +632,8 @@ public:
 
 	eTransponder *getFirstTransponder(int state);
 	eSatellite *findSatellite(int orbital_position);
+  std::multimap< int, eSatellite*>::iterator begin() { return satellites.begin(); }
+  std::multimap< int, eSatellite*>::iterator end() { return satellites.end(); }
 	std::list<eLNB>& getLNBs()	{	return lnbs;	}
 };
 

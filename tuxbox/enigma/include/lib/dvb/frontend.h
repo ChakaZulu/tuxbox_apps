@@ -15,7 +15,7 @@
 #include <lib/base/ebase.h>
 
 class eTransponder;
-class eLNB;
+class eSatellite;
 class eSwitchParameter;
 
 /**
@@ -27,7 +27,11 @@ class eFrontend: public Object
 {
 	int type;
 	int fd, secfd;
-	int lastcsw;
+
+  int lastcsw,
+      lastRotorCmd,
+      lastSmatvFreq;
+      
 	enum { stateIdle, stateTuning };
 	int state;
 	eTransponder *transponder;
@@ -38,8 +42,7 @@ class eFrontend: public Object
 	int tune(eTransponder *transponder, 
 			uint32_t Frequency, int polarisation,
 			uint32_t SymbolRate, CodeRate FEC_inner,
-			SpectralInversion Inversion, eLNB *lnb,
-			eSwitchParameter* switchParams, Modulation QAM);
+			SpectralInversion Inversion, eSatellite* sat, Modulation QAM);
 private:
 	void timeout();
 public:
@@ -54,7 +57,7 @@ public:
 	static int open(int type) { if (!frontend) frontend=new eFrontend(type); if (frontend->fd<0) { close(); return frontend->fd; } return 0; }
 	static void close() { delete frontend; }
 	static eFrontend *getInstance() { return frontend; }
-	
+
 	int Type() { return type; }
 	
 	int Status();
@@ -86,8 +89,8 @@ public:
 			uint32_t SymbolRate, 		// symbolrate in symbols/s (e.g. 27500000)
 			uint8_t FEC_inner,			// FEC_inner according to ETSI (-1 for none, 0 for auto, but please don't use that)
 			int Inversion,					// spectral invesion on(1)/off(0)
-			eLNB &lnb,              // description in dvb.h
-			eSwitchParameter &swParams);  // description in dvb.h
+      eSatellite &sat);       // complete satellite data... diseqc.. lnb ..switch
+
 	int tune_qam(eTransponder *transponder,
 			uint32_t Frequency, 		// absolute frequency in kHz
 			uint32_t SymbolRate, 		// symbolrate in symbols/s (e.g. 6900000)

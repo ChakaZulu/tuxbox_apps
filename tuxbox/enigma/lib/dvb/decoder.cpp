@@ -234,7 +234,7 @@ int Decoder::Set()
 	if (changed & 0xF7)
 		SetECM(parms.vpid, parms.apid, parms.ecmpid, parms.emmpid, parms.pmtpid, parms.casystemid, parms.descriptor_length, parms.descriptors);
 
-	if ( (changed & 0x0F) == 2 )	// only apid changed?
+/*	if ( (changed & 0x0F) == 2 )	// only apid changed?
 	{
 		// open audio device
 		if ( ( fd.audio == -1 ) && (parms.apid != -1) )
@@ -297,11 +297,11 @@ int Decoder::Set()
 		}
 		current = parms;
 		return 0;
-	}
+	}*/
 
-	if ( changed & 11 )
-	{
-		if ( fd.audio == -1 )  // open audio dev... if not open..
+  if ( changed & 2)
+  {
+    if ( fd.audio == -1 )  // open audio dev... if not open..
 		{
 			fd.audio=open(AUDIO_DEV, O_RDWR);
 			if (fd.audio<0)
@@ -309,16 +309,6 @@ int Decoder::Set()
 /*			else
 				eDebug("fd.audio opened");*/
 		}
-
-		if ( fd.video == -1 ) // open video dev... if not open
-		{
-			fd.video=open(VIDEO_DEV, O_RDWR);
-			if (fd.video<0)
-				eDebug("fd.video couldn't be opened");
-/*			else
-				eDebug("fd.video opened");*/
-		}
-
 		// get audio status
 		audioStatus astatus;
 		eDebugNoNewLine("AUDIO_GET_STATUS - ");
@@ -326,15 +316,6 @@ int Decoder::Set()
 			perror("failed");
 		else
 			eDebug("%s", astatus.playState == AUDIO_STOPPED ? "stopped" : astatus.playState == AUDIO_PAUSED ? "paused" : "playing" );
-
-		// get video status
-		videoStatus vstatus;
-		eDebugNoNewLine("VIDEO_GET_STATUS - ");
-		if (ioctl(fd.video, VIDEO_GET_STATUS, &vstatus)<0)
-			perror("failed");
-		else
-			eDebug("%s", vstatus.playState == VIDEO_STOPPED ? "stopped" : vstatus.playState == VIDEO_PLAYING ? "playing" : "freezed" );
-
 		// DEMUX STOP AUDIO
 		if (fd.demux_audio == -1)
 		{
@@ -352,6 +333,68 @@ int Decoder::Set()
 			else
 				eDebug("ok");
 		}
+    usleep(100);
+    if ( astatus.playState != AUDIO_STOPPED /* current.apid != -1*/ )
+		{
+			eDebugNoNewLine("AUDIO_STOP - ");
+			if (ioctl(fd.audio, AUDIO_STOP)<0)
+				perror("failed");
+			else
+				eDebug("ok");
+		}
+
+		if ( parms.apid != -1 )
+		{
+			if ( astatus.streamSource != AUDIO_SOURCE_DEMUX )
+			{
+				eDebugNoNewLine("AUDIO_SELECT_SOURCE(DMX) - ");
+				if (ioctl(fd.audio, AUDIO_SELECT_SOURCE, (audioStreamSource_t)AUDIO_SOURCE_DEMUX)<0)
+					perror("failed");
+				else
+					eDebug("ok");
+			}
+		}
+////////////////////////// DEMUX AUDIO SET FILTER /////////////////////////
+		if ( parms.apid != -1 )
+		{
+			pes_filter.pid		 = parms.apid;
+			pes_filter.input	 = DMX_IN_FRONTEND;
+			pes_filter.output	 = DMX_OUT_DECODER;
+			pes_filter.pesType = DMX_PES_AUDIO;
+			pes_filter.flags	 = 0;
+			eDebugNoNewLine("DMX_SET_PES_FILTER(0x%02x) - audio - ", parms.apid);
+			if (ioctl(fd.demux_audio, DMX_SET_PES_FILTER, &pes_filter)<0)
+				perror("failed");
+			else
+				eDebug("ok");
+		}
+		else  // we have no apid
+		{
+			close(fd.demux_audio);
+			fd.demux_audio=-1;
+//			eDebug("fd.demux_audio closed");
+		}
+  }
+
+  if ( changed & 9 )
+	{
+		if ( fd.video == -1 ) // open video dev... if not open
+		{
+			fd.video=open(VIDEO_DEV, O_RDWR);
+			if (fd.video<0)
+				eDebug("fd.video couldn't be opened");
+/*			else
+				eDebug("fd.video opened");*/
+		}
+
+		// get video status
+		videoStatus vstatus;
+		eDebugNoNewLine("VIDEO_GET_STATUS - ");
+		if (ioctl(fd.video, VIDEO_GET_STATUS, &vstatus)<0)
+			perror("failed");
+		else
+			eDebug("%s", vstatus.playState == VIDEO_STOPPED ? "stopped" : vstatus.playState == VIDEO_PLAYING ? "playing" : "freezed" );
+
 	// DEMUX STOP VIDEO
 		if (fd.demux_video == -1)
 		{
@@ -387,27 +430,6 @@ int Decoder::Set()
 				eDebug("ok");
 		}
 		usleep(100);
-
-		if ( astatus.playState != AUDIO_STOPPED /* current.apid != -1*/ )
-		{
-			eDebugNoNewLine("AUDIO_STOP - ");
-			if (ioctl(fd.audio, AUDIO_STOP)<0)
-				perror("failed");
-			else
-				eDebug("ok");
-		}
-
-		if ( parms.apid != -1 )
-		{
-			if ( astatus.streamSource != AUDIO_SOURCE_DEMUX )
-			{
-				eDebugNoNewLine("AUDIO_SELECT_SOURCE(DMX) - ");
-				if (ioctl(fd.audio, AUDIO_SELECT_SOURCE, (audioStreamSource_t)AUDIO_SOURCE_DEMUX)<0)
-					perror("failed");
-				else
-					eDebug("ok");
-			}
-		}
 
 		if ( vstatus.playState != VIDEO_STOPPED ) //*/ current.vpid != -1 )
 		{
@@ -451,27 +473,6 @@ int Decoder::Set()
 //			eDebug("fd.demux_video closed");
 		}
 
-////////////////////////// DEMUX AUDIO SET FILTER /////////////////////////
-		if ( parms.apid != -1 )
-		{
-			pes_filter.pid		 = parms.apid;
-			pes_filter.input	 = DMX_IN_FRONTEND;
-			pes_filter.output	 = DMX_OUT_DECODER;
-			pes_filter.pesType = DMX_PES_AUDIO;
-			pes_filter.flags	 = 0;
-			eDebugNoNewLine("DMX_SET_PES_FILTER(0x%02x) - audio - ", parms.apid);
-			if (ioctl(fd.demux_audio, DMX_SET_PES_FILTER, &pes_filter)<0)
-				perror("failed");
-			else
-				eDebug("ok");
-		}
-		else  // we have no apid
-		{
-			close(fd.demux_audio);
-			fd.demux_audio=-1;
-//			eDebug("fd.demux_audio closed");
-		}
-
 ////////////////////////// DEMUX_PCR SET FILTER /////////////////////////
 		if ( parms.pcrpid != -1 )
 		{
@@ -504,7 +505,34 @@ int Decoder::Set()
 			eDebug("ok");
 	}
 
-	if (changed & 11)
+  if (changed & 2)
+  {
+		if ( parms.apid != -1 )
+		{
+			eDebugNoNewLine("AUDIO_PLAY - ");
+			if (ioctl(fd.audio, AUDIO_PLAY)<0)
+				perror("failed");
+			else
+				eDebug("ok");
+		}
+		else  // no apid
+		{
+			close(fd.audio);
+			fd.audio = -1;
+//			eDebug("fd.audio closed");
+		}
+		if ( parms.apid != -1 )
+	 	{
+			eDebugNoNewLine("DMX_START (audio) - ");
+
+			if (ioctl(fd.demux_audio, DMX_START)<0)
+				perror("failed");
+			else
+				eDebug("ok");
+		}
+  }
+
+	if (changed & 9)
 	{
 		if ( parms.vpid != -1 )
 		{
@@ -521,20 +549,6 @@ int Decoder::Set()
 			fd.video = -1;
 		}
 
-		if ( parms.apid != -1 )
-		{
-			eDebugNoNewLine("AUDIO_PLAY - ");
-			if (ioctl(fd.audio, AUDIO_PLAY)<0)
-				perror("failed");
-			else
-				eDebug("ok");
-		}
-		else  // no apid
-		{
-			close(fd.audio);
-			fd.audio = -1;
-//			eDebug("fd.audio closed");
-		}
 	 	if ( parms.pcrpid != -1 )
 	 	{
 			eDebugNoNewLine("DMX_START (pcr) - ");
@@ -546,16 +560,6 @@ int Decoder::Set()
 		{
 			eDebug("enabling av sync mode");
 			::ioctl(fd.audio, AUDIO_SET_AV_SYNC, 1);
-		}
-
-		if ( parms.apid != -1 )
-	 	{
-			eDebugNoNewLine("DMX_START (audio) - ");
-
-			if (ioctl(fd.demux_audio, DMX_START)<0)
-				perror("failed");
-			else
-				eDebug("ok");
 		}
 
 	 	if ( parms.vpid != -1 )

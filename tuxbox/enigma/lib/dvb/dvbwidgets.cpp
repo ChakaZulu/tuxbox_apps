@@ -7,6 +7,15 @@
 #include <lib/gui/echeckbox.h>
 #include <lib/gui/eprogress.h>
 
+
+/*
+  satelliten auswahl in eTransponderwidget fixen,
+
+  beim zappen nicht find( Orbital_position ) verwende...
+  wegen multimap.. komplett durchiterieren.. und all ausprobieren...
+
+  */
+
 eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type)
 	:eWidget(parent), type(type), edit(edit)
 {
@@ -176,7 +185,10 @@ int eTransponderWidget::setTransponder(const eTransponder *transponder)
 		inversion->setCheck(transponder->satellite.inversion);
 
 		if ( sat->forEachEntry(selectSat(transponder, sat)) != eListBoxBase::OK )
+    {
+      eDebug("bla");
 			sat->setCurrent(0);
+    }
 
 		break;
 	}

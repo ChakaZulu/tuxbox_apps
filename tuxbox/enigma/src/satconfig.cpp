@@ -4,6 +4,7 @@
 #include <lib/gui/eskin.h>
 #include <lib/gui/ebutton.h>
 #include <lib/gui/emessage.h>
+#include <lib/gui/echeckbox.h>
 //#include <lib/driver/rc.h>
 
 eSatelliteConfigurationManager::eSatelliteConfigurationManager()
@@ -139,7 +140,7 @@ void eSatelliteConfigurationManager::createControlElements()
 
 void eSatelliteConfigurationManager::lnbSelected(eButton* who)
 {
-	eLNBSelitor sel( getSat4LnbButton(who) );
+	eLNBSetup sel( getSat4LnbButton(who) );
 	sel.setLCD(LCDTitle, LCDElement);
 
 	hide();
@@ -243,9 +244,9 @@ void eSatelliteConfigurationManager::addSatellite( eSatellite *s )
 //			c->move( ePoint( hx, y ) );
 	c->resize( eSize( 90, 30 ) );
 	c->setHelpText( _("press ok to select another 22kHz mode") );
-	new eListBoxEntryText( *c, "Auto", (void*)eSwitchParameter::HILO, 0, _("22kHz signal is automaticaly switched") );
-	new eListBoxEntryText( *c, "Hi", (void*)eSwitchParameter::ON, 0, _("22kHz is always enabled (high band)") );
-	new eListBoxEntryText( *c, "Lo", (void*)eSwitchParameter::OFF, 0, _("22kHz is always disabled (low band)") );
+	new eListBoxEntryText( *c, "Auto(Hi/Lo)", (void*)eSwitchParameter::HILO, 0, _("22kHz signal is automaticaly switched") );
+	new eListBoxEntryText( *c, "On", (void*)eSwitchParameter::ON, 0, _("22kHz is always enabled (high band)") );
+	new eListBoxEntryText( *c, "Off", (void*)eSwitchParameter::OFF, 0, _("22kHz is always disabled (low band)") );
 	c->setCurrent( (void*) (int) s->getSwitchParams().HiLoSignal );
 	CONNECT( c->selchanged_id, eSatelliteConfigurationManager::hiloChanged);
 
@@ -257,10 +258,11 @@ void eSatelliteConfigurationManager::addSatellite( eSatellite *s )
 //			c->move( ePoint( vx, y ) );
 	c->resize( eSize( 90, 30 ) );
 	c->setHelpText( _("press ok to select another LNB Voltage mode") );
-	new eListBoxEntryText( *c, "Auto", (void*)eSwitchParameter::HV, 0, _("Voltage is automaticaly changed") );
-	new eListBoxEntryText( *c, "14V", (void*)eSwitchParameter::_14V, 0, _("Voltage is always 14V (vertical)") );
+	new eListBoxEntryText( *c, "Auto(H/V)", (void*)eSwitchParameter::HV, 0, _("Voltage is automaticaly changed") );
+  new eListBoxEntryText( *c, "14V", (void*)eSwitchParameter::_14V, 0, _("Voltage is always 14V (vertical)") );
 	new eListBoxEntryText( *c, "18V", (void*)eSwitchParameter::_18V, 0, _("Voltage is always 18V (horizontal") );
-	c->setCurrent( (void*) (int) s->getSwitchParams().VoltageMode );
+	new eListBoxEntryText( *c, "14V", (void*)eSwitchParameter::_0V, 0, _("Voltage is always 14V (vertical)") );
+  c->setCurrent( (void*) (int) s->getSwitchParams().VoltageMode );
 	CONNECT( c->selchanged_id, eSatelliteConfigurationManager::voltageChanged);
 	entryMap.insert( std::pair <eSatellite*, SatelliteEntry> ( s, sat ) );
 }
@@ -293,14 +295,21 @@ void eSatelliteConfigurationManager::newPressed()
 	eLNB *lnb;
 	if ( !eTransponderList::getInstance()->getLNBs().size() )  // lnb list is empty ?
 	{
-		eTransponderList::getInstance()->getLNBs().push_back( eLNB(*eTransponderList::getInstance()) );
+    eTransponderList::getInstance()->getLNBs().push_back( eLNB(*eTransponderList::getInstance()) );
 		lnb = &eTransponderList::getInstance()->getLNBs().back();
 		lnb->setLOFHi(10600000);
 		lnb->setLOFLo(9750000);
 		lnb->setLOFThreshold(11700000);
-		lnb->getDiSEqC().DiSEqCParam=eDiSEqC::AA;
+		lnb->getDiSEqC().MiniDiSEqCParam=eDiSEqC::NO;
+    lnb->getDiSEqC().DiSEqCParam=eDiSEqC::AA;
 		lnb->getDiSEqC().DiSEqCMode=eDiSEqC::V1_0;
-	}
+		lnb->getDiSEqC().DiSEqCRepeats=0;
+		lnb->getDiSEqC().SeqRepeat=0;
+		lnb->getDiSEqC().uncommitted_switch=0;
+		lnb->getDiSEqC().uncommitted_gap=0;
+		lnb->getDiSEqC().useGotoXX=1;
+		lnb->getDiSEqC().rotorOffset=0;    
+  }
 	else // we use the last lnb in the list for the new Satellite
 		lnb = &eTransponderList::getInstance()->getLNBs().back();
 
@@ -338,7 +347,7 @@ int eSatelliteConfigurationManager::eventHandler(const eWidgetEvent &event)
 	return eWindow::eventHandler(event);
 }
 
-struct eLNBSelitor::selectlnb: public std::unary_function<const eListBoxEntryText&, void>
+struct eLNBPage::selectlnb: public std::unary_function<const eListBoxEntryText&, void>
 {
 	const eLNB *lnb;
 	eListBox<eListBoxEntryText> *lb;
@@ -359,104 +368,40 @@ struct eLNBSelitor::selectlnb: public std::unary_function<const eListBoxEntryTex
 };
 
 
-eLNBSelitor::eLNBSelitor( eSatellite* sat )
-:sat(sat)
+eLNBSetup::eLNBSetup( eSatellite* sat )
+  :sat(sat)
 {
-	lnb_list = new eListBox<eListBoxEntryText>(this);
-	lnb_list->setFlags( eListBoxBase::flagNoPageMovement );
-	lnb_list->setName("lnblist");
-	eLabel *l = new eLabel(this);
-	l->setName("lLofL");
-	lofL = new eNumber(this, 5, 0, 9, 1, 0, 0, l, 1 );  // todo descr label im skin mit name versehen für lcd anzeige
-	lofL->setName("lofL");
-	l = new eLabel(this);
-	l->setName("lLofH");
-	lofH = new eNumber(this, 5, 0, 9, 1, 0, 0, l, 1 );  // todo descr label im skin mit name versehen für lcd anzeige
-	lofH->setName("lofH");
-	l = new eLabel(this);
-	l->setName("lThreshold");
-	threshold = new eNumber(this, 5, 0 ,9, 1, 0, 0, l, 1);
-	threshold->setName("threshold");
-	l = new eLabel(this);
-	l->setName("lDiSEqCMode");
-	DiSEqCMode = new eComboBox( this, 3, l );
-	DiSEqCMode->setName("DiSEqCMode");
-	// *DiSEqCMode... here we use the operator eListBox* from eComboBox !
-	new eListBoxEntryText( *DiSEqCMode, "Mini-DiSEqC", (void*)eDiSEqC::MINI, 0, _("Use Mini DiSEqC Mode (for simple switches)") );
-	new eListBoxEntryText( *DiSEqCMode, "Version 1.0", (void*)eDiSEqC::V1_0, 0, _("Use DiSEqC Version 1.0") );
-//	new eListBoxEntryText( *DiSEqCMode, "Version 1.1", (void*)eDiSEqC::V1_1, 0, _("Use DiSEqC Version 1.1") );
-	l = new eLabel(this);
-	l->setName("lDiSEqCParam");
-	DiSEqCParam = new eComboBox( this, 4, l );
-	DiSEqCParam->setName("DiSEqCParam");
+	addActionMap(&i_focusActions->map);
 
-	cancel = new eButton(this);
-	cancel->setName("cancel");
+  eSkin *skin=eSkin::getActive();
+	if (skin->build(this, "eLNBSetup"))
+		eFatal("skin load of \"eLNBSetup\" failed");
 
-	save = new eButton(this);
-	save->setName("save");
+  DiSEqCPage = new eDiSEqCPage( this, sat );
+  LNBPage = new eLNBPage( this, sat );
+  DiSEqCPage->hide();
+  LNBPage->hide();
+  mp.addPage( LNBPage );    
+  mp.addPage( DiSEqCPage );
 
-	eSkin *skin=eSkin::getActive();
-	if (skin->build(this, "eLNBSelitor"))
-		eFatal("skin load of \"eLNBSelitor\" failed");
+// here we can not use the Makro CONNECT ... slot (*this, .... is here not okay..
+  ((eLNBPage*)LNBPage)->lnb_list->selchanged.connect( slot( *LNBPage, &eLNBPage::lnbChanged) );
+  ((eLNBPage*)LNBPage)->lnb_list->selchanged.connect( slot( *DiSEqCPage, &eDiSEqCPage::lnbChanged) );
 
-	// add all LNBs
-
-	int i=0;
-	for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
-		new eListBoxEntryText(lnb_list, eString().sprintf("LNB %i", i++), (void*)&(*it) );
-	
-	// add a None LNB
-	new eListBoxEntryText(lnb_list, _("New"), (void*) 0 );
-
-	lnb_list->forEachEntry(	selectlnb( sat->getLNB(), lnb_list ) );
-
-	CONNECT( lofL->selected, eLNBSelitor::numSelected);
-	CONNECT( lofH->selected, eLNBSelitor::numSelected);
-	CONNECT( threshold->selected, eLNBSelitor::numSelected);
-	CONNECT( save->selected, eLNBSelitor::onSave);
-	CONNECT( cancel->selected, eLNBSelitor::reject);
-	CONNECT( lnb_list->selchanged, eLNBSelitor::lnbChanged);
-	CONNECT( lnb_list->selected, eLNBSelitor::lnbSelected);
-	CONNECT( DiSEqCMode->selchanged, eLNBSelitor::DiSEqCModeChanged);
-
-	// on exec we begin in eventHandler execBegin
+  CONNECT( ((eLNBPage*)LNBPage)->next->selected, eLNBSetup::onNext );
+  CONNECT( ((eDiSEqCPage*)DiSEqCPage)->prev->selected, eLNBSetup::onPrev );  
+  CONNECT( ((eLNBPage*)LNBPage)->save->selected, eLNBSetup::onSave );
+  CONNECT( ((eLNBPage*)LNBPage)->cancel->selected, eLNBSetup::reject);
+  CONNECT( ((eDiSEqCPage*)DiSEqCPage)->save->selected, eLNBSetup::onSave);
+  CONNECT( ((eDiSEqCPage*)DiSEqCPage)->cancel->selected, eLNBSetup::reject);
 }
 
-void eLNBSelitor::lnbSelected( eListBoxEntryText*)
+void eLNBSetup::onSave()
 {
-	focusNext( eWidget::focusDirNext );
-}
+  eLNBPage *lnbpage = (eLNBPage*) LNBPage;
+  eDiSEqCPage *diseqcpage = (eDiSEqCPage*) DiSEqCPage;  
 
-void eLNBSelitor::lnbChanged( eListBoxEntryText *lnb )
-{
-	int l1 = 9750000;
-	int l2 = 10600000;
-	int l3 = 11700000;
-	if ( lnb && lnb->getKey() )
-	{
-		l1 = ((eLNB*)lnb->getKey())->getLOFLo();
-		l2 = ((eLNB*)lnb->getKey())->getLOFHi();
-		l3 = ((eLNB*)lnb->getKey())->getLOFThreshold();
-	}
-	lofL->setNumber( l1 / 1000 );
-	lofL->invalidate();
-	lofH->setNumber( l2 / 1000 );
-	lofH->invalidate();
-	threshold->setNumber( l3 / 1000 );
-	threshold->invalidate();
-
-	if (lnb->getKey())
-		DiSEqCMode->setCurrent( (void*) (int) ((eLNB*)lnb->getKey())->getDiSEqC().DiSEqCMode );
-	else
-		DiSEqCMode->setCurrent(0);
-
-	DiSEqCModeChanged( DiSEqCMode->getCurrent() );  // fake selchanged for initialize DiSEqCParam ComboBox...	
-}
-
-void eLNBSelitor::onSave()
-{
-	eLNB *p = (eLNB*) lnb_list->getCurrent()->getKey();
+  eLNB *p = (eLNB*) lnbpage->lnb_list->getCurrent()->getKey();
 //	eDebug("onSave lnb_list->getCurrent()->getKey() = %p", p );
 
 	if ( !p )  // then we must create new LNB; (New is selected)
@@ -468,13 +413,20 @@ void eLNBSelitor::onSave()
 /*	else
 		eDebug("do not create LNB");*/
 
-	p->setLOFLo( lofL->getNumber() * 1000 );
-	p->setLOFHi( lofH->getNumber() * 1000 );
-	p->setLOFThreshold( threshold->getNumber() * 1000 );
+	p->setLOFLo( lnbpage->lofL->getNumber() * 1000 );
+	p->setLOFHi( lnbpage->lofH->getNumber() * 1000 );
+	p->setLOFThreshold( lnbpage->threshold->getNumber() * 1000 );
 
-	p->getDiSEqC().DiSEqCMode = (eDiSEqC::tDiSEqCMode) (int) DiSEqCMode->getCurrent()->getKey();
-	p->getDiSEqC().DiSEqCParam = (eDiSEqC::tDiSEqCParam) (int) DiSEqCParam->getCurrent()->getKey();
-
+	p->getDiSEqC().MiniDiSEqCParam = (eDiSEqC::tMiniDiSEqCParam) (int) diseqcpage->MiniDiSEqCParam->getCurrent()->getKey();
+  p->getDiSEqC().DiSEqCMode = (eDiSEqC::tDiSEqCMode) (int) diseqcpage->DiSEqCMode->getCurrent()->getKey();
+	p->getDiSEqC().DiSEqCParam = (int) diseqcpage->DiSEqCParam->getCurrent()->getKey();
+	p->getDiSEqC().DiSEqCRepeats = (int) diseqcpage->DiSEqCRepeats->getCurrent()->getKey();
+  p->getDiSEqC().SeqRepeat = diseqcpage->SeqRepeat->isChecked();
+  p->getDiSEqC().uncommitted_switch = diseqcpage->uncommitted->isChecked();
+  p->getDiSEqC().uncommitted_gap = diseqcpage->uncommitted_gap->isChecked();
+  p->getDiSEqC().useGotoXX = diseqcpage->useGotoXX->isChecked();
+  p->getDiSEqC().rotorOffset = diseqcpage->rotorOffset->getNumber();
+        
 	if ( p != sat->getLNB() )  // the satellite must removed from the old lnb and inserts in the new
 	{
 		p->addSatellite( sat->getLNB()->takeSatellite( sat ) );
@@ -490,7 +442,7 @@ void eLNBSelitor::onSave()
 			eDebug("lnb not deleted");*/
 
 		// now we must set the LNB Pointer in eSatellite...
-		sat->setLNB(p);		
+		sat->setLNB(p);
 
 		close(-1); // we must reposition control elements in eSatelliteConfigurationManager
 	}
@@ -498,37 +450,113 @@ void eLNBSelitor::onSave()
 		close(0); // we must not reposition...
 }
 
-void eLNBSelitor::numSelected(int*)
+
+int eLNBSetup::eventHandler(const eWidgetEvent &event)
+{
+	switch (event.type)
+	{
+	case eWidgetEvent::execBegin:
+    mp.first();
+    ((eLNBPage*)LNBPage)->lnbChanged( ((eLNBPage*)LNBPage)->lnb_list->getCurrent() );   // fake selchanged for initialize lofl, lofh, threshold...
+    ((eDiSEqCPage*)DiSEqCPage)->lnbChanged( ((eLNBPage*)LNBPage)->lnb_list->getCurrent() );   // fake selchanged for initialize lofl, lofh, threshold...    
+	break;
+
+	default:
+		break;
+	}
+	return eWindow::eventHandler(event);
+}
+
+
+eLNBPage::eLNBPage( eWidget *parent, eSatellite* sat )
+  :eWidget(parent), sat(sat)
+{
+  addActionMap(&i_focusActions->map);
+  lnb_list = new eListBox<eListBoxEntryText>(this);
+	lnb_list->setFlags( eListBoxBase::flagNoPageMovement );
+	lnb_list->setName("lnblist");
+
+  eLabel *l = new eLabel(this);
+	l->setName("lLofL");
+	lofL = new eNumber(this, 5, 0, 9, 1, 0, 0, l, 1 );  // todo descr label im skin mit name versehen für lcd anzeige
+	lofL->setName("lofL");
+
+  l = new eLabel(this);
+	l->setName("lLofH");
+	lofH = new eNumber(this, 5, 0, 9, 1, 0, 0, l, 1 );  // todo descr label im skin mit name versehen für lcd anzeige
+	lofH->setName("lofH");
+
+  l = new eLabel(this);
+  l->setName("lThreshold");
+	threshold = new eNumber(this, 5, 0 ,9, 1, 0, 0, l, 1);
+	threshold->setName("threshold");
+                    
+	save = new eButton(this);
+	save->setName("save");
+
+  cancel = new eButton(this);
+	cancel->setName("cancel");
+
+  next = new eButton(this);
+  next->setName("next");
+
+	statusbar=new eStatusBar(this);
+  statusbar->setName("statusbar");
+    
+	eSkin *skin=eSkin::getActive();
+	if (skin->build(this, "eLNBPage"))
+		eFatal("skin load of \"eLNBPage\" failed");
+
+	// add all LNBs
+
+	int i=0;
+	for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
+		new eListBoxEntryText(lnb_list, eString().sprintf("LNB %i", i++), (void*)&(*it) );
+	
+	// add a None LNB
+	new eListBoxEntryText(lnb_list, _("New"), (void*) 0 );
+
+	lnb_list->forEachEntry(	selectlnb( sat->getLNB(), lnb_list ) );
+
+	CONNECT( lofL->selected, eLNBPage::numSelected);
+	CONNECT( lofH->selected, eLNBPage::numSelected);
+	CONNECT( threshold->selected, eLNBPage::numSelected);
+	CONNECT( lnb_list->selected, eLNBPage::lnbSelected);
+	// on exec we begin in eventHandler execBegin
+}
+
+void eLNBPage::lnbSelected( eListBoxEntryText*)
 {
 	focusNext( eWidget::focusDirNext );
 }
 
-void eLNBSelitor::DiSEqCModeChanged ( eListBoxEntryText* le)
+void eLNBPage::lnbChanged( eListBoxEntryText *lnb )
 {
-	if ( DiSEqCParam->getCount() )  // then still elements in the ComboBox... we remove it...
-		DiSEqCParam->clear();
-
-	if ( (eDiSEqC::tDiSEqCMode) (int) le->getKey() == eDiSEqC::MINI )
+  int l1 = 9750000;
+	int l2 = 10600000;
+	int l3 = 11700000;
+	if ( lnb && lnb->getKey() )
 	{
-		new eListBoxEntryText( *DiSEqCParam, "A", (void*)eDiSEqC::AA, 0, _("sends no MiniDiSEqC burst") );
-		new eListBoxEntryText( *DiSEqCParam, "B", (void*)eDiSEqC::AB, 0, _("sends MiniDiSEqC burst") );
+		l1 = ((eLNB*)lnb->getKey())->getLOFLo();
+		l2 = ((eLNB*)lnb->getKey())->getLOFHi();
+		l3 = ((eLNB*)lnb->getKey())->getLOFThreshold();
 	}
-	else // DiSEqC 1.0 or 1.1
-	{
-		new eListBoxEntryText( *DiSEqCParam, "A/A", (void*)eDiSEqC::AA, 0, _("sends DiSEqC cmd A/A") );
-		new eListBoxEntryText( *DiSEqCParam, "A/B", (void*)eDiSEqC::AB, 0, _("sends DiSEqC cmd A/B") );
-		new eListBoxEntryText( *DiSEqCParam, "B/A", (void*)eDiSEqC::BA, 0, _("sends DiSEqC cmd B/A") );
-		new eListBoxEntryText( *DiSEqCParam, "B/B", (void*)eDiSEqC::BB, 0, _("sends DiSEqC cmd B/B") );
-	}
-	if ( lnb_list->getCurrent() && lnb_list->getCurrent()->getKey() )
-		DiSEqCParam->setCurrent( (void*) ((eLNB*)lnb_list->getCurrent()->getKey())->getDiSEqC().DiSEqCParam );
-	else
-		DiSEqCParam->setCurrent( 0 );
+	lofL->setNumber( l1 / 1000 );
+	lofL->invalidate();
+	lofH->setNumber( l2 / 1000 );
+	lofH->invalidate();
+	threshold->setNumber( l3 / 1000 );
+	threshold->invalidate();
 }
 
-int eLNBSelitor::eventHandler(const eWidgetEvent &event)
+void eLNBPage::numSelected(int*)
 {
-	switch (event.type)
+	focusNext( eWidget::focusDirNext );
+}
+
+int eLNBPage::eventHandler(const eWidgetEvent &event)
+{
+  switch (event.type)
 	{
 	case eWidgetEvent::evtAction:
 		if (focus != lofL && focus != lofH && focus != threshold && event.action == &i_focusActions->left)
@@ -543,13 +571,196 @@ int eLNBSelitor::eventHandler(const eWidgetEvent &event)
 			break;
 		return 1;
 	
-	case eWidgetEvent::execBegin:
-		lnbChanged( lnb_list->getCurrent() );   // fake selchanged for initialize lofl, lofh, threshold...
-		DiSEqCModeChanged( DiSEqCMode->getCurrent() );  // fake selchanged for initialize DiSEqCParam ComboBox...
-	break;
+	default:
+		break;
+	}
+	return eWidget::eventHandler(event);
+}
+
+eDiSEqCPage::eDiSEqCPage( eWidget *parent, eSatellite *sat)
+  :eWidget(parent), sat(sat)
+{
+	addActionMap(&i_focusActions->map);
+
+  eLabel *l = new eLabel(this);
+  l->setName("lMiniDiSEqCPara");
+  MiniDiSEqCParam = new eComboBox( this, 4, l );
+  MiniDiSEqCParam->setName("MiniDiSEqCParam");
+  new eListBoxEntryText( *MiniDiSEqCParam, _("None"), (void*)eDiSEqC::NO, 0, _("sends no tone burst") );
+  new eListBoxEntryText( *MiniDiSEqCParam, "A", (void*)eDiSEqC::A, 0, _("sends modulated tone burst") );
+	new eListBoxEntryText( *MiniDiSEqCParam, "B", (void*)eDiSEqC::B, 0, _("sends unmodulated tone burst") );
+
+  l = new eLabel(this);
+  l->setName("lDiSEqCMode");
+	DiSEqCMode = new eComboBox( this, 4, l );
+	DiSEqCMode->setName("DiSEqCMode");
+  // *DiSEqCMode... here we use the operator eListBox* from eComboBox !
+	new eListBoxEntryText( *DiSEqCMode, "None", (void*)eDiSEqC::NONE, 0, _("Disable DiSEqC") );
+	new eListBoxEntryText( *DiSEqCMode, "Version 1.0", (void*)eDiSEqC::V1_0, 0, _("Use DiSEqC Version 1.0") );
+	new eListBoxEntryText( *DiSEqCMode, "Version 1.1", (void*)eDiSEqC::V1_1, 0, _("Use DiSEqC Version 1.1") );
+ 	new eListBoxEntryText( *DiSEqCMode, "Version 1.2", (void*)eDiSEqC::V1_2, 0, _("Use DiSEqC Version 1.2") );
+
+  // no SMATV at the moment... we can do this when anyone ask...
+// 	new eListBoxEntryText( *DiSEqCMode, "SMATV", (void*)eDiSEqC::SMATV, 0, _("Use SMATV Remote Tuning") );
+
+  lDiSEqCParam = new eLabel(this);
+	lDiSEqCParam->setName("lDiSEqCParam");
+	DiSEqCParam = new eComboBox( this, 4, lDiSEqCParam );
+	DiSEqCParam->setName("DiSEqCParam");
+	new eListBoxEntryText( *DiSEqCParam, "A/A", (void*)eDiSEqC::AA, 0, _("sends DiSEqC cmd A/A") );
+	new eListBoxEntryText( *DiSEqCParam, "A/B", (void*)eDiSEqC::AB, 0, _("sends DiSEqC cmd A/B") );
+	new eListBoxEntryText( *DiSEqCParam, "B/A", (void*)eDiSEqC::BA, 0, _("sends DiSEqC cmd B/A") );
+	new eListBoxEntryText( *DiSEqCParam, "B/B", (void*)eDiSEqC::BB, 0, _("sends DiSEqC cmd B/B") );
+	new eListBoxEntryText( *DiSEqCParam, "1", (void*)0xF0, 0, _("sends switch cmd 1") );
+	new eListBoxEntryText( *DiSEqCParam, "2", (void*)0xF1, 0, _("sends switch cmd 2") );
+	new eListBoxEntryText( *DiSEqCParam, "3", (void*)0xF2, 0, _("sends switch cmd 3") );
+	new eListBoxEntryText( *DiSEqCParam, "4", (void*)0xF3, 0, _("sends switch cmd 4") );
+	new eListBoxEntryText( *DiSEqCParam, "5", (void*)0xF4, 0, _("sends switch cmd 5") );
+	new eListBoxEntryText( *DiSEqCParam, "6", (void*)0xF5, 0, _("sends switch cmd 6") );
+	new eListBoxEntryText( *DiSEqCParam, "7", (void*)0xF6, 0, _("sends switch cmd 7") );
+	new eListBoxEntryText( *DiSEqCParam, "8", (void*)0xF7, 0, _("sends switch cmd 8") );
+	new eListBoxEntryText( *DiSEqCParam, "9", (void*)0xF8, 0, _("sends switch cmd 9") );
+	new eListBoxEntryText( *DiSEqCParam, "10", (void*)0xF9, 0, _("sends switch cmd 10") );
+	new eListBoxEntryText( *DiSEqCParam, "11", (void*)0xFA, 0, _("sends switch cmd 11") );
+	new eListBoxEntryText( *DiSEqCParam, "12", (void*)0xFB, 0, _("sends switch cmd 12") );
+	new eListBoxEntryText( *DiSEqCParam, "13", (void*)0xFC, 0, _("sends switch cmd 13") );
+	new eListBoxEntryText( *DiSEqCParam, "14", (void*)0xFD, 0, _("sends switch cmd 14") );
+	new eListBoxEntryText( *DiSEqCParam, "15", (void*)0xFE, 0, _("sends switch cmd 15") );
+	new eListBoxEntryText( *DiSEqCParam, "16", (void*)0xFF, 0, _("sends switch cmd 16") );
+
+  lDiSEqCRepeats = new eLabel(this);
+  lDiSEqCRepeats->setName("lDiSEqCRepeats");
+  DiSEqCRepeats = new eComboBox( this, 4, lDiSEqCRepeats );
+  DiSEqCRepeats->setName("DiSEqCRepeats");
+  new eListBoxEntryText( *DiSEqCRepeats, _("None"), (void*)0, 0, _("sends no DiSEqC repeats") );
+  new eListBoxEntryText( *DiSEqCRepeats, _("One"), (void*)1, 0, _("sends one repeat") );
+	new eListBoxEntryText( *DiSEqCRepeats, _("Two"), (void*)2, 0, _("sends two repeats") );
+
+  SeqRepeat = new eCheckbox(this);
+  SeqRepeat->setName("SeqRepeat");
+
+  uncommitted = new eCheckbox(this);
+  uncommitted->setName("uncommitted");
+  
+  uncommitted_gap = new eCheckbox(this);
+  uncommitted_gap->setName("uncommitted_gap");
+
+  useGotoXX = new eCheckbox(this);
+  useGotoXX->setName("useGotoXX");
+
+  lRotorOffset = new eLabel( this );
+  lRotorOffset->setName("lRotorOffset");
+  rotorOffset = new eNumber(this, 3, 0, 360, 3, 0, 0, lRotorOffset, 1 );
+  rotorOffset->setName("rotorOffset");
+  rotorOffset->setFlags( 0 );
+      
+  prev = new eButton(this);
+  prev->setName("prev");
+
+  save = new eButton(this);
+	save->setName("save");
+
+  cancel = new eButton(this);
+	cancel->setName("cancel");
+
+  statusbar=new eStatusBar(this);
+  statusbar->setName("statusbar");
+ 
+  eSkin *skin=eSkin::getActive();
+	if (skin->build(this, "eDiSEqCPage"))
+		eFatal("skin load of \"eDiSEqCPage\" failed");
+
+  CONNECT( DiSEqCMode->selchanged, eDiSEqCPage::DiSEqCModeChanged );
+}
+
+void eDiSEqCPage::DiSEqCModeChanged( eListBoxEntryText* e )
+{
+  switch( (int) e->getKey() )
+  {
+    case eDiSEqC::V1_2:
+      useGotoXX->show();
+      rotorOffset->show();
+      lRotorOffset->show();
+    case eDiSEqC::V1_1:
+      lDiSEqCRepeats->show();
+      DiSEqCRepeats->show();
+      uncommitted->show();
+      uncommitted_gap->show();
+    case eDiSEqC::V1_0:
+      lDiSEqCParam->show();
+      DiSEqCParam->show();
+      SeqRepeat->show();
+    break;
+  }
+  switch ( (int) e->getKey() )
+  {
+    default:
+    case eDiSEqC::NONE:
+      SeqRepeat->hide();
+      DiSEqCParam->hide();
+      lDiSEqCParam->hide();
+    case eDiSEqC::V1_0:
+      lDiSEqCRepeats->hide();
+      DiSEqCRepeats->hide();
+      uncommitted->hide();
+      uncommitted_gap->hide();
+    case eDiSEqC::V1_1:
+      useGotoXX->hide();
+      rotorOffset->hide();
+      lRotorOffset->hide();
+    case eDiSEqC::V1_2: // hide nothing
+    break;
+  }
+}
+
+void eDiSEqCPage::lnbChanged( eListBoxEntryText *lnb )
+{
+  if ( lnb && lnb->getKey() )
+  {
+    DiSEqCMode->setCurrent( (void*) (int) ((eLNB*)lnb->getKey())->getDiSEqC().DiSEqCMode );
+    MiniDiSEqCParam->setCurrent( (void*) ((eLNB*)lnb->getKey())->getDiSEqC().MiniDiSEqCParam );
+    DiSEqCParam->setCurrent( (void*) ((eLNB*)lnb->getKey())->getDiSEqC().DiSEqCParam );
+    DiSEqCRepeats->setCurrent( (void*) ((eLNB*)lnb->getKey())->getDiSEqC().DiSEqCRepeats );
+    SeqRepeat->setCheck( (int) ((eLNB*)lnb->getKey())->getDiSEqC().SeqRepeat );
+    uncommitted->setCheck( (int) ((eLNB*)lnb->getKey())->getDiSEqC().uncommitted_switch );
+    uncommitted_gap->setCheck( (int) ((eLNB*)lnb->getKey())->getDiSEqC().uncommitted_gap );
+    useGotoXX->setCheck( (int) ((eLNB*)lnb->getKey())->getDiSEqC().useGotoXX );
+    rotorOffset->setNumber( (int) ((eLNB*)lnb->getKey())->getDiSEqC().rotorOffset );
+  }
+	else
+  {
+		DiSEqCMode->setCurrent( 0 );
+		DiSEqCParam->setCurrent( 0 );
+		MiniDiSEqCParam->setCurrent( 0 );
+    DiSEqCRepeats->setCurrent( 0 );
+    SeqRepeat->setCheck( 0 );
+    uncommitted->setCheck( 0 );
+    uncommitted_gap->setCheck( 0 );
+    useGotoXX->setCheck( 1 );
+    rotorOffset->setNumber( 0 );
+  }
+  DiSEqCModeChanged( (eListBoxEntryText*) DiSEqCMode->getCurrent() );
+}
+
+int eDiSEqCPage::eventHandler(const eWidgetEvent &event)
+{
+  switch (event.type)
+	{
+  	case eWidgetEvent::evtAction:
+		if (event.action == &i_focusActions->left)
+			focusNext(eWidget::focusDirW);
+		else if (event.action == &i_focusActions->right)
+			focusNext(eWidget::focusDirE);
+		else if (event.action == &i_focusActions->up)
+			focusNext(eWidget::focusDirN);
+		else if (event.action == &i_focusActions->down)
+			focusNext(eWidget::focusDirS);
+		else
+			break;
+		return 1;
 
 	default:
 		break;
 	}
-	return eWindow::eventHandler(event);
+	return eWidget::eventHandler(event);
 }

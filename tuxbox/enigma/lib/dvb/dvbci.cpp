@@ -55,7 +55,7 @@ eDVBCI::eDVBCI():pollTimer(this),messages(this, 1)
 	
 	memset(appName,0,sizeof(appName));
 
-	run();
+  run();
 }
 
 void eDVBCI::thread()

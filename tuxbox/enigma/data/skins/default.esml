@@ -219,23 +219,48 @@
 		</eSatelliteConfigurationManager>
 	</object>
 
-	<object name="eLNBSelitor">
-		<eLNBSelitor position="100:100" size="450:400" text="LNB Configuration">
-			<eListbox name="lnblist" helptext="choose the LNB you wish to apply or edit" position="10:10" size="100:e-45" loadDeco="" />
-			<eLabel text="LOF/L:" name="lLofL" position="130:10" size="150:35" vcenter="on" />
-			<eNumber name="lofL" position="280:10" size="e-10:35" helptext="enter lnb lowband offset frequency (0..9, ok)" loadDeco="" />
-  		<eLabel text="LOF/H:" name="lLofH" position="130:55" size="150:35" vcenter="on" />
-			<eNumber name="lofH" position="280:55" size="e-10:35" helptext="enter lnb highband offset frequency (0..9, ok)" loadDeco="" />
-  		<eLabel text="Threshold:" name="lThreshold" position="130:100" size="150:35" vcenter="on"/>
-			<eNumber name="threshold" position="280:100" size="e-10:35" helptext="enter lnb threshold frequency (0..9, ok)" loadDeco="" />
-			<eLabel text="DiSEqC Mode:" name="lDiSEqCMode" position="130:145" size="150:35" vcenter="on"/>
-			<eComboBox name="DiSEqCMode" position="280:145" size="e-10:35" helptext="select DiSEqC mode (ok)" loadDeco="" />
-			<eLabel text="DiSEqC Para:" name="lDiSEqCPara" position="130:190" size="150:35" vcenter="on"/>
-			<eComboBox name="DiSEqCParam" position="280:190" size="e-10:35" helptext="select DiSEqC parameter (ok)" loadDeco="" />
-			<eButton name="save" text="save" position="130:e-75" size="100:30" helptext="use current selected lnb for the choosen satellite" loadDeco="" />
-			<eButton name="cancel" text="cancel" position="250:e-75" size="100:30" helptext="leave lnb-setup (no changes are saved)" loadDeco="" />
-			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
-		</eLNBSelitor>
+  <object name="eLNBSetup">
+    <eLNBSetup text="LNB Configuration" position="100:50" csize="550:400">
+    </eLNBSetup>
+  </object>
+  
+	<object name="eLNBPage">
+    <eLNBPage position="0:0" size="550:400" >
+      <eListbox name="lnblist" helptext="choose the LNB you wish to apply or edit" position="10:10" size="100:e-95" loadDeco="" />
+			<eLabel text="LOF/L:" name="lLofL" position="130:10" size="200:35" vcenter="on" />
+			<eNumber name="lofL" position="350:10" size="e-10:35" helptext="enter lnb lowband offset frequency (0..9, ok)" loadDeco="" />
+  		<eLabel text="LOF/H:" name="lLofH" position="130:55" size="200:35" vcenter="on" />
+			<eNumber name="lofH" position="350:55" size="e-10:35" helptext="enter lnb highband offset frequency (0..9, ok)" loadDeco="" />
+  		<eLabel text="Threshold:" name="lThreshold" position="130:100" size="200:35" vcenter="on"/>
+			<eNumber name="threshold" position="350:100" size="e-10:35" helptext="enter lnb threshold frequency (0..9, ok)" loadDeco="" />
+      <eButton name="save" text="save" position="10:e-85" size="170:40" helptext="use current selected lnb for the choosen satellite" loadDeco="" />
+			<eButton name="cancel" text="cancel" position="190:e-85" size="170:40" helptext="leave lnb-setup (no changes are saved)" loadDeco="" />
+      <eButton name="next" text="next page" position="370:e-85" size="170:40" helptext="goto next page (DiSEqC)" loadDeco="" />
+      <eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
+		</eLNBPage>
+	</object>
+
+  <object name="eDiSEqCPage">
+    <eDiSEqCPage position="0:0" size="550:400" >
+			<eLabel text="MiniDiSEqC Parameter:" name="lMiniDiSEqCPara" position="10:10" size="290:35" vcenter="on"/>
+			<eComboBox name="MiniDiSEqCParam" position="310:10" size="e-10:35" helptext="select MiniDiSEqC parameter (ok)" loadDeco="" />
+      <eLabel text="DiSEqC Mode:" name="lDiSEqCMode" position="10:55" size="290:35" vcenter="on"/>
+      <eComboBox name="DiSEqCMode" position="310:55" size="e-10:35" helptext="select DiSEqC mode (ok)" loadDeco="" />
+			<eLabel text="DiSEqC Parameter:" name="lDiSEqCParam" position="10:100" size="290:35" vcenter="on"/>
+			<eComboBox name="DiSEqCParam" position="310:100" size="e-10:35" helptext="select DiSEqC parameter (ok) - select DiSEqC Mode above" loadDeco="" />
+			<eLabel text="DiSEqC Repeats:" name="lDiSEqCRepeats" position="10:145" size="290:35" vcenter="on"/>
+			<eComboBox name="DiSEqCRepeats" position="310:145" size="e-10:35" helptext="select DiSEqC repeats (ok) ( DiSEqC higher level 1.0 )" loadDeco="" />
+      <eCheckbox text="Sequence repeat" name="SeqRepeat" position="10:190" size="290:30" helptext="send the complete DiSEqC sequence dupe" />
+      <eCheckbox text="Uncommitted switch" name="uncommitted" position="10:230" size="290:30" helptext="send to an uncommitted DiSEqC switch" />
+      <eCheckbox text="Uncommitted gap" name="uncommitted_gap" position="310:230" size="e-10:30" helptext="fill DiSEqC repeat gap with uncommitted command" />
+      <eCheckbox text="Rotor support gotoXX" name="useGotoXX" position="10:270" size="290:30" helptext="when the rotor support this, then use this" />
+      <eNumber name="rotorOffset" position="310:270" size="50:35" helptext="enter Rotor Offset (0..9, ok)" loadDeco="" />
+      <eLabel text="Rotor offset" name="lRotorOffset" position="370:270" size="e-10:30" vcenter="on" />      
+      <eButton name="prev" text="prev. page" position="10:e-85" size="170:40" helptext="goto prev page (LNB)" loadDeco="" />
+      <eButton name="save" text="save" position="190:e-85" size="170:40" helptext="use current selected lnb for the choosen satellite" loadDeco="" />
+			<eButton name="cancel" text="cancel" position="370:e-85" size="170:40" helptext="leave lnb-setup (no changes are saved)" loadDeco="" />
+      <eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
+		</eDiSEqCPage>
 	</object>
 
 	<object name="tsSelectType">

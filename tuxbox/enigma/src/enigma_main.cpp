@@ -1676,10 +1676,11 @@ void eZapMain::runVTXT()
 				eString aneedvtxtpid=getInfo(FileName.c_str(), "needvtxtpid");
 				eString aneedlcd=getInfo(FileName.c_str(), "needlcd");
 				// we search tuxtxt... this use lcd and vtxtpid... not perfekt... but i havo no other idea
-				if ( aneedvtxtpid.isNull()?false:atoi(aneedvtxtpid.c_str()) && aneedlcd.isNull()?false:atoi(aneedlcd.c_str()) )
+				if ((aneedvtxtpid.isNull() ? false : atoi(aneedvtxtpid.c_str())) &&
+            (aneedlcd.isNull() ? false : atoi(aneedlcd.c_str())) )
 				{
 					plugins.execPluginByName(namelist[count]->d_name);
-					executed++;
+					executed=1;
 				}
 			}
 			free(namelist[count]);

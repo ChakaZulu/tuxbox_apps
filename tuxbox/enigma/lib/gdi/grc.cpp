@@ -1,5 +1,5 @@
 // for debugging use:
-// #define SYNC_PAINT
+#define SYNC_PAINT
 #include <unistd.h>
 #ifndef SYNC_PAINT
 #include <pthread.h>
@@ -11,7 +11,7 @@
 
 #define MAXSIZE 1024
 
-#ifndef SYNC_PAINT
+// #ifndef SYNC_PAINT
 void *gRC::thread_wrapper(void *ptr)
 {
 	nice(0);

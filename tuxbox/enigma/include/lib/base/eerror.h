@@ -2,6 +2,9 @@
 #define __E_ERROR__
 
 #include "config.h"
+#include <string>
+#include <map>       
+#include <new>
 
 void eFatal(const char* fmt, ...);
 
