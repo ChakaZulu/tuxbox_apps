@@ -599,12 +599,9 @@ static eString setAudio(eString request, eString dirpath, eString opts, eHTTPCon
 	return WINDOWCLOSE;
 }
 
-static eString selectAudio(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+eString getAudioChannels(void)
 {
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	content->local_header["Cache-Control"] = "no-cache";
-
-	eString audioChannels;
+	eString result;
 	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
 	if (sapi)
 	{
@@ -613,27 +610,42 @@ static eString selectAudio(eString request, eString dirpath, eString opts, eHTTP
 			;it != astreams.end(); ++it )
 		{
 			if (it->pmtentry->elementary_PID == Decoder::current.apid)
-				audioChannels += eString().sprintf("<option selected value=\"0x%04x\">", it->pmtentry->elementary_PID);
+				result += eString().sprintf("<option selected value=\"0x%04x\">", it->pmtentry->elementary_PID);
 			else
-				audioChannels += eString().sprintf("<option value=\"0x%04x\">", it->pmtentry->elementary_PID);
+				result += eString().sprintf("<option value=\"0x%04x\">", it->pmtentry->elementary_PID);
 
-			audioChannels += removeBadChars(it->text);
-			audioChannels += "</option>";
+			result += removeBadChars(it->text);
+			result += "</option>";
 		}
 	}
 	else
-		audioChannels = "<option>none</option>";
+		result = "<option>none</option>";
+
+	return result;
+}
+
+static eString selectAudio(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	content->local_header["Cache-Control"] = "no-cache";
+
+	eString audioChannels = getAudioChannels();
 
 	eString result = readFile(TEMPLATE_DIR + "audioSelection.tmp");
 	result.strReplace("#LANGUAGES#", audioChannels);
-	
+
 	int channel = eAVSwitch::getInstance()->getAudioChannel();
 	result.strReplace(eString().sprintf("#%d#", channel).c_str(), eString("checked"));
 	result.strReplace("#0#", "");
 	result.strReplace("#1#", "");
 	result.strReplace("#2#", "");
-	
+
 	return result;
+}
+
+static eString audioChannels(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	return getAudioChannels();
 }
 
 eString getCurrentSubChannel(eString curServiceRef)
@@ -681,12 +693,9 @@ eString getCurrentSubChannel(eString curServiceRef)
 	return subChannel;
 }
 
-static eString selectSubChannel(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+eString getSubChannels(void)
 {
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	content->local_header["Cache-Control"] = "no-cache";
-	eString subChannels;
-
+	eString result;
 	eString curServiceRef = ref2string(eServiceInterface::getInstance()->service);
 	if (curServiceRef)
 	{
@@ -717,11 +726,11 @@ static eString selectSubChannel(eString request, eString dirpath, eString opts, 
 								eString subServiceRef = "1:0:7:" + eString().sprintf("%x", ld->service_id) + ":" + eString().sprintf("%x", ld->transport_stream_id) + ":" + eString().sprintf("%x", ld->original_network_id) + ":"
 									+ eString(nspace) + ":0:0:0:";
 								if (subServiceRef == curServiceRef)
-									subChannels += "<option selected value=\"" + subServiceRef + "\">";
+									result += "<option selected value=\"" + subServiceRef + "\">";
 								else
-									subChannels += "<option value=\"" + subServiceRef + "\">";
-								subChannels += removeBadChars(subService);
-								subChannels += "</option>";
+									result += "<option value=\"" + subServiceRef + "\">";
+								result += removeBadChars(subService);
+								result += "</option>";
 							}
 						}
 					}
@@ -731,7 +740,14 @@ static eString selectSubChannel(eString request, eString dirpath, eString opts, 
 			eit->unlock();
 		}
 	}
+	return result;
+}
 
+static eString selectSubChannel(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	content->local_header["Cache-Control"] = "no-cache";
+	eString subChannels = getSubChannels();
 	if (!subChannels)
 		subChannels = "<option>No subchannels available</option>";
 
@@ -739,6 +755,11 @@ static eString selectSubChannel(eString request, eString dirpath, eString opts, 
 	result.strReplace("#SUBCHANS#", subChannels);
 
 	return result;
+}
+
+static eString videoChannels(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	return getSubChannels();
 }
 
 static eString getPMT(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -4942,6 +4963,8 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/osdshot", osdshot, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/currentService", getCurrentServiceRef, lockWeb);
 // functions needed by dreamtv
+	dyn_resolver->addDyn("GET", "/cgi-bin/audioChannels", audioChannels, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/videoChannels", videoChannels, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/currentTransponderServices", getTransponderServices, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getServices", getServices, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/zapto", getCurrentVpidApid, false); // this dont really zap.. only used to return currently used pids;
