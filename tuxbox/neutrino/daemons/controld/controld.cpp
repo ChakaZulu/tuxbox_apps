@@ -282,11 +282,14 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 		videoDisplayFormat = ZAPIT_VIDEO_LETTER_BOX;
 		wss = SAA_WSS_43F;
 		break;
+	case AVS_FNCOUT_EXT43_1	: 
+		videoDisplayFormat = ZAPIT_VIDEO_PAN_SCAN;
+		wss = SAA_WSS_43F;
+		break;
 	default:
 		videoDisplayFormat = ZAPIT_VIDEO_LETTER_BOX;
 		wss = SAA_WSS_43F;
 		break;
-		//	?	case AVS_FNCOUT_EXT43_1	: videoDisplayFormat = VIDEO_PAN_SCAN;
 	}
 
 	zapit.setDisplayFormat(videoDisplayFormat);
@@ -766,7 +769,7 @@ int main(int argc, char **argv)
 {
 	CBasicServer controld_server;
 
-	printf("Controld  $Id: controld.cpp,v 1.84 2003/01/03 17:48:09 Jolt Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.85 2003/01/04 12:50:07 Zwen Exp $\n\n");
 
 	if (!controld_server.prepare(CONTROLD_UDS_NAME))
 		return -1;

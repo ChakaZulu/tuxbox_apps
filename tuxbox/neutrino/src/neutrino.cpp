@@ -1388,6 +1388,7 @@ void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNoti
 
 	oj = new CMenuOptionChooser("videomenu.videoformat", &g_settings.video_Format, true, videoSetupNotifier);
 	oj->addOption(2, "videomenu.videoformat_43");
+	oj->addOption(3, "videomenu.videoformat_431");
 	oj->addOption(1, "videomenu.videoformat_169");
 	oj->addOption(0, "videomenu.videoformat_autodetect");
 
@@ -3295,7 +3296,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.385 2003/01/03 17:48:09 Jolt Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.386 2003/01/04 12:50:07 Zwen Exp $\n\n");
 	//LCD-Init
 	CLCD::getInstance()->init();
 
