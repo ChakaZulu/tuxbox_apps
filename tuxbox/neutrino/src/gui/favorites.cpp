@@ -45,9 +45,8 @@
 int CFavorites::addChannelToFavorites()
 
 {
-
 	unsigned int bouquet_id;
-	unsigned int onid_sid;
+	t_channel_id channel_id;
 	char         *fav_bouquetname;
 	int          status = 0;
 
@@ -69,18 +68,17 @@ int CFavorites::addChannelToFavorites()
 	}
 
 
-	onid_sid = g_Zapit->getCurrentServiceID();
-	//fprintf (stderr, "ADDFav: %08lx  (onid_sid)  bq_id: %u \n", onid_sid, bouquet_id);
+	channel_id = g_Zapit->getCurrentServiceID();
 
-	if ( ! g_Zapit->existsChannelInBouquet (bouquet_id,onid_sid) ) {
-		g_Zapit->addChannelToBouquet(bouquet_id, onid_sid);
+	if ( ! g_Zapit->existsChannelInBouquet(bouquet_id, channel_id) ) {
+		g_Zapit->addChannelToBouquet(bouquet_id, channel_id);
 		status |= 2;
 	}
 
 
 	// -- tell zapit to save Boquets and reinit (if changed)
 	if (status) {
-		g_Zapit->saveBouquets();        // better be save than sorry (save first, commit later)
+		g_Zapit->saveBouquets();        // better be safe than sorry (save first, commit later)
 		g_Zapit->commitBouquetChange();
 	}
 
