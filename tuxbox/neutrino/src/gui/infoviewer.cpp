@@ -51,6 +51,7 @@ int mID;
 
 CInfoViewer::CInfoViewer()
 {
+	frameBuffer = CFrameBuffer::getInstance();
 	// UGLY
 	char strmID[40];
 	strcpy( strmID, getenv("mID") );
@@ -97,7 +98,7 @@ void CInfoViewer::paintTime( bool show_dot, bool firstPaint )
 		if ( ( !firstPaint ) && ( strcmp( timestr, old_timestr ) == 0 ) )
 		{
 			if ( show_dot )
-        		g_FrameBuffer->paintBoxRel(BoxEndX- time_width+ time_left_width- 10, ChanNameY, time_dot_width, time_height/2+2, COL_INFOBAR);
+        		frameBuffer->paintBoxRel(BoxEndX- time_width+ time_left_width- 10, ChanNameY, time_dot_width, time_height/2+2, COL_INFOBAR);
         	else
         		g_Fonts->infobar_channame->RenderString(BoxEndX- time_width+ time_left_width- 10, ChanNameY+ time_height, time_dot_width, ":", COL_INFOBAR);
         	strcpy( old_timestr, timestr );
@@ -108,7 +109,7 @@ void CInfoViewer::paintTime( bool show_dot, bool firstPaint )
 
     		if ( !firstPaint )
     		{
-    			g_FrameBuffer->paintBoxRel(BoxEndX- time_width- 10, ChanNameY, time_width+ 10, time_height, COL_INFOBAR);
+    			frameBuffer->paintBoxRel(BoxEndX- time_width- 10, ChanNameY, time_width+ 10, time_height, COL_INFOBAR);
     		}
 
 			timestr[2]= 0;
@@ -116,7 +117,7 @@ void CInfoViewer::paintTime( bool show_dot, bool firstPaint )
 			g_Fonts->infobar_channame->RenderString(BoxEndX- time_left_width- 10, ChanNameY+ time_height, time_left_width, &timestr[3], COL_INFOBAR);
 			g_Fonts->infobar_channame->RenderString(BoxEndX- time_width+ time_left_width- 10, ChanNameY+ time_height, time_dot_width, ":", COL_INFOBAR);
             if ( show_dot )
-        		g_FrameBuffer->paintBoxRel(BoxEndX- time_left_width- time_dot_width- 10, ChanNameY, time_dot_width, time_height/2+2, COL_INFOBAR);
+        		frameBuffer->paintBoxRel(BoxEndX- time_left_width- time_dot_width- 10, ChanNameY, time_dot_width, time_height/2+2, COL_INFOBAR);
 		}
 	}
 }
@@ -149,22 +150,22 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid,
         if ( fadeIn )
         {
         	fadeValue = 100;
-        	g_FrameBuffer->setAlphaFade(COL_INFOBAR, 8, convertSetupAlpha2Alpha(fadeValue) );
-        	g_FrameBuffer->setAlphaFade(COL_INFOBAR_SHADOW, 8, convertSetupAlpha2Alpha(fadeValue) );
-        	g_FrameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(fadeValue) );
-			g_FrameBuffer->paletteSet();
+        	frameBuffer->setAlphaFade(COL_INFOBAR, 8, convertSetupAlpha2Alpha(fadeValue) );
+        	frameBuffer->setAlphaFade(COL_INFOBAR_SHADOW, 8, convertSetupAlpha2Alpha(fadeValue) );
+        	frameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(fadeValue) );
+			frameBuffer->paletteSet();
         }
         else
         	fadeValue= g_settings.infobar_alpha;
 
 		// kill linke seite
-        g_FrameBuffer->paintBackgroundBox(BoxStartX, BoxStartY+ ChanHeight, BoxStartX + (ChanWidth/3), BoxStartY+ ChanHeight+ InfoHeightY_Info+ 10);
+        frameBuffer->paintBackgroundBox(BoxStartX, BoxStartY+ ChanHeight, BoxStartX + (ChanWidth/3), BoxStartY+ ChanHeight+ InfoHeightY_Info+ 10);
         // kill progressbar
-        g_FrameBuffer->paintBackgroundBox(BoxEndX- 120, BoxStartY, BoxEndX, BoxStartY+ ChanHeight);
+        frameBuffer->paintBackgroundBox(BoxEndX- 120, BoxStartY, BoxEndX, BoxStartY+ ChanHeight);
 
         //number box
-        g_FrameBuffer->paintBoxRel(BoxStartX+10, BoxStartY+10, ChanWidth, ChanHeight, COL_INFOBAR_SHADOW);
-        g_FrameBuffer->paintBoxRel(BoxStartX,    BoxStartY,    ChanWidth, ChanHeight, COL_INFOBAR);
+        frameBuffer->paintBoxRel(BoxStartX+10, BoxStartY+10, ChanWidth, ChanHeight, COL_INFOBAR_SHADOW);
+        frameBuffer->paintBoxRel(BoxStartX,    BoxStartY,    ChanWidth, ChanHeight, COL_INFOBAR);
 
         //channel number
         char strChanNum[10];
@@ -176,7 +177,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid,
         int ChanNameX = BoxStartX + ChanWidth + 10;
         int ChanNameY = BoxStartY + (ChanHeight>>1)   + 5; //oberkante schatten?
 
-       	g_FrameBuffer->paintBox(ChanNameX, ChanNameY, BoxEndX, BoxEndInfoY, COL_INFOBAR);
+       	frameBuffer->paintBox(ChanNameX, ChanNameY, BoxEndX, BoxEndInfoY, COL_INFOBAR);
 
 		paintTime( false, true );
 
@@ -187,7 +188,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid,
         int ChanInfoY = BoxStartY + ChanHeight+ 10;
         ButtonWidth = (BoxEndX- ChanInfoX- ICON_OFFSET)>> 2;
 
-        g_FrameBuffer->paintBox(ChanInfoX, ChanInfoY, ChanNameX, BoxEndInfoY, COL_INFOBAR);
+        frameBuffer->paintBox(ChanInfoX, ChanInfoY, ChanNameX, BoxEndInfoY, COL_INFOBAR);
 
 
         if ( showButtonBar )
@@ -195,9 +196,9 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid,
          	sec_timer_id = g_RCInput->addTimer(1000000, false);
 
         	if ( BOTTOM_BAR_OFFSET> 0 )
-	        	g_FrameBuffer->paintBackgroundBox(ChanInfoX, BoxEndInfoY, BoxEndX, BoxEndInfoY+ BOTTOM_BAR_OFFSET);
+	        	frameBuffer->paintBackgroundBox(ChanInfoX, BoxEndInfoY, BoxEndX, BoxEndInfoY+ BOTTOM_BAR_OFFSET);
 
-       		g_FrameBuffer->paintBox(ChanInfoX, BoxEndInfoY+ BOTTOM_BAR_OFFSET, BoxEndX, BoxEndY, COL_INFOBAR_BUTTONS);
+       		frameBuffer->paintBox(ChanInfoX, BoxEndInfoY+ BOTTOM_BAR_OFFSET, BoxEndX, BoxEndY, COL_INFOBAR_BUTTONS);
 		}
 
 		if ( !( info_CurrentNext.flags & ( sectionsd::epgflags::has_later | sectionsd::epgflags::has_current |  sectionsd::epgflags::not_broadcast ) ) )
@@ -212,7 +213,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid,
         if ( showButtonBar )
         {
 			// blau
-			g_FrameBuffer->paintIcon("blau.raw", BoxEndX- ICON_OFFSET- ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+			frameBuffer->paintIcon("blau.raw", BoxEndX- ICON_OFFSET- ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 			g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.streaminfo").c_str(), COL_INFOBAR_BUTTONS);
 
 			showButton_Audio();
@@ -235,8 +236,8 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid,
         }
 
 		// Schatten
-        g_FrameBuffer->paintBox(BoxEndX, ChanNameY+ SHADOW_OFFSET, BoxEndX+ SHADOW_OFFSET, BoxEndY, COL_INFOBAR_SHADOW);
-        g_FrameBuffer->paintBox(ChanInfoX+ SHADOW_OFFSET, BoxEndY, BoxEndX+ SHADOW_OFFSET, BoxEndY+ SHADOW_OFFSET, COL_INFOBAR_SHADOW);
+        frameBuffer->paintBox(BoxEndX, ChanNameY+ SHADOW_OFFSET, BoxEndX+ SHADOW_OFFSET, BoxEndY, COL_INFOBAR_SHADOW);
+        frameBuffer->paintBox(ChanInfoX+ SHADOW_OFFSET, BoxEndY, BoxEndX+ SHADOW_OFFSET, BoxEndY+ SHADOW_OFFSET, COL_INFOBAR_SHADOW);
 
         uint msg; uint data;
 
@@ -273,10 +274,10 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid,
 	    	        		fadeValue= 100;
 	        	    		g_RCInput->killTimer(fadeTimer);
 	            			res = messages_return::cancel_info;
-	            			g_FrameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(100) );
+	            			frameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(100) );
 		            	}
 		            	else
-	    	        		g_FrameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(fadeValue) );
+	    	        		frameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(fadeValue) );
 					}
 					else
 					{
@@ -287,15 +288,15 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid,
 	    	        		fadeValue= g_settings.infobar_alpha;
 	        	    		g_RCInput->killTimer(fadeTimer);
 	            			fadeIn = false;
-	            			g_FrameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(0) );
+	            			frameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(0) );
 		            	}
 		            	else
-	    	        		g_FrameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(fadeValue) );
+	    	        		frameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(fadeValue) );
 	    	        }
 
-					g_FrameBuffer->setAlphaFade(COL_INFOBAR, 8, convertSetupAlpha2Alpha(fadeValue) );
-					g_FrameBuffer->setAlphaFade(COL_INFOBAR_SHADOW, 8, convertSetupAlpha2Alpha(fadeValue) );
-					g_FrameBuffer->paletteSet();
+					frameBuffer->setAlphaFade(COL_INFOBAR, 8, convertSetupAlpha2Alpha(fadeValue) );
+					frameBuffer->setAlphaFade(COL_INFOBAR_SHADOW, 8, convertSetupAlpha2Alpha(fadeValue) );
+					frameBuffer->paletteSet();
 				}
 				else if ( ( msg == CRCInput::RC_ok ) ||
 				          ( msg == CRCInput::RC_home ) ||
@@ -363,10 +364,10 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid,
             if ( fadeIn || fadeOut )
             {
             	g_RCInput->killTimer(fadeTimer);
-           		g_FrameBuffer->setAlphaFade(COL_INFOBAR, 8, convertSetupAlpha2Alpha(g_settings.infobar_alpha) );
-           		g_FrameBuffer->setAlphaFade(COL_INFOBAR_SHADOW, 8, convertSetupAlpha2Alpha(g_settings.infobar_alpha) );
-           		g_FrameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(0) );
-           		g_FrameBuffer->paletteSet();
+           		frameBuffer->setAlphaFade(COL_INFOBAR, 8, convertSetupAlpha2Alpha(g_settings.infobar_alpha) );
+           		frameBuffer->setAlphaFade(COL_INFOBAR_SHADOW, 8, convertSetupAlpha2Alpha(g_settings.infobar_alpha) );
+           		frameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(0) );
+           		frameBuffer->paletteSet();
 			}
 
         }
@@ -374,15 +375,15 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid,
 
 void CInfoViewer::showIcon_16_9()
 {
-	g_FrameBuffer->paintIcon( ( aspectRatio == 3 )?"16_9.raw":"16_9_gray.raw", BoxEndX- 2* ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+	frameBuffer->paintIcon( ( aspectRatio == 3 )?"16_9.raw":"16_9_gray.raw", BoxEndX- 2* ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 }
 
 void CInfoViewer::showIcon_VTXT()
 {
 	if ( g_RemoteControl->current_PIDs.PIDs.vtxtpid != 0 )
-		g_FrameBuffer->paintIcon("vtxt.raw", BoxEndX- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+		frameBuffer->paintIcon("vtxt.raw", BoxEndX- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 	else
-		g_FrameBuffer->paintIcon("vtxt_gray.raw", BoxEndX- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+		frameBuffer->paintIcon("vtxt_gray.raw", BoxEndX- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 }
 
 int CInfoViewer::handleMsg(uint msg, uint data)
@@ -401,10 +402,10 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 	{
 		// hierher kann das event nur dann kommen, wenn ein anderes Fenster im Vordergrund ist!
 		g_RCInput->killTimer(fadeTimer);
-        g_FrameBuffer->setAlphaFade(COL_INFOBAR, 8, convertSetupAlpha2Alpha(g_settings.infobar_alpha) );
-        g_FrameBuffer->setAlphaFade(COL_INFOBAR_SHADOW, 8, convertSetupAlpha2Alpha(g_settings.infobar_alpha) );
-        g_FrameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(0) );
-		g_FrameBuffer->paletteSet();
+        frameBuffer->setAlphaFade(COL_INFOBAR, 8, convertSetupAlpha2Alpha(g_settings.infobar_alpha) );
+        frameBuffer->setAlphaFade(COL_INFOBAR_SHADOW, 8, convertSetupAlpha2Alpha(g_settings.infobar_alpha) );
+        frameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(0) );
+		frameBuffer->paletteSet();
 	}
     else if ( msg == NeutrinoMessages::EVT_ZAP_GOTAPIDS )
 	{
@@ -476,7 +477,7 @@ void CInfoViewer::showButton_SubServices()
 	if ( g_RemoteControl->subChannels.size()> 0 )
 	{
 		// gelbe Taste für NVODs / Subservices
-		g_FrameBuffer->paintIcon("gelb.raw", BoxEndX- ICON_OFFSET- 2* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+		frameBuffer->paintIcon("gelb.raw", BoxEndX- ICON_OFFSET- 2* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 
 		if ( g_RemoteControl->are_subchannels )
 			// SubServices
@@ -581,16 +582,16 @@ void CInfoViewer::show_Data( bool calledFromEvent = false )
         	//percent
 			if ( info_CurrentNext.flags & sectionsd::epgflags::has_current)
 			{
-				g_FrameBuffer->paintBoxRel(BoxEndX-114, posy,   2+100+2, height2, COL_INFOBAR_SHADOW); //border
-				g_FrameBuffer->paintBoxRel(BoxEndX-112, posy+2, runningPercent+2, height2-4, COL_INFOBAR+7);//fill(active)
-				g_FrameBuffer->paintBoxRel(BoxEndX-112+runningPercent, posy+2, 100-runningPercent, height2-4, COL_INFOBAR+3);//fill passive
+				frameBuffer->paintBoxRel(BoxEndX-114, posy,   2+100+2, height2, COL_INFOBAR_SHADOW); //border
+				frameBuffer->paintBoxRel(BoxEndX-112, posy+2, runningPercent+2, height2-4, COL_INFOBAR+7);//fill(active)
+				frameBuffer->paintBoxRel(BoxEndX-112+runningPercent, posy+2, 100-runningPercent, height2-4, COL_INFOBAR+3);//fill passive
 			}
 			else
-				g_FrameBuffer->paintBackgroundBoxRel(BoxEndX-114, posy,   2+100+2, height2);
+				frameBuffer->paintBackgroundBoxRel(BoxEndX-114, posy,   2+100+2, height2);
 
 			if ( info_CurrentNext.flags & sectionsd::epgflags::has_anything )
 			{
-				g_FrameBuffer->paintIcon("rot.raw", BoxEndX- ICON_OFFSET- 4* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+				frameBuffer->paintIcon("rot.raw", BoxEndX- ICON_OFFSET- 4* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 				g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- 4* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.eventlist").c_str(), COL_INFOBAR_BUTTONS);
 			}
 		}
@@ -598,14 +599,14 @@ void CInfoViewer::show_Data( bool calledFromEvent = false )
 		height = g_Fonts->infobar_info->getHeight();
 		int xStart= BoxStartX + ChanWidth;
 
-		g_FrameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR);
+		frameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR);
 
 		if ( ( info_CurrentNext.flags & sectionsd::epgflags::not_broadcast ) ||
 			 ( ( calledFromEvent ) && !( info_CurrentNext.flags & ( sectionsd::epgflags::has_next | sectionsd::epgflags::has_current ) ) ) )
 		{
 			// kein EPG verfügbar
 			ChanInfoY += height;
-			g_FrameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height, COL_INFOBAR);
+			frameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height, COL_INFOBAR);
 			g_Fonts->infobar_info->RenderString(BoxStartX + ChanWidth + 20,  ChanInfoY+height, BoxEndX- (BoxStartX + ChanWidth + 20), g_Locale->getText(gotTime?"infoviewer.noepg":"infoviewer.waittime").c_str(), COL_INFOBAR);
 		}
 		else
@@ -625,7 +626,7 @@ void CInfoViewer::show_Data( bool calledFromEvent = false )
 				ChanInfoY += height;
 
 				//info next
-				g_FrameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR);
+				frameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR);
 
 				g_Fonts->infobar_info->RenderString(ChanInfoX+10,                ChanInfoY+height, 100, nextStart, COL_INFOBAR);
 				g_Fonts->infobar_info->RenderString(xStart,  ChanInfoY+height, duration2TextPos- xStart- 5, info_CurrentNext.next_name, COL_INFOBAR);
@@ -640,7 +641,7 @@ void CInfoViewer::show_Data( bool calledFromEvent = false )
 				ChanInfoY += height;
 
 				//info next
-				g_FrameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR);
+				frameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR);
 
 				if ( ( !is_nvod ) && ( info_CurrentNext.flags & sectionsd::epgflags::has_next ) )
 				{
@@ -686,7 +687,7 @@ void CInfoViewer::showButton_Audio()
 								#endif
 						}
 
-                        g_FrameBuffer->paintBox(ChanInfoX, ChanNameY, BoxEndX, ChanInfoY, COL_INFOBAR);
+                        frameBuffer->paintBox(ChanInfoX, ChanNameY, BoxEndX, ChanInfoY, COL_INFOBAR);
                         g_Fonts->infobar_info->RenderString(xStart, ChanInfoY, BoxEndX- xStart, disp_text.c_str(), COL_INFOBAR);
                         KillShowEPG = true;
                 };
@@ -695,17 +696,17 @@ void CInfoViewer::showButton_Audio()
 	int count = g_RemoteControl->current_PIDs.APIDs.size();
 	if ( count > 1 )
 	{
-		g_FrameBuffer->paintIcon("gruen.raw", BoxEndX- ICON_OFFSET- 3* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+		frameBuffer->paintIcon("gruen.raw", BoxEndX- ICON_OFFSET- 3* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 		g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- 3* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.languages").c_str(), COL_INFOBAR_BUTTONS);
 	};
 
 	if ( ( g_RemoteControl->current_PIDs.PIDs.selected_apid < count ) &&
 	     ( g_RemoteControl->current_PIDs.APIDs[g_RemoteControl->current_PIDs.PIDs.selected_apid].is_ac3 ) )
-		g_FrameBuffer->paintIcon("dd.raw", BoxEndX- ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+		frameBuffer->paintIcon("dd.raw", BoxEndX- ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 	else if ( g_RemoteControl->has_ac3 )
-		g_FrameBuffer->paintIcon("dd_avail.raw", BoxEndX- ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+		frameBuffer->paintIcon("dd_avail.raw", BoxEndX- ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 	else
-		g_FrameBuffer->paintIcon("dd_gray.raw", BoxEndX- ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+		frameBuffer->paintIcon("dd_gray.raw", BoxEndX- ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 }
 
 void CInfoViewer::killTitle()
@@ -713,7 +714,7 @@ void CInfoViewer::killTitle()
 	if (is_visible )
 	{
 		is_visible = false;
-		g_FrameBuffer->paintBackgroundBox(BoxStartX, BoxStartY, BoxEndX+ SHADOW_OFFSET, BoxEndY+ SHADOW_OFFSET );
+		frameBuffer->paintBackgroundBox(BoxStartX, BoxStartY, BoxEndX+ SHADOW_OFFSET, BoxEndY+ SHADOW_OFFSET );
 	}
 }
 

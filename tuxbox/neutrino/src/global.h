@@ -77,7 +77,6 @@ NEUTRINO_CPP  CRemoteControl	*g_RemoteControl;
 NEUTRINO_CPP  fontRenderClass	*g_fontRenderer;
 NEUTRINO_CPP  FontsDef			*g_Fonts;
 NEUTRINO_CPP  CRCInput			*g_RCInput;
-NEUTRINO_CPP  CFrameBuffer		*g_FrameBuffer;
 
 NEUTRINO_CPP  CEpgData			*g_EpgData;
 NEUTRINO_CPP  CInfoViewer		*g_InfoViewer;

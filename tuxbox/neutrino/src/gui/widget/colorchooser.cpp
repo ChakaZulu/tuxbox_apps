@@ -34,6 +34,7 @@
 
 CColorChooser::CColorChooser(string Name, unsigned char *R, unsigned char *G, unsigned char *B, unsigned char* Alpha, CChangeObserver* Observer)
 {
+	frameBuffer = CFrameBuffer::getInstance();
 	observer = Observer;
 	name = Name;
 	width = 360;
@@ -54,14 +55,14 @@ void CColorChooser::setColor()
 	int color = convertSetupColor2RGB(*r,*g, *b);
 	if(!alpha)
 	{
-		g_FrameBuffer->paletteSetColor(254, color, 0);
-		g_FrameBuffer->paletteSet();
+		frameBuffer->paletteSetColor(254, color, 0);
+		frameBuffer->paletteSet();
 	}
 	else
 	{
 		int tAlpha = convertSetupAlpha2Alpha( *alpha );
-		g_FrameBuffer->paletteSetColor(254, color, tAlpha);
-		g_FrameBuffer->paletteSet();
+		frameBuffer->paletteSetColor(254, color, tAlpha);
+		frameBuffer->paletteSet();
 	}
 	/*
 	char colorstr[30];
@@ -269,14 +270,14 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 
 void CColorChooser::hide()
 {
-	g_FrameBuffer->paintBackgroundBoxRel(x,y, width,height);
+	frameBuffer->paintBackgroundBoxRel(x,y, width,height);
 }
 
 void CColorChooser::paint()
 {
-	g_FrameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD);
 	g_Fonts->menu_title->RenderString(x+10,y+hheight, width, g_Locale->getText(name).c_str(), COL_MENUHEAD);
-	g_FrameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT);
 
 	paintSlider(x+10, y+hheight, r,g_Locale->getText("colorchooser.red"),"red", true);
 	paintSlider(x+10, y+hheight+mheight, g,g_Locale->getText("colorchooser.green"),"green", false);
@@ -284,21 +285,21 @@ void CColorChooser::paint()
 	paintSlider(x+10, y+hheight+mheight*3, alpha,g_Locale->getText("colorchooser.alpha"),"alpha",false);
 
 	//color preview
-	g_FrameBuffer->paintBoxRel(x+220,y+hheight+5,    mheight*4,   mheight*4-10,   COL_MENUHEAD);
-	g_FrameBuffer->paintBoxRel(x+222,y+hheight+2+5,  mheight*4-4 ,mheight*4-4-10, 254);
+	frameBuffer->paintBoxRel(x+220,y+hheight+5,    mheight*4,   mheight*4-10,   COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x+222,y+hheight+2+5,  mheight*4-4 ,mheight*4-4-10, 254);
 }
 
 void CColorChooser::paintSlider(int x, int y, unsigned char *spos, string text, string iconname, bool selected)
 {
 	if (!spos)
 		return;
-	g_FrameBuffer->paintBoxRel(x+70,y,120,mheight, COL_MENUCONTENT);
-	g_FrameBuffer->paintIcon("volumebody.raw",x+70,y+2+mheight/4);
+	frameBuffer->paintBoxRel(x+70,y,120,mheight, COL_MENUCONTENT);
+	frameBuffer->paintIcon("volumebody.raw",x+70,y+2+mheight/4);
 	string iconfile = "volumeslider2";
 	if (selected)
 		iconfile += iconname;
 	iconfile +=".raw";
-	g_FrameBuffer->paintIcon(iconfile,x+73+(*spos),y+mheight/4);
+	frameBuffer->paintIcon(iconfile,x+73+(*spos),y+mheight/4);
 
 	g_Fonts->menu->RenderString(x,y+mheight, width, text.c_str(), COL_MENUCONTENT);
 }

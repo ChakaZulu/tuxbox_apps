@@ -50,6 +50,7 @@ using namespace std;
 class EventList
 {
 	private:
+		CFrameBuffer	*frameBuffer;
         CChannelEventList	evtlist;
 		void readEvents(unsigned onidSid, const std::string& channelname); // I really don't like handling names
 		unsigned int	selected;

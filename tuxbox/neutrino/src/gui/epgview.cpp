@@ -38,7 +38,7 @@ CEpgData::CEpgData()
 
 void CEpgData::start()
 {
-
+	frameBuffer = CFrameBuffer::getInstance();
 	ox = 540;
     sx = (((g_settings.screen_EndX-g_settings.screen_StartX) -ox) / 2) + g_settings.screen_StartX;
     oy = 320;
@@ -129,7 +129,7 @@ void CEpgData::showText( int startPos, int ypos )
 	int linecount=medlinecount;
 	string t;
 	int sb = linecount* medlineheight;
-	g_FrameBuffer->paintBoxRel(sx, y, ox- 15, sb, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(sx, y, ox- 15, sb, COL_MENUCONTENT);
 
 	for(int i=startPos; i<textCount && i<startPos+linecount; i++,y+=medlineheight)
 	{
@@ -140,13 +140,13 @@ void CEpgData::showText( int startPos, int ypos )
 			g_Fonts->epg_info2->RenderString(sx+10, y+medlineheight, ox- 15- 15, t.c_str(), COL_MENUCONTENT);
 	}
 
-	g_FrameBuffer->paintBoxRel(sx+ ox- 15, ypos, 15, sb,  COL_MENUCONTENT+ 1);
+	frameBuffer->paintBoxRel(sx+ ox- 15, ypos, 15, sb,  COL_MENUCONTENT+ 1);
 
 	int sbc= ((textCount- 1)/ linecount)+ 1;
 	float sbh= (sb- 4)/ sbc;
 	int sbs= (startPos+ 1)/ linecount;
 
-	g_FrameBuffer->paintBoxRel(sx+ ox- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
+	frameBuffer->paintBoxRel(sx+ ox- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
 
 }
 
@@ -251,7 +251,7 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 	height = g_Fonts->epg_date->getHeight();
 	if (doLoop)
 	{
-		g_FrameBuffer->paintBoxRel(g_settings.screen_StartX, g_settings.screen_StartY, 50, height+5, COL_INFOBAR);
+		frameBuffer->paintBoxRel(g_settings.screen_StartX, g_settings.screen_StartY, 50, height+5, COL_INFOBAR);
 		g_Fonts->epg_date->RenderString(g_settings.screen_StartX+10, g_settings.screen_StartY+height, 40, "-@-", COL_INFOBAR);
 	}
 
@@ -259,7 +259,7 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 	if (doLoop)
 	{
 		evtlist = g_Sectionsd->getEventsServiceKey( onid_sid );
-		g_FrameBuffer->paintBackgroundBoxRel(g_settings.screen_StartX, g_settings.screen_StartY, 50, height+5);
+		frameBuffer->paintBackgroundBoxRel(g_settings.screen_StartX, g_settings.screen_StartY, 50, height+5);
 	}
 
 	if(epgData.title.length()==0)
@@ -271,8 +271,8 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 		int sx = (((g_settings.screen_EndX- g_settings.screen_StartX)-ox) / 2) + g_settings.screen_StartX;
 		int sy = (((g_settings.screen_EndY- g_settings.screen_StartY)-oy) / 2) + g_settings.screen_StartY;
 		height = g_Fonts->epg_info2->getHeight();
-		g_FrameBuffer->paintBoxRel(sx, sy, ox, height+ 10, COL_INFOBAR_SHADOW); //border
-		g_FrameBuffer->paintBoxRel(sx+ 1, sy+ 1, ox- 2, height+ 8, COL_MENUCONTENT);
+		frameBuffer->paintBoxRel(sx, sy, ox, height+ 10, COL_INFOBAR_SHADOW); //border
+		frameBuffer->paintBoxRel(sx+ 1, sy+ 1, ox- 2, height+ 8, COL_MENUCONTENT);
 		g_Fonts->epg_info2->RenderString(sx+15, sy+height+5, ox-30, text, COL_MENUCONTENT);
 
 
@@ -280,7 +280,7 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 		g_RCInput->getMsg( &msg, &data, 20 );
 		neutrino->handleMsg( msg, data );
 
-		g_FrameBuffer->paintBackgroundBoxRel(sx, sy, ox, height+10);
+		frameBuffer->paintBackgroundBoxRel(sx, sy, ox, height+10);
 		return res;
 	}
 
@@ -308,7 +308,7 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 
 	if ( (oldtoph> toph) && (!doLoop) )
 	{
-		g_FrameBuffer->paintBackgroundBox (sx, sy- oldtoph- 1, sx+ ox, sy- toph);
+		frameBuffer->paintBackgroundBox (sx, sy- oldtoph- 1, sx+ ox, sy- toph);
 	}
 
 	if(epgData.info1.length()!=0)
@@ -337,13 +337,13 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 //	processTextToArray( epgData.userClassification.c_str() );
 
 	//show the epg
-	g_FrameBuffer->paintBoxRel(sx, sy- toph, ox, toph, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(sx, sy- toph, ox, toph, COL_MENUHEAD);
 	g_Fonts->epg_title->RenderString(sx+10, sy- toph+ topheight+ 3, ox-15, text1.c_str(), COL_MENUHEAD);
 	if (text2!="")
 		g_Fonts->epg_title->RenderString(sx+10, sy- toph+ 2* topheight+ 3, ox-15, text2.c_str(), COL_MENUHEAD);
 
 	//show date-time....
-	g_FrameBuffer->paintBoxRel(sx, sy+oy-botboxheight, ox, botboxheight, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(sx, sy+oy-botboxheight, ox, botboxheight, COL_MENUHEAD);
 	string fromto;
 	int widthl,widthr;
 	fromto= epg_start+ " - "+ epg_end;
@@ -362,21 +362,21 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 	if ( epg_done!= -1 )
 	{
 		int pbx = sx + 10 + widthl + 10 + ((ox-104-widthr-widthl-10-10-20)>>1);
-		g_FrameBuffer->paintBoxRel(pbx, sy+oy-height, 104, height-6, COL_MENUCONTENT+6);
-		g_FrameBuffer->paintBoxRel(pbx+2, sy+oy-height+2, 100, height-10, COL_MENUCONTENT);
-		g_FrameBuffer->paintBoxRel(pbx+2, sy+oy-height+2, epg_done, height-10, COL_MENUCONTENT+3);
+		frameBuffer->paintBoxRel(pbx, sy+oy-height, 104, height-6, COL_MENUCONTENT+6);
+		frameBuffer->paintBoxRel(pbx+2, sy+oy-height+2, 100, height-10, COL_MENUCONTENT);
+		frameBuffer->paintBoxRel(pbx+2, sy+oy-height+2, epg_done, height-10, COL_MENUCONTENT+3);
 	}
 
 	GetPrevNextEPGData( epgData.eventID, &epgData.epg_times.startzeit );
 	if (prev_id != 0)
 	{
-		g_FrameBuffer->paintBoxRel(sx+ 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT+ 3);
+		frameBuffer->paintBoxRel(sx+ 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT+ 3);
 		g_Fonts->epg_date->RenderString(sx+ 10, sy+ oy- 3, widthr, "<", COL_MENUCONTENT+ 3);
 	}
 
 	if (next_id != 0)
 	{
-		g_FrameBuffer->paintBoxRel(sx+ ox- botboxheight+ 8- 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT+ 3);
+		frameBuffer->paintBoxRel(sx+ ox- botboxheight+ 8- 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT+ 3);
 		g_Fonts->epg_date->RenderString(sx+ ox- botboxheight+ 8, sy+ oy- 3, widthr, ">", COL_MENUCONTENT+ 3);
 	}
 
@@ -396,7 +396,7 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 				case CRCInput::RC_left:
 					if (prev_id != 0)
 					{
-						g_FrameBuffer->paintBoxRel(sx+ 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT+ 1);
+						frameBuffer->paintBoxRel(sx+ 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT+ 1);
 						g_Fonts->epg_date->RenderString(sx+ 10, sy+ oy- 3, widthr, "<", COL_MENUCONTENT+ 1);
 
 						show(onid_sid, prev_id, &prev_zeit, false);
@@ -406,7 +406,7 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 				case CRCInput::RC_right:
 					if (next_id != 0)
 					{
-						g_FrameBuffer->paintBoxRel(sx+ ox- botboxheight+ 8- 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT+ 1);
+						frameBuffer->paintBoxRel(sx+ ox- botboxheight+ 8- 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT+ 1);
 						g_Fonts->epg_date->RenderString(sx+ ox- botboxheight+ 8, sy+ oy- 3, widthr, ">", COL_MENUCONTENT+ 1);
 
 						show(onid_sid, next_id, &next_zeit, false);
@@ -459,7 +459,7 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 
 void CEpgData::hide()
 {
-	g_FrameBuffer->paintBackgroundBox (sx, sy- toph, sx+ ox, sy+ oy);
+	frameBuffer->paintBackgroundBox (sx, sy- toph, sx+ ox, sy+ oy);
 	#ifdef USEACTIONLOG
 		g_ActionLog->println("epg: closed");
 	#endif

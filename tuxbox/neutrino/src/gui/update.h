@@ -114,6 +114,9 @@ class CHTTPUpdater
 
 class CFlashUpdate : public CMenuTarget, CFlashTool_StatusViewer
 {
+	private:
+
+		CFrameBuffer	*frameBuffer;
 		int fd_fp;
 
 		CHTTPUpdater httpUpdater;

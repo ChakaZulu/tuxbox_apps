@@ -77,6 +77,7 @@ class CChannelList
 		};
 
 	private:
+		CFrameBuffer		*frameBuffer;
 		unsigned int		selected;
 		unsigned int		tuned;
 		CLastChannel		lastChList;
@@ -132,8 +133,7 @@ class CChannelList
 		void setSelected( int nChannelNr); // for adjusting bouquet's channel list after numzap or quickzap
 
 		int handleMsg(uint msg, uint data);
-}
-;
+};
 
 
 #endif

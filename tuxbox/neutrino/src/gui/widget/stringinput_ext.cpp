@@ -34,6 +34,7 @@
 
 CExtendedInput::CExtendedInput(string Name, char* Value, string Hint_1, string Hint_2, CChangeObserver* Observ, bool Localizing)
 {
+	frameBuffer = CFrameBuffer::getInstance();
 	name = Name;
 	value = Value;
 
@@ -210,12 +211,12 @@ int CExtendedInput::exec( CMenuTarget* parent, string )
 
 void CExtendedInput::hide()
 {
-	g_FrameBuffer->paintBackgroundBoxRel(x, y, width, height);
+	frameBuffer->paintBackgroundBoxRel(x, y, width, height);
 }
 
 void CExtendedInput::paint()
 {
-	g_FrameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD);
 	if(localizing)
 	{
 		g_Fonts->menu_title->RenderString(x+ 10, y+ hheight, width- 10, g_Locale->getText(name).c_str(), COL_MENUHEAD);
@@ -224,7 +225,7 @@ void CExtendedInput::paint()
 	{
 		g_Fonts->menu_title->RenderString(x+ 10, y+ hheight, width- 10, name.c_str(), COL_MENUHEAD);
 	}
-	g_FrameBuffer->paintBoxRel(x, y+ hheight, width, height-hheight, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x, y+ hheight, width, height-hheight, COL_MENUCONTENT);
 
 	if ( hint_1.length()> 0 )
 	{
@@ -263,6 +264,7 @@ void CExtendedInput::paint()
 
 CExtendedInput_Item_Char::CExtendedInput_Item_Char(string Chars, bool Selectable )
 {
+	frameBuffer = CFrameBuffer::getInstance();
 	idx = 20;
 	idy = g_Fonts->menu->getHeight();
 	allowedChars = Chars;
@@ -290,8 +292,8 @@ void CExtendedInput_Item_Char::paint(int x, int y, bool focusGained )
 	if (focusGained)
 		color = COL_MENUCONTENTSELECTED;
 
-	g_FrameBuffer->paintBoxRel( startx, starty, idx, idy, COL_MENUCONTENT+4);
-	g_FrameBuffer->paintBoxRel( startx+1, starty+1, idx-2, idy-2, color);
+	frameBuffer->paintBoxRel( startx, starty, idx, idy, COL_MENUCONTENT+4);
+	frameBuffer->paintBoxRel( startx+1, starty+1, idx-2, idy-2, color);
 
 	char text[2];
 	text[0] = *data;
@@ -352,7 +354,7 @@ void CExtendedInput_Item_Char::keyPressed( int key )
 CIPInput::CIPInput(string Name, char* Value, string Hint_1 = "", string Hint_2 = "", CChangeObserver* Observ = NULL)
 	: CExtendedInput(Name, Value, Hint_1, Hint_2, Observ)
 {
-
+	frameBuffer = CFrameBuffer::getInstance();
 	addInputField( new CExtendedInput_Item_Char("0123456789") );
 	addInputField( new CExtendedInput_Item_Char("0123456789") );
 	addInputField( new CExtendedInput_Item_Char("0123456789") );

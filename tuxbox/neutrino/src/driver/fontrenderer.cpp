@@ -179,6 +179,7 @@ Font *fontRenderClass::getFont(const char *family, const char *style, int size)
 
 Font::Font(fontRenderClass *render, FTC_FaceID faceid, int isize)
 {
+	frameBuffer = CFrameBuffer::getInstance();
 	renderer=render;
 	font.font.face_id=faceid;
 	font.font.pix_width  = isize;
@@ -318,14 +319,14 @@ void Font::RenderString(int x, int y, int width, const char *text, unsigned char
 		int rx=x+glyph->left;
 		int ry=y-glyph->top;
 
-		__u8 *d=g_FrameBuffer->getFrameBufferPointer() + g_FrameBuffer->getStride()*ry + rx;
+		__u8 *d=frameBuffer->getFrameBufferPointer() + frameBuffer->getStride()*ry + rx;
 		__u8 *s=glyph->buffer;
 
 		int coff=(color+ 2)%8;
 
 		int w =	glyph->width;
 		int h =	glyph->height;
-		int stride= g_FrameBuffer->getStride();
+		int stride= frameBuffer->getStride();
 		int pitch = glyph->pitch;
 		for (int ay=0; ay<h; ay++)
 		{

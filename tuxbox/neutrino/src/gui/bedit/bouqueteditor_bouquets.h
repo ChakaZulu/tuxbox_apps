@@ -42,18 +42,25 @@
 
 using namespace std;
 
-	/* class for handling when bouquets changed.                  */
-	/* This class should be a temporarily work around             */
-	/* and should be replaced by standard neutrino event handlers */
-	/* (libevent) */
-	class CBouquetEditorEvents
-	{
-	public:
-		virtual void onBouquetsChanged() {};
-	};
 
-	class CBEBouquetWidget : public CMenuWidget
-	{
+	
+/* class for handling when bouquets changed.                  */
+/* This class should be a temporarily work around             */
+/* and should be replaced by standard neutrino event handlers */
+/* (libevent) */
+class CBouquetEditorEvents
+{
+public:
+	virtual void onBouquetsChanged() {};
+};
+
+class CBEBouquetWidget : public CMenuWidget
+{
+
+	private:
+
+		CFrameBuffer	*frameBuffer;
+
 		enum state_
 		{
 			beDefault,
@@ -102,7 +109,8 @@ using namespace std;
 
 		CZapitClient::BouquetList	Bouquets;
 		int exec(CMenuTarget* parent, string actionKey);
-	};
+};
+
 
 #endif
 

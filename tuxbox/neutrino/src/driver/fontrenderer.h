@@ -29,46 +29,6 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-/*
-$Id: fontrenderer.h,v 1.20 2002/02/14 00:02:15 field Exp $
-
-
-$Log: fontrenderer.h,v $
-Revision 1.20  2002/02/14 00:02:15  field
-Cache verbessert ?!
-
-Revision 1.19  2002/02/10 14:17:34  McClean
-simplify usage (part 2)
-
-Revision 1.18  2002/01/29 17:26:51  field
-Jede Menge Updates :)
-
-Revision 1.17  2002/01/03 20:03:20  McClean
-cleanup
-
-Revision 1.16  2001/12/05 21:38:09  rasc
-gamelist: eigener Fontdef fuer 2-zeiliges Menue
-
-Revision 1.15  2001/11/15 11:42:41  McClean
-gpl-headers added
-
-Revision 1.14  2001/10/16 19:11:16  rasc
--- CR LF --> LF in einigen Modulen
-
-Revision 1.13  2001/10/14 14:30:47  rasc
--- EventList Darstellung ueberarbeitet
--- kleiner Aenderungen und kleinere Bugfixes
--- locales erweitert..
-
-Revision 1.12  2001/09/27 11:23:50  field
-Numzap gefixt, kleiner Bugfixes
-
-Revision 1.11  2001/09/26 16:24:17  rasc
-- kleinere Aenderungen: Channel Num Zap fuer >999 Channels (Eutelsat/Astra) und eigener Font
-
-
-*/
-
 #ifndef __FONTRENDERER__
 #define __FONTRENDERER__
 
@@ -80,20 +40,8 @@ Revision 1.11  2001/09/26 16:24:17  rasc
 #include FT_FREETYPE_H
 #include FT_CACHE_H
 
-//#include <freetype/cache/ftcchunk.h>
-//#include <freetype/cache/ftcglyph.h>
-
 #include FT_CACHE_IMAGE_H
-//#include <freetype/cache/ftcimage.h>
-
-//#include <freetype/cache/ftcmanag.h>
-
 #include FT_CACHE_SMALL_BITMAPS_H
-//#include <freetype/cache/ftcsbits.h>
-
-
-//#include <freetype/cache/ftlru.h>
-
 
 class Font;
 class fontRenderClass
@@ -131,16 +79,16 @@ class fontRenderClass
 		fontRenderClass();
 		~fontRenderClass();
 
-
 		friend class Font;
 };
 
 class Font
 {
+		CFrameBuffer	*frameBuffer;
 		FTC_Image_Desc	font;
 		fontRenderClass *renderer;
-		FT_Face		face;
-		FT_Size		size;
+		FT_Face			face;
+		FT_Size			size;
 
 		FT_Error getGlyphBitmap(FT_ULong glyph_index, FTC_SBit *sbit);
 
@@ -156,10 +104,8 @@ class Font
 		int getHeight(void);
 
 		Font(fontRenderClass *render, FTC_FaceID faceid, int isize);
-		~Font()
-		{}
-}
-;
+		~Font(){}
+};
 
 class FontsDef
 {
@@ -191,8 +137,7 @@ class FontsDef
 		*infobar_channame,
 		*infobar_info,
 		*infobar_small;
-}
-;
+};
 
 #endif
 

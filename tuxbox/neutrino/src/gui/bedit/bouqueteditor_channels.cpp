@@ -1,6 +1,4 @@
 /*
-$Id: bouqueteditor_channels.cpp,v 1.11 2002/04/02 19:59:14 rasc Exp $
-
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -29,14 +27,6 @@ $Id: bouqueteditor_channels.cpp,v 1.11 2002/04/02 19:59:14 rasc Exp $
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-$Log: bouqueteditor_channels.cpp,v $
-Revision 1.11  2002/04/02 19:59:14  rasc
--- browsing/page function for bouquet channel editor list box
--- This enables quicker moving/sorting of your bouquet favorites.
--- paging keys: LEFT/RIGHT  (should be improved, read remarks!)
-
-
 */
 
 #include "bouqueteditor_channels.h"
@@ -45,6 +35,7 @@ Revision 1.11  2002/04/02 19:59:14  rasc
 
 CBEChannelWidget::CBEChannelWidget(string Caption, unsigned int Bouquet)
 {
+	frameBuffer = CFrameBuffer::getInstance();
 	selected = 0;
 	width = 500;
 	height = 440;
@@ -71,10 +62,10 @@ void CBEChannelWidget::paintItem(int pos)
 		color = COL_MENUCONTENTSELECTED;
 	}
 
-	g_FrameBuffer->paintBoxRel(x,ypos, width- 15, fheight, color);
+	frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, color);
 	if ((liststart+pos==selected) && (state == beMoving))
 	{
-		g_FrameBuffer->paintIcon("gelb.raw", x + 8, ypos+4);
+		frameBuffer->paintIcon("gelb.raw", x + 8, ypos+4);
 	}
 	if(liststart+pos < Channels.size())
 	{
@@ -105,44 +96,44 @@ void CBEChannelWidget::paint()
 
 	int ypos = y+ theight;
 	int sb = fheight* listmaxshow;
-	g_FrameBuffer->paintBoxRel(x+ width- 15,ypos, 15, sb,  COL_MENUCONTENT+ 1);
+	frameBuffer->paintBoxRel(x+ width- 15,ypos, 15, sb,  COL_MENUCONTENT+ 1);
 
 	int sbc= ((Channels.size()- 1)/ listmaxshow)+ 1;
 	float sbh= (sb- 4)/ sbc;
 	int sbs= (selected/listmaxshow);
 
-	g_FrameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
+	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
 
 }
 
 void CBEChannelWidget::paintHead()
 {
-	g_FrameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
 	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width, caption.c_str() , COL_MENUHEAD);
 }
 
 void CBEChannelWidget::paintFoot()
 {
 	int ButtonWidth = width / 4;
-	g_FrameBuffer->paintBoxRel(x,y+height, width,ButtonHeight, COL_MENUHEAD);
-	g_FrameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW);
+	frameBuffer->paintBoxRel(x,y+height, width,ButtonHeight, COL_MENUHEAD);
+	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW);
 
-	g_FrameBuffer->paintIcon("rot.raw", x+width- 4* ButtonWidth+ 8, y+height+4);
+	frameBuffer->paintIcon("rot.raw", x+width- 4* ButtonWidth+ 8, y+height+4);
 	g_Fonts->infobar_small->RenderString(x+width- 4* ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.delete").c_str(), COL_INFOBAR);
 
-	g_FrameBuffer->paintIcon("gruen.raw", x+width- 3* ButtonWidth+ 8, y+height+4);
+	frameBuffer->paintIcon("gruen.raw", x+width- 3* ButtonWidth+ 8, y+height+4);
 	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.add").c_str(), COL_INFOBAR);
 
-	g_FrameBuffer->paintIcon("gelb.raw", x+width- 2* ButtonWidth+ 8, y+height+4);
+	frameBuffer->paintIcon("gelb.raw", x+width- 2* ButtonWidth+ 8, y+height+4);
 	g_Fonts->infobar_small->RenderString(x+width- 2* ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.move").c_str(), COL_INFOBAR);
 
-	g_FrameBuffer->paintIcon("blau.raw", x+width- ButtonWidth+ 8, y+height+4);
+	frameBuffer->paintIcon("blau.raw", x+width- ButtonWidth+ 8, y+height+4);
 	g_Fonts->infobar_small->RenderString(x+width- ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.switchmode").c_str(), COL_INFOBAR);
 }
 
 void CBEChannelWidget::hide()
 {
-	g_FrameBuffer->paintBackgroundBoxRel(x,y, width,height+ButtonHeight);
+	frameBuffer->paintBackgroundBoxRel(x,y, width,height+ButtonHeight);
 }
 
 int CBEChannelWidget::exec(CMenuTarget* parent, string actionKey)

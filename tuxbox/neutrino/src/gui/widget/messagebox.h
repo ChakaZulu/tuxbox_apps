@@ -41,15 +41,23 @@
 
 using namespace std;
 
-	class CMessageBoxNotifier
-	{
-	  public:
-		virtual void onYes( ) = NULL;
-		virtual void onNo( ) = NULL;
-	};
 
-	class CMessageBox : CMenuWidget
-	{
+
+class CMessageBoxNotifier
+{
+  public:
+	virtual void onYes( ) = NULL;
+	virtual void onNo( ) = NULL;
+};
+
+
+	
+class CMessageBox : CMenuWidget
+{
+
+	private:
+
+		CFrameBuffer	*frameBuffer;
 		int						width;
 		int						height;
 		int						x;
@@ -91,7 +99,7 @@ using namespace std;
 		CMessageBox( string Caption, string Text, CMessageBoxNotifier* Notifier, int Width = 500, uint Default= mbrYes, uint ShowButtons= mbAll );
 		int exec(CMenuTarget* parent, string actionKey);
 
-	};
+};
 
 int ShowMsg ( string Caption, string Text, uint Default, uint ShowButtons, int Width = 450 );
 

@@ -35,8 +35,10 @@
 
 #define borderwidth 4
 
+
 CMessageBox::CMessageBox( string Caption, string Text, CMessageBoxNotifier* Notifier, int Width, uint Default, uint ShowButtons )
 {
+	frameBuffer = CFrameBuffer::getInstance();
 	theight= g_Fonts->menu_title->getHeight();
 	fheight= g_Fonts->menu->getHeight();
 
@@ -91,10 +93,10 @@ CMessageBox::CMessageBox( string Caption, string Text, CMessageBoxNotifier* Noti
 void CMessageBox::paintHead()
 {
 
-	g_FrameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
 	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width, g_Locale->getText(caption), COL_MENUHEAD);
 
-	g_FrameBuffer->paintBoxRel(x,y+theight+0, width,height - theight + 0, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x,y+theight+0, width,height - theight + 0, COL_MENUCONTENT);
 	for (int i= 0; i< text.size(); i++)
 		g_Fonts->menu->RenderString(x+10,y+ theight+ (fheight>>1)+ fheight* (i+ 1), width, text[i].c_str(), COL_MENUCONTENT);
 
@@ -116,8 +118,8 @@ void CMessageBox::paintButtons()
 	{
 		if(selected==0)
 			color = COL_MENUCONTENTSELECTED;
-		g_FrameBuffer->paintBoxRel(xpos, y+height-fheight-20, ButtonWidth, fheight, color);
-		g_FrameBuffer->paintIcon("rot.raw", xpos+14, y+height-fheight-15);
+		frameBuffer->paintBoxRel(xpos, y+height-fheight-20, ButtonWidth, fheight, color);
+		frameBuffer->paintIcon("rot.raw", xpos+14, y+height-fheight-15);
 		g_Fonts->infobar_small->RenderString(xpos + 43, y+height-fheight+4, ButtonWidth- 53, g_Locale->getText("messagebox.yes"), color);
 	}
 
@@ -129,8 +131,8 @@ void CMessageBox::paintButtons()
 		if(selected==1)
 			color = COL_MENUCONTENTSELECTED;
 
-		g_FrameBuffer->paintBoxRel(xpos, y+height-fheight-20, ButtonWidth, fheight, color);
-		g_FrameBuffer->paintIcon("gruen.raw", xpos+14, y+height-fheight-15);
+		frameBuffer->paintBoxRel(xpos, y+height-fheight-20, ButtonWidth, fheight, color);
+		frameBuffer->paintIcon("gruen.raw", xpos+14, y+height-fheight-15);
 		g_Fonts->infobar_small->RenderString(xpos + 43, y+height-fheight+4, ButtonWidth- 53, g_Locale->getText("messagebox.no"), color);
     }
 
@@ -141,8 +143,8 @@ void CMessageBox::paintButtons()
 		if(selected==2)
 			color = COL_MENUCONTENTSELECTED;
 
-		g_FrameBuffer->paintBoxRel(xpos, y+height-fheight-20, ButtonWidth, fheight, color);
-		g_FrameBuffer->paintIcon("home.raw", xpos+10, y+height-fheight-19);
+		frameBuffer->paintBoxRel(xpos, y+height-fheight-20, ButtonWidth, fheight, color);
+		frameBuffer->paintIcon("home.raw", xpos+10, y+height-fheight-19);
 		g_Fonts->infobar_small->RenderString(xpos + 43, y+height-fheight+4, ButtonWidth- 53, g_Locale->getText( ( showbuttons & mbCancel ) ? "messagebox.cancel" : "messagebox.back" ), color);
 	}
 }
@@ -171,20 +173,20 @@ void CMessageBox::cancel()
 
 void CMessageBox::hide()
 {
-	g_FrameBuffer->paintBackgroundBoxRel(x,y, width,height);
+	frameBuffer->paintBackgroundBoxRel(x,y, width,height);
 }
 
 int CMessageBox::exec(CMenuTarget* parent, string actionKey)
 {
 	int res = menu_return::RETURN_REPAINT;
     unsigned char pixbuf[(width+ 2* borderwidth) * (height+ 2* borderwidth)];
-	g_FrameBuffer->SaveScreen(x- borderwidth, y- borderwidth, width+ 2* borderwidth, height+ 2* borderwidth, pixbuf);
+	frameBuffer->SaveScreen(x- borderwidth, y- borderwidth, width+ 2* borderwidth, height+ 2* borderwidth, pixbuf);
 
 	// clear border
-	g_FrameBuffer->paintBackgroundBoxRel(x- borderwidth, y- borderwidth, width+ 2* borderwidth, borderwidth);
-	g_FrameBuffer->paintBackgroundBoxRel(x- borderwidth, y+ height, width+ 2* borderwidth, borderwidth);
-	g_FrameBuffer->paintBackgroundBoxRel(x- borderwidth, y, borderwidth, height);
-	g_FrameBuffer->paintBackgroundBoxRel(x+ width, y, borderwidth, height);
+	frameBuffer->paintBackgroundBoxRel(x- borderwidth, y- borderwidth, width+ 2* borderwidth, borderwidth);
+	frameBuffer->paintBackgroundBoxRel(x- borderwidth, y+ height, width+ 2* borderwidth, borderwidth);
+	frameBuffer->paintBackgroundBoxRel(x- borderwidth, y, borderwidth, height);
+	frameBuffer->paintBackgroundBoxRel(x+ width, y, borderwidth, height);
 
 	paintHead();
 	paintButtons();
@@ -285,7 +287,7 @@ int CMessageBox::exec(CMenuTarget* parent, string actionKey)
 
 	}
 
-	g_FrameBuffer->RestoreScreen(x- borderwidth, y- borderwidth, width+ 2* borderwidth, height+ 2* borderwidth, pixbuf);
+	frameBuffer->RestoreScreen(x- borderwidth, y- borderwidth, width+ 2* borderwidth, height+ 2* borderwidth, pixbuf);
 	return res;
 }
 

@@ -48,6 +48,8 @@ using namespace std;
 
 class CScanTs : public CMenuTarget
 {
+	private:
+		CFrameBuffer	*frameBuffer;
 		int x;
 		int y;
 		int width;

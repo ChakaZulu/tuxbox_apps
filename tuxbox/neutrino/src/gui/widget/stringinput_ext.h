@@ -51,6 +51,7 @@ class CExtendedInput_Item;
 class CExtendedInput : public CMenuTarget
 {
 	protected:
+		CFrameBuffer	*frameBuffer;
 		int x;
 		int y;
 		int width;
@@ -88,6 +89,7 @@ class CExtendedInput : public CMenuTarget
 class CExtendedInput_Item
 {
 	protected:
+		CFrameBuffer	*frameBuffer;
 		int ix, iy, idx, idy;
 		char* data;
 

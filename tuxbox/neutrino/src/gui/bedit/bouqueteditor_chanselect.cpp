@@ -1,5 +1,5 @@
 /*
-$Id: bouqueteditor_chanselect.cpp,v 1.12 2002/04/05 01:14:43 rasc Exp $
+$Id: bouqueteditor_chanselect.cpp,v 1.13 2002/04/20 00:09:50 McClean Exp $
 
 
 	Neutrino-GUI  -   DBoxII-Project
@@ -33,6 +33,9 @@ $Id: bouqueteditor_chanselect.cpp,v 1.12 2002/04/05 01:14:43 rasc Exp $
 
 
 $Log: bouqueteditor_chanselect.cpp,v $
+Revision 1.13  2002/04/20 00:09:50  McClean
+framebuffer - singleton Umbau (code cleanup)
+
 Revision 1.12  2002/04/05 01:14:43  rasc
 -- Favorites Bouquet handling (Easy Add Channels)
 
@@ -45,6 +48,7 @@ Revision 1.12  2002/04/05 01:14:43  rasc
 
 CBEChannelSelectWidget::CBEChannelSelectWidget(string Caption, unsigned int Bouquet, CZapitClient::channelsMode Mode)
 {
+	frameBuffer = CFrameBuffer::getInstance();
 	selected = 0;
 	width = 500;
 	height = 440;
@@ -70,19 +74,19 @@ void CBEChannelSelectWidget::paintItem(int pos)
 		color = COL_MENUCONTENTSELECTED;
 	}
 
-	g_FrameBuffer->paintBoxRel(x,ypos, width- 15, fheight, color);
+	frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, color);
 	if(liststart+pos < Channels.size())
 	{
 		g_Fonts->channellist->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, Channels[liststart+pos].name, color);
 	}
 	if( isChannelInBouquet( liststart+pos))
 	{
-		g_FrameBuffer->paintIcon("gruen.raw", x+8, ypos+4);
+		frameBuffer->paintIcon("gruen.raw", x+8, ypos+4);
 	}
 	else
 	{
-		g_FrameBuffer->paintBackgroundBoxRel(x+8,ypos+4, 16, fheight-4);
-		g_FrameBuffer->paintBoxRel(x+8,ypos+4, 16, fheight-4, color);
+		frameBuffer->paintBackgroundBoxRel(x+8,ypos+4, 16, fheight-4);
+		frameBuffer->paintBoxRel(x+8,ypos+4, 16, fheight-4, color);
 	}
 }
 
@@ -109,39 +113,39 @@ void CBEChannelSelectWidget::paint()
 
 	int ypos = y+ theight;
 	int sb = fheight* listmaxshow;
-	g_FrameBuffer->paintBoxRel(x+ width- 15,ypos, 15, sb,  COL_MENUCONTENT+ 1);
+	frameBuffer->paintBoxRel(x+ width- 15,ypos, 15, sb,  COL_MENUCONTENT+ 1);
 
 	int sbc= ((Channels.size()- 1)/ listmaxshow)+ 1;
 	float sbh= (sb- 4)/ sbc;
 	int sbs= (selected/listmaxshow);
 
-	g_FrameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
+	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
 
 }
 
 void CBEChannelSelectWidget::paintHead()
 {
-	g_FrameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
 	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width, caption.c_str() , COL_MENUHEAD);
 }
 
 void CBEChannelSelectWidget::paintFoot()
 {
 	int ButtonWidth = width / 3;
-	g_FrameBuffer->paintBoxRel(x,y+height, width,ButtonHeight, COL_MENUHEAD);
-	g_FrameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW);
+	frameBuffer->paintBoxRel(x,y+height, width,ButtonHeight, COL_MENUHEAD);
+	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW);
 
-	g_FrameBuffer->paintIcon("ok.raw", x+width- 3* ButtonWidth+ 8, y+height+1);
+	frameBuffer->paintIcon("ok.raw", x+width- 3* ButtonWidth+ 8, y+height+1);
 	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth+ 38, y+height+24 - 2, width, g_Locale->getText("bouqueteditor.switch").c_str(), COL_INFOBAR);
 
-	g_FrameBuffer->paintIcon("home.raw", x+width - ButtonWidth+ 8, y+height+1);
+	frameBuffer->paintIcon("home.raw", x+width - ButtonWidth+ 8, y+height+1);
 	g_Fonts->infobar_small->RenderString(x+width - ButtonWidth+ 38, y+height+24 - 2, width, g_Locale->getText("bouqueteditor.return").c_str(), COL_INFOBAR);
 
 }
 
 void CBEChannelSelectWidget::hide()
 {
-	g_FrameBuffer->paintBackgroundBoxRel(x,y, width,height+ButtonHeight);
+	frameBuffer->paintBackgroundBoxRel(x,y, width,height+ButtonHeight);
 }
 
 int CBEChannelSelectWidget::exec(CMenuTarget* parent, string actionKey)

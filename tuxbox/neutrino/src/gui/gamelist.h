@@ -57,107 +57,115 @@ using namespace std;
 
 class CPlugins
 {
-	struct plugin
-	{
-		std::string filename;
-		std::string cfgfile;
-		std::string sofile;
-		int version;
-		std::string name;
-		std::string description;
-		std::string depend;
-		int type;
+	private:
 
-		bool fb;
-		bool rc;
-		bool lcd;
-		bool vtxtpid;
-		int posx, posy, sizex, sizey;
-		bool showpig;
-		bool needoffset;
-	};
+		CFrameBuffer	*frameBuffer;
 
-	int fb, rc, lcd, pid;
-	int number_of_plugins;
-	std::string plugin_dir;
-	std::vector<struct plugin> plugin_list;
+		struct plugin
+		{
+			std::string filename;
+			std::string cfgfile;
+			std::string sofile;
+			int version;
+			std::string name;
+			std::string description;
+			std::string depend;
+			int type;
 
-	void parseCfg(plugin *plugin_data);
+			bool fb;
+			bool rc;
+			bool lcd;
+			bool vtxtpid;
+			int posx, posy, sizex, sizey;
+			bool showpig;
+			bool needoffset;
+		};
 
-	std::map<std::string, std::string> params;
-public:
+		int fb, rc, lcd, pid;
+		int number_of_plugins;
+		std::string plugin_dir;
+		std::vector<struct plugin> plugin_list;
 
-	~CPlugins();
+		void parseCfg(plugin *plugin_data);
 
-	void loadPlugins();
+		std::map<std::string, std::string> params;
+	public:
 
-	void setPluginDir(std::string dir) { plugin_dir = dir; }
+		~CPlugins();
 
-	PluginParam* makeParam(std::string id, PluginParam *next);
+		void loadPlugins();
 
-	void addParm(std::string cmd, int value);
-	void addParm(std::string cmd, std::string value);
+		void setPluginDir(std::string dir) { plugin_dir = dir; }
 
-	void setfb(int fd);
-	void setrc(int fd);
-	void setlcd(int fd);
-	void setvtxtpid(int fd);
+		PluginParam* makeParam(std::string id, PluginParam *next);
 
-	int getNumberOfPlugins() { return plugin_list.size(); }
-	std::string getName(int number) { return plugin_list[number].name; }
-	std::string getDescription(int number) { return plugin_list[number].description; }
-	int getVTXT(int number) { return plugin_list[number].vtxtpid; }
-	int getShowPig(int number) { return plugin_list[number].showpig; }
-	int getPosX(int number) { return plugin_list[number].posx; }
-	int getPosY(int number) { return plugin_list[number].posy; }
-	int getSizeX(int number) { return plugin_list[number].sizex; }
-	int getSizeY(int number) { return plugin_list[number].sizey; }
-	int getType(int number) { return plugin_list[number].type; }
+		void addParm(std::string cmd, int value);
+		void addParm(std::string cmd, std::string value);
 
-	void startPlugin(int number);
+		void setfb(int fd);
+		void setrc(int fd);
+		void setlcd(int fd);
+		void setvtxtpid(int fd);
+
+		int getNumberOfPlugins() { return plugin_list.size(); }
+		std::string getName(int number) { return plugin_list[number].name; }
+		std::string getDescription(int number) { return plugin_list[number].description; }
+		int getVTXT(int number) { return plugin_list[number].vtxtpid; }
+		int getShowPig(int number) { return plugin_list[number].showpig; }
+		int getPosX(int number) { return plugin_list[number].posx; }
+		int getPosY(int number) { return plugin_list[number].posy; }
+		int getSizeX(int number) { return plugin_list[number].sizex; }
+		int getSizeY(int number) { return plugin_list[number].sizey; }
+		int getType(int number) { return plugin_list[number].type; }
+
+		void startPlugin(int number);
 };
 
 
 class CGameList : public CMenuTarget
 {
 
-	struct game
-    {
-    	int		number;
-        string	name;
-		string	desc;
-	};
+	private:
 
-	unsigned int	liststart;
-	unsigned int	listmaxshow;
-	unsigned int	selected;
-	int				key;
-	string			name;
-	vector<game*>   gamelist;
+		CFrameBuffer	*frameBuffer;
+
+		struct game
+		{
+			int		number;
+			string	name;
+			string	desc;
+		};
+
+		unsigned int	liststart;
+		unsigned int	listmaxshow;
+		unsigned int	selected;
+		int				key;
+		string			name;
+		vector<game*>   gamelist;
 
 
-	int				fheight; // Fonthoehe Channellist-Inhalt
-	int				theight; // Fonthoehe Channellist-Titel
+		int				fheight; // Fonthoehe Channellist-Inhalt
+		int				theight; // Fonthoehe Channellist-Titel
 
-	int				fheight1,fheight2;
+		int				fheight1,fheight2;
 
-	int 			width;
-	int 			height;
-	int 			x;
-	int 			y;
+		int 			width;
+		int 			height;
+		int 			x;
+		int 			y;
 
-	void paintItem(int pos);
-	void paint();
-	void paintHead();
+		void paintItem(int pos);
+		void paint();
+		void paintHead();
 
-public:
+	public:
 
-	CGameList( string Name );
-	~CGameList();
+		CGameList( string Name );
+		~CGameList();
 
-	void hide();
-	int exec(CMenuTarget* parent, string actionKey);
-	void runGame(int selected );
+		void hide();
+		int exec(CMenuTarget* parent, string actionKey);
+		void runGame(int selected );
 };
 
 

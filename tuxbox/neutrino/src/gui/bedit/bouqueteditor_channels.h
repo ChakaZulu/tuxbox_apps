@@ -42,8 +42,14 @@
 
 using namespace std;
 
-	class CBEChannelWidget : public CMenuWidget
-	{
+
+class CBEChannelWidget : public CMenuWidget
+{
+
+	private:
+	
+		CFrameBuffer	*frameBuffer;
+	
 		enum state_
 		{
 			beDefault,
@@ -92,6 +98,6 @@ using namespace std;
 		CZapitClient::BouquetChannelList	Channels;
 		int exec(CMenuTarget* parent, string actionKey);
 		bool hasChanged();
-	};
+};
 
 #endif

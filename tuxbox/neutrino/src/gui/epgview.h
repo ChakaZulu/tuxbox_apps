@@ -69,6 +69,7 @@ using namespace std;
 class CEpgData
 {
 	private:
+		CFrameBuffer		*frameBuffer;
 		CChannelEventList	evtlist;
 		CEPGData			epgData;
 

@@ -60,6 +60,7 @@ typedef enum bouquetSwitchMode
 
 class CBouquet
 {
+
 	public:
 		int				unique_key;
 		string			name;
@@ -83,6 +84,9 @@ class CBouquet
 
 class CBouquetList
 {
+	private:
+		CFrameBuffer		*frameBuffer;
+
 		unsigned int		selected;
 		unsigned int		tuned;
 		unsigned int		liststart;

@@ -35,6 +35,7 @@
 CKeyChooser::CKeyChooser( int* Key, string title, string Icon )
 		: CMenuWidget(title, Icon)
 {
+	frameBuffer = CFrameBuffer::getInstance();
 	key = Key;
 	keyChooser = new CKeyChooserItem("keychooser.head", key);
 	keyDeleter = new CKeyChooserItemNoKey(key);
@@ -66,6 +67,7 @@ void CKeyChooser::paint()
 //*****************************
 CKeyChooserItem::CKeyChooserItem(string Name, int *Key)
 {
+	frameBuffer = CFrameBuffer::getInstance();
 	name = Name;
 	key = Key;
 	width = 350;
@@ -119,15 +121,15 @@ int CKeyChooserItem::exec(CMenuTarget* parent, string)
 
 void CKeyChooserItem::hide()
 {
-	g_FrameBuffer->paintBackgroundBoxRel(x, y, width, height);
+	frameBuffer->paintBackgroundBoxRel(x, y, width, height);
 }
 
 void CKeyChooserItem::paint()
 {
 
-	g_FrameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD);
 	g_Fonts->menu_title->RenderString(x+ 10, y+ hheight, width, g_Locale->getText(name).c_str(), COL_MENUHEAD);
-	g_FrameBuffer->paintBoxRel(x, y+ hheight, width, height-hheight, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x, y+ hheight, width, height-hheight, COL_MENUCONTENT);
 
 	//paint msg...
 	g_Fonts->menu->RenderString(x+ 10, y+ hheight+ mheight, width, g_Locale->getText("keychooser.text1").c_str(), COL_MENUCONTENT);

@@ -34,6 +34,7 @@
 
 CStringInput::CStringInput(string Name, char* Value, int Size,  string Hint_1, string Hint_2, char* Valid_Chars, CChangeObserver* Observ, string Icon )
 {
+	frameBuffer = CFrameBuffer::getInstance();
 	name = Name;
 	value = Value;
 	size = Size;
@@ -270,19 +271,19 @@ int CStringInput::handleOthers( uint msg, uint data )
 
 void CStringInput::hide()
 {
-	g_FrameBuffer->paintBackgroundBoxRel(x, y, width, height);
+	frameBuffer->paintBackgroundBoxRel(x, y, width, height);
 }
 
 void CStringInput::paint()
 {
-	g_FrameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD);
 
 	int iconoffset= (iconfile!="")?28:0;
 	g_Fonts->menu_title->RenderString(x+ 10+ iconoffset, y+ hheight, width- 10- iconoffset, g_Locale->getText(name).c_str(), COL_MENUHEAD);
 	if ( iconoffset> 0 )
-		g_FrameBuffer->paintIcon(iconfile.c_str(),x+8,y+5);
+		frameBuffer->paintIcon(iconfile.c_str(),x+8,y+5);
 
-	g_FrameBuffer->paintBoxRel(x, y+ hheight, width, height- hheight, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x, y+ hheight, width, height- hheight, COL_MENUCONTENT);
 
 
 
@@ -314,8 +315,8 @@ void CStringInput::paintChar(int pos)
 	if (pos==selected)
 		color = COL_MENUCONTENTSELECTED;
 
-	g_FrameBuffer->paintBoxRel(xpos, ypos, xs, ys, COL_MENUCONTENT+ 4);
-	g_FrameBuffer->paintBoxRel(xpos+ 1, ypos+ 1, xs- 2, ys- 2, color);
+	frameBuffer->paintBoxRel(xpos, ypos, xs, ys, COL_MENUCONTENT+ 4);
+	frameBuffer->paintBoxRel(xpos+ 1, ypos+ 1, xs- 2, ys- 2, color);
 
 	int xfpos = xpos + ((xs- g_Fonts->menu->getRenderWidth(ch.c_str()))>>1);
 
@@ -391,14 +392,14 @@ void CStringInputSMS::keyRightPressed()
 
 void CStringInputSMS::paint()
 {
-	g_FrameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD);
 
 	int iconoffset= (iconfile!="")?28:0;
 	g_Fonts->menu_title->RenderString(x+ 10+ iconoffset, y+ hheight, width- 10- iconoffset, g_Locale->getText(name).c_str(), COL_MENUHEAD);
 	if ( iconoffset> 0 )
-		g_FrameBuffer->paintIcon(iconfile.c_str(),x+8,y+5);
+		frameBuffer->paintIcon(iconfile.c_str(),x+8,y+5);
 
-	g_FrameBuffer->paintBoxRel(x, y+ hheight, width, height- hheight, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x, y+ hheight, width, height- hheight, COL_MENUCONTENT);
 
 	if ( hint_1.length()> 0 )
 	{
@@ -406,15 +407,15 @@ void CStringInputSMS::paint()
 		if ( hint_2.length()> 0 )
 			g_Fonts->menu_info->RenderString(x+ 20, y+ hheight+ mheight+ iheight* 2+ 40, width- 20, g_Locale->getText(hint_2).c_str(), COL_MENUCONTENT);
 	}
-	g_FrameBuffer->paintIcon("numericpad.raw", x+20+140, y+ hheight+ mheight+ iheight* 3+ 30, COL_MENUCONTENT);
+	frameBuffer->paintIcon("numericpad.raw", x+20+140, y+ hheight+ mheight+ iheight* 3+ 30, COL_MENUCONTENT);
 
 	for (int count=0;count<size;count++)
 		paintChar(count);
 
-	g_FrameBuffer->paintBoxRel(x,y+height-25, width,25, COL_MENUHEAD);
-	g_FrameBuffer->paintHLine(x, x+width,  y+height-25, COL_INFOBAR_SHADOW);
+	frameBuffer->paintBoxRel(x,y+height-25, width,25, COL_MENUHEAD);
+	frameBuffer->paintHLine(x, x+width,  y+height-25, COL_INFOBAR_SHADOW);
 
-	g_FrameBuffer->paintIcon("rot.raw", x+8, y+height-25+1);
+	frameBuffer->paintIcon("rot.raw", x+8, y+height-25+1);
 	g_Fonts->infobar_small->RenderString(x+38, y+height-25+24 - 2, width, g_Locale->getText("stringinput.caps").c_str(), COL_INFOBAR);
 
 }
@@ -434,8 +435,8 @@ void CPINInput::paintChar(int pos)
 	if (pos==selected)
 		color = COL_MENUCONTENTSELECTED;
 
-	g_FrameBuffer->paintBoxRel(xpos, ypos, xs, ys, COL_MENUCONTENT+ 4);
-	g_FrameBuffer->paintBoxRel(xpos+ 1, ypos+ 1, xs- 2, ys- 2, color);
+	frameBuffer->paintBoxRel(xpos, ypos, xs, ys, COL_MENUCONTENT+ 4);
+	frameBuffer->paintBoxRel(xpos+ 1, ypos+ 1, xs- 2, ys- 2, color);
 
 	int xfpos = xpos + ((xs- g_Fonts->menu->getRenderWidth(ch.c_str()))>>1);
 
@@ -560,13 +561,13 @@ int CPLPINInput::exec( CMenuTarget* parent, string )
 
 	unsigned char* pixbuf= new unsigned char[(width+ 2* borderwidth) * (height+ 2* borderwidth)];
 	if (pixbuf!= NULL)
-		g_FrameBuffer->SaveScreen(x- borderwidth, y- borderwidth, width+ 2* borderwidth, height+ 2* borderwidth, pixbuf);
+		frameBuffer->SaveScreen(x- borderwidth, y- borderwidth, width+ 2* borderwidth, height+ 2* borderwidth, pixbuf);
 
 	// clear border
-	g_FrameBuffer->paintBackgroundBoxRel(x- borderwidth, y- borderwidth, width+ 2* borderwidth, borderwidth);
-	g_FrameBuffer->paintBackgroundBoxRel(x- borderwidth, y+ height, width+ 2* borderwidth, borderwidth);
-	g_FrameBuffer->paintBackgroundBoxRel(x- borderwidth, y, borderwidth, height);
-	g_FrameBuffer->paintBackgroundBoxRel(x+ width, y, borderwidth, height);
+	frameBuffer->paintBackgroundBoxRel(x- borderwidth, y- borderwidth, width+ 2* borderwidth, borderwidth);
+	frameBuffer->paintBackgroundBoxRel(x- borderwidth, y+ height, width+ 2* borderwidth, borderwidth);
+	frameBuffer->paintBackgroundBoxRel(x- borderwidth, y, borderwidth, height);
+	frameBuffer->paintBackgroundBoxRel(x+ width, y, borderwidth, height);
 
 	char hint[100];
 	if ( fsk == 0x100 )
@@ -580,7 +581,7 @@ int CPLPINInput::exec( CMenuTarget* parent, string )
 
 	if (pixbuf!= NULL)
 	{
-		g_FrameBuffer->RestoreScreen(x- borderwidth, y- borderwidth, width+ 2* borderwidth, height+ 2* borderwidth, pixbuf);
+		frameBuffer->RestoreScreen(x- borderwidth, y- borderwidth, width+ 2* borderwidth, height+ 2* borderwidth, pixbuf);
 		delete pixbuf;
 	}
 

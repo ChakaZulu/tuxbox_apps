@@ -349,6 +349,7 @@ bool CHTTPUpdater::getFile( string version )
 
 CFlashUpdate::CFlashUpdate()
 {
+	frameBuffer = CFrameBuffer::getInstance();
 	width = 430;
 	hheight = g_Fonts->menu_title->getHeight();
 	mheight = g_Fonts->menu->getHeight();
@@ -403,7 +404,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, string)
 
 void CFlashUpdate::hide()
 {
-	g_FrameBuffer->paintBackgroundBoxRel(x,y, width,height);
+	frameBuffer->paintBackgroundBoxRel(x,y, width,height);
 }
 
 int CFlashUpdate::getGlobalStatus()
@@ -427,11 +428,11 @@ void CFlashUpdate::showGlobalStatus(int prog)
 	}
 	globalstatus = prog;
 
-	g_FrameBuffer->paintBox(x+10, globalstatusY, x+width-10, globalstatusY+10, COL_MENUCONTENT +2);
+	frameBuffer->paintBox(x+10, globalstatusY, x+width-10, globalstatusY+10, COL_MENUCONTENT +2);
 	if(prog!=0)
 	{
 		int pos = x+10+( (width- 20)/100* prog);
-		g_FrameBuffer->paintBox(x+10, globalstatusY,pos, globalstatusY+10, COL_MENUCONTENT +7);
+		frameBuffer->paintBox(x+10, globalstatusY,pos, globalstatusY+10, COL_MENUCONTENT +7);
 	}
 }
 
@@ -454,17 +455,17 @@ void CFlashUpdate::showLocalStatus(int prog)
 	}
 	lastprog = prog;
 
-	g_FrameBuffer->paintBox(x+10, localstatusY, x+width-10, localstatusY+10, COL_MENUCONTENT +2);
+	frameBuffer->paintBox(x+10, localstatusY, x+width-10, localstatusY+10, COL_MENUCONTENT +2);
 	if(prog!=0)
 	{
 		int pos = x+10+((width- 20)/100* prog);
-		g_FrameBuffer->paintBox(x+10, localstatusY, pos, localstatusY+10, COL_MENUCONTENT +7);
+		frameBuffer->paintBox(x+10, localstatusY, pos, localstatusY+10, COL_MENUCONTENT +7);
 	}
 }
 
 void CFlashUpdate::showStatusMessage(string text)
 {
-	g_FrameBuffer->paintBox(statusTextX-5, statusTextY-mheight, x+width, statusTextY,  COL_MENUCONTENT);
+	frameBuffer->paintBox(statusTextX-5, statusTextY-mheight, x+width, statusTextY,  COL_MENUCONTENT);
 	g_Fonts->menu->RenderString(statusTextX, statusTextY, width -(statusTextX- x), text.c_str(), COL_MENUCONTENT);
 }
 
@@ -547,9 +548,9 @@ void CFlashUpdate::paint()
 	}
 
 	int ypos=y;
-	g_FrameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD);
 	g_Fonts->menu_title->RenderString(x+10, ypos+ hheight, width- 10, g_Locale->getText("flashupdate.head").c_str(), COL_MENUHEAD);
-	g_FrameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
 
 	ypos+= hheight + (mheight >>1);
 
@@ -653,7 +654,7 @@ void CFlashUpdate::paint()
 
 	sleep(2);
 
-	g_FrameBuffer->paintBoxRel(x, y+ hheight, width, height- hheight, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x, y+ hheight, width, height- hheight, COL_MENUCONTENT);
 	g_Fonts->menu->RenderString(x+ 10, y+ mheight*3, width- 10, g_Locale->getText("flashupdate.reboot").c_str() , COL_MENUCONTENT);
 
 	sleep(2);

@@ -47,6 +47,9 @@ using namespace std;
 
 class CScreenSetup : public CMenuTarget
 {
+
+	private:
+		CFrameBuffer	*frameBuffer;
 		int	selected;
         int x_coord[2];
         int y_coord[2];
@@ -56,8 +59,9 @@ class CScreenSetup : public CMenuTarget
 		void paintBorderLR();
 		void paintCoords();
 		void paintBorder( int selected );
+	
 	public:
-
+		CScreenSetup();
 		void hide();
 		int exec( CMenuTarget* parent, string actionKey );
 

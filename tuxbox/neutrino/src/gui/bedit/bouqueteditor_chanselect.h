@@ -42,8 +42,13 @@
 
 using namespace std;
 
-	class CBEChannelSelectWidget : public CMenuWidget
-	{
+
+	
+class CBEChannelSelectWidget : public CMenuWidget
+{
+
+	private:
+		CFrameBuffer		*frameBuffer;
 		unsigned int		selected;
 
 		unsigned int		liststart;
@@ -82,7 +87,8 @@ using namespace std;
 		CZapitClient::BouquetChannelList	bouquetChannels; // list of chans that are currently selected
 		int exec(CMenuTarget* parent, string actionKey);
 		bool hasChanged();
-	};
+
+};
 
 #endif
 

@@ -33,6 +33,7 @@
 
 CBouquetList::CBouquetList( const std::string &Name )
 {
+	frameBuffer = CFrameBuffer::getInstance();
 	name = Name;
 	selected = 0;
 	width = 500;
@@ -323,7 +324,7 @@ int CBouquetList::show()
 
 void CBouquetList::hide()
 {
-	g_FrameBuffer->paintBackgroundBoxRel(x,y, width,height);
+	frameBuffer->paintBackgroundBoxRel(x,y, width,height);
 }
 
 
@@ -336,7 +337,7 @@ void CBouquetList::paintItem(int pos)
 		color = COL_MENUCONTENTSELECTED;
 	}
 
-	g_FrameBuffer->paintBoxRel(x,ypos, width- 15, fheight, color);
+	frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, color);
 	if(liststart+pos<Bouquets.size())
 	{
 		CBouquet* bouq = Bouquets[liststart+pos];
@@ -353,7 +354,7 @@ void CBouquetList::paintItem(int pos)
 
 void CBouquetList::paintHead()
 {
-	g_FrameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
 	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width, "Bouquets" /*g_Locale->getText(name).c_str()*/, COL_MENUHEAD);
 }
 
@@ -380,13 +381,13 @@ void CBouquetList::paint()
 
 	int ypos = y+ theight;
 	int sb = fheight* listmaxshow;
-	g_FrameBuffer->paintBoxRel(x+ width- 15,ypos, 15, sb,  COL_MENUCONTENT+ 1);
+	frameBuffer->paintBoxRel(x+ width- 15,ypos, 15, sb,  COL_MENUCONTENT+ 1);
 
 	int sbc= ((Bouquets.size()- 1)/ listmaxshow)+ 1;
 	float sbh= (sb- 4)/ sbc;
 	int sbs= (selected/listmaxshow);
 
-	g_FrameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
+	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
 
 }
 

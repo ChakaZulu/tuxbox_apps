@@ -92,6 +92,7 @@ class CMenuTarget
 class CMenuItem
 {
 	protected:
+		CFrameBuffer	*frameBuffer;
 		int x, y, dx, offx;
 		bool		active;
 	public:
@@ -257,6 +258,7 @@ class CMenuOptionStringChooser : public CMenuItem
 class CMenuWidget : public CMenuTarget
 {
 	protected:
+		CFrameBuffer		*frameBuffer;
 		COnPaintNotifier*	onPaintNotifier;
 		vector<CMenuItem*>	items;
 		string				name;

@@ -46,7 +46,7 @@ using namespace std;
 class CHintBox
 {
 	private: 
-
+		CFrameBuffer			*frameBuffer;
 		int						width;
 		int						height;
 		int						x;

@@ -100,53 +100,54 @@ bool CIPChangeNotifier::changeNotify(string OptionName, void* Data)
 
 bool CColorSetupNotifier::changeNotify(string OptionName, void*)
 {
+	CFrameBuffer *frameBuffer = CFrameBuffer::getInstance();
 	unsigned char r,g,b;
 	//setting colors-..
-	g_FrameBuffer->paletteGenFade(COL_MENUHEAD,
+	frameBuffer->paletteGenFade(COL_MENUHEAD,
 	                              convertSetupColor2RGB(g_settings.menu_Head_red, g_settings.menu_Head_green, g_settings.menu_Head_blue),
 	                              convertSetupColor2RGB(g_settings.menu_Head_Text_red, g_settings.menu_Head_Text_green, g_settings.menu_Head_Text_blue),
 	                              8, convertSetupAlpha2Alpha( g_settings.menu_Head_alpha ) );
 
-	g_FrameBuffer->paletteGenFade(COL_MENUCONTENT,
+	frameBuffer->paletteGenFade(COL_MENUCONTENT,
 	                              convertSetupColor2RGB(g_settings.menu_Content_red, g_settings.menu_Content_green, g_settings.menu_Content_blue),
 	                              convertSetupColor2RGB(g_settings.menu_Content_Text_red, g_settings.menu_Content_Text_green, g_settings.menu_Content_Text_blue),
 	                              8, convertSetupAlpha2Alpha(g_settings.menu_Content_alpha) );
 
 
-	g_FrameBuffer->paletteGenFade(COL_MENUCONTENTDARK,
+	frameBuffer->paletteGenFade(COL_MENUCONTENTDARK,
 	                              convertSetupColor2RGB(int(g_settings.menu_Content_red*0.6), int(g_settings.menu_Content_green*0.6), int(g_settings.menu_Content_blue*0.6)),
 	                              convertSetupColor2RGB(g_settings.menu_Content_Text_red, g_settings.menu_Content_Text_green, g_settings.menu_Content_Text_blue),
 	                              8, convertSetupAlpha2Alpha(g_settings.menu_Content_alpha) );
 
-	g_FrameBuffer->paletteGenFade(COL_MENUCONTENTSELECTED,
+	frameBuffer->paletteGenFade(COL_MENUCONTENTSELECTED,
 	                              convertSetupColor2RGB(g_settings.menu_Content_Selected_red, g_settings.menu_Content_Selected_green, g_settings.menu_Content_Selected_blue),
 	                              convertSetupColor2RGB(g_settings.menu_Content_Selected_Text_red, g_settings.menu_Content_Selected_Text_green, g_settings.menu_Content_Selected_Text_blue),
 	                              8, convertSetupAlpha2Alpha(g_settings.menu_Content_Selected_alpha) );
 
-	g_FrameBuffer->paletteGenFade(COL_MENUCONTENTINACTIVE,
+	frameBuffer->paletteGenFade(COL_MENUCONTENTINACTIVE,
 	                              convertSetupColor2RGB(g_settings.menu_Content_inactive_red, g_settings.menu_Content_inactive_green, g_settings.menu_Content_inactive_blue),
 	                              convertSetupColor2RGB(g_settings.menu_Content_inactive_Text_red, g_settings.menu_Content_inactive_Text_green, g_settings.menu_Content_inactive_Text_blue),
 	                              8, convertSetupAlpha2Alpha(g_settings.menu_Content_inactive_alpha) );
 
-	g_FrameBuffer->paletteGenFade(COL_INFOBAR,
+	frameBuffer->paletteGenFade(COL_INFOBAR,
 	                              convertSetupColor2RGB(g_settings.infobar_red, g_settings.infobar_green, g_settings.infobar_blue),
 	                              convertSetupColor2RGB(g_settings.infobar_Text_red, g_settings.infobar_Text_green, g_settings.infobar_Text_blue),
 	                              8, convertSetupAlpha2Alpha(g_settings.infobar_alpha) );
 
-/*	g_FrameBuffer->paletteSetColor( COL_INFOBAR_SHADOW,
+/*	frameBuffer->paletteSetColor( COL_INFOBAR_SHADOW,
 	                                convertSetupColor2RGB(
 	                                    int(g_settings.infobar_red*0.4),
 	                                    int(g_settings.infobar_green*0.4),
 	                                    int(g_settings.infobar_blue*0.4)),
 	                                g_settings.infobar_alpha);
 */
-	g_FrameBuffer->paletteGenFade(COL_INFOBAR_SHADOW,
+	frameBuffer->paletteGenFade(COL_INFOBAR_SHADOW,
 	                              convertSetupColor2RGB(int(g_settings.infobar_red*0.4), int(g_settings.infobar_green*0.4), int(g_settings.infobar_blue*0.4)),
 	                              convertSetupColor2RGB(g_settings.infobar_Text_red, g_settings.infobar_Text_green, g_settings.infobar_Text_blue),
 	                              8, convertSetupAlpha2Alpha(g_settings.infobar_alpha) );
 
 
-	g_FrameBuffer->paletteSet();
+	frameBuffer->paletteSet();
 	return false;
 }
 
@@ -205,13 +206,14 @@ int CAPIDChangeExec::exec(CMenuTarget* parent, string actionKey)
 
 void showSubchan(string subChannelName)
 {
+	CFrameBuffer *frameBuffer = CFrameBuffer::getInstance();
 	if(subChannelName!="")
 	{
 		int dx = g_Fonts->infobar_info->getRenderWidth(subChannelName.c_str()) + 20;
 		int dy = 30;
 		int x = g_settings.screen_EndX - dx -10;
 		int y = g_settings.screen_StartY + 10;
-		g_FrameBuffer->paintBoxRel(x,y, dx,dy, COL_MENUCONTENT);
+		frameBuffer->paintBoxRel(x,y, dx,dy, COL_MENUCONTENT);
 		g_Fonts->infobar_info->RenderString(x+10, y+30, dx-20, subChannelName.c_str(), COL_MENUCONTENT);
 
 		unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( 2 );
@@ -237,7 +239,7 @@ void showSubchan(string subChannelName)
 				res = messages_return::cancel_info;
 			}
 		}
-		g_FrameBuffer->paintBackgroundBoxRel(x,y, dx,dy);
+		frameBuffer->paintBackgroundBoxRel(x,y, dx,dy);
 	}
 	else
 	{

@@ -47,6 +47,7 @@ using namespace std;
 class CStringInput : public CMenuTarget
 {
 	protected:
+		CFrameBuffer	*frameBuffer;
 		int x;
 		int y;
 		int width;

@@ -48,6 +48,8 @@ class CKeyChooserItem;
 class CKeyChooserItemNoKey;
 class CKeyChooser : public CMenuWidget
 {
+	private:
+		CFrameBuffer			*frameBuffer;
 		int*					key;
 		CKeyChooserItem			*keyChooser;
 		CKeyChooserItemNoKey	*keyDeleter;
@@ -61,6 +63,9 @@ class CKeyChooser : public CMenuWidget
 
 class CKeyChooserItem : public CMenuTarget
 {
+	private:
+
+		CFrameBuffer	*frameBuffer;
 		int x;
 		int y;
 		int width;

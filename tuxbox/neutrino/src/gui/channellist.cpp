@@ -335,7 +335,7 @@ int CChannelList::show()
 
 void CChannelList::hide()
 {
-	g_FrameBuffer->paintBackgroundBoxRel(x, y, width, height+ info_height+ 5);
+	frameBuffer->paintBackgroundBoxRel(x, y, width, height+ info_height+ 5);
         clearItem2DetailsLine ();
 }
 
@@ -495,7 +495,7 @@ int CChannelList::numericZap(int key)
 			while(strlen(valstr)<4)
 				strcat(valstr,"·");   //"_"
 
-			g_FrameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR);
+			frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR);
 
 			for (int i=3; i>=0; i--)
 			{
@@ -571,7 +571,7 @@ int CChannelList::numericZap(int key)
 		}
 	}
 
-	g_FrameBuffer->paintBackgroundBoxRel(ox, oy, sx, sy);
+	frameBuffer->paintBackgroundBoxRel(ox, oy, sx, sy);
 
 	if ( doZap )
 	{
@@ -633,12 +633,12 @@ void CChannelList::paintDetails(int index)
 {
 	if ( chanlist[index]->currentEvent.description== "" )
 	{
-		g_FrameBuffer->paintBackgroundBoxRel(x, y+ height, width, info_height);
+		frameBuffer->paintBackgroundBoxRel(x, y+ height, width, info_height);
 	}
 	else
 	{
 		// löschen
-		g_FrameBuffer->paintBoxRel(x, y+ height, width, info_height, COL_MENUCONTENTDARK);
+		frameBuffer->paintBoxRel(x, y+ height, width, info_height, COL_MENUCONTENTDARK);
 
 		char cNoch[50];
 		char cSeit[50];
@@ -718,34 +718,34 @@ void CChannelList::paintItem2DetailsLine (int pos, int ch_index)
 
 
 	// Clear
-	g_FrameBuffer->paintBackgroundBoxRel(xpos,y, ConnectLineBox_Width, height+info_height);
+	frameBuffer->paintBackgroundBoxRel(xpos,y, ConnectLineBox_Width, height+info_height);
 
 	// paint Line if detail info (and not valid list pos)
 	if (pos >= 0 &&  chanlist[ch_index]->currentEvent.description != "")
 	{
 		// 1. col thick line
-		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos1, 4,fheight,     col1);
-		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos2, 4,info_height, col1);
+		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos1, 4,fheight,     col1);
+		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos2, 4,info_height, col1);
 
-		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 4,ypos2a-ypos1a, col1);
+		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 4,ypos2a-ypos1a, col1);
 
-		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 12,4, col1);
-		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos2a, 12,4, col1);
+		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 12,4, col1);
+		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos2a, 12,4, col1);
 
 		// 2. col small line
-		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos1, 1,fheight,     col2);
-		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos2, 1,info_height, col2);
+		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos1, 1,fheight,     col2);
+		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos2, 1,info_height, col2);
 
-		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 1,ypos2a-ypos1a+4, col2);
+		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 1,ypos2a-ypos1a+4, col2);
 
-		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 12,1, col2);
-		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-12, ypos2a, 8,1, col2);
+		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 12,1, col2);
+		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-12, ypos2a, 8,1, col2);
 
 		// -- small Frame around infobox
-                g_FrameBuffer->paintBoxRel(x,         ypos2, 2,info_height, col1);
-                g_FrameBuffer->paintBoxRel(x+width-2, ypos2, 2,info_height, col1);
-                g_FrameBuffer->paintBoxRel(x        , ypos2, width-2,2,     col1);
-                g_FrameBuffer->paintBoxRel(x        , ypos2+info_height-2, width-2,2, col1);
+                frameBuffer->paintBoxRel(x,         ypos2, 2,info_height, col1);
+                frameBuffer->paintBoxRel(x+width-2, ypos2, 2,info_height, col1);
+                frameBuffer->paintBoxRel(x        , ypos2, width-2,2,     col1);
+                frameBuffer->paintBoxRel(x        , ypos2+info_height-2, width-2,2, col1);
 
 	}
 
@@ -765,7 +765,7 @@ void CChannelList::paintItem(int pos)
 		paintItem2DetailsLine (pos, liststart+pos);
 	}
 
-	g_FrameBuffer->paintBoxRel(x,ypos, width- 15, fheight, color);
+	frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, color);
 	if(liststart+pos<chanlist.size())
 	{
 		CChannel* chan = chanlist[liststart+pos];
@@ -812,12 +812,12 @@ void CChannelList::paintHead()
 		strCaption = name;
 	}
 */
-	g_FrameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
 	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width- 65, strCaption.c_str(), COL_MENUHEAD);
 
-	g_FrameBuffer->paintIcon("help.raw", x+ width- 30, y+ 5 );
+	frameBuffer->paintIcon("help.raw", x+ width- 30, y+ 5 );
 	if (bouquetList!=NULL)
-		g_FrameBuffer->paintIcon("dbox.raw", x+ width- 60, y+ 5 );
+		frameBuffer->paintIcon("dbox.raw", x+ width- 60, y+ 5 );
 }
 
 void CChannelList::paint()
@@ -845,13 +845,13 @@ void CChannelList::paint()
 
 	int ypos = y+ theight;
 	int sb = fheight* listmaxshow;
-	g_FrameBuffer->paintBoxRel(x+ width- 15,ypos, 15, sb,  COL_MENUCONTENT+ 1);
+	frameBuffer->paintBoxRel(x+ width- 15,ypos, 15, sb,  COL_MENUCONTENT+ 1);
 
 	int sbc= ((chanlist.size()- 1)/ listmaxshow)+ 1;
 	float sbh= (sb- 4)/ sbc;
 	int sbs= (selected/listmaxshow);
 
-	g_FrameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
+	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
 
 	g_Sectionsd->setPauseSorting( false );
 }

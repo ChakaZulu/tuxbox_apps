@@ -73,6 +73,8 @@ using namespace std;
 class CInfoViewer
 {
 	private:
+		CFrameBuffer	*frameBuffer;
+
 		bool	gotTime;
 
 		int		InfoHeightY;

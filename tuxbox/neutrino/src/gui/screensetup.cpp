@@ -32,6 +32,13 @@
 #include "screensetup.h"
 #include "../global.h"
 
+
+
+CScreenSetup::CScreenSetup()
+{
+	frameBuffer = CFrameBuffer::getInstance();
+}
+
 int CScreenSetup::exec( CMenuTarget* parent, string )
 {
 	int res = menu_return::RETURN_REPAINT;
@@ -152,7 +159,7 @@ int CScreenSetup::exec( CMenuTarget* parent, string )
 
 void CScreenSetup::hide()
 {
-	g_FrameBuffer->paintBackgroundBox(0,0,720,576);
+	frameBuffer->paintBackgroundBox(0,0,720,576);
 }
 
 void CScreenSetup::paintBorder( int selected )
@@ -167,19 +174,19 @@ void CScreenSetup::paintBorder( int selected )
 
 void CScreenSetup::paintBorderUL()
 {
-	g_FrameBuffer->paintIcon( "border_ul.raw", x_coord[0], y_coord[0] );
+	frameBuffer->paintIcon( "border_ul.raw", x_coord[0], y_coord[0] );
 }
 
 void CScreenSetup::paintBorderLR()
 {
-	g_FrameBuffer->paintIcon("border_lr.raw", x_coord[1]- 96, y_coord[1]- 96 );
+	frameBuffer->paintIcon("border_lr.raw", x_coord[1]- 96, y_coord[1]- 96 );
 }
 
 void CScreenSetup::paintCoords()
 {
 	int x=15*19;
 	int y=15*16;
-	g_FrameBuffer->paintBoxRel(x,y, 15*9,15*6, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x,y, 15*9,15*6, COL_MENUCONTENT);
 	char xpos[30];
 	char ypos[30];
 	char xepos[30];
@@ -198,20 +205,20 @@ void CScreenSetup::paintCoords()
 
 void CScreenSetup::paint()
 {
-	memset(g_FrameBuffer->getFrameBufferPointer(), 7, g_FrameBuffer->getStride()*576);
+	memset(frameBuffer->getFrameBufferPointer(), 7, frameBuffer->getStride()*576);
 
 	for(int count=0;count<576;count+=15)
-		g_FrameBuffer->paintHLine(0,719, count, 8 );
+		frameBuffer->paintHLine(0,719, count, 8 );
 
 	for(int count=0;count<720;count+=15)
-		g_FrameBuffer->paintVLine(count,0, 575, 8 );
+		frameBuffer->paintVLine(count,0, 575, 8 );
 
-	g_FrameBuffer->paintBox(0,0, 15*15,15*15, 7);
-	g_FrameBuffer->paintBox(32*15+1,23*15+1, 719,575, 7);
+	frameBuffer->paintBox(0,0, 15*15,15*15, 7);
+	frameBuffer->paintBox(32*15+1,23*15+1, 719,575, 7);
 
 	int x=15*5;
 	int y=15*24;
-	g_FrameBuffer->paintBoxRel(x,y, 15*23,15*4, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x,y, 15*23,15*4, COL_MENUCONTENT);
 
 	g_Fonts->menu->RenderString(x+30,y+29, 15*23, g_Locale->getText("screensetup.upperleft").c_str(), COL_MENUHEAD);
 	g_Fonts->menu->RenderString(x+30,y+49, 15*23, g_Locale->getText("screensetup.lowerright").c_str(), COL_MENUCONTENT);

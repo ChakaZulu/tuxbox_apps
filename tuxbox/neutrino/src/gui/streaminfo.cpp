@@ -29,71 +29,12 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-/*
-$Id: streaminfo.cpp,v 1.22 2002/04/10 19:56:19 obi Exp $
-
-Module StreamInfo
-
-History:
- $Log: streaminfo.cpp,v $
- Revision 1.22  2002/04/10 19:56:19  obi
- changed pid defines
-
- Revision 1.21  2002/03/22 17:34:04  field
- Massive Umstellungen - NVODs/SubChannels=KAPUTT!
- Infoviewer tw. kaputt! NON-STABLE!
-
- Revision 1.20  2002/03/06 11:18:39  field
- Fixes & Updates
-
- Revision 1.19  2002/02/27 22:51:13  field
- Tasten kaputt gefixt - sollte wieder gehen :)
-
- Revision 1.18  2002/02/26 17:24:16  field
- Key-Handling weiter umgestellt EIN/AUS= KAPUTT!
-
- Revision 1.17  2002/02/25 19:32:26  field
- Events <-> Key-Handling umgestellt! SEHR BETA!
-
- Revision 1.16  2002/02/25 01:27:33  field
- Key-Handling umgestellt (moeglicherweise beta ;)
-
- Revision 1.15  2002/01/28 20:50:42  field
- Streaminfo besser
-
- Revision 1.14  2002/01/28 19:52:32  field
- Streaminfo ausfuehrlicher
-
- Revision 1.13  2002/01/03 20:03:20  McClean
- cleanup
-
- Revision 1.12  2001/11/26 02:34:04  McClean
- include (.../../stuff) changed - correct unix-formated files now
-
- Revision 1.11  2001/11/15 11:42:41  McClean
- gpl-headers added
-
- Revision 1.10  2001/10/22 15:24:48  McClean
- small designupdate
-
- Revision 1.9  2001/10/09 21:48:37  McClean
- ucode-check
-
- Revision 1.8  2001/09/23 21:34:07  rasc
- - LIFObuffer Module, pushbackKey fuer RCInput,
- - In einige Helper und widget-Module eingebracht
-   ==> harmonischeres Menuehandling
- - Infoviewer Breite fuer Channelsdiplay angepasst (>1000 Channels)
-
-
-*/
-
-
 #include "streaminfo.h"
 #include "../global.h"
 
 CStreamInfo::CStreamInfo()
 {
+	frameBuffer = CFrameBuffer::getInstance();
 	width = 350;
 	hheight = g_Fonts->menu_title->getHeight();
 	mheight = g_Fonts->menu->getHeight();
@@ -144,15 +85,15 @@ int CStreamInfo::exec(CMenuTarget* parent, string)
 
 void CStreamInfo::hide()
 {
-	g_FrameBuffer->paintBackgroundBoxRel(x,y, width,height);
+	frameBuffer->paintBackgroundBoxRel(x,y, width,height);
 }
 
 void CStreamInfo::paint()
 {
 	int ypos=y;
-	g_FrameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD);
 	g_Fonts->menu_title->RenderString(x+10, ypos+ hheight+1, width, g_Locale->getText("streaminfo.head").c_str(), COL_MENUHEAD);
-	g_FrameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
 
 	ypos+= hheight + (mheight >>1);
 

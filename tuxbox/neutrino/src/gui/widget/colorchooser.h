@@ -46,6 +46,8 @@ using namespace std;
 
 class CColorChooser : public CMenuTarget
 {
+	private:
+		CFrameBuffer	*frameBuffer;
 		int x;
 		int y;
 		int width;

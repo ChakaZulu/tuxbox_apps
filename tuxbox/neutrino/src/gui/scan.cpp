@@ -35,6 +35,7 @@
 
 CScanTs::CScanTs()
 {
+	frameBuffer = CFrameBuffer::getInstance();
 	width = 400;
 	hheight = g_Fonts->menu_title->getHeight();
 	mheight = g_Fonts->menu->getHeight();
@@ -45,8 +46,8 @@ CScanTs::CScanTs()
 
 int CScanTs::exec(CMenuTarget* parent, string)
 {
-	g_FrameBuffer->loadPal("scan.pal", 37, COL_MAXFREE);
-	g_FrameBuffer->loadPicture2Mem("scan.raw", g_FrameBuffer->getFrameBufferPointer());
+	frameBuffer->loadPal("scan.pal", 37, COL_MAXFREE);
+	frameBuffer->loadPicture2Mem("scan.raw", frameBuffer->getFrameBufferPointer());
 
 	g_Sectionsd->setPauseScanning( true );
 	g_Zapit->startScan( g_settings.scan_astra | g_settings.scan_eutel | g_settings.scan_kopernikus | g_settings.scan_digituerk | g_settings.scan_sirius | g_settings.scan_thor | g_settings.scan_tuerksat | g_settings.scan_bouquet );
@@ -64,7 +65,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 	unsigned int services = 0;
 	unsigned int sat = 0;
 	int ypos=y;
-	g_FrameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
 	ypos= y+ hheight + (mheight >>1);
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("scants.transponders").c_str(), COL_MENUCONTENT);
 	ypos+= mheight;
@@ -79,7 +80,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 	int xpos2 = x+20 + g_Fonts->menu->getRenderWidth(g_Locale->getText("scants.services").c_str());
 	int xpos3 = x+20 + g_Fonts->menu->getRenderWidth(g_Locale->getText("scants.actsatellite").c_str());
 
-	g_FrameBuffer->loadPal("radar.pal", 17, 37);
+	frameBuffer->loadPal("radar.pal", 17, 37);
 	int pos = 0;
 	bool finish = false;
 
@@ -92,7 +93,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 		char filename[30];
 		sprintf(filename, "radar%d.raw", pos);
 		pos = (pos+1)%10;
-		g_FrameBuffer->paintIcon8(filename, x+300,ypos+15, 17);
+		frameBuffer->paintIcon8(filename, x+300,ypos+15, 17);
 
 		unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd_MS( 250 );
 		msg = CRCInput::RC_nokey;
@@ -103,14 +104,14 @@ int CScanTs::exec(CMenuTarget* parent, string)
 
 			if ( msg == NeutrinoMessages::EVT_SCAN_SATELLITE )
 			{
-				g_FrameBuffer->paintBoxRel(xpos3, ypos+ 2* mheight, 80, mheight, COL_MENUCONTENT);
+				frameBuffer->paintBoxRel(xpos3, ypos+ 2* mheight, 80, mheight, COL_MENUCONTENT);
 				g_Fonts->menu->RenderString(xpos3, ypos+ 3*mheight, width, (char*)data, COL_MENUCONTENT);
 				delete (unsigned char*) data;
 			}
             else
 			if ( msg == NeutrinoMessages::EVT_SCAN_PROVIDER )
 			{
-				g_FrameBuffer->paintBoxRel(x+ 10, ypos+ 3* mheight, width- 10, mheight, COL_MENUCONTENT);
+				frameBuffer->paintBoxRel(x+ 10, ypos+ 3* mheight, width- 10, mheight, COL_MENUCONTENT);
 				g_Fonts->menu->RenderString(x+ 10, ypos+ 4* mheight, width- 10, (char*)data, COL_MENUCONTENT);
 				delete (unsigned char*) data;
 			}
@@ -119,7 +120,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 			{
 				char cb[10];
 				sprintf(cb, "%d", data);
-				g_FrameBuffer->paintBoxRel(xpos2, ypos+ mheight, 80, mheight, COL_MENUCONTENT);
+				frameBuffer->paintBoxRel(xpos2, ypos+ mheight, 80, mheight, COL_MENUCONTENT);
 				g_Fonts->menu->RenderString(xpos2, ypos+ 2* mheight, width, cb, COL_MENUCONTENT);
 			}
 			else
@@ -127,7 +128,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 			{
 				char cb[10];
 				sprintf(cb, "%d", data);
-				g_FrameBuffer->paintBoxRel(xpos1, ypos, 80, mheight, COL_MENUCONTENT);
+				frameBuffer->paintBoxRel(xpos1, ypos, 80, mheight, COL_MENUCONTENT);
 				g_Fonts->menu->RenderString(xpos1, ypos+ mheight, width, cb, COL_MENUCONTENT);
 			}
             else
@@ -153,15 +154,15 @@ int CScanTs::exec(CMenuTarget* parent, string)
 
 void CScanTs::hide()
 {
-	g_FrameBuffer->loadPal("radiomode.pal", 18, COL_MAXFREE);
-	g_FrameBuffer->paintBackgroundBoxRel(0,0, 720,576);
+	frameBuffer->loadPal("radiomode.pal", 18, COL_MAXFREE);
+	frameBuffer->paintBackgroundBoxRel(0,0, 720,576);
 }
 
 
 void CScanTs::paint()
 {
 	int ypos=y;
-	g_FrameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD);
 	g_Fonts->menu_title->RenderString(x+10, ypos+ hheight, width, g_Locale->getText("scants.head").c_str(), COL_MENUHEAD);
-	g_FrameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
 }

@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.229 2002/04/19 11:39:38 field Exp $
+        $Id: neutrino.cpp,v 1.230 2002/04/20 00:09:49 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -53,7 +53,6 @@ static void initGlobals(void)
 {
 	neutrino = NULL;
 
-	g_FrameBuffer = NULL;
 	g_fontRenderer = NULL;
 	g_Fonts = NULL;
 
@@ -83,8 +82,8 @@ static void initGlobals(void)
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 CNeutrinoApp::CNeutrinoApp()
 {
-	g_FrameBuffer = CFrameBuffer::getInstance();
-	g_FrameBuffer->setIconBasePath(DATADIR "/neutrino/icons/");
+	frameBuffer = CFrameBuffer::getInstance();
+	frameBuffer->setIconBasePath(DATADIR "/neutrino/icons/");
 
 	g_fontRenderer = new fontRenderClass;
 	SetupFrameBuffer();
@@ -664,8 +663,8 @@ void CNeutrinoApp::CmdParser(int argc, char **argv)
 
 void CNeutrinoApp::SetupFrameBuffer()
 {
-	g_FrameBuffer->init();
-	if (g_FrameBuffer->setMode(720, 576, 8))
+	frameBuffer->init();
+	if (frameBuffer->setMode(720, 576, 8))
 	{
 		printf("Error while setting framebuffer mode\n");
 		exit(-1);
@@ -673,8 +672,8 @@ void CNeutrinoApp::SetupFrameBuffer()
 
 	//make 1..8 transparent for dummy painting
 	for(int count =0;count<8;count++)
-		g_FrameBuffer->paletteSetColor(count, 0x000000, 0xffff);
-	g_FrameBuffer->paletteSet();
+		frameBuffer->paletteSetColor(count, 0x000000, 0xffff);
+	frameBuffer->paletteSet();
 }
 
 void CNeutrinoApp::SetupFonts()
@@ -745,37 +744,37 @@ void CNeutrinoApp::SetupFonts()
 
 void CNeutrinoApp::ClearFrameBuffer()
 {
-	memset(g_FrameBuffer->getFrameBufferPointer(), 255, g_FrameBuffer->getStride()*576);
+	memset(frameBuffer->getFrameBufferPointer(), 255, frameBuffer->getStride()*576);
 
 	//backgroundmode
-	g_FrameBuffer->setBackgroundColor(COL_BACKGROUND);
-	g_FrameBuffer->useBackground(false);
+	frameBuffer->setBackgroundColor(COL_BACKGROUND);
+	frameBuffer->useBackground(false);
 
 	//background
-	g_FrameBuffer->paletteSetColor(COL_BACKGROUND, 0x000000, 0xffff);
+	frameBuffer->paletteSetColor(COL_BACKGROUND, 0x000000, 0xffff);
 	//Windows Colors
-	g_FrameBuffer->paletteSetColor(0x0, 0x010101, 0);
-	g_FrameBuffer->paletteSetColor(0x1, 0x800000, 0);
-	g_FrameBuffer->paletteSetColor(0x2, 0x008000, 0);
-	g_FrameBuffer->paletteSetColor(0x3, 0x808000, 0);
-	g_FrameBuffer->paletteSetColor(0x4, 0x000080, 0);
-	g_FrameBuffer->paletteSetColor(0x5, 0x800080, 0);
-	g_FrameBuffer->paletteSetColor(0x6, 0x008080, 0);
+	frameBuffer->paletteSetColor(0x0, 0x010101, 0);
+	frameBuffer->paletteSetColor(0x1, 0x800000, 0);
+	frameBuffer->paletteSetColor(0x2, 0x008000, 0);
+	frameBuffer->paletteSetColor(0x3, 0x808000, 0);
+	frameBuffer->paletteSetColor(0x4, 0x000080, 0);
+	frameBuffer->paletteSetColor(0x5, 0x800080, 0);
+	frameBuffer->paletteSetColor(0x6, 0x008080, 0);
 	//	frameBuffer.paletteSetColor(0x7, 0xC0C0C0, 0);
-	g_FrameBuffer->paletteSetColor(0x7, 0xA0A0A0, 0);
+	frameBuffer->paletteSetColor(0x7, 0xA0A0A0, 0);
 
 	//	frameBuffer.paletteSetColor(0x8, 0x808080, 0);
-	g_FrameBuffer->paletteSetColor(0x8, 0x505050, 0);
+	frameBuffer->paletteSetColor(0x8, 0x505050, 0);
 
-	g_FrameBuffer->paletteSetColor(0x9, 0xFF0000, 0);
-	g_FrameBuffer->paletteSetColor(0xA, 0x00FF00, 0);
-	g_FrameBuffer->paletteSetColor(0xB, 0xFFFF00, 0);
-	g_FrameBuffer->paletteSetColor(0xC, 0x0000FF, 0);
-	g_FrameBuffer->paletteSetColor(0xD, 0xFF00FF, 0);
-	g_FrameBuffer->paletteSetColor(0xE, 0x00FFFF, 0);
-	g_FrameBuffer->paletteSetColor(0xF, 0xFFFFFF, 0);
+	frameBuffer->paletteSetColor(0x9, 0xFF0000, 0);
+	frameBuffer->paletteSetColor(0xA, 0x00FF00, 0);
+	frameBuffer->paletteSetColor(0xB, 0xFFFF00, 0);
+	frameBuffer->paletteSetColor(0xC, 0x0000FF, 0);
+	frameBuffer->paletteSetColor(0xD, 0xFF00FF, 0);
+	frameBuffer->paletteSetColor(0xE, 0x00FFFF, 0);
+	frameBuffer->paletteSetColor(0xF, 0xFFFFFF, 0);
 
-	g_FrameBuffer->paletteSet();
+	frameBuffer->paletteSet();
 }
 
 void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings,  CMenuWidget &audioSettings, CMenuWidget &parentallockSettings,
@@ -2014,11 +2013,11 @@ void CNeutrinoApp::ExitRun()
 	g_lcdd->shutdown();
 
 	for(int x=0;x<256;x++)
-		g_FrameBuffer->paletteSetColor(x, 0x000000, 0xffff);
-	g_FrameBuffer->paletteSet();
+		frameBuffer->paletteSetColor(x, 0x000000, 0xffff);
+	frameBuffer->paletteSet();
 
-	g_FrameBuffer->loadPicture2Mem("shutdown.raw", g_FrameBuffer->getFrameBufferPointer() );
-	g_FrameBuffer->loadPal("shutdown.pal");
+	frameBuffer->loadPicture2Mem("shutdown.raw", frameBuffer->getFrameBufferPointer() );
+	frameBuffer->loadPal("shutdown.pal");
 
 	saveSetup();
 	g_Controld->shutdown();
@@ -2061,11 +2060,11 @@ void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
 		// anzeigen NUR, wenn es vom Event kommt
 		if ( current_muted )
 		{
-			g_FrameBuffer->paintBoxRel(x, y, dx, dy, COL_INFOBAR);
-			g_FrameBuffer->paintIcon("mute.raw", x+5, y+5);
+			frameBuffer->paintBoxRel(x, y, dx, dy, COL_INFOBAR);
+			frameBuffer->paintIcon("mute.raw", x+5, y+5);
 		}
 		else
-			g_FrameBuffer->paintBackgroundBoxRel(x, y, dx, dy);
+			frameBuffer->paintBackgroundBoxRel(x, y, dx, dy);
 	}
 }
 
@@ -2082,8 +2081,8 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 	{
 		pixbuf= new unsigned char[ dx * dy ];
 		if (pixbuf!= NULL)
-			g_FrameBuffer->SaveScreen(x, y, dx, dy, pixbuf);
-		g_FrameBuffer->paintIcon("volume.raw",x,y, COL_INFOBAR);
+			frameBuffer->SaveScreen(x, y, dx, dy, pixbuf);
+		frameBuffer->paintIcon("volume.raw",x,y, COL_INFOBAR);
 	}
 
 	uint msg = key;
@@ -2123,8 +2122,8 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 		if (bDoPaint)
 		{
 			int vol = current_volume<<1;
-			g_FrameBuffer->paintBoxRel(x+40, y+12, 200, 15, COL_INFOBAR+1);
-			g_FrameBuffer->paintBoxRel(x+40, y+12, vol, 15, COL_INFOBAR+3);
+			frameBuffer->paintBoxRel(x+40, y+12, 200, 15, COL_INFOBAR+1);
+			frameBuffer->paintBoxRel(x+40, y+12, vol, 15, COL_INFOBAR+3);
         }
 
 		if ( msg != CRCInput::RC_timeout )
@@ -2136,7 +2135,7 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 	while ( msg != CRCInput::RC_timeout );
 
     if ( (bDoPaint) && (pixbuf!= NULL) )
-		g_FrameBuffer->RestoreScreen(x, y, dx, dy, pixbuf);
+		frameBuffer->RestoreScreen(x, y, dx, dy, pixbuf);
 }
 
 void CNeutrinoApp::tvMode( bool rezap )
@@ -2163,8 +2162,8 @@ void CNeutrinoApp::tvMode( bool rezap )
 
 	//printf( "tv-mode\n" );
 
-	memset(g_FrameBuffer->getFrameBufferPointer(), 255, g_FrameBuffer->getStride()*576);
-	g_FrameBuffer->useBackground(false);
+	memset(frameBuffer->getFrameBufferPointer(), 255, frameBuffer->getStride()*576);
+	frameBuffer->useBackground(false);
 
     if ( rezap )
 	{
@@ -2186,7 +2185,7 @@ void CNeutrinoApp::scartMode( bool bOnOff )
 	if ( bOnOff )
 	{
 		// SCART AN
-		memset(g_FrameBuffer->getFrameBufferPointer(), 255, g_FrameBuffer->getStride()*576);
+		memset(frameBuffer->getFrameBufferPointer(), 255, frameBuffer->getStride()*576);
 		g_Controld->setScartMode( 1 );
 
 		lastMode = mode;
@@ -2232,7 +2231,7 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 			g_Controld->setScartMode( 0 );
 		}
 
-		memset(g_FrameBuffer->getFrameBufferPointer(), 255, g_FrameBuffer->getStride()*576);
+		memset(frameBuffer->getFrameBufferPointer(), 255, frameBuffer->getStride()*576);
 
 		g_lcdd->setMode(CLcddClient::MODE_STANDBY);
 		g_Controld->videoPowerDown(true);
@@ -2283,10 +2282,10 @@ void CNeutrinoApp::radioMode( bool rezap = true )
 		g_ActionLog->println("mode: radio");
 	#endif
 
-	g_FrameBuffer->loadPal("radiomode.pal", 18, COL_MAXFREE);
-	g_FrameBuffer->loadBackground("radiomode.raw");
-	g_FrameBuffer->useBackground(true);
-	g_FrameBuffer->paintBackground();
+	frameBuffer->loadPal("radiomode.pal", 18, COL_MAXFREE);
+	frameBuffer->loadBackground("radiomode.raw");
+	frameBuffer->useBackground(true);
+	frameBuffer->paintBackground();
 
 	if ( rezap )
 	{
@@ -2393,7 +2392,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.229 2002/04/19 11:39:38 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.230 2002/04/20 00:09:49 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 

@@ -45,6 +45,7 @@ bool isNumber(const string& str)
 
 CMenuWidget::CMenuWidget(string Name, string Icon, int mwidth, int mheight, bool Localizing)
 {
+	frameBuffer = CFrameBuffer::getInstance();
 	onPaintNotifier = NULL;
 	name = Name;
 	iconfile = Icon;
@@ -229,7 +230,7 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 
 void CMenuWidget::hide()
 {
-	g_FrameBuffer->paintBackgroundBoxRel(x,y, width,height );
+	frameBuffer->paintBackgroundBoxRel(x,y, width,height );
 }
 
 void CMenuWidget::paint()
@@ -264,9 +265,9 @@ void CMenuWidget::paint()
 
 
 	int hheight = g_Fonts->menu_title->getHeight();
-	g_FrameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD);
 	g_Fonts->menu_title->RenderString(x+38,y+hheight+1, width, l_name.c_str(), COL_MENUHEAD);
-	g_FrameBuffer->paintIcon(iconfile.c_str(),x+8,y+5);
+	frameBuffer->paintIcon(iconfile.c_str(),x+8,y+5);
 
 	int ypos = y+hheight;
 
@@ -295,6 +296,7 @@ void CMenuWidget::paint()
 
 CMenuOptionChooser::CMenuOptionChooser(string OptionName, int* OptionValue, bool Active, CChangeObserver* Observ, bool Localizing)
 {
+	frameBuffer = CFrameBuffer::getInstance();
 	height= g_Fonts->menu->getHeight();
 	optionName = OptionName;
 	active = Active;
@@ -371,7 +373,7 @@ int CMenuOptionChooser::paint( bool selected )
 	if (!active)
 		color = COL_MENUCONTENTINACTIVE;
 
-	g_FrameBuffer->paintBoxRel(x,y, dx, height, color );
+	frameBuffer->paintBoxRel(x,y, dx, height, color );
 
 	string option = "error";
 
@@ -413,6 +415,7 @@ int CMenuOptionChooser::paint( bool selected )
 
 CMenuOptionStringChooser::CMenuOptionStringChooser(string OptionName, char* OptionValue, bool Active, CChangeObserver* Observ, bool Localizing)
 {
+	frameBuffer = CFrameBuffer::getInstance();
 	height= g_Fonts->menu->getHeight();
 	optionName = OptionName;
 	active = Active;
@@ -468,7 +471,7 @@ int CMenuOptionStringChooser::paint( bool selected )
 	if (!active)
 		color = COL_MENUCONTENTINACTIVE;
 
-	g_FrameBuffer->paintBoxRel(x,y, dx, height, color );
+	frameBuffer->paintBoxRel(x,y, dx, height, color );
 
 	string  l_optionName = g_Locale->getText(optionName);
 	string  l_option;
@@ -498,6 +501,7 @@ int CMenuOptionStringChooser::paint( bool selected )
 //-------------------------------------------------------------------------------------------------------------------------------
 CMenuForwarder::CMenuForwarder(string Text, bool Active, char* Option, CMenuTarget* Target, string ActionKey, bool Localizing, uint DirectKey, string IconName)
 {
+	frameBuffer = CFrameBuffer::getInstance();
 	height=g_Fonts->menu->getHeight();
 	text=Text;
 	option = Option;
@@ -549,12 +553,12 @@ int CMenuForwarder::paint(bool selected)
 	if (!active)
 		color = COL_MENUCONTENTINACTIVE;
 
-	g_FrameBuffer->paintBoxRel(x,y, dx, height, color );
+	frameBuffer->paintBoxRel(x,y, dx, height, color );
 	g_Fonts->menu->RenderString(stringstartposX, y+ height, dx- (stringstartposX - x),  l_text.c_str(), color);
 
 	if (iconName!="")
 	{
-		g_FrameBuffer->paintIcon(iconName.c_str(), x + 10, y+ ((height- 20)>>1) );
+		frameBuffer->paintIcon(iconName.c_str(), x + 10, y+ ((height- 20)>>1) );
 	}
 	else if ((directKey>= CRCInput::RC_0) && (directKey<= CRCInput::RC_9))
 	{
@@ -578,6 +582,7 @@ int CMenuForwarder::paint(bool selected)
 //-------------------------------------------------------------------------------------------------------------------------------
 CMenuSeparator::CMenuSeparator(int Type, string Text)
 {
+	frameBuffer = CFrameBuffer::getInstance();
 	directKey = CRCInput::RC_nokey;
 	iconName = "";
 
@@ -601,13 +606,11 @@ CMenuSeparator::CMenuSeparator(int Type, string Text)
 
 int CMenuSeparator::paint(bool selected)
 {
-
-
-	g_FrameBuffer->paintBoxRel(x,y, dx, height, COL_MENUCONTENT );
+	frameBuffer->paintBoxRel(x,y, dx, height, COL_MENUCONTENT );
 	if(type&LINE)
 	{
-		g_FrameBuffer->paintHLineRel(x+10,dx-20,y+(height>>1), COL_MENUCONTENT+5 );
-		g_FrameBuffer->paintHLineRel(x+10,dx-20,y+(height>>1)+1, COL_MENUCONTENT+2 );
+		frameBuffer->paintHLineRel(x+10,dx-20,y+(height>>1), COL_MENUCONTENT+5 );
+		frameBuffer->paintHLineRel(x+10,dx-20,y+(height>>1)+1, COL_MENUCONTENT+2 );
 	}
 	if(type&STRING)
 	{
@@ -628,7 +631,7 @@ int CMenuSeparator::paint(bool selected)
 			stringstartposX = x + dx - stringwidth - 20;
 		}
 
-		g_FrameBuffer->paintBoxRel(stringstartposX-5, y, stringwidth+10, height, COL_MENUCONTENT );
+		frameBuffer->paintBoxRel(stringstartposX-5, y, stringwidth+10, height, COL_MENUCONTENT );
 
 		g_Fonts->menu->RenderString(stringstartposX, y+height,dx- (stringstartposX- x) , l_text.c_str(), COL_MENUCONTENT);
 

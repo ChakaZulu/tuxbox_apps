@@ -27,63 +27,6 @@
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-$Id: gamelist.cpp,v 1.39 2002/03/22 17:34:04 field Exp $
-
-$Log: gamelist.cpp,v $
-Revision 1.39  2002/03/22 17:34:04  field
-Massive Umstellungen - NVODs/SubChannels=KAPUTT!
-Infoviewer tw. kaputt! NON-STABLE!
-
-Revision 1.38  2002/03/06 11:18:39  field
-Fixes & Updates
-
-Revision 1.37  2002/02/28 15:03:55  field
-Weiter Updates :)
-
-Revision 1.36  2002/02/27 22:51:13  field
-Tasten kaputt gefixt - sollte wieder gehen :)
-
-Revision 1.35  2002/02/26 17:24:16  field
-Key-Handling weiter umgestellt EIN/AUS= KAPUTT!
-
-Revision 1.34  2002/02/25 19:32:26  field
-Events <-> Key-Handling umgestellt! SEHR BETA!
-
-Revision 1.33  2002/02/25 01:27:33  field
-Key-Handling umgestellt (moeglicherweise beta ;)
-
-Revision 1.32  2002/02/22 22:10:38  field
-vtxt: avia_vbi start/stop
-
-Revision 1.26  2002/01/29 17:26:51  field
-Jede Menge Updates :)
-
-Revision 1.25  2002/01/15 23:17:59  McClean
-cleanup
-
-Revision 1.24  2002/01/08 03:08:20  McClean
-improve input-handling
-
-Revision 1.23  2002/01/03 20:03:20  McClean
-cleanup
-
-Revision 1.22  2002/01/02 04:49:36  McClean
-fix libfx2.so-location *grrr*
-
-Revision 1.21  2001/12/25 11:40:30  McClean
-better pushback handling
-
-Revision 1.20  2001/12/12 19:11:32  McClean
-prepare timing setup...
-
-Revision 1.19  2001/12/12 18:45:39  McClean
-fix gamelist-design, manual-update bug, add save settings now
-
-Revision 1.18  2001/12/05 21:38:09  rasc
-gamelist: eigener Fontdef fuer 2-zeiliges Menue
-
-
 */
 
 #include "gamelist.h"
@@ -96,6 +39,7 @@ gamelist: eigener Fontdef fuer 2-zeiliges Menue
 
 void CPlugins::loadPlugins()
 {
+	frameBuffer = CFrameBuffer::getInstance();
 	//printf("[CPlugins] Checking plugins-directory\n");
 	printf("[CPlugins] Dir: %s\n", PLUGINDIR "/");
 
@@ -283,7 +227,7 @@ void CPlugins::startPlugin(int number)
 	startparam = 0;
 	tmpparam = startparam;
 
-	setfb( g_FrameBuffer->getFileHandle() );
+	setfb( frameBuffer->getFileHandle() );
 	setlcd(0);
 
 	if (plugin_list[number].fb)
@@ -418,8 +362,8 @@ void CPlugins::startPlugin(int number)
 
     	if (plugin_list[number].fb)
     	{
-    		g_FrameBuffer->paletteSet();
-    		g_FrameBuffer->paintBackgroundBox(0,0,720,576);
+    		frameBuffer->paletteSet();
+    		frameBuffer->paintBackgroundBox(0,0,720,576);
     	}
 
     	if (plugin_list[number].vtxtpid)
@@ -455,6 +399,7 @@ void CPlugins::startPlugin(int number)
 
 CGameList::CGameList(string Name)
 {
+	frameBuffer = CFrameBuffer::getInstance();
 	name = Name;
 	selected = 0;
 	width = 500;
@@ -618,7 +563,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 
 void CGameList::hide()
 {
-	g_FrameBuffer->paintBackgroundBoxRel(x,y, width,height);
+	frameBuffer->paintBackgroundBoxRel(x,y, width,height);
 }
 
 void CGameList::paintItem(int pos)
@@ -635,15 +580,15 @@ void CGameList::paintItem(int pos)
 	if(liststart+pos==0)
 	{	//back is half-height...
 		itemheight = (fheight / 2) + 3;
-		g_FrameBuffer->paintBoxRel(x,ypos+itemheight, width, 15, COL_MENUCONTENT);
-		g_FrameBuffer->paintBoxRel(x+10,ypos+itemheight+5, width-20, 1, COL_MENUCONTENT+5);
-		g_FrameBuffer->paintBoxRel(x+10,ypos+itemheight+6, width-20, 1, COL_MENUCONTENT+2);
+		frameBuffer->paintBoxRel(x,ypos+itemheight, width, 15, COL_MENUCONTENT);
+		frameBuffer->paintBoxRel(x+10,ypos+itemheight+5, width-20, 1, COL_MENUCONTENT+5);
+		frameBuffer->paintBoxRel(x+10,ypos+itemheight+6, width-20, 1, COL_MENUCONTENT+2);
 	}
 	else
 	{
 		ypos -= (fheight / 2) - 15;
 	}
-    g_FrameBuffer->paintBoxRel(x,ypos, width, itemheight, color);
+    frameBuffer->paintBoxRel(x,ypos, width, itemheight, color);
 
 
 	if(liststart+pos<gamelist.size())
@@ -656,8 +601,8 @@ void CGameList::paintItem(int pos)
 
 void CGameList::paintHead()
 {
-	g_FrameBuffer->paintBoxRel(x,y, width,theight, COL_MENUHEAD);
-	g_FrameBuffer->paintIcon("games.raw",x+8,y+5);
+	frameBuffer->paintBoxRel(x,y, width,theight, COL_MENUHEAD);
+	frameBuffer->paintIcon("games.raw",x+8,y+5);
 	g_Fonts->menu_title->RenderString(x+38,y+theight+1, width, g_Locale->getText(name).c_str(), COL_MENUHEAD);
 }
 

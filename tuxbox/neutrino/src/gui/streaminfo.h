@@ -47,6 +47,9 @@ using namespace std;
 
 class CStreamInfo : public CMenuTarget
 {
+	private:
+
+		CFrameBuffer	*frameBuffer;
 		int x;
 		int y;
 		int width;
