@@ -260,6 +260,8 @@ int CMoviePlayerGui::show()
 			tsfilename = filebrowser->getSelectedFile()->Name.c_str();
 			//INFO("TS Filename %s",tsfilename);
 		}
+		if( tsfilename != NULL )
+		{
 		unsigned char buf[384*188];
 		unsigned short pida, pidv;
 		int dmxa, dmxv, dvr, adec, vdec, ts;
@@ -378,6 +380,7 @@ int CMoviePlayerGui::show()
 		close(dvr);
 		close(dmxv);
 		close(dmxa);
+		}
 		paint();
 		}
 //------------ YELLOW --------------------
@@ -392,6 +395,8 @@ int CMoviePlayerGui::show()
 			psfilename = filebrowser->getSelectedFile()->Name.c_str();
 			//INFO("PS Filename %s",psfilename);
 		}
+		if( psfilename != NULL )
+		{
 		unsigned short pida, pidv;
 		int dmxa, dmxv, dvr, adec, vdec, ps;
 		struct dmx_pes_filter_params p;
@@ -486,6 +491,7 @@ int CMoviePlayerGui::show()
 		close(dvr);
 		close(dmxv);
 		close(dmxa);
+		}
 		paint();
 		}
 		else if(msg == NeutrinoMessages::CHANGEMODE)
