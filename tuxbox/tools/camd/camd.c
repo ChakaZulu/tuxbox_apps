@@ -1,5 +1,5 @@
 /*
- * $Id: camd.c,v 1.8 2002/08/17 06:25:58 obi Exp $
+ * $Id: camd.c,v 1.9 2002/08/24 19:59:31 obi Exp $
  *
  * (C) 2001, 2002 by gillem, Hunz, kwon, tmbinc, TripleDES, obi
  *
@@ -736,8 +736,8 @@ void handlesockmsg (unsigned char * buffer, ssize_t len, int connfd)
 
 					for (i = 0; i < caid_count; i++)
 					{
-						reply[i + 4] = caid[i] >> 8;
-						reply[i + 5] = caid[i];
+						reply[(i << 1) + 4] = caid[i] >> 8;
+						reply[(i << 1) + 5] = caid[i];
 					}
 
 					if (write(connfd, reply, sizeof(reply)) < 0)
