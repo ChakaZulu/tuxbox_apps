@@ -19,10 +19,13 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <dbox/info.h>
-#include <dbox/gen_vbi.h>
 #include <string>
 #include <stdio.h>
 
+//gen_vbi ist nicht im cvs. Workaround
+//#include <dbox/gen_vbi.h>
+#define VBI_START_VTXT 1
+#define VBI_STOP_VTXT 2
 
 #include "sdt.h"
 #include "zap.h"
