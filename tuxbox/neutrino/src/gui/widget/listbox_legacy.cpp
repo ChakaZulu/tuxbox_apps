@@ -30,6 +30,11 @@ CListBoxExt::CListBoxExt(void) : CListBox("")
 	saveBoxText = NULL;
 }
 
+void CListBoxExt::setTitle(const char * const title)
+{
+	caption = title ? title : "";
+}
+
 void CListBoxExt::hide()
 {
 	//want2save?

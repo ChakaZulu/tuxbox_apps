@@ -29,15 +29,17 @@
 class CListBoxExt : public CListBox
 {
  protected:
-    const char *    saveBoxCaption;
-    const char *    saveBoxText;
+	const char *    saveBoxCaption;
+	const char *    saveBoxText;
     
-    virtual void hide();
-    void setSaveDialogText(const char * const title, const char * const text);
-    virtual void onSaveData(){};
+	void setTitle(const char * const title);
+
+	virtual void hide();
+	void setSaveDialogText(const char * const title, const char * const text);
+	virtual void onSaveData(){};
     
  public:
-    CListBoxExt(void); 
+	CListBoxExt(void); 
 };
 
 
