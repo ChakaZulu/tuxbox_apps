@@ -64,8 +64,6 @@ extern eString getRight(const eString&, char); // implemented in timer.cpp
 extern eString getLeft(const eString&, char);  // implemented in timer.cpp
 extern bool onSameTP( const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2 ); // implemented in timer.cpp
 
-static int videopos = 0;
-
 static eString getVersionInfo(const char *info)
 {
 	FILE *f=fopen("/.version", "rt");
@@ -432,18 +430,31 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 	eString command = opt["command"];
 	if (command == "rewind")
 	{
-		if (!--videopos)
-			videopos = 0;
+		if (eZapMain::getInstance()->skipping)
+		{
+			eZapMain::getInstance()->stopSkip(eZapMain::skipForward);
+			eZapMain::getInstance()->stopSkip(eZapMain::skipReverse);
+		}
+		eZapMain::getInstance()->startSkip(eZapMain::skipReverse);
 	}
 	else
 	if (command == "forward")
 	{
-		if (++videopos > 10)
-			videopos = 10;
+		if (eZapMain::getInstance()->skipping)
+		{
+			eZapMain::getInstance()->stopSkip(eZapMain::skipForward);
+			eZapMain::getInstance()->stopSkip(eZapMain::skipReverse);
+		}
+		eZapMain::getInstance()->startSkip(eZapMain::skipForward);
 	}
 	else
 	if (command == "stop")
 	{
+		if (eZapMain::getInstance()->skipping)
+		{
+			eZapMain::getInstance()->stopSkip(eZapMain::skipForward);
+			eZapMain::getInstance()->stopSkip(eZapMain::skipReverse);
+		}
 		eZapMain::getInstance()->stop();
 	}
 	else
@@ -614,7 +625,7 @@ static eString setVideo(eString request, eString dirpath, eString opts, eHTTPCon
 		if (vid < 0) vid = 0;
 
 		//set video position here...
-		videopos = vid;
+		//videopos = vid;
 	}
 
 	result += "<script language=\"javascript\">window.close();</script>";
@@ -847,6 +858,21 @@ static eString getVolBar()
 static eString getVideoBar()
 {
 	std::stringstream result;
+	int videopos = 0;
+	int min = 0, sec = 0;
+
+	eServiceHandler *handler=eServiceInterface::getInstance()->getService();
+	if (!handler)
+		return "";
+	int total=handler->getPosition(eServiceHandler::posQueryLength);
+	int current=handler->getPosition(eServiceHandler::posQueryCurrent);
+	if ((total > 0) && (current != -1))
+	{
+		min = total - current;
+		sec = min % 60;
+		min /= 60;
+		videopos = current / total * 10;
+	}
 
 	result << "<table cellspacing=\"0\" cellpadding=\"0\" border=\"0\">"
 		"<tr>";
@@ -862,6 +888,7 @@ static eString getVideoBar()
 			"<img src=\"trans.gif\" border=0></a></span></td>";
 	}
 
+	result << "&nbsp;&nbsp;-" << min << ":" << sec;
 	result << "</tr>"
 		"</table>";
 	return result.str();
@@ -1028,7 +1055,7 @@ static eString aboutDreambox(void)
 	eString result="<table border=0>";
 
 	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
-		result += "<img src=\"dm7000.jpg\" width=\"640\" border=\"0\"><br>";
+		result += "<img src=\"dm7000.jpg\" width=\"650\" border=\"0\"><br>";
 
 	result+=eString().sprintf(
 		"<tr><td>Model:</td><td>&nbsp;</td><td>%s</td></tr>"
