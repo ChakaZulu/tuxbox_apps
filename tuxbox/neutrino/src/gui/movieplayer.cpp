@@ -4,7 +4,7 @@
 	Movieplayer (c) 2003 by gagga
 	Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-        $Id: movieplayer.cpp,v 1.30 2003/09/01 00:15:09 gagga Exp $
+        $Id: movieplayer.cpp,v 1.31 2003/09/01 17:22:14 zwen Exp $
 
 	Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -922,7 +922,9 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		  //strcpy (mrl, "c:\\TestMovies\\dolby.mpg");
 		  int namepos = filebrowser->getSelectedFile ()->Name.rfind("vlc://");
 	          string mrl_str = filebrowser->getSelectedFile ()->Name.substr(namepos + 6);
-	          strcpy (mrl,mrl_str.c_str());
+				 char* tmp=curl_escape(mrl_str.c_str(), 0);
+	          strncpy (mrl,tmp, sizeof(mrl)-1);
+				 curl_free(tmp);
       		  printf ("Generated FILE MRL: %s\n", mrl);
 		  
 		  update_info = true;
