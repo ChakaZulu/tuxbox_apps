@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.68 2004/02/20 22:21:21 thegoodguy Exp $
+   $Id: timermanager.cpp,v 1.69 2004/02/24 23:40:16 thegoodguy Exp $
 
 	License: GPL
 
@@ -884,7 +884,7 @@ CTimerEvent_Record::CTimerEvent_Record(CConfigFile *config, int iId):
 	std::string id=ostr.str();
 	eventInfo.epgID = config->getInt64("EVENT_INFO_EPG_ID_"+id);
 	eventInfo.epg_starttime = config->getInt64("EVENT_INFO_EPG_STARTTIME_"+id);
-	eventInfo.channel_id = config->getInt32("EVENT_INFO_ONID_SID_"+id);
+	eventInfo.channel_id = config->getInt64("EVENT_INFO_CHANNEL_ID_"+id);
 	eventInfo.apids = config->getString("EVENT_INFO_APIDS_"+id);
 	eventInfo.mode = (CTimerd::CChannelMode) config->getInt32("EVENT_INFO_CHANNEL_MODE_"+id);
 }
@@ -929,7 +929,7 @@ void CTimerEvent_Record::saveToConfig(CConfigFile *config)
 	std::string id=ostr.str();
 	config->setInt64("EVENT_INFO_EPG_ID_"+id, eventInfo.epgID);
 	config->setInt64("EVENT_INFO_EPG_STARTTIME_"+id, eventInfo.epg_starttime);
-	config->setInt32("EVENT_INFO_ONID_SID_"+id, eventInfo.channel_id);
+	config->setInt64("EVENT_INFO_CHANNEL_ID_"+id, eventInfo.channel_id);
 	config->setInt32("EVENT_INFO_CHANNEL_MODE_"+id, (int) eventInfo.mode);
 	config->setString("EVENT_INFO_APIDS_"+id, eventInfo.apids);
 }
@@ -1021,7 +1021,7 @@ CTimerEvent(CTimerd::TIMER_NEXTPROGRAM, config, iId)
 	std::string id=ostr.str();
 	eventInfo.epgID = config->getInt64("EVENT_INFO_EPG_ID_"+id);
 	eventInfo.epg_starttime = config->getInt64("EVENT_INFO_EPG_STARTTIME_"+id);
-	eventInfo.channel_id = config->getInt32("EVENT_INFO_ONID_SID_"+id);
+	eventInfo.channel_id = config->getInt64("EVENT_INFO_CHANNEL_ID_"+id);
 	eventInfo.apids = config->getString("EVENT_INFO_APIDS_"+id);
 	eventInfo.mode = (CTimerd::CChannelMode) config->getInt32("EVENT_INFO_CHANNEL_MODE_"+id);
 }
@@ -1052,7 +1052,7 @@ void CTimerEvent_NextProgram::saveToConfig(CConfigFile *config)
 	std::string id=ostr.str();
 	config->setInt64("EVENT_INFO_EPG_ID_"+id,eventInfo.epgID);
 	config->setInt64("EVENT_INFO_EPG_STARTTIME_"+id,eventInfo.epg_starttime);
-	config->setInt32("EVENT_INFO_ONID_SID_"+id,eventInfo.channel_id);
+	config->setInt64("EVENT_INFO_CHANNEL_ID_"+id,eventInfo.channel_id);
 	config->setString("EVENT_INFO_APIDS_"+id,eventInfo.apids);
 	config->setInt32("EVENT_INFO_CHANNEL_MODE_"+id, (int) eventInfo.mode);
 }
