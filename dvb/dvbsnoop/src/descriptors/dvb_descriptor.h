@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.h,v 1.1 2003/07/08 19:59:50 rasc Exp $ 
+$Id: dvb_descriptor.h,v 1.2 2003/10/19 21:05:53 rasc Exp $ 
 
 
   dvbsnoop
@@ -9,6 +9,9 @@ $Id: dvb_descriptor.h,v 1.1 2003/07/08 19:59:50 rasc Exp $
 
 
 $Log: dvb_descriptor.h,v $
+Revision 1.2  2003/10/19 21:05:53  rasc
+- some datacarousell stuff started
+
 Revision 1.1  2003/07/08 19:59:50  rasc
 restructuring... some new, some fixes,
 trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18313-1 to spare?
@@ -31,6 +34,8 @@ void  descriptorDVB_BouquetName (u_char *b);
 void  descriptorDVB_Service (u_char *b);
 void  descriptorDVB_CountryAvail (u_char *b);
 void  descriptorDVB_Linkage (u_char *b);
+  void sub_descriptorDVB_Linkage0x0B (u_char *b, int len);
+  void sub_descriptorDVB_Linkage0x0C (u_char *b, int len);
 void  descriptorDVB_NVOD_Reference (u_char *b);
 void  descriptorDVB_TimeShiftedService (u_char *b);
 void  descriptorDVB_ShortEvent (u_char *b);

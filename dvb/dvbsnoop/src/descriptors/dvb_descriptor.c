@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.2 2003/10/16 19:02:28 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.3 2003/10/19 21:05:53 rasc Exp $ 
 
 
   dvbsnoop
@@ -14,6 +14,9 @@ $Id: dvb_descriptor.c,v 1.2 2003/10/16 19:02:28 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.3  2003/10/19 21:05:53  rasc
+- some datacarousell stuff started
+
 Revision 1.2  2003/10/16 19:02:28  rasc
 some updates to dvbsnoop...
 - small bugfixes
@@ -757,10 +760,19 @@ void descriptorDVB_Linkage (u_char *b)
  len = d.descriptor_length - 7;
  b  += 7 + 2;
 
+ indent (+1);
  if (d.linkage_type != 0x08) {
-    // private data
-    out_nl (4,"Private data:"); 
-    printhexdump_buf (4, b,len);
+
+    if (d.linkage_type == 0x0B) {		/* EN 301 192 */
+        sub_descriptorDVB_Linkage0x0B (b, len);
+    } else if (d.linkage_type == 0x0C) {	/* EN 301 192 */
+        sub_descriptorDVB_Linkage0x0C (b, len);
+    } else {
+    	// private data
+	out_nl (4,"Private data:"); 
+    	printhexdump_buf (4, b,len);
+    }
+
  } else {
     d.handover_type		= getBits (b, 0, 0, 4);
     d.reserved_1		= getBits (b, 0, 4, 3);
@@ -800,9 +812,118 @@ void descriptorDVB_Linkage (u_char *b)
     
 
  } //if
+ indent (-1);
+
+}
+
+
+
+/*
+ * -- as defined as private data for DSM-CC
+ * -- in EN 301 192
+ */
+
+void sub_descriptorDVB_Linkage0x0B (u_char *b, int len)			 /* $$$ TODO */
+{
+
+ typedef struct  _descLinkage0x0B {
+    u_int      platform_id_data_length;		
+
+        // inner Loop 1
+    	u_int      platform_id;		
+	u_int      platform_name_loop_length;		
+
+        // inner Loop 2
+    	u_char     ISO639_2_language_code[4];
+    	u_int      platform_name_length;
+
+ } descLinkage0x0B;
+
+
+
+ descLinkage0x0B  d;
+ int		  len_loop1;
+
+
+ /* $$$ */ out_nl (4, "-----> $$$$ Check this output !!! not verified, may be buggy ");
+ d.platform_id_data_length     	 = b[0];
+ out_SB_NL  (4,"Platform_ID_data_length: ",d.platform_id_data_length);
+
+ len_loop1 = d.platform_id_data_length;
+ b++;
+ len--;
+
+
+ while (len_loop1 > 0) {
+
+	int		 len_loop2;
+
+        d.platform_id 	 		= getBits (b, 0,  0, 24);
+        d.platform_name_loop_length  	= getBits (b, 0, 24,  8);
+	b += 4;
+	len -= 4;
+
+        out_SL_NL  (4,"Platform_id: ",d.platform_id);	/* $$$$ TODO: platform_id_str nach EN 162 */
+        out_SB_NL  (4,"Platform_name_loop_length: ",d.platform_name_loop_length);
+
+	len_loop1 -= 4;
+        len_loop2 = d.platform_name_loop_length;
+
+	while (len_loop2 > 0) {
+
+	 	getISO639_3 (d.ISO639_2_language_code, b);	
+        	d.platform_name_length  = getBits (b, 0, 24,  8);
+		b += 4;
+		len -= 4;
+		len_loop2 -= 4;
+
+ 		print_name (4, b,d.platform_name_length);
+		out_NL (4);
+
+		b +=  d.platform_name_length;
+		len -= d.platform_name_length;
+		len_loop2 -= d.platform_name_length;
+
+	}
+
+        len_loop1 -= d.platform_name_loop_length;
+
+ }
+
+
+  // private data
+  out_nl (4,"Private data:"); 
+  printhexdump_buf (4, b,len);
 
 
 }
+
+
+
+void sub_descriptorDVB_Linkage0x0C (u_char *b, int len)
+{
+
+ typedef struct  _descLinkage0x0C {
+    u_int      table_id;		
+    // conditional
+    u_int      bouquet_id;
+
+ } descLinkage0x0C;
+
+
+
+ descLinkage0x0C  d;
+
+ d.table_id				= getBits (b, 0,  0, 8);
+ out_S2W_NL  (4,"Table_id: ",d.table_id, dvbstrLinkage0CTable_TYPE(d.table_id));
+
+ if (d.table_id == 2) {
+	d.bouquet_id			= getBits (b, 0,  8, 16);
+ 	out_S2W_NL  (4,"Bouquet_id: ",d.bouquet_id, dvbstrBouquetTable_ID (d.bouquet_id));
+ }
+
+}
+
 
 
 
@@ -2514,6 +2635,7 @@ void descriptorDVB_DataBroadcast (u_char *b)
  d.data_broadcast_id		 = getBits (b, 0, 16, 16);
  d.component_tag		 = getBits (b, 0, 32, 8);
  d.selector_length		 = getBits (b, 0, 40, 8);
+ b += 6;
 
  
  out_S2W_NL (4,"Data_broadcast_ID: ",d.data_broadcast_id,
@@ -2521,9 +2643,47 @@ void descriptorDVB_DataBroadcast (u_char *b)
 
  out_SB_NL (4,"Component_tag: ",d.component_tag);
  out_SB_NL (5,"Selector_length: ",d.selector_length);
- out_nl    (4,"Selector-Bytes:");
- b += 6;
- printhexdump_buf (4,  b, d.selector_length);
+
+ /* $$$    EN 192  has to be implemented here!!! */
+
+ if (d.data_broadcast_id == 0x05) {
+	 // -- EN 301 192 Multi-protocol-encapsulation!
+
+	 {
+ 		typedef struct  _descMultiProtEncaps {
+			u_int	MAC_address_range;
+			u_int	MAC_ip_mapping_flag;
+			u_int	alignment_indicator;
+			u_int   reserved;
+			u_int   max_sections_per_datagram;
+ 		} descMultiProtEncaps;
+
+
+		descMultiProtEncaps e;
+
+ 		out_nl    (4,"Multi_Protocol_Encapsulation [EN 301 192]:");
+		indent (+1);
+ 		e.MAC_address_range	 = getBits (b, 0,  0,  3);
+ 		e.MAC_ip_mapping_flag	 = getBits (b, 0,  3,  1);
+ 		e.alignment_indicator	 = getBits (b, 0,  4,  1);
+ 		e.reserved		 = getBits (b, 0,  5,  3);
+ 		e.max_sections_per_datagram = getBits (b, 0,  8,  8);
+
+ 		out_S2B_NL (5,"MAC_address_range: ",e.MAC_address_range,
+			dvbstrMultiProtEncapsMACAddrRangeField (e.MAC_address_range) );
+ 		out_SB_NL (5,"MAC_ip_mapping_flag: ",e.MAC_ip_mapping_flag);
+ 		out_S2B_NL (5,"alignment_indicator: ",e.alignment_indicator,
+					(e.alignment_indicator) ?"32 bit": "8 bit");
+ 		out_SB_NL (6,"reserved: ",e.reserved);
+ 		out_SB_NL (5,"max_sections_per_datagram: ",e.max_sections_per_datagram);
+		indent (-1);
+
+	 }
+
+ } else {
+ 	out_nl    (4,"Selector-Bytes:");
+ 	printhexdump_buf (4,  b, d.selector_length);
+ }
 
  b += d.selector_length;
  getISO639_3 (d.ISO639_2_language_code, b);
@@ -3222,3 +3382,10 @@ void descriptorDVB_ServiceAvailability (u_char *b)
 
 
 
+
+
+/*
+ * $$$ TODO // Reminder
+ *   EN 301 192 datagram section (Table 3) = 0x3E
+ *
+ */

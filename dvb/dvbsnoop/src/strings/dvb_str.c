@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.14 2003/10/19 13:54:25 rasc Exp $
+$Id: dvb_str.c,v 1.15 2003/10/19 21:05:53 rasc Exp $
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -15,6 +15,9 @@ $Id: dvb_str.c,v 1.14 2003/10/19 13:54:25 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.15  2003/10/19 21:05:53  rasc
+- some datacarousell stuff started
+
 Revision 1.14  2003/10/19 13:54:25  rasc
 -more table decoding
 
@@ -122,7 +125,12 @@ char *dvbstrTableID (u_int id)
      {  0x01, 0x01,  "conditional_access_section" },
      {  0x02, 0x02,  "program_map_section" },
      {  0x03, 0x03,  "transport_stream_description_section" },
-     {  0x04, 0x3F,  "ITU-T Rec. H.222.0|ISO/IEC13813 reserved" },
+ //    {  0x04, 0x3F,  "ITU-T Rec. H.222.0|ISO/IEC13813 reserved" },
+ //
+ // $$$ TODO DSM-CC  anyone a ISO 13818-6 tp spare???
+     {  0x04, 0x3d,  "ITU-T Rec. H.222.0|ISO/IEC13813 reserved" },
+     {  0x3e, 0x3e,  "DSM-CC section with private data|ISO/IEC1381-6" },
+     {  0x3f, 0x3f,  "ITU-T Rec. H.222.0|ISO/IEC13813 reserved" },
 
      {  0x40, 0x40,  "network_information_section - actual network" },
      {  0x41, 0x41,  "network_information_section - other network" },
@@ -395,6 +403,7 @@ char *dvbstrLinkage_TYPE (u_int flag)
 
 {
   STR_TABLE  Table[] = {
+	  /* -- updated 2003-10-19 */
      {  0x00, 0x00,  "reserved" },
      {  0x01, 0x01,  "information service" },
      {  0x02, 0x02,  "EPG service" },
@@ -404,7 +413,9 @@ char *dvbstrLinkage_TYPE (u_int flag)
      {  0x06, 0x06,  "data broadcast service" },
      {  0x07, 0x07,  "RCS Map" },
      {  0x08, 0x08,  "mobile handover service" },
-     {  0x09, 0x7F,  "reserved" },
+     {  0x09, 0x09,  "system software update service" },
+     {  0x0A, 0x0A,  "TS containing SSU BAT or NIT" },
+     {  0x0B, 0x7F,  "reserved" },
      {  0x80, 0xFE,  "user defined" },
      {  0xFF, 0xFF,  "reserved" },
      {  0,0, NULL }
@@ -422,7 +433,7 @@ char *dvbstrHandover_TYPE (u_int flag)
      {  0x00, 0x00,  "reserved" },
      {  0x01, 0x01,  "DVB hand-over to an identical service in a neighbouring country" },
      {  0x02, 0x02,  "DVB hand-over to local variation to same service" },
-     {  0x02, 0x02,  "DVB hand-over to an associated service" },
+     {  0x03, 0x03,  "DVB hand-over to an associated service" },
      {  0,0, NULL }
   };
 
@@ -442,8 +453,6 @@ char *dvbstrOrigin_TYPE (u_int flag)
 
   return findTableID (Table, flag);
 }
-
-
 
 
 
@@ -2259,6 +2268,54 @@ char *dvbstrBouquetTable_ID (u_int i)
      	{  0,0, NULL }
   };
 
+
+  return findTableID (Table, i);
+}
+
+
+
+
+
+/*
+ * -- LinkageDescriptor0x0C Table_type  EN301192
+ *
+ */
+
+char *dvbstrLinkage0CTable_TYPE (u_int i)
+
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "not defined" },
+     {  0x01, 0x01,  "NIT" },
+     {  0x02, 0x02,  "BAT" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+
+/*
+ * -- MultiProtocolEncapsulationMACAddressRangeField
+ * -- EN 301 192
+ */
+
+char *dvbstrMultiProtEncapsMACAddrRangeField (u_int i)
+
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "reserved" },
+     {  0x01, 0x01,  "6" },
+     {  0x02, 0x02,  "6,5" },
+     {  0x03, 0x03,  "6,5,4" },
+     {  0x04, 0x04,  "6,5,4,3" },
+     {  0x05, 0x05,  "6,5,4,3,2" },
+     {  0x06, 0x06,  "6,5,4,3,2,1" },
+     {  0x07, 0x07,  "reserved" },
+     {  0,0, NULL }
+  };
 
   return findTableID (Table, i);
 }
