@@ -96,27 +96,22 @@ int CFavorites::addChannelToFavorites()
 // -- Add current channel to Favorites and display user messagebox
 //
 
-int CFavorites::exec(CMenuTarget* parent, string)
+int CFavorites::exec(CMenuTarget* parent, std::string)
 {
-	int    res = menu_return::RETURN_EXIT_ALL;
-	int    status;
-	string str;
-
+	int         status;
+	std::string str;
+	int         res = menu_return::RETURN_EXIT_ALL;
 
 	if (parent)
-	{
 		parent->hide();
-	}
 	
 	if (!bouquetList) {
-		ShowMsg ( "favorites.bouquetname",
-			g_Locale->getText("favorites.nobouquets"),
-			CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw" );
+		ShowMsg("favorites.bouquetname", g_Locale->getText("favorites.nobouquets"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw", 450, -1, true); // UTF-8
 		return res;
 	}
 
 
-	CHintBox* hintBox= new CHintBox( "favorites.bouquetname", g_Locale->getText("favorites.addchannel"), "info.raw", 380 );
+	CHintBox* hintBox = new CHintBox("favorites.bouquetname", g_Locale->getText("favorites.addchannel"), "info.raw", 380, true); // UTF-8
 	hintBox->paint();
 
 	status = addChannelToFavorites();
@@ -133,7 +128,7 @@ int CFavorites::exec(CMenuTarget* parent, string)
 
 	if (status) str +=  g_Locale->getText("favorites.finalhint");
 
-	ShowMsg ( "favorites.bouquetname", str, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw" );
+	ShowMsg("favorites.bouquetname", str, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw", 450, -1, true); // UTF-8
 
 //	if (status) {
 //		g_RCInput->postMsg( NeutrinoMessages::EVT_BOUQUETSCHANGED, 0 );

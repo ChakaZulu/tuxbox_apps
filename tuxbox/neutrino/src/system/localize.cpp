@@ -138,13 +138,11 @@ void CLocaleManager::loadLocale(std::string locale)
 			    (strncmp(buf, "audiomenu", 9) != 0) &&
 			    (strncmp(buf, "bouqueteditor", 13) != 0) &&
 			    (buf[0] != 'c') &&
-			    (strncmp(buf, "file", 4) != 0) &&
-			    (strncmp(buf, "fontmenu", 8) != 0) &&
-			    (strncmp(buf, "fontsize", 8) != 0) &&
+			    (strncmp(buf, "fa", 2) != 0) &&
+			    (strncmp(buf, "fi", 2) != 0) &&
+			    (strncmp(buf, "fo", 2) != 0) &&
 			    (buf[0] != 'k') &&
-			    (strncmp(buf, "languagesetup", 13) != 0) &&
-			    (strncmp(buf, "lcdcontroler", 12) != 0) &&
-			    (strncmp(buf, "lcdmenu", 7) != 0) &&
+			    (buf[0] != 'l') &&
 			    (strncmp(buf, "mainmenu", 8) != 0) &&
 			    (strncmp(buf, "messagebox", 10) != 0) &&
 			    (strncmp(buf, "miscsettings", 12) != 0) &&
