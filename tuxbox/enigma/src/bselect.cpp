@@ -3,7 +3,7 @@
 #include "elistbox.h"
 #include "edvb.h"
 #include "dvb.h"
-#include "ezap.h"
+#include "enigma.h"
 
 void eBouquetSelector::fillBouquetList()
 {

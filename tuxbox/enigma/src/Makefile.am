@@ -11,10 +11,10 @@ INCLUDES = \
 bin_PROGRAMS = enigma
 
 enigma_SOURCES = \
-	bselect.cpp bselect.moc.cpp ezap.cpp ezap.moc.cpp ezap_dyn.cpp \
-	ezap_event.cpp ezap_event.moc.cpp ezap_lcd.cpp ezap_lcd.moc.cpp \
-	ezap_main.cpp ezap_main.moc.cpp ezap_plugins.cpp ezap_plugins.moc.cpp \
-	ezap_setup.cpp ezap_setup.moc.cpp ezap_xmlrpc.cpp scan.cpp \
+	bselect.cpp bselect.moc.cpp enigma.cpp enigma.moc.cpp enigma_dyn.cpp \
+	enigma_event.cpp enigma_event.moc.cpp enigma_lcd.cpp enigma_lcd.moc.cpp \
+	enigma_main.cpp enigma_main.moc.cpp enigma_plugins.cpp enigma_plugins.moc.cpp \
+	enigma_setup.cpp enigma_setup.moc.cpp enigma_xmlrpc.cpp scan.cpp \
 	scan.moc.cpp setup_osd.cpp setup_osd.moc.cpp setupaudio.cpp \
 	setupaudio.moc.cpp setupnetwork.cpp setupnetwork.moc.cpp \
 	setupvideo.cpp setupvideo.moc.cpp showbnversion.cpp \

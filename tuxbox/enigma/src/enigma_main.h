@@ -5,7 +5,7 @@
 #include "ewindow.h"
 #include "si.h"
 #include "dvb.h"
-#include "ezap_lcd.h"
+#include "enigma_lcd.h"
 
 class eListbox;
 class eLabel;
