@@ -8,7 +8,7 @@ install_DATA = \
 	mp3.raw mute.raw network.raw numericpad.raw ok.raw power.raw radar.pal \
 	radar0.raw radar1.raw radar2.raw radar3.raw radar4.raw radar5.raw radar6.raw \
 	radar7.raw radar8.raw radar9.raw radiomode.pal radiomode.raw recording.raw \
-	rot.raw scan.pal scan.raw settings.raw shutdown.pal shutdown.raw softupdate.raw \
+	rot.raw scan.pal scan.raw settings.raw shell.raw shutdown.pal shutdown.raw softupdate.raw \
 	streaming.raw timer.raw video.raw volume.raw volumebody.raw volumeslider2.raw \
 	volumeslider2alpha.raw volumeslider2blue.raw volumeslider2green.raw \
 	volumeslider2red.raw vtxt.raw vtxt_gray.raw movie.raw movieplayer.raw \
