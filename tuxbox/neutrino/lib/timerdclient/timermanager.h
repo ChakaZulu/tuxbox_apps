@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.h,v 1.1 2002/10/13 11:35:03 woglinde Exp $
+	$Id: timermanager.h,v 1.2 2002/10/13 17:04:22 Zwen Exp $
 
 	License: GPL
 
@@ -33,7 +33,7 @@
 #include <string>
 
 #include "eventserver.h"
-#include "../../libconfigfile/configfile.h"
+#include "configfile.h"
 #include "config.h"
 
 
