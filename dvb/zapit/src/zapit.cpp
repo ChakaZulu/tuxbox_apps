@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.363 2005/01/21 21:50:30 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.364 2005/01/24 19:19:21 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -114,7 +114,7 @@ extern short curr_sat;
 extern short scan_runs;
 extern void get_transponder (TP_params *TP);
 extern int scan_transponder(TP_params *TP);
-extern void scan_clean();
+extern void scan_clean(void);
 extern short abort_scan;
 
 
@@ -756,10 +756,8 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		break;
 	}
 	case CZapitMessages::CMD_SCANSTOP:
-		if(scan_runs)
+		if (scan_runs)
 		{
-			pthread_cancel(scan_thread);
-			scan_runs = 0;
 			scan_clean();
 		}
 		break;
@@ -830,7 +828,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		uint32_t satlength;
 		char * satname;
 		xmlNodePtr search = xmlDocGetRootElement(scanInputParser)->xmlChildrenNode;
-		char * frontendname = getFrontendName();
+		const char * frontendname = getFrontendName();
 		CZapitClient::responseGetSatelliteList sat;
 
 		if (frontendname != NULL)
@@ -1766,7 +1764,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.363 2005/01/21 21:50:30 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.364 2005/01/24 19:19:21 thegoodguy Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {

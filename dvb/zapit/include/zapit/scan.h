@@ -1,5 +1,5 @@
 /*
- *  $Id: scan.h,v 1.28 2005/01/21 21:50:29 thegoodguy Exp $
+ *  $Id: scan.h,v 1.29 2005/01/24 19:19:20 thegoodguy Exp $
  */
 
 #ifndef __scan_h__
@@ -20,6 +20,6 @@ typedef transponder_list_t::iterator stiterator;
 
 extern CBouquetManager* scanBouquetManager;
 
-char * getFrontendName();
+const char * getFrontendName(void);
 
 #endif /* __scan_h__ */

@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.142 2005/01/23 19:29:25 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.143 2005/01/24 19:19:21 thegoodguy Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -45,6 +45,7 @@ uint actual_polarisation;
 bool scan_mode = false;
 bool one_flag;
 int one_tpid, one_onid;
+static bool scan_should_be_aborted;
 
 CBouquetManager* scanBouquetManager;
 
@@ -79,16 +80,29 @@ TP_map_t TP_scanmap;
 void write_xml_header(FILE * fd);
 void write_xml_footer(FILE * fd);
 
-t_satellite_position driveMotorToSatellitePosition(const char * const providerName)
+t_satellite_position getSatellitePosition(const char * const providerName)
 {
 	t_satellite_position satellite_position;
-	t_satellite_position currentSatellitePosition;
-	int                  waitForMotor;
 
 	if (frontend->getInfo()->type == FE_QPSK) /* sat */
 	{
 		satellite_position = satellitePositions[providerName];
+	}
+	else
+		satellite_position = SATELLITE_POSITION_OF_NON_SATELLITE_SOURCE;
 
+	return satellite_position;
+}
+
+t_satellite_position driveMotorToSatellitePosition(const char * const providerName)
+{
+	t_satellite_position currentSatellitePosition;
+	int                  waitForMotor;
+
+	t_satellite_position satellite_position = getSatellitePosition(providerName);
+
+	if (frontend->getInfo()->type == FE_QPSK) /* sat */
+	{
 		if (frontend->getDiseqcType() == DISEQC_1_2)
 		{
 			waitForMotor = 0;
@@ -110,8 +124,6 @@ t_satellite_position driveMotorToSatellitePosition(const char * const providerNa
 			}
 		}
 	}
-	else
-		satellite_position = SATELLITE_POSITION_OF_NON_SATELLITE_SOURCE;
 
 	return satellite_position;
 }
@@ -123,26 +135,6 @@ void cp(char * from, char * to)
 	strcat(cmd, " ");
 	strcat(cmd, to);
 	system(cmd);
-}
-
-void copy_to_satellite(FILE * fd, FILE * fd1, char * providerName)
-{
-	//copies services from previous services.xml file from start up to the sat that is being scanned...
-	char buffer[256] = "";
-
-	//look for sat to be scanned... or end of file
-	fgets(buffer, 255, fd1);
-	while(!feof(fd1) && !((strstr(buffer, "sat name") && strstr(buffer, providerName)) || strstr(buffer, "</zapit>")))
-	{
-		fputs(buffer, fd);
-		fgets(buffer, 255, fd1);
-	}
-
-	// if not end of file
-	if (!feof(fd1) && !strstr(buffer, "</zapit>"))
-		// skip to end of satellite
-		while (!feof(fd1) && !strstr(buffer, "</sat>"))
-			fgets(buffer, 255, fd1);
 }
 
 void copy_to_end(FILE * fd, FILE * fd1)
@@ -160,7 +152,7 @@ void copy_to_end(FILE * fd, FILE * fd1)
 	unlink(SERVICES_TMP);
 }
 
-char* getFrontendName(void)
+const char * getFrontendName(void)
 {
 	if (!frontend)
 		return NULL;
@@ -266,11 +258,15 @@ int get_nits(struct dvb_frontend_parameters *feparams, uint8_t polarization, con
 	return status;
 }
 
-int get_sdts(const t_satellite_position satellite_position, char * frontendType)
+int get_sdts(const t_satellite_position satellite_position, const char * const frontendType)
 {
 	uint32_t TsidOnid;
 
-	for (stiterator tI = transponders.begin(); tI != transponders.end(); tI++) {
+	for (stiterator tI = transponders.begin(); tI != transponders.end(); tI++)
+	{
+		if (scan_should_be_aborted)
+			return 0;
+
 		/* msg to neutrino */
 		processed_transponders++;
 
@@ -421,40 +417,43 @@ void write_transponder(FILE *fd, const transponder_id_t transponder_id, const tr
 		fprintf(fd, "\t\t</transponder>\n");
 }
 
-int write_provider(FILE *fd, const char *frontendType, const char *provider_name, const uint8_t DiSEqC)
+bool write_provider(FILE *fd, const char * const frontendType, const char * const provider_name)
 {
-	int status = -1;
+	bool transponders_found = false;
 
-	if (!transponders.empty())
+	t_satellite_position satellite_position = getSatellitePosition(provider_name);
+
+	/* channels */
+	for (stiterator tI = transponders.begin(); tI != transponders.end(); tI++)
 	{
-		/* cable tag */
-		if (!strcmp(frontendType, "cable"))
+		if (GET_SATELLITEPOSITION_FROM_TRANSPONDER_ID(tI->first) == satellite_position)
 		{
-			fprintf(fd, "\t<%s name=\"%s\">\n", frontendType, provider_name);
-		}
-
-		/* satellite tag */
-		else
-		{
-			fprintf(fd, "\t<%s name=\"%s\" diseqc=\"%hd\">\n", frontendType, provider_name, DiSEqC);
-		}
-
-		/* channels */
-		for (stiterator tI = transponders.begin(); tI != transponders.end(); tI++)
-		{
+			if (!transponders_found)
+			{
+				transponders_found = true;
+				/* cable tag */
+				if (!strcmp(frontendType, "cable"))
+				{
+					fprintf(fd, "\t<%s name=\"%s\">\n", frontendType, provider_name);
+				}
+				/* satellite tag */
+				else
+				{
+					// DiSEqC of first transponder of this provider
+					fprintf(fd, "\t<%s name=\"%s\" diseqc=\"%hd\">\n", frontendType, provider_name, tI->second.DiSEqC);
+				}
+			}
 			write_transponder(fd, tI->first, tI->second);
 		}
-
+	}
+	
+	if (transponders_found)  // this indicates that services have been found and that bouquets should be written...
+	{
 		/* end tag */
 		fprintf(fd, "\t</%s>\n", frontendType);
-		status = 0; // this indicates that services have been found and that bouquets should be written...
 	}
 
-	/* clear results for next provider */
-	allchans.clear();                  // different provider may have the same onid/sid pair // FIXME
-	transponders.clear();
-
-	return status;
+	return transponders_found;
 }
 
 int scan_transponder(xmlNodePtr transponder, const t_satellite_position satellite_position, uint8_t diseqc_pos)
@@ -501,9 +500,22 @@ int scan_transponder(xmlNodePtr transponder, const t_satellite_position satellit
 	return 0;
 }
 
-void scan_provider(xmlNodePtr search, char * providerName, uint8_t diseqc_pos, char * frontendType)
+void scan_provider(xmlNodePtr search, const char * const providerName, uint8_t diseqc_pos, const char * const frontendType)
 {
 	t_satellite_position satellite_position = driveMotorToSatellitePosition(providerName);
+
+	/* remove all (previous) transponders from current satellite position */
+	for (stiterator tI = transponders.begin(); tI != transponders.end();)
+	{
+		if (GET_SATELLITEPOSITION_FROM_TRANSPONDER_ID(tI->first) == satellite_position)
+		{
+			stiterator tmp = tI;
+			tI++;
+			transponders.erase(tmp);
+		}
+		else
+			tI++;
+	}
 
 	xmlNodePtr transponder = NULL;
 
@@ -514,6 +526,9 @@ void scan_provider(xmlNodePtr search, char * providerName, uint8_t diseqc_pos, c
 	/* read all transponders */
 	while ((transponder = xmlGetNextOccurence(transponder, "transponder")) != NULL)
 	{
+		if (scan_should_be_aborted)
+			return;
+
 		scan_transponder(transponder, satellite_position, diseqc_pos);
 
 		/* next transponder */
@@ -564,14 +579,12 @@ void scan_provider(xmlNodePtr search, char * providerName, uint8_t diseqc_pos, c
 
 void *start_scanthread(void *scanmode)
 {
-	FILE *fd = NULL;
-	FILE *fd1 = NULL;
+	FILE * fd;
 	char providerName[32] = "";
 	char providerName2[32] = "";
-	char *frontendType = NULL;
+	const char * frontendType;
 	uint8_t diseqc_pos = 0;
-	int scan_status = -1;
-	struct stat buffer; 
+	bool scan_success = false;
 	scanBouquetManager = new CBouquetManager();
 	processed_transponders = 0;
  	found_tv_chans = 0;
@@ -580,6 +593,8 @@ void *start_scanthread(void *scanmode)
 
 	curr_sat = 0;
 	one_flag = false;
+
+	scan_should_be_aborted = false;
 
         if ((frontendType = getFrontendName()) == NULL)
 	{
@@ -597,89 +612,65 @@ void *start_scanthread(void *scanmode)
 	/* get first child */
 	xmlNodePtr search = xmlDocGetRootElement(scanInputParser)->xmlChildrenNode;
 
-	transponders.clear();
-	allchans.clear();  // <- this invalidates all bouquets, too!
-
-	if  (!strcmp(frontendType, "cable"))
-	{
-		fd = fopen(SERVICES_XML, "w");
-		write_xml_header(fd);
-	}
-
-	/* read all sat or cable sections */
 	while ((search = xmlGetNextOccurence(search, frontendType)) != NULL)
 	{
 		/* get name of current satellite oder cable provider */
 		strcpy(providerName, xmlGetAttribute(search, "name"));
 
-		/* look whether provider is wanted */
 		for (spI = scanProviders.begin(); spI != scanProviders.end(); spI++)
 			if (!strcmp(spI->second.c_str(), providerName))
+			{
+				strncpy(providerName2, providerName, 30);
+
+				/* increase sat counter */
+				curr_sat++;
+
+				/* satellite receivers might need diseqc */
+				if (frontend->getInfo()->type == FE_QPSK)
+					diseqc_pos = spI->first;
+				if (diseqc_pos == 255 /* = -1 */)
+					diseqc_pos = 0;
+
+				scan_provider(search, providerName, diseqc_pos, frontendType);
+
 				break;
-
-		/* provider is not wanted - jump to the next one */
-		if (spI != scanProviders.end())
-		{
-			strncpy(providerName2, providerName, 30);
-
-			/* increase sat counter */
-			curr_sat++;
-
-			if  (!strcmp(frontendType, "sat"))
-			{
-				/* copy services.xml to /tmp directory */
-		
-		if(stat(SERVICES_XML, &buffer) == 0){
-  				 if (buffer.st_size > 0){
-					cp(SERVICES_XML, SERVICES_TMP);
-					}
-				}
-				if (!(fd = fopen(SERVICES_XML, "w")))
-				{
-					WARN("unable to open %s for writing", SERVICES_XML);
-					goto abort_scan;
-				}
-				if ((fd1 = fopen(SERVICES_TMP, "r")))
-					copy_to_satellite(fd, fd1, providerName);
-				else
-					write_xml_header(fd);
 			}
-
-			/* satellite receivers might need diseqc */
-			if (frontend->getInfo()->type == FE_QPSK)
-				diseqc_pos = spI->first;
-			if (diseqc_pos == 255 /* = -1 */)
-				diseqc_pos = 0;
-
-			scan_provider(search, providerName, diseqc_pos, frontendType);
-
-			/* write services */
-			scan_status = write_provider(fd, frontendType, providerName, diseqc_pos);
-
-			if (!strcmp(frontendType, "sat"))
-			{
-				if (fd1)
-					copy_to_end(fd, fd1);
-
-				write_xml_footer(fd);
-			}
-		}
 
 		/* go to next satellite */
 		search = search->xmlNextNode;
 	}
 
-	if  (!strcmp(frontendType, "cable"))
+	if (!scan_should_be_aborted)
+	{
+		/*
+		 * now write all the stuff
+		 */
+		search = xmlDocGetRootElement(scanInputParser)->xmlChildrenNode;
+		if (!(fd = fopen(SERVICES_XML, "w")))
+		{
+			WARN("unable to open %s for writing", SERVICES_XML);
+			goto abort_scan;
+		}
+		write_xml_header(fd);
+
+		while ((search = xmlGetNextOccurence(search, frontendType)) != NULL)
+		{
+			/* write services */
+			scan_success = scan_success || write_provider(fd, frontendType, xmlGetAttribute(search, "name"));
+			
+			/* go to next satellite */
+			search = search->xmlNextNode;
+		}
+	
 		write_xml_footer(fd);
+		chmod(SERVICES_XML, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
-	chmod(SERVICES_XML, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+		/* write bouquets if transponders were found */
+		if (scan_success)
+			write_bouquets(providerName2);
+	}
 
-	abort_scan:
-
-	/* write bouquets if services were found */
-	if (scan_status != -1)
-		write_bouquets(providerName2);
-
+ abort_scan:
 	/* report status */
 	INFO("found %d transponders and %d channels", found_transponders, found_channels);
 
@@ -690,12 +681,9 @@ void *start_scanthread(void *scanmode)
 	stop_scan(true);
 	pthread_exit(0);
 }
-void scan_clean()
+void scan_clean(void)
 {
-        allchans.clear();                  // different provider may have the same onid/sidpair // FIXME
-        transponders.clear();
-	cp(SERVICES_TMP, SERVICES_XML);
-        stop_scan(false);
+	scan_should_be_aborted = true;
 }
 int copy_to_satellite_inc(TP_params * TP, FILE * fd, FILE * fd1, char * providerName)
 {
@@ -750,7 +738,7 @@ int scan_transponder(TP_params *TP)
 	FILE* fd;
 	FILE* fd1;
 	struct stat buffer; 
-	char* frontendType = getFrontendName();
+	const char * frontendType = getFrontendName();
 	char providerName[32] = "";
 	t_satellite_position satellite_position;
 	uint8_t diseqc_pos = 0;
@@ -815,7 +803,7 @@ int scan_transponder(TP_params *TP)
 //printf("found : %d\n", prov_found); fflush(stdout);
 	/* write services */
 	if(!prov_found)
-		write_provider(fd, frontendType, providerName, diseqc_pos);
+		write_provider(fd, frontendType, providerName);
 	else
 	{
 		/* channels */
