@@ -1,5 +1,5 @@
 /*
-$Id: tsdt.c,v 1.11 2004/02/12 21:21:21 rasc Exp $
+$Id: tsdt.c,v 1.12 2004/10/17 22:20:36 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: tsdt.c,v 1.11 2004/02/12 21:21:21 rasc Exp $
 
 
 $Log: tsdt.c,v $
+Revision 1.12  2004/10/17 22:20:36  rasc
+section decoding functions renamed due to preparation of private structures
+
 Revision 1.11  2004/02/12 21:21:21  rasc
 MHP AIT descriptors
 some smaller changes
@@ -59,7 +62,7 @@ more PES stuff, DSM descriptors, testdata
 
 
 
-void decode_TSDT (u_char *b, int len)
+void section_TSDT (u_char *b, int len)
 {
 
  typedef struct  _TDST {

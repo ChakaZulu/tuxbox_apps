@@ -1,5 +1,5 @@
 /*
-$Id: userdef.h,v 1.2 2004/01/01 20:09:31 rasc Exp $
+$Id: userdef.h,v 1.3 2004/10/17 22:20:36 rasc Exp $
 
  DVBSNOOP
 
@@ -15,6 +15,6 @@ $Id: userdef.h,v 1.2 2004/01/01 20:09:31 rasc Exp $
 
 
 
-void decode_PRIVATE (u_char *b, int len);
+void section_PRIVATE (u_char *b, int len);
 
 

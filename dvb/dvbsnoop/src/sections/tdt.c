@@ -1,5 +1,5 @@
 /*
-$Id: tdt.c,v 1.6 2004/01/02 16:40:40 rasc Exp $
+$Id: tdt.c,v 1.7 2004/10/17 22:20:36 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: tdt.c,v 1.6 2004/01/02 16:40:40 rasc Exp $
 
 
 $Log: tdt.c,v $
+Revision 1.7  2004/10/17 22:20:36  rasc
+section decoding functions renamed due to preparation of private structures
+
 Revision 1.6  2004/01/02 16:40:40  rasc
 DSM-CC  INT/UNT descriptors complete
 minor changes and fixes
@@ -54,7 +57,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 
-void decode_TDT (u_char *b, int len)
+void section_TDT (u_char *b, int len)
 {
 
  typedef struct  _TDT {

@@ -1,5 +1,5 @@
 /*
-$Id: tsdt.h,v 1.4 2004/01/01 20:09:31 rasc Exp $
+$Id: tsdt.h,v 1.5 2004/10/17 22:20:36 rasc Exp $
 
  DVBSNOOP
 
@@ -15,10 +15,10 @@ $Id: tsdt.h,v 1.4 2004/01/01 20:09:31 rasc Exp $
 
 
 #ifndef __TSDT_H
-#define __TSDT_H 1
+#define __TSDT_H
 
 
-void decode_TSDT (u_char *b, int len);
+void section_TSDT (u_char *b, int len);
 
 
 #endif

@@ -1,5 +1,5 @@
 /*
-$Id: cat.c,v 1.9 2004/02/12 21:21:21 rasc Exp $
+$Id: cat.c,v 1.10 2004/10/17 22:20:36 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: cat.c,v 1.9 2004/02/12 21:21:21 rasc Exp $
 
 
 $Log: cat.c,v $
+Revision 1.10  2004/10/17 22:20:36  rasc
+section decoding functions renamed due to preparation of private structures
+
 Revision 1.9  2004/02/12 21:21:21  rasc
 MHP AIT descriptors
 some smaller changes
@@ -58,7 +61,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "misc/output.h"
 
 
-void decode_CAT (u_char *b, int len)
+void section_CAT (u_char *b, int len)
 {
  /* IS13818-1  S. 63 */
  /* see also: ETS 468, ETR 289 */

@@ -1,5 +1,5 @@
 /*
-$Id: mpe_fec.h,v 1.1 2004/07/24 11:47:08 rasc Exp $
+$Id: mpe_fec.h,v 1.2 2004/10/17 22:20:35 rasc Exp $
 
  DVBSNOOP
 
@@ -17,7 +17,7 @@ $Id: mpe_fec.h,v 1.1 2004/07/24 11:47:08 rasc Exp $
 #define __MPE_FEC_H 
 
 
-void decode_MPE_FEC (u_char *b, int len);
+void section_MPE_FEC (u_char *b, int len);
 int  real_time_parameters (u_char *b);
 
 

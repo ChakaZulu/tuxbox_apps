@@ -1,4 +1,5 @@
 
+ - section decoding functions renamed due to preparation of private structures
  - Changed: TS pid filtering from file, behavior changed
 // - New: new cmdline option -N <count>  (max decode <count> packets, similar to -n)
  - New: new cmdline option -maxdmx <n>  (replaces -f using pidscan)

@@ -1,5 +1,5 @@
 /*
-$Id: sit.h,v 1.3 2004/01/01 20:09:31 rasc Exp $
+$Id: sit.h,v 1.4 2004/10/17 22:20:36 rasc Exp $
 
  DVBSNOOP
 
@@ -14,5 +14,5 @@ $Id: sit.h,v 1.3 2004/01/01 20:09:31 rasc Exp $
 
 
 
-void decode_SIT (u_char *b, int len);
+void section_SIT (u_char *b, int len);
 

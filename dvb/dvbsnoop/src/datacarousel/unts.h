@@ -1,5 +1,5 @@
 /*
-$Id: unts.h,v 1.2 2004/01/01 20:09:16 rasc Exp $
+$Id: unts.h,v 1.3 2004/10/17 22:20:35 rasc Exp $
 
 
  DVBSNOOP
@@ -14,10 +14,10 @@ $Id: unts.h,v 1.2 2004/01/01 20:09:16 rasc Exp $
 
 
 #ifndef __UNTS_H
-#define __UNTS_H 1
+#define __UNTS_H
 
 
-void  decode_DSMCC_UNT (u_char *b, int len);
+void  section_DSMCC_UNT (u_char *b, int len);
 
 
 #endif

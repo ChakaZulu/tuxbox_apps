@@ -1,5 +1,5 @@
 /*
-$Id: ait.h,v 1.2 2004/02/10 22:57:52 rasc Exp $
+$Id: ait.h,v 1.3 2004/10/17 22:20:35 rasc Exp $
 
 
  DVBSNOOP
@@ -18,7 +18,7 @@ $Id: ait.h,v 1.2 2004/02/10 22:57:52 rasc Exp $
 
 
 
-void  decode_MHP_AIT (u_char *b, int len);
+void  section_MHP_AIT (u_char *b, int len);
 
 
 

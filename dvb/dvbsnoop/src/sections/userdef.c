@@ -1,5 +1,5 @@
 /*
-$Id: userdef.c,v 1.5 2004/02/16 22:45:37 rasc Exp $
+$Id: userdef.c,v 1.6 2004/10/17 22:20:36 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: userdef.c,v 1.5 2004/02/16 22:45:37 rasc Exp $
 
 
 $Log: userdef.c,v $
+Revision 1.6  2004/10/17 22:20:36  rasc
+section decoding functions renamed due to preparation of private structures
+
 Revision 1.5  2004/02/16 22:45:37  rasc
 small bugfix: crc is 32 bit
 
@@ -51,7 +54,7 @@ Revision 1.1  2003/10/19 13:59:00  rasc
 
 
 
-void decode_PRIVATE (u_char *b, int len)
+void section_PRIVATE (u_char *b, int len)
 {
  u_int      table_id;
  u_int      section_syntax_indicator;

@@ -1,5 +1,5 @@
 /*
-$Id: st.c,v 1.6 2004/01/02 16:40:40 rasc Exp $
+$Id: st.c,v 1.7 2004/10/17 22:20:36 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: st.c,v 1.6 2004/01/02 16:40:40 rasc Exp $
 
 
 $Log: st.c,v $
+Revision 1.7  2004/10/17 22:20:36  rasc
+section decoding functions renamed due to preparation of private structures
+
 Revision 1.6  2004/01/02 16:40:40  rasc
 DSM-CC  INT/UNT descriptors complete
 minor changes and fixes
@@ -58,7 +61,7 @@ dvbsnoop v0.7  -- Commit to CVS
  -- ETSI EN 300 468   5.2.8
 */
 
-void decode_ST (u_char *b, int len)
+void section_ST (u_char *b, int len)
 {
 
  typedef struct  _ST {

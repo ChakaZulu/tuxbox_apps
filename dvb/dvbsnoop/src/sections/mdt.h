@@ -1,5 +1,5 @@
 /*
-$Id: mdt.h,v 1.1 2004/08/22 18:36:45 rasc Exp $
+$Id: mdt.h,v 1.2 2004/10/17 22:20:36 rasc Exp $
 
  DVBSNOOP
 
@@ -18,7 +18,7 @@ $Id: mdt.h,v 1.1 2004/08/22 18:36:45 rasc Exp $
 #define  __MDT_H
 
 
-void decode_MDT (u_char *b, int len);
+void section_MDT (u_char *b, int len);
 
 
 #endif

@@ -1,5 +1,5 @@
 /*
-$Id: sit.c,v 1.9 2004/04/15 03:38:51 rasc Exp $
+$Id: sit.c,v 1.10 2004/10/17 22:20:36 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: sit.c,v 1.9 2004/04/15 03:38:51 rasc Exp $
 
 
 $Log: sit.c,v $
+Revision 1.10  2004/10/17 22:20:36  rasc
+section decoding functions renamed due to preparation of private structures
+
 Revision 1.9  2004/04/15 03:38:51  rasc
 new: TransportStream sub-decoding (ts2PES, ts2SEC)  [-tssubdecode]
 checks for continuity errors, etc. and decode in TS enclosed sections/pes packets
@@ -65,7 +68,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 
-void decode_SIT (u_char *b, int len)
+void section_SIT (u_char *b, int len)
 {
 
  typedef struct  _SIT {

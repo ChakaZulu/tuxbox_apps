@@ -1,5 +1,5 @@
 /*
-$Id: nit.c,v 1.9 2004/02/12 21:21:21 rasc Exp $
+$Id: nit.c,v 1.10 2004/10/17 22:20:36 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: nit.c,v 1.9 2004/02/12 21:21:21 rasc Exp $
 
 
 $Log: nit.c,v $
+Revision 1.10  2004/10/17 22:20:36  rasc
+section decoding functions renamed due to preparation of private structures
+
 Revision 1.9  2004/02/12 21:21:21  rasc
 MHP AIT descriptors
 some smaller changes
@@ -65,7 +68,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 
-void decode_NIT (u_char *b, int len)
+void section_NIT (u_char *b, int len)
 {
  /* EN 300 468  5.2  */
 

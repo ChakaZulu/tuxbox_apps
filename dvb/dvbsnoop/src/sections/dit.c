@@ -1,5 +1,5 @@
 /*
-$Id: dit.c,v 1.5 2004/01/01 20:09:31 rasc Exp $
+$Id: dit.c,v 1.6 2004/10/17 22:20:36 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dit.c,v 1.5 2004/01/01 20:09:31 rasc Exp $
 
 
 $Log: dit.c,v $
+Revision 1.6  2004/10/17 22:20:36  rasc
+section decoding functions renamed due to preparation of private structures
+
 Revision 1.5  2004/01/01 20:09:31  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -50,7 +53,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 
-void decode_DIT (u_char *b, int len)
+void section_DIT (u_char *b, int len)
 {
 
  typedef struct  _DIT {

@@ -1,5 +1,5 @@
 /*
-$Id: pat.c,v 1.9 2004/03/31 21:14:23 rasc Exp $
+$Id: pat.c,v 1.10 2004/10/17 22:20:36 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: pat.c,v 1.9 2004/03/31 21:14:23 rasc Exp $
 
 
 $Log: pat.c,v $
+Revision 1.10  2004/10/17 22:20:36  rasc
+section decoding functions renamed due to preparation of private structures
+
 Revision 1.9  2004/03/31 21:14:23  rasc
 New: Spider section pids  (snoop referenced section pids),
 some minor changes
@@ -64,7 +67,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 
-void decode_PAT (u_char *b, int len)
+void section_PAT (u_char *b, int len)
 {
  /* IS13818-1  S. 62 */
 

@@ -1,5 +1,5 @@
 /*
-$Id: sdt.c,v 1.10 2004/04/15 03:38:51 rasc Exp $
+$Id: sdt.c,v 1.11 2004/10/17 22:20:36 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: sdt.c,v 1.10 2004/04/15 03:38:51 rasc Exp $
 
 
 $Log: sdt.c,v $
+Revision 1.11  2004/10/17 22:20:36  rasc
+section decoding functions renamed due to preparation of private structures
+
 Revision 1.10  2004/04/15 03:38:51  rasc
 new: TransportStream sub-decoding (ts2PES, ts2SEC)  [-tssubdecode]
 checks for continuity errors, etc. and decode in TS enclosed sections/pes packets
@@ -75,7 +78,7 @@ dvbsnoop v0.7  -- Commit to CVS
  -- ETSI EN 300 468   5.2.3
 */
 
-void decode_SDT (u_char *b, int len)
+void section_SDT (u_char *b, int len)
 {
 
  typedef struct  _SDT {

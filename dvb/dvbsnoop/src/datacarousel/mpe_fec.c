@@ -1,5 +1,5 @@
 /*
-$Id: mpe_fec.c,v 1.1 2004/07/24 11:47:08 rasc Exp $
+$Id: mpe_fec.c,v 1.2 2004/10/17 22:20:35 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: mpe_fec.c,v 1.1 2004/07/24 11:47:08 rasc Exp $
 
 
 $Log: mpe_fec.c,v $
+Revision 1.2  2004/10/17 22:20:35  rasc
+section decoding functions renamed due to preparation of private structures
+
 Revision 1.1  2004/07/24 11:47:08  rasc
 EN 301 192 update
  - New: ECM_repetition_rate_descriptor (EN 301 192 v1.4.1)
@@ -42,7 +45,7 @@ EN 301 192 update
 
 
 
-void decode_MPE_FEC (u_char *b, int len)
+void section_MPE_FEC (u_char *b, int len)
 {
  /* EN 301 192 7.x */
 

@@ -1,5 +1,5 @@
 /*
-$Id: tot.h,v 1.4 2004/02/16 22:45:37 rasc Exp $
+$Id: tot.h,v 1.5 2004/10/17 22:20:36 rasc Exp $
 
  DVBSNOOP
 
@@ -17,7 +17,7 @@ $Id: tot.h,v 1.4 2004/02/16 22:45:37 rasc Exp $
 #define __TOT_H 
 
 
-void decode_TOT (u_char *b, int len);
+void section_TOT (u_char *b, int len);
 
 #endif
 

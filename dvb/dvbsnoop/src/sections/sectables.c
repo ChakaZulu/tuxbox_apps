@@ -1,5 +1,5 @@
 /*
-$Id: sectables.c,v 1.28 2004/08/22 18:36:45 rasc Exp $
+$Id: sectables.c,v 1.29 2004/10/17 22:20:36 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: sectables.c,v 1.28 2004/08/22 18:36:45 rasc Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.29  2004/10/17 22:20:36  rasc
+section decoding functions renamed due to preparation of private structures
+
 Revision 1.28  2004/08/22 18:36:45  rasc
  - Bugfix: multilang service descriptor fix  (tnx to Karsten Siebert)
  - New: MetaData Section  (Basic) (H.222.0 AMD1)
@@ -195,7 +198,7 @@ void decodeSections_buf (u_char *buf, int len, u_int pid)
   switch (pid) {
 
 	case  0x01D:		/* Measurement */
-		decode_TESTDATA  (buf, len);
+		section_TESTDATA  (buf, len);
 		break; 
 
         default:			// multiple PIDs possible
@@ -238,46 +241,46 @@ typedef struct _TABLE_IF_FUNC {
 
 static TABLE_ID_FUNC table_id_func[] = {
 
-     {  0x00, 0x00,  decode_PAT	},
-     {  0x01, 0x01,  decode_CAT	},
-     {  0x02, 0x02,  decode_PMT	},
-     {  0x03, 0x03,  decode_TSDT },
-// $$$ TODO     {  0x04, 0x04,  decode_14496_SCT },
-// $$$ TODO     {  0x05, 0x05,  decode_14496_OCT },
-     {  0x06, 0x06,  decode_MDT },	// Metadata section
-// $$$ TODO     {  0x07, 0x07,  decode_IPMP_CIT },	// IPMP_Control_Information_section (defined in ISO/IEC13818-11)
+     {  0x00, 0x00,  section_PAT	},
+     {  0x01, 0x01,  section_CAT	},
+     {  0x02, 0x02,  section_PMT	},
+     {  0x03, 0x03,  section_TSDT },
+// $$$ TODO     {  0x04, 0x04,  section_14496_SCT },
+// $$$ TODO     {  0x05, 0x05,  section_14496_OCT },
+     {  0x06, 0x06,  section_MDT },	// Metadata section
+// $$$ TODO     {  0x07, 0x07,  section_IPMP_CIT },	// IPMP_Control_Information_section (defined in ISO/IEC13818-11)
      /* res. */
-     {  0x3a, 0x3d,  decode_DSMCC_section },
-     {  0x3e, 0x3e,  decode_DSMCC_DATAGRAM },
-     {  0x40, 0x41,  decode_NIT	},
-     {  0x42, 0x42,  decode_SDT	},
+     {  0x3a, 0x3d,  section_DSMCC	},
+     {  0x3e, 0x3e,  section_DSMCC_DATAGRAM },
+     {  0x40, 0x41,  section_NIT	},
+     {  0x42, 0x42,  section_SDT	},
      /* res. */
-     {  0x46, 0x46,  decode_SDT	},
+     {  0x46, 0x46,  section_SDT	},
      /* res. */
-     {  0x4A, 0x4A,  decode_BAT	},
-     {  0x4B, 0x4B,  decode_DSMCC_UNT },
-     {  0x4C, 0x4C,  decode_DSMCC_INT },
-     {  0x4E, 0x6E,  decode_EIT	},  /*  4 different types */
-     {  0x70, 0x70,  decode_TDT },
-     {  0x71, 0x71,  decode_RST },
-     {  0x72, 0x72,  decode_ST  },
-     {  0x73, 0x73,  decode_TOT },
-     {  0x74, 0x74,  decode_MHP_AIT },
+     {  0x4A, 0x4A,  section_BAT	},
+     {  0x4B, 0x4B,  section_DSMCC_UNT },
+     {  0x4C, 0x4C,  section_DSMCC_INT },
+     {  0x4E, 0x6E,  section_EIT	},  /*  4 different types */
+     {  0x70, 0x70,  section_TDT },
+     {  0x71, 0x71,  section_RST },
+     {  0x72, 0x72,  section_ST  },
+     {  0x73, 0x73,  section_TOT },
+     {  0x74, 0x74,  section_MHP_AIT },
 
 // $$$ TODO
 // 0x75 container section (TS 102 323 [36])
 // 0x76 related content section (TS 102 323 [36])
 // 0x77 content identifier section (TS 102 323 [36])  (CIT)
 
-     {  0x78, 0x78,  decode_MPE_FEC },		// EN 301 192 v1.4.1
-     {  0x79, 0x79,  decode_RNT },		// TS 102 323
+     {  0x78, 0x78,  section_MPE_FEC },		// EN 301 192 v1.4.1
+     {  0x79, 0x79,  section_RNT },		// TS 102 323
 
      /* res. */
-     {  0x7E, 0x7E,  decode_DIT },
-     {  0x7F, 0x7F,  decode_SIT },
-     {  0x80, 0x8F,  decode_EMM_ECM },   /* $$$ Conditional Access Message Section */
+     {  0x7E, 0x7E,  section_DIT },
+     {  0x7F, 0x7F,  section_SIT },
+     {  0x80, 0x8F,  section_EMM_ECM },   /* $$$ Conditional Access Message Section */
 
-     {  0x90, 0xFE,  decode_PRIVATE },	 /* opps!? DSM-CC or other stuff?! */
+     {  0x90, 0xFE,  section_PRIVATE },	 /* opps!? DSM-CC or other stuff?! */
      {  0,0, NULL }
   };
 

@@ -1,5 +1,5 @@
 /*
-$Id: pmt.c,v 1.11 2004/04/19 22:09:33 rasc Exp $
+$Id: pmt.c,v 1.12 2004/10/17 22:20:36 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: pmt.c,v 1.11 2004/04/19 22:09:33 rasc Exp $
 
 
 $Log: pmt.c,v $
+Revision 1.12  2004/10/17 22:20:36  rasc
+section decoding functions renamed due to preparation of private structures
+
 Revision 1.11  2004/04/19 22:09:33  rasc
 minor change
 
@@ -74,7 +77,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 
-void decode_PMT (u_char *b, int len)
+void section_PMT (u_char *b, int len)
 {
  /* IS13818-1  S. 65 */
 

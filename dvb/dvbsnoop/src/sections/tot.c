@@ -1,5 +1,5 @@
 /*
-$Id: tot.c,v 1.8 2004/02/12 21:21:21 rasc Exp $
+$Id: tot.c,v 1.9 2004/10/17 22:20:36 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: tot.c,v 1.8 2004/02/12 21:21:21 rasc Exp $
 
 
 $Log: tot.c,v $
+Revision 1.9  2004/10/17 22:20:36  rasc
+section decoding functions renamed due to preparation of private structures
+
 Revision 1.8  2004/02/12 21:21:21  rasc
 MHP AIT descriptors
 some smaller changes
@@ -64,7 +67,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 
-void decode_TOT (u_char *b, int len)
+void section_TOT (u_char *b, int len)
 {
 
  typedef struct  _TOT {

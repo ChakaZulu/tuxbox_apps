@@ -1,5 +1,5 @@
 /*
-$Id: rnt.h,v 1.1 2004/07/25 21:13:37 rasc Exp $
+$Id: rnt.h,v 1.2 2004/10/17 22:20:39 rasc Exp $
 
  DVBSNOOP
 
@@ -17,7 +17,7 @@ $Id: rnt.h,v 1.1 2004/07/25 21:13:37 rasc Exp $
 #define __RNT_H 
 
 
-void decode_RNT (u_char *b, int len);
+void section_RNT (u_char *b, int len);
 
 
 #endif

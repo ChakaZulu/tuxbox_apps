@@ -1,5 +1,5 @@
 /*
-$Id: ait.c,v 1.4 2004/02/12 21:21:19 rasc Exp $
+$Id: ait.c,v 1.5 2004/10/17 22:20:35 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: ait.c,v 1.4 2004/02/12 21:21:19 rasc Exp $
 
 
 $Log: ait.c,v $
+Revision 1.5  2004/10/17 22:20:35  rasc
+section decoding functions renamed due to preparation of private structures
+
 Revision 1.4  2004/02/12 21:21:19  rasc
 MHP AIT descriptors
 some smaller changes
@@ -54,7 +57,7 @@ some AIT descriptors
 
 
 
-void decode_MHP_AIT (u_char *b, int len)
+void section_MHP_AIT (u_char *b, int len)
 {
  /* TS 102 812  */
 

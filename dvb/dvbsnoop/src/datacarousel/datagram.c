@@ -1,5 +1,5 @@
 /*
-$Id: datagram.c,v 1.17 2004/09/01 20:20:34 rasc Exp $
+$Id: datagram.c,v 1.18 2004/10/17 22:20:35 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: datagram.c,v 1.17 2004/09/01 20:20:34 rasc Exp $
 
 
 $Log: datagram.c,v $
+Revision 1.18  2004/10/17 22:20:35  rasc
+section decoding functions renamed due to preparation of private structures
+
 Revision 1.17  2004/09/01 20:20:34  rasc
 new cmdline option: -buffersize KB  (set demux buffersize in KBytes)
 
@@ -82,7 +85,7 @@ Revision 1.1  2003/10/19 22:22:58  rasc
 
 
 
-void decode_DSMCC_DATAGRAM (u_char *b, int len)
+void section_DSMCC_DATAGRAM (u_char *b, int len)
 {
  /* EN 301 192 7.x */
 // $$$ TODO this differs from ISO/IEC 13818-6:1998 AMD_1_2000_Cor_1_2002

@@ -1,5 +1,5 @@
 /*
-$Id: rst.h,v 1.3 2004/01/01 20:09:31 rasc Exp $
+$Id: rst.h,v 1.4 2004/10/17 22:20:36 rasc Exp $
 
  DVBSNOOP
 
@@ -14,5 +14,5 @@ $Id: rst.h,v 1.3 2004/01/01 20:09:31 rasc Exp $
 
 
 
-void decode_RST (u_char *b, int len);
+void section_RST (u_char *b, int len);
 

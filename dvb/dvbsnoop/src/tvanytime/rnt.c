@@ -1,5 +1,5 @@
 /*
-$Id: rnt.c,v 1.2 2004/07/26 20:58:03 rasc Exp $
+$Id: rnt.c,v 1.3 2004/10/17 22:20:39 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: rnt.c,v 1.2 2004/07/26 20:58:03 rasc Exp $
 
 
 $Log: rnt.c,v $
+Revision 1.3  2004/10/17 22:20:39  rasc
+section decoding functions renamed due to preparation of private structures
+
 Revision 1.2  2004/07/26 20:58:03  rasc
 RNT completed..  (TS 102 323)
 
@@ -42,7 +45,7 @@ do not forget to commit new files
 
 
 
-void decode_RNT (u_char *b, int len)
+void section_RNT (u_char *b, int len)
 {
  /* TS 102 323  */
 

@@ -11,9 +11,9 @@
 */
 
 #ifndef __TEST0X1D_H
-#define __TEST0X1D_H 1
+#define __TEST0X1D_H
 
-void decode_TESTDATA (u_char *b, int len);
+void section_TESTDATA (u_char *b, int len);
 
 #endif
 

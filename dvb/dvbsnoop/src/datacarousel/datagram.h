@@ -1,5 +1,5 @@
 /*
-$Id: datagram.h,v 1.4 2004/01/01 20:09:16 rasc Exp $
+$Id: datagram.h,v 1.5 2004/10/17 22:20:35 rasc Exp $
 
 
  DVBSNOOP
@@ -14,10 +14,10 @@ $Id: datagram.h,v 1.4 2004/01/01 20:09:16 rasc Exp $
 
 
 #ifndef _DATAGRAM_H
-#define _DATAGRAM_H 1
+#define _DATAGRAM_H
 
 
-void decode_DSMCC_DATAGRAM (u_char *b, int len);
+void section_DSMCC_DATAGRAM (u_char *b, int len);
 
 
 #endif
