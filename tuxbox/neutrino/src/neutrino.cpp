@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.157 2002/02/19 23:41:48 McClean Exp $
+        $Id: neutrino.cpp,v 1.158 2002/02/20 00:07:52 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.158  2002/02/20 00:07:52  McClean
+  add -flash for directly neutrino-start (for alexW)
+
   Revision 1.157  2002/02/19 23:41:48  McClean
   add neutrino-direct-start option (for alexW's-Images only at the moment)
 
@@ -1143,6 +1146,7 @@ void CNeutrinoApp::channelsInit()
 void CNeutrinoApp::CmdParser(int argc, char **argv)
 {
 	softupdate = false;
+	fromflash = false;
 	g_settings.network_streaming_use = 0;
 
 	for(int x=1; x<argc; x++)
@@ -1160,6 +1164,11 @@ void CNeutrinoApp::CmdParser(int argc, char **argv)
 		{
 			printf("enable streaming-control\n");
 			g_settings.network_streaming_use = 1;
+		}
+		else if ( !strcmp(argv[x], "-flash"))
+		{
+			printf("enable flash\n");
+			fromflash = true;
 		}
 		else
 		{
@@ -1413,7 +1422,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	oj->addOption(0, "options.on");
 	miscSettings.addItem( oj );
 
-	if (softupdate)
+	if (fromflash)
 	{
 		static int dummy = 0;
 		FILE* fd = fopen("/var/etc/.neutrino", "r");
@@ -2423,7 +2432,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.157 2002/02/19 23:41:48 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.158 2002/02/20 00:07:52 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

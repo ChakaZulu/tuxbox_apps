@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.45 2002/02/10 14:17:34 McClean Exp $
+//  $Id: neutrino.h,v 1.46 2002/02/20 00:07:52 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.46  2002/02/20 00:07:52  McClean
+//  add -flash for directly neutrino-start (for alexW)
+//
 //  Revision 1.45  2002/02/10 14:17:34  McClean
 //  simplify usage (part 2)
 //
@@ -236,6 +239,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		int				    mode;
 		bool				mute;
 		bool				softupdate;
+		bool				fromflash;
 		int					streamstatus;
 
 		channel_msg         firstchannel;
