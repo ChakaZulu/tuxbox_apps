@@ -266,8 +266,8 @@ public:
 
 /////////////////// Default Constructor /////////////////////////////
 template <class T>
-ePtrList<T>::ePtrList()		
-	:autoDelete(false), cur(std::list<T*>::begin())		
+ePtrList<T>::ePtrList()
+    :cur(std::list<T*>::begin()), autoDelete(false)		
 {		
 
 }

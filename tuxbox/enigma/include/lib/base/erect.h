@@ -106,6 +106,8 @@ namespace std
 		int x1, y1, x2, y2;
 		s >> x1 >> y1 >> x2 >> y2;
 		r.setCoords( x1, y1, x2, y2 );
+		
+		return s;
 	}
 }
 

@@ -1,0 +1,21 @@
+<rcdefaults>
+	<author>
+		<name>Felix Domke</name>
+		<email>tmbinc@gmx.net</email>
+	</author>
+
+	<device identifier="DBoxButton" >
+		<keys>
+			<key name="power" code="1" />
+			<key name="up" code="2" />
+			<key name="down" code="3" />
+		</keys>
+
+		<actionmap name="enigmaMain">
+			<action name="standby" key="power" flags="m" />
+			<action name="nextService" key="down" flags="mr" />
+			<action name="prevService" key="up" flags="mr" />
+		</actionmap>
+	</device>
+
+</rcdefaults>

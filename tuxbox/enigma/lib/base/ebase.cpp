@@ -102,7 +102,7 @@ void eMainloop::removeSocketNotifier(eSocketNotifier *sn)
 void eMainloop::processOneEvent()
 {
 // process pending timers...
-	long usec;
+	long usec=0;
 
 	while (TimerList && (usec = timeout_usec( TimerList.begin()->getNextActivation() ) ) <= 0 )
 		TimerList.begin()->activate();

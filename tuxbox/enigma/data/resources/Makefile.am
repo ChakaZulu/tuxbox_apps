@@ -1,4 +1,4 @@
-EXTRA_DIST = rcdboxnew.xml rcdboxold.xml rcdreambox.xml
+EXTRA_DIST = rcdboxnew.xml rcdboxold.xml rcdreambox.xml rcdboxbuttons.xml
 
 install-data-local:
 	install -d $(DATADIR)/enigma/resources

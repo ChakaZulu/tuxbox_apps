@@ -127,6 +127,7 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 	eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdreambox.xml");
 	eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdboxold.xml");
 	eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdboxnew.xml");
+	eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdboxbuttons.xml");
 	eDebug("[ENIGMA] ok, beginning mainloop");
 
 	if (eConfig::getInstance()->getKey("/elitedvb/system/bootCount", bootcount))
