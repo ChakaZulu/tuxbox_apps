@@ -3110,7 +3110,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	}
 	else if( msg == NeutrinoMessages::EVT_START_PLUGIN )
 	{
-		string plugname = std::string((char *) data);
+		std::string plugname = std::string((char *) data);
 				g_PluginList->setvtxtpid( g_RemoteControl->current_PIDs.PIDs.vtxtpid );
 		g_PluginList->startPlugin( plugname );
 		delete (unsigned char*) data;
@@ -3647,7 +3647,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, std::string actionKey)
 		parent->hide();
 		CFileBrowser b;
 		b.Dir_Mode=true;
-		string startdir=g_settings.network_nfs_mp3dir;
+		std::string startdir=g_settings.network_nfs_mp3dir;
 		if (b.exec(startdir))
 			strncpy(g_settings.network_nfs_mp3dir, b.getSelectedFile()->Name.c_str(), sizeof(g_settings.network_nfs_mp3dir)-1);
 		return menu_return::RETURN_REPAINT;
@@ -3657,7 +3657,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, std::string actionKey)
 		parent->hide();
 		CFileBrowser b;
 		b.Dir_Mode=true;
-		string startdir=g_settings.network_nfs_picturedir;
+		std::string startdir=g_settings.network_nfs_picturedir;
 		if (b.exec(startdir))
 			strncpy(g_settings.network_nfs_picturedir, b.getSelectedFile()->Name.c_str(), sizeof(g_settings.network_nfs_picturedir)-1);
 		return menu_return::RETURN_REPAINT;
@@ -3667,7 +3667,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, std::string actionKey)
 		parent->hide();
 		CFileBrowser b;
 		b.Dir_Mode=true;
-		string startdir=g_settings.network_nfs_moviedir;
+		std::string startdir=g_settings.network_nfs_moviedir;
 		if (b.exec(startdir))
 			strncpy(g_settings.network_nfs_moviedir, b.getSelectedFile()->Name.c_str(), sizeof(g_settings.network_nfs_moviedir)-1);
 		return menu_return::RETURN_REPAINT;

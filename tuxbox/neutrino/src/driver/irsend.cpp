@@ -5,6 +5,9 @@
 	License: GPL
 
 	Aenderungen: $Log: irsend.cpp,v $
+	Aenderungen: Revision 1.3  2003/09/19 19:25:27  thegoodguy
+	Aenderungen: cleanup
+	Aenderungen:
 	Aenderungen: Revision 1.2  2002/11/26 22:10:00  Zwen
 	Aenderungen: - changed config dir for *.lirc files to /var/tuxbox/config/lirc/
 	Aenderungen: - support for lirc actions on pressing volume +/- (volplus.lirc/volminus.lirc)
@@ -15,27 +18,30 @@
 	Aenderungen:
 */
 
+#include <driver/irsend.h>
+
 #include <stdio.h>
 #include <unistd.h>
 #include <fstream>
 
-#include "irsend.h"
-#include "liblircdclient.h"
+#include <liblircdclient.h>
 
 #define LIRCDIR "/var/tuxbox/config/lirc/"
 
-CIRSend::CIRSend(string configfile)
+CIRSend::CIRSend(const char * const configfile)
 {
-	m_configFile = LIRCDIR + configfile + ".lirc";
+	m_configFile = LIRCDIR;
+	m_configFile += configfile;
+	m_configFile += ".lirc";
 }
 
 bool CIRSend::Send()
 {
-	ifstream inp;
+	std::ifstream inp;
 	char buffer[101];
 	int wait_time;
 	int status=0;
-	inp.open(m_configFile.c_str(),ifstream::in);
+	inp.open(m_configFile.c_str(),std::ifstream::in);
 	if( inp.is_open() )
 	{
 		int linenr=0;
@@ -48,7 +54,7 @@ bool CIRSend::Send()
 				linenr++;
 				if(buffer[0]!=0)
 				{
-					string line = buffer;
+					std::string line = buffer;
 					if(line.substr(0,4)=="WAIT" || line.substr(0,4)=="wait")
 					{
 						sscanf(line.substr(5).c_str(),"%d",&wait_time);
@@ -58,17 +64,17 @@ bool CIRSend::Send()
 					else
 					{
 						int duration=0;
-						unsigned int space_pos1=line.find(" ");
-						if(space_pos1==string::npos)
+						unsigned int space_pos1=line.find(' ');
+						if(space_pos1==std::string::npos)
 						{
 							printf("[neutrino] IRSend syntax error in file %s line %d\n",m_configFile.c_str(),linenr);
 							status--;
 						}
 						else
 						{
-							string deviceName=line.substr(0,space_pos1);
-							unsigned int space_pos2=line.find(" ",space_pos1+1);
-							if(space_pos2!=string::npos)
+							std::string deviceName=line.substr(0,space_pos1);
+							unsigned int space_pos2=line.find(' ',space_pos1+1);
+							if(space_pos2!=std::string::npos)
 							{
 								sscanf(line.substr(space_pos2+1).c_str(),"%d",&duration);
 							}
