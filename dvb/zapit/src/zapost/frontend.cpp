@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.1 2002/04/14 06:06:31 obi Exp $
+ * $Id: frontend.cpp,v 1.2 2002/04/14 12:01:31 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -18,6 +18,8 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  */
+
+#include <iostream>
 
 #include "frontend.h"
 

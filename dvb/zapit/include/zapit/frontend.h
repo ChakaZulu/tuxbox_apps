@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.h,v 1.1 2002/04/14 06:06:31 obi Exp $
+ * $Id: frontend.h,v 1.2 2002/04/14 12:01:31 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -27,8 +27,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <sys/ioctl.h>
-
-#include <iostream>
 
 #include "nit.h"
 
