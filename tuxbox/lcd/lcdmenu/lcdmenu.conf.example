@@ -61,9 +61,9 @@ menu_items=Enigma,Neutrino,Lcars,Maintenance
 
 #
 # option: pin_protect (number, ...)
-# default: 4
+# default: none
 #
-pin_protect=4
+pin_protect=
 
 #
 # option: timeout
