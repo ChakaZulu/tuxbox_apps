@@ -45,7 +45,21 @@ using namespace std;
 
 eString getRotorConfig(void)
 {
-	eString result = "Function not working yet...";
+	eString result = readFile(TEMPLATE_DIR + "rotor.tmp");
+	
+	for (std::list<eLNB>::iterator it(eTransponderList::getInstance()->getLNBs().begin()); it != eTransponderList::getInstance()->getLNBs().end(); it++)
+	{
+		// go thru all satellites...
+		for (ePtrList<eSatellite>::iterator s (it->getSatelliteList().begin()); s != it->getSatelliteList().end(); s++)
+		{
+			result += "<tr>";
+			result += "<td>" + s->getDescription() + "</td>";
+			result += "<td>" + eString().sprintf("%d", s->getOrbitalPosition()) + "</td>";
+			int motorPosition = it->getDiSEqC().RotorTable[s->getOrbitalPosition()];
+			result += "<td>" + eString().sprintf("%d", motorPosition) + "</td>";
+			result += "<tr>";
+		}
+	}
 
 	return result;
 }
