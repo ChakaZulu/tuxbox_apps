@@ -1,5 +1,5 @@
 /*
-$Id: datagram.c,v 1.2 2003/10/21 19:54:44 rasc Exp $
+$Id: datagram.c,v 1.3 2003/10/21 21:31:29 rasc Exp $
 
    DATAGRAM section
    DSM-CC Data Carousel  EN 301 192 
@@ -8,6 +8,9 @@ $Id: datagram.c,v 1.2 2003/10/21 19:54:44 rasc Exp $
 
 
 $Log: datagram.c,v $
+Revision 1.3  2003/10/21 21:31:29  rasc
+no message
+
 Revision 1.2  2003/10/21 19:54:44  rasc
 no message
 
@@ -82,6 +85,22 @@ void decode_DATAGRAM_DSMCC (u_char *b, int len)
  d.reserved_1 			 = getBits (b, 0, 10, 2);
  d.section_length		 = getBits (b, 0, 12, 12);
 
+ d.MAC_addr6			 = getBits (b, 0, 24, 8);
+ d.MAC_addr5			 = getBits (b, 0, 32, 8);
+ d.reserved_2			 = getBits (b, 0, 40, 2);
+ d.payload_scrambling_control	 = getBits (b, 0, 42, 2);
+ d.address_scrambling_control	 = getBits (b, 0, 44, 2);
+ d.LLC_SNAP_flag		 = getBits (b, 0, 46, 1);
+
+ d.current_next_indicator	 = getBits (b, 0, 47, 1);
+ d.section_number 		 = getBits (b, 0, 48, 8);
+ d.last_section_number 		 = getBits (b, 0, 56, 8);
+
+ d.MAC_addr4			 = getBits (b, 0, 64, 8);
+ d.MAC_addr3			 = getBits (b, 0, 72, 8);
+ d.MAC_addr2			 = getBits (b, 0, 80, 8);
+ d.MAC_addr1			 = getBits (b, 0, 88, 8);
+    	// MAC-Bits:  MSB first ! 
 
 
 
@@ -98,8 +117,49 @@ void decode_DATAGRAM_DSMCC (u_char *b, int len)
  out_SB_NL (6,"reserved_1: ",d.reserved_1);
  out_SW_NL (5,"Section_length: ",d.section_length);
 
+ out_SB_NL (5,"MAC_addr_byte 6: ",d.MAC_addr6);
+ out_SB_NL (5,"MAC_addr_byte 5: ",d.MAC_addr5);
+ out_SB_NL (6,"reserved_2: ",d.reserved_2);
+ out_SB_NL (3,"payload_scrambling_control: ",d.payload_scrambling_control);  // $$$$ TODO
+ out_SB_NL (3,"address_scrambling_control: ",d.address_scrambling_control);  // $$$$ TODO
+ out_SB_NL (3,"LLC_SNAP_flag: ",d.LLC_SNAP_flag);
 
- out_nl (1," ..... to be finished... ");
+ out_SB_NL (3,"Current_next_indicator: ",d.current_next_indicator);
+ out_SB_NL (3,"Section_number: ",d.section_number);
+ out_SB_NL (3,"Last_Section_number: ",d.last_section_number);
+
+ out_SB_NL (5,"MAC_addr_byte 4: ",d.MAC_addr4);
+ out_SB_NL (5,"MAC_addr_byte 3: ",d.MAC_addr3);
+ out_SB_NL (5,"MAC_addr_byte 2: ",d.MAC_addr2);
+ out_SB    (5,"MAC_addr_byte 1: ",d.MAC_addr1);
+ out_nl    (3," => MAC-Address: %02x:%02x:%02x:%02x:%02x:%02x", d.MAC_addr1,
+		 d.MAC_addr2,d.MAC_addr3,d.MAC_addr4,d.MAC_addr5,d.MAC_addr6);
+
+
+ if (d.LLC_SNAP_flag == 0x01) {
+	 /*  ISO/IEC 8802-2   */
+
+	 /* $$$ TODO   ...... */
+
+
+ } else {
+	 /* $$$  TODO */
+	 out_nl (1, "...TODO.... IP datagram data bytes output ");
+
+ }
+
+  
+ // $$$$ unknown 
+ //    how do i distinguish between N1  datagram bytes and N2 stuffing bytes?
+ //    is there an else clause in specs missing????
+
+ //    also where to get ISO 8802-2  LLC - SubNetAccPoint  protocol ?????
+
+
+
+
+
+ out_nl (1," ...TODO.. to be finished... ");
 /*
  *
  * .... $$$$$$ TODO

@@ -1,5 +1,5 @@
 /*
-$Id: ints.c,v 1.1 2003/10/21 19:54:44 rasc Exp $
+$Id: ints.c,v 1.2 2003/10/21 21:31:29 rasc Exp $
 
    INT Section
    IP/MAC Notification Section
@@ -9,6 +9,9 @@ $Id: ints.c,v 1.1 2003/10/21 19:54:44 rasc Exp $
 
 
 $Log: ints.c,v $
+Revision 1.2  2003/10/21 21:31:29  rasc
+no message
+
 Revision 1.1  2003/10/21 19:54:44  rasc
 no message
 
@@ -53,7 +56,7 @@ void decode_INT_DSMCC (u_char *b, int len)
     //   target descriptor loop
     //   operational descriptor loop
 
-    unsigned long crc;
+    u_long     crc;
  } INTs;
 
 
@@ -67,7 +70,6 @@ void decode_INT_DSMCC (u_char *b, int len)
  d.reserved_1 			 = getBits (b, 0, 9, 1);
  d.reserved_2 			 = getBits (b, 0, 10, 2);
  d.section_length		 = getBits (b, 0, 12, 12);
-
 
 
 
@@ -85,7 +87,7 @@ void decode_INT_DSMCC (u_char *b, int len)
  out_SW_NL (5,"Section_length: ",d.section_length);
 
 
- out_nl (1," ..... to be finished... ");
+ out_nl (1," ..TODO... to be finished... ");
 /*
  *
  * .... $$$$$$ TODO

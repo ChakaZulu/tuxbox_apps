@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.6 2003/10/21 19:54:43 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.7 2003/10/21 21:31:29 rasc Exp $ 
 
 
   dvbsnoop
@@ -14,6 +14,9 @@ $Id: dvb_descriptor.c,v 1.6 2003/10/21 19:54:43 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.7  2003/10/21 21:31:29  rasc
+no message
+
 Revision 1.6  2003/10/21 19:54:43  rasc
 no message
 
@@ -2653,7 +2656,6 @@ void descriptorDVB_DataBroadcast (u_char *b)
  out_SB_NL (4,"Component_tag: ",d.component_tag);
  out_SB_NL (5,"Selector_length: ",d.selector_length);
 
- /* $$$    EN 192  has to be implemented here!!! */
 
  if (d.data_broadcast_id == 0x0005) {
 	 // -- EN 301 192 Multi-protocol-encapsulation!
@@ -2691,11 +2693,15 @@ void descriptorDVB_DataBroadcast (u_char *b)
 
  } else if (d.data_broadcast_id == 0x0006) {
 	 /* $$$ TODO EN 301 192 8.3.1 */
- 			out_nl    (4,"TODO Data Carousel info_structure, etc:");
+ 			out_nl    (4,"TODO Data_Carousel_info:");
 		 	printhexdump_buf (4,  b, d.selector_length);
  } else if (d.data_broadcast_id == 0x0007) {
 	 /* $$$ TODO EN 301 192 9.3.2 */
- 			out_nl    (4,"TODO Data Carousel Info, etc:");
+ 			out_nl    (4,"TODO Object_Carousel_Info:");
+		 	printhexdump_buf (4,  b, d.selector_length);
+ } else if (d.data_broadcast_id == 0x0009) {
+	 /* $$$ TODO EN 301 192 10.2.1 */
+ 			out_nl    (4,"TODO higher_protocol_asynchronous_data_info:");
 		 	printhexdump_buf (4,  b, d.selector_length);
  } else {
  	out_nl    (4,"Selector-Bytes:");
