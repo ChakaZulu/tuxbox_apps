@@ -48,6 +48,8 @@
 #include "widget/hintbox.h"
 #include "widget/stringinput.h"
 
+#include <sys/stat.h>
+
 //------------------------------------------------------------------------
 bool sortByDate (const CPicture& a, const CPicture& b)
 {

@@ -34,8 +34,10 @@
 #include <lcddisplay/lcddisplay.h>
 
 #include <dbox/fp.h>
+#include <fcntl.h>
 #include <sys/timeb.h>
 #include <time.h>
+#include <unistd.h>
 
 
 CLCD::CLCD()
