@@ -36,7 +36,6 @@
 #ifdef USEACTIONLOG
 
 
-
 CActionLog::CActionLog()
 {
 	if(!opendevice(SERIALDEVICE))
@@ -88,16 +87,10 @@ bool CActionLog::opendevice(string devicename)
 	return true;
 }
 
-static int messagecount = 0;
 void CActionLog::print(string text)
 {
 	if(fd!=-1)
 	{
-		messagecount++;
-		if(messagecount>300)
-		{
-			text = "beta-version - log disabled\r\n";
-		}
 		write(fd, text.c_str(), text.size() );
 	}	
 }

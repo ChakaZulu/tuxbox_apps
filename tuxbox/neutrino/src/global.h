@@ -29,81 +29,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-//
-// $Id: global.h,v 1.26 2002/03/14 20:42:56 McClean Exp $
-//
-// $Log: global.h,v $
-// Revision 1.26  2002/03/14 20:42:56  McClean
-// to fix...
-//
-// Revision 1.25  2002/03/07 18:32:34  field
-// Bugfix, weitere Umstellungen ;)
-//
-// Revision 1.24  2002/02/28 15:03:55  field
-// Weiter Updates :)
-//
-// Revision 1.23  2002/02/22 16:01:16  field
-// Plugin-Interface weiter verbessert
-//
-// Revision 1.22  2002/02/10 12:29:23  McClean
-// simplify (wortspiel *hrhr*) bouquet-edit
-//
-// Revision 1.21  2002/01/29 23:41:21  Simplex
-// need zapitclient for bouquet editor
-//
-// Revision 1.20  2002/01/15 23:17:59  McClean
-// cleanup
-//
-// Revision 1.19  2002/01/15 20:12:15  McClean
-// cleanups
-//
-// Revision 1.18  2002/01/03 20:03:20  McClean
-// cleanup
-//
-// Revision 1.17  2001/12/31 16:27:13  McClean
-// use lcddclient
-//
-// Revision 1.16  2001/12/28 16:31:09  Simplex
-// libcontroldclient is now used
-//
-// Revision 1.15  2001/12/26 16:23:08  Simplex
-// -Streamwatchdog renamed to EventWatchDog and moved to Controld
-// -EventWatchdog now works with notifier-classes instead of callback-functioms
-//
-// Revision 1.14  2001/12/14 16:56:42  faralla
-// better bouquet-key handling
-//
-// Revision 1.13  2001/12/12 01:47:17  McClean
-// cleanup
-//
-// Revision 1.12  2001/12/01 23:12:55  Simplex
-// global instance of watchdog
-//
-// Revision 1.11  2001/11/23 16:58:41  McClean
-// update-functions
-//
-// Revision 1.10  2001/11/15 11:42:41  McClean
-// gpl-headers added
-//
-// Revision 1.9  2001/10/30 22:18:09  McClean
-// add ts-scan mask
-//
-// Revision 1.8  2001/10/09 21:48:37  McClean
-// ucode-check
-//
-// Revision 1.7  2001/09/20 19:21:37  fnbrd
-// Channellist mit IDs.
-//
-// Revision 1.6  2001/09/18 20:20:26  field
-// Eventlist in den Infov. verschoben (gelber Knopf), Infov.-Anzeige auf Knoepfe
-// vorbereitet
-//
-// Revision 1.5  2001/09/17 18:37:40  fnbrd
-// inserted id and log.
-//
-//
 
-#define USEACTIONLOG
+//#define USEACTIONLOG
 
 #include "neutrino.h"
 #include "controldclient.h"

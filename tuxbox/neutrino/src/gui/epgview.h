@@ -50,7 +50,6 @@
 #include "driver/fontrenderer.h"
 #include "widget/color.h"
 #include "helpers/settings.h"
-#include "options.h"
 
 #include "sections/sectionsdMsg.h"
 

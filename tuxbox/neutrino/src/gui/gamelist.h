@@ -27,23 +27,6 @@
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-$Id: gamelist.h,v 1.12 2002/02/22 22:10:38 field Exp $
-
-$Log: gamelist.h,v $
-Revision 1.12  2002/02/22 22:10:38  field
-vtxt: avia_vbi start/stop
-
-Revision 1.8  2002/01/15 23:17:59  McClean
-cleanup
-
-Revision 1.7  2002/01/03 20:03:20  McClean
-cleanup
-
-Revision 1.6  2001/12/05 21:17:50  rasc
-gamelist 2-spaltig mit description... Font muss noch verbessert werden
-
-
 */
 
 #ifndef __gamelist__
