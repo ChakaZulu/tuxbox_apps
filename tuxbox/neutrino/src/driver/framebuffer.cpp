@@ -4,14 +4,6 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	Kommentar:
-
-	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
-	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
-	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
-	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-
-
 	License: GPL
 
 	This program is free software; you can redistribute it and/or modify
@@ -679,6 +671,11 @@ void CFrameBuffer::paintBackgroundBoxRel(int x, int y, int dx, int dy)
 	}
 }
 
+void CFrameBuffer::paintBackgroundBoxRel(CPoint origin, CDimension dimension)
+{
+	paintBackgroundBoxRel( origin.getXPos(), origin.getYPos(), dimension.getWidth(), dimension.getHeight() );
+}
+
 void CFrameBuffer::paintBackground()
 {
 	if(!useBackgroundPaint)
@@ -715,3 +712,5 @@ void CFrameBuffer::RestoreScreen(int x, int y, int dx, int dy, unsigned char* me
 		bkpos += dx;
 	}
 }
+
+
