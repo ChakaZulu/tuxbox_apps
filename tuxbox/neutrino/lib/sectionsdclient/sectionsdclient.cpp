@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.25 2002/10/14 20:03:56 thegoodguy Exp $
+  $Id: sectionsdclient.cpp,v 1.26 2002/10/15 20:39:48 woglinde Exp $
 
   License: GPL
 
@@ -20,6 +20,12 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: sectionsdclient.cpp,v $
+  Revision 1.26  2002/10/15 20:39:48  woglinde
+
+
+  mostly coding styles, adding license to some files,
+  using dos2unix on one file
+
   Revision 1.25  2002/10/14 20:03:56  thegoodguy
   Use CBasicClient in sectionsdclient, too ; always close_connection (even when the sectionsd did not respond)
 
@@ -95,6 +101,7 @@
 
 
 */
+
 #include <stdio.h>
 
 //#include <netinet/in.h>
@@ -105,7 +112,9 @@
 
 
 #include <eventserver.h>
+#include <sectionsdclient/sectionsdMsg.h>
 #include <sectionsdclient/sectionsdclient.h>
+
 
 int CSectionsdClient::readResponse(char* data, int size)
 {

@@ -32,8 +32,8 @@
 #include <stdio.h>
 
 #include <eventserver.h>
-#include <controldclient/controldclient.h>
 #include <controldclient/controldMsg.h>
+#include <controldclient/controldclient.h>
 
 
 void CControldClient::send(const unsigned char command, char* data = NULL, const unsigned int size = 0)

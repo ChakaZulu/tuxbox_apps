@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.31 2002/10/06 01:18:49 dirch Exp $
+	$Id: request.cpp,v 1.32 2002/10/15 20:39:47 woglinde Exp $
 
 	License: GPL
 
@@ -24,6 +24,8 @@
 
 
 */
+
+
 #include <arpa/inet.h> 
 #include <sys/sendfile.h>
 #include <sys/types.h>
@@ -35,6 +37,7 @@
 #include "debug.h"
 
 #define OUTBUFSIZE 2048
+
 
 //-------------------------------------------------------------------------
 CWebserverRequest::CWebserverRequest(CWebserver *server) 

@@ -23,8 +23,6 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "audio.h"
-#include "dbox/avs_core.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -33,6 +31,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <math.h>
+
+#include <dbox/avs_core.h>
+#include "audio.h"
 
 
 void audioControl::setVolume(const unsigned char volume)

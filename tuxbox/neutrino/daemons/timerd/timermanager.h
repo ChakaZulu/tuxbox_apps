@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.h,v 1.25 2002/10/15 18:12:02 Zwen Exp $
+	$Id: timermanager.h,v 1.26 2002/10/15 20:39:48 woglinde Exp $
 
 	License: GPL
 
@@ -29,10 +29,11 @@
 #include <stdio.h>
 #include <map>
 
-#include "timerdclient/timerdtypes.h"
-#include "eventserver.h"
-#include "configfile.h"
-#include "config.h"
+#include <configfile.h>
+#include <config.h>
+
+#include <eventserver.h>
+#include <timerdclient/timerdtypes.h>
 
 #define CONFIGFILE CONFIGDIR "/timerd.conf"
 

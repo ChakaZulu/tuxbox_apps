@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.11 2002/10/15 17:36:09 Zwen Exp $
+	$Id: webapi.cpp,v 1.12 2002/10/15 20:39:47 woglinde Exp $
 
 	License: GPL
 
@@ -22,9 +22,12 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+
+
 #include "webapi.h"
 #include "debug.h"
 #include "algorithm"
+
 
 //-------------------------------------------------------------------------
 bool CWebAPI::Execute(CWebserverRequest* request)

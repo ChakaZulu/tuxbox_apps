@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.9 2002/10/15 17:36:09 Zwen Exp $
+	$Id: controlapi.cpp,v 1.10 2002/10/15 20:39:47 woglinde Exp $
 
 	License: GPL
 
@@ -22,6 +22,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+
+
 #include "webdbox.h"
 #include "controlapi.h"
 #include "debug.h"

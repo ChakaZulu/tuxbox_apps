@@ -30,8 +30,8 @@
 #include <pthread.h>
 
 #include <lcddisplay/lcddisplay.h>
-#include <lcddclient/lcddtypes.h>
 #include <lcddclient/lcddMsg.h>
+#include <lcddclient/lcddtypes.h>
 
 #include "lcdpainter.h"
 

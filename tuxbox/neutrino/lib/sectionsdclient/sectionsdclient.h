@@ -6,7 +6,6 @@
 #include <vector>
 
 #include <zapit/basicclient.h>
-#include <sectionsdclient/sectionsdMsg.h>
 
 
 using namespace std;

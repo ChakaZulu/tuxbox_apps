@@ -1,7 +1,7 @@
 #ifndef SISECTIONS_HPP
 #define SISECTIONS_HPP
 //
-// $Id: SIsections.hpp,v 1.13 2001/11/03 03:13:52 field Exp $
+// $Id: SIsections.hpp,v 1.14 2002/10/15 20:39:47 woglinde Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -24,6 +24,12 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.hpp,v $
+// Revision 1.14  2002/10/15 20:39:47  woglinde
+//
+//
+// mostly coding styles, adding license to some files,
+// using dos2unix on one file
+//
 // Revision 1.13  2001/11/03 03:13:52  field
 // Auf Perspektiven vorbereitet
 //

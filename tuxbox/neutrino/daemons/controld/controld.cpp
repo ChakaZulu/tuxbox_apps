@@ -47,11 +47,12 @@
 #include <ost/video.h>
 
 #include <zapit/zapitclient.h>
+#include <eventserver.h>
+
 #include <controldclient/controldclient.h>
 #include <controldclient/controldMsg.h>
 #include <lcddclient/lcddclient.h>
 #include <timerdclient/timerdclient.h>
-#include <eventserver.h>
 
 #include "eventwatchdog.h"
 #include "driver/audio.h"
@@ -779,7 +780,7 @@ void sig_catch(int signal)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.70 2002/10/14 13:15:28 thegoodguy Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.71 2002/10/15 20:39:47 woglinde Exp $\n\n");
 
 	//printf("[controld] mainThread-pid: %d\n", getpid());
 	switch (fork())

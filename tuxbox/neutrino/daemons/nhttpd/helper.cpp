@@ -26,10 +26,14 @@
 
 */
 
-#include "helper.h"
+
 #include    <stdlib.h>                      // calloc and free prototypes.
 #include    <stdio.h>                       // printf prototype.
 #include    <string.h>                      // str* and memset prototypes.
+
+#include "helper.h"
+
+
 //-------------------------------------------------------------------------
 string itoh(unsigned int conv)
 {

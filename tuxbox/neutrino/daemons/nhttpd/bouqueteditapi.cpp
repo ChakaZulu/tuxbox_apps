@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: bouqueteditapi.cpp,v 1.6 2002/10/06 01:18:49 dirch Exp $
+	$Id: bouqueteditapi.cpp,v 1.7 2002/10/15 20:39:47 woglinde Exp $
 
 	License: GPL
 
@@ -22,6 +22,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+
+
 #include "bouqueteditapi.h"
 #include "debug.h"
 

@@ -23,11 +23,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "lcdpainter.h"
 
 #include <config.h>
-#include "bigclock.h"
-#include "newclock.h"
 
 #include <dbox/fp.h>
 
@@ -36,6 +33,9 @@
 #include <sys/timeb.h>
 #include <time.h>
 
+#include "bigclock.h"
+#include "newclock.h"
+#include "lcdpainter.h"
 
 CLCDPainter::CLCDPainter()
 {

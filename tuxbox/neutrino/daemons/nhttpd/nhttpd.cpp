@@ -33,11 +33,12 @@
 #include <sys/types.h>
 #include <stdio.h>
 
+#include <config.h>
+
 #include "webserver.h"
 #include "webdbox.h"
 #include "debug.h"
 
-#include "config.h"
 
 using namespace std;
 

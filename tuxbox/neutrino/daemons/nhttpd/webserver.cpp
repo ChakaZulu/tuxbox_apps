@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski
 
-	$Id: webserver.cpp,v 1.19 2002/10/13 21:21:49 thegoodguy Exp $
+	$Id: webserver.cpp,v 1.20 2002/10/15 20:39:47 woglinde Exp $
 
 	License: GPL
 
@@ -23,6 +23,8 @@
 
 
 */
+
+
 #include <netinet/in.h> 
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
@@ -35,11 +37,13 @@
 #include "debug.h"
 
 #define NHTTPD_CONFIGFILE CONFIGDIR "/nhttpd.conf"
+
+
 struct Cmyconn
 {
 	socklen_t			clilen;
 	string				Client_Addr;
-	int					Socket;
+	int				Socket;
 	CWebserver			*Parent;	
 };
 

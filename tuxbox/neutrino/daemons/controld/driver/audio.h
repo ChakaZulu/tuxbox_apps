@@ -26,7 +26,7 @@
 #ifndef __audiocontrol__
 #define __audiocontrol__
 
-#include "ost/audio.h"
+#include <ost/audio.h>
 
 class audioControl
 {

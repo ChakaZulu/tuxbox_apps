@@ -36,6 +36,7 @@
 
 #include <controldclient/controldclient.h>
 #include <lcddclient/lcddclient.h>
+#include <sectionsdclient/sectionsdMsg.h>
 #include <sectionsdclient/sectionsdclient.h>
 #include <timerdclient/timerdclient.h>
 #include "daemonc/remotecontrol.h"

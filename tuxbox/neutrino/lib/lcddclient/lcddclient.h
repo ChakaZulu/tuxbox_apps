@@ -36,7 +36,6 @@
 
 #include <zapit/basicclient.h>
 #include <lcddclient/lcddtypes.h>
-#include <lcddclient/lcddMsg.h>
 
 
 using namespace std;

@@ -1,4 +1,4 @@
-SUBDIRS = icons clock
+SUBDIRS = clock icons
 
 INCLUDES = \
 	-I$(top_srcdir)/lib \
@@ -16,4 +16,3 @@ lcdd_LDADD = \
 	@FREETYPE_LIBS@ \
 	@LCDDISPLAY_LIBS@ \
 	-lpthread
-

@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.138 2002/10/13 21:21:49 thegoodguy Exp $
+//  $Id: sectionsd.cpp,v 1.139 2002/10/15 20:39:47 woglinde Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,12 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.139  2002/10/15 20:39:47  woglinde
+//
+//
+//  mostly coding styles, adding license to some files,
+//  using dos2unix on one file
+//
 //  Revision 1.138  2002/10/13 21:21:49  thegoodguy
 //  Cleanup includes
 //
@@ -439,8 +445,9 @@
 // Daher nehmen wir SmartPointers aus der Boost-Lib (www.boost.org)
 #include <boost/smart_ptr.hpp>
 
-#include <eventserver.h>
+#include <sectionsdclient/sectionsdMsg.h>
 #include <sectionsdclient/sectionsdclient.h>
+#include <eventserver.h>
 
 #include "SIutils.hpp"
 #include "SIservices.hpp"
@@ -2007,7 +2014,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.138 2002/10/13 21:21:49 thegoodguy Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.139 2002/10/15 20:39:47 woglinde Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -4567,7 +4574,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.138 2002/10/13 21:21:49 thegoodguy Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.139 2002/10/15 20:39:47 woglinde Exp $\n");
 
 	try
 	{
