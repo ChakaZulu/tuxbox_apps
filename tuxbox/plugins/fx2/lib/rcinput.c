@@ -9,9 +9,9 @@
 #include <draw.h>
 
 static	int				fd = -1;
-extern	unsigned short	actcode;
-extern	int				doexit;
-extern	int				debug;
+		unsigned short	actcode=0xee;
+		int				doexit=0;
+		int				debug=0;
 
 #define Debug	if(debug)printf
 
