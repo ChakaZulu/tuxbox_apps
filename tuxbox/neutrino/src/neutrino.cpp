@@ -2572,7 +2572,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget mp3picSettings("mp3picsettings.general", NEUTRINO_ICON_SETTINGS);
 	CMenuWidget scanSettings("servicemenu.scants", NEUTRINO_ICON_SETTINGS);
 	CMenuWidget service("servicemenu.head", NEUTRINO_ICON_SETTINGS);
-	CMenuWidget moviePlayer("movieplayer", "streaming.raw");
+	CMenuWidget moviePlayer("movieplayer.head", "streaming.raw");
     
 	InitMainMenu(mainMenu, mainSettings, audioSettings, parentallockSettings, networkSettings, recordingSettings,
 					 colorSettings, lcdSettings, keySettings, videoSettings, languageSettings, miscSettings,
