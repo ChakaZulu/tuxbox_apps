@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.298 2003/03/02 22:05:16 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.299 2003/03/03 04:03:49 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -565,7 +565,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	case CZapitMessages::CMD_GET_CURRENT_SERVICEID:
 	{
 		CZapitMessages::responseGetCurrentServiceID msgCurrentSID;
-		msgCurrentSID.channel_id = channel->getChannelID();
+		msgCurrentSID.channel_id = tuned_transponder_id ? channel->getChannelID() : 0;
 		CBasicServer::send_data(connfd, &msgCurrentSID, sizeof(msgCurrentSID));
 		break;
 	}
@@ -1422,7 +1422,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.298 2003/03/02 22:05:16 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.299 2003/03/03 04:03:49 obi Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
