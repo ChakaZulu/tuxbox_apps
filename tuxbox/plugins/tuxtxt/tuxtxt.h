@@ -173,8 +173,6 @@ FT_Face		face;
 
 //some data
 
-int mID;
-
 int dmx, pig, avs, rc, fb;
 int sx, ex, sy, ey;
 int vtxtpid;

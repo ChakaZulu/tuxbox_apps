@@ -5,6 +5,7 @@
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
+ *    V1.21: cleanup                                                          *
  *    V1.20: show servicename instead of pid                                  *
  *    V1.19: added configmenu                                                 *
  *    V1.18: hide navbar in newsflash/subtitle mode, workaround for gtx-pig   *
@@ -37,7 +38,7 @@ void plugin_exec(PluginParam *par)
 {
 	//show versioninfo
 
-		printf("\nTuxTxt 1.20 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
+		printf("\nTuxTxt 1.21 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
 
 	//get params
 
@@ -192,15 +193,6 @@ int Init()
 {
 	struct dmxPesFilterParams dmx_flt;
 	int error;
-
-	//get mID -> workaround for pig on gtx
-
-		mID = atoi(getenv("mID"));
-		if(mID == 0)
-		{
-			printf("TuxTxt <mID not found>\n");
-			return 0;
-		}
 
 	//open demuxer
 
@@ -1584,8 +1576,7 @@ void SwitchScreenMode()
 			fontwidth  =  8;
 			fontheight = 21;
 
-			if(mID == 1) avia_pig_set_pos(pig, (StartX+322-55), StartY);
-			else		 avia_pig_set_pos(pig, (StartX+322), StartY);
+			avia_pig_set_pos(pig, (StartX+322), StartY);
 			avia_pig_set_size(pig, 320, 526);
 			avia_pig_set_stack(pig, 2);
 			avia_pig_show(pig);
@@ -1671,7 +1662,7 @@ void RenderCharFB(int Char, int Attribute)
 
 	//load char
 
-		if((error = FT_Load_Char(face, 1 + Char + ((Attribute>>8 & 1) * (128-32)), FT_LOAD_RENDER | FT_LOAD_MONOCHROME)) != 0)
+		if((error = FT_Load_Char(face, Char + ((Attribute>>8 & 1) * (128-32)), FT_LOAD_RENDER | FT_LOAD_MONOCHROME)) != 0)
 		{
 			printf("TuxTxt <FT_Load_Char => 0x%.2X>\n", error);
 			PosX += fontwidth;
@@ -1750,7 +1741,7 @@ void RenderCharBB(int Char, int Attribute)
 
 	//load char
 
-		if((error = FT_Load_Char(face, 1 + Char + ((Attribute>>8 & 1) * (128-32)), FT_LOAD_RENDER | FT_LOAD_MONOCHROME)) != 0)
+		if((error = FT_Load_Char(face, Char + ((Attribute>>8 & 1) * (128-32)), FT_LOAD_RENDER | FT_LOAD_MONOCHROME)) != 0)
 		{
 			printf("TuxTxt <FT_Load_Char %.3d => 0x%.2X>\n", Char, error);
 			PosX += fontwidth;
@@ -2553,7 +2544,6 @@ void *CacheThread(void *arg)
 
 								if(cachetable[current_page][current_subpage] == 0)
 								{
-//									printf("TuxTxt <Adding Page %.3X-%.2X>\n", current_page, current_subpage);
 									cachetable[current_page][current_subpage] = malloc(PAGESIZE);
 									memset(cachetable[current_page][current_subpage], ' ', PAGESIZE);
 								}
@@ -2579,21 +2569,8 @@ void *CacheThread(void *arg)
 
 								if(dehamming[vtxt_row[9]] & 8)	//C4 -> erase page
 								{
-//									printf("TuxTxt <Erase Page => %.3X-%.2X>\n", current_page, current_subpage);
 									memset(cachetable[current_page][current_subpage], ' ', PAGESIZE);
 								}
-
-//								if(dehamming[vtxt_row[12]] & 2)	//C7 -> suppress header
-//								{
-//									printf("TuxTxt <Suppress Header => %.3X-%.2X>\n", current_page, current_subpage);
-//									goto SkipPacket;
-//								}
-
-//								if(dehamming[vtxt_row[12]] & 8)	//C10 -> inhibit display
-//								{
-//									printf("TuxTxt <Inhibit Display => %.3X-%.2X>\n", current_page, current_subpage);
-//									current_page = -1;
-//								}
 						}
 						else if(packet_number < 24)
 						{
