@@ -152,6 +152,8 @@ class CFileBrowser
 		unsigned int		selected;
 		unsigned int		liststart;
 		unsigned int		listmaxshow;
+		std::vector<unsigned int> selections;
+
 		int 			fheight;	// Fonthoehe Filelist-Inhalt
 		int 			theight;	// Fonthoehe Filelist-Titel
 		int			foheight;	// Hoehe der button leiste
@@ -180,7 +182,10 @@ class CFileBrowser
 	public:
 		CFileList		filelist;
 
-		void ChangeDir(const std::string & filename);
+		/**
+		 * @param selection select the specified entry, ignored if selection == -1
+		 */
+		void ChangeDir(const std::string & filename, int selection = -1);
 		void hide();
 
 		std::string		Path;

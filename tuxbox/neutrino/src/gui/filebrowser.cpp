@@ -370,6 +370,7 @@ void CFileBrowser::commonInit()
 	Dirs_Selectable = false;
 	Dir_Mode = false;
 	selected = 0;
+	selections.clear();
 
 	x = g_settings.screen_StartX + 20;
 	y = g_settings.screen_StartY + 20;
@@ -409,7 +410,7 @@ CFile *CFileBrowser::getSelectedFile()
 
 //------------------------------------------------------------------------
 
-void CFileBrowser::ChangeDir(const std::string & filename)
+void CFileBrowser::ChangeDir(const std::string & filename, int selection)
 {
 	std::string newpath;
 	if(filename == "..")
@@ -469,6 +470,8 @@ void CFileBrowser::ChangeDir(const std::string & filename)
 	sort(filelist.begin(), filelist.end(), sortBy[g_settings.filebrowser_sortmethod]);
 
 	selected = 0;
+	if ((selection != -1) && (selection < (int)filelist.size()))
+		selected = selection;
 	paintHead();
 	paint();
 }
@@ -729,12 +732,22 @@ bool CFileBrowser::exec(const char * const dirname)
 			if (!(filelist.empty()))
 			{
 				if (S_ISDIR(filelist[selected].Mode) && (filelist[selected].getFileName() != ".."))
+				{
+					selections.push_back(selected);
 					ChangeDir(filelist[selected].Name);
+				}
 			}
 		}
 		else if ( msg == CRCInput::RC_left )
-		{
-			ChangeDir("..");
+		{			
+			if (selections.size() > 0)
+			{
+				ChangeDir("..",selections.back());
+				selections.pop_back();
+			} else
+			{
+				ChangeDir("..");
+			}
 		}
 		else if ( msg == CRCInput::RC_blue )
 		{
@@ -772,7 +785,16 @@ bool CFileBrowser::exec(const char * const dirname)
 			if (!(filelist.empty()))			
 			{
 				if (filelist[selected].getFileName() == "..")
-					ChangeDir("..");
+				{
+					if (selections.size() > 0)
+					{
+						ChangeDir("..",selections.back());
+						selections.pop_back();
+					} else
+					{
+						ChangeDir("..");
+					}
+				}
 				else
 				{
 					std::string filename = filelist[selected].Name;
