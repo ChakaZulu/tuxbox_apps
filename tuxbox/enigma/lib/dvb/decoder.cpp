@@ -12,7 +12,7 @@
 #include <signal.h>
 #include <errno.h>
 
-//#define OLD_VBI
+// #define OLD_VBI
 
 #undef strcpy
 #undef strcmp
@@ -199,7 +199,7 @@ int Decoder::Set()
     // vtxt reinsertion (ost api)
     if ( fd.demux_vtxt == -1 )
 		{
-			fd.demux_vtxt=open("/dev/dbox/vbi0, O_RDWR");
+			fd.demux_vtxt=open("/dev/dbox/vbi0", O_RDWR);
 			if (fd.demux_vtxt<0)
 				eDebug("fd.demux_vtxt couldn't be opened");
 /*			else
