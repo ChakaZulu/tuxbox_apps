@@ -29,12 +29,21 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-
+#include <algorithm>
 #include <global.h>
 #include <neutrino.h>
 
 #include "eventlist.h"
 
+// sort operators
+bool sortById (const CChannelEvent& a, const CChannelEvent& b)
+{
+	return a.eventID < b.eventID ;
+}
+bool sortByDescription (const CChannelEvent& a, const CChannelEvent& b)
+{
+	return a.description < b.description ;
+}
 
 EventList::EventList()
 {
@@ -62,6 +71,7 @@ EventList::EventList()
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
 	liststart = 0;
+	sort_mode = 0;
 }
 
 
@@ -143,6 +153,34 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 			else
 				selected -= listmaxshow;
 			liststart = (selected/listmaxshow)*listmaxshow;
+			paint();
+		}
+		else if ( msg == (uint) g_settings.key_channelList_sort )
+		{
+			unsigned long long selected_id = evtlist[selected].eventID;
+			if(sort_mode==0)
+			{
+				sort_mode=1;
+				sort(evtlist.begin(),evtlist.end(),sortByDescription);
+			}
+			else
+			{
+				sort_mode=0;
+				sort(evtlist.begin(),evtlist.end(),sortById);
+			}
+			// find selected
+			for ( selected=0 ; selected < evtlist.size(); selected++ )
+			{
+				if ( evtlist[selected].eventID == selected_id )
+					break;
+			}
+			oldselected=selected;
+			if(selected <=listmaxshow)
+				liststart=0;
+			else
+				liststart=(selected/listmaxshow)*listmaxshow;
+			hide();
+			paintHead();
 			paint();
 		}
 		else if ( msg == CRCInput::RC_up )

@@ -109,7 +109,9 @@ struct NeutrinoMessages {
 		mode_tv = 	1,
 		mode_radio = 2,
 		mode_scart = 3,
-		mode_standby = 	4
+		mode_standby = 4,
+		mode_mask = 0xFF,
+		norezap = 0x100
 	};
 };
 

@@ -147,6 +147,8 @@ keybindingmenu.pagedown Seite runterbl‰ttern
 keybindingmenu.pagedown_head Seite runterbl‰ttern
 keybindingmenu.cancel Kanalliste schlieﬂen
 keybindingmenu.cancel_head Kanalliste schlieﬂen
+keybindingmenu.sort Sortierreihenfolge ‰ndern
+keybindingmenu.sort_head Sortierreihenfolge ‰ndern
 keybindingmenu.channelup Kanal hoch
 keybindingmenu.channelup_head Kanal hoch Taste
 keybindingmenu.channeldown Kanal runter
@@ -539,6 +541,7 @@ timerlist.menunew Neuer Timer
 timerlist.reload Aktualisieren
 timerlist.modify Bearbeiten
 timerlist.message Nachricht
+timerlist.apid Audio PID
 timersettings.separator Timereinstellungen
 timersettings.record_safety_time Aufnahmekorrektur
 

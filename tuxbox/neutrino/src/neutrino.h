@@ -66,10 +66,12 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		enum
 		{
 			mode_unknown = -1,
-		    	mode_tv = 1,
+			mode_tv = 1,
 			mode_radio = 2,
 			mode_scart = 3,
-			mode_standby = 4
+			mode_standby = 4,
+			mode_mask = 0xFF,
+			norezap = 0x100
 		};
 
 		CConfigFile			configfile;
@@ -189,6 +191,8 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 
 		int handleMsg(uint msg, uint data);
 		void showProfiling( string text );
+
+		int getMode() {return mode;}
 
 	friend class CNeutrinoBouquetEditorEvents;
 };

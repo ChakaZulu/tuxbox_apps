@@ -75,6 +75,7 @@ class EventList
 		int 		height;
 		int 		x;
 		int 		y;
+		int      sort_mode;
 
 		void paintItem(unsigned pos);
 		void paint();

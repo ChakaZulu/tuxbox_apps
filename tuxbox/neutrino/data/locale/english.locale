@@ -147,6 +147,8 @@ keybindingmenu.pagedown page down
 keybindingmenu.pagedown_head Keysetup page down
 keybindingmenu.cancel close channellist
 keybindingmenu.cancel_head channellist close
+keybindingmenu.sort change sort order
+keybindingmenu.sort_head change sort order
 keybindingmenu.channelup channel up
 keybindingmenu.channelup_head Keysetup channel up
 keybindingmenu.channeldown channel down
@@ -542,6 +544,7 @@ timerlist.menunew New timer
 timerlist.reload Reload
 timerlist.modify Modify
 timerlist.message Message
+timerlist.apid Audio PID
 timersettings.separator Timersettings
 timersettings.record_safety_time Record time correction
 

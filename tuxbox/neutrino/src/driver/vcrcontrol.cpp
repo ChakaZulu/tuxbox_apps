@@ -29,21 +29,20 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include <sys/un.h>
-#include <string.h>
 
 #include <global.h>
 #include <neutrinoMessages.h>
 
 #include <gui/widget/messagebox.h>
+#include <liblircdclient.h>
 
 #include "vcrcontrol.h"
-
-
-#define SA struct sockaddr
-#define SAI struct sockaddr_in
+#include "neutrino.h"
 
 #define LIRCDIR "/var/tuxbox/config/"
 
+#define SA struct sockaddr
+#define SAI struct sockaddr_in
 
 CVCRControl* CVCRControl::getInstance()
 {
@@ -105,7 +104,7 @@ int CVCRControl::registerDevice(CVCRDevices deviceType, CDeviceInfo *deviceInfo)
 	static int i = 0;
 	if(deviceType == DEVICE_SERVER)
 	{
-		CServerDevice * device =  new CServerDevice(i++);		
+		CServerDevice * device =  new CServerDevice(i++);     
 		Devices[device->deviceID] = (CDevice*) device;
 		setDeviceOptions(device->deviceID,deviceInfo);
 		printf("CVCRControl registered new serverdevice: %u %s\n",device->deviceID,device->Name.c_str());
@@ -123,93 +122,60 @@ int CVCRControl::registerDevice(CVCRDevices deviceType, CDeviceInfo *deviceInfo)
 		return -1;
 }
 
-
-
-//-------------------------------------------------------------------------
-void CVCRControl::CVCRDevice::IRDeviceDisconnect()
-{
-	close(sock_fd);
-}
-
-//-------------------------------------------------------------------------
-bool CVCRControl::CVCRDevice::sendCommand(std::string command, const t_channel_id channel_id, unsigned long long epgid, uint apid)
-{
-	if(IRDeviceConnect())
-	{
-		std::stringstream ostr;
-		ostr << "SEND_ONCE " << Name << " " << command << std::endl << std::ends;
-		write(sock_fd, ostr.str().c_str(), ostr.str().length());
-		IRDeviceDisconnect();
-		return true;
-	}
-	else
-		return false;
-}
-//-------------------------------------------------------------------------
-bool CVCRControl::CVCRDevice::IRDeviceConnect()
-{
-	struct sockaddr_un addr;
-
-	addr.sun_family=AF_UNIX;
-	strcpy(addr.sun_path, "/dev/lircd");
-	sock_fd = socket(AF_UNIX,SOCK_STREAM,0);
-	if(!sock_fd)
-	{
-		printf("could not open lircd-socket\n");
-		return false;
-	};
-
-	if(!connect(sock_fd,(struct sockaddr *)&addr,sizeof(addr))==-1)
-	{
-		printf("could not connect to lircd-socket\n");
-		return false;
-	};
-	return true;
-
-}
 //-------------------------------------------------------------------------
 bool CVCRControl::CVCRDevice::Stop()
 {
 	deviceState = CMD_VCR_STOP;
-	// leave scart mode
-	g_RCInput->postMsg( NeutrinoMessages::VCR_OFF, 0 );
+
+	if(last_mode == NeutrinoMessages::mode_radio)
+	{
+		g_RCInput->postMsg( NeutrinoMessages::CHANGEMODE , NeutrinoMessages::mode_radio);
+	}
+	else if(last_mode == NeutrinoMessages::mode_tv)
+	{
+		g_RCInput->postMsg( NeutrinoMessages::VCR_OFF, 0 );
+	}
+	else if(last_mode == NeutrinoMessages::mode_standby)
+	{
+		g_RCInput->postMsg( NeutrinoMessages::VCR_OFF, 0 );
+		g_RCInput->postMsg( NeutrinoMessages::STANDBY_ON, 0 );
+	}
 	return ParseFile(LIRCDIR "stop.lirc");
 }
 
 //-------------------------------------------------------------------------
 bool CVCRControl::CVCRDevice::ParseFile(string filename)
 {
-FILE *inp;
-char buffer[101];
-char outbuffer[200];
-int wait_time;
-
+	FILE *inp;
+	char buffer[101];
+	int wait_time;
 	if( (inp = fopen(filename.c_str(),"r")) > 0)
 	{
-		IRDeviceConnect();
-		std::stringstream ostr;
-
-		while(!feof(inp))
+		CLircdClient lirc;
+		if(lirc.Connect())
 		{
-			if(fgets(buffer,100,inp) != NULL)
+			while(!feof(inp))
 			{
-				if(strncmp(buffer,"WAIT",4) == 0)		
-				{			// if wait command then sleep for n seconds
-					sscanf(&buffer[4],"%d",&wait_time);
-					if(wait_time > 0)
-						sleep(wait_time);
-				}
-				else
+				if(fgets(buffer,100,inp) != NULL)
 				{
-					sprintf(outbuffer,"SEND_ONCE %s %s \n",Name.c_str(),buffer);
-					printf("lirc send line: '%s'\n",outbuffer);
-	//				ostr << "SEND_ONCE " << Name << " " << buffer << std::endl << std::ends;
-					write(sock_fd, outbuffer, strlen(outbuffer)+1);
+					if(strncmp(buffer,"WAIT",4) == 0)
+					{			// if wait command then sleep for n seconds
+						sscanf(&buffer[4],"%d",&wait_time);
+						if(wait_time > 0)
+							sleep(wait_time);
+					}
+					else
+					{
+						// remove \n
+						if(buffer[strlen(buffer)-1]=='\n')
+							buffer[strlen(buffer)-1]=0;
+						lirc.SendCmd(Name, buffer);
+					}
 				}
 			}
+			lirc.Disconnect();
+			return true;
 		}
-		IRDeviceDisconnect();
-		return true;
 	}
 	else
 		printf("konnte datei %s nicht oeffnen\n",filename.c_str());
@@ -218,6 +184,19 @@ int wait_time;
 //-------------------------------------------------------------------------
 bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, unsigned long long epgid, uint apid)
 {
+	// leave menu (if in any)
+	g_RCInput->postMsg( CRCInput::RC_timeout, 0 );
+	
+	last_mode = CNeutrinoApp::getInstance()->getMode();
+	if(last_mode == NeutrinoMessages::mode_radio)
+	{
+		CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , NeutrinoMessages::mode_tv | NeutrinoMessages::norezap );
+	}
+	else if(last_mode == NeutrinoMessages::mode_standby)
+	{
+		CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , NeutrinoMessages::mode_tv | NeutrinoMessages::norezap );
+	}
+	
 	if(channel_id != 0)		// wenn ein channel angegeben ist
 	{
 		if(g_Zapit->getCurrentServiceID() != channel_id)	// und momentan noch nicht getuned ist
@@ -227,27 +206,16 @@ bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, unsigned lon
 	}
 	if(apid !=0) //selbiges für apid
 	{
- 		CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo ();
+		CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo ();
 		if(si.apid != apid)
 		{
-			printf("Setting Audio channel to %x\n",apid);
 			g_Zapit->setAudioChannel(apid);
 		}
 	}
+	// Auf Scart schalten
+	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::VCR_ON, 0 );
 	deviceState = CMD_VCR_RECORD;
-	// switch to scart mode
-	g_RCInput->postMsg( NeutrinoMessages::VCR_ON, 0 );
-/*
-sendCommand(POWER
-CONTROL Wait 1
-IR Send CH1
-CONTROL Wait 1
-IR Send CH1
-CONTROL Wait 1
-IR Send CH0
-CONTROL Wait 1
-IR Send RECOTR
-*/
+	// Send IR
 	return ParseFile(LIRCDIR "record.lirc");
 }
 
@@ -338,7 +306,7 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channe
 //		sprintf(tmp,"%u", g_RemoteControl->current_PIDs.PIDs.vpid );
 		CZapitClient::responseGetPIDs pids;
 		g_Zapit->getPIDS (pids);
- 		CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo ();
+		CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo ();
 		sprintf(tmp,"%u", si.vdid );
 		extVideoPID = tmp;
 //		sprintf(tmp,"%u", g_RemoteControl->current_PIDs.APIDs[g_RemoteControl->current_PIDs.PIDs.selected_apid].pid);
