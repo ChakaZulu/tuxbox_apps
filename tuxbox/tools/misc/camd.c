@@ -63,7 +63,7 @@ void _writecam(int cmd, unsigned char *data, int len)
   	perror("ioctl");
   }
 
-  printf("%d >",len);
+  printf("%03d >",len);
   for (i=0; i<len; i++)
     printf(" %02x", buffer[i]);
   printf("\n");
@@ -312,6 +312,11 @@ int main(int argc, char **argv)
   int initok=0, caid=0;
   int SID=9, ONID=0x85, ECMPID=0, EMMPID=0, VPID=0x1FF, APID=0x200,pmt=0;
   
+  int cardslot0,cardslot1;
+
+  cardslot0=0;
+  cardslot1=0;
+
   camfd=open("/dev/ost/ca0", O_RDWR);
 
   if( camfd <= 0 )
@@ -407,7 +412,7 @@ int main(int argc, char **argv)
       printf("\n");
       continue;
     }
-    printf("<");
+    printf("%03d <",len+4);
     for (i=0; i<len+4; i++)
       printf(" %02x", buffer[i]);
     printf("\n");
@@ -476,9 +481,43 @@ int main(int argc, char **argv)
         start(SID);
         break;
       }
+      case 0x8F:
+      {
+        printf("descramble_answer (special)\n");
+        start(SID);
+        break;
+      }
       case 0x9F:
       {
         printf("cardslot %02x %02x\n", buffer[5], buffer[6]);
+		if( buffer[5]&0x01 )
+		{
+			// no card in slot 0
+			printf("no card in slot 0 (KARTE2)\n");
+			cardslot0=0;
+		}
+		else
+		{
+			// card in slot 0
+			printf("card found in slot 0 (KARTE2)\n");
+			cardslot0=1;
+		}
+
+		if( buffer[6]&0x01 )
+		{
+			// no card in slot 0
+			printf("no card in slot 1 (KARTE1)\n");
+			cardslot1=0;
+		}
+		else
+		{
+			// card in slot 0
+			printf("card found in slot 1 (KARTE1)\n");
+//			if (cardslot1==0)
+//				initok=0;
+			cardslot1=1;
+		}
+
         if (!initok)
         {
           init();
@@ -506,6 +545,7 @@ int main(int argc, char **argv)
         printf("status(%02x): service-id: %04x", buffer[7], (buffer[5]<<8)|buffer[6]);
         for (i=4; i<len; i+=3)
           printf(", pid %x:=%x", (buffer[4+i]<<8)|buffer[i+5], buffer[i+6]);
+		printf("\n");
         break;
       }
       default:
