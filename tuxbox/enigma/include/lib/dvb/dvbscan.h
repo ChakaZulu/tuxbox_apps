@@ -13,6 +13,7 @@ public:
 		eventScanBegin=eDVBEvent::eventUser,		// -> next
 		eventScanTPadded,
 		eventScanNext,		// -> tune
+		eventScanTuneBegin,
 		eventScanTuneOK,	// tuneOK führt zu "getPAT"
 		eventScanTuneError,	// tuneError führt zu ScanError
 		eventScanGotPAT,	// -> Wait

@@ -117,7 +117,10 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 				eDebug("[SCAN] tune failed because of missing infos");
 				dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanError));
 			} else
+			{
+				dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanTuneBegin, 0, next));
 				dvb.setState(eDVBScanState(eDVBScanState::stateScanTune));
+			}
 		}
 		break;
 	}

@@ -434,10 +434,23 @@ int tsAutomatic::tuneNext(int next)
 	static int i=0;
 	i++;
 	eString progress=_("Search in progress ");
-	char bla [(i%9)+1];
-	memset(bla, '.', i%9);
-	bla[i%9]=0;
+	char bla [(i%5)+1];
+	memset(bla, '.', i%5);
+	bla[i%5]=0;
 	progress += bla;
+	if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )
+	{
+		progress += eString().sprintf("\n%d / %d / %c",
+			current_tp->satellite.frequency/1000,
+			current_tp->satellite.symbol_rate/1000,
+			current_tp->satellite.polarisation?'V':'H');
+	}
+	else
+	{
+		progress += eString().sprintf("\n%d / %d",
+			current_tp->cable.frequency/1000,
+			current_tp->cable.symbol_rate/1000 );
+	}
 	l_status->setText(progress);
 
 	return 0;
@@ -518,6 +531,9 @@ tsScan::tsScan(eWidget *parent, eString sattext)
 
 	service_provider = new eLabel(this);
 	service_provider->setName("service_provider");
+
+	transponder_data = new eLabel(this);
+	transponder_data->setName("transponder_data");
 
 	progress = new eProgress(this);
 	progress->setName("scan_progress");
@@ -653,10 +669,25 @@ void tsScan::dvbEvent(const eDVBEvent &event)
 			perc=(int) ( ( 100.00 / (tpLeft+tpScanned) ) * tpScanned );
 			progress->setPerc(perc);
 		break;
+	case eDVBScanEvent::eventScanTuneBegin:
+		if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )
+		{
+			transponder_data->setText( eString().sprintf("%d Mhz / %d ksyms / %s",
+				event.transponder->satellite.frequency / 1000,
+				event.transponder->satellite.symbol_rate / 1000,
+				event.transponder->satellite.polarisation?_("Vertical"):"Horizontal") );
+		}
+		else
+		{
+			transponder_data->setText( eString().sprintf("%d Mhz / %d ksyms",
+				event.transponder->cable.frequency / 1000,
+				event.transponder->cable.symbol_rate / 1000));
+		}
+		break;
 	case eDVBScanEvent::eventScanNext:
 			tpLeft--;
 			tpScanned++;
-			transponder_scanned->setText(eString().sprintf("%i", tpScanned));
+			transponder_scanned->setText(eString().sprintf("%d", tpScanned));
 			perc=(int) ( ( 100.00 / (tpLeft+tpScanned) ) * tpScanned );
 			progress->setPerc(perc);
 		break;
