@@ -2,3 +2,5 @@
 Makefile
 Makefile.in
 .deps
+stamp-h
+stamp-h.in
