@@ -22,7 +22,7 @@ function switchChannel(xy, bouquet, channel)
 	if (screen.width < 800)
 		setTimeout("reload()", 3000);
 	else
-		setTimeout("parent.header.location.reload()", 3000);
+		setTimeout("zapHeaderReload()", 3000);
 }
 
 function deleteMovie(xy)
