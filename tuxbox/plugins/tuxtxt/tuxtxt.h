@@ -82,7 +82,7 @@
 #if CFGTTF 
 int fontheight, fontwidth, fontwidth_normal, fontwidth_small, fontwidth_topmenumain, fontwidth_topmenusmall, ascender;
 int ymosaic[4];
-#define TTFWIDTHFACTOR 3/2 /* FIXME: otherwise too much space btw chars */
+#define TTFWIDTHFACTOR 4 /* FIXME: otherwise too much space btw chars */
 
 #define fontwidth_small_lcd 8
 #else
