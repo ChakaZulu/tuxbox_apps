@@ -108,11 +108,7 @@ void CVCRControl::registerDevice(CDevice * const device)
 //-------------------------------------------------------------------------
 bool CVCRControl::Record(const CTimerd::RecordingInfo * const eventinfo)
 {
-	int mode = g_Zapit->isChannelTVChannel(eventinfo->channel_id) ;
-	if(mode == 0 || mode == 1)
-		mode = NeutrinoMessages::mode_tv ;
-	else
-		mode = NeutrinoMessages::mode_radio;
+	int mode = g_Zapit->isChannelTVChannel(eventinfo->channel_id) ? NeutrinoMessages::mode_tv : NeutrinoMessages::mode_radio;
 
 	return Device->Record(eventinfo->channel_id, mode, eventinfo->epgID, eventinfo->apids); 
 }
