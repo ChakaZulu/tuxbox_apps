@@ -70,7 +70,7 @@ int endianTest=1;
 
 #define MAX_OUTPUT_SAMPLES 1022 /* AVIA_GT_PCM_MAX_SAMPLES-1 */
 
-CBaseDec::RetCode CWavDec::Decoder(FILE *in, int OutputFd, State* state, CAudioMetaData* meta_data, time_t* time_played)
+CBaseDec::RetCode CWavDec::Decoder(FILE *in, int OutputFd, State* state, CAudioMetaData* meta_data, time_t* time_played, unsigned int* secondsToSkip)
 {
 	char* buffer;
 	RetCode Status=OK; 
@@ -99,10 +99,12 @@ CBaseDec::RetCode CWavDec::Decoder(FILE *in, int OutputFd, State* state, CAudioM
 		Status=DSPSET_ERR;
 		return Status;
 	}
+	int actSecsToSkip = (*secondsToSkip != 0) ? *secondsToSkip : MSECS_TO_SKIP / 1000;
+	unsigned int oldSecsToSkip = *secondsToSkip;
 	int jumppos=0;
 	int bytes;
 	int bytes_to_play = (int) (1.0 * MSECS_TO_PLAY / 1000 * meta_data->bitrate / 8);
-	int bytes_to_skip = (int) (1.0 * MSECS_TO_SKIP / 1000 * meta_data->bitrate / 8);
+	int bytes_to_skip = (int) (1.0 * actSecsToSkip * meta_data->bitrate / 8);
 	int buffersize = MAX_OUTPUT_SAMPLES * mChannels * mBitsPerSample / 8;
 	buffer = (char*) malloc (buffersize);
 	do
@@ -112,6 +114,13 @@ CBaseDec::RetCode CWavDec::Decoder(FILE *in, int OutputFd, State* state, CAudioM
 		
 		if(*state==FF || *state==REV)
 		{
+			if (oldSecsToSkip != *secondsToSkip)
+			{
+				actSecsToSkip = (*secondsToSkip != 0) ? *secondsToSkip : MSECS_TO_SKIP / 1000;
+				bytes_to_skip = (int) (1.0 * actSecsToSkip * meta_data->bitrate / 8);
+				oldSecsToSkip = *secondsToSkip;
+			}
+			//printf("skipping %d secs and %d bytes\n",actSecsToSkip,bytes_to_skip);
 			if(std::abs(ftell(in)-jumppos) > bytes_to_play)
 			{
 				if(*state==FF)
@@ -132,6 +141,10 @@ CBaseDec::RetCode CWavDec::Decoder(FILE *in, int OutputFd, State* state, CAudioM
 						jumppos=ftell(in);
 					}
 				}
+			}
+			// if a custom value was set we only jump once
+			if (*secondsToSkip != 0) {
+				*state=PLAY;
 			}
 		}
 

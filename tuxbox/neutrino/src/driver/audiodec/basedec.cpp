@@ -41,28 +41,28 @@
 
 unsigned int CBaseDec::mSamplerate=0;
 
-CBaseDec::RetCode CBaseDec::DecoderBase(FILE *InputFp,int OutputFd, State* state, CAudioMetaData* md, time_t* t)
+CBaseDec::RetCode CBaseDec::DecoderBase(FILE *InputFp,int OutputFd, State* state, CAudioMetaData* md, time_t* t, unsigned int* secondsToSkip)
 {
 	RetCode Status;
 	if(ftype(InputFp, "ogg"))
 	{
 		printf("(ogg)\n");
-		Status = COggDec::getInstance()->Decoder(InputFp, OutputFd, state, md, t);
+		Status = COggDec::getInstance()->Decoder(InputFp, OutputFd, state, md, t, secondsToSkip);
 	}
 	else if(ftype(InputFp, "cdr"))
 	{
 		printf("(cdr)\n");
-		Status = CCdrDec::getInstance()->Decoder(InputFp, OutputFd, state, md, t);
+		Status = CCdrDec::getInstance()->Decoder(InputFp, OutputFd, state, md, t, secondsToSkip);
 	}
 	else if(ftype(InputFp, "wav"))
 	{
 		printf("(wav)\n");
-		Status = CWavDec::getInstance()->Decoder(InputFp, OutputFd, state, md, t);
+		Status = CWavDec::getInstance()->Decoder(InputFp, OutputFd, state, md, t, secondsToSkip);
 	}
 	else
 	{
 		printf("(mp3)\n");
-		Status = CMP3Dec::getInstance()->Decoder(InputFp, OutputFd, state, md, t);
+		Status = CMP3Dec::getInstance()->Decoder(InputFp, OutputFd, state, md, t, secondsToSkip);
 	}
 	return Status;
 }

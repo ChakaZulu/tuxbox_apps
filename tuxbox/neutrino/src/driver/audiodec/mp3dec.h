@@ -49,11 +49,11 @@ class CMP3Dec : public CBaseDec
 {
 private:
 	enum mad_layer m_layer;
-   enum mad_mode m_mode;
-   enum mad_emphasis m_emphasis;
-   unsigned long m_bitrate;
-   unsigned int m_samplerate;
-   bool m_vbr;
+	enum mad_mode m_mode;
+	enum mad_emphasis m_emphasis;
+	unsigned long m_bitrate;
+	unsigned int m_samplerate;
+	bool m_vbr;
 	unsigned int m_filesize;
 
 	const char*  MadErrorString(const struct mad_stream *Stream);
@@ -64,7 +64,7 @@ private:
 
 public:
 	static CMP3Dec* getInstance();
-	virtual RetCode Decoder(FILE *InputFp,int OutputFd, State* state, CAudioMetaData* m, time_t* t);
+	virtual RetCode Decoder(FILE *InputFp,int OutputFd, State* state, CAudioMetaData* m, time_t* t, unsigned int* secondsToSkip);
 	bool GetMetaData(FILE *in, bool nice, CAudioMetaData* m);
 	CMP3Dec(){};
 

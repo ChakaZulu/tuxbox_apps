@@ -53,7 +53,7 @@ class COggDec : public CBaseDec
 
 public:
 	static COggDec* getInstance();
-	virtual RetCode Decoder(FILE *,int , State* , CAudioMetaData* m, time_t* t);
+	virtual RetCode Decoder(FILE *,int , State* , CAudioMetaData* m, time_t* t, unsigned int* secondsToSkip);
 	bool GetMetaData(FILE *in, bool nice, CAudioMetaData* m);
 	COggDec(){};
 private:

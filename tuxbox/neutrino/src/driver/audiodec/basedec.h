@@ -39,10 +39,12 @@ public:
 	enum RetCode { OK = 0, READ_ERR, WRITE_ERR, DSPSET_ERR, DATA_ERR, INTERNAL_ERR };
 
 	// the follwing two methods have to be implemented for new decoders
-	virtual RetCode Decoder(FILE *InputFp,int OutputFd, State* state, CAudioMetaData* m, time_t* t)=0;
+	//@param secondsToSkip: a value of 0 indicates that normal FF/REV operation was requested
+	//                      a value  > 0 indicates that *one* jump forwards (FF) or backwards (REV) was requested
+	virtual RetCode Decoder(FILE *InputFp,int OutputFd, State* state, CAudioMetaData* m, time_t* t, unsigned int* secondsToSkip)=0;
 	virtual bool GetMetaData(FILE *in, bool nice, CAudioMetaData* m)=0;
 	
-	static RetCode DecoderBase(FILE *InputFp,int OutputFd, State* state, CAudioMetaData* m, time_t* t);
+	static RetCode DecoderBase(FILE *InputFp,int OutputFd, State* state, CAudioMetaData* m, time_t* t, unsigned int* secondsToSkip);
 	static bool GetMetaDataBase(FILE *in, bool nice, CAudioMetaData* m);
 	static void Init();
 

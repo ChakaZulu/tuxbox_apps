@@ -65,7 +65,7 @@ long ogg_tell(void *data)
 #define PCMBUFFER 4096 //4096 max for libtremor
 #define MAX_OUTPUT_SAMPLES 1022 /* AVIA_GT_PCM_MAX_SAMPLES-1 */
 
-CBaseDec::RetCode COggDec::Decoder(FILE *in, int OutputFd, State* state, CAudioMetaData* meta_data, time_t* time_played)
+CBaseDec::RetCode COggDec::Decoder(FILE *in, int OutputFd, State* state, CAudioMetaData* meta_data, time_t* time_played, unsigned int* secondsToSkip)
 {
   OggVorbis_File vf;
   int bitstream, rval;
@@ -148,28 +148,32 @@ CBaseDec::RetCode COggDec::Decoder(FILE *in, int OutputFd, State* state, CAudioM
 #endif
 		  bytes+=rval;
 	  } while (rval > 0 && bytes !=mSlotSize);
+	  int actMSecsToSkip = (*secondsToSkip != 0) ? *secondsToSkip * 1000 : MSECS_TO_SKIP;
 	  if((*state==FF || *state==REV) && mSeekable )
 	  {
 		  if((std::abs(mSlotTime[mWriteSlot]-jumptime)) > MSECS_TO_PLAY)
 		  {
 			  if(*state==FF)
 			  {
-				  ov_time_seek_page(&vf, mSlotTime[mWriteSlot] + MSECS_TO_SKIP);
-				  jumptime=mSlotTime[mWriteSlot]+MSECS_TO_SKIP;
+				  ov_time_seek_page(&vf, mSlotTime[mWriteSlot] + actMSecsToSkip);
+				  jumptime=mSlotTime[mWriteSlot]+actMSecsToSkip;
 			  }
 			  else
 			  {
-				  if(mSlotTime[mWriteSlot] < MSECS_TO_SKIP)
+				  if(mSlotTime[mWriteSlot] < actMSecsToSkip)
 				  {
 					  ov_time_seek(&vf, 0);
 					  *state=PLAY;
 				  }
 				  else
 				  {
-					  ov_time_seek_page(&vf, mSlotTime[mWriteSlot] - MSECS_TO_SKIP);
-					  jumptime=mSlotTime[mWriteSlot]-MSECS_TO_SKIP;
+					  ov_time_seek_page(&vf, mSlotTime[mWriteSlot] - actMSecsToSkip);
+					  jumptime=mSlotTime[mWriteSlot]-actMSecsToSkip;
 				  }
 			  }
+		  }
+		  if (*secondsToSkip != 0) {
+			  *state=PLAY;
 		  }
 	  }
 	  if(bytes == mSlotSize)

@@ -52,19 +52,21 @@ void CAudioPlayer::pause()
    else if(state==CBaseDec::PAUSE)
       state=CBaseDec::PLAY;
 }
-void CAudioPlayer::ff()
+void CAudioPlayer::ff(unsigned int seconds)
 {
-   if(state==CBaseDec::PLAY || state==CBaseDec::PAUSE || state==CBaseDec::REV)
-      state=CBaseDec::FF;
-   else if(state==CBaseDec::FF)
-      state=CBaseDec::PLAY;
+	m_SecondsToSkip = seconds;
+	if(state==CBaseDec::PLAY || state==CBaseDec::PAUSE || state==CBaseDec::REV)
+		state=CBaseDec::FF;
+	else if(state==CBaseDec::FF)
+		state=CBaseDec::PLAY;
 }
-void CAudioPlayer::rev()
+void CAudioPlayer::rev(unsigned int seconds)
 {
-   if(state==CBaseDec::PLAY || state==CBaseDec::PAUSE || state==CBaseDec::FF)
-      state=CBaseDec::REV;
-   else if(state==CBaseDec::REV)
-      state=CBaseDec::PLAY;
+	m_SecondsToSkip = seconds;
+	if(state==CBaseDec::PLAY || state==CBaseDec::PAUSE || state==CBaseDec::FF)
+		state=CBaseDec::REV;
+	else if(state==CBaseDec::REV)
+		state=CBaseDec::PLAY;
 }
 CAudioPlayer* CAudioPlayer::getInstance()
 {
@@ -101,8 +103,9 @@ void* CAudioPlayer::PlayThread(void * filename)
 			CBaseDec::RetCode Status;
 			printf("CAudioPlayer: Decoding %s ", (char*) filename);
 			Status = CBaseDec::DecoderBase(fp,soundfd,&getInstance()->state, 
-													 &getInstance()->m_MetaData,
-													 &getInstance()->m_played_time);
+						       &getInstance()->m_MetaData,
+						       &getInstance()->m_played_time,
+						       &getInstance()->m_SecondsToSkip);
 			fclose(fp);
 			if(Status != CBaseDec::OK)
 				fprintf(stderr,"Error %d occured during decoding.\n",(int)Status);

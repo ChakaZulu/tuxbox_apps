@@ -42,6 +42,7 @@ private:
 	CBaseDec::State state;
 	static void* PlayThread(void*);
 	void clearMetaData();
+	unsigned int m_SecondsToSkip;
 
 protected: 
 	CAudioMetaData m_MetaData;
@@ -51,14 +52,14 @@ public:
 	static CAudioPlayer* getInstance();
 	bool play(const char *filename, bool highPrio=false);
 	void stop();
-   void pause();
+	void pause();
 	void init();
-   void ff();
-   void rev();
-   CAudioMetaData getMetaData();
+	void ff(unsigned int seconds=0);
+	void rev(unsigned int seconds=0);
+	CAudioMetaData getMetaData();
 	CAudioMetaData readMetaData(const char*, bool);
-   time_t getTimePlayed(){return m_played_time;}
-   time_t getTimeTotal(){return m_MetaData.total_time;}
+	time_t getTimePlayed(){return m_played_time;}
+	time_t getTimeTotal(){return m_MetaData.total_time;}
 	int getScBuffered(){return m_sc_buffered;}
 	CBaseDec::State getState(){return state;}
 

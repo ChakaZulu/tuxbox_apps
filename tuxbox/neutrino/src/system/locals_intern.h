@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.14 2004/07/24 09:59:09 thegoodguy Exp $
+ * $Id: locals_intern.h,v 1.15 2004/07/27 23:13:59 chakazulu Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -166,6 +166,8 @@ const char * locale_real_names[] =
 	"audiomenu.stereo",
 	"audioplayer.add",
 	"audioplayer.artist_title",
+	"audioplayer.button_select_title_by_id",
+	"audioplayer.button_select_title_by_name",
 	"audioplayer.defdir",
 	"audioplayer.delete",
 	"audioplayer.deleteall",
@@ -175,6 +177,11 @@ const char * locale_real_names[] =
 	"audioplayer.head",
 	"audioplayer.highprio",
 	"audioplayer.id3scan",
+	"audioplayer.jump_backwards",
+	"audioplayer.jump_dialog_hint1",
+	"audioplayer.jump_dialog_hint2",
+	"audioplayer.jump_dialog_title",
+	"audioplayer.jump_forwards",
 	"audioplayer.keylevel",
 	"audioplayer.name",
 	"audioplayer.pause",
@@ -190,6 +197,7 @@ const char * locale_real_names[] =
 	"audioplayer.rewind",
 	"audioplayer.save_playlist",
 	"audioplayer.screensaver_timeout",
+	"audioplayer.select_title_by_name",
 	"audioplayer.shuffle",
 	"audioplayer.stop",
 	"audioplayer.title_artist",

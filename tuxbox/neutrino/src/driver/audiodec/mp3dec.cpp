@@ -273,7 +273,7 @@ void CMP3Dec::CreateInfo(CAudioMetaData* m)
  ****************************************************************************/
 #define INPUT_BUFFER_SIZE	(2*8192)
 #define OUTPUT_BUFFER_SIZE	1022*4 /* AVIA_GT_PCM_MAX_SAMPLES-1 */
-CBaseDec::RetCode CMP3Dec::Decoder(FILE *InputFp,int OutputFd, State* state, CAudioMetaData* meta_data, time_t* time_played)
+CBaseDec::RetCode CMP3Dec::Decoder(FILE *InputFp,int OutputFd, State* state, CAudioMetaData* meta_data, time_t* time_played, unsigned int* secondsToSkip)
 {
 	struct mad_stream	Stream;
 	struct mad_frame	Frame;
@@ -298,6 +298,12 @@ CBaseDec::RetCode CMP3Dec::Decoder(FILE *InputFp,int OutputFd, State* state, CAu
 	mad_synth_init(&Synth);
 	mad_timer_reset(&Timer);
 
+	// used as kind of mutex for single jumps in the file
+	// to make sure the amount of frames is calculated
+	// before jumping (without this state/secondsToSkip could change
+	// anytime within the loop)
+	bool jumpDone=false;
+
 	/* Decoding options can here be set in the options field of the
 	 * Stream structure.
 	 */
@@ -305,6 +311,7 @@ CBaseDec::RetCode CMP3Dec::Decoder(FILE *InputFp,int OutputFd, State* state, CAu
 	/* This is the decoding loop. */
 	do
 	{
+		int secondsToJump = *secondsToSkip;
 		if(*state==PAUSE)
 		{
 			// in pause mode do nothing
@@ -375,6 +382,18 @@ CBaseDec::RetCode CMP3Dec::Decoder(FILE *InputFp,int OutputFd, State* state, CAu
 			Stream.error=(mad_error)0;
 		}
 
+		long actFramesToSkip=FRAMES_TO_SKIP;
+		// Calculate the amount of frames within the custom period
+		if(((*state==FF) || (*state==REV)) && ((secondsToJump)!=0))
+		{
+			jumpDone=false;
+
+			// what is 1152? grabbed it from the documentation above {1} ;)
+			actFramesToSkip=secondsToJump * meta_data->samplerate/1152;
+			//printf("secsToSkip: %d, framesToSkip: %ld\n",
+			//secondsToJump,actFramesToSkip);
+		}
+
 		/* Decode the next mpeg frame. The streams is read from the
 		 * buffer, its constituents are break down and stored the the
 		 * Frame structure, ready for examination/alteration or PCM
@@ -406,14 +425,61 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 		// decode 'FRAMES_TO_PLAY' frames each 'FRAMES_TO_SKIP' frames in ff/rev mode 
 		if( (*state!=FF && 
 			  *state!=REV) || 
-			 FrameCount % FRAMES_TO_SKIP < FRAMES_TO_PLAY )
+		    FrameCount % actFramesToSkip < FRAMES_TO_PLAY )
 			ret=mad_frame_decode(&Frame,&Stream);
 		else if(*state==FF) // in FF mode just decode the header, this sets bufferptr to next frame and also gives stats about the frame for totals
-			ret=mad_header_decode(&Frame.header,&Stream);
+			if (secondsToJump != 0 && !jumpDone)
+			{	
+				jumpDone=true;
+				// jump forwards
+				long bytesForward = (Stream.bufend - Stream.this_frame) + ((ftell(InputFp)+Stream.this_frame-Stream.bufend) / FrameCount)*(actFramesToSkip + FRAMES_TO_PLAY);
+				//printf("jump forwards by %d secs and %ld bytes",secondsToJump, bytesForward);
+				
+				if (fseek(InputFp, bytesForward, SEEK_CUR)!=0)
+				{
+					// Reached end, do nothing
+				}
+				else
+				{
+					// Calculate timer
+					mad_timer_t m;
+					mad_timer_set(&m, 0, 32 * MAD_NSBSAMPLES(&Frame.header) *(actFramesToSkip + FRAMES_TO_PLAY), Frame.header.samplerate);
+					Timer.seconds += m.seconds;
+					if((Timer.fraction + m.fraction)*MAD_TIMER_RESOLUTION>=1)
+					{
+						Timer.seconds++;
+						Timer.fraction-= m.fraction;
+					}
+					else
+						Timer.fraction+= m.fraction;
+					// in case we calculated wrong...
+					if(Timer.seconds < 0)
+					{
+						Timer.seconds=0;
+						Timer.fraction=0;
+					}
+					*time_played=Timer.seconds;
+					FrameCount+=actFramesToSkip + FRAMES_TO_PLAY;
+				}
+				Stream.buffer=NULL;
+				Stream.next_frame=NULL;
+				// if a custom value was set we only jump once
+				*state=PLAY;
+				continue;
+			} else
+			{	
+				ret=mad_header_decode(&Frame.header,&Stream);
+			}
 		else
 		{ //REV
 			// Jump back 
-			long bytesBack = (Stream.bufend - Stream.this_frame) + ((ftell(InputFp)+Stream.this_frame-Stream.bufend) / FrameCount)*(FRAMES_TO_SKIP + FRAMES_TO_PLAY);
+			long bytesBack = (Stream.bufend - Stream.this_frame) + ((ftell(InputFp)+Stream.this_frame-Stream.bufend) / FrameCount)*(actFramesToSkip + FRAMES_TO_PLAY);
+
+			if (secondsToJump!=0)
+			{
+				jumpDone=true;
+				//printf("jumping backwards by %d secs and %ld bytes\n",secondsToJump, bytesBack);
+			}
 			if (fseek(InputFp, -1*(bytesBack), SEEK_CUR)!=0)
 			{
 				// Reached beginning
@@ -427,7 +493,7 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 			{
 				// Calculate timer
 				mad_timer_t m;
-				mad_timer_set(&m, 0, 32 * MAD_NSBSAMPLES(&Frame.header) *(FRAMES_TO_SKIP + FRAMES_TO_PLAY), Frame.header.samplerate);
+				mad_timer_set(&m, 0, 32 * MAD_NSBSAMPLES(&Frame.header) *(actFramesToSkip + FRAMES_TO_PLAY), Frame.header.samplerate);
 				Timer.seconds -= m.seconds;
 				if(Timer.fraction < m.fraction)
 				{
@@ -443,10 +509,14 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 					Timer.fraction=0;
 				}
 				*time_played=Timer.seconds;
-				FrameCount-=FRAMES_TO_SKIP + FRAMES_TO_PLAY;
+				FrameCount-=actFramesToSkip + FRAMES_TO_PLAY;
 			}
 			Stream.buffer=NULL;
 			Stream.next_frame=NULL;
+			// if a custom value was set we only jump once
+			if (secondsToJump != 0) {
+				*state=PLAY;
+			}
 			continue;
 		}
 
@@ -530,7 +600,7 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 
 				
 		// decode 5 frames each 75 frames in ff mode
-		if( *state!=FF || FrameCount % 75 < 5)
+		if( *state!=FF || FrameCount % actFramesToSkip < FRAMES_TO_PLAY)
 		{
 			
 			/* Once decoded the frame is synthesized to PCM samples. No errors
@@ -602,6 +672,13 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 				}
 			}
 		}
+		
+		// if a custom value was set we only jump once
+		if ((*state==FF || *state==REV) && secondsToJump != 0 && !jumpDone) {
+			jumpDone=true;
+			*state=PLAY;
+		}
+
 	}while(*state!=STOP_REQ);
 
 	/* Mad is no longer used, the structures that were initialized must

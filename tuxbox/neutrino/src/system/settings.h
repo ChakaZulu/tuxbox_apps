@@ -142,10 +142,10 @@ struct SNeutrinoSettings
 	int  network_nfs_type[4];
 	char network_nfs_username[4][31];
 	char network_nfs_password[4][31];
-   char network_nfs_mp3dir[100];
-   char network_nfs_picturedir[100];
-   char network_nfs_moviedir[100];
-   char network_nfs_recordingdir[100];
+	char network_nfs_mp3dir[100];
+	char network_nfs_picturedir[100];
+	char network_nfs_moviedir[100];
+	char network_nfs_recordingdir[100];
 
 	//recording
 	int  recording_type;
@@ -170,9 +170,9 @@ struct SNeutrinoSettings
 	char streaming_audiorate[6];
 	char streaming_server_startdir[40];
 	int streaming_transcode_audio;
-   int streaming_force_avi_rawaudio;
+	int streaming_force_avi_rawaudio;
 	int streaming_force_transcode_video;
-   int streaming_transcode_video_codec;
+	int streaming_transcode_video_codec;
 	int streaming_resolution;
     
 	//key configuration
@@ -279,6 +279,7 @@ struct SNeutrinoSettings
 	int   mp3player_follow;
 	char  mp3player_screensaver[3];
 	int   mp3player_highprio;
+	int   mp3player_select_title_by_name;
 
 	//Filebrowser
 	int filebrowser_showrights;
