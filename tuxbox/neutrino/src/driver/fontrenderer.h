@@ -89,7 +89,7 @@ class FBFontRenderClass
 		FTC_Image_Cache	imageCache;	/* the glyph image cache           */
 		FTC_SBit_Cache	sbitsCache;	/* the glyph small bitmaps cache   */
 
-		FTC_FaceID getFaceID(const char *family, const char *style);
+		FTC_FaceID getFaceID(const char * const family, const char * const style);
 		FT_Error getGlyphBitmap(FTC_Image_Desc *font, FT_ULong glyph_index, FTC_SBit *sbit);
 
 	public:
@@ -104,7 +104,7 @@ class FBFontRenderClass
 		                                     FT_Face*    aface);
 
 		//FT_Face getFace(const char *family, const char *style);
-		Font *getFont(const char *family, const char *style, int size);
+		Font *getFont(const char * const family, const char * const style, int size);
 
 		int AddFont(const char *filename, const bool make_italics = false);
 

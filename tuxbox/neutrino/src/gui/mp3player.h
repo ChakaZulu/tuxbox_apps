@@ -51,8 +51,8 @@ class CMP3
 	std::string Artist;
 	std::string Album;
 	std::string Year;
-	std::string Comment;
 #ifdef INCLUDE_UNUSED_STUFF
+	std::string Comment;
 	std::string ChannelMode;
 	std::string Bitrate;
 	std::string Samplerate;
@@ -133,7 +133,7 @@ class CMP3PlayerGui : public CMenuTarget
 	void rev();
 	int getNext();
 	void updateMP3Infos();
-	void updateTimes(bool force=false);
+	void updateTimes(const bool force = false);
 	void showMP3Info();
    void screensaver(bool on);
 

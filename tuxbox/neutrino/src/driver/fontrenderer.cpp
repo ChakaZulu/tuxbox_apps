@@ -119,7 +119,7 @@ FT_Error FBFontRenderClass::FTC_Face_Requester(FTC_FaceID face_id, FT_Face* afac
 	return 0;
 }
 
-FTC_FaceID FBFontRenderClass::getFaceID(const char *family, const char *style)
+FTC_FaceID FBFontRenderClass::getFaceID(const char * const family, const char * const style)
 {
 	for (fontListEntry *f=font; f; f=f->next)
 	{
@@ -169,7 +169,7 @@ FBFontRenderClass::fontListEntry::~fontListEntry()
 	delete[] style;
 }
 
-Font *FBFontRenderClass::getFont(const char *family, const char *style, int size)
+Font *FBFontRenderClass::getFont(const char * const family, const char * const style, int size)
 {
 	FTC_FaceID id=getFaceID(family, style);
 	if (!id)

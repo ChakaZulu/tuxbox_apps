@@ -1134,54 +1134,53 @@ void CNeutrinoApp::SetupTiming()
 **************************************************************************************/
 
 void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings,  CMenuWidget &audioSettings, CMenuWidget &parentallockSettings,
-										  CMenuWidget &networkSettings, CMenuWidget &recordingSettings, CMenuWidget &colorSettings, CMenuWidget &lcdSettings,
-										  CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings, CMenuWidget &miscSettings,
-										  CMenuWidget &service, CMenuWidget &fontSettings, CMenuWidget &mp3picSettings, CMenuWidget &streamingSettings)
+				CMenuWidget &networkSettings, CMenuWidget &recordingSettings, CMenuWidget &colorSettings, CMenuWidget &lcdSettings,
+				CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings, CMenuWidget &miscSettings,
+				CMenuWidget &service, CMenuWidget &fontSettings, CMenuWidget &mp3picSettings, CMenuWidget &streamingSettings)
 {
 	dprintf(DEBUG_DEBUG, "init mainmenue\n");
-	mainMenu.addItem( new CMenuSeparator() );
-	mainMenu.addItem( new CMenuForwarder("mainmenu.tvmode", true, "", this, "tv", true, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED), true );
-	mainMenu.addItem( new CMenuForwarder("mainmenu.radiomode", true, "", this, "radio", true, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN) );
-	mainMenu.addItem( new CMenuForwarder("mainmenu.scartmode", true, "", this, "scart", true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW) );
-	mainMenu.addItem( new CMenuForwarder("mainmenu.games", true, "", new CGameList("mainmenu.games"), "", true, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE) );
-	mainMenu.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	mainMenu.addItem( new CMenuForwarder("mainmenu.mp3player", true, "", new CMP3PlayerGui(), "", true) );
+	mainMenu.addItem(new CMenuSeparator());
+	mainMenu.addItem(new CMenuForwarder("mainmenu.tvmode", true, NULL, this, "tv", true, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED), true );
+	mainMenu.addItem(new CMenuForwarder("mainmenu.radiomode", true, NULL, this, "radio", true, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN) );
+	mainMenu.addItem(new CMenuForwarder("mainmenu.scartmode", true, NULL, this, "scart", true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW) );
+	mainMenu.addItem(new CMenuForwarder("mainmenu.games", true, NULL, new CGameList("mainmenu.games"), "", true, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE) );
+	mainMenu.addItem(new CMenuSeparator(CMenuSeparator::LINE));
+	mainMenu.addItem(new CMenuForwarder("mainmenu.mp3player", true, NULL, new CMP3PlayerGui()));
 
 #if HAVE_DVB_API_VERSION >= 3
-	mainMenu.addItem( new CMenuForwarder("mainmenu.movieplayer", true, "", new CMoviePlayerGui(), "", true) );
+	mainMenu.addItem(new CMenuForwarder("mainmenu.movieplayer", true, NULL, new CMoviePlayerGui()));
 #endif
 
-	mainMenu.addItem( new CMenuForwarder("mainmenu.pictureviewer", true, "", new CPictureViewerGui(), "", true) );
-	mainMenu.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	mainMenu.addItem(new CMenuForwarder("mainmenu.pictureviewer", true, NULL, new CPictureViewerGui()));
+	mainMenu.addItem(new CMenuSeparator(CMenuSeparator::LINE));
 	
-	mainMenu.addItem( new CMenuForwarder("mainmenu.settings", true, "", &mainSettings) );
-	mainMenu.addItem( new CLockedMenuForwarder("mainmenu.service", g_settings.parentallock_pincode, false, true, "", &service) );
-	mainMenu.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	mainMenu.addItem(new CMenuForwarder("mainmenu.settings", true, NULL, &mainSettings));
+	mainMenu.addItem(new CLockedMenuForwarder("mainmenu.service", g_settings.parentallock_pincode, false, true, NULL, &service) );
+	mainMenu.addItem(new CMenuSeparator(CMenuSeparator::LINE));
 	
-	mainMenu.addItem( new CMenuForwarder("mainmenu.sleeptimer", true, "", new CSleepTimerWidget, "",true) );
-	mainMenu.addItem( new CMenuForwarder("mainmenu.shutdown", true, "", this, "shutdown", true, CRCInput::RC_standby, "power.raw") );
+	mainMenu.addItem(new CMenuForwarder("mainmenu.sleeptimer", true, NULL, new CSleepTimerWidget));
+	mainMenu.addItem(new CMenuForwarder("mainmenu.shutdown", true, NULL, this, "shutdown", true, CRCInput::RC_standby, "power.raw") );
 //	mainMenu.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 //	mainMenu.addItem( new CMenuForwarder("mainmenu.info", true, "", new CDBoxInfoWidget, "",true) );
 
 
-	mainSettings.addItem( new CMenuSeparator() );
-	mainSettings.addItem( new CMenuForwarder("menu.back") );
-	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	mainSettings.addItem( new CMenuForwarder("mainsettings.savesettingsnow", true, "", this, "savesettings") );
-	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	mainSettings.addItem( new CMenuForwarder("mainsettings.video", true, "", &videoSettings) );
-	mainSettings.addItem( new CMenuForwarder("mainsettings.audio", true, "", &audioSettings) );
-	mainSettings.addItem( new CLockedMenuForwarder("parentallock.parentallock", g_settings.parentallock_pincode, true, true, "", &parentallockSettings) );
-	mainSettings.addItem( new CMenuForwarder("mainsettings.network", true, "", &networkSettings) );
-	mainSettings.addItem( new CMenuForwarder("mainsettings.recording", true, "", &recordingSettings) );
-	mainSettings.addItem( new CMenuForwarder("mainsettings.streaming", true, "", &streamingSettings) );	
-	mainSettings.addItem( new CMenuForwarder("mainsettings.language", true, "", &languageSettings ) );
-	mainSettings.addItem( new CMenuForwarder("mainsettings.colors", true,"", &colorSettings) );
-	mainSettings.addItem( new CMenuForwarder("mainsettings.lcd", true,"", &lcdSettings) );
-	mainSettings.addItem( new CMenuForwarder("mainsettings.keybinding", true,"", &keySettings) );
-	mainSettings.addItem( new CMenuForwarder("mp3picsettings.general", true,"", &mp3picSettings) );
-	mainSettings.addItem( new CMenuForwarder("mainsettings.misc", true, "", &miscSettings ) );
-
+	mainSettings.addItem(new CMenuSeparator());
+	mainSettings.addItem(new CMenuForwarder("menu.back"));
+	mainSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE));
+	mainSettings.addItem(new CMenuForwarder("mainsettings.savesettingsnow", true, NULL, this, "savesettings"));
+	mainSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE));
+	mainSettings.addItem(new CMenuForwarder("mainsettings.video", true, NULL, &videoSettings));
+	mainSettings.addItem(new CMenuForwarder("mainsettings.audio", true, NULL, &audioSettings));
+	mainSettings.addItem(new CLockedMenuForwarder("parentallock.parentallock", g_settings.parentallock_pincode, true, true, NULL, &parentallockSettings));
+	mainSettings.addItem(new CMenuForwarder("mainsettings.network", true, NULL, &networkSettings));
+	mainSettings.addItem(new CMenuForwarder("mainsettings.recording", true, NULL, &recordingSettings));
+	mainSettings.addItem(new CMenuForwarder("mainsettings.streaming", true, NULL, &streamingSettings));
+	mainSettings.addItem(new CMenuForwarder("mainsettings.language", true, NULL, &languageSettings));
+	mainSettings.addItem(new CMenuForwarder("mainsettings.colors", true, NULL, &colorSettings));
+	mainSettings.addItem(new CMenuForwarder("mainsettings.lcd", true, NULL, &lcdSettings));
+	mainSettings.addItem(new CMenuForwarder("mainsettings.keybinding", true, NULL, &keySettings));
+	mainSettings.addItem(new CMenuForwarder("mp3picsettings.general", true, NULL, &mp3picSettings));
+	mainSettings.addItem(new CMenuForwarder("mainsettings.misc", true, NULL, &miscSettings));
 }
 
 
@@ -1236,12 +1235,9 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		}
 
 		CMenuOptionChooser* ojDiseqcRepeats = new CMenuOptionChooser("satsetup.diseqcrepeat", (int *)&scanSettings.diseqcRepeat, (scanSettings.diseqcMode != NO_DISEQC) && (scanSettings.diseqcMode != DISEQC_1_0)/*, new CSatelliteNotifier*/, NULL, false);
-		for( uint i=0; i<=2; i++)
-		{
-			char ii[1 + 1];
-			sprintf( ii, "%d", i);
-			ojDiseqcRepeats->addOption(i, ii);
-		}
+		ojDiseqcRepeats->addOption(0, "0");
+		ojDiseqcRepeats->addOption(1, "1");
+		ojDiseqcRepeats->addOption(2, "2");
 
 		CMenuWidget* extSatSettings = new CMenuWidget("satsetup.extended", NEUTRINO_ICON_SETTINGS);
 		extSatSettings->addItem( new CMenuSeparator() );
@@ -2969,8 +2965,8 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	{
 		if( g_settings.recording_server_wakeup )
 		{
-			std::string command;
-			command = "etherwake " + std::string(g_settings.recording_server_mac);
+			std::string command = "etherwake ";
+			command += g_settings.recording_server_mac;
 			if(system(command.c_str()) != 0)
 				perror("etherwake failed");
 		}
