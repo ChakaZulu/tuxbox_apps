@@ -246,10 +246,10 @@ void eDVBCI::createCAPMT(int type,unsigned char *data)
 void eDVBCI::sendCAPMT()
 {
 	int i;
-	printf("CA-PMT:");
-	for(i=0;i<CAPMTlen;i++)
-		printf("%02x ",CAPMT[i]);
-	printf("\n");	
+	//printf("CA-PMT:");
+	//for(i=0;i<CAPMTlen;i++)
+	//	printf("%02x ",CAPMT[i]);
+	//printf("\n");	
 	
 	if(CAPMTlen>0)
 		sendTPDU(0xA0,CAPMTlen,1,CAPMT);
@@ -324,7 +324,7 @@ void eDVBCI::help_manager(unsigned int session)
       }
     case 2:
       {
-        unsigned char buffer[30];
+        unsigned char buffer[40];
 
         eDebug("[DVBCI] [HELP MANAGER] profile_reply");
         //was wir alles koennen :)
@@ -337,7 +337,7 @@ void eDVBCI::help_manager(unsigned int session)
         buffer[10]=0x00;
         buffer[11]=0x41;		//? :)
         buffer[12]=0x00;
-        buffer[13]=0x00;
+        buffer[13]=0x40;
         buffer[14]=0x00;
         buffer[15]=0x41;		//CA
         buffer[16]=0x00;
@@ -603,9 +603,9 @@ void eDVBCI::incoming(unsigned char *buffer,int len)
 	int tpdu_tc_id;
 	int x=0;
 	
-	for(int i=0;i<len;i++)
-		printf("%02x ",buffer[i]);
-	printf("\n");	
+	//for(int i=0;i<len;i++)
+	//	printf("%02x ",buffer[i]);
+	//printf("\n");	
 	
 	tc_id=buffer[x++];
 	m_l=buffer[x++];

@@ -32,7 +32,7 @@ void enigmaCImmi::answokPressed()
 
 enigmaCImmi::enigmaCImmi(): eWindow(0)
 {
-	int fd=eSkin::getActive()->queryValue("fontsize", 20);
+	int fd=eSkin::getActive()->queryValue("fontsize", 8); //20
 
 	DVBCI=eDVB::getInstance()->DVBCI;
 
@@ -143,9 +143,9 @@ void enigmaCImmi::getmmi(const char *data)
 	answok->hide();
 	headansw->hide();
 	
-	for(int i=1;i<data[0];i++)
-		printf("%02x ",data[i]);
-	printf("\n");
+	//for(int i=1;i<data[0];i++)
+	//	printf("%02x ",data[i]);
+	//printf("\n");
 
 	if(data[5] == 0x9F && data[6] == 0x88)
 	{
@@ -175,11 +175,19 @@ void enigmaCImmi::getmmi(const char *data)
 			
 			if(len&0x80)
 			{
-				len=data[10];
-				pos=12;
+				if((len&0x7f)==2)
+				{
+					len=data[10];
+					pos=12;
+				}
+				else if((len&0x7f)==1)
+				{
+					len=data[9];
+					pos=11;
+				}
 			}
 			
-			eDebug("entering t_menu_last");
+			eDebug("entering t_menu_last len=%d",len);
 			
 			while(pos<len)
 			{
@@ -187,7 +195,7 @@ void enigmaCImmi::getmmi(const char *data)
 				{
 					int len=data[pos++];
 					char buffer[len+1];
-					eDebug("entering text_last");
+					eDebug("entering text_last len=%d",len);
 
 					memcpy(buffer,data+pos,len);
 					buffer[len]=0;
@@ -211,7 +219,6 @@ void enigmaCImmi::getmmi(const char *data)
 		}	
 	}	
 }
-
 
 enigmaCI::enigmaCI(): eWindow(0)
 {

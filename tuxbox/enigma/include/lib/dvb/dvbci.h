@@ -24,7 +24,7 @@ class eDVBCI: private eThread, public eMainloop, public Object
 		
 	eTimer pollTimer;
 
-	unsigned char CAPMT[256];
+	unsigned char CAPMT[2048];
 	char appName[256];
 	int CAPMTlen;
 	int CAPMTpos;
