@@ -25,8 +25,7 @@
 #ifndef __neutrino_debug__
 #define __neutrino_debug__
 
-static int debug = 1;
-
+extern int debug;
 
 #define DEBUG_NORMAL	1
 #define DEBUG_INFO	2

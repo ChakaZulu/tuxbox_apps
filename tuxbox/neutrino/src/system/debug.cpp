@@ -24,6 +24,7 @@
 
 #include "debug.h"
 
+int debug = DEBUG_NORMAL;
 
 void setDebugLevel( int level )
 {
