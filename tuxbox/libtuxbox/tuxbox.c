@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: tuxbox.c,v 1.8 2003/03/08 17:30:55 waldi Exp $
+ * $Id: tuxbox.c,v 1.9 2003/03/14 07:46:10 obi Exp $
  */
 
 #ifdef HAVE_CONFIG_H
@@ -48,7 +48,7 @@ int tuxbox_read_proc (char *type)
 	file = fopen(filename, "r");
 
 	if (!file) {
-		perror("open");
+		perror(filename);
 		return ret;
 	}
 
@@ -75,6 +75,8 @@ const char *tuxbox_get_model_str (void)
 			return "D-BOX2";
 		case TUXBOX_MODEL_DREAMBOX:
 			return "Dreambox";
+		case TUXBOX_MODEL_PCI:
+			return "PCI";
 		default:
 			return "Unknown";
 	}
@@ -89,6 +91,8 @@ const char *tuxbox_get_submodel_str (void)
 			return "5600";
 		case TUXBOX_SUBMODEL_DREAMBOX_DM7000:
 			return "7000";
+		case TUXBOX_SUBMODEL_TTPCI:
+			return "Premium";
 		default:
 			return "Unknown";
 	}
@@ -105,6 +109,8 @@ const char *tuxbox_get_vendor_str (void)
 			return "Philips";
 		case TUXBOX_VENDOR_DREAM_MM:
 			return "Dream Multimedia TV";
+		case TUXBOX_VENDOR_TECHNOTREND:
+			return "Technotrend";
 		default:
 			return "Unknown";
 	}
