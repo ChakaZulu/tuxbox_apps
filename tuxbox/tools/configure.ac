@@ -14,5 +14,6 @@ Makefile
 camd/Makefile
 misc/Makefile
 satfind/Makefile
+tuxinfo/Makefile
 ])
 
