@@ -433,7 +433,10 @@ static QString getCurService()
 {
 	eService *current;
 	current=eDVB::getInstance()->service;
-	return current->service_name;
+	if(current)
+		return current->service_name;
+	else
+		return "no channel selected";
 }
 
 static QString web_root(QString request, QString path, QString opts, const eHTTPConnection *content)
@@ -442,7 +445,7 @@ static QString web_root(QString request, QString path, QString opts, const eHTTP
 	QMap<QString,QString> opt=getRequestOptions(opts);
 
 	QString mode=opt["mode"];
-	QString bid="1";
+	QString bid="0";
 
 	if(opt["bouquetid"])
 		bid=opt["bouquetid"];
@@ -479,7 +482,7 @@ static QString web_root(QString request, QString path, QString opts, const eHTTP
 		stats+="<span class=\"white\">running via net</span>";
 	} 
 	stats+=" | ";
- 
+
 	eDVB::getInstance()->config.getKey("/elitedvb/network/ip", myipp);
 	unpack(myipp, myip); 
 
@@ -492,7 +495,7 @@ static QString web_root(QString request, QString path, QString opts, const eHTTP
 	stats+=" | ";
 	tmp.sprintf("<span class=\"white\">booted enigma %d times</span>", bootcount);
 	stats+=tmp;
- 
+
 	tvc="normal";
 	radioc="normal";
 	aboutc="normal";
@@ -532,11 +535,12 @@ static QString web_root(QString request, QString path, QString opts, const eHTTP
 	QString eitc;
 
 	EIT *eit=eDVB::getInstance()->getEIT();
-	QString now_time="", now_duration="", now_text="", now_longtext="";
-	QString next_time="", next_duration="", next_text="", next_longtext="";
- 
+	
 	if(eit)
 	{
+		QString now_time="", now_duration="", now_text="", now_longtext="";
+		QString next_time="", next_duration="", next_text="", next_longtext="";
+ 
 		int p=0;
 
 		for(QListIterator<EITEvent> i(eit->events); i.current(); ++i)
@@ -556,9 +560,13 @@ static QString web_root(QString request, QString path, QString opts, const eHTTP
 				}
 				if(p==1)
 				{
-					next_time.sprintf("%s", ctime(&event->start_time));
-					next_time=next_time.mid(10,6);
-					next_duration.sprintf("%d", (int)(event->duration/60));
+					if(event->start_time!=0) {
+ 						next_time.sprintf("%s", ctime(&event->start_time));
+						next_time=next_time.mid(10,6);
+						next_duration.sprintf("%d", (int)(event->duration/60));
+					} else {
+						now_time="";
+					}
 				}
 				for(QListIterator<Descriptor> d(event->descriptor); d.current(); ++d)
 			        {
