@@ -135,7 +135,7 @@ bool CStreamingNotifier::changeNotify(const std::string & OptionName, void*)
 
 CRecordingNotifier::CRecordingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem* i3,
                                         CMenuItem* i4, CMenuItem* i5, CMenuItem* i6,
-                                        CMenuItem* i7, CMenuItem* i8)
+                                        CMenuItem* i7, CMenuItem* i8, CMenuItem* i9)
 {
    toDisable[0]=i1;
    toDisable[1]=i2;
@@ -145,6 +145,7 @@ CRecordingNotifier::CRecordingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem*
    toDisable[5]=i6;
    toDisable[6]=i7;
    toDisable[7]=i8;
+   toDisable[8]=i9;
 }
 bool CRecordingNotifier::changeNotify(const std::string & OptionName, void*)
 {
@@ -159,6 +160,7 @@ bool CRecordingNotifier::changeNotify(const std::string & OptionName, void*)
          toDisable[i]->setActive(false);
       if (g_settings.recording_type==3)
         toDisable[7]->setActive(true);
+        toDisable[8]->setActive(true);
    }
    else if(g_settings.recording_type==1)
    {
@@ -170,6 +172,7 @@ bool CRecordingNotifier::changeNotify(const std::string & OptionName, void*)
       toDisable[5]->setActive(true);
       toDisable[6]->setActive(false);
       toDisable[7]->setActive(false);
+      toDisable[8]->setActive(false);
    }
    else if(g_settings.recording_type==2)
    {
@@ -181,6 +184,7 @@ bool CRecordingNotifier::changeNotify(const std::string & OptionName, void*)
       toDisable[5]->setActive(false);
       toDisable[6]->setActive(true);
       toDisable[7]->setActive(false);
+      toDisable[8]->setActive(false);
    }
    
    if (g_settings.recording_type == 3) 

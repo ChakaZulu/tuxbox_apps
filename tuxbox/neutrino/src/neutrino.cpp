@@ -532,7 +532,8 @@ int CNeutrinoApp::loadSetup()
 	g_settings.recording_server_wakeup = configfile.getInt32( "recording_server_wakeup", 0 );
 	strcpy( g_settings.recording_server_mac, configfile.getString( "recording_server_mac", "11:22:33:44:55:66").c_str() );
 	g_settings.recording_vcr_no_scart = configfile.getInt32( "recording_vcr_no_scart", false);
-
+    strcpy( g_settings.recording_splitsize, configfile.getString( "recording_splitsize", "0").c_str() );
+    
 	//streaming (server)
 	g_settings.streaming_type = configfile.getInt32( "streaming_type", 0 );
 	g_settings.streaming_server_ip = configfile.getString("streaming_server_ip", "10.10.10.10");
@@ -850,6 +851,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32 ( "recording_server_wakeup", g_settings.recording_server_wakeup );
 	configfile.setString( "recording_server_mac", g_settings.recording_server_mac );
 	configfile.setInt32 ( "recording_vcr_no_scart", g_settings.recording_vcr_no_scart );
+	configfile.setString( "recording_splitsize", g_settings.recording_splitsize );
 
 	//streaming
 	configfile.setInt32 ( "streaming_type", g_settings.streaming_type );
@@ -1833,10 +1835,13 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	CStringInput * timerSettings_record_safety_time_after = new CStringInput("timersettings.record_safety_time_after", g_settings.record_safety_time_after, 2, "timersettings.record_safety_time_after.hint_1", "timersettings.record_safety_time_after.hint_2","0123456789 ", RecordingSafetyNotifier);
 	CMenuForwarder *mf6 = new CMenuForwarder("timersettings.record_safety_time_after", true, g_settings.record_safety_time_after, timerSettings_record_safety_time_after );
 
+    // for direct recording
     CMenuForwarder* mf7 = new CMenuForwarder("recordingmenu.defdir", (g_settings.recording_type==3), g_settings.network_nfs_recordingdir,this,"recordingdir");
+    CStringInput * recordingSettings_splitsize = new CStringInput("recordingmenu.splitsize", g_settings.recording_splitsize, 6, "ipsetup.hint_1", "ipsetup.hint_2", "0123456789 ");
+    CMenuForwarder* mf8 = new CMenuForwarder("recordingmenu.splitsize", (g_settings.recording_type==3), g_settings.recording_splitsize,recordingSettings_splitsize);
 	
 	CRecordingNotifier *RecordingNotifier =
-		new CRecordingNotifier(mf1,mf2,oj2,mf3,oj3,oj4,oj5,mf7);
+		new CRecordingNotifier(mf1,mf2,oj2,mf3,oj3,oj4,oj5,mf7,mf8);
 
     CMenuOptionChooser* oj1 = new CMenuOptionChooser("recordingmenu.recording_type", &g_settings.recording_type,
                                                     true, RecordingNotifier);
@@ -1864,6 +1869,7 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	recordingSettings.addItem( mf6);
 	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "recordingmenu.filesettingsseparator") );
 	recordingSettings.addItem( mf7);
+	recordingSettings.addItem( mf8);
 
 	recordingstatus = 0;
 }
@@ -2570,13 +2576,15 @@ void CNeutrinoApp::setupRecordingDevice(void)
 				fprintf(stderr, "[neutrino.cpp] fork of fserver process failed\n");
 			}
 			if (fserverpid == 0) {
-    				char * f_arg[6];
+    				char * f_arg[8];
                 	f_arg[0] = "/sbin/fserver";
                 	f_arg[1] = "-sport";
                 	f_arg[2] = "4000";
                 	f_arg[3] = "-o";
                 	f_arg[4] = g_settings.network_nfs_recordingdir;
-                	f_arg[5]= 0;
+                	f_arg[5] = "-splitsize";
+                	f_arg[6] = g_settings.recording_splitsize;
+                	f_arg[7]= 0;
 	
     				execvp(f_arg[0], f_arg);
     				fprintf(stderr,"[neutrino.cpp] execv of %s failed", f_arg[0]);
