@@ -36,7 +36,7 @@ eFrontend::eFrontend(int type, const char *demod, const char *sec): type(type)
 		secfd=-1;
 		
 	if (eDVB::getInstance()->config.getKey("/elitedvb/frontend/freqOffset", freq_offset))
-		freq_offset=-7000;
+		freq_offset=0;
 
 	if (type==feCable)
 	{
