@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.59 2002/09/11 21:14:22 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.60 2002/09/12 22:34:56 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -176,6 +176,21 @@ string CBouquetManager::convertForXML( string s)
 		  break;
 		  case '<':
 			r += "&lt;";
+		  break;
+		  case 'Ä':
+			r += "&#196;";
+		  break;
+		  case 'É':
+			r += "&#201;";
+		  break;
+		  case 'Í':
+			r += "&#205;";
+		  break;
+		  case 'Ü':
+			r += "&#220;";
+		  break;
+		  case 'é':
+			r += "&#233;";
 		  break;
 		  case '\"':
 			r += "&quot;";
