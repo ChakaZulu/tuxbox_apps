@@ -585,7 +585,6 @@ void eZapMain::keyDown(int code)
 	case eRCInput::RC_DOWN:
 	case eRCInput::RC_UP:
 	{
-		eEPGCache::getInstance()->stopEPG();
 		hide();
 		eZapLCD* pLCD = eZapLCD::getInstance();
 		pLCD->lcdMain->hide();
@@ -593,7 +592,6 @@ void eZapMain::keyDown(int code)
 		eService *service=eZap::getInstance()->getServiceSelector()->choose(0, code);
 		pLCD->lcdMain->show();
 		pLCD->lcdMenu->hide();
-		eEPGCache::getInstance()->startEPG();
 		if (!service)
 			break;
 		if (service)
@@ -645,8 +643,6 @@ void eZapMain::keyDown(int code)
 		if (!eDVB::getInstance()->getTransponders())
 			break;
 	
-		eEPGCache::getInstance()->stopEPG();
-
 		if (isVisible())
 			hide();
 
@@ -674,7 +670,7 @@ void eZapMain::keyDown(int code)
 					serviceChanged(service, -EAGAIN);
 		}
 		delete w;
-		eEPGCache::getInstance()->startEPG();
+
 		break;
 	}
 	}
@@ -688,7 +684,6 @@ void eZapMain::keyUp(int code)
 	{
 		if (isVisible())
 			hide();
-		eEPGCache::getInstance()->stopEPG();
 		eZapLCD* pLCD = eZapLCD::getInstance();
 		pLCD->lcdMain->hide();
 		pLCD->lcdMenu->show();
@@ -698,7 +693,6 @@ void eZapMain::keyUp(int code)
 			eZap::getInstance()->quit();
 		pLCD->lcdMenu->hide();
 		pLCD->lcdMain->show();
-		eEPGCache::getInstance()->startEPG();
 		break;
 	}
 	case eRCInput::RC_STANDBY:
@@ -719,7 +713,6 @@ void eZapMain::keyUp(int code)
 	{
 		if (flags&ENIGMA_NVOD)
 		{
-			eEPGCache::getInstance()->stopEPG();
 			if (isVisible())
 			{
 				timeout.stop();
@@ -728,11 +721,9 @@ void eZapMain::keyUp(int code)
 			nvodsel.show();
 			nvodsel.exec();
 			nvodsel.hide();
-			eEPGCache::getInstance()->startEPG();
 		}
 		if (flags&ENIGMA_SUBSERVICES)
 		{
-			eEPGCache::getInstance()->stopEPG();	
 			if (isVisible())
 			{
 				timeout.stop();
@@ -741,7 +732,6 @@ void eZapMain::keyUp(int code)
 			subservicesel.show();
 			subservicesel.exec();
 			subservicesel.hide();
-			eEPGCache::getInstance()->startEPG();
 		}
 		break;
 	}
@@ -749,7 +739,6 @@ void eZapMain::keyUp(int code)
 	{
 		if (flags&ENIGMA_AUDIO)
 		{
-			eEPGCache::getInstance()->stopEPG();
 			if (isVisible())
 			{
 				timeout.stop();
@@ -758,7 +747,6 @@ void eZapMain::keyUp(int code)
 			audiosel.show();
 			audiosel.exec();
 			audiosel.hide();
-			eEPGCache::getInstance()->startEPG();
 		}
 		break;
 	}
@@ -766,10 +754,8 @@ void eZapMain::keyUp(int code)
 	{
 		if (isVT)
 		{
-			eEPGCache::getInstance()->stopEPG();
 			eZapPlugins plugins;
 			plugins.execPluginByName("tuxtxt.cfg");
-			eEPGCache::getInstance()->startEPG();
 		}
 		break;
 	}
@@ -777,7 +763,6 @@ void eZapMain::keyUp(int code)
 	{
 		if (isEPG)
 		{
-			eEPGCache::getInstance()->stopEPG();
 			eEPGWindow wnd(eDVB::getInstance()->service);
 			if (isVisible())
 			{
@@ -787,13 +772,11 @@ void eZapMain::keyUp(int code)
 			wnd.show();
 			wnd.exec();
 			wnd.hide();
-			eEPGCache::getInstance()->startEPG();
 		}
 		break;
 	}
 	case eRCInput::RC_HELP:
 	{
-		eEPGCache::getInstance()->stopEPG();
 		if (!eDVB::getInstance()->service)
 			break;
 		if (isVisible())
@@ -813,7 +796,6 @@ void eZapMain::keyUp(int code)
 			ei.hide();
 			actual_eventDisplay=0;
 		}
-		eEPGCache::getInstance()->startEPG();
 		break;
 	}
 	}

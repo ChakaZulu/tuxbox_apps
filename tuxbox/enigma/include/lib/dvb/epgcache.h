@@ -2,16 +2,22 @@
 #define __epgcache_h_
 
 #include <vector>
+#include <list>
 #include <ext/hash_map>
 
 #include "si.h"
 #include "dvb.h"
 #include "edvb.h"
 
+#define CLEAN_INTERVAL 60000    //  1 min
+#define UPDATE_INTERVAL 3600000  // 60 min
+#define ZAP_DELAY 4000          // 4 sek
+
 class eventData;
 
 typedef std::map<int, eventData*> eventMap;
 typedef std::hash_map<sref, eventMap > eventCache;
+typedef std::hash_map<sref, time_t > updateMap;
 
 namespace std
 {
@@ -31,25 +37,24 @@ class eventData
 	char* EITdata;
 	int ByteSize;
 public:
-//	static int refcount;
+	static int CacheSize;
 	eventData(const eit_event_struct* e, int size)
 	:ByteSize(size)
 	{
-//		refcount++;
+		CacheSize+=size;
 		EITdata = new char[size];
 		memcpy(EITdata, (char*) e, size);
 	}
 	eventData(const eventData& Q)
 	:ByteSize(Q.ByteSize)
 	{
-//		refcount++;
+		CacheSize+=ByteSize;
 		EITdata = new char[ByteSize];
 		memcpy(EITdata, Q.EITdata, ByteSize);
 	}
 	~eventData()
 	{
-/*		qDebug("[EPGD] %i event(s) cached", refcount);
-		refcount--;*/
+		CacheSize-=ByteSize;
 		delete [] EITdata;
 	}	
 	operator const eit_event_struct*() const
@@ -66,20 +71,26 @@ class eEPGCache: public eSection
 {
 	Q_OBJECT
 private:
-  eService* current_service;
+	eService* current_service;
 	int current_sid;
+	int firstEventId;
 	int isRunning;
 	int sectionRead(__u8 *data);
 	static eEPGCache *instance;
+
 	eventCache eventDB;
-	QTimer IdleTimer;
+	updateMap serviceLastUpdated;
+	updateMap temp;
+
+	QTimer CleanTimer;
 	QTimer zapTimer;
+	QTimer EPGUpdate;
 public slots:
 	inline void startEPG();
 	inline void stopEPG();
-	inline void enterTransponder();
 	inline void enterService(eService*, int);
 	void cleanLoop();
+	void timeUpdated();
 public:
 	eEPGCache();
 	~eEPGCache();
@@ -93,42 +104,47 @@ signals:
 
 inline void eEPGCache::enterService(eService* service, int err)
 {
+	current_service = service;
+	firstEventId = 0;
+	time_t t = serviceLastUpdated[sref(service->original_network_id,service->service_id)];
+
 	if (!err)
-		zapTimer.start(5000, 1);
-
-	eventMap &s=eventDB[sref(service->original_network_id,service->service_id)];
-	eventMap::iterator event=s.begin();
-
-	if (event != s.end())
 	{
-		qDebug("Service has EPG");
+		int update = ( t ? ( UPDATE_INTERVAL - ( (time(0)+eDVB::getInstance()->time_difference-t) * 1000 ) ) : ZAP_DELAY );
+		zapTimer.start(update, 1);
+		if (update >= 60000)
+			qDebug("[EPGC] next update in %i min", update/60000);
+		else if (update >= 1000)
+			qDebug("[EPGC] next update in %i sec", update/1000);
+	}
+
+	if (t)
+	{
+		qDebug("[EPGC] service has EPG");
 		emit EPGAvail(1);
-		current_service = 0;	
 	}
 	else
 	{
-		qDebug("Service has no EPG");
-		current_service = service;
+		qDebug("[EPGC] service has no EPG");
 		emit EPGAvail(0);
 	}
-}
-
-inline void eEPGCache::enterTransponder()
-{
-	if (!zapTimer.isActive())
-		zapTimer.start(5000, 1);
 }
 
 inline void eEPGCache::startEPG()
 {
 	if (eDVB::getInstance()->time_difference)	
 	{
+		temp.clear();
 		qDebug("[EPGC] start caching events");
+		firstEventId=0;
 		start();
 		isRunning=1;
 	}
 	else
+	{
+		qDebug("[EPGC] wait for clock update");
 		zapTimer.start(1000, 1); // restart Timer
+	}
 }
 
 inline void eEPGCache::stopEPG()
@@ -137,7 +153,7 @@ inline void eEPGCache::stopEPG()
 	{
 		qDebug("[EPGC] stop caching events");
 		isRunning=0;
-		abort();
+		timeout();
 		zapTimer.stop();
 	}
 }
@@ -146,6 +162,5 @@ inline const eventMap& eEPGCache::getEventMap(int original_network_id, int servi
 {
 	return eventDB[sref(original_network_id,service_id)];
 }
-
 
 #endif

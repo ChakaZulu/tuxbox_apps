@@ -24,7 +24,7 @@ QString eListboxEntryEPG::getText(int col=0) const
 
 void eEPGWindow::fillEPGList()
 {
-	setText("EPG");
+	setText("EPG - "+current->service_name);
 	qDebug("get EventMap for onid: %02x, sid: %02x\n", current->original_network_id, current->service_id);
 	const eventMap& evt = eEPGCache::getInstance()->getEventMap(current->original_network_id, current->service_id);
 	eventMap::const_iterator It;
