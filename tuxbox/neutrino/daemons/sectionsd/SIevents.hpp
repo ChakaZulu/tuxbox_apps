@@ -1,7 +1,7 @@
 #ifndef SIEVENTS_HPP
 #define SIEVENTS_HPP
 //
-// $Id: SIevents.hpp,v 1.3 2001/05/18 13:11:46 fnbrd Exp $
+// $Id: SIevents.hpp,v 1.4 2001/05/18 20:31:04 fnbrd Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -24,6 +24,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.hpp,v $
+// Revision 1.4  2001/05/18 20:31:04  fnbrd
+// Aenderungen fuer -Wall
+//
 // Revision 1.3  2001/05/18 13:11:46  fnbrd
 // Fast komplett, fehlt nur noch die Auswertung der time-shifted events
 // (Startzeit und Dauer der Cinedoms).
@@ -155,13 +158,13 @@ class SIevent {
         printf("Extended-Text: %s\n", extendedText.c_str());
       if(contentClassification.length()) {
         printf("Content classification:");
-        for(int i=0; i<contentClassification.length(); i++)
+        for(unsigned i=0; i<contentClassification.length(); i++)
           printf(" 0x%02hhx", contentClassification[i]);
         printf("\n");
       }
       if(userClassification.length()) {
         printf("User classification:");
-        for(int i=0; i<userClassification.length(); i++)
+        for(unsigned i=0; i<userClassification.length(); i++)
           printf(" 0x%02hhx", userClassification[i]);
         printf("\n");
       }
