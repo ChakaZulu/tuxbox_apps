@@ -179,7 +179,9 @@ int CAPIDChangeExec::exec(CMenuTarget* parent, string actionKey)
 	//    printf("CAPIDChangeExec exec: %s\n", actionKey.c_str());
 	int sel= atoi(actionKey.c_str());
 	if (g_RemoteControl->selected_apid!= sel )
-		g_RemoteControl->setAPID(atoi(actionKey.c_str()));
+	{
+		g_RemoteControl->setAPID(sel);
+	}
 	return menu_return::RETURN_EXIT;
 }
 
@@ -195,7 +197,7 @@ void showSubchan(string subChannelName)
 		g_FrameBuffer->paintBoxRel(x,y, dx,dy, COL_MENUCONTENT);
 		g_Fonts->infobar_info->RenderString(x+10, y+30, dx-20, subChannelName.c_str(), COL_MENUCONTENT);
 		uint msg; uint data;
-		g_RCInput->getMsg( &msg, &data, 25 );
+		g_RCInput->getMsg( &msg, &data, 35 );
 		g_RCInput->postMsg( msg, data );
 		g_FrameBuffer->paintBackgroundBoxRel(x,y, dx,dy);
 	}
