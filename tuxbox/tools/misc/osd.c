@@ -21,12 +21,15 @@
  *
  *
  *   $Log: osd.c,v $
+ *   Revision 1.2  2001/03/07 19:18:00  gillem
+ *   - change some lines
+ *
  *   Revision 1.1  2001/03/06 21:49:23  gillem
  *   - initial release
  *
  *
  *
- *   $Revision: 1.1 $
+ *   $Revision: 1.2 $
  *
  */
 
@@ -71,6 +74,8 @@ int main (int argc, char **argv)
 	__u32 bitmap[20000];
 	__u32 i;
 	__u32 pale;
+	unsigned char rgb[3];
+	unsigned char r,g,b;
 
 	if ((fd = open("/dev/dbox/osd0",O_RDWR)) <= 0)
 	{
@@ -83,25 +88,29 @@ int main (int argc, char **argv)
 	osdf.framenr = 0;
 	osdf.x = 100;
 	osdf.y = 100;
-	osdf.w = 120-1;
-	osdf.h = 64*2; // odd + even
+	osdf.w = 200-1;
+	osdf.h = 100*2; // odd + even
     osdf.gbf = 0x1f;
 	osdf.pel = 1; // 4 bit * pixel
 
-	rgb2crycb( 100, 0, 100, 0, &pale );
-	palette[0] = 0;//pale;
-	rgb2crycb( 110, 0, 110, 3, &pale );
+//	rgb2crycb( 100, 0, 0, 3, &pale );
+//	palette[0] = 0;pale;
 
 	/* set palette */
 	for(i=1;i<16;i++)
 	{
+		r = header_data_cmap[i][0];
+		g = header_data_cmap[i][1];
+		b = header_data_cmap[i][2];
+		rgb2crycb( r, g, b, 3, &pale );
 		palette[i] = pale;
 	}
 
 	y=0;z=0;i=0;
-	for(x=0;x<120*64;x++)
+	for(x=0;x<200*100;x++)
 	{
-		i |= header_data[x]<<(28-(y*4));
+		i |= (header_data[x]<<(28-(y*4)));
+
 //		printf("%08X %d %d\n",i,y,header_data[x]);
 		y++;
 		if(y==8)
@@ -117,8 +126,17 @@ int main (int argc, char **argv)
 
 	osdf.psize = 16;
 	osdf.palette = &palette;
-	osdf.bsize = 120*64*4/16;	// half words ??? f*ck
+	osdf.bsize = 200*100*4/32;	// half words ??? f*ck
 	osdf.bitmap = &bitmap;
+
+	if ( ioctl( fd, OSD_IOCTL_CREATE_FRAME, &osdf ) < 0 )
+	{
+		perror("ioctl");
+	}
+
+	osdf.framenr = 1;
+	osdf.x = 350;
+	osdf.y = 350;
 
 	if ( ioctl( fd, OSD_IOCTL_CREATE_FRAME, &osdf ) < 0 )
 	{
