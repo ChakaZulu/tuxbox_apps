@@ -30,8 +30,6 @@ int fh_png_load(const char *name,unsigned char *buffer,int x,int y)
 	unsigned int i;
 	int bit_depth, color_type, interlace_type;
 	int number_passes,pass;
-	char *rp;
-	png_bytep rptr[2];
 	char *fbptr;
 	FILE *fh;
 
@@ -45,11 +43,10 @@ int fh_png_load(const char *name,unsigned char *buffer,int x,int y)
 		png_destroy_read_struct(&png_ptr, (png_infopp)NULL, (png_infopp)NULL);
 		fclose(fh); return(FH_ERROR_FORMAT);
 	}
-	rp=0;
+
 	if(setjmp(png_ptr->jmpbuf))
 	{
 		png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
-		if(rp) free(rp);
 		fclose(fh); return(FH_ERROR_FORMAT);
 	}
 
@@ -64,24 +61,14 @@ int fh_png_load(const char *name,unsigned char *buffer,int x,int y)
 	number_passes = png_set_interlace_handling(png_ptr);
 	png_read_update_info(png_ptr,info_ptr);
 
-	rp=(char*) malloc(width*3);
-	if(rp==NULL)
-	{
-		printf("Error: malloc\n");
-		return(FH_ERROR_MALLOC);
-	}
-	rptr[0]=(png_bytep) rp;
-
 	for(pass = 0; pass < number_passes; pass++)
 	{
 		fbptr = (char *)buffer;
 		for(i=0;i<height;i++,fbptr+=width*3)
 		{
-			png_read_rows(png_ptr, rptr, NULL, 1);
-			memcpy(fbptr,rp,width*3);
+			png_read_row(png_ptr, (png_byte*)fbptr, NULL);
 		}
 	}
-	free(rp);
 	png_read_end(png_ptr, info_ptr);
 	png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
 	fclose(fh);
