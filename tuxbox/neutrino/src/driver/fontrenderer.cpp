@@ -405,16 +405,16 @@ void Font::RenderString(int x, int y, const int width, const char *text, const u
 			x+=(kerning.x+32)>>6; // kerning!
 		}
 
-		int stride     = frameBuffer->getStride();
-		fb_pixel_t * d = frameBuffer->getFrameBufferPointer() + stride * (y - glyph->top) + sizeof(fb_pixel_t) * (x + glyph->left);
-		__u8 * s       = glyph->buffer;
-		int w          = glyph->width;
-		int h          = glyph->height;
-		int pitch      = glyph->pitch;
+		int stride  = frameBuffer->getStride();
+		uint8_t * d = ((uint8_t *)frameBuffer->getFrameBufferPointer()) + (x + glyph->left) * sizeof(fb_pixel_t) + stride * (y - glyph->top);
+		uint8_t * s = glyph->buffer;
+		int w       = glyph->width;
+		int h       = glyph->height;
+		int pitch   = glyph->pitch;
 
 		for (int ay=0; ay<h; ay++)
 		{
-			fb_pixel_t * td = d;
+			fb_pixel_t * td = (fb_pixel_t *)d;
 
 			int ax;
 			for (ax=0; ax < w + spread_by; ax++)

@@ -342,7 +342,8 @@ void CFrameBuffer::paintBoxRel(const int x, const int y, const int dx, const int
 	if (!getActive())
 		return;
 
-	fb_pixel_t * pos = getFrameBufferPointer() + x * sizeof(fb_pixel_t) + stride * y;
+	uint8_t * pos = ((uint8_t *)getFrameBufferPointer()) + x * sizeof(fb_pixel_t) + stride * y;
+
 	for(int count = 0; count < dy; count++)
 	{
 		memset(pos, col, dx * sizeof(fb_pixel_t));
@@ -355,11 +356,12 @@ void CFrameBuffer::paintVLine(int x, int ya, int yb, const fb_pixel_t col)
 	if (!getActive())
 		return;
 
-	fb_pixel_t * pos = getFrameBufferPointer() + x * sizeof(fb_pixel_t) + stride * ya;
+	uint8_t * pos = ((uint8_t *)getFrameBufferPointer()) + x * sizeof(fb_pixel_t) + stride * ya;
+
 	int dy = yb-ya;
 	for (int count = 0; count < dy; count++)
 	{
-		*pos = col;
+		*(fb_pixel_t *)pos = col;
 		pos += stride;
 	}
 }
@@ -369,10 +371,11 @@ void CFrameBuffer::paintVLineRel(int x, int y, int dy, const fb_pixel_t col)
 	if (!getActive())
 		return;
 
-	fb_pixel_t* pos = getFrameBufferPointer() + x * sizeof(fb_pixel_t) + stride * y;
+	uint8_t * pos = ((uint8_t *)getFrameBufferPointer()) + x * sizeof(fb_pixel_t) + stride * y;
+
 	for(int count=0;count<dy;count++)
 	{
-		*pos = col;
+		*(fb_pixel_t *)pos = col;
 		pos += stride;
 	}
 }
@@ -382,7 +385,8 @@ void CFrameBuffer::paintHLine(int xa, int xb, int y, const fb_pixel_t col)
 	if (!getActive())
 		return;
 
-	fb_pixel_t* pos = getFrameBufferPointer() + xa * sizeof(fb_pixel_t) + stride * y;
+	uint8_t * pos = ((uint8_t *)getFrameBufferPointer()) + xa * sizeof(fb_pixel_t) + stride * y;
+
 	int dx = xb -xa;
 	memset(pos, col, dx * sizeof(fb_pixel_t));
 }
@@ -392,7 +396,8 @@ void CFrameBuffer::paintHLineRel(int x, int dx, int y, const fb_pixel_t col)
 	if (!getActive())
 		return;
 
-	fb_pixel_t* pos = getFrameBufferPointer() + x * sizeof(fb_pixel_t) + stride * y;
+	uint8_t * pos = ((uint8_t *)getFrameBufferPointer()) + x * sizeof(fb_pixel_t) + stride * y;
+
 	memset(pos, col, dx * sizeof(fb_pixel_t));
 }
 
@@ -424,13 +429,14 @@ bool CFrameBuffer::paintIcon8(const std::string & filename, const int x, const i
 	height = (header.height_hi << 8) | header.height_lo;
 
 	unsigned char pixbuf[768];
-	fb_pixel_t * d = getFrameBufferPointer() + x * sizeof(fb_pixel_t) + stride * y;
+
+	uint8_t * d = ((uint8_t *)getFrameBufferPointer()) + x * sizeof(fb_pixel_t) + stride * y;
 	fb_pixel_t * d2;
 	for (int count=0; count<height; count ++ )
 	{
 		read(fd, &pixbuf, width );
 		unsigned char *pixpos = (unsigned char*) &pixbuf;
-		d2 = d;
+		d2 = (fb_pixel_t *) d;
 		for (int count2=0; count2<width; count2 ++ )
 		{
 			unsigned char color = *pixpos;
@@ -470,13 +476,13 @@ bool CFrameBuffer::paintIcon(const std::string & filename, const int x, const in
 	height = (header.height_hi << 8) | header.height_lo;
 
 	unsigned char pixbuf[768];
-	fb_pixel_t * d = getFrameBufferPointer() + x * sizeof(fb_pixel_t) + stride * y;
+	uint8_t * d = ((uint8_t *)getFrameBufferPointer()) + x * sizeof(fb_pixel_t) + stride * y;
 	fb_pixel_t * d2;
 	for (int count=0; count<height; count ++ )
 	{
 		read(fd, &pixbuf, width >> 1 );
 		unsigned char *pixpos = (unsigned char*) &pixbuf;
-		d2 = d;
+		d2 = (fb_pixel_t *) d;
 		for (int count2=0; count2<width >> 1; count2 ++ )
 		{
 			unsigned char compressed = *pixpos;
@@ -544,7 +550,10 @@ void CFrameBuffer::paintPixel(const int x, const int y, const fb_pixel_t col)
 	if (!getActive())
 		return;
 
-	fb_pixel_t * pos = getFrameBufferPointer() + x * sizeof(fb_pixel_t) + stride * y;
+	fb_pixel_t * pos = getFrameBufferPointer();
+	pos += (stride / sizeof(fb_pixel_t)) * y;
+	pos += x;
+
 	*pos = col;
 }
 
@@ -800,8 +809,8 @@ void CFrameBuffer::paintBackgroundBoxRel(int x, int y, int dx, int dy)
 	}
 	else
 	{
-		fb_pixel_t * fbpos = getFrameBufferPointer() + x * sizeof(fb_pixel_t) + stride * y;
-		fb_pixel_t * bkpos = background + x * sizeof(fb_pixel_t) + BACKGROUNDIMAGEWIDTH * y;
+		uint8_t * fbpos = ((uint8_t *)getFrameBufferPointer()) + x * sizeof(fb_pixel_t) + stride * y;
+		uint8_t * bkpos = ((uint8_t *)background) + x * sizeof(fb_pixel_t) + BACKGROUNDIMAGEWIDTH * y;
 		for(int count = 0;count < dy; count++)
 		{
 			memcpy(fbpos, bkpos, dx * sizeof(fb_pixel_t));
@@ -830,7 +839,7 @@ void CFrameBuffer::SaveScreen(int x, int y, int dx, int dy, fb_pixel_t * const m
 	if (!getActive())
 		return;
 
-	fb_pixel_t * fbpos = getFrameBufferPointer() + x * sizeof(fb_pixel_t) + stride * y;
+	uint8_t * fbpos = ((uint8_t *)getFrameBufferPointer()) + x * sizeof(fb_pixel_t) + stride * y;
 	fb_pixel_t * bkpos = memp;
 	for (int count = 0; count < dy; count++)
 	{
@@ -846,7 +855,7 @@ void CFrameBuffer::RestoreScreen(int x, int y, int dx, int dy, fb_pixel_t * cons
 	if (!getActive())
 		return;
 
-	fb_pixel_t * fbpos = getFrameBufferPointer() + x * sizeof(fb_pixel_t) + stride * y;
+	uint8_t * fbpos = ((uint8_t *)getFrameBufferPointer()) + x * sizeof(fb_pixel_t) + stride * y;
 	fb_pixel_t * bkpos = memp;
 	for (int count = 0; count < dy; count++)
 	{
