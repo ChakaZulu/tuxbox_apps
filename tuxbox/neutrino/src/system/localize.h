@@ -39,7 +39,7 @@
 
 char* getISO639Description(char *iso);
 
-typedef std::map<string,string> mapLocaleData;
+typedef std::map<std::string, std::string> mapLocaleData;
 
 class CLocaleManager
 {
@@ -47,9 +47,9 @@ class CLocaleManager
 		mapLocaleData localeData;
 
 	public:
-		void loadLocale(string locale);
+		void loadLocale(std::string locale);
 
-		string getText(string keyName);
+		std::string getText(std::string keyName);
 };
 
 
