@@ -113,13 +113,11 @@ static	unsigned short cw=0;
 
 	switch(code)
 	{
-#ifdef SUPPORT_SCREEN_DUMP
 	case RC_HELP:
 		if ( !cw )
 			write_xpm();
 		cw=1;
 		break;
-#endif
 	case RC_UP:
 	case RC_DOWN:
 	case RC_RIGHT:
@@ -209,11 +207,9 @@ void		RcGetActCode( void )
 			case 0x0d :
 				actcode=RC_OK;
 				break;
-#ifdef SUPPORT_SCREEN_DUMP
 			case 0x1c :
 				write_xpm();
 				break;
-#endif
 			}
 		}
 	}

@@ -439,8 +439,8 @@ void	write_xpm( void )
 	}
 	fprintf(fp,"/* XPM */\n");
 	fprintf(fp,"static char *pacman[] = {\n");
-	fprintf(fp,"\"  %d    %d    10    1\"",screeninfo.xres,screeninfo.yres);
-	for( i=0; i < 10; i++ )
+	fprintf(fp,"\"  %d    %d    90    1\"",screeninfo.xres,screeninfo.yres);
+	for( i=0; i < 90; i++ )
 		fprintf(fp,",\n\"%c c #%02x%02x%02x\"",i+97,
 			(unsigned char)(red[i]>>8),
 			(unsigned char)(green[i]>>8),

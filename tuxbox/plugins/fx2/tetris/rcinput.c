@@ -92,6 +92,7 @@ void		RcGetActCode( void )
 	char			buf[32];
 	int				x;
 	unsigned short	code = 0;
+static  unsigned short cw=0;
 
 	x = read( fd, buf, 32 );
 	if ( x < 2 )
@@ -112,6 +113,11 @@ void		RcGetActCode( void )
 
 	switch(code)
 	{
+	case RC_HELP:
+		if ( !cw )
+			write_xpm();
+		cw=1;
+		break;
 	case RC_UP:
 	case RC_DOWN:
 	case RC_RIGHT:

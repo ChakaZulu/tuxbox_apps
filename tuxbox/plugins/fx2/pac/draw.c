@@ -336,7 +336,6 @@ void	FBOverlayImage( int x, int y, int dx, int dy,
 	}
 }
 
-#ifdef SUPPORT_SCREEN_DUMP
 void	write_xpm( void )
 {
 	FILE			*fp;
@@ -369,4 +368,3 @@ void	write_xpm( void )
 
 	fclose(fp);
 }
-#endif
