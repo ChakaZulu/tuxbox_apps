@@ -4,7 +4,7 @@
    Copyright (C) 2001 Steffen Hehn 'McClean'
    Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timerd.cpp,v 1.22 2002/09/27 07:34:23 Zwen Exp $
+   $Id: timerd.cpp,v 1.23 2002/10/05 17:08:38 Zwen Exp $
 
    License: GPL
 
@@ -45,7 +45,8 @@
 #include "timerdMsg.h"
 #include "debug.h"
 #include "config.h"
-#include <configfile.h>
+#include "configfile.h"
+#include "sectionsdclient.h"
 
 bool doLoop;
 
@@ -555,7 +556,10 @@ int main(int argc, char **argv)
 
 	if(!no_wait)
 	{
-		sleep(30); // wait for correct date to be set...
+		// wait for correct date to be set...
+		CSectionsdClient* sectionsd = new CSectionsdClient;
+		while(!sectionsd->getIsTimeSet())
+			sleep(1);
 	}
    loadTimersFromConfig();
    
