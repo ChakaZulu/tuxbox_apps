@@ -1,3 +1,12 @@
+//
+// $Id: channellist.cpp,v 1.5 2001/08/15 17:02:26 fnbrd Exp $
+//
+// $Log: channellist.cpp,v $
+// Revision 1.5  2001/08/15 17:02:26  fnbrd
+// Channellist now wider
+//
+//
+
 #include "channellist.h"
 
 
@@ -86,7 +95,7 @@ CChannelList::CChannelList(int Key=-1, string Name="")
 	key = Key;
 	name = Name;
 	selected = 0;
-	width = 300;
+	width = 500;
 	height = 400;
 	x=((720-width) >> 1) - 40;
 	y=((576-height)>>1)-20;
@@ -175,7 +184,7 @@ void CChannelList::exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput* rc
 			{
 				paint(frameBuffer, fonts);
 			}
-			else 
+			else
 			{
 				paintItem(frameBuffer, fonts, selected - liststart);
 			}
@@ -191,8 +200,8 @@ void CChannelList::exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput* rc
 			{
 				paint(frameBuffer, fonts);
 			}
-			else 
-			{	
+			else
+			{
 				paintItem(frameBuffer, fonts, selected - liststart);
 			}
 		}
