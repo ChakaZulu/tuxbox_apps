@@ -500,7 +500,7 @@ parentallock.never Nie
 parentallock.onstart Bim Start
 parentallock.changetolocked Bi vorgsperrte Bouquets
 parentallock.onsignal Bi gsendeter Vorsperri
-parentallock.lockedSänder Vorgesperrte Sänder...
+parentallock.lockedsender Vorgesperrte Sänder...
 parentallock.lockedprogram Gspärrtes Programm (FSK ab %d)
 parentallock.head Goofe'schutz PIN
 
