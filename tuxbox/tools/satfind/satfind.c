@@ -57,6 +57,8 @@ typedef unsigned char screen_t[LCD_BUFFER_SIZE];
 
 #define FILLED 4
 
+struct dvb_frontend_parameters feparams;
+
 struct signal {
   uint32_t ber;
   uint16_t snr;
@@ -259,6 +261,7 @@ void prepare_main(screen_t screen) {
 }
 
 int main(int argc, char **argv) {
+  struct dvb_frontend_parameters feparams;
   int lcd_fd;
   int fe_fd,dmx_fd;
   int lcd_mode;
@@ -271,6 +274,18 @@ int main(int argc, char **argv) {
   unsigned char buf[1024];
   char network_name[31],old_name[31];
   int lcd;
+  int tune = 0;
+
+   if (argc == 2) {
+
+   	if (!strncmp(argv[1], "--tune", 6)) { 
+		tune  = 1; 
+	}
+	else {
+		printf("Usage: satfind ore \n       satfind --tune      for tune to TP 82 on ASTRA 1H\n");
+		return 0;
+	} 
+  }
 
   /* open dbox2-specific devices (LCD) */
   if((lcd_fd=open(LCD,O_RDWR))<0) {
@@ -332,6 +347,16 @@ int main(int argc, char **argv) {
   FD_SET(dmx_fd,&rfds);
   tv.tv_sec=0;
   tv.tv_usec=10000;
+
+  if (tune) {
+  	/* TP 82 (ProSiebenSat.1 Media AG) on ASTRA 1H */
+  	feparams.frequency = 1880000;
+  	feparams.inversion = 0;
+  	feparams.u.qpsk.symbol_rate = 27500000; 
+  	feparams.u.qpsk.fec_inner = FEC_3_4; 
+  }
+
+
   while(1) {
     if((result=select(dmx_fd+1,&rfds,NULL,NULL,&tv))>0) {
       if(FD_ISSET(dmx_fd,&rfds)) {
@@ -364,6 +389,14 @@ int main(int argc, char **argv) {
     FD_SET(dmx_fd,&rfds);
     tv.tv_sec=0;
     tv.tv_usec=10000;
+
+  if(tune) {
+	/* TUNE and wait till a possibly LOCK is done */
+  	ioctl(fe_fd,FE_SET_VOLTAGE,SEC_VOLTAGE_13);
+	ioctl(fe_fd,FE_SET_FRONTEND, &feparams);
+	ioctl(fe_fd,FE_SET_TONE, SEC_TONE_ON);
+	usleep(250);
+  }
 
     get_signal(&signal_quality,fe_fd);
     if (!signal_changed(&signal_quality, &old_signal))
