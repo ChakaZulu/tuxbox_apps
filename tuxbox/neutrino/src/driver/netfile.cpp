@@ -926,6 +926,7 @@ FILE *f_open(const char *filename, const char *acctype)
 			 char * ext = strrchr(url.file , '.');
 			 if (ext!=NULL)
 			 {
+  			 	if(strcasecmp(ext+1, "cdr")==0) f_type(fd, "audio/cdr");
   			 	if(strcasecmp(ext+1, "ogg")==0) f_type(fd, "audio/ogg");
 	  			if(strcasecmp(ext+1, "mp3")==0) f_type(fd, "audio/mpeg");
 	  			if(strcasecmp(ext+1, "mp2")==0) f_type(fd, "audio/mpeg");

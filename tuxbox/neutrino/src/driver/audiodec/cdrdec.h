@@ -1,9 +1,9 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	Copyright (C) 2004 Zwen
+	Copyright (C) 2004 thegoodguy
 	
-	wav audio decoder
+	cdr audio decoder
 	Homepage: http://www.dbox2.info/
 
 	Kommentar:
@@ -26,29 +26,18 @@
 */
 
 
-#ifndef __WAV_DEC__
-#define __WAV_DEC__
+#ifndef __CDR_DEC__
+#define __CDR_DEC__
 
-#include <stdio.h>
-#include <driver/audiodec/basedec.h>
+#include <driver/audiodec/wavdec.h>
 
-class CWavDec : public CBaseDec
+class CCdrDec : public CWavDec
 {
-
-public:
-	static CWavDec* getInstance();
-	virtual RetCode Decoder(FILE *,int , State* , CAudioMetaData* m, time_t* t);
-	bool GetMetaData(FILE *in, bool nice, CAudioMetaData* m);
-	CWavDec(){};
-
-protected:
+ public:
+	static CCdrDec* getInstance();
+ protected:
 	virtual bool SetMetaData(FILE* in, CAudioMetaData* m);
-
-	int mBitsPerSample;
-	int mChannels;
-	int header_size;
 };
-
 
 #endif
 

@@ -97,13 +97,14 @@ CAudioPlayerGui::CAudioPlayerGui()
 	filebrowser = new CFileBrowser();
 	filebrowser->Multi_Select = true;
 	filebrowser->Dirs_Selectable = true;
+	audiofilefilter.addFilter("cdr");
 	audiofilefilter.addFilter("mp3");
 	audiofilefilter.addFilter("m2a");
 	audiofilefilter.addFilter("mpa");
 	audiofilefilter.addFilter("mp2");
 	audiofilefilter.addFilter("m3u");
-	audiofilefilter.addFilter("url");
 	audiofilefilter.addFilter("ogg");
+	audiofilefilter.addFilter("url");
 	audiofilefilter.addFilter("wav");
 	filebrowser->Filter = &audiofilefilter;
 	if(strlen(g_settings.network_nfs_mp3dir)!=0)
@@ -413,8 +414,10 @@ int CAudioPlayerGui::show()
 					CFileList::iterator files = filebrowser->getSelectedFiles()->begin();
 					for(; files != filebrowser->getSelectedFiles()->end();files++)
 					{
-						if ((files->getType() == CFile::FILE_OGG) || (files->getType() == CFile::FILE_MP3) ||
-							 (files->getType() == CFile::FILE_WAV))
+						if ((files->getType() == CFile::FILE_CDR) ||
+						    (files->getType() == CFile::FILE_OGG) ||
+						    (files->getType() == CFile::FILE_MP3) ||
+						    (files->getType() == CFile::FILE_WAV))
 						{
 							CAudiofile audiofile;
 							audiofile.Filename = files->Name;

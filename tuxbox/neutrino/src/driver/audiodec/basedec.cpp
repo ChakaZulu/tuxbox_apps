@@ -27,6 +27,7 @@
 #define DBOX
 
 #include <basedec.h>
+#include <cdrdec.h>
 #include <mp3dec.h>
 #include <oggdec.h>
 #include <wavdec.h>
@@ -48,6 +49,11 @@ CBaseDec::RetCode CBaseDec::DecoderBase(FILE *InputFp,int OutputFd, State* state
 		printf("(ogg)\n");
 		Status = COggDec::getInstance()->Decoder(InputFp, OutputFd, state, md, t);
 	}
+	else if(ftype(InputFp, "cdr"))
+	{
+		printf("(cdr)\n");
+		Status = CCdrDec::getInstance()->Decoder(InputFp, OutputFd, state, md, t);
+	}
 	else if(ftype(InputFp, "wav"))
 	{
 		printf("(wav)\n");
@@ -67,6 +73,10 @@ bool CBaseDec::GetMetaDataBase(FILE *in, bool nice, CAudioMetaData* m)
 	if(ftype(in, "ogg"))
 	{
 		Status = COggDec::getInstance()->GetMetaData(in, nice, m);
+	}
+	else if(ftype(in, "cdr"))
+	{
+		Status = CCdrDec::getInstance()->GetMetaData(in, nice, m);
 	}
 	else if(ftype(in, "wav"))
 	{

@@ -1,13 +1,14 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	Copyright (C) 2004 Zwen
+	Copyright (C) 2004 thegoodguy
 	
-	wav audio decoder
 	Homepage: http://www.dbox2.info/
 
 	Kommentar:
 
+	cdr audio decoder
+	
 	License: GPL
 
 	This program is free software; you can redistribute it and/or modify
@@ -25,30 +26,36 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-
-#ifndef __WAV_DEC__
-#define __WAV_DEC__
-
 #include <stdio.h>
-#include <driver/audiodec/basedec.h>
+#include <unistd.h>
+#include <cdrdec.h>
 
-class CWavDec : public CBaseDec
+CCdrDec* CCdrDec::getInstance()
 {
+	static CCdrDec* CdrDec = NULL;
+	if (CdrDec == NULL)
+	{
+		CdrDec = new CCdrDec();
+	}
+	return CdrDec;
+}
 
-public:
-	static CWavDec* getInstance();
-	virtual RetCode Decoder(FILE *,int , State* , CAudioMetaData* m, time_t* t);
-	bool GetMetaData(FILE *in, bool nice, CAudioMetaData* m);
-	CWavDec(){};
+bool CCdrDec::SetMetaData(FILE* in, CAudioMetaData* m)
+{
+	header_size = 0;
 
-protected:
-	virtual bool SetMetaData(FILE* in, CAudioMetaData* m);
+	fseek(in, 0, SEEK_END);
+	int filesize = ftell(in);
 
-	int mBitsPerSample;
-	int mChannels;
-	int header_size;
-};
+	m->type = CAudioMetaData::CDR;
+	m->bitrate = 44100 * 2 * 2 * 8;
+	m->samplerate = 44100;
+	mBitsPerSample = 16;
+	mChannels = 2;
+	m->total_time = filesize / (44100 * 2 * 2);
+	m->type_info = "CDR / 2 channels / 16 bit";
+	m->changed=true;
+	return true;
+}
 
-
-#endif
 

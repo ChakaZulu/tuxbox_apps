@@ -79,13 +79,13 @@ CBaseDec::RetCode CWavDec::Decoder(FILE *in, int OutputFd, State* state, CAudioM
 		Status=DATA_ERR;
 		return Status;
 	}
-	fseek(in, 44, SEEK_SET);
+	fseek(in, header_size, SEEK_SET);
 	int fmt;
 	switch(mBitsPerSample)
 	{
 		case 8  : fmt = AFMT_U8;
 			break;
-		case 16 : fmt = AFMT_S16_LE;
+		case 16 : fmt = header_size == 0 ? AFMT_S16_BE : AFMT_S16_LE;
 			break;
 		default:
 			printf("%s: wrong bits per sample (%d)\n", ProgName, mBitsPerSample);
@@ -122,7 +122,7 @@ CBaseDec::RetCode CWavDec::Decoder(FILE *in, int OutputFd, State* state, CAudioM
 				{
 					if(ftell(in) < bytes_to_skip)
 					{
-						fseek(in, 44, SEEK_SET);
+						fseek(in, header_size, SEEK_SET);
 						*state=PLAY;
 					}
 					else
@@ -140,7 +140,7 @@ CBaseDec::RetCode CWavDec::Decoder(FILE *in, int OutputFd, State* state, CAudioM
 			fprintf(stderr,"%s: PCM write error (%s).\n", ProgName, strerror(errno));
 			Status=WRITE_ERR;
 		}  
-		*time_played = (meta_data->bitrate!=0) ? (ftell(in)-44)*8/meta_data->bitrate : 0;
+		*time_played = (meta_data->bitrate!=0) ? (ftell(in)-header_size)*8/meta_data->bitrate : 0;
 	} while (bytes > 0 && *state!=STOP_REQ && Status==OK);
 	free(buffer);
 	return Status;
@@ -165,6 +165,8 @@ bool CWavDec::SetMetaData(FILE* in, CAudioMetaData* m)
 {
 	/* Set Metadata */
 	struct WavHeader wh;
+
+	header_size = 44;
 	
 	fseek(in, 0, SEEK_END);
 	int filesize = ftell(in);
@@ -183,12 +185,10 @@ bool CWavDec::SetMetaData(FILE* in, CAudioMetaData* m)
 	m->samplerate = Swap32IfBE(wh.SampleRate);
 	mBitsPerSample = Swap16IfBE(wh.BitsPerSample);
 	mChannels = Swap16IfBE(wh.NumChannels);
-	m->total_time = (m->bitrate!=0) ? (filesize-44)*8 / m->bitrate : 0;
+	m->total_time = (m->bitrate!=0) ? (filesize-header_size)*8 / m->bitrate : 0;
 	std::stringstream ss;
 	ss << "Riff/Wave / " << mChannels << "channel(s) / " << mBitsPerSample << "bit";
 	m->type_info = ss.str();
 	m->changed=true;
 	return true;
 }
-
-

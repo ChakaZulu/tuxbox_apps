@@ -44,6 +44,7 @@ public:
 	enum AudioType
    {
 		NONE,
+		CDR,
 		MP3,
 		OGG,
 		WAV

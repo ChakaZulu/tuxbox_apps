@@ -95,6 +95,7 @@ public:
 		FILE_UNKNOWN = 0,
 		FILE_DIR,
 		FILE_TEXT,
+		FILE_CDR,
 		FILE_MP3,
 		FILE_OGG,
 		FILE_WAV,
