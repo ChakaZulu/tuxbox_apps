@@ -157,13 +157,16 @@ int CRemoteControl::handleMsg(uint msg, uint data)
 				if ( needs_nvods )
 					getNVODs();
 
-        		if ( current_programm_timer != 0 )
+				if ( current_programm_timer != 0 )
 					g_RCInput->killTimer( current_programm_timer );
 
 				time_t end_program= info_CN->current_zeit.startzeit+ info_CN->current_zeit.dauer;
 				current_programm_timer = g_RCInput->addTimer( &end_program );
 
-				g_RCInput->postMsg( NeutrinoMessages::EVT_PROGRAMLOCKSTATUS, info_CN->current_fsk, false );
+				if ((!is_video_started) && (info_CN->current_fsk == 0))
+					g_RCInput->postMsg( NeutrinoMessages::EVT_PROGRAMLOCKSTATUS, 0x100, false );
+				else
+					g_RCInput->postMsg( NeutrinoMessages::EVT_PROGRAMLOCKSTATUS, info_CN->current_fsk, false );
 			}
 		}
 	    return messages_return::handled;

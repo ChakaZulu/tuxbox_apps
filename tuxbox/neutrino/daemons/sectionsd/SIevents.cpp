@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.19 2002/09/21 21:58:55 thegoodguy Exp $
+// $Id: SIevents.cpp,v 1.20 2002/10/08 18:56:43 thegoodguy Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.cpp,v $
+// Revision 1.20  2002/10/08 18:56:43  thegoodguy
+// Improve interpretation of the parental rating descriptor & locking of channels in a locked bouquet
+//
 // Revision 1.19  2002/09/21 21:58:55  thegoodguy
 // Speed up code (hey - sets are a great structure)
 //
@@ -152,20 +155,25 @@ int SIevent::saveXML(FILE *file, const char *serviceName) const
 
 char SIevent::getFSK() const
 {
-	char fsk = 0;
 	for (SIparentalRatings::iterator it = ratings.begin(); it != ratings.end(); it++)
 	{
 		if (it->countryCode == "DEU")
 		{
-			return(it->rating + 3);
+		    if ((it->rating >= 0x01) && (it->rating <= 0x0F))
+			    return (it->rating + 3);           //                     0x01 to 0x0F minimum age = rating + 3 years
+		    else
+			    return (it->rating == 0 ? 0 : 18); // return FSK 18 for : 0x10 to 0xFF defined by the broadcaster
 		}
 	}
-	if (ratings.size()!=0)
+	if (ratings.size() != 0)
 	{
-		return(ratings.begin()->rating + 3);
+		if ((ratings.begin()->rating >= 0x01) && (ratings.begin()->rating <= 0x0F))
+			return (ratings.begin()->rating + 3);
+		else
+			return (ratings.begin()->rating == 0 ? 0 : 18);
 	}
 
-	return fsk;
+	return 0x00;                                           //                     0x00         undefined
 }
 
 int SIevent::saveXML0(FILE *file) const
