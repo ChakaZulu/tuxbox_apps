@@ -731,6 +731,8 @@ scants.startnow start scan
 scants.transponders Transponders:
 screensetup.lowerright green = setup lower right
 screensetup.upperleft red = setup upper left
+servicemenu.getplugins Reload plugins
+servicemenu.getplugins_hint Reloading plugins,\nplease be patient.
 servicemenu.head Service
 servicemenu.reload Reload channel lists
 servicemenu.reload_hint Reloading channel lists,\nplease be patient.

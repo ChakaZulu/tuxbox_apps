@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.41 2005/02/15 12:00:49 diemade Exp $
+ * $Id: locals_intern.h,v 1.42 2005/02/16 21:31:25 mogway Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -761,6 +761,8 @@ const char * locale_real_names[] =
 	"scants.transponders",
 	"screensetup.lowerright",
 	"screensetup.upperleft",
+	"servicemenu.getplugins",
+	"servicemenu.getplugins_hint",
 	"servicemenu.head",
 	"servicemenu.reload",
 	"servicemenu.reload_hint",

@@ -734,6 +734,8 @@ scants.startnow Kanalsuche starten
 scants.transponders Transponder:
 screensetup.lowerright grün = Bildrand unten, rechts
 screensetup.upperleft rot = Bildrand oben, links
+servicemenu.getplugins Plugins neu laden
+servicemenu.getplugins_hint Plugins werden neu geladen,\nbitte warten...
 servicemenu.head Service
 servicemenu.reload Kanallisten neu laden
 servicemenu.reload_hint Kanallisten werden neu geladen,\nbitte warten...

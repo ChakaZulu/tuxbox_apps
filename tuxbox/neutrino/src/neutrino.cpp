@@ -1620,6 +1620,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 	service.addItem(new CMenuForwarder(LOCALE_BOUQUETEDITOR_NAME    , true, NULL, new CBEBouquetWidget()                  ));
 	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_SCANTS    , true, NULL, &scanSettings                           ));
 	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_RELOAD    , true, NULL, this                  , "reloadchannels"));
+	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_GETPLUGINS, true, NULL, this                   , "reloadplugins"));
 	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_UCODECHECK, true, NULL, UCodeChecker                            ));
 
 	//softupdate
@@ -4443,6 +4444,16 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 		hintBox->paint();
 
 		g_Zapit->reinitChannels();
+
+		hintBox->hide();
+		delete hintBox;
+	}
+	else if(actionKey=="reloadplugins")
+	{
+		CHintBox * hintBox = new CHintBox(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_SERVICEMENU_GETPLUGINS_HINT));
+		hintBox->paint();
+
+		g_PluginList->loadPlugins();
 
 		hintBox->hide();
 		delete hintBox;
