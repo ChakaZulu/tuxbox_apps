@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: main.cpp,v $
+Revision 1.29  2003/01/05 21:07:09  TheDOC
+new version-number and README updated
+
 Revision 1.28  2003/01/05 19:52:47  TheDOC
 forgot include
 
@@ -158,7 +161,7 @@ int main(int argc, char **argv)
 
 	settings settings(&cam);
 
-	settings.setVersion("0.22 cvs");
+	settings.setVersion("0.30 cvs");
 
 	hardware hardware(&settings, &variables);
 	hardware.useDD(false);
