@@ -112,6 +112,7 @@ void TWebDbox::Streaminfo(TWebserverRequest* request)
 
 void TWebDbox::StopEPGScanning(TWebserverRequest* request, bool off)
 {
+
 int sock_fd;
 Tmconnect con;
 	if((sock_fd = Parent->SocketConnect(&con,sectionsd::portNumber)) != -1)
@@ -127,6 +128,7 @@ Tmconnect con;
 
 		close(sock_fd);
 	}
+
 }
 
 //-------------------------------------------------------------------------
@@ -204,6 +206,7 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 	printf("Execute CGI : %s\n",request->Filename->c_str());
 	if(strcmp(request->Filename->c_str(),"getdate") == 0)
 	{
+		request->SendPlainHeader();
 		if (request->ParameterList->Count==0)
 		{	//paramlos
 			char *timestr = new char[50];
@@ -219,6 +222,7 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 
 	if(strcmp(request->Filename->c_str(),"gettime") == 0)
 	{
+		request->SendPlainHeader();
 		if (request->ParameterList->Count==0)
 		{	//paramlos
 			char *timestr = new char[50];
@@ -233,20 +237,27 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 
 	if(strcmp(request->Filename->c_str(),"info") == 0)
 	{
+		request->SendPlainHeader();
 		if (request->ParameterList->Count == 0)
 		{	//paramlos
 			request->SocketWrite("Neutrino NG\n");
 		}
 		else if (request->ParameterList->GetIndex("streaminfo") != -1)
+		{
 			Streaminfo(request);
+		}
+		else
+			request->SocketWrite("error");	
 	}
 
 	if(strcmp(request->Filename->c_str(),"shutdown") == 0)
 	{
+		request->SendPlainHeader();
 		if (request->ParameterList->Count == 0)
 		{	//paramlos
 			request->SocketWrite("shutdown");
 			controld.shutdown();
+			request->SocketWrite("ok");
 		}
 		else
 		{
@@ -256,6 +267,7 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 
 	if(strcmp(request->Filename->c_str(),"volume") == 0)
 	{
+		request->SendPlainHeader();
 		if (request->ParameterList->Count == 0)
 		{	//paramlos - aktuelles volume anzeigen
 			char buf[10];
@@ -286,6 +298,7 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 				char vol = atol( request->ParameterList->GetValue(0) );
 				request->SocketWrite( request->ParameterList->GetValue(0) );
 				controld.setVolume(vol);
+				request->SocketWrite("ok");
 			}
 		}
 		else
@@ -297,7 +310,7 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 	if(strcmp(request->Filename->c_str(),"channellist") == 0)
 	{
 	char buf[250];
-		printf("Gebe channellist aus\n");
+		request->SendPlainHeader();
 		if(!ChannelList)
 			GetChannelList();
 		for(int i = 0; i < ChannelList->Count;i++)
@@ -314,8 +327,22 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 
 	if(strcmp(request->Filename->c_str(), "epg") == 0)
 	{
+		request->SendPlainHeader();
 		if(Parent->DEBUG) printf("EPG, Parameter: %d\n",request->ParameterList->Count);
-		if(request->ParameterList->Count == 1)
+		if(request->ParameterList->Count == 0)
+		{
+			if(!ChannelList)
+				GetChannelList();
+			TChannel *channel = ChannelList->Head;
+			if(Parent->DEBUG) printf("Jetzt channelList\n");
+			char buffer[255];
+			for(int i = 0; i < ChannelList->Count;i++)
+			{
+				printf("channel id: %ld\n",channel->onid_tsid);
+				channel = channel->Next;
+			}
+		}
+		else if(request->ParameterList->Count == 1)
 		{
 			request->ParameterList->PrintParameterList();
 			printf("Nach PArameter listen\n");
@@ -340,9 +367,15 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 			GetEPG( request, id, true);
 		}
 	}
+	if(strcmp(request->Filename->c_str(),"version") == 0)
+	{
+		request->SendPlainHeader();
+		request->SendFile("/",".version");
+	}
 
 	if(strcmp(request->Filename->c_str(),"zapto") == 0)
 	{
+		request->SendPlainHeader();
 		if (request->ParameterList->Count == 0)
 		{	//paramlos - aktuelles programm anzeigen
 			printf("zapto ohne params\n");
@@ -360,31 +393,41 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 			}
 			else if(request->ParameterList->GetIndex("stopplayback") != -1)
 			{
-				StopPlayback(request);
-				StopEPGScanning(request, true);
+//				StopPlayback(request);
+				zapit.stopPlayBack();
+				sectionsd.setPauseScanning(true);
+//				StopEPGScanning(request, true);
 				printf("stop playback requested..\n");
 			}
 			else if(request->ParameterList->GetIndex("startplayback") != -1)
 			{
-				char buf[30];
-				sprintf(buf, "%u\n", GetcurrentONIDSID());
-				ZapTo(&buf[0]);
-				StopEPGScanning(request, false);
+//				char buf[30];
+//				sprintf(buf, "%u\n", GetcurrentONIDSID());
+//				ZapTo(&buf[0]);
+				zapit.startPlayBack();
+//				StopEPGScanning(request, false);
+				sectionsd.setPauseScanning(false);
 				printf("start playback requested..\n");
+				request->SocketWrite("ok");
 			}
 			else if(request->ParameterList->GetIndex("stopsectionsd") != -1)
 			{
-				StopEPGScanning(request, true);
+//				StopEPGScanning(request, true);
+				sectionsd.setPauseScanning(true);
 				printf("stop sectionsd requested..\n");
+				request->SocketWrite("ok");
 			}
 			else if(request->ParameterList->GetIndex("startsectionsd") != -1)
 			{
-				StopEPGScanning(request, false);
+//				StopEPGScanning(request, false);
+				sectionsd.setPauseScanning(false);
 				printf("stop sectionsd requested..\n");
+				request->SocketWrite("ok");
 			}
 			else
 			{
 				ZapTo( request->ParameterList->Head->Name->c_str() );
+				request->SocketWrite("ok");
 			}
 		}
 		else
@@ -393,6 +436,7 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 			printf("[nhttpd] zapto fehler\n");
 		}
 	}
+	return true;
 }
 //-------------------------------------------------------------------------
 //-------------------------------------------------------------------------
@@ -444,10 +488,13 @@ int len = strlen(str);
 
 bool TWebDbox::Execute(TWebserverRequest* request)
 {
+	if(Parent->DEBUG) printf("executing\n");
 	if(strcmp(request->Filename->c_str(),"test.dbox2") == 0)
 	{
 		printf("Teste nun\n");
 		request->SendPlainHeader("text/html");
+		GetBouquetList();
+		updateEvents();
 		return true;
 	}
 	if(strcmp(request->Filename->c_str(),"avcontrol.dbox2") == 0)
@@ -836,6 +883,109 @@ void TWebDbox::ShowChannelList(TWebserverRequest* request)
 	request->SocketWriteLn("</body></html>");
 }
 //-------------------------------------------------------------------------
+// quick'n dirty bei McClean geklaut !
+void TWebDbox::updateEvents(void)
+{
+	char rip[]="127.0.0.1";
+
+	//printf("\n START CChannelList::updateEvents \n\n");
+	int sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	SAI servaddr;
+	memset(&servaddr,0,sizeof(servaddr));
+	servaddr.sin_family=AF_INET;
+	servaddr.sin_port=htons(sectionsd::portNumber);
+	inet_pton(AF_INET, rip, &servaddr.sin_addr);
+
+	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
+	{
+		perror("Couldn't connect to sectionsd!");
+		return;
+	}
+
+	sectionsd::msgRequestHeader req;
+	req.version = 2;
+
+	req.command = sectionsd::actualEventListTVshortIDs;
+	req.dataLength = 0;
+	write(sock_fd,&req,sizeof(req));
+
+	sectionsd::msgResponseHeader resp;
+	memset(&resp, 0, sizeof(resp));
+	if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0)
+	{
+		close(sock_fd);
+		return;
+	}
+	if(resp.dataLength<=0)
+	{
+		close(sock_fd);
+		return;
+	}
+
+	char* pData = new char[resp.dataLength] ;
+	if ( recv(sock_fd, pData, resp.dataLength, MSG_WAITALL)!= resp.dataLength )
+	{
+		delete[] pData;
+		close(sock_fd);
+		return;
+	}
+
+	close(sock_fd);
+
+	char *actPos = pData;
+
+/*	FILE *file=fopen("channellist.list", "wb");
+        if(file) {
+            fwrite(pData,  resp.dataLength, 1, file);
+            fclose(file);
+        }
+*/
+//	for(unsigned int count=0;count<chanlist.size();count++)
+//		chanlist[count]->currentEvent.description="";
+
+	while(actPos<pData+resp.dataLength)
+	{
+		unsigned* serviceID = (unsigned*) actPos;
+		actPos+=4;
+
+		unsigned long long* evt_id = (unsigned long long*) actPos;
+		actPos+=8;
+
+		time_t* startt = (time_t*) actPos;
+		actPos+=4;
+
+		unsigned* dauert = (unsigned*) actPos;
+		actPos+=4;
+
+		char* descriptiont= actPos;
+		actPos+=strlen(actPos)+1;
+		char *textt= actPos;
+		actPos+=strlen(actPos)+1;
+
+		printf("Kanal: %ld, event: %ld,Beschr: %s Text: %s\n",*serviceID,*evt_id,descriptiont,textt);
+/*
+		// quick'n dirty, sollte man mal anders machen
+		for (unsigned int count=0;count<chanlist.size();count++)
+		{
+			if (chanlist[count]->onid_sid==*serviceID)
+			{
+				chanlist[count]->currentEvent.id= *evt_id;
+				chanlist[count]->currentEvent.description= descriptiont;
+				chanlist[count]->currentEvent.text_1= textt;
+				chanlist[count]->currentEvent.startzeit= *startt;
+				chanlist[count]->currentEvent.dauer= *dauert;
+				//	printf("Channel found: %s\n", actPos);
+				break;
+			}
+		}
+*/
+	}
+
+	delete[] pData;
+	//printf("\n END CChannelList::updateEvents \n\n");
+	return;
+}
+//-------------------------------------------------------------------------
 
 void TWebDbox::GetEPGList()
 {
@@ -989,6 +1139,8 @@ Tmconnect con;
 		if(Parent->DEBUG) printf("Kanal ist aktuell\n");
 		return;
 	}
+	zapit.zapTo(sidonid);
+/*
 	if((sock_fd = Parent->SocketConnect(&con,EZAP_PORT)) != -1)
 	{
 		st_rmsg	sendmessage;
@@ -1007,7 +1159,10 @@ Tmconnect con;
 		}
 			close(sock_fd);
 	}
+*/
 }
+//-------------------------------------------------------------------------
+
 void TWebDbox::GetEventList(TWebserverRequest *request,TEventList *Events,unsigned onidSid, bool cgi = false)
 {
 char epgID[20];
@@ -1119,9 +1274,11 @@ Tmconnect con;
 			delete[] buffer;
 		}
 		close(sock_fd);
-
-		request->SocketWriteLn("</table>");
-		request->SocketWriteLn("</body></html>");
+		if(!cgi)
+		{
+			request->SocketWriteLn("</table>");
+			request->SocketWriteLn("</body></html>");
+		}
 	}
 }
 //-------------------------------------------------------------------------
@@ -1323,8 +1480,10 @@ char* TWebDbox::GetServiceName(int onidsid)
 }
 //-------------------------------------------------------------------------
 
+
 bool TWebDbox::GetChannelList()
 {
+/*
 int sock_fd;
 Tmconnect con;
 
@@ -1372,4 +1531,34 @@ Tmconnect con;
 		if(Parent->DEBUG) printf("Got %ld Channels\n",i);
 		return true;
 	}
+*/
+	if(!ChannelList)
+		ChannelList = new TChannelList;
+	TChannel *channel = NULL,*last = NULL;
+	CZapitClient::BouquetChannelList zapitChannels;
+	zapit.getChannels( zapitChannels);
+	for (uint i=0; i<zapitChannels.size(); i++)
+	{
+		if(Parent->DEBUG) 
+		{
+			printf("Neuen Channel anlegen: nr: %ld id: %ld name: %s\n",zapitChannels[i].nr,zapitChannels[i].onid_sid,zapitChannels[i].name);
+		}
+		channel= new TChannel(zapitChannels[i].nr,zapitChannels[i].onid_sid,zapitChannels[i].name);
+		ChannelList->Add(channel,last);
+		last = channel;
+	}
+	return true;
 }
+
+bool TWebDbox::GetBouquetList()
+{
+	CZapitClient::BouquetList zapitBouquets;
+	zapit.getBouquets(zapitBouquets, false);
+	for (uint i=0; i<zapitBouquets.size(); i++)
+	{
+		printf("Name: %s nr: %ld\n", zapitBouquets[i].name, zapitBouquets[i].bouquet_nr);
+	}
+
+
+}
+

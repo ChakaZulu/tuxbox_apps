@@ -15,7 +15,9 @@
 #include "helper.h"
 #include "controldclient.h"
 #include "../controld/clientlib/controldclient.h"
-#include "../../sections/sectionsdMsg.h"
+//#include "../../sections/sectionsdMsg.h"
+#include "../../sections/clientlib/sectionsdclient.h"
+#include "../../zapit/clientlib/zapitclient.h"
 
 
 using namespace std;
@@ -245,6 +247,8 @@ class TWebDbox
 	TWebserver * Parent;
 	TChannelList *ChannelList;
 	CControldClient controld;
+	CSectionsdClient sectionsd;
+	CZapitClient zapit;
 	map<unsigned, char*> ChannelListEvents;
 
 	time_t EPGDate;
@@ -258,6 +262,8 @@ public:
 
 	void ShowSettings(TWebserverRequest* request);
 	void ShowChannelList(TWebserverRequest* request);
+	bool GetBouquetList();
+
 	void ShowTimerList(TWebserverRequest *request);
 	char *GetServiceName(int onidsid);
 	void GetCurrentEPG(TWebserverRequest *request,unsigned onidSid);
@@ -280,6 +286,8 @@ public:
 	void StopPlayback(TWebserverRequest* request); 
 
 	void ParseString(TWebserverRequest *request,char *str,TParameterList * Parameter);
+
+	void updateEvents(void);
 
 };
 
