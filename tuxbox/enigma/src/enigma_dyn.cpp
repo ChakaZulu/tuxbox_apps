@@ -61,7 +61,7 @@
 
 using namespace std;
 
-#define WEBIFVERSION "2.8"
+#define WEBIFVERSION "2.8.1"
 
 #define KEYBOARDNORMAL 0
 #define KEYBOARDVIDEO 1
@@ -3641,14 +3641,23 @@ static eString showRemoteControl(eString request, eString dirpath, eString opts,
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
 	if (pdaScreen == 0)
+	{
 		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Nokia
 		 || eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Sagem
 		 || eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Philips)
 			result = readFile(TEMPLATE_DIR + "remoteControlDbox2.tmp");
 		else
 			result = readFile(TEMPLATE_DIR + "remoteControl.tmp");
+	}
 	else
-		result = readFile(TEMPLATE_DIR + "pdaRemoteControl.tmp");
+	{
+		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Nokia
+		 || eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Sagem
+		 || eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Philips)
+			result = readFile(TEMPLATE_DIR + "pdaRemoteControlDbox2.tmp");
+		else
+			result = readFile(TEMPLATE_DIR + "pdaRemoteControl.tmp");
+	}
 
 	return result;
 }
