@@ -2529,7 +2529,7 @@ void CNeutrinoApp::InitZapper()
 
 void CNeutrinoApp::setupRecordingDevice(void)
 {
-	if(g_settings.recording_type == 1 || g_settings.recording_type == 3)
+	if(g_settings.recording_type == 1)
 	{
 		CVCRControl::CServerDeviceInfo * info = new CVCRControl::CServerDeviceInfo;
 		int port;
@@ -2540,9 +2540,20 @@ void CNeutrinoApp::setupRecordingDevice(void)
 		info->StopSectionsd = (g_settings.recording_stopsectionsd == 1);
 		info->Name = "ngrab";
 		CVCRControl::getInstance()->registerDevice(CVCRControl::DEVICE_SERVER,info);
+		delete info;		
+	}
+	else if(g_settings.recording_type == 3)
+	{
+		CVCRControl::CServerDeviceInfo * info = new CVCRControl::CServerDeviceInfo;
+		info->ServerAddress = "127.0.0.1";
+		info->ServerPort = 4000;
+		info->StopPlayBack = (g_settings.recording_stopplayback == 1);
+		info->StopSectionsd = (g_settings.recording_stopsectionsd == 1);
+		info->Name = "ngrab";
+		CVCRControl::getInstance()->registerDevice(CVCRControl::DEVICE_SERVER,info);
 		delete info;
 		
-		if (g_settings.recording_type == 3) {
+		if (fserverpid == -1) {
     	    // start fserver process
 			fserverpid = fork();
 			if (fserverpid == -1) {
@@ -2552,7 +2563,7 @@ void CNeutrinoApp::setupRecordingDevice(void)
     				char * f_arg[6];
                 	f_arg[0] = "/sbin/fserver";
                 	f_arg[1] = "-sport";
-                	f_arg[2] = g_settings.recording_server_port;
+                	f_arg[2] = "4000";
                 	f_arg[3] = "-o";
                 	f_arg[4] = g_settings.network_nfs_recordingdir;
                 	f_arg[5]= 0;
@@ -2570,11 +2581,22 @@ void CNeutrinoApp::setupRecordingDevice(void)
 		CVCRControl::getInstance()->registerDevice(CVCRControl::DEVICE_VCR,info);
       delete info;
 	}
-   else
-   {
+    else
+    {
       if(CVCRControl::getInstance()->isDeviceRegistered())
          CVCRControl::getInstance()->unregisterDevice();
-   }
+    }
+    
+    if (g_settings.recording_type != 3 && fserverpid != -1) {
+        // stop fserver process
+        if(kill(fserverpid,SIGTERM)) {
+            fprintf(stderr,"\n[neutrino.cpp] fserver process not killed\n");
+        }
+        waitpid(fserverpid,0,0);
+        fprintf(stderr,"[neutrino.cpp] fserver stopped\n");
+        fserverpid = -1;
+    }
+
 }
 
 int CNeutrinoApp::run(int argc, char **argv)
@@ -3434,6 +3456,7 @@ void CNeutrinoApp::ExitRun()
 		}
 		waitpid(fserverpid,0,0);
 		fprintf(stderr,"[neutrino.cpp] fserver stopped\n");
+		fserverpid = -1;
 	}
 		
 	exit(0);

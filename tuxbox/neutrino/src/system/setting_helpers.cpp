@@ -185,8 +185,6 @@ bool CRecordingNotifier::changeNotify(const std::string & OptionName, void*)
    
    if (g_settings.recording_type == 3) 
    {
-        // set localhost as streaming server
-        g_settings.recording_server_ip = "127.0.0.1";
         // set SPTS mode for drivers
         FILE * fd = fopen("/var/etc/.spts_mode", "w");
 		if (fd)
