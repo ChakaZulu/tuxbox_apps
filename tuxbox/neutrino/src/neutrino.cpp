@@ -1,7 +1,4 @@
 /*
-
-        $Id: neutrino.cpp,v 1.269 2002/05/10 15:48:07 rasc Exp $
-
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -71,6 +68,8 @@
 
 #include "system/setting_helpers.h"
 #include "system/settings.h"
+#include "system/debug.h"
+
 
 #include <stdio.h>
 #include <unistd.h>
@@ -95,9 +94,6 @@
 #include <string>
 #include <vector>
 #include <map>
-
-#define SA struct sockaddr
-#define SAI struct sockaddr_in
 
 using namespace std;
 
@@ -170,11 +166,7 @@ CNeutrinoApp* CNeutrinoApp::getInstance()
 	if(!neutrinoApp)
 	{
 		neutrinoApp = new CNeutrinoApp();
-		printf("[neutrino] main Instance created\n");
-	}
-	else
-	{
-		//printf("[neutrino] frameBuffer Instace requested\n");
+		dprintf(DEBUG_DEBUG, "NeutrinoApp Instance created\n");
 	}
 	return neutrinoApp;
 }
@@ -186,7 +178,7 @@ void CNeutrinoApp::setupNetwork(bool force)
 	{
 		if(!g_settings.network_dhcp)
 		{
-			printf("doing network setup...\n");
+			dprintf(DEBUG_INFO, "doing network setup...\n");
 			//setup network
 			setNetworkAddress(g_settings.network_ip, g_settings.network_netmask, g_settings.network_broadcast);
 			if(strcmp(g_settings.network_nameserver, "000.000.000.000")!=0)
@@ -204,7 +196,7 @@ void CNeutrinoApp::testNetwork( )
 {
 	setupNetwork( true );
 
-	printf("doing network test...\n");
+	dprintf(DEBUG_INFO, "doing network test...\n");
 	//test network
 	testNetworkSettings(g_settings.network_ip, g_settings.network_netmask, g_settings.network_broadcast, g_settings.network_defaultgateway, g_settings.network_nameserver);
 }
@@ -482,7 +474,7 @@ int CNeutrinoApp::loadSetup()
 
 	if(!scanSettings.loadSettings(scanSettingsFile))
 	{
-		printf("error while loading scan-settings!\n");
+		dprintf(DEBUG_NORMAL,"error while loading scan-settings, using defaults!\n");
 		scanSettings.useDefaults();
 	}
 
@@ -498,7 +490,7 @@ void CNeutrinoApp::saveSetup()
 {
 	if(!scanSettings.saveSettings(scanSettingsFile))
 	{
-		printf("error while saveing scan-settings!\n");
+		dprintf(DEBUG_NORMAL, "error while saveing scan-settings!\n");
 	}
 
 	//video
@@ -634,7 +626,7 @@ void CNeutrinoApp::saveSetup()
 
 	if(configfile.getModifiedFlag())
 	{
-		printf("saveing neutrino txt-config\n");
+		dprintf(DEBUG_INFO, "saveing neutrino txt-config\n");
 		configfile.saveConfig(CONFIGDIR "/neutrino.conf");
 	}
 }
@@ -690,6 +682,7 @@ void CNeutrinoApp::doChecks()
 **************************************************************************************/
 void CNeutrinoApp::channelsInit()
 {
+	dprintf(DEBUG_DEBUG, "doing channelsInit\n");
 	//deleting old channelList for mode-switching.
 	delete channelList;
 	channelList = new CChannelList( "channellist.head" );
@@ -713,7 +706,7 @@ void CNeutrinoApp::channelsInit()
 
 	for ( uint i=0; i< bouquetList->Bouquets.size(); i++ )
 	{
-		printf(".");
+		dprintf(DEBUG_DEBUG, ".");
 		CZapitClient::BouquetChannelList zapitChannels;
 		g_Zapit->getBouquetChannels( bouquetList->Bouquets[i]->unique_key, zapitChannels);
 		for (uint j=0; j<zapitChannels.size(); j++)
@@ -727,7 +720,7 @@ void CNeutrinoApp::channelsInit()
 			}
 		}
 	}
-	printf("\nAll bouquets-channels received\n");
+	dprintf(DEBUG_DEBUG, "\nAll bouquets-channels received\n");
 }
 
 
@@ -754,21 +747,21 @@ void CNeutrinoApp::CmdParser(int argc, char **argv)
 	{
 		if ( !strcmp(argv[x], "-su"))
 		{
-			printf("Software update enabled\n");
+			dprintf(DEBUG_NORMAL, "Software update enabled\n");
 			softupdate = true;
 		}
 		else if ( !strcmp(argv[x], "-z"))
 		{
-			printf("zapitmode is default..\n");
+			dprintf(DEBUG_NORMAL, "zapitmode is default..\n");
 		}
 		else if ( !strcmp(argv[x], "-stream"))
 		{
-			printf("enable streaming-control\n");
+			dprintf(DEBUG_NORMAL, "enable streaming-control\n");
 			g_settings.network_streaming_use = 1;
 		}
 		else if ( !strcmp(argv[x], "-flash"))
 		{
-			printf("enable flash\n");
+			dprintf(DEBUG_NORMAL, "enable flash\n");
 			fromflash = true;
 		}
 		else if ( !strcmp(argv[x], "-font"))
@@ -783,7 +776,7 @@ void CNeutrinoApp::CmdParser(int argc, char **argv)
 		}
 		else
 		{
-			printf("Usage: neutrino [-su][-font /fontdir/fontfile fontname fontsize]\n");
+			dprintf(DEBUG_NORMAL, "Usage: neutrino [-su] [-flash] [-font /fontdir/fontfile fontname fontsize]\n");
 			exit(0);
 		}
 	}
@@ -794,7 +787,7 @@ void CNeutrinoApp::SetupFrameBuffer()
 	frameBuffer->init();
 	if (frameBuffer->setMode(720, 576, 8))
 	{
-		printf("Error while setting framebuffer mode\n");
+		dprintf(DEBUG_NORMAL, "Error while setting framebuffer mode\n");
 		exit(-1);
 	}
 
@@ -806,9 +799,9 @@ void CNeutrinoApp::SetupFrameBuffer()
 
 void CNeutrinoApp::SetupFonts()
 {
-    printf("FontFile: %s\n", (fontFile+ ".ttf").c_str() );
-	printf("FontName: %s\n", fontName.c_str() );
-	printf("FontSize: %d\n", fontsSizeOffset );
+    dprintf(DEBUG_INFO, "FontFile: %s\n", (fontFile+ ".ttf").c_str() );
+	dprintf(DEBUG_INFO, "FontName: %s\n", fontName.c_str() );
+	dprintf(DEBUG_INFO, "FontSize: %d\n", fontsSizeOffset );
 
 	g_fontRenderer->AddFont((fontFile+ ".ttf").c_str() );
 	g_fontRenderer->AddFont((fontFile+ "_bold.ttf").c_str() );
@@ -946,7 +939,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		for ( uint i=0; i< satList.size(); i++)
 		{
 			ojSat->addOption(satList[i].satName);
-			printf("got scanprovider (sat): %s\n", satList[i].satName );
+			dprintf(DEBUG_DEBUG, "got scanprovider (sat): %s\n", satList[i].satName );
 		}
 
 		CMenuOptionChooser* ojDiseqcRepeats = new CMenuOptionChooser("satsetup.diseqcrepeat", &((int)(scanSettings.diseqcRepeat)), scanSettings.diseqcMode != NO_DISEQC/*, new CSatelliteNotifier*/, NULL, false);
@@ -1022,7 +1015,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		for ( uint i=0; i< providerList.size(); i++)
 		{
 			oj->addOption( providerList[i].satName);
-			printf("got scanprovider (cable): %s\n", providerList[i].satName );
+			dprintf(DEBUG_DEBUG, "got scanprovider (cable): %s\n", providerList[i].satName );
 		}
 		settings.addItem( ojBouquets);
 		settings.addItem( ojInv );
@@ -1047,7 +1040,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 	//softupdate
 	if (softupdate)
 	{
-		printf("init soft-update-stuff\n");
+		dprintf(DEBUG_DEBUG, "init soft-update-stuff\n");
 		CMenuWidget* updateSettings = new CMenuWidget("servicemenu.update", "softupdate.raw", 450);
 		updateSettings->addItem( new CMenuSeparator() );
 		updateSettings->addItem( new CMenuForwarder("menu.back") );
@@ -1079,7 +1072,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 			fd = fopen("/var/etc/version", "r");
 			if(!fd)
 			{
-				perror("cannot read flash-versioninfo");
+				dperror("cannot read flash-versioninfo");
 			}
 			else
 			{
@@ -1103,7 +1096,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		}
 
 
-		printf("current flash-version: %s\n", g_settings.softupdate_currentversion);
+		dprintf(DEBUG_INFO, "current flash-version: %s\n", g_settings.softupdate_currentversion);
 		updateSettings->addItem( new CMenuForwarder("flashupdate.currentversion", false, (char*) &g_settings.softupdate_currentversion, NULL ));
 
 		CMenuOptionChooser *oj = new CMenuOptionChooser("flashupdate.updatemode", &g_settings.softupdate_mode,true);
@@ -1714,7 +1707,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	channelList = new CChannelList( "channellist.head" );
 
-
+	dprintf( DEBUG_NORMAL, "menue setup\n");
 	//Main settings
 	CMenuWidget mainMenu("mainmenu.head", "mainmenue.raw");
 	CMenuWidget mainSettings("mainsettings.head", "settings.raw");
@@ -1755,14 +1748,17 @@ int CNeutrinoApp::run(int argc, char **argv)
 	// ScanSettings
 	InitScanSettings(scanSettings);
 
+	dprintf( DEBUG_NORMAL, "control event register\n");
 	g_Controld->registerEvent(CControldClient::EVT_MUTECHANGED, 222, NEUTRINO_UDS_NAME);
     g_Controld->registerEvent(CControldClient::EVT_VOLUMECHANGED, 222, NEUTRINO_UDS_NAME);
 	g_Controld->registerEvent(CControldClient::EVT_MODECHANGED, 222, NEUTRINO_UDS_NAME);
 	g_Controld->registerEvent(CControldClient::EVT_VCRCHANGED, 222, NEUTRINO_UDS_NAME);
 
+	dprintf( DEBUG_NORMAL, "sectionsd event register\n");
 	g_Sectionsd->registerEvent(CSectionsdClient::EVT_TIMESET, 222, NEUTRINO_UDS_NAME);
 	g_Sectionsd->registerEvent(CSectionsdClient::EVT_GOT_CN_EPG, 222, NEUTRINO_UDS_NAME);
 
+	dprintf( DEBUG_NORMAL, "zapit event register\n");
 	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_FAILED, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_COMPLETE, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_COMPLETE_IS_NVOD, 222, NEUTRINO_UDS_NAME);
@@ -1776,6 +1772,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_Zapit->registerEvent(CZapitClient::EVT_RECORDMODE_ACTIVATED, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_RECORDMODE_DEACTIVATED, 222, NEUTRINO_UDS_NAME);
 
+	dprintf( DEBUG_NORMAL, "timerd event register\n");
 	g_Timerd->registerEvent(CTimerdClient::EVT_SHUTDOWN, 222, NEUTRINO_UDS_NAME);
 	g_Timerd->registerEvent(CTimerdClient::EVT_NEXTPROGRAM, 222, NEUTRINO_UDS_NAME);
 
@@ -1784,13 +1781,13 @@ int CNeutrinoApp::run(int argc, char **argv)
 	//settins
 	if(loadSettingsErg==1)
 	{
-		printf("config file missing\n");
+		dprintf(DEBUG_INFO, "config file missing\n");
 		saveSetup();
 		ShowHint ( "messagebox.info", g_Locale->getText("settings.noconffile") );
 	}
 	else if(loadSettingsErg==2)
 	{
-		printf("parts of configfile missing\n");
+		dprintf(DEBUG_INFO, "parts of configfile missing\n");
 		saveSetup();
 		ShowHint ( "messagebox.info", g_Locale->getText("settings.missingoptionsconffile") );
 	}
@@ -1898,7 +1895,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 
 					if ((bouquetList!=NULL) && (bouquetList->Bouquets.size() == 0 ))
 					{
-						printf("bouquets are empty\n");
+						dprintf(DEBUG_DEBUG, "bouquets are empty\n");
 						bouqMode = bsmAllChannels;
 					}
 					if ((bouquetList!=NULL) && (bouqMode == 1/*bsmBouquets*/))
@@ -1915,7 +1912,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 					}
 					else
 					{
-						printf("using all channels\n");
+						dprintf(DEBUG_DEBUG, "using all channels\n");
 						channelList->exec();
 					}
 				}
@@ -2118,7 +2115,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	}
 	else if ( msg == NeutrinoMessages::EVT_RECORDMODE )
 	{
-		printf("neutino - recordmode %s\n", ( data ) ? "on":"off" );
+		dprintf(DEBUG_DEBUG, "neutino - recordmode %s\n", ( data ) ? "on":"off" );
 
 		if ( ( !g_InfoViewer->is_visible ) && data )
 			g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
@@ -2153,7 +2150,7 @@ void CNeutrinoApp::ExitRun()
 		g_ActionLog->println("neutrino shutdown");
 	#endif
 
-	printf("neutrino exit\n");
+	dprintf(DEBUG_INFO, "exit\n");
 	//shutdown screen
 	g_lcdd->shutdown();
 
@@ -2504,7 +2501,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 }
 
 bool CNeutrinoApp::changeNotify(string OptionName)
-{
+{/*
 	int port = 0;
 	sscanf(g_settings.network_streamingserverport, "%d", &port);
 
@@ -2528,9 +2525,10 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 	rmsg.command = streamstatus +1;
 	write(sock_fd, &rmsg, sizeof(rmsg));
 	close(sock_fd);
-
+*/
 	return false;
 }
+
 
 
 /**************************************************************************************
@@ -2540,9 +2538,12 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.269 2002/05/10 15:48:07 rasc Exp $\n\n");
+	setDebugLevel(DEBUG_DEBUG);
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.270 2002/05/11 21:58:24 McClean Exp $\n\n");
+
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
+
 	tzset();
 	initGlobals();
 	return CNeutrinoApp::getInstance()->run(argc, argv);
