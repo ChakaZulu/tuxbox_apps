@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.152 2002/04/20 22:09:13 obi Exp $
+ * $Id: zapit.cpp,v 1.153 2002/04/20 23:04:45 Simplex Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1919,7 +1919,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.152 2002/04/20 22:09:13 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.153 2002/04/20 23:04:45 Simplex Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -2152,6 +2152,10 @@ void sendBouquets(bool emptyBouquetsToo)
 			 ((currentMode & RADIO_MODE) && (g_BouquetMan->Bouquets[i]->radioChannels.size()> 0) && (!g_BouquetMan->Bouquets[i]->bHidden)) ||
 			  (currentMode & TV_MODE) && (g_BouquetMan->Bouquets[i]->tvChannels.size()> 0) && (!g_BouquetMan->Bouquets[i]->bHidden))
 		{
+			if ((currentMode & RECORD_MODE) &&
+			    (((currentMode & RADIO_MODE) && (g_BouquetMan->Bouquets[i]->recModeRadioSize( frontend->getTsidOnid())) > 0 ) ||
+			      (currentMode & TV_MODE)    && (g_BouquetMan->Bouquets[i]->recModeTVSize( frontend->getTsidOnid())) > 0 ))
+			{
 			CZapitClient::responseGetBouquets msgBouquet;
 			// we'll send name and i+1 as bouquet number
 			strncpy(msgBouquet.name, g_BouquetMan->Bouquets[i]->Name.c_str(),30);
@@ -2162,6 +2166,7 @@ void sendBouquets(bool emptyBouquetsToo)
 			{
 				perror("[zapit] could not send any return\n");
 				return;
+			}
 			}
 		}
 	}

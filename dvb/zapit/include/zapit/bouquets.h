@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.16 2002/04/10 18:36:21 obi Exp $
+ * $Id: bouquets.h,v 1.17 2002/04/20 23:04:45 Simplex Exp $
  */
 
 #ifndef __bouquets_h__
@@ -70,6 +70,8 @@ class CBouquet
 //		void moveService (uint onidSid, uint newPosition);
 		void moveService (uint oldPosition, uint newPosition, uint8_t serviceType);
 
+		int recModeRadioSize( uint32_t);
+		int recModeTVSize( uint32_t);
 		CZapitChannel* getChannelByOnidSid(uint32_t onidSid, uint8_t serviceType = 0);
 };
 

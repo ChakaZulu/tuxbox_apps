@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.24 2002/04/14 06:06:31 obi Exp $
+ * $Id: bouquets.cpp,v 1.25 2002/04/20 23:04:45 Simplex Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -194,6 +194,28 @@ void CBouquet::moveService (uint oldPosition, uint newPosition, uint8_t serviceT
 		channels->erase( itOld);
 		channels->insert( itNew, tmp);
 	}
+}
+
+int CBouquet::recModeRadioSize( uint32_t tsid)
+{
+	int size = 0;
+	for ( uint i=0; i< tvChannels.size(); i++)
+	{
+		if ( tsid == tvChannels[i]->getTsidOnid())
+			size++;
+	}
+	return(size);
+}
+
+int CBouquet::recModeTVSize( uint32_t tsid)
+{
+	int size = 0;
+	for ( uint i=0; i< radioChannels.size(); i++)
+	{
+		if ( tsid == radioChannels[i]->getTsidOnid())
+			size++;
+	}
+	return(size);
 }
 
 
