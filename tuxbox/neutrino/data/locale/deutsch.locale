@@ -94,7 +94,7 @@ repeatblocker.hint_2 0 schaltet den Blocker aus (Rot ist " ")
 
 keybindingmenu.RC Fernbedienung
 keybindingmenu.repeatblock Tasten-Wiederholblocker
-keybindingmenu.repeatblock Wdh.-verzögerung
+keybindingmenu.repeatblock Wiederholungsverzögerung
 keybindingmenu.repeatblockgeneric Anfangsverzögerung
 keybindingmenu.head Tasten-Einstellungen
 keybindingmenu.modechange Modus wechsel
