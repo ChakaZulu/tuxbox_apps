@@ -160,7 +160,6 @@ extern "C" {
 	void init_p2p(p2p *p, void (*func)(uint8_t *buf, int count, void *p),
 		      int repack);
 	void get_pes (uint8_t *buf, int count, p2p *p, void (*func)(p2p *p));
-	void get_pes (uint8_t *buf, int count, p2p *p, void (*func)(p2p *p));
 	void pes_repack(p2p *p);
 	void setup_pes2ts( p2p *p, uint32_t pida, uint32_t pidv,
 			   void (*ts_write)(uint8_t *buf, int count, void *p));

@@ -1060,7 +1060,7 @@ void pes_to_ts2( int fdin, int fdout, uint16_t pida, uint16_t pidv, const int* p
 		count = read(fdin,buf,SIZE);
 		l += count;
 		if (*playstate == 0) break;
-		while (*playstate == 2) ;	// do nothing
+		while (*playstate == 2) usleep(10000);	// do nothing
 		if (verb) get_pes(buf,count,(void*)&p,pes_in_ts);
 	}
 

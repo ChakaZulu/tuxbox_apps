@@ -209,6 +209,7 @@ void* Play_Thread( void* filename )
 	ssize_t wr = 0;
 	ssize_t cache = sizeof(buf);
 	size_t r = 0;
+	ipack pack;
 
 	if( (char *) filename == NULL ) {
 	    	playstate = 0;
@@ -423,7 +424,7 @@ void CMoviePlayerGui::PlayStream( void )
 		}
 		else if( msg == CRCInput::RC_yellow )
 		{
-		  	if( playstate == 1 )
+		  	if( playstate != 2 )
 		  	{
 		  		// pause play
 		  		update_lcd = true;
