@@ -1,4 +1,6 @@
-EXTRA_DIST = \
+installdir = $(DATADIR)/enigma/pictures/chk_silver
+
+install_DATA = \
 	3D_border_unselected_corner_darkLight_neu.png 3D_border_unselected_corner_darkLight.png\
 	3D_border_unselected_corner_darkLight_swap.png 3D_border_unselected_corner_dark.png\
 	3D_border_unselected_corner_dark_swap.png 3D_border_unselected_corner_lightDark.png\
@@ -18,7 +20,4 @@ EXTRA_DIST = \
 	mainmenu/radio-fs8.png mainmenu/radio_sel-fs8.png mainmenu/rectime-fs8.png mainmenu/rectime_sel-fs8.png\
 	mainmenu/scart-fs8.png mainmenu/scart_sel-fs8.png mainmenu/setup-fs8.png setup_sel-fs8.png shutdown-fs8.png\
 	mainmenu/shutdown_sel-fs8.png mainmenu/tv-fs8.png mainmenu/tv_sel-fs8.png
-	
-	install-data-local:
-	install -d $(DATADIR)/enigma/pictures/chk_silver
-	install -m 0644 $(EXTRA_DIST) $(DATADIR)/enigma/pictures/chk_silver
+

@@ -1,10 +1,9 @@
-EXTRA_DIST = \
+installdir = $(DATADIR)/enigma/skins
+
+install_DATA = \
 	default.esml \
 	chk_blue2.esml chk_blue2.info \
 	neutrino.esml neutrino.info \
 	stone.esml stone.info \
 	silver.esml silver.info
 
-install-data-local:
-	install -d $(DATADIR)/enigma/skins
-	install -m 0644 $(EXTRA_DIST) $(DATADIR)/enigma/skins
