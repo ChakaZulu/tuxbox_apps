@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.17 2002/04/18 13:09:53 field Exp $
+  $Id: sectionsdclient.cpp,v 1.18 2002/07/27 17:14:51 obi Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: sectionsdclient.cpp,v $
+  Revision 1.18  2002/07/27 17:14:51  obi
+  no more warnings
+
   Revision 1.17  2002/04/18 13:09:53  field
   Sectionsd auf clientlib umgestellt :)
 
@@ -121,22 +124,34 @@ bool CSectionsdClient::sectionsd_close()
 		close(sock_fd);
 		sock_fd=0;
 	}
+
+	return true;
 }
 
 bool CSectionsdClient::send(char* data, int size)
 {
 	if(sock_fd)
 	{
-		write(sock_fd, data, size);
+		if (write(sock_fd, data, size) == size)
+		{
+			return true;
+		}
 	}
+
+	return false;
 }
 
 bool CSectionsdClient::receive(char* data, int size)
 {
 	if(sock_fd)
 	{
-		read(sock_fd, data, size);
+		if (read(sock_fd, data, size) > 0)
+		{
+			return true;
+		}
 	}
+
+	return false;
 }
 
 void CSectionsdClient::registerEvent(unsigned int eventID, unsigned int clientID, string udsName)
