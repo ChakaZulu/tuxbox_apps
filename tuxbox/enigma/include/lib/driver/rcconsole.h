@@ -13,6 +13,22 @@ protected:
 public:
 	eRCConsoleDriver(const char *filename);
 	~eRCConsoleDriver();
+	void flushBuffer() const
+	{
+		char data[16];
+		if (handle != -1)
+			while ( ::read(handle, data, 16) == 16 );
+	}
+	void lock() const
+	{
+		if ( sn )
+			sn->stop();
+	}
+	void unlock() const
+	{
+		if ( sn )
+			sn->start();
+	}
 };
 
 class eRCConsole: public eRCDevice
