@@ -1,5 +1,5 @@
 /*
-$Id: pespacket.c,v 1.3 2001/12/01 12:46:48 rasc Exp $
+$Id: pespacket.c,v 1.4 2001/12/06 15:33:18 rasc Exp $
 
    -- PES Decode/Table section
 
@@ -7,6 +7,9 @@ $Id: pespacket.c,v 1.3 2001/12/01 12:46:48 rasc Exp $
 
 
 $Log: pespacket.c,v $
+Revision 1.4  2001/12/06 15:33:18  rasc
+some small work on pespacket.c
+
 Revision 1.3  2001/12/01 12:46:48  rasc
 pespacket weitergestrickt, leider z.Zt. zuwenig Zeit um es richtig fertig zu machen.
 
@@ -65,8 +68,7 @@ void decodePES_buf (u_char *b, int len, int pid)
  }
 
  out_nl     (3,"Packet_start_code_prefix: %06lx",p.packet_start_code_prefix);
- out_SB_NL (3,"Stream_id: ",p.stream_id);
-//$$$ out_S2B_NL (3,"Stream_id: ",p.stream_id,dvbstrPESstream_ID(p.stream_id));
+ out_S2B_NL (3,"Stream_id: ",p.stream_id,dvbstrPESstream_ID(p.stream_id));
  out_SW_NL  (3,"PES_packet_length: ",p.PES_packet_length);
 
  b   += 6;
@@ -122,7 +124,7 @@ int  PES_decode2 (u_char *b, int len, int pid)
         u_int     original_or_copy;
         u_int     PTS_DTS_flags;
         u_int     ESCR_flag;
-        u_int     ES_rate;
+        u_int     ES_rate_flag;
         u_int     DSM_trick_mode_flag;
         u_int     additional_copy_info_flag;
         u_int     PES_CRC_flag;
@@ -149,7 +151,7 @@ int  PES_decode2 (u_char *b, int len, int pid)
  p.original_or_copy			= getBits (b, 0,  7, 1);
  p.PTS_DTS_flags			= getBits (b, 0,  8, 2);
  p.ESCR_flag				= getBits (b, 0, 10, 1);
- p.ES_rate				= getBits (b, 0, 11, 1);
+ p.ES_rate_flag				= getBits (b, 0, 11, 1);
  p.DSM_trick_mode_flag			= getBits (b, 0, 12, 1);
  p.additional_copy_info_flag		= getBits (b, 0, 13, 1);
  p.PES_CRC_flag				= getBits (b, 0, 14, 1);
@@ -159,15 +161,14 @@ int  PES_decode2 (u_char *b, int len, int pid)
 
 
  out_SB_NL  (6,"reserved1: ",p.reserved1);
-// Routine fehlt noch
-// out_S2B_NL (3,"PES_scrambling_control: ",p.PES_scrambling_control,
-//	dvbstrPESscramling_control_TYPE(p.PES_scrambling_control));
+ out_S2B_NL (3,"PES_scrambling_control: ",p.PES_scrambling_control,
+	dvbstrPESscrambling_ctrl_TYPE(p.PES_scrambling_control));
  out_SB_NL  (3,"PES_priority: ",p.PES_priority);
  out_SB_NL  (3,"data_alignment_indicator: ",p.data_alignment_indicator);
  out_SB_NL  (3,"copyright: ",p.copyright);
  out_SB_NL  (3,"original_or_copy: ",p.original_or_copy);
  out_SB_NL  (3,"PTS_DTS_flags: ",p.PTS_DTS_flags);
- out_SB_NL  (3,"ES_rate: ",p.ES_rate);
+ out_SB_NL  (3,"ES_rate_flag: ",p.ES_rate_flag);
  out_SB_NL  (3,"additional_copy_info_flag: ",p.additional_copy_info_flag);
  out_SB_NL  (3,"PES_CRC_flag: ",p.PES_CRC_flag);
  out_SB_NL  (3,"PES_extension_flag: ",p.PES_extension_flag);
@@ -196,18 +197,26 @@ int  PES_decode2 (u_char *b, int len, int pid)
  }
 
  if (p.ESCR_flag == 0x01) {
-   out_nl (3,"ESCR_base: ");
+   out_nl (3,"ESCR_flag: ");
    indent (+1);
+   out_nl (3,"ESCR_base: ");
    out_SB_NL  (3,"Reserved: ", getBits (b, 0,  0, 2) );
    print_xTS_field (b, 2) ;
-
    out_SW_NL  (3,"ESCR_extension: ", getBits (b, 0, 38, 9) );
    out_SW_NL  (3,"marker_bit: ",     getBits (b, 0, 47, 1) );
    indent (-1);
    b += 6;
-
  }
 
+ if (p.ES_rate_flag == 0x01) {
+   out_nl (3,"ES_rate_flag: ");
+   indent (+1);
+   out_SB_NL  (3,"Marker_bit: ", getBits (b, 0,  0,  1) );
+   out_SL_NL  (3,"ES_rate: ",    getBits (b, 0,  1, 22) );
+   out_SB_NL  (3,"Marker_bit: ", getBits (b, 0, 23,  1) );
+   indent (-1);
+   b += 3;
+ }
 
 
 

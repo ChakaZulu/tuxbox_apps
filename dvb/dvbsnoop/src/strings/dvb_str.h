@@ -54,6 +54,7 @@ char *dvbstrTS_ScramblingCtrl_TYPE (u_int id);
 /* -- PES stuff */
 
 char *dvbstrPESstream_ID(u_int id);
+char *dvbstrPESscrambling_ctrl_TYPE(u_int id);
 
 
 

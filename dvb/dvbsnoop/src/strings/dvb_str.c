@@ -1,10 +1,13 @@
 /*
-$Id: dvb_str.c,v 1.5 2001/12/01 12:34:17 rasc Exp $
+$Id: dvb_str.c,v 1.6 2001/12/06 15:33:18 rasc Exp $
 
   -- dvb decoder helper functions
 
 
 $Log: dvb_str.c,v $
+Revision 1.6  2001/12/06 15:33:18  rasc
+some small work on pespacket.c
+
 Revision 1.5  2001/12/01 12:34:17  rasc
 pespacket weitergestrickt, leider z.Zt. zuwenig Zeit um es richtig fertig zu machen.
 
@@ -1457,6 +1460,25 @@ char *dvbstrPESstream_ID (u_int i)
      {  0xF9, 0xF9,  "ancillary_stream" },
      {  0xFA, 0xFE,  "reserved data stream" },
      {  0xFF, 0xFF,  "program_stream_directory" },
+     {  0,0, NULL }
+  };
+
+
+  return findTableID (Table, i);
+}
+
+
+
+/*
+  -- PES Scrambling CTRL   ISO 13818-1  2.4.3.7
+*/
+
+char *dvbstrPESscrambling_ctrl_TYPE (u_int i)
+
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "not scrambled" },
+     {  0x01, 0x03,  "user defined (scrambled?)" },
      {  0,0, NULL }
   };
 
