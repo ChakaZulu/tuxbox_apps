@@ -29,6 +29,8 @@ test_sec_ne	: Like test_sections, but also test Not-Equal filter mode.
 test_pes	: Hex dump of PES data from stream.
 test_tt		: Demonstrate teletext decoding from PES data.
 test_av		: Test audio and video MPEG decoder API.
+test_vevent	: Test VIDEO_GET_EVENT and poll() for video events
+test_stc	: Test DMX_GET_STC.
 
 test_stillimage : Display single iframes as stillimages
 		  iframes can be created with the 'convert' tool from 

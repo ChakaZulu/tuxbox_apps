@@ -1,5 +1,5 @@
 /*
- * test_av_play.c - Test playing an MPEG TS from a file.
+ * test_av_play.c - Test playing an MPEG A+V PES (e.g. VDR recordings) from a file.
  *
  * Copyright (C) 2000 Ralph  Metzler <ralph@convergence.de>
  *                  & Marcus Metzler <marcus@convergence.de>
@@ -62,7 +62,7 @@ static int audioSelectSource(int fd, audio_stream_source_t source)
 
 
 
-static int audioSetMute(int fd, boolean state)
+static int audioSetMute(int fd, int state)
 {
 	int ans;
 
@@ -74,7 +74,7 @@ static int audioSetMute(int fd, boolean state)
 	return 0;
 }
 
-static int audioSetAVSync(int fd,boolean state)
+static int audioSetAVSync(int fd, int state)
 {
 	int ans;
 
@@ -175,7 +175,7 @@ static int videoSlowMotion(int fd,int nframes)
 
 #define BUFFY 32768
 #define NFD   2
-static void play_file_av(int filefd, int fd, int fd2)
+static void play_file_av(int filefd, int vfd, int afd)
 {
 	char buf[BUFFY];
 	int count;
@@ -185,85 +185,83 @@ static void play_file_av(int filefd, int fd, int fd2)
 
 	pfd[0].fd = STDIN_FILENO;
 	pfd[0].events = POLLIN;
-	
-	pfd[1].fd = fd;
+
+	pfd[1].fd = vfd;
 	pfd[1].events = POLLOUT;
-	
-	pfd[2].fd = fd2;
+
+	pfd[2].fd = afd;
 	pfd[2].events = POLLOUT;
-	
-	videoSelectSource(fd,VIDEO_SOURCE_MEMORY);
-	audioSelectSource(fd2,AUDIO_SOURCE_MEMORY);
+
+	videoSelectSource(vfd,VIDEO_SOURCE_MEMORY);
+	audioSelectSource(afd,AUDIO_SOURCE_MEMORY);
 
 	// FIXME: only seems to work if starting audio first!
-	audioPlay(fd2);
-	videoPlay(fd);
-	
-	
+	audioPlay(afd);
+	videoPlay(vfd);
+
 	count = read(filefd,buf,BUFFY);
-	write(fd,buf,count);
-	
+	write(vfd,buf,count);
+
 	while ( (count = read(filefd,buf,BUFFY)) >= 0  ){
 		written = 0;
 		while(written < count){
 			if (poll(pfd,NFD,1)){
 				if (pfd[1].revents & POLLOUT){
-					written += write(fd,buf+written,
+					written += write(vfd,buf+written,
 							count-written);
 				}
 				if (pfd[0].revents & POLLIN){
 					int c = getchar();
 					switch(c){
 					case 'z':
-						videoFreeze(fd);
+						videoFreeze(vfd);
 						printf("playback frozen\n");
 						stopped = 1;
 						break;
 
 					case 's':
-						videoStop(fd);
+						videoStop(vfd);
 						printf("playback stopped\n");
 						stopped = 1;
 						break;
-						
+
 					case 'c':
-						videoContinue(fd);
+						videoContinue(vfd);
 						printf("playback continued\n");
 						stopped = 0;
 						break;
 
 					case 'p':
-						videoPlay(fd);
-						audioPlay(fd2);
-					        audioSetAVSync(fd2, true);
-						audioSetMute(fd2, false);
+						videoPlay(vfd);
+						audioPlay(afd);
+					        audioSetAVSync(afd, 1);
+						audioSetMute(afd, 0);
 						printf("playback started\n");
 						stopped = 0;
 						break;
 
 					case 'f':
-					        audioSetAVSync(fd2, false);
-						audioSetMute(fd2, true);
-						videoFastForward(fd,0);
+					        audioSetAVSync(afd, 0);
+						audioSetMute(afd, 1);
+						videoFastForward(vfd,0);
 						printf("fastforward\n");
 						stopped = 0;
 						break;
 
 					case 'm':
-					        audioSetAVSync(fd2, false);
-						audioSetMute(fd2, true);
-						videoSlowMotion(fd,2);
+					        audioSetAVSync(afd, 0);
+						audioSetMute(afd, 1);
+						videoSlowMotion(vfd,2);
 						printf("slowmotion\n");
 						stopped = 0;
 						break;
 
 					case 'q':
-						videoContinue(fd);
+						videoContinue(vfd);
 						exit(0);
 						break;
 					}
 				}
-				
 			}
 		}
 	}
@@ -271,13 +269,13 @@ static void play_file_av(int filefd, int fd, int fd2)
 
 int main(int argc, char **argv)
 {
-	int fd, fd2;
+	int vfd, afd;
 	int filefd;
 	char *videodev = "/dev/dvb/adapter0/video0";
 	char *audiodev = "/dev/dvb/adapter0/audio0";
 
 	if (argc < 2) {
-		fprintf(stderr, "usage: test_av_play mpeg_ts_file\n");
+		fprintf(stderr, "usage: test_av_play mpeg_A+V_PES_file\n");
 		return 1;
 	}
 
@@ -293,16 +291,17 @@ int main(int argc, char **argv)
 		perror("File open:");
 		return -1;
 	}
-	if((fd = open(videodev,O_RDWR|O_NONBLOCK)) < 0){
+	if((vfd = open(videodev,O_RDWR|O_NONBLOCK)) < 0){
 		perror("VIDEO DEVICE: ");
 		return -1;
 	}
-	if((fd2 = open(audiodev,O_RDWR|O_NONBLOCK)) < 0){
+	if((afd = open(audiodev,O_RDWR|O_NONBLOCK)) < 0){
 		perror("AUDIO DEVICE: ");
 		return -1;
 	}
-	play_file_av(filefd, fd, fd2);
-	close(fd);
+	play_file_av(filefd, vfd, afd);
+	close(vfd);
+	close(afd);
 	close(filefd);
 	return 0;
 

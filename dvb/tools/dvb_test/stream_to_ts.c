@@ -1,5 +1,5 @@
 /*
- * $Id: stream_to_ts.c,v 1.1 2003/06/27 14:57:03 gagga Exp $
+ * $Id: stream_to_ts.c,v 1.2 2003/09/11 23:08:39 obi Exp $
  *
  * (C) 2003 gagga
  * Parts by obi
@@ -45,7 +45,6 @@
 int main(int argc, char **argv)
 {
 	unsigned short port;
-	unsigned short pida, pidv;
 	char *tsfilename;
 	int ts;
 

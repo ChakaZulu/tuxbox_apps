@@ -19,7 +19,7 @@
 
 
 static
-const char *usage_string = "\n\tusage: %s <still.mpg>\n\n";
+const char *usage_string = "\n\tusage: %s <still.mpg> ...\n\n";
 
 
 int main (int argc, char **argv)
@@ -29,14 +29,10 @@ int main (int argc, char **argv)
 	struct stat st;
 	struct video_still_picture sp;
 	char *videodev = "/dev/dvb/adapter0/video0";
+	int i = 1;
 
 	if (argc < 2) {
 		fprintf (stderr, usage_string, argv[0]);
-		return -1;
-	}
-
-	if ((filefd = open(argv[1], O_RDONLY)) < 0) {
-		perror(argv[1]);
 		return -1;
 	}
 
@@ -45,6 +41,13 @@ int main (int argc, char **argv)
 
 	if ((fd = open(videodev, O_RDWR)) < 0) {
 		perror(videodev);
+		return -1;
+	}
+
+next_pic:
+	printf("I-frame     : '%s'\n", argv[i]);
+	if ((filefd = open(argv[i], O_RDONLY)) < 0) {
+		perror(argv[i]);
 		return -1;
 	}
 
@@ -60,15 +63,19 @@ int main (int argc, char **argv)
 	}
 
 	printf ("read: %d bytes\n", read(filefd, sp.iFrame, sp.size));
+	close(filefd);
 
 	if ((ioctl(fd, VIDEO_STILLPICTURE, &sp) < 0)) {
 		perror("ioctl VIDEO_STILLPICTURE");
 		return -1;
 	}
+	free(sp.iFrame);
 
 	printf("Display image 10 seconds ...\n");
 	sleep(10);
 	printf("Done.\n");
+	if (argc > ++i)
+		goto next_pic;
 
 	return 0;
 }

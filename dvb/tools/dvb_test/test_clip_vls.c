@@ -1,5 +1,5 @@
 /*
- * $Id: test_clip_vls.c,v 1.2 2003/06/28 23:40:17 gagga Exp $
+ * $Id: test_clip_vls.c,v 1.3 2003/09/11 23:08:40 obi Exp $
  *
  * (C) 2003 gagga
  * Parts by obi
@@ -102,7 +102,6 @@ main (int argc, char **argv)
   int dmxa, dmxv, dvr, adec, vdec, ts;
   struct dmx_pes_filter_params p;
   ssize_t wr;
-  size_t r;
 
   if ((dmxa = open (DMX, O_RDWR | O_NONBLOCK)) < 0)
     {

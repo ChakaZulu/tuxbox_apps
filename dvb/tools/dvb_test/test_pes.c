@@ -39,29 +39,40 @@
 
 void usage(void)
 {
-	fprintf(stderr, "usage: test_pes PID\n");
+	fprintf(stderr, "usage: test_pes PID [filename]\n");
+	fprintf(stderr, "       Print a hexdump of PES packets from PID to stdout.\n");
+	fprintf(stderr, "  filename : Write binary PES data to file (no hexdump).\n");
 	fprintf(stderr, "       The default demux device used can be changed\n");
 	fprintf(stderr, "       using the DEMUX environment variable\n");
 	exit(1);
 }
 
-void process_pes(int fd)
+void process_pes(int fd, FILE *out)
 {
 	uint8_t buf[MAX_PES_SIZE];
 	int bytes;
 
 	bytes = read(fd, buf, sizeof(buf));
 	if (bytes < 0) {
-		if (errno == EOVERFLOW)
+		if (errno == EOVERFLOW) {
 			fprintf(stderr, "read error: buffer overflow (%d)\n",
 					EOVERFLOW);
+			return;
+		}
 		else {
 			perror("read");
 			exit(1);
 		}
 	}
-	hex_dump(buf, bytes);
-	printf("\n");
+	if (out == stdout) {
+		hex_dump(buf, bytes);
+		printf("\n");
+	}
+	else {
+		printf("got %d bytes\n", bytes);
+		if (fwrite(buf, 1, bytes, out) == 0)
+			perror("write output");
+	}
 }
 
 int set_filter(int fd, unsigned int pid)
@@ -85,9 +96,10 @@ int main(int argc, char *argv[])
 {
 	int dmxfd;
 	unsigned long pid;
-	char * dmxdev = "/dev/dvb/adapter0/demux0";
+	char *dmxdev = "/dev/dvb/adapter0/demux0";
+	FILE *out = stdout;
 
-	if (argc != 2)
+	if (argc != 2 && argc != 3)
 		usage();
 
 	pid = strtoul(argv[1], NULL, 0);
@@ -95,8 +107,18 @@ int main(int argc, char *argv[])
 		usage();
 	if (getenv("DEMUX"))
 		dmxdev = getenv("DEMUX");
+
 	fprintf(stderr, "test_pes: using '%s'\n", dmxdev);
 	fprintf(stderr, "          PID 0x%04lx\n", pid);
+
+	if (argc == 3) {
+		out = fopen(argv[2], "wb");
+		if (!out) {
+			perror("open output file");
+			exit(1);
+		}
+		fprintf(stderr, "          output to '%s'\n", argv[2]);
+	}
 
 	if ((dmxfd = open(dmxdev, O_RDWR)) < 0){
 		perror("open");
@@ -107,7 +129,7 @@ int main(int argc, char *argv[])
 		return 1;
 
 	for (;;) {
-		process_pes(dmxfd);
+		process_pes(dmxfd, out);
 	}
 
 	close(dmxfd);

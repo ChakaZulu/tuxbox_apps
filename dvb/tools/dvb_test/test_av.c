@@ -349,6 +349,9 @@ int videoGetStatus(int fd, char *arg)
 	case VIDEO_FORMAT_16_9:
 		printf("16:9 (%d)\n",stat.video_format);
 		break;
+	case VIDEO_FORMAT_221_1:
+		printf("2.21:1 (%d)\n",stat.video_format);
+		break;
 	default:
 		printf("unknown (%d)\n",stat.video_format);
 		break;
@@ -367,6 +370,35 @@ int videoGetStatus(int fd, char *arg)
 		break;
 	default:
 		printf("unknown (%d)\n",stat.display_format);
+		break;
+	}
+	return 0;
+}
+
+int videoGetSize(int fd, char *arg)
+{
+	video_size_t size;
+
+	if (arg)
+		return -1;
+	if (ioctl(fd, VIDEO_GET_SIZE, &size) == -1){
+		perror("VIDEO_GET_SIZE");
+		return 0;
+	}
+
+	printf("Video Size: %ux%u ", size.w, size.h);
+	switch (size.aspect_ratio) {
+	case VIDEO_FORMAT_4_3:
+		printf("4:3 (%d)\n", size.aspect_ratio);
+		break;
+	case VIDEO_FORMAT_16_9:
+		printf("16:9 (%d)\n", size.aspect_ratio);
+		break;
+	case VIDEO_FORMAT_221_1:
+		printf("2.21:1 (%d)\n", size.aspect_ratio);
+		break;
+	default:
+		printf("unknown aspect ratio (%d)\n", size.aspect_ratio);
 		break;
 	}
 	return 0;
@@ -434,6 +466,7 @@ cmd_t video_cmds[] =
 	{ "ff", "n: number of frames", videoFastForward },
 	{ "slow", "n: number of frames", videoSlowMotion },
 	{ "status", "", videoGetStatus },
+	{ "size", "", videoGetSize },
 	{ "stillpic", "filename", videoStillPicture},
 	{ "format", "n: 0 4:3, 1 16:9", videoFormat},
 	{ "dispformat", "n: 0 pan&scan, 1 letter box, 2 center cut out", videoDisplayFormat},
