@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.84 2001/11/24 21:22:07 Simplex Exp $
+        $Id: neutrino.cpp,v 1.85 2001/11/26 20:58:14 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.85  2001/11/26 20:58:14  McClean
+  *** empty log message ***
+
   Revision 1.84  2001/11/24 21:22:07  Simplex
   setting-menuitems for bouquet stuff
 
@@ -489,11 +492,11 @@ void CNeutrinoApp::setupDefaults()
 
 	//network
 	g_settings.networkSetOnStartup = 0;
-	strcpy(g_settings.network_ip, "192.168.40.10");
+	strcpy(g_settings.network_ip, "10.10.10.100");
 	strcpy(g_settings.network_netmask, "255.255.255.000");
-	strcpy(g_settings.network_broadcast, "192.168.40.255");
-	strcpy(g_settings.network_defaultgateway, "192.168.40.1");
-	strcpy(g_settings.network_nameserver, "192.168.40.1");
+	strcpy(g_settings.network_broadcast, "10.10.10.255");
+	strcpy(g_settings.network_defaultgateway, "10.10.10.10");
+	strcpy(g_settings.network_nameserver, "10.10.10.10");
 
 	//key bindings
 	g_settings.key_tvradio_mode = CRCInput::RC_nokey;
@@ -1985,7 +1988,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.84 2001/11/24 21:22:07 Simplex Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.85 2001/11/26 20:58:14 McClean Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;
