@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
   
-  $Id: zapit.cpp,v 1.17 2001/10/16 20:36:00 field Exp $
+  $Id: zapit.cpp,v 1.18 2001/10/17 11:09:55 faralla Exp $
   
   Done 2001 by Philipp Leusmann using many parts of code from older 
   applications by the DBoxII-Project.
@@ -70,6 +70,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   $Log: zapit.cpp,v $
+  Revision 1.18  2001/10/17 11:09:55  faralla
+  nvod-channel is set as last channel, too
+
   Revision 1.17  2001/10/16 20:36:00  field
   Audio decoding beim Umschalten beschleunigt
 
@@ -779,6 +782,8 @@ else
     {
       nvodname = cit->second.name;
       current_is_nvod = true;
+      curr_onid_sid = onid_sid;
+      save_settings();
       //printf("Getting sdt for NVOD\n");
       //sdt(cit->second.sid,false);
       //printf("Got sdt\n");
@@ -1797,7 +1802,7 @@ int main(int argc, char **argv) {
   }
   
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.17 2001/10/16 20:36:00 field Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.18 2001/10/17 11:09:55 faralla Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
