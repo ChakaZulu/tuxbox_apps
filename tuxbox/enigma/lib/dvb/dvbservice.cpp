@@ -533,6 +533,7 @@ void eDVBServiceController::PMTready(int error)
 void eDVBServiceController::EITready(int error)
 {
 	eDebug("EITready (%d)", error);
+	bool haveAC3=false, changed=false;
 	if (!error)
 	{
 		EIT *eit=dvb.getEIT();
@@ -551,6 +552,7 @@ void eDVBServiceController::EITready(int error)
 						{
 							if (((ComponentDescriptor*)*d)->component_tag == it->component_tag )
 							{
+								changed=true;
 								eString tmp = ((ComponentDescriptor*)*d)->text;
 								if (tmp)
 								{
@@ -561,6 +563,8 @@ void eDVBServiceController::EITready(int error)
 										it->text+=" (DTS)";
 								}
 							}
+							if ( !haveAC3 && (it->isAC3 || it->isDTS) )
+								haveAC3=true;
 						}
 					}
 				}
@@ -581,12 +585,15 @@ void eDVBServiceController::EITready(int error)
 	else
 		/*emit*/ dvb.gotEIT(0, error);
 
-	PMTEntry *audio = 0;
-	audio = priorityAudio(audio);
-	if (audio)
+	if ( changed && !(haveAC3 && eAudio::getInstance()->getAC3default()) )
 	{
-		setPID(audio);
-		setDecoder();
+		PMTEntry *audio = 0;
+		audio = priorityAudio(audio);
+		if (audio)
+		{
+			setPID(audio);
+			setDecoder();
+		}
 	}
 }
 
