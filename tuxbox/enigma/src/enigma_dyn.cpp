@@ -229,16 +229,24 @@ static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConn
 	time_t atime;
 	time(&atime);
 	atime += eDVB::getInstance()->time_difference;
-	result="<html>\n"
+	result = "<html>\n"
 		CHARSETMETA
 		"<head>\n"
-		"<title>enigma status</title>\n"
+		"<title>Enigma Status</title>\n"
 		"<link rel=stylesheet type=\"text/css\" href=\"/webif.css\">\n"
 		"</head>\n"
 		"<body>\n"
 		"<h1>Enigma status</h1>\n"
 		"<table>\n"
-		"<tr><td>current time:</td><td>" + eString(ctime(&atime)) + "</td></tr>\n"
+		"<tr><td>Current time:</td><td>" + eString(ctime(&atime)) + "</td></tr>\n"
+		"<tr><td>Recording status:</td><td>";
+#ifndef DISABLE_FILE
+		if (eZapMain::getInstance()->isRecording())
+			result += "ON";
+		else
+#endif
+			result += "OFF";
+	result += "</td></tr>\n"
 		"</table>\n"
 		"</body>\n"
 		"</html>\n";
