@@ -124,16 +124,19 @@ static  unsigned short cw=0;
 			FBPrintScreen();
 		cw=1;
 		break;
+	case RC_HOME:
+		doexit=3;
+		break;
+#if 0
 	case RC_UP:
 	case RC_DOWN:
 	case RC_RIGHT:
 	case RC_LEFT:
 	case RC_OK:
+#endif
+	default :
 		cw=0;
 		actcode=code;
-		break;
-	case RC_HOME:
-		doexit=3;
 		break;
 	}
 
