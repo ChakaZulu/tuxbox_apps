@@ -81,8 +81,8 @@ class CWebDbox
 	void ZapTo(string target);
 	void UpdateBouquets(void);
 
-	void timerEventType2Str(CTimerEvent::CTimerEventTypes type, char *str,int len);
-	void timerEventRepeat2Str(CTimerEvent::CTimerEventRepeat rep, char *str,int len);
+	void timerEventType2Str(CTimerd::CTimerEventTypes type, char *str,int len);
+	void timerEventRepeat2Str(CTimerd::CTimerEventRepeat rep, char *str,int len);
 
 
 public:

@@ -34,8 +34,6 @@
 
 #include "vcrcontrol.h"
 
-#include <sys/un.h>
-
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
 
@@ -135,7 +133,7 @@ void CVCRControl::CVCRDevice::IRDeviceDisconnect()
 }
 
 //-------------------------------------------------------------------------
-bool CVCRControl::CVCRDevice::sendCommand(std::string command, const t_channel_id channel_id, unsigned long long epgid)
+bool CVCRControl::CVCRDevice::sendCommand(std::string command, const t_channel_id channel_id, unsigned long long epgid, uint apid)
 {
 	if(IRDeviceConnect())
 	{
@@ -151,7 +149,7 @@ bool CVCRControl::CVCRDevice::sendCommand(std::string command, const t_channel_i
 //-------------------------------------------------------------------------
 bool CVCRControl::CVCRDevice::IRDeviceConnect()
 {
-	struct sockaddr_un addr;
+/*	struct sockaddr_un addr;
 
 	addr.sun_family=AF_UNIX;
 	strcpy(addr.sun_path, "/dev/lircd");
@@ -166,7 +164,7 @@ bool CVCRControl::CVCRDevice::IRDeviceConnect()
 	{
 		printf("could not connect to lircd-socket\n");
 		return false;
-	};
+	};*/
 	return true;
 
 }
@@ -177,7 +175,7 @@ bool CVCRControl::CVCRDevice::Stop()
 }
 
 //-------------------------------------------------------------------------
-bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, unsigned long long epgid)	
+bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, unsigned long long epgid, uint apid)	
 {
 	return true;
 }
@@ -209,7 +207,7 @@ bool CVCRControl::CServerDevice::Stop()
 }
 
 //-------------------------------------------------------------------------
-bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, unsigned long long epgid)	
+bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, unsigned long long epgid, uint apid)	
 {
 	printf("Record channel_id: %x epg: %llx\n", channel_id, epgid);
 	if(channel_id != 0)		// wenn ein channel angegeben ist
@@ -224,7 +222,7 @@ bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, unsigned 
 
 	g_Zapit->setRecordMode( true );					// recordmode einschalten
 
-	if(!sendCommand(CMD_VCR_RECORD,channel_id,epgid))
+	if(!sendCommand(CMD_VCR_RECORD,channel_id,epgid,apid))
 	{
 		if(!g_Zapit->isPlayBackActive())			// wenn command nicht gesendet werden konnte
 			g_Zapit->startPlayBack();				// dann alles rueckgaengig machen
@@ -247,7 +245,7 @@ void CVCRControl::CServerDevice::serverDisconnect()
 }
 
 //-------------------------------------------------------------------------
-bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channel_id channel_id, unsigned long long epgid)
+bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channel_id channel_id, unsigned long long epgid, uint apid)
 {
 	printf("Send command: %d channel_id: %x epgid: %llx\n",command, channel_id, epgid);
 	if(serverConnect())
@@ -255,6 +253,7 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channe
 		char tmp[40];
 		string extCommand="unknown";
 		string ext_channel_id = "error";
+		string ext_channel_name = "unknown";
 		string extEpgid="error";
 		string extVideoPID="error";
 		string extAudioPID="error";
@@ -263,10 +262,30 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channe
 		ext_channel_id = tmp;
 		sprintf(tmp,"%llu", epgid);
 		extEpgid = tmp;
-		sprintf(tmp,"%u", g_RemoteControl->current_PIDs.PIDs.vpid );
+//		sprintf(tmp,"%u", g_RemoteControl->current_PIDs.PIDs.vpid );
+		CZapitClient::responseGetPIDs pids;
+		g_Zapit->getPIDS (pids);
+		CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo ();
+		sprintf(tmp,"%u", si.vdid );
 		extVideoPID = tmp;
-		sprintf(tmp,"%u", g_RemoteControl->current_PIDs.APIDs[g_RemoteControl->current_PIDs.PIDs.selected_apid].pid);
+//		sprintf(tmp,"%u", g_RemoteControl->current_PIDs.APIDs[g_RemoteControl->current_PIDs.PIDs.selected_apid].pid);
+		if (apid!=0)
+		   sprintf(tmp,"%u", apid);
+		else
+		   sprintf(tmp,"%u", si.apid);
 		extAudioPID = tmp;
+
+		CZapitClient::BouquetChannelList channellist;     
+		g_Zapit->getChannels(channellist);
+		CZapitClient::BouquetChannelList::iterator channel = channellist.begin();
+		for(; channel != channellist.end();channel++)
+		{
+			if(channel->channel_id==channel_id)
+			{
+				ext_channel_name=channel->name;
+				break;
+			}
+		}
 
 		CSectionsdClient sections;
 		sectionsd::responseGetCurrentNextInfoChannelID current_next;
@@ -295,16 +314,24 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channe
 		string extMessage = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n\n";
 		extMessage +="<neutrino commandversion=\"1\">\n";
 		extMessage +="    <record command=\"" + extCommand + "\">\n";
-		extMessage +="        <channelname>" + g_RemoteControl->current_channel_name + "</channelname>\n";
+		extMessage +="        <channelname>" + ext_channel_name + "</channelname>\n";
 		extMessage +="        <epgtitle>" + extEPGTitle + "</epgtitle>\n";
 		extMessage +="        <onidsid>" + ext_channel_id + "</onidsid>\n";
 		extMessage +="        <epgid>" + extEpgid + "</epgid>\n";
 		extMessage +="        <videopid>" + extVideoPID + "</videopid>\n";
 		extMessage +="        <audiopids selected=\"" + extAudioPID + "\">\n";
-		for (unsigned int i= 0; i< g_RemoteControl->current_PIDs.APIDs.size(); i++)
+		bool apidFound=false;
+		for (unsigned int i= 0; i< pids.APIDs.size(); i++)
 		{
-			sprintf(tmp, "%u",  g_RemoteControl->current_PIDs.APIDs[i].pid );
+			sprintf(tmp, "%u",  pids.APIDs[i].pid );
 			extMessage +="            <audio pid=\"" + string(tmp) + "\" name=\"" + string(g_RemoteControl->current_PIDs.APIDs[i].desc)  + "\"/>\n";
+			if (pids.APIDs[i].pid==apid)
+			   apidFound=true;
+		}
+		if (!apidFound)
+		{
+		    // add spec apid to available
+		    extMessage +="            <audio pid=\"" + string(tmp) + "\" name=\"" + extAudioPID  + "\"/>\n";
 		}
 		extMessage +="        </audiopids>\n";
 		extMessage +="    </record>\n";

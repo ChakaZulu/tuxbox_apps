@@ -67,6 +67,7 @@ struct NeutrinoMessages {
 		ANNOUNCE_SLEEPTIMER =		CRCInput::RC_Messages + 14,
 		SLEEPTIMER =				CRCInput::RC_Messages + 15,
 		CHANGEMODE =				CRCInput::RC_Messages + 16,
+		REMIND = 			      CRCInput::RC_Messages + 17,
 
 
 		EVT_VOLCHANGED 	= 			CRCInput::RC_Events + 1,

@@ -2133,7 +2133,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				serverinfo.StopPlayBack = (g_settings.network_streaming_stopplayback == 1);
 				serverinfo.StopSectionsd = (g_settings.network_streaming_stopsectionsd == 1);
 				CVCRControl::getInstance()->setDeviceOptions(0,&serverinfo);
-				CVCRControl::getInstance()->Record((CTimerEvent::EventInfo *) data);
+				CVCRControl::getInstance()->Record((CTimerd::EventInfo *) data);
 				streamstatus = 1;
 			}
 			else
@@ -2158,8 +2158,8 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 
 		if ( msg == NeutrinoMessages::ZAPTO)
 		{
-			CTimerEvent::EventInfo * eventinfo; 
-			eventinfo = (CTimerEvent::EventInfo *) data;
+			CTimerd::EventInfo * eventinfo; 
+			eventinfo = (CTimerd::EventInfo *) data;
 			channelList->zapTo_ChannelID(eventinfo->channel_id);
 		}
 
@@ -2535,7 +2535,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 				serverinfo.StopSectionsd = (g_settings.network_streaming_stopsectionsd == 1);
 				CVCRControl::getInstance()->setDeviceOptions(0,&serverinfo);
 
-				CVCRControl::getInstance()->Record((CTimerEvent::EventInfo *) data);
+				CVCRControl::getInstance()->Record((CTimerd::EventInfo *) data);
 				streamstatus = 1;
 			}
 			else
@@ -2562,8 +2562,8 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 
 		if ( msg == NeutrinoMessages::ZAPTO)
 		{
-			CTimerEvent::EventInfo * eventinfo; 
-			eventinfo = (CTimerEvent::EventInfo *) data;
+			CTimerd::EventInfo * eventinfo; 
+			eventinfo = (CTimerd::EventInfo *) data;
 			channelList->zapTo_ChannelID(eventinfo->channel_id);
 			return messages_return::handled;
 		}
@@ -2575,21 +2575,24 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 				// WAKEUP
 				standbyMode( false );
 			}
-			ShowHint ( "messagebox.info", g_Locale->getText("zaptotimer.announce") );
+			if  ( mode != mode_scart )
+				ShowHint ( "messagebox.info", g_Locale->getText("zaptotimer.announce") );
 			return messages_return::handled;
 		}
 		if ( msg == NeutrinoMessages::ANNOUNCE_RECORD)
 		{
-			ShowHint ( "messagebox.info", g_Locale->getText("recordtimer.announce") );
-			CTimerEvent::EventInfo * eventinfo; 
-			eventinfo = (CTimerEvent::EventInfo *) data;
-			channelList->zapTo_ChannelID(eventinfo->channel_id); // dann umschalten
+			if  ( mode != mode_scart )
+				ShowHint ( "messagebox.info", g_Locale->getText("recordtimer.announce") );
+			CTimerd::EventInfo * eventinfo; 
+			eventinfo = (CTimerd::EventInfo *) data;
+//			channelList->zapTo_ChannelID(eventinfo->channel_id); // dann umschalten
 //				g_Zapit->zapTo_serviceID(eventinfo->channel_id);		
 			return messages_return::handled;
 		}
 		if ( msg == NeutrinoMessages::ANNOUNCE_SLEEPTIMER)
 		{
-			ShowHint ( "messagebox.info", g_Locale->getText("sleeptimerbox.announce") );
+			if  ( mode != mode_scart )
+				ShowHint ( "messagebox.info", g_Locale->getText("sleeptimerbox.announce") );
 			return messages_return::handled;
 		}
 		if ( msg == NeutrinoMessages::SLEEPTIMER)
@@ -2622,11 +2625,12 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		}
 		else if ( msg == NeutrinoMessages::ANNOUNCE_SHUTDOWN)
 		{
-			skipShutdownTimer = (ShowMsg ( "messagebox.info", 
-													 g_Locale->getText("shutdowntimer.announce") , 
-													 CMessageBox::mbrNo, 
-													 CMessageBox::mbYes | CMessageBox::mbNo, "",450,5)
-										==CMessageBox::mbrYes);
+			if  ( mode != mode_scart )
+				skipShutdownTimer = (ShowMsg ( "messagebox.info", 
+														 g_Locale->getText("shutdowntimer.announce") , 
+														 CMessageBox::mbrNo, 
+														 CMessageBox::mbYes | CMessageBox::mbNo, "",450,5)
+											==CMessageBox::mbrYes);
 		}
 		else if ( msg == NeutrinoMessages::SHUTDOWN )
 		{
@@ -2643,12 +2647,26 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		}
 		else if ( msg == NeutrinoMessages::EVT_POPUP )
 		{
-			ShowHint ( "messagebox.info", string((char *) data) );
+			if  ( mode != mode_scart )
+				ShowHint ( "messagebox.info", string((char *) data) );
 			return messages_return::handled;
 		}
 		else if ( msg == NeutrinoMessages::EVT_EXTMSG )
 		{
-			ShowMsg ( "messagebox.info", string((char *) data) , CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw" );
+			if  ( mode != mode_scart )
+				ShowMsg ( "messagebox.info", string((char *) data) , CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw" );
+			return messages_return::handled;
+		}
+		else if ( msg == NeutrinoMessages::REMIND)
+		{
+			string text = (char*)data;
+			string::size_type pos;
+			while((pos=text.find("/",0))!=string::npos)
+			{
+				text.replace(pos,1,"\n");
+			}
+			if  ( mode != mode_scart )
+				ShowMsg ( "timerlist.type.remind", text , CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw",0 );
 			return messages_return::handled;
 		}
 		else if ( msg == NeutrinoMessages::CHANGEMODE )
@@ -3058,7 +3076,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 	}
 	else
 	{
-		CTimerEvent::EventInfo eventinfo;
+		CTimerd::EventInfo eventinfo;
 
 		if(CVCRControl::getInstance()->registeredDevices() > 0)
 		{
@@ -3096,7 +3114,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.340 2002/10/13 20:49:41 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.341 2002/10/15 17:36:09 Zwen Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

@@ -30,6 +30,7 @@
 */
 #include "global.h"
 #include "neutrino.h"
+#include "config.h"
 #include "setting_helpers.h"
 
 #include "libnet.h"

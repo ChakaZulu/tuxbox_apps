@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.8 2002/10/15 16:50:29 dirch Exp $
+	$Id: controlapi.cpp,v 1.9 2002/10/15 17:36:09 Zwen Exp $
 
 	License: GPL
 
@@ -699,9 +699,9 @@ void CControlAPI::SendTimers(CWebserverRequest* request)
 		char zAddData[20+1]={0};
 		switch(timer->eventType)
 		{
-			case CTimerEvent::TIMER_NEXTPROGRAM :
-			case CTimerEvent::TIMER_ZAPTO :
-			case CTimerEvent::TIMER_RECORD :
+			case CTimerd::TIMER_NEXTPROGRAM :
+			case CTimerd::TIMER_ZAPTO :
+			case CTimerd::TIMER_RECORD :
             {
 				if(channellist.size()==0)
 				{
@@ -722,7 +722,7 @@ void CControlAPI::SendTimers(CWebserverRequest* request)
 			}
             break;
 			
-			case CTimerEvent::TIMER_STANDBY :
+			case CTimerd::TIMER_STANDBY :
             {
                sprintf(zAddData,"Standby: %s",(timer->standby_on ? "ON" : "OFF"));
             }

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.10 2002/10/10 22:32:52 Zwen Exp $
+	$Id: webapi.cpp,v 1.11 2002/10/15 17:36:09 Zwen Exp $
 
 	License: GPL
 
@@ -485,8 +485,8 @@ int pos = 0;
 		strftime(zbuffer,20,"%d.%m. %H:%M",mtime);
 		request->printf("<TR VALIGN=\"middle\" HEIGHT=\"%d\" CLASS=\"%c\">\n",(eventIterator->duration > 20 * 60)?(eventIterator->duration / 60):20 , classname);
 		request->printf("<TD><NOBR>");
-		request->printf("<A HREF=\"/fb/timer.dbox2?action=new&type=%d&alarm=%u&stop=%u&channel_id=%u\">&nbsp;<IMG SRC=\"/images/record.gif\" WIDTH=\"16\" HEIGHT=\"16\" ALT=\"Sendung aufnehmen\"></A>&nbsp;\n",CTimerEvent::TIMER_RECORD,(uint) eventIterator->startTime,(uint) eventIterator->startTime + eventIterator->duration,channel_id); 
-		request->printf("<A HREF=\"/fb/timer.dbox2?action=new&type=%d&alarm=%u&channel_id=%u\">&nbsp;<IMG SRC=\"/images/timer.gif\" WIDTH=\"21\" HEIGHT=\"21\" ALT=\"Timer setzen\"></A>&nbsp;\n",CTimerEvent::TIMER_ZAPTO,(uint) eventIterator->startTime,channel_id); 
+		request->printf("<A HREF=\"/fb/timer.dbox2?action=new&type=%d&alarm=%u&stop=%u&channel_id=%u\">&nbsp;<IMG SRC=\"/images/record.gif\" WIDTH=\"16\" HEIGHT=\"16\" ALT=\"Sendung aufnehmen\"></A>&nbsp;\n",CTimerd::TIMER_RECORD,(uint) eventIterator->startTime,(uint) eventIterator->startTime + eventIterator->duration,channel_id); 
+		request->printf("<A HREF=\"/fb/timer.dbox2?action=new&type=%d&alarm=%u&channel_id=%u\">&nbsp;<IMG SRC=\"/images/timer.gif\" WIDTH=\"21\" HEIGHT=\"21\" ALT=\"Timer setzen\"></A>&nbsp;\n",CTimerd::TIMER_ZAPTO,(uint) eventIterator->startTime,channel_id); 
 		request->printf("</NOBR></TD><TD><NOBR>%s&nbsp;<font size=\"-2\">(%d min)</font>&nbsp;</NOBR></TD>\n", zbuffer, eventIterator->duration / 60);
 		request->printf("<TD><A CLASS=\"elist\" HREF=epg.dbox2?eventid=%llx>%s</A></TD>\n</TR>\n", eventIterator->eventID, eventIterator->description.c_str());
 	}
@@ -722,9 +722,9 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
       char zAddData[20+1]={0};
       switch(timer->eventType)
       {
-         case CTimerEvent::TIMER_NEXTPROGRAM :
-         case CTimerEvent::TIMER_ZAPTO :
-         case CTimerEvent::TIMER_RECORD :
+         case CTimerd::TIMER_NEXTPROGRAM :
+         case CTimerd::TIMER_ZAPTO :
+         case CTimerd::TIMER_RECORD :
             {
                if(channellist.size()==0)
                {
@@ -744,11 +744,11 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
                   strcpy(zAddData,"Unknown");
             }
             break;
-         case CTimerEvent::TIMER_STANDBY :
+         case CTimerd::TIMER_STANDBY :
             {
                sprintf(zAddData,"Standby: %s",(timer->standby_on ? "ON" : "OFF"));
             }
-         case CTimerEvent::TIMER_REMIND :
+         case CTimerd::TIMER_REMIND :
             {
 				   strncpy(zAddData, timer->message, 20);
 					zAddData[20]=0;
@@ -826,7 +826,7 @@ void CWebAPI::modifyTimerForm(CWebserverRequest *request, unsigned timerId)
 	for(int i=0; i<=6;i++)
 	{
 		char zRep[21];
-		Parent->timerEventRepeat2Str((CTimerEvent::CTimerEventRepeat) i, zRep, sizeof(zRep)-1);
+		Parent->timerEventRepeat2Str((CTimerd::CTimerEventRepeat) i, zRep, sizeof(zRep)-1);
 		request->printf("<option value=\"%d\"",i);
 		if(((int)timer.eventRepeat) == i)
 		{
@@ -901,8 +901,8 @@ void CWebAPI::doModifyTimer(CWebserverRequest *request)
    time_t stopTimeT = mktime(stopTime);
    time_t announceTimeT = alarmTimeT-60;
 
-   CTimerEvent::CTimerEventRepeat rep = 
-   (CTimerEvent::CTimerEventRepeat) atoi(request->ParameterList["rep"].c_str());
+   CTimerd::CTimerEventRepeat rep = 
+   (CTimerd::CTimerEventRepeat) atoi(request->ParameterList["rep"].c_str());
 
    Parent->Timerd->modifyTimerEvent(modyId, announceTimeT, alarmTimeT, stopTimeT, rep);
 }
@@ -919,15 +919,15 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 	request->SocketWrite("                        document.NewTimerForm.ad.focus();}\n");
 	request->SocketWrite("function onEventChange() { tType=document.NewTimerForm.type.value;\n");
 	request->printf("  if (tType == \"%d\") my_show(\"StopDateRow\"); else my_hide(\"StopDateRow\");\n",
-		  (int)CTimerEvent::TIMER_RECORD);
+		  (int)CTimerd::TIMER_RECORD);
 	request->printf("  if (tType == \"%d\") my_show(\"StandbyRow\"); else my_hide(\"StandbyRow\");\n",
-		  (int)CTimerEvent::TIMER_STANDBY);
+		  (int)CTimerd::TIMER_STANDBY);
 	request->printf("  if (tType == \"%d\" || tType==\"%d\" || tType==\"%d\")\n",
-		  (int)CTimerEvent::TIMER_RECORD, (int)CTimerEvent::TIMER_NEXTPROGRAM,
-		  (int)CTimerEvent::TIMER_ZAPTO);
+		  (int)CTimerd::TIMER_RECORD, (int)CTimerd::TIMER_NEXTPROGRAM,
+		  (int)CTimerd::TIMER_ZAPTO);
 	request->SocketWrite("     my_show(\"ProgramRow\"); else my_hide(\"ProgramRow\");\n");
 	request->printf("  if (tType == \"%d\") my_show(\"MessageRow\"); else my_hide(\"MessageRow\");\n",
-		  (int)CTimerEvent::TIMER_REMIND);
+		  (int)CTimerd::TIMER_REMIND);
 	request->SocketWrite("  focusNMark();}\n");
 	request->SocketWrite("</script>\n");
 	// head of TABLE
@@ -943,7 +943,7 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 	for(int i=1; i<=7;i++)
 	{
 		char zType[21];
-		Parent->timerEventType2Str((CTimerEvent::CTimerEventTypes) i, zType, sizeof(zType)-1);
+		Parent->timerEventType2Str((CTimerd::CTimerEventTypes) i, zType, sizeof(zType)-1);
 		request->printf("<option value=\"%d\">%s\n",i,zType);
 	}
 	request->SocketWrite("</select>\n");
@@ -953,7 +953,7 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 	for(int i=0; i<=6;i++)
 	{
 		char zRep[21];
-		Parent->timerEventRepeat2Str((CTimerEvent::CTimerEventRepeat) i, zRep, sizeof(zRep)-1);
+		Parent->timerEventRepeat2Str((CTimerd::CTimerEventRepeat) i, zRep, sizeof(zRep)-1);
 		request->printf("<option value=\"%d\">%s\n",i,zRep);
 	}
 	request->SocketWrite("</select>\n");
@@ -1093,21 +1093,21 @@ time_t	announceTimeT = 0,
 	}
 		
    announceTimeT = alarmTimeT-60;
-   CTimerEvent::CTimerEventTypes type  = 
-   (CTimerEvent::CTimerEventTypes) atoi(request->ParameterList["type"].c_str());
-   CTimerEvent::CTimerEventRepeat rep = 
-   (CTimerEvent::CTimerEventRepeat) atoi(request->ParameterList["rep"].c_str());
+   CTimerd::CTimerEventTypes type  = 
+   (CTimerd::CTimerEventTypes) atoi(request->ParameterList["type"].c_str());
+   CTimerd::CTimerEventRepeat rep = 
+   (CTimerd::CTimerEventRepeat) atoi(request->ParameterList["rep"].c_str());
    bool standby_on = (request->ParameterList["sbon"]=="1");
-   CTimerEvent::EventInfo eventinfo;
+   CTimerd::EventInfo eventinfo;
    eventinfo.epgID      = 0;
    eventinfo.channel_id = atoi(request->ParameterList["channel_id"].c_str());
    void *data=NULL;
-   if(type == CTimerEvent::TIMER_STANDBY)
+   if(type == CTimerd::TIMER_STANDBY)
       data=&standby_on;
-   else if(type==CTimerEvent::TIMER_NEXTPROGRAM || type==CTimerEvent::TIMER_ZAPTO ||
-           type==CTimerEvent::TIMER_RECORD)
+   else if(type==CTimerd::TIMER_NEXTPROGRAM || type==CTimerd::TIMER_ZAPTO ||
+           type==CTimerd::TIMER_RECORD)
       data= &eventinfo;
-	else if(type==CTimerEvent::TIMER_REMIND)
+	else if(type==CTimerd::TIMER_REMIND)
 	{
 		char msg[REMINDER_MESSAGE_MAXLEN];
 		memset(msg, 0, sizeof(msg));
@@ -1115,7 +1115,7 @@ time_t	announceTimeT = 0,
 		data=msg;
 	}
 /*   
-	if(type!=CTimerEvent::TIMER_RECORD)
+	if(type!=CTimerd::TIMER_RECORD)
    {
       stopTimeT=0;
    }

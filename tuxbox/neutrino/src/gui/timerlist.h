@@ -61,8 +61,8 @@ class CTimerList : public CMenuTarget
 		CZapitClient::BouquetChannelList channellist;     
 		CTimerd::responseGetTimer timerNew;
 		int timerNew_standby_on;
-		char timerNew_channel_name[30];/*!!!*/
-
+		char m_apid[5];
+		
 		int 			width;
 		int 			height;
 		int 			x;
@@ -84,8 +84,8 @@ class CTimerList : public CMenuTarget
 		void updateEvents(void);
 		int  show();
 		int  exec(CMenuTarget* parent, string actionKey);
-		string convertTimerType2String(CTimerEvent::CTimerEventTypes type);
-		string convertTimerRepeat2String(CTimerEvent::CTimerEventRepeat rep);
+		string convertTimerType2String(CTimerd::CTimerEventTypes type);
+		string convertTimerRepeat2String(CTimerd::CTimerEventRepeat rep);
 		string convertChannelId2String(t_channel_id id);
 };
 

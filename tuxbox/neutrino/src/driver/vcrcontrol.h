@@ -110,7 +110,7 @@ class CVCRControl
 				CVCRDevices deviceType;
 				CVCRStates  deviceState;
 				virtual bool Stop(){return false;};
-				virtual bool Record(const t_channel_id channel_id = 0, unsigned long long epgid = 0){return false;};
+				virtual bool Record(const t_channel_id channel_id = 0, unsigned long long epgid = 0, uint apid = 0){return false;};
 				virtual bool Pause(){return false;};
 				virtual bool Resume(){return false;};
 				virtual bool IsAvailable(){return false;};
@@ -120,12 +120,12 @@ class CVCRControl
 
 		class CVCRDevice : public CDevice		// VCR per IR
 		{
-				bool sendCommand(std::string command, const t_channel_id channel_id, unsigned long long epgid);
+				bool sendCommand(std::string command, const t_channel_id channel_id, unsigned long long epgid, uint apid=0);
 				bool IRDeviceConnect();
 				void IRDeviceDisconnect();
 			public:
 				virtual bool Stop();		// TODO: VCR ansteuerung
-				virtual bool Record(const t_channel_id channel_id = 0, unsigned long long epgid = 0);	
+				virtual bool Record(const t_channel_id channel_id = 0, unsigned long long epgid = 0, uint apid = 0);	
 				virtual bool Pause();
 				virtual bool Resume();
 				virtual bool IsAvailable(){return true;};
@@ -148,7 +148,7 @@ class CVCRControl
 				bool serverConnect();
 				void serverDisconnect();
 
-				bool sendCommand(CVCRCommand command, const t_channel_id channel_id = 0,unsigned long long epgid = 0);
+				bool sendCommand(CVCRCommand command, const t_channel_id channel_id = 0,unsigned long long epgid = 0, uint apid = 0);
 
 			public:
 				std::string	ServerAddress;
@@ -157,7 +157,7 @@ class CVCRControl
 				bool	StopSectionsd;
 
 				virtual bool Stop();
-				virtual bool Record(const t_channel_id channel_id = 0, unsigned long long epgid = 0);
+				virtual bool Record(const t_channel_id channel_id = 0, unsigned long long epgid = 0, uint apid = 0);
 				virtual bool Pause(){return false;};
 				virtual bool Resume(){return false;};
 				virtual bool IsAvailable(){return true;};
@@ -180,12 +180,12 @@ class CVCRControl
 
 		int getDeviceState(int deviceid = 0){ if (Devices[deviceid] != NULL) return Devices[deviceid]->deviceState; else return CMD_VCR_UNKNOWN;};
 		bool Stop(int deviceID = 0){if(Devices[deviceID] != NULL) return Devices[deviceID]->Stop(); else return false;};
-		bool Record(CTimerEvent::EventInfo *eventinfo,int deviceID = 0)
+		bool Record(CTimerd::EventInfo *eventinfo,int deviceID = 0)
 		{
 			if(Devices[deviceID] != NULL) 
 			{
-				printf("eventinfo->channel_id: %08x, eventinfo->epgID: %llx\n", eventinfo->channel_id, eventinfo->epgID);
-				return Devices[deviceID]->Record(eventinfo->channel_id, eventinfo->epgID); 
+				printf("eventinfo->channel_id: %08x, eventinfo->epgID: %llx, apid %ux\n", eventinfo->channel_id, eventinfo->epgID, eventinfo->apid);
+				return Devices[deviceID]->Record(eventinfo->channel_id, eventinfo->epgID, eventinfo->apid); 
 			}
 			else return false;
 		};

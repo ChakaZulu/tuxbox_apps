@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.39 2002/10/05 20:32:06 dirch Exp $
+	$Id: webdbox.cpp,v 1.40 2002/10/15 17:36:09 Zwen Exp $
 
 	License: GPL
 
@@ -221,46 +221,46 @@ bool CWebDbox::GetChannelList(void)
 }
 //-------------------------------------------------------------------------
 
-void CWebDbox::timerEventType2Str(CTimerEvent::CTimerEventTypes type, char *str,int len)
+void CWebDbox::timerEventType2Str(CTimerd::CTimerEventTypes type, char *str,int len)
 {
    switch(type)
    {
-      case CTimerEvent::TIMER_SHUTDOWN : strncpy(str, "Shutdown",len);
+      case CTimerd::TIMER_SHUTDOWN : strncpy(str, "Shutdown",len);
          break;
-      case CTimerEvent::TIMER_NEXTPROGRAM : strncpy(str, "Next Program", len);
+      case CTimerd::TIMER_NEXTPROGRAM : strncpy(str, "Next Program", len);
          break;
-      case CTimerEvent::TIMER_ZAPTO : strncpy(str, "Zap to", len);
+      case CTimerd::TIMER_ZAPTO : strncpy(str, "Zap to", len);
          break;
-      case CTimerEvent::TIMER_STANDBY : strncpy(str, "Standby", len);
+      case CTimerd::TIMER_STANDBY : strncpy(str, "Standby", len);
          break;
-      case CTimerEvent::TIMER_RECORD : strncpy(str, "Record", len);
+      case CTimerd::TIMER_RECORD : strncpy(str, "Record", len);
          break;
-      case CTimerEvent::TIMER_REMIND : strncpy(str, "Remind", len);
+      case CTimerd::TIMER_REMIND : strncpy(str, "Remind", len);
          break;
-      case CTimerEvent::TIMER_SLEEPTIMER: strncpy(str, "Sleeptimer", len);
+      case CTimerd::TIMER_SLEEPTIMER: strncpy(str, "Sleeptimer", len);
          break;
       default: strncpy(str, "Unknown", len);
    }
    str[len]=0;
 }
 //-------------------------------------------------------------------------
-void CWebDbox::timerEventRepeat2Str(CTimerEvent::CTimerEventRepeat rep, char *str,int len)
+void CWebDbox::timerEventRepeat2Str(CTimerd::CTimerEventRepeat rep, char *str,int len)
 {
    switch(rep)
    {
-      case CTimerEvent::TIMERREPEAT_ONCE : strncpy(str, "Once",len);
+      case CTimerd::TIMERREPEAT_ONCE : strncpy(str, "Once",len);
          break;
-      case CTimerEvent::TIMERREPEAT_DAILY : strncpy(str, "Daily",len);
+      case CTimerd::TIMERREPEAT_DAILY : strncpy(str, "Daily",len);
          break;
-      case CTimerEvent::TIMERREPEAT_WEEKLY : strncpy(str, "Weekly",len);
+      case CTimerd::TIMERREPEAT_WEEKLY : strncpy(str, "Weekly",len);
          break;
-      case CTimerEvent::TIMERREPEAT_BIWEEKLY : strncpy(str, "Biweekly",len);
+      case CTimerd::TIMERREPEAT_BIWEEKLY : strncpy(str, "Biweekly",len);
          break;
-      case CTimerEvent::TIMERREPEAT_FOURWEEKLY : strncpy(str, "Fourweekly",len);
+      case CTimerd::TIMERREPEAT_FOURWEEKLY : strncpy(str, "Fourweekly",len);
          break;
-      case CTimerEvent::TIMERREPEAT_MONTHLY : strncpy(str, "Monthly",len);
+      case CTimerd::TIMERREPEAT_MONTHLY : strncpy(str, "Monthly",len);
          break;
-      case CTimerEvent::TIMERREPEAT_BYEVENTDESCRIPTION : strncpy(str, "By event desc.",len);
+      case CTimerd::TIMERREPEAT_BYEVENTDESCRIPTION : strncpy(str, "By event desc.",len);
          break;
 
       default: strncpy(str, "Unknown", len);

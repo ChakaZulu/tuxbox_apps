@@ -54,6 +54,8 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 
+#include <eventserver.h>
+
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
 
@@ -819,7 +821,7 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 			 			}
 						else if (emsg.eventID==CTimerdClient::EVT_REMIND)
 			 			{
-							*msg = NeutrinoMessages::EVT_EXTMSG;
+							*msg = NeutrinoMessages::REMIND;
 			 				*data = (unsigned) p;
 			 				dont_delete_p = true;
 						}
