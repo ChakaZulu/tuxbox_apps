@@ -128,6 +128,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		CVCRControl					*vcrControl;
 		CConsoleDestChangeNotifier	*ConsoleDestinationChanger;
 
+
 		void doChecks();
 		void firstChannel();
 		void setupColors_classic();
@@ -161,6 +162,8 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_menuColors);
 		void InitLcdSettings(CMenuWidget &lcdSettings);
 		void InitNetworkSettings(CMenuWidget &networkSettings);
+		void AddFontSettingItem(CMenuWidget &fontSettings, string menuname, char *value);
+		void InitFontSettings(CMenuWidget &fontSettings,CMenuWidget &fontSettings_Channellist ,CMenuWidget &fontSettings_Eventlist , CMenuWidget &fontSettings_Infobar ,CMenuWidget &fontSettings_Epg );
 		void InitStreamingSettings(CMenuWidget &streamingSettings);
 		void InitScreenSettings(CMenuWidget &);
 		void InitMiscSettings(CMenuWidget &);
@@ -170,7 +173,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings, CMenuWidget &audioSettings,
 		                  CMenuWidget &parentallockSettings, CMenuWidget &networkSettings, CMenuWidget &networkSettings,
 		                  CMenuWidget &colorSettings, CMenuWidget &lcdSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings,
-		                  CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &service);
+		                  CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &service, CMenuWidget &fontSettings);
 		void ClearFrameBuffer();
 		void SetupFonts();
 		void SetupFrameBuffer();

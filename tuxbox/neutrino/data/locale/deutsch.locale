@@ -44,6 +44,7 @@ mainsettings.video Video
 mainsettings.network Netzwerk
 mainsettings.streaming Streamingserver
 mainsettings.colors Farben / Themes
+mainsettings.font Schriftgrösse
 mainsettings.lcd LC-Display
 mainsettings.keybinding Tasten-Einstellungen
 mainsettings.misc Diverse Einstellungen
@@ -526,3 +527,29 @@ timerlist.program.unknown Programm unbekannt
 timerlist.standby.on Aufwachen aus Standby
 timerlist.standby.off Auf Standby gehen
 
+fontsize.menu Menutext
+fontsize.menu_title Menu Titel
+fontsize.menu_info Menu Info
+fontsize.epg_title EPG Titel
+fontsize.epg_info1 EPG Info 1
+fontsize.epg_info2 EPG Info 2
+fontsize.epg_date EPG Datum
+fontsize.alert Alert
+fontsize.eventlist_title Eventlist Titel
+fontsize.eventlist_itemlarge Eventlist gross
+fontsize.eventlist_itemsmall Eventlist klein
+fontsize.eventlist_datetime Eventlist Datum / Zeit
+fontsize.channellist Kanalliste
+fontsize.channellist_descr Beschreibung
+fontsize.channellist_number Nummer
+fontsize.channel_num_zap keine Ahnung
+fontsize.infobar_number Infobar Nummer
+fontsize.infobar_channame Infobar Kanal
+fontsize.infobar_info Infobar Info
+fontsize.infobar_small Infobar klein
+
+fontmenu.head Schriftgrössen Einstellungen
+fontmenu.channellist Kanalliste
+fontmenu.eventlist Eventlist
+fontmenu.epg EGP
+fontmenu.infobar Infobar

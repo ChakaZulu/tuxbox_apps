@@ -175,6 +175,35 @@ struct SNeutrinoSettings
 	int parentallock_prompt;
 	int parentallock_lockage;
 	char parentallock_pincode[5];
+
+
+	// Font sizes
+	char	fontsize_menu[4];
+	char	fontsize_menu_title[4];
+	char	fontsize_menu_info[4];
+
+	char	fontsize_epg_title[4];
+	char	fontsize_epg_info1[4];
+	char	fontsize_epg_info2[4];
+	char	fontsize_epg_date[4];
+	char	fontsize_alert[4];
+	char	fontsize_eventlist_title[4];
+	char	fontsize_eventlist_itemlarge[4];
+	char	fontsize_eventlist_itemsmall[4];
+	char	fontsize_eventlist_datetime[4];
+
+	char	fontsize_gamelist_itemlarge[4];
+	char	fontsize_gamelist_itemsmall[4];
+
+	char	fontsize_channellist[4];	
+	char	fontsize_channellist_descr[4];
+	char	fontsize_channellist_number[4];
+	char	fontsize_channel_num_zap[4];
+
+	char	fontsize_infobar_number[4];
+	char	fontsize_infobar_channame[4];
+	char	fontsize_infobar_info[4];
+	char	fontsize_infobar_small[4];
 };
 
 struct SglobalInfo
