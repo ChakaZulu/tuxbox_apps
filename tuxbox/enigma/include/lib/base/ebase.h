@@ -141,6 +141,7 @@ class eMainloop;
  */
 class eSocketNotifier
 {
+	friend class eMainloop;
 public:
 	enum { Read=POLLIN, Write=POLLOUT, Priority=POLLPRI, Error=POLLERR, Hungup=POLLHUP };
 private:
@@ -148,6 +149,7 @@ private:
 	int fd;
 	int state;
 	int requested;		// requested events (POLLIN, ...)
+	void activate(int what) { /*emit*/ activated(what); }
 public:
 	/**
 	 * \brief Constructs a eSocketNotifier.
@@ -160,7 +162,6 @@ public:
 	~eSocketNotifier();
 
 	Signal1<void, int> activated;
-	void activate(int what) { /*emit*/ activated(what); }
 
 	void start();
 	void stop();
@@ -185,7 +186,7 @@ class eTimer
 	long interval;
 	bool bSingleShot;
 	bool bActive;
-	void recalc( int diff )	{ nextActivation+=diff; }
+	inline void recalc(int);
 public:
 	/**
 	 * \brief Constructs a timer.
@@ -194,24 +195,26 @@ public:
 	 * \param context The thread from which the signal should be emitted.
 	 */
 	eTimer(eMainloop *context): context(*context), bActive(false) { }
-	~eTimer()	{		if (bActive) stop();	}
+	~eTimer() { if (bActive) stop(); }
 
 	Signal0<void> timeout;
 	void activate();
 
-	bool isActive()	{		return bActive;	}
+	bool isActive() { return bActive; }
 	timeval &getNextActivation() { return nextActivation; }
 
 	void start(long msec, bool b=false);
 	void stop();
 	void changeInterval(long msek);
-	bool operator<(const eTimer& t) const	{		return nextActivation < t.nextActivation;		}
+	bool operator<(const eTimer& t) const { return nextActivation < t.nextActivation; }
 	void startLongTimer( int seconds );
 };
 
 			// werden in einer mainloop verarbeitet
 class eMainloop
 {
+	friend class eTimer;
+	friend class eSocketNotifier;
 	std::map<int, eSocketNotifier*> notifiers;
 	ePtrList<eTimer> TimerList;
 	bool app_exit_loop;
@@ -219,21 +222,34 @@ class eMainloop
 	int loop_level;
 	void processOneEvent();
 	int retval;
+	int timer_offset;
+	pthread_mutex_t recalcLock;
+	inline void doRecalcTimers();
+	inline void addSocketNotifier(eSocketNotifier *sn);
+	inline void removeSocketNotifier(eSocketNotifier *sn);
+	inline void addTimer(eTimer* e)	{		TimerList.push_back(e);		TimerList.sort();	}
+	inline void removeTimer(eTimer* e)	{		TimerList.remove(e);	}
 public:
-	eMainloop():app_quit_now(0),loop_level(0),retval(0){	}
- 	void addSocketNotifier(eSocketNotifier *sn);
-	void removeSocketNotifier(eSocketNotifier *sn);
-	void addTimer(eTimer* e)	{		TimerList.push_back(e);		TimerList.sort();	}
-	void removeTimer(eTimer* e)	{		TimerList.remove(e);	}
-
+	static ePtrList<eMainloop> existing_loops;
+	eMainloop()
+		:app_quit_now(0),loop_level(0),retval(0),timer_offset(0)
+	{
+		existing_loops.push_back(this);
+		pthread_mutex_init(&recalcLock, 0);
+	}
+	~eMainloop()
+	{
+		existing_loops.remove(this);
+	}
 	int looplevel() { return loop_level; }
 
 	int exec();  // recursive enter the loop
 	void quit(int ret=0); // leave all pending loops (recursive leave())
 	void enter_loop();
 	void exit_loop();
+	void setTimerOffset( int );
+	int getTimerOffset() { return timer_offset; }
 	bool isAppQuitNowSet() { return app_quit_now; }
-	void recalcAllTimers( int difference );
 };
 
 /**

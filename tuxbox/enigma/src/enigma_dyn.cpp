@@ -522,7 +522,7 @@ static eString admin(eString request, eString dirpath, eString opts, eHTTPConnec
 		{
 			if (eZapStandby::getInstance())
 			{
-				eZapStandby::getInstance()->wakeUp(0);
+				eZapMain::getInstance()->wakeUp();
 				if (requester == "webif")
 					return "<html>" CHARSETMETA "<head><title>Wakeup</title></head><body>Enigma is waking up...</body></html>";
 				else
@@ -569,16 +569,9 @@ static eString admin2(eString command)
 	}
 	else
 	if (command == "wakeup")
-	{
-		if (eZapStandby::getInstance())
-			eZapStandby::getInstance()->wakeUp(0);
-	}
-	else
-	if (command == "standby")
-	{
-		if (!(eZapStandby::getInstance()))
-			eZapMain::getInstance()->gotoStandby();
-	}
+		eZapMain::getInstance()->wakeUp();
+	else if (command == "standby")
+		eZapMain::getInstance()->gotoStandby();
 
 	return "<?xml version=\"1.0\"?><!DOCTYPE wml PUBLIC \"-//WAPFORUM//DTD WML 1.1//EN\" \"http://www.wapforum.org/DTD/wml_1.1.xml\"><wml><card title=\"Info\"><p>Command " + command + " initiated.</p></card></wml>";
 }
@@ -2328,10 +2321,12 @@ static eString getControlScreenShot(void)
 {
 	eString result;
 
-	if (access("/dev/grabber", R_OK) == 0)
+	int ret = system("grabpic bmp > /tmp/screenshot.bmp");
+	eDebug("ret is %d", ret);
+	if ( ret >> 8 )
+		result = "grabpic tool is required but not existing or working";
+	else
 	{
-		system("cat /dev/grabber > /tmp/screenshot.bmp");
-
 		FILE *bitstream = 0;
 		int xres = 0, yres = 0, yres2 = 0, aspect = 0, winxres = 620, winyres = 0, rh = 0, rv = 0;
 		if (smallScreen == 1)
@@ -2379,9 +2374,7 @@ static eString getControlScreenShot(void)
 		result += "Original format: " + eString().sprintf("%d", xres) + "x" + eString().sprintf("%d", yres);
 		result += " (" + eString().sprintf("%d", rh) + ":" + eString().sprintf("%d", rv) + ")";
 	}
-	else
-		result = "Module grabber is required but not installed";
-
+	
 	return result;
 }
 
@@ -3912,9 +3905,10 @@ static eString deleteTimerEvent(eString request, eString dirpath, eString opts, 
 		result.strReplace("#URL#", "/deleteTimerEvent" + opts);
 	}
 	else
+	{
 		result = readFile(TEMPLATE_DIR + "deleteTimerComplete.tmp");
-
-	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
+		eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
+	}
 
 	return result;
 }
@@ -3982,7 +3976,7 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 
 	int eventid;
 	sscanf(eventID.c_str(), "%x", &eventid);
-	// printf("[CHANGETIMER] start: %d.%d. - %d:%d, end: %d.%d. - %d:%d\n", start.tm_mday, start.tm_mon, start.tm_hour, start.tm_min,
+	// eDebug("[CHANGETIMER] start: %d.%d. - %d:%d, end: %d.%d. - %d:%d", start.tm_mday, start.tm_mon, start.tm_hour, start.tm_min,
 	//								end.tm_mday, end.tm_mon, end.tm_hour, end.tm_min);
 
 	eServiceReference ref = string2ref(serviceRef);
@@ -4029,9 +4023,10 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 		result.strReplace("#URL#", "/changeTimerEvent" + opts);
 	}
 	else
+	{
 		result = "<script language=\"javascript\">window.close();</script>";
-
-	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
+		eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)	
+	}
 	return result;
 }
 
@@ -4052,6 +4047,7 @@ static eString addTimerEvent2(eString request, eString dirpath, eString opts, eH
 	eString emin = opt["emin"];
 	eString description = httpUnescape(opt["descr"]);
 	eString channel = httpUnescape(opt["channel"]);
+	eString after_event = opt["after_event"];
 
 	time_t now = time(0) + eDVB::getInstance()->time_difference;
 	tm start = *localtime(&now);
@@ -4078,14 +4074,19 @@ static eString addTimerEvent2(eString request, eString dirpath, eString opts, eH
 	time_t start1 = eventStartTime - (timeroffset * 60);
 	duration = duration + (2 * timeroffset * 60);
 
-	ePlaylistEntry entry(string2ref(serviceRef), start1, duration, eventid, ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR);
+	int type = atoi(after_event.c_str());
+	type |= ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR;
+
+	ePlaylistEntry entry(string2ref(serviceRef), start1, duration, eventid, type);
 	entry.service.descr = channel + "/" + description;
 
 	if (eTimerManager::getInstance()->addEventToTimerList(entry) == -1)
 		result += _("Timer event could not be added because time of the event overlaps with an already existing event.");
 	else
+	{
 		result += _("Timer event was created successfully.");
-	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
+		eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
+	}
 
 	return result;
 }
@@ -4136,7 +4137,7 @@ static eString editTimerEvent(eString request, eString dirpath, eString opts, eH
 	tm end = *localtime(&eventEnd);
 	int evType = atoi(eventType.c_str());
 
-	// printf("[ENIGMA_DYN] editTimerEvent: serviceRef = %s, ID = %s, start = %s, duration = %s\n", serviceRef.c_str(), eventID.c_str(), eventStartTime.c_str(), eventDuration.c_str());
+	// eDebug("[ENIGMA_DYN] editTimerEvent: serviceRef = %s, ID = %s, start = %s, duration = %s", serviceRef.c_str(), eventID.c_str(), eventStartTime.c_str(), eventDuration.c_str());
 
 	// TODO: check if ( type & ePlaylistEntry::isRepeating )
 	// .. then load another template.. with checkboxes for weekdays..
@@ -4179,6 +4180,9 @@ static eString showAddTimerEventWindow(eString request, eString dirpath, eString
 
 	eString result = readFile(TEMPLATE_DIR + "addTimerEvent.tmp");
 
+	result.strReplace("#AFTERTEXT#", _("After Event:"));
+	result.strReplace("#AFTEROPTS#", buildAfterEventOpts(0));
+	
 	result.strReplace("#SDAYOPTS#", genOptions(1, 31, 1, start.tm_mday));
 	result.strReplace("#SMONTHOPTS#", genOptions(1, 12, 1, start.tm_mon + 1));
 	result.strReplace("#SHOUROPTS#", genOptions(0, 23, 1, start.tm_hour));
@@ -4191,7 +4195,6 @@ static eString showAddTimerEventWindow(eString request, eString dirpath, eString
 
 	result.strReplace("#ZAPDATA#", getZapContent2("zap", zap[ZAPMODETV][ZAPSUBMODEBOUQUETS]));
 
-	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
 	return result;
 }
 
@@ -4495,7 +4498,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	if (eConfig::getInstance()->getKey("/ezap/webif/lockWebIf", lockWebIf))
 		eConfig::getInstance()->setKey("/ezap/webif/lockWebIf", lockWebIf);
 	
-	printf("[ENIGMA_DYN] lockWebIf = %d\n", lockWebIf);
+	eDebug("[ENIGMA_DYN] lockWebIf = %d", lockWebIf);
 	bool lockWeb = (lockWebIf == 1) ? true : false;
 
 	dyn_resolver->addDyn("GET", "/", web_root, lockWeb);
@@ -4531,7 +4534,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/tvMessageWindow", tvMessageWindow, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/status", doStatus, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/switchService", switchService, lockWeb);
-	dyn_resolver->addDyn("GET", "/cgi-bin/zapTo", zapTo, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/zapTo", zapTo, false); // this dont really zap.. only used to return apid and vpid
 	dyn_resolver->addDyn("GET", "/cgi-bin/admin", admin, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/audio", audio, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/selectAudio", selectAudio, lockWeb);

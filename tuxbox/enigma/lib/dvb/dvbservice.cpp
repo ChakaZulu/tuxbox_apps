@@ -244,15 +244,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 			tMHWEIT=0;
 		}
 
-		delete tdt;
-		tdt=0;
-
-		if ( !service.path.size() )
-		{
-			tdt=new TDT();
-			CONNECT(tdt->tableReady, eDVBServiceController::TDTready);
-			tdt->start();
-		}
+		startTDT();
 
 		dvb.tSDT.start(new SDT());
 
@@ -558,41 +550,40 @@ void eDVBServiceController::TDTready(int error)
 		std::map<tsref,int> &tOffsMap = eTransponderList::getInstance()->TimeOffsetMap;
 		std::map< tsref, int >::iterator it( tOffsMap.find( *transponder ) );
 
-		int enigma_diff = tdt->UTC_time-time(0);
+		time_t nowTime=time(0);
+		int enigma_diff = tdt->UTC_time-nowTime;
 
 		if ( dvb.time_difference )  // ref time ready?
 		{
 			// curTime is our current reference time....
-			time_t curTime = time(0);
-			time_t TPTime = curTime+enigma_diff;
-			curTime += dvb.time_difference;
+			time_t TPTime = nowTime+enigma_diff;
 
 			// difference between reference time and
 			// the transponder time
-			int diff = curTime-TPTime;
+			int diff = nowTime-TPTime;
 
 			if ( abs(diff) < 120 )
 			{
-				eDebug("diff < 120 .. use Transponder Time");
+				eDebug("[TIME] diff < 120 .. use Transponder Time");
 				tOffsMap[*transponder] = 0;
 				dvb.time_difference = enigma_diff;
 			}
 			else if ( it != tOffsMap.end() ) // correction saved?
 			{
-				eDebug("we have correction");
+				eDebug("[TIME] we have correction");
 				time_t CorrectedTpTime = TPTime+it->second;
-				int ddiff = curTime-CorrectedTpTime;
+				int ddiff = nowTime-CorrectedTpTime;
 				if ( abs(ddiff) < 120 )
 				{
-					eDebug("diff < 120 sek.. update time");
-					eDebug("update stored correction");
+					eDebug("[TIME] diff < 120 sek.. update time");
+					eDebug("[TIME] update stored correction");
 					tOffsMap[*transponder] = diff;
 					dvb.time_difference = enigma_diff + diff;
 				}
 			}
 			else
 			{
-				eDebug("no correction found... store calced correction");
+				eDebug("[TIME] no correction found... store calced correction(%d)",diff);
 				tOffsMap[*transponder] = diff;
 			}
 		}
@@ -601,19 +592,35 @@ void eDVBServiceController::TDTready(int error)
 			if ( it != tOffsMap.end() )
 			{
 				enigma_diff += it->second;
-				eDebug("we have correction (%d)... use", it->second );
+				eDebug("[TIME] we have correction (%d)... use", it->second );
 			}
 			else
-				eDebug("dont have correction.. set Transponder Diff");
+				eDebug("[TIME] dont have correction.. set Transponder Diff");
 			dvb.time_difference=enigma_diff;
 		}
-		time_t t = time(0)+dvb.time_difference;
-		tm now = *localtime(&t);
 
+		eDebug("[TIME] time_difference is %d", dvb.time_difference );
+		time_t t = nowTime+dvb.time_difference;
+		tm now = *localtime(&t);
 		eDebug("[TIME] time update to %02d:%02d:%02d",
 			now.tm_hour,
 			now.tm_min,
 			now.tm_sec);
+
+		if ( abs(dvb.time_difference) > 60 )
+		{
+			eDebug("[TIME] set Linux Time");
+			timeval tnow;
+			gettimeofday(&tnow,0);
+			tnow.tv_sec=t;
+			settimeofday(&tnow,0);
+			for (ePtrList<eMainloop>::iterator it(eMainloop::existing_loops)
+				;it != eMainloop::existing_loops.end(); ++it)
+				it->setTimerOffset(t-nowTime);
+			dvb.time_difference=1;
+		}
+		else if ( !dvb.time_difference )
+			dvb.time_difference=1;
 
 		/*emit*/ dvb.timeUpdated();
 	}
@@ -1212,6 +1219,18 @@ void eDVBServiceController::clearCAlist()
 	if (DVBCI2)
 		DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::getcaids));
 #endif
+}
+
+void eDVBServiceController::startTDT()
+{
+	delete tdt;
+	tdt=0;
+	if ( !service.path.size() )
+	{
+		tdt=new TDT();
+		CONNECT(tdt->tableReady, eDVBServiceController::TDTready);
+		tdt->start();
+	}
 }
 
 /*

@@ -209,9 +209,9 @@ public:
 
 	/* container for settings */
 	eDVBSettings *settings;
-
 	Signal0<void> timeUpdated;
 	int time_difference;
+	void updateTime();
 };
 
 #endif

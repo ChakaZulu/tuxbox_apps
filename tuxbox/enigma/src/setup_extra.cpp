@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.14 2004/06/12 08:59:14 ghostrider Exp $
+ * $Id: setup_extra.cpp,v 1.15 2004/06/15 10:35:51 ghostrider Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -136,12 +136,16 @@ void eExpertSetup::rc_setup()
 	show();
 }
 
+//implemented in upgrade.cpp
+extern bool erase(char mtd[30], const char *titleText);
+
 void eExpertSetup::factory_reset()
 {
 	hide();
 	eMessageBox mb(
 		_("When you do a factory reset, you will lost ALL your configuration data\n"
-			"(including bouquets, services, satellite data ...)\n\n"
+			"(including bouquets, services, satellite data ...)\n"
+			"After finishing the factory reset, your receiver restarts automatically!\n\n"
 			"Really do factory reset?"),
 		_("Factory reset"),
 		eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion,
@@ -151,17 +155,19 @@ void eExpertSetup::factory_reset()
 	mb.hide();
 	if ( ret == eMessageBox::btYes ) 
 	{
-		::unlink("/var/.init");
-		eMessageBox msg(
-			_("To finalize the factory reset your receiver must be restarted. "
-				"All changes from now to next restart will going lost!\n\n"
-				"Restart now?"),
-			_("Factory reset"),
-			eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btYes );
-		msg.show();
-		if ( msg.exec() == eMessageBox::btYes )
-			eZap::getInstance()->quit(2);
-		msg.hide();
+		switch( eSystemInfo::getInstance()->getHwType() )
+		{
+			case eSystemInfo::DM7000:
+			case eSystemInfo::DM500:
+			case eSystemInfo::DM5620:
+			case eSystemInfo::DM5600:
+			case eSystemInfo::TR_DVB272S:
+				erase("/dev/mtd/1", _("Factory reset..."));
+				system("reboot");
+				break;
+			default: 
+				eDebug("factory reset not implemented for this hardware!!\n");
+		}
 	}
 	show();
 }

@@ -68,7 +68,7 @@
 			<action name="green" key="green" flags="m" />
 			<action name="yellow" key="yellow" flags="m" />
 			<action name="blue" key="blue" flags="m" />
-			<action name="escape" key="LAME" flags="m" />
+			<action name="escape" key="LAME" flags="mr" />
 		</actionmap>
 
 		<actionmap name="mainmenu">
@@ -83,7 +83,7 @@
 			<action name="left" key="left" flags="mr" />
 			<action name="right" key="right" flags="mr" />
 			<action name="ok" key="ok" flags="m" />
-			<action name="cancel" key="LAME" flags="m" />
+			<action name="cancel" key="LAME" flags="mr" />
 			<action name="help" key="info" flags="m" />
 		</actionmap>
 

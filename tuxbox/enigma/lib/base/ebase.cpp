@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include <lib/base/eerror.h>
+#include <lib/system/elock.h>
 
 eSocketNotifier::eSocketNotifier(eMainloop *context, int fd, int requested, bool startnow): context(*context), fd(fd), state(0), requested(requested)
 {
@@ -42,9 +43,10 @@ void eTimer::start(long msek, bool singleShot)
 	bActive = true;
 	bSingleShot = singleShot;
 	interval = msek;
- 	gettimeofday(&nextActivation, 0);
-//	eDebug("this = %p\nnow sec = %d, usec = %d\nadd %d msec", this, nextActivation.tv_sec, nextActivation.tv_usec, msek);
+	gettimeofday(&nextActivation, 0);
+	nextActivation.tv_sec -= context.getTimerOffset();
 	nextActivation += (msek<0 ? 0 : msek);
+//	eDebug("this = %p\nnow sec = %d, usec = %d\nadd %d msec", this, nextActivation.tv_sec, nextActivation.tv_usec, msek);
 //	eDebug("next Activation sec = %d, usec = %d", nextActivation.tv_sec, nextActivation.tv_usec );
 	context.addTimer(this);
 }
@@ -56,9 +58,11 @@ void eTimer::startLongTimer( int seconds )
 
 	bActive = bSingleShot = true;
 	interval = 0;
- 	gettimeofday(&nextActivation, 0);
+	gettimeofday(&nextActivation, 0);
+	nextActivation.tv_sec -= context.getTimerOffset();
 //	eDebug("this = %p\nnow sec = %d, usec = %d\nadd %d msec", this, nextActivation.tv_sec, nextActivation.tv_usec, msek);
 	if ( seconds > 0 )
+#if 0
 	{
 		while ( seconds > (LONG_MAX/1000) )
 		{
@@ -68,6 +72,9 @@ void eTimer::startLongTimer( int seconds )
 		}
 		nextActivation += seconds*1000;
 	}
+#else
+		nextActivation.tv_sec += seconds;
+#endif
 //	eDebug("next Activation sec = %d, usec = %d", nextActivation.tv_sec, nextActivation.tv_usec );
 	context.addTimer(this);
 }
@@ -89,7 +96,7 @@ void eTimer::changeInterval(long msek)
 		nextActivation -= interval;  // sub old interval
 	}
 	else
-		bActive=true;	// then activate Timer
+		bActive=true; // then activate Timer
 
 	interval = msek;   			 			// set new Interval
 	nextActivation += interval;		// calc nextActivation
@@ -99,10 +106,17 @@ void eTimer::changeInterval(long msek)
 
 void eTimer::activate()   // Internal Funktion... called from eApplication
 {
+#if 0
 	timeval now;
 	gettimeofday(&now, 0);
-//	eDebug("this = %p\nnow sec = %d, usec = %d\nnextActivation sec = %d, usec = %d", this, now.tv_sec, now.tv_usec, nextActivation.tv_sec, nextActivation.tv_usec );
-//	eDebug("Timer emitted");
+	eDebug("this = %p\nnow sec = %d, usec = %d\nnextActivation sec = %d, usec = %d",
+	this,
+	now.tv_sec,
+	now.tv_usec,
+	nextActivation.tv_sec,
+	nextActivation.tv_usec );
+	eDebug("Timer emitted");
+#endif
 	context.removeTimer(this);
 
 	if (!bSingleShot)
@@ -116,12 +130,27 @@ void eTimer::activate()   // Internal Funktion... called from eApplication
 	/*emit*/ timeout();
 }
 
+inline void eTimer::recalc( int offset )
+{
+	nextActivation.tv_sec += offset;
+}
+
 // mainloop
 
-void eMainloop::recalcAllTimers( int difference )
+ePtrList<eMainloop> eMainloop::existing_loops;
+
+void eMainloop::setTimerOffset( int difference )
 {
-	for ( ePtrList<eTimer>::iterator it(TimerList.begin()); it != TimerList.end(); it++ )
-		it->recalc( difference );
+	singleLock s(recalcLock);
+	if (!TimerList)
+		timer_offset=0;
+	else
+	{
+		if ( timer_offset )
+			eDebug("time_offset %d avail.. add new offset %d than new is %d",
+			timer_offset, difference, timer_offset+difference);
+		timer_offset+=difference;
+	}
 }
 
 void eMainloop::addSocketNotifier(eSocketNotifier *sn)
@@ -139,8 +168,13 @@ void eMainloop::processOneEvent()
 // process pending timers...
 	long usec=0;
 
+	if ( TimerList )
+		doRecalcTimers();
 	while (TimerList && (usec = timeout_usec( TimerList.begin()->getNextActivation() ) ) <= 0 )
+	{
 		TimerList.begin()->activate();
+		doRecalcTimers();
+	}
 
 	int fdAnz = notifiers.size();
 	pollfd pfd[fdAnz];
@@ -153,12 +187,18 @@ void eMainloop::processOneEvent()
 		pfd[i].events = it->second->getRequested();
 	}
 
+//	eDebug("usec = %d", usec);
 	int ret=poll(pfd, fdAnz, TimerList ? usec / 1000 : -1);  // milli .. not micro seks
 
 	if (!ret) // timeouted leave poll .. immediate check all timers
 	{
-		while ( TimerList && timeout_usec( TimerList.begin()->getNextActivation() ) <= 0 )
+		if ( TimerList )
+			doRecalcTimers();
+		while (TimerList && timeout_usec(TimerList.begin()->getNextActivation()) <= 0 )
+		{
 			TimerList.begin()->activate();
+			doRecalcTimers();
+		}
 	}
 	else if (ret>0)
 	{
@@ -173,13 +213,17 @@ void eMainloop::processOneEvent()
 			if ( pfd[i].revents & req )
 			{
 				notifiers[pfd[i].fd]->activate(pfd[i].revents);
-
 				if (!--ret)
 					break;
 				else
 				{
-					while ( TimerList && timeout_usec( TimerList.begin()->getNextActivation() ) <= 0 )
+					if ( TimerList )
+						doRecalcTimers();
+					while (TimerList && timeout_usec(TimerList.begin()->getNextActivation()) <= 0 )
+					{
 						TimerList.begin()->activate();
+						doRecalcTimers();
+					}
 				}
 			}
 			else if (pfd[i].revents & (POLLERR|POLLHUP|POLLNVAL))
@@ -234,6 +278,17 @@ void eMainloop::quit( int ret )   // call this to leave all loops
 {
 	retval=ret;
 	app_quit_now = true;
+}
+
+inline void eMainloop::doRecalcTimers()
+{
+	singleLock s(recalcLock);
+	if ( timer_offset )
+	{
+		for (ePtrList<eTimer>::iterator it(TimerList); it != TimerList.end(); ++it )
+			it->recalc( timer_offset );
+		timer_offset=0;
+	}
 }
 
 eApplication* eApp = 0;

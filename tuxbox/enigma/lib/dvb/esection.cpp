@@ -280,20 +280,18 @@ void eSection::data(int socket)
 		if (lockcount)
 			eDebug("eSection::data on locked section!");
 
-		if (timer && section == -1)
+		int ret = reader.read(buf);
+		if ( ret != -2 && timer && section == -1)
 		{
 			section=0;
 			timer->start(10000, true);
 		}
 
-		int ret=reader.read(buf);
 		if (ret)
 		{
-			// restart timer when data from another table_id
-			// is received
-			if ( ret == 2 && timer)
+			if ( ret == -2 && timer && timer->isActive() )
 				timer->start(10000, true);
-			break;
+			return;
 		}
 
 		maxsec=buf[7];

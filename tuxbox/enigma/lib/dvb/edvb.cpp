@@ -69,6 +69,13 @@ void eDVB::tunedIn(eTransponder *trans, int err)
 	event(eDVBEvent(eDVBEvent::eventTunedIn, err, trans));
 }
 
+void eDVB::updateTime()
+{
+	eDVBServiceController *c = getServiceAPI();
+	if ( c && c->tdt && c->tdt->ready && !c->tdt->error )
+		c->TDTready(0);
+}
+
 eDVB::eDVB()
 	:parentEIT(0), recorder(0)
 	#ifndef DISABLE_CI

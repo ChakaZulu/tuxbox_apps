@@ -1,5 +1,6 @@
 #include <src/time_correction.h>
 #include <lib/dvb/edvb.h>
+#include <lib/dvb/dvbservice.h>
 
 eTimeCorrectionEditWindow::eTimeCorrectionEditWindow( tsref tp )
 	:updateTimer(eApp), transponder(tp)
@@ -99,21 +100,42 @@ eTimeCorrectionEditWindow::eTimeCorrectionEditWindow( tsref tp )
 
 void eTimeCorrectionEditWindow::savePressed()
 {
-	time_t nowTP = time(0)+eDVB::getInstance()->time_difference;
-	tm TPTime = *localtime( &nowTP );
-	TPTime.tm_hour = nTime->getNumber(0);
-	TPTime.tm_min = nTime->getNumber(1);
-	TPTime.tm_mday = (int)cday->getCurrent()->getKey();
-	TPTime.tm_wday = -1;
-	TPTime.tm_yday = -1;
-	TPTime.tm_mon = (int)cmonth->getCurrent()->getKey();
-	TPTime.tm_year = (int)cyear->getCurrent()->getKey();
-	time_t newTPTime = mktime(&TPTime);
-	int diff = newTPTime - nowTP;
-	eDVB::getInstance()->time_difference+=diff;
-	eTransponderList::getInstance()->TimeOffsetMap[transponder]=
-		diff;
-	eDVB::getInstance()->timeUpdated();
+	eDVB &dvb = *eDVB::getInstance();
+	std::map<tsref,int> &tOffsMap=
+		eTransponderList::getInstance()->TimeOffsetMap;
+	time_t oldTime = time(0);
+	time_t now = oldTime+dvb.time_difference;
+
+	tm nowTime = *localtime( &now );
+	nowTime.tm_hour = nTime->getNumber(0);
+	nowTime.tm_min = nTime->getNumber(1);
+	nowTime.tm_mday = (int)cday->getCurrent()->getKey();
+	nowTime.tm_wday = -1;
+	nowTime.tm_yday = -1;
+	nowTime.tm_mon = (int)cmonth->getCurrent()->getKey();
+	nowTime.tm_year = (int)cyear->getCurrent()->getKey();
+	time_t newTime = mktime(&nowTime);
+
+	tOffsMap.clear();
+
+	dvb.time_difference=1;
+	eDebug("[TIME] set Linux Time");
+	timeval tnow;
+	gettimeofday(&tnow, 0);
+	tnow.tv_sec=newTime;
+	settimeofday(&tnow, 0);
+	for (ePtrList<eMainloop>::iterator it(eMainloop::existing_loops)
+		;it != eMainloop::existing_loops.end(); ++it)
+		// only difference in linux time are interesting for us..
+		it->setTimerOffset(newTime-oldTime);
+
+	/*emit*/ dvb.timeUpdated();
+
+// for calc new transponder correction
+	eDVBServiceController *sapi = dvb.getServiceAPI();
+	if ( sapi )
+		sapi->startTDT();
+
 	close(0);
 }
 
@@ -136,14 +158,6 @@ int eTimeCorrectionEditWindow::eventHandler( const eWidgetEvent &event )
 		case eWidgetEvent::execDone:
 		{
 			updateTimer.stop();
-			std::map<tsref,int> &map =
-				eTransponderList::getInstance()->TimeOffsetMap;
-			// test if correction for this transponder in map
-			if ( map.find(transponder) == map.end() )
-			{
-			// not in map... we set 0 as correction
-				map[transponder]=0;
-			}
 			break;
 		}
 		default:
@@ -173,3 +187,4 @@ void eTimeCorrectionEditWindow::monthChanged( eListBoxEntryText *e )
 		cday->setCurrent( (void*) 1 );
 	}
 }
+

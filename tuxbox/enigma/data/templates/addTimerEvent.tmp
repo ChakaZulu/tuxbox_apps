@@ -63,6 +63,14 @@
 					</td>
 				</tr>
 				<tr>
+					<td>#AFTERTEXT#</d>
+					<td>
+						<select name="after_event" size="1">
+							#AFTEROPTS#
+						</select>
+					</td>
+				</tr>
+				<tr>
 					<td>Description:</td>
 					<td>
 						<input name="descr" type="text" size="100" maxlength="100">

@@ -23,7 +23,7 @@ eWidget::eWidget(eWidget *_parent, int takefocus)
 	shortcut(0), shortcutFocusWidget(0),
 	focus(0), TLW(0), takefocus(takefocus),
 	state( parent && !(parent->state&stateVisible) ? stateShow : 0 ),
-	target(0), in_loop(0), have_focus(0), just_showing(0),
+	target(0), result(0), in_loop(0), have_focus(0), just_showing(0),
 	font( parent ? parent->font : eSkin::getActive()->queryFont("global.normal") ),
 	backgroundColor(_parent?gColor(-1):gColor(eSkin::getActive()->queryScheme("global.normal.background"))),
 	foregroundColor(_parent?parent->foregroundColor:gColor(eSkin::getActive()->queryScheme("global.normal.foreground"))),

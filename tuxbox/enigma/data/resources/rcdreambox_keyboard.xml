@@ -336,7 +336,7 @@
 			<action name="yellow" key="KEY_YELLOW" flags="m" />
 			<action name="blue" key="KEY_BLUE" flags="m" />
 
-			<action name="escape" key="KEY_ESC" flags="m" />
+			<action name="escape" key="KEY_ESC" flags="mr" />
 		</actionmap>
 
 		<actionmap name="mainmenu">
@@ -353,7 +353,7 @@
 			<action name="ok" key="KEY_ENTER" flags="m" />
 			<action name="ok" key="KEY_OK" flags="m" />
 			<action name="ok" key="KEY_SPACE" flags="m" />
-			<action name="cancel" key="KEY_ESC" flags="m" />
+			<action name="cancel" key="KEY_ESC" flags="mr" />
 			<action name="help" key="KEY_HELP" flags="m" />
 		</actionmap>
 

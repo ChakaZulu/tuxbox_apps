@@ -41,14 +41,16 @@ function addTimerEvent()
 	var currentEmin = document.channelselector.emin.selectedIndex;
 	var emin = document.channelselector.emin.options[currentEmin].text;
 	var descr = document.channelselector.descr.value;
+	var currentAfterEvent = document.channelselector.after_event.selectedIndex;
+	var after_event = document.channelselector.after_event.options[currentAfterEvent].value;
 
-	var url = '/addTimerEvent2?ref=' + channel + '&sday=' + sday + '&smonth=' + smonth + '&shour=' + shour + '&smin=' + smin + '&eday=' + eday + '&emonth=' + emonth + '&ehour=' + ehour + '&emin=' + emin + '&descr=' + descr;
+	var url = '/addTimerEvent2?ref=' + channel + '&sday=' + sday + '&smonth=' + smonth + '&shour=' + shour + '&smin=' + smin + '&eday=' + eday + '&emonth=' + emonth + '&ehour=' + ehour + '&emin=' + emin + '&descr=' + descr + '&after_event=' + after_event;
 	NewWindow(url, 'add', '200', '200', 'no', '5000');
 }
 
 function showAddTimerEventWindow()
 {
-	NewWindow("/showAddTimerEventWindow", 'addTimer', '780', '250', 'no');
+	NewWindow("/showAddTimerEventWindow", 'addTimer', '780', '280', 'no');
 }
 
 

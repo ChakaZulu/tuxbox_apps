@@ -21,19 +21,16 @@ int fromBCD(int bcd);
 
 class Descriptor
 {
-		// better this fixed length or heap memory? don't know :/
-  __u8 data[256];
-  int len;
+	int tag;
 public:
 	inline Descriptor(descr_gen_t *descr)
 	{
-		len = descr->descriptor_length;
-		memcpy(data, descr, len);
+		tag = *((__u8*)descr);
 	};
 	inline virtual ~Descriptor(){};
 
 	static Descriptor *create(descr_gen_t *data);
-	int Tag() { return data[0]; }
+	int Tag() { return tag; }
 
 #ifdef SUPPORT_XML	
 	eString toXML();

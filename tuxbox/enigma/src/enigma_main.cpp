@@ -1708,7 +1708,7 @@ eZapMain::eZapMain()
 
 	actual_eventDisplay=0;
 
-//	clockUpdate();
+	clockUpdate();
 	standbyTime.tv_sec=-1;
 
 #ifndef DISABLE_FILE
@@ -3269,7 +3269,7 @@ int eZapMain::handleStandby(int i)
 	{
 		if ( state & stateSleeping )
 		{
-			eZapStandby::getInstance()->wakeUp(1);
+			wakeUp();
 			// this breakes the eZapStandby mainloop...
 			// and enigma wakes up
 			return 3;
@@ -3294,7 +3294,7 @@ int eZapMain::handleStandby(int i)
 			if (ret == eMessageBox::btYes)
 		// we do hardly shutdown the box..
 		// any pending timers are ignored
-				message_notifier.send(eZapMain::messageShutdown);
+				eZap::getInstance()->quit();
 			break;
 		}
 		case 6: // force .. ( Sleeptimer )
@@ -3310,7 +3310,7 @@ int eZapMain::handleStandby(int i)
 			if (ret == eMessageBox::btYes)
 				// use message_notifier to goto sleep...
 				// we will not block the mainloop...
-					message_notifier.send(eZapMain::messageGoSleep);
+					gotoStandby();
 			break;
 		}
 		default:
@@ -5654,7 +5654,7 @@ void eZapMain::leaveService()
 	else
 #endif
 		flags&=~(ENIGMA_NVOD|ENIGMA_SUBSERVICES|ENIGMA_AUDIO|ENIGMA_AUDIO_PS|ENIGMA_VIDEO);
-	
+
 	if (subtitle)
 		subtitle->stop();
 
@@ -5785,17 +5785,23 @@ void eZapMain::gotMessage(const int &c)
 	{
 		if (!eZapStandby::getInstance())
 		{
+	// close all open windows before goto standby
+			if(eApp->looplevel() > 1)
+			{
+				eApp->exit_loop();
+				message_notifier.send(c);
+				return;
+			}
 			eDebug("goto Standby (sleep)");
 			standbyPress(0);
 			standbyRelease();
 		}
-		else
-			eDebug("goto Standby... but already sleeping");
 		return;
 	}
-	else if ( c == eZapMain::messageShutdown )
+	else if ( c == eZapMain::messageWakeUp )
 	{
-		eZap::getInstance()->quit();
+		if ( eZapStandby::getInstance() )
+			eZapStandby::getInstance()->wakeUp(1);
 		return;
 	}
 #ifndef DISABLE_FILE
@@ -6352,6 +6358,18 @@ void eZapMain::gotEPGMessage( const eEPGCache::Message &msg )
 			eZap::getInstance()->getServiceSelector()->EPGUpdated();
 			break;
 	}
+}
+
+void eZapMain::gotoStandby()
+{
+	message_notifier.start();
+	message_notifier.send( messageGoSleep );
+}
+
+void eZapMain::wakeUp()
+{
+	message_notifier.start();
+	message_notifier.send( messageWakeUp );
 }
 
 eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eServiceReference &path, eWidget *lcdTitle, eWidget *lcdElement)

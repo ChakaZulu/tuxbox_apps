@@ -394,12 +394,10 @@ int main(int argc, char **argv)
 #ifdef MEMLEAK_CHECK
 	atexit(DumpUnfreed);
 #endif
-	time_t t=0;
 	int res;
 //	signal(SIGSEGV, fault);
 //	printf("(secret data: %x)\n", __mp_initsection);
 
-	stime(&t);
 	eDebug("%s", copyright);
 
 	setlocale (LC_ALL, "");

@@ -396,6 +396,7 @@ int eTextInputField::eventHandler( const eWidgetEvent &event )
 			}
 			else if (event.action == &i_texteditActions->deletechar && editMode)
 			{
+//				eDebug("istext.length is %d, curPos is %d", isotext.length(), curPos);
 				if ( isotext.length() )
 				{
 					lastKey=-1;
@@ -411,10 +412,12 @@ int eTextInputField::eventHandler( const eWidgetEvent &event )
 			}
 			else if (event.action == &i_texteditActions->backspace && editMode)
 			{
-				if ( isotext.length() && curPos)
+//				eDebug("istext.length is %d, curPos is %d", isotext.length(), curPos);
+				if (isotext.length())
 				{
 					lastKey=-1;
-					curPos--;
+					if (curPos)
+						curPos--;
 					isotext.erase( curPos, 1 );
 					updated();
 				}
@@ -661,6 +664,7 @@ int eTextInputField::keyDown(int rc)
 	if (editMode & (rc >= KEY_ASCII))
 	{
 		int ascii = rc - KEY_ASCII;
+		eDebug("ascii is %d (%c)", ascii, ascii);
 		if ( strchr( useableChars.c_str(), ascii ) ) // char useable?
 		{
 			if ( curPos == (int)isotext.length() )

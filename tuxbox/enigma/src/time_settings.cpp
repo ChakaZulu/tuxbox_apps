@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: time_settings.cpp,v 1.3 2004/04/18 14:57:06 tmbinc Exp $
+ * $Id: time_settings.cpp,v 1.4 2004/06/15 10:35:51 ghostrider Exp $
  */
 
 #include <time_settings.h>
@@ -62,18 +62,7 @@ void eTimeSettings::time_correction()
 		w.setLCD(LCDTitle, LCDElement);
 #endif
 		w.show();
-		if (!w.exec())
-		{
-			std::map<tsref, int> &map =
-				eTransponderList::getInstance()->TimeOffsetMap;
-			int tCorrection=0;
-			std::map<tsref, int>::iterator it = map.find(ref);
-			if ( it != map.end() )
-				tCorrection = it->second;
-			map.clear();
-			map[ref] = tCorrection;
-			eTimerManager::getInstance()->timeChanged();
-		}
+		w.exec();
 		w.hide();
 		show();
 	}

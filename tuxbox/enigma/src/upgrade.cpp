@@ -314,6 +314,8 @@ void eUpgrade::catalogTransferDone(int err)
 	http=0;
 }
 
+void flashImage(int checkmd5);
+
 void eUpgrade::imageTransferDone(int err)
 {
 	progress->hide();
@@ -478,6 +480,8 @@ void eUpgrade::abortDownload()
 	imagehelp->show();
 }
 
+bool erase(char mtd[30], const char *titleText);
+
 void eUpgrade::flashImage(int checkmd5)
 {
 	setStatus(_("checking consistency of file..."));
@@ -584,7 +588,7 @@ void eUpgrade::flashImage(int checkmd5)
 
 				system("cp /sbin/rebootSE /tmp/reboot");
 
-				if(!erase(mtd))
+				if(!erase(mtd,_("Erasing Flash...")))
 				{
 					mb.hide();
 					eMessageBox box(_("Erase error!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK );
@@ -651,7 +655,7 @@ void eUpgrade::flashImage(int checkmd5)
 	}
 }
 
-bool eUpgrade::erase(char mtd[30])
+bool erase(char mtd[30], const char *titleText)
 {
 	int fd;
 	mtd_info_t meminfo;
@@ -663,7 +667,7 @@ bool eUpgrade::erase(char mtd[30])
 	if( ioctl( fd, MEMGETINFO, &meminfo ) != 0 )
 		return false;
 
-	ProgressWindow wnd(_("Erasing Flash..."));
+	ProgressWindow wnd(titleText);
 	wnd.show();
 
 	erase.length = meminfo.erasesize;
