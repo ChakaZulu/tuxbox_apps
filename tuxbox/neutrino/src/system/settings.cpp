@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.1 2002/04/14 08:31:58 Simplex Exp $
+        $Id: settings.cpp,v 1.2 2002/04/14 19:57:48 Simplex Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -21,34 +21,77 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA
 */
 
-//#include <iostream>
+#include <iostream>
 #include <string>
 #include "settings.h"
 
 using namespace std;
 
+CScanSettings::CScanSettings()
+{
+	satNameNoDiseqc[0] = 0;
+	for( int i=0; i<MAX_SATELLITES; i++)
+	{
+		satName[i][0] = 0;
+		satDiseqc[i]  = -1;
+	}
+}
+
 void CScanSettings::useDefaults( bool cable = false)
 {
 	bouquetMode = donttouchBouquets;
-	diseqcMode = noDiSEqC;
-	satellites.clear();
+	diseqcMode = NO_DISEQC;
+	diseqcRepeat = 0;
 
-	SSatellite defaultSat;
 	if (cable)
-		strcpy( defaultSat.name, "Telekom");
+		strcpy( satNameNoDiseqc, "Telekom");
 	else
-		strcpy( defaultSat.name, "Astra 19.2E");
-	defaultSat.diseqc = 0;
-	satellites.insert( satellites.end(), defaultSat);
+		strcpy( satNameNoDiseqc, "Astra 19.2E");
+
 }
-/*
+
+int* CScanSettings::diseqscOfSat( char* satname)
+{
+	for( int i=0; i<MAX_SATELLITES; i++)
+	{
+		if ( !strcmp(satName[i], ""))
+		{
+			strncpy( satName[i], satname, 30);
+			return &satDiseqc[i];
+		}
+		else if ( !strcmp(satName[i], satname))
+		{
+			return &satDiseqc[i];
+		}
+	}
+	return(NULL);
+}
+
 ostream &operator<<(ostream& os, const CScanSettings& settings)
 {
 	os << settings.bouquetMode << endl;
-	os << settings.useDiseqc << endl;
-	for (uint i=0; i<settings.satellites.size(); i++)
+	os << settings.diseqcMode << endl;
+	os << settings.diseqcRepeat << endl;
+	if (settings.diseqcMode == NO_DISEQC)
 	{
-		os << '"' << settings.satellites[i].name << '"' << endl << settings.satellites[i].diseqc << endl;
+		os << '"' << settings.satNameNoDiseqc << '"';
+	}
+	else
+	{
+		int satCount = 0;
+		for (int i=0; i<MAX_SATELLITES; i++)
+		{
+			if (settings.satDiseqc[i] != -1)
+				satCount++;
+		}
+		os << satCount;
+		for (int i=0; i<MAX_SATELLITES; i++)
+		{
+			if (settings.satDiseqc[i] != -1)
+			{
+				os << endl << '"' << settings.satName[i] << '"' << endl << settings.satDiseqc[i];
+			}
+		}
 	}
 	return os;
 }
@@ -56,27 +99,48 @@ ostream &operator<<(ostream& os, const CScanSettings& settings)
 istream &operator>>(istream& is, CScanSettings& settings)
 {
 	string token;
-	settings.satellites.clear();
 	is >> (int)settings.bouquetMode;
-	is >> settings.useDiseqc;
-	while (!is.eof())
+	is >> (int)settings.diseqcMode;
+	is >> settings.diseqcRepeat;
+	if (settings.diseqcMode == NO_DISEQC)
 	{
-		is >> token;
-		string satname = token;
-		int diseqc;
-		while ( satname[ satname.length()-1] != '"')
+		string token, satname = "";
+		do
 		{
 			is >> token;
-			satname += " " + token;
+			satname += token + " ";
 		}
-		CScanSettings::SSatellite sat;
-		is >> sat.diseqc;
-		strncpy( sat.name, satname.substr(1, satname.length()-2).c_str(), 30);
-		settings.satellites.insert( settings.satellites.end(), sat);
-
-		cout << "[sat]:" << sat.name << "|" << sat.diseqc << endl;
+		while (token[ token.length()-1] != '"');
+		strncpy( settings.satNameNoDiseqc, satname.substr( 1, satname.length()-3).c_str(), 30);
 	}
-	// for an unknown reason the last entry is waste
-	settings.satellites.erase( settings.satellites.end()--);
+	else
+	{
+		int satCount;
+		is >> satCount;
+		cout << "have to read " << satCount << " sats" <<endl;
+		for (int i=0; i<satCount; i++)
+		{
+			string token, satname = "";
+			do
+			{
+				is >> token;
+				satname += token + " ";
+			}
+			while (token[ token.length()-1] != '"');
+			strncpy( settings.satName[i], satname.substr( 1, satname.length()-3).c_str(), 30);
+			if (i==0)
+			{
+				strncpy( settings.satNameNoDiseqc, settings.satName[i], 30);
+			}
+			is >> settings.satDiseqc[i];
+			cout << "read " << settings.satName[i] << " "<<settings.satDiseqc[i] <<endl;
+		}
+		for (int i=satCount; i<MAX_SATELLITES; i++)
+		{
+			settings.satName[i][0] = 0;
+			settings.satDiseqc[i] = -1;
+		}
+	}
+	cout << "Loaded scansettings:" << endl << settings << endl;
 	return is;
-}*/
+}

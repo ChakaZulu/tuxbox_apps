@@ -32,8 +32,8 @@
 #ifndef __settings__
 #define __settings__
 
-//#include <iostream>
 #include <vector>
+#include "zapitclient.h"
 
 using namespace std;
 
@@ -185,6 +185,8 @@ const int PARENTALLOCK_PROMPT_ONSTART        = 1;
 const int PARENTALLOCK_PROMPT_CHANGETOLOCKED = 2;
 const int PARENTALLOCK_PROMPT_ONSIGNAL       = 3;
 
+#define MAX_SATELLITES 20
+
 class CScanSettings
 {
 	public:
@@ -196,28 +198,22 @@ class CScanSettings
 			appendBouquets         // not yet supported
 		} bouquetMode;
 
-		enum
-		{
-			noDiSEqC,
-			miniDiSEqC,
-			DiSEqC
-		} diseqcMode;
+		diseqc_t diseqcMode;
 
-		typedef struct
-		{
-			char name[30];         // satellite-name or cable-provider
-			int  diseqc;
-		} SSatellite;
+		uint32_t diseqcRepeat;
 
-		typedef vector<SSatellite> SatelliteList;
-		SatelliteList satellites;
+		char satNameNoDiseqc[30];
+		int  satDiseqc[MAX_SATELLITES];
+		char satName[30][MAX_SATELLITES];
 
+		CScanSettings();
 		void useDefaults(bool cable = false);
+		int* diseqscOfSat( char* satname);
 
+		friend ostream& operator<<(ostream&, const CScanSettings&);
+		friend istream& operator>>(istream&, CScanSettings&);
 };
 
-ostream& operator<<(ostream&, const CScanSettings&);
-istream& operator>>(istream&, CScanSettings&);
 
 #endif
 

@@ -38,13 +38,15 @@ bool CSatDiseqcNotifier::changeNotify(string OptionName, void* Data)
 {
 	if( *((int*) Data)==0)   // diseqc off
 	{
-		satMenu->setActive(false);
-		extMenu->setActive(true);
+		satMenu->setActive(true);
+		extMenu->setActive(false);
+		repeatMenu->setActive(false);
 	}
 	else
 	{
-		satMenu->setActive(true);
-		extMenu->setActive(false);
+		satMenu->setActive(false);
+		extMenu->setActive(true);
+		repeatMenu->setActive(true);
 	}
 }
 

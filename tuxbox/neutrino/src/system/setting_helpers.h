@@ -41,10 +41,12 @@ class CSatDiseqcNotifier : public CChangeObserver
 	private:
 		CMenuItem* satMenu;
 		CMenuItem* extMenu;
+		CMenuItem* repeatMenu;
 	protected:
 		CSatDiseqcNotifier( ) : CChangeObserver(){};  // prevent calling constructor without data we need
 	public:
-		CSatDiseqcNotifier( CMenuItem* SatMenu, CMenuItem* ExtMenu) : CChangeObserver() { satMenu = SatMenu; extMenu = ExtMenu;};
+		CSatDiseqcNotifier( CMenuItem* SatMenu, CMenuItem* ExtMenu, CMenuItem* RepeatMenu) : CChangeObserver()
+		{ satMenu = SatMenu; extMenu = ExtMenu; repeatMenu = RepeatMenu;};
 		bool changeNotify(string OptionName, void*);
 };
 
