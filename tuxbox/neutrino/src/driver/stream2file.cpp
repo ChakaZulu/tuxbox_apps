@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.cpp,v 1.9 2004/05/06 06:45:38 thegoodguy Exp $
+ * $Id: stream2file.cpp,v 1.10 2004/05/06 13:31:34 thegoodguy Exp $
  * 
  * streaming to file/disc
  * 
@@ -80,7 +80,7 @@ static int dvrfd;
 
 static unsigned char demuxfd_count = 0;
 
-static unsigned char exit_flag = 0;
+static unsigned char exit_flag;
 static unsigned char busy_count = 0;
 
 static pthread_t demux_thread[MAXPIDS];
@@ -372,6 +372,8 @@ stream2file_error_msg_t start_recording(const char * const filename,
 		return STREAM2FILE_BUSY; // other thread is running
 
 	busy_count++;
+
+	exit_flag = 0;
 
 	strcpy(myfilename, filename);
 
