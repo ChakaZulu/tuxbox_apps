@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.4 2003/02/09 22:59:33 rasc Exp $
+$Id: helper.c,v 1.5 2003/02/09 23:01:10 rasc Exp $
 
  -- dvbsnoop
  -- a dvb sniffer tool
@@ -9,6 +9,9 @@ $Id: helper.c,v 1.4 2003/02/09 22:59:33 rasc Exp $
 
 
 $Log: helper.c,v $
+Revision 1.5  2003/02/09 23:01:10  rasc
+-- endian check (bug fix)
+
 Revision 1.4  2003/02/09 22:59:33  rasc
 -- endian check (bug fix)
 
@@ -37,7 +40,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 
-static little_endian_arch = 0;
+static int  little_endian_arch = 0;
 
 /*
   -- check Little/big endian architecture

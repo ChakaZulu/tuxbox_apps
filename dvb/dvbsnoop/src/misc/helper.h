@@ -6,7 +6,7 @@
 
 
 
-
+void setEndianArch (void);
 unsigned long getBits (u_char *buf, int byte_offset, int startbit, int bitlen);
 
 void print_name (int verbose, u_char *b, u_int len);
