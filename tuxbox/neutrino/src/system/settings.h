@@ -133,14 +133,14 @@ struct SNeutrinoSettings
 	char network_nameserver[20];
 
 	//streaming
-	int network_streaming_use;
-	int network_streaming_stopplayback;
-	int network_streaming_stopsectionsd;
-	char network_streamingserver[31];
-	char network_streamingserverport[10];
-
-	int vcr_recording;
-	char vcr_devicename[50];
+	int  recording_type;
+	int  recording_stopplayback;
+	int  recording_stopsectionsd;
+	char recording_server_ip[31];
+	char recording_server_port[10];
+	int  recording_server_wakeup;
+	char recording_server_mac[31];
+	char recording_vcr_devicename[50];
 
 	//key configuration
 	int key_tvradio_mode;

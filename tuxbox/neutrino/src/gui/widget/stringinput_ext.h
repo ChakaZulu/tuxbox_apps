@@ -175,5 +175,17 @@ class CDateInput : public CExtendedInput
 		char* getValue() {return value;}
 };
 
+//----------------------------------------------------------------------------------------------------
+
+class CMACInput : public CExtendedInput
+{
+	protected:
+		virtual void onBeforeExec();
+		virtual void onAfterExec();
+
+	public:
+		CMACInput(string Name, char* Value, string Hint_1 = "", string Hint_2 = "", CChangeObserver* Observ = NULL);
+};
+
 
 #endif

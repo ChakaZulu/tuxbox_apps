@@ -67,9 +67,9 @@ class CDHCPNotifier : public CChangeObserver
 class CRecordingNotifier : public CChangeObserver
 {
 	private:
-		CMenuForwarder* toDisable;
+		int *Recording_Type;
 	public:
-	CRecordingNotifier( CMenuForwarder*);
+	CRecordingNotifier( int* recording_type);
 	bool changeNotify(string OptionName, void*);
 };
 /*

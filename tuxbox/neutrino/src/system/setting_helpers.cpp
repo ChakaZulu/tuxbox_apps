@@ -117,15 +117,16 @@ bool CDHCPNotifier::changeNotify(string OptionName, void*)
 	return true;
 }
 
-CRecordingNotifier::CRecordingNotifier( CMenuForwarder* a1)
+CRecordingNotifier::CRecordingNotifier( int* recording_type)
 {
-	toDisable = a1;
+	Recording_Type = recording_type;
 }
 
 bool CRecordingNotifier::changeNotify(string OptionName, void*)
 {
 // something sucks here :(
 //	toDisable->setActive(g_settings.vcr_recording==0);
+	
 	return true;
 }
 

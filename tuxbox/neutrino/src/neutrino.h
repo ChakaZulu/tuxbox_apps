@@ -88,7 +88,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		int				lastMode;
 		bool				softupdate;
 		bool				fromflash;
-		int				streamstatus;
+		int				recordingstatus;
 		bool				record_mode;
 
 		long long 			standby_pressed_at;
@@ -120,7 +120,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void setupColors_classic();
 		void setupColors_neutrino();
 		void setupNetwork( bool force= false );
-		void setupStreamingServer(void);
+		void setupRecordingDevice(void);
 		void testNetwork();
 		void showNetwork();
 
@@ -150,7 +150,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void InitNetworkSettings(CMenuWidget &networkSettings);
 		void AddFontSettingItem(CMenuWidget &fontSettings, string menuname, char *value);
 		void InitFontSettings(CMenuWidget &fontSettings,CMenuWidget &fontSettings_Channellist ,CMenuWidget &fontSettings_Eventlist , CMenuWidget &fontSettings_Infobar ,CMenuWidget &fontSettings_Epg );
-		void InitStreamingSettings(CMenuWidget &streamingSettings);
+		void InitRecordingSettings(CMenuWidget &recordingSettings);
 		void InitScreenSettings(CMenuWidget &);
 		void InitMiscSettings(CMenuWidget &);
 		void InitScanSettings(CMenuWidget &);

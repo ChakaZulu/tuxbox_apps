@@ -105,7 +105,6 @@ class CVCRControl
 		{
 			public:
 				int sock_fd;
-				int deviceID;
 				std::string Name;
 				CVCRDevices deviceType;
 				CVCRStates  deviceState;
@@ -114,7 +113,7 @@ class CVCRControl
 				virtual bool Pause(){return false;};
 				virtual bool Resume(){return false;};
 				virtual bool IsAvailable(){return false;};
-				CDevice(int deviceid, CVCRDevices devicetype){deviceID = deviceid; deviceType = devicetype; deviceState = CMD_VCR_STOP;};
+				CDevice(CVCRDevices devicetype){deviceType = devicetype; deviceState = CMD_VCR_STOP;};
 				virtual ~CDevice(){};
 		};
 
@@ -128,7 +127,7 @@ class CVCRControl
 				virtual bool Pause();
 				virtual bool Resume();
 				virtual bool IsAvailable(){return true;};
-				CVCRDevice(int deviceid) : CDevice(deviceid,DEVICE_VCR) {};
+				CVCRDevice() : CDevice(DEVICE_VCR) {};
 				virtual ~CVCRDevice(){};
 		};
 
@@ -160,10 +159,10 @@ class CVCRControl
 				virtual bool Pause(){return false;};
 				virtual bool Resume(){return false;};
 				virtual bool IsAvailable(){return true;};
-				CServerDevice(int deviceid) : CDevice(deviceid,DEVICE_SERVER) {};			
+				CServerDevice() : CDevice(DEVICE_SERVER) {};			
 				virtual ~CServerDevice(){};
 		};
-		typedef std::map<int, CDevice*> CDeviceMap;
+//		typedef std::map<int, CDevice*> CDeviceMap;
 	
 
 	public:
@@ -171,25 +170,24 @@ class CVCRControl
 		~CVCRControl();
 		static CVCRControl* getInstance();
 
-		CDeviceMap Devices;
+//		CDeviceMap Devices;
+		CDevice *Device;
 		
-		int registerDevice(CVCRDevices deviceType, CDeviceInfo *deviceInfo);
-		int registeredDevices(){return Devices.size();};
-		void setDeviceOptions(int deviceID, CDeviceInfo *deviceInfo);
+		bool registerDevice(CVCRDevices deviceType, CDeviceInfo *deviceInfo);
+		void unregisterDevice();
 
-		int getDeviceState(int deviceid = 0){ if (Devices[deviceid] != NULL) return Devices[deviceid]->deviceState; else return CMD_VCR_UNKNOWN;};
-		bool Stop(int deviceID = 0){if(Devices[deviceID] != NULL) return Devices[deviceID]->Stop(); else return false;};
-		bool Record(CTimerd::EventInfo *eventinfo,int deviceID = 0)
+//		int registeredDevices(){return Devices.size();};
+		bool isDeviceRegistered(){return Device != NULL;};
+		void setDeviceOptions(CDeviceInfo *deviceInfo);
+
+		int getDeviceState(){return Device->deviceState;};
+		bool Stop(){return Device->Stop();};
+		bool Record(CTimerd::EventInfo *eventinfo)
 		{
-			if(Devices[deviceID] != NULL) 
-			{
-				printf("eventinfo->channel_id: %08x, eventinfo->epgID: %llx, apid %x\n", eventinfo->channel_id, eventinfo->epgID, eventinfo->apid);
-				return Devices[deviceID]->Record(eventinfo->channel_id, eventinfo->epgID, eventinfo->apid); 
-			}
-			else return false;
+			return Device->Record(eventinfo->channel_id, eventinfo->epgID, eventinfo->apid); 
 		};
-		bool Pause(int deviceID = 0){if(Devices[deviceID] != NULL) return Devices[deviceID]->Pause(); else return false;};
-		bool Resume(int deviceID = 0){if(Devices[deviceID] != NULL) return Devices[deviceID]->Resume(); else return false;};
+		bool Pause(){return Device->Pause();};
+		bool Resume(){return Device->Resume();};
 };
 
 

@@ -437,16 +437,15 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.network_defaultgateway, configfile.getString( "network_defaultgateway", "" ).c_str() );
 	strcpy( g_settings.network_nameserver, configfile.getString( "network_nameserver", "" ).c_str() );
 
-	//streaming
-	g_settings.network_streaming_use = configfile.getInt32( "network_streaming_use", 0 );
-	g_settings.network_streaming_stopplayback = configfile.getInt32( "network_streaming_stopplayback", 0 );
-	g_settings.network_streaming_stopsectionsd = configfile.getInt32( "network_streaming_stopsectionsd", 1 );
-	strcpy( g_settings.network_streamingserver, configfile.getString( "network_streamingserver", "10.10.10.10").c_str() );
-	strcpy( g_settings.network_streamingserverport, configfile.getString( "network_streamingserverport", "4000").c_str() );
-
-	//vcr per ir
-	g_settings.vcr_recording = configfile.getInt32( "vcr_recording", 0 );
-	strcpy( g_settings.vcr_devicename, configfile.getString( "vcr_devicename", "ORION").c_str() );
+	//streaming (server + vcr)
+	g_settings.recording_type = configfile.getInt32( "recording_type", 0 );
+	g_settings.recording_stopplayback = configfile.getInt32( "recording_stopplayback", 0 );
+	g_settings.recording_stopsectionsd = configfile.getInt32( "recording_stopsectionsd", 1 );
+	strcpy( g_settings.recording_server_ip, configfile.getString( "recording_server_ip", "10.10.10.10").c_str() );
+	strcpy( g_settings.recording_server_port, configfile.getString( "recording_server_port", "4000").c_str() );	
+	g_settings.recording_server_wakeup = configfile.getInt32( "recording_server_wakeup", 0 );
+	strcpy( g_settings.recording_server_mac, configfile.getString( "recording_server_mac", "11:22:33:44:55:66").c_str() );
+	strcpy( g_settings.recording_vcr_devicename, configfile.getString( "recording_vcr_devicename", "ORION").c_str() );
 
 	//rc-key configuration
 	g_settings.key_tvradio_mode = configfile.getInt32( "key_tvradio_mode", CRCInput::RC_nokey );
@@ -633,16 +632,15 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString( "network_defaultgateway", g_settings.network_defaultgateway );
 	configfile.setString( "network_nameserver", g_settings.network_nameserver );
 
-	//streaming
-	configfile.setInt32( "network_streaming_use", g_settings.network_streaming_use );
-	configfile.setInt32( "network_streaming_stopplayback", g_settings.network_streaming_stopplayback );
-	configfile.setInt32( "network_streaming_stopsectionsd", g_settings.network_streaming_stopsectionsd );
-	configfile.setString( "network_streamingserver", g_settings.network_streamingserver );
-	configfile.setString( "network_streamingserverport", g_settings.network_streamingserverport );
-
-	//vcr per ir
-	configfile.setInt32( "vcr_recording", g_settings.vcr_recording );
-	configfile.setString( "vcr_devicename", g_settings.vcr_devicename );
+	//recording (server + vcr)
+	configfile.setInt32 ( "recording_type", g_settings.recording_type );
+	configfile.setInt32 ( "recording_stopplayback", g_settings.recording_stopplayback );
+	configfile.setInt32 ( "recording_stopsectionsd", g_settings.recording_stopsectionsd );
+	configfile.setString( "recording_server_ip", g_settings.recording_server_ip );
+	configfile.setString( "recording_server_port", g_settings.recording_server_port );
+	configfile.setInt32 ( "recording_server_wakeup", g_settings.recording_server_wakeup );
+	configfile.setString( "recording_server_mac", g_settings.recording_server_mac );
+	configfile.setString( "recording_vcr_devicename", g_settings.recording_vcr_devicename );
 
 	//rc-key configuration
 	configfile.setInt32( "key_tvradio_mode", g_settings.key_tvradio_mode );
@@ -819,7 +817,6 @@ void CNeutrinoApp::CmdParser(int argc, char **argv)
 {
 	softupdate = false;
 	fromflash = false;
-//	g_settings.network_streaming_use = 0;
 
 #define FONTNAME "Micron"
 #define FONTFILE "micron"
@@ -963,7 +960,7 @@ void CNeutrinoApp::ClearFrameBuffer()
 }
 
 void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings,  CMenuWidget &audioSettings, CMenuWidget &parentallockSettings,
-										  CMenuWidget &networkSettings, CMenuWidget &streamingSettings, CMenuWidget &colorSettings, CMenuWidget &lcdSettings,
+										  CMenuWidget &networkSettings, CMenuWidget &recordingSettings, CMenuWidget &colorSettings, CMenuWidget &lcdSettings,
 										  CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings, CMenuWidget &miscSettings, 
 										  CMenuWidget &service, CMenuWidget &fontSettings)
 {
@@ -979,16 +976,6 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainMenu.addItem( new CMenuForwarder("mainmenu.shutdown", true, "", this, "shutdown", true, CRCInput::RC_standby, "power.raw") );
 	mainMenu.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
-/*
-	if(g_settings.network_streaming_use)
-	{
-		CMenuOptionChooser* oj = new CMenuOptionChooser("mainmenu.streaming", &streamstatus, true, this );
-		oj->addOption(0, "mainmenu.streaming_start");
-		oj->addOption(1, "mainmenu.streaming_stop");
-		mainMenu.addItem( oj );
-		mainMenu.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	}
-*/
 	mainMenu.addItem( new CMenuForwarder("mainmenu.settings", true, "", &mainSettings) );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.service", true, "", &service) );
 //	mainMenu.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
@@ -1004,7 +991,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainSettings.addItem( new CMenuForwarder("mainsettings.audio", true, "", &audioSettings) );
 	mainSettings.addItem( new CLockedMenuForwarder("parentallock.parentallock", g_settings.parentallock_pincode, true, "", &parentallockSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.network", true, "", &networkSettings) );
-	mainSettings.addItem( new CMenuForwarder("mainsettings.streaming", true, "", &streamingSettings) );
+	mainSettings.addItem( new CMenuForwarder("mainsettings.recording", true, "", &recordingSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.language", true, "", &languageSettings ) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.colors", true,"", &colorSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.lcd", true,"", &lcdSettings) );
@@ -1480,54 +1467,59 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	networkSettings.addItem( m5);
 }
 
-void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
+void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 {
-	dprintf(DEBUG_DEBUG, "init streamingsettings\n");
-	streamingSettings.addItem( new CMenuSeparator() );
-	streamingSettings.addItem( new CMenuForwarder("menu.back") );
-	streamingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	recordingSettings.addItem( new CMenuSeparator() );
+	recordingSettings.addItem( new CMenuForwarder("menu.back") );
+	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
-	CMenuOptionChooser* oj = new CMenuOptionChooser("streamingmenu.usestreamserver", &g_settings.network_streaming_use, true);
+	CMenuOptionChooser* oj = new CMenuOptionChooser("recordingmenu.recording_type", &g_settings.recording_type, true, this);
+	oj->addOption(0, "recordingmenu.off");
+	oj->addOption(1, "recordingmenu.server");
+	oj->addOption(2, "recordingmenu.vcr");
+	recordingSettings.addItem( oj );
+
+	CIPInput*   recordingSettings_server_ip= new CIPInput("recordingmenu.server_ip",  g_settings.recording_server_ip, "ipsetup.hint_1", "ipsetup.hint_2");
+	CStringInput*  recordingSettings_server_port= new CStringInput("recordingmenu.server_port", g_settings.recording_server_port, 6, "ipsetup.hint_1", "ipsetup.hint_2","0123456789 ");
+
+
+	recordingSettings.addItem( new CMenuForwarder("recordingmenu.server_ip", true, g_settings.recording_server_ip,recordingSettings_server_ip));
+	recordingSettings.addItem( new CMenuForwarder("recordingmenu.server_port", true, g_settings.recording_server_port,recordingSettings_server_port));
+
+	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+
+	oj = new CMenuOptionChooser("recordingmenu.server_wakeup", &g_settings.recording_server_wakeup, true);
 	oj->addOption(0, "options.off");
 	oj->addOption(1, "options.on");
-	streamingSettings.addItem( oj );
+	recordingSettings.addItem( oj );
 
-	CIPInput*   streamingSettings_streamingserver= new CIPInput("streamingmenu.streamingserver",  g_settings.network_streamingserver, "ipsetup.hint_1", "ipsetup.hint_2");
-	CStringInput*  streamingSettings_streamingserverport= new CStringInput("streamingmenu.streamingserverport", g_settings.network_streamingserverport, 6, "ipsetup.hint_1", "ipsetup.hint_2","0123456789 ");
 
-	streamingSettings.addItem( new CMenuForwarder("streamingmenu.streamingserver", true, g_settings.network_streamingserver,streamingSettings_streamingserver));
-	streamingSettings.addItem( new CMenuForwarder("streamingmenu.streamingserverport", true, g_settings.network_streamingserverport,streamingSettings_streamingserverport));
+	CMACInput *recordingSettings_server_mac= new CMACInput("recordingmenu.server_mac",  g_settings.recording_server_mac, "ipsetup.hint_1", "ipsetup.hint_2");
+	recordingSettings.addItem( new CMenuForwarder("recordingmenu.server_mac", true, g_settings.recording_server_mac,recordingSettings_server_mac));
 
-	streamingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
-	oj = new CMenuOptionChooser("streamingmenu.stopplayback", &g_settings.network_streaming_stopplayback, true);
+	oj = new CMenuOptionChooser("recordingmenu.stopplayback", &g_settings.recording_stopplayback, true);
 	oj->addOption(0, "options.off");
 	oj->addOption(1, "options.on");
-	streamingSettings.addItem( oj );
+	recordingSettings.addItem( oj );
 
-	oj = new CMenuOptionChooser("streamingmenu.stopsectionsd", &g_settings.network_streaming_stopsectionsd, true);
+	oj = new CMenuOptionChooser("recordingmenu.stopsectionsd", &g_settings.recording_stopsectionsd, true);
 	oj->addOption(0, "options.off");
 	oj->addOption(1, "options.on");
-	streamingSettings.addItem( oj );
+	recordingSettings.addItem( oj );
 
-	streamingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
-	CStringInput*  streamingSettings_vcr_devicename= new CStringInputSMS("streamingmenu.vcr_devicename", g_settings.vcr_devicename, 20, "ipsetup.hint_1", "ipsetup.hint_2","abcdefghijklmnopqrstuvwxyz0123456789-. ");
-	CMenuForwarder *m1 = new CMenuForwarder("streamingmenu.vcr_devicename",g_settings.vcr_recording==1, g_settings.vcr_devicename, streamingSettings_vcr_devicename );
-	CRecordingNotifier* recordingNotifier = new CRecordingNotifier(m1);
+	CStringInput*  recordingSettings_vcr_devicename= new CStringInputSMS("recordingmenu.vcr_devicename", g_settings.recording_vcr_devicename, 20, "ipsetup.hint_1", "ipsetup.hint_2","abcdefghijklmnopqrstuvwxyz0123456789-. ");
+//	CMenuForwarder *m1 = new CMenuForwarder("recordingmenu.vcr_devicename",true, g_settings.recording_vcr_devicename, recordingSettings_vcr_devicename );
+	recordingSettings.addItem( new CMenuForwarder("recordingmenu.vcr_devicename", true, g_settings.recording_vcr_devicename,recordingSettings_vcr_devicename));
 
-	oj = new CMenuOptionChooser("streamingmenu.vcr_recording", &g_settings.vcr_recording, true, recordingNotifier);
-	oj->addOption(0, "options.off");
-	oj->addOption(1, "options.on");
-	streamingSettings.addItem( oj );
+	CStringInput *timerSettings_record_safety_time= new CStringInput("timersettings.record_safety_time", g_settings.record_safety_time, 2, "ipsetup.hint_1", "ipsetup.hint_2","0123456789 ");
+	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "timersettings.separator") );
+	recordingSettings.addItem( new CMenuForwarder("timersettings.record_safety_time", true, g_settings.record_safety_time, timerSettings_record_safety_time ));
 
-	streamingSettings.addItem( new CMenuForwarder("streamingmenu.vcr_devicename", true, g_settings.vcr_devicename,streamingSettings_vcr_devicename));
-
-	CStringInput   *timerSettings_record_safety_time= new CStringInput("timersettings.record_safety_time", g_settings.record_safety_time, 2, "ipsetup.hint_1", "ipsetup.hint_2","0123456789 ");
-	streamingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "timersettings.separator") );
-	streamingSettings.addItem( new CMenuForwarder("timersettings.record_safety_time", true, g_settings.record_safety_time, timerSettings_record_safety_time ));
-
-	streamstatus = 0;
+	recordingstatus = 0;
 
 }
 
@@ -1880,12 +1872,12 @@ void CNeutrinoApp::ShowStreamFeatures()
 	StreamFeatureSelector.addItem( new CMenuForwarder("favorites.menueadd", true, "",
 																	  new CFavorites, id, true, CRCInput::RC_green, "gruen.raw"), false );
 
-	// start/stop streaming
-	if(g_settings.network_streaming_use || g_settings.vcr_recording)
+	// start/stop recording
+	if(g_settings.recording_type > 0)
 	{
-		CMenuOptionChooser* oj = new CMenuOptionChooser("mainmenu.streaming", &streamstatus, true, this, true, CRCInput::RC_red, "rot.raw" );
-		oj->addOption(0, "mainmenu.streaming_start");
-		oj->addOption(1, "mainmenu.streaming_stop");
+		CMenuOptionChooser* oj = new CMenuOptionChooser("mainmenu.recording", &recordingstatus, true, this, true, CRCInput::RC_red, "rot.raw" );
+		oj->addOption(0, "mainmenu.recording_start");
+		oj->addOption(1, "mainmenu.recording_stop");
 		StreamFeatureSelector.addItem( oj );
 		StreamFeatureSelector.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	}
@@ -1919,27 +1911,27 @@ void CNeutrinoApp::InitZapper()
 	}
 }
 
-void CNeutrinoApp::setupStreamingServer(void)
+void CNeutrinoApp::setupRecordingDevice(void)
 {
-	if(g_settings.vcr_recording)
-	{
-		CVCRControl::CVCRDeviceInfo * info = new CVCRControl::CVCRDeviceInfo;
-		info->Name = g_settings.vcr_devicename;
-		vcrControl->registerDevice(CVCRControl::DEVICE_VCR,info);
-
-	}
-	else
+	if(g_settings.recording_type == 1)
 	{
 		CVCRControl::CServerDeviceInfo * info = new CVCRControl::CServerDeviceInfo;
 		int port;
-		sscanf(g_settings.network_streamingserverport, "%d", &port);
-		info->ServerAddress = g_settings.network_streamingserver;
+		sscanf(g_settings.recording_server_port, "%d", &port);
+		info->ServerAddress = g_settings.recording_server_ip;
 		info->ServerPort = port;
-		info->StopPlayBack = (g_settings.network_streaming_stopplayback == 1);
-		info->StopSectionsd = (g_settings.network_streaming_stopsectionsd == 1);
+		info->StopPlayBack = (g_settings.recording_stopplayback == 1);
+		info->StopSectionsd = (g_settings.recording_stopsectionsd == 1);
 		info->Name = "ngrab";
 		vcrControl->registerDevice(CVCRControl::DEVICE_SERVER,info);
 		delete info;
+	}
+	else if(g_settings.recording_type == 2)
+	{
+		CVCRControl::CVCRDeviceInfo * info = new CVCRControl::CVCRDeviceInfo;
+		info->Name = g_settings.recording_vcr_devicename;
+		vcrControl->registerDevice(CVCRControl::DEVICE_VCR,info);
+
 	}
 }
 
@@ -2012,9 +2004,9 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	setupNetwork();
 
-	// setup streaming server
-	if(g_settings.network_streaming_use || g_settings.vcr_recording)
-		setupStreamingServer();
+	// setup recording device
+	if(g_settings.recording_type > 0)
+		setupRecordingDevice();
 	channelList = new CChannelList( "channellist.head" );
 
 	dprintf( DEBUG_NORMAL, "menue setup\n");
@@ -2026,7 +2018,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget audioSettings("audiomenu.head", "audio.raw");
 	CMenuWidget parentallockSettings("parentallock.parentallock", "lock.raw", 500);
 	CMenuWidget networkSettings("networkmenu.head", "network.raw");
-	CMenuWidget streamingSettings("streamingmenu.head", "streaming.raw");
+	CMenuWidget recordingSettings("recordingmenu.head", "recording.raw");
 	CMenuWidget colorSettings("colormenu.head", "colors.raw");
 	CMenuWidget fontSettings("fontmenu.head", "colors.raw");
 	CMenuWidget lcdSettings("lcdmenu.head", "lcd.raw");
@@ -2041,7 +2033,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget fontSettings_Epg("fontmenu.epg", "colors.raw");
 
 
-	InitMainMenu(mainMenu, mainSettings, audioSettings, parentallockSettings, networkSettings, streamingSettings,
+	InitMainMenu(mainMenu, mainSettings, audioSettings, parentallockSettings, networkSettings, recordingSettings,
 					 colorSettings, lcdSettings, keySettings, videoSettings, languageSettings, miscSettings, 
 					 service, fontSettings);
 
@@ -2133,7 +2125,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	InitNetworkSettings(networkSettings);
 
 	//streaming Setup
-	InitStreamingSettings(streamingSettings);
+	InitRecordingSettings(recordingSettings);
 
 	//font Setup
 	InitFontSettings(fontSettings, fontSettings_Channellist, fontSettings_Eventlist, fontSettings_Infobar, fontSettings_Epg);
@@ -2281,12 +2273,12 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				if( mode == mode_scart )
 				{
 					//wenn Aufnahme dann stoppen
-					if(CVCRControl::getInstance()->registeredDevices() > 0)
+					if(CVCRControl::getInstance()->isDeviceRegistered())
 					{
 						if(CVCRControl::getInstance()->getDeviceState() == CVCRControl::CMD_VCR_RECORD || CVCRControl::getInstance()->getDeviceState() == CVCRControl::CMD_VCR_PAUSE)
 						{
 							CVCRControl::getInstance()->Stop();
-							streamstatus=0;
+							recordingstatus=0;
 						}
 					}
 					// Scart-Mode verlassen
@@ -2446,17 +2438,17 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	}
 	else if(msg == NeutrinoMessages::RECORD_START)
 	{
-		if(CVCRControl::getInstance()->registeredDevices() > 0)
+		if(CVCRControl::getInstance()->isDeviceRegistered())
 		{
 			CVCRControl::CServerDeviceInfo serverinfo;
-			serverinfo.StopPlayBack = (g_settings.network_streaming_stopplayback == 1);
-			serverinfo.StopSectionsd = (g_settings.network_streaming_stopsectionsd == 1);
-			CVCRControl::getInstance()->setDeviceOptions(0,&serverinfo);
+			serverinfo.StopPlayBack = (g_settings.recording_stopplayback == 1);
+			serverinfo.StopSectionsd = (g_settings.recording_stopsectionsd == 1);
+			CVCRControl::getInstance()->setDeviceOptions(&serverinfo);
 
 			if(CVCRControl::getInstance()->Record((CTimerd::EventInfo *) data))
-				streamstatus = 1;
+				recordingstatus = 1;
 			else
-				streamstatus = 0;
+				recordingstatus = 0;
 		}
 		else
 			printf("Keine vcr Devices registriert\n");
@@ -2464,12 +2456,12 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	}
 	else if( msg == NeutrinoMessages::RECORD_STOP)
 	{
-		if(CVCRControl::getInstance()->registeredDevices() > 0)
+		if(CVCRControl::getInstance()->isDeviceRegistered())
 		{
 			if(CVCRControl::getInstance()->getDeviceState() == CVCRControl::CMD_VCR_RECORD || CVCRControl::getInstance()->getDeviceState() == CVCRControl::CMD_VCR_PAUSE)
 			{
 				CVCRControl::getInstance()->Stop();
-				streamstatus=0;
+				recordingstatus=0;
 			}
 			else
 				printf("falscher state\n");
@@ -3010,13 +3002,21 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 
 /**************************************************************************************
 *                                                                                     *
-*          changeNotify - features menu streaming server start / stop                 *
+*          changeNotify - features menu recording start / stop                        *
 *                                                                                     *
 **************************************************************************************/
 bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 {
 	printf("OptionName: %s\n",OptionName.c_str());
-	if(OptionName.substr(0,9).compare("fontsize.") == 0)
+	if(OptionName.compare("recordingmenu.recording_type") == 0)
+	{
+		if(g_settings.recording_type == 0) 
+			if(vcrControl->isDeviceRegistered())
+				vcrControl->unregisterDevice();
+		else
+			setupRecordingDevice();
+	}
+	else if(OptionName.substr(0,9).compare("fontsize.") == 0)
 	{
 		SetupFonts();
 	}
@@ -3024,22 +3024,22 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 	{
 		CTimerd::EventInfo eventinfo;
 
-		if(CVCRControl::getInstance()->registeredDevices() > 0)
+		if(CVCRControl::getInstance()->isDeviceRegistered())
 		{
-			if(streamstatus == 1)
+			if(recordingstatus == 1)
 			{
 				eventinfo.channel_id = g_RemoteControl->current_channel_id;
 				eventinfo.epgID = g_RemoteControl->current_EPGid;
 				eventinfo.apid = 0;
 
 				CVCRControl::CServerDeviceInfo serverinfo;
-				serverinfo.StopPlayBack = (g_settings.network_streaming_stopplayback == 1);
-				serverinfo.StopSectionsd = (g_settings.network_streaming_stopsectionsd == 1);
-				CVCRControl::getInstance()->setDeviceOptions(0,&serverinfo);
+				serverinfo.StopPlayBack = (g_settings.recording_stopplayback == 1);
+				serverinfo.StopSectionsd = (g_settings.recording_stopsectionsd == 1);
+				CVCRControl::getInstance()->setDeviceOptions(&serverinfo);
 
 				if(CVCRControl::getInstance()->Record(&eventinfo)==false)
 				{
-					streamstatus=0;
+					recordingstatus=0;
 					return false;
 				}
 			}
@@ -3065,7 +3065,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.346 2002/10/20 00:20:36 Zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.347 2002/10/22 10:46:57 dirch Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
