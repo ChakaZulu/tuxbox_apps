@@ -5,6 +5,7 @@
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
+ *    V1.27: show cache-status on lcd                                         *
  *    V1.26: ups, forgot this one                                             *
  *    V1.25: fixed colors (color 0 transparent)                               *
  *    V1.2x: some mods by Homar                                               *
@@ -42,21 +43,15 @@ void plugin_exec(PluginParam *par)
 {
 	//show versioninfo
 
-		printf("\nTuxTxt 1.26 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
+		printf("\nTuxTxt 1.27 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
 
 	//get params
 
-		vtxtpid = -1;
-		fb = -1;
-		rc = -1;
-		sx = -1;
-		ex = -1;
-		sy = -1;
-		ey = -1;
+		vtxtpid = fb = lcd = rc = sx = ex = sy = ey = -1;
 
 		for(; par; par = par->next)
 		{
-			if (!strcmp(par->id, P_ID_VTXTPID))
+			if(!strcmp(par->id, P_ID_VTXTPID))
 			{
 				vtxtpid = atoi(par->val);
 			}
@@ -64,29 +59,33 @@ void plugin_exec(PluginParam *par)
 			{
 				fb = atoi(par->val);
 			}
-			else if (!strcmp(par->id, P_ID_RCINPUT))
+			else if(!strcmp(par->id, P_ID_LCD))
+			{
+				lcd = atoi(par->val);
+			}
+			else if(!strcmp(par->id, P_ID_RCINPUT))
 			{
 				rc = atoi(par->val);
 			}
-			else if (!strcmp(par->id, P_ID_OFF_X))
+			else if(!strcmp(par->id, P_ID_OFF_X))
 			{
 				sx = atoi(par->val);
 			}
-			else if (!strcmp(par->id, P_ID_END_X))
+			else if(!strcmp(par->id, P_ID_END_X))
 			{
 				ex = atoi(par->val);
 			}
-			else if (!strcmp(par->id, P_ID_OFF_Y))
+			else if(!strcmp(par->id, P_ID_OFF_Y))
 			{
 				sy = atoi(par->val);
 			}
-			else if (!strcmp(par->id, P_ID_END_Y))
+			else if(!strcmp(par->id, P_ID_END_Y))
 			{
 				ey = atoi(par->val);
 			}
 		}
 
-		if(vtxtpid == -1 || fb == -1 || rc == -1 || sx == -1 || ex == -1 || sy == -1 || ey == -1)
+		if(vtxtpid == -1 || fb == -1 || lcd == -1 || rc == -1 || sx == -1 || ex == -1 || sy == -1 || ey == -1)
 		{
 			printf("TuxTxt <Invalid Param(s)>\n");
 			return;
@@ -174,6 +173,9 @@ void plugin_exec(PluginParam *par)
 									break;
 
 					case RC_DBOX:	ConfigMenu();
+									break;
+
+					case RC_STANDBY:ShowCacheStatus();
 				}
 			}
 
@@ -317,6 +319,8 @@ int Init()
 		page_atrb[32] = transp<<4 | transp;
 
 		inputcounter = 2;
+
+		cached_pages = 0;
 
 		current_page	= -1;
 		current_subpage	= -1;
@@ -848,6 +852,8 @@ void ConfigMenu()
 													page_atrb[32] = transp<<4 | transp;
 
 													inputcounter = 2;
+
+													cached_pages = 0;
 
 													current_page	= -1;
 													current_subpage	= -1;
@@ -2076,6 +2082,55 @@ void CopyBB2FB()
 }
 
 /******************************************************************************
+ * ShowCacheStatus                                                            *
+ ******************************************************************************/
+
+void ShowCacheStatus()
+{
+	int  x, y, show_pages;
+	char lcd_backup[120*64 / 8], lcd_backbuffer[120*64 / 8];
+
+	//backup lcd
+
+		read(lcd, &lcd_backup, sizeof(lcd_backup));
+
+	//show status
+
+		show_pages = cached_pages;
+
+		printf("TuxTxt <ShowCacheStatus => %d pages>\n", show_pages);
+
+		memset(&lcd_backbuffer, 0, sizeof(lcd_backbuffer));
+
+		for(y = 0; y < 64; y++)
+		{
+			for(x = 0; x < 120; x++)
+			{
+				lcd_backbuffer[x + (y/8)*120] |= lcd_layout[x + y*120] << (y%8);
+			}
+		}
+
+		for(y = 0; y < 35; y++)
+		{
+			for(x = 0; x < 21; x++)
+			{
+				lcd_backbuffer[x+9  + ((y+20)/8)*120] |= digits[x + y*21 + show_pages/1000*21*35] << ((y+20)%8);
+				lcd_backbuffer[x+36 + ((y+20)/8)*120] |= digits[x + y*21 + show_pages%1000/100*21*35] << ((y+20)%8);
+				lcd_backbuffer[x+63 + ((y+20)/8)*120] |= digits[x + y*21 + show_pages%100/10*21*35] << ((y+20)%8);
+				lcd_backbuffer[x+90 + ((y+20)/8)*120] |= digits[x + y*21 + show_pages%10*21*35] << ((y+20)%8);
+			}
+		}
+
+		write(lcd, &lcd_backbuffer, sizeof(lcd_backbuffer));
+
+		sleep(3);
+
+	//restore lcd
+
+		write(lcd, &lcd_backup, sizeof(lcd_backup));
+}
+
+/******************************************************************************
  * DecodePage                                                                 *
  ******************************************************************************/
 
@@ -2333,79 +2388,82 @@ int GetRCCode()
 					{
 						switch(RCCode)
 						{
-							case RC1_UP:	RCCode = RC_UP;
-											break;
+							case RC1_UP:		RCCode = RC_UP;
+												break;
 
-							case RC1_DOWN:	RCCode = RC_DOWN;
-											break;
+							case RC1_DOWN:		RCCode = RC_DOWN;
+												break;
 
-							case RC1_RIGHT:	RCCode = RC_RIGHT;
-											break;
+							case RC1_RIGHT:		RCCode = RC_RIGHT;
+												break;
 
-							case RC1_LEFT:	RCCode = RC_LEFT;
-											break;
+							case RC1_LEFT:		RCCode = RC_LEFT;
+												break;
 
-							case RC1_OK:	RCCode = RC_OK;
-											break;
+							case RC1_OK:		RCCode = RC_OK;
+												break;
 
-							case RC1_0:		RCCode = RC_0;
-											break;
+							case RC1_0:			RCCode = RC_0;
+												break;
 
-							case RC1_1:		RCCode = RC_1;
-											break;
+							case RC1_1:			RCCode = RC_1;
+												break;
 
-							case RC1_2:		RCCode = RC_2;
-											break;
+							case RC1_2:			RCCode = RC_2;
+												break;
 
-							case RC1_3:		RCCode = RC_3;
-											break;
+							case RC1_3:			RCCode = RC_3;
+												break;
 
-							case RC1_4:		RCCode = RC_4;
-											break;
+							case RC1_4:			RCCode = RC_4;
+												break;
 
-							case RC1_5:		RCCode = RC_5;
-											break;
+							case RC1_5:			RCCode = RC_5;
+												break;
 
-							case RC1_6:		RCCode = RC_6;
-											break;
+							case RC1_6:			RCCode = RC_6;
+												break;
 
-							case RC1_7:		RCCode = RC_7;
-											break;
+							case RC1_7:			RCCode = RC_7;
+												break;
 
-							case RC1_8:		RCCode = RC_8;
-											break;
+							case RC1_8:			RCCode = RC_8;
+												break;
 
-							case RC1_9:		RCCode = RC_9;
-											break;
+							case RC1_9:			RCCode = RC_9;
+												break;
 
-							case RC1_RED:	RCCode = RC_RED;
-											break;
+							case RC1_RED:		RCCode = RC_RED;
+												break;
 
-							case RC1_GREEN:	RCCode = RC_GREEN;
-											break;
+							case RC1_GREEN:		RCCode = RC_GREEN;
+												break;
 
-							case RC1_YELLOW:RCCode = RC_YELLOW;
-											break;
+							case RC1_YELLOW:	RCCode = RC_YELLOW;
+												break;
 
-							case RC1_BLUE:	RCCode = RC_BLUE;
-											break;
+							case RC1_BLUE:		RCCode = RC_BLUE;
+												break;
 
-							case RC1_PLUS:	RCCode = RC_PLUS;
-											break;
+							case RC1_PLUS:		RCCode = RC_PLUS;
+												break;
 
-							case RC1_MINUS:	RCCode = RC_MINUS;
-											break;
+							case RC1_MINUS:		RCCode = RC_MINUS;
+												break;
 
-							case RC1_MUTE:	RCCode = RC_MUTE;
-											break;
+							case RC1_MUTE:		RCCode = RC_MUTE;
+												break;
 
-							case RC1_HELP:	RCCode = RC_HELP;
-											break;
+							case RC1_HELP:		RCCode = RC_HELP;
+												break;
 
-							case RC1_DBOX:	RCCode = RC_DBOX;
-											break;
+							case RC1_DBOX:		RCCode = RC_DBOX;
+												break;
 
-							case RC1_HOME:	RCCode = RC_HOME;
+							case RC1_HOME:		RCCode = RC_HOME;
+												break;
+
+							case RC1_STANDBY:	RCCode = RC_STANDBY;
 						}
 					}
 					else
@@ -2558,6 +2616,7 @@ void *CacheThread(void *arg)
 								{
 									cachetable[current_page][current_subpage] = malloc(PAGESIZE);
 									memset(cachetable[current_page][current_subpage], ' ', PAGESIZE);
+									cached_pages++;
 								}
 
 							//store current subpage for this page
