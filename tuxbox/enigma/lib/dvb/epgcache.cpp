@@ -165,73 +165,76 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 			__u16 event_id = HILO(eit_event->event_id);
 //			eDebug("event_id is %d sid is %04x", event_id, service.sid);
 
-// search in eventmap
-			eventMap::iterator it =
-				servicemap.first.find(event_id);
-
-			// entry with this event_id is already exist ?
-			if ( it != servicemap.first.end() )
-			{
-				if ( source > it->second->type )  // update needed ?
-					goto next; // when not.. the skip this entry
-// search this event in timemap
-				timeMap::iterator It_tmp = 
-					servicemap.second.find(it->second->getStartTime());
-
-				if ( It_tmp != servicemap.second.end() )
-				{
-					// exempt memory
-					delete it->second;
-					// delete the found record from eventmap
-					servicemap.first.erase(it);
-					prevEventIt=servicemap.first.end();
-					// delete the found record from timemap
-					servicemap.second.erase(It_tmp);
-					prevTimeIt=servicemap.second.end();
-				}
-				else // error, such should not be!!!
-					eFatal("[EPGC]!!!! event not found in timemap");
-			}
-			
 // search in timemap
-			timeMap::iterator It =
+			timeMap::iterator tm_it =
 				servicemap.second.find(TM);
 
-			if ( It != servicemap.second.end() )
-			{
-				if ( source > It->second->type )  // update needed ?
-					goto next; // when not.. the skip this entry
-
-// search this time in eventmap
-				eventMap::iterator it_tmp = 
-					servicemap.first.find(It->second->getEventID());
-
-				if ( it_tmp != servicemap.first.end() )
-				{
-					// exempt memory
-					delete it_tmp->second;
-					// delete the found record from eventmap
-					servicemap.first.erase(it_tmp);
-					prevEventIt=servicemap.first.end();
-					// delete the found record from timemap
-					servicemap.second.erase(It);
-					prevTimeIt=servicemap.second.end();
-				}
-				else // error, such should not be!!!
-					eFatal("[EPGC]!!!! event not found in eventmap");
-			}
+// search in eventmap
+			eventMap::iterator ev_it =
+				servicemap.first.find(event_id);
 
 			eventData *evt = 0;
-			evt=new eventData(eit_event, eit_event_size, source);
-			prevEventIt=servicemap.first.insert( prevEventIt, std::pair<const __u16, eventData*>( event_id, evt) );
-			prevTimeIt=servicemap.second.insert( prevTimeIt, std::pair<const time_t, eventData*>( TM, evt ) );
-			
-			if ( servicemap.first.size() != servicemap.second.size() )
+
+			// entry with this event_id is already exist ?
+			if ( ev_it != servicemap.first.end() )
+			  // we can update existing entry in 
+			  // event_id map (do not rebuild sorted binary tree)
 			{
-				eFatal("(1)map sizes not equal :( sid %04x tsid %04x onid %04x size %d size2 %d, eventid %d, time_begin %d", 
-					service.sid, service.tsid, service.onid, 
-					servicemap.first.size(), servicemap.second.size(),
-					event_id, TM );
+				prevEventIt = ev_it;
+
+				if ( source > ev_it->second->type  )  // update needed ?
+					goto next; // when not.. then skip this entry
+
+				if ( tm_it == servicemap.second.end() ) 
+					// no entry with this start_time in timemap.. time changed ?
+				{
+					// when event_time has changed we must remove the old entry from time map
+					servicemap.second.erase(ev_it->second->getStartTime());
+					prevTimeIt=servicemap.second.end();
+				}
+				delete ev_it->second;  // release heap memory
+				ev_it->second=evt=new eventData(eit_event, eit_event_size, source);
+			}
+			else // we must add new event.. ( in maps this is really slow.. )
+			{
+				// event with same start-time already in timemap?
+				if ( tm_it != servicemap.second.end() )
+				{
+					if ( source > tm_it->second->type )
+					{
+//						eDebug("skip %d - %d", It->second->type, source );
+						goto next;
+					}
+//					eDebug("update %d -> %d", It->second->type, source );
+					// we must search this event in servicemap ( realy slow :( )
+					for (eventMap::iterator it(servicemap.first.begin())
+						; it != servicemap.first.end(); ++it )
+					{
+						if ( it->second->getStartTime() == TM )
+						{
+							delete it->second;  // release heap memory
+							servicemap.first.erase(it);  // remove from event map
+							prevEventIt=servicemap.first.end();
+							break;
+						}
+					}
+				}
+				evt=new eventData(eit_event, eit_event_size, source);
+				prevEventIt=servicemap.first.insert( prevEventIt, std::pair<const __u16, eventData*>( event_id, evt) );
+			}
+ 
+ // update only data pointer in timemap.. 
+			if ( tm_it != servicemap.second.end() ) 
+			{
+				tm_it->second=evt;
+				prevTimeIt=tm_it;
+			}
+			else  // add new entry to timemap
+			{
+#ifdef NVOD
+				if ( TM != 3599 )
+#endif
+					prevTimeIt=servicemap.second.insert( prevTimeIt, std::pair<const time_t, eventData*>( TM, evt ) );
 			}
 		}
 next:
@@ -355,14 +358,7 @@ void eEPGCache::cleanLoop()
 		{
 			for (timeMap::iterator It = DBIt->second.second.begin(); It != DBIt->second.second.end();)
 			{
-				if ( DBIt->second.first.size() != DBIt->second.second.size() )
-				{
-					eFatal("(2)map sizes not equal :( sid %04x tsid %04x onid %04x size %d size2 %d", 
-						DBIt->first.sid, DBIt->first.tsid, DBIt->first.onid, 
-						DBIt->second.first.size(), DBIt->second.second.size() );
-				}
 				cur_event = (*It->second).get();
-
 				duration = fromBCD( cur_event->duration_1)*3600 + fromBCD(cur_event->duration_2)*60 + fromBCD(cur_event->duration_3);
 
 				if ( now > (It->first+duration) )  // outdated normal entry (nvod references to)
@@ -371,34 +367,21 @@ void eEPGCache::cleanLoop()
 					eventMap::iterator b(DBIt->second.first.find(It->second->getEventID()));
 					if ( b != DBIt->second.first.end() )
 					{
-//						eDebug("old %d", DBIt->second.first.size() );
-						eDebug("[EPGC] delete old event (evmap)");
 						// release Heap Memory for this entry   (new ....)
-						delete b->second;
+						eDebug("[EPGC] delete old event (evmap)");
 						DBIt->second.first.erase(b);
-//						eDebug("new %d", DBIt->second.first.size() );
 					}
-					else
-						eFatal("[EPGC] event not found sid %04x tsid %04x onid %04x size %d size2 %d, eventid %d, time %d", 
-							DBIt->first.sid, DBIt->first.tsid, DBIt->first.onid, 
-							DBIt->second.first.size(), DBIt->second.second.size(),
-							It->second->getEventID(), It->second->getStartTime() );
 
 					// remove entry from timeMap
-//					eDebug("old %d", DBIt->second.second.size() );
+					eDebug("[EPGC] release heap mem");
+					delete It->second;
 					DBIt->second.second.erase(It);
 					eDebug("[EPGC] delete old event (timeMap)");
-//					eDebug("new %d", DBIt->second.second.size() );
 					It=DBIt->second.second.begin();  // start at begin
-					
+
 					// add this (changed) service to temp map...
 					if ( temp.find(DBIt->first) == temp.end() )
 						temp[DBIt->first]=std::pair<time_t, int>(now, NOWNEXT);
-
-//					eDebug("%d == %d", 
-//						DBIt->second.first.size(),
-//						DBIt->second.second.size());
-					ASSERT(DBIt->second.first.size() == DBIt->second.second.size());
 				}
 				else  // valid entry found
 							// we must not check any other event in this map
@@ -416,10 +399,6 @@ void eEPGCache::cleanLoop()
 					// current service?
 					if ( DBIt->first == current_service )
 					{
-//						eDebug("%08x == %08x, %08x == %08x, %08x == %08x",
-//							DBIt->first.sid, current_service.sid, 
-//							DBIt->first.onid, current_service.onid,
-//							DBIt->first.opos, current_service.opos);
 					// immediate .. after leave cleanloop 
 					// update epgdata for this service
 						zapTimer.start(0,true);
