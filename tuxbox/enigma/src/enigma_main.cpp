@@ -566,7 +566,7 @@ void eZapMain::setEIT(EIT *eit)
 		EINowTime->setText("");
 		EINextTime->setText("");
 	}
-	if (numsub)
+	if (numsub>1)
 	{
 		flags|=ENIGMA_SUBSERVICES;
 	}
