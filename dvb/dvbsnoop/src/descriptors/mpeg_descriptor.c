@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.c,v 1.15 2004/01/15 21:27:22 rasc Exp $
+$Id: mpeg_descriptor.c,v 1.16 2004/01/17 23:06:08 rasc Exp $
 
 
  DVBSNOOP
@@ -11,13 +11,16 @@ $Id: mpeg_descriptor.c,v 1.15 2004/01/15 21:27:22 rasc Exp $
 
 
 
- -- MPEG Descriptors  ISO/IEC 13818-1
+ -- MPEG Descriptors  ISO/IEC 13818-1/6
  -- all descriptors are returning their length used in buffer
 
 
 
 
 $Log: mpeg_descriptor.c,v $
+Revision 1.16  2004/01/17 23:06:08  rasc
+minor stuff, some restructs in output
+
 Revision 1.15  2004/01/15 21:27:22  rasc
 DSM-CC stream descriptors
 
@@ -78,6 +81,7 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 #include "dvbsnoop.h"
 #include "descriptor.h"
 #include "mpeg_descriptor.h"
+#include "descriptor_misc.h"
 #include "strings/dvb_str.h"
 #include "strings/dsmcc_str.h"
 #include "misc/hexprint.h"
@@ -1030,7 +1034,8 @@ void descriptorMPEG_Carousel_Identifier (u_char *b)
 
  indent (+1);
  if (d.format_id == 0x01) {
-	/* -- TR 102 006   4.7.xx */
+	// -- TR 101 202   4.7.xx
+	// -- FormatSpecifier
 	
 	d.module_version		 = getBits (b, 0,  0,  8);
 	d.module_id			 = getBits (b, 0,  8, 16);
@@ -1236,17 +1241,19 @@ void descriptorMPEG_NPT_reference (u_char *b)
    // descriptor_tag		 = b[0];
    // descriptor_length       	 = b[1];
 
-   outBit_Sx_NL (4,"postDiscontinuityIndicator: ",  	b,16, 1);
+   outBit_S2x_NL(4,"postDiscontinuityIndicator: ",  	b,16, 1,
+	   	(char *(*)(u_long)) dsmccStr_postDiscontinuityIndicator);
    outBit_Sx_NL (4,"contentId: ",		  	b,17, 7);
    outBit_Sx_NL (6,"reserved: ",		  	b,24, 7);
-   outBit_Sx_NL (4,"STC_Reference: ",		  	b,31,33);   // $$$ TODO ref calc + info
+
+   outBit64_Sx  (4,"STC_Reference: ",		  	b,31,33);
+   	out_nl  (4,"  [= ref/300 * 90 kHz]");
+ 
    outBit_Sx_NL (6,"reserved: ",		  	b,64,31);
-   outBit_Sx_NL (4,"NPT_Reference: ",		  	b,75,33);   // $$$ TODO ref calc + info
+   outBit64_Sx_NL (4,"NPT_Reference: ",		  	b,75,33);
    outBit_Sx_NL (4,"scaleNumerator: ",		  	b,108,16);
    outBit_Sx_NL (4,"scaleDenominator: ",	  	b,124,16);
 
-   // $$$ TODO equation calc ISO 13818-6 8.1.x
- 
 }
 
 
@@ -1258,16 +1265,21 @@ void descriptorMPEG_NPT_reference (u_char *b)
 
 void descriptorMPEG_NPT_endpoint (u_char *b)
 {
+   unsigned long long t;
+
    // descriptor_tag		 = b[0];
    // descriptor_length       	 = b[1];
 
    outBit_Sx_NL (6,"reserved: ",		  	b,16,15);
-   outBit_Sx_NL (4,"startNPT: ",		  	b,31,33);   // $$$ TODO ref calc + info
-   outBit_Sx_NL (6,"reserved: ",		  	b,64,15);
-   outBit_Sx_NL (4,"stopNPT: ",			  	b,79,33);   // $$$ TODO ref calc + info
 
-   // $$$ TODO equation calc ISO 13818-6 8.1.x
- 
+   t = outBit64_Sx (4,"startNPT: ",		  	b,31,33);
+       out_nl_calc_NPT (4,t); 
+
+   outBit_Sx_NL (6,"reserved: ",		  	b,64,15);
+
+   t = outBit64_Sx (4,"stopNPT: ",			b,79,33);
+       out_nl_calc_NPT (4,t); 
+
 }
 
 
@@ -1301,6 +1313,7 @@ void descriptorMPEG_stream_mode (u_char *b)
 
 void descriptorMPEG_stream_event (u_char *b)
 {
+   unsigned long long t;
    int len;
 
    // descriptor_tag	 = b[0];
@@ -1308,7 +1321,8 @@ void descriptorMPEG_stream_event (u_char *b)
 
    outBit_Sx_NL (4,"eventId: ",		  		b,16,16);
    outBit_Sx_NL (6,"reserved: ",		  	b,32,31);
-   outBit_Sx_NL (4,"eventNPT: ",		  	b,31,33);   // $$$ TODO ref calc + info
+   t = outBit64_Sx (4,"eventNPT: ",		  	b,79,33);
+       out_nl_calc_NPT (4,t); 
    
    b += 10;
    len -= 8;

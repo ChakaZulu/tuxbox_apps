@@ -1,5 +1,5 @@
 /*
-$Id: pes_dsmcc.c,v 1.8 2004/01/11 21:01:32 rasc Exp $
+$Id: pes_dsmcc.c,v 1.9 2004/01/17 23:06:10 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: pes_dsmcc.c,v 1.8 2004/01/11 21:01:32 rasc Exp $
 
 
 $Log: pes_dsmcc.c,v $
+Revision 1.9  2004/01/17 23:06:10  rasc
+minor stuff, some restructs in output
+
 Revision 1.8  2004/01/11 21:01:32  rasc
 PES stream directory, PES restructured
 
@@ -323,7 +326,7 @@ static void  dsmcc_program_stream_descriptorlist_loop (u_char *b, int len)
 		len--;
   	  }
 
-	  len2 = descriptor (b, DSMCC_STREAM);   // $$$ TODO is this correct?
+	  len2 = descriptor (b, DSMCC_STREAM);
 	  b += len2;
 	  len -= len2;
 

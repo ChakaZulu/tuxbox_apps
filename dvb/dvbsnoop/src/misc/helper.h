@@ -21,6 +21,9 @@ u_long outBit_Sx (int verbosity, const char *text, u_char *buf, int startbit, in
 u_long outBit_Sx_NL (int verbosity, const char *text, u_char *buf, int startbit, int bitlen);
 u_long outBit_S2x_NL (int verbosity, const char *text, u_char *buf, int startbit, int bitlen, char *(*f)(u_long) );
 
+unsigned long long outBit64_Sx (int verbosity, const char *text, u_char *buf, int startbit, int bitlen);
+unsigned long long outBit64_Sx_NL (int verbosity, const char *text, u_char *buf, int startbit, int bitlen);
+
 
 u_long getBits (u_char *buf, int byte_offset, int startbit, int bitlen);
 long long getBits48 (u_char *buf, int byte_offset, int startbit, int bitlen);

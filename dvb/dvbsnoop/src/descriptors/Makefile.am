@@ -7,7 +7,8 @@ noinst_HEADERS = \
 	dvb_descriptor.h \
 	mpeg_descriptor.h \
 	dsmcc_carousel_descriptor.h \
-	dsmcc_int_unt_descriptor.h
+	dsmcc_int_unt_descriptor.h\
+	descriptor_misc.h
 
 
 libdescriptors_a_SOURCES = \
@@ -15,6 +16,7 @@ libdescriptors_a_SOURCES = \
 	dvb_descriptor.c \
 	mpeg_descriptor.c \
 	dsmcc_carousel_descriptor.c \
-	dsmcc_int_unt_descriptor.c
+	dsmcc_int_unt_descriptor.c \
+	descriptor_misc.c
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.22 2004/01/13 23:23:38 rasc Exp $
+$Id: helper.c,v 1.23 2004/01/17 23:06:09 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: helper.c,v 1.22 2004/01/13 23:23:38 rasc Exp $
 
 
 $Log: helper.c,v $
+Revision 1.23  2004/01/17 23:06:09  rasc
+minor stuff, some restructs in output
+
 Revision 1.22  2004/01/13 23:23:38  rasc
 new getBits routine (hopfully more optimized)
 
@@ -137,6 +140,7 @@ u_long outBit_Sx (int verbosity, const char *text, u_char *buf, int startbit, in
 }
 
 
+
 u_long outBit_Sx_NL (int verbosity, const char *text, u_char *buf, int startbit, int bitlen)
 {
   u_long value;
@@ -168,6 +172,43 @@ u_long outBit_S2x_NL (int verbosity, const char *text, u_char *buf, int startbit
 
    return value;
 }
+
+
+
+
+/*
+  -- same for bitlen > 32
+  -- return unsigned long long
+ */
+
+unsigned long long outBit64_Sx (int verbosity, const char *text, u_char *buf, int startbit, int bitlen)
+{
+   unsigned long long value;
+
+
+   if (bitlen <= 48) {
+   	value =  getBits48 (buf,0,startbit,bitlen);
+	out_SLL (verbosity,text,(int)value);
+   } else {
+   	value =  getBits64 (buf,0,startbit,bitlen);
+	out_SLL (verbosity,text,value);
+   }
+
+   return value;
+}
+
+
+unsigned long long outBit64_Sx_NL (int verbosity, const char *text, u_char *buf, int startbit, int bitlen)
+{
+  unsigned long long value;
+
+  value = outBit64_Sx (verbosity,text,buf,startbit,bitlen);
+  out_NL (verbosity);
+  return value;
+
+}
+
+
 
 
 
@@ -261,6 +302,7 @@ unsigned long getBits (u_char *buf, int byte_offset, int startbit, int bitlen)
 		break;
 
 	default:	// -- 33.. bits: fail, deliver constant fail value
+		out_nl (1," Error: getBits() request out of bound!!!! (report!!) \n");
 		return (unsigned long) 0xFEFEFEFE;
 		break;
  }
@@ -291,7 +333,10 @@ long long getBits48 (u_char *buf, int byte_offset, int startbit, int bitlen)
  unsigned long long mask;
  unsigned long long tmp;
 
- if (bitlen > 48) return 0xFEFEFEFEFEFEFEFELL;
+ if (bitlen > 48) {
+	out_nl (1," Error: getBits48() request out of bound!!!! (report!!) \n");
+	return 0xFEFEFEFEFEFEFEFELL;
+ }
  
 
  b = &buf[byte_offset + (startbit / 8)];
