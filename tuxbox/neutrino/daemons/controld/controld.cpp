@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#define USE_LIBTUXBOX
+#define USE_LIBTUXBOX 1
 
 #include <config.h>
 
@@ -53,8 +53,6 @@
 #include <eventserver.h>
 #ifdef USE_LIBTUXBOX
 #include <tuxbox.h>
-#else
-#include <tuxbox/tuxbox_info.h>
 #endif
 
 #include "eventwatchdog.h"
@@ -597,14 +595,12 @@ void setBoxType()
 		settings.boxtype = CControldClient::TUXBOX_MAKER_TECHNOTREND;
 		break;
 	default:
-#endif
 		settings.boxtype = CControldClient::TUXBOX_MAKER_UNKNOWN;
-#ifdef USE_LIBTUXBOX
 	}
 	// fallback to old way ( via env. var)
-	if(settings.boxtype==CControldClient::TUXBOX_MAKER_UNKNOWN)
-#endif
+	if (settings.boxtype==CControldClient::TUXBOX_MAKER_UNKNOWN)
 	{
+#endif
 		char * strmID = getenv("mID");
 
 		if (strmID == NULL)
@@ -626,13 +622,11 @@ void setBoxType()
 			}
 		}
 		printf("[controld] Boxtype detected: (%d)\n", settings.boxtype);
-	}
 #ifdef USE_LIBTUXBOX
+	}
 	else
 		printf("[controld] Boxtype detected: (%d, %s %s)\n", settings.boxtype, tuxbox_get_vendor_str(), tuxbox_get_model_str());
 #endif
-
-
 }
 
 
@@ -830,7 +824,7 @@ int main(int argc, char **argv)
 {
 	CBasicServer controld_server;
 
-	printf("Controld  $Id: controld.cpp,v 1.99 2003/03/04 16:33:16 alexw Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.100 2003/03/05 19:28:12 thegoodguy Exp $\n\n");
 
 	if (!controld_server.prepare(CONTROLD_UDS_NAME))
 		return -1;
