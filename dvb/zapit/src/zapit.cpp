@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.175 2002/05/11 21:59:03 McClean Exp $
+ * $Id: zapit.cpp,v 1.176 2002/05/11 23:34:11 McClean Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -82,17 +82,6 @@ enum
 };
 
 int currentMode;
-
-struct rmsg
-{
-	uint8_t version;
-	uint8_t cmd;
-	uint8_t param;
-	unsigned short param2;
-	char param3[30];
-
-}
-rmsg;
 
 int connfd;
 
@@ -723,7 +712,7 @@ int getPlaybackStatus ()
 }
 
 
-void parse_command ()
+void parse_command (CZapitClient::commandHead &rmsg)
 {
 	#ifdef DEBUG
 		debug("Command received\n");
@@ -1236,7 +1225,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.175 2002/05/11 21:59:03 McClean Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.176 2002/05/11 23:34:11 McClean Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1418,10 +1407,11 @@ int main (int argc, char **argv)
 
 	while (true)
 	{
+		CZapitClient::commandHead rmsg;
 		connfd = accept(listenfd, (struct sockaddr*) &servaddr, (socklen_t*) &clilen);
 		memset(&rmsg, 0, sizeof(rmsg));
 		read(connfd, &rmsg, sizeof(rmsg));
-		parse_command();
+		parse_command(rmsg);
 		close(connfd);
 		connfd = -1;
 	}
