@@ -1219,7 +1219,8 @@ static	int		blinkc=0;
 				CopyBg2Screen( s->x-7,s->y-4, 21, 21);
 			}
 		}
-		if (( s->counter1 == 2 ) && ( s->type & TYP_STOPPER ))
+		if (( s->counter1 == 2 ) && ( s->type & TYP_STOPPER ) &&
+			!( s->type & TYP_EXPLODE ))
 			bgRect( s->x+1, s->y, s->width-1, s->height-2, 150 );
 	}
 	DrawSprite( deko[2] );		// ziel
