@@ -14,11 +14,6 @@
 #include <sys/time.h>
 #include <sys/mman.h>
 
-static	int							clip_x1=0;
-static	int							clip_y1=0;
-static	int							clip_x2=0;
-static	int							clip_y2=0;
-
 #ifndef USEX
 
 #ifdef __i386__
@@ -322,41 +317,15 @@ void	FB2CopyImage( int x1, int y1, int dx, int dy, unsigned char *src, int dbl )
 		return;
 	if ( !dbl )
 	{
-		if ( clip_x1 || clip_x2 || clip_y1 || clip_y2 )
-		{
-			if ( x1+dx <= clip_x1 )
-				return;
-			if ( x1 >= clip_x2 )
-				return;
-			if ( y1+dy <= clip_y1 )
-				return;
-			if ( y1 >= clip_y2 )
-				return;
-		}
 		for( y=0; (y < dy) && (y+y1<screeninfo.yres); y++ )
 		{
 			for( x=0; (x < dx) && (x+x1<688) && (y+y1>=0); x++ )
 			{
-				if (( clip_x1 || clip_x2 || clip_y1 || clip_y2 ) &&
-					(( x1+x < clip_x1 ) || ( x1+x >= clip_x2 ) ||
-					 ( y1+y < clip_y1 ) || ( y1+y >= clip_y2 )) )
-						continue;
 				if ( ( x+x1>=0 ) && *(src+dx*y+x) )
 					*(lfb+(y1+y)*stride+x1+x) = *(src+dx*y+x);
 			}
 		}
 		return;
-	}
-	if ( clip_x1 || clip_x2 || clip_y1 || clip_y2 )
-	{
-		if ( x1+dx <= clip_x1 )
-			return;
-		if ( x1 >= clip_x2 )
-			return;
-		if ( y1+dy <= clip_y1 )
-			return;
-		if ( y1 >= clip_y2 )
-			return;
 	}
 	s=src;
 	for( y=0; (y < dy) && (y+y1+y<screeninfo.yres); y++ )
@@ -368,13 +337,6 @@ void	FB2CopyImage( int x1, int y1, int dx, int dy, unsigned char *src, int dbl )
 		d1=d-x1+688;
 		for( x=0; (x < dx) && (d<d1); x++, s++ )
 		{
-			if (( clip_x1 || clip_x2 || clip_y1 || clip_y2 ) &&
-				(( x1+x+x < clip_x1 ) || ( x1+x+x >= clip_x2 ) ||
-				 ( y1+y+y < clip_y1 ) || ( y1+y+y >= clip_y2 )) )
-			{
-				d+=2;
-				continue;
-			}
 			if ( (x+x1>=0) && *s )
 			{
 				*d=*s;
@@ -549,18 +511,14 @@ void	FBBlink( int x, int y, int dx, int dy, int count )
 
 void	FBMove( int x, int y, int x2, int y2, int dx, int dy )
 {
-	unsigned char	*back;
+	unsigned char	back[ stride ];
 	int				i;
 
-/* copy out */
-	back = malloc(dx*dy);
 	for( i=0; i < dy; i++ )
-		memcpy(back+dx*i,lfb+(y+i)*stride+x,dx);
-
-/* copy in */
-	FBCopyImage( x2, y2, dx, dy, back );
-
-	free( back );
+	{
+		memcpy(back,lfb+(y+i)*stride+x,dx);
+		FBCopyImage( x2, y2+i, dx, 1, back );
+	}
 }
 
 #if 0
@@ -861,54 +819,21 @@ void	FB2CopyImage( int x, int y, int dx, int dy, unsigned char *src, int dbl )
 		return;
 	if( !dbl )
 	{
-		if ( clip_x1 || clip_x2 || clip_y1 || clip_y2 )
-		{
-			if ( x+dx <= clip_x1 )
-				return;
-			if ( x >= clip_x2 )
-				return;
-			if ( y+dy <= clip_y1 )
-				return;
-			if ( y >= clip_y2 )
-				return;
-		}
 		for( k=0; k < dy; k++ )
 		{
 			for( i=0; i < dx; i++, src++ )
 			{
-				if (( clip_x1 || clip_x2 || clip_y1 || clip_y2 ) &&
-					(( i+x < clip_x1 ) || ( i+x >= clip_x2 ) ||
-					 ( k+y < clip_y1 ) || ( k+y >= clip_y2 )) )
-						continue;
-				if ( *src && ( i+x < 688 ) )
+				if ( *src && ( i+x < 720 ) )
 					FBPaintPixel(i+x,k+y,*src);
 			}
 		}
 		return;
 	}
-	if ( clip_x1 || clip_x2 || clip_y1 || clip_y2 )
-	{
-		if ( x+dx+dx <= clip_x1 )
-			return;
-		if ( x >= clip_x2 )
-			return;
-		if ( y+dy+dy <= clip_y1 )
-			return;
-		if ( y >= clip_y2 )
-			return;
-	}
 	for( k=0; k < dy+dy; k+=2 )
 	{
 		for( i=0; i < dx+dx; i++, src++ )
 		{
-			if (( clip_x1 || clip_x2 || clip_y1 || clip_y2 ) &&
-				(( i+x < clip_x1 ) || ( i+x >= clip_x2 ) ||
-				 ( k+y < clip_y1 ) || ( k+y >= clip_y2 )) )
-			{
-				i++;
-				continue;
-			}
-			if ( *src && ( i+x < 688 ) )
+			if ( *src && ( i+x < 720 ) )
 			{
 				FBPaintPixel(i+x,k+y,*src);
 				FBPaintPixel(i+x,k+y+1,*src);
@@ -2333,12 +2258,4 @@ char	*FBEnterWord( int xpos, int ypos, int height,int len,unsigned char col)
 	}
 	FBFillRect( xoffs,yoffs, 3*52+3,4*52+4+2,BLACK);
 	return( text );
-}
-
-void	FBSetClip( int x1, int y1, int x2, int y2 )
-{
-	clip_x1=x1;
-	clip_y1=y1;
-	clip_x2=x2;
-	clip_y2=y2;
 }

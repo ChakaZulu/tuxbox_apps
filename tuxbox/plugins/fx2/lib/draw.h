@@ -37,7 +37,6 @@ extern	char	*FBEnterWord( int xpos, int ypos, int height,int len,
 					unsigned char col);
 extern	void	FBGetImage( int x1, int y1, int width, int height,
 					unsigned char *to );
-extern	void	FBSetClip( int x1, int y1, int x2, int y2 );
 #ifdef USEX
 extern	void	FBFlushGrafic( void );
 #endif
