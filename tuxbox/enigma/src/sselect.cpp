@@ -19,6 +19,7 @@
 #include <lib/dvb/record.h>
 #include <lib/dvb/servicemp3.h>
 #include <lib/gdi/font.h>
+#include <lib/gdi/fb.h>
 #include <lib/gui/actions.h>
 #include <lib/gui/eskin.h>
 #include <lib/gui/elabel.h>
@@ -972,6 +973,12 @@ void eServiceSelector::forEachServiceRef( Signal1<void,const eServiceReference&>
 int eServiceSelector::eventHandler(const eWidgetEvent &event)
 {
 	int num=0;
+	struct fb_var_screeninfo *screenInfo = fbClass::getInstance()->getScreenInfo();
+	if (screenInfo->bits_per_pixel == 16)
+	{
+		fbClass::getInstance()->SetMode(720, 576, 8);
+		fbClass::getInstance()->PutCMAP();
+	}
 	eServicePath enterPath;
 	switch (event.type)
 	{
@@ -1059,8 +1066,8 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 					eListBoxEntryService* p=0;
 					do
 						p = services->goPrev();
-					while ( p && ( p->flags&eListBoxEntryService::flagIsReturn || 
-									( p->service != last && 
+					while ( p && ( p->flags&eListBoxEntryService::flagIsReturn ||
+									( p->service != last &&
 										!(p->service.flags & eServiceReference::canDescent) &&
 										!(p->service.flags & eServiceReference::isDirectory))));
 					if (p)
@@ -1679,7 +1686,7 @@ eServiceSelector::eServiceSelector()
 	if ( !eZap::getInstance()->getServiceSelector() )
 		addActionToHelpList(&i_serviceSelectorActions->modeFile);
 #endif
-	
+
 	key[0] = key[1] = key[2] = key[3] = 0;
 
 	CONNECT(eDVB::getInstance()->serviceListChanged, eServiceSelector::actualize );
