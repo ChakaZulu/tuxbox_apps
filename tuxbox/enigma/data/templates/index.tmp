@@ -124,7 +124,7 @@
      <td width="100%" align="right">#MODE#</td>
      </tr>
      <tr>
-     <td width="100%" align="left">#COP#<br><span class="servicename">#SERVICENAME#</span>#EPG# #SI#<br>#EIT#</td>
+     <td width="100%" align="left">#COP#<br><span class="servicename">#SERVICENAME#</span> #EPG# #SI#<br>#EIT#</td>
      </tr>
     </table>
    </td>
