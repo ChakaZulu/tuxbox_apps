@@ -203,9 +203,14 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 					prevTimeIt=It=servicemap.second.end();
 				}
 				delete it->second;
-				ASSERT(it->second=evt=new eventData(eit_event, eit_event_size, source));
 				if ( debug )
+				{
+					ASSERT(it->second=evt=new eventData(eit_event, eit_event_size, source));
 					eDebug("update in map %d==%d %d", it->first, event_id, TM);
+				}
+				else
+					it->second=evt=new eventData(eit_event, eit_event_size, source);
+					
 			}
 			else // we must add new event.. ( in maps this is really slow.. )
 			{
@@ -239,8 +244,12 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 							event_id, TM);
 				}
 				if (debug)
+				{
 					eDebug("add new event_map entry time %d, event_id %d", TM, event_id);
-				ASSERT(evt=new eventData(eit_event, eit_event_size, source));
+					ASSERT(evt=new eventData(eit_event, eit_event_size, source));
+				}
+				else
+					evt=new eventData(eit_event, eit_event_size, source);
 				prevEventIt=servicemap.first.insert( prevEventIt, std::pair<const __u16, eventData*>( event_id, evt) );
 			}
  
