@@ -4,6 +4,7 @@
 #include <lib/base/estring.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <stdio.h>
 #include <unistd.h>
 #include <errno.h>
 #include <lib/picviewer/pictureviewer.h>
@@ -14,40 +15,41 @@ extern unsigned char * simple_resize(unsigned char * orgin, int ox, int oy, int 
 extern unsigned char * color_average_resize(unsigned char * orgin, int ox, int oy, int dx, int dy);
 
 #ifdef FBV_SUPPORT_GIF
-    extern int fh_gif_getsize(const char *, int *, int*, int, int);
-    extern int fh_gif_load(const char *, unsigned char *, int, int);
-    extern int fh_gif_id(const char *);
+extern int fh_gif_getsize(const char *, int *, int*, int, int);
+extern int fh_gif_load(const char *, unsigned char *, int, int);
+extern int fh_gif_id(const char *);
 #endif
 #ifdef FBV_SUPPORT_JPEG
-    extern int fh_jpeg_getsize(const char *, int *, int*, int, int);
-    extern int fh_jpeg_load(const char *, unsigned char *, int, int);
-    extern int fh_jpeg_id(const char *);
+extern int fh_jpeg_getsize(const char *, int *, int*, int, int);
+extern int fh_jpeg_load(const char *, unsigned char *, int, int);
+extern int fh_jpeg_id(const char *);
 #endif
 #ifdef FBV_SUPPORT_PNG
-    extern int fh_png_getsize(const char *, int *, int*, int, int);
-    extern int fh_png_load(const char *, unsigned char *, int, int);
-    extern int fh_png_id(const char *);
+extern int fh_png_getsize(const char *, int *, int*, int, int);
+extern int fh_png_load(const char *, unsigned char *, int, int);
+extern int fh_png_id(const char *);
 #endif
 #ifdef FBV_SUPPORT_BMP
-    extern int fh_bmp_getsize(const char *, int *, int*, int, int);
-    extern int fh_bmp_load(const char *, unsigned char *, int, int);
-    extern int fh_bmp_id(const char *);
+extern int fh_bmp_getsize(const char *, int *, int*, int, int);
+extern int fh_bmp_load(const char *, unsigned char *, int, int);
+extern int fh_bmp_id(const char *);
 #endif
 #ifdef FBV_SUPPORT_CRW
-    extern int fh_crw_getsize(const char *, int *, int*, int, int);
-    extern int fh_crw_load(const char *, unsigned char *, int, int);
-    extern int fh_crw_id(const char *);
+extern int fh_crw_getsize(const char *, int *, int*, int, int);
+extern int fh_crw_load(const char *, unsigned char *, int, int);
+extern int fh_crw_id(const char *);
 #endif
 
 ePictureViewer *ePictureViewer::instance;
 
 ePictureViewer::ePictureViewer(): messages(this, 1)
 {
+	printf("[PICTUREVIEWER] Constructor...\n");
 	if (!instance)
 		instance = this;
 
 	fh_root = NULL;
-	m_scaling = NONE;
+	m_scaling = COLOR;
 	m_aspect = 4.0 / 3;
 	m_CurrentPic_Name = "";
 	m_CurrentPic_Buffer = NULL;
@@ -78,12 +80,13 @@ ePictureViewer::ePictureViewer(): messages(this, 1)
 
 	CONNECT(messages.recv_msg, ePictureViewer::gotMessage);
 	run();
+	printf("[PICTUREVIEWER] Constructor done.\n");
 }
 
 ePictureViewer::~ePictureViewer()
 {
 	messages.send(Message::quit);
-	if ( thread_running() )
+	if (thread_running())
 		kill();
 	if (instance == this)
 		instance = 0;
@@ -91,7 +94,9 @@ ePictureViewer::~ePictureViewer()
 
 void ePictureViewer::thread()
 {
+	printf("[PICTUREVIEWER] thread...\n");
 	exec();
+	printf("[PICTUREVIEWER] thread done.\n");
 }
 
 void ePictureViewer::gotMessage(const Message &msg )
@@ -100,7 +105,8 @@ void ePictureViewer::gotMessage(const Message &msg )
 	{
 		case Message::display:
 			printf("[PICTUREVIEWER] display: %s\n", msg.filename);
-			ShowImage(std::string(msg.filename), true);
+			fbClass::getInstance()->SetMode(720, 576, 16);
+			ShowImage(std::string(msg.filename), false);
 			break;
 		case Message::zoom:
 			printf("[PICTUREVIEWER] zoom\n");
@@ -116,13 +122,13 @@ void ePictureViewer::gotMessage(const Message &msg )
 			quit(0);
 			break;
 		default:
-			eDebug("unhandled thread message");
+			printf("[PICTUREVIEWER] unhandled thread message");
 	}
 }
 
-eAutoInitP0<ePictureViewer> init_ePictureViewer(eAutoInitNumbers::configuration+1, "Picture Viewer");
+// eAutoInitP0<ePictureViewer> init_ePictureViewer(eAutoInitNumbers::configuration + 1, "Picture Viewer");
 
-void ePictureViewer::add_format(int (*picsize)(const char *, int *, int*, int, int ), int (*picread)(const char *, unsigned char *, int, int), int (*id)(const char*))
+void ePictureViewer::add_format(int (*picsize)(const char *, int *, int *, int, int ), int (*picread)(const char *, unsigned char *, int, int), int (*id)(const char*))
 {
 	CFormathandler *fhn;
 	fhn = (CFormathandler *) malloc(sizeof(CFormathandler));
@@ -166,20 +172,20 @@ ePictureViewer::CFormathandler * ePictureViewer::fh_getsize(const char *name, in
 
 bool ePictureViewer::DecodeImage(const std::string& name, bool showBusySign, bool unscaled)
 {
-// dbout("DecodeImage {\n"); 
+	printf("DecodeImage {\n");
 	if (name == m_NextPic_Name)
 	{
-//		dbout("DecodeImage }\n"); 
+		printf("DecodeImage }\n");
 		return true;
 	}
 
 	int x, y, xs, ys, imx, imy;
 	getCurrentRes(&xs, &ys);
-	
+
 	// Show red block for "next ready" in view state
 	if (showBusySign)
 		showBusy(m_startx + 3, m_starty + 3, 10, 0xff, 0, 0);
-   
+
 	CFormathandler *fh;
 	if (unscaled)
 		fh = fh_getsize(name.c_str(), &x, &y, INT_MAX, INT_MAX);
@@ -197,14 +203,14 @@ bool ePictureViewer::DecodeImage(const std::string& name, bool showBusySign, boo
 			printf("Error: malloc\n");
 			return false;
 		}
-		
-//		dbout("---Decoding Start(%d/%d)\n",x,y);
+
+		printf("---Decoding start(%d/%d)\n", x, y);
 		if (fh->get_pic(name.c_str(), m_NextPic_Buffer, x, y) == FH_ERROR_OK)
 		{
-//			dbout("---Decoding Done\n");
+			printf("---Decoding done\n");
 			if ((x > (m_endx - m_startx) || y > (m_endy - m_starty)) && m_scaling != NONE && !unscaled)
 			{
-				double aspect_ratio_correction = m_aspect / ((double)xs / ys); 
+				double aspect_ratio_correction = m_aspect / ((double)xs / ys);
 				if ((aspect_ratio_correction * y * (m_endx - m_startx) / x) <= (m_endy - m_starty))
 				{
 					imx = (m_endx - m_startx);
@@ -216,20 +222,20 @@ bool ePictureViewer::DecodeImage(const std::string& name, bool showBusySign, boo
 					imy = m_endy - m_starty;
 				}
 				if (m_scaling == SIMPLE)
-					m_NextPic_Buffer = simple_resize(m_NextPic_Buffer, x, y, imx,imy);
+					m_NextPic_Buffer = simple_resize(m_NextPic_Buffer, x, y, imx, imy);
 				else
 					m_NextPic_Buffer = color_average_resize(m_NextPic_Buffer, x, y, imx, imy);
 				x = imx; y = imy;
 			}
 			m_NextPic_X = x;
 			m_NextPic_Y = y;
-			if (x < (m_endx - m_startx)) 
-				m_NextPic_XPos = (m_endx - m_startx - x) / 2 + m_startx; 
+			if (x < (m_endx - m_startx))
+				m_NextPic_XPos = (m_endx - m_startx - x) / 2 + m_startx;
 			else
 				m_NextPic_XPos = m_startx;
-			if (y < (m_endy - m_starty)) 
-				m_NextPic_YPos = (m_endy - m_starty-y) / 2 + m_starty; 
-			else 
+			if (y < (m_endy - m_starty))
+				m_NextPic_YPos = (m_endy - m_starty-y) / 2 + m_starty;
+			else
 				m_NextPic_YPos = m_starty;
 			if (x > (m_endx - m_startx))
 				m_NextPic_XPan = (x - (m_endx - m_startx)) / 2;
@@ -282,7 +288,7 @@ bool ePictureViewer::DecodeImage(const std::string& name, bool showBusySign, boo
 	}
 	m_NextPic_Name = name;
 	hideBusy();
-//	dbout("DecodeImage }\n"); 
+	printf("DecodeImage }\n");
 	return(m_NextPic_Buffer != NULL);
 }
 
@@ -296,7 +302,7 @@ void ePictureViewer::SetVisible(int startx, int endx, int starty, int endy)
 
 bool ePictureViewer::ShowImage(const std::string & filename, bool unscaled)
 {
-//	dbout("Show Image {\n");
+	printf("Show Image {\n");
 	// Wird eh ueberschrieben ,also schonmal freigeben... (wenig speicher)
 	if (m_CurrentPic_Buffer != NULL)
 	{
@@ -305,13 +311,13 @@ bool ePictureViewer::ShowImage(const std::string & filename, bool unscaled)
 	}
 	DecodeImage(filename, true, unscaled);
 	DisplayNextImage();
-//	dbout("Show Image }\n");
+	printf("Show Image }\n");
 	return true;
 }
 
 bool ePictureViewer::DisplayNextImage()
 {
-//	dbout("DisplayNextImage {\n");
+	printf("DisplayNextImage {\n");
 	if (m_CurrentPic_Buffer != NULL)
 	{
 		free(m_CurrentPic_Buffer);
@@ -320,7 +326,7 @@ bool ePictureViewer::DisplayNextImage()
 	if(m_NextPic_Buffer != NULL)
 		fb_display(m_NextPic_Buffer, m_NextPic_X, m_NextPic_Y, m_NextPic_XPan, m_NextPic_YPan,
 	m_NextPic_XPos, m_NextPic_YPos);
-//	dbout("DisplayNextImage fb_disp done\n");
+	printf("---DisplayNextImage fb_disp done\n");
 	m_CurrentPic_Buffer = m_NextPic_Buffer;
 	m_NextPic_Buffer = NULL;
 	m_CurrentPic_Name = m_NextPic_Name;
@@ -330,21 +336,21 @@ bool ePictureViewer::DisplayNextImage()
 	m_CurrentPic_YPos = m_NextPic_YPos;
 	m_CurrentPic_XPan = m_NextPic_XPan;
 	m_CurrentPic_YPan = m_NextPic_YPan;
-//	dbout("DisplayNextImage }\n");
+	printf("DisplayNextImage }\n");
 	return true;
 }
 
 void ePictureViewer::Zoom(float factor)
-{ 
-//	dbout("Zoom %f\n",factor);
+{
+	printf("Zoom %f {\n",factor);
 	showBusy(m_startx + 3, m_starty + 3, 10, 0xff, 0xff, 0);
-	
+
 	int oldx = m_CurrentPic_X;
 	int oldy = m_CurrentPic_Y;
 	unsigned char *oldBuf = m_CurrentPic_Buffer;
 	m_CurrentPic_X = (int)(factor * m_CurrentPic_X);
 	m_CurrentPic_Y = (int)(factor * m_CurrentPic_Y);
-	 
+
 	if (m_scaling == COLOR)
 		m_CurrentPic_Buffer = color_average_resize(m_CurrentPic_Buffer, oldx, oldy, m_CurrentPic_X, m_CurrentPic_Y);
 	else
@@ -357,13 +363,13 @@ void ePictureViewer::Zoom(float factor)
 		return;
 	}
 
-	if (m_CurrentPic_X < (m_endx - m_startx)) 
-		m_CurrentPic_XPos = (m_endx - m_startx - m_CurrentPic_X) / 2 + m_startx; 
-	else 
+	if (m_CurrentPic_X < (m_endx - m_startx))
+		m_CurrentPic_XPos = (m_endx - m_startx - m_CurrentPic_X) / 2 + m_startx;
+	else
 		m_CurrentPic_XPos = m_startx;
-	if (m_CurrentPic_Y < (m_endy - m_starty)) 
-		m_CurrentPic_YPos = (m_endy - m_starty - m_CurrentPic_Y) / 2 + m_starty; 
-	else 
+	if (m_CurrentPic_Y < (m_endy - m_starty))
+		m_CurrentPic_YPos = (m_endy - m_starty - m_CurrentPic_Y) / 2 + m_starty;
+	else
 		m_CurrentPic_YPos = m_starty;
 	if (m_CurrentPic_X > (m_endx - m_startx))
 		m_CurrentPic_XPan = (m_CurrentPic_X - (m_endx - m_startx)) / 2;
@@ -374,13 +380,14 @@ void ePictureViewer::Zoom(float factor)
 	else
 		m_CurrentPic_YPan = 0;
 	fb_display(m_CurrentPic_Buffer, m_CurrentPic_X, m_CurrentPic_Y, m_CurrentPic_XPan, m_CurrentPic_YPan, m_CurrentPic_XPos, m_CurrentPic_YPos);
+	printf("Zoom }\n");
 }
 
 void ePictureViewer::Move(int dx, int dy)
-{ 
-//	dbout("Move %d %d\n",dx,dy);
+{
+	printf("Move %d %d {\n", dx, dy);
 	showBusy(m_startx+3,m_starty+3,10,0x00,0xff,00);
-	
+
 	int xs, ys;
 	getCurrentRes(&xs, &ys);
 	m_CurrentPic_XPan += dx;
@@ -394,24 +401,25 @@ void ePictureViewer::Move(int dx, int dy)
 		m_CurrentPic_YPan = m_CurrentPic_Y - ys - 1;
 	if(m_CurrentPic_YPan < 0)
 		m_CurrentPic_YPan = 0;
-	
-	if (m_CurrentPic_X < (m_endx - m_startx)) 
-		m_CurrentPic_XPos = (m_endx - m_startx - m_CurrentPic_X) / 2 + m_startx; 
-	else 
+
+	if (m_CurrentPic_X < (m_endx - m_startx))
+		m_CurrentPic_XPos = (m_endx - m_startx - m_CurrentPic_X) / 2 + m_startx;
+	else
 		m_CurrentPic_XPos = m_startx;
-	if (m_CurrentPic_Y < (m_endy - m_starty)) 
-		m_CurrentPic_YPos = (m_endy - m_starty - m_CurrentPic_Y) / 2 + m_starty; 
+	if (m_CurrentPic_Y < (m_endy - m_starty))
+		m_CurrentPic_YPos = (m_endy - m_starty - m_CurrentPic_Y) / 2 + m_starty;
 	else
 		m_CurrentPic_YPos = m_starty;
-//	dbout("Display x(%d) y(%d) xpan(%d) ypan(%d) xpos(%d) ypos(%d)\n",m_CurrentPic_X, m_CurrentPic_Y, 
+//	dbout("Display x(%d) y(%d) xpan(%d) ypan(%d) xpos(%d) ypos(%d)\n",m_CurrentPic_X, m_CurrentPic_Y,
 //	m_CurrentPic_XPan, m_CurrentPic_YPan, m_CurrentPic_XPos, m_CurrentPic_YPos);
 
 	fb_display(m_CurrentPic_Buffer, m_CurrentPic_X, m_CurrentPic_Y, m_CurrentPic_XPan, m_CurrentPic_YPan, m_CurrentPic_XPos, m_CurrentPic_YPos);
+	printf("Move }\n");
 }
 
 void ePictureViewer::showBusy(int sx, int sy, int width, char r, char g, char b)
 {
-//	dbout("Show Busy{\n");
+	printf("Show Busy{\n");
 
 	unsigned char rgb_buffer[3];
 	unsigned char* fb_buffer;
@@ -459,12 +467,12 @@ void ePictureViewer::showBusy(int sx, int sy, int width, char r, char g, char b)
 	m_busy_width = width;
 	m_busy_cpp = cpp;
 	free(fb_buffer);
-//	dbout("Show Busy}\n");
+	printf("Show Busy}\n");
 }
 
 void ePictureViewer::hideBusy()
 {
-//	dbout("Hide Busy{\n");
+	printf("Hide Busy {\n");
 	if (m_busy_buffer != NULL)
 	{
 		unsigned char * fb = fbClass::getInstance()->lfb;
@@ -482,7 +490,7 @@ void ePictureViewer::hideBusy()
 		free(m_busy_buffer);
 		m_busy_buffer = NULL;
 	}
-//	dbout("Hide Busy}\n");
+	printf("Hide Busy}\n");
 }
 
 void ePictureViewer::Cleanup()
