@@ -218,7 +218,10 @@ lcdmenu.head LCD Settings
 lcdmenu.inverse Invert
 lcdmenu.power Power
 lcdmenu.lcdcontroler Contrast / Brightness
-
+lcdmenu.statusline status line
+lcdmenu.statusline.volume volume
+lcdmenu.statusline.playtime playtime
+[
 lcdcontroler.head LCD Stettings
 lcdcontroler.contrast Contrast
 lcdcontroler.brightness normal Brightness
