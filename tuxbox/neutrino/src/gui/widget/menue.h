@@ -157,7 +157,6 @@ class CMenuSeparator : public CMenuItem
 
 class CMenuForwarder : public CMenuItem
 {
-		int		height;
 		std::string         text;
 		const char *        option;
 		const std::string * option_string;
@@ -170,10 +169,7 @@ class CMenuForwarder : public CMenuItem
 		CMenuForwarder(const char * const Text, const bool Active=true, const char * const Option=NULL, CMenuTarget* Target=NULL, std::string ActionKey="", bool Localizing= true, uint DirectKey= CRCInput::RC_nokey, std::string IconName= "");
 		CMenuForwarder(const char * const Text, const bool Active, const std::string &Option, CMenuTarget* Target=NULL, std::string ActionKey="", bool Localizing= true, uint DirectKey= CRCInput::RC_nokey, std::string IconName= "");
 		int paint(bool selected=false);
-		int getHeight(void) const
-		{
-			return height;
-		}
+		int getHeight(void) const;
 		int exec(CMenuTarget* parent);
 		bool isSelectable(void) const
 		{

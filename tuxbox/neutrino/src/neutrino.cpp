@@ -106,6 +106,13 @@
 
 #include <string.h>
 
+
+/* the following generic menu items are integrated into multiple menus at the same time */
+CMenuSeparator GenericMenuSeparator;
+CMenuSeparator GenericMenuSeparatorLine(CMenuSeparator::LINE);
+CMenuForwarder GenericMenuBack("menu.back");
+
+
 CBouquetList   * bouquetList;
 CPlugins       * g_PluginList;
 CRemoteControl * g_RemoteControl;
@@ -666,7 +673,7 @@ void CNeutrinoApp::saveSetup()
 	//misc
 	configfile.setInt32( "shutdown_real", g_settings.shutdown_real );
 	configfile.setInt32( "shutdown_real_rcdelay", g_settings.shutdown_real_rcdelay );
-	configfile.setInt32( "shutdown_showclock", g_settings.shutdown_showclock );
+	configfile.setInt32( "shutdown_showclock", g_settings.shutdown_showclock);
 	configfile.setInt32( "show_camwarning", g_settings.show_camwarning );
 	configfile.setString( "record_safety_time_before", g_settings.record_safety_time_before );
 	configfile.setString( "record_safety_time_after", g_settings.record_safety_time_after );
@@ -774,7 +781,7 @@ void CNeutrinoApp::saveSetup()
 
 	//recording (server + vcr)
 	configfile.setInt32 ( "recording_type", g_settings.recording_type );
-	configfile.setInt32 ( "recording_stopplayback", g_settings.recording_stopplayback );
+	configfile.setInt32 ( "recording_stopplayback", g_settings.recording_stopplayback);
 	configfile.setInt32 ( "recording_stopsectionsd", g_settings.recording_stopsectionsd );
 	configfile.setString( "recording_server_ip", g_settings.recording_server_ip );
 	configfile.setString( "recording_server_port", g_settings.recording_server_port );
@@ -1139,12 +1146,12 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 				CMenuWidget &service, CMenuWidget &fontSettings, CMenuWidget &mp3picSettings, CMenuWidget &streamingSettings)
 {
 	dprintf(DEBUG_DEBUG, "init mainmenue\n");
-	mainMenu.addItem(new CMenuSeparator());
+	mainMenu.addItem(&GenericMenuSeparator);
 	mainMenu.addItem(new CMenuForwarder("mainmenu.tvmode", true, NULL, this, "tv", true, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED), true );
 	mainMenu.addItem(new CMenuForwarder("mainmenu.radiomode", true, NULL, this, "radio", true, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN) );
 	mainMenu.addItem(new CMenuForwarder("mainmenu.scartmode", true, NULL, this, "scart", true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW) );
 	mainMenu.addItem(new CMenuForwarder("mainmenu.games", true, NULL, new CGameList("mainmenu.games"), "", true, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE) );
-	mainMenu.addItem(new CMenuSeparator(CMenuSeparator::LINE));
+	mainMenu.addItem(&GenericMenuSeparatorLine);
 	mainMenu.addItem(new CMenuForwarder("mainmenu.mp3player", true, NULL, new CMP3PlayerGui()));
 
 #if HAVE_DVB_API_VERSION >= 3
@@ -1152,23 +1159,23 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 #endif
 
 	mainMenu.addItem(new CMenuForwarder("mainmenu.pictureviewer", true, NULL, new CPictureViewerGui()));
-	mainMenu.addItem(new CMenuSeparator(CMenuSeparator::LINE));
+	mainMenu.addItem(&GenericMenuSeparatorLine);
 	
 	mainMenu.addItem(new CMenuForwarder("mainmenu.settings", true, NULL, &mainSettings));
 	mainMenu.addItem(new CLockedMenuForwarder("mainmenu.service", g_settings.parentallock_pincode, false, true, NULL, &service) );
-	mainMenu.addItem(new CMenuSeparator(CMenuSeparator::LINE));
+	mainMenu.addItem(&GenericMenuSeparatorLine);
 	
 	mainMenu.addItem(new CMenuForwarder("mainmenu.sleeptimer", true, NULL, new CSleepTimerWidget));
 	mainMenu.addItem(new CMenuForwarder("mainmenu.shutdown", true, NULL, this, "shutdown", true, CRCInput::RC_standby, "power.raw") );
-//	mainMenu.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+//	mainMenu.addItem(&GenericMenuSeparatorLine);
 //	mainMenu.addItem( new CMenuForwarder("mainmenu.info", true, "", new CDBoxInfoWidget, "",true) );
 
 
-	mainSettings.addItem(new CMenuSeparator());
-	mainSettings.addItem(new CMenuForwarder("menu.back"));
-	mainSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE));
+	mainSettings.addItem(&GenericMenuSeparator);
+	mainSettings.addItem(&GenericMenuBack);
+	mainSettings.addItem(&GenericMenuSeparatorLine);
 	mainSettings.addItem(new CMenuForwarder("mainsettings.savesettingsnow", true, NULL, this, "savesettings"));
-	mainSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE));
+	mainSettings.addItem(&GenericMenuSeparatorLine);
 	mainSettings.addItem(new CMenuForwarder("mainsettings.video", true, NULL, &videoSettings));
 	mainSettings.addItem(new CMenuForwarder("mainsettings.audio", true, NULL, &audioSettings));
 	mainSettings.addItem(new CLockedMenuForwarder("parentallock.parentallock", g_settings.parentallock_pincode, true, true, NULL, &parentallockSettings));
@@ -1197,9 +1204,9 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 	//sat-lnb-settings
 	if(g_info.delivery_system == DVB_S)
 	{
-		settings.addItem( new CMenuSeparator() );
-		settings.addItem( new CMenuForwarder("menu.back") );
-		settings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+		settings.addItem(&GenericMenuSeparator);
+		settings.addItem(&GenericMenuBack);
+		settings.addItem(&GenericMenuSeparatorLine);
 
 		satList.clear();
 		g_Zapit->getScanSatelliteList(satList);
@@ -1240,11 +1247,11 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		ojDiseqcRepeats->addOption(2, "2");
 
 		CMenuWidget* extSatSettings = new CMenuWidget("satsetup.extended", NEUTRINO_ICON_SETTINGS);
-		extSatSettings->addItem( new CMenuSeparator() );
-		extSatSettings->addItem( new CMenuForwarder("menu.back") );
-		extSatSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+		extSatSettings->addItem(&GenericMenuSeparator);
+		extSatSettings->addItem(&GenericMenuBack);
+		extSatSettings->addItem(&GenericMenuSeparatorLine);
 
-		CMenuForwarder* ojExtSatSettings = new CMenuForwarder("satsetup.extended", (scanSettings.diseqcMode != NO_DISEQC), "", extSatSettings);
+		CMenuForwarder* ojExtSatSettings = new CMenuForwarder("satsetup.extended", (scanSettings.diseqcMode != NO_DISEQC), NULL, extSatSettings);
 		for( uint i=0; i < satList.size(); i++)
 		{
 			CMenuOptionChooser* oj = new CMenuOptionChooser( satList[i].satName, scanSettings.diseqscOfSat( satList[i].satName), true/*, new CSatelliteNotifier*/);
@@ -1259,13 +1266,13 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		}
 
 		CMenuWidget* extMotorSettings = new CMenuWidget("satsetup.extended_motor", NEUTRINO_ICON_SETTINGS);
-		extMotorSettings->addItem( new CMenuSeparator() );
-		extMotorSettings->addItem( new CMenuForwarder("menu.back") );
-		extMotorSettings->addItem( new CMenuForwarder("satsetup.savesettingsnow", true, "", this, "savesettings") );
-		extMotorSettings->addItem( new CMenuForwarder("satsetup.motorcontrol", true, "", new CMotorControl()) );
-		extMotorSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+		extMotorSettings->addItem(&GenericMenuSeparator);
+		extMotorSettings->addItem(&GenericMenuBack);
+		extMotorSettings->addItem( new CMenuForwarder("satsetup.savesettingsnow", true, NULL, this, "savesettings") );
+		extMotorSettings->addItem( new CMenuForwarder("satsetup.motorcontrol", true, NULL, new CMotorControl()) );
+		extMotorSettings->addItem(&GenericMenuSeparatorLine);
 
-		CMenuForwarder* ojExtMotorSettings = new CMenuForwarder("satsetup.extended_motor", (scanSettings.diseqcMode == DISEQC_1_2), "", extMotorSettings);
+		CMenuForwarder* ojExtMotorSettings = new CMenuForwarder("satsetup.extended_motor", (scanSettings.diseqcMode == DISEQC_1_2), NULL, extMotorSettings);
 
 		for( uint i=0; i < satList.size(); i++)
 		{
@@ -1294,13 +1301,13 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		settings.addItem( ojDiseqcRepeats );
 		settings.addItem( ojExtSatSettings );
 		settings.addItem( ojExtMotorSettings );
-		settings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+		settings.addItem(&GenericMenuSeparatorLine);
 	}
 	else
 	{//kabel
-		settings.addItem( new CMenuSeparator() );
-		settings.addItem( new CMenuForwarder("menu.back") );
-		settings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+		settings.addItem(&GenericMenuSeparator);
+		settings.addItem(&GenericMenuBack);
+		settings.addItem(&GenericMenuSeparatorLine);
 
 		CZapitClient::SatelliteList providerList;
 		g_Zapit->getScanSatelliteList(providerList);
@@ -1316,46 +1323,45 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		settings.addItem( oj);
 	}
 
-	settings.addItem( new CMenuForwarder("scants.startnow", true, "", new CScanTs() ) );
-
+	settings.addItem(new CMenuForwarder("scants.startnow", true, NULL, new CScanTs()));
 }
 
 
 void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSettings)
 {
 	dprintf(DEBUG_DEBUG, "init serviceSettings\n");
-	service.addItem( new CMenuSeparator() );
-	service.addItem( new CMenuForwarder("menu.back") );
-	service.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	service.addItem( new CMenuForwarder("bouqueteditor.name", true, "", new CBEBouquetWidget()));
-	service.addItem( new CMenuForwarder("servicemenu.scants", true, "", &scanSettings ) );
-	service.addItem( new CMenuForwarder("servicemenu.reload", true, "", this, "reloadchannels" ) );
-	service.addItem( new CMenuForwarder("servicemenu.ucodecheck", true, "", UCodeChecker ) );
+	service.addItem(&GenericMenuSeparator);
+	service.addItem(&GenericMenuBack);
+	service.addItem(&GenericMenuSeparatorLine);
+	service.addItem( new CMenuForwarder("bouqueteditor.name", true, NULL, new CBEBouquetWidget()));
+	service.addItem( new CMenuForwarder("servicemenu.scants", true, NULL, &scanSettings ) );
+	service.addItem( new CMenuForwarder("servicemenu.reload", true, NULL, this, "reloadchannels" ) );
+	service.addItem( new CMenuForwarder("servicemenu.ucodecheck", true, NULL, UCodeChecker ) );
 
 	//softupdate
 	if(softupdate)
 	{
 		dprintf(DEBUG_DEBUG, "init soft-update-stuff\n");
 		CMenuWidget* updateSettings = new CMenuWidget("servicemenu.update", "softupdate.raw", 450);
-		updateSettings->addItem( new CMenuSeparator() );
-		updateSettings->addItem( new CMenuForwarder("menu.back") );
-		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+		updateSettings->addItem(&GenericMenuSeparator);
+		updateSettings->addItem(&GenericMenuBack);
+		updateSettings->addItem(&GenericMenuSeparatorLine);
 
 
 		//experten-funktionen für mtd lesen/schreiben
 		CMenuWidget* mtdexpert = new CMenuWidget("flashupdate.expertfunctions", "softupdate.raw");
-		mtdexpert->addItem( new CMenuSeparator() );
-		mtdexpert->addItem( new CMenuForwarder("menu.back") );
-		mtdexpert->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+		mtdexpert->addItem(&GenericMenuSeparator);
+		mtdexpert->addItem(&GenericMenuBack);
+		mtdexpert->addItem(&GenericMenuSeparatorLine);
 		CFlashExpert* fe = new CFlashExpert();
-		mtdexpert->addItem( new CMenuForwarder("flashupdate.readflash", true, "", fe, "readflash") );
-		mtdexpert->addItem( new CMenuForwarder("flashupdate.writeflash", true, "", fe, "writeflash") );
-		mtdexpert->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-		mtdexpert->addItem( new CMenuForwarder("flashupdate.readflashmtd", true, "", fe, "readflashmtd") );
-		mtdexpert->addItem( new CMenuForwarder("flashupdate.writeflashmtd", true, "", fe, "writeflashmtd") );
-		updateSettings->addItem( new CMenuForwarder("flashupdate.expertfunctions", true, "", mtdexpert ) );
+		mtdexpert->addItem( new CMenuForwarder("flashupdate.readflash", true, NULL, fe, "readflash") );
+		mtdexpert->addItem( new CMenuForwarder("flashupdate.writeflash", true, NULL, fe, "writeflash") );
+		mtdexpert->addItem(&GenericMenuSeparatorLine);
+		mtdexpert->addItem( new CMenuForwarder("flashupdate.readflashmtd", true, NULL, fe, "readflashmtd") );
+		mtdexpert->addItem( new CMenuForwarder("flashupdate.writeflashmtd", true, NULL, fe, "writeflashmtd") );
+		updateSettings->addItem( new CMenuForwarder("flashupdate.expertfunctions", true, NULL, mtdexpert ) );
 
-		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+		updateSettings->addItem(&GenericMenuSeparatorLine);
 		CMenuOptionChooser *oj = new CMenuOptionChooser("flashupdate.updatemode", &g_settings.softupdate_mode,true);
 		oj->addOption(0, "flashupdate.updatemode_manual");
 		oj->addOption(1, "flashupdate.updatemode_internet");
@@ -1404,11 +1410,10 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		CStringInputSMS * updateSettings_proxypass = new CStringInputSMS("flashupdate.proxypassword", g_settings.softupdate_proxypassword, 20, "flashupdate.proxypassword_hint1", "flashupdate.proxypassword_hint2", "abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-. ");
 		updateSettings->addItem( new CMenuForwarder("flashupdate.proxypassword", true, g_settings.softupdate_proxypassword, updateSettings_proxypass ) );
 
-		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-		updateSettings->addItem( new CMenuForwarder("flashupdate.checkupdate", true, "", new CFlashUpdate() ));
+		updateSettings->addItem(&GenericMenuSeparatorLine);
+		updateSettings->addItem(new CMenuForwarder("flashupdate.checkupdate", true, NULL, new CFlashUpdate()));
 
-		service.addItem( new CMenuForwarder("servicemenu.update", true, "", updateSettings ) );
-
+		service.addItem(new CMenuForwarder("servicemenu.update", true, NULL, updateSettings));
 	}
 }
 
@@ -1416,8 +1421,8 @@ void CNeutrinoApp::InitMp3PicSettings(CMenuWidget &mp3PicSettings)
 {
 	dprintf(DEBUG_DEBUG, "init mp3_pic_settings\n");
 
-	mp3PicSettings.addItem( new CMenuSeparator() );
-	mp3PicSettings.addItem( new CMenuForwarder("menu.back") );
+	mp3PicSettings.addItem(&GenericMenuSeparator);
+	mp3PicSettings.addItem(&GenericMenuBack);
 	
 	CMenuOptionChooser *oj = new CMenuOptionChooser("pictureviewer.scaling", &g_settings.picviewer_scaling, true );
 	oj->addOption((int)CPictureViewer::SIMPLE, "Simple");
@@ -1441,14 +1446,13 @@ void CNeutrinoApp::InitMp3PicSettings(CMenuWidget &mp3PicSettings)
 	mp3PicSettings.addItem( oj );
 	CStringInput * mp3_screensaver= new CStringInput("mp3player.screensaver_timeout", g_settings.mp3player_screensaver, 2, NULL, NULL, "0123456789 ");
 	mp3PicSettings.addItem( new CMenuForwarder("mp3player.screensaver_timeout", true, g_settings.mp3player_screensaver, mp3_screensaver ));
-	mp3PicSettings.addItem( new CMenuForwarder("mp3player.defdir", true, g_settings.network_nfs_mp3dir, 
-															 this, "mp3dir"));
+	mp3PicSettings.addItem( new CMenuForwarder("mp3player.defdir", true, g_settings.network_nfs_mp3dir, this, "mp3dir"));
 }
 void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 {
 	dprintf(DEBUG_DEBUG, "init miscsettings\n");
-	miscSettings.addItem( new CMenuSeparator() );
-	miscSettings.addItem( new CMenuForwarder("menu.back") );
+	miscSettings.addItem(&GenericMenuSeparator);
+	miscSettings.addItem(&GenericMenuBack);
 	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "miscsettings.general" ) );
 
 	CMenuOptionChooser *m1 = new CMenuOptionChooser("miscsettings.shutdown_real_rcdelay", &g_settings.shutdown_real_rcdelay, !g_settings.shutdown_real );
@@ -1516,9 +1520,9 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 
 void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
 {
-	languageSettings.addItem( new CMenuSeparator() );
-	languageSettings.addItem( new CMenuForwarder("menu.back") );
-	languageSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	languageSettings.addItem(&GenericMenuSeparator);
+	languageSettings.addItem(&GenericMenuBack);
+	languageSettings.addItem(&GenericMenuSeparatorLine);
 
 	languageSetupNotifier = new CLanguageSetupNotifier;
 	CMenuOptionStringChooser* oj = new CMenuOptionStringChooser("languagesetup.select", (char*)&g_settings.language, true, languageSetupNotifier, false);
@@ -1561,9 +1565,9 @@ void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
 void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNotifier* audioSetupNotifier)
 {
 	dprintf(DEBUG_DEBUG, "init audiosettings\n");
-	audioSettings.addItem( new CMenuSeparator() );
-	audioSettings.addItem( new CMenuForwarder("menu.back") );
-	audioSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	audioSettings.addItem(&GenericMenuSeparator);
+	audioSettings.addItem(&GenericMenuBack);
+	audioSettings.addItem(&GenericMenuSeparatorLine);
 
 	CMenuOptionChooser* oj = new CMenuOptionChooser("audiomenu.analogout", &g_settings.audio_AnalogMode, true, audioSetupNotifier);
 	oj->addOption(0, "audiomenu.stereo");
@@ -1587,9 +1591,9 @@ void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNoti
 void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNotifier* videoSetupNotifier)
 {
 	dprintf(DEBUG_DEBUG, "init videosettings\n");
-	videoSettings.addItem( new CMenuSeparator() );
-	videoSettings.addItem( new CMenuForwarder("menu.back") );
-	videoSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	videoSettings.addItem(&GenericMenuSeparator);
+	videoSettings.addItem(&GenericMenuBack);
+	videoSettings.addItem(&GenericMenuSeparatorLine);
 
 	CMenuOptionChooser* oj = new CMenuOptionChooser("videomenu.videosignal", &g_settings.video_Signal, true, videoSetupNotifier);
 	oj->addOption(1, "videomenu.videosignal_rgb");
@@ -1618,16 +1622,16 @@ void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNoti
 	oj->addOption(1, "options.on");
 	videoSettings.addItem( oj );
 
-	videoSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	videoSettings.addItem( new CMenuForwarder("videomenu.screensetup", true, "", new CScreenSetup() ) );
+	videoSettings.addItem(&GenericMenuSeparatorLine);
+	videoSettings.addItem( new CMenuForwarder("videomenu.screensetup", true, NULL, new CScreenSetup()));
 }
 
 void CNeutrinoApp::InitParentalLockSettings(CMenuWidget &parentallockSettings)
 {
 	dprintf(DEBUG_DEBUG, "init parentallocksettings\n");
-	parentallockSettings.addItem( new CMenuSeparator() );
-	parentallockSettings.addItem( new CMenuForwarder("menu.back") );
-	parentallockSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	parentallockSettings.addItem(&GenericMenuSeparator);
+	parentallockSettings.addItem(&GenericMenuBack);
+	parentallockSettings.addItem(&GenericMenuSeparatorLine);
 
 	CMenuOptionChooser* oj = new CMenuOptionChooser("parentallock.prompt", &g_settings.parentallock_prompt, true);
 	oj->addOption(PARENTALLOCK_PROMPT_NEVER         , "parentallock.never");
@@ -1649,9 +1653,9 @@ void CNeutrinoApp::InitParentalLockSettings(CMenuWidget &parentallockSettings)
 void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 {
 	dprintf(DEBUG_DEBUG, "init networksettings\n");
-	networkSettings.addItem( new CMenuSeparator() );
-	networkSettings.addItem( new CMenuForwarder("menu.back") );
-	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	networkSettings.addItem(&GenericMenuSeparator);
+	networkSettings.addItem(&GenericMenuBack);
+	networkSettings.addItem(&GenericMenuSeparatorLine);
 
 	network_automatic_start = networkConfig.automatic_start ? 1 : 0;
 	CMenuOptionChooser* oj = new CMenuOptionChooser("networkmenu.setuponstartup", &network_automatic_start, true);
@@ -1659,12 +1663,12 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	oj->addOption(1, "options.on");
 
 	networkSettings.addItem( oj );
-	networkSettings.addItem( new CMenuForwarder("networkmenu.test", true, "", this, "networktest") );
-	networkSettings.addItem( new CMenuForwarder("networkmenu.show", true, "", this, "networkshow") );
-	CMenuForwarder *m0 = new CMenuForwarder("networkmenu.setupnow", true, "", this, "network");
+	networkSettings.addItem( new CMenuForwarder("networkmenu.test", true, NULL, this, "networktest"));
+	networkSettings.addItem( new CMenuForwarder("networkmenu.show", true, NULL, this, "networkshow"));
+	CMenuForwarder *m0 = new CMenuForwarder("networkmenu.setupnow", true, NULL, this, "network");
 	networkSettings.addItem( m0 );
 
-	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	networkSettings.addItem(&GenericMenuSeparatorLine);
 
 	CIPInput * networkSettings_NetworkIP  = new CIPInput("networkmenu.ipaddress" , networkConfig.address   , "ipsetup.hint_1", "ipsetup.hint_2", MyIPChanger);
 	CIPInput * networkSettings_NetMask    = new CIPInput("networkmenu.netmask"   , networkConfig.netmask   , "ipsetup.hint_1", "ipsetup.hint_2");
@@ -1673,7 +1677,7 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	CIPInput * networkSettings_NameServer = new CIPInput("networkmenu.nameserver", networkConfig.nameserver, "ipsetup.hint_1", "ipsetup.hint_2");
 
 	CMenuForwarder *m1 = new CMenuForwarder("networkmenu.ipaddress", networkConfig.inet_static, networkConfig.address, networkSettings_NetworkIP );
-	CMenuForwarder *m2 = new CMenuForwarder("networkmenu.netmask", networkConfig.inet_static, networkConfig.netmask, networkSettings_NetMask );
+	CMenuForwarder *m2 = new CMenuForwarder("networkmenu.netmask", networkConfig.inet_static, networkConfig.netmask, networkSettings_NetMask);
 	CMenuForwarder *m3 = new CMenuForwarder("networkmenu.broadcast", networkConfig.inet_static, networkConfig.broadcast, networkSettings_Broadcast );
 	CMenuForwarder *m4 = new CMenuForwarder("networkmenu.gateway", networkConfig.inet_static, networkConfig.gateway, networkSettings_Gateway );
 	CMenuForwarder *m5 = new CMenuForwarder("networkmenu.nameserver", networkConfig.inet_static, networkConfig.nameserver, networkSettings_NameServer );
@@ -1685,18 +1689,18 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	oj->addOption(0, "options.off");
 	oj->addOption(1, "options.on");
 	networkSettings.addItem( oj );
-	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	networkSettings.addItem(&GenericMenuSeparatorLine);
 
 	networkSettings.addItem( m1);
 	networkSettings.addItem( m2);
 	networkSettings.addItem( m3);
 
-	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	networkSettings.addItem(&GenericMenuSeparatorLine);
 	networkSettings.addItem( m4);
 	networkSettings.addItem( m5);
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "NFS/CIFS") );
-	networkSettings.addItem( new CMenuForwarder("nfs.mount", true, "", new CNFSMountGui()));
-	networkSettings.addItem( new CMenuForwarder("nfs.umount", true, "", new CNFSUmountGui()));
+	networkSettings.addItem( new CMenuForwarder("nfs.mount", true, NULL, new CNFSMountGui()));
+	networkSettings.addItem( new CMenuForwarder("nfs.umount", true, NULL, new CNFSUmountGui()));
 }
 
 void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
@@ -1745,19 +1749,19 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	oj1->addOption(1, "recordingmenu.server");
 	oj1->addOption(2, "recordingmenu.vcr");
 
-	recordingSettings.addItem( new CMenuSeparator() );
-	recordingSettings.addItem( new CMenuForwarder("menu.back") );
-	recordingSettings.addItem( new CMenuForwarder("recordingmenu.setupnow", true, "", this, "recording"));
-	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	recordingSettings.addItem(&GenericMenuSeparator);
+	recordingSettings.addItem(&GenericMenuBack);
+	recordingSettings.addItem( new CMenuForwarder("recordingmenu.setupnow", true, NULL, this, "recording"));
+	recordingSettings.addItem(&GenericMenuSeparatorLine);
 	recordingSettings.addItem( oj1);
-	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	recordingSettings.addItem(&GenericMenuSeparatorLine);
 	recordingSettings.addItem( mf1);
 	recordingSettings.addItem( mf2);
 	recordingSettings.addItem( oj2);
 	recordingSettings.addItem( mf3);
 	recordingSettings.addItem( oj3 );
 	recordingSettings.addItem( oj4);
-	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	recordingSettings.addItem(&GenericMenuSeparatorLine);
 	recordingSettings.addItem( oj5);
 	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "timersettings.separator") );
 	recordingSettings.addItem( mf5);
@@ -1800,11 +1804,11 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
       
 
 
-	streamingSettings.addItem( new CMenuSeparator() );
-	streamingSettings.addItem( new CMenuForwarder("menu.back") );
-	streamingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	streamingSettings.addItem(&GenericMenuSeparator);
+	streamingSettings.addItem(&GenericMenuBack);
+	streamingSettings.addItem(&GenericMenuSeparatorLine);
 	streamingSettings.addItem( oj1);
-	streamingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	streamingSettings.addItem(&GenericMenuSeparatorLine);
 	streamingSettings.addItem( mf1);
 	streamingSettings.addItem( mf2);
 	streamingSettings.addItem( mf3);
@@ -1812,7 +1816,7 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 	streamingSettings.addItem( mf5);
 	streamingSettings.addItem( mf6);
 	streamingSettings.addItem( oj0);
-	streamingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	streamingSettings.addItem(&GenericMenuSeparatorLine);
 	streamingSettings.addItem( mf7);
 	//streamingSettings.addItem( new CMenuForwarder("movieplayer.defdir", true, g_settings.network_nfs_moviedir, 
 	//														 this, "moviedir"));
@@ -1827,99 +1831,99 @@ void CNeutrinoApp::AddFontSettingItem(CMenuWidget &fontSettings, const char * co
 
 void CNeutrinoApp::InitFontSettings(CMenuWidget &fontSettings,CMenuWidget &fontSettings_Channellist , CMenuWidget &fontSettings_Eventlist , CMenuWidget &fontSettings_Infobar ,CMenuWidget &fontSettings_Epg, CMenuWidget &fontSettings_Gamelist )
 {
-	fontSettings_Epg.addItem( new CMenuSeparator() );
-	fontSettings_Epg.addItem( new CMenuForwarder("menu.back") );
-	fontSettings_Epg.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	fontSettings_Epg.addItem(&GenericMenuSeparator);
+	fontSettings_Epg.addItem(&GenericMenuBack);
+	fontSettings_Epg.addItem(&GenericMenuSeparatorLine);
 	AddFontSettingItem(fontSettings_Epg, "fontsize.epg_title", g_settings.fontsize_epg_title);
 	AddFontSettingItem(fontSettings_Epg, "fontsize.epg_info1", g_settings.fontsize_epg_info1);
 	AddFontSettingItem(fontSettings_Epg, "fontsize.epg_info2", g_settings.fontsize_epg_info2);
 	AddFontSettingItem(fontSettings_Epg, "fontsize.epg_date", g_settings.fontsize_epg_date);
-	fontSettings_Epg.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	fontSettings_Epg.addItem( new CMenuForwarder("options.default", true, "", this, "fontsize.def1", this) );
+	fontSettings_Epg.addItem(&GenericMenuSeparatorLine);
+	fontSettings_Epg.addItem( new CMenuForwarder("options.default", true, NULL, this, "fontsize.def1", this) );
 
-	fontSettings_Eventlist.addItem( new CMenuSeparator() );
-	fontSettings_Eventlist.addItem( new CMenuForwarder("menu.back") );
-	fontSettings_Eventlist.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	fontSettings_Eventlist.addItem(&GenericMenuSeparator);
+	fontSettings_Eventlist.addItem(&GenericMenuBack);
+	fontSettings_Eventlist.addItem(&GenericMenuSeparatorLine);
 	AddFontSettingItem(fontSettings_Eventlist, "fontsize.eventlist_title", g_settings.fontsize_eventlist_title);
 	AddFontSettingItem(fontSettings_Eventlist, "fontsize.eventlist_itemlarge", g_settings.fontsize_eventlist_itemlarge);
 	AddFontSettingItem(fontSettings_Eventlist, "fontsize.eventlist_itemsmall", g_settings.fontsize_eventlist_itemsmall);
 	AddFontSettingItem(fontSettings_Eventlist, "fontsize.eventlist_datetime", g_settings.fontsize_eventlist_datetime);
-	fontSettings_Eventlist.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	fontSettings_Eventlist.addItem( new CMenuForwarder("options.default", true, "", this, "fontsize.def2", this) );
+	fontSettings_Eventlist.addItem(&GenericMenuSeparatorLine);
+	fontSettings_Eventlist.addItem( new CMenuForwarder("options.default", true, NULL, this, "fontsize.def2", this) );
 
-	fontSettings_Gamelist.addItem( new CMenuSeparator() );
-	fontSettings_Gamelist.addItem( new CMenuForwarder("menu.back") );
-	fontSettings_Gamelist.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	fontSettings_Gamelist.addItem(&GenericMenuSeparator);
+	fontSettings_Gamelist.addItem(&GenericMenuBack);
+	fontSettings_Gamelist.addItem(&GenericMenuSeparatorLine);
 	AddFontSettingItem(fontSettings_Gamelist, "fontsize.gamelist_itemLarge", g_settings.fontsize_gamelist_itemlarge);
 	AddFontSettingItem(fontSettings_Gamelist, "fontsize.gamelist_itemSmall", g_settings.fontsize_gamelist_itemsmall);
-	fontSettings_Gamelist.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	fontSettings_Gamelist.addItem( new CMenuForwarder("options.default", true, "", this, "fontsize.def3", this) );
+	fontSettings_Gamelist.addItem(&GenericMenuSeparatorLine);
+	fontSettings_Gamelist.addItem( new CMenuForwarder("options.default", true, NULL, this, "fontsize.def3", this) );
 
-	fontSettings_Channellist.addItem( new CMenuSeparator() );
-	fontSettings_Channellist.addItem( new CMenuForwarder("menu.back") );
-	fontSettings_Channellist.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	fontSettings_Channellist.addItem(&GenericMenuSeparator);
+	fontSettings_Channellist.addItem(&GenericMenuBack);
+	fontSettings_Channellist.addItem(&GenericMenuSeparatorLine);
 	AddFontSettingItem(fontSettings_Channellist, "fontsize.channellist", g_settings.fontsize_channellist);
 	AddFontSettingItem(fontSettings_Channellist, "fontsize.channellist_descr", g_settings.fontsize_channellist_descr);
 	AddFontSettingItem(fontSettings_Channellist, "fontsize.channellist_number", g_settings.fontsize_channellist_number);
 	AddFontSettingItem(fontSettings_Channellist, "fontsize.channel_num_zap", g_settings.fontsize_channel_num_zap);
-	fontSettings_Channellist.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	fontSettings_Channellist.addItem( new CMenuForwarder("options.default", true, "", this, "fontsize.def4", this) );
+	fontSettings_Channellist.addItem(&GenericMenuSeparatorLine);
+	fontSettings_Channellist.addItem( new CMenuForwarder("options.default", true, NULL, this, "fontsize.def4", this) );
 
-	fontSettings_Infobar.addItem( new CMenuSeparator() );
-	fontSettings_Infobar.addItem( new CMenuForwarder("menu.back") );
-	fontSettings_Infobar.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	fontSettings_Infobar.addItem(&GenericMenuSeparator);
+	fontSettings_Infobar.addItem(&GenericMenuBack);
+	fontSettings_Infobar.addItem(&GenericMenuSeparatorLine);
 	AddFontSettingItem(fontSettings_Infobar, "fontsize.infobar_number", g_settings.fontsize_infobar_number);
 	AddFontSettingItem(fontSettings_Infobar, "fontsize.infobar_channame", g_settings.fontsize_infobar_channame);
 	AddFontSettingItem(fontSettings_Infobar, "fontsize.infobar_info", g_settings.fontsize_infobar_info);
 	AddFontSettingItem(fontSettings_Infobar, "fontsize.infobar_small", g_settings.fontsize_infobar_small);
-	fontSettings_Infobar.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	fontSettings_Infobar.addItem( new CMenuForwarder("options.default", true, "", this, "fontsize.def5", this) );
+	fontSettings_Infobar.addItem(&GenericMenuSeparatorLine);
+	fontSettings_Infobar.addItem( new CMenuForwarder("options.default", true, NULL, this, "fontsize.def5", this) );
 
-	fontSettings.addItem( new CMenuSeparator() );
-	fontSettings.addItem( new CMenuForwarder("menu.back") );
-	fontSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	fontSettings.addItem(&GenericMenuSeparator);
+	fontSettings.addItem(&GenericMenuBack);
+	fontSettings.addItem(&GenericMenuSeparatorLine);
 	AddFontSettingItem(fontSettings, "fontsize.alert", g_settings.fontsize_alert);
-	fontSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	fontSettings.addItem(&GenericMenuSeparatorLine);
 	AddFontSettingItem(fontSettings, "fontsize.menu", g_settings.fontsize_menu);
 	AddFontSettingItem(fontSettings, "fontsize.menu_title", g_settings.fontsize_menu_title);
 	AddFontSettingItem(fontSettings, "fontsize.menu_info", g_settings.fontsize_menu_info);
-	fontSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	fontSettings.addItem( new CMenuForwarder("fontmenu.channellist", true,"", &fontSettings_Channellist) );
-	fontSettings.addItem( new CMenuForwarder("fontmenu.eventlist", true,"", &fontSettings_Eventlist) );
-	fontSettings.addItem( new CMenuForwarder("fontmenu.epg", true,"", &fontSettings_Epg) );
-	fontSettings.addItem( new CMenuForwarder("fontmenu.infobar", true,"", &fontSettings_Infobar) );
-	fontSettings.addItem( new CMenuForwarder("fontmenu.gamelist", true,"", &fontSettings_Gamelist) );
+	fontSettings.addItem(&GenericMenuSeparatorLine);
+	fontSettings.addItem( new CMenuForwarder("fontmenu.channellist", true, NULL, &fontSettings_Channellist) );
+	fontSettings.addItem( new CMenuForwarder("fontmenu.eventlist", true, NULL, &fontSettings_Eventlist) );
+	fontSettings.addItem( new CMenuForwarder("fontmenu.epg", true, NULL, &fontSettings_Epg) );
+	fontSettings.addItem( new CMenuForwarder("fontmenu.infobar", true, NULL, &fontSettings_Infobar) );
+	fontSettings.addItem( new CMenuForwarder("fontmenu.gamelist", true, NULL, &fontSettings_Gamelist) );
 	AddFontSettingItem(fontSettings, "fontsize.filebrowser_item", g_settings.fontsize_filebrowser_item);
-	fontSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	fontSettings.addItem( new CMenuForwarder("options.default", true, "", this, "fontsize.def6", this) );
+	fontSettings.addItem(&GenericMenuSeparatorLine);
+	fontSettings.addItem( new CMenuForwarder("options.default", true, NULL, this, "fontsize.def6", this) );
 }
 
 void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fontSettings )
 {
 	dprintf(DEBUG_DEBUG, "init colorsettings\n");
-	colorSettings.addItem( new CMenuSeparator() );
-	colorSettings.addItem( new CMenuForwarder("menu.back") );
-	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	colorSettings.addItem(&GenericMenuSeparator);
+	colorSettings.addItem(&GenericMenuBack);
+	colorSettings.addItem(&GenericMenuSeparatorLine);
 
 	CMenuWidget *colorSettings_Themes = new CMenuWidget("colorthememenu.head", NEUTRINO_ICON_SETTINGS);
 	InitColorThemesSettings(*colorSettings_Themes);
 
-	colorSettings.addItem( new CMenuForwarder("colormenu.themeselect", true, "", colorSettings_Themes) );
+	colorSettings.addItem( new CMenuForwarder("colormenu.themeselect", true, NULL, colorSettings_Themes) );
 	CMenuWidget *colorSettings_menuColors = new CMenuWidget("colormenusetup.head", NEUTRINO_ICON_SETTINGS, 400, 400);
 	InitColorSettingsMenuColors(*colorSettings_menuColors);
-	colorSettings.addItem( new CMenuForwarder("colormenu.menucolors", true, "", colorSettings_menuColors) );
+	colorSettings.addItem( new CMenuForwarder("colormenu.menucolors", true, NULL, colorSettings_menuColors) );
 
 	CMenuWidget *colorSettings_statusbarColors = new CMenuWidget("colormenu.statusbar", NEUTRINO_ICON_SETTINGS);
 	InitColorSettingsStatusBarColors(*colorSettings_statusbarColors);
-	colorSettings.addItem( new CMenuForwarder("colorstatusbar.head", true, "", colorSettings_statusbarColors) );
+	colorSettings.addItem( new CMenuForwarder("colorstatusbar.head", true, NULL, colorSettings_statusbarColors) );
 
-	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	colorSettings.addItem( new CMenuForwarder("colormenu.font", true,"", &fontSettings) );
+	colorSettings.addItem(&GenericMenuSeparatorLine);
+	colorSettings.addItem( new CMenuForwarder("colormenu.font", true, NULL, &fontSettings) );
 	CMenuWidget *colorSettings_timing = new CMenuWidget("colormenu.timing", NEUTRINO_ICON_SETTINGS);
 	InitColorSettingsTiming(*colorSettings_timing);
-	colorSettings.addItem( new CMenuForwarder("timing.head", true, "", colorSettings_timing) );
+	colorSettings.addItem( new CMenuForwarder("timing.head", true, NULL, colorSettings_timing));
 
-	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	colorSettings.addItem(&GenericMenuSeparatorLine);
 	if(g_info.box_Type != CControldClient::TUXBOX_MAKER_NOKIA)
 	{
 		//menuefaden nur bei enx-chips!
@@ -1930,7 +1934,7 @@ void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fo
 	} else {
 		//alpha-werte nur einstellen wenn gtx-chip
 		CAlphaSetup* chAlphaSetup = new CAlphaSetup("colormenu.gtx_alpha", &g_settings.gtx_alpha1, &g_settings.gtx_alpha2, NULL);
-		colorSettings.addItem( new CMenuForwarder("colormenu.gtx_alpha", true, "", chAlphaSetup ));
+		colorSettings.addItem( new CMenuForwarder("colormenu.gtx_alpha", true, NULL, chAlphaSetup));
 	}
 }
 
@@ -1938,18 +1942,18 @@ void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fo
 void CNeutrinoApp::InitColorThemesSettings(CMenuWidget &colorSettings_Themes)
 {
 	dprintf(DEBUG_DEBUG, "init themesettings\n");
-	colorSettings_Themes.addItem( new CMenuSeparator() );
-	colorSettings_Themes.addItem( new CMenuForwarder("menu.back") );
-	colorSettings_Themes.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	colorSettings_Themes.addItem( new CMenuForwarder("colorthememenu.neutrino_theme", true, "", this, "theme_neutrino") );
-	colorSettings_Themes.addItem( new CMenuForwarder("colorthememenu.classic_theme", true, "", this, "theme_classic") );
+	colorSettings_Themes.addItem(&GenericMenuSeparator);
+	colorSettings_Themes.addItem(&GenericMenuBack);
+	colorSettings_Themes.addItem(&GenericMenuSeparatorLine);
+	colorSettings_Themes.addItem( new CMenuForwarder("colorthememenu.neutrino_theme", true, NULL, this, "theme_neutrino") );
+	colorSettings_Themes.addItem( new CMenuForwarder("colorthememenu.classic_theme", true, NULL, this, "theme_classic") );
 }
 
 void CNeutrinoApp::InitColorSettingsMenuColors(CMenuWidget &colorSettings_menuColors)
 {
 	dprintf(DEBUG_DEBUG, "init colormenuesettings\n");
-	colorSettings_menuColors.addItem( new CMenuSeparator() );
-	colorSettings_menuColors.addItem( new CMenuForwarder("menu.back") );
+	colorSettings_menuColors.addItem(&GenericMenuSeparator);
+	colorSettings_menuColors.addItem(&GenericMenuBack);
 
 	CColorChooser* chHeadcolor = new CColorChooser("colormenu.background_head", &g_settings.menu_Head_red, &g_settings.menu_Head_green, &g_settings.menu_Head_blue,
 																  &g_settings.menu_Head_alpha, colorSetupNotifier);
@@ -1968,25 +1972,25 @@ void CNeutrinoApp::InitColorSettingsMenuColors(CMenuWidget &colorSettings_menuCo
 	CColorChooser* chContentInactiveTextcolor = new CColorChooser("colormenu.textcolor_head", &g_settings.menu_Content_inactive_Text_red, &g_settings.menu_Content_inactive_Text_green, &g_settings.menu_Content_inactive_Text_blue,
 																					  NULL, colorSetupNotifier);
 	colorSettings_menuColors.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "colormenusetup.menuhead") );
-	colorSettings_menuColors.addItem( new CMenuForwarder("colormenu.background", true, "", chHeadcolor ));
-	colorSettings_menuColors.addItem( new CMenuForwarder("colormenu.textcolor", true, "", chHeadTextcolor ));
+	colorSettings_menuColors.addItem( new CMenuForwarder("colormenu.background", true, NULL, chHeadcolor ));
+	colorSettings_menuColors.addItem( new CMenuForwarder("colormenu.textcolor", true, NULL, chHeadTextcolor ));
 	colorSettings_menuColors.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "colormenusetup.menucontent") );
-	colorSettings_menuColors.addItem( new CMenuForwarder("colormenu.background", true, "", chContentcolor ));
-	colorSettings_menuColors.addItem( new CMenuForwarder("colormenu.textcolor", true, "", chContentTextcolor ));
+	colorSettings_menuColors.addItem( new CMenuForwarder("colormenu.background", true, NULL, chContentcolor ));
+	colorSettings_menuColors.addItem( new CMenuForwarder("colormenu.textcolor", true, NULL, chContentTextcolor ));
 	colorSettings_menuColors.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "colormenusetup.menucontent_inactive") );
-	colorSettings_menuColors.addItem( new CMenuForwarder("colormenu.background", true, "", chContentInactivecolor ));
-	colorSettings_menuColors.addItem( new CMenuForwarder("colormenu.textcolor", true, "", chContentInactiveTextcolor));
+	colorSettings_menuColors.addItem( new CMenuForwarder("colormenu.background", true, NULL, chContentInactivecolor ));
+	colorSettings_menuColors.addItem( new CMenuForwarder("colormenu.textcolor", true, NULL, chContentInactiveTextcolor));
 	colorSettings_menuColors.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "colormenusetup.menucontent_selected") );
-	colorSettings_menuColors.addItem( new CMenuForwarder("colormenu.background", true, "", chContentSelectedcolor ));
-	colorSettings_menuColors.addItem( new CMenuForwarder("colormenu.textcolor", true, "", chContentSelectedTextcolor ));
+	colorSettings_menuColors.addItem( new CMenuForwarder("colormenu.background", true, NULL, chContentSelectedcolor ));
+	colorSettings_menuColors.addItem( new CMenuForwarder("colormenu.textcolor", true, NULL, chContentSelectedTextcolor ));
 }
 
 void CNeutrinoApp::InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_statusbarColors)
 {
 	dprintf(DEBUG_DEBUG, "init colorstatusbarsettings\n");
-	colorSettings_statusbarColors.addItem( new CMenuSeparator() );
+	colorSettings_statusbarColors.addItem(&GenericMenuSeparator);
 
-	colorSettings_statusbarColors.addItem( new CMenuForwarder("menu.back") );
+	colorSettings_statusbarColors.addItem(&GenericMenuBack);
 
 	CColorChooser* chInfobarcolor = new CColorChooser("colormenu.background_head", &g_settings.infobar_red, &g_settings.infobar_green, &g_settings.infobar_blue,
 																	  &g_settings.infobar_alpha, colorSetupNotifier);
@@ -1994,8 +1998,8 @@ void CNeutrinoApp::InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_s
 																			NULL, colorSetupNotifier);
 
 	colorSettings_statusbarColors.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "colorstatusbar.text") );
-	colorSettings_statusbarColors.addItem( new CMenuForwarder("colormenu.background", true, "", chInfobarcolor ));
-	colorSettings_statusbarColors.addItem( new CMenuForwarder("colormenu.textcolor", true, "", chInfobarTextcolor ));
+	colorSettings_statusbarColors.addItem( new CMenuForwarder("colormenu.background", true, NULL, chInfobarcolor ));
+	colorSettings_statusbarColors.addItem( new CMenuForwarder("colormenu.textcolor", true, NULL, chInfobarTextcolor ));
 }
 
 void CNeutrinoApp::InitColorSettingsTiming(CMenuWidget &colorSettings_timing)
@@ -2007,9 +2011,9 @@ void CNeutrinoApp::InitColorSettingsTiming(CMenuWidget &colorSettings_timing)
 	sprintf(g_settings.timing_menu_string,"%d",g_settings.timing_menu);
 	sprintf(g_settings.timing_filebrowser_string,"%d",g_settings.timing_filebrowser);
 
-	colorSettings_timing.addItem( new CMenuSeparator() );
-	colorSettings_timing.addItem( new CMenuForwarder("menu.back") );
-	colorSettings_timing.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	colorSettings_timing.addItem(&GenericMenuSeparator);
+	colorSettings_timing.addItem(&GenericMenuBack);
+	colorSettings_timing.addItem(&GenericMenuSeparatorLine);
 
 	CStringInput * colorSettings_timing_menu = new CStringInput("timing.menu", g_settings.timing_menu_string, 3, "timing.hint_1", "timing.hint_2", "0123456789 ", this);
 	colorSettings_timing.addItem( new CMenuForwarder("timing.menu", true, g_settings.timing_menu_string, colorSettings_timing_menu ) );
@@ -2026,8 +2030,8 @@ void CNeutrinoApp::InitColorSettingsTiming(CMenuWidget &colorSettings_timing)
 	CStringInput * colorSettings_timing_filebrowser = new CStringInput("timing.filebrowser", g_settings.timing_filebrowser_string, 3, "timing.hint_1", "timing.hint_2", "0123456789 ", this);
 	colorSettings_timing.addItem( new CMenuForwarder("timing.filebrowser", true,  g_settings.timing_filebrowser_string, colorSettings_timing_filebrowser ) );
 
-	colorSettings_timing.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	colorSettings_timing.addItem( new CMenuForwarder("options.default", true, "", this, "osd.def") );
+	colorSettings_timing.addItem(&GenericMenuSeparatorLine);
+	colorSettings_timing.addItem( new CMenuForwarder("options.default", true, NULL, this, "osd.def"));
 }
 
 void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
@@ -2037,10 +2041,10 @@ void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
 	static int lcdautodimm = CLCD::getInstance()->getAutoDimm()?1:0;
 
 	dprintf(DEBUG_DEBUG, "init lcdsettings\n");
-	lcdSettings.addItem( new CMenuSeparator() );
+	lcdSettings.addItem(&GenericMenuSeparator);
 
-	lcdSettings.addItem( new CMenuForwarder("menu.back") );
-	lcdSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	lcdSettings.addItem(&GenericMenuBack);
+	lcdSettings.addItem(&GenericMenuSeparatorLine);
 
 	CLcdControler* lcdsliders = new CLcdControler("lcdmenu.head", NULL);
 
@@ -2065,10 +2069,10 @@ void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
 		lcdSettings.addItem( oj );
 	}
 
-	lcdSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	lcdSettings.addItem( new CMenuForwarder("lcdmenu.lcdcontroler", true, "", lcdsliders ));
+	lcdSettings.addItem(&GenericMenuSeparatorLine);
+	lcdSettings.addItem( new CMenuForwarder("lcdmenu.lcdcontroler", true, NULL, lcdsliders));
 
-	lcdSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	lcdSettings.addItem(&GenericMenuSeparatorLine);
 	oj = new CMenuOptionChooser("lcdmenu.statusline", &g_settings.lcd_show_volume, true );
 	oj->addOption(0, "lcdmenu.statusline.playtime");
 	oj->addOption(1, "lcdmenu.statusline.volume");
@@ -2079,8 +2083,8 @@ void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
 void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 {
 	dprintf(DEBUG_DEBUG, "init keysettings\n");
-	keySettings.addItem( new CMenuSeparator() );
-	keySettings.addItem( new CMenuForwarder("menu.back") );
+	keySettings.addItem(&GenericMenuSeparator);
+	keySettings.addItem(&GenericMenuBack);
 
 	CKeyChooser*   keySettings_tvradio_mode = new CKeyChooser(&g_settings.key_tvradio_mode, "keybindingmenu.tvradiomode_head", NEUTRINO_ICON_SETTINGS);
 	CKeyChooser*   keySettings_channelList_pageup = new CKeyChooser(&g_settings.key_channelList_pageup, "keybindingmenu.pageup_head", NEUTRINO_ICON_SETTINGS);
@@ -2097,7 +2101,7 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 	CKeyChooser*   keySettings_subchannel_down = new CKeyChooser(&g_settings.key_subchannel_down, "keybindingmenu.subchanneldown_head", NEUTRINO_ICON_SETTINGS);
 
 	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.modechange") );
-	keySettings.addItem( new CMenuForwarder("keybindingmenu.tvradiomode", true, "", keySettings_tvradio_mode ));
+	keySettings.addItem( new CMenuForwarder("keybindingmenu.tvradiomode", true, NULL, keySettings_tvradio_mode));
 
 	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.channellist") );
 	CMenuOptionChooser *oj = new CMenuOptionChooser("keybindingmenu.bouquethandling" , &g_settings.bouquetlist_mode, true );
@@ -2105,19 +2109,19 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 	oj->addOption(1, "keybindingmenu.bouquetlist_on_ok");
 	oj->addOption(2, "keybindingmenu.allchannels_on_ok");
 	keySettings.addItem( oj );
-	keySettings.addItem( new CMenuForwarder("keybindingmenu.pageup", true, "", keySettings_channelList_pageup ));
-	keySettings.addItem( new CMenuForwarder("keybindingmenu.pagedown", true, "", keySettings_channelList_pagedown ));
-	keySettings.addItem( new CMenuForwarder("keybindingmenu.cancel", true, "", keySettings_channelList_cancel ));
-	keySettings.addItem( new CMenuForwarder("keybindingmenu.sort", true, "", keySettings_channelList_sort ));
-	keySettings.addItem( new CMenuForwarder("keybindingmenu.addrecord", true, "", keySettings_channelList_addrecord ));
-	keySettings.addItem( new CMenuForwarder("keybindingmenu.addremind", true, "", keySettings_channelList_addremind ));
+	keySettings.addItem( new CMenuForwarder("keybindingmenu.pageup", true, NULL, keySettings_channelList_pageup ));
+	keySettings.addItem( new CMenuForwarder("keybindingmenu.pagedown", true, NULL, keySettings_channelList_pagedown ));
+	keySettings.addItem( new CMenuForwarder("keybindingmenu.cancel", true, NULL, keySettings_channelList_cancel ));
+	keySettings.addItem( new CMenuForwarder("keybindingmenu.sort", true, NULL, keySettings_channelList_sort ));
+	keySettings.addItem( new CMenuForwarder("keybindingmenu.addrecord", true, NULL, keySettings_channelList_addrecord ));
+	keySettings.addItem( new CMenuForwarder("keybindingmenu.addremind", true, NULL, keySettings_channelList_addremind ));
 	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.quickzap") );
-	keySettings.addItem( new CMenuForwarder("keybindingmenu.channelup", true, "", keySettings_quickzap_up ));
-	keySettings.addItem( new CMenuForwarder("keybindingmenu.channeldown", true, "", keySettings_quickzap_down ));
-	keySettings.addItem( new CMenuForwarder("keybindingmenu.bouquetup", true, "", keySettings_bouquet_up ));
-	keySettings.addItem( new CMenuForwarder("keybindingmenu.bouquetdown", true, "", keySettings_bouquet_down ));
-	keySettings.addItem( new CMenuForwarder("keybindingmenu.subchannelup", true, "", keySettings_subchannel_up ));
-	keySettings.addItem( new CMenuForwarder("keybindingmenu.subchanneldown", true, "", keySettings_subchannel_down ));
+	keySettings.addItem( new CMenuForwarder("keybindingmenu.channelup", true, NULL, keySettings_quickzap_up ));
+	keySettings.addItem( new CMenuForwarder("keybindingmenu.channeldown", true, NULL, keySettings_quickzap_down ));
+	keySettings.addItem( new CMenuForwarder("keybindingmenu.bouquetup", true, NULL, keySettings_bouquet_up ));
+	keySettings.addItem( new CMenuForwarder("keybindingmenu.bouquetdown", true, NULL, keySettings_bouquet_down ));
+	keySettings.addItem( new CMenuForwarder("keybindingmenu.subchannelup", true, NULL, keySettings_subchannel_up ));
+	keySettings.addItem( new CMenuForwarder("keybindingmenu.subchanneldown", true, NULL, keySettings_subchannel_down ));
 }
 
 void CNeutrinoApp::SelectNVOD()
@@ -2127,7 +2131,7 @@ void CNeutrinoApp::SelectNVOD()
 		// NVOD/SubService- Kanal!
 		CMenuWidget NVODSelector( g_RemoteControl->are_subchannels?"nvodselector.subservice":"nvodselector.head", "video.raw", 350);
 
-		NVODSelector.addItem( new CMenuSeparator() );
+		NVODSelector.addItem(&GenericMenuSeparator);
 
 		int count = 0;
 		char nvod_id[5];
@@ -2142,7 +2146,7 @@ void CNeutrinoApp::SelectNVOD()
 				char nvod_s[100];
 				struct  tm *tmZeit;
 
-				tmZeit= localtime( &e->startzeit );
+				tmZeit= localtime(&e->startzeit );
 				sprintf(nvod_time_a, "%02d:%02d", tmZeit->tm_hour, tmZeit->tm_min);
 
 				time_t endtime = e->startzeit+ e->dauer;
@@ -2177,7 +2181,7 @@ void CNeutrinoApp::SelectNVOD()
 
 		if( g_RemoteControl->are_subchannels )
 		{
-			NVODSelector.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+			NVODSelector.addItem(&GenericMenuSeparatorLine);
 			CMenuOptionChooser* oj = new CMenuOptionChooser("nvodselector.directormode", &g_RemoteControl->director_mode, true, NULL, true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW);
 			oj->addOption(0, "options.off");
 			oj->addOption(1, "options.on");
@@ -2195,7 +2199,7 @@ void CNeutrinoApp::SelectAPID()
 		// wir haben APIDs für diesen Kanal!
 
 		CMenuWidget APIDSelector("apidselector.head", "audio.raw", 300);
-		APIDSelector.addItem( new CMenuSeparator() );
+		APIDSelector.addItem(&GenericMenuSeparator);
 
 		for( unsigned int count=0; count<g_RemoteControl->current_PIDs.APIDs.size(); count++ )
 		{
@@ -2210,7 +2214,7 @@ void CNeutrinoApp::SelectAPID()
 void CNeutrinoApp::ShowStreamFeatures()
 {
 	CMenuWidget StreamFeatureSelector("streamfeatures.head", "features.raw", 350);
-	StreamFeatureSelector.addItem( new CMenuSeparator() );
+	StreamFeatureSelector.addItem(&GenericMenuSeparator);
 
 	char id[5];
 	int cnt = 0;
@@ -2227,21 +2231,20 @@ void CNeutrinoApp::ShowStreamFeatures()
 			enabled_count++;
 
 #warning TODO: make sure g_PluginList->getName(count) is UTF-8 encoded
-			StreamFeatureSelector.addItem( new CMenuForwarder((g_PluginList->getName(count)).c_str(), true, "", StreamFeaturesChanger, id, false, (cnt== 0) ? CRCInput::RC_blue : CRCInput::RC_nokey, (cnt== 0)?NEUTRINO_ICON_BUTTON_BLUE:""), (cnt == 0) );
+			StreamFeatureSelector.addItem( new CMenuForwarder((g_PluginList->getName(count)).c_str(), true, NULL, StreamFeaturesChanger, id, false, (cnt== 0) ? CRCInput::RC_blue : CRCInput::RC_nokey, (cnt== 0)?NEUTRINO_ICON_BUTTON_BLUE:""), (cnt == 0) );
 			cnt++;
 		}
 	}
 
 	if(cnt>0)
 	{
-		StreamFeatureSelector.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+		StreamFeatureSelector.addItem(&GenericMenuSeparatorLine);
 	}
 
 	sprintf(id, "%d", -1);
 
 	// -- Add Channel to favorites
-	StreamFeatureSelector.addItem( new CMenuForwarder("favorites.menueadd", true, "",
-																	  new CFavorites, id, true, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN), false );
+	StreamFeatureSelector.addItem(new CMenuForwarder("favorites.menueadd", true, NULL, new CFavorites, id, true, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN), false);
 
 	// start/stop recording
 	if(g_settings.recording_type > 0)
@@ -2250,11 +2253,10 @@ void CNeutrinoApp::ShowStreamFeatures()
 		oj->addOption(0, "mainmenu.recording_start");
 		oj->addOption(1, "mainmenu.recording_stop");
 		StreamFeatureSelector.addItem( oj );
-		StreamFeatureSelector.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+		StreamFeatureSelector.addItem(&GenericMenuSeparatorLine);
 	}
 	// -- Timer Liste
-	StreamFeatureSelector.addItem( new CMenuForwarder("timerlist.name", true, "",
-																	  new CTimerList(), id, true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW), false );
+	StreamFeatureSelector.addItem(new CMenuForwarder("timerlist.name", true, NULL, new CTimerList(), id, true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW), false);
 
 	// -- Sectionsd pause
 	int dummy = g_Sectionsd->getIsScanningActive();
@@ -2265,12 +2267,9 @@ void CNeutrinoApp::ShowStreamFeatures()
 
 
 	// -- Stream Info
-	StreamFeatureSelector.addItem( new CMenuForwarder("streamfeatures.info", true, "",
-																	  StreamFeaturesChanger, id, true, CRCInput::RC_help, "help_small.raw"), false );
-
+	StreamFeatureSelector.addItem(new CMenuForwarder("streamfeatures.info", true, NULL, StreamFeaturesChanger, id, true, CRCInput::RC_help, "help_small.raw"), false);
 
 	StreamFeatureSelector.exec(NULL, "");
-
 }
 
 
@@ -2576,7 +2575,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 	while( true )
 	{
 		uint msg; uint data;
-		g_RCInput->getMsg( &msg, &data, 100 );	// 10 secs..
+		g_RCInput->getMsg(&msg, &data, 100 );	// 10 secs..
 
 		if( ( mode == mode_tv ) || ( ( mode == mode_radio ) ) )
 		{
@@ -2602,7 +2601,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			{
 				mainMenu.exec(NULL, "");
 			}
-			if( msg == CRCInput::RC_ok )
+			if( msg == CRCInput::RC_ok)
 			{
 				int bouqMode = g_settings.bouquetlist_mode;//bsmChannels;
 
@@ -2715,7 +2714,7 @@ void CNeutrinoApp::showProfiling(std::string text)
 {
 	struct timeval tv;
 
-	gettimeofday( &tv, NULL );
+	gettimeofday(&tv, NULL );
 	long long now = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
 
 
@@ -2755,7 +2754,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		{
 			// trigger StandBy
 			struct timeval tv;
-			gettimeofday( &tv, NULL );
+			gettimeofday(&tv, NULL );
 			standby_pressed_at = (tv.tv_sec*1000000) + tv.tv_usec;
 
 			if( mode == mode_standby )
@@ -2784,11 +2783,11 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 
 				do
 				{
-					g_RCInput->getMsg( &msg, &data, timeout );
+					g_RCInput->getMsg(&msg, &data, timeout );
 
 					if( msg != CRCInput::RC_timeout )
 					{
-						gettimeofday( &tv, NULL );
+						gettimeofday(&tv, NULL );
 						endtime = (tv.tv_sec*1000000) + tv.tv_usec;
 						diff = int((endtime - standby_pressed_at)/100000. );
 					}
@@ -2806,7 +2805,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		else /* data == 1: Standby button released */
 		{
 			struct timeval tv;
-			gettimeofday( &tv, NULL );
+			gettimeofday(&tv, NULL );
 			long long endtime = (tv.tv_sec*1000000) + tv.tv_usec;
 			int diff = int((endtime - standby_pressed_at)/100000. );
 			if( diff >= 10 )
@@ -3305,7 +3304,7 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 			CLCD::getInstance()->showVolume(current_volume);
 			if( msg != CRCInput::RC_timeout )
 			{
-				g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+				g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd );
 			}
 
 		}

@@ -592,7 +592,6 @@ int CMenuOptionStringChooser::paint( bool selected )
 CMenuForwarder::CMenuForwarder(const char * const Text, const bool Active, const char * const Option, CMenuTarget* Target, std::string ActionKey, bool Localizing, uint DirectKey, std::string IconName)
 {
 	frameBuffer = CFrameBuffer::getInstance();
-	height=g_Fonts->menu->getHeight();
 	text=Text;
 	option = Option;
 	option_string = NULL;
@@ -607,7 +606,6 @@ CMenuForwarder::CMenuForwarder(const char * const Text, const bool Active, const
 CMenuForwarder::CMenuForwarder(const char * const Text, const bool Active, const std::string &Option, CMenuTarget* Target, std::string ActionKey, bool Localizing, uint DirectKey, std::string IconName)
 {
 	frameBuffer = CFrameBuffer::getInstance();
-	height=g_Fonts->menu->getHeight();
 	text=Text;
 	option = NULL;
 	option_string = &Option;
@@ -617,6 +615,11 @@ CMenuForwarder::CMenuForwarder(const char * const Text, const bool Active, const
 	localizing = Localizing;
 	directKey = DirectKey;
 	iconName = IconName;
+}
+
+int CMenuForwarder::getHeight(void) const
+{
+	return g_Fonts->menu->getHeight();
 }
 
 int CMenuForwarder::exec(CMenuTarget* parent)
@@ -634,6 +637,7 @@ int CMenuForwarder::exec(CMenuTarget* parent)
 
 int CMenuForwarder::paint(bool selected)
 {
+	int height = getHeight();
 	std::string l_text = localizing ? g_Locale->getText(text) : text;
 
 	int stringstartposX = x + offx + 10;
