@@ -130,6 +130,7 @@ static int debug = 0;		/* print debugging output or not */
 static char logfile[255];	/* redirect errors from stderr */
 static int retry_num = 10;	/* number of retries for failed connections */
 static int enable_metadata = 0;	/* allow shoutcast meta data streaming */
+static int got_opts = 0;	/* is set to 1 if getOpts() was executed */
 static int cache_size = 196608;/* default cache size; can be overridden at */
 				/* runtime with an option in the options file */
 
@@ -160,6 +161,14 @@ void getOpts()
   char buf[4096], *ptr;
   int i;
   FILE *fd = NULL;
+
+  /* options which can be set from within neutrino */
+  enable_metadata = g_settings.audioplayer_enable_sc_metadata;
+
+  if (got_opts) /* prevent reading in options multiple times */
+    return;
+  else
+    got_opts = 1;
   
   for(i=0; dirs[i] != NULL; i++)
   {
@@ -174,8 +183,6 @@ void getOpts()
   
   if(strstr(buf, "debug=1"))
     debug = 1;
-
-  enable_metadata = g_settings.audioplayer_enable_sc_metadata;
 
   if((ptr = strstr(buf, "cachesize=")))
     cache_size = atoi(strchr(ptr, '=') + 1);
