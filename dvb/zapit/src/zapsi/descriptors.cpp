@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.45 2002/10/05 00:06:30 thegoodguy Exp $
+ * $Id: descriptors.cpp,v 1.46 2002/10/06 22:18:26 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -32,6 +32,8 @@
 #include <bouquets.h>
 #include <scan.h>
 
+#include <dvbstring.h>
+
 #include "descriptors.h"
 #include "sdt.h"
 
@@ -40,7 +42,7 @@ std::map <uint32_t, transpondermap> scantransponders;
 std::string curr_chan_name;
 uint32_t found_transponders;
 uint32_t found_channels;
-std::string lastProviderName;
+CDVBString lastProviderName(NULL, 0);
 std::map <t_channel_id, uint8_t> service_types;
 
 extern CFrontend *frontend;
@@ -422,8 +424,8 @@ uint8_t service_descriptor (uint8_t *buffer, const t_service_id service_id, cons
 	uint8_t service_type = buffer[2];
 	uint8_t service_provider_name_length = buffer[3];
 
-	std::string providerName = std::string((const char*)&(buffer[4]), service_provider_name_length);
-	std::string serviceName  = std::string((const char*)&(buffer[service_provider_name_length + 4]), (2 + buffer[1]) - (service_provider_name_length + 4));
+	CDVBString providerName = CDVBString((const char*)&(buffer[4]), service_provider_name_length);
+	CDVBString serviceName  = CDVBString((const char*)&(buffer[service_provider_name_length + 4]), (2 + buffer[1]) - (service_provider_name_length + 4));
 
 	found_channels++;
 
@@ -442,7 +444,7 @@ uint8_t service_descriptor (uint8_t *buffer, const t_service_id service_id, cons
 			CREATE_CHANNEL_ID,
 			CZapitChannel
 			(
-				serviceName,
+				serviceName.getContent(),
 				service_id,
 				transport_stream_id,
 				original_network_id,
@@ -452,13 +454,15 @@ uint8_t service_descriptor (uint8_t *buffer, const t_service_id service_id, cons
 		)
 	);
 
-	if (providerName == "")
-		providerName = "Unknown Provider";
+#define UNKNOWN_PROVIDER_NAME "Unknown Provider"
+
+	if (providerName.getContent() == "")
+		providerName = CDVBString(UNKNOWN_PROVIDER_NAME, strlen(UNKNOWN_PROVIDER_NAME));
 
 	if (lastProviderName != providerName)
 	{
 		lastProviderName = providerName;
-		eventServer->sendEvent(CZapitClient::EVT_SCAN_PROVIDER, CEventServer::INITID_ZAPIT, (void *) lastProviderName.c_str(), lastProviderName.length() + 1);
+		eventServer->sendEvent(CZapitClient::EVT_SCAN_PROVIDER, CEventServer::INITID_ZAPIT, (void *) lastProviderName.getContent().c_str(), lastProviderName.getContent().length() + 1);
 	}
 
 	switch (service_type)
@@ -470,14 +474,14 @@ uint8_t service_descriptor (uint8_t *buffer, const t_service_id service_id, cons
 		CBouquet* bouquet;
 		int bouquetId;
 
-		bouquetId = scanBouquetManager->existsBouquet(providerName);
+		bouquetId = scanBouquetManager->existsBouquet(providerName.getContent());
 
 		if (bouquetId == -1)
-			bouquet = scanBouquetManager->addBouquet(providerName);
+			bouquet = scanBouquetManager->addBouquet(providerName.getContent());
 		else
 			bouquet = scanBouquetManager->Bouquets[bouquetId];
 
-		bouquet->addService(new CZapitChannel(serviceName, service_id, transport_stream_id, original_network_id, service_type, 0));
+		bouquet->addService(new CZapitChannel(serviceName.getContent(), service_id, transport_stream_id, original_network_id, service_type, 0));
 		break;
 	}
 
