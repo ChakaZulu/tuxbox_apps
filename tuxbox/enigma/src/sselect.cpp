@@ -27,6 +27,7 @@
 #include <lib/system/info.h>
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
+#include <lib/picviewer/pictureviewer.h>
 #include <enigma_streamer.h>
 
 gFont eListBoxEntryService::serviceFont;
@@ -103,6 +104,67 @@ void eEPGStyleSelector::entrySelected( eListBoxEntryText* e )
 			eConfig::getInstance()->setKey("/ezap/serviceselector/lastEPGStyle", (int)e->getKey());
 		else
 			eConfig::getInstance()->setKey("/ezap/lastEPGStyle", (int)e->getKey());
+		close( (int)e->getKey() );
+	}
+	else
+		close(-1);
+}
+
+struct PicViewerStyleSelectorActions
+{
+	eActionMap map;
+	eAction infoPressed;
+	PicViewerStyleSelectorActions():
+		map("PicViewerStyleSelector", _("Picture Style Selector")),
+		infoPressed(map, "infoPressed", _("open the Picture Viewer with selected style"), eAction::prioDialog)
+	{
+	}
+};
+eAutoInitP0<PicViewerStyleSelectorActions> i_PicViewerStyleSelectorActions(eAutoInitNumbers::actions, "Picture Viewer Style Selector");
+
+ePicViewerStyleSelector::ePicViewerStyleSelector(int ssel)
+		:eListBoxWindow<eListBoxEntryText>(_("Picture Viewer Actions"), 5, 350, true)
+		,ssel(ssel)
+{
+	addActionMap(&i_PicViewerStyleSelectorActions->map);
+	move(ePoint(100, 100));
+	int last = 0;
+	if (ssel)
+		eConfig::getInstance()->getKey("/ezap/serviceselector/lastPicViewerStyle", last);
+	else
+		eConfig::getInstance()->getKey("/ezap/lastPicViewerStyle", last);
+	eListBoxEntryText *sel[2];
+	sel[0] = new eListBoxEntryText(&list,_("Channel EPG"), (void *)0, 0, _("Show selected slide") );
+	sel[1] = new eListBoxEntryText(&list,_("Multi EPG"), (void *)1, 0, _("Show slideshow (of all pictures in directory)"));
+
+	list.setCurrent(sel[last]);
+	CONNECT(list.selected, ePicViewerStyleSelector::entrySelected);
+}
+
+int ePicViewerStyleSelector::eventHandler( const eWidgetEvent &event )
+{
+	switch (event.type)
+	{
+		case eWidgetEvent::evtAction:
+			if (event.action == &i_PicViewerStyleSelectorActions->infoPressed)
+				entrySelected(list.getCurrent());
+			else
+				break;
+			return 1;
+		default:
+			break;
+	}
+	return eWindow::eventHandler(event);
+}
+
+void ePicViewerStyleSelector::entrySelected( eListBoxEntryText* e )
+{
+	if (e)
+	{
+		if ( ssel )
+			eConfig::getInstance()->setKey("/ezap/serviceselector/lastPicViewerStyle", (int)e->getKey());
+		else
+			eConfig::getInstance()->setKey("/ezap/lastPicViewerStyle", (int)e->getKey());
 		close( (int)e->getKey() );
 	}
 	else
@@ -946,8 +1008,7 @@ void eServiceSelector::updateCi()
 
 void eServiceSelector::forEachServiceRef( Signal1<void,const eServiceReference&> callback, bool fromBeg )
 {
-	eListBoxEntryService *safe = services->getCurrent(),
-											 *p, *beg;
+	eListBoxEntryService *safe = services->getCurrent(), *p, *beg;
 	if ( fromBeg )
 	{
 		services->moveSelection( eListBoxBase::dirFirst );
@@ -974,9 +1035,9 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 {
 	int num=0;
 	struct fb_var_screeninfo *screenInfo = fbClass::getInstance()->getScreenInfo();
-	if (screenInfo->bits_per_pixel == 16)
+	if (screenInfo->bits_per_pixel != 8)
 	{
-		fbClass::getInstance()->SetMode(720, 576, 8);
+		fbClass::getInstance()->SetMode(screenInfo->xres, screenInfo->yres, 8);
 		fbClass::getInstance()->PutCMAP();
 	}
 	eServicePath enterPath;
@@ -1120,25 +1181,55 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 				&& !movemode && !editMode && this == eZap::getInstance()->getServiceSelector() )
 			{
 				hide();
-				eEPGStyleSelector e(1);
-#ifndef DISABLE_LCD
-				e.setLCD( LCDTitle, LCDElement );
-#endif
-				e.show();
-				int ret = e.exec();
-				e.hide();
-				switch ( ret )
+				eServiceReference sref = eServiceInterface::getInstance()->service;
+				printf("[SSELECT] sref: %s\n", sref.path.c_str());
+				if (sref.path.right(4).upper() == ".JPG" ||
+				    sref.path.right(4).upper() == ".PNG" ||
+				    sref.path.right(4).upper() == ".BMP" ||
+				    sref.path.right(4).upper() == ".GIF") 
 				{
-					case 1:
-						/*emit*/ showEPGList((eServiceReferenceDVB&)selected);
-						show();
-						break;
-					case 2:
-						showMultiEPG();
-						break;
-					default:
-						show();
-						break;
+					ePicViewerStyleSelector e(1);
+#ifndef DISABLE_LCD
+					e.setLCD( LCDTitle, LCDElement );
+#endif
+					e.show();
+					int ret = e.exec();
+					e.hide();
+					switch (ret)
+					{
+						case 0:
+							ePictureViewer::getInstance()->displayImage(sref.path);
+							break;
+						case 1:
+							ePictureViewer::getInstance()->displaySlideshow(sref.path);
+							break;
+						default:
+							show();
+							break;
+					}
+				}
+				else
+				{
+					eEPGStyleSelector e(1);
+#ifndef DISABLE_LCD
+					e.setLCD( LCDTitle, LCDElement );
+#endif
+					e.show();
+					int ret = e.exec();
+					e.hide();
+					switch ( ret )
+					{
+						case 1:
+							/*emit*/ showEPGList((eServiceReferenceDVB&)selected);
+							show();
+							break;
+						case 2:
+							showMultiEPG();
+							break;
+						default:
+							show();
+							break;
+					}
 				}
 			}
 			else if (event.action == &i_serviceSelectorActions->pathUp)
