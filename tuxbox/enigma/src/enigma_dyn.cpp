@@ -130,6 +130,7 @@ static eString tvMessageWindow(eString request, eString dirpath, eString opt, eH
 	return readFile(TEMPLATE_DIR + "sendMessage.tmp");
 }
 
+#if 0
 class PluginCollector
 {
 	std::stringstream& result;
@@ -151,7 +152,6 @@ public:
 	}
 };
 
-#if 0
 static eString getControlPlugins(void)
 {
 	std::stringstream result;
@@ -3112,6 +3112,7 @@ static eString message(eString request, eString dirpath, eString opt, eHTTPConne
 		return "<script language=\"javascript\">window.close();</script>";
 }
 
+#if 0
 static eString startPlugin(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	std::map<eString, eString> opts = getRequestOptions(opt, '&');
@@ -3161,6 +3162,7 @@ static eString stopPlugin(eString request, eString dirpath, eString opt, eHTTPCo
 
 	return result;
 }
+#endif
 
 static eString xmessage(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
@@ -4814,8 +4816,8 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/saveUserBouquets", save_userBouquets, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/reloadTimerList", load_timerList, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/saveTimerList", save_timerList, lockWeb);
-	dyn_resolver->addDyn("GET", "/cgi-bin/startPlugin", startPlugin, lockWeb);
-	dyn_resolver->addDyn("GET", "/cgi-bin/stopPlugin", stopPlugin, lockWeb);
+//	dyn_resolver->addDyn("GET", "/cgi-bin/startPlugin", startPlugin, lockWeb);
+//	dyn_resolver->addDyn("GET", "/cgi-bin/stopPlugin", stopPlugin, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/osdshot", osdshot, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/currentService", getCurrentServiceRef, lockWeb);
 // functions needed by dreamtv
