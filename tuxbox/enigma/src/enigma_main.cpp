@@ -296,6 +296,7 @@ eZapMain::eZapMain(): eWidget(0, 1)
 	ASSIGN(VolumeBar, eProgress, "volume_bar");
 
 	Clock=new eLabel(this);
+	ASSIGN(Clock, eLabel, "time");
 
 	cur_start=cur_duration=-1;
 
@@ -379,7 +380,7 @@ void eZapMain::setEIT(EIT *eit)
 				start.sprintf("%02d:%02d", t->tm_hour, t->tm_min);
 			QString duration;
 			if (event->duration>0)
-				duration.sprintf("%dm", event->duration/60);
+				duration.sprintf("%d min", event->duration/60);
 			else
 				duration="";
 			switch (p)
@@ -410,7 +411,7 @@ void eZapMain::setEIT(EIT *eit)
 		}
 	} else
 	{
-		EINow->setText("no EIT");
+		EINow->setText("kein EPG verfügbar");
 		EINext->setText("");
 		EINowDuration->setText("");
 		EINextDuration->setText("");
