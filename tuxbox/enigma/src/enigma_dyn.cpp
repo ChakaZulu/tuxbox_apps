@@ -61,7 +61,7 @@
 
 using namespace std;
 
-#define WEBIFVERSION "2.8.1"
+#define WEBIFVERSION "2.8.2"
 
 #define KEYBOARDNORMAL 0
 #define KEYBOARDVIDEO 1
@@ -129,48 +129,6 @@ static eString tvMessageWindow(eString request, eString dirpath, eString opt, eH
 {
 	return readFile(TEMPLATE_DIR + "sendMessage.tmp");
 }
-
-#if 0
-class PluginCollector
-{
-	std::stringstream& result;
-public:
-	explicit PluginCollector(std::stringstream &res)
-		:result(res)
-	{
-	}
-	bool operator() (ePlugin& plugin)
-	{
-		result  << "<tr><td width=\"100\">"
-			<< button(100, "Start", GREEN, "javascript:startPlugin('" + plugin.cfgname+ "')", "#FFFFFF")
-			 << "</td><td>"
-			 << plugin.name
-			 << "</td><td>"
-			 << (plugin.desc ? plugin.desc : "(no description)")
-			 << "</td></tr>";
-		return false; // must return false in order to continue for_each loop
-	}
-};
-
-static eString getControlPlugins(void)
-{
-	std::stringstream result;
-	result << "<table width=\"100%\" border=\"1\" cellspacing=\"0\" cellpadding=\"0\">";
-	eZapPlugins plugins(-1);
-	plugins.find();
-
-	if (!plugins.list.getCount())
-		result << "<tr><td>No plugins found.</td></tr>";
-	else
-		plugins.list.forEachEntry(PluginCollector(result));
-
-	result << "</table>";
-	result << "<br>";
-	result << button(100, "Stop", RED, "javascript:stopPlugin()", "#FFFFFF");
-
-	return result.str();
-}
-#endif
 
 static int getOSDShot(eString mode)
 {
@@ -933,10 +891,6 @@ static eString getLeftNavi(eString mode, bool javascript)
 		}
 		result += "<br>";
 		result += button(110, "Message", LEFTNAVICOLOR, "javascript:sendMessage2TV()");
-#if 0
-		result += "<br>";
-		result += button(110, "Plugins", LEFTNAVICOLOR, pre + "?mode=controlPlugins" + post);
-#endif
 #ifndef DISABLE_FILE
 		result += "<br>";
 		result += button(110, "Timer", LEFTNAVICOLOR, pre + "?mode=controlTimerList" + post);
@@ -2375,14 +2329,6 @@ static eString getContent(eString mode, eString path, eString opts)
 		result += getControlTimerList();
 	}
 	else
-#if 0
-	if (mode == "controlPlugins")
-	{
-		result = getTitle("CONTROL: Plugins");
-		result += getControlPlugins();
-	}
-	else
-#endif
 	if (mode == "updates")
 	{
 		result = getTitle("UPDATES");
@@ -3111,58 +3057,6 @@ static eString message(eString request, eString dirpath, eString opt, eHTTPConne
 	else
 		return "<script language=\"javascript\">window.close();</script>";
 }
-
-#if 0
-static eString startPlugin(eString request, eString dirpath, eString opt, eHTTPConnection *content)
-{
-	std::map<eString, eString> opts = getRequestOptions(opt, '&');
-	eString requester = opts["requester"];
-	eString result;
-
-/*	if (opts.find("path") == opts.end())
-		return "E: no path set";*/
-
-	if (opts.find("name") == opts.end())
-		return "E: no plugin name given";
-
-	eZapPlugins plugins(-1);
-	eString path;
-	if (opts.find("path") != opts.end())
-	{
-		path = opts["path"];
-		if (path.length() && (path[path.length()-1] != '/'))
-			path += '/';
-	}
-	if (ePluginThread::getInstance())
-		ePluginThread::getInstance()->kill(true);
-
-	result = plugins.execPluginByName((path + opts["name"]).c_str());
-	if (requester == "webif")
-		result = closeWindow(content, "", 500);
-
-	return result;
-}
-
-static eString stopPlugin(eString request, eString dirpath, eString opt, eHTTPConnection *content)
-{
-	std::map<eString, eString> opts = getRequestOptions(opt, '&');
-	eString requester = opts["requester"];
-	eString result;
-
-	if (ePluginThread::getInstance())
-	{
-		ePluginThread::getInstance()->kill(true);
-		result = "+ok, plugin is stopped";
-	}
-	else
-		result = "E: no plugin is running";
-
-	if (requester == "webif")
-		result = closeWindow(content, "", 500);
-
-	return result;
-}
-#endif
 
 static eString xmessage(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
@@ -4816,8 +4710,6 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/saveUserBouquets", save_userBouquets, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/reloadTimerList", load_timerList, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/saveTimerList", save_timerList, lockWeb);
-//	dyn_resolver->addDyn("GET", "/cgi-bin/startPlugin", startPlugin, lockWeb);
-//	dyn_resolver->addDyn("GET", "/cgi-bin/stopPlugin", stopPlugin, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/osdshot", osdshot, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/currentService", getCurrentServiceRef, lockWeb);
 // functions needed by dreamtv

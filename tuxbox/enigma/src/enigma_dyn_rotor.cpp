@@ -47,19 +47,32 @@ using namespace std;
 eString getConfigRotor(void)
 {
 	eString result = readFile(TEMPLATE_DIR + "rotor.tmp");
-	eString tmp;
+	eString tmp  = readFile(TEMPLATE_DIR + "rotorSat.tmp");
+	eTransponder *tp = NULL;
+	eString satPos, satName, motorPos, current;
+	
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (sapi && sapi->transponder)
+		tp = sapi->transponder;
 	
 	for (std::list<eLNB>::iterator it(eTransponderList::getInstance()->getLNBs().begin()); it != eTransponderList::getInstance()->getLNBs().end(); it++)
 	{
 		// go thru all satellites...
 		for (ePtrList<eSatellite>::iterator s (it->getSatelliteList().begin()); s != it->getSatelliteList().end(); s++)
 		{
-			tmp += "<tr>";
-			tmp += "<td>" + s->getDescription() + "</td>";
-			tmp += "<td>" + eString().sprintf("%d", s->getOrbitalPosition()) + "</td>";
+			if (tp && s->getOrbitalPosition() == tp->satellite.orbital_position)
+				current = "on.gif";
+			else
+				current = "trans.gif";
+			satName = s->getDescription();
+			satPos = eString().sprintf("%d", s->getOrbitalPosition());
 			int motorPosition = it->getDiSEqC().RotorTable[s->getOrbitalPosition()];
-			tmp += "<td>" + eString().sprintf("%d", motorPosition) + "</td>";
-			tmp += "</tr>";
+			motorPos = eString().sprintf("%d", motorPosition);
+
+			tmp.strReplace("#CURRENT#", current);
+			tmp.strReplace("#SATPOS#", satPos);
+			tmp.strReplace("#SATNAME#", satName);
+			tmp.strReplace("#MOTORPOS#", motorPos);
 		}
 	}
 	result.strReplace("#MOTORPOSITIONS#", tmp);
@@ -75,7 +88,7 @@ static eString sendDiSEqCCmd(eString request, eString dirpath, eString opts, eHT
 	eString params = opt["params"];
 	eString frame = opt["frame"];
 	if (!frame)
-		frame = "0xE0";
+		frame = "E0";
 	
 	int iaddr, icmd, iframe;
 	sscanf(addr.c_str(), "%x", &iaddr);
@@ -83,6 +96,8 @@ static eString sendDiSEqCCmd(eString request, eString dirpath, eString opts, eHT
 	sscanf(frame.c_str(), "%x", &iframe);
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	
+	eDebug("[enigma_dyn_rotor] sending DiSeqCCmd: %x %x %s %x", iaddr, icmd, params.c_str(), iframe);
 	eFrontend::getInstance()->sendDiSEqCCmd(iaddr, icmd, params, iframe);
 	
 	return closeWindow(content, "", 500);
@@ -91,6 +106,5 @@ static eString sendDiSEqCCmd(eString request, eString dirpath, eString opts, eHT
 void ezapRotorInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 {
 	dyn_resolver->addDyn("GET", "/cgi-bin/sendDiSEqCCmd", sendDiSEqCCmd, lockWeb);
-//	dyn_resolver->addDyn("GET", "/cgi-bin/setConfigMultiBoot", setConfigMultiBoot, lockWeb);
 }
 #endif
