@@ -11,6 +11,7 @@ eWindow::eWindow(int takefocus)
 	titleSize=10;
 	border=5;
 	setBackgroundColor(eSkin::getActive()->queryScheme("backgroundColor"));
+	setForegroundColor(eSkin::getActive()->queryScheme("eWindow.titleBarColor"));
 
 	iTopLeft=eSkin::getActive()->queryImage("eWindow.topLeft");
 	iTop=eSkin::getActive()->queryImage("eWindow.top");
