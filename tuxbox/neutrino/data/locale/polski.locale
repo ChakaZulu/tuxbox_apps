@@ -590,7 +590,7 @@ timerlist.menunew Nowy timer
 timerlist.reload Przeladuj
 timerlist.modify Zmien
 timerlist.message Wiadomosc
-timerlist.apid Audio PID
+timerlist.apids Audio PIDs
 timerlist.bouquetselect Wybierz bukiet
 timerlist.channelselect Wybierz kanal
 timerlist.modeselect Wybór trybu
@@ -669,3 +669,7 @@ nfs.mounterror blad montowania
 nfs.umount Odmontuj volumin NFS
 nfs.umounterror blad odmontowania voluminu
 nfs.alreadymounted katalog juz zamontowny
+
+apids.hint_1 undef
+apids.hint_2 undef
+

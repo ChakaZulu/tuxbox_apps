@@ -472,8 +472,8 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 																		epgData.epg_times.startzeit - (atoi(g_settings.record_safety_time_before)*60),
 																		epgData.epg_times.startzeit + epgData.epg_times.dauer + (atoi(g_settings.record_safety_time_after)*60),
 																		epgData.eventID, epgData.epg_times.startzeit,
-																		epgData.epg_times.startzeit - (ANNOUNCETIME + (atoi(g_settings.record_safety_time_before)*60)),
-																		0, mode );
+																		epgData.epg_times.startzeit - (ANNOUNCETIME + 120 + (atoi(g_settings.record_safety_time_before)*60)),
+																		"", mode );
 							ShowMsg ( "timer.eventrecord.title", g_Locale->getText("timer.eventrecord.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 						}
 						else
@@ -496,7 +496,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 																  epgData.epg_times.startzeit,
 																  epgData.epg_times.startzeit - ANNOUNCETIME, 0,
 																  epgData.eventID, epgData.epg_times.startzeit,
-																  0, mode);
+																  "", mode);
 						ShowMsg ( "timer.eventtimed.title", g_Locale->getText("timer.eventtimed.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 					}
 					else

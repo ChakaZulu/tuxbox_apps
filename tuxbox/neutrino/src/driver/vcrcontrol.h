@@ -109,7 +109,7 @@ class CVCRControl
 				CVCRDevices deviceType;
 				CVCRStates  deviceState;
 				virtual bool Stop(){return false;};
-				virtual bool Record(const t_channel_id channel_id = 0, int mode=1, unsigned long long epgid = 0, uint apid = 0){return false;};
+				virtual bool Record(const t_channel_id channel_id = 0, int mode=1, unsigned long long epgid = 0, string apids = ""){return false;};
 				virtual bool Pause(){return false;};
 				virtual bool Resume(){return false;};
 				virtual bool IsAvailable(){return false;};
@@ -122,7 +122,7 @@ class CVCRControl
 			public:
 				bool SwitchToScart;
 				virtual bool Stop(); 
-				virtual bool Record(const t_channel_id channel_id = 0, int mode=1, unsigned long long epgid = 0, uint apid = 0);	
+				virtual bool Record(const t_channel_id channel_id = 0, int mode=1, unsigned long long epgid = 0, string apids = "");	
 				virtual bool Pause();
 				virtual bool Resume();
 				virtual bool IsAvailable(){return true;};
@@ -145,7 +145,7 @@ class CVCRControl
 				bool serverConnect();
 				void serverDisconnect();
 
-				bool sendCommand(CVCRCommand command, const t_channel_id channel_id = 0,unsigned long long epgid = 0, uint apid = 0);
+				bool sendCommand(CVCRCommand command, const t_channel_id channel_id = 0,unsigned long long epgid = 0, string apids = "");
 
 			public:
 				std::string	ServerAddress;
@@ -154,7 +154,7 @@ class CVCRControl
 				bool	StopSectionsd;
 
 				virtual bool Stop();
-				virtual bool Record(const t_channel_id channel_id = 0, int mode=1, unsigned long long epgid = 0, uint apid = 0);
+				virtual bool Record(const t_channel_id channel_id = 0, int mode=1, unsigned long long epgid = 0, string apids = "");
 				virtual bool Pause(){return false;};
 				virtual bool Resume(){return false;};
 				virtual bool IsAvailable(){return true;};
@@ -181,14 +181,14 @@ class CVCRControl
 
 		int getDeviceState(){return Device->deviceState;};
 		bool Stop(){return Device->Stop();};
-		bool Record(CTimerd::EventInfo *eventinfo)
+		bool Record(CTimerd::RecordingInfo *eventinfo)
 		{
 			int mode;
 			if(eventinfo->mode==CTimerd::MODE_RADIO)
 				mode=NeutrinoMessages::mode_radio;
 			else
 				mode=NeutrinoMessages::mode_tv;
-			return Device->Record(eventinfo->channel_id, mode, eventinfo->epgID, eventinfo->apid); 
+			return Device->Record(eventinfo->channel_id, mode, eventinfo->epgID, eventinfo->apids); 
 		};
 		bool Pause(){return Device->Pause();};
 		bool Resume(){return Device->Resume();};

@@ -535,7 +535,7 @@ sleeptimerbox.hint2 The dbox2 will shutdown after this time.
 sleeptimerbox.announce Sleeptimer in 1 min
 
 zaptotimer.announce Zapto timer in one minute
-recordtimer.announce Recording starts in one minute
+recordtimer.announce Recording starts in a few minutes
 shutdowntimer.announce Box will shutdown in 1 min.\nCancel Sutdown ?
 
 timerbar.channelswitch Schedule
@@ -590,7 +590,7 @@ timerlist.menunew New timer
 timerlist.reload Reload
 timerlist.modify Modify
 timerlist.message Message
-timerlist.apid Audio PID
+timerlist.apids Audio PIDs
 timerlist.bouquetselect choose bouquet
 timerlist.channelselect choose channel
 timerlist.modeselect Mode selection
@@ -669,3 +669,7 @@ nfs.mounterror mount error
 nfs.umount Umount NFS volume
 nfs.umounterror error umounting volume
 nfs.alreadymounted directory already mounted
+
+apids.hint_1 Enter APIDs to be streamed
+apids.hint_2 in hex notation seperated by ' '
+

@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdtypes.h,v 1.9 2002/12/24 12:34:18 Zwen Exp $
+	$Id: timerdtypes.h,v 1.10 2003/01/26 15:07:11 zwen Exp $
 
 	License: GPL
 
@@ -33,6 +33,7 @@
 
 
 #define REMINDER_MESSAGE_MAXLEN 31
+#define TIMERD_APIDS_MAXLEN 50
 
 class CTimerd
 {
@@ -79,16 +80,26 @@ class CTimerd
 			unsigned long long epgID;
 			time_t             epg_starttime;
 			t_channel_id       channel_id;
-			uint               apid;
+			std::string             apids;
+			CChannelMode       mode;
+		};
+		
+		struct TransferEventInfo
+		{
+			unsigned long long epgID;
+			time_t             epg_starttime;
+			t_channel_id       channel_id;
+			char               apids[TIMERD_APIDS_MAXLEN];
 			CChannelMode       mode;
 		};
 		
 		class RecordingInfo : public EventInfo
 		{
 		   public:
+				RecordingInfo(){};
 				RecordingInfo(EventInfo& e)
 				{
-					apid = e.apid;
+					strcpy(apids, e.apids.substr(0,TIMERD_APIDS_MAXLEN-1).c_str());
 					channel_id = e.channel_id;
 					epgID = e.epgID;
 					epg_starttime = e.epg_starttime;
@@ -96,14 +107,14 @@ class CTimerd
 				};
 				RecordingInfo& operator = (EventInfo& e)
 				{
-					apid = e.apid;
+					strcpy(apids, e.apids.substr(0,TIMERD_APIDS_MAXLEN-1).c_str());
 					channel_id = e.channel_id;
 					epgID = e.epgID;
 					epg_starttime = e.epg_starttime;
 					mode = e.mode;
 					return *this;
 				}
-
+			char apids[TIMERD_APIDS_MAXLEN];
 			int eventID;
 		};
 
@@ -124,7 +135,7 @@ class CTimerd
 			t_channel_id channel_id; //only filled if applicable
 			unsigned long long epgID; //only filled if applicable
 			time_t epg_starttime; //only filled if applicable
-			uint apid; //only filled if applicable
+			char apids[TIMERD_APIDS_MAXLEN]; //only filled if applicable
 			CChannelMode mode; //only filled if applicable
 			bool standby_on; //only filled if applicable
 			char message[REMINDER_MESSAGE_MAXLEN]; //only filled if applicable

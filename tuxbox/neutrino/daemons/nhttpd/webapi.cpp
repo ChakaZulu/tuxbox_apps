@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.29 2003/01/23 12:01:47 thegoodguy Exp $
+	$Id: webapi.cpp,v 1.30 2003/01/26 15:07:10 zwen Exp $
 
 	License: GPL
 
@@ -761,11 +761,9 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 					if(channel == channellist_tv.end())
 						sAddData="Unbekannter TV-Kanal";
 				}
-				if(timer->apid!=0)
+				if(timer->apids!="")
 				{
-					char apid[21];
-					sprintf(apid," (0x%x)",timer->apid);
-					sAddData+=apid;
+					sAddData+= string("(") + timer->apids + ")";
 				}
 				if(timer->epgID!=0)
 				{
@@ -876,8 +874,8 @@ void CWebAPI::modifyTimerForm(CWebserverRequest *request, unsigned timerId)
 			 stopTime->tm_hour );
 		request->printf("<INPUT TYPE=\"text\" name=\"smi\" value=\"%02d\" size=2 maxlength=2></TD></TR>\n",
 			 stopTime->tm_min);
-		request->printf("<TR><TD align=\"center\">APID: 0x<INPUT TYPE=\"text\" name=\"ap\" value=\"%04x\" size=4 maxlength=4></TD></TR>\n",
-          timer.apid);
+		request->printf("<TR><TD align=\"center\">APIDs: <INPUT TYPE=\"text\" name=\"ap\" value=\"%s\" size=10 maxlength=%d></TD></TR>\n",
+          timer.apids, TIMERD_APIDS_MAXLEN-1);
 	}
 	request->SocketWrite("<TR><TD align=\"center\">Wiederholung\n");
 	request->SocketWrite("<select name=\"rep\" onchange=\"onEventChange();\">\n");
@@ -977,7 +975,8 @@ void CWebAPI::doModifyTimer(CWebserverRequest *request)
 	correctTime(stopTime);
 	time_t stopTimeT = mktime(stopTime);
 	time_t announceTimeT = alarmTimeT-60;
-
+	if(timer.eventType == CTimerd::TIMER_RECORD)
+		announceTimeT-=120;
 	CTimerd::CTimerEventRepeat rep = 
 	(CTimerd::CTimerEventRepeat) atoi(request->ParameterList["rep"].c_str());
 	if(((int)rep) >= ((int)CTimerd::TIMERREPEAT_WEEKDAYS) && request->ParameterList["wd"] != "")
@@ -985,8 +984,8 @@ void CWebAPI::doModifyTimer(CWebserverRequest *request)
 	Parent->Timerd->modifyTimerEvent(modyId, announceTimeT, alarmTimeT, stopTimeT, rep);
 	if(request->ParameterList["ap"] != "")
 	{
-		uint apid=strtol(request->ParameterList["ap"].c_str(),NULL, 16);
-		Parent->Timerd->modifyTimerAPid(modyId,apid);
+		string apids = request->ParameterList["ap"];
+		Parent->Timerd->modifyTimerAPid(modyId,apids);
 	}
 }
 
@@ -1211,13 +1210,15 @@ time_t	announceTimeT = 0,
 	CTimerd::EventInfo eventinfo;
 	eventinfo.epgID = 0;
 	eventinfo.epg_starttime = 0;
-	eventinfo.apid = 0;
+	eventinfo.apids = "";
 	if(request->ParameterList["channel_id"].substr(0,1)=="R")
 		eventinfo.mode = CTimerd::MODE_RADIO;
 	else
 		eventinfo.mode = CTimerd::MODE_TV;
 	sscanf(request->ParameterList["channel_id"].substr(1).c_str(),"%u",&eventinfo.channel_id);
 	void *data=NULL;
+	if(type == CTimerd::TIMER_RECORD)
+		announceTimeT-=120;
 	if(type == CTimerd::TIMER_STANDBY)
 		data=&standby_on;
 	else if(type==CTimerd::TIMER_NEXTPROGRAM || type==CTimerd::TIMER_ZAPTO ||

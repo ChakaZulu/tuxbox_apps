@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdclient.h,v 1.36 2002/12/24 12:34:18 Zwen Exp $
+	$Id: timerdclient.h,v 1.37 2003/01/26 15:07:11 zwen Exp $
 
 	License: GPL
 
@@ -73,7 +73,7 @@ class CTimerdClient:private CBasicClient
 
 		// modify existing timer event
 		bool modifyTimerEvent(int eventid, time_t announcetime, time_t alarmtime, time_t stoptime, CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE);
-		void modifyTimerAPid(int eventid, uint apid);
+		void modifyTimerAPid(int eventid, std::string apids);
 
 		// set existing sleeptimer to new times or create new sleeptimer with these times
 		int setSleeptimer(time_t announcetime, time_t alarmtime, int timerid = 0);		
@@ -101,13 +101,13 @@ class CTimerdClient:private CBasicClient
 		// adds new record timer event
 		int addRecordTimerEvent(const t_channel_id channel_id, time_t alarmtime, time_t stoptime, 
 										unsigned long long epgID=0, time_t epg_starttime=0, time_t announcetime = 0, 
-										uint apid=0, CTimerd::CChannelMode mode=CTimerd::MODE_TV) 
+										std::string apids="", CTimerd::CChannelMode mode=CTimerd::MODE_TV) 
 			{
 				CTimerd::EventInfo eventInfo;
 				eventInfo.channel_id = channel_id;
 				eventInfo.epgID = epgID;
 				eventInfo.epg_starttime = epg_starttime;
-            eventInfo.apid = apid;
+            eventInfo.apids = apids;
 				eventInfo.mode = mode;
 				return addTimerEvent(CTimerd::TIMER_RECORD, &eventInfo, announcetime, alarmtime, stoptime);
 			};
@@ -119,13 +119,13 @@ class CTimerdClient:private CBasicClient
 		// adds new zapto timer event
 		int addZaptoTimerEvent(const t_channel_id channel_id, time_t alarmtime, time_t announcetime = 0, 
 									  time_t stoptime = 0, unsigned long long epgID=0, time_t epg_starttime=0,
-									  uint apid=0, CTimerd::CChannelMode mode=CTimerd::MODE_TV) 
+									  std::string apids="", CTimerd::CChannelMode mode=CTimerd::MODE_TV) 
 		{
 			CTimerd::EventInfo eventInfo;
 			eventInfo.channel_id = channel_id;
 			eventInfo.epgID = epgID;
 			eventInfo.epg_starttime = epg_starttime;
-			eventInfo.apid = apid;
+			eventInfo.apids = apids;
 			eventInfo.mode = mode;
 			return addTimerEvent(CTimerd::TIMER_ZAPTO, &eventInfo, announcetime, alarmtime, stoptime);
 		};

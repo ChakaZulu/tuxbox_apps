@@ -535,7 +535,7 @@ sleeptimerbox.hint2 Die dbox2 schaltet sich nach dieser Zeit aus.
 sleeptimerbox.announce Sleeptimer in 1 min
 
 zaptotimer.announce In einer Minute wird umgeschaltet
-recordtimer.announce Die Aufnahme beginnt in einer Minute
+recordtimer.announce Die Aufnahme beginnt in wenigen Minuten
 shutdowntimer.announce Die Box wird in 1 min runtergefahren.\nShutdown abbrechen?
 
 timerbar.channelswitch Umschalten
@@ -590,7 +590,7 @@ timerlist.menunew Neuer Timer
 timerlist.reload Aktualisieren
 timerlist.modify Bearbeiten
 timerlist.message Nachricht
-timerlist.apid Audio PID
+timerlist.apids Audio PIDs
 timerlist.bouquetselect Bouquet wählen
 timerlist.channelselect Kanal wählen
 timerlist.modeselect Modus-Auswahl
@@ -669,3 +669,8 @@ nfs.mounterror Mount-Fehler
 nfs.umount NFS Verzeichnis unmounten
 nfs.umounterror Umount-Fehler
 nfs.alreadymounted Verzeichnis bereits gemountet
+
+apids.hint_1 Geben Sie die zu streamenden APIDs ein,
+apids.hint_2 getrennt durch ' ' in hexadezimaler Form
+
+

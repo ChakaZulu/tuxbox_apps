@@ -590,7 +590,7 @@ timerlist.menunew novi vremenski brojac
 timerlist.reload obnoviti
 timerlist.modify obrada
 timerlist.message obavijest
-timerlist.apid audio pid
+timerlist.apids audio pids
 timerlist.bouquetselect izabrati buket
 timerlist.channelselect izabrati kanal
 timerlist.modeselect izbor
@@ -669,3 +669,7 @@ nfs.mounterror greska pri montiranju
 nfs.umount nfs direktorij sada demontirati
 nfs.umounterror greska pri demontiranju
 nfs.alreadymounted direktorij je vec montiran
+
+apids.hint_1 undef
+apids.hint_2 undef
+

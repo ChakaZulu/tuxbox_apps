@@ -172,8 +172,8 @@ int CTimerList::exec(CMenuTarget* parent, string actionKey)
 										 timerlist[selected].stopTime, timerlist[selected].eventRepeat);
 		if(timerlist[selected].eventType == CTimerd::TIMER_RECORD)
 		{
-			uint apid=strtol(m_apid,NULL, 16);
-			Timer->modifyTimerAPid(timerlist[selected].eventID,apid);
+			timerlist[selected].alarmTime -= 120; // 2 more mins for rec timer
+			Timer->modifyTimerAPid(timerlist[selected].eventID,timerlist[selected].apids);
 		}
 		return menu_return::RETURN_EXIT;
 	}
@@ -185,7 +185,7 @@ int CTimerList::exec(CMenuTarget* parent, string actionKey)
 		eventinfo.epg_starttime=0;
 		eventinfo.channel_id=timerNew.channel_id;
 		eventinfo.mode = timerNew.mode;
-		eventinfo.apid=0;
+		eventinfo.apids = "";
 		timerNew.standby_on = (timerNew_standby_on == 1);
 		void *data=NULL;
 		if(timerNew.eventType == CTimerd::TIMER_STANDBY)
@@ -194,6 +194,8 @@ int CTimerList::exec(CMenuTarget* parent, string actionKey)
 				  timerNew.eventType==CTimerd::TIMER_ZAPTO ||
 				  timerNew.eventType==CTimerd::TIMER_RECORD)
 		{
+			if (timerNew.eventType==CTimerd::TIMER_RECORD)
+				timerNew.announceTime-= 120; // 2 more mins for rec timer
 			if (strcmp(timerNew_channel_name, "---")==0)
 				return menu_return::RETURN_REPAINT;
 			data= &eventinfo;
@@ -485,11 +487,9 @@ void CTimerList::paintItem(int pos)
 			case CTimerd::TIMER_RECORD :
 				{
 					zAddData=convertChannelId2String(timer.channel_id,timer.mode);
-					if(timer.apid!=0)
+					if(strlen(timer.apids) != 0)
 					{
-						char capid[20];
-						sprintf(capid, "%04x", timer.apid);
-						zAddData+= " ("+string(capid)+")";
+						zAddData+= string(" (") + timer.apids + ")";
 					}
 					if(timer.epgID!=0)
 					{
@@ -757,11 +757,10 @@ int CTimerList::modifyTimer()
 	timerSettings.addItem(m3);
 	timerSettings.addItem(m4);
 
-   sprintf(m_apid,"%04x",timer->apid);
-   CStringInput  timerSettings_apid("timerlist.apid", m_apid , 4, "ipsetup.hint_1", "ipsetup.hint_2", "0123456789ABCDEF");
+   CStringInput  timerSettings_apids("timerlist.apids", timer->apids , 25, "apids.hint_1", "apids.hint_2", "0123456789ABCDEF ");
 	if(timer->eventType ==  CTimerd::TIMER_RECORD)
 	{
-		CMenuForwarder *m5 = new CMenuForwarder("timerlist.apid", true, m_apid, &timerSettings_apid );
+		CMenuForwarder *m5 = new CMenuForwarder("timerlist.apids", true, timer->apids, &timerSettings_apids );
 		timerSettings.addItem( m5);
 	}
 	timerSettings.addItem( new CMenuForwarder("timerlist.save", true, NULL, this, "modifytimer") );

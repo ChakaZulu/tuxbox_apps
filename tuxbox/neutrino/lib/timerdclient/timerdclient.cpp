@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.41 2002/12/08 10:46:11 thegoodguy Exp $
+	$Id: timerdclient.cpp,v 1.42 2003/01/26 15:07:11 zwen Exp $
 
 	License: GPL
 
@@ -212,7 +212,7 @@ int CTimerdClient::addTimerEvent( CTimerEventTypes evType, void* data , int min,
 //-------------------------------------------------------------------------
 int CTimerdClient::addTimerEvent( CTimerd::CTimerEventTypes evType, void* data, time_t announcetime, time_t alarmtime,time_t stoptime, CTimerd::CTimerEventRepeat evrepeat)
 {
-
+	CTimerd::TransferEventInfo tei;
 	CTimerdMsg::commandAddTimer msgAddTimer;
 	msgAddTimer.alarmTime  = alarmtime;
 	msgAddTimer.announceTime = announcetime;
@@ -227,7 +227,14 @@ int CTimerdClient::addTimerEvent( CTimerd::CTimerEventTypes evType, void* data, 
 	}
 	else if(evType == CTimerd::TIMER_NEXTPROGRAM || evType == CTimerd::TIMER_ZAPTO || evType == CTimerd::TIMER_RECORD )
 	{
-		length = sizeof( CTimerd::EventInfo);
+		CTimerd::EventInfo *ei=static_cast<CTimerd::EventInfo*>(data); 
+		strcpy(tei.apids, ei->apids.substr(0, TIMERD_APIDS_MAXLEN-1).c_str());
+		tei.channel_id = ei->channel_id;
+		tei.epg_starttime	= ei->epg_starttime;
+		tei.epgID = ei->epgID;
+		tei.mode	= ei->mode;
+		length = sizeof( CTimerd::TransferEventInfo);
+		data = &tei;
 	}
 	else if(evType == CTimerd::TIMER_STANDBY)
 	{
@@ -288,11 +295,11 @@ bool CTimerdClient::shutdown()
 	return response.status;
 }
 //-------------------------------------------------------------------------
-void CTimerdClient::modifyTimerAPid(int eventid, uint apid)
+void CTimerdClient::modifyTimerAPid(int eventid, std::string apids)
 {
 	CTimerdMsg::commandSetAPid data;
 	data.eventID=eventid;
-	data.apid=apid;
+	strcpy(data.apids, apids.substr(0, TIMERD_APIDS_MAXLEN-1).c_str());
 	send(CTimerdMsg::CMD_SETAPID, (char*) &data, sizeof(data)); 
 	close_connection();
 }

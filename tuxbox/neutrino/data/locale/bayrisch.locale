@@ -535,7 +535,7 @@ sleeptimerbox.hint2 De Box schoit si noch der Zeid aus.
 sleeptimerbox.announce Eischloftimer in min
 
 zaptotimer.announce In na Minutn is schluss
-recordtimer.announce In na Minutn werd aufgnomma
+recordtimer.announce In weniga Minutn werd aufgnomma
 shutdowntimer.announce De Box werd in oana Minutn runtagfahrn.\n Obbrecha?
 
 timerbar.channelswitch Umschoitn
@@ -590,7 +590,7 @@ timerlist.menunew Neia Timer
 timerlist.reload akualisiern
 timerlist.modify ändan
 timerlist.message Nochricht
-timerlist.apid Audio PID
+timerlist.apids Audio PIDs
 timerlist.bouquetselect Bouquet auswäihn
 timerlist.channelselect Senda auswäihn
 timerlist.modeselect Modus auswäihn
@@ -669,3 +669,7 @@ nfs.mounterror Mount-Fähla
 nfs.umount NFS Verzeichnis freigem
 nfs.umounterror Fähla beim Freigem
 nfs.alreadymounted Verzeichnis is scho gmounted
+
+apids.hint_1 undef
+apids.hint_2 undef
+

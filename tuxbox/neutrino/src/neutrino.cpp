@@ -3296,7 +3296,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 
 	else if(OptionName.substr(0,18).compare("mainmenu.recording") == 0)
 	{
-		CTimerd::EventInfo eventinfo;
+		CTimerd::RecordingInfo eventinfo;
 
 		if(CVCRControl::getInstance()->isDeviceRegistered())
 		{
@@ -3306,7 +3306,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 				eventinfo.channel_id = g_RemoteControl->current_channel_id;
 				eventinfo.epgID = g_RemoteControl->current_EPGid;
 				eventinfo.epg_starttime = 0;
-				eventinfo.apid = 0;
+				strcpy(eventinfo.apids, "");
 				if(getMode()==mode_radio)
 					eventinfo.mode = CTimerd::MODE_RADIO;
 				else
@@ -3341,7 +3341,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.392 2003/01/26 11:47:48 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.393 2003/01/26 15:07:11 zwen Exp $\n\n");
 	//LCD-Init
 	CLCD::getInstance()->init();
 

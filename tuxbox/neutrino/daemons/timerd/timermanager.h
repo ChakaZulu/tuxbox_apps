@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.h,v 1.31 2002/12/24 12:34:17 Zwen Exp $
+	$Id: timermanager.h,v 1.32 2003/01/26 15:07:10 zwen Exp $
 
 	License: GPL
 
@@ -121,9 +121,10 @@ class CTimerEvent_Record : public CTimerEvent
 
 		CTimerEvent_Record( time_t announceTime, time_t alarmTime, time_t stopTime, 
                           t_channel_id channel_id, unsigned long long epgID=0, time_t epg_starttime=0, 
-                          uint apid = 0, CTimerd::CChannelMode mode = CTimerd::MODE_TV,
+                          std::string apids = "", CTimerd::CChannelMode mode = CTimerd::MODE_TV,
 								  CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE);
 		CTimerEvent_Record(CConfigFile *config, int iId);
+		virtual ~CTimerEvent_Record(){};
 		virtual void fireEvent();
 		virtual void announceEvent();
 		virtual void stopEvent();
@@ -143,6 +144,7 @@ class CTimerEvent_Zapto : public CTimerEvent
 								 CTimerd::CChannelMode mode = CTimerd::MODE_TV,
 								 CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE);
 		CTimerEvent_Zapto(CConfigFile *config, int iId);
+		virtual ~CTimerEvent_Zapto(){};
 		virtual void fireEvent();
 		virtual void announceEvent();
 		virtual void stopEvent();
@@ -160,6 +162,7 @@ class CTimerEvent_NextProgram : public CTimerEvent
 										 t_channel_id channel_id, unsigned long long epgID=0, time_t epg_starttime=0,
 										 CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE);
 		CTimerEvent_NextProgram(CConfigFile *config, int iId);
+		virtual ~CTimerEvent_NextProgram(){};
 		virtual void fireEvent();
 		virtual void announceEvent();
 		virtual void stopEvent();
@@ -206,7 +209,7 @@ class CTimerManager
 		CTimerEvent* getNextEvent();
 		bool listEvents(CTimerEventMap &Events);
 		int modifyEvent(int eventID, time_t announceTime, time_t alarmTime, time_t stopTime, CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE);
-		int modifyEvent(int eventID, uint apid);
+		int modifyEvent(int eventID, std::string apids);
 		int rescheduleEvent(int eventID, time_t announceTime, time_t alarmTime, time_t stopTime);
 		void saveEventsToConfig();
 		void loadEventsFromConfig();
