@@ -124,7 +124,7 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 		for (unsigned int i= 0; i< items.size(); i++)
 		{
 			CMenuItem* titem = items[i];
-			if ( (titem->directKey!= CRCInput::RC_nokey) && (titem->directKey== msg) )
+			if ( ((uint)titem->directKey!= CRCInput::RC_nokey) && ((uint)titem->directKey==msg) )
 			{
 				if (titem->isSelectable())
 				{
@@ -273,7 +273,7 @@ void CMenuWidget::paint()
 	for (unsigned int i= 0; i< items.size(); i++)
 	{
 		if ( (items[i]->iconName!= "") ||
-			 ((items[i]->directKey>= CRCInput::RC_0) && (items[i]->directKey<= CRCInput::RC_9)) )
+			 (((uint)items[i]->directKey>= CRCInput::RC_0) && ((uint)items[i]->directKey<= CRCInput::RC_9)) )
 		{
 			iconOffset= g_Fonts->menu->getHeight();
 			break;
@@ -411,7 +411,7 @@ int CMenuOptionChooser::paint( bool selected )
 	{
 		frameBuffer->paintIcon(iconName.c_str(), x + 10, y+ ((height- 20)>>1) );
 	}
-	else if ((directKey>= CRCInput::RC_0) && (directKey<= CRCInput::RC_9))
+	else if (((uint)directKey>= CRCInput::RC_0) && ((uint)directKey<= CRCInput::RC_9))
 	{
 		//number
 		char tmp[10];
@@ -594,7 +594,7 @@ int CMenuForwarder::paint(bool selected)
 	{
 		frameBuffer->paintIcon(iconName.c_str(), x + 10, y+ ((height- 20)>>1) );
 	}
-	else if ((directKey>= CRCInput::RC_0) && (directKey<= CRCInput::RC_9))
+	else if (((uint)directKey>= CRCInput::RC_0) && ((uint)directKey<= CRCInput::RC_9))
 	{
 		//number
 		char tmp[10];

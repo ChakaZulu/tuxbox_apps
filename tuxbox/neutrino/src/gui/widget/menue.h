@@ -91,7 +91,7 @@ class CMenuItem
 		int x, y, dx, offx;
 		bool		active;
 	public:
-    	int		directKey;
+		int		directKey;
 		string	iconName;
 
 		CMenuItem()
