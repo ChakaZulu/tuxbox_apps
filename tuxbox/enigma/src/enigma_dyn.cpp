@@ -4064,7 +4064,13 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	// to find old event in timerlist..
 	eString serviceRef = opt["ref"];
 	eString oldEventType = opt["old_type"];
+	int oldType = atoi(oldEventType.c_str());
 	eString oldStartTime = opt["old_stime"];
+	eString newEventType = opt["type"];
+	if (newEventType == "repeating")
+		oldType |= ePlaylistEntry::isRepeating;
+	else
+		oldType &= ~ePlaylistEntry::isRepeating;
 
 	eString sday = opt["sday"];
 	eString smonth = opt["smonth"];
@@ -4088,7 +4094,7 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 
 	time_t now = time(0)+eDVB::getInstance()->time_difference;
 	tm start = *localtime(&now);
-	if (atoi(oldEventType.c_str()) & ePlaylistEntry::isRepeating)
+	if (oldType & ePlaylistEntry::isRepeating)
 	{
 		start.tm_year = 70;  // 1.1.1970
 		start.tm_mon = 0;
@@ -4104,7 +4110,7 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	start.tm_sec = 0;
 
 	tm end = *localtime(&now);
-	if (atoi(oldEventType.c_str()) & ePlaylistEntry::isRepeating)
+	if (oldType & ePlaylistEntry::isRepeating)
 	{
 		end.tm_year = 70;  // 1.1.1970
 		end.tm_mon = 0;
@@ -4122,7 +4128,6 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	time_t eventStartTime = mktime(&start);
 	time_t eventEndTime = mktime(&end);
 	int duration = eventEndTime - eventStartTime;
-	int oldType = atoi(oldEventType.c_str());
 
 	eServiceReference ref = string2ref(serviceRef);
 
@@ -4179,6 +4184,16 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 		else
 			oldType &= ~ePlaylistEntry::Su;
 	}
+	else
+	{
+		oldType &= ~(	ePlaylistEntry::Mo |
+				ePlaylistEntry::Tue |
+				ePlaylistEntry::Wed |
+				ePlaylistEntry::Thu |
+				ePlaylistEntry::Fr |
+				ePlaylistEntry::Sa |
+				ePlaylistEntry::Su);
+	}
 
 	ref.descr = channel + "/" + description;
 	ePlaylistEntry newEvent(
@@ -4194,10 +4209,7 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	{
 		// ask user if he wants to update only after_event action and duration
 		// then call modifyEvent again.. with true as third parameter..
-		if (atoi(oldEventType.c_str()) & ePlaylistEntry::isRepeating)
-			result = readFile(TEMPLATE_DIR + "queryEditRepeatingTimer.tmp");
-		else
-			result = readFile(TEMPLATE_DIR + "queryEditTimer.tmp");
+		result = readFile(TEMPLATE_DIR + "queryEditTimer.tmp");
 		opts.strReplace("force=no", "force=yes");
 		if (opts.find("?") != 0)
 			opts = "?" + opts;
@@ -4206,7 +4218,7 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	else
 	{
 		result = "<script language=\"javascript\">window.close();</script>";
-		eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
+		eTimerManager::getInstance()->saveTimerList();
 	}
 	return result;
 }
