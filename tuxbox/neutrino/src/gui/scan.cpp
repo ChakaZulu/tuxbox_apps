@@ -170,7 +170,6 @@ int CScanTs::exec(CMenuTarget* parent, string)
 
 				case NeutrinoMessages::EVT_SCAN_SATELLITE:
 					frameBuffer->paintBoxRel(xpos3, ypos, width-xpos3-105, mheight, COL_MENUCONTENT);//new position set
-					g_Fonts->menu->RenderString(xpos3, ypos+mheight, width-xpos3, "                                        ", COL_MENUCONTENT);
 					g_Fonts->menu->RenderString(xpos3, ypos+mheight, width-xpos3, (char*)data, COL_MENUCONTENT);
 					delete (unsigned char*) data;
 					break;
