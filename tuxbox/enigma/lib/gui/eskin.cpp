@@ -134,6 +134,7 @@ int eSkin::parseColors(XMLTreeNode *xcolors)
 	int colorused[maxcolors];
 	memset(colorused, 0, maxcolors*sizeof(int));
 	palette=new gRGB[maxcolors];
+	memset(palette, 0, sizeof(gRGB)*maxcolors);
 	
 	for (QListIterator<eNamedColor> i(colors); i.current(); ++i)
 	{
