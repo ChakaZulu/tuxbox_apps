@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.16 2002/10/28 15:45:06 dirch Exp $
+	$Id: webapi.cpp,v 1.17 2002/10/28 19:50:27 dirch Exp $
 
 	License: GPL
 
@@ -578,9 +578,9 @@ char volbuf[5];
 	{
 		request->SendPlainHeader("text/html");
 		if(	Parent->Controld->getMute())
-			params["MUTE"] == "mute";
+			params["MUTE"] = "mute";
 		else
-			params["MUTE"] == "muted";
+			params["MUTE"] = "muted";
 		request->ParseFile(Parent->Parent->PrivateDocumentRoot + "/controlpanel_old.html", params);
 	}
 	return true;
