@@ -104,6 +104,3 @@ enigma/src/core/system/init.cpp
 enigma/src/core/system/nconfig.cpp
 enigma/src/core/system/nxml.cpp
 enigma/src/core/system/xmlrpc.cpp
-enigma/src/core/system/harddisk.cpp
-enigma/src/core/xml/xmlparse.cpp
-enigma/src/core/xml/xmltree.cpp
