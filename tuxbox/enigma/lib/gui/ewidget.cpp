@@ -1,4 +1,4 @@
-	#include <errno.h>
+#include <errno.h>
 
 #include "enigma.h"
 #include <core/base/eerror.h>
@@ -7,13 +7,15 @@
 #include <core/gdi/epng.h>
 #include <core/gui/eskin.h>
 #include <core/system/init.h>
+#include <core/gui/actions.h>
+#include <core/base/eptrlist.h>
 
 eWidget::eWidget(eWidget *parent, int takefocus):
 	parent(parent),
 	takefocus(takefocus), 
 	font(parent?parent->font:gFont("NimbusSansL-Regular Sans L Regular", eSkin::getActive()->queryValue("fontsize", 20))),
 	backgroundColor(parent?gColor(-1):gColor(0x20)),
-	foregroundColor(parent?parent->foregroundColor:gColor(0x2F))
+	foregroundColor(parent?parent->foregroundColor:gColor(0x2F)), focus(0)
 {
 	LCDTitle=0;
 	LCDElement=0;
@@ -49,7 +51,7 @@ void eWidget::takeFocus()
 {
 	if ((!parent) && !have_focus)
 	{
-		oldfocus=eZap::getInstance()->focus;
+		oldTLfocus=eZap::getInstance()->focus;
 		eZap::getInstance()->focus=this;
 	}
 	have_focus++;
@@ -60,7 +62,7 @@ void eWidget::releaseFocus()
 	if ((!parent) && have_focus)
 	{
 		if (eZap::getInstance()->focus==this)	// if we don't have lost the focus, ...
-			eZap::getInstance()->focus=oldfocus;	// give it back
+			eZap::getInstance()->focus=oldTLfocus;	// give it back
 	 	have_focus--;
  	}
 }
@@ -177,40 +179,31 @@ void eWidget::event(const eWidgetEvent &event)
 {
 	if (!eventFilter(event))
 	{
-		switch (event.type)
-		{
-		case eWidgetEvent::keyUp:
-		case eWidgetEvent::keyDown:
-		{
-			eWidget *target=focusList()->current();
-			if (!have_focus)	// bypassing focus handling for root-widget
-				target=this;
-			if (target)
-			{
-				if (event.type==eWidgetEvent::keyUp)
-					target->keyUp(event.parameter);
-				else
-					target->keyDown(event.parameter);
-			}
-			break;
-		}
-		case eWidgetEvent::gotFocus:
-			gotFocus();
-			break;
-		case eWidgetEvent::lostFocus:
-			lostFocus();
-			break;
+		eWidget *target=this;
+		if (have_focus && event.toFocus())	// bypassing focus handling for root-widget
+			target=focusList()->current();
+		if (target) 
+			target->eventHandler(event);
+	}
+}
 
-		case eWidgetEvent::changedSize:
-		case eWidgetEvent::changedText:
-		case eWidgetEvent::changedFont:
-		case eWidgetEvent::changedForegroundColor:
-		case eWidgetEvent::changedBackgroundColor:
-		case eWidgetEvent::changedPosition:
-		case eWidgetEvent::changedPixmap:
-			invalidate();
-			break;
+void eWidget::keyEvent(const eRCKey &key)
+{
+	const eAction *a;
+	for (actionMapList::iterator i = actionmaps.begin(); i != actionmaps.end(); ++i)
+		if ((a=(*i)->findAction(key)))
+		{
+			event(eWidgetEvent(eWidgetEvent::handleAction, a));
+			return;
 		}
+	/* Action not found, try to use old Keyhandle */
+	int c = key.producer->getKeyCompatibleCode(key);
+	if (c != -1)
+	{
+		if (key.flags & eRCKey::flagBreak)
+			event(eWidgetEvent(eWidgetEvent::keyUp, c));
+		else
+			event(eWidgetEvent(eWidgetEvent::keyDown, c));
 	}
 }
 
@@ -329,20 +322,52 @@ void eWidget::hide()
 void eWidget::willHideChildren()
 {
 	_willHide();
-		if (!childlist.empty())
+	if (!childlist.empty())
+	{
+		ePtrList<eWidget>::iterator It(childlist);
+		while(It != childlist.end())
 		{
-			ePtrList<eWidget>::iterator It(childlist);
-			while(It != childlist.end())
-			{
-				It->willHideChildren();
-				It++;
-			}
+			It->willHideChildren();
+			It++;
 		}
+	}
 }
 
 int eWidget::eventFilter(const eWidgetEvent &event)
 {
 	return 0;
+}
+
+void eWidget::eventHandler(const eWidgetEvent &event)
+{
+	switch (event.type)
+	{
+	case eWidgetEvent::handleAction:
+		(const_cast<eAction*>(event.action))->handler();	// only useful for global actions
+		break;
+	case eWidgetEvent::keyUp:
+		keyUp(event.parameter);
+		break;
+	case eWidgetEvent::keyDown:
+		keyDown(event.parameter);
+		break;
+	case eWidgetEvent::gotFocus:
+		gotFocus();
+		break;
+	case eWidgetEvent::lostFocus:
+		lostFocus();
+		break;
+
+	case eWidgetEvent::changedSize:
+	case eWidgetEvent::changedText:
+	case eWidgetEvent::changedFont:
+	case eWidgetEvent::changedForegroundColor:
+	case eWidgetEvent::changedBackgroundColor:
+	case eWidgetEvent::changedPosition:
+	case eWidgetEvent::changedPixmap:
+		invalidate();
+		break;
+	}
 }
 
 void eWidget::keyDown(int rc)
@@ -399,6 +424,11 @@ void eWidget::checkFocus()
 	}
 }
 
+void eWidget::addActionMap(eActionMap *map)
+{
+	actionmaps.push_back(map);
+}
+
 void eWidget::redrawWidget(gPainter *target, const eRect &clip)
 {
 }
@@ -414,102 +444,114 @@ void eWidget::eraseBackground(gPainter *target, const eRect &clip)
 
 void eWidget::focusNext(int dir)
 {
-	eWidget *old=_focusList.current();
-
-	if (old)
-	{
-		switch (dir)
-		{
-		case focusDirNext:
-		case focusDirPrev:
-		{
-			do
-			{
-				if (dir)
-					_focusList.prev();
-				else
-					_focusList.next();
-			} while (_focusList.current() && !(_focusList.current()->state&stateShow));
-			break;
-		}
-		case focusDirN:
-		case focusDirE:
-		case focusDirS:
-		case focusDirW:
-		{
-			eWidget *nearest=old;
-			int difference=1<<30;
-			for (ePtrList<eWidget>::iterator i(_focusList.begin()); i != _focusList.end(); ++i)
-			{
-				if (old == *i)
-					continue;
-				if (!(focusList()->current()->state&stateShow))
-					continue;
-				ePoint m1=i->getPosition();
-				m1+=ePoint(i->getSize().width()/2, i->getSize().height()/2);
-				ePoint m2=old->getPosition();
-				m2+=ePoint(old->getSize().width()/2, old->getSize().height()/2);
-				
-				int xd=m1.x()-m2.x();
-				int yd=m1.y()-m2.y();
-				
-				int ldir=focusDirN;
-				int mydiff=0;
-				
-				if (xd > mydiff)	// rechts
-				{
-					mydiff=xd;
-					ldir=focusDirE;
-				}
-				if ((-xd) > mydiff) // links
-				{
-					mydiff=-xd;
-					ldir=focusDirW;
-				}
-				if (yd > mydiff)		// unten
-				{
-					mydiff=yd;
-					ldir=focusDirS;
-				}
-				if ((-yd) > mydiff)	// oben
-				{
-					mydiff=-yd;
-					ldir=focusDirN;
-				}
-				if (dir == ldir)	// nur elemente beruecksichtigen die in der richtung liegen...
-				{
-					int entf=xd*xd+yd*yd;
-					if (entf < difference)
-					{
-						difference=entf;
-						nearest=*i;
-					}
-				}
-			}
-			_focusList.first();
-			while (_focusList.current() && (_focusList.current()!=nearest))
-				_focusList.next();
-			break;
-		}
-		}
-	}
-
+	if (!_focusList.current())
+		_focusList.first();
 	if (!_focusList.current())
 	{
-		if (dir==focusDirPrev)	// wrap around
-			_focusList.last();
-		else
-			_focusList.first();
-		if (!old)
-			old=_focusList.current();
+		setFocus(0);
+		return;
 	}
 
-	if (old == _focusList.current())
+	switch (dir)
+	{
+	case focusDirNext:
+	{
+		if (_focusList.current() == _focusList.end())
+			_focusList.first();
+		else
+			while (_focusList.current() != _focusList.end())
+			{
+				_focusList.next();
+				if (_focusList.current()->state&stateShow)
+					break;
+			}
+		break;
+	}
+	case focusDirPrev:
+	{
+		if (_focusList.current() == _focusList.begin())
+			_focusList.last();
+		else
+			while (_focusList.current() != _focusList.begin())
+			{
+				_focusList.prev();
+				if (_focusList.current()->state&stateShow)
+					break;
+			}
+		break;
+	}
+	case focusDirN:
+	case focusDirE:
+	case focusDirS:
+	case focusDirW:
+	{
+		eWidget *nearest=_focusList.current();
+		int difference=1<<30;
+		for (ePtrList<eWidget>::iterator i(_focusList.begin()); i != _focusList.end(); ++i)
+		{
+			if (_focusList.current() == i)
+				continue;
+			if (!(focusList()->current()->state&stateShow))
+				continue;
+			ePoint m1=i->getPosition();
+			m1+=ePoint(i->getSize().width()/2, i->getSize().height()/2);
+			ePoint m2=_focusList.current()->getPosition();
+			m2+=ePoint(_focusList.current()->getSize().width()/2, _focusList.current()->getSize().height()/2);
+			
+			int xd=m1.x()-m2.x();
+			int yd=m1.y()-m2.y();
+			
+			int ldir=focusDirN;
+			int mydiff=0;
+			
+			if (xd > mydiff)	// rechts
+			{
+				mydiff=xd;
+				ldir=focusDirE;
+			}
+			if ((-xd) > mydiff) // links
+			{
+				mydiff=-xd;
+				ldir=focusDirW;
+			}
+			if (yd > mydiff)		// unten
+			{
+				mydiff=yd;
+				ldir=focusDirS;
+			}
+			if ((-yd) > mydiff)	// oben
+			{
+				mydiff=-yd;
+				ldir=focusDirN;
+			}
+			if (dir == ldir)	// nur elemente beruecksichtigen die in der richtung liegen...
+			{
+				int entf=xd*xd+yd*yd;
+				if (entf < difference)
+				{
+					difference=entf;
+					nearest=*i;
+				}
+			}
+		}
+		_focusList.setCurrent(nearest);
+		break;
+	}
+	}
+
+	setFocus(_focusList.current());
+}
+
+void eWidget::setFocus(eWidget *newfocus)
+{
+	if (focus == newfocus)
 		return;
-	if (old)
-		old->event(eWidgetEvent(eWidgetEvent::lostFocus));
-	if (_focusList.current())
-		_focusList.current()->event(eWidgetEvent(eWidgetEvent::gotFocus));
+	if (focus)
+		focus->event(eWidgetEvent(eWidgetEvent::lostFocus));
+	focus=newfocus;
+	if (focus)
+		focus->event(eWidgetEvent(eWidgetEvent::gotFocus));
+	_focusList.setCurrent(focus);
 }
 
 void eWidget::setFont(const gFont &fnt)
@@ -759,10 +801,8 @@ eWidget *eWidget::search(const eString &sname)
 			It++;
 		}
 	}
-
 	return 0;
 }
-
 
 static eWidget *create_eWidget(eWidget *parent)
 {

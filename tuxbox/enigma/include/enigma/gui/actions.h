@@ -6,6 +6,7 @@
 #include <list>
 #include <functional>
 #include <set>
+#include <libsig_comp.h>
 
 #include "rc.h"
 
@@ -22,6 +23,8 @@ public:
 	~eAction();
 	const char *getDescription() const { return description; }
 	const char *getIdentifier() const { return identifier; }
+	
+	Signal0<void> handler;
 	
 	keylist &getKeyList() { return keys; }
 	

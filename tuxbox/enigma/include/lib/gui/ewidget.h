@@ -10,6 +10,8 @@
 #include <include/libsig_comp.h>
 #include <core/gdi/grc.h>
 
+class eAction;
+class eActionMap;
 
 class eWidgetEvent
 {
@@ -23,9 +25,34 @@ public:
 		
 		changedText, changedFont, changedForegroundColor, changedBackgroundColor,
 		changedSize, changedPosition, changedPixmap,
+
+		handleAction
 	} type;
-	int parameter;
+	union
+	{
+		int parameter;
+		const eAction *action;
+	};
 	eWidgetEvent(eventType type, int parameter=0): type(type), parameter(parameter) { }
+	eWidgetEvent(eventType type, const eAction *action): type(type), action(action) { }
+	
+	/**
+	 * \brief Event should be delivered to the focused widget.
+	 *
+	 * \return true if the event should be delivered to the focused widget instead of the widget itself.
+	 */
+	int toFocus() const
+	{
+		switch (type)
+		{
+		case keyUp:
+		case keyDown:
+		case handleAction:
+			return 1;
+		default:
+			return 0;
+		}
+	}
 };
 
 /** \brief The main widget class. All widgets inherit this class.
@@ -43,7 +70,7 @@ public:// slots:
 	/**
 	 * \brief Exits a (model) widget.
 	 *
-	 * Quit the local event loop, thus returning the control to the function which called \c exec.
+	 * Quit the local event loop, thus returning the control to the function which called \a exec.
 	 * \sa eWidget::accept
 	 * \sa eWidget::reject
 	 */
@@ -52,7 +79,7 @@ public:// slots:
 	/**
 	 * \brief Closes with a returncode of 0 (success).
 	 *
-	 * Synonym to \c close(0);. Useful to use as a slot.
+	 * Synonym to \a close(0);. Useful to use as a slot.
 	 * \sa eWidget::close
 	 */
 	void accept();
@@ -60,7 +87,7 @@ public:// slots:
 	/**
 	 * \brief Closes with a returncode of -1 (failure).
 	 *
-	 * Synonym to \c close(-1);. Useful to use as a slot.
+	 * Synonym to \a close(-1);. Useful to use as a slot.
 	 * \sa eWidget::close
 	 */
 	void reject();
@@ -72,8 +99,12 @@ protected:
 	eSize size;
 	eRect clientrect;
 	eRect clientclip;
+
 	ePtrList<eWidget> _focusList;
-	eWidget *oldfocus;
+	eWidget *focus;
+
+		/// old top-level focus
+	eWidget *oldTLfocus;
 	int takefocus;
 	int state;
 	
@@ -104,8 +135,24 @@ protected:
 	void willShowChildren();
 	void willHideChildren();
 	
-	virtual int eventFilter(const eWidgetEvent &event);	/** 0 for 'no action taken' */
+	void keyEvent(const class eRCKey &key);
+	
+	/**
+	 * \brief Hi priority event filter.
+	 *
+	 * This event filter is called before the event is delivered via \a event.
+	 * \return 1 if the event should NOT be forwarded.
+	 */
+	virtual int eventFilter(const eWidgetEvent &event);
 
+	/**
+	 * \brief Handles an event.
+	 *
+	 * If re-implemented in a widget-sub-class, \c eWidget::event should be called whenever the event is
+	 * not processed by the widget.
+	 */
+	virtual void eventHandler(const eWidgetEvent &event);
+	
 	virtual void keyDown(int rc);
 	virtual void keyUp(int rc);
 	
@@ -115,6 +162,11 @@ protected:
 	virtual void recalcClientRect();
 	void recalcClip();
 	void checkFocus();
+	
+	typedef ePtrList<eActionMap> actionMapList;
+
+	void addActionMap(eActionMap *map);
+	actionMapList actionmaps;
 
 			// generic properties
 	gFont font;
@@ -264,9 +316,10 @@ public:
 	/**
 	 * \brief Delivers a widget-event.
 	 *
+	 * Internally calles \a eventFilter, then \a eventHandler() (in some cases of the focused widget)
 	 * \param event The event to deliver.
 	 */
-	void event(const eWidgetEvent &event);
+	virtual void event(const eWidgetEvent &event);
 	
 	/**
 	 * \brief Shows the widget.
@@ -308,6 +361,15 @@ public:
 	 * \param dir The direction, \c focusDirection.
 	 */
 	void focusNext(int dir=0);
+	
+	/**
+	 * \brief Gives focus to a widget.
+	 *
+	 * Set the focus to the specified widget. The \c focuslist is updated, too.
+	 * An \c gotFocus and \c lostFocus event will be generated.
+	 * \param newfocus The new widget to focus.
+	 */
+	void setFocus(eWidget *newfocus);
 	
 	/**
 	 * \brief Sets the widget font.

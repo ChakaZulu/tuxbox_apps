@@ -51,7 +51,7 @@ public:
 	inline T* prev();
 	inline T* first();
 	inline T* last();
-	inline T* setCurrent(const T*) const;
+	inline T* setCurrent(const T*);
 	inline const T* current() const;
 	inline const T* next() const;
 	inline const T* prev() const;
@@ -93,6 +93,11 @@ public:
 		return **std::list<T*>::iterator::operator->();
 	}
 	
+	operator T*() const
+	{
+		return &operator T&();
+	}
+	
 	void operator+=(int i)
 	{
 		while (i--)
@@ -123,6 +128,11 @@ public:
 	operator T&() const
 	{
 		return **std::list<T*>::const_iterator::operator->();
+	}
+
+	operator T*() const
+	{
+		return &operator T&();
 	}
 
 	void operator+=(int i)
@@ -158,6 +168,11 @@ public:
 		return **std::list<T*>::reverse_iterator::operator->();
 	}
 
+	operator T*() const
+	{
+		return &operator T&();
+	}
+
 	void operator+=(int i)
 	{
 		while (i--)
@@ -189,6 +204,11 @@ public:
 	operator T&() const
 	{
 		return **std::list<T*>::const_reverse_iterator::operator->();
+	}
+
+	operator T*() const
+	{
+		return &operator T&();
 	}
 
 	void operator+=(int i)
@@ -427,14 +447,14 @@ inline void ePtrList<T>::take(T* t)
 
 /////////////////// ePtrList setCurrent(T*) ////////////////////
 template <class T>
-inline T* ePtrList<T>::setCurrent(const T* t) const
+inline T* ePtrList<T>::setCurrent(const T* t)
 {
 	// Sets the internal current iterator to the first element that equals to t, and returns t when a item is found,
 	// otherwise it returns 0 !
-	for (std::list<T*>::iterator it(std::list<T*>::begin()); it != std::list<T*>::end(); it++)
+	for (std::list<T*>::iterator it(std::list<T*>::begin()); it != std::list<T*>::end(); ++it)
 		if (*it == t)
 		{
-			current = it;
+			cur = it;
 			return *it;
 		}
 
