@@ -7,7 +7,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include <malloc.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <net/if.h>
@@ -608,7 +607,6 @@ static eString selectAudio(eString request, eString dirpath, eString opts, eHTTP
 eString getCurrentSubChannel(eString curServiceRef)
 {
 	eString subChannel;
-
 	if (curServiceRef)
 	{
 		eString s1 = curServiceRef; int pos; eString nspace;
@@ -621,32 +619,33 @@ eString getCurrentSubChannel(eString curServiceRef)
 		EIT *eit = eDVB::getInstance()->getEIT();
 		if (eit)
 		{
-			ePtrList<EITEvent>::iterator s(eit->events);
-			for (ePtrList<Descriptor>::iterator d(s->descriptor); d != s->descriptor.end(); ++d)
+			int p=0;
+			for (ePtrList<EITEvent>::iterator i(eit->events); i != eit->events.end(); ++i)
 			{
-				if (d->Tag() == DESCR_LINKAGE)
+				EITEvent *event=*i;
+				if ((event->running_status>=2) || ((!p) && (!event->running_status)))
 				{
-					LinkageDescriptor *ld =(LinkageDescriptor *)*d;
-					if (ld->linkage_type == 0xB0) //subchannel
+					for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
 					{
-						char *tmp = (char *)malloc(ld->priv_len);
-						strncpy(tmp, (char *)ld->private_data, ld->priv_len);
-						tmp[ld->priv_len] = '\0';
-						eString subService(tmp);
-						free(tmp);
-
-						eString subServiceRef = "1:0:7:" + eString().sprintf("%x", ld->service_id) + ":" + eString().sprintf("%x", ld->transport_stream_id) + ":" + eString().sprintf("%x", ld->original_network_id) + ":"
-								  + eString(nspace) + ":0:0:0:";
-
-						if (subServiceRef == curServiceRef)
-							subChannel = removeBadChars(subService);
+						if (d->Tag() == DESCR_LINKAGE)
+						{
+							LinkageDescriptor *ld =(LinkageDescriptor *)*d;
+							if (ld->linkage_type == 0xB0) //subchannel
+							{
+								eString subService((char*)ld->private_data, ld->priv_len);
+								eString subServiceRef = "1:0:7:" + eString().sprintf("%x", ld->service_id) + ":" + eString().sprintf("%x", ld->transport_stream_id) + ":" + eString().sprintf("%x", ld->original_network_id) + ":"
+									+ eString(nspace) + ":0:0:0:";
+								if (subServiceRef == curServiceRef)
+									subChannel = removeBadChars(subService);
+							}
+						}
 					}
 				}
+				++p;
 			}
 			eit->unlock();
 		}
 	}
-
 	return subChannel;
 }
 
@@ -669,38 +668,39 @@ static eString selectSubChannel(eString request, eString dirpath, eString opts, 
 		EIT *eit = eDVB::getInstance()->getEIT();
 		if (eit)
 		{
-			subChannels = "";
-			ePtrList<EITEvent>::iterator s(eit->events);
-			for (ePtrList<Descriptor>::iterator d(s->descriptor); d != s->descriptor.end(); ++d)
+			int p=0;
+			for (ePtrList<EITEvent>::iterator i(eit->events); i != eit->events.end(); ++i)
 			{
-				if (d->Tag() == DESCR_LINKAGE)
+				EITEvent *event=*i;
+				if ((event->running_status>=2) || ((!p) && (!event->running_status)))
 				{
-					LinkageDescriptor *ld =(LinkageDescriptor *)*d;
-					if (ld->linkage_type == 0xB0) //subchannel
+					for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
 					{
-						char *tmp = (char *)malloc(ld->priv_len);
-						strncpy(tmp, (char *)ld->private_data, ld->priv_len);
-						tmp[ld->priv_len] = '\0';
-						eString subService(tmp);
-						free(tmp);
-
-						eString subServiceRef = "1:0:7:" + eString().sprintf("%x", ld->service_id) + ":" + eString().sprintf("%x", ld->transport_stream_id) + ":" + eString().sprintf("%x", ld->original_network_id) + ":"
-								  + eString(nspace) + ":0:0:0:";
-
-						if (subServiceRef == curServiceRef)
-							subChannels += "<option selected value=\"" + subServiceRef + "\">";
-						else
-							subChannels += "<option value=\"" + subServiceRef + "\">";
-						subChannels += removeBadChars(subService);
-						subChannels += "</option>";
+						if (d->Tag() == DESCR_LINKAGE)
+						{
+							LinkageDescriptor *ld =(LinkageDescriptor *)*d;
+							if (ld->linkage_type == 0xB0) //subchannel
+							{
+								eString subService((char*)ld->private_data, ld->priv_len);
+								eString subServiceRef = "1:0:7:" + eString().sprintf("%x", ld->service_id) + ":" + eString().sprintf("%x", ld->transport_stream_id) + ":" + eString().sprintf("%x", ld->original_network_id) + ":"
+									+ eString(nspace) + ":0:0:0:";
+								if (subServiceRef == curServiceRef)
+									subChannels += "<option selected value=\"" + subServiceRef + "\">";
+								else
+									subChannels += "<option value=\"" + subServiceRef + "\">";
+								subChannels += removeBadChars(subService);
+								subChannels += "</option>";
+							}
+						}
 					}
 				}
+				++p;
 			}
 			eit->unlock();
 		}
 	}
 
-	if (subChannels == "")
+	if (!subChannels)
 		subChannels = "<option>No subchannels available</option>";
 
 	eString result = readFile(TEMPLATE_DIR + "subChannelSelection.tmp");
@@ -3837,7 +3837,7 @@ static eString deleteTVBrowserTimerEvent(eString request, eString dirpath, eStri
 		atoi(eventStartTime.c_str()),
 		-1, -1, atoi(eventType.c_str()));
 
-	int ret = eTimerManager::getInstance()->deleteEventFromTimerList(e, true);
+	eTimerManager::getInstance()->deleteEventFromTimerList(e, true);
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
