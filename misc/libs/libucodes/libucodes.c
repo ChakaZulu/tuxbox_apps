@@ -1,10 +1,14 @@
 /*
-  $Id: libucodes.c,v 1.10 2001/10/09 20:39:26 fnbrd Exp $
+  $Id: libucodes.c,v 1.11 2001/10/22 01:42:54 fnbrd Exp $
   
   $Log: libucodes.c,v $
+  Revision 1.11  2001/10/22 01:42:54  fnbrd
+  Small comment for support ;)
+
   Revision 1.10  2001/10/09 20:39:26  fnbrd
   Added Id and Log
 
+  Alle vorherigen Versionen sind von McClean, d.h. er ist der Ansprechpartner ;)
 
 */
 
