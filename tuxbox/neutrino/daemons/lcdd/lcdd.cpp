@@ -2,7 +2,7 @@
 	LCD-Daemon  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
-	Homepage: http://mcclean.cyberphoria.org/
+	Homepage: http://dbox.cyberphoria.org/
 
 
 
@@ -59,7 +59,7 @@ char			channelname[30];
 unsigned char		volume;
 bool			muted, shall_exit;
 
-void show_channelname(char *);
+void show_channelname(string);
 void show_volume(unsigned char);
 void show_menu(lcdd_msg msg);
 void set_mode(lcdd_mode, char *title);
@@ -109,11 +109,29 @@ void parse_command(lcdd_msg rmsg) {
 	}
 }
 
-void show_channelname( char * name)
+void show_channelname( string name )
 {
 	if (mode!=LCDM_TV) return;
 	display.draw_fill_rect (0,14,120,48, CLCDDisplay::PIXEL_OFF);
-	fonts.channelname->RenderString(1,37, 130, name, CLCDDisplay::PIXEL_ON);
+	if (fonts.channelname->getRenderWidth(name.c_str())>120)
+	{
+		//try split...
+		int pos = name.find(" ");
+		if(pos!=-1)
+		{		//ok-show 2-line text
+				string text1 = name.substr(0,pos);
+				string text2 = name.substr(pos+1, name.length()-(pos+1) );
+
+				fonts.channelname->RenderString(1,29, 130, text1.c_str(), CLCDDisplay::PIXEL_ON);
+				fonts.channelname->RenderString(1,29+16, 130, text2.c_str(), CLCDDisplay::PIXEL_ON);
+		}
+		else
+			fonts.channelname->RenderString(1,37, 130, name.c_str(), CLCDDisplay::PIXEL_ON);
+	}
+	else
+	{
+		fonts.channelname->RenderString(1,37, 130, name.c_str(), CLCDDisplay::PIXEL_ON);
+	}
 	display.update();
 }
 

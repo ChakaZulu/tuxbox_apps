@@ -2,7 +2,7 @@
 	LCD-Daemon  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean', Georg Lukas
-	Homepage: http://mcclean.cyberphoria.org/
+	Homepage: http://dbox.cyberphoria.org/
 
 
 
