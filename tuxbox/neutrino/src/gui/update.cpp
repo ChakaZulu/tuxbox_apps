@@ -33,6 +33,7 @@
 
 #include "update.h"
 #include "neutrino.h"
+#include "gui/widget/messagebox.h"
 
 #include <sys/ioctl.h>
 #include <stdio.h>
@@ -278,6 +279,8 @@ bool CHTTPUpdater::getInfo()
 	FILE *headerfile;
 	string	sFileName = gTmpPath+ VersionFile;
 	headerfile = fopen(sFileName.c_str(), "w");
+	if (!headerfile)
+		return false;
 	res = (CURLcode) 1;
 	curl = curl_easy_init();
 	if(curl)
@@ -306,15 +309,14 @@ bool CHTTPUpdater::getInfo()
 				curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, tmp);
 			}
 		}
-
 		res = curl_easy_perform(curl);
 		curl_easy_cleanup(curl);
 	}
-	//	printf("do flush\n");
-	fflush(headerfile);
-	//	printf("do close\n");
-	fclose(headerfile);
-	//	printf("ready\n");
+	if (headerfile)
+	{
+		fflush(headerfile);
+		fclose(headerfile);
+	}
 	return res==0;
 }
 
@@ -326,6 +328,8 @@ bool CHTTPUpdater::getFile( string version )
 	FILE *headerfile;
 	string	sFileName = gTmpPath+ ImageFile;
 	headerfile = fopen(sFileName.c_str(), "w");
+	if (!headerfile)
+		return false;
 	res = (CURLcode) 1;
 	curl = curl_easy_init();
 	if(curl)
@@ -355,11 +359,8 @@ bool CHTTPUpdater::getFile( string version )
 		res = curl_easy_perform(curl);
 		curl_easy_cleanup(curl);
 	}
-	//	printf("do flush\n");
 	fflush(headerfile);
-	//	printf("do close\n");
 	fclose(headerfile);
-	//	printf("ready\n");
 	return res==0;
 }
 
@@ -576,6 +577,13 @@ void CFlashUpdate::paint()
 	{
 		return;
 	}
+
+	char msg[250];
+	sprintf( (char*) &msg, g_Locale->getText("flashupdate.msgbox").c_str(), new_major, new_provider, new_minor);
+    if ( ShowMsg ( "messagebox.info", msg, CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw" ) != CMessageBox::mbrYes )
+    {
+    	return;
+    }
 
 	//start update
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width- 10, g_Locale->getText("flashupdate.globalprogress").c_str() , COL_MENUCONTENT);

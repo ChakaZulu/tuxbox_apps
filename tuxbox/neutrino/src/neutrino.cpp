@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.258 2002/05/01 03:00:17 McClean Exp $
+        $Id: neutrino.cpp,v 1.259 2002/05/03 08:42:26 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -449,8 +449,8 @@ int CNeutrinoApp::loadSetup()
 	g_settings.key_subchannel_up = configfile.getInt( "key_subchannel_up",  CRCInput::RC_right );
 	g_settings.key_subchannel_down = configfile.getInt( "key_subchannel_down",  CRCInput::RC_left );
 
-	strcpy( g_settings.network_streamingserver, configfile.getString( "repeat_blocker", g_info.box_Type==3?"150":"25" ).c_str() );
-	strcpy( g_settings.network_streamingserver, configfile.getString( "repeat_genericblocker", g_info.box_Type==3?"25":"0" ).c_str() );
+	strcpy( g_settings.repeat_blocker, configfile.getString( "repeat_blocker", g_info.box_Type==3?"150":"25" ).c_str() );
+	strcpy( g_settings.repeat_genericblocker, configfile.getString( "repeat_genericblocker", g_info.box_Type==3?"25":"0" ).c_str() );
 
 	//screen configuration
 	g_settings.screen_StartX = configfile.getInt( "screen_StartX", 37 );
@@ -460,10 +460,10 @@ int CNeutrinoApp::loadSetup()
 
 	//Software-update
 	g_settings.softupdate_mode = configfile.getInt( "softupdate_mode", 1 );
-	strcpy( g_settings.network_streamingserver, configfile.getString( "softupdate_currentversion", "" ).c_str() );
-	strcpy( g_settings.network_streamingserver, configfile.getString( "softupdate_proxyserver", "" ).c_str() );
-	strcpy( g_settings.network_streamingserver, configfile.getString( "softupdate_proxyusername", "" ).c_str() );
-	strcpy( g_settings.network_streamingserver, configfile.getString( "softupdate_proxypassword", "" ).c_str() );
+	strcpy( g_settings.softupdate_currentversion, configfile.getString( "softupdate_currentversion", "" ).c_str() );
+	strcpy( g_settings.softupdate_proxyserver, configfile.getString( "softupdate_proxyserver", "" ).c_str() );
+	strcpy( g_settings.softupdate_proxyusername, configfile.getString( "softupdate_proxyusername", "" ).c_str() );
+	strcpy( g_settings.softupdate_proxypassword, configfile.getString( "softupdate_proxypassword", "" ).c_str() );
 
 	//BouquetHandling
 	g_settings.bouquetlist_mode = configfile.getInt( "bouquetlist_mode", 0 );
@@ -471,7 +471,7 @@ int CNeutrinoApp::loadSetup()
 	// parentallock
 	g_settings.parentallock_prompt = configfile.getInt( "parentallock_prompt", 0 );
 	g_settings.parentallock_lockage = configfile.getInt( "parentallock_lockage", 12 );
-	strcpy( g_settings.network_streamingserver, configfile.getString( "parentallock_pincode", "0000" ).c_str() );
+	strcpy( g_settings.parentallock_pincode, configfile.getString( "parentallock_pincode", "0000" ).c_str() );
 
 	if(configfile.getUnknownKeyQueryedFlag() && (erg==0))
 	{
@@ -509,7 +509,6 @@ void CNeutrinoApp::saveSetup()
 	{
 		cout << "error while saving scan-settings!" << endl;
 	}
-
 	//video
 	configfile.setInt( "video_Signal", g_settings.video_Signal );
 	configfile.setInt( "video_Format", g_settings.video_Format );
@@ -1323,7 +1322,7 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 		oj->addOption(1, "options.on");
 	networkSettings.addItem( oj );
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	
+
 	networkSettings.addItem( m1);
 	networkSettings.addItem( m2);
 	networkSettings.addItem( m3);
@@ -2522,7 +2521,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.258 2002/05/01 03:00:17 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.259 2002/05/03 08:42:26 field Exp $\n\n");
 	tzset();
 	initGlobals();
 

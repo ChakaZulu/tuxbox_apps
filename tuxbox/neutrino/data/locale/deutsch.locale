@@ -299,6 +299,7 @@ flashupdate.proxyusername_hint2 Ein leerer Eintrag bedeutet keine Authentifizier
 flashupdate.proxypassword Passwort
 flashupdate.proxypassword_hint1 Geben sie das Proxy-Passwort ein
 flashupdate.proxypassword_hint2
+flashupdate.msgbox Es wurde folgendes neues Image gefunden: %d.%d.%s\nWollen Sie diese Version jetzt herunterladen und installieren?
 
 bouqueteditor.name Bouquet-Verwaltung
 bouqueteditor.delete Löschen

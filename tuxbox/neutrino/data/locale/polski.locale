@@ -312,6 +312,7 @@ flashupdate.proxyusername_hint2 a empty entry means no proxy-auth
 flashupdate.proxypassword Password
 flashupdate.proxypassword_hint1 enter the proxyserver password
 flashupdate.proxypassword_hint2
+flashupdate.msgbox Found the following new image: %d.%d.%s\nDo you want to download and install this version now?
 
 bouqueteditor.name Bouquet-editor
 bouqueteditor.delete Delete
