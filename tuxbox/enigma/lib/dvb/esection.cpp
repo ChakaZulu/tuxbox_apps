@@ -11,9 +11,9 @@
 #include <lib/base/ebase.h>
 #include <lib/base/eerror.h>
 
-#define DEMUX "/dev/dvb/card0/demux0"
+#define DEMUX "/dev/dvb/adapter0/demux0"
 
-#include <ost/dmx.h>
+#include <linux/dvb/dmx.h>
 
 ePtrList<eSection> eSection::active;
 
@@ -37,7 +37,7 @@ void eSectionReader::close()
 int eSectionReader::open(int pid, __u8 *data, __u8 *mask, int len, int _flags)
 {
 	flags=flags;
-	dmxSctFilterParams secFilterParams;
+	dmx_sct_filter_params secFilterParams;
 	close();
 
 	handle=::open(DEMUX, O_RDWR|O_NONBLOCK);
@@ -50,9 +50,7 @@ int eSectionReader::open(int pid, __u8 *data, __u8 *mask, int len, int _flags)
 
 	secFilterParams.pid=pid;
 
-	const int maxsize=DMX_FILTER_SIZE;
-	memset(secFilterParams.filter.filter, 0, maxsize);
-	memset(secFilterParams.filter.mask, 0, maxsize);
+	memset(&secFilterParams.filter, 0, sizeof(struct dmx_filter));
 
 	secFilterParams.timeout=0;
 	secFilterParams.flags=DMX_IMMEDIATE_START;

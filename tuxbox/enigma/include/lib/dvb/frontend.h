@@ -7,10 +7,9 @@
 */
 
 #include <stdlib.h>
-#include <ost/dmx.h>
-#include <ost/frontend.h>
-#include <ost/sec.h>
-#include <ost/video.h>
+#include <linux/dvb/dmx.h>
+#include <linux/dvb/frontend.h>
+#include <linux/dvb/video.h>
 
 #include <lib/base/ebase.h>
 #include <lib/base/estring.h>
@@ -27,7 +26,7 @@ class eSwitchParameter;
 class eFrontend: public Object
 {
 	int type;
-	int fd, secfd;
+	int fd;
 
 	int lastcsw,
 			lastRotorCmd,
@@ -37,18 +36,20 @@ class eFrontend: public Object
 	enum { stateIdle, stateTuning };
 	int state;
 	eTransponder *transponder;
-	eFrontend(int type, const char *demod="/dev/dvb/card0/frontend0", const char *sec="/dev/dvb/card0/sec0");
+	eFrontend(int type, const char *demod="/dev/dvb/adapter0/frontend0");
 	static eFrontend *frontend;
 	eTimer *timer, timer2;
 	int tries;
 	int tune(eTransponder *transponder, 
 			uint32_t Frequency, int polarisation,
-			uint32_t SymbolRate, CodeRate FEC_inner,
-			SpectralInversion Inversion, eSatellite* sat, Modulation QAM);
+			uint32_t SymbolRate, fe_code_rate_t FEC_inner,
+			fe_spectral_inversion_t Inversion, eSatellite* sat, fe_modulation_t QAM);
 
 	void timeout();
+	/*
 	int RotorUseTimeout(secCmdSequence& seq, int newPos );
 	int RotorUseInputPower(secCmdSequence& seq, void *commands, int seqRepeat );
+	*/
 public:
 	int sendDiSEqCCmd( int addr, int cmd, eString params="", int frame=0xE0 );
 

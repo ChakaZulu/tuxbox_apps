@@ -1,7 +1,7 @@
 #include <lib/dvb/record.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <ost/dmx.h>
+#include <linux/dvb/dmx.h>
 #include <sys/ioctl.h>
 
 void eDVBRecorder::dataAvailable(int what)
@@ -109,10 +109,10 @@ void eDVBRecorder::s_open(const char *_filename)
 	outfd=-1;
 	openFile(splits=0);
 
-	dvrfd=::open("/dev/dvb/card0/dvr1", O_RDONLY|O_NONBLOCK);
+	dvrfd=::open("/dev/dvb/adapter0/dvr1", O_RDONLY|O_NONBLOCK);
 	if (dvrfd < 0)
 	{
-		eDebug("failed to open /dev/dvb/card0/dvr1 (%m)");
+		eDebug("failed to open /dev/dvb/adapter0/dvr1 (%m)");
 		::close(outfd);
 		outfd=-1;
 		return;
@@ -133,17 +133,17 @@ void eDVBRecorder::s_addPID(int pid)
 {
 	pid_t p;
 	p.pid=pid;
-	p.fd=::open("/dev/dvb/card0/demux1", O_RDWR);
+	p.fd=::open("/dev/dvb/adapter0/demux1", O_RDWR);
 	if (p.fd < 0)
 	{
 		eDebug("failed to open demux1");
 		return;
 	}
-	dmxPesFilterParams flt;
+	dmx_pes_filter_params flt;
 	flt.pid=p.pid;
 	flt.input=DMX_IN_FRONTEND;
 	flt.output=DMX_OUT_TS_TAP;
-	flt.pesType=DMX_PES_OTHER;
+	flt.pes_type=DMX_PES_OTHER;
 	flt.flags=0;
 
 	if (::ioctl(p.fd, DMX_SET_PES_FILTER, &flt)<0)

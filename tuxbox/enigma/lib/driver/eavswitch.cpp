@@ -1,13 +1,13 @@
 #include <lib/driver/eavswitch.h>
 
-#define VIDEO_DEV "/dev/dvb/card0/video0"
-#define AUDIO_DEV "/dev/dvb/card0/audio0"
+#define VIDEO_DEV "/dev/dvb/adapter0/video0"
+#define AUDIO_DEV "/dev/dvb/adapter0/audio0"
 
 #include <unistd.h>
 #include <fcntl.h>
 #include <dbox/avs_core.h>
-#include <ost/audio.h>
-#include <ost/video.h>
+#include <linux/dvb/audio.h>
+#include <linux/dvb/video.h>
 #include <sys/ioctl.h>
 
 #include <lib/system/econfig.h>
@@ -111,7 +111,7 @@ int eAVSwitch::setVolume(int vol)
 
 	if (s == "05" || s == "06")  // Dreambox
 	{
-		audioMixer_t mix;
+		audio_mixer_t mix;
 		mix.volume_left=(vol*vol)/64;
 		mix.volume_right=(vol*vol)/64;
 
