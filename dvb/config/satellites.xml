@@ -56,7 +56,7 @@ and combinations of this -->
 		<transponder frequency="11641000" symbol_rate="27500000" polarization="1" fec_inner="3"/>
 		<transponder frequency="11676000" symbol_rate="27500000" polarization="1" fec_inner="3"/>
 	</sat>
-	<sat name="Intelsat 707 &amp; Thor 2/3 1.0W" flags="5" position="-10">
+	<sat name="Intelsat 707, Thor 2/3 1.0W" flags="5" position="-10">
 		<!-- intelsat 707 -->
 		<transponder frequency="10969000" symbol_rate="2142000" polarization="0" fec_inner="3"/>
 		<transponder frequency="10974000" symbol_rate="4203000" polarization="1" fec_inner="2"/>
