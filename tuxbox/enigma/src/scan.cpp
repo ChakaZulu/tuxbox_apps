@@ -568,8 +568,9 @@ int tsAutomatic::tuneNext(int next)
 	}
 	else if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feTerrestrial )
 	{
-		progress += eString().sprintf("\n%d Khz",
-			current_tp->terrestrial.centre_frequency);
+		progress += eString().sprintf("\n%d,%d Mhz",
+			current_tp->terrestrial.centre_frequency/1000000,
+			current_tp->terrestrial.centre_frequency%1000000);
 	}
 	l_status->setText(progress);
 
@@ -797,11 +798,17 @@ void tsScan::dvbEvent(const eDVBEvent &event)
 				event.transponder->satellite.symbol_rate / 1000,
 				event.transponder->satellite.polarisation?_("Vertical"):"Horizontal") );
 		}
-		else
+		else if( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feCable )
 		{
 			transponder_data->setText( eString().sprintf("%d Mhz / %d ksyms",
 				event.transponder->cable.frequency / 1000,
 				event.transponder->cable.symbol_rate / 1000));
+		}
+		else 
+		{
+			transponder_data->setText( eString().sprintf("%d,%d Mhz",
+				event.transponder->terrestrial.centre_frequency/1000000,
+				event.transponder->terrestrial.centre_frequency%1000000));
 		}
 		break;
 	case eDVBScanEvent::eventScanNext:
