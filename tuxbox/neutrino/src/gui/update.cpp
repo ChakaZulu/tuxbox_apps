@@ -72,17 +72,18 @@
 #define gTmpPath "/var/tmp/"
 #define gUserAgent "neutrino/softupdater 1.0"
 
+// Only Squashfs v2.0 is supported in U-Boot Bootloader
 #ifdef SQUASHFS
 #define LIST_OF_UPDATES_LOCAL_FILENAME "squashfs.list"
 #define UPDATE_LOCAL_FILENAME          "update.squashfs"
-#define RELEASE_CYCLE                  "1.8"
+#define RELEASE_CYCLE                  "2.0"
 #define FILEBROWSER_UPDATE_FILTER      "squashfs"
-#define MTD_OF_WHOLE_IMAGE             5
-#define MTD_DEVICE_OF_UPDATE_PART      "/dev/mtd/3"
+#define MTD_OF_WHOLE_IMAGE             4
+#define MTD_DEVICE_OF_UPDATE_PART      "/dev/mtd/2"
 #else
 #define LIST_OF_UPDATES_LOCAL_FILENAME "cramfs.list"
 #define UPDATE_LOCAL_FILENAME          "update.cramfs"
-#define RELEASE_CYCLE                  "1.7"
+#define RELEASE_CYCLE                  "2.0"
 #define FILEBROWSER_UPDATE_FILTER      "cramfs"
 #define MTD_OF_WHOLE_IMAGE             4
 #define MTD_DEVICE_OF_UPDATE_PART      "/dev/mtd/2"
