@@ -15,6 +15,7 @@
 
 #include <lib/base/i18n.h>
 #include <lib/driver/rc.h>
+#include <lib/driver/eavswitch.h>
 #include <lib/dvb/service.h>
 #include <lib/dvb/dvb.h>
 #include <lib/dvb/edvb.h>
@@ -171,11 +172,8 @@ eZap::eZap(int argc, char **argv)
 					if ( eActionMapList::getInstance()->loadXML( TUXBOXDATADIR "/enigma/resources/rcdm7000.xml") )
 						if ( eActionMapList::getInstance()->loadXML( TUXBOXDATADIR "/enigma/resources/rcdreambox2.xml") )
 							eFatal("couldn't load RC Mapping file for DM7000");
-			if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdreambox_keyboard.xml") )
-				if ( eActionMapList::getInstance()->loadXML( TUXBOXDATADIR "/enigma/resources/rcdreambox_keyboard.xml") )
-					eDebug("couldn't load Dreambox keyboard mapping (rcdreambox_keyboard.xml)");
 			break;
-//		case eSystemInfo::TR_DVB272S:
+		case eSystemInfo::TR_DVB272S:
 		case eSystemInfo::DM5600:
 		case eSystemInfo::DM5620:
 		case eSystemInfo::DM500:
@@ -183,12 +181,12 @@ eZap::eZap(int argc, char **argv)
 				if ( eActionMapList::getInstance()->loadXML( TUXBOXDATADIR "/enigma/resources/rcdm5xxx.xml") )
 					eFatal("couldn't load RC Mapping file for DM5XXX");
 			break;
-		case eSystemInfo::TR_DVB272S:
-			if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rctrdvb272.xml") )
-				eActionMapList::getInstance()->loadXML( TUXBOXDATADIR "/enigma/resources/rctrdvb272.xml");
 		default:
 			break;
 	}
+	if ( eSystemInfo::getInstance()->hasKeyboard() && eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdreambox_keyboard.xml") )
+		if ( eActionMapList::getInstance()->loadXML( TUXBOXDATADIR "/enigma/resources/rcdreambox_keyboard.xml") )
+			eDebug("couldn't load Dreambox keyboard mapping (rcdreambox_keyboard.xml)");
 #endif
 #ifndef DISABLE_DBOX_RC
 	if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdboxold.xml") )
