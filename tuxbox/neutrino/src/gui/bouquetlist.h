@@ -105,7 +105,6 @@ class CBouquetList
 
 		CChannelList* orgChannelList;
 		CBouquet* addBouquet(const std::string& name, int BouquetKey=-1, bool locked=false );
-		void setName(const std::string& Name);
 		int getActiveBouquetNumber();
 		int activateBouquet( int id, bool bShowChannelList = false);
 		int show();

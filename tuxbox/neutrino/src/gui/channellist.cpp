@@ -152,11 +152,6 @@ CChannelList::CChannel* CChannelList::getChannel( int number)
 	return(NULL);
 }
 
-void CChannelList::setName(const std::string& Name)
-{
-	name = Name;
-}
-
 int CChannelList::getKey(int id)
 {
 	return chanlist[id]->key;

@@ -79,11 +79,6 @@ CBouquet* CBouquetList::addBouquet(const std::string& name, int BouquetKey, bool
 	return(tmp);
 }
 
-void CBouquetList::setName(const std::string& Name)
-{
-	name = Name;
-}
-
 int CBouquetList::getActiveBouquetNumber()
 {
 	return selected;
