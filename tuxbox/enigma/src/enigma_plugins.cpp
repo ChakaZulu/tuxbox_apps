@@ -222,16 +222,21 @@ void eZapPlugins::selected(eListboxEntry *lbe)
 
 	if (plugin->needrc)
 		MakeParam(P_ID_RCINPUT, eRCInput::getInstance()->lock());
+	else
+	{
+		qDebug("Close RC driver\n");
+		eRCInput::getInstance()->close();
+	}
 
 	if (plugin->needlcd)
 		MakeParam(P_ID_LCD, eLCD::getPrimary()->lock());
 
 	if (plugin->needoffsets)
 	{
-		MakeParam(P_ID_OFF_X, 37);
-		MakeParam(P_ID_OFF_Y, 23);
-		MakeParam(P_ID_END_X, 668);
-		MakeParam(P_ID_END_Y, 555);
+		MakeParam(P_ID_OFF_X, 0);
+		MakeParam(P_ID_OFF_Y, 0);
+		MakeParam(P_ID_END_X, 720);
+		MakeParam(P_ID_END_Y, 576);
 	}
 
  	if (plugin->needvtxtpid)
@@ -308,6 +313,11 @@ void eZapPlugins::selected(eListboxEntry *lbe)
 	
 	if (plugin->needrc)
 		eRCInput::getInstance()->unlock();
+	else
+	{
+		if (eRCInput::getInstance()->open())
+			qDebug("RC driver open success\n");
+	}
 
 	if (plugin->needlcd)
 		eLCD::getPrimary()->unlock();

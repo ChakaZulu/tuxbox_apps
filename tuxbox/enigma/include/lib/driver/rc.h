@@ -87,7 +87,7 @@ class eRCInput: public QObject
 {
 	Q_OBJECT
 	int locked;	
-	int handle;
+	QFile* rc;
 	static eRCInput *instance;
 signals:
 	void keyEvent(const eRCKey &);
@@ -107,8 +107,10 @@ public:
 	
 	int lock();
 	void unlock();
+	void close();
+	bool open();
 
-	void setHandle(int hRC);
+	void setFile(QFile* file);
 
 	void keyPressed(const eRCKey &key)
 	{
