@@ -1,5 +1,5 @@
 /*
-$Id: dmx_tspidscan.c,v 1.4 2003/12/10 20:07:15 rasc Exp $
+$Id: dmx_tspidscan.c,v 1.5 2003/12/10 23:18:10 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dmx_tspidscan.c,v 1.4 2003/12/10 20:07:15 rasc Exp $
 
 
 $Log: dmx_tspidscan.c,v $
+Revision 1.5  2003/12/10 23:18:10  rasc
+improve pidscan
+
 Revision 1.4  2003/12/10 20:07:15  rasc
 minor stuff
 
@@ -61,7 +64,7 @@ pidscan on transponder
 
 // timeout in ms
 // TimoutHIGH will be used on PIDs < 0x20
-#define PID_TIMEOUT_LOW		(250 - PID_TIME_WAIT)
+#define PID_TIMEOUT_LOW		(290 - PID_TIME_WAIT)
 #define PID_TIMEOUT_HIGH	(30100 - PID_TIME_WAIT)
 
 // max filters (will be checked dynamically)
@@ -152,6 +155,8 @@ int ts_pidscan (OPTION *opt)
 
 		for (i = 0; (i < MAX_PID_FILTER) && (pid <= MAX_PID); i++) {
 			if (dmxfd[i] < 0) {
+				// -- try to get as much pid into the filter
+				// -- as the demux can handle...
 				if ((dmxfd[i]=open(opt->devDemux,O_RDWR)) < 0) 
 					break;
 			}
@@ -203,7 +208,7 @@ int ts_pidscan (OPTION *opt)
 		if (pid_found) {
 		  int x;
 		  for (x=pid_low; x<pid; x++) {
-			  if (pidArray[x] > 1) {
+			  if (pidArray[x] > 0) {
 				  rescan = 1;
 				  break;
 			  }
