@@ -267,10 +267,10 @@ eString ServiceDescriptor::toString()
 CAIdentifierDescriptor::CAIdentifierDescriptor(descr_gen_t *descr)
 	:Descriptor(descr)
 {
-	CA_system_ids=descr->descriptor_length/2;
+	CA_system_ids=(len-2)/2;
 	CA_system_id=new __u16[CA_system_ids];
 	for (int i=0; i<CA_system_ids; i++)
-		CA_system_id[i]=(((__u8*)(descr+1))[i*2]<<8)|(((__u8*)(descr+1))[i*2+1]);
+		CA_system_id[i]=(((__u8*)(descr+2))[i*2]<<8)|(((__u8*)(descr+2))[i*2+1]);
 }
 
 #ifdef SUPPORT_XML
@@ -294,7 +294,6 @@ LinkageDescriptor::LinkageDescriptor(descr_linkage_struct *descr)
 {
 	private_data=0;
 	priv_len=0;
-	int len=descr->descriptor_length+2;
 	transport_stream_id=HILO(descr->transport_stream_id);
 	original_network_id=HILO(descr->original_network_id);
 	service_id=HILO(descr->service_id);
@@ -383,10 +382,9 @@ NVODReferenceDescriptor::NVODReferenceDescriptor(descr_gen_t *descr)
 	:Descriptor(descr)
 {
 	entries.setAutoDelete(true);
-	int len=descr->descriptor_length;
-	for (int i=0; i<len; i+=6)
-		entries.push_back(new NVODReferenceEntry((((__u8*)(descr+1))[i+0]<<8) | (((__u8*)(descr+1))[i+1]),
-			(((__u8*)(descr+1))[i+2]<<8) | (((__u8*)(descr+1))[i+3]),	(((__u8*)(descr+1))[i+4]<<8) | (((__u8*)(descr+1))[i+5])));
+	for (int i=0; i<(len-2); i+=6)
+		entries.push_back(new NVODReferenceEntry((((__u8*)(descr+2))[i]<<8) | (((__u8*)(descr+2))[i+1]),
+			(((__u8*)(descr+2))[i+2]<<8) | (((__u8*)(descr+2))[i+3]),	(((__u8*)(descr+2))[i+4]<<8) | (((__u8*)(descr+2))[i+5])));
 }
 
 NVODReferenceDescriptor::~NVODReferenceDescriptor()
@@ -463,8 +461,8 @@ eString StreamIdentifierDescriptor::toString()
 CADescriptor::CADescriptor(ca_descr_t *descr)
 	:Descriptor((descr_gen_t*)descr)
 {
-	data=new __u8[descr->descriptor_length+2];
-	memcpy(data, descr, descr->descriptor_length+2);
+	data=new __u8[len];
+	memcpy(data, descr, len);
 	CA_system_ID=HILO(descr->CA_system_ID);
 	CA_PID=HILO(descr->CA_PID);
 }
@@ -487,8 +485,7 @@ eString CADescriptor::toString()
 NetworkNameDescriptor::NetworkNameDescriptor(descr_gen_t *descr)
 	:Descriptor(descr)
 {
-	int len=descr->descriptor_length;
-	network_name=convertDVBUTF8((unsigned char*)descr+1, len);
+	network_name=convertDVBUTF8((unsigned char*)descr+2, len-2);
 }
 
 NetworkNameDescriptor::~NetworkNameDescriptor()
@@ -696,9 +693,8 @@ ServiceListDescriptor::ServiceListDescriptor(descr_gen_t *descr)
  :Descriptor(descr)
 {
 	entries.setAutoDelete(true);
-	int len=descr->descriptor_length;
-	for (int i=0; i<len; i+=3)
-		entries.push_back(new ServiceListDescriptorEntry((((__u8*)(descr+1))[i+0]<<8) | (((__u8*)(descr+1))[i+1]), ((__u8*)(descr+1))[i+2]));
+	for (int i=0; i<(len-2); i+=3)
+		entries.push_back(new ServiceListDescriptorEntry((((__u8*)(descr+2))[i]<<8) | (((__u8*)(descr+2))[i+1]), ((__u8*)(descr+2))[i+2]));
 }
 
 ServiceListDescriptor::~ServiceListDescriptor()
@@ -815,11 +811,8 @@ eString AC3Descriptor::toString()
 BouquetNameDescriptor::BouquetNameDescriptor(descr_gen_t *descr)
 	:Descriptor(descr)
 {
-	__u8 *data=(__u8*)descr;
-	int len=descr->descriptor_length;
-	data+=2;
-	if (len > 0)
-		name.assign((char*)data, len);
+	if ((len-2) > 0)
+		name.assign((char*)(descr+2), len-2);
 }
 
 #ifdef SUPPORT_XML
@@ -903,7 +896,6 @@ eString ExtendedEventDescriptor::toString()
 ComponentDescriptor::ComponentDescriptor(descr_component_struct *descr)
 	:Descriptor((descr_gen_t*)descr)
 {
-	int len=descr->descriptor_length+2;
 	stream_content=descr->stream_content;
 	component_type=descr->component_type;
 	component_tag=descr->component_tag;
@@ -930,12 +922,11 @@ eString ComponentDescriptor::toString()
 ContentDescriptor::ContentDescriptor(descr_gen_t *descr)
 	:Descriptor(descr)
 {
-	int len=descr->descriptor_length;
 	contentList.setAutoDelete(true);
 	__u8 *data=((__u8*)descr)+sizeof(descr_gen_t);
 	__u8 *work=data;
 
-  while( work < data+len )
+  while( work < data+len-2 )
 	{
 		descr_content_entry_struct *tmp = new descr_content_entry_struct();
 		memcpy(tmp, work, sizeof(descr_content_entry_struct) );
@@ -959,11 +950,11 @@ eString ContentDescriptor::toString()
 LesRadiosDescriptor::LesRadiosDescriptor(descr_lesradios_struct *descr)
 	:Descriptor((descr_gen_t*)descr)
 {
-	int len=descr->descriptor_length+2;
+	int len=this->len;
 	id=descr->id;
 	len-=sizeof(descr_lesradios_struct);
 	if ( len > 0 )
-		name.assign((char*)(descr+1), len);
+		name.assign((char*)(descr+2), len);
 }
 
 #ifdef SUPPORT_XML
@@ -1002,9 +993,7 @@ ParentalRatingDescriptor::ParentalRatingDescriptor( descr_gen_struct *descr)
 {
 	const char *data = ((char*)descr)+sizeof(struct descr_gen_struct);
 	const char *work = data;
-	int len=descr->descriptor_length;
-
-	while( work < data+len )
+	while( work < data+len-2 )
 	{
 		entryMap[ eString(work, 3) ] = *(work+3)+3;
 		work+=4;
@@ -1027,12 +1016,11 @@ eString ParentalRatingDescriptor::toString()
 RegistrationDescriptor::RegistrationDescriptor( descr_gen_struct *descr)
 	: Descriptor(descr)
 {
-  const char *data = ((char*)(descr+1));
-	int len=descr->descriptor_length;
-	if (len < 4)
+  const char *data = ((char*)(descr+2));
+	if (len < 6)
 		return;
 	memcpy(format_identifier, data, 4);
-	additional_identification_info.assign(data+4, len-4);
+	additional_identification_info.assign(data+4, len-6);
 }
 
 #ifdef SUPPORT_XML
@@ -1059,9 +1047,8 @@ SubtitlingDescriptor::SubtitlingDescriptor(descr_gen_struct *descr)
 	:Descriptor(descr)
 {
 	entries.setAutoDelete(true);
-	int len=descr->descriptor_length;
-	for (int i=0; i<len; i+=8)
-		entries.push_back(new SubtitleEntry(((__u8*)descr)+2+i));
+	for (int i=2; i<len; i+=8)
+		entries.push_back(new SubtitleEntry(((__u8*)descr)+i));
 }
 
 #ifdef SUPPORT_XML
