@@ -41,6 +41,15 @@ eAVSwitch::eAVSwitch()
 	fd=open("/dev/dbox/avs0", O_RDWR);
 	saafd=open("/dev/dbox/saa0", O_RDWR);
 	reloadSettings();
+
+		// initial volume settings
+	if (eConfig::getInstance()->getKey("/elitedvb/audio/volume", volume))
+		volume=10;
+	if (eConfig::getInstance()->getKey("/elitedvb/audio/mute", mute))
+		mute=0;
+
+	changeVolume(1, volume);
+	setMute(mute);
 }
 
 eAVSwitch *eAVSwitch::getInstance()
@@ -50,6 +59,9 @@ eAVSwitch *eAVSwitch::getInstance()
 
 eAVSwitch::~eAVSwitch()
 {
+	eConfig::getInstance()->setKey("/elitedvb/audio/volume", volume);
+	eConfig::getInstance()->setKey("/elitedvb/audio/mute", mute);
+
 	if (instance==this)
 		instance=0;
 
@@ -77,6 +89,58 @@ int eAVSwitch::setVolume(int vol)
 
 	return ioctl(fd, AVSIOSVOL, &vol);
 }
+
+void eAVSwitch::changeVolume(int abs, int vol)
+{
+	switch (abs)
+	{
+		case 0:
+			volume+=vol;
+			setMute(0);
+		break;
+		case 1:
+			volume=vol;
+			setMute(0);
+		break;
+	}
+
+	if (volume<0)
+		volume=0;
+
+	if (volume>63)
+		volume=63;
+
+	setVolume( (63-volume) * 65536/64 );
+
+	/*emit*/ volumeChanged(volume);
+}
+
+void eAVSwitch::toggleMute()
+{
+	mute = !mute;
+	setMute(mute);
+	if (mute)
+		/*emit*/ volumeChanged(63);	
+	else
+		/*emit*/ volumeChanged(volume);
+}
+
+void eAVSwitch::setMute(bool m)
+{
+	int a;
+
+	if(m)
+		a=AVS_MUTE;
+	else
+		a=AVS_UNMUTE;
+
+	if (ioctl(fd,AVSIOSMUTE, &a) < 0)
+	{
+		perror("AVSIOSMUTE:");
+		return;
+	}
+}
+
 
 int eAVSwitch::setTVPin8(int vol)
 {
@@ -131,20 +195,19 @@ int eAVSwitch::setInput(int v)
 	switch (v)
 	{
 	case 0:	//	Switch to DVB
-		v = 63;
+		if (!mute)
+			setMute(0);
 		ioctl(fd, AVSIOSVSW1, dvb);
 		ioctl(fd, AVSIOSASW1, dvb+1);
 		ioctl(fd, AVSIOSVSW2, dvb+2);
 		ioctl(fd, AVSIOSASW2, dvb+3);
 		ioctl(fd, AVSIOSVSW3, dvb+4);
 		ioctl(fd, AVSIOSASW3, dvb+5);
-		if (!eDVB::getInstance()->mute)
-			ioctl(fd, AVSIOSVOL, &eDVB::getInstance()->volume);
-		else
-			ioctl(fd, AVSIOSVOL, &v);
 		reloadSettings();
 		break;
 	case 1:   // Switch to VCR
+		if (!mute)
+			setMute(1);
 		v = (Type == SAGEM)? 0 : 2;
 		ioctl(fd, AVSIOSFBLK, &v);
 		ioctl(fd, AVSIOSVSW1, scart);
@@ -153,8 +216,8 @@ int eAVSwitch::setInput(int v)
 		ioctl(fd, AVSIOSASW2, scart+3);
 		ioctl(fd, AVSIOSVSW3, scart+4);
 		ioctl(fd, AVSIOSASW3, scart+5);
-		v = 0;  // full Volume
-		ioctl(fd, AVSIOSVOL, &v);
+/*		v = 0;  // full Volume
+		ioctl(fd, AVSIOSVOL, &v);*/
 		break;
 	}
 	return 0;

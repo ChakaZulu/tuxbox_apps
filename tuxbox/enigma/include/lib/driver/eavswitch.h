@@ -1,6 +1,8 @@
 #ifndef __eavswitch_h
 #define __eavswitch_h
 
+#include <core/base/ebase.h>
+
 enum eAVAspectRatio
 {
 	rUnknown, r43, r169
@@ -17,7 +19,13 @@ enum eAVColorFormat
 class eAVSwitch
 {
 	static eAVSwitch *instance;
+	int setVolume(int vol);	// 0..65535
+	void setMute(bool m);
+	int volume, mute;	
 public:
+	int getVolume() { return volume; }
+	int getMute() { return mute; }
+	Signal1<void, int> volumeChanged;
 	enum {NOKIA, SAGEM, PHILIPS} Type;
 	int scart[6];
 	int dvb[6];
@@ -27,16 +35,27 @@ public:
 	eAVColorFormat colorformat;
 	static eAVSwitch *getInstance();
 	eAVSwitch();
-	virtual int setTVPin8(int vol);
-	virtual int setVolume(int vol);	// 0..65535
-	virtual int setColorFormat(eAVColorFormat cf);
-	virtual int setAspectRatio(eAVAspectRatio as);
-	virtual int setActive(int active);
-	virtual int isVCRActive();
-	virtual int setInput(int v);	// 0: dbox, 1: vcr
-	virtual ~eAVSwitch();
+	int setTVPin8(int vol);
+	int setColorFormat(eAVColorFormat cf);
+	int setAspectRatio(eAVAspectRatio as);
+	int setActive(int active);
+	int isVCRActive();
+	int setInput(int v);	// 0: dbox, 1: vcr
+	~eAVSwitch();
 	void reloadSettings();
 	bool loadScartConfig();
+	/**
+	 * \brief Changes the volume.
+	 *
+	 * \param abs What to change:
+	 * \arg \c 0 Volume, relative
+	 * \arg \c 1 Volume, absolute
+	 * \arg \c 2 Mute, set
+	 * \arg \c 3 Mute, change
+	 * \param vol The volume/muteflag to set. In case of volume, 0 means max and 63 means min.
+	 */
+	void changeVolume(int abs, int vol);
+	void toggleMute();
 };
 
 class eAVSwitchNokia: public eAVSwitch
