@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_info.cpp,v 1.21 2003/03/05 10:28:49 waldi Exp $
+ * $Id: enigma_info.cpp,v 1.22 2003/05/10 17:40:18 tmbinc Exp $
  */
 
 #include <enigma_info.h>
@@ -35,7 +35,7 @@
 #include <lib/gui/emessage.h>
 #include <lib/gui/ebutton.h>
 #include <lib/base/i18n.h>
-#include <tuxbox.h>
+#include <lib/system/info.h>
 
 eZapInfo::eZapInfo()
 	:eListBoxWindow<eListBoxEntryMenu>(_("Infos"), 8, 220)
@@ -43,7 +43,7 @@ eZapInfo::eZapInfo()
 	move(ePoint(150, 136));
 	CONNECT((new eListBoxEntryMenu(&list, _("[back]"), _("back to mainmenu")))->selected, eZapInfo::sel_close);
 	CONNECT((new eListBoxEntryMenu(&list, _("Streaminfo"), _("open the Streaminfo")))->selected, eZapInfo::sel_streaminfo);
-	if (tuxbox_get_model() == TUXBOX_MODEL_DBOX2)
+	if (eSystemInfo::getInstance()->isRelease())
 		CONNECT((new eListBoxEntryMenu(&list, _("Show BN version"),_("show the Current Version of the Betanova FW")))->selected, eZapInfo::sel_bnversion);
 
 	CONNECT((new eListBoxEntryMenu(&list, _("About..."), _("open the about dialog")))->selected, eZapInfo::sel_about);
@@ -169,7 +169,7 @@ public:
 		if (eSkin::getActive()->build(this, "eAboutScreen"))
 			eFatal("skin load of \"eAboutScreen\" failed");
 
-		if (tuxbox_get_capabilities() & TUXBOX_CAPABILITIES_HDD)
+		if (eSystemInfo::getInstance()->hasHDD())
 		{
 			harddisks->hide();
 			eWidget *h=search("harddisk_label");
@@ -179,22 +179,11 @@ public:
 		
 		dreamlogo->hide();
 		
-		vendor->setText(tuxbox_get_vendor_str());
+		vendor->setText(eSystemInfo::getInstance()->getVendorString());
 		
-		switch (tuxbox_get_submodel())
-		{
-		case TUXBOX_SUBMODEL_DBOX2:
-			processor->setText(_("Processor: XPC823, 66MHz"));
-			break;
-		case TUXBOX_SUBMODEL_DREAMBOX_DM7000:
-			processor->setText(_("Processor: STB04500, 252MHz"));
-			break;
-		case TUXBOX_SUBMODEL_DREAMBOX_DM5600:
-			processor->setText(_("Processor: STB25xxx, 252MHz"));
-			break;
-		}
+		processor->setText(eString(_("Processor: ")) + eSystemInfo::getInstance()->getProcessorString());
 		
-		machine->setText(tuxbox_get_model_str());
+		machine->setText(eSystemInfo::getInstance()->getMachineString());
 		
 #if 0
 		int fe=atoi(eDVB::getInstance()->getInfo("fe").c_str());
@@ -274,7 +263,7 @@ public:
 				eString ver=verid.mid(1, 3);
 				eString date=verid.mid(4, 8);
 //				eString time=verid.mid(12, 4);
-				if (tuxbox_get_model() == TUXBOX_MODEL_DBOX2)
+				if (eSystemInfo::getInstance()->isRelease())
 					version->setText(eString().sprintf("%s %c.%d. %s",
 						typea[type%3],
 						ver[0],

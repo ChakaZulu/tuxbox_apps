@@ -46,7 +46,7 @@
 #include <lib/dvb/dvbservice.h>
 #include <lib/gdi/lcd.h>
 #include <lib/gdi/glcddc.h>
-#include <tuxbox.h>
+#include <lib/system/info.h>
 
 		// bis waldi das in nen .h tut
 #define MOVIEDIR "/hdd/movie"
@@ -1047,7 +1047,7 @@ eZapMain::~eZapMain()
 	pLCD->lcdMain->hide();
 	pLCD->lcdShutdown->show();
 	gLCDDC::getInstance()->setUpdate(0);
-	if (tuxbox_get_submodel() == TUXBOX_SUBMODEL_DREAMBOX_DM7000)
+	if (eSystemInfo::getInstance()->isRelease())
 		eDBoxLCD::getInstance()->switchLCD(0);
 
 	eConfig::getInstance()->setKey("/ezap/ui/serviceSelectorStyle", eZap::getInstance()->getServiceSelector()->getStyle() );
@@ -3113,7 +3113,7 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 
 		if (num != -1)
 		{
-#if 1
+#if 0
 			if (tuxbox_get_submodel() == TUXBOX_SUBMODEL_DREAMBOX_DM5600)
 			{
 				eDebug("write number to led-display");

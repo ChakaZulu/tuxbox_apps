@@ -9,7 +9,7 @@
 #include <lib/gdi/font.h>
 #include <engrab.h>
 
-#include <tuxbox.h>
+#include <lib/system/info.h>
 
 eTimerManager* eTimerManager::instance=0;
 
@@ -922,10 +922,9 @@ eTimerView::eTimerView( ePlaylistEntry* e)
 
 	new eListBoxEntryText( *type, _("switch"), (void*) ePlaylistEntry::SwitchTimerEntry );
 
-	tuxbox_capabilities caps = tuxbox_get_capabilities();
-	if (caps & TUXBOX_CAPABILITIES_HDD)
+	if (eSystemInfo::getInstance()->hasCI())
 		new eListBoxEntryText( *type, _("record DVR"), (void*) (ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR) );
-	if (caps & TUXBOX_CAPABILITIES_NETWORK)
+	if (eSystemInfo::getInstance()->hasNetwork())
 		new eListBoxEntryText( *type, _("Ngrab"), (void*) (ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recNgrab) );
 		//new eListBoxEntryText( *type, _("record VCR"), (void*) ePlaylistEntry::RecTimerEntry|ePlaylisteEntry::recVCR );
 
@@ -1090,10 +1089,9 @@ void eTimerView::selChanged( eListBoxEntryTimer *entry )
 		tm tmp = *localtime( &now );
 		updateDateTime( tmp, tmp );
 
-		tuxbox_capabilities caps = tuxbox_get_capabilities();
-		if (caps & TUXBOX_CAPABILITIES_HDD)
+		if (eSystemInfo::getInstance()->hasHDD())
 			type->setCurrent( (void*)(ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR) );
-		else if (caps & TUXBOX_CAPABILITIES_NETWORK)
+		else if (eSystemInfo::getInstance()->hasNetwork())
 			type->setCurrent( (void*)(ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recNgrab) );
 		else
 			type->setCurrent( (void*)ePlaylistEntry::SwitchTimerEntry );

@@ -12,7 +12,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
-#include <tuxbox.h>
+#include <lib/system/info.h>
 
 #ifdef PROFILE
 	#include <sys/time.h>
@@ -59,7 +59,7 @@ void eDVB::tunedIn(eTransponder *trans, int err)
 }
 
 eDVB::eDVB()
-	: state(eDVBState::stateIdle), parentEIT(0)
+	: parentEIT(0), state(eDVBState::stateIdle)
 {
 	settings=0;
 	time_difference=0;
@@ -93,36 +93,23 @@ eDVB::eDVB()
 	setMode(controllerService);
 
 		// init AV switch
-	switch (tuxbox_get_model())
+	switch (eSystemInfo::getInstance()->getAVS())
 	{
-	case TUXBOX_MODEL_DBOX2:
-		switch (tuxbox_get_vendor())
-		{
-		case TUXBOX_VENDOR_NOKIA:
-			new eAVSwitchNokia;
-			break;
-		case TUXBOX_VENDOR_PHILIPS:
-			new eAVSwitchPhilips;
-			break;
-		case TUXBOX_VENDOR_SAGEM:
-			new eAVSwitchSagem;
-			break;
-		default:
-			break;
-		}
+	case eSystemInfo::avsNokia:
+		new eAVSwitchNokia;
 		break;
-	case TUXBOX_MODEL_DREAMBOX:
-		switch (tuxbox_get_submodel())
-		{
-		case TUXBOX_SUBMODEL_DREAMBOX_DM5600:
-			new eRFmod;
-			eRFmod::getInstance()->init();
-		case TUXBOX_SUBMODEL_DREAMBOX_DM7000:
-			new eAVSwitchNokia;
-			break;
-		default:
-			break;
-		}
+	case eSystemInfo::avsPhilips:
+		new eAVSwitchPhilips;
+		break;
+	case eSystemInfo::avsSagem:
+		new eAVSwitchSagem;
+		break;
+	case eSystemInfo::avsDM5600:
+		new eRFmod;
+		eRFmod::getInstance()->init();
+			// fall through
+	case eSystemInfo::avsDM7000:
+		new eAVSwitchDreambox;
 		break;
 	default:
 		break;

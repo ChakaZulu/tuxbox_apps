@@ -14,8 +14,6 @@
 #include <lib/dvb/edvb.h>
 #include <lib/dvb/decoder.h>
 
-#include <tuxbox.h>
-
 /* sucks */
 
 #define SAAIOGREG               1 /* read registers                             */
@@ -50,6 +48,8 @@ eAVSwitch::eAVSwitch()
 	active=0;
 	if (!instance)
 		instance=this;
+		
+	useost = 0;
 
 	avsfd=open("/dev/dbox/avs0", O_RDWR);
 
@@ -109,8 +109,8 @@ int eAVSwitch::setVolume(int vol)
 		vol=0;
 	if (vol>63)
 		vol=63;
-
-	if (tuxbox_get_model() == TUXBOX_MODEL_DREAMBOX)
+		
+	if (useost)
 	{
 		if ((vol == 63) && !mute)
 		{
@@ -220,7 +220,7 @@ void eAVSwitch::toggleMute()
 	if (mute)
 	{
 //		setVolume(63);
-		if (tuxbox_get_model() == TUXBOX_MODEL_DREAMBOX)
+		if (useost)
 			muteOstAudio(1);
 		else
 			muteAvsAudio(1);
@@ -228,7 +228,7 @@ void eAVSwitch::toggleMute()
 	else
 	{
 //		changeVolume(1,volume);
-		if (tuxbox_get_model() == TUXBOX_MODEL_DREAMBOX)
+		if (useost)
 			muteOstAudio(0);
 		else
 			muteAvsAudio(0);
@@ -314,7 +314,7 @@ int eAVSwitch::setInput(int v)
 		changeVolume(1, volume);  // set Volume to TV Volume
 		if (mute)
 		{
-			if (tuxbox_get_model() == TUXBOX_MODEL_DREAMBOX)
+			if (useost)
 				muteOstAudio(1);
 			else
 				muteAvsAudio(1);
@@ -333,7 +333,7 @@ int eAVSwitch::setInput(int v)
 		ioctl(avsfd, AVSIOSASW3, scart+5);
 		if (mute)
 		{
-			if (tuxbox_get_model() == TUXBOX_MODEL_DREAMBOX)
+			if (useost)
 				muteOstAudio(0);
 			else
 				muteAvsAudio(0);

@@ -12,7 +12,7 @@
 #include <lib/system/econfig.h>
 #include <lib/dvb/dvbservice.h>
 #include <lib/dvb/dvbci.h>
-#include <tuxbox.h>
+#include <lib/system/info.h>
 
 eCImmi::eCImmi(eWidget *parent): eWidget(parent)
 {
@@ -398,7 +398,7 @@ enigmaCI::enigmaCI(): eWindow(0)
 
 	DVBCI=eDVB::getInstance()->DVBCI;
 	
-	if (tuxbox_get_submodel() == TUXBOX_SUBMODEL_DREAMBOX_DM5600)
+	if (eSystemInfo::getInstance()->hasCI() == 2)
 	{
 		setText(_("Common Interface Modules"));
 		move(ePoint(150, 80));
@@ -439,7 +439,7 @@ enigmaCI::enigmaCI(): eWindow(0)
 
 	CONNECT(app->selected, enigmaCI::appPressed);		
 
-	if (tuxbox_get_submodel() == TUXBOX_SUBMODEL_DREAMBOX_DM5600)
+	if (eSystemInfo::getInstance()->hasCI() == 2)
 	{
 		reset2=new eButton(this);
 		reset2->setText(_("Reset"));
@@ -495,7 +495,7 @@ enigmaCI::enigmaCI(): eWindow(0)
 	CONNECT(DVBCI->ci_progress, enigmaCI::updateCIinfo);		
 	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::init));
 
-	if (tuxbox_get_submodel() == TUXBOX_SUBMODEL_DREAMBOX_DM5600)
+	if (eSystemInfo::getInstance()->hasCI() == 2)
 	{
 		CONNECT(DVBCI2->ci_progress, enigmaCI::updateCI2info);		
 		DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::init));

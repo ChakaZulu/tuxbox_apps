@@ -31,6 +31,7 @@
 #include <lib/dvb/decoder.h>
 
 #include <lib/system/xmlrpc.h>
+#include <lib/system/info.h>
 #include <enigma.h>
 #include <enigma_dyn.h>
 #include <enigma_xmlrpc.h>
@@ -68,6 +69,8 @@ eZap::eZap(int argc, char **argv)
 	: eApplication(/*argc, argv, 0*/)
 {
 	int bootcount;
+	
+	new eSystemInfo();
 
 	eZapLCD *pLCD;
 	eHTTPDynPathResolver *dyn_resolver;

@@ -146,10 +146,13 @@ int NConfig::createNew(unsigned resize, unsigned dirent, unsigned mchunks)
 
 int NConfig::open(int how)
 {
+	printf("filename\n");
 	if (!fname)
 		return NC_ERR_NFILE;
+		printf("how\n");
 	if (how != NC_O_RO && how != NC_O_RW)
 		return NC_ERR_TYPE;
+	printf("fd\n");
 	if (fd > -1)
 		close();
 

@@ -5,7 +5,7 @@
 #include <lib/dvb/dvbci.h>
 #include <lib/dvb/eaudio.h>
 
-#include <tuxbox.h>
+#include <lib/system/info.h>
 
 eDVBServiceController::eDVBServiceController(eDVB &dvb)
 : eDVBController(dvb)
@@ -408,8 +408,8 @@ void eDVBServiceController::scanPMT()
 	
 	int isca=0;
 
-	if (tuxbox_get_model() == TUXBOX_MODEL_DREAMBOX)
-		calist.clear();
+	// ??
+	calist.clear();
 
 	usedCASystems.clear();
 
@@ -710,12 +710,5 @@ void eDVBServiceController::initCAlist()
 {
 	availableCASystems.clear();
 
-	if (tuxbox_get_model() == TUXBOX_MODEL_DBOX2)
-	{
-		availableCASystems.insert(0x1702);	// BetaCrypt C (sat)
-		availableCASystems.insert(0x1722);	// BetaCrypt D (cable)
-		availableCASystems.insert(0x1762);	// BetaCrypt F (ORF)
-	}
-	else
-		availableCASystems.insert(0x4A70);	// DreamCrypt
+	availableCASystems = eSystemInfo::getInstance()->getCAIDs();
 }

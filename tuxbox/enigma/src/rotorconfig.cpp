@@ -13,7 +13,7 @@
 #include <lib/dvb/dvbwidgets.h>
 #include <lib/dvb/edvb.h>
 
-#include <tuxbox.h>
+#include <lib/system/info.h>
 
 RotorConfig::RotorConfig(eLNB *lnb )
 	:lnb(lnb)
@@ -143,11 +143,8 @@ RotorConfig::RotorConfig(eLNB *lnb )
 	if (lnb)
 		setLNBData(lnb);
 
-	if (tuxbox_get_model() == TUXBOX_MODEL_DBOX2)
-	{
-		eDebug("useRotorInputPower can only used on dreambox");
+	if (!eSystemInfo::getInstance()->canMeasureLNBCurrent())
 		useRotorInPower->hide();
-	}
 }
 
 struct savePosition: public std::unary_function< eListBoxEntryText&, void>

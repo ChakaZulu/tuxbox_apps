@@ -34,6 +34,7 @@ protected:
 	int scart[6];
 	int dvb[6];
 	int active;
+	int useost;
 	void init();
 public:
 	eAVSwitch();
@@ -86,6 +87,15 @@ public:
 		dvb[4] = 1;
 		dvb[5] = 1;
 		init();
+	}
+};
+
+class eAVSwitchDreambox: public eAVSwitchNokia
+{
+public:
+	eAVSwitchDreambox()
+	{
+		useost=1;
 	}
 };
 

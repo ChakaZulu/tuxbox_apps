@@ -7,13 +7,14 @@
 #include <lib/base/ebase.h>
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
-#include "input_fake.h"
+#include <lib/driver/input_fake.h>
 
 void eRCDeviceInputDev::handleCode(int rccode)
 {
 	struct input_event *ev = (struct input_event *)rccode;
 	if (ev->type!=EV_KEY)
 		return;
+	eDebug("%x %x %x", ev->value, ev->code, ev->type);
 	switch (ev->value)
 	{
 	case 0:

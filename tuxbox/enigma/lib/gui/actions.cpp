@@ -102,7 +102,7 @@ void eActionMap::loadXML(eRCDevice *device, std::map<std::string,int> &keymap, c
 			std::map<std::string,int>::iterator i=keymap.find(std::string(key));
 			if (i == keymap.end())
 			{
-				eFatal("undefined key %s specified!", key);
+				eFatal("undefined key '%s' specified!", key);
 				continue;
 			}
 			icode=i->second;

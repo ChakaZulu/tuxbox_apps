@@ -12,7 +12,7 @@
 #include <lib/dvb/edvb.h>
 #include <sys/mman.h>
 
-#include <tuxbox.h>
+#include <lib/system/info.h>
 
 #define TMP_IMAGE "/var/tmp/root.cramfs"
 #define TMP_IMAGE_ALT "/var/tmp/cdk.cramfs"
@@ -509,7 +509,9 @@ void eUpgrade::flashImage(int checkmd5)
 				sync();
 				Decoder::Flush();
 				eString mtd;
-
+				
+				eFatal("ADD MTD INFO TO SYSINFO!");
+#if 0
 				switch (tuxbox_get_model())
 				{
 				case TUXBOX_MODEL_DBOX2:
@@ -524,6 +526,7 @@ void eUpgrade::flashImage(int checkmd5)
 					mtd="../null";
 					mtdsize=0;
 				}
+#endif
 
 				{
 					int fd=open(eString("/dev/mtdblock/" + mtd).c_str(), O_RDONLY);

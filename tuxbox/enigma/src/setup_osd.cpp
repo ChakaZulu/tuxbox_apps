@@ -6,7 +6,7 @@
 #include <lib/base/i18n.h>
 #include <lib/gdi/gfbdc.h>
 
-#include <tuxbox.h>
+#include <lib/system/info.h>
 
 eZapOsdSetup::eZapOsdSetup(): eWindow(0)
 {
@@ -33,7 +33,7 @@ eZapOsdSetup::eZapOsdSetup(): eWindow(0)
 	showConsoleOnFB->resize(eSize(fd+4+300, fd+4));
 	showConsoleOnFB->setHelpText(_("shows the linux console on TV"));
                                 
-	if (tuxbox_get_model() == TUXBOX_MODEL_DREAMBOX)
+	if (eSystemInfo::getInstance()->isRelease())
 		showConsoleOnFB->hide();
 
 	alpha = gFBDC::getInstance()->getAlpha();

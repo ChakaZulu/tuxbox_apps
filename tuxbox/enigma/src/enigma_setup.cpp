@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_setup.cpp,v 1.37 2003/03/05 10:28:49 waldi Exp $
+ * $Id: enigma_setup.cpp,v 1.38 2003/05/10 17:40:18 tmbinc Exp $
  */
 
 #include <enigma_setup.h>
@@ -43,7 +43,7 @@
 #include <lib/gui/elabel.h>
 #include "upgrade.h"
 
-#include <tuxbox.h>
+#include <lib/system/info.h>
 
 eZapSetup::eZapSetup()
 	:eListBoxWindow<eListBoxEntryMenu>(_("Setup"), 8, 450, true)
@@ -52,19 +52,11 @@ eZapSetup::eZapSetup()
 
 	int havenetwork = 0, haveci = 0, haveharddisk = 0, havelcd = 0, haverfmod = 0;
 
-	tuxbox_capabilities_t caps = tuxbox_get_capabilities ();
-	if (caps & TUXBOX_CAPABILITIES_NETWORK)
-		havenetwork = 1;
-	if (caps & TUXBOX_CAPABILITIES_CAM_CI)
-		haveci = 1;
-	if (caps & TUXBOX_CAPABILITIES_HDD)
-		haveharddisk = 1;
-	if (caps & TUXBOX_CAPABILITIES_LCD)
-		havelcd = 1;
-
-	tuxbox_submodel_t submodel = tuxbox_get_submodel ();
-	if (submodel == TUXBOX_SUBMODEL_DREAMBOX_DM5600)
-		haverfmod=1;
+	havenetwork = eSystemInfo::getInstance()->hasNetwork();
+	haveci = eSystemInfo::getInstance()->hasCI() > 0;
+	haveharddisk = eSystemInfo::getInstance()->hasHDD();
+	havelcd = eSystemInfo::getInstance()->hasLCD();
+	haverfmod = eSystemInfo::getInstance()->hasRFMod();
 	
 	list.setColumns(2);
 	addActionMap(&i_shortcutActions->map);

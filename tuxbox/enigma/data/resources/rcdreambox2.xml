@@ -4,45 +4,50 @@
 		<email>tmbinc@gmx.net</email>
 	</author>
 
-	<device identifier="Dreambox2" >
+	<device identifier="Dreambox IR RC" >
 		<keys>
-			<key name="0" code="00" />
-			<key name="1" code="01" />
-			<key name="2" code="02" />
-			<key name="3" code="03" />
-			<key name="4" code="04" />
-			<key name="5" code="05" />
-			<key name="6" code="06" />
-			<key name="7" code="07" />
-			<key name="8" code="08" />
-			<key name="9" code="09" />
-			<key name="volup" code="0a" />
-			<key name="voldown" code="0b" />
-			<key name="tv" code="0c" />
-			<key name="bouqup" code="0d" />
-			<key name="bouqdown" code="0e" />
-			<key name="power" code="0f" />
-			<key name="dream" code="20" />
-			<key name="up" code="21" />
-			<key name="down" code="22" />
-			<key name="left" code="23" />
-			<key name="right" code="24" />
-			<key name="ok" code="25" />
-			<key name="audio" code="26" />
-			<key name="video" code="27" />
-			<key name="info" code="28" />
-			<key name="record" code="35" />
-			<key name="red" code="40" />
-			<key name="green" code="41" />
-			<key name="yellow" code="42" />
-			<key name="blue" code="43" />
-			<key name="mute" code="44" />
-			<key name="text" code="45" />
-			<key name="next" code="50" />
-			<key name="prev" code="51" />
-			<key name="LAME" code="52" />
-			<key name="radio" code="53" />
-			<key name="help" code="54" />
+		<!-- woa. man beachte die mischung aus icode, code und den eigenen
+		identifiern. -->
+		
+			<key name="1" icode="2" />
+			<key name="2" icode="3" />
+			<key name="3" icode="4" />
+			<key name="4" icode="5" />
+			<key name="5" icode="6" />
+			<key name="6" icode="7" />
+			<key name="7" icode="8" />
+			<key name="8" icode="9" />
+			<key name="9" icode="10" />
+			<key name="0" icode="11" />
+
+			<key name="voldown" icode="114" />
+			<key name="volup" icode="115" />
+
+			<key name="tv" code="179" />
+			<key name="bouqup" icode="104" />
+			<key name="bouqdown" icode="109" />
+			<key name="power" icode="116" />
+			<key name="dream" icode="141" />
+			<key name="up" icode="103" />
+			<key name="down" icode="108" />
+			<key name="left" icode="105" />
+			<key name="right" icode="106" />
+			<key name="ok" code="160" />
+			<key name="audio" code="188" />
+			<key name="video" code="189" />
+			<key name="info" code="166" />
+<!--			<key name="record" code="35" /> -->
+			<key name="red" code="18e" />
+			<key name="green" code="18f" />
+			<key name="yellow" code="190" />
+			<key name="blue" code="191" />
+			<key name="mute" icode="113" />
+			<key name="text" code="184" />
+			<key name="next" code="197" />
+			<key name="prev" code="19c" />
+			<key name="LAME" icode="102" />
+			<key name="radio" code="181" />
+			<key name="help" icode="138" />
 		</keys>
 		
 				<!-- globale shortcuts. sollten auf jeder FB zu finden sein. -->
@@ -114,7 +119,7 @@
 			<action name="play" key="green" flags="m" />
 			<action name="pause" key="yellow" flags="m" />
 
-			<action name="record" key="record" flags="m" />
+<!--			<action name="record" key="record" flags="m" /> -->
 			<action name="record" key="radio" flags="m" />
 			
 			<action name="startSkipF" key="blue" flags="m" />
