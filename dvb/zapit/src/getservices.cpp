@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.67 2003/01/17 16:26:41 obi Exp $
+ * $Id: getservices.cpp,v 1.68 2003/03/03 05:24:19 obi Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -34,8 +34,10 @@ void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC)
 {
 	t_transport_stream_id transport_stream_id;
 	t_original_network_id original_network_id;
-	dvb_frontend_parameters feparams;
+	struct dvb_frontend_parameters feparams;
 	uint8_t polarization = 0;
+
+	memset(&feparams, 0, sizeof(struct dvb_frontend_parameters));
 
 	/* read all transponders */
 	while ((node = xmlGetNextOccurence(node, "transponder")) != NULL)
