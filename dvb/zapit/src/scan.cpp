@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.54 2002/07/22 15:00:50 Homar Exp $
+ * $Id: scan.cpp,v 1.55 2002/08/24 14:20:35 obi Exp $
  */
 
 #include <clientlib/zapitclient.h>
@@ -42,6 +42,15 @@ extern CZapitClient::bouquetMode bouquetMode;
 
 extern CEventServer *eventServer;
 
+void stop_scan()
+{
+	/* notify client about end of scan */
+	scan_runs = 0;
+	eventServer->sendEvent(CZapitClient::EVT_SCAN_COMPLETE, CEventServer::INITID_ZAPIT);
+	if (scanBouquetManager)
+		delete scanBouquetManager;
+}
+
 /* build transponder for cable-users with sat-feed*/
 int build_bf_transponder(uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, Modulation modulation)
 {
@@ -72,7 +81,7 @@ int build_bf_transponder(uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_
 	return status;
 }
 
-int get_nits (uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, uint8_t polarity, uint8_t DiSEqC, Modulation modulation)
+int get_nits (uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, uint8_t polarization, uint8_t DiSEqC, Modulation modulation)
 {
 	FrontendParameters feparams;
 	feparams.Frequency = frequency;
@@ -90,24 +99,35 @@ int get_nits (uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, uint
 		feparams.u.qam.QAM = modulation;
 	}
 
-	if (frontend->tuneFrequency(feparams, polarity, DiSEqC) == true)
+	if (frontend->tuneFrequency(feparams, polarization, DiSEqC) == true)
 	{
-		if((status = parse_nit(DiSEqC)) <= -2)
+		int tmp = found_transponders;
+
+		if ((status = parse_nit(DiSEqC)) <= -2)
 		{
 			/* NIT war leer, leese TS-ID und ON-ID von der SDT aus */
 			switch (status)
 			{
-				case (-2):
+				case -2:
 					printf("[scan.cpp] NIT nicht frontendkonform, lese SDT aus\n");
 					break;
-				case (-3):
+				case -3:
 					printf("[scan.cpp] NIT war leer, lese SDT aus\n");
 					break;
 				//todo weitere stati abfragen
 			}
 
-			status = fake_pat(get_sdt_TsidOnid(), feparams, polarity, DiSEqC);
-			printf("[scan.cpp] TS-ON ID = %08x\n", get_sdt_TsidOnid() );
+			status = fake_pat(get_sdt_TsidOnid(), feparams, polarization, DiSEqC);
+			printf("[scan.cpp] TS-ON ID = %08x\n", get_sdt_TsidOnid());
+		}
+
+		if (found_transponders != tmp)
+		{
+			printf("found new transponder(s) on %u %u %hhu\n", frequency, symbol_rate, polarization);
+		}
+		else
+		{
+			printf("no new transponder(s) in current nit\n");
 		}
 	}
 	else
@@ -128,6 +148,20 @@ int get_sdts()
 		{
 			printf("[scan.cpp] parsing sdt of tsid %04x, onid %04x\n", tI->second.transport_stream_id, tI->second.original_network_id);
 			status = parse_sdt();
+#if 0
+			int tmp = found_transponders;
+			
+			parse_nit(tI->second.DiSEqC);
+
+			if (found_transponders != tmp)
+			{
+				printf("found new transponder(s) on %u %u %hhu\n", tI->second.feparams.Frequency, tI->second.feparams.u.qpsk.SymbolRate, tI->second.polarization);
+			}
+			else
+			{
+				printf("no new transponder(s) in current nit\n");
+			}
+#endif
 		}
 		else
 		{
@@ -135,6 +169,7 @@ int get_sdts()
 			status = -1;
 		}
 	}
+
 	return status;
 }
 
@@ -145,7 +180,7 @@ FILE *write_xml_header (const char *filename)
 	if (fd == NULL)
 	{
 		perror("[scan.cpp] fopen");
-		scan_runs = 0;
+		stop_scan();
 		pthread_exit(0);
 	}
 	else
@@ -289,15 +324,6 @@ FILE *write_provider(FILE *fd, const char *type, const char *provider_name, cons
 	return fd;
 }
 
-void stop_scan()
-{
-	/* notify client about end of scan */
-	scan_runs = 0;
-	eventServer->sendEvent(CZapitClient::EVT_SCAN_COMPLETE, CEventServer::INITID_ZAPIT);
-	if (scanBouquetManager)
-		delete scanBouquetManager;
-}
-
 void *start_scanthread(void *param)
 {
 	FILE *fd = NULL;
@@ -351,13 +377,6 @@ void *start_scanthread(void *param)
 	/* read all sat or cable sections */
 	while ((search) && (!strcmp(search->GetType(), type)))
 	{
-		/*
-		 * notify client about start - yes should be outside
-		 * of this loop but fuckig pthread doesn't recognize
-		 * it
-		 */
-		scan_runs = 1;
-
 		/* get name of current satellite oder cable provider */
 		strcpy(providerName, search->GetAttributeValue("name"));
 
@@ -456,8 +475,6 @@ void *start_scanthread(void *param)
 	if (prepare_channels() < 0)
 	{
 		printf("[scan.cpp] Error parsing Services\n");
-		stop_scan();
-		pthread_exit(0);
 	}
 	else
 	{
