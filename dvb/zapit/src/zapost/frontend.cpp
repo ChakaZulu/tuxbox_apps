@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.21 2002/07/17 03:28:47 obi Exp $
+ * $Id: frontend.cpp,v 1.22 2002/07/22 01:57:19 Homar Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -35,6 +35,7 @@
 /* zapit */
 #include <getservices.h>
 #include <zapsi/nit.h>
+#include <zapsi/sdt.h>
 
 #include "frontend.h"
 
@@ -492,18 +493,24 @@ void CFrontend::secResetOverload ()
  */
 const bool CFrontend::tuneChannel (CZapitChannel *channel)
 {
+  bool noNit = false;
 	if (transponders.count(channel->getTsidOnid()) == 0)
 	{
 		/* if not found, lookup in nit */
-		parse_nit(channel->getDiSEqC());
-
-		if (transponders.count(channel->getTsidOnid()) == 0)
+		if ( (parse_nit(channel->getDiSEqC()) < 0))
 		{
+			currentTsidOnid = get_sdt_TsidOnid ();
+			noNit = true;
+			printf("[frontend.cpp] versuche zu tunen");
+		}
+		else if (transponders.count(channel->getTsidOnid()) == 0)
+		{
+			printf("[frontend.cpp] kann nicht tunen");
 			return false;
 		}
 	}
 
-	currentTsidOnid = channel->getTsidOnid();
+	currentTsidOnid = ( noNit ? currentTsidOnid : channel->getTsidOnid() );
 
 	std::map <uint32_t, transponder>::iterator transponder = transponders.find(currentTsidOnid);
 

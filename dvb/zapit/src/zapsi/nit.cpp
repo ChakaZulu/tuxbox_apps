@@ -1,5 +1,5 @@
 /*
- * $Id: nit.cpp,v 1.19 2002/06/27 19:46:00 Homar Exp $
+ * $Id: nit.cpp,v 1.20 2002/07/22 01:57:19 Homar Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -111,6 +111,13 @@ int parse_nit (unsigned char DiSEqC)
 			}
 		}
 
+		if ( !(transport_stream_loop_length = (((buffer[pos] & 0x0F) << 8) | buffer[pos + 1])))
+		{
+			/* Falls NIT leer, verlasse Auswertung */
+			printf("[nit.cpp] NIT-Table Auswertung fehlgeschlagen \n");
+			close(demux_fd);
+			return -3;
+		}
 		transport_stream_loop_length = ((buffer[pos] & 0x0F) << 8) | buffer[pos + 1];
 
 		for (pos += 2; pos < section_length - 3; pos += transport_descriptors_length + 6)

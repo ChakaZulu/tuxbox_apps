@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.52 2002/07/17 03:08:08 obi Exp $
+ * $Id: scan.cpp,v 1.53 2002/07/22 01:57:19 Homar Exp $
  */
 
 #include <clientlib/zapitclient.h>
@@ -59,8 +59,7 @@ void build_bf_transponder(uint32_t frequency, uint32_t symbol_rate, CodeRate FEC
 
 	if (frontend->tuneFrequency(feparams, 0, 0) == true)
 	{
-		uint16_t onid = get_onid();
-		fake_pat(onid, feparams,0,0);
+		fake_pat(get_sdt_TsidOnid(), feparams,0,0);
 	}
 	else
 	{
@@ -90,8 +89,10 @@ int get_nits (uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, uint
 	{
 		if(parse_nit(DiSEqC) == -2)
 		{
-			uint16_t onid = get_onid();
-			fake_pat(onid, feparams, polarity, DiSEqC);
+			/* NIT war leer, leese TS-ID und ON-ID von der SDT aus */
+			printf("[scan.cpp] NIT war leer, lese SDT aus\n");
+			fake_pat(get_sdt_TsidOnid(), feparams, polarity, DiSEqC);
+			printf("[scan.cpp] TS-ON ID = %08x\n", get_sdt_TsidOnid() );
 		}
 
 		return 0;

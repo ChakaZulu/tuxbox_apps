@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.cpp,v 1.24 2002/07/17 03:07:12 obi Exp $
+ * $Id: sdt.cpp,v 1.25 2002/07/22 01:57:19 Homar Exp $
  */
 
 /* system c */
@@ -15,13 +15,14 @@
 #include "descriptors.h"
 #include "sdt.h"
 
-unsigned short get_onid ()
+unsigned int get_sdt_TsidOnid ()
 {
 	int demux_fd;
 	unsigned char buffer[1024];
 
 	/* service_description_section elements */
-	unsigned short original_network_id;
+	uint16_t transport_stream_id;
+	uint16_t original_network_id;
 
 	if ((demux_fd = open(DEMUX_DEV, O_RDWR)) < 0)
 	{
@@ -44,9 +45,10 @@ unsigned short get_onid ()
 
 	close(demux_fd);
 
+	transport_stream_id = (buffer[3] << 8) | buffer[4];
 	original_network_id = (buffer[8] << 8) | buffer[9];
 
-	return original_network_id;
+	return ((transport_stream_id << 16) | original_network_id );
 }
 
 int parse_sdt ()
@@ -171,16 +173,16 @@ int parse_sdt ()
 
 				case 0xE5: /* unknown, Astra 19.2E */
 					break;
-					
+
 				case 0xE7: /* unknown, Eutelsat 13.0E */
 					break;
-					
+
 				case 0xED: /* unknown, Astra 19.2E */
 					break;
-					
+
 				case 0xF8: /* unknown, Astra 19.2E */
 					break;
-					
+
 				case 0xF9: /* unknown, Astra 19.2E */
 					break;
 
