@@ -629,5 +629,5 @@ void	NextLevel( void )
 
 void	MazePig( void )
 {
-	Fx2ShowPig( (int)pig_x[ level ]*32, (int)pig_y[level]*32, 8*32, 6*32 );
+//	Fx2ShowPig( (int)pig_x[ level ]*32, (int)pig_y[level]*32, 8*32, 6*32 );
 }
