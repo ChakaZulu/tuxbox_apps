@@ -67,11 +67,13 @@
 #include "gui/favorites.h"
 #include "gui/sleeptimer.h"
 #include "gui/dboxinfo.h"
+#include "gui/timerlist.h"
 
 #include "system/setting_helpers.h"
 #include "system/settings.h"
 #include "system/debug.h"
 #include "system/flashtool.h"
+
 
 #include <stdio.h>
 #include <unistd.h>
@@ -1069,6 +1071,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 	service.addItem( new CMenuForwarder("menu.back") );
 	service.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	service.addItem( new CMenuForwarder("bouqueteditor.name", true, "", new CBEBouquetWidget()));
+	service.addItem( new CMenuForwarder("timerlist.name", true, "", new CTimerList()));
 	service.addItem( new CMenuForwarder("servicemenu.scants", true, "", &scanSettings ) );
 	service.addItem( new CMenuForwarder("servicemenu.ucodecheck", true, "", UCodeChecker ) );
 
@@ -2778,7 +2781,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.310 2002/08/31 22:30:27 obi Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.311 2002/09/02 11:28:44 dirch Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

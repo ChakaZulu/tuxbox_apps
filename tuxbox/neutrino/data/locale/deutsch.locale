@@ -499,3 +499,27 @@ timer.eventtimed.title Sendung vormerken
 timer.eventtimed.msg Die Sendung wurde vorgemerkt.\nDie dbox2 wird sich zum Startzeitpunkt automatisch ein- \nund auf die Sendung umschalten.
 timer.eventrecord.title Aufnahme vormerken
 timer.eventrecord.msg   Die Sendung wurde zur Aufnahme vergemerkt
+timerlist.name Timerliste
+timerlist.delete Löschen
+timerlist.empty Es gibt momentan keine Timer
+timerlist.deleting Timer wird gelöscht
+timerlist.type.shutdown Shutdown
+timerlist.type.nextprogramm Nächstes Programm
+timerlist.type.zapto Umschalten
+timerlist.type.standby Standby
+timerlist.type.record Aufnahme
+timerlist.type.remind Erinnerung
+timerlist.type.sleeptimer Sleeptimer
+timerlist.type.unknown Unbekannt
+timerlist.repeat.once einmalig
+timerlist.repeat.daily täglich
+timerlist.repeat.weekly wöchentlich
+timerlist.repeat.biweekly 2-wöchentlich
+timerlist.repeat.fourweekly 4-wöchentlich
+timerlist.repeat.monthly monatlich
+timerlist.repeat.byeventdescription siehe timer
+timerlist.repeat.unknown unbekannt
+timerlist.program.unknown Programm unbekannt
+timerlist.standby.on Aufwachen aus Standby
+timerlist.standby.off Auf Standby gehen
+
