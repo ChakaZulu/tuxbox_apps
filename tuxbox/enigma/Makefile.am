@@ -8,5 +8,8 @@ install-data-local:
 	install -m 0644 skins/*.esml $(DATADIR)/enigma/skins
 	install -d $(DATADIR)/enigma/pictures
 	install -m 0644 pictures/*.png $(DATADIR)/enigma/pictures
+	install -d $(DATADIR)/enigma/templates
+	install -m 0644 templates/*.tmp $(DATADIR)/enigma/templates
+	install -d $(DATADIR)/enigma/htdocs
+	install -m 0644 htdocs/* $(DATADIR)/enigma/htdocs
 	install -d $(CONFIGDIR)/enigma
-
