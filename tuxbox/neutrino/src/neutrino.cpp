@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.144 2002/01/30 10:34:25 McClean Exp $
+        $Id: neutrino.cpp,v 1.145 2002/01/30 18:10:19 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.145  2002/01/30 18:10:19  McClean
+  dont use home-key for modeswitch by default (dont worxx) :(
+
   Revision 1.144  2002/01/30 10:34:25  McClean
   remove ifdefs
 
@@ -698,7 +701,8 @@ void CNeutrinoApp::setupDefaults()
 
 
 	//key bindings
-	g_settings.key_tvradio_mode = CRCInput::RC_home;
+	//g_settings.key_tvradio_mode = CRCInput::RC_home;
+	g_settings.key_tvradio_mode = CRCInput::RC_nokey;
 	g_settings.key_channelList_pageup = CRCInput::RC_red;
 	g_settings.key_channelList_pagedown = CRCInput::RC_green;
 	g_settings.key_channelList_cancel = CRCInput::RC_home;
@@ -2443,7 +2447,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.144 2002/01/30 10:34:25 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.145 2002/01/30 18:10:19 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;
