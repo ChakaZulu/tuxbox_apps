@@ -16,6 +16,6 @@ install-exec-local:
 	install -m 0644  enigma_demo.cfg $(PLUGINDIR)
 
 uninstall-local:
-	-rm $(PLUGINDIR)/eingma_demo.so
+	-rm $(PLUGINDIR)/enigma_demo.so
 	-rm $(PLUGINDIR)/enigma_demo.cfg
 	-rmdir $(PLUGINDIR)
