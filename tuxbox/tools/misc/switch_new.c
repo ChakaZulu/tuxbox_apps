@@ -21,6 +21,9 @@
  *
  *
  *   $Log: switch_new.c,v $
+ *   Revision 1.6  2001/04/25 08:03:59  fnbrd
+ *   Kleinigkeiten.
+ *
  *   Revision 1.5  2001/04/25 07:36:58  fnbrd
  *   Fixed mute/unmute.
  *
@@ -37,7 +40,7 @@
  *   - switch rewrite
  *
  *
- *   $Revision: 1.5 $
+ *   $Revision: 1.6 $
  *
  */
 
@@ -62,10 +65,10 @@ static struct argp_option options[] = {
   {"mute",                'm', 0,          0,  "Mute" },
   {"show",                's', 0,          0,  "Show current settings" },
   {"unmute",              'u', 0,          0,  "Unmute" },
-  {"volume",              'l', "VOL",      0,  "Set volume" },
+  {"volume",              'l', "VOL",      0,  "Set volume (0-63, 0 loudest)" },
   {"zc-detector",         'z', "0/1",      0,  "Set zero cross detector" },
   {"video-fs-ctrl",       'f', "<0-3>",    0,  "Set video function switch control" },
-  {"ycmix",               'y', "0/1",      0,  "Set y/c mix" },
+  {"ycmix",               'y', "0/1",      0,  "Set y/c mix (only cxa2092)" },
   {"video-fb-ctrl",       'b', "<0-3>",    0,  "Set video fast blanking control" },
   {"logic",               'c', "0/1",      0,  "Set logic" },
   {"route-video",         'v', "SRC:DEST", 0,  "Route video" },
@@ -141,7 +144,7 @@ int show_ycm()
 
 	if (ioctl(fd,AVSIOGYCM,&i)< 0)
 	{
-		perror("AVSIOGYCM:");
+// Haesslich bei cxa2126		perror("AVSIOGYCM:");
 		return -1;
 	}
 

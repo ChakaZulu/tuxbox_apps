@@ -21,8 +21,8 @@
  *
  *
  *   $Log: switch.c,v $
- *   Revision 1.8  2001/04/25 07:36:58  fnbrd
- *   Fixed mute/unmute.
+ *   Revision 1.9  2001/04/25 08:03:59  fnbrd
+ *   Kleinigkeiten.
  *
  *   Revision 1.7  2001/04/01 10:30:15  gillem
  *   - fix volume
@@ -46,7 +46,7 @@
  *
  *
  *
- *   $Revision: 1.8 $
+ *   $Revision: 1.9 $
  *
  */
 
@@ -87,14 +87,14 @@ void help (char *prog_name) {
   printf("Switches:\n
    -h,  --help                                   help
    -s,  --show                                   show current settings
-   -v,  --volume <vol>                           set TV volume
+   -v,  --volume <vol>                           set TV volume (0-63, 0 loudest)
    -m,  --mute                                   mute TV volume
    -u,  --unmute                                 unmute TV volume
   -rv,  --route-video <dest> <src>               route VIDEO
   -ra,  --route-audio <dest> <src>               route AUDIO
  -zcd,  --zero-cross-detector <on/off>           set ZCD
  -fnc,  --video-function-switch-control <0/1/2/3 set FNC
- -ycm,  --y-c-mix <0/1>                          set Y/C Mix
+ -ycm,  --y-c-mix <0/1>                          set Y/C Mix (only cxa2092)
 -fblk,  --video-fast-blanking-control <0/1/2/3>  set FBLK
 -log1,  --logic1 <0/1>                           set logic output 1
 -log2,  --logic2 <0/1>                           set logic output 2
@@ -314,7 +314,8 @@ void ycm_show() {
   int i=10;
 
   if (ioctl(fd,AVSIOGYCM,&i)< 0) {
-    perror("AVSIOGYCM:");
+//Haesslich bei cxa2126    perror("AVSIOGYCM:");
+    return;
   }
   printf("YCM: %d\n",i);
 }
