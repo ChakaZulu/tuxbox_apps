@@ -38,11 +38,98 @@
 #include <system/locals_intern.h>
 
 #include <fstream>
-#include <iostream>
-#include <map>
 #include <string>
 
 static const char * iso639filename = "/share/iso-codes/iso-639.tab";
+
+#if 1
+#include <stdlib.h>
+#include <stdio.h>
+
+#define ISO639_TABLE_SIZE 489
+typedef struct
+{
+	char * iso_639_2_code;
+	char * name;
+} iso639_t;
+
+iso639_t iso639[ISO639_TABLE_SIZE];
+
+int mycompare(const void * a, const void * b)
+{
+	return strcmp(((iso639_t *)a)->iso_639_2_code, ((iso639_t *)b)->iso_639_2_code);
+}
+
+void initialize_iso639_map(void)
+{
+	unsigned i = 0;
+	std::string s, t, v;
+	std::ifstream in(iso639filename);
+	if (in.is_open())
+	{
+		while (in.peek() == '#')
+			getline(in, s);
+		while (in >> s >> t >> v >> std::ws)
+		{
+			getline(in, v);
+
+			if (i == ISO639_TABLE_SIZE)
+			{
+				printf("ISO639 table overflow\n");
+				goto do_sorting;
+			}
+
+			iso639[i].iso_639_2_code = strdup(s.c_str());
+			iso639[i].name           = strdup(v.c_str());
+
+			i++;
+
+			if (s != t)
+			{
+				if (i == ISO639_TABLE_SIZE)
+				{
+					printf("ISO639 table overflow\n");
+					goto do_sorting;
+				}
+
+				iso639[i].iso_639_2_code = strdup(t.c_str());
+//				iso639[i].name           = strdup(v.c_str());
+				iso639[i].name           = iso639[i - 1].name;
+
+				i++;
+			}
+		}
+		if (i != ISO639_TABLE_SIZE)
+		{
+			printf("ISO639 table underflow\n");
+			while(i < ISO639_TABLE_SIZE)
+			{
+				iso639[i].iso_639_2_code = iso639[i].name = (char *)iso639filename; // fill with junk
+				i++;
+			}
+		}
+	do_sorting:
+		qsort(iso639, ISO639_TABLE_SIZE, sizeof(iso639_t), mycompare);
+	}
+	else
+		printf("Loading %s failed.\n", iso639filename);
+}
+
+const char * getISO639Description(const char * const iso)
+{
+	iso639_t tmp;
+	tmp.iso_639_2_code = (char *)iso;
+
+	void * value = bsearch(&tmp, iso639, ISO639_TABLE_SIZE, sizeof(iso639_t), mycompare);
+	if (value == NULL)
+		return iso;
+	else
+		return ((iso639_t *)value)->name;
+}
+#else
+#include <iostream>
+#include <map>
+
 static std::map<std::string, std::string> iso639;
 
 void initialize_iso639_map(void)
@@ -53,7 +140,7 @@ void initialize_iso639_map(void)
 	{
 		while (in.peek() == '#')
 			getline(in, s);
-		while (in >> s >> t >> u)
+		while (in >> s >> t >> u >> std::ws)
 		{
 			getline(in, v);
 			iso639[s] = v;
@@ -73,6 +160,7 @@ const char * getISO639Description(const char * const iso)
 	else
 		return it->second.c_str();
 }
+#endif
 
 CLocaleManager::CLocaleManager()
 {
@@ -94,7 +182,7 @@ const char * path[2] = {"/var/tuxbox/config/locale/", DATADIR "/neutrino/locale/
 
 CLocaleManager::loadLocale_ret_t CLocaleManager::loadLocale(const char * const locale)
 {
-	int i;
+	unsigned int i;
 	FILE * fd;
 
 	initialize_iso639_map();
