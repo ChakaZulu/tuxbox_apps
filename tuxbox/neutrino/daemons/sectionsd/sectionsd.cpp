@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.70 2001/10/22 11:41:09 field Exp $
+//  $Id: sectionsd.cpp,v 1.71 2001/10/22 14:27:24 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.71  2001/10/22 14:27:24  field
+//  Kleinigkeiten
+//
 //  Revision 1.70  2001/10/22 11:41:09  field
 //  nvod-zeiten
 //
@@ -1277,7 +1280,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.70 2001/10/22 11:41:09 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.71 2001/10/22 14:27:24 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1521,7 +1524,12 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
 #endif
   }
   else
+  {
     dprintf("current/next EPG not found!\n");
+#ifdef NO_ZAPD_NEUTRINO_HACK
+    currentNextWasOk=0;
+#endif
+  }
   return;
 }
 
@@ -2177,20 +2185,25 @@ struct connectionData *client=(struct connectionData *)conn;
   dprintf("Connection from %s closed!\n", inet_ntoa(client->clientAddr.sin_addr));
   delete client;
 #ifdef NO_ZAPD_NEUTRINO_HACK
-  if(currentNextWasOk) {
+  if((currentNextWasOk) && (header.command== sectionsd::currentNextInformationID))
+  {
     // Damit nach dem umschalten der camd/pzap usw. schneller anlaeuft.
-    currentNextWasOk=0;
-    if(dmxEIT.pause()) // -> lock
+//    currentNextWasOk=0;
+/*    if(dmxEIT.pause()) // -> lock
       return 0;
     if(dmxSDT.pause()) {
       dmxEIT.unpause(); // -> unlock
       return 0;
     }
-    int rc=5;
+    int rc=1;
     while(rc)
       rc=sleep(rc);
+
     dmxSDT.unpause();
     dmxEIT.unpause(); // -> unlock
+*/
+    if(!dmxEIT.isScheduled)
+        dmxEIT.change(); // auf scheduled umschalten / current/next ist eh' schon da...
   }
   else if(dmxEIT.isScheduled) {
     dmxEIT.change(); // auf present/following umschalten
@@ -2497,7 +2510,7 @@ static void *eitThread(void *)
 {
 struct SI_section_header header;
 char *buf;
-const unsigned timeoutInSeconds=2;
+const unsigned timeoutInSeconds=1;
 
   try {
   dprintf("eit-thread started.\n");
@@ -2584,23 +2597,29 @@ const unsigned timeoutInSeconds=2;
       dmxEIT.unpause(); // -> unlock
       continue;
     }
-    if(header.current_next_indicator) {
-      // Wir wollen nur aktuelle sections
-/*
-      // Zum debuggen
-      if(dmxEIT.isScheduled) {
-        printf("%hhx\n", header.section_number);
-	if(header.section_number==0xb1) {
-          printf("length: %hd\n", header.section_length);
-          dmxEIT.pause();
-	  FILE *file=fopen("eit.debug", "wb");
-	  if(file) {
-	    fwrite(buf, sizeof(header)+header.section_length-5, 1, file);
-	    fclose(file);
-	  }
-          dmxEIT.unpause();
+    if(header.current_next_indicator)
+    {
+        // Wir wollen nur aktuelle sections
+
+/*        // Zum debuggen
+//        if(dmxEIT.isScheduled)
+        {
+            printf("%hhx\n", header.section_number);
+            //if(header.section_number==0xb1)
+            {
+                printf("length: %hd\n", header.section_length);
+                dmxEIT.pause();
+                char    dn[100];
+                sprintf(dn, "eit.debug.%d", header.section_number);
+                FILE *file=fopen(dn, "wb");
+                if(file)
+                {
+                    fwrite(buf, sizeof(header)+header.section_length-5, 1, file);
+                    fclose(file);
+                }
+                dmxEIT.unpause();
+            }
         }
-      }
 */
         SIsectionEIT eit(SIsection(sizeof(header)+header.section_length-5, buf));
         if(eit.header())
@@ -2760,7 +2779,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.70 2001/10/22 11:41:09 field Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.71 2001/10/22 14:27:24 field Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
