@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.43 2002/08/31 01:39:49 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.44 2002/08/31 08:00:26 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -504,16 +504,6 @@ void CBouquetManager::makeRemainingChannelsBouquet( unsigned int tvChanNr, unsig
 		if (radioChannelsFind( allChannels[i]->getOnidSid()).EndOfChannels())
 		{
 			CZapitChannel* chan = copyChannelByOnidSid( allChannels[i]->getOnidSid());
-			chan->setChannelNumber(radioChanNr++);
-			remainChannels->addService( chan);
-		}
-	}
-
-	for ( map<unsigned int, CZapitChannel>::iterator it=allchans_radio.begin(); it!=allchans_radio.end(); it++)
-	{
-		if (radioChannelsFind( it->second.getOnidSid()).EndOfChannels())
-		{
-			CZapitChannel* chan = copyChannelByOnidSid( it->second.getOnidSid());
 			chan->setChannelNumber(radioChanNr++);
 			remainChannels->addService( chan);
 		}
