@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: flashimagecramfs.cpp,v 1.4 2002/06/29 13:07:49 waldi Exp $
+ * $Id: flashimagecramfs.cpp,v 1.5 2002/06/29 14:31:50 waldi Exp $
  */
 
 #include <flashimagecramfs.hpp>
@@ -63,7 +63,7 @@ FlashImage::FlashImageCramFS::FlashImageCramFS ( std::iostream & stream )
   }
 }
 
-FlashImage::FlashImageCramFS::~FlashImageCramFS ()
+FlashImage::FlashImageCramFS::~FlashImageCramFS () throw ()
 {
   delete buf;
 }
@@ -89,12 +89,12 @@ void FlashImage::FlashImageCramFS::get_file ( const std::string & name, std::ost
   }
 }
 
-int FlashImage::FlashImageCramFS::get_size ()
+int FlashImage::FlashImageCramFS::get_size () throw ()
 {
   return cramfssize;
 }
 
-int FlashImage::FlashImageCramFS::get_size_block ()
+int FlashImage::FlashImageCramFS::get_size_block () throw ()
 {
   return cramfsblocks;
 }
@@ -150,147 +150,6 @@ void FlashImage::FlashImageCramFS::get_block ( unsigned int block, char * buf )
   stream.seekg ( 4096 * block, std::ios::beg );
   stream.read ( buf, 4096 );
 }
-
-/*
-void FlashImage::FlashImageCramFS::sign ( Crypto::evp::key::privatekey & key, const Crypto::evp::md::md & md )
-{
-  stream.clear ();
-  stream.seekg ( 0 );
-
-  Crypto::evp::sign sign;
-  sign.init ( md );
-
-  unsigned int i = cramfsblocks;
-
-  while ( i )
-  {
-    stream.read ( buf, 4096 );
-    sign.update ( buf, 4096 );
-    i--;
-  }
-
-  stream.clear ();
-
-  std::string sig ( sign.final ( key ) );
-
-  if ( sig.size () > 4096 - sizeof ( signatureinfo ) )
-    throw std::runtime_error ( "cramfs: signature too long" );
-
-  stream.seekg ( cramfssize );
-
-  {
-    signatureinfo info;
-    info.magic = CRAMFS_32 ( magic );
-    info.version = CRAMFS_32 ( 1 );
-    info.size = CRAMFS_32 ( sig.length () );
-    info.reserved = 0;
-    stream.write ( ( char * ) &info, sizeof ( signatureinfo ) );
-  }
-
-  stream.write ( sig.data (), sig.length () );
-}
-
-int FlashImage::FlashImageCramFS::verify ( Crypto::evp::key::key & key, const Crypto::evp::md::md & md )
-{
-  stream.clear ();
-  stream.seekg ( cramfssize, std::ios::end );
-  stream.read ( buf, 4096 );
-
-  std::string sig;
-
-  {
-    signatureinfo * info = (signatureinfo *) buf;
-    unsigned int i;
-    if ( info -> magic != CRAMFS_32 ( magic ) )
-      throw std::runtime_error ( "cramfs (signatureinfo): wrong magic" );
-    i = CRAMFS_32 ( info -> size );
-    if ( i > 4096 - sizeof ( signatureinfo ) )
-      throw std::runtime_error ( "cramfs (signatureinfo): signature too long" );
-    sig = std::string ( ( buf + sizeof ( signatureinfo ) ), i );
-  }
-
-  stream.clear ();
-  stream.seekg ( 0 );
-
-  Crypto::evp::verify verify;
-  verify.init ( md );
-
-  unsigned i = cramfsblocks;
-  while ( i )
-  {
-    stream.read ( buf, 4096 );
-    verify.update ( buf, 4096 );
-    i--;
-  }
-
-  stream.clear ();
-
-  return verify.final ( sig, key );
-}
-
-void FlashImage::FlashImageCramFS::verify_block_init ( const Crypto::evp::md::md & md )
-{
-  if ( block )
-    delete block;
-
-  block = new verify_block;
-
-  block -> blocks = cramfsblocks;
-
-  stream.clear ();
-  stream.seekg ( cramfssize, std::ios::end );
-  stream.read ( buf, 4096 );
-
-  std::string sig;
-
-  {
-    signatureinfo * info = (signatureinfo *) buf;
-    unsigned int i;
-    if ( info -> magic != CRAMFS_32 ( magic ) )
-      throw std::runtime_error ( "cramfs (signatureinfo): wrong magic" );
-    i = CRAMFS_32 ( info -> size );
-    if ( i > 4096 - sizeof ( signatureinfo ) )
-      throw std::runtime_error ( "cramfs (signatureinfo): signature too long" );
-    block -> sig = std::string ( ( buf + sizeof ( signatureinfo ) ), i );
-  }
-
-  stream.clear ();
-  stream.seekg ( 0 );
-
-  block -> _verify.init ( md );
-}
-
-bool FlashImage::FlashImageCramFS::verify_block_update ()
-{
-  if ( ! block )
-    throw "";
-
-  stream.read ( buf, 4096 );
-  block -> _verify.update ( buf, 4096 );
-  block -> blocks--;
-
-  if ( ! block -> blocks )
-  {
-    stream.clear ();
-    return false;
-  }
-
-  return true;
-}
-
-int FlashImage::FlashImageCramFS::verify_block_final ( Crypto::evp::key::key & key )
-{
-  if ( ! block )
-    throw "";
-
-  int ret = block -> _verify.final ( block -> sig, key );
-
-  delete block;
-  block = NULL;
-
-  return ret;
-}
-*/
 
 unsigned long FlashImage::FlashImageCramFS::readdir ( std::istream &, unsigned long offset, unsigned long size, std::istream & filename )
 {

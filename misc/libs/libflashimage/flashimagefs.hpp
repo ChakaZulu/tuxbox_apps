@@ -17,17 +17,15 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: flashimagefs.hpp,v 1.3 2002/06/29 13:07:49 waldi Exp $
+ * $Id: flashimagefs.hpp,v 1.4 2002/06/29 14:31:50 waldi Exp $
  */
 
-#ifndef __LIBFLASHIMAGE_LIBFLASHIMAGEFS_HPP
-#define __LIBFLASHIMAGE_LIBFLASHIMAGEFS_HPP
+#ifndef __LIBFLASHIMAGE__LIBFLASHIMAGEFS_HPP
+#define __LIBFLASHIMAGE__LIBFLASHIMAGEFS_HPP
 
 #include <iostream>
 #include <stdexcept>
 #include <string>
-
-#include <libcrypto++/evp.hpp>
 
 namespace FlashImage
 {

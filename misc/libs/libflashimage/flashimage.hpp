@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: flashimage.hpp,v 1.3 2002/06/29 13:07:49 waldi Exp $
+ * $Id: flashimage.hpp,v 1.4 2002/06/29 14:31:50 waldi Exp $
  */
 
 #ifndef __LIBFLASHIMAGE__LIBFLASHIMAGE_HPP
@@ -38,6 +38,8 @@ namespace FlashImage
   class FlashImageSign;
   class FlashImageVerify;
 
+  class NoExceptionFlashImage;
+
   class FlashImage
   {
     public:
@@ -57,6 +59,8 @@ namespace FlashImage
       FlashImageFS & fs;
       std::map < std::string, std::string > control;
       static std::map < int, std::string > errors;
+
+      friend class NoExceptionFlashImage;
   };
 
   class FlashImageSignature
