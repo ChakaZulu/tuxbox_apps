@@ -25,16 +25,15 @@
 
 using namespace std;
 
-
 class CChannelEvent
 {
 	public:
-		unsigned 			serviceID;
+		unsigned	serviceID;
 		unsigned long long	eventID;
-		string				description;
-		string				text;
-		time_t				startTime;
-		unsigned			duration;
+		string		description;
+		string		text;
+		time_t		startTime;
+		unsigned	duration;
 };
 
 typedef vector<CChannelEvent> CChannelEventList;
@@ -59,6 +58,8 @@ class CSectionsdClient
 
 		bool getLinkageDescriptorsUniqueKey( unsigned long long uniqueKey, sectionsd::LinkageDescriptorList& descriptors );
 
+		bool getNVODTimesServiceKey( unsigned serviceKey, sectionsd::NVODTimesList& nvod_list );
+
 		bool getCurrentNextServiceKey( unsigned serviceKey, sectionsd::responseGetCurrentNextInfoChannelID& current_next );
 
 		bool getIsTimeSet();
@@ -67,8 +68,8 @@ class CSectionsdClient
 
 		void setServiceChanged( unsigned ServiceKey, bool requestEvent );
 
-
 		CChannelEventList getChannelEvents();
+
 
 		/*
 			ein beliebiges Event anmelden

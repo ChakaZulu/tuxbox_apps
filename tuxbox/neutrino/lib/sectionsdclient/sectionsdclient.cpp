@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.7 2002/03/22 14:33:53 field Exp $
+  $Id: sectionsdclient.cpp,v 1.8 2002/03/22 17:12:06 field Exp $
 
   License: GPL
 
@@ -20,8 +20,8 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: sectionsdclient.cpp,v $
-  Revision 1.7  2002/03/22 14:33:53  field
-  weitere Updates :)
+  Revision 1.8  2002/03/22 17:12:06  field
+  Weitere Updates, compiliert wieder
 
   Revision 1.6  2002/03/20 21:42:30  McClean
   add channel-event functionality
@@ -298,6 +298,48 @@ bool CSectionsdClient::getLinkageDescriptorsUniqueKey( unsigned long long unique
 	else
 		return false;
 }
+
+bool CSectionsdClient::getNVODTimesServiceKey( unsigned serviceKey, sectionsd::NVODTimesList& nvod_list )
+{
+	sectionsd::msgRequestHeader msg;
+
+	msg.version = 2;
+	msg.command = sectionsd::timesNVODservice;
+	msg.dataLength =  sizeof(serviceKey);
+
+	if ( sectionsd_connect() )
+	{
+        nvod_list.clear();
+
+		send((char*)&msg, sizeof(msg));
+		send((char*)&serviceKey, sizeof(serviceKey));
+
+		int nBufSize = readResponse();
+
+		char* pData = new char[nBufSize];
+		receive(pData, nBufSize);
+        char* dp = pData;
+
+        sectionsd::responseGetNVODTimes response;
+
+		while( dp< pData+ nBufSize )
+		{
+			response.onid_sid = *(unsigned *) dp;
+			dp+=sizeof(unsigned);
+			response.tsid = *(unsigned short *) dp;
+			dp+=sizeof(unsigned short);
+            response.zeit = *(sectionsd::sectionsdTime*) dp;
+			dp+= sizeof(sectionsd::sectionsdTime);
+
+			nvod_list.insert( nvod_list.end(), response);
+		}
+		sectionsd_close();
+		return true;
+	}
+	else
+		return false;
+}
+
 
 bool CSectionsdClient::getCurrentNextServiceKey( unsigned serviceKey, sectionsd::responseGetCurrentNextInfoChannelID& current_next )
 {
