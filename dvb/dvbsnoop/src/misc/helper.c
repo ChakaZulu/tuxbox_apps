@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.35 2004/11/03 21:00:59 rasc Exp $
+$Id: helper.c,v 1.36 2004/11/04 19:21:11 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,10 @@ $Id: helper.c,v 1.35 2004/11/03 21:00:59 rasc Exp $
 
 
 $Log: helper.c,v $
+Revision 1.36  2004/11/04 19:21:11  rasc
+Fixes and changes on "premiere.de" private sections
+Cleaning up "premiere.de" private descriptors (should be final now)
+
 Revision 1.35  2004/11/03 21:00:59  rasc
  - New: "premiere.de" private tables and descriptors (tnx to Peter.Pavlov, Premiere)
  - New: cmd option "-privateprovider <provider name>"
@@ -622,21 +626,21 @@ static void _print_time_mjd (int v, u_long mjd)
 
 static void _print_time_utc (int v, u_long utc)
 {
- out (v, " %02lx:%02lx:%02lx (UTC)",
+ out (v, "%02lx:%02lx:%02lx (UTC)",
 	 (utc>>16) &0xFF, (utc>>8) &0xFF, (utc) &0xFF);
 }
 
 
 void print_time_mjd (int v, u_long mjd)
 {
-  out (v, "0x%04lx [=",mjd);
+  out (v, "0x%04lx [= ",mjd);
   _print_time_mjd (v, mjd);
   out (v,"]");
 }
 
 void print_time_utc (int v, u_long utc)
 {
-  out (v, "0x%06lx [=",utc);
+  out (v, "0x%06lx [= ",utc);
   _print_time_utc (v, utc);
   out (v,"]");
 
@@ -644,8 +648,9 @@ void print_time_utc (int v, u_long utc)
 
 void print_time40 (int v, u_long mjd, u_long utc)
 {
-  out (v, "0x%lx%06lx [=",mjd, utc);
+  out (v, "0x%lx%06lx [= ",mjd, utc);
   _print_time_mjd (v, mjd);
+  out (v," ");
   _print_time_utc (v, utc);
   out (v,"]");
 }

@@ -1,5 +1,5 @@
 /*
-$Id: section_premiere_cit.c,v 1.1 2004/11/03 21:01:02 rasc Exp $
+$Id: section_premiere_cit.c,v 1.2 2004/11/04 19:21:11 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,10 @@ $Id: section_premiere_cit.c,v 1.1 2004/11/03 21:01:02 rasc Exp $
 
 
 $Log: section_premiere_cit.c,v $
+Revision 1.2  2004/11/04 19:21:11  rasc
+Fixes and changes on "premiere.de" private sections
+Cleaning up "premiere.de" private descriptors (should be final now)
+
 Revision 1.1  2004/11/03 21:01:02  rasc
  - New: "premiere.de" private tables and descriptors (tnx to Peter.Pavlov, Premiere)
  - New: cmd option "-privateprovider <provider name>"
@@ -56,16 +60,13 @@ void section_PRIVATE_PremiereDE_CIT (u_char *b, int len)
 
 
  section_syntax_indicator = 
- 	outBit_Sx_NL (3,"Section_syntax_indicator: ",	b, 8, 1);
+ 	outBit_Sx_NL (3,"Section_syntax_indicator: ",	b, 8, 1);	// ==1 
  	outBit_Sx_NL (3,"private_indicator: ",		b, 9, 1);
  	outBit_Sx_NL (6,"reserved: ",			b,10, 2);
  section_length =
 	outBit_Sx_NL (5,"private_section_length: ",	b,12,12);
 
 
- if (section_syntax_indicator == 0) {
-	b += 3;
- } else {
 
  	outBit_Sx_NL (3,"table_id_extension: ",		b, 24,16);
  	outBit_Sx_NL (6,"reserved: ",			b, 40, 2);
@@ -77,46 +78,38 @@ void section_PRIVATE_PremiereDE_CIT (u_char *b, int len)
 
 	b += 8;
 	section_length -= 5;
- }
 
 
 
 
-//
-// -- Premiere Content Information Table CIT
-// -- provided by  Peter.Pavlov (Premiere.de)
-//
+   //
+   // -- Premiere Content Information Table CIT
+   // -- provided by  Peter.Pavlov (Premiere.de)
+   //
 
 
- out_NL (3);
- outBit_Sx_NL (3,"Content id: ",		b, 0, 32);
- outBit_Sx_NL (3,"Duration: ",			b, 32,24);
- outBit_Sx_NL (3,"Reserved: ",			b, 56, 4);
- outBit_Sx_NL (5,"descriptor_section_length: ",	b, 60,12);
+   out_NL (3);
+   outBit_Sx_NL (3,"Content id: ",		b, 0, 32);
+   outBit_Sx_NL (3,"Duration: ",			b, 32,24);
+   outBit_Sx_NL (3,"Reserved: ",			b, 56, 4);
+   outBit_Sx_NL (5,"descriptor_section_length: ",	b, 60,12);
 
- b += 9;
- section_length -=9;
+   b += 9;
+   section_length -=9;
 
- while (section_length > 4 ) {
+   while (section_length > 4 ) {
 	int x;
 
       	x = descriptor (b, DVB_SI);
       	if (section_length < x) break;
       	b    += x;
       	section_length -= x;
-}
+   }
 
 
 
 
- if (section_length) {
-	print_private_data (3,b,section_length);
- 	b += section_length;
- }
-
- if (section_syntax_indicator != 0) {
- 	outBit_Sx_NL (5,"CRC: ",		b, 0, 32);
- }
+   outBit_Sx_NL (5,"CRC: ",		b, 0, 32);
 
 }
 

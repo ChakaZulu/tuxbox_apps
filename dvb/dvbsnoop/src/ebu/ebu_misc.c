@@ -1,5 +1,5 @@
 /*
-$Id: ebu_misc.c,v 1.2 2004/02/05 10:30:56 rasc Exp $
+$Id: ebu_misc.c,v 1.3 2004/11/04 19:21:11 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,10 @@ $Id: ebu_misc.c,v 1.2 2004/02/05 10:30:56 rasc Exp $
 
 
 $Log: ebu_misc.c,v $
+Revision 1.3  2004/11/04 19:21:11  rasc
+Fixes and changes on "premiere.de" private sections
+Cleaning up "premiere.de" private descriptors (should be final now)
+
 Revision 1.2  2004/02/05 10:30:56  rasc
 no message
 
@@ -93,7 +97,7 @@ static u_char invtab[256] = {
 
 
 
-// -- Invert Character/Buffer (LSB/MSB)
+// -- Invert Character/Buffer (LSb/MSb)
 //
 
 u_char invertChar (u_char *b)
@@ -122,7 +126,7 @@ void invertBuffer (u_char *b, int len)
 
 // -- Hamming 8/4 table
 static u_char unham84tab[256] = {
-  0x01, 0xff, 0x81, 0x01, 0xff, 0x00, 0x01, 0xff, 
+  0x01, 0xff, 0x01, 0x01, 0xff, 0x00, 0x01, 0xff, 
   0xff, 0x02, 0x01, 0xff, 0x0a, 0xff, 0xff, 0x07, 
   0xff, 0x00, 0x01, 0xff, 0x00, 0x80, 0xff, 0x00, 
   0x06, 0xff, 0xff, 0x0b, 0xff, 0x00, 0x03, 0xff, 
