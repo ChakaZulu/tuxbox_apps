@@ -1606,6 +1606,12 @@ eZapMain::eZapMain()
 	if ( eConfig::getInstance()->getKey("/ezap/ui/playlistmode", playlistmode ) )
 		playlistmode = 0;  // default TV Mode
 
+	int fastzap;
+	if ( eConfig::getInstance()->getKey("/elitedvb/extra/fastzapping", fastzap ) )
+		fastzap = 0;
+
+	Decoder::setFastZap(fastzap);
+
 	startMessages();
 
 	dvrInfoBar->zOrderRaise();
