@@ -40,6 +40,7 @@
 
 #include <sys/types.h>		/* Some systems define `time_t' here.  */
 #include <time.h>
+#include <string.h>
 
 #if HAVE_LIMITS_H
 # include <limits.h>

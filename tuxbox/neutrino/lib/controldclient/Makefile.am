@@ -1,5 +1,5 @@
 INCLUDES = \
-	-I../../../../dvb/zapit/include/zapit \
+	@ZAPIT_CFLAGS@ \
 	-I../include \
 	@EVENTSERVER_CFLAGS@
 

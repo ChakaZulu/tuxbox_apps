@@ -26,7 +26,7 @@
 #ifndef __bigclock__
 #define __bigclock__
 
-#include <liblcddisplay.h>
+#include <lcddisplay/lcddisplay.h>
 
 
 void showBigClock(CLCDDisplay* display, int h,int m);

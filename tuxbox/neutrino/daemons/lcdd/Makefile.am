@@ -1,7 +1,7 @@
 SUBDIRS = icons
 
 INCLUDES = \
-	-I$(top_srcdir)/lib \
+	-I$(top_srcdir)/lib/include \
 	@CONFIGFILE_CFLAGS@ \
 	@FREETYPE_CFLAGS@ \
 	@LCDDISPLAY_CFLAGS@ \

@@ -18,8 +18,13 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "eventwatchdog.h"
 #include <dbox/event.h>
+
+#include <eventserver.h>
+#include <controldclient.h>
+
+#include "eventwatchdog.h"
+
 
 CEventWatchDog::CEventWatchDog()
 {

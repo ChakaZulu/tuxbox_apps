@@ -26,7 +26,8 @@
 #ifndef __lcdpainter__
 #define __lcdpainter__
 
-#include <liblcddisplay.h>
+#include <lcddisplay/lcddisplay.h>
+#include <lcddisplay/fontrenderer.h>
 #include <lcddclient.h>
 
 

@@ -26,14 +26,13 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <errno.h>
+
+#include <dbox/fp.h>
 
 #include <string>
 #include <vector>
 #include <map>
-#include <errno.h>
-#include "eventserver.h"
-#include "controldclient.h"
-#include <dbox/fp.h>
 
 
 using namespace std;

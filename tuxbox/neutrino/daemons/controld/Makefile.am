@@ -1,17 +1,18 @@
 SUBDIRS = driver
 
 INCLUDES = \
-	-I$(top_srcdir)/lib \
-	@EVENTSERVER_CFLAGS@ \
-	@ZAPITCLIENT_CFLAGS@
-
+	@ZAPIT_CFLAGS@ \
+	-I$(top_srcdir)/lib/include \
+	@EVENTSERVER_CFLAGS@
+	
 bin_PROGRAMS = controld
 
 controld_LDADD = \
 	driver/libcontrold_driver.a \
-	$(top_builddir)/lib/lcddclient/liblcddclient.la
+	$(top_builddir)/lib/lcddclient/liblcddclient.la \
+	$(top_builddir)/lib/timerdclient/libtimerdclient.la \
 	@EVENTSERVER_LIBS@ \
-	@ZAPITCLIENT_LIBS@ \
+	@ZAPIT_LIBS@ \
 	-lpthread
 
 controld_SOURCES = controld.cpp eventwatchdog.cpp

@@ -41,26 +41,29 @@
 #include <unistd.h>
 #include <signal.h>
 
-#include "driver/audio.h"
-#include "controldMsg.h"
-#include "dbox/avs_core.h"
-#include "dbox/fp.h"
-#include "dbox/saa7126_core.h"
-#include "ost/video.h"
+#include <dbox/avs_core.h>
+#include <dbox/fp.h>
+#include <dbox/saa7126_core.h>
+#include <ost/video.h>
+
+#include <zapit/zapitclient.h>
+#include <controldclient.h>
+#include <lcddclient.h>
+#include <timerdclient.h>
+#include <eventserver.h>
+
 #include "eventwatchdog.h"
-#include "controldclient.h"
-#include "lcddclient.h"
-#include "zapitclient.h"
-#include "timerdclient.h"
-#include "eventserver.h"
+#include "driver/audio.h"
+
 
 #define CONF_FILE CONFIGDIR "/controld.conf"
 #define SAA7126_DEVICE "/dev/dbox/saa0"
 
-CLcddClient		lcdd;
+
+CLcddClient	lcdd;
 CZapitClient	zapit;
 CTimerdClient	timerd;
-CEventServer    *eventServer;
+CEventServer	*eventServer;
 
 struct Ssettings
 {
@@ -775,7 +778,7 @@ void sig_catch(int signal)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.66 2002/10/10 18:40:24 thegoodguy Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.67 2002/10/13 07:26:59 woglinde Exp $\n\n");
 
 	//printf("[controld] mainThread-pid: %d\n", getpid());
 	switch (fork())

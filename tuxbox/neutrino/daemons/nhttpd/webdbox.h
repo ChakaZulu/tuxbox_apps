@@ -10,15 +10,13 @@
 #include <vector>
 #include <map>
 
+#include <zapit/zapitclient.h>
+#include <controldclient.h>
+#include <sectionsdclient.h>
+#include <timerdclient.h>
+#include <eventserver.h>
+
 #include "request.h"
-//#include "controldclient.h"
-
-#include "../controld/clientlib/controldclient.h"
-#include "../../sections/clientlib/sectionsdclient.h"
-#include <zapitclient.h>
-#include "../timerd/clientlib/timerdclient.h"
-#include "../libevent/eventserver.h"
-
 
 
 using namespace std;

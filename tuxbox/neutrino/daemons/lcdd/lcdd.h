@@ -26,13 +26,13 @@
 #ifndef __lcdd__
 #define __lcdd__
 
-#include "lcdpainter.h"
 #include <configfile.h>
-#include <liblcddisplay.h>
-#include <lcddclient.h>
-#include <lcddMsg.h>
-
 #include <pthread.h>
+
+#include <lcddisplay/lcddisplay.h>
+#include <lcddclient.h>
+
+#include "lcdpainter.h"
 
 
 class CLCDD

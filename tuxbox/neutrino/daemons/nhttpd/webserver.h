@@ -9,13 +9,12 @@
 #include <netinet/ip.h>
 #include <netdb.h>
 #include <config.h>
-
 #include <string>
+#include <pthread.h>
 
-#include "pthread.h"
-#include "config.h"
-#include "../../libconfigfile/configfile.h"
-#include "../neutrinoNG/neutrinoMessages.h"
+#include <configfile.h>
+#include <neutrinoMessages.h>
+
 
 using namespace std;
 
