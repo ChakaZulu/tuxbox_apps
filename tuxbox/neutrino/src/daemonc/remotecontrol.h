@@ -53,28 +53,31 @@ struct st_rmsg
 class CSubService
 {
 	public:
-		CSubService(const unsigned int &aonid_sid, const unsigned short &atsid, const string &asubservice_name)
+		CSubService(const t_service_id &aservice_id, const t_transport_stream_id &atransport_stream_id, const t_original_network_id &aoriginal_network_id, const string &asubservice_name)
 		{
-			onid_sid= aonid_sid;
-			tsid= atsid;
+			original_network_id = aoriginal_network_id;
+			service_id          = aservice_id;
+			transport_stream_id = atransport_stream_id;
 			startzeit=0;
 			dauer=0;
 			subservice_name= asubservice_name;
 		}
-		CSubService(const unsigned int &aonid_sid, const unsigned short &atsid, const time_t &astartzeit, const unsigned adauer)
+		CSubService(const t_service_id &aservice_id, const t_transport_stream_id &atransport_stream_id, const t_original_network_id &aoriginal_network_id, const time_t &astartzeit, const unsigned adauer)
 		{
-			onid_sid= aonid_sid;
-			tsid= atsid;
+			original_network_id = aoriginal_network_id;
+			service_id          = aservice_id;
+			transport_stream_id = atransport_stream_id;
 			startzeit=astartzeit;
 			dauer=adauer;
 			subservice_name= "";
 		}
 
-		unsigned int    onid_sid;
-		unsigned short  tsid;
-		time_t          startzeit;
-		unsigned        dauer;
-		string          subservice_name;
+		t_service_id          service_id;
+		t_transport_stream_id transport_stream_id;
+		t_original_network_id original_network_id;
+		time_t                startzeit;
+		unsigned              dauer;
+		string                subservice_name;
 };
 
 typedef std::vector<CSubService> CSubServiceListSorted;
@@ -91,8 +94,8 @@ class CRemoteControl
 
 	public:
 		string					current_channel_name;
-		unsigned int				current_onid_sid;
-		unsigned int				current_sub_onid_sid;
+		t_channel_id				current_channel_id;
+		t_channel_id				current_sub_channel_id;
 		unsigned long long			current_EPGid;
 		unsigned long long			next_EPGid;
 		CZapitClient::responseGetPIDs		current_PIDs;
@@ -113,7 +116,7 @@ class CRemoteControl
 		unsigned int				zapCount;
 
 		CRemoteControl();
-		void zapTo_onid_sid( unsigned int onid_sid, string channame, bool start_video = true );
+		void zapTo_ChannelID(const t_channel_id channel_id, string channame, bool start_video = true );
 		void startvideo();
 		void stopvideo();
 		void queryAPIDs();

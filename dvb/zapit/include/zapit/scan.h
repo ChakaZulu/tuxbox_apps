@@ -1,5 +1,5 @@
 /*
- *  $Id: scan.h,v 1.18 2002/09/18 20:00:05 thegoodguy Exp $
+ *  $Id: scan.h,v 1.19 2002/09/23 13:31:15 thegoodguy Exp $
  */
 
 #ifndef __scan_h__
@@ -16,51 +16,51 @@
 
 struct scanchannel
 {
-	std::string name;
-	uint16_t sid;
-	uint16_t tsid;
-	uint8_t service_type;
-	uint16_t pmt;
-	uint16_t onid;
+	std::string           name;
+	t_service_id          service_id;
+	t_transport_stream_id transport_stream_id;
+	t_original_network_id original_network_id;
+	uint8_t               service_type;
+	uint16_t              pmt;
 
-	scanchannel(std::string Name, uint16_t Sid, uint16_t Tsid, uint16_t Onid, uint8_t Service_type)
+	scanchannel(std::string Name, t_service_id Sid, t_transport_stream_id Tsid, t_original_network_id Onid, uint8_t Service_type)
 	{
 		name = Name;
-		sid = Sid;
-		tsid = Tsid;
-		onid = Onid;
+		service_id = Sid;
+		transport_stream_id = Tsid;
+		original_network_id = Onid;
 		service_type = Service_type;
 		pmt = 0;
 	}
-	scanchannel(std::string Name, uint16_t Sid, uint16_t Tsid, uint16_t Onid)
+	scanchannel(std::string Name, t_service_id Sid, t_transport_stream_id Tsid, t_original_network_id Onid)
 	{
 		name = Name;
-		sid = Sid;
-		tsid = Tsid;
-		onid = Onid;
+		service_id = Sid;
+		transport_stream_id = Tsid;
+		original_network_id = Onid;
 		service_type = 1;
 		pmt = 0;
 	}
 
-	scanchannel(uint16_t Sid, uint16_t Tsid, uint16_t Pmt)
+	scanchannel(t_service_id Sid, t_transport_stream_id Tsid, uint16_t Pmt)
 	{
-		sid = Sid;
-		tsid = Tsid;
+		service_id = Sid;
+		transport_stream_id = Tsid;
 		pmt = Pmt;
-		onid = 0;
+		original_network_id = 0;
 		service_type = 0;
 	}
 };
 
 struct transpondermap
 {
-	uint16_t transport_stream_id;
-	uint16_t original_network_id;
+	t_transport_stream_id transport_stream_id;
+	t_original_network_id original_network_id;
 	FrontendParameters feparams;
 	uint8_t polarization;
 	uint8_t DiSEqC;
 
-	transpondermap(uint16_t p_transport_stream_id, uint16_t p_original_network_id, FrontendParameters p_feparams)
+	transpondermap(t_transport_stream_id p_transport_stream_id, t_original_network_id p_original_network_id, FrontendParameters p_feparams)
 	{
 		transport_stream_id = p_transport_stream_id;
 		original_network_id = p_original_network_id;
@@ -69,7 +69,7 @@ struct transpondermap
 		DiSEqC = 0;
 	}
 
-	transpondermap(uint16_t p_transport_stream_id, uint16_t p_original_network_id, FrontendParameters p_feparams, uint8_t p_polarization, uint8_t p_DiSEqC)
+	transpondermap(t_transport_stream_id p_transport_stream_id, t_original_network_id p_original_network_id, FrontendParameters p_feparams, uint8_t p_polarization, uint8_t p_DiSEqC)
 	{
 		transport_stream_id = p_transport_stream_id;
 		original_network_id = p_original_network_id;
@@ -81,17 +81,17 @@ struct transpondermap
 
 struct bouquet_mulmap
 {
-	std::string provname;
-	std::string servname;
-	uint16_t sid;
-	uint16_t onid;
+	std::string           provname;
+	std::string           servname;
+	t_service_id          service_id;
+	t_original_network_id original_network_id;
 
-	bouquet_mulmap(std::string Provname, std::string Servname, uint16_t Sid, uint16_t Onid)
+	bouquet_mulmap(std::string Provname, std::string Servname, t_service_id Sid, t_original_network_id Onid)
 	{
 		provname = Provname;
 		servname = Servname;
-		sid = Sid;
-		onid = Onid;
+		service_id = Sid;
+		original_network_id = Onid;
 	}
 };
 

@@ -3016,7 +3016,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 		{
 			if(streamstatus == 1)
 			{
-				eventinfo.onidSid = g_RemoteControl->current_onid_sid;
+				eventinfo.onidSid = g_RemoteControl->current_channel_id;
 				eventinfo.epgID = g_RemoteControl->current_EPGid;
 
 				CVCRControl::CServerDeviceInfo serverinfo;
@@ -3048,7 +3048,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.329 2002/09/20 13:17:33 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.330 2002/09/23 13:31:14 thegoodguy Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

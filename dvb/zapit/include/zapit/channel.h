@@ -1,5 +1,5 @@
 /*
- * $Id: channel.h,v 1.12 2002/09/20 16:55:22 thegoodguy Exp $
+ * $Id: channel.h,v 1.13 2002/09/23 13:31:15 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *	& Steffen Hehn <mcclean@berlios.de>
@@ -60,9 +60,9 @@ class CZapitChannel
 		unsigned char currentAudioChannel;
 
 		/* read only properties, set by constructor */
-		uint16_t service_id;
-		unsigned short transportStreamId;
-		uint16_t original_network_id;
+		t_service_id          service_id;
+		t_transport_stream_id transport_stream_id;
+		t_original_network_id original_network_id;
 		unsigned char serviceType;
 		unsigned char DiSEqC;
 
@@ -71,17 +71,17 @@ class CZapitChannel
 
 	public:
 		/* constructor, desctructor */
-		CZapitChannel (std::string p_name, uint16_t p_sid, unsigned short p_tsid, uint16_t p_onid, unsigned char p_service_type, unsigned char p_DiSEqC);
+		CZapitChannel (std::string p_name, t_service_id p_sid, t_transport_stream_id p_tsid, t_original_network_id p_onid, unsigned char p_service_type, unsigned char p_DiSEqC);
 		~CZapitChannel ();
 
 		/* get methods - read only variables */
-		uint16_t getServiceId()			{ return service_id; }
-		unsigned short getTransportStreamId()	{ return transportStreamId; }
-		uint16_t getOriginalNetworkId()		{ return original_network_id; }
-		unsigned char getServiceType()		{ return serviceType; }
-		unsigned char getDiSEqC()		{ return DiSEqC; }
-		t_channel_id getChannelID()		{ return CREATE_CHANNEL_ID; }
-		unsigned int getTsidOnid()		{ return (transportStreamId << 16) | original_network_id; }
+		t_service_id          getServiceId()         { return service_id; }
+		t_transport_stream_id getTransportStreamId() { return transport_stream_id; }
+		t_original_network_id getOriginalNetworkId() { return original_network_id; }
+		unsigned char         getServiceType()       { return serviceType; }
+		unsigned char         getDiSEqC()            { return DiSEqC; }
+		t_channel_id          getChannelID()         { return CREATE_CHANNEL_ID; }
+		uint32_t              getTsidOnid()          { return (transport_stream_id << 16) | original_network_id; }
 
 		/* get methods - read and write variables */
 		std::string getName()			{ return name; }

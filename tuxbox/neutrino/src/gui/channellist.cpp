@@ -509,7 +509,7 @@ void CChannelList::zapTo(int pos)
 	if ( pos!=(int)tuned )
 	{
 		tuned = pos;
-		g_RemoteControl->zapTo_onid_sid(chan->channel_id, chan->name, !chan->bAlwaysLocked );
+		g_RemoteControl->zapTo_ChannelID(chan->channel_id, chan->name, !chan->bAlwaysLocked );
 	}
 	g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
 

@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.h,v 1.47 2002/09/20 16:55:22 thegoodguy Exp $
+ * $Id: getservices.h,v 1.48 2002/09/23 13:31:15 thegoodguy Exp $
  */
 
 #ifndef __getservices_h__
@@ -15,6 +15,7 @@
 
 #include <eventserver.h>
 
+#include "types.h"
 #include "xmlinterface.h"
 #include <zapci/ci.h>
 #include <zapsi/descriptors.h>
@@ -26,20 +27,20 @@
 #define INVALID 0x1FFF
 
 void ParseTransponders (XMLTreeNode * xmltransponder, unsigned char DiSEqC);
-void ParseChannels (XMLTreeNode * node, unsigned short transport_stream_id, unsigned short original_network_id, unsigned char DiSEqC);
+void ParseChannels (XMLTreeNode * node, t_transport_stream_id transport_stream_id, t_original_network_id original_network_id, unsigned char DiSEqC);
 void FindTransponder (XMLTreeNode * root);
 void LoadSortList ();
 int LoadServices ();
 
 struct transponder
 {
-	unsigned short transport_stream_id;
+	t_transport_stream_id transport_stream_id;
 	FrontendParameters feparams;
 	unsigned char polarization;
 	unsigned char DiSEqC;
-	unsigned short original_network_id;
+	t_original_network_id original_network_id;
 
-	transponder (unsigned short p_transport_stream_id, FrontendParameters p_feparams)
+	transponder (t_transport_stream_id p_transport_stream_id, FrontendParameters p_feparams)
 	{
 		transport_stream_id = p_transport_stream_id;
 		feparams = p_feparams;
@@ -48,7 +49,7 @@ struct transponder
 		original_network_id = 0;
 	}
 
-	transponder (unsigned short p_transport_stream_id, FrontendParameters p_feparams, unsigned short p_polarization, unsigned char p_DiSEqC, unsigned short p_original_network_id)
+	transponder (t_transport_stream_id p_transport_stream_id, FrontendParameters p_feparams, unsigned short p_polarization, unsigned char p_DiSEqC, t_original_network_id p_original_network_id)
 	{
 		transport_stream_id = p_transport_stream_id;
 		feparams = p_feparams;

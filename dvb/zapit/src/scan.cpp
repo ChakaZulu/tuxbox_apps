@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.69 2002/09/21 20:20:05 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.70 2002/09/23 13:31:15 thegoodguy Exp $
  */
 
 #include <fcntl.h>
@@ -240,7 +240,7 @@ void write_bouquets()
 // make zapit reload its bouquets
 }
 
-void write_transponder(FILE *fd, uint16_t transport_stream_id, uint16_t original_network_id, uint8_t diseqc)
+void write_transponder(FILE *fd, t_transport_stream_id transport_stream_id, t_original_network_id original_network_id, uint8_t diseqc)
 {
 	stiterator tI = scantransponders.find((transport_stream_id << 16) | original_network_id);
 
@@ -274,21 +274,21 @@ void write_transponder(FILE *fd, uint16_t transport_stream_id, uint16_t original
 
 	for (sciterator cI = scanchannels.begin(); cI != scanchannels.end(); cI++)
 	{
-		if ((cI->second.tsid == transport_stream_id) && (cI->second.onid == original_network_id))
+		if ((cI->second.transport_stream_id == transport_stream_id) && (cI->second.original_network_id == original_network_id))
 		{
 			if (cI->second.name.length() == 0)
 			{
 				fprintf(fd,
 					"\t\t\t<channel service_id=\"%04x\" name=\"%04x\" service_type=\"%02x\"/>\n",
-					cI->second.sid,
-					cI->second.sid,
+					cI->second.service_id,
+					cI->second.service_id,
 					cI->second.service_type);
 			}
 			else
 			{
 				fprintf(fd,
 					"\t\t\t<channel service_id=\"%04x\" name=\"%s\" service_type=\"%02x\"/>\n",
-					cI->second.sid,
+					cI->second.service_id,
 					convertForXML(cI->second.name).c_str(),
 					cI->second.service_type);
 			}

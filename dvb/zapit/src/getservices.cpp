@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.50 2002/09/20 16:55:22 thegoodguy Exp $
+ * $Id: getservices.cpp,v 1.51 2002/09/23 13:31:15 thegoodguy Exp $
  */
 
 #include <stdio.h>
@@ -19,8 +19,8 @@ extern tallchans allchans;
 
 void ParseTransponders (XMLTreeNode *node, uint8_t DiSEqC)
 {
-	uint16_t transport_stream_id;
-	uint16_t original_network_id;
+	t_transport_stream_id transport_stream_id;
+	t_original_network_id original_network_id;
 	FrontendParameters feparams;
 	uint8_t polarization = 0;
 	uint8_t tmp;
@@ -82,11 +82,11 @@ void ParseTransponders (XMLTreeNode *node, uint8_t DiSEqC)
 	return;
 }
 
-void ParseChannels (XMLTreeNode *node, uint16_t transport_stream_id, uint16_t original_network_id, uint8_t DiSEqC)
+void ParseChannels (XMLTreeNode *node, t_transport_stream_id transport_stream_id, t_original_network_id original_network_id, uint8_t DiSEqC)
 {
-	uint16_t service_id;
-	std::string name;
-	uint8_t service_type;
+	t_service_id service_id;
+	std::string  name;
+	uint8_t      service_type;
 
 	while ((node != NULL) && (!strcmp(node->GetType(), "channel")))
 	{

@@ -248,7 +248,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, const t_channel_id new
 			showIcon_VTXT();
         }
 
-        if ( ( g_RemoteControl->current_onid_sid == channel_id) &&
+        if ( ( g_RemoteControl->current_channel_id == channel_id) &&
              !( ( ( info_CurrentNext.flags & sectionsd::epgflags::has_next ) &&
 				    ( info_CurrentNext.flags & ( sectionsd::epgflags::has_current | sectionsd::epgflags::has_no_current ) ) ) ||
 				    ( info_CurrentNext.flags & sectionsd::epgflags::not_broadcast ) ) )
@@ -504,7 +504,7 @@ void CInfoViewer::showFailure()
 	{
 		//böser workarround für startbug
 		printf("initial zap failed - rezap\n");
-		g_RemoteControl->zapTo_onid_sid( g_RemoteControl->current_onid_sid, "", true );
+		g_RemoteControl->zapTo_ChannelID(g_RemoteControl->current_channel_id, "", true );
 	}
 	else
 	{
@@ -664,7 +664,7 @@ void CInfoViewer::show_Data( bool calledFromEvent)
 	if ( is_visible )
 	{
 
-       	if ( ( g_RemoteControl->current_onid_sid == channel_id) &&
+       	if ( ( g_RemoteControl->current_channel_id == channel_id) &&
        		 ( g_RemoteControl->subChannels.size()> 0 ) && ( !g_RemoteControl->are_subchannels ) )
        	{
 			is_nvod = true;
