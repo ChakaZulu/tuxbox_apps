@@ -74,11 +74,17 @@ eDVB::eDVB()
 	instance=this;
 
 #ifndef DISABLE_CI
-	DVBCI=new eDVBCI();
-	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::start));
-
-	DVBCI2=new eDVBCI();
-	DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::start));
+	int numCI = eSystemInfo::getInstance()->hasCI();
+	if ( numCI > 0 )
+	{
+		DVBCI=new eDVBCI();
+		DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::start));
+	}
+	if ( numCI > 1 )
+	{
+		DVBCI2=new eDVBCI();
+		DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::start));
+	}
 #endif
 	if (eFrontend::open(eSystemInfo::getInstance()->getFEType())<0)
 		eFatal("couldn't open frontend");
@@ -427,7 +433,10 @@ void eDVB::setMode(int mode)
 	case controllerService:
 		controller = new eDVBServiceController(*this);
 #ifndef DISABLE_CI
-		DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::getcaids));
+		if ( DVBCI )
+			DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::getcaids));
+		if ( DVBCI2 )
+			DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::getcaids));
 #endif
 	break;
 	}

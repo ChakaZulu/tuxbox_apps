@@ -510,13 +510,15 @@ void eDVBServiceController::scanPMT()
 	usedCASystems.clear();
 
 	Decoder::parms.descriptor_length=0;
-	
+
 #ifndef DISABLE_CI
 	DVBCI=eDVB::getInstance()->DVBCI;
 	DVBCI2=eDVB::getInstance()->DVBCI2;
 
-	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTflush, pmt->program_number));
-	DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTflush, pmt->program_number));
+	if ( DVBCI )
+		DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTflush, pmt->program_number));
+	if ( DVBCI2 )
+		DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTflush, pmt->program_number));
 #endif
 
 	isca+=checkCA(calist, pmt->program_info);
@@ -549,8 +551,10 @@ void eDVBServiceController::scanPMT()
 		PMTEntry *pe=*i;
 
 #ifndef DISABLE_CI
-		DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTaddPID, pe->elementary_PID,pe->stream_type));
-		DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTaddPID, pe->elementary_PID,pe->stream_type));
+		if ( DVBCI )
+			DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTaddPID, pe->elementary_PID,pe->stream_type));
+		if ( DVBCI2 )
+			DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTaddPID, pe->elementary_PID,pe->stream_type));
 #endif
 
 		switch (pe->stream_type)
@@ -626,8 +630,10 @@ void eDVBServiceController::scanPMT()
 	}
 
 #ifndef DISABLE_CI
-	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::go));
-	DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::go));
+	if ( DVBCI )
+		DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::go));
+	if ( DVBCI2 )
+		DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::go));
 #endif
 
 	int needAC3Workaround=0;
@@ -828,13 +834,19 @@ int eDVBServiceController::checkCA(ePtrList<CA> &list, const ePtrList<Descriptor
 			Decoder::addCADescriptor((__u8*)(ca->data));
 
 #ifndef DISABLE_CI 
-			unsigned  char *buf=new unsigned char[ca->data[1]+2];
-			memcpy(buf, ca->data, ca->data[1]+2);
-			DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTaddDescriptor, buf));
+			if ( DVBCI )
+			{
+				unsigned  char *buf=new unsigned char[ca->data[1]+2];
+				memcpy(buf, ca->data, ca->data[1]+2);
+				DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTaddDescriptor, buf));
+			}
 
-			unsigned  char *buf2=new unsigned char[ca->data[1]+2];
-			memcpy(buf2, ca->data, ca->data[1]+2);
-			DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTaddDescriptor, buf2));
+			if ( DVBCI2 )
+			{
+				unsigned  char *buf2=new unsigned char[ca->data[1]+2];
+				memcpy(buf2, ca->data, ca->data[1]+2);
+				DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTaddDescriptor, buf2));
+			}
 #endif
 
 			int avail=0;

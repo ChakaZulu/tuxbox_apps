@@ -1534,12 +1534,12 @@ send:
 			case eSystemInfo::feCable:
 				eDebug("Cable Frontend detected");
 #if HAVE_DVB_API_VERSION < 3
-				front.Frequency = Frequency * 1000;
+				front.Frequency = Frequency;
 				front.u.qam.QAM=QAM;
 				front.u.qam.FEC_inner=FEC_inner;
 				front.u.qam.SymbolRate=SymbolRate;
 #else
-				front.frequency = Frequency;
+				front.frequency = Frequency * 1000;
 				front.u.qam.modulation=QAM;
 				front.u.qam.fec_inner=FEC_inner;
 				front.u.qam.symbol_rate=SymbolRate;

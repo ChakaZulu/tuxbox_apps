@@ -229,6 +229,7 @@ void eDVBCI::PMTaddDescriptor(unsigned char *data)
 
 void eDVBCI::newService()
 {
+	startTimer(true);
 	//eDebug("got new %d PMT entrys",tempPMTentrys);
 	ci_progress(appName);	
 	unsigned char capmt[2048];
@@ -1071,8 +1072,7 @@ void eDVBCI::stopTimer()
 void eDVBCI::deadReset()
 {
 	eDebug("CI timeoutet... do reset");
-	if (::ioctl(fd,CI_RESET)<0 )
-		eDebug("CI_RESET failed (%m)");
+	gotMessage(eDVBCIMessage(eDVBCIMessage::reset));
 }
 
 void eDVBCI::dataAvailable(int what)
