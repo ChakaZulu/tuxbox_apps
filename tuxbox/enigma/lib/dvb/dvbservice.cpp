@@ -579,9 +579,14 @@ void eDVBServiceController::TDTready(int error)
 				time_t CorrectedTpTime = TPTime+it->second;
 				int ddiff = nowTime-CorrectedTpTime;
 				eDebug("[TIME] diff after add correction is %d", ddiff);
-				if ( abs(ddiff) < 120 )
+				if ( abs(ddiff) < 30*60 )
 				{
-					eDebug("[TIME] diff < 120 sek.. update time");
+					eDebug("[TIME] use stored correction", diff);
+					dvb.time_difference = enigma_diff + ddiff;
+				}
+				else  // big change in calced correction.. summer to winter timer..
+				{
+					eDebug("[TIME] diff > 30min... update time");
 					eDebug("[TIME] update stored correction to %d", diff);
 					tOffsMap[*transponder] = diff;
 					dvb.time_difference = enigma_diff + diff;
