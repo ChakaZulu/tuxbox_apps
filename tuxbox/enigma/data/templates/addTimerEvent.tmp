@@ -73,7 +73,7 @@
 				<tr>
 					<td>Description:</td>
 					<td>
-						<input name="descr" type="text" size="100" maxlength="100">
+						<input name="descr" type="text" size="100" maxlength="100" style="color: #000000;">
 					</td>
 				</tr>
 				<tr>

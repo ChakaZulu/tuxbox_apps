@@ -12,7 +12,7 @@ function clearTimerList()
 
 function editTimerEvent(xy)
 {
-	NewWindow('/editTimerEvent?'+xy, 'editTimer', '780', '250', 'no');
+	NewWindow('/editTimerEvent?'+xy, 'editTimer', '780', '260', 'no');
 }
 
 function deleteTimerEvent(xy)
