@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.87 2003/06/16 20:54:10 digi_casi Exp $
+ * $Id: bouquets.cpp,v 1.88 2003/06/22 11:22:47 digi_casi Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -236,23 +236,43 @@ void CBouquetManager::writeBouquetFooter(FILE * bouq_fd)
 
 void CBouquetManager::writeBouquetChannels(FILE * bouq_fd, uint i)
 {
-	for ( unsigned int j=0; j<Bouquets[i]->tvChannels.size(); j++)
+	if (!strcmp(getFrontendName(), "sat"))
 	{
-		fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" tsid=\"%04x\" onid=\"%04x\" sat_position=\"%hd\"/>\n",
-				Bouquets[i]->tvChannels[j]->getServiceId(),
-				convert_UTF8_To_UTF8_XML(Bouquets[i]->tvChannels[j]->getName()).c_str(),
-				Bouquets[i]->tvChannels[j]->getTransportStreamId(), 
-				Bouquets[i]->tvChannels[j]->getOriginalNetworkId(),
-				Bouquets[i]->tvChannels[j]->getSatellitePosition());
+		for ( unsigned int j=0; j<Bouquets[i]->tvChannels.size(); j++)
+		{
+			fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" tsid=\"%04x\" onid=\"%04x\" sat_position=\"%hd\"/>\n",
+					Bouquets[i]->tvChannels[j]->getServiceId(),
+					convert_UTF8_To_UTF8_XML(Bouquets[i]->tvChannels[j]->getName()).c_str(),
+					Bouquets[i]->tvChannels[j]->getTransportStreamId(), 
+					Bouquets[i]->tvChannels[j]->getOriginalNetworkId(),
+					Bouquets[i]->tvChannels[j]->getSatellitePosition());
+		}
+		for ( unsigned int j=0; j<Bouquets[i]->radioChannels.size(); j++)
+		{
+			fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" tsid=\"%04x\" onid=\"%04x\" sat_position=\"%hd\"/>\n",
+					Bouquets[i]->radioChannels[j]->getServiceId(),
+					convert_UTF8_To_UTF8_XML(Bouquets[i]->radioChannels[j]->getName()).c_str(),
+					Bouquets[i]->radioChannels[j]->getTransportStreamId(), 
+					Bouquets[i]->radioChannels[j]->getOriginalNetworkId(), 
+					Bouquets[i]->radioChannels[j]->getSatellitePosition());
+		}
 	}
-	for ( unsigned int j=0; j<Bouquets[i]->radioChannels.size(); j++)
+	else
 	{
-		fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" tsid=\"%04x\" onid=\"%04x\" sat_position=\"%hd\"/>\n",
-				Bouquets[i]->radioChannels[j]->getServiceId(),
-				convert_UTF8_To_UTF8_XML(Bouquets[i]->radioChannels[j]->getName()).c_str(),
-				Bouquets[i]->radioChannels[j]->getTransportStreamId(), 
-				Bouquets[i]->radioChannels[j]->getOriginalNetworkId(), 
-				Bouquets[i]->radioChannels[j]->getSatellitePosition());
+		for ( unsigned int j=0; j<Bouquets[i]->tvChannels.size(); j++)
+		{
+			fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" onid=\"%04x\"/>\n",
+					Bouquets[i]->tvChannels[j]->getServiceId(),
+					convert_UTF8_To_UTF8_XML(Bouquets[i]->tvChannels[j]->getName()).c_str(),
+					Bouquets[i]->tvChannels[j]->getOriginalNetworkId());
+		}
+		for ( unsigned int j=0; j<Bouquets[i]->radioChannels.size(); j++)
+		{
+			fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" onid=\"%04x\"/>\n",
+					Bouquets[i]->radioChannels[j]->getServiceId(),
+					convert_UTF8_To_UTF8_XML(Bouquets[i]->radioChannels[j]->getName()).c_str(),
+					Bouquets[i]->radioChannels[j]->getOriginalNetworkId());
+		}
 	}
 }
 
