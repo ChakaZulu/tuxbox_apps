@@ -53,7 +53,7 @@
 
 using namespace std;
 
-#define WEBXFACEVERSION "1.4.3"
+#define WEBXFACEVERSION "1.4.5"
 
 int pdaScreen = 0;
 int screenWidth = 1024;
@@ -241,6 +241,7 @@ static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConn
 		"<h1>Enigma status</h1>\n"
 		"<table>\n"
 		"<tr><td>Current time:</td><td>" + eString(ctime(&atime)) + "</td></tr>\n"
+		"<tr><td>WebIf-Version:</td><td>" + eString(WEBXFACEVERSION) + "</td></tr>\n"
 		"<tr><td>Standby:</td><td>";
 		if (eZapMain::getInstance()->isSleeping())
 			result += "ON";
@@ -255,7 +256,7 @@ static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConn
 #endif
 			result += "OFF";
 	result += "</td></tr>\n";
-	result += "<tr><td>Mode:</td><td>" + eString().sprintf("%d", eZapMain::getInstance()->getMode()) + "</td></tr>";
+	result += "<tr><td>Mode:</td><td>" + eString().sprintf("%d", eZapMain::getInstance()->getMode()) + "</td></tr>\n";
 	
 	eString sRef;
 	if (eServiceInterface::getInstance()->service)
@@ -312,17 +313,17 @@ static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConn
 				vidform += "(20:9)"; break;
 		}
 	}
-	result += "<tr><td>name:</td><td>" + name + "</td></tr>";
-	result += "<tr><td>provider:</td><td>" + provider + "</td></tr>";
-	result += "<tr><td>vpid:</td><td>" + vpid + "</td></tr>";
-	result += "<tr><td>apid:</td><td>" + apid + "</td></tr>";
-	result += "<tr><td>pcrpid:</td><td>" + pcrpid + "</td></tr>";
-	result += "<tr><td>tpid:</td><td>" + tpid + "</td></tr>";
-	result += "<tr><td>tsid:</td><td>" + tsid + "</td></tr>";
-	result += "<tr><td>onid:</td><td>" + onid + "</td></tr>";
-	result += "<tr><td>sid:</td><td>" + sid + "</td></tr>";
-	result += "<tr><td>pmt:</td><td>" + pmt + "</td></tr>";
-	result += "<tr><td>vidformat:<td>" + vidform + "</td></tr>";
+	result += "<tr><td>name:</td><td>" + name + "</td></tr>\n";
+	result += "<tr><td>provider:</td><td>" + provider + "</td></tr>\n";
+	result += "<tr><td>vpid:</td><td>" + vpid + "</td></tr>\n";
+	result += "<tr><td>apid:</td><td>" + apid + "</td></tr>\n";
+	result += "<tr><td>pcrpid:</td><td>" + pcrpid + "</td></tr>\n";
+	result += "<tr><td>tpid:</td><td>" + tpid + "</td></tr>\n";
+	result += "<tr><td>tsid:</td><td>" + tsid + "</td></tr>\n";
+	result += "<tr><td>onid:</td><td>" + onid + "</td></tr>\n";
+	result += "<tr><td>sid:</td><td>" + sid + "</td></tr>\n";
+	result += "<tr><td>pmt:</td><td>" + pmt + "</td></tr>\n";
+	result += "<tr><td>vidformat:<td>" + vidform + "</td></tr>\n";
 	
 	result += "</table>\n"
 		"</body>\n"
