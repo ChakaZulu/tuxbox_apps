@@ -499,7 +499,7 @@ void CFlashUpdate::paint()
 	if(fgets(buf,sizeof(buf),fd)!=NULL)
 	{
 		//printf("vstr: %s\n", buf);
-		buf[19]= 0;
+		buf[28]= 0;
 		sscanf(buf, "version: %d.%d.%s\n", &new_major, &new_provider, (char*) &new_minor);
 	}
 	else
