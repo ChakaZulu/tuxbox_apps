@@ -365,6 +365,7 @@ flashupdate.getupdatefileerror impossibbile caricare Update
 flashupdate.cantopenfile impossibbile aprire il File
 flashupdate.fileis0bytes il File e 0 Byte
 flashupdate.eraseingflash Cancella Flash
+flashupdate.erasefailed unset
 flashupdate.programmingflash programmo Flash
 flashupdate.cantopenmtd impossibbile aprire MTD-Device
 flashupdate.ready Finito
@@ -751,3 +752,4 @@ pictureviewer.show Vedi
 pictureviewer.slideshow Vedi tipo Diashow
 pictureviewer.slide_time Diashow-Durata
 pictureviewer.scaling Graduazione
+pictureviewer.defdir unset

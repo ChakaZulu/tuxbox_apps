@@ -365,6 +365,7 @@ flashupdate.getupdatefileerror cha s'Update nid ladä
 flashupdate.cantopenfile cha Datei nid öffnä
 flashupdate.fileis0bytes d'Dateigrössi isch 0 Byte
 flashupdate.eraseingflash lösche Flash
+flashupdate.erasefailed unset
 flashupdate.programmingflash programmierä Flash
 flashupdate.cantopenmtd cha s'MTD-Device nid öffnä
 flashupdate.ready fertig
@@ -696,7 +697,7 @@ mp3player.title_artist Titu, Interpret
 mp3player.display_order Azeig
 mp3player.follow Selektiere akt. Track
 mp3player.screensaver_timeout Böudschirmschoner (min, 0=us)
-mp3player.defdir unset
+mp3player.defdir Schtart-Verz.
 
 movieplayer.name Movieplayer
 movieplayer.head Movieplayer
@@ -710,7 +711,7 @@ movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
 movieplayer.pleasewait Bitte warte.\nd'Verbindig zum Streamingsörver wird härgschtöut.
 movieplayer.nostreamingserver Verbindig zum\n Streamingsörver fäugschlage.
-movieplayer.defdir unset
+movieplayer.defdir Schtart-Verz.
 
 filebrowser.head Filebrowser
 filebrowser.filter.active Föuter a
@@ -751,3 +752,4 @@ pictureviewer.show Azeige
 pictureviewer.slideshow Diaschou
 pictureviewer.slide_time Diaschou-Azeigduur
 pictureviewer.scaling Skalierig
+pictureviewer.defdir Schtart-Verz.

@@ -365,6 +365,7 @@ flashupdate.getupdatefileerror ka Öpdate nidd lade
 flashupdate.cantopenfile ka Datei nidd uffmache
 flashupdate.fileis0bytes d'Dateigrößi isch 0 Byte
 flashupdate.eraseingflash lösch' grad s'Fläsh
+flashupdate.erasefailed unset
 flashupdate.programmingflash programmier grad s'Fläsh
 flashupdate.cantopenmtd ka's MTD-Device nidd uffmache
 flashupdate.ready ferdig
@@ -696,7 +697,7 @@ mp3player.title_artist Titel, Interpret
 mp3player.display_order Anzeig'
 mp3player.follow Selektiere akt. Track
 mp3player.screensaver_timeout Bildschirmschoner (min, 0=aus)
-mp3player.defdir unset
+mp3player.defdir Start-Verz.
 
 movieplayer.name Movieplayer
 movieplayer.head Movieplayer
@@ -710,7 +711,7 @@ movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
 movieplayer.pleasewait Bitte warde.\nD'Verbindig zuem Streamingserver wird herg'stellt.
 movieplayer.nostreamingserver Es het kei Verbindig\nzuem Streamingserver herg'stellt werde chönne.
-movieplayer.defdir unset
+movieplayer.defdir Start-Verz.
 
 filebrowser.head Filebrowser
 filebrowser.filter.active Filter aah
@@ -751,3 +752,4 @@ pictureviewer.show A'zeige
 pictureviewer.slideshow Diaschau
 pictureviewer.slide_time Diaschau-A'zeigeduur
 pictureviewer.scaling Skalierig
+pictureviewer.defdir Start-Verz.

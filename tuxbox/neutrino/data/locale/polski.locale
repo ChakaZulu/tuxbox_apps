@@ -365,6 +365,7 @@ flashupdate.getupdatefileerror nie moge pobrac aktualizacji
 flashupdate.cantopenfile nie moge otworzyc pliku
 flashupdate.fileis0bytes rozmiar pliku 0 Bajtow
 flashupdate.eraseingflash kasuje flash
+flashupdate.erasefailed unset
 flashupdate.programmingflash programuje flash
 flashupdate.cantopenmtd nie moge otworzyc urzadzenia Mtd
 flashupdate.ready gotowy
@@ -696,7 +697,7 @@ mp3player.title_artist Tytul, Interpretacja
 mp3player.display_order Kolejnosc
 mp3player.follow Auto-wybór biezacy
 mp3player.screensaver_timeout wygaszacz za:(min, 0=off)
-mp3player.defdir unset
+mp3player.defdir folder startowy
 
 movieplayer.name Odtwarzacz filmów
 movieplayer.head Odtwarzacz filmów 
@@ -710,7 +711,7 @@ movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
 movieplayer.pleasewait Poczekaj.\nLaczenie do streaming serwera...
 movieplayer.nostreamingserver Sreaming serwer nieosiagalny.
-movieplayer.defdir unset
+movieplayer.defdir folder startowy
 
 filebrowser.head Przegladarka
 filebrowser.filter.active Filtr wlaczony
@@ -751,3 +752,4 @@ pictureviewer.show pokaz
 pictureviewer.slideshow przewijaj
 pictureviewer.slide_time czas przewijania
 pictureviewer.scaling skalowanie
+pictureviewer.defdir folder startowy

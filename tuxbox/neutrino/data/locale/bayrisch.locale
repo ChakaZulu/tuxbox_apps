@@ -365,6 +365,7 @@ flashupdate.getupdatefileerror kon des Update ned lon
 flashupdate.cantopenfile kon de Datei ned aufmacha
 flashupdate.fileis0bytes de Datei hod 0 Byte
 flashupdate.eraseingflash lösch des Flash
+flashupdate.erasefailed unset
 flashupdate.programmingflash programmier des Flash
 flashupdate.cantopenmtd kon des MTD-Device ned aufmacha
 flashupdate.ready hobs
@@ -696,7 +697,7 @@ mp3player.title_artist Interpret
 mp3player.display_order Ozoagn
 mp3player.follow aktuelle Liad
 mp3player.screensaver_timeout Buidschirmschona (minutn, 0=aus)
-mp3player.defdir unset
+mp3player.defdir Start-Verz.
 
 movieplayer.name Fuimspuia
 movieplayer.head Fuimspuia
@@ -710,7 +711,7 @@ movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
 movieplayer.pleasewait Oan Moment, de Verbindung\nzum Streamingserva werd hergsteaid 
 movieplayer.nostreamingserver Koa Vabindung\nzum Streamingserva m�ch.
-movieplayer.defdir unset
+movieplayer.defdir Start-Verz.
 
 filebrowser.head Datiesucha
 filebrowser.filter.active Fuita o
@@ -751,3 +752,4 @@ pictureviewer.show Ozoign
 pictureviewer.slideshow Diaschaugn
 pictureviewer.slide_time Diaschaugn-Ozoagdaua
 pictureviewer.scaling Skalierung
+pictureviewer.defdir Start-Verz.
