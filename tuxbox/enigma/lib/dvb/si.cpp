@@ -18,12 +18,11 @@ extern "C"
 
 static int getEncodingTable( const char * language_code )
 {
-	int table=5;
 	if (!memcmp(language_code, "gre", 3))
-		table=3;
+		return 3;
 	else 
 		if (!memcmp(language_code, "pol", 3) // Polish
-		|| !memcmp(language_code, "cze", 3)  // Czech
+/*		|| !memcmp(language_code, "cze", 3)  // Czech
 		|| !memcmp(language_code, "ces", 3)
 		|| !memcmp(language_code, "slv", 3)  // Slovenian
 		|| !memcmp(language_code, "slo", 3)  // Slovak
@@ -32,18 +31,18 @@ static int getEncodingTable( const char * language_code )
 		|| !memcmp(language_code, "hrv", 3)
 		|| !memcmp(language_code, "rum", 3)  // Romanian
 		|| !memcmp(language_code, "ron", 3)
-		|| !memcmp(language_code, "wen", 3)) // Sorbian language
-			table=6;
+		|| !memcmp(language_code, "wen", 3)*/) // Sorbian language
+			return 6;
 	else 
 		if (!memcmp(language_code,"rus", 3)  // Russian
-		|| !memcmp(language_code, "bul", 3)  // Bulgarian
+/*		|| !memcmp(language_code, "bul", 3)  // Bulgarian
 		|| !memcmp(language_code, "scc", 3)  // Serbian
 		|| !memcmp(language_code, "srp", 3)
 		|| !memcmp(language_code, "mac", 3)  // Macedonian 
 		|| !memcmp(language_code, "mkd", 3)
-		|| !memcmp(language_code, "ukr", 3)) // Ukrainian
-			table=1;
-	return table;
+		|| !memcmp(language_code, "ukr", 3)*/) // Ukrainian
+			return 1;
+	return 0;
 }
 
 static eString qHex(int v)
@@ -729,12 +728,6 @@ ShortEventDescriptor::ShortEventDescriptor(descr_gen_t *descr)
 	int ptr=5;
 	int len=data[ptr++];
 
-	if (len && (data[ptr]<0x20))			// ignore charset
-	{
-		ptr++;
-		len--;
-	}
-
 	int table=getEncodingTable(language_code);
 
 	event_name=convertDVBUTF8((unsigned char*)data+ptr, len, table);
@@ -743,12 +736,6 @@ ShortEventDescriptor::ShortEventDescriptor(descr_gen_t *descr)
 	ptr+=len;
 
 	len=data[ptr++];
-
-	if (len && (data[ptr]<0x20))			// ignore charset
-	{
-		ptr++;
-		len--;
-	}
 
 	text=convertDVBUTF8((unsigned char*) data+ptr, len, table);
 }
@@ -878,20 +865,10 @@ ExtendedEventDescriptor::ExtendedEventDescriptor(descr_gen_t *descr)
 		eString item;
 		
 		item_description_len=data[ptr++];
-		if (item_description_len && (data[ptr]<0x20))           // ignore charset
-		{
-			ptr++;
-			item_description_len--;
-		}
 		item_description=convertDVBUTF8((unsigned char*) data+ptr, item_description_len, table);
 		ptr+=item_description_len;
-		
+
 		item_len=data[ptr++];
-		if (item_len && (data[ptr]<0x20))                       // ignore charset
-		{
-			ptr++;
-			item_len--;
-		}
 		item=convertDVBUTF8((unsigned char*) data+ptr, item_len, table);
 		ptr+=item_len;
 		
@@ -899,11 +876,6 @@ ExtendedEventDescriptor::ExtendedEventDescriptor(descr_gen_t *descr)
 	}
 	
 	int text_length=data[ptr++];
-	if (text_length && (data[ptr]<0x20))                    // ignore charset
-	{
-		ptr++;
-		text_length--;
-	}
 	text=convertDVBUTF8((unsigned char*) data+ptr, text_length, table);
 	ptr+=text_length;
 }
