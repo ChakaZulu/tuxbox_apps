@@ -34,50 +34,27 @@
 #define __neutrino_nfs_gui__
 
 #include <system/settings.h>
+#include <system/fsmounter.h>
 #include <gui/widget/menue.h>
 
 
 class CNFSMountGui : public CMenuTarget
 {
- protected:
-	
-	enum FS_Support
-		{
-			FS_UNSUPPORTED   = 0,
-			FS_READY         = 1,
-			FS_NEEDS_MODULES = 2,
-			FS_UNPROBED      = 3
-		};
-	
- public:
 
-	enum FSType
-		{
-			NFS  = 0,
-			CIFS = 1,
-			LUFS = 2
-		};
-	
  private:
-	static FS_Support fsSupported(const FSType fs, const bool keep_modules = false);
-
 	int menu();
 	int menuEntry(int nr);
 
 	char       m_entry[NETWORK_NFS_NR_OF_ENTRIES][200];
  	char       ISO_8859_1_entry[NETWORK_NFS_NR_OF_ENTRIES][200];
 
-	FS_Support m_nfs_sup;
-	FS_Support m_cifs_sup;
-	FS_Support m_lufs_sup;
+	CFSMounter::FS_Support m_nfs_sup;
+	CFSMounter::FS_Support m_cifs_sup;
+	CFSMounter::FS_Support m_lufs_sup;
 
  public:
 	CNFSMountGui();
 	int exec(CMenuTarget* parent, const std::string & actionKey);
-	static void mount(const char * const ip, const char * const dir, const char * const local_dir, 
-							const FSType fstype, const char * const username, const char * const password, 
-							char * options1, char * options2, const bool showerror = false);
-	static void automount();
 };
 
 class CNFSUmountGui : public CMenuTarget
@@ -90,7 +67,6 @@ class CNFSUmountGui : public CMenuTarget
 		CNFSUmountGui(){};
 		~CNFSUmountGui(){};
 		int  exec(CMenuTarget* parent, const std::string & actionKey);
-		static void umount(const char * const dir = NULL);
 };
 
 class CNFSSmallMenu : public CMenuTarget
@@ -103,10 +79,8 @@ class CNFSSmallMenu : public CMenuTarget
 		int exec( CMenuTarget* parent, const std::string & actionKey );
 };
 
-bool in_proc_filesystems(const char * const fsname);
-bool insert_modules(const CNFSMountGui::FSType fstype);
-bool remove_modules(const CNFSMountGui::FSType fstype);
+const char * mntRes2Str(CFSMounter::MountRes res);
+const char * mntRes2Str(CFSMounter::UMountRes res);
 
-extern bool nfs_mounted_once; /* needed by update.cpp to prevent removal of modules after flashing a new cramfs, since rmmod (busybox) might no longer be available */
 
 #endif
