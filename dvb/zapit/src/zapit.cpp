@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.183 2002/05/15 20:49:07 obi Exp $
+ * $Id: zapit.cpp,v 1.184 2002/05/16 02:36:45 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -38,15 +38,6 @@
 #define VBI_DEV "/dev/dbox/vbi0"
 #endif
 
-/* nokia api */
-#if (DVB_API_VERSION == 1)
-#include <ost/video.h>
-#define VIDEO_DEV "/dev/dvb/card0/video0"
-#else
-#include <linux/dvb/video.h>
-#define VIDEO_DEV "/dev/dvb/adapter0/video0"
-#endif
-
 /* tuxbox headers */
 #include <configfile.h>
 #include <lcddclient.h>
@@ -56,6 +47,7 @@
 #include <zapost/audio.h>
 #include <zapost/dmx.h>
 #include <zapost/frontend.h>
+#include <zapost/video.h>
 #include <zapsi/pat.h>
 #include <zapsi/pmt.h>
 
@@ -77,6 +69,8 @@ CEventServer * eventServer = NULL;
 CAudio * audio = NULL;
 /* the dvb frontend device */
 CFrontend * frontend = NULL;
+/* the dvb video device */
+CVideo * video = NULL;
 /* the current channel */
 CZapitChannel * channel = NULL;
 /* the transponder scan xml input */
@@ -111,8 +105,6 @@ std::string nvodname;
 bool current_is_nvod;
 
 /* file descriptors */
-int audio_fd = -1;
-int video_fd = -1;
 int dmx_audio_fd = -1;
 int dmx_general_fd = -1;
 int dmx_pcr_fd = -1;
@@ -167,6 +159,7 @@ void CZapitDestructor()
 		close(dmx_general_fd);
 
 	delete cam;
+	delete video;
 	delete audio;
 	delete frontend;
 	delete config;
@@ -661,39 +654,6 @@ void parseScanInputXml ()
 	}
 }
 
-/*
- * get current playback state
- *
- * -1: failure
- *  0: stopped
- *  1: playing
- */
-int getPlaybackStatus ()
-{
-	videoStatus status;
-
-	if (video_fd == -1)
-	{
-		return 0;
-	}
-
-	if (ioctl(video_fd, VIDEO_GET_STATUS, &status) < 0)
-	{
-		perror("[zapit] VIDEO_GET_STATUS");
-		return -1;
-	}
-
-	if (status.playState == VIDEO_PLAYING)
-	{
-		return 1;
-	}
-	else
-	{
-		return 0;
-	}
-}
-
-
 void parse_command (CZapitClient::commandHead &rmsg)
 {
 #ifdef DEBUG
@@ -935,7 +895,14 @@ void parse_command (CZapitClient::commandHead &rmsg)
 			case CZapitClient::CMD_SB_GET_PLAYBACK_ACTIVE:
 			{
 				CZapitClient::responseGetPlaybackState msgGetPlaybackState;
-				msgGetPlaybackState.activated = getPlaybackStatus();
+				if (video->isPlaying())
+				{
+					msgGetPlaybackState.activated = 1;
+				}
+				else
+				{
+					msgGetPlaybackState.activated = 0;
+				}
 				send(connfd, &msgGetPlaybackState, sizeof(msgGetPlaybackState), 0);
 				break;
 			}
@@ -1142,7 +1109,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.183 2002/05/15 20:49:07 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.184 2002/05/16 02:36:45 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1255,6 +1222,22 @@ int main (int argc, char **argv)
 	{
 		printf("[zapit] unable to initialize audio device\n");
 		CZapitDestructor();
+	}
+	else
+	{
+		audio->setVolume(255, 255);
+	}
+
+	video = new CVideo();
+
+	if (!video->isInitialized())
+	{
+		printf("[zapit] unable to initialize video device\n");
+		CZapitDestructor();
+	}
+	else
+	{
+		video->setBlank(true);
 	}
 
 	/* initialize cam */
@@ -1490,8 +1473,6 @@ void sendChannels( CZapitClient::channelsMode mode = CZapitClient::MODE_CURRENT,
 
 int startPlayBack()
 {
-	videoStatus video_status;
-
 	if ((dmx_pcr_fd == -1) && (dmx_pcr_fd = open(DEMUX_DEV, O_RDWR)) < 0)
 	{
 		perror("[zapit] " DEMUX_DEV);
@@ -1510,41 +1491,8 @@ int startPlayBack()
 		return -1;
 	}
 
-	/* open video device */
-	if ((video_fd == -1) && ((video_fd = open(VIDEO_DEV, O_RDWR)) < 0))
-	{
-		perror("[zapit] " VIDEO_DEV);
-		return -1;
-	}
-
-	/* get video status */
-	if (ioctl(video_fd, VIDEO_GET_STATUS, &video_status) < 0)
-	{
-		perror("[zapit] VIDEO_GET_STATUS");
-		return -1;
-	}
-
-	/* select video source */
-#ifndef ALWAYS_DO_VIDEO_SELECT_SOURCE
-	if ((video_status.streamSource != VIDEO_SOURCE_DEMUX) && (video_status.playState == VIDEO_STOPPED))
-#else
-
-	if (video_status.playState == VIDEO_STOPPED)
-#endif
-
-	{
-		if (ioctl(video_fd, VIDEO_SELECT_SOURCE, VIDEO_SOURCE_DEMUX) < 0)
-		{
-			perror("[zapit] VIDEO_SELECT_SOURCE");
-		}
-	}
-
-	/* start video */
-	if ((video_status.playState != VIDEO_PLAYING) && (ioctl(video_fd, VIDEO_PLAY) < 0))
-	{
-		perror("[zapit] VIDEO_PLAY");
-		return -1;
-	}
+	video->setSource(VIDEO_SOURCE_DEMUX);
+	video->start();
 
 	/* set bypass mode */
 	if (channel->getAudioChannel()->isAc3)
@@ -1555,6 +1503,8 @@ int startPlayBack()
 	{
 		audio->disableBypass();
 	}
+
+	audio->start();
 
 	/* start demux filters */
 	setDmxPesFilter(dmx_pcr_fd, DMX_OUT_DECODER, DMX_PES_PCR, channel->getPcrPid());
@@ -1643,22 +1593,8 @@ int stopPlayBack()
 	stopVbi();
 #endif /* DBOX2 */
 
-	if (audio_fd != -1)
-	{
-		close(audio_fd);
-		audio_fd = -1;
-	}
-
-	if (video_fd != -1)
-	{
-		if (ioctl(video_fd, VIDEO_STOP, 1) < 0)
-		{
-			perror("[zapit] VIDEO_STOP");
-		}
-
-		close(video_fd);
-		video_fd = -1;
-	}
+	audio->stop();
+	video->stop();
 
 	unsetDmxFilter(dmx_video_fd);
 	unsetDmxFilter(dmx_audio_fd);
