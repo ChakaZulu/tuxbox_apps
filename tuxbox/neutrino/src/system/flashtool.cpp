@@ -91,13 +91,13 @@ bool CFlashTool::readFromMTD( const std::string & filename, int globalProgressEn
 
 	if( (fd1 = open( mtdDevice.c_str(), O_RDONLY )) < 0 )
 	{
-		ErrorMessage = g_Locale->getText("flashupdate.cantopenmtd");
+		ErrorMessage = g_Locale->getText(LOCALE_FLASHUPDATE_CANTOPENMTD);
 		return false;
 	}
 
 	if( (fd2 = open( filename.c_str(), O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR  |  S_IRGRP | S_IWGRP  |  S_IROTH | S_IWOTH)) < 0 )
 	{
-		ErrorMessage = g_Locale->getText("flashupdate.cantopenfile");
+		ErrorMessage = g_Locale->getText(LOCALE_FLASHUPDATE_CANTOPENFILE);
 		close(fd1);
 		return false;
 	}
@@ -167,7 +167,7 @@ bool CFlashTool::program( const std::string & filename, int globalProgressEndEra
 
 	if( (fd1 = open( filename.c_str(), O_RDONLY )) < 0 )
 	{
-		ErrorMessage = g_Locale->getText("flashupdate.cantopenfile");
+		ErrorMessage = g_Locale->getText(LOCALE_FLASHUPDATE_CANTOPENFILE);
 		return false;
 	}
 
@@ -176,14 +176,14 @@ bool CFlashTool::program( const std::string & filename, int globalProgressEndEra
 
 	if(filesize==0)
 	{
-		ErrorMessage = g_Locale->getText("flashupdate.fileis0bytes");
+		ErrorMessage = g_Locale->getText(LOCALE_FLASHUPDATE_FILEIS0BYTES);
 		return false;
 	}
 
 	if(statusViewer)
 	{
 		statusViewer->showLocalStatus(0);
-		statusViewer->showStatusMessageUTF(g_Locale->getText("flashupdate.eraseingflash")); // UTF-8
+		statusViewer->showStatusMessageUTF(g_Locale->getText(LOCALE_FLASHUPDATE_ERASING)); // UTF-8
 	}
 
 	if(!erase(globalProgressEndErase))
@@ -198,12 +198,12 @@ bool CFlashTool::program( const std::string & filename, int globalProgressEndEra
 			statusViewer->showGlobalStatus(globalProgressEndErase);
 		}
 		statusViewer->showLocalStatus(0);
-		statusViewer->showStatusMessageUTF(g_Locale->getText("flashupdate.programmingflash")); // UTF-8
+		statusViewer->showStatusMessageUTF(g_Locale->getText(LOCALE_FLASHUPDATE_PROGRAMMINGFLASH)); // UTF-8
 	}
 
 	if( (fd2 = open( mtdDevice.c_str(), O_WRONLY )) < 0 )
 	{
-		ErrorMessage = g_Locale->getText("flashupdate.cantopenmtd");
+		ErrorMessage = g_Locale->getText(LOCALE_FLASHUPDATE_CANTOPENMTD);
 		close(fd1);
 		return false;
 	}
@@ -256,12 +256,13 @@ bool CFlashTool::erase(int globalProgressEnd)
 
 	if( (fd = open( mtdDevice.c_str(), O_RDWR )) < 0 )
 	{
-		ErrorMessage = g_Locale->getText("flashupdate.cantopenmtd");
+		ErrorMessage = g_Locale->getText(LOCALE_FLASHUPDATE_CANTOPENMTD);
 		return false;
 	}
 
 	if( ioctl( fd, MEMGETINFO, &meminfo ) != 0 )
 	{
+#warning TODO: localize error message
 		ErrorMessage = "can't get mtd-info";
 		return false;
 	}
@@ -292,7 +293,7 @@ bool CFlashTool::erase(int globalProgressEnd)
 
 		if(ioctl( fd, MEMERASE, &erase) != 0)
 		{
-			ErrorMessage = g_Locale->getText("flashupdate.erasefailed");
+			ErrorMessage = g_Locale->getText(LOCALE_FLASHUPDATE_ERASEFAILED);
 			close(fd);
 			return false;
 		}

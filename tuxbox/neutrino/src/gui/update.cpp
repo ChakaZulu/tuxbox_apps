@@ -92,7 +92,7 @@
 CFlashUpdate::CFlashUpdate()
 	:CProgressWindow()
 {
-	setTitle(g_Locale->getText("flashupdate.head")); // UTF-8
+	setTitle(g_Locale->getText(LOCALE_FLASHUPDATE_HEAD)); // UTF-8
 }
 
 
@@ -127,9 +127,9 @@ bool CFlashUpdate::selectHttpImage(void)
 	int selected = -1;
 
 	httpTool.setStatusViewer(this);
-	showStatusMessageUTF(g_Locale->getText("flashupdate.getinfofile")); // UTF-8
+	showStatusMessageUTF(g_Locale->getText(LOCALE_FLASHUPDATE_GETINFOFILE)); // UTF-8
 
-	CMenuWidget SelectionWidget("flashupdate.selectimage", "softupdate.raw");
+	CMenuWidget SelectionWidget(LOCALE_FLASHUPDATE_SELECTIMAGE, "softupdate.raw");
 	SelectionWidget.addItem(GenericMenuSeparator);
 	SelectionWidget.addItem(GenericMenuBack);
 
@@ -186,7 +186,7 @@ bool CFlashUpdate::selectHttpImage(void)
 
 	if (urls.empty())
 	{
-		ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, g_Locale->getText("flashupdate.getinfofileerror")); // UTF-8
+		ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, g_Locale->getText(LOCALE_FLASHUPDATE_GETINFOFILEERROR)); // UTF-8
 		return false;
 	}
 		
@@ -206,7 +206,7 @@ bool CFlashUpdate::getUpdateImage(const std::string & version)
 	CHTTPTool httpTool;
 	httpTool.setStatusViewer(this);
 
-	showStatusMessageUTF(std::string(g_Locale->getText("flashupdate.getupdatefile")) + ' ' + version); // UTF-8
+	showStatusMessageUTF(std::string(g_Locale->getText(LOCALE_FLASHUPDATE_GETUPDATEFILE)) + ' ' + version); // UTF-8
 
 	printf("get update (url): %s - %s\n", filename.c_str(), gTmpPath UPDATE_LOCAL_FILENAME);
 	return httpTool.downloadFile(filename, gTmpPath UPDATE_LOCAL_FILENAME, 40 );
@@ -216,7 +216,7 @@ bool CFlashUpdate::checkVersion4Update()
 {
 	char msg[400];
 	CFlashVersionInfo * versionInfo;
-	const char * msg_body;
+	const neutrino_locale_t msg_body;
 
 	if(g_settings.softupdate_mode==1) //internet-update
 	{
@@ -225,7 +225,7 @@ bool CFlashUpdate::checkVersion4Update()
 
 		showLocalStatus(100);
 		showGlobalStatus(20);
-		showStatusMessageUTF(g_Locale->getText("flashupdate.versioncheck")); // UTF-8
+		showStatusMessageUTF(g_Locale->getText(LOCALE_FLASHUPDATE_VERSIONCHECK)); // UTF-8
 
 		printf("internet version: %s\n", newVersion.c_str());
 
@@ -235,19 +235,19 @@ bool CFlashUpdate::checkVersion4Update()
 		
 		versionInfo = new CFlashVersionInfo(newVersion);
 
-		msg_body = "flashupdate.msgbox";
+		msg_body = LOCALE_FLASHUPDATE_MSGBOX;
 #ifdef SQUASHFS
 		sprintf(msg, g_Locale->getText(msg_body), versionInfo->getDate(), versionInfo->getTime(), versionInfo->getReleaseCycle(), versionInfo->getType());
 
 		if (strcmp(RELEASE_CYCLE, versionInfo->getReleaseCycle()))
 		{
 			delete versionInfo;
-			ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, g_Locale->getText("flashupdate.wrongbase")); // UTF-8
+			ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, g_Locale->getText(LOCALE_FLASHUPDATE_WRONGBASE)); // UTF-8
 			return false;
 		}
 
 		if ((strcmp("Release", versionInfo->getType()) != 0) &&
-		    (ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText("flashupdate.experimentalimage"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw") != CMessageBox::mbrYes)) // UTF-8
+		    (ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_FLASHUPDATE_EXPERIMENTALIMAGE), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw") != CMessageBox::mbrYes)) // UTF-8
 		{
 			delete versionInfo;
 			return false;
@@ -305,14 +305,14 @@ bool CFlashUpdate::checkVersion4Update()
 		{
 			hide();
 			printf("flash-file not found: %s\n", filename.c_str());
-			ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, g_Locale->getText("flashupdate.cantopenfile")); // UTF-8
+			ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, g_Locale->getText(LOCALE_FLASHUPDATE_CANTOPENFILE)); // UTF-8
 			return false;
 		}
 		hide();
 		
 #ifdef SQUASHFS
 #warning no squash filesystem version check in non-internet update mode
-		strcpy(msg, g_Locale->getText("flashupdate.squashfs.noversion"));
+		strcpy(msg, g_Locale->getText(LOCALE_FLASHUPDATE_SQUASHFS_NOVERSION));
 #else
 		//bestimmung der CramfsDaten
 		char cramfsName[30];
@@ -321,7 +321,7 @@ bool CFlashUpdate::checkVersion4Update()
 		versionInfo = new CFlashVersionInfo(cramfsName);
 #endif
 
-		msg_body = "flashupdate.msgbox_manual";
+		msg_body = LOCALE_FLASHUPDATE_MSGBOX_MANUAL;
 	}
 #ifndef SQUASHFS
 	sprintf(msg, g_Locale->getText(msg_body), versionInfo->getDate(), versionInfo->getTime(), versionInfo->getReleaseCycle(), versionInfo->getType());
@@ -329,12 +329,12 @@ bool CFlashUpdate::checkVersion4Update()
 	if (strcmp(RELEASE_CYCLE, versionInfo->getReleaseCycle()))
 	{
 		delete versionInfo;
-		ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, g_Locale->getText("flashupdate.wrongbase")); // UTF-8
+		ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, g_Locale->getText(LOCALE_FLASHUPDATE_WRONGBASE)); // UTF-8
 		return false;
 	}
 
 	if ((strcmp("Release", versionInfo->getType()) != 0) &&
-	    (ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText("flashupdate.experimentalimage"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw") != CMessageBox::mbrYes)) // UTF-8
+	    (ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_FLASHUPDATE_EXPERIMENTALIMAGE), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw") != CMessageBox::mbrYes)) // UTF-8
 	{
 		delete versionInfo;
 		return false;
@@ -367,7 +367,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 		if(!getUpdateImage(newVersion))
 		{
 			hide();
-			ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, g_Locale->getText("flashupdate.getupdatefileerror")); // UTF-8
+			ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, g_Locale->getText(LOCALE_FLASHUPDATE_GETUPDATEFILEERROR)); // UTF-8
 			return menu_return::RETURN_REPAINT;
 		}
 		filename = std::string(gTmpPath UPDATE_LOCAL_FILENAME);
@@ -383,11 +383,11 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 #warning no squash filesystem check implemented
 #else
 	//image-check
-	showStatusMessageUTF(g_Locale->getText("flashupdate.md5check")); // UTF-8
+	showStatusMessageUTF(g_Locale->getText(LOCALE_FLASHUPDATE_MD5CHECK)); // UTF-8
 	if(!ft.check_cramfs(filename))
 	{
 		hide();
-		ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, g_Locale->getText("flashupdate.md5sumerror")); // UTF-8
+		ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, g_Locale->getText(LOCALE_FLASHUPDATE_MD5SUMERROR)); // UTF-8
 		return menu_return::RETURN_REPAINT;
 	}
 #endif
@@ -406,7 +406,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 
 	//status anzeigen
 	showGlobalStatus(100);
-	showStatusMessageUTF(g_Locale->getText("flashupdate.ready")); // UTF-8
+	showStatusMessageUTF(g_Locale->getText(LOCALE_FLASHUPDATE_READY)); // UTF-8
 
 	hide();
 
@@ -414,7 +414,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 	nfs_mounted_once = false; /* needed by update.cpp to prevent removal of modules after flashing a new cramfs, since rmmod (busybox) might no longer be available */
 	CNFSUmountGui::umount();
 
-	ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText("flashupdate.flashreadyreboot")); // UTF-8
+	ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_FLASHUPDATE_FLASHREADYREBOOT)); // UTF-8
 	ft.reboot();
 	sleep(20000);
 
@@ -444,10 +444,10 @@ void CFlashExpert::readmtd(int readmtd)
 		filename = "/tmp/flashimage.img"; // US-ASCII (subset of UTF-8 and ISO8859-1)
 		readmtd = MTD_OF_WHOLE_IMAGE;
 	}
-	setTitle(g_Locale->getText("flashupdate.titlereadflash")); // UTF-8
+	setTitle(g_Locale->getText(LOCALE_FLASHUPDATE_TITLEREADFLASH)); // UTF-8
 	paint();
 	showGlobalStatus(0);
-	showStatusMessageUTF((std::string(g_Locale->getText("flashupdate.actionreadflash")) + " (" + CMTDInfo::getInstance()->getMTDName(readmtd) + ')')); // UTF-8
+	showStatusMessageUTF((std::string(g_Locale->getText(LOCALE_FLASHUPDATE_ACTIONREADFLASH)) + " (" + CMTDInfo::getInstance()->getMTDName(readmtd) + ')')); // UTF-8
 	CFlashTool ft;
 	ft.setStatusViewer( this );
 	ft.setMTDDevice(CMTDInfo::getInstance()->getMTDFileName(readmtd));
@@ -459,9 +459,9 @@ void CFlashExpert::readmtd(int readmtd)
 	else
 	{
 		showGlobalStatus(100);
-		showStatusMessageUTF(g_Locale->getText("flashupdate.ready")); // UTF-8
+		showStatusMessageUTF(g_Locale->getText(LOCALE_FLASHUPDATE_READY)); // UTF-8
 		char message[500];
-		sprintf(message, g_Locale->getText("flashupdate.savesuccess"), filename.c_str() );
+		sprintf(message, g_Locale->getText(LOCALE_FLASHUPDATE_SAVESUCCESS), filename.c_str());
 		sleep(1);
 		hide();
 		ShowHintUTF(LOCALE_MESSAGEBOX_INFO, message);
@@ -472,14 +472,14 @@ void CFlashExpert::writemtd(const std::string & filename, int mtdNumber)
 {
 	char message[500];
 #ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
-	sprintf(message, g_Locale->getText("flashupdate.reallyflashmtd"), Latin1_to_UTF8(filename).c_str(), CMTDInfo::getInstance()->getMTDName(mtdNumber).c_str());
+	sprintf(message, g_Locale->getText(LOCALE_FLASHUPDATE_REALLYFLASHMTD), Latin1_to_UTF8(filename).c_str(), CMTDInfo::getInstance()->getMTDName(mtdNumber).c_str());
 #else
-	sprintf(message, g_Locale->getText("flashupdate.reallyflashmtd"), filename.c_str(), CMTDInfo::getInstance()->getMTDName(mtdNumber).c_str());
+	sprintf(message, g_Locale->getText(LOCALE_FLASHUPDATE_REALLYFLASHMTD), filename.c_str(), CMTDInfo::getInstance()->getMTDName(mtdNumber).c_str());
 #endif
 	if (ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, message, CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw") != CMessageBox::mbrYes) // UTF-8
 		return;
 
-	setTitle(g_Locale->getText("flashupdate.titlewriteflash")); // UTF-8
+	setTitle(g_Locale->getText(LOCALE_FLASHUPDATE_TITLEWRITEFLASH)); // UTF-8
 	paint();
 	showGlobalStatus(0);
 	CFlashTool ft;
@@ -493,10 +493,10 @@ void CFlashExpert::writemtd(const std::string & filename, int mtdNumber)
 	else
 	{
 		showGlobalStatus(100);
-		showStatusMessageUTF(g_Locale->getText("flashupdate.ready")); // UTF-8
+		showStatusMessageUTF(g_Locale->getText(LOCALE_FLASHUPDATE_READY)); // UTF-8
 		sleep(1);
 		hide();
-		ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText("flashupdate.flashreadyreboot")); // UTF-8
+		ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_FLASHUPDATE_FLASHREADYREBOOT)); // UTF-8
 		ft.reboot();
 	}
 }
@@ -505,7 +505,7 @@ void CFlashExpert::writemtd(const std::string & filename, int mtdNumber)
 void CFlashExpert::showMTDSelector(const std::string & actionkey)
 {
 	//mtd-selector erzeugen
-	CMenuWidget* mtdselector = new CMenuWidget("flashupdate.mtdselector", "softupdate.raw");
+	CMenuWidget* mtdselector = new CMenuWidget(LOCALE_FLASHUPDATE_MTDSELECTOR, "softupdate.raw");
 	mtdselector->addItem(GenericMenuSeparator);
 	mtdselector->addItem(new CMenuForwarder(LOCALE_MESSAGEBOX_CANCEL));
 	mtdselector->addItem(GenericMenuSeparatorLine);
@@ -521,7 +521,7 @@ void CFlashExpert::showMTDSelector(const std::string & actionkey)
 
 void CFlashExpert::showFileSelector(const std::string & actionkey)
 {
-	CMenuWidget* fileselector = new CMenuWidget("flashupdate.fileselector", "softupdate.raw");
+	CMenuWidget* fileselector = new CMenuWidget(LOCALE_FLASHUPDATE_FILESELECTOR, "softupdate.raw");
 	fileselector->addItem(GenericMenuSeparator);
 	fileselector->addItem(new CMenuForwarder(LOCALE_MESSAGEBOX_CANCEL));
 	fileselector->addItem(GenericMenuSeparatorLine);

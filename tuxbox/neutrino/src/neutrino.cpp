@@ -448,10 +448,10 @@ void CNeutrinoApp::setupColors_dvb2k()
 
 typedef struct font_sizes
 {
-	const char * const name;
-	const unsigned int defaultsize;
-	const unsigned int style;
-	const unsigned int size_offset;
+	const neutrino_locale_t name;
+	const unsigned int      defaultsize;
+	const unsigned int      style;
+	const unsigned int      size_offset;
 } font_sizes_struct;
 
 #define FONT_STYLE_REGULAR 0
@@ -460,28 +460,28 @@ typedef struct font_sizes
 
 const font_sizes_struct neutrino_font[FONT_TYPE_COUNT] = 
 {
-	{"fontsize.menu"               ,  20, FONT_STYLE_BOLD   , 0},
-	{"fontsize.menu_title"         ,  30, FONT_STYLE_BOLD   , 0},
-	{"fontsize.menu_info"          ,  16, FONT_STYLE_REGULAR, 0},
-	{"fontsize.epg_title"          ,  25, FONT_STYLE_REGULAR, 1},
-	{"fontsize.epg_info1"          ,  17, FONT_STYLE_ITALIC , 2},
-	{"fontsize.epg_info2"          ,  17, FONT_STYLE_REGULAR, 2},
-	{"fontsize.epg_date"           ,  15, FONT_STYLE_REGULAR, 2},
-	{"fontsize.eventlist_title"    ,  30, FONT_STYLE_REGULAR, 0},
-	{"fontsize.eventlist_itemlarge",  20, FONT_STYLE_BOLD   , 1},
-	{"fontsize.eventlist_itemsmall",  14, FONT_STYLE_REGULAR, 1},
-	{"fontsize.eventlist_datetime" ,  16, FONT_STYLE_REGULAR, 1},
-	{"fontsize.gamelist_itemlarge" ,  20, FONT_STYLE_BOLD   , 1},
-	{"fontsize.gamelist_itemsmall" ,  16, FONT_STYLE_REGULAR, 1},
-	{"fontsize.channellist"        ,  20, FONT_STYLE_BOLD   , 1},
-	{"fontsize.channellist_descr"  ,  20, FONT_STYLE_REGULAR, 1},
-	{"fontsize.channellist_number" ,  14, FONT_STYLE_BOLD   , 2},
-	{"fontsize.channel_num_zap"    ,  40, FONT_STYLE_BOLD   , 0},
-	{"fontsize.infobar_number"     ,  50, FONT_STYLE_BOLD   , 0},
-	{"fontsize.infobar_channame"   ,  30, FONT_STYLE_BOLD   , 0},
-	{"fontsize.infobar_info"       ,  20, FONT_STYLE_REGULAR, 1},
-	{"fontsize.infobar_small"      ,  14, FONT_STYLE_REGULAR, 1},
-	{"fontsize.filebrowser_item"   ,  16, FONT_STYLE_BOLD   , 1}
+	{LOCALE_FONTSIZE_MENU               ,  20, FONT_STYLE_BOLD   , 0},
+	{LOCALE_FONTSIZE_MENU_TITLE         ,  30, FONT_STYLE_BOLD   , 0},
+	{LOCALE_FONTSIZE_MENU_INFO          ,  16, FONT_STYLE_REGULAR, 0},
+	{LOCALE_FONTSIZE_EPG_TITLE          ,  25, FONT_STYLE_REGULAR, 1},
+	{LOCALE_FONTSIZE_EPG_INFO1          ,  17, FONT_STYLE_ITALIC , 2},
+	{LOCALE_FONTSIZE_EPG_INFO2          ,  17, FONT_STYLE_REGULAR, 2},
+	{LOCALE_FONTSIZE_EPG_DATE           ,  15, FONT_STYLE_REGULAR, 2},
+	{LOCALE_FONTSIZE_EVENTLIST_TITLE    ,  30, FONT_STYLE_REGULAR, 0},
+	{LOCALE_FONTSIZE_EVENTLIST_ITEMLARGE,  20, FONT_STYLE_BOLD   , 1},
+	{LOCALE_FONTSIZE_EVENTLIST_ITEMSMALL,  14, FONT_STYLE_REGULAR, 1},
+	{LOCALE_FONTSIZE_EVENTLIST_DATETIME ,  16, FONT_STYLE_REGULAR, 1},
+	{LOCALE_FONTSIZE_GAMELIST_ITEMLARGE ,  20, FONT_STYLE_BOLD   , 1},
+	{LOCALE_FONTSIZE_GAMELIST_ITEMSMALL ,  16, FONT_STYLE_REGULAR, 1},
+	{LOCALE_FONTSIZE_CHANNELLIST        ,  20, FONT_STYLE_BOLD   , 1},
+	{LOCALE_FONTSIZE_CHANNELLIST_DESCR  ,  20, FONT_STYLE_REGULAR, 1},
+	{LOCALE_FONTSIZE_CHANNELLIST_NUMBER ,  14, FONT_STYLE_BOLD   , 2},
+	{LOCALE_FONTSIZE_CHANNEL_NUM_ZAP    ,  40, FONT_STYLE_BOLD   , 0},
+	{LOCALE_FONTSIZE_INFOBAR_NUMBER     ,  50, FONT_STYLE_BOLD   , 0},
+	{LOCALE_FONTSIZE_INFOBAR_CHANNAME   ,  30, FONT_STYLE_BOLD   , 0},
+	{LOCALE_FONTSIZE_INFOBAR_INFO       ,  20, FONT_STYLE_REGULAR, 1},
+	{LOCALE_FONTSIZE_INFOBAR_SMALL      ,  14, FONT_STYLE_REGULAR, 1},
+	{LOCALE_FONTSIZE_FILEBROWSER_ITEM   ,  16, FONT_STYLE_BOLD   , 1}
 };
 
 const neutrino_locale_t timing_setting_name[TIMING_SETTING_COUNT] =
@@ -1540,22 +1540,22 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 
 
 		//experten-funktionen für mtd lesen/schreiben
-		CMenuWidget* mtdexpert = new CMenuWidget("flashupdate.expertfunctions", "softupdate.raw");
+		CMenuWidget* mtdexpert = new CMenuWidget(LOCALE_FLASHUPDATE_EXPERTFUNCTIONS, "softupdate.raw");
 		mtdexpert->addItem(GenericMenuSeparator);
 		mtdexpert->addItem(GenericMenuBack);
 		mtdexpert->addItem(GenericMenuSeparatorLine);
 		CFlashExpert* fe = new CFlashExpert();
-		mtdexpert->addItem( new CMenuForwarder("flashupdate.readflash", true, NULL, fe, "readflash") );
-		mtdexpert->addItem( new CMenuForwarder("flashupdate.writeflash", true, NULL, fe, "writeflash") );
+		mtdexpert->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_READFLASH    , true, NULL, fe, "readflash"    ));
+		mtdexpert->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_WRITEFLASH   , true, NULL, fe, "writeflash"   ));
 		mtdexpert->addItem(GenericMenuSeparatorLine);
-		mtdexpert->addItem( new CMenuForwarder("flashupdate.readflashmtd", true, NULL, fe, "readflashmtd") );
-		mtdexpert->addItem( new CMenuForwarder("flashupdate.writeflashmtd", true, NULL, fe, "writeflashmtd") );
+		mtdexpert->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_READFLASHMTD , true, NULL, fe, "readflashmtd" ));
+		mtdexpert->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_WRITEFLASHMTD, true, NULL, fe, "writeflashmtd"));
 		mtdexpert->addItem(GenericMenuSeparatorLine);
 
 		CStringInputSMS * updateSettings_url_file = new CStringInputSMS(LOCALE_FLASHUPDATE_URL_FILE, g_settings.softupdate_url_file, 30, NULL, NULL, "abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-. ");
 		mtdexpert->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_URL_FILE, true, g_settings.softupdate_url_file, updateSettings_url_file));
 
-		updateSettings->addItem( new CMenuForwarder("flashupdate.expertfunctions", true, NULL, mtdexpert ) );
+		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_EXPERTFUNCTIONS, true, NULL, mtdexpert));
 
 		updateSettings->addItem(GenericMenuSeparatorLine);
 		CMenuOptionChooser *oj = new CMenuOptionChooser(LOCALE_FLASHUPDATE_UPDATEMODE, &g_settings.softupdate_mode, FLASHUPDATE_UPDATEMODE_OPTIONS, FLASHUPDATE_UPDATEMODE_OPTION_COUNT, true);
@@ -1563,7 +1563,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 
 
 		/* show current version */
-		updateSettings->addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "flashupdate.currentversion_sep"));
+		updateSettings->addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_FLASHUPDATE_CURRENTVERSION_SEP));
 
 		/* get current version SBBBYYYYMMTTHHMM -- formatsting */
 		CConfigFile configfile('\t');
@@ -1574,25 +1574,25 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 
 		static CFlashVersionInfo versionInfo(versionString);
 
-		updateSettings->addItem(new CMenuForwarder("flashupdate.currentversiondate", false, versionInfo.getDate()));
-		updateSettings->addItem(new CMenuForwarder("flashupdate.currentversiontime", false, versionInfo.getTime()));
-		updateSettings->addItem(new CMenuForwarder("flashupdate.currentreleasecycle", false, versionInfo.getReleaseCycle()));
+		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_CURRENTVERSIONDATE    , false, versionInfo.getDate()));
+		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_CURRENTVERSIONTIME    , false, versionInfo.getTime()));
+		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_CURRENTRELEASECYCLE   , false, versionInfo.getReleaseCycle()));
 		/* versionInfo.getType() returns const char * which is never deallocated */
-		updateSettings->addItem(new CMenuForwarder("flashupdate.currentversionsnapshot", false, versionInfo.getType()));
+		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_CURRENTVERSIONSNAPSHOT, false, versionInfo.getType()));
 
-		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "flashupdate.proxyserver_sep") );
+		updateSettings->addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_FLASHUPDATE_PROXYSERVER_SEP));
 
-		CStringInputSMS * updateSettings_proxy = new CStringInputSMS("flashupdate.proxyserver", g_settings.softupdate_proxyserver, 23, "flashupdate.proxyserver_hint1", "flashupdate.proxyserver_hint2", "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
-		updateSettings->addItem( new CMenuForwarder("flashupdate.proxyserver", true, g_settings.softupdate_proxyserver, updateSettings_proxy ) );
+		CStringInputSMS * updateSettings_proxy = new CStringInputSMS(LOCALE_FLASHUPDATE_PROXYSERVER, g_settings.softupdate_proxyserver, 23, LOCALE_FLASHUPDATE_PROXYSERVER_HINT1, LOCALE_FLASHUPDATE_PROXYSERVER_HINT2, "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
+		updateSettings->addItem new CMenuForwarder(LOCALE_FLASHUPDATE_PROXYSERVER, true, g_settings.softupdate_proxyserver, updateSettings_proxy));
 
-		CStringInputSMS * updateSettings_proxyuser = new CStringInputSMS("flashupdate.proxyusername", g_settings.softupdate_proxyusername, 23, "flashupdate.proxyusername_hint1", "flashupdate.proxyusername_hint2", "abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-. ");
-		updateSettings->addItem( new CMenuForwarder("flashupdate.proxyusername", true, g_settings.softupdate_proxyusername, updateSettings_proxyuser ) );
+		CStringInputSMS * updateSettings_proxyuser = new CStringInputSMS(LOCALE_FLASHUPDATE_PROXYUSERNAME, g_settings.softupdate_proxyusername, 23, LOCALE_FLASHUPDATE_PROXYUSERNAME_HINT1, LOCALE_FLASHUPDATE_PROXYUSERNAME_HINT2, "abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-. ");
+		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_PROXYUSERNAME, true, g_settings.softupdate_proxyusername, updateSettings_proxyuser));
 
-		CStringInputSMS * updateSettings_proxypass = new CStringInputSMS("flashupdate.proxypassword", g_settings.softupdate_proxypassword, 20, "flashupdate.proxypassword_hint1", "flashupdate.proxypassword_hint2", "abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-. ");
-		updateSettings->addItem( new CMenuForwarder("flashupdate.proxypassword", true, g_settings.softupdate_proxypassword, updateSettings_proxypass ) );
+		CStringInputSMS * updateSettings_proxypass = new CStringInputSMS(LOCALE_FLASHUPDATE_PROXYPASSWORD, g_settings.softupdate_proxypassword, 20, LOCALE_FLASHUPDATE_PROXYPASSWORD_HINT1, LOCALE_FLASHUPDATE_PROXYPASSWORD_HINT2, "abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-. ");
+		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_PROXYPASSWORD, true, g_settings.softupdate_proxypassword, updateSettings_proxypass));
 
 		updateSettings->addItem(GenericMenuSeparatorLine);
-		updateSettings->addItem(new CMenuForwarder("flashupdate.checkupdate", true, NULL, new CFlashUpdate()));
+		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_CHECKUPDATE, true, NULL, new CFlashUpdate()));
 
 		service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_UPDATE, true, NULL, updateSettings));
 	}
@@ -2159,10 +2159,10 @@ void CNeutrinoApp::AddFontSettingItem(CMenuWidget &fontSettings, const SNeutrino
 
 typedef struct font_sizes_groups
 {
-	const char * const                                groupname;
-	const unsigned int                                count;
+	const neutrino_locale_t                     groupname;
+	const unsigned int                          count;
 	const SNeutrinoSettings::FONT_TYPES * const content;
-	const char * const                                actionkey;
+	const char * const                          actionkey;
 } font_sizes_groups_struct;
 
 const SNeutrinoSettings::FONT_TYPES channellist_font_sizes[4] =
@@ -2213,12 +2213,12 @@ const SNeutrinoSettings::FONT_TYPES other_font_sizes[4] =
 
 const font_sizes_groups font_sizes_groups[6] =
 {
-	{"fontmenu.channellist", 4, channellist_font_sizes, "fontsize.dcha"},
-	{"fontmenu.eventlist"  , 4, eventlist_font_sizes  , "fontsize.deve"},
-	{"fontmenu.epg"        , 4, epg_font_sizes        , "fontsize.depg"},
-	{"fontmenu.infobar"    , 4, infobar_font_sizes    , "fontsize.dinf"},
-	{"fontmenu.gamelist"   , 2, gamelist_font_sizes   , "fontsize.dgam"},
-	{NULL                  , 4, other_font_sizes      , "fontsize.doth"}
+	{LOCALE_FONTMENU_CHANNELLIST, 4, channellist_font_sizes, "fontsize.dcha"},
+	{LOCALE_FONTMENU_EVENTLIST  , 4, eventlist_font_sizes  , "fontsize.deve"},
+	{LOCALE_FONTMENU_EPG        , 4, epg_font_sizes        , "fontsize.depg"},
+	{LOCALE_FONTMENU_INFOBAR    , 4, infobar_font_sizes    , "fontsize.dinf"},
+	{LOCALE_FONTMENU_GAMELIST   , 2, gamelist_font_sizes   , "fontsize.dgam"},
+	{NONEXISTANT_LOCALE         , 4, other_font_sizes      , "fontsize.doth"}
 };
 
 void CNeutrinoApp::InitFontSettings(CMenuWidget &fontSettings)
@@ -2827,24 +2827,24 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	dprintf( DEBUG_NORMAL, "menue setup\n");
 	//Main settings
-	CMenuWidget    mainMenu            (LOCALE_MAINMENU_HEAD            , "mainmenue.raw"       );
-	CMenuWidget    mainSettings        (LOCALE_MAINSETTINGS_HEAD        , NEUTRINO_ICON_SETTINGS);
-	CMenuWidget    languageSettings    (LOCALE_LANGUAGESETUP_HEAD       , "language.raw"        );
-	CVideoSettings videoSettings                                                                 ;
-	CMenuWidget    audioSettings       (LOCALE_AUDIOMENU_HEAD           , "audio.raw"           );
-	CMenuWidget    parentallockSettings(LOCALE_PARENTALLOCK_PARENTALLOCK, "lock.raw"            , 500);
-	CMenuWidget    networkSettings     (LOCALE_NETWORKMENU_HEAD         , "network.raw"         );
-	CMenuWidget    recordingSettings   (LOCALE_RECORDINGMENU_HEAD       , "recording.raw"       );
-	CMenuWidget    streamingSettings   (LOCALE_STREAMINGMENU_HEAD       , "streaming.raw"       );
-	CMenuWidget    colorSettings       (LOCALE_COLORMENU_HEAD           , "colors.raw"          );
-	CMenuWidget    fontSettings        ("fontmenu.head"                 , "colors.raw"          );
-	CMenuWidget    lcdSettings         (LOCALE_LCDMENU_HEAD             , "lcd.raw"             );
-	CMenuWidget    keySettings         (LOCALE_KEYBINDINGMENU_HEAD      , "keybinding.raw"      , 400);
-	CMenuWidget    miscSettings        (LOCALE_MISCSETTINGS_HEAD        , NEUTRINO_ICON_SETTINGS);
-	CMenuWidget    audioplPicSettings  (LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL   , NEUTRINO_ICON_SETTINGS);
-	CMenuWidget    scanSettings        (LOCALE_SERVICEMENU_SCANTS       , NEUTRINO_ICON_SETTINGS);
-	CMenuWidget    service             (LOCALE_SERVICEMENU_HEAD         , NEUTRINO_ICON_SETTINGS);
-	CMenuWidget    moviePlayer         (LOCALE_MOVIEPLAYER_HEAD         , "streaming.raw"       );
+	CMenuWidget    mainMenu            (LOCALE_MAINMENU_HEAD                 , "mainmenue.raw"       );
+	CMenuWidget    mainSettings        (LOCALE_MAINSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS);
+	CMenuWidget    languageSettings    (LOCALE_LANGUAGESETUP_HEAD            , "language.raw"        );
+	CVideoSettings videoSettings                                                                      ;
+	CMenuWidget    audioSettings       (LOCALE_AUDIOMENU_HEAD                , "audio.raw"           );
+	CMenuWidget    parentallockSettings(LOCALE_PARENTALLOCK_PARENTALLOCK     , "lock.raw"            , 500);
+	CMenuWidget    networkSettings     (LOCALE_NETWORKMENU_HEAD              , "network.raw"         );
+	CMenuWidget    recordingSettings   (LOCALE_RECORDINGMENU_HEAD            , "recording.raw"       );
+	CMenuWidget    streamingSettings   (LOCALE_STREAMINGMENU_HEAD            , "streaming.raw"       );
+	CMenuWidget    colorSettings       (LOCALE_COLORMENU_HEAD                , "colors.raw"          );
+	CMenuWidget    fontSettings        (LOCALE_FONTMENU_HEAD                 , "colors.raw"          );
+	CMenuWidget    lcdSettings         (LOCALE_LCDMENU_HEAD                  , "lcd.raw"             );
+	CMenuWidget    keySettings         (LOCALE_KEYBINDINGMENU_HEAD           , "keybinding.raw"      , 400);
+	CMenuWidget    miscSettings        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS);
+	CMenuWidget    audioplPicSettings  (LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL, NEUTRINO_ICON_SETTINGS);
+	CMenuWidget    scanSettings        (LOCALE_SERVICEMENU_SCANTS            , NEUTRINO_ICON_SETTINGS);
+	CMenuWidget    service             (LOCALE_SERVICEMENU_HEAD              , NEUTRINO_ICON_SETTINGS);
+	CMenuWidget    moviePlayer         (LOCALE_MOVIEPLAYER_HEAD              , "streaming.raw"       );
     
 	InitMainMenu(mainMenu, mainSettings, audioSettings, parentallockSettings, networkSettings, recordingSettings,
 					 colorSettings, lcdSettings, keySettings, videoSettings, languageSettings, miscSettings,
@@ -4182,7 +4182,7 @@ bool CNeutrinoApp::changeNotify(const neutrino_locale_t OptionName, void *)
 
 	if (strncmp(OptionName, "fontsize.", 9) == 0)
 	{
-		CHintBox * hintBox = new CHintBox(LOCALE_MESSAGEBOX_INFO, g_Locale->getText("fontsize.hint")); // UTF-8
+		CHintBox * hintBox = new CHintBox(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_FONTSIZE_HINT)); // UTF-8
 		hintBox->paint();
 
 		SetupFonts();
