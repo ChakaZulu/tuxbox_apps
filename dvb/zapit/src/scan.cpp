@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.86 2002/12/07 23:07:18 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.87 2002/12/17 22:02:37 obi Exp $
  */
 
 #include <fcntl.h>
@@ -165,7 +165,7 @@ int get_sdts()
 
 		INFO("parsing SDT (tsid:onid %04x:%04x)", tI->second.transport_stream_id, tI->second.original_network_id);
 
-		parse_sdt(tI->second.DiSEqC);
+		parse_sdt(tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC);
 	}
 
 	return 0;

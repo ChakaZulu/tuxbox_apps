@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.36 2002/11/29 00:36:05 obi Exp $
+ * $Id: frontend.cpp,v 1.37 2002/12/17 22:02:37 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -85,8 +85,6 @@ CFrontend::CFrontend ()
 	}
 	else {
 		initialized = true;
-		sendDiseqcReset();
-		sendDiseqcPowerOn();
 	}
 }
 
@@ -97,7 +95,8 @@ CFrontend::CFrontend ()
 
 CFrontend::~CFrontend ()
 {
-	sendDiseqcStandby();
+	if (diseqcType > MINI_DISEQC)
+		sendDiseqcStandby();
 	
 	delete info;
 	close(fd);
@@ -305,7 +304,18 @@ struct dvb_frontend_event CFrontend::getEvent ()
 			}
 
 			else {
-				WARN("NO LOCK: %x", event.status);
+				if (event.status & FE_HAS_SIGNAL)
+					WARN("FE_HAS_SIGNAL");
+				if (event.status & FE_HAS_CARRIER)
+					WARN("FE_HAS_CARRIER");
+				if (event.status & FE_HAS_VITERBI)
+					WARN("FE_HAS_VITERBI");
+				if (event.status & FE_HAS_SYNC)
+					WARN("FE_HAS_SYNC");
+				if (event.status & FE_TIMEDOUT)
+					WARN("FE_TIMEDOUT");
+				if (event.status & FE_REINIT)
+					WARN("FE_REINIT");
 			}
 		}
 
@@ -449,6 +459,16 @@ CFrontend::sendToneBurst (fe_sec_mini_cmd_t burst)
 /*
  * zapit frontend api
  */
+
+void CFrontend::setDiseqcType (diseqc_t newDiseqcType)
+{
+	if ((diseqcType <= MINI_DISEQC) && (newDiseqcType > MINI_DISEQC)) {
+		sendDiseqcReset();
+		sendDiseqcPowerOn();
+	}
+
+	diseqcType = newDiseqcType;
+}
 
 const bool
 CFrontend::tuneChannel (CZapitChannel *channel)

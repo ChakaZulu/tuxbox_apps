@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.274 2002/12/13 12:00:59 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.275 2002/12/17 22:02:37 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -369,9 +369,9 @@ int zapit(const t_channel_id channel_id, bool in_nvod)
 
 	DBG("setting ca pmt");
 
-	cam->setCaPmt(channel->getCaPmt());
-
 	startPlayBack();
+
+	cam->setCaPmt(channel->getCaPmt());
 
 	save_settings(false);
 
@@ -999,7 +999,7 @@ int main (int argc, char **argv)
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	fprintf(stdout, "$Id: zapit.cpp,v 1.274 2002/12/13 12:00:59 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.275 2002/12/17 22:02:37 obi Exp $\n");
 
 	if (argc > 1)
 	{
@@ -1442,7 +1442,7 @@ unsigned int zapTo_ChannelID(t_channel_id channel_id, bool isSubService)
 	else
 		eventServer->sendEvent(CZapitClient::EVT_ZAP_COMPLETE, CEventServer::INITID_ZAPIT, &channel_id, sizeof(channel_id));
 
-	channel->setCA_STATUS(get_sdt_free_CA_mode(channel->getServiceId()));
+	channel->setCA_STATUS(get_sdt_free_CA_mode(channel->getTransportStreamId(), channel->getOriginalNetworkId(), channel->getServiceId()));
 	INFO("CA STATUS: %d", channel->getCA_STATUS());
 	return result;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.cpp,v 1.40 2002/12/13 12:41:13 thegoodguy Exp $
+ * $Id: sdt.cpp,v 1.41 2002/12/17 22:02:37 obi Exp $
  */
 
 #include <fcntl.h>
@@ -55,12 +55,18 @@ uint32_t get_sdt_TsidOnid ()
 	return ((transport_stream_id << 16) | original_network_id );
 }
 
-ca_status_t get_sdt_free_CA_mode(const t_service_id p_service_id)
+ca_status_t get_sdt_free_CA_mode(
+	const t_transport_stream_id p_transport_stream_id,
+	const t_original_network_id p_original_network_id,
+	const t_service_id p_service_id)
 {
+	ca_status_t free_CA_mode = CA_STATUS_CLEAR;  // <- return CA_STATUS_CLEAR if something fails
+
+#ifndef SKIP_CA_STATUS
+
 	int demux_fd;
 	unsigned char buffer[SDT_SIZE];
 
-	ca_status_t free_CA_mode = CA_STATUS_CLEAR;  // <- return CA_STATUS_CLEAR if something fails
 	unsigned short section_length;
 	unsigned short service_id;
 	unsigned short descriptors_loop_length;
@@ -69,43 +75,63 @@ ca_status_t get_sdt_free_CA_mode(const t_service_id p_service_id)
 	unsigned char filter[DMX_FILTER_SIZE];
 	unsigned char mask[DMX_FILTER_SIZE];
 
-	memset(filter, 0x00, DMX_FILTER_SIZE);
-	memset(mask, 0x00, DMX_FILTER_SIZE);
-
 	filter[0] = 0x42;
-	mask[0] = 0xFF;
+	filter[1] = (p_transport_stream_id >> 8) & 0xff;
+	filter[2] = p_transport_stream_id & 0xff;
+	filter[3] = 0x00;
+	filter[4] = 0x00;
+	filter[5] = 0x00;
+	filter[6] = (p_original_network_id >> 8) & 0xff;
+	filter[7] = p_original_network_id & 0xff;
+	memset(&filter[8], 0x00, 8);
 
-	if ((demux_fd = open(DEMUX_DEVICE, O_RDWR)) < 0)
-	{
+	mask[0] = 0xFF;
+	mask[1] = 0xFF;
+	mask[2] = 0xFF;
+	mask[3] = 0x00;
+	mask[4] = 0xFF;
+	mask[5] = 0x00;
+	mask[6] = 0xFF;
+	mask[7] = 0xFF;
+	memset(&mask[8], 0x00, 8);
+
+	if ((demux_fd = open(DEMUX_DEVICE, O_RDWR)) < 0) {
 		ERROR(DEMUX_DEVICE);
 		return free_CA_mode;
 	}
 
-	if ((setDmxSctFilter(demux_fd, 0x0011, filter, mask) < 0) ||
-	    (readDmx(demux_fd, buffer, SDT_SIZE) < 0))
-	{
-		close(demux_fd);
-		return free_CA_mode;
-	}
+	do {
+		if ((setDmxSctFilter(demux_fd, 0x0011, filter, mask) < 0) || (readDmx(demux_fd, buffer, SDT_SIZE) < 0)) {
+			close(demux_fd);
+			return free_CA_mode;
+		}
+
+		section_length = ((buffer[1] & 0x0F) << 8) | buffer[2];
+
+		for (pos = 11; pos < section_length - 1; pos += descriptors_loop_length + 5) {
+
+			service_id = (buffer[pos] << 8) | buffer[pos + 1];
+			descriptors_loop_length = ((buffer[pos + 3] & 0x0F) << 8) | buffer[pos + 4];
+
+			if (service_id == p_service_id) {
+				free_CA_mode = (buffer [pos + 3] & 0x10) == 0 ? CA_STATUS_FTA : CA_STATUS_LOCK;
+				break;
+			}
+		}
+
+	} while (filter[4]++ != buffer[7]);
 
 	close(demux_fd);
 
-	section_length = ((buffer[1] & 0x0F) << 8) | buffer[2];
-	for (pos = 11; pos < section_length - 1; pos += descriptors_loop_length + 5)
-	{
-		service_id = (buffer[pos] << 8) | buffer[pos + 1];
-		if (service_id == p_service_id)
-		{
-			free_CA_mode = (buffer [pos + 3] & 0x10) == 0 ? CA_STATUS_FTA : CA_STATUS_LOCK;
-			break;
-		}
-		descriptors_loop_length = ((buffer[pos + 3] & 0x0F) << 8) | buffer[pos + 4];
-	}
+#endif /* SKIP_CA_STATUS */
 
 	return free_CA_mode;
 }
 
-int parse_sdt(const uint8_t DiSEqC)
+int parse_sdt(
+	const t_transport_stream_id p_transport_stream_id,
+	const t_original_network_id p_original_network_id,
+	const uint8_t DiSEqC)
 {
 	int demux_fd;
 	unsigned char buffer[SDT_SIZE];
@@ -136,25 +162,33 @@ int parse_sdt(const uint8_t DiSEqC)
 	unsigned char filter[DMX_FILTER_SIZE];
 	unsigned char mask[DMX_FILTER_SIZE];
 
-	memset(filter, 0x00, DMX_FILTER_SIZE);
-	memset(mask, 0x00, DMX_FILTER_SIZE);
-
 	filter[0] = 0x42;
+	filter[1] = (p_transport_stream_id >> 8) & 0xff;
+	filter[2] = p_transport_stream_id & 0xff;
+	filter[3] = 0x00;
 	filter[4] = 0x00;
-	mask[0] = 0xFF;
-	mask[4] = 0xFF;
+	filter[5] = 0x00;
+	filter[6] = (p_original_network_id >> 8) & 0xff;
+	filter[7] = p_original_network_id & 0xff;
+	memset(&filter[8], 0x00, 8);
 
-	if ((demux_fd = open(DEMUX_DEVICE, O_RDWR)) < 0)
-	{
+	mask[0] = 0xFF;
+	mask[1] = 0xFF;
+	mask[2] = 0xFF;
+	mask[3] = 0x00;
+	mask[4] = 0xFF;
+	mask[5] = 0x00;
+	mask[6] = 0xFF;
+	mask[7] = 0xFF;
+	memset(&mask[8], 0x00, 8);
+
+	if ((demux_fd = open(DEMUX_DEVICE, O_RDWR)) < 0) {
 		ERROR(DEMUX_DEVICE);
 		return -1;
 	}
 
-	do
-	{
-		if ((setDmxSctFilter(demux_fd, 0x0011, filter, mask) < 0) ||
-		    (readDmx(demux_fd, buffer, SDT_SIZE) < 0))
-		{
+	do {
+		if ((setDmxSctFilter(demux_fd, 0x0011, filter, mask) < 0) || (readDmx(demux_fd, buffer, SDT_SIZE) < 0)) {
 			close(demux_fd);
 			return -1;
 		}

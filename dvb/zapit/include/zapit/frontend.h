@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.h,v 1.18 2002/11/02 21:46:21 obi Exp $
+ * $Id: frontend.h,v 1.19 2002/12/17 22:02:36 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -126,7 +126,7 @@ class CFrontend
 		void setDiseqcRepeats (uint8_t repeats)		{ diseqcRepeats = repeats; }
 		const uint8_t getDiseqcRepeats ()		{ return diseqcRepeats; }
 
-		void setDiseqcType (diseqc_t type)		{ diseqcType = type; }
+		void setDiseqcType (diseqc_t type);
 		const diseqc_t getDiseqcType ()			{ return diseqcType; }
 		
 		const bool isInitialized ()			{ return initialized; }
