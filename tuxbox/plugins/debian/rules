@@ -8,9 +8,11 @@ export DH_COMPAT=3
 
 # These are used for cross-compiling and for saving the configure script
 # from having to guess our platform (since we know it already)
+DEB_HOST_ARCH       ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
 DEB_HOST_GNU_TYPE   ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
 DEB_BUILD_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 
+VERSION = $(shell dpkg-parsechangelog | grep ^Version: | cut -d ' ' -f 2)
 ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
 	CFLAGS += -g
 endif
@@ -23,6 +25,9 @@ CXX = g++-3.2
 
 CXXFLAGS = $(CFLAGS)
 export CC CXX CFLAGS CXXFLAGS INSTALL_PROGRAM
+
+PACKAGES = $(shell dh_listpackages -a)
+VERSION = $(shell dpkg-parsechangelog | grep ^Version: | cut -d ' ' -f 2)
 
 build/config.status:
 	dh_testdir
@@ -64,23 +69,47 @@ install: build
 	dh_clean -k
 	dh_installdirs
 
-	$(MAKE) -C build install DESTDIR=$(CURDIR)/debian/tuxbox-plugins
-	$(MAKE) -C build install DESTDIR=$(CURDIR)/debian/tuxbox-plugins-udeb
-	mv debian/tuxbox-plugins/usr/lib/pkgconfig/* debian/tuxbox-plugins-dev/usr/lib/pkgconfig/
-	rm -rf debian/tuxbox-plugins/usr/lib/pkgconfig/
-	rm -rf debian/tuxbox-plugins-udeb/usr/lib/pkgconfig/
+	$(MAKE) -C build install prefix=$(CURDIR)/debian/tmp/usr
+
+	dh_movefiles
 
 
 # Build architecture-independent files here.
 binary-indep: build install
-# We have nothing to do by default.
+	dh_testdir -i
+	dh_testroot -i
+#	dh_installdebconf -i	
+	dh_installdocs -i
+#	dh_installexamples -i
+#	dh_installmenu -i
+#	dh_installlogrotate -i 
+#	dh_installemacsen -i
+#	dh_installpam -i 
+#	dh_installmime -i
+#	dh_installinit -i
+#	dh_installcron -i
+#	dh_installman -i
+#	dh_installinfo -i
+#	dh_undocumented -i
+	dh_installchangelogs -i
+	dh_link -i
+	dh_strip -i
+	dh_compress -i
+	dh_fixperms -i
+	dh_makeshlibs -i
+	dh_installdeb -i
+#	dh_perl -i
+	dh_shlibdeps -i
+	dh_gencontrol -i
+	dh_md5sums -i
+	dh_builddeb -i
 
 # Build architecture-dependent files here.
 binary-arch: build install
 	dh_testdir -a
 	dh_testroot -a
 #	dh_installdebconf -a	
-	dh_installdocs -a
+#	dh_installdocs -a
 #	dh_installexamples -a
 #	dh_installmenu -a
 #	dh_installlogrotate -a 
@@ -92,7 +121,7 @@ binary-arch: build install
 #	dh_installman -a
 #	dh_installinfo -a
 #	dh_undocumented -a
-	dh_installchangelogs -a
+#	dh_installchangelogs -a
 	dh_link -a
 	dh_strip -a
 	dh_compress -a
@@ -101,9 +130,13 @@ binary-arch: build install
 	dh_installdeb -a
 #	dh_perl -a
 	dh_shlibdeps -a
-	dh_gencontrol -a
-	dh_md5sums -a
-	dh_builddeb -a
+	dh_gencontrol -a -- -fdebian/files~
+#	dh_md5sums -a
+#	dh_builddeb -a
+	$(foreach PACKAGE, $(PACKAGES), \
+	( dpkg-distaddfile $(PACKAGE)_$(VERSION)_$(DEB_HOST_ARCH).udeb tuxbox-image optional ) ; )
+	$(foreach PACKAGE, $(PACKAGES), \
+	( dh_builddeb -p$(PACKAGE) --filename=$(PACKAGE)_$(VERSION)_$(DEB_HOST_ARCH).udeb ) ; )
 
 binary: binary-indep binary-arch
 .PHONY: build clean binary-indep binary-arch binary install configure
