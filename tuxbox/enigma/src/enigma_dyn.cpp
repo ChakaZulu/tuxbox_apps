@@ -818,6 +818,40 @@ static eString getStats()
 	return result;
 }
 
+static eString getChannelStats()
+{
+	std::stringstream result;
+
+	if (eZapMain::getInstance()->getAC3Logo())
+		result << "<img src=\"dolby_on.png\" border=0>";
+	else
+		result << "<img src=\"dolby_off.png\" border=0>";
+	
+	if (eZapMain::getInstance()->getSmartcardLogo())
+		result << "<img src=\"crypt_on.png\" border=0>";
+	else
+		result << "<img src=\"crypt_off.png\" border=0>";
+		
+	if (eZapMain::getInstance()->get16_9Logo())
+		result << "<img src=\"format_on.png\" border=0>";
+	else
+		result << "<img src=\"format_off.png\" border=0>";
+		
+	return result.str();
+}
+
+static eString getRecordingStat()
+{
+	std::stringstream result;
+
+	if (eZapMain::getInstance()->isRecording())
+		result << "<img src=\"red_blinking.gif\" border=0>";
+	else
+		result << "&nbsp;";
+		
+	return result.str();
+}
+
 static eString getVolBar()
 {
 	std::stringstream result;
@@ -1748,6 +1782,8 @@ static eString getEITC2()
 	result.strReplace("#SERVICENAME#", curService);
 	result.strReplace("#STATS#", getStats());
 	result.strReplace("#EMPTYCELL#", "&nbsp;");
+	result.strReplace("#CHANSTATS#", getChannelStats());
+	result.strReplace("#RECORDING#", getRecordingStat());
 
 	return result;
 }
