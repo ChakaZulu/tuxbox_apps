@@ -31,8 +31,8 @@
 		like <I>snoop</I> on Sun Solaris or <I>tcpdump</I> under Linux.<BR><BR> The
 		programm was mainly written to learn and understand the DVB protocol structures
 		and streams sent via sattelites. Out of this reason, the programm ist not
-		performance optimized, but it will hopefully do its job.<BR><BR>Author: Rainer
-		Scherg (rasc@users.sourceforge.net)</P> 
+		performance optimized, but it will hopefully do its job.<BR><BR>Rainer Scherg
+		(rasc) </P> 
 	 <P><BR></P> 
 	 <H2>Under what Licence is dvbsnoop?</H2> 
 	 <P>dvbsnoop is published under GPL with extension:</P> 
@@ -72,7 +72,7 @@ License:
 		api</A>. You need to have the dvb driver installed on your computer to use
 		dvbsnoop. dvbsnoop is text-based, so it should work on any unix based system,
 		which offers you shell access.</P> 
-	<H3> cross compiling for the dbox2 (ppc)</H3> 
+	 <H3> cross compiling for the dbox2 (ppc)</H3> 
 	 <P>dvbsnoop is part of the dbox2 cdk. The dbox2 is a powerful digital
 		satellite receiver (set top box) with a network interface.<BR> Just follow the
 		installation instructions of the dbox2 cdk:</P> 
@@ -88,12 +88,13 @@ make .dvbsnoop
 		</TR> 
 	 </TABLE> 
 	 <H3> native compilation</H3> 
-	 <P>Check out dvbsnoop from the cvs. You will find the cvs and checkout
-	 	instructions on <A HREF="http://cvs.tuxbox.org">http://cvs.tuxbox.org</A>.
-		If your distribution still uses Linux kernel 2.4, then you probably need to
-		set the path to your DVB API header files by appending
-			<PRE>CPPFLAGS=-I/path/to/dvb-kernel/linux/include</PRE>
-		to the configure command.</P>
+	 <P>Check out dvbsnoop from the cvs or download a tarball. You will find the
+		cvs and checkout instructions on <A
+		HREF="http://cvs.tuxbox.org">http://cvs.tuxbox.org</A>. If your distribution
+		still uses Linux kernel 2.4, then you probably need to set the path to your DVB
+		API header files by appending </P> 
+	 <PRE>CPPFLAGS=-I/path/to/dvb-kernel/linux/include</PRE> 
+	 <P>to the configure command.</P> 
 	 <TABLE CELLPADDING="10"> 
 		<TR> 
 		  <TD>&nbsp;</TD> 
@@ -105,10 +106,9 @@ make
 </PRE></TD> 
 		</TR> 
 	 </TABLE> 
-	 <P><B>Important:</B> Currently I work with a dbox2 only (I do not own a dvb
-		card for my linux server) - so I do not know if dvbsnoop is compiling on a
-		linux based PC smoothly. Feedback or Makefile.am patches would be nice, if
-		there is any problem...</P> 
+	 <P><B>Important:</B> Currently I'm working with a dbox2 only (I do not own
+		a dvb card for my linux server) - so I do not know if dvbsnoop is working on a
+		linux based PC smoothly.</P> 
 	 <P><BR><BR><BR></P> 
 	 <H2>How to use dvbsnoop?</H2> 
 	 <P>dvbsnoop is a commandline tool.<BR>To tune in a transponder, use a
@@ -535,10 +535,10 @@ CRC: 3952000829 (0xeb8ebf3d)
 		decoding:</B><BR>Currently I do not have the ISO 13818-6 (DSM-CC), so I try to
 		get these information out of other documents, which are freely available.
 		Unfortunatly these document are describing only a certain parts of the data
-		carousel, so missunderstandings by me may be possible - If you see any odd
-		output, <B>please report</B> this. If you have the ISO 13818-6:1998 to spare, I
-		would be glad to have a look on it. (340 CHF at www.iso.ch is very expensive
-		for a small open source project...).<BR></P> 
+		carousel, missunderstandings may be possible - If you see any odd output,
+		<B>please report</B> this. If you have the ISO 13818-6:1998 to spare, I would
+		be glad to have a look on it. (340 CHF at www.iso.ch is very expensive for a
+		small open source project...).<BR></P> 
 	 <P><BR><BR><BR></P> 
 	 <H2>Related Topic and Links</H2> 
 	 <P>Please visit the following websites for more information:</P> 
@@ -555,9 +555,10 @@ CRC: 3952000829 (0xeb8ebf3d)
 			 HREF="http://sourceforge.net/projects/dvbsnoop">http://sourceforge.net/projects/dvbsnoop</A></B></TD>
 		  
 		  <TD>&nbsp;</TD> 
-		  <TD>The project homepage of dvbsnoop, currently dvbsnoop is hosted at
-			 <B>www.tuxbox.org</B>. To check out the source, read the cvs information on
-			 tuxbox.org</TD> 
+		  <TD>The project homepage of dvbsnoop, currently the dvbsnoop cvs is
+			 hosted at <B>www.tuxbox.org</B>. To check out the source, read the cvs
+			 information on tuxbox.org. <B>Tarballs will be published on this site.</B></TD>
+		  
 		</TR> 
 		<TR> 
 		  <TD VALIGN="TOP"><A
@@ -662,24 +663,39 @@ CRC: 3952000829 (0xeb8ebf3d)
 		HREF="http://cvs.tuxbox.org/">cvs.tuxbox.org</A></B>! This was necessary due to
 		uptime problems at <A HREF="http://www.berlios.de">berlios.de</A>.</P> 
 	 <P><BR><BR></P> 
-	 <H2>Thanks...</H2> 
+	 <H2>Authors, Co-Authors, Thanks, ...</H2> 
+	 <TABLE>
+		<TR>
+		  <TD COLSPAN="3"><B>Authors are:</B></TD>
+		</TR>
+		<TR>
+		  <TD>&nbsp;Rainer Scherg &nbsp;</TD>
+		  <TD>&nbsp;(rasc)&nbsp; </TD>
+		  <TD>&nbsp;&lt;rasc@users.sourceforge.net&gt;</TD>
+		</TR>
+		<TR>
+		  <TD>&nbsp;Andreas Oberritter &nbsp;</TD>
+		  <TD>&nbsp;(obi)&nbsp;</TD>
+		  <TD>&nbsp;&lt;obi@saftware.de&gt;&nbsp;</TD>
+		</TR>
+	 </TABLE>
 	 <P><B>Thanks</B> a lot to all the members and developers of the
-		tuxbox@dbox2 project!!!<BR>These heros do great support and also bugfixing -
-		see the history information in the source!! Special thanks to obi...
-		;-)<BR></P> 
+		tuxbox@dbox2 project!!!<BR>These heros ;-) do great support and also bugfixing
+		- see also the history information in the source!!<BR><BR></P> 
 	 <P><BR><BR></P> 
 	 <H2>Where to send bugreports, requests?</H2> 
 	 <P>Please send bugreports with a detailed description to: &nbsp;&nbsp;
 		<A
-		 HREF="mailto:rasc@users.sourceforge.net?DVBSNOOP - Bugreport...">rasc@users.sourceforge.net</A><BR>Do
-		NOT send saved stream files or large files without permission via email!</P> 
-	 <P><BR><BR></P>
-	 <H2>Some keywords...</H2>
+		HREF="mailto:rasc@users.sourceforge.net?DVBSNOOP - Bugreport...">rasc@users.sourceforge.net</A><BR>Do
+		NOT send saved stream files or large files without permission via
+		email!<BR>Bugfixes, code snipsets, etc. are welcome</P> 
+	 <P><BR><BR></P> 
+	 <H2>Some keywords...</H2> 
 	 <P>DVB stream analyzer, mpeg stream analyzer, ts stream analyzer, MPEG,
 		MPG, descriptor, digital television, satellite TV, cable TV, dvb-c, dvb-s,
 		dvb-t, MHP, DSM-CC, SI, PES, TOT, PAT, PMT, SDT, EIT, NIT, TDST, RST, SIT, DIT,
 		BAT, EMM, ECM, SI Tables, SSU, datagram, sections, transport stream analyzer,
 		packet elementary stream, DEMUX, ISO/IEC 13818-1, ISO/IEC 13818-6, ETSI EN 300
 		468, ETSI EN 301 162, ETSI TR 102 006, ITU-T H.220,</P> 
-	 <P><BR><BR><BR><BR>(c) 2001-2003 Rainer Scherg<BR><BR></P> </BODY>
+	 <P><BR><BR><BR><BR>(c) 2001-2003 Rainer Scherg (rasc)<BR><BR></P> </BODY>
 </HTML>
