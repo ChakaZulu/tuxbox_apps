@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.132 2003/12/24 13:55:46 obi Exp $
+ * $Id: scan.cpp,v 1.133 2004/02/01 14:34:28 metallica Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -416,7 +416,7 @@ void write_bouquets(const char * const providerName)
 void write_transponder(FILE *fd, t_transport_stream_id transport_stream_id, t_original_network_id original_network_id)
 {
 	stiterator tI = scantransponders.find((transport_stream_id << 16) | original_network_id);
-
+	static bool emptyTransponder = false;
 	switch (frontend->getInfo()->type) {
 	case FE_QAM: /* cable */
 		fprintf(fd,
@@ -431,15 +431,7 @@ void write_transponder(FILE *fd, t_transport_stream_id transport_stream_id, t_or
 		break;
 
 	case FE_QPSK: /* satellite */
-		fprintf(fd,
-			"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" polarization=\"%hu\">\n",
-			tI->second.transport_stream_id,
-			tI->second.original_network_id,
-			tI->second.feparams.frequency,
-			tI->second.feparams.inversion,
-			tI->second.feparams.u.qpsk.symbol_rate,
-			tI->second.feparams.u.qpsk.fec_inner,
-			tI->second.polarization);
+		emptyTransponder = true;
 		break;
 
 	case FE_OFDM: /* terrestrial */
@@ -464,6 +456,18 @@ void write_transponder(FILE *fd, t_transport_stream_id transport_stream_id, t_or
 
 	for (tallchans::const_iterator cI = allchans.begin(); cI != allchans.end(); cI++)
 		if ((cI->second.getTransportStreamId() == transport_stream_id) && (cI->second.getOriginalNetworkId() == original_network_id)) {
+			if(emptyTransponder){
+					fprintf(fd,
+			"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" polarization=\"%hu\">\n",
+			tI->second.transport_stream_id,
+			tI->second.original_network_id,
+			tI->second.feparams.frequency,
+			tI->second.feparams.inversion,
+			tI->second.feparams.u.qpsk.symbol_rate,
+			tI->second.feparams.u.qpsk.fec_inner,
+			tI->second.polarization);
+			emptyTransponder = false;
+			}
 			if (cI->second.getName().length() == 0)
 				fprintf(fd,
 					"\t\t\t<channel service_id=\"%04x\" name=\"%04x\" service_type=\"%02x\"/>\n",
@@ -477,9 +481,9 @@ void write_transponder(FILE *fd, t_transport_stream_id transport_stream_id, t_or
 					convert_UTF8_To_UTF8_XML(cI->second.getName()).c_str(),
 					cI->second.getServiceType());
 		}
-
+	if(!emptyTransponder){
 	fprintf(fd, "\t\t</transponder>\n");
-
+	}
 	return;
 }
 
