@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.164 2002/04/28 05:38:51 obi Exp $
+ * $Id: zapit.cpp,v 1.165 2002/04/28 08:07:37 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -654,18 +654,7 @@ int changeapid (uint8_t pid_nr)
 	/* update current channel */
 	channel->setAudioChannel(pid_nr);
 
-#ifdef USE_EXTERNAL_CAMD
-	if ((channel->getEcmPid() != NONE) && (channel->getEcmPid() != INVALID))
-	{
-		cam->setEcm(channel);
-	}
-#endif
-
 	return 8;
-}
-
-void endzap ()
-{
 }
 
 void shutdownBox ()
@@ -1882,7 +1871,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.164 2002/04/28 05:38:51 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.165 2002/04/28 08:07:37 obi Exp $\n\n");
 
 	if (argc > 1)
 	{

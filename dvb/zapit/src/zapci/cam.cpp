@@ -1,5 +1,5 @@
 /*
- * $Id: cam.cpp,v 1.10 2002/04/28 05:38:51 obi Exp $
+ * $Id: cam.cpp,v 1.11 2002/04/28 08:07:37 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -209,7 +209,9 @@ int CCam::sendMessage (uint8_t *data, uint16_t length)
 int CCam::setEcm (CZapitChannel *channel)
 {
 #ifdef USE_EXTERNAL_CAMD
-	uint8_t buffer[15];
+	uint8_t i;
+	uint8_t buffer[8 + ((channel->getPids()->count_vpids + channel->getPids()->count_apids) << 1) + (channel->getTeletextPid() ? 2 : 0)];
+	uint8_t pos = 9;
 
 	buffer[0] = 0x0D;
 	buffer[1] = channel->getOriginalNetworkId() >> 8;
@@ -220,14 +222,26 @@ int CCam::setEcm (CZapitChannel *channel)
 	buffer[6] = caSystemId;
 	buffer[7] = channel->getEcmPid() >> 8;
 	buffer[8] = channel->getEcmPid();
-	buffer[9] = channel->getVideoPid() >> 8;
-	buffer[10] = channel->getVideoPid();
-	buffer[11] = channel->getAudioPid() >> 8;
-	buffer[12] = channel->getAudioPid();
-	buffer[13] = channel->getTeletextPid() >> 8;
-	buffer[14] = channel->getTeletextPid();
 
-	return sendMessage(buffer, 15);
+	if (channel->getVideoPid() != 0)
+	{
+		buffer[pos++] = channel->getVideoPid() >> 8;
+		buffer[pos++] = channel->getVideoPid();
+	}
+
+	for (i = 0; i < channel->getPids()->count_apids; i++)
+	{
+		buffer[pos++] = channel->getPids()->apids[i].pid >> 8;
+		buffer[pos++] = channel->getPids()->apids[i].pid;
+	}
+
+	if (channel->getTeletextPid() != 0)
+	{
+		buffer[pos++] = channel->getTeletextPid() >> 8;
+		buffer[pos++] = channel->getTeletextPid();
+	}
+
+	return sendMessage(buffer, pos);
 #else
 	uint8_t i;
 	uint8_t buffer[12 + (4 * (channel->getPids()->count_vpids + channel->getPids()->count_apids))];

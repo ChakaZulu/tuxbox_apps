@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.11 2002/04/24 18:51:18 field Exp $
+ * $Id: pmt.cpp,v 1.12 2002/04/28 08:07:37 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -149,6 +149,9 @@ uint16_t parse_ES_info(uint8_t *buffer, pids *ret_pids, uint16_t ca_system_id)
 				{
 					ret_pids->apids[ap_count].is_ac3 = true;
 				}
+				break;
+
+			case 0xB1: /* unknown, Astra 19.2E */
 				break;
 
 			case 0xC0: /* unknown, Astra 19.2E */
