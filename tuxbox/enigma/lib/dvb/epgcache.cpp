@@ -5,10 +5,11 @@
 
 eEPGCache *eEPGCache::instance;
 
-#define HILO(x) (x##_hi << 8 | x##_lo) 
+#define HILO(x) (x##_hi << 8 | x##_lo)
 #include "lowlevel/dvb.h"
 
-eEPGCache::eEPGCache(): eSection(0x12, 0x40, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xE0)
+
+eEPGCache::eEPGCache():eSection(0x12, 0x40, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xE0)
 {
 	qDebug("[EPGC] Initialized EPGCache");
 	connect(eDVB::getInstance(), SIGNAL(enterTransponder(eTransponder*)), SLOT(enterTransponder()));
@@ -28,22 +29,22 @@ int eEPGCache::sectionRead(__u8 *data)
 	int original_network_id=HILO(eit->original_network_id);
 	int len=HILO(eit->section_length)+3-4;
 	int ptr=EIT_SIZE;
+//	qDebug("ptr = %i, len = %i, ptr<len = %i", ptr, len, ptr<len);
 	while (ptr<len)
 	{
 		eit_event_struct *eit_event=(eit_event_struct*)(data+ptr);
 		int event_id=HILO(eit_event->event_id);
 
-		std::map<int,eventData> &service=eventDB[sref(original_network_id,service_id)];
-		std::map<int,eventData>::iterator event=service.find(event_id);
+		eventMap &service=eventDB[sref(original_network_id,service_id)];
+		eventMap::iterator event=service.find(event_id);
+//		qDebug("Incoming Event: %x:%x:%x", original_network_id, service_id, event_id);
 		if (event==service.end())
 		{
 			eventData ed(
 				eventData::iterator((__u8*)(data+ptr)), 
 				eventData::iterator((__u8*)(data+ptr+HILO(((eit_event_struct*)(data+ptr))->descriptors_loop_length)+EIT_LOOP_SIZE))
 			);
-
-			eventDB[sref(original_network_id,service_id)]
-				.insert(std::pair<int,eventData>(event_id, ed));
+			eventDB[sref(original_network_id,service_id)].insert(std::pair<int,eventData>(event_id, ed));
 			qDebug("hey, new: %x:%x:%x", original_network_id, service_id, event_id);
 		}
 		ptr+=HILO(((eit_event_struct*)(data+ptr))->descriptors_loop_length)+EIT_LOOP_SIZE;
@@ -63,8 +64,8 @@ void eEPGCache::leaveTransponder()
 
 EITEvent *eEPGCache::lookupEvent(int original_network_id, int service_id, int event_id)
 {
-	std::map<int,eventData> &service=eventDB[sref(original_network_id,service_id)];
-	std::map<int,eventData>::iterator event=service.find(event_id);
+	eventMap &service=eventDB[sref(original_network_id,service_id)];
+	eventMap::iterator event=service.find(event_id);
 	if (event==service.end())
 		return 0;
 	return new EITEvent((const eit_event_struct*)&(*event->second.begin()));
@@ -72,12 +73,18 @@ EITEvent *eEPGCache::lookupEvent(int original_network_id, int service_id, int ev
 
 EITEvent *eEPGCache::lookupCurrentEvent(int original_network_id, int service_id)
 {
-	std::map<int,eventData> &service=eventDB[sref(original_network_id,service_id)];
-	std::map<int,eventData>::iterator event=service.begin();
+	eventMap &service=eventDB[sref(original_network_id,service_id)];
+	eventMap::iterator event=service.begin();
 	if (event==service.end())
 		return 0;
 	return new EITEvent((const eit_event_struct*)&(*event->second.begin()));
 }
+
+const eventMap& eEPGCache::getEventMap(int original_network_id, int service_id)
+{
+	return eventDB[sref(original_network_id,service_id)];
+}
+
 
 eAutoInitP0<eEPGCache> init_eEPGCacheInit(6, "EPG cache");
 

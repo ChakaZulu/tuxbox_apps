@@ -40,6 +40,12 @@ QString eListboxEntryService::getText(int col=0) const
 		EITEvent *e=eEPGCache::getInstance()->lookupCurrentEvent(service.original_network_id, service.service_id);
 		if (e)
 		{
+/*			tm* t = localtime(&e->start_time);
+			QString _long_description;
+			_long_description += QString().sprintf("Start = %02d:%02d", t->tm_hour, t->tm_min);
+			time_t endtime = e->start_time+e->duration;
+			localtime(&endtime);
+			_long_description += QString().sprintf("End %02d:%02d\n", t->tm_hour, t->tm_min);			*/
 			for (QListIterator<Descriptor> d(e->descriptor); d.current(); ++d)
 			{
 				Descriptor *descriptor=d.current();
@@ -51,7 +57,13 @@ QString eListboxEntryService::getText(int col=0) const
 					sname+=")";
 					break;
 				}
+/*				else if (d.current()->Tag()==DESCR_EXTENDED_EVENT)
+				{
+					ExtendedEventDescriptor *ss=(ExtendedEventDescriptor*)d.current();
+					_long_description+=ss->item_description;
+				}*/
 			}
+//			qDebug(_long_description+"\n");
 			delete e;
 		}
 		return sname;
@@ -147,7 +159,7 @@ int eServiceSelector::eventFilter(const eWidgetEvent &event)
 }
 
 eServiceSelector::eServiceSelector()
-								:eLBWindow("Select Service...", eListbox::tLitebar, 16, eSkin::getActive()->queryValue("fontsize", 20), 400)
+								:eLBWindow("Select Service...", eListbox::tLitebar, 16, eSkin::getActive()->queryValue("fontsize", 20), 600)
 {
 	pbs = new eBouquetSelector();
 

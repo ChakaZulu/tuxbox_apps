@@ -373,6 +373,7 @@ int eListbox::setProperty(const QString &prop, const QString &value)
 void eListbox::setActiveColor(gColor active)
 {
 	col_active=active;
+
 	if (current && current->current())
 		invalidateEntry(active);		/* das ist ja wohl buggy hier */
 }

@@ -19,6 +19,7 @@
 #include "decoder.h"
 #include "enigma_plugins.h"
 #include "download.h"
+#include "epgcache.h"
 
 static QString getISO639Description(char *iso)
 {
@@ -739,17 +740,49 @@ void eZapMain::keyUp(int code)
 		}
 		break;
 	}
-#if 0
+//#if 0
 	case eRCInput::RC_RED:
 	{
-		hide();
+		eService* current = eDVB::getInstance()->service;
+		qDebug("get EventMap for onid: %02x, sid: %02x\n", current->original_network_id, current->service_id);
+		const eventMap& evt = eEPGCache::getInstance()->getEventMap(current->original_network_id, current->service_id);
+		eventMap::const_iterator It;
+		for (It = evt.begin(); It != evt.end(); It++)
+		{
+			qDebug("Vector Size = %i\n", It->second.size());
+				EITEvent* e = new EITEvent( (const eit_event_struct*) &(*It->second.begin()));
+ 				tm* t = localtime(&e->start_time);
+				QString _long_description;
+				_long_description += QString().sprintf("Start = %02d:%02d", t->tm_hour, t->tm_min);
+				time_t endtime = e->start_time+e->duration;
+				localtime(&endtime);
+				_long_description += QString().sprintf("End %02d:%02d\n", t->tm_hour, t->tm_min);			
+				for (QListIterator<Descriptor> d(e->descriptor); d.current(); ++d)
+				{
+					Descriptor *descriptor=d.current();
+					if (descriptor->Tag()==DESCR_SHORT_EVENT)
+					{
+						ShortEventDescriptor *ss=(ShortEventDescriptor*)descriptor;
+						_long_description+=ss->event_name+"\n";
+					}
+					else if (d.current()->Tag()==DESCR_EXTENDED_EVENT)
+					{
+						ExtendedEventDescriptor *ss=(ExtendedEventDescriptor*)d.current();
+						_long_description+=ss->item_description;
+					}
+				}
+				qDebug(_long_description+"\n");
+				delete e;
+		}
+		break;
+/*		hide();
 		eDownloadWindow down("http://www.elitedvb.net/files/tuner.so");
 		down.show();
 		down.exec();
 		down.hide();
-		show();
+		show();*/
 	}
-#endif
+//#endif
 	case eRCInput::RC_HELP:
 	{
 		if (!eDVB::getInstance()->service)
