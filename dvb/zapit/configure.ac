@@ -53,13 +53,11 @@ AC_OUTPUT([
 Makefile
 include/Makefile
 include/zapit/Makefile
-include/zapit/xml/Makefile
 include/zapit/zapci/Makefile
 include/zapit/zapost/Makefile
 include/zapit/zapsi/Makefile
 lib/Makefile
 src/Makefile
-src/xml/Makefile
 src/zapci/Makefile
 src/zapost/Makefile
 src/zapsi/Makefile
