@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.45 2001/08/09 23:36:26 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.46 2001/08/16 01:35:23 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.46  2001/08/16 01:35:23  fnbrd
+//  internal changes.
+//
 //  Revision 1.45  2001/08/09 23:36:26  fnbrd
 //  Pause command for the grabbers, internal changes.
 //
@@ -167,6 +170,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <time.h>
+#include <signal.h>
 //#include <sys/resource.h> // getrusage
 #include <set>
 #include <map>
@@ -1014,7 +1018,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.45 2001/08/09 23:36:26 fnbrd Exp $\n"
+    "$Id: sectionsd.cpp,v 1.46 2001/08/16 01:35:23 fnbrd Exp $\n"
     "Current time: %s\n"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1271,8 +1275,13 @@ static void sendEventList(struct connectionData *client, const unsigned char ser
     return;
   }
   *evtList=0;
-  if(dmxEIT.pause()) { // -> lock
+  if(dmxEIT.pause()) {
     delete[] evtList;
+    return;
+  }
+  if(dmxSDT.pause()) {
+    delete[] evtList;
+    dmxEIT.unpause();
     return;
   }
   lockServices();
@@ -1297,7 +1306,8 @@ static void sendEventList(struct connectionData *client, const unsigned char ser
     } // if ==serviceTyp
   unlockEvents();
   unlockServices();
-  dmxEIT.unpause(); // -> unlock
+  dmxSDT.unpause();
+  dmxEIT.unpause();
   struct sectionsd::msgResponseHeader msgResponse;
   msgResponse.dataLength=strlen(evtList)+1;
   if(msgResponse.dataLength==1)
@@ -1888,12 +1898,8 @@ static void *houseKeepingThread(void *)
     while(rc)
       rc=sleep(rc);
     dprintf("housekeeping.\n");
-/*
-    if(stopDMXeit())
-      return 0;
-    if(stopDMXsdt())
-      return 0;
-*/
+    dmxEIT.pause();
+    dmxSDT.pause();
     struct mallinfo speicherinfo1;
     if(debug)
       // Speicher-Info abfragen
@@ -1927,18 +1933,14 @@ static void *houseKeepingThread(void *)
 //      dprintf("Number of services: %u\n", services.size());
       unlockServices();
     }
-/*
-    if(startDMXsdt())
-      return 0;
-    if(startDMXeit())
-      return 0;
-*/
     if(debug) {
       // Speicher-Info abfragen
       struct mallinfo speicherinfo=mallinfo();
       dprintf("total size of memory occupied by chunks handed out by malloc: %d\n", speicherinfo.uordblks);
       dprintf("total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %.2fMB)\n",speicherinfo.arena, speicherinfo.arena/1024, (float)speicherinfo.arena/(1024.*1024));
     }
+    dmxSDT.unpause();
+    dmxEIT.unpause();
   } // for endlos
   } // try
   catch (std::exception& e) {
@@ -1956,14 +1958,40 @@ static void printHelp(void)
     printf("\nUsage: sectionsd [-d]\n\n");
 }
 
+static int listenSocket=0;
+
+// Just to get our listen socket closed cleanly
+static void signalHandler(int signum)
+{
+  if(listenSocket)
+    close(listenSocket);
+  listenSocket=0;
+/*
+  if(signum==SIGABRT)
+    printf("received SIGABRT\n");
+  else if(signum==SIGINT)
+    printf("received SIGINT\n");
+  else if(signum==SIGUSR1)
+    printf("received SIGUSR1\n");
+  else if(signum==SIGHUP)
+    printf("received SIGHUP\n");
+  else if(signum==SIGQUIT)
+    printf("received SIGQUIT\n");
+  else if(signum==SIGTSTP)
+    printf("received SIGSTP\n");
+  else if(signum==SIGTERM)
+    printf("received SIGTERM\n");
+*/
+  exit(0);
+}
+
 int main(int argc, char **argv)
 {
 pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
-int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.45 2001/08/09 23:36:26 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.46 2001/08/16 01:35:23 fnbrd Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
@@ -1986,6 +2014,9 @@ struct sockaddr_in serverAddr;
     return 0;
 
   // from here on forked
+
+  signal(SIGTERM, signalHandler); // killall
+  signal(SIGINT, signalHandler); // CTRL-C
 
   // den Port für die Clients öffnen
   listenSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -2036,7 +2067,7 @@ struct sockaddr_in serverAddr;
   pthread_attr_setdetachstate(&conn_attrs, PTHREAD_CREATE_DETACHED);
   // Unsere Endlosschliefe
   socklen_t clientInputLen = sizeof(serverAddr);
-  for(;;) {
+  for(;listenSocket;) {
     // wir warten auf eine Verbindung
     struct connectionData *client=new connectionData; // Wird vom Thread freigegeben
     if(!client)
