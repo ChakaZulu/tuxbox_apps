@@ -62,6 +62,7 @@ int Decoder::fd::demux_vtxt;
 
 static void SetECM(int vpid, int apid, int pmtpid, int descriptor_length, __u8 *descriptors)
 {
+#if 0
 	eDebug("-------------------Set ECM-----------------");
 	static int lastpid=-1;
 
@@ -112,6 +113,7 @@ static void SetECM(int vpid, int apid, int pmtpid, int descriptor_length, __u8 *
 		break;
 	}
 	}
+#endif
 }
 
 int Decoder::Initialize()
