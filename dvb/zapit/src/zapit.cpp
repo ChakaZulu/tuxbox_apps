@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.178 2002/05/12 00:44:32 obi Exp $
+ * $Id: zapit.cpp,v 1.179 2002/05/12 00:58:37 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -177,47 +177,60 @@ void signal_handler (int signum)
 }
 
 #ifdef DBOX2
-int startVbi (int fd, dvb_pid_t teletext_pid)
+/*
+ * return 0 on success or if nothing to do
+ * return -1 otherwise
+ */
+int startVbi ()
 {
-	if ((teletext_pid == NONE) || (teletext_pid >= INVALID))
+	if ((channel->getTeletextPid() == NONE) || (channel->getTeletextPid() >= INVALID))
 	{
-		return fd;
+		return -1;
 	}
 
-	if ((fd == -1) && ((fd = open(VBI_DEV, O_RDWR)) < 0))
+	if ((vbi_fd == -1) && ((vbi_fd = open(VBI_DEV, O_RDWR)) < 0))
 	{
 		perror ("[zapit] " VBI_DEV);
 		return -1;
 	}
 
-	if (ioctl(fd, AVIA_VBI_START_VTXT, teletext_pid) < 0)
+	if (ioctl(vbi_fd, AVIA_VBI_START_VTXT, channel->getTeletextPid()) < 0)
 	{
 		perror("[zapit] VBI_START_VTXT");
-		close(fd);
+		close(vbi_fd);
+		vbi_fd = -1;
 		return -1;
 	}
 
-	return fd;
+	return 0;
 }
 
-int stopVbi (int fd)
+/*
+ * return 0 on success or if nothing to do
+ * return -1 otherwise
+ */
+int stopVbi ()
 {
-	if (fd == -1)
+	if (vbi_fd == -1)
 	{
-		return fd;
+		return 0;
 	}
 
-	if (ioctl(fd, AVIA_VBI_STOP_VTXT, 0) < 0)
+	if (ioctl(vbi_fd, AVIA_VBI_STOP_VTXT, 0) < 0)
 	{
 		perror("[zapit] VBI_STOP_VTXT");
+		close(vbi_fd);
+		vbi_fd = -1;
+		return -1;
 	}
 
-	close(fd);
-	return -1;
+	close(vbi_fd);
+	vbi_fd = -1;
+	return 0;
 }
 #endif /* DBOX2 */
 
-int save_settings (bool write)
+void save_settings (bool write)
 {
 	if (channel != NULL)
 	{
@@ -247,8 +260,6 @@ int save_settings (bool write)
 		config->setInt("diseqcType", frontend->getDiseqcType());
 		config->saveConfig(CONFIGFILE);
 	}
-
-	return 0;
 }
 
 channel_msg load_settings()
@@ -269,11 +280,15 @@ channel_msg load_settings()
 	return output_msg;
 }
 
-bool setAudioBypassMode (bool isAc3)
+/*
+ * return 0 on success or if nothing to do
+ * return -1 otherwise
+ */
+int setAudioBypassMode (bool isAc3)
 {
 	if (isAc3 == wasAc3)
 	{
-		return false;
+		return 0;
 	}
 
 	if (audio_fd != -1)
@@ -284,46 +299,54 @@ bool setAudioBypassMode (bool isAc3)
 	if ((audio_fd = open(AUDIO_DEV, O_RDWR)) < 0)
 	{
 		perror("[zapit] " AUDIO_DEV);
-		return false;
+		return -1;
 	}
 
 	if (ioctl(audio_fd, AUDIO_SET_BYPASS_MODE, isAc3 ? 0 : 1) < 0)
 	{
 		perror("[zapit] AUDIO_SET_BYPASS_MODE");
 		close(audio_fd);
-		return false;
+		return -1;
 	}
 
 	wasAc3 = isAc3;
 
-	return true;
+	return 0;
 }
 
-bool setAudioMute (bool mute)
+/*
+ * return 0 on success
+ * return -1 otherwise
+ */
+int setAudioMute (bool mute)
 {
 	if ((audio_fd == -1) && ((audio_fd = open(AUDIO_DEV, O_RDWR)) < 0))
 	{
 		perror("[zapit] " AUDIO_DEV);
-		return false;
+		return -1;
 	}
 
 	if (ioctl(audio_fd, AUDIO_SET_MUTE, mute) < 0)
 	{
 		perror("[zapit] AUDIO_SET_MUTE");
-		return false;
+		return -1;
 	}
 
-	return true;
+	return 0;
 }
 
-bool setAudioVolume (unsigned int left, unsigned int right)
+/*
+ * return 0 on success
+ * return -1 otherwise
+ */
+int setAudioVolume (unsigned int left, unsigned int right)
 {
 	audioMixer_t mixer;
 
 	if ((audio_fd == -1) && ((audio_fd = open(AUDIO_DEV, O_RDWR)) < 0))
 	{
 		perror("[zapit] " AUDIO_DEV);
-		return false;
+		return -1;
 	}
 
 	mixer.volume_left = left;
@@ -332,10 +355,10 @@ bool setAudioVolume (unsigned int left, unsigned int right)
 	if (ioctl(audio_fd, AUDIO_SET_MIXER, &mixer) < 0)
 	{
 		perror("[zapit] AUDIO_SET_MIXER");
-		return false;
+		return -1;
 	}
 
-	return true;
+	return 0;
 }
 
 /*
@@ -346,6 +369,10 @@ bool setAudioVolume (unsigned int left, unsigned int right)
  * - send channel name to lcdd
  * - start descrambler
  * - start pcr, audio, video, teletext
+ *
+ * return 0 on success
+ * return -1 otherwise
+ *
  */
 int zapit (uint32_t onid_sid, bool in_nvod)
 {
@@ -491,25 +518,40 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 	cam->setCaPmt(channel->getCaPmt());
 
 	startPlayBack();
+
 	save_settings(false);
+
 	return 0;
 }
 
+/*
+ * return 0 on success
+ * return -1 otherwise
+ */
 int changeapid (uint8_t index)
 {
 	/* stop demux filter */
-	unsetDmxFilter(dmx_audio_fd);
+	if (unsetDmxFilter(dmx_audio_fd) < 0)
+	{
+		return -1;
+	}
 
 	/* update current channel */
 	channel->setAudioChannel(index);
 
 	/* set bypass mode */
-	setAudioBypassMode(channel->getAudioChannel()->isAc3);
+	if (setAudioBypassMode(channel->getAudioChannel()->isAc3) < 0)
+	{
+		return -1;
+	}
 
 	/* start demux filter */
-	setDmxPesFilter(dmx_audio_fd, DMX_OUT_DECODER, DMX_PES_AUDIO, channel->getAudioPid());
+	if (setDmxPesFilter(dmx_audio_fd, DMX_OUT_DECODER, DMX_PES_AUDIO, channel->getAudioPid()) < 0)
+	{
+		return -1;
+	}
 
-	return 8;
+	return 0;
 }
 
 void setRadioMode ()
@@ -536,6 +578,10 @@ void unsetRecordMode ()
 	eventServer->sendEvent(CZapitClient::EVT_RECORDMODE_DEACTIVATED, CEventServer::INITID_ZAPIT );
 }
 
+/*
+ * return 0 on success
+ * return -1 otherwise
+ */
 int prepare_channels ()
 {
 	// for the case this function is NOT called for the first time (by main())
@@ -565,6 +611,10 @@ int prepare_channels ()
 	return 0;
 }
 
+/*
+ * return 0 on success
+ * return -1 otherwise
+ */
 int start_scan ()
 {
 	if (scanInputParser == NULL)
@@ -1150,7 +1200,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.178 2002/05/12 00:44:32 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.179 2002/05/12 00:58:37 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1623,7 +1673,7 @@ int startPlayBack()
 
 #ifdef DBOX2
 
-	vbi_fd = startVbi(vbi_fd, channel->getTeletextPid());
+	startVbi();
 #endif /* DBOX2 */
 
 	return 0;
@@ -1633,7 +1683,7 @@ int stopPlayBack()
 {
 
 #ifndef DBOX2
-	vbi_fd = stopVbi(vbi_fd);
+	stopVbi();
 #endif /* DBOX2 */
 
 	if (audio_fd != -1)
