@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.24 2001/10/08 00:17:28 McClean Exp $
+//  $Id: neutrino.h,v 1.25 2001/10/10 01:20:09 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.25  2001/10/10 01:20:09  McClean
+//  menue changed
+//
 //  Revision 1.24  2001/10/08 00:17:28  McClean
 //  ucode-check - not rumnning
 //
@@ -180,7 +183,7 @@ class CNeutrinoApp : public CMenuTarget
 	void InitNetworkSettings(CMenuWidget &networkSettings);
 	void InitScreenSettings(CMenuWidget &);
 	void InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNotifier* videoSetupNotifier);
-	void InitMainSettings(CMenuWidget &mainSettings, CMenuWidget &audioSettings, CMenuWidget &networkSettings,
+	void InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings, CMenuWidget &audioSettings, CMenuWidget &networkSettings,
 			CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings);
 	void ClearFrameBuffer();
 	void SetupFonts();

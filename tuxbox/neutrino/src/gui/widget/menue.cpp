@@ -1,9 +1,12 @@
 /*
-$Id: menue.cpp,v 1.17 2001/10/01 20:41:08 McClean Exp $
+$Id: menue.cpp,v 1.18 2001/10/10 01:20:10 McClean Exp $
 
 
 History:
  $Log: menue.cpp,v $
+ Revision 1.18  2001/10/10 01:20:10  McClean
+ menue changed
+
  Revision 1.17  2001/10/01 20:41:08  McClean
  plugin interface for games - beta but nice.. :)
 
@@ -141,7 +144,7 @@ void CMenuWidget::paint()
     g_lcdd->setMode(LCDM_MENU, l_name);
 
 	width = 400;
-	height = 470; // height(menu_title)+10+...
+	height = 370; // height(menu_title)+10+...
 	x=((720-width)>>1) -20;
 	y=(576-height)>>1;
 

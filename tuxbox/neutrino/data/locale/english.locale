@@ -4,24 +4,21 @@ options.off off
 options.on on
 
 mainmenu.head Main menue
-mainmenu.runmode Mode
-mainmenu.shutdown Shutdown
 mainmenu.tvmode TV-Mode
 mainmenu.radiomode Radio-Mode
-mainmenu.mp3player MP3-Player
-mainmenu.splayback Stream Playback
-mainmenu.info Info
-mainmenu.streaminfo Streaminfo
-mainmenu.settings Settings
-mainmenu.language Language
-mainmenu.screensetup Screen Setup
-mainmenu.audio Audio
-mainmenu.video Video
-mainmenu.network Network
-mainmenu.colors Colors
-mainmenu.keybinding Key Setup
 mainmenu.games Play Games
-mainmenu.ucodecheck Check ucodes
+mainmenu.shutdown Shutdown
+mainmenu.settings Settings
+
+mainsettings.head Settings
+mainsettings.language Language
+mainsettings.screensetup Screen Setup
+mainsettings.audio Audio
+mainsettings.video Video
+mainsettings.network Network
+mainsettings.colors Colors
+mainsettings.keybinding Key Setup
+mainsettings.ucodecheck Check ucodes
 
 languagesetup.head Language Setup
 languagesetup.select Language

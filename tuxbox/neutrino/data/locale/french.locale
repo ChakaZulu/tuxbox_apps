@@ -4,24 +4,21 @@ options.off outre de
 options.on dessus
 
 mainmenu.head Menu principal
-mainmenu.runmode Mode
-mainmenu.shutdown mettre hors circuit
 mainmenu.tvmode TV-Mode
 mainmenu.radiomode Radio-Mode
-mainmenu.mp3player MP3-Joueur
-mainmenu.splayback jouer Stream
-mainmenu.info Informations
-mainmenu.streaminfo Canal
-mainmenu.settings Réglages
-mainmenu.language Langue
-mainmenu.screensetup ajuster le secteur d'image visible 
-mainmenu.audio Argile
-mainmenu.video Vidéo
-mainmenu.network Réseau
-mainmenu.colors Couleurs / Thèmes
-mainmenu.keybinding Ajuster des clés
 mainmenu.games Play Games
-mainmenu.ucodecheck Check ucodes
+mainmenu.shutdown mettre hors circuit
+mainmenu.settings Settings
+
+mainsettings.head Settings
+mainsettings.language Langue
+mainsettings.screensetup ajuster le secteur d'image visible
+mainsettings.audio Argile
+mainsettings.video Vidéo
+mainsettings.network Réseau
+mainsettings.colors  Couleurs / Thèmes
+mainsettings.keybinding Ajuster des clés
+mainsettings.ucodecheck Check ucodes
 
 languagesetup.head Ajuster un langue
 languagesetup.select Langue

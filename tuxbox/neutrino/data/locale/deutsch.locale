@@ -4,24 +4,21 @@ options.off aus
 options.on ein
 
 mainmenu.head Hauptmenü
-mainmenu.runmode Modus
-mainmenu.shutdown Ausschalten
 mainmenu.tvmode TV-Modus
 mainmenu.radiomode Radio-Modus
-mainmenu.mp3player MP3-Spieler
-mainmenu.splayback Stream Wiedergabe
-mainmenu.info Informationen
-mainmenu.streaminfo Sender/Kanal
-mainmenu.settings Einstellungen
-mainmenu.language Sprache
-mainmenu.screensetup Sichtbaren Bildbereich einstellen
-mainmenu.audio Ton
-mainmenu.video Video
-mainmenu.network Netzwerk
-mainmenu.colors Farben/Themes
-mainmenu.keybinding Tasten-Einstellungen
 mainmenu.games Spiele spielen
-mainmenu.ucodecheck UCodes überprüfen
+mainmenu.shutdown Ausschalten
+mainmenu.settings Einstellungen
+
+mainsettings.head Einstellungen
+mainsettings.language Sprache
+mainsettings.screensetup Sichtbaren Bildbereich einstellen
+mainsettings.audio Ton
+mainsettings.video Video
+mainsettings.network Netzwerk
+mainsettings.colors Farben / Themes
+mainsettings.keybinding Tasten-Einstellungen
+mainsettings.ucodecheck UCodes überprüfen
 
 languagesetup.head Spracheinstellungen
 languagesetup.select Sprache

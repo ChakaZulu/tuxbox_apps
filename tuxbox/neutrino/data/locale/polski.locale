@@ -4,24 +4,21 @@ options.off wyl
 options.on wla
 
 mainmenu.head Menu Glowne
-mainmenu.runmode Modus
-mainmenu.shutdown Wylaczyc
 mainmenu.tvmode Telewizja
 mainmenu.radiomode Radio
-mainmenu.mp3player MP3-Odtwarzacz
-mainmenu.splayback Stream Ogladac
-mainmenu.info Informacje
-mainmenu.streaminfo Dane o Kanale
-mainmenu.settings Opcje
-mainmenu.language Jezyk
-mainmenu.screensetup Ustawienie widocznej czesci obrazu
-mainmenu.audio Dzwiek
-mainmenu.video Obraz
-mainmenu.network Siec
-mainmenu.colors Farby/Tematy
-mainmenu.keybinding Ustawienie klawiszy
 mainmenu.games w Gry grac
-mainmenu.ucodecheck Check ucodes
+mainmenu.shutdown Wylaczyc
+mainmenu.settings Settings
+
+mainsettings.head Settings
+mainsettings.language Jezyk
+mainsettings.screensetup Ustawienie widocznej czesci obrazu
+mainsettings.audio Dzwiek
+mainsettings.video Obraz
+mainsettings.network Siec
+mainsettings.colors Farby / Tematy
+mainsettings.keybinding Ustawienie klawiszy
+mainsettings.ucodecheck Check ucodes
 
 languagesetup.head Ustawienie jezyka
 languagesetup.select Jezyk

@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.58 2001/10/09 21:48:37 McClean Exp $
+        $Id: neutrino.cpp,v 1.59 2001/10/10 01:20:09 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.59  2001/10/10 01:20:09  McClean
+  menue changed
+
   Revision 1.58  2001/10/09 21:48:37  McClean
   ucode-check
 
@@ -735,32 +738,28 @@ void CNeutrinoApp::ClearFrameBuffer()
 	g_FrameBuffer->paletteSet();
 }
 
-void CNeutrinoApp::InitMainSettings(CMenuWidget &mainSettings, CMenuWidget &audioSettings, CMenuWidget &networkSettings,
+void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings,  CMenuWidget &audioSettings, CMenuWidget &networkSettings,
 				     CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings)
 {
+	mainMenu.addItem( new CMenuSeparator() );
+	mainMenu.addItem( new CMenuForwarder("mainmenu.tvmode", true, "", this, "tv"), true );
+	mainMenu.addItem( new CMenuForwarder("mainmenu.radiomode", (zapit), "", this, "radio") );
+	mainMenu.addItem( new CMenuForwarder("mainmenu.games", true, "", new CGameList("mainmenu.games") ));
+	mainMenu.addItem( new CMenuForwarder("mainmenu.shutdown", true, "", this, "shutdown") );
+	mainMenu.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	mainMenu.addItem( new CMenuForwarder("mainmenu.settings", true, "", &mainSettings) );
+
 	mainSettings.addItem( new CMenuSeparator() );
-	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "mainmenu.runmode") );
-	mainSettings.addItem( new CMenuForwarder("mainmenu.shutdown", true, "", this, "shutdown") );
-	mainSettings.addItem( new CMenuForwarder("mainmenu.tvmode", true, "", this, "tv"), true );
-	mainSettings.addItem( new CMenuForwarder("mainmenu.radiomode", (zapit), "", this, "radio") );
-	mainSettings.addItem( new CMenuForwarder("mainmenu.games", true, "", new CGameList("mainmenu.games") ));
-
-	//mainSettings.addItem( new CMenuForwarder(g_Locale->getText("mainmenu.mp3player"), false, "", this, "mp3") );
-	//mainSettings.addItem( new CMenuForwarder("mainmenu.splayback", false, "", this, "playback") );
-
-	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "mainmenu.info") );
-
-	mainSettings.addItem( new CMenuForwarder("mainmenu.streaminfo", true, "", g_StreamInfo ) );
-
-	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "mainmenu.settings") );
-	mainSettings.addItem( new CMenuForwarder("mainmenu.language", true, "", &languageSettings ) );
-	mainSettings.addItem( new CMenuForwarder("mainmenu.video", true, "", &videoSettings) );
-	mainSettings.addItem( new CMenuForwarder("mainmenu.screensetup", true, "", g_ScreenSetup ) );
-	mainSettings.addItem( new CMenuForwarder("mainmenu.audio", true, "", &audioSettings) );
-	mainSettings.addItem( new CMenuForwarder("mainmenu.network", true, "", &networkSettings) );
-	mainSettings.addItem( new CMenuForwarder("mainmenu.colors", true,"", &colorSettings) );
-	mainSettings.addItem( new CMenuForwarder("mainmenu.keybinding", true,"", &keySettings) );
-	mainSettings.addItem( new CMenuForwarder("mainmenu.ucodecheck", true, "", g_UcodeCheck ) );
+	mainSettings.addItem( new CMenuForwarder("menu.back") );
+	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	mainSettings.addItem( new CMenuForwarder("mainsettings.language", true, "", &languageSettings ) );
+	mainSettings.addItem( new CMenuForwarder("mainsettings.video", true, "", &videoSettings) );
+	mainSettings.addItem( new CMenuForwarder("mainsettings.screensetup", true, "", g_ScreenSetup ) );
+	mainSettings.addItem( new CMenuForwarder("mainsettings.audio", true, "", &audioSettings) );
+	mainSettings.addItem( new CMenuForwarder("mainsettings.network", true, "", &networkSettings) );
+	mainSettings.addItem( new CMenuForwarder("mainsettings.colors", true,"", &colorSettings) );
+	mainSettings.addItem( new CMenuForwarder("mainsettings.keybinding", true,"", &keySettings) );
+	mainSettings.addItem( new CMenuForwarder("mainsettings.ucodecheck", true, "", g_UcodeCheck ) );
 }
 
 void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
@@ -1143,7 +1142,7 @@ void CNeutrinoApp::InitZapper()
     }
 }
 
-void CNeutrinoApp::RealRun(CMenuWidget &mainSettings)
+void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 {
 	while(nRun)
 	{
@@ -1151,7 +1150,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainSettings)
 
 		if (key==CRCInput::RC_setup)
 		{
-			mainSettings.exec(NULL, "");
+			mainMenu.exec(NULL, "");
 		}
 		else if (key==CRCInput::RC_standby)
 		{
@@ -1281,7 +1280,8 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 
 	//Main settings
-	CMenuWidget mainSettings("mainmenu.head", "settings.raw");
+	CMenuWidget mainMenu("mainmenu.head", "settings.raw");
+	CMenuWidget mainSettings("mainsettings.head", "settings.raw");
 	CMenuWidget languageSettings("languagesetup.head", "settings.raw");
 	CMenuWidget videoSettings("videomenu.head", "video.raw");
 	CMenuWidget audioSettings("audiomenu.head", "audio.raw");
@@ -1290,7 +1290,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget keySettings("keybindingmenu.head", "settings.raw");
 //	CMenuWidget screenSettings("",fonts,"");
 
-	InitMainSettings(mainSettings, audioSettings, networkSettings, colorSettings, keySettings, videoSettings, languageSettings);
+	InitMainMenu(mainMenu, mainSettings, audioSettings, networkSettings, colorSettings, keySettings, videoSettings, languageSettings);
 
 	//language Setup
 	InitLanguageSettings(languageSettings);
@@ -1330,7 +1330,7 @@ int CNeutrinoApp::run(int argc, char **argv)
     mute = false;
 	nRun = true;
 
-	RealRun(mainSettings);
+	RealRun(mainMenu);
 
 	ExitRun();
 	return 0;
@@ -1501,7 +1501,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.58 2001/10/09 21:48:37 McClean Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.59 2001/10/10 01:20:09 McClean Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;
