@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.17 2001/07/16 13:08:34 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.18 2001/07/16 15:57:58 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.18  2001/07/16 15:57:58  fnbrd
+//  Parameter -d fuer debugausgaben
+//
 //  Revision 1.17  2001/07/16 13:08:34  fnbrd
 //  Noch ein Fehler beseitigt.
 //
@@ -111,6 +114,11 @@
 // Wieviele Stunden EPG gecached werden sollen
 #define HOURS_TO_CACHE 24
 
+static int debug=0;
+
+#define dprintf(fmt, args...) {if(debug) printf(fmt, ## args);}
+#define dputs(str) {if(debug) puts(str);}
+
 static SIevents events; // die Menge mit den epg's
 static SIservices services; // die Menge mit den services (aus der sdt)
 
@@ -187,7 +195,7 @@ static SIevent nullEvt; // Null-Event, falls keins gefunden
     removeControlCodes(servicename);
       // Jetz pruefen ob der Servicename der gewuenschte ist
 //      printf("Servicename: '%s'\n", servicename);
-    printf("testing '%s'\n", servicename);
+    dprintf("testing '%s'\n", servicename);
     if(!strcasecmp(servicename, serviceName)) {
       // Event (serviceid) suchen
       time_t zeit=time(NULL);
@@ -260,7 +268,7 @@ int j;
       continue; // interuppted
     else if(rc<0) {
       perror ("poll");
-      printf("errno: %d\n", errno);
+//      printf("errno: %d\n", errno);
       return -1;
     }
     int r=read (fd, buf, n-j);
@@ -292,7 +300,7 @@ static void commandCurrentNextInfoChannelName(struct connectionData *client, cha
   char* pResultData=0;
 
   data[dataLength-1]=0; // to be sure it has an trailing 0
-  printf("Request of current/next information for '%s'\n", data);
+  dprintf("Request of current/next information for '%s'\n", data);
 
   if(stopDMXeit())
     return;
@@ -304,11 +312,11 @@ static void commandCurrentNextInfoChannelName(struct connectionData *client, cha
 //  readSection(request.Name, &pResultData, &nResultDataSize);
 
   if(evt.serviceID!=0) {//Found
-    printf("current EPG found.\n");
+    dprintf("current EPG found.\n");
     SItime siStart = *(evt.times.begin());
     const SIevent &nextEvt=findNextSIeventForService(evt.serviceID, siStart.startzeit+siStart.dauer);
     if(nextEvt.serviceID!=0) {
-      printf("next EPG found.\n");
+      dprintf("next EPG found.\n");
 
       // Folgendes ist grauenvoll, habs aber einfach kopiert aus epgd
       // und keine Lust das grossartig zu verschoenern
@@ -351,7 +359,7 @@ static void commandCurrentNextInfoChannelName(struct connectionData *client, cha
     delete[] pResultData;
   }
   else
-    printf("current/next EPG not found!\n");
+    dprintf("current/next EPG not found!\n");
 }
 
 // Mostly copied from epgd (something bugfixed ;) )
@@ -361,7 +369,7 @@ static void commandActualEPGchannelName(struct connectionData *client, char *dat
   char* pResultData=0;
 
   data[dataLength-1]=0; // to be sure it has an trailing 0
-  printf("Request of actual EPG for '%s'\n", data);
+  dprintf("Request of actual EPG for '%s'\n", data);
 
   if(stopDMXeit())
     return;
@@ -373,7 +381,7 @@ static void commandActualEPGchannelName(struct connectionData *client, char *dat
 //  readSection(request.Name, &pResultData, &nResultDataSize);
 
   if(evt.serviceID!=0) {//Found
-    printf("EPG found.\n");
+    dprintf("EPG found.\n");
     nResultDataSize=strlen(evt.name.c_str())+1+		//Name + del
       strlen(evt.text.c_str())+1+		//Text + del
       strlen(evt.extendedText.c_str())+1+	//ext + del
@@ -399,7 +407,7 @@ static void commandActualEPGchannelName(struct connectionData *client, char *dat
       evt.extendedText.c_str(), nSDay, nSMon, nSYear, nSH, nSM, nFH, nFM, nProcentagePassed );
   }
   else
-    printf("actual EPG not found!\n");
+    dprintf("actual EPG not found!\n");
   pthread_mutex_unlock(&eventsLock);
   startDMXeit();
 
@@ -415,7 +423,7 @@ static void commandActualEPGchannelName(struct connectionData *client, char *dat
 
 static void commandEventListTV(struct connectionData *client, char *data, unsigned dataLength)
 {
-  puts("Request of TV event list.\n");
+  dputs("Request of TV event list.\n");
   char *evtList=new char[256*256];
   if(!evtList) {
     fprintf(stderr, "low on memory!\n");
@@ -459,14 +467,14 @@ static void *connectionThread(void *conn)
 {
 struct connectionData *client=(struct connectionData *)conn;
 
-  printf("Connection from %s\n", inet_ntoa(client->clientAddr.sin_addr));
+  dprintf("Connection from %s\n", inet_ntoa(client->clientAddr.sin_addr));
   struct msgSectionsdRequestHeader header;
   memset(&header, 0, sizeof(header));
 
   if(readNbytes(client->connectionSocket, (char *)&header, sizeof(header) , 2)>0) {
-    printf("version: %hhd, cmd: %hhd\n", header.version, header.command);
+    dprintf("version: %hhd, cmd: %hhd\n", header.version, header.command);
     if(header.version==2 && header.command<NUMBER_OF_SECTIONSD_COMMANDS) {
-      printf("data length: %hd\n", header.dataLength);
+      dprintf("data length: %hd\n", header.dataLength);
       char *data=new char[header.dataLength+1];
       if(!data)
         fprintf(stderr, "low on memory!\n");
@@ -475,18 +483,18 @@ struct connectionData *client=(struct connectionData *)conn;
         if(header.dataLength)
 	  rc=readNbytes(client->connectionSocket, data, header.dataLength, 2);
         if(rc>0) {
-          printf("Starting command %hhd\n", header.command);
+          dprintf("Starting command %hhd\n", header.command);
           connectionCommands[header.command](client, data, header.dataLength);
         }
         delete[] data;
       }
     }
     else
-      puts("Unknow format or version of request!");
+      dputs("Unknow format or version of request!");
   }
 //  oldDaemonCommands(client);
   close(client->connectionSocket);
-  printf("Connection from %s closed!\n", inet_ntoa(client->clientAddr.sin_addr));
+  dprintf("Connection from %s closed!\n", inet_ntoa(client->clientAddr.sin_addr));
   delete client;
   return 0;
 }
@@ -503,7 +511,7 @@ struct dmxSctFilterParams flt;
 char *buf;
 const unsigned timeoutInSeconds=2;
 
-  printf("sdt-thread started.\n");
+  dprintf("sdt-thread started.\n");
   memset (&flt.filter, 0, sizeof (struct dmxFilter));
   flt.pid              = 0x11;
   flt.filter.filter[0] = 0x42;
@@ -571,7 +579,7 @@ const unsigned timeoutInSeconds=2;
       delete[] buf;
   } // for
   close(fd);
-  printf("sdt-thread ended\n");
+  dprintf("sdt-thread ended\n");
   return 0;
 }
 
@@ -672,7 +680,7 @@ const unsigned timeoutInSeconds=31;
 char *buf;
 int timeset=0;
 
-  printf("time-thread started.\n");
+  dprintf("time-thread started.\n");
   memset (&flt.filter, 0, sizeof (struct dmxFilter));
   flt.pid              = 0x14;
   flt.filter.filter[0] = 0x70; // TDT
@@ -703,7 +711,7 @@ int timeset=0;
       }
       timeset=1;
       time_t t=time(NULL);
-      printf("local time: %s", ctime(&t));
+      dprintf("local time: %s", ctime(&t));
     }
   }
   }
@@ -773,7 +781,7 @@ int timeset=0;
       }
       timeset=1;
       time_t t=time(NULL);
-      printf("local time: %s", ctime(&t));
+      dprintf("local time: %s", ctime(&t));
     }
     delete[] buf;
     close(fd);
@@ -785,7 +793,7 @@ int timeset=0;
     while(rc)
       rc=sleep(rc);
   } // for
-  printf("time-thread ended\n");
+  dprintf("time-thread ended\n");
   return 0;
 }
 
@@ -800,7 +808,7 @@ struct dmxSctFilterParams flt;
 char *buf;
 const unsigned timeoutInSeconds=2;
 
-  printf("eit-thread started.\n");
+  dprintf("eit-thread started.\n");
   memset (&flt.filter, 0, sizeof (struct dmxFilter));
   flt.pid              = 0x12;
 //  flt.filter.filter[0] = 0x4e; // present/following
@@ -889,7 +897,7 @@ const unsigned timeoutInSeconds=2;
       delete[] buf;
   } // for
 
-  printf("eit-thread ended\n");
+  dprintf("eit-thread ended\n");
   return 0;
 }
 
@@ -904,7 +912,7 @@ struct dmxSctFilterParams flt;
 char *buf;
 const unsigned timeoutInSeconds=2;
 
-  printf("eit-thread (nvod) started.\n");
+  dprintf("eit-thread (nvod) started.\n");
   memset (&flt.filter, 0, sizeof (struct dmxFilter));
   flt.pid              = 0x12;
   flt.filter.filter[0] = 0x4f; // present/following
@@ -979,7 +987,7 @@ const unsigned timeoutInSeconds=2;
     else
       delete[] buf;
   } // for
-  printf("eit-thread (nvod) ended\n");
+  dprintf("eit-thread (nvod) ended\n");
   return 0;
 }
 
@@ -989,12 +997,12 @@ const unsigned timeoutInSeconds=2;
 //*********************************************************************
 static void *houseKeepingThread(void *)
 {
-  printf("housekeeping-thread started.\n");
+  dprintf("housekeeping-thread started.\n");
   for(;;) {
-    int rc=60;
+    int rc=2*60;  // sleep 2 minutes
     while(rc)
-      rc=sleep(rc); // sleep 60 seconds
-    printf("housekeeping.\n");
+      rc=sleep(rc);
+    dprintf("housekeeping.\n");
     if(stopDMXeit())
       return 0;
 //    if(stopDMXeitNVOD())
@@ -1011,11 +1019,11 @@ static void *houseKeepingThread(void *)
     anzEventsAlt=events.size();
     events.removeOldEvents(60*60); // alte Events = aelter als 1 h
     if(events.size()!=anzEventsAlt)
-      printf("Removed %d old events.\n", anzEventsAlt-events.size());
-    printf("Number of events: %u\n", events.size());
+      dprintf("Removed %d old events.\n", anzEventsAlt-events.size());
+    dprintf("Number of events: %u\n", events.size());
     pthread_mutex_unlock(&eventsLock);
     pthread_mutex_lock(&servicesLock);
-    printf("Number of services: %u\n", services.size());
+    dprintf("Number of services: %u\n", services.size());
     pthread_mutex_unlock(&servicesLock);
     if(startDMXeit())
       return 0;
@@ -1023,19 +1031,37 @@ static void *houseKeepingThread(void *)
 //      return 0;
     // Speicher-Info abfragen
     struct mallinfo speicherinfo=mallinfo();
-    printf("total size of memory occupied by chunks handed out by malloc: %d\n", speicherinfo.uordblks);
-    printf("total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %fMB)\n",speicherinfo.arena, speicherinfo.arena/1024, (float)speicherinfo.arena/(1024.*1024));
+    dprintf("total size of memory occupied by chunks handed out by malloc: %d\n", speicherinfo.uordblks);
+    dprintf("total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %fMB)\n",speicherinfo.arena, speicherinfo.arena/1024, (float)speicherinfo.arena/(1024.*1024));
   } // for endlos
 }
 
-int main(void)
+static void printHelp(void)
+{
+    printf("\nUsage: sectionsd [-d]\n\n");
+}
+
+int main(int argc, char **argv)
 {
 pthread_t threadTOT, threadEIT, threadEITnvod, threadSDT, threadHouseKeeping;
 int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.17 2001/07/16 13:08:34 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.18 2001/07/16 15:57:58 fnbrd Exp $\n");
+
+  if(argc!=1 && argc!=2) {
+    printHelp();
+    return 1;
+  }
+  if(argc==2) {
+    if(!strcmp(argv[1], "-d"))
+      debug=1;
+    else {
+      printHelp();
+      return 1;
+    }
+  }
   printf("caching %d hours\n", HOURS_TO_CACHE);
 
   tzset(); // TZ auswerten
@@ -1064,7 +1090,6 @@ struct sockaddr_in serverAddr;
 
   rc=pthread_create(&threadSDT, 0, sdtThread, 0);
   if(rc) {
-    printf("failed to create sdt-thread (rc=%d)\n", rc);
     fprintf(stderr, "failed to create sdt-thread (rc=%d)\n", rc);
     return 1;
   }
