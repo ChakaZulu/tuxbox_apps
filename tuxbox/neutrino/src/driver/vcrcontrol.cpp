@@ -114,7 +114,7 @@ bool CVCRControl::CServerDevice::Stop()
 //-------------------------------------------------------------------------
 bool CVCRControl::CServerDevice::Record(unsigned onidsid, unsigned long long epgid)	
 {
-	printf("Record onidsid: %u epg: %llu\n",onidsid,epgid);
+	printf("Record onidsid: %x epg: %llx\n",onidsid,epgid);
 	if(onidsid != 0)		// wenn ein channel angegeben ist
 		if(g_Zapit->getCurrentServiceID() != onidsid)	// und momentan noch nicht getuned ist
 			g_Zapit->zapTo_serviceID(onidsid);		// dann umschalten
@@ -140,7 +140,7 @@ void CVCRControl::CServerDevice::serverDisconnect()
 //-------------------------------------------------------------------------
 bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command,unsigned onidsid,unsigned long long epgid)
 {
-	printf("Send command: %d onidsid: %u epgid: %llu\n",command, onidsid, epgid);
+	printf("Send command: %d onidsid: %x epgid: %llx\n",command, onidsid, epgid);
 	if(serverConnect())
 	{
 		externalCommand extcommand;

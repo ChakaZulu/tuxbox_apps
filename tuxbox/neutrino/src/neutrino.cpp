@@ -1867,9 +1867,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			if(CVCRControl::getInstance()->registeredDevices() > 0)
 			{
 				if(CVCRControl::getInstance()->getDeviceState() == CVCRControl::CMD_VCR_STOP || CVCRControl::getInstance()->getDeviceState() == CVCRControl::CMD_VCR_UNKNOWN)
-				{
-					CVCRControl::getInstance()->Record((CTimerEvent::EventInfo *)data);
-				}
+					CVCRControl::getInstance()->Record((CTimerEvent::EventInfo *) data);
 				else
 					printf("falscher state\n");
 			}
@@ -2645,7 +2643,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.290 2002/06/11 21:25:17 dirch Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.291 2002/06/12 01:34:07 dirch Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

@@ -61,7 +61,8 @@ class CVCRControl
 			CMD_VCR_RECORD	=	1,
 			CMD_VCR_STOP	=	2,
 			CMD_VCR_PAUSE	=	3,
-			CMD_VCR_RESUME	=	4
+			CMD_VCR_RESUME	=	4,
+			CMD_VCR_AVAILABLE =	5
 		}CVCRCommand;
 
 		enum CVCRDevices
@@ -109,6 +110,7 @@ class CVCRControl
 				virtual bool Record(unsigned onidsid = 0, unsigned long long epgid = 0){};
 				virtual bool Pause(){};
 				virtual bool Resume(){};
+				virtual bool IsAvailable(){};
 				CDevice(int deviceid, CVCRDevices devicetype){deviceID = deviceid; deviceType = devicetype; deviceState = CMD_VCR_STOP;};
 		};
 
@@ -119,6 +121,7 @@ class CVCRControl
 				virtual bool Record(unsigned onidsid = 0, unsigned long long epgid = 0){};	
 				virtual bool Pause(){};
 				virtual bool Resume(){};
+				virtual bool IsAvailable(){return true;};
 				CVCRDevice(int deviceid) : CDevice(deviceid,DEVICE_VCR) {};
 		};
 
@@ -149,6 +152,7 @@ class CVCRControl
 				virtual bool Record(unsigned int onidsid = 0, unsigned long long epgid = 0);
 				virtual bool Pause(){return false;};
 				virtual bool Resume(){return false;};
+				virtual bool IsAvailable(){return true;};
 				CServerDevice(int deviceid) : CDevice(deviceid,DEVICE_SERVER) {};			
 		};
 		typedef std::map<int, CDevice*> CDeviceMap;
@@ -164,7 +168,15 @@ class CVCRControl
 		int registeredDevices(){return Devices.size();};
 		int getDeviceState(int deviceid = 0){ if (Devices[deviceid] != NULL) return Devices[deviceid]->deviceID; else return CMD_VCR_UNKNOWN;};
 		bool Stop(int deviceID = 0){if(Devices[deviceID] != NULL) return Devices[deviceID]->Stop(); else return false;};
-		bool Record(CTimerEvent::EventInfo *eventinfo,int deviceID = 0){if(Devices[deviceID] != NULL) return Devices[deviceID]->Record(eventinfo->onidSid,eventinfo->epgID); else return false;};
+		bool Record(CTimerEvent::EventInfo *eventinfo,int deviceID = 0)
+		{
+			if(Devices[deviceID] != NULL) 
+			{
+				printf("eventinfo->onidSid: %x, eventinfo->epgID: %llx\n",eventinfo->onidSid,eventinfo->epgID);
+				return Devices[deviceID]->Record(eventinfo->onidSid,eventinfo->epgID); 
+			}
+			else return false;
+		};
 		bool Pause(int deviceID = 0){if(Devices[deviceID] != NULL) return Devices[deviceID]->Pause(); else return false;};
 		bool Resume(int deviceID = 0){if(Devices[deviceID] != NULL) return Devices[deviceID]->Resume(); else return false;};
 };
