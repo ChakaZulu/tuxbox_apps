@@ -83,7 +83,7 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	CONNECT(abort->selected, eZapVideoSetup::abortPressed);
 
 	status = new eStatusBar(this);	
-	status->move( ePoint(0, clientrect.height()-34) );
+	status->move( ePoint(0, clientrect.height()-30) );
 	status->resize( eSize( clientrect.width(), 30) );
 	status->setFlags( eStatusBar::flagLoadDeco );
 }

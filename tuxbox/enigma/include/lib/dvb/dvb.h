@@ -475,9 +475,14 @@ public:
 
 	~eTransponderList()
 	{
+		writeLNBData();  // write Data to registry
+
 		if (instance == this)
 			instance = 0;
 	}
+
+	void readLNBData();
+	void writeLNBData();
 
 	void updateStats(int &transponders, int &scanned, int &services);
 	eTransponder &createTransponder(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id);

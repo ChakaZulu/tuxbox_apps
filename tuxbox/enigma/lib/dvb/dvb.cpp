@@ -6,6 +6,7 @@
 #include <core/dvb/dvb.h>
 #include <core/dvb/si.h>
 #include <core/dvb/frontend.h>
+#include <core/system/econfig.h>
 
 eTransponderList* eTransponderList::instance=0;
 
@@ -286,30 +287,8 @@ eTransponderList::eTransponderList()
 {
 	if (!instance)
 		instance = this;
-
-	{
-		lnbs.push_back(eLNB(*this));
-		eLNB &lnb=lnbs.back();
 	
-		lnb.setLOFHi(10600000);
-		lnb.setLOFLo(9750000);
-		lnb.setLOFThreshold(11700000);
-		lnb.getDiSEqC().sat=0;
-	
-		lnb.addSatellite(192)->setDescription("Astra 19.2E");
-	}
-
-	{
-		lnbs.push_back(eLNB(*this));
-		eLNB &lnb=lnbs.back();
-	
-		lnb.setLOFHi(10600000);
-		lnb.setLOFLo(9750000);
-		lnb.setLOFThreshold(11700000);
-		lnb.getDiSEqC().sat=1;
-		
-		lnb.addSatellite(130)->setDescription("Eutelsat 13.0E");
-	}
+	readLNBData();
 }
 
 eTransponder &eTransponderList::createTransponder(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id)
@@ -468,4 +447,95 @@ eSatellite *eTransponderList::findSatellite(int orbital_position)
 	if (i == satellites.end())
 		return 0;
 	return i->second;
+}
+
+void eTransponderList::readLNBData()
+{
+	eString basepath="/elitedvb/DVB/config/lnbs/";
+
+	int lnbread=0;
+ 	while (1)
+	{
+		unsigned int tmp=0;
+
+		if ( eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/lofH").c_str(), tmp) )
+			break;
+		lnbs.push_back(eLNB(*this));
+		eLNB &lnb=lnbs.back();
+
+		lnb.setLOFHi(tmp);
+
+		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/lofL").c_str(), tmp);
+		lnb.setLOFLo(tmp);
+
+		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/lofThreshold").c_str(), tmp);
+		lnb.setLOFThreshold(tmp);
+
+		int tmpint;
+		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/DISEqCpara").c_str(), tmpint);
+		lnb.getDiSEqC().sat=tmpint;
+
+		int satread=0;
+		while(1)
+		{
+			char * descr=0;
+			if ( eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/satellites/"+eString().setNum(satread)+"/OrbitalPosition").c_str(), tmpint) )
+				break;  // no satellite for this lnb found
+
+			eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/satellites/"+eString().setNum(satread)+"/description").c_str(), descr) ;
+
+			lnb.addSatellite(tmpint)->setDescription(descr);
+			satread++;
+		}
+		lnbread++;
+	}
+
+	if (lnbread<1)
+	{
+		eDebug("couldn't read satellite data.. use default");
+		{	
+			lnbs.push_back(eLNB(*this));
+			eLNB &lnb=lnbs.back();
+			lnb.setLOFHi(10600000);
+			lnb.setLOFLo(9750000);
+			lnb.setLOFThreshold(11700000);
+			lnb.getDiSEqC().sat=0;
+			lnb.addSatellite(192)->setDescription("Astra 19.2E");
+		}
+		{
+			lnbs.push_back(eLNB(*this));
+			eLNB &lnb=lnbs.back();
+			lnb.setLOFHi(10600000);
+			lnb.setLOFLo(9750000);
+			lnb.setLOFThreshold(11700000);
+			lnb.getDiSEqC().sat=1;
+			lnb.addSatellite(130)->setDescription("Eutelsat 13.0E");
+		}
+	}
+	else
+		eDebug("%i lnbs readed", lnbread);
+}
+
+void eTransponderList::writeLNBData()
+{
+	eString basepath="/elitedvb/DVB/config/lnbs/";
+
+	int lnbwrite=0;
+	for ( std::list<eLNB>::iterator it( lnbs.begin() ); it != lnbs.end(); it++)
+	{
+		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/lofH").c_str(), it->getLOFHi() );
+		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/lofL").c_str(), it->getLOFLo() );
+		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/lofThreshold").c_str(), it->getLOFThreshold() );
+		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/DISEqCpara").c_str(), it->getDiSEqC().sat );
+
+		int satwrite=0;
+		for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
+		{
+			eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/satellites/"+eString().setNum(satwrite)+"/OrbitalPosition").c_str(), s->getOrbitalPosition() );
+			eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/satellites/"+eString().setNum(satwrite)+"/description").c_str(), s->getDescription().c_str() );
+			satwrite++;
+		}
+		lnbwrite++;
+	}
+	eDebug("%i LNBs written", lnbwrite);
 }

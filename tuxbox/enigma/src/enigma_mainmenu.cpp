@@ -4,10 +4,10 @@
 #include <apps/enigma/enigma_plugins.h>
 #include <apps/enigma/enigma_info.h>
 #include <apps/enigma/enigma_lcd.h>
+#include <apps/enigma/enigma_vcr.h>
 
 #include <core/gui/eskin.h>
 #include <core/driver/eavswitch.h>
-#include <core/gui/emessage.h>
 #include <core/gui/elabel.h>
 #include <core/dvb/epgcache.h>
 #include <core/base/i18n.h>
@@ -49,7 +49,7 @@ void eMainMenu::sel_vcr()
 {
 	window.hide();
 	eAVSwitch::getInstance()->setInput(1);
-	eMessageBox mb("If you can read this, your scartswitch doesn't work", "VCR");
+	enigmaVCR mb("If you can read this, your scartswitch doesn't work", "VCR");
 	mb.show();
 	eZapLCD *pLCD=eZapLCD::getInstance();
 	pLCD->lcdMenu->hide();

@@ -68,7 +68,7 @@ void eWidget::takeFocus()
 		if (oldTLfocus)
 		{
 			eDebug("focus problem");
-			eFatal("da hat %s den focus und %s wil ihn haben", oldTLfocus->getText().c_str(), getText().c_str());
+			eFatal("da hat %s den focus und %s will ihn haben", oldTLfocus->getText().c_str(), getText().c_str());
 		}
 		addActionMap(&i_focusActions->map);
 	}

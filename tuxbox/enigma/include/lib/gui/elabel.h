@@ -14,17 +14,20 @@ protected:
 	int flags;
 	eTextPara *para;
 	int align;
+	void validate( const eSize* s=0 );
 	void invalidate();
-	void validate();
 	void willHide();
 	int eventFilter(const eWidgetEvent &event);
 	virtual void redrawWidget(gPainter *target, const eRect &area);
 	int setProperty(const eString &prop, const eString &value);
+	int yOffs;
 public:
+	enum { flagVCenter = 64 };
 	eLabel(eWidget *parent, int flags=0 /* RS_WRAP */ , int takefocus=0 );
 	~eLabel();
 
-	void setFlags(int flag);
+	void setFlags(int flags);
+	void removeFlags(int flags);
 	void setAlign(int align);
 
 	eSize getExtend();

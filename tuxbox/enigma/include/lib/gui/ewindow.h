@@ -26,7 +26,7 @@ protected:
 	void willShow();
 	void willHide();
 public:
-
+	eRect getTitleBarRect();
 	/**
 	 * \brief Constructs the window
 	 *

@@ -6,14 +6,21 @@
 eStatusBar::eStatusBar( eWidget* parent, int fl)
 	:eWidget(parent), flags( fl ), client(this)
 {
+	client.setFont( eSkin::getActive()->queryFont("eStatusBar") );
+	client.setForegroundColor ( eSkin::getActive()->queryColor("eStatusBar.foreground") );
+	client.setBackgroundColor ( eSkin::getActive()->queryColor("eStatusBar.background") );
+	client.setFlags(eLabel::flagVCenter);   // works current only on Labels with one line
+	
+	initialize();
+}
+
+void eStatusBar::initialize()
+{
 	if ( !(flags & flagOwnerDraw) )
 	{
 		if (parent)
 			CONNECT( parent->focusChanged, eStatusBar::update );
 	}
-	client.setFont( eSkin::getActive()->queryFont("eStatusBar") );
-	client.setForegroundColor ( eSkin::getActive()->queryColor("eStatusBar.foreground") );
-	client.setBackgroundColor ( eSkin::getActive()->queryColor("eStatusBar.background") );
 }
 
 void eStatusBar::update( const eWidget* p )
@@ -54,6 +61,8 @@ int eStatusBar::setProperty(const eString &prop, const eString &value)
 		flags |= flagOwnerDraw;
 	else
 		return eWidget::setProperty(prop, value);
+
+	initialize();
 	
 	return 0;
 }
@@ -67,6 +76,7 @@ void eStatusBar::redrawBorder(gPainter *target, const eRect& where)
 
 void eStatusBar::redrawWidget(gPainter *target, const eRect& where)
 {
+	eDebug("redraw Statusbar");
 	redrawBorder(target, where);		
 }
 

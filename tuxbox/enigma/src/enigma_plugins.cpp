@@ -16,6 +16,7 @@
 #include <apps/enigma/enigma.h>
 #include <core/base/eerror.h>
 #include <core/gdi/lcd.h>
+#include <core/gdi/font.h>
 #include <core/driver/rc.h>
 #include <core/driver/streamwd.h>
 #include <core/dvb/edvb.h>
@@ -71,26 +72,27 @@ void MakeParam(char* id, int val)
 	tmp = p;		
 }
 
-ePlugin::ePlugin(eListBox<ePlugin> *parent, const char *cfgfile)
-	:eListBoxEntry((eListBox<eListBoxEntry>*)parent)
+ePlugin::ePlugin(eListBox<ePlugin> *parent, const char *cfgfile, const char* descr)
+	:eListBoxEntryText((eListBox<eListBoxEntryText>*)parent)
 {
 	if (!cfgfile)
 	{
-		isback=1;
+		text="[back]";
 		return;
 	}
-	isback=0;
 
 	eDebug(cfgfile);
-	name=getInfo(cfgfile, "name");
+	text=getInfo(cfgfile, "name");
 
-	if (name.isNull())
-		name="(" + eString(cfgfile) + " is invalid)";
+	if (text.isNull())
+		text="(" + eString(cfgfile) + " is invalid)";
 		
-	desc=getInfo(cfgfile, "desc");
+	eString desc=getInfo(cfgfile, "desc");
 
-	if (desc.isNull())
-		desc="";
+	if (desc)
+	{
+		text+=" - "+desc;
+	}
 
 	depend=getInfo(cfgfile, "depend");
 
@@ -325,7 +327,7 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 
 void eZapPlugins::selected(ePlugin *plugin)
 {
-	if (!plugin || plugin->isback)
+	if (!plugin || !plugin->pluginname )
 	{
 		window->close(0);
 		return;

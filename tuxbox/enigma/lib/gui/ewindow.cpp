@@ -11,24 +11,25 @@ eWindow::eWindow(int takefocus)
 {
 	deco.load("eWindow");
 
-	borderTop=deco.borderTop;
+/*	borderTop=deco.borderTop;
 	borderLeft=deco.borderLeft;
 	borderRight=deco.borderRight;
-	borderBottom=deco.borderBottom;
+	borderBottom=deco.borderBottom;*/
 	
 // setBackgroundColor(eSkin::getActive()->queryScheme("global.normal.background"));
 	titleBarColor=eSkin::getActive()->queryScheme("eWindow.titleBar");
 	fontColor=eSkin::getActive()->queryScheme("eWindow.titleBarFont");
 
-	borderLeft=eSkin::getActive()->queryValue("eWindow.borderLeft", borderLeft);
-	borderRight=eSkin::getActive()->queryValue("eWindow.borderRight", borderRight);
-	borderBottom=eSkin::getActive()->queryValue("eWindow.borderBottom", borderBottom);
-	borderTop=eSkin::getActive()->queryValue("eWindow.borderTop", 30);
-	titleOffsetX=eSkin::getActive()->queryValue("eWindow.titleOffsetX", 10);
-	titleOffsetY=eSkin::getActive()->queryValue("eWindow.titleOffsetY", 10);
+	borderLeft=eSkin::getActive()->queryValue("eWindow.borderLeft", deco.borderLeft);
+	borderRight=eSkin::getActive()->queryValue("eWindow.borderRight", deco.borderRight);
+	borderBottom=eSkin::getActive()->queryValue("eWindow.borderBottom", deco.borderBottom);
+	borderTop=eSkin::getActive()->queryValue("eWindow.borderTop", deco.borderTop );
+
+	titleOffsetX=eSkin::getActive()->queryValue("eWindow.titleOffsetX", 0);
+	titleOffsetY=eSkin::getActive()->queryValue("eWindow.titleOffsetY", 0);
+	titleHeight=eSkin::getActive()->queryValue("eWindow.titleHeight", titleFontSize+10);
 	titleBorderY=eSkin::getActive()->queryValue("eWindow.titleBorderY", 0);
 	titleFontSize=eSkin::getActive()->queryValue("eWindow.titleFontSize", 20);
-	titleHeight=eSkin::getActive()->queryValue("eWindow.titleHeight", titleFontSize+10);
 
 	font = eSkin::getActive()->queryFont("eWindow.Childs");
 
@@ -39,9 +40,17 @@ eWindow::~eWindow()
 {
 }
 
+eRect eWindow::getTitleBarRect()
+{
+	return eRect(titleOffsetX, titleOffsetY, width()-titleOffsetX/*-titleBorderY*/, titleHeight);
+}
+
 void eWindow::redrawWidget(gPainter *target, const eRect &where)
 {
-	if ((clientrect & where) != where)
+	if ( deco && where.contains( eRect( 0,0, width(), height() ) ) )  // the draw Deco
+		deco.drawDecoration(target, ePoint(width(), height()));	
+
+	if ( where.contains( getTitleBarRect() ) );
 		drawTitlebar(target);
 
 	if (LCDTitle)
@@ -50,21 +59,20 @@ void eWindow::redrawWidget(gPainter *target, const eRect &where)
 
 void eWindow::drawTitlebar(gPainter *target)
 {
-	deco.drawDecoration(target, ePoint(width(), height()));
 	target->setForegroundColor(titleBarColor);
-	target->fill(eRect(titleOffsetX, titleOffsetY, width()-titleOffsetX-titleBorderY, titleHeight));
+	target->fill( getTitleBarRect() );
 	target->flush();
 
 	target->setBackgroundColor(titleBarColor);
 	target->setForegroundColor(fontColor);
 	target->setFont( eSkin::getActive()->queryFont("eWindow.TitleBar") );
-	target->renderText(eRect(titleOffsetX, titleOffsetY, width()-titleOffsetX-titleBorderY, titleHeight), text);
+	target->renderText(getTitleBarRect(), text);
 	target->flush();
 }
 
 void eWindow::recalcClientRect()
 {
-	clientrect=eRect(borderLeft, borderTop, size.width()-borderLeft-borderRight, size.height()-borderTop-borderBottom);
+	clientrect=eRect(borderLeft, (titleOffsetY?titleOffsetY:borderTop)+titleHeight, size.width()-borderLeft-borderRight, size.height()-borderBottom-titleHeight-(titleOffsetY?titleOffsetY:borderTop));
 }
 
 int eWindow::eventHandler(const eWidgetEvent &event)
@@ -72,7 +80,7 @@ int eWindow::eventHandler(const eWidgetEvent &event)
 	switch (event.type)
 	{
 		case eWidgetEvent::changedText:
-			redraw(eRect(0, 0, width(), borderTop));
+			redraw( getTitleBarRect() );
 		return 1;
 
 		case eWidgetEvent::evtAction:

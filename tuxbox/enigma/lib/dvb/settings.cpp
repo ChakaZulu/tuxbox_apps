@@ -427,4 +427,6 @@ void eDVBSettings::clearList()
 
 eDVBSettings::~eDVBSettings()
 {
+	if (transponderlist)
+		delete transponderlist;
 }

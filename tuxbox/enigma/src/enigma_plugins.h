@@ -3,52 +3,16 @@
 
 #include <core/gui/listbox.h>
 
-class ePlugin: eListBoxEntry
+class ePlugin: eListBoxEntryText
 {
 	friend class eZapPlugins;
 	friend class eListBox<ePlugin>;
 public:
 	int version;
-	eString name, desc;
 	eString depend, sopath, pluginname;
 	bool needfb, needrc, needlcd, needvtxtpid, needoffsets, showpig;
 	int posx, posy, sizex, sizey;
-	int isback;
-	ePlugin(eListBox<ePlugin> *parent, const char *cfgfile);
-
-	bool operator < ( const ePlugin& e) const
-	{
-			return name < e.name;
-	}
-
-protected:
-	void redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int hilited) const
-	{
-		rc->setFont(listbox->getFont());
-
-		if ((coNormalB != -1 && !hilited) || (hilited && coActiveB != -1))
-		{
-			rc->setForegroundColor(hilited?coActiveB:coNormalB);
-			rc->fill(rect);
-			rc->setBackgroundColor(hilited?coActiveB:coNormalB);
-		} else
-		{
-			eWidget *w=listbox->getNonTransparentBackground();
-			rc->setForegroundColor(w->getBackgroundColor());
-			rc->fill(rect);
-			rc->setBackgroundColor(w->getBackgroundColor());
-		}
-
-		rc->setForegroundColor(hilited?coActiveF:coNormalF);
-
-		eString txt(isback?_("[back]"):name + " - " + desc);
-
-		rc->renderText(rect, txt);
-		
-		eWidget* p = listbox->getParent();			
-		if (hilited && p && p->LCDElement)
-			p->LCDElement->setText(txt);
-	}
+	ePlugin(eListBox<ePlugin> *parent, const char *cfgfile, const char* descr=0);
 };
 
 class eZapPlugins: public Object

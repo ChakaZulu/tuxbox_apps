@@ -19,6 +19,7 @@ class eListBoxEntryService: public eListBoxEntry
 	static gFont serviceFont;
 	static gFont descrFont;
 	static gFont numberFont;
+	int getHeight();
 public:
 	eServiceReference service;
 	eListBoxEntryService(eListBox<eListBoxEntryService> *lb, const eServiceReference &service);

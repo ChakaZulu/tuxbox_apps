@@ -60,6 +60,7 @@ eZapLCDMain::eZapLCDMain(eWidget *parent): eWidget(parent, 0), clocktimer(eApp)
 	
 	Volume->show();
 	Progress->hide();
+	Progress->zOrderRaise();	
 	
 	CONNECT(clocktimer.timeout, eZapLCDMain::clockUpdate);
 	CONNECT(eDVB::getInstance()->timeUpdated, eZapLCDMain::clockUpdate);
@@ -136,10 +137,22 @@ eZapLCDMenu::eZapLCDMenu(eWidget *parent): eWidget(parent, 0)
 	ASSIGN(Element, eLabel, "element");
 }
 
+void eZapLCDScart::volumeUpdate(int vol)
+{
+	volume->setPerc((63-vol)*100/63);
+}
+
 eZapLCDScart::eZapLCDScart(eWidget *parent): eWidget(parent, 0)
 {	
+	volume = new eProgress(this);
+	volume->setName("volume_bar");
+
+	CONNECT(eAVSwitch::getInstance()->volumeChanged, eZapLCDScart::volumeUpdate);
+
 	if (eSkin::getActive()->build(this, "enigma_lcd_scart"))
 		eFatal("skin load of \"enigma_lcd_scart\" failed");
+
+	volume->zOrderRaise();	
 }
 
 eZapLCDStandby::eZapLCDStandby(eWidget *parent): eWidget(parent, 0)

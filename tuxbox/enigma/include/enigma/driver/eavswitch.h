@@ -21,7 +21,7 @@ class eAVSwitch
 	static eAVSwitch *instance;
 	int setVolume(int vol);	// 0..65535
 	void muteAviaAudio(bool);
-	int volume, mute;	
+	int volume, VCRVolume, mute;
 public:
 	void sendVolumeChanged();
 	int getVolume() { return volume; }
@@ -51,11 +51,10 @@ public:
 	 * \param abs What to change:
 	 * \arg \c 0 Volume, relative
 	 * \arg \c 1 Volume, absolute
-	 * \arg \c 2 Mute, set
-	 * \arg \c 3 Mute, change
 	 * \param vol The volume/muteflag to set. In case of volume, 0 means max and 63 means min.
 	 */
 	void changeVolume(int abs, int vol);
+	void changeVCRVolume(int abs, int vol);
 	void toggleMute();
 };
 

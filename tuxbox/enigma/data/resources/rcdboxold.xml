@@ -102,8 +102,14 @@
 			<action name="8" key="8" flags="mr" />
 			<action name="9" key="9" flags="mr" />
 		</actionmap>
+
 		<actionmap name="enigmaStandby">
 			<action name="wakeUp" key="power" flags="m" />
+		</actionmap>
+
+		<actionmap name="enigmaVCR">
+			<action name="volumeUp" key="+" flags="mr" />
+			<action name="volumeDown" key="-" flags="mr" />
 		</actionmap>
 	</device>
 </rcdefaults>

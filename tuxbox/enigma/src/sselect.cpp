@@ -7,6 +7,7 @@
 #include <apps/enigma/epgwindow.h>
 
 #include <core/base/i18n.h>
+#include <core/gdi/font.h>
 #include <core/gui/actions.h>
 #include <core/gui/eskin.h>
 #include <core/gui/elabel.h>
@@ -80,6 +81,18 @@ eListBoxEntryService::eListBoxEntryService(eListBox<eListBoxEntryService> *lb, c
 eListBoxEntryService::~eListBoxEntryService()
 {
 }
+
+int eListBoxEntryService::getHeight()
+{
+	eTextPara *para;
+	para = new eTextPara( eRect(0,0,100,50) );
+	para->setFont( serviceFont );
+	para->renderString("Mjdyl");
+	int i = para->getBoundBox().height();
+	para->destroy();
+	return i+4;
+}
+
 
 void eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int hilited)
 {
@@ -351,7 +364,8 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 			}
 			else if (event.action == &i_serviceSelectorActions->showAllServices)
 			{
-				useBouquet( pbs->getAllServicesBouquet() );
+				pbs->moveTo( 9999 );
+				useBouquet( pbs->current() );
 				services->sort();
 				services->invalidate();
 			}

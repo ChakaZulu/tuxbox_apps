@@ -20,31 +20,21 @@ class eSatelliteConfigurationManager: public eWindow
 {
 	eWidget *w_buttons;
 	eButton *button_close;
-	int eventFilter(const eWidgetEvent &event);
+	int eventHandler(const eWidgetEvent &event);
 public:
 	void okPressed();
 	bool lnbSelected(eString& str);
+	bool satSelected(eString& str);
+	bool DISEqCSelected(eString& str);	
 public:
 	eSatelliteConfigurationManager();
 	~eSatelliteConfigurationManager();
 };
 
-class eListBoxEntryLNB: public eListBoxEntryText
-{
-	friend class eListBox<eListBoxEntryLNB>;
-public:
-	const eLNB* lnb;
-	eListBoxEntryLNB(eListBox<eListBoxEntryLNB>* lb, const eLNB* lnb, eString text)
-		:eListBoxEntryText(((eListBox<eListBoxEntryText>*)lb), text), lnb(lnb)
-	{
-	}		
-};
-
-
 class eLNBSelitor: public eWindow  // Selitor = "Sel"ector + Ed"itor" :-)
 {
-	eListBox<eListBoxEntryLNB> *lnb_list;
-	eNumber *lofH, *lofL, *lnbThreshold;
+	eListBox<eListBoxEntryText> *lnb_list;
+	eNumber *lofH, *lofL, *threshold;
 	eButton *use; 	// use this LNB for Satelite and close LNBSelitor
 	eButton *apply; // apply changed to selected LNB
 	eButton *remove; // remove the selected LNB
@@ -60,19 +50,5 @@ public:
 		return 0;
 	}
 };
-
-inline eLNBSelitor::eLNBSelitor()
-{
-	// add all LNBs
-
-	int i=0;
-
-	for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
-		new eListBoxEntryLNB(lnb_list, &(*it), eString().sprintf("LNB %i", i++));
-	
-	// add a None LNB
-	new eListBoxEntryLNB(lnb_list, 0, _("New"));
-}
-
 
 #endif

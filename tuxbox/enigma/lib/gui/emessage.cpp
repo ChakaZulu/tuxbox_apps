@@ -1,6 +1,5 @@
 #include "emessage.h"
 
-//#include "enigma.h"   //
 #include <core/gui/elabel.h>
 #include <core/gui/ebutton.h>
 #include <core/gui/eskin.h>
@@ -15,29 +14,38 @@ eMessageBox::eMessageBox(eString message, eString caption, bool display_only): e
 
 	text=new eLabel(this);
 	text->setText(message);
-	text->move(ePoint(0, 0));
-	
-	text->resize(eSize(clientrect.width()-20, clientrect.height()));
-	text->setFlags(RS_WRAP);
+	text->move(ePoint(10, 10));
+	text->resize( eSize(clientrect.width()-20, clientrect.height() ));
+	text->setFlags(RS_WRAP|eLabel::flagVCenter);
 
 	eSize ext=text->getExtend();
+
+// HACK ... the size given by getExtend is okay... but the the renderer sucks....
+	ext+=eSize(2,0);
+////////////////////////////
+
 	if (ext.width()<150)
 		ext.setWidth(150);
-	text->resize(ext); 
 
-	resize(eSize(ext.width()+20+size.width()-clientrect.width(), ext.height()+size.height()-clientrect.height() + fontsize +14));
-	
+	text->resize(ext);
+
 	if (!display_only)
 	{
 		eButton *b=new eButton(this);
 		b->resize(eSize(size.width()-20, fontsize+4));
-		b->setText("...OK!");
-		ext=b->getExtend();
-		b->resize(ext);
-		b->move(ePoint(clientrect.width()-ext.width(), clientrect.height()-fontsize-14));	// right align
+		b->setText("close");
+		eSize bSize=b->getExtend();
+		bSize+=eSize(10,10);
+		b->resize(bSize);
+		resize( eSize( ext.width()+ 20 + size.width() - clientrect.width() , ext.height() + size.height() - clientrect.height() + bSize.height() + 20 ));
+		b->move( ePoint( clientrect.width() - ( bSize.width()+10 ), clientrect.height() - ( bSize.height() + 10) ));	// right align
 		CONNECT(b->selected, eMessageBox::okPressed);
-	} else
-		zOrderLower();
+	}
+	else
+	{
+		resize(eSize(ext.width() + 20 + size.width()-clientrect.width(), ext.height() + size.height() - clientrect.height() + 20 ));
+		zOrderRaise();
+	}
 }
 
 eMessageBox::~eMessageBox()

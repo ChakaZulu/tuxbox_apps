@@ -112,13 +112,31 @@
 	</object>
 
 	<object name="eSatelliteConfigurationManager">
-		<eSatelliteConfigurationManager cposition="120:80" csize="500:370" text="Satellitenkonfiguration">
-			<eLabel text="DISEqC" position="60:10" size="80:30" align="center"/>
-  		<eLabel text="Sat/Position" position="140:10" size="280:30" align="center"/>
-			<eLabel text="LNB" position="420:10" size="80:30" align="center"/>
-			<eWidget name="buttons" position="60:55" size="e-10:e-10" />
-			<eButton name="close" position="10:e-40" size="50:30" text="close"/>
+		<eSatelliteConfigurationManager position="80:40" size="570:470" text="Satellitenkonfiguration">
+			<eLabel text="DISEqC" position="100:10" size="80:30" align="center"/>
+  		<eLabel text="Sat/Position" position="190:10" size="280:30" align="center"/>
+			<eLabel text="LNB" position="480:10" size="80:30" align="center"/>
+			<eWidget name="buttons" position="100:50" size="e-10:e-10" />
+			<eButton name="close" position="10:e-70" size="80:30" text="close"/>
+			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="on" />
 		</eSatelliteConfigurationManager>
+	</object>
+
+	<object name="eLNBSelitor">
+		<eLNBSelitor position="100:100" size="400:350" text="LNB Configuration">
+			<eListbox name="lnblist" helptext="choose the LNB you wish to apply or edit" position="10:10" size="100:e-95" loadDeco="on"/>
+			<eLabel text="LOF/L:" position="130:10" size="100:35" />
+			<eNumber name="lofL" position="250:10" size="e-10:35" />
+  		<eLabel text="LOF/H:" position="130:60" size="100:35" />
+			<eNumber name="lofH" position="250:60" size="e-10:35" />
+  		<eLabel text="Threshold:" position="130:110" size="150:35" />
+			<eNumber name="threshold" position="250:110" size="e-10:35" />
+			<eButton name="apply" text="apply" position="130:e-125" size="100:30" />
+			<eButton name="delete" text="delete" position="250:e-125" size="e-10:30" />
+			<eButton name="use" text="use" position="10:e-75" size="100:30" />
+			<eButton name="cancel" text="cancel" position="130:e-75" size="100:30" />
+			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="on" />
+		</eLNBSelitor>
 	</object>
 
 	<object name="tsSelectType">
@@ -197,7 +215,6 @@
 			<eLabel text="Symbolrate:" position="10:124" size="140:32" />
 			<eNumber name="symbolrate" position="150:124:" size="e-150:32" />
 			<eLabel text="KSymb/s" position="e-145:125" size="e:32" />
-			
 		</eTranspondersettings>
 	</object>
 

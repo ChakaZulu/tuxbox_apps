@@ -72,15 +72,14 @@ void eListBoxEntryEPG::redraw(gPainter *rc, const eRect& rect, gColor coActiveB,
 		paraTime = new eTextPara( eRect( rect.left(), 0, rect.width(), rect.height()) );
 		paraTime->setFont( TimeFont );
 		paraTime->renderString(time.str());
-		eSize s1 = paraTime->getExtend();
-		DescrXOffs = s1.width()+s1.height();
+		DescrXOffs = paraTime->getBoundBox().width()+paraTime->getBoundBox().height();
 
 		paraDescr = new eTextPara( eRect( rect.left() ,0, rect.width(), rect.height()) );
 		paraDescr->setFont( DescrFont );
 		paraDescr->renderString(descr);
-		
-		DescrYOffs = ((rect.height() - paraDescr->boundBox.height()) / 2 ) - paraDescr->boundBox.top();
-		TimeYOffs = ((rect.height() - paraTime->boundBox.height()) / 2 ) - paraTime->boundBox.top();
+
+		DescrYOffs = ((rect.height() - paraDescr->getBoundBox().height()) / 2 ) - paraDescr->getBoundBox().top();
+		TimeYOffs = ((rect.height() - paraTime->getBoundBox().height()) / 2 ) - paraTime->getBoundBox().top();
 	}
 
 	rc->renderPara(*paraTime, ePoint( rect.left(), rect.top() + TimeYOffs ) );

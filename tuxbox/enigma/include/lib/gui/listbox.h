@@ -34,7 +34,8 @@ protected:
 	int setProperty(const eString &prop, const eString &value);
 	void eraseBackground(gPainter *target, const eRect &clip) { }
 	int eventHandler(const eWidgetEvent &event);
-	void recalc();
+	void recalcMaxEntries();
+	void recalcClientRect();
 	void redrawBorder(gPainter *target, eRect &area);
 	void invalidateEntry(int n){	invalidate(getEntryRect(n));}
 	int focusChanged();
@@ -48,7 +49,8 @@ class eListBox: public eListBoxBase
 
 	ePtrList<T> childs;
 	ePtrList_T_iterator top, bottom, current;
-
+	int recalced;
+	void recalcEntryHeight(T* entry);
 public:
 	eListBox(eWidget *parent);
 	~eListBox();
@@ -102,11 +104,17 @@ public:
 		if (listbox)
 			listbox->append(this);
 	}
-	~eListBoxEntry()
+	virtual ~eListBoxEntry()
 	{
 		if (listbox)
 			listbox->remove(this);
 	}
+
+	virtual int getHeight()
+	{
+		eDebug("--------------------eListBoxEntry getHeight()" );		
+		return 0;
+	};
 };
 
 class eListBoxEntryText: public eListBoxEntry
@@ -132,7 +140,7 @@ public:
 			font = eSkin::getActive()->queryFont("eListBox.EntryText.normal");
 	}
 
-	virtual ~eListBoxEntryText();
+	~eListBoxEntryText();
 	
 	bool operator < ( const eListBoxEntryText& e) const
 	{
@@ -144,6 +152,8 @@ public:
 	
 	void *getKey() { return key; }
 	const eString& getText() { return text; }
+
+	int getHeight();
 
 protected:
 	void redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state );
@@ -238,7 +248,7 @@ inline T* eListBox<T>::goPrev()
 template <class T>
 inline eListBox<T>::eListBox(eWidget *parent)
 	 :eListBoxBase(parent),
-		top(childs.end()), bottom(childs.end()), current(childs.end())
+		top(childs.end()), bottom(childs.end()), current(childs.end()), recalced(0)
 {
 	childs.setAutoDelete(false);	// machen wir selber
 
@@ -254,6 +264,24 @@ inline eListBox<T>::~eListBox()
 }
 
 template <class T>
+inline void eListBox<T>::recalcEntryHeight(T* entry)
+{
+	if (!recalced)
+	{
+ 		int i = entry->getHeight();
+
+		if (i)
+			item_height = i;
+
+		recalced=1;
+
+		recalcClientRect();
+		recalcMaxEntries();
+		init();
+	}
+}
+
+template <class T>
 inline void eListBox<T>::redrawWidget(gPainter *target, const eRect &where)
 {
 	if ( !isVisible() )
@@ -261,12 +289,14 @@ inline void eListBox<T>::redrawWidget(gPainter *target, const eRect &where)
 
 	eRect rc = where;
 
-	eListBox::redrawBorder(target, rc);
+	eListBoxBase::redrawBorder(target, rc);
 
 	// rc wird in eListBoxBase ggf auf den neuen Client Bereich ohne Rand verkleinert
+	
+	if ( childs.front() != childs.end() )
+		recalcEntryHeight( childs.front() );
 
 	int i=0;
-
 	for (ePtrList_T_iterator entry(top); (entry != bottom) && (entry != childs.end()); ++entry)
 	{
 		eRect rect = getEntryRect(i);

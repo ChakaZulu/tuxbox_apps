@@ -1108,7 +1108,6 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 
 void eZapMain::startService(const eServiceReference &serviceref, int err)
 {
-	eDebug("---------------START SERVICE--------------------");
 	isVT = Decoder::parms.tpid != -1;
 
 	setVTButton(isVT);

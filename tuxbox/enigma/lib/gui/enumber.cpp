@@ -9,11 +9,11 @@
 eRect eNumber::getNumberRect(int n)
 {
 	if (deco_selected && have_focus)
-		return eRect( deco_selected.borderLeft + n * space_selected, deco_selected.borderTop, space, crect_selected.height() );
+		return eRect( deco_selected.borderLeft + n * space_selected, deco_selected.borderTop, dspace, crect_selected.height() );
 	else if (deco)
-		return eRect( deco.borderLeft + n * space, deco.borderTop, space, crect.height() );
+		return eRect( deco.borderLeft-1 + n * dspace, deco.borderTop, dspace, crect.height() );
 	else
-		return eRect( n * space, 0, space, height() );
+		return eRect( n * dspace-1, 0, dspace, height() );
 
 }
 
@@ -68,7 +68,7 @@ int eNumber::eventHandler(const eWidgetEvent &event)
 			crect.setTop( deco.borderTop );
 			crect.setBottom( height() - deco.borderBottom );
 			crect.setRight( width() - deco.borderRight );
-			space = (crect.width()-2) / len;
+			dspace = (crect.width()-2) / len;
 		}
 		if (deco_selected)
 		{
@@ -79,7 +79,7 @@ int eNumber::eventHandler(const eWidgetEvent &event)
 			space_selected = (crect_selected.width()-2) / len;
 		}
 		else
-			space = (size.width()-2) / len;	
+			dspace = (size.width()-2) / len;	
 		break;
 	case eWidgetEvent::evtAction:
 		if (event.action == &i_cursorActions->left)

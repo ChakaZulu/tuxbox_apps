@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_scan.cpp,v 1.5 2002/07/02 00:19:33 Ghostrider Exp $
+ * $Id: enigma_scan.cpp,v 1.6 2002/08/03 14:44:36 Ghostrider Exp $
  */
 
 #include "enigma_scan.h"
@@ -64,8 +64,8 @@ void eZapScan::sel_bouquet()
 
 void eZapScan::sel_satconfig()
 {
-	eSatelliteConfigurationManager satconfig;
 	hide();
+	eSatelliteConfigurationManager satconfig;
 	satconfig.show();
 	satconfig.exec();
 	satconfig.hide();

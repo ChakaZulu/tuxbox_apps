@@ -55,8 +55,10 @@ public:
 
 class eZapLCDScart: public eWidget
 {
+	eProgress* volume;
 public:
 	eZapLCDScart(eWidget *parent);
+	void volumeUpdate(int);
 };
 
 class eZapLCDStandby: public eWidget

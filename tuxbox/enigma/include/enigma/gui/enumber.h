@@ -20,7 +20,7 @@ private:
 	eRect getNumberRect(int n);
 	int eventHandler(const eWidgetEvent &event);
 	int number[16];
-	int len, space, space_selected, active;
+	int len, dspace, space_selected, active;
 	gColor cursorB, cursorF, normalB, normalF;
 	int have_focus;
 	int min, max, digit, maxdigits, isactive;

@@ -11,7 +11,7 @@ eListBoxBase::eListBoxBase(eWidget* parent)
 		iArrowRight(eSkin::getActive()->queryImage("eListBox.arrow.right")),
 		colorActiveB(eSkin::getActive()->queryScheme("global.selected.background")),
 		colorActiveF(eSkin::getActive()->queryScheme("global.selected.foreground")),
-		item_height(font.pointSize),   // das suckt !! das ist ein anderer Font, als der für die Entrys genommen wir...
+		item_height( font.pointSize ),
 		flags(0)
 {
 }
@@ -24,7 +24,7 @@ void eListBoxBase::setFlags(int _flags)
 		loadDeco();
 }
 
-void eListBoxBase::recalc()
+void eListBoxBase::recalcMaxEntries()
 {
 	if (deco_selected && have_focus)
 		MaxEntries = crect_selected.height() / item_height;
@@ -100,26 +100,31 @@ void eListBoxBase::redrawBorder(gPainter *target, eRect& where)
 	}
 }
 
+void eListBoxBase::recalcClientRect()
+{
+		if (deco)
+		{
+			crect.setLeft( deco.borderLeft );
+			crect.setTop( deco.borderTop );
+			crect.setRight( width() - 1 - deco.borderRight );
+			crect.setBottom( height() - 1 - deco.borderBottom );
+		}
+		if (deco_selected)
+		{
+			crect_selected.setLeft( deco_selected.borderLeft );
+			crect_selected.setTop( deco_selected.borderTop );
+			crect_selected.setRight( width() - 1 - deco_selected.borderRight );
+			crect_selected.setBottom( height() - 1 -deco_selected.borderBottom );
+		}
+}
+
 int eListBoxBase::eventHandler(const eWidgetEvent &event)
 {
 	switch (event.type)
 	{
 		case eWidgetEvent::changedSize:
-			if (deco)
-			{
-				crect.setLeft( deco.borderLeft );
-				crect.setTop( deco.borderTop );
-				crect.setRight( width() - deco.borderRight );
-				crect.setBottom( height() - deco.borderBottom );
-			}
-			if (deco_selected)
-			{
-				crect_selected.setLeft( deco_selected.borderLeft );
-				crect_selected.setTop( deco_selected.borderTop );
-				crect_selected.setRight( width() - deco_selected.borderRight );
-				crect_selected.setBottom( height() - deco_selected.borderBottom );
-			}
-			recalc();
+			recalcClientRect();
+			recalcMaxEntries();
 		break;
 
 		default:
@@ -132,7 +137,7 @@ int eListBoxBase::focusChanged()
 {
 	if (deco && deco_selected)
 	{
-		recalc();
+		recalcMaxEntries();
 
 		if (isVisible())
 			invalidate();
@@ -149,6 +154,17 @@ eListBoxEntryText::~eListBoxEntryText()
 		para->destroy();
 		para = 0;
 	}
+}
+
+int eListBoxEntryText::getHeight()
+{
+	eTextPara *test;
+	test = new eTextPara( eRect(0,0,100,50) );
+	test->setFont( font );
+	test->renderString("Mjdyl");
+	int i = test->getBoundBox().height();
+	test->destroy();
+	return i+4;
 }
 
 void eListBoxEntryText::redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state)
@@ -173,8 +189,7 @@ void eListBoxEntryText::redraw(gPainter *rc, const eRect& rect, gColor coActiveB
 		para->setFont( font );
 		para->renderString(text);
 		para->realign(align);
-
-		yOffs = ((rect.height() - para->boundBox.height()) / 2 + 0) - para->boundBox.top() ;
+		yOffs = ((rect.height() - para->getBoundBox().height()) / 2 + 0) - para->getBoundBox().top() ;
 	}		
  	
 	rc->renderPara(*para, ePoint(0, rect.top()+yOffs ) );
@@ -208,9 +223,3 @@ void eListBoxEntryTextStream::redraw(gPainter *rc, const eRect& rect, gColor coA
 	if (state && p && p->LCDElement)
 		p->LCDElement->setText(text.str());
 }
-
-
-/*eSize eListBoxEntryText::getTextExtend()	
-{
-	return para?para->getExtend():eSize();
-} */

@@ -17,6 +17,7 @@ class eStatusBar : public eWidget
 	int eventHandler(const eWidgetEvent &event);
 	void loadDeco();
 	void redrawBorder(gPainter *, const eRect &);
+	void initialize();
 public:
 	enum
 	{
@@ -29,3 +30,4 @@ public:
 };
 
 #endif // __CORE_GUI_STATUSBAR__
+

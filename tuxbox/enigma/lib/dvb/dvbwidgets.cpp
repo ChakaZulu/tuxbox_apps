@@ -10,16 +10,26 @@
 eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type)
 	:eWidget(parent), type(type), edit(edit)
 {
+	sat=new eListBox<eListBoxEntryText>(this);
+	sat->setName("sat");
+	sat->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
+	for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
+		for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
+			new eListBoxEntryText(sat, s->getDescription().c_str(), (void*) *s);
+
 	int init[5]={1,2,3,4,5};
 	frequency=new eNumber(this, 5, 0, 9, 1, init, 0, 0, edit);
 	frequency->setName("frequency");
+	
+	inversion=new eCheckbox(this);
+	inversion->setName("inversion");
 
 	polarity=new eListBox<eListBoxEntryText>(this);
 	polarityEntry[0]=new eListBoxEntryText(polarity, _("vertical"), (void*)0);
 	polarityEntry[1]=new eListBoxEntryText(polarity, _("horizontal"), (void*)1);
 	polarity->setName("polarity");
 	polarity->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
-	
+
 	fec=new eListBox<eListBoxEntryText>(this);
 	fecEntry[0]=new eListBoxEntryText(fec, "Auto", (void*)0);
 	fecEntry[1]=new eListBoxEntryText(fec, "1/2", (void*)1);
@@ -28,20 +38,10 @@ eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type)
 	fecEntry[4]=new eListBoxEntryText(fec, "5/6", (void*)4);
 	fecEntry[5]=new eListBoxEntryText(fec, "7/8", (void*)5);
 	fec->setName("fec");
-	fec->setFlags(eListBoxBase::flagNoUpDownMovement);
+	fec->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
 	
 	symbolrate=new eNumber(this, 5, 0, 9, 1, init, 0, 0, edit);
 	symbolrate->setName("symbolrate");
-	
-	inversion=new eCheckbox(this);
-	inversion->setName("inversion");
-
-	sat=new eListBox<eListBoxEntryText>(this);
-	sat->setName("sat");
-	sat->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
-	for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
-		for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
-			new eListBoxEntryText(sat, s->getDescription().c_str(), (void*) *s);
 
 	CONNECT(frequency->selected, eTransponderWidget::nextField0);
 	CONNECT(polarity->selected, eTransponderWidget::nextField1);

@@ -20,6 +20,8 @@ eButton::eButton(eWidget *parent, eLabel* desc, int takefocus, bool loadDeco)
 
 	if (deco)
 		align=eTextPara::dirCenter;
+	
+	setFlags( flagVCenter );
 
 	addActionMap(&i_cursorActions->map);
 }
@@ -105,15 +107,15 @@ int eButton::eventHandler(const eWidgetEvent &event)
 			{
 				crect.setLeft( deco.borderLeft );
 				crect.setTop( deco.borderTop );
-				crect.setRight( width() - deco.borderRight );
-				crect.setBottom( height() - deco.borderBottom );
+				crect.setRight( width() - 1 - deco.borderRight );
+				crect.setBottom( height() - 1 - deco.borderBottom );
 			}
 			if (deco_selected)
 			{
 				crect_selected.setLeft( deco_selected.borderLeft );
 				crect_selected.setTop( deco_selected.borderTop );
-				crect_selected.setRight( width() - deco_selected.borderRight );
-				crect_selected.setBottom( height() - deco_selected.borderBottom );
+				crect_selected.setRight( width() - 1 - deco_selected.borderRight );
+				crect_selected.setBottom( height() - 1 - deco_selected.borderBottom );
 			}
 		break;
 
@@ -127,12 +129,12 @@ void eButton::redrawWidget(gPainter *target, const eRect &area)
 {
 	if (deco_selected && have_focus)
 	{
-		deco_selected.drawDecoration(target, ePoint(width(), height()));
+		deco_selected.drawDecoration(target, ePoint(width(), height()) );
 		eLabel::redrawWidget(target, crect_selected);
 	}
 	else if (deco)
 	{
-		deco.drawDecoration(target, ePoint(width(), height()));
+		deco.drawDecoration(target, ePoint(width(), height()) );
 		eLabel::redrawWidget(target, crect);
 	}
 	else

@@ -13,7 +13,7 @@
 	</fonts>
 		
 	<fontalias>
-		<map name="eStatusBar" font="Nimbus" size="20" />
+		<map name="eStatusBar" font="Blue.Regular" size="24" />
 		<map name="eWindow.TitleBar" font="Blue.Bold" size="32" />
 		<map name="eWindow.Childs" font="Blue.Regular" size="30" />
 
@@ -91,10 +91,10 @@
 	
 	 <values>
 	 	<value name="eWindow.titleFontSize" value="24" />
-		<value name="eWindow.borderLeft" value="4" />
+		<!--value name="eWindow.borderLeft" value="4" />
 		<value name="eWindow.borderRight" value="4" />
 		<value name="eWindow.borderBottom" value="16" />
-		<value name="eWindow.borderTop" value="50" />
+		<value name="eWindow.borderTop" value="50" /-->
 		<value name="eWindow.titleOffsetX" value="0" />
 		<value name="eWindow.titleOffsetY" value="20" />
 		<value name="eWindow.titleHeight" value="30" />
@@ -153,17 +153,15 @@
 	</images>
 
 	<imagealias>
-		<!--map name="eStatusBar.top" img="Statusbar.border.bottom/top" />
-		<map name="eStatusBar.bottom" img="Statusbar.border.bottom/top" />
-		<map name="eStatusBar.left" img="Statusbar.border.left/right" />
-		<map name="eStatusBar.right" img="Statusbar.border.left/right" />
-		<map name="eStatusBar.topLeft" img="Statusbar.border.leftTop" />
-		<map name="eStatusBar.bottomRight" img="Statusbar.border.rightBottom" />		
-		<map name="eStatusBar.topRight" img="Statusbar.border.rightTop" />
-		<map name="eStatusBar.bottomLeft" img="Statusbar.border.leftBottom" /-->		
-		<map name="eStatusBar.top" img="3DBorder.unselected.hor.light" />		
-		<map name="eStatusBar.bottom" img="3DBorder.unselected.hor.dark" />		
-			
+		<map name="eStatusBar.top" img="3DBorder.unselected.hor.light" />
+		<map name="eStatusBar.left" img="3DBorder.unselected.ver.light" />
+		<map name="eStatusBar.topLeft" img="3DBorder.unselected.corner.light" />
+		<map name="eStatusBar.bottom" img="3DBorder.unselected.hor.dark" />
+		<map name="eStatusBar.right" img="3DBorder.unselected.ver.dark" />
+		<map name="eStatusBar.bottomRight" img="3DBorder.unselected.corner.dark" />		
+		<map name="eStatusBar.topRight" img="3DBorder.unselected.corner.lightDark" />
+		<map name="eStatusBar.bottomLeft" img="3DBorder.unselected.corner.lightDark" />		
+
 		<map name="eButton.top" img="3DBorder.unselected.hor.light" />
 		<map name="eButton.left" img="3DBorder.unselected.ver.light" />
 		<map name="eButton.topLeft" img="3DBorder.unselected.corner.light" />
@@ -195,14 +193,22 @@
 	
 	<object name="enigma_lcd_main">
 		<eZapLCDMain position="0:0" size="120:64">
-			<eLabel position="0:0" size="120:17" pixmap="lcd_enigma_logo" />
 			<eProgress position="7:2" size="65:6" name="progress_bar" foregroundColor="0" leftColor="0" rightColor="255" border="1" />
-			<eLabel position="2:17" size="118:32" font="lcd.main.service_name" wrap="on" name="service_name" />
+			<eLabel position="0:0" size="120:17" pixmap="lcd_enigma_logo" />
+			<eLabel position="2:17" size="120:32" font="lcd.main.service_name" wrap="on" name="service_name" />
 			<eLabel position="74:49" size="46:15" font="lcd.main.clock" name="clock" align="right" />
 			<eLabel position="0:53" size="11:13" pixmap="speaker" />
 			<eProgress position="12:56" size="60:6" name="volume_bar" foregroundColor="255" leftColor="255" rightColor="0" border="1" />
 		</eZapLCDMain>
 	</object> 
+
+	<object name="enigma_lcd_scart">
+		<eZapLCDScart position="0:0" size="120:64">
+			<eProgress position="7:2" size="65:6" name="volume_bar" foregroundColor="0" leftColor="0" rightColor="255" border="1" />
+			<eLabel position="0:0" size="120:17" pixmap="lcd_enigma_logo" />
+		  <eLabel position="4:20" size="112:38" pixmap="lcd_scart" />	
+		</eZapLCDScart>
+	</object>
 
 	<object name="ezap_main">
 		<eZapMain position="70:382" size="580:134">
