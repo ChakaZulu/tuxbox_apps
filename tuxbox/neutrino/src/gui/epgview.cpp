@@ -243,7 +243,7 @@ string GetGenre( char contentClassification )
 }
 
 
-int CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long long id, time_t* startzeit, bool doLoop )
+int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startzeit, bool doLoop )
 {
 	int res = menu_return::RETURN_REPAINT;
 
@@ -255,9 +255,10 @@ int CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long lo
 		g_Fonts->epg_date->RenderString(g_settings.screen_StartX+10, g_settings.screen_StartY+height, 40, "-@-", COL_INFOBAR);
 	}
 
-	GetEPGData( channelName, onid_tsid, id, startzeit );
+	GetEPGData( onid_sid, id, startzeit );
 	if (doLoop)
 	{
+		evtlist = g_Sectionsd->getEventsServiceKey( onid_sid );
 		g_FrameBuffer->paintBackgroundBoxRel(g_settings.screen_StartX, g_settings.screen_StartY, 50, height+5);
 	}
 
@@ -282,7 +283,6 @@ int CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long lo
 		g_FrameBuffer->paintBackgroundBoxRel(sx, sy, ox, height+10);
 		return res;
 	}
-
 
 	int pos;
 	string text1 = epgData.title;
@@ -346,12 +346,12 @@ int CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long lo
 	g_FrameBuffer->paintBoxRel(sx, sy+oy-botboxheight, ox, botboxheight, COL_MENUHEAD);
 	string fromto;
 	int widthl,widthr;
-	fromto= epgData.start+ " - "+ epgData.end;
+	fromto= epg_start+ " - "+ epg_end;
 
 	widthl = g_Fonts->epg_date->getRenderWidth(fromto.c_str());
 	g_Fonts->epg_date->RenderString(sx+40,  sy+oy-3, widthl, fromto.c_str(), COL_MENUHEAD);
-	widthr = g_Fonts->epg_date->getRenderWidth(epgData.date.c_str());
-	g_Fonts->epg_date->RenderString(sx+ox-40-widthr,  sy+oy-3, widthr, epgData.date.c_str(), COL_MENUHEAD);
+	widthr = g_Fonts->epg_date->getRenderWidth(epg_date.c_str());
+	g_Fonts->epg_date->RenderString(sx+ox-40-widthr,  sy+oy-3, widthr, epg_date.c_str(), COL_MENUHEAD);
 
 	int showPos = 0;
 	textCount = epgText.size();
@@ -359,15 +359,15 @@ int CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long lo
 	showText(showPos, textypos);
 
 	//show progressbar
-	if ( epgData.done!= -1 )
+	if ( epg_done!= -1 )
 	{
 		int pbx = sx + 10 + widthl + 10 + ((ox-104-widthr-widthl-10-10-20)>>1);
 		g_FrameBuffer->paintBoxRel(pbx, sy+oy-height, 104, height-6, COL_MENUCONTENT+6);
 		g_FrameBuffer->paintBoxRel(pbx+2, sy+oy-height+2, 100, height-10, COL_MENUCONTENT);
-		g_FrameBuffer->paintBoxRel(pbx+2, sy+oy-height+2, epgData.done, height-10, COL_MENUCONTENT+3);
+		g_FrameBuffer->paintBoxRel(pbx+2, sy+oy-height+2, epg_done, height-10, COL_MENUCONTENT+3);
 	}
 
-	GetPrevNextEPGData(current_id, &current_zeit);
+	GetPrevNextEPGData( epgData.eventID, &epgData.epg_times.startzeit );
 	if (prev_id != 0)
 	{
 		g_FrameBuffer->paintBoxRel(sx+ 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT+ 3);
@@ -399,7 +399,7 @@ int CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long lo
 						g_FrameBuffer->paintBoxRel(sx+ 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT+ 1);
 						g_Fonts->epg_date->RenderString(sx+ 10, sy+ oy- 3, widthr, "<", COL_MENUCONTENT+ 1);
 
-						show(channelName, onid_tsid, prev_id, &prev_zeit, false);
+						show(onid_sid, prev_id, &prev_zeit, false);
 					}
 					break;
 
@@ -409,7 +409,7 @@ int CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long lo
 						g_FrameBuffer->paintBoxRel(sx+ ox- botboxheight+ 8- 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT+ 1);
 						g_Fonts->epg_date->RenderString(sx+ ox- botboxheight+ 8, sy+ oy- 3, widthr, ">", COL_MENUCONTENT+ 1);
 
-						show(channelName, onid_tsid, next_id, &next_zeit, false);
+						show(onid_sid, next_id, &next_zeit, false);
 					}
 					break;
 
@@ -465,188 +465,71 @@ void CEpgData::hide()
 	#endif
 }
 
-void CEpgData::GetEPGData( const string channelName, const unsigned int onid_tsid, unsigned long long id, time_t* startzeit )
+void CEpgData::GetEPGData( const unsigned int onid_tsid, unsigned long long id, time_t* startzeit )
 {
-	int sock_fd;
-	SAI servaddr;
-	char rip[]="127.0.0.1";
-
 	epgText.clear();
-	emptyLineCount 	= 0;
-	epgData.title	= "";
-	epgData.info1 	= "";
-	epgData.info2 	= "";
-	epgData.date 	= "";
-	epgData.start 	= "";
-	epgData.end 	= "";
-	epgData.done 	= -1;
-	epgData.fsk	= 0;
-	epgData.contentClassification	= "";
-	epgData.userClassification		= "";
+	emptyLineCount = 0;
 
-	sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	memset(&servaddr,0,sizeof(servaddr));
-	servaddr.sin_family=AF_INET;
-	servaddr.sin_port=htons(sectionsd::portNumber);
-	inet_pton(AF_INET, rip, &servaddr.sin_addr);
+	bool res;
 
-	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
+	if ( id!= 0 )
+		res = g_Sectionsd->getEPGid( id, *startzeit, &epgData );
+	else
+		res = g_Sectionsd->getActualEPGServiceKey( onid_tsid, &epgData );
+
+	if ( res )
 	{
-		perror("Couldn't connect to server!");
-		return;
+		struct tm *pStartZeit = localtime(&(epgData.epg_times).startzeit);
+		char temp[11];
+		strftime( temp, sizeof(temp), "%d.%m.%Y", pStartZeit);
+		epg_date= temp;
+		strftime( temp, sizeof(temp), "%H:%M", pStartZeit);
+		epg_start= temp;
+
+		long int uiEndTime((epgData.epg_times).startzeit+ (epgData.epg_times).dauer);
+		struct tm *pEndeZeit = localtime((time_t*)&uiEndTime);
+		strftime( temp, sizeof(temp), "%H:%M", pEndeZeit);
+		epg_end= temp;
+
+		epg_done= -1;
+		if (( time(NULL)- (epgData.epg_times).startzeit )>= 0 )
+		{
+			unsigned nProcentagePassed=(unsigned)((float)(time(NULL)-(epgData.epg_times).startzeit)/(float)(epgData.epg_times).dauer*100.);
+			if (nProcentagePassed<= 100)
+				epg_done= nProcentagePassed;
+		}
 	}
 
-	if ( (( onid_tsid != 0 )  ) || ( id!= 0 ) )
-	{
-		if ( id!= 0 )
-		{
-			// query EPG für bestimmtes Event
-			sectionsd::msgRequestHeader req;
-			req.version = 2;
-			req.command = sectionsd::epgEPGid;
-			req.dataLength = 12;
-			write(sock_fd,&req,sizeof(req));
-
-			write(sock_fd, &id, sizeof(id));
-			write(sock_fd, startzeit, sizeof(*startzeit));
-			printf("[epgdata] query for evt_id >%llx<, time %lx\n", id, *startzeit);
-		}
-		else
-		{
-			// query EPG normal
-			sectionsd::msgRequestHeader req;
-			req.version = 2;
-			req.command = sectionsd::actualEPGchannelID;
-			req.dataLength = 4;
-			write(sock_fd,&req,sizeof(req));
-
-			write(sock_fd, &onid_tsid, sizeof(onid_tsid));
-			printf("[epgdata] query for onid_tsid >%x< (%s)\n", onid_tsid, channelName.c_str());
-		}
-
-		sectionsd::msgResponseHeader resp;
-		memset(&resp, 0, sizeof(resp));
-		read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader));
-
-		int nBufSize = resp.dataLength;
-		if(nBufSize>0)
-		{
-			char* pData = new char[nBufSize] ;
-			read(sock_fd, pData, nBufSize);
-
-			sectionsd::sectionsdTime*    epg_times;
-			char* dp = pData;
-
-			current_id = *((unsigned long long *)dp);
-            dp+= sizeof(current_id);
-
-			epgData.title = dp;
-			dp+=strlen(dp)+1;
-			epgData.info1 = dp;
-			dp+=strlen(dp)+1;
-			epgData.info2 = dp;
-			dp+=strlen(dp)+1;
-			epgData.contentClassification = dp;
-			dp+=strlen(dp)+1;
-			epgData.userClassification = dp;
-			dp+=strlen(dp)+1;
-			epgData.fsk = *dp++;
-			// printf("fsk: %d\n", epgData.fsk);
-
-			epg_times = (sectionsd::sectionsdTime*) dp;
-            dp+= sizeof(sectionsd::sectionsdTime);
-
-			struct tm *pStartZeit = localtime(&(*epg_times).startzeit);
-			char temp[11];
-			strftime( temp, sizeof(temp), "%d.%m.%Y", pStartZeit);
-			epgData.date= temp;
-			strftime( temp, sizeof(temp), "%H:%M", pStartZeit);
-			epgData.start= temp;
-
-			long int uiEndTime((*epg_times).startzeit+ (*epg_times).dauer);
-			struct tm *pEndeZeit = localtime((time_t*)&uiEndTime);
-			strftime( temp, sizeof(temp), "%H:%M", pEndeZeit);
-            epgData.end= temp;
-
-			if (( time(NULL)- (*epg_times).startzeit )>= 0 )
-			{
-				unsigned nProcentagePassed=(unsigned)((float)(time(NULL)-(*epg_times).startzeit)/(float)(*epg_times).dauer*100.);
-				if (nProcentagePassed<= 100)
-					epgData.done= nProcentagePassed;
-			}
-
-			#ifdef USEACTIONLOG
-				char buf[1000];
-				sprintf((char*) buf, "epg: %08x \"%s\" %s %s - %s, \"%s\"", onid_tsid, channelName.c_str(), epgData.date.c_str(), epgData.start.c_str(), epgData.end.c_str(), epgData.title.c_str() );
-				g_ActionLog->println(buf);
-			#endif
-
-			delete[] pData;
-		}
-	}
-	close(sock_fd);
+	#ifdef USEACTIONLOG
+		char buf[1000];
+		sprintf((char*) buf, "epg: %08x %s %s - %s, \"%s\"", onid_sid, epgData.date.c_str(), epgData.start.c_str(), epgData.end.c_str(), epgData.title.c_str() );
+		g_ActionLog->println(buf);
+	#endif
 }
 
 void CEpgData::GetPrevNextEPGData( unsigned long long id, time_t* startzeit )
 {
-	int sock_fd;
-	SAI servaddr;
-	char rip[]="127.0.0.1";
-
 	prev_id= 0;
 	next_id= 0;
-	//        time_t* prev_zeit;
-	//        time_t* next_zeit;
 
-	sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	memset(&servaddr,0,sizeof(servaddr));
-	servaddr.sin_family=AF_INET;
-	servaddr.sin_port=htons(sectionsd::portNumber);
-	inet_pton(AF_INET, rip, &servaddr.sin_addr);
-
-	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
+	for ( int i= 0; i< evtlist.size(); i++ )
 	{
-		perror("Couldn't connect to server!");
-		return;
+		//printf("%d %llx/%llx - %x %x\n", i, evtlist[i].eventID, id, evtlist[i].startTime, *startzeit);
+    	if ( ( evtlist[i].eventID == id ) && ( evtlist[i].startTime == *startzeit ) )
+    	{
+        	if ( i > 0 )
+        	{
+        		prev_id= evtlist[i- 1].eventID;
+        		prev_zeit= evtlist[i- 1].startTime;
+        	}
+ 			if ( i < ( evtlist.size()- 1 ) )
+        	{
+        		next_id= evtlist[i+ 1].eventID;
+        		next_zeit= evtlist[i+ 1].startTime;
+        	}
+			break;
+    	}
 	}
 
-	// query PrevNext für bestimmtes Event
-	sectionsd::msgRequestHeader req;
-	req.version = 2;
-	req.command = sectionsd::getEPGPrevNext;
-	req.dataLength = 12;
-	write(sock_fd,&req,sizeof(req));
-
-	write(sock_fd, &id, sizeof(id));
-	write(sock_fd, startzeit, sizeof(*startzeit));
-	printf("[epgdata] query prev/next for evt_id >%llx<, time %lx\n", id, *startzeit);
-
-	sectionsd::msgResponseHeader resp;
-	memset(&resp, 0, sizeof(resp));
-	read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader));
-
-	int nBufSize = resp.dataLength;
-	if(nBufSize>0)
-	{
-		char* pData = new char[nBufSize] ;
-		recv(sock_fd, pData, nBufSize, MSG_WAITALL);
-
-		char* dp = pData;
-		//printf("%s \n", dp);
-		sscanf(dp, "%012llx\xFF", &prev_id);
-		dp+= 13;
-		sscanf(dp, "%08lx\xFF", &prev_zeit);
-		dp+= 9;
-		sscanf(dp, "%012llx\xFF", &next_id);
-		dp+= 13;
-		sscanf(dp, "%08lx\xFF", &next_zeit);
-
-		//printf("got prev evt_id >%llx<, time %x\n", prev_id, prev_zeit);
-		//printf("got next evt_id >%llx<, time %x\n", next_id, next_zeit);
-
-		delete[] pData;
-	}
-
-	close(sock_fd);
 }
 

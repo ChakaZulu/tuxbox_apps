@@ -30,15 +30,15 @@
 */
 
 //
-// $Id: eventlist.cpp,v 1.44 2002/04/18 10:42:55 field Exp $
+// $Id: eventlist.cpp,v 1.45 2002/04/18 12:26:23 field Exp $
 //
 //  -- EPG Event List // Vorschau
 //
 //
 //
 // $Log: eventlist.cpp,v $
-// Revision 1.44  2002/04/18 10:42:55  field
-// Updates, sectionsd clientlib
+// Revision 1.45  2002/04/18 12:26:23  field
+// sectionsd-clientlib
 //
 // Revision 1.43  2002/03/22 17:34:04  field
 // Massive Umstellungen - NVODs/SubChannels=KAPUTT!
@@ -335,7 +335,7 @@ int EventList::exec(unsigned onidSid, const std::string& channelname)
 			{
 				hide();
 
-				res = g_EpgData->show(channelname, onidSid, evtlist[selected].eventID, &evtlist[selected].startTime);
+				res = g_EpgData->show(onidSid, evtlist[selected].eventID, &evtlist[selected].startTime);
                 if ( res == menu_return::RETURN_EXIT_ALL )
                 {
                 	loop = false;

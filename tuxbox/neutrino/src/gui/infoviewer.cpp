@@ -489,18 +489,21 @@ void CInfoViewer::show_Data( bool calledFromEvent = false )
 		int height = g_Fonts->infobar_channame->getHeight()/3;
 		int ChanInfoY = BoxStartY + ChanHeight+ 15; //+10
 
-		//percent
+
 		if ( showButtonBar )
 		{
 			int posy = BoxStartY+12;
 			int height2= 20;
-
+        	//percent
 			if ( info_CurrentNext.flags & sectionsd::epgflags::has_current)
 			{
 				g_FrameBuffer->paintBoxRel(BoxEndX-114, posy,   2+100+2, height2, COL_INFOBAR_SHADOW); //border
 				g_FrameBuffer->paintBoxRel(BoxEndX-112, posy+2, runningPercent+2, height2-4, COL_INFOBAR+7);//fill(active)
 				g_FrameBuffer->paintBoxRel(BoxEndX-112+runningPercent, posy+2, 100-runningPercent, height2-4, COL_INFOBAR+3);//fill passive
 			}
+			else
+				g_FrameBuffer->paintBackgroundBoxRel(BoxEndX-114, posy,   2+100+2, height2);
+
 			if ( info_CurrentNext.flags & sectionsd::epgflags::has_anything )
 			{
 				g_FrameBuffer->paintIcon("rot.raw", BoxEndX- ICON_OFFSET- 4* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );

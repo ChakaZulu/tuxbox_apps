@@ -52,6 +52,7 @@
 #include "helpers/settings.h"
 
 #include "sections/sectionsdMsg.h"
+#include "sectionsdclient.h"
 
 #include "pthread.h"
 
@@ -64,45 +65,22 @@ using namespace std;
 
 
 
-/*struct EPGData
-{
-	char title[100];
-	char info1[600];
-	char info2[3000];
-	char date[20];
-	char start[10];
-	char end[10];
-	char done[6];
-};
-*/
-
-struct EPGData
-{
-	string 	title;
-	string 	info1;
-	string 	info2;
-	string 	date;
-	string 	start;
-	string 	end;
-	int	done;
-	char	fsk;
-	string 	contentClassification;
-	string 	userClassification;
-};
-
 
 class CEpgData
 {
 	private:
-		EPGData		epgData;
+		CChannelEventList	evtlist;
+		CEPGData			epgData;
+
+		string 		epg_date;
+		string 		epg_start;
+		string 		epg_end;
+		int			epg_done;
 
 		unsigned long long prev_id;
 		time_t prev_zeit;
 		unsigned long long next_id;
 		time_t next_zeit;
-
-		unsigned long long current_id;
-		time_t current_zeit;
 
 		int			ox, oy, sx, sy, toph;
 		int			emptyLineCount, info1_lines;
@@ -112,7 +90,7 @@ class CEpgData
 		int			botheight,botboxheight;
 		int			medlineheight,medlinecount;
 
-		void GetEPGData( string channelName, unsigned int onid_tsid, unsigned long long id, time_t* startzeit );
+		void GetEPGData( unsigned int onid_sid, unsigned long long id, time_t* startzeit );
 		void GetPrevNextEPGData( unsigned long long id, time_t* startzeit );
 		void addTextToArray( string text );
 		void processTextToArray( string text );
@@ -122,7 +100,7 @@ class CEpgData
 
 		CEpgData();
 		void start( );
-		int show( string channelName, unsigned int onid_tsid, unsigned long long id = 0, time_t* startzeit = NULL, bool doLoop = true);
+		int show( unsigned int onid_tsid, unsigned long long id = 0, time_t* startzeit = NULL, bool doLoop = true );
 		void hide();
 };
 

@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.226 2002/04/17 19:12:37 field Exp $
+        $Id: neutrino.cpp,v 1.227 2002/04/18 12:26:23 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1714,8 +1714,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				{
 					// show EPG
 
-					g_EpgData->show( channelList->getActiveChannelName(),
-			        		         channelList->getActiveChannelOnid_sid() );
+					g_EpgData->show( channelList->getActiveChannelOnid_sid() );
 
 				}
 				else if ( msg == g_settings.key_tvradio_mode )
@@ -2361,7 +2360,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.226 2002/04/17 19:12:37 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.227 2002/04/18 12:26:23 field Exp $\n\n");
 	tzset();
 	initGlobals();
 
