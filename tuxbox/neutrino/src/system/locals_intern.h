@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.26 2004/11/03 10:25:26 thegoodguy Exp $
+ * $Id: locals_intern.h,v 1.27 2004/11/03 18:01:02 thegoodguy Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -312,6 +312,9 @@ const char * locale_real_names[] =
 	"filebrowser.sort.namedirsfirst",
 	"filebrowser.sort.size",
 	"filebrowser.sort.type",
+	"filesystem.is.utf8",
+	"filesystem.is.utf8.option.iso8859.1",
+	"filesystem.is.utf8.option.utf8",
 	"flashupdate.actionreadflash",
 	"flashupdate.cantopenfile",
 	"flashupdate.cantopenmtd",

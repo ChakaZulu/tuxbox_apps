@@ -488,11 +488,12 @@ void CFlashExpert::readmtd(int readmtd)
 void CFlashExpert::writemtd(const std::string & filename, int mtdNumber)
 {
 	char message[500];
-#ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
-	sprintf(message, g_Locale->getText(LOCALE_FLASHUPDATE_REALLYFLASHMTD), Latin1_to_UTF8(filename).c_str(), CMTDInfo::getInstance()->getMTDName(mtdNumber).c_str());
-#else
-	sprintf(message, g_Locale->getText(LOCALE_FLASHUPDATE_REALLYFLASHMTD), filename.c_str(), CMTDInfo::getInstance()->getMTDName(mtdNumber).c_str());
-#endif
+
+	sprintf(message,
+		g_Locale->getText(LOCALE_FLASHUPDATE_REALLYFLASHMTD),
+		FILESYSTEM_ENCODING_TO_UTF8_STRING(filename).c_str(),
+		CMTDInfo::getInstance()->getMTDName(mtdNumber).c_str());
+
 	if (ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, message, CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw") != CMessageBox::mbrYes) // UTF-8
 		return;
 

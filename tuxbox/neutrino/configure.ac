@@ -30,11 +30,6 @@ TUXBOX_APPS_LIB_PKGCONFIG(UCODES,tuxbox-ucodes)
 TUXBOX_APPS_LIB_PKGCONFIG(ZAPIT,tuxbox-zapit)
 TUXBOX_APPS_LIB_PKGCONFIG(MPEGTOOLS,tuxbox-mpegtools)
 
-AC_ARG_ENABLE(filesystems-utf8-encoded,
-         [  --enable-filesystems-utf8-encoded   enable utf8 encoded filesystems],
-         [],
-         [AC_DEFINE(FILESYSTEM_IS_ISO8859_1_ENCODED,1,[iso8859-1 encoded filesystems])])
-
 AC_ARG_ENABLE(16-bit-mode,
          [  --enable-16-bit-mode                enable 16 bit graphics mode],
          [],

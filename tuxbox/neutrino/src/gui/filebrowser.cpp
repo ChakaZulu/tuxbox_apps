@@ -883,11 +883,7 @@ void CFileBrowser::addRecursiveDir(CFileList * re_filelist, std::string rpath, b
 		n = tmplist.size();
 		if(progress)
 		{
-#ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
-			progress->showStatusMessageUTF(Latin1_to_UTF8(rpath)); // ISO-8859-1
-#else
-			progress->showStatusMessageUTF(rpath); // UTF-8
-#endif
+			progress->showStatusMessageUTF(FILESYSTEM_ENCODING_TO_UTF8_STRING(rpath));
 		}
 		for(int i = 0; i < n;i++)
 		{
@@ -974,11 +970,8 @@ void CFileBrowser::paintItem(unsigned int pos)
 		if ( actual_file->Name.length() > 0 )
 		{
 			if (liststart+pos==selected)
-#ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
-				CLCD::getInstance()->showMenuText(0, actual_file->getFileName().c_str()); // ISO-8859-1
-#else
-				CLCD::getInstance()->showMenuText(0, actual_file->getFileName().c_str(), -1, true); // UTF-8
-#endif                                   
+				CLCD::getInstance()->showMenuText(0, FILESYSTEM_ENCODING_TO_UTF8_STRING(actual_file->getFileName()).c_str(), -1, true); // UTF-8
+
 			switch(actual_file->getType())
 			{
 			case CFile::FILE_CDR:
@@ -1000,11 +993,7 @@ void CFileBrowser::paintItem(unsigned int pos)
 			}
 			frameBuffer->paintIcon(fileicon, x+5 , ypos + (fheight-16) / 2 );
 	
-#ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
-			g_Font[SNeutrinoSettings::FONT_TYPE_FILEBROWSER_ITEM]->RenderString(x + 35, ypos + fheight, colwidth1 - 10 , actual_file->getFileName(), color); // ISO-8859-1
-#else
-			g_Font[SNeutrinoSettings::FONT_TYPE_FILEBROWSER_ITEM]->RenderString(x + 35, ypos + fheight, colwidth1 - 10 , actual_file->getFileName(), color, 0, true); // UTF-8
-#endif
+			g_Font[SNeutrinoSettings::FONT_TYPE_FILEBROWSER_ITEM]->RenderString(x + 35, ypos + fheight, colwidth1 - 10 , FILESYSTEM_ENCODING_TO_UTF8_STRING(actual_file->getFileName()), color, 0, true); // UTF-8
 
 			if( S_ISREG(actual_file->Mode) )
 			{
@@ -1067,11 +1056,8 @@ void CFileBrowser::paintHead()
 
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0);
 
-#ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
-	snprintf(l_name, sizeof(l_name), "%s %s", g_Locale->getText(LOCALE_FILEBROWSER_HEAD), Latin1_to_UTF8(name).c_str()); // UTF-8
-#else
-	snprintf(l_name, sizeof(l_name), "%s %s", g_Locale->getText(LOCALE_FILEBROWSER_HEAD), name.c_str()); // UTF-8
-#endif
+	snprintf(l_name, sizeof(l_name), "%s %s", g_Locale->getText(LOCALE_FILEBROWSER_HEAD), FILESYSTEM_ENCODING_TO_UTF8_STRING(name).c_str()); // UTF-8
+
 	g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_TITLE]->RenderString(x+10,y+theight+1, width-11, l_name, COL_MENUHEAD, 0, true); // UTF-8
 }
 

@@ -517,7 +517,7 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 	std::string ext_channel_name = g_Zapit->getChannelName(channel_id);
 	if (!(ext_channel_name.empty()))
 	{
-		strcpy(&(filename[pos]), ext_channel_name.c_str());
+		strcpy(&(filename[pos]), UTF8_TO_FILESYSTEM_ENCODING(ext_channel_name.c_str()));
 		char * p_act = &(filename[pos]);
 		do {
 			p_act += strcspn(p_act, "/ \"%&-\t`'´!,:;");

@@ -71,7 +71,7 @@ struct SNeutrinoSettings
 		TIMING_EPG         = 2,
 		TIMING_INFOBAR     = 3,
 		TIMING_FILEBROWSER = 4,
-    TIMING_NUMERICZAP  = 5
+		TIMING_NUMERICZAP  = 5
 	};
 
 	int  timing       [TIMING_SETTING_COUNT]   ;
@@ -178,6 +178,8 @@ struct SNeutrinoSettings
 	int streaming_force_transcode_video;
 	int streaming_transcode_video_codec;
 	int streaming_resolution;
+
+	int filesystem_is_utf8;
     
 	//key configuration
 	int key_tvradio_mode;
@@ -263,6 +265,10 @@ struct SNeutrinoSettings
 	};
 
 	int lcd_setting[LCD_SETTING_COUNT];
+
+#define FILESYSTEM_ENCODING_TO_UTF8(a) (g_settings.filesystem_is_utf8 ? (a) : ZapitTools::Latin1_to_UTF8(a).c_str())
+#define UTF8_TO_FILESYSTEM_ENCODING(a) (g_settings.filesystem_is_utf8 ? (a) : ZapitTools::UTF8_to_Latin1(a).c_str())
+#define FILESYSTEM_ENCODING_TO_UTF8_STRING(a) (g_settings.filesystem_is_utf8 ? (a) : Latin1_to_UTF8(a))
 
 
 #if HAVE_DVB_API_VERSION == 1

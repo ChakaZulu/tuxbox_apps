@@ -634,6 +634,7 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.network_nfs_picturedir, configfile.getString( "network_nfs_picturedir", "" ).c_str() );
 	strcpy( g_settings.network_nfs_moviedir, configfile.getString( "network_nfs_moviedir", "" ).c_str() );
 	strcpy( g_settings.network_nfs_recordingdir, configfile.getString( "network_nfs_recordingdir", "" ).c_str() );
+	g_settings.filesystem_is_utf8              = configfile.getBool("filesystem_is_utf8"                 , true );
 
 	//recording (server + vcr)
 	g_settings.recording_type = configfile.getInt32("recording_type", RECORDING_OFF);
@@ -950,6 +951,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString( "network_nfs_picturedir", g_settings.network_nfs_picturedir);
 	configfile.setString( "network_nfs_moviedir", g_settings.network_nfs_moviedir);
 	configfile.setString( "network_nfs_recordingdir", g_settings.network_nfs_recordingdir);
+	configfile.setBool  ("filesystem_is_utf8"                 , g_settings.filesystem_is_utf8             );
 
 	//recording (server + vcr)
 	configfile.setInt32 ("recording_type",                      g_settings.recording_type);
@@ -1714,6 +1716,13 @@ const CMenuOptionChooser::keyval MISCSETTINGS_FB_DESTINATION_OPTIONS[MISCSETTING
 	{ 2, LOCALE_OPTIONS_FB     }
 };
 
+#define MISCSETTINGS_FILESYSTEM_IS_UTF8_OPTION_COUNT 2
+const CMenuOptionChooser::keyval MISCSETTINGS_FILESYSTEM_IS_UTF8_OPTIONS[MISCSETTINGS_FILESYSTEM_IS_UTF8_OPTION_COUNT] =
+{
+	{ 0, LOCALE_FILESYSTEM_IS_UTF8_OPTION_ISO8859_1 },
+	{ 1, LOCALE_FILESYSTEM_IS_UTF8_OPTION_UTF8      }
+};
+
 typedef struct misc_setting_files_t
 {
 	const neutrino_locale_t                  name;
@@ -1776,9 +1785,9 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	miscSettings.addItem(m1);
 	
 	miscSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_FILEBROWSER_HEAD));
-	miscSettings.addItem(new CMenuOptionChooser(LOCALE_FILEBROWSER_SHOWRIGHTS        , &g_settings.filebrowser_showrights        , MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true ));
-	miscSettings.addItem(new CMenuOptionChooser(LOCALE_FILEBROWSER_DENYDIRECTORYLEAVE, &g_settings.filebrowser_denydirectoryleave, MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true ));
-
+	miscSettings.addItem(new CMenuOptionChooser(LOCALE_FILESYSTEM_IS_UTF8            , &g_settings.filesystem_is_utf8            , MISCSETTINGS_FILESYSTEM_IS_UTF8_OPTIONS, MISCSETTINGS_FILESYSTEM_IS_UTF8_OPTION_COUNT, true ));
+	miscSettings.addItem(new CMenuOptionChooser(LOCALE_FILEBROWSER_SHOWRIGHTS        , &g_settings.filebrowser_showrights        , MESSAGEBOX_NO_YES_OPTIONS              , MESSAGEBOX_NO_YES_OPTION_COUNT              , true ));
+	miscSettings.addItem(new CMenuOptionChooser(LOCALE_FILEBROWSER_DENYDIRECTORYLEAVE, &g_settings.filebrowser_denydirectoryleave, MESSAGEBOX_NO_YES_OPTIONS              , MESSAGEBOX_NO_YES_OPTION_COUNT              , true ));
 }
 
 

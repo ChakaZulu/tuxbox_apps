@@ -247,6 +247,9 @@ filebrowser.sort.name (filename)
 filebrowser.sort.namedirsfirst (filename2)
 filebrowser.sort.size (Size)
 filebrowser.sort.type (type)
+filesystem.is.utf8 file system
+filesystem.is.utf8.option.iso8859.1 ISO-8859-1
+filesystem.is.utf8.option.utf8 UTF-8
 flashupdate.actionreadflash reading
 flashupdate.cantopenfile can't open file
 flashupdate.cantopenmtd can't open mtd-device

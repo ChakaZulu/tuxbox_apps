@@ -457,11 +457,8 @@ int CMTDInfo::getMTDCount()
 std::string CMTDInfo::getMTDName(const int pos)
 {
 #warning TODO: check /proc/mtd specification to determine mtdname encoding
-#ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
-	return Latin1_to_UTF8(mtdData[pos]->name);
-#else
-	return mtdData[pos]->name;
-#endif
+
+	return FILESYSTEM_ENCODING_TO_UTF8_STRING(mtdData[pos]->name);
 }
 
 std::string CMTDInfo::getMTDFileName(const int pos)

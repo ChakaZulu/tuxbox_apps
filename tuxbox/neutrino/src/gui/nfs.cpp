@@ -211,13 +211,8 @@ int CNFSMountGui::exec( CMenuTarget* parent, const std::string & actionKey )
 			sprintf(m_entry[i],
 				nfs_entry_printf_string[(g_settings.network_nfs_type[i] == (int) NFS) ? 0 : 1],
 				g_settings.network_nfs_ip[i].c_str(),
-#ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
-				ZapitTools::Latin1_to_UTF8(g_settings.network_nfs_dir[i]).c_str(),
-				ZapitTools::Latin1_to_UTF8(g_settings.network_nfs_local_dir[i]).c_str(),
-#else
-				g_settings.network_nfs_dir[i],
-				g_settings.network_nfs_local_dir[i],
-#endif
+				FILESYSTEM_ENCODING_TO_UTF8(g_settings.network_nfs_dir[i]),
+				FILESYSTEM_ENCODING_TO_UTF8(g_settings.network_nfs_local_dir[i]),
 				g_Locale->getText(g_settings.network_nfs_automount[i] ? LOCALE_MESSAGEBOX_YES : LOCALE_MESSAGEBOX_NO));
 		}
 		returnval = menu();
@@ -231,13 +226,8 @@ int CNFSMountGui::exec( CMenuTarget* parent, const std::string & actionKey )
 			sprintf(m_entry[i],
 				nfs_entry_printf_string[(g_settings.network_nfs_type[i] == (int) NFS) ? 0 : 1],
 				g_settings.network_nfs_ip[i].c_str(),
-#ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
-				ZapitTools::Latin1_to_UTF8(g_settings.network_nfs_dir[i]).c_str(),
-				ZapitTools::Latin1_to_UTF8(g_settings.network_nfs_local_dir[i]).c_str(),
-#else
-				g_settings.network_nfs_dir[i],
-				g_settings.network_nfs_local_dir[i],
-#endif
+				FILESYSTEM_ENCODING_TO_UTF8(g_settings.network_nfs_dir[i]),
+				FILESYSTEM_ENCODING_TO_UTF8(g_settings.network_nfs_local_dir[i]),
 				g_Locale->getText(g_settings.network_nfs_automount[i] ? LOCALE_MESSAGEBOX_YES : LOCALE_MESSAGEBOX_NO));
 			sprintf(ISO_8859_1_entry[i],ZapitTools::UTF8_to_Latin1(m_entry[i]).c_str());
 		}

@@ -1677,10 +1677,8 @@ void CAudioPlayerGui::GetMetaData(CAudiofileExt &File)
 			else
 				File.MetaData.title = tmp;
 		}
-#ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
-		File.MetaData.artist = Latin1_to_UTF8(File.MetaData.artist);
-		File.MetaData.title = Latin1_to_UTF8(File.MetaData.title);
-#endif
+		File.MetaData.artist = FILESYSTEM_ENCODING_TO_UTF8_STRING(File.MetaData.artist);
+		File.MetaData.title  = FILESYSTEM_ENCODING_TO_UTF8_STRING(File.MetaData.title );
 	}
 }
 //------------------------------------------------------------------------
