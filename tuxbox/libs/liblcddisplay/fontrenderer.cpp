@@ -31,9 +31,6 @@
 
 #include <freetype/freetype.h>
 
-  /* the following header shouldn't be used in normal programs */
-#include <freetype/internal/ftdebug.h>
-
   /* showing driver name */
 #include <freetype/ftmodule.h>
 #include <freetype/internal/ftobjs.h>

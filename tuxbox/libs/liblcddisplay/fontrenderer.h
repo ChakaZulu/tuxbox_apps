@@ -30,7 +30,6 @@
 #include "lcddisplay.h"
 #include <freetype/freetype.h>
 #include <freetype/ftcache.h>
-#include <freetype/cache/ftcchunk.h>
 #include <freetype/cache/ftcglyph.h>
 #include <freetype/cache/ftcimage.h>
 #include <freetype/cache/ftcmanag.h>
