@@ -167,7 +167,7 @@ int CPictureViewerGui::show()
 {
 	int res = -1;
 
-	CLCD::getInstance()->setMode(CLCD::MODE_MENU, g_Locale->getText("pictureviewer.head") );
+	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, g_Locale->getText("pictureviewer.head") );
 	m_state=MENU;
 
 	uint msg; uint data;
@@ -405,7 +405,7 @@ int CPictureViewerGui::show()
 				CNFSSmallMenu nfsMenu;
 				nfsMenu.exec(this, "");
 				update=true;
-            CLCD::getInstance()->setMode(CLCD::MODE_MENU, g_Locale->getText("pictureviewer.head") );
+				CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, g_Locale->getText("pictureviewer.head") );
 			}
 		}
 		else if(msg == NeutrinoMessages::CHANGEMODE)
