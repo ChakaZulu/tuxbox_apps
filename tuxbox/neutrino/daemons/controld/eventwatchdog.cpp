@@ -128,7 +128,7 @@ void* CEventWatchDog::watchdogThread (void *arg)
 					{
 						pthread_mutex_lock( &WatchDog->wd_mutex );
 						WatchDog->VideoMode = (uint)newVideoMode;
-						WatchDog->videoModeChanged( newVideoMode);
+						WatchDog->videoModeChanged( newVideoMode );
 						pthread_mutex_unlock( &WatchDog->wd_mutex );
 					}
 				}

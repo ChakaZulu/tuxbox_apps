@@ -67,7 +67,8 @@ class CControld
 
 			CMD_REGISTEREVENT,
 			CMD_UNREGISTEREVENT,
-			CMD_EVENT
+			CMD_EVENT,
+			CMD_GETASPECTRATIO
 		};
 
 
@@ -123,6 +124,11 @@ class CControld
 		struct responseVideoFormat
 		{
 			unsigned char format;
+		};
+
+		struct responseAspectRatio
+		{
+			unsigned char aspectRatio;
 		};
 
 		struct responseVideoOutput

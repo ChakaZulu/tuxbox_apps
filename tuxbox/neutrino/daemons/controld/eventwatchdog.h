@@ -75,6 +75,7 @@ class CEventWatchDog
 
 	int getVideoMode();
 	int getVCRMode();
+
 	void startThread();
 	void videoModeChanged( int nNewVideoMode );
 	void vcrModeChanged( int nNewVCRMode );

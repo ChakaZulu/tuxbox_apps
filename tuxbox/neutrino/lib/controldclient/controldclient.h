@@ -125,6 +125,13 @@ class CControldClient
 		*/
 		void setVideoFormat(char);
 		char getVideoFormat();
+		/*
+			getAspectRatio : Aktueller Wert aus dem Bitstream
+					2: 4:3
+					3: 16:9
+					4: 2:2.1
+		*/
+		char getAspectRatio();
 
 		/*
 			setVideoOutput(char) : Setzten des Videooutputs ( composite / svhs / rgb )

@@ -47,12 +47,12 @@ bool CControldClient::controld_connect()
 	servaddr.sun_family = AF_UNIX;
 	strcpy(servaddr.sun_path, CONTROLD_UDS_NAME);
 	clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
-	
+
 	if ((sock_fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
 	{
 		perror("controldclient: socket");
 		return false;
-	}	
+	}
 
 	if(connect(sock_fd, (struct sockaddr*) &servaddr, clilen) <0 )
 	{
@@ -182,6 +182,19 @@ void CControldClient::setVideoFormat(char format)
 	send((char*)&msg, sizeof(msg));
 	send((char*)&msg2, sizeof(msg2));
 	controld_close();
+}
+
+char CControldClient::getAspectRatio()
+{
+	CControld::commandHead msg;
+	CControld::responseAspectRatio rmsg;
+	msg.version=CControld::ACTVERSION;
+	msg.cmd=CControld::CMD_GETASPECTRATIO;
+	controld_connect();
+	send((char*)&msg, sizeof(msg));
+	receive((char*)&rmsg, sizeof(rmsg));
+	controld_close();
+	return rmsg.aspectRatio;
 }
 
 char CControldClient::getVideoFormat()

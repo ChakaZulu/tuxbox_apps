@@ -76,6 +76,7 @@ int	sagem_scart[4];
 int	sagem_dvb[4];
 int	philips_scart[4];
 int	philips_dvb[4];
+char aspectRatio;
 
 void sig_catch(int);
 
@@ -85,7 +86,6 @@ class CControldAspectRatioNotifier : public CAspectRatioNotifier
 		virtual void aspectRatioChanged( int newAspectRatio); //override;
 };
 
-bool bNotifyRegistered = false;
 CEventWatchDog* watchDog;
 CControldAspectRatioNotifier* aspectRatioNotifier;
 
@@ -233,7 +233,7 @@ void setvideooutput(int format, bool bSaveSettings = true)
 
 }
 
-void setVideoFormat(int format, bool bUnregNotifier = true)
+void setVideoFormat(int format, bool bSaveFormat = true )
 {
 	int fd;
 	int videoDisplayFormat;
@@ -244,7 +244,7 @@ void setVideoFormat(int format, bool bUnregNotifier = true)
 	*/
 
 
-	if (bUnregNotifier) // only set settings if we dont come from watchdog or video_off
+	if (bSaveFormat) // only set settings if we dont come from watchdog or video_off
 	{
 		if (format < 0)
 			format=0;
@@ -256,78 +256,74 @@ void setVideoFormat(int format, bool bUnregNotifier = true)
 
 	if (format==0) // automatic switch
 	{
-		if (!bNotifyRegistered)
+		printf("[controld] setting VideoFormat to auto \n");
+
+		switch ( aspectRatio )
 		{
-			printf("[controld] setting VideoFormat to auto \n");
-			watchDog->registerNotifier(WDE_VIDEOMODE, aspectRatioNotifier);
-			bNotifyRegistered = true;
+			case 2 :
+				format= 2;
+				break;
+			case 3 :
+				format= 1;
+				break;
 		}
 	}
-	else
+
+	if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
 	{
-		if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
-		{
-			perror("open");
-			return;
-		}
-		if (format< 0)
-			format= 0;
-
-		int avsiosfncFormat = format;
-		if (settings.boxtype == CControldClient::BOXTYPE_PHILIPS) // Philips
-		{
-			switch (format)
-			{
-				case 1 :
-					avsiosfncFormat=2;
-					break;
-				case 2 :
-					avsiosfncFormat=1;
-					break;
-			}
-		}
-		if (ioctl(fd,AVSIOSFNC,&avsiosfncFormat)< 0)
-		{
-			perror("AVSIOSFNC:");
-			return;
-		}
-		close(fd);
-
-		switch( format )
-		{
-			//	?	case AVS_FNCOUT_INTTV	: videoDisplayFormat = VIDEO_PAN_SCAN;
-			case AVS_FNCOUT_EXT169	:
-				videoDisplayFormat = VIDEO_CENTER_CUT_OUT;
-				break;
-			case AVS_FNCOUT_EXT43	:
-				videoDisplayFormat = VIDEO_LETTER_BOX;
-				break;
-			default:
-				videoDisplayFormat = VIDEO_LETTER_BOX;
-				//	?	case AVS_FNCOUT_EXT43_1	: videoDisplayFormat = VIDEO_PAN_SCAN;
-		}
-
-		if ((fd = open("/dev/ost/video0",O_RDWR)) <= 0)
-		{
-			perror("open");
-			return;
-		}
-
-		if ( ioctl(fd, VIDEO_SET_DISPLAY_FORMAT, videoDisplayFormat))
-		{
-			perror("VIDEO SET DISPLAY FORMAT:");
-			return;
-		}
-		close(fd);
-
-		watchDog->VideoMode = format;
-		if ((bNotifyRegistered) && (bUnregNotifier))
-		{
-			watchDog->unregisterNotifier(WDE_VIDEOMODE, aspectRatioNotifier);
-			bNotifyRegistered = false;
-		}
-
+		perror("open");
+		return;
 	}
+	if (format< 0)
+		format= 0;
+
+	int avsiosfncFormat = format;
+	if (settings.boxtype == CControldClient::BOXTYPE_PHILIPS) // Philips
+	{
+		switch (format)
+		{
+			case 1 :
+				avsiosfncFormat=2;
+				break;
+			case 2 :
+				avsiosfncFormat=1;
+				break;
+		}
+	}
+	if (ioctl(fd,AVSIOSFNC,&avsiosfncFormat)< 0)
+	{
+		perror("AVSIOSFNC:");
+		return;
+	}
+	close(fd);
+
+    switch( format )
+	{
+		//	?	case AVS_FNCOUT_INTTV	: videoDisplayFormat = VIDEO_PAN_SCAN;
+		case AVS_FNCOUT_EXT169	:
+			videoDisplayFormat = VIDEO_CENTER_CUT_OUT;
+			break;
+		case AVS_FNCOUT_EXT43	:
+			videoDisplayFormat = VIDEO_LETTER_BOX;
+			break;
+		default:
+			videoDisplayFormat = VIDEO_LETTER_BOX;
+			//	?	case AVS_FNCOUT_EXT43_1	: videoDisplayFormat = VIDEO_PAN_SCAN;
+	}
+
+	if ((fd = open("/dev/ost/video0",O_RDWR)) <= 0)
+	{
+		perror("open");
+		return;
+	}
+
+	if ( ioctl(fd, VIDEO_SET_DISPLAY_FORMAT, videoDisplayFormat))
+	{
+		perror("VIDEO SET DISPLAY FORMAT:");
+		return;
+	}
+	close(fd);
+
 }
 
 void LoadScart_Settings()
@@ -545,8 +541,8 @@ void disableVideoOutput(bool disable)
 	if(!disable)
 	{
 		zapit.startPlayBack();
-		setvideooutput(settings.videooutput);
-		setVideoFormat(settings.videoformat);
+		setvideooutput(settings.videooutput, false);
+		setVideoFormat(settings.videoformat, false);
 	}
 	else
 	{
@@ -761,6 +757,12 @@ void parse_command(int connfd, CControld::commandHead* rmessage)
 			msg8.format = settings.videoformat;
 			write(connfd,&msg8,sizeof(msg8));
 			break;
+		case CControld::CMD_GETASPECTRATIO:
+			//printf("[controld] get videoformat (fnc)\n");
+			CControld::responseAspectRatio msga;
+			msga.aspectRatio = aspectRatio;
+			write(connfd,&msga,sizeof(msga));
+			break;
 		case CControld::CMD_GETVIDEOOUTPUT:
 			//printf("[controld] get videooutput (fblk)\n");
 			CControld::responseVideoOutput msg9;
@@ -797,7 +799,7 @@ void sig_catch(int)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.46 2002/03/07 11:46:08 field Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.47 2002/03/07 15:15:36 field Exp $\n\n");
 
 	if (fork() != 0)
 		return 0;
@@ -851,11 +853,12 @@ int main(int argc, char **argv)
 
 	watchDog = new CEventWatchDog();
 	aspectRatioNotifier = new CControldAspectRatioNotifier();
+	watchDog->registerNotifier(WDE_VIDEOMODE, aspectRatioNotifier);
 
 	//init
 	setVolume(settings.volume);
 	setvideooutput(settings.videooutput);
-	setVideoFormat(settings.videoformat);
+	setVideoFormat(settings.videoformat, false);
 	if (settings.mute== 1)
 		Mute();
 
@@ -883,19 +886,24 @@ int main(int argc, char **argv)
   	}
 }
 
-void CControldAspectRatioNotifier::aspectRatioChanged( int newAspectRatio)
+void CControldAspectRatioNotifier::aspectRatioChanged( int newAspectRatio )
 {
-	//	printf("[controld] CControldAspectRatioNotifier::aspectRatioChanged( %d) \n", newAspectRatio);
-	switch (newAspectRatio)
+	//printf("[controld] CControldAspectRatioNotifier::aspectRatioChanged( %d ) \n", newAspectRatio);
+	aspectRatio= newAspectRatio;
+
+	if ( settings.videoformat == 0 )
 	{
-		case 2 :
-			setVideoFormat(2, false);
-			break;
-		case 3 :
-			setVideoFormat(1, false);
-			break;
-		default:
-			printf("[controld] Unknown apsectRatio: %d", newAspectRatio);
+		switch (newAspectRatio)
+		{
+			case 2 :
+				setVideoFormat( 2, false );
+				break;
+			case 3 :
+				setVideoFormat( 1, false );
+				break;
+			default:
+				printf("[controld] Unknown apsectRatio: %d", newAspectRatio);
+		}
 	}
 }
 
