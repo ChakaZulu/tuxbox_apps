@@ -491,6 +491,7 @@ void	InitLevel( void )
 	afunc=-1;
 	main_x=660;
 	memset(deko,0,sizeof(deko));
+	memset(bgImage,STEELBLUE,1600*160);
 	deko[0]=CreateSprite(0,0,main_x+160,80);			// cursor
 	deko[0]->anilocked=1;
 	switch( level )
@@ -685,7 +686,6 @@ int	InitLemm( void )
 		if ( LoadPics() == -1 )
 			return -1;
 		bgImage=malloc(1600*160);
-		memset(bgImage,STEELBLUE,1600*160);
 		SoundStart();
 	}
 
