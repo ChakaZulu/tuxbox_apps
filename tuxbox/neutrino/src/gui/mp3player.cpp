@@ -431,15 +431,15 @@ int CMP3PlayerGui::show()
 							mp3.Title = tmp;
 							char url[80];
 							FILE* f=fopen(files->Name.c_str(), "r");
-                     if(f!=NULL)
-                     {
-                        fgets(url, 80, f);
-                        if(url[strlen(url)-1] == '\n') url[strlen(url)-1]=0;
-                        if(url[strlen(url)-1] == '\r') url[strlen(url)-1]=0;
-                        mp3.Album = url;
-                        playlist.push_back(mp3);
-                        fclose(f);
-                     }
+							if(f!=NULL)
+							{
+								fgets(url, 80, f);
+								if(url[strlen(url)-1] == '\n') url[strlen(url)-1]=0;
+								if(url[strlen(url)-1] == '\r') url[strlen(url)-1]=0;
+								mp3.Album = url;
+								playlist.push_back(mp3);
+								fclose(f);
+							}
 						}
 						else if(files->getType() == CFile::FILE_MP3_PLAYLIST)
 						{
