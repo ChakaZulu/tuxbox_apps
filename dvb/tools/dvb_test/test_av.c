@@ -230,6 +230,28 @@ int videoContinue(int fd, char *arg)
 	return 0;
 }
 
+int videoFormat(int fd, char *arg)
+{
+	int format;
+	if (!arg)
+		return -1;
+	format = atoi(arg);
+	if (ioctl(fd, VIDEO_SET_FORMAT, format) == -1)
+		perror("VIDEO_SET_FORMAT");
+	return 0;
+}
+
+int videoDisplayFormat(int fd, char *arg)
+{
+	int format;
+	if (!arg)
+		return -1;
+	format = atoi(arg);
+	if (ioctl(fd, VIDEO_SET_DISPLAY_FORMAT, format) == -1)
+		perror("VIDEO_SET_DISPLAY_FORMAT");
+	return 0;
+}
+
 int videoSelectSource(int fd, char *arg)
 {
 	int source;
@@ -413,6 +435,8 @@ cmd_t video_cmds[] =
 	{ "slow", "n: number of frames", videoSlowMotion },
 	{ "status", "", videoGetStatus },
 	{ "stillpic", "filename", videoStillPicture},
+	{ "format", "n: 0 4:3, 1 16:9", videoFormat},
+	{ "dispformat", "n: 0 pan&scan, 1 letter box, 2 center cut out", videoDisplayFormat},
 	{ NULL, NULL, NULL }
 };
 int usage(void)
@@ -436,7 +460,7 @@ int syntax_error(void)
 
 int process_kbd_input(int vfd, int afd)
 {
-	char buf[80], *cmd;
+	char buf[256], *cmd;
 	int i;
 
 	if (!fgets(buf, sizeof(buf), stdin))
