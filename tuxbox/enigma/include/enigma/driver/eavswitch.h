@@ -36,6 +36,7 @@ public:
 	virtual int setInput(int v);	// 0: dbox, 1: vcr
 	virtual ~eAVSwitch();
 	void reloadSettings();
+	bool loadScartConfig();
 };
 
 class eAVSwitchNokia: public eAVSwitch
@@ -56,6 +57,7 @@ public:
 		dvb[3] = 0;
 		dvb[4] = 1;
 		dvb[5] = 1;
+		loadScartConfig();
 	}
 };
 
@@ -77,6 +79,7 @@ public:
 		dvb[3] = 0;
 		dvb[4] = 1;
 		dvb[5] = 0;
+		loadScartConfig();
 	}
 };
 
@@ -98,6 +101,7 @@ public:
 		dvb[3] = 0;
 		dvb[4] = 0;
 		dvb[5] = 0;
+		loadScartConfig();
 	}
 };
 
