@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.cpp,v 1.32 2002/09/23 13:31:15 thegoodguy Exp $
+ * $Id: sdt.cpp,v 1.33 2002/09/24 16:46:17 thegoodguy Exp $
  */
 
 /* system c */
@@ -65,7 +65,7 @@ uint32_t get_sdt_TsidOnid ()
 	return ((transport_stream_id << 16) | original_network_id );
 }
 
-int parse_sdt ()
+int parse_sdt(const uint8_t DiSEqC)
 {
 	int demux_fd;
 	unsigned char buffer[SDT_SIZE];
@@ -139,7 +139,7 @@ int parse_sdt ()
 					break;
 
 				case 0x48:
-					service_descriptor(buffer + pos2, service_id, transport_stream_id, original_network_id);
+					service_descriptor(buffer + pos2, service_id, transport_stream_id, original_network_id, DiSEqC);
 					break;
 
 				case 0x49:

@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.72 2002/09/24 12:55:12 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.73 2002/09/24 16:46:17 thegoodguy Exp $
  */
 
 #include <fcntl.h>
@@ -31,6 +31,7 @@ static int status = 0;
 
 CBouquetManager* scanBouquetManager;
 
+extern tallchans allchans;   //  defined in zapit.cpp
 extern int found_transponders;
 extern int found_channels;
 extern std::map <t_channel_id, uint8_t> service_types;
@@ -163,11 +164,11 @@ int get_sdts()
 		if (frontend->tuneFrequency(tI->second.feparams, tI->second.polarization, tI->second.DiSEqC) == true)
 		{
 			printf("[scan.cpp] parsing SDT (tsid:onid %04x:%04x)\n", tI->second.transport_stream_id, tI->second.original_network_id);
-			status = parse_sdt();
+			status = parse_sdt(tI->second.DiSEqC);
 
 			if (demux_fd != -1) {
 				printf("[scan.cpp] parsing PAT\n");
-				parse_pat(demux_fd, NULL, tI->second.original_network_id);
+				parse_pat(demux_fd, NULL, tI->second.original_network_id, tI->second.DiSEqC);
 				printf("[scan.cpp] parsing BAT\n");
 				parse_bat(demux_fd);
 				printf("[scan.cpp] parsing NIT\n");
@@ -272,25 +273,25 @@ void write_transponder(FILE *fd, t_transport_stream_id transport_stream_id, t_or
 		return;
 	}
 
-	for (sciterator cI = scanchannels.begin(); cI != scanchannels.end(); cI++)
+	for (tallchans_iterator cI = allchans.begin(); cI != allchans.end(); cI++)
 	{
-		if ((cI->second.transport_stream_id == transport_stream_id) && (cI->second.original_network_id == original_network_id))
+		if ((cI->second.getTransportStreamId() == transport_stream_id) && (cI->second.getOriginalNetworkId() == original_network_id))
 		{
-			if (cI->second.name.length() == 0)
+			if (cI->second.getName().length() == 0)
 			{
 				fprintf(fd,
 					"\t\t\t<channel service_id=\"%04x\" name=\"%04x\" service_type=\"%02x\"/>\n",
-					cI->second.service_id,
-					cI->second.service_id,
-					cI->second.service_type);
+					cI->second.getServiceId(),
+					cI->second.getServiceId(),
+					cI->second.getServiceType());
 			}
 			else
 			{
 				fprintf(fd,
 					"\t\t\t<channel service_id=\"%04x\" name=\"%s\" service_type=\"%02x\"/>\n",
-					cI->second.service_id,
-					convertForXML(cI->second.name).c_str(),
-					cI->second.service_type);
+					cI->second.getServiceId(),
+					convertForXML(cI->second.getName()).c_str(),
+					cI->second.getServiceType());
 			}
 		}
 	}
@@ -333,7 +334,7 @@ FILE *write_provider(FILE *fd, const char *type, const char *provider_name, cons
 	}
 
 	/* clear results for next provider */
-	scanchannels.clear();
+	allchans.clear();                  // different provider may have the same onid/sid pair // FIXME
 	scantransponders.clear();
 
 	return fd;
@@ -477,18 +478,18 @@ void *start_scanthread(void *param)
 		std::map <t_channel_id, uint8_t>::iterator stI;
 		for (stI = service_types.begin(); stI != service_types.end(); stI++)
 		{
-			sciterator scI = scanchannels.find(stI->first);
+			tallchans_iterator scI = allchans.find(stI->first);
 
-			if (scI != scanchannels.end())
+			if (scI != allchans.end())
 			{
-				if (scI->second.service_type != stI->second)
+				if (scI->second.getServiceType() != stI->second)
 				{
 					printf("[scan.cpp] setting service_type of channel_id %08x from %02x to %02x\n",
 							stI->first,
-							scI->second.service_type,
+							scI->second.getServiceType(),
 							stI->second);
 
-					scI->second.service_type = stI->second;
+					scI->second.setServiceType(stI->second);
 				}
 			}
 		}

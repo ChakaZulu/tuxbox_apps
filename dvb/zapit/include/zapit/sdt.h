@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.h,v 1.9 2002/09/18 23:02:16 thegoodguy Exp $
+ * $Id: sdt.h,v 1.10 2002/09/24 16:46:17 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -21,6 +21,8 @@
 
 #ifndef __sdt_h__
 #define __sdt_h__
+
+#include <types.h>
 
 enum service_type_e
 {
@@ -48,7 +50,7 @@ struct sdt_generic_descriptor {
         u_char  descriptor_length               : 8;
 };
 
-int parse_sdt ();
+int parse_sdt(const uint8_t DiSEqC);
 unsigned int get_sdt_TsidOnid ();
 
 #endif /* __sdt_h__ */

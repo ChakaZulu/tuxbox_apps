@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.237 2002/09/23 13:31:15 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.238 2002/09/24 16:46:17 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -543,6 +543,7 @@ int start_scan ()
 	}
 
 	transponders.clear();
+	allchans.clear();
 	found_transponders = 0;
 	found_channels = 0;
 
@@ -1053,7 +1054,7 @@ int main (int argc, char **argv)
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.237 2002/09/23 13:31:15 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.238 2002/09/24 16:46:17 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{

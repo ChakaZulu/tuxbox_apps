@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.42 2002/09/24 12:55:13 thegoodguy Exp $
+ * $Id: descriptors.cpp,v 1.43 2002/09/24 16:46:17 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -35,8 +35,8 @@
 #include "descriptors.h"
 #include "sdt.h"
 
+extern tallchans allchans;   //  defined in zapit.cpp
 std::map <uint32_t, transpondermap> scantransponders;
-std::map <t_channel_id, scanchannel> scanchannels;
 std::string curr_chan_name;
 uint32_t found_transponders;
 uint32_t found_channels;
@@ -412,11 +412,11 @@ uint8_t bouquet_name_descriptor (uint8_t *buffer)
 }
 
 /* 0x48 */
-uint8_t service_descriptor (uint8_t *buffer, uint16_t service_id, uint16_t transport_stream_id, uint16_t original_network_id)
+uint8_t service_descriptor (uint8_t *buffer, const t_service_id service_id, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id, const uint8_t DiSEqC)
 {
-	sciterator I = scanchannels.find(CREATE_CHANNEL_ID);
+	tallchans_iterator I = allchans.find(CREATE_CHANNEL_ID);
 
-	if (I != scanchannels.end())
+	if (I != allchans.end())
 		return buffer[1];
 
 	uint8_t service_type = buffer[2];
@@ -435,18 +435,19 @@ uint8_t service_descriptor (uint8_t *buffer, uint16_t service_id, uint16_t trans
 		sizeof(found_channels)
 	);
 
-	scanchannels.insert
+	allchans.insert
 	(
-		std::pair <t_channel_id, scanchannel>
+		std::pair <t_channel_id, CZapitChannel>
 		(
 			CREATE_CHANNEL_ID,
-			scanchannel
+			CZapitChannel
 			(
 				serviceName,
 				service_id,
 				transport_stream_id,
 				original_network_id,
-				service_type
+				service_type,
+				DiSEqC
 			)
 		)
 	);

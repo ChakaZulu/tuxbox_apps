@@ -1,5 +1,5 @@
 /*
- * $Id: pat.cpp,v 1.36 2002/09/21 12:47:11 thegoodguy Exp $
+ * $Id: pat.cpp,v 1.37 2002/09/24 16:46:17 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org> jaja :)
  *
@@ -35,6 +35,7 @@
 
 #define PAT_SIZE 1024
 
+extern tallchans allchans;   //  defined in zapit.cpp
 extern CEventServer * eventServer;
 extern unsigned int found_channels;
 extern unsigned int found_transponders;
@@ -76,7 +77,7 @@ int fake_pat (uint32_t TsidOnid, FrontendParameters feparams, uint8_t polarity, 
 	return status;
 }
 
-int parse_pat (int demux_fd, CZapitChannel * channel, unsigned short original_network_id)
+int parse_pat (const int demux_fd, CZapitChannel * channel, const t_original_network_id original_network_id, const uint8_t DiSEqC)
 {
 	/* buffer for program association table */
 	unsigned char buffer[PAT_SIZE];
@@ -90,8 +91,6 @@ int parse_pat (int demux_fd, CZapitChannel * channel, unsigned short original_ne
 	memset(filter, 0x00, DMX_FILTER_SIZE);
 	memset(mask, 0x00, DMX_FILTER_SIZE);
 
-	filter[0] = 0x00;
-	filter[4] = 0x00;
 	mask[0] = 0xFF;
 	mask[4] = 0xFF;
 
@@ -110,20 +109,20 @@ int parse_pat (int demux_fd, CZapitChannel * channel, unsigned short original_ne
 			return status;
 		}
 
-		unsigned short transport_stream_id = (buffer[3] << 8) | buffer[4];
+		t_transport_stream_id transport_stream_id = (buffer[3] << 8) | buffer[4];
 
 		/* loop over service id / program map table pid pairs */
 		for (i = 8; i < (((buffer[1] & 0x0F) << 8) | buffer[2]) + 3; i += 4)
 		{
-			unsigned short service_id = (buffer[i] << 8) | buffer[i+1];
+			t_service_id service_id = (buffer[i] << 8) | buffer[i+1];
 
 			if (channel == NULL)
 			{
 				if ((service_id != 0x0000) && (original_network_id != 0x0000))
 				{
-					sciterator I = scanchannels.find(CREATE_CHANNEL_ID);
+					tallchans_iterator I = allchans.find(CREATE_CHANNEL_ID);
 
-					if (I == scanchannels.end())
+					if (I == allchans.end())
 					{
 						char service_name[5];
 						sprintf(service_name, "%hx", service_id);
@@ -137,18 +136,19 @@ int parse_pat (int demux_fd, CZapitChannel * channel, unsigned short original_ne
 							sizeof(found_channels)
 						);
 
-						scanchannels.insert
+						allchans.insert
 						(
-							std::pair <t_channel_id, scanchannel>
+							std::pair <t_channel_id, CZapitChannel>
 							(
 								CREATE_CHANNEL_ID,
-								scanchannel
+								CZapitChannel
 								(
 									string(service_name),
 									service_id,
 									transport_stream_id,
 									original_network_id,
-									0x00 // dummy service_type
+									0x00, // dummy service_type
+									DiSEqC
 								)
 							)
 						);

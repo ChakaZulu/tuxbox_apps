@@ -1,5 +1,5 @@
 /*
- * $Id: channel.h,v 1.13 2002/09/23 13:31:15 thegoodguy Exp $
+ * $Id: channel.h,v 1.14 2002/09/24 16:46:17 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *	& Steffen Hehn <mcclean@berlios.de>
@@ -63,8 +63,10 @@ class CZapitChannel
 		t_service_id          service_id;
 		t_transport_stream_id transport_stream_id;
 		t_original_network_id original_network_id;
-		unsigned char serviceType;
 		unsigned char DiSEqC;
+
+		/* read/write properties (write possibility needed by scan) */
+		unsigned char serviceType;
 
 		/* the conditional access program map table of this channel */
 		CCaPmt * caPmt;
@@ -100,6 +102,7 @@ class CZapitChannel
 		int addAudioChannel(unsigned short pid, bool isAc3, std::string description, unsigned char componentTag);
 
 		/* set methods */
+		void setServiceType(const unsigned char pserviceType)   { serviceType = pserviceType; }
 		void setName(std::string pName)				{ name = pName; }
 		void setAudioChannel(unsigned char pAudioChannel)	{ if (pAudioChannel < audioChannels.size()) currentAudioChannel = pAudioChannel; }
 		void setPcrPid(unsigned short pPcrPid)			{ pcrPid = pPcrPid; }
