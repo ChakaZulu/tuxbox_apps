@@ -111,7 +111,16 @@ a:hover {
 	font-weight: bold; 
 }
 
-#epg .description
+#mepg .time {
+	font-size: 12px;
+	font-weight: bold;
+}
+
+#mepg .duration {
+	font-size: 10px;
+}
+
+#epg .description,
 #mepg .description {
 	font-size: 10px;
 }	
