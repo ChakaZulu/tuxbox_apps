@@ -173,17 +173,6 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 		parent->hide();
 	}
 
-	// PIN
-	if(g_settings.parentallock_prompt == PARENTALLOCK_PROMPT_CHANGETOLOCKED)
-	{
-		char pin[5]={0,0,0,0,0};
-		CPINInput pi( "parentallock.head", pin, 4);
-		pi.exec(this,"");
-		if(strcmp(pin, g_settings.parentallock_pincode)!=0)
-		{
-			return res;
-		}
-	}
 // getting all bouquets from zapit
 	Bouquets.clear();
 	g_Zapit->getBouquets(Bouquets, true);
