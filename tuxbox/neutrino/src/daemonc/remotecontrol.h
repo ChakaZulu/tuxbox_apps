@@ -92,6 +92,7 @@ class CRemoteControl
 		void zapTo( string chnlname );
         void queryAPIDs();
         void setAPID(int APID);
+        void setNVOD(int NVOD);
 		void shutdown();
 		void setZapper (bool zapper);
 		bool getZapper(){return zapit_mode;}

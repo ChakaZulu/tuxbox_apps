@@ -1,7 +1,10 @@
 //
-// $Id: remotecontrol.cpp,v 1.20 2001/10/16 17:00:13 faralla Exp $
+// $Id: remotecontrol.cpp,v 1.21 2001/10/16 17:22:39 field Exp $
 //
 // $Log: remotecontrol.cpp,v $
+// Revision 1.21  2001/10/16 17:22:39  field
+// NVODs funktionieren (mit jeder Menge Fehler, speziell im EPG/Zeiten...)
+//
 // Revision 1.20  2001/10/16 17:00:13  faralla
 // nvod nearly ready
 //
@@ -98,7 +101,7 @@ static void getNVODs(unsigned onidSid, st_nvod_info *nvods )
             //printf("dataLength: %u\n", resp.dataLength);
             char *p=pData;
 
-            (short)nvods->count_nvods = 0;
+            nvods->count_nvods = 0;
             while(p<pData+resp.dataLength)
             {
                 nvods->count_nvods+= 1;
@@ -305,18 +308,21 @@ void * CRemoteControl::RemoteControlThread (void *arg)
                                         break;
                                     }
                         case 'i':   {
-                        		printf("Telling zapit the number of nvod-chans: %d\n",RemoteControl->nvods_int.count_nvods);
-                        		write(sock_fd, &RemoteControl->nvods_int.count_nvods, 2);
-                                        printf("Sending NVODs to zapit\n");
+                                        //printf("Telling zapit the number of nvod-chans: %d\n",RemoteControl->nvods_int.count_nvods);
+                                        write(sock_fd, &RemoteControl->nvods_int.count_nvods, 2);
+
+                                        //printf("Sending NVODs to zapit\n");
                                         for(int count=1;count<=RemoteControl->nvods_int.count_nvods;count++)
                                         {
-                                            printf("Sending %d\n", count);
+                                            //printf("Sending %d\n", count);
                                             write(sock_fd, &RemoteControl->nvods_int.nvods[count].onid_sid, 4);
                                             write(sock_fd, &RemoteControl->nvods_int.nvods[count].tsid, 2);
                                         }
                                         break;
                                     }
                         case '9':   printf("Changed apid\n");
+                                    break;
+                        case 'e':   printf("Changed NOVD-Nr\n");
                                     break;
 
                         default: printf("Unknown return-code >%s<, %d\n", return_buf, return_buf[2]);
@@ -393,6 +399,20 @@ void CRemoteControl::setAPID(int APID)
 	send();
 }
 
+void CRemoteControl::setNVOD(int NVOD)
+{
+    pthread_mutex_lock( &send_mutex );
+
+    remotemsg.version=1;
+    remotemsg.cmd='e';
+    snprintf( (char*) &remotemsg.param3, 10, "%x", nvods_int.nvods[NVOD].onid_sid);
+    nvods_int.selected = NVOD;
+    printf("changing NVOD# to %d\n", nvods_int.selected);
+
+    pthread_mutex_unlock( &send_mutex );
+	send();
+}
+
 
 void CRemoteControl::zapTo_onid_sid( unsigned int onid_sid )
 {
@@ -462,4 +482,5 @@ void  CRemoteControl::shutdown()
 
     send();
 }
+
 

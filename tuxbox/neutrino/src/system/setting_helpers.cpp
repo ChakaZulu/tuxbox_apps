@@ -126,8 +126,8 @@ int CAPIDChangeExec::exec(CMenuTarget* parent, string actionKey)
 
 int CNVODChangeExec::exec(CMenuTarget* parent, string actionKey)
 {
-//    printf("CAPIDChangeExec exec: %s\n", actionKey.c_str());
-    g_RemoteControl->setAPID(atoi(actionKey.c_str()));
+//    printf("CNVODChangeExec exec: %s\n", actionKey.c_str());
+    g_RemoteControl->setNVOD(atoi(actionKey.c_str()));
     return RETURN_EXIT;
 };
 
