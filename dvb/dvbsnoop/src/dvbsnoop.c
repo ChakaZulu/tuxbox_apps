@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.c,v 1.26 2004/03/31 21:14:22 rasc Exp $
+$Id: dvbsnoop.c,v 1.27 2004/04/03 12:05:22 rasc Exp $
 
  DVBSNOOP
 
@@ -14,6 +14,9 @@ $Id: dvbsnoop.c,v 1.26 2004/03/31 21:14:22 rasc Exp $
 
 
 $Log: dvbsnoop.c,v $
+Revision 1.27  2004/04/03 12:05:22  rasc
+release 1.3.0
+
 Revision 1.26  2004/03/31 21:14:22  rasc
 New: Spider section pids  (snoop referenced section pids),
 some minor changes
@@ -111,6 +114,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "misc/cmdline.h"
 #include "misc/hexprint.h"
 #include "misc/pkt_time.h"
+#include "misc/pid_mem.h"
 
 #include "dvb_api/dmx_sect.h"
 #include "dvb_api/dmx_pes.h"
@@ -118,6 +122,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "dvb_api/dmx_tspidscan.h"
 #include "dvb_api/dmx_tspidbandwidth.h"
 #include "dvb_api/fe_signal.h"
+#include "dvb_api/fe_info.h"
 
 
 
