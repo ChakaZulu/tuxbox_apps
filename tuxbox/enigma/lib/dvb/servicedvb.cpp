@@ -244,9 +244,10 @@ void eDVRPlayerThread::readMore(int what)
 	{
 		int rd = buffer.fromfile(sourcefd, maxBufferSize);
 
+		int next=0;
 		if ( rd < maxBufferSize)
 		{
-			int next=1;
+			next=1;
 			if (livemode)
 			{
 				struct stat s;
@@ -265,7 +266,8 @@ void eDVRPlayerThread::readMore(int what)
 			if (next && openFile(slice+1)) // if no next part found, else continue there...
 				flushbuffer=1;
 		}
-		else
+
+		if (!next)
 		{
 			singleLock s(poslock);
 			position+=rd;
