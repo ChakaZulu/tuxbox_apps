@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.118 2003/06/02 22:22:07 digi_casi Exp $
+ * $Id: scan.cpp,v 1.119 2003/06/05 09:08:49 digi_casi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -66,6 +66,24 @@ extern std::map<string, t_satellite_position>::iterator spos_it;
 extern CZapitClient::bouquetMode bouquetMode;
 extern CEventServer *eventServer;
 extern diseqc_t diseqcType;
+
+t_satellite_position driveMotorToSatellitePosition(char * providerName)
+{
+	t_satellite_position currentSatellitePosition = 0;
+	t_satellite_position satellitePosition = 0;
+	
+	/* position satellite dish if provider is on a different satellite */
+	currentSatellitePosition = frontend->getCurrentSatellitePosition();
+	satellitePosition = satellitePositions[providerName];
+	if ((currentSatellitePosition != satellitePosition) && (motorPositions[satellitePosition] != 0))
+	{
+		printf("[scan] start_scanthread: moving satellite dish from satellite position %d to %d\n", currentSatellitePosition, satellitePosition);
+		printf("[scan] motorPosition = %d\n", motorPositions[satellitePosition]);
+		frontend->positionMotor(motorPositions[satellitePosition]);
+		frontend->setCurrentSatellitePosition(currentSatellitePosition);
+	}
+	return satellitePosition;
+}
 
 void cp(char * from, char * to)
 {
@@ -477,7 +495,6 @@ void *start_scanthread(void *)
  	found_tv_chans = 0;
  	found_radio_chans = 0;
  	found_data_chans = 0;
- 	t_satellite_position currentSatellitePosition = 0;
  	t_satellite_position satellitePosition = 0;
 
 
@@ -537,16 +554,8 @@ void *start_scanthread(void *)
 				if (diseqc_pos == 255 /* = -1 */)
 					diseqc_pos = 0;
 				
-				/* position satellite dish if provider is on a different satellite */
-				currentSatellitePosition = frontend->getCurrentSatellitePosition();
-				satellitePosition = satellitePositions[providerName];
-				if ((frontend->getDiseqcType() == DISEQC_1_2) && (currentSatellitePosition != satellitePosition) && (motorPositions[satellitePosition] != 0))
-				{
-					printf("[scan] start_scanthread: moving satellite dish from satellite position %d to %d\n", currentSatellitePosition, satellitePosition);
-					printf("[scan] motorPosition = %d\n", motorPositions[satellitePosition]);
-					frontend->positionMotor(motorPositions[satellitePosition]);
-					frontend->setCurrentSatellitePosition(currentSatellitePosition);
-				}
+				if (strcmp(type, "sat") && (frontend->getDiseqcType() == DISEQC_1_2))
+					satellitePosition = driveMotorToSatellitePosition(providerName);
 						
 				scan_provider(search, providerName, satfeed, diseqc_pos);
 					
