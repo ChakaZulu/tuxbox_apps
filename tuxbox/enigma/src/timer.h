@@ -71,6 +71,7 @@ public:
 //	bool updateRunningEvent( eWidget *w, ePlaylistEntry& entry );
 	bool removeEventFromTimerList( eWidget *w, const ePlaylistEntry& entry, int type=erase );
 	bool removeEventFromTimerList( eWidget *w, const eServiceReference *ref, const EITEvent *evt);
+	void cleanupEvents();
 	bool addEventToTimerList( eWidget *w, const eServiceReference *ref, const EITEvent *evt, int type = ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR|ePlaylistEntry::stateWaiting, const ePlaylistEntry *exclude=0 );
 	bool addEventToTimerList( eWidget *w, const ePlaylistEntry& entry, const ePlaylistEntry *exclude=0 );
 	bool eventAlreadyInList( eWidget *w, EITEvent &e, eServiceReference &ref );
@@ -114,13 +115,14 @@ public:
 class eTimerListView:public eWindow
 {
 	eListBox<eListBoxEntryTimer>* events;
-	eButton *add, *erase;
+	eButton *add, *erase, *cleanup;
 public:
 	eTimerListView();
 	void fillTimerList();
 	void entrySelected(eListBoxEntryTimer *entry);
 	void addPressed();
 	void erasePressed();
+	void cleanupPressed();
 };
 
 class eTimerEditView: public eWindow

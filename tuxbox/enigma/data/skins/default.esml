@@ -698,8 +698,9 @@
 	<object name="eTimerListView">
 		<eTimerListView cposition="70:100" csize="580:395" text="EPG">
 			<eListbox name="events" position="10:10" size="e-10:e-90" loadDeco="" helptext="press ok to select another event" />
-			<eButton name="add" text="add" position="10:e-80" size="200:40" helptext="add new Timer (ok)" loadDeco="" shortcut="green" />
-			<eButton name="remove" text="remove" position="220:e-80" size="200:40" helptext="delete the current selected timer (ok)" loadDeco="" shortcut="red" />
+			<eButton name="add" text="add" position="10:e-80" size="180:40" helptext="add new Timer (ok)" loadDeco="" shortcut="green" />
+			<eButton name="remove" text="remove" position="200:e-80" size="180:40" helptext="delete the current selected timer (ok)" loadDeco="" shortcut="red" />
+			<eButton name="cleanup" text="cleanup" position="400:e-80" size="180:40" helptext="delete expired timer (ok)" loadDeco="" shortcut="blue" />
 			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
 		</eTimerListView>
 	</object>

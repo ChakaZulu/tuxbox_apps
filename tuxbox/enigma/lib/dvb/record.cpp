@@ -26,18 +26,17 @@ int eDVBRecorder::flushBuffer()
 	{
 		eDebug("recording write error, maybe disk full");
 		rmessagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::rWriteError));
-		return wr;
+		return -1;
 	}
 	size+=wr;
 	bufptr=0;
-	return wr;
+	return 0;
 }
 
 void eDVBRecorder::thread()
 {
-	rmessagepump.start();
 	int wr=-1;
-	while (state != stateStopped)
+	while (state == stateRunning)
 	{
 		wr=0;
 //		singleLock s(bufferLock);
@@ -49,12 +48,16 @@ void eDVBRecorder::thread()
 		bufptr += r;
 
 		if ( bufptr > 65535 )
-			wr = flushBuffer();
+			if (flushBuffer())
+				state = stateError;
 
 		if (size > splitsize)
-			openFile(++splits);
+			if (openFile(++splits))
+			{
+				state = stateError;
+				rmessagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::rWriteError));
+			}
 	}
-	rmessagepump.stop();
 }
 
 void eDVBRecorder::PMTready(int error)
@@ -125,7 +128,7 @@ void eDVBRecorder::gotBackMessage(const eDVBRecorderMessage &msg)
 	}
 }
 
-void eDVBRecorder::openFile(int suffix)
+int eDVBRecorder::openFile(int suffix)
 {
 	eString tfilename=filename;
 	if (suffix)
@@ -140,7 +143,11 @@ void eDVBRecorder::openFile(int suffix)
 	outfd=::open(tfilename.c_str(), O_CREAT|O_WRONLY|O_TRUNC|O_LARGEFILE, 0555);
 
 	if (outfd < 0)
+	{
 		eDebug("failed to open DVR file: %s (%m)", tfilename.c_str());	
+		return -1;
+	}
+	return 0;
 }
 
 void eDVBRecorder::open(const char *_filename)
@@ -218,7 +225,7 @@ void eDVBRecorder::addNewPID(int pid)
 
 void eDVBRecorder::validatePIDs()
 {
-	if (state==stateStopped)
+	if (state != stateRunning)
 		return;
 	eDebug("validatePIDs");
 	for (std::set<pid_t>::iterator it(pids.begin()); it != pids.end(); ++it )
@@ -294,7 +301,7 @@ void eDVBRecorder::start()
 
 void eDVBRecorder::stop()
 {
-	if ( state != stateRunning )
+	if ( state == stateStopped )
 		return;
 
 	eDebug("eDVBRecorder::stop()");
@@ -316,7 +323,7 @@ void eDVBRecorder::stop()
 
 void eDVBRecorder::close()
 {
-	if (state == stateRunning)
+	if (state != stateStopped)
 		stop();
 
 	eDebug("eDVBRecorder::close()");
@@ -332,16 +339,14 @@ void eDVBRecorder::close()
 	::close(outfd);
 
 	if ( thread_running() )
-	{
 		kill(true);
-		rmessagepump.stop();
-	}
 }
 
 eDVBRecorder::eDVBRecorder(PMT *pmt)
 :state(stateStopped), rmessagepump(eApp, 1), dvrfd(-1), outfd(-1), bufptr(0)
 {
 	CONNECT(rmessagepump.recv_msg, eDVBRecorder::gotBackMessage);
+	rmessagepump.start();
 
 	if (pmt)
 	{
@@ -361,7 +366,7 @@ eDVBRecorder::~eDVBRecorder()
 
 void eDVBRecorder::writeSection(void *data, int pid)
 {
-	if ( state == stateRunning )
+	if ( state != stateStopped )
 		return;
 
 	__u8 *table=(__u8*)data;

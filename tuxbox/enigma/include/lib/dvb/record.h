@@ -25,7 +25,7 @@
 
 class eDVBRecorder: private eThread, public Object
 {
-	enum { stateRunning = 1, stateStopped = 0 }state;
+	enum { stateRunning = 1, stateStopped = 0, stateError = 2 }state;
 	struct eDVBRecorderMessage
 	{
 		enum eCode
@@ -73,7 +73,7 @@ class eDVBRecorder: private eThread, public Object
 	void thread();
 	void gotBackMessage(const eDVBRecorderMessage &msg);
 	inline int flushBuffer();
-	void openFile(int suffix=0);
+	int openFile(int suffix=0);
 public:
 	void PMTready(int error);
 	eAUTable<PMT> tPMT;

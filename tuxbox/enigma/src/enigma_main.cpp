@@ -2522,10 +2522,10 @@ int eZapMain::recordDVR(int onoff, int user, const char *timer_descr )
 	eServiceHandler *handler=eServiceInterface::getInstance()->getService();
 	if (!handler)
 		return -1;
-
+	
 	if (onoff) //  start recording
 	{
-		if ( freeRecordSpace() == -1 )
+		if ( freeRecordSpace() < 10) // less than 10MB free (or directory not found)
 		{
 			handleServiceEvent(eServiceEvent(eServiceEvent::evtRecordFailed));
 			return -3;
@@ -4611,11 +4611,27 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 		break;
 #ifndef DISABLE_FILE
 	case eServiceEvent::evtRecordFailed:
+	{
+		int freespace = freeRecordSpace();
+
 		if ( state&stateInTimerMode )
-			message_notifier.send(eZapMain::messageNoRecordSpaceLeft);
+		{
+			if (state & stateRecording)
+				message_notifier.send(eZapMain::messageNoRecordSpaceLeft);
+		} else
+			recordDVR(0, 0);  // stop Recording
+		
+		const char *message;
+		if (freespace < 0)
+			message=_("Record failed due to inaccessable storage.");
+		else if (freespace < 10)
+			message=_("Record stopped due to full harddisk. Delete some recordings and try again.");
 		else
-			recordDVR(0,1);  // stop Recording
+			message=_("Record failed due to an write error during recording. Check for filesystem corruption.");
+		
+		postMessage(eZapMessage(1, _("record failed"), message, -1), 0);
 		break;
+	}
 	case eServiceEvent::evtEnd:
 	{
 		int serviceFlags = eServiceInterface::getInstance()->getService()->getFlags();
@@ -4636,7 +4652,7 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 			nextService(1);
 		}
 		else
-			eDebug("ende im gelaende.");
+			eDebug("end in the area.");
 		break;
 	}
 	case eServiceEvent::evtStatus:
@@ -5217,10 +5233,14 @@ void eZapMain::gotMessage(const int &c)
 #ifndef DISABLE_FILE
 	else if ( c == eZapMain::messageNoRecordSpaceLeft )
 	{
-		if ( state & stateInTimerMode && state & stateRecording )
-			eTimerManager::getInstance()->abortEvent( ePlaylistEntry::errorNoSpaceLeft );
-		else
-			eDebug("noSpaceLeft message.. but not in TimerMode");
+		if (state & stateInTimerMode)
+		{
+		 	if (state & stateRecording)
+				eTimerManager::getInstance()->abortEvent( ePlaylistEntry::errorNoSpaceLeft );
+			else
+				eDebug("no state Recording!");
+		} else
+			eWarning("noSpaceLeft message.. but not in TimerMode");
 		return;
 	}
 #endif

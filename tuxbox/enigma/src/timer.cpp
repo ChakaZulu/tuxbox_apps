@@ -719,7 +719,13 @@ void eTimerManager::actionHandler()
 				{
 					writeToLogfile(eString().sprintf("call eZapMain::getInstance()->recordDVR(1,0,%s)",descr.length()?descr.c_str():""));
 					eDebug("[eTimerManager] start DVR");
-					eZapMain::getInstance()->recordDVR(1, 0, descr.length()?descr.c_str():0 );
+					int result = eZapMain::getInstance()->recordDVR(1, 0, descr.length()?descr.c_str():0 );
+					writeToLogfile(eString().sprintf("result is %d", result));
+					if (result < 0)
+					{
+							/* recording did not start due an error. an error message will already be displayed on the screen. */
+						abortEvent(ePlaylistEntry::errorNoSpaceLeft);
+					}
 				}
 				else
 #endif
@@ -1150,6 +1156,17 @@ bool eTimerManager::removeEventFromTimerList( eWidget *sel, const ePlaylistEntry
 		}
 	return false;
 }
+
+void eTimerManager::cleanupEvents()
+{
+	for ( std::list<ePlaylistEntry>::iterator i( timerlist->getList().begin() ); i != timerlist->getList().end();)
+		if ((i->type & (ePlaylistEntry::stateFinished|ePlaylistEntry::stateError)) && !(i->type & ePlaylistEntry::isRepeating))
+			i = timerlist->getList().erase(i);
+		else
+	 		++i;
+}
+	
+
 /*
 bool eTimerManager::updateRunningTimerEvent( eWidget *sel, const ePlaylistEntry& entry )
 {
@@ -1511,6 +1528,10 @@ eTimerListView::eTimerListView()
 	erase->setName("remove");
 	CONNECT( erase->selected, eTimerListView::erasePressed );
 
+	cleanup = new eButton( this );
+	cleanup->setName("cleanup");
+	CONNECT( cleanup->selected, eTimerListView::cleanupPressed );
+
 	if (eSkin::getActive()->build(this, "eTimerListView"))
 		eWarning("Timer view widget build failed!");
 
@@ -1537,6 +1558,12 @@ void eTimerListView::addPressed()
 		fillTimerList();
 	e.hide();
 	show();
+}
+
+void eTimerListView::cleanupPressed()
+{
+	eTimerManager::getInstance()->cleanupEvents();
+	fillTimerList();
 }
 
 void eTimerListView::entrySelected(eListBoxEntryTimer *entry)
