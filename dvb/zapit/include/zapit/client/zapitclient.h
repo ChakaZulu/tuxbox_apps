@@ -206,9 +206,9 @@ class CZapitClient:public CBasicClient
 
 	struct responseFESignal
 	{
-		unsigned int sig;
-		unsigned int snr;
-		unsigned int ber;
+		unsigned int  sig;
+		unsigned int  snr;
+		unsigned long ber;
 		// maybe later... 
 		// int          has_lock;
 		// int          has_signal;
