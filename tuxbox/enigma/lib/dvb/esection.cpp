@@ -13,7 +13,10 @@
 #ifdef DBOX
 #include <ost/dmx.h>
 #else
+extern "C"
+{
 #include <xp/xp_osd_user.h>
+}
 #endif
 #include "esection.h"
 
@@ -72,6 +75,7 @@ int eSectionReader::open(int pid, __u8 *data, __u8 *mask, int len, int _flags)
 		secFilterParams.filter.mask[i]=i<len?mask[i]:0;
 	}
 
+#ifdef ESECTION_DEBUG
 	printf("%02x: ", pid);
 	for (int i=0; i<DMX_FILTER_SIZE; i++)
 		printf("%02x ", secFilterParams.filter.filter[i]);
@@ -79,6 +83,7 @@ int eSectionReader::open(int pid, __u8 *data, __u8 *mask, int len, int _flags)
 	for (int i=0; i<DMX_FILTER_SIZE; i++)
 		printf("%02x ", secFilterParams.filter.mask[i]);
 	printf("\n");
+#endif
 
 	if (ioctl(handle, DMX_SET_FILTER, &secFilterParams) < 0)
 	{
@@ -103,12 +108,12 @@ int eSectionReader::open(int pid, __u8 *data, __u8 *mask, int len, int _flags)
 	printf("\n");
 	if (ioctl(handle, DEMUX_FILTER_SET, &secFilterParams))
 	{
-		close(handle);
+		::close(handle);
 		return -1;
 	}
 	if (ioctl(handle, DEMUX_START, 0))
 	{
-		close(handle);
+		::close(handle);
 		return -1;
 	}
 #endif
@@ -135,9 +140,9 @@ int eSectionReader::read(__u8 *buf)
 	if (::read(handle, buf, 16384)<0)
 	{
 		if (errno==EAGAIN)
-			break;
+			return errno; 
 		perror("read section");
-		break;
+		return errno;
 	}
 #endif
 	return 0;
