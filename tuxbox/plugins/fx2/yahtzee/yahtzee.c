@@ -13,6 +13,7 @@
 #include <pics.h>
 #include <pig.h>
 #include <fcntl.h>
+#include <config.h>
 
 #define LOGO_X			600
 #define LOGO_Y			30
@@ -634,9 +635,10 @@ void	DrawWinner( void )
 #endif
 
 /* load HScore */
-	fd = open( "/var/games/yahtzee.hscore", O_RDONLY );
+	fd = open( GAMESDIR "/yahtzee.hscore", O_RDONLY );
 	if ( fd == -1 )
 	{
+		mkdir( GAMESDIR, 567 );
 		for( i=0;i<8;i++)
 		{
 			strcpy(hsc[i].name,"-");
@@ -667,7 +669,7 @@ void	DrawWinner( void )
 		hsc[i].flag=1;
 	}
 /* save hscore */
-	fd = open( "/var/games/yahtzee.hscore", O_CREAT|O_WRONLY, 438 );
+	fd = open( GAMESDIR "/yahtzee.hscore", O_CREAT|O_WRONLY, 438 );
 	if ( fd != -1 )
 	{
 		write( fd, hsc, sizeof(hsc) );
