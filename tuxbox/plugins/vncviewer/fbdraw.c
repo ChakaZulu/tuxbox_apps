@@ -16,11 +16,11 @@ vp_pan_virt(int x0, int y0) {
 	IMPORT_FRAMEBUFFER_VARS
 	
 	if (p_landscape) {
-		w = v_scale * p_xsize;
-		h = v_scale * p_ysize;
+		w = v_scale * pv_xsize;
+		h = v_scale * pv_ysize;
 	} else {
-		w = v_scale * p_ysize;
-		h = v_scale * p_xsize;
+		w = v_scale * pv_ysize;
+		h = v_scale * pv_xsize;
 	}
 
 	if (v_xsize > w) {
@@ -79,8 +79,8 @@ grid_pan(int dx, int dy) {
 	IMPORT_FRAMEBUFFER_VARS
 
 	if (p_landscape) {
-		gx = p_xsize * v_scale / 2;
-		gy = p_ysize * v_scale / 2;
+		gx = pv_xsize * v_scale / 2;
+		gy = pv_ysize * v_scale / 2;
 	} else {
 #if 0
 		int tmp = dy;
@@ -88,8 +88,8 @@ grid_pan(int dx, int dy) {
 		dx = tmp;
 #endif
 
-		gx = p_ysize * v_scale / 2;
-		gy = p_xsize * v_scale / 2;
+		gx = pv_ysize * v_scale / 2;
+		gy = pv_xsize * v_scale / 2;
 	}
 
 	if ((v_x0/gx)*gx == v_x0) {
@@ -110,11 +110,11 @@ grid_pan(int dx, int dy) {
 	}
 
 	if (p_landscape) {
-		if (dx>0 && v_x0 + v_scale * p_xsize >= v_xsize) x0=v_x0;
-		if (dy>0 && v_y0 + v_scale * p_ysize >= v_ysize) y0=v_y0;
+		if (dx>0 && v_x0 + v_scale * pv_xsize >= v_xsize) x0=v_x0;
+		if (dy>0 && v_y0 + v_scale * pv_ysize >= v_ysize) y0=v_y0;
 	} else {
-		if (dx>0 && v_x0 + v_scale * p_ysize >= v_xsize) x0=v_x0;
-		if (dy>0 && v_y0 + v_scale * p_xsize >= v_ysize) y0=v_y0;
+		if (dx>0 && v_x0 + v_scale * pv_ysize >= v_xsize) x0=v_x0;
+		if (dy>0 && v_y0 + v_scale * pv_xsize >= v_ysize) y0=v_y0;
 	}
 	if (dx==0) x0=v_x0;
 	if (dy==0) y0=v_y0;
@@ -176,7 +176,8 @@ void flip_orientation() {
  *		 < 1024 (10 bits per component)
  */
 
-#define RGBC(c) (((c) & 0x1f)<<1 | ((c)&0x7e0)<<5 | ((c)&0xf800)<<10)
+//#define RGBC(c) (((c) & 0x1f)<<1 | ((c)&0x7e0)<<5 | ((c)&0xf800)<<10)
+#define RGBC(c) (((c) & 0x1f) | ((c)&0x3e0)<<5 | ((c)&0x7C00)<<10)
 #define CR(c) ((c)>>20)
 #define CG(c) ((c)>>10&1023)
 #define CB(c) ((c)&1023)
@@ -241,7 +242,8 @@ s2aa_pixel(Pixel *src)
 	rgb = RGBC(p0&0xffff) + RGBC(p0>>16)
 	    + RGBC(p1&0xffff) + RGBC(p1>>16);
 
-	return (rgb>>3 & 0x1f) | (rgb>>7 & 0x7e0) | (rgb>>12 & 0xf800);
+//	return (rgb>>3 & 0x1f) | (rgb>>7 & 0x7e0) | (rgb>>12 & 0xf800);
+	return (rgb>>2 & 0x1f) | (rgb>>7 & 0x7e0) | (rgb>>12 & 0x7C00) | 0x8000;
 }
 
 void
@@ -288,7 +290,8 @@ s4aa_pixel(Pixel *src)
 		     + RGBC(p1&0xffff) + RGBC(p1>>16);
 	}
 
-	return (rgb>>5 & 0x1f) | (rgb>>9 & 0x7e0) | (rgb>>14 & 0xf800);
+//	return (rgb>>5 & 0x1f) | (rgb>>9 & 0x7e0) | (rgb>>14 & 0xf800);
+	return (rgb>>4 & 0x1f) | (rgb>>9 & 0x7e0) | (rgb>>14 & 0x7c00) | 0x8000;
 
 }
 
@@ -329,10 +332,13 @@ s3aa_line(Pixel *src, Pixel *dst, int wp)
 
 	xs = v_xsize;
 	if (!initialized) {
-		for (i=0; i<568; i++) {
-			pix_b[i] = (i/9) >>1;
+//		for (i=0; i<568; i++) {
+		for (i=0; i<280; i++) {
+			pix_b[i] = (i/9);
+//			pix_g[i] = (i/9) <<5;
 			pix_g[i] = (i/9) <<5;
-			pix_r[i] = (i/9) >>1<<11;
+//			pix_r[i] = (i/9) >>1<<11;
+			pix_r[i] = (i/9) <<10;
 		}
 		initialized=1;
 	}
@@ -356,7 +362,7 @@ s3aa_line(Pixel *src, Pixel *dst, int wp)
 		p2=RGBC(*(src+2*xs))+RGBC(*(src+1+2*xs))+RGBC(*(src+2+2*xs));
 
 		p = p0 + p1 + p2;
-		*dst = pix_b[CB(p)] | pix_g[CG(p)] | pix_r[CR(p)];
+		*dst = pix_b[CB(p)] | pix_g[CG(p)] | pix_r[CR(p)] | 0x8000;
 
 		src += 3;
 		dst++;
@@ -423,7 +429,7 @@ s3aa_line_subpixel(Pixel *src, Pixel *dst, int wp)
 		p2 = p5;
 		p3 = p6;
 
-		*dst = pix_b[b] | pix_g[g] | pix_r[r];
+		*dst = pix_b[b] | pix_g[g] | pix_r[r] | 0x8000;
 
 		src += 3;
 		dst++;
@@ -469,7 +475,7 @@ s3aa_line_portrait(Pixel *src, Pixel *dst, int hp)
 		p2=RGBC(*(src+2*xs))+RGBC(*(src+1+2*xs))+RGBC(*(src+2+2*xs));
 
 		p = p0 + p1 + p2;
-		*dst = pix_b[CB(p)] | pix_g[CG(p)] | pix_r[CR(p)];
+		*dst = pix_b[CB(p)] | pix_g[CG(p)] | pix_r[CR(p)] | 0x8000;
 
 		src += 3;
 		dst += p_xsize;
@@ -481,7 +487,7 @@ draw_border(int xp, int yp, int wp, int hp,
 	int oxp, int oyp, int owp, int ohp)
 {
 	Pixel *buf;
-	int j;
+	int j,k;
 	IMPORT_FRAMEBUFFER_VARS
 
 #ifdef DEBUG_CLIP
@@ -498,10 +504,12 @@ draw_border(int xp, int yp, int wp, int hp,
 	if (xp+wp > oxp+owp) wp = oxp-xp+owp;
 	if (yp+hp > oyp+ohp) hp = oyp-yp+ohp;
 
-	buf = p_buf + yp*p_xsize + xp;
+	buf = p_buf + (yp+p_yoff)*p_xsize + xp + p_xoff;
 
 	for (j=0; j<hp; j++) {
-		memset(buf, 0, wp*sizeof(Pixel));
+		for(k=0 ; k < wp ; k++)
+			buf[k] = 0x8000;
+		//		memset(buf, 0, wp*sizeof(Pixel));
 		buf += p_xsize;
 	}
 }
@@ -519,7 +527,7 @@ redraw_phys_landscape(int xp, int yp, int wp, int hp)
 	yv = v_y0 + yp*v_scale;
 
 	src = v_buf + yv*v_xsize + xv;
-	dst = p_buf + yp*p_xsize + xp;
+	dst = p_buf + (yp+p_yoff)*p_xsize + xp + p_xoff;
 
 	switch(v_scale) {
 	case 1: aa_line = s1aa_line; break;
@@ -554,6 +562,7 @@ redraw_phys_landscape(int xp, int yp, int wp, int hp)
  *       +-----------------------------+   *
  *                                         *
  *******************************************/
+// TODO implemnt change pv_xsize/p_xoff...
 void
 redraw_phys_portrait(int xp, int yp, int wp, int hp)
 {
@@ -564,7 +573,7 @@ redraw_phys_portrait(int xp, int yp, int wp, int hp)
 	IMPORT_FRAMEBUFFER_VARS
 
 #ifdef DEBUG_CLIP
-	fprintf(stderr, "xp=%d yp=%d wp=%d hp=%d\n", xp, yp, wp, hp);
+	fprintf(stderr, "redraw_phys_portrait xp=%d yp=%d wp=%d hp=%d\n", xp, yp, wp, hp);
 	fprintf(stderr, "v_x0=%d v_y0=%d\n", v_x0, v_y0);
 #endif
 
@@ -623,7 +632,7 @@ redraw_virt(int xv, int yv, int wv, int hv) {
 			wp = wv;
 			hp = hv;
 		} else {
-			xp = p_xsize - (yv + hv-1 - v_y0) - 1;
+			xp = pv_xsize - (yv + hv-1 - v_y0) - 1;
 			yp = xv - v_x0;
 			wp = hv;
 			hp = wv;
@@ -658,7 +667,7 @@ redraw_virt(int xv, int yv, int wv, int hv) {
 			if (xv+v_scale*wp > v_xsize) wp--;
 			if (yv+v_scale*hp > v_ysize) hp--;
 		} else {
-			xp = p_xsize - ((yv + hv-1 - v_y0) / v_scale) - 1;
+			xp = pv_xsize - ((yv + hv-1 - v_y0) / v_scale) - 1;
 			yp = (xv - v_x0) / v_scale;
 			wp = (hv + v_scale-1) / v_scale;
 			hp = (wv + v_scale-1) / v_scale;
@@ -672,8 +681,8 @@ redraw_virt(int xv, int yv, int wv, int hv) {
 	/* clip to screen size */
 	if (xp < 0) { wp += xp; xp = 0; }
 	if (yp < 0) { hp += yp; yp = 0; }
-	if (xp+wp > p_xsize) wp = p_xsize - xp;
-	if (yp+hp > p_ysize) hp = p_ysize - yp;
+	if (xp+wp > pv_xsize) wp = pv_xsize - xp;
+	if (yp+hp > pv_ysize) hp = pv_ysize - yp;
 
 	/* entirely off-screen ? */
 	if (wp<=0 || hp<=0) return;
@@ -714,12 +723,12 @@ redraw_phys(int xp, int yp, int wp, int hp) {
 		if (yv<0) {
 			yp = -v_y0/v_scale;
 			yv = 0;
-			draw_border(0, 0, p_xsize, yp,
+			draw_border(0, 0, pv_xsize, yp,
 				oxp, oyp, owp, ohp);
 		}
 		if (yv+hp*v_scale > v_ysize) {
 			hp = (v_ysize - yv)/v_scale;
-			draw_border(0, yp+hp, p_xsize, p_ysize-yp-hp,
+			draw_border(0, yp+hp, pv_xsize, pv_ysize-yp-hp,
 				oxp, oyp, owp, ohp);
 		}
 		if (xv<0) {
@@ -730,29 +739,29 @@ redraw_phys(int xp, int yp, int wp, int hp) {
 		}
 		if (xv+wp*v_scale > v_xsize) {
 			wp = (v_xsize - xv)/v_scale;
-			draw_border(xp+wp, yp, p_xsize-xp-wp, hp,
+			draw_border(xp+wp, yp, pv_xsize-xp-wp, hp,
 				oxp, oyp, owp, ohp);
 		}
 	} else {
 		xv = v_x0 + yp*v_scale;
-		yv = v_y0 + (p_xsize-xp-wp)*v_scale;
+		yv = v_y0 + (pv_xsize-xp-wp)*v_scale;
 
 		if (xv<0) {
 			yp = -v_x0/v_scale;
 			xv = 0;
-			draw_border(0, 0, p_xsize, yp,
+			draw_border(0, 0, pv_xsize, yp,
 				oxp, oyp, owp, ohp);
 		}
 		if (xv+hp*v_scale > v_xsize) {
 			hp = (v_xsize - xv)/v_scale;
-			draw_border(0, yp+hp, p_xsize, p_ysize-yp-hp,
+			draw_border(0, yp+hp, pv_xsize, pv_ysize-yp-hp,
 				oxp, oyp, owp, ohp);
 		}
 		if (yv<0) {
 			int d = -yv / v_scale;
 			xp -= d;
 			yv = 0;
-			draw_border(xp+wp, yp, p_xsize-xp-wp, hp,
+			draw_border(xp+wp, yp, pv_xsize-xp-wp, hp,
 				oxp, oyp, owp, ohp);
 		}
 		if (yv+wp*v_scale > v_ysize) {
@@ -788,6 +797,6 @@ redraw_phys_all(void)
 {
 	IMPORT_FRAMEBUFFER_VARS
 	
-	redraw_phys(0, 0, p_xsize, p_ysize);
+	redraw_phys(0, 0, pv_xsize, pv_ysize);
 	redraw_all_overlays();
 }

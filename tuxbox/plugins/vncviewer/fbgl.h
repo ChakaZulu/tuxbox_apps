@@ -31,6 +31,10 @@ typedef struct {
 	void* p_framebuf;
 	int p_xsize;
 	int p_ysize;
+	int pv_xsize;
+	int pv_ysize;
+	int p_xoff;
+	int p_yoff;
 	bool p_landscape;
 	Pixel *p_buf;
 
@@ -81,6 +85,10 @@ extern fbvnc_framebuffer_t global_framebuffer;
 	void *const p_framebuf = global_framebuffer.p_framebuf;		\
 	const int p_xsize = global_framebuffer.p_xsize;			\
 	const int p_ysize = global_framebuffer.p_ysize;			\
+	const int pv_xsize = global_framebuffer.pv_xsize;			\
+	const int pv_ysize = global_framebuffer.pv_ysize;			\
+	const int p_xoff = global_framebuffer.p_xoff;			\
+	const int p_yoff = global_framebuffer.p_yoff;			\
 	const bool p_landscape = global_framebuffer.p_landscape;	\
 	Pixel *const p_buf = global_framebuffer.p_buf;			\
 	const int v_xsize = global_framebuffer.v_xsize;			\
@@ -105,6 +113,10 @@ extern fbvnc_framebuffer_t global_framebuffer;
 	(void)p_framebuf;						\
 	(void)p_xsize;							\
 	(void)p_ysize;							\
+	(void)pv_xsize;							\
+	(void)pv_ysize;							\
+	(void)p_xoff;							\
+	(void)p_yoff;							\
 	(void)p_landscape;						\
 	(void)p_buf;							\
 	(void)v_xsize;							\
@@ -146,6 +158,8 @@ enum fbvnc_event {
 	FBVNC_EVENT_SEND_UPDATE_REQUEST = 0x2000,
 	FBVNC_EVENT_KEYREPEAT = 0x4000,
 	FBVNC_EVENT_TICK_SECOND = 0x8000,
+	FBVNC_EVENT_ZOOM_IN       = 0x10000,
+	FBVNC_EVENT_ZOOM_OUT       = 0x20000
 };
 
 typedef struct {

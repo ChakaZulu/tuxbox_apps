@@ -297,6 +297,7 @@ SetFormatAndEncodings()
 	spf.format.redMax = Swap16IfLE(spf.format.redMax);
 	spf.format.greenMax = Swap16IfLE(spf.format.greenMax);
 	spf.format.blueMax = Swap16IfLE(spf.format.blueMax);
+	spf.format.bigEndian = (*(char *)&endianTest ? 0 : 1);
 
 	if(!WriteExact(rfbsock, (char *)&spf, sz_rfbSetPixelFormatMsg))
 		return False;
@@ -965,4 +966,10 @@ rfbPixelFormat *format;
 			fprintf(stderr,"Uses a colour map (not true colour).\n");
 		}
 	}
+}
+
+Bool DisconnectFromRFBServer()
+{
+	if(rfbsock>0)
+		close(rfbsock);
 }

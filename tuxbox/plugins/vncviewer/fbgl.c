@@ -142,8 +142,8 @@ void
 gl_fillbox(int x, int y, int w, int h, int col) {
 	int i, j, col2;
 	IMPORT_FRAMEBUFFER_VARS
-
-	col2 = 0x8000 | ((col & 0xFF) << 8) | ((col & 0xFF00) >> 8);
+//   col2 = 0x8000 | ((col & 0xFF) << 8) | ((col & 0xFF00) >> 8);
+	col2 = 0x8000 | col;
 	for (j=0; j<h; j++) {
 		Pixel *buf = v_buf + (y+j) * v_xsize + x;
 		
@@ -169,7 +169,7 @@ gl_putbox(int x, int y, int w, int h, CARD8 *buf) {
 //		memcpy(dst, src, w * sizeof(Pixel));
 		for(k=0; k < w ; k++)
 		{
-			dst[k] = 0x8000 | ((src[k] & 0xFF) << 8) | (src[k] >> 8) ;
+			dst[k] = 0x8000 | src[k] ;
 		}
 		src += w;
 		dst += v_xsize;

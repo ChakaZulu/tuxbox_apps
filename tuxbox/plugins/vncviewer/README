@@ -16,12 +16,15 @@ ok : left mouse click
 ? : mouse up/ mouse down toggle (e.g. for moving windows)
 mute: toggle mouse movement/panning mode
 up/down/left/right: move pointer/pan screen
+vol_down: scale++ (zoom out)
+vol_up: scale-- (zoom in)
 
 Configfile (CONFIGDIR + vnc.conf) syntax
 =========================================
 server=<vnc server>
 port=<vnc port> (i.e. 5900 for screen0 5901 for screen1 ...)
 passwd=<passwd> (only needed if not using using vncpasswd)
+scale=<scale factor> (1 no scale - 4 scale by 1/4)
 
 Authentication
 =============================================

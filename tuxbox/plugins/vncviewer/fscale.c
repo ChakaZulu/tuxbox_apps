@@ -87,13 +87,13 @@ read_img_pixels(struct viewport *v, FILE *f, int format) {
 			}
 
 #if 1
-			p = ( (r<<7) & 0x7c00 )
+/*			p = ( (r<<7) & 0x7c00 )
 			  | ( (g<<2) & 0x03e0 )
 			  | ( (b>>3) & 0x001f )
-			  | 0x8000;
-/*			p = ( (r<<8) & 0xf800 )
+			  | 0x8000;*/
+			p = ( (r<<8) & 0xf800 )
 			  | ( (g<<3) & 0x07e0 )
-			  | ( (b>>3) & 0x001f );*/
+			  | ( (b>>3) & 0x001f );
 #else
 			/* Dither matrix:
 			 *  0 3  =>  0   48

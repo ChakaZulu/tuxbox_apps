@@ -259,7 +259,7 @@ void ov_redraw(fbvnc_overlay_t *ov) {
 	if (p_landscape) {
 		redraw_phys(ov->x, ov->y, ov->w, ov->h);
 	} else {
-		redraw_phys(p_xsize - ov->y - ov->h, ov->x, ov->h, ov->w);
+		redraw_phys(pv_xsize - ov->y - ov->h, ov->x, ov->h, ov->w);
 	}
 }
 
@@ -269,7 +269,7 @@ void ov_redraw_part(fbvnc_overlay_t *ov, int x, int y, int w, int h) {
 	if (p_landscape) {
 		redraw_phys(ov->x+x, ov->y+y, w, h);
 	} else {
-		redraw_phys(p_xsize - ov->y - y - h, ov->x+x, h, w);
+		redraw_phys(pv_xsize - ov->y - y - h, ov->x+x, h, w);
 	}
 }
 
@@ -465,7 +465,7 @@ ev_zoom_out(fbvnc_event_t *ev, fbvnc_overlay_t *ov) {
 
 	global_framebuffer.v_scale++;
 #if 0
-	vp_pan(-p_xsize/4, -p_ysize/4);
+	vp_pan(-pv_xsize/4, -pv_ysize/4);
 #else
 	vp_pan(0, 0);
 #endif
@@ -480,7 +480,7 @@ ev_zoom_in(fbvnc_event_t *ev, fbvnc_overlay_t *ov) {
 
 	global_framebuffer.v_scale--;
 #if 0
-	vp_pan(p_xsize/4, p_ysize/4);
+	vp_pan(pv_xsize/4, pv_ysize/4);
 #else
 	vp_pan(0, 0);
 #endif
@@ -493,7 +493,7 @@ set_scale(int s) {
 
 	global_framebuffer.v_scale = s;
 #if 0
-	vp_pan(p_xsize/4, p_ysize/4);
+	vp_pan(pv_xsize/4, pv_ysize/4);
 #else
 	vp_pan(0, 0);
 #endif
@@ -719,8 +719,8 @@ ev_quickpan(fbvnc_event_t *ev, fbvnc_overlay_t *ov) {
 
 	if (ev->evtype == FBVNC_EVENT_TS_DOWN) vp_hide_overlays();
 
-	x0 = ev->x * v_xsize / ov->w - p_xsize*v_scale/2;
-	y0 = ev->y * v_ysize / ov->h - p_ysize*v_scale/2;
+	x0 = ev->x * v_xsize / ov->w - pv_xsize*v_scale/2;
+	y0 = ev->y * v_ysize / ov->h - pv_ysize*v_scale/2;
 
 	if (x0 != v_x0 || y0 != v_y0) vp_pan_virt(x0, y0);
 
@@ -776,7 +776,7 @@ void draw_pixmap(Pixel *pix, int x, int y, int w, int h) {
 	
 	for (j=0; j<h; j++) {
 		Pixel *src = pix + j*w;
-		Pixel *dst = p_buf + p_xsize*(y + j) + x;
+		Pixel *dst = p_buf + p_xsize*(y + j + p_yoff) + x + p_xoff;
 		int i;
 		
 		for (i=0; i<w; i++) {
@@ -799,8 +799,8 @@ void draw_overlay_part(fbvnc_overlay_t *ov, int x, int y, int w, int h) {
 	if (p_landscape) {
 		for (j=0; j<h; j++) {
 			Pixel *src = ov->pixels + (j+y)*ov->w + x;
-			Pixel *dst = p_buf + p_xsize*(ov->y + j + y)
-				+ ov->x + x;
+			Pixel *dst = p_buf + p_xsize*(ov->y + j + y + p_yoff)
+				+ ov->x + x + p_xoff;
 			int i;
 			
 			for (i=0; i<w; i++) {
@@ -814,15 +814,15 @@ void draw_overlay_part(fbvnc_overlay_t *ov, int x, int y, int w, int h) {
 	} else {
 		for (j=0; j<h; j++) {
 			Pixel *src = ov->pixels + (j+y)*ov->w + x;
-			Pixel *dst = p_buf + p_xsize*(ov->x+x)
-			           + (p_xsize - (ov->y + y + j) - 1);
+			Pixel *dst = p_buf + p_xsize*(ov->x+x+p_xoff)
+			           + (pv_xsize - (ov->y + y + j + p_yoff) - 1);
 			int i;
 
 			for (i=0; i<w; i++) {
 				Pixel c = *src;
 
 				if (c != ICO_TRANS) *dst = c;
-				dst += p_xsize;
+				dst += pv_xsize;
 				src++;
 			}
 		}
@@ -904,7 +904,7 @@ overlay_event(fbvnc_event_t *ev, fbvnc_overlay_t *ov, bool check_hit) {
 		y = ev->y;
 	} else {
 		x = ev->y;
-		y = p_xsize - ev->x - 1;
+		y = pv_xsize - ev->x - 1;
 	}
 
 	if (check_hit && (
@@ -977,46 +977,46 @@ void
 overlays_init() {
 	IMPORT_FRAMEBUFFER_VARS
 
-	add_overlay(
-		p_xsize-45, 0,
-		p_ysize-45, 0,
+/*	add_overlay(
+		pv_xsize-45, 0,
+		pv_ysize-45, 0,
 		10, 10,
 		ico_lamp, FBVNC_EVENT_TS_DOWN, ev_lamp, 0);
 	
 	mouse_multibutton_mode = 0;
 	mouse_button = 0;
 	ov_mousestate = add_overlay(
-		p_xsize-63, 0,
-		p_ysize-63, 0,
+		pv_xsize-63, 0,
+		pv_ysize-63, 0,
 		12, 9,
 		ico_mouse, FBVNC_EVENT_TS_DOWN, ev_mouse, 0);
 
 	add_overlay(
-		p_xsize-81, 0,
-		p_ysize-81, 0,
+		pv_xsize-81, 0,
+		pv_ysize-81, 0,
 		15, 9,
 		ico_kbdselect, FBVNC_EVENT_TS_DOWN, ev_kbd_sel, 0);
 
 	add_overlay(
-		p_xsize-143, 0,
-		p_ysize-143, 0,
+		pv_xsize-143, 0,
+		pv_ysize-143, 0,
 		50, 9,
 		ico_zoom, FBVNC_EVENT_TS_DOWN, ev_zoom, 0);
 	
 	add_overlay(
-		p_xsize-173, 0,
-		p_ysize-173, 0,
+		pv_xsize-173, 0,
+		pv_ysize-173, 0,
 		25, 9,
 		ico_volume, FBVNC_EVENT_TS_DOWN | FBVNC_EVENT_TS_MOVE | FBVNC_EVENT_TS_UP, ev_volume, 0);
 
 	ov_battery = add_overlay(
-		p_xsize-200, 0,
-		p_ysize-200, 0,
+		pv_xsize-200, 0,
+		pv_ysize-200, 0,
 		19, 9,
 		ico_battery, FBVNC_EVENT_TS_DOWN | FBVNC_EVENT_TICK_SECOND, ev_battery, 0);
-
+	*/
 	/* is physical display smaller than logical one? */
-	if (global_framebuffer.p_xsize * global_framebuffer.p_ysize < global_framebuffer.v_xsize * global_framebuffer.v_ysize) {
+	if (global_framebuffer.pv_xsize * global_framebuffer.pv_ysize < global_framebuffer.v_xsize * global_framebuffer.v_ysize) {
 		add_overlay(
 			0, 0,
 			0, 0,
@@ -1026,8 +1026,8 @@ overlays_init() {
 
 	init_virt_keyboard();
 	ov_keyboard = add_overlay(
-		0, p_ysize-80,
-		0, p_xsize-80,
+		0, pv_ysize-80,
+		0, pv_xsize-80,
 		240, 80, 
 		ico_keybd, 
 		FBVNC_EVENT_TS_DOWN | FBVNC_EVENT_TS_UP, ev_keybd, 0);

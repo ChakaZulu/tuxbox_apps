@@ -1,5 +1,4 @@
 TODO: 
-- scaling (client side)
 - automatic panning of screen when cursor reaches screen boarders
 - bgr233 mode
 - virtual overlay keyboard
@@ -12,4 +11,5 @@ DONE:
 - convertet frambuffer mode from RGB565 to RGB555
 - tuxbox plugin architecture
 - IR-RC support
-
+- scaling (client side)
+- respect visible area on TV

@@ -93,6 +93,7 @@ extern struct timeval updateRequestTime;
 extern Bool sendUpdateRequest;
 
 extern Bool ConnectToRFBServer(const char *hostname, int port);
+extern Bool DisconnectFromRFBServer();
 extern Bool InitialiseRFBConnection(int sock);
 extern Bool SetFormatAndEncodings();
 extern Bool SendIncrementalFramebufferUpdateRequest();

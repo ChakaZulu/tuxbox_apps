@@ -48,6 +48,7 @@ fbvnc_framebuffer_t global_framebuffer;
 int fb_fd;
 int rc_fd;
 char terminate;
+int gScale,sx,sy,ex,ey;
 #endif
 
 static bool quit_requested = 0;
@@ -135,6 +136,10 @@ get_fbinfo() {
 	//printf("RGB %d/%d %d/%d %d/%d\n", myFormat.redMax, myFormat.redShift, myFormat.greenMax, myFormat.greenShift, myFormat.blueMax, myFormat.blueShift);
 	global_framebuffer.p_xsize = vinf.xres;
 	global_framebuffer.p_ysize = vinf.yres;
+	global_framebuffer.pv_xsize = ex-sx;
+	global_framebuffer.pv_ysize = ey-sy;
+	global_framebuffer.p_xoff = sx;
+	global_framebuffer.p_yoff = sy;
 #ifndef PLUGIN
 	global_framebuffer.p_buf = f->sbuf;
 	global_framebuffer.kb_fd = f->tty;
@@ -287,7 +292,7 @@ fbvnc_init() {
 	global_framebuffer.v_ysize = v_ysize;
 	global_framebuffer.v_x0 = 0;
 	global_framebuffer.v_y0 = 0;
-	global_framebuffer.v_scale = 1;
+	global_framebuffer.v_scale = gScale;
 	global_framebuffer.v_bpp = sizeof(Pixel);
 	global_framebuffer.v_buf = (Pixel*) xmalloc(v_xsize * v_ysize * sizeof(Pixel));
 #ifndef PLUGIN
@@ -330,6 +335,7 @@ fbvnc_init() {
 	{
 		cleanup_and_exit("fb mmap failed", EXIT_ERROR);
 	}
+	memset(global_framebuffer.p_buf,0 , vinf.xres * vinf.yres * (vinf.bits_per_pixel/8));
 
 #elif 1
 	global_framebuffer.p_framebuf = FBopen(0, FB_OPEN_NEW_VC);
@@ -381,6 +387,7 @@ fbvnc_close() {
 	if (global_framebuffer.v_buf) {
 		free(global_framebuffer.v_buf);
 	}
+	DisconnectFromRFBServer();
 }
 
 #define SQR(x) ((x)*(x))
@@ -821,8 +828,8 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched) {
 		int r;
 		int buttons, dx, dy;
 
-		if (mouse_x < 0) mouse_x = global_framebuffer.p_xsize / 2;
-		if (mouse_y < 0) mouse_y = global_framebuffer.p_ysize / 2;
+		if (mouse_x < 0) mouse_x = global_framebuffer.pv_xsize / 2;
+		if (mouse_y < 0) mouse_y = global_framebuffer.pv_ysize / 2;
 
 		/* fprintf(stderr, "read mouse readpos=%d buf=[%d,%d,%d]\n", readpos, buf[0], buf[1], buf[2]); */
 		r=read(msefd, buf + readpos, 3-readpos);
@@ -853,8 +860,8 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched) {
 		if (mouse_x < 0) mouse_x = 0;
 		if (mouse_y < 0) mouse_y = 0;
 
-		if (mouse_x >= global_framebuffer.p_xsize) mouse_x = global_framebuffer.p_xsize-1;
-		if (mouse_y >= global_framebuffer.p_ysize) mouse_y = global_framebuffer.p_ysize-1;
+		if (mouse_x >= global_framebuffer.pv_xsize) mouse_x = global_framebuffer.pv_xsize-1;
+		if (mouse_y >= global_framebuffer.pv_ysize) mouse_y = global_framebuffer.pv_ysize-1;
 
 		if (buttons & ~mouse_button) {
 			mouse_button = buttons;
@@ -884,8 +891,8 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched) {
 		int count;
 		static int rc_x = -1, rc_y=-1, rc_dx=0, rc_dy=0, step=5;
 		static char rc_pan=0;
-		if (rc_x < 0) rc_x = global_framebuffer.p_xsize / 2;
-		if (rc_y < 0) rc_y = global_framebuffer.p_ysize / 2;
+		if (rc_x < 0) rc_x = global_framebuffer.pv_xsize / 2;
+		if (rc_y < 0) rc_y = global_framebuffer.pv_ysize / 2;
 
 		count = read(rc_fd, &iev, sizeof(struct input_event));
 		if ((count == sizeof(struct input_event)) && ((iev.value == 1)||(iev.value == 2)))
@@ -895,12 +902,10 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched) {
 			// count events for speedup
 			if(lastcode==iev.code)
 			{
-				struct timeval now;
-				gettimeofday(&now, NULL);
-				if((now.tv_sec == evttime.tv_sec
-					 && (now.tv_usec - evttime.tv_usec) < 225000) ||
-					((now.tv_sec-1) == evttime.tv_sec
-					 && ((now.tv_usec+1000000) -evttime.tv_usec) < 225000))
+				if((iev.time.tv_sec == evttime.tv_sec
+					 && (iev.time.tv_usec - evttime.tv_usec) < 225000) ||
+					((iev.time.tv_sec-1) == evttime.tv_sec
+					 && ((iev.time.tv_usec+1000000) -evttime.tv_usec) < 225000))
 				{
 					countevt++;
 				}
@@ -910,7 +915,7 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched) {
 			else
 				countevt=0;
 			lastcode = iev.code;
-			gettimeofday(&evttime, NULL);
+			memcpy(&evttime, &iev.time, sizeof(evttime));
 			
 			if(iev.code == KEY_TOPLEFT || iev.code == KEY_TOPRIGHT || iev.code == KEY_UP ||
 				iev.code == KEY_BOTTOMLEFT || iev.code == KEY_BOTTOMRIGHT || iev.code == KEY_DOWN ||
@@ -959,8 +964,8 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched) {
 					rc_y += step;
 				else
 					rc_dy =-step;
-				if (rc_y >= global_framebuffer.p_ysize) 
-					rc_y = global_framebuffer.p_ysize-1;
+				if (rc_y >= global_framebuffer.pv_ysize) 
+					rc_y = global_framebuffer.pv_ysize-1;
 				retval=FBVNC_EVENT_TS_MOVE;
 			}
 			if (iev.code == KEY_TOPLEFT || iev.code == KEY_BOTTOMLEFT || iev.code == KEY_LEFT)
@@ -979,11 +984,11 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched) {
 					rc_x += step;
 				else
 					rc_dx =-step;
-				if (rc_x >= global_framebuffer.p_xsize) 
-					rc_x = global_framebuffer.p_xsize-1;
+				if (rc_x >= global_framebuffer.pv_xsize) 
+					rc_x = global_framebuffer.pv_xsize-1;
 				retval=FBVNC_EVENT_TS_MOVE;
 			}
-			if (iev.code == KEY_HELP)
+			else if (iev.code == KEY_HELP)
 			{
 				if(mouse_button > 0)
 				{
@@ -996,7 +1001,7 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched) {
 					retval=FBVNC_EVENT_TS_DOWN;
 				}
 			}
-			if (iev.code == KEY_MUTE)
+			else if (iev.code == KEY_MUTE)
 			{
 				ev->key = hbtn.pan;
 				if(rc_pan)
@@ -1005,7 +1010,17 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched) {
 					retval=FBVNC_EVENT_BTN_DOWN;
 				rc_pan=!rc_pan;
 			}
-			if(iev.code == KEY_OK)
+			else if(iev.code == KEY_VOLUMEDOWN)
+			{
+				rc_x = rc_y = 0;
+				retval = (fbvnc_event) (FBVNC_EVENT_ZOOM_OUT | FBVNC_EVENT_TS_MOVE);
+			}
+			else if(iev.code == KEY_VOLUMEUP)
+			{
+				rc_x = rc_y = 0;
+				retval = (fbvnc_event) (FBVNC_EVENT_ZOOM_IN | FBVNC_EVENT_TS_MOVE);
+			}
+			else if(iev.code == KEY_OK)
 			{
 				nextev.x =rc_x;
 				nextev.y =rc_y;  
@@ -1014,7 +1029,7 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched) {
 				mouse_button=1;
 				retval=FBVNC_EVENT_TS_DOWN;
 			}
-			if(iev.code == KEY_2)
+			else if(iev.code == KEY_2)
 			{
 				nextev.x =rc_x;
 				nextev.y =rc_y;  
@@ -1023,7 +1038,7 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched) {
 				mouse_button=2;
 				retval=FBVNC_EVENT_TS_DOWN;
 			}
-			if(iev.code == KEY_3)
+			else if(iev.code == KEY_3)
 			{
 				nextev.x =rc_x;
 				nextev.y =rc_y;  
@@ -1039,7 +1054,7 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched) {
 			ev->dx=rc_dx;
 			ev->dy=rc_dy;
 			
-			if(retval==FBVNC_EVENT_TS_MOVE)
+			if(retval & FBVNC_EVENT_TS_MOVE)
 				rc_dx = rc_dy = 0;
 			//printf("x:%d/y:%d (%d) dx:%d/dy:%d [%d]\n",ev->x,ev->y,mouse_button,ev->dx,ev->dy,countevt);
 			RetEvent(retval);
@@ -1077,7 +1092,7 @@ scaledPointerEvent(int xp, int yp, int button) {
 		SendPointerEvent(xp*v_scale + v_x0, yp*v_scale + v_y0, button);
 	} else {
 		SendPointerEvent((yp          )*v_scale + v_x0,
-		                 (p_xsize-xp-1)*v_scale + v_y0,
+		                 (pv_xsize-xp-1)*v_scale + v_y0,
 				 button);
 	}
 }
@@ -1166,9 +1181,10 @@ show_pnm_image() {
 		fbvnc_event_t ev;
 
 		fbvnc_get_event(&ev, 0);
-		if (ev.evtype == FBVNC_EVENT_TS_MOVE) {
+		if (ev.evtype & FBVNC_EVENT_TS_MOVE) {
 			vp_pan(-ev.dx, -ev.dy);
-		} else if (ev.evtype == FBVNC_EVENT_BTN_DOWN) {
+		} 
+		if (ev.evtype & FBVNC_EVENT_BTN_DOWN) {
 			int key;
 			key = key_map(ev.key);
 
@@ -1290,7 +1306,7 @@ int main(int argc, char **argv) {
 	int key_pending = 0;
 	static int pnmfd = -1;
 #ifdef PLUGIN
-	int lcd, sx, ex, sy, ey;
+	int lcd;
 	fb_fd = lcd = rc_fd = sx = ex = sy = ey = -1;
 	for(; par; par = par->next)
 	{
@@ -1332,6 +1348,9 @@ int main(int argc, char **argv) {
 	config.loadConfig(CONFIGDIR "/vnc.conf");
 	strncpy(hostname, config.getString("server","vnc").c_str(), 254);
    port=config.getInt32("port",5900);
+   gScale=config.getInt32("scale",1);
+	if(gScale > 4 || gScale < 1)
+		gScale=1;
 	strcpy(passwdString,config.getString("passwd","").substr(0,8).c_str());
 	if(strlen(passwdString) == 0)
 	{
@@ -1426,215 +1445,243 @@ int main(int argc, char **argv) {
 		fbvnc_get_event(&ev, sched);
 
 		//printf("Event %X\n",ev.evtype);
-		switch(ev.evtype) {
-		case FBVNC_EVENT_NULL:
-			break;
-		case FBVNC_EVENT_QUIT:
-			cleanup_and_exit("QUIT", EXIT_OK);
-			break;
-		case FBVNC_EVENT_TICK_SECOND:
-			check_overlays(&ev);
-			schedule_delete(sched, FBVNC_EVENT_TICK_SECOND);
-			schedule_add(sched, 1000, FBVNC_EVENT_TICK_SECOND);
-			break;
-		case FBVNC_EVENT_SEND_UPDATE_REQUEST:
-			if (!SendIncrementalFramebufferUpdateRequest())
-				cleanup_and_exit("inc update", EXIT_ERROR);
-			break;
-		case FBVNC_EVENT_DATA_READABLE:
-			if (ev.fd < 0) break;
-
-			if (ev.fd == readfd[FDNUM_VNC]) {
-				if (!HandleRFBServerMessage())
-					cleanup_and_exit("rfb msg", EXIT_ERROR);
-			} else if (pnmFifo && ev.fd == pnmfd) {
-				load_pnm_image(&pnmfd);
-				if (img_saved) show_pnm_image();
-			} else {
-				fprintf(stderr, "Got data on filehandle %d?!",
-					ev.fd);
-				cleanup_and_exit("bad data", EXIT_ERROR);
+		if (ev.evtype == FBVNC_EVENT_NULL)
+		{
+			//nothing yet
+		}
+		else
+		{
+			if (ev.evtype & FBVNC_EVENT_QUIT)
+			{
+				cleanup_and_exit("QUIT", EXIT_OK);
 			}
-			break;
-			case FBVNC_EVENT_TS_DOWN:
-			pan_toggle_count = 0;
-			key_pending = 0;
-			active_overlay = check_overlays(&ev);
-			if (active_overlay)
-				break;
-			if (panning) {
-				panning = 2;
-				overlay_toggle=0;
-				break;
+			if (ev.evtype & FBVNC_EVENT_TICK_SECOND)
+			{
+				check_overlays(&ev);
+				schedule_delete(sched, FBVNC_EVENT_TICK_SECOND);
+				schedule_add(sched, 1000, FBVNC_EVENT_TICK_SECOND);
 			}
-			mouse_x = ev.x;
-			mouse_y = ev.y;
-			if (mouse_multibutton_mode==2) {
-				mouse_button = 1;
-				/* workaround: Zaurus hardware can't register
-				 * [menu] and [mail] simultaneously w/ ts
-				 * so use mouse1 instead for right click
-				 */
-				if (btn_state[hbtn.mouse1]) mouse_button = 4;
-				if (btn_state[hbtn.mouse2]) mouse_button = 2;
-				if (btn_state[hbtn.mouse3]) mouse_button = 4;
-				scaledPointerEvent(mouse_x, mouse_y, mouse_button);
-			} else {
-				scaledPointerEvent(mouse_x, mouse_y, mouse_button);
+			if (ev.evtype & FBVNC_EVENT_SEND_UPDATE_REQUEST)
+			{
+				if (!SendIncrementalFramebufferUpdateRequest())
+					cleanup_and_exit("inc update", EXIT_ERROR);
 			}
-			break;
-		case FBVNC_EVENT_TS_MOVE:
-			key_pending = 0;
-			if (active_overlay) {
-				overlay_event(&ev, active_overlay, 0);
-				break;
-			}
-#if defined(INPUT_PS2MOUSE) | defined(PLUGIN)
-			if (panning) {
-				panning=2;
-				overlay_toggle=0;
-				vp_pan(-ev.dx, -ev.dy);
-				break;
-			}
-#endif
-			if (panning) {
-				vp_pan(-ev.dx, -ev.dy);
-				break;
-			} 
-			mouse_x = ev.x;
-			mouse_y = ev.y;
-			scaledPointerEvent(mouse_x, mouse_y, mouse_button);
-			break;
-		case FBVNC_EVENT_TS_UP:
-			key_pending = 0;
-			if (active_overlay) {
-				overlay_event(&ev, active_overlay, 0);
-				active_overlay = 0;
-				break;
-			}
-			if (panning) {
-				break;
-			}
-			mouse_x = ev.x;
-			mouse_y = ev.y;
-			if (mouse_multibutton_mode != 1) {
-				scaledPointerEvent(mouse_x, mouse_y, 0);
-			}
-			break;
-		case FBVNC_EVENT_KEYREPEAT:
-			if (kbdRate && rep_key) {
-				schedule_add(sched, 1000 / kbdRate, FBVNC_EVENT_KEYREPEAT);
-				SendKeyEvent(rep_key, 1);
-			}
-
-			break;
-		case FBVNC_EVENT_BTN_DOWN:
-			if (btn_state[ev.key]) {
-				static bool warned=0;
-				if (!warned) {
-					fprintf(stderr, "got hardware keyrepeat?!\n");
-					warned=1;
-				}
-				rep_key = 0;
-			}
-
-			schedule_delete(sched, FBVNC_EVENT_KEYREPEAT);
-			btn_state[ev.key] = 1;
-			
-			if (active_overlay) {
-				overlay_event(&ev, active_overlay, 0);
-				break;
-			}
-			if (ev.key==hbtn.mouse1) {
-				if (btn_state[hbtn.altgr] || btn_state[hbtn.action]) {
-					set_mouse_state((mouse_multibutton_mode+1) % 3);
-					break;
-				}
-			}
-			if (mouse_multibutton_mode==1) {
-				if (ev.key==hbtn.mouse1) {
-					mouse_button = 1;
-				} else if (ev.key==hbtn.mouse2) {
-					mouse_button = 2;
-				} else if (ev.key==hbtn.mouse3) {
-					mouse_button = 4;
-				}
-				scaledPointerEvent(mouse_x, mouse_y, mouse_button);
-				break;
-			}
-			if (mouse_multibutton_mode==2) {
-				if (ev.key==hbtn.mouse1 || ev.key==hbtn.mouse2 || ev.key==hbtn.mouse3) {
-					mouse_button = 1;
-					/* don't generate event yet */
-					key_pending = ev.key;
-					break;
-				}
-			}
-			if (ev.key==hbtn.pan) {
-				vp_hide_overlays();
-				overlay_toggle=1;
-				panning = 1;
-				break;
-			}
-
-			if (key_pending) key_press(key_pending);
-			key_press(ev.key);
-			if (key_pending) key_release(key_pending);
-			break;
-		case FBVNC_EVENT_BTN_UP:
-			btn_state[ev.key] = 0;
-			schedule_delete(sched, FBVNC_EVENT_KEYREPEAT);
-			rep_key = 0;
-			if (active_overlay) {
-				overlay_event(&ev, active_overlay, 0);
-				break;
-			}
-			if (mouse_multibutton_mode==1 && (
-				ev.key==hbtn.mouse1 ||
-				ev.key==hbtn.mouse2 ||
-				ev.key==hbtn.mouse3 )
-			) {
-				mouse_button = 0;
-				scaledPointerEvent(mouse_x, mouse_y, 0);
-			} else if (mouse_multibutton_mode==2 && (ev.key==hbtn.mouse1 || ev.key==hbtn.mouse2 || ev.key==hbtn.mouse3)) {
-				mouse_button = 1;
-				if (key_pending) {
-					/* not used as modifier - send key events */
-					key_press(ev.key);
-					key_release(ev.key);
-					key_pending = 0;
-					schedule_delete(sched, FBVNC_EVENT_KEYREPEAT);
-				}
-			} else if (ev.key==hbtn.pan) {
-#ifdef INPUT_PS2MOUSE
-				if (panning == 1 && overlay_toggle) {
-#else
-				if (panning == 1) {
-#endif
-					/* no mouse move events, toggle overlay */
-					if (global_framebuffer.hide_overlays > 1) {
-						/* was hidden, restore it */
-						vp_restore_overlays();
-						vp_restore_overlays();
+			if (ev.evtype & FBVNC_EVENT_DATA_READABLE)
+			{
+				if (ev.fd >= 0)
+				{
+					if (ev.fd == readfd[FDNUM_VNC]) {
+						if (!HandleRFBServerMessage())
+							cleanup_and_exit("rfb msg", EXIT_ERROR);
+					} else if (pnmFifo && ev.fd == pnmfd) {
+						load_pnm_image(&pnmfd);
+						if (img_saved) show_pnm_image();
 					} else {
-						/* keep overlay hidden */
+						fprintf(stderr, "Got data on filehandle %d?!",
+								  ev.fd);
+						cleanup_and_exit("bad data", EXIT_ERROR);
 					}
-					++ pan_toggle_count;
-					if (pan_toggle_count > 7) {
-						pan_toggle_count = 0;
-						do_calibration();
-						vp_pan(0, 0);
-					}
-				} else {
-					vp_restore_overlays();
 				}
-				panning = 0;
-			} else if (ev.key==hbtn.action) {
-				/* nothing to do ?! */
-			} else {
-				key_release(ev.key);
 			}
-			break;
+			if (ev.evtype & FBVNC_EVENT_TS_DOWN)
+			{
+				pan_toggle_count = 0;
+				key_pending = 0;
+				active_overlay = check_overlays(&ev);
+				if (!active_overlay)
+				{
+					if (panning) {
+						panning = 2;
+						overlay_toggle=0;
+					}
+					else
+					{
+						mouse_x = ev.x;
+						mouse_y = ev.y;
+						if (mouse_multibutton_mode==2) {
+							mouse_button = 1;
+							/* workaround: Zaurus hardware can't register
+							 * [menu] and [mail] simultaneously w/ ts
+							 * so use mouse1 instead for right click
+							 */
+							if (btn_state[hbtn.mouse1]) mouse_button = 4;
+							if (btn_state[hbtn.mouse2]) mouse_button = 2;
+							if (btn_state[hbtn.mouse3]) mouse_button = 4;
+							scaledPointerEvent(mouse_x, mouse_y, mouse_button);
+						} else {
+							scaledPointerEvent(mouse_x, mouse_y, mouse_button);
+						}
+					}
+				}
+			}
+			if (ev.evtype & FBVNC_EVENT_TS_MOVE)
+			{
+				key_pending = 0;
+				if (active_overlay) {
+					overlay_event(&ev, active_overlay, 0);
+				}
+#if defined(INPUT_PS2MOUSE) | defined(PLUGIN)
+				else if (panning) {
+					panning=2;
+					overlay_toggle=0;
+					vp_pan(-ev.dx, -ev.dy);
+				}
+#endif
+				else if (panning) {
+					vp_pan(-ev.dx, -ev.dy);
+				} 
+				else
+				{
+					mouse_x = ev.x;
+					mouse_y = ev.y;
+					scaledPointerEvent(mouse_x, mouse_y, mouse_button);
+				}
+			}
+			if (ev.evtype & FBVNC_EVENT_TS_UP)
+			{
+				key_pending = 0;
+				if (active_overlay) {
+					overlay_event(&ev, active_overlay, 0);
+					active_overlay = 0;
+				}
+				else if (!panning) {
+					mouse_x = ev.x;
+					mouse_y = ev.y;
+					if (mouse_multibutton_mode != 1) {
+						scaledPointerEvent(mouse_x, mouse_y, 0);
+					}
+				}
+			}
+			if (ev.evtype & FBVNC_EVENT_KEYREPEAT)
+			{
+				if (kbdRate && rep_key) {
+					schedule_add(sched, 1000 / kbdRate, FBVNC_EVENT_KEYREPEAT);
+					SendKeyEvent(rep_key, 1);
+				}
+			}
+			if (ev.evtype & FBVNC_EVENT_BTN_DOWN)
+			{
+				if (btn_state[ev.key]) {
+					static bool warned=0;
+					if (!warned) {
+						fprintf(stderr, "got hardware keyrepeat?!\n");
+						warned=1;
+					}
+					rep_key = 0;
+				}
+				schedule_delete(sched, FBVNC_EVENT_KEYREPEAT);
+				btn_state[ev.key] = 1;
+
+				if (active_overlay) {
+					overlay_event(&ev, active_overlay, 0);
+				} 
+				else if (ev.key==hbtn.mouse1) {
+					if (btn_state[hbtn.altgr] || btn_state[hbtn.action]) {
+						set_mouse_state((mouse_multibutton_mode+1) % 3);
+					}
+				}
+				else if (mouse_multibutton_mode==1) {
+					if (ev.key==hbtn.mouse1) {
+						mouse_button = 1;
+					} else if (ev.key==hbtn.mouse2) {
+						mouse_button = 2;
+					} else if (ev.key==hbtn.mouse3) {
+						mouse_button = 4;
+					}
+					scaledPointerEvent(mouse_x, mouse_y, mouse_button);
+				}
+				else if (mouse_multibutton_mode==2) {
+					if (ev.key==hbtn.mouse1 || ev.key==hbtn.mouse2 || ev.key==hbtn.mouse3) {
+						mouse_button = 1;
+						/* don't generate event yet */
+						key_pending = ev.key;
+					}
+				}
+				else if (ev.key==hbtn.pan) {
+					vp_hide_overlays();
+					overlay_toggle=1;
+					panning = 1;
+				}
+				else if (key_pending) key_press(key_pending);
+				else
+				{
+					key_press(ev.key);
+					if (key_pending) key_release(key_pending);
+				}
+			}
+			if (ev.evtype & FBVNC_EVENT_BTN_UP)
+			{
+				btn_state[ev.key] = 0;
+				schedule_delete(sched, FBVNC_EVENT_KEYREPEAT);
+				rep_key = 0;
+				if (active_overlay) {
+					overlay_event(&ev, active_overlay, 0);
+				}
+				else if (mouse_multibutton_mode==1 && ( ev.key==hbtn.mouse1 ||
+																	 ev.key==hbtn.mouse2 ||
+																	 ev.key==hbtn.mouse3 ))
+				{
+					mouse_button = 0;
+					scaledPointerEvent(mouse_x, mouse_y, 0);
+				} else if (mouse_multibutton_mode==2 && (ev.key==hbtn.mouse1 || 
+																	  ev.key==hbtn.mouse2 || 
+																	  ev.key==hbtn.mouse3)) 
+				{
+					mouse_button = 1;
+					if (key_pending) {
+						/* not used as modifier - send key events */
+						key_press(ev.key);
+						key_release(ev.key);
+						key_pending = 0;
+						schedule_delete(sched, FBVNC_EVENT_KEYREPEAT);
+					}
+				} else if (ev.key==hbtn.pan) {
+#if defined(INPUT_PS2MOUSE) | defined(PLUGIN)
+					if (panning == 1 && overlay_toggle)
+#else	
+					if (panning == 1)
+#endif	
+				   {
+						/* no mouse move events, toggle overlay */
+						if (global_framebuffer.hide_overlays > 1) {
+							/* was hidden, restore it */
+							vp_restore_overlays();
+							vp_restore_overlays();
+						} else {
+							/* keep overlay hidden */
+						}
+						++ pan_toggle_count;
+						if (pan_toggle_count > 7) {
+							pan_toggle_count = 0;
+							do_calibration();
+							vp_pan(0, 0);
+						}
+					} else {
+						vp_restore_overlays();
+					}
+					panning = 0;
+				} else if (ev.key==hbtn.action) {
+					/* nothing to do ?! */
+				} else {
+					key_release(ev.key);
+				}
+			}
+			if (ev.evtype & FBVNC_EVENT_ZOOM_IN)
+			{
+				if (global_framebuffer.v_scale > 1)
+				{
+					global_framebuffer.v_scale--;
+					vp_pan(0, 0);
+				}
+			}
+			if (ev.evtype & FBVNC_EVENT_ZOOM_OUT)
+			{
+				if (global_framebuffer.v_scale < 4)
+				{
+					global_framebuffer.v_scale++;
+					vp_pan(0, 0);
+				}
+			}
 		}
 	}
 	return;
