@@ -398,9 +398,10 @@ extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDV
 
 void eServiceSelector::addService(const eServiceReference &ref)
 {
-	if ( eZap::getInstance()->getServiceSelector() == this )
-	{
 #ifndef DISABLE_FILE
+	if ( eZap::getInstance()->getServiceSelector() == this &&
+		eZapMain::getInstance()->getMode() != eZapMain::modeFile )
+	{
 		eServiceReferenceDVB temp;
 		eServiceReferenceDVB &Ref = (eServiceReferenceDVB&) ref;
 		eServiceReferenceDVB &rec =
@@ -409,8 +410,8 @@ void eServiceSelector::addService(const eServiceReference &ref)
 			temp;
 		if ( rec && !onSameTP(Ref,rec) )
 			return;
-#endif
 	}
+#endif
 	if ( ref.isLocked() && (eConfig::getInstance()->pLockActive() & 2) )
 		return;
 
