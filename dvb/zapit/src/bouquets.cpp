@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.51 2002/09/06 00:37:24 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.52 2002/09/09 08:51:32 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -606,6 +606,7 @@ CZapitChannel* CBouquetManager::copyChannelByOnidSid( unsigned int onid_sid)
 	if (itChannel != allchans_tv.end())
 	{
 		chan = new CZapitChannel(itChannel->second);
+		chan->setIsCopy(true);
 	}
 	else
 	{
@@ -613,6 +614,7 @@ CZapitChannel* CBouquetManager::copyChannelByOnidSid( unsigned int onid_sid)
 		if (itChannel != allchans_radio.end())
 		{
 			chan = new CZapitChannel(itChannel->second);
+			chan->setIsCopy(true);
 		}
 	}
 	return( chan);
