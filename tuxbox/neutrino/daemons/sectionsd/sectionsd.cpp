@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.22 2001/07/17 14:15:52 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.23 2001/07/18 03:26:45 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.23  2001/07/18 03:26:45  fnbrd
+//  Speicherloch gefixed.
+//
 //  Revision 1.22  2001/07/17 14:15:52  fnbrd
 //  Kleine Aenderung damit auch static geht.
 //
@@ -399,8 +402,10 @@ static void commandAllEventsChannelName(struct connectionData *client, char *dat
   *evtList=0;
   if(serviceID!=0) {
     // service Found
-    if(pauseDMXeit())
+    if(pauseDMXeit()) {
+      delete[] evtList;
       return;
+    }
     pthread_mutex_lock(&eventsLock);
     for(SIevents::iterator e=events.begin(); e!=events.end(); e++)
       if(e->serviceID==serviceID) {
@@ -417,14 +422,17 @@ static void commandAllEventsChannelName(struct connectionData *client, char *dat
 	} // if times.size
       } // if = serviceID
     pthread_mutex_unlock(&eventsLock);
-    if(unpauseDMXeit())
+    if(unpauseDMXeit()) {
+      delete[] evtList;
       return;
+    }
   }
   struct msgSectionsdResponseHeader responseHeader;
   responseHeader.dataLength=strlen(evtList)+1;
   write(client->connectionSocket, &responseHeader, sizeof(responseHeader));
   if(responseHeader.dataLength)
     write(client->connectionSocket, evtList, responseHeader.dataLength);
+  delete[] evtList;
   return;
 }
 
@@ -599,8 +607,10 @@ static void commandEventListTV(struct connectionData *client, char *data, unsign
     return;
   }
   *evtList=0;
-  if(pauseDMXeit())
+  if(pauseDMXeit()) {
+    delete[] evtList;
     return;
+  }
   pthread_mutex_lock(&servicesLock);
   pthread_mutex_lock(&eventsLock);
   for(SIservices::iterator s=services.begin(); s!=services.end(); s++)
@@ -623,6 +633,7 @@ static void commandEventListTV(struct connectionData *client, char *data, unsign
   write(client->connectionSocket, &msgResponse, sizeof(msgResponse));
   if(msgResponse.dataLength)
     write(client->connectionSocket, evtList, msgResponse.dataLength);
+  delete[] evtList;
   return;
 }
 
@@ -1184,7 +1195,7 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.22 2001/07/17 14:15:52 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.23 2001/07/18 03:26:45 fnbrd Exp $\n");
 
   if(argc!=1 && argc!=2) {
     printHelp();
