@@ -4,4 +4,5 @@
 	<td><input name="store" type="button" style="width: 100px; height: 22px; background-color: #CB0303; color: #FFFFFF;" value="Store Sat" onClick="javascript:motor('storetopos', '#MOTORPOS#')"></td>
 	<td><input name="goto" type="button" style="width: 100px; height: 22px; background-color: #1FCB12; color: #FFFFFF;" value="Goto Sat" onClick="javascript:motor('gotostoredpos', '#MOTORPOS#')"></td>
 	<td>#SATNAME#</td>
+	<td>#MOTORPOS#</td>
 </tr>

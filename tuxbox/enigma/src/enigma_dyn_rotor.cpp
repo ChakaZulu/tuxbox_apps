@@ -47,7 +47,7 @@ using namespace std;
 eString getConfigRotor(void)
 {
 	eString result = readFile(TEMPLATE_DIR + "rotor.tmp");
-	eString tmp  = readFile(TEMPLATE_DIR + "rotorSat.tmp");
+	eString positions;
 	eTransponder *tp = NULL;
 	eString satPos, satName, motorPos, current;
 	
@@ -60,6 +60,7 @@ eString getConfigRotor(void)
 		// go thru all satellites...
 		for (ePtrList<eSatellite>::iterator s (it->getSatelliteList().begin()); s != it->getSatelliteList().end(); s++)
 		{
+			eString tmp  = readFile(TEMPLATE_DIR + "rotorSat.tmp");
 			if (tp && s->getOrbitalPosition() == tp->satellite.orbital_position)
 				current = "on.gif";
 			else
@@ -73,9 +74,10 @@ eString getConfigRotor(void)
 			tmp.strReplace("#SATPOS#", satPos);
 			tmp.strReplace("#SATNAME#", satName);
 			tmp.strReplace("#MOTORPOS#", motorPos);
+			positions += tmp;
 		}
 	}
-	result.strReplace("#MOTORPOSITIONS#", tmp);
+	result.strReplace("#MOTORPOSITIONS#", positions);
 
 	return result;
 }
