@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.167 2003/06/18 12:19:23 alexw Exp $
+//  $Id: sectionsd.cpp,v 1.168 2004/02/08 15:38:57 thegoodguy Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -180,7 +180,7 @@ typedef boost::shared_ptr<class SIevent>
 SIeventPtr;
 
 // Mengen mit SIeventPtr sortiert nach UniqueKey
-typedef std::map<unsigned long long, SIeventPtr, std::less<unsigned long long> > MySIeventsOrderUniqueKey;
+typedef std::map<event_id_t, SIeventPtr, std::less<event_id_t> > MySIeventsOrderUniqueKey;
 static MySIeventsOrderUniqueKey mySIeventsOrderUniqueKey;
 
 // Mengen mit SIeventPtr sortiert nach Event-ID fuer NVOD-Events (mehrere Zeiten)
@@ -219,7 +219,7 @@ static MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey mySIeventsOrderFirstEn
 
 // Hier landen alle Service-Ids von Meta-Events inkl. der zugehoerigen Event-ID (nvod)
 // d.h. key ist der Unique Service-Key des Meta-Events und Data ist der unique Event-Key
-typedef std::map<unsigned, unsigned long long, std::less<unsigned> > MySIeventUniqueKeysMetaOrderServiceUniqueKey;
+typedef std::map<t_channel_id, event_id_t, std::less<t_channel_id> > MySIeventUniqueKeysMetaOrderServiceUniqueKey;
 static MySIeventUniqueKeysMetaOrderServiceUniqueKey mySIeventUniqueKeysMetaOrderServiceUniqueKey;
 
 /*
@@ -233,17 +233,17 @@ class NvodSubEvent {
       uniqueServiceID=n.uniqueServiceID;
       uniqueEventID=n.uniqueEventID;
     }
-    unsigned uniqueServiceID; // zum zappen per onid+sid
-    unsigned long long uniqueMetaEventID; // ID des Meta-Events
-    unsigned long long uniqueMetaEventID; // ID des eigentlichen Events
+    t_channel_id uniqueServiceID;
+    event_id_t   uniqueMetaEventID; // ID des Meta-Events
+    event_id_t   uniqueMetaEventID; // ID des eigentlichen Events
 };
 
 // Menge sortiert nach Meta-ServiceIDs (NVODs)
-typedef std::multimap<unsigned, class NvodSubEvent *, std::less<unsigned> > nvodSubEvents;
+typedef std::multimap<t_channel_id, class NvodSubEvent *, std::less<t_channel_id> > nvodSubEvents;
 */
 
 // Loescht ein Event aus allen Mengen
-static bool deleteEvent(const unsigned long long uniqueKey)
+static bool deleteEvent(const event_id_t uniqueKey)
 {
 	MySIeventsOrderUniqueKey::iterator e = mySIeventsOrderUniqueKey.find(uniqueKey);
 
@@ -402,11 +402,11 @@ typedef boost::shared_ptr<class SIservice>
 SIservicePtr;
 
 // Key ist unsigned  (Unique Service-ID), data ist ein SIservicePtr
-typedef std::map<unsigned, SIservicePtr, std::less<unsigned> > MySIservicesOrderUniqueKey;
+typedef std::map<t_channel_id, SIservicePtr, std::less<t_channel_id> > MySIservicesOrderUniqueKey;
 static MySIservicesOrderUniqueKey mySIservicesOrderUniqueKey;
 
 // Key ist unsigned (Unique Sevice-ID), data ist ein SIservicePtr
-typedef std::map<unsigned, SIservicePtr, std::less<unsigned> > MySIservicesNVODorderUniqueKey;
+typedef std::map<t_channel_id, SIservicePtr, std::less<t_channel_id> > MySIservicesNVODorderUniqueKey;
 static MySIservicesNVODorderUniqueKey mySIservicesNVODorderUniqueKey;
 
 // Hier sollte man die hash-funktion fuer strings der stl benutzen
@@ -492,7 +492,7 @@ static DMX dmxSDT(0x11, 256);
 // misc. functions
 //------------------------------------------------------------
 
-static unsigned findServiceUniqueKeyforServiceName(const char *serviceName)
+static t_channel_id findServiceUniqueKeyforServiceName(const char * const serviceName)
 {
 	SIservice *sp = new SIservice((unsigned short)0, (unsigned short)0);
 
@@ -518,7 +518,7 @@ static unsigned findServiceUniqueKeyforServiceName(const char *serviceName)
 	return 0;
 }
 
-static const SIevent& findSIeventForEventUniqueKey(const long long& eventUniqueKey)
+static const SIevent& findSIeventForEventUniqueKey(const event_id_t eventUniqueKey)
 {
 	// Event (eventid) suchen
 	MySIeventsOrderUniqueKey::iterator e = mySIeventsOrderUniqueKey.find(eventUniqueKey);
@@ -584,9 +584,9 @@ static const SIevent& findNextSIeventForServiceUniqueKey(const t_channel_id serv
 }
 
 
-static const SIevent &findActualSIeventForServiceName(const char *serviceName, SItime& zeit)
+static const SIevent &findActualSIeventForServiceName(const char * const serviceName, SItime& zeit)
 {
-	unsigned serviceUniqueKey = findServiceUniqueKeyforServiceName(serviceName);
+	t_channel_id serviceUniqueKey = findServiceUniqueKeyforServiceName(serviceName);
 
 	if (serviceUniqueKey)
 		return findActualSIeventForServiceUniqueKey(serviceUniqueKey, zeit);
@@ -597,7 +597,7 @@ static const SIevent &findActualSIeventForServiceName(const char *serviceName, S
 
 
 // Sucht das naechste Event anhand unique key und Startzeit
-static const SIevent &findNextSIevent(const unsigned long long uniqueKey, SItime &zeit)
+static const SIevent &findNextSIevent(const event_id_t uniqueKey, SItime &zeit)
 {
 	MySIeventsOrderUniqueKey::iterator eFirst = mySIeventsOrderUniqueKey.find(uniqueKey);
 
@@ -642,7 +642,7 @@ static const SIevent &findNextSIevent(const unsigned long long uniqueKey, SItime
 }
 
 // Sucht das naechste UND vorhergehende Event anhand unique key und Startzeit
-static void findPrevNextSIevent(const unsigned long long uniqueKey, SItime &zeit, SIevent &prev, SItime &prev_zeit, SIevent &next, SItime &next_zeit)
+static void findPrevNextSIevent(const event_id_t uniqueKey, SItime &zeit, SIevent &prev, SItime &prev_zeit, SIevent &next, SItime &next_zeit)
 {
 	prev = nullEvt;
 	next = nullEvt;
@@ -942,8 +942,8 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 					}
 					else
 					{
-						*((unsigned long long *)liste) = e->first->uniqueKey();
-						liste += 8;
+						*((event_id_t *)liste) = e->first->uniqueKey();
+						liste += sizeof(event_id_t);
 						*((unsigned *)liste) = t->startzeit;
 						liste += 4;
 						*((unsigned *)liste) = t->dauer;
@@ -1060,7 +1060,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.167 2003/06/18 12:19:23 alexw Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.168 2004/02/08 15:38:57 thegoodguy Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -1205,7 +1205,7 @@ static void commandComponentTagsUniqueKey(int connfd, char *data, const unsigned
 	if (dataLength != 8)
 		return ;
 
-	unsigned long long uniqueKey = *(unsigned long long*)data;
+	event_id_t uniqueKey = *(event_id_t *)data;
 
 	dprintf("Request of ComponentTags for 0x%llx\n", uniqueKey);
 
@@ -1297,7 +1297,7 @@ static void commandLinkageDescriptorsUniqueKey(int connfd, char *data, const uns
 	if (dataLength != 8)
 		return ;
 
-	unsigned long long uniqueKey = *(unsigned long long*)data;
+	event_id_t uniqueKey = *(event_id_t *)data;
 
 	dprintf("Request of LinkageDescriptors for 0x%llx\n", uniqueKey);
 
@@ -1326,9 +1326,9 @@ static void commandLinkageDescriptorsUniqueKey(int connfd, char *data, const uns
 				countDescs++;
 				dprintf(" %s \n", linkage_desc->name.c_str());
 				nResultDataSize += strlen(linkage_desc->name.c_str()) + 1 +  	// name
-				                   sizeof(unsigned short) +  //transportStreamId
-				                   sizeof(unsigned short) +  //originalNetworkId
-				                   sizeof(unsigned short); //serviceId
+				                   sizeof(t_transport_stream_id) +  //transportStreamId
+				                   sizeof(t_original_network_id) +  //originalNetworkId
+				                   sizeof(t_service_id); //serviceId
 			}
 		}
 	}
@@ -1356,12 +1356,12 @@ static void commandLinkageDescriptorsUniqueKey(int connfd, char *data, const uns
 			{
 				strcpy(p, linkage_desc->name.c_str());
 				p += strlen(linkage_desc->name.c_str()) + 1;
-				*((unsigned short *)p) = linkage_desc->transportStreamId;
-				p += sizeof(unsigned short);
-				*((unsigned short *)p) = linkage_desc->originalNetworkId;
-				p += sizeof(unsigned short);
-				*((unsigned short *)p) = linkage_desc->serviceId;
-				p += sizeof(unsigned short);
+				*((t_transport_stream_id *)p) = linkage_desc->transportStreamId;
+				p += sizeof(t_transport_stream_id);
+				*((t_original_network_id *)p) = linkage_desc->originalNetworkId;
+				p += sizeof(t_original_network_id);
+				*((t_service_id *)p) = linkage_desc->serviceId;
+				p += sizeof(t_service_id);
 			}
 		}
 	}
@@ -1599,10 +1599,10 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 	}
 
 	nResultDataSize =
-	    sizeof(unsigned long long) +        	// Unique-Key
+	    sizeof(event_id_t) +                        // Unique-Key
 	    sizeof(CSectionsdClient::sectionsdTime) +  	// zeit
 	    strlen(evt.name.c_str()) + 1 + 		// name + 0
-	    sizeof(unsigned long long) +        	// Unique-Key
+	    sizeof(event_id_t) +                        // Unique-Key
 	    sizeof(CSectionsdClient::sectionsdTime) +  	// zeit
 	    strlen(nextEvt.name.c_str()) + 1 +    	// name + 0
 	    sizeof(unsigned) + 				// flags
@@ -1620,8 +1620,8 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 	}
 
 	char *p = pResultData;
-	*((unsigned long long *)p) = evt.uniqueKey();
-	p += sizeof(unsigned long long);
+	*((event_id_t *)p) = evt.uniqueKey();
+	p += sizeof(event_id_t);
 	CSectionsdClient::sectionsdTime zeit;
 	zeit.startzeit = zeitEvt1.startzeit;
 	zeit.dauer = zeitEvt1.dauer;
@@ -1629,8 +1629,8 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 	p += sizeof(CSectionsdClient::sectionsdTime);
 	strcpy(p, evt.name.c_str());
 	p += strlen(evt.name.c_str()) + 1;
-	*((unsigned long long *)p) = nextEvt.uniqueKey();
-	p += sizeof(unsigned long long);
+	*((event_id_t *)p) = nextEvt.uniqueKey();
+	p += sizeof(event_id_t);
 	zeit.startzeit = zeitEvt2.startzeit;
 	zeit.dauer = zeitEvt2.dauer;
 	*((CSectionsdClient::sectionsdTime *)p) = zeit;
@@ -1680,7 +1680,7 @@ static void sendEPG(int connfd, const SIevent& e, const SItime& t, int shortepg 
 	{
 		// new format - 0 delimiters
 		responseHeader.dataLength =
-		    sizeof(unsigned long long) +        // Unique-Key
+		    sizeof(event_id_t) +                        // Unique-Key
 		    strlen(e.name.c_str()) + 1 + 		// Name + del
 		    strlen(e.text.c_str()) + 1 + 		// Text + del
 		    strlen(e.extendedText.c_str()) + 1 + 	// ext + del
@@ -1708,8 +1708,8 @@ static void sendEPG(int connfd, const SIevent& e, const SItime& t, int shortepg 
 	if (!shortepg)
 	{
 		char *p = msgData;
-		*((unsigned long long *)p) = e.uniqueKey();
-		p += sizeof(unsigned long long);
+		*((event_id_t *)p) = e.uniqueKey();
+		p += sizeof(event_id_t);
 
 		strcpy(p, e.name.c_str());
 		p += strlen(e.name.c_str()) + 1;
@@ -1758,7 +1758,7 @@ static void commandGetNextEPG(int connfd, char *data, const unsigned dataLength)
 	if (dataLength != 8 + 4)
 		return ;
 
-	unsigned long long *uniqueEventKey = (unsigned long long *)data;
+	event_id_t * uniqueEventKey = (event_id_t *)data;
 
 	time_t *starttime = (time_t *)(data + 8);
 
@@ -1834,7 +1834,7 @@ static void commandGetEPGPrevNext(int connfd, char *data, const unsigned dataLen
 	if (dataLength != 8 + 4)
 		return ;
 
-	unsigned long long *uniqueEventKey = (unsigned long long *)data;
+	event_id_t * uniqueEventKey = (event_id_t *)data;
 
 	time_t *starttime = (time_t *)(data + 8);
 
@@ -2070,8 +2070,8 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 					} // if sendServiceName
 					else
 					{
-						*((unsigned long long *)liste) = e->first->uniqueKey();
-						liste += 8;
+						*((event_id_t *)liste) = e->first->uniqueKey();
+						liste += sizeof(event_id_t);
 						*((unsigned *)liste) = t->startzeit;
 						liste += 4;
 						*((unsigned *)liste) = t->dauer;
@@ -2178,7 +2178,7 @@ static void commandGetNextShort(int connfd, char *data, const unsigned dataLengt
 	if (dataLength != 8 + 4)
 		return ;
 
-	unsigned long long *uniqueEventKey = (unsigned long long *)data;
+	event_id_t * uniqueEventKey = (event_id_t *)data;
 
 	time_t *starttime = (time_t *)(data + 8);
 
@@ -2239,7 +2239,7 @@ static void commandEPGepgID(int connfd, char *data, const unsigned dataLength)
 	if (dataLength != 8 + 4)
 		return ;
 
-	unsigned long long* epgID = (unsigned long long*)data;
+	event_id_t * epgID = (event_id_t *)data;
 
 	time_t* startzeit = (time_t *)(data + 8);
 
@@ -2292,7 +2292,7 @@ static void commandEPGepgIDshort(int connfd, char *data, const unsigned dataLeng
 	if (dataLength != 8)
 		return;
 
-	unsigned long long* epgID = (unsigned long long*)data;
+	event_id_t * epgID = (event_id_t *)data;
 
 	dprintf("Request of actual EPG for 0x%llx\n", *epgID);
 
@@ -3469,7 +3469,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.167 2003/06/18 12:19:23 alexw Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.168 2004/02/08 15:38:57 thegoodguy Exp $\n");
 
 	try {
 		if (argc != 1 && argc != 2) {

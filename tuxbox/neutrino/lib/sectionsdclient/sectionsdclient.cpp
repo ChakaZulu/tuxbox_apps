@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.34 2003/10/03 17:59:21 thegoodguy Exp $
+  $Id: sectionsdclient.cpp,v 1.35 2004/02/08 15:38:56 thegoodguy Exp $
 
   License: GPL
 
@@ -180,7 +180,7 @@ void CSectionsdClient::setServiceChanged(const t_channel_id channel_id, const bo
 }
 
 
-bool CSectionsdClient::getComponentTagsUniqueKey(const unsigned long long uniqueKey, CSectionsdClient::ComponentTagList& tags)
+bool CSectionsdClient::getComponentTagsUniqueKey(const event_id_t uniqueKey, CSectionsdClient::ComponentTagList& tags)
 {
 	if (send(sectionsd::ComponentTagsUniqueKey, (char*)&uniqueKey, sizeof(uniqueKey)))
 	{
@@ -220,7 +220,7 @@ bool CSectionsdClient::getComponentTagsUniqueKey(const unsigned long long unique
 	}
 }
 
-bool CSectionsdClient::getLinkageDescriptorsUniqueKey(const unsigned long long uniqueKey, CSectionsdClient::LinkageDescriptorList& descriptors)
+bool CSectionsdClient::getLinkageDescriptorsUniqueKey(const event_id_t uniqueKey, CSectionsdClient::LinkageDescriptorList& descriptors)
 {
 	if (send(sectionsd::LinkageDescriptorsUniqueKey, (char*)&uniqueKey, sizeof(uniqueKey)))
 	{
@@ -240,12 +240,12 @@ bool CSectionsdClient::getLinkageDescriptorsUniqueKey(const unsigned long long u
 		{
 			response.name = dp;
 			dp+= strlen(dp)+1;
-			response.transportStreamId = *(unsigned short *) dp;
-			dp+=sizeof(unsigned short);
-			response.originalNetworkId = *(unsigned short *) dp;
-			dp+=sizeof(unsigned short);
-			response.serviceId = *(unsigned short *) dp;
-			dp+=sizeof(unsigned short);
+			response.transportStreamId = *(t_transport_stream_id *) dp;
+			dp+=sizeof(t_transport_stream_id);
+			response.originalNetworkId = *(t_original_network_id *) dp;
+			dp+=sizeof(t_original_network_id);
+			response.serviceId = *(t_service_id *) dp;
+			dp+=sizeof(t_service_id);
 
 			descriptors.insert( descriptors.end(), response);
 		}
@@ -304,16 +304,16 @@ bool CSectionsdClient::getCurrentNextServiceKey(const t_channel_id channel_id, C
 		char* dp = pData;
 
 		// current
-		current_next.current_uniqueKey = *((unsigned long long *)dp);
-		dp+= sizeof(unsigned long long);
+		current_next.current_uniqueKey = *((event_id_t *)dp);
+		dp+= sizeof(event_id_t);
 		current_next.current_zeit = *(CSectionsdClient::sectionsdTime*) dp;
 		dp+= sizeof(CSectionsdClient::sectionsdTime);
 		current_next.current_name = dp;
 		dp+=strlen(dp)+1;
 
 		// next
-		current_next.next_uniqueKey = *((unsigned long long *)dp);
-		dp+= sizeof(unsigned long long);
+		current_next.next_uniqueKey = *((event_id_t *)dp);
+		dp+= sizeof(event_id_t);
 		current_next.next_zeit = *(CSectionsdClient::sectionsdTime*) dp;
 		dp+= sizeof(CSectionsdClient::sectionsdTime);
 		current_next.next_name = dp;
@@ -356,7 +356,7 @@ CChannelEventList CSectionsdClient::getChannelEvents()
 			{
 				CChannelEvent aEvent;
 
-				aEvent.eventID = *((unsigned long long *) dp);
+				aEvent.eventID = *((event_id_t *) dp);
 				dp+=sizeof(aEvent.eventID);
 
 				aEvent.startTime = *((time_t *) dp);
@@ -399,7 +399,7 @@ CChannelEventList CSectionsdClient::getEventsServiceKey(const t_channel_id chann
 			{
 				CChannelEvent aEvent;
 
-				aEvent.eventID = *((unsigned long long *) dp);
+				aEvent.eventID = *((event_id_t *) dp);
 				dp+=sizeof(aEvent.eventID);
 
 				aEvent.startTime = *((time_t *) dp);
@@ -441,7 +441,7 @@ bool CSectionsdClient::getActualEPGServiceKey(const t_channel_id channel_id, CEP
 			char* dp = pData;
 
 
-			epgdata->eventID = *((unsigned long long *)dp);
+			epgdata->eventID = *((event_id_t *)dp);
 			dp+= sizeof(epgdata->eventID);
 
 			epgdata->title = dp;
@@ -473,7 +473,7 @@ bool CSectionsdClient::getActualEPGServiceKey(const t_channel_id channel_id, CEP
 }
 
 
-bool CSectionsdClient::getEPGid(const unsigned long long eventid, const time_t starttime, CEPGData * epgdata)
+bool CSectionsdClient::getEPGid(const event_id_t eventid, const time_t starttime, CEPGData * epgdata)
 {
 	sectionsd::commandGetEPGid msg;
 
@@ -492,7 +492,7 @@ bool CSectionsdClient::getEPGid(const unsigned long long eventid, const time_t s
 			char* dp = pData;
 
 
-			epgdata->eventID = *((unsigned long long *)dp);
+			epgdata->eventID = *((event_id_t *)dp);
 			dp+= sizeof(epgdata->eventID);
 
 			epgdata->title = dp;
@@ -524,7 +524,7 @@ bool CSectionsdClient::getEPGid(const unsigned long long eventid, const time_t s
 }
 
 
-bool CSectionsdClient::getEPGidShort(const unsigned long long eventid, CShortEPGData * epgdata)
+bool CSectionsdClient::getEPGidShort(const event_id_t eventid, CShortEPGData * epgdata)
 {
 	if (send(sectionsd::epgEPGidShort, (char*)&eventid, sizeof(eventid)))
 	{

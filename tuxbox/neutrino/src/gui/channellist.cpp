@@ -120,7 +120,7 @@ void CChannelList::updateEvents(void)
 
 	for (uint count=0; count<chanlist.size(); count++)
 		for ( CChannelEventList::iterator e= events.begin(); e != events.end(); ++e )
-			if (chanlist[count]->channel_id == e->serviceID() )
+			if (chanlist[count]->channel_id == e->get_channel_id())
 			{
 				chanlist[count]->currentEvent= *e;
 				break;

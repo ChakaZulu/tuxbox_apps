@@ -3,7 +3,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.h,v 1.26 2003/10/03 17:59:21 thegoodguy Exp $
+  $Id: sectionsdclient.h,v 1.27 2004/02/08 15:38:56 thegoodguy Exp $
 
   License: GPL
 
@@ -47,11 +47,13 @@ class CShortEPGData
 
 class CEPGData;
 
+typedef unsigned long long event_id_t;
+
 class CChannelEvent
 {
  public:
-	unsigned           serviceID( void ) const { return ( eventID>>16 ); }
-	unsigned long long eventID;
+	t_channel_id       get_channel_id(void) const { return eventID >> 16; }
+	event_id_t         eventID;
 	std::string        description;
 	std::string        text;
 	time_t             startTime;
@@ -124,11 +126,11 @@ class CSectionsdClient : private CBasicClient
 
 	struct responseGetCurrentNextInfoChannelID
 	{
-		unsigned long long              current_uniqueKey;
+		event_id_t                      current_uniqueKey;
 		CSectionsdClient::sectionsdTime current_zeit;
 		std::string                     current_name;
 		char                            current_fsk;
-		unsigned long long              next_uniqueKey;
+		event_id_t                      next_uniqueKey;
 		CSectionsdClient::sectionsdTime next_zeit;
 		std::string                     next_name;
 		unsigned                        flags;
@@ -139,9 +141,9 @@ class CSectionsdClient : private CBasicClient
 
 
 
-	bool getComponentTagsUniqueKey(const unsigned long long uniqueKey, CSectionsdClient::ComponentTagList& tags);
+	bool getComponentTagsUniqueKey(const event_id_t uniqueKey, CSectionsdClient::ComponentTagList& tags);
 
-	bool getLinkageDescriptorsUniqueKey(const unsigned long long uniqueKey, CSectionsdClient::LinkageDescriptorList& descriptors);
+	bool getLinkageDescriptorsUniqueKey(const event_id_t uniqueKey, CSectionsdClient::LinkageDescriptorList& descriptors);
 
 	bool getNVODTimesServiceKey(const t_channel_id channel_id, CSectionsdClient::NVODTimesList& nvod_list);
 
@@ -163,11 +165,11 @@ class CSectionsdClient : private CBasicClient
 
 	CChannelEventList getEventsServiceKey(const t_channel_id channel_id);
 
-	bool getEPGid(const unsigned long long eventid, const time_t starttime, CEPGData * epgdata);
+	bool getEPGid(const event_id_t eventid, const time_t starttime, CEPGData * epgdata);
 
 	bool getActualEPGServiceKey(const t_channel_id channel_id, CEPGData * epgdata);
 
-	bool getEPGidShort(const unsigned long long eventid, CShortEPGData * epgdata);
+	bool getEPGidShort(const event_id_t eventid, CShortEPGData * epgdata);
 
 
 	/*
