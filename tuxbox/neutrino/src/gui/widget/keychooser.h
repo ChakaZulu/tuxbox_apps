@@ -42,8 +42,6 @@
 #include "menue.h"
 
 
-using namespace std;
-
 class CKeyChooserItem;
 class CKeyChooserItemNoKey;
 class CKeyChooser : public CMenuWidget
@@ -55,7 +53,7 @@ class CKeyChooser : public CMenuWidget
 		CKeyChooserItemNoKey	*keyDeleter;
 
 	public:
-		CKeyChooser(int *Key, const char * const title, string Icon="" ); // title: UTF-8
+		CKeyChooser(int *Key, const char * const title, std::string Icon="" ); // title: UTF-8
 		~CKeyChooser();
 
 		void paint();
@@ -72,7 +70,7 @@ class CKeyChooserItem : public CMenuTarget
 		int height;
 		int hheight; // head font height
 		int mheight; // menu font height
-		string		name;
+		std::string	name;
 		int		*key;
 		FontsDef	*fonts;
 
@@ -83,7 +81,7 @@ class CKeyChooserItem : public CMenuTarget
 		CKeyChooserItem(const char * const Name, int *Key); // UTF-8
 
 		void hide();
-		int exec(CMenuTarget* parent, string actionKey );
+		int exec(CMenuTarget* parent, std::string actionKey );
 
 };
 
@@ -98,7 +96,7 @@ class CKeyChooserItemNoKey : public CMenuTarget
 			key=Key;
 		};
 
-		int exec( CMenuTarget* parent, string actionKey )
+		int exec( CMenuTarget* parent, std::string actionKey )
 		{
 			*key=CRCInput::RC_nokey;
 			return menu_return::RETURN_REPAINT;

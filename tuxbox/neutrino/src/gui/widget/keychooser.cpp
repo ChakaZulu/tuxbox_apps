@@ -29,15 +29,16 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "keychooser.h"
+
 #include <global.h>
 #include <neutrino.h>
 
 #include <gui/color.h>
 
-#include "keychooser.h"
 
 
-CKeyChooser::CKeyChooser( int* Key, const char * const title, string Icon )
+CKeyChooser::CKeyChooser( int* Key, const char * const title, std::string Icon )
 		: CMenuWidget(title, Icon)
 {
 	frameBuffer = CFrameBuffer::getInstance();
@@ -65,8 +66,8 @@ void CKeyChooser::paint()
 {
 	CMenuWidget::paint();
 
-	string text = g_Locale->getText("keychoosermenu.currentkey") + ": " + CRCInput::getKeyName(*key);
-	g_Fonts->menu->RenderString(x+ 10, y+ 65, width, text.c_str(), COL_MENUCONTENT);
+	std::string text = g_Locale->getText("keychoosermenu.currentkey") + ": " + CRCInput::getKeyName(*key);
+	g_Fonts->menu->RenderString(x+ 10, y+ 65, width, text, COL_MENUCONTENT, 0, true); // UTF-8
 }
 
 //*****************************
@@ -84,7 +85,7 @@ CKeyChooserItem::CKeyChooserItem(const char * const Name, int *Key)
 }
 
 
-int CKeyChooserItem::exec(CMenuTarget* parent, string)
+int CKeyChooserItem::exec(CMenuTarget* parent, std::string)
 {
 	int res = menu_return::RETURN_REPAINT;
 
