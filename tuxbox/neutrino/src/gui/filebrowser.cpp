@@ -627,29 +627,29 @@ void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
 					modestring += string((actual_file->Mode & (2 << (m*3)))?"w":"-");
 					modestring += string((actual_file->Mode & (1 << (m*3)))?"x":"-");
 				}
-				g_Fonts->filebrowser_item->RenderString(x + width - 150 , ypos+ fheight, 80, modestring.c_str(), color);
+				g_Fonts->filebrowser_item->RenderString(x + width - 180 , ypos+ fheight, 80, modestring.c_str(), color);
 
 				char tmpstr[256];
             if((double)actual_file->Size / (1024. * 1024 * 1024) > 1)
             {
-               snprintf(tmpstr,sizeof(tmpstr),"%.4gGB", 
+               snprintf(tmpstr,sizeof(tmpstr),"%.4gG", 
                         (double)actual_file->Size / (1024. * 1024 * 1024));
             }
             else if((double)actual_file->Size / (1024. * 1024) > 1)
             {
-               snprintf(tmpstr,sizeof(tmpstr),"%.4gMB", 
+               snprintf(tmpstr,sizeof(tmpstr),"%.4gM", 
                         (double)actual_file->Size / (1024. * 1024));
             }
             else if((double)actual_file->Size / (1024.) > 1)
             {
-               snprintf(tmpstr,sizeof(tmpstr),"%.4gKB", 
+               snprintf(tmpstr,sizeof(tmpstr),"%.4gK", 
                         (double)actual_file->Size / (1024.));
             }
             else
-               snprintf(tmpstr,sizeof(tmpstr),"%dB", (int)actual_file->Size);
+               snprintf(tmpstr,sizeof(tmpstr),"%d", (int)actual_file->Size);
 
-				int breite = g_Fonts->filebrowser_item->getRenderWidth(tmpstr)< 70?g_Fonts->filebrowser_item->getRenderWidth(tmpstr):60;
-				g_Fonts->filebrowser_item->RenderString(x + width - 80 + (60 - breite), ypos+ fheight, breite, tmpstr, color);
+				int breite = g_Fonts->filebrowser_item->getRenderWidth(tmpstr)< 80?g_Fonts->filebrowser_item->getRenderWidth(tmpstr):70;
+				g_Fonts->filebrowser_item->RenderString(x + width - 90 + (70 - breite), ypos+ fheight, breite, tmpstr, color);
 			}
 			if( S_ISDIR(actual_file->Mode) )
 			{
