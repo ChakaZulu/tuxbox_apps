@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.100 2004/08/01 19:35:58 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.101 2004/08/02 08:09:44 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -286,8 +286,11 @@ void CBouquetManager::saveBouquets(const CZapitClient::bouquetMode bouquetMode, 
 	
 	if ((bouquetMode == CZapitClient::BM_UPDATEBOUQUETS) || (bouquetMode == CZapitClient::BM_CREATESATELLITEBOUQUET))
 	{
-		storeBouquets();
-		clearAll();
+		BouquetList storedBouquets;
+
+		storedBouquets = Bouquets;
+		Bouquets.clear();
+		remainChannels = NULL;
 		
 		LoadServices(frontend->getInfo()->type, frontend->getDiseqcType());
 		
@@ -309,7 +312,7 @@ void CBouquetManager::saveBouquets(const CZapitClient::bouquetMode bouquetMode, 
 		
 		while (!(storedBouquets.empty()))
 		{
-			int dest = existsBouquet(storedBouquets[0]->Name);
+			int dest = existsBouquet(storedBouquets[0]->Name.c_str());
 			if (dest != -1)
 			{
 				while (!(storedBouquets[0]->tvChannels.empty()))
@@ -415,36 +418,6 @@ void CBouquetManager::loadBouquets(bool ignoreBouquetFile)
 	renumServices();
 }
 
-void CBouquetManager::copy_bouquet_list(BouquetList const * const from, CBouquet * const from_remainChannels, BouquetList * const to, CBouquet * * const to_remainChannels)
-{
-	for (std::vector<CBouquet *>::iterator it = to->begin(); it != to->end(); it++)
-		delete (*it);
-
-	to->clear();
-	*to_remainChannels = NULL;
-
-	for (std::vector<CBouquet *>::const_iterator it = from->begin(); it != from->end(); it++)
-	{
-		CBouquet * orig_bouquet = *it;
-		CBouquet * new_bouquet  = new CBouquet(*orig_bouquet);
-
-		to->push_back(new_bouquet);
-
-		if (orig_bouquet == from_remainChannels)
-			*to_remainChannels = new_bouquet;
-	}
-}
-
-void CBouquetManager::storeBouquets(void)
-{
-	copy_bouquet_list(&Bouquets, remainChannels, &storedBouquets, &storedremainChannels);
-}
-
-void CBouquetManager::restoreBouquets(void)
-{
-	copy_bouquet_list(&storedBouquets, storedremainChannels, &Bouquets, &remainChannels);
-}
-
 void CBouquetManager::makeRemainingChannelsBouquet(void)
 {
 	ChannelList unusedChannels;
@@ -517,11 +490,17 @@ void CBouquetManager::deleteBouquet(const CBouquet* bouquet)
 // -- Find Bouquet-Name, if BQ exists   (2002-04-02 rasc)
 // -- Return: Bouqet-ID (found: 0..n)  or -1 (Bouquet does not exist)
 //
-int CBouquetManager::existsBouquet(const std::string & name)
+int CBouquetManager::existsBouquet(char const * const name)
 {
 	unsigned int i;
-	for (i=0; (i<Bouquets.size()) && (Bouquets[i]->Name != name); i++);
-	return (i<Bouquets.size()) ?(int)i :(int)-1;
+
+	for (i = 0; i < Bouquets.size(); i++)
+	{
+		if (Bouquets[i]->Name == name)
+			return (int)i;
+	}
+
+	return -1;
 }
 
 

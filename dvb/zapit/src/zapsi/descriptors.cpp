@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.65 2004/02/17 16:26:07 thegoodguy Exp $
+ * $Id: descriptors.cpp,v 1.66 2004/08/02 08:09:48 thegoodguy Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -495,7 +495,7 @@ void service_descriptor(const unsigned char * const buffer, const t_service_id s
 		CBouquet* bouquet;
 		int bouquetId;
 
-		bouquetId = scanBouquetManager->existsBouquet(providerName);
+		bouquetId = scanBouquetManager->existsBouquet(providerName.c_str());
 
 		if (bouquetId == -1)
 			bouquet = scanBouquetManager->addBouquet(providerName);

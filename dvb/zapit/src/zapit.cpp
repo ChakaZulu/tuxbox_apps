@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.355 2004/08/01 19:55:42 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.356 2004/08/02 08:09:44 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -483,7 +483,6 @@ int prepare_channels(fe_type_t frontendType, diseqc_t diseqcType)
 
 	INFO("LoadServices: success");
 	bouquetManager->loadBouquets();
-	bouquetManager->storeBouquets();
 
 	return 0;
 }
@@ -719,7 +718,10 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	case CZapitMessages::CMD_BQ_RESTORE:
 	{
 		CZapitMessages::responseCmd response;
-		bouquetManager->restoreBouquets();
+
+		bouquetManager->clearAll();
+		bouquetManager->loadBouquets();
+
 		response.cmd = CZapitMessages::CMD_READY;
 		CBasicServer::send_data(connfd, &response, sizeof(response));
 		break;
@@ -729,17 +731,6 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	{
 		CZapitMessages::responseCmd response;
 		prepare_channels(frontend->getInfo()->type, diseqcType);
-		response.cmd = CZapitMessages::CMD_READY;
-		CBasicServer::send_data(connfd, &response, sizeof(response));
-		eventServer->sendEvent(CZapitClient::EVT_BOUQUETS_CHANGED, CEventServer::INITID_ZAPIT);
-		break;
-	}
-
-	case CZapitMessages::CMD_BQ_COMMIT_CHANGE:
-	{
-		CZapitMessages::responseCmd response;
-		bouquetManager->renumServices();
-		bouquetManager->storeBouquets();
 		response.cmd = CZapitMessages::CMD_READY;
 		CBasicServer::send_data(connfd, &response, sizeof(response));
 		eventServer->sendEvent(CZapitClient::EVT_BOUQUETS_CHANGED, CEventServer::INITID_ZAPIT);
@@ -1004,15 +995,20 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 
 	case CZapitMessages::CMD_BQ_RENUM_CHANNELLIST:
 		bouquetManager->renumServices();
-		bouquetManager->storeBouquets();
 		break;
 
 	case CZapitMessages::CMD_BQ_SAVE_BOUQUETS:
 	{
 		CZapitMessages::responseCmd response;
+
 		bouquetManager->saveBouquets();
+		bouquetManager->renumServices();
+
 		response.cmd = CZapitMessages::CMD_READY;
 		CBasicServer::send_data(connfd, &response, sizeof(response));
+
+		eventServer->sendEvent(CZapitClient::EVT_BOUQUETS_CHANGED, CEventServer::INITID_ZAPIT);
+
 		break;
 	}
 
@@ -1644,7 +1640,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.355 2004/08/01 19:55:42 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.356 2004/08/02 08:09:44 thegoodguy Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {

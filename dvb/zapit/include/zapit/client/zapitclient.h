@@ -426,11 +426,8 @@ class CZapitClient:public CBasicClient
 	/* necessarily after bouquet editing operations*/
 	void renumChannellist();
 
-	/* saves current bouquet configuration to bouquets.xml*/
+	/* saves current bouquet configuration to bouquets.xml */
 	void saveBouquets();
-
-	/* commit bouquet change */
-	void commitBouquetChange();
 
 	/****************************************/
 	/*					*/

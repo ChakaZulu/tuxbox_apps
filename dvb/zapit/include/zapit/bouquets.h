@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.55 2004/08/01 19:35:57 thegoodguy Exp $
+ * $Id: bouquets.h,v 1.56 2004/08/02 08:09:43 thegoodguy Exp $
  */
 
 #ifndef __bouquets_h__
@@ -78,16 +78,12 @@ class CBouquetManager
 {
  private:
 	CBouquet * remainChannels;
-	CBouquet * storedremainChannels;
 
 	void makeRemainingChannelsBouquet(void);
 	void parseBouquetsXml            (const xmlNodePtr root);
 	void writeBouquetHeader          (FILE * bouq_fd, uint i, const char * bouquetName);
 	void writeBouquetFooter          (FILE * bouq_fd);
 	void writeBouquetChannels        (FILE * bouq_fd, uint i);
-
-	void copy_bouquet_list(BouquetList const * const from, CBouquet   * const from_remainChannels,
-			       BouquetList       * const to  , CBouquet * * const to_remainChannels  );
 
  public:
 		CBouquetManager() { remainChannels = NULL; };
@@ -118,14 +114,12 @@ class CBouquetManager
 		void saveBouquets(void);
 		void saveBouquets(const CZapitClient::bouquetMode bouquetMode, const char * const providerName);
 		void loadBouquets(bool ignoreBouquetFile = false);
-		void storeBouquets(void);
-		void restoreBouquets(void);
 		void renumServices();
 
 		CBouquet* addBouquet(const std::string & name);
 		void deleteBouquet(const unsigned int id);
 		void deleteBouquet(const CBouquet* bouquet);
-		int  existsBouquet(const std::string & name);
+		int  existsBouquet(char const * const name);
 		void moveBouquet(const unsigned int oldId, const unsigned int newId);
 		bool existsChannelInBouquet(unsigned int bq_id, const t_channel_id channel_id);
 

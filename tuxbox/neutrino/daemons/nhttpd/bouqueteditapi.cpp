@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: bouqueteditapi.cpp,v 1.26 2004/04/08 18:53:52 thegoodguy Exp $
+	$Id: bouqueteditapi.cpp,v 1.27 2004/08/02 08:09:48 thegoodguy Exp $
 
 	License: GPL
 
@@ -285,7 +285,6 @@ bool CBouqueteditAPI::saveBouquet(CWebserverRequest* request)
         if(!request->Authenticate())    
                 return false;   
 	Parent->Zapit->saveBouquets();
-	Parent->Zapit->commitBouquetChange();
 	Parent->UpdateBouquets();
 	request->Send302("/bouquetedit/main?saved=1");
 	return true;

@@ -546,7 +546,6 @@ void CBEBouquetWidget::saveChanges()
 	CHintBox* hintBox= new CHintBox(LOCALE_BOUQUETEDITOR_NAME, g_Locale->getText(LOCALE_BOUQUETEDITOR_SAVINGCHANGES), 480); // UTF-8
 	hintBox->paint();
 	g_Zapit->saveBouquets();
-	g_Zapit->commitBouquetChange();
 	hintBox->hide();
 	delete hintBox;
 }

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.23 2004/06/10 19:56:12 rasc Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.24 2004/08/02 08:09:44 thegoodguy Exp $
  *
  * types used for clientlib <-> zapit communication - d-box2 linux project
  *
@@ -95,7 +95,7 @@ class CZapitMessages
 			CMD_BQ_REMOVE_CHANNEL_FROM_BOUQUET = 46,
 			CMD_BQ_RENUM_CHANNELLIST           = 47,
 			CMD_BQ_RESTORE                     = 48,
-			CMD_BQ_COMMIT_CHANGE               = 49,
+			/* unused:			CMD_BQ_COMMIT_CHANGE               = 49, */
 			CMD_BQ_SAVE_BOUQUETS               = 50,
 
 			CMD_SET_RECORD_MODE                = 51,

@@ -90,9 +90,9 @@ int CFavorites::addChannelToFavorites()
 
 
 	// -- tell zapit to save Boquets and reinit (if changed)
-	if (status) {
-		g_Zapit->saveBouquets();        // better be safe than sorry (save first, commit later)
-		g_Zapit->commitBouquetChange();
+	if (status)
+	{
+		g_Zapit->saveBouquets();
 	}
 
 	return status;
