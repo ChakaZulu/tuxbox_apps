@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.340 2004/01/05 22:43:37 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.341 2004/01/05 22:53:38 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1602,7 +1602,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.340 2004/01/05 22:43:37 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.341 2004/01/05 22:53:38 thegoodguy Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
@@ -1624,7 +1624,7 @@ int main(int argc, char **argv)
 			fprintf(stderr,
 				"Usage: %s [-d] [-q]\n"
 				"-d : debug mode\n"
-				"-q : quit mode\n"
+				"-q : quiet mode\n"
 				"\n"
 				"Keys in config file "	CONFIGFILE ":\n"
 				"saveLastChannel" ", "
