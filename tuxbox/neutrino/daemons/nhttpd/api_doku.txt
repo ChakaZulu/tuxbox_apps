@@ -626,13 +626,14 @@ Parameter: httpdversion
 Rückgabe: 
 
 Version des httpd 
-1 : nhttpd
+1 : nhttpd (legacy api)
 2 : thttpd
+3 : nhttpd
 
 Beispiel:
 
 >>>http://dbox/control/info?httpdversion
-1
+3
 
 
 **********************************************************************************************

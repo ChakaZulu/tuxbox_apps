@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.34 2004/02/24 20:36:09 thegoodguy Exp $
+	$Id: controlapi.cpp,v 1.35 2004/02/24 21:06:40 thegoodguy Exp $
 
 	License: GPL
 
@@ -138,7 +138,7 @@ bool CControlAPI::TimerCGI(CWebserverRequest *request)
 	
 	if (Parent->Timerd->isTimerdAvailable())
 	{
-		if ((request->ParameterList.size() > 0))
+		if (!(request->ParameterList.empty()))
 		{
 			if (request->ParameterList["action"] == "new")
 			{
@@ -167,7 +167,7 @@ bool CControlAPI::SetModeCGI(CWebserverRequest *request)
 	// Standard httpd header senden
 	request->SendPlainHeader("text/plain");
 	
-	if (request->ParameterList.size() > 0)
+	if (!(request->ParameterList.empty()))
 	{
 		if (request->ParameterList["1"] == "status")
 		{
@@ -260,7 +260,7 @@ bool CControlAPI::GetDateCGI(CWebserverRequest *request)
 {
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
 
-	if (request->ParameterList.size() == 0)
+	if (request->ParameterList.empty())
 	{
 		//paramlos
 		char *timestr = new char[50];
@@ -286,7 +286,7 @@ bool CControlAPI::GetTimeCGI(CWebserverRequest *request)
 
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
 	
-	if (request->ParameterList.size() == 0)
+	if (request->ParameterList.empty())
 	{
 		//paramlos
 		char *timestr = new char[50];
@@ -339,8 +339,9 @@ bool CControlAPI::GetBouquetsxmlCGI(CWebserverRequest *request)		// sendet die d
 
 bool CControlAPI::GetChannel_IDCGI(CWebserverRequest *request) // sendet die aktuelle channel_id
 {
+	t_channel_id channel_id = Parent->Zapit->getCurrentServiceID();
 	request->SendPlainHeader("text/plain");
-	request->printf("%u\n", Parent->Zapit->getCurrentServiceID());
+	request->printf("%u\n", ((((uint32_t)GET_ORIGINAL_NETWORK_ID_FROM_CHANNEL_ID(channel_id)) << 16) | GET_SERVICE_ID_FROM_CHANNEL_ID(channel_id)));
 	return true;
 }
 
@@ -352,18 +353,18 @@ bool CControlAPI::MessageCGI(CWebserverRequest *request)
 	std::string message;
 	int event = 0;
 
-	if (request->ParameterList.size() == 0)
+	if (request->ParameterList.empty())
 	{	//paramlos
 		request->SendError();
 		return false;
 	}
 	
-	if (request->ParameterList["popup"] != "")
+	if (!(request->ParameterList["popup"].empty()))
 	{
 		message = request->ParameterList["popup"];
 		event = NeutrinoMessages::EVT_POPUP;
 	}
-	else if (request->ParameterList["nmsg"] != "")
+	else if (!(request->ParameterList["nmsg"].empty()))
 	{
 		message = request->ParameterList["nmsg"];
 		event = NeutrinoMessages::EVT_EXTMSG;
@@ -385,10 +386,10 @@ bool CControlAPI::MessageCGI(CWebserverRequest *request)
 
 bool CControlAPI::InfoCGI(CWebserverRequest *request)
 {
-	if (request->ParameterList.size() == 0)
+	if (request->ParameterList.empty())
 	{
 		//paramlos
-		request->SocketWrite("Neutrino NG\n");
+		request->SocketWrite("Neutrino\n");
 		return true;
 	}
 	else
@@ -413,7 +414,7 @@ bool CControlAPI::InfoCGI(CWebserverRequest *request)
 		else if (request->ParameterList["1"] == "httpdversion")	// httpd version ausgeben
 		{
 			request->SendPlainHeader("text/plain");			// Standard httpd header senden
-			request->SocketWrite("2");
+			request->SocketWrite("3");
 			return true;
 		}
 		else
@@ -430,7 +431,7 @@ bool CControlAPI::ShutdownCGI(CWebserverRequest *request)
 {
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
 	
-	if (request->ParameterList.size() == 0)
+	if (request->ParameterList.empty())
 	{
 		//paramlos
 		Parent->EventServer->sendEvent(NeutrinoMessages::SHUTDOWN, CEventServer::INITID_HTTPD);
@@ -450,7 +451,7 @@ bool CControlAPI::VolumeCGI(CWebserverRequest *request)
 {
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
 	
-	if (request->ParameterList.size() == 0)
+	if (request->ParameterList.empty())
 	{	//paramlos - aktuelle volume anzeigen
 		request->printf("%d", Parent->Controld->getVolume());			// volume ausgeben
 		return true;
@@ -506,7 +507,7 @@ bool CControlAPI::GetBouquetCGI(CWebserverRequest *request)
 
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
 
-	if (request->ParameterList.size() > 0)
+	if (!(request->ParameterList.empty()))
 	{
 		int mode = CZapitClient::MODE_CURRENT;
 		
@@ -555,7 +556,7 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
 
-	if (request->ParameterList.size() == 0)
+	if (request->ParameterList.empty())
 	{
 		CZapitClient::BouquetChannelList *channellist = Parent->GetChannelList(CZapitClient::MODE_CURRENT);
 		
@@ -892,7 +893,7 @@ void CControlAPI::SendTimers(CWebserverRequest* request)
 			if (timer->mode == CTimerd::MODE_RADIO)
 			{
 				// Radiokanal
-				if (channellist_radio.size() == 0)
+				if (channellist_radio.empty())
 					Parent->Zapit->getChannels(channellist_radio,CZapitClient::MODE_RADIO);
 
 				CZapitClient::BouquetChannelList::iterator channel = channellist_radio.begin();
@@ -914,7 +915,7 @@ void CControlAPI::SendTimers(CWebserverRequest* request)
 			else
 			{
 				//TV Kanal
-				if (channellist_tv.size() == 0)
+				if (channellist_tv.empty())
 					Parent->Zapit->getChannels(channellist_tv, CZapitClient::MODE_TV);
 
 				CZapitClient::BouquetChannelList::iterator channel = channellist_tv.begin();
