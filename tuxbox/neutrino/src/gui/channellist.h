@@ -1,9 +1,12 @@
 #ifndef __channellist__
 #define __channellist__
 //
-// $Id: channellist.h,v 1.9 2001/09/13 10:12:41 field Exp $
+// $Id: channellist.h,v 1.10 2001/09/14 16:18:46 field Exp $
 //
 // $Log: channellist.h,v $
+// Revision 1.10  2001/09/14 16:18:46  field
+// Umstellung auf globale Variablen...
+//
 // Revision 1.9  2001/09/13 10:12:41  field
 // Major update! Beschleunigtes zappen & EPG uvm...
 //
@@ -55,7 +58,6 @@ class CChannelList
 	unsigned int		liststart;
 	unsigned int		listmaxshow;
 	unsigned int		numwidth;
-	FontsDef		*fonts;
 	int			fheight; // Fonthoehe Channellist-Inhalt
 	int			theight; // Fonthoehe Channellist-Titel
 
@@ -68,13 +70,13 @@ class CChannelList
 	int 			x;
 	int 			y;
 
-	void paintItem(CFrameBuffer* fb, int pos);
-	void paint(CFrameBuffer* fb);
-	void paintHead(CFrameBuffer* fb);
-	void hide(CFrameBuffer* fb);
+	void paintItem(int pos);
+	void paint();
+	void paintHead();
+	void hide();
 
 	public:
-	CChannelList(SNeutrinoSettings *settings, int Key=-1, string Name="", FontsDef *cfont=NULL);
+    CChannelList(int Key=-1, string Name="");
 	~CChannelList();
 	void addChannel(int key, int number, string name);
 	void setName(string Name);
@@ -82,12 +84,12 @@ class CChannelList
 	string getActiveChannelName();
 	int getActiveChannelNumber();
 
-	void zapTo(CRemoteControl *remoteControl, CInfoViewer *infoViewer, int pos);
-	bool showInfo(CInfoViewer *infoViewer, int pos);
+	void zapTo(int pos);
+	bool showInfo(int pos);
 	void updateEvents(void);
-	void numericZap(CFrameBuffer *frameBuffer, CRCInput *rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, SNeutrinoSettings* settings, int key);
-	void exec(CFrameBuffer *frameBuffer, CRCInput *rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, SNeutrinoSettings* settings);
-	void quickZap(CFrameBuffer *frameBuffer, CRCInput *rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, SNeutrinoSettings* settings, int key);
+	void numericZap(int key);
+	void exec();
+	void quickZap(int key);
 };
 
 

@@ -28,20 +28,18 @@ class CColorChooser : public CMenuTarget
 
 	string	name;
 
-	FontsDef *fonts;
-
 	CChangeObserver* observer;
 
-		void paint(CFrameBuffer* frameBuffer);
-		void setColor(CFrameBuffer* frameBuffer);
-		void paintSlider(CFrameBuffer* frameBuffer, int x, int y, unsigned char *spos, string text, bool selected);
+		void paint();
+		void setColor();
+		void paintSlider(int x, int y, unsigned char *spos, string text, bool selected);
 
 	public:
 
-		CColorChooser(string Name, FontsDef *Fonts, unsigned char *R, unsigned char *G, unsigned char *B, unsigned char* Alpha, CChangeObserver* Observer = NULL);
+		CColorChooser(string Name, unsigned char *R, unsigned char *G, unsigned char *B, unsigned char* Alpha, CChangeObserver* Observer = NULL);
 
-		void hide(CFrameBuffer* frameBuffer);
-		int exec(CFrameBuffer* frameBuffer, CRCInput *rcInput, CMenuTarget* parent, string actionKey );
+		void hide();
+		int exec( CMenuTarget* parent, string actionKey );
 
 };
 

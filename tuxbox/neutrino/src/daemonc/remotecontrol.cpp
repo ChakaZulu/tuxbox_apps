@@ -1,6 +1,5 @@
 #include "remotecontrol.h"
-
-
+#include "../global.h"
 
 CRemoteControl::CRemoteControl()
 {

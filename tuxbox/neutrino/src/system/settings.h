@@ -87,7 +87,5 @@ struct SNeutrinoSettings
 	int	screen_EndY;
 };
 
-
-
 #endif
 

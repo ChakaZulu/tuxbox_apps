@@ -1,5 +1,5 @@
 #include "framebuffer.h"
-
+#include "../global.h"
 
 CFrameBuffer::CFrameBuffer(const char *fb)
 {
@@ -52,6 +52,7 @@ CFrameBuffer::CFrameBuffer(const char *fb)
 	nolfb:
 		printf("framebuffer not available.\n");
 		lfb=0;
+printf("CFrameBuffer:Init");
 }
 
 

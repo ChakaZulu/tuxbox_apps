@@ -42,18 +42,11 @@ using namespace std;
 class CInfoViewer
 {
 	private:
-		CFrameBuffer		*frameBuffer;
-		FontsDef			*fonts;
-		SNeutrinoSettings	*settings;
-
 		int					intShowDuration;
 
 		pthread_t			thrViewer;
         pthread_cond_t      epg_cond;
         pthread_mutex_t     epg_mutex;
-
-        CRCInput		    *rcInput;
-        CStreamInfo         *StreamInfo;
 
 		int					InfoHeightY;
 		int					BoxEndX;
@@ -85,14 +78,12 @@ class CInfoViewer
 
         CInfoViewer();
 
-        void start( CFrameBuffer *FrameBuffer, FontsDef *Fonts, SNeutrinoSettings *Settings,
-                    CRCInput *AInput );
+        void start();
 
         void showTitle( int ChanNum, string Channel, bool CalledFromNumZap = false );
         void killTitle();
 
         void setDuration( int Duration );
-        void setStreamInfo( CStreamInfo *Info );
 };
 
 

@@ -1,6 +1,5 @@
 #include "rcinput.h"
-
-
+#include "../global.h"
 
 /**************************************************************************
 *	Constructor - opens rc-input device and starts threads

@@ -1,35 +1,32 @@
 #include "stringinput.h"
+#include "../global.h"
 
-
-CStringInput::CStringInput(string Name, FontsDef *Fonts, char* Value, int Size)
+CStringInput::CStringInput(string Name, char* Value, int Size)
 {
 	name = Name;
 	value = Value;
-	fonts = Fonts;
 	size = Size;
 	width = 400;
-	hheight = fonts->menu_title
-->getHeight();
-	mheight = fonts->menu
-->getHeight();
-	height = hheight+mheight+50;
-	x=((720-width) >> 1) -50;
-	y=((500-height)>>1);
+	hheight = g_Fonts->menu_title->getHeight();
+	mheight = g_Fonts->menu->getHeight();
+	height = hheight+ mheight+ 50;
+	x = ((720-width) >> 1) -50;
+	y = ((500-height)>>1);
 	selected = 0;
 }
 
 
-int CStringInput::exec(CFrameBuffer* frameBuffer, CRCInput *rcInput,CMenuTarget* parent, string)
+int CStringInput::exec( CMenuTarget* parent, string )
 {
 	if (parent)
 	{
-		parent->hide(frameBuffer);
+		parent->hide();
 	}
 
 	for(int count=strlen(value)-1;count<size-1;count++)
 		strcat(value, " ");
 	
-	paint( frameBuffer);
+	paint();
 
 	bool loop = true;
 	char validchars[] = "0123456789. ";
@@ -37,7 +34,7 @@ int CStringInput::exec(CFrameBuffer* frameBuffer, CRCInput *rcInput,CMenuTarget*
 	//int selected = 0;
 	while(loop)
 	{
-		int key = rcInput->getKey(300); 
+		int key = g_RCInput->getKey(300);
 		if(key==CRCInput::RC_timeout)
 		{//timeout, close 
 			loop = false;
@@ -47,8 +44,8 @@ int CStringInput::exec(CFrameBuffer* frameBuffer, CRCInput *rcInput,CMenuTarget*
 			if(selected>0)
 			{
 				selected--;
-				paintChar(frameBuffer, selected+1);
-				paintChar(frameBuffer, selected);
+				paintChar(selected+1);
+				paintChar(selected);
 			}
 		}
 		else if (key==CRCInput::RC_right)
@@ -56,8 +53,8 @@ int CStringInput::exec(CFrameBuffer* frameBuffer, CRCInput *rcInput,CMenuTarget*
 			if(selected<(int)strlen(value)-1)
 			{
 				selected++;
-				paintChar(frameBuffer, selected-1);
-				paintChar(frameBuffer, selected);
+				paintChar(selected-1);
+				paintChar(selected);
 			}
 		}
 		else if (key==CRCInput::RC_up)
@@ -70,7 +67,7 @@ int CStringInput::exec(CFrameBuffer* frameBuffer, CRCInput *rcInput,CMenuTarget*
 			if(npos>=(int)strlen(validchars))
 				npos = 0;
 			value[selected]=validchars[npos];
-			paintChar(frameBuffer, selected);
+			paintChar(selected);
 		}
 		else if (key==CRCInput::RC_down)
 		{
@@ -82,7 +79,7 @@ int CStringInput::exec(CFrameBuffer* frameBuffer, CRCInput *rcInput,CMenuTarget*
 			if(npos<0)
 				npos = strlen(validchars)-1;
 			value[selected]=validchars[npos];
-			paintChar(frameBuffer, selected);
+			paintChar(selected);
 		}
 		else if (key==CRCInput::RC_ok)
 		{
@@ -91,7 +88,7 @@ int CStringInput::exec(CFrameBuffer* frameBuffer, CRCInput *rcInput,CMenuTarget*
 
 	}
 	
-	hide(frameBuffer);
+	hide();
 
 	for(int count=size-1;count>=0;count--)
 	{
@@ -106,28 +103,28 @@ int CStringInput::exec(CFrameBuffer* frameBuffer, CRCInput *rcInput,CMenuTarget*
 	return CMenuTarget::RETURN_REPAINT;
 }
 
-void CStringInput::hide(CFrameBuffer* frameBuffer)
+void CStringInput::hide()
 {
-	frameBuffer->paintBoxRel(x,y, width,height, COL_BACKGROUND);
+	g_FrameBuffer->paintBoxRel(x, y, width, height, COL_BACKGROUND);
 }
 
-void CStringInput::paint(CFrameBuffer* frameBuffer)
+void CStringInput::paint()
 {
-	frameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD);
-	fonts->menu_title->RenderString(x+10,y+hheight, width, name.c_str(), COL_MENUHEAD);
-	frameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT);
+	g_FrameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+ 10, y+ hheight, width, name.c_str(), COL_MENUHEAD);
+	g_FrameBuffer->paintBoxRel(x, y+ hheight, width, height- hheight, COL_MENUCONTENT);
 
 	for (int count=0;count<size;count++)
-		paintChar(frameBuffer, count);
+		paintChar(count);
 
 }
 
-void CStringInput::paintChar(CFrameBuffer* frameBuffer, int pos)
+void CStringInput::paintChar(int pos)
 {
 	int xs = 20;
 	int ys = mheight;
-	int xpos = x+20+ pos*xs;
-	int ypos = y+hheight+25;
+	int xpos = x+ 20+ pos* xs;
+	int ypos = y+ hheight+ 25;
 
 	string ch = "";
 	if(pos<(int)strlen(value))
@@ -137,12 +134,12 @@ void CStringInput::paintChar(CFrameBuffer* frameBuffer, int pos)
 	if (pos==selected)
 		color = COL_MENUCONTENTSELECTED;
 
-	frameBuffer->paintBoxRel(xpos,ypos, xs, ys, COL_MENUCONTENT+4);
-	frameBuffer->paintBoxRel(xpos+1,ypos+1, xs-2, ys-2, color);
+	g_FrameBuffer->paintBoxRel(xpos, ypos, xs, ys, COL_MENUCONTENT+ 4);
+	g_FrameBuffer->paintBoxRel(xpos+ 1, ypos+ 1, xs- 2, ys- 2, color);
 
-	int xfpos = xpos + ((xs-fonts->menu->getRenderWidth(ch.c_str()))>>1);
+	int xfpos = xpos + ((xs- g_Fonts->menu->getRenderWidth(ch.c_str()))>>1);
 
-	fonts->menu->RenderString(xfpos,ypos+ys, width, ch.c_str(), color);
+	g_Fonts->menu->RenderString(xfpos,ypos+ys, width, ch.c_str(), color);
 }
 
 

@@ -2,11 +2,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "fontrenderer.h"
+#include "../global.h"
 
 // this method is recommended for FreeType >2.0.x:
 #include <ft2build.h>
 #include FT_FREETYPE_H
+
 
 FT_Error fontRenderClass::myFTC_Face_Requester(FTC_FaceID  face_id,
                             FT_Library  library,
@@ -17,9 +20,8 @@ FT_Error fontRenderClass::myFTC_Face_Requester(FTC_FaceID  face_id,
 }
 
 
-fontRenderClass::fontRenderClass(CFrameBuffer *fb)
+fontRenderClass::fontRenderClass()
 {
-	framebuffer = fb;
 	printf("[FONT] initializing core...");
 	if (FT_Init_FreeType(&library))
 	{
@@ -133,12 +135,11 @@ Font *fontRenderClass::getFont(const char *family, const char *style, int size)
 	FTC_FaceID id=getFaceID(family, style);
 	if (!id)
 		return 0;
-	return new Font(framebuffer, this, id, size);
+	return new Font(this, id, size);
 }
 
-Font::Font(CFrameBuffer *fb, fontRenderClass *render, FTC_FaceID faceid, int isize)
+Font::Font(fontRenderClass *render, FTC_FaceID faceid, int isize)
 {
-	framebuffer=fb;
 	renderer=render;
 	font.font.face_id=faceid;
 	font.font.pix_width  = isize;
@@ -270,7 +271,7 @@ void Font::RenderString(int x, int y, int width, const char *string, unsigned ch
 		int rx=x+glyph->left;
 		int ry=y-glyph->top;
     
-		__u8 *d=framebuffer->lfb + framebuffer->Stride()*ry + rx;
+		__u8 *d=g_FrameBuffer->lfb + g_FrameBuffer->Stride()*ry + rx;
 		__u8 *s=glyph->buffer;
     
 		for (int ay=0; ay<glyph->height; ay++)
@@ -284,7 +285,7 @@ void Font::RenderString(int x, int y, int width, const char *string, unsigned ch
 				*td++=color + c;   // we use color as "base color" plus 7 consecutive colors for anti-aliasing
 			}
 			s+=glyph->pitch-ax;
-			d+=framebuffer->Stride();
+			d+=g_FrameBuffer->Stride();
 		}
 		x+=glyph->xadvance+1;
 		if(pen1>x)

@@ -16,20 +16,15 @@ using namespace std;
 
 class CScreenSetup : public CMenuTarget
 {
-	string				name;
-	SNeutrinoSettings	*settings;
 	int					selected;
-	FontsDef		*fonts;
 	
-		void paint(CFrameBuffer* frameBuffer);
-		void paintBorderUL(CFrameBuffer* frameBuffer);
-		void paintBorderLR(CFrameBuffer* frameBuffer);
+		void paint();
+		void paintBorderUL();
+		void paintBorderLR();
 	public:
 
-		CScreenSetup(string Name, FontsDef *Fonts, SNeutrinoSettings* Settings);
-
-		void hide(CFrameBuffer* frameBuffer);
-		int exec(CFrameBuffer* frameBuffer, CRCInput *rcInput, CMenuTarget* parent, string actionKey );
+		void hide();
+		int exec( CMenuTarget* parent, string actionKey );
 
 };
 

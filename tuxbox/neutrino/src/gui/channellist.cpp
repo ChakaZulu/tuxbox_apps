@@ -1,7 +1,10 @@
 //
-// $Id: channellist.cpp,v 1.15 2001/09/13 10:12:41 field Exp $
+// $Id: channellist.cpp,v 1.16 2001/09/14 16:18:46 field Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.16  2001/09/14 16:18:46  field
+// Umstellung auf globale Variablen...
+//
 // Revision 1.15  2001/09/13 10:12:41  field
 // Major update! Beschleunigtes zappen & EPG uvm...
 //
@@ -39,6 +42,7 @@
 
 #include "channellist.h"
 #include "../include/debug.h"
+#include "../global.h"
 
 static char* copyStringto(const char* from, char* to, int len)
 {
@@ -121,20 +125,20 @@ void CChannelList::updateEvents(void)
   return;
 }
 
-CChannelList::CChannelList(SNeutrinoSettings *settings, int Key=-1, string Name="", FontsDef *Fonts)
+//CChannelList::CChannelList(SNeutrinoSettings *settings, int Key=-1, string Name="", FontsDef *Fonts)
+CChannelList::CChannelList(int Key=-1, string Name="")
 {
-	fonts = Fonts;
 	key = Key;
 	name = Name;
 	selected = 0;
 	width = 500;
 	height = 440;
-	theight=fonts->menu_title->getHeight();
-	fheight=fonts->channellist->getHeight();
+	theight= g_Fonts->menu_title->getHeight();
+	fheight= g_Fonts->channellist->getHeight();
 	listmaxshow = (height-theight-0)/fheight;
 	height = theight+0+listmaxshow*fheight; // recalc height
-	x=(((settings->screen_EndX-settings->screen_StartX)-width) / 2) + settings->screen_StartX;
-	y=(((settings->screen_EndY-settings->screen_StartY)-height) / 2) + settings->screen_StartY;
+	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
+	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
 	liststart = 0;
 	tuned=0xfffffff;
 }
@@ -178,44 +182,44 @@ int CChannelList::getActiveChannelNumber()
 }
 
 
-void CChannelList::exec(CFrameBuffer* frameBuffer, CRCInput* rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, SNeutrinoSettings* settings)
+void CChannelList::exec()
 {
 	if(chanlist.size()==0)
 	{
 		//evtl. anzeige dass keine kanalliste....
 		return;
 	}
-	paintHead(frameBuffer);
+	paintHead();
 	updateEvents();
-	paint(frameBuffer);
+	paint();
 	
 	int oldselected = selected;
 	int zapOnExit = false;
 	bool loop=true;
 	while (loop)
 	{
-		int key = rcInput->getKey(100); 
-		if ((key==CRCInput::RC_timeout) || (key==settings->key_channelList_cancel))
+		int key = g_RCInput->getKey(100);
+		if ((key==CRCInput::RC_timeout) || (key==g_settings.key_channelList_cancel))
 		{
 			selected = oldselected;
 			loop=false;
 		}
-		else if (key==settings->key_channelList_pageup)
+		else if (key==g_settings.key_channelList_pageup)
 		{
 			selected+=listmaxshow;
 			if (selected>chanlist.size()-1)
 				selected=0;
 			liststart = (selected/listmaxshow)*listmaxshow;
-			paint(frameBuffer);
+			paint();
 		}
-		else if (key==settings->key_channelList_pagedown)
+		else if (key==g_settings.key_channelList_pagedown)
 		{
 			if ((int(selected)-int(listmaxshow))<0)
 				selected=chanlist.size()-1;
 			else
 				selected -= listmaxshow;
 			liststart = (selected/listmaxshow)*listmaxshow;
-			paint(frameBuffer);
+			paint();
 		}
 		else if (key==CRCInput::RC_up)
 		{
@@ -225,32 +229,32 @@ void CChannelList::exec(CFrameBuffer* frameBuffer, CRCInput* rcInput, CRemoteCon
 				selected = chanlist.size()-1;
 			}
 			else selected--;
-			paintItem(frameBuffer, prevselected - liststart);
+			paintItem(prevselected - liststart);
 			unsigned int oldliststart = liststart;
 			liststart = (selected/listmaxshow)*listmaxshow;
 			if(oldliststart!=liststart)
 			{
-				paint(frameBuffer);
+				paint();
 			}
 			else
 			{
-				paintItem(frameBuffer, selected - liststart);
+				paintItem(selected - liststart);
 			}
 		}
 		else if (key==CRCInput::RC_down)
 		{
 			int prevselected=selected;
 			selected = (selected+1)%chanlist.size();
-			paintItem(frameBuffer, prevselected - liststart);
+			paintItem(prevselected - liststart);
 			unsigned int oldliststart = liststart;
 			liststart = (selected/listmaxshow)*listmaxshow;
 			if(oldliststart!=liststart)
 			{
-				paint(frameBuffer);
+				paint();
 			}
 			else
 			{
-				paintItem(frameBuffer, selected - liststart);
+				paintItem(selected - liststart);
 			}
 		}
 		else if (key==CRCInput::RC_ok)
@@ -259,19 +263,19 @@ void CChannelList::exec(CFrameBuffer* frameBuffer, CRCInput* rcInput, CRemoteCon
 			loop=false;
 		}
 	}
-	hide(frameBuffer);
+	hide();
 	if(zapOnExit)
 	{
-		zapTo(remoteControl,infoViewer, selected);
+		zapTo(selected);
 	}
 }
 
-void CChannelList::hide(CFrameBuffer* frameBuffer)
+void CChannelList::hide()
 {
-	frameBuffer->paintBackgroundBoxRel(x,y, width,height);
+	g_FrameBuffer->paintBackgroundBoxRel(x,y, width,height);
 }
 
-bool CChannelList::showInfo(CInfoViewer *infoViewer, int pos)
+bool CChannelList::showInfo(int pos)
 {
 	if((pos >= (signed int) chanlist.size()) || (pos<0))
 	{
@@ -279,11 +283,11 @@ bool CChannelList::showInfo(CInfoViewer *infoViewer, int pos)
 	}
 	selected=pos;
 	channel* chan = chanlist[selected];
-	infoViewer->showTitle(selected+1, chan->name, true);
+	g_InfoViewer->showTitle(selected+1, chan->name, true);
 	return true;
 }
 
-void CChannelList::zapTo(CRemoteControl *remoteControl, CInfoViewer *infoViewer, int pos)
+void CChannelList::zapTo(int pos)
 {
 	if ( (pos >= (signed int) chanlist.size()) || (pos< 0) )
     {
@@ -295,12 +299,12 @@ void CChannelList::zapTo(CRemoteControl *remoteControl, CInfoViewer *infoViewer,
     if ( pos!=(int)tuned )
 	{
         tuned = pos;
-    	remoteControl->zapTo(chan->key, chan->name);
+    	g_RemoteControl->zapTo(chan->key, chan->name);
     }
-    infoViewer->showTitle(selected+ 1, chan->name);
+    g_InfoViewer->showTitle(selected+ 1, chan->name);
 }
 
-void CChannelList::numericZap(CFrameBuffer *frameBuffer, CRCInput *rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, SNeutrinoSettings* settings, int key)
+void CChannelList::numericZap(int key)
 {
     if(chanlist.size()==0)
     {
@@ -308,8 +312,10 @@ void CChannelList::numericZap(CFrameBuffer *frameBuffer, CRCInput *rcInput, CRem
         return;
     }
  
-	int ox=300, oy=200;
-	int sx=fonts->channellist->getRenderWidth("000")+14, sy=fonts->channellist->getHeight()+6;
+	int ox=300;
+    int oy=200;
+	int sx = g_Fonts->channellist->getRenderWidth("000")+14;
+    int sy = g_Fonts->channellist->getHeight()+6;
 	char valstr[10];
 	int chn=key;
 	int pos=1;
@@ -321,22 +327,15 @@ void CChannelList::numericZap(CFrameBuffer *frameBuffer, CRCInput *rcInput, CRem
 		{
  			strcat(valstr,"-");
 		}
-		frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR);
-		fonts->channellist->RenderString(ox+7, oy+sy-3, sx, valstr, COL_INFOBAR);
-/*		if(!showInfo(infoViewer, chn-1))
-		{	//channelnumber out of bounds
-			infoViewer->killTitle(); //warum tut das net?
-			usleep(100000);		
-			frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_BACKGROUND);
-			return;
-		}
-*/
-        showInfo(infoViewer, chn- 1);
+		g_FrameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR);
+		g_Fonts->channellist->RenderString(ox+7, oy+sy-3, sx, valstr, COL_INFOBAR);
 
-		if ((key=rcInput->getKey(30))==-1)
+        showInfo(chn- 1);
+
+		if ((key=g_RCInput->getKey(30))==CRCInput::RC_timeout)
     		break;
 
-		if ((key>=0) && (key<=9))
+		if ( (key>=0) && (key<=9) )
 		{ //numeric
             if ( pos==3 )
             {
@@ -356,16 +355,16 @@ void CChannelList::numericZap(CFrameBuffer *frameBuffer, CRCInput *rcInput, CRem
 	        }
 			break;
 		}
-        else if (key==settings->key_quickzap_down)
+        else if (key==g_settings.key_quickzap_down)
 		{
 			if ( chn == 1 )
 				chn = chanlist.size();
 			else
 				chn--;
 		}
-		else if (key==settings->key_quickzap_up)
+		else if (key==g_settings.key_quickzap_up)
 		{
-			chn = ( chn + 1 )%( chanlist.size() + 1 );
+			chn = ( chn )%( chanlist.size() ) + 1;
         }
         else if (key==CRCInput::RC_home)
         {
@@ -373,77 +372,42 @@ void CChannelList::numericZap(CFrameBuffer *frameBuffer, CRCInput *rcInput, CRem
             break;
 		};
 	}
-	//channel selected - show+go
-/*	frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR);
-	sprintf((char*) &valstr, "%d",chn);
-	while(strlen(valstr)<3)
-	{
-		strcat(valstr,"-");
-	}
-	fonts->channellist->RenderString(ox+7, oy+sy-3, sx, valstr, COL_INFOBAR);
-	usleep(100000);
-*/
-	frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_BACKGROUND);
+
+	g_FrameBuffer->paintBoxRel(ox, oy, sx, sy, COL_BACKGROUND);
 
 	chn--;
 	if (chn<0)
 		chn=0;
-	zapTo( remoteControl, infoViewer, chn);
+	zapTo( chn );
 }
 
-void CChannelList::quickZap(CFrameBuffer* frameBuffer, CRCInput* rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, SNeutrinoSettings* settings, int key)
+void CChannelList::quickZap(int key)
 {
-        if(chanlist.size()==0)
-        {
-                //evtl. anzeige dass keine kanalliste....
-                return;
-        }
+    if(chanlist.size()==0)
+    {
+        //evtl. anzeige dass keine kanalliste....
+        return;
+    }
  
 	printf("quickzap start\n");
-/*	while(1)
-	{
-		if (key==settings->key_quickzap_down)
-		{
-			if(selected==0)
-					selected = chanlist.size()-1;
-				else
-					selected--;
-				channel* chan = chanlist[selected];
-			infoViewer->showTitle( selected+1, chan->name);
-		}
-		else if (key==settings->key_quickzap_up)
-		{
-			selected = (selected+1)%chanlist.size();
-			channel* chan = chanlist[selected];
-			infoViewer->showTitle(selected+1, chan->name);
-		}
-		else
-		{
-			zapTo(remoteControl, infoViewer,  selected);
-			break;
-		}
-		key = rcInput->getKey(7); 
-	}
-*/
-        if (key==settings->key_quickzap_down)
-		{
-			if(selected==0)
-					selected = chanlist.size()-1;
-				else
-					selected--;
+    if (key==g_settings.key_quickzap_down)
+    {
+        if(selected==0)
+            selected = chanlist.size()-1;
+        else
+            selected--;
 //				channel* chan = chanlist[selected];
-		}
-		else if (key==settings->key_quickzap_up)
-		{
-			selected = (selected+1)%chanlist.size();
+    }
+    else if (key==g_settings.key_quickzap_up)
+    {
+        selected = (selected+1)%chanlist.size();
 //			channel* chan = chanlist[selected];
-		};
+    };
 
-        zapTo(remoteControl, infoViewer,  selected);
-
+    zapTo( selected );
 }
 
-void CChannelList::paintItem(CFrameBuffer* frameBuffer, int pos)
+void CChannelList::paintItem(int pos)
 {
 	int ypos = y+ theight+0 + pos*fheight;
 	int color = COL_MENUCONTENT;
@@ -452,53 +416,53 @@ void CChannelList::paintItem(CFrameBuffer* frameBuffer, int pos)
 		color = COL_MENUCONTENTSELECTED;
 	}
 
-	frameBuffer->paintBoxRel(x,ypos, width, fheight, color);
+	g_FrameBuffer->paintBoxRel(x,ypos, width, fheight, color);
 	if(liststart+pos<chanlist.size())
 	{
 		channel* chan = chanlist[liststart+pos];
 		//number
                 char tmp[10];
                 sprintf((char*) tmp, "%d", chan->number);
-		int numpos = x+5+numwidth-fonts->channellist_number->getRenderWidth(tmp);
-		fonts->channellist_number->RenderString(numpos,ypos+fheight, numwidth+5, tmp, color, fheight);
+		int numpos = x+5+numwidth- g_Fonts->channellist_number->getRenderWidth(tmp);
+		g_Fonts->channellist_number->RenderString(numpos,ypos+fheight, numwidth+5, tmp, color, fheight);
 		if(strlen(chan->currentEvent.c_str()))
 		{
     			// name + description
 			char nameAndDescription[100];
 			snprintf(nameAndDescription, sizeof(nameAndDescription), "%s - %s", chan->name.c_str(), chan->currentEvent.c_str());
-			fonts->channellist->RenderString(x+5+numwidth+10,ypos+fheight, width-numwidth-20, nameAndDescription, color);
+			g_Fonts->channellist->RenderString(x+5+numwidth+10,ypos+fheight, width-numwidth-20, nameAndDescription, color);
                 }
 		else
 		  //name
-		  fonts->channellist->RenderString(x+5+numwidth+10,ypos+fheight, width-numwidth-20, chan->name.c_str(), color);
+		  g_Fonts->channellist->RenderString(x+5+numwidth+10,ypos+fheight, width-numwidth-20, chan->name.c_str(), color);
 	}
 }
 
-void CChannelList::paintHead(CFrameBuffer* frameBuffer)
+void CChannelList::paintHead()
 {
-	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
-	fonts->menu_title->RenderString(x+10,y+theight+0, width, name.c_str(), COL_MENUHEAD);
+	g_FrameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width, name.c_str(), COL_MENUHEAD);
 }
 
-void CChannelList::paint(CFrameBuffer* frameBuffer)
+void CChannelList::paint()
 {
 	liststart = (selected/listmaxshow)*listmaxshow;
 	int lastnum =  chanlist[liststart]->number + listmaxshow;
 
 	if(lastnum<10)
-	    numwidth = fonts->channellist_number->getRenderWidth("0");
+	    numwidth = g_Fonts->channellist_number->getRenderWidth("0");
 	else if(lastnum<100)
-	    numwidth = fonts->channellist_number->getRenderWidth("00");
+	    numwidth = g_Fonts->channellist_number->getRenderWidth("00");
 	else if(lastnum<1000)
-	    numwidth = fonts->channellist_number->getRenderWidth("000");
+	    numwidth = g_Fonts->channellist_number->getRenderWidth("000");
 	else if(lastnum<10000)
-	    numwidth = fonts->channellist_number->getRenderWidth("0000");
+	    numwidth = g_Fonts->channellist_number->getRenderWidth("0000");
 	else // if(lastnum<100000)
-	    numwidth = fonts->channellist_number->getRenderWidth("00000");
+	    numwidth = g_Fonts->channellist_number->getRenderWidth("00000");
 	
 	for(unsigned int count=0;count<listmaxshow;count++)
 	{
-		paintItem(frameBuffer, count);
+		paintItem(count);
 	}
 }
 

@@ -22,10 +22,10 @@ class CKeyChooser : public CMenuWidget
 	CKeyChooserItemNoKey	*keyDeleter;
 
 	public:
-		CKeyChooser(int *Key, string title, FontsDef *fonts, string Icon="" );
+		CKeyChooser(int *Key, string title, string Icon="" );
 		~CKeyChooser();
 
-		void paint(CFrameBuffer* frameBuffer);
+		void paint();
 };
 
 class CKeyChooserItem : public CMenuTarget
@@ -40,14 +40,14 @@ class CKeyChooserItem : public CMenuTarget
 	int		*key;
 	FontsDef	*fonts;
 	
-		void paint(CFrameBuffer* frameBuffer);
+		void paint();
 
 	public:
 
-		CKeyChooserItem(string Name, FontsDef *fonts, int *Key);
+		CKeyChooserItem(string Name, int *Key);
 
-		void hide(CFrameBuffer* frameBuffer);
-		int exec(CFrameBuffer* frameBuffer, CRCInput *rcInput, CMenuTarget* parent, string actionKey );
+		void hide();
+		int exec(CMenuTarget* parent, string actionKey );
 
 };
 
@@ -59,8 +59,8 @@ class CKeyChooserItemNoKey : public CMenuTarget
 
 		CKeyChooserItemNoKey(int *Key){key=Key;};
 
-		int exec(CFrameBuffer* frameBuffer, CRCInput *rcInput, CMenuTarget* parent, string actionKey )
-			{*key=CRCInput::RC_nokey;return CMenuTarget::RETURN_REPAINT;}
+		int exec( CMenuTarget* parent, string actionKey )
+			{*key=CRCInput::RC_nokey; return CMenuTarget::RETURN_REPAINT;}
 
 };
 

@@ -19,23 +19,22 @@ class CStringInput : public CMenuTarget
 	int y;
 	int width;
 	int height;
-	int hheight,mheight; // head/menu font height
+	int hheight, mheight; // head/menu font height
 	
 	string	name;
 	char*	value;
 	int		size;
 	int		selected;
-	FontsDef *fonts;
 
-		void paint(CFrameBuffer* frameBuffer);
-		void paintChar(CFrameBuffer* frameBuffer, int pos);
+    void paint();
+    void paintChar(int pos);
 
 	public:
 
-		CStringInput(string Name, FontsDef *Fonts, char* Value, int Size);
+		CStringInput(string Name, char* Value, int Size);
 
-		void hide(CFrameBuffer* frameBuffer);
-		int exec(CFrameBuffer* frameBuffer, CRCInput *rcInput, CMenuTarget* parent, string actionKey );
+		void hide();
+		int exec( CMenuTarget* parent, string actionKey );
 
 };
 

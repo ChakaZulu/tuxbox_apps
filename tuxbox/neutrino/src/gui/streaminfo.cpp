@@ -1,52 +1,51 @@
 #include "streaminfo.h"
+#include "../global.h"
 
-
-CStreamInfo::CStreamInfo(FontsDef *Fonts)
+CStreamInfo::CStreamInfo()
 {
-	fonts = Fonts;
 	width = 300;
-	hheight = fonts->menu_title->getHeight();
-	mheight = fonts->menu->getHeight();
+	hheight = g_Fonts->menu_title->getHeight();
+	mheight = g_Fonts->menu->getHeight();
 	height = hheight+5*mheight;
 	x=((720-width) >> 1) -20;
 	y=(576-height)>>1;
 }
 
 
-int CStreamInfo::exec(CFrameBuffer* frameBuffer, CRCInput *rcInput, CMenuTarget* parent, string)
+int CStreamInfo::exec(CMenuTarget* parent, string)
 {
 	if (parent)
 	{
-		parent->hide(frameBuffer);
+		parent->hide();
 	}
-	paint(frameBuffer);
+	paint();
 
-	int key = rcInput->getKey(130);
+	int key = g_RCInput->getKey(130);
 
     if ( (key==CRCInput::RC_spkr) ||
 	     (key==CRCInput::RC_plus) ||
          (key==CRCInput::RC_minus) )
     {
-        rcInput->addKey2Buffer(key);
+        g_RCInput->addKey2Buffer(key);
     }
 
-	hide(frameBuffer);
+	hide();
 	return CMenuTarget::RETURN_REPAINT;
 }
 
-void CStreamInfo::hide(CFrameBuffer* frameBuffer)
+void CStreamInfo::hide()
 {
-	frameBuffer->paintBackgroundBoxRel(x,y, width,height);
+	g_FrameBuffer->paintBackgroundBoxRel(x,y, width,height);
 }
 
-void CStreamInfo::paint(CFrameBuffer* frameBuffer)
+void CStreamInfo::paint()
 {
 	int ypos=y;
-	frameBuffer->paintBoxRel(x,ypos, width,hheight, COL_MENUHEAD);
-	fonts->menu_title->RenderString(x+10,ypos+hheight, width,"Streaminfo", COL_MENUHEAD);
-	frameBuffer->paintBoxRel(x,ypos+hheight, width,height-hheight, COL_MENUCONTENT);
+	g_FrameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+10, ypos+ hheight, width, "Streaminfo", COL_MENUHEAD);
+	g_FrameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
 
-	ypos+=hheight;
+	ypos+= hheight;
 	
 	FILE* fd = fopen("/proc/bus/bitstream", "rt");
 	if (fd==NULL)
@@ -79,14 +78,14 @@ void CStreamInfo::paint(CFrameBuffer* frameBuffer)
 	
 	//paint msg...
 	sprintf((char*) buf, "Resolution: %dx%d", bitInfo[0], bitInfo[1] );
-	fonts->menu->RenderString(x+10,ypos+mheight, width, buf, COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
 
-	ypos+=mheight;
+	ypos+= mheight;
 
 	sprintf((char*) buf, "Bitrate: %d bit/sec", bitInfo[4]*50);
-	fonts->menu->RenderString(x+10,ypos+mheight, width, buf, COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
 
-	ypos+=mheight;
+	ypos+= mheight;
 
 
 	switch ( bitInfo[2] )
@@ -96,9 +95,9 @@ void CStreamInfo::paint(CFrameBuffer* frameBuffer)
 		case 4: strcpy(buf, "Aspect Ratio: 2.21:1"); break;
 		default: strcpy(buf, "Aspect Ratio: unknown");
 	}
-	fonts->menu->RenderString(x+10,ypos+mheight, width, buf, COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
 
-	ypos+=mheight;
+	ypos+= mheight;
 
 
 	switch ( bitInfo[3] )
@@ -107,9 +106,9 @@ void CStreamInfo::paint(CFrameBuffer* frameBuffer)
 		case 6: strcpy(buf, "Framerate: 50fps"); break;
 		default: strcpy(buf, "Framerate: unknown");
 	}
-	fonts->menu->RenderString(x+10,ypos+mheight, width, buf, COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
 
-	ypos+=mheight;
+	ypos+= mheight;
 
 
 	switch ( bitInfo[6] )
@@ -120,9 +119,9 @@ void CStreamInfo::paint(CFrameBuffer* frameBuffer)
 		case 4: strcpy(buf, "Audiotype:  stereo"); break;
 		default: strcpy(buf, "Audiotype: unknown");
 	}
-	fonts->menu->RenderString(x+10,ypos+mheight, width, buf, COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
 
-	ypos+=mheight;
+	ypos+= mheight;
 }
 
 

@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.24 2001/09/13 10:12:41 field Exp $
+        $Id: neutrino.cpp,v 1.25 2001/09/14 16:18:46 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.25  2001/09/14 16:18:46  field
+  Umstellung auf globale Variablen...
+
   Revision 1.24  2001/09/13 10:12:41  field
   Major update! Beschleunigtes zappen & EPG uvm...
 
@@ -88,54 +91,67 @@
 */
 
 #include "neutrino.h"
-
 #include "include/debug.h"
+
+//global variablen
+
+SNeutrinoSettings   g_settings;
+
+FontsDef        *g_Fonts = NULL;
+CFrameBuffer    *g_FrameBuffer = NULL;
+
+CRCInput        *g_RCInput = NULL;
+CLCDD           *g_lcdd = NULL;
+CControld       *g_Controld = NULL;
+CRemoteControl  *g_RemoteControl = NULL;
+
+CEpgData        *g_EpgData = NULL;
+CInfoViewer     *g_InfoViewer = NULL;
+CStreamInfo     *g_StreamInfo = NULL;
+CScreenSetup    *g_ScreenSetup = NULL;
 
 
 class CColorSetupNotifier : public CChangeObserver
 {
-	SNeutrinoSettings*	settings;
-	CFrameBuffer*		frameBuffer;
-
 	public:
-		CColorSetupNotifier(CFrameBuffer* FrameBuffer, SNeutrinoSettings* Settings){settings=Settings;frameBuffer=FrameBuffer;}
+		CColorSetupNotifier() {};
 
 		void changeNotify(string OptionName)
 		{
 			//setting colors-..
-			frameBuffer->paletteGenFade(COL_MENUHEAD, 
-				convertSetupColor2RGB(settings->menu_Head_red,settings->menu_Head_green,settings->menu_Head_blue),
-				convertSetupColor2RGB(settings->menu_Head_Text_red,settings->menu_Head_Text_green,settings->menu_Head_Text_blue),
-				8, convertSetupAlpha2Alpha(settings->menu_Head_alpha) );
+			g_FrameBuffer->paletteGenFade(COL_MENUHEAD,
+				convertSetupColor2RGB(g_settings.menu_Head_red, g_settings.menu_Head_green, g_settings.menu_Head_blue),
+				convertSetupColor2RGB(g_settings.menu_Head_Text_red, g_settings.menu_Head_Text_green, g_settings.menu_Head_Text_blue),
+				8, convertSetupAlpha2Alpha( g_settings.menu_Head_alpha ) );
 			
-			frameBuffer->paletteGenFade(COL_MENUCONTENT, 
-				convertSetupColor2RGB(settings->menu_Content_red,settings->menu_Content_green,settings->menu_Content_blue),
-				convertSetupColor2RGB(settings->menu_Content_Text_red,settings->menu_Content_Text_green,settings->menu_Content_Text_blue),
-				8, convertSetupAlpha2Alpha(settings->menu_Content_alpha) );
+			g_FrameBuffer->paletteGenFade(COL_MENUCONTENT,
+				convertSetupColor2RGB(g_settings.menu_Content_red, g_settings.menu_Content_green, g_settings.menu_Content_blue),
+				convertSetupColor2RGB(g_settings.menu_Content_Text_red, g_settings.menu_Content_Text_green, g_settings.menu_Content_Text_blue),
+				8, convertSetupAlpha2Alpha(g_settings.menu_Content_alpha) );
 
-			frameBuffer->paletteGenFade(COL_MENUCONTENTSELECTED, 
-				convertSetupColor2RGB(settings->menu_Content_Selected_red,settings->menu_Content_Selected_green,settings->menu_Content_Selected_blue),
-				convertSetupColor2RGB(settings->menu_Content_Selected_Text_red,settings->menu_Content_Selected_Text_green,settings->menu_Content_Selected_Text_blue),
-				8, convertSetupAlpha2Alpha(settings->menu_Content_Selected_alpha) );
+			g_FrameBuffer->paletteGenFade(COL_MENUCONTENTSELECTED,
+				convertSetupColor2RGB(g_settings.menu_Content_Selected_red, g_settings.menu_Content_Selected_green, g_settings.menu_Content_Selected_blue),
+				convertSetupColor2RGB(g_settings.menu_Content_Selected_Text_red, g_settings.menu_Content_Selected_Text_green, g_settings.menu_Content_Selected_Text_blue),
+				8, convertSetupAlpha2Alpha(g_settings.menu_Content_Selected_alpha) );
 
-			frameBuffer->paletteGenFade(COL_MENUCONTENTINACTIVE, 
-				convertSetupColor2RGB(settings->menu_Content_inactive_red,settings->menu_Content_inactive_green,settings->menu_Content_inactive_blue),
-				convertSetupColor2RGB(settings->menu_Content_inactive_Text_red,settings->menu_Content_inactive_Text_green,settings->menu_Content_inactive_Text_blue),
-				8, convertSetupAlpha2Alpha(settings->menu_Content_inactive_alpha) );
+			g_FrameBuffer->paletteGenFade(COL_MENUCONTENTINACTIVE,
+				convertSetupColor2RGB(g_settings.menu_Content_inactive_red, g_settings.menu_Content_inactive_green, g_settings.menu_Content_inactive_blue),
+				convertSetupColor2RGB(g_settings.menu_Content_inactive_Text_red, g_settings.menu_Content_inactive_Text_green, g_settings.menu_Content_inactive_Text_blue),
+				8, convertSetupAlpha2Alpha(g_settings.menu_Content_inactive_alpha) );
 
-			frameBuffer->paletteGenFade(COL_INFOBAR, 
-				convertSetupColor2RGB(settings->infobar_red,settings->infobar_green,settings->infobar_blue),
-				convertSetupColor2RGB(settings->infobar_Text_red,settings->infobar_Text_green,settings->infobar_Text_blue),
-				8, convertSetupAlpha2Alpha(settings->infobar_alpha) );
+			g_FrameBuffer->paletteGenFade(COL_INFOBAR,
+				convertSetupColor2RGB(g_settings.infobar_red, g_settings.infobar_green, g_settings.infobar_blue),
+				convertSetupColor2RGB(g_settings.infobar_Text_red, g_settings.infobar_Text_green, g_settings.infobar_Text_blue),
+				8, convertSetupAlpha2Alpha(g_settings.infobar_alpha) );
 
-			frameBuffer->paletteSetColor( COL_INFOBAR_SHADOW, 
+			g_FrameBuffer->paletteSetColor( COL_INFOBAR_SHADOW,
 							convertSetupColor2RGB(
-								int(settings->infobar_red*0.4),
-								int(settings->infobar_green*0.4),
-								int(settings->infobar_blue*0.4)),
-							settings->infobar_alpha);
+								int(g_settings.infobar_red*0.4),
+								int(g_settings.infobar_green*0.4),
+								int(g_settings.infobar_blue*0.4)),
+                                    g_settings.infobar_alpha);
 
-			frameBuffer->paletteSet();
+			g_FrameBuffer->paletteSet();
 		}
 };
 
@@ -182,26 +198,24 @@ void setDefaultGateway(char* ip)
 
 class CNetworkSetupNotifier : public CChangeObserver
 {
-	SNeutrinoSettings*	settings;
-
 	public:
-		CNetworkSetupNotifier(SNeutrinoSettings* Settings){settings=Settings;}
+//		CNetworkSetupNotifier(){}
 
 		void changeNotify(string OptionName)
 		{
 			printf("notify: %s\n", OptionName.c_str() );
-			if( (settings->networkSetOnStartup) && (OptionName=="initial"))
+			if( (g_settings.networkSetOnStartup) && (OptionName=="initial"))
 			{
 				printf("doing network setup...\n");
 				//setup network
-				setNetworkAddress(settings->network_ip, settings->network_netmask, settings->network_broadcast);
-				setDefaultGateway(settings->network_defaultgateway);
+				setNetworkAddress(g_settings.network_ip, g_settings.network_netmask, g_settings.network_broadcast);
+				setDefaultGateway(g_settings.network_defaultgateway);
 
 				FILE* fd = fopen("/etc/resolv.conf", "w");
 				if(fd)
 				{
 					fprintf(fd, "# resolv.conf - generated by neutrino\n\n");
-					fprintf(fd, "nameserver %s\n", settings->network_nameserver);
+					fprintf(fd, "nameserver %s\n", g_settings.network_nameserver);
 					fclose(fd);
 				}
 				else
@@ -222,10 +236,11 @@ CNeutrinoApp::CNeutrinoApp()
 	nRun = true;
 	channelList = NULL;
 	fontRenderer = NULL;
-	frameBuffer.setIconBasePath("/usr/lib/icons/");
+
+    g_FrameBuffer = new CFrameBuffer;
+	g_FrameBuffer->setIconBasePath("/usr/lib/icons/");
 	settingsFile = "/var/neutrino.conf";
 	mode = mode_tv;
-
 }
 
 /*-------------------------------------------------------------------------------------
@@ -241,20 +256,20 @@ CNeutrinoApp::~CNeutrinoApp()
 		delete fontRenderer;
 }
 
-void CNeutrinoApp::setupNetwork(SNeutrinoSettings* settings, bool force)
+void CNeutrinoApp::setupNetwork(bool force)
 {
-	if((settings->networkSetOnStartup) || (force))
+	if((g_settings.networkSetOnStartup) || (force))
 	{
 		printf("doing network setup...\n");
 		//setup network
-		setNetworkAddress(settings->network_ip, settings->network_netmask, settings->network_broadcast);
-		setDefaultGateway(settings->network_defaultgateway);
+		setNetworkAddress(g_settings.network_ip, g_settings.network_netmask, g_settings.network_broadcast);
+		setDefaultGateway(g_settings.network_defaultgateway);
 
 		FILE* fd = fopen("/etc/resolv.conf", "w");
 		if(fd)
 		{
 			fprintf(fd, "# resolv.conf - generated by neutrino\n\n");
-			fprintf(fd, "nameserver %s\n", settings->network_nameserver);
+			fprintf(fd, "nameserver %s\n", g_settings.network_nameserver);
 			fclose(fd);
 		}
 		else
@@ -270,57 +285,57 @@ void CNeutrinoApp::setupNetwork(SNeutrinoSettings* settings, bool force)
 *          CNeutrinoApp -  setup Color Sheme (Neutrino)                               *
 *                                                                                     *
 **************************************************************************************/
-void CNeutrinoApp::setupColors_neutrino(SNeutrinoSettings* settings)
+void CNeutrinoApp::setupColors_neutrino()
 {
-	settings->menu_Head_alpha = 0x00;
-	settings->menu_Head_red   = 0x00;
-	settings->menu_Head_green = 0x0A; 
-	settings->menu_Head_blue  = 0x19;
+	g_settings.menu_Head_alpha = 0x00;
+	g_settings.menu_Head_red   = 0x00;
+	g_settings.menu_Head_green = 0x0A;
+	g_settings.menu_Head_blue  = 0x19;
 
-	settings->menu_Head_Text_alpha = 0x00;
-	settings->menu_Head_Text_red   = 0x5f;
-	settings->menu_Head_Text_green = 0x41; 
-	settings->menu_Head_Text_blue  = 0x00;
+	g_settings.menu_Head_Text_alpha = 0x00;
+	g_settings.menu_Head_Text_red   = 0x5f;
+	g_settings.menu_Head_Text_green = 0x41;
+	g_settings.menu_Head_Text_blue  = 0x00;
 
-	settings->menu_Content_alpha = 0x14;
-	settings->menu_Content_red   = 0x00;
-	settings->menu_Content_green = 0x14; 
-	settings->menu_Content_blue  = 0x23;
+	g_settings.menu_Content_alpha = 0x14;
+	g_settings.menu_Content_red   = 0x00;
+	g_settings.menu_Content_green = 0x14;
+	g_settings.menu_Content_blue  = 0x23;
 
-	settings->menu_Content_Text_alpha = 0x00;
-	settings->menu_Content_Text_red   = 0x64;
-	settings->menu_Content_Text_green = 0x64; 
-	settings->menu_Content_Text_blue  = 0x64;
+	g_settings.menu_Content_Text_alpha = 0x00;
+	g_settings.menu_Content_Text_red   = 0x64;
+	g_settings.menu_Content_Text_green = 0x64;
+	g_settings.menu_Content_Text_blue  = 0x64;
 
-	settings->menu_Content_Selected_alpha = 0x14;
-	settings->menu_Content_Selected_red   = 0x19;
-	settings->menu_Content_Selected_green = 0x3c;
-	settings->menu_Content_Selected_blue  = 0x64;
+	g_settings.menu_Content_Selected_alpha = 0x14;
+	g_settings.menu_Content_Selected_red   = 0x19;
+	g_settings.menu_Content_Selected_green = 0x3c;
+	g_settings.menu_Content_Selected_blue  = 0x64;
 
-	settings->menu_Content_Selected_Text_alpha  = 0x00;
-	settings->menu_Content_Selected_Text_red    = 0x00;
-	settings->menu_Content_Selected_Text_green  = 0x00; 
-	settings->menu_Content_Selected_Text_blue   = 0x00;
+	g_settings.menu_Content_Selected_Text_alpha  = 0x00;
+	g_settings.menu_Content_Selected_Text_red    = 0x00;
+	g_settings.menu_Content_Selected_Text_green  = 0x00;
+	g_settings.menu_Content_Selected_Text_blue   = 0x00;
 
-	settings->menu_Content_inactive_alpha = 0x14;
-	settings->menu_Content_inactive_red   = 0x00;
-	settings->menu_Content_inactive_green = 0x14;
-	settings->menu_Content_inactive_blue  = 0x23;
+	g_settings.menu_Content_inactive_alpha = 0x14;
+	g_settings.menu_Content_inactive_red   = 0x00;
+	g_settings.menu_Content_inactive_green = 0x14;
+	g_settings.menu_Content_inactive_blue  = 0x23;
 
-	settings->menu_Content_inactive_Text_alpha  = 0x00;
-	settings->menu_Content_inactive_Text_red    = 0x1e;
-	settings->menu_Content_inactive_Text_green  = 0x28; 
-	settings->menu_Content_inactive_Text_blue   = 0x3c;
+	g_settings.menu_Content_inactive_Text_alpha  = 0x00;
+	g_settings.menu_Content_inactive_Text_red    = 0x1e;
+	g_settings.menu_Content_inactive_Text_green  = 0x28;
+	g_settings.menu_Content_inactive_Text_blue   = 0x3c;
 
-	settings->infobar_alpha = 0x14;
-	settings->infobar_red   = 0x00;
-	settings->infobar_green = 0x14;
-	settings->infobar_blue  = 0x23;
+	g_settings.infobar_alpha = 0x14;
+	g_settings.infobar_red   = 0x00;
+	g_settings.infobar_green = 0x14;
+	g_settings.infobar_blue  = 0x23;
 
-	settings->infobar_Text_alpha = 0x00;
-	settings->infobar_Text_red   = 0x64;
-	settings->infobar_Text_green = 0x64;
-	settings->infobar_Text_blue  = 0x64;
+	g_settings.infobar_Text_alpha = 0x00;
+	g_settings.infobar_Text_red   = 0x64;
+	g_settings.infobar_Text_green = 0x64;
+	g_settings.infobar_Text_blue  = 0x64;
 }
 
 /**************************************************************************************
@@ -328,57 +343,57 @@ void CNeutrinoApp::setupColors_neutrino(SNeutrinoSettings* settings)
 *          CNeutrinoApp -  setup Color Sheme (classic)                                *
 *                                                                                     *
 **************************************************************************************/
-void CNeutrinoApp::setupColors_classic(SNeutrinoSettings* settings)
+void CNeutrinoApp::setupColors_classic()
 {
-	settings->menu_Head_alpha = 20;
-	settings->menu_Head_red   =  5;
-	settings->menu_Head_green = 10; 
-	settings->menu_Head_blue  = 60;
+	g_settings.menu_Head_alpha = 20;
+	g_settings.menu_Head_red   =  5;
+	g_settings.menu_Head_green = 10;
+	g_settings.menu_Head_blue  = 60;
 
-	settings->menu_Head_Text_alpha = 0;
-	settings->menu_Head_Text_red   = 100;
-	settings->menu_Head_Text_green = 100; 
-	settings->menu_Head_Text_blue  = 100;
+	g_settings.menu_Head_Text_alpha = 0;
+	g_settings.menu_Head_Text_red   = 100;
+	g_settings.menu_Head_Text_green = 100;
+	g_settings.menu_Head_Text_blue  = 100;
 
-	settings->menu_Content_alpha = 20;
-	settings->menu_Content_red   = 50;
-	settings->menu_Content_green = 50; 
-	settings->menu_Content_blue  = 50;
+	g_settings.menu_Content_alpha = 20;
+	g_settings.menu_Content_red   = 50;
+	g_settings.menu_Content_green = 50;
+	g_settings.menu_Content_blue  = 50;
 
-	settings->menu_Content_Text_alpha = 0;
-	settings->menu_Content_Text_red   = 100;
-	settings->menu_Content_Text_green = 100; 
-	settings->menu_Content_Text_blue  = 100;
+	g_settings.menu_Content_Text_alpha = 0;
+	g_settings.menu_Content_Text_red   = 100;
+	g_settings.menu_Content_Text_green = 100;
+	g_settings.menu_Content_Text_blue  = 100;
 
-	settings->menu_Content_Selected_alpha = 20;
-	settings->menu_Content_Selected_red   = 5;
-	settings->menu_Content_Selected_green = 10;
-	settings->menu_Content_Selected_blue  = 60;
+	g_settings.menu_Content_Selected_alpha = 20;
+	g_settings.menu_Content_Selected_red   = 5;
+	g_settings.menu_Content_Selected_green = 10;
+	g_settings.menu_Content_Selected_blue  = 60;
 
-	settings->menu_Content_Selected_Text_alpha  = 0;
-	settings->menu_Content_Selected_Text_red    = 100;
-	settings->menu_Content_Selected_Text_green  = 100; 
-	settings->menu_Content_Selected_Text_blue   = 100;
+	g_settings.menu_Content_Selected_Text_alpha  = 0;
+	g_settings.menu_Content_Selected_Text_red    = 100;
+	g_settings.menu_Content_Selected_Text_green  = 100;
+	g_settings.menu_Content_Selected_Text_blue   = 100;
 
-	settings->menu_Content_inactive_alpha = 20;
-	settings->menu_Content_inactive_red   = 50;
-	settings->menu_Content_inactive_green = 50;
-	settings->menu_Content_inactive_blue  = 50;
+	g_settings.menu_Content_inactive_alpha = 20;
+	g_settings.menu_Content_inactive_red   = 50;
+	g_settings.menu_Content_inactive_green = 50;
+	g_settings.menu_Content_inactive_blue  = 50;
 
-	settings->menu_Content_inactive_Text_alpha  = 0;
-	settings->menu_Content_inactive_Text_red    = 80;
-	settings->menu_Content_inactive_Text_green  = 80; 
-	settings->menu_Content_inactive_Text_blue   = 80;
+	g_settings.menu_Content_inactive_Text_alpha  = 0;
+	g_settings.menu_Content_inactive_Text_red    = 80;
+	g_settings.menu_Content_inactive_Text_green  = 80;
+	g_settings.menu_Content_inactive_Text_blue   = 80;
 
-	settings->infobar_alpha = 20;
-	settings->infobar_red   = 5;
-	settings->infobar_green = 10;
-	settings->infobar_blue  = 60;
+	g_settings.infobar_alpha = 20;
+	g_settings.infobar_red   = 5;
+	g_settings.infobar_green = 10;
+	g_settings.infobar_blue  = 60;
 
-	settings->infobar_Text_alpha = 0;
-	settings->infobar_Text_red   = 100;
-	settings->infobar_Text_green = 100;
-	settings->infobar_Text_blue  = 100;
+	g_settings.infobar_Text_alpha = 0;
+	g_settings.infobar_Text_red   = 100;
+	g_settings.infobar_Text_green = 100;
+	g_settings.infobar_Text_blue  = 100;
 }
 
 
@@ -387,40 +402,40 @@ void CNeutrinoApp::setupColors_classic(SNeutrinoSettings* settings)
 *          CNeutrinoApp -  setupDefaults, set the application-defaults                *
 *                                                                                     *
 **************************************************************************************/
-void CNeutrinoApp::setupDefaults(SNeutrinoSettings* settings)
+void CNeutrinoApp::setupDefaults()
 {
 	//video
-	settings->video_Signal = 0;
-	settings->video_Format = 0;
+	g_settings.video_Signal = 0;
+	g_settings.video_Format = 0;
 
 	//audio
-	settings->audio_Stereo = 1;
-	settings->audio_DolbyDigital = 0;
+	g_settings.audio_Stereo = 1;
+	g_settings.audio_DolbyDigital = 0;
 
 	//colors
-	setupColors_neutrino(settings);
+	setupColors_neutrino();
 
 	//network
-	settings->networkSetOnStartup = 0;
-	strcpy(settings->network_ip, "192.168.40.10");
-	strcpy(settings->network_netmask, "255.255.255.000");
-	strcpy(settings->network_broadcast, "192.168.40.255");
-	strcpy(settings->network_defaultgateway, "192.168.40.1");
-	strcpy(settings->network_nameserver, "192.168.40.1");
+	g_settings.networkSetOnStartup = 0;
+	strcpy(g_settings.network_ip, "192.168.40.10");
+	strcpy(g_settings.network_netmask, "255.255.255.000");
+	strcpy(g_settings.network_broadcast, "192.168.40.255");
+	strcpy(g_settings.network_defaultgateway, "192.168.40.1");
+	strcpy(g_settings.network_nameserver, "192.168.40.1");
 
 	//key bindings
-	settings->key_tvradio_mode = CRCInput::RC_nokey;
-	settings->key_channelList_pageup = CRCInput::RC_green;
-	settings->key_channelList_pagedown = CRCInput::RC_red;
-	settings->key_channelList_cancel = CRCInput::RC_home;
-	settings->key_quickzap_up = CRCInput::RC_up;
-	settings->key_quickzap_down = CRCInput::RC_down;
+	g_settings.key_tvradio_mode = CRCInput::RC_nokey;
+	g_settings.key_channelList_pageup = CRCInput::RC_green;
+	g_settings.key_channelList_pagedown = CRCInput::RC_red;
+	g_settings.key_channelList_cancel = CRCInput::RC_home;
+	g_settings.key_quickzap_up = CRCInput::RC_up;
+	g_settings.key_quickzap_down = CRCInput::RC_down;
 
 	//screen settings
-	settings->screen_StartX=37;
-	settings->screen_StartY=23;
-	settings->screen_EndX=668;
-	settings->screen_EndY=555;
+	g_settings.screen_StartX=37;
+	g_settings.screen_StartY=23;
+	g_settings.screen_EndX=668;
+	g_settings.screen_EndY=555;
 }
 
 
@@ -429,7 +444,7 @@ void CNeutrinoApp::setupDefaults(SNeutrinoSettings* settings)
 *          CNeutrinoApp -  loadSetup, load the application-settings                   *
 *                                                                                     *
 **************************************************************************************/
-bool CNeutrinoApp::loadSetup(SNeutrinoSettings* settings)
+bool CNeutrinoApp::loadSetup()
 {
 	int fd;
 	fd = open(settingsFile.c_str(), O_RDONLY );
@@ -439,7 +454,7 @@ bool CNeutrinoApp::loadSetup(SNeutrinoSettings* settings)
 		printf("error while loading settings: %s\n", settingsFile.c_str() );
 		return false;
 	}
-	if(read(fd, settings, sizeof(*settings))!=sizeof(*settings))
+	if(read(fd, &g_settings, sizeof(g_settings))!=sizeof(g_settings))
 	{
 		printf("error while loading settings: %s - config from old version?\n", settingsFile.c_str() );
 		return false;
@@ -453,7 +468,7 @@ bool CNeutrinoApp::loadSetup(SNeutrinoSettings* settings)
 *          CNeutrinoApp -  saveSetup, save the application-settings                   *
 *                                                                                     *
 **************************************************************************************/
-void CNeutrinoApp::saveSetup(SNeutrinoSettings* settings)
+void CNeutrinoApp::saveSetup()
 {
 	int fd;
 	fd = open(settingsFile.c_str(), O_WRONLY | O_CREAT );
@@ -463,7 +478,7 @@ void CNeutrinoApp::saveSetup(SNeutrinoSettings* settings)
 		printf("error while saving settings: %s\n", settingsFile.c_str() );
 		return;
 	}
-	write(fd, settings,  sizeof(*settings) );
+	write(fd, &g_settings,  sizeof(g_settings) );
 	close(fd);
 }
 
@@ -544,7 +559,7 @@ void CNeutrinoApp::channelsInit()
 
 //deleting old channelList for mode-switching.	
 	delete channelList;
-	channelList = new CChannelList(&settings, 1,"All Services",fonts);
+	channelList = new CChannelList(1, "All Services");
 	
 		
 		sendmessage.version=1;
@@ -654,7 +669,7 @@ void CNeutrinoApp::CmdParser(int argc, char **argv)
 
 void CNeutrinoApp::SetupFrameBuffer()
 {
-	if (frameBuffer.setMode(720, 576, 8))
+	if (g_FrameBuffer->setMode(720, 576, 8))
 	{
 		printf("Error while setting framebuffer mode\n");
 		exit(-1);
@@ -662,265 +677,262 @@ void CNeutrinoApp::SetupFrameBuffer()
 
 	//make 1..8 transparent for dummy painting
 	for(int count =0;count<8;count++)
-		frameBuffer.paletteSetColor(count, 0x000000, 0xffff); 
-	frameBuffer.paletteSet();
+		g_FrameBuffer->paletteSetColor(count, 0x000000, 0xffff);
+	g_FrameBuffer->paletteSet();
 }
 
 void CNeutrinoApp::SetupFonts()
 {
-	fonts = new FontsDef();
-	fonts->menu=fontRenderer->getFont("Arial", "Regular", 20); // was "Arial" "Bold" 20
-	fonts->menu->RenderString( 10, 100, 500, "DEMO!", 0 );
-	fonts->menu_title=fontRenderer->getFont("Arial", "Regular", 30); // was: "Arial Black", "Regular", 30
+	g_Fonts->menu=fontRenderer->getFont("Arial", "Regular", 20); // was "Arial" "Bold" 20
+	g_Fonts->menu->RenderString( 10, 100, 500, "DEMO!", 0 );
+	g_Fonts->menu_title=fontRenderer->getFont("Arial", "Regular", 30); // was: "Arial Black", "Regular", 30
 	                                                              // but this font has wrong metric! (getHeight())
-	fonts->menu_title->RenderString( 10, 100, 500, "DEMO!", 0 );
-	fonts->epg_title=fontRenderer->getFont("Arial", "Regular", 30);
-	fonts->epg_title->RenderString( 10, 100, 500, "DEMO!", 0 );
+	g_Fonts->menu_title->RenderString( 10, 100, 500, "DEMO!", 0 );
+	g_Fonts->epg_title=fontRenderer->getFont("Arial", "Regular", 30);
+	g_Fonts->epg_title->RenderString( 10, 100, 500, "DEMO!", 0 );
 	
-	fonts->epg_info1=fontRenderer->getFont("Arial", "Italic", 17); // info1 must be same size as info2, but italic
-	fonts->epg_info1->RenderString( 10, 100, 500, "DEMO!", 0 );
-	fonts->epg_info2=fontRenderer->getFont("Arial", "Regular", 17);
-	fonts->epg_info2->RenderString( 10, 100, 500, "DEMO!", 0 );
+	g_Fonts->epg_info1=fontRenderer->getFont("Arial", "Italic", 17); // info1 must be same size as info2, but italic
+	g_Fonts->epg_info1->RenderString( 10, 100, 500, "DEMO!", 0 );
+	g_Fonts->epg_info2=fontRenderer->getFont("Arial", "Regular", 17);
+	g_Fonts->epg_info2->RenderString( 10, 100, 500, "DEMO!", 0 );
 
-	fonts->epg_date=fontRenderer->getFont("Arial", "Regular", 15);
-	fonts->epg_date->RenderString( 10, 100, 500, "DEMO!", 0 );
-	fonts->alert=fontRenderer->getFont("Arial", "Regular", 100);
+	g_Fonts->epg_date=fontRenderer->getFont("Arial", "Regular", 15);
+	g_Fonts->epg_date->RenderString( 10, 100, 500, "DEMO!", 0 );
+	g_Fonts->alert=fontRenderer->getFont("Arial", "Regular", 100);
 
-	fonts->channellist=fontRenderer->getFont("Arial", "Regular", 20);
-	fonts->channellist->RenderString( 10, 100, 500, "DEMO!", 0 );
-	fonts->channellist_number=fontRenderer->getFont("Arial", "Regular", 14);
-	fonts->channellist_number->RenderString( 10, 100, 500, "DEMO!", 0);
+	g_Fonts->channellist=fontRenderer->getFont("Arial", "Regular", 20);
+	g_Fonts->channellist->RenderString( 10, 100, 500, "DEMO!", 0 );
+	g_Fonts->channellist_number=fontRenderer->getFont("Arial", "Regular", 14);
+	g_Fonts->channellist_number->RenderString( 10, 100, 500, "DEMO!", 0);
 	
-	fonts->infobar_number=fontRenderer->getFont("Arial", "Regular", 50);
-	fonts->infobar_number->RenderString( 10, 100, 500, "DEMO!", 0 );
-	fonts->infobar_channame=fontRenderer->getFont("Arial", "Regular", 30);
-	fonts->infobar_channame->RenderString( 10, 100, 500, "DEMO!", 0 );
-	fonts->infobar_info=fontRenderer->getFont("Arial", "Regular", 20);
-	fonts->infobar_info->RenderString( 10, 100, 500, "DEMO!", 0 );
+	g_Fonts->infobar_number=fontRenderer->getFont("Arial", "Regular", 50);
+	g_Fonts->infobar_number->RenderString( 10, 100, 500, "DEMO!", 0 );
+	g_Fonts->infobar_channame=fontRenderer->getFont("Arial", "Regular", 30);
+	g_Fonts->infobar_channame->RenderString( 10, 100, 500, "DEMO!", 0 );
+	g_Fonts->infobar_info=fontRenderer->getFont("Arial", "Regular", 20);
+	g_Fonts->infobar_info->RenderString( 10, 100, 500, "DEMO!", 0 );
 
-    fonts->infobar_small=fontRenderer->getFont("Arial", "Regular", 14);
-	fonts->infobar_small->RenderString( 10, 100, 500, "DEMO!", 0 );
+    g_Fonts->infobar_small=fontRenderer->getFont("Arial", "Regular", 14);
+	g_Fonts->infobar_small->RenderString( 10, 100, 500, "DEMO!", 0 );
 
-	fonts->fixedabr20=fontRenderer->getFont("Arial Black", "Regular", 20);
-	fonts->fixedabr20->RenderString( 10, 100, 500, "DEMO!", 0 );
+	g_Fonts->fixedabr20=fontRenderer->getFont("Arial Black", "Regular", 20);
+	g_Fonts->fixedabr20->RenderString( 10, 100, 500, "DEMO!", 0 );
 }
 
 void CNeutrinoApp::ClearFrameBuffer()
 {
-	memset(frameBuffer.lfb, 255, frameBuffer.Stride()*576);
+	memset(g_FrameBuffer->lfb, 255, g_FrameBuffer->Stride()*576);
 
 	//backgroundmode
-	frameBuffer.setBackgroundColor(COL_BACKGROUND);
-	frameBuffer.useBackground(false);
+	g_FrameBuffer->setBackgroundColor(COL_BACKGROUND);
+	g_FrameBuffer->useBackground(false);
 
 	//background
-	frameBuffer.paletteSetColor(COL_BACKGROUND, 0x000000, 0xffff); 
+	g_FrameBuffer->paletteSetColor(COL_BACKGROUND, 0x000000, 0xffff);
 	//Windows Colors
-	frameBuffer.paletteSetColor(0x0, 0x010101, 0);
-	frameBuffer.paletteSetColor(0x1, 0x800000, 0);
-	frameBuffer.paletteSetColor(0x2, 0x008000, 0);
-	frameBuffer.paletteSetColor(0x3, 0x808000, 0);
-	frameBuffer.paletteSetColor(0x4, 0x000080, 0);
-	frameBuffer.paletteSetColor(0x5, 0x800080, 0);
-	frameBuffer.paletteSetColor(0x6, 0x008080, 0);
+	g_FrameBuffer->paletteSetColor(0x0, 0x010101, 0);
+	g_FrameBuffer->paletteSetColor(0x1, 0x800000, 0);
+	g_FrameBuffer->paletteSetColor(0x2, 0x008000, 0);
+	g_FrameBuffer->paletteSetColor(0x3, 0x808000, 0);
+	g_FrameBuffer->paletteSetColor(0x4, 0x000080, 0);
+	g_FrameBuffer->paletteSetColor(0x5, 0x800080, 0);
+	g_FrameBuffer->paletteSetColor(0x6, 0x008080, 0);
 //	frameBuffer.paletteSetColor(0x7, 0xC0C0C0, 0);
-	frameBuffer.paletteSetColor(0x7, 0xA0A0A0, 0);
+	g_FrameBuffer->paletteSetColor(0x7, 0xA0A0A0, 0);
 
 //	frameBuffer.paletteSetColor(0x8, 0x808080, 0);
-	frameBuffer.paletteSetColor(0x8, 0x505050, 0);
+	g_FrameBuffer->paletteSetColor(0x8, 0x505050, 0);
 
-	frameBuffer.paletteSetColor(0x9, 0xFF0000, 0);
-	frameBuffer.paletteSetColor(0xA, 0x00FF00, 0);
-	frameBuffer.paletteSetColor(0xB, 0xFFFF00, 0);
-	frameBuffer.paletteSetColor(0xC, 0x0000FF, 0);
-	frameBuffer.paletteSetColor(0xD, 0xFF00FF, 0);
-	frameBuffer.paletteSetColor(0xE, 0x00FFFF, 0);
-	frameBuffer.paletteSetColor(0xF, 0xFFFFFF, 0);
+	g_FrameBuffer->paletteSetColor(0x9, 0xFF0000, 0);
+	g_FrameBuffer->paletteSetColor(0xA, 0x00FF00, 0);
+	g_FrameBuffer->paletteSetColor(0xB, 0xFFFF00, 0);
+	g_FrameBuffer->paletteSetColor(0xC, 0x0000FF, 0);
+	g_FrameBuffer->paletteSetColor(0xD, 0xFF00FF, 0);
+	g_FrameBuffer->paletteSetColor(0xE, 0x00FFFF, 0);
+	g_FrameBuffer->paletteSetColor(0xF, 0xFFFFFF, 0);
 
-	frameBuffer.paletteSet();
+	g_FrameBuffer->paletteSet();
 }
 
 void CNeutrinoApp::InitMainSettings(CMenuWidget &mainSettings, CMenuWidget &audioSettings, CMenuWidget &networkSettings,
 				     CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings)
 {
 	mainSettings.addItem( new CMenuSeparator() );
-	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "Run mode", fonts) );
-	mainSettings.addItem( new CMenuForwarder("Shutdown", fonts, true, "", this, "shutdown") );
-	mainSettings.addItem( new CMenuForwarder("TV-Mode", fonts, true, "", this, "tv"), true );
-	mainSettings.addItem( new CMenuForwarder("Radio-Mode", fonts, (zapit), "", this, "radio") );
-	mainSettings.addItem( new CMenuForwarder("MP3-Player", fonts, false, "", this, "mp3") );
-	mainSettings.addItem( new CMenuForwarder("Stream playback", fonts, false, "", this, "playback") );
+	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "Run mode") );
+	mainSettings.addItem( new CMenuForwarder("Shutdown", true, "", this, "shutdown") );
+	mainSettings.addItem( new CMenuForwarder("TV-Mode", true, "", this, "tv"), true );
+	mainSettings.addItem( new CMenuForwarder("Radio-Mode", (zapit), "", this, "radio") );
+	mainSettings.addItem( new CMenuForwarder("MP3-Player", false, "", this, "mp3") );
+	mainSettings.addItem( new CMenuForwarder("Stream playback", false, "", this, "playback") );
 
-	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "Info", fonts) );
+	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "Info") );
 
-	CStreamInfo* StreamInfo = new CStreamInfo(fonts);
-    infoViewer.setStreamInfo(StreamInfo);
-	mainSettings.addItem( new CMenuForwarder("Stream Info", fonts, true, "", StreamInfo) );
+	mainSettings.addItem( new CMenuForwarder("Stream Info", true, "", g_StreamInfo ) );
 
-	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "Settings", fonts) );
-	mainSettings.addItem( new CMenuForwarder("Video", fonts, true, "", &videoSettings) );
+	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "Settings") );
+	mainSettings.addItem( new CMenuForwarder("Video", true, "", &videoSettings) );
 
-	CScreenSetup* screenSettings= new CScreenSetup("Screen setup", fonts, &settings);
-	mainSettings.addItem( new CMenuForwarder("Screen Setup", fonts, true, "", screenSettings) );
-	mainSettings.addItem( new CMenuForwarder("Audio", fonts, true, "", &audioSettings) );
-	mainSettings.addItem( new CMenuForwarder("Network", fonts, true, "", &networkSettings) );
-	mainSettings.addItem( new CMenuForwarder("Colors", fonts, true,"", &colorSettings) );
-	mainSettings.addItem( new CMenuForwarder("Key binding", fonts, true,"", &keySettings) );
+	mainSettings.addItem( new CMenuForwarder("Screen Setup", true, "", g_ScreenSetup ) );
+	mainSettings.addItem( new CMenuForwarder("Audio", true, "", &audioSettings) );
+	mainSettings.addItem( new CMenuForwarder("Network", true, "", &networkSettings) );
+	mainSettings.addItem( new CMenuForwarder("Colors", true,"", &colorSettings) );
+	mainSettings.addItem( new CMenuForwarder("Key binding", true,"", &keySettings) );
 }
 
 void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNotifier &audioSetupNotifier)
 {
 	audioSettings.addItem( new CMenuSeparator() );
-	audioSettings.addItem( new CMenuForwarder("back", fonts) );
+	audioSettings.addItem( new CMenuForwarder("back") );
 	audioSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-		CMenuOptionChooser* oj = new CMenuOptionChooser("Stereo", fonts, &settings.audio_Stereo, true, &audioSetupNotifier);
+		CMenuOptionChooser* oj = new CMenuOptionChooser("Stereo", &g_settings.audio_Stereo, true, &audioSetupNotifier);
 		oj->addOption(0, "off");
 		oj->addOption(1, "on");
 	audioSettings.addItem( oj );
-		oj = new CMenuOptionChooser("Dolby Digital", fonts, &settings.audio_DolbyDigital, true, &audioSetupNotifier);
+		oj = new CMenuOptionChooser("Dolby Digital", &g_settings.audio_DolbyDigital, true, &audioSetupNotifier);
 		oj->addOption(0, "off");
 		oj->addOption(1, "on");
-	audioSettings.addItem( oj );	
+	audioSettings.addItem( oj );
 }
 
 void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNotifier &videoSetupNotifier)
 {
 	videoSettings.addItem( new CMenuSeparator() );
-	videoSettings.addItem( new CMenuForwarder("back", fonts) );
+	videoSettings.addItem( new CMenuForwarder("back") );
 	videoSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-		CMenuOptionChooser* oj = new CMenuOptionChooser("Output signal", fonts, &settings.video_Signal, true, &videoSetupNotifier);
+		CMenuOptionChooser* oj = new CMenuOptionChooser("Output signal", &g_settings.video_Signal, true, &videoSetupNotifier);
 		oj->addOption(0, "RGB");
 		oj->addOption(1, "S-Video");
 		oj->addOption(2, "FBAS");
 	videoSettings.addItem( oj );
-		oj = new CMenuOptionChooser("Format", fonts, &settings.video_Format, true, &videoSetupNotifier);
+		oj = new CMenuOptionChooser("Format", &g_settings.video_Format, true, &videoSetupNotifier);
 		oj->addOption(0, "4:3");
 		oj->addOption(1, "16:9");
-	videoSettings.addItem( oj );	
+	videoSettings.addItem( oj );
 }
 
 void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings, CNetworkSetupNotifier &networkSetupNotifier)
 {
 	networkSettings.addItem( new CMenuSeparator() );
-	networkSettings.addItem( new CMenuForwarder("back", fonts) );
+	networkSettings.addItem( new CMenuForwarder("back") );
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	networkSettings.addItem( new CMenuForwarder("setup network now", fonts, true, "", this, "network") );
+	networkSettings.addItem( new CMenuForwarder("setup network now", true, "", this, "network") );
 
-	CMenuOptionChooser* oj = new CMenuOptionChooser("setup network on startup", fonts, &settings.networkSetOnStartup, true, &networkSetupNotifier);
+	CMenuOptionChooser* oj = new CMenuOptionChooser("setup network on startup", &g_settings.networkSetOnStartup, true, &networkSetupNotifier);
 		oj->addOption(0, "off");
 		oj->addOption(1, "on");
 	networkSettings.addItem( oj );	
 
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-		CStringInput*	networkSettings_NetworkIP= new CStringInput("IP Address", fonts, settings.network_ip, 3*4+3);
-		CStringInput*	networkSettings_NetMask= new CStringInput("Network mask", fonts, settings.network_netmask, 3*4+3);
-		CStringInput*	networkSettings_Broadcast= new CStringInput("Broadcast", fonts, settings.network_broadcast, 3*4+3);
-		CStringInput*	networkSettings_Gateway= new CStringInput("Default gateway", fonts, settings.network_defaultgateway, 3*4+3);
-		CStringInput*	networkSettings_NameServer= new CStringInput("Nameserver", fonts, settings.network_nameserver, 3*4+3);
-	networkSettings.addItem( new CMenuForwarder("IP Address", fonts, true, settings.network_ip, networkSettings_NetworkIP ));
-	networkSettings.addItem( new CMenuForwarder("Netmask", fonts, true, settings.network_netmask, networkSettings_NetMask ));
-	networkSettings.addItem( new CMenuForwarder("Broadcast", fonts, true, settings.network_broadcast, networkSettings_Broadcast ));
+		CStringInput*	networkSettings_NetworkIP= new CStringInput("IP Address", g_settings.network_ip, 3*4+3);
+		CStringInput*	networkSettings_NetMask= new CStringInput("Network mask", g_settings.network_netmask, 3*4+3);
+		CStringInput*	networkSettings_Broadcast= new CStringInput("Broadcast", g_settings.network_broadcast, 3*4+3);
+		CStringInput*	networkSettings_Gateway= new CStringInput("Default gateway", g_settings.network_defaultgateway, 3*4+3);
+		CStringInput*	networkSettings_NameServer= new CStringInput("Nameserver", g_settings.network_nameserver, 3*4+3);
+	networkSettings.addItem( new CMenuForwarder("IP Address", true, g_settings.network_ip, networkSettings_NetworkIP ));
+	networkSettings.addItem( new CMenuForwarder("Netmask", true, g_settings.network_netmask, networkSettings_NetMask ));
+	networkSettings.addItem( new CMenuForwarder("Broadcast", true, g_settings.network_broadcast, networkSettings_Broadcast ));
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	networkSettings.addItem( new CMenuForwarder("Default gateway", fonts, true, settings.network_defaultgateway, networkSettings_Gateway ));
-	networkSettings.addItem( new CMenuForwarder("Nameserver", fonts, true, settings.network_nameserver, networkSettings_NameServer ));
+	networkSettings.addItem( new CMenuForwarder("Default gateway", true, g_settings.network_defaultgateway, networkSettings_Gateway ));
+	networkSettings.addItem( new CMenuForwarder("Nameserver", true, g_settings.network_nameserver, networkSettings_NameServer ));
 }
 
 void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings)
 {
 	colorSettings.addItem( new CMenuSeparator() );
-	colorSettings.addItem( new CMenuForwarder("back", fonts) );
+	colorSettings.addItem( new CMenuForwarder("back") );
 	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 }
 
 void CNeutrinoApp::InitAudioThemesSettings(CMenuWidget &audioSettings_Themes)
 {
 	audioSettings_Themes.addItem( new CMenuSeparator() );
-	audioSettings_Themes.addItem( new CMenuForwarder("back", fonts) );
+	audioSettings_Themes.addItem( new CMenuForwarder("back") );
 	audioSettings_Themes.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	audioSettings_Themes.addItem( new CMenuForwarder("Neutrino default theme", fonts, true, "", this, "theme_neutrino") );
-	audioSettings_Themes.addItem( new CMenuForwarder("Classic theme", fonts, true, "", this, "theme_classic") );
+	audioSettings_Themes.addItem( new CMenuForwarder("Neutrino default theme", true, "", this, "theme_neutrino") );
+	audioSettings_Themes.addItem( new CMenuForwarder("Classic theme", true, "", this, "theme_classic") );
 }
 
 void CNeutrinoApp::InitColorSettingsMenuColors(CMenuWidget &colorSettings_menuColors, CMenuWidget &colorSettings)
 {
 	colorSettings_menuColors.addItem( new CMenuSeparator() );
-	colorSettings_menuColors.addItem( new CMenuForwarder("back", fonts) );
-			CColorChooser* chHeadcolor = new CColorChooser("background color", fonts, &settings.menu_Head_red, &settings.menu_Head_green, &settings.menu_Head_blue, 
-					&settings.menu_Head_alpha, colorSetupNotifier);
-			CColorChooser* chHeadTextcolor = new CColorChooser("text color", fonts, &settings.menu_Head_Text_red, &settings.menu_Head_Text_green, &settings.menu_Head_Text_blue, 
-					NULL, colorSetupNotifier);
-			CColorChooser* chContentcolor = new CColorChooser("background color", fonts, &settings.menu_Content_red, &settings.menu_Content_green, &settings.menu_Content_blue, 
-					&settings.menu_Content_alpha, colorSetupNotifier);
-			CColorChooser* chContentTextcolor = new CColorChooser("text color", fonts, &settings.menu_Content_Text_red, &settings.menu_Content_Text_green, &settings.menu_Content_Text_blue, 
-					NULL, colorSetupNotifier);
-			CColorChooser* chContentSelectedcolor = new CColorChooser("background color", fonts, &settings.menu_Content_Selected_red, &settings.menu_Content_Selected_green, &settings.menu_Content_Selected_blue, 
-					&settings.menu_Content_Selected_alpha, colorSetupNotifier);
-			CColorChooser* chContentSelectedTextcolor = new CColorChooser("text color", fonts, &settings.menu_Content_Selected_Text_red, &settings.menu_Content_Selected_Text_green, &settings.menu_Content_Selected_Text_blue, 
-					NULL, colorSetupNotifier);
-			CColorChooser* chContentInactivecolor = new CColorChooser("background color", fonts, &settings.menu_Content_inactive_red, &settings.menu_Content_inactive_green, &settings.menu_Content_inactive_blue, 
-					&settings.menu_Content_inactive_alpha, colorSetupNotifier);
-			CColorChooser* chContentInactiveTextcolor = new CColorChooser("text color", fonts, &settings.menu_Content_inactive_Text_red, &settings.menu_Content_inactive_Text_green, &settings.menu_Content_inactive_Text_blue, 
-					NULL, colorSetupNotifier);
-	colorSettings_menuColors.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "Menu heads", fonts) );
-	colorSettings_menuColors.addItem( new CMenuForwarder("Background", fonts, true, "", chHeadcolor ));
-	colorSettings_menuColors.addItem( new CMenuForwarder("Textcolor", fonts, true, "", chHeadTextcolor ));
-	colorSettings_menuColors.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "Menu body", fonts) );
-	colorSettings_menuColors.addItem( new CMenuForwarder("Background", fonts, true, "", chContentcolor ));
-	colorSettings_menuColors.addItem( new CMenuForwarder("Textcolor", fonts, true, "", chContentTextcolor ));
-	colorSettings_menuColors.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "Menu body - inactive", fonts) );
-	colorSettings_menuColors.addItem( new CMenuForwarder("Background", fonts, true, "", chContentInactivecolor ));
-	colorSettings_menuColors.addItem( new CMenuForwarder("Textcolor", fonts, true, "", chContentInactiveTextcolor));
-	colorSettings_menuColors.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "Menu body - selected", fonts) );
-	colorSettings_menuColors.addItem( new CMenuForwarder("Background", fonts, true, "", chContentSelectedcolor ));
-	colorSettings_menuColors.addItem( new CMenuForwarder("Textcolor", fonts, true, "", chContentSelectedTextcolor ));
+	colorSettings_menuColors.addItem( new CMenuForwarder("back") );
 
-	colorSettings.addItem( new CMenuForwarder("menu colors", fonts, true, "", &colorSettings_menuColors) );
+    CColorChooser* chHeadcolor = new CColorChooser("background color", &g_settings.menu_Head_red, &g_settings.menu_Head_green, &g_settings.menu_Head_blue,
+					&g_settings.menu_Head_alpha, colorSetupNotifier);
+    CColorChooser* chHeadTextcolor = new CColorChooser("text color", &g_settings.menu_Head_Text_red, &g_settings.menu_Head_Text_green, &g_settings.menu_Head_Text_blue,
+					NULL, colorSetupNotifier);
+    CColorChooser* chContentcolor = new CColorChooser("background color", &g_settings.menu_Content_red, &g_settings.menu_Content_green, &g_settings.menu_Content_blue,
+					&g_settings.menu_Content_alpha, colorSetupNotifier);
+    CColorChooser* chContentTextcolor = new CColorChooser("text color", &g_settings.menu_Content_Text_red, &g_settings.menu_Content_Text_green, &g_settings.menu_Content_Text_blue,
+					NULL, colorSetupNotifier);
+    CColorChooser* chContentSelectedcolor = new CColorChooser("background color", &g_settings.menu_Content_Selected_red, &g_settings.menu_Content_Selected_green, &g_settings.menu_Content_Selected_blue,
+					&g_settings.menu_Content_Selected_alpha, colorSetupNotifier);
+    CColorChooser* chContentSelectedTextcolor = new CColorChooser("text color", &g_settings.menu_Content_Selected_Text_red, &g_settings.menu_Content_Selected_Text_green, &g_settings.menu_Content_Selected_Text_blue,
+					NULL, colorSetupNotifier);
+    CColorChooser* chContentInactivecolor = new CColorChooser("background color", &g_settings.menu_Content_inactive_red, &g_settings.menu_Content_inactive_green, &g_settings.menu_Content_inactive_blue,
+					&g_settings.menu_Content_inactive_alpha, colorSetupNotifier);
+    CColorChooser* chContentInactiveTextcolor = new CColorChooser("text color", &g_settings.menu_Content_inactive_Text_red, &g_settings.menu_Content_inactive_Text_green, &g_settings.menu_Content_inactive_Text_blue,
+					NULL, colorSetupNotifier);
+	colorSettings_menuColors.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "Menu heads") );
+	colorSettings_menuColors.addItem( new CMenuForwarder("Background", true, "", chHeadcolor ));
+	colorSettings_menuColors.addItem( new CMenuForwarder("Textcolor", true, "", chHeadTextcolor ));
+	colorSettings_menuColors.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "Menu body") );
+	colorSettings_menuColors.addItem( new CMenuForwarder("Background", true, "", chContentcolor ));
+	colorSettings_menuColors.addItem( new CMenuForwarder("Textcolor", true, "", chContentTextcolor ));
+	colorSettings_menuColors.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "Menu body - inactive") );
+	colorSettings_menuColors.addItem( new CMenuForwarder("Background", true, "", chContentInactivecolor ));
+	colorSettings_menuColors.addItem( new CMenuForwarder("Textcolor", true, "", chContentInactiveTextcolor));
+	colorSettings_menuColors.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "Menu body - selected") );
+	colorSettings_menuColors.addItem( new CMenuForwarder("Background", true, "", chContentSelectedcolor ));
+	colorSettings_menuColors.addItem( new CMenuForwarder("Textcolor", true, "", chContentSelectedTextcolor ));
+
+	colorSettings.addItem( new CMenuForwarder("menu colors", true, "", &colorSettings_menuColors) );
 }
 
 void CNeutrinoApp::InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_statusbarColors, CMenuWidget &colorSettings)
 {
 	colorSettings_statusbarColors.addItem( new CMenuSeparator() );
-	colorSettings_statusbarColors.addItem( new CMenuForwarder("back", fonts) );
-			CColorChooser* chInfobarcolor = new CColorChooser("background color", fonts, &settings.infobar_red, &settings.infobar_green, &settings.infobar_blue, 
-					&settings.infobar_alpha, colorSetupNotifier);
-			CColorChooser* chInfobarTextcolor = new CColorChooser("text color", fonts, &settings.infobar_Text_red, &settings.infobar_Text_green, &settings.infobar_Text_blue, 
+	colorSettings_statusbarColors.addItem( new CMenuForwarder("back") );
+			CColorChooser* chInfobarcolor = new CColorChooser("background color", &g_settings.infobar_red, &g_settings.infobar_green, &g_settings.infobar_blue,
+					&g_settings.infobar_alpha, colorSetupNotifier);
+			CColorChooser* chInfobarTextcolor = new CColorChooser("text color", &g_settings.infobar_Text_red, &g_settings.infobar_Text_green, &g_settings.infobar_Text_blue,
 					NULL, colorSetupNotifier);
-	colorSettings_statusbarColors.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "Status bars", fonts) );
-	colorSettings_statusbarColors.addItem( new CMenuForwarder("Background", fonts, true, "", chInfobarcolor ));
-	colorSettings_statusbarColors.addItem( new CMenuForwarder("Textcolor", fonts, true, "", chInfobarTextcolor ));
-	colorSettings.addItem( new CMenuForwarder("statusbar colors", fonts, true, "", &colorSettings_statusbarColors) );
+	colorSettings_statusbarColors.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "Status bars") );
+	colorSettings_statusbarColors.addItem( new CMenuForwarder("Background", true, "", chInfobarcolor ));
+	colorSettings_statusbarColors.addItem( new CMenuForwarder("Textcolor", true, "", chInfobarTextcolor ));
+	colorSettings.addItem( new CMenuForwarder("statusbar colors", true, "", &colorSettings_statusbarColors) );
 }
 
 void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 {
 	keySettings.addItem( new CMenuSeparator() );
-	keySettings.addItem( new CMenuForwarder("back", fonts) );
-		CKeyChooser*	keySettings_tvradio_mode = new CKeyChooser(&settings.key_tvradio_mode, "tv/radio mode key setup", fonts, "settings.raw");
-		CKeyChooser*	keySettings_channelList_pageup = new CKeyChooser(&settings.key_channelList_pageup, "page up key setup", fonts, "settings.raw");
-		CKeyChooser*	keySettings_channelList_pagedown = new CKeyChooser(&settings.key_channelList_pagedown, "page down key setup", fonts, "settings.raw");
-		CKeyChooser*	keySettings_channelList_cancel = new CKeyChooser(&settings.key_channelList_cancel, "cancel key setup", fonts, "settings.raw");
-		CKeyChooser*	keySettings_quickzap_up = new CKeyChooser(&settings.key_quickzap_up, "up key setup", fonts, "settings.raw");
-		CKeyChooser*	keySettings_quickzap_down = new CKeyChooser(&settings.key_quickzap_down, "down key setup", fonts, "settings.raw");
-	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "mode change", fonts) );
-	keySettings.addItem( new CMenuForwarder("tv/radio mode", fonts, true, "", keySettings_tvradio_mode ));
-	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "channellist", fonts) );
-	keySettings.addItem( new CMenuForwarder("page up", fonts, true, "", keySettings_channelList_pageup ));
-	keySettings.addItem( new CMenuForwarder("page down", fonts, true, "", keySettings_channelList_pagedown ));
-	keySettings.addItem( new CMenuForwarder("cancel", fonts, true, "", keySettings_channelList_cancel ));
-	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "quickzap", fonts) );
-	keySettings.addItem( new CMenuForwarder("channel up", fonts, true, "", keySettings_quickzap_up ));
-	keySettings.addItem( new CMenuForwarder("channel down", fonts, true, "", keySettings_quickzap_down ));
+	keySettings.addItem( new CMenuForwarder("back") );
+		CKeyChooser*	keySettings_tvradio_mode = new CKeyChooser(&g_settings.key_tvradio_mode, "tv/radio mode key setup", "settings.raw");
+		CKeyChooser*	keySettings_channelList_pageup = new CKeyChooser(&g_settings.key_channelList_pageup, "page up key setup", "settings.raw");
+		CKeyChooser*	keySettings_channelList_pagedown = new CKeyChooser(&g_settings.key_channelList_pagedown, "page down key setup", "settings.raw");
+		CKeyChooser*	keySettings_channelList_cancel = new CKeyChooser(&g_settings.key_channelList_cancel, "cancel key setup", "settings.raw");
+		CKeyChooser*	keySettings_quickzap_up = new CKeyChooser(&g_settings.key_quickzap_up, "up key setup",   "settings.raw");
+		CKeyChooser*	keySettings_quickzap_down = new CKeyChooser(&g_settings.key_quickzap_down, "down key setup", "settings.raw");
+	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "mode change") );
+	keySettings.addItem( new CMenuForwarder("tv/radio mode", true, "", keySettings_tvradio_mode ));
+	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "channellist") );
+	keySettings.addItem( new CMenuForwarder("page up", true, "", keySettings_channelList_pageup ));
+	keySettings.addItem( new CMenuForwarder("page down", true, "", keySettings_channelList_pagedown ));
+	keySettings.addItem( new CMenuForwarder("cancel", true, "", keySettings_channelList_cancel ));
+	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "quickzap") );
+	keySettings.addItem( new CMenuForwarder("channel up", true, "", keySettings_quickzap_up ));
+	keySettings.addItem( new CMenuForwarder("channel down", true, "", keySettings_quickzap_down ));
 }
 
 void CNeutrinoApp::InitZapper()
 {
-	remoteControl.setZapper(zapit);
+	g_RemoteControl->setZapper(zapit);
 	volume = 100;
 	if (!zapit)
 		channelsInit();
 		
-	infoViewer.start(&frameBuffer, fonts, &settings, &rcInput);
-	epgData.start(&frameBuffer, fonts, &rcInput, &settings);	
+	g_InfoViewer->start();
+	g_EpgData->start();
 		
 	if (zapit) 
 	{
@@ -937,7 +949,7 @@ void CNeutrinoApp::InitZapper()
 		}
 	}
 	if (!zapit)
-		channelList->zapTo(&remoteControl, &infoViewer,  0);
+		channelList->zapTo(0);
 }
 
 void CNeutrinoApp::RealRun(CMenuWidget &mainSettings)
@@ -945,11 +957,11 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainSettings)
 	mute = false;
 	while(nRun)
 	{
-		int key = rcInput.getKey(); 
+		int key = g_RCInput->getKey();
 
 		if (key==CRCInput::RC_setup)
 		{
-			mainSettings.exec(&frameBuffer, &rcInput, NULL, "");
+			mainSettings.exec(NULL, "");
 		}
 		else if (key==CRCInput::RC_standby)
 		{
@@ -960,29 +972,29 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainSettings)
 		{
 			if (key==CRCInput::RC_ok)
 			{	//channellist
-				channelList->exec(&frameBuffer, &rcInput, &remoteControl, &infoViewer, &settings);
+				channelList->exec();
 			}
-			else if ((key==settings.key_quickzap_up) || (key==settings.key_quickzap_down))
+			else if ((key==g_settings.key_quickzap_up) || (key==g_settings.key_quickzap_down))
 			{
 				//quickzap
-				channelList->quickZap(&frameBuffer, &rcInput, &remoteControl, &infoViewer, &settings, key);
+				channelList->quickZap( key );
 			}
 			else if (key==CRCInput::RC_help)
 			{	//epg
-				if ( infoViewer.is_visible )
+				if ( g_InfoViewer->is_visible )
 				{
-                    infoViewer.killTitle();
-					epgData.show( channelList->getActiveChannelName() );
+                    g_InfoViewer->killTitle();
+					g_EpgData->show( channelList->getActiveChannelName() );
 				}
 				else
 				{
-					infoViewer.showTitle(  channelList->getActiveChannelNumber(),
-					                       channelList->getActiveChannelName() );
+					g_InfoViewer->showTitle(  channelList->getActiveChannelNumber(),
+					                         channelList->getActiveChannelName() );
 				}
 			}
 			else if ((key>=0) && (key<=9))
 			{ //numeric zap
-				channelList->numericZap( &frameBuffer, &rcInput, &remoteControl, &infoViewer, &settings, key);
+				channelList->numericZap( key );
 			}
 			else if (key==CRCInput::RC_spkr)
 			{	//mute
@@ -998,61 +1010,71 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainSettings)
 
 void CNeutrinoApp::ExitRun()
 {
-	saveSetup(&settings);
+	saveSetup();
 	printf("neutrino exit\n");
 	//shutdown screen
 
 	//memset(frameBuffer.lfb, 255, frameBuffer.Stride()*576);
 	for(int x=0;x<256;x++)
-		frameBuffer.paletteSetColor(x, 0x000000, 0xffff); 
+		g_FrameBuffer->paletteSetColor(x, 0x000000, 0xffff);
 
-	frameBuffer.paletteSet();
-	frameBuffer.paintIcon8("shutdown.raw",0,0);
-	frameBuffer.loadPal("shutdown.pal");
+	g_FrameBuffer->paletteSet();
+	g_FrameBuffer->paintIcon8("shutdown.raw",0,0);
+	g_FrameBuffer->loadPal("shutdown.pal");
 
-	Controld.shutdown();
+	g_Controld->shutdown();
 	sleep(55555);
 }
 
 int CNeutrinoApp::run(int argc, char **argv)
 {
-	printf("neutrino2\n");
-
 	CmdParser(argc, argv);
 
-	fontRenderer = new fontRenderClass( &frameBuffer);
+	fontRenderer = new fontRenderClass;
 
 	SetupFrameBuffer();
-	
+
+    g_Fonts = new FontsDef;	
 	SetupFonts();
 
 	ClearFrameBuffer();
 
-	if(!loadSetup(&settings))
+	if(!loadSetup())
 	{
 		//setup default if configfile not exists
-		setupDefaults( &settings);
+		setupDefaults();
 		printf("using defaults...\n\n");
 	}
+    g_RCInput = new CRCInput;
+    g_lcdd = new CLCDD;
+    g_Controld = new CControld;
+    g_RemoteControl = new CRemoteControl;
+    g_EpgData = new CEpgData;
+    g_InfoViewer = new CInfoViewer;
+    g_StreamInfo = new CStreamInfo;
+    g_ScreenSetup = new CScreenSetup;
 
-	colorSetupNotifier = new CColorSetupNotifier(&frameBuffer, &settings);
-	CAudioSetupNotifier		audioSetupNotifier;
-	CVideoSetupNotifier		videoSetupNotifier;
-	CNetworkSetupNotifier		networkSetupNotifier(&settings);
+    printf("\nCNeutrinoApp::run - objects initialized...\n\n");
+
+	colorSetupNotifier = new CColorSetupNotifier();
+
+	CAudioSetupNotifier        audioSetupNotifier;
+	CVideoSetupNotifier        videoSetupNotifier;
+	CNetworkSetupNotifier      networkSetupNotifier;
 	
 	colorSetupNotifier->changeNotify("initial");
 
-	setupNetwork(&settings);
+	setupNetwork();
 
-	channelList = new CChannelList(&settings, 1,"All Services",fonts);
+	channelList = new CChannelList( 1, "All Services" );
 
 	//Main settings
-	CMenuWidget mainSettings("Neutrino Setup",fonts,"settings.raw");
-	CMenuWidget videoSettings("Video Setup",fonts,"video.raw");
-	CMenuWidget audioSettings("Audio Setup",fonts,"audio.raw");
-	CMenuWidget networkSettings("Network Setup",fonts,"settings.raw");
-	CMenuWidget colorSettings("Color Setup",fonts,"settings.raw");
-	CMenuWidget keySettings("Key Setup",fonts,"settings.raw");
+	CMenuWidget mainSettings("Neutrino Setup", "settings.raw");
+	CMenuWidget videoSettings("Video Setup", "video.raw");
+	CMenuWidget audioSettings("Audio Setup", "audio.raw");
+	CMenuWidget networkSettings("Network Setup", "settings.raw");
+	CMenuWidget colorSettings("Color Setup", "settings.raw");
+	CMenuWidget keySettings("Key Setup", "settings.raw");
 //	CMenuWidget screenSettings("",fonts,"");
 
 	InitMainSettings(mainSettings, audioSettings, networkSettings, colorSettings, keySettings, videoSettings);
@@ -1069,18 +1091,18 @@ int CNeutrinoApp::run(int argc, char **argv)
 	//color Setup
 	InitColorSettings(colorSettings);
 
-	CMenuWidget colorSettings_statusbarColors("Statusbar Colors",fonts,"settings.raw");
+	CMenuWidget colorSettings_statusbarColors("Statusbar Colors", "settings.raw");
 	InitColorSettingsStatusBarColors(colorSettings_statusbarColors, colorSettings);
 
-	CMenuWidget audioSettings_Themes("Select a theme",fonts,"settings.raw");
+	CMenuWidget audioSettings_Themes("Select a theme", "settings.raw");
 	InitAudioThemesSettings(audioSettings_Themes);
 
 	// Hacking Shit
-	colorSettings.addItem( new CMenuForwarder("select color theme", fonts, true, "", &audioSettings_Themes) );
+	colorSettings.addItem( new CMenuForwarder("select color theme", true, "", &audioSettings_Themes) );
 	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	// Meno
 
-   	CMenuWidget colorSettings_menuColors("menu colors",fonts,"settings.raw");
+   	CMenuWidget colorSettings_menuColors("menu colors", "settings.raw");
 	InitColorSettingsMenuColors(colorSettings_menuColors, colorSettings);
 
 	//keySettings
@@ -1099,18 +1121,18 @@ void CNeutrinoApp::AudioMuteToggle()
 {
 	int dx = 40;
 	int dy = 40;
-	int x = settings.screen_EndX-dx;
-	int y = settings.screen_StartY;
+	int x = g_settings.screen_EndX-dx;
+	int y = g_settings.screen_StartY;
     if ( !mute )
     {
-    	frameBuffer.paintBoxRel(x, y, dx, dy, COL_INFOBAR);
-    	frameBuffer.paintIcon("mute.raw", x+5, y+5);
-    	Controld.Mute();
+    	g_FrameBuffer->paintBoxRel(x, y, dx, dy, COL_INFOBAR);
+    	g_FrameBuffer->paintIcon("mute.raw", x+5, y+5);
+    	g_Controld->Mute();
     }
     else
     {
-        frameBuffer.paintBoxRel(x, y, dx, dy, COL_BACKGROUND);
-    	Controld.UnMute();
+        g_FrameBuffer->paintBoxRel(x, y, dx, dy, COL_BACKGROUND);
+    	g_Controld->UnMute();
     }
 	mute = !mute;
 }
@@ -1119,10 +1141,10 @@ void CNeutrinoApp::setVolume(int key)
 {
 	int dx = 256;
 	int dy = 40;
-	int x = (((settings.screen_EndX-settings.screen_StartX)-dx) / 2) + settings.screen_StartX;
-	int y = settings.screen_EndY-100;
+	int x = (((g_settings.screen_EndX- g_settings.screen_StartX)- dx) / 2) + g_settings.screen_StartX;
+	int y = g_settings.screen_EndY- 100;
 
-	frameBuffer.paintIcon("volume.raw",x,y, COL_INFOBAR);
+	g_FrameBuffer->paintIcon("volume.raw",x,y, COL_INFOBAR);
 
     do
 	{
@@ -1142,58 +1164,56 @@ void CNeutrinoApp::setVolume(int key)
 		}
         else 
         {
-            rcInput.addKey2Buffer(key);
+            g_RCInput->addKey2Buffer(key);
             key= CRCInput::RC_timeout;
         }
 
-		Controld.setVolume(volume);
+		g_Controld->setVolume(volume);
 
 		int vol = volume<<1;
-		frameBuffer.paintBoxRel(x+40, y+12, 200, 15, COL_INFOBAR+1);
-		frameBuffer.paintBoxRel(x+40, y+12, vol, 15, COL_INFOBAR+3);
+		g_FrameBuffer->paintBoxRel(x+40, y+12, 200, 15, COL_INFOBAR+1);
+		g_FrameBuffer->paintBoxRel(x+40, y+12, vol, 15, COL_INFOBAR+3);
 
         if ( key != CRCInput::RC_timeout )
         {
-    		key = rcInput.getKey(30);
+    		key = g_RCInput->getKey(30);
         }
 
 	} while ( key != CRCInput::RC_timeout );
 
-	frameBuffer.paintBoxRel(x, y, dx, dy, COL_BACKGROUND);
+	g_FrameBuffer->paintBoxRel(x, y, dx, dy, COL_BACKGROUND);
 }
 
 void CNeutrinoApp::tvMode()
 {
 	mode = mode_tv;
-//	infoViewer.killTitle();
 
-	memset(frameBuffer.lfb, 255, frameBuffer.Stride()*576);
-	frameBuffer.useBackground(false);
+	memset(g_FrameBuffer->lfb, 255, g_FrameBuffer->Stride()*576);
+	g_FrameBuffer->useBackground(false);
 
 	if (zapit)
 	{
-		remoteControl.tvMode();
+		g_RemoteControl->tvMode();
 		channelsInit();
-		channelList->zapTo(&remoteControl, &infoViewer,  firstchannel.chan_nr -1);
+		channelList->zapTo( firstchannel.chan_nr -1 );
 	}
 }
 
 void CNeutrinoApp::radioMode()
 {
 	mode = mode_radio;
-//	infoViewer.killTitle();
 
-	frameBuffer.loadPal("dboxradio.pal", 18, 199);
-	frameBuffer.paintIcon8("dboxradio.raw",0,0, 18);
-	frameBuffer.loadBackground("dboxradio.raw", 18);
-	frameBuffer.useBackground(true);
+	g_FrameBuffer->loadPal("dboxradio.pal", 18, 199);
+	g_FrameBuffer->paintIcon8("dboxradio.raw",0,0, 18);
+	g_FrameBuffer->loadBackground("dboxradio.raw", 18);
+	g_FrameBuffer->useBackground(true);
 
 	if (zapit)
 	{
 		firstChannel();
-		remoteControl.radioMode();
+		g_RemoteControl->radioMode();
 		channelsInit();
-		channelList->zapTo(&remoteControl, &infoViewer,  0);
+		channelList->zapTo( 0 );
 	} 
 }
 
@@ -1203,19 +1223,19 @@ void CNeutrinoApp::radioMode()
 *          CNeutrinoApp -  exec, menuitem callback (shutdown)                         *
 *                                                                                     *
 **************************************************************************************/
-int CNeutrinoApp::exec(CFrameBuffer* frameBuffer, CRCInput* rcInput, CMenuTarget* parent, string actionKey)
+int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 {
 	printf("ac: %s\n", actionKey.c_str());
 	int returnval = CMenuTarget::RETURN_REPAINT;
 
 	if(actionKey=="theme_neutrino")
 	{
-		setupColors_neutrino( &settings );
+		setupColors_neutrino();
 		colorSetupNotifier->changeNotify("initial");
 	}
 	else if(actionKey=="theme_classic")
 	{
-		setupColors_classic( &settings );
+		setupColors_classic();
 		colorSetupNotifier->changeNotify("initial");
 	}
 	else if(actionKey=="shutdown")
@@ -1235,7 +1255,7 @@ int CNeutrinoApp::exec(CFrameBuffer* frameBuffer, CRCInput* rcInput, CMenuTarget
 	}
 	else if(actionKey=="network")
 	{
-		setupNetwork(&settings, true);
+		setupNetwork( true );
 	}
 
 	return returnval;

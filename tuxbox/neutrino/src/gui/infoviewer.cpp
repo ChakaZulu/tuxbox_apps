@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.14 2001/09/13 17:15:51 field Exp $
+// $Id: infoviewer.cpp,v 1.15 2001/09/14 16:18:46 field Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.15  2001/09/14 16:18:46  field
+// Umstellung auf globale Variablen...
+//
 // Revision 1.14  2001/09/13 17:15:51  field
 // verbessertes warten aufs epg
 //
@@ -30,13 +33,12 @@
 //
 
 #include "infoviewer.h"
+#include "../global.h"
 
 CInfoViewer::CInfoViewer()
 {
 	intShowDuration = 15; //7,5 sec
-	frameBuffer = NULL;
-	fonts = NULL;
-    BoxStartX=BoxStartY=BoxEndX=BoxEndY=0;
+    BoxStartX= BoxStartY= BoxEndX= BoxEndY=0;
 
 	strcpy( running, "");
 	strcpy( next, "");
@@ -44,6 +46,7 @@ CInfoViewer::CInfoViewer()
 	strcpy( nextStart, "");
 	strcpy( runningDuration, "");
 	strcpy( nextDuration, "");
+
 	runningPercent = 0;
 	CurrentChannel = "";
 
@@ -56,33 +59,23 @@ CInfoViewer::CInfoViewer()
 	}
 }
 
-void CInfoViewer::start(CFrameBuffer *FrameBuffer, FontsDef *Fonts, SNeutrinoSettings *Settings, CRCInput *AInput )
+void CInfoViewer::start()
 {
-	frameBuffer = FrameBuffer;
-	fonts = Fonts;
-	settings = Settings;
-    rcInput = AInput;
-
-	InfoHeightY = fonts->infobar_number->getHeight()*9/8 +
-                  2*fonts->infobar_info->getHeight() +
-//                  fonts->infobar_small->getHeight() +
+	InfoHeightY = g_Fonts->infobar_number->getHeight()*9/8 +
+                  2*g_Fonts->infobar_info->getHeight() +
+//                  g_Fonts->infobar_small->getHeight() +
                   25;
 
 //	printf("infoh %d", InfoHeightY);
 
-    ChanWidth = fonts->infobar_number->getRenderWidth("000") + 10;
-	ChanHeight = fonts->infobar_number->getHeight()*9/8;
+    ChanWidth = g_Fonts->infobar_number->getRenderWidth("000") + 10;
+	ChanHeight = g_Fonts->infobar_number->getHeight()*9/8;
 
 }
 
 void CInfoViewer::setDuration( int Duration )
 {
 	intShowDuration = Duration;
-}
-
-void CInfoViewer::setStreamInfo( CStreamInfo *Info )
-{
-    StreamInfo = Info;
 }
 
 void CInfoViewer::showTitle( int ChanNum, string Channel, bool CalledFromNumZap )
@@ -99,9 +92,9 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, bool CalledFromNumZap 
     }
     pthread_mutex_unlock( &epg_mutex );
 
-	BoxStartX = settings->screen_StartX+ 20;
-	BoxEndX   = settings->screen_EndX- 20;
-	BoxEndY   = settings->screen_EndY- 20;
+	BoxStartX = g_settings.screen_StartX+ 20;
+	BoxEndX   = g_settings.screen_EndX- 20;
+	BoxEndY   = g_settings.screen_EndY- 20;
 	BoxStartY = BoxEndY- InfoHeightY;
 
 	//frameBuffer->paintVLine(settings->screen_StartX,0,576, 3);
@@ -110,27 +103,27 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, bool CalledFromNumZap 
 
 
 	//number box
-	frameBuffer->paintBoxRel(BoxStartX+10, BoxStartY+10, ChanWidth, ChanHeight, COL_INFOBAR_SHADOW);
-	frameBuffer->paintBoxRel(BoxStartX,    BoxStartY,    ChanWidth, ChanHeight, COL_INFOBAR);
+	g_FrameBuffer->paintBoxRel(BoxStartX+10, BoxStartY+10, ChanWidth, ChanHeight, COL_INFOBAR_SHADOW);
+	g_FrameBuffer->paintBoxRel(BoxStartX,    BoxStartY,    ChanWidth, ChanHeight, COL_INFOBAR);
 
 	//channel number
 	char strChanNum[10];
 	sprintf( (char*) strChanNum, "%d", ChanNum);
-	int ChanNumXPos = BoxStartX + ((ChanWidth - fonts->infobar_number->getRenderWidth(strChanNum))>>1);
-	fonts->infobar_number->RenderString(ChanNumXPos, BoxStartY+ChanHeight, ChanWidth, strChanNum, COL_INFOBAR);
+	int ChanNumXPos = BoxStartX + ((ChanWidth - g_Fonts->infobar_number->getRenderWidth(strChanNum))>>1);
+	g_Fonts->infobar_number->RenderString(ChanNumXPos, BoxStartY+ChanHeight, ChanWidth, strChanNum, COL_INFOBAR);
 
 	//infobox
 	int ChanNameX = BoxStartX + ChanWidth + 10;
 	int ChanNameY = BoxStartY + (ChanHeight>>1)   + 5; //oberkante schatten?
-	frameBuffer->paintBox(ChanNameX, ChanNameY, BoxEndX, BoxEndY, COL_INFOBAR);
+	g_FrameBuffer->paintBox(ChanNameX, ChanNameY, BoxEndX, BoxEndY, COL_INFOBAR);
 	
 	// ... with channel name
-	int height=fonts->infobar_channame->getHeight()+5;
-	fonts->infobar_channame->RenderString(ChanNameX+15, ChanNameY+height, BoxEndX-ChanNameX-135, Channel.c_str(), COL_INFOBAR);
+	int height=g_Fonts->infobar_channame->getHeight()+5;
+	g_Fonts->infobar_channame->RenderString(ChanNameX+15, ChanNameY+height, BoxEndX-ChanNameX-135, Channel.c_str(), COL_INFOBAR);
 
 	int ChanInfoX = BoxStartX + (ChanWidth >>1);
 	int ChanInfoY = BoxStartY + ChanHeight+10;
-	frameBuffer->paintBox(ChanInfoX, ChanInfoY, ChanNameX, BoxEndY, COL_INFOBAR);
+	g_FrameBuffer->paintBox(ChanInfoX, ChanInfoY, ChanNameX, BoxEndY, COL_INFOBAR);
 
     is_visible = true;
     pthread_cond_signal( &epg_cond );
@@ -141,10 +134,10 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, bool CalledFromNumZap 
 
     do
     {
-        key = rcInput->getKey( intShowDuration* 5 );
+        key = g_RCInput->getKey( intShowDuration* 5 );
         if ( key == CRCInput::RC_blue )
         {
-            StreamInfo->exec(frameBuffer, rcInput, NULL, "");
+            g_StreamInfo->exec(NULL, "");
             key = -1;
         }
 
@@ -155,11 +148,11 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, bool CalledFromNumZap 
          ( ( key != CRCInput::RC_home ) || ( CalledFromNumZap ) ) &&
          ( key != -1 ) )
     {
-        rcInput->addKey2Buffer(key);
+        g_RCInput->addKey2Buffer(key);
     };
 
-    if ( ( key != settings->key_quickzap_up ) &&
-         ( key != settings->key_quickzap_down ) &&
+    if ( ( key != g_settings.key_quickzap_up ) &&
+         ( key != g_settings.key_quickzap_down ) &&
          ( key != CRCInput::RC_help ) &&
          ( !CalledFromNumZap ) )
     {
@@ -178,48 +171,48 @@ void CInfoViewer::showData()
 	
 
 	//percent
-	height=fonts->infobar_channame->getHeight()/3;
-	int height2= int( fonts->infobar_channame->getHeight()/1.5);
-	frameBuffer->paintBoxRel(BoxEndX-114, ChanNameY+height,   2+100+2, height2, COL_INFOBAR+7);
-	frameBuffer->paintBoxRel(BoxEndX-112, ChanNameY+height+2, runningPercent+2, height2-4, COL_INFOBAR+5);
-	frameBuffer->paintBoxRel(BoxEndX-112+runningPercent, ChanNameY+height+2, 100-runningPercent, height2-4, COL_INFOBAR+2);
+	height = g_Fonts->infobar_channame->getHeight()/3;
+	int height2= int( g_Fonts->infobar_channame->getHeight()/1.5);
+	g_FrameBuffer->paintBoxRel(BoxEndX-114, ChanNameY+height,   2+100+2, height2, COL_INFOBAR+7);
+	g_FrameBuffer->paintBoxRel(BoxEndX-112, ChanNameY+height+2, runningPercent+2, height2-4, COL_INFOBAR+5);
+	g_FrameBuffer->paintBoxRel(BoxEndX-112+runningPercent, ChanNameY+height+2, 100-runningPercent, height2-4, COL_INFOBAR+2);
 
 	//info running
-	int start1width      = fonts->infobar_info->getRenderWidth(runningStart);
-	int duration1Width   = fonts->infobar_info->getRenderWidth(runningDuration); 
+	int start1width      = g_Fonts->infobar_info->getRenderWidth(runningStart);
+	int duration1Width   = g_Fonts->infobar_info->getRenderWidth(runningDuration);
 	int duration1TextPos = BoxEndX-duration1Width-10;
-	height=fonts->infobar_info->getHeight();
-	fonts->infobar_info->RenderString(ChanInfoX+10,                ChanInfoY+height, start1width, runningStart, COL_INFOBAR);
-	fonts->infobar_info->RenderString(ChanInfoX+10+start1width+10, ChanInfoY+height, duration1TextPos-(ChanInfoX+10+start1width+10)-10, running, COL_INFOBAR);
-	fonts->infobar_info->RenderString(duration1TextPos,            ChanInfoY+height, duration1Width, runningDuration, COL_INFOBAR);
+	height = g_Fonts->infobar_info->getHeight();
+	g_Fonts->infobar_info->RenderString(ChanInfoX+10,                ChanInfoY+height, start1width, runningStart, COL_INFOBAR);
+	g_Fonts->infobar_info->RenderString(ChanInfoX+10+start1width+10, ChanInfoY+height, duration1TextPos-(ChanInfoX+10+start1width+10)-10, running, COL_INFOBAR);
+	g_Fonts->infobar_info->RenderString(duration1TextPos,            ChanInfoY+height, duration1Width, runningDuration, COL_INFOBAR);
 
 	ChanInfoY += height;
 
 	//info next
-    frameBuffer->paintBox(BoxStartX + ChanWidth + 25, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR);
+    g_FrameBuffer->paintBox(BoxStartX + ChanWidth + 25, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR);
 
-	int start2width      = fonts->infobar_info->getRenderWidth(nextStart);
-	int duration2Width   = fonts->infobar_info->getRenderWidth(nextDuration); 
+	int start2width      = g_Fonts->infobar_info->getRenderWidth(nextStart);
+	int duration2Width   = g_Fonts->infobar_info->getRenderWidth(nextDuration);
 	int duration2TextPos = BoxEndX-duration2Width-10;
-	fonts->infobar_info->RenderString(ChanInfoX+10,                ChanInfoY+height, start2width, nextStart, COL_INFOBAR);
-	fonts->infobar_info->RenderString(ChanInfoX+10+start2width+10, ChanInfoY+height, duration2TextPos-(ChanInfoX+10+start2width+10)-10, next, COL_INFOBAR);
-	fonts->infobar_info->RenderString(duration2TextPos,            ChanInfoY+height, duration2Width, nextDuration, COL_INFOBAR);
+	g_Fonts->infobar_info->RenderString(ChanInfoX+10,                ChanInfoY+height, start2width, nextStart, COL_INFOBAR);
+	g_Fonts->infobar_info->RenderString(ChanInfoX+10+start2width+10, ChanInfoY+height, duration2TextPos-(ChanInfoX+10+start2width+10)-10, next, COL_INFOBAR);
+	g_Fonts->infobar_info->RenderString(duration2TextPos,            ChanInfoY+height, duration2Width, nextDuration, COL_INFOBAR);
 }
 
 void CInfoViewer::showWarte()
 {
-	int height=fonts->infobar_info->getHeight();
+	int height = g_Fonts->infobar_info->getHeight();
     int ChanInfoY = BoxStartY + ChanHeight+ 15+ 2* height;
     int xStart= BoxStartX + ChanWidth + 25;
 
     pthread_mutex_trylock( &epg_mutex );
-	fonts->infobar_info->RenderString(xStart, ChanInfoY, BoxEndX- xStart, EPG_NotFound_Text, COL_INFOBAR);
+	g_Fonts->infobar_info->RenderString(xStart, ChanInfoY, BoxEndX- xStart, EPG_NotFound_Text, COL_INFOBAR);
     pthread_mutex_unlock( &epg_mutex );
 }
 
 void CInfoViewer::killTitle()
 {
-	frameBuffer->paintBackgroundBox(BoxStartX, BoxStartY, BoxEndX, BoxEndY );
+	g_FrameBuffer->paintBackgroundBox(BoxStartX, BoxStartY, BoxEndX, BoxEndY );
     is_visible = false;
 }
 

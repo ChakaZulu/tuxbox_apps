@@ -34,8 +34,8 @@ class CMenuTarget
 		
 	CMenuTarget(){};
 	virtual ~CMenuTarget(){};
-	virtual void hide(CFrameBuffer* frameBuffer){};
-	virtual int exec(CFrameBuffer* frameBuffer, CRCInput* rcInput, CMenuTarget* parent, string actionKey){return 0;};
+	virtual void hide(){};
+	virtual int exec(CMenuTarget* parent, string actionKey){return 0;};
 };
 
 
@@ -51,17 +51,16 @@ class CMenuItem
 			RETURN_EXIT = 2,
 			RETURN_EXIT_ALL = 4
 		};
-		FontsDef	*fonts;
 
 		CMenuItem(){};
 		virtual ~CMenuItem(){};
 
 		virtual void init(int X, int Y, int DX){x=X;y=Y;dx=DX;}
-		virtual int paint(CFrameBuffer*	frameBuffer, bool selected=false){return -1;};
+		virtual int paint(bool selected=false){return -1;};
 		virtual int getHeight(){return -1;};
 		virtual bool isSelectable(){return false;};
 
-		virtual int exec(CFrameBuffer* frameBuffer, CRCInput* rcInput, CMenuTarget* parent){return 0;};
+		virtual int exec(CMenuTarget* parent){return 0;};
 };
 
 class CMenuSeparator : public CMenuItem
@@ -82,9 +81,9 @@ class CMenuSeparator : public CMenuItem
 		};
 
 		
-		CMenuSeparator(int Type=0, string Text="", FontsDef *Fonts=NULL);
+		CMenuSeparator(int Type=0, string Text="");
 
-		int paint(CFrameBuffer*	frameBuffer, bool selected=false);
+		int paint(bool selected=false);
 		int getHeight(){return height;};
 };
 
@@ -99,10 +98,10 @@ class CMenuForwarder : public CMenuItem
 
 	public:
 		
-		CMenuForwarder(string Text, FontsDef *Fonts, bool Active=true, char *Option=NULL, CMenuTarget* Target=NULL, string ActionKey="");
-		int paint(CFrameBuffer* frameBuffer, bool selected=false);
+		CMenuForwarder(string Text, bool Active=true, char *Option=NULL, CMenuTarget* Target=NULL, string ActionKey="");
+		int paint(bool selected=false);
 		int getHeight(){return height;};
-		int exec(CFrameBuffer* frameBuffer, CRCInput* rcInput, CMenuTarget* parent);
+		int exec(CMenuTarget* parent);
 		bool isSelectable(){return active;};
 };
 
@@ -123,21 +122,19 @@ class CMenuOptionChooser : public CMenuItem
 
 	public:
 		CMenuOptionChooser(){};
-		CMenuOptionChooser(string OptionName, FontsDef *Fonts, int* OptionValue, bool Active = false, CChangeObserver* Observ = NULL);
+		CMenuOptionChooser(string OptionName, int* OptionValue, bool Active = false, CChangeObserver* Observ = NULL);
 		~CMenuOptionChooser();
 
 		void addOption(int key, string value);
-		int paint(CFrameBuffer* frameBuffer, bool selected);
+		int paint(bool selected);
 		int getHeight(){return height;};
 		bool isSelectable(){return active;};
 
-		int exec(CFrameBuffer* frameBuffer, CRCInput* rcInput, CMenuTarget* parent);
+		int exec(CMenuTarget* parent);
 };
 
 class CMenuWidget : public CMenuTarget
 {
-	public:
-		FontsDef		*fonts;
 	protected:
 		vector<CMenuItem*>	items;
 		string			name;
@@ -150,14 +147,14 @@ class CMenuWidget : public CMenuTarget
 		int			selected;
 
 	public:
-		CMenuWidget(){name="";iconfile="";selected=-1;fonts=NULL;};
-		CMenuWidget(string Name, FontsDef *Fonts, string Icon="");
+		CMenuWidget(){name="";iconfile="";selected=-1;};
+		CMenuWidget(string Name, string Icon="");
 		~CMenuWidget();
 
 		virtual void addItem(CMenuItem* menuItem, bool defaultselected=false);
-		virtual void paint(CFrameBuffer* frameBuffer);
-		virtual void hide(CFrameBuffer* frameBuffer);
-		virtual int exec(CFrameBuffer* frameBuffer, CRCInput* rcInput, CMenuTarget* parent, string actionKey);
+		virtual void paint();
+		virtual void hide();
+		virtual int exec(CMenuTarget* parent, string actionKey);
 
 		void setName(string Name){name=Name;};
 		void setIcon(string Icon){iconfile=Icon;};

@@ -50,11 +50,7 @@ struct EPGData
 class CEpgData
 {
 	private:
-		CFrameBuffer		*frameBuffer;
-		FontsDef		*fonts;
-		CRCInput		*rcInput;
 		EPGData			epgData;
-		SNeutrinoSettings	*settings;
 
 		int			ox, oy, sx, sy;
 		int			emptyLineCount;
@@ -71,7 +67,7 @@ class CEpgData
 	public:
 
 		CEpgData();
-		void start(CFrameBuffer	*FrameBuffer, FontsDef *Fonts, CRCInput* RcInput, SNeutrinoSettings *Settings );
+		void start( );
 		void show( string channelName );
 		void hide();
 };

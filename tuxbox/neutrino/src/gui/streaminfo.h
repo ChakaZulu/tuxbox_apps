@@ -20,17 +20,16 @@ class CStreamInfo : public CMenuTarget
 		int y;
 		int width;
 		int height;
-		FontsDef *fonts;
 		int hheight,mheight; // head/menu font height
 		
-		void paint(CFrameBuffer* frameBuffer);
+		void paint();
 
 	public:
 
-		CStreamInfo(FontsDef *Fonts);
+		CStreamInfo();
 
-		void hide(CFrameBuffer* frameBuffer);
-		int exec(CFrameBuffer* frameBuffer, CRCInput *rcInput, CMenuTarget* parent, string actionKey );
+		void hide();
+		int exec( CMenuTarget* parent, string actionKey );
 
 };
 

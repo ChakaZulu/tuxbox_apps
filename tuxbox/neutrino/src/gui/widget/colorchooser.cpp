@@ -1,15 +1,14 @@
 #include "colorchooser.h"
+#include "../global.h"
 
-
-CColorChooser::CColorChooser(string Name, FontsDef *Fonts, unsigned char *R, unsigned char *G, unsigned char *B, unsigned char* Alpha, CChangeObserver* Observer)
+CColorChooser::CColorChooser(string Name, unsigned char *R, unsigned char *G, unsigned char *B, unsigned char* Alpha, CChangeObserver* Observer)
 {
 	observer = Observer;
 	name = Name;
-	fonts = Fonts;
 	width = 360;
-	hheight = fonts->menu_title->getHeight();
-	mheight = fonts->menu->getHeight();
-	height = hheight+mheight*4;
+	hheight = g_Fonts->menu_title->getHeight();
+	mheight = g_Fonts->menu->getHeight();
+	height = hheight+ mheight* 4;
 	x=((720-width) >> 1) -20;
 	y=(576-height)>>1;
 
@@ -19,19 +18,19 @@ CColorChooser::CColorChooser(string Name, FontsDef *Fonts, unsigned char *R, uns
 	alpha = Alpha;
 }
 
-void CColorChooser::setColor(CFrameBuffer* frameBuffer)
+void CColorChooser::setColor()
 {
 	int color = convertSetupColor2RGB(*r,*g, *b);
 	if(!alpha)
 	{
-		frameBuffer->paletteSetColor(254, color, 0);
-		frameBuffer->paletteSet();
+		g_FrameBuffer->paletteSetColor(254, color, 0);
+		g_FrameBuffer->paletteSet();
 	}
 	else
 	{
 		int tAlpha = convertSetupAlpha2Alpha( *alpha );
-		frameBuffer->paletteSetColor(254, color, tAlpha);
-		frameBuffer->paletteSet();
+		g_FrameBuffer->paletteSetColor(254, color, tAlpha);
+		g_FrameBuffer->paletteSet();
 	}
 	/*
 	char colorstr[30];
@@ -41,22 +40,22 @@ void CColorChooser::setColor(CFrameBuffer* frameBuffer)
 	*/
 }
 
-int CColorChooser::exec(CFrameBuffer* frameBuffer, CRCInput *rcInput, CMenuTarget* parent, string)
+int CColorChooser::exec(CMenuTarget* parent, string)
 {
 	if (parent)
 	{
-		parent->hide(frameBuffer);
+		parent->hide();
 	}
-	setColor(frameBuffer);
-	paint( frameBuffer);
-	setColor(frameBuffer);
+	setColor();
+	paint();
+	setColor();
 
 	bool loop = true;
 
 	int selected = 0;
 	while(loop)
 	{
-		int key = rcInput->getKey(300); 
+		int key = g_RCInput->getKey(300);
 		if(key==-1)
 		{//timeout, close 
 			loop = false;
@@ -74,24 +73,24 @@ int CColorChooser::exec(CFrameBuffer* frameBuffer, CRCInput *rcInput, CMenuTarge
 			}
 			if(selected<max)
 			{
-				paintSlider(frameBuffer, x+10, y+hheight, r,"red", false);
-				paintSlider(frameBuffer, x+10, y+hheight+mheight, g,"green", false);
-				paintSlider(frameBuffer, x+10, y+hheight+mheight*2, b,"blue", false);
-				paintSlider(frameBuffer, x+10, y+hheight+mheight*3, alpha,"alpha",false);
+				paintSlider(x+10, y+ hheight, r, "red", false);
+				paintSlider(x+10, y+ hheight+ mheight, g, "green", false);
+				paintSlider(x+ 10, y+ hheight+ mheight* 2, b, "blue", false);
+				paintSlider(x+ 10, y+ hheight+ mheight* 3, alpha,"alpha",false);
 				selected++;
 				switch (selected)
 				{
 					case 0:
-						paintSlider(frameBuffer, x+10, y+hheight, r,"red", true);
+						paintSlider(x+ 10, y+ hheight, r, "red", true);
 						break;
 					case 1:
-						paintSlider(frameBuffer, x+10, y+hheight+mheight, g,"green", true);
+						paintSlider(x+ 10, y+ hheight+ mheight, g, "green", true);
 						break;
 					case 2:
-						paintSlider(frameBuffer, x+10, y+hheight+mheight*2, b,"blue", true);
+						paintSlider(x+ 10, y+ hheight+ mheight* 2, b, "blue", true);
 						break;
 					case 3:
-						paintSlider(frameBuffer, x+10, y+hheight+mheight*3, alpha,"alpha",true);
+						paintSlider(x+ 10, y+ hheight+ mheight* 3, alpha, "alpha", true);
 						break;
 				}
 			}
@@ -100,24 +99,24 @@ int CColorChooser::exec(CFrameBuffer* frameBuffer, CRCInput *rcInput, CMenuTarge
 		{
 			if(selected>0)
 			{
-				paintSlider(frameBuffer, x+10, y+hheight, r,"red", false);
-				paintSlider(frameBuffer, x+10, y+hheight+mheight, g,"green", false);
-				paintSlider(frameBuffer, x+10, y+hheight+mheight*2, b,"blue", false);
-				paintSlider(frameBuffer, x+10, y+hheight+mheight*3, alpha,"alpha",false);
+				paintSlider(x+10, y+hheight, r,"red", false);
+				paintSlider(x+10, y+hheight+mheight, g,"green", false);
+				paintSlider(x+10, y+hheight+mheight*2, b,"blue", false);
+				paintSlider(x+10, y+hheight+mheight*3, alpha,"alpha",false);
 				selected--;
 				switch (selected)
 				{
 					case 0:
-						paintSlider(frameBuffer, x+10, y+hheight, r,"red", true);
+						paintSlider(x+10, y+hheight, r,"red", true);
 						break;
 					case 1:
-						paintSlider(frameBuffer, x+10, y+hheight+mheight, g,"green", true);
+						paintSlider(x+10, y+hheight+mheight, g,"green", true);
 						break;
 					case 2:
-						paintSlider(frameBuffer, x+10, y+hheight+mheight*2, b,"blue", true);
+						paintSlider(x+10, y+hheight+mheight*2, b,"blue", true);
 						break;
 					case 3:
-						paintSlider(frameBuffer, x+10, y+hheight+mheight*3, alpha,"alpha",true);
+						paintSlider(x+10, y+hheight+mheight*3, alpha,"alpha",true);
 						break;
 				}
 			}
@@ -130,32 +129,32 @@ int CColorChooser::exec(CFrameBuffer* frameBuffer, CRCInput *rcInput, CMenuTarge
 					if (*r<100)
 					{
 						*r+=5;
-						paintSlider(frameBuffer, x+10, y+hheight, r,"red", true);
-						setColor(frameBuffer);
+						paintSlider(x+10, y+hheight, r,"red", true);
+						setColor();
 					}
 					break;
 				case 1:
 					if (*g<100)
 					{
 						*g+=5;
-						paintSlider(frameBuffer, x+10, y+hheight+mheight, g,"green", true);
-						setColor(frameBuffer);
+						paintSlider(x+10, y+hheight+mheight, g,"green", true);
+						setColor();
 					}
 					break;
 				case 2:
 					if (*b<100)
 					{
 						*b+=5;
-						paintSlider(frameBuffer, x+10, y+hheight+mheight*2, b,"blue", true);
-						setColor(frameBuffer);
+						paintSlider(x+10, y+hheight+mheight*2, b,"blue", true);
+						setColor();
 					}
 					break;
 				case 3:
 					if (*alpha<100)
 					{
 						*alpha+=5;
-						paintSlider(frameBuffer, x+10, y+hheight+mheight*3, alpha,"alpha",true);
-						setColor(frameBuffer);
+						paintSlider(x+10, y+hheight+mheight*3, alpha,"alpha",true);
+						setColor();
 					}
 					break;
 			}
@@ -168,76 +167,76 @@ int CColorChooser::exec(CFrameBuffer* frameBuffer, CRCInput *rcInput, CMenuTarge
 					if (*r>0)
 					{
 						*r-=5;
-						paintSlider(frameBuffer, x+10, y+hheight, r,"red", true);
-						setColor(frameBuffer);
+						paintSlider(x+10, y+hheight, r,"red", true);
+						setColor();
 					}
 					break;
 				case 1:
 					if (*g>0)
 					{
 						*g-=5;
-						paintSlider(frameBuffer, x+10, y+hheight+mheight, g,"green", true);
-						setColor(frameBuffer);
+						paintSlider(x+10, y+hheight+mheight, g,"green", true);
+						setColor();
 					}
 					break;
 				case 2:
 					if (*b>0)
 					{
 						*b-=5;
-						paintSlider(frameBuffer, x+10, y+hheight+mheight*2, b,"blue", true);
-						setColor(frameBuffer);
+						paintSlider(x+10, y+hheight+mheight*2, b,"blue", true);
+						setColor();
 					}
 					break;
 				case 3:
 					if (*alpha>0)
 					{
 						*alpha-=5;
-						paintSlider(frameBuffer, x+10, y+hheight+mheight*3, alpha,"alpha",true);
-						setColor(frameBuffer);
+						paintSlider(x+10, y+hheight+mheight*3, alpha,"alpha",true);
+						setColor();
 					}
 					break;
 			}
 		}
 	}
-	hide(frameBuffer);
+	hide();
 	if(observer)
 		observer->changeNotify(name);
 	return CMenuTarget::RETURN_REPAINT;
 }
 
-void CColorChooser::hide(CFrameBuffer* frameBuffer)
+void CColorChooser::hide()
 {
-	frameBuffer->paintBoxRel(x,y, width,height, COL_BACKGROUND);
+	g_FrameBuffer->paintBoxRel(x,y, width,height, COL_BACKGROUND);
 }
 
-void CColorChooser::paint(CFrameBuffer* frameBuffer)
+void CColorChooser::paint()
 {
-	frameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD);
-	fonts->menu_title->RenderString(x+10,y+hheight, width, name.c_str(), COL_MENUHEAD);
-	frameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT);
+	g_FrameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+10,y+hheight, width, name.c_str(), COL_MENUHEAD);
+	g_FrameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT);
 
-	paintSlider(frameBuffer, x+10, y+hheight, r,"red", true);
-	paintSlider(frameBuffer, x+10, y+hheight+mheight, g,"green", false);
-	paintSlider(frameBuffer, x+10, y+hheight+mheight*2, b,"blue", false);
-	paintSlider(frameBuffer, x+10, y+hheight+mheight*3, alpha,"alpha",false);
+	paintSlider(x+10, y+hheight, r,"red", true);
+	paintSlider(x+10, y+hheight+mheight, g,"green", false);
+	paintSlider(x+10, y+hheight+mheight*2, b,"blue", false);
+	paintSlider(x+10, y+hheight+mheight*3, alpha,"alpha",false);
 
 	//color preview
-	frameBuffer->paintBoxRel(x+220,y+hheight, mheight*4,mheight*4, COL_MENUHEAD);
-	frameBuffer->paintBoxRel(x+221,y+hheight+1, mheight*4-2,mheight*4-2, 254);
+	g_FrameBuffer->paintBoxRel(x+220,y+hheight, mheight*4,mheight*4, COL_MENUHEAD);
+	g_FrameBuffer->paintBoxRel(x+221,y+hheight+1, mheight*4-2,mheight*4-2, 254);
 }
 
-void CColorChooser::paintSlider(CFrameBuffer* frameBuffer, int x, int y, unsigned char *spos, string text, bool selected)
+void CColorChooser::paintSlider(int x, int y, unsigned char *spos, string text, bool selected)
 {
 	if (!spos)
 		return;
-	frameBuffer->paintBoxRel(x+70,y,120,mheight, COL_MENUCONTENT);
-	frameBuffer->paintIcon("volumebody.raw",x+70,y+2+mheight/4);
+	g_FrameBuffer->paintBoxRel(x+70,y,120,mheight, COL_MENUCONTENT);
+	g_FrameBuffer->paintIcon("volumebody.raw",x+70,y+2+mheight/4);
 	string iconfile = "volumeslider2";
 	if (selected)
 		iconfile += text;
 	iconfile +=".raw";
-	frameBuffer->paintIcon(iconfile,x+73+(*spos),y+mheight/4);
+	g_FrameBuffer->paintIcon(iconfile,x+73+(*spos),y+mheight/4);
 
-	fonts->menu->RenderString(x,y+mheight, width, text.c_str(), COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x,y+mheight, width, text.c_str(), COL_MENUCONTENT);
 }
 

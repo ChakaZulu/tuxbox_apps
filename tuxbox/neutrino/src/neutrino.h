@@ -46,7 +46,6 @@
 #include "driver/fontrenderer.h"
 #include "driver/rcinput.h"
 
-// #include "widget/window.h"
 #include "widget/color.h"
 #include "widget/menue.h"
 #include "widget/channellist.h"
@@ -88,11 +87,11 @@ class CNeutrinoApp : public CMenuTarget
 		mode_radio = 1
 	};
 
-	struct SNeutrinoSettings	settings;
 	string				settingsFile;
+//    struct SNeutrinoSettings	settings;
 
 	bool				nRun;
-	int				mode;
+	int				    mode;
 	char				volume;
 	bool				mute;
 		
@@ -101,27 +100,29 @@ class CNeutrinoApp : public CMenuTarget
 	channel_msg			firstchannel;
 	bool				zapit;
 
-	CRCInput			rcInput;
-	CFrameBuffer		frameBuffer;
+//	CRCInput			rcInput;
+//	CFrameBuffer		frameBuffer;
 	fontRenderClass		*fontRenderer;
-	FontsDef			*fonts;
+//	FontsDef			*fonts;
 
 	CColorSetupNotifier* colorSetupNotifier;
 
 	CChannelList		*channelList;
-	CRemoteControl		remoteControl;
-	CControld			Controld;
-	CInfoViewer			infoViewer;
-	CEpgData			epgData;
+//	CRemoteControl		remoteControl;
+//	CControld			Controld;
+//	CInfoViewer			infoViewer;
+//	CEpgData			epgData;
 
 	void firstChannel();
 	void channelsInit();
-	void setupDefaults(SNeutrinoSettings* settings);
-	void setupColors_classic(SNeutrinoSettings* settings);
-	void setupColors_neutrino(SNeutrinoSettings* settings);
-	void setupNetwork(SNeutrinoSettings* settings, bool force=false);
-	void saveSetup(SNeutrinoSettings* settings);
-	bool loadSetup(SNeutrinoSettings* settings);
+	void setupDefaults();
+	void setupColors_classic();
+	void setupColors_neutrino();
+	void setupNetwork( bool force= false );
+//	void saveSetup(SNeutrinoSettings* settings);
+//	bool loadSetup(SNeutrinoSettings* settings);
+    void saveSetup();
+	bool loadSetup();
 
 	void tvMode();
 	void radioMode();
@@ -154,7 +155,7 @@ class CNeutrinoApp : public CMenuTarget
 
 	int run(int argc, char **argv);
 	//callback stuff only....
-	int exec(CFrameBuffer* frameBuffer, CRCInput* rcInput, CMenuTarget* parent, string actionKey);
+	int exec(CMenuTarget* parent, string actionKey);
 };
 
 #endif
