@@ -1,5 +1,5 @@
 /*
-$Id: dmx_ts.c,v 1.27 2004/10/12 20:37:47 rasc Exp $
+$Id: dmx_ts.c,v 1.28 2004/11/16 09:15:03 obi Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dmx_ts.c,v 1.27 2004/10/12 20:37:47 rasc Exp $
 
 
 $Log: dmx_ts.c,v $
+Revision 1.28  2004/11/16 09:15:03  obi
+show received pid instead of command line pid if pid 0x2000 was specified (full TS)
+
 Revision 1.27  2004/10/12 20:37:47  rasc
  - Changed: TS pid filtering from file, behavior changed
  - New: new cmdline option -maxdmx <n>  (replaces -f using pidscan)
@@ -287,7 +290,8 @@ int  doReadTS (OPTION *opt)
 
        // -- new packet, output header
        indent (0);
-       print_packet_header (opt, "TS", opt->pid, count, n, skipped_bytes);
+       if (opt->pid != 0x2000)
+     	  print_packet_header (opt, "TS", opt->pid, count, n, skipped_bytes);
 
 
 	// -- SyncByte for TS packet and correct len?
@@ -304,7 +308,9 @@ int  doReadTS (OPTION *opt)
 	// -- filter pid?  (e.g. if multi-pid-ts-file)
 	if ((opt->pid >= 0) && (opt->pid <= MAX_PID) && is_ts_packet) {
 	   int packet_pid = getBits (b, 0,11, 13);
-	   if (opt->pid != packet_pid) {
+	   if (opt->pid == 0x2000) {
+     	        print_packet_header (opt, "TS", packet_pid, count, n, skipped_bytes);
+	   } else if (opt->pid != packet_pid) {
  		out_SW_NL(6,"skipped packet, assigned PID: ",packet_pid);
 		filter_match = 0;
 	   }
