@@ -25,7 +25,7 @@ private:
 	int type;
 public:
 	eZapPlugins(int type, eWidget* lcdTitle=0, eWidget* lcdElement=0);
-	eString execPluginByName(const char* name);
+	eString execPluginByName(const char* name, bool onlySearch=false);
 	void execPlugin(ePlugin* plugin);
 	int exec();
 	int find(bool ignore_requires=false);

@@ -209,7 +209,7 @@ int eZapPlugins::exec()
 	return res;
 }
 
-eString eZapPlugins::execPluginByName(const char* name)
+eString eZapPlugins::execPluginByName(const char* name, bool onlySearch)
 {
 	if ( name )
 	{
@@ -228,7 +228,8 @@ eString eZapPlugins::execPluginByName(const char* name)
 					eDebug("currently one plugin is running.. dont start another one!!");
 					return _("E: currently another plugin is running...");
 				}
-				execPlugin(&p);
+				if ( !onlySearch )
+					execPlugin(&p);
 				return "OK";
 			}
 			else if ( i == 2)

@@ -4,6 +4,7 @@
 #include <enigma.h>
 #include <enigma_epg.h>
 #include <enigma_main.h>
+#include <enigma_plugins.h>
 #include <sselect.h>
 
 #include <lib/base/i18n.h>
@@ -58,7 +59,13 @@ eEPGStyleSelector::eEPGStyleSelector()
 	eListBoxEntryText *sel[3];
 	sel[0] = new eListBoxEntryText(&list,_("Channel EPG"), (void*)1, 0, _("open EPG for selected Channel") );
 	sel[1] = new eListBoxEntryText(&list,_("Multi EPG"), (void*)2, 0, _("open EPG for next five channels") );
-	sel[2] = new eListBoxEntryText(&list,_("External EPG"), (void*)3, 0, _("open external plugin EPG") );
+
+	// only show external EPG Entry when it realy exist..
+	eZapPlugins plugins(2);
+	if ( plugins.execPluginByName("extepg.cfg",true) == "OK"
+		|| plugins.execPluginByName("_extepg.cfg",true) == "OK" )
+		sel[2] = new eListBoxEntryText(&list,_("External EPG"), (void*)3, 0, _("open external plugin EPG") );
+
 	list.setCurrent(sel[last-1]);
 	CONNECT( list.selected, eEPGStyleSelector::entrySelected );
 }
