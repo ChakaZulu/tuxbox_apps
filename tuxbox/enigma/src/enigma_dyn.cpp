@@ -66,7 +66,7 @@ using namespace std;
 
 #define NOCONTENT "<? header(\"HTTP/1.0 204 No Content\"); ?>"
 
-#define WEBXFACEVERSION "1.2.5"
+#define WEBXFACEVERSION "1.2.6"
 
 static int currentBouquet = 0;
 static int currentChannel = -1;
@@ -2465,7 +2465,11 @@ public:
 					int tablePos = 0;
 					time_t tableTime = start;
 					result << "<tr>"
-						"<td id=\"channel\" width=" << eString().sprintf("%d", CHANNELWIDTH) << ">" << filter_string(current->service_name) << "</td>";
+						<< "<td id=\"channel\" width=" << eString().sprintf("%d", CHANNELWIDTH) << ">"
+						<< "<span class=\"channel\">"
+						<< filter_string(current->service_name)
+						<< "</span>"
+						<< "</td>";
 					tablePos += CHANNELWIDTH;
 
 					timeMap::const_iterator It;
@@ -2536,21 +2540,25 @@ public:
 								<< "&duration=" << event.duration
 								<< "&descr=" << short_description
 								<< "&channel=" << filter_string(current->service_name)
-								<< "')\"><img src=\"kalarm.png\" border=0></a>"
+								<< "')\"><img src=\"timer.gif\" border=0></a>"
 								<< "&nbsp;&nbsp;";
 #endif
 							tm* t = localtime(&event.start_time);
 							result << std::setfill('0')
+								<< "<span class=\"time\">"
 								<< std::setw(2) << t->tm_mday << '.'
 								<< std::setw(2) << t->tm_mon+1 << ". - "
 								<< std::setw(2) << t->tm_hour << ':'
 								<< std::setw(2) << t->tm_min << ' '
+								<< "</span>"
+								<< "<span class=\"duration\">"
 								<< " (" << event.duration / 60 << " min)"
-
+								<< "</span>"
 								<< "<br><b>"
-
 								<< "<a href=\'javascript:switchChannel(\"" << ref2string(ref) << "\")\'>"
+								<< "<span class=\"description\">"
 								<< short_description
+								<< "</span>"
 								<< "</a>"
 
 								<< "</b><br>";
@@ -2611,7 +2619,7 @@ public:
 				<< std::setfill('0')
 				<< std::setw(2) << t->tm_mday << '.'
 				<< std::setw(2) << t->tm_mon+1 << "."
-				<< "<br>"
+				<< " - "
 				<< std::setw(2) << t->tm_hour << ':'
 				<< std::setw(2) << t->tm_min << ' '
 				<< "<br>"
@@ -2693,7 +2701,7 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 						<< "&duration=" << event.duration
 						<< "&descr=" << ((ShortEventDescriptor*)descriptor)->event_name
 						<< "&channel=" << filter_string(current->service_name)
-						<< "')\"><img src=\"kalarm.png\" border=0></a>"
+						<< "')\"><img src=\"timer.gif\" border=0></a>"
 						<< "&nbsp;&nbsp;";
 #endif
 					result << std::setw(2) << t->tm_mday << '.'
