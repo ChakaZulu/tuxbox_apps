@@ -41,6 +41,8 @@ struct SNeutrinoSettings
 
 	//misc
 	int box_Type;
+	int shutdown_real;
+	int shutdown_showclock;
 
 	//audio
 	int audio_Stereo;

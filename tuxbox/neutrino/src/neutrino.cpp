@@ -1,6 +1,6 @@
 /*
  
-        $Id: neutrino.cpp,v 1.120 2002/01/06 18:38:04 McClean Exp $
+        $Id: neutrino.cpp,v 1.121 2002/01/07 00:16:24 McClean Exp $
  
 	Neutrino-GUI  -   DBoxII-Project
  
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  
   $Log: neutrino.cpp,v $
+  Revision 1.121  2002/01/07 00:16:24  McClean
+  standby-mode
+
   Revision 1.120  2002/01/06 18:38:04  McClean
   save-optimize
 
@@ -583,6 +586,8 @@ void CNeutrinoApp::setupDefaults()
 
 	//misc
 	g_settings.box_Type = 1;
+	g_settings.shutdown_real = 1;
+	g_settings.shutdown_showclock = 1;
 
 	//video
 	g_settings.video_Signal = 0; //composite?
@@ -1283,6 +1288,11 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	oj->addOption(2, "Sagem");
 	oj->addOption(3, "Philips");
 	miscSettings.addItem( oj );
+
+	oj = new CMenuOptionChooser("miscsettings.shutdown_real", &g_settings.shutdown_real, true );
+	oj->addOption(0, "options.off");
+	oj->addOption(1, "options.on");
+	miscSettings.addItem( oj );
 }
 
 
@@ -1875,7 +1885,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 		}
 		else if (key==CRCInput::RC_standby)
 		{
-			nRun=false;
+			exec(NULL,"shutdown");
 		}
 
 		if ((mode==mode_tv) || ((mode==mode_radio)) )
@@ -1965,20 +1975,18 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 
 void CNeutrinoApp::ExitRun()
 {
-	saveSetup();
 	printf("neutrino exit\n");
 	//shutdown screen
 
 	//memset(frameBuffer.lfb, 255, frameBuffer.Stride()*576);
 	for(int x=0;x<256;x++)
 		g_FrameBuffer->paletteSetColor(x, 0x000000, 0xffff);
-
 	g_FrameBuffer->paletteSet();
 
 	g_FrameBuffer->loadPicture2Mem("shutdown.raw", g_FrameBuffer->lfb );
-	//	g_FrameBuffer->paintIcon8("shutdown.raw",0,0);
 	g_FrameBuffer->loadPal("shutdown.pal");
 
+	saveSetup();
 	g_Controld->shutdown();
 	sleep(55555);
 }
@@ -2151,8 +2159,23 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 	}
 	else if(actionKey=="shutdown")
 	{
-		nRun=false;
-		returnval = CMenuTarget::RETURN_EXIT_ALL;
+		if(!g_settings.shutdown_real)
+		{
+			g_lcdd->setMode(CLcddClient::MODE_STANDBY);
+			g_Controld->videoPowerDown(true);
+			while(g_RCInput->getKey(1)!= CRCInput::RC_timeout)
+			{}
+			printf("standby-loop\n");
+			while (g_RCInput->getKey(100)!=CRCInput::RC_standby)
+			{}
+			printf("standby-loopended\n");
+			g_lcdd->setMode(CLcddClient::MODE_TVRADIO);
+			g_Controld->videoPowerDown(false);
+		}
+		else
+		{
+			ExitRun();
+		}
 	}
 	else if(actionKey=="tv")
 	{
@@ -2219,7 +2242,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.120 2002/01/06 18:38:04 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.121 2002/01/07 00:16:24 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

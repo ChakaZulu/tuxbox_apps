@@ -31,8 +31,9 @@ mainsettings.keybinding Ajuster des clés
 mainsettings.misc Misc Settings
 
 miscsettings.head Misc Settings
-miscsettings.epgold EPG the old way...
+miscsettings.shutdown_real Real Shutdown
 miscsettings.boxtype DBox type
+
 
 languagesetup.head Ajuster un langue
 languagesetup.select Langue

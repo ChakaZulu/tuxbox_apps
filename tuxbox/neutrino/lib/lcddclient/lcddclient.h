@@ -113,7 +113,8 @@ class CLcddClient
 			MODE_SCART,
 			MODE_MENU,
 			MODE_SAVER,
-			MODE_SHUTDOWN
+			MODE_SHUTDOWN,
+			MODE_STANDBY
 		};
 
 

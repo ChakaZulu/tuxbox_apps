@@ -31,7 +31,7 @@ mainsettings.keybinding Ustawienie klawiszy
 mainsettings.misc Misc Settings
 
 miscsettings.head Misc Settings
-miscsettings.epgold EPG starym sposobem pokazywac
+miscsettings.shutdown_real Real Shutdown
 miscsettings.boxtype DBox type
 
 languagesetup.head Ustawienie jezyka

@@ -351,7 +351,8 @@ void setScartMode(bool onoff)
 void disableVideoOutput(bool disable)
 {
 	int arg=disable?1:0;
-    int fd;
+	int fd;
+	printf("[controld] videoOutput %s\n", disable?"off":"on");
 
 	if((fd = open(SAA7126_DEVICE,O_RDWR|O_NONBLOCK)) < 0)
 	{
@@ -359,7 +360,7 @@ void disableVideoOutput(bool disable)
 		return;
 	}
 
-	if ( (ioctl(fd,SAAIOGPOWERSAVE,&arg) < 0))
+	if ( (ioctl(fd,SAAIOSPOWERSAVE,&arg) < 0))
 	{
 		perror("[controld] IOCTL: ");
 		close(fd);

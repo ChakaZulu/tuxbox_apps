@@ -31,7 +31,7 @@ mainsettings.keybinding Tasten-Einstellungen
 mainsettings.misc Diverse Einstellungen
 
 miscsettings.head Diverse Einstellungen
-miscsettings.epgold EPG auf alte Art anzeigen
+miscsettings.shutdown_real DBox echt herunterfahren
 miscsettings.boxtype DBox Hersteller
 
 languagesetup.head Spracheinstellungen

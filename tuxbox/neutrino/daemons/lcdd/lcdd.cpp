@@ -54,7 +54,7 @@ fontRenderClass	*fontRenderer;
 FontsDef		fonts;
 pthread_t		thrTime;
 
-CLcddClient::mode		mode;
+CLcddClient::mode	mode;
 raw_display_t	icon_lcd;
 raw_display_t	icon_setup;
 raw_display_t	icon_power;
@@ -62,6 +62,7 @@ raw_display_t	icon_power;
 char			servicename[40];
 char			volume;
 bool			muted, shall_exit, debugoutput;
+bool			showclock;
 
 void show_servicename(string);
 void show_volume(char);
@@ -145,13 +146,21 @@ void show_time()
 {
 	char timestr[50];
 	struct timeb tm;
-	if ((mode==CLcddClient::MODE_TVRADIO) || (mode==CLcddClient::MODE_SCART))
+	if (showclock)
 	{
 		ftime(&tm);
 		strftime((char*) &timestr, 20, "%H:%M", localtime(&tm.time) );
 
-		display.draw_fill_rect (81,50,120,64, CLCDDisplay::PIXEL_OFF);
-		fonts.time->RenderString(82,62, 50, timestr, CLCDDisplay::PIXEL_ON);
+		if(mode!=CLcddClient::MODE_STANDBY)
+		{
+			display.draw_fill_rect (81,50,120,64, CLCDDisplay::PIXEL_OFF);
+			fonts.time->RenderString(82,62, 50, timestr, CLCDDisplay::PIXEL_ON);
+		}
+		else
+		{
+			display.draw_fill_rect (0,0,120,64, CLCDDisplay::PIXEL_OFF);
+			fonts.menutitle->RenderString(60,62, 60, timestr, CLCDDisplay::PIXEL_ON);
+		}
 		display.update();
 	}
 }
@@ -211,33 +220,50 @@ void set_mode(CLcddClient::mode m, char *title)
 	switch (m)
 	{
 		case CLcddClient::MODE_TVRADIO:
+			//printf("[lcdd] mode: tvradio\n");
 			display.load_screen(&icon_lcd);
 			mode = m;
+			showclock = true;
 			show_volume(volume);
 			show_servicename(servicename);
 			show_time();
 			display.update();
 			break;
 		case CLcddClient::MODE_SCART:
+			//printf("[lcdd] mode: scart\n");
 			display.load_screen(&icon_lcd);
 			mode = m;
+			showclock = true;
 			show_volume(volume);
 			show_time();
 			display.update();
 			break;
 		case CLcddClient::MODE_MENU:
+			//printf("[lcdd] mode: menu\n");
 			mode = m;
+			showclock = false;
 			display.load_screen(&icon_setup);
 			fonts.menutitle->RenderString(-1,28, 140, title,
 				CLCDDisplay::PIXEL_ON);
 			display.update();
 			break;
 		case CLcddClient::MODE_SHUTDOWN:
+			//printf("[lcdd] mode: shutdown\n");
 			mode = m;
+			showclock = false;
 			display.load_screen(&icon_power);
 			display.update();
 			shall_exit = true;
 			break;
+		case CLcddClient::MODE_STANDBY:
+			//printf("[lcdd] mode: standby\n");
+			mode = m;
+			showclock = true;
+			display.draw_fill_rect (-1,0,120,64, CLCDDisplay::PIXEL_OFF);
+			show_time();
+			display.update();
+			break;
+
 		default:
 			printf("[lcdd] Unknown mode: %i\n", m);
 			return;
@@ -301,8 +327,8 @@ int main(int argc, char **argv)
 		printf("exit...(no neutrino_lcd.raw)\n");
 		exit(-1);
 	}
-
 	display.dump_screen(&icon_lcd);
+
 	mode = CLcddClient::MODE_TVRADIO;
 	show_servicename("");
 	show_time();
