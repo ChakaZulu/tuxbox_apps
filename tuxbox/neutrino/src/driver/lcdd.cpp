@@ -279,9 +279,9 @@ void CLCD::showMP3(const std::string artist, const std::string title,
 	display.draw_fill_rect (-1,10,104,24, CLCDDisplay::PIXEL_OFF);
 	display.draw_fill_rect (-1,20,104,37, CLCDDisplay::PIXEL_OFF);
 	display.draw_fill_rect (-1,33,121,50, CLCDDisplay::PIXEL_OFF);
-	fonts.menu->RenderString(0,22, 107, artist.c_str() , CLCDDisplay::PIXEL_ON, 0);
-	fonts.menu->RenderString(0,35, 107, album.c_str() , CLCDDisplay::PIXEL_ON, 0);
-	fonts.menu->RenderString(0,48, 125, title.c_str() , CLCDDisplay::PIXEL_ON, 0);
+	fonts.menu->RenderString(0,22, 107, artist.c_str() , CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
+	fonts.menu->RenderString(0,35, 107, album.c_str() , CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
+	fonts.menu->RenderString(0,48, 125, title.c_str() , CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
 	display.update();
 }
 
