@@ -5,7 +5,8 @@
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
- *    V1.8: zap subpages, picture&text mode, subtitle fixed                   *
+ *    V1.9: enx fixed, subpage zapping fixed, tvmode reactivated              *
+ *    V1.8: zap subpages, text&picture mode, subtitle fixed                   *
  *    V1.7: speedup?, neutrino look ;)                                        *
  *    V1.6: added transparency mode                                           *
  *    V1.5: added newsflash/subtitle support                                  *
@@ -25,7 +26,7 @@ void plugin_exec(PluginParam *par)
 {
 	//show versioninfo
 
-		printf("\nTuxTxt 1.8 - Coypright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
+		printf("\nTuxTxt 1.9 - Coypright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
 
 	//get params
 
@@ -140,6 +141,8 @@ void plugin_exec(PluginParam *par)
 
 					case RC_DBOX:	SwitchScreenMode();
 									break;
+
+					case RC_MUTE:	SwitchTVMode();
 				}
 			}
 
@@ -174,10 +177,11 @@ int Init()
 
 	//open pig
 
+		pig = -1;
+
 		if((pig = open("/dev/dbox/pig0", O_RDONLY)) == -1)
 		{
 			perror("TuxTxt <open /dev/dbox/pig0>");
-			return 0;
 		}
 
 	//setup rc
@@ -313,7 +317,7 @@ void CleanUp()
 
 	//hide pig
 
-		avia_pig_hide(pig);
+		if(screenmode) avia_pig_hide(pig);
 
 	//stop decode-thread
 
@@ -672,10 +676,6 @@ void GetNextSubPage()
 
 		if(subpage != 0)
 		{
-			//enable manual subpage zapping
-
-				zap_subpage_manual = 1;
-
 			//search next subpage
 
 				for(loop = subpage + 1; loop <= 0x79; loop++)
@@ -689,6 +689,10 @@ void GetNextSubPage()
 							RenderCharFB('S', white);
 							RenderCharFB('+', white);
 							RenderCharFB('1', white);
+
+						//enable manual subpage zapping
+
+							zap_subpage_manual = 1;
 
 						//update page
 
@@ -710,6 +714,10 @@ void GetNextSubPage()
 							RenderCharFB('S', white);
 							RenderCharFB('+', white);
 							RenderCharFB('1', white);
+
+						//enable manual subpage zapping
+
+							zap_subpage_manual = 1;
 
 						//update page
 
@@ -744,10 +752,6 @@ void GetPrevSubPage()
 
 		if(subpage != 0)
 		{
-			//enable manual subpage zapping
-
-				zap_subpage_manual = 1;
-
 			//search previous subpage
 
 				for(loop = subpage - 1; loop > 0x00; loop--)
@@ -761,6 +765,10 @@ void GetPrevSubPage()
 							RenderCharFB('S', white);
 							RenderCharFB('-', white);
 							RenderCharFB('1', white);
+
+						//enable manual subpage zapping
+
+							zap_subpage_manual = 1;
 
 						//update page
 
@@ -782,6 +790,10 @@ void GetPrevSubPage()
 							RenderCharFB('S', white);
 							RenderCharFB('-', white);
 							RenderCharFB('1', white);
+
+						//enable manual subpage zapping
+
+							zap_subpage_manual = 1;
 
 						//update page
 
@@ -815,6 +827,8 @@ void SwitchTranspMode()
 
 			printf("TuxTxt <SwitchTranspMode => %d>\n", transpmode);
 
+		//update page
+
 			pageupdate = 1;
 	}
 }
@@ -827,46 +841,79 @@ void SwitchScreenMode()
 {
 	int error;
 
-	//reset transparency mode
+	if(pig != -1)
+	{
+		//reset transparency mode
 
-		if(transpmode) SwitchTranspMode();
+			if(transpmode) SwitchTranspMode();
 
-	//toggle mode
+		//toggle mode
 
-		screenmode++;
-		screenmode &= 1;
+			screenmode++;
+			screenmode &= 1;
 
-		printf("TuxTxt <SwitchScreenMode => %d>\n", screenmode);
+			printf("TuxTxt <SwitchScreenMode => %d>\n", screenmode);
 
-		pageupdate = 1;
+		//update page
 
-	//clear backbuffer
+			pageupdate = 1;
 
-		memset(&backbuffer, black, sizeof(backbuffer));
+		//clear backbuffer
 
-	//set mode
+			memset(&backbuffer, black, sizeof(backbuffer));
 
-		if(screenmode == 0)
-		{
-			fontwidth  = 16;
-			fontheight = 22;
+		//set mode
 
-			avia_pig_hide(pig);
-		}
-		else
-		{
-			fontwidth  =  8;
-			fontheight = 21;
+			if(screenmode)
+			{
+				fontwidth  =  8;
+				fontheight = 21;
 
-			avia_pig_set_pos(pig, (StartX+269), (StartY+20));
-			avia_pig_set_size(pig, 320, 504);
-			avia_pig_show(pig);
-		}
+				avia_pig_set_pos(pig, (StartX+269), (StartY+20));
+				avia_pig_set_size(pig, 320, 504);
+				avia_pig_show(pig);
+			}
+			else
+			{
+				fontwidth  = 16;
+				fontheight = 22;
 
-		if((error = FT_Set_Pixel_Sizes(face, fontwidth, fontheight)) != 0)
-		{
-			printf("TuxTxt <FT_Set_Pixel_Sizes => 0x%.2X>", error);
-		}
+				avia_pig_hide(pig);
+			}
+
+			if((error = FT_Set_Pixel_Sizes(face, fontwidth, fontheight)) != 0)
+			{
+				printf("TuxTxt <FT_Set_Pixel_Sizes => 0x%.2X>", error);
+			}
+	}
+}
+
+/******************************************************************************
+ * SwitchTVMode                                                               *
+ ******************************************************************************/
+
+void SwitchTVMode()
+{
+	if(!screenmode)
+	{
+		//toggle mode
+
+			tvmode++;
+			tvmode &= 1;
+
+			printf("TuxTxt <SwitchTVMode => %d>\n", tvmode);
+
+		//set mode
+
+			if(tvmode)
+			{
+				memset(lfb, transp, var_screeninfo.xres * var_screeninfo.yres);
+			}
+			else
+			{
+				pageupdate = 1;
+			}
+	}
 }
 
 /******************************************************************************
@@ -1072,7 +1119,7 @@ void RenderPage()
 {
 	int row, col, byte;
 
-	if(pageupdate == 1 && current_page != page && inputcounter == 2)
+	if(!tvmode && pageupdate && current_page != page && inputcounter == 2)
 	{
 		//reset update flag
 
@@ -1107,7 +1154,7 @@ void RenderPage()
 
 			memcpy(lfb, &backbuffer, sizeof(backbuffer));
 	}
-	else
+	else if(!tvmode)
 	{
 		//update timestring
 
@@ -1128,7 +1175,7 @@ void RenderPage()
 void DecodePage()
 {
 	int row, col;
-	int hide = 0, clear, loop;
+	int boxed = 0, clear, loop;
 	int foreground, background, doubleheight, charset;
 
 	//copy page to decode buffer
@@ -1142,11 +1189,11 @@ void DecodePage()
 
 	//check for newsflash & subtitle
 
-		if(dehamming[page_char[11-6]] & 12 && !screenmode) hide = 1;
+		if(dehamming[page_char[11-6]] & 12 && !screenmode) boxed = 1;
 
 	//modify header
 
-		if(hide) memset(&page_char, ' ', 40);
+		if(boxed) memset(&page_char, ' ', 40);
 		else     memcpy(&page_char, " TuxTxt ", 8);
 
 	//decode
@@ -1160,7 +1207,7 @@ void DecodePage()
 				doubleheight = 0;
 				charset = 0;
 
-				if(hide == 1 && memchr(&page_char[row*40], start_box, 40) == 0)
+				if(boxed == 1 && memchr(&page_char[row*40], start_box, 40) == 0)
 				{
 					foreground = transp;
 					background = transp;
@@ -1221,7 +1268,7 @@ void DecodePage()
 												break;
 
 						case end_box:			page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
-												if(hide)
+												if(boxed)
 												{
 													foreground = transp;
 													background = transp;
@@ -1229,7 +1276,7 @@ void DecodePage()
 												break;
 
 						case start_box:			page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
-												if(hide) for(clear = 0; clear < col; clear++) page_atrb[row*40 + clear] = transp<<4 | transp;
+												if(boxed) for(clear = 0; clear < col; clear++) page_atrb[row*40 + clear] = transp<<4 | transp;
 												break;
 
 						case normal_size:		doubleheight = 0;
@@ -1427,6 +1474,8 @@ int GetRCCode()
 
 							case RC1_HOME:	RCCode = RC_HOME;
 											break;
+
+							case RC1_MUTE:	RCCode = RC_MUTE;
 						}
 					}
 					else
@@ -1592,7 +1641,12 @@ void *CacheThread(void *arg)
 
 							//set update flag
 
-								if(current_page == page) pageupdate = 1;
+								if(current_page == page)
+								{
+									pageupdate = 1;
+
+									if(!zap_subpage_manual) subpage = current_subpage;
+								}
 
 							//check controlbits
 

@@ -137,6 +137,7 @@ void GetNextSubPage();
 void GetPrevSubPage();
 void SwitchTranspMode();
 void SwitchScreenMode();
+void SwitchTVMode();
 void RenderCharFB(int Char, int Attribute);
 void RenderCharBB(int Char, int Attribute);
 void RenderPageNotFound();
@@ -165,7 +166,7 @@ int vtxtpid;
 int PosX, PosY, StartX, StartY;
 int current_page, current_subpage, page, subpage, lastpage, pageupdate, zap_subpage_manual;
 int inputcounter;
-int screenmode, transpmode;
+int screenmode, transpmode, tvmode;
 int fontwidth, fontheight;
 
 pthread_t thread_id;
