@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.115 2002/04/16 11:23:50 field Exp $
+//  $Id: sectionsd.cpp,v 1.116 2002/04/16 13:03:26 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.116  2002/04/16 13:03:26  field
+//  stime in neutrino verschoben
+//
 //  Revision 1.115  2002/04/16 11:23:50  field
 //  Timeout-Handling umgestellt
 //
@@ -1571,7 +1574,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.115 2002/04/16 11:23:50 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.116 2002/04/16 13:03:26 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -3042,8 +3045,7 @@ static void *timeThread(void *)
 {
 	unsigned timeoutInSeconds= 31;
 	char *buf;
-	struct timeval tv;
-	long long timeDiff;
+	time_t tim;
 
 	dmxTOT.addfilter(0x73, 0xff);
 	dmxTOT.addfilter(0x70, (0xff- 0x03));
@@ -3100,12 +3102,11 @@ static void *timeThread(void *)
 				case 0x70:
 				{
 				    dmxTOT.unlock();
-                	time_t tim=changeUTCtoCtime(((const unsigned char *)&tdt_tot_header)+3);
+                	tim=changeUTCtoCtime(((const unsigned char *)&tdt_tot_header)+3);
     				if(tim)
     				{
-						gettimeofday( &tv, NULL );
-
-      					if(stime(&tim)< 0)
+    					// alles herausgetan, das macht jetzt das neutrino!
+/*      					if(stime(&tim)< 0)
       					{
         					perror("[sectionsd] cannot set date");
 							dmxTOT.closefd();
@@ -3123,6 +3124,8 @@ static void *timeThread(void *)
     	  					time_t t=time(NULL);
       						dprintf("TDT/TOT: local time: %s", ctime(&t));
       					}
+*/
+						timeset=1;
     				}
 
     				break;
@@ -3132,7 +3135,8 @@ static void *timeThread(void *)
 			}
   		} while (timeset!=1);
 
-  		eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD, &timeDiff, sizeof(timeDiff) );
+//  		eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD, &timeDiff, sizeof(timeDiff) );
+		eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD, &tim, sizeof(tim) );
 
 		dmxTOT.closefd();
 		dprintf("dmxTOT: changing from TDT/TOT to TOT.\n");
@@ -3197,7 +3201,8 @@ static void *timeThread(void *)
 //      printf("Time offset %d", timeOffsetMinutes);
 //      if(timeOffsetFound)
 //        tim+=timeOffsetMinutes*60L;
-				if(stime(&tim)< 0)
+
+/*				if(stime(&tim)< 0)
 				{
         			perror("[sectionsd] cannot set date");
     				dmxTOT.closefd();
@@ -3207,6 +3212,8 @@ static void *timeThread(void *)
       			timeset=1;
 				time_t t=time(NULL);
       			dprintf("TOT: local time: %s", ctime(&t));
+*/
+				eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD, &tim, sizeof(tim) );
     		}
 
     		dmxTOT.closefd();
@@ -3736,7 +3743,7 @@ int main(int argc, char **argv)
 	int rc;
 	struct sockaddr_in serverAddr;
 
-	printf("$Id: sectionsd.cpp,v 1.115 2002/04/16 11:23:50 field Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.116 2002/04/16 13:03:26 field Exp $\n");
 	try
 	{
 
