@@ -2889,6 +2889,10 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		{
 			uint new_msg;
 
+			/* Note: pressing the power button on the dbox (not the remote control) over 1 second */
+			/*       shuts down the system even if !g_settings.shutdown_real_rcdelay (see below)  */
+			gettimeofday(&standby_pressed_at, NULL);
+
 			if (mode == mode_standby)
 			{
 				new_msg = NeutrinoMessages::STANDBY_OFF;
@@ -2899,10 +2903,6 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 			}
 			else
 			{
-                                /* Note: pressing the power button on the dbox (not the remote control) over 1 second */
-				/*       shuts down the system even if !g_settings.shutdown_real_rcdelay (see below)  */
-				gettimeofday(&standby_pressed_at, NULL);
-
 				new_msg = NeutrinoMessages::STANDBY_ON;
 
 				if ((g_settings.shutdown_real_rcdelay))
