@@ -54,10 +54,10 @@ class CStringInput : public CMenuTarget
 		std::string name;
 		std::string hint_1, hint_2;
 		std::string iconfile;
-		char *      validchars;
-		char *      value;
-		int         size;
-		int         selected;
+		const char * validchars;
+		char *       value;
+		int          size;
+		int          selected;
 		CChangeObserver * observ;
 
 		virtual void paint();
@@ -77,7 +77,7 @@ class CStringInput : public CMenuTarget
 	public:
 
 		// Name, Hint_1, Hint_2: UTF-8 encoded
-		CStringInput(const char * const Name, char* Value, int Size, const char * const Hint_1 = NULL, const char * const Hint_2 = NULL, char* Valid_Chars= "0123456789. ", CChangeObserver* Observ = NULL, const char * const Icon = NULL);
+		CStringInput(const char * const Name, char* Value, int Size, const char * const Hint_1 = NULL, const char * const Hint_2 = NULL, const char * const Valid_Chars= "0123456789. ", CChangeObserver* Observ = NULL, const char * const Icon = NULL);
 
 		void hide();
 		int exec( CMenuTarget* parent, std::string actionKey );
@@ -104,7 +104,7 @@ class CStringInputSMS : public CStringInput
 		virtual void paint();
 
 	public:
-		CStringInputSMS(const char * const Name, char* Value, int Size, const char * const Hint_1 = NULL, const char * const Hint_2 = NULL, char* Valid_Chars= "", CChangeObserver* Observ = NULL, const char * const Icon = NULL);
+		CStringInputSMS(const char * const Name, char* Value, int Size, const char * const Hint_1, const char * const Hint_2, const char * const Valid_Chars, CChangeObserver* Observ = NULL, const char * const Icon = NULL);
 };
 
 class CPINInput : public CStringInput
