@@ -64,64 +64,51 @@ CKeyChooser::~CKeyChooser()
 
 void CKeyChooser::paint()
 {
-	CMenuWidget::paint();
+	std::string * text = &(((CMenuSeparator *)(items[0]))->text);
+	*text = g_Locale->getText("keychoosermenu.currentkey");
+	(*text) += ": ";
+	(*text) += CRCInput::getKeyName(*key);
 
-	std::string text = g_Locale->getText("keychoosermenu.currentkey");
-	text += ": ";
-	text += CRCInput::getKeyName(*key);
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, y+ 65, width, text, COL_MENUCONTENT, 0, true); // UTF-8
+	CMenuWidget::paint();
 }
 
 //*****************************
 CKeyChooserItem::CKeyChooserItem(const char * const Name, int *Key)
 {
-	frameBuffer = CFrameBuffer::getInstance();
-	hheight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
-	mheight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
 	name = Name;
 	key = Key;
-	width = 350;
-	height = hheight+2*mheight;
-	x=((720-width) >> 1) -20;
-	y=(576-height)>>1;
+	x = y = width = height = 0;
 }
 
 
 int CKeyChooserItem::exec(CMenuTarget* parent, const std::string &)
 {
+	uint msg;
+	uint data;
+	unsigned long long timeoutEnd;
+
 	int res = menu_return::RETURN_REPAINT;
 
 	if (parent)
-	{
 		parent->hide();
-	}
+
 	paint();
 
 	g_RCInput->clearRCMsg();
 
-	uint msg; uint data;
-	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_menu );
+	timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing_menu);
 
-	bool loop=true;
-	while (loop)
+ get_Message:
+	g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+	
+	if (msg != CRCInput::RC_timeout)
 	{
-		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
-
-		if ( msg == CRCInput::RC_timeout )
-			loop = false;
+		if ((msg >= 0) && (msg <= CRCInput::RC_MaxRC))
+			*key = msg;
+		else if (CNeutrinoApp::getInstance()->handleMsg(msg, data) & messages_return::cancel_all)
+			res = menu_return::RETURN_EXIT_ALL;
 		else
-		{
-			if ( ( msg >= 0 ) && ( msg <= CRCInput::RC_MaxRC ) )
-			{
-				loop = false;
-				*key = msg;
-			}
-			else if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
-			{
-				res = menu_return::RETURN_EXIT_ALL;
-				loop = false;
-			}
-		}
+			goto get_Message;
 	}
 
 	hide();
@@ -130,15 +117,25 @@ int CKeyChooserItem::exec(CMenuTarget* parent, const std::string &)
 
 void CKeyChooserItem::hide()
 {
-	frameBuffer->paintBackgroundBoxRel(x, y, width, height);
+	CFrameBuffer::getInstance()->paintBackgroundBoxRel(x, y, width, height);
 }
 
 void CKeyChooserItem::paint()
 {
+	int hheight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
+	int mheight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
 
-	frameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD);
+	width       = 350;
+	height      = hheight + 2 * mheight;
+	x           = ((720-width) >> 1) -20;
+	y           = (576-height) >> 1;
+
+	CFrameBuffer * frameBuffer = CFrameBuffer::getInstance();
+
+	frameBuffer->paintBoxRel(x, y          , width, hheight         , COL_MENUHEAD   );
+	frameBuffer->paintBoxRel(x, y + hheight, width, height - hheight, COL_MENUCONTENT);
+
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+ 10, y+ hheight, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
-	frameBuffer->paintBoxRel(x, y+ hheight, width, height-hheight, COL_MENUCONTENT);
 
 	//paint msg...
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, y+ hheight+ mheight, width, g_Locale->getText("keychooser.text1"), COL_MENUCONTENT, 0, true); // UTF-8

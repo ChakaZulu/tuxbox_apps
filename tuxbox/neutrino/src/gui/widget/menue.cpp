@@ -320,7 +320,7 @@ void CMenuWidget::paint()
 	iconOffset= 0;
 	for (unsigned int i= 0; i< items.size(); i++)
 	{
-		if ((items[i]->iconName!= "") || CRCInput::isNumeric(items[i]->directKey))
+		if ((!(items[i]->iconName.empty())) || CRCInput::isNumeric(items[i]->directKey))
 		{
 			iconOffset = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
 			break;
@@ -484,7 +484,7 @@ int CMenuOptionChooser::paint( bool selected )
 		}
 	}
 
-	if (iconName!="")
+	if (!(iconName.empty()))
 	{
 		frameBuffer->paintIcon(iconName, x + 10, y + ((height - 20) >> 1));
 	}
@@ -766,16 +766,16 @@ int CMenuSeparator::paint(bool selected)
 
 bool CPINProtection::check()
 {
-	char cPIN[4] = "";
-	char hint[100] = "";
+	char cPIN[4];
+	const char * hint = NULL;
 	do
 	{
-		strcpy( cPIN, "");
+		cPIN[0] = 0;
 		CPINInput* PINInput = new CPINInput( "pinprotection.head", cPIN, 4, hint);
 		PINInput->exec( getParent(), "");
 		delete PINInput;
-		strcpy( hint, "pinprotection.wrongcode");
-	} while ((strncmp(cPIN,validPIN,4) != 0) && ( std::string(cPIN) != ""));
+		hint = "pinprotection.wrongcode";
+	} while ((strncmp(cPIN,validPIN,4) != 0) && (cPIN[0] != 0));
 	return ( strncmp(cPIN,validPIN,4) == 0);
 }
 
@@ -784,22 +784,22 @@ bool CZapProtection::check()
 {
 
 	int res;
-	char cPIN[5] = "";
-	std::string hint2;
+	char cPIN[5];
+	const char * hint2 = NULL;
 	do
 	{
-		strcpy( cPIN, "" );
+		cPIN[0] = 0;
 
-		CPLPINInput* PINInput = new CPLPINInput( "parentallock.head", cPIN, 4, hint2.c_str(), fsk );
+		CPLPINInput* PINInput = new CPLPINInput( "parentallock.head", cPIN, 4, hint2, fsk );
 
 		res = PINInput->exec( getParent(), "");
 		delete PINInput;
 
-		hint2= "pinprotection.wrongcode";
+		hint2 = "pinprotection.wrongcode";
 	} while ( (strncmp(cPIN,validPIN,4) != 0) &&
-			  ( std::string(cPIN) != "" ) &&
-			  ( res == menu_return::RETURN_REPAINT ) &&
-			  ( fsk >= g_settings.parentallock_lockage ) );
+		  (cPIN[0] != 0) &&
+		  ( res == menu_return::RETURN_REPAINT ) &&
+		  ( fsk >= g_settings.parentallock_lockage ) );
 	return ( ( strncmp(cPIN,validPIN,4) == 0 ) ||
 			 ( fsk < g_settings.parentallock_lockage ) );
 }

@@ -63,15 +63,13 @@ class CKeyChooserItem : public CMenuTarget
 {
 	private:
 
-		CFrameBuffer	*frameBuffer;
 		int x;
 		int y;
 		int width;
 		int height;
-		int hheight; // head font height
-		int mheight; // menu font height
-		std::string	name;
-		int		*key;
+
+		const char * name;
+		int        * key;
 
 		void paint();
 

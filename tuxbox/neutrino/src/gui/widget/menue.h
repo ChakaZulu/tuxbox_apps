@@ -130,9 +130,10 @@ class CMenuItem
 class CMenuSeparator : public CMenuItem
 {
 		int		type;
-		std::string	text;
 
 	public:
+		std::string	text;
+
 		enum
 		{
 		    EMPTY =	0,
