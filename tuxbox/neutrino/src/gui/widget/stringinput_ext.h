@@ -200,5 +200,23 @@ class CTimeInput : public CExtendedInput
 		CTimeInput(const neutrino_locale_t Name, char* Value, const neutrino_locale_t Hint_1, const neutrino_locale_t Hint_2, CChangeObserver* Observ = NULL, bool* cancel=NULL);
 };
 
+//----------------------------------------------------------------------------------------------------
+
+class CIntInput : public CExtendedInput
+{
+	char myValueString[16];
+	long* myValue;
+	unsigned int m_size;
+	protected:
+		virtual void onBeforeExec();
+		virtual void onAfterExec();
+
+	public:
+		/**
+		 *@param Size how many digits can be entered
+		 */
+		CIntInput(const neutrino_locale_t Name, long& Value, const unsigned int Size, const neutrino_locale_t Hint_1, const neutrino_locale_t Hint_2, CChangeObserver* Observ = NULL);
+};
+
 
 #endif

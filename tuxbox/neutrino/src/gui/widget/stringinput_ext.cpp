@@ -590,5 +590,42 @@ void CTimeInput::onAfterExec()
 	strcpy(tmp, value);
 	strcpy(value+1, tmp+2);
 }
+//-----------------------------#################################-------------------------------------------------------
+
+CIntInput::CIntInput(const neutrino_locale_t Name, long& Value, const unsigned int Size, const neutrino_locale_t Hint_1, const neutrino_locale_t Hint_2, CChangeObserver* Observ)
+	: CExtendedInput(Name, myValueString, Hint_1, Hint_2, Observ)
+{
+	myValue = &Value;
+	if (Size<16)
+		m_size = Size;
+	else
+		m_size = 15;
+	frameBuffer = CFrameBuffer::getInstance();
+	for (unsigned int i=0;i<Size;i++)
+	{
+		addInputField( new CExtendedInput_Item_Char("0123456789 ") );
+	}
+	addInputField( new CExtendedInput_Item_newLiner(30) );
+	calculateDialog();
+}
+
+void CIntInput::onBeforeExec()
+{
+ 	if (*myValue == 0)
+ 	{
+		sprintf(value,"%-15ld",0l);
+ 	} else {
+		sprintf(value,"%-*ld",m_size,*myValue);
+	}
+}
+
+void CIntInput::onAfterExec()
+{
+	
+	sscanf(value, "%ld", myValue);
+	//printf("input was: %ld",*myValue);
+}
+
+
 
 //-----------------------------#################################-------------------------------------------------------
