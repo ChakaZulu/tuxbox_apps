@@ -731,6 +731,7 @@ movieplayer.tsplayback TS Abspielen
 movieplayer.fileplayback Datei via VLC
 movieplayer.dvdplayback DVD
 movieplayer.vcdplayback (S)VCD
+movieplayer.help ROT/Home Stop\nGRÜN Resync\nGELB Pause/Weiter\n\nHilfe: http://www.giggo.de/dbox2/movieplayer.html\n
 
 filebrowser.head Filebrowser
 filebrowser.filter.active Filter an

@@ -4,7 +4,7 @@
   Movieplayer (c) 2003 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.58 2003/11/18 22:05:54 gagga Exp $
+  $Id: movieplayer.cpp,v 1.59 2003/12/21 16:53:30 gagga Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -197,9 +197,8 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
     current = -1;
 	selected = 0;
 
-	printf("actionKey=%s\n",actionKey.c_str());
-	//CMenuForwarder* mf7 = new CMenuForwarder("movieplayer.defdir", true, g_settings.network_nfs_moviedir,this,"moviedir");
-	//parent.addItem(mf7);
+	printf("[movieplayer.cpp] actionKey=%s\n",actionKey.c_str());
+	
 	//define screen width
 	width = 710;
 	if ((g_settings.screen_EndX - g_settings.screen_StartX) <
@@ -257,10 +256,11 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 	else if (actionKey=="dvdplayback") {
         PlayStream (STREAMTYPE_DVD);
 	}
-	else if (actionKey=="svcdplayback") {
+	else if (actionKey=="vcdplayback") {
         PlayStream (STREAMTYPE_SVCD);
 	}
 	else if (actionKey=="tsplayback") {
+        isTS=true;
         PlayFile();
 	}
 	
@@ -582,7 +582,7 @@ ReceiveStreamThread (void *mrl)
 			if (playstate == CMoviePlayerGui::PLAY) {
 				nothingreceived++;
 				if (nothingreceived > 200) {
-					printf ("[movieplayer.cpp] PlayStreamthread: Didn't receive for a while. Stopping.\n");
+					printf ("[movieplayer.cpp] ReceiveStreamthread: Didn't receive for a while. Stopping.\n");
 					playstate = CMoviePlayerGui::STOPPED;	
 				}	
 			}
@@ -1136,6 +1136,12 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		{
 			if (playstate == CMoviePlayerGui::PLAY) playstate = CMoviePlayerGui::RESYNC;
 		}
+		else if (msg == CRCInput::RC_help)
+ 		{
+     		std::string helptext = g_Locale->getText("movieplayer.help");
+     		std::string fullhelptext = helptext + "\nVersion:$Id: movieplayer.cpp,v 1.59 2003/12/21 16:53:30 gagga Exp $\n\nMovieplayer (c) 2003 by gagga";
+     		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+ 		}
 		else
 			if (msg == NeutrinoMessages::RECORD_START
 			    || msg == NeutrinoMessages::ZAPTO
@@ -1253,7 +1259,13 @@ CMoviePlayerGui::PlayFile (void)
 			fprintf (bookmarkfile, "%ld\n", fileposition);
 			fclose (bookmarkfile);
 		}
-		else if (msg == CRCInput::RC_left)
+ 		else if (msg == CRCInput::RC_help)
+ 		{
+     		std::string helptext = g_Locale->getText("movieplayer.help");
+     		std::string fullhelptext = helptext + "\nVersion:$Id: movieplayer.cpp,v 1.59 2003/12/21 16:53:30 gagga Exp $\n\nMovieplayer (c) 2003 by gagga";
+     		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+ 		}
+        else if (msg == CRCInput::RC_left)
 		{
 			// rewind
 			if (speed > 1)
