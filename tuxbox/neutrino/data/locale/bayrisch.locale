@@ -710,6 +710,7 @@ nfs.mounterror Mount-Fähla
 nfs.umount NFS Verzeichnis freigem
 nfs.umounterror Fähla beim Freigem
 nfs.alreadymounted Verzeichnis is scho gmounted
+nfs.mount_options unset
 nfsmenu.head NFS Eistellunga
 
 apids.hint_1 Gems de APIDs zu streama getrend

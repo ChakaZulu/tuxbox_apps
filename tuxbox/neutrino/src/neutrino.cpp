@@ -413,7 +413,9 @@ int CNeutrinoApp::loadSetup()
 	g_settings.network_nfs_automount[1] = configfile.getInt32( "network_nfs_automount_2", 0);
 	g_settings.network_nfs_automount[2] = configfile.getInt32( "network_nfs_automount_3", 0);
 	g_settings.network_nfs_automount[3] = configfile.getInt32( "network_nfs_automount_4", 0);
-	
+	strcpy( g_settings.network_nfs_mount_options[0], configfile.getString( "network_nfs_mount_options_1", "ro,soft,udp" ).c_str() );
+	strcpy( g_settings.network_nfs_mount_options[1], configfile.getString( "network_nfs_mount_options_2", "nolock,rsize=8192,wsize=8192" ).c_str() );
+
 	//streaming (server + vcr)
 	g_settings.recording_type = configfile.getInt32( "recording_type", 0 );
 	g_settings.recording_stopplayback = configfile.getInt32( "recording_stopplayback", 0 );
@@ -511,7 +513,7 @@ int CNeutrinoApp::loadSetup()
 
 	strcpy( g_settings.picviewer_slide_time, configfile.getString( "picviewer_slide_time", "10" ).c_str() );
 	g_settings.picviewer_scaling = configfile.getInt32("picviewer_scaling", 1 /*(int)CPictureViewer::SIMPLE*/);
-	
+
 	g_settings.mp3player_display = configfile.getInt32("mp3player_display",(int)CMP3PlayerGui::ARTIST_TITLE);
 	g_settings.mp3player_follow  = configfile.getInt32("mp3player_follow",0);
 	strcpy( g_settings.mp3player_screensaver, configfile.getString( "mp3player_screensaver", "0" ).c_str() );
@@ -642,6 +644,8 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "network_nfs_automount_2", g_settings.network_nfs_automount[1]);
 	configfile.setInt32( "network_nfs_automount_3", g_settings.network_nfs_automount[2]);
 	configfile.setInt32( "network_nfs_automount_4", g_settings.network_nfs_automount[3]);
+	configfile.setString( "network_nfs_mount_options_1", g_settings.network_nfs_mount_options[0]);
+	configfile.setString( "network_nfs_mount_options_2", g_settings.network_nfs_mount_options[1]);
 
 	//recording (server + vcr)
 	configfile.setInt32 ( "recording_type", g_settings.recording_type );
@@ -1061,9 +1065,9 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 
 		satList.clear();
 		g_Zapit->getScanSatelliteList(satList);
-		
+
 		t_satellite_position currentSatellitePosition = g_Zapit->getCurrentSatellitePosition();
-		
+
 		if (scanSettings.diseqcMode == DISEQC_1_2)
 		{
 			//printf("[neutrino] received %d sats\n", satList.size());
@@ -1074,7 +1078,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 				scanSettings.satMotorPos[i] = satList[i].motorPosition;
 				strcpy(scanSettings.satName[i], satList[i].satName);
 				//scanSettings.satDiseqc[i] = satList[i].satDiseqc;
-				if (satList[i].satPosition == currentSatellitePosition) 
+				if (satList[i].satPosition == currentSatellitePosition)
 					strcpy(scanSettings.satNameNoDiseqc, satList[i].satName);
 			}
 			for (uint i = satList.size(); i < MAX_SATELLITES; i++)
@@ -1084,7 +1088,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 				scanSettings.satDiseqc[i] = -1;
 			}
 		}
-		
+
 		CMenuOptionStringChooser* ojSat = new CMenuOptionStringChooser("satsetup.satellite", scanSettings.satNameNoDiseqc, (scanSettings.diseqcMode == DISEQC_1_2)/*, new CSatelliteNotifier*/, NULL, false);
 		for (uint i=0; i < satList.size(); i++)
 		{
@@ -1104,7 +1108,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		extSatSettings->addItem( new CMenuSeparator() );
 		extSatSettings->addItem( new CMenuForwarder("menu.back") );
 		extSatSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-		
+
 		CMenuForwarder* ojExtSatSettings = new CMenuForwarder("satsetup.extended", (scanSettings.diseqcMode != NO_DISEQC), "", extSatSettings);
 		for( uint i=0; i < satList.size(); i++)
 		{
@@ -1118,14 +1122,14 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 			}
 			extSatSettings->addItem( oj);
 		}
-		
+
 		CMenuWidget* extMotorSettings = new CMenuWidget("satsetup.extended_motor", "settings.raw");
 		extMotorSettings->addItem( new CMenuSeparator() );
 		extMotorSettings->addItem( new CMenuForwarder("menu.back") );
 		extMotorSettings->addItem( new CMenuForwarder("satsetup.savesettingsnow", true, "", this, "savesettings") );
 		extMotorSettings->addItem( new CMenuForwarder("satsetup.motorcontrol", true, "", new CMotorControl()) );
 		extMotorSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-		
+
 		CMenuForwarder* ojExtMotorSettings = new CMenuForwarder("satsetup.extended_motor", (scanSettings.diseqcMode == DISEQC_1_2), "", extMotorSettings);
 
 		for( uint i=0; i < satList.size(); i++)
@@ -1282,10 +1286,10 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 void CNeutrinoApp::InitMp3PicSettings(CMenuWidget &mp3PicSettings)
 {
 	dprintf(DEBUG_DEBUG, "init mp3_pic_settings\n");
-	
+
 	mp3PicSettings.addItem( new CMenuSeparator() );
 	mp3PicSettings.addItem( new CMenuForwarder("menu.back") );
-	
+
    	CMenuOptionChooser *oj = new CMenuOptionChooser("pictureviewer.scaling", &g_settings.picviewer_scaling, true );
 	oj->addOption((int)CPictureViewer::SIMPLE, "Simple");
 	oj->addOption((int)CPictureViewer::COLOR, "Color Average");
@@ -1294,15 +1298,15 @@ void CNeutrinoApp::InitMp3PicSettings(CMenuWidget &mp3PicSettings)
 	mp3PicSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "pictureviewer.head") );
 	mp3PicSettings.addItem( oj );
 	mp3PicSettings.addItem( new CMenuForwarder("pictureviewer.slide_time", true, g_settings.picviewer_slide_time, pic_timeout ));
-	
+
 	oj = new CMenuOptionChooser("mp3player.display_order", &g_settings.mp3player_display, true );
 	oj->addOption((int)CMP3PlayerGui::ARTIST_TITLE, "mp3player.artist_title");
-	oj->addOption((int)CMP3PlayerGui::TITLE_ARTIST, "mp3player.title_artist"); 
+	oj->addOption((int)CMP3PlayerGui::TITLE_ARTIST, "mp3player.title_artist");
    	mp3PicSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "mp3player.name") );
 	mp3PicSettings.addItem( oj );
   	oj = new CMenuOptionChooser("mp3player.follow", &g_settings.mp3player_follow, true );
-	oj->addOption(0, "messagebox.no"); 
-	oj->addOption(1, "messagebox.yes"); 
+	oj->addOption(0, "messagebox.no");
+	oj->addOption(1, "messagebox.yes");
 	mp3PicSettings.addItem( oj );
 	CStringInput*  mp3_screensaver= new CStringInput("mp3player.screensaver_timeout", g_settings.mp3player_screensaver, 2, "", "", "0123456789 ");
 	mp3PicSettings.addItem( new CMenuForwarder("mp3player.screensaver_timeout", true, g_settings.mp3player_screensaver, mp3_screensaver ));
@@ -1383,7 +1387,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 		oj->addOption(2, "options.fb");
 		miscSettings.addItem( oj );
 	}
-	
+
 	CMenuOptionChooser *oj2 = new CMenuOptionChooser("miscsettings.infobar_sat_display", &g_settings.infobar_sat_display, true );
 	oj2->addOption(1, "options.on");
 	oj2->addOption(0, "options.off");
@@ -1396,7 +1400,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 
 	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.RC") );
 	miscSettings.addItem( new CMenuForwarder("keybindingmenu.repeatblock", true, g_settings.repeat_genericblocker, keySettings_repeatBlocker ));
- 	miscSettings.addItem( new CMenuForwarder("keybindingmenu.repeatblockgeneric", true, g_settings.repeat_blocker, keySettings_repeat_genericblocker ));	
+ 	miscSettings.addItem( new CMenuForwarder("keybindingmenu.repeatblockgeneric", true, g_settings.repeat_blocker, keySettings_repeat_genericblocker ));
 	miscSettings.addItem( m1 );
 }
 
@@ -2264,7 +2268,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	//mp3/picviewer Setup
 	InitMp3PicSettings(mp3picSettings);
-	
+
    	//misc Setup
 	InitMiscSettings(miscSettings);
 	miscSettings.setOnPaintNotifier(this);
@@ -2577,7 +2581,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 			struct timeval tv;
 			gettimeofday( &tv, NULL );
 			standby_pressed_at = (tv.tv_sec*1000000) + tv.tv_usec;
-			
+
 			if( mode == mode_standby )
 			{
 				g_RCInput->postMsg( NeutrinoMessages::STANDBY_OFF, 0 );
@@ -2590,7 +2594,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 			{
 				int timeout = 5;
 				int timeout1 = 5;
-				
+
 				sscanf(g_settings.repeat_blocker, "%d", &timeout);
 				timeout = int(timeout/100.0) + 5;
 				sscanf(g_settings.repeat_genericblocker, "%d", &timeout1);
@@ -2601,7 +2605,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 				uint msg; uint data;
 				int diff = 0;
 				long long endtime;
-				
+
 				do
 				{
 					g_RCInput->getMsg( &msg, &data, timeout );
@@ -3123,7 +3127,7 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 				frameBuffer->paintBoxRel(x+40, y+12, 200, 15, COL_INFOBAR+1);
 				frameBuffer->paintBoxRel(x+40, y+12, vol, 15, COL_INFOBAR+3);
 			}
-		
+
 			CLCD::getInstance()->showVolume(current_volume);
 			if( msg != CRCInput::RC_timeout )
 			{
@@ -3393,7 +3397,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, std::string actionKey)
 		networkConfig.automatic_start = (network_automatic_start == 1);
 		networkConfig.commitConfig();
 		saveSetup();
-		
+
 		/* send motor position list to zapit */
 		if (scanSettings.diseqcMode == DISEQC_1_2)
 		{
@@ -3560,7 +3564,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.479 2003/07/29 21:50:05 zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.480 2003/07/30 21:33:36 homar Exp $\n\n");
 
 	tzset();
 	initGlobals();

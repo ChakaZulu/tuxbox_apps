@@ -709,10 +709,11 @@ nfs.dir NFS Verzeichnis
 nfs.localdir lokales Verzeichnis
 nfs.automount Beim Start mounten
 nfs.mountnow Jetzt mounten
-nfs.mounterror Mount-Fehler
+nfs.mounterror Mount-Fehler: lade default-Einstellungen
 nfs.umount NFS Verzeichnis unmounten
 nfs.umounterror Umount-Fehler
 nfs.alreadymounted Verzeichnis bereits gemountet
+nfs.mount_options Mount-Optionen
 nfsmenu.head NFS Einstellungen
 
 apids.hint_1 Geben Sie die zu streamenden APIDs ein,

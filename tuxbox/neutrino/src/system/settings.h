@@ -137,7 +137,8 @@ struct SNeutrinoSettings
 	char network_nfs_local_dir[4][100];
 	char network_nfs_dir[4][100];
 	int  network_nfs_automount[4];
-	
+	char network_nfs_mount_options[2][31];
+
 	//streaming
 	int  recording_type;
 	int  recording_stopplayback;
@@ -208,7 +209,7 @@ struct SNeutrinoSettings
 	char	fontsize_gamelist_itemlarge[4];
 	char	fontsize_gamelist_itemsmall[4];
 
-	char	fontsize_channellist[4];	
+	char	fontsize_channellist[4];
 	char	fontsize_channellist_descr[4];
 	char	fontsize_channellist_number[4];
 	char	fontsize_channel_num_zap[4];
@@ -317,16 +318,16 @@ class CScanSettings
 	delivery_system_t         delivery_system;
 
 	CScanSettings();
-	
+
 	int* diseqscOfSat( char* satname);
 	int* motorPosOfSat( char* satname);
 	char* CScanSettings::satOfDiseqc(int diseqc) const;
 	char* CScanSettings::satOfMotorPos(int32_t motorPos) const;
 	void toSatList( CZapitClient::ScanSatelliteList& ) const;
 	void toMotorPosList( CZapitClient::ScanMotorPosList& ) const;
-	
+
 	void useDefaults(const delivery_system_t _delivery_system);
-	
+
 	bool loadSettings(const std::string fileName, const delivery_system_t _delivery_system);
 	bool saveSettings(const std::string fileName);
 };

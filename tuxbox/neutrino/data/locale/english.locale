@@ -710,10 +710,11 @@ nfs.dir NFS directory
 nfs.localdir local dir
 nfs.automount mount on startup
 nfs.mountnow mount now
-nfs.mounterror mount error
+nfs.mounterror mount error: loading default values
 nfs.umount Umount NFS volume
 nfs.umounterror error umounting volume
 nfs.alreadymounted directory already mounted
+nfs.mount_options mount options
 nfsmenu.head NFS settings
 
 apids.hint_1 Enter APIDs to be streamed

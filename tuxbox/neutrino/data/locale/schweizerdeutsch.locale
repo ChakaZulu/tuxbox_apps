@@ -710,6 +710,7 @@ nfs.mounterror I'häng - Fehler
 nfs.umount NFS Verzeichniss abhänge
 nfs.umounterror Abhäng-Fehler
 nfs.alreadymounted Verzeichnis bereits a'ghängt
+nfs.mount_options unset
 nfsmenu.head NFS Iischdellige
 
 apids.hint_1 Gib z'erschd d'zschdriemendi APIDs ii,

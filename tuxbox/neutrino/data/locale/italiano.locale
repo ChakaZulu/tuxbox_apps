@@ -710,6 +710,7 @@ nfs.mounterror errore di caricamento
 nfs.umount scarica NFS
 nfs.umounterror errore scarica NFS
 nfs.alreadymounted Directory gia caricato
+nfs.mount_options unset
 nfsmenu.head Impostazioni NFS 
 
 apids.hint_1 Inoltrare i dati APIDs per Streamen,
