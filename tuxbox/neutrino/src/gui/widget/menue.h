@@ -93,6 +93,7 @@ class CMenuItem
 {
 	protected:
 		int x, y, dx, offx;
+		bool		active;
 	public:
     	int		directKey;
 		string	iconName;
@@ -128,6 +129,11 @@ class CMenuItem
 		{
 			return 0;
 		}
+		virtual void setActive( bool Active)
+		{
+			active = Active;
+			paint();
+		};
 };
 
 class CMenuSeparator : public CMenuItem
@@ -162,7 +168,6 @@ class CMenuForwarder : public CMenuItem
 		int		height;
 		string		text;
 		char*		option;
-		bool		active;
 		CMenuTarget*	jumpTarget;
 		string		actionKey;
 		bool        localizing;
@@ -192,7 +197,6 @@ class CMenuOptionChooser : public CMenuItem
 		vector<keyval*>    options;
 		int                height;
 		string             optionName;
-		bool               active;
 		int*               optionValue;
 		CChangeObserver*   observ;
 		bool               localizing;
@@ -222,7 +226,6 @@ class CMenuOptionStringChooser : public CMenuItem
 		vector<string>	options;
 		int				height;
 		string			optionName;
-		bool			active;
 		char*			optionValue;
 		CChangeObserver*	observ;
 		bool               localizing;

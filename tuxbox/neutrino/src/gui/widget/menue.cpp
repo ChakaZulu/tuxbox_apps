@@ -30,11 +30,14 @@
 */
 
 /*
-$Id: menue.cpp,v 1.48 2002/03/22 17:34:04 field Exp $
+$Id: menue.cpp,v 1.49 2002/04/14 08:37:53 Simplex Exp $
 
 
 History:
  $Log: menue.cpp,v $
+ Revision 1.49  2002/04/14 08:37:53  Simplex
+ made menuitems activatable
+
  Revision 1.48  2002/03/22 17:34:04  field
  Massive Umstellungen - NVODs/SubChannels=KAPUTT!
  Infoviewer tw. kaputt! NON-STABLE!
@@ -144,6 +147,17 @@ History:
 
 #include "menue.h"
 #include "../global.h"
+
+bool isNumber(const string& str)
+{
+	for (string::const_iterator i = str.begin(); i != str.end(); i++)
+	{
+		if (!isdigit(*i)) return false;
+	}
+	return true;
+}
+
+
 
 CMenuWidget::CMenuWidget(string Name, string Icon, int mwidth, int mheight)
 {
@@ -464,7 +478,7 @@ int CMenuOptionChooser::paint( bool selected )
 
 	string  l_optionName = g_Locale->getText(optionName);
 	string  l_option;
-	if ( localizing )
+	if ( localizing && !isNumber(option))
 		l_option = g_Locale->getText(option);
 	else
 		l_option = option;
