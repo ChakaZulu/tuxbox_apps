@@ -267,7 +267,7 @@ int CListBox::exec(CMenuTarget* parent, string actionKey)
 	}
 
 	//want2save?
-	if(toSave)
+	if((toSave) && (saveBoxCaption!="") && (saveBoxText!=""))
 	{
 		if( ShowMsg ( saveBoxCaption, saveBoxText, CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo ) == CMessageBox::mbrYes )
 		{
