@@ -1,0 +1,139 @@
+menu.back Spowrotem
+
+options.off wyl
+options.on wla
+
+mainmenu.head Menu Glowne
+mainmenu.runmode Modus
+mainmenu.shutdown Wylaczyc
+mainmenu.tvmode Telewizja
+mainmenu.radiomode Radio
+mainmenu.mp3player MP3-Odtwarzacz
+mainmenu.splayback Stream Ogladac
+mainmenu.info Informacje
+mainmenu.streaminfo Dane o Kanale
+mainmenu.settings Opcje
+mainmenu.language Jezyk
+mainmenu.screensetup Ustawienie widocznej czesci obrazu
+mainmenu.audio Dzwiek
+mainmenu.video Obraz
+mainmenu.network Siec
+mainmenu.colors Farby/Tematy
+mainmenu.keybinding Ustawienie klawiszy
+mainmenu.games w Gry grac
+
+languagesetup.head Ustawienie jezyka
+languagesetup.select Jezyk
+
+audiomenu.head Ustawienie Dzwieku
+audiomenu.stereo Stereo
+audiomenu.dolbydigital Dolby Digital
+
+videomenu.head Ustawienie Obrazu
+videomenu.videosignal Typ Sygnalu Obrazu
+videomenu.videosignal_rgb RGB
+videomenu.videosignal_svideo S-Video
+videomenu.videosignal_composite Composite
+videomenu.videoformat Format Obrazu
+videomenu.videoformat_43 4:3
+videomenu.videoformat_169 16:9
+videomenu.epgold EPG starym sposobem pokazywac
+
+networkmenu.head Ustawienia Sieciowe
+networkmenu.setupnow Ustawienia teraz przekazac
+networkmenu.setuponstartup Przy starcie przekazac
+networkmenu.ipaddress IP-Adres
+networkmenu.netmask Maska Sieci
+networkmenu.broadcast Broadcast
+networkmenu.gateway Standardowa Gateway
+networkmenu.nameserver Nameserver
+
+ipsetup.hint_1 Klawisze "0"-"9", Czerwony jest " ", Zielony jest "."
+ipsetup.hint_2 albo Gora/Dol, OK zapisuje, Home wychodzi
+
+colormenu.head Ustawienia Kolorow
+colormenu.statusbar Listwa Statusowa
+colormenu.themeselect Wybor Tematu
+colormenu.menucolors Kolory Menu
+colormenu.background Kolor Tla
+colormenu.background_head Kolor Tla
+colormenu.textcolor Kolor Tekstu
+colormenu.textcolor_head Kolor Tekstu
+
+colorthememenu.head Wybor Tematu
+colorthememenu.neutrino_theme Neutrino Temat
+colorthememenu.classic_theme Klasyczny Temat
+
+colormenusetup.head Kolory Menu
+colormenusetup.menuhead Lista Tytuowa
+colormenusetup.menucontent Zawartosc Okien
+colormenusetup.menucontent_inactive Zawartosc Okien wylaczona
+colormenusetup.menucontent_selected Zawartosc Okien Selekcja
+
+colorstatusbar.head Kolory Listwy Statusowej
+colorstatusbar.text Listwa Statusowa
+
+repeatblocker.hint_1 Czas (w ms) miedzy 2 naciskiem Klawisza
+repeatblocker.hint_2 0 wylacza blokade (Czerwony jest " ")
+
+keybindingmenu.RC Pilot
+keybindingmenu.repeatblock Blokada powtarzania klawiszy
+keybindingmenu.head Ustawienia Klawiszy
+keybindingmenu.modechange Zmiana Modusu
+keybindingmenu.channellist Lista Kanalow
+keybindingmenu.quickzap Szybkie Przelaczanie
+keybindingmenu.tvradiomode Telewizja/Radio
+keybindingmenu.tvradiomode_head Telewizja/Radio
+keybindingmenu.pageup Strona dalej
+keybindingmenu.pageup_head Strona dalej
+keybindingmenu.pagedown Strona spowrotem
+keybindingmenu.pagedown_head Strona spowrotem
+keybindingmenu.cancel Liste Kanalow zamknac
+keybindingmenu.cancel_head Liste Kanalow zamknac
+keybindingmenu.channelup Kanal do gory
+keybindingmenu.channelup_head Klawisz Kanal do gory
+keybindingmenu.channeldown Kanal na dol
+keybindingmenu.channeldown_head Klawisz Kanal na dol
+
+colorchooser.red czerwony
+colorchooser.green zielony
+colorchooser.blue niebieski
+colorchooser.alpha alpha
+
+keychoosermenu.setnew Nowy Klawisz wybrac
+keychoosermenu.setnone Zaden Klawisz
+keychoosermenu.currentkey Terazniejszy Klawisz
+
+keychooser.head Nowy Klawisz wybrac
+keychooser.text1 Prosze Klawisz nadusic
+keychooser.text2 Prosze Czekac, przerywam
+
+screensetup.upperleft czerw = Rog u gory, po lewej
+screensetup.lowerright ziel = Rog na dole, po prawej
+
+channellist.head Wszystkie Kanaly
+
+infoviewer.epgnotload EPG jeszcze nie zaladowane...
+infoviewer.epgwait Czekam na EPG...
+infoviewer.streaminfo Stream-Informacja
+infoviewer.eventlist Lista Programowa
+infoviewer.languages Wybor Dzwieku
+infoviewer.notavailable Kanal (na razie) niedostepny
+infoviewer.cantdecode Kanal nie mozliwy do dekodowania
+
+epgviewer.notfound EPG-Informacje nie znalezione
+epgviewer.nodetailed Informacje nie sa dostepne
+epglist.head Vorschau - %s
+epglist.noevents EPG niedostepne...
+
+streaminfo.head Informacje
+streaminfo.resolution Rozdzielczosc
+streaminfo.bitrate Przekaz
+streaminfo.aratio Rozklad
+streaminfo.aratio_unknown Rozklad: nieznany
+streaminfo.framerate Przekaz
+streaminfo.framerate_unknown Przekaz: nieznany
+streaminfo.audiotype Typ Dzwieku
+streaminfo.audiotype_unknown Typ Dzwieku: nieznany
+
+apidselector.head Wybor Jezyka
