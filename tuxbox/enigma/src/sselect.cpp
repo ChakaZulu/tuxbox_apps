@@ -261,12 +261,8 @@ void eServiceSelector::useBouquet(eBouquet *bouquet)
 eService *eServiceSelector::choose(eService *current, int irc)
 {
 	result=current;
+	list.moveSelection(irc);
 	show();
-	if (irc!=-1)
-	{
-		keyDown(irc);
-		keyUp(irc);
-	}
 	if (!exec())
 		result=0;
 	hide();

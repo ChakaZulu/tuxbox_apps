@@ -725,6 +725,7 @@ void eZapMain::showServiceSelector(int dir)
 void eZapMain::nextService()
 {
 	eService *service=eZap::getInstance()->getServiceSelector()->next();
+	eDebug("nextService: %x", service);
 	if (!service)
 		return;
 	if (service)
@@ -985,7 +986,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		else if (isVisible() && (event.action == &i_enigmaMainActions->toggleInfobar))
 			hideInfobar();
 		else if (event.action == &i_enigmaMainActions->showServiceSelector)
-			showServiceSelector(0);
+			showServiceSelector(-1);
 		else if (event.action == &i_enigmaMainActions->showSubservices)
 			showSubserviceMenu();
 		else if (event.action == &i_enigmaMainActions->showAudio)
@@ -1001,9 +1002,9 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		else if (event.action == &i_enigmaMainActions->prevService)
 			prevService();
 		else if (event.action == &i_enigmaMainActions->serviceListDown)
-			showServiceSelector(-1);
+			showServiceSelector(eListbox::dirDown);
 		else if (event.action == &i_enigmaMainActions->serviceListUp)
-			showServiceSelector(1);
+			showServiceSelector(eListbox::dirUp);
 		else if (event.action == &i_enigmaMainActions->volumeUp)
 			volumeUp();
 		else if (event.action == &i_enigmaMainActions->volumeDown) 
