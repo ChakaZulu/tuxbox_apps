@@ -694,6 +694,8 @@ static eString getLeftNavi(eString mode, eString path)
 #ifndef DISABLE_FILE
 	if (mode.find("config") == 0)
 	{
+		result += button(110, "Mount Manager", LEFTNAVICOLOR, "?mode=configMountMgr");
+		result += "<br>";
 		result += button(110, "HDD", LEFTNAVICOLOR, "?mode=configHDD");
 		result += "<br>";
 		result += button(110, "USB", LEFTNAVICOLOR, "?mode=configUSB");
@@ -2226,6 +2228,12 @@ static eString getContent(eString mode, eString path)
 	}
 	else
 #ifndef DISABLE_FILE
+	if (mode == "configMountMgr")
+	{
+		result = getTitle("CONFIG: Mount Manager");
+		result += getConfigMountMgr();
+	}
+	else
 	if (mode == "configHDD")
 	{
 		result = getTitle("CONFIG: HDD");
