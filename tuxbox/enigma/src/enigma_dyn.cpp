@@ -594,72 +594,52 @@ static eString getZapContent(eString mode, eString path)
 static eString aboutDreambox(void)
 {
 	eString result("");
+	result += "<table border=0>";
 
 	switch (eSystemInfo::getInstance()->getHwType())
 	{
 		case eSystemInfo::dbox2Nokia:
-			result += "Model: d-Box 2";
-			result += "<br>";
-			result += "Manufacturer: Nokia";
-			result += "<br>";
-			result += "Processor: XPC823, 66MHz";
-			result += "<br>";
+			result += "<tr><td>Box:</td><td>d-Box 2</td></tr>";
+			result += "<tr><td>Manufacturer:</td><td>Nokia</td></tr>";
+			result += "<tr><td>Processor:</td><td>XPC823, 66MHz</td></tr>";
 			break;
 		case eSystemInfo::dbox2Philips:
-			result += "Model: d-Box 2";
-			result += "<br>";
-			result += "Manufacturer: Philips";
-			result += "<br>";
-			result += "Processor: XPC823, 66MHz";
-			result += "<br>";
+			result += "<tr><td>Box:</td><td>d-Box 2</td></tr>";
+			result += "<tr><td>Manufacturer</td><td>Philips</td></tr>";
+			result += "<tr><td>Processor</td><td>XPC823, 66MHz</td></tr>";
 			break;
 		case eSystemInfo::dbox2Sagem:
-			result += "Model: d-Box 2";
-			result += "<br>";
-			result += "Manufacturer: Sagem";
-			result += "<br>";
-			result += "Processor: XPC823, 66MHz";
-			result += "<br>";
+			result += "<tr><td>Box:</td><td>d-Box 2</td></tr>";
+			result += "<tr><td>Manufacturer:</td><td>Sagem</td></tr>";
+			result += "<tr><td>Processor</td><td>XPC823, 66MHz</td></tr>";
 			break;
 		case eSystemInfo::DM5600:
-			result += "Model: DM5600";
-			result += "<br>";
-			result += "Manufacturer: Dream-Multimedia-TV";
-			result += "<br>";
-			result += "Processor: STBx25xx, 252MHz";
-			result += "<br>";
+			result += "<tr><td>Box:</td><td>DM5600</td></tr>";
+			result += "<tr><td>Manufacturer</td><td>Dream-Multimedia-TV</td></tr>";
+			result += "<tr><td>Processor:</td><td>STBx25xx, 252MHz</td></tr>";
 			break;
 		case eSystemInfo::DM5620:
-			result += "Model: DM5620";
-			result += "<br>";
-			result += "Manufacturer: Dream-Multimedia-TV";
-			result += "<br>";
-			result += "Processor: STBx25xx, 252MHz";
-			result += "<br>";
+			result += "<tr><td>Box:</td><td>DM5620</td></tr></td></tr>";
+			result += "<tr><td>Manufacturer:</td><td>Box: Dream-Multimedia-TV</td></tr>";
+			result += "<tr><td>Processor:</td><td>STBx25xx, 252MHz</td></tr>";
 			break;
 		case eSystemInfo::DM7000:
-			result += "Model: DM7000";
-			result += "<br>";
-			result += "Manufacturer: Dream-Multimedia-TV";
-			result += "<br>";
-			result += "Processor: STB04500, 252MHz";
-			result += "<br>";
+			result += "<tr><td>Box:</td><td>DM7000</td></tr>";
+			result += "<tr><td>Manufacturer:</td><td>Dream-Multimedia-TV</td></tr>";
+			result += "<tr><td>Processor:</td><td>STB04500, 252MHz</td></tr>";
 			break;
 	}
 
 	switch (eSystemInfo::getInstance()->getFEType())
 	{
 		case eSystemInfo::feSatellite:
-			result += "Frontend: Satellite";
-			result += "<br>";
+			result += "<tr><td>Frontend:</td><td>Satellite</td></tr>";
 			break;
 		case eSystemInfo::feCable:
-			result += "Frontend: Cable";
-			result += "<br>";
+			result += "<tr><td>Frontend:</td><td>Cable</td></tr>";
 			break;
 		case eSystemInfo::feTerrestrial:
-			result += "Frontend: Terrestrial";
-			result += "<br>";
+			result += "<tr><td>Frontend:</td><td>Terrestrial</td></tr>";
 			break;
 	}
 
@@ -703,19 +683,18 @@ static eString aboutDreambox(void)
 			sharddisks+=")";
 		}
 	}
-#endif //DISABLE_FILE
-	result += "Harddisk: ";
-	if (sharddisks == "")
-		sharddisks="none";
-	result += sharddisks;
-	result += "<br>";
 
-	result += "Firmware Version: ";
+	result += "<tr><td>Harddisk:</td><td>";
+	if (sharddisks == "")
+		sharddisks="none</td></tr>";
+	result += sharddisks;
+#endif //DISABLE_FILE
+
+	result += "<tr><td>Firmware Version:</td><td>";
 	eString verid=getVersionInfo("version");
 	if (!verid)
 	{
-		result += "unknown";
-		result += "<br>";
+		result += "unknown</td></tr>";
 	}
 	else
 	{
@@ -733,8 +712,9 @@ static eString aboutDreambox(void)
 			result += eString(typea[type%3]) + eString(" ") + ver[0] + "." + ver[1] + "." + ver[2]+ ", " + date.mid(6, 2) + "." + date.mid(4, 2) + "." + date.left(4);
 		else
 			result += eString().sprintf("%s %c.%d. %s", typea[type%3], ver[0], atoi(eString().sprintf("%c%c", ver[1], ver[2]).c_str()	), (date.mid(6, 2) + "." + date.mid(4, 2) + "." + date.left(4)).c_str());
-			result += "<br>";
+		result += "</td></tr>";
 	}
+	result += "</table>";
 
 	return result;
 }
