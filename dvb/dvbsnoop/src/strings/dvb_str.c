@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.59 2004/08/24 21:30:24 rasc Exp $
+$Id: dvb_str.c,v 1.60 2004/08/25 19:51:09 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.59 2004/08/24 21:30:24 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.60  2004/08/25 19:51:09  rasc
+ - Update: EN 300 468 v1.6.1 Terrestrial delivery system descriptor
+
 Revision 1.59  2004/08/24 21:30:24  rasc
 more Metadata
 
@@ -1318,6 +1321,45 @@ char *dvbstrTerrTransmissionMode_FLAG (u_int i)
 
   return findTableID (Table, i);
 }
+
+
+// Update EN 300 468 1.6.1.
+char *dvbstrTerrPriority (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "HP (high priority)" },
+     {  0x01, 0x01,  "LP (low priority)" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+// Update EN 300 468 1.6.1.
+char *dvbstrTerrTimeSlicingIndicator (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "at least one elementary stream uses Time Slicing" },
+     {  0x01, 0x01,  "Time Slicing is not used.)" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+// Update EN 300 468 1.6.1.
+char *dvbstrTerrMPE_FEC_Indicator (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "at least one elementary stream uses MPE-FEC" },
+     {  0x01, 0x01,  "MPE-FEC is not used.)" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
 
 
 /*

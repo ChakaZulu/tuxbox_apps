@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.h,v 1.28 2004/08/24 21:30:24 rasc Exp $ 
+$Id: dvb_str.h,v 1.29 2004/08/25 19:51:09 rasc Exp $ 
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dvb_str.h,v 1.28 2004/08/24 21:30:24 rasc Exp $
 
 
 $Log: dvb_str.h,v $
+Revision 1.29  2004/08/25 19:51:09  rasc
+ - Update: EN 300 468 v1.6.1 Terrestrial delivery system descriptor
+
 Revision 1.28  2004/08/24 21:30:24  rasc
 more Metadata
 
@@ -141,6 +144,9 @@ char *dvbstrTerrHierarchy_FLAG(u_int id);
 char *dvbstrTerrCodeRate_FLAG(u_int id);
 char *dvbstrTerrGuardInterval_FLAG(u_int id);
 char *dvbstrTerrTransmissionMode_FLAG(u_int id);
+char *dvbstrTerrPriority (u_int i);
+char *dvbstrTerrTimeSlicingIndicator (u_int i);
+char *dvbstrTerrMPE_FEC_Indicator (u_int i);
 char *dvbstrAspectRatioInfo_FLAG(u_int id);
 char *dvbstrHierarchy_TYPE(u_int id);
 char *dvbstrRunningStatus_FLAG (u_int id);

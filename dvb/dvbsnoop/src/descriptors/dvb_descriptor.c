@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.37 2004/08/24 21:30:22 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.38 2004/08/25 19:51:09 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dvb_descriptor.c,v 1.37 2004/08/24 21:30:22 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.38  2004/08/25 19:51:09  rasc
+ - Update: EN 300 468 v1.6.1 Terrestrial delivery system descriptor
+
 Revision 1.37  2004/08/24 21:30:22  rasc
 more Metadata
 
@@ -2059,76 +2062,47 @@ void descriptorDVB_Subtitling  (u_char *b)
 
 /*
   0x5A TerrestDelivSys  descriptor  (Terrestrial delivery system descriptor)
+  ETSI 300 468    6.2.xx 
+  -- 2004-08-28 update auf EN 300 468 1.6.1 (routine rewritten)
 */
 
 void descriptorDVB_TerrestDelivSys (u_char *b)
 
 {
- /* ETSI 300 468    6.2.xx */
-
- typedef struct  _descCDS {
-    u_int      descriptor_tag;
-    u_int      descriptor_length;		
-
-    u_long     centre_frequency;
-    u_int      bandwidth;
-    u_int      reserved_1;
-    u_int      constellation;
-    u_long     hierarchy_information;
-    u_int      code_rate_HP_stream;
-    u_int      code_rate_LP_stream;
-    u_int      guard_interval;
-    u_int      transmission_mode; 
-    u_int      other_frequency_flag;
-    u_int      reserved_2;
-
- } descTDS;
-
- descTDS  d;
- //int      i;
+  u_long  cfreq;
 
 
+  // tag	 = b[0];
+  // len       	 = b[1];
 
+  cfreq				 = getBits (b, 0, 16, 32);
+  // frequency is in 10 Hz steps == * 10
+  out_nl (4,"Center frequency: 0x%08x (= %lu.%03lu kHz)",cfreq,
+		 cfreq / 100, cfreq % 100 );
 
- d.descriptor_tag		 = b[0];
- d.descriptor_length       	 = b[1];
-
-
- d.centre_frequency		 = getBits (b, 0, 16, 32);
- d.bandwidth			 = getBits (b, 0, 48, 3);
- d.reserved_1			 = getBits (b, 0, 51, 5);
- d.constellation		 = getBits (b, 0, 56, 2);
- d.hierarchy_information	 = getBits (b, 0, 58, 3);
- d.code_rate_HP_stream		 = getBits (b, 0, 61, 3);
- d.code_rate_LP_stream		 = getBits (b, 0, 64, 3);
- d.guard_interval		 = getBits (b, 0, 67, 2);
- d.transmission_mode		 = getBits (b, 0, 69, 2);
- d.other_frequency_flag		 = getBits (b, 0, 71, 1);
- d.reserved_2			 = getBits (b, 0, 72, 32);
-
- 
- // frequency is in 10 Hz steps == * 10
- out_nl (4,"Center frequency: 0x%08x (= %lu.%03lu kHz)",d.centre_frequency,
-	 d.centre_frequency / 100, d.centre_frequency % 100 );
-
- out_S2B_NL (4,"Bandwidth: ",d.bandwidth,
-	 dvbstrTerrBandwidth_SCHEME (d.bandwidth));
- out_SB_NL (6,"reserved_1: ",d.reserved_1);
- out_S2B_NL (4,"Constellation: ",d.constellation,
-	 dvbstrTerrConstellation_FLAG(d.constellation));
- out_S2B_NL (4,"Hierarchy information: ",d.hierarchy_information,
-	 dvbstrTerrHierarchy_FLAG(d.hierarchy_information));
- out_S2B_NL (4,"Code_rate_HP_stream: ",d.code_rate_HP_stream,
-	 dvbstrTerrCodeRate_FLAG(d.code_rate_HP_stream));
- out_S2B_NL (4,"Code_rate_LP_stream: ",d.code_rate_LP_stream,
-	 dvbstrTerrCodeRate_FLAG(d.code_rate_LP_stream));
- out_S2B_NL (4,"Guard_interval: ",d.guard_interval,
-	 dvbstrTerrGuardInterval_FLAG(d.guard_interval));
- out_S2B_NL (4,"Transmission_mode: ",d.transmission_mode,
-	 dvbstrTerrTransmissionMode_FLAG(d.transmission_mode));
- out_SB_NL (4,"Other_frequency_flag: ",d.other_frequency_flag);
- out_SL_NL (6,"reserved_2: ",d.reserved_2);
-
+  outBit_S2x_NL  (4,"Bandwidth: ",  		b, 48,  3,
+		 	(char *(*)(u_long)) dvbstrTerrBandwidth_SCHEME );
+  outBit_S2x_NL (4,"priority: ",  		b, 51,  1,
+		 	(char *(*)(u_long)) dvbstrTerrPriority );
+  outBit_S2x_NL (4,"Time_Slicing_indicator: ",	b, 52,  1,
+		 	(char *(*)(u_long)) dvbstrTerrTimeSlicingIndicator );
+  outBit_S2x_NL (4,"MPE-FEC_indicator: ",	b, 53,  1,
+		 	(char *(*)(u_long)) dvbstrTerrMPE_FEC_Indicator );
+  outBit_Sx_NL  (6,"reserved_1: ",  		b, 54,  2);
+  outBit_S2x_NL (4,"Constellation: ",  		b, 56,  2,
+		 	(char *(*)(u_long)) dvbstrTerrConstellation_FLAG );
+  outBit_S2x_NL (4,"Hierarchy information: ", 	b, 58,  3,
+		 	(char *(*)(u_long)) dvbstrTerrHierarchy_FLAG );
+  outBit_S2x_NL (4,"Code_rate_HP_stream: ", 	b, 61,  3,
+		 	(char *(*)(u_long)) dvbstrTerrCodeRate_FLAG );
+  outBit_S2x_NL (4,"Code_rate_LP_stream: ", 	b, 64,  3,
+		 	(char *(*)(u_long)) dvbstrTerrCodeRate_FLAG );
+  outBit_S2x_NL (4,"Guard_interval: ", 		b, 67,  2,
+		 	(char *(*)(u_long)) dvbstrTerrGuardInterval_FLAG );
+  outBit_S2x_NL (4,"Transmission_mode: ", 	b, 69,  2,
+		 	(char *(*)(u_long)) dvbstrTerrTransmissionMode_FLAG );
+  outBit_Sx_NL  (4,"Other_frequency_flag: ", 	b, 71,  1);
+  outBit_Sx_NL  (6,"reserved_2: ", 		b, 72, 32);
 
 }
 
