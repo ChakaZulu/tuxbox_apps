@@ -1085,7 +1085,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 			dprintf(DEBUG_DEBUG, "got scanprovider (sat): %s\n", satList[i].satName );
 		}
 
-		CMenuOptionChooser* ojDiseqcRepeats = new CMenuOptionChooser("satsetup.diseqcrepeat", &((int)(scanSettings.diseqcRepeat)), scanSettings.diseqcMode != NO_DISEQC/*, new CSatelliteNotifier*/, NULL, false);
+		CMenuOptionChooser* ojDiseqcRepeats = new CMenuOptionChooser("satsetup.diseqcrepeat", &((int)(scanSettings.diseqcRepeat)), (scanSettings.diseqcMode != NO_DISEQC) && (scanSettings.diseqcMode != DISEQC_1_0)/*, new CSatelliteNotifier*/, NULL, false);
 		for( uint i=0; i<=2; i++)
 		{
 			char ii[2];
@@ -1105,7 +1105,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 			for( int j=0; j<=63; j++)
 			{
 				char jj[2];
-				sprintf( jj, "%d", j);
+				sprintf( jj, "%d", j + 1);
 				oj->addOption( j, jj);
 			}
 			extSatSettings->addItem( oj);
@@ -3362,7 +3362,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.409 2003/02/14 15:09:37 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.410 2003/02/14 16:30:11 thegoodguy Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
