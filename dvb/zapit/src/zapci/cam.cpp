@@ -1,5 +1,5 @@
 /*
- * $Id: cam.cpp,v 1.29 2002/12/08 14:50:30 thegoodguy Exp $
+ * $Id: cam.cpp,v 1.30 2002/12/26 06:47:31 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>,
  *             thegoodguy         <thegoodguy@berlios.de>
@@ -55,9 +55,13 @@ bool CCam::setCaPmt(CCaPmt * caPmt)
 
 	unsigned int size = caPmt->getLength();
 
-	char buffer[3 + get_length_field_size(size) + size];
+	char *buffer = new char[3 + get_length_field_size(size) + size];
 
 	size_t pos = caPmt->writeToBuffer((unsigned char*)buffer);
 
-	return sendMessage(buffer, pos);
+	bool ret = sendMessage(buffer, pos);
+
+	delete[] buffer;
+
+	return ret;
 }
