@@ -61,7 +61,7 @@
 
 using namespace std;
 
-#define WEBIFVERSION "2.7.3.1"
+#define WEBIFVERSION "2.8"
 
 #define KEYBOARDNORMAL 0
 #define KEYBOARDVIDEO 1
@@ -151,6 +151,7 @@ public:
 	}
 };
 
+#if 0
 static eString getControlPlugins(void)
 {
 	std::stringstream result;
@@ -169,6 +170,7 @@ static eString getControlPlugins(void)
 
 	return result.str();
 }
+#endif
 
 static int getOSDShot(eString mode)
 {
@@ -931,8 +933,10 @@ static eString getLeftNavi(eString mode, bool javascript)
 		}
 		result += "<br>";
 		result += button(110, "Message", LEFTNAVICOLOR, "javascript:sendMessage2TV()");
+#if 0
 		result += "<br>";
 		result += button(110, "Plugins", LEFTNAVICOLOR, pre + "?mode=controlPlugins" + post);
+#endif
 #ifndef DISABLE_FILE
 		result += "<br>";
 		result += button(110, "Timer", LEFTNAVICOLOR, pre + "?mode=controlTimerList" + post);
@@ -2372,12 +2376,14 @@ static eString getContent(eString mode, eString path, eString opts)
 		result += getControlTimerList();
 	}
 	else
+#if 0
 	if (mode == "controlPlugins")
 	{
 		result = getTitle("CONTROL: Plugins");
 		result += getControlPlugins();
 	}
 	else
+#endif
 	if (mode == "updates")
 	{
 		result = getTitle("UPDATES");
