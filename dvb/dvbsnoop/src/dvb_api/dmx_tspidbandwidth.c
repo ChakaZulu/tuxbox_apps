@@ -1,5 +1,5 @@
 /*
-$Id: dmx_tspidbandwidth.c,v 1.2 2003/12/15 20:09:48 rasc Exp $
+$Id: dmx_tspidbandwidth.c,v 1.3 2003/12/20 05:44:20 obi Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,11 @@ $Id: dmx_tspidbandwidth.c,v 1.2 2003/12/15 20:09:48 rasc Exp $
 
 
 $Log: dmx_tspidbandwidth.c,v $
+Revision 1.3  2003/12/20 05:44:20  obi
+- use more exact division,
+- use unsigned long long for calculations because of overflows on high bandwidth pids,
+- display kbit/s instead of kb/s to avoid confusion
+
 Revision 1.2  2003/12/15 20:09:48  rasc
 no message
 
@@ -72,7 +77,7 @@ int ts_pidbandwidth (OPTION *opt)
   int		 pid;
   long           b;
   long           packets_total;
-  long long      b_total;
+  unsigned long long      b_total;
 
 
 
@@ -156,7 +161,7 @@ int ts_pidbandwidth (OPTION *opt)
 				// -- calc bandwidth
 
 				{
-				   long  bit_s;
+				   unsigned long long  bit_s;
 				   long  d_tim_ms;
 				   int   packets;
 
@@ -170,17 +175,21 @@ int ts_pidbandwidth (OPTION *opt)
 				   if (d_tim_ms <= 0) d_tim_ms = 1;   //  ignore usecs 
 
 				   out (3, "packets read: %3d/(%ld)   d_time: %2ld.%03ld s  = ",
-					packets, packets_total, d_tim_ms/1000, d_tim_ms % 1000);
+					packets, packets_total, d_tim_ms / 1000UL, d_tim_ms % 1000UL);
 
-				   bit_s = (b*(1000L*8))/d_tim_ms;
-				   out (1, "%5ld.%03ld kb/s", bit_s/1000, (bit_s % 1000) );
+				   /* cast to unsigned long long so it doesn't overflow as early,
+				    * add time / 2 before division for correct rounding */
+				   bit_s = (((unsigned long long)b * 8000ULL) + ((unsigned long long)d_tim_ms / 2ULL)) / (unsigned long long)d_tim_ms;
+
+				   out (1, "%5llu.%03llu kbit/s", bit_s / 1000UL, bit_s % 1000UL);
 
 				   // -- average bandwidth
 				   d_tim_ms = delta_time_ms (&tv,&first_tv);
 				   if (d_tim_ms <= 0) d_tim_ms = 1;   //  ignore usecs 
 
-				   bit_s = (b_total*(1000L*8))/d_tim_ms;
-				   out (2, "   (Avrg: %5ld.%03ld kb/s)", bit_s/1000, (bit_s % 1000) );
+				   bit_s = ((b_total * 8000ULL) + ((unsigned long long)d_tim_ms / 2ULL)) / (unsigned long long)d_tim_ms;
+
+				   out (2, "   (Avrg: %5llu.%03llu kbit/s)", bit_s / 1000UL, bit_s % 1000UL);
 
 				   out_NL (1);
 
