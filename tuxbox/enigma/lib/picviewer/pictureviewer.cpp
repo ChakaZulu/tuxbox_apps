@@ -1,4 +1,3 @@
-#ifndef DISABLE_FILE
 #include <config.h>
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
@@ -387,7 +386,7 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 				slideshowTimeout();
 			}
 			else
-			if (evt.action == &i_cursorActions->up ||
+			if (evt.action == &i_cursorActions->down ||
 			    evt.action == &i_cursorActions->right ||
 			    evt.action == &i_shortcutActions->blue)
 			{
@@ -396,7 +395,7 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 				DisplayNextImage();
 			}
 			else
-			if (evt.action == &i_cursorActions->down ||
+			if (evt.action == &i_cursorActions->up ||
 			    evt.action == &i_cursorActions->left ||
 			    evt.action == &i_shortcutActions->red)
 			{
@@ -634,4 +633,3 @@ void ePictureViewer::hideBusy()
 	}
 	eDebug("Hide Busy}");
 }
-#endif
