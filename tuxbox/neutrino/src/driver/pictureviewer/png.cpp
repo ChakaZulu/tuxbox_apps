@@ -65,6 +65,11 @@ int fh_png_load(const char *name,unsigned char *buffer,int x,int y)
 	png_read_update_info(png_ptr,info_ptr);
 
 	rp=(char*) malloc(width*3);
+	if(rp==NULL)
+	{
+		printf("Error: malloc\n");
+		return(FH_ERROR_MALLOC);
+	}
 	rptr[0]=(png_bytep) rp;
 
 	for(pass = 0; pass < number_passes; pass++)

@@ -186,6 +186,10 @@ keybindingmenu.cancel Kanalliste schließen
 keybindingmenu.cancel_head Kanalliste schließen
 keybindingmenu.sort Sortierreihenfolge ändern
 keybindingmenu.sort_head Sortierreihenfolge ändern
+keybindingmenu.addrecord Aufnahme-Timer hinzufügen
+keybindingmenu.addrecord_head Aufnahme-Timer hinzufügen
+keybindingmenu.addremind Umschalt-Timer hinzufügen
+keybindingmenu.addremind_head Umschalt-Timer hinzufügen
 keybindingmenu.channelup Kanal hoch
 keybindingmenu.channelup_head Kanal hoch Taste
 keybindingmenu.channeldown Kanal runter

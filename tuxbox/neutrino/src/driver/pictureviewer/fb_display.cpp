@@ -62,7 +62,8 @@ void fb_display(unsigned char *rgbbuff, int x_size, int y_size, int x_pan, int y
     struct fb_var_screeninfo *var;
     unsigned short *fbbuff = NULL;
     int bp = 0;
-    
+    if(rgbbuff==NULL)
+		 return;
     /* read current video mode */
     var = CFrameBuffer::getInstance()->getScreenInfo();
 
@@ -77,7 +78,9 @@ void fb_display(unsigned char *rgbbuff, int x_size, int y_size, int x_pan, int y
     
     /* blit buffer 2 fb */
     fbbuff = (unsigned short *) convertRGB2FB(rgbbuff, x_size * y_size, var->bits_per_pixel, &bp);
-    /* ClearFB if image is smaller */
+    if(fbbuff==NULL)
+		 return;
+	 /* ClearFB if image is smaller */
     if(x_size < (int)var->xres || y_size < (int)var->yres)
        clearFB(var->bits_per_pixel, bp);
     blit2FB(fbbuff, x_size, y_size, var->xres, var->yres, x_pan, y_pan, x_offs, y_offs, bp);
@@ -193,6 +196,12 @@ void clearFB(int bpp, int cpp)
 				to = (var->transp).offset;
 				short black=make16color(0,0,0, rl, ro, gl, go, bl, bo, tl, to);
 				unsigned short *s_fbbuff = (unsigned short *) malloc(y*stride/2 * sizeof(unsigned short));
+				if(s_fbbuff==NULL)
+				{
+					printf("Error: malloc\n");
+					return;
+				}
+
 				for(i = 0; i < y*stride/2; i++)
 				   s_fbbuff[i] = black;
 				memcpy(lfb, s_fbbuff, y*stride);
@@ -253,13 +262,16 @@ void* convertRGB2FB(unsigned char *rgbbuff, unsigned long count, int bpp, int *c
     tl = (var->transp).length;
     to = (var->transp).offset;
 	 
-	 s_fbbuff = (unsigned short *) malloc(count * sizeof(unsigned short));
-
 	 switch(bpp)
     {
 	case 8:
 	    *cpp = 1;
 	    c_fbbuff = (unsigned char *) malloc(count * sizeof(unsigned char));
+		 if(c_fbbuff==NULL)
+		 {
+			 printf("Error: malloc\n");
+			 return NULL;
+		 }
 	    for(i = 0; i < count; i++)
 		c_fbbuff[i] = make8color(rgbbuff[i*3], rgbbuff[i*3+1], rgbbuff[i*3+2]);
 	    fbbuff = (void *) c_fbbuff;
@@ -267,6 +279,11 @@ void* convertRGB2FB(unsigned char *rgbbuff, unsigned long count, int bpp, int *c
 	case 15:
 	    *cpp = 2;
 	    s_fbbuff = (unsigned short *) malloc(count * sizeof(unsigned short));
+		 if(s_fbbuff==NULL)
+		 {
+			 printf("Error: malloc\n");
+			 return NULL;
+		 }
 	    for(i = 0; i < count ; i++)
 		s_fbbuff[i] = make15color(rgbbuff[i*3], rgbbuff[i*3+1], rgbbuff[i*3+2]);
 	    fbbuff = (void *) s_fbbuff;
@@ -274,7 +291,11 @@ void* convertRGB2FB(unsigned char *rgbbuff, unsigned long count, int bpp, int *c
 	case 16:
 	    *cpp = 2;
 	    s_fbbuff = (unsigned short *) malloc(count * sizeof(unsigned short));
-	    fbbuff = (void *) malloc(count * 2);
+		 if(s_fbbuff==NULL)
+		 {
+			 printf("Error: malloc\n");
+			 return NULL;
+		 }
 	    for(i = 0; i < count ; i++)
 			 s_fbbuff[i]=make16color(rgbbuff[i*3], rgbbuff[i*3+1], rgbbuff[i*3+2], rl, ro, gl, go, bl, bo, tl, to);
 		 fbbuff = (void *) s_fbbuff;
@@ -283,6 +304,11 @@ void* convertRGB2FB(unsigned char *rgbbuff, unsigned long count, int bpp, int *c
 	case 32:
 	    *cpp = 4;
 	    i_fbbuff = (unsigned int *) malloc(count * sizeof(unsigned int));
+		 if(i_fbbuff==NULL)
+		 {
+			 printf("Error: malloc\n");
+			 return NULL;
+		 }
 	    for(i = 0; i < count ; i++)
 		i_fbbuff[i] = ((rgbbuff[i*3] << 16) & 0xFF0000) |
 			    ((rgbbuff[i*3+1] << 8) & 0xFF00) |

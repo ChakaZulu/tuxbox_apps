@@ -94,6 +94,11 @@ int fh_bmp_load(const char *name,unsigned char *buffer,int x,int y)
 				if(x%8 >0)
 					bytes++;
 				unsigned char* tbuffer = (unsigned char*) malloc(bytes);
+				if(tbuffer==NULL)
+				{
+					printf("Error: malloc\n");
+					return (FH_ERROR_MALLOC);
+				}
 				for (i=0; i<y; i++) {
 					read(fd, tbuffer, bytes);
 					for (j=0; j<x/8; j++) {
@@ -140,6 +145,11 @@ int fh_bmp_load(const char *name,unsigned char *buffer,int x,int y)
 			fetch_pallete(fd, pallete, 16);
 			lseek(fd, raster, SEEK_SET);
 			unsigned char* tbuffer = (unsigned char*) malloc(x/2+1);
+			if(tbuffer==NULL)
+			{
+				printf("Error: malloc\n");
+				return (FH_ERROR_MALLOC);
+			}
 			unsigned char c1,c2;
 			for (i=0; i<y; i++) {
 				read(fd, tbuffer, x/2 + x%2);
@@ -173,6 +183,11 @@ int fh_bmp_load(const char *name,unsigned char *buffer,int x,int y)
 			fetch_pallete(fd, pallete, 256);
 			lseek(fd, raster, SEEK_SET);
 			unsigned char* tbuffer = (unsigned char*) malloc(x);
+			if(tbuffer==NULL)
+			{
+				printf("Error: malloc\n");
+				return (FH_ERROR_MALLOC);
+			}
 			for (i=0; i<y; i++) 
 		   {
 				read(fd, tbuffer, x);

@@ -186,6 +186,10 @@ keybindingmenu.cancel close channellist
 keybindingmenu.cancel_head channellist close
 keybindingmenu.sort change sort order
 keybindingmenu.sort_head change sort order
+keybindingmenu.addrecord add record timer
+keybindingmenu.addrecord_head add record timer
+keybindingmenu.addremind add zapto timer
+keybindingmenu.addremind_head add zapto timer
 keybindingmenu.channelup channel up
 keybindingmenu.channelup_head Keysetup channel up
 keybindingmenu.channeldown channel down

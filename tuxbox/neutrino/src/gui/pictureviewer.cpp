@@ -110,6 +110,8 @@ int CPictureViewerGui::exec(CMenuTarget* parent, string actionKey)
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height)/ 2) + g_settings.screen_StartY;
 
 	m_viewer->SetScaling((CPictureViewer::ScalingMode)g_settings.picviewer_scaling);
+	m_viewer->SetVisible(g_settings.screen_StartX, g_settings.screen_EndX, g_settings.screen_StartY, g_settings.screen_EndY);
+
 	if(g_settings.video_Format==1)
 		m_viewer->SetAspectRatio(16.0/9);
 	else if(g_settings.video_Format==0)
@@ -126,16 +128,6 @@ int CPictureViewerGui::exec(CMenuTarget* parent, string actionKey)
 		parent->hide();
 	}
 
-	// set radio mode background
-	//	if(frameBuffer->getActive())
-	//	memset(frameBuffer->getFrameBufferPointer(), 0, frameBuffer->getStride()*576);
-	//	int bgcolor = frameBuffer->getBackgroundColor();
-	//	frameBuffer->setBackgroundColor(1);
-	//	frameBuffer->setTransparency(0);
-	//	frameBuffer->paintBackgroundBox(0,0,720,576);
-	//	frameBuffer->useBackground(true);
-	//	frameBuffer->paintBackground();
-
 	// tell neutrino we're in pic_mode
 	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , NeutrinoMessages::mode_pic );
 	// remember last mode
@@ -145,11 +137,8 @@ int CPictureViewerGui::exec(CMenuTarget* parent, string actionKey)
 
 	show();
 
-	// Restore normal background
-	// frameBuffer->setBackgroundColor(bgcolor);
-	//frameBuffer->useBackground(false);
-	//if(frameBuffer->getActive())
-	//	memset(frameBuffer->getFrameBufferPointer(), 255, frameBuffer->getStride()*576);
+	// free picviewer mem
+	m_viewer->Cleanup();
 
 	// Start Sectionsd
 	g_Sectionsd->setPauseScanning(false);
@@ -372,31 +361,71 @@ int CPictureViewerGui::show()
 			}
 			update=true;
 		}
-		else if( ( msg >= CRCInput::RC_1 ) && ( msg <= CRCInput::RC_9 ) && playlist.size() > 0)
-		{ //numeric zap
-			int x1=(g_settings.screen_EndX- g_settings.screen_StartX)/2 + g_settings.screen_StartX-50;
-			int y1=(g_settings.screen_EndY- g_settings.screen_StartY)/2 + g_settings.screen_StartY;
-			string num;
-			int val=0;
-			char str[11];
-			do
+		else if( msg == CRCInput::RC_1 )
+		{ 
+			if(m_state==MENU)
 			{
-				val = val * 10 + CRCInput::getNumericValue(msg);
-				sprintf(str,"%d",val);
-				int w=g_Fonts->channel_num_zap->getRenderWidth(str);
-				frameBuffer->paintBoxRel(x1-7, y1-g_Fonts->channel_num_zap->getHeight()-5, w+14, 
-												 g_Fonts->channel_num_zap->getHeight()+10, COL_MENUCONTENT+6);
-				frameBuffer->paintBoxRel(x1-4, y1-g_Fonts->channel_num_zap->getHeight()-3, w+8, 
-												 g_Fonts->channel_num_zap->getHeight()+6, COL_MENUCONTENTSELECTED);
-				g_Fonts->channel_num_zap->RenderString(x1,y1,w+1,str,COL_MENUCONTENTSELECTED,0);
-				g_RCInput->getMsg( &msg, &data, 100 ); 
-			} while (g_RCInput->isNumeric(msg) && val < 1000000);
-			if(msg==CRCInput::RC_ok)
-				selected=min((int)playlist.size(), val)-1;
-			update=true;
+			}
+			else
+			{
+				m_viewer->Zoom(1.5);
+			}
+
+		}
+		else if( msg == CRCInput::RC_3 )
+		{ 
+			if(m_state==MENU)
+			{
+			}
+			else
+			{
+				m_viewer->Zoom(2.0/3);
+			}
+
+		}
+		else if( msg == CRCInput::RC_2 )
+		{ 
+			if(m_state==MENU)
+			{
+			}
+			else
+			{
+				m_viewer->Move(0,-50);
+			}
+		}
+		else if( msg == CRCInput::RC_4 )
+		{ 
+			if(m_state==MENU)
+			{
+			}
+			else
+			{
+				m_viewer->Move(-50,0);
+			}
+		}
+		else if( msg == CRCInput::RC_6 )
+		{ 
+			if(m_state==MENU)
+			{
+			}
+			else
+			{
+				m_viewer->Move(50,0);
+			}
+		}
+		else if( msg == CRCInput::RC_8 )
+		{ 
+			if(m_state==MENU)
+			{
+			}
+			else
+			{
+				m_viewer->Move(0,50);
+			}
 		}
 		else if(msg==CRCInput::RC_0)
 		{
+			view(selected, true);
 		}
 		else if(msg==CRCInput::RC_setup)
 		{
@@ -573,7 +602,7 @@ void CPictureViewerGui::paint()
 	visible = true;
 }
 
-void CPictureViewerGui::view(unsigned int index)
+void CPictureViewerGui::view(unsigned int index, bool unscaled)
 {
 	selected=index;
 	
@@ -584,8 +613,10 @@ void CPictureViewerGui::view(unsigned int index)
 	
 	if(m_state == MENU)
 		frameBuffer->setMode(720,576,16);
-	m_viewer->ShowImage(playlist[index].Filename,g_settings.screen_StartX, g_settings.screen_EndX,
-							  g_settings.screen_StartY, g_settings.screen_EndY);
+	if(unscaled)
+		m_viewer->DecodeImage(playlist[index].Filename, true, unscaled);
+	m_viewer->ShowImage(playlist[index].Filename, unscaled);
+
 	//Decode next
 	unsigned int next=selected+1;
 	if(next > playlist.size()-1)
@@ -593,11 +624,9 @@ void CPictureViewerGui::view(unsigned int index)
 	if(m_state==MENU)
 		m_state=VIEW;
 	if(m_state==VIEW)
-		m_viewer->DecodeImage(playlist[next].Filename,g_settings.screen_StartX, g_settings.screen_EndX,
-									 g_settings.screen_StartY, g_settings.screen_EndY, true);
+		m_viewer->DecodeImage(playlist[next].Filename,true);
 	else
-		m_viewer->DecodeImage(playlist[next].Filename,g_settings.screen_StartX, g_settings.screen_EndX,
-									 g_settings.screen_StartY, g_settings.screen_EndY, false);
+		m_viewer->DecodeImage(playlist[next].Filename,false);
 }
 
 void CPictureViewerGui::endView()

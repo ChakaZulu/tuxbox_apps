@@ -151,6 +151,7 @@ int fh_jpeg_getsize(const char *filename,int *x,int *y, int wanted_width, int wa
 	px=ciptr->output_width; py=ciptr->output_height;
 	c=ciptr->output_components;
 	*x=px; *y=py;
+//	jpeg_finish_decompress(ciptr);
 	jpeg_destroy_decompress(ciptr);
 	fclose(fh);
 //	 dbout("fh_jpeg_getsize }\n");

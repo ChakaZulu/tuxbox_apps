@@ -1342,8 +1342,9 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
  	miscSettings.addItem( new CMenuForwarder("keybindingmenu.repeatblockgeneric", true, "", keySettings_repeat_genericblocker ));
 	
 	oj = new CMenuOptionChooser("pictureviewer.scaling", &g_settings.picviewer_scaling, true );
-	oj->addOption((int)CPictureViewer::SIMPLE, "SIMPLE");
-	oj->addOption((int)CPictureViewer::COLOR, "COLOR AVERAGE");
+	oj->addOption((int)CPictureViewer::SIMPLE, "Simple");
+	oj->addOption((int)CPictureViewer::COLOR, "Color Average");
+	oj->addOption((int)CPictureViewer::NONE, "None");
 	CStringInput*  pic_timeout= new CStringInput("pictureviewer.slide_time", g_settings.picviewer_slide_time, 2, "", "", "0123456789 ");
 	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "pictureviewer.head") );
 	miscSettings.addItem( oj );
@@ -3361,7 +3362,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.418 2003/02/22 13:14:03 zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.419 2003/02/22 18:36:49 zwen Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

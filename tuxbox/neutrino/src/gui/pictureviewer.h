@@ -103,7 +103,7 @@ class CPictureViewerGui : public CMenuTarget
 		void hide();
 
 		CFileFilter picture_filter;
-		void view(unsigned int nr);
+		void view(unsigned int nr, bool unscaled=false);
 		void endView();
 
 	public:
