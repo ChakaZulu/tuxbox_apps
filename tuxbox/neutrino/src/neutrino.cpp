@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.100 2001/12/15 13:52:22 obi Exp $
+        $Id: neutrino.cpp,v 1.101 2001/12/16 23:38:33 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.101  2001/12/16 23:38:33  McClean
+  change scartmode-behavior
+
   Revision 1.100  2001/12/15 13:52:22  obi
   moved configuation files to CONFIGDIR
 
@@ -1907,12 +1910,24 @@ void CNeutrinoApp::tvMode()
 
 void CNeutrinoApp::scartMode()
 {
+	memset(g_FrameBuffer->lfb, 255, g_FrameBuffer->Stride()*576);
+	g_lcdd->setMode(LCDM_SCART);
+	g_Controld->setScartMode( 1 );
+	while(g_RCInput->getKey(1)!= CRCInput::RC_timeout){}
+	printf("scartmode-loop\n");
+	while (g_RCInput->getKey(100)!=CRCInput::RC_home){}
+	printf("scartmode-loopended\n");
+	g_lcdd->setMode(LCDM_TV);
+	g_Controld->setScartMode( 0 );
+
+	/*
 	if(mode==mode_scart)
 	{
 		return;
 	}
 	mode = mode_scart;
 	g_Controld->setScartMode( 1 );
+	*/
 }
 
 void CNeutrinoApp::radioMode()
@@ -2002,7 +2017,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.100 2001/12/15 13:52:22 obi Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.101 2001/12/16 23:38:33 McClean Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;
