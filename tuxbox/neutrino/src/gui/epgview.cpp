@@ -659,7 +659,8 @@ void CEpgData::showTimerEventBar (bool show)
     // hide only?
     if (! show) return;
 
-    frameBuffer->paintBoxRel(x,y,w,h, COL_INFOBAR_SHADOW+1);
+    // frameBuffer->paintBoxRel(x,y,w,h, COL_INFOBAR_SHADOW+1);
+    frameBuffer->paintBoxRel(x,y,w,h, COL_MENUHEAD);
 
 
 

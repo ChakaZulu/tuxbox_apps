@@ -479,6 +479,12 @@ int CNeutrinoApp::loadSetup()
 		scanSettings.useDefaults();
 	}
 
+	if(!g_Timer->loadTimerEvents(CONFIGDIR "/neutrino.timerevents.conf"))
+	{
+		dprintf(DEBUG_NORMAL,"error while loading timerevents, using defaults!\n");
+	}
+
+
 	return erg;
 }
 
@@ -489,6 +495,13 @@ int CNeutrinoApp::loadSetup()
 **************************************************************************************/
 void CNeutrinoApp::saveSetup()
 {
+
+	if(!g_Timer->saveTimerEvents(CONFIGDIR "/neutrino.timerevents.conf"))
+	{
+		dprintf(DEBUG_NORMAL,"error while saving timerevents!\n");
+	}
+
+
 	if(!scanSettings.saveSettings(scanSettingsFile))
 	{
 		dprintf(DEBUG_NORMAL, "error while saveing scan-settings!\n");
@@ -2556,7 +2569,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.275 2002/05/17 13:06:50 woglinde Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.276 2002/05/20 00:03:29 rasc Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
