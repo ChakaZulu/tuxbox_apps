@@ -2,11 +2,10 @@
 #define __httpd_h
 
 #include <asm/types.h>
-#include <qfile.h>
 #include <eptrlist.h>
 #include <ebase.h>
-#include <core/socket/qsocket.h>
-#include <core/socket/qserversocket.h>
+#include <core/socket/socket.h>
+#include <core/socket/serversocket.h>
 #include <map>
 #include <estring.h>
 #include <eerror.h>
@@ -15,7 +14,7 @@ class eHTTPConnection;
 class eHTTPDataSource;
 class eHTTPD;
 
-class eHTTPGarbage: public QObject, public Object
+class eHTTPGarbage
 {
 	eTimer garbage;
 	ePtrList<eHTTPConnection> *conn;
@@ -57,7 +56,7 @@ public:
 	int doWrite(int bytes);
 };
 
-class eHTTPConnection: public QSocket
+class eHTTPConnection: public eSocket
 {
 	void doError(int error);
 	
@@ -65,7 +64,7 @@ class eHTTPConnection: public QSocket
 	
 	int processLocalState();
 	int processRemoteState();
-	void writeString(const char *string);
+	void writeString(const char *data);
 	
 	eHTTPDataSource *data;
 	eHTTPD *parent;
@@ -97,7 +96,7 @@ public:
 	int localstate, remotestate;
 	
 	eHTTPConnection(int socket, eHTTPD *parent);
-	eHTTPConnection(const char *host, int port=80);
+	eHTTPConnection(eString host, int port=80);
 	void die();
 	static eHTTPConnection *doRequest(const char *uri, int *error=0);
 	void start();
@@ -118,15 +117,20 @@ public:
 	int content_length, content_length_remaining;
 };
 
-class eHTTPD: public QServerSocket, public Object
+class eHTTPD: public eServerSocket
 {
 	friend class eHTTPConnection;
 	ePtrList<eHTTPPathResolver> resolver;
 private:// slots:
 	void oneConnectionClosed();
+	static eHTTPD *instance;
+	eHTTPConnection *conn;
+	
 public:
-	eHTTPD(Q_UINT16 port, int backlog=0);
+	eHTTPD(int port);
 	void newConnection(int socket);
+
+	static eHTTPD *getInstance() { return instance; }
 
 	void addResolver(eHTTPPathResolver *r) { resolver.push_back(r); }
 	void removeResolver(eHTTPPathResolver *r) { resolver.remove(r); }

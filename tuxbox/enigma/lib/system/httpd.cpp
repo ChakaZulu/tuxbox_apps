@@ -1,4 +1,3 @@
-#include <qfile.h>
 #include <sys/socket.h>
 #include <error.h>
 #include <errno.h>
@@ -7,6 +6,7 @@
 #include "edvb.h"
 #include "httpd.h"
 #include <string>
+
 
 void eHTTPGarbage::doGarbage()
 {
@@ -33,7 +33,7 @@ eHTTPGarbage::eHTTPGarbage():garbage(eApp)
 {
 	instance=this;
 	conn=0;
-	CONNECT(garbage.timeout, eHTTPGarbage::doGarbage);
+//	CONNECT(garbage.timeout, eHTTPGarbage::doGarbage);
 }
 
 eHTTPGarbage::~eHTTPGarbage()
@@ -83,16 +83,21 @@ int eHTTPError::doWrite(int w)
 	return -1;
 }
 
-eHTTPConnection::eHTTPConnection(int socket, eHTTPD *parent): QSocket(parent), parent(parent)
+eHTTPConnection::eHTTPConnection(int socket, eHTTPD *parent): eSocket(socket), parent(parent)
 {
+#if 0
 	eDebug("eHTTPConnection");
+#endif
 	CONNECT(this->readyRead_ , eHTTPConnection::readData);
 	CONNECT(this->bytesWritten_ , eHTTPConnection::bytesWritten);
 	CONNECT(this->error_ , eHTTPConnection::gotError);
+#if 0
 	eDebug("Aufruf von setSocket!");
+#endif
 	setSocket(socket);
+#if 0
 	eDebug("zurück aus setSocket");
-//	QHostAddress me=address(), he=peerAddress();
+#endif
 	buffersize=64*1024;
 	dying=0;
 	localstate=stateWait;
@@ -100,13 +105,12 @@ eHTTPConnection::eHTTPConnection(int socket, eHTTPD *parent): QSocket(parent), p
 	data=0;
 }
 
-eHTTPConnection::eHTTPConnection(const char *host, int port): QSocket(0), parent(0)
+eHTTPConnection::eHTTPConnection(eString host, int port): eSocket(0), parent(0)
 {
 	CONNECT(this->readyRead_ , eHTTPConnection::readData);
 	CONNECT(this->bytesWritten_ , eHTTPConnection::bytesWritten);
 	CONNECT(this->error_ , eHTTPConnection::gotError);
 	CONNECT(this->connected_ , eHTTPConnection::hostConnected);	
-	eDebug("Hier");
 	connectToHost(host, port);
 	dying=0;
 
@@ -228,7 +232,7 @@ eHTTPConnection *eHTTPConnection::doRequest(const char *uri, int *error)
 	if (!path.size())
 		path="/";
 
-	eHTTPConnection *c=new eHTTPConnection(host.c_str(), 80);
+	eHTTPConnection *c=new eHTTPConnection(host, 80);
 	c->request="GET";
 	c->requestpath=path.c_str();
 	return c;
@@ -239,7 +243,7 @@ void eHTTPConnection::die()
 	if (!dying)
 	{
 		dying=1;
-		emit closing();
+		/* emit */ closing();
 		eHTTPGarbage::getInstance()->destruct(this);
 		eDebug("destruct ok");
 	}
@@ -272,12 +276,16 @@ int eHTTPConnection::processLocalState()
 		switch (localstate)
 		{
 		case stateWait:
+#if 0
 			eDebug("local wait");
+#endif
 			done=1;
 			break;
 		case stateRequest:
 		{
+#if 0
 			eDebug("local request");
+#endif
 			eString req=request+" "+requestpath+" "+httpversion+"\r\n";
 			writeBlock(req.c_str(), req.length());
 			localstate=stateHeader;
@@ -286,13 +294,18 @@ int eHTTPConnection::processLocalState()
 		}
 		case stateResponse:
 		{
+#if 0
+			eDebug("local Response");
+#endif
 			writeString( (httpversion + " " + eString().setNum(code)+" " + code_descr + "\r\n").c_str() );
 			localstate=stateHeader;
 			local_header["Connection"]="close";
 			break;
 		}
 		case stateHeader:
+#if 0
 			eDebug("local header");
+#endif
 			for (std::map<std::string,std::string>::iterator cur=local_header.begin(); cur!=local_header.end(); ++cur)
 			{
 				writeString(cur->first.c_str());
@@ -307,7 +320,9 @@ int eHTTPConnection::processLocalState()
 				localstate=stateData;
 			break;
 		case stateData:
+#if 0
 			eDebug("local data");
+#endif
 			if (data)
 			{
 				int btw=buffersize-bytesToWrite();
@@ -326,7 +341,7 @@ int eHTTPConnection::processLocalState()
 			localstate=stateClose;
 			break;
 		case stateClose:
-			close();		// bye, bye, remote
+			close(0);		// bye, bye, remote
 			if (state() == Idle)
 			{
 				eDebug("state: IDLE!");
@@ -348,10 +363,14 @@ int eHTTPConnection::processRemoteState()
 		{
 		case stateWait:
 		{
+			int i=0;
+#if 0
 			eDebug("remote stateWait");
+#endif
 			char buffer[1024];
-			while (bytesAvailable())
-				readBlock(buffer, 1024);
+			while (bytesAvailable()) {
+				i=readBlock(buffer, 1024);
+			}
 			done=1;
 			break;
 		}
@@ -398,7 +417,9 @@ int eHTTPConnection::processRemoteState()
 		}
 		case stateHeader:
 		{
+#if 0
 			eDebug("remote stateHeader");
+#endif
 			eString line;
 			if (!getLine(line))
 			{
@@ -448,7 +469,9 @@ int eHTTPConnection::processRemoteState()
 		}
 		case stateData:
 		{
+#if 0
 			eDebug("remote stateData");
+#endif
 			ASSERT(data);
 			char buffer[1024];
 			int len;
@@ -474,11 +497,15 @@ int eHTTPConnection::processRemoteState()
 			break;
 		}
 		case stateDone:
+#if 0
 			eDebug("remote stateDone");
+#endif
 			remotestate=stateClose;
 			break;
 		case stateClose:
+#if 0
 			eDebug("remote stateClose");
+#endif
 			remotestate=stateWait;
 			abort=1;
 			break;
@@ -490,9 +517,9 @@ int eHTTPConnection::processRemoteState()
 	return 0;
 }
 
-void eHTTPConnection::writeString(const char *string)
+void eHTTPConnection::writeString(const char *data)
 {
-	writeBlock(string, strlen(string));
+	writeBlock(data, strlen(data));
 }
 
 int eHTTPConnection::getLine(eString &line)
@@ -500,7 +527,7 @@ int eHTTPConnection::getLine(eString &line)
 	if (!canReadLine())
 		return 0;
 
-	line = (const char*) readLine();
+	line = readLine();
 
 	line.erase(line.length()-1);
 
@@ -516,8 +543,9 @@ void eHTTPConnection::gotError(int)
 	die();
 }
 
-eHTTPD::eHTTPD(Q_UINT16 port, int backlog): QServerSocket(port, backlog)
+eHTTPD::eHTTPD(int port): eServerSocket(port)
 {
+	instance=this;
 	new eHTTPGarbage;
 	if (!ok())
 		eDebug("[NET] httpd server FAILED on port %d", port);
@@ -536,12 +564,12 @@ eHTTPConnection::~eHTTPConnection()
 
 void eHTTPD::newConnection(int socket)
 {
-	eHTTPConnection *conn=new eHTTPConnection(socket, this);
+	conn=new eHTTPConnection(socket, this);
 	CONNECT(conn->connectionClosed_ , eHTTPD::oneConnectionClosed);
-	CONNECT(conn->delayedCloseFinished_ , eHTTPD::oneConnectionClosed);	
+	CONNECT(conn->delayedCloseFinished_ , eHTTPD::oneConnectionClosed);
 }
 
 void eHTTPD::oneConnectionClosed()
 {
-	eHTTPGarbage::getInstance()->destruct((eHTTPConnection*)sender());
+	eHTTPGarbage::getInstance()->destruct(conn);
 }
