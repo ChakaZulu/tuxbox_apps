@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.63 2002/01/16 22:40:17 Simplex Exp $
+  $Id: zapit.cpp,v 1.64 2002/01/28 16:40:30 field Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -92,6 +92,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.64  2002/01/28 16:40:30  field
+  Kleinigkeiten in Bezug auf keine ecm_pid found
+
   Revision 1.63  2002/01/16 22:40:17  Simplex
   more adaptions to CBouquetManager
 
@@ -468,21 +471,26 @@ int set_vtxt(uint vpid)
 // war descriptor
 int parsePMTInfo(char *buffer, int len, int ca_system_id)
 {
-  int count=0;
-  int desc,len2,ca_id, ca_pid=0;
+    int count=0;
+    int desc,len2,ca_id;
+    int ca_pid= no_ecmpid_found;
 
-  while(count<len)
+    while(count<len)
     {
-      desc=buffer[count++];
-      len2=buffer[count++];
-      if (desc == 0x09)
+        desc=buffer[count++];
+        len2=buffer[count++];
+        if (desc == 0x09)
         {
-	  ca_id=(buffer[count]<<8)|buffer[count+1];
-	  count+=2;
-	  if ((ca_id == ca_system_id) && ((ca_id>>8) == ((0x18|0x27)&0xD7)))
-	    {
-	      ca_pid= ( ( buffer[count]& 0x1F )<<8 ) | buffer[count+1];
-	    }
+            ca_id=(buffer[count]<<8)|buffer[count+1];
+            count+=2;
+            if ((ca_id == ca_system_id) && ((ca_id>>8) == ((0x18|0x27)&0xD7)))
+            {
+                ca_pid= ( ( buffer[count]& 0x1F )<<8 ) | buffer[count+1];
+            }
+            else if (ca_pid == no_ecmpid_found)
+            {
+                ca_pid = invalid_ecmpid_found;
+            }
 	  count+=2;
 	  count+=(len2-4);
         }
@@ -599,6 +607,8 @@ pids parse_pmt(int pid, int ca_system_id)
         {
             ecm_pid = no_ecmpid_found; // not scrambled...
         }
+
+        //printf("[zapit]: ecm_pid: %x\n", ecm_pid);
 
         while ( dp < ( r- 4 ) )
         {
@@ -1144,7 +1154,7 @@ else
       dprintf("[zapit] zapping to sid: %04x %s. VPID: 0x%04x. APID: 0x%04x, PMT: 0x%04x\n", cit->second.sid, cit->second.name.c_str(), cit->second.vpid, cit->second.apid, cit->second.pmt);
 
 
-      if ( ( cit->second.ecmpid > 0 ) && ( cit->second.ecmpid != no_ecmpid_found ) )
+      if ( ( cit->second.ecmpid > 0 ) && ( cit->second.ecmpid < no_ecmpid_found ) )
 	{
 		decode_vals *vals =(decode_vals*) malloc(sizeof(decode_vals));
 
@@ -1337,7 +1347,7 @@ int changeapid(ushort pid_nr)
       //        descramble(0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff);
 
 
-      if ( ( cit->second.ecmpid > 0 ) && ( cit->second.ecmpid != no_ecmpid_found ) )
+      if ( ( cit->second.ecmpid > 0 ) && ( cit->second.ecmpid < no_ecmpid_found ) )
         {
 /*	  cam_reset();
 	  descramble(cit->second.onid, cit->second.tsid, 0x104, caid, cit->second.ecmpid,  pids_desc.apids[pid_nr].pid , vpid);
@@ -1995,9 +2005,10 @@ void parse_command()
             strcpy(m_status, "00d");
             m_status[1]= pids_desc.count_apids & 0x0f;
             if ( current_is_nvod )
-                m_status[1]|= 0x80;
-            if ( pids_desc.ecmpid != 0)
+                m_status[1]|= zapped_chan_is_nvod;
+/*            if ( pids_desc.ecmpid != 0)
                 m_status[1]|= 0x40;
+*/
         }
         else
             strcpy(m_status, "-0d");
@@ -2024,9 +2035,10 @@ void parse_command()
             strcpy(m_status, "00e");
             m_status[1]= pids_desc.count_apids & 0x0f;
             if ( current_is_nvod )
-                m_status[1]|= 0x80;
-            if ( pids_desc.ecmpid != 0)
+                m_status[1]|= zapped_chan_is_nvod;
+/*            if ( pids_desc.ecmpid != 0)
                 m_status[1]|= 0x40;
+*/
         }
         else
             strcpy(m_status, "-0e");
@@ -2481,7 +2493,7 @@ int main(int argc, char **argv) {
     }
 
   system("cp " CONFIGDIR "/zapit/last_chan /tmp/zapit_last_chan");
-  printf("Zapit $Id: zapit.cpp,v 1.63 2002/01/16 22:40:17 Simplex Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.64 2002/01/28 16:40:30 field Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;

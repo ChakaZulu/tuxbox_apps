@@ -86,6 +86,9 @@ typedef struct apid_struct_2 {
 
 #define max_num_apids 10
 #define no_ecmpid_found 0x10000
+#define invalid_ecmpid_found 0x10001
+
+#define zapped_chan_is_nvod 0x80
 
 typedef struct pids{
         ushort count_vpids;
@@ -104,5 +107,7 @@ extern std::map<std::string, uint> namechans_tv;
 extern std::map<uint, channel> allchans_radio;
 extern std::map<uint, uint> numchans_radio;
 extern std::map<std::string, uint> namechans_radio;
+
+
 
 #endif
