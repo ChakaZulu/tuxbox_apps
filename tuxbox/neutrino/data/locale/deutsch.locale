@@ -29,7 +29,9 @@ cablesetup.provider Kabelanbieter
 
 satsetup.disqeqc DiSEqC
 satsetup.satellite Satellit
-satsetup.extended DiSEqC-Einstellung
+satsetup.extended DiSEqC-Einstellungen
+satsetup.extended_lnb LNB-Einstellungen
+satsetup.extended_motor Motor-Einstellungen
 satsetup.nodiseqc Kein DiSEqC
 satsetup.minidiseqc Mini-DiSEqC
 satsetup.diseqc10 DiSEqC 1.0
