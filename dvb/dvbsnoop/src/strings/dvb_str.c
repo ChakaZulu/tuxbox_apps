@@ -1,10 +1,13 @@
 /*
-$Id: dvb_str.c,v 1.3 2001/10/05 17:43:37 rasc Exp $
+$Id: dvb_str.c,v 1.4 2001/10/06 18:19:18 Toerli Exp $
 
   -- dvb decoder helper functions
 
 
 $Log: dvb_str.c,v $
+Revision 1.4  2001/10/06 18:19:18  Toerli
+Steuerzeichen entfernt. rasc wuerdest du mal bitte nen gescheiten unix-konformen Editor verwenden... windows editoren sind ungeeignet
+
 Revision 1.3  2001/10/05 17:43:37  rasc
 typo...
 

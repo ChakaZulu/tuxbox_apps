@@ -1,5 +1,5 @@
 /*
-$Id: sectables.c,v 1.1 2001/09/30 13:05:20 rasc Exp $
+$Id: sectables.c,v 1.2 2001/10/06 18:19:18 Toerli Exp $
 
  --  For more information please see: ISO 13818 (-1) and ETSI 300 468
  -- Verbose Level >= 2
@@ -7,6 +7,9 @@ $Id: sectables.c,v 1.1 2001/09/30 13:05:20 rasc Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.2  2001/10/06 18:19:18  Toerli
+Steuerzeichen entfernt. rasc wuerdest du mal bitte nen gescheiten unix-konformen Editor verwenden... windows editoren sind ungeeignet
+
 Revision 1.1  2001/09/30 13:05:20  rasc
 dvbsnoop v0.7  -- Commit to CVS
 

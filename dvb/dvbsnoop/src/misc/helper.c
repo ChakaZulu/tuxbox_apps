@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.1 2001/09/30 13:05:20 rasc Exp $
+$Id: helper.c,v 1.2 2001/10/06 18:19:18 Toerli Exp $
 
  -- dvbsnoop
  -- a dvb sniffer tool
@@ -9,6 +9,9 @@ $Id: helper.c,v 1.1 2001/09/30 13:05:20 rasc Exp $
 
 
 $Log: helper.c,v $
+Revision 1.2  2001/10/06 18:19:18  Toerli
+Steuerzeichen entfernt. rasc wuerdest du mal bitte nen gescheiten unix-konformen Editor verwenden... windows editoren sind ungeeignet
+
 Revision 1.1  2001/09/30 13:05:20  rasc
 dvbsnoop v0.7  -- Commit to CVS
 

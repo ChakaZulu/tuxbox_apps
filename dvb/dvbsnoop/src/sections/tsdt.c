@@ -1,5 +1,5 @@
 /*
-$Id: tsdt.c,v 1.1 2001/09/30 13:05:20 rasc Exp $
+$Id: tsdt.c,v 1.2 2001/10/06 18:19:18 Toerli Exp $
 
    -- TSDT section
    -- Transport Stream Description Section
@@ -9,6 +9,9 @@ $Id: tsdt.c,v 1.1 2001/09/30 13:05:20 rasc Exp $
 
 
 $Log: tsdt.c,v $
+Revision 1.2  2001/10/06 18:19:18  Toerli
+Steuerzeichen entfernt. rasc wuerdest du mal bitte nen gescheiten unix-konformen Editor verwenden... windows editoren sind ungeeignet
+
 Revision 1.1  2001/09/30 13:05:20  rasc
 dvbsnoop v0.7  -- Commit to CVS
 
