@@ -2,7 +2,7 @@
 #define __network_interfaces_h__
 
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libnet/network_interfaces.h,v 1.1 2003/03/05 02:18:21 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libnet/network_interfaces.h,v 1.2 2003/03/05 17:13:11 thegoodguy Exp $
  *
  * (C) 2003 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -24,7 +24,7 @@
 
 #include <string>
 
-bool getInetAttributes(const std::string name, std::string &address, std::string &netmask, std::string &broadcast, std::string &gateway);
-bool setInetAttributes(const std::string name, const std::string address, const std::string netmask, const std::string broadcast, const std::string gateway);
+bool getInetAttributes(const std::string name, bool &automatic_start, std::string &address, std::string &netmask, std::string &broadcast, std::string &gateway);
+bool setInetAttributes(const std::string name, const bool automatic_start, const std::string address, const std::string netmask, const std::string broadcast, const std::string gateway);
 
 #endif /* __network_interfaces_h__ */

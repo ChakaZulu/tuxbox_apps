@@ -131,7 +131,6 @@ struct SNeutrinoSettings
 	unsigned char infobar_Text_blue;
 
 	//network
-	int networkSetOnStartup;
 	std::string network_nfs_ip[4];
 	char network_nfs_local_dir[4][100];
 	char network_nfs_dir[4][100];

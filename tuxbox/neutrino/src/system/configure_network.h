@@ -2,7 +2,7 @@
 #define __configure_network_h__
 
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/system/configure_network.h,v 1.1 2003/03/05 02:20:48 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/system/configure_network.h,v 1.2 2003/03/05 17:13:25 thegoodguy Exp $
  *
  * (C) 2003 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -27,6 +27,7 @@
 class CNetworkConfig
 {
  private:
+	bool        orig_automatic_start;
 	std::string orig_address;
 	std::string orig_netmask;
 	std::string orig_broadcast;
@@ -38,6 +39,7 @@ class CNetworkConfig
 	bool modified_from_orig(void);
 
  public:
+	bool        automatic_start;
 	std::string address;
 	std::string netmask;
 	std::string broadcast;

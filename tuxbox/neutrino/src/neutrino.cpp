@@ -170,30 +170,6 @@ CNeutrinoApp* CNeutrinoApp::getInstance()
 }
 
 
-void CNeutrinoApp::setupNetwork(bool force)
-{
-	if ((g_settings.networkSetOnStartup) || (force))
-	{
-		dprintf(DEBUG_INFO, "doing network setup...\n");
-		networkConfig.commitConfig();
-	}
-}
-
-void CNeutrinoApp::testNetwork( )
-{
-	setupNetwork( true );
-
-	dprintf(DEBUG_INFO, "doing network test...\n");
-	//test network
-	testNetworkSettings(networkConfig.address.c_str(), networkConfig.netmask.c_str(), networkConfig.broadcast.c_str(), networkConfig.gateway.c_str(), networkConfig.nameserver.c_str(), networkConfig.inet_static);
-}
-
-void CNeutrinoApp::showNetwork( )
-{
-	dprintf(DEBUG_INFO, "showing current network settings...\n");
-	showCurrentNetworkSettings();
-}
-
 /**************************************************************************************
 *                                                                                     *
 *          CNeutrinoApp -  setup Color Sheme (Neutrino)                               *
@@ -409,7 +385,6 @@ int CNeutrinoApp::loadSetup()
 	g_settings.infobar_Text_blue = configfile.getInt32( "infobar_Text_blue", 0x64 );
 
 	//network
-	g_settings.networkSetOnStartup = configfile.getInt32( "networkSetOnStartup", fromflash==true?1:0 );
 	g_settings.network_nfs_ip[0] = configfile.getString("network_nfs_ip_1", "");
 	g_settings.network_nfs_ip[1] = configfile.getString("network_nfs_ip_2", "");
 	g_settings.network_nfs_ip[2] = configfile.getString("network_nfs_ip_3", "");
@@ -633,7 +608,6 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "infobar_Text_blue", g_settings.infobar_Text_blue );
 
 	//network
-	configfile.setInt32( "networkSetOnStartup", g_settings.networkSetOnStartup );
 	configfile.setString( "network_nfs_ip_1", g_settings.network_nfs_ip[0] );
 	configfile.setString( "network_nfs_ip_2", g_settings.network_nfs_ip[1] );
 	configfile.setString( "network_nfs_ip_3", g_settings.network_nfs_ip[2] );
@@ -1464,7 +1438,8 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	networkSettings.addItem( new CMenuForwarder("menu.back") );
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
-	CMenuOptionChooser* oj = new CMenuOptionChooser("networkmenu.setuponstartup", &g_settings.networkSetOnStartup, true);
+	network_automatic_start = networkConfig.automatic_start ? 1 : 0;
+	CMenuOptionChooser* oj = new CMenuOptionChooser("networkmenu.setuponstartup", &network_automatic_start, true);
 	oj->addOption(0, "options.off");
 	oj->addOption(1, "options.on");
 
@@ -1489,7 +1464,7 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	CMenuForwarder *m5 = new CMenuForwarder("networkmenu.nameserver", networkConfig.inet_static, networkConfig.nameserver, networkSettings_NameServer );
 
 	CDHCPNotifier* dhcpNotifier = new CDHCPNotifier(m1,m2,m3,m4,m5, m0);
-	if(g_settings.networkSetOnStartup)
+	if (networkConfig.automatic_start)
 	{
 		dhcpNotifier->startStopDhcp();
 	}
@@ -2124,7 +2099,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	colorSetupNotifier->changeNotify("initial", NULL);
 
-	setupNetwork();
 	CNFSMountGui::automount();
 
 	// setup recording device
@@ -3244,15 +3218,18 @@ int CNeutrinoApp::exec(CMenuTarget* parent, std::string actionKey)
 	}
 	else if(actionKey=="network")
 	{
-		setupNetwork( true );
+		networkConfig.automatic_start = (network_automatic_start == 1);
+		networkConfig.commitConfig();
 	}
 	else if(actionKey=="networktest")
 	{
-		testNetwork( );
+		dprintf(DEBUG_INFO, "doing network test...\n");
+		testNetworkSettings(networkConfig.address.c_str(), networkConfig.netmask.c_str(), networkConfig.broadcast.c_str(), networkConfig.gateway.c_str(), networkConfig.nameserver.c_str(), networkConfig.inet_static);
 	}
 	else if(actionKey=="networkshow")
 	{
-		showNetwork( );
+		dprintf(DEBUG_INFO, "showing current network settings...\n");
+		showCurrentNetworkSettings();
 	}
 	else if(actionKey=="savesettings")
 	{
@@ -3341,7 +3318,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.422 2003/03/05 02:20:47 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.423 2003/03/05 17:13:25 thegoodguy Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

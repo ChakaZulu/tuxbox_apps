@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/system/configure_network.cpp,v 1.1 2003/03/05 02:20:48 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/system/configure_network.cpp,v 1.2 2003/03/05 17:13:25 thegoodguy Exp $
  *
  * (C) 2003 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -29,26 +29,30 @@ CNetworkConfig::CNetworkConfig(void)
 	char our_nameserver[16];
 	netGetNameserver(our_nameserver);
 	nameserver = our_nameserver;
-	inet_static = getInetAttributes("eth0", address, netmask, broadcast, gateway);
+	inet_static = getInetAttributes("eth0", automatic_start, address, netmask, broadcast, gateway);
 	copy_to_orig();
 }
 
 void CNetworkConfig::copy_to_orig(void)
 {
-	orig_address     = address;
-	orig_netmask     = netmask;
-	orig_broadcast   = broadcast;
-	orig_gateway     = gateway;
-	orig_inet_static = inet_static;
+	orig_automatic_start = automatic_start;
+	orig_address         = address;
+	orig_netmask         = netmask;
+	orig_broadcast       = broadcast;
+	orig_gateway         = gateway;
+	orig_inet_static     = inet_static;
 }
 
 bool CNetworkConfig::modified_from_orig(void)
 {
-	return ((orig_address     != address    ) ||
-		(orig_netmask     != netmask    ) ||
-		(orig_broadcast   != broadcast  ) ||
-		(orig_gateway     != gateway    ) ||
-		(orig_inet_static != inet_static));
+	return (
+		(orig_automatic_start != automatic_start) ||
+		(orig_address         != address        ) ||
+		(orig_netmask         != netmask        ) ||
+		(orig_broadcast       != broadcast      ) ||
+		(orig_gateway         != gateway        ) ||
+		(orig_inet_static     != inet_static    )
+		);
 }
 
 void CNetworkConfig::commitConfig(void)
@@ -59,7 +63,7 @@ void CNetworkConfig::commitConfig(void)
 		{
 			copy_to_orig();
 			netSetNameserver(nameserver.c_str());
-			setInetAttributes("eth0", address, netmask, broadcast, gateway);
+			setInetAttributes("eth0", automatic_start, address, netmask, broadcast, gateway);
 			system("ifdown eth0");
 			system("ifup eth0");
 		}

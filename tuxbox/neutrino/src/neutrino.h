@@ -79,6 +79,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		std::string			scanSettingsFile;
 		CScanSettings			scanSettings;
 		int                             network_dhcp;
+		int                             network_automatic_start;
 
 		std::string			fontName;
 		std::string			fontFile;

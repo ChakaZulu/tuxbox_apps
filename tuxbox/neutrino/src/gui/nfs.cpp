@@ -185,13 +185,10 @@ void CNFSMountGui::mount(const char* ip, const char* dir, const char* local_dir,
 
 void CNFSMountGui::automount()
 {
-	if(g_settings.networkSetOnStartup)
+	for(int i = 0; i < 4; i++)
 	{
-		for(int i=0 ; i < 4 ;i++)
-		{
-			if(g_settings.network_nfs_automount[i])
-				mount(g_settings.network_nfs_ip[i].c_str(), g_settings.network_nfs_dir[i], g_settings.network_nfs_local_dir[i], false);
-		}
+		if(g_settings.network_nfs_automount[i])
+			mount(g_settings.network_nfs_ip[i].c_str(), g_settings.network_nfs_dir[i], g_settings.network_nfs_local_dir[i], false);
 	}
 }
 

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libnet/network_interfaces.cpp,v 1.2 2003/03/05 14:39:42 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libnet/network_interfaces.cpp,v 1.3 2003/03/05 17:13:11 thegoodguy Exp $
  *
  * (C) 2003 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -73,7 +73,31 @@ std::list<std::string>::iterator add_attributes(const std::map<std::string, std:
 	return here;
 }
 
-bool write_interface(const std::string filename, const std::string name, const std::string family, const std::string method, const std::map<std::string, std::string> attribute)
+std::string remove_interface_from_line(const std::string interface, const std::string line)
+{
+	std::string        s;
+	std::istringstream in(line.c_str());
+	std::ostringstream out;
+	bool               contains_at_least_one_interface = false;
+
+	if (in >> s)
+	{
+		out << s;  /* auto */
+		
+		while (in >> s)
+		{
+			if (s != interface)
+			{
+				out << ' ' << s;
+				contains_at_least_one_interface = true;
+			}
+		}
+	}
+
+	return (contains_at_least_one_interface ? out.str() : "");
+}
+
+bool write_interface(const std::string filename, const std::string name, const bool automatic_start, const std::string family, const std::string method, const std::map<std::string, std::string> attribute)
 {
 	std::string            s;
 	std::list<std::string> line;
@@ -81,22 +105,54 @@ bool write_interface(const std::string filename, const std::string name, const s
 
 	read_file(filename, line); /* ignore return value */
 
-	for (std::list<std::string>::iterator it = line.begin(); it != line.end(); it++)
+	for (std::list<std::string>::iterator it = line.begin(); it != line.end(); )
 	{
 		{
 			std::istringstream in((*it).c_str());
 			
-			if (!(in >> std::ws >> s))
+			if (!(in >> s))
+			{
+				it++;
 				continue;
+			}
 			
 			if (s != std::string("iface"))
+			{
+				if (s == std::string("auto"))
+				{
+					bool advance = true;
+					while (in >> s)
+					{
+						if (s == std::string(name))
+						{
+							*it = remove_interface_from_line(name, *it);
+							if ((*it).empty())
+							{
+								it = line.erase(it); /* erase advances it */
+								advance = false;
+							}
+							break;
+						}
+					}
+					if (advance)
+						it++;
+				}
+				else
+					it++;
 				continue;
-			
-			if (!(in >> std::ws >> s))
+			}
+
+			if (!(in >> s))
+			{
+				it++;
 				continue;
+			}
 			
 			if (s != std::string(name))
+			{
+				it++;
 				continue;
+			}
 		}
 			
 		found = true;
@@ -106,6 +162,9 @@ bool write_interface(const std::string filename, const std::string name, const s
 		out << "iface " << name << ' ' << family << ' ' << method;
 		(*it) = out.str();
 
+		if (automatic_start)
+			line.insert(it, "auto " + name);
+		
 		/* add attributes */
 		it++;
 		it = add_attributes(attribute, line, it);
@@ -115,7 +174,7 @@ bool write_interface(const std::string filename, const std::string name, const s
 		{
 			std::istringstream in((*it).c_str());
 
-			if (!(in >> std::ws >> s))  /* retain empty lines */	
+			if (!(in >> s))             /* retain empty lines */	
 			{
 				it++;
 				continue;
@@ -138,8 +197,6 @@ bool write_interface(const std::string filename, const std::string name, const s
 			
 			it = line.erase(it);
 		}
-
-		break;
 	}
 
 	if (!found)
@@ -153,80 +210,107 @@ bool write_interface(const std::string filename, const std::string name, const s
 	return write_file(filename, line);
 }
 
-bool read_interface(const std::string filename, const std::string name, std::string &family, std::string &method, std::map<std::string, std::string> &attribute)
+bool read_interface(const std::string filename, const std::string name, bool &automatic_start, std::string &family, std::string &method, std::map<std::string, std::string> &attribute)
 {
 	std::string   s;
 	std::string   t;
 	std::ifstream in(filename.c_str());
+	bool          advance = true;
 
+	automatic_start = false;
 	attribute.clear();
 
 	if (!in.is_open())
 		return false;
 
-	while (getline(in, s))
+	while (true)
 	{
+		if (advance)
+		{
+			if (!getline(in, s))
+				break;
+		}
+		else
+			advance = true;
+
 		{
 			std::istringstream in(s.c_str());
 			
-			if (!(in >> std::ws >> s))
+			if (!(in >> s))
 				continue;
 			
 			if (s != std::string("iface"))
+			{
+				if (s == std::string("auto"))
+				{
+					while (in >> s)
+					{
+						if (s == std::string(name))
+						{
+							automatic_start = true;
+							break;
+						}
+					}
+				}
 				continue;
+			}
 
-			if (!(in >> std::ws >> s))
+			if (!(in >> s))
 				continue;
 			
 			if (s != std::string(name))
 				continue;
 			
-			if (!(in >> std::ws >> s))
+			if (!(in >> s))
 				continue;
 			
-			if (!(in >> std::ws >> t))
+			if (!(in >> t))
 				continue;
 			
 			family = s;
 			method = t;
 		}
-	
-		while (getline(in, s))
+
+		while (true)
 		{
+			if (!getline(in, s))
+				return true;
+
 			std::istringstream in(s.c_str());
 
-			if (!(in >> std::ws >> s))  /* ignore empty lines */	
+			if (!(in >> t))             /* ignore empty lines */	
 				continue;
 		
-			if (s[0] == '#')            /* ignore comments */
+			if (t[0] == '#')            /* ignore comments */
 				continue;
 			
-			if (s == std::string("iface"))
+			if (t == std::string("iface"))
 				break;
 			
-			if (s == std::string("auto"))
+			if (t == std::string("auto"))
 				break;
 			
-			if (s == std::string("mapping"))
+			if (t == std::string("mapping"))
 				break;
 			
-			if (!(in >> std::ws >> t))
+			if (!(in >> s))
 				continue;
 			
-			attribute[s] = t;
+			attribute[t] = s;
 		}
+		advance = false;
 	}
 
 	return true;
 }
 
-bool getInetAttributes(const std::string name, std::string &address, std::string &netmask, std::string &broadcast, std::string &gateway)
+bool getInetAttributes(const std::string name, bool &automatic_start, std::string &address, std::string &netmask, std::string &broadcast, std::string &gateway)
 {
 	std::string family;
 	std::string method;
 	std::map<std::string, std::string> attribute;
 
-	if (!read_interface("/etc/network/interfaces", name, family, method, attribute))
+	if (!read_interface("/etc/network/interfaces", name, automatic_start, family, method, attribute))
 		return false;
 
 	if (family != "inet")
@@ -254,7 +338,7 @@ bool getInetAttributes(const std::string name, std::string &address, std::string
 	return true;
 }
 
-bool setInetAttributes(const std::string name, const std::string address, const std::string netmask, const std::string broadcast, const std::string gateway)
+bool setInetAttributes(const std::string name, const bool automatic_start, const std::string address, const std::string netmask, const std::string broadcast, const std::string gateway)
 {
 	std::map<std::string, std::string> attribute;
 
@@ -267,5 +351,5 @@ bool setInetAttributes(const std::string name, const std::string address, const 
 	if (!gateway.empty())
 		attribute["gateway"] = gateway;
 
-	return write_interface("/etc/network/interfaces", name, "inet", "static", attribute);
+	return write_interface("/etc/network/interfaces", name, automatic_start, "inet", "static", attribute);
 }
