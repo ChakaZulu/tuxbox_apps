@@ -835,6 +835,9 @@ void eServiceSelector::serviceSelected(eListBoxEntryService *entry)
 		{
 			hide();
 			ePictureViewer e(ref.path);
+#ifndef DISABLE_LCD
+			e.setLCD( LCDTitle, LCDElement );
+#endif
 			e.show();
 			e.exec();
 			e.hide();
@@ -1139,6 +1142,9 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 					if ( ret != -1 )
 					{
 						ePictureViewer e(selected.path);
+#ifndef DISABLE_LCD
+						e.setLCD( LCDTitle, LCDElement );
+#endif
 						e.show();
 						e.exec();
 						e.hide();

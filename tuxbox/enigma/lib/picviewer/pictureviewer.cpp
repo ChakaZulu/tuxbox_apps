@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <dirent.h>
+#include <src/enigma_main.h>
 #include <lib/gui/eskin.h>
 #include <lib/gui/elabel.h>
 #include <lib/gdi/font.h>
@@ -57,6 +58,7 @@ ePictureViewer::ePictureViewer(const eString &filename)
 	eDebug("[PICTUREVIEWER] Constructor...");
 
 	addActionMap(&i_cursorActions->map);
+	addActionMap(&i_shortcutActions->map);
 
 	move(ePoint(70, 50));
 	resize(eSize(590, 470));
@@ -65,6 +67,8 @@ ePictureViewer::ePictureViewer(const eString &filename)
 	l->setFont(eSkin::getActive()->queryFont("epg.title"));
 	l->resize(eSize(clientrect.width() - 100, 30));
 	l->setText(_("Loading picture... please wait."));
+
+	setText(_("Picture Viewer"));
 
 	fh_root = NULL;
 	m_scaling = COLOR;
@@ -107,6 +111,8 @@ ePictureViewer::ePictureViewer(const eString &filename)
 
 	m_busy_buffer = NULL;
 
+	blockOK = true;
+
 	init_handlers();
 
 	CONNECT(slideshowTimer.timeout, ePictureViewer::slideshowTimeout);
@@ -130,7 +136,8 @@ ePictureViewer::~ePictureViewer()
 		free(m_CurrentPic_Buffer);
 		m_CurrentPic_Buffer = NULL;
 	}
-	CFormathandler *tmp=NULL;
+
+	CFormathandler *tmp = NULL;
 	while(fh_root)
 	{
 		tmp = fh_root;
@@ -169,7 +176,7 @@ void ePictureViewer::init_handlers(void)
 #endif
 }
 
-ePictureViewer::CFormathandler * ePictureViewer::fh_getsize(const char *name, int *x, int *y, int width_wanted, int height_wanted)
+ePictureViewer::CFormathandler *ePictureViewer::fh_getsize(const char *name, int *x, int *y, int width_wanted, int height_wanted)
 {
 	CFormathandler *fh;
 	for (fh = fh_root; fh != NULL; fh = fh->next)
@@ -326,19 +333,20 @@ bool ePictureViewer::ShowImage(const std::string & filename, bool unscaled)
 #endif
 	}
 	DisplayNextImage();
+	blockOK = false;
 	eDebug("Show Image }");
 	return true;
 }
 
 void ePictureViewer::slideshowTimeout()
 {
-	int wrap = 1;
 	bool setTimer = true;
 	eString tmp = *myIt;
 	eDebug("[PICTUREVIEWER] slideshowTimeout: show %s", tmp.c_str());
 	ShowImage(tmp, false);
 	if (++myIt == slideshowList.end())
 	{
+		int wrap = 1;
 		eConfig::getInstance()->getKey("/picviewer/wraparound", wrap);
 		if (wrap == 1)
 			myIt = slideshowList.begin();
@@ -359,13 +367,44 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 	switch(evt.type)
 	{
 		case eWidgetEvent::evtAction:
-			if (/* evt.action == &i_cursorActions->ok || */
-				evt.action == &i_cursorActions->cancel ||
-				evt.action == &i_cursorActions->left ||
-				evt.action == &i_cursorActions->right )
+		{
+			if (evt.action == &i_cursorActions->cancel ||
+			    ((evt.action == &i_cursorActions->ok) && !blockOK))
 				close(0);
 			else
-			if (evt.action == &i_cursorActions->up)
+			if (evt.action == &i_shortcutActions->yellow)
+			{
+				if (slideshowPaused)
+				{
+					if (++myIt == slideshowList.end())
+						myIt = slideshowList.begin();
+					slideshowTimeout();
+					slideshowPaused = false;
+				}
+				else
+				{
+					slideshowTimer.stop();
+					if (myIt == slideshowList.begin())
+					{
+						myIt = slideshowList.end();
+						myIt--;
+					}
+					else
+						myIt--;
+					slideshowPaused = true;
+				}
+			}
+			if (evt.action == &i_shortcutActions->green)
+			{
+				slideshowPaused = false;
+				if (++myIt == slideshowList.end())
+					myIt = slideshowList.begin();
+				slideshowTimeout();
+			}
+			else
+			if (evt.action == &i_cursorActions->up ||
+			    evt.action == &i_cursorActions->right ||
+			    evt.action == &i_shortcutActions->blue)
 			{
 				if (++myIt == slideshowList.end())
 					myIt = slideshowList.begin();
@@ -373,7 +412,9 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 				DisplayNextImage();
 			}
 			else
-			if (evt.action == &i_cursorActions->down)
+			if (evt.action == &i_cursorActions->down ||
+			    evt.action == &i_cursorActions->left ||
+			    evt.action == &i_shortcutActions->red)
 			{
 				if (myIt == slideshowList.begin())
 				{
@@ -386,6 +427,7 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 				DisplayNextImage();
 			}
 			break;
+		}
 		case eWidgetEvent::execBegin:
 		{
 			int mode = 0;
@@ -397,10 +439,12 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 			break;
 		}
 		case eWidgetEvent::execDone:
+		{
 			fbClass::getInstance()->SetMode(720, 576, 8);
 			fbClass::getInstance()->PutCMAP();
 			fbClass::getInstance()->unlock();
 			break;
+		}
 		default:
 			return eWidget::eventHandler(evt);
 	}
@@ -455,6 +499,8 @@ void ePictureViewer::listDirectory(eString directory, int includesubdirs)
 bool ePictureViewer::ShowSlideshow(const std::string& filename, bool unscaled)
 {
 	eDebug("Show Slideshow { %s", filename.c_str());
+	slideshowPaused = false;
+
 	int includesubdirs = 1;
 	eConfig::getInstance()->getKey("/picviewer/includesubdirs", includesubdirs);
 

@@ -29,6 +29,8 @@ class ePictureViewer: public eWidget
 	int eventHandler(const eWidgetEvent &evt);
 	void listDirectory(eString, int);
 	bool showBusySign;
+	bool slideshowPaused;
+	bool blockOK;
 public:
 	ePictureViewer( const eString &filename);
 	~ePictureViewer();

@@ -24,7 +24,7 @@ struct PicViewerStyleSelectorActions
 eAutoInitP0<PicViewerStyleSelectorActions> i_PicViewerStyleSelectorActions(eAutoInitNumbers::actions, "Picture Viewer Style Selector");
 
 ePicViewerStyleSelector::ePicViewerStyleSelector(int ssel)
-		:eListBoxWindow<eListBoxEntryText>(_("Picture Viewer 1.2 - Actions"), 5, 350, true)
+		:eListBoxWindow<eListBoxEntryText>(_("Picture Viewer 1.3 - Modes"), 5, 350, true)
 		,ssel(ssel)
 {
 	eListBoxEntrySeparator *sep;
