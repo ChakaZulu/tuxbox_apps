@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.36 2002/04/18 13:09:53 field Exp $
+//  $Id: sectionsdMsg.h,v 1.37 2002/09/24 22:29:06 thegoodguy Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -25,6 +25,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsdMsg.h,v $
+//  Revision 1.37  2002/09/24 22:29:06  thegoodguy
+//  Code cleanup (kick out onid_sid)
+//
 //  Revision 1.36  2002/04/18 13:09:53  field
 //  Sectionsd auf clientlib umgestellt :)
 //
@@ -123,6 +126,14 @@
 
 #include <string>
 #include <vector>
+
+
+#include <stdint.h>
+
+typedef uint16_t t_service_id;
+typedef uint16_t t_original_network_id;
+typedef uint16_t t_transport_stream_id;
+
 
 using namespace std;
 
@@ -225,10 +236,11 @@ struct sectionsd
 
     typedef std::vector<responseGetLinkageDescriptors> LinkageDescriptorList;
 
-    struct responseGetNVODTimes
+	struct responseGetNVODTimes
 	{
-		unsigned onid_sid;
-		unsigned short tsid;
+		t_service_id          service_id;
+		t_original_network_id original_network_id;
+		t_transport_stream_id transport_stream_id;
 		sectionsd::sectionsdTime zeit;
 	};
 

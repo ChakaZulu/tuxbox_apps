@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.18 2002/07/27 17:14:51 obi Exp $
+  $Id: sectionsdclient.cpp,v 1.19 2002/09/24 22:29:06 thegoodguy Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: sectionsdclient.cpp,v $
+  Revision 1.19  2002/09/24 22:29:06  thegoodguy
+  Code cleanup (kick out onid_sid)
+
   Revision 1.18  2002/07/27 17:14:51  obi
   no more warnings
 
@@ -381,12 +384,10 @@ bool CSectionsdClient::getNVODTimesServiceKey( unsigned serviceKey, sectionsd::N
 
 		while( dp< pData+ nBufSize )
 		{
-			response.onid_sid = *(unsigned *) dp;
-			dp+=sizeof(unsigned);
-			response.tsid = *(unsigned short *) dp;
-			dp+=sizeof(unsigned short);
-            response.zeit = *(sectionsd::sectionsdTime*) dp;
-			dp+= sizeof(sectionsd::sectionsdTime);
+			response.service_id = *(t_service_id *) dp;			dp += sizeof(t_service_id);
+			response.original_network_id = *(t_original_network_id *) dp;	dp += sizeof(t_original_network_id);
+			response.transport_stream_id = *(t_transport_stream_id *) dp;	dp += sizeof(t_transport_stream_id);
+			response.zeit = *(sectionsd::sectionsdTime*) dp;		dp += sizeof(sectionsd::sectionsdTime);
 
 			nvod_list.insert( nvod_list.end(), response);
 		}

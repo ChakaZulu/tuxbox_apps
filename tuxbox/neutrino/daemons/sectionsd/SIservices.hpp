@@ -1,7 +1,7 @@
 #ifndef SISERVICES_HPP
 #define SISERVICES_HPP
 //
-// $Id: SIservices.hpp,v 1.6 2001/07/25 11:39:17 fnbrd Exp $
+// $Id: SIservices.hpp,v 1.7 2002/09/24 22:29:06 thegoodguy Exp $
 //
 // classes SIservices and SIservices (dbox-II-project)
 //
@@ -24,6 +24,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIservices.hpp,v $
+// Revision 1.7  2002/09/24 22:29:06  thegoodguy
+// Code cleanup (kick out onid_sid)
+//
 // Revision 1.6  2001/07/25 11:39:17  fnbrd
 // Added unique keys to Events and Services
 //
@@ -43,6 +46,10 @@
 // Alles neu macht der Mai.
 //
 //
+
+
+#include "sectionsdMsg.h"
+
 
 // forward references
 class SIservice;
@@ -85,9 +92,9 @@ class SInvodReference
     unsigned uniqueKey(void) const {
       return (((unsigned)originalNetworkID)<<16) + serviceID;
     }
-    unsigned short serviceID;
-    unsigned short transportStreamID;
-    unsigned short originalNetworkID;
+    t_service_id          serviceID;
+    t_original_network_id originalNetworkID;
+    t_transport_stream_id transportStreamID;
 };
 
 // Fuer for_each

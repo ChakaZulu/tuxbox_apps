@@ -279,9 +279,9 @@ void CRemoteControl::getNVODs()
 			{
 				if ( NVODs[i].zeit.dauer> 0 )
 				{
-					CSubService newService (NVODs[i].onid_sid & 0xFFFF,
-								NVODs[i].tsid,
-								NVODs[i].onid_sid >> 16,
+					CSubService newService (NVODs[i].service_id,
+								NVODs[i].transport_stream_id,
+								NVODs[i].original_network_id,
 								NVODs[i].zeit.startzeit, 
 								NVODs[i].zeit.dauer);
 
