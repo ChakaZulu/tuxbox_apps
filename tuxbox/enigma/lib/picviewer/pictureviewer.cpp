@@ -296,6 +296,8 @@ bool ePictureViewer::ShowImage(const std::string & filename, bool unscaled)
 	struct fb_var_screeninfo *screenInfo = fbClass::getInstance()->getScreenInfo();
 	if (screenInfo->bits_per_pixel != 16)
 	{
+		while (gRC::getInstance().mustDraw())
+			usleep(1000);
 		fbClass::getInstance()->lock();
 		fbClass::getInstance()->SetMode(720, 576, 16);
 		fbClass::getInstance()->PutCMAP();
