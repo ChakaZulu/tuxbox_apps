@@ -660,7 +660,7 @@ int eListBoxBase::moveSelection(int dir, bool sendSelected)
 				}
 			}
 			if( !current->isSelectable() )
-				current--;
+				current++;
 			break;
 
 		case dirUp:
