@@ -689,26 +689,26 @@ int Decoder::displayIFrame(const char *frame, int len)
 
 	if ( fd.video != -1 )
 	{
-		if (::ioctl(fd.video, VIDEO_CLEAR_BUFFER)<0 )
-			eDebug("VIDEO_CLEAR_BUFFER failed (%m)");
 		parms.vpid=-1;
 		Set();
 	}
 
 	int fd = open(VIDEO_DEV, O_RDWR);
-
 	if (::ioctl(fd, VIDEO_SELECT_SOURCE, VIDEO_SOURCE_MEMORY )<0)
 		eDebug("VIDEO_SELECT_SOURCE failed (%m)");
+	if (::ioctl(fd, VIDEO_CLEAR_BUFFER)<0 )
+		eDebug("VIDEO_CLEAR_BUFFER failed (%m)");
 	if ( ::ioctl(fd, VIDEO_PLAY) < 0 )
 		eDebug("VIDEO_PLAY failed (%m)");
 
 	unsigned char buf[128];
 	memset(&buf, 0, 128);
-	for ( int i=0; i < 20; i++ )
+	for ( int i=0; i < 2; i++ )
 	{
 		write(fdv, frame, len);
 		write(fdv, &buf, 128);
 	}
+	usleep(50*1000);
 
 	close(fd);
 
