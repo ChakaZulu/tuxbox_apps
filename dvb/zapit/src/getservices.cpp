@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.75 2003/06/01 17:23:18 digi_casi Exp $
+ * $Id: getservices.cpp,v 1.76 2003/06/02 09:34:44 digi_casi Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -30,8 +30,11 @@
 extern std::map <uint32_t, transponder> transponders;
 extern tallchans allchans;
 
-std::map <string, t_satellite_position> satellitePositions; //satellite position as specified in satellites.xml
-std::map <t_satellite_position, uint8_t> motorPositions; //stored satellitepositions in diseqc 1.2 motor
+std::map<string, t_satellite_position> satellitePositions; //satellite position as specified in satellites.xml
+std::map<string, t_satellite_position>::iterator spos_it;
+
+std::map<t_satellite_position, uint8_t> motorPositions; //stored satellitepositions in diseqc 1.2 motor
+std::map<t_satellite_position, uint8_t>::iterator mpos_it;
 
 void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC, std::string satellite, t_satellite_position satellitePosition)
 {
@@ -188,34 +191,37 @@ int LoadMotorPositions(void)
 	FILE *fd = NULL;
 	int motorPosition = 0;
 	char buffer[256] = "";
-	t_satellite_position satellitePosition = 0;
-	int temp;
+	t_satellite_position satellitePosition;
+	int temp1, temp2;
+	
+	printf("[getservices] loading motor positions...\n");
 	
 	if ((fd = fopen(MOTORCONFIGFILE, "r")))
 	{
 		fgets(buffer, 255, fd);
 		while(!feof(fd))
-		{
-			sscanf(buffer, "%d %d", &temp, &motorPosition);
-			satellitePosition = (t_satellite_position)temp;
+		{	
+			sscanf(buffer, "%d %d", &temp1, &temp2);
+			satellitePosition = (t_satellite_position)temp1;
+			motorPosition = (uint8_t)temp2;
 			motorPositions[satellitePosition]++;
 			motorPositions[satellitePosition] = motorPosition;
 			fgets(buffer, 255, fd);	
 		}
 		fclose(fd);
+		
+		for (mpos_it = motorPositions.begin(); mpos_it != motorPositions.end(); mpos_it++)
+		printf("satellitePosition = %d, motorPosition = %d\n", mpos_it->first, mpos_it->second);
 	}
-	std::map<t_satellite_position, uint8_t>::iterator it;
-	for (it = motorPositions.begin(); it != motorPositions.end(); it++)
-	{
-		printf("satellitePosition = %d, motorPosition = %d\n", it->first, it->second);
-	}
+	else
+		printf("[getservices] motor.conf not found.\n");
 	
 	return 0;
 }
 
 int LoadSatellitePositions(void)
 {
-	string satellite;
+	string satelliteName;
 	t_satellite_position satellitePosition;
 	
 	printf("[getservices] loading satellite positions...\n");
@@ -232,10 +238,10 @@ int LoadSatellitePositions(void)
 	{
 		if (!(strcmp(xmlGetName(search), "sat")))
 		{	
-			satellite = xmlGetAttribute(search, "name");
+			satelliteName = xmlGetAttribute(search, "name");
 			satellitePosition = xmlGetSignedNumericAttribute(search, "position", 10);
-			satellitePositions[satellite]++;
-			satellitePositions[satellite] = satellitePosition;
+			satellitePositions[satelliteName]++;
+			satellitePositions[satelliteName] = satellitePosition;
 		}
 
 		search = search->xmlNextNode;
@@ -243,20 +249,19 @@ int LoadSatellitePositions(void)
 	
 	xmlFreeDoc(parser);
 	
-	std::map<std::string, t_satellite_position>::iterator it;
-	for (it = satellitePositions.begin(); it != satellitePositions.end(); it++)
-	{
-		printf("satellite = %s, satellitePosition = %d\n", it->first.c_str(), it->second);
-	}
+	for (spos_it = satellitePositions.begin(); spos_it != satellitePositions.end(); spos_it++)
+		printf("satelliteName = %s, satellitePosition = %d\n", spos_it->first.c_str(), spos_it->second);
+		
 	return 0;
 }
 
-int LoadServices(diseqc_t diseqctype)
+int LoadServices(diseqc_t diseqcType)
 {
-	LoadSatellitePositions();
-	
-	if (diseqctype == DISEQC_1_2)
+	if (diseqcType == DISEQC_1_2)
+	{
+		LoadSatellitePositions();
 		LoadMotorPositions();
+	}
 	
 	xmlDocPtr parser = parseXmlFile(string(SERVICES_XML));
 
