@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_language.cpp,v 1.11 2002/10/22 03:03:27 obi Exp $
+ * $Id: setup_language.cpp,v 1.12 2002/11/14 02:03:09 Ghostrider Exp $
  */
 
 #include <setup_language.h>
@@ -32,12 +32,13 @@ eZapLanguageSetup::eZapLanguageSetup(): eWindow(0)
 
 	setText(_("Language Setup"));
 	move(ePoint(150, 136));
-	resize(eSize(350, 230));
+	resize(eSize(390, 230));
 
 	eLabel *l=new eLabel(this);
 	l->setText(_("Language:"));
-	l->move(ePoint(10, 20));
-	l->resize(eSize(150, fd+4));
+  l->setFlags(eLabel::flagVCenter);
+	l->move(ePoint(20, 20));
+	l->resize(eSize(140, 35));
 
 	language=new eListBox<eListBoxEntryText>(this, l);
 	language->loadDeco();
@@ -83,15 +84,15 @@ eZapLanguageSetup::eZapLanguageSetup(): eWindow(0)
 	ok=new eButton(this);
 	ok->setText(_("save"));
 	ok->move(ePoint(20, 80));
-	ok->resize(eSize(90, fd+4));
+	ok->resize(eSize(170, 40));
 	ok->setHelpText(_("save changes and close window"));
 	ok->loadDeco();
 	CONNECT(ok->selected, eZapLanguageSetup::okPressed);
 
 	abort=new eButton(this);
 	abort->setText(_("abort"));
-	abort->move(ePoint(140, 80));
-	abort->resize(eSize(100, fd+4));
+	abort->move(ePoint(210, 80));
+	abort->resize(eSize(170, 40));
 	abort->setHelpText(_("leave language setup (no changes are saved)"));
 	abort->loadDeco();
 	CONNECT(abort->selected, eZapLanguageSetup::abortPressed);

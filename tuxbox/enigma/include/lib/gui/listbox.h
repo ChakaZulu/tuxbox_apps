@@ -31,7 +31,8 @@ public:
 	enum	{		OK = 0,		ERROR=1,		E_ALLREADY_SELECTED = 2,		E_COULDNT_FIND = 4,		E_INVALID_ENTRY = 8,	 E_NOT_VISIBLE = 16		};
 	void setFlags(int);
 	void removeFlags(int);
-	void invalidateEntry(int n){	invalidate(getEntryRect(n));}
+  void invalidateEntry(int n){	invalidate(getEntryRect(n));}
+  void invalidateContent();
 	void setColumns(int col);
 	int getColumns() { return columns; }
 	void setMoveMode(int move) { movemode=move; }
@@ -104,7 +105,14 @@ public:
 		return ERROR;
 	}
 
-
+  void invalidateCurrent()
+  {
+    int n=0;
+    for (ePtrList_T_iterator i(top); i != bottom; ++i, n++)
+      if ( i == current )
+        invalidate(getEntryRect(n));    
+  }
+  
 	enum
 	{
 		dirPageDown, dirPageUp, dirDown, dirUp, dirFirst
@@ -267,7 +275,7 @@ inline void eListBox<T>::clearList()
 	if (!in_atomic)
 	{
 		selchanged(0);
-		invalidate();
+		invalidateContent();
 	} else
 	{
 		atomic_selchanged=1;
@@ -421,7 +429,7 @@ inline void eListBox<T>::init()
 		if (bottom == childs.end() )
 			break;	
 	if (!in_atomic)
-		invalidate();
+		invalidateContent();
 	else
 		atomic_redraw=arAll;
 }
@@ -602,7 +610,7 @@ inline int eListBox<T>::moveSelection(int dir)
 			if (in_atomic)
 				atomic_redraw=arAll;
 			else
-				invalidate();
+				invalidateContent();
 		} else if ( current != oldptr)
 		{
 			int i=0;
@@ -746,7 +754,7 @@ inline int eListBox<T>::setCurrent(const T *c)
 		if (isVisible())
 		{
 			if (!in_atomic)
-				invalidate();   // Draw all
+				invalidateContent();   // Draw all
 			else
 				atomic_redraw=arAll;
 		}
@@ -797,7 +805,7 @@ void eListBox<T>::endAtomic()
 	if (!--in_atomic)
 	{
 		if (atomic_redraw == arAll)
-			invalidate();
+			invalidateContent();
 		else if (atomic_redraw == arCurrentOld)
 		{
 			if (atomic_new != -1)

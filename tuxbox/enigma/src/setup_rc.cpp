@@ -70,15 +70,15 @@ eZapRCSetup::eZapRCSetup(): eWindow(0)
 	ok=new eButton(this);
 	ok->setText(_("save"));
 	ok->move(ePoint(20, 135));
-	ok->resize(eSize(90, fd+4));
+	ok->resize(eSize(170, 40));
 	ok->setHelpText(_("close window and save changes"));
 	ok->loadDeco();
 	CONNECT(ok->selected, eZapRCSetup::okPressed);
 
 	abort=new eButton(this);
 	abort->setText(_("abort"));
-	abort->move(ePoint(140, 135));
-	abort->resize(eSize(100, fd+4));
+	abort->move(ePoint(210, 135));
+	abort->resize(eSize(170, 40));
 	abort->setHelpText(_("close window (no changes are saved)"));
 	abort->loadDeco();
 	CONNECT(abort->selected, eZapRCSetup::abortPressed);

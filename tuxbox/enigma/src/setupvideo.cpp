@@ -30,7 +30,7 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 
 	setText(_("Video Setup"));
 	move(ePoint(150, 136));
-	resize(eSize(350, 270));
+	resize(eSize(400, 270));
 
 	eLabel *l=new eLabel(this);
 	l->setText("Colorformat:");
@@ -68,8 +68,8 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 
 	ok=new eButton(this);
 	ok->setText(_("save"));
-	ok->move(ePoint(20, 130));
-	ok->resize(eSize(90, fd+4));
+	ok->move(ePoint(20, 120));
+	ok->resize(eSize(170, 40));
 	ok->setHelpText(_("save settings and leave video setup"));
 	ok->loadDeco();
 
@@ -77,8 +77,8 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 
 	abort=new eButton(this);
 	abort->setText(_("abort"));
-	abort->move(ePoint(140, 130));
-	abort->resize(eSize(100, fd+4));
+	abort->move(ePoint(210, 120));
+	abort->resize(eSize(170, 40));
 	abort->setHelpText(_("leave video setup (no changes are saved)"));
 	abort->loadDeco();
 

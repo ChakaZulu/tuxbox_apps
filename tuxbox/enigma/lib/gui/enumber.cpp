@@ -70,6 +70,15 @@ void eNumber::redrawWidget(gPainter *p, const eRect &area)
 		redrawNumber(p, i, area);
 }
 
+void eNumber::invalidateNum()
+{
+  eRect rect;
+  for (int i=0; i<len; i++)
+		rect |= getNumberRect(i);
+
+  invalidate(rect);
+}
+
 int eNumber::eventHandler(const eWidgetEvent &event)
 {
 	if (LCDTmp)
@@ -313,6 +322,7 @@ void eNumber::setNumber(int n)
 		number[i]=n%base;
 		n/=base;
 	}
+	invalidate();
 }
 
 int eNumber::getNumber()

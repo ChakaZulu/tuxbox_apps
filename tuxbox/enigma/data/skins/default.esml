@@ -125,12 +125,14 @@
 		<color name="folder3" color="#808080" />
 		<color name="folder4" color="#c0c0c0" />
 		<color name="folder5" color="#efe6e6" />
-	</colors>
+    <color name="eServiceSelector.entrySelectedToMove" color="#ff0303" />
+    <color name="eServiceSelector.entryInFavourite" color="#ff0303" />
+  </colors>
 
 	<colorscheme>
-		<map name="volume_left" color="volume4" />
+    <map name="volume_left" color="volume4" />
 		<map name="volume_right" color="volume2" />
-	</colorscheme>
+  </colorscheme>
 
 	<object name="eZapMainMenu">
 		<eWidget position="0:300" size="720:270" backgroundColor="-1" >
@@ -303,27 +305,27 @@
 	</object>
 	
 	<object name="tsManual">
-		<tsManual position="0:0" size="e:350">
+		<tsManual position="0:0" size="e:360">
 			<eTranspondersettings name="transponder" position="0:0" size="400:160" />
 			<eFEStatus name="festatus" position="0:160" size="400:85" />
-			<eButton text="start scan" name="start" position="10:e-30" size="200:30" helptext="start the transponderscan" loadDeco="" />
-			<eButton text="abort" name="abort" position="e-100:e-30" size="90:30" helptext="close window and do not scan" loadDeco="" />
-			<eCheckbox text="use ONIT" name="useonit" position="10:e-100" size="200:30" helptext="enable/disable check ONIT on any transponder" />
-			<eCheckbox text="use BAT" name="usebat" position="210:e-100" size="e:30" helptext="enable/disable use BAT for scan (if exist)" />
-			<eCheckbox text="clear list before" name="clearlist" position="10:e-70" size="200:30" helptext="remove all services before scan" />
-			<eCheckbox text="network search" name="searchnit" position="210:e-70" size="e:30" helptext="enable/disable initiate network search" />
+			<eButton text="start scan" name="start" position="10:e-40" size="200:40" helptext="start the transponderscan" loadDeco="" />
+			<eButton text="abort" name="abort" position="230:e-40" size="200:40" helptext="close window and do not scan" loadDeco="" />
+			<eCheckbox text="use ONIT" name="useonit" position="10:e-110" size="200:30" helptext="enable/disable check ONIT on any transponder" />
+			<eCheckbox text="use BAT" name="usebat" position="210:e-110" size="e:30" helptext="enable/disable use BAT for scan (if exist)" />
+			<eCheckbox text="clear list before" name="clearlist" position="10:e-80" size="200:30" helptext="remove all services before scan" />
+			<eCheckbox text="network search" name="searchnit" position="210:e-80" size="e:30" helptext="enable/disable initiate network search" />
 		</tsManual>
 	</object>
 	
 	<object name="tsAutomatic">
-		<tsAutomatic position="0:0" size="e:350">
+		<tsAutomatic position="0:0" size="e:360">
 			<eLabel name="lNet" position="10:40" size="150:30" text="Network:" />
 			<eComboBox name="network" position="160:40" size="e-70:35" loadDeco="" helptext="choose satelite/cable provider (ok)" />
 			<eFEStatus name="festatus" position="0:100" size="400:85" />
 			<eLabel name="status" position="10:190" size="e-10:e-80" />
-			<eCheckBox name="eraseall" text="erase all" position="10:e-70" size="150:30" helptext="erase bouquets and services before scan" />
-  		<eButton text="start scan" name="start" position="10:e-30" size="200:30" align="center" helptext="starts the transponderscan" loadDeco="" />
-			<eButton text="abort" name="abort" position="e-100:e-30" size="90:30" helptext="close window and do not scan" loadDeco="" />
+			<eCheckBox name="eraseall" text="erase all" position="10:e-80" size="150:30" helptext="erase bouquets and services before scan" />
+  		<eButton text="start scan" name="start" position="10:e-40" size="200:40" align="center" helptext="starts the transponderscan" loadDeco="" />
+			<eButton text="abort" name="abort" position="230:e-40" size="200:40" helptext="close window and do not scan" loadDeco="" />
 		</tsAutomatic>
 	</object>
 
@@ -345,9 +347,9 @@
 	<object name="setup.skins">
 		<eSkinSetup cposition="100:100" csize="400:300" text="Skin Setup">
 			<eLabel text="Skins:" position="20:10" size="100:30" />
-			<eListbox name="skins" position="120:10" size="e-10:e-50" helptext="select skin and press ok or choose save" loadDeco="" />
-			<eButton text="save" name="accept" position="10:e-120" size="80:30" helptext="close skin setup and save changes" loadDeco="" />
-			<eButton text="abort" name="reject" position="10:e-80" size="80:30" helptext="abort skin setup ( no changes are saved )" loadDeco="" />
+			<eListbox name="skins" position="120:10" size="e-20:e-90" helptext="select skin and press ok or choose save" loadDeco="" />
+			<eButton text="save" name="accept" position="20:e-80" size="170:40" helptext="close skin setup and save changes" loadDeco="" />
+			<eButton text="abort" name="reject" position="210:e-80" size="170:40" helptext="abort skin setup ( no changes are saved )" loadDeco="" />
 			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
 		</eSkinSetup>
 	</object>
@@ -447,7 +449,7 @@
 			<eComboBox name="e_day" openEntries="10" position="270:e-165" size="e-92:35" helptext="select day (ok)" loadDeco="" />
 			<eNumber name="e_time" position="e-82:e-165" size="72:35" helptext="edit the end time (0..9, left, right)" loadDeco="" />
 			<eComboBox name="type" openEntries="2" position="10:e-120" size="150:35" helptext="select the timer type (ok)" loadDeco="" />
-			<eComboBox name="services" openEntries="10" position="170:e-120" size="e-10:35" helptext="select the service (ok)" loadDeco="" sorted="" />
+			<eButtons name="select_service" position="170:e-120" size="e-10:35" helptext="to change service press ok" loadDeco="" />
 			<eButton name="close" text="close" position="10:e-75" size="150:35" helptext="close timer menu (ok)" loadDeco="" />
 			<eButton name="update" text="update" position="170:e-75" size="150:35" helptext="update the current selected timer (ok)" loadDeco="" />
 			<eButton name="add" text="add" position="e-260:e-75" size="90:35" helptext="add new Timer (ok)" loadDeco="" />

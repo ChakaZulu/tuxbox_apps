@@ -93,7 +93,7 @@ void gPixmap::blit(const gPixmap &src, ePoint pos, const eRect &clip, int flag)
 	{
 		if (flag & blitAlphaTest)
 		{
-				// no real alphatest yet
+        // no real alphatest yet
 			int width=area.width();
 			unsigned char *src=(unsigned char*)srcptr;
 			unsigned char *dst=(unsigned char*)dstptr;
@@ -108,7 +108,7 @@ void gPixmap::blit(const gPixmap &src, ePoint pos, const eRect &clip, int flag)
 					*dst++=*src++;
 			}
 		} else
-			memcpy(dstptr, srcptr, area.width()*bypp); 
+			memcpy(dstptr, srcptr, area.width()*bypp);
 		srcptr+=src.stride;
 		dstptr+=stride;
 	}

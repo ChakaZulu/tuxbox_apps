@@ -5,7 +5,6 @@ typedef std::list<eServiceReferenceDVB>::iterator ServiceReferenceDVBIterator;
 
 eDVBSettings::eDVBSettings(eDVB &dvb): dvb(dvb)
 {
-	transponderlist=0;
 	transponderlist=new eTransponderList;
 	loadServices();
 	loadBouquets();

@@ -211,7 +211,7 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 		MakeParam(P_ID_RCINPUT, eRCInput::getInstance()->lock());
 
 	if (plugin->needlcd)
-		MakeParam(P_ID_LCD,	eDBoxLCD::getInstance()->lock() );
+    MakeParam(P_ID_LCD,	eDBoxLCD::getInstance()->lock() );
 
 	if (plugin->needoffsets)
 	{

@@ -109,7 +109,7 @@ int eLabel::eventHandler(const eWidgetEvent &event)
 {
 	switch (event.type)
 	{
-	case eWidgetEvent::changedFont:
+  case eWidgetEvent::changedFont:
 	case eWidgetEvent::changedText:
 	case eWidgetEvent::changedSize:
 		invalidate();

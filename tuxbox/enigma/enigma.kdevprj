@@ -34,9 +34,9 @@ configure_args=\s--build=i386-linux --host=i386-linux --target=i386-linux\s
 dir_where_make_will_be_called=./
 email=
 kdevprj_version=1.3
-lfv_open_groups=GNU,Skin Files
+lfv_open_groups=GNU
 make_options=\s-j1 install
-makefiles=Makefile.am,enigma/Makefile.am,enigma/docs/Makefile.am,enigma/docs/en/Makefile.am,src/Makefile.am,lib/base/Makefile.am,lib/Makefile.am,lib/driver/Makefile.am,lib/dvb/lowlevel/Makefile.am,lib/dvb/Makefile.am,lib/gdi/Makefile.am,lib/gui/Makefile.am,lib/socket/Makefile.am,lib/system/Makefile.am,include/Makefile.am,include/lib/base/Makefile.am,include/lib/Makefile.am,include/lib/driver/Makefile.am,include/lib/dvb/Makefile.am,include/lib/gdi/Makefile.am,include/lib/gui/Makefile.am,include/lib/socket/Makefile.am,include/lib/system/Makefile.am,include/lib/dvb/lowlevel/Makefile.am,po/Makefile.am,data/skins/Makefile.am,data/Makefile.am
+makefiles=Makefile.am,enigma/Makefile.am,enigma/docs/Makefile.am,enigma/docs/en/Makefile.am,src/Makefile.am,lib/base/Makefile.am,lib/Makefile.am,lib/driver/Makefile.am,lib/dvb/lowlevel/Makefile.am,lib/dvb/Makefile.am,lib/gdi/Makefile.am,lib/gui/Makefile.am,lib/socket/Makefile.am,lib/system/Makefile.am,include/Makefile.am,include/lib/base/Makefile.am,include/lib/Makefile.am,include/lib/driver/Makefile.am,include/lib/dvb/Makefile.am,include/lib/gdi/Makefile.am,include/lib/gui/Makefile.am,include/lib/socket/Makefile.am,include/lib/system/Makefile.am,include/lib/dvb/lowlevel/Makefile.am,po/Makefile.am,data/skins/Makefile.am,data/Makefile.am,data/resources/Makefile.am
 modifyMakefiles=false
 project_name=Enigma
 project_type=normal_empty
@@ -59,9 +59,9 @@ Headers=*.h,*.hh,*.hxx,*.hpp,*.H
 Language Files=*.po
 Makefiles=*.am,*.am.old
 Others=*
-Skin Files=*.esml,*.info
 Sources=*.cpp,*.c,*.cc,*.C,*.cxx,*.ec,*.ecpp,*.lxx,*.l++,*.ll,*.l
-groups=Skin Files,Language Files,Makefiles,Headers,Sources,GNU,Others
+XML Files=*.esml,*.xml
+groups=XML Files,Language Files,Makefiles,Headers,Sources,GNU,Others
 
 [Makefile.am]
 dist=true
@@ -84,8 +84,43 @@ install_location=
 type=HEADER
 
 [data/Makefile.am]
-sub_dirs=skins
+sub_dirs=skins,resources
 type=normal
+
+[data/resources/Makefile.am]
+files=data/resources/rcdboxbuttons.xml,data/resources/rcdboxnew.xml,data/resources/rcdboxold.xml,data/resources/rcdreambox.xml,data/resources/rcdreambox2.xml
+sub_dirs=
+type=normal
+
+[data/resources/rcdboxbuttons.xml]
+dist=true
+install=false
+install_location=
+type=DATA
+
+[data/resources/rcdboxnew.xml]
+dist=true
+install=false
+install_location=
+type=DATA
+
+[data/resources/rcdboxold.xml]
+dist=true
+install=false
+install_location=
+type=DATA
+
+[data/resources/rcdreambox.xml]
+dist=true
+install=false
+install_location=
+type=DATA
+
+[data/resources/rcdreambox2.xml]
+dist=true
+install=false
+install_location=
+type=DATA
 
 [data/skins/Makefile.am]
 files=data/skins/chk_blue2.esml,data/skins/chk_blue2.info,data/skins/chkdesign.esml,data/skins/chkdesign.info,data/skins/chkv2.esml,data/skins/chkv2.info,data/skins/default.esml,data/skins/dream.esml,data/skins/dream.info,data/skins/neutrino.esml,data/skins/neutrino.info

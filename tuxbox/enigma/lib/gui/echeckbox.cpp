@@ -62,12 +62,11 @@ void eCheckbox::setCheck(int c)
 		return;
 
 	ischecked=c;
-  	
-	setPixmap(eSkin::getActive()->queryImage(ischecked?"eCheckbox.checked":"eCheckbox.unchecked"));
 
+	setPixmap(eSkin::getActive()->queryImage(ischecked?"eCheckbox.checked":"eCheckbox.unchecked"));
+  
 	if (LCDTmp)
 		LCDTmp->setPixmap(eSkin::getActive()->queryImage(ischecked?"eCheckboxLCD.checked":"eCheckboxLCD.unchecked"));
-
 }
 
 int eCheckbox::setProperty(const eString &prop, const eString &value)

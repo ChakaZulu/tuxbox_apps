@@ -32,7 +32,8 @@ protected:
 	void gotFocus();
 	void lostFocus();
 public:
-	Signal1<void, int*> selected;
+  void invalidateNum();
+  Signal1<void, int*> selected;
 	Signal0<void> numberChanged;
 	eNumber(eWidget *parent, int len, int min, int max, int maxdigits, int *init, int isactive=0, eWidget* descr=0, int grabfocus=1, const char* deco="eNumber" );
 	~eNumber();

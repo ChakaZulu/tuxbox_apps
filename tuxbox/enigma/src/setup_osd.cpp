@@ -36,11 +36,11 @@ eZapOsdSetup::eZapOsdSetup(): eWindow(0)
 	alpha = gFBDC::getInstance()->getAlpha();
 	eLabel* l = new eLabel(this);
 	l->setText(_("Alpha:"));
-	l->move(ePoint(20, 125));
+	l->move(ePoint(20, 105));
 	l->resize(eSize(110, fd+4));
 	sAlpha = new eSlider( this, l, 0, 512 );
 	sAlpha->setIncrement( 10 ); // Percent !
-	sAlpha->move( ePoint( 140, 125 ) );
+	sAlpha->move( ePoint( 140, 105 ) );
 	sAlpha->resize(eSize( 300, fd+4 ) );
 	sAlpha->setHelpText(_("change the transparency correction"));
 	sAlpha->setValue( alpha);
@@ -49,11 +49,11 @@ eZapOsdSetup::eZapOsdSetup(): eWindow(0)
 	brightness = gFBDC::getInstance()->getBrightness();
 	l = new eLabel(this);
 	l->setText(_("Brightness:"));
-	l->move(ePoint(20, 165));
+	l->move(ePoint(20, 145));
 	l->resize(eSize(110, fd+4));
 	sBrightness = new eSlider( this, l, 0, 255 );
 	sBrightness->setIncrement( 5 ); // Percent !
-	sBrightness->move( ePoint( 140, 165 ) );
+	sBrightness->move( ePoint( 140, 145 ) );
 	sBrightness->resize(eSize( 300, fd+4 ) );
 	sBrightness->setHelpText(_("change the brightness correction"));
 	sBrightness->setValue( brightness);
@@ -62,11 +62,11 @@ eZapOsdSetup::eZapOsdSetup(): eWindow(0)
 	gamma = gFBDC::getInstance()->getGamma();
 	l = new eLabel(this);
 	l->setText(_("Contrast:"));
-	l->move(ePoint(20, 205));
+	l->move(ePoint(20, 185));
 	l->resize(eSize(110, fd+4));
 	sGamma = new eSlider( this, l, 0, 255 );
 	sGamma->setIncrement( 5 ); // Percent !
-	sGamma->move( ePoint( 140, 205 ) );
+	sGamma->move( ePoint( 140, 185 ) );
 	sGamma->resize(eSize( 300, fd+4 ) );
 	sGamma->setHelpText(_("change the contrast"));
 	sGamma->setValue( gamma);
@@ -74,8 +74,8 @@ eZapOsdSetup::eZapOsdSetup(): eWindow(0)
 
 	ok=new eButton(this);
 	ok->setText(_("save"));
-	ok->move(ePoint(20, 265));
-	ok->resize(eSize(90, fd+4));
+	ok->move(ePoint(20, 250));
+	ok->resize(eSize(170, 40));
 	ok->setHelpText(_("close window and save changes"));
 	ok->loadDeco();
 	
@@ -83,8 +83,8 @@ eZapOsdSetup::eZapOsdSetup(): eWindow(0)
 
 	abort=new eButton(this);
 	abort->setText(_("abort"));
-	abort->move(ePoint(140, 265));
-	abort->resize(eSize(100, fd+4));
+	abort->move(ePoint(210, 250));
+	abort->resize(eSize(170, 40));
 	abort->setHelpText(_("close window (no changes are saved)"));
 	abort->loadDeco();
 

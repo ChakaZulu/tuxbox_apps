@@ -31,7 +31,8 @@ class eFrontend: public Object
 
   int lastcsw,
       lastRotorCmd,
-      lastSmatvFreq;
+      lastSmatvFreq,
+      curRotorPos;    // current Orbital Position
       
 	enum { stateIdle, stateTuning };
 	int state;
@@ -44,11 +45,14 @@ class eFrontend: public Object
 			uint32_t Frequency, int polarisation,
 			uint32_t SymbolRate, CodeRate FEC_inner,
 			SpectralInversion Inversion, eSatellite* sat, Modulation QAM);
-private:
+
 	void timeout();
+  int RotorUseTimeout(secCmdSequence& seq, int newPos );
+  int RotorUseInputPower(secCmdSequence& seq, void *commands, int seqRepeat );
 public:
   int sendDiSEqCCmd( int addr, int cmd, eString params="", int frame=0xE0 );
-  
+
+  Signal0<void> rotorRunning, rotorStopped, rotorTimeout;
   Signal2<void, eTransponder*, int> tunedIn;
 	~eFrontend();
 

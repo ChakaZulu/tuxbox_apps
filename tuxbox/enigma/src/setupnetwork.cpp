@@ -108,8 +108,8 @@ eZapNetworkSetup::eZapNetworkSetup():
 
 	ok=new eButton(this);
 	ok->setText(_("save"));
-	ok->move(ePoint(20, 230));
-	ok->resize(eSize(90, fd+4));
+	ok->move(ePoint(10, 220));
+	ok->resize(eSize(170, 40));
 	ok->setHelpText(_("close window and save changes"));
 	ok->loadDeco();
 	
@@ -118,8 +118,8 @@ eZapNetworkSetup::eZapNetworkSetup():
 	abort=new eButton(this);
 	abort->loadDeco();
 	abort->setText(_("abort"));
-	abort->move(ePoint(140, 230));
-	abort->resize(eSize(100, fd+4));
+	abort->move(ePoint(200, 220));
+	abort->resize(eSize(170, 40));
 	abort->setHelpText(_("close window (no changes are saved)"));
 
 	CONNECT(abort->selected, eZapNetworkSetup::abortPressed);

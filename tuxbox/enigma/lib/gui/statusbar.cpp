@@ -19,7 +19,7 @@ void eStatusBar::initialize()
 {
 	if ( !(flags & flagOwnerDraw) )
 	{
-		eDebug("CONNECT PARENT");
+//		eDebug("CONNECT PARENT");
 		if (parent)
 			CONNECT( parent->focusChanged, eStatusBar::update );
 	}
@@ -29,11 +29,12 @@ void eStatusBar::initialize()
 
 void eStatusBar::update( const eWidget* p )
 {
-	eDebug("update p = %p", p);
+//	eDebug("update p = %p", p);
 	if (p)
 	{
 		current = p;
-		invalidate( clientrect );
+		client.setText( current->getHelpText() );    
+//		invalidate( clientrect );
 	}
 }
 
@@ -64,19 +65,19 @@ int eStatusBar::setProperty(const eString &prop, const eString &value)
 
 void eStatusBar::redrawWidget(gPainter *target, const eRect& where)
 {
-	eDebug("redrawWidget where left = %d, top = %d, right = %d, bottom = %d", where.left(), where.top(), where.right(), where.bottom() );
+//	eDebug("redrawWidget where left = %d, top = %d, right = %d, bottom = %d", where.left(), where.top(), where.right(), where.bottom() );
 	if ( deco )
 	{
 		deco.drawDecoration(target, ePoint(width(), height()) );
-		eDebug("draw Deco");
+//		eDebug("draw Deco");
 	}
-	
-	if ( (!(flags & flagOwnerDraw)) && current && where.contains( clientrect ) )
+/*
+	if ( (!(flags & flagOwnerDraw)) && current )
 	{
-		eDebug("setText");
+//		eDebug("setText");
 		client.setText( current->getHelpText() );
 	}
-	eDebug("redrawWidget ende");
+//	eDebug("redrawWidget ende");*/
 }
 
 int eStatusBar::eventHandler(const eWidgetEvent &event)

@@ -44,11 +44,7 @@ void eWindow::redrawWidget(gPainter *target, const eRect &where)
 	if ( deco )  // then draw Deco
 		deco.drawDecoration(target, ePoint(width(), height()));
 
-	if ( where.contains( getTitleBarRect() ) );
-		drawTitlebar(target);
-
-	if (LCDTitle)
-		LCDTitle->setText(text);
+	drawTitlebar(target);
 }
 
 void eWindow::eraseBackground(gPainter *target, const eRect &clip)
@@ -74,7 +70,7 @@ void eWindow::drawTitlebar(gPainter *target)
 
 void eWindow::recalcClientRect()
 {
-	clientrect=eRect(borderLeft, (titleOffsetY?titleOffsetY:borderTop)+titleHeight, size.width()-borderLeft-borderRight, size.height()-borderBottom-titleHeight-(titleOffsetY?titleOffsetY:borderTop));
+  clientrect=eRect(borderLeft, (titleOffsetY?titleOffsetY:borderTop)+titleHeight, size.width()-borderLeft-borderRight, size.height()-borderBottom-titleHeight-(titleOffsetY?titleOffsetY:borderTop));
 }
 
 int eWindow::eventHandler(const eWidgetEvent &event)
@@ -82,9 +78,9 @@ int eWindow::eventHandler(const eWidgetEvent &event)
 	switch (event.type)
 	{
 		case eWidgetEvent::changedText:
-			redraw( getTitleBarRect() );
+     redraw( getTitleBarRect() );
 		return 1;
-
+    
 		case eWidgetEvent::evtAction:
 			if ((event.action == &i_cursorActions->cancel) && in_loop)	// hack
 			{
@@ -100,9 +96,10 @@ int eWindow::eventHandler(const eWidgetEvent &event)
 	return eWidget::eventHandler(event);
 }
 
-
 void eWindow::willShow()
 {
+ 	if (LCDTitle)
+		LCDTitle->setText(text);
 }
 
 void eWindow::willHide()

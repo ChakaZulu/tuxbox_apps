@@ -85,10 +85,14 @@
 			<action name="nextBouquet" key="+" flags="mr" />
 			<action name="prevBouquet" key="-" flags="mr" />
 			<action name="pathUp" key="d-box" flags="m" />
-			<action name="showEPGSelector" key="red" flags="m" />
 			<action name="toggleStyle" key="mute" flags="m" />
 			<action name="toggleFocus" key="yellow" flags="m" />
-		</actionmap>
+			<action name="pathUp" key="d-box" flags="m" />
+			<action name="showEPGSelector" key="?" flags="m" />
+			<action name="addService" key="green" flags="m" />
+			<action name="showMenu" key="red" flags="m" />
+			<action name="showFavourite" key="blue" flags="m" />
+    </actionmap>
 
 		<actionmap name="numbers">
 			<action name="0" key="0" flags="mr" />
@@ -105,6 +109,11 @@
 
 		<actionmap name="enigmaStandby">
 			<action name="wakeUp" key="power" flags="m" />
+		</actionmap>
+
+    <actionmap name="epgSelector">
+			<action name="addTimerEvent" key="green" flags="m" />
+			<action name="removeTimerEvent" key="red" flags="m" />
 		</actionmap>
 
 		<actionmap name="enigmaVCR">

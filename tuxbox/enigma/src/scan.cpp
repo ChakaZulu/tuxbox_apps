@@ -116,7 +116,7 @@ void tsManual::start()
 		sapi->setUseBAT(c_usebat->isChecked());
 		sapi->setNetworkSearch(c_searchnit->isChecked());
 		sapi->setClearList(c_clearlist->isChecked());
-			
+    sapi->setSkipOtherOrbitalPositions(1);
 		close(0);
 	}
 }
@@ -393,7 +393,7 @@ int existNetworks::addNetwork(tpPacket &packet, XMLTreeNode *node, int type)
 				asymbol_rate="6900000";
 			if (!ainversion)
 				ainversion="0";
-			int frequency=atoi(afrequency), symbol_rate=atoi(asymbol_rate), inversion=atoi(ainversion);;
+			int frequency=atoi(afrequency)/1000, symbol_rate=atoi(asymbol_rate), inversion=atoi(ainversion);;
 			t.setCable(frequency, symbol_rate, inversion);
 			break;
 		}
@@ -719,7 +719,6 @@ TransponderScan::~TransponderScan()
 
 int TransponderScan::exec()
 {
-	eDVB::getInstance()->setMode(eDVB::controllerScan);
 	eSize size=eSize(window->getClientSize().width(), window->getClientSize().height()-30);
 
 	eString text;
@@ -770,12 +769,12 @@ int TransponderScan::exec()
 		{
 			eTransponder transponder(*eDVB::getInstance()->settings->getTransponders());
 
-			eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+       eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 
 			if (sapi && sapi->transponder)
-				transponder=*sapi->transponder;
+        transponder=*sapi->transponder;
 			else
-				switch (eFrontend::getInstance()->Type())
+        switch (eFrontend::getInstance()->Type())
 				{
 				case eFrontend::feCable:
 					transponder.setCable(402000, 6900000, 0);	// some cable transponder
@@ -787,6 +786,7 @@ int TransponderScan::exec()
 					break;
 				}
 
+      eDVB::getInstance()->setMode(eDVB::controllerScan);        
 			tsManual manual_scan(window, transponder, LCDTitle, LCDElement);
 			manual_scan.show();
 			switch (manual_scan.exec())
@@ -803,7 +803,8 @@ int TransponderScan::exec()
 		}
 		case stateAutomatic:
 		{
-			tsAutomatic automatic_scan(window);
+      eDVB::getInstance()->setMode(eDVB::controllerScan);
+      tsAutomatic automatic_scan(window);
 			automatic_scan.setLCD( LCDTitle, LCDElement);
 			automatic_scan.show();
 			switch (automatic_scan.exec())
@@ -853,9 +854,8 @@ int TransponderScan::exec()
 			break;
 		}
 	}
-	
-	eDVB::getInstance()->setMode(eDVB::controllerService);
 
-	window->hide();
+	eDVB::getInstance()->setMode(eDVB::controllerService);  
+  window->hide();
 	return 0;
 }

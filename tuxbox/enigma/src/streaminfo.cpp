@@ -289,7 +289,6 @@ class siCA: public eWidget
 	eLabel *availca[2], *usedca[2];
 public:
 	siCA(eWidget *parent);
-	void redrawWidget();
 };
 
 siCA::siCA(eWidget *parent): eWidget(parent)
@@ -362,10 +361,6 @@ siCA::siCA(eWidget *parent): eWidget(parent)
 	usedca[1]->setText(usedcas);
 	usedca[1]->move(ePoint(10, y+50));
 	usedca[1]->resize(eSize(420, numsys*fs+fs));
-}
-
-void siCA::redrawWidget()
-{
 }
 
 eStreaminfo::eStreaminfo(int mode, decoderParameters *parms): eWindow(1), statusbar(this)

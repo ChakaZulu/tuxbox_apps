@@ -443,7 +443,7 @@ int eWidget::eventHandler(const eWidgetEvent &evt)
 	case eWidgetEvent::changedForegroundColor:
 	case eWidgetEvent::changedBackgroundColor:
 	case eWidgetEvent::changedPosition:
-	case eWidgetEvent::changedPixmap:
+  case eWidgetEvent::changedPixmap:
 		invalidate();
 		break;
 	default:
@@ -732,8 +732,11 @@ void eWidget::setForegroundColor(const gColor& color)
 
 void eWidget::setPixmap(gPixmap *pmap)
 {
-	pixmap=pmap;
-	event(eWidgetEvent(eWidgetEvent::changedPixmap));
+  if ( pixmap != pmap )
+  {  
+    pixmap=pmap;
+  	event(eWidgetEvent(eWidgetEvent::changedPixmap));
+  }
 }
 
 void eWidget::setTarget(gDC *newtarget)

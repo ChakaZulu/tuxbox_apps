@@ -93,18 +93,15 @@ int eListBoxBase::setProperty(const eString &prop, const eString &value)
 
 void eListBoxBase::redrawBorder(gPainter *target, eRect& where)
 {
-	if ( where.contains( eRect( 0, 0, size.width(), size.height() ) ) )
+	if (deco_selected && have_focus)
 	{
-		if (deco_selected && have_focus)
-		{
-			deco_selected.drawDecoration(target, ePoint(width(), height()));
-			where = crect_selected;
-		}
-		else if (deco)
-		{
-			deco.drawDecoration(target, ePoint(width(), height()));
-			where = crect;
-		}
+		deco_selected.drawDecoration(target, ePoint(width(), height()));
+		where = crect_selected;
+	}
+	else if (deco)
+	{
+		deco.drawDecoration(target, ePoint(width(), height()));
+		where = crect;
 	}
 }
 
@@ -162,6 +159,15 @@ void eListBoxBase::gotFocus()
 		}
 }
 
+void eListBoxBase::invalidateContent()
+{
+  eRect rc;
+  for ( int i=0; i<MaxEntries; i++ )
+    rc |= getEntryRect(i);
+
+  invalidate(rc);
+}
+
 void eListBoxBase::lostFocus()
 {
 	if ( descr )
@@ -177,7 +183,7 @@ int eListBoxBase::newFocus()
 {
 	if (deco && deco_selected)
 	{
-		recalcMaxEntries();
+    recalcMaxEntries();
 
 		if (isVisible())
 			invalidate();

@@ -17,9 +17,10 @@ public:
 	operator bool() { return iTopLeft || iTop || iTopRight || iLeft || iRight || iBottomLeft || iBottom || iBottomRight; }
 	
 	eDecoration();
+  
 	bool load(const eString& basename);
 
-	void drawDecoration(gPainter *target, ePoint size);
+	void drawDecoration(gPainter *target, ePoint size );
 	int borderTop, borderLeft, borderBottom, borderRight;
 };
 

@@ -594,12 +594,12 @@ void eLNBPage::lnbChanged( eListBoxEntryText *lnb )
     incVoltage = ((eLNB*)lnb->getKey())->getIncreasedVoltage();
   }
 	lofL->setNumber( l1 / 1000 );
-	lofL->invalidate();
+	lofL->invalidateNum();
 	lofH->setNumber( l2 / 1000 );
-	lofH->invalidate();
+	lofH->invalidateNum();
   increased_voltage->setCheck( incVoltage );
 	threshold->setNumber( l3 / 1000 );
-	threshold->invalidate();
+	threshold->invalidateNum();
 }
 
 void eLNBPage::numSelected(int*)
@@ -788,7 +788,7 @@ eRotorPage::eRotorPage( eWidget *parent, eSatellite *sat )
   lRotorOffset = new eLabel( this );
   lRotorOffset->setName("lRotorOffset");
 
-  RotorOffset = new eNumber(this, 1, 0, 360, 3, 0, 0, lRotorOffset );
+  RotorOffset = new eNumber(this, 1, 0, 3600, 4, 0, 0, lRotorOffset );
   RotorOffset->setFlags( eNumber::flagPosNeg );
   RotorOffset->setName("RotorOffset");
 
@@ -911,8 +911,8 @@ void eRotorPage::posChanged( eListBoxEntryText *e )
     number->setNumber( 0 );
     direction->setCurrent( 0 );
   }
-  orbital_position->invalidate();
-  number->invalidate();
+  orbital_position->invalidateNum();
+  number->invalidateNum();
 }
 
 void eRotorPage::numSelected(int*)
@@ -931,7 +931,7 @@ void eRotorPage::onAdd()
                                           direction->getCurrent()->getKey() ? 'W':'E'
                                           ), (void*) ( direction->getCurrent()->getKey() ? - orbital_position->getNumber() : orbital_position->getNumber() ) );
   positions->sort();
-  positions->invalidate();
+  positions->invalidateContent();
   positions->endAtomic();
 }
 

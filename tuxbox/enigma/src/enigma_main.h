@@ -165,9 +165,7 @@ class eZapMain: public eWidget
 {
 public:
 	enum { modeTV, modeRadio, modeFile, modePlaylist, modeEnd };
-	enum { stateNormal, stateSleeping, stateInTimerMode, stateRecording, 
-		stateMask=7,
-		recDVR=8, recVCR=16 };
+	enum { stateSleeping=2, stateInTimerMode=4, stateRecording=8, recDVR=16, recVCR=32 };
 
 private:
 	eLabel 	*ChannelNumber, *ChannelName, *Clock, *EINow, *EINext,
@@ -193,7 +191,7 @@ private:
 	std::list<eZapMessage> messages;
 	eFixedMessagePump<int> message_notifier;
 
-	eTimer timeout, clocktimer, messagetimeout, progresstimer, volumeTimer, recStatusBlink;
+	eTimer timeout, clocktimer, messagetimeout, progresstimer, volumeTimer, standbyTimer, recStatusBlink;
 
 	int cur_start, cur_duration, cur_event_id;
 	eString cur_event_text;
@@ -224,7 +222,6 @@ private:
 	int isSeekable() const { return serviceFlags & eServiceHandler::flagIsSeekable; }
 	eZapLCD lcdmain;
 	
-	void redrawWidget(gPainter *, const eRect &where);
 	void eraseBackground(gPainter *, const eRect &where);
 	void setEIT(EIT *);
 	void handleNVODService(SDTEntry *sdtentry);
@@ -270,7 +267,8 @@ private:
 	void addService(const eServiceReference &service);
 	
 	void doPlaylistAdd(const eServiceReference &service);
-	void addServiceToFavourite(eServiceSelector *s);
+	void addServiceToFavourite(eServiceSelector *s, int dontask=0);
+  void removeServiceFromFavourite( const eServiceReference &service );
 	
 	void showFavourites();
 	void showBouquetList(int sellast);
@@ -280,7 +278,7 @@ private:
 	static eZapMain *instance;
 	
 	eServicePath modeLast[modeEnd];
-	int mode, last_mode, state, oldstate;
+	int mode, last_mode, state;
 protected:
 	int eventHandler(const eWidgetEvent &event);
 private:
@@ -301,8 +299,8 @@ private:
 	void updateProgress();
 	void getPlaylistPosition();
 	void setPlaylistPosition();
-	bool handleState(int notimer, int justask=0);
-	
+	bool handleState(int justask=0);
+  void gotoStandby();
 	void blinkRecord();
 public:
 	void postMessage(const eZapMessage &message, int clear=0);
@@ -327,8 +325,7 @@ public:
 	void setMode(int mode, int user=0); // user made change?
 	void setModeD(int mode);
 	int getRealMode() { return last_mode==-1 ? mode : last_mode; }
-	int getState() { return state; }
-	void setState( int newState ) { state = newState; }
+	void toggleTimerMode();
 	
 	void setServiceSelectorPath(eServicePath path);
 	void getServiceSelectorPath(eServicePath &path);
@@ -346,12 +343,5 @@ class eServiceContextMenu: public eListBoxWindow<eListBoxEntryText>
 public:
 	eServiceContextMenu(const eServiceReference &ref, const eServiceReference &path);
 };
-
-/*
-class eRecordingStatus: public eDecoWidget
-{
-public:
-	eRecordingStatus();
-}; */
 
 #endif /* __enigma_main_h */

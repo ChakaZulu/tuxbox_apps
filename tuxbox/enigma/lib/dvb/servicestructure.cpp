@@ -6,11 +6,12 @@ eServiceStructureHandler::eServiceStructureHandler(): eServiceHandler(eServiceRe
 {
 	if (eServiceInterface::getInstance()->registerHandler(id, this)<0)
 		eFatal("couldn't register serviceHandler %d", id);
-	cache.addPersistentService(eServiceReference(eServiceReference::idStructure, eServiceReference::flagDirectory|eServiceReference::shouldSort, modeRoot), new eService(0, _("root node")));
-	cache.addPersistentService(eServiceReference(eServiceReference::idStructure, eServiceReference::flagDirectory|eServiceReference::shouldSort, modeTV), new eService(0, _("TV mode")));
-	cache.addPersistentService(eServiceReference(eServiceReference::idStructure, eServiceReference::flagDirectory|eServiceReference::shouldSort, modeRadio), new eService(0, _("Radio Mode")));
-	cache.addPersistentService(eServiceReference(eServiceReference::idStructure, eServiceReference::flagDirectory|eServiceReference::shouldSort, modeFile), new eService(0, _("File Mode")));
-	cache.addPersistentService(eServiceReference(eServiceReference::idStructure, eServiceReference::flagDirectory|eServiceReference::shouldSort, modeFavourite), new eService(0, _("Favourites")));
+	cache.addPersistentService(eServiceReference(eServiceReference::idStructure, eServiceReference::flagDirectory, modeRoot), new eService(0, _("root node")));
+	cache.addPersistentService(eServiceReference(eServiceReference::idStructure, eServiceReference::flagDirectory, modeTV), new eService(0, _("TV mode")));
+	cache.addPersistentService(eServiceReference(eServiceReference::idStructure, eServiceReference::flagDirectory, modeRadio), new eService(0, _("Radio Mode")));
+	cache.addPersistentService(eServiceReference(eServiceReference::idStructure, eServiceReference::flagDirectory, modeFile), new eService(0, _("File Mode")));
+  cache.addPersistentService(eServiceReference(eServiceReference::idStructure, eServiceReference::flagDirectory, modeFavourite), new eService(0, _("Favourites")));
+	cache.addPersistentService(eServiceReference(eServiceReference::idStructure, eServiceReference::flagDirectory, modeTvRadio), new eService(0, _("TV/Radio")));
 }
 
 eServiceStructureHandler::~eServiceStructureHandler()

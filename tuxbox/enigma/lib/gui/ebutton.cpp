@@ -74,7 +74,7 @@ int eButton::eventHandler(const eWidgetEvent &event)
 {
 	switch (event.type)
 	{
-		case eWidgetEvent::evtAction:
+    case eWidgetEvent::evtAction:
 			if (event.action == &i_cursorActions->ok)
 			{
 				/*emit*/ selected();

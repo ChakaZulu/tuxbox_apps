@@ -16,14 +16,12 @@
 #include <lib/gui/emessage.h>
 
 #include <dbox/fp.h>
-
 #define FP_IOCTL_GET_LNB_CURRENT 9
 
 eFrontend* eFrontend::frontend;
 
 eFrontend::eFrontend(int type, const char *demod, const char *sec)
-: type(type), timer2(eApp)
-
+:type(type), curRotorPos( 1000 ), timer2(eApp)
 {
 	state=stateIdle;
 	timer=new eTimer(eApp);
@@ -54,26 +52,7 @@ eFrontend::eFrontend(int type, const char *demod, const char *sec)
     if ( sendDiSEqCCmd( 0, 0 ) )
       exit(0);
 
-/*    
-		secCmdSequence seq;
-		secCommand cmd;
-		secDiseqcCmd DiSEqC;
-		DiSEqC.addr=0;
-		DiSEqC.cmd=0;
-		DiSEqC.numParams=0;
- 		cmd.type = SEC_CMDTYPE_DISEQC;
-		cmd.u.diseqc=DiSEqC;
-		seq.miniCommand=SEC_MINI_NONE;
-		seq.numCommands=0;
-		seq.commands=&cmd;
-		seq.voltage=SEC_VOLTAGE_13;
-		seq.continuousTone=SEC_TONE_OFF;
-		if (ioctl(secfd, SEC_SEND_SEQUENCE, &seq)<0)
-		{
-			perror("SEC_SEND_SEQUENCE");
-			exit(0);
-		}*/
-	} else
+  } else
 		secfd=-1;
 		
 	lastcsw=0;
@@ -285,6 +264,155 @@ int eFrontend::sendDiSEqCCmd( int addr, int Cmd, eString params, int frame )
   return 0;
 }
 
+int eFrontend::RotorUseTimeout(secCmdSequence& seq, int newPosition )
+{
+  int TimePerDegree=600; // msec
+  int startDelay=500;//1000;
+
+  // send DiSEqC Sequence ( normal diseqc switches )
+  if ( ioctl(secfd, SEC_SEND_SEQUENCE, &seq) < 0 )
+	{
+		perror("SEC_SEND_SEQUENCE");
+		return -1;
+ 	}
+
+  /* emit */ rotorRunning();
+
+  if ( curRotorPos != 1000 ) // uninitialized  
+    usleep( (abs(newPosition - curRotorPos) * TimePerDegree * 100) + startDelay );
+
+  /* emit */ rotorStopped();
+
+  curRotorPos = newPosition;
+
+  return 0;
+}
+
+int eFrontend::RotorUseInputPower(secCmdSequence& seq, void *cmds, int SeqRepeat )
+{
+      secCommand *commands = (secCommand*) cmds;
+      int idlePowerInput=0;
+      int runningPowerInput=0;
+//      int cnt=0;
+
+      // open front prozessor
+      int fp=::open("/dev/dbox/fp0", O_RDWR);
+      if (fp < 0)
+      {
+        eDebug("couldn't open fp");
+        return -1;
+      }
+
+      // we send first the normal DiSEqC Switch Cmds
+      // and the the Rotor CMD
+      seq.numCommands--;
+
+      // send DiSEqC Sequence ( normal diseqc switches )
+      if ( ioctl(secfd, SEC_SEND_SEQUENCE, &seq) < 0 )
+   		{
+   			perror("SEC_SEND_SEQUENCE");
+   			return -1;
+    	}
+      else if ( SeqRepeat )   // Sequence Repeat selected ?
+      {
+        usleep( 80000 ); // between seq repeats we wait 80ms
+        ioctl(secfd, SEC_SEND_SEQUENCE, &seq);  // then repeat the cmd
+      }
+      usleep( 80000 ); // wait 80ms
+
+      // get power input of Rotor on idle  not work on dbox yet .. only dreambox
+      if (ioctl(fp, FP_IOCTL_GET_LNB_CURRENT, &idlePowerInput )<0)
+     	{
+   		  eDebug("FP_IOCTL_GET_LNB_CURRENT sucks.\n");
+ 	    	return -1;
+     	}
+//      eDebug("idle power input = %dmA", idlePowerInput );
+
+      // send DiSEqC Sequence (Rotor)
+      seq.commands=&commands[seq.numCommands];  // last command is rotor cmd... see above...
+      seq.numCommands=1;  // only rotor cmd
+
+      if ( ioctl(secfd, SEC_SEND_SEQUENCE, &seq) < 0 )
+   		{
+   			perror("SEC_SEND_SEQUENCE");
+   			return -1;
+    	}
+      else if ( SeqRepeat )  // Sequence repeat ?
+      {
+        usleep( 80000 ); // between seq repeats we wait 80ms
+        ioctl(secfd, SEC_SEND_SEQUENCE, &seq);
+      }
+
+      // set rotor start timeout
+      time_t timeout=time(0)+5;
+
+      // now wait for rotor start
+      while(true)
+      {
+        if (ioctl(fp, FP_IOCTL_GET_LNB_CURRENT, &runningPowerInput)<0)
+       	{
+     		  eDebug("FP_IOCTL_GET_LNB_CURRENT sucks.\n");
+   	    	return 2;
+       	}
+//       	eDebug("(%d) %d mA\n", cnt, runningPowerInput);
+//        cnt++;
+
+        if ( abs(runningPowerInput-idlePowerInput ) < 70 ) // rotor running ?
+        {
+          usleep(50000);  // not... then wait 50ms
+        }
+        else  // rotor is running
+        {
+          /* emit */ rotorRunning();          
+          timeout=0;
+          break;  // leave endless loop
+        }
+
+        if ( timeout <= time(0) )   // timeout
+        {
+          /* emit */ rotorTimeout();                                
+          break;
+        }
+      }
+
+      if ( !timeout )  // then the Rotor is Running... we wait if it stops..
+      {
+        // set rotor timeout to 30sec's...
+        timeout = time(0) + 30;
+//        cnt=0;
+        while(true)
+        {
+          if (ioctl(fp, FP_IOCTL_GET_LNB_CURRENT, &runningPowerInput)<0)
+         	{
+         		printf("FP_IOCTL_GET_LNB_CURRENT sucks.\n");
+     	    	return 2;
+         	}
+//         	eDebug("(%d) %d mA", cnt, runningPowerInput);
+//          cnt++;
+
+          if ( abs( idlePowerInput-runningPowerInput ) > 70 ) // rotor stoped ?
+          {
+            usleep(50000);  // not... then wait 50ms
+          }
+          else  // rotor has stopped
+          {
+            /* emit */ rotorStopped();                      
+            break;
+          }
+
+          if ( timeout <= time(0) ) // Rotor has timouted
+          {
+            /* emit */ rotorTimeout();                      
+            break;
+          }
+        }
+
+      }
+      ::close(fp);
+
+      return 0;
+}
+
 int eFrontend::tune(eTransponder *trans,
 		uint32_t Frequency, 		// absolute frequency in kHz
 		int polarisation, 			// polarisation (polHor, polVert, ...)
@@ -464,6 +592,7 @@ int eFrontend::tune(eTransponder *trans,
           i++;                
         }
       }
+      seq.numCommands=cmdCount;
     }
     else // no DiSEqC
     {
@@ -527,137 +656,36 @@ int eFrontend::tune(eTransponder *trans,
   		seq.continuousTone = SEC_TONE_OFF;
     }
 
-    // set Voltage( 0/14/18V  vertical/horizontal )
-    if ( swParams.VoltageMode == eSwitchParameter::_0V )
+    // Voltage( 0/14/18V  vertical/horizontal )
+    int voltage = SEC_VOLTAGE_OFF;
+    if ( swParams.VoltageMode == eSwitchParameter::_14V || ( polarisation == polVert && swParams.VoltageMode == eSwitchParameter::HV )  )
     {
-      seq.voltage = SEC_VOLTAGE_OFF;
-    }
-    else if ( swParams.VoltageMode == eSwitchParameter::_14V || ( polarisation == polVert && swParams.VoltageMode == eSwitchParameter::HV )  )
-    {
-      seq.voltage = lnb->getIncreasedVoltage() ? SEC_VOLTAGE_13_5 : SEC_VOLTAGE_13;
+      voltage = lnb->getIncreasedVoltage() ? SEC_VOLTAGE_13_5 : SEC_VOLTAGE_13;
     }
   	else if ( swParams.VoltageMode == eSwitchParameter::_18V || ( polarisation==polHor && swParams.VoltageMode == eSwitchParameter::HV)  )
     {
-      seq.voltage = lnb->getIncreasedVoltage() ? SEC_VOLTAGE_18_5 : SEC_VOLTAGE_18;
+      voltage = lnb->getIncreasedVoltage() ? SEC_VOLTAGE_18_5 : SEC_VOLTAGE_18;
     }
-
+    
     // set cmd ptr in sequence..
     seq.commands=commands;
     
     // handle DiSEqC Rotor
     if ( lnb->getDiSEqC().DiSEqCMode == eDiSEqC::V1_2 && sendSeq == -3 )
     {
-      int idlePowerInput=0;
-      int runningPowerInput=0;
-//      int cnt=0;
-      
-      // open front prozessor
-      int fp=::open("/dev/dbox/fp0", O_RDWR);
-      if (fp < 0)
-      {
-        eDebug("couldn't open fp");
-        return -1;
-      }
+      // drive rotor always with 18V ( is faster )
+      seq.voltage = SEC_VOLTAGE_18;
 
-      // when a DiSEqC Rotor is avail.. we send first the normal DiSEqC Switch Cmd
-      // and the the Rotor CMD
-      seq.numCommands=cmdCount-1;
-                  
-      // send DiSEqC Sequence ( normal diseqc switches )
-      if ( sendSeq && ioctl(secfd, SEC_SEND_SEQUENCE, &seq) < 0 )
-   		{
-   			perror("SEC_SEND_SEQUENCE");
-   			return -1;
-    	}
-      else if ( lnb->getDiSEqC().SeqRepeat )   // Sequence Repeat selected ?
-      {
-        usleep( 80000 ); // between seq repeats we wait 80ms
-        ioctl(secfd, SEC_SEND_SEQUENCE, &seq);  // then repeat the cmd
-      }
-      usleep( 80000 ); // between seq repeats we wait 80ms
-     
-      // get power input of Rotor on idle  not work on dbox yet .. only dreambox
-      if (ioctl(fp, FP_IOCTL_GET_LNB_CURRENT, &idlePowerInput )<0)
-     	{
-   		  eDebug("FP_IOCTL_GET_LNB_CURRENT sucks.\n");
- 	    	return -1;
-     	}
-//      eDebug("idle power input = %dmA", idlePowerInput );
+//      RotorUseInputPower(seq, (void*) commands, cmdCount, lnb->getDiSEqC().SeqRepeat );
+      RotorUseTimeout(seq, sat->getOrbitalPosition() );
 
-      // send DiSEqC Sequence (Rotor)
-      seq.numCommands=1;  // only rotor cmd
-      seq.commands=&commands[cmdCount-1];  // last command is rotor cmd... see above...
-      
-      if ( sendSeq && ioctl(secfd, SEC_SEND_SEQUENCE, &seq) < 0 )
-   		{
-   			perror("SEC_SEND_SEQUENCE");
-   			return -1;
-    	}
-      else if ( lnb->getDiSEqC().SeqRepeat )  // Sequence repeat ?
-      {
-        usleep( 80000 ); // between seq repeats we wait 80ms
-        ioctl(secfd, SEC_SEND_SEQUENCE, &seq);
-      }
-      
-      // set rotor start timeout      
-      time_t timeout=time(0)+5;
-
-      // now wait for rotor start
-      while(true)
-      {
-        if (ioctl(fp, FP_IOCTL_GET_LNB_CURRENT, &runningPowerInput)<0)
-       	{
-     		  eDebug("FP_IOCTL_GET_LNB_CURRENT sucks.\n");
-   	    	return 2;
-       	}
-//       	eDebug("(%d) %d mA\n", cnt, runningPowerInput);
-//        cnt++;
-
-        if ( abs(runningPowerInput-idlePowerInput ) < 70 ) // rotor running ?
-        {
-          usleep(50000);  // not... then wait 50ms
-        }
-        else  // rotor is running
-        {
-          timeout=0;
-          break;  // leave endless loop
-        }
-
-        if ( timeout <= time(0) )   // timeout
-          break;
-      }
-
-      if ( !timeout )  // then the Rotor is Running... we wait if it stops..
-      {
-        // set rotor timeout to 20sec's...
-        timeout = time(0) + 20;
-//        cnt=0;
-        while(true)
-        {
-          if (ioctl(fp, FP_IOCTL_GET_LNB_CURRENT, &runningPowerInput)<0)
-         	{
-         		printf("FP_IOCTL_GET_LNB_CURRENT sucks.\n");
-     	    	return 2;
-         	}
-//         	eDebug("(%d) %d mA", cnt, runningPowerInput);
-//          cnt++;
-
-          if ( abs( idlePowerInput-runningPowerInput ) > 70 ) // rotor stoped ?
-          {
-            usleep(50000);  // not... then wait 50ms
-          }
-          else  // rotor has stopped
-            break;
-
-          if ( timeout <= time(0) ) // Rotor has timouted
-            break;
-        }
-      }
-      ::close(fp);
+      // set the right voltage
+      if ( voltage != SEC_VOLTAGE_18 )
+        ioctl(secfd, SEC_SET_VOLTAGE, &voltage);
     }
     else  // no Rotor avail... we send the complete cmd...
     {
-      seq.numCommands=cmdCount;
+      seq.voltage=voltage;
       if ( sendSeq && ioctl(secfd, SEC_SEND_SEQUENCE, &seq) < 0 )
    		{
    			perror("SEC_SEND_SEQUENCE");

@@ -51,61 +51,53 @@ bool eDecoration::load(const eString& base)
 
 void eDecoration::drawDecoration(gPainter *target, ePoint size)
 {
-	int x=0, xm=size.x(), y, ym;
-	
+  int x=0, xm=size.x(), y, ym;
+
 	if (iTopLeft)
 	{
-		target->blit(*iTopLeft, ePoint(0, 0));
-		target->flush();
+    target->blit(*iTopLeft, ePoint(0, 0) );
 		x+=iTopLeft->x;
 	}
 
 	if (iTopRight)
 	{
-		xm-=iTopRight->x;
+    xm-=iTopRight->x;
 		target->blit(*iTopRight, ePoint(xm, 0), eRect(x, 0, size.x()-x, size.y()));
-		target->flush();
 	}
 	
 	if (iTop)
-	{
-		while (x<xm)
+  {
+    while (x<xm)
 		{
 			target->blit(*iTop, ePoint(x, 0), eRect(x, 0, xm-x, size.y()));
 			x+=iTop->x;
 		}
-		target->flush();
-	} else
-	{
+  }
+  else
 		target->fill( eRect( 0, 0, size.x(), borderTop ) );
-		target->flush();
-	}
 
 	x=0;
 	xm=size.x();
 
 	if (iBottomLeft)
 	{
-		target->blit(*iBottomLeft, ePoint(0, size.y()-iBottomLeft->y));
-		target->flush();
+    target->blit(*iBottomLeft, ePoint(0, size.y()-iBottomLeft->y));
 		x+=iBottomLeft->x;
 	}
 
 	if (iBottomRight)
 	{
-		xm-=iBottomRight->x;
+    xm-=iBottomRight->x;
  		target->blit(*iBottomRight, ePoint(xm, size.y()-iBottomRight->y), eRect(x, size.y()-iBottomRight->y, size.x()-x, iBottomRight->y));
-		target->flush();
 	}
 	
 	if (iBottom)
 	{
-		while (x<xm)
+    while (x<xm)
 		{
 			target->blit(*iBottom, ePoint(x, size.y()-iBottom->y), eRect(x, size.y()-iBottom->y, xm-x, iBottom->y));
 			x+=iBottom->x;
 		}
-		target->flush();
 	}
 	
 	y=0; ym=size.y();
@@ -115,26 +107,26 @@ void eDecoration::drawDecoration(gPainter *target, ePoint size)
 	if (iBottomLeft)
 		ym=size.y()-iBottomLeft->y;
 	if (iLeft)
-	{
-		while (y<ym)
+  {
+    while (y<ym)
 		{
-			target->blit(*iLeft, ePoint(0, y), eRect(0, y, iLeft->x, ym-y));
+      target->blit(*iLeft, ePoint(0, y), eRect(0, y, iLeft->x, ym-y));
 			y+=iLeft->y;
 		}
-	}
+  }
 
 	if (iTopRight)
 		y=iTopRight->y;
 	if (iBottomRight)
 		ym=size.y()-iBottomRight->y;
 	if (iRight)
-	{
-		while (y<ym)
+  {
+    while (y<ym)
 		{
 			target->blit(*iRight, ePoint(size.x()-iRight->x, y), eRect(size.x()-iRight->x, y, iRight->x, ym-y));
 			y+=iRight->y;
 		}
-	}
+  }
 	
 	target->flush();
 }

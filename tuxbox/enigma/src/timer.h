@@ -4,7 +4,9 @@
 #include <lib/dvb/serviceplaylist.h>
 #include <lib/gui/combobox.h>
 #include <lib/gui/enumber.h>
+#include <sselect.h>
 #include <epgwindow.h>
+
 
 class eTimerManager: public Object
 {
@@ -47,13 +49,13 @@ class eTimerManager: public Object
 // handle all eit related timer stuff ( for smart Timers)
 	void EITready(int);
 public:
-	enum { erase, update };
+  enum { erase, update };
 	eTimerManager();
 	~eTimerManager();
 	static eTimerManager *getInstance() { return instance; }
   bool removeEventFromTimerList( eWidget *sel, const ePlaylistEntry& entry, int type=erase );
   bool removeEventFromTimerList( eWidget *sel, const eServiceReference *ref, const EITEvent *evt);
-  bool addEventToTimerList( eWidget *sel, const eServiceReference *ref, const EITEvent *evt, int type = ePlaylistEntry::SwitchTimerEntry | ePlaylistEntry::stateWaiting );
+  bool addEventToTimerList( eWidget *sel, const eServiceReference *ref, const EITEvent *evt, int type = ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR|ePlaylistEntry::stateWaiting );
 	bool addEventToTimerList( eWidget *sel, const ePlaylistEntry& entry );
 	ePlaylistEntry* findEvent( eServiceReference *service, EITEvent *evt );
 	template <class Z>
@@ -90,19 +92,21 @@ public:
 class eTimerView: public eWindow
 {
 	eListBox<eListBoxEntryTimer>* events;
-	eComboBox *bday, *bmonth, *byear, *eday, *emonth, *eyear, *type, *services;
+	eComboBox *bday, *bmonth, *byear, *eday, *emonth, *eyear, *type;
 	eNumber *btime, *etime;
-	eButton *add, *update, *erase, *bclose;
+	eButton *add, *update, *erase, *bclose, *bSelectService;
 	tm beginTime, endTime;
 	friend struct _selectEvent;
+  eServiceReference tmpService;
 private:
-	void selectServiceInCombo( const eServiceReference& ref );
-	void comboBoxClosed( eComboBox*, eListBoxEntryText* );
+  eServicePath buildServicePath( eServiceReference &ref );
+  void showServiceSelector();
 	void selChanged( eListBoxEntryTimer* );
 	void fillTimerList();
 	void entrySelected(eListBoxEntryTimer *entry);
 	int eventHandler(const eWidgetEvent &event);
-	void invalidateEntry( eListBoxEntryTimer* );
+  void comboBoxClosed( eComboBox *combo,  eListBoxEntryText* );
+  void invalidateEntry( eListBoxEntryTimer* );
 	void updateDateTime( const tm& beginTime, const tm& endTime );
 	void updateDay( eComboBox* dayCombo, int year, int month, int day );
 	void updatePressed();
