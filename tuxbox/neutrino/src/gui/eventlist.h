@@ -1,9 +1,12 @@
 #ifndef EVENTLIST_HPP
 #define EVENTLIST_HPP
 //
-// $Id: eventlist.h,v 1.2 2001/09/18 11:34:42 fnbrd Exp $
+// $Id: eventlist.h,v 1.3 2001/09/18 14:58:20 field Exp $
 //
 // $Log: eventlist.h,v $
+// Revision 1.3  2001/09/18 14:58:20  field
+// Eventlist verbessert
+//
 // Revision 1.2  2001/09/18 11:34:42  fnbrd
 // Some changes.
 //
@@ -39,7 +42,7 @@ class EventList
     void removeAllEvents(void);
     void readEvents(const std::string& channelname); // I really don't like handling names
     unsigned int		selected;
-    unsigned int		tuned;
+    int                 current_event;
     unsigned int		liststart;
     unsigned int		listmaxshow;
     unsigned int		numwidth;
