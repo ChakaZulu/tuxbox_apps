@@ -3508,7 +3508,7 @@ void eZapMain::repeatSkip(int dir)
 				}
 			}
 			else
-				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,time*380)); // ca in TS
+				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,time*376)); // ca in TS
 
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekEnd));
 
