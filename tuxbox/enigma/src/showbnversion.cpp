@@ -119,7 +119,7 @@ void ShowBNVersion::eventOccured(int event)
 		}
 	}
 	if (event==eDVB::eventServiceFailed)
-		text->setText("Tune failed. Please to a channelsearch first.");
+		text->setText("Tune failed. Please do a channelsearch first.");
 }
 
 ShowBNVersion::ShowBNVersion(): eWindow(1)
