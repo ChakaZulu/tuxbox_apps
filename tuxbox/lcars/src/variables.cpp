@@ -66,15 +66,15 @@ std::string variables::waitForEvent()
 	std::string return_string;
 	bool doit = true;
 
-	while(doit)
+	/*while(doit)
 	{
 		pthread_mutex_lock(&events_mutex);
 		doit = (events.size() == 0);
 		pthread_mutex_unlock(&events_mutex);
-		usleep(100);
-	}
-	//if (doit)
-	//	pthread_mutex_lock(&event_wait_mutex);
+		usleep(1000);
+	}*/
+	if (doit)
+		pthread_mutex_lock(&event_wait_mutex);
 	pthread_mutex_lock(&events_mutex);
 	return_string = events.front();
 	events.pop();

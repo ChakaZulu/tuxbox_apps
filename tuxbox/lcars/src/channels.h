@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: channels.h,v $
+Revision 1.7  2002/05/27 12:01:43  TheDOC
+linkage-perspectives fix and stuff
+
 Revision 1.6  2002/05/18 02:55:24  TheDOC
 LCARS 0.21TP7
 
@@ -172,6 +175,7 @@ class channels
 	int current_mode;
 	int old_TS, old_ONID;
 	std::queue<int> last_channels;
+	std::vector<linkage> linkage_perspectives;
 public:	
 	channels(settings *setting, pat *p1, pmt *p2, eit *e, cam *c, hardware *h, osd *o, zap *z, tuner *t, variables *v);
 	channels(settings *setting, pat *p1, pmt *p2);

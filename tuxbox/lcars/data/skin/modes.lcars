@@ -438,6 +438,9 @@ Perspective
 Index:
 2
 +++
+Init:
+	CONTROL Var Set OLD_MODE 2
++++
 Actions:
 GREEN:
 	CHANNELS Zap Zap

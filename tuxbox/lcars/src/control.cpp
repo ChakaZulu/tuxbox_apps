@@ -890,7 +890,7 @@ int control::runCommand(command_class command, bool val)
 				{
 					int curr_perspective = atoi(vars->getvalue("%CURR_PERSPECTIVE").c_str());
 					curr_perspective++;
-					if (curr_perspective >= eit_obj->numberPerspectives())
+					if (curr_perspective >= channels_obj->currentNumberPerspectives())
 						curr_perspective = 0;
 					channels_obj->setPerspective(curr_perspective);
 					vars->setvalue("%CURR_PERSPECTIVE", curr_perspective);
@@ -901,12 +901,12 @@ int control::runCommand(command_class command, bool val)
 					int curr_perspective = atoi(vars->getvalue("%CURR_PERSPECTIVE").c_str());
 					curr_perspective--;
 					if (curr_perspective < 0)
-						curr_perspective = eit_obj->numberPerspectives() - 1;
+						curr_perspective = channels_obj->currentNumberPerspectives() - 1;
 					channels_obj->setPerspective(curr_perspective);
 					vars->setvalue("%CURR_PERSPECTIVE", curr_perspective);
 					vars->setvalue("%CURR_PERSPECTIVE_NAME", channels_obj->getPerspectiveName(curr_perspective));
 				}
-				else if (atoi(command.args[1].c_str()) < eit_obj->numberPerspectives())
+				else if (atoi(command.args[1].c_str()) < channels_obj->currentNumberPerspectives())
 				{
 					channels_obj->setPerspective(atoi(command.args[1].c_str()));
 					vars->setvalue("%CURR_PERSPECTIVE", command.args[1]);

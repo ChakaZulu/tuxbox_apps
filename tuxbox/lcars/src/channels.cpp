@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: channels.cpp,v $
+Revision 1.9  2002/05/27 12:00:32  TheDOC
+linkage-perspectives fix and stuff
+
 Revision 1.8  2002/05/18 04:31:02  TheDOC
 Warningelimination
 
@@ -66,6 +69,7 @@ channels::channels(settings *set, pat *p1, pmt *p2)
 	pmt_obj = p2;
 	setting = set;
 	current_mode = CHANNEL;
+	linkage_perspectives.clear();
 }
 
 
@@ -82,6 +86,7 @@ channels::channels(settings *set, pat *p1, pmt *p2, eit *e, cam *c, hardware *h,
 	zap_obj = z;
 	tuner_obj = t;
 	vars = v;
+	linkage_perspectives.clear();
 }
 
 void channels::setStuff(eit *e, cam *c, hardware *h, osd*o, zap *z, tuner *t, variables *v)
@@ -107,18 +112,20 @@ bool channels::currentIsMultiPerspective()
 
 int channels::currentNumberPerspectives()
 {
-	return eit_obj->numberPerspectives();
+	return linkage_perspectives.size();;
 }
 
 void channels::parsePerspectives()
 {
-	basic_channellist[cur_pos].number_perspectives = eit_obj->numberPerspectives();
-	for (int i = 0; i < basic_channellist[cur_pos].number_perspectives; i++)
+	int num = eit_obj->numberPerspectives();
+	for (int i = 0; i < num; i++)
 	{
-		basic_channellist[cur_pos].perspective[i] = eit_obj->nextLinkage();
-		printf("%s\n", basic_channellist[cur_pos].perspective[i].name);
+		//basic_channellist[cur_pos].perspective[i] = eit_obj->nextLinkage();
+		linkage_perspectives.insert(linkage_perspectives.end(), eit_obj->nextLinkage());
+		//printf("%s\n", basic_channellist[cur_pos].perspective[i].name);
 	}
 	curr_perspective = 0;
+	old_TS = -1;
 	/*osd_obj->createPerspective();
 	char message[100];
 	sprintf(message, "Please choose perspective (%d - %d)", 1, basic_channellist[cur_pos].number_perspectives);
@@ -128,40 +135,44 @@ void channels::parsePerspectives()
 
 void channels::setPerspective(int number)
 {
+	std::cout << "Switching to perspective number " << number << std::endl;
+	if ((unsigned int) number >= linkage_perspectives.size())
+		return;
 	pmt_data pmt_entry;
 
 	current_mode = LINKAGE;
 
 	curr_perspective = number;
+	linkage tmp_link = linkage_perspectives[number];
 
-	printf("----------------------\n");
-	printf("APID: %d\n", apid);
-	printf("Current perspective: %d\n", curr_perspective);
-	if (old_TS != basic_channellist[cur_pos].perspective[curr_perspective].TS || old_ONID != basic_channellist[cur_pos].perspective[curr_perspective].ONID)
+	//printf("----------------------\n");
+	//printf("APID: %d\n", apid);
+	//printf("Current perspective: %d\n", curr_perspective);
+	if (old_TS != tmp_link.TS || old_ONID != tmp_link.ONID)
 	{
 		std::cout << "New TS selected" << std::endl;
-		std::cout << "The new TS is: " << basic_channellist[cur_pos].perspective[curr_perspective].TS << std::endl;
-		tune(basic_channellist[cur_pos].perspective[curr_perspective].TS, basic_channellist[cur_pos].perspective[curr_perspective].ONID);
+		std::cout << "The new TS is: " << tmp_link.TS << std::endl;
+		tune(tmp_link.TS, tmp_link.ONID);
 	}
-	old_ONID = basic_channellist[cur_pos].perspective[curr_perspective].ONID;
-	old_TS = basic_channellist[cur_pos].perspective[curr_perspective].TS;
+	old_ONID = tmp_link.ONID;
+	old_TS = tmp_link.TS;
 	
 	zap_obj->close_dev();
 	pat_obj->readPAT();
 	ECM = 0;
 			
 	memset (&pmt_entry, 0, sizeof (struct pmt_data));
-	pmt_entry = pmt_obj->readPMT(pat_obj->getPMT(basic_channellist[cur_pos].perspective[curr_perspective].SID));
+	pmt_entry = pmt_obj->readPMT(pat_obj->getPMT(tmp_link.SID));
 	//channels.deleteCurrentAPIDs();
-	basic_channellist[cur_pos].perspective[curr_perspective].APIDcount = 0;
+	tmp_link.APIDcount = 0;
 	for (int i = 0; i < pmt_entry.pid_counter; i++)
 	{
 		if (pmt_entry.type[i] == 0x02)
-			basic_channellist[cur_pos].perspective[curr_perspective].VPID = pmt_entry.PID[i];
+			tmp_link.VPID = pmt_entry.PID[i];
 		else if (pmt_entry.type[i] == 0x04 || pmt_entry.type[i] == 0x03 || pmt_entry.type[i] == 0x06)
 		{
 			printf("an APID: %04x\n", pmt_entry.PID[i]);
-			basic_channellist[cur_pos].perspective[curr_perspective].APID[basic_channellist[cur_pos].perspective[curr_perspective].APIDcount++] = pmt_entry.PID[i];
+			tmp_link.APID[tmp_link.APIDcount++] = pmt_entry.PID[i];
 		}
 		printf("type: %d - PID: %04x\n", pmt_entry.type[i], pmt_entry.PID[i]);
 	}
@@ -176,19 +187,19 @@ void channels::setPerspective(int number)
 	}
 /*	osd_obj->addCommand("HIDE perspective");
 	osd_obj->createPerspective();
-	osd_obj->setPerspectiveName(basic_channellist[cur_pos].perspective[curr_perspective].name);
+	osd_obj->setPerspectiveName(tmp_link.name);
 	osd_obj->addCommand("SHOW perspective");*/
-	printf("%s\n", basic_channellist[cur_pos].perspective[curr_perspective].name);
-	if (basic_channellist[cur_pos].perspective[curr_perspective].APIDcount == 1)
-		zap_obj->zap_to(basic_channellist[cur_pos].perspective[curr_perspective].VPID, basic_channellist[cur_pos].perspective[curr_perspective].APID[apid], pmt_entry.PCR, ECM, basic_channellist[cur_pos].perspective[curr_perspective].SID, basic_channellist[cur_pos].perspective[curr_perspective].ONID, basic_channellist[cur_pos].perspective[curr_perspective].TS);
+	printf("%s\n", tmp_link.name);
+	if (tmp_link.APIDcount == 1)
+		zap_obj->zap_to(tmp_link.VPID, tmp_link.APID[apid], pmt_entry.PCR, ECM, tmp_link.SID, tmp_link.ONID, tmp_link.TS);
 	else
-		zap_obj->zap_to(basic_channellist[cur_pos].perspective[curr_perspective].VPID, basic_channellist[cur_pos].perspective[curr_perspective].APID[0], pmt_entry.PCR, ECM, basic_channellist[cur_pos].perspective[curr_perspective].SID, basic_channellist[cur_pos].perspective[curr_perspective].ONID, basic_channellist[cur_pos].perspective[curr_perspective].TS, basic_channellist[cur_pos].perspective[curr_perspective].APID[1]);
+		zap_obj->zap_to(tmp_link.VPID, tmp_link.APID[0], pmt_entry.PCR, ECM, tmp_link.SID, tmp_link.ONID, tmp_link.TS, tmp_link.APID[1]);
 
 }
 
 std::string channels::getPerspectiveName(int number)
 {
-	return basic_channellist[cur_pos].perspective[number].name;
+	return linkage_perspectives[number].name;
 }
 
 void channels::zapCurrentChannel()
@@ -338,6 +349,7 @@ void channels::setCurrentOSDEvent(osd *osd_obj)
 void channels::zapCurrentAudio(int pid)
 {
 	apid = pid;
+	
 	//hardware_obj->useDD(true);
 
 	if (current_mode == CHANNEL)
@@ -353,7 +365,8 @@ void channels::zapCurrentAudio(int pid)
 	}
 	else if (current_mode == LINKAGE)
 	{
-		zap_obj->zap_audio(basic_channellist[cur_pos].perspective[curr_perspective].VPID, basic_channellist[cur_pos].perspective[curr_perspective].APID[apid] , ECM, basic_channellist[cur_pos].perspective[curr_perspective].SID, basic_channellist[cur_pos].perspective[curr_perspective].ONID);
+		linkage tmp_link = linkage_perspectives[curr_perspective];	
+		zap_obj->zap_audio(tmp_link.VPID, tmp_link.APID[apid] , ECM, tmp_link.SID, tmp_link.ONID);
 		//zap_obj->zap_audio(getCurrentVPID(), getCurrentAPID(apid), ECM, getCurrentSID(), getCurrentONID());
 
 		event now = eit_obj->getNow();
@@ -701,7 +714,7 @@ int channels::getCurrentSID()
 	if (current_mode == CHANNEL)
 		return basic_channellist[cur_pos].SID;
 	else if (current_mode == LINKAGE)
-		return basic_channellist[cur_pos].perspective[curr_perspective].SID;
+		return linkage_perspectives[curr_perspective].SID;
 	else
 		return 0;
 
@@ -727,7 +740,7 @@ int channels::getCurrentAPIDcount()
 	}
 	else if (current_mode == LINKAGE)
 	{
-		while(basic_channellist[cur_pos].perspective[curr_perspective].APID[count++] != 0)
+		while(linkage_perspectives[curr_perspective].APID[count++] != 0)
 			if (count > 3)
 				break;
 		count--;
