@@ -15,7 +15,7 @@
 
 #include "../controld/clientlib/controldclient.h"
 #include "../../sections/clientlib/sectionsdclient.h"
-#include "../../zapit/clientlib/zapitclient.h"
+#include <zapitclient.h>
 #include "../timerd/clientlib/timerdclient.h"
 #include "../libevent/eventserver.h"
 

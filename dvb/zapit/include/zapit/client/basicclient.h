@@ -1,8 +1,11 @@
 /*
- * $Id: cam.h,v 1.20 2002/09/25 18:51:13 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/Attic/basicclient.h,v 1.1 2002/09/25 18:51:13 thegoodguy Exp $
  *
- * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>,
- *             thegoodguy         <thegoodguy@berlios.de>
+ * Basic Client Class (Neutrino) - DBoxII-Project
+ *
+ * (C) 2002 by thegoodguy <thegoodguy@berlios.de>
+ *
+ * License: GPL
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,18 +23,21 @@
  *
  */
 
-#ifndef __cam_h__
-#define __cam_h__
+#ifndef __basicclient__
+#define __basicclient__
 
-#include "ci.h"
-#include <basicclient.h>
-
-class CCam : public CBasicClient
+class CBasicClient
 {
-	private:
-		bool sendMessage (char* data, const size_t length);
-	public:
-		bool setCaPmt (CCaPmt* caPmt);
+ private:
+	int sock_fd;
+
+ protected:
+	bool open_connection(const char* socketname);
+	bool send_data(char* data, const size_t size);
+	bool receive_data(char* data, const size_t size);
+	void close_connection();
+	
+	CBasicClient();
 };
 
-#endif /* __cam_h__ */
+#endif

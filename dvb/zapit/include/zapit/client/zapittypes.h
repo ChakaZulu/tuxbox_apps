@@ -1,8 +1,9 @@
 /*
- * $Id: cam.h,v 1.20 2002/09/25 18:51:13 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/zapittypes.h,v 1.1 2002/09/25 18:51:13 thegoodguy Exp $
  *
- * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>,
- *             thegoodguy         <thegoodguy@berlios.de>
+ * zapit's types which are used by the clientlib - d-box2 linux project
+ *
+ * (C) 2002 by thegoodguy <thegoodguy@berlios.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,18 +21,30 @@
  *
  */
 
-#ifndef __cam_h__
-#define __cam_h__
+#ifndef __zapittypes_h__
+#define __zapittypes_h__
 
-#include "ci.h"
-#include <basicclient.h>
 
-class CCam : public CBasicClient
+#include <stdint.h>
+
+typedef uint16_t t_service_id;
+typedef uint16_t t_original_network_id;
+typedef uint16_t t_transport_stream_id;
+
+/* unique channel identification */
+typedef uint32_t t_channel_id;
+#define CREATE_CHANNEL_ID ((original_network_id << 16) | service_id)
+
+
+/* diseqc types */
+enum diseqc_t
 {
-	private:
-		bool sendMessage (char* data, const size_t length);
-	public:
-		bool setCaPmt (CCaPmt* caPmt);
+	NO_DISEQC,
+	MINI_DISEQC,
+	DISEQC_1_0,
+	DISEQC_1_1,
+	SMATV_REMOTE_TUNING
 };
 
-#endif /* __cam_h__ */
+
+#endif /* __zapittypes_h__ */

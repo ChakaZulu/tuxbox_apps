@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.51 2002/09/25 16:48:03 thegoodguy Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.52 2002/09/25 18:51:13 thegoodguy Exp $ *
  *
  * Client-Interface für zapit - DBoxII-Project
  *
@@ -29,7 +29,7 @@
 #include <eventserver.h>
 
 
-#include "zapitclient.h"
+#include "include/zapitclient.h"
 
 
 inline bool CZapitClient::zapit_connect()

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/types.h,v 1.2 2002/09/21 12:47:10 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/types.h,v 1.3 2002/09/25 18:51:13 thegoodguy Exp $
  *
  * zapit's types - d-box2 linux project
  * these types are used by the clientlib and zapit itself
@@ -26,7 +26,7 @@
 #define __zapit__types_h__
 
 
-#include "clientlib/zapittypes.h"
+#include "clientlib/include/zapittypes.h"
 
 
 #endif /* __zapit__types_h__ */

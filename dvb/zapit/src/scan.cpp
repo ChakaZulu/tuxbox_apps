@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.75 2002/09/25 16:05:33 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.76 2002/09/25 18:51:13 thegoodguy Exp $
  */
 
 #include <fcntl.h>
@@ -10,7 +10,7 @@
 /* libevent */
 #include <eventserver.h>
 
-#include <clientlib/zapitclient.h>
+#include <zapitclient.h>
 #include <zapost/frontend.h>
 #include <zapsi/bat.h>
 #include <zapsi/nit.h>

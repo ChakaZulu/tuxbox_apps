@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.27 2002/09/20 16:55:22 thegoodguy Exp $
+ * $Id: pzapit.cpp,v 1.28 2002/09/25 18:51:13 thegoodguy Exp $
  *
  * simple commandline client for zapit
  *
@@ -26,7 +26,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <clientlib/zapitclient.h>
+#include <zapitclient.h>
 
 int usage (std::string basename)
 {
