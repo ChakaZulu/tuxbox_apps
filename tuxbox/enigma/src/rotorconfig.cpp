@@ -25,14 +25,6 @@ RotorConfig::RotorConfig(eLNB *lnb )
 	useRotorInPower = new eCheckbox(this);
 	useRotorInPower->setName("useRotorInPower");
 
-	lDegPerSec = new eLabel(this);
-	lDegPerSec->setName("lDegPerSec");
-	lDegPerSec->hide();
-	DegPerSec = new eNumber( this, 2, 0, 10, 3, 0, 0, lDegPerSec);
-	DegPerSec->setFlags( eNumber::flagFixedNum );
-	DegPerSec->setName("DegPerSec");
-	DegPerSec->hide();
-
 	lDeltaA = new eLabel(this);
 	lDeltaA->setName("lDeltaA");
 	lDeltaA->hide();
@@ -125,7 +117,6 @@ RotorConfig::RotorConfig(eLNB *lnb )
 	CONNECT( Longitude->selected, RotorConfig::numSelected );
 	CONNECT( Latitude->selected, RotorConfig::numSelected );
 	CONNECT( number->selected, RotorConfig::numSelected );
-	CONNECT( DegPerSec->selected, RotorConfig::numSelected );
 	CONNECT( DeltaA->selected, RotorConfig::numSelected );
 	CONNECT( add->selected, RotorConfig::onAdd );
 	CONNECT( remove->selected, RotorConfig::onRemove );
@@ -172,7 +163,6 @@ void RotorConfig::onSavePressed()
 	lnb->getDiSEqC().useGotoXX = useGotoXX->isChecked();
 	lnb->getDiSEqC().useRotorInPower = useRotorInPower->isChecked()?1:0;
 	lnb->getDiSEqC().useRotorInPower |= DeltaA->getNumber()<<8;
-	lnb->getDiSEqC().DegPerSec = DegPerSec->getFixedNum();
 	lnb->getDiSEqC().gotoXXLaDirection = (int) LaDirection->getCurrent()->getKey();
 	lnb->getDiSEqC().gotoXXLoDirection = (int) LoDirection->getCurrent()->getKey();
 	lnb->getDiSEqC().gotoXXLatitude = Latitude->getFixedNum();
@@ -189,8 +179,6 @@ void RotorConfig::useRotorInPowerChanged( int state )
 	eDebug("useRotorInPowerChanged to %d", state);
 	if (state)
 	{
-		lDegPerSec->hide();
-		DegPerSec->hide();
 		lDeltaA->show();
 		DeltaA->show();
 	}
@@ -198,8 +186,6 @@ void RotorConfig::useRotorInPowerChanged( int state )
 	{
 		lDeltaA->hide();
 		DeltaA->hide();
-		lDegPerSec->show();
-		DegPerSec->show();
 	}
 }
 
@@ -274,7 +260,6 @@ void RotorConfig::setLNBData( eLNB *lnb )
 		LaDirection->setCurrent( (void*) lnb->getDiSEqC().gotoXXLaDirection );
 		Longitude->setFixedNum( lnb->getDiSEqC().gotoXXLongitude );
 		LoDirection->setCurrent( (void*) lnb->getDiSEqC().gotoXXLoDirection );
-		DegPerSec->setFixedNum( lnb->getDiSEqC().DegPerSec );
 		DeltaA->setNumber( (lnb->getDiSEqC().useRotorInPower & 0x0000FF00) >> 8 );
 	}
 	else
@@ -283,7 +268,6 @@ void RotorConfig::setLNBData( eLNB *lnb )
 		LaDirection->setCurrent(0);
 		Longitude->setFixedNum(0);
 		LoDirection->setCurrent(0);
-		DegPerSec->setFixedNum( 1.0 );
 		DeltaA->setNumber(40);
 		useGotoXX->setCheck( 1 );
 		useRotorInPower->setCheck( 0 );

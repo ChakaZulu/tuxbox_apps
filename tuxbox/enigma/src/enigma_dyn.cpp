@@ -2141,12 +2141,14 @@ static eString getContent(eString mode, eString path)
 	}
 	else
 #ifndef DISABLE_FILE
+#ifdef ENABLE_DYN_MOUNT
 	if (mode == "configMountMgr")
 	{
 		result = getTitle("CONFIG: Mount Manager");
 		result += getConfigMountMgr();
 	}
 	else
+#endif
 	if (mode == "configHDD")
 	{
 		result = getTitle("CONFIG: HDD");
@@ -4058,8 +4060,9 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/control/zapto", getCurrentVpidApid, false); // this dont really zap.. only used to return currently used pids;
 	dyn_resolver->addDyn("GET", "/control/getonidsid", neutrino_suck_getonidsid, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/channellist", neutrino_suck_getchannellist, lockWeb);
-	
-	ezapMountInitializeDyn(dyn_resolver, lockWeb);
 	ezapWapInitializeDyn(dyn_resolver, lockWeb);
+#ifdef ENABLE_DYN_MOUNT
+	ezapMountInitializeDyn(dyn_resolver, lockWeb);
+#endif
 }
 

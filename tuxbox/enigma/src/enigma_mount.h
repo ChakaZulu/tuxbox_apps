@@ -1,3 +1,5 @@
+#ifdef ENABLE_DYN_MOUNT
+
 #ifndef __enigma_mount_h__
 #define __enigma_mount_h__
 
@@ -63,5 +65,4 @@ public:
 };
 #endif
 
-
-
+#endif

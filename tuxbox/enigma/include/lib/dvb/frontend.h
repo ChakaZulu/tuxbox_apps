@@ -81,18 +81,12 @@ class eFrontend: public Object
 			curRotorPos;    // current Orbital Position
 
 	eLNB *lastLNB;
-         
-	enum { stateIdle, stateTuning, stateDiSEqC } state;
 	eTransponder *transponder;
-	eFrontend(int type, const char *demod=DEMOD_DEV, const char *sec=SEC_DEV);
 	static eFrontend *frontend;
-	eTimer *timer, timer2, timer3, rotorTimer1, rotorTimer2;
-	int tries, noRotorCmd;
-	int tune(eTransponder *transponder, 
-			uint32_t Frequency, int polarisation,
-			uint32_t SymbolRate,
-			CodeRate FEC_inner,
-			SpectralInversion Inversion, eSatellite* sat, Modulation QAM);
+	eTimer rotorTimer1, rotorTimer2, 
+				checkRotorLockTimer, checkLockTimer, updateTransponderTimer;
+	eSocketNotifier *sn;
+	int tries, noRotorCmd, wasLoopthrough, lostlockcount;
 	Signal1<void, eTransponder*> tpChanged;
 // ROTOR INPUTPOWER
 	timeval rotorTimeout;
@@ -104,16 +98,30 @@ class eFrontend: public Object
 			voltage,
 			increased;
 ///////////////////
-	void timeout();
+#if HAVE_DVB_API_VERSION < 3
+	FrontendParameters front;
+#else
+	struct dvb_frontend_parameters front;
+#endif
+
+	eFrontend(int type, const char *demod=DEMOD_DEV, const char *sec=SEC_DEV);
+	int tune(eTransponder *transponder, 
+			uint32_t Frequency, int polarisation,
+			uint32_t SymbolRate,
+			CodeRate FEC_inner,
+			SpectralInversion Inversion, eSatellite* sat, Modulation QAM);
+
 	int RotorUseTimeout(eSecCmdSequence& seq, eLNB *lnb);
 	int RotorUseInputPower(eSecCmdSequence& seq, eLNB *lnb);
 	void RotorStartLoop();
 	void RotorRunningLoop();
 	void RotorFinish(bool tune=true);
 	int SendSequence( const eSecCmdSequence &seq );
-	void checkLock();
-	void checkRotorLock();
 	void updateTransponder();
+	void readFeEvent(int what);
+	int setFrontend();
+	void checkRotorLock();
+	void checkLock();
 public:
 	void disableRotor() { noRotorCmd = 1, lastRotorCmd=-1; } // no more rotor cmd is sent when tune
 	void enableRotor() { noRotorCmd = 0, lastRotorCmd=-1; }  // rotor cmd is sent when tune

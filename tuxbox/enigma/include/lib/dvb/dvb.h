@@ -727,7 +727,6 @@ struct eDiSEqC
 	int uncommitted_cmd;    // state of the 4 uncommitted switches..
 	int useGotoXX;          // Rotor Support gotoXX Position ?
 	int useRotorInPower;    // can we use Rotor Input Power to detect Rotor state ?
-	double DegPerSec;       // degress per Second.. used when no Input Power can used
 	enum { NORTH, SOUTH, EAST, WEST };
 	int gotoXXLoDirection;  // EAST, WEST
 	int gotoXXLaDirection;  // NORT, SOUTH

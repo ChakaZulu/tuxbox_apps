@@ -65,10 +65,10 @@ struct gOpcode
 		{
 			gFont font;
 			eRect area;
-			eString text;
+			char *text;
 			gRGB foregroundColor, backgroundColor;
 			prenderText(const gFont &font, const eRect &area, const eString &text, const gRGB &foregroundColor, const gRGB &backgroundColor):
-				font(font), area(area), text(text), foregroundColor(foregroundColor), backgroundColor(backgroundColor) { }
+				font(font), area(area), text(text.length()?strdup(text.c_str()):0), foregroundColor(foregroundColor), backgroundColor(backgroundColor) { }
 		} *renderText;
 
 		struct prenderPara

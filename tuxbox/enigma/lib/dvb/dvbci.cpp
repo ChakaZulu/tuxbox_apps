@@ -108,9 +108,9 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 			ci_progress(_("no module"));	
 		ci_state=0;
 		clearCAIDs();
-		if (::ioctl(fd,CI_RESET)<0 )
-			eDebug("CI_RESET failed (%m)");
-		dataAvailable(0);
+//		if (::ioctl(fd,CI_RESET)<0 )
+//			eDebug("CI_RESET failed (%m)");
+		dataAvailable(1000);  // force reset
 		break;
 	case eDVBCIMessage::init:
 //		eDebug("[DVBCI] got init message..");
@@ -1202,55 +1202,57 @@ void eDVBCI::dataAvailable(int what)
 	int present;
 	unsigned char buffer[1024];
 	int size;
-	(void)what;
 
 	stopTimer();
 
-	if (::ioctl(fd,CI_GET_STATUS,&present)<0)
-		eDebug("CI_GET_STATUS failed (%m)");
-
-	if(present == 2 || present != 1) 
+	if ( what != 1000 )
 	{
-		eDebug("[DVBCI] module removed");
+		if (::ioctl(fd,CI_GET_STATUS,&present)<0)
+			eDebug("CI_GET_STATUS failed (%m)");
 
-		// clear receive lpdu queues
-		ptrlpduQueueElem curElem, lastElem;
-		for (int i=0; i < MAXTRANSPORTSESSIONS; ++i)
+		if(present == 2 || present != 1) 
 		{
-			if (lpduReceiveQueues[i].numLPDUS)
+			eDebug("[DVBCI] module removed");
+
+			// clear receive lpdu queues
+			ptrlpduQueueElem curElem, lastElem;
+			for (int i=0; i < MAXTRANSPORTSESSIONS; ++i)
 			{
-				curElem = lpduReceiveQueues[i].firstLPDU;
-				while (curElem != NULL)
+				if (lpduReceiveQueues[i].numLPDUS)
 				{
-					lastElem = curElem;
-					curElem = curElem->nextElem;
-					// And remove element
-					free(lastElem);
+					curElem = lpduReceiveQueues[i].firstLPDU;
+					while (curElem != NULL)
+					{
+						lastElem = curElem;
+						curElem = curElem->nextElem;
+						// And remove element
+						free(lastElem);
+					}
 				}
 			}
+
+			// clear sendqueue
+			while(sendqueue.size())
+			{
+				delete [] sendqueue.top().data;
+				sendqueue.pop();
+			}
+
+			memset(appName,0,sizeof(appName));
+			ci_progress(_("no module"));
+
+			char *buf="\x9f\x88\x00\x00";
+			ci_mmi_progress(buf,4);
+
+			for(int i=0;i<MAX_SESSIONS;i++)
+				sessions[i].state=STATE_FREE;
+
+			::read(fd,&buffer,0);	
+			ci_state=0;
+			clearCAIDs();
+
+			return;
 		}
-
-		// clear sendqueue
-		while(sendqueue.size())
-		{
-			delete [] sendqueue.top().data;
-			sendqueue.pop();
-		}
-
-		memset(appName,0,sizeof(appName));
-		ci_progress(_("no module"));
-
-		char *buf="\x9f\x88\x00\x00";
-		ci_mmi_progress(buf,4);
-
-		for(int i=0;i<MAX_SESSIONS;i++)
-			sessions[i].state=STATE_FREE;
-		
-		::read(fd,&buffer,0);	
-		ci_state=0;
-		clearCAIDs();
-
-		return;
 	}
 	
 	if(ci_state==0)						//CI plugged

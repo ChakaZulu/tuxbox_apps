@@ -440,8 +440,6 @@
 	<object name="RotorConfig">
 		<RotorConfig text="Motor Config" cposition="80:100" csize="550:400" >
 			<eCheckbox text="Use Motor Input Power" name="useRotorInPower" position="10:10" size="300:35" helptext="Use motor input power for running detection.. else use timeout" />
-			<eNumber name="DegPerSec" position="320:10" size="100:35" helptext="motor drive speed, in degrees per second" loadDeco="" />
-			<eLabel name="lDegPerSec" text="/sec" position="430:10" size="e-10:35" vcenter="on" />
 			<eNumber name="DeltaA" position="320:10" size="60:35" helptext="motor power input difference between running and not running" loadDeco="" />
 			<eLabel name="lDeltaA" text="mA" position="390:10" size="e-10:35" vcenter="on" />
 
@@ -527,6 +525,15 @@
 			<eCheckbox name="nocircular" text="no circ polariz." position="180:e-80" size="e-10:30" helptext="change circular to linear polarization" />
   		<eButton text="start scan" name="start" position="10:e-40" size="260:40" align="center" helptext="starts the transponder scan" loadDeco="" shortcut="green" />
 		</tsAutomatic>
+	</object>
+
+	<object name="tsTryLock">
+		<tsTryLock position="0:0" size="e:340">
+			<eLabel name="lNet" position="10:5" size="e-10:30" text="scanning..." />
+			<eLabel name="lStatus" position="10:55" size="e-10:90" />
+			<eFEStatus name="festatus" position="0:170" size="400:85" />
+  		<eButton text="abort" name="bAbort" position="10:e-40" size="260:40" align="center" helptext="aborts the transponder scan" loadDeco="" shortcut="red" />
+		</tsTryLock>
 	</object>
 
 	<object name="tsAutomatic_cable">

@@ -1,3 +1,4 @@
+#ifdef ENABLE_DYN_MOUNT
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -519,4 +520,4 @@ void *mountThread(void *cmd)
 	pthread_exit(NULL);
 }
 
-
+#endif

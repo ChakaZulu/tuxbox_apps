@@ -169,6 +169,127 @@ int tsManual::eventHandler(const eWidgetEvent &event)
 	return 0;
 }
 
+tsTryLock::tsTryLock(eWidget *parent, tpPacket *packet, eString ttext)
+	:eWidget(parent), ret(0), inProgress(0), packet(packet)
+	,current_tp(packet->possibleTransponders.begin())	
+{
+	l_status=new eLabel(this, RS_WRAP);
+	l_status->setName("lStatus");
+
+	eFEStatusWidget *festatus_widget=new eFEStatusWidget(this, eFrontend::getInstance());
+	festatus_widget->setName("festatus");
+
+	b_abort=new eButton(this);
+	b_abort->setName("bAbort");
+
+	eSkin *skin=eSkin::getActive();
+
+	if ( skin->build(this, "tsTryLock") )
+		eFatal("skin load of \"tsTryLock\" failed");
+
+	eLabel *l = (eLabel*)search("lNet");
+	if (l)
+	{
+		eString text = l->getText();
+		text.erase( text.size()-3 );
+		text+=ttext;
+		l->setText(text);
+	}
+
+	CONNECT(b_abort->selected, tsTryLock::reject);
+	CONNECT(eDVB::getInstance()->eventOccured, tsTryLock::dvbEvent);
+}
+
+void tsTryLock::dvbEvent(const eDVBEvent &event)
+{
+	if (!inProgress)
+		return;
+	switch (event.type)
+	{
+		case eDVBScanEvent::eventTunedIn:
+			inProgress=0;
+			if (ret)
+				close(ret);
+			else if (event.err)
+			{
+				inProgress=1;
+				if (nextTransponder(event.err))  
+					close(-2); // no lock possible
+				else
+				{
+					eString progress=_("Waiting for tuner lock on:");
+					progress += eString().sprintf("\n\n%d / %d / %c",
+					current_tp->satellite.frequency/1000,
+					current_tp->satellite.symbol_rate/1000,
+					current_tp->satellite.polarisation?'V':'H');
+
+					static int i=0;
+					i++;
+					char bla [(i%5)+1];
+					memset(bla, '.', i%5);
+					bla[i%5]=0;
+
+					progress += bla;
+					l_status->setText(progress);
+				}
+			}
+			else
+				accept();  // tp found
+			break;
+	default:
+		break;
+	}
+}
+
+int tsTryLock::nextTransponder(int next)
+{
+	if (next)
+	{
+		if ( next != -EAGAIN )
+		{
+			current_tp->state=eTransponder::stateError;
+			eDebug("set to state Error");
+		}
+		else
+			eDebug("dont set to state error");
+		++current_tp;
+	}
+
+	if (current_tp == packet->possibleTransponders.end())
+	{
+		if ( next == -EAGAIN )
+			current_tp=packet->possibleTransponders.begin();
+		else
+		{
+			inProgress=0;
+			return 1;
+		}
+	}
+
+	return current_tp->tune();
+}
+
+int tsTryLock::eventHandler(const eWidgetEvent &e)
+{
+	switch(e.type)
+	{
+		case eWidgetEvent::execBegin:
+			inProgress=1;
+			nextTransponder(0);
+			setFocus(b_abort);
+			break;
+		case eWidgetEvent::wantClose:
+			if (!inProgress)
+				break;
+			else
+				ret=e.parameter;
+			return 1;
+		default:
+			break;
+	}
+	return eWidget::eventHandler(e);
+}
+
 tsAutomatic::tsAutomatic(eWidget *parent)
 	:eWidget(parent), ret(0), inProgress(0)
 {
@@ -235,7 +356,7 @@ tsAutomatic::tsAutomatic(eWidget *parent)
 			l_status->setText(_("To begin searching for a valid cable provider press OK, or choose your desired cable provider manually and press OK"));
 		break;
 	}
-	
+
 	setFocus(l_network);
 	setHelpID(61);
 }
@@ -252,7 +373,7 @@ void tsAutomatic::start()
 		close(1);
 	} else
 	{
-		tpPacket *pkt=(tpPacket*)(l_network->getCurrent() -> getKey());
+		tpPacket *pkt=(tpPacket*)(l_network->getCurrent()->getKey());
 		eLNB *lnb=0;
 		if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )
 		{
@@ -313,15 +434,13 @@ void tsAutomatic::dvbEvent(const eDVBEvent &event)
 			close(ret);
 			break;            
 		case eDVBScanEvent::eventTunedIn:
-			if ( event.err != -2 ) // skiped in nextTransponder
-				eDebug("tunedIn");
 			inProgress=0;
 			if (ret)
 				close(ret);
 			else if (event.err)
 			{
 				inProgress=1;
-				tuneNext(1);
+				tuneNext(event.err);
 			}
 			else
 			{
@@ -370,6 +489,7 @@ int tsAutomatic::nextNetwork(int first)
 
 	current_tp = pkt->possibleTransponders.begin();
 	last_tp = pkt->possibleTransponders.end();
+	first_tp = pkt->possibleTransponders.begin();
 	return 0;
 }
 
@@ -377,14 +497,21 @@ int tsAutomatic::nextTransponder(int next)
 {
 	if (next)
 	{
-		current_tp->state=eTransponder::stateError;
+		if ( next != -EAGAIN )
+			current_tp->state=eTransponder::stateError;
+
 		++current_tp;
 	}
 
 	if (current_tp == last_tp)
 	{
-		inProgress=0;
-		return 1;
+		if ( next == -EAGAIN )
+			current_tp=first_tp;
+		else
+		{
+			inProgress=0;
+			return 1;
+		}
 	}
 
 	if ( c_nocircular && c_nocircular->isChecked() )
@@ -455,7 +582,7 @@ int tsAutomatic::eventHandler(const eWidgetEvent &e)
 			if (b_start->isVisible() || !inProgress)
 				break;
 			else
-				ret=result;
+				ret=e.parameter;
 			return 1;
 		default:
 			break;
@@ -1087,7 +1214,6 @@ int TransponderScan::Exec()
 						if ( lnb && !i->satellite.useable(lnb))
 							continue;
 
-						sapi->addTransponder(*i);
 						cnt++;
 					}
 
@@ -1096,6 +1222,33 @@ int TransponderScan::Exec()
 						toScan.erase(toScan.begin());
 						++satScanned;
 						continue;
+					}
+
+					eString str = ' '+toScan.front().packet->name;
+					str += eString().sprintf("        (%d/%d)", satScanned+1, toScan.size()+satScanned);
+
+					statusbar->setText(_("Waiting for tuner lock... please wait"));
+					tsTryLock t(this, pkt, str);
+					current = &t;
+					t.show();
+					int ret = t.exec();
+					t.hide();
+					current=0;
+					switch(ret)
+					{
+						case -1:  // user abort
+							toScan.clear();
+							continue;
+						case -2:  // no lock on this satellite
+							toScan.erase(toScan.begin());
+							continue;
+					}
+
+					for (std::list<eTransponder>::iterator i(pkt->possibleTransponders.begin()); i != pkt->possibleTransponders.end(); ++i)
+					{
+						if ( lnb && !i->satellite.useable(lnb))
+							continue;
+						sapi->addTransponder(*i);
 					}
 
 					// scanflags auswerten
@@ -1112,7 +1265,7 @@ int TransponderScan::Exec()
 				}
 
 				eString str = ' '+toScan.front().packet->name;
-				str += eString().sprintf("...     (%d/%d)", satScanned+1, toScan.size()+satScanned);
+				str += eString().sprintf("        (%d/%d)", satScanned+1, toScan.size()+satScanned);
 
 				tsScan scan(this, str );
 #ifndef DISABLE_LCD

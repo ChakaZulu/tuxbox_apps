@@ -19,26 +19,43 @@
 #include <lib/system/info.h>
 #include <lib/driver/rc.h>
 
+// need this to check if currently a dvb service running.. 
+// for lostlock/retune handling.. 
+// when no dvb service is running or needed we call savePower..
+#include <lib/dvb/service.h> 
+// for check if in background a recording is running
+#include <lib/dvb/edvb.h>
+
 eFrontend* eFrontend::frontend;
 
 eFrontend::eFrontend(int type, const char *demod, const char *sec)
-:type(type), curRotorPos( 1000 ), state(stateIdle),
-	transponder(0), timer2(eApp), timer3(eApp), rotorTimer1(eApp), rotorTimer2(eApp), 
-	noRotorCmd(0)
+:type(type), curRotorPos(10000), transponder(0), rotorTimer1(eApp), 
+	rotorTimer2(eApp), checkRotorLockTimer(eApp), checkLockTimer(eApp), 
+	updateTransponderTimer(eApp), sn(0), noRotorCmd(0)
 {
-	timer=new eTimer(eApp);
 	CONNECT(rotorTimer1.timeout, eFrontend::RotorStartLoop );
 	CONNECT(rotorTimer2.timeout, eFrontend::RotorRunningLoop );
-	CONNECT(timer->timeout, eFrontend::timeout);
-	CONNECT(timer2.timeout, eFrontend::checkLock );
-	CONNECT(timer3.timeout, eFrontend::checkRotorLock );
+	CONNECT(checkRotorLockTimer.timeout, eFrontend::checkRotorLock );
+	CONNECT(checkLockTimer.timeout, eFrontend::checkLock );
+	CONNECT(updateTransponderTimer.timeout, eFrontend::updateTransponder );
 
-	fd=::open(demod, O_RDWR);
+	fd=::open(demod, O_RDWR|O_NONBLOCK);
 	if (fd<0)
 	{
 		perror(demod);
 		return;
 	}
+
+#if HAVE_DVB_API_VERSION < 3
+	FrontendEvent ev;
+#else
+	dvb_frontend_event ev;
+#endif
+	while ( !::ioctl(fd, FE_GET_EVENT, &ev) )
+		eDebug("[FE] clear FE_EVENT queue");
+
+	sn=new eSocketNotifier(eApp, fd, eSocketNotifier::Read);
+	CONNECT(sn->activated, eFrontend::readFeEvent );
 #if HAVE_DVB_API_VERSION < 3
 	if (type==eSystemInfo::feSatellite)
 	{
@@ -58,68 +75,223 @@ eFrontend::eFrontend(int type, const char *demod, const char *sec)
 
 void eFrontend::checkLock()
 {
-#if 0	
-	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
+	if (!Locked())
 	{
-		int fp = ::open("/dev/dbox/fp0", O_RDWR);
-		if ( fp >= 0 )
-		{
-#define FP_IOCTL_IS_LOOPTHROUGH 0x103
-			__u8 isloopthrough=0;
-			int ret = ::ioctl(fp, FP_IOCTL_IS_LOOPTHROUGH, &isloopthrough);
-			if ( ret < 0 )
-				eDebug("%m");
-			::close(fp);
-			if ( isloopthrough )
-			{
-				eDebug("loopthrough active.. dont retune... ");
-				return;
-			}
-			else
-				eDebug("loopthrough not active.. retune... ");
-		}
+		if (++lostlockcount > 2)
+			setFrontend();
+		else
+			checkLockTimer.start(750,true);
 	}
-#endif
-	if (state == stateIdle && !eDVB::getInstance()->getScanAPI() )
+	else
 	{
-		if (!Locked() && transponder)
-		{
-			tries=0;
-			timer2.stop();
-			transponder->tune();
-		}
-		else if ( ++tries > 2 && tries < 4 )
-			updateTransponder();
+		lostlockcount=0;
+		checkLockTimer.start(750,true);
 	}
 }
 
 void eFrontend::checkRotorLock()
 {
-	if ( Locked() )
+	if (!transponder)
+		return;
+	if (type==eSystemInfo::feSatellite)
 	{
-		curRotorPos=1000;
-		eApp->exit_loop();
+		eSatellite * sat = eTransponderList::getInstance()->findSatellite(transponder->satellite.orbital_position);
+		if (sat)
+		{
+			eLNB *lnb = sat->getLNB();
+			if (lnb && lnb->getDiSEqC().DiSEqCMode == eDiSEqC::V1_2 && curRotorPos>=10000 )
+			{
+				int snr = SNR();
+				eDebug("[FE] checkRotorLock SNR is %d... old was %d", snr, curRotorPos-=10000 );
+				if ( Locked() && abs(curRotorPos - snr) < 2000 )
+				{
+					eDebug("[FE] rotor has stopped..");
+					curRotorPos=newPos;
+					/*emit*/ tunedIn(transponder, 0);
+//					eDebug("!!!!!!!!!!!!!!!! TUNED IN OK 1 !!!!!!!!!!!!!!!!");
+					if ( !eDVB::getInstance()->getScanAPI() )
+					{
+						eDebug("[FE] start update transponder data timer");
+						updateTransponderTimer.start(2000,true);
+						checkLockTimer.start(750,true);
+//						eDebug("ROTOR STOPPED 2");
+						s_RotorStopped();
+					}
+					return;
+				}
+				else
+				{
+					eDebug("[FE] rotor already running");
+					curRotorPos=10000;
+					if ( eDVB::getInstance()->getScanAPI() )
+					{
+//						eDebug("!!!!!!!!!!!!!!!! TUNED IN EAGAIN 1 !!!!!!!!!!!!!!!!");
+						/*emit*/ tunedIn(transponder, -EAGAIN);
+					}
+					else
+						setFrontend();
+					return;
+				}
+			}
+		}
 	}
-	else if ( curRotorPos < (eDVB::getInstance()->getScanAPI()?1010:1040) )
+}
+
+int eFrontend::setFrontend()
+{
+	bool doSavePower=false;
+	eServiceHandler *handler= 
+		eServiceInterface::getInstance()->getService();
+	if ( handler && handler->getID() != eServiceReference::idDVB )
 	{
-		++curRotorPos;
-		transponder->tune();
-		if ( curRotorPos == 1001 )
-			timer3.start(1000,true);
-		else
-			timer3.start(3000,true);
+		if ( !eDVB::getInstance()->recorder )
+			doSavePower=true;
+	}
+	if ( doSavePower )
+	{
+		eDebug("no running dvb service.. disable frontend (2)");
+		savePower();
 	}
 	else
 	{
-		curRotorPos=1000;
-		eApp->exit_loop();
+		if (ioctl(fd, FE_SET_FRONTEND, &front)<0)
+		{
+			eDebug("FE_SET_FRONTEND failed (%m)");
+			return -1;
+		}
+		eDebug("FE_SET_FRONTEND OK");
 	}
+	return 0;
+}
+
+void eFrontend::readFeEvent(int what)
+{
+#if HAVE_DVB_API_VERSION < 3
+	FrontendEvent ev;
+	memset(&ev, 0, sizeof(FrontendEvent));
+#else
+	dvb_frontend_event ev;
+	memset(&ev, 0, sizeof(dvb_frontend_event));
+#endif
+	if ( ::ioctl(fd, FE_GET_EVENT, &ev) < 0 )
+	{
+		eDebug("FE_GET_EVENT failed(%m)");
+		return;
+	}
+	if ( !transponder )
+	{
+		eDebug("[FE] no transponder .. ignore FE Events");
+		return;
+	}
+#if HAVE_DVB_API_VERSION < 3 
+	switch (ev.type)
+	{
+		case FE_COMPLETION_EV:
+#else
+		if ( ev.status & FE_HAS_LOCK )
+#endif
+		{
+			eDebug("[FE] evt. locked");
+			if (type==eSystemInfo::feSatellite)
+			{
+				eSatellite * sat = eTransponderList::getInstance()->findSatellite(transponder->satellite.orbital_position);
+				if (sat)
+				{
+					eLNB *lnb = sat->getLNB();
+					if (lnb && lnb->getDiSEqC().DiSEqCMode == eDiSEqC::V1_2)
+					{
+						if (curRotorPos==5000) // rotor running in input power mode
+						{
+							eDebug("[FE] ignore .. rotor is running");
+							return;
+						}
+						if (curRotorPos==10000)
+						{
+							curRotorPos+=SNR();
+							checkRotorLockTimer.start(2000,true);   // check SNR in 2 sek
+							eDebug("[FE] start check locktimer cur snr is %d", curRotorPos );
+							return;
+						}
+					}
+				}
+			}
+			if ( !eDVB::getInstance()->getScanAPI() )
+			{
+				eDebug("[FE] start update transponder data timer");
+				updateTransponderTimer.start(2000,true);
+				checkLockTimer.start(750,true);
+			}
+//			eDebug("!!!!!!!!!!!!!!!! TUNED IN OK 2 !!!!!!!!!!!!!!!!");
+			/*emit*/ tunedIn(transponder, 0);
+			return;
+		}
+
+#if HAVE_DVB_API_VERSION < 3
+		case FE_FAILURE_EV:
+#else
+		else if ( ev.status & FE_TIMEDOUT )
+#endif
+		{
+			eDebug("[FE] evt. failure");
+			if (type==eSystemInfo::feSatellite)
+			{
+				eSatellite * sat = eTransponderList::getInstance()->findSatellite(transponder->satellite.orbital_position);
+				if (sat)
+				{
+					eLNB *lnb = sat->getLNB();
+					if ( lnb && lnb->getDiSEqC().DiSEqCMode == eDiSEqC::V1_2 )
+					{
+						if (curRotorPos==5000) // rotor running in input power mode
+						{
+							eDebug("[FE] ignore .. rotor is running");
+							return;
+						}
+						if ( curRotorPos==10000 )
+						{
+							eDebug("[FE] RotorPos uninitialized (%d)", tries);
+							// check every transponder two times..
+							if (eDVB::getInstance()->getScanAPI() && ++tries > 1)
+							{
+								tries=0;
+								eDebug("[FE] don't set this TP to error");
+//								eDebug("!!!!!!!!!!!!!!!! TUNED IN EAGAIN 2 !!!!!!!!!!!!!!!!");
+								/*emit*/ tunedIn(transponder, -EAGAIN);  // nextTransponder
+								return;
+							}
+							setFrontend();
+							return;
+						}
+					}
+				}
+			}
+//			eDebug("!!!!!!!!!!!!!!!! TUNED IN ETIMEDOUT 1 !!!!!!!!!!!!!!!!");						
+			if ( !eDVB::getInstance()->getScanAPI() )
+			{
+				if (++lostlockcount > 5)
+				{
+					needreset=2;
+					lostlockcount=0;
+					if ( transponder )
+						transponder->tune();
+				}
+				else
+					setFrontend();
+			}
+			/*emit*/ tunedIn(transponder, -ETIMEDOUT);
+			return;
+		}
+#if HAVE_DVB_API_VERSION < 3
+		default:
+			eDebug("[FE] unhandled event (type %d)", ev.type);
+	}
+#endif
 }
 
 void eFrontend::InitDiSEqC()
 {
 	lastcsw = lastSmatvFreq = lastRotorCmd = lastucsw = lastToneBurst = -1;
 	lastLNB=0;
+	transponder=0;
 	std::list<eLNB> &lnbs = eTransponderList::getInstance()->getLNBs();
 	for (std::list<eLNB>::iterator it(lnbs.begin()); it != lnbs.end(); ++it)
 		if ( it->getDiSEqC().DiSEqCMode != eDiSEqC::NONE &&
@@ -135,54 +307,9 @@ void eFrontend::InitDiSEqC()
 	}
 }
 
-void eFrontend::timeout()
-{
-	bool inScan = eDVB::getInstance()->getScanAPI() ? true : false;
-	if (Locked())
-	{
-		eDebug("+");
-		state=stateIdle;
-		needreset=0;
-		if (!inScan)
-		{
-			tries=0;
-			timer2.start(1000);
-		}
-		/*emit*/ tunedIn(transponder, 0);
-	}
-	else
-	{
-		if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite
-			&& inScan && lastLNB )
-		{
-			if ( !transponder->satellite.useable(lastLNB) )
-				tries=1;
-		}
-
-		if (--tries)
-		{
-			eDebugNoNewLine("-: %x,", Status());
-			timer->start(100, true);
-		}
-		else
-		{
-			eDebug("couldn't lock. (state: %x)", Status());
-			state=stateIdle;
-			/*emit*/ tunedIn(transponder, -ETIMEDOUT);
-			timer2.stop();
-			if (!inScan)
-			{
-				if ( transponder )
-					transponder->tune();
-				++needreset;
-			}
-		}
-	}
-}
-
 eFrontend::~eFrontend()
 {
-	delete timer;
+	delete sn;
 	if (fd>=0)
 		::close(fd);
 #if HAVE_DVB_API_VERSION < 3
@@ -629,9 +756,6 @@ int eFrontend::RotorUseTimeout(eSecCmdSequence& seq, eLNB *lnb )
 #else
 	dvb_diseqc_master_cmd *commands = seq.commands;
 #endif
-	double TimePerDegree=1000/lnb->getDiSEqC().DegPerSec; // msec
-	int startDelay=800;  // we use hardcoded start delay of 800msec
-
 	// we send first the normal DiSEqC Switch Cmds
 	// and then the Rotor CMD
 	seq.numCommands--;
@@ -668,20 +792,7 @@ int eFrontend::RotorUseTimeout(eSecCmdSequence& seq, eLNB *lnb )
 	else
 		eDebug("Rotor Cmd is sent");
 
-	/* emit */ s_RotorRunning(newPos);
-	if ( curRotorPos == 1000 ) // uninitialized
-	{
-		eRCInput::getInstance()->lock();
-		timer3.start(0,true);
-		eApp->enter_loop();
-		eDebug("raus");
-		eRCInput::getInstance()->unlock();
-	}
-	else
-		usleep( (int)( abs(newPos - curRotorPos) * TimePerDegree * 100) + startDelay );
-
-	/* emit */ s_RotorStopped();
-	curRotorPos = newPos;
+	tries=0;
 	return 0;
 }
 
@@ -774,7 +885,11 @@ void eFrontend::RotorStartLoop()
 		if ( abs(runningPowerInput-idlePowerInput ) >= DeltaA ) // rotor running ?
 		{
 			eDebug("Rotor is Running");
-			/* emit */ s_RotorRunning( newPos );
+			if ( !eDVB::getInstance()->getScanAPI() )
+			{
+//				eDebug("ROTOR RUNNING EMIT");
+				/* emit */ s_RotorRunning( newPos );
+			}
 
 			// set rotor running timeout  // 150 sek
 			gettimeofday(&rotorTimeout,0);
@@ -824,7 +939,8 @@ void eFrontend::RotorFinish(bool tune)
 		eDebug("FE_SET_VOLTAGE failed (%m)");
 	curVoltage = voltage;
 #endif
-	if ( tune )
+	curRotorPos=newPos;
+	if ( tune && transponder )
 		transponder->tune();
 }
 
@@ -1087,7 +1203,7 @@ double calcSatHourangle( double Azimuth, double Elevation, double Declination, d
 
 void eFrontend::updateTransponder()
 {
-	if ( transponder->satellite.valid && eSystemInfo::getInstance()->canUpdateTransponder())
+	if ( Locked() && transponder && transponder->satellite.valid && eSystemInfo::getInstance()->canUpdateTransponder())
 	{
 #if HAVE_DVB_API_VERSION < 3
 		FrontendParameters front;
@@ -1130,7 +1246,7 @@ void eFrontend::updateTransponder()
 #else
 			transponder->satellite.inversion=front.parameters.inversion;
 #endif
-//				eDebug("NEW INVERSION = %d", front.Inversion );
+//			eDebug("NEW INVERSION = %d", front.Inversion );
 		}
 	}
 }
@@ -1147,35 +1263,30 @@ int eFrontend::tune(eTransponder *trans,
 //	eDebug("op = %d", trans->satellite.orbital_position );
 	tries=0;
 	int finalTune=1;
-#if HAVE_DVB_API_VERSION < 3
-	FrontendParameters front;
-#else
-	struct dvb_frontend_parameters front;
-#endif
 	eSection::abortAll();
-	timer->stop();
+
+	lostlockcount=0;
+	checkRotorLockTimer.stop();
+	checkLockTimer.stop();
+	updateTransponderTimer.stop();
+
+	if ( curRotorPos > 10000 )
+		curRotorPos = 10000;
+
+//	eDebug("ROTOR STOPPED 1");
+	/* emit */ s_RotorStopped();
 
 	if ( rotorTimer1.isActive() || rotorTimer2.isActive() )
 	{
-		eDebug("Switch while running rotor... send stop..");
-		/* emit */ s_RotorStopped();
+		eDebug("Switch ... but running rotor... send stop..");
 		rotorTimer1.stop();
 		rotorTimer2.stop();
 		// ROTOR STOP
 		sendDiSEqCCmd( 0x31, 0x60 );
 		sendDiSEqCCmd( 0x31, 0x60 );
 		lastRotorCmd=-1;
+		curRotorPos=10000;
 	}
-
-	if (state==stateTuning)
-	{
-		state=stateIdle;
-		if (transponder)
-			/*emit*/ tunedIn(transponder, -ECANCELED);
-	}
-
-	if (state==stateTuning)
-		return -EBUSY;
 
 	if (needreset > 1)
 	{
@@ -1203,8 +1314,16 @@ int eFrontend::tune(eTransponder *trans,
 					lnb->getDiSEqC().uncommitted_cmd : lastucsw),
 				ToneBurst = (lnb->getDiSEqC().MiniDiSEqCParam ?
 					lnb->getDiSEqC().MiniDiSEqCParam : lastToneBurst),
-				RotorCmd = lastRotorCmd;
+				RotorCmd = lastRotorCmd,
+				sendRotorCmd=0;
 //				SmatvFreq = -1;
+
+		if ( !transponder->satellite.useable( lnb ) )
+		{
+//			eDebug("!!!!!!!!!!!!!!!! TUNED IN ETIMEDOUT 2 !!!!!!!!!!!!!!!!");
+			/*emit*/ tunedIn(transponder, -ETIMEDOUT);
+			return 0;
+		}
 
 		eSecCmdSequence seq;
 #if HAVE_DVB_API_VERSION < 3
@@ -1335,7 +1454,7 @@ int eFrontend::tune(eTransponder *trans,
 			}
 #endif
 
-			if ( RotorCmd != lastRotorCmd )  // rotorCmd must sent?
+			if ( RotorCmd != lastRotorCmd || curRotorPos >= 5000 )  // rotorCmd must sent?
 			{
 				cmdCount=1; // this is the RotorCmd
 				if ( ucsw != lastucsw )
@@ -1383,6 +1502,7 @@ int eFrontend::tune(eTransponder *trans,
 					commands[cmdCount-1].msg_len=4;
 #endif
 				}
+				sendRotorCmd++;
 			}
 		}
 			
@@ -1513,8 +1633,6 @@ int eFrontend::tune(eTransponder *trans,
 			eDebug("send no DiSEqC");
 			seq.commands=0;
 		}
-		else
-			state=stateDiSEqC;
 
 		seq.numCommands=cmdCount;
 		eDebug("%d DiSEqC cmds to send", cmdCount);
@@ -1537,7 +1655,7 @@ int eFrontend::tune(eTransponder *trans,
 		}
      
 			// no DiSEqC related Stuff
-
+		
 		// calc Frequency
 		int local = Frequency - ( Frequency > lnb->getLOFThreshold() ? lnb->getLOFHi() : lnb->getLOFLo() );
 #if HAVE_DVB_API_VERSION < 3
@@ -1545,6 +1663,7 @@ int eFrontend::tune(eTransponder *trans,
 #else
 		front.frequency = abs(local);
 #endif
+
 		// set Continuous Tone ( 22 Khz... low - high band )
 		if ( (swParams.HiLoSignal == eSwitchParameter::ON) || ( (swParams.HiLoSignal == eSwitchParameter::HILO) && (Frequency > lnb->getLOFThreshold()) ) )
 			seq.continuousTone = eSecCmdSequence::TONE_ON;
@@ -1565,9 +1684,7 @@ int eFrontend::tune(eTransponder *trans,
 		seq.commands=commands;
 
 		// handle DiSEqC Rotor
-		if ( curRotorPos > 1000 )
-			eDebug("check Lock in rotor krams");
-		else if ( lastRotorCmd != RotorCmd && !noRotorCmd )
+		if ( sendRotorCmd )
 		{
 //			eDebug("handle DISEqC Rotor.. cmdCount = %d", cmdCount);
 /*			eDebug("0x%02x,0x%02x,0x%02x,0x%02x,0x%02x",
@@ -1579,8 +1696,7 @@ int eFrontend::tune(eTransponder *trans,
 
 			// drive rotor with 18V when we can measure inputpower
 			// or we know which orbital pos currently is selected
-			if ( lnb->getDiSEqC().useRotorInPower&1
-				|| curRotorPos < 1000 )
+			if ( lnb->getDiSEqC().useRotorInPower&1 )
 				seq.voltage = eSecCmdSequence::VOLTAGE_18;
 			else
 				seq.voltage = voltage;
@@ -1592,14 +1708,20 @@ int eFrontend::tune(eTransponder *trans,
 
 			if ( lnb->getDiSEqC().useRotorInPower&1 )
 			{
+				curRotorPos=5000;
 				DeltaA=(lnb->getDiSEqC().useRotorInPower & 0x0000FF00) >> 8;
 				RotorUseInputPower(seq, lnb );
 				finalTune=0;
 			}
 			else
 			{
+				curRotorPos=10000;
+				if ( !eDVB::getInstance()->getScanAPI() )
+				{
+					eDebug("ROTOR RUNNING EMIT");
+					/* emit */ s_RotorRunning( newPos );
+				}
 				RotorUseTimeout(seq, lnb );
-				RotorFinish(false);  // set correct voltage...
 			}
 		}
 		else if ( lastucsw != ucsw || ( ToneBurst && lastToneBurst != ToneBurst) )
@@ -1640,76 +1762,64 @@ send:
 		delete [] commands;
 	}
 
-	if (finalTune)
+#if HAVE_DVB_API_VERSION < 3
+	front.Inversion = Inversion;
+#else
+	front.inversion = Inversion;
+#endif
+	switch (type)
 	{
+		case eSystemInfo::feCable:
+			eDebug("Cable Frontend detected");
 #if HAVE_DVB_API_VERSION < 3
-		front.Inversion = Inversion;
+			front.Frequency = Frequency;
+			front.u.qam.QAM=QAM;
+			front.u.qam.FEC_inner=FEC_inner;
+			front.u.qam.SymbolRate=SymbolRate;
 #else
-		front.inversion = Inversion;
+			front.frequency = Frequency * 1000;
+			front.u.qam.modulation=QAM;
+			front.u.qam.fec_inner=FEC_inner;
+			front.u.qam.symbol_rate=SymbolRate;
 #endif
-		switch (type)
-		{
-			case eSystemInfo::feCable:
-				eDebug("Cable Frontend detected");
+			break;
+		case eSystemInfo::feSatellite:
+			eDebug("Sat Frontend detected");
 #if HAVE_DVB_API_VERSION < 3
-				front.Frequency = Frequency;
-				front.u.qam.QAM=QAM;
-				front.u.qam.FEC_inner=FEC_inner;
-				front.u.qam.SymbolRate=SymbolRate;
+			front.u.qpsk.FEC_inner=FEC_inner;
+			front.u.qpsk.SymbolRate=SymbolRate;
 #else
-				front.frequency = Frequency * 1000;
-				front.u.qam.modulation=QAM;
-				front.u.qam.fec_inner=FEC_inner;
-				front.u.qam.symbol_rate=SymbolRate;
+			front.u.qpsk.fec_inner=FEC_inner;
+			front.u.qpsk.symbol_rate=SymbolRate;
 #endif
-				break;
-			case eSystemInfo::feSatellite:
-				eDebug("Sat Frontend detected");
+			break;
+		case eSystemInfo::feTerrestrial:
+			eDebug("DVB-T Frontend detected");
 #if HAVE_DVB_API_VERSION < 3
-				front.u.qpsk.FEC_inner=FEC_inner;
-				front.u.qpsk.SymbolRate=SymbolRate;
+			// FIXME: v1 has no *_AUTO parameters for DVB-T
+			front.u.ofdm.bandWidth=BANDWIDTH_8_MHZ;	// random
+			front.u.ofdm.HP_CodeRate=FEC_AUTO;
+			front.u.ofdm.LP_CodeRate=FEC_AUTO;
+			front.u.ofdm.Constellation=QAM_16; // random
+			front.u.ofdm.TransmissionMode=TRANSMISSION_MODE_2K; // random
+			front.u.ofdm.guardInterval=GUARD_INTERVAL_1_32;	// random
+			front.u.ofdm.HierarchyInformation=HIERARCHY_NONE; // random
 #else
-				front.u.qpsk.fec_inner=FEC_inner;
-				front.u.qpsk.symbol_rate=SymbolRate;
+			// FIXME: no frontend can handle all these AUTOs
+			front.u.ofdm.bandwidth=BANDWIDTH_AUTO;
+			front.u.ofdm.code_rate_HP=FEC_AUTO;
+			front.u.ofdm.code_rate_LP=FEC_AUTO;
+			front.u.ofdm.constellation=QAM_AUTO;
+			front.u.ofdm.transmission_mode=TRANSMISSION_MODE_AUTO;
+			front.u.ofdm.guard_interval=GUARD_INTERVAL_AUTO;
+			front.u.ofdm.hierarchy_information=HIERARCHY_AUTO;
 #endif
-				break;
-			case eSystemInfo::feTerrestrial:
-				eDebug("DVB-T Frontend detected");
-#if HAVE_DVB_API_VERSION < 3
-				// FIXME: v1 has no *_AUTO parameters for DVB-T
-				front.u.ofdm.bandWidth=BANDWIDTH_8_MHZ;	// random
-				front.u.ofdm.HP_CodeRate=FEC_AUTO;
-				front.u.ofdm.LP_CodeRate=FEC_AUTO;
-				front.u.ofdm.Constellation=QAM_16; // random
-				front.u.ofdm.TransmissionMode=TRANSMISSION_MODE_2K; // random
-				front.u.ofdm.guardInterval=GUARD_INTERVAL_1_32;	// random
-				front.u.ofdm.HierarchyInformation=HIERARCHY_NONE; // random
-#else
-				// FIXME: no frontend can handle all these AUTOs
-				front.u.ofdm.bandwidth=BANDWIDTH_AUTO;
-				front.u.ofdm.code_rate_HP=FEC_AUTO;
-				front.u.ofdm.code_rate_LP=FEC_AUTO;
-				front.u.ofdm.constellation=QAM_AUTO;
-				front.u.ofdm.transmission_mode=TRANSMISSION_MODE_AUTO;
-				front.u.ofdm.guard_interval=GUARD_INTERVAL_AUTO;
-				front.u.ofdm.hierarchy_information=HIERARCHY_AUTO;
-#endif
-				break;
-		}
-		if (ioctl(fd, FE_SET_FRONTEND, &front)<0)
-		{
-			eDebug("FE_SET_FRONTEND failed (%m)");
-			return -1;
-		}
-		eDebug("FE_SET_FRONTEND OK");
+			break;
+	}
 
-		if ( curRotorPos < 1001 )
-		{
-			state=stateTuning;
-			tries=20;
-			timer->start(50, true);
-		}
-  }
+	if (finalTune)
+		return setFrontend();
+
 	return 0;
 }
 
@@ -1751,7 +1861,12 @@ int eFrontend::tune_ofdm(eTransponder *transponder,
 
 int eFrontend::savePower()
 {
-	timer2.stop();
+	transponder=0;
+	checkLockTimer.stop();
+	checkRotorLockTimer.stop();
+	updateTransponderTimer.stop();
+	rotorTimer1.stop();
+	rotorTimer2.stop();
 #if HAVE_DVB_API_VERSION < 3
 	if ( ioctl(fd, FE_SET_POWER_STATE, FE_POWER_OFF) < 0 )
 		eDebug("FE_SET_POWER_STATE failed (%m)");

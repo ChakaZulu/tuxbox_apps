@@ -307,6 +307,8 @@ void gPixmapDC::exec(gOpcode *o)
 		para->renderString(o->parm.renderText->text, o->flags);
 		para->blit(*this, ePoint(0, 0), o->parm.renderText->backgroundColor, o->parm.renderText->foregroundColor);
 		para->destroy();
+		if (o->parm.renderText->text)
+			free(o->parm.renderText->text);
 		delete o->parm.renderText;
 		break;
 	}

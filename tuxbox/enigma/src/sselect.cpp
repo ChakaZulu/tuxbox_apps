@@ -1812,10 +1812,10 @@ void eServiceSelector::setPath(const eServicePath &newpath, const eServiceRefere
 
 void eServiceSelector::removeCurrent(bool selNext)
 {
-	services->beginAtomic();
 	eListBoxEntryService *cur = services->getCurrent();
 	if ( !cur )
 		return;
+	services->beginAtomic();
 	if ( selNext )
 		services->goNext();
 	else

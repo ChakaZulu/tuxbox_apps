@@ -56,13 +56,28 @@ public:
 	eTransponder &getTransponder() { return transponder; }
 };
 
+class tsTryLock: public eWidget
+{
+	eButton *b_abort;
+	eLabel *l_status;
+	int ret, inProgress;
+	tpPacket *packet;
+	std::list<eTransponder>::iterator current_tp;
+	void dvbEvent(const eDVBEvent &event);
+	int nextTransponder(int next);
+
+	int eventHandler(const eWidgetEvent &);
+public:
+	tsTryLock(eWidget *parent, tpPacket *tppacket, eString ttext);
+};
+
 class tsAutomatic: public eWidget
 {
 	eButton *b_start;
 	eComboBox *l_network;
 	eCheckbox *c_onlyFree, *c_nocircular;
 	eLabel *l_status;
-	std::list<eTransponder>::iterator current_tp, last_tp;
+	std::list<eTransponder>::iterator current_tp, last_tp, first_tp;
 	int automatic;
 	int ret;
 	void start();

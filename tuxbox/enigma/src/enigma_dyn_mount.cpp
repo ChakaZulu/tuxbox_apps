@@ -1,3 +1,4 @@
+#ifdef ENABLE_DYN_MOUNT
 #include <map>
 #include <time.h>
 #include <fcntl.h>
@@ -383,3 +384,4 @@ void ezapMountInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 	dyn_resolver->addDyn("GET", "/control/unmountMountPoint", unmountMountPoint, lockWeb);
 }
 
+#endif
