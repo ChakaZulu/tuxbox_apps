@@ -86,15 +86,15 @@ int CFile::getType()
 	{
 		std::string extension;
 		extension = Name.substr(ext_pos + 1, Name.length() - ext_pos);
-		if((strcasecmp(extension.c_str(),"mp3") == 0) || (strcasecmp(extension.c_str(),"m2a") == 0) ||
-			(strcasecmp(extension.c_str(),"mpa") == 0) )
+		if ((strcasecmp(extension.c_str(),"mp3") == 0) || (strcasecmp(extension.c_str(),"m2a") == 0) || 
+		    (strcasecmp(extension.c_str(),"mpa") == 0))
 			return FILE_MP3;
-      if((strcasecmp(extension.c_str(),"m3u") == 0))
-         return FILE_MP3_PLAYLIST;
-		if((strcasecmp(extension.c_str(),"txt") == 0) || (strcasecmp(extension.c_str(),"sh") == 0))
+		if (strcasecmp(extension.c_str(),"m3u") == 0)
+			return FILE_MP3_PLAYLIST;
+		if ((strcasecmp(extension.c_str(),"txt") == 0) || (strcasecmp(extension.c_str(),"sh") == 0))
 			return FILE_TEXT;
-		if((strcasecmp(extension.c_str(),"jpg") == 0) || (strcasecmp(extension.c_str(),"png") == 0) || 
-			(strcasecmp(extension.c_str(),"bmp") == 0) || (strcasecmp(extension.c_str(),"gif") == 0))
+		if ((strcasecmp(extension.c_str(),"jpg") == 0) || (strcasecmp(extension.c_str(),"png") == 0) || 
+		    (strcasecmp(extension.c_str(),"bmp") == 0) || (strcasecmp(extension.c_str(),"gif") == 0))
 			return FILE_PICTURE;
 	}
 	return FILE_UNKNOWN;
@@ -121,20 +121,29 @@ std::string CFile::getPath()			// return complete path including trailing /
 //------------------------------------------------------------------------
 //------------------------------------------------------------------------
 
+bool comparetolower(const char a, const char b)
+{
+	return tolower(a) < tolower(b);
+};
+
 // sort operators
 bool sortByName (const CFile& a, const CFile& b)
 {
-	std::string sa=a.Name;
-	std::string sb=b.Name;
-	std::transform(sa.begin(), sa.end(), sa.begin(), tolower);
-	std::transform(sb.begin(), sb.end(), sb.begin(), tolower);
-	
-	if(sa == sb)
+	if (std::lexicographical_compare(a.Name.begin(), a.Name.end(), b.Name.begin(), b.Name.end(), comparetolower))
+		return true;
+
+	if (std::lexicographical_compare(b.Name.begin(), b.Name.end(), a.Name.begin(), a.Name.end(), comparetolower))
+		return false;
+
+	return a.Mode < b.Mode;
+/*
+	int result = __gnu_cxx::lexicographical_compare_3way(a.Name.begin(), a.Name.end(), b.Name.begin(), b.Name.end(), comparetolower);
+
+	if (result == 0)
 		return a.Mode < b.Mode;
 	else
-	{
-		return sa < sb;
-	}
+		return result < 0;
+*/
 }
 
 bool sortByType (const CFile& a, const CFile& b)
@@ -202,7 +211,7 @@ CFileBrowser::~CFileBrowser()
 
 CFile *CFileBrowser::getSelectedFile()
 {
-	if ((filelist.size() > 0) && (filelist[selected].Name.length() > 0))
+	if ((!(filelist.empty())) && (!(filelist[selected].Name.empty())))
 		return &filelist[selected];
 	else
 		return NULL;
@@ -500,7 +509,7 @@ bool CFileBrowser::exec(std::string Dirname)
 		}
 		else if ( msg == CRCInput::RC_down )
 		{
-			if (filelist.size() != 0)
+			if (!(filelist.empty()))
 			{
 				int prevselected=selected;
 				selected = (selected + 1) % filelist.size();
@@ -520,7 +529,7 @@ bool CFileBrowser::exec(std::string Dirname)
 		}
 		else if ( msg == CRCInput::RC_right )
 		{
-			if (filelist.size() != 0)
+			if (!(filelist.empty()))
 			{
 				if (S_ISDIR(filelist[selected].Mode) && (filelist[selected].getFileName() != ".."))
 					ChangeDir(filelist[selected].Name);
@@ -544,8 +553,7 @@ bool CFileBrowser::exec(std::string Dirname)
 		}
 		else if (msg == CRCInput::RC_ok)
 		{
-			
-			if (filelist.size() != 0)
+			if (!(filelist.empty()))			
 			{
 				if (filelist[selected].getFileName() == "..")
 					ChangeDir("..");
@@ -763,17 +771,17 @@ void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
 				g_Font[SNeutrinoSettings::FONT_TYPE_FILEBROWSER_ITEM]->RenderString(x + width - 180 , ypos+ fheight, 80, modestring, color, 0, true); // UTF-8
 
 				char tmpstr[256];
-				if((double)actual_file->Size / (1024. * 1024 * 1024) > 1)
+				if (actual_file->Size >= 1073741824LL)
 				{
 					snprintf(tmpstr,sizeof(tmpstr),"%.4gG", 
 						 (double)actual_file->Size / (1024. * 1024 * 1024));
 				}
-				else if((double)actual_file->Size / (1024. * 1024) > 1)
+				else if (actual_file->Size >= 1048576LL)
 				{
 					snprintf(tmpstr,sizeof(tmpstr),"%.4gM", 
 						 (double)actual_file->Size / (1024. * 1024));
 				}
-				else if((double)actual_file->Size / (1024.) > 1)
+				else if (actual_file->Size >= 1024LL)
 				{
 					snprintf(tmpstr,sizeof(tmpstr),"%.4gK", 
 						 (double)actual_file->Size / (1024.));
@@ -832,7 +840,7 @@ void CFileBrowser::paintFoot()
 
 	frameBuffer->paintBoxRel(x, y+height- (foheight ), width, (foheight ), COL_MENUHEAD);
 
-	if(filelist.size()>0)
+	if (!(filelist.empty()))
 	{
 		std::string nextsort;
 		type = filelist[selected].getType();
