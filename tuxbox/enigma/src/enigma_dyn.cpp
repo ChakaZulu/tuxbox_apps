@@ -60,7 +60,7 @@
 
 using namespace std;
 
-#define WEBIFVERSION "2.4.2"
+#define WEBIFVERSION "2.5.0"
 
 #define KEYBOARDNORMAL 0
 #define KEYBOARDVIDEO 1
@@ -70,7 +70,7 @@ int keyboardMode = KEYBOARDNORMAL;
 int pdaScreen = 0;
 int screenWidth = 1024;
 eString lastTransponder;
-bool streamingActive;
+bool streamingActive = false;
 
 eString playStatus = "Off";
 
@@ -3331,6 +3331,8 @@ static eString pda_root(eString request, eString dirpath, eString opts, eHTTPCon
 static eString web_root(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	eString result;
+
+	streamingActive = false;
 
 	std::map<eString,eString> opt = getRequestOptions(opts, '&');
 	content->local_header["Content-Type"]="text/html; charset=utf-8";

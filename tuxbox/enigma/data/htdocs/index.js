@@ -35,6 +35,8 @@ function switchChannel(xy, bouquet, channel)
 		else
 			document.location = "?path="+xy+"&mode=zap&zapmode=4&zapsubmode=1";
 
+		if (parent.data.streaming == "1")
+			setTimeout("vlc()", 2500);
 		setTimeout("parent.data.location.reload()", 2000);
 		setTimeout("parent.channavi.location.reload()", 2000);
 	}
