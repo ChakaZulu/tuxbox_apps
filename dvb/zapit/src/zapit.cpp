@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.267 2002/10/19 01:22:28 Zwen Exp $
+ * $Id: zapit.cpp,v 1.268 2002/10/28 22:47:21 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -60,7 +60,7 @@
 /* the conditional access module */
 CCam * cam = NULL;
 /* the configuration file */
-CConfigFile * config = NULL;
+CConfigFile config(',');
 /* the event server */
 CEventServer * eventServer = NULL;
 /* the dvb audio device */
@@ -152,11 +152,14 @@ void CZapitDestructor()
 	if (dmx_video_fd != -1)
 		close(dmx_video_fd);
 
-	delete cam;
-	delete video;
-	delete audio;
-	delete frontend;
-	delete config;
+	if (cam != NULL)
+	    delete cam;
+	if (video != NULL)
+	    delete video;
+	if (audio != NULL)
+	    delete audio;
+	if (frontend != NULL)
+	    delete frontend;
 
 	// remove this in class
 	exit(0);
@@ -179,19 +182,19 @@ void save_settings (bool write)
 {
 	if (channel != NULL)
 	{
-		config->setInt32("lastChannelMode", (currentMode & RADIO_MODE) ? 1 : 0);
+		config.setInt32("lastChannelMode", (currentMode & RADIO_MODE) ? 1 : 0);
 
 		// now save the lowest channel number with the current channel_id
 		int c = ((currentMode & RADIO_MODE) ? bouquetManager->radioChannelsBegin() : bouquetManager->tvChannelsBegin()).getLowestChannelNumberWithChannelID(channel->getChannelID());
 		if (c >= 0)
-			config->setInt32((currentMode & RADIO_MODE) ? "lastChannelRadio" : "lastChannelTV", c);
+			config.setInt32((currentMode & RADIO_MODE) ? "lastChannelRadio" : "lastChannelTV", c);
 	}
 
 	if (write)
 	{
-		config->setInt32("diseqcRepeats", frontend->getDiseqcRepeats());
-		config->setInt32("diseqcType", frontend->getDiseqcType());
-		config->saveConfig(CONFIGFILE);
+		config.setInt32("diseqcRepeats", frontend->getDiseqcRepeats());
+		config.setInt32("diseqcType", frontend->getDiseqcType());
+		config.saveConfig(CONFIGFILE);
 	}
 }
 
@@ -199,12 +202,12 @@ CZapitClient::responseGetLastChannel load_settings()
 {
 	CZapitClient::responseGetLastChannel lastchannel;
 
-	if (config->getInt32("lastChannelMode", 0))
+	if (config.getInt32("lastChannelMode", 0))
 		lastchannel.mode = 'r';
 	else
 		lastchannel.mode = 't';
 
-	lastchannel.channelNumber = config->getInt32((currentMode & RADIO_MODE) ? "lastChannelRadio" : "lastChannelTV", 0);
+	lastchannel.channelNumber = config.getInt32((currentMode & RADIO_MODE) ? "lastChannelRadio" : "lastChannelTV", 0);
 
 	return lastchannel;
 }
@@ -1026,7 +1029,7 @@ int main (int argc, char **argv)
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.267 2002/10/19 01:22:28 Zwen Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.268 2002/10/28 22:47:21 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1063,9 +1066,7 @@ int main (int argc, char **argv)
 	curr_sat = -1;
 
 	/* load configuration */
-	config = new CConfigFile(',');
-
-	if (!config->loadConfig(CONFIGFILE))
+	if (!config.loadConfig(CONFIGFILE))
 	{
 		/* set defaults if no configuration file exists */
 		printf("[zapit] %s not found\n", CONFIGFILE);
@@ -1098,17 +1099,17 @@ int main (int argc, char **argv)
 	{
 		char tmp[16];
 
-		frontend->setDiseqcType((diseqc_t) config->getInt32("diseqcType", NO_DISEQC));
-		frontend->setDiseqcRepeats(config->getInt32("diseqcRepeats", 0));
+		frontend->setDiseqcType((diseqc_t) config.getInt32("diseqcType", NO_DISEQC));
+		frontend->setDiseqcRepeats(config.getInt32("diseqcRepeats", 0));
 
 		for (i = 0; i < MAX_LNBS; i++)
 		{
 			/* low offset */
 			sprintf(tmp, "lnb%d_OffsetLow", i);
-			frontend->setLnbOffset(false, i, config->getInt32(tmp, 9750000));
+			frontend->setLnbOffset(false, i, config.getInt32(tmp, 9750000));
 			/* high offset */
 			sprintf(tmp, "lnb%d_OffsetHigh", i);
-			frontend->setLnbOffset(true, i, config->getInt32(tmp, 10600000));
+			frontend->setLnbOffset(true, i, config.getInt32(tmp, 10600000));
 		}
 	}
 

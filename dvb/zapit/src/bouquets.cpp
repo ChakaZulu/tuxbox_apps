@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.70 2002/10/12 23:14:20 obi Exp $
+ * $Id: bouquets.cpp,v 1.71 2002/10/28 22:47:21 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -35,7 +35,7 @@
 #include <zapit/xmlinterface.h>
 
 extern tallchans allchans;   //  defined in zapit.cpp
-extern CConfigFile * config; //  defined in zapit.cpp
+extern CConfigFile config;   //  defined in zapit.cpp
 
 /**** class CBouquet ********************************************************/
 
@@ -337,7 +337,7 @@ void CBouquetManager::renumServices()
 {
 	deleteBouquet(remainChannels);
 	
-	if (config->getBool("makeRemainingChannelsBouquet", true))
+	if (config.getBool("makeRemainingChannelsBouquet", true))
 	    makeRemainingChannelsBouquet();
 
 	storeBouquets();
