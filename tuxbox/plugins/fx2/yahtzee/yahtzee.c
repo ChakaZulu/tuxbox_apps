@@ -12,6 +12,7 @@
 #include <colors.h>
 #include <pics.h>
 #include <pig.h>
+#include <fcntl.h>
 
 #define LOGO_X			600
 #define LOGO_Y			30
@@ -20,6 +21,13 @@ extern	int		doexit;
 
 extern	unsigned short	actcode;
 extern	unsigned short	realcode;
+
+typedef struct _HScore
+{
+	char	name[12];
+	long	points;
+	char	flag;
+} HScore;
 
 typedef struct _Player
 {
@@ -596,6 +604,9 @@ void	DrawWinner( void )
 	char			text[ 64 ];
 	int				w=0;
 	int				i;
+	int				n;
+	HScore			hsc[8];
+	int				fd;
 
 	Fx2StopPig();
 
@@ -622,10 +633,85 @@ void	DrawWinner( void )
 	FBFlushGrafic();
 #endif
 
+/* load HScore */
+	fd = open( "/var/games/yahtzee.hscore", O_RDONLY );
+	if ( fd == -1 )
+	{
+		for( i=0;i<8;i++)
+		{
+			strcpy(hsc[i].name,"-");
+			hsc[i].points=0;
+			hsc[i].flag=0;
+		}
+	}
+	else
+	{
+		read( fd, hsc, sizeof(hsc) );
+		close(fd);
+		for( i=0;i<8;i++)
+			hsc[i].flag=0;
+	}
+
+/* insert into hscore */
+	for( n=0; n < numplayers; n++ )
+	{
+		for( i=0; i<8; i++ )
+			if ( player[n].nums[16] > hsc[i].points )
+				break;
+		if ( i==8 )
+			continue;
+		if ( i < 7 )
+			memmove( hsc+i+1,hsc+i,sizeof(HScore)*(7-i) );
+		strcpy(hsc[i].name,player[n].name);
+		hsc[i].points=player[n].nums[16];
+		hsc[i].flag=1;
+	}
+/* save hscore */
+	fd = open( "/var/games/yahtzee.hscore", O_CREAT|O_WRONLY, 438 );
+	if ( fd != -1 )
+	{
+		write( fd, hsc, sizeof(hsc) );
+		close(fd);
+	}
+
 	while( realcode != 0xee )
 		RcGetActCode();
 
 	actcode=0xee;
+	i=50;
+	while( !doexit && ( i>0 ))
+	{
+		RcGetActCode();
+		if ( actcode == RC_OK )
+			break;
+		tv.tv_sec = 0;
+		tv.tv_usec = 200000;
+		select( 0, 0, 0, 0, &tv );
+		i--;
+	}
+
+/* show hscore */
+	FBFillRect( 0, 0, 720, 576, BLACK );
+
+	FBDrawString( 220, 32, 64, "HighScore", RED, BLACK );
+	for( i=0; i<8; i++ )
+	{
+		if ( hsc[i].flag )
+			FBFillRect( 88, 120+i*48, 8, 8, YELLOW );
+		FBDrawString( 100, 100+i*48, 48, hsc[i].name, WHITE, 0 );
+		sprintf(text,"%d",hsc[i].points);
+		n = FBDrawString( 400, 100+i*48, 48, text, BLACK, BLACK );
+		FBDrawString( 500-n, 100+i*48, 48, text, WHITE, BLACK );
+	}
+#ifdef USEX
+	FBFlushGrafic();
+#endif
+
+	while( realcode != 0xee )
+		RcGetActCode();
+
+	actcode=0xee;
+	i=0;
 	while( !doexit )
 	{
 		RcGetActCode();
@@ -634,5 +720,13 @@ void	DrawWinner( void )
 		tv.tv_sec = 0;
 		tv.tv_usec = 100000;
 		select( 0, 0, 0, 0, &tv );
+		i++;
+		if ( i==50 )
+		{
+			FBDrawString( 190, 480, 48, "press OK for new game",GRAY,0);
+#ifdef USEX
+			FBFlushGrafic();
+#endif
+		}
 	}
 }
