@@ -45,7 +45,7 @@
 CScanTs::CScanTs()
 {
 	frameBuffer = CFrameBuffer::getInstance();
-	width = 400;
+	width = 500;
 	hheight = g_Fonts->menu_title->getHeight();
 	mheight = g_Fonts->menu->getHeight();
 	height = hheight+8*mheight;		//space for infolines
@@ -78,18 +78,34 @@ int CScanTs::exec(CMenuTarget* parent, string)
 	int ypos=y;
 	frameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
 	ypos= y+ hheight + (mheight >>1);
-	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("scants.transponders").c_str(), COL_MENUCONTENT);
-	ypos+= mheight;
-	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("scants.services").c_str(), COL_MENUCONTENT);
-	ypos+= mheight;
+	int xpos3 = 0;;
 	if (g_info.delivery_system == DVB_S)
 	{	//sat only
 		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("scants.actsatellite").c_str(), COL_MENUCONTENT);
-	}
+		xpos3 = x+20 + g_Fonts->menu->getRenderWidth(g_Locale->getText("scants.actsatellite").c_str());
+}
+	if (g_info.delivery_system == DVB_C)		// maybe add DVB_T later:)
+	{	//cable
+		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("scants.actcable").c_str(), COL_MENUCONTENT);
+		xpos3 = x+20 + g_Fonts->menu->getRenderWidth(g_Locale->getText("scants.actcable").c_str());
+}
+	ypos+= mheight;
+
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("scants.transponders").c_str(), COL_MENUCONTENT);
+	ypos+= mheight;
+
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("scants.frequency").c_str(), COL_MENUCONTENT);
+	ypos+= mheight;
+
+	ypos+= mheight;	//providername
+	ypos+= mheight; // channelname
+
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("scants.servicenames").c_str(), COL_MENUCONTENT);
+	ypos+= mheight;
 
 	int xpos1 = x+20 + g_Fonts->menu->getRenderWidth(g_Locale->getText("scants.transponders").c_str());
 	int xpos2 = x+20 + g_Fonts->menu->getRenderWidth(g_Locale->getText("scants.services").c_str());
-	int xpos3 = x+20 + g_Fonts->menu->getRenderWidth(g_Locale->getText("scants.actsatellite").c_str());
+
 
 	frameBuffer->loadPal("radar.pal", 17, 37);
 	int pos = 0;
@@ -108,7 +124,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 		char cb1[21];
 		sprintf(filename, "radar%d.raw", pos);
 		pos = (pos+1)%10;
-		frameBuffer->paintIcon8(filename, x+300,ypos+15, 17);
+		frameBuffer->paintIcon8(filename, x+400,ypos+15, 17);
 
 		unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd_MS( 250 );
 		msg = CRCInput::RC_nokey;
@@ -120,32 +136,36 @@ int CScanTs::exec(CMenuTarget* parent, string)
 			switch (msg)
 			{
 				case NeutrinoMessages::EVT_SCAN_SATELLITE:
-					frameBuffer->paintBox(xpos3, ypos+ 2* mheight, x+width-105, ypos+ 2* mheight+mheight, COL_MENUCONTENT);
-					g_Fonts->menu->RenderString(xpos3, ypos+ 3*mheight, width, (char*)data, COL_MENUCONTENT);
+					frameBuffer->paintBoxRel(xpos3, ypos+  mheight, x+width-105, mheight, COL_MENUCONTENT);//new position set
+					g_Fonts->menu->RenderString(xpos3, ypos+ 2*mheight, width, (char*)data, COL_MENUCONTENT);
 					delete (unsigned char*) data;
 					break;
-				case NeutrinoMessages::EVT_SCAN_NUM_CHANNELS:
-					sprintf(cb, "%d", data);
-					frameBuffer->paintBox(xpos2, ypos+ mheight, x+width-105, ypos+ mheight+mheight, COL_MENUCONTENT);
-					g_Fonts->menu->RenderString(xpos2, ypos+ 2* mheight, width, cb, COL_MENUCONTENT);
-					break;
+	//todo: merge the follwing 2 cases:
 				case NeutrinoMessages::EVT_SCAN_NUM_TRANSPONDERS:	//willbe obsolete soon
 					sprintf(cb, "%d", data);
-					frameBuffer->paintBox(xpos1, ypos, x+width-105, ypos+mheight, COL_MENUCONTENT);
-					g_Fonts->menu->RenderString(xpos1, ypos+ mheight, width, cb, COL_MENUCONTENT);
+					frameBuffer->paintBoxRel(xpos1, ypos+2*mheight, x+width-105, mheight, COL_MENUCONTENT); //new position set
+					g_Fonts->menu->RenderString(xpos1, ypos+ 3*mheight, width, cb, COL_MENUCONTENT);
 					found_transponder = data;
 					break;
 				case NeutrinoMessages::EVT_SCAN_REPORT_NUM_SCANNED_TRANSPONDERS:
 					if (found_transponder == 0) data = 0;
 					sprintf(cb1, "%d/%d", data,found_transponder);
-					frameBuffer->paintBox(xpos1, ypos, x+width-105, ypos+mheight, COL_MENUCONTENT);
-					g_Fonts->menu->RenderString(xpos1, ypos+ mheight, width, cb1, COL_MENUCONTENT);
+					frameBuffer->paintBoxRel(xpos1, ypos+2*mheight, x+width-105, mheight, COL_MENUCONTENT); // new position set
+					g_Fonts->menu->RenderString(xpos1, ypos+ 3*mheight, width, cb1, COL_MENUCONTENT);
 					break;
+
 				case NeutrinoMessages::EVT_SCAN_PROVIDER:
-					frameBuffer->paintBoxRel(x+ 10, ypos+ 3* mheight+2, width-20, mheight, COL_MENUCONTENT);
-					g_Fonts->menu->RenderString(x+ 10, ypos+ 4* mheight, width-20, (char*)data, COL_MENUCONTENTINACTIVE, 0, true); // UTF-8
+					frameBuffer->paintBoxRel(x+ 10, ypos+ 4* mheight+2, width-20, mheight, COL_MENUCONTENT);
+					g_Fonts->menu->RenderString(x+ 10, ypos+ 5* mheight, width-20, (char*)data, COL_MENUCONTENTINACTIVE, 0, true); // UTF-8
 					delete (unsigned char*) data;
 					break;
+
+				case NeutrinoMessages::EVT_SCAN_NUM_CHANNELS:
+					sprintf(cb, "%d", data);
+					frameBuffer->paintBoxRel(xpos2, ypos+ 7*mheight, x+width-105, mheight , COL_MENUCONTENT);
+					g_Fonts->menu->RenderString(xpos2, ypos+ 8* mheight, width, cb, COL_MENUCONTENT);
+					break;
+
 				case NeutrinoMessages::EVT_SCAN_COMPLETE:
 				case NeutrinoMessages::EVT_SCAN_FAILED:
     					success  = (msg == NeutrinoMessages::EVT_SCAN_COMPLETE);
