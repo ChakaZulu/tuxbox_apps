@@ -4,6 +4,8 @@ noinst_LTLIBRARIES = master.la
 
 master_la_SOURCES = board.c somain.c
 
+master_la_LIBADD = ../lib/libfx2.la
+
 master_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
 install-exec-local:

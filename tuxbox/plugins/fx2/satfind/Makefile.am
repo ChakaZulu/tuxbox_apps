@@ -4,6 +4,8 @@ noinst_LTLIBRARIES = satfind.la
 
 satfind_la_SOURCES = satfind.c
 
+satfind_la_LIBADD = ../lib/libfx2.la
+
 satfind_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
 install-exec-local:

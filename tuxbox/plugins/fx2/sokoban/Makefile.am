@@ -4,6 +4,8 @@ noinst_LTLIBRARIES = soko.la
 
 soko_la_SOURCES = board.c somain.c
 
+soko_la_LIBADD = ../lib/libfx2.la
+
 soko_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
 install-exec-local:

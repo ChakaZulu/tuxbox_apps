@@ -4,6 +4,8 @@ noinst_LTLIBRARIES = mines.la
 
 mines_la_SOURCES = board.c somain.c
 
+mines_la_LIBADD = ../lib/libfx2.la
+
 mines_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
 install-exec-local:
