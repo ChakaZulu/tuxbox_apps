@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicserver.cpp,v 1.8 2003/08/14 02:41:28 obi Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicserver.cpp,v 1.9 2004/04/08 07:19:00 thegoodguy Exp $
  *
  * Basic Server Class Class - The Tuxbox Project
  *
@@ -28,6 +28,7 @@
 
 #include <cstdio>
 
+#include <inttypes.h>
 #include <sys/poll.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -51,6 +52,32 @@ bool CBasicServer::send_data(int fd, const void * data, const size_t size)
         timeout.tv_sec  = SEND_TIMEOUT_IN_SECONDS;
         timeout.tv_usec = 0;
         return ::send_data(fd, data, size, timeout);
+}
+
+void CBasicServer::delete_string(char * data)
+{
+	free((void *)data);
+}
+
+char * CBasicServer::receive_string(int fd)
+{
+	uint8_t length;
+
+	if (receive_data(fd, &length, sizeof(length)))
+	{
+		char * data = (char *)malloc(((size_t)length) + 1);
+		if (receive_data(fd, &data, length))
+		{
+			data[((size_t)length) + 1] = 0; /* add terminating 0 */
+			return data;
+		}
+		else
+		{
+			delete_string(data);
+			return NULL;
+		}
+	}
+	return NULL;
 }
 
 bool CBasicServer::prepare(const char* socketname)

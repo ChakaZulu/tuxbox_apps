@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicclient.cpp,v 1.16 2003/06/29 12:57:48 alexw Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicclient.cpp,v 1.17 2004/04/08 07:19:00 thegoodguy Exp $
  *
  * Basic Client Class - The Tuxbox Project
  *
@@ -27,6 +27,7 @@
 #include "basicmessage.h"
 #include "basicsocket.h"
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -98,6 +99,23 @@ bool CBasicClient::send_data(const char* data, const size_t size)
 		return false;
 	}
 	return true;
+}
+
+bool CBasicClient::send_string(const char* data)
+{
+	uint8_t send_length;
+	size_t length = strlen(data);
+	if (length > 255)
+	{
+		printf("[CBasicClient] string too long - sending only first 255 characters: %s\n", data);
+		send_length = 255;
+	}
+	else
+	{
+		send_length = length;
+	}
+	return (send_data((char *)&send_length, sizeof(send_length)) &&
+		send_data(data, send_length));
 }
 
 bool CBasicClient::receive_data(char* data, const size_t size, bool use_max_timeout)

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.20 2004/03/06 10:41:42 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.21 2004/04/08 07:19:00 thegoodguy Exp $
  *
  * types used for clientlib <-> zapit communication - d-box2 linux project
  *
@@ -186,16 +186,6 @@ class CZapitMessages
 		CZapitClient::channelsOrder order;
 	};
 
-	struct commandAddBouquet
-	{
-		char name[30];
-	};
-
-	struct commandExistsBouquet
-	{
-		char name[30];
-	};
-
 	struct commandExistsChannelInBouquet
 	{
 		unsigned int bouquet;
@@ -223,7 +213,6 @@ class CZapitMessages
 	struct commandRenameBouquet
 	{
 		unsigned int bouquet;
-		char         name[30];
 	};
 
 	struct commandMoveBouquet

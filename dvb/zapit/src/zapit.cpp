@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.349 2004/04/07 19:33:21 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.350 2004/04/08 07:19:00 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -901,9 +901,9 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 
 	case CZapitMessages::CMD_BQ_ADD_BOUQUET:
 	{
-		CZapitMessages::commandAddBouquet msgAddBouquet;
-		CBasicServer::receive_data(connfd, &msgAddBouquet, sizeof(msgAddBouquet));
-		bouquetManager->addBouquet(msgAddBouquet.name);
+		char * name = CBasicServer::receive_string(connfd);
+		bouquetManager->addBouquet(name);
+		CBasicServer::delete_string(name);
 		break;
 	}
 
@@ -919,17 +919,21 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	{
 		CZapitMessages::commandRenameBouquet msgRenameBouquet;
 		CBasicServer::receive_data(connfd, &msgRenameBouquet, sizeof(msgRenameBouquet)); // bouquet & channel number are already starting at 0!
+		char * name = CBasicServer::receive_string(connfd);
 		if (msgRenameBouquet.bouquet < bouquetManager->Bouquets.size())
-			bouquetManager->Bouquets[msgRenameBouquet.bouquet]->Name = msgRenameBouquet.name;
+			bouquetManager->Bouquets[msgRenameBouquet.bouquet]->Name = name;
+		CBasicServer::delete_string(name);
 		break;
 	}
 
 	case CZapitMessages::CMD_BQ_EXISTS_BOUQUET:
 	{
-		CZapitMessages::commandExistsBouquet msgExistsBouquet;
 		CZapitMessages::responseGeneralInteger responseInteger;
-		CBasicServer::receive_data(connfd, &msgExistsBouquet, sizeof(msgExistsBouquet));
-		responseInteger.number = bouquetManager->existsBouquet(msgExistsBouquet.name);
+
+		char * name = CBasicServer::receive_string(connfd);
+		responseInteger.number = bouquetManager->existsBouquet(name);
+		CBasicServer::delete_string(name);
+
 		CBasicServer::send_data(connfd, &responseInteger, sizeof(responseInteger)); // bouquet & channel number are already starting at 0!
 		break;
 	}
@@ -1620,7 +1624,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.349 2004/04/07 19:33:21 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.350 2004/04/08 07:19:00 thegoodguy Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.101 2004/04/07 20:52:08 mws Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.102 2004/04/08 07:19:00 thegoodguy Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -604,11 +604,8 @@ void CZapitClient::setScanBouquetMode(const bouquetMode mode)
 /* adds bouquet at the end of the bouquetlist  */
 void CZapitClient::addBouquet(const char * const name)
 {
-	CZapitMessages::commandAddBouquet msg;
-
-	strncpy(msg.name, name, 30);
-
-	send(CZapitMessages::CMD_BQ_ADD_BOUQUET, (char*)&msg, sizeof(msg));
+	if (send(CZapitMessages::CMD_BQ_ADD_BOUQUET))
+		send_string(name);
 
 	close_connection();
 }
@@ -646,9 +643,9 @@ void CZapitClient::renameBouquet(const unsigned int bouquet, const char * const 
 	CZapitMessages::commandRenameBouquet msg;
 
 	msg.bouquet = bouquet;
-	strncpy(msg.name, newName, 30);
 
-	send(CZapitMessages::CMD_BQ_RENAME_BOUQUET, (char*)&msg, sizeof(msg));
+	if (send(CZapitMessages::CMD_BQ_RENAME_BOUQUET, (char*)&msg, sizeof(msg)))
+		send_string(newName);
 
 	close_connection();
 }
@@ -658,12 +655,10 @@ void CZapitClient::renameBouquet(const unsigned int bouquet, const char * const 
 /* bouquets are numbered starting at 0 */
 signed int CZapitClient::existsBouquet(const char * const name)
 {
-	CZapitMessages::commandExistsBouquet msg;
 	CZapitMessages::responseGeneralInteger response;
 
-	strncpy(msg.name, name, 30);
-
-	send(CZapitMessages::CMD_BQ_EXISTS_BOUQUET, (char*)&msg, sizeof(msg));
+	if (send(CZapitMessages::CMD_BQ_EXISTS_BOUQUET))
+		send_string(name);
 
 	CBasicClient::receive_data((char* )&response, sizeof(response));
 	close_connection();
