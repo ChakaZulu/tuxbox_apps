@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.170 2002/05/04 14:39:57 McClean Exp $
+ * $Id: zapit.cpp,v 1.171 2002/05/04 15:25:25 McClean Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1476,8 +1476,9 @@ void parse_command ()
 				msgCurrentServiceInfo.vdid = channel->getVideoPid();
 				msgCurrentServiceInfo.apid = channel->getAudioPid();
 				msgCurrentServiceInfo.vtxtpid = channel->getTeletextPid();
-				msgCurrentServiceInfo.pcrpid = channel->getPcrPid();;
-
+				msgCurrentServiceInfo.pcrpid = channel->getPcrPid();
+				msgCurrentServiceInfo.tsfrequency = frontend->getFrequency();
+				msgCurrentServiceInfo.polarisation = frontend->getPolarization();
 				send( connfd, &msgCurrentServiceInfo, sizeof(msgCurrentServiceInfo), 0);
 			break;
 
@@ -1886,7 +1887,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.170 2002/05/04 14:39:57 McClean Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.171 2002/05/04 15:25:25 McClean Exp $\n\n");
 
 	if (argc > 1)
 	{

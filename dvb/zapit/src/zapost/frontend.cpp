@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.13 2002/04/24 16:11:54 obi Exp $
+ * $Id: frontend.cpp,v 1.14 2002/05/04 15:25:25 McClean Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -117,6 +117,40 @@ Modulation CFrontend::getModulation (uint8_t modulation)
 	default:
 		return QAM_64;
 	}
+}
+
+unsigned int CFrontend::getFrequency ()
+{
+	if (info->type == FE_QPSK)
+	{
+		if (currentToneMode == SEC_TONE_OFF)
+		{
+			return currentFrequency + lnbOffsetsLow[currentDiseqc];
+		}
+		else
+		{
+			return currentFrequency + lnbOffsetsHigh[currentDiseqc];
+		}
+	}
+	else
+		return currentFrequency;
+}
+
+unsigned char CFrontend::getPolarization ()
+{
+	if (info->type == FE_QPSK)
+	{
+		if (currentVoltage == SEC_VOLTAGE_13)
+		{
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	else
+		return 2;
 }
 
 void CFrontend::selfTest ()
@@ -563,7 +597,20 @@ const bool CFrontend::tuneFrequency (FrontendParameters feparams, uint8_t polari
 		setFrontend(&feparams);
 
 		/* wait for completion */
-		getEvent();
+//stupid workaround for buggy drivers
+		static int mID = -1;
+		if ( mID==-1 )
+		{
+			char strmID[40];
+			strcpy( strmID, getenv("mID") );
+			mID = atoi(strmID);
+		}
+		
+		if ( mID==2 || mID==3 )		//philips || sagem
+			return true;
+		else
+			getEvent();
+//end
 	}
 
 	return tuned;

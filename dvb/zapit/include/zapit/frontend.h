@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.h,v 1.6 2002/04/24 12:11:07 obi Exp $
+ * $Id: frontend.h,v 1.7 2002/05/04 15:25:25 McClean Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -95,6 +95,8 @@ class CFrontend
 		const FrontendParameters *getFrontend ();
 		const bool getEvent ();
 		const FrontendInfo *getInfo ()	{ return info; };
+		unsigned int getFrequency ();
+		unsigned char getPolarization ();
 
 		/* ost sec api */
 		void secSetTone (secToneMode mode);
