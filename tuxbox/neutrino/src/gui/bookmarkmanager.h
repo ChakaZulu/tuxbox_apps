@@ -40,6 +40,9 @@
 #include <vector>
 #include <map>
 
+#include <driver/framebuffer.h>
+#include <gui/widget/menue.h>
+
 #define MAXBOOKMARKS 10
 #define BOOKMARKFILE "/var/tuxbox/config/bookmarks"
 
@@ -60,6 +63,7 @@ class CBookmark
     	void setName(std::string name);                
     	void setUrl(std::string url);
     	void setTime(std::string time);
+
             
 };
 
@@ -71,12 +75,33 @@ class CBookmarkManager
 	std::vector<CBookmark> bookmarks;
 	CConfigFile	bookmarkfile;
 	
+    CFrameBuffer		*frameBuffer;
+	unsigned int		selected;
+	unsigned int		liststart;
+	unsigned int		listmaxshow;
+	int					fheight; // Fonthoehe Timerlist-Inhalt
+	int					theight; // Fonthoehe Timerlist-Titel
+	int                 buttonHeight;
+	bool				visible;			
+	int 			width;
+	int 			height;
+	int 			x;
+	int 			y;
+
+	
 	//int bookmarkCount;
 	bool bookmarksmodified;
 	void readBookmarkFile();
 	void writeBookmarkFile();
 	CBookmark getBookmark();
 	int addBookmark(CBookmark inBookmark);
+	
+    void paintItem(int pos);
+	void paint();
+	void paintHead();
+	void paintFoot();
+	void hide();
+
 
 
  public:
@@ -85,9 +110,13 @@ class CBookmarkManager
 	int createBookmark(std::string name, std::string url, std::string time);
 	int createBookmark(std::string url, std::string time);
 	int createBookmark(CBookmark bookmark);
+	void removeBookmark(int index);
+	void renameBookmark(int index);
 	int getBookmarkCount();
 	int getMaxBookmarkCount();
 	void flush();
+	
+	CBookmark * getBookmark(CMenuTarget* parent);
 };
 
 #endif

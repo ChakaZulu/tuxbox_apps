@@ -750,6 +750,11 @@ movieplayer.goto.h1 = -> absoluter Sprung
 movieplayer.goto.h2 +,- -> relativer Sprung
 movieplayer.wrongvlcversion Funktion ist mit der benutzten Version des VLC nicht möglich
 
+bookmarkmanager.name Bookmarks
+bookmarkmanager.delete Löschen
+bookmarkmanager.rename Umbenennen
+bookmarkmanager.select Auswählen
+
 filebrowser.head Filebrowser
 filebrowser.filter.active Filter an
 filebrowser.filter.inactive Filter aus

@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.73 2004/02/08 14:25:35 thegoodguy Exp $
+  $Id: movieplayer.cpp,v 1.74 2004/02/09 17:12:20 gagga Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -171,7 +171,14 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 		parent->hide ();
 	}
 
-	// set zapit in standby mode
+	CBookmark * theBookmark;
+    if (actionKey=="bookmarkplayback") {
+        isBookmark = true;
+        theBookmark = bookmarkmanager->getBookmark(NULL);
+	}
+	
+	
+    // set zapit in standby mode
 	g_Zapit->setStandby (true);
 
 	// tell neutrino we're in ts_mode
@@ -183,7 +190,7 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 		 getLastMode () /*| NeutrinoMessages::norezap */ );
 
 	// Stop sectionsd
-	g_Sectionsd->setPauseScanning (true);
+	//g_Sectionsd->setPauseScanning (true);
 
     isBookmark=false;
     startfilename = "";
@@ -208,20 +215,27 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
         isPES=true;
         PlayFile();
 	}
-	/*else if (actionKey=="bookmarkplayback") {
-        isTS=true;
+	else if (actionKey=="bookmarkplayback") {
         isBookmark = true;
-        startfilename = "/mnt/movies/040130_152723_00.ts";
-        startposition = 8807424;
-        PlayFile();
-	}*/
-	/*else if (actionKey=="bookmarkplayback") {
-        isBookmark = true;
-        startfilename = "vlc://p:/PREMIERE_NOSTALGIE_Der_gro_e_Wolf_ruft_20040131_0516051.mpg";
-        startposition = 500;
-        PlayStream (STREAMTYPE_FILE);	
-	}*/
-	
+        if (theBookmark != NULL) {
+            startfilename = theBookmark->getUrl();
+            sscanf (theBookmark->getTime().c_str(), "%lld", &startposition);
+            int vlcpos = startfilename.rfind("vlc://");
+            if (vlcpos==0)
+            {
+                PlayStream (STREAMTYPE_FILE);	
+            }
+            else {
+                // TODO check if file is a TS. Not required right now as writing bookmarks is disabled for PES anyway
+                isTS = true;
+                isPES = false;
+                PlayFile();
+            }
+                
+        }
+
+	}
+
 	bookmarkmanager->flush();
 
 	g_Zapit->setStandby (false);
@@ -1537,7 +1551,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		else if (msg == CRCInput::RC_help)
  		{
      		std::string helptext = g_Locale->getText("movieplayer.vlchelp");
-     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.73 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.74 $\n\nMovieplayer (c) 2003, 2004 by gagga";
      		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -1704,7 +1718,7 @@ CMoviePlayerGui::PlayFile (void)
  		else if (msg == CRCInput::RC_help)
  		{
 			std::string fullhelptext = g_Locale->getText("movieplayer.tshelp");
-			fullhelptext += "\nVersion: $Revision: 1.73 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			fullhelptext += "\nVersion: $Revision: 1.74 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else if (msg == CRCInput::RC_left)
