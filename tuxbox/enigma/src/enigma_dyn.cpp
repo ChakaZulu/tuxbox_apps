@@ -818,11 +818,20 @@ public:
 			result += LIGHTGREY;
 		else
 			result += DARKGREY;
-
 		result += "\">";
-		result += button(50, "EPG", GREEN, "javascript:openMultiEPG('" + ref2string(e) + "')");
-		result += eString("<a href=\"/") + "?path=" + ref2string(e) + "\">";
-		result += "&nbsp;&nbsp;&nbsp;";
+
+		if (!(e.flags & eServiceReference::isDirectory))
+		{
+			result += button(50, "EPG", GREEN, "javascript:openEPG('" + ref2string(e) + "')");
+			result += "&nbsp;&nbsp;";
+			result += "<a href=\'javascript:switchChannel(\"" + ref2string(e) + "\")\'>";
+		}
+		else
+		{
+			result += button(50, "EPG", GREEN, "javascript:openMultiEPG('" + ref2string(e) + "')");
+			result += "&nbsp;&nbsp;";
+			result += eString("<a href=\"/")+ "?path=" + ref2string(e) + "\">";
+		}
 
 		eService *service=iface.addRef(e);
 		if (!service)
