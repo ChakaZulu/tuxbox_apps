@@ -645,8 +645,8 @@ int CPLPINInput::handleOthers(neutrino_msg_t msg, neutrino_msg_data_t data)
 int CPLPINInput::exec( CMenuTarget* parent, const std::string & )
 {
 
-	unsigned char* pixbuf= new unsigned char[(width+ 2* borderwidth) * (height+ 2* borderwidth)];
-	if (pixbuf!= NULL)
+	fb_pixel_t * pixbuf= new fb_pixel_t[(width+ 2* borderwidth) * (height+ 2* borderwidth)];
+	if (pixbuf != NULL)
 		frameBuffer->SaveScreen(x- borderwidth, y- borderwidth, width+ 2* borderwidth, height+ 2* borderwidth, pixbuf);
 
 	// clear border
@@ -666,7 +666,7 @@ int CPLPINInput::exec( CMenuTarget* parent, const std::string & )
 
 	int res = CPINInput::exec ( parent, "" );
 
-	if (pixbuf!= NULL)
+	if (pixbuf != NULL)
 	{
 		frameBuffer->RestoreScreen(x- borderwidth, y- borderwidth, width+ 2* borderwidth, height+ 2* borderwidth, pixbuf);
 		delete pixbuf;

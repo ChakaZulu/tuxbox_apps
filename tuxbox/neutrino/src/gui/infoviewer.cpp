@@ -454,12 +454,12 @@ void CInfoViewer::showSubchan()
 	CFrameBuffer *frameBuffer = CFrameBuffer::getInstance();
 	CNeutrinoApp *neutrino = CNeutrinoApp::getInstance();
 
-	std::string subChannelName = "";
+	std::string subChannelName;
 
 	if ( g_RemoteControl->selected_subchannel >= 0)
 		subChannelName = g_RemoteControl->subChannels[g_RemoteControl->selected_subchannel].subservice_name;
 
-	if ( subChannelName != "" )
+	if (!(subChannelName.empty()))
 	{
 		char text[100];
 		sprintf( text, "%d - %s", g_RemoteControl->selected_subchannel, subChannelName.c_str() );
@@ -480,7 +480,7 @@ void CInfoViewer::showSubchan()
 		int x = g_settings.screen_EndX - dx -10;
 		int y = g_settings.screen_StartY + 10;
 
-		unsigned char pixbuf[(dx+ 2* borderwidth) * (dy+ 2* borderwidth)];
+		fb_pixel_t pixbuf[(dx+ 2* borderwidth) * (dy+ 2* borderwidth)];
 		frameBuffer->SaveScreen(x- borderwidth, y- borderwidth, dx+ 2* borderwidth, dy+ 2* borderwidth, pixbuf);
 
 		// clear border
