@@ -30,6 +30,7 @@
 
 #include <linux/fb.h>
 #include <linux/vt.h>
+#include <stdint.h>
 #include "dbox/fb.h"
 
 #include <string>
