@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.70 2002/02/04 23:19:00 Simplex Exp $
+  $Id: zapit.cpp,v 1.71 2002/02/05 18:59:54 gillem Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -92,6 +92,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.71  2002/02/05 18:59:54  gillem
+  - add close vdi device
+
   Revision 1.70  2002/02/04 23:19:00  Simplex
   reinit channels, saving bouquets
 
@@ -465,16 +468,18 @@ int set_vtxt(uint vpid)
     {
         if (ioctl(fd, VBI_STOP_VTXT, vpid) < 0)
         {
-            perror("[zapit] VBI_STOP_VTXT");
-            return 1;
+		close(fd);
+		perror("[zapit] VBI_STOP_VTXT");
+		return 1;
         }
     }
     else
     {
         if (ioctl(fd, VBI_START_VTXT, vpid) < 0)
         {
-            perror("[zapit] VBI_START_VTXT");
-            return 1;
+		close(fd);
+		perror("[zapit] VBI_START_VTXT");
+		return 1;
         }
     }
     close(fd);
@@ -533,6 +538,7 @@ pids parse_pmt(int pid, int ca_system_id)
   memset(&ret_pids,0,sizeof(ret_pids));
 
   fd=open(DEMUX_DEV, O_RDWR);
+
   if (fd<0)
     {
       perror("[zapit] /dev/ost/demux0");
@@ -2472,7 +2478,7 @@ int main(int argc, char **argv) {
     }
 
   system("cp " CONFIGDIR "/zapit/last_chan /tmp/zapit_last_chan");
-  printf("Zapit $Id: zapit.cpp,v 1.70 2002/02/04 23:19:00 Simplex Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.71 2002/02/05 18:59:54 gillem Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
