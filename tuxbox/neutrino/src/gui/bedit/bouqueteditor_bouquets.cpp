@@ -1,4 +1,5 @@
 #include "bouqueteditor_bouquets.h"
+#include "messagebox.h"
 #include "../global.h"
 
 CBEBouquetWidget::CBEBouquetWidget()
@@ -115,6 +116,7 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 	paint();
 	paintFoot();
 
+	bouquetsChanged = false;
 	int oldselected = selected;
 	bool loop=true;
 	while (loop)
@@ -124,8 +126,31 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 		{
 			if (state == beDefault)
 			{
-				selected = oldselected;
-				loop=false;
+				if (bouquetsChanged)
+				{
+					CMessageBox* messageBox = new CMessageBox( "bouqueteditor.name", "bouqueteditor.savechanges?", NULL );
+					messageBox->exec( this, "");
+					switch( messageBox->result)
+					{
+						case CMessageBox::mbrYes :
+							loop=false;
+							saveChanges();
+						break;
+						case CMessageBox::mbrNo :
+							loop=false;
+							discardChanges();
+						break;
+						case CMessageBox::mbrCancel :
+							paintHead();
+							paint();
+							paintFoot();
+						break;
+					}
+				}
+				else
+				{
+					loop = false;
+				}
 			}
 			else if (state == beMoving)
 			{
@@ -257,6 +282,7 @@ void CBEBouquetWidget::addBouquet()
 		Bouquets.clear();
 		g_Zapit->getBouquets(Bouquets, true);
 		selected = Bouquets.size() - 1;
+		bouquetsChanged = true;
 	}
 	paintHead();
 	paint();
@@ -278,6 +304,7 @@ void CBEBouquetWidget::finishMoveBouquet()
 		g_Zapit->moveBouquet( origPosition+1, newPosition+1);
 		Bouquets.clear();
 		g_Zapit->getBouquets(Bouquets, true);
+		bouquetsChanged = true;
 	}
 	paint();
 }
@@ -291,9 +318,13 @@ void CBEBouquetWidget::cancelMoveBouquet()
 void CBEBouquetWidget::renameBouquet()
 {
 	string newName = inputName( Bouquets[selected].name, "bouqueteditor.newbouquetname");
-	g_Zapit->renameBouquet( selected + 1, newName);
-	Bouquets.clear();
-	g_Zapit->getBouquets(Bouquets, true);
+	if (newName != Bouquets[selected].name)
+	{
+		g_Zapit->renameBouquet( selected + 1, newName);
+		Bouquets.clear();
+		g_Zapit->getBouquets(Bouquets, true);
+		bouquetsChanged = true;
+	}
 	paintHead();
 	paint();
 	paintFoot();
@@ -334,5 +365,14 @@ void CBEBouquetWidget::internalMoveBouquet( unsigned int fromPosition, unsigned 
 	selected = toPosition;
 	newPosition = toPosition;
 	paint();
+}
+
+void CBEBouquetWidget::saveChanges()
+{
+
+}
+
+void CBEBouquetWidget::discardChanges()
+{
 }
 

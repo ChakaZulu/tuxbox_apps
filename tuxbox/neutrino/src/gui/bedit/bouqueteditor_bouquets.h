@@ -31,7 +31,7 @@ using namespace std;
 
 		int 				ButtonHeight;
 		//string				name;
-
+		bool	bouquetsChanged;
 		int		width;
 		int		height;
 		int		x;
@@ -50,6 +50,9 @@ using namespace std;
 		void cancelMoveBouquet();
 		void internalMoveBouquet( unsigned int fromPosition, unsigned int toPosition);
 		void renameBouquet();
+
+		void saveChanges();
+		void discardChanges();
 
 		string inputName( string defaultName, string caption);
 
