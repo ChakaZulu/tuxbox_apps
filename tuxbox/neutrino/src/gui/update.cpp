@@ -293,7 +293,7 @@ bool CFlashUpdate::checkVersion4Update()
 	}
 
 	if ((strcmp("Release", versionInfo->getType()) != 0) &&
-	    (ShowMsgUTF("messagebox.info", "flashupdate.experimentalimage", CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw") != CMessageBox::mbrYes)) // UTF-8
+	    (ShowMsgUTF("messagebox.info", g_Locale->getText("flashupdate.experimentalimage"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw") != CMessageBox::mbrYes)) // UTF-8
 	{
 		delete versionInfo;
 		return false;
