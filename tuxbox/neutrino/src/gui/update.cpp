@@ -197,10 +197,26 @@ bool CFlashUpdate::checkVersion4Update(string &sFileName)
 			return false;
 		}
 	}
-
+	else
+	{
+		FILE* fd = fopen((string(gTmpPath+ ImageFile)).c_str(), "r");
+		if(fd)
+		{
+			fclose(fd);
+		}
+		else
+		{
+			hide();
+			printf("flash-file not found: %s\n", (string(gTmpPath+ ImageFile)).c_str() );
+			ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.cantopenfile") );
+			return false;
+		}
+	}
+	
 	showLocalStatus(100);
 	showGlobalStatus(20);
 
+	hide();
 	char msg[250];
 	sprintf( (char*) &msg, g_Locale->getText("flashupdate.msgbox").c_str(), new_major, new_provider, new_minor);
     if ( ShowMsg ( "messagebox.info", msg, CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw" ) != CMessageBox::mbrYes )
@@ -246,6 +262,8 @@ int CFlashUpdate::exec(CMenuTarget* parent, string)
 	ft.setStatusViewer(this);
 
 	sFileName = gTmpPath+ ImageFile;
+
+
 	//image-check
 	showStatusMessage(g_Locale->getText("flashupdate.md5check") );
 	if(!ft.check_cramfs(sFileName))

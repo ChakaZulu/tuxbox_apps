@@ -311,7 +311,9 @@ bool CFlashTool::erase(int globalProgressEnd)
 
 bool CFlashTool::check_cramfs( string filename )
 {
-	return cramfs_crc( (char*) filename.c_str())==1; 
+	int retVal = cramfs_crc( (char*) filename.c_str() );
+	printf("flashcheck returned: %d\n", retVal);
+	return retVal==1; 
 }
 
 void CFlashTool::reboot()
