@@ -1411,33 +1411,53 @@ bool msOverlap( const ePlaylistEntry &m, const ePlaylistEntry &s )
 			return false;
 	}
 
-/*				eDebug("multiple %02d:%02d, duration = %d, entry %02d:%02d, duration = %d",
-					multiple.tm_hour, multiple.tm_min, i->duration,
-					Entry.tm_hour, Entry.tm_min, entry.duration );*/
 	int mask = ePlaylistEntry::Su;
-	for ( int x=0; x < Entry.tm_wday; x++ )
-		mask*=2;
-	if ( m.type & mask )
-		return Overlap( Entry.tm_hour*3600+Entry.tm_min*60, s.duration,
-								multiple.tm_hour*3600+multiple.tm_min*60, m.duration );
+	for ( int x=0; x < 7; ++x )
+	{
+		if ( m.type & mask )
+		{
+			int tmp1 = Entry.tm_wday*24*3600+Entry.tm_hour*3600+Entry.tm_min*60;
+			int tmp2 = x*24*3600+multiple.tm_hour*3600+multiple.tm_min*60;
+			if ( Overlap( tmp1, s.duration, tmp2, m.duration ) )
+				return true;
+			else if ( tmp1+s.duration > 24*7*3600 && Overlap( 0, tmp1+s.duration-24*7*3600, tmp2, m.duration ) )// event over end of weak
+				return true;
+			else if ( tmp2+m.duration > 24*7*3600 && Overlap( 0, tmp2+m.duration-24*7*3600, tmp1, s.duration ) )
+				return true;
+		}
+		mask <<= 1;
+	}
 	return false;
 }
 
 bool mmOverlap( const ePlaylistEntry &m1, const ePlaylistEntry &m2 )
 {
-	struct tm multiple = *localtime( &m1.time_begin ),
-		     Entry = *localtime( &m2.time_begin );
+	struct tm multiple1 = *localtime( &m1.time_begin ),
+		     multiple2 = *localtime( &m2.time_begin );
 
-/*				eDebug("multiple %02d:%02d, duration = %d, entry %02d:%02d, duration = %d",
-					multiple.tm_hour, multiple.tm_min, i->duration,
-					Entry.tm_hour, Entry.tm_min, entry.duration );*/
-	if ( Overlap( Entry.tm_hour*3600+Entry.tm_min*60, m2.duration,
-								multiple.tm_hour*3600+multiple.tm_min*60, m1.duration ) )
+	int mask1 = ePlaylistEntry::Su;
+	for ( int x=0; x < 7; ++x )
 	{
-		int tmp = ePlaylistEntry::Su|ePlaylistEntry::Mo|ePlaylistEntry::Tue|
-							ePlaylistEntry::Wed|ePlaylistEntry::Thu|ePlaylistEntry::Fr|
-							ePlaylistEntry::Sa;
-		return (m1.type&tmp) & (m2.type&tmp);
+		if ( m1.type & mask1 )
+		{
+			int mask2 = ePlaylistEntry::Su;
+			for ( int y=0; y < 7; ++y )
+			{
+				if ( m2.type & mask2 )
+				{
+					int tmp1 = x*24*3600+multiple1.tm_hour*3600+multiple1.tm_min*60;
+					int tmp2 = y*24*3600+multiple2.tm_hour*3600+multiple2.tm_min*60;
+					if ( Overlap( tmp1, m1.duration, tmp2, m2.duration ) )
+						return true;
+					else if ( tmp1+m1.duration > 24*7*3600 && Overlap( 0, tmp1+m1.duration-24*7*3600, tmp2, m2.duration ) )
+						return true;
+					else if ( tmp2+m2.duration > 24*7*3600 && Overlap( 0, tmp2+m2.duration-24*7*3600, tmp1, m1.duration ) )
+						return true;
+				}
+				mask2 <<= 1;
+			}
+		}
+		mask1 <<= 1;
 	}
 	return false;
 }
