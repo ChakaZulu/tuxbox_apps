@@ -411,19 +411,12 @@ int CAudioPlayerGui::show()
 					CFileList::iterator files = filebrowser->getSelectedFiles()->begin();
 					for(; files != filebrowser->getSelectedFiles()->end();files++)
 					{
-						if(files->getType() == CFile::FILE_MP3 )
+						if ((files->getType() == CFile::FILE_OGG) || (files->getType() == CFile::FILE_MP3))
 						{
-							CAudiofile mp3;
-							mp3.Filename = files->Name;
-							mp3.FileType = CFile::FILE_MP3;
-							playlist.push_back(mp3);
-						}
-						if(files->getType() == CFile::FILE_OGG)
-						{
-							CAudiofile mp3;
-							mp3.Filename = files->Name;
-							mp3.FileType = CFile::FILE_OGG;
-							playlist.push_back(mp3);
+							CAudiofile audiofile;
+							audiofile.Filename = files->Name;
+							audiofile.FileType = files->getType();
+							playlist.push_back(audiofile);
 						}
 						if(files->getType() == CFile::STREAM_MP3)
 						{

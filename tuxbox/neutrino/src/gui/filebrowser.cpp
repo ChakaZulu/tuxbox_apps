@@ -86,7 +86,7 @@ size_t CurlWriteToString(void *ptr, size_t size, size_t nmemb, void *data)
 	return size*nmemb;
 }
 //------------------------------------------------------------------------
-int CFile::getType(void) const
+CFile::FileType CFile::getType(void) const
 {
 	if(S_ISDIR(Mode))
 		return FILE_DIR;

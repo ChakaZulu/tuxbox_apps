@@ -103,7 +103,7 @@ public:
 		STREAM_PICTURE
 	};
 
-	int		getType(void) const;
+	FileType	getType(void) const;
 	std::string	getFileName(void) const;
 	std::string	getPath(void) const;
 
