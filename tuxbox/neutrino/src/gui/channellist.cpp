@@ -1,7 +1,10 @@
 //
-// $Id: channellist.cpp,v 1.5 2001/08/15 17:02:26 fnbrd Exp $
+// $Id: channellist.cpp,v 1.6 2001/08/16 23:19:18 McClean Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.6  2001/08/16 23:19:18  McClean
+// epg-view and quickview changed
+//
 // Revision 1.5  2001/08/15 17:02:26  fnbrd
 // Channellist now wider
 //
@@ -97,9 +100,9 @@ CChannelList::CChannelList(int Key=-1, string Name="")
 	selected = 0;
 	width = 500;
 	height = 400;
-	x=((720-width) >> 1) - 40;
-	y=((576-height)>>1)-20;
-	listmaxshow = 17;
+	x=((720-width) >> 1);
+	y=((576-height)>>1);
+	listmaxshow = 20;
 	liststart = 0;
 	tuned=0xfffffff;
 }
@@ -136,6 +139,11 @@ int CChannelList::getKey(int id)
 string CChannelList::getActiveChannelName()
 {
 	return chanlist[selected]->name;
+}
+
+int CChannelList::getActiveChannelNumber()
+{
+	return selected+1;
 }
 
 void CChannelList::exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput* rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, SNeutrinoSettings* settings)

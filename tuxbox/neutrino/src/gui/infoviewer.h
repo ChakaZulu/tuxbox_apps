@@ -68,9 +68,14 @@ class CInfoViewer
 	public:
 
         CInfoViewer();
+
         void start(CFrameBuffer *FrameBuffer, FontsDef *Fonts, SNeutrinoSettings *Settings );
-        void showTitle( int ChanNum, string Channel );
+
+        void showTitle( int ChanNum, string Channel, bool reshow=false );
         void killTitle();
+
+	bool isActive();	
+
         void setDuration( int Duration );
 };
 

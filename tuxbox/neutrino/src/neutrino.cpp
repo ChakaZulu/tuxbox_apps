@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.8 2001/08/15 17:10:02 fnbrd Exp $
+        $Id: neutrino.cpp,v 1.9 2001/08/16 23:19:18 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.9  2001/08/16 23:19:18  McClean
+  epg-view and quickview changed
+
   Revision 1.8  2001/08/15 17:10:02  fnbrd
   Channellist with events.
 
@@ -906,8 +909,16 @@ int CNeutrinoApp::run(int argc, char **argv)
 			}
 			else if (key==CRCInput::RC_help)
 			{	//epg
-				infoViewer.killTitle();
-				epgData.show( channelList->getActiveChannelName() );
+				if(infoViewer.isActive())
+				{
+					infoViewer.killTitle();
+					epgData.show( channelList->getActiveChannelName() );
+				}
+				else
+				{
+					infoViewer.showTitle(   channelList->getActiveChannelNumber(), 
+							channelList->getActiveChannelName(), true );
+				}
 			}
 			else if ((key>=0) && (key<=9))
 			{ //numeric zap
