@@ -142,7 +142,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 		char cb[10];
 		char cb1[21];
  		char cb2[5];
- 		char cb3[30];
+
 		sprintf(filename, "radar%d.raw", pos);
 		pos = (pos+1)%10;
 		frameBuffer->paintIcon8(filename, x+400,ypos+15, 17);
