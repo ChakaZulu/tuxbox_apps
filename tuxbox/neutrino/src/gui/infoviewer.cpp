@@ -42,6 +42,11 @@
 #define SHADOW_OFFSET 6
 
 
+int time_left_width;
+int time_dot_width;
+int time_height;
+char old_timestr[10];
+
 CInfoViewer::CInfoViewer()
 {
 	BoxStartX= BoxStartY= BoxEndX= BoxEndY=0;
@@ -62,6 +67,45 @@ void CInfoViewer::start()
 	ChanHeight = g_Fonts->infobar_number->getHeight()*9/8;
 
 	aspectRatio = g_Controld->getAspectRatio();
+
+	time_height = g_Fonts->infobar_channame->getHeight()+5;
+	time_left_width = g_Fonts->infobar_channame->getRenderWidth("99");
+	time_dot_width = g_Fonts->infobar_channame->getRenderWidth(":");
+}
+
+void CInfoViewer::paintTime( bool show_dot, bool firstPaint )
+{
+	if ( gotTime )
+	{
+	    int ChanNameY = BoxStartY + (ChanHeight>>1)   + 5; //oberkante schatten?
+
+		char timestr[10];
+		struct timeb tm;
+
+		ftime(&tm);
+		strftime((char*) &timestr, 20, "%H:%M", localtime(&tm.time) );
+
+		if ( ( !firstPaint ) && ( strcmp( timestr, old_timestr ) == 0 ) )
+		{
+			if ( show_dot )
+        		g_FrameBuffer->paintBoxRel(BoxEndX- time_left_width- time_dot_width- 10, ChanNameY, time_dot_width, time_height/2, COL_INFOBAR);
+        	else
+        		g_Fonts->infobar_channame->RenderString(BoxEndX-time_left_width- time_dot_width- 10, ChanNameY+ time_height, time_dot_width, ":", COL_INFOBAR);
+        	strcpy( old_timestr, timestr );
+        }
+        else
+        {
+        	strcpy( old_timestr, timestr );
+
+
+    		if ( !firstPaint )
+    			g_FrameBuffer->paintBoxRel(BoxEndX- time_left_width*2- time_dot_width- 10, ChanNameY, time_left_width*2+ time_dot_width, time_height, COL_INFOBAR);
+
+			g_Fonts->infobar_channame->RenderString(BoxEndX-time_left_width*2- time_dot_width-10, ChanNameY+ time_height, time_left_width*2+ time_dot_width, timestr, COL_INFOBAR);
+            if ( show_dot )
+        		g_FrameBuffer->paintBoxRel(BoxEndX- time_left_width- time_dot_width- 10, ChanNameY, time_dot_width, time_height/2, COL_INFOBAR);
+		}
+	}
 }
 
 void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid, bool calledFromNumZap )
@@ -104,17 +148,10 @@ neutrino->showProfiling("infoviewer showtitle");
 
        	g_FrameBuffer->paintBox(ChanNameX, ChanNameY, BoxEndX, BoxEndInfoY, COL_INFOBAR);
 
-        int height=g_Fonts->infobar_channame->getHeight()+5;
+        int height=time_height;
+        int timewidth= time_left_width* 2+ time_dot_width;
 
-        //time? todo - thread suxx...
-        char timestr[50];
-        struct timeb tm;
-        ftime(&tm);
-        strftime((char*) &timestr, 20, "%H:%M", localtime(&tm.time) );
-        int timewidth = g_Fonts->infobar_channame->getRenderWidth(timestr);
-
-        if ( gotTime )
-	      	g_Fonts->infobar_channame->RenderString(BoxEndX-timewidth-10, ChanNameY+height, timewidth+ 5, timestr, COL_INFOBAR);
+		paintTime( false, true );
 
 		// ... with channel name
         g_Fonts->infobar_channame->RenderString(ChanNameX+ 10, ChanNameY+height, BoxEndX- (ChanNameX+ 20)- timewidth- 15, Channel.c_str(), COL_INFOBAR);
@@ -129,6 +166,8 @@ neutrino->showProfiling("before if ( showButtonBar )");
 
         if ( showButtonBar )
         {
+         	sec_timer_id = g_RCInput->addTimer(1000000, false);
+
         	if ( BOTTOM_BAR_OFFSET> 0 )
 	        	g_FrameBuffer->paintBackgroundBox(ChanInfoX, BoxEndInfoY, BoxEndX, BoxEndInfoY+ BOTTOM_BAR_OFFSET);
 
@@ -187,6 +226,9 @@ neutrino->showProfiling("vor Schatten;");
 
         if ( !calledFromNumZap )
         {
+            sec_timer_id = g_RCInput->addTimer(1000000, false);
+            bool show_dot= true;
+
         	neutrino->showProfiling("start infoviewer loop");
        		bool hideIt = true;
 			unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_infobar >> 1 );
@@ -196,6 +238,7 @@ neutrino->showProfiling("vor Schatten;");
 			while ( ! ( res & ( messages_return::cancel_info | messages_return::cancel_all ) ) )
 			{
 				g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+                //printf(" g_RCInput->getMsgAbsoluteTimeout %x\n", msg);
 
 				if ( msg == CRCInput::RC_help )
 				{
@@ -222,6 +265,11 @@ neutrino->showProfiling("vor Schatten;");
         			g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
 					res = messages_return::cancel_all;
 				}
+				else if ( ( msg == NeutrinoMessages::EVT_TIMER ) && ( data = sec_timer_id ) )
+				{
+        			paintTime( show_dot, false );
+ 					show_dot = !show_dot;
+				}
 				else
 				{
             		res = neutrino->handleMsg( msg, data );
@@ -240,6 +288,7 @@ neutrino->showProfiling("vor Schatten;");
             if ( hideIt )
 				killTitle();
 
+            g_RCInput->killTimer(sec_timer_id);
         }
 
 	neutrino->showProfiling("end infoviewer");

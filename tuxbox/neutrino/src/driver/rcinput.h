@@ -30,14 +30,14 @@
 */
 
 /*
-$Id: rcinput.h,v 1.29 2002/04/16 12:00:00 field Exp $
+$Id: rcinput.h,v 1.30 2002/04/16 16:48:00 field Exp $
 
  Module  RemoteControle Handling
 
 History:
  $Log: rcinput.h,v $
- Revision 1.29  2002/04/16 12:00:00  field
- Bugfix?!
+ Revision 1.30  2002/04/16 16:48:00  field
+ Kleinigkeiten / Timers
 
  Revision 1.27  2002/04/10 16:39:19  field
  Timeset bugfix (beim scan zb)
@@ -152,6 +152,7 @@ class CRCInput
 			uint		id;
 			unsigned long long	interval;
 			unsigned long long	times_out;
+			bool		correct_time;
 		};
 
 		uint			timerid;
@@ -170,6 +171,8 @@ class CRCInput
 		int translate(int code);
 
 		void calculateMaxFd();
+
+		int checkTimers();
 
 	public:
 		//rc-code definitions
@@ -209,16 +212,17 @@ class CRCInput
 
 		static string getKeyName(int);
 
-		int addTimer(unsigned long long Interval, bool oneshot= true);
+		int addTimer(unsigned long long Interval, bool oneshot= true, bool correct_time= true );
 		int addTimer(struct timeval Timeout);
+		void killTimer(int id);
 
 		long long calcTimeoutEnd( int Timeout );
 		long long calcTimeoutEnd_MS( int Timeout );
 
 		void getMsgAbsoluteTimeout(uint *msg, uint* data, unsigned long long *TimeoutEnd, bool bAllowRepeatLR= false);
-		void getMsg(uint *msg, uint* data, int Timeout= -1, bool bAllowRepeatLR= false);     //get message, timeout in 1/10 secs :)
-		void getMsg_ms(uint *msg, uint* data, int Timeout= -1, bool bAllowRepeatLR= false);     //get message, timeout in msecs :)
-		void getMsg_us(uint *msg, uint* data, unsigned long long Timeout= -1, bool bAllowRepeatLR= false);     //get message, timeout in µsecs :)
+		void getMsg(uint *msg, uint* data, int Timeout, bool bAllowRepeatLR= false);     //get message, timeout in 1/10 secs :)
+		void getMsg_ms(uint *msg, uint* data, int Timeout, bool bAllowRepeatLR= false);     //get message, timeout in msecs :)
+		void getMsg_us(uint *msg, uint* data, unsigned long long Timeout, bool bAllowRepeatLR= false);     //get message, timeout in µsecs :)
 		void postMsg(uint msg, uint data, bool Priority = true );  // push message back into buffer
 		void clearMsg();						// Msgs aus der Schleife löschen - löscht zZ ALLES :(
 };

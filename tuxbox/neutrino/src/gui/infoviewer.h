@@ -95,9 +95,12 @@ class CInfoViewer
 
 		char aspectRatio;
 
+		int	 	sec_timer_id;
+
 		void getEPG();
 
 		void show_Data( bool calledFromEvent = false );
+		void paintTime( bool show_dot, bool firstPaint );
 
 		void showButton_Audio();
 		void showButton_SubServices();

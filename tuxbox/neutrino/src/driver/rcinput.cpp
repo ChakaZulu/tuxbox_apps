@@ -207,7 +207,7 @@ void CRCInput::restartInput()
 	open();
 }
 
-int CRCInput::addTimer(unsigned long long Interval, bool oneshot)
+int CRCInput::addTimer(unsigned long long Interval, bool oneshot, bool correct_time )
 {
 	struct timeval tv;
 
@@ -222,6 +222,7 @@ int CRCInput::addTimer(unsigned long long Interval, bool oneshot)
 
 	_newtimer.id = timerid++;
 	_newtimer.times_out = timeNow+ Interval;
+	_newtimer.correct_time = correct_time;
 
 	vector<timer>::iterator e;
 	for ( e= timers.begin(); e!= timers.end(); ++e )
@@ -229,12 +230,64 @@ int CRCInput::addTimer(unsigned long long Interval, bool oneshot)
 			break;
 
 	timers.insert(e, _newtimer);
+	return _newtimer.id;
 }
 
 int CRCInput::addTimer(struct timeval Timeout)
 {
 	unsigned long long timesout = (unsigned long long) Timeout.tv_usec + (unsigned long long)((unsigned long long) Timeout.tv_sec * (unsigned long long) 1000000);
-	addTimer( timesout );
+	return addTimer( timesout, true, false );
+}
+
+void CRCInput::killTimer(int id)
+{
+	vector<timer>::iterator e;
+	for ( e= timers.begin(); e!= timers.end(); ++e )
+		if ( e->id == id )
+		{
+			timers.erase(e);
+			break;
+		}
+}
+
+int CRCInput::checkTimers()
+{
+	struct timeval tv;
+	int _id = 0;
+
+	gettimeofday( &tv, NULL );
+	unsigned long long timeNow = (unsigned long long) tv.tv_usec + (unsigned long long)((unsigned long long) tv.tv_sec * (unsigned long long) 1000000);
+
+
+	vector<timer>::iterator e;
+	for ( e= timers.begin(); e!= timers.end(); ++e )
+		if ( e->times_out< timeNow+ 200 )
+		{
+//			printf("timeout timer %d %lld %lld\n",e->id,e->times_out,timeNow );
+			_id = e->id;
+			if ( e->interval != 0 )
+			{
+				timer _newtimer;
+				_newtimer.id= e->id;
+				_newtimer.interval= e->interval;
+				_newtimer.times_out= e->times_out+ e->interval;
+				_newtimer.correct_time= e->correct_time;
+
+            	timers.erase(e);
+				for ( e= timers.begin(); e!= timers.end(); ++e )
+					if ( e->times_out< _newtimer.times_out )
+						break;
+
+				timers.insert(e, _newtimer);
+			}
+			else
+				timers.erase(e);
+
+			break;
+        }
+//        else
+//    		printf("skipped timer %d %lld %lld\n",e->id,e->times_out, timeNow );
+	return _id;
 }
 
 
@@ -269,10 +322,12 @@ void CRCInput::getMsgAbsoluteTimeout(uint *msg, uint* data, unsigned long long *
 	gettimeofday( &tv, NULL );
 	unsigned long long timeNow = (unsigned long long) tv.tv_usec + (unsigned long long)((unsigned long long) tv.tv_sec * (unsigned long long) 1000000);
 
-	unsigned long long diff = ( *TimeoutEnd - timeNow );
+	unsigned long long diff;
 
-	if ( diff < 250 )
-		diff = 250;  // Minimum Differenz...
+	if ( *TimeoutEnd < timeNow+ 100 )
+		diff = 100;  // Minimum Differenz...
+	else
+		diff = ( *TimeoutEnd - timeNow );
 
 	getMsg_us( msg, data, diff, bAllowRepeatLR );
 
@@ -288,38 +343,32 @@ void CRCInput::getMsgAbsoluteTimeout(uint *msg, uint* data, unsigned long long *
 
 void CRCInput::getMsg(uint *msg, uint *data, int Timeout, bool bAllowRepeatLR)
 {
-	getMsg_us( msg, data, (Timeout== -1)?(unsigned long long)-1:(unsigned long long) Timeout * 100* 1000, bAllowRepeatLR );
+	getMsg_us( msg, data, (unsigned long long) Timeout * 100* 1000, bAllowRepeatLR );
 }
 
 void CRCInput::getMsg_ms(uint *msg, uint *data, int Timeout, bool bAllowRepeatLR)
 {
-	getMsg_us( msg, data, (Timeout== -1)?(unsigned long long)-1:(unsigned long long) Timeout * 1000, bAllowRepeatLR );
+	getMsg_us( msg, data, (unsigned long long) Timeout * 1000, bAllowRepeatLR );
 }
 
 void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool bAllowRepeatLR)
 {
 	static long long last_keypress=0;
 	unsigned long long getKeyBegin;
+
 	static __u16 rc_last_key = 0;
 	static __u16 rc_last_repeat_key = 0;
 
 	struct timeval tv, tvselect;
-	struct timeval *tvslectp;
-	int InitialTimeout = Timeout;
+	unsigned long long InitialTimeout = Timeout;
+	long long targetTimeout;
+
+	int timer_id;
 	fd_set rfds;
 	__u16 rc_key;
 
 	//set 0
 	*data = 0;
-
-	if(Timeout==(unsigned long long)-1)
-	{
-		tvslectp = NULL;
-	}
-	else
-	{
-		tvslectp = &tvselect;
-	}
 
 	// wiederholung reinmachen - dass wirklich die ganze zeit bis timeout gewartet wird!
 	gettimeofday( &tv, NULL );
@@ -327,9 +376,34 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 
 	while(1)
 	{
-		//nicht genau - verbessern!
-	    tvselect.tv_sec = Timeout/1000000;
-		tvselect.tv_usec = Timeout%1000000;
+		timer_id = 0;
+		if ( timers.size()> 0 )
+		{
+			gettimeofday( &tv, NULL );
+			unsigned long long t_n= (unsigned long long) tv.tv_usec + (unsigned long long)((unsigned long long) tv.tv_sec * (unsigned long long) 1000000);
+			if ( timers[0].times_out< t_n )
+			{
+				timer_id = checkTimers();
+       			*msg = NeutrinoMessages::EVT_TIMER;
+				*data = timer_id;
+				return;
+			}
+			else
+			{
+             	targetTimeout = timers[0].times_out - t_n;
+				if (targetTimeout> Timeout)
+					targetTimeout= Timeout;
+				else
+					timer_id = timers[0].id;
+			}
+		}
+		else
+			targetTimeout= Timeout;
+
+	    tvselect.tv_sec = targetTimeout/1000000;
+		tvselect.tv_usec = targetTimeout%1000000;
+		//printf("InitialTimeout= %lld:%lld\n", Timeout/1000000,Timeout%1000000);
+        //printf("targetTimeout= %d:%d\n", tvselect.tv_sec,tvselect.tv_usec);
 
 		FD_ZERO(&rfds);
 		if (fd_rc> 0)
@@ -342,15 +416,36 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 		FD_SET(fd_pipe_low_priority[0], &rfds);
 		calculateMaxFd();
 
-		int status =  select(fd_max+1, &rfds, NULL, NULL, tvslectp);
+		int status =  select(fd_max+1, &rfds, NULL, NULL, &tvselect);
 
-		if (status==-1)
+		if ( status == -1 )
 		{
 			perror("[neutrino - getMsg_us]: select returned ");
 			// in case of an error return timeout...?!
 			*msg = RC_timeout;
 			*data = 0;
 			return;
+		}
+		else if ( status == 0 ) // Timeout!
+		{
+			if ( timer_id != 0 )
+			{
+			    timer_id = checkTimers();
+				if ( timer_id != 0 )
+				{
+        			*msg = NeutrinoMessages::EVT_TIMER;
+					*data = timer_id;
+					return;
+				}
+				else
+					continue;
+			}
+			else
+			{
+				*msg = RC_timeout;
+				*data = 0;
+				return;
+			}
 		}
 
 		if(FD_ISSET(fd_pipe_high_priority[0], &rfds))
@@ -426,7 +521,26 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 			 			if (emsg.eventID==CSectionsdClient::EVT_TIMESET)
 			 			{
 			 				*msg = NeutrinoMessages::EVT_TIMESET;
-			 				*data = (unsigned) p;
+
+			 				struct timeval tv;
+        					gettimeofday( &tv, NULL );
+        					long long timeOld = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
+
+        					stime((time_t*) p);
+
+                            gettimeofday( &tv, NULL );
+        					long long timeNew = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
+
+							delete p;
+							p= new unsigned char[ sizeof(long long) ];
+        					*(long long*) p = timeNew - timeOld;
+
+							// Timer anpassen
+							for ( vector<timer>::iterator e= timers.begin(); e!= timers.end(); ++e )
+								if (e->correct_time)
+									e->times_out+= *(long long*) p;
+
+                            *data = (unsigned) p;
 			 				dont_delete_p = true;
 			 			}
 			 			else if (emsg.eventID==CSectionsdClient::EVT_GOT_CN_EPG)
@@ -603,27 +717,27 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 			return;
 		}
 
-		if ( InitialTimeout == 0 )
-		{//nicht warten wenn kein key da ist
-		   	*msg = RC_timeout;
+        if ( InitialTimeout == 0 )
+		{
+			//nicht warten wenn kein key da ist
+			*msg = RC_timeout;
 			*data = 0;
-			//printf("[rcin] no timeout\n");
 			return;
 		}
-		else if(tvslectp != NULL)
-		{//timeout neu kalkulieren
+		else
+		{
+			//timeout neu kalkulieren
 			gettimeofday( &tv, NULL );
 			long long getKeyNow = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
 			long long diff = (getKeyNow - getKeyBegin);
-			//printf("[rcin] timeout before: %d\n", Timeout );
-			Timeout -= diff;
-			//printf("[rcin] diff timeout: %lld, %d\n", diff, Timeout );
-			if( Timeout <= 0 )
+			if( Timeout <= diff )
 			{
 				*msg = RC_timeout;
 				*data = 0;
 				return;
 			}
+			else
+				Timeout -= diff;
 		}
 	}
 }
