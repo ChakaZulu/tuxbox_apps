@@ -133,6 +133,7 @@
 ./src/timer.cpp
 ./src/tpeditwindow.cpp
 ./src/upgrade.cpp
+./src/wizard_fpupdate.cpp
 ./src/wizard_language.cpp
 ./src/wizard_scan.cpp
 ./src/wizard_timezone.cpp
