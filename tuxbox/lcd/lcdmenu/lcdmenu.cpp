@@ -1,5 +1,5 @@
 /*
- * $Id: lcdmenu.cpp,v 1.9 2001/12/10 06:25:34 obi Exp $
+ * $Id: lcdmenu.cpp,v 1.10 2001/12/14 06:09:05 obi Exp $
  *
  * A startup menu for the d-box 2 linux project
  *
@@ -20,6 +20,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
  * $Log: lcdmenu.cpp,v $
+ * Revision 1.10  2001/12/14 06:09:05  obi
+ * moved fontrenderer and lcddisplay to a lib
+ *
  * Revision 1.9  2001/12/10 06:25:34  obi
  * changed config path to tuxbox default
  *
@@ -230,9 +233,9 @@ bool CLCDMenu::drawString(string text, int top, int align, int color)
     else
     {
 #ifdef DEBUG
-	cout << "menufont->RenderString(" << left << "," << top << "," << width << ",\"" << text.c_str() << "\"," << color << ")" << endl;
+	cout << "menufont->RenderString(" << left << "," << top << "," << width << ",\"" << text.c_str() << "\"," << color << ",0)" << endl;
 #endif
-	menuFont->RenderString(left, top, width, text.c_str(), color);
+	menuFont->RenderString(left, top, width, text.c_str(), color, 0);
         return true;
     }
 }
@@ -384,9 +387,9 @@ string CLCDMenu::pinScreen(string title, bool isNewPin)
 
 #ifdef DEBUG
 	cout << "pin[" << i << "]=" << pin[i] << endl;
-	cout << "menuFont->RenderString(" << left << "," << 3*fontSize << "," << fontSize << ",*,CLCDDisplay::PIXEL_ON)" << endl;
+	cout << "menuFont->RenderString(" << left << "," << 3*fontSize << "," << fontSize << ",*,CLCDDisplay::PIXEL_ON, 0)" << endl;
 #endif
-	menuFont->RenderString(left, 3*fontSize, fontSize, "*", CLCDDisplay::PIXEL_ON);
+	menuFont->RenderString(left, 3*fontSize, fontSize, "*", CLCDDisplay::PIXEL_ON, 0);
 
 #ifndef X86_BUILD
 	update();
@@ -422,7 +425,7 @@ bool CLCDMenu::checkPin(string title)
 int main(int argc, char **argv)
 {
     /* print version information */
-    cout << "$Id: lcdmenu.cpp,v 1.9 2001/12/10 06:25:34 obi Exp $" << endl;
+    cout << "$Id: lcdmenu.cpp,v 1.10 2001/12/14 06:09:05 obi Exp $" << endl;
 
     /* create menu instance */
     CLCDMenu *menu = new CLCDMenu();
@@ -450,7 +453,7 @@ int main(int argc, char **argv)
 	cout << "saving configuration..." << endl;
 	menu->getConfig()->dump();
 #endif
-	menu->getConfig()->saveConfig("/var/etc/lcdmenu.conf");
+	menu->getConfig()->saveConfig(CONFIGDIR "/lcdmenu.conf");
 
 	/* reset modified flag */
 	menu->getConfig()->setModifiedFlag(false);
