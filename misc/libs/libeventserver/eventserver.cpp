@@ -1,4 +1,7 @@
 /*
+
+        $Header: /cvs/tuxbox/apps/misc/libs/libeventserver/eventserver.cpp,v 1.11 2002/09/21 15:13:40 thegoodguy Exp $
+
 	Event-Server  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -22,16 +25,18 @@
 */
 
 #include <stdio.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <unistd.h>
 
 #include "eventserver.h"
 
-void CEventServer::registerEvent2(unsigned int eventID, unsigned int ClientID, string udsName)
+void CEventServer::registerEvent2(const unsigned int eventID, const unsigned int ClientID, const std::string udsName)
 {
-	strcpy( eventData[eventID][ClientID].udsName, udsName.c_str());
-	eventData[eventID][ClientID].clientID=ClientID;
+	strcpy(eventData[eventID][ClientID].udsName, udsName.c_str());
 }
 
-void CEventServer::registerEvent(int fd)
+void CEventServer::registerEvent(const int fd)
 {
 	commandRegisterEvent msg;
 
@@ -43,34 +48,32 @@ void CEventServer::registerEvent(int fd)
 	registerEvent2(msg.eventID, msg.clientID, msg.udsName);
 }
 
-void CEventServer::unRegisterEvent2(unsigned int eventID, unsigned int ClientID)
+void CEventServer::unRegisterEvent2(const unsigned int eventID, const unsigned int ClientID)
 {
 	eventData[eventID].erase( ClientID );
 }
 
-void CEventServer::unRegisterEvent(int fd)
+void CEventServer::unRegisterEvent(const int fd)
 {
 	commandUnRegisterEvent msg;
 	read(fd, &msg, sizeof(msg));
 	unRegisterEvent2(msg.eventID, msg.clientID);
 }
 
-void CEventServer::sendEvent(unsigned int eventID, unsigned int initiatorID, void* eventbody, unsigned int eventbodysize)
+void CEventServer::sendEvent(const unsigned int eventID, const initiators initiatorID, const void* eventbody, const unsigned int eventbodysize)
 {
 	eventClientMap notifyClients = eventData[eventID];
 
-	eventClientMap::iterator pos = notifyClients.begin();
-	for(;pos!=notifyClients.end();pos++)
+	for(eventClientMap::iterator pos = notifyClients.begin(); pos != notifyClients.end(); pos++)
 	{
 		//allen clients ein event schicken
 		eventClient client = pos->second;
-//		printf("[eventserver]: send event (%d) to: %d - %s\n", eventID, client.clientID, client.udsName);
 		sendEvent2Client(eventID, initiatorID, &client, eventbody, eventbodysize);
 	}
 }
 
 
-bool CEventServer::sendEvent2Client(unsigned int eventID, unsigned int initiatorID, eventClient* ClientData, void* eventbody, unsigned int eventbodysize)
+bool CEventServer::sendEvent2Client(const unsigned int eventID, const initiators initiatorID, const eventClient* ClientData, const void* eventbody, const unsigned int eventbodysize)
 {
 	struct sockaddr_un servaddr;
 	int clilen, sock_fd;

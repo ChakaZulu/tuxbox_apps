@@ -1,4 +1,7 @@
 /*
+
+        $Header: /cvs/tuxbox/apps/misc/libs/libeventserver/eventserver.h,v 1.11 2002/09/21 15:13:40 thegoodguy Exp $
+
 	Event-Server  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -19,42 +22,21 @@
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
 */
 
 #ifndef __libevent__
 #define __libevent__
 
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <errno.h>
-
 #include <string>
 #include <map>
-
-using namespace std;
 
 
 class CEventServer
 {
-		struct eventClient
-		{
-			unsigned int clientID;//doppelt..
-			char udsName[50];
-		};
+ public:
 
-		//key: clientid
-		typedef std::map<unsigned int, eventClient> eventClientMap;
-
-		//key: eventid
-		std::map<unsigned int, eventClientMap> eventData;
-
-		bool sendEvent2Client(unsigned int eventID, unsigned int initiatorID, eventClient* ClientData, void* eventbody=NULL, unsigned int eventbodysize=0);
-
-	public:
-
-		enum initiators
+	enum initiators
 		{
 			INITID_CONTROLD,
 			INITID_SECTIONSD,
@@ -63,31 +45,47 @@ class CEventServer
 			INITID_THTTPD
 		};
 
-		struct commandRegisterEvent
-		{
-			unsigned int eventID;
-			unsigned int clientID;
-			char udsName[50];
-		};
 
-		struct commandUnRegisterEvent
-		{
-			unsigned int eventID;
-			unsigned int clientID;
-		};
+	struct commandRegisterEvent
+	{
+		unsigned int eventID;
+		unsigned int clientID;
+		char udsName[50];
+	};
 
-		struct eventHead
-		{
-			unsigned int eventID;
-			unsigned int initiatorID;
-			unsigned int dataSize;
-		};
+	struct commandUnRegisterEvent
+	{
+		unsigned int eventID;
+		unsigned int clientID;
+	};
 
-		void registerEvent2(unsigned int eventID, unsigned int ClientID, string udsName);
-		void registerEvent(int fd);
-		void unRegisterEvent2(unsigned int eventID, unsigned int ClientID);
-		void unRegisterEvent(int fd);
-		void sendEvent(unsigned int eventID, unsigned int initiatorID, void* eventbody=NULL, unsigned int eventbodysize=0);
+	struct eventHead
+	{
+		unsigned int eventID;
+		unsigned int initiatorID;
+		unsigned int dataSize;
+	};
+
+	void registerEvent2(const unsigned int eventID, const unsigned int ClientID, const std::string udsName);
+	void registerEvent(const int fd);
+	void unRegisterEvent2(const unsigned int eventID, const unsigned int ClientID);
+	void unRegisterEvent(const int fd);
+	void sendEvent(const unsigned int eventID, const initiators initiatorID, const void* eventbody = NULL, const unsigned int eventbodysize = 0);
+
+ protected:
+
+	struct eventClient
+	{
+		char udsName[50];
+	};
+
+	//key: ClientID                                              // Map is a Sorted Associative Container
+	typedef std::map<unsigned int, eventClient> eventClientMap;  // -> clients with lower ClientID receive events first
+
+	//key: eventID
+	std::map<unsigned int, eventClientMap> eventData;
+
+	bool sendEvent2Client(const unsigned int eventID, const initiators initiatorID, const eventClient* ClientData, const void* eventbody = NULL, const unsigned int eventbodysize = 0);
 
 };
 
