@@ -66,6 +66,7 @@ public:
 	void SendHTMLFooter();
 	void SendHTMLHeader(string Titel);
 	void SendPlainHeader(string contenttype = "text/plain");
+	void Send302(char *URI);
 	void Send404Error();
 	void Send500Error();
 
@@ -76,6 +77,7 @@ public:
 
 
 	int Method;
+	string Host;
 	string URL;
 	string Path;
 	string Filename;
@@ -101,7 +103,7 @@ public:
 	bool ParseFirstLine(string zeile);
 	bool ParseHeader(string header);
 	bool ParseBoundaries(string bounds);
-
+	void URLDecode(string &encodedString);
 	bool HandleUpload();
 	bool HandleUpload(char * Name);
 	void PrintRequest();

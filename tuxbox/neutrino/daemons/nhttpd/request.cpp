@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.17 2002/05/26 15:54:03 Leahcim Exp $
+	$Id: request.cpp,v 1.18 2002/05/27 09:55:39 Leahcim Exp $
 
 	License: GPL
 
@@ -38,6 +38,7 @@ CWebserverRequest::CWebserverRequest(CWebserver *server)
 	Parent = server;
 
 	Method = M_UNKNOWN; 
+	Host = "";
 	URL = "";
 	Filename = "";
 	FileExt = "";
@@ -293,6 +294,7 @@ int ende;
 			}
 			string header = rawbuffer.substr(ende+1,headerende - ende - 2);
 			ParseHeader(header);
+			Host = HeaderList["Host"];
 			if(Method == M_POST) // TODO: Und testen ob content = formdata
 			{				
 
@@ -430,6 +432,24 @@ void CWebserverRequest::SendHTMLHeader(string Titel)
 void CWebserverRequest::SendHTMLFooter()
 {
 	SocketWriteLn("</body></html>");
+}
+//-------------------------------------------------------------------------
+void CWebserverRequest::Send302(char *URI)
+{
+	if(Parent->DEBUG) {
+		printf("Sende 302\n");
+		printf(URI);
+		printf("\n");
+	}
+	SocketWrite("HTTP/1.0 302 Moved Permanently\n");
+	SocketWrite("Location: ");
+	SocketWrite(URI);
+	SocketWrite("\n");
+	SocketWrite("Content-Type: text/plain\n\n");
+	SocketWrite("302 : Object moved\n\nIf you dont get redirected click <a href=\"");
+	SocketWrite(URI);
+	SocketWrite("\">here</a>\n");
+	HttpStatus = 302;
 }
 //-------------------------------------------------------------------------
 void CWebserverRequest::Send404Error()
@@ -723,4 +743,50 @@ string CWebserverRequest::ParseLine(string line,CStringList params)		// replaces
 		}
 	}
 	return line;
+}
+//-------------------------------------------------------------------------
+// Decode URLEncoded string
+void CWebserverRequest::URLDecode(string &encodedString) 
+{
+  char *newString=NULL;
+  const char *string = encodedString.c_str();
+  int count=0;
+  char hex[3]={'\0'};
+  unsigned long iStr;
+
+  count = 0;
+  if((newString = (char *)malloc(sizeof(char) * strlen(string) + 1) ) != NULL)
+	{
+
+	  /* copy the new sring with the values decoded */
+	  while(string[count]) /* use the null character as a loop terminator */
+		{
+		  if (string[count] == '%')
+			{
+			  hex[0]=string[count+1];
+			  hex[1]=string[count+2];
+			  hex[2]='\0';
+			  iStr = strtoul(hex,NULL,16); /* convert to Hex char */
+			  newString[count]=(char)iStr;
+			  count++; 
+			  string = string + 2; /* need to reset the pointer so that we don't write hex out */
+			}
+		  else
+			{
+				if (string[count] == '+')
+					newString[count] = ' ';
+				else
+					newString[count] = string[count];
+			  count++;
+			}
+	  } /* end of while loop */
+
+	  newString[count]='\0'; /* when done copying the string,need to terminate w/ null char */
+	}
+	else
+	{
+		return;
+	}
+	encodedString = newString;
+	free(newString);
 }
