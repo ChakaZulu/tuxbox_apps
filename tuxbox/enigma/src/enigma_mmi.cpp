@@ -125,6 +125,11 @@ void enigmaMMI::haveScheduledData()
 
 void enigmaMMI::closeMMI()
 {
+	if (closeTimer.isActive())
+	{
+//		eDebug("closeTimer active.. ignore closeMMI()");
+		return;
+	}
 //	eDebug("closeMMI");
 	if ( open )
 	{
