@@ -2160,11 +2160,11 @@ struct countTimer
 
 struct getEntryString
 {
-	std::stringstream &result;
+	std::map<int, eString> &myList;
 	bool repeating;
 
-	getEntryString(std::stringstream &result, bool repeating)
-		:result(result), repeating(repeating)
+	getEntryString(std::map<int, eString> &myList, bool repeating)
+		:myList(myList), repeating(repeating)
 	{
 	}
 
@@ -2236,46 +2236,46 @@ struct getEntryString
 		tmp.strReplace("#CHANNEL#", channel);
 		tmp.strReplace("#DESCRIPTION#", description);
 
-	result << tmp;
+		myList[se->time_begin]= tmp;
 	}
 };
 
 static eString getControlTimerList()
 {
 	eString result = readFile(TEMPLATE_DIR + "timerListBody.tmp");
+	std::map<int, eString> myList;
+	std::map<int, eString>::iterator myIt;
 
 	// regular timers
-	int count1 = 0;
-	eTimerManager::getInstance()->forEachEntry(countTimer(count1, false));
-	// repeating timers
-	int count2 = 0;
-	eTimerManager::getInstance()->forEachEntry(countTimer(count2, true));
+	int count = 0;
+	eTimerManager::getInstance()->forEachEntry(countTimer(count, false));
 
-	if (count1 + count2)
+	eString tmp;
+	if (count)
 	{
-		std::stringstream tmp;
-		if (count1)
-		{
-			eTimerManager::getInstance()->forEachEntry(getEntryString(tmp, 0));
-			result.strReplace("#TIMER_REGULAR#", tmp.str());
-		}
-		else
-			result.strReplace("#TIMER_REGULAR#", "");
-		tmp.clear();
-		tmp.str("");
-		if (count2)
-		{
-			eTimerManager::getInstance()->forEachEntry(getEntryString(tmp, 1));
-			result.strReplace("#TIMER_REPEATED#", tmp.str());
-		}
-		else
-			result.strReplace("#TIMER_REPEATED#", "");
+		eTimerManager::getInstance()->forEachEntry(getEntryString(myList, 0));
+		for (myIt = myList.begin(); myIt != myList.end(); ++myIt)
+			tmp += myIt->second;
+		result.strReplace("#TIMER_REGULAR#", tmp);
 	}
 	else
+		result.strReplace("#TIMER_REGULAR#", "<tr><td colspan=\"7\">None</td></tr>");
+
+	tmp ="";
+	myList.clear();
+
+	// repeating timers
+	count = 0;
+	eTimerManager::getInstance()->forEachEntry(countTimer(count, true));
+	if (count)
 	{
-		result.strReplace("#TIMER_REGULAR#", "");
-		result.strReplace("#TIMER_REPEATED#", "<tr><td>No timer events available.</td></tr>");
+		eTimerManager::getInstance()->forEachEntry(getEntryString(myList, 1));
+			for (myIt = myList.begin(); myIt != myList.end(); ++myIt)
+				tmp += myIt->second;
+			result.strReplace("#TIMER_REPEATED#", tmp);
 	}
+	else
+		result.strReplace("#TIMER_REPEATED#", "<tr><td colspan=\"7\">None</td></tr>");
 
 	// buttons
 	result.strReplace("#BUTTONCLEANUP#", button(100, "Cleanup", BLUE, "javascript:cleanupTimerList()"));
