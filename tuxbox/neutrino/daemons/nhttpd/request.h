@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: request.h,v 1.24 2003/03/14 07:20:01 obi Exp $
+        $Id: request.h,v 1.25 2004/04/08 18:35:10 thegoodguy Exp $
 
         License: GPL
 
@@ -118,7 +118,7 @@ public:
 	bool ParseFirstLine(std::string zeile);
 	bool ParseHeader(std::string header);
 	bool ParseBoundaries(std::string bounds);
-	void URLDecode(std::string &encodedString);
+	static void URLDecode(std::string &encodedString);
 	bool HandleUpload(void);
 	bool HandleUpload(char *Name);
 	void PrintRequest(void);
