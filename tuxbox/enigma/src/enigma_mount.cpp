@@ -139,7 +139,7 @@ int eMountPoint::readMounts(eString localdir)
 	return 0;
 }
 
-int eMountPoint::doMount()
+int eMountPoint::mount()
 {
 	eString cmd;
 	eString ip;
@@ -152,6 +152,8 @@ int eMountPoint::doMount()
 		g_mntstatus1 = -1;
 		if (readMounts(localDir) != -1)
 		{
+			if (!(access(localDir.c_str(), R_OK)))
+				system(eString("mkdir" + localDir).c_str());
 			if (access(localDir.c_str(), R_OK))
 			{
 				
@@ -225,43 +227,14 @@ int eMountPoint::doMount()
 	else 
 		rc = -1; //mount point is already mounted
 	return rc;
-}
-
-bool eMountPoint::mount()
-{
-	eString message;
-	switch(doMount())
-	{
-		case -1:
-				message = "Mountpoint is already mounted.";
-				break;
-
-		case -2:
-				message = "Local directory is already used as mount point.";
-				break;
-
-		case -3:
-				message = "CIFS is not supported.";
-				break;
-
-		case -4:
-				message = "NFS is not supported.";
-				break;
-
-		case -5:
-				message = "Mount failed (timeout).";
-				break;
-
-		case -10:
-//				createFolder();
-				break;
-	}
-
-	if (message)
-	{
-		
-	}
-	return true;
+/*
+ -1: "Mountpoint is already mounted.";
+ -2: "Local directory is already used as mount point.";
+ -3: "CIFS is not supported.";
+ -4: "NFS is not supported.";
+ -5: "Mount failed (timeout).";
+-10: "Unable to create mount dir.";
+*/
 }
 
 bool eMountPoint::unmount()

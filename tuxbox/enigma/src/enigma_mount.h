@@ -13,7 +13,6 @@ class eMountPoint
 private:
 	bool in_proc_filesystems(eString);
 	int readMounts(eString);
-	int doMount();
 public:
 	int id;			//sequential number
 	eString	userName;	//username, only for CIFS
@@ -34,7 +33,7 @@ public:
 	~eMountPoint();
 	
 	void save(FILE *);
-	bool mount(void);
+	int mount(void);
 	bool unmount(void);
 };
 
