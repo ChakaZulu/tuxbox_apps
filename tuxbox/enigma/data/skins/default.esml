@@ -55,10 +55,13 @@
 	
 	 <values>
 		<value name="eWindow.titleFontSize" value="25" />
-		<value name="eWindow.borderSize" value="0" />
+		<value name="eWindow.borderLeft" value="0" />
+		<value name="eWindow.borderRight" value="0" />
+		<value name="eWindow.borderBottom" value="0" />
+		<value name="eWindow.borderTop" value="32" />
 		<value name="eWindow.titleOffsetX" value="10" />
 		<value name="eWindow.titleOffsetY" value="0" />
-		<value name="eWindow.titleSize" value="32" />
+		<value name="eWindow.titleHeight" value="32" />
 		<value name="fontsize" value="24" />
 	</values>
 
@@ -97,7 +100,7 @@
 
 	<object name="enigma_lcd_main">
 		<eZapLCDMain position="0:0" size="120:64">
-			<ePixmap position="0:0" size="120:17" pixmap="enigma_logo" />
+			<eLabel position="0:0" size="120:17" pixmap="enigma_logo" />
 			<eLabel position="0:17" size="120:34" font="NimbusSansL-Regular Sans L Regular;16" wrap="on" name="service_name" />
 			<eLabel position="74:51" size="46:13" font="NimbusSansL-Regular Sans L Regular;14" name="clock" align="right" />
 			<eProgress position="0:56" size="70:6" name="volume_bar" foregroundColor="255" leftColor="255" rightColor="0" border="1" />
@@ -107,16 +110,16 @@
 	<object name="enigma_lcd_menu">
 		<eZapLCDMenu position="0:0" size="120:64">
 			<eLabel position="0:0" size="120:18" font="NimbusSansL-Regular Sans L Regular;14" name="title" />
-		  <ePixmap position="0:18" size="120:3" pixmap="lcd_menu" />
+		  <eLabel position="0:18" size="120:3" pixmap="lcd_menu" />
 			<eLabel position="0:22" size="120:43" font="NimbusSansL-Regular Sans L Regular;14" name="element" wrap="on" />
-			<!--ePixmap position="0:61" size="120:3" pixmap="lcd_menu" /-->
+			<!--eLabel position="0:61" size="120:3" pixmap="lcd_menu" /-->
 		</eZapLCDMenu>
 	</object>
 
 	<object name="enigma_lcd_scart">
 		<eZapLCDScart position="0:0" size="120:64">
-			<ePixmap position="0:0" size="120:17" pixmap="enigma_logo" />
-		  <ePixmap position="4:24" size="112:38" pixmap="lcd_scart" />	
+			<eLabel position="0:0" size="120:17" pixmap="enigma_logo" />
+		  <eLabel position="4:24" size="112:38" pixmap="lcd_scart" />	
 		</eZapLCDScart>
 	</object>
 
@@ -175,12 +178,12 @@
 
 			<eProgress position="14:62" size="95:17" name="progress_bar" foregroundColor="osd_normal" border="1" />
 
-			<ePixmap position="140:37" size="104:24" pixmap="osd_crypt_on" name="osd_crypt_on" />
-			<ePixmap position="163:39" size="104:24" pixmap="osd_format_on" name="osd_format_on"/>
-			<ePixmap position="208:41" size="104:24" pixmap="osd_dolby_on" name="osd_dolby_on"/>
-			<ePixmap position="163:39" size="104:24" pixmap="osd_format_off" name="osd_format_off"/>
-			<ePixmap position="208:41" size="104:24" pixmap="osd_dolby_off" name="osd_dolby_off"/>
-			<ePixmap position="140:37" size="104:24" pixmap="osd_crypt_off" name="osd_crypt_off"/>
+			<eLabel position="140:37" size="104:24" pixmap="osd_crypt_on" name="osd_crypt_on" />
+			<eLabel position="163:39" size="104:24" pixmap="osd_format_on" name="osd_format_on"/>
+			<eLabel position="208:41" size="104:24" pixmap="osd_dolby_on" name="osd_dolby_on"/>
+			<eLabel position="163:39" size="104:24" pixmap="osd_format_off" name="osd_format_off"/>
+			<eLabel position="208:41" size="104:24" pixmap="osd_dolby_off" name="osd_dolby_off"/>
+			<eLabel position="140:37" size="104:24" pixmap="osd_crypt_off" name="osd_crypt_off"/>
 			<eLabel name="description" />
 			
 			<eLabel name="button_red_enabled" position="243:39" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_red" />

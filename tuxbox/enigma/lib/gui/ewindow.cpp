@@ -9,8 +9,8 @@
 eWindow::eWindow(int takefocus)
 	:eWidget(0, takefocus)
 {
-	titleSize=10;
-	border=5;
+	borderTop=10;
+	borderLeft=borderRight=borderBottom=5;
 	setBackgroundColor(eSkin::getActive()->queryScheme("backgroundColor"));
 	setForegroundColor(eSkin::getActive()->queryScheme("eWindow.titleBarColor"));
 
@@ -24,19 +24,23 @@ eWindow::eWindow(int takefocus)
 	iBottomRight=eSkin::getActive()->queryImage("eWindow.bottomRight");
 	
 	if (iLeft)
-		if (border<iLeft->x)
-			border=iLeft->x;
+		if (borderLeft<iLeft->x)
+			borderLeft=iLeft->x;
 	if (iRight)
-		if (border<iRight->x)
-			border=iRight->x;
+		if (borderRight<iRight->x)
+			borderRight=iRight->x;
 	if (iTopLeft)
-		titleSize=iTopLeft->y;
-	
-	border=eSkin::getActive()->queryValue("eWindow.borderSize", border);
-	titleSize=eSkin::getActive()->queryValue("eWindow.titleSize", 30);
+		borderTop=iTopLeft->y;
+
+	borderLeft=eSkin::getActive()->queryValue("eWindow.borderLeft", borderLeft);
+	borderRight=eSkin::getActive()->queryValue("eWindow.borderRight", borderRight);
+	borderBottom=eSkin::getActive()->queryValue("eWindow.borderBottom", borderBottom);
+	borderTop=eSkin::getActive()->queryValue("eWindow.borderTop", 30);
 	titleOffsetX=eSkin::getActive()->queryValue("eWindow.titleOffsetX", 10);
 	titleOffsetY=eSkin::getActive()->queryValue("eWindow.titleOffsetY", 10);
+	titleBorderY=eSkin::getActive()->queryValue("eWindow.titleBorderY", 0);
 	titleFontSize=eSkin::getActive()->queryValue("eWindow.titleFontSize", 20);
+	titleHeight=eSkin::getActive()->queryValue("eWindow.titleHeight", titleFontSize+10);
 }
 
 eWindow::~eWindow()
@@ -49,7 +53,7 @@ void eWindow::OnFontSizeChanged(int NewFontSize)
 
 void eWindow::redrawWidget(gPainter *target, const eRect &where)
 {
-	if (where.contains(eRect(0, 0, width(), titleSize)))
+	if (where.contains(eRect(0, 0, width(), borderTop)))
 		drawTitlebar(target);
 
 	if (LCDTitle)
@@ -84,7 +88,7 @@ void eWindow::drawTitlebar(gPainter *target)
 		target->flush();
 	} else
 	{
-		target->fill(eRect(0, 0, width(), titleSize));
+		target->fill(eRect(0, 0, width(), borderTop));
 		target->flush();
 	}
 
@@ -144,15 +148,18 @@ void eWindow::drawTitlebar(gPainter *target)
 	}
 	
 	target->flush();
+	
+	target->fill(eRect(titleOffsetX, titleOffsetY, width()-titleOffsetX-titleBorderY, titleHeight));
+	target->flush();
 
 	target->setFont(gFont("NimbusSansL-Regular Sans L Regular", titleFontSize));
-	target->renderText(eRect(titleOffsetX, titleOffsetY, width()-titleOffsetX, titleSize), text);
+	target->renderText(eRect(titleOffsetX, titleOffsetY, width()-titleOffsetX-titleBorderY, titleHeight), text);
 	target->flush();
 }
 
 void eWindow::recalcClientRect()
 {
-	clientrect=eRect(border, titleSize, size.width()-border*2, size.height()-titleSize-border);
+	clientrect=eRect(borderLeft, borderTop, size.width()-borderLeft-borderRight, size.height()-borderTop-borderBottom);
 }
 
 int eWindow::eventFilter(const eWidgetEvent &event)
@@ -160,7 +167,7 @@ int eWindow::eventFilter(const eWidgetEvent &event)
 	switch (event.type)
 	{
 	case eWidgetEvent::changedText:
-		redraw(eRect(0, 0, width(), titleSize));
+		redraw(eRect(0, 0, width(), borderTop));
 		return 1;
 		break;
 	}
