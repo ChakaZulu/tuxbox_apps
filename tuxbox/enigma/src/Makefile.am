@@ -18,7 +18,7 @@ enigma_SOURCES = \
 	audio_dynamic.cpp setup_keyboard.cpp wizard_fpupdate.cpp enigma_mount.cpp \
 	enigma_dyn_mount.cpp enigma_dyn_utils.cpp enigma_dyn_wap.cpp enigma_dyn_conf.cpp \
 	enigma_dyn_flash.cpp enigma_dyn_xml.cpp enigma_streamer.cpp \
-	enigma_processutils.cpp
+	enigma_processutils.cpp picviewer.cpp
 
 enigma_LDADD_WHOLE = \
 	$(top_builddir)/lib/driver/libenigma_driver.a \
@@ -29,8 +29,7 @@ enigma_LDADD_WHOLE = \
 	$(top_builddir)/lib/gui/libenigma_gui.a \
 	$(top_builddir)/lib/gdi/libenigma_gdi.a \
 	$(top_builddir)/lib/socket/libenigma_socket.a \
-	$(top_builddir)/lib/system/libenigma_system.a \
-	$(top_builddir)/lib/picviewer/libenigma_picviewer.a
+	$(top_builddir)/lib/system/libenigma_system.a 
 
 enigma_LDADD = \
 	@FREETYPE_LIBS@ \

@@ -1,3 +1,5 @@
+#ifdef PICVIEWER
+
 #include <algorithm>
 #include <list>
 
@@ -45,8 +47,8 @@ ePicViewerStyleSelector::ePicViewerStyleSelector(int ssel)
 	int last=1;
 
 	eListBoxEntryText *sel[3];
-	sel[0] = new eListBoxEntryText(&list,_("Show Picture"), (void*)1, 0, _("show this picture"));
-	sel[1] = new eListBoxEntryText(&list,_("Show Slideshow"), (void*)2, 0, _("show slideshow of all pictures in this directory"));
+	sel[0] = new eListBoxEntryText(&list,_("Show Picture"), (void *)1, 0, _("show this picture"));
+	sel[1] = new eListBoxEntryText(&list,_("Show Slideshow"), (void *)2, 0, _("show slideshow of all pictures in this directory"));
 
 	list.setCurrent(sel[last-1]);
 	CONNECT(list.selected, ePicViewerStyleSelector::entrySelected);
@@ -75,19 +77,19 @@ void ePicViewerStyleSelector::entrySelected(eListBoxEntryText* e)
 		int selection = (int)e->getKey();
 		switch(selection)
 		{
-			case 1: printf("[PICVIEWER] show slideshow now...\n");
+			case 1: printf("[PICVIEWER] show slide now...\n");
+//				ePictureViewer::getInstance()->displayImage("picture.jpg");
+				break;
+			case 2:
+				printf("[PICVIEWER] show slideshow now...\n");
 				/*
 				for (all pics in directory)
-					pictureViewer->("picture.jpb");
+					ePictureViewer::getInstance()->displayImage("picture.jpg");
 				*/
 				break;
-			default: 
-				printf("[PICVIEWER] show picture now...\n");
-				ePictureViewer::getInstance()->displayImage("picture.jpg");
-				break;
 		}
-		close((int)e->getKey()); // ???
 	}
-	else
-		close(-1);
+	close(-1);
 }
+#endif
+
