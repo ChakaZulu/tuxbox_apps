@@ -1,7 +1,14 @@
 //
-// $Id: channellist.cpp,v 1.30 2001/10/10 17:17:13 field Exp $
+// $Id: channellist.cpp,v 1.31 2001/10/11 21:04:58 rasc Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.31  2001/10/11 21:04:58  rasc
+// - EPG:
+//   Event: 2 -zeilig: das passt aber noch nicht  ganz (read comments!).
+//   Key-handling etwas harmonischer gemacht  (Left/Right/Exit)
+// - Code etwas restrukturiert und eine Fettnaepfe meinerseits beseitigt
+//   (\r\n wg. falscher CSV Einstellung...)
+//
 // Revision 1.30  2001/10/10 17:17:13  field
 // zappen auf onid_sid umgestellt
 //

@@ -1,7 +1,18 @@
 //
-// $Id: eventlist.cpp,v 1.13 2001/10/04 19:28:44 fnbrd Exp $
+// $Id: eventlist.cpp,v 1.14 2001/10/11 21:04:58 rasc Exp $
+//
+//  -- EPG Event List // Vorschau 
+//
+//
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.14  2001/10/11 21:04:58  rasc
+// - EPG:
+//   Event: 2 -zeilig: das passt aber noch nicht  ganz (read comments!).
+//   Key-handling etwas harmonischer gemacht  (Left/Right/Exit)
+// - Code etwas restrukturiert und eine Fettnaepfe meinerseits beseitigt
+//   (\r\n wg. falscher CSV Einstellung...)
+//
 // Revision 1.13  2001/10/04 19:28:44  fnbrd
 // Eventlist benutzt ID bei zapit und laesst sich per rot wieder schliessen.
 //
@@ -115,6 +126,7 @@ void EventList::readEvents(unsigned onidSid, const std::string& channelname)
         char etime[6];
         char eduration[10];
         char ename[100];
+        char datetime2[100];
         char *actPos=pData;
 
         struct  tm tmZeit;
@@ -154,12 +166,18 @@ void EventList::readEvents(unsigned onidSid, const std::string& channelname)
                 current_event++;
 
             evt->epg.description=std::string(ename);
-            evt->datetimeduration=std::string(edate);
-            evt->datetimeduration+=std::string(" ");
-            evt->datetimeduration+=std::string(etime);
-            evt->datetimeduration+=std::string(" (");
+
+//$$$ RASC sagt:
+//$$$ TODO Localization of weekday and month
+//$$$ Das muss auch noch graphisch etwas anderst gemacht werden!
+//$$$ Die Darstellung ist ein erster Test..., so ist es unuebersichtlich!!
+//$$$ Vorschlaege willkommen: (Font, aufbaue, etc)
+
+            strftime(datetime2,sizeof(datetime2), "%a. %H:%M -  %d. %b  ",&tmZeit);
+            evt->datetimeduration=std::string(datetime2);
+            evt->datetimeduration+=std::string("  [");
             evt->datetimeduration+=std::string(eduration);
-            evt->datetimeduration+=std::string(" m)");
+            evt->datetimeduration+=std::string(" min] ");
 
 //            printf("id: %s - name: %s\n", epgID, evt->name.c_str());
 //    tmp->number=number;
@@ -193,9 +211,10 @@ EventList::EventList()
     current_event = 0;
 
 	width = 580;
-	height = 440;
+//	height = 440;
+	height = 480;
 	theight= g_Fonts->menu_title->getHeight();
-	fheight= g_Fonts->channellist->getHeight();
+	fheight= g_Fonts->channellist->getHeight() * 2 + 2;
 	listmaxshow = (height-theight-0)/fheight;
 	height = theight+0+listmaxshow*fheight; // recalc height
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
@@ -288,27 +307,30 @@ void EventList::exec(unsigned onidSid, const std::string& channelname)
 		}
 		else if (key==CRCInput::RC_ok)
 		{
-            loop= false;
+			loop= false;
+		}
+                else if (key==CRCInput::RC_left) {
+			loop= false;
 		}
                 else if (key==CRCInput::RC_red) {
-                  loop= false;
+			loop= false;
 		}
-   		else if (key==CRCInput::RC_help)
+   		else if (key==CRCInput::RC_help || key==CRCInput::RC_right)
 		{
-            event* evt = evtlist[selected];
-            if ( evt->epg.id != 0 )
-            {
-                hide();
+		  event* evt = evtlist[selected];
+		  if ( evt->epg.id != 0 ) {
+			hide();
 
-                g_EpgData->show("", 0, evt->epg.id, &evt->epg.startzeit);
+			g_EpgData->show("", 0, evt->epg.id, &evt->epg.startzeit);
 
-                paintHead();
-                paint();
-            }
-        }
+			paintHead();
+			paint();
+		  }
+		}
 	}
 
     hide();
+
 }
 
 void EventList::hide()
@@ -344,8 +366,12 @@ void EventList::paintItem(unsigned int pos)
 //		printf("date time duration '%s'\n", evt->datetimeduration.c_str());
 
 
-        g_Fonts->channellist_number->RenderString(x+ 10, ypos+ fheight, 157, evt->datetimeduration.c_str(), color, fheight);
-		g_Fonts->channellist->RenderString(x+ 170, ypos+ fheight, width- 180, evt->epg.description.c_str(), color);
+//        g_Fonts->channellist_number->RenderString(x+ 5, ypos+ fheight/2, width-10, evt->datetimeduration.c_str(), color, fheight/2);
+//$$$ RASC: das color +1 ist falsch hier (Absicht, damit man sieht hier muss was getan werden)
+//$$$ auch sollten wg. der besseren Darstellung andere Fontmappings benutzt werden...
+        g_Fonts->channellist->RenderString(x+ 5, ypos+ fheight/2+3, width-10, evt->datetimeduration.c_str(), color+1 , fheight/2);
+		g_Fonts->channellist->RenderString(x+  5, ypos+ fheight, 35, "-  ", color);
+		g_Fonts->channellist->RenderString(x+ 40, ypos+ fheight, width- 40, evt->epg.description.c_str(), color);
 	}
 }
 

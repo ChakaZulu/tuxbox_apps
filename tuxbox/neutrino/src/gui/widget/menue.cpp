@@ -1,9 +1,16 @@
 /*
-$Id: menue.cpp,v 1.18 2001/10/10 01:20:10 McClean Exp $
+$Id: menue.cpp,v 1.19 2001/10/11 21:04:58 rasc Exp $
 
 
 History:
  $Log: menue.cpp,v $
+ Revision 1.19  2001/10/11 21:04:58  rasc
+ - EPG:
+   Event: 2 -zeilig: das passt aber noch nicht  ganz (read comments!).
+   Key-handling etwas harmonischer gemacht  (Left/Right/Exit)
+ - Code etwas restrukturiert und eine Fettnaepfe meinerseits beseitigt
+   (\r\n wg. falscher CSV Einstellung...)
+
  Revision 1.18  2001/10/10 01:20:10  McClean
  menue changed
 
@@ -55,36 +62,34 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
     int pos;
     int key;
 
-	if ( parent )
-		parent->hide();
 
-	paint();
-	int retval = CMenuItem::RETURN_REPAINT;
+    if ( parent ) parent->hide();
 
-    do
-	{
-		key = g_RCInput->getKey(300);
+    paint();
+    int retval = CMenuItem::RETURN_REPAINT;
 
-		if ( (key==CRCInput::RC_up) || (key==CRCInput::RC_down) )
-		{
-            //search next / prev selectable item
-			for (unsigned int count=1; count< items.size(); count++)
+    do {
+	key = g_RCInput->getKey(300);
+
+	switch (key) {
+
+		case (CRCInput::RC_up) :
+		case (CRCInput::RC_down) :
 			{
-                if (key==CRCInput::RC_up)
-                {
+			   //search next / prev selectable item
+			   for (unsigned int count=1; count< items.size(); count++) {
+
+				if (key==CRCInput::RC_up) {
 				    pos = selected- count;
 				    if ( pos<0 )
-    					pos = items.size()-1;
-                }
-                else
-                {
-                    pos = (selected+ count)%items.size();
-                }
+					pos = items.size()-1;
+				} else {
+				    pos = (selected+ count)%items.size();
+				}
 
 				CMenuItem* item = items[pos];
 
-				if ( item->isSelectable() )
-				{
+				if ( item->isSelectable() ) {
 					//clear prev. selected
 					items[selected]->paint( false );
 					//select new
@@ -92,45 +97,52 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 					selected = pos;
 					break;
 				}
-			}			
-		}
-		else if (key==CRCInput::RC_ok)
-		{
-            //exec this item...
-			CMenuItem* item = items[selected];
-			int ret = item->exec( this );
+			   }
+			}
+			break;
 		
-			if(ret==CMenuItem::RETURN_EXIT)
+		case (CRCInput::RC_ok) :
 			{
-                key = CRCInput::RC_timeout;
+				//exec this item...
+				CMenuItem* item = items[selected];
+				int ret = item->exec( this );
+		
+				if(ret==CMenuItem::RETURN_EXIT) {
+					key = CRCInput::RC_timeout;
+				} else if(ret==CMenuItem::RETURN_EXIT_ALL) {
+					retval = CMenuItem::RETURN_EXIT_ALL;
+					key = CRCInput::RC_timeout;
+				} else if(ret==CMenuItem::RETURN_REPAINT) {
+					paint();
+				}
 			}
-			else if(ret==CMenuItem::RETURN_EXIT_ALL)
-			{
-				retval = CMenuItem::RETURN_EXIT_ALL;
-                key = CRCInput::RC_timeout;
-			}
-			else if(ret==CMenuItem::RETURN_REPAINT)
-			{
-				paint();
-			}
-		}
-        else if (key==CRCInput::RC_home)
-		{
-//            retval = CMenuItem::RETURN_EXIT;
-            key = CRCInput::RC_timeout;
-        } else if (key != CRCInput::RC_timeout) {
-		// unknown Key, push it back... and leave
-		g_RCInput->pushbackKey (key);
-            key = CRCInput::RC_timeout;
+			break;
+
+		case (CRCInput::RC_home):
+			key = CRCInput::RC_timeout;
+			break;
+
+		case (CRCInput::RC_left):
+		case (CRCInput::RC_right):
+			key = CRCInput::RC_timeout;
+			break;
+
+		case (CRCInput::RC_timeout):
+			break;
+
+		default:
+			// unknown Key, push it back... and leave
+			g_RCInput->pushbackKey (key);
+			key = CRCInput::RC_timeout;
+			break;
         }
 
-	} while ( key!=CRCInput::RC_timeout );
+   } while ( key!=CRCInput::RC_timeout );
 
-	hide();
+   hide();
+   g_lcdd->setMode(LCDM_TV, g_Locale->getText(name));
 
-    g_lcdd->setMode(LCDM_TV, g_Locale->getText(name));
-
-	return retval;
+   return retval;
 }
 
 void CMenuWidget::hide()

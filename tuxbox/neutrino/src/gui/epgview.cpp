@@ -1,7 +1,14 @@
 //
-// $Id: epgview.cpp,v 1.14 2001/09/22 13:18:07 field Exp $
+// $Id: epgview.cpp,v 1.15 2001/10/11 21:04:58 rasc Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.15  2001/10/11 21:04:58  rasc
+// - EPG:
+//   Event: 2 -zeilig: das passt aber noch nicht  ganz (read comments!).
+//   Key-handling etwas harmonischer gemacht  (Left/Right/Exit)
+// - Code etwas restrukturiert und eine Fettnaepfe meinerseits beseitigt
+//   (\r\n wg. falscher CSV Einstellung...)
+//
 // Revision 1.14  2001/09/22 13:18:07  field
 // epg-anzeige bug gefixt
 //
@@ -264,7 +271,7 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
 			if (toShow)
 				showText(showPos,textypos);
 		}
-		else if ( (key==CRCInput::RC_ok) || (key==CRCInput::RC_help)  || (key==g_settings.key_channelList_cancel) )
+		else if ( (key==CRCInput::RC_ok) || (key==CRCInput::RC_help)  || (key==g_settings.key_channelList_cancel) || (key==CRCInput::RC_left))
 		{
 			loop = false;
 		}
