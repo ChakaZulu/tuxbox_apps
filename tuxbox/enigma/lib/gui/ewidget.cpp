@@ -15,7 +15,7 @@ eWidget::eWidget(eWidget *parent, int takefocus):
 	backgroundColor(parent?gColor(-1):gColor(0x20)),
 	foregroundColor(parent?parent->foregroundColor:gColor(0x2F))
 {
-	target=parent?parent->target:(gFBDC::getInstance());
+	target=parent?0:gFBDC::getInstance();
 	in_loop=0;
 	state=parent?stateShow:0;
  	have_focus=0;
@@ -433,7 +433,7 @@ gPainter *eWidget::getPainter(QRect area)
 	QRect myclip=QRect(getAbsolutePosition(), size);
 	if (parent)
 		myclip&=parent->clientclip;
-	gPainter *p=new gPainter(*target, myclip);
+	gPainter *p=new gPainter(*getTLW()->target, myclip);
 	if (!area.isNull())
 		p->clip(area);
 	p->setForegroundColor(foregroundColor);
