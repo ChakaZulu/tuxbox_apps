@@ -1039,6 +1039,18 @@ void eNFSSetup::okPressed()
 		eConfig::getInstance()->setKey((cmd+"password").c_str(), pass->getText().c_str());
 		eConfig::getInstance()->setKey((cmd+"automount").c_str(), (int)doamount->isChecked());
 	}
+	
+	eMessageBox msg(
+_               ("NFS-Entry stored. Further entry?\n"),
+_		("NFS-Setup..."),
+		eMessageBox::btYes|eMessageBox::btNo, eMessageBox::btNo);
+		msg.show();
+		int res=msg.exec();
+		msg.hide();
+	if (res != eMessageBox::btYes)
+		close(0);
+	else
+		nextPressed();
 }
 
 bool eNFSSetup::ismounted()
