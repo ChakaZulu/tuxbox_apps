@@ -218,6 +218,8 @@ int CExtendedInput::exec( CMenuTarget* parent, const std::string & )
 			} else {
 				//keine änderungen - beenden ok
 				loop=false;
+				if(cancel != NULL)
+					*cancel = true;
 			}
 		}
 		else if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
