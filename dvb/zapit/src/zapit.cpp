@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
   
-  $Id: zapit.cpp,v 1.20 2001/10/18 13:27:11 field Exp $
+  $Id: zapit.cpp,v 1.21 2001/10/18 23:04:48 field Exp $
   
   Done 2001 by Philipp Leusmann using many parts of code from older 
   applications by the DBoxII-Project.
@@ -70,6 +70,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   $Log: zapit.cpp,v $
+  Revision 1.21  2001/10/18 23:04:48  field
+  vtxt-neues cmd
+
   Revision 1.20  2001/10/18 13:27:11  field
   vtxt
 
@@ -235,6 +238,9 @@ void write_lcd(char *name) {
   close(lcdd_fd);
 }
 
+// nachdem #include "gen_vbi.h" noch nicht geht (noch nicht offiziell im cdk...)
+#define VBI_START_VTXT 1
+#define VBI_STOP_VTXT 2
 
 int set_vtxt(uint vpid)
 {
@@ -247,15 +253,22 @@ int set_vtxt(uint vpid)
         return -fd;
     }
 
-// nachdem #include "gen_vbi.h" noch nicht geht (noch nicht offiziell im cdk...)
-#define VBI_SETPID 1
-
-    if (ioctl(fd, VBI_SETPID, vpid) < 0)
+    if (vpid == 0)
     {
-        perror("VBI_SETPID");
-        return 1;
+        if (ioctl(fd, VBI_STOP_VTXT, vpid) < 0)
+        {
+            perror("VBI_STOP_VTXT");
+            return 1;
+        }
     }
-
+    else
+    {
+        if (ioctl(fd, VBI_START_VTXT, vpid) < 0)
+        {
+            perror("VBI_START_VTXT");
+            return 1;
+        }
+    }
     close(fd);
     return 0;
 }
@@ -374,8 +387,8 @@ pids parse_pmt(int pid, int ca_system_id)
             return ret_pids;
         }
       
-/*
-        FILE *file=fopen("zapit.pmt", "wb");
+
+/*        FILE *file=fopen("zapit.pmt", "wb");
         if(file) {
             fwrite(buffer, sec_len+ 3, 1, file);
             fclose(file);
@@ -1839,7 +1852,7 @@ int main(int argc, char **argv) {
   }
   
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.20 2001/10/18 13:27:11 field Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.21 2001/10/18 23:04:48 field Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
