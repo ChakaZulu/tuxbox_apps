@@ -1,5 +1,5 @@
 /*
- * $Id: ci.cpp,v 1.2 2002/07/14 00:38:23 obi Exp $
+ * $Id: ci.cpp,v 1.3 2002/07/17 02:16:50 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -71,7 +71,6 @@ CEsInfo::~CEsInfo ()
 CCaPmt::CCaPmt ()
 {
 	ca_pmt_tag = 0x9F8032;
-	length_field = 0;
 	program_info_length = 0;
 }
 
@@ -88,5 +87,32 @@ CCaPmt::~CCaPmt ()
 	{
 		delete es_info[i];
 	}
+}
+
+unsigned int CCaPmt::getLength ()
+{
+	unsigned char size_indicator = (length_field[0] >> 7) & 0x01;
+	unsigned int length_value = 0;
+	unsigned char length_field_size = 0;
+
+	if (size_indicator == 0)
+	{
+		length_field_size = 1;
+		length_value = length_field[0] & 0x7F;
+	}
+
+	else if (size_indicator == 1)
+	{
+		unsigned int i;
+
+		length_field_size = length_field[0] & 0x7F;
+
+		for (i = 0; i < length_field_size; i++)
+		{
+			length_value = (length_value << 8) | length_field[i + 1];
+		}
+	}
+
+	return 3 + length_field_size + length_value;
 }
 

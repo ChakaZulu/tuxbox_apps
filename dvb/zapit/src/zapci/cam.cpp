@@ -1,5 +1,5 @@
 /*
- * $Id: cam.cpp,v 1.16 2002/07/16 22:12:18 obi Exp $
+ * $Id: cam.cpp,v 1.17 2002/07/17 02:16:50 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -119,12 +119,8 @@ int CCam::sendMessage (unsigned char * data, unsigned short length)
 
 int CCam::setCaPmt (CCaPmt * caPmt)
 {
-	/*
-	 * there is a spec violation inside, when length_field > 127
-	 * just hope that this will never happen :-)
-	 */
-
-	unsigned char buffer[caPmt->length_field + 4];
+	unsigned char buffer[caPmt->getLength()];
+	unsigned char offset;
 	unsigned short pos;
 	unsigned short pos2;
 	unsigned short i;
@@ -134,19 +130,26 @@ int CCam::setCaPmt (CCaPmt * caPmt)
 	buffer[0] = caPmt->ca_pmt_tag >> 16;
 	buffer[1] = caPmt->ca_pmt_tag >> 8;
 	buffer[2] = caPmt->ca_pmt_tag;
-	buffer[3] = caPmt->length_field;
-	buffer[4] = caPmt->ca_pmt_list_management;
-	buffer[5] = caPmt->program_number >> 8;
-	buffer[6] = caPmt->program_number;
-	buffer[7] = (caPmt->reserved1 << 6) | (caPmt->version_number << 1) | caPmt->current_next_indicator;
-	buffer[8] = (caPmt->reserved2 << 4) | (caPmt->program_info_length >> 8);
-	buffer[9] = caPmt->program_info_length;
+
+	for (i = 0; i < caPmt->length_field.size(); i++)
+	{
+		buffer[i + 3] = caPmt->length_field[i];
+	}
+
+	offset = i - 1;
+
+	buffer[offset + 4] = caPmt->ca_pmt_list_management;
+	buffer[offset + 5] = caPmt->program_number >> 8;
+	buffer[offset + 6] = caPmt->program_number;
+	buffer[offset + 7] = (caPmt->reserved1 << 6) | (caPmt->version_number << 1) | caPmt->current_next_indicator;
+	buffer[offset + 8] = (caPmt->reserved2 << 4) | (caPmt->program_info_length >> 8);
+	buffer[offset + 9] = caPmt->program_info_length;
 
 	if (caPmt->program_info_length != 0)
 	{
-		buffer[10] = caPmt->ca_pmt_cmd_id;
+		buffer[offset + 10] = caPmt->ca_pmt_cmd_id;
 
-		for (pos = 11, i = 0; pos < caPmt->program_info_length + 10; pos += caPmt->ca_descriptor[i]->descriptor_length + 2, i++)
+		for (pos = offset + 11, i = 0; pos < caPmt->program_info_length + offset + 10; pos += caPmt->ca_descriptor[i]->descriptor_length + 2, i++)
 		{
 			buffer[pos] = caPmt->ca_descriptor[i]->descriptor_tag;
 			buffer[pos + 1] = caPmt->ca_descriptor[i]->descriptor_length;
@@ -162,7 +165,7 @@ int CCam::setCaPmt (CCaPmt * caPmt)
 		}
 	}
 
-	for (pos = caPmt->program_info_length + 10, i = 0; pos < caPmt->length_field + 4; pos += caPmt->es_info[i]->ES_info_length + 5, i++)
+	for (pos = caPmt->program_info_length + offset + 10, i = 0; pos < caPmt->getLength(); pos += caPmt->es_info[i]->ES_info_length + 5, i++)
 	{
 		buffer[pos] = caPmt->es_info[i]->stream_type;
 		buffer[pos + 1] = (caPmt->es_info[i]->reserved1 << 5) | (caPmt->es_info[i]->elementary_PID >> 8);

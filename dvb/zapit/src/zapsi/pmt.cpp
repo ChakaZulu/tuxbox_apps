@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.19 2002/07/14 00:38:23 obi Exp $
+ * $Id: pmt.cpp,v 1.20 2002/07/17 02:16:50 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -52,7 +52,7 @@
  * 0xc6 User Private (Canal+)
  */
 
-unsigned short parse_ES_info (unsigned char * buffer, CZapitChannel * channel, CCaPmt * caPmt)
+unsigned short parse_ES_info (unsigned char * buffer, CZapitChannel * channel, CCaPmt * caPmt, unsigned int * ca_pmt_length)
 {
 	unsigned short ES_info_length;
 	unsigned short pos;
@@ -246,7 +246,7 @@ unsigned short parse_ES_info (unsigned char * buffer, CZapitChannel * channel, C
 		esInfo->ES_info_length += 1;
 	}
 
-	caPmt->length_field += esInfo->ES_info_length + 5;
+	*ca_pmt_length += esInfo->ES_info_length + 5;
 	caPmt->es_info.insert(caPmt->es_info.end(), esInfo);
 
 	return ES_info_length;
@@ -258,6 +258,9 @@ int parse_pmt (int demux_fd, CZapitChannel * channel)
 
 	/* current position in buffer */
 	unsigned short i;
+
+	/* ca pmt length field value */
+	unsigned int ca_pmt_length;
 
 	/* length of elementary stream description */
 	unsigned short ES_info_length;
@@ -285,7 +288,7 @@ int parse_pmt (int demux_fd, CZapitChannel * channel)
 	CCaPmt * caPmt = new CCaPmt();
 
 	/* ca pmt */
-	caPmt->length_field = 0x06;
+	ca_pmt_length = 6;
 	caPmt->program_number = (buffer[3] << 8) + buffer[4];
 	caPmt->reserved1 = buffer[5] >> 6;
 	caPmt->version_number = (buffer[5] >> 1) & 0x1F;
@@ -321,13 +324,42 @@ int parse_pmt (int demux_fd, CZapitChannel * channel)
 	{
 		caPmt->ca_pmt_cmd_id = 0x01; // ok_descrambling
 		caPmt->program_info_length += 1;
-		caPmt->length_field += caPmt->program_info_length;
+		ca_pmt_length += caPmt->program_info_length;
 	}
 
 	/* pmt */
 	for (i = 12 + program_info_length; i < section_length - 1; i += ES_info_length + 5)
 	{
-		ES_info_length = parse_ES_info(buffer + i, channel, caPmt);
+		ES_info_length = parse_ES_info(buffer + i, channel, caPmt, &ca_pmt_length);
+	}
+
+	printf("ca_pmt_length: %d\n", ca_pmt_length);
+
+	if (ca_pmt_length < 128)
+	{
+		caPmt->length_field.push_back(ca_pmt_length);
+	}
+	else
+	{
+		unsigned int mask = 0xFF;
+		unsigned char length_field_size = 1;
+
+		while ((ca_pmt_length & mask) != ca_pmt_length)
+		{
+			length_field_size++;
+			mask = (mask << 8) & 0xFF;
+		}
+
+		printf("length_field_size: %d, mask: %08x\n", length_field_size, mask);
+
+		caPmt->length_field.push_back((1 << 7) | length_field_size);
+
+		printf("length_field[0]: %02x, length_field.size(): %02x\n", caPmt->length_field[0], caPmt->length_field.size());
+
+		for (i = 0; i < length_field_size; i++)
+		{
+			caPmt->length_field.push_back(ca_pmt_length >> ((length_field_size - i - 1) << 3));
+		}
 	}
 
 	channel->setCaPmt(caPmt);

@@ -1,5 +1,5 @@
 /*
- * $Id: ci.h,v 1.1 2002/05/05 01:52:36 obi Exp $
+ * $Id: ci.h,v 1.2 2002/07/17 02:16:50 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -69,9 +69,10 @@ class CCaPmt : public CCaTable
 	public:
 		CCaPmt ();
 		~CCaPmt ();
+		unsigned int getLength ();
 
 		unsigned int	ca_pmt_tag		: 24;
-		unsigned char	length_field		: 8;
+		std::vector <unsigned char> length_field;
 		unsigned char	ca_pmt_list_management	: 8;
 		unsigned short	program_number		: 16;
 		unsigned char	reserved1		: 2;
