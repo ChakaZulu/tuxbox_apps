@@ -222,6 +222,7 @@
 		<img name="key.29" src="button_dbox.png" />
 		<img name="key.30" src="button_home.png" />
 		<img name="key.31" src="button_mute.png" />
+		<img name="key.32" src="button_menu.png" />
 	</images>
 
 	<colors>
