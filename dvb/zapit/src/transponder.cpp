@@ -1,5 +1,5 @@
 /*
- * $Id: transponder.cpp,v 1.2 2002/05/15 22:04:29 obi Exp $
+ * $Id: transponder.cpp,v 1.3 2002/05/15 22:14:33 McClean Exp $
  *
  * (C) 2002 by Steffen Hehn "McClean" <McClean@tuxbox.org>
  *
@@ -31,6 +31,7 @@ CTransponder::CTransponder()
 	symbolrate = 0;
 	polarisation = 0;
 	innerFec = 0;
+	diseqc = 0;
 	originalNetworkId = 0;
 	transportStreamId = 0;
 }
@@ -73,6 +74,16 @@ unsigned char CTransponder::getPolarisation()
 void CTransponder::setPolarisation(unsigned char cpolarisation)
 {
 	polarisation = cpolarisation;
+}
+
+unsigned char CTransponder::getDiseqc()
+{
+	return diseqc;
+}
+
+void CTransponder::setDiseqc(unsigned char cdiseqc)
+{
+	diseqc = cdiseqc;
 }
 
 unsigned char CTransponder::getInnerFec()
