@@ -563,9 +563,6 @@ static eString getZapContent(eString mode, eString path)
 		}
 	}
 
-	if (result == "")
-		result = "No Info available";
-
 	return result;
 }
 
@@ -810,7 +807,7 @@ static eString getEITC()
 	}
 	else
 	{
-		result=" ";
+		result="no eit";
 	}
 
 	return result;
@@ -1341,8 +1338,8 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 
 		if(sapi && sapi->service)
 		{
-			result.strReplace("#EPG#", "<u><a href=\"javascript:openEPG()\" class=\"small\"></a></u>");
-			result.strReplace("#SI#", "<u><a href=\"javascript:openSI()\" class=\"small\"></a></u>");
+			result.strReplace("#EPG#", "<u><a href=\"javascript:openEPG()\" class=\"small\">EPG-Info</a></u>");
+			result.strReplace("#SI#", "<u><a href=\"javascript:openSI()\" class=\"small\">Stream-Info</a></u>");
 		}
 		else
 		{
