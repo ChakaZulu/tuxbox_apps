@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_language.cpp,v 1.10 2002/10/15 23:31:29 Ghostrider Exp $
+ * $Id: setup_language.cpp,v 1.11 2002/10/22 03:03:27 obi Exp $
  */
 
 #include <setup_language.h>
@@ -56,7 +56,7 @@ eZapLanguageSetup::eZapLanguageSetup(): eWindow(0)
 
 	if (!f)
 	{
-		new eListBoxEntryText(language, "Englisch", (void*) new eString("C"));
+		new eListBoxEntryText(language, "English", (void*) new eString("C"));
 		new eListBoxEntryText(language, "Deutsch", (void*) new eString("de_DE"));
 	} else
 	{

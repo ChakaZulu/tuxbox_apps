@@ -291,10 +291,10 @@ int existNetworks::parseNetworks()
 	switch (fetype)
 	{
 	case eFrontend::feSatellite:
-		filename=CONFIGDIR "/satellites.xml";
+		filename="/etc/satellites.xml";
 		break;
 	case eFrontend::feCable:
-		filename=CONFIGDIR "/cables.xml";
+		filename="/etc/cables.xml";
 		break;
 	default:
 		break;

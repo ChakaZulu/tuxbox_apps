@@ -286,7 +286,7 @@ void eSatelliteConfigurationManager::newPressed()
 	}
 	if ( !found )
 	{
-		eMessageBox("no more unused Satellites in satellites.xml, please add a new Satellite with possible Transponder(s)","couldnt add Satellite" );
+		eMessageBox("No more unused satellites in satellites.xml. Please add a new satellite with possible transponder(s).","Could not add satellite." );
 		return;
 	}
 

@@ -240,7 +240,7 @@
 
 	<object name="tsSelectType">
 		<tsSelectType cposition="0:0" csize="e:300">
-			<eLabel text="Sendersuchlauf" position="0:0" size="400:30" />
+			<eLabel text="transponder scan" position="0:0" size="400:30" />
 			<eListbox name="menu" position="20:30" size="e-20:e-10" helptext="choose scan type or abort" />
 		</tsSelectType>
 	</object>
