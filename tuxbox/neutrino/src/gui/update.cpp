@@ -416,6 +416,8 @@ void CFlashUpdate::paint()
 	fflush(fd2);
 	fclose(fd2);
 
+
+	showGlobalStatus(100);
 	showStatusMessage( g_Locale->getText("flashupdate.ready") );
 
 	CNeutrinoApp::getInstance()->exec(NULL, "savesettings");

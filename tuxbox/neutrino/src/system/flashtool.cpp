@@ -60,9 +60,9 @@ void CFlashTool::setStatusViewer( CProgress_StatusViewer* statusview )
 	statusViewer = statusview;
 }
 
-bool CFlashTool::program( string filename )
+bool CFlashTool::readFromMTD( string filename )
 {
-	int	fd1, fd2;
+	int		fd1, fd2;
 	long	filesize;
 
 	if(statusViewer)
@@ -77,7 +77,73 @@ bool CFlashTool::program( string filename )
 		return false;
 	}
 
+	if(filename=="")
+	{
+		ErrorMessage = "filename not set";
+		return false;
+	}
+
+	if( (fd1 = open( mtdDevice.c_str(), O_RDONLY )) < 0 )
+	{
+		ErrorMessage = g_Locale->getText("flashupdate.cantopenmtd");
+		return false;
+	}
+
+	if( (fd2 = open( filename.c_str(), O_WRONLY )) < 0 )
+	{
+		ErrorMessage = g_Locale->getText("flashupdate.cantopenfile");
+		close(fd1);
+		return false;
+	}
+
+/*
+	char buf[1024];
+	long fsize = filesize;
+	while(fsize>0)
+	{
+		long block = fsize;
+		if(block>(long)sizeof(buf))
+		{
+			block = sizeof(buf);
+		}
+		read( fd1, &buf, block);
+		write( fd2, &buf, block);
+		fsize -= block;
+		char prog = char(100-(100./filesize*fsize));
+		if(statusViewer)
+		{
+			statusViewer->showLocalStatus(prog);
+		}
+	}
+*/
+	if(statusViewer)
+	{
+		statusViewer->showLocalStatus(100);
+	}
+
+	close(fd1);
+	close(fd2);
+	return true;
+}
+
+bool CFlashTool::program( string filename )
+{
+	int		fd1, fd2;
+	long	filesize;
+
+	if(statusViewer)
+	{
+		statusViewer->showLocalStatus(0);
+		statusViewer->showStatusMessage("");
+	}
+
 	if(mtdDevice=="")
+	{
+		ErrorMessage = "mtd-device not set";
+		return false;
+	}
+
+	if(filename=="")
 	{
 		ErrorMessage = "filename not set";
 		return false;
@@ -147,9 +213,7 @@ bool CFlashTool::program( string filename )
 
 	if(statusViewer)
 	{
-		statusViewer->showGlobalStatus(100);
 		statusViewer->showLocalStatus(100);
-		statusViewer->showStatusMessage(g_Locale->getText("flashupdate.ready"));
 	}
 
 	close(fd1);

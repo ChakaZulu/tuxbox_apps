@@ -54,7 +54,7 @@ class CFlashTool
 		void setStatusViewer( CProgress_StatusViewer* statusview );
 
 		bool program( string filename );
-
+		bool readFromMTD( string filename );
 };
 
 
