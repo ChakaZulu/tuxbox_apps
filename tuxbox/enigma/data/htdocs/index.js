@@ -42,7 +42,7 @@ function remoteControl(box)
 	if (box == "dbox2")
 		NewWindow("/showRemoteControl", "RC", "165", "500", "no");
 	else
-		NewWindow("/showRemoteControl", "RC", "293", "750", "no");
+		NewWindow("/showRemoteControl", "RC", "293", "770", "no");
 }
 
 function tuneTransponder(transponder)
@@ -55,11 +55,11 @@ function tuneTransponder(transponder)
 			transponder = document.channelselector.channel.options[currentTransponder].value;
 			satFinder(transponder);
 		}
-		else
-			alert("Error: No transponder selected.");
 	}
 	else
+	{
 		satFinder(transponder);
+	}
 }
 
 function satFinder(transponder)
@@ -104,7 +104,7 @@ function openEPG(xy)
 {
 	if (xy == undefined)
 		xy = "";
-	NewWindow('/getcurrentepg2?ref='+xy, 'EPG', screen.width, screen.height, 'yes');
+	NewWindow('/getcurrentepg?type=extended&ref='+xy, 'EPG', screen.width, screen.height, 'yes');
 }
 
 function openMultiEPG(xy)

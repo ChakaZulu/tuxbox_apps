@@ -12,14 +12,6 @@ body {
 	font-size: 13px;
 }
 
-#mainbody {
-	background-image: url(bg.png);
-}
-
-#headbody {
-	background-image: url(bg.png);
-}
-
 h1 {
 	font-size: 20px;
 }
@@ -79,7 +71,6 @@ a:hover {
 }
 
 #topnavi {
-	padding-left: 120px;
 	background-color: #D9E0E7;
 	border-bottom: 1px solid #98A4B6;
 	border-top: 1px solid #98A4B6;
@@ -90,7 +81,7 @@ a:hover {
 #channavi {
 	padding-left: 120px;
 	background-color: #D9E0E7;
-	border-bottom: 1px solid #98A4B6;
+	border-bottom: 0px solid #98A4B6;
 	border-top: 1px solid #98A4B6;
 	border-left: 0px solid #98A4B6;
 	border-right: 0px solid #98A4B6;
@@ -99,6 +90,10 @@ a:hover {
 #topnavi input,
 #leftnavi input {
 	color: #000000;
+}
+
+#leftnavi .zapnavi {
+	color: #FFFFFF;
 }
 
 #contentcell .title {
@@ -217,6 +212,7 @@ a:hover {
 }
 
 #megatable {
-	border: 1px solid #98A4B6;
+	border-left: 0px solid #98A4B6;
+	border-right: 0px solid #98A4B6;
 }
 

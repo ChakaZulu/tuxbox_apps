@@ -1,0 +1,23 @@
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="webif.css">
+		<script language="javascript" type="text/javascript" src="window.js"></script>
+		<script>
+		function topnavi(command)
+		{
+			parent.body.location = "body?mode=" + command;
+			parent.leftnavi.location = "leftnavi?mode=" + command;
+		}
+		</script>
+	</head>
+	<body id="topnavi">
+		<table border="0" height="22px" cellspacing="0" cellpadding="0">
+		<tr>
+			<td width="120">&nbsp;</td>
+			<td><input name="zap" type="button" style="width: 100px; height: 22px" value="ZAP" onClick="topnavi('zap')"></td>
+			<td><input name="control" type="button" style="width: 100px; height: 22px" value="CONTROL" onClick="topnavi('control')"></td>
+			<td><input name="config" type="button" style="width: 100px; height: 22px" value="CONFIG" onClick="topnavi('config')"></td>
+			<td><input name="help" type="button" style="width: 100px; height: 22px" value="HELP" onClick="topnavi('help')"></td>
+		</tr>
+	</body>
+</html>

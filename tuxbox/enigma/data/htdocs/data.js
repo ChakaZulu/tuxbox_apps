@@ -70,7 +70,4 @@ function init(requester)
 		parent.header.getElem("id", "recording", null).src = "blinking_red.gif";
 	else
 		parent.header.getElem("id", "recording", null).src = "trans.gif";
-	
-	<!-- channavi -->
-	parent.channavi.getElem("id", "filler", null).width = 780 - 110 - 110 * (butAudio + butVideo + butEPG + butInfo + butStream + butRecord + butStop);
 }

@@ -3,6 +3,13 @@
 		<link rel="stylesheet" type="text/css" href="webif.css">
 		<script language="javascript" type="text/javascript" src="window.js"></script>
 		<script language="javascript" type="text/javascript" src="index.js"></script>
+		<script>
+		function leftnavi(command)
+		{
+			parent.body.location = "body" + command;
+			document.location.reload();
+		}
+		</script>
 	</head>
 	<body id="leftnavi">
 		#LEFTNAVI#
