@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.141 2002/01/29 23:23:06 field Exp $
+        $Id: neutrino.cpp,v 1.142 2002/01/29 23:45:29 Simplex Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.142  2002/01/29 23:45:29  Simplex
+  first lines for bouquet editor
+
   Revision 1.141  2002/01/29 23:23:06  field
   Mehr Details in Channellist (sectionsd updaten)
 
@@ -456,6 +459,7 @@ static void initGlobals(void)
 	g_RCInput = NULL;
 	g_lcdd = NULL;
 	g_Controld = NULL;
+	g_Zapit = NULL;
 	g_RemoteControl = NULL;
 
 	g_EpgData = NULL;
@@ -1210,6 +1214,9 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainMenu.addItem( new CMenuForwarder("mainmenu.radiomode", true, "", this, "radio") );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.scartmode", true, "", this, "scart") );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.games", true, "", new CGameList("mainmenu.games") ));
+#ifdef USEBOUQUETEDDI
+	mainMenu.addItem( new CMenuForwarder("bouqueteditor.name", true, "", new CBEBouquetWidget()));
+#endif
 	mainMenu.addItem( new CMenuForwarder("mainmenu.shutdown", true, "", this, "shutdown") );
 	mainMenu.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	streamstatus = 0;
@@ -1847,6 +1854,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_Locale = new CLocaleManager;
 	g_RCInput = new CRCInput;
 	g_lcdd = new CLcddClient;
+	g_Zapit = new CZapitClient;
 
 	g_RemoteControl = new CRemoteControl;
 	g_EpgData = new CEpgData;
@@ -2431,7 +2439,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.141 2002/01/29 23:23:06 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.142 2002/01/29 23:45:29 Simplex Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.42 2002/01/28 23:46:47 field Exp $
+//  $Id: neutrino.h,v 1.43 2002/01/29 23:45:29 Simplex Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.43  2002/01/29 23:45:29  Simplex
+//  first lines for bouquet editor
+//
 //  Revision 1.42  2002/01/28 23:46:47  field
 //  Boxtyp automatisch, Vol im Scartmode, Kleinigkeiten
 //
@@ -156,6 +159,7 @@
 #include "widget/stringinput.h"
 #include "widget/screensetup.h"
 #include "widget/gamelist.h"
+#include "widget/bouqueteditor_bouquets.h"
 #include "helpers/setting_helpers.h"
 
 #include "zapit/getservices.h"
