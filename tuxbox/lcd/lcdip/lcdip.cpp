@@ -9,12 +9,15 @@ int pt[3]={1, 10, 100};
 int main()
 {
 	display.draw_string(10, 10, "IP eingeben:");
-	
+	FILE* pFile=fopen("/var/lcdip", "r"); // tum lesen "w" zum schreiben
 	int update=0;
 	update=1;
 	
 	int curpos=0;
-	int ip[4]={192, 168, 0, 202};
+	//int ip[4]={192, 168, 0, 202};
+	int ip[4];
+	for(int i=0; i< 4; i++) ip[i]=fgetc(pFile);
+	fclose(pFile);
 	int done=0;
 	RCOpen();
 	while (!done)
@@ -125,6 +128,10 @@ int main()
 	
 	char exec[100];
 	sprintf(exec, "/sbin/ifconfig eth0 %d.%d.%d.%d up", ip[0], ip[1], ip[2], ip[3]);
+	FILE* paFile=fopen("/var/lcdip", "w"); 
+	for(int i=0; i< 4; i++) putc(ip[i], paFile);
+	fclose(paFile);
+
 	if (!(system(exec)>>8))
 	{
 		display.draw_string(0, 30, "  IP GESETZT!  ");
