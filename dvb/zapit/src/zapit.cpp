@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.322 2003/06/10 09:43:08 digi_casi Exp $
+ * $Id: zapit.cpp,v 1.323 2003/06/10 17:52:39 digi_casi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -234,6 +234,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 		
 			waitForMotor = abs(channel->getSatellitePosition() - frontend->getCurrentSatellitePosition()) / motorRotationSpeed; //assuming 1.8 degrees/second motor rotation speed for the time being...
 			printf("[zapit] waiting %d seconds for motor to turn satellite dish.\n", waitForMotor);
+			eventServer->sendEvent(CZapitClient::EVT_ZAP_MOTOR, CEventServer::INITID_ZAPIT, &waitForMotor, sizeof(waitForMotor));
 			sleep(waitForMotor);
 		
 			frontend->setCurrentSatellitePosition(channel->getSatellitePosition());
@@ -1513,7 +1514,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.322 2003/06/10 09:43:08 digi_casi Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.323 2003/06/10 17:52:39 digi_casi Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
