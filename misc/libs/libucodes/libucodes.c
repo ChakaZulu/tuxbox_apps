@@ -6,7 +6,7 @@
 
 struct Sucode
 {
-	char md5[32];
+	char md5[35];
 	char name[20];
 };
 
