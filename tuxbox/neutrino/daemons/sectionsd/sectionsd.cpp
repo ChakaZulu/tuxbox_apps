@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.4 2001/07/12 22:51:25 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.5 2001/07/14 10:19:26 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.5  2001/07/14 10:19:26  fnbrd
+//  Mit funktionierendem time-thread (mktime der glibc muss aber gefixt werden)
+//
 //  Revision 1.4  2001/07/12 22:51:25  fnbrd
 //  Time-Thread im sectionsd (noch disabled, da prob mit mktime)
 //
@@ -323,7 +326,15 @@ struct SI_section_TOT_header {
       unsigned char reserved1 : 2;
       unsigned short section_length : 12;
       // 3 bytes
-      unsigned long long UTC_time : 40;
+      unsigned char utc_date_hi : 8;
+      unsigned char utc_date_lo : 8;
+      unsigned char utc_hour : 4;
+      unsigned char utc_hour_ten : 4;
+      unsigned char utc_min : 4;
+      unsigned char utc_min_ten : 4;
+      unsigned char utc_sec : 4;
+      unsigned char utc_sec_ten : 4;
+//      unsigned long long UTC_time : 40;
       // 8 bytes
       unsigned char reserved2 : 4;
       unsigned short descriptors_loop_length : 12;
@@ -401,16 +412,18 @@ char *buf;
   flt.timeout          = 0;
   flt.flags            = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
 
-  if ((fd = open("/dev/ost/demux0", O_RDWR)) == -1) {
-    perror ("/dev/ost/demux0");
-    return 0;
-  }
-  if (ioctl (fd, DMX_SET_FILTER, &flt) == -1) {
-    close(fd);
-    perror ("DMX_SET_FILTER");
-    return 0;
-  }
-  for(;;) {
+  fd=0;  for(;;) {
+    if(!fd) {
+      if ((fd = open("/dev/ost/demux0", O_RDWR)) == -1) {
+        perror ("/dev/ost/demux0");
+        return 0;
+      }
+      if (ioctl (fd, DMX_SET_FILTER, &flt) == -1) {
+        close(fd);
+        perror ("DMX_SET_FILTER");
+        return 0;
+      }
+    }
     int rc=readNbytes(fd, (char *)&header, sizeof(header), timeoutInSeconds);
     if(!rc) {
       continue; // timeout -> kein EPG
@@ -422,6 +435,7 @@ char *buf;
     buf=new char[sizeof(header)+header.section_length-5];
     if(!buf) {
       fprintf(stderr, "Not enough memory!\n");
+      close(fd);
       break;
     }
     // Den Header kopieren
@@ -436,7 +450,9 @@ char *buf;
       break;
     }
     time_t tim=changeUTCtoCtime(((const unsigned char *)&header)+3);
+    printf("time: %ld\n", tim);
     if(tim) {
+      timeOffsetFound=0;
       parseDescriptors(buf+sizeof(struct SI_section_TOT_header), ((struct SI_section_TOT_header *)buf)->descriptors_loop_length, "DEU");
 /*
       struct tm tm_time;
@@ -449,12 +465,12 @@ char *buf;
       tm_time.tm_year=year-1900;
       tm_time.tm_isdst=0;
 */
-      time_t t=time(NULL);
-      printf("local time: %s", ctime(&t));
+//      time_t t=time(NULL);
+//      printf("local time: %s", ctime(&t));
 //      printf("%d:%d:%d\n", tm_time.tm_hour, tm_time.tm_min, tm_time.tm_sec);
 //      printf("%d.%d.%d\n", tm_time.tm_mday, tm_time.tm_mon, tm_time.tm_year);
 //      tim=mktime(&tm_time);
-      printf("local time: %s", ctime(&tim));
+//      printf("local time: %s", ctime(&tim));
       if(timeOffsetFound)
         tim+=timeOffsetMinutes*60L;
       printf("local time: %s", ctime(&tim));
@@ -462,13 +478,16 @@ char *buf;
         perror("cannot set date");
 	break;
       }
-      t=time(NULL);
+      time_t t=time(NULL);
       printf("local time: %s", ctime(&t));
     }
     delete[] buf;
-    sleep(60*30); // sleep 30 minutes
+    close(fd);
+    fd=0;
+    rc=60*30;
+    while(rc)
+      rc=sleep(rc); // sleep 30 minutes
   } // for
-  close(fd);
   printf("time-thread ended\n");
   return 0;
 }
@@ -565,7 +584,9 @@ static void *houseKeepingThread(void *)
 {
   printf("housekeeping-thread started.\n");
   for(;;) {
-    sleep(60); // sleep 60 seconds
+    int rc=60;
+    while(rc)
+      rc=sleep(rc); // sleep 60 seconds
     printf("housekeeping.\n");
     pthread_mutex_lock(&eventsLock);
     printf("Number of events: %u\n", events.size());
@@ -588,7 +609,7 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.4 2001/07/12 22:51:25 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.5 2001/07/14 10:19:26 fnbrd Exp $\n");
 
   tzset(); // TZ auswerten
 
@@ -629,11 +650,11 @@ struct sockaddr_in serverAddr;
   }
 
   // time-Thread starten
-//  rc=pthread_create(&threadTOT, 0, timeThread, 0);
-//  if(rc) {
-//    fprintf(stderr, "failed to create time-thread (rc=%d)\n", rc);
-//    return 1;
-//  }
+  rc=pthread_create(&threadTOT, 0, timeThread, 0);
+  if(rc) {
+    fprintf(stderr, "failed to create time-thread (rc=%d)\n", rc);
+    return 1;
+  }
 
   // housekeeping-Thread starten
   rc=pthread_create(&threadHouseKeeping, 0, houseKeepingThread, 0);
