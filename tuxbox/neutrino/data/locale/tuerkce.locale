@@ -1,0 +1,188 @@
+menu.back zurück
+
+options.off aus
+options.on ein
+
+mainmenu.head ANA MENÜ
+mainmenu.tvmode TELEVIZYON
+mainmenu.radiomode RADIO
+mainmenu.vcrmode VIDEO
+mainmenu.games OYUNLAR
+mainmenu.shutdown KAPAT
+mainmenu.settings AYARLAR
+
+mainsettings.head AYARLAR
+mainsettings.language MENÜ DIL
+mainsettings.audio SES
+mainsettings.video VIDEO
+mainsettings.network AG BAGLANTISI
+mainsettings.colors RENK / RENK SECIMI
+mainsettings.keybinding TUS AYARLARI
+mainsettings.misc SECENEKLER
+
+miscsettings.head SECENEKLER
+miscsettings.ucodecheck UCodes KONTROLLÜ
+miscsettings.epgold EPG SECENEKLERI GÖSTER
+miscsettings.boxtype DBox ÜRETICI
+miscsettings.boxtype_nokia Nokia
+miscsettings.boxtype_sagem Sagem
+miscsettings.boxtype_philips Philips
+
+languagesetup.head DIL AYARI
+languagesetup.select MENÜ DIL
+
+audiomenu.head SES AYARI
+audiomenu.stereo STEREO
+audiomenu.dolbydigital DOLBY DIGITAL
+
+videomenu.head VIDEO AYARI
+videomenu.screensetup GÖRÜNTÜ AYARI
+videomenu.videosignal VIDEO SIGNALI
+videomenu.videosignal_rgb RGB
+videomenu.videosignal_svideo S-VIDEO
+videomenu.videosignal_composite COMPOSITE
+videomenu.videoformat EKRAN FORMATI
+videomenu.videoformat_43 4:3
+videomenu.videoformat_169 16:9
+
+networkmenu.head AG AYARLARI
+networkmenu.setupnow AG AYARINI SIMDI KAYID ED
+networkmenu.setuponstartup TEKRAR ACIMININDA KAYIDLAMA
+networkmenu.ipaddress IP-ADRESI
+networkmenu.netmask NETMASK
+networkmenu.broadcast BROADCAST
+networkmenu.gateway STANDARD GATEway
+networkmenu.nameserver NAMESERVER
+
+ipsetup.hint_1 KULLANIN "0"-"9", KIRMIZI ist " ", YESIL "."
+ipsetup.hint_2 YADA Up/Down, OK KAYID EDER, HOME CIKIS
+
+colormenu.head RENK AYARI
+colormenu.statusbar ILETKENLIK MENÜSÜ
+colormenu.themeselect RENK SECIMINI SECINIZ
+colormenu.menucolors MENÜ RENKLERI
+colormenu.background ALT RENK
+colormenu.background_head ALT RENK
+colormenu.textcolor  YAZI RENGI
+colormenu.textcolor_head Textfarbe
+
+colorthememenu.head RENK SECIMINI SECINIZ
+colorthememenu.neutrino_theme NEUTRINO RENK SECIMI
+colorthememenu.classic_theme KLASIK RENK SECIMI
+
+colormenusetup.head MENÜ RENKLERI
+colormenusetup.menuhead BASLIK
+colormenusetup.menucontent PENCERE ICI
+colormenusetup.menucontent_inactive PENCERE ICI SECILMEMIS
+colormenusetup.menucontent_selected PENCERE ICI SECILMIS
+
+colorstatusbar.head ILETKENLIK MENÜ RENGI
+colorstatusbar.text ILETKENLIK MENÜSÜ
+
+repeatblocker.hint_1 IKI TUS BASMA ARASI EN AZ ZAMAN (ms)
+repeatblocker.hint_2 0 ENGELI KALDIRIYOR (KIRMIZI " ")
+
+keybindingmenu.RC KUMANDA
+keybindingmenu.repeatblock TUS TEKRARLAMA ENGELI
+keybindingmenu.head TUS AYARLARI
+keybindingmenu.modechange DEMEC DEGISME
+keybindingmenu.channellist KANAL LISTESI
+keybindingmenu.quickzap HIZLI CEVIRME
+keybindingmenu.tvradiomode TELEVIZYON/RADIO DEMECI
+keybindingmenu.tvradiomode_head Fernseh-/Radio-Modus
+keybindingmenu.pageup SAYFA YUKARI
+keybindingmenu.pageup_head SAYFA ASAGI
+keybindingmenu.pagedown SAYFA ASAGI CEVIR
+keybindingmenu.pagedown_head SAYFA ASAGI CEVIR
+keybindingmenu.cancel KANAL LISTESINI KAPAT
+keybindingmenu.cancel_head KANAL LISTESINI KAPAT
+keybindingmenu.channelup KANAL YUKARI
+keybindingmenu.channelup_head KANAL YUKARI TUSU
+keybindingmenu.channeldown KANAL ASAGI
+keybindingmenu.channeldown_head KANAL ASAGI TUSU
+
+colorchooser.red KIRMIZI
+colorchooser.green YESIL
+colorchooser.blue MAVI
+colorchooser.alpha ALFA
+
+keychoosermenu.setnew YENI TUS AYARLA
+keychoosermenu.setnone TUSSUZ
+keychoosermenu.currentkey SIMDIKI TUS
+
+keychooser.head YENI TUS AYARLA
+keychooser.text1 TUSA BASINIZ
+keychooser.text2 CIKMAK ICIN BEKLEYINIZ
+screensetup.upperleft rot = EKRAN KENARI ÜST, SOL
+screensetup.lowerright grün = EKRAN KENARI ALT, SAG
+
+channellist.head BÜTÜN KANLLAR
+
+infoviewer.epgnotload EPG DAHA BULUNMADI...
+infoviewer.epgwait EPG BEKLENIYOR...
+infoviewer.streaminfo STREAM BILGISI
+infoviewer.eventlist PROGRAM
+infoviewer.languages SES SECENEGI
+infoviewer.notavailable KANAL SIMDILIK BULUNAMIYOR
+infoviewer.cantdecode KANAL CÖZILEMIYOR
+infoviewer.selecttime BASLANGIC VAKTI
+infoviewer.nocurrent SIMDIKI PROGRAMA BILGI YOK
+infoviewer.noepg EPG BULUNAMIYOR
+infoviewer.subservice EKRAN YÖNETIMI
+
+epgviewer.notfound EPG BILGISI BULUNAMADI
+epgviewer.nodetailed AYRINTILI BILGI YOK
+epglist.head GELECEK PROGRAMDAN PARCALAR - %s
+epglist.noevents EPG YOK...
+
+streaminfo.head BILGI
+streaminfo.resolution EKRAN CÖZÜMÜ
+streaminfo.bitrate BITRATE
+streaminfo.aratio ORAN
+streaminfo.aratio_unknown ORAN: unbekannt
+streaminfo.framerate EKRAN ORANI
+streaminfo.framerate_unknown EKRAN ORANI: unbekannt
+streaminfo.audiotype SES AYARI
+streaminfo.audiotype_unknown SES AYARI: unbekannt
+
+apidselector.head DIL SECENEGI
+
+nvodselector.head BASLANGIC VAKITI SECINIZ
+nvodselector.subservice EKRAN YÖNETIMI - PERSPEKTIFLER
+
+ucodecheck.head UCODE YOKLAMASI
+ucodecheck.avia500 AVIA 500
+ucodecheck.avia600 AVIA 600
+ucodecheck.ucode UCODE
+ucodecheck.cam-alpha CAM-ALFA
+
+date.Mon  PZT
+date.Tue  SL
+date.Wed  CRS
+date.Thu  PRS
+date.Fri  CU
+date.Sat  CMT
+date.Sun  PZ
+
+date.Jan  OCAK
+date.Feb  SUB
+date.Mar  MART
+date.Apr  NIS
+date.May  MAY
+date.Jun  HZR
+date.Jul  TEM
+date.Aug  AGUS
+date.Sep  EYL
+date.Oct  EKIM
+date.Nov  KAS
+date.Dec  ARALIK
+
+nvod.starting (BASLAMA %d DAK)
+nvod.proz (%d%% GECTI)
+
+scants.head TRANSPONDER ARAMA
+scants.info1 BASLAMAK ICIN OK TUSUNA BASINIZ
+scants.info2 CIKMAK ICIN HOME TUSUNA BASINIZ....
+scants.transponders TRANSPONDER:
+scants.services SERVIS:
+mainsettings.scants TRANSPONDER ARAMA
