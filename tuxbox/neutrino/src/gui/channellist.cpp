@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.41 2001/12/12 11:33:57 McClean Exp $
+// $Id: channellist.cpp,v 1.42 2001/12/12 11:46:06 McClean Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.42  2001/12/12 11:46:06  McClean
+// performance-improvements
+//
 // Revision 1.41  2001/12/12 11:33:57  McClean
 // major epg-fixes
 //
@@ -172,6 +175,41 @@ static char* copyStringto(const char* from, char* to, int len)
 	return (char *)++from;
 }
 
+CChannelList::CChannelList(int Key=-1, const std::string &Name)
+{
+	key = Key;
+	name = Name;
+	selected = 0;
+	width = 500;
+	height = 440;
+	theight= g_Fonts->menu_title->getHeight();
+	fheight= g_Fonts->channellist->getHeight();
+	listmaxshow = (height-theight-0)/fheight;
+	height = theight+0+listmaxshow*fheight; // recalc height
+	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
+	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
+	liststart = 0;
+	tuned=0xfffffff;
+}
+
+CChannelList::~CChannelList()
+{
+	for(unsigned int count=0;count<chanlist.size();count++)
+	{
+		delete chanlist[count];
+	}
+	chanlist.clear();
+}
+
+void CChannelList::exec()
+{   int nNewChannel;
+
+	nNewChannel = show();
+	if (nNewChannel > -1){
+		zapTo(nNewChannel);
+	}
+}
+
 // quick'n dirty
 void CChannelList::updateEvents(void)
 {
@@ -287,32 +325,6 @@ void CChannelList::updateEvents(void)
     return;
 }
 
-CChannelList::CChannelList(int Key=-1, const std::string &Name)
-{
-	key = Key;
-	name = Name;
-	selected = 0;
-	width = 500;
-	height = 440;
-	theight= g_Fonts->menu_title->getHeight();
-	fheight= g_Fonts->channellist->getHeight();
-	listmaxshow = (height-theight-0)/fheight;
-	height = theight+0+listmaxshow*fheight; // recalc height
-	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
-	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
-	liststart = 0;
-	tuned=0xfffffff;
-}
-
-CChannelList::~CChannelList()
-{
-	for(unsigned int count=0;count<chanlist.size();count++)
-	{
-		delete chanlist[count];
-	}
-	chanlist.clear();
-}
-
 void CChannelList::addChannel(int key, int number, const std::string& name, unsigned int ids)
 {
 	channel* tmp = new channel();
@@ -350,16 +362,6 @@ const std::string CChannelList::getActiveChannelID()
 int CChannelList::getActiveChannelNumber()
 {
 	return selected+1;
-}
-
-
-void CChannelList::exec()
-{   int nNewChannel;
-
-	nNewChannel = show();
-	if (nNewChannel > -1){
-		zapTo(nNewChannel);
-	}
 }
 
 int CChannelList::show()

@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: infoviewer.cpp,v 1.53 2001/12/12 11:33:57 McClean Exp $
+// $Id: infoviewer.cpp,v 1.54 2001/12/12 11:46:06 McClean Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.54  2001/12/12 11:46:06  McClean
+// performance-improvements
+//
 // Revision 1.53  2001/12/12 11:33:57  McClean
 // major epg-fixes
 //
@@ -176,6 +179,23 @@
 
 #include "infoviewer.h"
 #include "../global.h"
+
+char* copyStringto( char* from, char* to, int len)
+{
+	while( *from != '\n' )
+	{
+		if (len>2)
+		{
+			*to = *from;
+			to++;
+			len--;
+		}
+		from++;
+	}
+	*to = 0;
+	from ++;
+	return from;
+}
 
 CInfoViewer::CInfoViewer()
 {
@@ -391,43 +411,6 @@ void CInfoViewer::showButtonNVOD(bool CalledFromShowData = false)
     };
 }
 
-void CInfoViewer::showButtonAudio()
-{
-    string  to_compare= getActiveChannelID();
-
-    if ( strcmp(g_RemoteControl->audio_chans.name, to_compare.c_str() )== 0 )
-    {
-        if ( ( g_RemoteControl->GetECMPID()== 0 ) || ( g_RemoteControl->audio_chans.count_apids== 0 ) )
-        {
-            int height = g_Fonts->infobar_info->getHeight();
-            int ChanInfoY = BoxStartY + ChanHeight+ 15+ 2* height;
-            int xStart= BoxStartX + ChanWidth + 30;
-
-        	//int ChanNameX = BoxStartX + ChanWidth + 10;
-        	int ChanNameY = BoxStartY + ChanHeight + 10;
-
-
-            string  disp_text;
-            if ( ( g_RemoteControl->GetECMPID()== 0 ) && ( g_RemoteControl->audio_chans.count_apids!= 0 ) )
-                disp_text= g_Locale->getText("infoviewer.cantdecode");
-            else
-                disp_text= g_Locale->getText("infoviewer.notavailable");
-
-        	g_FrameBuffer->paintBox(ChanInfoX, ChanNameY, BoxEndX, ChanInfoY, COL_INFOBAR);
-            g_Fonts->infobar_info->RenderString(xStart, ChanInfoY, BoxEndX- xStart, disp_text.c_str(), COL_INFOBAR);
-            KillShowEPG = true;
-        };
-
-
-        // grün, wenn mehrere APIDs
-        if ( g_RemoteControl->audio_chans.count_apids> 1 )
-        {
-            g_FrameBuffer->paintIcon("gruen.raw", BoxEndX- 3* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-            g_Fonts->infobar_small->RenderString(BoxEndX- 3* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.languages").c_str(), COL_INFOBAR);
-        };
-    };
-}
-
 void CInfoViewer::showData()
 {
     int is_nvod= false;
@@ -565,6 +548,43 @@ void CInfoViewer::showData()
             }
         }
     }
+}
+
+void CInfoViewer::showButtonAudio()
+{
+    string  to_compare= getActiveChannelID();
+
+    if ( strcmp(g_RemoteControl->audio_chans.name, to_compare.c_str() )== 0 )
+    {
+        if ( ( g_RemoteControl->GetECMPID()== 0 ) || ( g_RemoteControl->audio_chans.count_apids== 0 ) )
+        {
+            int height = g_Fonts->infobar_info->getHeight();
+            int ChanInfoY = BoxStartY + ChanHeight+ 15+ 2* height;
+            int xStart= BoxStartX + ChanWidth + 30;
+
+        	//int ChanNameX = BoxStartX + ChanWidth + 10;
+        	int ChanNameY = BoxStartY + ChanHeight + 10;
+
+
+            string  disp_text;
+            if ( ( g_RemoteControl->GetECMPID()== 0 ) && ( g_RemoteControl->audio_chans.count_apids!= 0 ) )
+                disp_text= g_Locale->getText("infoviewer.cantdecode");
+            else
+                disp_text= g_Locale->getText("infoviewer.notavailable");
+
+        	g_FrameBuffer->paintBox(ChanInfoX, ChanNameY, BoxEndX, ChanInfoY, COL_INFOBAR);
+            g_Fonts->infobar_info->RenderString(xStart, ChanInfoY, BoxEndX- xStart, disp_text.c_str(), COL_INFOBAR);
+            KillShowEPG = true;
+        };
+
+
+        // grün, wenn mehrere APIDs
+        if ( g_RemoteControl->audio_chans.count_apids> 1 )
+        {
+            g_FrameBuffer->paintIcon("gruen.raw", BoxEndX- 3* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+            g_Fonts->infobar_small->RenderString(BoxEndX- 3* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.languages").c_str(), COL_INFOBAR);
+        };
+    };
 }
 
 void CInfoViewer::showWarte()
@@ -709,24 +729,6 @@ void * CInfoViewer::InfoViewerThread (void *arg)
 	}
 	return NULL;
 }
-
-char* copyStringto( char* from, char* to, int len)
-{
-	while( *from != '\n' )
-	{
-		if (len>2)
-		{
-			*to = *from;
-			to++;
-			len--;
-		}
-		from++;
-	}
-	*to = 0;
-	from ++;
-	return from;
-}
-
 
 bool CInfoViewer::getEPGData( string channelName, unsigned int onid_tsid )
 {
