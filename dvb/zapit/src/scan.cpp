@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.45 2002/04/20 10:28:56 obi Exp $
+ * $Id: scan.cpp,v 1.46 2002/04/20 12:02:04 Simplex Exp $
  */
 
 #include "frontend.h"
@@ -30,6 +30,7 @@ extern int found_channels;
 extern CFrontend *frontend;
 extern XMLTreeParser *scanInputParser;
 extern std::map <uint8_t, std::string> scanProviders;
+extern CZapitClient::bouquetMode bouquetMode;
 
 int get_nits (uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, uint8_t polarity, uint8_t DiSEqC, Modulation modulation)
 {
@@ -110,7 +111,7 @@ int write_xml_footer(FILE *fd)
 	}
 }
 
-void write_bouquets(unsigned short mode)
+void write_bouquets()
 {
 	FILE *bouq_fd;
 	std::string oldname = "";
@@ -121,15 +122,14 @@ void write_bouquets(unsigned short mode)
 	mode&256 - keine aenderung an bouqets
 	*/
 
-	if (mode & 1024)
+	if (bouquetMode == CZapitClient::BM_DELETEBOUQUETS)
 	{
 		printf("[zapit] removing existing bouqets.xml\n");
 		system("/bin/rm " CONFIGDIR "/zapit/bouquets.xml");
 		scanbouquets.clear();
 		return;
 	}
-
-	if ((mode & 256) || (scanbouquets.empty()))
+	else if ((bouquetMode == CZapitClient::BM_DONTTOUCHBOUQUETS) || (scanbouquets.empty()))
 	{
 		printf("[zapit] leavin bouquets.xml untouched\n");
 		scanbouquets.clear();
@@ -277,9 +277,6 @@ void *start_scanthread(void *param)
 	char providerName[32];
 	char type[8];
 
-	/* still used for bouquets */
-	unsigned short do_diseqc = *(unsigned short *) (param);
-
 	uint8_t diseqc_pos = 0;
 
 	uint32_t frequency;
@@ -289,7 +286,6 @@ void *start_scanthread(void *param)
 	uint8_t modulation;
 
 	curr_sat = 0;
-
 	if ((frontend == NULL) || (frontend->isInitialized() == false))
 	{
 		printf("[scan.cpp] unable not scan without a frontend \n");
@@ -308,7 +304,7 @@ void *start_scanthread(void *param)
 		strcpy(type, "cable");
 		polarization = 0;
 		break;
-	
+
 	default:	/* unsupported frontend */
 		stop_scan();
 		pthread_exit(0);
@@ -325,7 +321,7 @@ void *start_scanthread(void *param)
 	{
 		/*
 		 * notify client about start - yes should be outside
-		 * of this loop but fuckig pthread doesn't recognize 
+		 * of this loop but fuckig pthread doesn't recognize
 		 * it
 		 */
 		scan_runs = 1;
@@ -407,7 +403,7 @@ void *start_scanthread(void *param)
 	if (write_xml_footer(fd) != -1)
 	{
 		/* write bouquets if channels did not fail */
-		write_bouquets(do_diseqc);
+		write_bouquets();
 	}
 
 	/* report status */

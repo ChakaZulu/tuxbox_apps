@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.h,v 1.52 2002/04/19 14:53:29 obi Exp $
+ * $Id: zapit.h,v 1.53 2002/04/20 12:02:04 Simplex Exp $
  */
 
 #ifndef __zapit_h__
@@ -38,7 +38,7 @@ typedef struct decode_struct
 int prepare_channels();
 int save_settings (bool write);
 void *start_scanthread(void *);
-void start_scan();
+int start_scan();
 void sendBouquetList();
 void sendChannelListOfBouquet( uint nBouquet);
 

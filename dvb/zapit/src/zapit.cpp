@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.140 2002/04/19 14:53:29 obi Exp $
+ * $Id: zapit.cpp,v 1.141 2002/04/20 12:02:04 Simplex Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -126,6 +126,7 @@ extern int found_transponders;
 extern int found_channels;
 extern short curr_sat;
 extern short scan_runs;
+CZapitClient::bouquetMode bouquetMode = CZapitClient::BM_CREATEBOUQUETS;
 
 /* videotext */
 bool use_vtxtd = false;
@@ -837,7 +838,7 @@ int prepare_channels ()
 	return 23;
 }
 
-int start_scan (unsigned short do_diseqc)
+int start_scan ()
 {
 	if (scanInputParser == NULL)
 	{
@@ -893,7 +894,7 @@ int start_scan (unsigned short do_diseqc)
 	dmx_video_fd = unsetPesFilter(dmx_video_fd);
 	dmx_pcr_fd = unsetPesFilter(dmx_pcr_fd);
 
-	if (pthread_create(&scan_thread, 0, start_scanthread, &do_diseqc))
+	if (pthread_create(&scan_thread, 0, start_scanthread, NULL))
 	{
 		perror("[zapit] pthread_create: scan_thread");
 		return -1;
@@ -904,7 +905,7 @@ int start_scan (unsigned short do_diseqc)
 	while (scan_runs == 0)
 	{
 		/*
-		 * this stupid line of code is here just 
+		 * this stupid line of code is here just
 		 * to workaround a stupid behaviour because
 		 * the scan thread won't recognize that scan_runs
 		 * changes. maybe it is the compiler's fault.
@@ -1397,50 +1398,6 @@ void parse_command ()
 				}
 			}
 			break;
-		case 'g':
-			start_scan(rmsg.param2);
-			status = "00g";
-
-			if (send(connfd, status, strlen(status),0) == -1)
-			{
-				perror("[zapit] send");
-				return;
-			}
-			break;
-		case 'h':
-			if (scan_runs > 0)
-			{
-				status = "00h";
-			}
-			else
-			{
-				status = "-0h";
-			}
-
-			if (send(connfd, status, strlen(status), 0) == -1)
-			{
-				perror("[zapit] send");
-				return;
-			}
-
-			if (send(connfd, &curr_sat, sizeof(short), 0) == -1)
-			{
-				perror("[zapit] send");
-				return;
-			}
-
-			if (send(connfd, &found_transponders, sizeof(int), 0) == -1)
-			{
-				perror("[zapit] send");
-				return;
-			}
-
-			if (send(connfd, &found_channels, sizeof(int), 0) == -1)
-			{
-				perror("[zapit] send");
-				return;
-			}
-			break;
 		case 'i':
 			uint nvod_onidsid;
 			ushort nvod_tsid;
@@ -1652,9 +1609,7 @@ void parse_command ()
 			break;
 
 			case CZapitClient::CMD_SCANSTART :
-				CZapitClient::commandStartScan msgStartScan;
-				read( connfd, &msgStartScan, sizeof(msgStartScan));
-				start_scan(msgStartScan.satelliteMask);
+				start_scan();
 			break;
 
 			case CZapitClient::CMD_SCANREADY :
@@ -1715,6 +1670,10 @@ void parse_command ()
 				uint32_t repeat;
 				read( connfd, &repeat, sizeof(repeat));
 				frontend->setDiseqcRepeats(repeat);
+			break;
+
+			case CZapitClient::CMD_SCANSETBOUQUETMODE :
+				read( connfd, &bouquetMode, sizeof(bouquetMode));
 			break;
 
 			case CZapitClient::CMD_BQ_ADD_BOUQUET :
@@ -1988,7 +1947,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.140 2002/04/19 14:53:29 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.141 2002/04/20 12:02:04 Simplex Exp $\n\n");
 
 	if (argc > 1)
 	{
