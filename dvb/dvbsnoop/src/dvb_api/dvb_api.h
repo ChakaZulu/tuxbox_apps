@@ -1,5 +1,5 @@
 /*
-$Id: dvb_api.h,v 1.3 2004/01/03 15:40:45 rasc Exp $
+$Id: dvb_api.h,v 1.4 2004/01/06 14:06:08 rasc Exp $
 
 
  DVBSNOOP
@@ -25,7 +25,7 @@ $Id: dvb_api.h,v 1.3 2004/01/03 15:40:45 rasc Exp $
 #if defined(HAVE_LINUX_DVB_DMX_H)
 
 // API 3
-#define	DVB_API_3
+#define DVB_API_VERSION 3
 
 #include <linux/dvb/dmx.h>
 #define DEMUX_DEVICE    "/dev/dvb/adapter0/demux0"
@@ -36,7 +36,7 @@ $Id: dvb_api.h,v 1.3 2004/01/03 15:40:45 rasc Exp $
 #elif defined(HAVE_OST_DMX_H)
 
 // API 1
-#undef	DVB_API_3
+#define DVB_API_VERSION 1
 
 #include <ost/dmx.h>
 #define DEMUX_DEVICE   "/dev/dvb/card0/demux0"

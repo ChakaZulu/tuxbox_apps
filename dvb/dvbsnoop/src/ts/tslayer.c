@@ -1,5 +1,5 @@
 /*
-$Id: tslayer.c,v 1.14 2004/01/06 03:13:26 rasc Exp $
+$Id: tslayer.c,v 1.15 2004/01/06 14:06:11 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: tslayer.c,v 1.14 2004/01/06 03:13:26 rasc Exp $
 
 
 $Log: tslayer.c,v $
+Revision 1.15  2004/01/06 14:06:11  rasc
+no message
+
 Revision 1.14  2004/01/06 03:13:26  rasc
 TS prints PES/Section ID on payload_start
 
@@ -174,7 +177,7 @@ void decodeTS_buf (u_char *b, int len, int pid)
     out_nl (3,"Payload: (len: %d)",len);
 
 	// -- if payload_start, check PES/SECTION
-	// -- $$$ check PES-StreamID if changed by ISO!!!
+	// -- $$$ check PESStreamID if changed by ISO!!!
 	if (t.payload_unit_start_indicator & ! t.transport_scrambling_control) {
 	    indent (+1);
 	    if (b[0]==0x00 && b[1]==0x00 && b[2]==0x01 && b[3]>=0xBC) {

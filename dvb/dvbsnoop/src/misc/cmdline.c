@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.21 2004/01/03 15:40:47 rasc Exp $
+$Id: cmdline.c,v 1.22 2004/01/06 14:06:09 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: cmdline.c,v 1.21 2004/01/03 15:40:47 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.22  2004/01/06 14:06:09  rasc
+no message
+
 Revision 1.21  2004/01/03 15:40:47  rasc
 simple frontend signal status query added "-s signal"
 
@@ -235,7 +238,8 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
 static void title (void)
 {
     printf("dvbsnoop  - a dvb/mpeg2 stream analyzer tool\n");
-    printf("Version: %s  (%s %s)\n",DVBSNOOP_VERSION,__DATE__,__TIME__);
+    printf("Version: %s/api-%d  (%s %s)\n",
+		    DVBSNOOP_VERSION,DVB_API_VERSION,__DATE__,__TIME__);
     printf("         %s  \n",DVBSNOOP_URL);
     printf("         %s  \n",DVBSNOOP_COPYRIGHT);
     printf("\n");

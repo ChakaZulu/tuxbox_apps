@@ -1,5 +1,5 @@
 /*
-$Id: dmx_pes.c,v 1.21 2004/01/06 03:13:25 rasc Exp $
+$Id: dmx_pes.c,v 1.22 2004/01/06 14:06:08 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dmx_pes.c,v 1.21 2004/01/06 03:13:25 rasc Exp $
 
 
 $Log: dmx_pes.c,v $
+Revision 1.22  2004/01/06 14:06:08  rasc
+no message
+
 Revision 1.21  2004/01/06 03:13:25  rasc
 TS prints PES/Section ID on payload_start
 
@@ -339,7 +342,7 @@ static long pes_SyncRead (int fd, u_char *buf, u_long len, u_long *skipped_bytes
 	if (n1 <= 0) return n1;			// error or strange, abort
 
 	// -- byte shift for packet_start_code_prefix
-	// -- sync found? 0x000001 + valid StreamID
+	// -- sync found? 0x000001 + valid PESstream_ID
 	// -- $$$ check this if streamID defs will be enhanced by ISO!!!
 
 	c = buf[3];
