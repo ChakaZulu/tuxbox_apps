@@ -1,5 +1,5 @@
 /*
-$Id: sectables.c,v 1.26 2004/08/12 22:57:18 rasc Exp $
+$Id: sectables.c,v 1.27 2004/08/13 01:15:54 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: sectables.c,v 1.26 2004/08/12 22:57:18 rasc Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.27  2004/08/13 01:15:54  rasc
+small change in PID assignment display
+
 Revision 1.26  2004/08/12 22:57:18  rasc
  - New: MPEG Content Labeling descriptor  (H.222.0 AMD1)
  - New: PES update ITU-T H.222.0 AMD2
@@ -172,9 +175,15 @@ void decodeSections_buf (u_char *buf, int len, u_int pid)
 
 
   if (pid != DUMMY_PID) {
-  	out_nl (2,"PID:  %u (0x%04x)",pid,pid);
-  	out_nl (2,"PID assignment: %s", dvbstrPID_assignment(pid));
+	char *s;
+
+  	out (2,"PID:  %u (0x%04x)",pid,pid);
+
+  	s =  dvbstrPID_assignment(pid);
+	if (*s) out (2,"  [= assigned for: %s]", s);
+	out_NL (2);
   }
+
   table_id = buf[0];
 
 

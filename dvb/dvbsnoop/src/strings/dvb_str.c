@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.56 2004/08/12 22:57:19 rasc Exp $
+$Id: dvb_str.c,v 1.57 2004/08/13 01:15:54 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.56 2004/08/12 22:57:19 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.57  2004/08/13 01:15:54  rasc
+small change in PID assignment display
+
 Revision 1.56  2004/08/12 22:57:19  rasc
  - New: MPEG Content Labeling descriptor  (H.222.0 AMD1)
  - New: PES update ITU-T H.222.0 AMD2
@@ -242,6 +245,7 @@ char *dvbstrPID_assignment (u_int id)
      {  0x0001, 0x0001,  "ISO 13818-1 Conditional Access Table (CAT)" },
      {  0x0002, 0x0002,  "ISO 13818-1 Transport Stream Description Table (TSDT)" },
      {  0x0003, 0x0003,  "ISO 13818-11 IPMP Control Information " },
+     {  0x0004, 0x000F,  "" },
      {  0x0010, 0x0010,  "DVB Network Information Table (NIT), Stuffing Table (ST)" },
      {  0x0011, 0x0011,  "DVB Service Description Table (SDT), Bouquet Association Table (BAT)" },
      {  0x0012, 0x0012,  "DVB Event Information Table (EIT)" },
@@ -249,12 +253,14 @@ char *dvbstrPID_assignment (u_int id)
      {  0x0014, 0x0014,  "DVB Time and Date Table (TDT), Time Offset Table (TOT)" },
      {  0x0015, 0x0015,  "DVB Network Synchronization" },
      {  0x0016, 0x0016,  "TV ANYTIME Resolution Notification Table (RNT)" },
+     {  0x0017, 0x001B,  "" },
      {  0x001C, 0x001C,  "DVB Inband Signalling" },
      {  0x001D, 0x001D,  "DVB Measurement" },
      {  0x001E, 0x001E,  "DVB Discontinuity Information Table (DIT)" },
      {  0x001F, 0x001F,  "DVB Selection Information Table (SIT)" },
 
      // $$$ TODO  ATSC Pid assignment
+     {  0x0020, 0x1FFE,  "" },
 
      {  0x1FFF, 0x1FFF,  "Null Packet" },
      {  0,0, NULL }
