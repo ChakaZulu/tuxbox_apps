@@ -1,5 +1,5 @@
 /*
- * $Id: cam.cpp,v 1.23 2002/09/25 14:53:58 thegoodguy Exp $
+ * $Id: cam.cpp,v 1.24 2002/09/25 15:22:04 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>,
  *             thegoodguy         <thegoodguy@berlios.de>
@@ -30,10 +30,7 @@ bool CCam::sendMessage(char* data, const unsigned short length)
 	if (!open_connection(CAMD_UDS_NAME))
 		return false;
 
-	if (send_data(data, length))
-		return true;
-	else
-		return false;
+	return send_data(data, length);
 }
 
 bool CCam::setCaPmt(CCaPmt * caPmt)
