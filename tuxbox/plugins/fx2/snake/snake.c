@@ -143,7 +143,9 @@ void	MoveSnake( void )
 	int			i;
 	snake_ele	*snake2;
 
+printf("pos1\n");
 	memmove(snake+1,snake,sizeof(snake_ele)*(snake_len-1));
+printf("pos2\n");
 	switch( actcode )
 	{
 	case RC_LEFT :
@@ -163,6 +165,7 @@ void	MoveSnake( void )
 			snake[0].dir = DOWN;
 		break;
 	}
+printf("pos3\n");
 	switch( snake[0].dir )
 	{
 	case UP :
@@ -180,6 +183,7 @@ void	MoveSnake( void )
 	}
 	if (( snake[0].x == goodie.x ) && ( snake[0].y == goodie.y ))
 	{
+printf("pos4 l=%d\n",snake_len);
 		score += 100;
 		DrawScore();
 		snake_len++;
@@ -192,10 +196,13 @@ void	MoveSnake( void )
 		{
 			snake_len--;
 		}
+printf("pos4.1\n");
 		SetNewGoodi();
+printf("pos4.2\n");
 	}
 	else
 	{
+printf("pos5\n");
 		count--;
 		if ( !count )
 		{
@@ -204,6 +211,7 @@ void	MoveSnake( void )
 		}
 	}
 
+printf("pos6\n");
 	FBFillRect( last.x*16, last.y*16, 16, 16, BLACK );
 	FBFillRect( snake[0].x*16, snake[0].y*16, 16, 16, GREEN2 );
 	FBFillRect( snake[1].x*16, snake[1].y*16, 16, 16, GREEN );
@@ -221,6 +229,7 @@ void	MoveSnake( void )
 			return;
 		}
 	}
+printf("pos7\n");
 }
 
 void	DrawMaze( void )
