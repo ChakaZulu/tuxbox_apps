@@ -1,7 +1,10 @@
 //
-// $Id: remotecontrol.cpp,v 1.23 2001/10/16 19:21:30 field Exp $
+// $Id: remotecontrol.cpp,v 1.24 2001/10/16 21:22:44 field Exp $
 //
 // $Log: remotecontrol.cpp,v $
+// Revision 1.24  2001/10/16 21:22:44  field
+// NVODs besser
+//
 // Revision 1.23  2001/10/16 19:21:30  field
 // NVODs! Zeitanzeige geht noch nicht
 //
@@ -74,62 +77,71 @@ static void getNVODs(unsigned onidSid, st_nvod_info *nvods )
     servaddr.sin_port=htons(sectionsd::portNumber);
     inet_pton(AF_INET, rip, &servaddr.sin_addr);
 
-    if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
+    int rep_cnt= 10;
+    do
     {
-        perror("CRemoteControl - getNVODs - couldn't connect to sectionsd!\n");
-        return;
-    }
-    sectionsd::msgRequestHeader req;
-    req.version = 2;
-    req.command = sectionsd::timesNVODservice;
-    req.dataLength = 4;
-    write(sock_fd, &req, sizeof(req));
-    write(sock_fd, &onidSid, req.dataLength);
-    sectionsd::msgResponseHeader resp;
-    memset(&resp, 0, sizeof(resp));
-    if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0)
-    {
-        close(sock_fd);
-        return;
-    }
+        rep_cnt--;
+        if (rep_cnt< 9 )
+            printf("getNVODs - try #%d\n", 10- rep_cnt);
 
-    if(resp.dataLength)
-    {
-        char* pData = new char[resp.dataLength] ;
-        if(read(sock_fd, pData, resp.dataLength)>0)
+        if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
         {
-            //printf("dataLength: %u\n", resp.dataLength);
-            char *p=pData;
+            perror("CRemoteControl - getNVODs - couldn't connect to sectionsd!\n");
+            // return;
+            break;
+        }
+        sectionsd::msgRequestHeader req;
+        req.version = 2;
+        req.command = sectionsd::timesNVODservice;
+        req.dataLength = 4;
+        write(sock_fd, &req, sizeof(req));
+        write(sock_fd, &onidSid, req.dataLength);
+        sectionsd::msgResponseHeader resp;
+        memset(&resp, 0, sizeof(resp));
+        if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0)
+        {
+            close(sock_fd);
+            return;
+        }
 
-            nvods->count_nvods = 0;
-            while(p<pData+resp.dataLength)
+        if(resp.dataLength)
+        {
+            char* pData = new char[resp.dataLength] ;
+            if(read(sock_fd, pData, resp.dataLength)>0)
             {
-                nvods->count_nvods+= 1;
-                unsigned onidsid2=*(unsigned *)p;
-//                printf("onid_sid: 0x%x\n", onidsid2);
-                nvods->nvods[nvods->count_nvods- 1].onid_sid = onidsid2;
+                //printf("dataLength: %u\n", resp.dataLength);
+                char *p=pData;
 
-                p+=4;
-                unsigned short tsid=*(unsigned short *)p;
-//                printf("tsid: 0x%x\n", tsid);
-                nvods->nvods[nvods->count_nvods- 1].tsid = tsid;
-
-                p+=2;
-                unsigned char numberOfTimes=*p;
-                p++;
-                for(int i=0; i<numberOfTimes; i++)
+                nvods->count_nvods = 0;
+                while(p<pData+resp.dataLength)
                 {
-                    time_t zeit=*(time_t *)p;
+                    nvods->count_nvods+= 1;
+                    unsigned onidsid2=*(unsigned *)p;
+                    // printf("onid_sid: 0x%x\n", onidsid2);
+                    nvods->nvods[nvods->count_nvods- 1].onid_sid = onidsid2;
+
                     p+=4;
-//                    printf("%s", ctime(&zeit));
-                    if (i == 0)
-                        nvods->nvods[nvods->count_nvods- 1].startzeit = zeit;
+                    unsigned short tsid=*(unsigned short *)p;
+                    // printf("tsid: 0x%x\n", tsid);
+                    nvods->nvods[nvods->count_nvods- 1].tsid = tsid;
+
+                    p+=2;
+                    unsigned char numberOfTimes=*p;
+                    p++;
+                    for(int i=0; i<numberOfTimes; i++)
+                    {
+                        time_t zeit=*(time_t *)p;
+                        p+=4;
+                        // printf("%s", ctime(&zeit));
+                        if (i == 0)
+                            nvods->nvods[nvods->count_nvods- 1].startzeit = zeit;
+                    }
                 }
             }
+            delete[] pData;
         }
-        delete[] pData;
-    }
-    close(sock_fd);
+        close(sock_fd);
+    } while ( ( nvods->count_nvods== 0 ) && ( rep_cnt> 0) );
 }
 
 void * CRemoteControl::RemoteControlThread (void *arg)
@@ -264,10 +276,9 @@ void * CRemoteControl::RemoteControlThread (void *arg)
                                                 {
                                                     unsigned int onid_sid;
 
-                                                    printf("NVOD-Basechannel!\n");
-
                                                     sscanf( r_msg.param3, "%x", &onid_sid );
                                                     getNVODs( onid_sid, &RemoteControl->nvods_int );
+                                                    printf("NVOD-Basechannel - got %d nvods!\n", RemoteControl->nvods_int.count_nvods);
 
                                                     strcpy( RemoteControl->nvods_int.name, r_msg.param3 );
 
@@ -320,7 +331,7 @@ void * CRemoteControl::RemoteControlThread (void *arg)
                                         //printf("Sending NVODs to zapit\n");
                                         for(int count=0;count<RemoteControl->nvods_int.count_nvods;count++)
                                         {
-                                            //printf("Sending %d\n", count);
+                                            //printf("Sending NVOD %d - %x \n", count, RemoteControl->nvods_int.nvods[count].onid_sid);
                                             write(sock_fd, &RemoteControl->nvods_int.nvods[count].onid_sid, 4);
                                             write(sock_fd, &RemoteControl->nvods_int.nvods[count].tsid, 2);
                                         }
