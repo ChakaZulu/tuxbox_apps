@@ -98,7 +98,7 @@
 #include "gui/dboxinfo.h"
 #include "gui/timerlist.h"
 #include "gui/alphasetup.h"
-#include "gui/mp3player.h"
+#include "gui/audioplayer.h"
 
 #if HAVE_DVB_API_VERSION >= 3
 #include "gui/movieplayer.h"
@@ -619,7 +619,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.picviewer_scaling = configfile.getInt32("picviewer_scaling", 1 /*(int)CPictureViewer::SIMPLE*/);
 
 	//MP3-Player
-	g_settings.mp3player_display = configfile.getInt32("mp3player_display",(int)CMP3PlayerGui::ARTIST_TITLE);
+	g_settings.mp3player_display = configfile.getInt32("mp3player_display",(int)CAudioPlayerGui::ARTIST_TITLE);
 	g_settings.mp3player_follow  = configfile.getInt32("mp3player_follow",0);
 	strcpy( g_settings.mp3player_screensaver, configfile.getString( "mp3player_screensaver", "0" ).c_str() );
 	g_settings.mp3player_highprio  = configfile.getInt32("mp3player_highprio",0);
@@ -1208,7 +1208,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SCARTMODE, true, NULL, this, "scart", true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
 	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_GAMES, true, NULL, new CGameList(LOCALE_MAINMENU_GAMES), "", true, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 	mainMenu.addItem(GenericMenuSeparatorLine);
-	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_MP3PLAYER, true, NULL, new CMP3PlayerGui(), NULL, true, CRCInput::RC_1));
+	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_MP3PLAYER, true, NULL, new CAudioPlayerGui(), NULL, true, CRCInput::RC_1));
 
 	#if HAVE_DVB_API_VERSION >= 3
 	//mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_MOVIEPLAYER, true, NULL, new CMoviePlayerGui()));
@@ -1500,8 +1500,8 @@ const CMenuOptionChooser::keyval PICTUREVIEWER_SCALING_OPTIONS[PICTUREVIEWER_SCA
 #define MP3PLAYER_DISPLAY_ORDER_OPTION_COUNT 2
 const CMenuOptionChooser::keyval MP3PLAYER_DISPLAY_ORDER_OPTIONS[MP3PLAYER_DISPLAY_ORDER_OPTION_COUNT] =
 {
-	{ CMP3PlayerGui::ARTIST_TITLE, LOCALE_MP3PLAYER_ARTIST_TITLE },
-	{ CMP3PlayerGui::TITLE_ARTIST, LOCALE_MP3PLAYER_TITLE_ARTIST }
+	{ CAudioPlayerGui::ARTIST_TITLE, LOCALE_MP3PLAYER_ARTIST_TITLE },
+	{ CAudioPlayerGui::TITLE_ARTIST, LOCALE_MP3PLAYER_TITLE_ARTIST }
 };
 
 void CNeutrinoApp::InitMp3PicSettings(CMenuWidget &mp3PicSettings)

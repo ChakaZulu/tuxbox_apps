@@ -68,7 +68,7 @@ class CAudiofile
 typedef std::vector<CAudiofile> CPlayList;
 
 
-class CMP3PlayerGui : public CMenuTarget
+class CAudioPlayerGui : public CMenuTarget
 {
  public:
 	enum State
@@ -142,8 +142,8 @@ class CMP3PlayerGui : public CMenuTarget
    void screensaver(bool on);
 
  public:
-	CMP3PlayerGui();
-	~CMP3PlayerGui();
+	CAudioPlayerGui();
+	~CAudioPlayerGui();
 	int show();
 	int exec(CMenuTarget* parent, const std::string & actionKey);
 };
