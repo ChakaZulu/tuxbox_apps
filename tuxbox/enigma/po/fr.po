@@ -720,7 +720,7 @@ msgstr "Changer la vitesse de répétition de la télécommande\nGauche => moins
 #: src/parentallock.cpp:79
 
 msgid "change Setup PIN (ok)"
-msgstr "Changer le PIN "reglages" (OK)"
+msgstr "Changer le PIN 'reglages' (OK)"
 
 #: src/setup_osd.cpp:232
 

@@ -5693,7 +5693,7 @@ msgstr "dogradnja uspiješna!\nrestartam..."
 #: src/software_update.cpp:55
 
 msgid "Upload your Image via FTP or Samba to the '/tmp' folder.Then rename it to 'root.cramfs' and press ok.In the upcomming list select 'manual update' and follow the instructions."
-msgstr "Ubacite vaš Image preko FTP-a ili Sambe u "/tmp" direktorij.Onda mu promjenite ime u "root.cramfs" te stisnite ok.U sljedećem meniu koji slijedi odaberite "manualna nadogradnja" i slijedite upute."
+msgstr "Ubacite vaš Image preko FTP-a ili Sambe u '/tmp' direktorij.Onda mu promjenite ime u 'root.cramfs' te stisnite ok.U sljedećem meniu koji slijedi odaberite 'manualna nadogradnja' i slijedite upute."
 
 #: src/setup_timezone.cpp:41
 #, fuzzy

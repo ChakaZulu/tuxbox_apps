@@ -5741,7 +5741,7 @@ msgstr "Sim"
 #, c-format
 
 msgid "You are trying to delete '%s'.\nReally do this?"
-msgstr "Você está tentando apagar '%s'.\Quer realmente fazer isto?"
+msgstr "Você está tentando apagar '%s'.\nQuer realmente fazer isto?"
 
 #: src/setup_osd.cpp:324
 
