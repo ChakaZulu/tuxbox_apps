@@ -33,9 +33,29 @@
 #include <config.h>
 #endif
 
-#include "update.h"
+#include <gui/update.h>
+
+#include <global.h>
+#include <neutrino.h>
 
 #include <driver/encoding.h>
+#include <driver/fontrenderer.h>
+#include <driver/rcinput.h>
+
+#include <gui/color.h>
+#include <gui/nfs.h>
+
+#include <gui/widget/messagebox.h>
+#include <gui/widget/hintbox.h>
+
+#include <system/flashtool.h>
+#include <system/httptool.h>
+
+#include <libcramfs.h>
+
+#include <curl/curl.h>
+#include <curl/types.h>
+#include <curl/easy.h>
 
 #include <stdio.h>
 #include <unistd.h>
@@ -43,25 +63,6 @@
 #include <sys/ioctl.h>
 #include <dirent.h>
 
-#include <curl/curl.h>
-#include <curl/types.h>
-#include <curl/easy.h>
-
-#include <libcramfs.h>
-
-#include <global.h>
-#include <neutrino.h>
-
-#include <system/flashtool.h>
-#include <system/httptool.h>
-#include <driver/fontrenderer.h>
-#include <driver/rcinput.h>
-
-#include "color.h"
-#include "nfs.h"
-
-#include "widget/messagebox.h"
-#include "widget/hintbox.h"
 
 #define gTmpPath "/var/tmp/"
 #define gUserAgent "neutrino/softupdater 1.0"

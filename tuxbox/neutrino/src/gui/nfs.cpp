@@ -30,19 +30,24 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
+
+#include <gui/nfs.h>
+
+#include <gui/filebrowser.h>
+#include <gui/widget/menue.h>
+#include <gui/widget/hintbox.h>
+#include <gui/widget/stringinput.h>
+#include <gui/widget/stringinput_ext.h>
+
 #include <sys/mount.h>
 #include <unistd.h>
 #include <fstream>
 #include <global.h>
 #include <pthread.h>
 
-#include "nfs.h"
-#include "filebrowser.h"
-#include "widget/menue.h"
-#include "widget/hintbox.h"
-#include "widget/stringinput.h"
-#include "widget/stringinput_ext.h"
 
 pthread_mutex_t g_mut;
 pthread_cond_t g_cond;

@@ -4,7 +4,7 @@
 	Movieplayer (c) 2003 by gagga
 	Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-        $Id: movieplayer.cpp,v 1.43 2003/09/11 13:30:33 thegoodguy Exp $
+        $Id: movieplayer.cpp,v 1.44 2003/09/12 08:49:47 thegoodguy Exp $
 
 	Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -40,8 +40,14 @@
  - MP3 HTTP streaming
 */
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
+
 #if HAVE_DVB_API_VERSION >= 3
+
+#include <gui/movieplayer.h>
+
 #include <global.h>
 #include <neutrino.h>
 
@@ -49,41 +55,41 @@
 #include <driver/rcinput.h>
 #include <daemonc/remotecontrol.h>
 #include <system/settings.h>
-#include <algorithm>
-#include <sys/time.h>
-#include <fstream>
 
-#include "eventlist.h"
-#include "movieplayer.h"
-#include <transform.h>
-#include "color.h"
-#include "infoviewer.h"
-#include "nfs.h"
+#include <gui/eventlist.h>
+#include <gui/color.h>
+#include <gui/infoviewer.h>
+#include <gui/nfs.h>
 
 #include <gui/widget/icons.h>
-#include "widget/menue.h"
-#include "widget/messagebox.h"
-#include "widget/hintbox.h"
-#include "widget/stringinput.h"
+#include <gui/widget/menue.h>
+#include <gui/widget/messagebox.h>
+#include <gui/widget/hintbox.h>
+#include <gui/widget/stringinput.h>
 
-#include <fcntl.h>
 #include <linux/dvb/audio.h>
 #include <linux/dvb/dmx.h>
 #include <linux/dvb/video.h>
+
+#include <algorithm>
+#include <fstream>
+
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+#include <transform.h>
 
 #include <curl/curl.h>
 #include <curl/types.h>
 #include <curl/easy.h>
 
 #include <poll.h>
-
-#include <linux/dvb/audio.h>
 
 #define ADAP	"/dev/dvb/adapter0"
 #define ADEC	ADAP "/audio0"
@@ -100,7 +106,7 @@
 #define STREAMTYPE_SVCD	2
 #define STREAMTYPE_FILE	3
 
-#define ConnectLineBox_Width	15
+#define MOVIEPLAYER_ConnectLineBox_Width	15
 
 #define RINGBUFFERSIZE 348*188*10
 #define MAXREADSIZE 348*188
@@ -170,10 +176,10 @@ CMoviePlayerGui::exec (CMenuTarget * parent, std::string actionKey)
   //define screen width
   width = 710;
   if ((g_settings.screen_EndX - g_settings.screen_StartX) <
-      width + ConnectLineBox_Width)
+      width + MOVIEPLAYER_ConnectLineBox_Width)
     width =
       (g_settings.screen_EndX - g_settings.screen_StartX) -
-      ConnectLineBox_Width;
+      MOVIEPLAYER_ConnectLineBox_Width;
 
   //define screen height
   height = 570;
@@ -192,8 +198,8 @@ CMoviePlayerGui::exec (CMenuTarget * parent, std::string actionKey)
 
   x =
     (((g_settings.screen_EndX - g_settings.screen_StartX) -
-      (width + ConnectLineBox_Width)) / 2) + g_settings.screen_StartX +
-    ConnectLineBox_Width;
+      (width + MOVIEPLAYER_ConnectLineBox_Width)) / 2) + g_settings.screen_StartX +
+    MOVIEPLAYER_ConnectLineBox_Width;
   y =
     (((g_settings.screen_EndY - g_settings.screen_StartY) - height) / 2) +
     g_settings.screen_StartY;
@@ -1359,14 +1365,14 @@ CMoviePlayerGui::hide ()
   if (visible)
     {
       frameBuffer->paintBackgroundBoxRel (x -
-					  ConnectLineBox_Width
+					  MOVIEPLAYER_ConnectLineBox_Width
 					  - 1,
 					  y +
 					  title_height
 					  - 1,
 					  width
 					  +
-					  ConnectLineBox_Width
+					  MOVIEPLAYER_ConnectLineBox_Width
 					  + 2, height + 2 - title_height);
       frameBuffer->paintBackgroundBoxRel (x, y, width, title_height);
       frameBuffer->ClearFrameBuffer ();
