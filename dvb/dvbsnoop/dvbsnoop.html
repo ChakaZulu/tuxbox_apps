@@ -11,9 +11,10 @@
 	  CONTENT="dvbsnoop - dvbsnoop is a simple analyzing and monitoring tool for DVB data transmission streams and related data streams. ">
 	 <META NAME="Author" CONTENT="Rainer Scherg"> 
   </HEAD> 
-  <BODY>
-	 <H1>dvbsnoop - A DVB Stream Analyzer Tool</H1> 
-	 <H2>What is dvbsnoop?</H2>
+  <BODY> 
+	 <H1>dvbsnoop - A DVB Stream Analyzer Tool</H1>
+	 <P><BR></P> 
+	 <H2>What is dvbsnoop?</H2> 
 	 <P>dvbsnoop is a DVB sniffer and monitoring program. <BR><BR>Its purpose is
 		to debug, dump or view dvb/mpeg/dsm-cc/MHP stream information (e.g. digital
 		television broadcasts) send via satellite, cable or terrestrial. Basically you
@@ -22,9 +23,10 @@
 		under Linux.<BR><BR> The programm was mainly written to learn and understand
 		the DVB protocol structures and streams sent via sattelites. Out of this
 		reason, the programm ist not performance optimized, but it will hopefully do
-		its job.</P>
-	 <H2>Under what Licence is dvbsnoop?</H2>
-	 <P>dvbsnoop is published under GPL with extension:</P>
+		its job.<BR><BR>Author: Rainer Scherg (rasc@users.sourceforge.net)</P> 
+	 <P><BR></P>
+	 <H2>Under what Licence is dvbsnoop?</H2> 
+	 <P>dvbsnoop is published under GPL with extension:</P> 
 	 <PRE>
 License: 
 
@@ -41,22 +43,390 @@ License:
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA
-</PRE>
+</PRE> 
 	 <P><B>Extension: </B> It is not allowed to sell this or parts of this
 		software without prior written permission by the author. It is also not allowed
 		to bundle this software for commercial purpose without prior written permission
-		by the author. This includes also offers in online auctions...</P>
-	 <H2>Is there any disclaimer?</H2>
+		by the author. This includes also offers in online auctions...</P> 
+	 <P><BR></P>
+	 <H2>Is there any disclaimer?</H2> 
 	 <P>Yes, the standard disclaimer for all non-commercial software (;-)):<BR>
 		You may use this program freely, but on your own risk.<BR>There is no garantee,
 		that this programm will fit your needs in any way. Also this program might not
 		compile on your computer - and if so, it may crash your computer or even eat
-		your cat.</P>
+		your cat.</P> 
 	 <P>By the way: It is strictly forbidden to use this program for hacking
-		encrypted TV channels.</P>
-	 <PRE>
+		encrypted TV channels.</P> 
+	 <P><BR></P>
+	 <H2>How to use dvbsnoop?</H2> 
+	 <P>dvbsnoop is a commandline tool.<BR>To tune in a transponder, use a
+		proper tuning program like <I>dvbtune</I> (see:
+		<A HREF="http://www.linuxtv.org">http://www.linuxtv.org</A>) or a GUI based DVB
+		program like <I>Neutrino</I> or <I>Enigma</I> which is running on a dbox2 or on
+		a Linux-PC (see: <A
+		HREF="http://www.tuxbox.org">http://www.tuxbox.org</A>).</P>
+	 <H3>Command Line Options:</H3>
+	 <TABLE BGCOLOR="#e0e0e0">
+		<TR BGCOLOR="#c0c0c0">
+		  <TD><B>Option</B></TD>
+		  <TD>&nbsp;</TD>
+		  <TD><B>Description</B></TD>
+		</TR>
+		<TR>
+		  <TD>-demux device</TD>
+		  <TD></TD>
+		  <TD>demux device [/dev/dvb/adapter0/demux0]</TD>
+		</TR>
+		<TR>
+		  <TD>-dvr device</TD>
+		  <TD></TD>
+		  <TD>dvr device [/dev/dvb/adapter0/dvr0]</TD>
+		</TR>
+		<TR>
+		  <TD>-s [sec|ts|pes]</TD>
+		  <TD></TD>
+		  <TD>stream type [-s sec]</TD>
+		</TR>
+		<TR>
+		  <TD>-f filter</TD>
+		  <TD></TD>
+		  <TD>filtervalue for 'sec' demux [-f 0]</TD>
+		</TR>
+		<TR>
+		  <TD> -m mask</TD>
+		  <TD></TD>
+		  <TD>maskvalue for 'sec' demux [-m 0]</TD>
+		</TR>
+		<TR>
+		  <TD>-crc</TD>
+		  <TD></TD>
+		  <TD>CRC check when reading 'sec'</TD>
+		</TR>
+		<TR>
+		  <TD>-nocrc</TD>
+		  <TD></TD>
+		  <TD>No CRC check when reading 'sec' [-nocrc]</TD>
+		</TR>
+		<TR>
+		  <TD>-n count</TD>
+		  <TD></TD>
+		  <TD>receive count packets (0=no limit) [-n 0]</TD>
+		</TR>
+		<TR>
+		  <TD>-b</TD>
+		  <TD></TD>
+		  <TD>binary output of packets (disables other output)</TD>
+		</TR>
+		<TR>
+		  <TD>-if</TD>
+		  <TD>&nbsp;</TD>
+		  <TD>input file, reads from binary file instead of demux device</TD>
+		</TR>
+		<TR>
+		  <TD VALIGN="TOP"> -ph mode</TD>
+		  <TD>&nbsp;</TD>
+		  <TD>print hex buffer, modes: [-ph 1]<BR> &nbsp; 0=none, 1=hexdump,
+			 2=hex line 3=ascii line</TD>
+		</TR>
+		<TR>
+		  <TD>-nph</TD>
+		  <TD>&nbsp;</TD>
+		  <TD>don't print hex buffer (= -ph 0)</TD>
+		</TR>
+		<TR>
+		  <TD>-pd verbose</TD>
+		  <TD>&nbsp;</TD>
+		  <TD>print stream decode (verbose level 0..9) [-pd 7]</TD>
+		</TR>
+		<TR>
+		  <TD>-npd</TD>
+		  <TD>&nbsp;</TD>
+		  <TD>don't print decoded stream (= -pd 0) </TD>
+		</TR>
+		<TR>
+		  <TD>-t[n|d|f]</TD>
+		  <TD>&nbsp;</TD>
+		  <TD>print timestamp (no, delta, full) [-tf] </TD>
+		</TR>
+	 </TABLE>
+	 <P>(default values are in square brackets...)</P>
+	 <P></P>
+	 <H3>Examples:</H3>
+	 <H4>dvbsnoop 0x10</H4>
+	 <P>dump PID 0x10 (sections mode). This command will dump the NIT
+		transmission within the dvb data stream.</P>
+	 <TABLE>
+		<TR>
+		  <TD BGCOLOR="#e0e0e0">
+			 <PRE>~/bin &gt; ./dvbsnoop 0x10 | more
+DvbSnoop   Vers. 1.0a   -- (c) Rainer Scherg
+
+---------------------------------------------------------
+SECT-Packet: 00000001   PID: 16 (0x0010), Length: 282 (0x011a)
+Time received: Thu 16.10.2003  21:43:07.954
+---------------------------------------------------------
+  0000:   @  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 
+  0000:  40 f1 17 00 01 e9 01 01 f0 00 f1 0a 04 ff 00 01 
+  0010:   .  .  C  .  .  .  .  P  .  .  .  .  u  .  .  . 
+  <B>[...]</B>
+  0100:      .  .  .  S  .  .  .  .  C  .  .  %  D  u  . 
+  0100:  20 00 04 04 53 00 01 f0 0d 43 0b 01 25 44 75 01 
+  0110:   .  .  .     .  .  l  .  .  z 
+  0110:  92 81 02 20 00 04 6c d5 b5 7a 
+
+PID:  16 (0x0010)
+NIT-decoding....
+Table_ID: 64 (0x40)  [= network_information_section - actual network]
+section_syntax_indicator: 1 (0x01)
+reserved_1: 1 (0x01)
+reserved_2: 3 (0x03)
+Section_length: 279 (0x0117)
+Network_ID: 1 (0x0001)  [= Astra Satellite Network 19.2E / Satellite / SES]
+reserved_3: 3 (0x03)
+Version_number: 20 (0x14)
+Current_next_indicator: 1 (0x01)
+Section_number: 1 (0x01)
+Last_Section_number: 1 (0x01)
+reserved_4: 15 (0x0f)
+Network_descriptor_length: 0 (0x0000)
+
+reserved_5: 15 (0x0f)
+Transport_stream_loop_length: 266 (0x010a)
+    
+    Transport_stream_ID: 1279 (0x04ff)
+    Original_network_ID: 1 (0x0001)  [= Astra Satellite Network 19,2&deg;E | Soci&eacute;t&eacute; Europ&eacute;enne des Satellites]
+    reserved_1: 15 (0x0f)
+    Transport_descriptor_length: 13 (0x000d)
+        
+        DVB-DescriptorTag: 67 (0x43)  [= satellite_delivery_system_descriptor]
+        Descriptor_length: 11 (0x000b)
+        Frequency: 18453072 (=  11.99250 GHz)
+        Orbital_position: 402 (=  19.2)
+        West_East_flag: 1 (0x01)  [= EAST]
+        Polarisation: 0 (0x00)  [= linear - horizontal]
+        Modulation (Sat): 1 (0x01)  [= QPSK]
+        Symbol_rate: 2576384 (=  27.5000)
+        FEC_inner: 3 (0x03)  [= 3/4 conv. code rate]
+        
+    Transport_stream_ID: 1115 (0x045b)
+    Original_network_ID: 1 (0x0001)  [= Astra Satellite Network 19,2&deg;E | Soci&eacute;t&eacute; Europ&eacute;enne des Satellites]
+    reserved_1: 15 (0x0f)
+    Transport_descriptor_length: 13 (0x000d)
+        
+        DVB-DescriptorTag: 67 (0x43)  [= satellite_delivery_system_descriptor]
+        Descriptor_length: 11 (0x000b)
+        Frequency: 19292789 (=  12.66275 GHz)
+        Orbital_position: 402 (=  19.2)
+        West_East_flag: 1 (0x01)  [= EAST]
+        Polarisation: 0 (0x00)  [= linear - horizontal]
+        Modulation (Sat): 1 (0x01)  [= QPSK]
+        Symbol_rate: 2228224 (=  22.0000)
+        FEC_inner: 4 (0x04)  [= 5/6 conv. code rate]
+        
+    Transport_stream_ID: 1117 (0x045d)
+    Original_network_ID: 1 (0x0001)  [= Astra Satellite Network 19,2&deg;E | Soci&eacute;t&eacute; Europ&eacute;enne des Satellites]
+    reserved_1: 15 (0x0f)
+    Transport_descriptor_length: 13 (0x000d)
+        
+        DVB-DescriptorTag: 67 (0x43)  [= satellite_delivery_system_descriptor]
+        Descriptor_length: 11 (0x000b)
+        Frequency: 19304997 (=  12.69225 GHz)
+        Orbital_position: 402 (=  19.2)
+        West_East_flag: 1 (0x01)  [= EAST]
+        Polarisation: 0 (0x00)  [= linear - horizontal]
+        Modulation (Sat): 1 (0x01)  [= QPSK]
+        Symbol_rate: 2228224 (=  22.0000)
+        FEC_inner: 4 (0x04)  [= 5/6 conv. code rate]
+        
+    Transport_stream_ID: 1119 (0x045f)
+    Original_network_ID: 1 (0x0001)  [= Astra Satellite Network 19,2&deg;E | Soci&eacute;t&eacute; Europ&eacute;enne des Satellites]
+    reserved_1: 15 (0x0f)
+    Transport_descriptor_length: 13 (0x000d)
+        
+        DVB-DescriptorTag: 67 (0x43)  [= satellite_delivery_system_descriptor]
+        Descriptor_length: 11 (0x000b)
+        Frequency: 19341685 (=  12.72175 GHz)
+        Orbital_position: 402 (=  19.2)
+        West_East_flag: 1 (0x01)  [= EAST]
+</PRE><B>[...]</B></TD>
+		</TR>
+	 </TABLE>
+	 <P></P>
+	 <H4>dvbsnoop -n 10 -td -f 0x50 -m 0xff -nph -pd 3 0x12</H4>
+	 <P>dump 10 packets of PID 0x12 (EIT, ...) in sections mode, using the fpid
+		filter 0x50 and pid mask 0xff.<BR>-nph and -pd 3 tells dvbsnoop not to print a
+		hexdump and restrict output to print decoded streams at verbose level 3.
+		Timestamps should be printed in 'delta'-mode...</P>
+	 <TABLE>
+		<TR>
+		  <TD BGCOLOR="#e0e0e0">
+			 <PRE>~/bin &gt; ./dvbsnoop -n 10 -td -f 0x50 -m 0xff -nph -pd 3 0x12
+DvbSnoop   Vers. 1.0a   -- (c) Rainer Scherg
+
+---------------------------------------------------------
+SECT-Packet: 00000001   PID: 18 (0x0012), Length: 528 (0x0210)
+Time (delta) received: 0.068 (sec)
+---------------------------------------------------------
+PID:  18 (0x0012)
+EIT-decoding....
+Table_ID: 80 (0x50)  [= event_information_section - actual transport stream, schedule]
+section_syntax_indicator: 1 (0x01)
+Service_ID: 12003 (0x2ee3)  [=  --&gt; refers to PMS program_number]
+Version_number: 6 (0x06)
+Current_next_indicator: 1 (0x01)
+Section_number: 112 (0x70)
+Last_Section_number: 176 (0xb0)
+Transport_stream_ID: 1089 (0x0441)
+Original_network_ID: 1 (0x0001)  [= Astra Satellite Network 19,2&deg;E | Soci&eacute;t&eacute; Europ&eacute;enne des Satellites]
+Segment_last_Section_number: 112 (0x70)
+Last_table_id: 80 (0x50)  [= event_information_section - actual transport stream, schedule]
+    
+    Event_ID: 674 (0x02a2)
+    Start_time: 0xcec0181500 (=2003-10-16 18:15:00 [UTC])
+    Duration: 0x0010000 (= 01:00:00 [UTC])
+    Running_status: 0 (0x00)  [= undefined]
+    Free_CA_mode: 0 (0x00)  [= unscrambled]
+    
+    Event_ID: 675 (0x02a3)
+    Start_time: 0xcec0191500 (=2003-10-16 19:15:00 [UTC])
+    Duration: 0x0010000 (= 01:00:00 [UTC])
+    Running_status: 0 (0x00)  [= undefined]
+    Free_CA_mode: 0 (0x00)  [= unscrambled]
+    
+    Event_ID: 676 (0x02a4)
+    Start_time: 0xcec0201500 (=2003-10-16 20:15:00 [UTC])
+    Duration: 0x0010000 (= 01:00:00 [UTC])
+    Running_status: 0 (0x00)  [= undefined]
+    Free_CA_mode: 0 (0x00)  [= unscrambled]
+==========================================================
 
 
-Rainer Scherg
-</PRE> </BODY>
+---------------------------------------------------------
+SECT-Packet: 00000002   PID: 18 (0x0012), Length: 774 (0x0306)
+Time (delta) received: 0.048 (sec)
+---------------------------------------------------------
+PID:  18 (0x0012)
+EIT-decoding....
+Table_ID: 80 (0x50)  [= event_information_section - actual transport stream, schedule]
+section_syntax_indicator: 1 (0x01)
+Service_ID: 12040 (0x2f08)  [=  --&gt; refers to PMS program_number]
+Version_number: 6 (0x06)
+Current_next_indicator: 1 (0x01)
+</PRE><B>[...]</B></TD>
+		</TR>
+	 </TABLE>
+	 <P></P>
+	 <H4>dvbsnoop -n 200 -s ts -b 0x00 &gt; ts-stream.pid0x1000.file</H4>
+	 <P>Dump 200 packets of PID 0x00 in transport stream mode to an image
+		file.<BR>The raw datastream will be dumped in the specified stream mode (PES,
+		SECTION or TS).<BR>This file can be used, to postprocess dvb the data
+		streams.</P>
+	 <H4>dvbsnoop -if ts-stream.pid0x1000.file &nbsp; -s ts 0x00</H4>
+	 <P>Read a data stream from filea and analyze ithe stream.<BR>It is
+		important that you specify which mode an which pid!</P>
+	 <P><BR></P>
+	 <H2>Related Topic and Links</H2>
+	 <P>Please visit the following websites for more information:</P>
+	 <TABLE>
+		<TR>
+		  <TD VALIGN="TOP"><A
+			 HREF="http://sourceforge.net/projects/dvbsnoop">http://sourceforge.net/projects/dvbsnoop</A></TD>
+		  <TD>&nbsp;</TD>
+		  <TD>The project homepage of dvbsnoop, currently dvbsnoop is hosted at
+			 <B>www.tuxbox.org</B>. To check out the source, read the cvs information on
+			 tuxbox.org</TD>
+		</TR>
+		<TR>
+		  <TD VALIGN="TOP"><A
+			 HREF="http://www.tuxbox.org">http://www.tuxbox.org</A></TD>
+		  <TD>&nbsp;</TD>
+		  <TD>Website for linux on a <B><I>dbox2</I></B> (a set top box mainly
+			 sold in Europe or provided by the German pay tv provider "Premiere").<BR> Here
+			 you will also find a support forum for linux@dbox2.</TD>
+		</TR>
+		<TR>
+		  <TD VALIGN="TOP"><B><A
+			 HREF="http://cvs.tuxbox.org/">cvs.tuxbox.org</A></B></TD>
+		  <TD>&nbsp;</TD>
+		  <TD>The CVS for linux@dbox2. dvbsnoop is part of the linux@dbox2
+			 project applications...</TD>
+		</TR>
+		<TR>
+		  <TD VALIGN="TOP"><A
+			 HREF="http://tuxbox.berlios.de">http://tuxbox.berlios.de</A></TD>
+		  <TD>&nbsp;</TD>
+		  <TD>The old dbox2@linux homepage.<BR>For more links on this topic, have
+			 a look on the <A HREF="http://tuxbox.org/forum/">FAQ-Section of the
+			 forum</A>!</TD>
+		</TR>
+		<TR>
+		  <TD><A HREF="http://www.linuxtv.org">http://www.linuxtv.org</A></TD>
+		  <TD>&nbsp;</TD>
+		  <TD>Linux based TV</TD>
+		</TR>
+		<TR>
+		  <TD><A HREF="http://www.dvb.org">http://www.dvb.org</A></TD>
+		  <TD>&nbsp;</TD>
+		  <TD>Information about DVB</TD>
+		</TR>
+		<TR>
+		  <TD><A HREF="http://www.mhp.org">http://www.mhp.org</A></TD>
+		  <TD>&nbsp;</TD>
+		  <TD>Information about MHP</TD>
+		</TR>
+		<TR>
+		  <TD><A HREF="http://www.etsi.org">http://www.etsi.org</A></TD>
+		  <TD>&nbsp;</TD>
+		  <TD>Standards documents</TD>
+		</TR>
+		<TR>
+		  <TD VALIGN="TOP">irc:#dbox2</TD>
+		  <TD>&nbsp;</TD>
+		  <TD>IRC Support channel for dbox2. (use e.g. IRC server
+			 irc.freenet.de:6667)</TD>
+		</TR>
+		<TR>
+		  <TD VALIGN="TOP"><A
+			 HREF="http://www.linuxstb.org/">http://www.linuxstb.org/</A></TD>
+		  <TD>&nbsp;</TD>
+		  <TD>another very good site, with a punch of good tools!</TD>
+		</TR>
+		<TR>
+		  <TD VALIGN="TOP"><A
+			 HREF="http://www.magicality.org/code/dvbdata/">http://www.magicality.org/code/dvbdata/</A></TD>
+		  <TD>&nbsp;</TD>
+		  <TD>A tool for saving data from the Data Carousell. (from Richard
+			 Palmer )</TD>
+		</TR>
+		<TR>
+		  <TD VALIGN="TOP"><A
+			 HREF="http://www.linuxdvb.tv/">http://www.linuxdvb.tv/</A></TD>
+		  <TD>&nbsp;</TD>
+		  <TD>... just have a look</TD>
+		</TR>
+		<TR>
+		  <TD VALIGN="TOP"><A
+			 HREF="http://www.cadsoft.de/people/kls/vdr/">http://www.cadsoft.de/people/kls/vdr/</A></TD>
+		  <TD>&nbsp;</TD>
+		  <TD>... not directly related with dvbsnoop, but mui mucho cool! a DVB
+			 personal video recorder... </TD>
+		</TR>
+	 </TABLE>
+	 <P><B>Remark:</B><BR>In 2003 the development <B>CVS has been moved</B> from
+		cvs.berlios.de (German sourceforge clone) to <B><A
+		HREF="http://cvs.tuxbox.org/">cvs.tuxbox.org</A></B>! This was necessary due to
+		uptime problems at <A HREF="http://www.berlios.de">berlios.de</A>.</P>
+	 <P><BR></P>
+	 <H2>Thanks...</H2>
+	 <P><B>Thanks</B> a lot to all the members and developers of the
+		tuxbox@dbox2 project!!!<BR>These heros do great support and also bugfixing -
+		see the history information in the source!! ;-)</P>
+	 <P><BR><BR></P>
+	 <H2>Where to send bugreports?</H2>
+	 <P>Please send bugreports with a detailed description to: &nbsp;&nbsp;
+		<A
+		 HREF="mailto:rasc@users.sourceforge.net?DVBSNOOP - Bugreport...">rasc@users.sourceforge.net</A><BR>Do
+		NOT send saved stream files via email!</P> 
+	 <P></P>
+	 <P><BR><BR><BR>Rainer Scherg</P></BODY>
 </HTML>

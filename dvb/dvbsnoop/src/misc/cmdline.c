@@ -1,10 +1,13 @@
 /*
-$Id: cmdline.c,v 1.4 2003/10/16 19:02:27 rasc Exp $
+$Id: cmdline.c,v 1.5 2003/10/16 20:45:47 rasc Exp $
 
  -- (c) 2001 rasc
 
 
 $Log: cmdline.c,v $
+Revision 1.5  2003/10/16 20:45:47  rasc
+no message
+
 Revision 1.4  2003/10/16 19:02:27  rasc
 some updates to dvbsnoop...
 - small bugfixes
@@ -126,7 +129,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
     printf("DVB, the streams and the coordination between the streams...\n");
     printf("Tnx to all the guys of the linux-dbox2 project for their help\n");
     printf("Please report errors!\n");
-    printf(" (c) 2001 rasc ...\n");
+    printf(" (c) 2001-2003  Rainer Scherg.\n");
     printf("     Use on your own risk - no warrenty in any way given.\n");
     printf("     Miss-use is prohibited...\n");
     printf("     \n");
