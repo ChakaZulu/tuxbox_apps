@@ -4569,6 +4569,11 @@ static eString data(eString request, eString dirpath, eString opt, eHTTPConnecti
 		else
 			result.strReplace("#DISKH#", eString().sprintf("~%d h, %02d min", min/60, min%60));
 	}
+	else
+	{
+		result.strReplace("#DISKGB#", "n/a");
+		result.strReplace("#DISKH#", "n/a");
+	}
 
 	// volume
 	result.strReplace("#VOLUME#", (eAVSwitch::getInstance()->getMute()) ? "0" : eString().sprintf("%d", 63 - eAVSwitch::getInstance()->getVolume()));

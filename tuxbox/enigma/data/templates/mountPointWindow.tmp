@@ -5,6 +5,7 @@
 <body onUnload="parent.window.opener.location.reload(true)">
 <form name="mountpoint" action="#ACTION#">
 	<input name="action" type="hidden" value="#CMD#">
+	<input type="hidden" name="id" value="#ID#">
 	<table border=0 cellspacing=5 cellpadding=0>
 	<tr>
 		<td>

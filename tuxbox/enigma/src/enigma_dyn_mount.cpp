@@ -102,12 +102,12 @@ static eString addChangeMountPoint(eString request, eString dirpath, eString opt
 	if (action == "change")
 	{
 		eMountMgr::getInstance()->changeMountPoint(atoi(id.c_str()), mp);
-		result = "<html><body onUnload=\"parent.window.opener.location.reload(true)\">Mount point changed successfully.";
+		result = "<html><body onUnload=\"parent.window.opener.location.reload(true)\"><script>window.close();</script></body></html>";
 	}
 	else
 	{
 		eMountMgr::getInstance()->addMountPoint(mp);
-		result = "<html><body onUnload=\"parent.window.opener.location.reload(true)\">Mount point added successfully.";
+		result = "<html><body onUnload=\"parent.window.opener.location.reload(true)\"><script>window.close();</script></body></html>";
 	}
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
@@ -215,6 +215,7 @@ static eString mountPointWindow(eString request, eString dirpath, eString opts, 
 			udp = "checked";
 	}
 
+	result.strReplace("#ID#", eString().sprintf("%d", mp.id));
 	result.strReplace("#LDIR#", mp.localDir);
 	result.strReplace("#FSTYPE#", eString().sprintf("%d", mp.fstype));
 	result.strReplace("#PW#", mp.password);

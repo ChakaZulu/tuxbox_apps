@@ -176,7 +176,6 @@ int eMountPoint::mount()
 {
 	eString cmd;
 	eString ip;
-	eString useoptions;
 	int rc = 0;
 	if (!mp.mounted)
 	{
@@ -189,10 +188,6 @@ int eMountPoint::mount()
 				system(eString("mkdir " + mp.localDir).c_str());
 			if (access(mp.localDir.c_str(), R_OK) == 0)
 			{
-				if (mp.ownOptions)
-					useoptions = mp.options + "," + mp.ownOptions;
-				if (useoptions[useoptions.length() - 1] == ',') //remove?
-					useoptions = useoptions.left(useoptions.length() - 1); //remove?
 				ip.sprintf("%d.%d.%d.%d", mp.ip[0], mp.ip[1], mp.ip[2], mp.ip[3]);
 				switch (mp.fstype)
 				{
@@ -200,13 +195,19 @@ int eMountPoint::mount()
 						if (fileSystemIsSupported("nfs"))
 						{
 							cmd = "mount -t nfs ";
-							cmd += ip + ":" + mp.mountDir + " " + mp.localDir + " -o ";
+							cmd += ip + ":" + mp.mountDir + " " + mp.localDir;
+							cmd += " -o" + mp.options;
 							if (mp.rsize != -1)
+							{
 								cmd += eString().sprintf("rsize=%d", mp.rsize);
+								cmd += (mp.options) ? "," : "";
+							}
 							if (mp.wsize != -1)
+							{
 								cmd += eString().sprintf(",wsize=%d", mp.wsize);
-							if (useoptions)
-								cmd += "," + useoptions;
+								cmd += (mp.options) ? "," : "";
+							}
+							cmd += (mp.ownOptions) ? mp.ownOptions : "";
 						}
 						else
 							rc = -4; //NFS filesystem not supported
@@ -220,8 +221,10 @@ int eMountPoint::mount()
 							if (mp.password)
 								cmd += "pass=" + mp.password;
 							cmd += ",unc=//" + ip + "/" + mp.mountDir;
-							if (useoptions)
-								cmd += "," + useoptions;
+							cmd += (mp.options) ? "," : "";
+							cmd += mp.options;
+							cmd += (mp.ownOptions) ? "," : "";
+							cmd += mp.ownOptions;
 						}
 						else
 							rc = -3; //CIFS filesystem not supported
