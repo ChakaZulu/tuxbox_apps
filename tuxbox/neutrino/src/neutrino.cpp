@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.31 2001/09/17 16:02:35 field Exp $
+        $Id: neutrino.cpp,v 1.32 2001/09/17 18:36:56 fnbrd Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.32  2001/09/17 18:36:56  fnbrd
+  Fixed use of unwanted globals ;)
+
   Revision 1.31  2001/09/17 16:02:35  field
   Keyblocker einstellbar, String(Nummern)-Input verbessert
 
@@ -70,7 +73,7 @@
   works with zapit again
 
   Revision 1.18  2001/08/22 00:03:24  ge0rg
-  verständliche Fehlermeldungen
+  verst„ndliche Fehlermeldungen
 
   Revision 1.17  2001/08/21 18:30:15  ge0rg
   added power down LCD logo
@@ -108,27 +111,35 @@
 #include "neutrino.h"
 #include "include/debug.h"
 
+#define NEUTRINO_CPP
+#include "global.h"
+
 // Globale Variablen - to use import global.h
 
-    CNeutrinoApp        *neutrino = NULL;
-    SNeutrinoSettings   g_settings;
+// I don't like globals, I would have hidden them in classes,
+// but if you wanna do it so... ;)
 
-    CFrameBuffer    *g_FrameBuffer = NULL;
-    fontRenderClass *g_fontRenderer = NULL;
-    FontsDef        *g_Fonts = NULL;
+static void initGlobals(void)
+{
+  neutrino = NULL;
 
-    CRCInput        *g_RCInput = NULL;
-    CLCDD           *g_lcdd = NULL;
-    CControld       *g_Controld = NULL;
-    CRemoteControl  *g_RemoteControl = NULL;
+  g_FrameBuffer = NULL;
+  g_fontRenderer = NULL;
+  g_Fonts = NULL;
 
-    CEpgData        *g_EpgData = NULL;
-    CInfoViewer     *g_InfoViewer = NULL;
-    CStreamInfo     *g_StreamInfo = NULL;
-    CScreenSetup    *g_ScreenSetup = NULL;
+  g_RCInput = NULL;
+  g_lcdd = NULL;
+  g_Controld = NULL;
+  g_RemoteControl = NULL;
 
-    CLocaleManager	*g_Locale = NULL;
+  g_EpgData = NULL;
+  g_InfoViewer = NULL;
+  g_StreamInfo = NULL;
+  g_ScreenSetup = NULL;
 
+  g_Locale = NULL;
+
+}
 // Ende globale Variablen
 
 
@@ -1243,6 +1254,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
+  initGlobals();
 	neutrino = new CNeutrinoApp;
 	return neutrino->run(argc, argv);
 }

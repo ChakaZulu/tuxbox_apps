@@ -15,22 +15,29 @@
 #include "helpers/settings.h"
 #include "helpers/locale.h"
 
-extern  CNeutrinoApp        *neutrino;
-extern  SNeutrinoSettings   g_settings;
+#ifndef NEUTRINO_CPP
+#define NEUTRINO_CPP extern
+#endif
 
-extern  CLCDD           *g_lcdd;
-extern  CControld       *g_Controld;
-extern  CRemoteControl  *g_RemoteControl;
+NEUTRINO_CPP  CNeutrinoApp        *neutrino;
+NEUTRINO_CPP  SNeutrinoSettings   g_settings;
 
-extern  fontRenderClass *g_fontRenderer;
-extern  FontsDef        *g_Fonts;
-extern  CRCInput        *g_RCInput;
-extern  CFrameBuffer    *g_FrameBuffer;
+NEUTRINO_CPP  CLCDD           *g_lcdd;
+NEUTRINO_CPP  CControld       *g_Controld;
+NEUTRINO_CPP  CRemoteControl  *g_RemoteControl;
 
-extern  CEpgData        *g_EpgData;
-extern  CInfoViewer     *g_InfoViewer;
-extern  CStreamInfo     *g_StreamInfo;
+NEUTRINO_CPP  fontRenderClass *g_fontRenderer;
+NEUTRINO_CPP  FontsDef        *g_Fonts;
+NEUTRINO_CPP  CRCInput        *g_RCInput;
+NEUTRINO_CPP  CFrameBuffer    *g_FrameBuffer;
 
-extern  CScreenSetup    *g_ScreenSetup;
+NEUTRINO_CPP  CEpgData        *g_EpgData;
+NEUTRINO_CPP  CInfoViewer     *g_InfoViewer;
+NEUTRINO_CPP  CStreamInfo     *g_StreamInfo;
 
-extern CLocaleManager	*g_Locale;
+NEUTRINO_CPP  CScreenSetup    *g_ScreenSetup;
+
+NEUTRINO_CPP CLocaleManager	*g_Locale;
+
+
+
