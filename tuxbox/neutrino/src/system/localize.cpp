@@ -29,48 +29,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-/*
-$Id: localize.cpp,v 1.1 2002/04/28 23:00:49 McClean Exp $
-
-
-$Log: localize.cpp,v $
-Revision 1.1  2002/04/28 23:00:49  McClean
-renamed localize
-
-Revision 1.13  2002/04/14 08:34:30  Simplex
-return key when not in string-table
-
-Revision 1.12  2002/02/28 17:34:10  McClean
-repair locale-api
-
-Revision 1.11  2002/02/28 15:03:55  field
-Weiter Updates :)
-
-Revision 1.10  2002/01/03 20:03:20  McClean
-cleanup
-
-Revision 1.9  2001/12/03 19:09:10  McClean
-fixed install targets
-
-Revision 1.8  2001/11/26 02:34:04  McClean
-include (.../../stuff) changed - correct unix-formated files now
-
-Revision 1.7  2001/11/15 11:42:41  McClean
-gpl-headers added
-
-Revision 1.6  2001/10/14 14:30:47  rasc
--- EventList Darstellung ueberarbeitet
--- kleiner Aenderungen und kleinere Bugfixes
--- locales erweitert..
-
-
-
-*/
-
-
-
-#include "locale.h"
 #include <config.h>
+
+#include "localize.h"
 #include "iso639.h"
 
 char* getISO639Description(char *iso)

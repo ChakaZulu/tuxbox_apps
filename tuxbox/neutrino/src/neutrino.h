@@ -36,7 +36,7 @@
 #include "neutrinoMessages.h"
 #include "driver/framebuffer.h"
 #include "system/setting_helpers.h"
-
+#include "libconfigfile/configfile.h"
 #include <string>
 
 using namespace std;
@@ -74,6 +74,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 			char command;
 		};
 
+		CConfigFile			configfile;
 		string				settingsFile;
 		string				scanSettingsFile;
 		CScanSettings		scanSettings;
@@ -112,14 +113,13 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 
 		void doChecks();
 		void firstChannel();
-		void setupDefaults();
 		void setupColors_classic();
 		void setupColors_neutrino();
 		void setupNetwork( bool force= false );
 		void testNetwork();
 
 		void saveSetup();
-		bool loadSetup(SNeutrinoSettings* load2=NULL);
+		int loadSetup();
 
 		void tvMode( bool rezap = true );
 		void radioMode( bool rezap = true );

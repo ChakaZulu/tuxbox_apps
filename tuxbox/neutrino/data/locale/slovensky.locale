@@ -323,6 +323,9 @@ messagebox.error chyba
 messagebox.discard Chcete zmeny vymazat?
 messagebox.info Informacia
 
+settings.noconffile No neutrino-settings found.\nUseing defaults.
+settings.missingoptionsconffile The neutrino-settings have been updated.\nNew Options will be set to default.
+
 cam.wrong Pozor, vasa smartcard\n nie kompatibilna s CAM_ALPHA.BIN!!!\n\nMa sa toto upozornenie opakovat?
 
 stringinput.caps velke/male pismena

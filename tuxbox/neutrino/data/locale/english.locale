@@ -327,6 +327,10 @@ messagebox.error Error
 messagebox.discard Discard changes?
 messagebox.info Information
 
+
+settings.noconffile No neutrino-settings found.\nUseing defaults.
+settings.missingoptionsconffile The neutrino-settings have been updated.\nNew Options will be set to default.
+
 cam.wrong ATTENTION, YOUR CARD \nDOES NOT MATCH CAMALPHA.BIN!!\n\nDo you whish to get this warning again?
 ucodes.failure ATTENTION, µCodes could NOT be found!\n\nPlease upload them via FTP (or DBox-BootManager),\nthen restart your DBox!
 

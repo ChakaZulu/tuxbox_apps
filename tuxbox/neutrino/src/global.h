@@ -42,7 +42,7 @@
 #include "driver/fontrenderer.h"
 #include "driver/rcinput.h"
 
-#include "system/locale.h"
+#include "system/localize.h"
 #include "system/settings.h"
 
 #include "gui/epgview.h"
