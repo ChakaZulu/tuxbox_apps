@@ -46,15 +46,20 @@ using namespace std;
 
 #define BAUDRATE B115200
 #define SERIALDEVICE "/dev/tts/0"
+#define SERIALDEVICEALTERNATE "/dev/ttyS"
 
 class CActionLog
 {
 		int fd;
 		struct termios oldtio, newtio;
+
+		bool opendevice(string devicename);
+
 	public:
 			
 		CActionLog();
 		~CActionLog();
+
 
 		void print(string text);
 		void println(string text);

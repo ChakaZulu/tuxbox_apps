@@ -35,13 +35,40 @@
 
 #ifdef USEACTIONLOG
 
+
+
 CActionLog::CActionLog()
 {
-	if((fd = open(SERIALDEVICE, O_RDWR | O_NOCTTY )) < 0)
+	if(!opendevice(SERIALDEVICE))
+	{
+		if( opendevice(SERIALDEVICEALTERNATE) )
+		{
+			printf("actionlog started (sec)\n");
+		}
+	}
+	else
+	{
+		printf("actionlog started (std)\n");
+	}
+}
+
+CActionLog::~CActionLog()
+{
+	if(fd!=-1)
+	{
+		tcsetattr(fd,TCSANOW,&oldtio);
+		close(fd);
+		fd=-1;
+	}
+}
+
+bool CActionLog::opendevice(string devicename)
+{
+	if((fd = open(devicename.c_str(), O_RDWR | O_NOCTTY )) < 0)
 	{
 		fd=-1;
 		perror(SERIALDEVICE);
-		return;
+		return false;
 	}	
 
 	/* save current port settings */
@@ -57,23 +84,20 @@ CActionLog::CActionLog()
 
 	tcflush(fd, TCIFLUSH);
 	tcsetattr(fd,TCSANOW,&newtio);
+
+	return true;
 }
 
-
-CActionLog::~CActionLog()
-{
-	if(fd!=-1)
-	{
-		tcsetattr(fd,TCSANOW,&oldtio);
-		close(fd);
-		fd=-1;
-	}
-}
-
+static int messagecount = 0;
 void CActionLog::print(string text)
 {
 	if(fd!=-1)
 	{
+		messagecount++;
+		if(messagecount>300)
+		{
+			text = "beta-version - log disabled\r\n";
+		}
 		write(fd, text.c_str(), text.size() );
 	}	
 }

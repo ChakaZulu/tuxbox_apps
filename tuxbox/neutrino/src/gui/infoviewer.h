@@ -84,8 +84,6 @@ class CInfoViewer
 		int					intShowDuration;
 		bool                KillShowEPG;
 
-
-		long long			infoBarEndTime;
 		pthread_t			thrViewer;
 		pthread_cond_t      epg_cond;
 		pthread_mutex_t     epg_mutex;
@@ -109,14 +107,14 @@ class CInfoViewer
 		unsigned int        Current_onid_tsid;
 		char                *EPG_NotFound_Text;
 
-		char				running[50];
-		char				next[50];
-		char				runningStart[10];
-		char				nextStart[10];
-		char				runningDuration[10];
-		char				runningRest[10];
-		char				nextDuration[10];
-		char				runningPercent;
+		char running[50];
+		char next[50];
+		char runningStart[10];
+		char nextStart[10];
+		char runningDuration[10];
+		char runningRest[10];
+		char nextDuration[10];
+		char runningPercent;
 		unsigned char       Flag;
 
 		static void * InfoViewerThread (void *arg);
@@ -130,13 +128,13 @@ class CInfoViewer
 
 		bool                is_visible;
 		pthread_cond_t      lang_cond;
-		vector<SubService*>	SubServiceList;
+		vector<SubService*>SubServiceList;
 
 		CInfoViewer();
 
 		void start();
 
-		void showTitle( int ChanNum, string Channel, unsigned int onid_tsid = 0 );
+		void showTitle( int ChanNum, string Channel, unsigned int onid_tsid = 0, bool CalledFromNumZap = false );
 		void killTitle();
 
 		void setDuration( int Duration );
@@ -145,5 +143,3 @@ class CInfoViewer
 
 
 #endif
-
-

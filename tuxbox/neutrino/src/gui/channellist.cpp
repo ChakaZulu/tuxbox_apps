@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.52 2002/01/16 02:09:04 McClean Exp $
+// $Id: channellist.cpp,v 1.53 2002/01/18 23:34:36 McClean Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.53  2002/01/18 23:34:36  McClean
+// repair infobar
+//
 // Revision 1.52  2002/01/16 02:09:04  McClean
 // cleanups+quickzap-fix
 //
@@ -544,7 +547,7 @@ bool CChannelList::showInfo(int pos)
 	}
 	selected=pos;
 	channel* chan = chanlist[selected];
-	g_InfoViewer->showTitle(selected+1, chan->name, chan->onid_sid );
+	g_InfoViewer->showTitle(selected+1, chan->name, chan->onid_sid, true );
 	return true;
 }
 
@@ -677,6 +680,32 @@ void CChannelList::numericZap(int key)
 
 void CChannelList::quickZap(int key)
 {
+        if(chanlist.size()==0)
+        {
+                //evtl. anzeige dass keine kanalliste....
+                return;
+        }
+
+        //      printf("quickzap start\n");
+        if (key==g_settings.key_quickzap_down)
+        {
+                if(selected==0)
+                        selected = chanlist.size()-1;
+                else
+                        selected--;
+                //                              channel* chan = chanlist[selected];
+        }
+        else if (key==g_settings.key_quickzap_up)
+        {
+                selected = (selected+1)%chanlist.size();
+                //                      channel* chan = chanlist[selected];
+        }
+
+        zapTo( selected );
+
+
+
+	/*
 	if(chanlist.size()==0)
 	{
 		//evtl. anzeige dass keine kanalliste....
@@ -717,6 +746,7 @@ void CChannelList::quickZap(int key)
 	while ((key==g_settings.key_quickzap_down) || (key==g_settings.key_quickzap_up ));
 
 	zapTo( selected );
+*/
 }
 
 int CChannelList::hasChannel(int nChannelNr)
