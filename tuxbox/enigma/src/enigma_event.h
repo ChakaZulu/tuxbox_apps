@@ -1,5 +1,5 @@
-#ifndef __ezap_event_h
-#define __ezap_event_h
+#ifndef __enigma_event_h
+#define __enigma_event_h
 
 #include "ewindow.h"
 #include <qlist.h>
@@ -26,4 +26,4 @@ public:
 	void setList(const QList<EITEvent> &events);
 };
 
-#endif
+#endif /* __enigma_event_h */

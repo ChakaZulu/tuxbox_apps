@@ -1,8 +1,8 @@
-#ifndef __ezap_dyn_h_
-#define __ezap_dyn_h_
+#ifndef __enigma_dyn_h
+#define __enigma_dyn_h
 
 class eHTTPDynPathResolver;
 
 void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver);
 
-#endif
+#endif /* __enigma_dyn_h */

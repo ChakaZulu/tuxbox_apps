@@ -420,9 +420,9 @@ void eZapMain::setEIT(EIT *eit)
 	}
 	if (numsub)
 	{
-		flags|=EZAP_SUBSERVICES;
+		flags|=ENIGMA_SUBSERVICES;
 	}
-	if (flags&(EZAP_NVOD|EZAP_SUBSERVICES))
+	if (flags&(ENIGMA_NVOD|EZAP_SUBSERVICES))
 		ButtonGreen->setText("\x19");
 	else
 		ButtonGreen->setText("");
@@ -551,7 +551,7 @@ void eZapMain::keyUp(int code)
 		break;
 	case eRCInput::RC_GREEN:
 	{
-		if (flags&EZAP_NVOD)
+		if (flags&ENIGMA_NVOD)
 		{
 			if (isVisible())
 			{
@@ -562,7 +562,7 @@ void eZapMain::keyUp(int code)
 			nvodsel.exec();
 			nvodsel.hide();
 		}
-		if (flags&EZAP_SUBSERVICES)
+		if (flags&ENIGMA_SUBSERVICES)
 		{
 			if (isVisible())
 			{
@@ -577,7 +577,7 @@ void eZapMain::keyUp(int code)
 	}
 	case eRCInput::RC_YELLOW:
 	{
-		if (flags&EZAP_AUDIO)
+		if (flags&ENIGMA_AUDIO)
 		{
 			if (isVisible())
 			{
@@ -622,7 +622,7 @@ void eZapMain::serviceChanged(eService *service, int err)
 		return;
 
 	if (service->service_type==4)
-		flags|=EZAP_NVOD;
+		flags|=ENIGMA_NVOD;
 	ChannelName->setText(service->service_name);
 	
 	switch (err)
@@ -655,12 +655,12 @@ void eZapMain::serviceChanged(eService *service, int err)
 	
 	ChannelNumber->setText(QString().sprintf("%d", service->service_number));
 	
-	if (flags&(EZAP_NVOD|EZAP_SUBSERVICES))
+	if (flags&(ENIGMA_NVOD|EZAP_SUBSERVICES))
 		ButtonGreen->setText("\x19");	// ein runder knopf
 	else
 		ButtonGreen->setText("");
 
-	if (flags&EZAP_AUDIO)
+	if (flags&ENIGMA_AUDIO)
 		ButtonYellow->setText("\x19");	// ein runder knopf
 	else
 		ButtonYellow->setText("");
@@ -730,7 +730,7 @@ void eZapMain::gotPMT(PMT *pmt)
 		}
 	}
 	if (numaudio>1)
-		flags|=EZAP_AUDIO;
+		flags|=ENIGMA_AUDIO;
 }
 
 void eZapMain::timeOut()

@@ -178,7 +178,7 @@ eZap::eZap(int argc, char **argv): QApplication(argc, argv, 0)
 #endif
 	main=new eZapMain();
 	
-	qDebug("[EZAP] starting httpd");
+	qDebug("[ENIGMA] starting httpd");
 	eHTTPD *httpd=new eHTTPD(7575);
 	eHTTPDynPathResolver *dyn_resolver=new eHTTPDynPathResolver();
 	ezapInitializeDyn(dyn_resolver);
@@ -186,10 +186,10 @@ eZap::eZap(int argc, char **argv): QApplication(argc, argv, 0)
 	httpd->addResolver(dyn_resolver);
 	
 	eHTTPFilePathResolver *fileresolver=new eHTTPFilePathResolver();
-	fileresolver->addTranslation("/usr/httpd/htdocs", "/www");
-	fileresolver->addTranslation("/var/elitedvb/htdocs", "/");
+	fileresolver->addTranslation(DATADIR "/enigma/htdocs", "/");
+	fileresolver->addTranslation("/var/tuxbox/htdocs", "/www"); /* TODO: make user configurable */
 	httpd->addResolver(fileresolver);
-	qDebug("[EZAP] ok, beginning mainloop");
+	qDebug("[ENIGMA] ok, beginning mainloop");
 	__u32 lastchannel;
 
 	int bootcount;
@@ -198,8 +198,8 @@ eZap::eZap(int argc, char **argv): QApplication(argc, argv, 0)
 
 	if (!bootcount)
 	{
-		eMessageBox msg("Willkommen zu EliteDVB.\n\nBitte führen sie zunächst eine Kanalsuche durch, indem sie die d-Box-Taste drücken um in das "
-			"Hauptmenü zu gelangen. Dort gibt es den Unterpunkt \"Transponder Scan\", der genau das macht, was sie glauben.\n", "EliteDVB - erster Start");
+		eMessageBox msg("Willkommen zu enigma.\n\nBitte führen sie zunächst eine Kanalsuche durch, indem sie die d-Box-Taste drücken um in das "
+			"Hauptmenü zu gelangen. Dort gibt es den Unterpunkt \"Transponder Scan\", der genau das macht, was sie glauben.\n", "enigma - erster Start");
 		msg.show();
 		msg.exec();
 		msg.hide();
@@ -222,24 +222,24 @@ eZap::~eZap()
 	eSkin_close();
 	if (eDVB::getInstance()->service)
 		eDVB::getInstance()->config.setKey("/ezap/ui/lastChannel", (__u32)((eDVB::getInstance()->original_network_id<<16)|eDVB::getInstance()->service_id));
-	qDebug("[EZAP] beginning clean shutdown");
-	qDebug("[EZAP] main");
+	qDebug("[ENIGMA] beginning clean shutdown");
+	qDebug("[ENIGMA] main");
 	delete main;
-	qDebug("[EZAP] serviceSelector");
+	qDebug("[ENIGMA] serviceSelector");
 	delete serviceSelector;
-	qDebug("[EZAP] eDVB");
+	qDebug("[ENIGMA] eDVB");
 	delete eDVB::getInstance();
-	qDebug("[EZAP] font");
+	qDebug("[ENIGMA] font");
 	delete font;
-	qDebug("[EZAP] rc");
+	qDebug("[ENIGMA] rc");
 	delete rc;
-	qDebug("[EZAP] grc");
+	qDebug("[ENIGMA] grc");
 	delete grc;
-	qDebug("[EZAP] gfbdc");
+	qDebug("[ENIGMA] gfbdc");
 	delete gfbdc;
-	qDebug("[EZAP] lcd");
+	qDebug("[ENIGMA] lcd");
 	delete glcddc;
-	qDebug("[EZAP] fertig");
+	qDebug("[ENIGMA] fertig");
 	instance=0;
 }
 
@@ -321,7 +321,7 @@ eMainMenu::eMainMenu()
 	connect(new eListboxEntryText(window->list, "Streaminfo"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_streaminfo(eListboxEntry*)));
 	connect(new eListboxEntryText(window->list, "Show BN version"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_bnversion(eListboxEntry*)));
 	connect(new eListboxEntryText(window->list, "Plugins"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_plugins(eListboxEntry*)));
-	connect(new eListboxEntryText(window->list, "Quit EliteDVB"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_quit(eListboxEntry*)));
+	connect(new eListboxEntryText(window->list, "Quit enigma"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_quit(eListboxEntry*)));
 	connect(new eListboxEntryText(window->list, "RECORD MODE"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_record(eListboxEntry*)));
 	connect(new eListboxEntryText(window->list, "About..."), SIGNAL(selected(eListboxEntry*)), SLOT(sel_about(eListboxEntry*)));
 }
@@ -423,12 +423,12 @@ void eMainMenu::sel_about(eListboxEntry *)
 {
 	window->hide();
 	eMessageBox msgbox(
-"eZap was constructed by Felix Domke <tmbinc@gmx.net> in 2001, 2002 for the dbox2-linux-project.\n"
+"enigma was constructed by Felix Domke <tmbinc@gmx.net> in 2001, 2002 for the dbox2-linux-project.\n"
 "Special thanks and respects go out to:\n"
 "Farbrausch Consumer Consulting (http://www.farb-rausch.de)\n"
 "some unnamed guy (WN) who provided us lowlevel information (without you, the whole think wouldn't be possible. thanks again.)\n"
 "and off course all dbox2-linux-team-members.\n",
-	"About eZap");
+	"About enigma");
 	msgbox.show();
 	msgbox.exec();
 	msgbox.hide();

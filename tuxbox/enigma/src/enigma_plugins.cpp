@@ -7,6 +7,7 @@
 #include "edvb.h"
 #include "enigma.h"
 #include "emessage.h"
+#include "config.h"
 
 typedef int     (*PluginInfoProc)( struct SPluginInfo *info );
 typedef int     (*PluginExecProc)( int fd_fb, int fd_rc, int fd_lcd, char *cfgfile );
@@ -81,9 +82,7 @@ eZapPlugins::eZapPlugins()
 
 int eZapPlugins::exec()
 {
-//	const QString PluginPath = "/usr/lib/neutrino/games/";
-	const QString PluginPath = "/usr/games/";
-#warning FIXME to DATADIR
+	const QString PluginPath = PLUGINDIR "/";
 	struct dirent **namelist;
 
 	int n = scandir(PluginPath, &namelist, 0, alphasort);

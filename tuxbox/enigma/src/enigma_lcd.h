@@ -1,5 +1,5 @@
-#ifndef __ezap_lcd_h
-#define __ezap_lcd_h
+#ifndef __enigma_lcd_h
+#define __enigma_lcd_h
 
 #include "ewidget.h"
 #include "multipage.h"
@@ -30,4 +30,4 @@ public:
 	eZapLCDMain(eWidget *parent);
 };
 
-#endif
+#endif /* __enigma_lcd_h */

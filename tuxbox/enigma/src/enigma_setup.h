@@ -1,5 +1,5 @@
-#ifndef __ezap_setup_h
-#define __ezap_setup_h
+#ifndef __enigma_setup_h
+#define __enigma_setup_h
 
 #include "ewidget.h"
 #include "elbwindow.h"
@@ -23,4 +23,4 @@ public:
 	int exec();
 };
 
-#endif
+#endif /* __enigma_setup_h */

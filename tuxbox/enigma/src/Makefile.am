@@ -36,28 +36,28 @@ enigma_LDADD = \
 AM_CXXFLAGS = $(LIBFREETYPE_CFLAGS)
 
 $(top_srcdir)/enigma/src/core/driver/libdriver.a:
-	make -C $(top_srcdir)/enigma/src/core/driver
+	cd $(top_srcdir)/enigma/src/core/driver && $(MAKE)
 
 $(top_srcdir)/enigma/src/core/dvb/libdvb.a:
-	make -C $(top_srcdir)/enigma/src/core/dvb
+	cd $(top_srcdir)/enigma/src/core/dvb && $(MAKE)
 
 $(top_srcdir)/enigma/src/core/dvb/lowlevel/liblowlevel.a:
-	make -C $(top_srcdir)/enigma/src/core/dvb/lowlevel
+	cd $(top_srcdir)/enigma/src/core/dvb/lowlevel && $(MAKE)
 
 $(top_srcdir)/enigma/src/core/gdi/libgdi.a:
-	make -C $(top_srcdir)/enigma/src/core/gdi
+	cd $(top_srcdir)/enigma/src/core/gdi && $(MAKE)
 
 $(top_srcdir)/enigma/src/core/gui/libgui.a:
-	make -C $(top_srcdir)/enigma/src/core/gui
+	cd $(top_srcdir)/enigma/src/core/gui && $(MAKE)
 
 $(top_srcdir)/enigma/src/core/system/libsystem.a:
-	make -C $(top_srcdir)/enigma/src/core/system
+	cd $(top_srcdir)/enigma/src/core/system && $(MAKE)
 
 $(top_srcdir)/enigma/src/core/xml/libxml.a:
-	make -C $(top_srcdir)/enigma/src/core/xml
+	cd $(top_srcdir)/enigma/src/core/xml && $(MAKE)
 
 $(top_srcdir)/edvb/miniqt/libminiqt.a:
-	make -C $(top_srcdir)/edvb/miniqt
+	cd $(top_srcdir)/edvb/miniqt && $(MAKE)
 
 %.moc.cpp: %.h
 	$(MOC) $< -o $@

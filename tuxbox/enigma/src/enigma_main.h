@@ -1,5 +1,5 @@
-#ifndef __ezap_main_h
-#define __ezap_main_h
+#ifndef __enigma_main_h
+#define __enigma_main_h
 
 #include "elistbox.h"
 #include "ewindow.h"
@@ -109,9 +109,9 @@ public:
 	~eServiceNumberWidget();
 };
 
-#define EZAP_NVOD		1	
-#define EZAP_AUDIO	2
-#define EZAP_SUBSERVICES	4
+#define ENIGMA_NVOD		1	
+#define ENIGMA_AUDIO	2
+#define ENIGMA_SUBSERVICES	4
 
 class eEventDisplay;
 
@@ -160,4 +160,4 @@ public:
 	~eZapMain();
 };
 
-#endif
+#endif /* __enigma_main_h */

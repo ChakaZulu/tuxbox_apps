@@ -1,5 +1,5 @@
-#ifndef __ezap_plugins_h
-#define __ezap_plugins_h
+#ifndef __enigma_plugins_h
+#define __enigma_plugins_h
 
 #include "ewidget.h"
 #include "elbwindow.h"
@@ -30,4 +30,4 @@ public:
 	int exec();
 };
 
-#endif
+#endif /* __enigma_plugins_h */

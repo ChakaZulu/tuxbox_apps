@@ -1,5 +1,5 @@
-#ifndef __ezap_h
-#define __ezap_h
+#ifndef __enigma_h
+#define __enigma_h
 
 #include <qapplication.h>
 #include <qtimer.h>
@@ -91,4 +91,4 @@ public:
 	int exec();
 };
 
-#endif
+#endif /* __enigma_h */
