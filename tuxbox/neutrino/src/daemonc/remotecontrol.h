@@ -126,6 +126,7 @@ public:
 	void tvMode();
 
 	int handleMsg(uint msg, uint data);
+	std::string getCurrentChannelName(){ return current_channel_name; }
 };
 
 

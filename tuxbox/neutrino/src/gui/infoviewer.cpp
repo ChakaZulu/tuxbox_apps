@@ -588,6 +588,7 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 		if ( data == channel_id)
 		{
 			// show failure..!
+			CLCD::getInstance()->showServicename("("+g_RemoteControl->getCurrentChannelName()+")");
 			printf("zap failed!\n");
            	showFailure();
 
