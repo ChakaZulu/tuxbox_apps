@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.8 2004/07/06 20:57:02 chakazulu Exp $
+ * $Id: locals_intern.h,v 1.9 2004/07/06 21:34:55 chakazulu Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -519,14 +519,14 @@ const char * locale_real_names[] =
 	"mp3player.shuffle",
 	"mp3player.stop",
 	"mp3player.title_artist",
-        "mp3player.save_playlist",
-        "mp3player.playlist_name",
-        "mp3player.playlist_name_hint1",
-        "mp3player.playlist_name_hint2",
-        "mp3player.playlist_fileerror_title",
-        "mp3player.playlist_fileerror_msg",
-        "mp3player.playlist_fileoverwrite_title",
-        "mp3player.playlist_fileoverwrite_msg",
+	"mp3player.save_playlist",
+	"mp3player.playlist_name",
+	"mp3player.playlist_name_hint1",
+	"mp3player.playlist_name_hint2",
+	"mp3player.playlist_fileerror_title",
+	"mp3player.playlist_fileerror_msg",
+	"mp3player.playlist_fileoverwrite_title",
+	"mp3player.playlist_fileoverwrite_msg",
 	"networkmenu.broadcast",
 	"networkmenu.dhcp",
 	"networkmenu.gateway",
