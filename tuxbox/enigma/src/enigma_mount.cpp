@@ -366,7 +366,6 @@ int eMountMgr::unmountMountPoint(int id)
 
 void eMountMgr::automountMountPoints(void)
 {
-	int rc;
 	for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
 	{
 		if (mp_it->mp.automount == 1)
@@ -524,6 +523,7 @@ t_mount loadMPFromConfig(int i)
 	__u32 sip = ntohl(0x0a000061);
 	char *ctmp  = 0;
 	int itmp = 0;
+	
 	eString cmd = eString().sprintf("/elitedvb/network/nfs%d/", i);
 
 	eConfig::getInstance()->getKey((cmd + "ip").c_str(), sip);
@@ -621,26 +621,29 @@ void eMountMgr::init()
 	}
 	delete config;
 	
+	addMountedFileSystems();
+	
+	bool found = false;
 	for (int i = 0; i < MAX_NFS_ENTRIES; i++)
 	{
-		int itmp = 0;
-		t_mount mp = loadMPFromConfig(i);
-		if (mp.mountDir && mp.localDir)
+		int fstype = -1;
+		eString key = eString().sprintf("/elitedvb/network/nfs%d/fstype", i);
+		eConfig::getInstance()->getKey((key).c_str(), fstype);
+		if (fstype != -1)
 		{
-			for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
+			t_mount mp2 = loadMPFromConfig(i);
+			if (mp2.mountDir && mp2.localDir)
 			{
-				if ((mp_it->mp.localDir == mp.localDir) && (mp_it->mp.mountDir == mp.mountDir))
-					break;
-				else
+				for (std::vector <eMountPoint>::iterator mp_it2 = mountPoints.begin(); mp_it2 != mountPoints.end(); mp_it2++)
 				{
-					addMountPoint(mp);
-					break;
+					if (found = ((mp_it2->mp.localDir == mp2.localDir) && (mp_it2->mp.mountDir == mp2.mountDir)))
+						break;
 				}
+				if (!found)
+					addMountPoint(mp2);
 			}
 		}
 	}
-	
-	addMountedFileSystems();
 }
 
 void eMountMgr::save()

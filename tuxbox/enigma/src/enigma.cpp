@@ -229,11 +229,12 @@ eZap::eZap(int argc, char **argv)
 	extern void activateSwapFile(eString);
 	activateSwapFile(eString(swapfilename));
 #endif
+#endif
+	eDVB::getInstance()->configureNetwork();
+
 #ifdef ENABLE_DYN_MOUNT
 	eMountMgr::getInstance()->automountMountPoints();
 #endif
-#endif
-	eDVB::getInstance()->configureNetwork();
 
 	// build Service Selector
 	serviceSelector = new eServiceSelector();
