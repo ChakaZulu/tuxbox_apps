@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.7 2001/07/19 22:08:49 fnbrd Exp $
+//  $Id: sectionsdMsg.h,v 1.8 2001/07/19 22:19:41 fnbrd Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -25,8 +25,8 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsdMsg.h,v $
-//  Revision 1.7  2001/07/19 22:08:49  fnbrd
-//  Noch ne Beschreibung dazu
+//  Revision 1.8  2001/07/19 22:19:41  fnbrd
+//  Noch ne Beschreibung.
 //
 //  Revision 1.6  2001/07/19 22:02:13  fnbrd
 //  Mehr Befehle.
@@ -122,6 +122,19 @@ enum sectionsdCommands {
 //     unsigned short (minutes after events are old (after their end time))
 //   data of response:
 //     -
+//
+// dumpAllServicesinformation:
+//   data of request:
+//     -
+//   data of response:
+//     is a string (c-string) with all cached services
+//     3 lines per service
+//     1. line: service-ID, service-type, eitScheduleFlag (bool),
+//              eitPresentFollowingFlag (bool), runningStatus (bool),
+//              freeCAmode (bool), number of nvod services
+//     2. line: service name
+//     3. line: provider name
+//
 //
 // actualEventListRadioshort:
 //   data of request:
