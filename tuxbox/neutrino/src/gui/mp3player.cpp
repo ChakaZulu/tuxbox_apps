@@ -621,13 +621,13 @@ void CMP3PlayerGui::paintItem(int pos)
 	{
 		if ((pos + liststart) == (unsigned)current)
 		{
-			color   = COL_MENUCONTENTSELECTED;
-			bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
+			color   = COL_MENUCONTENTSELECTED + 2;
+			bgcolor = COL_MENUCONTENTSELECTED_PLUS_2;
 		}
 		else
 		{
-			color   = COL_MENUCONTENTSELECTED + 2;
-			bgcolor = COL_MENUCONTENTSELECTED_PLUS_2;
+			color   = COL_MENUCONTENTSELECTED;
+			bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
 		}
 	}
 	else
@@ -635,26 +635,26 @@ void CMP3PlayerGui::paintItem(int pos)
 		{
 			if ((pos + liststart) == (unsigned)current)
 			{
-				color   = COL_MENUCONTENTDARK;
-				bgcolor = COL_MENUCONTENTDARK_PLUS_0;
+				color   = COL_MENUCONTENTDARK + 2;
+				bgcolor = COL_MENUCONTENTDARK_PLUS_2;
 			}
 			else
 			{
-				color   = COL_MENUCONTENTDARK + 2;
-				bgcolor = COL_MENUCONTENTDARK_PLUS_2;
+				color   = COL_MENUCONTENTDARK;
+				bgcolor = COL_MENUCONTENTDARK_PLUS_0;
 			}
 		}
 		else
 		{
 			if ((pos + liststart) == (unsigned)current)
 			{
-				color   = COL_MENUCONTENT;
-				bgcolor = COL_MENUCONTENT_PLUS_0;
+				color   = COL_MENUCONTENT + 2;
+				bgcolor = COL_MENUCONTENT_PLUS_2;
 			}
 			else
 			{
-				color   = COL_MENUCONTENT + 2;
-				bgcolor = COL_MENUCONTENT_PLUS_2;
+				color   = COL_MENUCONTENT;
+				bgcolor = COL_MENUCONTENT_PLUS_0;
 			}
 		}
 
