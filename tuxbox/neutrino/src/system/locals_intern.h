@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.3 2004/06/06 23:20:41 thegoodguy Exp $
+ * $Id: locals_intern.h,v 1.4 2004/06/07 07:14:33 thegoodguy Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -436,6 +436,7 @@ const char * locale_real_names[] =
 	"messagebox.no",
 	"messagebox.yes",
 	"miscsettings.bootinfo",
+	"miscsettings.bootmenu",
 //	"miscsettings.boxtype"                            /* FIXME: unused */
 	"miscsettings.driver_boot",
 	"miscsettings.fb_destination",

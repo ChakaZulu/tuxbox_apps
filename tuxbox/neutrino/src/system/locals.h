@@ -2,7 +2,7 @@
 #define __locals__
 
 /*
- * $Id: locals.h,v 1.2 2004/06/06 23:20:41 thegoodguy Exp $
+ * $Id: locals.h,v 1.3 2004/06/07 07:14:33 thegoodguy Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -436,6 +436,7 @@ typedef enum
 	LOCALE_MESSAGEBOX_NO                                  ,
 	LOCALE_MESSAGEBOX_YES                                 ,
 	LOCALE_MISCSETTINGS_BOOTINFO                          ,
+	LOCALE_MISCSETTINGS_BOOTMENU                          ,
 //	LOCALE_MISCSETTINGS_BOXTYPE                           , /* FIXME: unused */
 	LOCALE_MISCSETTINGS_DRIVER_BOOT                       ,
 	LOCALE_MISCSETTINGS_FB_DESTINATION                    ,

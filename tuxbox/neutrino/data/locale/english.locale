@@ -409,6 +409,7 @@ messagebox.info Information
 messagebox.no No
 messagebox.yes Yes
 miscsettings.bootinfo Show infos at start
+miscsettings.bootmenu Show boot menu
 miscsettings.boxtype DBox type
 miscsettings.driver_boot driver and boot options
 miscsettings.fb_destination Expert! Boot-Console

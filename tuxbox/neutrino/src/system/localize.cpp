@@ -163,7 +163,7 @@ CLocaleManager::loadLocale_ret_t CLocaleManager::loadLocale(const char * const l
 
 			while (1)
 			{
-				j = strcmp(buf, locale_real_names[i]);
+				j = (i >= (sizeof(locale_real_names)/sizeof(const char *))) ? -1 : strcmp(buf, locale_real_names[i]);
 				if (j > 0)
 				{
 					printf("[%s.locale] missing entry:     %s\n", locale, locale_real_names[i]);

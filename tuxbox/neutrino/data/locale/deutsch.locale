@@ -409,6 +409,7 @@ messagebox.info Information
 messagebox.no Nein
 messagebox.yes Ja
 miscsettings.bootinfo Infos beim Booten anzeigen
+miscsettings.bootmenu Bootmenü anzeigen
 miscsettings.boxtype DBox Hersteller
 miscsettings.driver_boot Treiber- und Bootoptionen
 miscsettings.fb_destination EXPERT! Boot-Konsole
