@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerd.cpp,v 1.48 2003/03/01 15:28:10 zwen Exp $
+	$Id: timerd.cpp,v 1.49 2003/03/14 06:43:04 obi Exp $
 
 	License: GPL
 
@@ -38,10 +38,10 @@
 
 int timerd_debug = 0;
 
-static void signalHandler(int signum)
+static void signalHandler(int /*signum*/)
 {
 	CTimerManager::getInstance()->shutdown();
-	exit(0);
+	exit(EXIT_SUCCESS);
 }
 
 bool parse_command(CBasicMessage::Header &rmsg, int connfd)
@@ -371,23 +371,41 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	return true;
 }
 
+void usage(FILE *dest)
+{
+	fprintf(dest, "timerd\n");
+	fprintf(dest, "command line parameters:\n");
+	fprintf(dest, "-d, --debug    enable debugging code (implies -f)\n");
+	fprintf(dest, "-f, --fork     do not fork\n");
+	fprintf(dest, "-h, --help     display this text and exit\n\n");
+}
+
 int main(int argc, char **argv)
 {
 	bool do_fork = true;
 
 	dprintf("startup\n");
-	if(argc > 1)
+
+	for (int i = 1; i < argc; i++)
 	{
-		for(int i = 1; i < argc; i++)
+		if ((!strncmp(argv[i], "-d", 2)) || (!strncmp(argv[i], "--debug", 7)))
 		{
-			if(strncmp(argv[i], "-f", 2) == 0)
-			{
-				do_fork = false;
-			}
-			if(strncmp(argv[i], "-d", 2) == 0)
-			{
-				timerd_debug = 1;
-			}
+			timerd_debug = 1;
+			do_fork = false;
+		}
+		else if ((!strncmp(argv[i], "-f", 2)) || (!strncmp(argv[i], "--fork", 6)))
+		{
+			do_fork = false;
+		}
+		else if ((!strncmp(argv[i], "-h", 2)) || (!strncmp(argv[i], "--help", 6)))
+		{
+			usage(stdout);
+			return EXIT_SUCCESS;
+		}
+		else
+		{
+			usage(stderr);
+			return EXIT_FAILURE;
 		}
 	}
 
@@ -402,16 +420,16 @@ int main(int argc, char **argv)
 		{
 			case -1:
 				perror("[timerd] fork");
-				return -1;
+				return EXIT_FAILURE;
 			case 0:
 				break;
 			default:
-				return 0;
+				return EXIT_SUCCESS;
 		}
 		if(setsid() == -1)
 		{
 			perror("[timerd] setsid");
-			return -1;
+			return EXIT_FAILURE;
 		}
 	}
 
