@@ -275,8 +275,8 @@ infoviewer.epgwait Warte auf EPG-Informationen...
 infoviewer.streaminfo Features
 infoviewer.eventlist Programm
 infoviewer.languages Tonwahl
-infoviewer.notavailable Kanal (zur Zeit) nicht verfügbar
-infoviewer.cantdecode Kanal kann nicht entschlüsselt werden
+infoviewer.notavailable Kanal (zur Zeit) nicht verfügbar.
+infoviewer.cantdecode Kanal kann nicht entschlüsselt werden.
 infoviewer.selecttime Startzeiten
 infoviewer.nocurrent Keine Info zu laufendem Programm
 infoviewer.noepg Keine EPG-Information verfügbar
@@ -380,7 +380,7 @@ flashupdate.erasefailed Flash löschen fehlgeschlagen
 flashupdate.programmingflash programmiere Flash
 flashupdate.cantopenmtd kann das MTD-Device nicht öffnen
 flashupdate.ready fertig
-flashupdate.reboot Die DBox wird neu gestartet
+flashupdate.reboot Die DBox wird neu gestartet.
 flashupdate.updatemode Updatemodus
 flashupdate.updatemode_manual manuell (ftp)
 flashupdate.updatemode_internet internet
@@ -569,7 +569,7 @@ pinprotection.wrongcode Geben Sie den Code nocheinmal ein!
 pinprotection.head PIN-Abfrage
 
 favorites.bouquetname Meine Favoriten
-favorites.nobouquets Favoriten sind nur mit aktivierten Bouquets möglich
+favorites.nobouquets Favoriten sind nur mit aktivierten Bouquets möglich.
 favorites.addchannel Der aktuelle Kanal wird dem Bouquet \n"Meine Favoriten" hinzugefügt. \nDie Speicherung benötigt einen Moment...
 favorites.menueadd Kanal Favoriten hinzufügen
 favorites.bqcreated Bouquet "Meine Favoriten" wurde angelegt...\n
@@ -582,19 +582,19 @@ sleeptimerbox.hint1 Ausschaltzeit in Min. (000=aus)
 sleeptimerbox.hint2 Die dbox2 schaltet sich nach dieser Zeit aus.
 sleeptimerbox.announce Sleeptimer in 1 min
 
-zaptotimer.announce In einer Minute wird umgeschaltet
-recordtimer.announce Die Aufnahme beginnt in wenigen Minuten
+zaptotimer.announce In einer Minute wird umgeschaltet.
+recordtimer.announce Die Aufnahme beginnt in wenigen Minuten.
 shutdowntimer.announce Die Box wird in 1 min runtergefahren.\nShutdown abbrechen?
 
 timerbar.channelswitch Umschalten
 timerbar.recordevent Aufnehmen
 timer.eventtimed.title Sendung vormerken
-timer.eventtimed.msg Die Sendung wurde vorgemerkt
+timer.eventtimed.msg Die Sendung wurde vorgemerkt.
 timer.eventrecord.title Aufnahme vormerken
-timer.eventrecord.msg Die Sendung wurde zur Aufnahme vorgemerkt
+timer.eventrecord.msg Die Sendung wurde zur Aufnahme vorgemerkt.
 timerlist.name Timerliste
 timerlist.delete Löschen
-timerlist.empty Es gibt momentan keine Timer
+timerlist.empty Es gibt momentan keine Timer.
 timerlist.type.shutdown Shutdown
 timerlist.type.nextprogram Nächstes Programm
 timerlist.type.zapto Umschalten
@@ -747,14 +747,14 @@ nfs.mounterror Mount-Fehler: lade default-Einstellungen
 nfs.mounttimeout Mount-Fehler: Timeout
 nfs.umount NFS/CIFS Verzeichnis unmounten
 nfs.umounterror Umount-Fehler
-nfs.alreadymounted Verzeichnis bereits gemountet
+nfs.alreadymounted Verzeichnis bereits gemountet.
 nfs.mount_options Mount-Optionen
 nfs.type Typ
 nfs.type_nfs NFS
 nfs.type_cifs CIFS
 nfs.username CIFS Benutzername
 nfs.password CIFS Passwort
-nfs.mounterror_notsup Dateisystem-Typ wird nicht unterstützt
+nfs.mounterror_notsup Dateisystem-Typ wird nicht unterstützt.
 nfsmenu.head NFS/CIFS Einstellungen
 
 apids.hint_1 Geben Sie die zu streamenden APIDs ein,
