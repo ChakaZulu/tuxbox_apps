@@ -33,7 +33,7 @@ int CSleepTimerWidget::exec(CMenuTarget* parent, string)
 
 	// retrieve old code from cvs please, if needed
 
-	ShowMsg ( "Sleeptimer", "deactivated due to module removal, this will recoded later into the timerd", CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw" );
+	ShowMsg ( "Sleeptimer", "timer module removed, this will re-coded later into the timerd", CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw" );
 
 
 
