@@ -137,7 +137,7 @@ int main(int argc, char **argv)
 		exit(-1);
 	}
 
-	if (!display.paintIcon("neutrino_lcd.raw",0,0,0))
+	if (!display.paintIcon("neutrino_lcd.raw",0,0,false))
 	{
 		printf("exit...(no icon)\n");
 		exit(-1);
