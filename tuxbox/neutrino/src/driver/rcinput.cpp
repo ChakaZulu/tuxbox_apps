@@ -598,7 +598,7 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 			 			else
 			 				printf("[neutrino] event INITID_CONTROLD - unknown eventID 0x%x\n",  emsg.eventID );
 			 		}
-			 		else if ( emsg.initiatorID == CEventServer::INITID_THTTPD )
+			 		else if ( emsg.initiatorID == CEventServer::INITID_HTTPD )
 			 		{
 			 			if (emsg.eventID==NeutrinoMessages::SHUTDOWN)
 			 			{
@@ -633,7 +633,7 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 			 				*data = 0;
 			 			}
 						else
-							printf("[neutrino] event INITID_NHTTPD - unknown eventID 0x%x\n",  emsg.eventID );
+							printf("[neutrino] event INITID_HTTPD - unknown eventID 0x%x\n",  emsg.eventID );
 					}
 					else if ( emsg.initiatorID == CEventServer::INITID_SECTIONSD )
 			 		{

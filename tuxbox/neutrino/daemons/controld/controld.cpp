@@ -51,6 +51,7 @@
 #include "controldclient.h"
 #include "lcddclient.h"
 #include "zapitclient.h"
+#include "timerdclient.h"
 #include "eventserver.h"
 
 #define CONF_FILE CONFIGDIR "/controld.conf"
@@ -58,6 +59,7 @@
 
 CLcddClient		lcdd;
 CZapitClient	zapit;
+CTimerdClient	timerd;
 CEventServer    *eventServer;
 
 struct Ssettings
@@ -154,7 +156,11 @@ void saveSettings()
 void shutdownBox()
 {
 	lcdd.shutdown();
+
 	zapit.shutdown();
+
+	timerd.shutdown();
+
 	saveSettings();
 
 	if (execlp("/sbin/halt", "/sbin/halt", 0)<0)
@@ -754,7 +760,7 @@ void sig_catch(int signal)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.63 2002/10/04 17:56:01 thegoodguy Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.64 2002/10/05 20:46:20 dirch Exp $\n\n");
 
 	//printf("[controld] mainThread-pid: %d\n", getpid());
 	switch (fork())
