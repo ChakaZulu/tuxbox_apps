@@ -1,4 +1,4 @@
 AUTOMAKE_OPTIONS = gnu
 
-SUBDIRS = dvb_test stream
+SUBDIRS = dvb_test stream dvbnetctrl
 

@@ -13,6 +13,7 @@ TUXBOX_APPS_LIB_PKGCONFIG(MPEGTOOLS,tuxbox-mpegtools)
 AC_OUTPUT([
 Makefile
 dvb_test/Makefile
+dvbnetctrl/Makefile
 skyscan/Makefile
 stream/Makefile
 ])
