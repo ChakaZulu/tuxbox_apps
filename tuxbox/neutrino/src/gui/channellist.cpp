@@ -531,7 +531,7 @@ int CChannelList::numericZap(int key)
 	}
 
 	//schneller zap mit "0" taste zwischen den letzten beiden sendern...
-	if( key == 0 )
+	if (key == CRCInput::RC_0)
 	{
 		int  ch;
 
@@ -552,9 +552,9 @@ int CChannelList::numericZap(int key)
 	int sx = 4* g_Fonts->channel_num_zap->getRenderWidth(widest_number)+ 14;
 	int sy = g_Fonts->channel_num_zap->getHeight()+6;
 	char valstr[10];
-	int chn=key;
+	int chn = CRCInput::getNumericValue(key);
+	int pos = 1;
 	int lastchan= -1;
-	int pos=1;
 	uint msg; uint data;
 	bool doZap = true;
 
@@ -588,17 +588,19 @@ int CChannelList::numericZap(int key)
 				chn = tuned + 1;
 			break;
 		}
-		else if ( ( msg >= 0 ) && ( msg <= 9 ) )
-		{ //numeric
-			if ( pos==4 )
+		else if (CRCInput::isNumeric(msg))
+		{
+			if (pos == 4)
 			{
-				chn = msg;
-				pos = 0;
+				chn = 0;
+				pos = 1;
 			}
 			else
-				chn = chn* 10 + msg;
-
-			pos++;
+			{
+				chn *= 10;
+				pos++;
+			}
+			chn += CRCInput::getNumericValue(msg);
 		}
 		else if ( msg == CRCInput::RC_ok )
 		{

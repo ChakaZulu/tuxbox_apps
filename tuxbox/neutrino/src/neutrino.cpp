@@ -2456,7 +2456,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				// show Infoviewer
 				g_InfoViewer->showTitle(channelList->getActiveChannelNumber(), channelList->getActiveChannelName(), channelList->getActiveSatellitePosition(), channelList->getActiveChannel_ChannelID()); // UTF-8
 			}
-			else if( ( msg >= CRCInput::RC_0 ) && ( msg <= CRCInput::RC_9 ))
+			else if (CRCInput::isNumeric(msg))
 			{ //numeric zap
 				if( g_RemoteControl->director_mode )
 				{
@@ -3446,7 +3446,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.473 2003/07/04 11:14:22 zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.474 2003/07/08 12:50:20 thegoodguy Exp $\n\n");
 
 	tzset();
 	initGlobals();
