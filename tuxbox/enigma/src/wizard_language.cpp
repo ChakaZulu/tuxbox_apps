@@ -1,4 +1,4 @@
-#include <locale.h>
+#include "wizard_language.h"
 #include <lib/gui/eskin.h>
 #include <lib/gui/listbox.h>
 #include <lib/gdi/font.h>
@@ -7,7 +7,9 @@
 #include <lib/system/econfig.h>
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
-#include "wizard_language.h"
+#include <locale.h>
+#include <unistd.h>
+#include <sys/stat.h>
 
 static const char * getCountry(const char *language);
 
@@ -133,6 +135,10 @@ eWizardLanguage::eWizardLanguage()
 		if ((id=strchr(line, ' ')))
 		{
 			*id++=0;
+			struct stat s;
+			if ( stat(eString().sprintf("/usr/share/locale/%c%c/LC_MESSAGES/tuxbox-enigma.mo", id[0], id[1]).c_str(), &s)
+				&& stat(eString().sprintf("/share/locale/%c%c/LC_MESSAGES/tuxbox-enigma.mo", id[0], id[1]).c_str(), &s) )
+				continue;
 			eLanguageEntry *c=new eLanguageEntry(list, id, d);
 			
 			if ((current && !strcmp(id, current)) || !cur)
