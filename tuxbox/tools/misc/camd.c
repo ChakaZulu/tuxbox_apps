@@ -203,7 +203,7 @@ int find_emmpid(int ca_system_id) {
 
   if (r<=0) return 0;
 
-  r=buffer[2];
+  r=((buffer[1]&0x0F)<<8)|buffer[2];
 
   //for(count=0;count<r-1;count++)
   //  printf("%02d: %02X\n",count,buffer[count]);
@@ -326,10 +326,9 @@ int main(int argc, char **argv)
     sscanf(argv[2], "%x", &APID);
     sscanf(argv[3], "%x", &pmt);
   }
-  
-  if (argc>=5)
-  {
-    sscanf(argv[4], "%x", &EMMPID);
+  else {
+    fprintf(stderr,"usage: %s <vpid> <apid> <pmt>\n",argv[0]);
+    exit(1);
   }
   
   reset();
@@ -525,7 +524,20 @@ int main(int argc, char **argv)
       memcpy(tb, buffer+4, len-1);
       tb[len-1]=0;
       printf("cam-revision: %s\n", tb, len);
-      setemm(0x104, caid, 0x1500);
+      if (EMMPID == 0) {
+            printf("searching EMM-pid for ca_system_ID %04X\n",caid);
+            EMMPID=find_emmpid(caid);
+            if (EMMPID == 0) {
+              printf("no EMM-pid found for ca_system_ID %04X\n",caid);
+              //printf("press enter to exit\n");
+              //getchar();
+              //exit(0);
+            }
+            else
+             printf("EMM-pid found: %04X\n",EMMPID);
+      }
+      if (EMMPID == 0) break;
+      setemm(0x104, caid, EMMPID);
       init();
 
     } else 
