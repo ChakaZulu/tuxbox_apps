@@ -4843,53 +4843,60 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 	if (!mode)
 		mode = "zap";
 
-	eString zapModeS = opt["zapmode"];
-	if (zapModeS)
-		zapMode = atoi(zapModeS.c_str());
-
-	eString zapSubModeS = opt["zapsubmode"];
-	if (zapSubModeS)
-		zapSubMode = atoi(zapSubModeS.c_str());
-
-	eString curBouquet = opt["curBouquet"];
-	if (curBouquet)
-		currentBouquet = atoi(curBouquet.c_str());
-
-	eString curChannel = opt["curChannel"];
-	if (curChannel)
-		currentChannel = atoi(curChannel.c_str());
-
 	eString path = opt["path"];
-	if ((zapMode >= 0) && (zapMode <= 4) && (zapSubMode >= 0) && (zapSubMode <= 4))
+
+	if (mode == "zap")
 	{
-		if (!path)
+		eString zapModeS = opt["zapmode"];
+		if (zapModeS)
+			zapMode = atoi(zapModeS.c_str());
+
+		eString zapSubModeS = opt["zapsubmode"];
+		if (zapSubModeS)
+			zapSubMode = atoi(zapSubModeS.c_str());
+
+		eString curBouquet = opt["curBouquet"];
+		if (curBouquet)
+			currentBouquet = atoi(curBouquet.c_str());
+
+		eString curChannel = opt["curChannel"];
+		if (curChannel)
+			currentChannel = atoi(curChannel.c_str());
+
+		if ((zapMode >= 0) && (zapMode <= 4) && (zapSubMode >= 0) && (zapSubMode <= 4))
+		{
+			if (!path)
+				path = zap[zapMode][zapSubMode];
+		}
+		else
+		{
+			zapMode = ZAPMODETV;
+			zapSubMode = ZAPSUBMODEBOUQUETS;
 			path = zap[zapMode][zapSubMode];
+		}
+
+		if (zapMode != previousZapMode || zapSubMode != previousZapSubMode)
+		{
+			currentBouquet = 0;
+			currentChannel = -1;
+		}
+
+		result = getContent(mode, path, opts);
 	}
 	else
 	{
-		zapMode = ZAPMODETV;
-		zapSubMode = ZAPSUBMODEBOUQUETS;
-		path = zap[zapMode][zapSubMode];
+		result = readFile(TEMPLATE_DIR + "index2.tmp");
+		eString tmp = getContent(mode, path, opts);
+		if (tmp)
+			result.strReplace("#CONTENT#", tmp);
+		else
+			result = "";
+
+		if (mode == "controlSatFinder")
+			result.strReplace("#ONLOAD#", "onLoad=init()");
+		else
+			result.strReplace("#ONLOAD#", "");
 	}
-
-	if (zapMode != previousZapMode || zapSubMode != previousZapSubMode)
-	{
-		currentBouquet = 0;
-		currentChannel = -1;
-	}
-
-	result = readFile(TEMPLATE_DIR + "index2.tmp");
-	result.strReplace("#LEFTNAVI#", getLeftNavi(mode, false));
-	eString tmp = getContent(mode, path, opts);
-	if (tmp)
-		result.strReplace("#CONTENT#", tmp);
-	else
-		result = "";
-
-	if (mode == "zap" || mode == "controlSatFinder")
-		result.strReplace("#ONLOAD#", "onLoad=init()");
-	else
-		result.strReplace("#ONLOAD#", "");
 
 	if (!result)
 		result = closeWindow(content, "Please wait...", 3000);
