@@ -127,7 +127,7 @@ void show_time()
 
 
 	display.draw_fill_rect (81,50,120,64, CLCDDisplay::PIXEL_OFF);
-	fonts.time->RenderString(83,62, 50, timestr, CLCDDisplay::PIXEL_ON);
+	fonts.time->RenderString(82,62, 50, timestr, CLCDDisplay::PIXEL_ON);
 	display.update();
 }
 
