@@ -251,7 +251,7 @@ void eDVB::configureNetwork()
 		{
 			if (fork() == 0)
 			{
-				for (unsigned int i=0; i < 90; ++i )
+				for (unsigned int i=3; i < 90; ++i )
 					close(i);
 				execlp("nmbd", "nmbd", "-D", NULL);
 
@@ -264,7 +264,7 @@ void eDVB::configureNetwork()
 		{
 			if (fork() == 0)
 			{
-				for (unsigned int i=0; i < 90; ++i )
+				for (unsigned int i=3; i < 90; ++i )
 					close(i);
 				execlp("smbd", "smbd", "-D", NULL);
 				_exit(0);
