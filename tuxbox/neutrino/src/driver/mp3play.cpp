@@ -30,6 +30,7 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#define DBOX
 
 /****************************************************************************
  * Includes																	*
@@ -628,7 +629,9 @@ bool  CMP3Player::SetDSP(int soundfd, struct mad_header *Header)
 		 printf("setfmt failed\n");
 	 if(::ioctl(soundfd, SNDCTL_DSP_CHANNELS, &channels))
 		 printf("channel set failed\n");
+#ifdef DBOX
 	 if (dsp_speed != m_samplerate)
+#endif
 	 {
 		// mute audio to reduce pops when changing samplerate (avia_reset)
 		bool was_muted = avs_mute(true);
