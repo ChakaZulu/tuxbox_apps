@@ -1,9 +1,12 @@
 #ifndef __channellist__
 #define __channellist__
 //
-// $Id: channellist.h,v 1.5 2001/08/16 23:19:18 McClean Exp $
+// $Id: channellist.h,v 1.6 2001/08/20 01:26:54 McClean Exp $
 //
 // $Log: channellist.h,v $
+// Revision 1.6  2001/08/20 01:26:54  McClean
+// stream info added
+//
 // Revision 1.5  2001/08/16 23:19:18  McClean
 // epg-view and quickview changed
 //
@@ -59,7 +62,7 @@ class CChannelList
 
 	public:
 
-		CChannelList(int Key=-1, string Name="");
+		CChannelList(SNeutrinoSettings *settings, int Key=-1, string Name="");
 		~CChannelList();
 
 		void addChannel(int key, int number, string name);

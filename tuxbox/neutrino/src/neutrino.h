@@ -61,6 +61,7 @@
 #include "helpers/infoviewer.h"
 #include "helpers/epgdata.h"
 #include "helpers/settings.h"
+#include "helpers/streaminfo.h"
 
 #include <string>
 #include <vector>
@@ -118,6 +119,7 @@ class CNeutrinoApp : public CMenuTarget
 		void setupDefaults(SNeutrinoSettings* settings);
 		void setupColors_classic(SNeutrinoSettings* settings);
 		void setupColors_neutrino(SNeutrinoSettings* settings);
+		void setupNetwork(SNeutrinoSettings* settings, bool force=false);
 		void saveSetup(SNeutrinoSettings* settings);
 		bool loadSetup(SNeutrinoSettings* settings);
 
@@ -135,7 +137,7 @@ class CNeutrinoApp : public CMenuTarget
 		void InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNotifier &audioSetupNotifier);
 		void InitColorSettings(CMenuWidget &);
 		void InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_menuColors, CMenuWidget &);
-		void InitNetworkSettings(CMenuWidget &networkSettings, CNetworkSetupNotifier &networkSetupNotifier);
+		void InitNetworkSettings(CMenuWidget &networkSettings);
 		void InitScreenSettings(CMenuWidget &);
 		void InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNotifier &videoSetupNotifier);
 		void InitAudioThemesSettings(CMenuWidget &);

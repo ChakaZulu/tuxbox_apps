@@ -1,7 +1,10 @@
 //
-// $Id: channellist.cpp,v 1.7 2001/08/16 23:24:17 McClean Exp $
+// $Id: channellist.cpp,v 1.8 2001/08/20 01:26:54 McClean Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.8  2001/08/20 01:26:54  McClean
+// stream info added
+//
 // Revision 1.7  2001/08/16 23:24:17  McClean
 // positioning and display-clear bug fixed
 //
@@ -28,27 +31,27 @@ static char* copyStringto(const char* from, char* to, int len)
 }
 
 
-CChannelList::CChannelList(int Key=-1, string Name="")
+CChannelList::CChannelList(SNeutrinoSettings *settings, int Key=-1, string Name="")
 {
-        key = Key;
-        name = Name;
-        selected = 0;
-        width = 500;
-        height = 440;
-        x=((720-width) >> 1);
-        y=((576-height)>>1);
-        listmaxshow = 20;
-        liststart = 0;
-        tuned=0xfffffff;
+	key = Key;
+	name = Name;
+	selected = 0;
+	width = 500;
+	height = 440;
+	x=(((settings->screen_EndX-settings->screen_StartX)-width) / 2) + settings->screen_StartX;
+	y=(((settings->screen_EndY-settings->screen_StartY)-height) / 2) + settings->screen_StartY;
+	listmaxshow = 20;
+	liststart = 0;
+	tuned=0xfffffff;
 }
 
 CChannelList::~CChannelList()
 {
-        for(unsigned int count=0;count<chanlist.size();count++)
-        {
-                delete chanlist[count];
-        }
-        chanlist.clear();
+	for(unsigned int count=0;count<chanlist.size();count++)
+	{
+		delete chanlist[count];
+	}
+	chanlist.clear();
 }
 
 
@@ -56,19 +59,20 @@ CChannelList::~CChannelList()
 // quick'n dirty
 void CChannelList::updateEvents(void)
 {
-char rip[]="127.0.0.1";
+	char rip[]="127.0.0.1";
 
-  int sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-  SAI servaddr;
-  memset(&servaddr,0,sizeof(servaddr));
-  servaddr.sin_family=AF_INET;
-  servaddr.sin_port=htons(sectionsd::portNumber);
-  inet_pton(AF_INET, rip, &servaddr.sin_addr);
+	int sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	SAI servaddr;
+	memset(&servaddr,0,sizeof(servaddr));
+	servaddr.sin_family=AF_INET;
+	servaddr.sin_port=htons(sectionsd::portNumber);
+	inet_pton(AF_INET, rip, &servaddr.sin_addr);
 
-  if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1) {
-    perror("Couldn't connect to sectionsd!");
-    return;
-  }
+	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
+	{
+		perror("Couldn't connect to sectionsd!");
+		return;
+	}
   sectionsd::msgRequestHeader req;
   req.version = 2;
   req.command = sectionsd::actualEventListTVshort;
@@ -129,7 +133,6 @@ void CChannelList::addChannel(int key, int number, string name)
 	tmp->number=number;
 	tmp->name=name;
 	chanlist.insert(chanlist.end(), tmp);
-
 }
 
 void CChannelList::setName(string Name)

@@ -101,7 +101,7 @@ int CMenuWidget::exec(CFrameBuffer* frameBuffer, FontsDef* fonts , CRCInput* rcI
 
 void CMenuWidget::hide(CFrameBuffer* frameBuffer)
 {
-		frameBuffer->paintBackgroundBoxRel(x,y, width,height );
+		frameBuffer->paintBackgroundBoxRel(x-5,y-5, width+10,height+20 );
 }
 
 void CMenuWidget::paint(CFrameBuffer* frameBuffer, FontsDef* fonts)
