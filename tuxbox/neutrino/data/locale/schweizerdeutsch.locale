@@ -51,6 +51,8 @@ mainsettings.keybinding Taste-Iischdellige
 mainsettings.misc Diversi Iischdellige 
 mainsettings.scan Iischdellige Kanalsürch 
 
+mp3picsettings.general unset
+
 miscsettings.head Diverse Iischdellige 
 miscsettings.shutdown_real Sdändbymodus 
 miscsettings.boxtype DBox Hersdeller 
@@ -661,12 +663,19 @@ mp3player.keylevel Taschde-Umschaldig
 mp3player.fastforward schnälle Vorl.
 mp3player.pause Pause
 mp3player.rewind schnälle Rückl.
+mp3player.artist_title unset
+mp3player.title_artist unset
+mp3player.display_order unset
+mp3player.follow unset
 
 filebrowser.head Filebrowser 
-filebrowser.filter Filder 
+filebrowser.filter.active unset
+filebrowser.filter.inactive unset
 filebrowser.select Usswähle 
 filebrowser.mark Markiere 
 filebrowser.scan Verzeichnisse durchsürche 
+filebrowser.sort.name unset
+filebrowser.sort.date unset
 
 nfs.mount Verzeichniss i'hänge 
 nfs.ip NFS Server IP 

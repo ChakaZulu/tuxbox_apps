@@ -51,6 +51,8 @@ mainsettings.keybinding Impostazioni-Tasti
 mainsettings.misc Altre Impostazioni
 mainsettings.scan Impostazioni Ricerca Canali
 
+mp3picsettings.general unset
+
 miscsettings.head Altre Impostazioni
 miscsettings.shutdown_real Modo Standby
 miscsettings.boxtype DBox Costruttore
@@ -661,12 +663,19 @@ mp3player.keylevel Cambio-Tasti
 mp3player.fastforward Avanti svelto
 mp3player.pause Pausa
 mp3player.rewind Indietro svelto
+mp3player.artist_title unset
+mp3player.title_artist unset
+mp3player.display_order unset
+mp3player.follow unset
 
 filebrowser.head filebrowser
-filebrowser.filter filtro
+filebrowser.filter.active unset
+filebrowser.filter.inactive unset
 filebrowser.select scegli
 filebrowser.mark seleziona
 filebrowser.scan cerca nella directory
+filebrowser.sort.name unset
+filebrowser.sort.date unset
 
 nfs.mount carica directory
 nfs.ip NFS Server IP

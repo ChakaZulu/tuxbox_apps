@@ -51,6 +51,8 @@ mainsettings.keybinding Wybor klawiszy
 mainsettings.misc Inne Ustawienia
 mainsettings.scan Ustawienia Strojenia
 
+mp3picsettings.general unset
+
 miscsettings.head Inne Ustawienia
 miscsettings.shutdown_real Zalacz Standby
 miscsettings.boxtype Tyb DBox'a
@@ -661,12 +663,19 @@ mp3player.keylevel poziom
 mp3player.fastforward przewin.
 mp3player.pause pauza
 mp3player.rewind rewind
+mp3player.artist_title unset
+mp3player.title_artist unset
+mp3player.display_order unset
+mp3player.follow unset
 
 filebrowser.head Przegladarka
-filebrowser.filter Filtr
+filebrowser.filter.active unset
+filebrowser.filter.inactive unset
 filebrowser.select Wybierz
 filebrowser.mark Zaznacz
 filebrowser.scan Skanuj folder
+filebrowser.sort.name unset
+filebrowser.sort.date unset
 
 nfs.mount Zamontuj volumin NFS
 nfs.ip NFS IP serwera
