@@ -16,6 +16,9 @@
 /*
 
 $Log: tuner.cpp,v $
+Revision 1.26  2003/03/08 17:31:18  waldi
+use tuxbox and frontend infos
+
 Revision 1.25  2003/02/07 14:07:23  alexw
 for those with new api
 
@@ -105,6 +108,15 @@ tuner::tuner(settings *s)
 		perror("OPEN FRONTEND DEVICE");
 		exit(1);
 	}
+
+	dvb_frontend_info info;
+	if (ioctl(frontend, FE_GET_INFO, &info))
+	{
+		perror("ioctl");
+		exit(1);
+	}
+
+	type = info.type;
 #endif
 }
 
@@ -150,7 +162,7 @@ bool tuner::tune(unsigned int frequ, unsigned int symbol, int polarization, int 
 	fe_sec_tone_mode_t tone_mode;
 	fe_sec_voltage_t voltage;
 
-	if (setting->boxIsSat())
+	if (type == FE_QPSK)
 	{
 		// $$$ rasc
 		// Das Verhalten von Sectone (22KHz) sollte konfigurierbar sein.
@@ -215,7 +227,7 @@ bool tuner::tune(unsigned int frequ, unsigned int symbol, int polarization, int 
 			perror("FE_SET_TONE");
 	}
 
-	if (setting->boxIsCable())
+	if (type == FE_QAM)
 	{
 		frontp.frequency = frequ * 100000;
 		frontp.u.qam.symbol_rate = symbol * 1000;
@@ -273,7 +285,7 @@ bool tuner::tune(unsigned int frequ, unsigned int symbol, int polarization, int 
 	FrontendParameters frontp;
 	int status;
 
-	if (setting->boxIsSat())
+	if (type == FE_QPSK)
 	{
 
 		// $$$ rasc
@@ -339,7 +351,7 @@ bool tuner::tune(unsigned int frequ, unsigned int symbol, int polarization, int 
 		close(device);
 	}
 
-	if (setting->boxIsCable())
+	if (type == FE_QAM)
 	{
 		if (frequ < 1500) // sorry, but the old drivers are buggy :(
 			return false;

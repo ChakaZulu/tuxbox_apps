@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: tuner.h,v $
+Revision 1.9  2003/03/08 17:31:18  waldi
+use tuxbox and frontend infos
+
 Revision 1.8  2003/01/05 19:28:45  TheDOC
 lcars should be old-api-compatible again
 
@@ -50,6 +53,8 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <sys/poll.h>
 #include <memory.h>
 
+#include <linux/dvb/frontend.h>
+
 #include "devices.h"
 #include "settings.h"
 
@@ -57,10 +62,12 @@ class tuner
 {
 	settings *setting;
 	int frontend;
+	fe_type type;
 public:
 	tuner(settings *s);
 	~tuner();
-	fe_code_rate_t getFEC(int fec);
+	fe_code_rate getFEC(int fec);
+	fe_type getType() { return type; };
 	bool tune(unsigned int frequ, unsigned int symbol, int polarization = -1, int fec = 0, int diseqc = 0);
 };
 

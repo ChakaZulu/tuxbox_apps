@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: hardware.cpp,v $
+Revision 1.12  2003/03/08 17:31:18  waldi
+use tuxbox and frontend infos
+
 Revision 1.11  2003/01/26 04:08:16  thedoc
 correct sagem vcr-scart-routing
 
@@ -158,14 +161,15 @@ bool hardware::switch_vcr()
 {
 	int i = 0, j = 0, nothing, nothinga, fblk = 2;
 
-	//printf("Getbox: %d\n", setting->getBox());
 	if (!vcr_on)
 	{
 		//printf("on\n");
 		old_fblk = getfblk();
 		avs = open("/dev/dbox/avs0",O_RDWR);
-		if (setting->getBox() == SAGEM) // Sagem
+
+		switch (tuxbox_get_vendor())
 		{
+		case TUXBOX_VENDOR_SAGEM:
 			i = 0;
 			j = 1;
 			nothing = 7;
@@ -174,9 +178,9 @@ bool hardware::switch_vcr()
 			ioctl(avs,AVSIOSVSW1,&i);
 			ioctl(avs,AVSIOSASW1,&j);
 			ioctl(avs,AVSIOSASW2,&nothinga);
-		}
-		else if (setting->getBox() == NOKIA) // Nokia
-		{
+			break;
+
+		case TUXBOX_VENDOR_NOKIA:
 			i = 3;
 			j = 2;
 			nothing = 1;
@@ -186,25 +190,30 @@ bool hardware::switch_vcr()
 			ioctl(avs,AVSIOSVSW1,&i);
 			ioctl(avs,AVSIOSASW1,&j);
 			ioctl(avs,AVSIOSASW2,&nothinga);
-		}
-		else if (setting->getBox() == PHILIPS) // Philips
-		{
-			nothing = 3;
+			break;
 
+		case TUXBOX_VENDOR_PHILIPS:
 			i = 2;
 			j = 2;
+			nothing = 3;
 			ioctl(avs,AVSIOSFBLK,&fblk);
 			ioctl(avs,AVSIOSVSW3,&nothing);
 			ioctl(avs,AVSIOSVSW2,&i);
 			ioctl(avs,AVSIOSASW2,&j);
+			break;
+
+		default:
+			break;
 		}
 	}
 	else
 	{
 		setOutputMode(old_fblk);
 		avs = open("/dev/dbox/avs0",O_RDWR);
-		if (setting->getBox() == SAGEM)
+
+		switch (tuxbox_get_vendor())
 		{
+		case TUXBOX_VENDOR_SAGEM:
 			i = 0;
 			j = 0;
 			nothing = 0;
@@ -213,10 +222,9 @@ bool hardware::switch_vcr()
 			ioctl(avs,AVSIOSVSW2,&nothing);
 			ioctl(avs,AVSIOSVSW1,&i);
 			ioctl(avs,AVSIOSASW1,&j);
+			break;
 
-		}
-		else if (setting->getBox() == NOKIA)
-		{
+		case TUXBOX_VENDOR_NOKIA:
 			i = 5;
 			j = 1;
 			nothing = 1;
@@ -226,9 +234,9 @@ bool hardware::switch_vcr()
 			ioctl(avs,AVSIOSVSW1,&i);
 			ioctl(avs,AVSIOSASW1,&j);
 			ioctl(avs,AVSIOSASW2,&nothinga);
-		}
-		else if (setting->getBox() == PHILIPS)
-		{
+			break;
+
+		case TUXBOX_VENDOR_PHILIPS:
 			i = 1;
 			j = 1;
 			nothing = 1;
@@ -237,6 +245,10 @@ bool hardware::switch_vcr()
 			ioctl(avs,AVSIOSVSW3,&nothing);
 			ioctl(avs,AVSIOSVSW2,&i);
 			ioctl(avs,AVSIOSASW2,&j);
+			break;
+
+		default:
+			break;
 		}
 	}
 	//printf ("i: %d - j: %d\n", i, j);
@@ -304,22 +316,24 @@ void hardware::setOutputMode(int i)
 {
 	int setmode = 0;
 
-	if (setting->getBox() == NOKIA)
+	switch (tuxbox_get_vendor())
 	{
+	case TUXBOX_VENDOR_NOKIA:
 		if (i == OUTPUT_FBAS)
 			setmode = 0;
 		else
 			setmode = 3;
-	}
-	else if (setting->getBox() == PHILIPS)
-	{
+		break;
+
+	case TUXBOX_VENDOR_PHILIPS:
 		if (i == OUTPUT_FBAS)
 			setmode = 0;
 		else
 			setmode = 1;
-	}
-	else if (setting->getBox() == SAGEM)
-	{
+		break;
+
+	default:
+		break;
 	}
 
 	setfblk(setmode);
@@ -343,25 +357,27 @@ int hardware::getfblk()
 	close(avs);
 
 	int outputtype = 0;
-	if (setting->getBox() == NOKIA)
+
+	switch (tuxbox_get_vendor())
 	{
+	case TUXBOX_VENDOR_NOKIA:
 		if (fblk == 3)
 			outputtype = OUTPUT_RGB;
 		else if (fblk == 0)
 			outputtype = OUTPUT_FBAS;
-	}
-	else if (setting->getBox() == PHILIPS)
-	{
+		break;
+
+	case TUXBOX_VENDOR_PHILIPS:
 		if (fblk == 1)
 			outputtype = OUTPUT_RGB;
 		else if (fblk == 0)
 			outputtype = OUTPUT_FBAS;
+		break;
 
+	default:
+		break;
 	}
-	else if (setting->getBox() == SAGEM)
-	{
 
-	}
 	return outputtype;
 }
 

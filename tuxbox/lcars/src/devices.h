@@ -50,7 +50,6 @@
 
 #include <dbox/avs_core.h>
 #include <dbox/fp.h>
-#include <dbox/info.h>
 
 #define AVS_DEV "/dev/dbox/avs0"
 

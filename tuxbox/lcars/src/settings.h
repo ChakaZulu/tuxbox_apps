@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: settings.h,v $
+Revision 1.7  2003/03/08 17:31:18  waldi
+use tuxbox and frontend infos
+
 Revision 1.6  2002/06/02 12:18:47  TheDOC
 source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
 
@@ -55,9 +58,10 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 
 #include "cam.h"
 
-#define NOKIA 1
-#define PHILIPS 2
-#define SAGEM 3
+#include <tuxbox.h>
+#include <tuxbox/info_dbox2.h>
+
+tuxbox_dbox2_gt_t tuxbox_get_dbox2_gt (void);
 
 struct setting_s
 {
@@ -79,12 +83,9 @@ struct setting_s
 
 class settings
 {
-	bool isCable;
-	bool isGTX;
 	int CAID;
 	int EMM;
 	int find_emmpid(int ca_system_id);
-	int box; // 1= nokia 2=sagem
 	int oldTS;
 	bool usediseqc;
 	cam *cam_obj;
@@ -93,8 +94,6 @@ class settings
 public:
 	settings(cam *c);
 	void initme();
-	bool boxIsCable();
-	bool boxIsSat();
 	int getCAID();
 	int getTransparentColor();
 	int getEMMpid(int TS = -1);
@@ -135,8 +134,6 @@ public:
 	void setProxyPort(int port) { setting.proxy_port = port; }
 	int getProxyPort() { return setting.proxy_port; }
 
-	int getBox() { return box; }
-	bool boxIsGTX() { return isGTX; }
 	void setDiseqc(bool use) { usediseqc = use; }
 	bool useDiseqc() { return usediseqc; }
 

@@ -2,9 +2,7 @@ INCLUDES = \
 	@CURL_CFLAGS@ \
 	@FREETYPE_CFLAGS@ \
 	@PLUGINS_CFLAGS@ \
-	-Werror
-#	-DOLD_VBI
-#	-DDREAMBOX
+	@TUXBOX_CFLAGS@
 
 bin_PROGRAMS = lcars
 
@@ -16,10 +14,15 @@ lcars_SOURCES = \
 	tot.cpp checker.cpp tuner.cpp update.cpp control.cpp variables.cpp \
 	ir.cpp cam.cpp
 
+lcars_CFLAGS = -Werror
+#	-DOLD_VBI
+#	-DDREAMBOX
+
 lcars_LDADD = \
 	@CURL_LIBS@ \
 	@FREETYPE_LIBS@ \
-	-lpthread -ldl -lz
+	@TUXBOX_LIBS@
+	-lpthread -ldl
 
 install-data-local:
 	install -d $(CONFIGDIR)/lcars

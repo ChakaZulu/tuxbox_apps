@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: settings.cpp,v $
+Revision 1.14  2003/03/08 17:31:18  waldi
+use tuxbox and frontend infos
+
 Revision 1.13  2003/01/26 00:00:20  thedoc
 mv bugs /dev/null
 
@@ -80,51 +83,14 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include "help.h"
 #include "cam.h"
 
+#define need_TUXBOX_GET
+#include <tuxbox.h>
+
+TUXBOX_GET(dbox2_gt);
+
 settings::settings(cam *c)
 {
 	cam_obj = c;
-	FILE *fp;
-	char buffer[100];
-	int type = -1;
-	isGTX = false;
-
-	//printf("----------------> SETTINGS <--------------------\n");
-	fp = fopen("/proc/bus/dbox", "r");
-	while (!feof(fp))
-	{
-		fgets(buffer, 100, fp);
-		sscanf(buffer, "fe=%d", &type);
-		sscanf(buffer, "mID=%d", &box);
-
-
-
-		int gtx = 0;
-		sscanf(buffer, "gtxID=%x\n", &gtx);
-		if (gtx != 0)
-		{
-			if ((unsigned int)gtx != 0xffffffff)
-			{
-				isGTX = true;
-			}
-			else
-			{
-				isGTX = false;
-			}
-		}
-
-	}
-	fclose(fp);
-
-	//if (box == 3)
-	//printf ("Sagem-Box\n");
-	//else if (box == 1)
-	//printf("Nokia-Box\n");
-	//else if (box == 2)
-	//printf("Philips-Box\n");
-	//else
-	//printf("Unknown Box\n");
-
-	isCable = (type == DBOX_FE_CABLE);
 
 	CAID = cam_obj->getCAID();
 	//printf("Set-CAID: %x\n", CAID);
@@ -136,13 +102,14 @@ settings::settings(cam *c)
 	setting.gwip = 0;
 	setting.serverip = 0;
 	setting.dnsip = 0;
-	if (box == NOKIA)
+
+	switch (tuxbox_get_vendor())
 	{
+	case TUXBOX_VENDOR_NOKIA:
 		setting.rcRepeat = true;
 		setting.supportOldRc = true;
-	}
-	else if (box == SAGEM || box == PHILIPS)
-	{
+		break;
+	default:
 		setting.rcRepeat = false;
 		setting.supportOldRc = false;
 	}
@@ -212,16 +179,6 @@ int settings::find_emmpid(int ca_system_id) {
 	return 0;
 }
 
-bool settings::boxIsCable()
-{
-	return isCable;
-}
-
-bool settings::boxIsSat()
-{
-	return !isCable;
-}
-
 int settings::getCAID()
 {
 	return CAID;
@@ -229,7 +186,7 @@ int settings::getCAID()
 
 int settings::getTransparentColor()
 {
-	if (isGTX)
+	if (tuxbox_get_dbox2_gt() == TUXBOX_DBOX2_GT_GTX)
 		return 0xFC0F;
 	else
 		return 0;

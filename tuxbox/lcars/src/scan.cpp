@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: scan.cpp,v $
+Revision 1.19  2003/03/08 17:31:18  waldi
+use tuxbox and frontend infos
+
 Revision 1.18  2002/11/26 20:03:14  TheDOC
 some debug-output and small fixes
 
@@ -140,7 +143,7 @@ channels scan::scanChannels(int type, int start_frequency, int start_symbol, int
 	osd_obj->setScanChannelNumber(0);
 
 
-	if (setting->boxIsCable())
+	if (tuner_obj->getType() == FE_QAM)
 	{
 		start_symbol = 6900;
 		osd_obj->createPerspective();
@@ -242,7 +245,7 @@ channels scan::scanChannels(int type, int start_frequency, int start_symbol, int
 			}
 		}
 	}
-	else if (setting->boxIsSat())
+	else if (tuner_obj->getType() == FE_QPSK)
 	{
 		int max_chans = 2;
 
