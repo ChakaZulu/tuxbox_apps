@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.47 2004/03/10 21:05:53 rasc Exp $
+$Id: dvb_str.c,v 1.48 2004/03/21 00:37:47 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.47 2004/03/10 21:05:53 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.48  2004/03/21 00:37:47  rasc
+Query FrontEnd Info  (option: -s feinfo)
+
 Revision 1.47  2004/03/10 21:05:53  rasc
 WSS (Wide Screen Signalling)  data decoding
 
@@ -1504,7 +1507,7 @@ char *dvbstrContentNibble_TYPE(u_int i)
      {  0x0108, 0x0108,  "adult movie/drama" },
 
      {  0x0109, 0x010E,  "reserved" },
-     {  0x010F, 0x010A,  "user defined" },
+     {  0x010F, 0x010F,  "user defined" },
 
      // News Current Affairs
      {  0x0200, 0x0200,  "news/current affairs (general)" },

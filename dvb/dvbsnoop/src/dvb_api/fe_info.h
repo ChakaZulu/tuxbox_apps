@@ -1,5 +1,5 @@
 /*
-$Id: fe_signal.h,v 1.2 2004/03/21 00:37:47 rasc Exp $
+$Id: fe_info.h,v 1.1 2004/03/21 00:38:45 rasc Exp $
 
 
  DVBSNOOP
@@ -11,13 +11,13 @@ $Id: fe_signal.h,v 1.2 2004/03/21 00:37:47 rasc Exp $
 
 */
 
-#ifndef __FE_SIGNAL_H
-#define __FE_SIGNAL_H 
+#ifndef __FE_INFO_H
+#define __FE_INFO_H
 
 
 #include "misc/cmdline.h"
 
-int  do_SignalStrength (OPTION *opt);
+int  do_FE_Info (OPTION *opt);
 
 
 #endif

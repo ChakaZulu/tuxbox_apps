@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.30 2004/03/09 20:59:23 rasc Exp $
+$Id: cmdline.c,v 1.31 2004/03/21 00:37:47 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: cmdline.c,v 1.30 2004/03/09 20:59:23 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.31  2004/03/21 00:37:47  rasc
+Query FrontEnd Info  (option: -s feinfo)
+
 Revision 1.30  2004/03/09 20:59:23  rasc
 VPS decoding (someone check the NPP & PTY code output please...)
 
@@ -224,7 +227,10 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
 		 	opt->packet_mode = PIDSCAN;
 			opt->pid = DUMMY_PID;	// dummy to avoid usage output
 	 } else if (!strcmp (s,"signal")) {
-		 	opt->packet_mode = SIGNALSCAN;
+		 	opt->packet_mode = SCAN_FE_SIGNAL;
+			opt->pid = DUMMY_PID;	// dummy to avoid usage output
+	 } else if (!strcmp (s,"feinfo")) {
+		 	opt->packet_mode = SCAN_FE_INFO;
 			opt->pid = DUMMY_PID;	// dummy to avoid usage output
 	 } else opt->help = 1;
      } else if (isdigit (argv[i][0])) {
@@ -297,6 +303,7 @@ static void usage (void)
     printf("                         pidscan = transponder pid scan,\n");
     printf("                         bandwidth = data rate statistics for pid\n");
     printf("                         signal = signal rate statistics \n");
+    printf("                         feinfo = frontend information\n");
     printf("                 stream type or pidscan\n");
     printf("   -TIMEOUT ms:  section read timeout in ms [-TIMEOUT 0]\n");
     printf("   -f filter:    filtervalue for 'sec' demux [-f 0]\n");

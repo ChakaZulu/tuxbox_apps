@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.c,v 1.24 2004/01/06 03:13:24 rasc Exp $
+$Id: dvbsnoop.c,v 1.25 2004/03/21 00:37:46 rasc Exp $
 
  DVBSNOOP
 
@@ -14,6 +14,9 @@ $Id: dvbsnoop.c,v 1.24 2004/01/06 03:13:24 rasc Exp $
 
 
 $Log: dvbsnoop.c,v $
+Revision 1.25  2004/03/21 00:37:46  rasc
+Query FrontEnd Info  (option: -s feinfo)
+
 Revision 1.24  2004/01/06 03:13:24  rasc
 TS prints PES/Section ID on payload_start
 
@@ -183,8 +186,12 @@ int main(int argc, char **argv)
 			err = ts_pidbandwidth (&opt);
 			break;
 
-		case SIGNALSCAN:
+		case SCAN_FE_SIGNAL:
 			err = do_SignalStrength (&opt);
+			break;
+
+		case SCAN_FE_INFO:
+			err = do_FE_Info (&opt);
 			break;
 
 		default:

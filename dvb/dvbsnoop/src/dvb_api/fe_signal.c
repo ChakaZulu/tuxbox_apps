@@ -1,5 +1,5 @@
 /*
-$Id: fe_signal.c,v 1.8 2004/03/06 22:33:11 rasc Exp $
+$Id: fe_signal.c,v 1.9 2004/03/21 00:37:47 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: fe_signal.c,v 1.8 2004/03/06 22:33:11 rasc Exp $
 
 
 $Log: fe_signal.c,v $
+Revision 1.9  2004/03/21 00:37:47  rasc
+Query FrontEnd Info  (option: -s feinfo)
+
 Revision 1.8  2004/03/06 22:33:11  rasc
 no message
 
@@ -28,7 +31,7 @@ no message
 
 Revision 1.5  2004/01/06 20:06:36  rasc
 revert a change for -s signal + small adaptions
-(frontend.h uses enums instead of #defines, so committ didn't work...)
+(frontend.h uses enums instead of #defines, so commit didn't work...)
 
 Revision 1.4  2004/01/05 02:03:42  rasc
 no message
@@ -301,7 +304,7 @@ static void out_status_detail (int v,fe_status_t s)
 // FE_HAS_VITERBI = 0x04, /* FEC is stable */
 // FE_HAS_SYNC = 0x08, /* found sync bytes */
 // FE_HAS_LOCK = 0x10, /* everything's working... */
-// FE_TIMEDOUT = 0x20, /* no lock within the last Ÿ2 seconds
+// FE_TIMEDOUT = 0x20, /* no lock within the last 2 seconds
 // FE_REINIT = 0x40 /* frontend was reinitialized, */
 //
 // DVB_API: 1
@@ -314,9 +317,3 @@ static void out_status_detail (int v,fe_status_t s)
 
 
 
-//
-// -- read FrontEndInfo
-//
-
-// $$$ TODO
-// static int read_FEInfo(int f, struct dvb_frontend_info *fi);
