@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.78 2001/10/31 12:38:30 field Exp $
+//  $Id: sectionsd.cpp,v 1.79 2001/10/31 18:04:46 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.79  2001/10/31 18:04:46  field
+//  dmxTOT wird bei scan nicht gestoppt
+//
 //  Revision 1.78  2001/10/31 12:38:30  field
 //  Timethread auch gepaust beim scanning
 //
@@ -1160,13 +1163,13 @@ static void commandPauseScanning(struct connectionData *client, char *data, cons
   if(scanning && pause) {
     dmxEIT.real_pause();
     dmxSDT.real_pause();
-    dmxTOT.real_pause();
+//    dmxTOT.real_pause();
     scanning=0;
   }
   else if(!pause && !scanning) {
     dmxSDT.real_unpause();
     dmxEIT.real_unpause();
-    dmxTOT.real_unpause();
+//    dmxTOT.real_unpause();
     scanning=1;
   }
   pthread_mutex_unlock(&scanningLock);
@@ -1339,7 +1342,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.78 2001/10/31 12:38:30 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.79 2001/10/31 18:04:46 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -2937,7 +2940,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.78 2001/10/31 12:38:30 field Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.79 2001/10/31 18:04:46 field Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
