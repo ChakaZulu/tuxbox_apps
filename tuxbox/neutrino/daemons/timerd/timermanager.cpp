@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.61 2003/01/21 21:29:20 zwen Exp $
+   $Id: timermanager.cpp,v 1.62 2003/01/22 20:11:41 zwen Exp $
 
 	License: GPL
 
@@ -289,9 +289,9 @@ int CTimerManager::rescheduleEvent(int eventID, time_t announceTime, time_t alar
 // ---------------------------------------------------------------------------------
 void CTimerManager::loadEventsFromConfig()
 {
-	CConfigFile *config = new CConfigFile(',');
+	CConfigFile config(',');
 
-	if(!config->loadConfig(CONFIGFILE))
+	if(!config.loadConfig(CONFIGFILE))
 	{
 		/* set defaults if no configuration file exists */
 		dprintf("%s not found\n", CONFIGFILE);
@@ -299,21 +299,21 @@ void CTimerManager::loadEventsFromConfig()
 	else
 	{
 		vector<int> savedIDs;
-		savedIDs = config->getInt32Vector ("IDS");
+		savedIDs = config.getInt32Vector ("IDS");
 		dprintf("%d timer(s) in config\n",savedIDs.size());
 		for(unsigned int i=0; i < savedIDs.size(); i++)
 		{
 			stringstream ostr;
 			ostr << savedIDs[i];
 			string id=ostr.str();
-			CTimerd::CTimerEventTypes type=(CTimerd::CTimerEventTypes)config->getInt32 ("EVENT_TYPE_"+id,0);
+			CTimerd::CTimerEventTypes type=(CTimerd::CTimerEventTypes)config.getInt32 ("EVENT_TYPE_"+id,0);
 			time_t now = time(NULL);
 			switch(type)
 			{
 				case CTimerd::TIMER_SHUTDOWN :
 					{
 						CTimerEvent_Shutdown *event=
-						new CTimerEvent_Shutdown(config, savedIDs[i]);
+						new CTimerEvent_Shutdown(&config, savedIDs[i]);
 						if((event->alarmTime >= now) || (event->stopTime > now))
 						{
 							addEvent(event,false);
@@ -334,7 +334,7 @@ void CTimerManager::loadEventsFromConfig()
 				case CTimerd::TIMER_NEXTPROGRAM :
 					{
 						CTimerEvent_NextProgram *event=
-						new CTimerEvent_NextProgram(config, savedIDs[i]);
+						new CTimerEvent_NextProgram(&config, savedIDs[i]);
 						if((event->alarmTime >= now) || (event->stopTime > now))
 						{
 							addEvent(event,false);
@@ -355,7 +355,7 @@ void CTimerManager::loadEventsFromConfig()
 				case CTimerd::TIMER_ZAPTO :
 					{
 						CTimerEvent_Zapto *event=
-						new CTimerEvent_Zapto(config, savedIDs[i]);
+						new CTimerEvent_Zapto(&config, savedIDs[i]);
 						if((event->alarmTime >= now) || (event->stopTime > now))
 						{
 							addEvent(event,false);
@@ -376,7 +376,7 @@ void CTimerManager::loadEventsFromConfig()
 				case CTimerd::TIMER_STANDBY :
 					{
 						CTimerEvent_Standby *event=
-						new CTimerEvent_Standby(config, savedIDs[i]);
+						new CTimerEvent_Standby(&config, savedIDs[i]);
 						if((event->alarmTime >= now) || (event->stopTime > now))
 						{
 							addEvent(event,false);
@@ -397,7 +397,7 @@ void CTimerManager::loadEventsFromConfig()
 				case CTimerd::TIMER_RECORD :
 					{
 						CTimerEvent_Record *event=
-						new CTimerEvent_Record(config, savedIDs[i]);
+						new CTimerEvent_Record(&config, savedIDs[i]);
 						if((event->alarmTime >= now) || (event->stopTime > now))
 						{
 							addEvent(event,false);
@@ -418,7 +418,7 @@ void CTimerManager::loadEventsFromConfig()
 				case CTimerd::TIMER_SLEEPTIMER :
 					{
 						CTimerEvent_Sleeptimer *event=
-						new CTimerEvent_Sleeptimer(config, savedIDs[i]);
+						new CTimerEvent_Sleeptimer(&config, savedIDs[i]);
 						if((event->alarmTime >= now) || (event->stopTime > now))
 						{
 							addEvent(event,false);
@@ -439,7 +439,7 @@ void CTimerManager::loadEventsFromConfig()
 				case CTimerd::TIMER_REMIND :
 					{
 						CTimerEvent_Remind *event=
-						new CTimerEvent_Remind(config, savedIDs[i]);
+						new CTimerEvent_Remind(&config, savedIDs[i]);
 						if((event->alarmTime >= now) || (event->stopTime > now))
 						{
 							addEvent(event,false);
@@ -462,23 +462,23 @@ void CTimerManager::loadEventsFromConfig()
 			}
 		}
 	}
-	delete config;
 	saveEventsToConfig();
 }
 // -------------------------------------------------------------------------------------
 void CTimerManager::saveEventsToConfig()
 {
-	CConfigFile *config = new CConfigFile(',');
-	config->clear();
+	CConfigFile config(',');
+	config.clear();
+	printf("[Timerd]: Save %d events to config ... saving ", events.size());
 	CTimerEventMap::iterator pos = events.begin();
 	for(;pos != events.end();pos++)
 	{
 		CTimerEvent *event = pos->second;
-		event->saveToConfig(config);
+		printf("%d ",event->eventID);
+		event->saveToConfig(&config);
 	}
-	config->saveConfig(CONFIGFILE);
-	delete config;
-
+	printf("\n");
+	config.saveConfig(CONFIGFILE);
 }
 //------------------------------------------------------------
 bool CTimerManager::shutdown()
