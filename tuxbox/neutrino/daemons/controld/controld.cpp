@@ -44,24 +44,25 @@
 #include "dbox/avs_core.h"
 #include "ost/video.h"
 
-#include "../lcdd/lcdd.h"
-
 #include "eventwatchdog.h"
 #include "controldclient.h"
+#include "lcddclient.h"
 
 #define CONF_FILE CONFIGDIR "/controld.conf"
 
+
+CLcddClient lcdd;
 
 struct Ssettings
 {
 	char volume;
 	bool mute;
-	char videotype;
+	char videooutput;
 	char videoformat;
 
 	char boxtype;
 	char lastmode;
-}settings;
+} settings;
 
 
 void sig_catch(int);
@@ -109,32 +110,10 @@ void saveSettings()
 	close(fd);
 }
 
-
-void sendto_lcdd(unsigned char cmd, unsigned char param)
-{
-	int sock_fd;
-	SAI servaddr;
-	struct lcdd_msg lmsg;
-
-	sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	memset(&servaddr,0,sizeof(servaddr));
-	servaddr.sin_family=AF_INET;
-	servaddr.sin_port=htons(LCDD_PORT);
-	inet_pton(AF_INET, "127.0.0.1", &servaddr.sin_addr);
-
-	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))!=-1)
-	{
-		lmsg.version=LCDD_VERSION;
-		lmsg.cmd=cmd;
-		lmsg.param = param;
-		write(sock_fd,&lmsg,sizeof(lmsg));
-		close(sock_fd);
-	}
-}
-
 void shutdownBox()
 {
-    sendto_lcdd(LC_POWEROFF, 0);
+	lcdd.shutdown();
+
 	sig_catch(1);
     if (execlp("/sbin/halt", "/sbin/halt", 0)<0)
     {
@@ -142,7 +121,7 @@ void shutdownBox()
     }
 }
 
-void setVideoType(int format)
+void setvideooutput(int format)
 {
 	int fd;
 	/*
@@ -157,7 +136,7 @@ void setVideoType(int format)
 		format=3;
 	}
 
-	settings.videotype = format;
+	settings.videooutput = format;
 
 	if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
 	{
@@ -310,22 +289,29 @@ void switch_vcr( bool vcr_on)
 		printf("switch to dvb-input...\n");
 		if (settings.boxtype == 2) // Sagem
 		{
-			routeVideo(0, 0, 0, settings.videotype);
+			routeVideo(0, 0, 0, settings.videooutput);
 		}
 		else if (settings.boxtype == 1) // Nokia
 		{
-			routeVideo(5, 1, 7, settings.videotype);
+			routeVideo(5, 1, 7, settings.videooutput);
 		}
 		else if (settings.boxtype == 3) // Philips
 		{
-			routeVideo(1, 1, 1, settings.videotype);
+			routeVideo(1, 1, 1, settings.videooutput);
 		}
 	}
 }
 
-void setScartMode(char onoff)
+void setScartMode(bool onoff)
 {
-
+	if(onoff)
+	{
+		lcdd.setMode(CLcddClient::MODE_SCART);
+	}
+	else
+	{
+		lcdd.setMode(CLcddClient::MODE_TVRADIO);
+	}
 	switch_vcr( onoff );
 }
 
@@ -340,7 +326,7 @@ void setVolume(char volume)
 	settings.volume = volume;
 
 	int i = 64-int(volume*64.0/100.0);
-	printf("[controld] set volume: %d\n", i );
+	//printf("[controld] set volume: %d\n", i );
 	if (i < 0)
 	{
 		i=0;
@@ -363,7 +349,8 @@ void setVolume(char volume)
 	}
 	close(fd);
 
-	sendto_lcdd(LC_VOLUME, volume);
+
+	lcdd.setVolume(volume);
 }
 
 void Mute()
@@ -386,7 +373,7 @@ void Mute()
 	}
 	close(fd);
 
-	sendto_lcdd(LC_MUTE, LC_MUTE_ON);
+	lcdd.setMute(true);
 }
 
 void UnMute()
@@ -409,7 +396,7 @@ void UnMute()
 	}
 	close(fd);
 
-	sendto_lcdd(LC_MUTE, LC_MUTE_OFF);
+	lcdd.setMute(false);
 }
 
 
@@ -424,17 +411,17 @@ void parse_command(int connfd, CControldClient::commandHead* rmessage)
   switch (rmessage->cmd)
   {
     case CControldClient::CMD_SHUTDOWN:
-      printf("[controld] shutdown\n");
+      //printf("[controld] shutdown\n");
       shutdownBox();
       break;
     case CControldClient::CMD_SETVOLUME:
-      printf("[controld] set volume\n");
+      //printf("[controld] set volume\n");
       CControldClient::commandVolume msg;
 	  read(connfd, &msg, sizeof(msg));
       setVolume(msg.volume);
       break;
 	case CControldClient::CMD_MUTE:
-      printf("[controld] mute\n");
+      //printf("[controld] mute\n");
       Mute();
       break;
     case CControldClient::CMD_UNMUTE:
@@ -442,57 +429,57 @@ void parse_command(int connfd, CControldClient::commandHead* rmessage)
       UnMute();
       break;
     case CControldClient::CMD_SETVIDEOFORMAT:
-      printf("[controld] set videoformat\n");
+      //printf("[controld] set videoformat\n");
       CControldClient::commandVideoFormat msg2;
 	  read(connfd, &msg2, sizeof(msg2));
 	  setVideoFormat(msg2.format);
       break;
     case CControldClient::CMD_SETVIDEOOUTPUT:
-      printf("[controld] set videooutput\n");
+      //printf("[controld] set videooutput\n");
       CControldClient::commandVideoOutput msg3;
 	  read(connfd, &msg3, sizeof(msg3));
-	  setVideoType(msg3.output);
+	  setvideooutput(msg3.output);
       break;
 	  
     case CControldClient::CMD_SETBOXTYPE:
-      printf("[controld] set boxtype\n");
+      //printf("[controld] set boxtype\n");
       CControldClient::commandBoxType msg4;
 	  read(connfd, &msg4, sizeof(msg4));
 	  setBoxType(msg4.boxtype);
       break;
     case CControldClient::CMD_SETSCARTMODE:
-      printf("[controld] set scartmode\n");
+      //printf("[controld] set scartmode\n");
       CControldClient::commandScartMode msg5;
 	  read(connfd, &msg5, sizeof(msg5));
       setScartMode(msg5.mode);
       break;
 
 	case CControldClient::CMD_GETVOLUME:
-		printf("[controld] get volume\n");
+		//printf("[controld] get volume\n");
 		CControldClient::responseVolume msg6;
 		msg6.volume = settings.volume;
 		write(connfd,&msg6,sizeof(msg6));
 		break;
 	case CControldClient::CMD_GETMUTESTATUS:
-		printf("[controld] get mute\n");
+		//printf("[controld] get mute\n");
 		CControldClient::responseMute msg7;
 		msg7.mute = settings.mute;
 		write(connfd,&msg7,sizeof(msg7));
 		break;
 	case CControldClient::CMD_GETVIDEOFORMAT:
-		printf("[controld] get videoformat (fnc)\n");
+		//printf("[controld] get videoformat (fnc)\n");
 		CControldClient::responseVideoFormat msg8;
 		msg8.format = settings.videoformat;
 		write(connfd,&msg8,sizeof(msg8));
 		break;
 	case CControldClient::CMD_GETVIDEOOUTPUT:
-		printf("[controld] get videooutput (fblk)\n");
+		//printf("[controld] get videooutput (fblk)\n");
 		CControldClient::responseVideoOutput msg9;
-		msg9.output = settings.videotype;
+		msg9.output = settings.videooutput;
 		write(connfd,&msg9,sizeof(msg9));
 		break;
 	case CControldClient::CMD_GETBOXTYPE:
-		printf("[controld] get boxtype\n");
+		//printf("[controld] get boxtype\n");
 		CControldClient::responseBoxType msg0;
 		msg0.boxtype = settings.boxtype;
 		write(connfd,&msg0,sizeof(msg0));
@@ -554,7 +541,7 @@ int main(int argc, char **argv)
 		printf("[controld] using defaults\n");
 		settings.volume = 100;
 		settings.mute = 0;
-		settings.videotype = 1; // fblk1 - rgb
+		settings.videooutput = 1; // fblk1 - rgb
 		settings.videoformat = 2; // fnc2 - 4:3
 		settings.boxtype = 1; //nokia
 	}
@@ -563,7 +550,7 @@ int main(int argc, char **argv)
 	aspectRatioNotifier = new CControldAspectRatioNotifier();
 	//init
 	setVolume(settings.volume);
-	setVideoType(settings.videotype);
+	setvideooutput(settings.videooutput);
 	setVideoFormat(settings.videoformat);
 
 	struct CControldClient::commandHead rmessage;
