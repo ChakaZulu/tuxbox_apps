@@ -54,6 +54,7 @@ private slots:
 	void keyPressed(int);
 public:
 	eRCShortDriver(const char *filename);
+	~eRCShortDriver();
 };
 
 class eRCKey

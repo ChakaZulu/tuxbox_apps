@@ -322,6 +322,16 @@ const char *eRCKeyDBoxButton::getDescription() const
 	}
 }
 
+int eRCKeyDBoxButton::getCompatibleCode() const
+{
+	switch (code)
+	{
+	case 1: return eRCInput::RC_STANDBY;
+	case 2: return eRCInput::RC_RIGHT;
+	case 3: return eRCInput::RC_LEFT;
+	}
+}
+
 class eDBoxRCHardware
 {
   eRCDBoxDriver driver;

@@ -76,6 +76,7 @@ class eRCKeyDBoxButton: public eRCKey
 {
 public:
 	const char *getDescription() const;
+	int getCompatibleCode() const;
 	eRCKeyDBoxButton(eRCDevice *producer, int code, int flags)
 			: eRCKey(producer, code, flags)
 	{

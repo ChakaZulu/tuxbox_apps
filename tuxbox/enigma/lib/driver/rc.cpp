@@ -2,6 +2,7 @@
 #include <qdatetime.h>
 #include "rc.h"
 #include <stdio.h>
+#include "init.h"
 
 int eRCKey::getCompatibleCode() const
 {
@@ -41,14 +42,22 @@ eRCShortDriver::eRCShortDriver(const char *filename): eRCDriver(eRCInput::getIns
 {
 	rc.setName(filename);
 	if (!rc.open(IO_ReadOnly))
-		qDebug("failed to open %s", filename);
-	else
 	{
-		qDebug("driver open success");
+		qDebug("failed to open %s", filename);
+		sn=0;
+	} else
+	{
+		sn=new QSocketNotifier(rc.handle(), QSocketNotifier::Read, this);
+		connect(sn, SIGNAL(activated(int)), SLOT(keyPressed(int)));
 		eRCInput::getInstance()->setFile(&rc);
 	}
-	sn=new QSocketNotifier(rc.handle(), QSocketNotifier::Read, this);
-	connect(sn, SIGNAL(activated(int)), SLOT(keyPressed(int)));
+}
+
+eRCShortDriver::~eRCShortDriver()
+{
+	rc.close();
+	if (sn)
+		delete sn;
 }
 
 eRCInput *eRCInput::instance;
@@ -98,3 +107,5 @@ void eRCInput::setFile(QFile* file)
 {
 	rc = file;
 }
+
+eAutoInitP0<eRCInput, 1> init_rcinput("RC Input layer");
