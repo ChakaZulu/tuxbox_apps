@@ -628,45 +628,42 @@ void CMP3PlayerGui::hide()
 
 void CMP3PlayerGui::paintItem(int pos)
 {
-//	printf("paintItem{\n");
 	int ypos = y + title_height + theight + pos*fheight;
 	int color;
 
-	pos += liststart;
-
-	if ((pos) == selected)
+	if ((pos + liststart) == selected)
 		color = COL_MENUCONTENTSELECTED;
 	else
-		if (((pos) < playlist.size()) && (pos & 1))
+		if (((pos + liststart) < playlist.size()) && (pos & 1))
 			color = COL_MENUCONTENTDARK;
 		else
 			color = COL_MENUCONTENT;
 	
-	if (pos == (unsigned)current)
+	if ((pos + liststart) == (unsigned)current)
 		color += 2;
 
 	frameBuffer->paintBoxRel(x, ypos, width - 15, fheight, color);
 
-	if (pos < playlist.size())
+	if ((pos + liststart) < playlist.size())
 	{
-		if (playlist[pos].Title.empty())
+		if (playlist[pos + liststart].Title.empty())
 		{
 			// id3tag noch nicht geholt
-			get_id3(&playlist[pos]);
-			get_mp3info(&playlist[pos]);
+			get_id3(&playlist[pos + liststart]);
+			get_mp3info(&playlist[pos + liststart]);
 			if(m_state!=CMP3PlayerGui::STOP)
 				usleep(100*1000);
 		}
 		char sNr[20];
-		sprintf(sNr, "%2d : ", pos + 1);
+		sprintf(sNr, "%2d : ", pos + liststart + 1);
 		std::string tmp=sNr;
  		std::string artist="Aritst?";
 		std::string title="Title?";
 		
-		if (!playlist[pos].Artist.empty())
-			artist = playlist[pos].Artist;
-		if (!playlist[pos].Title.empty())
-			title = playlist[pos].Title;
+		if (!playlist[pos + liststart].Artist.empty())
+			artist = playlist[pos + liststart].Artist;
+		if (!playlist[pos + liststart].Title.empty())
+			title = playlist[pos + liststart].Title;
 		if(g_settings.mp3player_display == TITLE_ARTIST)
 		{
 			tmp += title;
@@ -680,25 +677,25 @@ void CMP3PlayerGui::paintItem(int pos)
 			tmp += title;
 		}
 
-		if (!playlist[pos].Album.empty())
+		if (!playlist[pos + liststart].Album.empty())
 		{
 			tmp += " (";
-			tmp += playlist[pos].Album;
+			tmp += playlist[pos + liststart].Album;
 			tmp += ')';
 		}
 		
-		int w=g_Fonts->menu->getRenderWidth(playlist[pos].Duration)+5;
+		int w=g_Fonts->menu->getRenderWidth(playlist[pos + liststart].Duration)+5;
 		g_Fonts->menu->RenderString(x+10,ypos+fheight, width-30-w, tmp, color, fheight, true); // UTF-8
-		g_Fonts->menu->RenderString(x+width-15-w,ypos+fheight, w, playlist[pos].Duration, color, fheight);
+		g_Fonts->menu->RenderString(x+width-15-w,ypos+fheight, w, playlist[pos + liststart].Duration, color, fheight);
 		
-		if(pos==selected)
+		if ((pos + liststart) == selected)
+		{
 			paintItemID3DetailsLine(pos);
-		
-		if(pos==selected && m_state==CMP3PlayerGui::STOP)
-			CLCD::getInstance()->showMP3(playlist[pos].Artist, playlist[pos].Title, playlist[pos].Album);
+			if (m_state == CMP3PlayerGui::STOP)
+				CLCD::getInstance()->showMP3(playlist[pos + liststart].Artist, playlist[pos + liststart].Title, playlist[pos + liststart].Album);
+		}
 		
 	}
-//	printf("paintItem}\n");
 }
 
 //------------------------------------------------------------------------
