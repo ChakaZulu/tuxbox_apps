@@ -55,6 +55,7 @@
 #include <global.h>
 #include <neutrino.h>
 
+#include <zapit/client/zapitclient.h>
 
 #define info_height 60
 
@@ -241,8 +242,6 @@ int CTimerList::exec(CMenuTarget* parent, std::string actionKey)
 		parent->hide();
 	}
 
-	channellist_tv.clear();
-	channellist_radio.clear();
 	int ret = show();
 
 	return ret;

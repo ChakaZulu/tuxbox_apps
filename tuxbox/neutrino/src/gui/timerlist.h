@@ -34,7 +34,6 @@
 #define __timerlist__
 
 #include <timerdclient/timerdclient.h>
-#include <zapit/client/zapitclient.h>
 
 #include <gui/widget/menue.h>
 
@@ -57,8 +56,6 @@ class CTimerList : public CMenuTarget
 
 		CTimerdClient *Timer;
 		CTimerd::TimerList timerlist;             // List of timers		
-		CZapitClient::BouquetChannelList channellist_tv;     
-		CZapitClient::BouquetChannelList channellist_radio;     
 		CTimerd::responseGetTimer timerNew;
 		int timerNew_standby_on;
 		char timerNew_channel_name[30];
