@@ -219,16 +219,16 @@ void CScreenSetup::paint()
 {
 	if (!frameBuffer->getActive())
 		return;
-	memset(frameBuffer->getFrameBufferPointer(), 7, frameBuffer->getStride()*576);
+	memset(frameBuffer->getFrameBufferPointer(), 8, frameBuffer->getStride()*576);
 
 	for(int count=0;count<576;count+=15)
-		frameBuffer->paintHLine(0,719, count, 8 );
+		frameBuffer->paintHLine(0,719, count, 9 );
 
 	for(int count=0;count<720;count+=15)
-		frameBuffer->paintVLine(count,0, 575, 8 );
+		frameBuffer->paintVLine(count,0, 575, 9 );
 
-	frameBuffer->paintBox(0,0, 15*15,15*15, 7);
-	frameBuffer->paintBox(32*15+1,23*15+1, 719,575, 7);
+	frameBuffer->paintBox(0,0, 15*15,15*15, 8);
+	frameBuffer->paintBox(32*15+1,23*15+1, 719,575, 8);
 
 	int x=15*5;
 	int y=15*24;
