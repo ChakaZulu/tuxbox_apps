@@ -43,7 +43,6 @@ PMTEntry *eDVBServiceController::priorityAudio(PMTEntry *audio)
 
 	if (audiochannelspriority)
 	{
-//		printf(">>>%s\n", audiochannelspriority);
 		std::stringstream audiochannels;
 
 		audiochannels.clear();
@@ -54,8 +53,7 @@ PMTEntry *eDVBServiceController::priorityAudio(PMTEntry *audio)
 			for (std::list<eDVBServiceController::audioStream>::iterator it(audioStreams.begin())
 				;it != audioStreams.end(); ++it)
 			{
-//				printf("  -comparing:%s:%s:\n", audiochannel.c_str(), it->text.c_str());
-				if (audiochannel == it->text)
+				if (audiochannel.upper() == it->text.upper())
 				{
 					audio2 = it->pmtentry;
 					break;
@@ -66,7 +64,6 @@ PMTEntry *eDVBServiceController::priorityAudio(PMTEntry *audio)
 	}
 	if (audio2 != 0)
 		audio = audio2;
-//	printf("<<<%d\n", audio->elementary_PID);
 	return audio;
 }
 
