@@ -94,14 +94,14 @@ audiomenu.PCMOffset smanjivanje glasnoce pcm
 videomenu.head namjestiti video
 videomenu.screensetup namjestiti ekran
 videomenu.videosignal vrsta video signala
-videomenu.videosignal_rgb RGB + CVBS
+videomenu.videosignal_rgb rgb + cvbs
 videomenu.videosignal_svideo s-video
-videomenu.videosignal_yuv_v YUV + VBS
-videomenu.videosignal_yuv_c YUV + CVBS
-videomenu.videosignal_composite CVBS
+videomenu.videosignal_yuv_v yuv + vbs
+videomenu.videosignal_yuv_c yuv + cvbs
+videomenu.videosignal_composite cvbs
 videomenu.videoformat format ekrana
-videomenu.videoformat_43 4:3 (LB)
-videomenu.videoformat_431 4:3 (PS)
+videomenu.videoformat_43 4:3 (lb)
+videomenu.videoformat_431 4:3 (ps)
 videomenu.videoformat_169 16:9
 videomenu.videoformat_autodetect automatično
 videomenu.vcrswitch automatični av-scart ulaz
@@ -132,19 +132,19 @@ recordingmenu.server_mac mac adresa
 recordingmenu.setupnow namješćenje sada preuzeti
 recordingmenu.no_scart nema mijenjanja scarta
 
-streamingmenu.head namjescenje promatraca filmova
+streamingmenu.head namješćenje promatrača filmova
 streamingmenu.streaming_type streamingserver
 streamingmenu.server_ip ip streamingservera
 streamingmenu.server_port port streamingservera
 streamingmenu.streaming_server_cddrive dvd
-streamingmenu.streaming_server_startdir direktorij (VLC)
+streamingmenu.streaming_server_startdir direktorij (vlc)
 streamingmenu.streaming_videorate brzina videa
 streamingmenu.streaming_audiorate brzina audia
-streamingmenu.streaming_ac3_enabled podrzavati ac3
+streamingmenu.streaming_ac3_enabled podržavati ac3
 streamingmenu.off ugaseno
 streamingmenu.on upaljeno
-streamingmenu.streaming_force_transcode Force Transcoding
-streamingmenu.streaming_resolution Resolution
+streamingmenu.streaming_force_transcode silno transkodiranje
+streamingmenu.streaming_resolution resolucija
 streamingmenu.352x288 352x288
 streamingmenu.352x576 352x576
 streamingmenu.480x576 480x576
@@ -387,7 +387,7 @@ flashupdate.updatemode_internet sa interneta
 flashupdate.currentversion_sep instalirana verzija
 flashupdate.currentversiondate datum
 flashupdate.currentversiontime vrijeme
-flashupdate.currentreleasecycle Release cycle
+flashupdate.currentreleasecycle release imidž
 flashupdate.currentversionsnapshot vrsta imidža
 flashupdate.checkupdate tražiti novu verziju
 flashupdate.versioncheck provjeriti verziju
@@ -421,7 +421,7 @@ flashupdate.titlewriteflash pisati fleš
 flashupdate.actionwriteflash piše se fleš
 flashupdate.flashreadyreboot Imidž je uspješno flešovan.\nVaš dbox2 startuje sada ponovno.
 flashupdate.reallyflashmtd Hoćete li stvarno nastaviti flešovanje?\n\nAko se desi greška ili imidž nije\nu redu, onda vaš dbox2 neće više raditi.\n\nIme imidža: %s\nPozicija: %s
-flashupdate.wrongbase Verzija osnovnog imidža ne paše više,\ntreba se instalirati novi osnovni imidž!
+flashupdate.wrongbase Verzija release imidža ne paše više,\ntreba se instalirati novi komletni imidž!
 flashupdate.experimentalimage Izabrali ste snapshot,\novo je verzija za pokusavanje i mozda vas\ndbox2 poslije obnavljanja nece vise raditi.\n\nHocete li stvarno sa ovom verzijom obnoviti softver?
 
 bouqueteditor.name namjestiti buket
@@ -675,7 +675,7 @@ fontsize.infobar_small mala infromativna traka
 fontsize.gamelist_itemlarge veliko
 fontsize.gamelist_itemsmall malo
 fontsize.filebrowser_item dio pretraživača datoteka
-fontsize.hint slova se namjesćaju,\nčekajte molim ...
+fontsize.hint slova se namješćaju,\nčekajte molim ...
 
 fontmenu.head namješćenje veličine slova
 fontmenu.channellist lista kanala
@@ -720,12 +720,12 @@ movieplayer.chooseps odigrati ps
 movieplayer.choosestream streamati
 movieplayer.choosepes odigrati pes
 movieplayer.bookmark oznaka
-movieplayer.choosestreamsvcd (S)VCD
-movieplayer.choosestreamdvd DVD
+movieplayer.choosestreamsvcd (s)vcd
+movieplayer.choosestreamdvd dvd
 movieplayer.choosestreamfile datoteka preko vlca
-movieplayer.pleasewait Uspostavlja se veza sa streamingserverom.\nCekajte molim ...
-movieplayer.nostreamingserver Nije bilo moguce\nuspostaviti vezu sa streamingserverom.
-movieplayer.defdir pocetni direktorij
+movieplayer.pleasewait Uspostavlja se veza sa streamingserverom.\nČekajte molim ...
+movieplayer.nostreamingserver Nije bilo moguće\nuspostaviti vezu sa streamingserverom.
+movieplayer.defdir početni direktorij
 movieplayer.buffering predraditi...
 
 filebrowser.head pretraživač datoteka
@@ -749,9 +749,9 @@ nfs.umount nfs/cifs direktorij sada demontirati
 nfs.umounterror greška pri demontiranju
 nfs.alreadymounted direktorij je već montiran
 nfs.mount_options opcije za montiranje
-nfs.type Typ
-nfs.type_nfs NFS
-nfs.type_cifs CIFS
+nfs.type tip
+nfs.type_nfs nfs
+nfs.type_cifs cifs
 nfs.username ime korisnika za cifs
 nfs.password lozinka za cifs
 nfs.mounterror_notsup ne podnosi se sistem datoteka
@@ -768,6 +768,4 @@ pictureviewer.show pokazati
 pictureviewer.slideshow pokazivanje slika
 pictureviewer.slide_time trajanje pokazivanja slika
 pictureviewer.scaling skaliranje
-pictureviewer.defdir pocetni direktorij
-
-
+pictureviewer.defdir početni direktorij
