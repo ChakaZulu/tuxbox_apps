@@ -22,7 +22,7 @@ msgstr "FF"
 
 #: default.esml:844
 msgid "&#53;"
-msgstr ""
+msgstr "&#53;"
 
 #: default.esml:382
 msgid "here you can change your sat/lnb mapping"
@@ -163,11 +163,11 @@ msgstr "borrar elemento elegido"
 
 #: default.esml:860
 msgid "abc &lt;-&gt; ABC"
-msgstr ""
+msgstr "abc &lt;-&gt; ABC"
 
 #: default.esml:854
 msgid "&lt;"
-msgstr ""
+msgstr "&lt;"
 
 #: default.esml:399
 msgid "select DiSEqC mode (ok)"
@@ -240,11 +240,11 @@ msgstr "Servicios"
 
 #: default.esml:846
 msgid "&#54;"
-msgstr ""
+msgstr "&#54;"
 
 #: default.esml:840
 msgid "&#51;"
-msgstr ""
+msgstr "&#51;"
 
 #: default.esml:607
 msgid "enable/disable inversion (ok)"
@@ -260,7 +260,7 @@ msgstr "Red:"
 
 #: default.esml:858
 msgid "&gt;"
-msgstr ""
+msgstr "&gt;"
 
 #: default.esml:726 default.esml:730
 msgid "select month (ok)"
@@ -352,7 +352,7 @@ msgstr "LOF/H:"
 
 #: default.esml:838
 msgid "&#50;"
-msgstr ""
+msgstr "&#50;"
 
 #: default.esml:443
 msgid "motor drive speed, in degrees per second"
@@ -372,7 +372,7 @@ msgstr "Elegir otro servicio (ok)"
 
 #: default.esml:848
 msgid "&#55;"
-msgstr ""
+msgstr "&#55;"
 
 #: default.esml:736
 msgid "scan EPG"
@@ -557,7 +557,7 @@ msgstr "Hora parada"
 
 #: default.esml:842
 msgid "&#52;"
-msgstr ""
+msgstr "&#52;"
 
 #: default.esml:468
 msgid "add to table/existing will be overwritten"
@@ -569,7 +569,7 @@ msgstr "frontend:"
 
 #: default.esml:852
 msgid "&#57;"
-msgstr ""
+msgstr "&#57;"
 
 #: default.esml:345 default.esml:422
 msgid "AGC:"
@@ -629,7 +629,7 @@ msgstr "Viernes"
 
 #: default.esml:836
 msgid "&#49;"
-msgstr ""
+msgstr "&#49;"
 
 #: default.esml:462 src/tpeditwindow.cpp:71
 msgid "Orbital Position:"
@@ -765,7 +765,7 @@ msgstr "Entre su longituda (0..9, +, -, ok)"
 
 #: default.esml:861
 msgid "abc2 &lt;-&gt; 2abc"
-msgstr ""
+msgstr "abc2 &lt;-&gt; 2abc"
 
 #: default.esml:368
 msgid "remove the selected Satellite"
@@ -840,9 +840,8 @@ msgid "harddisk: "
 msgstr "Disco duro:"
 
 #: default.esml:751
-#, fuzzy
 msgid "FP Version:"
-msgstr "Inversión:"
+msgstr "Verión FP:"
 
 #: default.esml:803
 msgid "status:"
@@ -913,9 +912,8 @@ msgid "press left or right to move motor"
 msgstr "Pulse derecha/izquierda para mover el motor"
 
 #: default.esml:753
-#, fuzzy
 msgid "Upgrade FP"
-msgstr "Actualización acceptada"
+msgstr "Actualizar FP"
 
 #: default.esml:490
 msgid "calc param 2 (see your motor manual or let it 00)"
@@ -955,7 +953,7 @@ msgstr "Elige su preferencia"
 
 #: default.esml:850
 msgid "&#56;"
-msgstr ""
+msgstr "&#56;"
 
 #: default.esml:403
 msgid "select DiSEqC repeats (ok)"
@@ -1007,7 +1005,7 @@ msgstr "Aplicar"
 
 #: default.esml:856
 msgid "&#48;"
-msgstr ""
+msgstr "&#48;"
 
 #: default.esml:722
 msgid "Fr"
@@ -1686,17 +1684,15 @@ msgstr "Descripción no disponible"
 
 #: src/enigma_dyn.cpp:2062
 msgid "No timer events available"
-msgstr "Temporizador no disponible"
+msgstr "Ningun temporizador disponible"
 
 #: src/enigma_dyn.cpp:2080
-#, fuzzy
 msgid "No regular timer events available"
-msgstr "Temporizador no disponible"
+msgstr "Ningun temporizador regular disponible"
 
 #: src/enigma_dyn.cpp:2089
-#, fuzzy
 msgid "No repeating timer events available"
-msgstr "Temporizador no disponible"
+msgstr "Ningun temporizador repetitivo disponible"
 
 #: src/enigma_dyn.cpp:3535
 msgid ""
@@ -2003,7 +1999,7 @@ msgstr "NVOD"
 
 #: src/enigma_main.cpp:514
 msgid "Video"
-msgstr "Video"
+msgstr "Vídeo"
 
 #: src/enigma_main.cpp:650 src/enigma_main.cpp:771
 msgid "Audio"
@@ -2035,7 +2031,7 @@ msgstr "Pista audio"
 
 #: src/enigma_main.cpp:817
 msgid "no subtitles"
-msgstr ""
+msgstr "Sin subtítulo"
 
 #: src/enigma_main.cpp:859
 msgid "multiple Services"
@@ -2092,7 +2088,7 @@ msgstr "Favoritos (TV)"
 
 #: src/enigma_main.cpp:1392
 msgid "Favourites (Radio)"
-msgstr "Favoritos (radio)"
+msgstr "Favoritos (Radio)"
 
 #: src/enigma_main.cpp:1397
 msgid "Favourites (File)"
@@ -2494,9 +2490,8 @@ msgid "restart your dreambox"
 msgstr "Reiniciar su receptor"
 
 #: src/enigma_main.cpp:6460
-#, fuzzy
 msgid "restart your receiver"
-msgstr "Reiniciar su receptor"
+msgstr "Reinicie su receptor"
 
 #: src/enigma_main.cpp:6464 src/enigma_main.cpp:6468
 msgid "shutdown now"
@@ -3717,19 +3712,19 @@ msgstr "Mostrar actualizaciones del EPG en la Infobar"
 
 #: src/setup_extra.cpp:52
 msgid "Show remaining Time"
-msgstr "Mostrar tiempo restante del evento"
+msgstr "Mostrar tiempo restante"
 
 #: src/setup_extra.cpp:52
 msgid "show event remaining time in the infobar"
-msgstr "Mostrar tiempo restante en la Infobar"
+msgstr "Mostrar tiempo del evento restante en la Infobar"
 
 #: src/setup_extra.cpp:53
 msgid "Don't open serial port"
-msgstr ""
+msgstr "Cerrar puerto serie"
 
 #: src/setup_extra.cpp:53
 msgid "don't write debug messages to /dev/tts/0"
-msgstr ""
+msgstr "No enviar mensajes debug a /dev/tts/0"
 
 #: src/setup_extra.cpp:54
 msgid "Auto bouquet change"
@@ -3743,11 +3738,11 @@ msgstr ""
 
 #: src/setup_extra.cpp:57
 msgid "Enable fast zapping"
-msgstr ""
+msgstr "Cambio canal rapido"
 
 #: src/setup_extra.cpp:57
 msgid "enables faster zapping.. but with visible sync"
-msgstr ""
+msgstr "Cambiar el canal mas rapido.. sincronización visible"
 
 #: src/setup_harddisk.cpp:183
 msgid "Harddisk Setup"
@@ -4055,18 +4050,16 @@ msgid "select your time zone (ok)"
 msgstr "Elige zona (ok)"
 
 #: src/setup_timezone.cpp:86
-#, fuzzy
 msgid ""
 "You have to restart enigma to apply the new Timezone\n"
 "Restart now?"
 msgstr ""
-"Hay que reiniciar enigma para activar el nuevo tematico\n"
+"Hay que reiniciar enigma para activar la zona horaria\n"
 "Reiniciar ahora?"
 
 #: src/setup_timezone.cpp:86
-#, fuzzy
 msgid "Timezone changed"
-msgstr "Tematico cambiado"
+msgstr "Zona horaria cambiada"
 
 #: src/setupengrab.cpp:25
 msgid "Ngrab Server"
@@ -4110,7 +4103,7 @@ msgstr "Dirección IP del receptor (0..9, izq., der.)"
 
 #: src/setupnetwork.cpp:425
 msgid "get Network data from a DHCP Server in the local Network"
-msgstr ""
+msgstr "Obtener información de la red local de un servidor DHCP"
 
 #: src/setupnetwork.cpp:438
 msgid "enter netmask of your network (0..9, left, right)"
@@ -4165,12 +4158,10 @@ msgid "press ok to edit your provider password"
 msgstr "Pulse OK para editar su contraseña"
 
 #: src/setupnetwork.cpp:544
-#, fuzzy
 msgid "Enable Network"
-msgstr "Añadir red nuevo"
+msgstr "Activar tarjeta red"
 
 #: src/setupnetwork.cpp:547
-#, fuzzy
 msgid "enable/disable network (ok)"
 msgstr "Activar/desactivar tarjeta red (ok)"
 
@@ -4196,11 +4187,11 @@ msgstr "Rechazar conexiones entrantes al puerto 21"
 
 #: src/setupnetwork.cpp:615
 msgid "mounts"
-msgstr "Directorios compartidos"
+msgstr "Montar"
 
 #: src/setupnetwork.cpp:620
 msgid "here you can setup nfs/cifs mounts"
-msgstr "Para incluir directorios compartidos en su red local"
+msgstr "Para montar un directorio compartido en la red local"
 
 #: src/setupnetwork.cpp:881
 msgid "enter IP Address (0..9, left, right)"
@@ -4275,19 +4266,18 @@ msgid "NFS/CIFS mount error already mounted"
 msgstr "El directorio ya fue activado"
 
 #: src/setupnetwork.cpp:1355
-#, fuzzy
 msgid ""
 "Recording on CIFS shares is unstable.\n"
 "Therefore CIFS support is not included in the standard distribution. Use it "
 "at your own risk!"
 msgstr ""
 "La grabación en directorios CIFS no funciona siempre.\n"
-"Por eso, CIFS no está incluido por defecto. Para usarlo, tiene que copiar el "
-"controlador 'cifs.o' al directorio /var y activarlo al inicio del sistema."
+"Por eso, CIFS no está incluido por defecto. Utilizelo bajo propria "
+"responsabilidad !"
 
 #: src/setupvideo.cpp:51 src/system_settings.cpp:43
 msgid "A/V Settings"
-msgstr "Configuración Audio/Video"
+msgstr "Configuración Audio/Vídeo"
 
 #: src/setupvideo.cpp:56
 msgid "Color Format:"
@@ -4303,7 +4293,7 @@ msgstr "RGB"
 
 #: src/setupvideo.cpp:68
 msgid "SVideo"
-msgstr "SVideo"
+msgstr "SVídeo"
 
 #: src/setupvideo.cpp:71
 msgid "YPbPr"
@@ -4323,11 +4313,11 @@ msgstr "Elige formato pantalla (izquierda, derecha)"
 
 #: src/setupvideo.cpp:89
 msgid "4:3 letterbox"
-msgstr "4 : 3 letterbox"
+msgstr "4:3 letterbox"
 
 #: src/setupvideo.cpp:90
 msgid "4:3 panscan"
-msgstr "4 : 3 panscan"
+msgstr "4:3 panscan"
 
 #: src/setupvideo.cpp:91
 msgid "16:9"
@@ -4370,13 +4360,12 @@ msgid "auto switch to VCR connector"
 msgstr "Activar euroconnecor Vídeo automaticamente"
 
 #: src/setupvideo.cpp:178
-#, fuzzy
 msgid "test"
-msgstr "Oeste"
+msgstr "Test"
 
 #: src/setupvideo.cpp:183
 msgid "show testpicture"
-msgstr ""
+msgstr "Activar carta de ajuste"
 
 #: src/setupvideo.cpp:358
 msgid "TV System Wizard"
@@ -4400,12 +4389,11 @@ msgstr "Abrir actualización manual"
 
 #: src/software_update.cpp:36
 msgid "Expert Flash Save/Restore"
-msgstr ""
+msgstr "Menú avanzado"
 
 #: src/software_update.cpp:36
-#, fuzzy
 msgid "open expert flash tool"
-msgstr "Abrir configuración avanzada"
+msgstr "Abrir útiles avanzados"
 
 #: src/software_update.cpp:57
 msgid ""
@@ -4797,15 +4785,16 @@ msgid ""
 "The new endtime is before now time!\n"
 "This stops the running timer(recording)\n"
 msgstr ""
+"La hora de parada ya pasó!\n"
+"Eso termina el temporizador actual(grabacion)\n"
 
 #: src/timer.cpp:2129
 msgid "New endtime are now adjusted"
-msgstr ""
+msgstr "Hora de parada ajustada"
 
 #: src/timer.cpp:2142
-#, fuzzy
 msgid "The event has already finished... you can not change endtime!"
-msgstr "Este evento ya está en la lista."
+msgstr "Este evento ya terminó... no se puede editar la hora de parada!"
 
 #: src/timer.cpp:2164
 msgid ""
@@ -5095,14 +5084,12 @@ msgid "open harddisc setup"
 msgstr "Abrir configuración disco duro"
 
 #: src/system_settings.cpp:54
-#, fuzzy
 msgid "Keyboard Setup"
-msgstr "Configuración disco duro"
+msgstr "Configuración teclado"
 
 #: src/system_settings.cpp:54
-#, fuzzy
 msgid "open keyboard setup"
-msgstr "Abrir configuración disco duro"
+msgstr "Abrir configuración del teclado IR"
 
 #: src/system_settings.cpp:57
 msgid "open on screen display settings"
