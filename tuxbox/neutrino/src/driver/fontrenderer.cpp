@@ -33,9 +33,9 @@
 #include <config.h>
 #endif
 
-#include "fontrenderer.h"
+#include <driver/fontrenderer.h>
 
-#include "system/debug.h"
+#include <system/debug.h>
 
 
 FT_Error FBFontRenderClass::myFTC_Face_Requester(FTC_FaceID  face_id,
@@ -55,9 +55,8 @@ FBFontRenderClass::FBFontRenderClass()
 		dprintf(DEBUG_NORMAL, "[FONT] initializing core failed.\n");
 		return;
 	}
-	dprintf(DEBUG_DEBUG, "[FONT] loading fonts...\n");
-	fflush(stdout);
-	font=0;
+
+	font = NULL;
 
 	int maxbytes= 4 *1024*1024;
 	dprintf(DEBUG_INFO, "[FONT] Intializing font cache, using max. %dMB...", maxbytes/1024/1024);
@@ -87,6 +86,14 @@ FBFontRenderClass::FBFontRenderClass()
 
 FBFontRenderClass::~FBFontRenderClass()
 {
+	fontListEntry * g;
+	
+	for (fontListEntry * f = font; f; f = g)
+	{
+		g = f->next;
+		delete f;
+	}
+
 	FTC_Manager_Done(cacheManager);
 	FT_Done_FreeType(library);
 }
