@@ -1,3 +1,8 @@
+/*
+** initial coding by fx2
+*/
+
+
 #include <stdio.h>
 
 #include <draw.h>
