@@ -181,6 +181,10 @@ void eDBoxLCD::update()
 {
 	unsigned char raw[120*8];
 	int x, y, yy;
+
+	if ( locked )
+		return;
+
 	for (y=0; y<8; y++)
 	{
 		for (x=0; x<120; x++)
