@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.h,v 1.20 2004/07/24 11:44:44 rasc Exp $
+$Id: dvbsnoop.h,v 1.21 2004/11/16 09:12:41 obi Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: dvbsnoop.h,v 1.20 2004/07/24 11:44:44 rasc Exp $
 
 
 $Log: dvbsnoop.h,v $
+Revision 1.21  2004/11/16 09:12:41  obi
+increased MAX_PID from 0x1fff to 0x2000 (which means "full transport stream" in linux dvb api terms)
+
 Revision 1.20  2004/07/24 11:44:44  rasc
 EN 301 192 update
  - New: ECM_repetition_rate_descriptor (EN 301 192 v1.4.1)
@@ -107,7 +110,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 /* some defs */
-#define MAX_PID    0x1FFF
+#define MAX_PID    0x2000
 #define DUMMY_PID  0xFFFF	/* special if no pid is needed */
 #define INVALID_PID  0xFEFE	/* a invalid PID*/
 
