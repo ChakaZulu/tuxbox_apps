@@ -1,4 +1,4 @@
-AC_INIT(tuxbox-apps-dvb-zapit,0.0.1,,zapit)
+AC_INIT(zapit,0.0.1)
 AM_INIT_AUTOMAKE(zapit,0.0.1)
 
 TUXBOX_APPS
@@ -38,15 +38,24 @@ if test $NEUTRINO_SOURCE; then
 	CFLAGS="$orig_CFLAGS"
 	CPPFLAGS="$orig_CPPFLAGS"
 fi
+
 if test $LCDDCLIENT_CFLAGS; then
 	AC_DEFINE(DBOX2,1,[enable dbox2 specific code])
-	AM_CONDITIONAL(DBOX2,true)
 fi
+
+AM_CONDITIONAL(DBOX2,test $LCDDCLIENT_CFLAGS)
+
 AC_SUBST(LCDDCLIENT_CFLAGS)
 AC_SUBST(LCDDCLIENT_SOURCE)
 
 AC_OUTPUT([
 Makefile
+include/Makefile
+include/zapit/Makefile
+include/zapit/xml/Makefile
+include/zapit/zapci/Makefile
+include/zapit/zapost/Makefile
+include/zapit/zapsi/Makefile
 lib/Makefile
 src/Makefile
 src/xml/Makefile
@@ -54,6 +63,5 @@ src/zapci/Makefile
 src/zapost/Makefile
 src/zapsi/Makefile
 tuxbox-zapit.pc
-tuxbox-zapitclient.pc
 ])
 

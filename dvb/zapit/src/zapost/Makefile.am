@@ -1,9 +1,7 @@
-INCLUDES = -I$(top_srcdir)/src
+INCLUDES = \
+	-I$(top_srcdir)/include
 
 noinst_LIBRARIES = libzapost.a
-
-zapostincludedir = ${includedir}/tuxbox/zapit/zapost
-zapostinclude_HEADERS = frontend.h
 
 libzapost_a_SOURCES = audio.cpp dmx.cpp frontend.cpp video.cpp
 

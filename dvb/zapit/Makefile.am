@@ -1,7 +1,7 @@
 AUTOMAKE_OPTIONS = gnu
 
-SUBDIRS = lib src
+SUBDIRS = include lib src
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = tuxbox-zapit.pc tuxbox-zapitclient.pc
+pkgconfig_DATA = tuxbox-zapit.pc
 

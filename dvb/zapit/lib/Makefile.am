@@ -1,8 +1,9 @@
-INCLUDES = -I$(top_srcdir)/src
+INCLUDES = \
+	-I$(top_srcdir)/include
 
 lib_LTLIBRARIES  = libzapitclient.la
 
-tuxboxincludedir = ${includedir}/tuxbox
-tuxboxinclude_HEADERS = zapitclient.h
+pkgincludedir = ${includedir}/tuxbox
+pkginclude_HEADERS = zapitclient.h
 
 libzapitclient_la_SOURCES = zapitclient.cpp
