@@ -1,7 +1,10 @@
 /*
-  $Id: libucodes.c,v 1.22 2003/04/02 17:12:20 obi Exp $
+  $Id: libucodes.c,v 1.23 2003/04/04 17:34:06 obi Exp $
   
   $Log: libucodes.c,v $
+  Revision 1.23  2003/04/04 17:34:06  obi
+  added cam_01_01_005G
+
   Revision 1.22  2003/04/02 17:12:20  obi
   added cam_01_02_106E md5sum
 
@@ -97,6 +100,7 @@ static struct Sucode ucodes[] =
 	{"a5984825ff554ea530efc4733ffd7473","cam_01_01_005F"},
 	{"704cb8d9965babbdc7d4e7cae6e5584e","cam_01_02_002F"},
 	{"c51074b2edf6c14e0bb99ee3ed8b9c47","cam_01_02_105F"},
+	{"f85070f3545677fc3e74abdeb8b33a42","cam_01_01_005G"},
 	{"16c5e1eba0cfe63f2bbc648e1644c883","cam_NOKIA_PRODTEST2"},
 	{"ff441ce2f3feab815d360e3032d23888","cam_ProdTestImage_2"},
 	{"420baf447bfd529a794bb36ef80f1652","cam_STREAMHACK"}
