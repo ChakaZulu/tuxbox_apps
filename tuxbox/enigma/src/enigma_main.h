@@ -495,6 +495,7 @@ private:
 	void redrawIndexmarks();
 	void deleteFile(eServiceSelector *);
 	void renameFile(eServiceSelector *);
+	void showHDDSpaceLeft(eLabel *);
 #endif // DISABLE_FILE
 public:
 	eServicePath getRoot(int list, int mode=-1);

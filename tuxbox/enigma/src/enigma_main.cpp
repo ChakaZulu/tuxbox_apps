@@ -5848,6 +5848,33 @@ eServicePath eZapMain::getRoot(int list, int _mode)
 	return b;
 }
 
+void eZapMain::showHDDSpaceLeft(eLabel *DVRSpaceLeft)
+{
+	static int swp;
+
+	int fds = freeRecordSpace();
+	if (fds != -1)
+	{
+		swp^=1;
+		if (swp)
+		{
+			if (fds<1024)
+				DVRSpaceLeft->setText(eString().sprintf("%dMB\nfree", fds));
+			else
+				DVRSpaceLeft->setText(eString().sprintf("%d.%02d GB\nfree", fds/1024, (int)((fds%1024)/10.34) ));
+		}
+		else
+		{
+			int min = fds/33;
+				if (min<60)
+				DVRSpaceLeft->setText(eString().sprintf("~%d min\nfree", min ));
+			else
+				DVRSpaceLeft->setText(eString().sprintf("~%dh%02dmin\nfree", min/60, min%60 ));
+		}
+		DVRSpaceLeft->show();
+	}
+}
+
 void eZapMain::showServiceInfobar(int show)
 {
 	dvrfunctions=show;
@@ -5858,6 +5885,9 @@ void eZapMain::showServiceInfobar(int show)
 		dvbInfoBar->hide();
 		fileInfoBar->hide();
 		dvrInfoBar->show();
+#ifndef DISABLE_FILE
+		showHDDSpaceLeft(DVRSpaceLeft);
+#endif
 		prepareDVRHelp();
 	} else
 	{
