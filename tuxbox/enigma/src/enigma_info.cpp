@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_info.cpp,v 1.8 2002/11/11 21:51:25 tmbinc Exp $
+ * $Id: enigma_info.cpp,v 1.9 2002/11/15 06:01:38 tmbinc Exp $
  */
 
 #include <enigma_info.h>
@@ -100,7 +100,6 @@ static eString getVersionInfo(const char *info)
 	fclose(f);
 	return result;
 }
-
 
 class eAboutScreen: public eWindow
 {

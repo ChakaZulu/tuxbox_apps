@@ -57,7 +57,7 @@ int eListBoxEntryEPG::getEntryHeight()
 		tmp->destroy();
 		tmp = new eTextPara( eRect(0, 0, 200, 30) );
 		tmp->setFont( TimeFont );
-		tmp->renderString( "09.09," );
+		tmp->renderString( "Tue 09.09," );
 		dateXSize = tmp->getBoundBox().width();
 		tmp->destroy();
 	}
@@ -80,6 +80,8 @@ eListBoxEntryEPG::eListBoxEntryEPG(const eit_event_struct* evt, eListBox<eListBo
 		descr = "no event data avail";
 }
 
+extern const char *dayStrShort[];
+
 eString eListBoxEntryEPG::redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int hilited)
 {
 	drawEntryRect(rc, rect, coActiveB, coActiveF, coNormalB, coNormalF, hilited);
@@ -91,7 +93,7 @@ eString eListBoxEntryEPG::redraw(gPainter *rc, const eRect& rect, gColor coActiv
 		paraDate = new eTextPara( eRect( 0, 0, dateXSize, rect.height()) );
 		paraDate->setFont( TimeFont );
 		eString tmp;
-		tmp.sprintf("%02d.%02d,", start_time.tm_mday, start_time.tm_mon+1);
+		tmp.sprintf("%s %02d.%02d,", dayStrShort[start_time.tm_wday], start_time.tm_mday, start_time.tm_mon+1);
 		paraDate->renderString( tmp );
 		paraDate->realign( eTextPara::dirRight );
 		TimeYOffs = ((rect.height() - paraDate->getBoundBox().height()) / 2 ) - paraDate->getBoundBox().top();
@@ -133,7 +135,7 @@ eString eListBoxEntryEPG::redraw(gPainter *rc, const eRect& rect, gColor coActiv
 		paraDescr = new eTextPara( eRect( 0 ,0, rect.width(), rect.height()) );
 		paraDescr->setFont( DescrFont );
 		paraDescr->renderString(descr);
-		DescrYOffs = ((rect.height() - paraDescr->getBoundBox().height()) / 2 ) - paraDescr->getBoundBox().top();
+		DescrYOffs = 0; // ((rect.height() - paraDescr->getBoundBox().height()) / 2 ) - paraDescr->getBoundBox().top();
 	}
 	rc->renderPara(*paraDescr, ePoint( xpos, rect.top() + DescrYOffs ) );
 

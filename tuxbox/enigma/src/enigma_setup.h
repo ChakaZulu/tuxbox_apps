@@ -18,6 +18,7 @@ private:
 	void sel_rc();
 	void sel_harddisk();
 	void sel_ci();
+	void sel_upgrade();
 public:
 	eZapSetup();
 	~eZapSetup();

@@ -1,0 +1,1854 @@
+# created by Enigma Language Editor 0.2
+#       (c) 10/2002 ole <olest@gmx.net>
+# *************************************
+# *   use/modify on your own risk!    *
+# *************************************
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: tuxbox-enigma 0.1\n"
+"POT-Creation-Date: 2002-11-14 21:11+0100\n"
+"PO-Revision-Date: 2002-05-04 02:00+0200\n"
+"Last-Translator: \n"
+"Language-Team: tr <tr@tuxbox.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: lib/dvb/serviceplaylist.cpp:110
+#, c-format
+msgid " (%d entries)"
+msgstr "(%d entries)"
+
+#: src/enigma_main.cpp:210
+msgid " Euro lost)"
+msgstr "Euro lost)"
+
+#: src/enigma_main.cpp:204
+msgid " to "
+msgstr "git"
+
+#: src/scan.cpp:612
+#, c-format
+msgid "%02i minutes and %02i seconds left"
+msgstr "%02i dakika ve %02i saniye kaldi"
+
+#: src/scan.cpp:614
+#, c-format
+msgid "%02i seconds left"
+msgstr "%02i saniye kaldi"
+
+#: src/setup_harddisk.cpp:305
+msgid "(error reading information)"
+msgstr "(infarmatsiyo okunurken hata oldu)"
+
+#: src/satconfig.cpp:218
+msgid "*delete*"
+msgstr "*Sil*"
+
+#: src/setupvideo.cpp:66
+msgid "16:9 (PIN8)"
+msgstr "16:9 (pin8)"
+
+#: default.esml:213
+msgid "22Khz"
+msgstr "22Khz"
+
+#: src/satconfig.cpp:249
+msgid "22kHz is always disabled (low band)"
+msgstr "22khz herzaman kapali (Alcak Band)"
+
+#: src/satconfig.cpp:248
+msgid "22kHz is always enabled (high band)"
+msgstr "22khz herzaman acik (Yuksek band)"
+
+#: src/satconfig.cpp:247
+msgid "22kHz signal is automaticaly switched"
+msgstr "22khz sinyal otomatik degisir"
+
+#: src/setupvideo.cpp:64
+msgid "4:3 letterbox"
+msgstr "4:3 Letterbox"
+
+#: src/setupvideo.cpp:65
+msgid "4:3 panscan"
+msgstr "4:3 Panscan"
+
+#: src/scan.cpp:270
+msgid "A valid transponder has been found. Verify that the right network is selected"
+msgstr "A valid transponder has been found. Verify that the right network is selected"
+
+#: default.esml:278 default.esml:294 default.esml:318
+#: src/setup_language.cpp:92 src/scan.cpp:36 src/setup_rc.cpp:79
+#: src/setupvideo.cpp:79 src/setup_osd.cpp:85 src/setupnetwork.cpp:120
+#: src/setup_lcd.cpp:98
+msgid "abort"
+msgstr "iptalet"
+
+#: default.esml:318
+msgid "abort skin setup ( no changes are saved )"
+msgstr "abort skin setup ( no changes are saved )"
+
+#: default.esml:436 src/enigma_info.cpp:43
+msgid "About..."
+msgstr "Bilgi"
+
+#: default.esml:421
+msgid "add"
+msgstr "hafiza"
+
+#: default.esml:216
+msgid "add a new Satellite"
+msgstr "Yeni uydu ekle"
+
+#: src/enigma_main.cpp:1574 src/enigma_main.cpp:1583
+msgid "Add Channel to Favourite"
+msgstr "bu kanali faforiye al"
+
+#: src/timer.cpp:466 src/timer.cpp:477 src/timer.cpp:487 src/timer.cpp:976
+msgid "Add event to timerlist"
+msgstr "Saat ayarIarini hafiza listesine al"
+
+#: default.esml:421
+msgid "add new Timer (ok)"
+msgstr "yeni zamani hafizaya al (ok)"
+
+#: src/sselect.cpp:41
+msgid "add Service"
+msgstr "Servisi hafizaya al"
+
+#: src/sselect.cpp:42
+msgid "add Service to Favourite"
+msgstr "bu servisi  fafori listesine al"
+
+#: src/enigma_main.cpp:2630
+msgid "add service to favourites"
+msgstr "bu servisi fafori listesine al"
+
+#: src/enigma_main.cpp:2631
+msgid "add service to playlist"
+msgstr "bu servisi playlistesine al"
+
+#: src/epgwindow.cpp:26
+msgid "add this event to timer list"
+msgstr "add this event to timer list"
+
+#: default.esml:366
+msgid "AGC"
+msgstr "AGC"
+
+#: src/scan.cpp:491
+msgid "All known transponders have been tried, but no lock was possible. Verify antenna-/cable-setup or try another satellite/network."
+msgstr "Butun taninan transponder tarandi , ve hic bir transpondr'a kitlenemedi , uydu anteninizi /kablonuzu-kontrol edin ve ya baska uydu ve ya baska ag seciniz."
+
+#: src/scan.cpp:484
+msgid "All known transponders have been tried, but no lock was possible. Verify antenna-/cable-setup or try manual search if its some obscure satellite/network."
+msgstr "Butun taninan transponder tarandi , ve hic bir transpondr'a kitlenemedi , uydu antninizi /kablonuzu-kontrol edin ve ya tek frakan ayrai yapip arayin  ve ya baska uydu/ag aramasi yaptirin"
+
+#: src/setup_osd.cpp:38
+msgid "Alpha:"
+msgstr "Alpha:"
+
+#: src/timer.cpp:759
+msgid "April"
+msgstr "Nisan"
+
+#: src/setup_harddisk.cpp:199
+msgid "Are you SURE that you want to format this disk?\n"
+msgstr "eminmisiniz  diski format cekmek icin?\n"
+
+#: src/enigma_main.cpp:324
+msgid "Audio"
+msgstr "Audio"
+
+#: src/timer.cpp:760
+msgid "August"
+msgstr "Agustos"
+
+#: src/scan.cpp:34
+msgid "auto scan"
+msgstr "Otomatik tarama"
+
+#: src/scan.cpp:176
+msgid "automatic"
+msgstr "Otomatik"
+
+#: src/enigma_main.cpp:2624 src/setup_harddisk.cpp:126
+msgid "back"
+msgstr "geri"
+
+#: src/enigma_setup.cpp:48
+msgid "back to Mainmenu"
+msgstr "Ana menuye geri don"
+
+#: src/enigma_info.cpp:272
+msgid "beta"
+msgstr "Beta"
+
+#: src/enigma_scan.cpp:42
+msgid "Bouquets..."
+msgstr "Bouketler..."
+
+#: src/setup_osd.cpp:51 src/setup_lcd.cpp:54
+msgid "Brightness:"
+msgstr "sefafligi:"
+
+#: src/streaminfo.cpp:336
+msgid "by it uses:"
+msgstr "by it uses:"
+
+#: lib/gui/emessage.cpp:96
+msgid "Cancel"
+msgstr "Cik"
+
+#: default.esml:237 default.esml:261
+msgid "cancel"
+msgstr "cik"
+
+#: default.esml:454
+msgid "capacity:"
+msgstr "kapasitesi"
+
+#: src/setup_osd.cpp:58
+msgid "change the brightness correction"
+msgstr "parlakligi ayarlama"
+
+#: src/setup_osd.cpp:71
+msgid "change the contrast"
+msgstr "kontrasini degistir"
+
+#: src/setup_osd.cpp:45
+msgid "change the transparency correction"
+msgstr "transprant degistirme yeri"
+
+#: src/enigma_scan.cpp:35
+msgid "Channels"
+msgstr "Kanalar"
+
+#: src/enigma_setup.cpp:49
+msgid "Channels..."
+msgstr "Kanal"
+
+#: src/setupvideo.cpp:63
+msgid "choose aspect ratio ( left, right )"
+msgstr "Choose aspect ratio ( left, right )"
+
+#: src/setupvideo.cpp:50
+msgid "choose colorformat ( left, right )"
+msgstr "Renk ayari icin (sol, sag  )"
+
+#: default.esml:335
+msgid "choose polarity (left, right)"
+msgstr "polarasyon secenegi (sol, sag)"
+
+#: default.esml:289
+msgid "choose satelite/cable provider (ok)"
+msgstr "uydu secenegi/kablo  provider (ok)"
+
+#: default.esml:269
+msgid "choose scan type or abort"
+msgstr "secenek tarama tipini ve ya cik"
+
+#: default.esml:338
+msgid "choose the FEC (left, right)"
+msgstr "FEC secenegi (sol, sag)"
+
+#: default.esml:229
+msgid "choose the LNB you wish to apply or edit"
+msgstr "choose the LNB you wish to apply or edit"
+
+#: default.esml:326
+msgid "choose wished satellite (ok)"
+msgstr "choose wished satellite (ok)"
+
+#: default.esml:281
+msgid "clear list before"
+msgstr "listeyi ilk once silin"
+
+#: default.esml:217 default.esml:419 default.esml:460
+msgid "close"
+msgstr "kapat"
+
+#: default.esml:217
+msgid "close Satelliteconfiguration"
+msgstr "Uydu ayar bolgesini kapat"
+
+#: default.esml:317
+msgid "close skin setup and save changes"
+msgstr "skin ayarini kapat ve degisikligi hafizaya al"
+
+#: default.esml:419
+msgid "close timer menu (ok)"
+msgstr "saat munusunu kapat (ok)"
+
+#: src/setup_rc.cpp:82 src/setup_osd.cpp:88 src/setupnetwork.cpp:123
+#: src/setup_lcd.cpp:101
+msgid "close window (no changes are saved)"
+msgstr "Pencereyi kapat (degisklikler hafizaya alinmadi)"
+
+#: default.esml:278 default.esml:294
+msgid "close window and do not scan"
+msgstr "pencereyi kapat ve tarama yapma"
+
+#: src/setup_rc.cpp:74 src/setup_osd.cpp:79 src/setupnetwork.cpp:113
+#: src/setup_lcd.cpp:93
+msgid "close window and save changes"
+msgstr "Pencereyi kapat (degisilikler hafizaya alindi)"
+
+#: src/enigma_setup.cpp:61
+msgid "Common Interface..."
+msgstr "Ci modul girisi"
+
+#: default.esml:456
+msgid "connected:"
+msgstr "baglandi"
+
+#: src/setup_osd.cpp:64 src/setup_lcd.cpp:59
+msgid "Contrast:"
+msgstr "contrast"
+
+#: src/enigma_plugins.cpp:142 src/enigma_main.cpp:1669
+msgid "Couldn't read plugin directory"
+msgstr "Couldn't read plugin directory"
+
+#: src/setup_harddisk.cpp:262
+msgid "creating filesystem failed."
+msgstr "yeni dosyasistemi yapilamadi."
+
+#: src/enigma_main.cpp:1798
+msgid "Currently an digital recording is in progress!"
+msgstr "Currently an digital recording is in progress!"
+
+#: src/enigma_main.cpp:1796
+msgid "Currently an timer based digital recording is in progress!"
+msgstr "Currently an timer based digital recording is in progress!"
+
+#: src/enigma_main.cpp:1803
+msgid "Currently an timer based event is in progress!"
+msgstr "Currently an timer based event is in progress!"
+
+#: src/timer.cpp:761
+msgid "December"
+msgstr "Aralik"
+
+#: src/timer.cpp:414
+msgid "Delete event from timerlist"
+msgstr "Bu ayari listeden sil"
+
+#: src/enigma_main.cpp:1431 src/enigma_main.cpp:1437 src/enigma_main.cpp:2628
+msgid "delete service"
+msgstr "servisi sil"
+
+#: default.esml:422
+msgid "delete the current selected timer (ok)"
+msgstr "delete the current selected timer (ok)"
+
+#: src/satconfig.cpp:598
+msgid "Disable DiSEqC"
+msgstr "DiSEqC kapali"
+
+#: default.esml:247
+msgid "DiSEqC Mode:"
+msgstr "DiSEqC modu:"
+
+#: default.esml:249
+msgid "DiSEqC Parameter:"
+msgstr "DiSEqC Parmametresi:"
+
+#: default.esml:251
+msgid "DiSEqC Repeats:"
+msgstr "DiSEqC  tekrarlama:"
+
+#: src/scan.cpp:840
+msgid "Done."
+msgstr "indirdi"
+
+#: default.esml:412
+msgid "edit the begin time (0..9, left, right)"
+msgstr "zamanin baslangicini editle (0..9, sol, sag)"
+
+#: default.esml:416
+msgid "edit the end time (0..9, left, right)"
+msgstr "edit the end time (0..9, left, right)"
+
+#: default.esml:279
+msgid "enable/disable check ONIT on any transponder"
+msgstr "enable/disable check ONIT on any transponder"
+
+#: default.esml:282
+msgid "enable/disable initiate network search"
+msgstr "enable/disable initiate network search"
+
+#: default.esml:357
+msgid "enable/disable inversion (ok)"
+msgstr "Acik/Kapali inversion(ok)"
+
+#: default.esml:332
+msgid "enable/disable inversion here (ok)"
+msgstr "enable/disable inversion here (ok)"
+
+#: src/setupnetwork.cpp:107
+msgid "enable/disable network config (ok)"
+msgstr "ag ayralarini  ac/kapat (ok)"
+
+#: default.esml:280
+msgid "enable/disable use BAT for scan (if exist)"
+msgstr "enable/disable use BAT for scan (if exist)"
+
+#: src/enigma_main.cpp:113
+msgid "enigma standby"
+msgstr "enigma standby"
+
+#: src/enigma_main.cpp:60
+msgid "enigma Zapp"
+msgstr "enigma zapping"
+
+#: default.esml:349
+msgid "enter frequency (0..9, left, right)"
+msgstr "frekans yazin (0..9,sol,sag)"
+
+#: src/setupnetwork.cpp:57
+msgid "enter IP Adress of the box (0..9, left, right)"
+msgstr "cihazin IP adresini yazin (0..9,sol,sag)"
+
+#: src/setupnetwork.cpp:99
+msgid "enter ip of your gateway (0..9, left, right)"
+msgstr "ip ve ya gateway numarasini yazin (0..9, sol, sag)"
+
+#: default.esml:233
+msgid "enter lnb highband offset frequency (0..9, ok)"
+msgstr "lnb yuksekbandini secin  ve offset frakansi (0..9, ok"
+
+#: default.esml:231
+msgid "enter lnb lowband offset frequency (0..9, ok)"
+msgstr "alcakband lnb offset frakansini yazin (0..9, ok) "
+
+#: default.esml:235
+msgid "enter lnb threshold frequency (0..9, ok)"
+msgstr "lnb kuvetlendirici frakansini yaziniz (0..9, ok)"
+
+#: src/setupnetwork.cpp:71
+msgid "enter netmask of your network (0..9, left, right)"
+msgstr "ag ayarinin netmask numarasini yazin (0..9, sol, sag)"
+
+#: default.esml:257
+msgid "enter Rotor Offset (0..9, ok)"
+msgstr "Rotor ofset yazilim yeri (0..9, ok)"
+
+#: default.esml:341 default.esml:353
+msgid "enter symbolrate (0..9, left, right)"
+msgstr "Sembol hizini yazin (0..9,sol,sag)"
+
+#: default.esml:329
+msgid "enter transponder frequeny (0..9, left, right)"
+msgstr "transpondrer frekansini yazin (0..9,sol, sag)"
+
+#: src/setupnetwork.cpp:85
+msgid "enter your domain name server (0..9, left, right)"
+msgstr "sizin sorverin domain ismini yazin (0..9, sol, sag)"
+
+#: default.esml:401 default.esml:407
+msgid "EPG"
+msgstr "EPG"
+
+#: src/epgwindow.cpp:25
+msgid "epg selector"
+msgstr "Epg secenegi"
+
+#: default.esml:292
+msgid "erase all"
+msgstr "Herseyi sil"
+
+#: default.esml:292
+msgid "erase bouquets and services before scan"
+msgstr "bouqeti silin   servisi taramadan once"
+
+#: src/enigma_plugins.cpp:142 src/enigma_main.cpp:1669
+msgid "Error"
+msgstr "hata"
+
+#: lib/dvb/servicestructure.cpp:13
+msgid "Favourites"
+msgstr "Favoriler"
+
+#: src/enigma_main.cpp:607
+msgid "Favourites ("
+msgstr "Faforiler ("
+
+#: src/setupvideo.cpp:46
+msgid "FBAS"
+msgstr "FBAS"
+
+#: src/timer.cpp:758
+msgid "February"
+msgstr "Subat"
+
+#: default.esml:337
+msgid "FEC:"
+msgstr "FEC:"
+
+#: src/enigma_main.cpp:605
+msgid "File"
+msgstr "DOSYA"
+
+#: src/enigma_mainmenu.cpp:39
+msgid "File mode"
+msgstr "Dosya modu"
+
+#: lib/dvb/servicestructure.cpp:12
+msgid "File Mode"
+msgstr "Dosya modu"
+
+#: default.esml:255
+msgid "fill DiSEqC repeat gap with uncommitted command"
+msgstr "fill DiSEqC repeat gap with uncommitted command"
+
+#: src/enigma.cpp:197
+msgid "First start of enigma"
+msgstr "Enigma'nin ilk baslangici"
+
+#: default.esml:461
+msgid "format"
+msgstr "Format"
+
+#: src/setup_harddisk.cpp:200 src/setup_harddisk.cpp:213
+#: src/setup_harddisk.cpp:231 src/setup_harddisk.cpp:241
+#: src/setup_harddisk.cpp:263 src/setup_harddisk.cpp:274
+msgid "formatting harddisk..."
+msgstr "diski formatlaniyor..."
+
+#: default.esml:328 default.esml:348
+msgid "Frequency:"
+msgstr "Frekans"
+
+#: src/timer.cpp:763
+msgid "Friday"
+msgstr "Cuma"
+
+#: default.esml:440
+msgid "frontend: "
+msgstr "frontend: "
+
+#: src/enigma_info.cpp:208
+msgid "Frontend: Cable"
+msgstr "Frontend: kablo"
+
+#: src/enigma_info.cpp:205
+msgid "Frontend: Satellite"
+msgstr "Frontend:uydu"
+
+#: src/enigma_info.cpp:214
+msgid "Frontend: Simulator"
+msgstr "On Taraf: Simulator"
+
+#: src/enigma_info.cpp:211
+msgid "Frontend: Terrestric"
+msgstr "Frontend: Terrestric"
+
+#: src/enigma_mainmenu.cpp:51
+msgid "games"
+msgstr "Oyunlar"
+
+#: src/sselect.cpp:37
+msgid "go one dir path up"
+msgstr "go one dir path up"
+
+#: src/enigma_main.cpp:62
+msgid "go to standby (press)"
+msgstr "standby gecmek icin (basin)"
+
+#: src/enigma_main.cpp:64
+msgid "go to standby (release)"
+msgstr "standby gecin (release)"
+
+#: src/enigma_main.cpp:63
+msgid "go to standby (repeat)"
+msgstr "standby gecmek icin (tekrarla)"
+
+#: default.esml:238
+msgid "goto next page (DiSEqC)"
+msgstr "bir dahaki sayfaya gec (DiSEqC)"
+
+#: default.esml:259
+msgid "goto prev page (LNB)"
+msgstr "bir sayfa geri (LNB)"
+
+#: src/enigma_setup.cpp:200
+msgid "Harddisk setup..."
+msgstr "Harddisk kurulum"
+
+#: src/setup_harddisk.cpp:120
+msgid "harddisk setup..."
+msgstr "harddisk krulumu..."
+
+#: src/enigma_setup.cpp:60
+msgid "Harddisk..."
+msgstr "Harddisk"
+
+#: default.esml:441
+msgid "harddisk: "
+msgstr "harddisk:"
+
+#: src/enigma_main.cpp:75
+msgid "history next"
+msgstr "birdahaki gecmisi"
+
+#: src/enigma_main.cpp:76
+msgid "history prev"
+msgstr "gecmise geri"
+
+#: lib/dvb/dvbwidgets.cpp:60
+msgid "horizontal"
+msgstr "Yatay (H)"
+
+#: default.esml:204
+msgid "HTTP Download"
+msgstr "HTTP Download"
+
+#: src/setup_harddisk.cpp:309
+#, c-format
+msgid "in use, %d.%03d GB (~%d minutes) free"
+msgstr "su an kulanilan, %d.%03d GB (~%d dakika) yer kaldi"
+
+#: src/enigma_mainmenu.cpp:42
+msgid "information"
+msgstr "Bilgiler"
+
+#: src/enigma_info.cpp:37
+msgid "Infos"
+msgstr "Informatsiyon"
+
+#: src/enigma_setup.cpp:60 src/enigma_setup.cpp:61
+msgid "initialize harddisc"
+msgstr "Harddisk ayarlaniyor"
+
+#: src/setup_harddisk.cpp:311
+msgid "initialized, but unknown filesystem"
+msgstr "duseniyor, ama taninmayan dosyasistemi"
+
+#: src/enigma_info.cpp:273
+msgid "internal"
+msgstr "internal"
+
+#: default.esml:332
+msgid "Inv:"
+msgstr "Inv:"
+
+#: src/timer.cpp:920
+msgid "Invalid begin or end time.!\nPlease check time and date"
+msgstr "Saat 'in ilk ve ya son yerleri doldurulmamis.!\nLutfen saati ve tarihi kontrol edin"
+
+#: src/timer.cpp:976
+msgid "Invalid begin or end time.!\nYou can not add this to timerlist"
+msgstr "Saat 'in ilk veya sonyerleri doldurulmamis.!\nbu ayari zaman listesine alamasiniz"
+
+#: default.esml:356
+msgid "Inversion:"
+msgstr "Inversion:"
+
+#: src/timer.cpp:758
+msgid "January"
+msgstr "Ocak"
+
+#: src/timer.cpp:759
+msgid "July"
+msgstr "Temmuz"
+
+#: src/timer.cpp:759
+msgid "June"
+msgstr "Haziran"
+
+#: src/enigma_info.cpp:260
+msgid "keine"
+msgstr "Yok"
+
+#: default.esml:342 default.esml:354
+msgid "KSymb/s"
+msgstr "KSymb/s"
+
+#: src/setup_language.cpp:33
+msgid "Language Setup"
+msgstr "Dil secimi ayari"
+
+#: src/enigma_setup.cpp:56
+msgid "Language..."
+msgstr "Dil secim"
+
+#: src/setup_language.cpp:38
+msgid "Language:"
+msgstr "Dil secimi"
+
+#: src/setup_lcd.cpp:41
+msgid "LC-Display Setup"
+msgstr "LC-Ekran ayari"
+
+#: src/enigma_setup.cpp:52
+msgid "LCD..."
+msgstr "LCD"
+
+#: src/setup_language.cpp:95
+msgid "leave language setup (no changes are saved)"
+msgstr "Dil secimi ayarindan cik (hafizada bir degisiklik yok)"
+
+#: default.esml:237 default.esml:261
+msgid "leave lnb-setup (no changes are saved)"
+msgstr "lnb-modundan cik (degisiklik hafizaya alinmadi)"
+
+#: src/setupvideo.cpp:82
+msgid "leave video setup (no changes are saved)"
+msgstr "Video ayarlari cik (Yaptiginiz degisikler islenmedi)"
+
+#: default.esml:212
+msgid "LNB"
+msgstr "LNB"
+
+#: default.esml:223
+msgid "LNB Configuration"
+msgstr "LNB kurulumu"
+
+#: default.esml:367
+msgid "Lock"
+msgstr "Kilit"
+
+#: default.esml:232
+msgid "LOF/H:"
+msgstr "LOF/H:"
+
+#: default.esml:230
+msgid "LOF/L:"
+msgstr "LOF/L:"
+
+#: src/enigma_mainmenu.cpp:59
+msgid "Mainmenu"
+msgstr "Ana menu"
+
+#: src/scan.cpp:35
+msgid "manual scan.."
+msgstr "Kendi  seceneginize gore tarama"
+
+#: src/timer.cpp:758
+msgid "March"
+msgstr "Mart"
+
+#: src/timer.cpp:759
+msgid "May"
+msgstr "Mayis"
+
+#: default.esml:330 default.esml:350
+msgid "MHz"
+msgstr "MHz"
+
+#: default.esml:245
+msgid "MiniDiSEqC Parameter:"
+msgstr "MiniDiSEqC parmametresi"
+
+#: default.esml:452
+msgid "model:"
+msgstr "model:"
+
+#: src/timer.cpp:762
+msgid "Monday"
+msgstr "Pazartesi"
+
+#: src/enigma_main.cpp:2627
+msgid "move service"
+msgstr "filim servisi"
+
+#: src/enigma_main.cpp:350
+msgid "multiple Services"
+msgstr "multiple Servisi"
+
+#: src/enigma_info.cpp:161
+msgid "my"
+msgstr "Benim"
+
+#: default.esml:282
+msgid "network search"
+msgstr "Ag tarama"
+
+#: src/setupnetwork.cpp:32
+msgid "Network setup"
+msgstr "ag ayar yeri"
+
+#: src/enigma_setup.cpp:50
+msgid "Network..."
+msgstr "Ag"
+
+#: default.esml:288
+msgid "Network:"
+msgstr "Ag"
+
+#: default.esml:216
+msgid "new"
+msgstr "Yeni"
+
+#: src/satconfig.cpp:517
+msgid "New"
+msgstr "Yeni"
+
+#: default.esml:238
+msgid "next page"
+msgstr "bir dahaki sayfa"
+
+#: lib/gui/emessage.cpp:98
+msgid "No"
+msgstr "Hayir"
+
+#: src/channelinfo.cpp:215
+msgid "no data for this service avail"
+msgstr "bu servis icin data gosterilemiyor"
+
+#: src/timer.cpp:510
+msgid "no description avail"
+msgstr "Yazilim yok veya hazir degil"
+
+#: src/enigma_event.cpp:169 src/enigma_event.cpp:178
+msgid "no description available"
+msgstr "Yazilim su an hazir degil"
+
+#: src/enigma_main.cpp:877
+msgid "no EPG available"
+msgstr "EPG goruntulenemiyor"
+
+#: src/enigma_event.cpp:161
+msgid "no info available"
+msgstr "Su an ulasilamiyor"
+
+#: src/satconfig.cpp:589 src/satconfig.cpp:635
+msgid "None"
+msgstr "yok"
+
+#: src/streaminfo.cpp:161 src/streaminfo.cpp:172 src/streaminfo.cpp:184
+#: src/streaminfo.cpp:196 src/streaminfo.cpp:309 src/streaminfo.cpp:340
+msgid "none"
+msgstr "yok"
+
+#: src/timer.cpp:761
+msgid "November"
+msgstr "Kasim"
+
+#: src/enigma_main.cpp:238 src/enigma_main.cpp:245
+msgid "NVOD"
+msgstr "NVOD"
+
+#: src/enigma_main.cpp:2158 src/enigma_main.cpp:2160
+msgid "NVOD Service - select a starttime, please"
+msgstr "NVOD Service - select a starttime, please"
+
+#: src/timer.cpp:760
+msgid "October"
+msgstr "Ekim"
+
+#: lib/gui/emessage.cpp:95
+msgid "OK"
+msgstr "OK"
+
+#: default.esml:445
+msgid "ok"
+msgstr "ok"
+
+#: src/satconfig.cpp:636
+msgid "One"
+msgstr "Biri"
+
+#: src/enigma_main.cpp:2128 src/enigma_main.cpp:2129
+msgid "One moment please..."
+msgstr "bir saniye bekleyin lutfen..."
+
+#: src/enigma_setup.cpp:49
+msgid "open channel setup"
+msgstr "Kanal ayari ac"
+
+#: src/enigma_setup.cpp:56
+msgid "open language selector"
+msgstr "Dil secimini yapiniz"
+
+#: src/enigma_setup.cpp:52
+msgid "open lcd setup"
+msgstr "LCD ayari ac"
+
+#: src/enigma_setup.cpp:50
+msgid "open network setup"
+msgstr "Ag ayarlari ac"
+
+#: src/enigma_setup.cpp:51
+msgid "open osd setup"
+msgstr "OSD ayarlari ac"
+
+#: src/enigma_setup.cpp:53
+msgid "open remotecontrol setup"
+msgstr "Uzaktan kumanda ayarlari ac"
+
+#: src/enigma_setup.cpp:55
+msgid "open skin selector"
+msgstr "Gorunum modu degistir"
+
+#: src/enigma_setup.cpp:57
+msgid "open timer view"
+msgstr "Zaman bakma kurulum yeri"
+
+#: src/enigma_setup.cpp:54
+msgid "open video setup"
+msgstr "Video ayarlari ac"
+
+#: src/enigma_setup.cpp:51
+msgid "OSD..."
+msgstr "OSD "
+
+#: src/enigma_main.cpp:85
+msgid "pause playback"
+msgstr "playback durdur "
+
+#: src/enigma_main.cpp:1522
+msgid "Play"
+msgstr "Play"
+
+#: src/setup_harddisk.cpp:230
+msgid "please wait while initializing harddisk.\nThis might take some minutes.\n"
+msgstr "lutfen bekleyin harddisk tanilinyor.\n bu bir kac dakika zaman alir\n"
+
+#: src/enigma_plugins.cpp:123
+msgid "Plugins"
+msgstr "Girisler "
+
+#: default.esml:334
+msgid "Polarity:"
+msgstr "polarizasyon:"
+
+#: default.esml:408
+msgid "press ok to edit the selected event"
+msgstr "press ok to edit the selected event"
+
+#: src/satconfig.cpp:236
+msgid "press ok to goto LNB config"
+msgstr " LNB ayarlarina girmek icin OK tusuna basiniz"
+
+#: src/satconfig.cpp:246
+msgid "press ok to select another 22kHz mode"
+msgstr " Baska bir 22khz ayari icin OK tusuna basin"
+
+#: src/satconfig.cpp:260
+msgid "press ok to select another LNB Voltage mode"
+msgstr "LNB turunu ve guc kaynagi degistirmek icin  OK tusuna basin "
+
+#: src/satconfig.cpp:216
+msgid "press ok to select another satellite, or delete this satellite"
+msgstr " Baska uydu veya uyduyu silmek icin OK tusuna basiniz"
+
+#: default.esml:259
+msgid "prev. page"
+msgstr "sayfa ,geri"
+
+#: default.esml:439
+msgid "processor: "
+msgstr "processor: "
+
+#: src/enigma_info.cpp:176
+msgid "Processor: STB04500, 252MHz"
+msgstr "Processor: STB04500, 252MHz"
+
+#: src/enigma_info.cpp:179
+msgid "Processor: STB25xxx, 252MHz"
+msgstr "Processor: STB25xxx, 252MHz"
+
+#: src/enigma_info.cpp:170
+msgid "Processor: XPC823, 66MHz"
+msgstr "Processor: XPC823, 66MHz"
+
+#: src/enigma_info.cpp:173
+msgid "Processor: XPC823, 80MHz"
+msgstr "Processor: XPC823, 80MHz"
+
+#: default.esml:305
+msgid "Progress:"
+msgstr "Programlama:"
+
+#: src/enigma_main.cpp:72
+msgid "quickzap next"
+msgstr "birdahaki acelezapping"
+
+#: src/enigma_main.cpp:73
+msgid "quickzap prev"
+msgstr "hizlizapping geri"
+
+#: src/enigma_main.cpp:604
+msgid "Radio"
+msgstr "Radio"
+
+#: src/enigma_mainmenu.cpp:36
+msgid "Radio mode"
+msgstr "Radio modu"
+
+#: lib/dvb/servicestructure.cpp:11
+msgid "Radio Mode"
+msgstr "Radio modu"
+
+#: src/enigma_main.cpp:1583
+msgid "Really add this channel to your favourite list?"
+msgstr "gercektenmi bu kanali fafori listesine almak istiyorsunuz?"
+
+#: src/timer.cpp:415
+msgid "Really delete this event?"
+msgstr "Yaptiginiz ayari silmek mi istiyorsunuz?"
+
+#: src/enigma_main.cpp:1437
+msgid "Really delete this service?"
+msgstr "gercektenmi bu servisi silmek istiyorsun?"
+
+#: src/enigma_main.cpp:1813
+msgid "Really do this?"
+msgstr "gercekten yapmak istiyormusunuz?"
+
+#: src/timer.cpp:421
+msgid "Really update this event?"
+msgstr "Really update this event?"
+
+#: src/enigma_main.cpp:87 src/enigma_main.cpp:1273
+msgid "record"
+msgstr "cekim"
+
+#: src/timer.cpp:872
+msgid "record DVR"
+msgstr "Record DVR"
+
+#: src/enigma_main.cpp:618
+msgid "recorded movies"
+msgstr "cekilmis filimler"
+
+#: default.esml:430
+msgid "recording... press shift+record to end!"
+msgstr "kayit...cekimi durdurmak icin shift+record basin !"
+
+#: src/enigma_info.cpp:271
+msgid "release"
+msgstr "Serbest birak"
+
+#: default.esml:431
+msgid "remaining disk space:"
+msgstr "disk ad degistirme spacesi:"
+
+#: src/enigma_setup.cpp:53
+msgid "Remote Control..."
+msgstr "Uzaktan kumanda"
+
+#: src/setup_rc.cpp:34
+msgid "Remotecontrol Setup"
+msgstr "Uzaktan kumanda ayarlari "
+
+#: default.esml:422
+msgid "remove"
+msgstr "yerini degistir"
+
+#: default.esml:281
+msgid "remove all services before scan"
+msgstr "butun servisleri sil tarama yapmadan once"
+
+#: src/timer.cpp:540
+msgid "remove this entry from timer list"
+msgstr "Yaptiginiz saat ayarini listeden silin"
+
+#: src/epgwindow.cpp:27
+msgid "remove this event from timer list"
+msgstr "Saat listesinden ayari sil"
+
+#: src/setup_rc.cpp:52
+msgid "Repeat Delay:"
+msgstr "Tekrarlama bekletiliyor"
+
+#: src/setup_rc.cpp:47
+msgid "Repeat Rate:"
+msgstr "Rate tekrarla:"
+
+#: src/enigma_main.cpp:90
+msgid "repeat skipping forward"
+msgstr "repeat skipping forward"
+
+#: src/enigma_main.cpp:94
+msgid "repeat skipping reverse"
+msgstr "repeat skipping reverse"
+
+#: src/enigma_main.cpp:86
+msgid "resume playback"
+msgstr "resume playback"
+
+#: src/setupvideo.cpp:47
+msgid "RGB"
+msgstr "RGB"
+
+#: lib/dvb/servicestructure.cpp:9
+msgid "root node"
+msgstr "root node"
+
+#: default.esml:258
+msgid "Rotor offset"
+msgstr "Rotor ofseti"
+
+#: default.esml:256
+msgid "Rotor support gotoXX"
+msgstr "Rotor support gotoXX"
+
+#: default.esml:211
+msgid "Sat/Position"
+msgstr "uydu/posusyonu"
+
+#: default.esml:325
+msgid "Satellite:"
+msgstr "uydu:"
+
+#: default.esml:210
+msgid "Satelliteconfiguration"
+msgstr "uydu kurulumu"
+
+#: src/enigma_scan.cpp:41
+msgid "Satellites..."
+msgstr "uydular..."
+
+#: src/timer.cpp:763
+msgid "Saturday"
+msgstr "Cumartesi"
+
+#: default.esml:236 default.esml:260 default.esml:317
+#: src/setup_language.cpp:84 src/setup_rc.cpp:71 src/setupvideo.cpp:70
+#: src/setup_osd.cpp:76 src/setupnetwork.cpp:110 src/setup_lcd.cpp:90
+msgid "save"
+msgstr "hafizaya all"
+
+#: src/setup_language.cpp:87
+msgid "save changes and close window"
+msgstr "Degisikligi hafizaya al ve pencereyi kapat"
+
+#: src/setupvideo.cpp:73
+msgid "save settings and leave video setup"
+msgstr "Havizaya al ve video ayarlarindan cik"
+
+#: src/scan.cpp:845
+msgid "Scan is in finished, press ok to close window"
+msgstr "Tarama tamamlandi   pencereyi kapatmak icin OK tusuna basin"
+
+#: src/scan.cpp:829
+msgid "Scan is in progress... please wait"
+msgstr "Uydu taramasi yapiliyor ... lutfen biraz bekleyin"
+
+#: default.esml:300
+msgid "scanning..."
+msgstr "taraniyor..."
+
+#: src/streaminfo.cpp:427
+msgid "Scramble system information (left, right)"
+msgstr "kodalma informasyon sistemi (sol, sag)"
+
+#: src/scan.cpp:500
+msgid "Search in progress "
+msgstr "Tarama yapiyor"
+
+#: default.esml:411 default.esml:415
+msgid "select day (ok)"
+msgstr "gunu sec (ok)"
+
+#: default.esml:248
+msgid "select DiSEqC mode (ok)"
+msgstr "DiSEqC modu secenegi (ok)"
+
+#: default.esml:250
+msgid "select DiSEqC parameter (ok) - select DiSEqC Mode above"
+msgstr "select DiSEqC parameter (ok) - select DiSEqC Mode above"
+
+#: default.esml:252
+msgid "select DiSEqC repeats (ok) ( DiSEqC higher level 1.0 )"
+msgstr "select DiSEqC repeats (ok) ( DiSEqC higher level 1.0 )"
+
+#: default.esml:246
+msgid "select MiniDiSEqC parameter (ok)"
+msgstr "MiniDiSEqC secim icin parmemetresi (ok)"
+
+#: default.esml:410 default.esml:414
+msgid "select month (ok)"
+msgstr "Ay secenegi (ok)"
+
+#: src/enigma_plugins.cpp:125
+msgid "select plugin and press ok"
+msgstr "girisi secin ve ok basin"
+
+#: default.esml:316
+msgid "select skin and press ok or choose save"
+msgstr "select skin and press ok or choose save"
+
+#: default.esml:418
+msgid "select the service (ok)"
+msgstr "servis secimi (ok)"
+
+#: default.esml:417
+msgid "select the timer type (ok)"
+msgstr "saat cesidi secenegi secin (ok)"
+
+#: default.esml:409 default.esml:413
+msgid "select year (ok)"
+msgstr "Yil seciniz (ok)"
+
+#: src/setup_language.cpp:47
+msgid "select your language (left, right)"
+msgstr "Dil seciminizi yapin (sola , sag)"
+
+#: default.esml:253
+msgid "send the complete DiSEqC sequence dupe"
+msgstr "send the complete DiSEqC sequence dupe"
+
+#: default.esml:254
+msgid "send to an uncommitted DiSEqC switch"
+msgstr "send to an uncommitted DiSEqC switch"
+
+#: src/satconfig.cpp:610
+msgid "sends DiSEqC cmd A/A"
+msgstr "cmd A/A DiSEqC gonder"
+
+#: src/satconfig.cpp:611
+msgid "sends DiSEqC cmd A/B"
+msgstr "cmd A/B DiSEqC gonder"
+
+#: src/satconfig.cpp:612
+msgid "sends DiSEqC cmd B/A"
+msgstr "cmd B/A DiSEqC gonder"
+
+#: src/satconfig.cpp:613
+msgid "sends DiSEqC cmd B/B"
+msgstr "cmd b/B DiSEqC gonder"
+
+#: src/satconfig.cpp:590
+msgid "sends modulated tone burst"
+msgstr "ayarli ton burst gonder "
+
+#: src/satconfig.cpp:635
+msgid "sends no DiSEqC repeats"
+msgstr "DiSEqC tekrarlamasi gonderme"
+
+#: src/satconfig.cpp:589
+msgid "sends no tone burst"
+msgstr "tone burst gonderme"
+
+#: src/satconfig.cpp:636
+msgid "sends one repeat"
+msgstr "tekrarlamanin birini gonder"
+
+#: src/satconfig.cpp:614
+msgid "sends switch cmd 1"
+msgstr "cmd 1 degistiriciyi gonder"
+
+#: src/satconfig.cpp:623
+msgid "sends switch cmd 10"
+msgstr "cmd 10 degistiriciyi gonder"
+
+#: src/satconfig.cpp:624
+msgid "sends switch cmd 11"
+msgstr "cmd 11 degistiriciyi gonder"
+
+#: src/satconfig.cpp:625
+msgid "sends switch cmd 12"
+msgstr "cmd 12 degistiriciyi gonder"
+
+#: src/satconfig.cpp:626
+msgid "sends switch cmd 13"
+msgstr "cmd 13 degistiriciyi gonder"
+
+#: src/satconfig.cpp:627
+msgid "sends switch cmd 14"
+msgstr "cmd 14 degistiriciyi gonder"
+
+#: src/satconfig.cpp:628
+msgid "sends switch cmd 15"
+msgstr "cmd 15 degistiriciyi gonder"
+
+#: src/satconfig.cpp:629
+msgid "sends switch cmd 16"
+msgstr "cmd 16 degistiriciyi gonder"
+
+#: src/satconfig.cpp:615
+msgid "sends switch cmd 2"
+msgstr "cmd 2 degistiriciyi gonder"
+
+#: src/satconfig.cpp:616
+msgid "sends switch cmd 3"
+msgstr "cmd 3 degistiriciyi gonder"
+
+#: src/satconfig.cpp:617
+msgid "sends switch cmd 4"
+msgstr "cmd 4 degistiriciyi gonder"
+
+#: src/satconfig.cpp:618
+msgid "sends switch cmd 5"
+msgstr "cmd 5 degistiriciyi gonder"
+
+#: src/satconfig.cpp:619
+msgid "sends switch cmd 6"
+msgstr "cmd 6 degistiriciyi gonder"
+
+#: src/satconfig.cpp:620
+msgid "sends switch cmd 7"
+msgstr "cmd 7 degistiriciyi gonder"
+
+#: src/satconfig.cpp:621
+msgid "sends switch cmd 8"
+msgstr "cmd 8 degistiriciyi gonder"
+
+#: src/satconfig.cpp:622
+msgid "sends switch cmd 9"
+msgstr "cmd 9 degistiriciyi gonder"
+
+#: src/satconfig.cpp:637
+msgid "sends two repeats"
+msgstr "ikin ci tekrarlamayi gonder"
+
+#: src/satconfig.cpp:591
+msgid "sends unmodulated tone burst"
+msgstr "ayarsiz ton burst gonder"
+
+#: src/timer.cpp:760
+msgid "September"
+msgstr "Eylul"
+
+#: default.esml:253
+msgid "Sequence repeat"
+msgstr "Sequence repeat"
+
+#: src/enigma_main.cpp:2132 src/enigma_main.cpp:2133
+msgid "Service could not be found !"
+msgstr "aradiginiz servis bulunamadi !"
+
+#: src/streaminfo.cpp:426
+msgid "Service information (right)"
+msgstr "servis infarmasyonu (sag)"
+
+#: src/enigma_main.cpp:78
+msgid "service list and down"
+msgstr "servis listesi ve indirme"
+
+#: src/enigma_main.cpp:79
+msgid "service list and up"
+msgstr "servis listesi yukari"
+
+#: src/enigma_main.cpp:2621
+msgid "Service Menu"
+msgstr "servis munusu"
+
+#: src/sselect.cpp:34
+msgid "service selector"
+msgstr "Servis secimi"
+
+#: default.esml:373 default.esml:380 default.esml:387
+msgid "Services"
+msgstr "Servis"
+
+#: default.esml:301
+msgid "services scanned     :"
+msgstr "servis tarandi:"
+
+#: src/setup_lcd.cpp:72
+msgid "set LCD brightness ( left / right )"
+msgstr "LCD ekraninin sefafligi (sol/sag )"
+
+#: src/setup_lcd.cpp:86
+msgid "set LCD brightness for Standby Mode ( left / right )"
+msgstr "LCD ekrani Standby de sefafligi modu (sol/ sag )"
+
+#: src/setup_lcd.cpp:79
+msgid "set LCD contrast ( left / right )"
+msgstr "LCD ekraninin kontrasi (sol/sag )"
+
+#: src/setup_rc.cpp:67
+msgid "set RC repeat delay ( left / right )"
+msgstr "Set RC repeat delay ( left / right )"
+
+#: src/setup_rc.cpp:60
+msgid "set RC repeat rate ( left / right )"
+msgstr "Set RC repeat rate ( left / right )"
+
+#: src/enigma_setup.cpp:44
+msgid "Setup"
+msgstr "Menu"
+
+#: src/enigma_mainmenu.cpp:48
+msgid "setup"
+msgstr "Ayarlar"
+
+#: src/enigma_main.cpp:68
+msgid "show audio selector"
+msgstr "ses secenegini goster"
+
+#: src/enigma_info.cpp:42
+msgid "Show BN version"
+msgstr "BN versiyonunu goster"
+
+#: src/enigma_main.cpp:97
+msgid "show bouquet list"
+msgstr " bouquet listesini goster"
+
+#: src/setup_osd.cpp:29
+msgid "Show Console on Framebuffer"
+msgstr "Show Console on Framebuffer"
+
+#: src/enigma_main.cpp:70
+msgid "show epg schedule list"
+msgstr "schedule epg listesini goster"
+
+#: src/enigma_main.cpp:71
+msgid "show extended info"
+msgstr "extended informasyonu goster"
+
+#: src/enigma_main.cpp:98
+msgid "show favourites"
+msgstr "faforitleri goster"
+
+#: src/enigma_main.cpp:61
+msgid "show main menu"
+msgstr "ana munuyu goster"
+
+#: src/setup_osd.cpp:21
+msgid "Show OSD on EIT Update"
+msgstr "OSD icinde EIT Update goster"
+
+#: src/enigma_main.cpp:66
+msgid "show service selector"
+msgstr "servis secenegini goster"
+
+#: src/sselect.cpp:39
+msgid "show service selector menu"
+msgstr "Menu secimi icin servisi goster"
+
+#: src/enigma_main.cpp:67
+msgid "show subservices/NVOD"
+msgstr "subservices/NVOD goster"
+
+#: src/enigma_main.cpp:69
+msgid "show Videotext"
+msgstr "Videotext goster"
+
+#: src/sselect.cpp:40
+msgid "showFavourite"
+msgstr "Favori'leri goster"
+
+#: src/setup_osd.cpp:24
+msgid "shows OSD when now/next info is changed"
+msgstr "OSD degistigi zaman simdi/sonra degisikligi goster"
+
+#: src/sselect.cpp:38
+msgid "shows the EPG selector for the highlighted channel"
+msgstr "Kanal bilgilerini (EPG) goster "
+
+#: src/setup_osd.cpp:32
+msgid "shows the linux console on TV"
+msgstr "Linux consulunu TV de goster"
+
+#: src/enigma_mainmenu.cpp:45
+msgid "shutdown"
+msgstr "Tam kapatma"
+
+#: src/enigma_setup.cpp:152
+msgid "Skin changed"
+msgstr "Gorunumu degistir"
+
+#: default.esml:314
+msgid "Skin Setup"
+msgstr "Skin ayari"
+
+#: src/enigma_setup.cpp:55
+msgid "Skin..."
+msgstr "Gorunum"
+
+#: default.esml:315
+msgid "Skins:"
+msgstr "Skins:"
+
+#: default.esml:365
+msgid "SNR"
+msgstr "SNR"
+
+#: default.esml:443
+msgid "software version:"
+msgstr "ssoftware versiyonu:"
+
+#: src/setup_harddisk.cpp:240
+msgid "sorry, couldn't find sfdisk utility to partition harddisk."
+msgstr "sorry, couldn't find sfdisk utility to partition harddisk."
+
+#: src/enigma_setup.cpp:200
+msgid "sorry, no harddisks found!"
+msgstr "Ozurdilerim , harddisk bulunamadi!"
+
+#: src/enigma_main.cpp:1431
+msgid "Sorry, you cannot delete this service."
+msgstr "ozurdileriz bu servisi silemesiniz"
+
+#: src/enigma_main.cpp:1273
+msgid "Sorry, you cannot record this service."
+msgstr "ozurdileriz bu servisi cekemesiniz."
+
+#: src/setup_lcd.cpp:64
+msgid "Standby:"
+msgstr "Standby:"
+
+#: default.esml:277 default.esml:293
+msgid "start scan"
+msgstr "Taramayi baslat"
+
+#: src/enigma_main.cpp:89
+msgid "start skipping forward"
+msgstr "start skipping forward"
+
+#: src/enigma_main.cpp:93
+msgid "start skipping reverse"
+msgstr "start skipping reverse"
+
+#: default.esml:277
+msgid "start the transponderscan"
+msgstr "transponder taramasini baslat"
+
+#: default.esml:293
+msgid "starts the transponderscan"
+msgstr "transponder taramasini baslat"
+
+#: default.esml:458
+msgid "status:"
+msgstr "statusu:"
+
+#: src/enigma_main.cpp:84
+msgid "stop playback"
+msgstr "playback durdur"
+
+#: src/enigma_main.cpp:91
+msgid "stop skipping forward"
+msgstr "stop skipping forward"
+
+#: src/enigma_main.cpp:95
+msgid "stop skipping reverse"
+msgstr "stop skipping reverse"
+
+#: src/enigma_info.cpp:41
+msgid "Streaminfo"
+msgstr "Streaminformatsiyonu"
+
+#: src/setup_harddisk.cpp:273
+msgid "successfully formated your disk!"
+msgstr "diskiniz basarili format cekildi !"
+
+#: src/timer.cpp:762
+msgid "Sunday"
+msgstr "Pazar"
+
+#: src/streaminfo.cpp:304
+msgid "supported coding systems:"
+msgstr "bu kodlamayi destekliyor"
+
+#: src/setupvideo.cpp:48
+msgid "SVideo"
+msgstr "S Video"
+
+#: src/timer.cpp:871 src/enigma_main.cpp:2129 src/enigma_main.cpp:2133
+#: src/enigma_main.cpp:2142 src/enigma_main.cpp:2149 src/enigma_main.cpp:2155
+#: src/enigma_main.cpp:2160 src/enigma_main.cpp:2165
+msgid "switch"
+msgstr "Degistir"
+
+#: src/sselect.cpp:45 src/enigma_main.cpp:102
+msgid "switch to File mode"
+msgstr "Dosya moduna gec"
+
+#: src/sselect.cpp:35
+msgid "switch to next bouquet"
+msgstr "Baska bouqet gecmek icin"
+
+#: src/sselect.cpp:36
+msgid "switch to previous bouquet"
+msgstr "switch to previous bouquet"
+
+#: src/sselect.cpp:44 src/enigma_main.cpp:101
+msgid "switch to Radio mode"
+msgstr "Radio moduna gec"
+
+#: src/sselect.cpp:43 src/enigma_main.cpp:100
+msgid "switch to TV mode"
+msgstr "TV moduna gec"
+
+#: default.esml:340 default.esml:352
+msgid "Symbolrate:"
+msgstr "Symbolhizi"
+
+#: default.esml:368
+msgid "Sync"
+msgstr "Sync"
+
+#: src/scan.cpp:833
+#, c-format
+msgid "The transponderscan has finished and found %i new Transponders, %i new TV Services, %i new Radio Services and %i new Data Services. %i Transponders within %i Services scanned."
+msgstr "Uydu taramasi biti ve  buldu %i yeni Transponder,  %i  ve yeni TV servisi, %i yeni Radio servisi ve %i yeni data servisi, %i transponder beklemede %i servis tarandi"
+
+#: src/setup_harddisk.cpp:211
+msgid "There's data on this harddisk.\nYou will loose that data. Proceed?"
+msgstr "su an harddiskte data var .\ndevam ederseniz data yi kaybedersiniz.devami?"
+
+#: src/enigma_main.cpp:2153 src/enigma_main.cpp:2155
+msgid "This content could not be displayed"
+msgstr "Bu content ekranda gosterilemiyor"
+
+#: src/enigma_main.cpp:1521 src/enigma_main.cpp:1522
+msgid "This directory doesn't contain anything playable!"
+msgstr "This directory doesn't contain anything playable!"
+
+#: src/timer.cpp:466
+msgid "This event already began.\nYou can not add this to timerlist"
+msgstr "Bu saat ayari su an cekime baslamistir.\nBu saat ayarini liste hafizasina alamazsiniz"
+
+#: src/timer.cpp:477
+msgid "This event is already in the timerlist."
+msgstr "Bu saat ayari su an listede var"
+
+#: src/timer.cpp:487
+msgid "This service can not added to the timerlist.\nThe event overlaps with another event in the timerlist\nPlease check manually the timerlist."
+msgstr "bu servis saat listesine alinamiyor.\nlutfen baska saat ayarini  saat listesine doldurun\nlutfen manual saat listesini kontroledin"
+
+#: src/enigma_main.cpp:2141 src/enigma_main.cpp:2142
+msgid "This service could not be descrambled"
+msgstr "Bu servis sifreli degil"
+
+#: src/enigma_main.cpp:1574
+msgid "This service is already in your favourite list."
+msgstr "Bu servis su an sizin fafori listenizde mevcut."
+
+#: src/enigma_main.cpp:2148 src/enigma_main.cpp:2149
+msgid "This service sends (currently) no signal"
+msgstr "Bu servis yayin  (dogru)  sinyal yok"
+
+#: src/enigma_main.cpp:1820
+msgid "This stops the recording!"
+msgstr "Bu cekimi durdurur!"
+
+#: src/enigma_main.cpp:1825
+msgid "This stops the timer based event!"
+msgstr "This stops the timer based event!"
+
+#: src/enigma_main.cpp:1818
+msgid "This stops the timer, and digital recording!"
+msgstr "Bu saati ve digital cekimi durdurur!"
+
+#: default.esml:234
+msgid "Threshold:"
+msgstr "kuvetlendirici:"
+
+#: src/timer.cpp:763
+msgid "Thursday"
+msgstr "persembe"
+
+#: src/timer.cpp:832
+msgid "Timer list"
+msgstr "Saat listesi"
+
+#: src/enigma_setup.cpp:57
+msgid "Timer..."
+msgstr "zaman"
+
+#: src/timer.cpp:20
+msgid "Timerlist"
+msgstr "Saat listesi"
+
+#: src/timer.cpp:539
+msgid "timerView"
+msgstr "Saat'a bakma"
+
+#: src/scan.cpp:204
+msgid "To begin searching for a valid cable provider press OK, or choose your wished cable provider manually and press OK"
+msgstr "To begin searching for a valid cable provider press OK, or choose your wished cable provider manually and press OK"
+
+#: src/scan.cpp:201
+msgid "To begin searching for a valid satellite press OK, or choose your wished satellite manually and press OK"
+msgstr "To begin searching for a valid satellite press OK, or choose your wished satellite manually and press OK"
+
+#: src/sselect.cpp:46
+msgid "toggle between classic and multi column style"
+msgstr "toggle between classic and multi column style"
+
+#: src/sselect.cpp:47
+msgid "toggle focus between service and bouquet list"
+msgstr "toggle focus between service and bouquet list"
+
+#: src/enigma_main.cpp:65
+msgid "toggle infobar"
+msgstr "toggle infarmasyonkolomu"
+
+#: src/enigma_main.cpp:82
+msgid "toggle mute flag"
+msgstr "toggle mute flag"
+
+#: src/streaminfo.cpp:428
+msgid "Transponder information (left)"
+msgstr "transponder  infarmasyonu (sol)"
+
+#: src/scan.cpp:705
+msgid "Transponder Scan"
+msgstr "Transponder taramasi"
+
+#: default.esml:268
+msgid "transponder scan"
+msgstr "transponder taranmasi"
+
+#: src/enigma_scan.cpp:39
+msgid "Transponder scan"
+msgstr "Transponder tarama"
+
+#: default.esml:302
+msgid "transponder scanned:"
+msgstr "Transponder tarandi"
+
+#: src/timer.cpp:762
+msgid "Tuesday"
+msgstr "Sali"
+
+#: src/enigma_main.cpp:603
+msgid "TV"
+msgstr "TV"
+
+#: lib/dvb/servicestructure.cpp:10 src/enigma_mainmenu.cpp:33
+msgid "TV mode"
+msgstr "TV modu"
+
+#: src/satconfig.cpp:637
+msgid "Two"
+msgstr "iki"
+
+#: default.esml:255
+msgid "Uncommitted gap"
+msgstr "Uncommitted gap"
+
+#: default.esml:254
+msgid "Uncommitted switch"
+msgstr "Uncommitted switch"
+
+#: src/setup_harddisk.cpp:307
+msgid "uninitialized - format it to use!"
+msgstr "uninitialized - format it to use!"
+
+#: src/enigma_info.cpp:266
+msgid "unknown"
+msgstr "Bilinmeyen"
+
+#: src/enigma_info.cpp:153
+msgid "Unknown"
+msgstr "Taninmamis"
+
+#: src/enigma_main.cpp:2163 src/enigma_main.cpp:2165
+msgid "Unknown error!!"
+msgstr "Taninmayan bir yanlis!!"
+
+#: default.esml:420
+msgid "update"
+msgstr "update"
+
+#: src/timer.cpp:420 src/timer.cpp:920
+msgid "Update event in timerlist"
+msgstr "saat listesini guncelestirin"
+
+#: default.esml:420
+msgid "update the current selected timer (ok)"
+msgstr "update the current selected timer (ok)"
+
+#: default.esml:280
+msgid "use BAT"
+msgstr "use BAT"
+
+#: default.esml:236 default.esml:260
+msgid "use current selected lnb for the choosen satellite"
+msgstr "use current selected lnb for the choosen satellite"
+
+#: src/satconfig.cpp:599
+msgid "Use DiSEqC Version 1.0"
+msgstr "1.0 DiSEqC vesiyonunu kulan"
+
+#: src/satconfig.cpp:600
+msgid "Use DiSEqC Version 1.1"
+msgstr "1.1 DiSEqC vesiyonunu kulan"
+
+#: src/satconfig.cpp:601
+msgid "Use DiSEqC Version 1.2"
+msgstr "1.2 DiSEqC vesiyonunu kulan"
+
+#: default.esml:279
+msgid "use ONIT"
+msgstr "ONIT kulan"
+
+#: src/enigma_mainmenu.cpp:54
+msgid "VCR"
+msgstr "VCR"
+
+#: lib/dvb/dvbwidgets.cpp:59
+msgid "vertical"
+msgstr "Dikey (V)"
+
+#: src/streaminfo.cpp:236
+msgid "Video format:"
+msgstr "Video format"
+
+#: src/setupvideo.cpp:31
+msgid "Video Setup"
+msgstr "Video ayarlari "
+
+#: src/enigma_setup.cpp:54
+msgid "Video..."
+msgstr "Video"
+
+#: default.esml:214
+msgid "Voltage"
+msgstr "Voltaj"
+
+#: src/satconfig.cpp:262 src/satconfig.cpp:264
+msgid "Voltage is always 14V (vertical)"
+msgstr "LNB guc kaynagi cikis voltaji herzaman sabitdir  14V ( Dikey )"
+
+#: src/satconfig.cpp:263
+msgid "Voltage is always 18V (horizontal"
+msgstr "LNB güç kaynagi cikis voltaji herzaman sabitdir  18V ( Yatay )"
+
+#: src/satconfig.cpp:261
+msgid "Voltage is automaticaly changed"
+msgstr "Guc kaynagi otomatik degisir"
+
+#: src/enigma_main.cpp:81
+msgid "volume down"
+msgstr "sesini kapatin"
+
+#: src/enigma_main.cpp:80
+msgid "volume up"
+msgstr "ses acin"
+
+#: src/enigma_main.cpp:114
+msgid "wake up enigma"
+msgstr "enigma uyan'dir"
+
+#: src/timer.cpp:762
+msgid "Wednesday"
+msgstr "Carsamba"
+
+#: src/enigma.cpp:195
+msgid "Welcome to enigma.\n\nPlease do a transponderscan first.\n(mainmenu > setup > channels > transponder scan)"
+msgstr "Enigma'ya hos geldiniz.\n\n lutfen once kanal taratmasi yapin.\n(Anakurulum>kurulum>kanallar>Ag taratma)"
+
+#: default.esml:256
+msgid "when the rotor support this, then use this"
+msgstr "when the rotor support this, then use this"
+
+#: lib/gui/emessage.cpp:97
+msgid "Yes"
+msgstr "Evet"
+
+#: src/enigma_setup.cpp:152
+msgid "You have to reboot to apply the new skin"
+msgstr "Yeni skin ayarlarini hafizaya almasi icin cihazinizi yeniden calistiriniz"
+
+#: src/timer.cpp:413
+msgid "You would to delete the running event.. this stops the timer mode (recording)!"
+msgstr "Yaptiginiz ayari silmek mi istiyorsunuz..  yaparsaniz saat ayarini durdurur ve (cekimide)!"
+
+#: src/timer.cpp:419
+msgid "You would to update the running event.. this stops the timer mode (recording)!"
+msgstr "You would to update the running event.. this stops the timer mode (recording)!"
+
+#: src/enigma_info.cpp:40 src/enigma_setup.cpp:48 src/enigma_scan.cpp:38
+msgid "[back]"
+msgstr "Geri"
+

@@ -284,7 +284,7 @@ struct eServiceReference
 
 	eString descr;
 
-	int flags;
+	int flags; // flags will NOT be compared.
 	enum
 	{
 		isDirectory=1,		// SHOULD enter  (implies mustDescent)
@@ -358,7 +358,7 @@ struct eServiceReference
 	{
 		if (type != c.type)
 			return 0;
-		return (flags == c.flags) && (memcmp(data, c.data, sizeof(int)*4)==0) && (path == c.path);
+		return /* (flags == c.flags) && */ (memcmp(data, c.data, sizeof(int)*4)==0) && (path == c.path);
 	}
 	bool operator!=(const eServiceReference &c) const
 	{
@@ -372,10 +372,10 @@ struct eServiceReference
 		if (type > c.type)
 			return 0;
 			
-		if (flags < c.flags)
+/*		if (flags < c.flags)
 			return 1;
 		if (flags > c.flags)
-			return 0;
+			return 0; */
 
 		int r=memcmp(data, c.data, sizeof(int)*4);
 		if (r)

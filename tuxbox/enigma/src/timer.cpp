@@ -737,6 +737,8 @@ const char *monthStr[12] = { _("January"), _("February"), _("March"),
 													_("November"), _("December") };
 const char *dayStr[7] = { _("Sunday"), _("Monday"), _("Tuesday"), _("Wednesday"),
 											 _("Thursday"), _("Friday"), _("Saturday") };
+const char *dayStrShort[7] = { _("Sun"), _("Mon"), _("Tue"), _("Wed"),
+											 _("Thu"), _("Fri"), _("Sat") };
 
 int weekday (int d, int m, int y)
 {

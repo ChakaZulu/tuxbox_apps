@@ -82,7 +82,7 @@ public:
 	int getPosition(int);
 	int getLength(int);
 	
-	int getError() const { return (state != stateError) ? error : 0; }
+	int getError() const { return (state == stateError) ? error : 0; }
 	
 	void thread();
 };

@@ -102,6 +102,8 @@ eMainMenu::eMainMenu()
 		if (!pixmaps[i][1])
 			eFatal("error, mainmenu bug, mainmenu.%s.sel not defined", pixmap_name[i]);
 	}
+
+	setActive(active=eZapMain::getInstance()->getRealMode());		
 }
 
 void eMainMenu::sel_tv()
@@ -194,9 +196,11 @@ int eMainMenu::eventHandler(const eWidgetEvent &event)
 	switch (event.type)
 	{
 	case eWidgetEvent::willShow:
-		setActive(active=eZapMain::getInstance()->getRealMode());		
-	break;
-
+		if (LCDTitle)
+			LCDTitle->setText(_("Mainmenu"));
+		if (LCDElement)
+			LCDElement->setText( description->getText() );
+		break;
 	case eWidgetEvent::evtAction:
 		if (event.action == &i_cursorActions->left)
 		{

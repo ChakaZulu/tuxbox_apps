@@ -102,3 +102,4 @@ src/download.cpp
 src/setupnetwork.cpp
 src/setup_lcd.cpp
 src/setup_harddisk.cpp
+src/upgrade.cpp

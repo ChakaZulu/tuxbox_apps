@@ -23,6 +23,7 @@ private:
 	eIOBuffer readbuffer;
 	eIOBuffer writebuffer;
 	int writebusy;
+	sockaddr_in  serv_addr;
 protected:
 	eSocketNotifier	*rsn;
 	virtual void notifier(int);

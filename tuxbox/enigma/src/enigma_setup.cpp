@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_setup.cpp,v 1.28 2002/11/14 19:07:09 Ghostrider Exp $
+ * $Id: enigma_setup.cpp,v 1.29 2002/11/15 06:01:38 tmbinc Exp $
  */
 
 #include <enigma_setup.h>
@@ -38,6 +38,7 @@
 #include <lib/dvb/edvb.h>
 #include <lib/gui/eskin.h>
 #include <lib/gui/elabel.h>
+#include "upgrade.h"
 
 eZapSetup::eZapSetup()
 	:eListBoxWindow<eListBoxEntryMenu>(_("Setup"), 12, 220, true)
@@ -56,6 +57,7 @@ eZapSetup::eZapSetup()
 	{
 		CONNECT((new eListBoxEntryMenu(&list, _("Harddisk..."), _("initialize harddisc") ))->selected, eZapSetup::sel_harddisk);
 		CONNECT((new eListBoxEntryMenu(&list, _("Common Interface..."), _("initialize harddisc") ))->selected, eZapSetup::sel_ci);
+		CONNECT((new eListBoxEntryMenu(&list, _("Upgrade..."), _("upgrade firmware") ))->selected, eZapSetup::sel_upgrade);
 	}
 }
 
@@ -196,5 +198,17 @@ void eZapSetup::sel_ci()
 	ci.show();
 	ci.exec();
 	ci.hide();
+	show();
+}
+
+void eZapSetup::sel_upgrade()
+{
+	hide();
+	{
+		eUpgrade up;
+		up.show();
+		up.exec();
+		up.hide();
+	}
 	show();
 }

@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <termios.h>
 
-
 #include <lib/base/i18n.h>
 #include <lib/driver/rc.h>
 #include <lib/dvb/service.h>
@@ -195,7 +194,7 @@ eZap::eZap(int argc, char **argv)
 	httpd->addResolver(fileresolver);
 
 	eDebug("[ENIGMA] ok, beginning mainloop");
-
+	
 /*
 	{
 		eMessageBox msg("Warning:\nThis version of enigma contains incomplete code.\n"

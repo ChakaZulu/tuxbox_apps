@@ -155,14 +155,15 @@ int eZapStandby::eventHandler(const eWidgetEvent &event)
 	case eWidgetEvent::execBegin:
 	{
 		eDBoxLCD::getInstance()->switchLCD(0);
-		system("/sbin/hdparm -y /dev/ide/host0/bus0/target0/lun0/disc");
-		system("/sbin/hdparm -y /dev/ide/host0/bus0/target1/lun0/disc");
 		eZapLCD *pLCD=eZapLCD::getInstance();
 		pLCD->lcdMain->hide();
 		pLCD->lcdStandby->show();
 		if (handler)
-			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 1));
+			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 0));
 		eAVSwitch::getInstance()->setInput(1);
+		system("/bin/sync");
+		system("/sbin/hdparm -y /dev/ide/host0/bus0/target0/lun0/disc");
+		system("/sbin/hdparm -y /dev/ide/host0/bus0/target1/lun0/disc");
 
 		break;
 	}
@@ -1328,13 +1329,22 @@ int eZapMain::recordDVR(int onoff, int user, eString name)
 		} 
 
 		eString filename;
+		eString cname="";
+		
+		for (unsigned int i=0; i<name.length(); ++i)
+		{
+			if (strchr("abcdefghijklkmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_-()", name[i]))
+				cname+=name[i];
+			else
+				cname+='_';
+		}
 		
 		int suffix=0;
 		struct stat s;
 		do
 		{
 			filename=MOVIEDIR "/";
-			filename+=name;
+			filename+=cname;
 			if (suffix)
 				filename+=eString().sprintf(" [%d]", suffix);
 			suffix++;
@@ -2160,6 +2170,7 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 	{
 		serviceFlags = eServiceInterface::getInstance()->getService()->getFlags();
 		setSmartcardLogo( serviceFlags & eServiceHandler::flagIsScrambled );
+		set16_9Logo(0);
 		if (serviceFlags & eServiceHandler::flagSupportPosition)
 		{
 			eDebug("support position query..");

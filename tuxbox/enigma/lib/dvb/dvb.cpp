@@ -535,9 +535,11 @@ void eTransponderList::readLNBData()
     eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/SeqRepeat").c_str(), tmpint );
     lnb.getDiSEqC().SeqRepeat = tmpint;
     
-    eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/uncomitted_switch").c_str(), tmpint );
+    tmpint=0;
+    eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/uncommitted_switch").c_str(), tmpint );
     lnb.getDiSEqC().uncommitted_switch = tmpint;
     
+    tmpint=0;
     eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/uncommitted_gap").c_str(), tmpint );
     lnb.getDiSEqC().uncommitted_gap = tmpint;
     

@@ -30,7 +30,7 @@ public:
 	eHTTPDataSource(eHTTPConnection *c);
 	virtual ~eHTTPDataSource();
 	virtual void haveData(void *data, int len);
-	virtual int doWrite(int bytes)=0;	// number of written bytes, -1 for "no more"
+	virtual int doWrite(int bytes);	// number of written bytes, -1 for "no more"
 };
 
 class eHTTPError: public eHTTPDataSource
@@ -64,7 +64,8 @@ private:
 	void hostConnected();
 	void destruct();
 public:
-	Signal0<void> closing;
+	Signal1<void,int> transferDone;
+	Signal1<eHTTPDataSource*,eHTTPConnection*> createDataSource;
 	enum
 	{
 		/*
@@ -85,7 +86,7 @@ public:
 	int persistent;
 	
 	eHTTPConnection(int socket, int issocket, eHTTPD *parent, int persistent=0);
-	eHTTPConnection(eString host, int port=80);
+	eHTTPConnection(); // ready to do "connectToHost"
 	static eHTTPConnection *doRequest(const char *uri, int *error=0);
 	void start();
 	~eHTTPConnection();
