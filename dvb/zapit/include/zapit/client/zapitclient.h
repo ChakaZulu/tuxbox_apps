@@ -290,17 +290,19 @@ class CZapitClient:public CBasicClient
 	/* adds bouquet at the end of the bouquetlist*/
 	void addBouquet(std::string name);
 
-	/* moves a bouquet from one position to another, bouquet list begins at position=1*/
-	void moveBouquet( unsigned int bouquet, unsigned int newPos);
+	/* moves a bouquet from one position to another */
+	/* exception: bouquets are numbered starting at 0 in this routine! */
+	void moveBouquet(const unsigned int bouquet, const unsigned int newPos);
+	/* deletes a bouquet with all its channels */
+	/* exception: bouquets are numbered starting at 0 in this routine! */
+	void deleteBouquet(const unsigned int bouquet);
+
+	/* assigns new name to bouquet*/
+	/* exception: bouquets are numbered starting at 0 in this routine! */
+	void renameBouquet(const unsigned int bouquet, std::string newName);
 
 	/* moves a channel of a bouquet from one position to another, channel lists begin at position=1*/
 	void moveChannel( unsigned int bouquet, unsigned int oldPos, unsigned int newPos, channelsMode mode = MODE_CURRENT);
-
-	/* deletes a bouquet with all its channels*/
-	void deleteBouquet( unsigned int bouquet);
-
-	/* assigns new name to bouquet*/
-	void renameBouquet( unsigned int bouquet, std::string newName);
 
 	// -- check if Bouquet-Name exists (2002-04-02 rasc)
 	// -- Return bq_id or 0
@@ -321,10 +323,12 @@ class CZapitClient:public CBasicClient
 	void removeChannelFromBouquet(const unsigned int bouquet, const t_channel_id channel_id);
 
 	/* set a bouquet's lock-state*/
-	void setBouquetLock( unsigned int bouquet, bool lock);
+	/* exception: bouquets are numbered starting at 0 in this routine! */
+	void setBouquetLock(const unsigned int bouquet, const bool lock);
 
 	/* set a bouquet's hidden-state*/
-	void setBouquetHidden( unsigned int bouquet, bool hidden);
+	/* exception: bouquets are numbered starting at 0 in this routine! */
+	void setBouquetHidden(const unsigned int bouquet, const bool hidden);
 
 	/* renums the channellist, means gives the channels new numbers */
 	/* based on the bouquet order and their order within bouquets */

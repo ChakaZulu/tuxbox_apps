@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: bouqueteditapi.cpp,v 1.1 2002/09/24 08:09:19 dirch Exp $
+	$Id: bouqueteditapi.cpp,v 1.2 2002/10/03 17:20:59 thegoodguy Exp $
 
 	License: GPL
 
@@ -121,10 +121,10 @@ bool CBouqueteditAPI::Execute(CWebserverRequest* request)
 		if (request->ParameterList["selected"] != "" && (request->ParameterList["action"] == "up" || request->ParameterList["action"] == "down")) {
 			int selected = atoi(request->ParameterList["selected"].c_str());
 			if (request->ParameterList["action"] == "up") {
-				Parent->Zapit->moveBouquet(selected, selected-1);
+				Parent->Zapit->moveBouquet(selected - 1, (selected - 1) - 1);
 				selected--;
 			} else {
-				Parent->Zapit->moveBouquet(selected, selected+1);
+				Parent->Zapit->moveBouquet(selected - 1, (selected + 1) - 1);
 				selected++;
 			}
 			char redirbuff[100];
@@ -160,7 +160,7 @@ bool CBouqueteditAPI::Execute(CWebserverRequest* request)
 			request->SocketWrite(outbuff);
 			request->SendHTMLFooter();
 		} else {
-			Parent->Zapit->deleteBouquet(selected);
+			Parent->Zapit->deleteBouquet(selected - 1);
 			request->Send302("/bouquetedit/main#akt");
 		}
 		return true;
@@ -199,7 +199,7 @@ bool CBouqueteditAPI::Execute(CWebserverRequest* request)
 		}
 		else
 		{
-			Parent->Zapit->renameBouquet(atoi(request->ParameterList["selected"].c_str()), request->ParameterList["nameto"].c_str());
+			Parent->Zapit->renameBouquet(atoi(request->ParameterList["selected"].c_str()) - 1, request->ParameterList["nameto"].c_str());
 			request->Send302("/bouquetedit/main#akt");
 		}
 		return true;

@@ -394,7 +394,7 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 
 void CBEBouquetWidget::deleteBouquet()
 {
-	g_Zapit->deleteBouquet( selected + 1);
+	g_Zapit->deleteBouquet(selected);
 	Bouquets.clear();
 	g_Zapit->getBouquets(Bouquets, true);
 	if (selected >= Bouquets.size())
@@ -431,7 +431,7 @@ void CBEBouquetWidget::finishMoveBouquet()
 	state = beDefault;
 	if (newPosition != origPosition)
 	{
-		g_Zapit->moveBouquet( origPosition+1, newPosition+1);
+		g_Zapit->moveBouquet(origPosition, newPosition);
 		Bouquets.clear();
 		g_Zapit->getBouquets(Bouquets, true);
 		bouquetsChanged = true;
@@ -450,7 +450,7 @@ void CBEBouquetWidget::renameBouquet()
 	string newName = inputName( Bouquets[selected].name, "bouqueteditor.newbouquetname");
 	if (newName != Bouquets[selected].name)
 	{
-		g_Zapit->renameBouquet( selected + 1, newName);
+		g_Zapit->renameBouquet(selected, newName);
 		Bouquets.clear();
 		g_Zapit->getBouquets(Bouquets, true);
 		bouquetsChanged = true;
@@ -464,7 +464,7 @@ void CBEBouquetWidget::switchHideBouquet()
 {
 	bouquetsChanged = true;
 	Bouquets[selected].hidden = !Bouquets[selected].hidden;
-	g_Zapit->setBouquetHidden( selected + 1, Bouquets[selected].hidden);
+	g_Zapit->setBouquetHidden(selected, Bouquets[selected].hidden);
 	paint();
 }
 
@@ -472,7 +472,7 @@ void CBEBouquetWidget::switchLockBouquet()
 {
 	bouquetsChanged = true;
 	Bouquets[selected].locked = !Bouquets[selected].locked;
-	g_Zapit->setBouquetLock( selected + 1, Bouquets[selected].locked);
+	g_Zapit->setBouquetLock(selected, Bouquets[selected].locked);
 	paint();
 }
 
