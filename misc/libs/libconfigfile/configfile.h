@@ -1,5 +1,5 @@
 /*
- * $Id: configfile.h,v 1.3 2002/04/20 21:46:17 Simplex Exp $
+ * $Id: configfile.h,v 1.4 2002/04/28 16:14:20 McClean Exp $
  *
  * Copyright (C) 2001, 2002 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -38,6 +38,7 @@ class CConfigFile
 		ConfigDataMap configData;
 		char delimiter;
 		bool modifiedFlag;
+		bool unknownKeyQueryedFlag;
 
 	public:
 		CConfigFile (const char p_delimiter);
@@ -52,14 +53,18 @@ class CConfigFile
 		bool getBool (const std::string p_keyName, const bool defaultValue = false);
 		void setBool (const std::string p_keyName, const bool p_keyValue);
 
-		const bool getModifiedFlag () { return modifiedFlag; }
-		void setModifiedFlag (const bool p_value) { modifiedFlag = p_value; }
-
 		std::vector <std::string> getStringVector (const std::string p_keyName);
 		void setStringVector (const std::string p_keyName, const std::vector <std::string> p_vec);
 
 		std::vector <int> getIntVector (const std::string p_keyName);
 		void setIntVector (const std::string p_keyName, const std::vector <int> p_vec);
+
+		const bool getModifiedFlag () { return modifiedFlag; }
+		void setModifiedFlag (const bool p_value) { modifiedFlag = p_value; }
+
+		const bool getUnknownKeyQueryedFlag () { return unknownKeyQueryedFlag; }
+		void setUnknownKeyQueryedFlag (const bool p_value) { unknownKeyQueryedFlag = p_value; }
+
 };
 
 #endif /* __configfile_h__ */

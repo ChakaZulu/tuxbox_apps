@@ -1,5 +1,5 @@
 /*
- * $Id: configfile.cpp,v 1.3 2002/04/20 21:46:17 Simplex Exp $
+ * $Id: configfile.cpp,v 1.4 2002/04/28 16:14:20 McClean Exp $
  *
  * configuration object for the d-box 2 linux project
  *
@@ -29,6 +29,7 @@ using namespace std;
 CConfigFile::CConfigFile(const char p_delimiter)
 {
 	modifiedFlag = false;
+	unknownKeyQueryedFlag = false;
 	delimiter = p_delimiter;
 }
 
@@ -93,6 +94,7 @@ string CConfigFile::getString (string p_keyName, const string defaultValue = "")
 {
 	if ( configData.find( p_keyName) == configData.end())
 	{
+		unknownKeyQueryedFlag = true;
 		return defaultValue;
 	}
 	else
@@ -103,13 +105,22 @@ string CConfigFile::getString (string p_keyName, const string defaultValue = "")
 
 void CConfigFile::setString (string p_keyName, string p_keyValue)
 {
-	configData[p_keyName] = p_keyValue;
+	bool tmpUnknownKeyQueryedFlag = unknownKeyQueryedFlag;
+	unknownKeyQueryedFlag = false;
+	string oldValue = getString(p_keyName);
+	if((oldValue!=p_keyValue) || (unknownKeyQueryedFlag))
+	{
+		modifiedFlag = true;
+		configData[p_keyName] = p_keyValue;
+	}
+	unknownKeyQueryedFlag = tmpUnknownKeyQueryedFlag;
 }
 
 int CConfigFile::getInt (string p_keyName, const int defaultValue = 0)
 {
 	if ( configData.find( p_keyName) == configData.end())
 	{
+		unknownKeyQueryedFlag = true;
 		return defaultValue;
 	}
 	else
@@ -120,16 +131,25 @@ int CConfigFile::getInt (string p_keyName, const int defaultValue = 0)
 
 void CConfigFile::setInt (string p_keyName, int p_keyValue)
 {
-	char *configDataChar = (char *) malloc(sizeof(p_keyValue));
-	sprintf(configDataChar, "%d", p_keyValue);
-	configData[p_keyName] = string(configDataChar);
-	free(configDataChar);
+	bool tmpUnknownKeyQueryedFlag = unknownKeyQueryedFlag;
+	unknownKeyQueryedFlag = false;
+	int oldValue = getInt(p_keyName);
+	if((oldValue!=p_keyValue) || (unknownKeyQueryedFlag))
+	{
+		modifiedFlag = true;
+		char *configDataChar = (char *) malloc(sizeof(p_keyValue));
+		sprintf(configDataChar, "%d", p_keyValue);
+		configData[p_keyName] = string(configDataChar);
+		free(configDataChar);
+	}
+	unknownKeyQueryedFlag = tmpUnknownKeyQueryedFlag;
 }
 
 bool CConfigFile::getBool (string p_keyName, const bool defaultValue = false)
 {
 	if ( configData.find( p_keyName) == configData.end())
 	{
+		unknownKeyQueryedFlag = true;
 		return defaultValue;
 	}
 	else
@@ -147,14 +167,22 @@ bool CConfigFile::getBool (string p_keyName, const bool defaultValue = false)
 
 void CConfigFile::setBool (string p_keyName, bool p_keyValue)
 {
-	if (p_keyValue)
+	bool tmpUnknownKeyQueryedFlag = unknownKeyQueryedFlag;
+	unknownKeyQueryedFlag = false;
+	bool oldValue = getBool(p_keyName);
+	if((oldValue!=p_keyValue) || (unknownKeyQueryedFlag))
 	{
-		configData[p_keyName] = string("true");
+		modifiedFlag = true;
+		if (p_keyValue)
+		{
+			configData[p_keyName] = string("true");
+		}
+		else
+		{
+			configData[p_keyName] = string("false");
+		}
 	}
-	else
-	{
-		configData[p_keyName] = string("false");
-	}
+	unknownKeyQueryedFlag = tmpUnknownKeyQueryedFlag;
 }
 
 const bool CConfigFile::saveConfig (string p_filename)
@@ -201,6 +229,10 @@ vector <string> CConfigFile::getStringVector (string p_keyName)
 			length++;
 		}
 	}
+	if(length==0)
+	{
+		unknownKeyQueryedFlag = true;
+	}
 
 	vec.push_back(keyValue.substr(pos, length));
 	return vec;
@@ -241,6 +273,11 @@ vector <int> CConfigFile::getIntVector (string p_keyName)
 		{
 			length++;
 		}
+	}
+
+	if(length==0)
+	{
+		unknownKeyQueryedFlag = true;
 	}
 
 	vec.push_back(atoi(keyValue.substr(pos, length).c_str()));
