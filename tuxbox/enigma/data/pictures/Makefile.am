@@ -14,5 +14,5 @@ install_DATA = \
 	scan.mvi diseqc_0-fs8.png diseqc_1-fs8.png diseqc_2-fs8.png arrow_up.png \
 	lcd-speaker.png lcd-clock.png separator-fs8.png marker-fs8.png \
 	marker_small-fs8.png padlock-fs8.png padlock_small-fs8.png check-fs8.png \
-	radio.mvi
+	radio.mvi mp3.mvi
 
