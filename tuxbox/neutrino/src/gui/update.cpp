@@ -612,7 +612,7 @@ int CFlashExpert::exec(CMenuTarget* parent, const std::string & actionKey)
 		{
 			if(selectedMTD==-1)
 			{
-				writemtd("flashimage.img", MTD_OF_WHOLE_IMAGE);
+				writemtd(actionKey, MTD_OF_WHOLE_IMAGE);
 			}
 			else
 			{
