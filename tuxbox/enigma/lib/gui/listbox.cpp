@@ -219,9 +219,9 @@ int eListBoxBase::eventHandler(const eWidgetEvent &event)
 				moveSelection(dirPageDown);
 			else if ( !childs.empty() && current->eventHandler(event) )
 				return 1;
-			else if ((event.action == &i_cursorActions->up) && !(flags & flagNoUpDownMovement))
+			else if ((event.action == &i_cursorActions->up) && !(flags & flagNoUpDownMovement) && !(flags&flagLostFocusOnFirst && current == childs.begin()) )
 				moveSelection(dirUp);
-			else if ((event.action == &i_cursorActions->down) && !(flags & flagNoUpDownMovement))
+			else if ((event.action == &i_cursorActions->down) && !(flags & flagNoUpDownMovement) && !(flags&flagLostFocusOnLast && current == --childs.end()) )
 				moveSelection(dirDown);
 			else if (event.action == &i_cursorActions->ok)
 			{
