@@ -12,6 +12,7 @@
 
 #include "widget/screensetup.h"
 #include "helpers/settings.h"
+#include "helpers/locale.h"
 
 extern  SNeutrinoSettings   g_settings;
 
@@ -29,4 +30,4 @@ extern  CStreamInfo     *g_StreamInfo;
 
 extern  CScreenSetup    *g_ScreenSetup;
 
-
+extern CLocaleManager	*g_Locale;

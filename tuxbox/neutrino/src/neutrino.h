@@ -62,6 +62,7 @@
 #include "helpers/epgdata.h"
 #include "helpers/settings.h"
 #include "helpers/streaminfo.h"
+#include "helpers/locale.h"
 
 #include <string>
 #include <vector>
