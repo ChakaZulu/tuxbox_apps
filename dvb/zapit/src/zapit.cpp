@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.240 2002/09/25 20:43:34 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.241 2002/09/26 14:29:04 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -384,7 +384,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod)
 		bool failed = false;
 		int dmx_sct_fd;
 
-		debug("[zapit] looking up pids for onid:sid %04x:%04x\n", channel->getOriginalNetworkId(), channel->getServiceId());
+		debug("[zapit] looking up pids for channel_id %08x\n", channel->getChannelID());
 
 		/* open demux device */
 		if ((dmx_sct_fd = open(DEMUX_DEVICE, O_RDWR)) < 0)
@@ -518,8 +518,8 @@ int prepare_channels ()
 	// we clear all cannel lists, they are refilled
 	// by LoadServices() and LoadBouquets()
 	transponders.clear();
-	allchans.clear();
 	bouquetManager->clearAll();
+	allchans.clear();  // <- this invalidates all bouquets, too!
 
 	if (LoadServices() < 0)
 		return -1;
@@ -544,7 +544,9 @@ int start_scan ()
 	}
 
 	transponders.clear();
-	allchans.clear();
+	bouquetManager->clearAll();
+	allchans.clear();  // <- this invalidates all bouquets, too!
+
 	found_transponders = 0;
 	found_channels = 0;
 
@@ -850,7 +852,9 @@ void parse_command (CZapitMessages::commandHead &rmsg)
 			{
 				CZapitMessages::commandRenameBouquet msgRenameBouquet;
 				read(connfd, &msgRenameBouquet, sizeof(msgRenameBouquet));
-				bouquetManager->Bouquets[msgRenameBouquet.bouquet - 1]->Name = msgRenameBouquet.name;
+				msgRenameBouquet.bouquet--;
+				if (msgRenameBouquet.bouquet < bouquetManager->Bouquets.size())
+					bouquetManager->Bouquets[msgRenameBouquet.bouquet]->Name = msgRenameBouquet.name;
 				break;
 			}
 			case CZapitMessages::CMD_BQ_EXISTS_BOUQUET:		// 2002-04-03 rasc
@@ -902,27 +906,28 @@ void parse_command (CZapitMessages::commandHead &rmsg)
 			case CZapitMessages::CMD_BQ_MOVE_CHANNEL:
 			{
 				CZapitMessages::commandMoveChannel msgMoveChannel;
-				read( connfd, &msgMoveChannel, sizeof(msgMoveChannel));
-				bouquetManager->Bouquets[ msgMoveChannel.bouquet - 1]->moveService
-				(
-					msgMoveChannel.oldPos - 1,
-					msgMoveChannel.newPos - 1,
-					(((currentMode & RADIO_MODE) && msgMoveChannel.mode == CZapitClient::MODE_CURRENT) || (msgMoveChannel.mode==CZapitClient::MODE_RADIO)) ? 2 : 1
-				);
+				read(connfd, &msgMoveChannel, sizeof(msgMoveChannel));
+				msgMoveChannel.bouquet--;
+				if (msgMoveChannel.bouquet < bouquetManager->Bouquets.size())
+					bouquetManager->Bouquets[msgMoveChannel.bouquet]->moveService(msgMoveChannel.oldPos - 1, msgMoveChannel.newPos - 1, (((currentMode & RADIO_MODE) && msgMoveChannel.mode == CZapitClient::MODE_CURRENT) || (msgMoveChannel.mode==CZapitClient::MODE_RADIO)) ? 2 : 1);
 				break;
 			}
 			case CZapitMessages::CMD_BQ_SET_LOCKSTATE:
 			{
 				CZapitMessages::commandBouquetState msgBouquetLockState;
 				read(connfd, &msgBouquetLockState, sizeof(msgBouquetLockState));
-				bouquetManager->Bouquets[msgBouquetLockState.bouquet - 1]->bLocked = msgBouquetLockState.state;
+				msgBouquetLockState.bouquet--;
+				if (msgBouquetLockState.bouquet < bouquetManager->Bouquets.size())
+					bouquetManager->Bouquets[msgBouquetLockState.bouquet]->bLocked = msgBouquetLockState.state;
 				break;
 			}
 			case CZapitMessages::CMD_BQ_SET_HIDDENSTATE:
 			{
 				CZapitMessages::commandBouquetState msgBouquetHiddenState;
 				read(connfd, &msgBouquetHiddenState, sizeof(msgBouquetHiddenState));
-				bouquetManager->Bouquets[msgBouquetHiddenState.bouquet - 1]->bHidden = msgBouquetHiddenState.state;
+				msgBouquetHiddenState.bouquet--;
+				if (msgBouquetHiddenState.bouquet < bouquetManager->Bouquets.size())
+					bouquetManager->Bouquets[msgBouquetHiddenState.bouquet]->bHidden = msgBouquetHiddenState.state;
 				break;
 			}
 			case CZapitMessages::CMD_BQ_RENUM_CHANNELLIST:
@@ -1004,7 +1009,7 @@ void parse_command (CZapitMessages::commandHead &rmsg)
 				current_is_nvod = true;
 				break;
 			}
-			case CZapitMessages::CMD_REGISTEREVENTS :
+			case CZapitMessages::CMD_REGISTEREVENTS:
 				eventServer->registerEvent(connfd);
 				break;
 
@@ -1040,7 +1045,7 @@ void parse_command (CZapitMessages::commandHead &rmsg)
 	}
 	else
 	{
-		perror("[zapit] unknown cmd version\n");
+		printf("[zapit] Command ignored: cmd version %d received - zapit cmd version is %d\n", rmsg.version, CZapitMessages::ACTVERSION);
 		return;
 	}
 	debug("[zapit] cmd %d processed\n", rmsg.cmd);
@@ -1055,7 +1060,7 @@ int main (int argc, char **argv)
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.240 2002/09/25 20:43:34 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.241 2002/09/26 14:29:04 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1564,4 +1569,3 @@ unsigned zapTo(const unsigned int channel)
 	else
 		return 0;
 }
-
