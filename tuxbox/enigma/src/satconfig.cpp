@@ -399,7 +399,7 @@ struct savePosition: public std::unary_function< eListBoxEntryText&, void>
 	bool operator()(eListBoxEntryText& s)
 	{
 		if ( (int)s.getKey() == 0xFFFF )
-			break; // ignore sample Entry... delete me...
+			return 0; // ignore sample Entry... delete me...
 
 		int num = atoi( s.getText().left( s.getText().find('/') ).c_str() );
 		map[ (int)s.getKey() ] = num;
