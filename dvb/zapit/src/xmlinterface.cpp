@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.12 2002/11/18 00:27:56 obi Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.13 2002/11/25 21:26:18 thegoodguy Exp $
  *
  * xmlinterface for zapit - d-box2 linux project
  *
@@ -37,10 +37,10 @@ std::string Unicode_Character_to_UTF8(const int character)
 std::string convert_UTF8_To_UTF8_XML(const std::string s)
 {
 	std::string r;
-	unsigned int i;
-	for (i = 0; i < s.length(); i++)
+
+	for (std::string::const_iterator it = s.begin(); it != s.end(); it++)
 	{
-		switch (s[i])          // cf. http://www.w3.org/TR/xhtml1/dtds.html
+		switch (*it)           // cf. http://www.w3.org/TR/xhtml1/dtds.html
 		{
 		case '<':           
 			r += "&lt;";
@@ -58,7 +58,7 @@ std::string convert_UTF8_To_UTF8_XML(const std::string s)
 			r += "&apos;";
 			break;
 		default:
-			r += s[i];     // all UTF8 chars with more than one byte are >= 0x80 !
+			r += *it;      // all UTF8 chars with more than one byte are >= 0x80 !
 /*
   default:
   // skip characters which are not part of ISO-8859-1
@@ -67,18 +67,18 @@ std::string convert_UTF8_To_UTF8_XML(const std::string s)
   //
   // reason: sender name contain 0x86, 0x87 and characters below 0x20
   if ((((unsigned char)s[i]) & 0x60) != 0)
-  r += s[i];
+  r += *it;
 */
 		}
 	}
 	return r;
 }
 
-std::string convert_to_UTF8(std::string s)
+std::string convert_to_UTF8(const std::string s)
 {
 	std::string r;
 	
-	for (std::string::iterator it = s.begin(); it != s.end(); it++)
+	for (std::string::const_iterator it = s.begin(); it != s.end(); it++)
 		r += Unicode_Character_to_UTF8((const unsigned char)*it);
 		
 	return r;
@@ -87,19 +87,21 @@ std::string convert_to_UTF8(std::string s)
 std::string Utf8_to_Latin1(const std::string s)
 {
 	std::string r;
-	unsigned int i;
-	for (i = 0; i < s.length(); i++)
+
+	for (std::string::const_iterator it = s.begin(); it != s.end(); it++)
 	{
-		if ((i < s.length() - 3) && ((s[i] & 0xf0) == 0xf0))      // skip (can't be encoded in Latin1)
-			i += 3;
-		else if ((i < s.length() - 2) && ((s[i] & 0xe0) == 0xe0)) // skip (can't be encoded in Latin1)
-			i += 2;
-		else if ((i < s.length() - 1) && ((s[i] & 0xc0) == 0xc0))
+		if (((*it) & 0xf0) == 0xf0)      // skip (can't be encoded in Latin1)
+			it += 3;
+		else if (((*it) & 0xe0) == 0xe0) // skip (can't be encoded in Latin1)
+			it += 2;
+		else if (((*it) & 0xc0) == 0xc0)
 		{
-			r += ((s[i] & 3) << 6) | (s[i + 1] & 0x3f);
-			i++;
+			char c = (((*it) & 3) << 6);
+			it++;
+			if (it != s.end())
+				r += (c | ((*it) & 0x3f));
 		}
-		else r += s[i];
+		else r += *it;
 	}
 	return r;
 }
