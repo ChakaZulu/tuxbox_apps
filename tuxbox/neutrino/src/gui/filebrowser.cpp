@@ -230,35 +230,37 @@ int n;
 		paintHead();
 		n = scandir(Path.c_str(), &namelist, 0, alphasort);
 	}
-   for(int i = 0; i < n;i++)
-   {
-      CFile file;
-      if(strcmp(namelist[i]->d_name,".") != 0)
-      {
-         file.Name = Path + namelist[i]->d_name;
+	for(int i = 0; i < n;i++)
+	{
+		CFile file;
+		if(strcmp(namelist[i]->d_name,".") != 0)
+		{
+			file.Name = Path + namelist[i]->d_name;
 //			printf("file.Name: '%s', getFileName: '%s' getPath: '%s'\n",file.Name.c_str(),file.getFileName().c_str(),file.getPath().c_str());
-         if(stat((file.Name).c_str(),&statbuf) != 0)
-            perror("stat error");
-         file.Mode = statbuf.st_mode;
-         file.Size = statbuf.st_size;
-         file.Time = statbuf.st_mtime;
+			if(stat((file.Name).c_str(),&statbuf) != 0)
+				perror("stat error");
+			file.Mode = statbuf.st_mode;
+			file.Size = statbuf.st_size;
+			file.Time = statbuf.st_mtime;
 
-         if(Filter != NULL && (!S_ISDIR(file.Mode)) && use_filter)
-            if(!Filter->matchFilter(file.Name))
-            {
-               free(namelist[i]);
-               continue;
-            }
-         if(Dir_Mode && (!S_ISDIR(file.Mode)))
-         {
-            free(namelist[i]);
-            continue;
-         }
-         filelist.push_back(file);
-      }
-      free(namelist[i]);
-   }
-   free(namelist);
+			if(Filter != NULL && (!S_ISDIR(file.Mode)) && use_filter)
+				if(!Filter->matchFilter(file.Name))
+				{
+					free(namelist[i]);
+					continue;
+				}
+			if(Dir_Mode && (!S_ISDIR(file.Mode)))
+			{
+				free(namelist[i]);
+				continue;
+			}
+			filelist.push_back(file);
+		}
+		free(namelist[i]);
+	}
+
+	free(namelist);
+
 	if( smode == 0 )
 		sort(filelist.begin(), filelist.end(), sortByName);
 	else
@@ -274,6 +276,7 @@ bool CFileBrowser::exec(string Dirname)
 {
 	bool res = false;
 
+	smode = 0;
 	name = Dirname;
 	paintHead();
 	readDir(Dirname);
