@@ -117,7 +117,7 @@ int eString::readEncodingFile()
 		TransponderDefaultMapping.clear();
 		TransponderUseTwoCharMapping.clear();
 		char *line = (char*) malloc(256);
-		size_t bufsize;
+		size_t bufsize=256;
 		char countrycode[256];
 		while( getline(&line, &bufsize, f) != -1 )
 		{
