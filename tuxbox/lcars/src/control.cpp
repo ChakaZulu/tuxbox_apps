@@ -1750,6 +1750,8 @@ void control::openMenu(int menuNumber)
 		}
 		if (number > 0 && number < 30 && vars->getvalue("%PLUGINMENU") == "true")
 		{
+			if (number > plugins_obj->getNumberOfPlugins())
+				continue;
 			//std::cout << "NUUUUMBER: " << number << std::endl;
 			osd_obj->addCommand("HIDE menu");
 			//teletext_obj->stopReinsertion();
