@@ -355,13 +355,13 @@ bool CAudioSetupNotifier::changeNotify(const std::string & OptionName, void*)
 {
 	//printf("notify: %s\n", OptionName.c_str() );
 
-	if(OptionName=="audiomenu.PCMOffset")
+	if (OptionName == LOCALE_AUDIOMENU_PCMOFFSET)
 	{
 		if (g_settings.audio_avs_Control == 2)   //lirc
 			g_Controld->setVolume(100 - atoi(g_settings.audio_PCMOffset), CControld::TYPE_OST);
 	}
 
-	if(OptionName=="audiomenu.analogout")
+	if (OptionName == LOCALE_AUDIOMENU_ANALOGOUT)
 	{
 		g_Zapit->setAudioMode(g_settings.audio_AnalogMode);
 	}

@@ -138,10 +138,10 @@ void CBEChannelWidget::paintHead()
 
 const struct button_label CBEChannelWidgetButtons[4] =
 {
-	{ NEUTRINO_ICON_BUTTON_RED   , "bouqueteditor.delete"     },
-	{ NEUTRINO_ICON_BUTTON_GREEN , "bouqueteditor.add"        },
-	{ NEUTRINO_ICON_BUTTON_YELLOW, "bouqueteditor.move"       },
-	{ NEUTRINO_ICON_BUTTON_BLUE  , "bouqueteditor.switchmode" }
+	{ NEUTRINO_ICON_BUTTON_RED   , LOCALE_BOUQUETEDITOR_DELETE     },
+	{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_BOUQUETEDITOR_ADD        },
+	{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_BOUQUETEDITOR_MOVE       },
+	{ NEUTRINO_ICON_BUTTON_BLUE  , LOCALE_BOUQUETEDITOR_SWITCHMODE }
 };
 
 void CBEChannelWidget::paintFoot()

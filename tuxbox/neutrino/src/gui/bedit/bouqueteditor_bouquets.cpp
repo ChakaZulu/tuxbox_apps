@@ -137,14 +137,14 @@ void CBEBouquetWidget::paint()
 void CBEBouquetWidget::paintHead()
 {
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0);
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+theight+0, width, "Bouquets" /*g_Locale->getText(name).c_str()*/, COL_MENUHEAD);
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+theight+0, width, g_Locale->getText(LOCALE_BOUQUETLIST_HEAD), COL_MENUHEAD, 0, true); // UTF-8
 }
 
 const struct button_label CBEBouquetWidgetButtons[3] =
 {
-	{ NEUTRINO_ICON_BUTTON_RED   , "bouqueteditor.delete" },
-	{ NEUTRINO_ICON_BUTTON_GREEN , "bouqueteditor.add"    },
-	{ NEUTRINO_ICON_BUTTON_YELLOW, "bouqueteditor.move"   }
+	{ NEUTRINO_ICON_BUTTON_RED   , LOCALE_BOUQUETEDITOR_DELETE },
+	{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_BOUQUETEDITOR_ADD    },
+	{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_BOUQUETEDITOR_MOVE   }
 };
 
 void CBEBouquetWidget::paintFoot()
@@ -161,13 +161,13 @@ void CBEBouquetWidget::paintFoot()
 	switch( blueFunction)
 	{
 		case beRename:
-			Button[3].locale = "bouqueteditor.rename";
+			Button[3].locale = LOCALE_BOUQUETEDITOR_RENAME;
 		break;
 		case beHide:
-			Button[3].locale = "bouqueteditor.hide";
+			Button[3].locale = LOCALE_BOUQUETEDITOR_HIDE;
 		break;
 		case beLock:
-			Button[3].locale = "bouqueteditor.lock";
+			Button[3].locale = LOCALE_BOUQUETEDITOR_LOCK;
 		break;
 	}
 	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 5, y + height + 4, (width - 28 - 10) / 4, 4, Button);
@@ -217,7 +217,7 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, const std::string & actionKey)
 			{
 				if (bouquetsChanged)
 				{
-					int result = ShowMsgUTF("bouqueteditor.name", g_Locale->getText("bouqueteditor.savechanges?"), CMessageBox::mbrYes, CMessageBox::mbAll); // UTF-8
+					int result = ShowMsgUTF(LOCALE_BOUQUETEDITOR_NAME, g_Locale->getText(LOCALE_BOUQUETEDITOR_SAVECHANGES), CMessageBox::mbrYes, CMessageBox::mbAll); // UTF-8
 
 					switch( result )
 					{
@@ -420,7 +420,7 @@ void CBEBouquetWidget::deleteBouquet()
 
 void CBEBouquetWidget::addBouquet()
 {
-	std::string newName = inputName("", "bouqueteditor.bouquetname");
+	std::string newName = inputName("", LOCALE_BOUQUETEDITOR_BOUQUETNAME);
 	if (!(newName.empty()))
 	{
 		g_Zapit->addBouquet(ZapitTools::Latin1_to_UTF8(newName.c_str()).c_str());
@@ -462,7 +462,7 @@ void CBEBouquetWidget::cancelMoveBouquet()
 
 void CBEBouquetWidget::renameBouquet()
 {
-	std::string newName = inputName(Bouquets[selected].name, "bouqueteditor.newbouquetname");
+	std::string newName = inputName(Bouquets[selected].name, LOCALE_BOUQUETEDITOR_NEWBOUQUETNAME);
 	if (newName != Bouquets[selected].name)
 	{
 		g_Zapit->renameBouquet(selected, ZapitTools::Latin1_to_UTF8(newName.c_str()).c_str());
@@ -526,7 +526,7 @@ void CBEBouquetWidget::internalMoveBouquet( unsigned int fromPosition, unsigned 
 
 void CBEBouquetWidget::saveChanges()
 {
-	CHintBox* hintBox= new CHintBox("bouqueteditor.name", g_Locale->getText("bouqueteditor.savingchanges"), 480); // UTF-8
+	CHintBox* hintBox= new CHintBox(LOCALE_BOUQUETEDITOR_NAME, g_Locale->getText(LOCALE_BOUQUETEDITOR_SAVINGCHANGES), 480); // UTF-8
 	hintBox->paint();
 	g_Zapit->saveBouquets();
 	g_Zapit->commitBouquetChange();
@@ -536,7 +536,7 @@ void CBEBouquetWidget::saveChanges()
 
 void CBEBouquetWidget::discardChanges()
 {
-	CHintBox* hintBox= new CHintBox("bouqueteditor.name", g_Locale->getText("bouqueteditor.discardingchanges"), 480); // UTF-8
+	CHintBox* hintBox= new CHintBox(LOCALE_BOUQUETEDITOR_NAME, g_Locale->getText(LOCALE_BOUQUETEDITOR_DISCARDINGCHANGES), 480); // UTF-8
 	hintBox->paint();
 	g_Zapit->restoreBouquets();
 	hintBox->hide();

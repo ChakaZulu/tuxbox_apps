@@ -750,7 +750,7 @@ int CTimerList::modifyTimer()
 	timerSettings.addItem(m3);
 	timerSettings.addItem(m4);
 
-	CStringInput timerSettings_apids("timerlist.apids", timer->apids , 25, "apids.hint_1", "apids.hint_2", "0123456789ABCDEF ");
+	CStringInput timerSettings_apids("timerlist.apids", timer->apids , 25, LOCALE_APIDS_HINT_1, LOCALE_APIDS_HINT_2, "0123456789ABCDEF ");
 	if(timer->eventType ==  CTimerd::TIMER_RECORD)
 	{
 		CMenuForwarder *m5 = new CMenuForwarder("timerlist.apids", true, timer->apids, &timerSettings_apids );

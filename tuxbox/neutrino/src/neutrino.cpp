@@ -1388,7 +1388,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		CZapitClient::SatelliteList providerList;
 		g_Zapit->getScanSatelliteList(providerList);
 
-		CMenuOptionStringChooser* oj = new CMenuOptionStringChooser("cablesetup.provider", (char*)&scanSettings.satNameNoDiseqc, true/*, new CCableProviderNotifier*/);
+		CMenuOptionStringChooser* oj = new CMenuOptionStringChooser(LOCALE_CABLESETUP_PROVIDER, (char*)&scanSettings.satNameNoDiseqc, true/*, new CCableProviderNotifier*/);
 
 		for( uint i=0; i< providerList.size(); i++)
 		{
@@ -1409,7 +1409,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 	service.addItem(GenericMenuSeparator);
 	service.addItem(GenericMenuBack);
 	service.addItem(GenericMenuSeparatorLine);
-	service.addItem( new CMenuForwarder("bouqueteditor.name", true, NULL, new CBEBouquetWidget()));
+	service.addItem( new CMenuForwarder(LOCALE_BOOKMARKMANAGER_NAME, true, NULL, new CBEBouquetWidget()));
 	service.addItem( new CMenuForwarder("servicemenu.scants", true, NULL, &scanSettings ) );
 	service.addItem( new CMenuForwarder("servicemenu.reload", true, NULL, this, "reloadchannels" ) );
 	service.addItem( new CMenuForwarder("servicemenu.ucodecheck", true, NULL, UCodeChecker ) );
@@ -1647,26 +1647,26 @@ void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNoti
 	audioSettings.addItem(GenericMenuBack);
 	audioSettings.addItem(GenericMenuSeparatorLine);
 
-	CMenuOptionChooser* oj = new CMenuOptionChooser("audiomenu.analogout", &g_settings.audio_AnalogMode, true, audioSetupNotifier);
-	oj->addOption(0, "audiomenu.stereo");
-	oj->addOption(1, "audiomenu.monoleft");
-	oj->addOption(2, "audiomenu.monoright");
+	CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_AUDIOMENU_ANALOGOUT, &g_settings.audio_AnalogMode, true, audioSetupNotifier);
+	oj->addOption(0, LOCALE_AUDIOMENU_STEREO);
+	oj->addOption(1, LOCALE_AUDIOMENU_MONOLEFT);
+	oj->addOption(2, LOCALE_AUDIOMENU_MONORIGHT);
 
 	audioSettings.addItem( oj );
 
-	oj = new CMenuOptionChooser("audiomenu.dolbydigital", &g_settings.audio_DolbyDigital, true, audioSetupNotifier);
+	oj = new CMenuOptionChooser(LOCALE_AUDIOMENU_DOLBYDIGITAL, &g_settings.audio_DolbyDigital, true, audioSetupNotifier);
 	oj->addOption(0, "options.off");
 	oj->addOption(1, "options.on");
 	audioSettings.addItem( oj );
 
-	CStringInput * audio_PCMOffset = new CStringInput("audiomenu.PCMOffset", g_settings.audio_PCMOffset, 2, NULL, NULL, "0123456789 ", audioSetupNotifier);
-	CMenuForwarder *mf = new CMenuForwarder("audiomenu.PCMOffset", (g_settings.audio_avs_Control == CControld::TYPE_LIRC), g_settings.audio_PCMOffset, audio_PCMOffset );
+	CStringInput * audio_PCMOffset = new CStringInput(LOCALE_AUDIOMENU_PCMOFFSET, g_settings.audio_PCMOffset, 2, NULL, NULL, "0123456789 ", audioSetupNotifier);
+	CMenuForwarder *mf = new CMenuForwarder(LOCALE_AUDIOMENU_PCMOFFSET, (g_settings.audio_avs_Control == CControld::TYPE_LIRC), g_settings.audio_PCMOffset, audio_PCMOffset );
 	CAudioSetupNotifier2 *audioSetupNotifier2 = new CAudioSetupNotifier2(mf);
 
-	oj = new CMenuOptionChooser("audiomenu.avs_control", &g_settings.audio_avs_Control, true, audioSetupNotifier2);
-	oj->addOption(CControld::TYPE_OST, "audiomenu.ost");
-	oj->addOption(CControld::TYPE_AVS, "audiomenu.avs");
-	oj->addOption(CControld::TYPE_LIRC, "audiomenu.lirc");
+	oj = new CMenuOptionChooser(LOCALE_AUDIOMENU_AVS_CONTROL, &g_settings.audio_avs_Control, true, audioSetupNotifier2);
+	oj->addOption(CControld::TYPE_OST, LOCALE_AUDIOMENU_OST);
+	oj->addOption(CControld::TYPE_AVS, LOCALE_AUDIOMENU_AVS);
+	oj->addOption(CControld::TYPE_LIRC, LOCALE_AUDIOMENU_LIRC);
 	audioSettings.addItem(oj);
 	audioSettings.addItem(mf);
 }
@@ -2418,7 +2418,7 @@ void CNeutrinoApp::SelectAPID()
 	{
 		// wir haben APIDs für diesen Kanal!
 
-		CMenuWidget APIDSelector("apidselector.head", "audio.raw", 300);
+		CMenuWidget APIDSelector(LOCALE_APIDSELECTOR_HEAD, "audio.raw", 300);
 		APIDSelector.addItem(GenericMenuSeparator);
 
 		for( unsigned int count=0; count<g_RemoteControl->current_PIDs.APIDs.size(); count++ )
@@ -2663,7 +2663,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget mainSettings("mainsettings.head", NEUTRINO_ICON_SETTINGS);
 	CMenuWidget languageSettings("languagesetup.head", "language.raw");
 	CMenuWidget videoSettings("videomenu.head", "video.raw");
-	CMenuWidget audioSettings("audiomenu.head", "audio.raw");
+	CMenuWidget audioSettings(LOCALE_AUDIOMENU_HEAD, "audio.raw");
 	CMenuWidget parentallockSettings("parentallock.parentallock", "lock.raw", 500);
 	CMenuWidget networkSettings("networkmenu.head", "network.raw");
 	CMenuWidget recordingSettings("recordingmenu.head", "recording.raw");

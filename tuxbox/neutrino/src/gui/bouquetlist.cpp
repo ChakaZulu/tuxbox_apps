@@ -379,7 +379,7 @@ void CBouquetList::paintItem(int pos)
 void CBouquetList::paintHead()
 {
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0);
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+theight+0, width, g_Locale->getText("bouquetlist.head"), COL_MENUHEAD, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+theight+0, width, g_Locale->getText(LOCALE_BOUQUETLIST_HEAD), COL_MENUHEAD, 0, true); // UTF-8
 }
 
 void CBouquetList::paint()

@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.89 2004/05/14 23:28:26 gagga Exp $
+  $Id: movieplayer.cpp,v 1.90 2004/05/15 21:35:18 thegoodguy Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -1782,7 +1782,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		else if (msg == CRCInput::RC_help)
  		{
 			std::string fullhelptext = g_Locale->getText("movieplayer.vlchelp");
-			fullhelptext += "\nVersion: $Revision: 1.89 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			fullhelptext += "\nVersion: $Revision: 1.90 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -1918,7 +1918,7 @@ CMoviePlayerGui::PlayFile (void)
 		}
 
 		if (showaudioselectdialog) {
-            CMenuWidget APIDSelector("apidselector.head", "audio.raw", 300);
+            CMenuWidget APIDSelector(LOCALE_APIDSELECTOR_HEAD, "audio.raw", 300);
     		APIDSelector.addItem(GenericMenuSeparator);
     		apidchanged = 0;
     		CAPIDSelectExec *APIDChanger;
@@ -1986,7 +1986,7 @@ CMoviePlayerGui::PlayFile (void)
  		else if (msg == CRCInput::RC_help)
  		{
 			std::string fullhelptext = g_Locale->getText("movieplayer.tshelp");
-			fullhelptext += "\nVersion: $Revision: 1.89 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			fullhelptext += "\nVersion: $Revision: 1.90 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
  		else if (msg == CRCInput::RC_setup)
