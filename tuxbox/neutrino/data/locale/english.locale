@@ -27,6 +27,7 @@ servicemenu.head Service
 servicemenu.update Software Update
 servicemenu.scants Servicescan
 servicemenu.ucodecheck Check ucodes
+servicemenu.reload Reload Channel-lists
 
 cablesetup.provider cable provider
 
@@ -165,20 +166,6 @@ timing.infobar Infobar
 timing.filebrowser Filebrowser
 timing.hint_1 Time in sec. After this time the
 timing.hint_2 infobar will be faded out.
-
-pluginmenu.head Plugin Settings
-tuxnews.size Tuxnews size
-tuxnews_size.small small
-tuxnews_size.medium medium
-tuxnews_size.large large
-tuxnews.speed Scroll speed
-tuxnews_speed.slow slow
-tuxnews_speed.medium medium
-tuxnews_speed.fast fast
-tuxnews.position Bar position
-tuxnews_position.top top
-tuxnews_position.center center
-tuxnews_position.bottom bottom
 
 repeatblocker.hint_1 Shortest time (in ms) to recognize 2 keystrokes
 repeatblocker.hint_2 Enter 0 to switch of the blocker (red is space)

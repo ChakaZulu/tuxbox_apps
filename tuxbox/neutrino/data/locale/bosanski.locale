@@ -27,6 +27,7 @@ servicemenu.head servis
 servicemenu.update obnoviti softver
 servicemenu.scants traziti kanale
 servicemenu.ucodecheck provjeriti ucodese
+servicemenu.reload unset
 
 cablesetup.provider snabdjevac
 
@@ -165,20 +166,6 @@ timing.infobar infromativna traka
 timing.filebrowser pretrazivac datoteka
 timing.hint_1 vrijeme u sekundama u kojemu
 timing.hint_2 ce biti pokazana informativna traka
-
-pluginmenu.head namjescenje plugina
-tuxnews.size velicina tuxnewsa
-tuxnews_size.small malo
-tuxnews_size.medium srednje
-tuxnews_size.large veliko
-tuxnews.speed brzina tuxnewsa
-tuxnews_speed.slow sporo
-tuxnews_speed.medium srednje
-tuxnews_speed.fast brzo
-tuxnews.position pozicija tuxnewsa
-tuxnews_position.top gore
-tuxnews_position.center sredina
-tuxnews_position.bottom dolje
 
 repeatblocker.hint_1 vrijeme (u ms) izmedu 2 pritiska tipke
 repeatblocker.hint_2 0 ugasi blokera (crveno je " ")

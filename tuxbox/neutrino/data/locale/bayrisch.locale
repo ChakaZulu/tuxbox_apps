@@ -20,13 +20,14 @@ mainmenu.recording Streaming (aufnemma)
 mainmenu.recording_start ofanga
 mainmenu.recording_stop aufhearn
 mainmenu.pictureviewer Buidlschauga
-mainmenu.movieplayer unset
+mainmenu.movieplayer Fuimspuia
 mainmenu.pausesectionsd EPG aussalesn
 
 servicemenu.head Service
 servicemenu.update Software-aktualisiern
 servicemenu.scants Senda suacha
 servicemenu.ucodecheck UCodes obcheckn
+servicemenu.reload unset
 
 cablesetup.provider Kabiobieta
 
@@ -165,20 +166,6 @@ timing.infobar Infobar
 timing.filebrowser Filebrausa
 timing.hint_1 Einblendzeit in Sek., die das OSD
 timing.hint_2 auf dem TV angezeigt wird
-
-pluginmenu.head Plugins Eistellunga
-tuxnews.size Tuxnew Gräss
-tuxnews_size.small kloa
-tuxnews_size.medium mittl
-tuxnews_size.large groß
-tuxnews.speed Gschwindigkeid
-tuxnews_speed.slow langsam
-tuxnews_speed.medium mittl
-tuxnews_speed.fast schnoi
-tuxnews.position Tuxnews Position
-tuxnews_position.top obn
-tuxnews_position.center mittn
-tuxnews_position.bottom untn
 
 repeatblocker.hint_1 Mindestzeit (ms) zwischn zwoa Dasdndrucka
 repeatblocker.hint_2 0 schoitt an Blocka aus (Rot is " ")
@@ -690,13 +677,13 @@ mp3player.title_artist Interpret
 mp3player.display_order Ozoagn
 mp3player.follow aktuelle Liad
 
-movieplayer.name unset
-movieplayer.head unset
-movieplayer.play unset
-movieplayer.choosets unset
-movieplayer.chooseps unset
-movieplayer.choosepes unset
-movieplayer.bookmark unset
+movieplayer.name Fuimspuia
+movieplayer.head Fuimspuia
+movieplayer.play Spuin
+movieplayer.choosets TS Spuin
+movieplayer.chooseps PS Spuin
+movieplayer.choosepes PES spuin
+movieplayer.bookmark Vormerka
 
 filebrowser.head Datiesucha
 filebrowser.filter.active Fuita o

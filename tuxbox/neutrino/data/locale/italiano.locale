@@ -27,6 +27,7 @@ servicemenu.head Service
 servicemenu.update Aggiornamento-Software
 servicemenu.scants Ricerca Canali
 servicemenu.ucodecheck Controllo UCodes
+servicemenu.reload unset
 
 cablesetup.provider Gestore
 
@@ -165,20 +166,6 @@ timing.infobar Infobar
 timing.filebrowser filebrowser 
 timing.hint_1 Tempo in Sek di veduta del OSD
 timing.hint_2 sullo schermo
-
-pluginmenu.head Impostazioni Plugin
-tuxnews.size grandezza Tuxnews
-tuxnews_size.small stretto
-tuxnews_size.medium medio
-tuxnews_size.large largo
-tuxnews.speed velocita
-tuxnews_speed.slow lento
-tuxnews_speed.medium medio
-tuxnews_speed.fast svelto
-tuxnews.position posizione
-tuxnews_position.top alto
-tuxnews_position.center centro
-tuxnews_position.bottom sotto
 
 repeatblocker.hint_1 Tempo (in ms) tra 2 premuteTasti
 repeatblocker.hint_2 0 spegne il Blocker tasti (Rosso e " ")

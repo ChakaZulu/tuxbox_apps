@@ -27,6 +27,7 @@ servicemenu.head Service
 servicemenu.update Software-Aktualisierung
 servicemenu.scants Kanalsuche
 servicemenu.ucodecheck UCodes überprüfen
+servicemenu.reload Kanallisten neu laden
 
 cablesetup.provider Kabelanbieter
 
@@ -165,20 +166,6 @@ timing.infobar Infobar
 timing.filebrowser Filebrowser
 timing.hint_1 Einblendzeit in Sek., die das OSD
 timing.hint_2 auf dem TV angezeigt wird
-
-pluginmenu.head Plugin Einstellungen
-tuxnews.size Tuxnews Größe
-tuxnews_size.small klein
-tuxnews_size.medium mittel
-tuxnews_size.large gross
-tuxnews.speed Tuxnews Geschwindigkeit
-tuxnews_speed.slow langsam
-tuxnews_speed.medium mittel
-tuxnews_speed.fast schnell
-tuxnews.position Tuxnews Position
-tuxnews_position.top oben
-tuxnews_position.center mitte
-tuxnews_position.bottom unten
 
 repeatblocker.hint_1 Mindestzeit (in ms) zwischen 2 Tastendrücken
 repeatblocker.hint_2 0 schaltet den Blocker aus (Rot ist " ")

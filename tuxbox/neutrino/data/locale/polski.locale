@@ -27,6 +27,7 @@ servicemenu.head Ustawienia
 servicemenu.update Aktualizacja oprogramowania
 servicemenu.scants Strojenie
 servicemenu.ucodecheck Wersja ucodes
+servicemenu.reload unset
 
 cablesetup.provider provider kablowy
 
@@ -165,20 +166,6 @@ timing.infobar Info
 timing.filebrowser Przegldarka plików
 timing.hint_1 Czas w sekundach po którym
 timing.hint_2 listwa info zostanie wygaszona
-
-pluginmenu.head Menu dodatki
-tuxnews.size Rozmiar
-tuxnews_size.small Maly
-tuxnews_size.medium Sredni
-tuxnews_size.large Duzy
-tuxnews.speed Predkosc
-tuxnews_speed.slow Wolno
-tuxnews_speed.medium Srednio
-tuxnews_speed.fast Szybko
-tuxnews.position Pozycja
-tuxnews_position.top Góra
-tuxnews_position.center Srodek
-tuxnews_position.bottom Dól
 
 repeatblocker.hint_1 czas (w ms) pomiedzy nacisnieciami klawisza
 repeatblocker.hint_2 0 wylacza blokade (czerwony jest " ")

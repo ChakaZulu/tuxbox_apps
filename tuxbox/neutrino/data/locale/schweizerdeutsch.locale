@@ -27,6 +27,7 @@ servicemenu.head Sörvis
 servicemenu.update Software-Öbdaede
 servicemenu.scants Kanalsürchi
 servicemenu.ucodecheck UCodes tschegge
+servicemenu.reload unset
 
 cablesetup.provider Kabelabieder
 
@@ -165,20 +166,6 @@ timing.infobar Infobar
 timing.filebrowser Filebrowser
 timing.hint_1 Iinbländzit in Sek., di's OSD
 timing.hint_2 uffem TV a'zeigt wird
-
-pluginmenu.head Plugin Iischdellige
-tuxnews.size Tuxnews Größi
-tuxnews_size.small chlei
-tuxnews_size.medium middel
-tuxnews_size.large gross
-tuxnews.speed Tuxnews Gschwindigkeit
-tuxnews_speed.slow lahm
-tuxnews_speed.medium middel
-tuxnews_speed.fast schnäll
-tuxnews.position Tuxnews Position
-tuxnews_position.top obe
-tuxnews_position.center mitti
-tuxnews_position.bottom unde
 
 repeatblocker.hint_1 Mindeschtzit (in ms) zwüsche 2 Tastedrück'
 repeatblocker.hint_2 0 schaldet de Blocker us (Rot isch " ")
