@@ -265,10 +265,10 @@ static eString switchService(eString request, eString dirpath, eString opt, eHTT
 		eZapMain::getInstance()->playService(*ref, eZapMain::psSetMode|eZapMain::psDontAdd);
 		delete ref;
 		result="0";
-	} else
-	{
+	} 
+	else
 		result+="-1";
-	}
+
 	return result;
 }
 
@@ -473,7 +473,7 @@ eString read_file(eString filename)
 	int size=0;
 
 	char tempbuf[BLOCKSIZE+200];
-	eString result("");
+	eString result;
 
 	while((size=read(fd, tempbuf, BLOCKSIZE))>0)
 	{
@@ -752,7 +752,7 @@ public:
 
 static eString getZapContent(eString mode, eString path)
 {
-	eString result("");
+	eString result;
 	eString tpath;
 
 	int pos=0, lastpos=0, temp=0;
@@ -801,7 +801,7 @@ static eString getZapContent(eString mode, eString path)
 
 static eString aboutDreambox(void)
 {
-	eString result("");
+	eString result;
 	result += "<table border=0>";
 
 	switch (eSystemInfo::getInstance()->getHwType())
@@ -1206,11 +1206,6 @@ static eString getContent(eString mode, eString path)
 	{
 		result = getTitle("Zap");
 		zap_result += getZapContent(mode, path);
-//		if (path)
-//		{
-//			path = eServiceStructureHandler::getRoot(eServiceStructureHandler::modeTV).toString();
-//			zap_result += getZapContent(mode, path);
-//		}
 		result += getEITC();
 		result.strReplace("#SERVICENAME#", filter_string(getCurService()));
 
@@ -1454,6 +1449,7 @@ static eString getEITC2()
 		eit->unlock();
 	}
 
+
 	now_text = now_text.left(30);
 	next_text = next_text.left(30);
 	result = read_file(TEMPLATE_DIR+"header.tmp");
@@ -1492,7 +1488,7 @@ static eString audiom3u(eString request, eString dirpath, eString opt, eHTTPConn
 
 static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	eString result("");
+	eString result;
 	eString tmp;
 	eService* current;
 
@@ -1557,9 +1553,18 @@ eString genRecordString(eServiceReference ref, EITEvent event)
 	return result;
 }
 
+eString genEPGString(eServiceReference ref, EITEvent event)
+{
+	eString result;
+	result += "javascript:EPGDetails(\"ref=" + ref2string(ref);
+	result += "&ID=" + eString().sprintf("%d", event.event_id);
+	result += "\")";
+	return result;
+}
+
 static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	eString result("");
+	eString result;
 	eString tmp;
 	eService* current;
 
@@ -1594,6 +1599,7 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 		{
 			EITEvent event(*It->second);
 			for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
+
 			{
 				Descriptor *descriptor=*d;
 				if (descriptor->Tag() == DESCR_SHORT_EVENT)
@@ -1604,7 +1610,9 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 					result += genRecordString(ref, event);
 					result += "\'>Record</a></u>";
 					result += "&nbsp;&nbsp;";
-					result += eString().sprintf("<span class=\"epg\"><a  href=\"javascript:EPGDetails()\">%02d.%02d - %02d:%02d ", t->tm_mday, t->tm_mon+1, t->tm_hour, t->tm_min);
+					result += "<span class=\"epg\"><a  href=\'";
+					result += genEPGString(ref, event);
+					result += eString().sprintf("\')>%02d.%02d - %02d:%02d ", t->tm_mday, t->tm_mon+1, t->tm_hour, t->tm_min);
 					result += tmp;
 					result += ((ShortEventDescriptor*)descriptor)->event_name;
 					result += "</span></a></u><br>\n";
@@ -1617,17 +1625,8 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 	eString tmp2 = read_file(TEMPLATE_DIR+"EPG.tmp");
 	tmp2.strReplace("#CHANNEL#", filter_string(current->service_name));
 	tmp2.strReplace("#BODY#", result);
+
 	return tmp2;
-}
-
-static eString record(eString request, eString dirpath, eString opt, eHTTPConnection *content)
-{
-	return "<html>" CHARSETMETA "<head><title>Record Event</title></head><body>Coming soon ;-)</body></html>\n";
-}
-
-static eString EPGDetails(eString request, eString dirpath, eString opt, eHTTPConnection *content)
-{
-	return "<html>" CHARSETMETA "<head><title>EPG Details</title></head><body>Coming soon ;-)</body></html>\n";
 }
 
 static eString getsi(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -2321,6 +2320,67 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	return result;
 }
 
+static eString EPGDetails(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	eString result;
+	eService *current = NULL;
+
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	std::map<eString,eString> opt=getRequestOptions(opts);
+	eString serviceRef = opt["ref"];
+	eString eventID = opt["ID"];
+	int eventid = atoi(eventID.c_str());
+	eString description = "No description available";
+	eString ext_description =" No detailed description available";
+
+	printf("[ENIGMA_DYN] getEPGDetails: serviceRef = %s, ID = %s\n", serviceRef.c_str(), eventID.c_str());
+
+	// search for the event... to get the description...
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (sapi)
+	{
+		eServiceReference ref(string2ref(serviceRef));
+		current = eDVB::getInstance()->settings->getTransponders()->searchService((eServiceReferenceDVB&)ref);
+		if(current)
+		{
+			EITEvent *event = eEPGCache::getInstance()->lookupEvent((eServiceReferenceDVB&)ref, eventid );
+			if(event)
+			{
+				for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
+				{
+					if (d->Tag() == DESCR_SHORT_EVENT)
+					{
+						// ok, we probably found the event...
+						description = ((ShortEventDescriptor*)*d)->event_name;
+						printf("[ENIGMA_DYN] getEPGDetails: found description = %s", description.c_str());
+						break;
+					}
+					if (d->Tag() == DESCR_EXTENDED_EVENT)
+					{
+						// ok, we probably found the event...
+						ext_description = ((ExtendedEventDescriptor*)*d)->item_description;
+						printf("[ENIGMA_DYN] getEPGDetails: found extended description = %s", ext_description.c_str());
+						break;
+					}
+				}
+				delete event;
+			}
+		}
+	}
+
+	description = filter_string(description);
+	ext_description = filter_string(ext_description);
+
+	result = "<html>" + eString(CHARSETMETA) + "<head><title>Stream Info</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/si.css\"></head><body bgcolor=#ffffff>";
+	result += "<span class=\"title\"><b>" + description + "</b></span>";
+	result += "<br>";
+	result = ext_description;
+	result += "</body>";
+	result += "</html>";
+
+	return result;
+}
+
 void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 {
 	dyn_resolver->addDyn("GET", "/", web_root);
@@ -2334,12 +2394,11 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/ln", createSymlink, true );
 
 	dyn_resolver->addDyn("GET", "/setVolume", setVolume);
-	dyn_resolver->addDyn("GET", "/record", record);
-	dyn_resolver->addDyn("GET", "/EPGDetails", EPGDetails);
 	dyn_resolver->addDyn("GET", "/showTimerList", showTimerList);
 	dyn_resolver->addDyn("GET", "/addTimerEvent", addTimerEvent);
 	dyn_resolver->addDyn("GET", "/cleanupTimerList", cleanupTimerList);
 	dyn_resolver->addDyn("GET", "/clearTimerList", clearTimerList);
+	dyn_resolver->addDyn("GET", "/EPGDetails", EPGDetails);
 	dyn_resolver->addDyn("GET", "/cgi-bin/status", doStatus);
 	dyn_resolver->addDyn("GET", "/cgi-bin/switchService", switchService);
 	dyn_resolver->addDyn("GET", "/cgi-bin/admin", admin);
@@ -2375,14 +2434,4 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/control/zapto", neutrino_suck_zapto);
 	dyn_resolver->addDyn("GET", "/control/getonidsid", neutrino_suck_getonidsid );
 	dyn_resolver->addDyn("GET", "/control/channellist", neutrino_suck_getchannellist );
-
-/*
-	dyn_resolver->addDyn("GET", "/record/on", record_on);
-	dyn_resolver->addDyn("GET", "/record/off", record_off);
-*/
-/*	dyn_resolver->addDyn("GET", "/channels/numberchannels", channels_numberchannels);
-	dyn_resolver->addDyn("GET", "/channels/gethtmlchannels", channels_gethtmlchannels);
-	dyn_resolver->addDyn("GET", "/channels/getchannels", channels_getgetchannels);
-	dyn_resolver->addDyn("GET", "/epg/now", epg_now);
-	dyn_resolver->addDyn("GET", "/epg/next", epg_next); */
 }
