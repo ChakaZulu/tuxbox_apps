@@ -405,32 +405,30 @@ void CPlugins::startPlugin(int number)
 
 
 		if (!plugin_list[number].rc)
+			g_RCInput->restartInput();
+		g_RCInput->clearRCMsg();
+
+		if (plugin_list[number].lcd)
+		{       
+			if(lcd_fd != -1)
+				close(lcd_fd);
+			CLCD::getInstance()->resume();
+		}       
+
+		if (plugin_list[number].fb)
 		{
-    		g_RCInput->restartInput();
-    		g_RCInput->clearRCMsg();
-    	}
-
-	if (plugin_list[number].lcd)
-	{
-		if(lcd_fd != -1)
-			close(lcd_fd);
-		CLCD::getInstance()->resume();
-	}
-
-    	if (plugin_list[number].fb)
-    	{
-    		frameBuffer->paletteSet();
-    		frameBuffer->paintBackgroundBox(0,0,720,576);
-    	}
+			frameBuffer->paletteSet();
+			frameBuffer->paintBackgroundBox(0,0,720,576);
+		}
 
 #ifdef USE_VBI_INTERFACE
-    	if (plugin_list[number].vtxtpid)
-    	{
-    		int vtpid= atoi(params.find(P_ID_VTXTPID)->second.c_str());
-    		if (vtpid!=0)
-    		{
-    			// versuche, den gtx/enx_vbi wieder zu starten
-        		int fd = open("/dev/dbox/vbi0", O_RDWR);
+		if (plugin_list[number].vtxtpid)
+		{
+			int vtpid= atoi(params.find(P_ID_VTXTPID)->second.c_str());
+			if (vtpid!=0)
+			{
+				// versuche, den gtx/enx_vbi wieder zu starten
+				int fd = open("/dev/dbox/vbi0", O_RDWR);
 				if (fd > 0)
 				{
 					ioctl(fd, AVIA_VBI_START_VTXT, vtpid);
