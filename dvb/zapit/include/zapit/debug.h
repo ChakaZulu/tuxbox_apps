@@ -1,5 +1,5 @@
 /*
- * $Id: debug.h,v 1.4 2003/01/30 17:21:16 obi Exp $
+ * $Id: debug.h,v 1.5 2003/02/28 19:37:00 obi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -85,8 +85,15 @@ extern int debug;
 #define fop(cmd, args...) ({					\
 	int _r;							\
 	if (fd >= 0) { if ((_r = ::cmd(fd, args)) < 0)		\
-		ERROR(#cmd"("#args")");				\
-	} else { _r = fd; } 					\
+		ERROR(#cmd"(fd, "#args")"); }			\
+	else { _r = fd; } 					\
+	_r;							\
+})
+
+#define quiet_fop(cmd, args...) ({				\
+	int _r;							\
+	if (fd >= 0) { _r = ::cmd(fd, args); }			\
+	else { _r = fd; } 					\
 	_r;							\
 })
 
