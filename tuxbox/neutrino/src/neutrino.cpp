@@ -1523,18 +1523,13 @@ void CNeutrinoApp::InitMp3PicSettings(CMenuWidget &mp3PicSettings)
 
 }
 
-#if HAVE_DVB_API_VERSION == 1
-#define MISC_SETTING_FILES_COUNT 4
-#else
-#define MISC_SETTING_FILES_COUNT 3
-#endif
 const char * misc_setting_files[MISC_SETTING_FILES_COUNT][4] =
 {
+	{"miscsettings.sptsmode"     , "/var/etc/.spts_mode"  , "options.off", "options.on" }, /* cf. #define MISC_SETTING_SPTS_MODE 0 (settings.h) */
 	{"miscsettings.bootinfo"     , "/var/etc/.cdkVcInfo"  , "options.on" , "options.off"},
 #if HAVE_DVB_API_VERSION == 1
 	{"miscsettings.startbhdriver", "/var/etc/.bh"         , "options.off", "options.on" },
 #endif
-	{"miscsettings.sptsmode"     , "/var/etc/.spts_mode"  , "options.off", "options.on" },
 	{"miscsettings.hwsections"   , "/var/etc/.hw_sections", "options.on" , "options.off"}
 };
 
@@ -1565,20 +1560,18 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	{
 		miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "miscsettings.driver_boot" ) );
 
-		static int misc_option[MISC_SETTING_FILES_COUNT];
-
 		for (int i = 0; i < MISC_SETTING_FILES_COUNT; i++)
 		{
 			FILE * fd = fopen(misc_setting_files[i][1], "r");
 			if (fd)
 			{
 				fclose(fd);
-				misc_option[i] = 1;
+				g_settings.misc_option[i] = 1;
 			}
 			else
-				misc_option[i] = 0;
+				g_settings.misc_option[i] = 0;
 
-			oj = new CMenuOptionChooser(misc_setting_files[i][0], &(misc_option[i]), true, new CTouchFileNotifier(misc_setting_files[i][1]));
+			oj = new CMenuOptionChooser(misc_setting_files[i][0], &(g_settings.misc_option[i]), true, new CTouchFileNotifier(misc_setting_files[i][1]));
 			oj->addOption(0, misc_setting_files[i][2]);
 			oj->addOption(1, misc_setting_files[i][3]);
 			miscSettings.addItem(oj);

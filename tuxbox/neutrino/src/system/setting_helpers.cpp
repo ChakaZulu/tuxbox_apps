@@ -186,14 +186,6 @@ bool CRecordingNotifier::changeNotify(const std::string & OptionName, void*)
       toDisable[8]->setActive(false);
    }
    
-   if (g_settings.recording_type == CNeutrinoApp::RECORDING_FILE) 
-   {
-        // set SPTS mode for drivers
-        FILE * fd = fopen("/var/etc/.spts_mode", "w");
-		if (fd)
-			fclose(fd);
-   }
-   
    return true;
 }
 

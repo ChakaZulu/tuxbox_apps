@@ -255,6 +255,18 @@ struct SNeutrinoSettings
 
 	int lcd_setting[LCD_SETTING_COUNT];
 
+
+#if HAVE_DVB_API_VERSION == 1
+#define MISC_SETTING_FILES_COUNT 4
+#else
+#define MISC_SETTING_FILES_COUNT 3
+#endif
+
+#define MISC_SETTING_SPTS_MODE 0
+
+	int misc_option[MISC_SETTING_FILES_COUNT];
+
+
 	// pictureviewer
 	char   picviewer_slide_time[3];
 	int    picviewer_scaling;

@@ -1,7 +1,7 @@
 /*
- * $Id: stream2file.cpp,v 1.7 2004/05/03 20:41:39 thegoodguy Exp $
+ * $Id: stream2file.cpp,v 1.8 2004/05/04 11:34:40 thegoodguy Exp $
  * 
- * streaming ts to file/disc
+ * streaming to file/disc
  * 
  * Copyright (C) 2004 Axel Buehning <diemade@tuxbox.org>,
  *                    thegoodguy <thegoodguy@berlios.de>
@@ -76,20 +76,25 @@ extern "C" {
 #define FILENAMEBUFFERSIZE 512
 
 static int demuxfd[MAXPIDS];
+static int dvrfd;
 
 static unsigned char demuxfd_count = 0;
 
-static unsigned char exit_flag = 2;
+static unsigned char exit_flag = 0;
+static unsigned char busy_count = 0;
 
-static ringbuffer_t *ringbuf;
-
-static pthread_t file_thread;
-static pthread_t demux_thread;
+static pthread_t demux_thread[MAXPIDS];
 static unsigned long long limit;
 
 static char myfilename[512];
 
-static int sync_byte_offset (const unsigned char * buf, const unsigned int len) {
+typedef struct filenames_t
+{
+	const char * extension;
+	ringbuffer_t * ringbuffer;
+};
+
+static int sync_byte_offset(const unsigned char * buf, const unsigned int len) {
 
 	unsigned int i;
 
@@ -144,6 +149,7 @@ void * FileThread(void * v_arg)
 	const unsigned long long splitsize = (limit / TS_SIZE) * TS_SIZE;
 	unsigned long long remfile=0;
 	int fd2 = -1;
+	ringbuffer_t * ringbuf = ((struct filenames_t *)v_arg)->ringbuffer;
 
 	while (1)
 	{
@@ -156,7 +162,7 @@ void * FileThread(void * v_arg)
 			{
 				char filename[FILENAMEBUFFERSIZE];
 
-				sprintf(filename, "%s.%3.3d.ts", (char *)v_arg, ++filecount);
+				sprintf(filename, "%s.%3.3d.%s", myfilename, ++filecount, ((struct filenames_t *)v_arg)->extension);
 				if (fd2 != -1)
 					close(fd2);
 				if ((fd2 = open(filename, O_WRONLY | O_CREAT | O_SYNC | O_TRUNC | O_LARGEFILE, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) < 0)
@@ -235,7 +241,9 @@ void * FileThread(void * v_arg)
 
 void * DMXThread(void * v_arg)
 {
-	int dvrfd;
+	pthread_t file_thread;
+	struct filenames_t filename_data;
+	char filename_extension[3];
 	ringbuffer_data_t vec[2];
 	ssize_t written;
 	ssize_t todo;
@@ -244,25 +252,37 @@ void * DMXThread(void * v_arg)
 	int     offset = 0;
 	ssize_t r = 0;
 
-	/* write raw transport stream */
-	if ((dvrfd = open(DVRDEV, O_RDONLY)) < 0)
+	ringbuffer_t * ringbuf = ringbuffer_create(RINGBUFFERSIZE);
+
+	filename_data.ringbuffer = ringbuf;
+
+	if (v_arg == &dvrfd)
 	{
-		perror ("[stream2file]: error opening dvr");
-		goto the_end;
+		filename_data.extension = "ts";
+	}
+	else
+	{
+		for (int i = 0; i < MAXPIDS; i++)
+			if (v_arg == (&(demuxfd[i])))
+				sprintf(filename_extension, "%u", i);
+		filename_data.extension = filename_extension;
 	}
 
-	pthread_create(&file_thread, 0, FileThread, myfilename);
+	pthread_create(&file_thread, 0, FileThread, &filename_data);
 
-	while (!exit_flag)
-	{
-		r = read(dvrfd, &(buf[0]), TS_SIZE);
-		if (r > 0)
+	if (v_arg == &dvrfd)
+		while (!exit_flag)
 		{
-			offset = sync_byte_offset(&(buf[0]), r);
-			if (offset != -1)
-				break;
+			r = read(*(int *)v_arg, &(buf[0]), TS_SIZE);
+			if (r > 0)
+			{
+				offset = sync_byte_offset(&(buf[0]), r);
+				if (offset != -1)
+					break;
+			}
 		}
-	}
+	else
+		offset = 0;
 
 	written = ringbuffer_write(ringbuf, (char *)&(buf[offset]), r - offset);
 	// TODO: Retry
@@ -294,7 +314,7 @@ void * DMXThread(void * v_arg)
 
 		while (!exit_flag)
 		{
-			r = read(dvrfd, vec[0].buf, todo);
+			r = read(*(int *)v_arg, vec[0].buf, todo);
 			
 			if (r > 0)
 			{
@@ -322,17 +342,20 @@ void * DMXThread(void * v_arg)
 	//sleep(1); // give FileThread some time to write remaining content of ringbuffer to file
 	//	pthread_kill(rcst, SIGKILL);
 
-	close(dvrfd);
+	if (v_arg == &dvrfd)
+		close(*(int *)v_arg);
+	else
+		unsetPesFilter(*(int *)v_arg);
 
 	pthread_join(file_thread, NULL);
 
 	ringbuffer_free(ringbuf);
 
- the_end:
-	while (demuxfd_count > 0)
-		unsetPesFilter(demuxfd[--demuxfd_count]);
+	if (v_arg == &dvrfd)
+		while (demuxfd_count > 0)
+			unsetPesFilter(demuxfd[--demuxfd_count]);
 
-	exit_flag = 2;
+	busy_count--;
 
 	pthread_exit(NULL);
 }
@@ -342,20 +365,21 @@ stream2file_error_msg_t start_recording(const char * const filename,
 					const char * const info,
 					const unsigned long long splitsize,
 					const unsigned int numpids,
-					const unsigned short * const pids)
+					const unsigned short * const pids,
+					const bool write_ts)
 {
 	int fd;
 	char buf[FILENAMEBUFFERSIZE];
 
-	if (exit_flag != 2)
+	if (busy_count != 0)
 		return STREAM2FILE_BUSY; // other thread is running
 
-	exit_flag = 0;
+	busy_count++;
 
 	strcpy(myfilename, filename);
 
 	// write stream information (should wakeup the disk from standby, too)
-	sprintf(buf, "%s.info", filename);
+	sprintf(buf, "%s.xml", filename);
 	if ((fd = open(buf, O_SYNC | O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) >= 0)
 	{
 		write(fd, info, strlen(info));
@@ -364,7 +388,7 @@ stream2file_error_msg_t start_recording(const char * const filename,
 	}
 	else
 	{
-		exit_flag = 2;
+		busy_count--;
 		return STREAM2FILE_INVALID_DIRECTORY;
 	}
 
@@ -381,24 +405,43 @@ stream2file_error_msg_t start_recording(const char * const filename,
 	{
 		if (pids[i] > 0x1fff)
 		{
-			exit_flag = 2;
+			busy_count--;
 			return STREAM2FILE_INVALID_PID;
 		}
 		
-		if ((demuxfd[i] = setPesFilter(pids[i], DMX_OUT_TS_TAP)) < 0)
+		if ((demuxfd[i] = setPesFilter(pids[i], write_ts ? DMX_OUT_TS_TAP : DMX_OUT_TAP)) < 0)
 		{
 			for (unsigned int j = 0; j < i; j++)
 				unsetPesFilter(demuxfd[j]);
 
-			exit_flag = 2;
+			busy_count--;
 			return STREAM2FILE_PES_FILTER_FAILURE;
 		}
 	}
 	
-	ringbuf = ringbuffer_create(RINGBUFFERSIZE);
-
 	demuxfd_count = numpids;
-	pthread_create(&demux_thread, 0, DMXThread, NULL);
+
+	if (write_ts)
+	{
+		if ((dvrfd = open(DVRDEV, O_RDONLY)) < 0)
+		{
+			while (demuxfd_count > 0)
+				unsetPesFilter(demuxfd[--demuxfd_count]);
+
+			busy_count--;
+			return STREAM2FILE_DVR_OPEN_FAILURE;
+		}
+		pthread_create(&demux_thread[0], 0, DMXThread, &dvrfd);
+	}
+	else
+	{
+		for (unsigned int i = 0; i < numpids; i++)
+		{
+			busy_count++;
+			pthread_create(&demux_thread[i], 0, DMXThread, &demuxfd[i]);
+		}
+		busy_count--;
+	}
 
 	return STREAM2FILE_OK;
 }
