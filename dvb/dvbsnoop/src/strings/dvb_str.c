@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.30 2003/12/27 18:17:18 rasc Exp $
+$Id: dvb_str.c,v 1.31 2003/12/28 00:01:15 rasc Exp $
 
 
  http://dvbsnoop.sourceforge.net/
@@ -18,6 +18,9 @@ $Id: dvb_str.c,v 1.30 2003/12/27 18:17:18 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.31  2003/12/28 00:01:15  rasc
+some minor changes/adds...
+
 Revision 1.30  2003/12/27 18:17:18  rasc
 dsmcc PES dsmcc_program_stream_descriptorlist
 
@@ -218,7 +221,8 @@ char *dvbstrTableID (u_int id)
      {  0x7E, 0x7E,  "discontinuity_information_section" },
      {  0x7F, 0x7F,  "selection_information_section" },
      {  0x80, 0x8F,  "DVB CA message section (EMM/ECM)" },   /* ITU-R BT.1300 ref. */
-     {  0x90, 0xFE,  "User private" },
+     {  0x90, 0xBF,  "User private" },
+     {  0xC0, 0xFE,  "ATSC reserved" },		/* ETR 211e02 */
      {  0xFF, 0xFF,  "forbidden" },
      {  0,0, NULL }
   };
@@ -349,8 +353,9 @@ char *dvbstrDVBDescriptorTAG (u_int tag)
      {  0x71, 0x71,  "service_identifier_descriptor" },
      {  0x72, 0x72,  "service_availability_descriptor" },
      {  0x73, 0x7F,  "reserved_descriptor" },
-     {  0x80, 0xEF,  "User defined" },
-     	{  0xf0, 0xf0,  "$$$ MHP Object Carousel" },
+     {  0x80, 0xAF,  "ATSC reserved" },		/* ETR 211e02 */
+     {  0xB0, 0xEF,  "User defined" },
+     	{  0xf0, 0xf0,  "$$$ MHP Object Carousel" },	// $$$ TODO
      	{  0xf1, 0xf1,  "$$$ MHP Multiprotocol Encapsulation" },
 	{  0xf2, 0xFE,  "reserved MHP" },
 

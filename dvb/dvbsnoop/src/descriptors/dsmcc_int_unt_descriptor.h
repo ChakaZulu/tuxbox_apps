@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_int_unt_descriptor.h,v 1.4 2003/12/27 22:02:43 rasc Exp $ 
+$Id: dsmcc_int_unt_descriptor.h,v 1.5 2003/12/28 00:01:14 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: dsmcc_int_unt_descriptor.h,v 1.4 2003/12/27 22:02:43 rasc Exp $
 
 
 $Log: dsmcc_int_unt_descriptor.h,v $
+Revision 1.5  2003/12/28 00:01:14  rasc
+some minor changes/adds...
+
 Revision 1.4  2003/12/27 22:02:43  rasc
 dsmcc INT UNT descriptors started
 
@@ -49,8 +52,8 @@ void descriptorDSMCC_IP_address (u_char *b);
 
 void descriptorDSMCC_IP_MAC_platform_name (u_char *b);
 void descriptorDSMCC_IP_MAC_platform_provider_name (u_char *b);
-
 void descriptorDSMCC_MAC_address_range (u_char *b);
+void descriptorDSMCC_IP_slash (u_char *b);
 
 
 #endif

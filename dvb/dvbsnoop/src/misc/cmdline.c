@@ -1,12 +1,10 @@
 /*
-$Id: cmdline.c,v 1.16 2003/12/17 23:57:29 rasc Exp $
+$Id: cmdline.c,v 1.17 2003/12/28 00:01:14 rasc Exp $
 
 
  DVBSNOOP
 
  a dvb sniffer  and mpeg2 stream analyzer tool
- mainly for me to learn about dvb streams, mpeg2, mhp, dsm-cc, ...
-
  http://dvbsnoop.sourceforge.net/
 
  (c) 2001-2003   Rainer.Scherg@gmx.de
@@ -15,6 +13,9 @@ $Id: cmdline.c,v 1.16 2003/12/17 23:57:29 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.17  2003/12/28 00:01:14  rasc
+some minor changes/adds...
+
 Revision 1.16  2003/12/17 23:57:29  rasc
 add. hexdump mode, different layout for some purpose
 option:  -ph 4
@@ -83,6 +84,8 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 
+static void title (void);
+static void usage (void);
 
 
 
@@ -149,6 +152,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
      else if (!strcmp (argv[i],"-tf")) opt->time_mode = FULL_TIME;
      else if (!strcmp (argv[i],"-td")) opt->time_mode = DELTA_TIME;
      else if (!strcmp (argv[i],"-tn")) opt->time_mode = NO_TIME;
+     else if (!strcmp (argv[i],"-help")) opt->help = 1;
      else if (!strcmp (argv[i],"-s")) {
          s = argv[++i];
          if (!strcmp (s,"sec")) opt->packet_mode = SECT;
@@ -182,8 +186,14 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
    -- help ?  (and return abort)
   */
 
-  if (argc==1 || opt->help || opt->pid > 0x1FFF) {
+  if (opt->help) {
     usage ();
+    return(0); 
+  } 
+
+  if (argc==1 || opt->pid > 0x1FFF) {
+    title ();
+    printf("For help type 'dvbsnoop -help' ...\n");
     return(0); 
   } 
 
@@ -193,17 +203,26 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
 
 
 
-void usage (void)
-{
 
+
+
+static void title (void)
+{
     printf("dvbsnoop  - a dvb/mpeg2 stream analyzer tool\n");
     printf("Version: %s  (%s %s)\n",DVBSNOOP_VERSION,__DATE__,__TIME__);
     printf("         %s  \n",DVBSNOOP_URL);
     printf("         %s  \n",DVBSNOOP_COPYRIGHT);
     printf("\n");
-    printf("Usage\n");
-    printf(" dvbsnoop [opts] pid \n\n");
-    printf(" Options:  \n");
+}
+
+
+
+static void usage (void)
+{
+    title ();
+
+    printf("Usage:   dvbsnoop [opts] pid \n");
+    printf("Options:  \n");
     printf("   -demux device: demux device [%s]\n",DEMUX_DEVICE);
     printf("   -dvr device:   dvr device [%s]\n",DVR_DEVICE);
     printf("   -s [type]:    snoop type  [-s sec]\n");
@@ -229,6 +248,7 @@ void usage (void)
     printf("   -npd:         don't print decoded stream (= -pd 0) \n");
     printf("   -t[n|d|f]:    print timestamp (no, delta, full) [-tf] \n");
     printf("   -HCP:         hide copyright and program info header at program start\n");
+    printf("   -help:        this usage info...\n");
     printf("\n");
     
 

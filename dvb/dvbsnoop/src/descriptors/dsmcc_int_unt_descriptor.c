@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_int_unt_descriptor.c,v 1.5 2003/12/27 22:02:43 rasc Exp $ 
+$Id: dsmcc_int_unt_descriptor.c,v 1.6 2003/12/28 00:01:14 rasc Exp $ 
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: dsmcc_int_unt_descriptor.c,v 1.5 2003/12/27 22:02:43 rasc Exp $
 
 
 $Log: dsmcc_int_unt_descriptor.c,v $
+Revision 1.6  2003/12/28 00:01:14  rasc
+some minor changes/adds...
+
 Revision 1.5  2003/12/27 22:02:43  rasc
 dsmcc INT UNT descriptors started
 
@@ -100,7 +103,7 @@ int  descriptorDSMCC_INT_UNT_Private  (u_char *b)
      case 0x0C:  descriptorDSMCC_IP_MAC_platform_name (b); break;
      case 0x0D:  descriptorDSMCC_IP_MAC_platform_provider_name (b); break;
      case 0x0E:  descriptorDSMCC_MAC_address_range (b); break;
-//     {  0x0F, 0x0F,  "target_IP_slash_descriptor" },
+     case 0x0F:  descriptorDSMCC_IP_slash (b); break;
 //     {  0x10, 0x10,  "target_IP_source_slash_descriptor" },
 //     {  0x11, 0x11,  "target_IPv6_slash_descriptor" },
 //     {  0x12, 0x12,  "target_IPv6_source_slash_descriptor" },
@@ -340,6 +343,53 @@ void descriptorDSMCC_MAC_address_range (u_char *b)
  }
 
 }
+
+
+
+
+
+
+/*
+  0x0F - IP_slash
+  ETSI EN 301 192  (ISO 13818-6)
+*/
+
+void descriptorDSMCC_IP_slash (u_char *b)
+{
+ int    len;
+
+ // descriptor_tag	= b[0];
+ len			= b[1];
+ b += 2;
+
+ while (len > 0) {
+ 	u_long ip;
+	int    mask;
+
+	ip   = outBit_Sx_NL (4,"IPv4_slash_mask: ",  b, 0,32);
+	mask = outBit_Sx_NL (4,"IPv4_slash_mask: ",  b,32, 8);
+ 	out (4,"  [= ");
+		displ_IPv4_addr (4, ip);
+		out_nl (4,"/%d]",mask);
+
+ 	b += 5;
+	len -= 5;
+ }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
