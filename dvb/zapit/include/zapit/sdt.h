@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.h,v 1.12 2002/12/10 00:44:00 Homar Exp $
+ * $Id: sdt.h,v 1.13 2002/12/13 12:00:39 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -51,7 +51,7 @@ struct sdt_generic_descriptor {
 };
 
 int parse_sdt(const uint8_t DiSEqC);
-unsigned int get_sdt_TsidOnid ();
-bool get_sdt_free_CA_mode ( t_service_id p_service_id);
+unsigned int get_sdt_TsidOnid();
+ca_status_t get_sdt_free_CA_mode(const t_service_id p_service_id);
 
 #endif /* __sdt_h__ */
