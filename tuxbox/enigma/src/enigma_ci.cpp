@@ -388,7 +388,7 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 
 		eDebug("TEXT:%s",text);
 
-		eMMIEnqWindow wnd(convertLatin1UTF8(text), nrcount, blind );
+		eMMIEnqWindow wnd(text, nrcount, blind );
 		open = &wnd;
 		int ret = wnd.exec();
 		open = 0;
@@ -459,19 +459,20 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 				memset(text,0,size+1);
 				memcpy(text,data+rp,size);
 				eDebug("TEXT:%s",text);
+
 				currElement++;
 
 				if(currElement==1)
-					titleText=convertLatin1UTF8(text);
+					titleText=text;
 				if(currElement==2)
-					subTitleText=convertLatin1UTF8(text);
+					subTitleText=text;
 				if(currElement==3)
-					bottomText=convertLatin1UTF8(text);
+					bottomText=text;
 
 				if(currElement>3)
 				{
 					eDebug("new entry text %s", text);
-					entrys.push_back( std::pair<eString, int>( convertLatin1UTF8(text), currElement-3 ) );
+					entrys.push_back( std::pair<eString, int>( text, currElement-3 ) );
 				}
 				rp += size;
 			}
@@ -546,10 +547,10 @@ eMMIEnqWindow::eMMIEnqWindow( eString text, int num, bool blind )
 	{
 		newHeight+=10;
 		title = new eLabel(this);
-		title->setAlign(eTextPara::dirCenter);
 		title->move(ePoint(0,10));
 		title->resize(eSize(getClientSize().width(), 100));
 		title->setText(text);
+		title->setAlign(eTextPara::dirCenter);
 		eSize size = title->getSize();
 		size.setHeight( title->getExtend().height()+10) ;
 		title->resize( size );
@@ -615,10 +616,10 @@ eMMIListWindow::eMMIListWindow(eString titleTextT, eString subtitleTextT, eStrin
 		newHeight+=10;
 		title = new eLabel(this);
 		title->setFlags( RS_WRAP );
-		title->setAlign(eTextPara::dirCenter);
 		title->move(ePoint(0,10));
 		title->resize(eSize(getClientSize().width(), 100));
 		title->setText(titleTextT);
+		title->setAlign(eTextPara::dirCenter);
 		eSize size = title->getSize();
 		size.setHeight( title->getExtend().height()+10) ;
 		title->resize( size );
@@ -634,7 +635,6 @@ eMMIListWindow::eMMIListWindow(eString titleTextT, eString subtitleTextT, eStrin
 		newHeight+=10;
 		subtitle = new eLabel(this);
 		subtitle->setFlags( RS_WRAP );
-		subtitle->setAlign(eTextPara::dirCenter);
 		if ( title )
 		{
 			ePoint pos = title->getPosition();
@@ -645,6 +645,7 @@ eMMIListWindow::eMMIListWindow(eString titleTextT, eString subtitleTextT, eStrin
 			subtitle->move(ePoint(0,10));
 		subtitle->resize(eSize(getClientSize().width(), 100));
 		subtitle->setText(subtitleTextT);
+		subtitle->setAlign(eTextPara::dirCenter);
 		eSize size = subtitle->getSize();
 		size.setHeight( subtitle->getExtend().height()+10) ;
 		subtitle->resize( size );
@@ -660,10 +661,10 @@ eMMIListWindow::eMMIListWindow(eString titleTextT, eString subtitleTextT, eStrin
 		newHeight += 10;
 		bottomText = new eLabel(this);
 		bottomText->setFlags( RS_WRAP );
-		bottomText->setAlign(eTextPara::dirCenter);
 		bottomText->move(ePoint(0,list.getPosition().y()+list.getSize().height()+10));
 		bottomText->resize(eSize(getClientSize().width(), 100));
 		bottomText->setText(bottomTextT);
+		bottomText->setAlign(eTextPara::dirCenter);
 		eSize size = bottomText->getSize();
 		size.setHeight( bottomText->getExtend().height()+10 ) ;
 		bottomText->resize( size );
