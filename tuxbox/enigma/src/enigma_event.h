@@ -14,14 +14,12 @@ class eEventDisplay: public eWindow
 	QString service;
 	QListIterator<EITEvent> *events;
 	QList<EITEvent> *eventlist;
-
 	eLabel *title, *long_description, *eventDate, *eventTime, *channel;
-
 protected:
 	void keyDown(int rc);
 	void keyUp(int rc);
 public:
-	eEventDisplay(QString service, const QList<EITEvent> &events);
+	eEventDisplay(QString service, const QList<EITEvent>* e=0, EITEvent* evt=0);
 	~eEventDisplay();
 	
 	void setEvent(EITEvent *event);

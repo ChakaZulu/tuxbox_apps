@@ -8,6 +8,7 @@
 
 void eEventDisplay::keyDown(int rc)
 {
+	if (eventlist)
 	switch (rc)
 	{
 	case eRCInput::RC_RIGHT:
@@ -35,7 +36,7 @@ void eEventDisplay::keyUp(int rc)
 	}
 }
 
-eEventDisplay::eEventDisplay(QString service, const QList<EITEvent> &e): eWindow(1), service(service)
+eEventDisplay::eEventDisplay(QString service, const QList<EITEvent>* e, EITEvent* evt): eWindow(1), service(service)
 	/*
 			kleine anmerkung:
 			
@@ -72,7 +73,10 @@ eEventDisplay::eEventDisplay(QString service, const QList<EITEvent> &e): eWindow
 	eventTime->setText("");
 	channel->setText("");
 
-	setList(e);
+	if (e)
+		setList(*e);
+	else if (evt)
+		setEvent(evt);
 }
 
 eEventDisplay::~eEventDisplay()
@@ -83,13 +87,11 @@ eEventDisplay::~eEventDisplay()
 
 void eEventDisplay::setEvent(EITEvent *event)
 {
-
 	if (event)
 	{
 		QString _title=0, _long_description="";
 		QString _eventDate="";
 		QString _eventTime="";
-
 
 		tm *begin=event->start_time!=-1?localtime(&event->start_time):0;
 		if (begin)

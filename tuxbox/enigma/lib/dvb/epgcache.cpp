@@ -4,7 +4,6 @@
 #include "edvb.h"
 #include "lowlevel/dvb.h"
 #include "si.h"
-
 //int eventData::refcount=0;
 
 eEPGCache *eEPGCache::instance;

@@ -7,6 +7,7 @@
 #include "eskin.h"
 #include "epgcache.h"
 #include <algorithm>
+#include "epgwindow.h"
 
 eListboxEntryService::eListboxEntryService(eService &service, eListbox *listbox): eListboxEntry(listbox), service(service)
 {
@@ -145,6 +146,16 @@ int eServiceSelector::eventFilter(const eWidgetEvent &event)
 		case eRCInput::RC_HOME:
 		{
 			fillServiceList();
+			return 1;
+		}
+		case eRCInput::RC_HELP:
+		{
+			eEPGWindow wnd(eDVB::getInstance()->service);
+			hide();
+			wnd.show();
+			wnd.exec();
+			wnd.hide();
+			show();
 			return 1;
 		}
 		}

@@ -63,6 +63,8 @@ class eEPGCache: public eSection
 {
 	Q_OBJECT
 private:
+  eService* current_service;
+	int current_sid;
 	int isRunning;
 	int sectionRead(__u8 *data);
 	static eEPGCache *instance;

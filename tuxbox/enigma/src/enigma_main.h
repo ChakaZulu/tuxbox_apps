@@ -165,6 +165,7 @@ private slots:
 	void setSmartcardLogo(bool b);
 	void setAC3Logo(bool b);
 	void setVTButton(bool b);
+	void setEPGButton(bool b);
 public:
 	eZapMain();
 	~eZapMain();

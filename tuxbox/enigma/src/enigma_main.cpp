@@ -20,6 +20,7 @@
 #include "enigma_plugins.h"
 #include "download.h"
 #include "epgcache.h"
+#include "epgwindow.h"
 
 static QString getISO639Description(char *iso)
 {
@@ -364,11 +365,11 @@ eZapMain::eZapMain(): eWidget(0, 1)
 	cur_start=cur_duration=-1;
 
 	connect(eStreamWatchdog::getInstance(), SIGNAL(AspectRatioChanged(int)), SLOT(set16_9Logo(int)));
+	connect(eDVB::getInstance(), SIGNAL(scrambled(bool)), SLOT(setSmartcardLogo(bool)));
 	connect(eDVB::getInstance(), SIGNAL(switchedService(eService*,int)), SLOT(serviceChanged(eService*,int)));
 	connect(eDVB::getInstance(), SIGNAL(gotEIT(EIT*,int)), SLOT(gotEIT(EIT*,int)));
 	connect(eDVB::getInstance(), SIGNAL(gotSDT(SDT*)), SLOT(gotSDT(SDT*)));
 	connect(eDVB::getInstance(), SIGNAL(gotPMT(PMT*)), SLOT(gotPMT(PMT*)));
-	connect(eDVB::getInstance(), SIGNAL(scrambled(bool)), SLOT(setSmartcardLogo(bool)));
 	connect(&timeout, SIGNAL(timeout()), SLOT(timeOut()));
 	connect(&clocktimer, SIGNAL(timeout()), SLOT(clockUpdate()));
 	connect(eDVB::getInstance(), SIGNAL(timeUpdated()), SLOT(clockUpdate()));
@@ -395,6 +396,20 @@ void eZapMain::set16_9Logo(int aspect)
 	{
 		WideOn->hide();
 		WideOff->show();
+	}
+}
+
+void eZapMain::setEPGButton(bool b)
+{
+	if (b)
+	{
+		ButtonRedDis->hide();
+		ButtonRedEn->show();
+	}
+	else
+	{
+		ButtonRedEn->hide();
+		ButtonRedDis->show();
 	}
 }
 
@@ -741,49 +756,19 @@ void eZapMain::keyUp(int code)
 		}
 		break;
 	}
-//#if 0
 	case eRCInput::RC_RED:
 	{
-		eService* current = eDVB::getInstance()->service;
-		qDebug("get EventMap for onid: %02x, sid: %02x\n", current->original_network_id, current->service_id);
-		const eventMap& evt = eEPGCache::getInstance()->getEventMap(current->original_network_id, current->service_id);
-		eventMap::const_iterator It;
-		for (It = evt.begin(); It != evt.end(); It++)
+		eEPGWindow wnd(eDVB::getInstance()->service);
+		if (isVisible())
 		{
-				EITEvent* e = new EITEvent(*It->second);
- 				tm* t = localtime(&e->start_time);
-				QString _long_description;
-				_long_description += QString().sprintf("Datum %d.%d.%4d, StartTime %02d:%02d, ", t->tm_mday, t->tm_mon+1, t->tm_year+1900, t->tm_hour, t->tm_min);
-				time_t endtime = e->start_time+e->duration;
-				localtime(&endtime);
-				_long_description += QString().sprintf("EndTime %02d:%02d\n", t->tm_hour, t->tm_min);			
-
-				for (QListIterator<Descriptor> d(e->descriptor); d.current(); ++d)
-				{
-					Descriptor *descriptor=d.current();
-					if (descriptor->Tag()==DESCR_SHORT_EVENT)
-					{
-						ShortEventDescriptor *ss=(ShortEventDescriptor*)descriptor;
-						_long_description+=ss->event_name+"\n";
-					}
-					else if (d.current()->Tag()==DESCR_EXTENDED_EVENT)
-					{
-						ExtendedEventDescriptor *ss=(ExtendedEventDescriptor*)d.current();
-						_long_description+=ss->item_description;
-					}
-				}
-				qDebug(_long_description+"\n");
-				delete e;
+			timeout.stop();
+			hide();
 		}
+		wnd.show();
+		wnd.exec();
+		wnd.hide();
 		break;
-/*		hide();
-		eDownloadWindow down("http://www.elitedvb.net/files/tuner.so");
-		down.show();
-		down.exec();
-		down.hide();
-		show();*/
 	}
-//#endif
 	case eRCInput::RC_HELP:
 	{
 		if (!eDVB::getInstance()->service)
@@ -796,7 +781,7 @@ void eZapMain::keyUp(int code)
 		EIT *eit=eDVB::getInstance()->getEIT();
 		QList<EITEvent> dummy;
 		{
-			eEventDisplay ei(eDVB::getInstance()->service->service_name, eit?eit->events:dummy);
+			eEventDisplay ei(eDVB::getInstance()->service->service_name, eit?&eit->events:&dummy);
 			if (eit)
 				eit->unlock();		// HIER liegt der hund begraben.
 			actual_eventDisplay=&ei;
@@ -865,7 +850,6 @@ void eZapMain::serviceChanged(eService *service, int err)
 		ButtonGreenDis->show();	
 	}
 
-
 	if (flags&ENIGMA_AUDIO)
 	{
 		ButtonYellowDis->hide();
@@ -876,7 +860,7 @@ void eZapMain::serviceChanged(eService *service, int err)
 		ButtonYellowEn->hide();
 		ButtonYellowDis->show();
 	}
-
+	
 	if (!eZap::getInstance()->focus)
 		show();
 
