@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.285 2003/01/02 13:14:03 obi Exp $
+ * $Id: zapit.cpp,v 1.286 2003/01/04 20:07:27 alexw Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1286,7 +1286,6 @@ void enterStandby(void)
 	}
 
 	if (audio) {
-		audio->mute();
 		delete audio;
 		audio = NULL;
 	}
@@ -1431,7 +1430,7 @@ int main (int argc, char **argv)
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	fprintf(stdout, "$Id: zapit.cpp,v 1.285 2003/01/02 13:14:03 obi Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.286 2003/01/04 20:07:27 alexw Exp $\n");
 
 	if (argc > 1)
 	{

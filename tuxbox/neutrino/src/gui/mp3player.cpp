@@ -100,6 +100,9 @@ int CMP3PlayerGui::exec(CMenuTarget* parent, string actionKey)
 	frameBuffer->useBackground(true);
 	frameBuffer->paintBackground();
 
+	// set zapit in standby mode
+	g_Zapit->setStandby(true);
+
 	// tell neutrino we're in mp3_mode
 	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , NeutrinoMessages::mode_mp3 );
 	// remember last mode
@@ -113,6 +116,7 @@ int CMP3PlayerGui::exec(CMenuTarget* parent, string actionKey)
 	frameBuffer->useBackground(false);
 	
 	// Restore last mode
+	g_Zapit->setStandby(false);
  	//t_channel_id channel_id=CNeutrinoApp::getInstance()->channelList->getActiveChannel_ChannelID();
  	//g_Zapit->zapTo_serviceID(channel_id);
 	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , m_LastMode );
