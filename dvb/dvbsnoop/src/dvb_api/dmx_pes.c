@@ -1,5 +1,5 @@
 /*
-$Id: dmx_pes.c,v 1.17 2004/01/01 20:09:23 rasc Exp $
+$Id: dmx_pes.c,v 1.18 2004/01/02 00:00:37 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dmx_pes.c,v 1.17 2004/01/01 20:09:23 rasc Exp $
 
 
 $Log: dmx_pes.c,v $
+Revision 1.18  2004/01/02 00:00:37  rasc
+error output for buffer overflow
+
 Revision 1.17  2004/01/01 20:09:23  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -92,11 +95,12 @@ dvbsnoop v0.7  -- Commit to CVS
 
 #include "pes/pespacket.h"
 #include "dvb_api.h"
+#include "dmx_error.h"
 #include "dmx_pes.h"
 
 
 #define PES_BUF_SIZE  (256 * 1024)
-#define READ_BUF_SIZE (2 * 64 * 1024)  // larger as 64KB !!
+#define READ_BUF_SIZE (2 * 64 * 1024)  // larger (64KB + 6 Bytes) !!!
 
 
 
@@ -134,7 +138,7 @@ int  doReadPES (OPTION *opt)
 
 
   if((fd = open(f,openMode)) < 0){
-      perror(f);
+      IO_error(f);
       return -1;
   }
 
@@ -158,7 +162,7 @@ int  doReadPES (OPTION *opt)
     flt.flags = DMX_IMMEDIATE_START;
 
     if ((i=ioctl(fd,DMX_SET_PES_FILTER,&flt)) < 0) {
-      perror ("DMX_SET_PES_FILTER failed: ");
+      IO_error ("DMX_SET_PES_FILTER failed: ");
       return -1;
     }
 
@@ -191,7 +195,7 @@ int  doReadPES (OPTION *opt)
 
 
     // -- error or eof?
-    if (n == -1) perror("read");
+    if (n == -1) IO_error("read");
     if (n < 0)  continue;
     if (n == 0) {
 	if (dmxMode) continue;	// dmxmode = no eof!
@@ -278,8 +282,6 @@ static long pes_UnsyncRead (int fd, u_char *buf, u_long len)
         l = (buf[4]<<8) + buf[5];		// PES packet size...
 
 	if (l > 0) {
-           if ( (l+6) > len) return -1;		// prevent buffer overflow
-
            n1 = read(fd, buf+6, (unsigned int) l );
            n = (n1 < 0) ? n1 : 6+n1;
 	}
@@ -353,11 +355,6 @@ static long pes_SyncRead (int fd, u_char *buf, u_long len, u_long *skipped_bytes
         l = (buf[4]<<8) + buf[5];		// PES packet size...
 
 	if (l > 0) {
-           if ( (l+6) > len) {
-		fprintf (stderr,"buffer to small on pes read (%ld)\n",l);
-	   	return -1;		// prevent buffer overflow
-	   }
-
            n2 = read(fd, buf+6, (unsigned int) l );
            n1 = (n2 < 0) ? n2 : 6+n2;		// we already read 4+2 bytes
 	}

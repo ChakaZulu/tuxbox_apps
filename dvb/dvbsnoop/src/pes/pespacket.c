@@ -1,5 +1,5 @@
 /*
-$Id: pespacket.c,v 1.16 2004/01/01 20:09:29 rasc Exp $
+$Id: pespacket.c,v 1.17 2004/01/02 00:00:41 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: pespacket.c,v 1.16 2004/01/01 20:09:29 rasc Exp $
 
 
 $Log: pespacket.c,v $
+Revision 1.17  2004/01/02 00:00:41  rasc
+error output for buffer overflow
+
 Revision 1.16  2004/01/01 20:09:29  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -125,15 +128,13 @@ void decodePES_buf (u_char *b, u_int len, int pid)
 		p.packet_start_code_prefix);
     // $$$    return;
  }
- if (len < 6) {
-    out_nl (3," !!! Opps, read pes stream length too short (= no PES)!!!\n");
-    return;
- }
 
 
  out_nl     (3,"Packet_start_code_prefix: %06lx",p.packet_start_code_prefix);
  out_S2B_NL (3,"Stream_id: ",p.stream_id,dvbstrPESstream_ID(p.stream_id));
  out_SW_NL  (3,"PES_packet_length: ",p.PES_packet_length);
+
+
 
  b   += 6;
  len -= 6;
@@ -176,10 +177,18 @@ void decodePES_buf (u_char *b, u_int len, int pid)
 
 
 	default:
-    		out_nl (4,"Default PES decoding:");
-		indent (+1);
-		PES_decode2 (b, len2, pid);
-		indent (-1);
+ 		if ((p.PES_packet_length==0) && ((p.stream_id & 0xF0)==0xE0)) {
+
+			 out_nl (3," ==> video elementary stream... \n");
+
+ 		} else {
+
+    			out_nl (4,"Default PES decoding:");
+			indent (+1);
+			PES_decode2 (b, len2, pid);
+			indent (-1);
+
+		}
 		break;
 
  }
@@ -188,6 +197,23 @@ void decodePES_buf (u_char *b, u_int len, int pid)
 }
 
 
+ // Annotation:
+ // ISO 13818-1, 2.4.3.6:
+ // PES_packet_length:  A 16-bit field specifying the number of bytes in the
+ // PES packet following the last byte of the field. A value of 0 indicates that
+ // the PES packet length is neither specified nor bounded and is allowed only
+ // in PES packets whose payload consists of bytes from a video elementary
+ // stream contained in Transport Stream packets.
+
+
+
+
+
+
+
+/*
+ *  PES  Decoding
+ */
 
 void  PES_decode2 (u_char *b, int len, int pid)
 

@@ -1,5 +1,5 @@
 /*
-$Id: dmx_ts.c,v 1.16 2004/01/01 20:09:23 rasc Exp $
+$Id: dmx_ts.c,v 1.17 2004/01/02 00:00:37 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dmx_ts.c,v 1.16 2004/01/01 20:09:23 rasc Exp $
 
 
 $Log: dmx_ts.c,v $
+Revision 1.17  2004/01/02 00:00:37  rasc
+error output for buffer overflow
+
 Revision 1.16  2004/01/01 20:09:23  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -87,6 +90,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 #include "ts/tslayer.h"
 #include "dvb_api.h"
+#include "dmx_error.h"
 #include "dmx_ts.h"
 
 
@@ -129,7 +133,7 @@ int  doReadTS (OPTION *opt)
 
 
   if((fd_dvr = open(f,O_RDONLY)) < 0){
-      perror(f);
+      IO_error(f);
       return -1;
   }
 
@@ -145,7 +149,7 @@ int  doReadTS (OPTION *opt)
     struct dmx_pes_filter_params flt;
 
     if((fd_dmx = open(opt->devDemux,O_RDWR)) < 0){
-        perror(opt->devDemux);
+        IO_error(opt->devDemux);
 	close (fd_dvr);
         return -1;
     }
@@ -161,7 +165,7 @@ int  doReadTS (OPTION *opt)
     flt.flags = DMX_IMMEDIATE_START;
 
     if ((i=ioctl(fd_dmx,DMX_SET_PES_FILTER,&flt)) < 0) {
-      perror ("DMX_SET_PES_FILTER failed: ");
+      IO_error ("DMX_SET_PES_FILTER failed: ");
       return -1;
     }
 
@@ -192,7 +196,7 @@ int  doReadTS (OPTION *opt)
 
 
     // -- error or eof?
-    if (n == -1) perror("read");
+    if (n == -1) IO_error("read");
     if (n < 0)  continue;
     if (n == 0) {
 	if (!fileMode) continue;	// DVRmode = no eof!

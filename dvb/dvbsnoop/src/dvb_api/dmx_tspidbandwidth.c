@@ -1,5 +1,5 @@
 /*
-$Id: dmx_tspidbandwidth.c,v 1.4 2004/01/01 20:09:23 rasc Exp $
+$Id: dmx_tspidbandwidth.c,v 1.5 2004/01/02 00:00:37 rasc Exp $
 
 
  DVBSNOOP
@@ -12,6 +12,9 @@ $Id: dmx_tspidbandwidth.c,v 1.4 2004/01/01 20:09:23 rasc Exp $
 
 
 $Log: dmx_tspidbandwidth.c,v $
+Revision 1.5  2004/01/02 00:00:37  rasc
+error output for buffer overflow
+
 Revision 1.4  2004/01/01 20:09:23  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -52,6 +55,7 @@ new: bandwidth usage reporting for a PID
 #include "misc/pkt_time.h"
 
 #include "dvb_api.h"
+#include "dmx_error.h"
 #include "dmx_tspidbandwidth.h"
 
 
@@ -105,14 +109,14 @@ int ts_pidbandwidth (OPTION *opt)
 	// -- open DVR device for reading
    	pfd.events = POLLIN | POLLPRI;
 	if((pfd.fd = open(opt->devDvr,O_RDONLY|O_NONBLOCK)) < 0){
-		perror(opt->devDvr);
+		IO_error(opt->devDvr);
 		return -1;
    	}
 
 
 
 	if ((dmxfd=open(opt->devDemux,O_RDWR)) < 0) {
-		perror(opt->devDemux);
+		IO_error(opt->devDemux);
 		return -1;
 	}
 	ioctl (dmxfd,DMX_SET_BUFFER_SIZE, sizeof(buf));
@@ -123,7 +127,7 @@ int ts_pidbandwidth (OPTION *opt)
 		flt.pes_type = DMX_PES_OTHER;
 		flt.flags = DMX_IMMEDIATE_START;
 		if (ioctl(dmxfd, DMX_SET_PES_FILTER, &flt) < 0) {
-			perror("DMX_SET_PES_FILTER");
+			IO_error("DMX_SET_PES_FILTER");
 			return -1;
 		}
 
@@ -221,7 +225,7 @@ int ts_pidbandwidth (OPTION *opt)
 
 
 	if (ioctl(dmxfd, DMX_STOP) < 0)
-		perror("DMX_STOP");
+		IO_error("DMX_STOP");
 	close(dmxfd);
 	close(pfd.fd);
 

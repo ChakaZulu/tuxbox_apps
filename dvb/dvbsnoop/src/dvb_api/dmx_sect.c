@@ -1,5 +1,5 @@
 /*
-$Id: dmx_sect.c,v 1.14 2004/01/01 20:09:23 rasc Exp $
+$Id: dmx_sect.c,v 1.15 2004/01/02 00:00:37 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dmx_sect.c,v 1.14 2004/01/01 20:09:23 rasc Exp $
 
 
 $Log: dmx_sect.c,v $
+Revision 1.15  2004/01/02 00:00:37  rasc
+error output for buffer overflow
+
 Revision 1.14  2004/01/01 20:09:23  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -79,6 +82,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 #include "sections/sectables.h"
 #include "dvb_api.h"
+#include "dmx_error.h"
 #include "dmx_sect.h"
 
 
@@ -113,7 +117,7 @@ int  doReadSECT (OPTION *opt)
 
 
   if((fd = open(f,openMode)) < 0){
-      perror(f);
+      IO_error(f);
       return -1;
   }
 
@@ -133,7 +137,7 @@ int  doReadSECT (OPTION *opt)
     if (opt->crc) flt.flags |= DMX_CHECK_CRC;
 
     if ((i=ioctl (fd, DMX_SET_FILTER, &flt)) < 0) {
-      perror ("DMX_SET_FILTER failed: ");
+      IO_error ("DMX_SET_FILTER failed: ");
       return -1;
     }
 
@@ -154,7 +158,7 @@ int  doReadSECT (OPTION *opt)
     n = sect_read(fd,buf,sizeof(buf));
 
     // -- error or eof?
-    if (n == -1) perror("read");
+    if (n == -1) IO_error("read");
     if (n < 0)  continue;
     if (n == 0) {
 	if (dmxMode) continue;	// dmxmode = no eof!

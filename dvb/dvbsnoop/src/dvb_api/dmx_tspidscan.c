@@ -1,5 +1,5 @@
 /*
-$Id: dmx_tspidscan.c,v 1.11 2004/01/01 20:09:23 rasc Exp $
+$Id: dmx_tspidscan.c,v 1.12 2004/01/02 00:00:37 rasc Exp $
 
 
  DVBSNOOP
@@ -14,6 +14,9 @@ $Id: dmx_tspidscan.c,v 1.11 2004/01/01 20:09:23 rasc Exp $
 
 
 $Log: dmx_tspidscan.c,v $
+Revision 1.12  2004/01/02 00:00:37  rasc
+error output for buffer overflow
+
 Revision 1.11  2004/01/01 20:09:23  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -72,6 +75,7 @@ pidscan on transponder
 #include "misc/output.h"
 
 #include "dvb_api.h"
+#include "dmx_error.h"
 #include "dmx_tspidscan.h"
 
 
@@ -141,7 +145,7 @@ int ts_pidscan (OPTION *opt)
    // alloc pids
    pidArray = (int *) malloc ( (MAX_PID+1) * sizeof(int) );
   	if (!pidArray) {
-		perror("malloc");
+		IO_error("malloc");
 		return -1;
 	}
 
@@ -152,7 +156,7 @@ int ts_pidscan (OPTION *opt)
    dmxfd = (int *) malloc(sizeof(int) * MAX_PID_FILTER);
 	if (!dmxfd) {
 		free (pidArray);
-		perror("malloc");
+		IO_error("malloc");
 		return -1;
 	}
 
@@ -173,7 +177,7 @@ int ts_pidscan (OPTION *opt)
 		// -- open DVR device for reading
 	   	pfd.events = POLLIN | POLLPRI;
    		if((pfd.fd = open(opt->devDvr,O_RDONLY|O_NONBLOCK)) < 0){
-			perror(opt->devDvr);
+			IO_error(opt->devDvr);
 			free (pidArray);
 			free (dmxfd);
 			return -1;
@@ -189,7 +193,7 @@ int ts_pidscan (OPTION *opt)
 			if (dmxfd[i] < 0) {
 				if ((dmxfd[i]=open(opt->devDemux,O_RDWR)) < 0)  {
 					// -- no filters???
-					if (i == 0) perror(opt->devDemux);
+					if (i == 0) IO_error(opt->devDemux);
 					break;
 				}
 			}
@@ -205,7 +209,7 @@ int ts_pidscan (OPTION *opt)
 			flt.pes_type = DMX_PES_OTHER;
 			flt.flags = DMX_IMMEDIATE_START;
 			if (ioctl(dmxfd[i], DMX_SET_PES_FILTER, &flt) < 0) {
-				if (i == 0) perror("DMX_SET_PES_FILTER");
+				if (i == 0) IO_error("DMX_SET_PES_FILTER");
 				break;
 			}
 			pid ++;

@@ -1,5 +1,5 @@
 /*
-$Id: tslayer.c,v 1.10 2004/01/01 20:09:43 rasc Exp $
+$Id: tslayer.c,v 1.11 2004/01/02 00:00:42 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: tslayer.c,v 1.10 2004/01/01 20:09:43 rasc Exp $
 
 
 $Log: tslayer.c,v $
+Revision 1.11  2004/01/02 00:00:42  rasc
+error output for buffer overflow
+
 Revision 1.10  2004/01/01 20:09:43  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -117,8 +120,14 @@ void decodeTS_buf (u_char *b, int len, int pid)
 
 
  out_SB_NL (3,"Sync-Byte: ",t.sync_byte);
- out_SB_NL (3,"Transport_error_indicator: ",t.transport_error_indicator);
- out_SB_NL (3,"Payload_unit_start_indicator: ",t.payload_unit_start_indicator);
+ out_SB    (3,"Transport_error_indicator: ",t.transport_error_indicator);
+    if (t.transport_error_indicator) out_nl (4,"  [ ==> Packet has errors!]");
+    else out_NL (3);
+
+ out_SB    (3,"Payload_unit_start_indicator: ",t.payload_unit_start_indicator);
+    if (t.payload_unit_start_indicator) out_nl (6,"  ==> Packet data starts");
+    else out_NL (3);
+
  out_SB_NL (3,"transport_priority: ",t.transport_priority);
  out_S2W_NL(3,"PID: ",t.pid, dvbstrTSpid_ID (t.pid) );
 
