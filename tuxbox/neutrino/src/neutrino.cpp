@@ -734,6 +734,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.mp3player_follow  = configfile.getInt32("mp3player_follow",0);
 	strcpy( g_settings.mp3player_screensaver, configfile.getString( "mp3player_screensaver", "0" ).c_str() );
 	g_settings.mp3player_highprio  = configfile.getInt32("mp3player_highprio",0);
+	g_settings.mp3player_select_title_by_name = configfile.getInt32("mp3player_select_title_by_name",0);
 
 	//Filebrowser
 	g_settings.filebrowser_showrights =  configfile.getInt32("filebrowser_showrights", 1);
@@ -1044,6 +1045,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "mp3player_follow", g_settings.mp3player_follow );
 	configfile.setString( "mp3player_screensaver", g_settings.mp3player_screensaver );
 	configfile.setInt32( "mp3player_highprio", g_settings.mp3player_highprio );
+	configfile.setInt32( "mp3player_select_title_by_name", g_settings.mp3player_select_title_by_name );
 
 	//Filebrowser
 	configfile.setInt32("filebrowser_showrights", g_settings.filebrowser_showrights);
@@ -1629,6 +1631,7 @@ void CNeutrinoApp::InitAudioplPicSettings(CMenuWidget &audioplPicSettings)
 	audioplPicSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_AUDIOPLAYER_NAME));
 	audioplPicSettings.addItem(new CMenuOptionChooser(LOCALE_AUDIOPLAYER_DISPLAY_ORDER, &g_settings.mp3player_display     , AUDIOPLAYER_DISPLAY_ORDER_OPTIONS, AUDIOPLAYER_DISPLAY_ORDER_OPTION_COUNT, true ));
 	audioplPicSettings.addItem(new CMenuOptionChooser(LOCALE_AUDIOPLAYER_FOLLOW       , &g_settings.mp3player_follow      , MESSAGEBOX_NO_YES_OPTIONS      , MESSAGEBOX_NO_YES_OPTION_COUNT      , true ));
+	audioplPicSettings.addItem(new CMenuOptionChooser(LOCALE_AUDIOPLAYER_SELECT_TITLE_BY_NAME       , &g_settings.mp3player_select_title_by_name      , MESSAGEBOX_NO_YES_OPTIONS      , MESSAGEBOX_NO_YES_OPTION_COUNT      , true ));
 
 	CStringInput * audio_screensaver= new CStringInput(LOCALE_AUDIOPLAYER_SCREENSAVER_TIMEOUT, g_settings.mp3player_screensaver, 2, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ");
 	audioplPicSettings.addItem(new CMenuForwarder(LOCALE_AUDIOPLAYER_SCREENSAVER_TIMEOUT, true, g_settings.mp3player_screensaver, audio_screensaver));

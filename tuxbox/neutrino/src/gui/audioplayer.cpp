@@ -42,6 +42,7 @@
 #include <driver/encoding.h>
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
+#include <driver/audiometadata.h>
 #define DBOX 1
 #ifdef DBOX
 #include <driver/aviaext.h>
@@ -60,6 +61,7 @@
 #include <gui/widget/messagebox.h>
 #include <gui/widget/hintbox.h>
 #include <gui/widget/stringinput.h>
+#include <gui/widget/stringinput_ext.h>
 
 #include <system/settings.h>
 
@@ -84,6 +86,8 @@
 #endif
 #define ConnectLineBox_Width	15
 
+#define AUDIOPLAYERGUI_SMSKEY_TIMEOUT 750
+
 //------------------------------------------------------------------------
 
 CAudioPlayerGui::CAudioPlayerGui()
@@ -93,6 +97,7 @@ CAudioPlayerGui::CAudioPlayerGui()
 	visible = false;
 	selected = 0;
 	m_metainfo = "";
+	m_select_title_by_name = g_settings.mp3player_select_title_by_name==1;
 
 	if(strlen(g_settings.network_nfs_mp3dir)!=0)
 		Path = g_settings.network_nfs_mp3dir;
@@ -108,6 +113,7 @@ CAudioPlayerGui::CAudioPlayerGui()
 	audiofilefilter.addFilter("ogg");
 	audiofilefilter.addFilter("url");
 	audiofilefilter.addFilter("wav");
+	m_SMSKeyInput.setTimeout(AUDIOPLAYERGUI_SMSKEY_TIMEOUT);
 }
 
 //------------------------------------------------------------------------
@@ -236,6 +242,10 @@ int CAudioPlayerGui::show()
 	bool update=true;
 	bool clear_before_update=false;
 	key_level=0;
+
+	unsigned char keySelectedBySMSInput=0;
+	bool checkSMSKeyInput=false;
+	
 	while(loop)
 	{
 		if(!m_screensaver)
@@ -287,6 +297,15 @@ int CAudioPlayerGui::show()
 				screensaver(false);
 			}
 		}
+
+		if (!(msg == CRCInput::RC_timeout)
+		    && ((!g_RCInput->isNumeric(msg) || msg == CRCInput::RC_0) || playlist.empty()))
+		{
+			//printf("resetting\n");
+			m_SMSKeyInput.resetOldKey();
+			checkSMSKeyInput=false;
+		}
+
 		if( msg == CRCInput::RC_timeout)
 		{
 			// nothing
@@ -405,10 +424,14 @@ int CAudioPlayerGui::show()
 					update=true;
 				}
 			}
-			else
+			else if(key_level==1)
 			{
 				stop();
+			} else
+			{
+				// key_level==2
 			}
+
 		}
 		else if(msg==CRCInput::RC_green)
 		{
@@ -534,10 +557,38 @@ int CAudioPlayerGui::show()
 				paintLCD();
 				update=true;
 			}
-			else
+			else if (key_level==1)
 			{
 				if(curr_audiofile.FileType != CFile::STREAM_MP3)
 					rev();
+			} else { // key_level == 2
+
+ 				if(m_state==CAudioPlayerGui::STOP)
+ 				{
+ 					if (!playlist.empty()) 
+ 					{
+ 						savePlaylist();
+ 						CLCD::getInstance()->setMode(CLCD::MODE_AUDIO);
+ 						paintLCD();
+ 						update=true;
+ 					}
+ 				} else
+				{
+					if(curr_audiofile.FileType != CFile::STREAM_MP3)
+					   //&& curr_audiofile.FileType != CFile::FILE_MP3)
+					{
+						long seconds=0;
+						CIntInput secondsInput(LOCALE_AUDIOPLAYER_JUMP_DIALOG_TITLE,
+								       seconds,
+								       5,
+								       LOCALE_AUDIOPLAYER_JUMP_DIALOG_HINT1,
+								       LOCALE_AUDIOPLAYER_JUMP_DIALOG_HINT2);
+						int res = secondsInput.exec(NULL,"");
+						if (seconds != 0 && res!= menu_return::RETURN_EXIT_ALL)
+							rev(seconds);
+						update=true;
+					}
+				}
 			}
 		}
 		else if(msg==CRCInput::RC_yellow)
@@ -551,9 +602,13 @@ int CAudioPlayerGui::show()
 				clear_before_update=true;
 				update=true;
 			}
-			else
+			else if(key_level==1)
 			{
 				pause();
+			} else 
+			{ // key_level==2
+				m_select_title_by_name=!m_select_title_by_name;
+				paintFoot();
 			}
 		}
 		else if(msg==CRCInput::RC_blue)
@@ -575,59 +630,63 @@ int CAudioPlayerGui::show()
 					update = true;
 				}
 			}
-			else
+			else if (key_level == 1)
 			{
 				if(curr_audiofile.FileType != CFile::STREAM_MP3)
 					ff();
+			} else // key_level == 2
+			{
+				if (m_state!=CAudioPlayerGui::STOP)
+				{
+					
+					if(curr_audiofile.FileType != CFile::STREAM_MP3)
+					   //&& curr_audiofile.FileType != CFile::FILE_MP3)
+					{
+						long seconds=0;
+						CIntInput secondsInput(LOCALE_AUDIOPLAYER_JUMP_DIALOG_TITLE,
+								       seconds,
+								       5,
+								       LOCALE_AUDIOPLAYER_JUMP_DIALOG_HINT1,
+								       LOCALE_AUDIOPLAYER_JUMP_DIALOG_HINT2);
+						int res = secondsInput.exec(NULL,"");
+						if (seconds != 0 && res!= menu_return::RETURN_EXIT_ALL)
+							ff(seconds);
+						update = true;
+					}
+				}
 			}
 
 		}
 		else if(msg==CRCInput::RC_help)
 		{
-			if(key_level==1)
-			{
+			if (key_level==2)
 				key_level=0;
-				paintFoot();
-			}
 			else
-			{
-				if(m_state!=CAudioPlayerGui::STOP)
-				{
-					key_level=1;
-					paintFoot();
-				} 
-				else 
-				{
-					if (!playlist.empty()) 
-					{
-						savePlaylist();
-						CLCD::getInstance()->setMode(CLCD::MODE_AUDIO);
-						paintLCD();
-						update=true;
-					}
-				}
-			}
+				key_level++;
+			// jumping in streams not supported
+			if (m_state!=CAudioPlayerGui::STOP
+			    && key_level==2
+			    && curr_audiofile.FileType == CFile::STREAM_MP3)
+				key_level=0;
+
+			paintFoot();
 		}
 		else if ((msg >= CRCInput::RC_1) && (msg <= CRCInput::RC_9) && !(playlist.empty()))
-		{ //numeric zap
-			int x1=(g_settings.screen_EndX- g_settings.screen_StartX)/2 + g_settings.screen_StartX-50;
-			int y1=(g_settings.screen_EndY- g_settings.screen_StartY)/2 + g_settings.screen_StartY;
-			int val=0;
-			char str[11];
-			do
+		{ //numeric zap or SMS zap
+			if (m_select_title_by_name)
 			{
-				val = val * 10 + CRCInput::getNumericValue(msg);
-				sprintf(str,"%d",val);
-				int w = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP]->getRenderWidth(str);
-				int h = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP]->getHeight();
-				frameBuffer->paintBoxRel(x1 - 7, y1 - h - 5, w + 14, h + 10, COL_MENUCONTENT_PLUS_6);
-				frameBuffer->paintBoxRel(x1 - 4, y1 - h - 3, w +  8, h +  6, COL_MENUCONTENTSELECTED_PLUS_0);
-				g_Font[SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP]->RenderString(x1,y1,w+1,str,COL_MENUCONTENTSELECTED,0);
-				g_RCInput->getMsg( &msg, &data, 100 ); 
-			} while (g_RCInput->isNumeric(msg) && val < 1000000);
-			if (msg == CRCInput::RC_ok)
-				selected = std::min((int)playlist.size(), val) - 1;
-			update = true;
+				//printf("received key: %c\n",msg);
+				keySelectedBySMSInput = m_SMSKeyInput.handleMsg(msg);
+				checkSMSKeyInput=true;
+			} else 
+			{
+				//printf("numeric zap\n");
+				int val=0;
+				if (getNumericInput(msg,val))
+					selected = std::min((int)playlist.size(), val) - 1;
+				update = true;
+			}
+			
 		}
 		else if(msg == CRCInput::RC_0)
 		{
@@ -680,6 +739,51 @@ int CAudioPlayerGui::show()
 			paintHead();
 			paintLCD();
 		}
+
+		// check if sms key selection can be executed
+		if (checkSMSKeyInput)
+		{
+			time_t actTime = time(NULL);
+			double timeout = m_SMSKeyInput.getOldKeyTime() + m_SMSKeyInput.getTimeout()/1000.0; 
+			if(actTime > timeout)
+			{
+				checkSMSKeyInput=false;
+				
+				unsigned int i;
+				//printf("before loop\n");
+				for(i=(selected+1) % playlist.size(); i != selected ; i= (i+1) % playlist.size())
+				{	
+					std::string fName = "";
+					getFileInfoToDisplay(fName,i,true);
+					char firstCharOfTitle = fName[0];
+					//printf("index i: %d\n",i);
+					if (tolower(firstCharOfTitle) == keySelectedBySMSInput)
+					{
+						//printf("got it: %s\n",fName.c_str());
+						break;
+					}
+				}
+				
+				int prevselected=selected;
+				selected=i;
+				
+				paintItem(prevselected - liststart);
+				unsigned int oldliststart = liststart;
+				liststart = (selected/listmaxshow)*listmaxshow;
+				//printf("before paint\n");
+				if(oldliststart!=liststart)
+				{
+					paint();
+				}
+				else
+				{
+					paintItem(selected - liststart);
+				}
+				update=true;
+			} 
+//			else 
+// 				printf("no timeout\n");
+		}
 	}
 	hide();
 
@@ -690,6 +794,7 @@ int CAudioPlayerGui::show()
 }
 
 //------------------------------------------------------------------------
+
 
 void CAudioPlayerGui::hide()
 {
@@ -767,32 +872,7 @@ void CAudioPlayerGui::paintItem(int pos)
 		char sNr[20];
 		sprintf(sNr, "%2d : ", pos + liststart + 1);
 		std::string tmp=sNr;
- 		std::string artist="Artist?";
-		std::string title="Title?";
-		
-		if (!playlist[pos + liststart].Artist.empty())
-			artist = playlist[pos + liststart].Artist;
-		if (!playlist[pos + liststart].Title.empty())
-			title = playlist[pos + liststart].Title;
-		if(g_settings.mp3player_display == TITLE_ARTIST)
-		{
-			tmp += title;
-			tmp += ", ";
-			tmp += artist;
-		}
-		else //if(g_settings.mp3player_display == ARTIST_TITLE)
-		{
-			tmp += artist;
-			tmp += ", ";
-			tmp += title;
-		}
-
-		if (!playlist[pos + liststart].Album.empty())
-		{
-			tmp += " (";
-			tmp += playlist[pos + liststart].Album;
-			tmp += ')';
-		}
+		getFileInfoToDisplay(tmp,pos+liststart,false);
 		
 		char dura[9];
 		snprintf(dura, 8, "%ld:%02ld", playlist[pos + liststart].Duration / 60, playlist[pos + liststart].Duration % 60);
@@ -835,44 +915,60 @@ void CAudioPlayerGui::paintHead()
 }
 
 //------------------------------------------------------------------------
-const struct button_label AudioPlayerButtons[2][4] =
+const struct button_label AudioPlayerButtons[6][4] =
 {
 	{
-		{ NEUTRINO_ICON_BUTTON_RED   , LOCALE_AUDIOPLAYER_STOP        },
-		{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_AUDIOPLAYER_REWIND      },
-		{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_AUDIOPLAYER_PAUSE       },
-		{ NEUTRINO_ICON_BUTTON_BLUE  , LOCALE_AUDIOPLAYER_FASTFORWARD },
+		{ NEUTRINO_ICON_BUTTON_RED   , LOCALE_AUDIOPLAYER_STOP                        },
+		{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_AUDIOPLAYER_REWIND                      },
+		{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_AUDIOPLAYER_PAUSE                       },
+		{ NEUTRINO_ICON_BUTTON_BLUE  , LOCALE_AUDIOPLAYER_FASTFORWARD                 },
 	},
 	{
-		{ NEUTRINO_ICON_BUTTON_RED   , LOCALE_AUDIOPLAYER_DELETE      },
-		{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_AUDIOPLAYER_ADD         },
-		{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_AUDIOPLAYER_DELETEALL   },
-		{ NEUTRINO_ICON_BUTTON_BLUE  , LOCALE_AUDIOPLAYER_SHUFFLE     }
+		{ NEUTRINO_ICON_BUTTON_RED   , LOCALE_AUDIOPLAYER_DELETE                      },
+		{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_AUDIOPLAYER_ADD                         },
+		{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_AUDIOPLAYER_DELETEALL                   },
+		{ NEUTRINO_ICON_BUTTON_BLUE  , LOCALE_AUDIOPLAYER_SHUFFLE                     }
+	},
+	{
+		{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_AUDIOPLAYER_JUMP_BACKWARDS              },
+//		{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_AUDIOPLAYER_BUTTON_SELECT_TITLE_BY_NAME },			
+		{ NEUTRINO_ICON_BUTTON_BLUE  , LOCALE_AUDIOPLAYER_JUMP_FORWARDS               }
+	},
+	{
+		{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_AUDIOPLAYER_JUMP_BACKWARDS              },
+//		{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_AUDIOPLAYER_BUTTON_SELECT_TITLE_BY_ID   },			
+		{ NEUTRINO_ICON_BUTTON_BLUE  , LOCALE_AUDIOPLAYER_JUMP_FORWARDS               }
+	},
+	{
+		{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_AUDIOPLAYER_SAVE_PLAYLIST               },
+		{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_AUDIOPLAYER_BUTTON_SELECT_TITLE_BY_NAME },			
+	},
+	{
+		{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_AUDIOPLAYER_SAVE_PLAYLIST               },
+		{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_AUDIOPLAYER_BUTTON_SELECT_TITLE_BY_ID   },			
 	}
+
 };
+//------------------------------------------------------------------------
 
 void CAudioPlayerGui::paintFoot()
 {
 //	printf("paintFoot{\n");
-	if(m_state==CAudioPlayerGui::STOP) // insurance
-		key_level=0;
+ 	if(m_state==CAudioPlayerGui::STOP
+ 	   && key_level==1) // insurance
+ 		key_level=2;
+
 	int ButtonWidth = (width-20) / 4;
 	int ButtonWidth2 = (width-50) / 2;
 	frameBuffer->paintBoxRel(x,y+(height-info_height-2*buttonHeight), width,2*buttonHeight, COL_MENUHEAD_PLUS_0);
 	frameBuffer->paintHLine(x, x+width,  y+(height-info_height-2*buttonHeight), COL_INFOBAR_SHADOW_PLUS_0);
 
-	if (!(playlist.empty()))
+	if (!playlist.empty())
 	{
+		// play
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, x + 1* ButtonWidth2 + 25, y+(height-info_height-buttonHeight)-3);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 1 * ButtonWidth2 + 53 , y+(height-info_height-buttonHeight)+24 - 4, ButtonWidth2- 28, g_Locale->getText(LOCALE_AUDIOPLAYER_PLAY), COL_INFOBAR, 0, true); // UTF-8
-		if (m_state==CAudioPlayerGui::STOP) {
-		  // help will store a playlist file
-		  frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ 0* ButtonWidth + 25, y+(height-info_height-buttonHeight)-3);
-		  g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+ 0* ButtonWidth +53 , y+(height-info_height-buttonHeight)+24 - 4, ButtonWidth2- 28, g_Locale->getText(LOCALE_AUDIOPLAYER_SAVE_PLAYLIST), COL_INFOBAR, 0, true); // UTF-8
-		}
-	}
-	if(m_state!=CAudioPlayerGui::STOP)
-	{
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 1 * ButtonWidth2 + 53 , y+(height-info_height-buttonHeight)+24 - 4, ButtonWidth2- 28, g_Locale->getText(LOCALE_AUDIOPLAYER_PLAY), COL_INFOBAR, 0, true); // UTF-8		
+		// keylevel switch
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ 0* ButtonWidth + 25, y+(height-info_height-buttonHeight)-3);
 		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+ 0* ButtonWidth +53 , y+(height-info_height-buttonHeight)+24 - 4, ButtonWidth2- 28, g_Locale->getText(LOCALE_AUDIOPLAYER_KEYLEVEL), COL_INFOBAR, 0, true); // UTF-8
 	}
@@ -884,9 +980,27 @@ void CAudioPlayerGui::paintFoot()
 		else
 			::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 10, y + (height - info_height - 2 * buttonHeight) + 4, ButtonWidth, 4, AudioPlayerButtons[1]);
 	}
-	else
+	else if (key_level == 1)
 	{	
 		::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 10, y + (height - info_height - 2 * buttonHeight) + 4, ButtonWidth, 4, AudioPlayerButtons[0]);
+	} else { // key_level == 2
+		if (m_state == CAudioPlayerGui::STOP)
+		{
+			if (m_select_title_by_name)
+			{
+				::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + ButtonWidth + 10, y + (height - info_height - 2 * buttonHeight) + 4, ButtonWidth, 2, AudioPlayerButtons[5]);
+			} else {
+				::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + ButtonWidth + 10, y + (height - info_height - 2 * buttonHeight) + 4, ButtonWidth, 2, AudioPlayerButtons[4]);
+			}
+		} else {
+			if (m_select_title_by_name)
+			{
+				::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + ButtonWidth + 10, y + (height - info_height - 2 * buttonHeight) + 4, ButtonWidth*2, 2, AudioPlayerButtons[3]);
+			} else {
+				::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + ButtonWidth + 10, y + (height - info_height - 2 * buttonHeight) + 4, ButtonWidth*2, 2, AudioPlayerButtons[2]);
+			}
+			
+		}
 	}
 //	printf("paintFoot}\n");
 }
@@ -975,6 +1089,7 @@ void CAudioPlayerGui::clearItemID3DetailsLine ()
 {
 	paintItemID3DetailsLine (-1);
 }
+//------------------------------------------------------------------------
 
 void CAudioPlayerGui::paintItemID3DetailsLine (int pos)
 {
@@ -1048,6 +1163,7 @@ void CAudioPlayerGui::paintItemID3DetailsLine (int pos)
 		frameBuffer->paintBackgroundBoxRel(x, ypos2, width, info_height);
 	}
 }
+//------------------------------------------------------------------------
 
 void CAudioPlayerGui::stop()
 {
@@ -1063,6 +1179,7 @@ void CAudioPlayerGui::stop()
 	if(CAudioPlayer::getInstance()->getState() != CBaseDec::STOP)
 		CAudioPlayer::getInstance()->stop();
 }
+//------------------------------------------------------------------------
 
 void CAudioPlayerGui::pause()
 {
@@ -1078,37 +1195,39 @@ void CAudioPlayerGui::pause()
 	}
 	paintLCD();
 }
+//------------------------------------------------------------------------
 
-void CAudioPlayerGui::ff()
+void CAudioPlayerGui::ff(unsigned int seconds)
 {
 	if(m_state==CAudioPlayerGui::FF)
 	{
 		m_state=CAudioPlayerGui::PLAY;
-		CAudioPlayer::getInstance()->ff();
+		CAudioPlayer::getInstance()->ff(seconds);
 	}
 	else if(m_state==CAudioPlayerGui::PLAY || m_state==CAudioPlayerGui::PAUSE || m_state==CAudioPlayerGui::REV)
 	{
 		m_state=CAudioPlayerGui::FF;
-		CAudioPlayer::getInstance()->ff();
+		CAudioPlayer::getInstance()->ff(seconds);
 	}
 	paintLCD();
 }
+//------------------------------------------------------------------------
 
-void CAudioPlayerGui::rev()
+void CAudioPlayerGui::rev(unsigned int seconds)
 {
 	if(m_state==CAudioPlayerGui::REV)
 	{
 		m_state=CAudioPlayerGui::PLAY;
-		CAudioPlayer::getInstance()->rev();
+		CAudioPlayer::getInstance()->rev(seconds);
 	}
 	else if(m_state==CAudioPlayerGui::PLAY || m_state==CAudioPlayerGui::PAUSE || m_state==CAudioPlayerGui::FF)
 	{
 		m_state=CAudioPlayerGui::REV;
-		CAudioPlayer::getInstance()->rev();
+		CAudioPlayer::getInstance()->rev(seconds);
 	}
 	paintLCD();
 }
-
+//------------------------------------------------------------------------
 
 void CAudioPlayerGui::play(int pos)
 {
@@ -1173,6 +1292,7 @@ void CAudioPlayerGui::play(int pos)
 	if(!m_screensaver)
 		paintFoot();
 }
+//------------------------------------------------------------------------
 
 int CAudioPlayerGui::getNext()
 {
@@ -1183,6 +1303,8 @@ int CAudioPlayerGui::getNext()
 		ret=0;
 	return ret;
 }
+//------------------------------------------------------------------------
+
 void CAudioPlayerGui::updateMetaData()
 {
 	bool updateMeta=false;
@@ -1255,6 +1377,7 @@ void CAudioPlayerGui::updateMetaData()
 	}
 
 }
+//------------------------------------------------------------------------
 
 void CAudioPlayerGui::updateTimes(const bool force)
 {
@@ -1315,6 +1438,54 @@ void CAudioPlayerGui::updateTimes(const bool force)
 	}
 }
 
+//------------------------------------------------------------------------
+void CAudioPlayerGui::getFileInfoToDisplay(std::string& fileInfo, int pos, bool loadMetaData)
+{
+	std::string artist ="Artist?";
+	std::string title = "Title?";
+	CAudioMetaData meta;
+	meta.clear();
+	CAudiofile file = playlist[pos];
+	// make sure that fields are read if we are selecting titles by name
+	if (loadMetaData
+	    && (file.Artist.empty() || file.Title.empty()))
+	{
+		GetMetaData(&file);
+	}
+
+	if (!file.Artist.empty())
+		artist = file.Artist;
+
+	if (!file.Title.empty())
+		title = file.Title;
+
+	if(g_settings.mp3player_display == TITLE_ARTIST)
+	{
+		fileInfo += title;
+		fileInfo += ", ";
+		fileInfo += artist;
+	}
+	else //if(g_settings.mp3player_display == ARTIST_TITLE)
+	{
+		fileInfo += artist;
+		fileInfo += ", ";
+		fileInfo += title;
+	}
+	
+	if (!file.Album.empty())
+	{
+		fileInfo += " (";
+		fileInfo += file.Album;
+		fileInfo += ')';
+	} 
+	if (fileInfo.empty())
+	{
+		fileInfo += "Unknown #";
+		fileInfo += (pos+1);
+	}
+}
+//------------------------------------------------------------------------
+
 void CAudioPlayerGui::paintLCD()
 {
 	switch(m_state)
@@ -1345,6 +1516,7 @@ void CAudioPlayerGui::paintLCD()
 		break;
 	}
 }
+//------------------------------------------------------------------------
 
 void CAudioPlayerGui::screensaver(bool on)
 {
@@ -1364,6 +1536,7 @@ void CAudioPlayerGui::screensaver(bool on)
 		m_idletime=time(NULL);
 	}
 }
+//------------------------------------------------------------------------
 
 void CAudioPlayerGui::GetMetaData(CAudiofile *File)
 {
@@ -1406,6 +1579,28 @@ void CAudioPlayerGui::GetMetaData(CAudiofile *File)
 #endif
 	}
 }
+//------------------------------------------------------------------------
+
+bool CAudioPlayerGui::getNumericInput(neutrino_msg_data_t& msg, int& val) {
+	
+	neutrino_msg_data_t data;
+	int x1=(g_settings.screen_EndX- g_settings.screen_StartX)/2 + g_settings.screen_StartX-50;
+	int y1=(g_settings.screen_EndY- g_settings.screen_StartY)/2 + g_settings.screen_StartY;
+	char str[11];
+	do
+	{
+		val = val * 10 + CRCInput::getNumericValue(msg);
+		sprintf(str,"%d",val);
+		int w = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP]->getRenderWidth(str);
+		int h = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP]->getHeight();
+		frameBuffer->paintBoxRel(x1 - 7, y1 - h - 5, w + 14, h + 10, COL_MENUCONTENT_PLUS_6);
+		frameBuffer->paintBoxRel(x1 - 4, y1 - h - 3, w +  8, h +  6, COL_MENUCONTENTSELECTED_PLUS_0);
+		g_Font[SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP]->RenderString(x1,y1,w+1,str,COL_MENUCONTENTSELECTED,0);
+		g_RCInput->getMsg(&msg, &data, 100); 
+	} while (g_RCInput->isNumeric(msg) && val < 1000000);
+	return (msg == CRCInput::RC_ok);
+}
+//------------------------------------------------------------------------
 
 void CAudioPlayerGui::savePlaylist()
 {
@@ -1481,7 +1676,7 @@ void CAudioPlayerGui::savePlaylist()
 			}
 			input.close();
 		} else {
-			std::cout << "neither .m3u nor directory selected, abort" << std::endl;
+			std::cout << "CAudioPlayerGui: neither .m3u nor directory selected, abort" << std::endl;
 			return;
 		}
 		std::string absPlaylistFilename = absPlaylistDir;
@@ -1489,7 +1684,7 @@ void CAudioPlayerGui::savePlaylist()
 		absPlaylistFilename += filename;
 		absPlaylistFilename += ".m3u";		
 		std::ofstream playlistFile(absPlaylistFilename.c_str());
-		std::cout << "Audioplayer: writing playlist to " << absPlaylistFilename << std::endl;
+		std::cout << "CAudioPlayerGui: writing playlist to " << absPlaylistFilename << std::endl;
 		if (!playlistFile) {
 			// an error occured
 			const int msgsize = 255;
@@ -1503,7 +1698,7 @@ void CAudioPlayerGui::savePlaylist()
 			DisplayErrorMessage(msg);
 			// refresh view
 			this->paint();
-			std::cout << "could not create play list file " 
+			std::cout << "CAudioPlayerGui: could not create play list file " 
 				  << absPlaylistFilename << std::endl;
 			return;
 		}
@@ -1520,6 +1715,7 @@ void CAudioPlayerGui::savePlaylist()
 	}  
 	this->paint();
 }
+//------------------------------------------------------------------------
 
 bool CAudioPlayerGui::askToOverwriteFile(const std::string& filename) {
 	
@@ -1535,6 +1731,7 @@ bool CAudioPlayerGui::askToOverwriteFile(const std::string& filename) {
 	this->paint();
 	return res;
 }
+//------------------------------------------------------------------------
 
 std::string CAudioPlayerGui::absPath2Rel(const std::string& fromDir,
 					 const std::string& absFilename) {

@@ -101,6 +101,8 @@ audiomenu.ost ost
 audiomenu.stereo stereo
 audioplayer.add Add
 audioplayer.artist_title Artist, Title
+audioplayer.button_select_title_by_id search by ID
+audioplayer.button_select_title_by_name search by name
 audioplayer.defdir start dir.
 audioplayer.delete Delete
 audioplayer.deleteall delete all
@@ -110,6 +112,11 @@ audioplayer.follow auto select current
 audioplayer.head Audio Playlist
 audioplayer.highprio High decode priority
 audioplayer.id3scan Scanning ID3 tags
+audioplayer.jump_backwards jump backwards
+audioplayer.jump_dialog_hint1 Please enter jump target
+audioplayer.jump_dialog_hint2 (relative, in seconds)
+audioplayer.jump_dialog_title Enter jump target
+audioplayer.jump_forwards jump forwards
 audioplayer.keylevel key level
 audioplayer.name Audioplayer
 audioplayer.pause pause
@@ -125,6 +132,7 @@ audioplayer.playlist_name_hint2 The extension .m3u will be added automatically
 audioplayer.rewind rewind
 audioplayer.save_playlist save play list
 audioplayer.screensaver_timeout screensaver timeout (min, 0=off)
+audioplayer.select_title_by_name search title by name (SMS)
 audioplayer.shuffle shuffle
 audioplayer.stop Stop
 audioplayer.title_artist Title, Artist

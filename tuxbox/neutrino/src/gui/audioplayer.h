@@ -98,6 +98,7 @@ class CAudioPlayerGui : public CMenuTarget
 	time_t         m_time_total;
 	time_t         m_time_played;
 	std::string    m_metainfo;
+	bool           m_select_title_by_name;
 
 	CPlayList      playlist;
 	CAudiofile     curr_audiofile;
@@ -110,9 +111,11 @@ class CAudioPlayerGui : public CMenuTarget
 	int            m_title_w;
 
 	int            m_LastMode;
-   int            m_idletime;
-   bool           m_screensaver;
+	int            m_idletime;
+	bool           m_screensaver;
 	bool           m_vol_ost;
+
+	SMSKeyInput    m_SMSKeyInput;
 
 	void paintItem(int pos);
 	void paint();
@@ -130,14 +133,28 @@ class CAudioPlayerGui : public CMenuTarget
 	void play(int pos);
 	void stop();
 	void pause();
-	void ff();
-	void rev();
+	void ff(unsigned int seconds=0);
+	void rev(unsigned int seconds=0);
 	int getNext();
 	void GetMetaData(CAudiofile *File);
 	void updateMetaData();
 	void updateTimes(const bool force = false);
 	void showMetaData();
 	void screensaver(bool on);
+	bool getNumericInput(neutrino_msg_t& msg,int& val);
+	
+	/**
+	 * Appends the file information to the given string.
+	 * @param fileInfo a string where the file information will be appended
+	 * @param pos the position of the file to return the information for
+	 * @param loadMetaData if we have to make sure that meta data is loaded or not
+	 * (meta data must be present to make "search by title" work)
+	 */
+	void getFileInfoToDisplay(std::string& fileInfo, int pos, bool loadMetaData);
+
+	/**
+	 * Saves the current playlist into a .m3u playlist file.
+	 */
 	void savePlaylist();
 
 	/**

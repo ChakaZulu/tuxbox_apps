@@ -139,6 +139,8 @@ audiomenu.ost ost
 audiomenu.stereo stereo
 audioplayer.add Hinzufügen
 audioplayer.artist_title Interpret, Titel
+audioplayer.button_select_title_by_id Suche n. ID
+audioplayer.button_select_title_by_name Suche n. Name
 audioplayer.defdir Start-Verz.
 audioplayer.delete Löschen
 audioplayer.deleteall Alle löschen
@@ -148,6 +150,11 @@ audioplayer.follow Selektiere akt. Track
 audioplayer.head Audio Playlist
 audioplayer.highprio Hohe Decodier-Priorität
 audioplayer.id3scan Scanne ID3-Tags
+audioplayer.jump_backwards rückw. springen
+audioplayer.jump_dialog_hint1 Bitte Sprungziel eingeben
+audioplayer.jump_dialog_hint2 (relativ, in Sekunden)
+audioplayer.jump_dialog_title Sprungziel eingeben
+audioplayer.jump_forwards vorw. springen
 audioplayer.keylevel Tasten-Umschaltung
 audioplayer.name Audioplayer
 audioplayer.pause Pause
@@ -163,6 +170,7 @@ audioplayer.playlist_name_hint2 Die Erweiterung .m3u wird automatisch angehängt
 audioplayer.rewind schneller Rückl.
 audioplayer.save_playlist Playlist speichern
 audioplayer.screensaver_timeout Bildschirmschoner (min, 0=aus)
+audioplayer.select_title_by_name Titelsuche nach Name (SMS)
 audioplayer.shuffle Shuffle
 audioplayer.stop Stopp
 audioplayer.title_artist Titel, Interpret
