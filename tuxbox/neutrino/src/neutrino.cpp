@@ -1545,8 +1545,15 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	oj->addOption(0, "options.on");
 	miscSettings.addItem( oj );
 
+	CMenuOptionChooser *oj2 = new CMenuOptionChooser("miscsettings.infobar_sat_display", &g_settings.infobar_sat_display, true );
+	oj2->addOption(1, "options.on");
+	oj2->addOption(0, "options.off");
+	miscSettings.addItem( oj2 );
+
 	if (fromflash)
 	{
+		miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "miscsettings.driver_boot" ) );
+
 		static int misc_option[MISC_SETTING_FILES_COUNT];
 
 		for (int i = 0; i < MISC_SETTING_FILES_COUNT; i++)
@@ -1572,11 +1579,6 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 		oj->addOption(2, "options.fb");
 		miscSettings.addItem( oj );
 	}
-
-	CMenuOptionChooser *oj2 = new CMenuOptionChooser("miscsettings.infobar_sat_display", &g_settings.infobar_sat_display, true );
-	oj2->addOption(1, "options.on");
-	oj2->addOption(0, "options.off");
-	miscSettings.addItem( oj2 );
 
 	keySetupNotifier = new CKeySetupNotifier;
 	CStringInput * keySettings_repeat_genericblocker = new CStringInput("keybindingmenu.repeatblockgeneric", g_settings.repeat_blocker, 3, "repeatblocker.hint_1", "repeatblocker.hint_2", "0123456789 ", keySetupNotifier);
