@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.39 2001/09/19 20:48:26 field Exp $
+        $Id: neutrino.cpp,v 1.40 2001/09/20 00:36:32 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.40  2001/09/20 00:36:32  field
+  epg mit zaopit zum grossteil auf onid & s_id umgestellt
+
   Revision 1.39  2001/09/19 20:48:26  field
   Sprachauswahl funktioniert... (zapit updaten!)
 
@@ -488,14 +491,16 @@ void CNeutrinoApp::channelsInit()
 		SAI servaddr;
 		char rip[]="127.0.0.1";
 		char *return_buf;
+        channel_msg_2   zapitchannel;
 
-//deleting old channelList for mode-switching.	
-	delete channelList;
-	channelList = new CChannelList(1, "channellist.head");
-	
+
+        //deleting old channelList for mode-switching.
+    	delete channelList;
+    	channelList = new CChannelList(1, "channellist.head");
 		
 		sendmessage.version=1;
-		sendmessage.cmd = 5;
+        // neu! war 5, mit neuem zapit holen wir uns auch die onid_tsid
+		sendmessage.cmd = 'c';
 
 		sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 		memset(&servaddr,0,sizeof(servaddr));
@@ -524,23 +529,19 @@ void CNeutrinoApp::channelsInit()
 	
 		printf("That was returned: %s\n", return_buf);
 	
-		if (atoi(return_buf) != 5)
+		if ( strcmp(return_buf, "00c")!= 0 )
 		{
-         		free(return_buf);
+            free(return_buf);
 			printf("Wrong Command was send for channelsInit(). Exiting.\n");
 			return;
 		}
-	        free(return_buf);
+        free(return_buf);
 		memset(&zapitchannel,0,sizeof(zapitchannel));
-		while (recv(sock_fd, &zapitchannel, sizeof(zapitchannel),0)>0) {
+		while (recv(sock_fd, &zapitchannel, sizeof(zapitchannel),0)>0)
+        {
 			char channel_name[30];
-			uint channel_nr = zapitchannel.chan_nr;
-			strncpy(channel_name,zapitchannel.name,30);
-		
-			//printf("Name received: %s\n", channel_name);
-			//printf("Channelnumber received: %d\n", channel_nr);
-			channelList->addChannel(channel_nr, channel_nr, channel_name);
-			memset(&zapitchannel,0,sizeof(zapitchannel));
+			strncpy(channel_name, zapitchannel.name,30);
+			channelList->addChannel( zapitchannel.chan_nr, zapitchannel.chan_nr, channel_name, zapitchannel.onid_tsid );
 		}
 		printf("All channels received\n");
 			
@@ -942,6 +943,7 @@ void CNeutrinoApp::InitZapper()
 {
 	g_RemoteControl->setZapper(zapit);
 	volume = 100;
+
 	if (!zapit)
 		channelsInit();
 		
@@ -1017,8 +1019,11 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainSettings)
 				}
 				else
 				{
-					g_InfoViewer->showTitle(  channelList->getActiveChannelNumber(),
-					                         channelList->getActiveChannelName() );
+					g_InfoViewer->showTitle( channelList->getActiveChannelNumber(),
+					                         channelList->getActiveChannelName(),
+                                             channelList->getActiveChannelOnid_tsid(),
+                                             false
+                                            );
 				}
 			}
 			else if ((key>=0) && (key<=9))
@@ -1320,7 +1325,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.39 2001/09/19 20:48:26 field Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.40 2001/09/20 00:36:32 field Exp $\n\n");
     tzset();
 
     initGlobals();

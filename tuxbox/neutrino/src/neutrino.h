@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.17 2001/09/19 18:03:14 field Exp $
+//  $Id: neutrino.h,v 1.18 2001/09/20 00:36:32 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.18  2001/09/20 00:36:32  field
+//  epg mit zaopit zum grossteil auf onid & s_id umgestellt
+//
 //  Revision 1.17  2001/09/19 18:03:14  field
 //  Infobar, Sprachauswahl
 //
@@ -114,9 +117,8 @@ class CNeutrinoApp : public CMenuTarget
 	char				volume;
 	bool				mute;
 		
+    channel_msg         firstchannel;
 	st_rmsg				sendmessage;
-	channel_msg			zapitchannel;
-	channel_msg			firstchannel;
 	bool				zapit;
 
 	CColorSetupNotifier    *colorSetupNotifier;

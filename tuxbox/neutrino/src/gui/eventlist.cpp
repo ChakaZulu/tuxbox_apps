@@ -1,7 +1,10 @@
 //
-// $Id: eventlist.cpp,v 1.7 2001/09/19 00:11:57 McClean Exp $
+// $Id: eventlist.cpp,v 1.8 2001/09/20 00:36:32 field Exp $
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.8  2001/09/20 00:36:32  field
+// epg mit zaopit zum grossteil auf onid & s_id umgestellt
+//
 // Revision 1.7  2001/09/19 00:11:57  McClean
 // dont add events with "" Text
 //
@@ -137,7 +140,7 @@ void EventList::readEvents(const std::string& channelname)
 //    tmp->number=number;
 //    tmp->name=name;
             if(evt->name !="")
-		evtlist.insert(evtlist.end(), evt);
+                evtlist.insert(evtlist.end(), evt);
         }
 
         delete[] pData;
@@ -333,13 +336,5 @@ void EventList::paint()
 		paintItem(count);
 	}
 }
-
-
-
-
-
-
-
-
 
 

@@ -64,6 +64,7 @@ class CInfoViewer
         int                 ChanInfoX;
 
 		string				CurrentChannel;
+        unsigned int        Current_onid_tsid;
         char                *EPG_NotFound_Text;
 
 		char				running[50];
@@ -76,7 +77,7 @@ class CInfoViewer
 
 		static void * InfoViewerThread (void *arg);
         static void * LangViewerThread (void *arg);
-		bool getEPGData( string channelName );
+		bool getEPGData( string channelName, unsigned int onid_tsid );
 		void showData();
         void showWarte();
         void showButtons();
@@ -89,7 +90,7 @@ class CInfoViewer
 
         void start();
 
-        void showTitle( int ChanNum, string Channel, bool CalledFromNumZap = false );
+        void showTitle( int ChanNum, string Channel, unsigned int onid_tsid = 0, bool CalledFromNumZap = false );
         void killTitle();
 
         void setDuration( int Duration );

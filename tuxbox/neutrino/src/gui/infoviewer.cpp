@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.19 2001/09/19 18:03:14 field Exp $
+// $Id: infoviewer.cpp,v 1.20 2001/09/20 00:36:32 field Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.20  2001/09/20 00:36:32  field
+// epg mit zaopit zum grossteil auf onid & s_id umgestellt
+//
 // Revision 1.19  2001/09/19 18:03:14  field
 // Infobar, Sprachauswahl
 //
@@ -97,11 +100,13 @@ void CInfoViewer::setDuration( int Duration )
 	intShowDuration = Duration;
 }
 
-void CInfoViewer::showTitle( int ChanNum, string Channel, bool CalledFromNumZap )
+void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid, bool CalledFromNumZap )
 {
     pthread_mutex_lock( &epg_mutex );
 
 	CurrentChannel = Channel;
+    Current_onid_tsid = onid_tsid;
+
 //  Auskommentieren, falls es euch nicht gefällt..?
     ShowInfo_Info = !CalledFromNumZap;
 //    ShowInfo_Info = false;
@@ -313,6 +318,7 @@ void * CInfoViewer::InfoViewerThread (void *arg)
 {
     int repCount;
     string query = "";
+    unsigned int    query_onid_tsid;
     bool gotEPG, requeryEPG;
     struct timespec abs_wait;
     struct timeval now;
@@ -352,12 +358,13 @@ void * CInfoViewer::InfoViewerThread (void *arg)
 
                 pthread_mutex_trylock( &InfoViewer->epg_mutex );
                 query = InfoViewer->CurrentChannel;
+                query_onid_tsid = InfoViewer->Current_onid_tsid;
                 pthread_mutex_unlock( &InfoViewer->epg_mutex );
 
 
 //                printf("CInfoViewer::InfoViewerThread getEPGData for %s\n", query.c_str());
 
-                gotEPG = InfoViewer->getEPGData(query);
+                gotEPG = InfoViewer->getEPGData(query, query_onid_tsid);
 
                 pthread_mutex_trylock( &InfoViewer->epg_mutex );
 
@@ -405,7 +412,7 @@ char* copyStringto( char* from, char* to, int len)
 	return from;
 }
 
-bool CInfoViewer::getEPGData( string channelName )
+bool CInfoViewer::getEPGData( string channelName, unsigned int onid_tsid )
 {
 	#ifdef EPG_SECTIONSD
 		int sock_fd;
@@ -433,64 +440,127 @@ bool CInfoViewer::getEPGData( string channelName )
 			return false;
 		}
 
-		sectionsd::msgRequestHeader req;
-		req.version = 2;
-		req.command = sectionsd::currentNextInformation;
-		req.dataLength = channelName.length()+1;
-		write(sock_fd,&req,sizeof(req));
+        if ( onid_tsid != 0 )
+        {
+            // query mit onid_tsid...
 
-		char chanName[50];
-		strcpy(chanName, channelName.c_str());
-		for(int count=strlen(chanName)-1;count>=0;count--)
-		{
-			if((chanName[count]==' ') || (chanName[count]==0))
-			{
-				chanName[count]=0;
-			}
-			else
-				break;
-		}
-		printf("query epg for >%s<\n", chanName);
-		write(sock_fd, chanName, strlen(chanName)+1);
+    		sectionsd::msgRequestHeader req;
+    		req.version = 2;
+    		req.command = sectionsd::currentNextInformationID;
+    		req.dataLength = 4;
+    		write(sock_fd,&req,sizeof(req));
 
-		sectionsd::msgResponseHeader resp;
-		memset(&resp, 0, sizeof(resp));
-		read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader));
+            write(sock_fd, &onid_tsid, sizeof(onid_tsid));
+//            char    num_evts = 2;
+//            write(sock_fd, &num_evts, 1);
+    		printf("query epg for onid_tsid >%x< (%s)\n", onid_tsid, channelName.c_str());
 
-		int nBufSize = resp.dataLength;
-		if(nBufSize>0)
-		{
-			char* pData = new char[nBufSize+1] ;
-			read(sock_fd, pData, nBufSize);
-//			printf("data: %s\n\n", pData);
-			char tmpPercent[10];
-			char tmp[20];
+            sectionsd::msgResponseHeader resp;
+        	memset(&resp, 0, sizeof(resp));
 
-			char * pos = copyStringto( pData, tmp, sizeof(tmp));
-			pos = copyStringto( pos, running, sizeof(running));
-			pos = copyStringto( pos, runningStart, sizeof(runningStart));
-			pos = copyStringto( pos, runningDuration, sizeof(runningDuration));		
-			pos = copyStringto( pos, tmpPercent, sizeof(tmpPercent));
-			pos = copyStringto( pos, tmp, sizeof(tmp));
-			pos = copyStringto( pos, next, sizeof(next));
-			pos = copyStringto( pos, nextStart, sizeof(nextStart));
-			pos = copyStringto( pos, nextDuration, sizeof(nextDuration));		
+            read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader));
 
-			runningPercent = atoi(tmpPercent);
+            int nBufSize = resp.dataLength;
+            if(nBufSize>0)
+            {
+     
+        		char* pData = new char[nBufSize+1] ;
+                read(sock_fd, pData, nBufSize);
+    		char tmp[20];
 
-			int val = atoi(runningDuration);
-			sprintf((char*) &runningDuration, "%d min", val);
-			val = atoi(nextDuration);
-			sprintf((char*) &nextDuration, "%d min", val);
+    		char * pos = copyStringto( pData, tmp, sizeof(tmp));
+    		pos = copyStringto( pos, running, sizeof(running));
+    		pos = copyStringto( pos, runningStart, sizeof(runningStart));
+    		pos = copyStringto( pos, runningDuration, sizeof(runningDuration));
 
+    		pos = copyStringto( pos, tmp, sizeof(tmp));
+    		pos = copyStringto( pos, next, sizeof(next));
+    		pos = copyStringto( pos, nextStart, sizeof(nextStart));
+    		pos = copyStringto( pos, nextDuration, sizeof(nextDuration));
 
-			delete[] pData;
-			retval = true;
-		}
+            time_t startzeit;
+    		unsigned long long dauer;
+            sscanf(runningDuration, "%08lx", &dauer);
+    		sprintf((char*) &runningDuration, "%d min", dauer/ 60);
 
-		printf("exit epg-get\n\n");
-		close(sock_fd);
-		return retval;
+            sscanf(runningStart, "%08lx", &startzeit);
+            struct tm *pStartZeit = localtime(&startzeit);
+    		sprintf((char*) &runningStart, "%02d:%02d", pStartZeit->tm_hour, pStartZeit->tm_min);
+
+            runningPercent=(unsigned)((float)(time(NULL)- startzeit)/(float)dauer*100.);
+
+            sscanf(nextDuration, "%08lx", &dauer);
+    		sprintf((char*) &nextDuration, "%d min", dauer/ 60);
+
+            sscanf(nextStart, "%08lx", &startzeit);
+            pStartZeit = localtime(&startzeit);
+    		sprintf((char*) &nextStart, "%02d:%02d", pStartZeit->tm_hour, pStartZeit->tm_min);
+
+    		delete[] pData;
+    		retval = true;
+    	}
+        }
+        else
+        {
+    		sectionsd::msgRequestHeader req;
+    		req.version = 2;
+    		req.command = sectionsd::currentNextInformation;
+    		req.dataLength = channelName.length()+1;
+    		write(sock_fd,&req,sizeof(req));
+
+    		char chanName[50];
+    		strcpy(chanName, channelName.c_str());
+    		for(int count=strlen(chanName)-1;count>=0;count--)
+    		{
+    			if((chanName[count]==' ') || (chanName[count]==0))
+    			{
+    				chanName[count]=0;
+    			}
+    			else
+    				break;
+    		}
+    		printf("query epg for >%s<\n", chanName);
+    		write(sock_fd, chanName, strlen(chanName)+1);
+
+        	sectionsd::msgResponseHeader resp;
+        	memset(&resp, 0, sizeof(resp));
+        	read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader));
+
+        	int nBufSize = resp.dataLength;
+        	if(nBufSize>0)
+            {
+     
+        		char* pData = new char[nBufSize+1] ;
+        		read(sock_fd, pData, nBufSize);
+    //			printf("data: %s\n\n", pData);
+        		char tmpPercent[10];
+        		char tmp[20];
+
+        		char * pos = copyStringto( pData, tmp, sizeof(tmp));
+        		pos = copyStringto( pos, running, sizeof(running));
+        		pos = copyStringto( pos, runningStart, sizeof(runningStart));
+        		pos = copyStringto( pos, runningDuration, sizeof(runningDuration));
+        		pos = copyStringto( pos, tmpPercent, sizeof(tmpPercent));
+        		pos = copyStringto( pos, tmp, sizeof(tmp));
+        		pos = copyStringto( pos, next, sizeof(next));
+        		pos = copyStringto( pos, nextStart, sizeof(nextStart));
+        		pos = copyStringto( pos, nextDuration, sizeof(nextDuration));
+
+        		runningPercent = atoi(tmpPercent);
+
+        		int val = atoi(runningDuration);
+        		sprintf((char*) &runningDuration, "%d min", val);
+        		val = atoi(nextDuration);
+        		sprintf((char*) &nextDuration, "%d min", val);
+
+        		delete[] pData;
+        		retval = true;
+        	}
+        }
+
+//    	printf("exit epg-get\n\n");
+    	close(sock_fd);
+    	return retval;
 	#endif
 	#ifndef EPG_SECTIONSD
 		strcpy( running, "");

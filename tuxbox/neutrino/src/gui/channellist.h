@@ -1,9 +1,12 @@
 #ifndef __channellist__
 #define __channellist__
 //
-// $Id: channellist.h,v 1.11 2001/09/18 11:48:43 fnbrd Exp $
+// $Id: channellist.h,v 1.12 2001/09/20 00:36:32 field Exp $
 //
 // $Log: channellist.h,v $
+// Revision 1.12  2001/09/20 00:36:32  field
+// epg mit zaopit zum grossteil auf onid & s_id umgestellt
+//
 // Revision 1.11  2001/09/18 11:48:43  fnbrd
 // Changed some parameter to const string&
 //
@@ -53,6 +56,7 @@ class CChannelList
 		int	number;
 		string	name;
 		string  currentEvent;
+        unsigned int    onid_tsid;
 	};
 
 
@@ -81,11 +85,12 @@ class CChannelList
 	public:
     CChannelList(int Key=-1, const std::string& Name="");
 	~CChannelList();
-	void addChannel(int key, int number, const std::string& name);
+	void addChannel(int key, int number, const std::string& name, unsigned int ids = 0);
 	void setName(const std::string& Name);
 	int getKey(int);
 	const std::string& getActiveChannelName();
 	int getActiveChannelNumber();
+    unsigned int getActiveChannelOnid_tsid();
 
 	void zapTo(int pos);
 	bool showInfo(int pos);

@@ -1,7 +1,10 @@
 //
-// $Id: channellist.cpp,v 1.18 2001/09/18 11:48:43 fnbrd Exp $
+// $Id: channellist.cpp,v 1.19 2001/09/20 00:36:32 field Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.19  2001/09/20 00:36:32  field
+// epg mit zaopit zum grossteil auf onid & s_id umgestellt
+//
 // Revision 1.18  2001/09/18 11:48:43  fnbrd
 // Changed some parameter to const string&
 //
@@ -157,12 +160,13 @@ CChannelList::~CChannelList()
 	chanlist.clear();
 }
 
-void CChannelList::addChannel(int key, int number, const std::string& name)
+void CChannelList::addChannel(int key, int number, const std::string& name, unsigned int ids)
 {
 	channel* tmp = new channel();
 	tmp->key=key;
 	tmp->number=number;
 	tmp->name=name;
+    tmp->onid_tsid=ids;
 	chanlist.insert(chanlist.end(), tmp);
 }
 
@@ -184,6 +188,11 @@ const std::string& CChannelList::getActiveChannelName()
 int CChannelList::getActiveChannelNumber()
 {
 	return selected+1;
+}
+
+unsigned int CChannelList::getActiveChannelOnid_tsid()
+{
+	return chanlist[selected]->onid_tsid;
 }
 
 
@@ -288,7 +297,7 @@ bool CChannelList::showInfo(int pos)
 	}
 	selected=pos;
 	channel* chan = chanlist[selected];
-	g_InfoViewer->showTitle(selected+1, chan->name, true);
+	g_InfoViewer->showTitle(selected+1, chan->name, chan->onid_tsid, true);
 	return true;
 }
 
@@ -306,7 +315,7 @@ void CChannelList::zapTo(int pos)
         tuned = pos;
     	g_RemoteControl->zapTo(chan->key, chan->name);
     }
-    g_InfoViewer->showTitle(selected+ 1, chan->name);
+    g_InfoViewer->showTitle(selected+ 1, chan->name, chan->onid_tsid);
 }
 
 void CChannelList::numericZap(int key)
