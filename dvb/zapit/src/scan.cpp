@@ -61,7 +61,7 @@ int issatbox()
 
 void get_nits(int frequency, int symbol_rate, int polarity, int FEC_inner, int DiSEqC)
 {
-	if (finaltune(frequency, symbol_rate, polarity, FEC_inner, DiSEqC) > 0)
+	if (finaltune(frequency, symbol_rate, polarity, FEC_inner, DiSEqC) == 0)
 		nit(DiSEqC);
 	else
 		printf("No signal found on transponder\n");
@@ -75,7 +75,7 @@ void get_sdts()
 	{
 		sdt_tries = 0;
 
-		if (finaltune(tI->second.freq, tI->second.symbolrate, tI->second.polarization, tI->second.fec_inner, tI->second.diseqc) > 0)
+		if (finaltune(tI->second.freq, tI->second.symbolrate, tI->second.polarization, tI->second.fec_inner, tI->second.diseqc) == 0)
 		{
 			//if (pat(tI->second.freq,tI->second.symbolrate) >0)
 			//{
@@ -276,7 +276,7 @@ void *start_scanthread(void *param)
 
 		for (int freq = 3300; freq <= 4600; freq += 80)
 		{
-			if (finaltune(freq, symbolrate, 0, 0, 0) > 0)
+			if (finaltune(freq, symbolrate, 0, 0, 0) == 0)
 			{
 				fake_pat(&scantransponders, freq, symbolrate);
 			}
@@ -284,7 +284,7 @@ void *start_scanthread(void *param)
 			{
 				printf("[scan.cpp] No signal found on transponder. Trying SR 6875\n");
 
-				if (finaltune(freq, symbolrate2, 0, 0, 0) > 0)
+				if (finaltune(freq, symbolrate2, 0, 0, 0) == 0)
 					fake_pat(&scantransponders, freq, symbolrate2);
 				else
 					printf("[scan.cpp] No signal found on transponder\n");
