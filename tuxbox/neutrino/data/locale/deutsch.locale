@@ -43,8 +43,7 @@ mainsettings.audio Audio
 mainsettings.video Video
 mainsettings.network Netzwerk
 mainsettings.streaming Streamingserver
-mainsettings.colors Farben / Themes
-mainsettings.font Schriftgrösse
+mainsettings.colors Farben / Themes / Schrift
 mainsettings.lcd LC-Display
 mainsettings.keybinding Tasten-Einstellungen
 mainsettings.misc Diverse Einstellungen
@@ -108,6 +107,7 @@ ipsetup.hint_2 OK speichert, Home bricht ab
 colormenu.head Farb-Einstellungen
 colormenu.statusbar Statusbalken
 colormenu.themeselect Theme auswählen
+colormenu.font Schriftgrösse
 colormenu.menucolors Menüfarben
 colormenu.background Hintergrundfarbe
 colormenu.background_head Hintergrundfarbe

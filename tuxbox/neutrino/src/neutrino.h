@@ -156,7 +156,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void InitServiceSettings(CMenuWidget &, CMenuWidget &);
 		void InitColorSettingsMenuColors(CMenuWidget &);
 		void InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNotifier* audioSetupNotifier);
-		void InitColorSettings(CMenuWidget &);
+		void InitColorSettings(CMenuWidget &, CMenuWidget &);
 		void InitLanguageSettings(CMenuWidget &);
 		void InitColorThemesSettings(CMenuWidget &);
 		void InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_menuColors);

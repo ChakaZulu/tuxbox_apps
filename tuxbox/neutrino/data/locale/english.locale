@@ -43,14 +43,14 @@ mainsettings.audio Audio
 mainsettings.video Video
 mainsettings.network Network
 mainsettings.streaming Streamingserver
-mainsettings.colors Colors
+mainsettings.colors Colors / themes / font
 mainsettings.lcd LC-Display
 mainsettings.keybinding Key Setup
-mainsettings.misc Misc Settings
+mainsettings.misc Misc settings
 mainsettings.scan Scan settings
 
-miscsettings.head Misc Settings
-miscsettings.shutdown_real Enable Standby
+miscsettings.head Misc settings
+miscsettings.shutdown_real Enable standby
 miscsettings.boxtype DBox type
 miscsettings.startneutrinodirect start neutrino directly
 miscsettings.general General
@@ -108,6 +108,7 @@ ipsetup.hint_2 OK saves, Home aborts
 colormenu.head Color Settings
 colormenu.statusbar Infobar
 colormenu.themeselect select theme
+colormenu.font Font size
 colormenu.menucolors Menucolor
 colormenu.background Background
 colormenu.background_head Background
@@ -528,3 +529,29 @@ timerlist.program.unknown Program unknown
 timerlist.standby.on Leave standby
 timerlist.standby.off Enter standby
 
+fontsize.menu Menutext
+fontsize.menu_title Menu Title
+fontsize.menu_info Menu Info
+fontsize.epg_title EPG Title
+fontsize.epg_info1 EPG Info 1
+fontsize.epg_info2 EPG Info 2
+fontsize.epg_date EPG Date
+fontsize.alert Alert
+fontsize.eventlist_title Title
+fontsize.eventlist_itemlarge large
+fontsize.eventlist_itemsmall small
+fontsize.eventlist_datetime date / time
+fontsize.channellist Channellist
+fontsize.channellist_descr Description
+fontsize.channellist_number Number
+fontsize.channel_num_zap keine Ahnung
+fontsize.infobar_number Number
+fontsize.infobar_channame Channel name
+fontsize.infobar_info info
+fontsize.infobar_small small
+
+fontmenu.head Fontsize settings
+fontmenu.channellist Channellist
+fontmenu.eventlist Eventlist
+fontmenu.epg EGP
+fontmenu.infobar Infobar

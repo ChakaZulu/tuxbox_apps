@@ -50,8 +50,8 @@
 #include "sectionsdclient.h"
 
 
-#define info_height 60
-
+//#define info_height 60
+int info_height;
 
 
 CChannelList::CChannel::CChannel()
@@ -67,12 +67,15 @@ CChannelList::CChannelList( const std::string &Name )
 	selected = 0;
 	width = 560;
 	height = 420;
+/*
 	theight= g_Fonts->menu_title->getHeight();
 	fheight= g_Fonts->channellist->getHeight();
 	listmaxshow = (height-theight-0)/fheight;
 	height = theight+0+listmaxshow*fheight; // recalc height
+	info_height = g_Fonts->channellist->getHeight() + g_Fonts->channellist_descr->getHeight() + 10;
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-( height+ info_height) ) / 2) + g_settings.screen_StartY;
+*/
 	liststart = 0;
 	tuned=0xfffffff;
 	zapProtection= NULL;;
@@ -201,6 +204,14 @@ int CChannelList::show()
 		return res;
 	}
 	g_lcdd->setMode(CLcddClient::MODE_MENU, g_Locale->getText(name) );
+
+	theight= g_Fonts->menu_title->getHeight();
+	fheight= g_Fonts->channellist->getHeight();
+	listmaxshow = (height-theight-0)/fheight;
+	height = theight+0+listmaxshow*fheight; // recalc height
+	info_height = g_Fonts->channellist->getHeight() + g_Fonts->channellist_descr->getHeight() + 10;
+	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
+	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-( height+ info_height) ) / 2) + g_settings.screen_StartY;
 
 	paintHead();
 	updateEvents();

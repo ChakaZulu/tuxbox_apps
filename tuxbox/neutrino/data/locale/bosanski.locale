@@ -44,7 +44,6 @@ mainsettings.video Video
 mainsettings.network Mreza 
 mainsettings.streaming Streamingserver 
 mainsettings.colors Boje / teme 
-mainsettings.font Velicina slova 
 mainsettings.lcd Tecni kristal 
 mainsettings.keybinding Namjestiti tipku 
 mainsettings.misc Namjestiti razne stvari 
@@ -108,6 +107,7 @@ ipsetup.hint_2 OK memorise, Home prekida
 colormenu.head Namjestiti boje 
 colormenu.statusbar Statusna traka 
 colormenu.themeselect Izabrati teme 
+colormenu.font Velicina slova 
 colormenu.menucolors Boja izbora 
 colormenu.background Boja pozadine 
 colormenu.background_head Boja pozadine 

@@ -999,7 +999,6 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainSettings.addItem( new CMenuForwarder("mainsettings.streaming", true, "", &streamingSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.language", true, "", &languageSettings ) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.colors", true,"", &colorSettings) );
-	mainSettings.addItem( new CMenuForwarder("mainsettings.font", true,"", &fontSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.lcd", true,"", &lcdSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.keybinding", true,"", &keySettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.misc", true, "", &miscSettings ) );
@@ -1556,24 +1555,9 @@ void CNeutrinoApp::InitFontSettings(CMenuWidget &fontSettings,CMenuWidget &fontS
 	fontSettings.addItem( new CMenuForwarder("fontmenu.eventlist", true,"", &fontSettings_Eventlist) );
 	fontSettings.addItem( new CMenuForwarder("fontmenu.epg", true,"", &fontSettings_Epg) );
 	fontSettings.addItem( new CMenuForwarder("fontmenu.infobar", true,"", &fontSettings_Infobar) );
-
-
-/*
-	CMenuOptionChooser* oj = new CMenuOptionChooser("streamingmenu.usestreamserver", &g_settings.network_streaming_use, true);
-	oj->addOption(0, "options.off");
-	oj->addOption(1, "options.on");
-	fontSettings.addItem( oj );
-*/
-	
-
-
-
-//	fontSize = new CStringInput("fontsize.", g_settings.fontsize_, 2, "ipsetup.hint_1", "ipsetup.hint_2","1234567890 ");
-//	fontSettings.addItem( new CMenuForwarder("fontsize.", true, g_settings.fontsize_ ,fontSize));
-//	fontSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 }
 
-void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings)
+void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fontSettings )
 {
 	dprintf(DEBUG_DEBUG, "init colorsettings\n");
 	colorSettings.addItem( new CMenuSeparator() );
@@ -1584,6 +1568,9 @@ void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings)
 	InitColorThemesSettings(*colorSettings_Themes);
 
 	colorSettings.addItem( new CMenuForwarder("colormenu.themeselect", true, "", colorSettings_Themes) );
+	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+
+	colorSettings.addItem( new CMenuForwarder("colormenu.font", true,"", &fontSettings) );
 	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
 	CMenuWidget *colorSettings_menuColors = new CMenuWidget("colormenusetup.head", "settings.raw", 400, 400);
@@ -2105,7 +2092,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	InitFontSettings(fontSettings, fontSettings_Channellist, fontSettings_Eventlist, fontSettings_Infobar, fontSettings_Epg);
 
 	//color Setup
-	InitColorSettings(colorSettings);
+	InitColorSettings(colorSettings, fontSettings);
 
 	//LCD Setup
 	InitLcdSettings(lcdSettings);
@@ -3068,7 +3055,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.320 2002/09/12 11:28:42 dirch Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.321 2002/09/12 19:23:36 dirch Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
