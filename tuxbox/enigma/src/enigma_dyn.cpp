@@ -1926,7 +1926,7 @@ public:
 								<< "<br><b>"
 
 //								<< "<a href=\'javascript:EPGDetails(\"ref=" << ref2string(ref)
-//								<< "&ID=" << event.event_id
+//								<< "&ID=" << eString().sprintf("%x", event.event_id)
 //								<< "\")\'>"
 
 								<< short_description
@@ -2075,7 +2075,7 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 						<< std::setw(2) << t->tm_hour << ':'
 						<< std::setw(2) << t->tm_min << ' '
 						<< "<a href=\'javascript:EPGDetails(\"ref=" << serviceRef
-						<< "&ID=" << event.event_id
+						<< "&ID=" << eString().sprintf("%x",event.event_id)
 						<< "\")\'>"
 						<< ((ShortEventDescriptor*)descriptor)->event_name
 						<< "</a></span></u><br>\n";
@@ -2724,11 +2724,12 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	std::map<eString,eString> opt=getRequestOptions(opts);
 	eString serviceRef = opt["ref"];
 	eString eventID = opt["ID"];
-	int eventid = atoi(eventID.c_str());
+	int eventid;
 	eString eventStartTime = opt["start"];
 	eString eventDuration = opt["duration"];
 	eString description = _("No description available");
 
+	sscanf(eventID.c_str(), "%x", &eventid);
 	eDebug("[ENIGMA_DYN] addTimerEvent: serviceRef = %s, ID = %s, start = %s, duration = %s\n", serviceRef.c_str(), eventID.c_str(), eventStartTime.c_str(), eventDuration.c_str());
 
 	// search for the event... to get the description...
@@ -2766,7 +2767,7 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	int start = atoi(eventStartTime.c_str()) - (timeroffset * 60);
 	int duration = atoi(eventDuration.c_str()) + (2 * timeroffset * 60);
 
-	ePlaylistEntry entry(string2ref(serviceRef), start, duration, atoi(eventID.c_str()), ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR);
+	ePlaylistEntry entry(string2ref(serviceRef), start, duration, eventid, ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR);
 	eDebug("[ENIGMA_DYN] description = %s", description.c_str());
 	entry.service.descr = description;
 
@@ -2787,9 +2788,11 @@ static eString EPGDetails(eString request, eString dirpath, eString opts, eHTTPC
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString,eString> opt=getRequestOptions(opts);
 	eString serviceRef = opt["ref"];
-	int eventid = atoi(opt["ID"].c_str());
+	eString eventID = opt["ID"];
+	int eventid;
 	eString description = _("No description available");
-
+	
+	sscanf(eventID.c_str(), "%x", &eventid);
 	eDebug("[ENIGMA_DYN] getEPGDetails: serviceRef = %s, ID = %04x", serviceRef.c_str(), eventid);
 
 	// search for the event... to get the description...
