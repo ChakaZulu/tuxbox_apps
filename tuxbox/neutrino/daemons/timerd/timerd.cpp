@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerd.cpp,v 1.51 2004/01/14 19:20:22 zwen Exp $
+	$Id: timerd.cpp,v 1.52 2004/02/20 22:21:21 thegoodguy Exp $
 
 	License: GPL
 
@@ -321,9 +321,9 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 					CTimerdMsg::commandRemind remind;
 					CBasicServer::receive_data(connfd, &remind, sizeof(CTimerdMsg::commandRemind));
 					event = new CTimerEvent_Remind(msgAddTimer.announceTime,
-															 msgAddTimer.alarmTime,
-															 remind.message,
-															 msgAddTimer.eventRepeat);
+								       msgAddTimer.alarmTime,
+								       remind.message,
+								       msgAddTimer.eventRepeat);
 					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent(event);
 					break;
 

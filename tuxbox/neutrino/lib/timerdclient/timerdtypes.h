@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdtypes.h,v 1.11 2003/11/30 13:21:04 zwen Exp $
+	$Id: timerdtypes.h,v 1.12 2004/02/20 22:21:22 thegoodguy Exp $
 
 	License: GPL
 
@@ -30,7 +30,7 @@
 #include <vector>
 
 #include <zapit/client/zapittypes.h>
-
+#include <sectionsdclient/sectionsdtypes.h>
 
 #define REMINDER_MESSAGE_MAXLEN 31
 #define TIMERD_APIDS_MAXLEN 50
@@ -77,48 +77,48 @@ class CTimerd
 
 		struct EventInfo
 		{
-			unsigned long long epgID;
-			time_t             epg_starttime;
-			t_channel_id       channel_id;
-			std::string             apids;
-			CChannelMode       mode;
-			bool               recordingSafety;
+			event_id_t   epgID;
+			time_t       epg_starttime;
+			t_channel_id channel_id;
+			std::string  apids;
+			CChannelMode mode;
+			bool         recordingSafety;
 		};
 		
 		struct TransferEventInfo
 		{
-			unsigned long long epgID;
-			time_t             epg_starttime;
-			t_channel_id       channel_id;
-			char               apids[TIMERD_APIDS_MAXLEN];
-			CChannelMode       mode;
-			bool               recordingSafety;
+			event_id_t   epgID;
+			time_t       epg_starttime;
+			t_channel_id channel_id;
+			char         apids[TIMERD_APIDS_MAXLEN];
+			CChannelMode mode;
+			bool         recordingSafety;
 		};
 		
 		class RecordingInfo : public EventInfo
-		{
-		   public:
+			{
+			public:
 				RecordingInfo(){};
 				RecordingInfo(EventInfo& e)
-				{
-					strcpy(apids, e.apids.substr(0,TIMERD_APIDS_MAXLEN-1).c_str());
-					channel_id = e.channel_id;
-					epgID = e.epgID;
-					epg_starttime = e.epg_starttime;
-					mode = e.mode;
-				};
+					{
+						strcpy(apids, e.apids.substr(0,TIMERD_APIDS_MAXLEN-1).c_str());
+						channel_id = e.channel_id;
+						epgID = e.epgID;
+						epg_starttime = e.epg_starttime;
+						mode = e.mode;
+					};
 				RecordingInfo& operator = (EventInfo& e)
-				{
-					strcpy(apids, e.apids.substr(0,TIMERD_APIDS_MAXLEN-1).c_str());
-					channel_id = e.channel_id;
-					epgID = e.epgID;
-					epg_starttime = e.epg_starttime;
-					mode = e.mode;
-					return *this;
-				}
-			char apids[TIMERD_APIDS_MAXLEN];
-			int eventID;
-		};
+					{
+						strcpy(apids, e.apids.substr(0,TIMERD_APIDS_MAXLEN-1).c_str());
+						channel_id = e.channel_id;
+						epgID = e.epgID;
+						epg_starttime = e.epg_starttime;
+						mode = e.mode;
+						return *this;
+					}
+				char apids[TIMERD_APIDS_MAXLEN];
+				int eventID;
+			};
 
 		struct RecordingStopInfo
 		{
@@ -127,20 +127,20 @@ class CTimerd
 
 		struct responseGetTimer
 		{		
-			int								eventID;
-			CTimerEventTypes	eventType;
-			CTimerEventStates	eventState;
-			CTimerEventRepeat	eventRepeat;
-			time_t							alarmTime;
-			time_t							announceTime;
-			time_t							stopTime;
-			t_channel_id channel_id; //only filled if applicable
-			unsigned long long epgID; //only filled if applicable
-			time_t epg_starttime; //only filled if applicable
-			char apids[TIMERD_APIDS_MAXLEN]; //only filled if applicable
-			CChannelMode mode; //only filled if applicable
-			bool standby_on; //only filled if applicable
-			char message[REMINDER_MESSAGE_MAXLEN]; //only filled if applicable
+			int               eventID;
+			CTimerEventTypes  eventType;
+			CTimerEventStates eventState;
+			CTimerEventRepeat eventRepeat;
+			time_t            alarmTime;
+			time_t            announceTime;
+			time_t            stopTime;
+			t_channel_id      channel_id;                       //only filled if applicable
+			event_id_t        epgID;                            //only filled if applicable
+			time_t            epg_starttime;                    //only filled if applicable
+			char              apids[TIMERD_APIDS_MAXLEN];       //only filled if applicable
+			CChannelMode      mode;                             //only filled if applicable
+			bool              standby_on;                       //only filled if applicable
+			char              message[REMINDER_MESSAGE_MAXLEN]; //only filled if applicable
 			bool operator< (const responseGetTimer& a) const
 			{
 				return this->alarmTime < a.alarmTime ;
