@@ -329,6 +329,121 @@ void CNeutrinoApp::setupColors_classic()
 	g_settings.infobar_Text_blue  = 100;
 }
 
+/**************************************************************************************
+*                                                                                     *
+*          CNeutrinoApp -  setup Color Sheme (darkblue)	                       *
+*                                                                                     *
+**************************************************************************************/
+void CNeutrinoApp::setupColors_dblue()
+{
+	g_settings.menu_Head_alpha = 0;
+	g_settings.menu_Head_red   = 0;
+	g_settings.menu_Head_green = 0;
+	g_settings.menu_Head_blue  = 50;
+
+	g_settings.menu_Head_Text_alpha = 0;
+	g_settings.menu_Head_Text_red   = 95;
+	g_settings.menu_Head_Text_green = 100;
+	g_settings.menu_Head_Text_blue  = 100;
+
+	g_settings.menu_Content_alpha = 20;
+	g_settings.menu_Content_red   = 0;
+	g_settings.menu_Content_green = 0;
+	g_settings.menu_Content_blue  = 20;
+
+	g_settings.menu_Content_Text_alpha = 0;
+	g_settings.menu_Content_Text_red   = 100;
+	g_settings.menu_Content_Text_green = 100;
+	g_settings.menu_Content_Text_blue  = 100;
+
+	g_settings.menu_Content_Selected_alpha = 15;
+	g_settings.menu_Content_Selected_red   = 0;
+	g_settings.menu_Content_Selected_green = 65;
+	g_settings.menu_Content_Selected_blue  = 0;
+
+	g_settings.menu_Content_Selected_Text_alpha  = 0;
+	g_settings.menu_Content_Selected_Text_red    = 0;
+	g_settings.menu_Content_Selected_Text_green  = 0;
+	g_settings.menu_Content_Selected_Text_blue   = 0;
+
+	g_settings.menu_Content_inactive_alpha = 20;
+	g_settings.menu_Content_inactive_red   = 0;
+	g_settings.menu_Content_inactive_green = 0;
+	g_settings.menu_Content_inactive_blue  = 15;
+
+	g_settings.menu_Content_inactive_Text_alpha  = 0;
+	g_settings.menu_Content_inactive_Text_red    = 55;
+	g_settings.menu_Content_inactive_Text_green  = 70;
+	g_settings.menu_Content_inactive_Text_blue   = 85;
+
+	g_settings.infobar_alpha = 20;
+	g_settings.infobar_red   = 0;
+	g_settings.infobar_green = 0;
+	g_settings.infobar_blue  = 20;
+
+	g_settings.infobar_Text_alpha = 0;
+	g_settings.infobar_Text_red   = 100;
+	g_settings.infobar_Text_green = 100;
+	g_settings.infobar_Text_blue  = 100;
+}
+
+/**************************************************************************************
+*                                                                                     *
+*          CNeutrinoApp -  setup Color Sheme (dvb2000)	                               *
+*                                                                                     *
+**************************************************************************************/
+void CNeutrinoApp::setupColors_dvb2k()
+{
+	g_settings.menu_Head_alpha = 0;
+	g_settings.menu_Head_red   = 25;
+	g_settings.menu_Head_green = 25;
+	g_settings.menu_Head_blue  = 25;
+
+	g_settings.menu_Head_Text_alpha = 0;
+	g_settings.menu_Head_Text_red   = 100;
+	g_settings.menu_Head_Text_green = 100;
+	g_settings.menu_Head_Text_blue  = 0;
+
+	g_settings.menu_Content_alpha = 0;
+	g_settings.menu_Content_red   = 0;
+	g_settings.menu_Content_green = 20;
+	g_settings.menu_Content_blue  = 0;
+
+	g_settings.menu_Content_Text_alpha = 0;
+	g_settings.menu_Content_Text_red   = 100;
+	g_settings.menu_Content_Text_green = 100;
+	g_settings.menu_Content_Text_blue  = 100;
+
+	g_settings.menu_Content_Selected_alpha = 0;
+	g_settings.menu_Content_Selected_red   = 100;
+	g_settings.menu_Content_Selected_green = 100;
+	g_settings.menu_Content_Selected_blue  = 100;
+
+	g_settings.menu_Content_Selected_Text_alpha  = 0;
+	g_settings.menu_Content_Selected_Text_red    = 0;
+	g_settings.menu_Content_Selected_Text_green  = 0;
+	g_settings.menu_Content_Selected_Text_blue   = 0;
+
+	g_settings.menu_Content_inactive_alpha = 20;
+	g_settings.menu_Content_inactive_red   = 0;
+	g_settings.menu_Content_inactive_green = 25;
+	g_settings.menu_Content_inactive_blue  = 0;
+
+	g_settings.menu_Content_inactive_Text_alpha  = 0;
+	g_settings.menu_Content_inactive_Text_red    = 100;
+	g_settings.menu_Content_inactive_Text_green  = 100;
+	g_settings.menu_Content_inactive_Text_blue   = 0;
+
+	g_settings.infobar_alpha = 5;
+	g_settings.infobar_red   = 0;
+	g_settings.infobar_green = 19;
+	g_settings.infobar_blue  = 0;
+
+	g_settings.infobar_Text_alpha = 0;
+	g_settings.infobar_Text_red   = 100;
+	g_settings.infobar_Text_green = 100;
+	g_settings.infobar_Text_blue  = 100;
+}
 
 typedef struct font_sizes
 {
@@ -2181,6 +2296,9 @@ void CNeutrinoApp::InitColorThemesSettings(CMenuWidget &colorSettings_Themes)
 	colorSettings_Themes.addItem(GenericMenuSeparatorLine);
 	colorSettings_Themes.addItem(new CMenuForwarder(LOCALE_COLORTHEMEMENU_NEUTRINO_THEME, true, NULL, this, "theme_neutrino"));
 	colorSettings_Themes.addItem(new CMenuForwarder(LOCALE_COLORTHEMEMENU_CLASSIC_THEME, true, NULL, this, "theme_classic"));
+	colorSettings_Themes.addItem(new CMenuForwarder(LOCALE_COLORTHEMEMENU_DBLUE_THEME, true, NULL, this, "theme_dblue"));
+	colorSettings_Themes.addItem(new CMenuForwarder(LOCALE_COLORTHEMEMENU_DVB2K_THEME, true, NULL, this, "theme_dvb2k"));
+
 }
 
 void CNeutrinoApp::InitColorSettingsMenuColors(CMenuWidget &colorSettings_menuColors)
@@ -3894,6 +4012,16 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 	else if(actionKey=="theme_classic")
 	{
 		setupColors_classic();
+		colorSetupNotifier->changeNotify("initial", NULL);
+	}
+	else if(actionKey=="theme_dblue")
+	{
+		setupColors_dblue();
+		colorSetupNotifier->changeNotify("initial", NULL);
+	}
+	else if(actionKey=="theme_dvb2k")
+	{
+		setupColors_dvb2k();
 		colorSetupNotifier->changeNotify("initial", NULL);
 	}
 	else if(actionKey=="shutdown")

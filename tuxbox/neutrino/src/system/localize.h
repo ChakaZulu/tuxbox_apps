@@ -222,6 +222,8 @@ class CLocaleManager
 #define LOCALE_COLORTHEMEMENU_CLASSIC_THEME                  "colorthememenu.classic_theme"
 #define LOCALE_COLORTHEMEMENU_HEAD                           "colorthememenu.head"
 #define LOCALE_COLORTHEMEMENU_NEUTRINO_THEME                 "colorthememenu.neutrino_theme"
+#define LOCALE_COLORTHEMEMENU_DBLUE_THEME                    "colorthememenu.dblue_theme"
+#define LOCALE_COLORTHEMEMENU_DVB2K_THEME                    "colorthememenu.dvb2k_theme"
 #define LOCALE_DATE_APR                                      "date.Apr"
 #define LOCALE_DATE_AUG                                      "date.Aug"
 #define LOCALE_DATE_DEC                                      "date.Dec"
