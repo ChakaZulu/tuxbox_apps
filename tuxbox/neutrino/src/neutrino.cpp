@@ -1424,6 +1424,15 @@ const CMenuOptionChooser::keyval SCANTS_BOUQUET_OPTIONS[SCANTS_BOUQUET_OPTION_CO
 	{ CZapitClient::BM_CREATESATELLITEBOUQUET, LOCALE_SCANTS_BOUQUET_SATELLITE }
 };
 
+#define SCANTS_ZAPIT_SCANTYPE_COUNT 4
+const CMenuOptionChooser::keyval SCANTS_ZAPIT_SCANTYPE[SCANTS_ZAPIT_SCANTYPE_COUNT] =
+{
+	{  CZapitClient::ST_TVRADIO	, LOCALE_ZAPIT_SCANTYPE_TVRADIO     },
+	{  CZapitClient::ST_TV		, LOCALE_ZAPIT_SCANTYPE_TV    },
+	{  CZapitClient::ST_RADIO	, LOCALE_ZAPIT_SCANTYPE_RADIO     },
+	{  CZapitClient::ST_ALL		, LOCALE_ZAPIT_SCANTYPE_ALL }
+};
+
 #define SATSETUP_DISEQC_OPTION_COUNT 6
 const CMenuOptionChooser::keyval SATSETUP_DISEQC_OPTIONS[SATSETUP_DISEQC_OPTION_COUNT] =
 {
@@ -1476,6 +1485,9 @@ const CMenuOptionChooser::keyval OPTIONS_OFF0_ON1_OPTIONS[OPTIONS_OFF0_ON1_OPTIO
 void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 {
 	dprintf(DEBUG_DEBUG, "init scansettings\n");
+
+	CMenuOptionChooser* ojScantype = new CMenuOptionChooser(LOCALE_ZAPIT_SCANTYPE, (int *)&scanSettings.scanType, SCANTS_ZAPIT_SCANTYPE, SCANTS_ZAPIT_SCANTYPE_COUNT, true);
+
 	CMenuOptionChooser* ojBouquets = new CMenuOptionChooser(LOCALE_SCANTS_BOUQUET, (int *)&scanSettings.bouquetMode, SCANTS_BOUQUET_OPTIONS, SCANTS_BOUQUET_OPTION_COUNT, true);
 
 	settings.addItem(GenericMenuSeparator);
@@ -1553,6 +1565,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 
 		CMenuOptionChooser* ojDiseqc = new CMenuOptionChooser(LOCALE_SATSETUP_DISEQC, (int *)&scanSettings.diseqcMode, SATSETUP_DISEQC_OPTIONS, SATSETUP_DISEQC_OPTION_COUNT, true, new CSatDiseqcNotifier(ojSat, ojExtSatSettings, ojExtMotorSettings, ojDiseqcRepeats));
 
+		settings.addItem( ojScantype );
 		settings.addItem( ojDiseqc );
 		settings.addItem( ojBouquets );
 		settings.addItem( ojSat );
@@ -1575,6 +1588,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 			oj->addOption(providerList[i].satName);
 			dprintf(DEBUG_DEBUG, "got scanprovider (cable): %s\n", providerList[i].satName );
 		}
+		settings.addItem( ojScantype );
 		settings.addItem( ojBouquets);
 		settings.addItem( oj);
 	}

@@ -85,6 +85,13 @@ class CZapitClient:public CBasicClient
 			BM_CREATESATELLITEBOUQUET
 		};
 
+	enum scanType
+		{
+			ST_TVRADIO,
+			ST_TV,
+			ST_RADIO,
+			ST_ALL
+		};
 
 	typedef enum channelsMode_
 		{
@@ -365,6 +372,9 @@ class CZapitClient:public CBasicClient
 
 	/* set diseqcRepeat*/
 	void setScanBouquetMode(const bouquetMode mode);
+
+	/* set Scan-Type for channel search */
+	void setScanType(const scanType mode);
 
 	/* get FrontEnd Signal Params */ 
 	void getFESignal (struct responseFESignal& f);

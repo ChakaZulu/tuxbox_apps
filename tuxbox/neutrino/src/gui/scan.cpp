@@ -125,6 +125,9 @@ if(get_set.TP_scan)
 	CZapitClient::ScanSatelliteList satList;
 	CNeutrinoApp::getInstance()->getScanSettings().toSatList( satList);
 	g_Zapit->setScanSatelliteList( satList);
+
+        /* send scantype to zapit */
+        g_Zapit->setScanType( CNeutrinoApp::getInstance()->getScanSettings().scanType );
 	
 	/* send motor position list to zapit */
 	if (diseqcType == DISEQC_1_2)

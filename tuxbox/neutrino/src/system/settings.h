@@ -358,6 +358,7 @@ class CScanSettings
  public:
 	CConfigFile               configfile;
 	CZapitClient::bouquetMode bouquetMode;
+	CZapitClient::scanType scanType;
 	diseqc_t                  diseqcMode;
 	uint32_t                  diseqcRepeat;
 	int			  satCount;

@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.368 2005/03/01 09:54:54 diemade Exp $
+ * $Id: zapit.cpp,v 1.369 2005/03/03 19:59:33 diemade Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -119,6 +119,7 @@ extern short abort_scan;
 
 
 CZapitClient::bouquetMode bouquetMode = CZapitClient::BM_CREATEBOUQUETS;
+CZapitClient::scanType scanType = CZapitClient::ST_ALL;
 
 /* the map which stores the wanted cable/satellites */
 std::map<uint8_t, std::string> scanProviders;
@@ -910,6 +911,10 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 
 	case CZapitMessages::CMD_SCANSETBOUQUETMODE:
 		CBasicServer::receive_data(connfd, &bouquetMode, sizeof(bouquetMode));
+		break;
+
+	case CZapitMessages::CMD_SCANSETTYPE:
+		CBasicServer::receive_data(connfd, &scanType, sizeof(scanType));
 		break;
 
 	case CZapitMessages::CMD_SET_RECORD_MODE:
@@ -1761,7 +1766,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.368 2005/03/01 09:54:54 diemade Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.369 2005/03/03 19:59:33 diemade Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {

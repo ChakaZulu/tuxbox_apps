@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.106 2005/01/18 07:53:06 diemade Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.107 2005/03/03 19:59:32 diemade Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -588,6 +588,13 @@ void CZapitClient::setDiseqcRepeat(const uint32_t repeat)
 void CZapitClient::setScanBouquetMode(const bouquetMode mode)
 {
 	send(CZapitMessages::CMD_SCANSETBOUQUETMODE, (const char *) & mode, sizeof(mode));
+	close_connection();
+}
+
+/* set Scan-TYpe for channelsearch */
+void CZapitClient::setScanType(const scanType mode)
+{
+	send(CZapitMessages::CMD_SCANSETTYPE, (const char *) & mode, sizeof(mode));
 	close_connection();
 }
 

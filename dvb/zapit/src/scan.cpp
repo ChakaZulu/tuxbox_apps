@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.147 2005/02/01 18:16:06 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.148 2005/03/03 19:59:33 diemade Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -71,6 +71,8 @@ extern std::map<t_satellite_position, uint8_t>::iterator mpos_it;
 extern std::map<string, t_satellite_position> satellitePositions;
 
 extern CZapitClient::bouquetMode bouquetMode;
+extern CZapitClient::scanType scanType;
+static bool service_wr = false;
 extern CEventServer *eventServer;
 extern diseqc_t diseqcType;
 
@@ -401,18 +403,44 @@ void write_transponder(FILE *fd, const transponder_id_t transponder_id, const tr
 				}
 				emptyTransponder = false;
 			}
-			if (cI->second.getName().empty())
-				fprintf(fd,
-					"\t\t\t<channel service_id=\"%04x\" name=\"%04x\" service_type=\"%02x\"/>\n",
-					cI->second.getServiceId(),
-					cI->second.getServiceId(),
-					cI->second.getServiceType());
-			else
-				fprintf(fd,
-					"\t\t\t<channel service_id=\"%04x\" name=\"%s\" service_type=\"%02x\"/>\n",
-					cI->second.getServiceId(),
-					convert_UTF8_To_UTF8_XML(cI->second.getName().c_str()).c_str(),
-					cI->second.getServiceType());
+
+			// write channels in services.xml by scanType  
+
+			service_wr = false;
+
+			switch ( scanType ) {
+
+				case CZapitClient::ST_TVRADIO:
+					if ( (cI->second.getServiceType() == 1 ) || (cI->second.getServiceType() == 2) )
+						service_wr=true;
+					break;
+				case CZapitClient::ST_TV:
+					if ( cI->second.getServiceType() == 1 )
+						service_wr=true;
+					break;
+				case CZapitClient::ST_RADIO:
+					if ( cI->second.getServiceType() == 2 )
+						service_wr=true;
+					break;
+				case CZapitClient::ST_ALL:
+						service_wr=true;
+					break;
+			}
+
+			if ( service_wr )
+			
+				if (cI->second.getName().empty())
+					fprintf(fd,
+						"\t\t\t<channel service_id=\"%04x\" name=\"%04x\" service_type=\"%02x\"/>\n",
+						cI->second.getServiceId(),
+						cI->second.getServiceId(),
+						cI->second.getServiceType());
+				else
+					fprintf(fd,
+						"\t\t\t<channel service_id=\"%04x\" name=\"%s\" service_type=\"%02x\"/>\n",
+						cI->second.getServiceId(),
+						convert_UTF8_To_UTF8_XML(cI->second.getName().c_str()).c_str(),
+						cI->second.getServiceType());
 		}
 	}
 

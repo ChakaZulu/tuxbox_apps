@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.42 2005/02/16 21:31:25 mogway Exp $
+ * $Id: locals_intern.h,v 1.43 2005/03/03 19:59:41 diemade Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -924,6 +924,11 @@ const char * locale_real_names[] =
 	"videomenu.videosignal_svideo",
 	"videomenu.videosignal_yuv_c",
 	"videomenu.videosignal_yuv_v",
-	"zaptotimer.announce",
+	"zapit.scantype",
+	"zapit.scantype.all",
+	"zapit.scantype.radio",
+	"zapit.scantype.tv",
+	"zapit.scantype.tvradio",
+ 	"zaptotimer.announce",
 };
 #endif

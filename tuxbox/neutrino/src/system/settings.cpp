@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.37 2004/10/27 16:08:47 lucgas Exp $
+        $Id: settings.cpp,v 1.38 2005/03/03 19:59:41 diemade Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -195,6 +195,7 @@ void CScanSettings::useDefaults(const delivery_system_t _delivery_system)
 {
 	delivery_system = _delivery_system;
 	bouquetMode     = CZapitClient::BM_UPDATEBOUQUETS;
+	scanType = CZapitClient::ST_ALL;
 	diseqcMode      = NO_DISEQC;
 	diseqcRepeat    = 0;
 
@@ -229,6 +230,7 @@ bool CScanSettings::loadSettings(const char * const fileName, const delivery_sys
 	diseqcMode = (diseqc_t) configfile.getInt32("diseqcMode"  , diseqcMode);
 	diseqcRepeat = configfile.getInt32("diseqcRepeat", diseqcRepeat);
 	bouquetMode = (CZapitClient::bouquetMode) configfile.getInt32("bouquetMode" , bouquetMode);
+	scanType=(CZapitClient::scanType) configfile.getInt32("scanType", scanType);
 	strcpy(satNameNoDiseqc, configfile.getString("satNameNoDiseqc", satNameNoDiseqc).c_str());
 
 	if (1/*diseqcMode != NO_DISEQC*/)
@@ -268,6 +270,7 @@ bool CScanSettings::saveSettings(const char * const fileName)
 	configfile.setInt32( "diseqcMode", diseqcMode );
 	configfile.setInt32( "diseqcRepeat", diseqcRepeat );
 	configfile.setInt32( "bouquetMode", bouquetMode );
+	configfile.setInt32( "scanType", scanType );
 	configfile.setString( "satNameNoDiseqc", satNameNoDiseqc );
 	
 	if (1/*diseqcMode != NO_DISEQC*/)	
