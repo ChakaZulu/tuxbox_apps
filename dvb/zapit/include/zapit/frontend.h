@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.h,v 1.29 2003/11/27 00:32:06 homar Exp $
+ * $Id: frontend.h,v 1.30 2004/06/10 19:56:12 rasc Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -56,14 +56,9 @@ class CFrontend
 		fe_modulation_t last_qam;
 
 
-		uint32_t			getBitErrorRate(void) const;
 		uint32_t			getDiseqcReply(const int timeout_ms) const;
 		struct dvb_frontend_event	getEvent(void);
 		struct dvb_frontend_parameters	getFrontend(void) const;
-		uint16_t			getSignalNoiseRatio(void) const;
-		uint16_t			getSignalStrength(void) const;
-		fe_status_t			getStatus(void) const;
-		uint32_t			getUncorrectedBlocks(void) const;
 
 		void				secResetOverload(void);
 		void				secSetTone(const fe_sec_tone_mode_t mode, const uint32_t ms);
@@ -92,6 +87,14 @@ class CFrontend
 		static fe_modulation_t		getModulation(const uint8_t modulation);
 		uint8_t				getPolarization(void) const;
 		const struct dvb_frontend_info *getInfo(void) const			{ return &info; };
+
+		uint32_t			getBitErrorRate(void) const;
+		uint16_t			getSignalNoiseRatio(void) const;
+		uint16_t			getSignalStrength(void) const;
+		fe_status_t			getStatus(void) const;
+		uint32_t			getUncorrectedBlocks(void) const;
+
+
 		const int32_t 			getCurrentSatellitePosition() { return currentSatellitePosition; }
 
 		void				setDiseqcRepeats(const uint8_t repeats)	{ diseqcRepeats = repeats; }

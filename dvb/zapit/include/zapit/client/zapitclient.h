@@ -203,6 +203,20 @@ class CZapitClient:public CBasicClient
 	};
 	typedef std::vector<responseGetSatelliteList> SatelliteList;
 
+
+	struct responseFESignal
+	{
+		unsigned int sig;
+		unsigned int snr;
+		unsigned int ber;
+		// maybe later... 
+		// int          has_lock;
+		// int          has_signal;
+		// int          has_sync;
+		// int          has_carrier;
+	};
+
+
  public:
 	/*****************************/
 	/*                           */
@@ -349,6 +363,9 @@ class CZapitClient:public CBasicClient
 
 	/* set diseqcRepeat*/
 	void setScanBouquetMode(const bouquetMode mode);
+
+	/* get FrontEnd Signal Params */ 
+	void getFESignal (struct responseFESignal& f);
 
 	/****************************************/
 	/*					*/

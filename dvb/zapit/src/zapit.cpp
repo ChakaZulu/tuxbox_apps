@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.353 2004/05/20 15:55:31 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.354 2004/06/10 19:56:12 rasc Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1071,6 +1071,19 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		break;
 	}
 
+	case CZapitMessages::CMD_GET_FE_SIGNAL:
+	{
+		CZapitClient::responseFESignal response_FEsig;
+
+		response_FEsig.sig = frontend->getSignalStrength();
+		response_FEsig.snr = frontend->getSignalNoiseRatio();
+		response_FEsig.ber = frontend->getBitErrorRate();
+
+		CBasicServer::send_data(connfd, &response_FEsig, sizeof(CZapitClient::responseFESignal));
+		sendAPIDs(connfd);
+		break;
+	}
+
 	case CZapitMessages::CMD_SETSUBSERVICES:
 	{
 		CZapitClient::commandAddSubServices msgAddSubService;
@@ -1632,7 +1645,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.353 2004/05/20 15:55:31 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.354 2004/06/10 19:56:12 rasc Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {

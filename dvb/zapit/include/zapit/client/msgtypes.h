@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.22 2004/05/06 10:22:40 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.23 2004/06/10 19:56:12 rasc Exp $
  *
  * types used for clientlib <-> zapit communication - d-box2 linux project
  *
@@ -119,7 +119,9 @@ class CZapitMessages
 			CMD_SEND_MOTOR_COMMAND             = 68,
 
 			CMD_GET_CHANNEL_NAME               = 69,
-			CMD_IS_TV_CHANNEL                  = 70
+			CMD_IS_TV_CHANNEL                  = 70,
+
+			CMD_GET_FE_SIGNAL                  = 71
 		};
 
 	struct commandBoolean
@@ -311,6 +313,7 @@ class CZapitMessages
 		uint8_t param1;
 		uint8_t param2;
 	};
+
 
 };
 

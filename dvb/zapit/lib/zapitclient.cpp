@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.102 2004/04/08 07:19:00 thegoodguy Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.103 2004/06/10 19:56:12 rasc Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -591,6 +591,23 @@ void CZapitClient::setDiseqcRepeat(const uint32_t repeat)
 void CZapitClient::setScanBouquetMode(const bouquetMode mode)
 {
 	send(CZapitMessages::CMD_SCANSETBOUQUETMODE, (const char *) & mode, sizeof(mode));
+	close_connection();
+}
+
+//
+// -- query Frontend Signal parameters
+//
+void CZapitClient::getFESignal (struct responseFESignal &f)
+{
+	struct responseFESignal rsignal;
+
+	send(CZapitMessages::CMD_GET_FE_SIGNAL);
+	CBasicClient::receive_data((char *) &rsignal, sizeof(rsignal));
+
+	f.sig = rsignal.sig;
+	f.snr = rsignal.snr;
+	f.ber = rsignal.ber;
+
 	close_connection();
 }
 
