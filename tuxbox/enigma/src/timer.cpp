@@ -517,7 +517,7 @@ void eTimerManager::actionHandler()
 			long t = getSecondsToBegin();
 			if ( (nextStartingEvent->type & ePlaylistEntry::recDVR)
 				&& t > HDD_PREPARE_TIME
-				&& rec && ( checkTimeshift(rec) || ( canHandleTwoServices && onSameTP(rec, Ref) ) ) )
+				&& rec && ( checkTimeshift(rec) || ( !rec.path && canHandleTwoServices && onSameTP(rec, Ref))))
 			{
 		// we dont zap now.. playback is running.. will zap immediate before eventbegin
 				t -= HDD_PREPARE_TIME;
@@ -586,7 +586,7 @@ void eTimerManager::actionHandler()
 		// is running or the service is on the same transponder and satellite
 				if ( nextStartingEvent->type & ePlaylistEntry::recDVR
 					&& handler && handler->getState() != eServiceHandler::stateStopped
-					&& rec && ( checkTimeshift(rec) || (canHandleTwoServices && onSameTP(rec,Ref))))
+					&& rec && ( checkTimeshift(rec) || (!rec.path && canHandleTwoServices && onSameTP(rec,Ref))))
 				{
 					eDebug("[eTimerManager] change to service in background :)");
 					writeToLogfile("zap to correct service in background :)");
