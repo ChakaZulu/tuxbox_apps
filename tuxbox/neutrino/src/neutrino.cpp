@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.187 2002/03/05 17:33:06 field Exp $
+        $Id: neutrino.cpp,v 1.188 2002/03/05 20:46:21 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -266,6 +266,9 @@ void CNeutrinoApp::setupDefaults()
 	//audio
 	g_settings.audio_Stereo = 1;
 	g_settings.audio_DolbyDigital = 0;
+
+	//vcr
+	g_settings.vcr_AutoSwitch = 1;
 
 	//colors
 	setupColors_neutrino();
@@ -1123,6 +1126,11 @@ void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNoti
 	}
 
 	videoSettings.addItem( oj );
+
+	oj = new CMenuOptionChooser("videomenu.vcrswitch", &g_settings.vcr_AutoSwitch, true, NULL);
+	oj->addOption(0, "options.off");
+	oj->addOption(1, "options.on");
+	videoSettings.addItem( oj );
 }
 
 void CNeutrinoApp::InitParentalLockSettings(CMenuWidget &parentallockSettings)
@@ -1598,6 +1606,9 @@ int CNeutrinoApp::run(int argc, char **argv)
 	AudioMute( g_Controld->getMute(), true );
 	g_Controld->registerEvent(CControldClient::EVT_MUTECHANGED, 222, NEUTRINO_UDS_NAME);
 
+	g_Controld->registerEvent(CControldClient::EVT_MODECHANGED, 222, NEUTRINO_UDS_NAME);
+	g_Controld->registerEvent(CControldClient::EVT_VCRCHANGED, 222, NEUTRINO_UDS_NAME);
+
 	RealRun(mainMenu);
 
 	ExitRun();
@@ -1639,7 +1650,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 
 		else if ( msg == messages::VCR_ON )
 		{
-			if ( mode != mode_scart )
+			if  ( mode != mode_scart )
 			{
 				// noch nicht im Scart-Mode...
 				scartMode( true );
@@ -1780,17 +1791,18 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 int CNeutrinoApp::handleMsg(uint msg, uint data)
 {
 
-/*    if ( msg == CRCInput::RC_spkr )
+    if ( msg == messages::EVT_VCRCHANGED )
 	{
-		// NUR PROBEWEISE
-		if ( mode != mode_scart )
-			g_RCInput->pushbackMsg( messages::VCR_ON, 0 );
-		else
-			g_RCInput->pushbackMsg( messages::VCR_OFF, 0 );
-		return messages_return::cancel_all;
+		if ( g_settings.vcr_AutoSwitch == 1 )
+		{
+			if ( (bool) data )
+				g_RCInput->pushbackMsg( messages::VCR_ON, 0 );
+			else
+				g_RCInput->pushbackMsg( messages::VCR_OFF, 0 );
+		}
+		return messages_return::handled;
 	}
 	else
-*/
 	if ( msg == CRCInput::RC_standby )
 	{
 		// trigger StandBy
@@ -1954,11 +1966,13 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 	int x = (((g_settings.screen_EndX- g_settings.screen_StartX)- dx) / 2) + g_settings.screen_StartX;
 	int y = g_settings.screen_EndY- 100;
 
-	unsigned char pixbuf[dx*dy];
+	unsigned char* pixbuf;
 
 	if (bDoPaint)
 	{
-		g_FrameBuffer->SaveScreen(x, y, dx, dy, pixbuf);
+		pixbuf= new unsigned char[ dx * dy ];
+		if (pixbuf!= NULL)
+			g_FrameBuffer->SaveScreen(x, y, dx, dy, pixbuf);
 		g_FrameBuffer->paintIcon("volume.raw",x,y, COL_INFOBAR);
 	}
 
@@ -2010,7 +2024,8 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 
 	}
 	while ( msg != CRCInput::RC_timeout );
-    if (bDoPaint)
+
+    if ( (bDoPaint) && (pixbuf!= NULL) )
 		g_FrameBuffer->RestoreScreen(x, y, dx, dy, pixbuf);
 }
 
@@ -2281,7 +2296,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.187 2002/03/05 17:33:06 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.188 2002/03/05 20:46:21 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

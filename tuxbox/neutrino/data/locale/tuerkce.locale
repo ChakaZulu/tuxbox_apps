@@ -52,6 +52,7 @@ videomenu.videoformat EKRAN FORMATI
 videomenu.videoformat_43 4:3
 videomenu.videoformat_169 16:9
 videomenu.videoformat_autodetect autodetect
+videomenu.vcrswitch VCR Switch Scart automatically
 
 networkmenu.head AG AYARLARI
 networkmenu.test test network now

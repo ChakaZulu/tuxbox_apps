@@ -49,6 +49,9 @@ struct SNeutrinoSettings
 	int audio_Stereo;
 	int audio_DolbyDigital;
 
+	//vcr
+	int	vcr_AutoSwitch;
+
 	//language
 	char language[25];
 

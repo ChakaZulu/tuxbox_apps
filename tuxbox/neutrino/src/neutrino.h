@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.59 2002/03/05 17:33:06 field Exp $
+//  $Id: neutrino.h,v 1.60 2002/03/05 20:46:21 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.60  2002/03/05 20:46:21  field
+//  VCR-Scart umschalten funktioniert automatisch :) (ein/aus-schaltbar)
+//
 //  Revision 1.59  2002/03/05 17:33:06  field
 //  Events worken (so halbwegs :)
 //
@@ -263,7 +266,8 @@ struct messages {
 			SHUTDOWN	= CRCInput::RC_Messages + 7,
 
 			EVT_VOLCHANGED 	= CRCInput::RC_Events + 1,
-			EVT_MUTECHANGED	= CRCInput::RC_Events + 2
+			EVT_MUTECHANGED	= CRCInput::RC_Events + 2,
+			EVT_VCRCHANGED	= CRCInput::RC_Events + 3
 		};
 };
 

@@ -52,6 +52,7 @@ videomenu.videoformat Format de Télévision
 videomenu.videoformat_43 4:3
 videomenu.videoformat_169 16:9
 videomenu.videoformat_autodetect autodetect
+videomenu.vcrswitch VCR Switch Scart automatically
 
 networkmenu.head Ajuster un Réseau
 networkmenu.test test network now

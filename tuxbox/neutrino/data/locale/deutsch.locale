@@ -52,6 +52,7 @@ videomenu.videoformat Bildschirmformat
 videomenu.videoformat_43 4:3
 videomenu.videoformat_169 16:9
 videomenu.videoformat_autodetect automatisch
+videomenu.vcrswitch VCR Scart-Eingang automatisch
 
 networkmenu.head Netzwerk Einstellungen
 networkmenu.test Netzwerk testen
