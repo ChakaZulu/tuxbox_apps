@@ -1030,36 +1030,33 @@ void CAudioPlayerGui::paintInfo()
 			xstart=10;
 		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+xstart, y + 4 + 1*fheight, width- 20, tmp, COL_MENUCONTENTSELECTED, 0, true); // UTF-8
 		// second line (Artist/Title...)
-		if (!playlist.empty() && current >=0)
+		if ( curr_audiofile.FileType != CFile::STREAM_AUDIO &&
+		     !curr_audiofile.MetaData.bitrate )
 		{
-			if ( curr_audiofile.FileType != CFile::STREAM_AUDIO &&
-				 curr_audiofile.MetaData.bitrate )
-			{
-				GetMetaData(&curr_audiofile);
-			}
-
-			if (curr_audiofile.MetaData.title.empty())
-				tmp = curr_audiofile.MetaData.artist;
-			else if (curr_audiofile.MetaData.artist.empty())
-				tmp = curr_audiofile.MetaData.title;
-			else if (g_settings.audioplayer_display == TITLE_ARTIST)
-			{
-				tmp = curr_audiofile.MetaData.title;
-				tmp += " / ";
-				tmp += curr_audiofile.MetaData.artist;
-			}
-			else //if(g_settings.audioplayer_display == ARTIST_TITLE)
-			{
-				tmp = curr_audiofile.MetaData.artist;
-				tmp += " / ";
-				tmp += curr_audiofile.MetaData.title;
-			}
-			w = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(tmp, true); // UTF-8
-			xstart=(width-w)/2;
-			if(xstart < 10)
-				xstart=10;
-			g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+xstart, y +4+ 2*fheight, width- 20, tmp, COL_MENUCONTENTSELECTED, 0, true); // UTF-8
+			GetMetaData(&curr_audiofile);
 		}
+
+		if (curr_audiofile.MetaData.title.empty())
+			tmp = curr_audiofile.MetaData.artist;
+		else if (curr_audiofile.MetaData.artist.empty())
+			tmp = curr_audiofile.MetaData.title;
+		else if (g_settings.audioplayer_display == TITLE_ARTIST)
+		{
+			tmp = curr_audiofile.MetaData.title;
+			tmp += " / ";
+			tmp += curr_audiofile.MetaData.artist;
+		}
+		else //if(g_settings.audioplayer_display == ARTIST_TITLE)
+		{
+			tmp = curr_audiofile.MetaData.artist;
+			tmp += " / ";
+			tmp += curr_audiofile.MetaData.title;
+		}
+		w = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(tmp, true); // UTF-8
+		xstart=(width-w)/2;
+		if(xstart < 10)
+			xstart=10;
+		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+xstart, y +4+ 2*fheight, width- 20, tmp, COL_MENUCONTENTSELECTED, 0, true); // UTF-8
 		
 		// reset so fields get painted always
 		m_metainfo.clear();
