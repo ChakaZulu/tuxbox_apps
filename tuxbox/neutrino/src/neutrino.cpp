@@ -875,26 +875,26 @@ void CNeutrinoApp::ClearFrameBuffer()
 	//background
 	frameBuffer->paletteSetColor(COL_BACKGROUND, 0x000000, 0xffff);
 	//Windows Colors
-	frameBuffer->paletteSetColor(0x0, 0x010101, 0);
-	frameBuffer->paletteSetColor(0x1, 0x800000, 0);
-	frameBuffer->paletteSetColor(0x2, 0x008000, 0);
-	frameBuffer->paletteSetColor(0x3, 0x808000, 0);
-	frameBuffer->paletteSetColor(0x4, 0x000080, 0);
-	frameBuffer->paletteSetColor(0x5, 0x800080, 0);
-	frameBuffer->paletteSetColor(0x6, 0x008080, 0);
-	//	frameBuffer.paletteSetColor(0x7, 0xC0C0C0, 0);
-	frameBuffer->paletteSetColor(0x7, 0xA0A0A0, 0);
+	frameBuffer->paletteSetColor(0x1, 0x010101, 0);
+	frameBuffer->paletteSetColor(0x2, 0x800000, 0);
+	frameBuffer->paletteSetColor(0x3, 0x008000, 0);
+	frameBuffer->paletteSetColor(0x4, 0x808000, 0);
+	frameBuffer->paletteSetColor(0x5, 0x000080, 0);
+	frameBuffer->paletteSetColor(0x6, 0x800080, 0);
+	frameBuffer->paletteSetColor(0x7, 0x008080, 0);
+	//	frameBuffer.paletteSetColor(0x8, 0xC0C0C0, 0);
+	frameBuffer->paletteSetColor(0x8, 0xA0A0A0, 0);
 
-	//	frameBuffer.paletteSetColor(0x8, 0x808080, 0);
-	frameBuffer->paletteSetColor(0x8, 0x505050, 0);
+	//	frameBuffer.paletteSetColor(0x9, 0x808080, 0);
+	frameBuffer->paletteSetColor(0x9, 0x505050, 0);
 
-	frameBuffer->paletteSetColor(0x9, 0xFF0000, 0);
-	frameBuffer->paletteSetColor(0xA, 0x00FF00, 0);
-	frameBuffer->paletteSetColor(0xB, 0xFFFF00, 0);
-	frameBuffer->paletteSetColor(0xC, 0x0000FF, 0);
-	frameBuffer->paletteSetColor(0xD, 0xFF00FF, 0);
-	frameBuffer->paletteSetColor(0xE, 0x00FFFF, 0);
-	frameBuffer->paletteSetColor(0xF, 0xFFFFFF, 0);
+	frameBuffer->paletteSetColor(0xA, 0xFF0000, 0);
+	frameBuffer->paletteSetColor(0xB, 0x00FF00, 0);
+	frameBuffer->paletteSetColor(0xC, 0xFFFF00, 0);
+	frameBuffer->paletteSetColor(0xD, 0x0000FF, 0);
+	frameBuffer->paletteSetColor(0xE, 0xFF00FF, 0);
+	frameBuffer->paletteSetColor(0xF, 0x00FFFF, 0);
+	frameBuffer->paletteSetColor(0x10, 0xFFFFFF, 0);
 
 	frameBuffer->paletteSet();
 }
@@ -2778,7 +2778,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.307 2002/07/22 21:08:07 wjoost Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.308 2002/07/26 14:06:58 McClean Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

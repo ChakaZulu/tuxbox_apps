@@ -110,7 +110,7 @@ class CFrameBuffer
 		void paintHLineRel(int x, int dx, int y, unsigned char col);
 
 
-		bool paintIcon(string filename, int x, int y, unsigned char offset=0);
+		bool paintIcon(string filename, int x, int y, unsigned char offset=1);
 		bool paintIcon8(string filename, int x, int y, unsigned char offset=0);
 		void loadPal(string filename, unsigned char offset=0, unsigned char endidx=255 );
 		void setIconBasePath(string);
