@@ -131,15 +131,15 @@ recordingmenu.server_mac Indirizzo Mac
 recordingmenu.setupnow Accettare le Impostazioni
 recordingmenu.no_scart no scart
 
-streamingmenu.head unset
-streamingmenu.streaming_type unset
-streamingmenu.server_ip unset
-streamingmenu.server_port unset
-streamingmenu.streaming_server_cddrive unset
-streamingmenu.streaming_videorate unset
-streamingmenu.streaming_audiorate unset
-streamingmenu.off unset
-streamingmenu.on unset
+streamingmenu.head namjescenje promatraca filmova
+streamingmenu.streaming_type streamingserver
+streamingmenu.server_ip ip streamingservera
+streamingmenu.server_port port streamingservera
+streamingmenu.streaming_server_cddrive dvd
+streamingmenu.streaming_videorate brzina videa
+streamingmenu.streaming_audiorate brzina audia
+streamingmenu.off ugaseno
+streamingmenu.on upaljeno
 
 ping.ok e raggiungibile (ping)
 ping.unreachable non e raggiungibile (unreachable)
@@ -707,8 +707,8 @@ movieplayer.choosepes PES Play
 movieplayer.bookmark bookmark
 movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
-movieplayer.pleasewait unset
-movieplayer.nostreamingserver unset
+movieplayer.pleasewait Uspostavlja se veza sa streamingserverom.\nCekajte molim ...
+movieplayer.nostreamingserver Nije bilo moguce\nuspostaviti vezu sa streamingserverom.
 
 filebrowser.head filebrowser
 filebrowser.filter.active Filtro on
@@ -726,7 +726,7 @@ nfs.localdir Directory locale
 nfs.automount autocarica directory
 nfs.mountnow carica adesso
 nfs.mounterror errore di caricamento
-nfs.mounttimeout unset
+nfs.mounttimeout greska pri montiranju: tajm-aut
 nfs.umount scarica NFS/CIFS
 nfs.umounterror errore scarica NFS/CIFS
 nfs.alreadymounted Directory gia caricato
@@ -734,8 +734,8 @@ nfs.mount_options unset
 nfs.type Typ
 nfs.type_nfs NFS
 nfs.type_cifs CIFS
-nfs.username unset
-nfs.password unset
+nfs.username ime korisnika za cifs
+nfs.password lozinka za cifs
 nfsmenu.head Impostazioni NFS /CIFS
 
 apids.hint_1 Inoltrare i dati APIDs per Streamen,

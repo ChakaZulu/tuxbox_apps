@@ -131,15 +131,15 @@ recordingmenu.server_mac MAC adres
 recordingmenu.setupnow wykonaj zmiany 
 recordingmenu.no_scart nie przelaczaj w tryb Euro
 
-streamingmenu.head unset
-streamingmenu.streaming_type unset
-streamingmenu.server_ip unset
-streamingmenu.server_port unset
-streamingmenu.streaming_server_cddrive unset
-streamingmenu.streaming_videorate unset
-streamingmenu.streaming_audiorate unset
-streamingmenu.off unset
-streamingmenu.on unset
+streamingmenu.head Ustawienia odtwarzacza
+streamingmenu.streaming_type Typ serwera
+streamingmenu.server_ip IP serwera
+streamingmenu.server_port Port serwera
+streamingmenu.streaming_server_cddrive Naped DVD
+streamingmenu.streaming_videorate Obraz-przeplywnosc
+streamingmenu.streaming_audiorate Dzwiek-przeplywnosc
+streamingmenu.off Wyl
+streamingmenu.on Wl
 
 ping.ok osiagalny (ping)
 ping.unreachable nieosiagalny
@@ -466,7 +466,7 @@ GENRE.SHOW.1 game show/quiz
 GENRE.SHOW.2 variety show
 GENRE.SHOW.3 talk show
 
-GENRE.SPORTS.0 Sport
+GENRE.SPORTS.0 sport
 GENRE.SPORTS.1 imprezy specjalne(Olimpiada,Puchar swiata itd.)
 GENRE.SPORTS.2 magazyny sportowe
 GENRE.SPORTS.3 pilka nozna
@@ -521,7 +521,7 @@ GENRE.DOCUS_MAGAZINES.5 nauki spoleczne/duchowe
 GENRE.DOCUS_MAGAZINES.6 szkolnictwo wyzsze
 GENRE.DOCUS_MAGAZINES.7 jezyki
 
-GENRE.TRAVEL_HOBBIES.0 Podróze i wolny czas
+GENRE.TRAVEL_HOBBIES.0 podróze i wolny czas
 GENRE.TRAVEL_HOBBIES.1 turystyka/podróze
 GENRE.TRAVEL_HOBBIES.2 rzemioslo
 GENRE.TRAVEL_HOBBIES.3 motoryzacja
@@ -707,8 +707,8 @@ movieplayer.choosepes Odtwarzaj PES
 movieplayer.bookmark Ulubione
 movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
-movieplayer.pleasewait unset
-movieplayer.nostreamingserver unset
+movieplayer.pleasewait Poczekaj.\nLaczenie do streaming serwera...
+movieplayer.nostreamingserver Sreaming serwer nieosiagalny.
 
 filebrowser.head Przegladarka
 filebrowser.filter.active Filtr wlaczony
@@ -726,16 +726,16 @@ nfs.localdir lokalny katalog
 nfs.automount zamontuj przy starcie
 nfs.mountnow zamontuj teraz
 nfs.mounterror blad montowania
-nfs.mounttimeout unset
+nfs.mounttimeout Przekroczony czas
 nfs.umount Odmontuj volumin NFS/CIFS
 nfs.umounterror blad odmontowania voluminu
 nfs.alreadymounted katalog juz zamontowny
-nfs.mount_options unset
+nfs.mount_options parametry NFS
 nfs.type Typ
 nfs.type_nfs NFS
 nfs.type_cifs CIFS
-nfs.username unset
-nfs.password unset
+nfs.username CIFS uzytkownik
+nfs.password CIFS haslo
 nfsmenu.head ustawienia NFS/CIFS
 
 apids.hint_1 Podaj APIDy do odbioru w
