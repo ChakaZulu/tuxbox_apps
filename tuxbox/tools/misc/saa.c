@@ -32,7 +32,16 @@ void help(char *prog_name) {
      "                      CSYNC    = 4\n"
      "                      DEMOFF   = 8\n"
      "                      SYMP     = 16\n"
-     "                      COLORBAR = 128\n");
+     "                      COLORBAR = 128\n"
+	 " -w, --wss <x>        widescreen signaling\n"
+	 "                      0    4:3 full format\n"
+	 "                      1    14:9 center letterbox\n"
+	 "                      2    14:9 top letterbox\n"
+	 "                      3    16:9 center letterbox\n"
+	 "                      4    16:9 top letterbox\n"
+	 "                      5    >16:9 center letterbox\n"
+	 "                      6    4:3 with 14:9 center letterbox\n"
+	 "                      7    16:9 full format (anamorphic)\n");
   exit(0);
 }
 
@@ -140,6 +149,10 @@ int main(int argc, char **argv)
 	  	mode = SAAIOSPOWERSAVE;
 	  }
     }
+	else if ((strcmp("-w",argv[count]) == 0) || (strcmp("--wss",argv[count]) == 0) ) {
+		arg = atoi(argv[count+1]);
+		mode = SAAIOSWSS;
+	}
 	else {
       help(argv[0]);
 	  return 0;
