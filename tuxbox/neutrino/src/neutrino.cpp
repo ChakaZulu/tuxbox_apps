@@ -2499,6 +2499,13 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	}
 	else if( msg == NeutrinoMessages::ANNOUNCE_RECORD)
 	{
+		if( g_settings.recording_server_wakeup )
+		{
+			string command;
+			command = "ether-wake "+ string(g_settings.recording_server_mac);
+			if(system(command.c_str()) != NULL)
+				perror("ether-wake failed");
+		}
 		if( mode != mode_scart )
 			ShowHint ( "messagebox.info", g_Locale->getText("recordtimer.announce") );
 		CTimerd::EventInfo * eventinfo; 
@@ -2652,12 +2659,6 @@ void CNeutrinoApp::ExitRun()
 #endif
 
 	dprintf(DEBUG_INFO, "exit\n");
-/*  moved to controld
-	//shutdown screen
-	g_lcdd->shutdown();
-	// timerd beenden und wakeup programmieren
-	g_Timerd->shutdown();
-*/
 	for(int x=0;x<256;x++)
 		frameBuffer->paletteSetColor(x, 0x000000, 0xffff);
 	frameBuffer->paletteSet();
@@ -3073,7 +3074,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.352 2002/10/28 17:56:53 Zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.353 2002/10/29 15:41:37 dirch Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
