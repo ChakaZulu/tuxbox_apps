@@ -320,7 +320,7 @@ void setVideoFormat(int format, bool bUnregNotifier = true)
 		}
 		close(fd);
 
-		watchDog->lastVideoMode = format;
+		watchDog->VideoMode = format;
 		if ((bNotifyRegistered) && (bUnregNotifier))
 		{
 			watchDog->unregisterNotifier(WDE_VIDEOMODE, aspectRatioNotifier);
@@ -797,7 +797,7 @@ void sig_catch(int)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.43 2002/03/05 19:58:49 field Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.44 2002/03/06 11:17:04 field Exp $\n\n");
 
 	if (fork() != 0)
 		return 0;
@@ -863,8 +863,9 @@ int main(int argc, char **argv)
 		memset(&rmessage, 0, sizeof(rmessage));
 		read(connfd,&rmessage,sizeof(rmessage));
 
+		//printf("[controld] before parse_command(connfd, &rmessage);\n");
 		parse_command(connfd, &rmessage);
-
+		//printf("[controld] after parse_command(connfd, &rmessage);\n");
 		close(connfd);
 	}
 

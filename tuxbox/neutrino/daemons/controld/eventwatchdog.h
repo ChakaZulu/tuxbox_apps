@@ -30,8 +30,11 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <errno.h>
 #include "eventserver.h"
 #include "controldclient.h"
+#include <dbox/fp.h>
+
 
 using namespace std;
 
@@ -55,10 +58,10 @@ class CAspectRatioNotifier : public CEventWatchdogNotifier
 		virtual void aspectRatioChanged( int newAspectRatio ) = NULL;
 };
 
-class CVideoModeNotifier : public CEventWatchdogNotifier
+class CVCRModeNotifier : public CEventWatchdogNotifier
 {
 	public:
-		virtual void VCRModeChanged( bool newVCRMode ) = NULL;
+		virtual void VCRModeChanged( int newVCRMode ) = NULL;
 };
 
 class CEventWatchDog
@@ -71,14 +74,14 @@ class CEventWatchDog
 	map<uint, EventWatchdogNotifiers*>	Notifiers;
 
 	int getVideoMode();
-	bool getVCRMode();
+	int getVCRMode();
 	void startThread();
 	void videoModeChanged( int nNewVideoMode );
-	void vcrModeChanged( bool bBNewVCRMode );
+	void vcrModeChanged( int nNewVCRMode );
 
   public :
-	int 	lastVideoMode;
-	bool    lastVCRMode;
+	int 	VideoMode;
+	int    	VCRMode;
 	CEventWatchDog();
 
 	static void * watchdogThread (void *arg);

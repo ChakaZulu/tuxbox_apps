@@ -41,6 +41,9 @@ using namespace std;
 
 #define CONTROLD_UDS_NAME "/tmp/controld.sock"
 
+#define VCR_STATUS_OFF 0
+#define VCR_STATUS_ON 1
+#define VCR_STATUS_16_9 2
 
 class CControldClient
 {

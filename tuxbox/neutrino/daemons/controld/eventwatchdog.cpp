@@ -44,39 +44,28 @@ void CEventWatchDog::startThread()
 
 int CEventWatchDog::getVideoMode()
 {
-	FILE* fdEvent = fopen("/proc/bus/bitstream", "rt");
-	if (fdEvent==NULL)
+	int bitInfo = 0;
+	char buffer[100];
+	FILE* fp = fopen("/proc/bus/bitstream", "r");
+	while (!feof(fp))
 	{
-		printf("error while opening proc-bitstream\n" );
-		return -1;
+		fgets(buffer, 100, fp);
+		sscanf(buffer, "A_RATIO: %d", &bitInfo);
 	}
-
-	int bitInfo[10];
-	char *key,*tmpptr,buf[100];
-	int value, pos=0;
-	fgets(buf,29,fdEvent);//dummy
-	while(!feof(fdEvent))
-	{
-		if(fgets(buf,29,fdEvent)!=NULL)
-		{
-			buf[strlen(buf)-1]=0;
-			tmpptr=buf;
-			key=strsep(&tmpptr,":");
-			for(;tmpptr[0]==' ';tmpptr++);
-			value=atoi(tmpptr);
-			//printf("%s: %d\n",key,value);
-			bitInfo[pos]= value;
-			pos++;
-		}
-	}
-	fclose(fdEvent);
-
-	return(bitInfo[2]);
+	fclose(fp);
+	return bitInfo;
 }
 
-bool CEventWatchDog::getVCRMode()
+int CEventWatchDog::getVCRMode()
 {
-	return false;
+	int val;
+	int fp = open("/dev/dbox/fp0",O_RDWR);
+
+	ioctl(fp, FP_IOCTL_GET_VCR, &val);
+
+	close(fp);
+	//printf("getVCRMode= %d\n", val);
+	return val;
 }
 
 void CEventWatchDog::videoModeChanged( int nNewVideoMode )
@@ -89,14 +78,14 @@ void CEventWatchDog::videoModeChanged( int nNewVideoMode )
 	eventServer->sendEvent(CControldClient::EVT_MODECHANGED, 0, &nNewVideoMode, sizeof(nNewVideoMode));
 }
 
-void CEventWatchDog::vcrModeChanged( bool bBNewVCRMode )
+void CEventWatchDog::vcrModeChanged( int nNewVCRMode )
 {
 	EventWatchdogNotifiers* notifiers = Notifiers.find(WDE_VCRONOFF)->second;
 	for (uint i=0; i<notifiers->size(); i++ )
 	{
-		((CVideoModeNotifier*)(*notifiers)[i])->VCRModeChanged( bBNewVCRMode );
+		((CVCRModeNotifier*)(*notifiers)[i])->VCRModeChanged( nNewVCRMode );
 	}
-	eventServer->sendEvent(CControldClient::EVT_VCRCHANGED, 0, &bBNewVCRMode, sizeof(bBNewVCRMode));
+	eventServer->sendEvent(CControldClient::EVT_VCRCHANGED, 0, &nNewVCRMode, sizeof(nNewVCRMode));
 }
 
 void* CEventWatchDog::watchdogThread (void *arg)
@@ -104,7 +93,7 @@ void* CEventWatchDog::watchdogThread (void *arg)
 	CEventWatchDog* WatchDog = (CEventWatchDog*) arg;
 
 	int fd_ev;
-	fd_set rfds;
+	int status;
 
 	struct event_t event;
 
@@ -114,51 +103,42 @@ void* CEventWatchDog::watchdogThread (void *arg)
 		return NULL;
 	}
 
-	if ( ioctl(fd_ev, EVENT_SET_FILTER, EVENT_VCR_OFF | EVENT_VCR_ON | EVENT_ARATIO_CHANGE /*| EVENT_VHSIZE_CHANGE*/ ) < 0 )
+	if ( ioctl(fd_ev, EVENT_SET_FILTER, EVENT_VCR_CHANGED | EVENT_ARATIO_CHANGE /*| EVENT_VHSIZE_CHANGE*/ ) < 0 )
 	{
 		perror("ioctl");
 		close(fd_ev);
 		return NULL;
 	}
 
-	fcntl( fd_ev, F_SETFL, O_NONBLOCK );
-
-
 	while (1)
 	{
-		FD_ZERO(&rfds);
-		FD_SET(fd_ev, &rfds);
-
-		int status = select(fd_ev+1, &rfds, NULL, NULL, NULL);
-
-		if(FD_ISSET(fd_ev, &rfds))
+		//printf("[controld] before read\n", status);
+		status = read(fd_ev, &event, sizeof(event));
+		//printf("[controld] read result <%d>\n", status);
+		if ( status == sizeof(event) )
 		{
-			status = read(fd_ev, &event, sizeof(event));
-			if ( status == sizeof(event) )
+			if (event.event == EVENT_ARATIO_CHANGE)
 			{
-                if (event.event == EVENT_ARATIO_CHANGE)
-                {
-                	//printf("(event.event == EVENT_ARATIO_CHANGE)\n");
-					int newVideoMode = WatchDog->getVideoMode();
-					if ( (newVideoMode != WatchDog->lastVideoMode) && (newVideoMode != -1) )
-					{
-						pthread_mutex_trylock( &WatchDog->wd_mutex );
-						WatchDog->lastVideoMode = (uint)newVideoMode;
-						WatchDog->videoModeChanged( newVideoMode);
-						pthread_mutex_unlock( &WatchDog->wd_mutex );
-					}
+               	//printf("(event.event == EVENT_ARATIO_CHANGE)\n");
+				int newVideoMode = WatchDog->getVideoMode();
+				if ( (newVideoMode != WatchDog->VideoMode) && (newVideoMode != -1) )
+				{
+					pthread_mutex_trylock( &WatchDog->wd_mutex );
+					WatchDog->VideoMode = (uint)newVideoMode;
+					WatchDog->videoModeChanged( newVideoMode);
+					pthread_mutex_unlock( &WatchDog->wd_mutex );
 				}
-                else if ( (event.event == EVENT_VCR_ON) || (event.event == EVENT_VCR_OFF) )
-                {
-                	//printf("(event.event == EVENT_VCR)\n");
-					int newVCRMode = (event.event == EVENT_VCR_ON);
-					if ( (newVCRMode != WatchDog->lastVCRMode) )
-					{
-						pthread_mutex_trylock( &WatchDog->wd_mutex );
-						WatchDog->lastVCRMode = newVCRMode;
-						WatchDog->vcrModeChanged( newVCRMode );
-						pthread_mutex_unlock( &WatchDog->wd_mutex );
-					}
+			}
+			else if ( event.event == EVENT_VCR_CHANGED )
+			{
+               	//printf("(event.event == EVENT_VCR)\n");
+				int newVCRMode = WatchDog->getVCRMode();
+				if ( (newVCRMode != WatchDog->VCRMode) )
+				{
+					pthread_mutex_trylock( &WatchDog->wd_mutex );
+					WatchDog->VCRMode = newVCRMode;
+					WatchDog->vcrModeChanged( newVCRMode );
+					pthread_mutex_unlock( &WatchDog->wd_mutex );
 				}
 			}
 		}
@@ -175,6 +155,10 @@ void CEventWatchDog::registerNotifier( uint watchdogEvent, CEventWatchdogNotifie
 	if (watchdogEvent== WDE_VIDEOMODE)
 	{
 		videoModeChanged( getVideoMode() );
+	}
+	if (watchdogEvent== WDE_VCRONOFF)
+	{
+		vcrModeChanged( getVCRMode() );
 	}
 
 	if (bThreadRunning)
