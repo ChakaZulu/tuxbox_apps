@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.43 2003/11/30 21:21:13 thegoodguy Exp $
+	$Id: webapi.cpp,v 1.44 2003/11/30 23:53:04 thegoodguy Exp $
 
 	License: GPL
 
@@ -31,8 +31,6 @@
 #include "debug.h"
 #include "algorithm"
 #include "sstream"
-
-using namespace std;
 
 //-------------------------------------------------------------------------
 bool CWebAPI::Execute(CWebserverRequest* request)
@@ -182,13 +180,17 @@ bool CWebAPI::Dbox(CWebserverRequest* request)
 bool CWebAPI::ShowBouquets(CWebserverRequest* request)
 // show the bouquet list
 {
-string classname;
-string actual;
+	std::string classname;
+	const char * actual;
 
 	request->SendPlainHeader("text/html");
 	int BouquetNr = (request->ParameterList["bouquet"] != "")?atoi(request->ParameterList["bouquet"].c_str()):0;
 	bool javascript = (request->ParameterList["js"].compare("1") == 0);
-	request->SocketWriteLn("<HTML>\n<HEAD><title>DBOX2-Neutrino Bouquetliste</title><link rel=\"stylesheet\" TYPE=\"text/css\" HREF=\"../global.css\">");
+	request->SocketWrite("<HTML>\n<HEAD><title>DBOX2-Neutrino Bouquetliste</title>"
+			     "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\" />\n"
+			     "<link rel=\"stylesheet\" href=\"../global.css\" type=\"text/css\" />\n"
+		);
+
 	request->SocketWrite("<SCRIPT LANGUAGE=\"JavaScript\">\n<!--\n function go_to(url1, url2)\n{\n top.content.location.href = url1;\n top.bouquets.location.href = url2;\n }\n//-->\n </SCRIPT>\n</HEAD><BODY>");
 
 	request->SocketWriteLn("<TABLE cellspacing=0 cellpadding=0 border=0 width=\"100%\">");
@@ -226,9 +228,9 @@ string actual;
 				classname = "";
 			}
 			if(javascript)
-				request->printf("<tr height=\"20\"%s><TD>%s<NOBR><a CLASS=\"blist\" HREF=\"javascript:go_to('/fb/channellist.dbox2?bouquet=%d#akt','/fb/bouquetlist.dbox2?js=1&bouquet=%d#akt');\">%s</a></NOBR></TD></TR>\n",classname.c_str(),actual.c_str(),(bouquet->bouquet_nr + 1),(bouquet->bouquet_nr + 1),bouquet->name);
+				request->printf("<tr height=\"20\"%s><TD>%s<NOBR><a CLASS=\"blist\" HREF=\"javascript:go_to('/fb/channellist.dbox2?bouquet=%d#akt','/fb/bouquetlist.dbox2?js=1&bouquet=%d#akt');\">%s</a></NOBR></TD></TR>\n",classname.c_str(), actual,(bouquet->bouquet_nr + 1),(bouquet->bouquet_nr + 1),bouquet->name);
 			else
-				request->printf("<tr height=\"20\"%s><TD>%s<NOBR><a CLASS=\"blist\" HREF=\"/fb/channellist.dbox2?bouquet=%d#akt\" TARGET=\"content\">%s</a></NOBR></TD></TR>\n",classname.c_str(),actual.c_str(),(bouquet->bouquet_nr + 1),bouquet->name);
+				request->printf("<tr height=\"20\"%s><TD>%s<NOBR><a CLASS=\"blist\" HREF=\"/fb/channellist.dbox2?bouquet=%d#akt\" TARGET=\"content\">%s</a></NOBR></TD></TR>\n",classname.c_str(), actual, (bouquet->bouquet_nr + 1),bouquet->name);
 		}
 	}
 	request->SocketWrite("</TABLE>\n");
@@ -633,23 +635,27 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 			bool has_current_next = Parent->Sectionsd->getCurrentNextServiceKey(channel->channel_id, currentNextInfo);
 			prozent = 100 * (time(NULL) - event->startTime) / event->duration;
 			timeString(event->startTime, timestr);
-			request->printf("<tr><td align=\"left\" style=\"width: 31px\" class=\"%cepg\">"
-			                "<table border=\"0\" rules=\"none\" style=\"height: 10px; width: 30px\" cellspacing=\"0\" cellpadding=\"0\">"
+			request->printf("<tr>"
+					"<td align=\"left\" style=\"width: 32px\" class=\"%cepg\">"
+			                "<table border=\"0\" rules=\"none\" style=\"height: 10px; border: 1px solid black; width: 30px\" cellspacing=\"0\" cellpadding=\"0\">"
 					"<tr>"
-					"<td style=\"background-color: #2211FF; border: 1px solid black; height: 10px; width: %dpx\">"
-					"</td>"
-					"<td style=\"background-color: #EAEBFF; border: 1px solid black; height: 10px; width: %dpx\">"
-					"</td>"
+					"<td style=\"background-color: #2211FF; height: 10px; width: %dpx\"></td>"
+					"<td style=\"background-color: #EAEBFF; height: 10px; width: %dpx\"></td>"
 					"</tr>"
 					"</table></td>"
 					, classname
-					, (prozent / 10) * 3,(10 - (prozent / 10))*3);
+					, (prozent / 10) * 3
+					, (10 - (prozent / 10))*3
+				);
 			request->printf("<td class=\"%cepg\">",classname);
 			request->printf("<a class=\"clistsmall\" href=\"epg.dbox2?epgid=%llx\">",event->eventID);
 //			request->printf("<a class=\"clistsmall\" href=\"epg.dbox2?epgid=%llx&amp;startzeit=%lx\">",event->eventID,event->startTime);
-			request->printf("%s&nbsp;%s&nbsp;", timestr, event->description.c_str()); 
-
-			request->printf("<span style=\"font-size: 8pt\">(%ld von %d min, %d%%)</span></a>", (time(NULL) - event->startTime)/60,event->duration / 60,prozent);
+			request->printf("%s&nbsp;%s&nbsp;"
+			                "<span style=\"font-size: 8pt; white-space: nowrap\">(%ld von %d min, %d%%)</span></a>"
+					, timestr
+					, event->description.c_str()
+					, (time(NULL) - event->startTime)/60
+					, event->duration / 60,prozent);
 
 			if ((has_current_next) && (currentNextInfo.flags & CSectionsdClient::epgflags::has_next)) {
 				timeString(currentNextInfo.next_zeit.startzeit, timestr);
@@ -714,7 +720,7 @@ char volbuf[5];
 }
 
 //-------------------------------------------------------------------------
-bool CWebAPI::ShowEPG(CWebserverRequest *request,string Title, string Info1, string Info2)
+bool CWebAPI::ShowEPG(CWebserverRequest *request,std::string Title, std::string Info1, std::string Info2)
 {
 	CStringList params;
 	params["Title"] = (Title != "")?Title:"Kein EPG vorhanden";
@@ -738,7 +744,7 @@ bool CWebAPI::ShowActualEpg(CWebserverRequest *request)
 }
 
 //-------------------------------------------------------------------------
-bool CWebAPI::ShowEpg(CWebserverRequest *request,string EpgID,string Startzeit)
+bool CWebAPI::ShowEpg(CWebserverRequest *request,std::string EpgID,std::string Startzeit)
 {
 	unsigned long long epgid;
 	uint startzeit;
@@ -800,13 +806,13 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 	channellist_radio.clear();
 
 	request->SendHTMLHeader("TIMERLISTE");
-	request->SocketWrite("<center>\n<TABLE CLASS=\"timer\" border=0>\n<TR>\n");
-	request->SocketWrite("<TD CLASS=\"ctimer\" align=\"center\"><b>Alarm-Zeit</TD>\n");
-	request->SocketWrite("<TD CLASS=\"ctimer\" align=\"center\"><b>Stop-Zeit</TD>\n");
-	request->SocketWrite("<TD CLASS=\"ctimer\" align=\"center\"><b>Wiederholung</TD>\n");
-	request->SocketWrite("<TD CLASS=\"ctimer\" align=\"center\"><b>Typ</TD>\n");
-	request->SocketWrite("<TD CLASS=\"ctimer\" align=\"center\"><b>Beschreibung</TD>\n");
-	request->SocketWrite("<TD CLASS=\"ctimer\"><TD CLASS=\"ctimer\"></TR>\n");
+	request->SocketWrite("<center>\n<TABLE CLASS=\"timer\" border=0>\n<TR>\n"
+	                     "<TD CLASS=\"ctimer\" align=\"center\"><b>Alarm-Zeit</TD>\n"
+	                     "<TD CLASS=\"ctimer\" align=\"center\"><b>Stop-Zeit</TD>\n"
+	                     "<TD CLASS=\"ctimer\" align=\"center\"><b>Wiederholung</TD>\n"
+	                     "<TD CLASS=\"ctimer\" align=\"center\"><b>Typ</TD>\n"
+	                     "<TD CLASS=\"ctimer\" align=\"center\"><b>Beschreibung</TD>\n"
+	                     "<TD CLASS=\"ctimer\"><TD CLASS=\"ctimer\"></TR>\n");
 
 	int i = 1;
 	char classname= 'a';
@@ -840,7 +846,7 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 		request->printf("<TD CLASS=\"%ctimer\" align=center>%s</TD>", classname, zType);
 
 		// Add Data
-		string sAddData="";
+		std::string sAddData="";
 		switch(timer->eventType)
 		{
 			case CTimerd::TIMER_NEXTPROGRAM :
@@ -885,16 +891,16 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 				}
 				if(strlen(timer->apids) > 0)
 				{
-					sAddData+= string("(") + timer->apids + ")";
+					sAddData+= std::string("(") + timer->apids + ')';
 				}
 				if(timer->epgID!=0)
 				{
-					stringstream ss;
+					std::stringstream ss;
 					CSectionsdClient sdc;
 					CEPGData epgdata;
 					if (sdc.getEPGid(timer->epgID, timer->epg_starttime, &epgdata))
 					{
-						ss << "<BR><A CLASS=\"timer\" HREF=\"epg.dbox2?epgid=" << hex << timer->epgID 
+						ss << "<BR><A CLASS=\"timer\" HREF=\"epg.dbox2?epgid=" << std::hex << timer->epgID 
 							<< "&startzeit=" << timer->epg_starttime
 							<< "\">" << epgdata.title << "</A>";
 						sAddData+=ss.str();
@@ -914,7 +920,7 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 			break;
 			case CTimerd::TIMER_REMIND :
 			{
-				sAddData = string(timer->message).substr(0,20);
+				sAddData = std::string(timer->message).substr(0,20);
 			}
 			break;
 
@@ -1002,7 +1008,7 @@ void CWebAPI::modifyTimerForm(CWebserverRequest *request, unsigned timerId)
 	request->SocketWrite("<TR><TD align=\"center\">Wiederholung\n");
 	request->SocketWrite("<select name=\"rep\" onchange=\"onEventChange();\">\n");
 	char zRep[21];
-	string visibility;
+	const char * visibility;
 	for(int i=0; i<=6;i++)
 	{
 		if(i!=(int)CTimerd::TIMERREPEAT_BYEVENTDESCRIPTION)
@@ -1028,17 +1034,16 @@ void CWebAPI::modifyTimerForm(CWebserverRequest *request, unsigned timerId)
 	// Weekdays
 	char weekdays[8];
 	Parent->Timerd->setWeekdaysToStr(timer.eventRepeat, weekdays);
-	request->printf("<tr id=\"WeekdaysRow\" style=\"visibility:%s\"><TD align=\"center\">\n",
-								visibility.c_str());
+	request->printf("<tr id=\"WeekdaysRow\" style=\"visibility:%s\"><TD align=\"center\">\n", visibility);
 	request->printf("Wochentage <INPUT TYPE=\"text\" name=\"wd\" value=\"%s\" size=7 maxlength=7> (Mo-So, X=Timer)</TD></TR>\n",
 		 weekdays);
 
-	request->SocketWrite("<TR><TD colspan=2 height=10></TR>\n");
-	request->SocketWrite("<TR><TD align=\"center\"><INPUT TYPE=\"submit\" value=\"OK\"></form></TD>\n");
-	request->SocketWrite("<TD align=\"center\"><form method=\"GET\" action=\"/fb/timer.dbox2\">\n");
-	request->SocketWrite("<INPUT type=\"hidden\" name=\"action\" value=\"none\">\n");
-	request->SocketWrite("<INPUT TYPE=\"submit\" value=\"CANCEL\"></form></TD>\n");
-	request->SocketWrite("</TR></TABLE></TABLE>");
+	request->SocketWrite("<TR><TD colspan=2 height=10></TR>\n"
+	                     "<TR><TD align=\"center\"><INPUT TYPE=\"submit\" value=\"OK\"></form></TD>\n"
+	                     "<TD align=\"center\"><form method=\"GET\" action=\"/fb/timer.dbox2\">\n"
+	                     "<INPUT type=\"hidden\" name=\"action\" value=\"none\">\n"
+			     "<INPUT TYPE=\"submit\" value=\"CANCEL\"></form></TD>\n"
+			     "</TR></TABLE></TABLE>");
 	request->SendHTMLFooter();
 }
 
@@ -1106,7 +1111,7 @@ void CWebAPI::doModifyTimer(CWebserverRequest *request)
 	Parent->Timerd->modifyTimerEvent(modyId, announceTimeT, alarmTimeT, stopTimeT, rep);
 	if(request->ParameterList["ap"] != "")
 	{
-		string apids = request->ParameterList["ap"];
+		std::string apids = request->ParameterList["ap"];
 		Parent->Timerd->modifyTimerAPid(modyId,apids);
 	}
 }
@@ -1116,12 +1121,12 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 {
 	request->SendHTMLHeader("NEUER TIMER");
 	// Javascript
-	request->SocketWrite("<script language =\"javascript\">\n");
-	request->SocketWrite("function my_show(id) {document.getElementById(id).style.visibility=\"visible\";}\n");
-	request->SocketWrite("function my_hide(id) {document.getElementById(id).style.visibility=\"hidden\";}\n");
-	request->SocketWrite("function focusNMark() { document.NewTimerForm.ad.select();\n");
-	request->SocketWrite("                        document.NewTimerForm.ad.focus();}\n");
-	request->SocketWrite("function onEventChange() { tType=document.NewTimerForm.type.value;\n");
+	request->SocketWrite("<script language =\"javascript\">\n"
+	                     "function my_show(id) {document.getElementById(id).style.visibility=\"visible\";}\n"
+	                     "function my_hide(id) {document.getElementById(id).style.visibility=\"hidden\";}\n"
+	                     "function focusNMark() { document.NewTimerForm.ad.select();\n"
+	                     "                        document.NewTimerForm.ad.focus();}\n"
+	                     "function onEventChange() { tType=document.NewTimerForm.type.value;\n");
 	request->printf("  if (tType == \"%d\") my_show(\"StopDateRow\"); else my_hide(\"StopDateRow\");\n",
 		  (int)CTimerd::TIMER_RECORD);
 	request->printf("  if (tType == \"%d\") my_show(\"StandbyRow\"); else my_hide(\"StandbyRow\");\n",
@@ -1246,11 +1251,11 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 	request->printf("Nachricht <INPUT TYPE=\"text\" name=\"msg\" value=\"\" size=20 maxlength=%d> ('/'=NL)\n",REMINDER_MESSAGE_MAXLEN-1);
 	request->SocketWrite("</TD></TR>\n");
 	// Buttons
-	request->SocketWrite("<TD align=\"center\"><INPUT TYPE=\"submit\" value=\"OK\"></form>\n");
-	request->SocketWrite("<TD align=\"center\"><form method=\"GET\" action=\"/fb/timer.dbox2\">\n");
-	request->SocketWrite("<INPUT TYPE=\"hidden\" NAME=\"action\" VALUE=\"none\">\n");
-	request->SocketWrite("<INPUT TYPE=\"submit\" value=\"CANCEL\"></form></TD>\n");
-	request->SocketWrite("</TABLE></TABLE>\n");
+	request->SocketWrite("<TD align=\"center\"><INPUT TYPE=\"submit\" value=\"OK\"></form>\n"
+	                     "<TD align=\"center\"><form method=\"GET\" action=\"/fb/timer.dbox2\">\n"
+	                     "<INPUT TYPE=\"hidden\" NAME=\"action\" VALUE=\"none\">\n"
+	                     "<INPUT TYPE=\"submit\" value=\"CANCEL\"></form></TD>\n"
+	                     "</TABLE></TABLE>\n");
 	request->SendHTMLFooter();
 }
 
