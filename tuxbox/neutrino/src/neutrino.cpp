@@ -532,7 +532,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.recording_server_wakeup = configfile.getInt32( "recording_server_wakeup", 0 );
 	strcpy( g_settings.recording_server_mac, configfile.getString( "recording_server_mac", "11:22:33:44:55:66").c_str() );
 	g_settings.recording_vcr_no_scart = configfile.getInt32( "recording_vcr_no_scart", false);
-    strcpy( g_settings.recording_splitsize, configfile.getString( "recording_splitsize", "0").c_str() );
+	strcpy( g_settings.recording_splitsize, configfile.getString( "recording_splitsize", "2").c_str() );
     
 	//streaming (server)
 	g_settings.streaming_type = configfile.getInt32( "streaming_type", 0 );
