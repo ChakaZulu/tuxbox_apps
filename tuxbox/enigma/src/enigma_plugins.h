@@ -12,7 +12,7 @@ public:
 	int version;
 	eString name, desc;
 	eString depend, sopath, pluginname;
-	bool needfb, needrc, needlcd, needvtxtpid, needoffsets, showpig;
+	bool needfb, needrc, needlcd, needvtxtpid, needoffsets, showpig, needvidformat;
 	int posx, posy, sizex, sizey;
 	int isback;
 	ePlugin(eListbox *parent, const char *cfgfile);

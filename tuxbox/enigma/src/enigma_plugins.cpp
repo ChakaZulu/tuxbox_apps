@@ -18,6 +18,7 @@
 #include <core/base/eerror.h>
 #include <core/gdi/lcd.h>
 #include <core/driver/rc.h>
+#include <core/driver/streamwd.h>
 #include <core/dvb/edvb.h>
 #include <core/dvb/decoder.h>
 #include <core/gui/elistbox.h>
@@ -102,6 +103,7 @@ ePlugin::ePlugin(eListbox *parent, const char *cfgfile): eListboxEntry(parent)
 					aneedlcd=getInfo(cfgfile, "needlcd"),
 					aneedvtxtpid=getInfo(cfgfile, "needvtxtpid"),
 					aneedoffsets=getInfo(cfgfile, "needoffsets"),
+					aneedvidformat=getInfo(cfgfile, "needvidformat"),
 					apigon=getInfo(cfgfile, "pigon");
 
 	needfb=(aneedfb.isNull()?false:atoi(aneedfb));
@@ -109,6 +111,7 @@ ePlugin::ePlugin(eListbox *parent, const char *cfgfile): eListboxEntry(parent)
 	needrc=(aneedrc.isNull()?false:atoi(aneedrc));
 	needvtxtpid=(aneedvtxtpid.isNull()?false:atoi(aneedvtxtpid));
 	needoffsets=(aneedoffsets.isNull()?false:atoi(aneedoffsets));
+	needvidformat=(aneedvidformat.isNull()?false:atoi(aneedvidformat));
 	version=(apluginVersion.isNull()?0:atoi(apluginVersion));
 	showpig=(apigon.isNull()?false:atoi(apigon));
 
@@ -259,12 +262,17 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 		}
 	}
 
-/*	
-	for(PluginParam *par = first; par; par=par->next )
+	if (plugin->needvidformat)
+	{
+		MakeParam(P_ID_VFORMAT, eStreamWatchdog::getInstance()->isAnamorph()?2:1);
+	}
+
+/*	for(PluginParam *par = first; par; par=par->next )
 	{
 		printf ("id: %s - val: %s\n", par->id, par->val);
 		printf("%d\n", par->next);
-	}*/
+	}
+*/
 
 	for (i=0; i<argc; i++)
 	{
