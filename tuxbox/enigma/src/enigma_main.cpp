@@ -5670,7 +5670,6 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 		// disable skipping
 		if(skipping) 
 			endSkip();
-		
 		int serviceFlags = eServiceInterface::getInstance()->getService()->getFlags();
 		if (playlist->current != playlist->getConstList().end())
 		{
@@ -5679,12 +5678,18 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 		}
 		if (playlist->current != playlist->getConstList().end() )
 		{
-			playlist->current->current_position=-1;		// start from beginning.
-			eServiceInterface::getInstance()->play((eServiceReference&)(*playlist->current));
+			eServiceReference &ref = *playlist->current;
+			if ( ref.path )  // is the current playlist entry a file?
+			{
+				playlist->current->current_position=-1;	// start from beginning
+				eServiceInterface::getInstance()->play((eServiceReference&)(*playlist->current));
+			}
+			else  // when not hold prev service
+				--playlist->current;
 		}
 		else if (!playlistmode)
 		{
-			if(! (serviceFlags & eServiceHandler::flagIsTrack)  )
+			if(! (serviceFlags & eServiceHandler::flagIsTrack)  )  // current service is a track (file)
 				break;
 			nextService(1);
 		}
