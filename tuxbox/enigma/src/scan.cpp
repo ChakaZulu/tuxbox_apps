@@ -1417,7 +1417,7 @@ int TransponderScan::eventHandler( const eWidgetEvent &event )
 			{
 				Decoder::locked=0;
 				Decoder::Flush();
-				if ( service && ( !last_orbital_pos || ((((eServiceReferenceDVB&)service).getDVBNamespace().get() & 0xFFFF0000) >> 16 ) == last_orbital_pos ) )
+				if ( service /*&& ( !last_orbital_pos || ((((eServiceReferenceDVB&)service).getDVBNamespace().get() & 0xFFFF0000) >> 16 ) == last_orbital_pos )*/ )
 				{
 					eFrontend::getInstance()->savePower();
 					eServiceInterface::getInstance()->service=eServiceReference();
