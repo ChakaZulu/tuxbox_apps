@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.33 2004/01/01 20:09:40 rasc Exp $
+$Id: dvb_str.c,v 1.34 2004/01/05 02:03:42 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.33 2004/01/01 20:09:40 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.34  2004/01/05 02:03:42  rasc
+no message
+
 Revision 1.33  2004/01/01 20:09:40  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -277,11 +280,13 @@ char *dvbstrMPEGDescriptorTAG (u_int tag)
      {  0x15, 0x15,  "deferred_association_tag_descriptor" },
      {  0x16, 0x16,  "ISO/IEC13818-6 Reserved" },
      /* $$$ TODO... vvvvvvv */
+     	  /* DSM-CC stream descriptors */
      {  0x17, 0x17,  "NPT_reference_descriptor" },
      {  0x18, 0x18,  "NPT_endpoint_descriptor" },
      {  0x19, 0x19,  "stream_mode_descriptor" },
      {  0x1A, 0x1A,  "stream_event_descriptor" },
      /* $$$ TODO... ^^^^^^^^ */
+          /* MPEG-4 descriptors */
      {  0x1B, 0x1B,  "MPEG4_video_descriptor" },
      {  0x1C, 0x1C,  "MPEG4_audio_descriptor" },
      {  0x1D, 0x1D,  "IOD_descriptor" },

@@ -1,5 +1,5 @@
 /*
-$Id: fe_signal.c,v 1.3 2004/01/04 22:03:21 rasc Exp $
+$Id: fe_signal.c,v 1.4 2004/01/05 02:03:42 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: fe_signal.c,v 1.3 2004/01/04 22:03:21 rasc Exp $
 
 
 $Log: fe_signal.c,v $
+Revision 1.4  2004/01/05 02:03:42  rasc
+no message
+
 Revision 1.3  2004/01/04 22:03:21  rasc
 time for a version leap
 
@@ -249,22 +252,62 @@ static int read_Signal(int f, FE_SIGNAL *s, FE_SIG_CAP *cap)
 }
 
 
+/*
+  -- DVI-API Frontend Status Flags -> verbose
+  -- we do this API independent per flag...
+  -- see history of dvb_api docs
+ */
 
 static void out_status_detail (int v,fe_status_t s)
 {
 	out (v,"[");
-#ifdef DVB_API_1
+
+#ifdef FE_HAS_POWER
+	// the frontend is powered up and is ready to be used  (API1)
+	if (s & FE_HAS_POWER) 	out (v,"PWR ");	
+#endif
+#ifdef FE_HAS_SIGNAL
+	// the frontend detects a signal above the normal noise level (API1..3)
 	if (s & FE_HAS_SIGNAL) 	out (v,"SIG ");
+#endif
+#ifdef FE_HAS_LOCK
+	// frontend successfully locked to a DVB signal (API1..3)
 	if (s & FE_HAS_LOCK) 	out (v,"LOCK ");
-#else
-	if (s & FE_HAS_SIGNAL) 	out (v,"SIG ");
+#endif
+#ifdef QPSK_SPECTRUM_INV
+	// oops, very old... same as FE_SPECTRUM_INV  (API1 - V 0.9.2)
+	if (s & QPSK_SPECTRUM_INV) out (v,"INV ");
+#endif
+#ifdef FE_SPECTRUM_INV
+	// spectrum inversion is enabled/was necessary for lock (API1 - V 0.9.4)
+	if (s & FE_SPECTRUM_INV) out (v,"INV ");
+#endif
+#ifdef TUNER_HAS_LOCK
+	// the tuner has a frequency lock (API1)
+	if (s & TUNER_HAS_LOCK)  out (v,"TLCK ");
+#endif
+
+#ifdef FE_HAS_CARRIER
+	// found a DVB signal  (API3)
 	if (s & FE_HAS_CARRIER)	out (v,"CARR ");
+#endif
+#ifdef FE_HAS_VITERBI
+	// FEC is stable (API3)
 	if (s & FE_HAS_VITERBI)	out (v,"VIT ");
+#endif
+#ifdef FE_HAS_SYNC
+	// found sync bytes (API3)
 	if (s & FE_HAS_SYNC) 	out (v,"SYNC ");
-	if (s & FE_HAS_LOCK) 	out (v,"LOCK ");
+#endif
+#ifdef FE_TIMEDOUT
+	// no lock within the last 2 seconds (API3)
 	if (s & FE_TIMEDOUT) 	out (v,"TIMOUT ");
+#endif
+#ifdef FE_REINIT
+	// frontend was reinitialized (API3)
 	if (s & FE_REINIT) 	out (v,"REINIT ");
 #endif
+
 	out (v,"]");
 }
 
