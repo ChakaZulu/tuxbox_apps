@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.42 2003/03/03 23:24:42 mws Exp $
+ * $Id: pzapit.cpp,v 1.43 2003/03/14 07:31:51 obi Exp $
  *
  * simple commandline client for zapit
  *
@@ -21,9 +21,9 @@
  *
  */
 
+#include <cstdio>
+#include <cstring>
 #include <iostream>
-#include <stdio.h>
-#include <string.h>
 #include <unistd.h>
 
 #include <zapit/client/zapitclient.h>

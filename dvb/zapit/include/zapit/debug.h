@@ -1,5 +1,5 @@
 /*
- * $Id: debug.h,v 1.5 2003/02/28 19:37:00 obi Exp $
+ * $Id: debug.h,v 1.6 2003/03/14 07:31:50 obi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -23,9 +23,9 @@
 #define __zapit_debug_h__
 
 
-#include <errno.h>
-#include <stdio.h>
-#include <string.h>
+#include <cerrno>
+#include <cstdio>
+#include <cstring>
 
 
 #ifdef HAVE_CONFIG_H

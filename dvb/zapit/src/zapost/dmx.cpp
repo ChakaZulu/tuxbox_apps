@@ -1,5 +1,5 @@
 /*
- * $Id: dmx.cpp,v 1.17 2003/03/03 04:26:14 obi Exp $
+ * $Id: dmx.cpp,v 1.18 2003/03/14 07:31:51 obi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -19,9 +19,8 @@
  *
  */
 
+#include <cstring>
 #include <fcntl.h>
-#include <stdio.h>
-#include <string.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 

@@ -1,16 +1,17 @@
 /*
- * $Id: bouquets.h,v 1.45 2002/12/22 20:48:50 thegoodguy Exp $
+ * $Id: bouquets.h,v 1.46 2003/03/14 07:31:50 obi Exp $
  */
 
 #ifndef __bouquets_h__
 #define __bouquets_h__
 
 #include <algorithm>
+#include <cstdio>
 #include <functional>
-#include <vector>
 #include <map>
-#include <stdint.h>
-#include <stdio.h>
+#include <vector>
+
+#include <inttypes.h>
 
 #include "channel.h"
 #include "xmlinterface.h"

@@ -1,5 +1,5 @@
 /*
- * $Id: channel.h,v 1.19 2003/01/30 17:21:16 obi Exp $
+ * $Id: channel.h,v 1.20 2003/03/14 07:31:50 obi Exp $
  *
  * (C) 2002 Steffen Hehn <mcclean@berlios.de>
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
@@ -25,7 +25,7 @@
 
 /* system */
 #include <string>
-#include <stdint.h>
+#include <inttypes.h>
 
 /* zapit */
 #include "ci.h"

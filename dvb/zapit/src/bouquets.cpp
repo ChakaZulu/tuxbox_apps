@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.80 2002/12/23 10:35:46 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.81 2003/03/14 07:31:51 obi Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -62,14 +62,14 @@ CZapitChannel* CBouquet::getChannelByChannelID(const t_channel_id channel_id, co
 	
 	switch (serviceType)
 	{
-		case RESERVED: // ?
-		case DIGITAL_TELEVISION_SERVICE:
-		case NVOD_REFERENCE_SERVICE:
-		case NVOD_TIME_SHIFTED_SERVICE:
+		case ST_RESERVED: // ?
+		case ST_DIGITAL_TELEVISION_SERVICE:
+		case ST_NVOD_REFERENCE_SERVICE:
+		case ST_NVOD_TIME_SHIFTED_SERVICE:
 			channels = &tvChannels;
 			break;
 				
-		case DIGITAL_RADIO_SOUND_SERVICE:
+		case ST_DIGITAL_RADIO_SOUND_SERVICE:
 			channels = &radioChannels;
 			break;
 	}
@@ -80,7 +80,7 @@ CZapitChannel* CBouquet::getChannelByChannelID(const t_channel_id channel_id, co
 	if (i<channels->size())
 		result = (*channels)[i];
 
-	if ((serviceType == RESERVED) && (result == NULL))
+	if ((serviceType == ST_RESERVED) && (result == NULL))
 	{
 		result = getChannelByChannelID(channel_id, 2);
 	}
@@ -92,13 +92,13 @@ void CBouquet::addService(CZapitChannel* newChannel)
 {
 	switch (newChannel->getServiceType())
 	{
-		case DIGITAL_TELEVISION_SERVICE:
-		case NVOD_REFERENCE_SERVICE:
-		case NVOD_TIME_SHIFTED_SERVICE:
+		case ST_DIGITAL_TELEVISION_SERVICE:
+		case ST_NVOD_REFERENCE_SERVICE:
+		case ST_NVOD_TIME_SHIFTED_SERVICE:
 			tvChannels.push_back(newChannel);
 			break;
 			
-		case DIGITAL_RADIO_SOUND_SERVICE:
+		case ST_DIGITAL_RADIO_SOUND_SERVICE:
 			radioChannels.push_back(newChannel);
 			break;
 	}
@@ -111,13 +111,13 @@ void CBouquet::removeService(CZapitChannel* oldChannel)
 		ChannelList* channels = &tvChannels;
 		switch (oldChannel->getServiceType())
 		{
-			case DIGITAL_TELEVISION_SERVICE:
-			case NVOD_REFERENCE_SERVICE:
-			case NVOD_TIME_SHIFTED_SERVICE:
+			case ST_DIGITAL_TELEVISION_SERVICE:
+			case ST_NVOD_REFERENCE_SERVICE:
+			case ST_NVOD_TIME_SHIFTED_SERVICE:
 				channels = &tvChannels;
 				break;
 
-			case DIGITAL_RADIO_SOUND_SERVICE:
+			case ST_DIGITAL_RADIO_SOUND_SERVICE:
 				channels = &radioChannels;
 				break;
 		}
@@ -130,13 +130,13 @@ void CBouquet::moveService(const unsigned int oldPosition, const unsigned int ne
 	ChannelList* channels = &tvChannels;
 	switch (serviceType)
 	{
-		case DIGITAL_TELEVISION_SERVICE:
-		case NVOD_REFERENCE_SERVICE:
-		case NVOD_TIME_SHIFTED_SERVICE:
+		case ST_DIGITAL_TELEVISION_SERVICE:
+		case ST_NVOD_REFERENCE_SERVICE:
+		case ST_NVOD_TIME_SHIFTED_SERVICE:
 			channels = &tvChannels;
 			break;
 			
-		case DIGITAL_RADIO_SOUND_SERVICE:
+		case ST_DIGITAL_RADIO_SOUND_SERVICE:
 			channels = &radioChannels;
 			break;
 	}

@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.h,v 1.24 2003/01/30 17:21:16 obi Exp $
+ * $Id: frontend.h,v 1.25 2003/03/14 07:31:50 obi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -22,13 +22,8 @@
 #ifndef __zapit_frontend_h__
 #define __zapit_frontend_h__
 
-/* system */
-#include <stdint.h>
-
-/* linuxtv api */
+#include <inttypes.h>
 #include <linux/dvb/frontend.h>
-
-/* zapit */
 #include <zapit/types.h>
 
 #define MAX_LNBS	64	/* due to Diseqc 1.1  (2003-01-10 rasc) */
@@ -41,7 +36,7 @@ class CFrontend
 		/* tuning finished flag */
 		bool tuned;
 		/* information about the used frontend type */
-		dvb_frontend_info *info;
+		struct dvb_frontend_info info;
 		/* current tuned frequency */
 		uint32_t currentFrequency;
 		/* current 22kHz tone mode */
@@ -59,44 +54,44 @@ class CFrontend
 		/* high lnb offsets */
 		int32_t lnbOffsetsHigh[MAX_LNBS];
 
-		uint32_t			getBitErrorRate(void);
-		uint32_t			getDiseqcReply(int timeout_ms);
+		uint32_t			getBitErrorRate(void) const;
+		uint32_t			getDiseqcReply(const int timeout_ms) const;
 		struct dvb_frontend_event	getEvent(void);
-		struct dvb_frontend_parameters	getFrontend(void);
-		uint16_t			getSignalNoiseRatio(void);
-		uint16_t			getSignalStrength(void);
-		fe_status_t			getStatus(void);
-		uint32_t			getUncorrectedBlocks(void);
+		struct dvb_frontend_parameters	getFrontend(void) const;
+		uint16_t			getSignalNoiseRatio(void) const;
+		uint16_t			getSignalStrength(void) const;
+		fe_status_t			getStatus(void) const;
+		uint32_t			getUncorrectedBlocks(void) const;
 
 		void				secResetOverload(void);
-		void				secSetTone(fe_sec_tone_mode_t mode);
-		void				secSetVoltage(fe_sec_voltage_t voltage, uint32_t ms);
-		void				sendDiseqcCommand(struct dvb_diseqc_master_cmd *cmd, uint32_t ms);
+		void				secSetTone(const fe_sec_tone_mode_t mode, const uint32_t ms);
+		void				secSetVoltage(const fe_sec_voltage_t voltage, const uint32_t ms);
+		void				sendDiseqcCommand(const struct dvb_diseqc_master_cmd *cmd, const uint32_t ms);
 		void				sendDiseqcPowerOn(void);
 		void				sendDiseqcReset(void);
-		void				sendDiseqcSmatvRemoteTuningCommand(uint32_t frequency);
+		void				sendDiseqcSmatvRemoteTuningCommand(const uint32_t frequency);
 		void				sendDiseqcStandby(void);
-		void				sendDiseqcZeroByteCommand(uint8_t frm, uint8_t addr, uint8_t cmd);
-		void				sendToneBurst(fe_sec_mini_cmd_t burst, uint32_t ms);
-		void				setFrontend(struct dvb_frontend_parameters *feparams);
-		void				setSec(uint8_t sat_no, uint8_t pol, bool high_band, uint32_t frequency);
+		void				sendDiseqcZeroByteCommand(const uint8_t frm, const uint8_t addr, const uint8_t cmd);
+		void				sendToneBurst(const fe_sec_mini_cmd_t burst, const uint32_t ms);
+		void				setFrontend(const struct dvb_frontend_parameters *feparams);
+		void				setSec(const uint8_t sat_no, const uint8_t pol, const bool high_band, const uint32_t frequency);
 
 	public:
 		CFrontend(void);
 		~CFrontend(void);
 
-		static fe_code_rate_t		getCodeRate(uint8_t fec_inner);
-		uint8_t				getDiseqcPosition(void)			{ return currentDiseqc; }
-		uint8_t				getDiseqcRepeats(void)			{ return diseqcRepeats; }
-		diseqc_t			getDiseqcType(void)			{ return diseqcType; }
-		unsigned int			getFrequency(void);
-		static fe_modulation_t		getModulation(uint8_t modulation);
-		unsigned char			getPolarization(void);
-		struct dvb_frontend_info *	getInfo(void)				{ return info; };
+		static fe_code_rate_t		getCodeRate(const uint8_t fec_inner);
+		uint8_t				getDiseqcPosition(void) const		{ return currentDiseqc; }
+		uint8_t				getDiseqcRepeats(void) const		{ return diseqcRepeats; }
+		diseqc_t			getDiseqcType(void) const		{ return diseqcType; }
+		uint32_t			getFrequency(void) const;
+		static fe_modulation_t		getModulation(const uint8_t modulation);
+		uint8_t				getPolarization(void) const;
+		const struct dvb_frontend_info *getInfo(void) const			{ return &info; };
 
-		void				setDiseqcRepeats(uint8_t repeats)	{ diseqcRepeats = repeats; }
-		void				setDiseqcType(diseqc_t type);
-		void				setLnbOffset(bool high, uint8_t index, int32_t offset);
+		void				setDiseqcRepeats(const uint8_t repeats)	{ diseqcRepeats = repeats; }
+		void				setDiseqcType(const diseqc_t type);
+		void				setLnbOffset(const bool high, const uint8_t index, const int offset);
 		int				setParameters(struct dvb_frontend_parameters *feparams, uint8_t polarization, uint8_t diseqc);
 };
 

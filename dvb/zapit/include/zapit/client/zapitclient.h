@@ -131,6 +131,7 @@ class CZapitClient:public CBasicClient
 		unsigned int nr;
 		t_channel_id channel_id;
 		char	 name[30];
+		unsigned char service_type;
 	};
 
 	struct responseGetBouquetChannels : public responseChannels

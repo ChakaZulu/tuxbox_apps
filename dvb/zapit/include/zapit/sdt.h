@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.h,v 1.16 2003/01/30 17:21:16 obi Exp $
+ * $Id: sdt.h,v 1.17 2003/03/14 07:31:50 obi Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -23,26 +23,6 @@
 #define __zapit_sdt_h__
 
 #include "types.h"
-
-enum service_type_e {
-	RESERVED,
-	DIGITAL_TELEVISION_SERVICE,
-	DIGITAL_RADIO_SOUND_SERVICE,
-	TELETEXT_SERVICE,
-	NVOD_REFERENCE_SERVICE,
-	NVOD_TIME_SHIFTED_SERVICE,
-	MOSAIC_SERVICE,
-	PAL_CODED_SIGNAL,
-	SECAM_CODED_SIGNAL,
-	D_D2_MAC,
-	FM_RADIO,
-	NTSC_CODED_SIGNAL,
-	DATA_BROADCAST_SERVICE,
-	COMMON_INTERFACE_RESERVED,
-	RCS_MAP,
-	RCS_FLS,
-	DVB_MHP_SERVICE
-};
 
 unsigned long get_sdt_TsidOnid(void);
 int nvod_service_ids(const t_transport_stream_id, const t_original_network_id, const t_service_id, const unsigned int num, t_transport_stream_id * const, t_original_network_id * const, t_service_id * const);

@@ -1,5 +1,5 @@
 /*
- * $Id: video.cpp,v 1.8 2003/01/30 17:21:17 obi Exp $
+ * $Id: video.cpp,v 1.9 2003/03/14 07:31:51 obi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -20,7 +20,6 @@
  */
 
 #include <fcntl.h>
-#include <stdio.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 

@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.55 2003/01/30 17:21:17 obi Exp $
+ * $Id: descriptors.cpp,v 1.56 2003/03/14 07:31:51 obi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -19,7 +19,7 @@
  *
  */
 
-#include <stdio.h>
+#include <cstdio>
 #include <map>
 #include <string>
 
@@ -453,10 +453,10 @@ void service_descriptor(const unsigned char * const buffer, const t_service_id s
 	}
 
 	switch (service_type) {
-	case DIGITAL_TELEVISION_SERVICE:
-	case DIGITAL_RADIO_SOUND_SERVICE:
-	case NVOD_REFERENCE_SERVICE:
-	case NVOD_TIME_SHIFTED_SERVICE:
+	case ST_DIGITAL_TELEVISION_SERVICE:
+	case ST_DIGITAL_RADIO_SOUND_SERVICE:
+	case ST_NVOD_REFERENCE_SERVICE:
+	case ST_NVOD_TIME_SHIFTED_SERVICE:
 	{
 		CBouquet* bouquet;
 		int bouquetId;

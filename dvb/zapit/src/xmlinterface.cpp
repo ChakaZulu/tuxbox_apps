@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.20 2002/12/27 16:58:49 obi Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.21 2003/03/14 07:31:51 obi Exp $
  *
  * xmlinterface for zapit - d-box2 linux project
  *
@@ -21,7 +21,7 @@
  *
  */
 
-#include <stdio.h>
+#include <cstdio>
 
 #include <zapit/debug.h>
 #include <zapit/xmlinterface.h>

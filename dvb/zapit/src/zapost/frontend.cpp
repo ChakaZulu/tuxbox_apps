@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.45 2003/03/07 22:42:12 thegoodguy Exp $
+ * $Id: frontend.cpp,v 1.46 2003/03/14 07:31:51 obi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -21,18 +21,19 @@
 
 /* system c */
 #include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <sys/ioctl.h>
 #include <sys/poll.h>
 #include <sys/time.h>
-#include <time.h>
 #include <unistd.h>
 
 /* zapit */
 #include <zapit/debug.h>
 #include <zapit/frontend.h>
 #include <zapit/settings.h>
+
+#define diff(x,y)	(max(x,y) - min(x,y))
+#define min(x,y)	((x < y) ? x : y)
+#define max(x,y)	((x > y) ? x : y)
 
 CFrontend::CFrontend(void)
 {
@@ -43,12 +44,10 @@ CFrontend::CFrontend(void)
 	diseqcRepeats = 0;
 	diseqcType = NO_DISEQC;
 
-	info = new dvb_frontend_info();
-
 	if ((fd = open(FRONTEND_DEVICE, O_RDWR|O_NONBLOCK)) < 0)
 		ERROR(FRONTEND_DEVICE);
 
-	fop(ioctl, FE_GET_INFO, info);
+	fop(ioctl, FE_GET_INFO, &info);
 }
 
 CFrontend::~CFrontend(void)
@@ -56,11 +55,10 @@ CFrontend::~CFrontend(void)
 	if (diseqcType > MINI_DISEQC)
 		sendDiseqcStandby();
 	
-	delete info;
 	close(fd);
 }
 
-fe_code_rate_t CFrontend::getCodeRate(uint8_t fec_inner)
+fe_code_rate_t CFrontend::getCodeRate(const uint8_t fec_inner)
 {
 	switch (fec_inner & 0x0F) {
 	case 0x01:
@@ -80,7 +78,7 @@ fe_code_rate_t CFrontend::getCodeRate(uint8_t fec_inner)
 	}
 }
 
-fe_modulation_t CFrontend::getModulation(uint8_t modulation)
+fe_modulation_t CFrontend::getModulation(const uint8_t modulation)
 {
 	switch (modulation) {
 	case 0x01:
@@ -98,9 +96,9 @@ fe_modulation_t CFrontend::getModulation(uint8_t modulation)
 	}
 }
 
-unsigned int CFrontend::getFrequency(void)
+uint32_t CFrontend::getFrequency(void) const
 {
-	switch (info->type) {
+	switch (info.type) {
 	case FE_QPSK:
 		if (currentToneMode == SEC_TONE_OFF)
 			return currentFrequency + lnbOffsetsLow[currentDiseqc];
@@ -114,7 +112,7 @@ unsigned int CFrontend::getFrequency(void)
 	}
 }
 
-unsigned char CFrontend::getPolarization(void)
+uint8_t CFrontend::getPolarization(void) const
 {
 	if (currentVoltage == SEC_VOLTAGE_13)
 		return 1;
@@ -122,7 +120,7 @@ unsigned char CFrontend::getPolarization(void)
 		return 0;
 }
 
-fe_status_t CFrontend::getStatus(void)
+fe_status_t CFrontend::getStatus(void) const
 {
 	fe_status_t status;
 
@@ -131,7 +129,7 @@ fe_status_t CFrontend::getStatus(void)
 	return status;
 }
 
-uint32_t CFrontend::getBitErrorRate(void)
+uint32_t CFrontend::getBitErrorRate(void) const
 {
 	uint32_t ber;
 
@@ -140,7 +138,7 @@ uint32_t CFrontend::getBitErrorRate(void)
 	return ber;
 }
 
-uint16_t CFrontend::getSignalStrength(void)
+uint16_t CFrontend::getSignalStrength(void) const
 {
 	uint16_t strength;
 
@@ -149,7 +147,7 @@ uint16_t CFrontend::getSignalStrength(void)
 	return strength;
 }
 
-uint16_t CFrontend::getSignalNoiseRatio(void)
+uint16_t CFrontend::getSignalNoiseRatio(void) const
 {
 	uint16_t snr;
 
@@ -158,7 +156,7 @@ uint16_t CFrontend::getSignalNoiseRatio(void)
 	return snr;
 }
 
-uint32_t CFrontend::getUncorrectedBlocks(void)
+uint32_t CFrontend::getUncorrectedBlocks(void) const
 {
 	uint32_t blocks;
 
@@ -167,7 +165,7 @@ uint32_t CFrontend::getUncorrectedBlocks(void)
 	return blocks;
 }
 
-void CFrontend::setFrontend(struct dvb_frontend_parameters *feparams)
+void CFrontend::setFrontend(const struct dvb_frontend_parameters *feparams)
 {
 	struct dvb_frontend_event event;
 
@@ -183,7 +181,7 @@ void CFrontend::setFrontend(struct dvb_frontend_parameters *feparams)
 	fop(ioctl, FE_SET_FRONTEND, feparams);
 }
 
-struct dvb_frontend_parameters CFrontend::getFrontend(void)
+struct dvb_frontend_parameters CFrontend::getFrontend(void) const
 {
 	struct dvb_frontend_parameters feparams;
 
@@ -215,7 +213,7 @@ struct dvb_frontend_event CFrontend::getEvent(void)
 			break;
 
 		gettimeofday(&tv2, NULL);
-		msec -= ((tv2.tv_sec - tv.tv_sec) * 1000) + ((tv2.tv_usec - tv.tv_usec) / 1000);
+		msec = TIMEOUT_MAX_MS - ((tv2.tv_sec - tv.tv_sec) * 1000) - ((tv2.tv_usec - tv.tv_usec) / 1000);
 
 		if (pfd.revents & POLLIN) {
 #if 0
@@ -291,17 +289,19 @@ struct dvb_frontend_event CFrontend::getEvent(void)
 
 #endif /* DEBUG_SEC_TIMING */
 
-void CFrontend::secSetTone(fe_sec_tone_mode_t toneMode)
+void CFrontend::secSetTone(const fe_sec_tone_mode_t toneMode, const uint32_t ms)
 {
 	TIMER_START();
 
-	if (fop(ioctl, FE_SET_TONE, toneMode) == 0)
+	if (fop(ioctl, FE_SET_TONE, toneMode) == 0) {
 		currentToneMode = toneMode;
+		usleep(1000 * ms);
+	}
 
 	TIMER_STOP();
 }
 
-void CFrontend::secSetVoltage(fe_sec_voltage_t voltage, uint32_t ms)
+void CFrontend::secSetVoltage(const fe_sec_voltage_t voltage, const uint32_t ms)
 {
 	TIMER_START();
 	
@@ -322,7 +322,7 @@ void CFrontend::secResetOverload(void)
 	TIMER_STOP();
 }
 
-void CFrontend::sendDiseqcCommand(struct dvb_diseqc_master_cmd *cmd, uint32_t ms)
+void CFrontend::sendDiseqcCommand(const struct dvb_diseqc_master_cmd *cmd, const uint32_t ms)
 {
 	TIMER_START();
 
@@ -332,7 +332,7 @@ void CFrontend::sendDiseqcCommand(struct dvb_diseqc_master_cmd *cmd, uint32_t ms
 	TIMER_STOP();
 }
 
-uint32_t CFrontend::getDiseqcReply(int timeout_ms)
+uint32_t CFrontend::getDiseqcReply(const int timeout_ms) const
 {
 	struct dvb_diseqc_slave_reply reply;
 
@@ -363,7 +363,7 @@ uint32_t CFrontend::getDiseqcReply(int timeout_ms)
 	}
 }
 
-void CFrontend::sendToneBurst(fe_sec_mini_cmd_t burst, uint32_t ms)
+void CFrontend::sendToneBurst(const fe_sec_mini_cmd_t burst, const uint32_t ms)
 {
 	TIMER_START();
 
@@ -373,7 +373,7 @@ void CFrontend::sendToneBurst(fe_sec_mini_cmd_t burst, uint32_t ms)
 	TIMER_STOP();
 }
 
-void CFrontend::setDiseqcType(diseqc_t newDiseqcType)
+void CFrontend::setDiseqcType(const diseqc_t newDiseqcType)
 {
 	switch (newDiseqcType) {
 	case NO_DISEQC:
@@ -416,7 +416,7 @@ void CFrontend::setDiseqcType(diseqc_t newDiseqcType)
 	diseqcType = newDiseqcType;
 }
 
-void CFrontend::setLnbOffset(bool high, uint8_t index, int32_t offset)
+void CFrontend::setLnbOffset(const bool high, const uint8_t index, int offset)
 {
 	if (index < MAX_LNBS) {
 		if (high)
@@ -426,11 +426,11 @@ void CFrontend::setLnbOffset(bool high, uint8_t index, int32_t offset)
 	}
 }
 
-int CFrontend::setParameters(struct dvb_frontend_parameters *feparams, uint8_t polarization, uint8_t diseqc)
+int CFrontend::setParameters(struct dvb_frontend_parameters *feparams, const uint8_t polarization, const uint8_t diseqc)
 {
 	int ret, freq_offset = 0;
 
-	if (info->type == FE_QPSK) {
+	if (info.type == FE_QPSK) {
 		bool high_band;
 
 		if (feparams->frequency < 11700000) {
@@ -454,7 +454,7 @@ int CFrontend::setParameters(struct dvb_frontend_parameters *feparams, uint8_t p
 	 */
 
 	bool auto_inversion = (feparams->inversion == INVERSION_AUTO);
-	if ((!(info->caps & FE_CAN_INVERSION_AUTO)) && (auto_inversion))
+	if ((!(info.caps & FE_CAN_INVERSION_AUTO)) && (auto_inversion))
 		feparams->inversion = INVERSION_OFF;
 
 
@@ -471,7 +471,7 @@ int CFrontend::setParameters(struct dvb_frontend_parameters *feparams, uint8_t p
 		 * software auto inversion for stupid frontends
 		 */
 
-		if ((!(info->caps & FE_CAN_INVERSION_AUTO))
+		if ((!(info.caps & FE_CAN_INVERSION_AUTO))
 			&& (auto_inversion)
 			&& (feparams->inversion == INVERSION_OFF)
 			&& ((!tuned) || (event.parameters.frequency - feparams->frequency))) {
@@ -481,10 +481,8 @@ int CFrontend::setParameters(struct dvb_frontend_parameters *feparams, uint8_t p
 
 	} while (0);
 
-
-
 	if (tuned) {
-		ret = abs(event.parameters.frequency - feparams->frequency);
+		ret = diff(event.parameters.frequency, feparams->frequency);
 #if 0
 		/*
 		 * if everything went ok, then it is a good idea to copy the real
@@ -510,19 +508,19 @@ int CFrontend::setParameters(struct dvb_frontend_parameters *feparams, uint8_t p
 	 * to this method as a pointer
 	 */
 
-	if (info->type == FE_QPSK)
+	if (info.type == FE_QPSK)
 		feparams->frequency += freq_offset;
 
 	return ret;
 }
 
-void CFrontend::setSec(uint8_t sat_no, uint8_t pol, bool high_band, uint32_t frequency)
+void CFrontend::setSec(const uint8_t sat_no, const uint8_t pol, const bool high_band, const uint32_t frequency)
 {
 	uint8_t repeats = diseqcRepeats;
 
 	fe_sec_voltage_t v = pol ? SEC_VOLTAGE_13 : SEC_VOLTAGE_18;
 	fe_sec_tone_mode_t t = high_band ? SEC_TONE_ON : SEC_TONE_OFF;
-	fe_sec_mini_cmd_t b = ((sat_no / 4) % 2) ? SEC_MINI_B : SEC_MINI_A;
+	fe_sec_mini_cmd_t b = ((sat_no /* / 4 */) % 2) ? SEC_MINI_B : SEC_MINI_A;
 
 	/*
 	 * [0] from master, no reply, 1st transmission
@@ -542,7 +540,7 @@ void CFrontend::setSec(uint8_t sat_no, uint8_t pol, bool high_band, uint32_t fre
 	 * set all SEC / DiSEqC parameters
 	 */
 
-	secSetTone(SEC_TONE_OFF);
+	secSetTone(SEC_TONE_OFF, 15);
 	secSetVoltage(v, 15);
 
 	if (diseqcType >= SMATV_REMOTE_TUNING) {
@@ -587,7 +585,7 @@ void CFrontend::setSec(uint8_t sat_no, uint8_t pol, bool high_band, uint32_t fre
 	if (diseqcType == MINI_DISEQC)
 		sendToneBurst(b, 15);
 
-	secSetTone(t);
+	secSetTone(t, 15);
 
 	currentDiseqc = sat_no;
 }
@@ -618,7 +616,7 @@ void CFrontend::sendDiseqcZeroByteCommand(uint8_t framing_byte, uint8_t address,
 	sendDiseqcCommand(&diseqc_cmd, 15);
 }
 
-void CFrontend::sendDiseqcSmatvRemoteTuningCommand(uint32_t frequency)
+void CFrontend::sendDiseqcSmatvRemoteTuningCommand(const uint32_t frequency)
 {
  	/*
 	 * [0] from master, no reply, 1st transmission

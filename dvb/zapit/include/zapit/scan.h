@@ -1,5 +1,5 @@
 /*
- *  $Id: scan.h,v 1.25 2002/12/23 00:51:31 thegoodguy Exp $
+ *  $Id: scan.h,v 1.26 2003/03/14 07:31:50 obi Exp $
  */
 
 #ifndef __scan_h__
@@ -7,7 +7,7 @@
 
 #include <linux/dvb/frontend.h>
 
-#include <stdint.h>
+#include <inttypes.h>
 
 #include <map>
 #include <string>

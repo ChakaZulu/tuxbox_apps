@@ -1,5 +1,5 @@
 /*
- * $Id: audio.cpp,v 1.12 2003/01/30 17:21:17 obi Exp $
+ * $Id: audio.cpp,v 1.13 2003/03/14 07:31:51 obi Exp $
  *
  * (C) 2002 by Steffen Hehn 'McClean' &
  *	Andreas Oberritter <obi@tuxbox.org>
@@ -21,7 +21,6 @@
  */
 
 #include <fcntl.h>
-#include <stdio.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 
@@ -43,7 +42,7 @@ CAudio::~CAudio(void)
 
 int CAudio::setBypassMode(int disable)
 {
-	return fop(ioctl, AUDIO_SET_BYPASS_MODE, disable);
+	return quiet_fop(ioctl, AUDIO_SET_BYPASS_MODE, disable);
 }
 
 int CAudio::setMute(int enable)

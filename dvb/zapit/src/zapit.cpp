@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.302 2003/03/06 18:44:31 obi Exp $
+ * $Id: zapit.cpp,v 1.303 2003/03/14 07:31:51 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -23,8 +23,8 @@
  */
 
 /* system headers */
+#include <csignal>
 #include <fcntl.h>
-#include <signal.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
@@ -181,13 +181,13 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 			cit = allchans.find(channel_id);
 
 			if (currentMode & RADIO_MODE) {
-				if ((cit == allchans.end()) || (cit->second.getServiceType() != DIGITAL_RADIO_SOUND_SERVICE)) {
+				if ((cit == allchans.end()) || (cit->second.getServiceType() != ST_DIGITAL_RADIO_SOUND_SERVICE)) {
 					DBG("channel_id " PRINTF_CHANNEL_ID_TYPE " not found", channel_id);
 					return -1;
 				}
 			}
 			else {
-				if (cit == allchans.end() || (cit->second.getServiceType() == DIGITAL_RADIO_SOUND_SERVICE)) {
+				if (cit == allchans.end() || (cit->second.getServiceType() == ST_DIGITAL_RADIO_SOUND_SERVICE)) {
 					DBG("channel_id " PRINTF_CHANNEL_ID_TYPE " not found", channel_id);
 					return -1;
 				}
@@ -221,7 +221,9 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 		if (t == transponders.end())
 			return -1;
 
-		switch (frontend->setParameters(&t->second.feparams, t->second.polarization, t->second.DiSEqC)) {
+		int diff = frontend->setParameters(
+				&t->second.feparams, t->second.polarization, t->second.DiSEqC);
+		switch (diff) {
 		case -1:
 			WARN("tuning failed\n");
 			tuned_transponder_id = 0;
@@ -229,7 +231,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 		case 0:
 			break;
 		default:
-			WARN("tuned frequency does not match requested frequency\n");
+			WARN("tuned frequency does not match requested frequency. difference: %u\n", diff);
 			break;
 		}
 
@@ -245,7 +247,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 
 	if (!tsid_onid) {
 		thisChannel = channel;
-		if (thisChannel->getServiceType() == NVOD_REFERENCE_SERVICE) {
+		if (thisChannel->getServiceType() == ST_NVOD_REFERENCE_SERVICE) {
 			current_is_nvod = true;
 			saveSettings(false);
 			return 0;
@@ -314,7 +316,7 @@ int select_nvod_subservice_num(int num)
 	t_transport_stream_id transport_stream_id;
 	t_service_id service_id;
 
-	if ((!channel) || (channel->getServiceType() != NVOD_REFERENCE_SERVICE) || (num < 0))
+	if ((!channel) || (channel->getServiceType() != ST_NVOD_REFERENCE_SERVICE) || (num < 0))
 		return -1;
 
 	if (channel->getTsidOnid() != tuned_transponder_id)
@@ -1099,6 +1101,7 @@ void internalSendChannels(int connfd, ChannelList* channels, const unsigned int 
 		strncpy(response.name, ((*channels)[i]->getName()).c_str(), 30);
 		response.channel_id = (*channels)[i]->getChannelID();
 		response.nr = first_channel_nr + i;
+		response.service_type = (*channels)[i]->getServiceType();
 
 		if (CBasicServer::send_data(connfd, &response, sizeof(response)) == false)
 		{
@@ -1159,13 +1162,13 @@ void sendChannels(int connfd, const CZapitClient::channelsMode mode, const CZapi
 		if (((currentMode & RADIO_MODE) && (mode == CZapitClient::MODE_CURRENT)) || (mode==CZapitClient::MODE_RADIO))
 		{
 			for (tallchans_iterator it = allchans.begin(); it != allchans.end(); it++)
-				if (it->second.getServiceType() == DIGITAL_RADIO_SOUND_SERVICE)
+				if (it->second.getServiceType() == ST_DIGITAL_RADIO_SOUND_SERVICE)
 					channels.push_back(&(it->second));
 		}
 		else
 		{
 			for (tallchans_iterator it = allchans.begin(); it != allchans.end(); it++)
-				if (it->second.getServiceType() != DIGITAL_RADIO_SOUND_SERVICE)
+				if (it->second.getServiceType() != ST_DIGITAL_RADIO_SOUND_SERVICE)
 					channels.push_back(&(it->second));
 		}
 		sort(channels.begin(), channels.end(), CmpChannelByChName());
@@ -1423,7 +1426,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.302 2003/03/06 18:44:31 obi Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.303 2003/03/14 07:31:51 obi Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
