@@ -11,6 +11,7 @@
 #include <malloc.h>
 #include <colors.h>
 #include <pics.h>
+#include <pig.h>
 
 #define LOGO_X			600
 #define LOGO_Y			30
@@ -29,6 +30,9 @@ typedef struct _Player
 static	int		numplayers=0;
 static	int		actplayer=0;
 static	Player	player[9];
+static	char	pig_dis = 0;
+
+static	int		pig_x[] = { 450, 450, 150, 150 };
 
 static	int		myrand( int idx )
 {
@@ -36,6 +40,20 @@ static	int		myrand( int idx )
 	gettimeofday(&tv,0);
 
 	return tv.tv_usec % idx;
+}
+
+static	void	DoYellow( void )
+{
+	if ( pig_dis )
+	{
+		Fx2ShowPig( pig_x[actplayer], 300, 160, 144 );
+		pig_dis=0;
+	}
+	else
+	{
+		Fx2StopPig();
+		pig_dis=1;
+	}
 }
 
 void	EnterPlayer( void )
@@ -61,7 +79,7 @@ void	EnterPlayer( void )
 	/* first enter num players */
 	if ( numplayers )
 	{
-		x=FBDrawString( 150,200,64,"Die selben Spieler : OK/BLUE",RED,0);
+		x=FBDrawString( 150,200,64,"same player ? : OK / BLUE",RED,0);
 #ifdef USEX
 		FBFlushGrafic();
 #endif
@@ -72,6 +90,9 @@ void	EnterPlayer( void )
 		while( !doexit )
 		{
 			RcGetActCode();
+			if ( actcode == RC_YELLOW )
+				DoYellow();
+
 			if (( actcode == RC_OK ) || ( actcode == RC_BLUE ))
 				break;
 			tv.tv_sec = 0;
@@ -82,7 +103,7 @@ void	EnterPlayer( void )
 			return;
 		FBFillRect( 150,200,x,64,BLACK);
 	}
-	x=FBDrawString( 150,200,64,"Anzahl der Spieler : ",RED,0);
+	x=FBDrawString( 100,232,64,"how many player (1-4): ",RED,0);
 #ifdef USEX
 	FBFlushGrafic();
 #endif
@@ -101,14 +122,14 @@ void	EnterPlayer( void )
 	if ( doexit )
 		return;
 
-	FBDrawString( 150+x,200,64,cnum,WHITE,0);
+	FBDrawString( 100+x,232,64,cnum,WHITE,0);
 
 	for( i=0; i < numplayers; i++ )
 	{
-		FBFillRect(150,280,570,64,BLACK);
-		sprintf(txt,"Name %d: ",i+1);
-		x=FBDrawString( 150,280,64,txt,WHITE,0);
-		strcpy(player[i].name,FBEnterWord(150+x,280,64,9,WHITE));
+		FBFillRect(150,300,570,64,BLACK);
+		sprintf(txt,"%d. name : ",i+1);
+		x=FBDrawString( 150,300,64,txt,WHITE,0);
+		strcpy(player[i].name,FBEnterWord(150+x,300,64,9,WHITE));
 	}
 }
 
@@ -182,6 +203,8 @@ static	void	Roll( void )
 #endif
 		actcode=0xee;
 		RcGetActCode();
+		if ( actcode == RC_YELLOW )
+			DoYellow();
 		if (( actcode == RC_BLUE ) || ( actcode == RC_OK ))
 			break;
 	}
@@ -228,6 +251,9 @@ static	void	SelectForRoll( void )
 		blocker=1;
 		switch( actcode )
 		{
+		case RC_YELLOW :
+			DoYellow();
+			break;
 		case RC_UP :
 			if ( nr > 0 )
 				nnr=nr-1;
@@ -380,6 +406,9 @@ static	void	SelectInBoard( void )
 		blocker=1;
 		switch( actcode )
 		{
+		case RC_YELLOW :
+			DoYellow();
+			break;
 		case RC_UP :
 			for( nnr=nr-1; nnr>-1; nnr-- )
 				if ( player[i].nums[nnr] == -1 )
@@ -480,15 +509,15 @@ void	RunYahtzee( void )
 	FBDrawString( 36, 202, 32, "6",WHITE,0);
 	FBDrawString( 36, 230, 32, "total",WHITE,0);
 	FBDrawString( 36, 258, 32, "Bonus",WHITE,0);
-	FBDrawString( 36, 286, 32, "3 Gleiche",WHITE,0);
-	FBDrawString( 36, 314, 32, "4 Gleiche",WHITE,0);
+	FBDrawString( 36, 286, 32, "3of a kind",WHITE,0);
+	FBDrawString( 36, 314, 32, "4of a kind",WHITE,0);
 	FBDrawString( 36, 342, 32, "FullHouse",WHITE,0);
-	FBDrawString( 36, 370, 32, "kl.Strasse",WHITE,0);
-	FBDrawString( 36, 398, 32, "gr.Strasse",WHITE,0);
+	FBDrawString( 36, 370, 32, "sm.street",WHITE,0);
+	FBDrawString( 36, 398, 32, "lg.street",WHITE,0);
 	FBDrawString( 36, 426, 32, "Yahtzee",WHITE,0);
 	FBDrawString( 36, 454, 32, "Chance",WHITE,0);
 	FBDrawString( 36, 482, 32, "total",WHITE,0);
-	FBDrawString( 36, 510, 32, "Summe",WHITE,0);
+	FBDrawString( 36, 510, 32, "Summary",WHITE,0);
 
 	actplayer=0;
 
@@ -523,6 +552,10 @@ void	RunYahtzee( void )
 		}
 		if ( n==17 )
 			return;
+
+		if ( !pig_dis )
+			Fx2ShowPig( pig_x[actplayer], 300, 160, 144 );
+
 		memset(wu,0,5);		/* mark all wuerfel for roll */
 		memset(mwu,0,5);	/* mark all wuerfel for roll */
 		for( n=0; n < 3 && !doexit; n++ )
@@ -557,20 +590,26 @@ void	DrawWinner( void )
 	int				w=0;
 	int				i;
 
+	Fx2StopPig();
+
 	if ( numplayers == 1 )
 	{
-		sprintf(text,"%d Punkte !",player[0].nums[16] );
-		FBDrawString( 250, 200, 64, text, RED, 0 );
+		FBFillRect( 180, 180, 400, 180, WHITE );
+
+		sprintf(text,"%d points !",player[0].nums[16] );
+		FBDrawString( 300, 232, 64, text, RED, 0 );
 	}
 	else
 	{
+		FBFillRect( 180, 180, 450, 180, WHITE );
+
 		for( i=1; i<numplayers; i++ )
 			if ( player[i].nums[16] > player[w].nums[16] )
 				w=i;
-		sprintf(text,"%s hat gewonnen !",player[w].name);
-		FBDrawString( 250, 200, 64, text, RED, 0 );
-		sprintf(text,"mit %d Punkten",player[w].nums[16] );
-		FBDrawString( 250, 264, 64, text, RED, 0 );
+		sprintf(text,"Winner is %s",player[w].name);
+		FBDrawString( 200, 200, 64, text, RED, 0 );
+		sprintf(text,"with %d points",player[w].nums[16] );
+		FBDrawString( 200, 264, 64, text, RED, 0 );
 	}
 #ifdef USEX
 	FBFlushGrafic();
