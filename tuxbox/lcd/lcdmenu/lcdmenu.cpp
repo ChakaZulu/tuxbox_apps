@@ -1,5 +1,5 @@
 /*
- * $Id: lcdmenu.cpp,v 1.19 2002/08/17 08:04:58 obi Exp $
+ * $Id: lcdmenu.cpp,v 1.20 2002/09/01 00:47:23 obi Exp $
  *
  * A startup menu for the d-box 2 linux project
  *
@@ -39,34 +39,34 @@ CLCDMenu::CLCDMenu (std::string configFilename)
 	if (!config->loadConfig(configFilename))
 	{
 		/* defaults */
-		config->setInt("font_size", 12);
-		config->setInt("line_spacing", 3);
-		config->setInt("default_entry", 0);
-		config->setInt("text_align", 0);
+		config->setInt32("font_size", 12);
+		config->setInt32("line_spacing", 3);
+		config->setInt32("default_entry", 0);
+		config->setInt32("text_align", 0);
 		config->setBool("show_numbers", false);
-		config->setInt("timeout", 10);
+		config->setInt32("timeout", 10);
 		config->setString("pin", std::string("__lUISdFwUYjg"));
 		addEntry("Enigma");
 		addEntry("Neutrino");
 		addEntry("Lcars");
 		addEntry("Maintenance");
 		config->setStringVector("menu_items", entries);
-		config->setInt("visible_entries", 4);
+		config->setInt32("visible_entries", 4);
 		//addPinProtection(3);
-		config->setIntVector("pin_protect", pinEntries);
+		config->setInt32Vector("pin_protect", pinEntries);
 	}
 
 	/* user defineable settings */
-	fontSize = config->getInt("font_size");
-	lineSpacing = config->getInt("line_spacing");
-	defaultEntry = config->getInt("default_entry");
-	textAlign = config->getInt("text_align");
+	fontSize = config->getInt32("font_size");
+	lineSpacing = config->getInt32("line_spacing");
+	defaultEntry = config->getInt32("default_entry");
+	textAlign = config->getInt32("text_align");
 	showNumbers = config->getBool("show_numbers");
-	timeoutValue = config->getInt("timeout");
+	timeoutValue = config->getInt32("timeout");
 	cryptedPin = config->getString("pin");
 	entries = config->getStringVector("menu_items");
-	pinEntries = config->getIntVector("pin_protect");
-	visibleEntries = config->getInt("visible_entries");
+	pinEntries = config->getInt32Vector("pin_protect");
+	visibleEntries = config->getInt32("visible_entries");
 	entryCount = entries.size();
 
 	if (defaultEntry >= visibleEntries)

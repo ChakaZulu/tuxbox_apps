@@ -1,5 +1,5 @@
 /*
- * $Id: main.cpp,v 1.2 2002/04/14 23:20:38 obi Exp $
+ * $Id: main.cpp,v 1.3 2002/09/01 00:47:23 obi Exp $
  *
  * A startup menu for the d-box 2 linux project
  *
@@ -40,7 +40,7 @@ int main (int argc, char **argv)
     /* remember last selection */
     if (menu->getSelectedEntry() != menu->getDefaultEntry())
     {
-	menu->getConfig()->setInt("default_entry", menu->getSelectedEntry());
+	menu->getConfig()->setInt32("default_entry", menu->getSelectedEntry());
 	menu->getConfig()->setModifiedFlag(true);
     }
 
