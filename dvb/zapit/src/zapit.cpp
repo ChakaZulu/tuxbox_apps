@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.66 2002/01/29 18:01:12 field Exp $
+  $Id: zapit.cpp,v 1.67 2002/01/29 20:44:07 Simplex Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -92,6 +92,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.67  2002/01/29 20:44:07  Simplex
+  made some Bouquetmanager-stuff "hot"
+
   Revision 1.66  2002/01/29 18:01:12  field
   Schriebfehler...
 
@@ -875,21 +878,6 @@ void save_settings()
 		perror("[zapit] fopen: /tmp/zapit_last_chan");
 	}
 
-#ifndef USEBOUQUETMAN
-	std::map<uint, channel>::iterator cit;
-	if (Radiomode_on)
-	{
-		fprintf(channel_settings, "radio\n");
-		cit = allchans_radio.find(curr_onid_sid);
-	}
-	else
-	{
-		fprintf(channel_settings, "tv\n");
-		cit = allchans_tv.find(curr_onid_sid);
-	}
-	fprintf(channel_settings, "%06d\n", cit->second.chan_nr);
-	fprintf(channel_settings, "%s\n", cit->second.name.c_str());
-#else
 	if (Radiomode_on)
 	{
 		CBouquetManager::radioChannelIterator cit = g_BouquetMan->radioChannelsFind(curr_onid_sid);
@@ -911,7 +899,6 @@ void save_settings()
 		}
 	}
 
-#endif
 	fclose(channel_settings);
   //printf("Saved settings\n");
 }
@@ -1549,65 +1536,6 @@ int prepare_channels()
   int ls = LoadServices();
 	g_BouquetMan->loadBouquets();
 
-#ifndef USEBOUQUETMAN
-  if (ls > 0)
-    {
-      int number = 1;
-      for (numit = numchans_tv.begin(); numit != numchans_tv.end(); numit++)
-	{
-   cit = allchans_tv.find(numit->second);
-	  cit->second.chan_nr = number;
-	  allnumchannels_tv.insert(std::pair<uint,uint>(number++, (cit->second.onid<<16)+cit->second.sid));
-	  allnamechannels_tv.insert(std::pair<std::string, uint>(cit->second.name, (cit->second.onid<<16)+cit->second.sid));
-	  //printf("Inserted %d %s\n", cit->second.chan_nr, cit->second.name.c_str());
-	}
-      numchans_tv.clear();
-      for (nameit = namechans_tv.begin(); nameit != namechans_tv.end(); nameit++)
-	{
-	  cit = allchans_tv.find(nameit->second);
-	  cit->second.chan_nr = number;
-	  allnumchannels_tv.insert(std::pair<uint, uint>(number++, (cit->second.onid<<16)+cit->second.sid));
-	  allnamechannels_tv.insert(std::pair<std::string, uint>(nameit->first, (cit->second.onid<<16)+cit->second.sid));
-	  //printf("Inserted %d %s\n", cit->second.chan_nr, cit->second.name.c_str());
-	}
-      namechans_tv.clear();
-      number = 1;
-      for (numit = numchans_radio.begin(); numit != numchans_radio.end(); numit++)
-	{
-	  cit = allchans_radio.find(numit->second);
-	  cit->second.chan_nr = number;
-	  allnumchannels_radio.insert(std::pair<uint,uint>(number++, (cit->second.onid<<16)+cit->second.sid));
-	  allnamechannels_radio.insert(std::pair<std::string, uint>(cit->second.name, (cit->second.onid<<16)+cit->second.sid));
-	  //printf("Inserted %s\n", cit->second.name.c_str());
-	}
-      numchans_radio.clear();
-      for (nameit = namechans_radio.begin(); nameit != namechans_radio.end(); nameit++)
-	{
-	  cit = allchans_radio.find(nameit->second);
-	  cit->second.chan_nr = number;
-	  allnumchannels_radio.insert(std::pair<uint, uint>(number++, (cit->second.onid<<16)+cit->second.sid));
-	  allnamechannels_radio.insert(std::pair<std::string, uint>(nameit->first, (cit->second.onid<<16)+cit->second.sid));
-	  //printf("Inserted %s\n", cit->second.name.c_str());
-	}
-      namechans_radio.clear();
-    }
-#endif
-/*else
-  {
-    if (ls == -23)
-    {
-    	printf("No services.xml found. Starting to scan one.");
-    	start_scan();
-    	while (scan_runs > 0)
-    	{
-    		printf("Found transponders: %d\n",found_transponders);
-    		printf("Found_channels: %d\n",found_channels);
-    		sleep(3);
-    	}
-    	}
-    	else
-    		return -1;
-  }*/
   return 23;
 }
 
@@ -1910,25 +1838,13 @@ void parse_command()
 					perror("[zapit] could not send any return\n");
 					return;
 				}
-#ifndef USEBOUQUETMAN
-				for (sit = allnumchannels_radio.begin(); sit != allnumchannels_radio.end(); sit++)
-				{
-#else
 				for ( CBouquetManager::radioChannelIterator radiocit = g_BouquetMan->radioChannelsBegin(); radiocit != g_BouquetMan->radioChannelsEnd(); radiocit++)
 				{
-#endif
 					channel_msg_2 chanmsg;
 
-#ifndef USEBOUQUETMAN
-					cit = allchans_radio.find(sit->second);
-					strncpy(chanmsg.name, cit->second.name.c_str(),30);
-					chanmsg.onid_tsid = (cit->second.onid<<16)|cit->second.sid;
-					chanmsg.chan_nr = sit->first;
-#else
 					strncpy(chanmsg.name, (*radiocit)->name.c_str(),30);
 					chanmsg.chan_nr = (*radiocit)->chan_nr;
 					chanmsg.onid_tsid = (*radiocit)->OnidSid();
-#endif
 
 					if (send(connfd, &chanmsg, sizeof(chanmsg),0) == -1)
 					{
@@ -1958,24 +1874,12 @@ void parse_command()
 					perror("[zapit] could not send any return\n");
 					return;
 				}
-#ifndef USEBOUQUETMAN
-				for (sit = allnumchannels_tv.begin(); sit != allnumchannels_tv.end(); sit++)
-				{
-					cit = allchans_tv.find(sit->second);
-#else
 				for ( CBouquetManager::tvChannelIterator tvcit = g_BouquetMan->tvChannelsBegin(); tvcit != g_BouquetMan->tvChannelsEnd(); tvcit++)
 				{
-#endif
 					channel_msg_2 chanmsg;
-#ifndef USEBOUQUETMAN
-					strncpy(chanmsg.name, cit->second.name.c_str(),30);
-					chanmsg.chan_nr = sit->first;
-					chanmsg.onid_tsid = (cit->second.onid<<16)|cit->second.sid;
-#else
 					strncpy(chanmsg.name, (*tvcit)->name.c_str(),30);
 					chanmsg.chan_nr = (*tvcit)->chan_nr;
 					chanmsg.onid_tsid = (*tvcit)->OnidSid();
-#endif
 					if (send(connfd, &chanmsg, sizeof(chanmsg),0) == -1)
 					{
 						perror("[zapit] could not send any return\n");
@@ -2495,7 +2399,7 @@ int main(int argc, char **argv) {
     }
 
   system("cp " CONFIGDIR "/zapit/last_chan /tmp/zapit_last_chan");
-  printf("Zapit $Id: zapit.cpp,v 1.66 2002/01/29 18:01:12 field Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.67 2002/01/29 20:44:07 Simplex Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
