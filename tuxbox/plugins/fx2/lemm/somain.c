@@ -31,10 +31,14 @@ extern	void	PicSetupColors( void );
 /* special */
 extern	void	ModifyColor( char picid, unsigned char cfrom, unsigned char cto );
 extern	void	AnimateDeko( void );
+extern	void	UnanimatedDeko( void );
 extern	void	RunKey( void );
 extern	void	RunLemm( void );
 extern	void	RemoveBg( void );
 extern	void	SoundPlay( int pnr );
+extern	int		dblInit( void );
+extern	void	dblFree( void );
+extern	void	dblDrawFrame( int all );
 
 static	void	setup_colors( void )
 {
@@ -62,6 +66,9 @@ int lemmings_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 
 	setup_colors();
 
+	if ( dblInit() < 0 )
+		return -1;
+
 	if ( RcInitialize( fdrc ) < 0 )
 		return -1;
 
@@ -74,17 +81,20 @@ int lemmings_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 
 		InitLevel();
 
+		dblDrawFrame( 1 );
+
 		doexit=0;
 		while( !doexit )
 		{
 			tv.tv_sec = 0;
-			tv.tv_usec = 100000;
+			tv.tv_usec = 70000;
 			x = select( 0, 0, 0, 0, &tv );		/* 50ms pause */
 			RcGetActCode( );
 			RunKey();
-
-			AnimateDeko();
+			UnanimatedDeko();
 			RunLemm();
+			AnimateDeko();
+			dblDrawFrame( 0 );
 #ifdef USEX
 			FBFlushGrafic();
 #endif
@@ -115,6 +125,8 @@ int lemmings_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 	}
 
 	SoundPlay(-2);	// stop thread
+
+	dblFree();
 
 	RemoveBg();
 
