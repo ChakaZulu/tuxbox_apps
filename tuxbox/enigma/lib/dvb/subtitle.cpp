@@ -7,6 +7,7 @@
 #include <asm/types.h>
 #include "subtitle.h"
 #include <lib/base/eerror.h>
+#include <lib/gdi/fb.h>
 
 void bitstream_init(struct bitstream *bit, void *buffer, int size)
 {
@@ -639,8 +640,10 @@ void subtitle_clear_screen(struct subtitle_ctx *sub)
 	int y;
 	
 	//eDebug("BBOX clear %d:%d -> %d:%d", sub->bbox_left, sub->bbox_top, sub->bbox_right, sub->bbox_bottom);
-	
-	if (sub->bbox_right > sub->bbox_left)
+
+	// do not draw when anyone has locked the 
+	// framebuffer ( non enigma plugins... )
+	if (sub->bbox_right > sub->bbox_left && !fbClass::getInstance()->islocked())
 		for (y=sub->bbox_top; y < sub->bbox_bottom; ++y)
 			memset(sub->screen_buffer + y * sub->screen_width, 0, sub->bbox_right - sub->bbox_left);
 		
@@ -763,7 +766,10 @@ void subtitle_redraw(struct subtitle_ctx *sub, int page_id)
 				sub->bbox_right = x1;
 			if (y1 > sub->bbox_bottom)
 				sub->bbox_bottom = y1;
-				
+
+			// do not draw when anyone has locked the 
+			// framebuffer ( non enigma plugins... )
+			if ( !fbClass::getInstance()->islocked() )
 				/* copy to screen */
 			for (y=0; y < reg->region_height; ++y)
 			{
@@ -797,7 +803,12 @@ void subtitle_redraw(struct subtitle_ctx *sub, int page_id)
 		clut = clut->next;
 	}
 	if (clut)
-		sub->set_palette(clut);
+	{
+		// do not change color palette when anyone has 
+		// locked the framebuffer ( non enigma plugins )
+		if (!fbClass::getInstance()->islocked())
+			sub->set_palette(clut);
+	}
 	else
 		eDebug("[SUB] CLUT NOT FOUND.");
 }
