@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: checker.cpp,v $
+Revision 1.13  2003/10/16 00:33:23  obi
+bugfix
+
 Revision 1.12  2003/01/06 05:03:11  TheDOC
 dreambox compatible
 
@@ -136,8 +139,9 @@ void* checker::startEventChecker(void* object)
 	if((fd = open("/dev/dbox/event0", O_RDWR)) < 0)
 	{
 		perror("open");
-		return false;
+		pthread_exit(NULL);
 	}
+
 	int old_vcr_mode = c->get_16_9_mode();
 
 	while(1)
@@ -239,6 +243,7 @@ void* checker::startEventChecker(void* object)
 		}*/
 	}
 	close(fd);
+	pthread_exit(NULL);
 }
 
 void checker::aratioCheck()
