@@ -34,15 +34,18 @@
 #include <dbox/avia_gt_pig.h>
 
 
+using namespace std;
+
+
 #define PIG_DEV "/dev/dbox/pig"			// pig_nr will be appended!!
 
 class CPIG
 {
 	public:
-		CPIG (void);
-		CPIG (int pig_nr = 0);		// incl. open
+		CPIG ();
+		CPIG (int pig_nr);		// incl. open
 		CPIG (int pig_nr, int x, int y, int w, int h); // open + set_coord
-		~CPIG (void);
+		~CPIG ();
 
 		int  pigopen  (int pig_nr);
 		void pigclose (void);

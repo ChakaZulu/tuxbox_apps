@@ -46,7 +46,7 @@
 // -- Constructor
 //
 
-CPIG::CPIG(void)
+CPIG::CPIG()
 {
     fd = -1;
     status = CLOSED;
@@ -70,7 +70,7 @@ CPIG::CPIG(int pig_nr, int x, int y, int w, int h)
 
 }
 
-CPIG::~CPIG(void)
+CPIG::~CPIG()
 {
 	pigclose ();		// cleanup anyway!!
 
