@@ -104,7 +104,8 @@ int CScanTs::exec(CMenuTarget* parent, string)
 	ypos+= mheight;
 
 	int xpos1 = x+20 + g_Fonts->menu->getRenderWidth(g_Locale->getText("scants.transponders").c_str());
-	//int xpos2 = x+20 + g_Fonts->menu->getRenderWidth(g_Locale->getText("scants.services").c_str());
+ 	int xpos2 = x+20 + g_Fonts->menu->getRenderWidth(g_Locale->getText("scants.services").c_str());
+ 	int xpos4 = x+20 + g_Fonts->menu->getRenderWidth(g_Locale->getText("scants.freqdata").c_str());
 
 
 	frameBuffer->loadPal("radar.pal", 17, 37);
@@ -122,6 +123,8 @@ int CScanTs::exec(CMenuTarget* parent, string)
 		char filename[30];
 		char cb[10];
 		char cb1[21];
+ 		char cb2[5];
+ 		char cb3[30];
 		sprintf(filename, "radar%d.raw", pos);
 		pos = (pos+1)%10;
 		frameBuffer->paintIcon8(filename, x+400,ypos+15, 17);
@@ -135,37 +138,86 @@ int CScanTs::exec(CMenuTarget* parent, string)
 
 			switch (msg)
 			{
+
 				case NeutrinoMessages::EVT_SCAN_SATELLITE:
-					frameBuffer->paintBoxRel(xpos3, ypos, x+width-400, mheight, COL_MENUCONTENT); //new position set
-					g_Fonts->menu->RenderString(xpos3, ypos+ mheight, width, (char*)data, COL_MENUCONTENT);
+					frameBuffer->paintBoxRel(xpos3, ypos, width-xpos3-145, mheight, COL_MENUCONTENT);//new position set
+					g_Fonts->menu->RenderString(xpos3, ypos+mheight, width-xpos3, (char*)data, COL_MENUCONTENT);
 					delete (unsigned char*) data;
 					break;
 	//todo: merge the follwing 2 cases:
 				case NeutrinoMessages::EVT_SCAN_NUM_TRANSPONDERS:	//willbe obsolete soon
 					sprintf(cb, "%d", data);
-					frameBuffer->paintBoxRel(xpos1, ypos+1*mheight, x+width-400, mheight, COL_MENUCONTENT);
-					g_Fonts->menu->RenderString(xpos1, ypos+ 2*mheight, width, cb, COL_MENUCONTENT);
+					frameBuffer->paintBoxRel(xpos1, ypos+1*mheight, width-xpos1-105, mheight, COL_MENUCONTENT); //new position set
+					g_Fonts->menu->RenderString(xpos1, ypos+ 2*mheight, width-xpos1, cb, COL_MENUCONTENT);
 					found_transponder = data;
 					break;
+
 				case NeutrinoMessages::EVT_SCAN_REPORT_NUM_SCANNED_TRANSPONDERS:
 					if (found_transponder == 0) data = 0;
 					sprintf(cb1, "%d/%d", data,found_transponder);
-					frameBuffer->paintBoxRel(xpos1, ypos+1*mheight, x+width-400, mheight, COL_MENUCONTENT);
-					g_Fonts->menu->RenderString(xpos1, ypos+ 2*mheight, width, cb1, COL_MENUCONTENT);
+					frameBuffer->paintBoxRel(xpos1, ypos+1*mheight, width-xpos1-105, mheight, COL_MENUCONTENT); // new position set
+					g_Fonts->menu->RenderString(xpos1, ypos+ 2*mheight, width-xpos1, cb1, COL_MENUCONTENT);
 					break;
 
+				case NeutrinoMessages::EVT_SCAN_REPORT_FREQUENCY:          //will be  enlarged to receive a structure
+					sprintf(cb1, "%u",data );
+					frameBuffer->paintBoxRel(xpos4, ypos+2*mheight,100, mheight, COL_MENUCONTENT); // new position set
+					g_Fonts->menu->RenderString(xpos4, ypos+3*mheight,100, cb1, COL_MENUCONTENT);
+					break;
+				case NeutrinoMessages::EVT_SCAN_REPORT_FREQUENCYP:          //will be  enlarged to receive a structure
+					if ( data == 0 )  {
+						sprintf(cb2, "-H" );
+					}
+					else
+						sprintf(cb2, "-V" );
+					frameBuffer->paintBoxRel(xpos4+100,ypos+2*mheight,30, mheight, COL_MENUCONTENT); // new position set
+					g_Fonts->menu->RenderString(xpos4+100, ypos+3*mheight,30, cb2, COL_MENUCONTENT);
+					break;
 				case NeutrinoMessages::EVT_SCAN_PROVIDER:
-					frameBuffer->paintBoxRel(x+ 10, ypos+ 4* mheight+2, width-20, mheight, COL_MENUCONTENT);
-					g_Fonts->menu->RenderString(x+ 10, ypos+ 5* mheight, width-20, (char*)data, COL_MENUCONTENTINACTIVE, 0, true); // UTF-8
+					frameBuffer->paintBoxRel(x+ 10, ypos+ 3* mheight+2, width-x-10, mheight, COL_MENUCONTENT);
+					g_Fonts->menu->RenderString(x+ 10, ypos+ 4* mheight, width-x-10, (char*)data, COL_MENUCONTENT, 0, true); // UTF-8
 					delete (unsigned char*) data;
 					break;
-
-				case NeutrinoMessages::EVT_SCAN_NUM_CHANNELS:
-					sprintf(cb, "%d", data);
-					frameBuffer->paintBoxRel(x+ 10, ypos+6*mheight, width-20, mheight , COL_MENUCONTENT);
-					g_Fonts->menu->RenderString(x + 10, ypos+ 7* mheight, width, cb, COL_MENUCONTENT);
+				case NeutrinoMessages::EVT_SCAN_SERVICENAME:
+					frameBuffer->paintBoxRel(x+ 8, ypos+ 4* mheight+2, width-x-10, mheight, COL_MENUCONTENT);
+					g_Fonts->menu->RenderString(x+ 10, ypos+ 5* mheight, width-x-10, (char*)data, COL_MENUCONTENT, 0, true); // UTF-8
+					delete (unsigned char*) data;
 					break;
+				case NeutrinoMessages::EVT_SCAN_NUM_CHANNELS:
+					sprintf(cb, " = %d", data);
+					frameBuffer->paintBoxRel(x +210, ypos+ 6*mheight, 70, mheight , COL_MENUCONTENT);   //ist nen bischen zu tief
+					g_Fonts->menu->RenderString(x + 210, ypos+ 7*mheight,130, cb, COL_MENUCONTENT);
+					break;
+				case NeutrinoMessages::EVT_SCAN_FOUND_TV_CHAN:
+					sprintf(cb, "%d", data);
+					frameBuffer->paintBoxRel(x +8, ypos+6*mheight,60, mheight , COL_MENUCONTENT);   //ist nen bischen zu tief
+					g_Fonts->menu->RenderString(x + 10, ypos+ 7* mheight, 70, cb, COL_MENUCONTENT);
+					break;
+/*  the goodguy hier ist der gui part
+				case NeutrinoMessages::EVT_SCAN_FOUND_A_CHAN:
+					scaninfo * pommes;
+					pommes = (scaninfo *) data;
+					sprintf(cb1, "%d   %d    %d    =  %d",pommes->found_tv_chans,pommes->found_radio_chans,pommes->found_data_chans,pommes->found_tv_chans+pommes->found_radio_chans+pommes->found_data_chans);
+					frameBuffer->paintBoxRel(x +8,ypos+6*mheight,60, mheight , COL_MENUCONTENT);   //ist nen bischen zu tief
+					g_Fonts->menu->RenderString(x + 10, ypos+ 7* mheight, 260, cb1, COL_MENUCONTENT);
+					sprintf(cb3, "%s" , pommes->ServiceName);
+					//dprintf( DEBUG_NORMAL, "Also SN = %s buffer = %s \n",pommes->ServiceName,cb3 );
 
+					frameBuffer->paintBoxRel(x+ 8, ypos+ 4* mheight+2, width-x-10, mheight, COL_MENUCONTENT);
+					g_Fonts->menu->RenderString(x+ 10, ypos+ 5* mheight, width-x-10,cb3, COL_MENUCONTENT, 0, true); // UTF-8
+					delete (unsigned char*) pommes;
+					break;
+*/
+				case NeutrinoMessages::EVT_SCAN_FOUND_RADIO_CHAN:
+					sprintf(cb, "%d", data);
+					frameBuffer->paintBoxRel(x +68, ypos+6*mheight,60, mheight , COL_MENUCONTENT);   //ist nen bischen zu tief
+					g_Fonts->menu->RenderString(x + 72, ypos+ 7* mheight, 40, cb, COL_MENUCONTENT);
+					break;
+				case NeutrinoMessages::EVT_SCAN_FOUND_DATA_CHAN:
+					sprintf(cb, "%d", data);
+					frameBuffer->paintBoxRel(x +146, ypos+6*mheight,60, mheight , COL_MENUCONTENT);   //ist nen bischen zu tief
+					g_Fonts->menu->RenderString(x + 148, ypos+ 7* mheight, 70, cb, COL_MENUCONTENT);
+					break;
 				case NeutrinoMessages::EVT_SCAN_COMPLETE:
 				case NeutrinoMessages::EVT_SCAN_FAILED:
     					success  = (msg == NeutrinoMessages::EVT_SCAN_COMPLETE);
