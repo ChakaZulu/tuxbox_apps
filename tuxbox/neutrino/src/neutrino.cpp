@@ -1175,11 +1175,11 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainMenu.addItem(new CMenuForwarder("mainmenu.scartmode", true, NULL, this, "scart", true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW) );
 	mainMenu.addItem(new CMenuForwarder("mainmenu.games", true, NULL, new CGameList("mainmenu.games"), "", true, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE) );
 	mainMenu.addItem(GenericMenuSeparatorLine);
-	mainMenu.addItem(new CMenuForwarder("mainmenu.mp3player", true, NULL, new CMP3PlayerGui()));
+	mainMenu.addItem(new CMenuForwarder("mainmenu.mp3player", true, NULL, new CMP3PlayerGui(), NULL, true, CRCInput::RC_1 ));
 
 	#if HAVE_DVB_API_VERSION >= 3
 	//mainMenu.addItem(new CMenuForwarder("mainmenu.movieplayer", true, NULL, new CMoviePlayerGui()));
-	mainMenu.addItem(new CMenuForwarder("mainmenu.movieplayer", true, NULL, &moviePlayer));
+	mainMenu.addItem(new CMenuForwarder("mainmenu.movieplayer", true, NULL, &moviePlayer, NULL, true, CRCInput::RC_2 ));
 
 	moviePlayer.addItem(GenericMenuSeparator);
 	moviePlayer.addItem(GenericMenuBack);
@@ -1195,14 +1195,14 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	moviePlayer.addItem(new CMenuForwarder("mainmenu.settings", true, NULL, &streamingSettings));
 #endif
 
-	mainMenu.addItem(new CMenuForwarder("mainmenu.pictureviewer", true, NULL, new CPictureViewerGui()));
+	mainMenu.addItem(new CMenuForwarder("mainmenu.pictureviewer", true, NULL, new CPictureViewerGui(), NULL, true, CRCInput::RC_3));
 	mainMenu.addItem(GenericMenuSeparatorLine);
 	
-	mainMenu.addItem(new CMenuForwarder("mainmenu.settings", true, NULL, &mainSettings));
-	mainMenu.addItem(new CLockedMenuForwarder("mainmenu.service", g_settings.parentallock_pincode, false, true, NULL, &service) );
+	mainMenu.addItem(new CMenuForwarder("mainmenu.settings", true, NULL, &mainSettings, NULL, true, CRCInput::RC_4));
+	mainMenu.addItem(new CLockedMenuForwarder("mainmenu.service", g_settings.parentallock_pincode, false, true, NULL, &service, NULL, true, CRCInput::RC_5) );
 	mainMenu.addItem(GenericMenuSeparatorLine);
 
-	mainMenu.addItem(new CMenuForwarder("mainmenu.sleeptimer", true, NULL, new CSleepTimerWidget));
+	mainMenu.addItem(new CMenuForwarder("mainmenu.sleeptimer", true, NULL, new CSleepTimerWidget, NULL, true, CRCInput::RC_6));
 	mainMenu.addItem(new CMenuForwarder("mainmenu.shutdown", true, NULL, this, "shutdown", true, CRCInput::RC_standby, "power.raw") );
 
 //	mainMenu.addItem(GenericMenuSeparatorLine);
@@ -1211,23 +1211,23 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainSettings.addItem(GenericMenuSeparator);
 	mainSettings.addItem(GenericMenuBack);
 	mainSettings.addItem(GenericMenuSeparatorLine);
-	mainSettings.addItem(new CMenuForwarder("mainsettings.savesettingsnow", true, NULL, this, "savesettings"));
+	mainSettings.addItem(new CMenuForwarder("mainsettings.savesettingsnow", true, NULL, this, "savesettings", true, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
 	mainSettings.addItem(GenericMenuSeparatorLine);
-	mainSettings.addItem(new CMenuForwarder("mainsettings.video", true, NULL, &videoSettings));
-	mainSettings.addItem(new CMenuForwarder("mainsettings.audio", true, NULL, &audioSettings));
+	mainSettings.addItem(new CMenuForwarder("mainsettings.video", true, NULL, &videoSettings, NULL, true, CRCInput::RC_1));
+	mainSettings.addItem(new CMenuForwarder("mainsettings.audio", true, NULL, &audioSettings, NULL, true, CRCInput::RC_2));
 	if(g_settings.parentallock_prompt)
-		mainSettings.addItem(new CLockedMenuForwarder("parentallock.parentallock", g_settings.parentallock_pincode, true, true, NULL, &parentallockSettings));
+		mainSettings.addItem(new CLockedMenuForwarder("parentallock.parentallock", g_settings.parentallock_pincode, true, true, NULL, &parentallockSettings, NULL, true, CRCInput::RC_3));
 	else
-	        mainSettings.addItem(new CMenuForwarder("parentallock.parentallock", true, NULL, &parentallockSettings));
-	mainSettings.addItem(new CMenuForwarder("mainsettings.network", true, NULL, &networkSettings));
-	mainSettings.addItem(new CMenuForwarder("mainsettings.recording", true, NULL, &recordingSettings));
-	mainSettings.addItem(new CMenuForwarder("mainsettings.streaming", true, NULL, &streamingSettings));
-	mainSettings.addItem(new CMenuForwarder("mainsettings.language", true, NULL, &languageSettings));
-	mainSettings.addItem(new CMenuForwarder("mainsettings.colors", true, NULL, &colorSettings));
-	mainSettings.addItem(new CMenuForwarder("mainsettings.lcd", true, NULL, &lcdSettings));
-	mainSettings.addItem(new CMenuForwarder("mainsettings.keybinding", true, NULL, &keySettings));
-	mainSettings.addItem(new CMenuForwarder("mp3picsettings.general", true, NULL, &mp3picSettings));
-	mainSettings.addItem(new CMenuForwarder("mainsettings.misc", true, NULL, &miscSettings));
+		mainSettings.addItem(new CMenuForwarder("parentallock.parentallock", true, NULL, &parentallockSettings, NULL, true, CRCInput::RC_4));
+	mainSettings.addItem(new CMenuForwarder("mainsettings.network", true, NULL, &networkSettings, NULL, true, CRCInput::RC_5));
+	mainSettings.addItem(new CMenuForwarder("mainsettings.recording", true, NULL, &recordingSettings, NULL, true, CRCInput::RC_6));
+	mainSettings.addItem(new CMenuForwarder("mainsettings.streaming", true, NULL, &streamingSettings, NULL, true, CRCInput::RC_7));
+	mainSettings.addItem(new CMenuForwarder("mainsettings.language", true, NULL, &languageSettings, NULL, true, CRCInput::RC_8));
+	mainSettings.addItem(new CMenuForwarder("mainsettings.colors", true, NULL, &colorSettings, NULL, true, CRCInput::RC_9));
+	mainSettings.addItem(new CMenuForwarder("mainsettings.lcd", true, NULL, &lcdSettings, NULL, true, CRCInput::RC_0));
+	mainSettings.addItem(new CMenuForwarder("mainsettings.keybinding", true, NULL, &keySettings, NULL, true, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
+	mainSettings.addItem(new CMenuForwarder("mp3picsettings.general", true, NULL, &mp3picSettings, NULL, true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
+	mainSettings.addItem(new CMenuForwarder("mainsettings.misc", true, NULL, &miscSettings, NULL, true, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
 }
 
 
