@@ -594,22 +594,25 @@ void setBoxType()
 	// fallback to old way ( via env. var)
 	if(settings.boxtype==CControldClient::TUXBOX_MAKER_UNKNOWN)
 	{
-		char strmID[40];
-		int mID;
-		if(getenv("mID")!=NULL)
-			strcpy( strmID, getenv("mID") );
-		mID = atoi(strmID);
+		char * strmID = getenv("mID");
 
-		switch ( mID )
+		if (strmID == NULL)
+			settings.boxtype = CControldClient::TUXBOX_MAKER_UNKNOWN;
+		else
 		{
+			int mID = atoi(strmID);
+
+			switch (mID)
+			{
 			case 3:	
-			   settings.boxtype= CControldClient::TUXBOX_MAKER_SAGEM;
-			   break;
+				settings.boxtype= CControldClient::TUXBOX_MAKER_SAGEM;
+				break;
 			case 2:	
-			   settings.boxtype= CControldClient::TUXBOX_MAKER_PHILIPS;
-			   break;
+				settings.boxtype= CControldClient::TUXBOX_MAKER_PHILIPS;
+				break;
 			default:
 				settings.boxtype= CControldClient::TUXBOX_MAKER_NOKIA;
+			}
 		}
 		printf("[controld] Boxtype detected: (%d)\n", settings.boxtype);
 	}
@@ -814,7 +817,7 @@ int main(int argc, char **argv)
 {
 	CBasicServer controld_server;
 
-	printf("Controld  $Id: controld.cpp,v 1.94 2003/02/19 19:18:08 zwen Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.95 2003/02/19 20:18:37 thegoodguy Exp $\n\n");
 
 	if (!controld_server.prepare(CONTROLD_UDS_NAME))
 		return -1;
