@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.50 2005/01/16 18:13:45 diemade Exp $
+	$Id: controlapi.cpp,v 1.51 2005/01/18 11:23:30 diemade Exp $
 
 	License: GPL
 
@@ -84,7 +84,7 @@ bool CControlAPI::Execute(CWebserverRequest* request)
 		"timer","setmode","standby","getdate","gettime","settings","getservicesxml",
 		"getbouquetsxml","getonidsid","message","info","shutdown","volume",
 		"channellist","getbouquet","getbouquets","epg","version","zapto", "startplugin",
-		"getmode","exec",NULL
+		"getmode","exec","system",NULL
 	};
 
 	dprintf("Execute CGI : %s\n",request->Filename.c_str());
@@ -165,8 +165,10 @@ bool CControlAPI::Execute(CWebserverRequest* request)
 		return StartPluginCGI(request);
 	case 20:
 		return GetModeCGI(request);
-		case 21: 
-        return ExecCGI(request);
+	case 21: 
+	        return ExecCGI(request);
+	case 22: 
+	        return SystemCGI(request);
 	default:
 		request->SendError();
 		return false;
@@ -365,6 +367,56 @@ bool CControlAPI::ExecCGI(CWebserverRequest *request)
 		request->Send404Error();		
 	}
 	return res;
+}
+
+//-------------------------------------------------------------------------
+
+bool CControlAPI::SystemCGI(CWebserverRequest *request)
+{
+	std::string pluginname;
+	
+	if (request->ParameterList.size() == 1)
+	{
+
+		if (request->ParameterList["1"] == "getAViAExtIec")
+		{
+			request->printf("%d\n", Parent->Zapit->IecState());
+			return true;
+		}
+		if (request->ParameterList["setAViAExtIec"] == "on")
+		{
+			Parent->Zapit->IecOn();
+			request->SendOk();
+			return true;
+		}
+		if (request->ParameterList["setAViAExtIec"] == "off")
+		{
+			Parent->Zapit->IecOff();
+			request->SendOk();
+			return true;
+		}
+		if (request->ParameterList["1"] == "getAViAExtPlayBack")
+		{
+			request->printf("%d\n", Parent->Zapit->PlaybackState());
+			return true;
+		}
+		if (request->ParameterList["setAViAExtPlayBack"] == "pes")
+		{
+			Parent->Zapit->PlaybackPES();
+			request->SendOk();
+			return true;
+		}
+		if (request->ParameterList["setAViAExtPlayBack"] == "spts")
+		{
+			Parent->Zapit->PlaybackSPTS();
+			request->SendOk();
+			return true;
+		}
+	}
+	
+	request->SendError();
+	return false;
+
 }
 
 

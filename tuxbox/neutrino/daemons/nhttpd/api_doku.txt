@@ -25,7 +25,7 @@ Bei Problem oder Fragen Mail an derdirch@web.de oder Dirch in #dbox2
 17. Fenster in neutrino			http://dbox/control/message
 18. Timerd Interface			http://dbox/control/timer
 19. Shellscript ausführen               http://dbox/cgi-bin/exec
-
+20. System-/Treiberfunktionen           http://dbox/control/system
 **********************************************************************************************
 1. Die Kanalliste
 **********************************************************************************************
@@ -979,4 +979,67 @@ buli.sh gibt einen RSS-Feed zurück, der vom Newsticker angezeigt wird. In newsti
 muss dann der Aufruf folgendermassen aussehen:
 
 http://dbox/cgi-bin/exec?buli
+
+
+**********************************************************************************************
+20. System-/Treiberfunktionen
+**********************************************************************************************
+
+Handler: http://dbox/control/system
+
+Parameter: getAViAExtIec
+Rückgabe: Status des Iec (optischer Ausgang)
+
+0 = Iec deaktiviert
+1 = Iec aktiviert
+
+Beispiel:
+http://dbox/control/system?getAViAExtIec
+1
+
+
+Parameter: setAViAExtIec=on
+Rückgabe: ok
+
+Aktiviert den Iec
+
+http://dbox/control/system?setAViAExtIec=on
+ok
+
+
+Parameter: setAViAExtIec=off
+Rückgabe: ok
+
+Deaktiviert den Iec
+
+http://dbox/control/system?setAViAExtIec=off
+ok
+
+Parameter: getAViAExtPlayback
+Rückgabe: Gibt zurück, in welchem Modus der Demux laeuft
+
+0 = PES
+1 = SPTS
+
+Beispiel:
+http://dbox/control/system?getAViAExtPlayback
+1
+
+
+Parameter: getAViAExtPlayback=pes
+Rückgabe: ok
+
+Aktiviert den PES-Modus
+
+http://dbox/control/system?setAViAExtPlayback=pes
+ok
+
+
+Parameter: getAViAExtPlayback=spts
+Rückgabe: ok
+
+Aktiviert den SPTS-Modus
+
+http://dbox/control/system?setAViAExtPlayback=spts
+ok
 
