@@ -23,6 +23,8 @@ include/dvb/hardware/Makefile
 include/dvb/id/Makefile
 include/dvb/pool/Makefile
 include/dvb/table/Makefile
+qa/Makefile
+qa/capmt/Makefile
 src/Makefile
 src/channel/Makefile
 src/descriptor/Makefile
