@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.175 2004/04/27 16:24:21 metallica Exp $
+//  $Id: sectionsd.cpp,v 1.176 2004/04/29 09:11:13 metallica Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1060,7 +1060,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.175 2004/04/27 16:24:21 metallica Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.176 2004/04/29 09:11:13 metallica Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -3474,7 +3474,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.175 2004/04/27 16:24:21 metallica Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.176 2004/04/29 09:11:13 metallica Exp $\n");
 
 	try {
 		if (argc != 1 && argc != 2) {
@@ -3508,7 +3508,7 @@ int main(int argc, char **argv)
 			case 0:
 				break;
 			default:
-				_exit(0); //return EXIT_SUCCESS;
+				return EXIT_SUCCESS;
 			}
 
 			if (setsid() == -1) {

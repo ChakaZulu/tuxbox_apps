@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.23 2003/03/31 20:22:19 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.24 2004/04/29 09:11:13 metallica Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -73,10 +73,10 @@ DMX::DMX(const unsigned char p, const unsigned short bufferSizeInKB)
 
 DMX::~DMX()
 {
-	closefd();
 	pthread_mutex_destroy(&pauselock);
 	pthread_mutex_destroy(&start_stop_mutex);
 	pthread_cond_destroy (&change_cond);
+	closefd();
 }
 
 ssize_t DMX::read(char * const buf, const size_t buflength, const unsigned timeoutMInSeconds)
