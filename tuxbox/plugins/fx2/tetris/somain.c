@@ -44,6 +44,8 @@ static	HScore	hsc[8];
 static	HScore	ihsc[8];
 static	int		use_ihsc=0;
 
+extern	unsigned long BuildCheck( char *user, long score );
+
 static	void	LoadHScore( void )
 {
 	CURL			*curl;
@@ -234,12 +236,7 @@ static	void	SaveGame( void )
 			memcpy(p,p+1,x);
 	}
 
-	for( p=user,x='a'; *p; p++,x+=2 )
-	{
-		chk <<= 1;
-		chk ^= ((*p)+x);
-	}
-	chk ^= score;
+	chk=BuildChk( user, score );
 
 	sprintf(url,"%s/games/tetris.php?action=put&user=%s&score=%d&chk=%d",
 		hscore,user,score,chk);
