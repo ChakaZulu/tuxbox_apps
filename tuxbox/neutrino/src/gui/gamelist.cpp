@@ -227,8 +227,7 @@ void CPlugins::startPlugin(int number)
 	char depstring[129];
 	char			*argv[20];
 	void			*libhandle[20];
-	int				argc;
-	int				i;
+	int			argc, i, lcd_fd=-1;
 	char			*p;
 	char			*np;
 	void			*handle;
@@ -241,7 +240,6 @@ void CPlugins::startPlugin(int number)
 	tmpparam = startparam;
 
 	setfb( frameBuffer->getFileHandle() );
-	setlcd(0);
 
 	if (plugin_list[number].fb)
 	{
@@ -269,6 +267,11 @@ void CPlugins::startPlugin(int number)
 	if (plugin_list[number].lcd)
 	{
 		// cout << "With LCD " << endl;
+		g_lcdd->pause();
+		if( (lcd_fd=open("/dev/dbox/lcd0", O_RDWR)) < 0 )
+			setlcd( 0 );
+		else
+			setlcd( lcd_fd );
 
 		startparam = makeParam(P_ID_LCD, startparam);
 	}
@@ -374,6 +377,13 @@ void CPlugins::startPlugin(int number)
     		g_RCInput->restartInput();
     		g_RCInput->clearRCMsg();
     	}
+
+	if (plugin_list[number].lcd)
+	{
+		if(lcd_fd != -1)
+			close(lcd_fd);
+		g_lcdd->resume();
+	}
 
     	if (plugin_list[number].fb)
     	{
