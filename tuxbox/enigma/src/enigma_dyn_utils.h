@@ -8,12 +8,14 @@
 #include <lib/dvb/dvbservice.h>
 #include <lib/dvb/service.h>
 #include <lib/dvb/serviceplaylist.h>
+#include <lib/system/http_dyn.h>
 
 #define TEMPLATE_DIR DATADIR+eString("/enigma/templates/")
 #define HTDOCS_DIR DATADIR+eString("/enigma/htdocs/")
 
 #define CHARSETMETA "<META http-equiv=Content-Type content=\"text/html; charset=UTF-8\">\n"
 #define NOCONTENT "<? header(\"HTTP/1.0 204 No Content\"); ?>"
+#define CLOSEWINDOW "<html><body><script>window.close();</script></body></html>"
 
 #define BLUE "#12259E"
 #define RED "#CB0303"
@@ -38,6 +40,7 @@ eString httpEscape(const eString &string);
 std::map<eString, eString> getRequestOptions(eString opt, char delimiter);
 eString ref2string(const eServiceReference &r);
 eServiceReference string2ref(const eString &service);
+eString closeWindow(eHTTPConnection *content);
 
 extern eString getRight(const eString&, char); // implemented in timer.cpp
 extern eString getLeft(const eString&, char);  // implemented in timer.cpp

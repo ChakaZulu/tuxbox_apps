@@ -51,7 +51,7 @@
 
 using namespace std;
 
-#define WEBXFACEVERSION "1.3.4"
+#define WEBXFACEVERSION "1.4.0"
 
 int pdaScreen = 0;
 
@@ -337,6 +337,7 @@ static eString admin(eString request, eString dirpath, eString opts, eHTTPConnec
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString command = opt["command"];
 	eString requester = opt["requester"];
+	eString result =  "Unknown admin command. (valid commands are: shutdown, reboot, restart, standby, wakeup)";
 	if (command)
 	{
 		if (command == "shutdown")
@@ -345,26 +346,26 @@ static eString admin(eString request, eString dirpath, eString opts, eHTTPConnec
 			{
 				eZap::getInstance()->quit();
 				if (requester == "webif")
-					return "<html>" CHARSETMETA "<head><title>Shutdown</title></head><body>Shutdown initiated...</body></html>";
+					result = "Shutdown initiated...";
 				else
-					return "<html>" CHARSETMETA "<head><title>Shutdown</title></head><body>Shutdown initiated.</body></html>";
+					result = "Shutdown initiated.";
 			}
 		}
 		else if (command == "reboot")
 		{
 			eZap::getInstance()->quit(4);
 			if (requester == "webif")
-				return "<html>" CHARSETMETA "<head><title>Reboot</title></head><body>Reboot initiated...</body></html>";
+				result = "Reboot initiated...";
 			else
-				return "<html>" CHARSETMETA "<head><title>Reboot</title></head><body>Reboot initiated.</body></html>";
+				result = "Reboot initiated.";
 		}
 		else if (command == "restart")
 		{
 			eZap::getInstance()->quit(2);
 			if (requester == "webif")
-				return "<html>" CHARSETMETA "<head><title>Restart Enigma</title></head><body>Restart initiated...</body></html>";
+				result = "Restart initiated...";
 			else
-				return "<html>" CHARSETMETA "<head><title>Restart of enigma is initiated.</title></head><body>Restart initiated</body></html>";
+				result = "Restart initiated";
 		}
 		else if (command == "wakeup")
 		{
@@ -372,30 +373,33 @@ static eString admin(eString request, eString dirpath, eString opts, eHTTPConnec
 			{
 				eZapStandby::getInstance()->wakeUp(1);
 				if (requester == "webif")
-					return "<html>" CHARSETMETA "<head><title>Wakeup</title></head><body>Enigma is waking up...</body></html>";
+					result = "Enigma is waking up...";
 				else
-					return "<html>" CHARSETMETA "<head><title>Wakeup</title></head><body>enigma is waking up.</body></html>";
+					result = "enigma is waking up.";
 			}
 			if (requester == "webif")
-				return "<html>" CHARSETMETA "<head><title>Wakeup</title></head><body>Enigma doesn't sleep.</body></html>";
+				result =  "Enigma doesn't sleep.";
 			else
-				return "<html>" CHARSETMETA "<head><title>Wakeup</title></head><body>enigma doesn't sleep :)</body></html>";
+				result = "enigma doesn't sleep :)";
 		}
 		else if (command == "standby")
 		{
 			if (eZapStandby::getInstance())
 				if (requester == "webif")
-					return "<html>" CHARSETMETA "<head><title>Standby</title></head><body>Enigma is already sleeping.</body></html>";
+					result = "Enigma is already sleeping.";
 				else
-					return "<html>" CHARSETMETA "<head><title>Standby</title></head><body>enigma is already sleeping</body></html>";
+					result = "enigma is already sleeping";
 			eZapMain::getInstance()->gotoStandby();
 			if (requester == "webif")
-				return "<html>" CHARSETMETA "<head><title>Standby</title></head><body>Standby initiated...</body></html>";
+				result =  "Standby initiated...";
 			else
-				return "<html>" CHARSETMETA "<head><title>Standby</title></head><body>enigma is sleeping now</body></html>";
+				result =  "enigma is sleeping now</body></html>";
 		}
 	}
-	return "<html>" CHARSETMETA "<head><title>Error</title></head><body>Unknown admin command.(valid commands are: shutdown, reboot, restart, standby, wakeup) </body></html>";
+	if (pdaScreen == 0)
+		return "<html>" + eString(CHARSETMETA) + "<head><title>" + command + "</title></head><body>" + result + "</body></html>";
+	else
+		return "<html>" + eString(CHARSETMETA) + "<head><title>" + command + "</title></head><body><script>window.close();</script>" + result + "</body></html>";
 }
 
 #ifndef DISABLE_FILE
@@ -431,9 +435,7 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 		eZapMain::getInstance()->play();
 	}
 
-	content->code=204;
-	content->code_descr="No Content";
-	return NOCONTENT;
+	return closeWindow(content);
 }
 #endif
 
@@ -907,9 +909,7 @@ static eString setVolume(eString request, eString dirpath, eString opts, eHTTPCo
 		eAVSwitch::getInstance()->changeVolume(1, 63 - vol);
 	}
 
-	content->code=204;
-	content->code_descr="No Content";
-	return NOCONTENT;
+	return closeWindow(content);
 }
 
 static eString setVideo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -935,9 +935,7 @@ static eString setVideo(eString request, eString dirpath, eString opts, eHTTPCon
 		}
 	}
 
-	content->code=204;
-	content->code_descr="No Content";
-	return NOCONTENT;
+	return closeWindow(content);
 }
 
 static eString getIP()
@@ -1104,6 +1102,7 @@ static eString getEITC(eString result)
 								break;
 						}
 					}
+					else
 					if (descriptor->Tag() == DESCR_EXTENDED_EVENT)
 					{
 						ExtendedEventDescriptor *ss =(ExtendedEventDescriptor*)*descriptor;
@@ -1141,8 +1140,13 @@ static eString getEITC(eString result)
 			result.strReplace("#NEXTST#", next_text);
 			result.strReplace("#NEXTLT#", next_longtext);
 		}
+		else
+			result = "<br>";
+
 		eit->unlock();
 	}
+	else
+		result = "<br>";
 
 	return result;
 }
@@ -1337,9 +1341,7 @@ static eString deleteMovie(eString request, eString dirpath, eString opts, eHTTP
 			::unlink(eString().sprintf("%s.eit", getLeft(ref.path, '.').c_str()).c_str());
 		}
 	}
-	content->code=204;
-	content->code_descr="No Content";
-	return NOCONTENT;
+	return closeWindow(content);
 }
 #endif
 
@@ -1914,9 +1916,7 @@ static eString setConfigUSB(eString request, eString dirpath, eString opts, eHTT
 			setSwapFile(0, swapUSBFile);
 	}
 
-	content->code = 204;
-	content->code_descr = "No Content";
-	return NOCONTENT;
+	return closeWindow(content);
 }
 
 static eString setConfigHDD(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -1939,9 +1939,7 @@ static eString setConfigHDD(eString request, eString dirpath, eString opts, eHTT
 			setSwapFile(0, swapHDDFile);
 	}
 
-	content->code=204;
-	content->code_descr="No Content";
-	return NOCONTENT;
+	return closeWindow(content);
 }
 #endif
 
@@ -1966,7 +1964,10 @@ static eString aboutDreambox(void)
 	result << "<table border=0 cellspacing=0 cellpadding=0>";
 
 	if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000)
-		result << "<img src=\"dm7000.jpg\" width=\"620\" border=\"0\"><br><br>";
+		if (pdaScreen == 0)
+			result << "<img src=\"dm7000.jpg\" width=\"620\" border=\"0\"><br><br>";
+		else
+			result << "<img src=\"dm7000.jpg\" width=\"160\" border=\"0\"><br><br>";
 
 	result  << "<tr><td>Model:</td><td>" << eSystemInfo::getInstance()->getModel() << "</td></tr>"
 		<< "<tr><td>Manufacturer:</td><td>" << eSystemInfo::getInstance()->getManufacturer() << "</td></tr>"
@@ -2179,7 +2180,7 @@ static eString getControlScreenShot(void)
 		FILE *bitstream = 0;
 		int xres = 0, yres = 0, yres2 = 0, aspect = 0, winxres = 620, winyres = 0, rh = 0, rv = 0;
 		if (pdaScreen == 1)
-			winxres = 240;
+			winxres = 160;
 		if (Decoder::current.vpid != -1)
 			bitstream=fopen("/proc/bus/bitstream", "rt");
 		if (bitstream)
@@ -2551,6 +2552,7 @@ class eMEPG: public Object
 	time_t start;
 	time_t end;
 	int tableWidth;
+	int channelWidth;
 public:
 	int getTableWidth(void)
 	{
@@ -2591,7 +2593,7 @@ public:
 					int tablePos = 0;
 					time_t tableTime = start;
 					result << "<tr>"
-						<< "<td id=\"channel\" width=" << eString().sprintf("%d", CHANNELWIDTH) << ">"
+						<< "<td id=\"channel\" width=" << eString().sprintf("%d", channelWidth) << ">"
 						<< "<span class=\"channel\">"
 						<< filter_string(current->service_name)
 						<< "</span>"
@@ -2706,7 +2708,7 @@ public:
 
 								<< "</b><br>";
 
-							if (eventDuration >= 15 * 60)
+							if ((eventDuration >= 15 * 60) && (pdaScreen == 0))
 							{
 								result << "<span class=\"description\">"
 									<< filter_string(ext_description)
@@ -2730,12 +2732,13 @@ public:
 		}
 	}
 
-	eMEPG(time_t start, const eServiceReference & bouquetRef)
+	eMEPG(time_t start, const eServiceReference & bouquetRef, int channelWidth)
 		:hours(6)   // horizontally visible hours
-		,d_min(5)  // distance on time scale for 1 minute
+		,d_min((pdaScreen == 0) ? 5 : 3)  // distance on time scale for 1 minute
 		,start(start)
 		,end(start + hours * 3600)
-		,tableWidth((end - start) / 60 * d_min + CHANNELWIDTH)
+		,tableWidth((end - start) / 60 * d_min + channelWidth)
+		,channelWidth((pdaScreen == 0) ? CHANNELWIDTH : CHANNELWIDTH / 2)
 	{
 		Signal1<void, const eServiceReference&> cbSignal;
 		CONNECT(cbSignal, eMEPG::getcurepg);
@@ -2748,15 +2751,15 @@ public:
 		return multiEPG;
 	}
 
-	eString getTimeScale()
+	eString getTimeScale(int channelWidth)
 	{
 		std::stringstream result;
 
 		result << "<tr>"
-			<< "<th width=" << eString().sprintf("%d", CHANNELWIDTH) << ">"
+			<< "<th width=" << eString().sprintf("%d", channelWidth) << ">"
 			<< "CHANNEL"
 			<< "<br>"
-			<< "<img src=\"trans.gif\" border=\"0\" height=\"1\" width=\"" << eString().sprintf("%d", CHANNELWIDTH) << "\">"
+			<< "<img src=\"trans.gif\" border=\"0\" height=\"1\" width=\"" << eString().sprintf("%d", channelWidth) << "\">"
 			<< "</th>";
 
 		for (time_t i = start; i < end; i += 15 * 60)
@@ -2785,14 +2788,15 @@ static eString getMultiEPG(eString request, eString dirpath, eString opts, eHTTP
 	std::map<eString, eString>opt = getRequestOptions(opts, '&');
 	eString refs = opt["ref"];
 	eServiceReference bouquetRef = string2ref(refs);
+	int channelWidth = (pdaScreen == 0) ? CHANNELWIDTH : CHANNELWIDTH / 2;
 
 	time_t start = time(0) + eDVB::getInstance()->time_difference;
 	start -= ((start % 900) + (60 * 60)); // align to 15 mins & start 1 hour before now
 
-	eMEPG mepg(start, bouquetRef);
+	eMEPG mepg(start, bouquetRef, channelWidth);
 
-	eString result = readFile(TEMPLATE_DIR + "mepg.tmp");
-	result.strReplace("#TIMESCALE#", mepg.getTimeScale());
+	eString result = (pdaScreen == 0) ? readFile(TEMPLATE_DIR + "mepg.tmp") : readFile(TEMPLATE_DIR + "mepg_small.tmp");
+	result.strReplace("#TIMESCALE#", mepg.getTimeScale(channelWidth));
 	result.strReplace("#BODY#", mepg.getMultiEPG());
 	return result;
 }
@@ -3075,11 +3079,7 @@ static eString startPlugin(eString request, eString dirpath, eString opt, eHTTPC
 
 	result = plugins.execPluginByName((path + opts["name"]).c_str());
 	if (requester == "webif")
-	{
-		content->code=204;
-		content->code_descr="No Content";
-		result = NOCONTENT;
-	}
+		result = closeWindow(content);
 
 	return result;
 }
@@ -3099,11 +3099,7 @@ static eString stopPlugin(eString request, eString dirpath, eString opt, eHTTPCo
 		result = "E: no plugin is running";
 		
 	if (requester == "webif")
-	{
-		content->code=204;
-		content->code_descr="No Content";
-		result = NOCONTENT;
-	}
+		result = closeWindow(content);
 
 	return result;
 }
@@ -3215,9 +3211,7 @@ static eString zapTo(eString request, eString dirpath, eString opts, eHTTPConnec
 	if (!(current_service.flags&eServiceReference::isDirectory))	// is playable
 		playService(current_service);
 
-	content->code=204;
-	content->code_descr="No Content";
-	return NOCONTENT;
+	return closeWindow(content);
 }
 
 #if 0
@@ -3649,9 +3643,7 @@ static eString cleanupTimerList(eString request, eString dirpath, eString opt, e
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eTimerManager::getInstance()->cleanupEvents();
 	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
-	content->code=204;
-	content->code_descr="No Content";
-	return NOCONTENT;
+	return closeWindow(content);
 }
 
 static eString clearTimerList(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -3659,9 +3651,7 @@ static eString clearTimerList(eString request, eString dirpath, eString opt, eHT
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eTimerManager::getInstance()->clearEvents();
 	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
-	content->code=204;
-	content->code_descr="No Content";
-	return NOCONTENT;
+	return closeWindow(content);
 }
 
 static eString addTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)

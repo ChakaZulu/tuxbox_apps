@@ -300,6 +300,7 @@ static eString unmountMountPoint(eString request, eString dirpath, eString opts,
 		result = "<html><body>Mount point unmounted successfully.</body></html>";
 	else
 		result = "<html><body>Mount point unmount failed.</body></html>";
+	return result;
 }
 
 void ezapMountInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)

@@ -214,3 +214,21 @@ std::map<eString, eString> getRequestOptions(eString opt, char delimiter)
 	}
 	return result;
 }
+
+eString closeWindow(eHTTPConnection *content)
+{
+	eString result;
+
+	if (pdaScreen == 0)
+	{
+		content->code=204;
+		content->code_descr="No Content";
+		result = eString(NOCONTENT);
+	}
+	else
+	{
+		content->local_header["Content-Type"]="text/html; charset=utf-8";
+		result = eString(CLOSEWINDOW);
+	}
+	return result;
+}
