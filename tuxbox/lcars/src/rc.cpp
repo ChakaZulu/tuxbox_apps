@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: rc.cpp,v $
+Revision 1.8  2003/01/05 02:41:53  TheDOC
+lcars supports inputdev now
+
 Revision 1.7  2002/10/20 02:03:37  TheDOC
 Some fixes and stuff
 
@@ -51,6 +54,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <unistd.h>
 #include <fcntl.h>
 #include <iostream>
+#include <linux/input.h>
 
 rc::rc(hardware *h, settings *s)
 {
@@ -58,63 +62,41 @@ rc::rc(hardware *h, settings *s)
 	rcstop = false;
 	hardware_obj = h;
 
-	fp = open("/dev/dbox/rc0", O_RDONLY);
+	fp = open("/dev/input/event0", O_RDONLY);
+	if (fp < 0)
+	{
+		perror("Could not open input device");
+		exit(1);
+	}
 
 	int rcs[NUMBER_RCS][25] =
 	    {
 	        {
-	            RC1_0,
-	            RC1_1,
-	            RC1_2,
-	            RC1_3,
-	            RC1_4,
-	            RC1_5,
-	            RC1_6,
-	            RC1_7,
-	            RC1_8,
-	            RC1_9,
-	            RC1_STANDBY,
-	            RC1_HOME,
-	            RC1_DBOX,
-	            RC1_RED,
-	            RC1_GREEN,
-	            RC1_YELLOW,
-	            RC1_BLUE,
-	            RC1_OK,
-	            RC1_VOLPLUS,
-	            RC1_MUTE,
-	            RC1_HELP,
-	            RC1_UP,
-	            RC1_DOWN,
-	            RC1_RIGHT,
-	            RC1_LEFT
-	        },
-	        {
-	            RC2_0,
-	            RC2_1,
-	            RC2_2,
-	            RC2_3,
-	            RC2_4,
-	            RC2_5,
-	            RC2_6,
-	            RC2_7,
-	            RC2_8,
-	            RC2_9,
-	            RC2_STANDBY,
-	            RC2_HOME,
-	            RC2_DBOX,
-	            RC2_RED,
-	            RC2_GREEN,
-	            RC2_YELLOW,
-	            RC2_BLUE,
-	            RC2_OK,
-	            RC2_VOLPLUS,
-	            RC2_MUTE,
-	            RC2_HELP,
-	            RC2_UP,
-	            RC2_DOWN,
-	            RC2_RIGHT,
-	            RC2_LEFT
+	            RC_0,
+	            RC_1,
+	            RC_2,
+	            RC_3,
+	            RC_4,
+	            RC_5,
+	            RC_6,
+	            RC_7,
+	            RC_8,
+	            RC_9,
+	            RC_STANDBY,
+	            RC_HOME,
+	            RC_DBOX,
+	            RC_RED,
+	            RC_GREEN,
+	            RC_YELLOW,
+	            RC_BLUE,
+	            RC_OK,
+	            RC_VOLPLUS,
+	            RC_MUTE,
+	            RC_HELP,
+	            RC_UP,
+	            RC_DOWN,
+	            RC_RIGHT,
+	            RC_LEFT
 	        }
 	    };
 	//rc_codes = rcs;
@@ -132,7 +114,7 @@ rc::~rc()
 	close(fp);
 }
 
-int rc::start_thread(bool withoutkeyboard)
+int rc::start_thread()
 {
 
 	int status;
@@ -142,12 +124,6 @@ int rc::start_thread(bool withoutkeyboard)
 	                         NULL,
 	                         start_rcqueue,
 	                         (void *)this );
-
-	if (!withoutkeyboard)
-		status = pthread_create( &keyboardThread,
-		                         NULL,
-		                         start_keyboardqueue,
-		                         (void *)this );
 
 	return status;
 
@@ -175,169 +151,109 @@ int rc::parseKey(std::string key)
 {
 	if (key == "1")
 	{
-		return RC1_1;
+		return RC_1;
 	}
 	else if (key == "2")
 	{
-		return RC1_2;
+		return RC_2;
 	}
 	else if (key == "3")
 	{
-		return RC1_3;
+		return RC_3;
 	}
 	else if (key == "4")
 	{
-		return RC1_4;
+		return RC_4;
 	}
 	else if (key == "5")
 	{
-		return RC1_5;
+		return RC_5;
 	}
 	else if (key == "6")
 	{
-		return RC1_6;
+		return RC_6;
 	}
 	else if (key == "7")
 	{
-		return RC1_7;
+		return RC_7;
 	}
 	else if (key == "8")
 	{
-		return RC1_8;
+		return RC_8;
 	}
 	else if (key == "9")
 	{
-		return RC1_9;
+		return RC_9;
 	}
 	else if (key == "0")
 	{
-		return RC1_0;
+		return RC_0;
 	}
 	else if (key == "STANDBY")
 	{
-		return RC1_STANDBY;
+		return RC_STANDBY;
 	}
 	else if (key == "HOME")
 	{
-		return RC1_HOME;
+		return RC_HOME;
 	}
 	else if (key == "DBOX")
 	{
-		return RC1_DBOX;
+		return RC_DBOX;
 	}
 	else if (key == "RED")
 	{
-		return RC1_RED;
+		return RC_RED;
 	}
 	else if (key == "GREEN")
 	{
-		return RC1_GREEN;
+		return RC_GREEN;
 	}
 	else if (key == "YELLOW")
 	{
-		return RC1_YELLOW;
+		return RC_YELLOW;
 	}
 	else if (key == "BLUE")
 	{
-		return RC1_BLUE;
+		return RC_BLUE;
 	}
 	else if (key == "OK")
 	{
-		return RC1_OK;
+		return RC_OK;
 	}
 	else if (key == "VOLPLUS")
 	{
-		return RC1_VOLPLUS;
+		return RC_VOLPLUS;
 	}
 	else if (key == "VOLMINUS")
 	{
-		return RC1_VOLMINUS;
+		return RC_VOLMINUS;
 	}
 	else if (key == "MUTE")
 	{
-		return RC1_MUTE;
+		return RC_MUTE;
 	}
 	else if (key == "HELP")
 	{
-		return RC1_HELP;
+		return RC_HELP;
 	}
 	else if (key == "UP")
 	{
-		return RC1_UP;
+		return RC_UP;
 	}
 	else if (key == "DOWN")
 	{
-		return RC1_DOWN;
+		return RC_DOWN;
 	}
 	else if (key == "RIGHT")
 	{
-		return RC1_RIGHT;
+		return RC_RIGHT;
 	}
 	else if (key == "LEFT")
 	{
-		return RC1_LEFT;
+		return RC_LEFT;
 	}
 	return -1;
-}
-
-void* rc::start_keyboardqueue( void * this_ptr )
-{
-	rc *r = (rc *) this_ptr;
-	struct termios t,ot;
-
-	tcgetattr(0,&t);
-	t.c_lflag &= ~(ECHO | ICANON | ECHOK | ECHOE | ECHONL);
-	ot = t;
-	tcsetattr(0,TCSANOW,&t);
-	while(1)
-	{
-		char character;
-
-		std::cin.get(character);
-
-		if (character > 47 && character < 58)
-			r->cheat_command(character - 48);
-		switch(character)
-		{
-		case 10:
-			r->cheat_command(RC1_OK);
-			break;
-		case 65:
-			r->cheat_command(RC1_UP);
-			break;
-		case 66:
-			r->cheat_command(RC1_DOWN);
-			break;
-		case 67:
-			r->cheat_command(RC1_RIGHT);
-			break;
-		case 68:
-			r->cheat_command(RC1_LEFT);
-			break;
-		case 113: // q
-			r->cheat_command(RC1_RED);
-			break;
-		case 119: // w
-			r->cheat_command(RC1_GREEN);
-			break;
-		case 101: // e
-			r->cheat_command(RC1_YELLOW);
-			break;
-		case 114: // r
-			r->cheat_command(RC1_BLUE);
-			break;
-		case 32: // SPACE
-			r->cheat_command(RC1_MUTE);
-			break;
-		case 8: // BACKSPACE
-			r->cheat_command(RC1_HOME);
-			break;
-
-
-		}
-		//printf("%d\n", character);
-	}
-	return 0;
 }
 
 void rc::cheat_command(unsigned short cmd)
@@ -366,28 +282,12 @@ void rc::startrc()
 void rc::restart()
 {
 	close(fp);
-	fp = open("/dev/dbox/rc0", O_RDONLY);
-}
-
-unsigned short rc::read_from_rc_raw()
-{
-	unsigned short read_code = 0;
-
-	read(fp, &read_code, 2);
-
-	last_read = read_code;
-
-	return read_code;
+	fp = open("/dev/input/event0", O_RDONLY);
 }
 
 unsigned short rc::get_last()
 {
 	return last_read;
-}
-
-unsigned short rc::convert_code(unsigned short rc)
-{
-	return rc % 0x40;
 }
 
 unsigned short rc::read_from_rc()
@@ -406,101 +306,26 @@ unsigned short rc::read_from_rc()
 
 unsigned short rc::read_from_rc2()
 {
-	unsigned short read_code = 0;
+	struct input_event read_code;
+	int rd;
 
 	pthread_mutex_lock( &mutex );
 
-	if (!setting->getRCRepeat())
+	do
 	{
-		do
-		{
-			read(fp, &read_code, 2);
-			//printf("RC: %x\n", read_code);
-			if (setting->getSupportOldRc())
-				read_code = old_to_new(read_code);
-		} while (read_code == last_read || (read_code & 0xff00) == 0x5c00);
-	}
-	else
+		rd = read(fp, &read_code, sizeof(struct input_event));
+	} while(read_code.value != 1);
+
+	if (rd < (int) sizeof(struct input_event))
 	{
-		do
-		{
-			read(fp, &read_code, 2);
-			//printf("RC: %x\n", read_code);
-			if (setting->getSupportOldRc())
-				read_code = old_to_new(read_code);
-		} while ((read_code & 0xff00) == 0x5c00);
-
+		perror("[rc.cpp] Error reading input-event");
+		return 0;
 	}
-
-	last_read = read_code;
-
-	read_code %= 0x40;
+	last_read = read_code.code;
 
 	pthread_mutex_unlock( &mutex );
 
-	return read_code;
-}
-
-int rc::old_to_new(int read_code)
-{
-	switch (read_code)
-	{
-	case RC2_1:
-		return RC1_1;
-	case RC2_2:
-		return RC1_2;
-	case RC2_3:
-		return RC1_3;
-	case RC2_4:
-		return RC1_4;
-	case RC2_5:
-		return RC1_5;
-	case RC2_6:
-		return RC1_6;
-	case RC2_7:
-		return RC1_7;
-	case RC2_8:
-		return RC1_8;
-	case RC2_9:
-		return RC1_9;
-	case RC2_0:
-		return RC1_0;
-	case RC2_STANDBY:
-		return RC1_STANDBY;
-	case RC2_HOME:
-		return RC1_HOME;
-	case RC2_DBOX:
-		return RC1_DBOX;
-	case RC2_RED:
-		return RC1_RED;
-	case RC2_GREEN:
-		return RC1_GREEN;
-	case RC2_YELLOW:
-		return RC1_YELLOW;
-	case RC2_BLUE:
-		return RC1_BLUE;
-	case RC2_OK:
-		return RC1_OK;
-	case RC2_VOLPLUS:
-		return RC1_VOLPLUS;
-	case RC2_VOLMINUS:
-		return RC1_VOLMINUS;
-	case RC2_MUTE:
-		return RC1_MUTE;
-	case RC2_HELP:
-		return RC1_HELP;
-	case RC2_UP:
-		return RC1_UP;
-	case RC2_DOWN:
-		return RC1_DOWN;
-	case RC2_RIGHT:
-		return RC1_RIGHT;
-	case RC2_LEFT:
-		return RC1_LEFT;
-
-
-	}
-	return read_code;
+	return read_code.code;
 }
 
 int rc::get_number()
@@ -511,7 +336,7 @@ int rc::get_number()
 	{
 		for (codes = 0; codes < 10; codes++)
 		{
-			if (convert_code(last_read) == rc_codes[i][codes])
+			if (last_read == rc_codes[i][codes])
 				number = codes;
 		}
 	}

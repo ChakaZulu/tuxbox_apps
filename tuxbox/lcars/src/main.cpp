@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: main.cpp,v $
+Revision 1.26  2003/01/05 02:41:53  TheDOC
+lcars supports inputdev now
+
 Revision 1.25  2002/11/12 19:09:02  obi
 ported to dvb api v3
 
@@ -192,7 +195,7 @@ int main(int argc, char **argv)
 	int test = open("/dev/dvb/adapter0/demux0", O_RDWR);
 	if (test < 0)
 	{
-		rc.start_thread(true);
+		rc.start_thread();
 		osd.createIP();
 		osd.setIPDescription("Please enter IP-address!");
 		osd.addCommand("SHOW ip");
@@ -206,16 +209,16 @@ int main(int argc, char **argv)
 				osd.setIP(number);
 				osd.setIPNextPosition();
 			}
-			else if (key == RC1_RIGHT)
+			else if (key == RC_RIGHT)
 			{
 				osd.setIPNextPosition();
 			}
-			else if (key == RC1_LEFT)
+			else if (key == RC_LEFT)
 			{
 				osd.setIPPrevPosition();
 			}
-		} while ( key != RC1_OK && key != RC1_HOME);
-		if (key == RC1_OK)
+		} while ( key != RC_OK && key != RC_HOME);
+		if (key == RC_OK)
 		{
 			settings.setIP(osd.getIPPart(0), osd.getIPPart(1), osd.getIPPart(2), osd.getIPPart(3));
 
@@ -259,7 +262,7 @@ int main(int argc, char **argv)
 	if (rc.command_available())
 	{
 		int com = rc.read_from_rc();
-		if (com == RC1_HELP)
+		if (com == RC_HELP)
 		{
 			//printf("Emergency channel-scan\n");
 			channels = scan.scanChannels(NORMAL);
@@ -347,7 +350,7 @@ int main(int argc, char **argv)
 	int txtfd;*/
 
 	hardware.setOutputMode(settings.getOutputFormat());
-	rc.start_thread(true);
+	rc.start_thread();
 
 	control control(&osd, &rc, &hardware, &settings, &scan, &channels, &eit, &cam, &zap, &tuner, &update, &timer, &plugins, &checker, &fb, &variables, &ir, &pig, &teletext, &sdt);
 	

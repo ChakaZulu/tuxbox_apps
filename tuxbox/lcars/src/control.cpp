@@ -1840,31 +1840,31 @@ void control::openMenu(int menuNumber)
 		key = rc_obj->read_from_rc();
 		number = rc_obj->get_number();
 
-		if (key == RC1_DOWN)
+		if (key == RC_DOWN)
 		{
 			osd_obj->selectNextEntry();
 		}
-		else if (key == RC1_UP)
+		else if (key == RC_UP)
 		{
 			osd_obj->selectPrevEntry();
 		}
-		else if (key == RC1_OK)
+		else if (key == RC_OK)
 		{
 			number = osd_obj->menuSelectedIndex();
 		}
-		else if (key == RC1_RED)
+		else if (key == RC_RED)
 		{
 			number = 30;
 		}
-		else if (key == RC1_GREEN)
+		else if (key == RC_GREEN)
 		{
 			number = 31;
 		}
-		else if (key == RC1_YELLOW)
+		else if (key == RC_YELLOW)
 		{
 			number = 32;
 		}
-		else if (key == RC1_BLUE)
+		else if (key == RC_BLUE)
 		{
 			number = 33;
 		}
@@ -2017,7 +2017,7 @@ void control::openMenu(int menuNumber)
 			osd_obj->addCommand("SHOW menu");
 			osd_obj->addCommand("COMMAND menu select next");
 		}
-	} while(key != RC1_HOME && key != RC1_RIGHT && key != RC1_LEFT);
+	} while(key != RC_HOME && key != RC_RIGHT && key != RC_LEFT);
 	osd_obj->addCommand("HIDE menu");
 	vars->setvalue("%PLUGINMENU", "false");
 }

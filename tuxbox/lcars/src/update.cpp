@@ -182,13 +182,13 @@ void update::run(int type)
 		do
 		{
 			key = rc_obj->read_from_rc();
-			if (key == RC1_HOME)
+			if (key == RC_HOME)
 			{
 				osd_obj->addCommand("HIDE perspective");
 				system("killall ftpd");
 				return;
 			}
-		} while (key != RC1_OK);
+		} while (key != RC_OK);
 	}
 	system("killall ftpd");
 	if (type == UPDATE_MANUALFILES)

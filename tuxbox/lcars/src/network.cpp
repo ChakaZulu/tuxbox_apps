@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: network.cpp,v $
+Revision 1.18  2003/01/05 02:41:53  TheDOC
+lcars supports inputdev now
+
 Revision 1.17  2002/10/14 01:19:15  woglinde
 
 
@@ -619,107 +622,107 @@ void *network::startlistening(void *object)
 					}
 					else if (path[2] == "1")
 					{
-						n->rc_obj->cheat_command(RC1_1);
+						n->rc_obj->cheat_command(RC_1);
 					}
 					else if (path[2] == "2")
 					{
-						n->rc_obj->cheat_command(RC1_2);
+						n->rc_obj->cheat_command(RC_2);
 					}
 					else if (path[2] == "3")
 					{
-						n->rc_obj->cheat_command(RC1_3);
+						n->rc_obj->cheat_command(RC_3);
 					}
 					else if (path[2] == "4")
 					{
-						n->rc_obj->cheat_command(RC1_4);
+						n->rc_obj->cheat_command(RC_4);
 					}
 					else if (path[2] == "5")
 					{
-						n->rc_obj->cheat_command(RC1_5);
+						n->rc_obj->cheat_command(RC_5);
 					}
 					else if (path[2] == "6")
 					{
-						n->rc_obj->cheat_command(RC1_6);
+						n->rc_obj->cheat_command(RC_6);
 					}
 					else if (path[2] == "7")
 					{
-						n->rc_obj->cheat_command(RC1_7);
+						n->rc_obj->cheat_command(RC_7);
 					}
 					else if (path[2] == "8")
 					{
-						n->rc_obj->cheat_command(RC1_8);
+						n->rc_obj->cheat_command(RC_8);
 					}
 					else if (path[2] == "9")
 					{
-						n->rc_obj->cheat_command(RC1_9);
+						n->rc_obj->cheat_command(RC_9);
 					}
 					else if (path[2] == "0")
 					{
-						n->rc_obj->cheat_command(RC1_0);
+						n->rc_obj->cheat_command(RC_0);
 					}
 					else if (path[2] == "standby")
 					{
-						n->rc_obj->cheat_command(RC1_STANDBY);
+						n->rc_obj->cheat_command(RC_STANDBY);
 					}
 					else if (path[2] == "home")
 					{
-						n->rc_obj->cheat_command(RC1_HOME);
+						n->rc_obj->cheat_command(RC_HOME);
 					}
 					else if (path[2] == "dbox")
 					{
-						n->rc_obj->cheat_command(RC1_DBOX);
+						n->rc_obj->cheat_command(RC_DBOX);
 					}
 					else if (path[2] == "blue")
 					{
-						n->rc_obj->cheat_command(RC1_BLUE);
+						n->rc_obj->cheat_command(RC_BLUE);
 					}
 					else if (path[2] == "yellow")
 					{
-						n->rc_obj->cheat_command(RC1_YELLOW);
+						n->rc_obj->cheat_command(RC_YELLOW);
 					}
 					else if (path[2] == "green")
 					{
-						n->rc_obj->cheat_command(RC1_GREEN);
+						n->rc_obj->cheat_command(RC_GREEN);
 					}
 					else if (path[2] == "red")
 					{
-						n->rc_obj->cheat_command(RC1_RED);
+						n->rc_obj->cheat_command(RC_RED);
 					}
 					else if (path[2] == "up")
 					{
-						n->rc_obj->cheat_command(RC1_UP);
+						n->rc_obj->cheat_command(RC_UP);
 					}
 					else if (path[2] == "down")
 					{
-						n->rc_obj->cheat_command(RC1_DOWN);
+						n->rc_obj->cheat_command(RC_DOWN);
 					}
 					else if (path[2] == "right")
 					{
-						n->rc_obj->cheat_command(RC1_RIGHT);
+						n->rc_obj->cheat_command(RC_RIGHT);
 					}
 					else if (path[2] == "left")
 					{
-						n->rc_obj->cheat_command(RC1_LEFT);
+						n->rc_obj->cheat_command(RC_LEFT);
 					}
 					else if (path[2] == "ok")
 					{
-						n->rc_obj->cheat_command(RC1_OK);
+						n->rc_obj->cheat_command(RC_OK);
 					}
 					else if (path[2] == "mute")
 					{
-						n->rc_obj->cheat_command(RC1_MUTE);
+						n->rc_obj->cheat_command(RC_MUTE);
 					}
 					else if (path[2] == "plus")
 					{
-						n->rc_obj->cheat_command(RC1_VOLPLUS);
+						n->rc_obj->cheat_command(RC_VOLPLUS);
 					}
 					else if (path[2] == "minus")
 					{
-						n->rc_obj->cheat_command(RC1_VOLMINUS);
+						n->rc_obj->cheat_command(RC_VOLMINUS);
 					}
 					else if (path[2] == "help")
 					{
-						n->rc_obj->cheat_command(RC1_HELP);
+						n->rc_obj->cheat_command(RC_HELP);
 					}
 
 
