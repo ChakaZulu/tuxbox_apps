@@ -958,8 +958,10 @@ FILE *f_open(const char *filename, const char *acctype)
 			   
 			   /* first stage: try to determine the filetype from the file */
 			   /* magic, if there is any */
-			   magic = htonl(magic) & 0xfff00000;
-			   
+			   magic = htonl(magic) & 0xffffff00;
+
+			   dprintf(stderr, "magic: %08x (%s)\n", magic, &magic);
+
 			   if( strstr( (char*)&magic, "ID3") )	{ f_type(fd, "audio/mpeg"); magic = 0; }
 			   if( strstr( (char*)&magic, "Ogg") )	{ f_type(fd, "audio/ogg");  magic = 0; }
 			   
