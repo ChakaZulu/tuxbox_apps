@@ -3,12 +3,13 @@
 	<td width=100% class="title">#SERVICENAME#</td>
 </tr>
 <tr>
-	<td>#OPS#</td>
+	<td bgcolor="#d9e0e7">#OPS#</td>
 </tr>
 </table>
+<br>
 <TABLE WIDTH=100% BORDER=0 CELLPADDING=0 CELLSPACING=0>
 	<TR>
-		<TD WIDTH=100%>#NOWT# #NOWD# <B>#NOWST#</B></TD>
+		<TD WIDTH=100% bgcolor="#d9e0e7">#NOWT# #NOWD# <B>#NOWST#</B></TD>
 	</TR>
 	<TR>
 		<TD WIDTH=100%>#NOWLT#</TD>
@@ -17,7 +18,7 @@
 		<TD>&nbsp;</TD>
 	</TR>
 	<TR>
-		<TD WIDTH=100%>#NEXTT# #NEXTD#<B>#NEXTST#</B></TD>
+		<TD WIDTH=100% bgcolor="#d9e0e7">#NEXTT# #NEXTD#<B>#NEXTST#</B></TD>
 	</TR>
 	<TR>
 		<TD WIDTH=100%>#NEXTLT#</TD>
