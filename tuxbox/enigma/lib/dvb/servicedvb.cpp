@@ -987,14 +987,21 @@ eService *eServiceHandlerDVB::createService(const eServiceReference &node)
 				// i know that THIS is not really a SIT parser :)
 			if ((packet[0] != 0x47) || (packet[1] != 0x40) || (packet[2] != 0x1f) || (packet[3] != 0x10))
 				break;
+			int nameoffset = 6;
 			if (memcmp(packet+0x15, "ENIGMA", 6))
-				break;
+			{
+				//failed so check another
+				if (!memcmp(packet+0x15, "NEUTRINONG", 10))
+					nameoffset = 10;
+				else
+					break;
+			}
 			// we found our private descriptor:
 			__u8 *descriptor=packet+0x13;
 			int len=descriptor[1];
 			dvb=new eServiceDVB(eServiceID((packet[0xf]<<8)|packet[0x10]), l.c_str());
-			len-=6;
-			descriptor+=2+6; // skip tag, len, ENIGMA
+			len-=nameoffset;
+			descriptor+=2+nameoffset; // skip tag, len, ENIGMA or NEUTRINONG
 			for (int i=0; i<len; i+=descriptor[i+1]+2)
 			{
 				int tag=descriptor[i];
