@@ -11,7 +11,8 @@ noinst_HEADERS = \
 	dmx_tspidbandwidth.h \
 	dmx_error.h \
 	fe_signal.h \
-	fe_info.h
+	fe_info.h \
+	fe_misc.h
 
 
 libdvbapi_a_SOURCES = \
@@ -22,7 +23,7 @@ libdvbapi_a_SOURCES = \
 	dmx_tspidbandwidth.c \
 	dmx_error.c \
 	fe_signal.c \
-	fe_info.c 
-	
+	fe_info.c \
+	fe_misc.c
 
 

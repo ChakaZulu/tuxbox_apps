@@ -1,5 +1,5 @@
 /*
-$Id: fe_info.c,v 1.2 2004/03/21 00:40:40 rasc Exp $
+$Id: fe_info.c,v 1.3 2004/03/21 13:20:07 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: fe_info.c,v 1.2 2004/03/21 00:40:40 rasc Exp $
 
 
 $Log: fe_info.c,v $
+Revision 1.3  2004/03/21 13:20:07  rasc
+more -feinfo, some restructs on FE code
+
 Revision 1.2  2004/03/21 00:40:40  rasc
 no message
 
@@ -29,21 +32,19 @@ Query FrontEnd Info  (option: -s feinfo)
 */
 
 
-#include <fcntl.h>
 #include <stdint.h>
-#include <sys/ioctl.h>
 #include <sys/time.h>
-#include <unistd.h>
 #include <errno.h>
 
 
 #include "dvbsnoop.h"
 #include "fe_info.h"
+#include "fe_misc.h"
 #include "misc/cmdline.h"
 #include "misc/output.h"
 
-#include "dvb_api.h"
 #include "dmx_error.h"
+#include "dvb_api.h"
 
 
 
@@ -67,16 +68,12 @@ Query FrontEnd Info  (option: -s feinfo)
 
 
 
-
-static int read_FEInfo(int f, struct dvb_frontend_info *fi);
-
-
-
 int  do_FE_Info (OPTION *opt)
 
 {
   int        fd_fe = 0;
   int        err;
+  u_long     d;
   struct dvb_frontend_info fi;
 
 
@@ -113,33 +110,34 @@ int  do_FE_Info (OPTION *opt)
 
    {
      char   *s;
-     char   *sf;
-     u_long d;
-
 
      s  = "";
-     sf = "kHz";
-     d  = 1;
      switch (fi.type) {
-	case FE_QPSK:   s = "QPSK (DVB-S)"; sf = "MHz"; d = 1000L;  break;
-	case FE_QAM:	s = "QAM (DVB-C)"; break;
-	case FE_OFDM:	s = "OFDM (DVB-T)"; break;
+	case FE_QPSK:   s = "QPSK (DVB-S)"; d = 1000L;  break;
+	case FE_QAM:	s = "QAM (DVB-C)";  d = 1L;     break;
+	case FE_OFDM:	s = "OFDM (DVB-T)"; d = 1L;     break;
 	default:	s = "unkonwn"; break;
      }
      out_nl (1,"Frontend-type:       %s", s);
 
 
-     out_nl (1,"Frequency (min):     %d.%d %s", fi.frequency_min/d, fi.frequency_min%d, sf);
-     out_nl (1,"Frequency (max):     %d.%d %s", fi.frequency_max/d, fi.frequency_max%d, sf);
+     if (d == 1000L) {
+       out_nl (1,"Frequency (min):     %d.%03d MHz", fi.frequency_min / d, fi.frequency_min % d);
+       out_nl (1,"Frequency (max):     %d.%03d MHz", fi.frequency_max / d, fi.frequency_max % d);
+     } else {
+       out_nl (1,"Frequency (min):     %d kHz", fi.frequency_min);
+       out_nl (1,"Frequency (max):     %d kHz", fi.frequency_max);
+     }
 
-     out_nl (1,"Frequency stepsize:  %d.%d %s", fi.frequency_stepsize/d, fi.frequency_stepsize%d, sf);
-     out_nl (1,"Frequency tolerance: %d", fi.frequency_tolerance);
+     out_nl (1,"Frequency stepsize:  %d kHz", fi.frequency_stepsize);
+     out_nl (1,"Frequency tolerance: %d Hz", fi.frequency_tolerance);
 
    }
 
 
-   out_nl (1,"Symbol rate (min):     %d", fi.symbol_rate_min);
-   out_nl (1,"Symbol rate (max):     %d", fi.symbol_rate_max);
+   d = 1000000L;
+   out_nl (1,"Symbol rate (min):     %d.%06d MSym/s", fi.symbol_rate_min / d, fi.symbol_rate_min % d);
+   out_nl (1,"Symbol rate (max):     %d.%06d MSym/s", fi.symbol_rate_max / d, fi.symbol_rate_max % d);
    out_nl (1,"Symbol rate tolerance: %d ppm", fi.symbol_rate_tolerance);
    
 
@@ -184,38 +182,8 @@ int  do_FE_Info (OPTION *opt)
 
 
 
-/*
- * -- read frontend info
- */
-
-static int read_FEInfo(int f, struct dvb_frontend_info *fi)
-{
-  int err = 0;
-
-
-  err = ioctl(f, FE_GET_INFO, fi);
-  if (err < 0) {
-	IO_error ("frontend ioctl");
-  	return -1;
-  }
-  return 0;
-}
-
-
-
-
 #endif  // DVB-API Check
 
 
 
-
-
-
-
-
-//
-// read_FE_get_frontend...
-//
-// int ioctl(int fd, int request = FE GET FRONTEND, struct dvb frontend parameters *p);
-// int ioctl(int fd, int request = QPSK GET EVENT, struct dvb frontend event *ev);
 
