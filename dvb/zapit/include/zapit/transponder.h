@@ -1,5 +1,5 @@
 /*
- * $Id:
+ * $Id: transponder.h,v 1.2 2002/05/15 22:04:29 obi Exp $
  *
  * (C) 2002 by Steffen Hehn "McClean" <McClean@tuxbox.org>
  *
@@ -28,11 +28,11 @@ class CTransponder
 {
 	private:
 		unsigned int	frequency;
-		unsigned int	modulation;
+		unsigned char	modulation;
 		unsigned int	symbolrate;
 		unsigned char	polarisation;
 		unsigned char	innerFec;
-		
+
 		unsigned short	originalNetworkId;
 		unsigned short	transportStreamId;
 
@@ -43,8 +43,8 @@ class CTransponder
 		unsigned int getFrequency();
 		void setFrequency(unsigned int);
 
-		unsigned int getModulation();
-		void setModulation(unsigned int);
+		unsigned char getModulation();
+		void setModulation(unsigned char);
 
 		unsigned int getSymbolrate();
 		void setSymbolrate(unsigned int);

@@ -1,5 +1,5 @@
 /*
- * $Id:
+ * $Id: transponder.cpp,v 1.2 2002/05/15 22:04:29 obi Exp $
  *
  * (C) 2002 by Steffen Hehn "McClean" <McClean@tuxbox.org>
  *
@@ -23,7 +23,7 @@
 #include "transponder.h"
 
 
-	
+
 CTransponder::CTransponder()
 {
 	frequency = 0;
@@ -45,14 +45,14 @@ void CTransponder::setFrequency(unsigned int ifrequency)
 	frequency = ifrequency;
 }
 
-unsigned int CTransponder::getModulation()
+unsigned char CTransponder::getModulation()
 {
 	return modulation;
 }
 
-void CTransponder::setModulation(unsigned int imodulation)
+void CTransponder::setModulation(unsigned char cmodulation)
 {
-	modulation = imodulation;
+	modulation = cmodulation;
 }
 
 unsigned int CTransponder::getSymbolrate()
@@ -109,3 +109,4 @@ unsigned int CTransponder::getTsidOnid()
 {
 	return (transportStreamId << 16) | originalNetworkId;
 }
+
