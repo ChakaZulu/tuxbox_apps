@@ -33,6 +33,7 @@
 #include <global.h>
 #include <neutrino.h>
 
+#include <driver/encoding.h>
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
 #include <daemonc/remotecontrol.h>
@@ -497,7 +498,7 @@ void CTimerList::paintItem(int pos)
 						if (g_Sectionsd->getEPGid(timer.epgID, timer.epg_starttime, &epgdata))
 						{
 #warning fixme sectionsd should deliver data in UTF-8 format
-							zAddData+= " : " + epgdata.title;
+							zAddData+= " : " + Latin1_to_UTF8(epgdata.title);
 						}
 					}
 				}
