@@ -269,3 +269,6 @@ bouqueteditor.delete Delete
 bouqueteditor.add Add
 bouqueteditor.move Move
 bouqueteditor.rename Rename
+bouqueteditor.newbouquetname New name of bouquets
+bouqueteditor.bouquetname Name of bouquets
+
