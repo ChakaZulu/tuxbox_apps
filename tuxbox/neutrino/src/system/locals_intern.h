@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.22 2004/09/20 23:57:43 sat_man Exp $
+ * $Id: locals_intern.h,v 1.23 2004/10/19 20:18:46 zwen Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -543,6 +543,7 @@ const char * locale_real_names[] =
 	"movieplayer.toomanybookmarks",
 	"movieplayer.tshelp",
 	"movieplayer.tsplayback",
+	"movieplayer.tsplayback_pc",
 	"movieplayer.vcdplayback",
 	"movieplayer.vlchelp",
 	"movieplayer.wrongvlcversion",

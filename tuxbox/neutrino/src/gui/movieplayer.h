@@ -64,10 +64,13 @@ class CMoviePlayerGui : public CMenuTarget
 		    JB          = 10,
 			SKIP        = 11,
 			AUDIOSELECT = 12,
+		    ITEMSELECT  = 13,
 		    SOFTRESET   = 99
 		};
 
  private:
+        static int     lastParental;
+        
 	pthread_t      rct;
 	CFrameBuffer * frameBuffer;
 	int            m_LastMode;	
@@ -81,10 +84,10 @@ class CMoviePlayerGui : public CMenuTarget
 	CBookmarkManager * bookmarkmanager;
 
 	void PlayStream(int streamtype);
-	void PlayFile();
+	void PlayFile(int parental=0);
+	void ParentalEntrance(void);
 
 	CFileFilter tsfilefilter;
-	CFileFilter pesfilefilter;
 	CFileFilter vlcfilefilter;
 
  public:
