@@ -4,7 +4,7 @@
 	Movieplayer (c) 2003 by gagga
 	Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-        $Id: movieplayer.cpp,v 1.25 2003/08/12 22:36:16 gagga Exp $
+        $Id: movieplayer.cpp,v 1.26 2003/08/13 16:49:02 thegoodguy Exp $
 
 	Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -48,7 +48,6 @@
 #undef _FILE_OFFSET_BITS
 #include <global.h>
 #include <neutrino.h>
-#include <system/debug.h>
 
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
@@ -918,7 +917,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 	    "/var/tuxbox/config/movieplayer.bookmarks";
 	  bookmarkfile = fopen (bookmarkfilename, "a");
 	  fprintf (bookmarkfile, "%s\n", filename);
-	  fprintf (bookmarkfile, "%d\n", fileposition);
+	  fprintf (bookmarkfile, "%ld\n", fileposition);
 	  fclose (bookmarkfile);
 	}
       else if (msg == CRCInput::RC_left)
@@ -1103,7 +1102,7 @@ CMoviePlayerGui::PlayFile (void)
 	    "/var/tuxbox/config/movieplayer.bookmarks";
 	  bookmarkfile = fopen (bookmarkfilename, "a");
 	  fprintf (bookmarkfile, "%s\n", filename);
-	  fprintf (bookmarkfile, "%d\n", fileposition);
+	  fprintf (bookmarkfile, "%ld\n", fileposition);
 	  fclose (bookmarkfile);
 	}
       else if (msg == CRCInput::RC_left)
