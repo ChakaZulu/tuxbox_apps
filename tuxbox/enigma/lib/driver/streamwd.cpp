@@ -93,6 +93,18 @@ int eStreamWatchdog::getVCRActivity()
 
 void eStreamWatchdog::reloadSettings()
 {
+	int VcrSlbVlt = getVCRActivity();
+	if (eAVSwitch::getInstance()->getInput())  // VCR selected
+	{
+		// Loop through VCR Slowblanking values to TV Slowblanking
+		if ( VcrSlbVlt )
+		{
+			if ( eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000 )
+				eAVSwitch::getInstance()->setTVPin8(VcrSlbVlt==2?12:6);
+		}
+		return;
+	}
+
 	FILE *bitstream=fopen("/proc/bus/bitstream", "rt");
 	int frate=0;
 	if (bitstream)
@@ -145,7 +157,6 @@ void eStreamWatchdog::reloadSettings()
 			break;
 	}
 	eAVSwitch::getInstance()->setVideoFormat( videoDisplayFormat );
-
 	eAVSwitch::getInstance()->setAspectRatio(doanamorph?r169:r43);
 
 	switch (frate)
@@ -166,16 +177,7 @@ void eStreamWatchdog::reloadSettings()
 	unsigned int auto_vcr_switching=1;
 	eConfig::getInstance()->getKey("/elitedvb/video/vcr_switching", auto_vcr_switching );
 	if ( auto_vcr_switching )
-	{
-		int VcrSlbVlt = getVCRActivity();
 		/*emit*/VCRActivityChanged( VcrSlbVlt );
-// Loop through VCR Slowblanking values to TV Slowblanking
-		if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
-		{
-			if ( VcrSlbVlt && eAVSwitch::getInstance()->getInput() )
-				eAVSwitch::getInstance()->setTVPin8(VcrSlbVlt==2?12:6);
-		}
-	}
 }
 
 int eStreamWatchdog::isAnamorph()
