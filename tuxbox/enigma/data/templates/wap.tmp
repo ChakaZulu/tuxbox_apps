@@ -2,9 +2,8 @@
 <!DOCTYPE wml PUBLIC "-//WAPFORUM//DTD WML 1.1//EN"
  "http://www.wapforum.org/DTD/wml_1.1.xml">
 <wml>
-	<card id="c1" title="Dreambox">
+	<card id="c1" title="#SERVICE#">
 		<p>
-			#SERVICE#<br/>
 			#NOWST#	
 		</p>
 		<p>
@@ -19,11 +18,11 @@
 	</card>
 	<card id="ctl" title="Control">
 	<p>
-		Shutdown<br/>
-		Restart<br/>
-		Reboot<br/>
-		Standby<br/>
-		Wakeup<br/>
+		<a href="/wap?mode=admin&command=shutdown">Shutdown</a><br/>
+		<a href="/wap?mode=admin&command=restart">Restart</a><br/>
+		<a href="/wap?mode=admin&command=reboot">Reboot</a><br/>
+		<a href="/wap?mode=admin&command=standby">Standby</a><br/>
+		<a href="/wap?mode=admin&command=wakeup">Wakeup</a><br/>
 	</p>
 	</card>
 </wml>

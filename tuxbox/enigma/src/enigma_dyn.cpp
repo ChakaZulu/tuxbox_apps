@@ -552,6 +552,39 @@ static eString admin(eString request, eString dirpath, eString opts, eHTTPConnec
 	return "<html>" CHARSETMETA "<head><title>Error</title></head><body>Unknown admin command.(valid commands are: shutdown, reboot, restart, standby, wakeup) </body></html>";
 }
 
+static eString admin2(eString command)
+{
+	if (command == "shutdown")
+	{
+		if (eSystemInfo::getInstance()->canShutdown())
+			eZap::getInstance()->quit();
+	}
+	else
+	if (command == "reboot")
+	{
+		eZap::getInstance()->quit(4);
+	}
+	else
+	if (command == "restart")
+	{
+		eZap::getInstance()->quit(2);
+	}
+	else
+	if (command == "wakeup")
+	{
+		if (eZapStandby::getInstance())
+			eZapStandby::getInstance()->wakeUp(0);
+	}
+	else
+	if (command == "standby")
+	{
+		if (!(eZapStandby::getInstance()))
+			eZapMain::getInstance()->gotoStandby();
+	}
+	return "<?xml version=\"1.0\"?><!DOCTYPE wml PUBLIC \"-//WAPFORUM//DTD WML 1.1//EN\" \"http://www.wapforum.org/DTD/wml_1.1.xml\"><wml><card title=\"Info\"><p>Command " + command + " initiated.</p></card></wml>";
+}
+
+
 #ifndef DISABLE_FILE
 static eString videocontrol(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
@@ -3234,7 +3267,6 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 			return readFile(TEMPLATE_DIR + "index.tmp");
 	}
 
-
 	if (smallScreen == 0)
 	{
 		result = readFile(TEMPLATE_DIR + "index_big.tmp");
@@ -3284,11 +3316,22 @@ static eString wap_web_root(eString request, eString dirpath, eString opts, eHTT
 	eString result;
 
 	std::map<eString,eString> opt = getRequestOptions(opts);
+	eString mode = opt["mode"];
+	eString spath = opt["path"];
+
 	content->local_header["Content-Type"]="text/vnd.wap.wml";
 
-	result = readFile(TEMPLATE_DIR + "wap.tmp");
-	result = getEITC2(result);
-	result.strReplace("#SERVICE#", getCurService());
+	if (mode == "admin")
+	{
+		eString command = opt["command"];
+		result = admin2(command);
+	}
+	else
+	{
+		result = readFile(TEMPLATE_DIR + "wap.tmp");
+		result = getEITC2(result);
+		result.strReplace("#SERVICE#", getCurService());
+	}
 
 	return result;
 }
@@ -3935,24 +3978,24 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 {
 	dyn_resolver->addDyn("GET", "/", web_root, true);
-	dyn_resolver->addDyn("GET", "/wap", wap_web_root);
+	dyn_resolver->addDyn("GET", "/wap", wap_web_root, true);
 //	dyn_resolver->addDyn("GET", NAVIGATOR_PATH, navigator, true);
 
-	dyn_resolver->addDyn("GET", "/cgi-bin/ls", listDirectory);
+	dyn_resolver->addDyn("GET", "/cgi-bin/ls", listDirectory, true);
 	dyn_resolver->addDyn("GET", "/cgi-bin/mkdir", makeDirectory, true);
 	dyn_resolver->addDyn("GET", "/cgi-bin/rmdir", removeDirectory, true);
 	dyn_resolver->addDyn("GET", "/cgi-bin/rm", removeFile, true);
 	dyn_resolver->addDyn("GET", "/cgi-bin/mv", moveFile, true);
 	dyn_resolver->addDyn("GET", "/cgi-bin/ln", createSymlink, true);
 #ifndef DISABLE_FILE
-	dyn_resolver->addDyn("GET", "/cgi-bin/stop", stop);
-	dyn_resolver->addDyn("GET", "/cgi-bin/pause", pause);
-	dyn_resolver->addDyn("GET", "/cgi-bin/play", play);
-	dyn_resolver->addDyn("GET", "/cgi-bin/record", record);
-	dyn_resolver->addDyn("GET", "/cgi-bin/videocontrol", videocontrol);
+	dyn_resolver->addDyn("GET", "/cgi-bin/stop", stop, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/pause", pause, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/play", play, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/record", record, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/videocontrol", videocontrol, true);
 #endif
-	dyn_resolver->addDyn("GET", "/setVolume", setVolume);
-	dyn_resolver->addDyn("GET", "/setVideo", setVideo);
+	dyn_resolver->addDyn("GET", "/setVolume", setVolume, true);
+	dyn_resolver->addDyn("GET", "/setVideo", setVideo, true);
 	dyn_resolver->addDyn("GET", "/showTimerList", showTimerList, true);
 	dyn_resolver->addDyn("GET", "/addTimerEvent", addTimerEvent, true);
 	dyn_resolver->addDyn("GET", "/addTimerEvent2", addTimerEvent2, true);
@@ -3962,60 +4005,60 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/changeTimerEvent", changeTimerEvent, true);
 	dyn_resolver->addDyn("GET", "/cleanupTimerList", cleanupTimerList, true);
 	dyn_resolver->addDyn("GET", "/clearTimerList", clearTimerList, true);
-	dyn_resolver->addDyn("GET", "/EPGDetails", EPGDetails);
-	dyn_resolver->addDyn("GET", "/msgWindow", msgWindow);
-	dyn_resolver->addDyn("GET", "/tvMessageWindow", tvMessageWindow);
-	dyn_resolver->addDyn("GET", "/cgi-bin/status", doStatus);
-	dyn_resolver->addDyn("GET", "/cgi-bin/switchService", switchService);
-	dyn_resolver->addDyn("GET", "/cgi-bin/zapTo", zapTo);
-	dyn_resolver->addDyn("GET", "/cgi-bin/admin", admin);
-	dyn_resolver->addDyn("GET", "/cgi-bin/audio", audio);
-	dyn_resolver->addDyn("GET", "/cgi-bin/selectAudio", selectAudio);
-	dyn_resolver->addDyn("GET", "/cgi-bin/setAudio", setAudio);
-	dyn_resolver->addDyn("GET", "/cgi-bin/setScreen", setScreen);
+	dyn_resolver->addDyn("GET", "/EPGDetails", EPGDetails, true);
+	dyn_resolver->addDyn("GET", "/msgWindow", msgWindow, true);
+	dyn_resolver->addDyn("GET", "/tvMessageWindow", tvMessageWindow, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/status", doStatus, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/switchService", switchService, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/zapTo", zapTo, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/admin", admin, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/audio", audio, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/selectAudio", selectAudio, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/setAudio", setAudio, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/setScreen", setScreen, true);
 #ifndef DISABLE_FILE
-	dyn_resolver->addDyn("GET", "/cgi-bin/setConfigUSB", setConfigUSB);
-	dyn_resolver->addDyn("GET", "/cgi-bin/setConfigHDD", setConfigHDD);
+	dyn_resolver->addDyn("GET", "/cgi-bin/setConfigUSB", setConfigUSB, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/setConfigHDD", setConfigHDD, true);
 #endif
-	dyn_resolver->addDyn("GET", "/cgi-bin/getPMT", getPMT);
-	dyn_resolver->addDyn("GET", "/cgi-bin/getEIT", getEIT);
-	dyn_resolver->addDyn("GET", "/cgi-bin/message", message);
-	dyn_resolver->addDyn("GET", "/control/message", message);
-	dyn_resolver->addDyn("GET", "/cgi-bin/xmessage", xmessage);
+	dyn_resolver->addDyn("GET", "/cgi-bin/getPMT", getPMT, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/getEIT", getEIT, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/message", message, true);
+	dyn_resolver->addDyn("GET", "/control/message", message, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/xmessage", xmessage, true);
 
-	dyn_resolver->addDyn("GET", "/audio.m3u", audiom3u);
-	dyn_resolver->addDyn("GET", "/version", version);
-	dyn_resolver->addDyn("GET", "/header", header);
-	dyn_resolver->addDyn("GET", "/body", body);
-	dyn_resolver->addDyn("GET", "/blank", blank);
-	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg", getcurepg2);
-	dyn_resolver->addDyn("GET", "/getcurrentepg2", getcurepg2);
-	dyn_resolver->addDyn("GET", "/getMultiEPG", getMultiEPG);
-	dyn_resolver->addDyn("GET", "/cgi-bin/streaminfo", getstreaminfo);
-	dyn_resolver->addDyn("GET", "/cgi-bin/channelinfo", getchannelinfo);
-	dyn_resolver->addDyn("GET", "/channels/getcurrent", channels_getcurrent);
-	dyn_resolver->addDyn("GET", "/cgi-bin/reloadSettings", reload_settings);
+	dyn_resolver->addDyn("GET", "/audio.m3u", audiom3u, true);
+	dyn_resolver->addDyn("GET", "/version", version, true);
+	dyn_resolver->addDyn("GET", "/header", header, true);
+	dyn_resolver->addDyn("GET", "/body", body, true);
+	dyn_resolver->addDyn("GET", "/blank", blank, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg", getcurepg2, true);
+	dyn_resolver->addDyn("GET", "/getcurrentepg2", getcurepg2, true);
+	dyn_resolver->addDyn("GET", "/getMultiEPG", getMultiEPG, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/streaminfo", getstreaminfo, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/channelinfo", getchannelinfo, true);
+	dyn_resolver->addDyn("GET", "/channels/getcurrent", channels_getcurrent, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/reloadSettings", reload_settings, true);
 #ifndef DISABLE_FILE
-	dyn_resolver->addDyn("GET", "/cgi-bin/reloadRecordings", load_recordings);
-	dyn_resolver->addDyn("GET", "/cgi-bin/saveRecordings", save_recordings);
-	dyn_resolver->addDyn("GET", "/cgi-bin/deleteMovie", deleteMovie);
+	dyn_resolver->addDyn("GET", "/cgi-bin/reloadRecordings", load_recordings, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/saveRecordings", save_recordings, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/deleteMovie", deleteMovie, true);
 #endif
-	dyn_resolver->addDyn("GET", "/cgi-bin/reloadPlaylist", load_playlist);
-	dyn_resolver->addDyn("GET", "/cgi-bin/savePlaylist", save_playlist);
-	dyn_resolver->addDyn("GET", "/cgi-bin/reloadUserBouquets", load_userBouquets);
-	dyn_resolver->addDyn("GET", "/cgi-bin/saveUserBouquets", save_userBouquets);
-	dyn_resolver->addDyn("GET", "/cgi-bin/reloadTimerList", load_timerList);
-	dyn_resolver->addDyn("GET", "/cgi-bin/saveTimerList", save_timerList);
-	dyn_resolver->addDyn("GET", "/cgi-bin/startPlugin", startPlugin);
-	dyn_resolver->addDyn("GET", "/cgi-bin/stopPlugin", stopPlugin);
-	dyn_resolver->addDyn("GET", "/cgi-bin/osdshot", osdshot);
-	dyn_resolver->addDyn("GET", "/cgi-bin/currentService", getCurrentServiceRef);
-	dyn_resolver->addDyn("GET", "/cgi-bin/currentTransponderServices", getTransponderServices);
+	dyn_resolver->addDyn("GET", "/cgi-bin/reloadPlaylist", load_playlist, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/savePlaylist", save_playlist, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/reloadUserBouquets", load_userBouquets, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/saveUserBouquets", save_userBouquets, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/reloadTimerList", load_timerList, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/saveTimerList", save_timerList, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/startPlugin", startPlugin, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/stopPlugin", stopPlugin, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/osdshot", osdshot, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/currentService", getCurrentServiceRef, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/currentTransponderServices", getTransponderServices, true);
 #ifndef DISABLE_FILE
-	dyn_resolver->addDyn("GET", "/cgi-bin/setFakeRecordingState", setFakeRecordingState);
+	dyn_resolver->addDyn("GET", "/cgi-bin/setFakeRecordingState", setFakeRecordingState, true);
 #endif
-	dyn_resolver->addDyn("GET", "/control/zapto", neutrino_suck_zapto);
-	dyn_resolver->addDyn("GET", "/control/getonidsid", neutrino_suck_getonidsid);
-	dyn_resolver->addDyn("GET", "/control/channellist", neutrino_suck_getchannellist);
+	dyn_resolver->addDyn("GET", "/control/zapto", neutrino_suck_zapto, true);
+	dyn_resolver->addDyn("GET", "/control/getonidsid", neutrino_suck_getonidsid, true);
+	dyn_resolver->addDyn("GET", "/control/channellist", neutrino_suck_getchannellist, true);
 }
 
