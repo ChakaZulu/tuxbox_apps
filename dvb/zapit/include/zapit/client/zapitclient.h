@@ -32,10 +32,8 @@
 
 class CZapitClient:public CBasicClient
 {
-	inline bool zapit_connect();
-
  private:
-	void send(const unsigned char command, char* data, const unsigned int size);
+	bool send(const unsigned char command, char* data, const unsigned int size);
 
 
  public:

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.66 2002/10/18 00:01:04 dirch Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.67 2002/10/18 09:35:23 thegoodguy Exp $ *
  *
  * Client-Interface für zapit - DBoxII-Project
  *
@@ -52,21 +52,22 @@ std::string Utf8_to_Latin1(const std::string s)
 	return r;
 }
 
-inline bool CZapitClient::zapit_connect()
-{
-	return open_connection(ZAPIT_UDS_NAME);
-}
-
 //void CZapitClient::send(const CZapitMessages::commands command, char* data = NULL, const unsigned int size = 0)
-void CZapitClient::send(const unsigned char command, char* data = NULL, const unsigned int size = 0)
+bool CZapitClient::send(const unsigned char command, char* data = NULL, const unsigned int size = 0)
 {
 	CBasicMessage::Header msgHead;
 	msgHead.version = CZapitMessages::ACTVERSION;
 	msgHead.cmd     = command;
-	zapit_connect();
-	send_data((char*)&msgHead, sizeof(msgHead));
-	if (size != 0)
-	    send_data(data, size);
+
+	open_connection(ZAPIT_UDS_NAME); // if the return value is false, the next send_data call will return false, too
+
+        if (!send_data((char*)&msgHead, sizeof(msgHead)))
+            return false;
+
+        if (size != 0)
+            return send_data(data, size);
+
+        return true;
 }
 
 
@@ -330,7 +331,7 @@ void CZapitClient::getChannels( BouquetChannelList& channels, channelsMode mode,
 /* restore bouquets so as if they where just loaded*/
 void CZapitClient::restoreBouquets()
 {
-	send(CZapitMessages::CMD_RESTORE_BOUQUETS);
+	send(CZapitMessages::CMD_BQ_RESTORE);
 
 	CZapitMessages::responseCmd response;
 	CBasicClient::receive_data((char* )&response, sizeof(response));
@@ -351,7 +352,7 @@ void CZapitClient::reinitChannels()
 /* commit bouquet change */
 void CZapitClient::commitBouquetChange()
 {
-	send(CZapitMessages::CMD_COMMIT_BOUQUET_CHANGE);
+	send(CZapitMessages::CMD_BQ_COMMIT_CHANGE);
 
 	CZapitMessages::responseCmd response;
 	CBasicClient::receive_data((char* )&response, sizeof(response));
@@ -391,18 +392,11 @@ void CZapitClient::setVolume (unsigned int left, unsigned int right)
 /* start TS-Scan */
 bool CZapitClient::startScan()
 {
-	CBasicMessage::Header msgHead;
-	msgHead.version = CZapitMessages::ACTVERSION;
-	msgHead.cmd     = CZapitMessages::CMD_SCANSTART;
-
-	if (!zapit_connect())
-		return false;
-
-	send_data((char*)&msgHead, sizeof(msgHead));
-
+	bool reply = send(CZapitMessages::CMD_SCANSTART);
+	
 	close_connection();
-
-	return true;
+	
+	return reply;
 }
 
 /* query if ts-scan is ready - response gives status */

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.5 2002/10/18 00:01:04 dirch Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.6 2002/10/18 09:35:23 thegoodguy Exp $
  *
  * types used for clientlib <-> zapit communication - d-box2 linux project
  *
@@ -36,13 +36,22 @@
 class CZapitMessages
 {
  public:
-	static const char ACTVERSION = 3;
+	static const char ACTVERSION = 4;
 
 	enum commands
 		{
-			CMD_SHUTDOWN		 = 0,
-			CMD_ZAPTO		 = 1,
+			CMD_SHUTDOWN		 = 1,
+
+			CMD_REGISTEREVENTS,
+			CMD_UNREGISTEREVENTS,
+
+			CMD_ZAPTO,
 			CMD_ZAPTO_CHANNELNR,
+			CMD_ZAPTO_SERVICEID,
+			CMD_ZAPTO_SUBSERVICEID,
+			CMD_ZAPTO_SERVICEID_NOWAIT,
+			CMD_ZAPTO_SUBSERVICEID_NOWAIT,
+
 			CMD_STOP_VIDEO,					// not supported yet
 			CMD_SET_MODE,
 			CMD_GET_MODE,
@@ -54,7 +63,6 @@ class CZapitMessages
 			CMD_GET_CHANNELS,
 			CMD_GET_BOUQUETS,
 			CMD_GET_BOUQUET_CHANNELS,
-			CMD_RESTORE_BOUQUETS,
 			CMD_GET_CA_INFO,					// not supported yet
 			CMD_GET_CURRENT_SERVICEID,
 			CMD_GET_CURRENT_SERVICEINFO,
@@ -79,6 +87,8 @@ class CZapitMessages
 			CMD_BQ_EXISTS_CHANNEL_IN_BOUQUET,			// Check if Channel already in BQ
 			CMD_BQ_REMOVE_CHANNEL_FROM_BOUQUET,
 			CMD_BQ_RENUM_CHANNELLIST,
+			CMD_BQ_RESTORE,
+			CMD_BQ_COMMIT_CHANGE,
 			CMD_BQ_SAVE_BOUQUETS,
 
 			CMD_SET_RECORD_MODE,
@@ -91,16 +101,9 @@ class CZapitMessages
 			CMD_READY,
 			CMD_GETPIDS,
 			CMD_SETSUBSERVICES,
-			CMD_ZAPTO_SERVICEID,
-			CMD_ZAPTO_SUBSERVICEID,
-			CMD_ZAPTO_SERVICEID_NOWAIT,
-			CMD_ZAPTO_SUBSERVICEID_NOWAIT,
 			CMD_SET_AUDIOCHAN,
-			CMD_REGISTEREVENTS,
-			CMD_UNREGISTEREVENTS,
 			CMD_MUTE,
-			CMD_SET_VOLUME,
-			CMD_COMMIT_BOUQUET_CHANGE
+			CMD_SET_VOLUME
 		};
 
 	struct commandBoolean

@@ -2,7 +2,7 @@
 #define __basicserver__
 
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicserver.h,v 1.1 2002/10/17 20:51:18 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicserver.h,v 1.2 2002/10/18 09:35:23 thegoodguy Exp $
  *
  * Basic Server Class (Neutrino) - DBoxII-Project
  *
@@ -30,8 +30,11 @@
 
 class CBasicServer
 {
+    int sock_fd;
+
  public:
-	bool run(const char* socketname, bool (parse_command)(CBasicMessage::Header &rmsg, int connfd));
+	bool prepare(const char* socketname);
+	void run(bool (parse_command)(CBasicMessage::Header &rmsg, int connfd));
 };
 
 #endif
