@@ -1,5 +1,5 @@
 //
-// $Id: SIutils.cpp,v 1.9 2001/07/12 22:51:25 fnbrd Exp $
+// $Id: SIutils.cpp,v 1.10 2001/07/12 22:55:51 fnbrd Exp $
 //
 // utility functions for the SI-classes (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIutils.cpp,v $
+// Revision 1.10  2001/07/12 22:55:51  fnbrd
+// Fehler behoben
+//
 // Revision 1.9  2001/07/12 22:51:25  fnbrd
 // Time-Thread im sectionsd (noch disabled, da prob mit mktime)
 //
@@ -154,7 +157,7 @@ time_t changeUTCtoCtime(const unsigned char *buffer)
     int mjd, time;
 
     mjd  = (((unsigned)buffer[0])<< 8) + buffer[1];
-    time = (((unsigned)buffer[2]) << 16) + (((unsigned)buffer[3] << 8) + buffer[4];
+    time = (((unsigned)buffer[2]) << 16) + (((unsigned)buffer[3]) << 8) + buffer[4];
     if(mjd == 0xffff && time == 0xffffff)
       // keine Uhrzeit
       return 0;
