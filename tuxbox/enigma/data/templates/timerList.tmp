@@ -1,0 +1,29 @@
+<html>
+<head>
+	<title>Timer List</title>
+	<link rel="stylesheet" type="text/css" href="/epgview.css">
+	<script language="javascript">
+		function cleanupTimerList()
+		{
+			win=window.open("/cleanupTimerList", "switchStatus", "width=1, height=1, left=0, top=0");
+			win.focus();
+			parent.setTimeout("close()", 300);
+		}
+	</script>
+	<script language="javascript">
+		function clearTimerList()
+		{
+			win=window.open("/clearTimerList", "switchStatus", "width=1, height=1, left=0, top=0");
+			win.focus();
+			parent.setTimeout("close()", 300);
+		}
+	</script>
+</head>
+<body bgcolor="#ffffff">
+#BODY#
+<br><br>
+<u><a href="javascript:cleanupTimerList()">Delete completed/failed timer events</a></u>
+<br>
+<u><a href="javascript:clearTimerList()">Delete all events</a></u>
+</body>
+</html>
