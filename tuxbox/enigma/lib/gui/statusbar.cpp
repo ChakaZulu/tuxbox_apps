@@ -36,7 +36,7 @@ void eStatusBar::update( const eWidget* p )
 }
 
 int eStatusBar::getFlags() const	
-{			
+{
 	return flags;	
 }
 

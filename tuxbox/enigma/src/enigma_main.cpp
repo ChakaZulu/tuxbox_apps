@@ -1151,11 +1151,8 @@ void eZapMain::volumeUp()
 	if (!volume.isVisible())
 	{
 		volume.show();
-		volumeTimer.start(5000, true);
+		volumeTimer.start(2000, true);
 	}
-//		if (!isVisible())
-//			show();
-//		timeout.start(1000, 1);
 }
 
 void eZapMain::volumeDown()
@@ -1166,9 +1163,6 @@ void eZapMain::volumeDown()
 		volume.show();
 		volumeTimer.start(2000, true);
 	}
-//		if (!isVisible())
-//			show();
-//		timeout.start(1000, 1);
 }
 
 void eZapMain::hideVolumeSlider()
@@ -2410,7 +2404,6 @@ void eZapMain::gotEIT()
 	int old_event_id=cur_event_id;
 	
 	setEIT(eit);
-
 	if (eit)
 	{
 		int state=0;

@@ -98,7 +98,7 @@ int eWindow::eventHandler(const eWidgetEvent &event)
 
 void eWindow::willShow()
 {
- 	if (LCDTitle)
+	if (LCDTitle)
 		LCDTitle->setText(text);
 }
 

@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_language.cpp,v 1.12 2002/11/14 02:03:09 Ghostrider Exp $
+ * $Id: setup_language.cpp,v 1.13 2002/11/18 03:40:12 Ghostrider Exp $
  */
 
 #include <setup_language.h>
@@ -28,8 +28,6 @@
 
 eZapLanguageSetup::eZapLanguageSetup(): eWindow(0)
 {
-	int fd=eSkin::getActive()->queryValue("fontsize", 20);
-
 	setText(_("Language Setup"));
 	move(ePoint(150, 136));
 	resize(eSize(390, 230));
@@ -53,7 +51,7 @@ eZapLanguageSetup::eZapLanguageSetup(): eWindow(0)
 	if ( eConfig::getInstance()->getKey("/elitedvb/language", temp) )
 		temp=0;
 		
-	eListBoxEntryText *cur;
+	eListBoxEntryText *cur=0;
 
 	if (!f)
 	{

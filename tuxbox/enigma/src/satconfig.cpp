@@ -371,9 +371,6 @@ eLNBSetup::eLNBSetup( eSatellite* sat, eWidget* lcdTitle, eWidget* lcdElement )
 	mp.addPage( DiSEqCPage );
 	mp.addPage( RotorPage );
 
-/*	statusbar=new eStatusBar(this);
-  statusbar->setName("statusbar");*/
-  
 // here we can not use the Makro CONNECT ... slot (*this, .... is here not okay..
 	LNBPage->lnb_list->selchanged.connect( slot( *LNBPage, &eLNBPage::lnbChanged) );
 	LNBPage->lnb_list->selchanged.connect( slot( *DiSEqCPage, &eDiSEqCPage::lnbChanged) );
@@ -403,6 +400,7 @@ struct savePosition: public std::unary_function< eListBoxEntryText&, void>
 	{
 		if ( (int)s.getKey() == 0xFFFF )
 			break; // ignore sample Entry... delete me...
+
 		int num = atoi( s.getText().left( s.getText().find('/') ).c_str() );
 		map[ (int)s.getKey() ] = num;
 		return 0;
@@ -464,7 +462,6 @@ void eLNBSetup::onSave()
 	eFrontend::getInstance()->Reset();
 }
 
-
 int eLNBSetup::eventHandler(const eWidgetEvent &event)
 {
 	switch (event.type)
@@ -475,7 +472,6 @@ int eLNBSetup::eventHandler(const eWidgetEvent &event)
 		DiSEqCPage->lnbChanged( LNBPage->lnb_list->getCurrent() );   // fake selchanged for initialize lofl, lofh, threshold...
 		RotorPage->lnbChanged( LNBPage->lnb_list->getCurrent() );   // fake selchanged for initialize lofl, lofh, threshold...        
 	break;
-
 	default:
 		break;
 	}
@@ -539,9 +535,6 @@ eLNBPage::eLNBPage( eWidget *parent, eSatellite* sat )
 	next = new eButton(this);
 	next->setName("next");
 
-/*	statusbar=new eStatusBar(this);
-  statusbar->setName("statusbar");*/
-    
 	eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "eLNBPage"))
 		eFatal("skin load of \"eLNBPage\" failed");
@@ -561,18 +554,7 @@ eLNBPage::eLNBPage( eWidget *parent, eSatellite* sat )
 	CONNECT( lofH->selected, eLNBPage::numSelected);
 	CONNECT( threshold->selected, eLNBPage::numSelected);
 	CONNECT( lnb_list->selected, eLNBPage::lnbSelected);
-	CONNECT( focusChanged, eLNBPage::updateText);
 	// on exec we begin in eventHandler execBegin
-}
-
-void eLNBPage::updateText(const eWidget* w)  // for Statusbar....
-{
-	if (w)
-	{
-		setHelpText( w->getHelpText() );
-		if (parent)
-			parent->focusChanged( this );
-	}
 }
 
 void eLNBPage::lnbSelected( eListBoxEntryText*)
@@ -688,26 +670,12 @@ eDiSEqCPage::eDiSEqCPage( eWidget *parent, eSatellite *sat)
 	cancel = new eButton(this);
 	cancel->setName("cancel");
 
-/*  statusbar=new eStatusBar(this);
-	statusbar->setName("statusbar");*/
- 
 	eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "eDiSEqCPage"))
 		eFatal("skin load of \"eDiSEqCPage\" failed");
 
 	CONNECT( DiSEqCMode->selchanged, eDiSEqCPage::DiSEqCModeChanged );
-	CONNECT( focusChanged, eDiSEqCPage::updateText);
 	addActionMap(&i_focusActions->map);
-}
-
-void eDiSEqCPage::updateText(const eWidget* w)  // for Statusbar....
-{
-	if (w)
-	{
-		setHelpText( w->getHelpText() );
-		if (parent)
-			parent->focusChanged( this );
-	}
 }
 
 void eDiSEqCPage::numSelected(int*)
@@ -819,9 +787,6 @@ eRotorPage::eRotorPage( eWidget *parent, eSatellite *sat )
 	remove = new eButton ( this );
 	remove->setName("remove");
   
-/*  feState = new eFEStatusWidget( this, eFrontend::getInstance() );
-	feState->setName("feState");*/
-    
 	prev = new eButton(this);
 	prev->setName("prev");
 
@@ -831,9 +796,6 @@ eRotorPage::eRotorPage( eWidget *parent, eSatellite *sat )
 	cancel = new eButton(this);
 	cancel->setName("cancel");
 
-/*  statusbar=new eStatusBar(this);
-	statusbar->setName("statusbar");*/
-   
 	eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "eRotorPage"))
 		eFatal("skin load of \"eRotorPage\" failed");
@@ -844,19 +806,8 @@ eRotorPage::eRotorPage( eWidget *parent, eSatellite *sat )
 	CONNECT( add->selected, eRotorPage::onAdd );
 	CONNECT( remove->selected, eRotorPage::onRemove );
 	CONNECT( positions->selchanged, eRotorPage::posChanged );
-	CONNECT( focusChanged, eRotorPage::updateText );
   
 	addActionMap(&i_focusActions->map);
-}
-
-void eRotorPage::updateText(const eWidget* w)  // for Statusbar....
-{
-	if (w)
-	{
-		setHelpText( w->getHelpText() );
-		if (parent)
-			parent->focusChanged( this );
-	}
 }
 
 void eRotorPage::lnbChanged( eListBoxEntryText *lnb )
@@ -889,7 +840,7 @@ void eRotorPage::lnbChanged( eListBoxEntryText *lnb )
 	}
 	else
 	{
-		new eListBoxEntryText( positions, _("delete me"), (void*) 0xFFFF );    
+		new eListBoxEntryText( positions, _("delete me"), (void*) 0xFFFF );
 		posChanged(0);
 	}
 
@@ -924,12 +875,16 @@ void eRotorPage::onAdd()
 {
 	positions->beginAtomic();
 
-	new eListBoxEntryText( positions,
-												eString().sprintf(" %d / %03d %c",
-																					number->getNumber(),
-																					orbital_position->getNumber(),
-																					direction->getCurrent()->getKey() ? 'W':'E'
-																				), (void*) ( direction->getCurrent()->getKey() ? - orbital_position->getNumber() : orbital_position->getNumber() ) );
+	new eListBoxEntryText( positions,eString().sprintf(" %d / %03d %c",
+																											number->getNumber(),
+																											orbital_position->getNumber(),
+																											direction->getCurrent()->getKey() ? 'W':'E'
+																										),
+													(void*) ( direction->getCurrent()->getKey()
+													? - orbital_position->getNumber()
+													: orbital_position->getNumber() )
+												);
+
 	positions->sort();
 	positions->invalidateContent();
 	positions->endAtomic();

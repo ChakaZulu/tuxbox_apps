@@ -194,15 +194,18 @@ void eChannelInfo::closeEIT()
 	{
 //		eDebug("close EIT");
 		eit->abort();
-		delete eit;
-		eit = 0;
 	}
 }
 
 void eChannelInfo::getServiceInfo( const eServiceReferenceDVB& service )
 {
 	closeEIT();
-
+	if (eit)
+	{
+		eit=0;
+		delete eit;
+	}
+	
 	if (! service.path.size())
 	{
 		EITEvent *e = 0;
@@ -314,10 +317,7 @@ int eChannelInfo::LayoutIcon(eLabel *icon, int doit, int num )
 		icon->move(ePoint(x,y));
 		icon->show();
 		num++;
-
 	}
-	else
-		icon->hide();
 
 	return num;
 

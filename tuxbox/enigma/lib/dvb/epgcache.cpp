@@ -67,7 +67,7 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 		else // if ( source == NOWNEXT )
 		{
 //			eDebug("beginTime = %d, event_id = %d, service.sid = %d, service.onid = %d", event.beginTime, event.event_id, event.service.sid, event.service.onid );
-//hakl			eDebug("firstNowNexEvent beginTime = %d, event_id = %d, service.sid = %d, service.onid = %d", firstNowNextEvent.beginTime, firstNowNextEvent.event_id, firstNowNextEvent.service.sid, firstNowNextEvent.service.onid );
+//			eDebug("firstNowNexEvent beginTime = %d, event_id = %d, service.sid = %d, service.onid = %d", firstNowNextEvent.beginTime, firstNowNextEvent.event_id, firstNowNextEvent.service.sid, firstNowNextEvent.service.onid );
 
 			if ( !firstNowNextEvent.valid() )
 			{

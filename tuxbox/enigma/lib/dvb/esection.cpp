@@ -189,7 +189,7 @@ void eSection::data(int socket)
 		if (reader.read(buf))
 			break;
 		maxsec=buf[7];
-	
+
 //		printf("%d/%d, we want %d  | service_id %04x | version %04x\n", buf[6], maxsec, section, (buf[3]<<8)|buf[4], buf[5]);
 
 		if (flags&SECREAD_INORDER)

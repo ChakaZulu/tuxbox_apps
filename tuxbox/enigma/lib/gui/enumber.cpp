@@ -72,11 +72,12 @@ void eNumber::redrawWidget(gPainter *p, const eRect &area)
 
 void eNumber::invalidateNum()
 {
-  eRect rect;
-  for (int i=0; i<len; i++)
-		rect |= getNumberRect(i);
-
-  invalidate(rect);
+	if ( have_focus && deco_selected )
+		invalidate( crect_selected );
+	else if ( deco )
+		invalidate( crect );
+	else
+		invalidate();
 }
 
 int eNumber::eventHandler(const eWidgetEvent &event)

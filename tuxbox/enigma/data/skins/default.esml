@@ -323,8 +323,8 @@
 		<tsAutomatic position="0:0" size="e:360">
 			<eLabel name="lNet" position="10:40" size="150:30" text="Network:" />
 			<eComboBox name="network" position="160:40" size="e-70:35" loadDeco="" helptext="choose satelite/cable provider (ok)" />
-			<eFEStatus name="festatus" position="0:100" size="400:85" />
-			<eLabel name="status" position="10:190" size="e-10:e-80" />
+			<eLabel name="status" position="10:90" size="e-10:90" />
+			<eFEStatus name="festatus" position="0:170" size="400:85" />
 			<eCheckBox name="eraseall" text="erase all" position="10:e-80" size="150:30" helptext="erase bouquets and services before scan" />
   		<eButton text="start scan" name="start" position="10:e-40" size="200:40" align="center" helptext="starts the transponderscan" loadDeco="" />
 			<eButton text="abort" name="abort" position="230:e-40" size="200:40" helptext="close window and do not scan" loadDeco="" />

@@ -80,7 +80,6 @@ class eLNBPage : public eWidget
 	void numSelected(int*);
 	void lnbChanged( eListBoxEntryText* );
 	void lnbSelected(eListBoxEntryText*);
-	void updateText(const eWidget* w);  // for Statusbar....
 public:
 	eLNBPage( eWidget *parent, eSatellite *sat );
 };
@@ -101,7 +100,6 @@ class eDiSEqCPage : public eWidget
 	void lnbChanged( eListBoxEntryText* );
 	void DiSEqCModeChanged( eListBoxEntryText* );
 	void numSelected(int*);
-	void updateText(const eWidget* w);  // for Statusbar....
 public:
 	eDiSEqCPage( eWidget *parent, eSatellite *sat );
 };
@@ -125,7 +123,6 @@ class eRotorPage : public eWidget
 	void numSelected(int*);
 	void lnbChanged( eListBoxEntryText* );
 	void posChanged( eListBoxEntryText* );
-	void updateText(const eWidget* w);  // for Statusbar....
 public:  
 	eRotorPage( eWidget *parent, eSatellite *sat );
 };

@@ -187,7 +187,7 @@ void eWidget::redraw(eRect area)		// area bezieht sich nicht auf die clientarea
 					cr.moveBy(-It->position.x(), -It->position.y());
 					It->redraw(cr);
 				}
-				It++;				
+				It++;
 			}
 		}
 	}
@@ -208,10 +208,11 @@ void eWidget::invalidate(eRect area, int force)
 	while (force || (((int)w->getBackgroundColor())==-1))
 	//	while (1)
 	{
-//		force=0;
+		force=0;
 		if (!w->parent)	// spaetestens fuers TLW sollte backgroundcolor aber non-transparent sein
 			break;
 		area.moveBy(w->position.x(), w->position.y());
+
 		w=w->parent;
 		area.moveBy(w->clientrect.x(), w->clientrect.y());
 	}
@@ -670,9 +671,7 @@ void eWidget::focusNext(int dir)
 
 void eWidget::setFocus(eWidget *newfocus)
 {
-  // used for statusbar and always emitted when setFocus is called...
-  
-  if (parent && parent->parent)
+	if (parent && parent->parent)
 		return getTLW()->setFocus(newfocus);
 
 	if (focus == newfocus)
@@ -687,7 +686,8 @@ void eWidget::setFocus(eWidget *newfocus)
 		focus->event(eWidgetEvent(eWidgetEvent::gotFocus));
 
 	_focusList.setCurrent(focus);
-  /* emit */ focusChanged(focus);
+
+	/* emit */ focusChanged(focus);
 }
 
 void eWidget::setHelpText( const eString& e)

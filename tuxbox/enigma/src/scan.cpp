@@ -149,7 +149,7 @@ tsAutomatic::tsAutomatic(eWidget *parent): eWidget(parent)
 {
 	eLabel* l = new eLabel(this);
 	l->setName("lNet");
-	l_network=new eComboBox(this, 4, l);
+	l_network=new eComboBox(this, 3, l);
 	l_network->setName("network");
 
 	eFEStatusWidget *festatus_widget=new eFEStatusWidget(this, eFrontend::getInstance());

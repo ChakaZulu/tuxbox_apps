@@ -39,6 +39,7 @@ public:
 	~eChannelInfo()
 	{
 		closeEIT();
+		delete eit;
 	}
 	void update( const eServiceReferenceDVB& );
 	void clear();

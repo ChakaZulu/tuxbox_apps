@@ -121,26 +121,26 @@ int eTransponder::satellite::tune(eTransponder *trans)
 	eDebug("[TUNE] tuning to %d/%d/%s/%d@%d", frequency, symbol_rate, polarisation?"V":"H", fec, orbital_position);
 	int inv=0;
 
-  std::multimap< int, eSatellite* >::iterator it ( trans->tplist.begin() );
+	std::multimap< int, eSatellite* >::iterator it ( trans->tplist.begin() );
 
-  int not_tuned=1;
+	int not_tuned=1;
   
-  while( not_tuned )
-  {
-    while ( it != trans->tplist.end() && it->second->getOrbitalPosition() != orbital_position )
-      it++;
+	while( not_tuned )
+	{
+		while ( it != trans->tplist.end() && it->second->getOrbitalPosition() != orbital_position )
+			it++;
 
-    if ( it->second->getOrbitalPosition() == orbital_position)
-      not_tuned = eFrontend::getInstance()->tune_qpsk(trans, frequency, polarisation, symbol_rate, fec, inv, *it->second );
+		if ( it->second->getOrbitalPosition() == orbital_position)
+			not_tuned = eFrontend::getInstance()->tune_qpsk(trans, frequency, polarisation, symbol_rate, fec, inv, *it->second );
 
-    if ( !not_tuned ) // the we have tuned *g*
-      return 0;
-    else if ( it == trans->tplist.end() )
-  	{
-  		eDebug("couldn't tune to sat at orbital_position %d..", orbital_position);
-  		return -ENOENT;
-  	}
-  }
+		if ( !not_tuned ) // the we have tuned *g*
+			return 0;
+		else if ( it == trans->tplist.end() )
+		{
+			eDebug("couldn't tune to sat at orbital_position %d..", orbital_position);
+			return -ENOENT;
+		}
+	}
   
   return 0;
 }
@@ -498,7 +498,7 @@ void eTransponderList::readLNBData()
 	eString basepath="/elitedvb/DVB/config/lnbs/";
 
 	int lnbread=0;
- 	while (1)
+	while (1)
 	{
 		unsigned int tmp=0;
 		int tmpint=0;
@@ -517,7 +517,7 @@ void eTransponderList::readLNBData()
 		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/lofThreshold").c_str(), tmp);
 		lnb.setLOFThreshold(tmp);
 
- 		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/IncreasedVoltage").c_str(), tmpint);
+		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/IncreasedVoltage").c_str(), tmpint);
 		lnb.setIncreasedVoltage(tmpint);
     
 		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/DiSEqCMode").c_str(), tmpint );
@@ -526,43 +526,43 @@ void eTransponderList::readLNBData()
 		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/DiSEqCParam").c_str(), tmpint );
 		lnb.getDiSEqC().DiSEqCParam = tmpint;
 
-    eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/DiSEqCRepeats").c_str(), tmpint );
+		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/DiSEqCRepeats").c_str(), tmpint );
 		lnb.getDiSEqC().DiSEqCRepeats = tmpint;
 
-    eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/MiniDiSEqCParam").c_str(), tmpint );
-    lnb.getDiSEqC().MiniDiSEqCParam = (eDiSEqC::tMiniDiSEqCParam) tmpint;
+		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/MiniDiSEqCParam").c_str(), tmpint );
+		lnb.getDiSEqC().MiniDiSEqCParam = (eDiSEqC::tMiniDiSEqCParam) tmpint;
 
-    eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/SeqRepeat").c_str(), tmpint );
-    lnb.getDiSEqC().SeqRepeat = tmpint;
+		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/SeqRepeat").c_str(), tmpint );
+		lnb.getDiSEqC().SeqRepeat = tmpint;
     
-    tmpint=0;
-    eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/uncommitted_switch").c_str(), tmpint );
-    lnb.getDiSEqC().uncommitted_switch = tmpint;
+		tmpint=0;
+		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/uncommitted_switch").c_str(), tmpint );
+		lnb.getDiSEqC().uncommitted_switch = tmpint;
     
-    tmpint=0;
-    eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/uncommitted_gap").c_str(), tmpint );
-    lnb.getDiSEqC().uncommitted_gap = tmpint;
+		tmpint=0;
+		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/uncommitted_gap").c_str(), tmpint );
+		lnb.getDiSEqC().uncommitted_gap = tmpint;
     
-    eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/useGotoXX").c_str(), tmpint );
-    lnb.getDiSEqC().useGotoXX = tmpint;
+		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/useGotoXX").c_str(), tmpint );
+		lnb.getDiSEqC().useGotoXX = tmpint;
 
-    eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/rotorOffset").c_str(), tmpint );
-    lnb.getDiSEqC().rotorOffset = tmpint;
+		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/rotorOffset").c_str(), tmpint );
+		lnb.getDiSEqC().rotorOffset = tmpint;
 
-    char* tmpStr=0;
-    eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/RotorTable").c_str(), tmpStr );    
+		char* tmpStr=0;
+		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/RotorTable").c_str(), tmpStr );    
 
-    if (tmpStr)
-    {
-      eString tmp = tmpStr;
-      for (unsigned int i=0; i < tmp.length(); i+=7)
-      {
-        eString cur = tmp.mid(i);
-        int x = atoi( cur.mid(0,4).c_str() );
-        int y = atoi( cur.mid(4,3).c_str() );
-        lnb.getDiSEqC().RotorTable[x] = y;
-      }
-    }
+		if (tmpStr)
+		{
+			eString tmp = tmpStr;
+			for (unsigned int i=0; i < tmp.length(); i+=7)
+			{
+				eString cur = tmp.mid(i);
+				int x = atoi( cur.mid(0,4).c_str() );
+				int y = atoi( cur.mid(4,3).c_str() );
+				lnb.getDiSEqC().RotorTable[x] = y;
+			}
+		}
                                                                    
 		int satread=0;
 		while(1)
@@ -597,17 +597,17 @@ void eTransponderList::readLNBData()
 			lnb.setLOFHi(10600000);
 			lnb.setLOFLo(9750000);
 			lnb.setLOFThreshold(11700000);
-      lnb.setIncreasedVoltage(0);
+			lnb.setIncreasedVoltage(0);
 			lnb.getDiSEqC().MiniDiSEqCParam=eDiSEqC::NO;
-      lnb.getDiSEqC().DiSEqCParam=eDiSEqC::AA;
+			lnb.getDiSEqC().DiSEqCParam=eDiSEqC::AA;
 			lnb.getDiSEqC().DiSEqCMode=eDiSEqC::V1_0;
 			lnb.getDiSEqC().DiSEqCRepeats=0;
 			lnb.getDiSEqC().SeqRepeat=0;
 			lnb.getDiSEqC().uncommitted_switch=0;
-      lnb.getDiSEqC().uncommitted_gap=0;
-      lnb.getDiSEqC().useGotoXX=1;
-      lnb.getDiSEqC().rotorOffset=0;
-      eSatellite *sat = lnb.addSatellite(192);
+			lnb.getDiSEqC().uncommitted_gap=0;
+			lnb.getDiSEqC().useGotoXX=1;
+			lnb.getDiSEqC().rotorOffset=0;
+			eSatellite *sat = lnb.addSatellite(192);
 			sat->setDescription("Astra 19.2E");
 			eSwitchParameter &sParams = sat->getSwitchParams();
 			sParams.VoltageMode = eSwitchParameter::HV;
@@ -619,17 +619,17 @@ void eTransponderList::readLNBData()
 			lnb.setLOFHi(10600000);
 			lnb.setLOFLo(9750000);
 			lnb.setLOFThreshold(11700000);
-      lnb.setIncreasedVoltage(0);
-      lnb.getDiSEqC().MiniDiSEqCParam=eDiSEqC::NO;
-      lnb.getDiSEqC().DiSEqCParam=eDiSEqC::AB;
+			lnb.setIncreasedVoltage(0);
+			lnb.getDiSEqC().MiniDiSEqCParam=eDiSEqC::NO;
+			lnb.getDiSEqC().DiSEqCParam=eDiSEqC::AB;
 			lnb.getDiSEqC().DiSEqCMode=eDiSEqC::V1_0;		
 			lnb.getDiSEqC().DiSEqCRepeats=0;
 			lnb.getDiSEqC().SeqRepeat=0;
 			lnb.getDiSEqC().uncommitted_switch=0;
-      lnb.getDiSEqC().uncommitted_gap=0;
-      lnb.getDiSEqC().useGotoXX=1;
-      lnb.getDiSEqC().rotorOffset=0;
-      eSatellite *sat = lnb.addSatellite(130);
+			lnb.getDiSEqC().uncommitted_gap=0;
+			lnb.getDiSEqC().useGotoXX=1;
+			lnb.getDiSEqC().rotorOffset=0;
+			eSatellite *sat = lnb.addSatellite(130);
 			sat->setDescription("Eutelsat 13.0E");
 			eSwitchParameter &sParams = sat->getSwitchParams();
 			sParams.VoltageMode = eSwitchParameter::HV;
@@ -650,9 +650,9 @@ void eTransponderList::writeLNBData()
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/lofL").c_str(), it->getLOFLo() );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/lofThreshold").c_str(), it->getLOFThreshold() );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/IncreasedVoltage").c_str(), it->getIncreasedVoltage() );    
-    eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/DiSEqCMode").c_str(), (int) it->getDiSEqC().DiSEqCMode );
+		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/DiSEqCMode").c_str(), (int) it->getDiSEqC().DiSEqCMode );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/MiniDiSEqCParam").c_str(), (int) it->getDiSEqC().MiniDiSEqCParam );
-    eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/DiSEqCParam").c_str(), (int) it->getDiSEqC().DiSEqCParam );
+		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/DiSEqCParam").c_str(), (int) it->getDiSEqC().DiSEqCParam );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/DiSEqCRepeats").c_str(), (int) it->getDiSEqC().DiSEqCRepeats );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/SeqRepeat").c_str(), (int) it->getDiSEqC().SeqRepeat );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/uncommitted_switch").c_str(), (int) it->getDiSEqC().uncommitted_switch );
@@ -660,18 +660,18 @@ void eTransponderList::writeLNBData()
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/useGotoXX").c_str(), (int) it->getDiSEqC().useGotoXX );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/rotorOffset").c_str(), (int) it->getDiSEqC().rotorOffset );    
 
-    eString tmpStr;
-    for ( std::map<int,int>::iterator i( it->getDiSEqC().RotorTable.begin() ); i != it->getDiSEqC().RotorTable.end(); i++ )
-    {
-      if ( i->first > 0 )
-        tmpStr+=eString().sprintf("+%03d%03d", i->first, i->second );
-      else
-        tmpStr+=eString().sprintf("%03d%03d", i->first, i->second );      
-    }
+		eString tmpStr;
+		for ( std::map<int,int>::iterator i( it->getDiSEqC().RotorTable.begin() ); i != it->getDiSEqC().RotorTable.end(); i++ )
+		{
+			if ( i->first > 0 )
+				tmpStr+=eString().sprintf("+%03d%03d", i->first, i->second );
+			else
+				tmpStr+=eString().sprintf("%03d%03d", i->first, i->second );      
+		}
 
-    eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/RotorTable").c_str(), tmpStr.c_str() );
+		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/RotorTable").c_str(), tmpStr.c_str() );
         
-    int satwrite=0;
+		int satwrite=0;
 		for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
 		{
 			eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/satellites/"+eString().setNum(satwrite)+"/OrbitalPosition").c_str(), s->getOrbitalPosition() );
@@ -679,7 +679,7 @@ void eTransponderList::writeLNBData()
 			eSwitchParameter &sParams = s->getSwitchParams();
 			eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/satellites/"+eString().setNum(satwrite)+"/VoltageMode").c_str(), (int) sParams.VoltageMode );
 			eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/satellites/"+eString().setNum(satwrite)+"/HiLoSignal").c_str(), (int) sParams.HiLoSignal );
-      satwrite++;
+			satwrite++;
 		}
 		// we must delete no more exist Satellites from registry...
 		int tmp;

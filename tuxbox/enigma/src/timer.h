@@ -49,13 +49,13 @@ class eTimerManager: public Object
 // handle all eit related timer stuff ( for smart Timers)
 	void EITready(int);
 public:
-  enum { erase, update };
+	enum { erase, update };
 	eTimerManager();
 	~eTimerManager();
 	static eTimerManager *getInstance() { return instance; }
-  bool removeEventFromTimerList( eWidget *sel, const ePlaylistEntry& entry, int type=erase );
-  bool removeEventFromTimerList( eWidget *sel, const eServiceReference *ref, const EITEvent *evt);
-  bool addEventToTimerList( eWidget *sel, const eServiceReference *ref, const EITEvent *evt, int type = ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR|ePlaylistEntry::stateWaiting );
+	bool removeEventFromTimerList( eWidget *sel, const ePlaylistEntry& entry, int type=erase );
+	bool removeEventFromTimerList( eWidget *sel, const eServiceReference *ref, const EITEvent *evt);
+	bool addEventToTimerList( eWidget *sel, const eServiceReference *ref, const EITEvent *evt, int type = ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR|ePlaylistEntry::stateWaiting );
 	bool addEventToTimerList( eWidget *sel, const ePlaylistEntry& entry );
 	ePlaylistEntry* findEvent( eServiceReference *service, EITEvent *evt );
 	template <class Z>
@@ -97,23 +97,23 @@ class eTimerView: public eWindow
 	eButton *add, *update, *erase, *bclose, *bSelectService;
 	tm beginTime, endTime;
 	friend struct _selectEvent;
-  eServiceReference tmpService;
+	eServiceReference tmpService;
 private:
-  eServicePath buildServicePath( eServiceReference &ref );
-  void showServiceSelector();
+	eServicePath buildServicePath( eServiceReference &ref );
+	void showServiceSelector();
 	void selChanged( eListBoxEntryTimer* );
 	void fillTimerList();
 	void entrySelected(eListBoxEntryTimer *entry);
 	int eventHandler(const eWidgetEvent &event);
-  void comboBoxClosed( eComboBox *combo,  eListBoxEntryText* );
-  void invalidateEntry( eListBoxEntryTimer* );
+	void comboBoxClosed( eComboBox *combo,  eListBoxEntryText* );
+	void invalidateEntry( eListBoxEntryTimer* );
 	void updateDateTime( const tm& beginTime, const tm& endTime );
 	void updateDay( eComboBox* dayCombo, int year, int month, int day );
 	void updatePressed();
 	void selectEvent( ePlaylistEntry* e );
 	void addPressed();
 	void erasePressed();
-  void focusChanged( const eWidget* );
+	void focusChanged( const eWidget* );
 	void focusNext(int*)
 	{
 		eWidget::focusNext(eWidget::focusDirNext);

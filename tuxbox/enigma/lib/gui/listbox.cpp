@@ -162,11 +162,12 @@ void eListBoxBase::gotFocus()
 
 void eListBoxBase::invalidateContent()
 {
-  eRect rc;
-  for ( int i=0; i<MaxEntries*columns; i++ )
-    rc |= getEntryRect(i);
-
-  invalidate(rc);
+	if ( have_focus && deco_selected )
+		invalidate( crect_selected );
+	else if ( deco )
+		invalidate( crect );
+	else
+		invalidate();
 }
 
 void eListBoxBase::lostFocus()

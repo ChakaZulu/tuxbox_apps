@@ -86,22 +86,11 @@ eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type)
 	CONNECT(symbolrate->selected, eTransponderWidget::nextField0);
 	CONNECT(inversion->checked, eTransponderWidget::updated2);
 
-	CONNECT(focusChanged, eTransponderWidget::updateText);
 }
 
 void eTransponderWidget::nextField0(int *)
 {
 	focusNext(eWidget::focusDirNext);
-}
-
-void eTransponderWidget::updateText(const eWidget* w)  // for Statusbar....
-{
-	if (w)
-	{
-		setHelpText( w->getHelpText() );
-		if (parent)
-			parent->focusChanged( this );
-	}
 }
 
 void eTransponderWidget::updated1(eListBoxEntryText *)
@@ -221,25 +210,21 @@ int eTransponderWidget::getTransponder(eTransponder *transponder)
 
 int eFEStatusWidget::eventHandler(const eWidgetEvent &event)
 {
-	eDebug("fe status widget: event %d", event.type);
+//	eDebug("fe status widget: event %d", event.type);
 	switch (event.type)
 	{
 	case eWidgetEvent::gotFocus:
-		if (!isVisible())
-			break;
-		// fall through
 	case eWidgetEvent::willShow:
 		updatetimer.start(500);
-		update();
 		break;
 	case eWidgetEvent::lostFocus:
 	case eWidgetEvent::willHide:
 		updatetimer.stop();
 		break;
 	default:
-		break;
+		return eWidget::eventHandler(event);
 	}
-	return eWidget::eventHandler(event);
+	return 1;
 }
 
 eFEStatusWidget::eFEStatusWidget(eWidget *parent, eFrontend *fe): eWidget(parent), fe(fe), updatetimer(eApp)
