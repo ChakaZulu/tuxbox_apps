@@ -592,7 +592,7 @@ int CNeutrinoApp::loadSetup()
 		g_settings.uboot_lcd_inverse	= -1;
 		g_settings.uboot_lcd_contrast	= -1;
 	
-		FILE* fd = fopen("/var/tuxbox/boot/ppcboot.conf", "r");
+		FILE* fd = fopen("/var/tuxbox/boot/boot.conf", "r");
 		if(fd)
 		{
 			char buffer[100];
@@ -617,7 +617,7 @@ int CNeutrinoApp::loadSetup()
 					g_settings.uboot_lcd_contrast = atoi(&buffer[13]);
 				}
 				else
-					printf("unknown entry found in ppcboot.conf\n");
+					printf("unknown entry found in boot.conf\n");
 			}
 	
 			fclose(fd);
@@ -641,7 +641,7 @@ void CNeutrinoApp::saveSetup()
 		(g_settings.uboot_lcd_inverse  != g_settings.lcd_inverse) ||
 		(g_settings.uboot_lcd_contrast != g_settings.lcd_contrast)) )
 	{
-		FILE* fd = fopen("/var/tuxbox/boot/ppcboot.conf", "w");
+		FILE* fd = fopen("/var/tuxbox/boot/boot.conf", "w");
 
 		if(fd != NULL)
 		{
@@ -670,7 +670,7 @@ void CNeutrinoApp::saveSetup()
 		}
 		else
 		{
-			dprintf(DEBUG_NORMAL, "unable to write file /var/tuxbox/boot/ppcboot.conf\n");
+			dprintf(DEBUG_NORMAL, "unable to write file /var/tuxbox/boot/boot.conf\n");
 		}
 	}
 
