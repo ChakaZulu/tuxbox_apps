@@ -17,7 +17,7 @@
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -61,7 +61,7 @@ void TWebDbox::Streaminfo(TWebserverRequest* request)
 	}
 
 	fgets(buf,29,fd);//dummy
-	while(!feof(fd)) 
+	while(!feof(fd))
 	{
 		if(fgets(buf,29,fd)!=NULL)
 		{
@@ -81,7 +81,7 @@ void TWebDbox::Streaminfo(TWebserverRequest* request)
 	request->SocketWrite(buf); //Resolution x y
 	sprintf((char*) buf, "%d\n", bitInfo[4]*50);
 	request->SocketWrite(buf); //Bitrate bit/sec
-	
+
 	switch ( bitInfo[2] ) //format
 	{
 		case 2: request->SocketWrite("4:3\n"); break;
@@ -133,7 +133,7 @@ Tmconnect con;
 //-------------------------------------------------------------------------
 void TWebDbox::GetcurrentVAPid(TWebserverRequest* request)
 {
-char return_buf[4] = {0}; 
+char return_buf[4] = {0};
 st_rmsg		sendmessage;
 int sock_fd;
 Tmconnect con;
@@ -183,13 +183,13 @@ Tmconnect con;
 		sendmessage.cmd = 2;
 
 		write(sock_fd, &sendmessage, sizeof(sendmessage));
-		if (recv(sock_fd, return_buf, 3,0) <= 0 ) 
+		if (recv(sock_fd, return_buf, 3,0) <= 0 )
 		{
 			perror("recv(zapit)");
 			close(sock_fd);
 			return;
 		}
-	
+
 		request->SocketWrite(return_buf);
 
 		close(sock_fd);
@@ -246,7 +246,7 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 		else if (request->ParameterList->GetIndex("streaminfo") != -1)
 			Streaminfo(request);
 	}
-	
+
 	if(strcmp(request->Filename->c_str(),"shutdown") == 0)
 	{
 		request->SendPlainHeader();
@@ -281,13 +281,13 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 				request->SocketWrite("mute");
 				controld.setMute(true);
 			}
-			else 
+			else
 			if(request->ParameterList->GetIndex("unmute") != -1)
 			{
 				request->SocketWrite("unmute");
 				controld.setMute(false);
 			}
-			else 
+			else
 			if(request->ParameterList->GetIndex("status") != -1)
 			{
 				request->SocketWrite( (char *) (controld.getMute()?"1":"0") );
@@ -318,7 +318,7 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 			TChannel *channel = ChannelList->GetValue(i);
 			if(channel)
 			{
-				sprintf(buf, "%u %s\n", channel->onid_tsid, channel->Name);		
+				sprintf(buf, "%u %s\n", channel->onid_tsid, channel->Name);
 				request->SocketWrite(buf);
 			}
 		}
@@ -484,7 +484,7 @@ bool TWebDbox::Execute(TWebserverRequest* request)
 							vcraudio = atoi(request->ParameterList->GetValue(request->ParameterList->GetIndex("VCR_AUDIO")));
 							if(request->ParameterList->GetIndex("AUX_AUDIO") != -1)
 							{
-								auxaudio = atoi(request->ParameterList->GetValue(request->ParameterList->GetIndex("AUX_AUDIO")));	
+								auxaudio = atoi(request->ParameterList->GetValue(request->ParameterList->GetIndex("AUX_AUDIO")));
 								TAvControl *av = new TAvControl();
 								av->Set_TV_Sources(tvvideo,tvaudio);
 								av->Set_VCR_Sources(vcrvideo,vcraudio);
@@ -520,12 +520,12 @@ bool TWebDbox::Execute(TWebserverRequest* request)
 		ShowChannelList(request);
 		return true;
 	}
-	else 
+	else
 	{
 		if (strcmp(request->Filename->c_str(),"controlpanel.dbox2") == 0)
 		{	//funktionen für controlpanel links
 			if (request->ParameterList->Count > 0)
-			{	
+			{
 //				request->ParameterList->PrintParameterList();
 				if( request->ParameterList->GetIndex("volumemute") != -1)
 				{
@@ -620,7 +620,7 @@ bool TWebDbox::Execute(TWebserverRequest* request)
 		else if (strcmp(request->Filename->c_str(),"timer.dbox2") == 0)
 		{
 			printf("Timer request\n");
-			
+
 			if(request->ParameterList->Count > 0)
 			{
 				if( (request->ParameterList->GetIndex("set") != -1) && (request->ParameterList->GetIndex("time") != -1) && (request->ParameterList->GetIndex("channel") != -1) )
@@ -653,7 +653,7 @@ bool TWebDbox::Execute(TWebserverRequest* request)
 
 
 		}
-		else if (strcmp(request->Filename->c_str(),"switch.dbox2") == 0) 
+		else if (strcmp(request->Filename->c_str(),"switch.dbox2") == 0)
 		{
 			if(request->ParameterList->Count > 0)
 			{
@@ -665,7 +665,7 @@ bool TWebDbox::Execute(TWebserverRequest* request)
 //					request->SocketWriteLn("Content-Type: text/html\n");
 					return true;
 				}
- 
+
 				if(request->ParameterList->GetIndex("eventlist") != -1)
 				{
 					request->SendPlainHeader("text/html");
@@ -673,7 +673,7 @@ bool TWebDbox::Execute(TWebserverRequest* request)
 					GetEventList( request, NULL, id );
 					return true;
 				}
-				
+
 				if(request->ParameterList->GetIndex("shutdown") != -1)
 				{
 					request->SendPlainHeader("text/html");
@@ -683,7 +683,7 @@ bool TWebDbox::Execute(TWebserverRequest* request)
 					controld.shutdown();
 					return true;
 				}
-				
+
 				if(request->ParameterList->GetIndex("tvmode") != -1)
 				{
 					ChannelListEvents.clear();
@@ -692,7 +692,7 @@ bool TWebDbox::Execute(TWebserverRequest* request)
 					ShowChannelList(request);
 					return true;
 				}
-				
+
 				if(request->ParameterList->GetIndex("radiomode") != -1)
 				{
 					ChannelListEvents.clear();
@@ -741,10 +741,10 @@ TWebDbox::TWebDbox(TWebserver *server)
 	ChannelList = NULL;
 	EPGDate = 0;
 //	ChannelListEvents.clear();
-	if(!ChannelList)
+/*	if(!ChannelList)
 		GetChannelList();
 	GetEPGList();
-
+*/
 }
 //-------------------------------------------------------------------------
 
@@ -768,7 +768,7 @@ void TWebDbox::ShowSettings(TWebserverRequest* request)
 
 	request->SocketWrite("<html>\n<body>");
 
-	request->SocketWrite("Boxtype "); 
+	request->SocketWrite("Boxtype ");
 	request->SocketWrite(dbox_names[boxtype]);
 	request->SocketWrite("<br>\n");
 
@@ -779,7 +779,7 @@ void TWebDbox::ShowSettings(TWebserverRequest* request)
 	request->SocketWrite("videoformat ");
 	request->SocketWrite(videoformat_names[videoformat]);
 	request->SocketWrite("<br>\n");
-	
+
 	request->SocketWrite("</body>\n</html>\n");
 	printf("Ende ShowSettings\n");
 }
@@ -793,9 +793,9 @@ void TWebDbox::ShowChannelList(TWebserverRequest* request)
 	GetEPGList();
 
 	request->SendPlainHeader("text/html");
-	
+
 	//show chanlist
-	
+
 	request->SocketWriteLn("<html>");
 	request->SocketWriteLn("<head><title>DBOX2-Neutrino Channellist</title><link rel=\"stylesheet\" type=\"text/css\" href=\"../channellist.css\"></head>");
 	//request->println("<script> function openWindow(theURL) { window.open(theURL,'Neutrino-EPG','scrollbars=no,width=100,height=100');}</script>");
@@ -812,12 +812,12 @@ void TWebDbox::ShowChannelList(TWebserverRequest* request)
 	{
 
 		TParameterList *params = new TParameterList;
-		
+
 		classname[0] = (i&1)?'a':'b';
 		if(channel->onid_tsid == current_channel)
 		{
 			classname[0] = 'c';
-			params->Add("AKT","<a name=akt></a>"); 
+			params->Add("AKT","<a name=akt></a>");
 		}
 		else
 			params->Add("AKT"," ");
@@ -830,12 +830,12 @@ void TWebDbox::ShowChannelList(TWebserverRequest* request)
 		char nr[3] ={0};
 		sprintf(nr,"%d",i);
 		params->Add("CHANNEL_NR",nr);
-		
+
 
 		char teststr[] = "<tr><td class=\"%%CLASS%%\">%%AKT%%<a href=\"switch.dbox2?zapto=%%CHANNEL_ID%%\">%%CHANNEL_NR%%. %%CHANNEL_NAME%%</a> <a href=\"switch.dbox2?eventlist=%%CHANNEL_ID%%\"><img src=\"../images/elist.gif\" border=\"0\"></a></td></tr>\n\0";
 		ParseString(request,teststr,params);
 		delete params;
-	
+
 		if(channel->EPG != NULL)
 		{
 			sprintf(buffer,"<tr><td class=\"%cepg\"><a href=epg.dbox2?channel=%d>%s</a> <font size=-3>(%d von %d min, %d\%)</font></td></tr>\n",classname[0],channel->onid_tsid,channel->EPG->c_str(),(time(NULL)-channel->Starttime)/60,channel->Duration / 60,100 * (time(NULL)-channel->Starttime) / channel->Duration  );
@@ -904,7 +904,7 @@ Tmconnect con;
 				}
 				else
 				{
-			
+
 					char* pData = new char[resp.dataLength];
 					if(Parent->DEBUG) printf("Lese eine %d byte lange EventList\n",resp.dataLength);
 					if ( read(sock_fd, pData, resp.dataLength)<=0 )
@@ -944,7 +944,7 @@ Tmconnect con;
 						channel->Starttime = (*epg_times).startzeit;
 						channel->Duration = (*epg_times).dauer;
 
-//						printf("ID: '%s' NAME: '%s' TEXT: '%s'\n",eventid,name,text); 
+//						printf("ID: '%s' NAME: '%s' TEXT: '%s'\n",eventid,name,text);
 						if(channel->EPG) delete channel->EPG;
 						channel->EPG = new TString(name);
 
@@ -954,9 +954,9 @@ Tmconnect con;
 						delete[] pData;
 					}
 				}
-			}	
+			}
 		}
-			
+
 		channel = channel->Next;
 		i++;
 	}while(channel && (i < ChannelList->Count));
@@ -1035,7 +1035,7 @@ int sock_fd;
 Tmconnect con;
 
 	if((sock_fd = Parent->SocketConnect(&con,sectionsd::portNumber)) != -1)
-	{	
+	{
 		sectionsd::msgRequestHeader req;
 		req.version = 2;
 		req.command = sectionsd::allEventsChannelID;
@@ -1045,7 +1045,7 @@ Tmconnect con;
 
 		sectionsd::msgResponseHeader resp;
 		memset(&resp, 0, sizeof(resp));
-		if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0) 
+		if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0)
 		{
 			close(sock_fd);
 			return;
@@ -1073,7 +1073,7 @@ Tmconnect con;
 				request->SocketWriteLn("</h3>");
 
 				request->SocketWrite("<table cellspacing=\"0\">\n");
-			}			
+			}
 			pos=1;
 			actPos=buffer;
 
@@ -1110,7 +1110,7 @@ Tmconnect con;
 				zeit = mktime(tmzeit);
 //				printf("zeit: %s rawzeit = %ld\n",ctime(&zeit),zeit);
 				if((zeit + (atoi(eduration) * 60)) >= time(NULL))
-				{	
+				{
 					if(cgi)
 					{
 						sprintf(buf, "%s %s %s %s %s\n", epgID, edate, etime, eduration, ename);
@@ -1118,7 +1118,7 @@ Tmconnect con;
 					else
 					{
 						classname = (pos&1)?'a':'b';
-						
+
 //						sprintf(buf, "<tr><td class=\"%c\">%s, %s <small>(%smin)</small> <a href=\"timer.dbox2?set&time=%ld&channel=%ld\"><IMG SRC=\"../images/timer.gif\" WIDTH=21 HEIGHT=21 BORDER=0 ALT=\"Timer\"></a></tr></td>", classname, edate, etime, eduration,zeit,onidSid);
 						sprintf(buf, "<tr><td class=\"%c\">%s, %s <small>(%smin)</small></tr></td>", classname, edate, etime, eduration,zeit,onidSid);
 						sprintf(&buf[strlen(buf)], "<tr><td class=\"%ctext\"><a href=epg.dbox2?epgid=%s>%s</a></td></tr>\n", classname,epgID, ename);
@@ -1156,7 +1156,7 @@ Tmconnect con;
 
 		sectionsd::msgResponseHeader resp;
 		memset(&resp, 0, sizeof(resp));
-		if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0) 
+		if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0)
 		{
 			printf("Fehler in read\n");
 			close(sock_fd);
@@ -1177,7 +1177,7 @@ Tmconnect con;
 			titel2 = titel + strlen(titel) + 1;
 			text = titel2 + strlen(titel2) + 1;
 			sectionsd::sectionsdTime *epg_times = (sectionsd::sectionsdTime*) (text + strlen(text) + 1);
-			
+
 			char *buffer2 = new char[buffer_len + 400];
 			buffer[0]=0;
 //			sprintf(buffer2,"Titel: %s<BR>\nTitel2: %s<BR>\nText: %s<BR>\n<BR>\n\0",titel,titel2,text);
@@ -1211,7 +1211,7 @@ Tmconnect con;
 
 		sectionsd::msgResponseHeader resp;
 		memset(&resp, 0, sizeof(resp));
-		if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0) 
+		if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0)
 		{
 			printf("Fehler in read\n");
 			close(sock_fd);
@@ -1347,11 +1347,11 @@ Tmconnect con;
 		st_rmsg		sendmessage;
 		TChannel *channel = NULL,*last = NULL;
 		int i;
-		
+
 		sendmessage.version=1;
         // neu! war 5, mit neuem zapit holen wir uns auch die onid_tsid
 		sendmessage.cmd = 'c';
-		
+
 		write(sock_fd, &sendmessage, sizeof(sendmessage));
 		char result[4]={0};
 
@@ -1375,7 +1375,7 @@ Tmconnect con;
 		i = 0;
 		while (recv(sock_fd, &zapitchannel, sizeof(zapitchannel),0)>0)
         {
-			
+
 			if(Parent->DEBUG) printf("%u %s\n", zapitchannel.onid_tsid, zapitchannel.name);
 			channel= new TChannel(zapitchannel.chan_nr,zapitchannel.onid_tsid,zapitchannel.name);
 			ChannelList->Add(channel,last);
