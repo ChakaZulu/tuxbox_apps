@@ -25,6 +25,10 @@ extern	void	FBCopyImageCol( int x, int y, int dx, int dy, unsigned char col,
 extern	void	FBBlink( int x, int y, int dx, int dy, int count );
 extern	void	FBMove( int x, int y, int x2, int y2, int dx, int dy );
 extern	void	FBPrintScreen( void );
+extern	void	FBPause( void );
+#ifdef USEX
+extern	void	FBFlushGrafic( void );
+#endif
 
 #define BNR0			0
 #define BLACK			1

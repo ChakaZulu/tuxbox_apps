@@ -13,6 +13,8 @@
 #include <sys/time.h>
 #include <sys/mman.h>
 
+#ifndef USEX
+
 #ifdef __i386__
 #define fbdevname	"/dev/fb0"
 #else
@@ -24,6 +26,7 @@
 #endif
 
 #include <draw.h>
+#include <rcinput.h>
 
 static	int							fd = -1;
 static	struct fb_var_screeninfo	screeninfo;
@@ -38,6 +41,7 @@ static	unsigned short				green[ 256 ];
 static	unsigned short				blue[ 256 ];
 static	unsigned short				trans[ 256 ];
 static	int							lastcolor=0;
+extern	int							actcode;
 
 void	FBSetColor( int idx, uchar r, uchar g, uchar b )
 {
@@ -445,3 +449,319 @@ void	FBMove( int x, int y, int x2, int y2, int dx, int dy )
 
 	free( back );
 }
+
+void	FBPause( void )
+{
+	unsigned char	*back;
+	int				dx = screeninfo.xres;
+	int				dy = screeninfo.yres;
+	int				x;
+	int				y;
+	int				sx;
+	int				sy;
+	int				i;
+	struct timeval	tv;
+static int			pos[64] =
+{
+0, 2, 11, 23, 5, 31, 33, 29, 14, 53, 59, 36, 35, 3, 49, 1, 
+16, 19, 56, 34, 58, 32, 51, 12, 4, 52, 63, 7, 57, 50, 6, 24, 
+43, 48, 39, 8, 20, 44, 27, 42, 10, 55, 61, 21, 17, 37, 47, 25, 
+54, 28, 18, 46, 60, 9, 30, 38, 62, 26, 15, 13, 41, 22, 40, 45
+};
+
+	back = malloc( available );
+	if ( back )		// dimm out
+	{
+		memcpy(back,lfb,available);
+
+		for( i=0; i < 64; i++ )
+		{
+			sx = pos[i] >> 3;
+			sy = pos[i] & 0x7;
+			for( y=0; y < dy; y+=8 )
+			{
+				for( x=0; x < dx; x+=8 )
+				{
+					FBPaintPixel(x+sx,y+sy,0);
+				}
+			}
+		}
+	}
+
+	actcode = 0xee;
+
+	while( actcode == 0xee )
+	{
+		tv.tv_usec = 300000;
+		tv.tv_sec = 0;
+		select(0,0,0,0,&tv);
+		RcGetActCode();
+	}
+
+	if ( back )		// dimm in
+	{
+		for( i=0; i < 64; i++ )
+		{
+			sx = pos[i] >> 3;
+			sy = pos[i] & 0x7;
+			for( y=0; y < dy; y+=8 )
+			{
+				for( x=0; x < dx; x+=8 )
+				{
+					*(lfb+(y+sy)*stride+x+sx) = *(back+(y+sy)*stride+x+sx);
+				}
+			}
+		}
+
+		free(back);
+	}
+
+	tv.tv_usec = 0;
+	tv.tv_sec = 2;
+	select(0,0,0,0,&tv);
+}
+
+#else	/* USEX */
+
+#include <X11/Xlib.h>
+#include <X11/X.h>
+
+#include <draw.h>
+#include <rcinput.h>
+
+static	Display			*dpy = 0;
+static	Window			window;
+static	GC				gc;
+static	unsigned long	colors[ 256 ];
+static	int				planes=16;
+static	int				xres;
+static	int				yres;
+extern	int				actcode;
+
+void	FBSetColor( int idx, uchar r, uchar g, uchar b )
+{
+	switch( planes )
+	{
+	case 24 :
+		colors[idx] = r<<16 | g<<8 | b;
+		break;
+	case 16 :
+		colors[idx] = (r&0xf8)<<8 | (g&0xfc) << 3 | (b&0xf8)>>3;
+		break;
+	}
+}
+
+void	FBSetupColors( void )
+{
+}
+
+int	FBInitialize( int xRes, int yRes, int bpp, int extfd )
+{
+	dpy = XOpenDisplay(0);
+	if ( !dpy )
+		return -1;
+
+	xres = xRes;
+	yres = yRes;
+
+	window = XCreateSimpleWindow(dpy,RootWindow(dpy,0),
+			100, 100, xRes, yRes, 0, 0, 0 );
+
+	XMapWindow(dpy,window);
+
+	planes=DisplayPlanes(dpy,0);
+
+	gc = XCreateGC( dpy, window, 0, 0 );
+	XSetFunction( dpy,gc,GXcopy);
+
+	FBSetColor( BLACK, 1, 1, 1 );
+    FBSetColor( BNR0, 1, 1, 1 ); 
+    FBSetColor( WHITE, 255, 255, 255 );
+
+	XFlush(dpy);
+	return dpy ? 0 : -1;
+}
+
+void	FBClose( void )
+{
+	XCloseDisplay(dpy);
+}
+
+void	FBPaintPixel( int x, int y, unsigned char col )
+{
+	XSetForeground(dpy,gc,colors[col]);
+	XDrawPoint( dpy, window, gc, x, y );
+}
+
+void	FBDrawLine( int xa, int ya, int xb, int yb, unsigned char col )
+{
+	XSetForeground(dpy,gc,colors[col]);
+	XDrawLine( dpy, window, gc, xa, ya, xb, yb );
+}
+
+void	FBDrawHLine( int x, int y, int dx, unsigned char col )
+{
+	XSetForeground(dpy,gc,colors[col]);
+	XDrawLine( dpy, window, gc, x, y, x+dx, y );
+}
+
+void	FBDrawVLine( int x, int y, int dy, unsigned char col )
+{
+	XSetForeground(dpy,gc,colors[col]);
+	XDrawLine( dpy, window, gc, x, y, x, y+dy );
+}
+
+void	FBFillRect( int x, int y, int dx, int dy, unsigned char col )
+{
+	XSetForeground(dpy,gc,colors[col]);
+	XFillRectangle( dpy, window, gc, x, y, dx, dy );
+}
+
+void	FBDrawRect( int x, int y, int dx, int dy, unsigned char col )
+{
+	XSetForeground(dpy,gc,colors[col]);
+	XDrawRectangle( dpy, window, gc, x, y, dx, dy );
+}
+
+void	FBCopyImage( int x, int y, int dx, int dy, unsigned char *src )
+{
+	int	i;
+	int	k;
+
+	for( k=0; k < dy; k++ )
+		for( i=0; i < dx; i++, src++ )
+			FBPaintPixel(i+x,k+y,*src);
+}
+
+void	FBOverlayImage(int x, int y, int dx, int dy, int relx, int rely,
+					unsigned char c1,
+					unsigned char *src,
+					unsigned char *under,
+					unsigned char *right,
+					unsigned char *bottom )
+{
+	int				i;
+	int				k;
+
+#define SWC(a)	((a)==WHITE?c1:(a))
+
+	if ( !dx || !dy )
+		return;
+	for( i=0; i < dy; i++ )
+	{
+		for( k=0; k < dx; k++ )
+		{
+			if ( *(src+dx*i+k) != BLACK )
+				FBPaintPixel(k+x,i+y,SWC(*(src+dx*i+k)));
+			else if ( relx )
+			{
+				if ( relx+k >= dx )		/* use rigth */
+				{
+					if ( right )
+						FBPaintPixel(k+x,i+y,*(right+dx*i+relx+k-dx));
+					else
+						FBPaintPixel(k+x,i+y,SWC(*(src+dx*i+k)));
+				}
+				else
+				{
+					if ( under )
+						FBPaintPixel(k+x,i+y,*(under+dx*i+relx+k));
+					else
+						FBPaintPixel(k+x,i+y,SWC(*(src+dx*i+k)));
+				}
+			}
+			else
+			{
+				if ( rely+i >= dy )		/* use bottom */
+				{
+					if ( bottom )
+						FBPaintPixel(k+x,i+y,*(bottom+dx*(i+rely-dy)+k));
+					else
+						FBPaintPixel(k+x,i+y,SWC(*(src+dx*i+k)));
+				}
+				else
+				{
+					if ( under )
+						FBPaintPixel(k+x,i+y,*(under+dx*(i+rely)+k));
+					else
+						FBPaintPixel(k+x,i+y,SWC(*(src+dx*i+k)));
+				}
+			}
+		}
+	}
+}
+
+void	FBCopyImageCol( int x, int y, int dx, int dy, unsigned char col,
+					unsigned char *src )
+{
+	int	i;
+	int	k;
+
+	for( k=0; k < dy; k++ )
+		for( i=0; i < dx; i++, src++ )
+			FBPaintPixel(i+x,k+y,*src+col);
+}
+
+void	FBBlink( int x, int y, int dx, int dy, int count )
+{
+}
+
+void	FBMove( int x, int y, int x2, int y2, int dx, int dy )
+{
+	XCopyArea( dpy, window, window, gc, x, y, dx, dy, x2, y2 );
+}
+
+void	FBPrintScreen( void )
+{
+}
+
+void	FBFlushGrafic( void )
+{
+	XFlush(dpy);
+}
+
+void	FBPause( void )
+{
+	int				dx = xres;
+	int				dy = yres;
+	int				x;
+	int				y;
+	int				sx;
+	int				sy;
+	int				i;
+	struct timeval	tv;
+static int			pos[64] =
+{
+0, 2, 11, 23, 5, 31, 33, 29, 14, 53, 59, 36, 35, 3, 49, 1, 
+16, 19, 56, 34, 58, 32, 51, 12, 4, 52, 63, 7, 57, 50, 6, 24, 
+43, 48, 39, 8, 20, 44, 27, 42, 10, 55, 61, 21, 17, 37, 47, 25, 
+54, 28, 18, 46, 60, 9, 30, 38, 62, 26, 15, 13, 41, 22, 40, 45
+};
+
+	for( i=0; i < 64; i++ )
+	{
+		sx = pos[i] >> 3;
+		sy = pos[i] & 0x7;
+		for( y=0; y < dy; y+=8 )
+		{
+			for( x=0; x < dx; x+=8 )
+			{
+				FBPaintPixel(x+sx,y+sy,0);
+			}
+		}
+	}
+
+printf("pause()\n");
+
+	actcode = 0xee;
+
+	while( actcode == 0xee )
+	{
+		tv.tv_usec = 300000;
+		tv.tv_sec = 0;
+		select(0,0,0,0,&tv);
+		RcGetActCode();
+	}
+}
+
+#endif

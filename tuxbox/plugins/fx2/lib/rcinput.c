@@ -106,6 +106,10 @@ static  unsigned short cw=0;
 	if ( x < 2 )
 	{
 		realcode=0xee;
+		if ( cw == 2 )
+			cw=3;
+		if ( cw == 1 )
+			cw=0;
 		return;
 	}
 
@@ -124,12 +128,36 @@ static  unsigned short cw=0;
 
 	Debug("code=%04x\n",code);
 
+	if ( cw == 3 )
+	{
+		if ( code == RC_SPKR )
+		{
+			actcode = RC_SPKR;
+			cw=1;
+		}
+		return;
+	}
+
+	if ( cw == 2 )
+	{
+		if ( code != RC_SPKR )
+			cw=3;
+		return;
+	}
+
 	switch(code)
 	{
 	case RC_HELP:
 		if ( !cw )
 			FBPrintScreen();
 		cw=1;
+		break;
+	case RC_SPKR:
+		if ( !cw )
+		{
+			FBPause();
+			cw=2;
+		}
 		break;
 	case RC_HOME:
 		doexit=3;
@@ -237,6 +265,10 @@ void		RcGetActCode( void )
 				break;
 			case 'y' :
 				actcode=RC_YELLOW;
+				break;
+			case 'q' :
+				actcode=RC_SPKR;
+				FBPause();
 				break;
 			}
 		}
