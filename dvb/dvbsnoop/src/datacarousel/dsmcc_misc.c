@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_misc.c,v 1.9 2004/02/15 20:46:09 rasc Exp $
+$Id: dsmcc_misc.c,v 1.10 2004/02/17 23:54:12 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: dsmcc_misc.c,v 1.9 2004/02/15 20:46:09 rasc Exp $
 
 
 $Log: dsmcc_misc.c,v $
+Revision 1.10  2004/02/17 23:54:12  rasc
+Bug (not fixed yet): DSM-CC  DII Carousel Descriptor Loop is strange
+
 Revision 1.9  2004/02/15 20:46:09  rasc
 DSM-CC  data/object carousell continued   (DSI, DII, DDB, DCancel)
 
@@ -120,7 +123,7 @@ int dsmcc_pto_descriptor_loop (u_char *name, u_char *b)
 
 int dsmcc_CompatibilityDescriptor(u_char *b)
 {
-   int  len;
+   int  len, len_descr;
    int  count;
 
 
@@ -128,6 +131,7 @@ int dsmcc_CompatibilityDescriptor(u_char *b)
 
    indent (+1);
    len   = outBit_Sx_NL (4,"compatibilityDescriptorLength: ",	b, 0,16);
+   len_descr = len + 2;
 
    if (len > 0) {
 
@@ -138,6 +142,9 @@ int dsmcc_CompatibilityDescriptor(u_char *b)
 
 	while (count-- > 0) {
 		int  subDesc_count;
+
+
+		if (len <= 0) break;
 
 		out_nl (4,"Descriptor (loop):");
 		indent (+1);
@@ -154,15 +161,20 @@ int dsmcc_CompatibilityDescriptor(u_char *b)
    		outBit_Sx_NL (4,"Version: ",			b,64,16);
 
    		subDesc_count = outBit_Sx_NL (4,"SubDescriptorCount: ", b,80, 8);
-		b    += 11;
+		b   += 11;
+		len -= 11;
 
 		while (subDesc_count > 0) {
 			int  i;
+
+			if (len <= 0) break;
 
 			out_nl (5,"SubDescriptor (loop):");
 			indent (+1);
 			i = subDescriptor (b);
    			indent (-1);
+			b += i;
+			len -= i;
 		}
    		indent (-1);
    	}
@@ -171,7 +183,7 @@ int dsmcc_CompatibilityDescriptor(u_char *b)
 
 
    indent (-1);
-   return len;
+   return len_descr;
 }
 
 
@@ -459,6 +471,33 @@ int  dsmcc_carousel_NSAP_address_B20 (int v, const char *s, u_char *b)
 
 
 
+
+
+/*
+ * carousel descriptor loop
+ * ETSI EN 301 192 v1.3.1  8.1.3
+ */
+
+int dsmcc_CarouselDescriptor_Loop (const char *s, u_char *b, int len)
+{
+   int len_org = len;
+
+
+  out_nl (4,"%s  (Carousel Descriptor loop):", s);
+
+  indent (+1);
+  while (len > 0) {
+	int  x;
+
+ 	x   = descriptor (b,  DSMCC_CAROUSEL);
+	b += x;
+	len -= x;
+  }
+  out_NL (4);
+  indent (-1);
+
+  return len_org;
+}
 
 
 

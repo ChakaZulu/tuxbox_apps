@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_carousel_descriptor.h,v 1.13 2004/02/15 01:01:03 rasc Exp $ 
+$Id: dsmcc_carousel_descriptor.h,v 1.14 2004/02/17 23:54:13 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: dsmcc_carousel_descriptor.h,v 1.13 2004/02/15 01:01:03 rasc Exp $
 
 
 $Log: dsmcc_carousel_descriptor.h,v $
+Revision 1.14  2004/02/17 23:54:13  rasc
+Bug (not fixed yet): DSM-CC  DII Carousel Descriptor Loop is strange
+
 Revision 1.13  2004/02/15 01:01:03  rasc
 DSM-CC  DDB (DownloadDataBlock Message)
 DSM-CC  U-N-Message  started
@@ -87,6 +90,7 @@ void descriptorDSMCC_subgroup_association (u_char *b);
 
 void descriptorDSMCC_MHP_label (u_char *b);
 void descriptorDSMCC_MHP_caching_priority (u_char *b);
+void descriptorDSMCC_MHP_content_type (u_char *b);
 
 
 #endif

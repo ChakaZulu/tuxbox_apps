@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_misc.h,v 1.5 2004/02/15 18:58:27 rasc Exp $
+$Id: dsmcc_misc.h,v 1.6 2004/02/17 23:54:12 rasc Exp $
 
 
  DVBSNOOP
@@ -48,6 +48,7 @@ int   dsmcc_UserID (int v, u_char *b, int len);
 u_long dsmcc_print_transactionID_32 (int v, u_char *b);
 
 int   dsmcc_carousel_NSAP_address_B20 (int v, const char *s, u_char *b);
+int   dsmcc_CarouselDescriptor_Loop (const char *s, u_char *b, int len);
 
 
 #endif

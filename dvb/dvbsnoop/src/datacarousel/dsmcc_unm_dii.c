@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_unm_dii.c,v 1.2 2004/02/15 20:46:09 rasc Exp $
+$Id: dsmcc_unm_dii.c,v 1.3 2004/02/17 23:54:12 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dsmcc_unm_dii.c,v 1.2 2004/02/15 20:46:09 rasc Exp $
 
 
 $Log: dsmcc_unm_dii.c,v $
+Revision 1.3  2004/02/17 23:54:12  rasc
+Bug (not fixed yet): DSM-CC  DII Carousel Descriptor Loop is strange
+
 Revision 1.2  2004/02/15 20:46:09  rasc
 DSM-CC  data/object carousell continued   (DSI, DII, DDB, DCancel)
 
@@ -75,19 +78,37 @@ int dsmcc_DownloadInfoIndication (int v, u_char *b, u_int len)
 	len -= 2;
 
 
+	indent (+1);
 	while (n_modules > 0) {
+		u_int    mId;
+
 		out_NL (v);
 		out_nl (v, "Module:");
 		indent (+1);
 
-		outBit_Sx_NL (v,"moduleId: ",		b,  0, 16);
+		mId = outBit_Sx (v,"moduleId: ",	b,  0, 16);
+		      out_nl (v, "%s", (mId < 0xFFF0)
+				? "" : "  [= DAVIC application]");
 		outBit_Sx_NL (v,"moduleSize: "	,	b, 16, 32);
 		outBit_Sx_NL (v,"moduleVersion: ",	b, 48,  8);
 		len2 = outBit_Sx_NL (v,"moduleInfoLength: ",	b, 56,  8);
 		b += 8;
 		len -= 8;
 
-		print_databytes (v, "moduleInfoBytes: ", b, len2);
+
+		// moduleInfoByte: these fields shall convey a list of descriptors
+		// which each define one or more attributes of the described module,
+		// except when the moduleId is within the range of 0xFFF0-0xFFFF. In
+		// this case, the moduleInfoByte structure contains the ModuleInfo
+		// structure as defined by DAVIC with the privateDataByte field of that
+		// structure as a loop of descriptors.
+
+// $$$ TODO  BUG-FIX !!!!: we have a bug here!
+		if (mId < 0xFFF0) {
+			dsmcc_CarouselDescriptor_Loop ("ModuleInfo", b, len2);
+		} else {
+			print_databytes (v, "moduleInfoBytes: ", b, len2);  // $$$ TODO Davic
+		}
 		b += len2;
 		len -= len2;
 
@@ -95,6 +116,7 @@ int dsmcc_DownloadInfoIndication (int v, u_char *b, u_int len)
 		n_modules--;
 	}
 	out_NL (v);
+	indent (-1);
 
 
 	len2 = outBit_Sx_NL (v,"privateDataLength: ",	b,  0, 16);
@@ -135,12 +157,12 @@ int dsmcc_DownloadInfoIndication (int v, u_char *b, u_int len)
 // moduleInfoLength: this field defines the length in bytes of the
 // moduleInfo field for the described module.
 //
-// moduleInfoByte: these fields shall convey a list of descriptors
-// which each define one or more attributes of the described module,
-// except when the moduleId is within the range of 0xFFF0-0xFFFF. In
-// this case, the moduleInfoByte structure contains the ModuleInfo
-// structure as defined by DAVIC with the privateDataByte field of that
-// structure as a loop of descriptors.
+// !! moduleInfoByte: these fields shall convey a list of descriptors
+// !! which each define one or more attributes of the described module,
+// !! except when the moduleId is within the range of 0xFFF0-0xFFFF. In
+// !! this case, the moduleInfoByte structure contains the ModuleInfo
+// !! structure as defined by DAVIC with the privateDataByte field of that
+// !! structure as a loop of descriptors.
 //
 // privateDataLength: this field defines the length in bytes of the
 // privateDataByte field.

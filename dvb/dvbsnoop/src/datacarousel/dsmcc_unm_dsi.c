@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_unm_dsi.c,v 1.2 2004/02/15 20:46:09 rasc Exp $
+$Id: dsmcc_unm_dsi.c,v 1.3 2004/02/17 23:54:12 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dsmcc_unm_dsi.c,v 1.2 2004/02/15 20:46:09 rasc Exp $
 
 
 $Log: dsmcc_unm_dsi.c,v $
+Revision 1.3  2004/02/17 23:54:12  rasc
+Bug (not fixed yet): DSM-CC  DII Carousel Descriptor Loop is strange
+
 Revision 1.2  2004/02/15 20:46:09  rasc
 DSM-CC  data/object carousell continued   (DSI, DII, DDB, DCancel)
 
@@ -65,7 +68,9 @@ int dsmcc_DownloadServerInitiate (int v, u_char *b, u_int len)
 
 	len2 = outBit_Sx_NL (v,"privateDataLength: ",	b,  0, 16);
 	b += 2;
-	// $$$ TODO  Super-group-Info
+	// $$$ TODO  Super-group-Info  && carousel descr.
+	// GroupStruct + dsmcc_CarouselDescriptor_Loop ("GroupInfo", b, len);
+
 	print_databytes (v, "private data: ", b, len2);
 
 	return len_org;

@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_carousel_descriptor.c,v 1.19 2004/02/15 20:46:10 rasc Exp $ 
+$Id: dsmcc_carousel_descriptor.c,v 1.20 2004/02/17 23:54:13 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dsmcc_carousel_descriptor.c,v 1.19 2004/02/15 20:46:10 rasc Exp $
 
 
 $Log: dsmcc_carousel_descriptor.c,v $
+Revision 1.20  2004/02/17 23:54:13  rasc
+Bug (not fixed yet): DSM-CC  DII Carousel Descriptor Loop is strange
+
 Revision 1.19  2004/02/15 20:46:10  rasc
 DSM-CC  data/object carousell continued   (DSI, DII, DDB, DCancel)
 
@@ -131,6 +134,7 @@ int  descriptorDSMCC_CAROUSEL (u_char *b)
 	// MHP
      case 0x70:  descriptorDSMCC_MHP_label (b); break;
      case 0x71:  descriptorDSMCC_MHP_caching_priority (b); break;
+     case 0x72:  descriptorDSMCC_MHP_content_type (b); break;
 
      default: 
 	if (b[0] < 0x80) {
@@ -390,9 +394,20 @@ void descriptorDSMCC_MHP_caching_priority (u_char *b)
 
 
 
+/*
+  0x72 -  MHP content type descriptor
+  ETSI  TS 102 812  v 1.2.1
+*/
 
-// $$$ TODO 0x72 content type descriptor
+void descriptorDSMCC_MHP_content_type (u_char *b)
+{
+  int  len;
 
+  // tag	= b[0];
+  len        = b[1];
+
+  print_text_UTF8 (4, "content_type_data: ", b+2, len);
+}
 
 
 
