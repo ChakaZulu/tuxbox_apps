@@ -658,24 +658,4 @@ public:
 };
 
 #endif //DISABLE_FILE
-
-class eTimeCorrectionEditWindow: public eWindow
-{
-	eTimer updateTimer;
-	eLabel *lCurTransponderTime, *lCurTransponderDate;
-	eComboBox *cday, *cmonth, *cyear;
-	eButton *bSet, *bReject;
-	eNumber *nTime;
-	eStatusBar *sbar;
-	tsref transponder;
-	int eventHandler( const eWidgetEvent &e );
-	void savePressed();
-	void updateTPTimeDate();
-	void monthChanged( eListBoxEntryText* );
-	void yearChanged( eListBoxEntryText* );
-	void fieldSelected(int *){focusNext(eWidget::focusDirNext);}
-public:
-	eTimeCorrectionEditWindow( tsref tp );
-};
-
 #endif /* __enigma_main_h */

@@ -17,15 +17,16 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: time_settings.cpp,v 1.2 2003/09/07 00:03:58 ghostrider Exp $
+ * $Id: time_settings.cpp,v 1.3 2004/04/18 14:57:06 tmbinc Exp $
  */
 
 #include <time_settings.h>
 #include <setup_timezone.h>
-#include <enigma_main.h>
+#include <time_correction.h>
 #include <timer.h>
 #include <lib/dvb/edvb.h>
 #include <lib/dvb/dvbservice.h>
+#include <lib/gui/emessage.h>
 
 eTimeSettings::eTimeSettings()
 	:eSetupWindow(_("Time Settings"), 5, 350)
