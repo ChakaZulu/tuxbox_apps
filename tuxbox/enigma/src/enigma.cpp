@@ -179,7 +179,7 @@ eZap::eZap(int argc, char **argv): QApplication(argc, argv, 0)
 	main=new eZapMain();
 	
 	qDebug("[ENIGMA] starting httpd");
-	eHTTPD *httpd=new eHTTPD(7575);
+	eHTTPD *httpd=new eHTTPD(80);
 	eHTTPDynPathResolver *dyn_resolver=new eHTTPDynPathResolver();
 	ezapInitializeDyn(dyn_resolver);
 	ezapInitializeXMLRPC(dyn_resolver);
