@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.88 2003/06/22 11:22:47 digi_casi Exp $
+ * $Id: bouquets.cpp,v 1.89 2003/09/16 08:58:39 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -90,7 +90,7 @@ CZapitChannel* CBouquet::getChannelByChannelID(const t_channel_id channel_id, co
 
 	if ((serviceType == ST_RESERVED) && (result == NULL))
 	{
-		result = getChannelByChannelID(channel_id, 2);
+		result = getChannelByChannelID(channel_id, ST_DIGITAL_RADIO_SOUND_SERVICE);
 	}
 
 	return result;
@@ -280,7 +280,7 @@ void CBouquetManager::writeBouquetChannels(FILE * bouq_fd, uint i)
 /**** class CBouquetManager *************************************************/
 void CBouquetManager::saveBouquets(void)
 {
-	FILE * bouq_fd = NULL;
+	FILE * bouq_fd;
 	
 	bouq_fd = fopen(BOUQUETS_XML, "w");
 		
@@ -315,22 +315,43 @@ void CBouquetManager::saveBouquets(CZapitClient::bouquetMode bouquetMode, char *
 	if (diseqcType != DISEQC_1_2)
 	{
 		// not diseqc 1.2 or (diseqc 1.2 and no bouquets.xml file exists)
-		bouq_fd = fopen(BOUQUETS_XML, "w");
-		
-		fprintf(bouq_fd, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<zapit>\n");
 
-		for (unsigned int i = 0; i < Bouquets.size(); i++)
+		if (bouquetMode == CZapitClient::BM_UPDATEBOUQUETS)
 		{
-			if (Bouquets[i] != remainChannels)
+			storeBouquets();
+
+			loadBouquets();
+			deleteBouquet(remainChannels);
+			remainChannels = NULL;
+
+			while (storedBouquets.size() != 0)
 			{
-				writeBouquetHeader(bouq_fd, i, convert_UTF8_To_UTF8_XML(Bouquets[i]->Name).c_str());
-				writeBouquetChannels(bouq_fd, i);
-				writeBouquetFooter(bouq_fd);
+				int dest = existsBouquet(storedBouquets[0]->Name);
+				if (dest != -1)
+				{
+					while (storedBouquets[0]->tvChannels.size() != 0)
+					{
+						if (!(existsChannelInBouquet(dest, storedBouquets[0]->tvChannels[0]->getChannelID())))
+							Bouquets[dest]->addService(storedBouquets[0]->tvChannels[0]);
+						storedBouquets[0]->removeService(storedBouquets[0]->tvChannels[0]);
+					}
+					while (storedBouquets[0]->radioChannels.size() != 0)
+					{
+						if (!(existsChannelInBouquet(dest, storedBouquets[0]->radioChannels[0]->getChannelID())))
+							Bouquets[dest]->addService(storedBouquets[0]->radioChannels[0]);
+						storedBouquets[0]->removeService(storedBouquets[0]->radioChannels[0]);
+					}
+					delete storedBouquets[0];
+				}
+				else
+				{
+					Bouquets.push_back(storedBouquets[0]);
+				}
+				storedBouquets.erase(storedBouquets.begin());
 			}
 		}
-	
-		fprintf(bouq_fd, "</zapit>\n");
-		fclose(bouq_fd);
+
+		saveBouquets();
 	}
 	else
 	{
@@ -384,7 +405,7 @@ void CBouquetManager::saveBouquets(CZapitClient::bouquetMode bouquetMode, char *
 			}
 		}
 		else
-			printf("[bouquets] unknown bouquet mode.\n");
+			printf("[bouquets] unsupported bouquet mode.\n");
 	}
 }
 
@@ -515,11 +536,10 @@ void CBouquetManager::makeRemainingChannelsBouquet()
 void CBouquetManager::renumServices()
 {
 	deleteBouquet(remainChannels);
+	remainChannels = NULL;
 	
 	if (config.getBool("makeRemainingChannelsBouquet", true))
-	    makeRemainingChannelsBouquet();
-
-	storeBouquets();
+		makeRemainingChannelsBouquet();
 }
 
 CBouquet* CBouquetManager::addBouquet( string name)

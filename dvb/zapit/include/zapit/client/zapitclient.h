@@ -81,7 +81,7 @@ class CZapitClient:public CBasicClient
 			BM_CREATEBOUQUETS,
 			BM_DELETEBOUQUETS,
 			BM_DONTTOUCHBOUQUETS,
-			BM_UPDATEBOUQUETS,	 // not yet supported
+			BM_UPDATEBOUQUETS,
 			BM_CREATESATELLITEBOUQUET
 		};
 
@@ -421,7 +421,7 @@ class CZapitClient:public CBasicClient
 	/*
 	  ein beliebiges Event anmelden
 	*/
-	void registerEvent(const unsigned int eventID, const unsigned int clientID, const std::string udsName);
+	void registerEvent(const unsigned int eventID, const unsigned int clientID, const char * const udsName);
 
 	/*
 	  ein beliebiges Event abmelden

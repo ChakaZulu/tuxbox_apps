@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.92 2003/06/29 12:57:47 alexw Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.93 2003/09/16 08:58:38 thegoodguy Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -843,14 +843,14 @@ bool CZapitClient::isRecordModeActive()
 	return response.activated;
 }
 
-void CZapitClient::registerEvent(const unsigned int eventID, const unsigned int clientID, const std::string udsName)
+void CZapitClient::registerEvent(const unsigned int eventID, const unsigned int clientID, const char * const udsName)
 {
 	CEventServer::commandRegisterEvent msg;
 
 	msg.eventID = eventID;
 	msg.clientID = clientID;
 
-	strcpy(msg.udsName, udsName.c_str());
+	strcpy(msg.udsName, udsName);
 
 	send(CZapitMessages::CMD_REGISTEREVENTS, (char*)&msg, sizeof(msg));
 

@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.328 2003/08/15 23:34:10 obi Exp $
+ * $Id: zapit.cpp,v 1.329 2003/09/16 08:58:39 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -459,6 +459,8 @@ int prepare_channels(fe_type_t frontendType, diseqc_t diseqcType)
 
 	INFO("LoadServices: success");
 	bouquetManager->loadBouquets();
+	bouquetManager->storeBouquets();
+
 	return 0;
 }
 
@@ -702,6 +704,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	{
 		CZapitMessages::responseCmd response;
 		bouquetManager->renumServices();
+		bouquetManager->storeBouquets();
 		response.cmd = CZapitMessages::CMD_READY;
 		CBasicServer::send_data(connfd, &response, sizeof(response));
 		eventServer->sendEvent(CZapitClient::EVT_BOUQUETS_CHANGED, CEventServer::INITID_ZAPIT);
@@ -953,6 +956,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	
 	case CZapitMessages::CMD_BQ_RENUM_CHANNELLIST:
 		bouquetManager->renumServices();
+		bouquetManager->storeBouquets();
 		break;
 
 	case CZapitMessages::CMD_BQ_SAVE_BOUQUETS:
@@ -1520,7 +1524,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.328 2003/08/15 23:34:10 obi Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.329 2003/09/16 08:58:39 thegoodguy Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
