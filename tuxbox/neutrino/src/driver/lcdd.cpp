@@ -123,13 +123,6 @@ bool CLCD::lcdInit(const char * fontfile, const char * fontname, const bool _set
 	}
 	display.dump_screen(&icon_power);
 
-	if (!display.paintIcon("neutrino_lcd.raw",0,0,false))
-	{
-		printf("exit...(no neutrino_lcd.raw)\n");
-		return false;
-	}
-	display.dump_screen(&icon_lcd);
-
 	if (!display.paintIcon("neutrino_lcd2.raw",0,0,false))
 	{
 		printf("exit...(no neutrino_lcd2.raw)\n");
@@ -144,6 +137,13 @@ bool CLCD::lcdInit(const char * fontfile, const char * fontname, const bool _set
 	}
 	display.dump_screen(&icon_lcd3);
 
+	if (!display.paintIcon("neutrino_lcd.raw",0,0,false))
+	{
+		printf("exit...(no neutrino_lcd.raw)\n");
+		return false;
+	}
+	display.dump_screen(&icon_lcd);
+	
 	mode = MODE_TVRADIO;
 	showServicename("Booting...");
 	showclock=true;
