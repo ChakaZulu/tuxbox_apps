@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.94 2001/12/12 11:39:04 McClean Exp $
+        $Id: neutrino.cpp,v 1.95 2001/12/12 12:03:46 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.95  2001/12/12 12:03:46  McClean
+  make flash-compatible
+
   Revision 1.94  2001/12/12 11:39:04  McClean
   fix timeselect-bug (cinedom)
 
@@ -920,6 +923,10 @@ void CNeutrinoApp::CmdParser(int argc, char **argv)
 		{
 			printf("Software update enabled\n");
 			softupdate = true;
+		}
+		else if ( !strcmp(argv[x], "-z"))
+		{
+			printf("zapitmode is default..\n");
 		}
 		else {
 			printf("Usage: neutrino [-su]\n");
@@ -1986,7 +1993,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.94 2001/12/12 11:39:04 McClean Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.95 2001/12/12 12:03:46 McClean Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;
