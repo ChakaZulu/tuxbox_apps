@@ -149,7 +149,7 @@ void CLocaleManager::loadLocale(std::string locale)
 			    (strncmp(keystr, "file", 4) != 0) &&
 			    (strncmp(keystr, "fontmenu", 8) != 0) &&
 			    (strncmp(keystr, "fontsize", 8) != 0) &&
-			    (strncmp(keystr, "keychooser", 10) != 0) &&
+			    (strncmp(keystr, "k", 1) != 0) &&
 			    (strncmp(keystr, "languagesetup", 13) != 0) &&
 			    (strncmp(keystr, "lcdcontroler", 12) != 0) &&
 			    (strncmp(keystr, "lcdmenu", 7) != 0) &&
@@ -171,7 +171,7 @@ void CLocaleManager::loadLocale(std::string locale)
 			    (strncmp(keystr, "streamingmenu", 13) != 0) &&
 			    (strncmp(keystr, "timersettings", 13) != 0) &&
 			    (strncmp(keystr, "timing", 6) != 0) &&
-			    (strncmp(keystr, "videomenu", 9) != 0) &&
+			    (strncmp(keystr, "v", 1) != 0) &&
 			    ((strncmp(keystr, "flashupdate", 11) != 0) || 
 			     ((strcmp(keystr, "flashupdate.actionreadflash") == 0) ||
 			      (strcmp(keystr, "flashupdate.getinfofile") == 0) ||
@@ -182,7 +182,6 @@ void CLocaleManager::loadLocale(std::string locale)
 			      (strcmp(keystr, "flashupdate.reallyflashmtd") == 0) ||
 			      (strcmp(keystr, "flashupdate.savesuccess") == 0) ||
 			      (strcmp(keystr, "flashupdate.versioncheck") == 0))) &&
-			    ((strncmp(keystr, "keybindingmenu", 14) != 0) || (strncmp(keystr, "keybindingmenu.repeatblock", 26) == 0)) &&
 			    ((strncmp(keystr, "mainsettings", 12) != 0) || (strcmp(keystr, "mainsettings.savesettingsnow_hint") == 0)) &&
 			    ((strncmp(keystr, "servicemenu", 11) != 0) || (strcmp(keystr, "servicemenu.reload_hint") == 0)) &&
 			    ((strncmp(keystr, "timerlist", 9) != 0) || (strncmp(keystr, "timerlist.weekdays.hint", 23) == 0)) &&
