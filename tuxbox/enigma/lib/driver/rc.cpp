@@ -128,6 +128,7 @@ int eRCInput::lock()
 		for ( std::map<eString,eRCDevice*,lstr>::iterator it( devices.begin() );
 			it != devices.end(); ++it)
 		{
+			it->second->getDriver()->flushBuffer();
 			it->second->getDriver()->lock();
 		}
 	}
