@@ -238,7 +238,8 @@ void CFileBrowser::ChangeDir(std::string filename)
 		newpath=filename;
 	}
 	if(newpath.rfind("/") != newpath.length()-1 ||
-		newpath.length() == strlen(VLC_URI))
+      newpath.length() == 0 ||
+		newpath == VLC_URI)
 	{
 		newpath = newpath + "/";
 	}
