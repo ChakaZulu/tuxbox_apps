@@ -18,5 +18,4 @@ install-exec-local:
 	install -d $(CONFIGDIR)/tuxtxt
 	install .libs/tuxtxt.so $(PLUGINDIR)
 	install -m 0644 tuxtxt.cfg $(PLUGINDIR)
-	install -m 0644 font/tuxtxt.fon $(FONTDIR)
 	install -m 0644 tuxtxt.conf $(CONFIGDIR)/tuxtxt
