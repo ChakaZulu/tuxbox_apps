@@ -15,7 +15,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 program: fserver by Axel Buehning <mail at diemade.de>
 
-$Id: fserver.c,v 1.4 2004/04/29 02:10:27 carjay Exp $
+$Id: fserver.c,v 1.5 2004/04/30 12:24:06 gagga Exp $
 
 */
 
@@ -48,6 +48,7 @@ int main(int argc, char * argv[])
 	struct sockaddr_in  servaddr;
 	int ListenSocket, ConnectionSocket;
 	u_short Port = LISTENPORT;
+	u_short splitsize = 0;
 	char buf[BUFLEN];
 	char * p_act;
 	int rc;
@@ -63,30 +64,19 @@ int main(int argc, char * argv[])
 	struct sockaddr_in cliaddr;
 	socklen_t clilen = sizeof(cliaddr);
 
-	printf("[fserver.c] fserver version $Id: fserver.c,v 1.4 2004/04/29 02:10:27 carjay Exp $\n");
+	printf("[fserver.c] fserver version $Id: fserver.c,v 1.5 2004/04/30 12:24:06 gagga Exp $\n");
 	
 	// set signal handler for clean termination
 	signal(SIGTERM, clean_exit);
-	
-	a_arg[0] = a_grabname;
-	a_arg[1] = "-s";
-	a_arg[2] = a_filename;
-	a_arg[3] = a_vpid;
-	a_arg[4] = a_apid;
-	n = 5;
-
-	strcpy (a_grabname,argv[0]);
-	if (strrchr(a_grabname,'/')){
-		strcpy (strrchr(a_grabname,'/') + 1, "streamfile");
-	}
-	else {
-		strcpy(a_grabname,"streamfile");
-	}
 	
 	for (i = 1; i < argc; i++) {
 		if (!strcmp("-sport",argv[i])) {
 			i++; if (i >= argc) { fprintf(stderr, "[fserver.c] need port for -sport\n"); return -1; }
 			Port = atoi(argv[i]);
+		}
+		else if (!strcmp("-splitsize",argv[i])) {
+			i++; if (i >= argc) { fprintf(stderr, "[fserver.c] need size for -splizsize\n"); return -1; }
+			splitsize = atoi(argv[i]);
 		}
 		else if (!strcmp("-o",argv[i])) {
 			i++; if (i >= argc) { fprintf(stderr, "[fserver.c] need path for -o\n"); return -1; }
@@ -96,6 +86,34 @@ int main(int argc, char * argv[])
 			a_arg[n++]=argv[i];
 		}
 	}
+
+	strcpy (a_grabname,argv[0]);
+	if (strrchr(a_grabname,'/')){
+		strcpy (strrchr(a_grabname,'/') + 1, "streamfile");
+	}
+	else {
+		strcpy(a_grabname,"streamfile");
+	}
+
+	n=0;
+	a_arg[n] = a_grabname;
+	n++;
+	a_arg[n] = "-s";
+	n++;
+	if (splitsize > 0) {
+    	a_arg[n] = "-l";
+    	n++;
+    	char splitsize_string[10];
+    	sprintf(splitsize_string, "%d",splitsize);
+    	a_arg[n] = splitsize_string;
+    	n++;
+	}
+	a_arg[n] = a_filename;
+	n++;
+	a_arg[n] = a_vpid;
+	n++;
+	a_arg[n] = a_apid;
+	n++;
 	a_arg[n] = 0;
 
 	//network-setup
