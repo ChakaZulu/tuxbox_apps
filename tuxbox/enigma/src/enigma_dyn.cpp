@@ -55,7 +55,7 @@ using namespace std;
 #define RED "#CB0303"
 #define GREEN "#1FCB12"
 #define YELLOW "#F5FF3C"
-#define LIGHTGREY "#FEFEFE"
+#define LIGHTGREY "#F4F4EC"
 #define DARKGREY "#D9E0E7"
 #define LEFTNAVICOLOR "#D9E0E7"
 #define TOPNAVICOLOR "#D9E0E7"
@@ -1064,7 +1064,7 @@ public:
 			{
 				result += "<a href=\"javascript:deleteMovie('";
 				result += serviceRef;
-				result += "')\"><img src=\"edittrash.png\" border=0></a>";
+				result += "')\"><img src=\"trash.gif\" height=20 border=0></a>";
 			}
 			else
 				result += "&#160;";
