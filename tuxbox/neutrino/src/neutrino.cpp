@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.22 2001/09/07 00:21:39 McClean Exp $
+        $Id: neutrino.cpp,v 1.23 2001/09/09 23:53:46 fnbrd Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,10 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.23  2001/09/09 23:53:46  fnbrd
+  Fixed some bugs, only shown compiling with -Os.
+  Conclusion: use -Os ;)
+
   Revision 1.22  2001/09/07 00:21:39  McClean
   spezial shutdown (lcd) fix for GeOrG :))
 
@@ -493,7 +497,7 @@ void CNeutrinoApp::firstChannel()
 
 	write(sock_fd, &sendmessage, sizeof(sendmessage));
 	return_buf = (char*) malloc(4);
-	memset(return_buf, 0, sizeof(return_buf));
+	memset(return_buf, 0, 4);
 	
 	if (recv(sock_fd, return_buf, 3,0) <= 0 ) {
 		perror("recv(zapit)");
@@ -505,8 +509,10 @@ void CNeutrinoApp::firstChannel()
 	if (strncmp(return_buf,"00a",3))
 	{
 		printf("Wrong Command was sent for firstChannel(). Exiting.\n");
+		free(return_buf);
 		return;
 	}
+	free(return_buf);
 	
 	
 	memset(&firstchannel, 0, sizeof(firstchannel));
@@ -558,7 +564,7 @@ void CNeutrinoApp::channelsInit()
 
 		write(sock_fd, &sendmessage, sizeof(sendmessage));
 		return_buf = (char*) malloc(4);
-		memset(return_buf, 0, sizeof(return_buf));
+		memset(return_buf, 0, 4);
 		if (recv(sock_fd, return_buf, 3,0) <= 0 ) {
 			perror("recv(zapit)");
 			exit(-1);
@@ -568,10 +574,11 @@ void CNeutrinoApp::channelsInit()
 	
 		if (atoi(return_buf) != 5)
 		{
+         		free(return_buf);
 			printf("Wrong Command was send for channelsInit(). Exiting.\n");
 			return;
 		}
-	
+	        free(return_buf);
 		memset(&zapitchannel,0,sizeof(zapitchannel));
 		while (recv(sock_fd, &zapitchannel, sizeof(zapitchannel),0)>0) {
 			char channel_name[30];
