@@ -12,21 +12,13 @@
 #include <draw.h>
 #include <maze.h>
 
+#include <../../mczap/neutrinoNG/plugins/gameplugins.h>
+
 	int		doexit = 0;
 	int		debug = 0;
 extern	int	gametime;
 extern	int	pices;
 extern	unsigned short	actcode;
-
-typedef struct _SPluginInfo
-{
-	char			name[20];
-	char			desc[100];
-	int				type;
-	unsigned char	needfb;
-	unsigned char	needrc;
-	unsigned char	needlcd;
-} SPluginInfo;
 
 int pacman_exec( int fdfb, int fdrc, int fdlcd )
 {
@@ -86,8 +78,9 @@ int pacman_exec( int fdfb, int fdrc, int fdlcd )
 	return 0;
 }
 
-int	pacman_getInfo( SPluginInfo *info )
+int	pacman_getInfo( struct SPluginInfo *info )
 {
+	info->pluginversion = 1;
 	strcpy(info->name,"Pacman");
 	strcpy(info->desc,"The good old pacman in new dboxII generation");
 	info->type=1;

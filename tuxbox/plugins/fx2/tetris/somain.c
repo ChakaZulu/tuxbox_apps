@@ -12,19 +12,11 @@
 #include <draw.h>
 #include <board.h>
 
+#include <../../mczap/neutrinoNG/plugins/gameplugins.h>
+
 	int		debug = 0;
 	int		doexit = 0;
 extern	unsigned short	actcode;
-
-typedef struct _SPluginInfo
-{
-	char			name[20];
-	char			desc[100];
-	int				type;
-	unsigned char	needfb;
-	unsigned char	needrc;
-	unsigned char	needlcd;
-} SPluginInfo;
 
 int tetris_exec( int fdfb, int fdrc, int fdlcd )
 {
@@ -82,8 +74,9 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd )
 	return 0;
 }
 
-int	tetris_getInfo( SPluginInfo *info )
+int	tetris_getInfo( struct SPluginInfo *info )
 {
+	info->pluginversion=1;
 	strcpy(info->name,"Tetris");
 	strcpy(info->desc,"i break together - tetris  :)");
 	info->type=1;
