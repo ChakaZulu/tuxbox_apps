@@ -64,13 +64,13 @@ int zapSubMode = ZAPSUBMODEBOUQUETS;
 
 extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
 
-eString zap[5][6] =
+eString zap[5][5] =
 {
-	{"TV", ";0:7:1:0:0:0:0:0:0:0:", /* Satellites */ ";1:15:fffffffc:12:0:0:0:0:0:0:", /* Providers */ ";1:15:ffffffff:12:ffffffff:0:0:0:0:0:", /* Bouquets */ ";4097:7:0:6:0:0:0:0:0:0:", /* All Services */ ";1:15:ffffffff:12:fffffffe:0:0:0:0:0:" },
-	{"Radio", ";0:7:2:0:0:0:0:0:0:0:", /* Satellites */ ";1:15:fffffffc:4:0:0:0:0:0:0:", /* Providers */ ";1:15:ffffffff:4:ffffffff:0:0:0:0:0:", /* Bouquets */ ";4097:7:0:4:0:0:0:0:0:0:", /* All Services */ ";1:15:ffffffff:4:fffffffe:0:0:0:0:0:" },
-	{"Data", ";0:7:6:0:0:0:0:0:0:0:", /* Satellites */ ";1:15:fffffffc:ffffffe9:0:0:0:0:0:0:", /* Providers */ ";1:15:ffffffff:ffffffe9:ffffffff:0:0:0:0:0:", /* Bouquets */ "", /* All Services */ ";1:15:ffffffff:ffffffe9:fffffffe:0:0:0:0:0:" },
+	{"TV", ";0:7:1:0:0:0:0:0:0:0:", /* Satellites */ ";1:15:fffffffc:12:0:0:0:0:0:0:", /* Providers */ ";1:15:ffffffff:12:ffffffff:0:0:0:0:0:", /* Bouquets */ ";4097:7:0:6:0:0:0:0:0:0:" },
+	{"Radio", ";0:7:2:0:0:0:0:0:0:0:", /* Satellites */ ";1:15:fffffffc:4:0:0:0:0:0:0:", /* Providers */ ";1:15:ffffffff:4:ffffffff:0:0:0:0:0:", /* Bouquets */ ";4097:7:0:4:0:0:0:0:0:0:" },
+	{"Data", ";0:7:6:0:0:0:0:0:0:0:", /* Satellites */ ";1:15:fffffffc:ffffffe9:0:0:0:0:0:0:", /* Providers */ ";1:15:ffffffff:ffffffe9:ffffffff:0:0:0:0:0:", /* Bouquets */ "" },
 	{"Recordings", ";4097:7:0:1:0:0:0:0:0:0:", /* Satellites */ "", /* Providers */ "", /* Bouquets */ ""},
-	{"Root", ";2:47:0:0:0:0:/", /* Satellites */ "", /* Providers */ "", /* Bouquets */ "", /* All Services */ ""}
+	{"Root", ";2:47:0:0:0:0:/", /* Satellites */ "", /* Providers */ "", /* Bouquets */ "" }
 };
 
 eString removeBadChars(eString s)
@@ -751,12 +751,8 @@ static eString getLeftNavi(eString mode, eString path)
 	{
 		if (pdaScreen == 0)
 		{
-			if ( eSystemInfo::getInstance()->getFEType() != eSystemInfo::feSatellite )
-			{
-				result += button(110, "All Services", LEFTNAVICOLOR, "?path=" + zap[zapMode][ZAPSUBMODEALLSERVICES]);
-				result += "<br>";
-			}
-			else if (zap[zapMode][ZAPSUBMODESATELLITES])
+			if ( zap[zapMode][ZAPSUBMODESATELLITES]
+				&& eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )
 			{
 				result += button(110, "Satellites", LEFTNAVICOLOR, "?path=" + zap[zapMode][ZAPSUBMODESATELLITES]);
 				result += "<br>";
@@ -2304,9 +2300,6 @@ static eString getContent(eString mode, eString path)
 							break;
 						case ZAPSUBMODEBOUQUETS:
 							tmp += " - Bouquets";
-							break;
-						case ZAPSUBMODEALLSERVICES:
-							tmp += " - All Services";
 							break;
 					}
 				}
@@ -4216,7 +4209,7 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 			}
 		}
 
-		for (int i = 2; i < 6; i++)
+		for (int i = 2; i < 5; i++)
 		{
 			if (spath == zap[zapMode][i])
 			{
