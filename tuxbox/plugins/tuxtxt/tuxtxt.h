@@ -128,6 +128,13 @@
 #define	RC_DBOX		0x18
 #define	RC_HOME		0x1F
 
+//messages
+
+#define ShowInfoBar		0
+#define PageNotFound	1
+#define ShowServiceName	2
+#define NoServicesFound 3
+
 //functions
 
 void ConfigMenu();
@@ -153,7 +160,7 @@ void CopyBB2FB();
 void RenderCatchedPage();
 void RenderCharFB(int Char, int Attribute);
 void RenderCharBB(int Char, int Attribute);
-void RenderPageNotFound();
+void RenderMessage(int Message);
 void RenderPage();
 void DecodePage();
 void ShowCacheStatus();
@@ -187,7 +194,7 @@ int catch_row, catch_col, catched_page;
 int prev_100, prev_10, next_10, next_100;
 int fnc_old, fnc_mode1, fnc_mode2, fnc_old1, fnc_old2;
 int clear_page, clear_subpage;
-int pids_found;
+int pids_found, current_service;
 int SDT_ready;
 
 FILE *conf;

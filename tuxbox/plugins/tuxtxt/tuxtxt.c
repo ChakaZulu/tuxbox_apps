@@ -5,6 +5,9 @@
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
+ *    V1.30: change infobar, fix servicescan (segfault on RTL Shop)           *
+ *    V1.29: infobar improvements by AlexW                                    *
+ *    V1.28: use devfs device names by obi                                    *
  *    V1.27: show cache-status on lcd                                         *
  *    V1.26: ups, forgot this one                                             *
  *    V1.25: fixed colors (color 0 transparent)                               *
@@ -29,7 +32,7 @@
  *    V1.05: added newsflash/subtitle support                                 *
  *    V1.04: skip not received pages on +/-10, some mods                      *
  *    V1.03: segfault fixed                                                   *
- *    V1.02: made it work under enigma                                        *
+ *    V1.02: made it work under enigma by trh                                 *
  *    V1.01: added tuxtxt to cvs                                              *
  ******************************************************************************/
 
@@ -43,7 +46,7 @@ void plugin_exec(PluginParam *par)
 {
 	//show versioninfo
 
-		printf("\nTuxTxt 1.27 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
+		printf("\nTuxTxt 1.30 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
 
 	//get params
 
@@ -332,19 +335,15 @@ int Init()
 		next_100 = 0x100;
 		next_10  = 0x100;
 		subpage	 = 0;
-		SDT_ready = 0;
 		pageupdate = 0;
 
 		zap_subpage_manual = 0;
 
-	//show infobar
-
-		RenderPageNotFound();
+		SDT_ready = 0;
 
 	//get all vtxt-pids
-		SDT_ready = 1;
+
 		if(GetVideotextPIDs() == 0) return 0;
-		RenderPageNotFound();
 
 	//set filter & start demuxer
 
@@ -456,11 +455,15 @@ void CleanUp()
 int GetVideotextPIDs()
 {
 	struct dmxSctFilterParams dmx_flt;
-	int pat_scan, pmt_scan, sdt_scan, desc_scan, pid_test, byte, diff; //pmt_scan_start
+	int pat_scan, pmt_scan, sdt_scan, desc_scan, pid_test, byte, diff;
 
 	unsigned char PAT[1024];
 	unsigned char SDT[1024];
 	unsigned char PMT[1024];
+
+	//show infobar
+
+		RenderMessage(ShowInfoBar);
 
 	//read PAT to get all PMT's
 
@@ -484,27 +487,6 @@ int GetVideotextPIDs()
 			perror("TuxTxt <read PAT>");
 			return 0;
 		}
-
-	//read SDT to get servicenames
-
-		dmx_flt.pid				= 0x0011;
-		dmx_flt.flags			= DMX_ONESHOT | DMX_CHECK_CRC | DMX_IMMEDIATE_START;
-		dmx_flt.filter.filter[0]= 0x42;
-		dmx_flt.filter.mask[0]	= 0xFF;
-		dmx_flt.timeout			= 5000;
-
-		if(ioctl(dmx, DMX_SET_FILTER, &dmx_flt) == -1)
-		{
-			perror("TuxTxt <DMX_SET_FILTER SDT>");
-			SDT_ready = 0;
-		}
-
-		if(read(dmx, SDT, sizeof(SDT)) == -1)
-		{
-			perror("TuxTxt <read SDT>");
-			SDT_ready = 0;
-		}
-
 
 	//scan each PMT for vtxt-pid
 
@@ -531,12 +513,11 @@ int GetVideotextPIDs()
 				perror("TuxTxt <read PMT>");
 				continue;
 			}
-
 			for(pmt_scan = 0x0C + ((PMT[0x0A]<<8 | PMT[0x0B]) & 0x0FFF); pmt_scan < (((PMT[0x01]<<8 | PMT[0x02]) & 0x0FFF) - 7); pmt_scan += 5 + PMT[pmt_scan + 4])
 			{
 				if(PMT[pmt_scan] == 6)
 				{
-					for(desc_scan = pmt_scan + 5; desc_scan < pmt_scan + ((PMT[pmt_scan + 3]<<8 | PMT[pmt_scan + 4]) & 0x0FFF); desc_scan += 2 + PMT[desc_scan + 1])
+					for(desc_scan = pmt_scan + 5; desc_scan < pmt_scan + ((PMT[pmt_scan + 3]<<8 | PMT[pmt_scan + 4]) & 0x0FFF) + 5; desc_scan += 2 + PMT[desc_scan + 1])
 					{
 						if(PMT[desc_scan] == 0x56)
 						{
@@ -555,8 +536,49 @@ skip_pid:;
 			}
 		}
 
+	//check for videotext
+
+		if(pids_found == 0)
+		{
+			printf("TuxTxt <no Videotext on TS found>\n");
+
+			RenderMessage(NoServicesFound);
+
+			sleep(3);
+
+			return 0;
+		}
+
+	//read SDT to get servicenames
+
+		dmx_flt.pid				= 0x0011;
+		dmx_flt.flags			= DMX_ONESHOT | DMX_CHECK_CRC | DMX_IMMEDIATE_START;
+		dmx_flt.filter.filter[0]= 0x42;
+		dmx_flt.filter.mask[0]	= 0xFF;
+		dmx_flt.timeout			= 5000;
+
+		if(ioctl(dmx, DMX_SET_FILTER, &dmx_flt) == -1)
+		{
+			perror("TuxTxt <DMX_SET_FILTER SDT>");
+
+			RenderMessage(ShowServiceName);
+
+			return 1;
+		}
+
+		if(read(dmx, SDT, sizeof(SDT)) == -1)
+		{
+			perror("TuxTxt <read SDT>");
+
+			RenderMessage(ShowServiceName);
+
+			return 1;
+		}
+
+		SDT_ready = 1;
+
 	//scan SDT to get servicenames
-		if (SDT_ready)
+
 		for(sdt_scan = 0x0B; sdt_scan < ((SDT[1]<<8 | SDT[2]) & 0x0FFF) - 7; sdt_scan += 5 + ((SDT[sdt_scan + 3]<<8 | SDT[sdt_scan + 4]) & 0x0FFF))
 		{
 			for(pid_test = 0; pid_test < pids_found; pid_test++)
@@ -565,7 +587,6 @@ skip_pid:;
 				{
 					diff = 0;
 					pid_table[pid_test].service_name_len = SDT[sdt_scan+9 + SDT[sdt_scan+8]];
-
 					for(byte = 0; byte < pid_table[pid_test].service_name_len; byte++)
 					{
 						if(SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] == 'ִ') SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] = 0x5B;
@@ -585,15 +606,21 @@ skip_pid:;
 			}
 		}
 
-	//check videotext
+	//show current servicename
 
-		if(pids_found == 0)
+		current_service = 0;
+
+		if(vtxtpid != 0) 
 		{
-			printf("TuxTxt <no Videotext on TS found>\n");
-			return 0;
+			while(pid_table[current_service].vtxt_pid != vtxtpid && current_service < pids_found)
+			{
+				current_service++;
+			}
 		}
 
-		return 1;
+		RenderMessage(ShowServiceName);
+
+	return 1;
 }
 
 /******************************************************************************
@@ -627,7 +654,7 @@ void ConfigMenu()
 		if(vtxtpid == 0) vtxtpid = pid_table[0].vtxt_pid;
 		else
 		{
-			while(pid_table[current_pid].vtxt_pid != vtxtpid)
+			while(pid_table[current_pid].vtxt_pid != vtxtpid && current_pid < pids_found)
 			{
 				current_pid++;
 			}
@@ -636,8 +663,7 @@ void ConfigMenu()
 		if (SDT_ready)
 			memcpy(&menu[6*62 + 3 + (24-pid_table[current_pid].service_name_len)/2], &pid_table[current_pid].service_name, pid_table[current_pid].service_name_len);
 		else
-			memcpy(&menu[6*62 + 3 + 4], "Aktueller Sender", 16);
-
+			sprintf(&menu[6*62 + 13], "%.4X", vtxtpid);
 
 		if(current_pid == 0 || pids_found == 1)				 menu[6*62 +  1] = ' ';
 		if(current_pid == pids_found - 1 || pids_found == 1) menu[6*62 + 28] = ' ';
@@ -781,7 +807,9 @@ void ConfigMenu()
 									current_pid--;
 
 									memset(&menu[6*62 + 3], ' ', 24);
-									memcpy(&menu[6*62 + 3 + (24-pid_table[current_pid].service_name_len)/2], &pid_table[current_pid].service_name, pid_table[current_pid].service_name_len);
+
+									if(SDT_ready) memcpy(&menu[6*62 + 3 + (24-pid_table[current_pid].service_name_len)/2], &pid_table[current_pid].service_name, pid_table[current_pid].service_name_len);
+									else		  sprintf(&menu[6*62 + 13], "%.4X", pid_table[current_pid].vtxt_pid);
 
 										if(pids_found > 1)
 										{
@@ -811,7 +839,9 @@ void ConfigMenu()
 									current_pid++;
 
 									memset(&menu[6*62 + 3], ' ', 24);
-									memcpy(&menu[6*62 + 3 + (24-pid_table[current_pid].service_name_len)/2], &pid_table[current_pid].service_name, pid_table[current_pid].service_name_len);
+
+									if(SDT_ready) memcpy(&menu[6*62 + 3 + (24-pid_table[current_pid].service_name_len)/2], &pid_table[current_pid].service_name, pid_table[current_pid].service_name_len);
+									else		  sprintf(&menu[6*62 + 13], "%.4X", pid_table[current_pid].vtxt_pid);
 
 									if(pids_found > 1)
 									{
@@ -900,6 +930,9 @@ void ConfigMenu()
 													}
 
 												//show new videotext
+
+													current_service = current_pid;
+													RenderMessage(ShowServiceName);
 
 													fcntl(rc, F_SETFL, O_NONBLOCK);
 													pageupdate = 1;
@@ -1042,7 +1075,7 @@ void PageInput(int Number)
 				}
 				else
 				{
-					RenderPageNotFound();
+					RenderMessage(PageNotFound);
 					printf("TuxTxt <DirectInput => %.3X not found>\n", page);
 				}
 		}
@@ -1808,37 +1841,22 @@ void RenderCharBB(int Char, int Attribute)
 }
 
 /******************************************************************************
- * RenderPageNotFound                                                         *
+ * RenderMessage                                                              *
  ******************************************************************************/
 
-void RenderPageNotFound()
+void RenderMessage(int Message)
 {
 	int byte;
 	int fbcolor, timecolor, menucolor;
-		int current_pid = 0;
-		char message_2[] = "ד Textname:                          הי";
+	char message_1[] = "אבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט";
+	char message_2[] = "ד                                   הי";
+	char message_3[] = "ד   suche nach Videotext-Diensten   הי";
+	char message_4[] = "ד                                   הי";
+	char message_5[] = "וזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי";
+	char message_6[] = "כללללללללללללללללללללללללללללללללללללך";
 
-	
-		if (SDT_ready)
-		{
-			if(vtxtpid == 0)
-				vtxtpid = pid_table[0].vtxt_pid;
-			else
-			{
-				while(pid_table[current_pid].vtxt_pid != vtxtpid)
-				{
-					current_pid++;
-				}
-			}
-			memcpy(&message_2[12], &pid_table[current_pid].service_name, pid_table[current_pid].service_name_len);
-		}
-		else
-			memcpy(&message_2[12], "Suche...", 8);
-	
-	char message_1[] = "אבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט";
-	char message_3[] = "ד Seite ??? nicht im Cache: warte... הי";
-	char message_4[] = "וזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי";
-	char message_5[] = "כלללללללללללללללללללללללללללללללללללללך";
+	char message_7[] = "ד keine Videotext-Dienste verf}gbar הי";
+	char message_8[] = "ד  warte auf Empfang von Seite 100  הי";
 
 	//reset zoom
 
@@ -1870,53 +1888,73 @@ void RenderPageNotFound()
 
 	//set pagenumber
 
-		message_3[ 8] = (page >> 8) | '0';
-		message_3[ 9] = (page & 0x0F0)>>4 | '0';
-		message_3[10] = (page & 0x00F) | '0';
+		if(Message == PageNotFound || Message == ShowServiceName)
+		{
+			memset(&message_3[1], ' ', 35);
+
+			message_8[31] = (page >> 8) | '0';
+			message_8[32] = (page & 0x0F0)>>4 | '0';
+			message_8[33] = (page & 0x00F) | '0';
+			memcpy(&message_4, &message_8, sizeof(message_8));
+
+			if(SDT_ready) memcpy(&message_2[2 + (35 - pid_table[current_service].service_name_len)/2], &pid_table[current_service].service_name, pid_table[current_service].service_name_len);
+			else		  sprintf(&message_2[17], "%.4X", pid_table[current_service].vtxt_pid);
+		}
+		else if(Message == NoServicesFound) memcpy(&message_3, &message_7, sizeof(message_7));
 
 	//render infobar
 
 		PosX = StartX + fontwidth-3;
-		PosY = StartY + fixfontheight*18;
-		for(byte = 0; byte < 38; byte++)
+		PosY = StartY + fixfontheight*16;
+		for(byte = 0; byte < 37; byte++)
 		{
 			RenderCharFB(message_1[byte], menucolor<<4 | menu2);
 		}
-		RenderCharFB(message_1[38], fbcolor<<4 | menu2);
+		RenderCharFB(message_1[37], fbcolor<<4 | menu2);
 
 		PosX = StartX + fontwidth-3;
-		PosY = StartY + fixfontheight*19;
+		PosY = StartY + fixfontheight*17;
 		RenderCharFB(message_2[0], menucolor<<4 | menu2);
-		for(byte = 1; byte < 37; byte++)
+		for(byte = 1; byte < 36; byte++)
 		{
 			RenderCharFB(message_2[byte], menucolor<<4 | white);
 		}
-		RenderCharFB(message_2[37], menucolor<<4 | menu2);
-		RenderCharFB(message_2[38], fbcolor<<4 | menu2);
+		RenderCharFB(message_2[36], menucolor<<4 | menu2);
+		RenderCharFB(message_2[37], fbcolor<<4 | menu2);
 
 		PosX = StartX + fontwidth-3;
-		PosY = StartY + fixfontheight*20;
+		PosY = StartY + fixfontheight*18;
 		RenderCharFB(message_3[0], menucolor<<4 | menu2);
-		for(byte = 1; byte < 37; byte++)
+		for(byte = 1; byte < 36; byte++)
 		{
 			RenderCharFB(message_3[byte], menucolor<<4 | white);
 		}
-		RenderCharFB(message_3[37], menucolor<<4 | menu2);
-		RenderCharFB(message_3[38], fbcolor<<4 | menu2);
+		RenderCharFB(message_3[36], menucolor<<4 | menu2);
+		RenderCharFB(message_3[37], fbcolor<<4 | menu2);
+
+		PosX = StartX + fontwidth-3;
+		PosY = StartY + fixfontheight*19;
+		RenderCharFB(message_4[0], menucolor<<4 | menu2);
+		for(byte = 1; byte < 36; byte++)
+		{
+			RenderCharFB(message_4[byte], menucolor<<4 | white);
+		}
+		RenderCharFB(message_4[36], menucolor<<4 | menu2);
+		RenderCharFB(message_4[37], fbcolor<<4 | menu2);
+
+		PosX = StartX + fontwidth-3;
+		PosY = StartY + fixfontheight*20;
+		for(byte = 0; byte < 37; byte++)
+		{
+			RenderCharFB(message_5[byte], menucolor<<4 | menu2);
+		}
+		RenderCharFB(message_5[37], fbcolor<<4 | menu2);
 
 		PosX = StartX + fontwidth-3;
 		PosY = StartY + fixfontheight*21;
 		for(byte = 0; byte < 38; byte++)
 		{
-			RenderCharFB(message_4[byte], menucolor<<4 | menu2);
-		}
-		RenderCharFB(message_4[38], fbcolor<<4 | menu2);
-
-		PosX = StartX + fontwidth-3;
-		PosY = StartY + fixfontheight*22;
-		for(byte = 0; byte < 39; byte++)
-		{
-			RenderCharFB(message_5[byte], fbcolor<<4 | menu2);
+			RenderCharFB(message_6[byte], fbcolor<<4 | menu2);
 		}
 }
 
@@ -1939,7 +1977,7 @@ void RenderPage()
 			if(subpagetable[page] != 0xFF) DecodePage();
 			else
 			{
-				RenderPageNotFound();
+				RenderMessage(PageNotFound);
 				return;
 			}
 
