@@ -1,7 +1,10 @@
 /*
-  $Id: libucodes.c,v 1.16 2002/08/21 09:18:58 obi Exp $
+  $Id: libucodes.c,v 1.17 2002/08/30 09:03:08 obi Exp $
   
   $Log: libucodes.c,v $
+  Revision 1.17  2002/08/30 09:03:08  obi
+  added some missing microcodes
+
   Revision 1.16  2002/08/21 09:18:58  obi
   no more compile warnings
 
@@ -44,11 +47,18 @@ struct Sucode
 
 static struct Sucode ucodes[] = 
 {
+	{"965d834c7bb743df6841f4fda5b4e790","avia500v083"},
+	{"108fa2fa0ee84451ea7ea2db9adaa44b","avia500v090"},
 	{"fece1d3324e0917b921d814490d8a824","avia500v093"},
 	{"7373f3934263b3c3ea1d0f500f0044a5","avia500v110"},
 	{"da492146ba7e177883feadaa0cf89aa5","avia600vb017"},
+	{"c31dc570cf941afb6fc4813f561aa378","avia600vb018"},
 	{"6a748fb28000738cafeb9e27443ac623","avia600vb022"},
-	{"d4c12df0d4ce8ba9eb858509d832df65","ucode"},
+	{"53c5bc4081dfadab9935ad256e4d6239","ucode_0000"},
+	{"66627c5ddf269a1f3a9f9f3c22fbd41b","ucode_0013"},
+	{"6582a89e7e13e410c366e47b4ef9d38e","ucode_0014"},
+	{"d4c12df0d4ce8ba9eb858509d832df65","ucode_B107"},
+	{"4e080873126f156a0b489af176520620","ucode_B121"},
 	{"ff6fafbd2aa1f29afe232a72fac57870","cam_01_01_001D"},
 	{"c42d6753794dd95146eac31f2a65b516","cam_01_01_004D"},
 	{"be4b0f38557c416ce04e7fa3fa634f95","cam_01_01_005D"},
