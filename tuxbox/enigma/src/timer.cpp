@@ -371,6 +371,67 @@ void eTimerManager::saveTimerList()
 	timerlist->save();
 }
 
+static eString typeToString(int type)
+{
+	std::stringstream s;
+	if ( type & ePlaylistEntry::SwitchTimerEntry )
+		s << "SwitchTimerEntry";
+	if ( type & ePlaylistEntry::RecTimerEntry )
+		s << std::endl << "RecTimerEntry";
+	if ( type & ePlaylistEntry::recDVR )
+		s << std::endl << "recDVR";
+	if ( type & ePlaylistEntry::recVCR )
+		s << std::endl << "recVCR";
+	if ( type & ePlaylistEntry::recNgrab )
+		s << std::endl << "recNgrab";
+	if ( type & ePlaylistEntry::stateWaiting )
+		s << std::endl << "stateWaiting";
+	if ( type & ePlaylistEntry::stateRunning )
+		s << std::endl << "stateRunning";
+	if ( type & ePlaylistEntry::statePaused )
+		s << std::endl << "statePaused";
+	if ( type & ePlaylistEntry::stateFinished )
+		s << std::endl << "stateFinished";
+	if ( type & ePlaylistEntry::stateError )
+		s << std::endl << "stateError";
+	if ( type & ePlaylistEntry::errorNoSpaceLeft )
+		s << std::endl << "errorNoSpaceLeft";
+	if ( type & ePlaylistEntry::errorUserAborted )
+		s << std::endl << "errorUserAborted";
+	if ( type & ePlaylistEntry::errorZapFailed )
+		s << std::endl << "errorZapFailed";
+	if ( type & ePlaylistEntry::errorOutdated )
+		s << std::endl << "errorOutdated";
+	if ( type & ePlaylistEntry::isSmartTimer )
+		s << std::endl << "isSmartTimer";
+	if ( type & ePlaylistEntry::isRepeating )
+	{
+		s << std::endl << "isRepeating(";
+		if ( type & ePlaylistEntry::Su )
+			s << "Su";
+		if ( type & ePlaylistEntry::Mo )
+			s << " Mo";
+		if ( type & ePlaylistEntry::Tue )
+			s << " Tue";
+		if ( type & ePlaylistEntry::Wed )
+			s << " Wed";
+		if ( type & ePlaylistEntry::Thu )
+			s << " Thu";
+		if ( type & ePlaylistEntry::Fr )
+			s << " Fr";
+		if ( type & ePlaylistEntry::Sa )
+			s << " Sa";
+		s << ')';
+	}
+	if ( type & ePlaylistEntry::doFinishOnly )
+		s << std::endl << "doFinishOnly";
+	if ( type & ePlaylistEntry::doShutdown )
+		s << std::endl << "doShutdown";
+	if ( type & ePlaylistEntry::doGoSleep )
+		s << std::endl << "doGoSleep";
+	return s.str();
+}
+
 void eTimerManager::timeChanged()
 {
 	writeToLogfile("--> timeChanged()");
@@ -768,7 +829,6 @@ void eTimerManager::actionHandler()
 						writeToLogfile(eString().sprintf(" - is our new nextEvent... timeToNextEvent is %d", timeToNextEvent));
 					}
 					count++;
-
 				}
 				else if ( i->type & ePlaylistEntry::stateWaiting )
 				{
@@ -820,7 +880,6 @@ void eTimerManager::actionHandler()
 				i++;
 			}
 			eDebug("[eTimerManager] updated ( %d waiting events in list )", count );
-			timerlist->save();
 			if ( nextStartingEvent != timerlist->getList().end() )
 			{
 				tm evtTime;
@@ -877,12 +936,13 @@ void eTimerManager::actionHandler()
 				writeToLogfile("no more waiting events...");
 				actionTimer.stop();
 			}
-			if ( prevEvent != nextStartingEvent || 
-				( prevEvent->type & ePlaylistEntry::isRepeating && 
-					prevEvent->type & ePlaylistEntry::stateFinished &&
-					!(prevEvent->type & ePlaylistEntry::stateWaiting) ) )
+			if ( prevEvent != timerlist->getConstList().end() )
 			{
-				if ( prevEvent != timerlist->getConstList().end() )
+//				eDebug("prevEvent is %s", typeToString(prevEvent->type).c_str() );
+				if ( prevEvent != nextStartingEvent || 
+					( prevEvent->type & ePlaylistEntry::isRepeating && 
+						prevEvent->type & ePlaylistEntry::stateFinished &&
+						!(prevEvent->type & ePlaylistEntry::stateWaiting) ) )
 				{
 					if ( prevEvent->type&ePlaylistEntry::stateError && 
 							 prevEvent->type&ePlaylistEntry::errorUserAborted )
@@ -907,26 +967,32 @@ void eTimerManager::actionHandler()
 						// 2 -> enigma was Wakedup from timer
 						// 3 -> enigma was coming up from deepstandby.. initiated by timer
 						int enigmaState = eZapMain::getInstance()->handleStandby(1);
+						writeToLogfile(eString().sprintf("call eZapMain::handleStandby(1) .. returned is %d, i was %d", enigmaState, i ) );
 
 						if ( i == -1 )
 							i = enigmaState;
 
-						writeToLogfile(eString().sprintf("call eZapMain::handleStandby(%d)",i));
 						if ( prevEvent != timerlist->getConstList().end() 
 							&& prevEvent->type & ePlaylistEntry::stateFinished )
 						{
+							writeToLogfile(eString().sprintf("call eZapMain::handleStandby(%d)", i));
 							eZapMain::getInstance()->handleStandby(i);
 						}
+						else
+							writeToLogfile(eString().sprintf("dont call handleStandby"));
 					}
 					if ( prevEvent->type & ePlaylistEntry::isRepeating 
 						&& prevEvent->type & ePlaylistEntry::stateFinished
 						&& !(prevEvent->type & ePlaylistEntry::stateWaiting) )
 					{
+						writeToLogfile("[eTimerManager]reset stateWaiting to repeating timer");
 						eDebug("[eTimerManager]reset stateWaiting to repeating timer");
 						prevEvent->type |= ePlaylistEntry::stateWaiting;
 					}
 				}
 			}
+			if ( prevEvent != nextStartingEvent )
+				timerlist->save();
 			writeToLogfile(eString().sprintf("<-- actionHandler() calldepth=%d setNextEvent", calldepth--));
 		}
 		break;
@@ -989,6 +1055,7 @@ void eTimerManager::actionHandler()
 						eServiceInterface::getInstance()->play( playbackRef, -1 );
 						if ( playbackRef.type != eServiceReference::idDVB )
 						{
+							eDebug("old service is running again (no DVB) :)");
 							writeToLogfile("old service is running again (no DVB) :)");
 							Decoder::locked=0;
 							playbackRef = eServiceReference();
@@ -1104,6 +1171,7 @@ void eTimerManager::actionHandler()
 			Decoder::locked=0;
 			playbackRef = eServiceReference();
 			conn2.disconnect();
+			eDebug("actionHandler() back on old service.. set stoptimer..");
 			writeToLogfile("actionHandler() back on old service.. set stoptimer..");
 			nextAction = stopEvent;
 			actionTimer.start( getSecondsToEnd() * 1000, true );
