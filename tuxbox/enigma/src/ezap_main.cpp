@@ -295,6 +295,7 @@ eZapMain::eZapMain(): eWidget(0, 1)
 	ASSIGN(Description, eLabel, "description");
 	ASSIGN(VolumeBar, eProgress, "volume_bar");
 
+
 	Clock=new eLabel(this);
 	ASSIGN(Clock, eLabel, "time");
 

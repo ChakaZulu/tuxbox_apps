@@ -67,7 +67,6 @@
 
 	<object name="test">
 		<eWindow position="75:75" size="500:300" text="Skinned testwindow">
-			<ePixmap position="0:0" size="720:216" pixmap="/share/tuxbox/elitedvb/pictures/osd.png"/>
 			<eLabel position="0:0" size="480:50" text="Hello world."
 				font="Courier New Regular;26"/>
 			<eLabel position="50:50" size="430:100" text="you suck\nblabla"/>
