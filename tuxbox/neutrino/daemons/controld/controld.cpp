@@ -44,7 +44,6 @@
 #include "dbox/avs_core.h"
 #include "saa7126/saa7126_core.h"
 #include "ost/video.h"
-
 #include "eventwatchdog.h"
 #include "controldclient.h"
 #include "lcddclient.h"
@@ -53,6 +52,7 @@
 #define SAA7126_DEVICE "/dev/dbox/saa0"
 
 CLcddClient lcdd;
+
 
 struct Ssettings
 {
@@ -117,7 +117,7 @@ void saveSettings()
 	else
 	{
 		tosave=true;
-	}	
+	}
 
 	if(tosave)
 	{
@@ -212,7 +212,16 @@ void setVideoFormat(int format, bool bUnregNotifier = true)
 			return;
 		}
 
-		if (ioctl(fd,AVSIOSFNC,&format)< 0)
+		int avsiosfncFormat = format;
+		if (settings.boxtype == CControldClient::BOXTYPE_PHILIPS) // Philips
+		{
+			switch (format)
+			{
+				case 1 : avsiosfncFormat=2; break;
+				case 2 : avsiosfncFormat=1; break;
+			}
+		}
+		if (ioctl(fd,AVSIOSFNC,&avsiosfncFormat)< 0)
 		{
 			perror("AVSIOSFNC:");
 			return;
@@ -484,7 +493,7 @@ void parse_command(int connfd, CControldClient::commandHead* rmessage)
 	  read(connfd, &msg3, sizeof(msg3));
 	  setvideooutput(msg3.output);
       break;
-	  
+
     case CControldClient::CMD_SETBOXTYPE:
       //printf("[controld] set boxtype\n");
       CControldClient::commandBoxType msg4;
@@ -581,7 +590,7 @@ int main(int argc, char **argv)
 		exit( -1 );
 	}
 
-	//busyBox 
+	//busyBox
 	signal(SIGHUP,sig_catch);
 	signal(SIGINT,sig_catch);
 	signal(SIGQUIT,sig_catch);
