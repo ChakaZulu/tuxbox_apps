@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.9 2004/07/06 21:34:55 chakazulu Exp $
+ * $Id: locals_intern.h,v 1.10 2004/07/11 09:44:11 thegoodguy Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -166,6 +166,14 @@ const char * locale_real_names[] =
 	"audiomenu.stereo",
 	"audioplayer.head",
 	"audioplayer.name",
+	"audioplayer.playlist_fileerror_msg",
+	"audioplayer.playlist_fileerror_title",
+	"audioplayer.playlist_fileoverwrite_msg",
+	"audioplayer.playlist_fileoverwrite_title",
+	"audioplayer.playlist_name",
+	"audioplayer.playlist_name_hint1",
+	"audioplayer.playlist_name_hint2",
+	"audioplayer.save_playlist",
 	"audioplayerpicsettings.general",
 	"bookmarkmanager.delete",
 	"bookmarkmanager.name",
@@ -474,6 +482,7 @@ const char * locale_real_names[] =
 	"miscsettings.head",
 	"miscsettings.hwsections",
 	"miscsettings.infobar_sat_display",
+	"miscsettings.pmtupdate",
 	"miscsettings.shutdown_real",
 	"miscsettings.shutdown_real_rcdelay",
 	"miscsettings.sptsmode",
@@ -519,14 +528,6 @@ const char * locale_real_names[] =
 	"mp3player.shuffle",
 	"mp3player.stop",
 	"mp3player.title_artist",
-	"mp3player.save_playlist",
-	"mp3player.playlist_name",
-	"mp3player.playlist_name_hint1",
-	"mp3player.playlist_name_hint2",
-	"mp3player.playlist_fileerror_title",
-	"mp3player.playlist_fileerror_msg",
-	"mp3player.playlist_fileoverwrite_title",
-	"mp3player.playlist_fileoverwrite_msg",
 	"networkmenu.broadcast",
 	"networkmenu.dhcp",
 	"networkmenu.gateway",

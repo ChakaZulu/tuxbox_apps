@@ -139,6 +139,14 @@ audiomenu.ost ost
 audiomenu.stereo stereo
 audioplayer.head Audio Playlist
 audioplayer.name Audioplayer
+audioplayer.playlist_fileerror_msg Datei kann nicht erstellt werden:
+audioplayer.playlist_fileerror_title Fehler
+audioplayer.playlist_fileoverwrite_msg Soll diese Datei ueberschrieben werden:
+audioplayer.playlist_fileoverwrite_title Ueberschreiben?
+audioplayer.playlist_name Dateiname der Playlist
+audioplayer.playlist_name_hint1 Geben Sie den Dateinamen der Playlist ein
+audioplayer.playlist_name_hint2 Die Erweiterung .m3u wird automatisch angehaengt
+audioplayer.save_playlist Playlist speichern
 audioplayerpicsettings.general Audioplayer / Bildbetrachter
 bookmarkmanager.delete Löschen
 bookmarkmanager.name Bookmarks
@@ -448,6 +456,7 @@ miscsettings.general Allgemein
 miscsettings.head Diverse Einstellungen
 miscsettings.hwsections HW-Sections verwenden
 miscsettings.infobar_sat_display Infobar Satellitenanzeige
+miscsettings.pmtupdate PMT Update verwenden
 miscsettings.shutdown_real Standbymodus
 miscsettings.shutdown_real_rcdelay Verzögerter Shutdown
 miscsettings.sptsmode SPTS-Mode Treiber laden
@@ -493,14 +502,6 @@ mp3player.screensaver_timeout Bildschirmschoner (min, 0=aus)
 mp3player.shuffle Shuffle
 mp3player.stop Stopp
 mp3player.title_artist Titel, Interpret
-mp3player.save_playlist Playlist speichern
-mp3player.playlist_name Dateiname der Playlist
-mp3player.playlist_name_hint1 Geben Sie den Dateinamen der Playlist ein
-mp3player.playlist_name_hint2 Die Erweiterung .m3u wird automatisch angehaengt
-mp3player.playlist_fileerror_title Fehler
-mp3player.playlist_fileerror_msg Datei kann nicht erstellt werden:
-mp3player.playlist_fileoverwrite_title Ueberschreiben?
-mp3player.playlist_fileoverwrite_msg Soll diese Datei ueberschrieben werden:
 networkmenu.broadcast Broadcast
 networkmenu.dhcp DHCP
 networkmenu.gateway Standard Gateway

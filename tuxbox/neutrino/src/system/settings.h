@@ -259,9 +259,9 @@ struct SNeutrinoSettings
 
 
 #if HAVE_DVB_API_VERSION == 1
-#define MISC_SETTING_FILES_COUNT 5
+#define MISC_SETTING_FILES_COUNT 6
 #else
-#define MISC_SETTING_FILES_COUNT 4
+#define MISC_SETTING_FILES_COUNT 5
 #endif
 
 #define MISC_SETTING_SPTS_MODE 0

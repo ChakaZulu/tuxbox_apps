@@ -101,6 +101,14 @@ audiomenu.ost ost
 audiomenu.stereo stereo
 audioplayer.head Audio Playlist
 audioplayer.name Audioplayer
+audioplayer.playlist_fileerror_msg File could not be created:
+audioplayer.playlist_fileerror_title Error
+audioplayer.playlist_fileoverwrite_msg Do you want to overwrite this file:
+audioplayer.playlist_fileoverwrite_title Overwrite?
+audioplayer.playlist_name filename of the play list
+audioplayer.playlist_name_hint1 Please enter the filename of the playlist
+audioplayer.playlist_name_hint2 The extension .m3u will be added automatically
+audioplayer.save_playlist save play list
 audioplayerpicsettings.general audioplayer / picviewer
 bookmarkmanager.delete delete
 bookmarkmanager.name bookmarks
@@ -207,9 +215,7 @@ filebrowser.sort.name (filename)
 filebrowser.sort.namedirsfirst (filename2)
 filebrowser.sort.size (Size)
 filebrowser.sort.type (type)
-flashupdate.action Action:
 flashupdate.actionreadflash reading
-flashupdate.actionwriteflash writing
 flashupdate.cantopenfile can't open file
 flashupdate.cantopenmtd can't open mtd-device
 flashupdate.checkupdate search for new version
@@ -251,7 +257,6 @@ flashupdate.readflash Read whole image
 flashupdate.readflashmtd Read one partition
 flashupdate.ready ready
 flashupdate.reallyflashmtd Do you really want to flash?\n\nIf a error occurs or the image is not\nvalid, the box will not boot after flashing.\n\nImagename: %s\nTarget: %s
-flashupdate.reboot rebooting box....
 flashupdate.savesuccess The image was successfully saved \nunder %s.
 flashupdate.selectimage Available Images
 flashupdate.squashfs.noversion SquashFS version checks are currently only supported when updating over the web.\nAre you sure that you wish to install this image?
@@ -296,7 +301,6 @@ fontsize.menu_info Menu Info
 fontsize.menu_title Menu Title
 gtxalpha.alpha1 Alpha 1
 gtxalpha.alpha2 Alpha 2
-infoviewer.cantdecode Channel can't be decoded
 infoviewer.epgnotload EPG not loaded....
 infoviewer.epgwait waiting for EPG...
 infoviewer.eventlist Event-List
@@ -393,11 +397,9 @@ mainsettings.language Language
 mainsettings.lcd LC-Display
 mainsettings.misc Misc settings
 mainsettings.network Network
-mainsettings.plugins Plugin Settings
 mainsettings.recording Recording
 mainsettings.savesettingsnow save settings now
 mainsettings.savesettingsnow_hint Saving settings,\nplease wait...
-mainsettings.scan Scan settings
 mainsettings.streaming Movieplayer
 mainsettings.video Video
 menu.back back
@@ -410,13 +412,13 @@ messagebox.no No
 messagebox.yes Yes
 miscsettings.bootinfo Show infos at start
 miscsettings.bootmenu Show boot menu
-miscsettings.boxtype DBox type
 miscsettings.driver_boot driver and boot options
 miscsettings.fb_destination Expert! Boot-Console
 miscsettings.general General
 miscsettings.head Misc settings
 miscsettings.hwsections use hardware sections
 miscsettings.infobar_sat_display Satellite display on infobar
+miscsettings.pmtupdate enable pmt update
 miscsettings.shutdown_real Enable standby
 miscsettings.shutdown_real_rcdelay Delayed shutdown
 miscsettings.sptsmode use spts mode
@@ -462,14 +464,6 @@ mp3player.screensaver_timeout screensaver timeout (min, 0=off)
 mp3player.shuffle shuffle
 mp3player.stop Stop
 mp3player.title_artist Title, Artist
-mp3player.save_playlist save play list
-mp3player.playlist_name filename of the play list
-mp3player.playlist_name_hint1 Please enter the filename of the playlist
-mp3player.playlist_name_hint2 The extension .m3u will be added automatically
-mp3player.playlist_fileerror_title Error
-mp3player.playlist_fileerror_msg File could not be created:
-mp3player.playlist_fileoverwrite_title Overwrite?
-mp3player.playlist_fileoverwrite_msg Do you want to overwrite this file:
 networkmenu.broadcast Broadcast
 networkmenu.dhcp DHCP
 networkmenu.gateway default gateway
@@ -525,7 +519,6 @@ parentallock.lockedprogram Locked program (from %d years up)
 parentallock.lockedsender Locked sender...
 parentallock.never never
 parentallock.onsignal on broadcasted lock
-parentallock.onstart on start
 parentallock.parentallock Youth protection
 parentallock.prompt prompt for PIN
 pictureviewer.defdir start dir.
@@ -578,7 +571,6 @@ satsetup.diseqc11 DiSEqC 1.1
 satsetup.diseqc12 DiSEqC 1.2
 satsetup.diseqcrepeat DiSEqC-repeats
 satsetup.extended DiSEqC-Settings
-satsetup.extended_lnb LNB-Settings
 satsetup.extended_motor Motor-Settings
 satsetup.minidiseqc Mini-DiSEqC
 satsetup.motorcontrol Manual Motor-Setup
@@ -604,7 +596,6 @@ scants.numberofradioservices Radio
 scants.numberoftotalservices Total
 scants.numberoftvservices TV
 scants.provider Provider:
-scants.services Services:
 scants.startnow start scan
 scants.transponders Transponders:
 screensetup.lowerright green = setup lower right
@@ -623,18 +614,15 @@ sleeptimerbox.hint1 Shutdown time in min. (000=off)
 sleeptimerbox.hint2 The dbox2 will shutdown after this time.
 sleeptimerbox.title Sleeptimer
 streamfeatures.head Features
-streamfeatures.info Stream-Information
 streaminfo.aratio Aspect Ratio
 streaminfo.aratio_unknown Aspect Ratio: unknown
 streaminfo.audiotype Audiotype
 streaminfo.audiotype_unknown Audiotype: unknown
 streaminfo.bitrate Bitrate
-streaminfo.ecm_invalid invalid CA-system
 streaminfo.framerate Framerate
 streaminfo.framerate_unknown Framerate: unknown
 streaminfo.head Stream-Information
 streaminfo.not_available not available
-streaminfo.not_crypted not crypted
 streaminfo.resolution Resolution
 streaming.buffer_overflow The recording was aborted,\nsince the data could not be written fast enough.
 streaming.busy One or several recording processes are active.\nIf you encounter this message and no recording is active, please restart Neutrino.
@@ -678,7 +666,6 @@ timerlist.bouquetselect choose bouquet
 timerlist.channel Channel
 timerlist.channelselect choose channel
 timerlist.delete Delete
-timerlist.empty There are no timers at the moment
 timerlist.menumodify Modify timer
 timerlist.menunew New timer
 timerlist.message Message
