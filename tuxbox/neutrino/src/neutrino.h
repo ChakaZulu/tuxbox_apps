@@ -41,6 +41,7 @@
 #include "driver/framebuffer.h"
 #include "system/setting_helpers.h"
 #include "libconfigfile/configfile.h"
+#include "driver/vcrcontrol.h"
 #include <string>
 
 using namespace std;
@@ -125,7 +126,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		CUCodeCheckExec				*UCodeChecker;
 		CStreamFeaturesChangeExec	*StreamFeaturesChanger;
 		CIPChangeNotifier			*MyIPChanger;
-
+		CVCRControl					*vcrControl;
 
 		void doChecks();
 		void firstChannel();
@@ -143,7 +144,6 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void standbyMode( bool bOnOff );
 		void setVolume(int key, bool bDoPaint = true);
 		void AudioMute( bool newValue, bool isEvent= false );
-		bool setExternalRecording( int nstreamstatus );
 
 
 		void ExitRun();

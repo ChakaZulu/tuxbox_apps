@@ -137,6 +137,8 @@ CNeutrinoApp::CNeutrinoApp()
 	frameBuffer = CFrameBuffer::getInstance();
 	frameBuffer->setIconBasePath(DATADIR "/neutrino/icons/");
 
+	vcrControl = CVCRControl::getInstance();
+
 	g_fontRenderer = new fontRenderClass;
 	SetupFrameBuffer();
 
@@ -1718,6 +1720,21 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	setupNetwork();
 
+	// setup streaming server 
+	if(g_settings.network_streaming_use)
+	{
+		CVCRControl::CServerDeviceInfo * info = new CVCRControl::CServerDeviceInfo;
+		int port;
+		sscanf(g_settings.network_streamingserverport, "%d", &port);
+		info->ServerAddress = g_settings.network_streamingserver;
+		info->ServerPort = port;
+		info->StopPlayBack = false;
+		info->StopSectionsd = true;
+		info->Name = "ngrab";
+		vcrControl->registerDevice(CVCRControl::DEVICE_SERVER,info);
+		delete info;
+	}
+
 	channelList = new CChannelList( "channellist.head" );
 
 	dprintf( DEBUG_NORMAL, "menue setup\n");
@@ -1838,48 +1855,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 }
 
 
-bool CNeutrinoApp::setExternalRecording(int nstreamstatus )
-{
-	#ifdef USEACTIONLOG
-		g_ActionLog->println("setExternalRecording");
-	#endif
-	if(g_settings.network_streaming_use)
-	{
-		printf("setExternalRecording: %d\n",nstreamstatus);
-
-	#define SA struct sockaddr
-	#define SAI struct sockaddr_in
-
-		int port = 0;
-		sscanf(g_settings.network_streamingserverport, "%d", &port);
-
-		printf("streamstatus : %d\n", streamstatus);
-		printf("server: %s:%d\n",g_settings.network_streamingserver, port);
-
-		int sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-		SAI servaddr;
-		memset(&servaddr,0,sizeof(SAI));
-		servaddr.sin_family=AF_INET;
-		servaddr.sin_port=htons(port);
-		inet_pton(AF_INET, g_settings.network_streamingserver, &servaddr.sin_addr);
-
-
-		if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
-		{
-			perror("[neutrino] -  cannot connect to streamingserver\n");
-			return false;
-		}
-		externalCommand rmsg;
-		rmsg.version=1;
-		rmsg.command = nstreamstatus;
-		write(sock_fd, &rmsg, sizeof(rmsg));
-		close(sock_fd);
-		streamstatus = nstreamstatus;
-	}
-	return true;
-}
-
-
 void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 {
 	while( true )
@@ -1889,20 +1864,32 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 
 		if ( msg == NeutrinoMessages::RECORD_START)
 		{
-			if( (streamstatus == CMD_VCR_STOP) || (streamstatus == CMD_VCR_UNKNOWN) )
+			if(CVCRControl::getInstance()->registeredDevices() > 0)
 			{
-				// noch nicht am streamen . . 
-				setExternalRecording(CMD_VCR_START);
+				if(CVCRControl::getInstance()->getDeviceState() == CVCRControl::CMD_VCR_STOP || CVCRControl::getInstance()->getDeviceState() == CVCRControl::CMD_VCR_UNKNOWN)
+				{
+					CVCRControl::getInstance()->Record();
+				}
+				else
+					printf("falscher state\n");
 			}
+			else
+				printf("Keine vcr Devices registriert\n");
 		}
 
 		if ( msg == NeutrinoMessages::RECORD_STOP)
 		{
-			if( (streamstatus == CMD_VCR_START) || (streamstatus == CMD_VCR_PAUSE) )
+			if(CVCRControl::getInstance()->registeredDevices() > 0)
 			{
-				// wenn momentan am streamen oder paused . .
-				setExternalRecording(CMD_VCR_STOP);
+				if(CVCRControl::getInstance()->getDeviceState() == CVCRControl::CMD_VCR_RECORD || CVCRControl::getInstance()->getDeviceState() == CVCRControl::CMD_VCR_PAUSE)
+				{
+					CVCRControl::getInstance()->Stop();
+				}
+				else
+					printf("falscher state\n");
 			}
+			else
+				printf("Keine vcr Devices registriert\n");
 		}
 
 		if ( msg == NeutrinoMessages::ZAPTO)
@@ -1912,11 +1899,11 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 
 		if ( msg == NeutrinoMessages::ANNOUNCE_ZAPTO)
 		{
-			ShowHint ( "messagebox.info", "gleich umschalten");
+			ShowHint ( "messagebox.info", "In einer Minute wird umschaltet");
 		}
 		if ( msg == NeutrinoMessages::ANNOUNCE_RECORD)
 		{
-			ShowHint ( "messagebox.info", "Die Aufnahme beginnt in wenigen minuten");
+			ShowHint ( "messagebox.info", "Die Aufnahme beginnt in einer minute");
 		}
 		if ( msg == NeutrinoMessages::ANNOUNCE_SLEEPTIMER)
 		{
@@ -2658,7 +2645,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.288 2002/05/31 20:33:29 dirch Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.289 2002/06/01 13:41:08 dirch Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
