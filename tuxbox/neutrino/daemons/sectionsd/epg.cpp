@@ -2,11 +2,11 @@
 // Beispiel zur Benutzung der Klasse Section
 //
 //
-// $Id: epg.cpp,v 1.3 2001/05/13 00:00:36 fnbrd Exp $
+// $Id: epg.cpp,v 1.4 2001/05/13 00:08:54 fnbrd Exp $
 //
 // $Log: epg.cpp,v $
-// Revision 1.3  2001/05/13 00:00:36  fnbrd
-// Fehler behoben, falls keine missing sections.
+// Revision 1.4  2001/05/13 00:08:54  fnbrd
+// Kleine Debugausgabe dazu.
 //
 // Revision 1.2  2001/05/12 23:55:04  fnbrd
 // Ueberarbeitet, geht aber noch nicht ganz.
@@ -222,7 +222,8 @@ int main(int argc, char **argv)
       return 6;
     }
     if(missingSections.find(Section(header.table_id, header.service_id, header.section_number))!=missingSections.end()) {
-      printf("Find missing section\n");
+      printf("Find missing section:");
+      Section::dumpSmallSectionHeader(&header);
 //    if(missingSections.find(Section(header.table_id, header.service_id, header.section_number).key())!=missingSections.end()) {
       // War bisher vermisst
       // In die Menge einfuegen
