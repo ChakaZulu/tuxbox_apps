@@ -1294,10 +1294,6 @@ eZapMain::eZapMain()
 	VolumeBar->setRightColor( eSkin::getActive()->queryColor("volume_right") );
 	VolumeBar->setBorder(0);
 
-/*	subtitle = new eSubtitleWidget();
-	std::set<int> pages; pages.insert(-1);
-	subtitle->start(0x3ea, pages);*/
-
 	dvrInfoBar=new eLabel(this);
 	dvrInfoBar->setName("dvrInfoBar");
 	dvrInfoBar->hide();

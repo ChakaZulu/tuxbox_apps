@@ -323,8 +323,9 @@ private:
 		*DVRSpaceLeft;
 
 	eWidget *dvrInfoBar, *dvbInfoBar, *fileInfoBar;
-	
-	eSubtitleWidget *subtitle;
+
+	eWidget *bla;  // not used
+
 	int dvrfunctions;
 	int stateOSD;
 
