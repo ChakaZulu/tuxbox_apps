@@ -2,7 +2,13 @@
  *                    <<< TuxTxt - Videotext via d-box >>>                    *
  *                                                                            *
  *                        (c) Thomas "LazyT" Loewe '02                        *
- ******************************************************************************/ 
+ *----------------------------------------------------------------------------*
+ * History                                                                    *
+ *                                                                            *
+ *    V1.3 (LazyT): segfault fixed                                            *
+ *    V1.2 (trh)  : made it work under enigma                                 *
+ *    V1.1 (LazyT): added tuxtxt to cvs                                       *
+ ******************************************************************************/
 
 #include "tuxtxt.h"
 
@@ -17,7 +23,7 @@ void plugin_exec(PluginParam *par)
 	
 	//show versioninfo
 
-		printf("\nTuxTxt [0.1.6]\n\n");
+		printf("\nTuxTxt [1.3]\n\n");
 
 	//get params
 
@@ -311,6 +317,7 @@ void plugin_exec(PluginParam *par)
 		ioctl(dmx, DMX_STOP);
 
 		close(dmx);
+
 		if(!extrc)
 			close(rc);
 
@@ -338,6 +345,7 @@ int Init()
 		}
 
 	//open rc
+
 		if(!extrc)
 		{
 			if((rc = open("/dev/dbox/rc0", O_RDONLY | O_NONBLOCK)) == -1)
@@ -350,11 +358,12 @@ int Init()
 		{
 			rc = extrc;
 		}
+
 		ioctl(rc, RC_IOCTL_BCODES, 1);
 
 	//allocate pagebuffer & init all buffers
 
-		if((pagebuffer = malloc(0x8FF * 40*24)) == 0)
+		if((pagebuffer = malloc(0x899 * 40*24)) == 0)
 		{
 			perror("allocate pagebuffers failed");
 			return 0;
@@ -943,10 +952,12 @@ void DecodePage()
 			{
 				page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
 
-				if(doubleheight)
-				{
-					page_char[(row+1)*40 + col] = 255;
-				}
+				//skip doubleheight in lower line
+
+					if(doubleheight)
+					{
+						page_char[(row+1)*40 + col] = 255;
+					}
 			}
 		}
 
@@ -956,7 +967,6 @@ void DecodePage()
 			{
 				for(loop = 0; loop < 40; loop++)
 				{
-//					page_char[(row+1)*40 + loop] = '*';
 					page_atrb[(row+1)*40 + loop] = (page_atrb[row*40 + loop] & 0x38) | (page_atrb[row*40 + loop] & 0x38)>>3;
 				}
 
@@ -976,6 +986,7 @@ void *DecodePacket(void *arg)
 
 	int line, byte, bit;
 	int packet_number;
+	int deham1, deham2, deham3;
 
 	while(1)
 	{
@@ -1010,11 +1021,22 @@ void *DecodePacket(void *arg)
 							}
 						}
 
-					//decode packet number & prepare packet
+					//decode packet number
 
-						packet_number = (dehamming[vtxt_line[3]] & 8) >> 3 | dehamming[vtxt_line[4]] << 1;
+						deham1 = (dehamming[vtxt_line[3]] & 8) >> 3;
+						deham2 = dehamming[vtxt_line[4]] << 1;
 
-						if(packet_number == 0)		//page header
+						if(deham1 == 0xFF || deham2 == 0xFF)
+						{
+							printf("biterror in packet detected - skipping...\n");
+							goto SkipPacket;
+						}
+
+						packet_number = deham1 | deham2;
+
+					//analyze packet
+
+						if(packet_number == 0)								//page header
 						{
 							//remove parity bit from data bytes (dirty, i know...)
 
@@ -1023,21 +1045,35 @@ void *DecodePacket(void *arg)
 									vtxt_line[byte] &= 127;
 								}
 
+							//decode pagenumber
+
+								deham1 = (dehamming[vtxt_line[3]] & 7) << 8;
+								deham2 = dehamming[vtxt_line[6]] << 4;
+								deham3 = dehamming[vtxt_line[5]];
+
+								if(deham1 == 0xFF || deham2 == 0xFF || deham3 == 0xFF)
+								{
+									printf("biterror in pageheader detected - skipping...\n");
+									current_page = -1;
+									goto SkipPacket;
+								}
+
+								current_page = deham1 | deham2 | deham3;
+
 							//copy time info
 
 								memcpy(&timestring[0], &vtxt_line[37], 8);
 
-							//get pagenumber, skip hex-pages and mark page as received
-
-								current_page = ((dehamming[vtxt_line[3]] & 7) << 8) + ((dehamming[vtxt_line[6]]) << 4) + (dehamming[vtxt_line[5]]);
+							//mod pagenumber, skip hex-pages and set cachetable
 
 								if(current_page < 0x100)
 								{
 									current_page += 0x800;
 								}
 
-								if((current_page & 0x0FF) > 0x099)
+								if(((current_page & 0x0F0) > 0x090) || ((current_page & 0x00F) > 0x009))
 								{
+									current_page = -1;
 									goto SkipPacket;
 								}
 
@@ -1058,7 +1094,7 @@ void *DecodePacket(void *arg)
 									update = 1;
 								}
 						}
-						else if(packet_number < 24)	//displayable packet
+						else if(packet_number < 24 && current_page != -1)	//displayable packet for valid page
 						{
 							//remove parity bit from data bytes (dirty, i know...)
 
@@ -1067,7 +1103,7 @@ void *DecodePacket(void *arg)
 									vtxt_line[byte] &= 127;
 								}
 						}
-						else						//non displayable packet
+						else												//non displayable packet
 						{
 							goto SkipPacket;
 						}

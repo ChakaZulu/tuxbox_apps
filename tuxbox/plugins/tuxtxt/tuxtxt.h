@@ -26,7 +26,7 @@
 //colortable
 
 #define black	0x00
-#define red	0x01
+#define red		0x01
 #define green	0x02
 #define yellow	0x03
 #define blue	0x04
@@ -37,37 +37,37 @@
 
 //spacing attributes
 
-#define alpha_black		0x00
-#define alpha_red		0x01
-#define alpha_green		0x02
+#define alpha_black			0x00
+#define alpha_red			0x01
+#define alpha_green			0x02
 #define alpha_yellow		0x03
-#define alpha_blue		0x04
+#define alpha_blue			0x04
 #define alpha_magenta		0x05
-#define alpha_cyan		0x06
-#define alpha_white		0x07
-#define flash			0x08
-#define steady			0x09
-#define end_box			0x0A
-#define start_box		0x0B
-#define normal_size		0x0C
+#define alpha_cyan			0x06
+#define alpha_white			0x07
+#define flash				0x08
+#define steady				0x09
+#define end_box				0x0A
+#define start_box			0x0B
+#define normal_size			0x0C
 #define double_height		0x0D
 #define double_width		0x0E
-#define double_size		0x0F
+#define double_size			0x0F
 #define mosaic_black		0x10
-#define mosaic_red		0x11
+#define mosaic_red			0x11
 #define mosaic_green		0x12
 #define mosaic_yellow		0x13
-#define mosaic_blue		0x14
+#define mosaic_blue			0x14
 #define mosaic_magenta		0x15
-#define mosaic_cyan		0x16
+#define mosaic_cyan			0x16
 #define mosaic_white		0x17
-#define conceal			0x18
+#define conceal				0x18
 #define contiguous_mosaic	0x19
 #define separated_mosaic	0x1A
-#define esc			0x1B
+#define esc					0x1B
 #define black_background	0x1C
 #define new_background		0x1D
-#define hold_mosaic		0x1E
+#define hold_mosaic			0x1E
 #define release_mosaic		0x1F
 
 //rc codes
@@ -160,7 +160,7 @@ unsigned short RCCode;
 
 int Page = 0x100, PageInput = 0, PageInputCount = 2, update = 1, visible = 1, show_string = 1;
 
-int packet, current_page, vtxtpid;
+int packet, current_page = -1, vtxtpid;
 
 unsigned char *pagebuffer;
 unsigned char  pagetable[0x8FF];
