@@ -128,7 +128,7 @@ colormenu.background_head Kolor tla
 colormenu.textcolor Kolor tekstu
 colormenu.textcolor_head Kolor tekstu
 colormenu.fade Redukcja kontrastu 
-colormenu.timing unset
+colormenu.timing Czas wyswietlania OSD
 
 colorthememenu.head Wybor tematu
 colorthememenu.neutrino_theme Temat Neutrino
