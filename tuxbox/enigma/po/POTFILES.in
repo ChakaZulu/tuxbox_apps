@@ -15,6 +15,7 @@ enigma/src/apps/enigma/epgwindow.cpp
 enigma/src/apps/enigma/satconfig.cpp
 enigma/src/apps/enigma/scan.cpp
 enigma/src/apps/enigma/setupnetwork.cpp
+enigma/src/apps/enigma/setup_language.cpp
 enigma/src/apps/enigma/setup_osd.cpp
 enigma/src/apps/enigma/setupvideo.cpp
 enigma/src/apps/enigma/showbnversion.cpp

@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: tuxbox-enigma 0.1\n"
-"POT-Creation-Date: 2002-05-01 09:00+0200\n"
-"PO-Revision-Date: 2002-05-01 09:13+0200\n"
+"POT-Creation-Date: 2002-05-04 01:48+0200\n"
+"PO-Revision-Date: 2002-05-04 02:00+0200\n"
 "Last-Translator: Bastian Blank <waldi@tuxbox.org>\n"
 "Language-Team: German <de@tuxbox.org>\n"
 "MIME-Version: 1.0\n"
@@ -27,7 +27,7 @@ msgid "Transponder scan"
 msgstr "Kanalsuche"
 
 #: enigma/src/apps/enigma/enigma_mainmenu.cpp:25
-#: enigma/src/apps/enigma/enigma_setup.cpp:14
+#: enigma/src/apps/enigma/enigma_setup.cpp:15
 msgid "Setup"
 msgstr "Einstellungen"
 
@@ -51,30 +51,30 @@ msgstr "Beenden"
 msgid "About..."
 msgstr "Über..."
 
-#: enigma/src/apps/enigma/enigma_setup.cpp:17
+#: enigma/src/apps/enigma/enigma_setup.cpp:18
 msgid "[back]"
 msgstr "[Zurück]"
 
-#: enigma/src/apps/enigma/enigma_setup.cpp:18
+#: enigma/src/apps/enigma/enigma_setup.cpp:19
 msgid "Bouquets..."
 msgstr "Bouquets..."
 
-#: enigma/src/apps/enigma/enigma_setup.cpp:19
+#: enigma/src/apps/enigma/enigma_setup.cpp:20
 msgid "Network..."
 msgstr "Netzwerk..."
 
 #. 	CONNECT((list, _("Audio...")))->selected, sel_sound);
-#: enigma/src/apps/enigma/enigma_setup.cpp:21
+#: enigma/src/apps/enigma/enigma_setup.cpp:22
 msgid "Video..."
 msgstr "Video..."
 
-#: enigma/src/apps/enigma/enigma_setup.cpp:22
+#: enigma/src/apps/enigma/enigma_setup.cpp:23
 msgid "Satellites..."
 msgstr "Satelliten..."
 
-#: enigma/src/apps/enigma/scan.cpp:84
-msgid "scanning"
-msgstr ""
+#: enigma/src/apps/enigma/enigma_setup.cpp:24
+msgid "Language..."
+msgstr "Sprache..."
 
 #: enigma/src/apps/enigma/scan.cpp:284
 #, c-format
@@ -99,6 +99,24 @@ msgstr "%d\tbekannte Services"
 #: enigma/src/apps/enigma/setupnetwork.cpp:31
 msgid "Network setup"
 msgstr "Netzwerkeinstellungen"
+
+#: enigma/src/apps/enigma/setup_language.cpp:49
+msgid "Language Setup"
+msgstr "Spracheinstellungen"
+
+#: enigma/src/apps/enigma/setup_language.cpp:54
+msgid "Language:"
+msgstr "Sprache:"
+
+#: enigma/src/apps/enigma/setup_language.cpp:65
+#: enigma/src/apps/enigma/setupvideo.cpp:91
+msgid "[OK]"
+msgstr "[OK]"
+
+#: enigma/src/apps/enigma/setup_language.cpp:71
+#: enigma/src/apps/enigma/setupvideo.cpp:98
+msgid "[ABORT]"
+msgstr "[Abbrechen]"
 
 #: enigma/src/apps/enigma/setupvideo.cpp:62
 msgid "Video Setup"
