@@ -1,5 +1,5 @@
 /*
- * $Id: cam.cpp,v 1.31 2003/01/30 17:21:17 obi Exp $
+ * $Id: cam.cpp,v 1.32 2003/02/09 19:22:08 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>,
  *             thegoodguy         <thegoodguy@berlios.de>
@@ -22,8 +22,8 @@
 
 /* zapit */
 #include <zapit/cam.h>
-#include <zapit/settings.h>           /* CAMD_UDS_NAME         */
-#include <connection/messagetools.h>  /* get_length_field_size */
+#include <zapit/settings.h> /* CAMD_UDS_NAME         */
+#include <messagetools.h>   /* get_length_field_size */
 
 
 const unsigned char CCam::getVersion(void) const

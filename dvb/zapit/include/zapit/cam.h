@@ -1,5 +1,5 @@
 /*
- * $Id: cam.h,v 1.24 2003/01/30 17:21:16 obi Exp $
+ * $Id: cam.h,v 1.25 2003/02/09 19:22:08 thegoodguy Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>,
  *               thegoodguy         <thegoodguy@berlios.de>
@@ -24,7 +24,7 @@
 #define __zapit_cam_h__
 
 #include "ci.h"
-#include <connection/basicclient.h>
+#include <basicclient.h>
 
 class CCam : public CBasicClient
 {

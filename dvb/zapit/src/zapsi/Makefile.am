@@ -1,5 +1,6 @@
 INCLUDES = \
 	-I$(top_srcdir)/include \
+        @EVENTSERVER_CFLAGS@ \
 	@XML_CFLAGS@
 
 noinst_LTLIBRARIES = libzapsi.la

@@ -1,5 +1,5 @@
 /*
- * $Id: ci.cpp,v 1.11 2003/01/30 17:21:17 obi Exp $
+ * $Id: ci.cpp,v 1.12 2003/02/09 19:22:08 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -20,7 +20,7 @@
  */
 
 #include <zapit/ci.h>
-#include <connection/messagetools.h>
+#include <messagetools.h>
 
 /*
  * conditional access descriptors
