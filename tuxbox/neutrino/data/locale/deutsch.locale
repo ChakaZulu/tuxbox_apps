@@ -144,7 +144,7 @@ screensetup.upperleft rot = Bildrand oben, links
 screensetup.lowerright grün = Bildrand unten, rechts
 
 channellist.head Alle Kanäle
-channellist.nonefound Es wurden keine Kanäle gefunden!\nFühren Sie bitte eine Kanal-Scan durch\n(dbox-Taste -> Service)
+channellist.nonefound Es wurden keine Kanäle gefunden!\nFühren Sie bitte einen Kanal-Scan durch\n(dbox-Taste -> Service)
 channellist.since seit %02d:%02d
 
 infoviewer.epgnotload Informationen noch nicht geladen...
