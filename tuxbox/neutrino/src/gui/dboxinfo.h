@@ -33,16 +33,12 @@
 #ifndef __dboxinfo__
 #define __dboxinfo__
 
-#include <string>
+#include <gui/widget/menue.h>
 
 #include <driver/framebuffer.h>
 
-#include "color.h"
+#include <string>
 
-#include "widget/menue.h"
-
-
-using namespace std;
 
 class CDBoxInfoWidget : public CMenuTarget
 {
@@ -62,7 +58,7 @@ class CDBoxInfoWidget : public CMenuTarget
 		CDBoxInfoWidget();
 
 		void hide();
-		int exec( CMenuTarget* parent, string actionKey );
+		int exec( CMenuTarget* parent, std::string actionKey );
 
 };
 

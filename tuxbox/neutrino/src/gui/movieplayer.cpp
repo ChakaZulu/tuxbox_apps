@@ -4,7 +4,7 @@
 	Movieplayer (c) 2003 by gagga
 	Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-        $Id: movieplayer.cpp,v 1.44 2003/09/12 08:49:47 thegoodguy Exp $
+        $Id: movieplayer.cpp,v 1.45 2003/09/12 17:25:04 thegoodguy Exp $
 
 	Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -1390,7 +1390,7 @@ CMoviePlayerGui::paintHead ()
   frameBuffer->paintBoxRel (x, y + title_height, width, theight,
 			    COL_MENUHEAD);
   frameBuffer->paintIcon ("movie.raw", x + 7, y + title_height + 10);
-  g_Fonts->menu_title->RenderString (x + 35, y + theight + title_height + 0, width - 45, strCaption.c_str (), COL_MENUHEAD, 0, true);	// UTF-8
+  g_Fonts->menu_title->RenderString (x + 35, y + theight + title_height + 0, width - 45, strCaption, COL_MENUHEAD, 0, true); // UTF-8
   int ypos = y + title_height;
   if (theight > 26)
     ypos = (theight - 26) / 2 + y + title_height;

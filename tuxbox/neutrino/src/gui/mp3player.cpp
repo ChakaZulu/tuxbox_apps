@@ -413,7 +413,7 @@ int CMP3PlayerGui::show()
 						}
                   else if(files->getType() == CFile::FILE_MP3_PLAYLIST)
                   {
-                     std::string sPath = files->Name.substr(0, files->Name.rfind("/"));
+                     std::string sPath = files->Name.substr(0, files->Name.rfind('/'));
                      std::ifstream infile;
                      char cLine[256];
                      infile.open (files->Name.c_str(), ifstream::in);
@@ -428,7 +428,7 @@ int CMP3PlayerGui::show()
                            std::string filename = sPath + "/" + cLine;
                            
                            unsigned int pos;
-                           while((pos=filename.find("\\"))!=std::string::npos)
+                           while((pos=filename.find('\\'))!=std::string::npos)
                               filename[pos]='/';
 
                            std::ifstream testfile;
@@ -669,7 +669,7 @@ void CMP3PlayerGui::paintItem(int pos)
          tmp += artist + ", " + title + album;
 
 		int w=g_Fonts->menu->getRenderWidth(playlist[liststart+pos].Duration)+5;
-		g_Fonts->menu->RenderString(x+10,ypos+fheight, width-30-w, tmp.c_str(), color, fheight, true); // UTF-8
+		g_Fonts->menu->RenderString(x+10,ypos+fheight, width-30-w, tmp, color, fheight, true); // UTF-8
 		g_Fonts->menu->RenderString(x+width-15-w,ypos+fheight, w, playlist[liststart+pos].Duration, color, fheight);
 
 		if(liststart+pos==selected)
@@ -690,7 +690,7 @@ void CMP3PlayerGui::paintHead()
 	std::string strCaption = g_Locale->getText("mp3player.head");
 	frameBuffer->paintBoxRel(x,y+title_height, width,theight, COL_MENUHEAD);
 	frameBuffer->paintIcon("mp3.raw",x+7,y+title_height+10);
-	g_Fonts->menu_title->RenderString(x+35,y+theight+title_height+0, width- 45, strCaption.c_str(), COL_MENUHEAD, 0, true); // UTF-8
+	g_Fonts->menu_title->RenderString(x+35,y+theight+title_height+0, width- 45, strCaption, COL_MENUHEAD, 0, true); // UTF-8
 	int ypos=y+title_height;
 	if(theight > 26)
 		ypos = (theight-26) / 2 + y + title_height;
@@ -1131,7 +1131,7 @@ void CMP3PlayerGui::get_id3(CMP3 *mp3)
 	if (mp3->Artist.empty() && mp3->Title.empty())
 	{
 		//Set from Filename
-		std::string tmp = mp3->Filename.substr(mp3->Filename.rfind("/")+1);
+		std::string tmp = mp3->Filename.substr(mp3->Filename.rfind('/')+1);
 		tmp = tmp.substr(0,tmp.length()-4);	//remove .mp3
 		unsigned int i = tmp.rfind(" - ");
 		if(i != std::string::npos)
@@ -1141,7 +1141,7 @@ void CMP3PlayerGui::get_id3(CMP3 *mp3)
 		}
 		else
 		{
-			i = tmp.rfind("-");
+			i = tmp.rfind('-');
 			if(i != std::string::npos)
 			{ //Trennzeichen "-"
 				mp3->Artist = tmp.substr(0, i);
@@ -1371,7 +1371,7 @@ void CMP3PlayerGui::updateMP3Infos()
 			m_mp3info=CMP3Player::getInstance()->getMp3Info();
 			frameBuffer->paintBoxRel(x + 10, y+ 4 + 2*fheight, width-20, sheight, COL_MENUCONTENTSELECTED);
 			int xstart = ((width - 20 - g_Fonts->infobar_small->getRenderWidth( m_mp3info ))/2)+10;
-			g_Fonts->infobar_small->RenderString(x+ xstart, y+4 + 2*fheight+sheight, width- 2*xstart, m_mp3info.c_str(), COL_MENUCONTENTSELECTED);
+			g_Fonts->infobar_small->RenderString(x+ xstart, y+4 + 2*fheight+sheight, width- 2*xstart, m_mp3info, COL_MENUCONTENTSELECTED);
 		}
 	}
 }
@@ -1395,7 +1395,7 @@ void CMP3PlayerGui::updateTimes(bool force)
 			m_time_played=CMP3Player::getInstance()->getTimePlayed();
 			updatePlayed=true;
 		}
-		std::string time_tmp=m_time_played.substr(0,m_time_played.find(":")+1) + "00";
+		std::string time_tmp=m_time_played.substr(0,m_time_played.find(':')+1) + "00";
 		int w1=g_Fonts->menu->getRenderWidth(" / " + m_time_total);
 		int w2=g_Fonts->menu->getRenderWidth(time_tmp);
 

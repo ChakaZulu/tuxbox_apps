@@ -738,7 +738,7 @@ void CChannelList::paintDetails(int index)
 		std::string text2= chanlist[index]->currentEvent.text;
 
 		int xstart = 10;
-		if ( g_Fonts->channellist->getRenderWidth(text1.c_str())> (width - 30 - seit_len) )
+		if ( g_Fonts->channellist->getRenderWidth(text1) > (width - 30 - seit_len) )
 		{
 			// zu breit, Umbruch versuchen...
 		    int pos;
@@ -747,25 +747,25 @@ void CChannelList::paintDetails(int index)
 				pos = text1.find_last_of("[ -.]+");
 				if ( pos!=-1 )
 					text1 = text1.substr( 0, pos );
-			} while ( ( pos != -1 ) && ( g_Fonts->channellist->getRenderWidth(text1.c_str())> (width - 30 - seit_len) ) );
+			} while ( ( pos != -1 ) && ( g_Fonts->channellist->getRenderWidth(text1) > (width - 30 - seit_len) ) );
 
-			std::string text3= chanlist[index]->currentEvent.description.substr(text1.length()+ 1).c_str();
+			std::string text3= chanlist[index]->currentEvent.description.substr(text1.length()+ 1);
 			if ( text2 != "" )
 				text3= text3+ " · ";
 
-			xstart+= g_Fonts->channellist->getRenderWidth(text3.c_str());
-			g_Fonts->channellist->RenderString(x+ 10, y+ height+ 5+ 2* fheight, width - 30- noch_len, text3.c_str(), COL_MENUCONTENTDARK);
+			xstart+= g_Fonts->channellist->getRenderWidth(text3);
+			g_Fonts->channellist->RenderString(x+ 10, y+ height+ 5+ 2* fheight, width - 30- noch_len, text3, COL_MENUCONTENTDARK);
 		}
 
 		if ( text2 != "" )
 		{
 			while ( text2.find_first_of("[ -.+*#?=!$%&/]+") == 0 )
 				text2 = text2.substr( 1 );
-			text2 = text2.substr( 0, text2.find("\n") );
-			g_Fonts->channellist_descr->RenderString(x+ xstart, y+ height+ 5+ 2* fheight, width- xstart- 20- noch_len, text2.c_str(), COL_MENUCONTENTDARK);
+			text2 = text2.substr( 0, text2.find('\n') );
+			g_Fonts->channellist_descr->RenderString(x+ xstart, y+ height+ 5+ 2* fheight, width- xstart- 20- noch_len, text2, COL_MENUCONTENTDARK);
 		}
 
-		g_Fonts->channellist->RenderString(x+ 10, y+ height+ 5+ fheight, width - 30 - seit_len, text1.c_str(), COL_MENUCONTENTDARK);
+		g_Fonts->channellist->RenderString(x+ 10, y+ height+ 5+ fheight, width - 30 - seit_len, text1, COL_MENUCONTENTDARK);
 		g_Fonts->channellist_descr->RenderString (x+ width- 10- seit_len, y+ height+ 5+    fheight   , seit_len, cSeit, COL_MENUCONTENTDARK, 0, true); // UTF-8
 		g_Fonts->channellist_number->RenderString(x+ width- 10- noch_len, y+ height+ 5+ 2* fheight- 2, noch_len, cNoch, COL_MENUCONTENTDARK, 0, true); // UTF-8
 	}
@@ -860,13 +860,13 @@ void CChannelList::paintItem(int pos)
 
 		int numpos = x+5+numwidth- g_Fonts->channellist_number->getRenderWidth(tmp);
 		g_Fonts->channellist_number->RenderString(numpos,ypos+fheight, numwidth+5, tmp, color, fheight);
-		if(strlen(chan->currentEvent.description.c_str()))
+		if (!(chan->currentEvent.description.empty()))
 		{
 			char nameAndDescription[100];
 			snprintf(nameAndDescription, sizeof(nameAndDescription), "%s · ", CZapitClient::Utf8_to_Latin1(chan->name).c_str());
 
 			unsigned int ch_name_len= g_Fonts->channellist->getRenderWidth(nameAndDescription);
-			unsigned int ch_desc_len= g_Fonts->channellist_descr->getRenderWidth(chan->currentEvent.description.c_str());
+			unsigned int ch_desc_len= g_Fonts->channellist_descr->getRenderWidth(chan->currentEvent.description);
 
 			if ( (width- numwidth- 20- 15- ch_name_len)< ch_desc_len )
 				ch_desc_len = (width- numwidth- 20- 15- ch_name_len);
@@ -877,14 +877,14 @@ void CChannelList::paintItem(int pos)
 
 
 			// rechtsbündig - auskommentiert
-			// g_Fonts->channellist_descr->RenderString(x+ width- 15- ch_desc_len, ypos+ fheight, ch_desc_len, chan->currentEvent.description.c_str(), color);
+			// g_Fonts->channellist_descr->RenderString(x+ width- 15- ch_desc_len, ypos+ fheight, ch_desc_len, chan->currentEvent.description, color);
 
 			// linksbündig
-			g_Fonts->channellist_descr->RenderString(x+ 5+ numwidth+ 10+ ch_name_len+ 5, ypos+ fheight, ch_desc_len, chan->currentEvent.description.c_str(), color);
+			g_Fonts->channellist_descr->RenderString(x+ 5+ numwidth+ 10+ ch_name_len+ 5, ypos+ fheight, ch_desc_len, chan->currentEvent.description, color);
 		}
 		else
 			//name
-			g_Fonts->channellist->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, chan->name.c_str(), color, 0, true); // UTF-8
+			g_Fonts->channellist->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, chan->name, color, 0, true); // UTF-8
 	}
 }
 
@@ -898,7 +898,7 @@ void CChannelList::paintHead()
 	}
 */
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width- 65, strCaption.c_str(), COL_MENUHEAD, 0, true); // UTF-8
+	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width- 65, strCaption, COL_MENUHEAD, 0, true); // UTF-8
 
 	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ width- 30, y+ 5 );
 	if (bouquetList!=NULL)

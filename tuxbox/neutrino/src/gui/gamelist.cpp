@@ -30,13 +30,16 @@
 */
 
 
+#include <gui/gamelist.h>
+
+#include <config.h>
+
 #include <sstream>
 #include <fstream>
 #include <iostream>
 
 #include <dirent.h>
 #include <dlfcn.h>
-#include <config.h>
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -44,8 +47,6 @@
 
 #include <global.h>
 #include <neutrino.h>
-
-#include "gamelist.h"
 
 /* for alexW images with old drivers: 
  * #define USE_VBI_INTERFACE 1
@@ -60,12 +61,12 @@
 extern CPlugins       * g_PluginList;    /* neutrino.cpp */
 extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
-bool CPlugins::plugin_exists(string filename)
+bool CPlugins::plugin_exists(std::string filename)
 {
 	return (find_plugin(filename) >= 0);
 }
 
-int CPlugins::find_plugin(string filename)
+int CPlugins::find_plugin(std::string filename)
 {
 	for(int i = 0; i <  (int) plugin_list.size();i++)
 	{
@@ -92,7 +93,7 @@ std::string fname;
 		{
 			plugin new_plugin;
 			new_plugin.filename = filename.substr(0, pos);
-			fname = string(dir) + "/";
+			fname = std::string(dir) + '/';
 			new_plugin.cfgfile = fname.append(new_plugin.filename);
 			new_plugin.cfgfile.append(".cfg");
 			new_plugin.sofile = fname;
@@ -247,7 +248,7 @@ PluginParam* CPlugins::makeParam(std::string id, PluginParam *next)
 	return startparam;
 }
 
-void CPlugins::startPlugin(string name)
+void CPlugins::startPlugin(std::string name)
 {
 	int pluginnr = find_plugin(name);
 	if( pluginnr > -1)
@@ -277,10 +278,10 @@ void CPlugins::startPlugin(int number)
 
 	if (plugin_list[number].fb)
 	{
-		// cout << "With FB " << params.find(P_ID_FBUFFER)->second.c_str() <<endl;
+		// std::cout << "With FB " << params.find(P_ID_FBUFFER)->second.c_str() <<std::endl;
 		startparam = makeParam(P_ID_FBUFFER, startparam);
-		//cout << "New Startparam: " << startparam << endl;
-		//cout << "New Tmpparam: " << tmpparam << endl;
+		//std::cout << "New Startparam: " << startparam << std::endl;
+		//std::cout << "New Tmpparam: " << tmpparam << std::endl;
 	}
 	if (plugin_list[number].rc)
 	{
@@ -288,7 +289,7 @@ void CPlugins::startPlugin(int number)
 		addParm(P_ID_RCBLK_ANF, g_settings.repeat_genericblocker);
 		addParm(P_ID_RCBLK_REP, g_settings.repeat_blocker);
 
-		// cout << "With RC " << params.find(P_ID_RCINPUT)->second.c_str() << endl;
+		// std::cout << "With RC " << params.find(P_ID_RCINPUT)->second.c_str() << std::endl;
 		startparam = makeParam(P_ID_RCINPUT, startparam);
 		startparam = makeParam(P_ID_RCBLK_ANF, startparam);
 		startparam = makeParam(P_ID_RCBLK_REP, startparam);
@@ -299,7 +300,7 @@ void CPlugins::startPlugin(int number)
 	}
 	if (plugin_list[number].lcd)
 	{
-		// cout << "With LCD " << endl;
+		// std::cout << "With LCD " << std::endl;
 		CLCD::getInstance()->pause();
 		if( (lcd_fd=open("/dev/dbox/lcd0", O_RDWR)) < 0 )
 			setlcd( 0 );
@@ -310,7 +311,7 @@ void CPlugins::startPlugin(int number)
 	}
 	if (plugin_list[number].vtxtpid)
 	{
-		// cout << "With VTXTPID " << params.find(P_ID_VTXTPID)->second.c_str() << endl;
+		// std::cout << "With VTXTPID " << params.find(P_ID_VTXTPID)->second.c_str() << std::endl;
 		// versuche, den gtx/enx_vbi zu stoppen
 #ifdef USE_VBI_INTERFACE
 
@@ -331,7 +332,7 @@ void CPlugins::startPlugin(int number)
 		addParm(P_ID_END_X, g_settings.screen_EndX);
 		addParm(P_ID_END_Y, g_settings.screen_EndY);
 
-		// cout << "With OFFSETS " << params.find(P_ID_OFF_X)->second.c_str() << ":" << params.find(P_ID_OFF_Y)->second.c_str() << endl;
+		// std::cout << "With OFFSETS " << params.find(P_ID_OFF_X)->second.c_str() << ":" << params.find(P_ID_OFF_Y)->second.c_str() << std::endl;
 
 		startparam = makeParam(P_ID_VFORMAT, startparam);
 		startparam = makeParam(P_ID_OFF_X, startparam);
@@ -491,7 +492,7 @@ CGameList::~CGameList()
 }
 
 
-int CGameList::exec(CMenuTarget* parent, string actionKey)
+int CGameList::exec(CMenuTarget* parent, std::string actionKey)
 {
 	int res = menu_return::RETURN_REPAINT;
 
@@ -660,8 +661,8 @@ void CGameList::paintItem(int pos)
 	if(liststart+pos<gamelist.size())
 	{
     	game* aktgame = gamelist[liststart+pos];
-		g_Fonts->gamelist_itemLarge->RenderString(x+10, ypos+fheight1+3, width-20, aktgame->name.c_str(), color);
-		g_Fonts->gamelist_itemSmall->RenderString(x+20, ypos+fheight,    width-20, aktgame->desc.c_str(), color);
+		g_Fonts->gamelist_itemLarge->RenderString(x+10, ypos+fheight1+3, width-20, aktgame->name, color);
+		g_Fonts->gamelist_itemSmall->RenderString(x+20, ypos+fheight,    width-20, aktgame->desc, color);
 	}
 }
 

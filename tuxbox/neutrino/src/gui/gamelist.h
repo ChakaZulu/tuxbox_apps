@@ -87,8 +87,8 @@ class CPlugins
 
 		void parseCfg(plugin *plugin_data);
 		void scanDir(const char *dir);
-		bool plugin_exists(string filename);
-		int find_plugin(string filename);
+		bool plugin_exists(std::string filename);
+		int find_plugin(std::string filename);
 
 
 		std::map<std::string, std::string> params;
@@ -124,7 +124,7 @@ class CPlugins
 
 		void startPlugin(int number);
 
-		void startPlugin(string filename); // start plugins also by name
+		void startPlugin(std::string filename); // start plugins also by name
 };
 
 
@@ -138,16 +138,16 @@ class CGameList : public CMenuTarget
 		struct game
 		{
 			int	number;
-			string	name;
-			string	desc;
+			std::string	name;
+			std::string	desc;
 		};
 
 		unsigned int	liststart;
 		unsigned int	listmaxshow;
 		unsigned int	selected;
 		int		key;
-		string		name;
-		vector<game*>   gamelist;
+		std::string		name;
+		std::vector<game*>   gamelist;
 
 
 		int		fheight; // Fonthoehe Channellist-Inhalt
@@ -171,7 +171,7 @@ class CGameList : public CMenuTarget
 		~CGameList();
 
 		void hide();
-		int exec(CMenuTarget* parent, string actionKey);
+		int exec(CMenuTarget* parent, std::string actionKey);
 		void runGame(int selected );
 };
 

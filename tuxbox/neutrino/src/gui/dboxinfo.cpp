@@ -30,13 +30,13 @@
 */
 
 
+#include <gui/dboxinfo.h>
+
 #include <global.h>
-#include <neutrino.h>
 
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
 
-#include "dboxinfo.h"
 
 
 CDBoxInfoWidget::CDBoxInfoWidget()
@@ -52,7 +52,7 @@ CDBoxInfoWidget::CDBoxInfoWidget()
 }
 
 
-int CDBoxInfoWidget::exec(CMenuTarget* parent, string)
+int CDBoxInfoWidget::exec(CMenuTarget* parent, std::string)
 {
 	if (parent)
 	{

@@ -324,9 +324,9 @@ int CPictureViewerGui::show()
 						{
 							CPicture pic;
 							pic.Filename = files->Name;
-							string tmp   = files->Name.substr(files->Name.rfind("/")+1);
-							pic.Name     = tmp.substr(0,tmp.rfind("."));
-							pic.Type     = tmp.substr(tmp.rfind(".")+1);
+							string tmp   = files->Name.substr(files->Name.rfind('/')+1);
+							pic.Name     = tmp.substr(0,tmp.rfind('.'));
+							pic.Type     = tmp.substr(tmp.rfind('.')+1);
 							struct stat statbuf;
 							if(stat(pic.Filename.c_str(),&statbuf) != 0)
 								printf("stat error");
@@ -522,7 +522,7 @@ void CPictureViewerGui::paintItem(int pos)
 		char timestring[18];
 		strftime(timestring, 18, "%d-%m-%Y %H:%M", gmtime(&playlist[liststart+pos].Date));
 		int w = g_Fonts->menu->getRenderWidth(timestring);
-		g_Fonts->menu->RenderString(x+10,ypos+fheight, width-30 - w, tmp.c_str(), color, fheight);
+		g_Fonts->menu->RenderString(x+10,ypos+fheight, width-30 - w, tmp, color, fheight);
 		g_Fonts->menu->RenderString(x+width-20-w,ypos+fheight, w, timestring, color, fheight);
 
 	}
@@ -537,7 +537,7 @@ void CPictureViewerGui::paintHead()
 	string strCaption = g_Locale->getText("pictureviewer.head");
 	frameBuffer->paintBoxRel(x,y, width,theight, COL_MENUHEAD);
 	frameBuffer->paintIcon("mp3.raw",x+7,y+10);
-	g_Fonts->menu_title->RenderString(x+35,y+theight+0, width- 45, strCaption.c_str(), COL_MENUHEAD, 0, true); // UTF-8
+	g_Fonts->menu_title->RenderString(x+35,y+theight+0, width- 45, strCaption, COL_MENUHEAD, 0, true); // UTF-8
 	int ypos=y+0;
 	if(theight > 26)
 		ypos = (theight-26) / 2 + y ;
