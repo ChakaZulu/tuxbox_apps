@@ -28,6 +28,7 @@ fx2/bouquet/Makefile
 fx2/lib/Makefile
 fx2/mines/Makefile
 fx2/snake/Makefile
+fx2/sokoban/Makefile
 fx2/tetris/Makefile
 fx2/lcdcirc/Makefile
 fx2/satfind/Makefile
