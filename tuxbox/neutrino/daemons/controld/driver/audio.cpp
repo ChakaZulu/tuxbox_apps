@@ -30,7 +30,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <math.h>
 
 #include <dbox/avs_core.h>
 #include "audio.h"

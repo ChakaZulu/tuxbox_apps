@@ -24,6 +24,8 @@
 */
 
 #include <config.h>
+
+ #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -70,6 +72,7 @@ CEventServer	*eventServer;
 struct Ssettings
 {
 	char volume;
+	char volume_avs;
 	bool mute;
 	bool mute_avs;
 	char videooutput;
@@ -624,9 +627,38 @@ void setBoxType()
 }
 
 
+// input:  0 <=     volumne          <= 100
+// output: 0 <= map_volume(., true)  <= 63
+// output: 0 <= map_volume(., false) <= 255 (well rather <= 0xFC)
+const unsigned char map_volume(const unsigned char volume, const bool to_AVS)
+{
+	int i = volume; 
+
+	if (volume != 0)
+	{
+		i = lrint(64 - 32 * log(volume/13.5)) & 0xFFFFFFFF;
+	}
+	else 
+	{                   
+		i = 63;
+	}
+
+	if (i < 0)
+	{
+		i = 0;
+	}
+	else if (i > 63)
+	{
+		i = 63;
+	}
+
+	return (to_AVS) ? i : (i << 2);
+}
+
+
 void parse_command(int connfd, CControld::commandHead* rmessage)
 {
-
+	
 	if(rmessage->version!=CControld::ACTVERSION)
 	{
 		perror("[controld] unknown version\n");
@@ -634,43 +666,54 @@ void parse_command(int connfd, CControld::commandHead* rmessage)
 	}
 	switch (rmessage->cmd)
 	{
-		case CControld::CMD_SHUTDOWN:
-			//printf("[controld] shutdown\n");
-			shutdownBox();
-			break;
-		case CControld::CMD_SETVOLUME_AVS:
-			//printf("[controld] set volume\n");
-			CControld::commandVolume msg;
-			read(connfd, &msg, sizeof(msg));
-			settings.volume = msg.volume;
-			audioControl::setVolume(msg.volume);
-			lcdd.setVolume(msg.volume);
-			eventServer->sendEvent( CControldClient::EVT_VOLUMECHANGED, CEventServer::INITID_CONTROLD, &msg.volume, sizeof(msg.volume) );
-			break;
-		case CControld::CMD_MUTE:
-			settings.mute = true;
-			zapit.muteAudio(true);
-			lcdd.setMute(true);
-			eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute, sizeof(settings.mute));
-			break;
-		case CControld::CMD_MUTE_AVS:
-			settings.mute_avs = true;
-			audioControl::setMute(true);
-			lcdd.setMute(true);
-			eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute_avs, sizeof(settings.mute_avs));
-			break;
-		case CControld::CMD_UNMUTE:
-			settings.mute = false;
-			zapit.muteAudio(false);
-			lcdd.setMute(settings.mute_avs);
-			eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute_avs, sizeof(settings.mute_avs));
-			break;
-		case CControld::CMD_UNMUTE_AVS:
-			settings.mute_avs = false;
-			audioControl::setMute(false);
-			lcdd.setMute(settings.mute);
-			eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute, sizeof(settings.mute));
-			break;
+	case CControld::CMD_SHUTDOWN:
+		shutdownBox();
+		break;
+
+	case CControld::CMD_SETVOLUME:
+	case CControld::CMD_SETVOLUME_AVS:
+		CControld::commandVolume msg_commandVolume;
+		read(connfd, &msg_commandVolume, sizeof(msg_commandVolume));
+
+		if (rmessage->cmd == CControld::CMD_SETVOLUME)
+		{
+			settings.volume = msg_commandVolume.volume;
+			zapit.setVolume(map_volume(msg_commandVolume.volume, false), map_volume(msg_commandVolume.volume, false));
+		}
+		else
+		{
+			settings.volume_avs = msg_commandVolume.volume;
+			audioControl::setVolume(map_volume(msg_commandVolume.volume, true));
+		}
+		lcdd.setVolume(msg_commandVolume.volume);
+		eventServer->sendEvent(CControldClient::EVT_VOLUMECHANGED, CEventServer::INITID_CONTROLD, &msg_commandVolume.volume, sizeof(msg_commandVolume.volume));
+		break;
+
+	case CControld::CMD_MUTE:
+		settings.mute = true;
+		zapit.muteAudio(true);
+		lcdd.setMute(true);
+		eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute, sizeof(settings.mute));
+		break;
+	case CControld::CMD_MUTE_AVS:
+		settings.mute_avs = true;
+		audioControl::setMute(true);
+		lcdd.setMute(true);
+		eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute_avs, sizeof(settings.mute_avs));
+		break;
+	case CControld::CMD_UNMUTE:
+		settings.mute = false;
+		zapit.muteAudio(false);
+		lcdd.setMute(settings.mute_avs);
+		eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute_avs, sizeof(settings.mute_avs));
+		break;
+	case CControld::CMD_UNMUTE_AVS:
+		settings.mute_avs = false;
+		audioControl::setMute(false);
+		lcdd.setMute(settings.mute);
+		eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute, sizeof(settings.mute));
+		break;
+
 		case CControld::CMD_SETANALOGMODE:
 			CControld::commandAnalogMode msgmd;
 			read(connfd, &msgmd, sizeof(msgmd));
@@ -710,22 +753,20 @@ void parse_command(int connfd, CControld::commandHead* rmessage)
 			saveSettings();
 			break;
 
-		case CControld::CMD_GETVOLUME_AVS:
-			//printf("[controld] get volume\n");
-			CControld::responseVolume msg6;
-			msg6.volume = settings.volume;
-			write(connfd,&msg6,sizeof(msg6));
-			break;
-		case CControld::CMD_GETMUTESTATUS:
-			CControld::responseMute msg7;
-			msg7.mute = settings.mute;
-			write(connfd,&msg7,sizeof(msg7));
-			break;
-		case CControld::CMD_GETMUTESTATUS_AVS:
-			CControld::responseMute msg_7;
-			msg_7.mute = settings.mute_avs;
-			write(connfd,&msg_7,sizeof(msg_7));
-			break;
+	case CControld::CMD_GETVOLUME:
+	case CControld::CMD_GETVOLUME_AVS:
+		CControld::responseVolume msg_responseVolume;
+		msg_responseVolume.volume = (rmessage->cmd == CControld::CMD_GETVOLUME) ? settings.volume : settings.volume_avs;
+		write(connfd, &msg_responseVolume, sizeof(msg_responseVolume));
+		break;
+
+	case CControld::CMD_GETMUTESTATUS:
+	case CControld::CMD_GETMUTESTATUS_AVS:
+		CControld::responseMute msg_responseMute;
+		msg_responseMute.mute = (rmessage->cmd == CControld::CMD_GETMUTESTATUS) ? settings.mute : settings.mute_avs;
+		write(connfd, &msg_responseMute, sizeof(msg_responseMute));
+		break;
+
 		case CControld::CMD_GETVIDEOFORMAT:
 			//printf("[controld] get videoformat (fnc)\n");
 			CControld::responseVideoFormat msg8;
@@ -780,7 +821,7 @@ void sig_catch(int signal)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.71 2002/10/15 20:39:47 woglinde Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.72 2002/10/17 13:07:16 thegoodguy Exp $\n\n");
 
 	//printf("[controld] mainThread-pid: %d\n", getpid());
 	switch (fork())
@@ -840,6 +881,7 @@ int main(int argc, char **argv)
 	{
 		printf("[controld] using defaults\n");
 		settings.volume      = 100;
+		settings.volume_avs  = 100;
 		settings.mute        = false;
 		settings.mute_avs    = false;
 		settings.videooutput = 1; // fblk1 - rgb
@@ -854,8 +896,9 @@ int main(int argc, char **argv)
 	watchDog->registerNotifier(WDE_VIDEOMODE, aspectRatioNotifier);
 
 	//init
-	audioControl::setVolume(settings.volume);
-	lcdd.setVolume(settings.volume);
+	audioControl::setVolume(map_volume(settings.volume_avs, true));
+	zapit.setVolume(map_volume(settings.volume, false), map_volume(settings.volume, false));
+	lcdd.setVolume(settings.volume_avs);    // we could also display settings.volume at startup
 
 	audioControl::setMute(settings.mute_avs);
 	zapit.muteAudio(settings.mute);
