@@ -3,6 +3,14 @@
 
 #include "ewidget.h"
 
+/**
+ * \brief A (decorated) top level widget.
+ *
+ * An eWindow is whats actually seen as a window. It's top level (thus you cannot specify a parent),
+ * and may have a (skinned) decoration. It's clientrect is usually a bit smaller since it has a titlebar
+ * and a border.
+ *
+ */
 class eWindow: public eWidget
 {
 //	Q_OBJECT
@@ -20,7 +28,18 @@ protected:
 	void willShow();
 	void willHide();
 public:
+
+	/**
+	 * \brief Constructs the window
+	 *
+	 * \arg takefocus the \c eWidget::eWidget takefocus parameter. You don't need to set it if just
+	 * one widget \e inside the parent needs focus. That widget can apply for it by itself.
+	 */
 	eWindow(int takefocus=0);
+	
+	/**
+	 * destructs the window.
+	 */
 	~eWindow();
 };
 

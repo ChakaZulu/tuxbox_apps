@@ -40,9 +40,31 @@ class eWidget: public Object
 	};
 
 public:// slots:
+	/**
+	 * \brief Exits a (model) widget.
+	 *
+	 * Quit the local event loop, thus returning the control to the function which called \c exec.
+	 * \sa eWidget::accept
+	 * \sa eWidget::reject
+	 */
 	void close(int result);
+	
+	/**
+	 * \brief Closes with a returncode of 0 (success).
+	 *
+	 * Synonym to \c close(0);. Useful to use as a slot.
+	 * \sa eWidget::close
+	 */
 	void accept();
+
+	/**
+	 * \brief Closes with a returncode of -1 (failure).
+	 *
+	 * Synonym to \c close(-1);. Useful to use as a slot.
+	 * \sa eWidget::close
+	 */
 	void reject();
+	
 	std::list<eWidget*> childlist;
 	
 protected:

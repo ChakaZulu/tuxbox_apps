@@ -40,11 +40,22 @@ struct gPalette
 	gRGB *data;
 };
 
+/**
+ * \brief A softreference to a font.
+ *
+ * The font is specified by a name and a size.
+ * \c gFont is part of the \ref gdi.
+ */
 struct gFont
 {
 	QString family;
 	int pointSize;
 	
+	/**
+	 * \brief Constructs a font with the given name and size.
+	 * \param family The name of the font, for example "NimbusSansL-Regular Sans L Regular".
+	 * \param pointSize the size of the font in PIXELS.
+	 */
 	gFont(const QString &family, int pointSize):
 			family(family), pointSize(pointSize)
 	{

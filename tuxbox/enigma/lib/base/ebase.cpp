@@ -1,24 +1,6 @@
 #include "ebase.h"
-#include <pthread.h>
 #include <fcntl.h>
 #include <unistd.h>
-
-void *eThread::wrapper(void *ptr)
-{
-	((eThread*)ptr)->thread();
-	pthread_exit(0);
-}
-
-eThread::eThread()
-{
-	thread_id=pthread_create(&the_thread, 0, wrapper, this);
-}
-
-eThread::~eThread()
-{
-	printf("waiting for thread shutdown");
-	pthread_join(thread_id, 0);
-}
 
 eSocketNotifier::eSocketNotifier(eMainloop *context, int fd, int requested, bool startnow): fd(fd), context(*context), requested(requested)
 {
@@ -211,25 +193,6 @@ void eMainloop::exit_loop()  // call this to leave the current loop
 void eMainloop::quit()   // call this to leave all loops
 {
 	app_quit_now = true;
-}
-
-int eMessagePump::send(void *data, int len)
-{
-	return ::write(fd[1], data, len)<0;
-}
-
-int eMessagePump::recv(void *data, int len)
-{
-	unsigned char*dst=(unsigned char*)data;
-	while (len)
-	{
-		int r=::read(fd[0], dst, len);
-		if (r<0)
-			return r;
-		dst+=r;
-		len-=r;
-	}
-	return 0;
 }
 
 eApplication* eApp = 0;
