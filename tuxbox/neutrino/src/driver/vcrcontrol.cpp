@@ -231,13 +231,14 @@ bool CVCRControl::CServerDevice::Stop()
 		g_Zapit->startPlayBack();
 	g_Sectionsd->setPauseScanning(false);
 	g_Zapit->setRecordMode( false );
-	// alten mode wieder herstellen (ausser wen zwischenzeitlich auf sb geschalten wurde)
+	// alten mode wieder herstellen (ausser wen zwischenzeitlich auf oder aus sb geschalten wurde)
 	if(CNeutrinoApp::getInstance()->getMode() != last_mode && 
-		CNeutrinoApp::getInstance()->getMode() != NeutrinoMessages::mode_standby)
+		CNeutrinoApp::getInstance()->getMode() != NeutrinoMessages::mode_standby &&
+		last_mode != NeutrinoMessages::mode_standby)
 		g_RCInput->postMsg( NeutrinoMessages::CHANGEMODE , last_mode);
 
 	if(last_mode == NeutrinoMessages::mode_standby &&
-		CNeutrinoApp::getInstance()->getMode() != NeutrinoMessages::mode_standby )
+		CNeutrinoApp::getInstance()->getMode() == NeutrinoMessages::mode_standby )
 	{
 		//Wenn vorher und jetzt standby, dann die zapit wieder auf sb schalten
 		g_Zapit->setStandby(true);
@@ -266,11 +267,16 @@ bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode,
 		if(last_mode == NeutrinoMessages::mode_standby)
 		{
 			g_Zapit->setStandby(false);
-			g_Zapit->muteAudio(true);
 		}
 		if(g_Zapit->getCurrentServiceID() != channel_id)	// und momentan noch nicht getuned ist
 		{
 			g_Zapit->zapTo_serviceID(channel_id);		// dann umschalten
+		}
+		if(last_mode == NeutrinoMessages::mode_standby)
+		{
+			sleep(1); // Wait for zapit to come alive
+			g_Zapit->muteAudio(false); // god knows why this is neccessary, it wont work without
+			g_Zapit->muteAudio(true);
 		}
 	}
 
