@@ -641,7 +641,8 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched) {
 #ifdef INPUT_PS2MOUSE
 	FD_SET_u(msefd, &rfds);
 #endif
-	FD_SET_u(kb_fd, &rfds);
+	if(kb_fd!=-1)
+		FD_SET_u(kb_fd, &rfds);
 #ifdef PLUGIN
 	FD_SET_u(rc_fd, &rfds);
 #endif
@@ -686,19 +687,21 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched) {
 	ev->dx = 0;
 	ev->dy = 0;
 
-	if (FD_ISSET(kb_fd, &rfds)) {
-		unsigned char k;
-		int r;
-		r=read(kb_fd, &k, sizeof k);
-		if (r!=sizeof k) cleanup_and_exit("read kb", EXIT_SYSERROR);
+	if(kb_fd!=-1) {
+		if (FD_ISSET(kb_fd, &rfds)) {
+			unsigned char k;
+			int r;
+			r=read(kb_fd, &k, sizeof k);
+			if (r!=sizeof k) cleanup_and_exit("read kb", EXIT_SYSERROR);
 
-		if (debug) {
-			/* debug keyboard */
-			fprintf(stderr, "key=%d (0x%02x)\n", k, k);
+			if (debug) {
+				/* debug keyboard */
+				fprintf(stderr, "key=%d (0x%02x)\n", k, k);
+			}
+
+			ev->key = k&0x7f;
+			RetEvent((k&0x80) ? FBVNC_EVENT_BTN_UP : FBVNC_EVENT_BTN_DOWN);
 		}
-
-		ev->key = k&0x7f;
-		RetEvent((k&0x80) ? FBVNC_EVENT_BTN_UP : FBVNC_EVENT_BTN_DOWN);
 	}
 
 #ifdef INPUT_TS
