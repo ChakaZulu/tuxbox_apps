@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.cpp,v 1.32 2002/09/27 07:34:23 Zwen Exp $
+	$Id: timermanager.cpp,v 1.33 2002/09/30 14:44:11 Zwen Exp $
 
 	License: GPL
 
@@ -264,36 +264,32 @@ bool CTimerManager::shutdown()
 			}
 		}
 	}
+        int minutes=0xFFFF;
+	int erg;
 	if(nextAnnounceTime!=0)
 	{
-		int minutes,x;
-		minutes=((nextAnnounceTime-time(NULL))/60)-5; //Wakeup 5 min befor next announce
-		if(minutes<1)
-			minutes=1; //wait at least 1 min befor wakeup
-		int fd = open("/dev/dbox/fp0", O_RDWR);
-		if ((x=ioctl(fd, FP_IOCTL_SET_WAKEUP_TIMER, &minutes))<0)
-		{
-			if(x==-1) // Wakeup not supported
-			{
-				dprintf("Wakeup not supported (%d min.)\n",minutes);
-			}
-			else
-			{
-				dprintf("Error setting wakeup (%d)\n",x);
-			}
-			return false;
-		}
-		else
-		{
-			dprintf("wakeup in %d min. programmed\n",minutes);
-			return true;
-		}
-	}
-	else
-	{
-		dprintf("no wakeup timed\n");
-		return false;
-	}
+           minutes=((nextAnnounceTime-time(NULL))/60)-5; //Wakeup 5 min befor next announce
+           if(minutes<1)
+              minutes=1; //wait at least 1 min befor wakeup
+        }
+        int fd = open("/dev/dbox/fp0", O_RDWR);
+        if ((erg=ioctl(fd, FP_IOCTL_SET_WAKEUP_TIMER, &minutes))<0)
+        {
+           if(erg==-1) // Wakeup not supported
+           {
+              dprintf("Wakeup not supported (%d min.)\n",minutes);
+           }
+           else
+           {
+              dprintf("Error setting wakeup (%d)\n",erg);
+           }
+           return false;
+        }
+        else
+        {
+           dprintf("wakeup in %d min. programmed\n",minutes);
+           return true;
+        }
 }
 
 //------------------------------------------------------------
