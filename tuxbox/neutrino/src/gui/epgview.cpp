@@ -459,17 +459,18 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 
 				// 31.05.2002 dirch		record timer
 				case CRCInput::RC_red:
-					timerdclient = new CTimerdClient;
-					if(timerdclient->isTimerdAvailable())
+					if(g_settings.network_streaming_use)
 					{
-						timerdclient->addRecordTimerEvent(onid_sid, epgData.eventID, epgData.epg_times.startzeit, epgData.epg_times.startzeit - ANNOUNCETIME,epgData.epg_times.startzeit + epgData.epg_times.dauer );
-						ShowMsg ( "timer.eventrecord.title", g_Locale->getText("timer.eventrecord.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
-					}
-					else
-						printf("timerd not available\n");
-					delete timerdclient;
-					
-//					g_Timer->storeEvent (onid_sid, epgData.eventID, CTimer::RecordEvent, epgData.epg_times.startzeit, epgData.epg_times.startzeit+epgData.epg_times.dauer);
+						timerdclient = new CTimerdClient;
+						if(timerdclient->isTimerdAvailable())
+						{
+							timerdclient->addRecordTimerEvent(onid_sid, epgData.eventID, epgData.epg_times.startzeit, epgData.epg_times.startzeit - ANNOUNCETIME,epgData.epg_times.startzeit + epgData.epg_times.dauer );
+							ShowMsg ( "timer.eventrecord.title", g_Locale->getText("timer.eventrecord.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
+						}
+						else
+							printf("timerd not available\n");
+						delete timerdclient;
+					}					
 					break;
 
 				// 31.05.2002 dirch		zapto timer
@@ -479,16 +480,14 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 					if(timerdclient->isTimerdAvailable())
 					{
 						timerdclient->addZaptoTimerEvent(onid_sid, epgData.eventID, epgData.epg_times.startzeit, epgData.epg_times.startzeit - ANNOUNCETIME, 0);
+						printf("Added ZaptoTimerEvent for onidsid: %u epgID: %lu\n",onid_sid,epgData.eventID);
 						ShowMsg ( "timer.eventtimed.title", g_Locale->getText("timer.eventtimed.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 					}
 					else
 						printf("timerd not available\n");
 					delete timerdclient;
-//					g_Timer->storeEvent (onid_sid, epgData.eventID, CTimer::Switch2Event, epgData.epg_times.startzeit, 0);
 					break;
 
-// das muss raus				case CRCInput::RC_red:
-// das muss rasc					g_RCInput->postMsg( msg, data );
 
 				case CRCInput::RC_ok:
 				case CRCInput::RC_help:

@@ -1979,7 +1979,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 		uint msg; uint data;
 		g_RCInput->getMsg( &msg, &data, 100 ); // 10 secs..
 
-		if ( msg == NeutrinoMessages::RECORD_START)
+		if (msg == NeutrinoMessages::RECORD_START)
 		{
 			if(CVCRControl::getInstance()->registeredDevices() > 0)
 			{
@@ -2012,7 +2012,8 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 
 		if ( msg == NeutrinoMessages::ZAPTO)
 		{
-			CTimerEvent::EventInfo * eventinfo = (CTimerEvent::EventInfo *) data;
+			CTimerEvent::EventInfo * eventinfo; 
+			eventinfo = (CTimerEvent::EventInfo *) data;
 			channelList->zapToOnidSid(eventinfo->onidSid);
 		}
 
@@ -2030,7 +2031,6 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 		}
 		if ( msg == NeutrinoMessages::SLEEPTIMER)
 		{
-			printf("sleeptimer\n");
 			if(g_settings.shutdown_real)
 				ExitRun();
 			else
@@ -2778,7 +2778,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.308 2002/07/26 14:06:58 McClean Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.309 2002/08/29 21:59:32 dirch Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

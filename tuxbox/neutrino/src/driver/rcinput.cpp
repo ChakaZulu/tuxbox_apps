@@ -787,7 +787,8 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 						else if (emsg.eventID==CTimerdClient::EVT_ZAPTO)
 			 			{
 							*msg = NeutrinoMessages::ZAPTO;
-							*data = *(unsigned *)  p;
+							*data = (unsigned)  p;
+			 				dont_delete_p = true;
 						}
 						else if (emsg.eventID==CTimerdClient::EVT_SHUTDOWN)
 			 			{

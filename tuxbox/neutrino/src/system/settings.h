@@ -206,7 +206,7 @@ class CScanSettings
 		CScanSettings();
 
 		int* diseqscOfSat( char* satname);
-
+		char* CScanSettings::satOfDiseqc(int diseqc) const;
 		void toSatList( CZapitClient::ScanSatelliteList& ) const;
 
 
