@@ -383,19 +383,19 @@ CIPInput::CIPInput(std::string Name, std::string &Value, std::string Hint_1, std
 {
 	ip = &Value;
 	frameBuffer = CFrameBuffer::getInstance();
-	addInputField( new CExtendedInput_Item_Char("0123456789") );
-	addInputField( new CExtendedInput_Item_Char("0123456789") );
-	addInputField( new CExtendedInput_Item_Char("0123456789") );
-	addInputField( new CExtendedInput_Item_Spacer(20) );
-	addInputField( new CExtendedInput_Item_Char("0123456789") );
+	addInputField( new CExtendedInput_Item_Char("012") );
 	addInputField( new CExtendedInput_Item_Char("0123456789") );
 	addInputField( new CExtendedInput_Item_Char("0123456789") );
 	addInputField( new CExtendedInput_Item_Spacer(20) );
-	addInputField( new CExtendedInput_Item_Char("0123456789") );
+	addInputField( new CExtendedInput_Item_Char("012") );
 	addInputField( new CExtendedInput_Item_Char("0123456789") );
 	addInputField( new CExtendedInput_Item_Char("0123456789") );
 	addInputField( new CExtendedInput_Item_Spacer(20) );
+	addInputField( new CExtendedInput_Item_Char("012") );
 	addInputField( new CExtendedInput_Item_Char("0123456789") );
+	addInputField( new CExtendedInput_Item_Char("0123456789") );
+	addInputField( new CExtendedInput_Item_Spacer(20) );
+	addInputField( new CExtendedInput_Item_Char("012") );
 	addInputField( new CExtendedInput_Item_Char("0123456789") );
 	addInputField( new CExtendedInput_Item_Char("0123456789") );
 	addInputField( new CExtendedInput_Item_newLiner(30) );
