@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.24 2001/07/18 13:51:05 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.25 2001/07/19 10:33:52 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.25  2001/07/19 10:33:52  fnbrd
+//  Beschleunigt, interne Strukturen geaendert, Ausgaben sortiert.
+//
 //  Revision 1.24  2001/07/18 13:51:05  fnbrd
 //  Datumsfehler behoben.
 //
@@ -114,8 +117,11 @@
 #include <time.h>
 
 #include <set>
+#include <map>
 #include <algorithm>
 #include <string>
+
+#include <loki/SmartPtr.h>
 
 #include <ost/dmx.h>
 
@@ -136,7 +142,6 @@ static int debug=0;
 #define dprintf(fmt, args...) {if(debug) printf(fmt, ## args);}
 #define dputs(str) {if(debug) puts(str);}
 
-static SIevents events; // die Menge mit den epg's
 static SIservices services; // die Menge mit den services (aus der sdt)
 
 static pthread_mutex_t eventsLock=PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge events geschrieben und gelesen wird
@@ -147,6 +152,95 @@ static pthread_mutex_t dmxEITnvodLock=PTHREAD_MUTEX_INITIALIZER;
 static int dmxEITfd=0;
 static int dmxSDTfd=0;
 static int dmxEITfd2=0;
+static int timeset=0;
+static SIevent nullEvt; // Null-Event, falls keins gefunden
+
+//------------------------------------------------------------
+// Wir verwalten die events in SmartPointers
+// und nutzen verschieden sortierte Menge zum Zugriff
+//------------------------------------------------------------
+using namespace Loki;
+
+typedef SmartPtr<class SIevent, RefCounted, DisallowConversion, AssertCheckStrict>
+  SIeventPtr;
+
+// Key ist unsigned short (Event-ID), data ist ein SIeventPtr
+typedef map<unsigned short, SIeventPtr, less<unsigned short> > MySIeventsOrderEventID;
+MySIeventsOrderEventID mySIeventsOrderEventID;
+
+// Key ist timet (startzeit), data ist ein SIeventPtr
+struct OrderServiceIDFirstStartTimeEventID
+{
+    bool operator()(const SIeventPtr &p1, const SIeventPtr &p2) {
+
+      return
+        p1->serviceID == p2->serviceID ?
+        (p1->times.begin()->startzeit == p2->times.begin()->startzeit ? p1->eventID < p2->eventID : p1->times.begin()->startzeit < p2->times.begin()->startzeit )
+        :
+        (p1->serviceID < p2->serviceID );
+    }
+};
+
+typedef map<const SIeventPtr, SIeventPtr, OrderServiceIDFirstStartTimeEventID > MySIeventsOrderServiceIDFirstStartTimeEventID;
+MySIeventsOrderServiceIDFirstStartTimeEventID mySIeventsOrderServiceIDFirstStartTimeEventID;
+
+// Key ist timet (startzeit), data ist ein SIeventPtr
+struct OrderFirstEndTimeServiceIDEventID
+{
+    bool operator()(const SIeventPtr &p1, const SIeventPtr &p2) {
+
+      return
+        p1->times.begin()->startzeit + (long)p1->times.begin()->dauer == p2->times.begin()->startzeit + (long)p2->times.begin()->dauer ?
+        ( p1->serviceID == p2->serviceID ? p1->eventID < p2->eventID : p1->serviceID < p2->serviceID )
+        :
+	( p1->times.begin()->startzeit + (long)p1->times.begin()->dauer < p2->times.begin()->startzeit + (long)p2->times.begin()->dauer ) ;
+    }
+};
+
+typedef map<const SIeventPtr, SIeventPtr, OrderFirstEndTimeServiceIDEventID > MySIeventsOrderFirstEndTimeServiceIDEventID;
+MySIeventsOrderFirstEndTimeServiceIDEventID mySIeventsOrderFirstEndTimeServiceIDEventID;
+
+// Loescht ein Event aus allen Mengen
+static void deleteEvent(const unsigned short eventID)
+{
+  MySIeventsOrderEventID::iterator e=mySIeventsOrderEventID.find(eventID);
+  if(e!=mySIeventsOrderEventID.end()) {
+    mySIeventsOrderFirstEndTimeServiceIDEventID.erase(e->second);
+    mySIeventsOrderServiceIDFirstStartTimeEventID.erase(e->second);
+    mySIeventsOrderEventID.erase(eventID);
+  }
+}
+
+// Fuegt ein Event in alle Mengen ein
+static void addEvent(const SIevent &e)
+{
+  SIeventPtr s(new SIevent(e));
+  // Damit in den nicht nach Event-ID sortierten Mengen
+  // Mehrere Events mit gleicher ID sind, diese vorher loeschen
+  deleteEvent(e.eventID);
+  mySIeventsOrderEventID.insert(make_pair(e.eventID, s));
+  mySIeventsOrderServiceIDFirstStartTimeEventID.insert(make_pair(s, SIeventPtr(s)));
+  mySIeventsOrderFirstEndTimeServiceIDEventID.insert(make_pair(s, SIeventPtr(s)));
+}
+
+static void removeOldEvents(long seconds)
+{
+  // Alte events loeschen
+  time_t zeit=time(NULL);
+  for(MySIeventsOrderFirstEndTimeServiceIDEventID::iterator e=mySIeventsOrderFirstEndTimeServiceIDEventID.begin(); e!=mySIeventsOrderFirstEndTimeServiceIDEventID.end(); e++)
+    if(e->first->times.size()) {
+      if(e->first->times.begin()->startzeit+(long)e->first->times.begin()->dauer<zeit-seconds)
+        deleteEvent(e->first->eventID);
+      else
+        break; // sortiert nach Endzeit, daher weiter Suchen unnoetig
+    }
+  return;
+}
+
+
+//------------------------------------------------------------
+// other stuff
+//------------------------------------------------------------
 
 static int startDMXeit(void)
 {
@@ -278,8 +372,7 @@ static unsigned short findServiceIDforServiceName(const char *serviceName)
     strncpy(servicename, s->serviceName.c_str(), sizeof(servicename)-1);
     servicename[sizeof(servicename)-1]=0;
     removeControlCodes(servicename);
-      // Jetz pruefen ob der Servicename der gewuenschte ist
-//      printf("Servicename: '%s'\n", servicename);
+    // Jetz pruefen ob der Servicename der gewuenschte ist
     dprintf("testing '%s'\n", servicename);
     if(!strcasecmp(servicename, serviceName))
       return s->serviceID;
@@ -287,54 +380,40 @@ static unsigned short findServiceIDforServiceName(const char *serviceName)
   return 0;
 }
 
-static const SIevent &findActualSIeventForServiceName(const char *serviceName)
+static const SIevent &findActualSIeventForServiceID(const unsigned serviceID)
 {
-static SIevent nullEvt; // Null-Event, falls keins gefunden
-
-  // Die for-Schleifen sind laestig,
-  // Evtl. sollte man aus den sets maps machen, damit man den key einfacher aendern
-  // kann und somit find() funktioniert
-  unsigned short serviceID=findServiceIDforServiceName(serviceName);
-  if(serviceID) {
-    // Event (serviceid) suchen
-    time_t zeit=time(NULL);
-    for(SIevents::iterator e=events.begin(); e!=events.end(); e++)
-      if(e->serviceID==serviceID)
-        for(SItimes::iterator t=e->times.begin(); t!=e->times.end(); t++)
-          if(t->startzeit<=zeit && zeit<=(long)(t->startzeit+t->dauer))
-            return *e;
-  }
+  time_t zeit=time(NULL);
+  // Event (serviceid) suchen
+  int serviceIDfound=0;
+  for(MySIeventsOrderServiceIDFirstStartTimeEventID::iterator e=mySIeventsOrderServiceIDFirstStartTimeEventID.begin(); e!=mySIeventsOrderServiceIDFirstStartTimeEventID.end(); e++)
+    if(e->first->serviceID==serviceID) {
+      serviceIDfound=1;
+      for(SItimes::iterator t=e->first->times.begin(); t!=e->first->times.end(); t++)
+        if(t->startzeit<=zeit && zeit<=(long)(t->startzeit+t->dauer))
+          return *(e->first);
+    } // if = serviceID
+    else if(serviceIDfound)
+      break; // sind nach serviceID und startzeit sortiert, daher weiter Suchen unnoetig
   return nullEvt;
 }
 
-static const SIevent &findNextSIeventForService(const unsigned short serviceID, const time_t end_time_last_evt)
+static const SIevent &findActualSIeventForServiceName(const char *serviceName)
 {
-static SIevent nullEvt; // Null-Event, falls keins gefunden
-
-  const SIevent * nextEvt=&nullEvt;
-  for(SIevents::iterator e=events.begin(); e!=events.end(); e++)
-    if(e->serviceID==serviceID)
-      for(SItimes::iterator t=e->times.begin(); t!=e->times.end(); t++)
-        if(t->startzeit>=end_time_last_evt)
-	  if(nextEvt->times.size()) {
-            if(t->startzeit<nextEvt->times.begin()->startzeit)
-	      nextEvt=&(*e);
-          }
-          else
-	    nextEvt=&(*e);
-  return *nextEvt;
+  unsigned short serviceID=findServiceIDforServiceName(serviceName);
+  if(serviceID)
+    return findActualSIeventForServiceID(serviceID);
+  return nullEvt;
 }
 
-static const SIevent &findActualSIeventForService(const SIservice &s)
+static const SIevent &findNextSIevent(const unsigned short eventID)
 {
-static SIevent nullEvt; // Null-Event, falls keins gefunden
-
-  time_t zeit=time(NULL);
-  for(SIevents::iterator e=events.begin(); e!=events.end(); e++)
-    if(e->serviceID==s.serviceID)
-      for(SItimes::iterator t=e->times.begin(); t!=e->times.end(); t++)
-        if(t->startzeit<=zeit && zeit<=(long)(t->startzeit+t->dauer))
-          return *e;
+  MySIeventsOrderEventID::iterator eFirst=mySIeventsOrderEventID.find(eventID);
+  if(eFirst!=mySIeventsOrderEventID.end()) {
+    MySIeventsOrderServiceIDFirstStartTimeEventID::iterator eNext=mySIeventsOrderServiceIDFirstStartTimeEventID.find(eFirst->second);
+    eNext++;
+    if(eNext!=mySIeventsOrderServiceIDFirstStartTimeEventID.end())
+      return *(eNext->second);
+  }
   return nullEvt;
 }
 
@@ -410,20 +489,23 @@ static void commandAllEventsChannelName(struct connectionData *client, char *dat
       return;
     }
     pthread_mutex_lock(&eventsLock);
-    for(SIevents::iterator e=events.begin(); e!=events.end(); e++)
-      if(e->serviceID==serviceID) {
-        if(e->times.size()) { // Nur events mit Zeiten
+    int serviceIDfound=0;
+    for(MySIeventsOrderServiceIDFirstStartTimeEventID::iterator e=mySIeventsOrderServiceIDFirstStartTimeEventID.begin(); e!=mySIeventsOrderServiceIDFirstStartTimeEventID.end(); e++)
+      if(e->first->serviceID==serviceID) {
+        serviceIDfound=1;
+        if(e->first->times.size()) { // Nur events mit Zeiten
 	  char strZeit[50];
 	  struct tm *tmZeit;
-          tmZeit=localtime(&(e->times.begin()->startzeit));
+          tmZeit=localtime(&(e->first->times.begin()->startzeit));
 	  sprintf(strZeit, "%02d.%02d %02d:%02d %u ",
-	    tmZeit->tm_mday, tmZeit->tm_mon+1, tmZeit->tm_hour, tmZeit->tm_min, e->times.begin()->dauer/60);
+	    tmZeit->tm_mday, tmZeit->tm_mon+1, tmZeit->tm_hour, tmZeit->tm_min, e->first->times.begin()->dauer/60);
 	  strcat(evtList, strZeit);
-	  strcat(evtList, e->name.c_str());
+	  strcat(evtList, e->first->name.c_str());
 	  strcat(evtList, "\n");
-//	  strcat(evtList, ctime(&(e->times.begin()->startzeit)));
 	} // if times.size
       } // if = serviceID
+      else if(serviceIDfound)
+        break; // sind nach serviceID und startzeit sortiert -> nicht weiter suchen
     pthread_mutex_unlock(&eventsLock);
     if(unpauseDMXeit()) {
       delete[] evtList;
@@ -446,10 +528,10 @@ char stati[1024];
   dputs("Request of status information");
 
   pthread_mutex_lock(&eventsLock);
-  int anzEvents=events.size();
+  unsigned anzEvents=mySIeventsOrderEventID.size();
   pthread_mutex_unlock(&eventsLock);
   pthread_mutex_lock(&servicesLock);
-  int anzServices=services.size();
+  unsigned anzServices=services.size();
   pthread_mutex_unlock(&servicesLock);
   struct mallinfo speicherinfo=mallinfo();
   time_t zeit=time(NULL);
@@ -457,8 +539,8 @@ char stati[1024];
     "Current time: %s"
     "Hours to cache: %d\n"
     "Events are old %dmin after their end time\n"
-    "Number of cached services: %d\n"
-    "Number of cached Events: %d\n"
+    "Number of cached services: %u\n"
+    "Number of cached Events: %u\n"
     "Total size of memory occupied by chunks handed out by malloc: %d\n"
     "Total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %.2fMB)\n",
     ctime(&zeit),
@@ -494,7 +576,8 @@ static void commandCurrentNextInfoChannelName(struct connectionData *client, cha
   if(evt.serviceID!=0) {//Found
     dprintf("current EPG found.\n");
     SItime siStart = *(evt.times.begin());
-    const SIevent &nextEvt=findNextSIeventForService(evt.serviceID, siStart.startzeit+siStart.dauer);
+    const SIevent &nextEvt=findNextSIevent(evt.eventID);
+//    const SIevent &nextEvt=findNextSIeventForService(evt.serviceID, siStart.startzeit+siStart.dauer);
     if(nextEvt.serviceID!=0) {
       dprintf("next EPG found.\n");
 
@@ -618,7 +701,7 @@ static void commandEventListTV(struct connectionData *client, char *data, unsign
   pthread_mutex_lock(&eventsLock);
   for(SIservices::iterator s=services.begin(); s!=services.end(); s++)
     if(s->serviceTyp==0x01) { // TV
-      const SIevent &evt=findActualSIeventForService(*s);
+      const SIevent &evt=findActualSIeventForServiceID(s->serviceID);
       strcat(evtList, s->serviceName.c_str());
       strcat(evtList, "\n");
       if(evt.serviceID!=0)
@@ -844,7 +927,6 @@ int fd;
 struct dmxSctFilterParams flt;
 const unsigned timeoutInSeconds=31;
 char *buf;
-int timeset=0;
 
   dprintf("time-thread started.\n");
   memset (&flt.filter, 0, sizeof (struct dmxFilter));
@@ -1003,37 +1085,30 @@ const unsigned timeoutInSeconds=2;
     rc=readNbytes(dmxEITfd, buf+sizeof(header), header.section_length-5, timeoutInSeconds);
     pthread_mutex_unlock(&dmxEITlock);
     if(!rc) {
-//      close(fd);
       delete[] buf;
       continue; // timeout -> kein EPG
-//      return 0; // timeout -> kein EPG
     }
     else if(rc<0) {
       close(dmxEITfd);
       dmxEITfd=0;
-//      perror ("read section");
       delete[] buf;
       break;
-//      return 5;
     }
     if(header.current_next_indicator) {
       // Wir wollen nur aktuelle sections
       SIsectionEIT eit(SIsection(sizeof(header)+header.section_length-5, buf));
-//      SIsection section(sizeof(header)+header.section_length-5, buf);
-//      SIsectionEIT eit(section);
       time_t zeit=time(NULL);
-      // Nich alle Events speichern
+      // Nicht alle Events speichern
       for(SIevents::iterator e=eit.events().begin(); e!=eit.events().end(); e++)
         if(e->times.size()>0) {
-	  if(e->times.begin()->startzeit<zeit+(long)HOURS_TO_CACHE*60L*60L &&
-	    e->times.begin()->startzeit+(long)e->times.begin()->dauer>zeit-(long)OLD_EVENTS_ARE*60L
+	  if(e->times.begin()->startzeit < zeit+(long)HOURS_TO_CACHE*60L*60L &&
+	    e->times.begin()->startzeit+(long)e->times.begin()->dauer > zeit-(long)OLD_EVENTS_ARE*60L
 	  ) {
             pthread_mutex_lock(&eventsLock);
-            events.insert(*e);
+	    addEvent(*e);
             pthread_mutex_unlock(&eventsLock);
           }
 	}
-//      events.insert(eit.events().begin(), eit.events().end());
     } // if
     else
       delete[] buf;
@@ -1047,6 +1122,7 @@ const unsigned timeoutInSeconds=2;
 //			EIT-nvod-thread
 // reads EPG-datas (nvod)
 //*********************************************************************
+/*
 static void *eitNVODthread(void *)
 {
 struct SI_section_header header;
@@ -1132,6 +1208,7 @@ const unsigned timeoutInSeconds=2;
   dprintf("eit-thread (nvod) ended\n");
   return 0;
 }
+*/
 
 //*********************************************************************
 //			housekeeping-thread
@@ -1151,8 +1228,14 @@ static void *houseKeepingThread(void *)
       return 0;
 //    if(stopDMXeitNVOD())
 //      return 0;
+    if(debug) {
+      // Speicher-Info abfragen
+      struct mallinfo speicherinfo=mallinfo();
+      dprintf("total size of memory occupied by chunks handed out by malloc: %d\n", speicherinfo.uordblks);
+      dprintf("total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %fMB)\n",speicherinfo.arena, speicherinfo.arena/1024, (float)speicherinfo.arena/(1024.*1024));
+    }
     pthread_mutex_lock(&eventsLock);
-    unsigned anzEventsAlt=events.size();
+//    unsigned anzEventsAlt=events.size();
 /*
     pthread_mutex_lock(&servicesLock);
     events.mergeAndRemoveTimeShiftedEvents(services);
@@ -1160,11 +1243,13 @@ static void *houseKeepingThread(void *)
     if(events.size()!=anzEventsAlt)
       printf("Removed %d time-shifted events.\n", anzEventsAlt-events.size());
 */
-    anzEventsAlt=events.size();
-    events.removeOldEvents(OLD_EVENTS_ARE*60); // alte Events
-    if(events.size()!=anzEventsAlt)
-      dprintf("Removed %d old events.\n", anzEventsAlt-events.size());
-    dprintf("Number of events: %u\n", events.size());
+    unsigned anzEventsAlt=mySIeventsOrderEventID.size();
+    removeOldEvents(OLD_EVENTS_ARE*60); // alte Events
+    if(mySIeventsOrderEventID.size()!=anzEventsAlt)
+      dprintf("Removed %d old events.\n", anzEventsAlt-mySIeventsOrderEventID.size());
+    dprintf("Number of sptr events (event-ID): %u\n", mySIeventsOrderEventID.size());
+    dprintf("Number of sptr events (service-id, start time, event-id): %u\n", mySIeventsOrderServiceIDFirstStartTimeEventID.size());
+    dprintf("Number of sptr events (end time, service-id, event-id): %u\n", mySIeventsOrderFirstEndTimeServiceIDEventID.size());
     pthread_mutex_unlock(&eventsLock);
     if(debug) {
       pthread_mutex_lock(&servicesLock);
@@ -1198,7 +1283,7 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.24 2001/07/18 13:51:05 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.25 2001/07/19 10:33:52 fnbrd Exp $\n");
 
   if(argc!=1 && argc!=2) {
     printHelp();
