@@ -241,6 +241,7 @@ CAudioMetaData CAudioPlayer::readMetaData(const char* filename, bool nice)
 		if(!Status)
 			fprintf(stderr,"Error occured during meta data reading.\n");
 
+		//		fclose(fp); /* netfile has 20 slots only -> maybe we have more than 20 file in our list */
 	}
 	else
 		fprintf(stderr,"Error opening file %s\n",(char *) filename);

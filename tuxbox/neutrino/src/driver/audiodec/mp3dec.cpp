@@ -736,7 +736,7 @@ void CMP3Dec::GetMP3Info(FILE* in, bool nice, CAudioMetaData *m)
 		fseek(in, 0, SEEK_END);
 		filesize=ftell(in);
 
-		m->total_time=filesize*8/Header.bitrate;
+		m->total_time = (Header.bitrate != 0) ? (filesize * 8 / Header.bitrate) : 0;
 	}
 	else
 	{
