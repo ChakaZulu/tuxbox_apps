@@ -17,14 +17,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_info.cpp,v 1.29 2004/06/11 17:05:32 ghostrider Exp $
+ * $Id: enigma_info.cpp,v 1.30 2004/08/16 10:30:15 ghostrider Exp $
  */
 
 #include <enigma_info.h>
 #include <unistd.h>
 
 #include <streaminfo.h>
-#include <showbnversion.h>
 
 #include <lib/base/i18n.h>
 #include <lib/dvb/service.h>
@@ -41,14 +40,6 @@ eZapInfo::eZapInfo()
 {
 	move(ePoint(150, 166));
 	CONNECT((new eListBoxEntryMenu(&list, _("Streaminfo"), _("open the Streaminfo")))->selected, eZapInfo::sel_streaminfo);
-	switch ( eSystemInfo::getInstance()->getHwType() )
-	{
-		case eSystemInfo::dbox2Nokia:
-		case eSystemInfo::dbox2Philips:
-		case eSystemInfo::dbox2Sagem:
-			CONNECT((new eListBoxEntryMenu(&list, _("Show BN version"),_("show the Current Version of the Betanova FW")))->selected, eZapInfo::sel_bnversion);
-			break;
-	}
 	CONNECT((new eListBoxEntryMenu(&list, _("About..."), _("open the about dialog")))->selected, eZapInfo::sel_about);
 }
 
@@ -66,19 +57,6 @@ void eZapInfo::sel_streaminfo()
 	si.show();
 	si.exec();
 	si.hide();
-	show();
-}
-
-void eZapInfo::sel_bnversion()
-{
-	hide();	
-	ShowBNVersion bn;
-#ifndef DISABLE_LCD
-	bn.setLCD(LCDTitle, LCDElement);
-#endif
-	bn.show();
-	bn.exec();
-	bn.hide();
 	show();
 }
 
