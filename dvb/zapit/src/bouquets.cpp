@@ -1,10 +1,10 @@
 /*
- * $Id: bouquets.cpp,v 1.36 2002/08/29 13:36:18 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.37 2002/08/29 15:17:26 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
  * (C) 2002 by Simplex <simplex@berlios.de>,
- *	     rasc <rasc@berlios.de>
+ *	       rasc    <rasc@berlios.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -829,18 +829,18 @@ CBouquetManager::ChannelIterator CBouquetManager::ChannelIterator::FindChannelNr
 	return (*this);
 }
 
-CBouquetManager::ChannelIterator CBouquetManager::tvChannelsFind( unsigned int onid_sid)
+CBouquetManager::ChannelIterator CBouquetManager::tvChannelsFind(const unsigned int onid_sid)
 {
 	ChannelIterator it = tvChannelsBegin();
 	while ((!it.EndOfChannels()) && ((*it)->getOnidSid() != onid_sid))
 		it++;
-	return( it);
+	return it;
 }
 
-CBouquetManager::ChannelIterator CBouquetManager::radioChannelsFind( unsigned int onid_sid)
+CBouquetManager::ChannelIterator CBouquetManager::radioChannelsFind(const unsigned int onid_sid)
 {
 	ChannelIterator it = radioChannelsBegin();
 	while ((!it.EndOfChannels()) && ((*it)->getOnidSid() != onid_sid))
 		it++;
-	return( it);
+	return it;
 }
