@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.91 2002/12/22 22:56:57 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.92 2002/12/23 00:51:31 thegoodguy Exp $
  */
 
 #include <fcntl.h>
@@ -278,7 +278,7 @@ void *start_scanthread(void *param)
 	FILE *fd = NULL;
 
 	char providerName[32];
-	char type[8];
+	char * type;
 
 	uint8_t diseqc_pos = 0;
 	uint8_t polarization = 0;
@@ -289,27 +289,9 @@ void *start_scanthread(void *param)
 
 	curr_sat = 0;
 
-	if ((frontend == NULL) || (frontend->isInitialized() == false))
+        if ((type = getFrontendName()) == NULL)
 	{
-		WARN("unable to scan without a frontend");
-		stop_scan();
-		pthread_exit(0);
-	}
-
-	switch (frontend->getInfo()->type) {
-	case FE_QPSK:	/* satellite frontend */
-		strcpy(type, "sat");
-		break;
-
-	case FE_QAM:	/* cable frontend */
-		strcpy(type, "cable");
-		break;
-
-	case FE_OFDM:	/* terrestrial frontend */
-		strcpy(type, "terrestrial");
-		break;
-
-	default:	/* unsupported frontend */
+		WARN("unable to scan without a supported frontend");
 		stop_scan();
 		pthread_exit(0);
 	}
@@ -472,4 +454,27 @@ void *start_scanthread(void *param)
 
 	stop_scan();
 	pthread_exit(0);
+}
+
+char * getFrontendName()
+{
+    if ((frontend == NULL) || (frontend->isInitialized() == false))
+	return NULL;
+
+    switch (frontend->getInfo()->type) {
+        case FE_QPSK:   /* satellite frontend */
+	    return "sat";
+	    break;
+
+        case FE_QAM:    /* cable frontend */
+	    return "cable";
+	    break;
+
+        case FE_OFDM:   /* terrestrial frontend */
+	    return "terrestrial";
+	    break;
+
+        default:        /* unsupported frontend */
+	    return NULL;
+    }
 }

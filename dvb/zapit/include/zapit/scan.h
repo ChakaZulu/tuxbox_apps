@@ -1,5 +1,5 @@
 /*
- *  $Id: scan.h,v 1.24 2002/11/02 17:21:15 obi Exp $
+ *  $Id: scan.h,v 1.25 2002/12/23 00:51:31 thegoodguy Exp $
  */
 
 #ifndef __scan_h__
@@ -36,5 +36,7 @@ extern std::map <uint32_t, transpondermap> scantransponders;
 typedef std::map <uint32_t, transpondermap>::iterator stiterator;
 
 extern CBouquetManager* scanBouquetManager;
+
+char * getFrontendName();
 
 #endif /* __scan_h__ */
