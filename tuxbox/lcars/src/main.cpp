@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: main.cpp,v $
+Revision 1.13  2002/03/03 23:06:51  TheDOC
+update-fix
+
 Revision 1.12  2002/03/03 22:56:27  TheDOC
 lcars 0.20
 
@@ -98,7 +101,7 @@ int main(int argc, char **argv)
 
 	
 	int cramfs = 6;
-	bool update_enabled = true;
+	bool update_enabled = false;
 	
 	int key = -1;
 	int number = -1;	
