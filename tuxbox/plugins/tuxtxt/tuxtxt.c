@@ -5,6 +5,7 @@
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
+ *    V1.35: add lcd-support                                                  *
  *    V1.34: add infoline for pagecatching                                    *
  *    V1.33: fix service-switch by wjoost                                     *
  *    V1.32: fix 16:9/4:3 (wss override)                                      *
@@ -50,7 +51,7 @@ void plugin_exec(PluginParam *par)
 {
 	//show versioninfo
 
-		printf("\nTuxTxt 1.34 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
+		printf("\nTuxTxt 1.35 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
 
 	//get params
 
@@ -182,11 +183,11 @@ void plugin_exec(PluginParam *par)
 					case RC_DBOX:	ConfigMenu();
 									break;
 
-					case RC_STANDBY:ShowCacheStatus();
+					case RC_STANDBY:;
 				}
 			}
 
-			//update page or timestring
+			//update page or timestring and lcd
 
 				RenderPage();
 
@@ -207,62 +208,35 @@ int Init()
 	struct dmxPesFilterParams dmx_flt;
 	int error;
 
-	//open demuxer
+	//init data
 
-		if((dmx = open("/dev/dvb/card0/demux0", O_RDWR)) == -1)
-		{
-			perror("TuxTxt <open /dev/dvb/card0/demux0>");
-			return 0;
-		}
+		memset(&cachetable, 0, sizeof(cachetable));
+		memset(&subpagetable, 0xFF, sizeof(subpagetable));
+		memset(&backbuffer, black, sizeof(backbuffer));
 
-	//open pig
+		page_atrb[32] = transp<<4 | transp;
 
-		if((pig = open("/dev/dbox/pig0", O_RDWR)) == -1)
-		{
-			perror("TuxTxt <open /dev/dbox/pig0>");
-			return 0;
-		}
+		inputcounter = 2;
 
-	//load config
+		cached_pages = 0;
 
-		if((conf = fopen(CONFIGDIR "/tuxtxt/tuxtxt.conf", "rb+")) == 0)
-		{
-			perror("TuxTxt <fopen tuxtxt.conf>");
-			return 0;
-		}
+		current_page	= -1;
+		current_subpage	= -1;
 
-		fread(&screen_mode1, 1, sizeof(screen_mode1), conf);
-		fread(&screen_mode2, 1, sizeof(screen_mode2), conf);
+		page	 = 0x100;
+		lastpage = 0x100;
+		prev_100 = 0x100;
+		prev_10  = 0x100;
+		next_100 = 0x100;
+		next_10  = 0x100;
+		subpage	 = 0;
+		pageupdate = 0;
 
-		screen_old1 = screen_mode1;
-		screen_old2 = screen_mode2;
+		zap_subpage_manual = 0;
 
-	//open avs
+	//init lcd
 
-		if((avs = open("/dev/dbox/avs0", O_RDWR)) == -1)
-		{
-			perror("TuxTxt <open /dev/dbox/avs0>");
-			return 0;
-		}
-
-		ioctl(avs, AVSIOGSCARTPIN8, &fnc_old);
-		ioctl(avs, AVSIOSSCARTPIN8, &fncmodes[screen_mode1]);
-
-	//open saa
-
-		if((saa = open("/dev/dbox/saa0", O_RDWR)) == -1)
-		{
-			perror("TuxTxt <open /dev/dbox/saa0>");
-			return 0;
-		}
-
-		ioctl(saa, SAAIOGWSS, &saa_old);
-		ioctl(saa, SAAIOSWSS, &saamodes[screen_mode1]);
-
-	//setup rc
-
-		fcntl(rc, F_SETFL, O_NONBLOCK);
-		ioctl(rc, RC_IOCTL_BCODES, 1);
+		UpdateLCD();
 
 	//init fontlibrary
 
@@ -330,37 +304,78 @@ int Init()
 			return 0;
 		}
 
-	//init data
+	//open demuxer
 
-		memset(&cachetable, 0, sizeof(cachetable));
-		memset(&subpagetable, 0xFF, sizeof(subpagetable));
-		memset(&backbuffer, black, sizeof(backbuffer));
-
-		page_atrb[32] = transp<<4 | transp;
-
-		inputcounter = 2;
-
-		cached_pages = 0;
-
-		current_page	= -1;
-		current_subpage	= -1;
-
-		page	 = 0x100;
-		lastpage = 0x100;
-		prev_100 = 0x100;
-		prev_10  = 0x100;
-		next_100 = 0x100;
-		next_10  = 0x100;
-		subpage	 = 0;
-		pageupdate = 0;
-
-		zap_subpage_manual = 0;
-
-		SDT_ready = 0;
+		if((dmx = open("/dev/dvb/card0/demux0", O_RDWR)) == -1)
+		{
+			perror("TuxTxt <open /dev/dvb/card0/demux0>");
+			return 0;
+		}
 
 	//get all vtxt-pids
 
-		if(GetVideotextPIDs() == 0) return 0;
+		if(GetVideotextPIDs() == 0)
+		{
+			FT_Done_FreeType(library);
+			munmap(lfb, fix_screeninfo.smem_len);
+			close(dmx);
+			return 0;
+		}
+		else
+		{
+			RenderCharLCD(pids_found/10,  7, 44);
+			RenderCharLCD(pids_found%10, 19, 44);
+		}
+
+	//load config
+
+		if((conf = fopen(CONFIGDIR "/tuxtxt/tuxtxt.conf", "rb+")) == 0)
+		{
+			perror("TuxTxt <fopen tuxtxt.conf>");
+			return 0;
+		}
+
+		fread(&screen_mode1, 1, sizeof(screen_mode1), conf);
+		fread(&screen_mode2, 1, sizeof(screen_mode2), conf);
+
+		screen_old1 = screen_mode1;
+		screen_old2 = screen_mode2;
+
+	//open avs
+
+		if((avs = open("/dev/dbox/avs0", O_RDWR)) == -1)
+		{
+			perror("TuxTxt <open /dev/dbox/avs0>");
+			return 0;
+		}
+
+		ioctl(avs, AVSIOGSCARTPIN8, &fnc_old);
+		ioctl(avs, AVSIOSSCARTPIN8, &fncmodes[screen_mode1]);
+
+	//open saa
+
+		if((saa = open("/dev/dbox/saa0", O_RDWR)) == -1)
+		{
+			perror("TuxTxt <open /dev/dbox/saa0>");
+			return 0;
+		}
+
+		ioctl(saa, SAAIOGWSS, &saa_old);
+		ioctl(saa, SAAIOSWSS, &saamodes[screen_mode1]);
+
+	//open pig
+
+		if((pig = open("/dev/dbox/pig0", O_RDWR)) == -1)
+		{
+			perror("TuxTxt <open /dev/dbox/pig0>");
+			return 0;
+		}
+
+	//setup rc
+
+		fcntl(rc, F_SETFL, O_NONBLOCK);
+		ioctl(rc, RC_IOCTL_BCODES, 1);
+
 
 	//set filter & start demuxer
 
@@ -574,6 +589,8 @@ skip_pid:;
 		}
 
 	//read SDT to get servicenames
+
+		SDT_ready = 0;
 
 		dmx_flt.pid				= 0x0011;
 		dmx_flt.flags			= DMX_ONESHOT | DMX_CHECK_CRC | DMX_IMMEDIATE_START;
@@ -937,6 +954,8 @@ void ConfigMenu()
 													pageupdate = 0;
 
 													zap_subpage_manual = 0;
+
+													hintmode = 0;
 
 												//free pagebuffers
 
@@ -1408,23 +1427,22 @@ void Next100()
 
 void PageCatching()
 {
-	int val, byte;
-	char line25[] = " ïð w{hlen   ñò anzeigen   óô abbrechen ¨§§¨¨¨¨¨¨¨¨¨¨§§¨¨¨¨¨¨¨¨¨¨¨¨§§¨¨¨¨¨¨¨¨¨¨¨";
+	int val;
+
+	//show info line
+
+		pagecatching = 1;
+		CopyBB2FB();
 
 	//check for pagenumber(s)
 
 		CatchNextPage(1);
 
-		if(!catched_page) return;
-
-	//change line 25
-
-		PosX = StartX;
-		PosY = StartY + 24*fixfontheight;
-
-		for(byte = 0; byte < 40; byte++)
+		if(!catched_page)
 		{
-			RenderCharFB(line25[byte], line25[byte + 40]);
+			pagecatching = 0;
+			CopyBB2FB();
+			return;
 		}
 
 	//set blocking mode
@@ -1448,6 +1466,7 @@ void PageCatching()
 
 				case RC_HOME:	fcntl(rc, F_SETFL, O_NONBLOCK);
 								pageupdate = 1;
+								pagecatching = 0;
 								RCCode = 0;
 								return;
 			}
@@ -1462,6 +1481,7 @@ void PageCatching()
 		page = catched_page;
 		subpage = subpagetable[page];
 		pageupdate = 1;
+		pagecatching = 0;
 
 	//reset to nonblocking mode
 
@@ -1899,6 +1919,26 @@ void RenderCharBB(int Char, int Attribute)
 }
 
 /******************************************************************************
+ * RenderCharLCD                                                             *
+ ******************************************************************************/
+
+void RenderCharLCD(int Digit, int XPos, int YPos)
+{
+	int x, y;
+
+	//render digit to lcd backbuffer
+
+		for(y = 0; y < 15; y++)
+		{
+			for(x = 0; x < 10; x++)
+			{
+				if(lcd_digits[Digit*15*10 + x + y*10]) lcd_backbuffer[XPos + x + ((YPos+y)/8)*120] |= 1 << ((YPos+y)%8);
+				else								   lcd_backbuffer[XPos + x + ((YPos+y)/8)*120] &= ~(1 << ((YPos+y)%8));
+			}
+		}
+}
+
+/******************************************************************************
  * RenderMessage                                                              *
  ******************************************************************************/
 
@@ -2071,6 +2111,10 @@ void RenderPage()
 				RenderCharFB(timestring[byte], page_atrb[32]);
 			}
 	}
+
+	//update lcd
+
+		UpdateLCD();
 }
 
 /******************************************************************************
@@ -2080,7 +2124,8 @@ void RenderPage()
 void CreateLine25()
 {
 	int byte;
-	char line25[] = "   ?00<      ??0<      >??0      >?00   ((((((((((1111111111AAAAAAAAAAXXXXXXXXXX";
+	char line25_1[] = "   ?00<      ??0<      >??0      >?00   ((((((((((1111111111AAAAAAAAAAXXXXXXXXXX";
+	char line25_2[] = " ïð w{hlen   ñò anzeigen   óô abbrechen ¤¨¨¤¤¤¤¤¤¤¤¤¤¨¨¤¤¤¤¤¤¤¤¤¤¤¤¨¨¤¤¤¤¤¤¤¤¤¤¤";
 
 	//get prev 100th
 
@@ -2097,7 +2142,7 @@ void CreateLine25()
 			while(subpagetable[prev_100] == 0xFF);
 		}
 
-		line25[3] = (prev_100 >> 8) | '0';
+		line25_1[3] = (prev_100 >> 8) | '0';
 
 	//get next 100th
 
@@ -2111,7 +2156,7 @@ void CreateLine25()
 		}
 		while(subpagetable[next_100] == 0xFF);
 
-		line25[34] = (next_100 >> 8) | '0';
+		line25_1[34] = (next_100 >> 8) | '0';
 
 	//get prev 10th
 
@@ -2129,8 +2174,8 @@ void CreateLine25()
 			while(subpagetable[prev_10] == 0xFF);
 		}
 
-		line25[13] = (prev_10 >> 8) | '0';
-		line25[14] = ((prev_10 & 0x0F0)>>4) | '0';
+		line25_1[13] = (prev_10 >> 8) | '0';
+		line25_1[14] = ((prev_10 & 0x0F0)>>4) | '0';
 
 	//get next 10th
 
@@ -2145,8 +2190,8 @@ void CreateLine25()
 		}
 		while(subpagetable[next_10] == 0xFF);
 
-		line25[24] = (next_10 >> 8) | '0';
-		line25[25] = ((next_10 & 0x0F0)>>4) | '0';
+		line25_1[24] = (next_10 >> 8) | '0';
+		line25_1[25] = ((next_10 & 0x0F0)>>4) | '0';
 
 	//render line 25
 
@@ -2155,8 +2200,9 @@ void CreateLine25()
 
 		for(byte = 0; byte < 40; byte++)
 		{
-			if(boxed) RenderCharBB(' ', transp<<4 | transp);
-			else	  RenderCharBB(line25[byte], line25[byte + 40]);
+			if(boxed)			  RenderCharBB(' ', transp<<4 | transp);
+			else if(pagecatching) RenderCharBB(line25_2[byte], line25_2[byte + 40]);
+			else				  RenderCharBB(line25_1[byte], line25_1[byte + 40]);
 		}
 }
 
@@ -2209,52 +2255,131 @@ void CopyBB2FB()
 }
 
 /******************************************************************************
- * ShowCacheStatus                                                            *
+ * UpdateLCD                                                                  *
  ******************************************************************************/
 
-void ShowCacheStatus()
+void UpdateLCD()
 {
-	int  x, y, show_pages;
-	char lcd_backup[120*64 / 8], lcd_backbuffer[120*64 / 8];
+	static int init_lcd = 1, old_cached_pages = -1, old_page = -1, old_subpage = -1, old_subpage_max = -1, old_hintmode = -1;
+	int  x, y, subpage_max = 0, update_lcd = 0;
 
-	//backup lcd
+	//init or update lcd
 
-		read(lcd, &lcd_backup, sizeof(lcd_backup));
-
-	//show status
-
-		show_pages = cached_pages;
-
-		printf("TuxTxt <ShowCacheStatus => %d pages>\n", show_pages);
-
-		memset(&lcd_backbuffer, 0, sizeof(lcd_backbuffer));
-
-		for(y = 0; y < 64; y++)
+		if(init_lcd)
 		{
-			for(x = 0; x < 120; x++)
+			init_lcd = 0;
+
+			for(y = 0; y < 64; y++)
 			{
-				lcd_backbuffer[x + (y/8)*120] |= lcd_layout[x + y*120] << (y%8);
+				for(x = 0; x < 120; x++)
+				{
+					if(lcd_layout[x + y*120]) lcd_backbuffer[x + (y/8)*120] |= 1 << (y%8);
+					else					  lcd_backbuffer[x + (y/8)*120] &= ~(1 << (y%8));
+				}
 			}
+
+			write(lcd, &lcd_backbuffer, sizeof(lcd_backbuffer));
+
+			for(y = 15; y <= 58; y++)
+			{
+				for(x = 1; x < 118; x++)
+				{
+					lcd_backbuffer[x + (y/8)*120] &= ~(1 << (y%8));
+				}
+			}
+
+			for(x = 3; x <= 116; x++)
+			{
+				lcd_backbuffer[x + (39/8)*120] |= 1 << (39%8);
+			}
+
+			for(y = 42; y <= 60; y++)
+			{
+				lcd_backbuffer[35 + (y/8)*120] |= 1 << (y%8);
+			}
+
+			for(y = 42; y <= 60; y++)
+			{
+				lcd_backbuffer[60 + (y/8)*120] |= 1 << (y%8);
+			}
+
+			RenderCharLCD(10, 43, 20);
+			RenderCharLCD(11, 79, 20);
+
+			return;
+		}
+		else
+		{
+			//page
+
+				if(old_page != page)
+				{
+					RenderCharLCD(page>>8,  7, 20);
+					RenderCharLCD((page&0x0F0)>>4, 19, 20);
+					RenderCharLCD(page&0x00F, 31, 20);
+
+					old_page = page;
+					update_lcd = 1;
+				}
+
+			//current subpage
+
+				if(old_subpage != subpage)
+				{
+					RenderCharLCD(subpage>>4,  55, 20);
+					RenderCharLCD(subpage&0x0F,  67, 20);
+
+					old_subpage = subpage;
+					update_lcd = 1;
+				}
+
+			//max subpage
+
+				for(x = 0; x <= 0x79; x++)
+				{
+					if(cachetable[page][x] != 0) subpage_max = x;
+				}
+
+				if(old_subpage_max != subpage_max)
+				{
+					RenderCharLCD(subpage_max>>4,  91, 20);
+					RenderCharLCD(subpage_max&0x0F, 103, 20);
+
+					old_subpage_max = subpage_max;
+					update_lcd = 1;
+				}
+
+			//cachestatus
+
+				if(old_cached_pages != cached_pages)
+				{
+					RenderCharLCD(cached_pages/1000, 67, 44);
+					RenderCharLCD(cached_pages%1000/100, 79, 44);
+					RenderCharLCD(cached_pages%100/10, 91, 44);
+					RenderCharLCD(cached_pages%10, 103, 44);
+
+					old_cached_pages = cached_pages;
+					update_lcd = 1;
+				}
+
+			//mode
+
+				if(old_hintmode != hintmode)
+				{
+					if(hintmode) RenderCharLCD(12, 43, 44);
+					else		 RenderCharLCD(13, 43, 44);
+
+					old_hintmode = hintmode;
+					update_lcd = 1;
+				}
 		}
 
-		for(y = 0; y < 35; y++)
+		if(update_lcd)
 		{
-			for(x = 0; x < 21; x++)
-			{
-				lcd_backbuffer[x+9  + ((y+20)/8)*120] |= digits[x + y*21 + show_pages/1000*21*35] << ((y+20)%8);
-				lcd_backbuffer[x+36 + ((y+20)/8)*120] |= digits[x + y*21 + show_pages%1000/100*21*35] << ((y+20)%8);
-				lcd_backbuffer[x+63 + ((y+20)/8)*120] |= digits[x + y*21 + show_pages%100/10*21*35] << ((y+20)%8);
-				lcd_backbuffer[x+90 + ((y+20)/8)*120] |= digits[x + y*21 + show_pages%10*21*35] << ((y+20)%8);
-			}
+			printf("TuxTxt <update lcd => %.3x-%.2x/%.2x %.2d %.1d %.4d>\n", page, subpage, subpage_max, pids_found, hintmode, cached_pages);
+
+			write(lcd, &lcd_backbuffer, sizeof(lcd_backbuffer));
 		}
-
-		write(lcd, &lcd_backbuffer, sizeof(lcd_backbuffer));
-
-		sleep(3);
-
-	//restore lcd
-
-		write(lcd, &lcd_backup, sizeof(lcd_backup));
 }
 
 /******************************************************************************
