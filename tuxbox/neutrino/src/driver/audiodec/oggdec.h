@@ -29,6 +29,8 @@
 #ifndef __OGG_DEC__
 #define __OGG_DEC__
 
+#define DBOX
+
 #include <mad.h>
 #include <stdio.h>
 #include <fcntl.h>
@@ -36,8 +38,13 @@
 #include <pthread.h>
 #include <basedec.h>
 #include <driver/audiometadata.h>
+#ifdef DBOX
 #include <tremor/ogg.h>
 #include <tremor/ivorbisfile.h>
+#else
+#include <ogg/ogg.h>
+#include <vorbis/vorbisfile.h>
+#endif
 
 #define DECODE_SLOTS 30
 
