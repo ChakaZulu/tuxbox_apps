@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.57 2002/09/11 14:41:20 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.58 2002/09/11 20:12:42 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -59,7 +59,7 @@ CZapitChannel* CBouquet::getChannelByChannelID(const t_channel_id channel_id, co
 	}
 
 	unsigned int i;
-	for (i=0; (i<channels->size()) && ((*channels)[i]->getOnidSid() != channel_id); i++);
+	for (i=0; (i<channels->size()) && ((*channels)[i]->getChannelID() != channel_id); i++);
 
 	if (i<channels->size())
 		result = (*channels)[i];
@@ -371,16 +371,16 @@ void CBouquetManager::restoreBouquets()
 void CBouquetManager::makeRemainingChannelsBouquet()
 {
 	ChannelList unusedChannels;
-	__gnu_cxx::hash_set<uint32_t> chans_processed;
+	__gnu_cxx::hash_set<t_channel_id> chans_processed;
 
 	deleteBouquet(remainChannels);
 
 	for (vector<CBouquet*>::iterator it = Bouquets.begin(); it != Bouquets.end(); it++)
 	{
 		for (vector<CZapitChannel*>::iterator jt = (*it)->tvChannels.begin(); jt != (*it)->tvChannels.end(); jt++)
-			chans_processed.insert((*jt)->getOnidSid());
+			chans_processed.insert((*jt)->getChannelID());
 		for (vector<CZapitChannel*>::iterator jt = (*it) ->radioChannels.begin(); jt != (*it)->radioChannels.end(); jt++)
-			chans_processed.insert((*jt)->getOnidSid());
+			chans_processed.insert((*jt)->getChannelID());
 	}
 
 	remainChannels = addBouquet((Bouquets.size() == 0) ? "Alle Kanäle" : "Andere"); // TODO: use locales
@@ -392,7 +392,7 @@ void CBouquetManager::makeRemainingChannelsBouquet()
 	sort(unusedChannels.begin(), unusedChannels.end(), CmpChannelByChName());
 
 	for (ChannelList::iterator it = unusedChannels.begin(); it != unusedChannels.end(); it++)
-		remainChannels->addService(findChannelByChannelID((*it)->getOnidSid()));
+		remainChannels->addService(findChannelByChannelID((*it)->getChannelID()));
 
 	if ((remainChannels->tvChannels.size() == 0) && (remainChannels->radioChannels.size() == 0))
 	{
@@ -557,7 +557,7 @@ int CBouquetManager::ChannelIterator::getLowestChannelNumberWithChannelID(const 
 
 	for (b = 0; b < Owner->Bouquets.size(); b++)
 		for (c = 0; (unsigned int) c < getBouquet()->size(); c++, i++)
-			if ((**this)->getOnidSid() == channel_id)
+			if ((**this)->getChannelID() == channel_id)
 			    return i;
 	return -1; // not found
 }

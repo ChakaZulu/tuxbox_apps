@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.37 2002/09/11 14:41:20 thegoodguy Exp $
+ * $Id: bouquets.h,v 1.38 2002/09/11 20:12:42 thegoodguy Exp $
  */
 
 #ifndef __bouquets_h__
@@ -23,8 +23,6 @@
 #endif
 
 using namespace std;
-
-typedef uint32_t t_channel_id;             // channel_id: (original_network_id << 16) | service_id
 
 typedef __gnu_cxx::hash_map<t_channel_id, CZapitChannel> tallchans;
 typedef __gnu_cxx::hash_map<t_channel_id, CZapitChannel>::iterator tallchans_iterator;
