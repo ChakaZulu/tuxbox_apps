@@ -50,7 +50,7 @@ void	FBSetColor( int idx, uchar r, uchar g, uchar b )
 	red[idx] = r<<8;
 	green[idx] = g<<8;
 	blue[idx] = b<<8;
-	trans[idx] = 0;
+	trans[idx] = idx ? 0 : 0xffff;
 
 	if ( idx > lastcolor )
 		lastcolor=idx;
