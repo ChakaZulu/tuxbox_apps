@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.100 2004/11/07 21:17:09 chakazulu Exp $
+  $Id: movieplayer.cpp,v 1.101 2004/12/10 15:39:30 gmo18t Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -1090,22 +1090,20 @@ void updateLcd(const std::string & sel_filename)
 
 // GMO snip start ...
 
-	#define MP_WITH_PCR 1  // use video stream as pcr source
-
 //===========================	
 //== PlayFile Thread Stuff ==
 //===========================
-	#define PF_BUF_SIZE   (800*188)	
-	#define PF_DMX_SIZE   (PF_BUF_SIZE + PF_BUF_SIZE/2)
-	#define PF_RD_TIMEOUT 3000
-	#define PF_EMPTY      0
-	#define PF_READY      1
-	#define PF_LST_ITEMS  30
-	#define PF_SKPOS_OFFS MINUTEOFFSET
-	#define PF_JMP_DIV    4  
-	#define PF_JMP_START  0
-	#define PF_JMP_MID    5555
-	#define PF_JMP_END    9999
+#define PF_BUF_SIZE   (800*188)	
+#define PF_DMX_SIZE   (PF_BUF_SIZE + PF_BUF_SIZE/2)
+#define PF_RD_TIMEOUT 3000
+#define PF_EMPTY      0
+#define PF_READY      1
+#define PF_LST_ITEMS  30
+#define PF_SKPOS_OFFS MINUTEOFFSET
+#define PF_JMP_DIV    4  
+#define PF_JMP_START  0
+#define PF_JMP_MID    5555
+#define PF_JMP_END    9999
 
 //-- live stream item --
 //----------------------
@@ -1157,13 +1155,11 @@ typedef struct
 } MP_CTX;
 
 //-- some bullshit global values --
-	#ifndef _MP_SIMULATOR
 static int g_itno = 0;
-	#endif
 
 static bool mp_openDVBDevices(MP_CTX *ctx);
 static void mp_closeDVBDevices(MP_CTX *ctx);
-static void mp_softReset(MP_CTX *ctx);
+static void mp_softReset(MP_CTX *ctx, bool refill);
 static void mp_freezeAV(MP_CTX *ctx);
 static void mp_unfreezeAV(MP_CTX *ctx);
 static void mp_startDMX(MP_CTX *ctx);
@@ -1175,8 +1171,8 @@ static void mp_analyze(MP_CTX *ctx);
 //== returns offset to start of TS packet or actual ==
 //== pos on failure.                                ==
 //==================================================== 
-	#define SIZE_TS_PKT 188
-	#define SIZE_PROBE  (100*SIZE_TS_PKT)
+#define SIZE_TS_PKT 188
+#define SIZE_PROBE  (100*SIZE_TS_PKT)
 
 static off_t mp_seekSync(int fd, off_t pos)
 {
@@ -1225,9 +1221,6 @@ static bool mp_openDVBDevices(MP_CTX *ctx)
 
 	if((ctx->dmxa = open(DMX, O_RDWR)) < 0
 		|| (ctx->dmxv = open(DMX, O_RDWR)) < 0
-#ifdef MP_WITH_PCR
-		|| (ctx->dmxp = open(DMX, O_RDWR)) < 0
-#endif
 		|| (ctx->dvr = open(DVR, O_WRONLY)) < 0
 		|| (ctx->adec = open(ADEC, O_RDWR)) < 0 || (ctx->vdec = open(VDEC, O_RDWR)) < 0)
 	{
@@ -1253,14 +1246,6 @@ static void mp_closeDVBDevices(MP_CTX *ctx)
 		close (ctx->adec);
 	}
 
-#ifdef MP_WITH_PCR
-	if(ctx->dmxp != -1)
-	{
-		ioctl (ctx->dmxp, DMX_STOP);
-		close(ctx->dmxp);
-	}
-#endif
-
 	if(ctx->dmxa != -1)
 	{
 		ioctl (ctx->dmxa, DMX_STOP);
@@ -1283,12 +1268,9 @@ static void mp_closeDVBDevices(MP_CTX *ctx)
 
 //== mp_softReset ==
 //==================
-static void mp_softReset(MP_CTX *ctx)
+static void mp_softReset(MP_CTX *ctx, bool refill = true)
 {
 	//-- stop DMX devices --
-#ifdef MP_WITH_PCR
-	ioctl(ctx->dmxp, DMX_STOP);
-#endif
 	ioctl(ctx->dmxv, DMX_STOP);
 	ioctl(ctx->dmxa, DMX_STOP);
 
@@ -1312,13 +1294,6 @@ static void mp_softReset(MP_CTX *ctx)
 	ioctl (ctx->dmxv, DMX_SET_BUFFER_SIZE, PF_DMX_SIZE);
 	ioctl (ctx->dmxv, DMX_SET_PES_FILTER, &(ctx->p));
 
-#ifdef MP_WITH_PCR
-	//-- NEW: use vpid stream as pcr stream too !!! --
-	ctx->p.pid      = ctx->pidv;
-	ctx->p.pes_type = DMX_PES_PCR;
-	ioctl (ctx->dmxp, DMX_SET_PES_FILTER, &(ctx->p));
-#endif
-
 	//-- switch audio decoder bypass depending on audio type --  
 	if(ctx->ac3 == 1)
 		ioctl(ctx->adec, AUDIO_SET_BYPASS_MODE,0UL);	// bypass on
@@ -1330,10 +1305,12 @@ static void mp_softReset(MP_CTX *ctx)
 	ioctl(ctx->vdec, VIDEO_PLAY);					// video
 	ioctl(ctx->adec, AUDIO_SET_AV_SYNC, 1UL);	// needs sync !
 
+	//-- refill input buffer --
+	if (refill) ctx->refillBuffer = true;
+
 	//-- but never start demuxers here, because this will --
 	//-- be done outside (e.g. short before writing.)     --
-	ctx->refillBuffer = true;
-	ctx->startDMX     = true;
+	ctx->startDMX = true;
 }
 
 //== mp_freezeAV ==
@@ -1370,9 +1347,6 @@ static void mp_startDMX(MP_CTX *ctx)
 	{
 		ioctl (ctx->dmxa, DMX_START);	// audio first !
 		ioctl (ctx->dmxv, DMX_START);
-#ifdef MP_WITH_MCR
-		ioctl (ctx->dmxp, DMX_START);
-#endif    
 		ctx->startDMX = false;
 	}
 }
@@ -1400,10 +1374,11 @@ static void mp_checkEvent(MP_CTX *ctx)
 			while(g_playstate == CMoviePlayerGui::PAUSE)	usleep(10000);
 			fprintf(stderr, "[mp] continue\n");
 
-			//-- after unpause, a call to "SoftReset" --
-			//-- will initialize all devices again,   --
-			//-- but demuxer will be started later.   --
-			mp_softReset(ctx);
+			//-- after unpause, a call to "SoftReset"   --
+			//-- will initialize all devices again,     --
+			//-- but demuxer will be started later.     --
+			//-- (refilling of input buffer not needed) --
+			mp_softReset(ctx, false);
 			break;
 
 			//-- next item of program/play-list   --
@@ -1556,10 +1531,10 @@ static void mp_checkEvent(MP_CTX *ctx)
 /*
 static ssize_t mp_read(struct pollfd *pH, char *buf, size_t count, int tio)
 {
-  if ( (poll(pH, 1, tio) > 0) && (pH->events & pH->revents) )
-	 return (read(pH->fd, buf, count));
-  else
-	 return -1;
+	if ( (poll(pH, 1, tio) > 0) && (pH->events & pH->revents) )
+		return (read(pH->fd, buf, count));
+	else
+		return -1;
 }
 */
 
@@ -1579,8 +1554,8 @@ static ssize_t mp_tcpRead(struct pollfd *pH, char *buf, size_t count, int tio)
 
 //== mp_probe ==
 //==============
-	#define MP_STREAM_MAGIC  "#DBOXSTREAM"
-	#define MP_PLAYLST_MAGIC "#DBOXPLAYLST"
+#define MP_STREAM_MAGIC  "#DBOXSTREAM"
+#define MP_PLAYLST_MAGIC "#DBOXPLAYLST"
 
 static bool mp_probe(const char *fname, MP_CTX *ctx)
 {
@@ -1716,12 +1691,10 @@ static bool mp_probe(const char *fname, MP_CTX *ctx)
 //================
 static void mp_analyze(MP_CTX *ctx)
 {
-#ifndef _MP_SIMULATOR
 	currentapid = 0;	// global
 	numpida     = 0;	// global
 
 	find_all_avpids (ctx->inFd, &(ctx->pidv), apids, ac3flags, &numpida);
-	//lseek(ctx->inFd, ctx->pos, SEEK_SET);
 	ctx->pos = mp_seekSync(ctx->inFd, ctx->pos);
 
 	for(int i=0; i<numpida; i++)
@@ -1751,13 +1724,6 @@ static void mp_analyze(MP_CTX *ctx)
 	}
 
 	apidchanged = 0;
-
-#else
-	find_avpids (ctx->inFd, &(ctx->pidv), &(ctx->pida));
-	lseek(ctx->inFd, 0L, SEEK_SET);
-
-	ctx->ac3 = is_audio_ac3(ctx->inFd);
-#endif      
 }
 
 //== TCP I/O ==
@@ -2074,8 +2040,6 @@ void *mp_playFileThread (void *filename)
 //=======================================
 //== CMoviePlayerGui::ParentalEntrance ==
 //=======================================
-	#define CI_MAX 4
-
 void CMoviePlayerGui::ParentalEntrance(void)
 {
 	CZapProtection pin(g_settings.parentallock_pincode, 18);
@@ -2085,7 +2049,6 @@ void CMoviePlayerGui::ParentalEntrance(void)
 	}
 }
 
-	#ifndef _MP_SIMULATOR
 //===============================
 //== CMoviePlayerGui::PlayFile ==
 //===============================
@@ -2499,7 +2462,6 @@ void CMoviePlayerGui::PlayFile (int parental)
 		pthread_join(rct, NULL);
 	}
 }
-	#endif
 
 // ... GMO snip end
 
@@ -2852,7 +2814,7 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.100 $");
+	helpbox.addLine("Version: $Revision: 1.101 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
@@ -2873,7 +2835,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.100 $");
+	helpbox.addLine("Version: $Revision: 1.101 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
