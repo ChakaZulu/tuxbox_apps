@@ -5,8 +5,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include "../../bmp2raw/bmp.h"
-#include "../../bmp2raw/raw.h"
+#include "bmp.h"
+#include "raw.h"
 
 #include "lcd-ks0713.h"
 

@@ -13,7 +13,7 @@
 #include <sys/types.h>
 
 #include "lcd-ks0713.h"
-#include "../../bmp2raw/ani.h"
+#include "ani.h"
 
 typedef unsigned char screen_t[LCD_BUFFER_SIZE];
 
