@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.48 2002/09/01 22:03:21 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.49 2002/09/03 18:31:01 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -124,14 +124,14 @@ void CBouquet::moveService (unsigned int oldPosition, unsigned int newPosition, 
 	}
 	if ((oldPosition < channels->size()) && (newPosition < channels->size()))
 	{
-		ChannelList::iterator itOld, itNew;
-		unsigned int i;
-		for (i=0, itOld = channels->begin(); i<oldPosition; i++, itOld++);
-		for (i=0, itNew = channels->begin(); i<newPosition; i++, itNew++);
+		ChannelList::iterator it = channels->begin();
 
-		CZapitChannel* tmp = (*channels)[oldPosition];
-		channels->erase( itOld);
-		channels->insert( itNew, tmp);
+		advance(it, oldPosition);
+		CZapitChannel* tmp = *it;
+		channels->erase(it);
+
+		advance(it, newPosition - oldPosition);
+		channels->insert(it, tmp);
 	}
 }
 
