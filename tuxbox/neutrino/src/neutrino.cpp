@@ -2168,11 +2168,11 @@ void CNeutrinoApp::SelectNVOD()
 					nvod_time_x[0]= 0;
 
 				sprintf(nvod_s, "%s - %s %s", nvod_time_a, nvod_time_e, nvod_time_x);
-				NVODSelector.addItem( new CMenuForwarder(nvod_s, true, "", NVODChanger, nvod_id, false), (count == g_RemoteControl->selected_subchannel) );
+				NVODSelector.addItem(new CMenuForwarder(nvod_s, true, NULL, NVODChanger, nvod_id, false), (count == g_RemoteControl->selected_subchannel));
 			}
 			else
 			{
-				NVODSelector.addItem( new CMenuForwarder((Latin1_to_UTF8(e->subservice_name)).c_str(), true, "", NVODChanger, nvod_id, false, (count<10)? (count) : CRCInput::RC_nokey ), (count == g_RemoteControl->selected_subchannel) );
+				NVODSelector.addItem(new CMenuForwarder((Latin1_to_UTF8(e->subservice_name)).c_str(), true, NULL, NVODChanger, nvod_id, false, (uint)(CRCInput::convertDigitToKey(count))), (count == g_RemoteControl->selected_subchannel));
 			}
 
 			count++;
