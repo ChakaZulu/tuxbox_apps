@@ -140,7 +140,7 @@ void saveSettings()
 		int fd;
 		fd = open(CONF_FILE, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR  |  S_IRGRP | S_IWGRP  |  S_IROTH | S_IWOTH );
 
-		if (fd==-1)
+		if (fd<0)
 		{
 			printf("[controld] error while saving settings: %s\n", CONF_FILE );
 			return;
@@ -195,7 +195,7 @@ void setvideooutput(int format, bool bSaveSettings = true)
 	 		arg = 0;
 	 		break;
     }
-	if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
+	if ((fd = open("/dev/dbox/avs0",O_RDWR)) < 0)
 	{
 		perror("open");
 		return;
@@ -204,10 +204,10 @@ void setvideooutput(int format, bool bSaveSettings = true)
 	if (ioctl(fd, AVSIOSFBLK, &arg)< 0)
 	{
 		perror("AVSIOSFBLK:");
+		close(fd);
 		return;
 	}
 	close(fd);
-
 
 	switch ( format )
 	{
@@ -230,8 +230,6 @@ void setvideooutput(int format, bool bSaveSettings = true)
 	if ( (ioctl(fd, SAAIOSMODE, &arg) < 0))
 	{
 		perror("[controld] IOCTL: ");
-		close(fd);
-		return;
 	}
 	close(fd);
 
@@ -241,6 +239,8 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 {
 	int fd;
 	int videoDisplayFormat;
+	int avsiosfncFormat;
+	int wss;
 
 	/*
 		16:9 : fnc 1
@@ -264,10 +264,11 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 
 		switch ( aspectRatio )
 		{
-			case 2 :
+			case 2 :	// 4:3
 				format= 2;
 				break;
-			case 3 :
+			case 3 :	// 16:9
+			case 4 :	// 21,1:1
 				format= 1;
 				break;
 			default:
@@ -276,7 +277,7 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 		}
 	}
 
-	if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
+	if ((fd = open("/dev/dbox/avs0",O_RDWR)) < 0)
 	{
 		perror("open");
 		return;
@@ -284,7 +285,7 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 	if (format< 0)
 		format= 0;
 
-	int avsiosfncFormat = format;
+	avsiosfncFormat = format;
 	if (settings.boxtype == CControldClient::BOXTYPE_PHILIPS) // Philips
 	{
 		switch (format)
@@ -299,7 +300,8 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 	}
 	if (ioctl(fd,AVSIOSFNC,&avsiosfncFormat)< 0)
 	{
-		perror("AVSIOSFNC:");
+		perror("AVSIOSFNC");
+		close(fd);
 		return;
 	}
 	close(fd);
@@ -309,16 +311,19 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 		//	?	case AVS_FNCOUT_INTTV	: videoDisplayFormat = VIDEO_PAN_SCAN;
 		case AVS_FNCOUT_EXT169	:
 			videoDisplayFormat = VIDEO_CENTER_CUT_OUT;
+			wss = SAA_WSS_169F;	
 			break;
 		case AVS_FNCOUT_EXT43	:
 			videoDisplayFormat = VIDEO_LETTER_BOX;
+			wss = SAA_WSS_43F;
 			break;
 		default:
 			videoDisplayFormat = VIDEO_LETTER_BOX;
+			wss = SAA_WSS_43F;
 			//	?	case AVS_FNCOUT_EXT43_1	: videoDisplayFormat = VIDEO_PAN_SCAN;
 	}
 
-	if ((fd = open("/dev/ost/video0",O_RDWR)) <= 0)
+	if ((fd = open("/dev/ost/video0",O_RDWR)) < 0)
 	{
 		perror("open");
 		return;
@@ -327,10 +332,18 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 	if ( ioctl(fd, VIDEO_SET_DISPLAY_FORMAT, videoDisplayFormat))
 	{
 		perror("VIDEO SET DISPLAY FORMAT:");
+		close(fd);
 		return;
 	}
 	close(fd);
 
+	if ( (fd = open("/dev/dbox/saa0",O_RDWR) < 0))
+	{
+		perror("open /dev/dbox/saa0");
+		return;
+	}
+	ioctl(fd,SAAIOSWSS,&wss);
+	close(fd);
 }
 
 void LoadScart_Settings()
@@ -430,7 +443,7 @@ void routeVideo(int v1, int a1, int v2, int a2, int v3, int a3, int fblk)
 {
 	int fd;
 
-	if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
+	if ((fd = open("/dev/dbox/avs0",O_RDWR)) < 0)
 	{
 		perror("open");
 		return;
@@ -439,43 +452,48 @@ void routeVideo(int v1, int a1, int v2, int a2, int v3, int a3, int fblk)
 	if (ioctl(fd, AVSIOSFBLK, &fblk)< 0)
 	{
 		perror("AVSIOSFBLK:");
+		close(fd);
 		return;
 	}
 
 	if (ioctl(fd,AVSIOSVSW1,&v1)< 0)
 	{
 		perror("AVSIOSVSW1:");
+		close(fd);
 		return;
 	}
 
 	if (ioctl(fd,AVSIOSASW1,&a1)< 0)
 	{
 		perror("AVSIOSASW1:");
+		close(fd);
 		return;
 	}
 
 	if (ioctl(fd,AVSIOSVSW2,&v2)< 0)
 	{
 		perror("AVSIOSVSW2:");
+		close(fd);
 		return;
 	}
 
 	if (ioctl(fd,AVSIOSASW2,&a2)< 0)
 	{
 		perror("AVSIOSASW2:");
+		close(fd);
 		return;
 	}
 
 	if (ioctl(fd,AVSIOSVSW3,&v3)< 0)
 	{
 		perror("AVSIOSVSW3:");
+		close(fd);
 		return;
 	}
 
 	if (ioctl(fd,AVSIOSASW3,&a3)< 0)
 	{
 		perror("AVSIOSASW3:");
-		return;
 	}
 
 	close(fd);
@@ -576,8 +594,6 @@ void disableVideoOutput(bool disable)
 	}
 	else
 	{
-		int fd;
-
 		setvideooutput(0, false);
 		setVideoFormat(-1, false);
 		zapit.stopPlayBack();
@@ -746,7 +762,7 @@ void sig_catch(int signal)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.58 2002/05/08 16:21:43 McClean Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.59 2002/08/04 15:15:03 wjoost Exp $\n\n");
 
 	//printf("[controld] mainThread-pid: %d\n", getpid());
 	switch (fork())
@@ -869,14 +885,15 @@ void CControldAspectRatioNotifier::aspectRatioChanged( int newAspectRatio )
 	{
 		switch (newAspectRatio)
 		{
-			case 2 :
+			case 2 :	// 4:3
 				setVideoFormat( 2, false );
 				break;
-			case 3 :
+			case 3 :	// 16:9
+			case 4 :	// 2,21:1
 				setVideoFormat( 1, false );
 				break;
 			default:
-				printf("[controld] Unknown apsectRatio: %d", newAspectRatio);
+				printf("[controld] Unknown aspectRatio: %d", newAspectRatio);
 		}
 	}
 }
