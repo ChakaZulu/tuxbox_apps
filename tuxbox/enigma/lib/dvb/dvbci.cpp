@@ -560,6 +560,7 @@ void eDVBCI::dataAvailable(int what)
 	if(present!=1)						//CI removed
 	{	
 		eDebug("[DVBCI] module removed");	
+		memset(appName,0,sizeof(appName));
 		ci_progress("no module");
 		
 		::read(fd,&buffer,0);	
