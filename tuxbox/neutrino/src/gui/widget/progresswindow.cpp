@@ -146,7 +146,7 @@ void CProgressWindow::paint()
 	showLocalStatus(0);
 	ypos+= mheight+10;
 
-	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width- 10, g_Locale->getText("flashupdate.globalprogress").c_str() , COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width- 10, g_Locale->getText("flashupdate.globalprogress").c_str() , COL_MENUCONTENT, 0, true); // UTF-8
 	ypos+= mheight;
 
 	globalstatusY = ypos+ mheight-20;

@@ -140,7 +140,7 @@ bool CFlashUpdate::checkVersion4Update()
 		if(!getInfo())
 		{
 			hide();
-			ShowHint("messagebox.error", g_Locale->getText("flashupdate.getinfofileerror") );
+			ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.getinfofileerror")); // UTF-8
 			return false;
 		}
 
@@ -154,7 +154,7 @@ bool CFlashUpdate::checkVersion4Update()
 		CConfigFile configfile('\t');
 		if(!configfile.loadConfig(sFileName))
 		{
-			ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.getinfofileerror") );
+			ShowHintUTF( "messagebox.error", g_Locale->getText("flashupdate.getinfofileerror")); // UTF-8
 			return false;
 		}
 		else
@@ -162,7 +162,7 @@ bool CFlashUpdate::checkVersion4Update()
 			newVersion = configfile.getString( "version", "" );
 			if(newVersion=="")
 			{
-				ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.getinfofileerror") );
+				ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.getinfofileerror")); // UTF-8
 				return false;
 			}
 		}
@@ -170,7 +170,7 @@ bool CFlashUpdate::checkVersion4Update()
 
 		if(newVersion==installedVersion)
 		{
-			ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.nonewversion") );
+			ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.nonewversion")); // UTF-8
 			return false;
 		}
 	}
@@ -186,7 +186,7 @@ bool CFlashUpdate::checkVersion4Update()
 		{
 			hide();
 			printf("flash-file not found: %s\n", (string(gTmpPath+ ImageFile)).c_str() );
-			ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.cantopenfile") );
+			ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.cantopenfile")); // UTF-8
 			return false;
 		}
 		hide();
@@ -199,7 +199,7 @@ bool CFlashUpdate::checkVersion4Update()
 
 		if ( strcmp("1.6", versionInfo.getBaseImageVersion().c_str()) )
 		{
-			ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.wrongbase").c_str() );
+			ShowHintUTF( "messagebox.error", g_Locale->getText("flashupdate.wrongbase")); // UTF-8
 			return false;
 		}
 
@@ -223,7 +223,7 @@ bool CFlashUpdate::checkVersion4Update()
 
 	if ( strcmp("1.6", versionInfo.getBaseImageVersion().c_str()) )
 	{
-		ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.wrongbase").c_str() );
+		ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.wrongbase")); // UTF-8
 		return false;
 	}
 	
@@ -263,7 +263,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, string)
 		if(!getUpdateImage(newVersion))
 		{
 			hide();
-			ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.getupdatefileerror") );
+			ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.getupdatefileerror")); // UTF-8
 			return menu_return::RETURN_REPAINT;
 		}
 	}
@@ -281,7 +281,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, string)
 	if(!ft.check_cramfs(sFileName))
 	{
 		hide();
-		ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.md5sumerror") );
+		ShowHintUTF( "messagebox.error", g_Locale->getText("flashupdate.md5sumerror")); // UTF-8
 		return menu_return::RETURN_REPAINT;
 	}
 
@@ -293,7 +293,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, string)
 	if(!ft.program(sFileName, 80, 100))
 	{
 		hide();
-		ShowHint ( "messagebox.error", ft.getErrorMessage() );
+		ShowHint("messagebox.error", ft.getErrorMessage());
 		return menu_return::RETURN_REPAINT;
 	}
 
@@ -302,7 +302,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, string)
 	showStatusMessage( g_Locale->getText("flashupdate.ready") );
 
 	hide();
-	ShowHint ( "messagebox.info", g_Locale->getText("flashupdate.flashreadyreboot") );
+	ShowHintUTF("messagebox.info", g_Locale->getText("flashupdate.flashreadyreboot")); // UTF-8
 	ft.reboot();
 	sleep(20000);
 
@@ -351,7 +351,7 @@ void CFlashExpert::readmtd(int readmtd)
 		sprintf(message, g_Locale->getText("flashupdate.savesuccess").c_str(), filename.c_str() );
 		sleep(1);
 		hide();
-		ShowHint ( "messagebox.info", message );
+		ShowHint("messagebox.info", message);
 	}
 }
 
@@ -381,7 +381,7 @@ void CFlashExpert::writemtd(string filename, int mtdNumber)
 		showStatusMessage( g_Locale->getText("flashupdate.ready"));
 		sleep(1);
 		hide();
-		ShowHint ( "messagebox.info",  g_Locale->getText("flashupdate.flashreadyreboot") );
+		ShowHintUTF("messagebox.info", g_Locale->getText("flashupdate.flashreadyreboot")); // UTF-8
 		ft.reboot();
 	}
 }
@@ -399,7 +399,8 @@ void CFlashExpert::showMTDSelector(string actionkey)
 	{
 		char sActionKey[20];
 		sprintf(sActionKey, "%s%d", actionkey.c_str(), x);
-		mtdselector->addItem(  new CMenuForwarder( mtdInfo->getMTDName(x), true, "", this, sActionKey ) );
+		mtdselector->addItem(  new CMenuForwarder( mtdInfo->getMTDName(x).c_str(), true, "", this, sActionKey ) );
+#warning TODO: make sure mtdInfo->getMTDName(x) returns something UTF-8 encoded
 	}
 	mtdselector->exec(NULL,"");
 }
@@ -425,7 +426,8 @@ void CFlashExpert::showFileSelector(string actionkey)
 			int pos = filen.find(".img");
 			if(pos!=-1)
 			{
-				fileselector->addItem(  new CMenuForwarder( filen, true, "", this, actionkey + filen ) );
+				fileselector->addItem(  new CMenuForwarder( filen.c_str(), true, "", this, actionkey + filen ) );
+#warning TODO: make sure filen is UTF-8 encoded
 			}
 			free(namelist[count]);
 		}

@@ -64,7 +64,7 @@ class CColorChooser : public CMenuTarget
 
 	public:
 
-		CColorChooser(string Name, unsigned char *R, unsigned char *G, unsigned char *B, unsigned char* Alpha, CChangeObserver* Observer = NULL);
+		CColorChooser(const char * const Name, unsigned char *R, unsigned char *G, unsigned char *B, unsigned char* Alpha, CChangeObserver* Observer = NULL); // UTF-8
 
 		void hide();
 		int exec( CMenuTarget* parent, string actionKey );

@@ -135,25 +135,25 @@ void CBEBouquetWidget::paintFoot()
 	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW);
 
 	frameBuffer->paintIcon("rot.raw", x+width- 4* ButtonWidth - 20, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- 4* ButtonWidth, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.delete").c_str(), COL_INFOBAR);
+	g_Fonts->infobar_small->RenderString(x+width- 4* ButtonWidth, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.delete"), COL_INFOBAR, 0, true); // UTF-8
 
 	frameBuffer->paintIcon("gruen.raw", x+width- 3* ButtonWidth - 30, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.add").c_str(), COL_INFOBAR);
+	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.add"), COL_INFOBAR, 0, true); // UTF-8
 
 	frameBuffer->paintIcon("gelb.raw", x+width- 2* ButtonWidth - 30, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- 2* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.move").c_str(), COL_INFOBAR);
+	g_Fonts->infobar_small->RenderString(x+width- 2* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.move"), COL_INFOBAR, 0, true); // UTF-8
 
 	frameBuffer->paintIcon("blau.raw", x+width- ButtonWidth - 30, y+height+4);
 	switch( blueFunction)
 	{
 		case beRename:
-			g_Fonts->infobar_small->RenderString(x+width- ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 10, g_Locale->getText("bouqueteditor.rename").c_str(), COL_INFOBAR);
+			g_Fonts->infobar_small->RenderString(x+width- ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 10, g_Locale->getText("bouqueteditor.rename"), COL_INFOBAR, 0, true); // UTF-8
 		break;
 		case beHide:
-			g_Fonts->infobar_small->RenderString(x+width- ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 10, g_Locale->getText("bouqueteditor.hide").c_str(), COL_INFOBAR);
+			g_Fonts->infobar_small->RenderString(x+width- ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 10, g_Locale->getText("bouqueteditor.hide"), COL_INFOBAR, 0, true); // UTF-8
 		break;
 		case beLock:
-			g_Fonts->infobar_small->RenderString(x+width- ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 10, g_Locale->getText("bouqueteditor.lock").c_str(), COL_INFOBAR);
+			g_Fonts->infobar_small->RenderString(x+width- ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 10, g_Locale->getText("bouqueteditor.lock"), COL_INFOBAR, 0, true); // UTF-8
 		break;
 	}
 	frameBuffer->paintIcon("dbox.raw", x+width - 28, y+height);
@@ -200,7 +200,7 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 			{
 				if (bouquetsChanged)
 				{
-					int result = ShowMsg ( "bouqueteditor.name", g_Locale->getText("bouqueteditor.savechanges?"), CMessageBox::mbrYes, CMessageBox::mbAll );
+					int result = ShowMsg("bouqueteditor.name", g_Locale->getText("bouqueteditor.savechanges?"), CMessageBox::mbrYes, CMessageBox::mbAll, "", 450, -1, true); // UTF-8
 
 					switch( result )
 					{
@@ -474,7 +474,7 @@ void CBEBouquetWidget::switchLockBouquet()
 	paint();
 }
 
-string CBEBouquetWidget::inputName( string defaultName, string caption)
+string CBEBouquetWidget::inputName(const std::string defaultName, const std::string caption)
 {
 	char Name[30] = "";
 	if (defaultName != "")
@@ -482,7 +482,7 @@ string CBEBouquetWidget::inputName( string defaultName, string caption)
 		strncpy( Name, defaultName.c_str(), 30);
 	}
 
-	CStringInputSMS* nameInput = new CStringInputSMS(caption, Name, 29,
+	CStringInputSMS* nameInput = new CStringInputSMS(caption.c_str(), Name, 29,
 												 "" /* hint 1*/, "" /*hint2*/,
 													 "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
 	nameInput->exec(this, "");
@@ -513,7 +513,7 @@ void CBEBouquetWidget::internalMoveBouquet( unsigned int fromPosition, unsigned 
 
 void CBEBouquetWidget::saveChanges()
 {
-	CHintBox* hintBox= new CHintBox( "bouqueteditor.name", g_Locale->getText("bouqueteditor.savingchanges"), "info.raw", 480 );
+	CHintBox* hintBox= new CHintBox("bouqueteditor.name", g_Locale->getText("bouqueteditor.savingchanges"), "info.raw", 480, true); // UTF-8
 	hintBox->paint();
 	g_Zapit->saveBouquets();
 	g_Zapit->commitBouquetChange();
@@ -523,7 +523,7 @@ void CBEBouquetWidget::saveChanges()
 
 void CBEBouquetWidget::discardChanges()
 {
-	CHintBox* hintBox= new CHintBox( "bouqueteditor.name", g_Locale->getText("bouqueteditor.discardingchanges"), "info.raw", 480 );
+	CHintBox* hintBox= new CHintBox("bouqueteditor.name", g_Locale->getText("bouqueteditor.discardingchanges"), "info.raw", 480, true); // UTF-8
 	hintBox->paint();
 	g_Zapit->restoreBouquets();
 	hintBox->hide();

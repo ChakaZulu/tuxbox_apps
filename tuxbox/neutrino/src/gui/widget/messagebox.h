@@ -68,7 +68,7 @@ class CMessageBox
 
 	int                      selected;
 	int                      showbuttons;
-	bool                     utf8;        // utf8_encoded: Caption & Text
+	bool                     utf8;        // utf8_encoded: Text
 	
 	void paintHead();
 	void paintButtons();
@@ -95,7 +95,7 @@ class CMessageBox
 			mbBack = 0x08
 		} buttons;
 	
-	// utf8_encoded: Caption & Text
+	// utf8_encoded: Text ; Caption is always UTF-8 encoded
 	CMessageBox(const std::string Caption, std::string Text, CMessageBoxNotifier* Notifier, const std::string Icon = "", int Width = 500, uint Default= mbrYes, uint ShowButtons= mbAll, const bool utf8_encoded = false);
 	~CMessageBox(void);
 
@@ -103,7 +103,7 @@ class CMessageBox
 	
 };
 
-// utf8_encoded: Caption & Text
+// utf8_encoded: Text ; Caption is always UTF-8 encoded
 int ShowMsg(const std::string Caption, std::string Text, uint Default, uint ShowButtons, const std::string Icon = "", int Width = 450, int timeout = -1, const bool utf8_encoded = false);
 
 

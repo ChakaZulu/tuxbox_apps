@@ -33,14 +33,11 @@
 #ifndef __lcdcontroler__
 #define __lcdcontroler__
 
-#include <string>
-
 #include <driver/framebuffer.h>
 
 #include "menue.h"
 
-
-using namespace std;
+#include <string>
 
 class CLcdControler : public CMenuTarget
 {
@@ -57,20 +54,20 @@ class CLcdControler : public CMenuTarget
 		unsigned char brightnessstandby;
 
 
-		string	name;
+		std::string	name;
 
 		CChangeObserver* observer;
 
 		void paint();
 		void setLcd();
-		void paintSlider(int x, int y, unsigned int spos, float factor, string text, string iconname, bool selected);
+		void paintSlider(int x, int y, unsigned int spos, float factor, const std::string text, std::string iconname, bool selected); // text in UTF-8
 
 	public:
 
-		CLcdControler(string Name, CChangeObserver* Observer=NULL);
+		CLcdControler(const char * const Name, CChangeObserver* Observer=NULL); // UTF-8
 
 		void hide();
-		int exec( CMenuTarget* parent, string actionKey );
+		int exec( CMenuTarget* parent, std::string actionKey );
 
 };
 

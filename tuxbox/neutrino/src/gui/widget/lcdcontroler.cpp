@@ -46,7 +46,7 @@
 #define CONTRASTFACTOR 0.63
 
 
-CLcdControler::CLcdControler(string Name, CChangeObserver* Observer)
+CLcdControler::CLcdControler(const char * const Name, CChangeObserver* Observer)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	observer = Observer;
@@ -71,7 +71,7 @@ void CLcdControler::setLcd()
 	CLCD::getInstance()->setContrast(contrast);
 }
 
-int CLcdControler::exec(CMenuTarget* parent, string)
+int CLcdControler::exec(CMenuTarget* parent, std::string)
 {
 	int selected, res = menu_return::RETURN_REPAINT;
 	unsigned int contrast_alt, brightness_alt, brightnessstandby_alt;
@@ -122,7 +122,7 @@ int CLcdControler::exec(CMenuTarget* parent, string)
 							break;
 						case 3:
 							frameBuffer->paintBoxRel(x, y+hheight+mheight*3+mheight/2, width, mheight, COL_MENUCONTENTSELECTED);
-							g_Fonts->menu->RenderString(x+10, y+hheight+mheight*4+mheight/2, width, g_Locale->getText("options.default"), COL_MENUCONTENTSELECTED);
+							g_Fonts->menu->RenderString(x+10, y+hheight+mheight*4+mheight/2, width, g_Locale->getText("options.default"), COL_MENUCONTENTSELECTED, 0, true); // UTF-8
 							break;
 					}
 				}
@@ -148,7 +148,7 @@ int CLcdControler::exec(CMenuTarget* parent, string)
 							paintSlider(x+10, y+hheight+mheight*2, brightnessstandby, BRIGHTNESSFACTOR, g_Locale->getText("lcdcontroler.brightnessstandby"),"brightnessstandby", true);
 							CLCD::getInstance()->setMode(CLCD::MODE_STANDBY);
 							frameBuffer->paintBoxRel(x, y+hheight+mheight*3+mheight/2, width, mheight, COL_MENUCONTENT);
-							g_Fonts->menu->RenderString(x+10, y+hheight+mheight*4+mheight/2, width, g_Locale->getText("options.default"), COL_MENUCONTENT);
+							g_Fonts->menu->RenderString(x+10, y+hheight+mheight*4+mheight/2, width, g_Locale->getText("options.default"), COL_MENUCONTENT, 0, true); // UTF-8
 							break;
 						case 3:
 							break;
@@ -241,7 +241,7 @@ int CLcdControler::exec(CMenuTarget* parent, string)
 
 			case CRCInput::RC_home:
 				if ( ( (contrast != contrast_alt) || (brightness != brightness_alt) || (brightnessstandby != brightnessstandby_alt) ) &&
-			    	 ( ShowMsg(name, g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel, "", 380 ) == CMessageBox::mbrCancel ) )
+				     ( ShowMsg(name, g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel, "", 380, -1, true) == CMessageBox::mbrCancel ) ) // UTF-8
 					break;
 
 				// sonst abbruch...
@@ -295,7 +295,7 @@ void CLcdControler::paint()
 	CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
 
 	frameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10,y+hheight, width, g_Locale->getText(name).c_str(), COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+10,y+hheight, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT);
 
 	paintSlider(x+10, y+hheight, contrast, CONTRASTFACTOR, g_Locale->getText("lcdcontroler.contrast"),"contrast", true);
@@ -303,24 +303,24 @@ void CLcdControler::paint()
 	paintSlider(x+10, y+hheight+mheight*2, brightnessstandby, BRIGHTNESSFACTOR, g_Locale->getText("lcdcontroler.brightnessstandby"),"brightnessstandby",false);
 
 	frameBuffer->paintHLineRel(x+10, width-20, y+hheight+mheight*3+mheight/4, COL_MENUCONTENT+3 );
-	g_Fonts->menu->RenderString(x+10, y+hheight+mheight*4+mheight/2, width, g_Locale->getText("options.default"), COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+10, y+hheight+mheight*4+mheight/2, width, g_Locale->getText("options.default"), COL_MENUCONTENT, 0, true); // UTF-8
 }
 
-void CLcdControler::paintSlider(int x, int y, unsigned int spos, float factor, string text, string iconname, bool selected)
+void CLcdControler::paintSlider(int x, int y, unsigned int spos, float factor, std::string text, std::string iconname, bool selected)
 {
 	int startx = 200;
 	char wert[5];
 
 	frameBuffer->paintBoxRel(x + startx, y, 120, mheight, COL_MENUCONTENT);
 	frameBuffer->paintIcon("volumebody.raw", x + startx, y+2+mheight/4);
-	string iconfile = "volumeslider2";
+	std::string iconfile = "volumeslider2";
 	if (selected)
 		iconfile += "blue";
 	iconfile +=".raw";
 	frameBuffer->paintIcon(iconfile, (int)(x + (startx+3)+(spos / factor)), y+mheight/4);
 
-	g_Fonts->menu->RenderString(x, y+mheight, width, text.c_str(), COL_MENUCONTENT);
-	sprintf(wert, "%3d", spos);
+	g_Fonts->menu->RenderString(x, y+mheight, width, text, COL_MENUCONTENT, 0, true); // UTF-8
+	sprintf(wert, "%3d", spos); // UTF-8 encoded
 	frameBuffer->paintBoxRel(x + startx + 120 + 10, y, 50, mheight, COL_MENUCONTENT);
-	g_Fonts->menu->RenderString(x + startx + 120 + 10, y+mheight, width, wert, COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x + startx + 120 + 10, y+mheight, width, wert, COL_MENUCONTENT, 0, true); // UTF-8
 }

@@ -231,10 +231,10 @@ bool CLcdNotifier::changeNotify(string OptionName, void *Data)
 bool CCableSpectalInversionNotifier::changeNotify(string OptionName, void* Data)
 {
 	static bool messageShowed = false;
-
+	
 	if (!messageShowed)
 	{
-		ShowMsg ( "messagebox.info", g_Locale->getText("cablesetup.spectralInversionWarning"), CMessageBox::mbrYes, CMessageBox::mbYes, "info.raw");
+		ShowMsg("messagebox.info", g_Locale->getText("cablesetup.spectralInversionWarning"), CMessageBox::mbrYes, CMessageBox::mbYes, "info.raw", 450, -1, true); // UTF-8
 		messageShowed = true;
 	}
 
@@ -549,7 +549,7 @@ void testNetworkSettings(const char* ip, const char* netmask, const char* broadc
 	text += "\ndboxupdate.berlios.de: ";
 	text += mypinghost("195.37.77.138");
 
-	ShowMsg("networkmenu.test", text, CMessageBox::mbrBack, CMessageBox::mbBack);
+	ShowMsg("networkmenu.test", text, CMessageBox::mbrBack, CMessageBox::mbBack, "", 450, -1, true); // UTF-8
 }
 
 void showCurrentNetworkSettings()
@@ -588,7 +588,7 @@ void showCurrentNetworkSettings()
 		text += ": ";
 		text += router;
 	}
-	ShowMsg("networkmenu.show", text, CMessageBox::mbrBack, CMessageBox::mbBack);
+	ShowMsg("networkmenu.show", text, CMessageBox::mbrBack, CMessageBox::mbBack, "", 450, -1, true); // UTF-8
 }
 
 unsigned long long getcurrenttime()

@@ -66,7 +66,7 @@ class CAlphaSetup : public CMenuTarget
 
 	public:
 
-		CAlphaSetup(string Name, unsigned char* Alpha1, unsigned char* Alpha2, CChangeObserver* Observer = NULL);
+		CAlphaSetup(const char * const Name, unsigned char* Alpha1, unsigned char* Alpha2, CChangeObserver* Observer = NULL); // UTF-8
 
 		void hide();
 		int exec( CMenuTarget* parent, string actionKey );

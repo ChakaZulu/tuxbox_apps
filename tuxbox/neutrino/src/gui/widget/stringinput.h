@@ -79,7 +79,8 @@ class CStringInput : public CMenuTarget
 
 	public:
 
-		CStringInput(string Name, char* Value, int Size, string Hint_1 = "", string Hint_2 = "", char* Valid_Chars= "0123456789. ", CChangeObserver* Observ = NULL, string Icon="" );
+		// Name: UTF-8 encoded
+		CStringInput(const char * const Name, char* Value, int Size, string Hint_1 = "", string Hint_2 = "", char* Valid_Chars= "0123456789. ", CChangeObserver* Observ = NULL, string Icon="" );
 
 		void hide();
 		int exec( CMenuTarget* parent, string actionKey );
@@ -106,7 +107,7 @@ class CStringInputSMS : public CStringInput
 		virtual void paint();
 
 	public:
-		CStringInputSMS(string Name, char* Value, int Size, string Hint_1 = "", string Hint_2 = "", char* Valid_Chars= "", CChangeObserver* Observ = NULL, string Icon="");
+		CStringInputSMS(const char * const Name, char* Value, int Size, string Hint_1 = "", string Hint_2 = "", char* Valid_Chars= "", CChangeObserver* Observ = NULL, string Icon="");
 };
 
 class CPINInput : public CStringInput
@@ -114,7 +115,7 @@ class CPINInput : public CStringInput
 	protected:
 		virtual void paintChar(int pos);
 	public:
-		CPINInput(string Name, char* Value, int Size, string Hint_1 = "", string Hint_2 = "", char* Valid_Chars= "0123456789", CChangeObserver* Observ = NULL)
+		CPINInput(const char * const Name, char* Value, int Size, string Hint_1 = "", string Hint_2 = "", char* Valid_Chars= "0123456789", CChangeObserver* Observ = NULL)
 		 : CStringInput(Name, Value, Size, Hint_1, Hint_2, Valid_Chars, Observ, "lock.raw") {};
 
 		 int exec( CMenuTarget* parent, string actionKey );
@@ -127,7 +128,7 @@ class CPLPINInput : public CPINInput
 
 		virtual int handleOthers( uint msg, uint data );
 	public:
-		CPLPINInput(string Name, char* Value, int Size, string Hint_1, int FSK )
+		CPLPINInput(const char * const Name, char* Value, int Size, string Hint_1, int FSK )
 		 : CPINInput(Name, Value, Size, " ", Hint_1) { fsk= FSK; };
 
 		int exec( CMenuTarget* parent, string actionKey );
@@ -136,7 +137,7 @@ class CPLPINInput : public CPINInput
 class CPINChangeWidget : public CStringInput
 {
 	public:
-		CPINChangeWidget(string Name, char* Value, int Size, string Hint_1 = "", string Hint_2 = "", char* Valid_Chars= "0123456789", CChangeObserver* Observ = NULL)
+		CPINChangeWidget(const char * const Name, char* Value, int Size, string Hint_1 = "", string Hint_2 = "", char* Valid_Chars= "0123456789", CChangeObserver* Observ = NULL)
 		: CStringInput(Name, Value, Size, Hint_1, Hint_2, Valid_Chars, Observ){};
 };
 

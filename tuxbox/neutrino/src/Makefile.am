@@ -46,4 +46,4 @@ neutrino_LDADD = \
 	-ljpeg \
 	-lpthread
 
-AM_CPPFLAGS = -DSKIP_CA_STATUS -Werror
+AM_CPPFLAGS = -DSKIP_CA_STATUS

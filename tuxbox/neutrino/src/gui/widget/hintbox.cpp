@@ -38,13 +38,14 @@
 #define borderwidth 4
 
 
-CHintBox::CHintBox( string Caption, string Text, string Icon, int Width )
+CHintBox::CHintBox(const std::string Caption, std::string Text, std::string Icon, int Width, const bool utf8_encoded)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	theight= g_Fonts->menu_title->getHeight();
 	fheight= g_Fonts->menu->getHeight();
 	iconfile = Icon;
 	caption = Caption;
+	utf8     = utf8_encoded;
 	Text = Text+ "\n";
 	text.clear();
 
@@ -62,7 +63,7 @@ CHintBox::CHintBox( string Caption, string Text, string Icon, int Width )
 	height = theight+ fheight* ( text.size()+ 1 );
 
 	width = Width;
-	int nw= g_Fonts->menu_title->getRenderWidth( g_Locale->getText(caption).c_str() ) + 20;
+	int nw= g_Fonts->menu_title->getRenderWidth(g_Locale->getText(caption), true) + 20; // UTF-8
 	if ( iconfile!="" )
 		nw+= 30;
 	if ( nw> width )
@@ -70,7 +71,7 @@ CHintBox::CHintBox( string Caption, string Text, string Icon, int Width )
 
 	for (unsigned int i= 0; i< text.size(); i++)
 	{
-		int nw= g_Fonts->menu->getRenderWidth( text[i].c_str() ) + 20;
+		int nw= g_Fonts->menu->getRenderWidth(text[i], utf8_encoded) + 20; // UTF-8
 		if ( nw> width )
 			width= nw;
 	}
@@ -100,14 +101,14 @@ void CHintBox::paint( bool saveScreen )
 	if ( iconfile!= "" )
 	{
 		frameBuffer->paintIcon(iconfile.c_str(),x+8,y+5);
-		g_Fonts->menu_title->RenderString(x+40, y+theight+0, width- 40, g_Locale->getText(caption).c_str(), COL_MENUHEAD);
+		g_Fonts->menu_title->RenderString(x+40, y+theight+0, width- 40, g_Locale->getText(caption), COL_MENUHEAD, 0, true); // UTF-8
 	}
 	else
-		g_Fonts->menu_title->RenderString(x+10, y+theight+0, width- 10, g_Locale->getText(caption).c_str(), COL_MENUHEAD);
+		g_Fonts->menu_title->RenderString(x+10, y+theight+0, width- 10, g_Locale->getText(caption), COL_MENUHEAD, 0, true); // UTF-8
 
 	frameBuffer->paintBoxRel(x,y+theight+0, width,height - theight + 0, COL_MENUCONTENT);
 	for (unsigned int i= 0; i< text.size(); i++)
-		g_Fonts->menu->RenderString(x+10,y+ theight+ (fheight>>1)+ fheight* (i+ 1), width, text[i].c_str(), COL_MENUCONTENT);
+		g_Fonts->menu->RenderString(x+10,y+ theight+ (fheight>>1)+ fheight* (i+ 1), width, text[i], COL_MENUCONTENT, 0, utf8); // UTF-8
 }
 
 void CHintBox::hide()
@@ -122,9 +123,9 @@ void CHintBox::hide()
 		frameBuffer->paintBackgroundBoxRel(x, y, width, height);
 }
 
-int ShowHint ( string Caption, string Text, string Icon, int Width, int timeout )
+int ShowHint(const std::string Caption, const std::string Text, std::string Icon, int Width, int timeout, const bool utf8_encoded)
 {
- 	CHintBox* hintBox= new CHintBox( Caption, Text, Icon, Width );
+ 	CHintBox* hintBox= new CHintBox(Caption, Text, Icon, Width, utf8_encoded);
 	hintBox->paint();
 
 	if ( timeout == -1 )

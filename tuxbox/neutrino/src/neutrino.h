@@ -157,7 +157,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void InitColorSettingsTiming(CMenuWidget &colorSettings_timing);
 		void InitLcdSettings(CMenuWidget &lcdSettings);
 		void InitNetworkSettings(CMenuWidget &networkSettings);
-		void AddFontSettingItem(CMenuWidget &fontSettings, std::string menuname, char *value);
+		void AddFontSettingItem(CMenuWidget &fontSettings, const char * const menuname, char *value);
 		void InitFontSettings(CMenuWidget &fontSettings,CMenuWidget &fontSettings_Channellist ,CMenuWidget &fontSettings_Eventlist , CMenuWidget &fontSettings_Infobar ,CMenuWidget &fontSettings_Epg, CMenuWidget &fontSettings_Gamelist);
 		void InitRecordingSettings(CMenuWidget &recordingSettings);
 		void InitStreamingSettings(CMenuWidget &streamingSettings);

@@ -53,7 +53,7 @@ static const string iconnames[4] = {
 	"alpha"
 };
 
-CColorChooser::CColorChooser(string Name, unsigned char *R, unsigned char *G, unsigned char *B, unsigned char* Alpha, CChangeObserver* Observer)
+CColorChooser::CColorChooser(const char * const Name, unsigned char *R, unsigned char *G, unsigned char *B, unsigned char* Alpha, CChangeObserver* Observer) // UTF-8
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	observer = Observer;
@@ -174,7 +174,7 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 		}
 		case CRCInput::RC_home:
 			if (((*value[VALUE_R] != r_alt) || (*value[VALUE_G] != g_alt) || (*value[VALUE_B] != b_alt) || ((value[VALUE_ALPHA]) && (*(value[VALUE_ALPHA]) != a_alt))) &&
-			    (ShowMsg(name, g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel, "", 380 ) == CMessageBox::mbrCancel ))
+			    (ShowMsg(name, g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel, "", 380, -1, true) == CMessageBox::mbrCancel )) // UTF-8
 				break;
 
 				// sonst abbruch...
@@ -214,7 +214,7 @@ void CColorChooser::hide()
 void CColorChooser::paint()
 {
 	frameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10,y+hheight, width, g_Locale->getText(name).c_str(), COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+10,y+hheight, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT);
 
 	string names[4] = {

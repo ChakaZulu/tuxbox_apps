@@ -42,7 +42,7 @@
 #include "stringinput_ext.h"
 
 
-CExtendedInput::CExtendedInput(string Name, char* Value, string Hint_1, string Hint_2, CChangeObserver* Observ, bool Localizing)
+CExtendedInput::CExtendedInput(const char * const Name, char* Value, string Hint_1, string Hint_2, CChangeObserver* Observ, bool Localizing)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	name = Name;
@@ -58,14 +58,7 @@ CExtendedInput::CExtendedInput(string Name, char* Value, string Hint_1, string H
 	iheight = g_Fonts->menu_info->getHeight();
 
 	localizing = Localizing;
-	if(localizing)
-	{
-		width = g_Fonts->menu_title->getRenderWidth( g_Locale->getText(name).c_str())+20;
-	}
-	else
-	{
-		width = g_Fonts->menu_title->getRenderWidth( name.c_str())+20;
-	}
+	width = g_Fonts->menu_title->getRenderWidth(localizing ? g_Locale->getText(name) : name, true)+20; // UTF-8
 	height = hheight+ mheight+ 20;
 
 	if ( hint_1.length()> 0 )
@@ -202,7 +195,7 @@ int CExtendedInput::exec( CMenuTarget* parent, string )
 		else if ( (msg==CRCInput::RC_home) || (msg==CRCInput::RC_timeout) )
 		{
 			if(strcmp(value, oldval)!= 0){
-			     int erg=ShowMsg(name, g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbNo | CMessageBox::mbYes | CMessageBox::mbCancel, "", 380 );
+				int erg=ShowMsg(name, g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbNo | CMessageBox::mbYes | CMessageBox::mbCancel, "", 380, -1, true); // UTF-8
 				 if(erg==CMessageBox::mbrYes){
 					strcpy(value, oldval);
 					loop=false;
@@ -244,14 +237,7 @@ void CExtendedInput::hide()
 void CExtendedInput::paint()
 {
 	frameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD);
-	if(localizing)
-	{
-		g_Fonts->menu_title->RenderString(x+ 10, y+ hheight, width- 10, g_Locale->getText(name).c_str(), COL_MENUHEAD);
-	}
-	else
-	{
-		g_Fonts->menu_title->RenderString(x+ 10, y+ hheight, width- 10, name.c_str(), COL_MENUHEAD);
-	}
+	g_Fonts->menu_title->RenderString(x+ 10, y+ hheight, width- 10, localizing ? g_Locale->getText(name) : name, COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintBoxRel(x, y+ hheight, width, height-hheight, COL_MENUCONTENT);
 
 	if ( hint_1.length()> 0 )
@@ -378,7 +364,7 @@ void CExtendedInput_Item_Char::keyPressed( int key )
 
 //-----------------------------#################################-------------------------------------------------------
 
-CIPInput::CIPInput(std::string Name, std::string &Value, std::string Hint_1, std::string Hint_2, CChangeObserver* Observ)
+CIPInput::CIPInput(const char * const Name, std::string &Value, std::string Hint_1, std::string Hint_2, CChangeObserver* Observ)
 	: CExtendedInput(Name, IP, Hint_1, Hint_2, Observ)
 {
 	ip = &Value;
@@ -429,7 +415,7 @@ void CIPInput::onAfterExec()
 }
 
 //-----------------------------#################################-------------------------------------------------------
-CDateInput::CDateInput(string Name, time_t* Time, string Hint_1, string Hint_2, CChangeObserver* Observ)
+CDateInput::CDateInput(const char * const Name, time_t* Time, string Hint_1, string Hint_2, CChangeObserver* Observ)
 	: CExtendedInput(Name, "", Hint_1, Hint_2, Observ)
 {
 	time=Time;
@@ -513,7 +499,7 @@ void CDateInput::onAfterExec()
 }
 //-----------------------------#################################-------------------------------------------------------
 
-CMACInput::CMACInput(string Name, char* Value, string Hint_1, string Hint_2, CChangeObserver* Observ)
+CMACInput::CMACInput(const char * const Name, char* Value, string Hint_1, string Hint_2, CChangeObserver* Observ)
 	: CExtendedInput(Name, Value, Hint_1, Hint_2, Observ)
 {
 	frameBuffer = CFrameBuffer::getInstance();

@@ -505,8 +505,8 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
     gamelist.clear();
 
     game* tmp = new game();
-    tmp->name = g_Locale->getText("menu.back");
-    gamelist.insert(gamelist.end(), tmp);
+    tmp->name = CZapitClient::Utf8_to_Latin1(g_Locale->getText("menu.back"));
+    gamelist.push_back(tmp);
 
 	for(unsigned int count=0;count < (unsigned int)g_PluginList->getNumberOfPlugins();count++)
 	{

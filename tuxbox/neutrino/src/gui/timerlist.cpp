@@ -806,7 +806,7 @@ int CTimerList::newTimer()
 
 	CZapitClient zapit;
 	CZapitClient::BouquetList bouquetlist;
-	zapit.getBouquets(bouquetlist);
+	zapit.getBouquets(bouquetlist, false, true); // UTF-8
 	CZapitClient::BouquetList::iterator bouquet = bouquetlist.begin();
 	CMenuWidget mctv("timerlist.bouquetselect", "settings.raw");
 	CMenuWidget mcradio("timerlist.bouquetselect", "settings.raw");
@@ -817,7 +817,7 @@ int CTimerList::newTimer()
 		CMenuWidget* mwradio = new CMenuWidget("timerlist.channelselect", "settings.raw");
 		toDelete.insert(toDelete.end(), mwradio);
 		CZapitClient::BouquetChannelList subchannellist;
-		zapit.getBouquetChannels(bouquet->bouquet_nr,subchannellist,CZapitClient::MODE_TV);
+		zapit.getBouquetChannels(bouquet->bouquet_nr,subchannellist,CZapitClient::MODE_TV, true); // UTF-8
 		CZapitClient::BouquetChannelList::iterator channel = subchannellist.begin();
 		for(; channel != subchannellist.end();channel++)
 		{
@@ -828,7 +828,7 @@ int CTimerList::newTimer()
 		if (subchannellist.size()>0)
 			mctv.addItem(new CMenuForwarder(bouquet->name, true, NULL, mwtv));
 		subchannellist.clear();
-		zapit.getBouquetChannels(bouquet->bouquet_nr,subchannellist,CZapitClient::MODE_RADIO);
+		zapit.getBouquetChannels(bouquet->bouquet_nr,subchannellist,CZapitClient::MODE_RADIO, true); // UTF-8
 		channel = subchannellist.begin();
 		for(; channel != subchannellist.end();channel++)
 		{

@@ -55,7 +55,7 @@ class CKeyChooser : public CMenuWidget
 		CKeyChooserItemNoKey	*keyDeleter;
 
 	public:
-		CKeyChooser(int *Key, string title, string Icon="" );
+		CKeyChooser(int *Key, const char * const title, string Icon="" ); // title: UTF-8
 		~CKeyChooser();
 
 		void paint();
@@ -80,7 +80,7 @@ class CKeyChooserItem : public CMenuTarget
 
 	public:
 
-		CKeyChooserItem(string Name, int *Key);
+		CKeyChooserItem(const char * const Name, int *Key); // UTF-8
 
 		void hide();
 		int exec(CMenuTarget* parent, string actionKey );

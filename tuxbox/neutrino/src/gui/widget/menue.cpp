@@ -41,25 +41,19 @@
 #include "menue.h"
 #include "stringinput.h"
 
-
-bool isDigit(const char ch)
-{
-	if((ch>'0') && (ch<'9'))
-		return true;
-	else return false;
-}
+#include <cctype>
 
 bool isNumber(const std::string& str)
 {
 	for (std::string::const_iterator i = str.begin(); i != str.end(); i++)
 	{
-		if (!isDigit(*i)) return false;
+		if (!std::isdigit(*i)) return false;
 	}
 	return true;
 }
 
 
-CMenuWidget::CMenuWidget(std::string Name, std::string Icon, int mwidth, int mheight, bool Localizing)
+CMenuWidget::CMenuWidget(const char * const Name, const std::string Icon, const int mwidth, const int mheight, const bool Localizing)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	onPaintNotifier = NULL;
@@ -256,7 +250,7 @@ int CMenuWidget::exec(CMenuTarget* parent, std::string)
 	hide();
 	if(!parent)
 	{
-		CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO, g_Locale->getText(name));
+		CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
 	}
 
 	return retval;
@@ -269,18 +263,15 @@ void CMenuWidget::hide()
 
 void CMenuWidget::paint()
 {
-	std::string  l_name = name;
-	if(localizing)
-	{
-		l_name = g_Locale->getText(name);
-	}
-	CLCD::getInstance()->setMode(CLCD::MODE_MENU, l_name);
+	std::string l_name = localizing ? g_Locale->getText(name) : name;
+
+	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, l_name);
 
 	height=wanted_height;
 	if(height > (g_settings.screen_EndY - g_settings.screen_StartY))
 		height = g_settings.screen_EndY - g_settings.screen_StartY;
 
-	int neededWidth = g_Fonts->menu_title->getRenderWidth(l_name.c_str());
+	int neededWidth = g_Fonts->menu_title->getRenderWidth(l_name, true); // UTF-8
 	if (neededWidth> width-48)
 	{
 		width= neededWidth+ 49;
@@ -333,7 +324,7 @@ void CMenuWidget::paint()
 		sb_width=0;
 
 	frameBuffer->paintBoxRel(x,y, width+sb_width,hheight, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+38,y+hheight+1, width-40, l_name.c_str(), COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+38,y+hheight+1, width-40, l_name, COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintIcon(iconfile.c_str(),x+8,y+5);
 
 	item_start_y = y+hheight;
@@ -423,9 +414,9 @@ void CMenuOptionChooser::removeAllOptions()
 	options.clear();
 }
 
-void CMenuOptionChooser::setOptionValue(int val)
+void CMenuOptionChooser::setOptionValue(const int newvalue)
 {
-	*optionValue = val;
+	*optionValue = newvalue;
 }
 
 int CMenuOptionChooser::getOptionValue(void) const
@@ -515,7 +506,7 @@ int CMenuOptionChooser::paint( bool selected )
 
 //-------------------------------------------------------------------------------------------------------------------------------
 
-CMenuOptionStringChooser::CMenuOptionStringChooser(std::string OptionName, char* OptionValue, bool Active, CChangeObserver* Observ, bool Localizing)
+CMenuOptionStringChooser::CMenuOptionStringChooser(const char * const OptionName, char* OptionValue, bool Active, CChangeObserver* Observ, bool Localizing)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	height= g_Fonts->menu->getHeight();
@@ -586,12 +577,12 @@ int CMenuOptionStringChooser::paint( bool selected )
 	int stringstartposName = x + offx + 10;
 	int stringstartposOption = x + dx - stringwidth - 10; //+ offx
 
-	g_Fonts->menu->RenderString(stringstartposName,   y+height,dx- (stringstartposName - x), l_optionName.c_str(), color);
+	g_Fonts->menu->RenderString(stringstartposName,   y+height,dx- (stringstartposName - x), l_optionName, color, 0, true); // UTF-8
 	g_Fonts->menu->RenderString(stringstartposOption, y+height,dx- (stringstartposOption - x), l_option.c_str(), color);
 
 	if(selected)
 	{
-		CLCD::getInstance()->showMenuText(0, l_optionName);
+		CLCD::getInstance()->showMenuText(0, l_optionName, -1, true); // UTF-8
 		CLCD::getInstance()->showMenuText(1, l_option);
 	}
 
@@ -601,7 +592,7 @@ int CMenuOptionStringChooser::paint( bool selected )
 
 
 //-------------------------------------------------------------------------------------------------------------------------------
-CMenuForwarder::CMenuForwarder(std::string Text, bool Active, const char * const Option, CMenuTarget* Target, std::string ActionKey, bool Localizing, uint DirectKey, std::string IconName)
+CMenuForwarder::CMenuForwarder(const char * const Text, const bool Active, const char * const Option, CMenuTarget* Target, std::string ActionKey, bool Localizing, uint DirectKey, std::string IconName)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	height=g_Fonts->menu->getHeight();
@@ -616,7 +607,7 @@ CMenuForwarder::CMenuForwarder(std::string Text, bool Active, const char * const
 	iconName = IconName;
 }
 
-CMenuForwarder::CMenuForwarder(std::string Text, bool Active, const std::string &Option, CMenuTarget* Target, std::string ActionKey, bool Localizing, uint DirectKey, std::string IconName)
+CMenuForwarder::CMenuForwarder(const char * const Text, const bool Active, const std::string &Option, CMenuTarget* Target, std::string ActionKey, bool Localizing, uint DirectKey, std::string IconName)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	height=g_Fonts->menu->getHeight();
@@ -646,18 +637,13 @@ int CMenuForwarder::exec(CMenuTarget* parent)
 
 int CMenuForwarder::paint(bool selected)
 {
-	std::string  l_text;
-
-	if ( localizing )
-		l_text = g_Locale->getText(text);
-	else
-		l_text = text;
+	std::string l_text = localizing ? g_Locale->getText(text) : text;
 
 	int stringstartposX = x + offx + 10;
 
-	if(selected)
+	if (selected)
 	{
-		CLCD::getInstance()->showMenuText(0, l_text);
+		CLCD::getInstance()->showMenuText(0, l_text, -1, true); // UTF-8
 
 		if (option)
 			CLCD::getInstance()->showMenuText(1, option);
@@ -665,7 +651,7 @@ int CMenuForwarder::paint(bool selected)
 			if (option_string)
 				CLCD::getInstance()->showMenuText(1, *option_string);
 			else
-				CLCD::getInstance()->showMenuText(1, "");
+				CLCD::getInstance()->showMenuText(1, "", -1, true); // UTF-8
 	}
 
 	unsigned char color = COL_MENUCONTENT;
@@ -675,7 +661,7 @@ int CMenuForwarder::paint(bool selected)
 		color = COL_MENUCONTENTINACTIVE;
 
 	frameBuffer->paintBoxRel(x,y, dx, height, color );
-	g_Fonts->menu->RenderString(stringstartposX, y+ height, dx- (stringstartposX - x),  l_text.c_str(), color);
+	g_Fonts->menu->RenderString(stringstartposX, y+ height, dx- (stringstartposX - x), l_text, color, 0, true); // UTF-8
 
 	if (iconName!="")
 	{
@@ -709,7 +695,7 @@ int CMenuForwarder::paint(bool selected)
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------
-CMenuSeparator::CMenuSeparator(int Type, std::string Text)
+CMenuSeparator::CMenuSeparator(const int Type, const char * const Text)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	directKey = CRCInput::RC_nokey;
@@ -744,7 +730,7 @@ int CMenuSeparator::paint(bool selected)
 	if(type&STRING)
 	{
 		std::string  l_text = g_Locale->getText(text);
-		int stringwidth = g_Fonts->menu->getRenderWidth(l_text.c_str());
+		int stringwidth = g_Fonts->menu->getRenderWidth(l_text, true); // UTF-8
 		int stringstartposX = 0;
 
 		if(type&ALIGN_CENTER)
@@ -762,12 +748,12 @@ int CMenuSeparator::paint(bool selected)
 
 		frameBuffer->paintBoxRel(stringstartposX-5, y, stringwidth+10, height, COL_MENUCONTENT );
 
-		g_Fonts->menu->RenderString(stringstartposX, y+height,dx- (stringstartposX- x) , l_text.c_str(), COL_MENUCONTENTINACTIVE);
+		g_Fonts->menu->RenderString(stringstartposX, y+height,dx- (stringstartposX- x) , l_text, COL_MENUCONTENTINACTIVE, 0, true); // UTF-8
 
 		if(selected)
 		{
-			CLCD::getInstance()->showMenuText(0, l_text);
-			CLCD::getInstance()->showMenuText(1, "");
+			CLCD::getInstance()->showMenuText(0, l_text, -1, true); // UTF-8
+			CLCD::getInstance()->showMenuText(1, "", -1, true); // UTF-8
 		}
 	}
 	return y+ height;

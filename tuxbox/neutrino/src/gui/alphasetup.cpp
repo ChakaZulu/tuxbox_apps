@@ -54,7 +54,7 @@
 #include "alphasetup.h"
 
 
-CAlphaSetup::CAlphaSetup(string Name, unsigned char* Alpha1, unsigned char* Alpha2, CChangeObserver* Observer)
+CAlphaSetup::CAlphaSetup(const char * const Name, unsigned char* Alpha1, unsigned char* Alpha2, CChangeObserver* Observer)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	observer = Observer;
@@ -204,10 +204,10 @@ int CAlphaSetup::exec(CMenuTarget* parent, string)
 			case CRCInput::RC_home:
 				if ((*alpha1 != alpha1_alt) || (*alpha2 != alpha2_alt))
 				{
-			    	if (ShowMsg(name, g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel, "", 380) == CMessageBox::mbrCancel)
-			    	{
+					if (ShowMsg(name, g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel, "", 380, -1, true) == CMessageBox::mbrCancel) // UTF-8
+					{
 						break;
-			    	}
+					}
 				}
 
 				// sonst abbruch...
@@ -244,7 +244,7 @@ void CAlphaSetup::hide()
 void CAlphaSetup::paint()
 {
 	frameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10,y+hheight, width, g_Locale->getText(name).c_str(), COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+10,y+hheight, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT);
 
 	paintSlider(x+10, y+hheight, alpha1,g_Locale->getText("gtxalpha.alpha1"),"red", true);

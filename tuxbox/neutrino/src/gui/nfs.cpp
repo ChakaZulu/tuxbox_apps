@@ -256,7 +256,7 @@ void CNFSMountGui::mount(const char* ip, const char* dir, const char* local_dir,
 		if(strcmp(mountOn,local_dir)==0)
 	  	{
 			if(showerror)
-				ShowHint ( "messagebox.info",  g_Locale->getText("nfs.alreadymounted"));
+				ShowHintUTF( "messagebox.info",  g_Locale->getText("nfs.alreadymounted")); // UTF-8
 			printf("[neutrino]: NFS mount error %s already mounted\n", local_dir);
 			in.close();
 			return;
@@ -308,9 +308,9 @@ void CNFSMountGui::mount(const char* ip, const char* dir, const char* local_dir,
 	{
 		if(showerror)
 			if(retcode == ETIMEDOUT)
-				ShowHint ( "messagebox.info",  g_Locale->getText("nfs.mounttimeout"));
+				ShowHintUTF("messagebox.info", g_Locale->getText("nfs.mounttimeout")); // UTF-8
 			else
-				ShowHint ( "messagebox.info",  g_Locale->getText("nfs.mounterror"));
+				ShowHintUTF("messagebox.info", g_Locale->getText("nfs.mounterror")); // UTF-8
 		strcpy(g_settings.network_nfs_mount_options[0],"ro,soft,udp");
 		strcpy(g_settings.network_nfs_mount_options[1],"nolock,rsize=8192,wsize=8192");
 		printf("[neutrino]: NFS mount error: \"%s\"\n", cmd.c_str());
@@ -368,7 +368,8 @@ int CNFSUmountGui::menu()
 			count++;
 			string s1=string(mountDev) + " -> " + mountOn;
 			string s2=string("doumount ") + mountOn;
-			umountMenu.addItem(new CMenuForwarder(s1, true, NULL, this, s2));
+#warning TODO: make sure s1 is UTF-8 encoded
+			umountMenu.addItem(new CMenuForwarder(s1.c_str(), true, NULL, this, s2));
 		}
 	}
 	in.close();
@@ -383,7 +384,7 @@ void CNFSUmountGui::umount(string dir)
 {
 	if(dir!= "")
 	if(umount2(dir.c_str(),MNT_FORCE)!=0)
-		ShowHint ( "messagebox.info", g_Locale->getText("nfs.umounterror") );
+		ShowHintUTF("messagebox.info", g_Locale->getText("nfs.umounterror")); // UTF-8
 	else
 	{
 		char buffer[200+1],mountDev[100],mountOn[100],mountType[20];

@@ -75,7 +75,7 @@ class CExtendedInput : public CMenuTarget
 
 	public:
 
-		CExtendedInput(string Name, char* Value, string Hint_1 = "", string Hint_2 = "", CChangeObserver* Observ = NULL, bool Localizing=true);
+		CExtendedInput(const char * const Name, char* Value, string Hint_1 = "", string Hint_2 = "", CChangeObserver* Observ = NULL, bool Localizing=true);
 
 		void hide();
 		int exec( CMenuTarget* parent, string actionKey );
@@ -158,7 +158,7 @@ class CIPInput : public CExtendedInput
 		virtual void onAfterExec();
 
 	public:
-		CIPInput(std::string Name, std::string &Value, std::string Hint_1 = "", std::string Hint_2 = "", CChangeObserver* Observ = NULL);
+		CIPInput(const char * const Name, std::string &Value, std::string Hint_1 = "", std::string Hint_2 = "", CChangeObserver* Observ = NULL);
 };
 
 //----------------------------------------------------------------------------------------------------
@@ -173,7 +173,7 @@ class CDateInput : public CExtendedInput
 		virtual void onAfterExec();
 
 	public:
-		CDateInput(string Name, time_t* Time, string Hint_1 = "", string Hint_2 = "", CChangeObserver* Observ = NULL);
+		CDateInput(const char * const Name, time_t* Time, string Hint_1 = "", string Hint_2 = "", CChangeObserver* Observ = NULL);
 		~CDateInput();
 		char* getValue() {return value;}
 };
@@ -187,7 +187,7 @@ class CMACInput : public CExtendedInput
 		virtual void onAfterExec();
 
 	public:
-		CMACInput(string Name, char* Value, string Hint_1 = "", string Hint_2 = "", CChangeObserver* Observ = NULL);
+		CMACInput(const char * const Name, char* Value, string Hint_1 = "", string Hint_2 = "", CChangeObserver* Observ = NULL);
 };
 
 

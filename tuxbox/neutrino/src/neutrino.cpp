@@ -1733,7 +1733,7 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 
 }
 
-void CNeutrinoApp::AddFontSettingItem(CMenuWidget &fontSettings, std::string menuname, char *value)
+void CNeutrinoApp::AddFontSettingItem(CMenuWidget &fontSettings, const char * const menuname, char *value)
 {
 	CStringInput *fontSize;
 	fontSize = new CStringInput(menuname, value, 3, "ipsetup.hint_1", "ipsetup.hint_2","0123456789 ",this);
@@ -2073,7 +2073,8 @@ void CNeutrinoApp::SelectNVOD()
 			}
 			else
 			{
-				NVODSelector.addItem( new CMenuForwarder(e->subservice_name, true, "", NVODChanger, nvod_id, false, (count<10)? (count) : CRCInput::RC_nokey ), (count == g_RemoteControl->selected_subchannel) );
+#warning TODO: check whether subservice_name is UTF-8 encoded or not
+				NVODSelector.addItem( new CMenuForwarder((e->subservice_name).c_str(), true, "", NVODChanger, nvod_id, false, (count<10)? (count) : CRCInput::RC_nokey ), (count == g_RemoteControl->selected_subchannel) );
 			}
 
 			count++;
@@ -2131,7 +2132,8 @@ void CNeutrinoApp::ShowStreamFeatures()
 
 			enabled_count++;
 
-			StreamFeatureSelector.addItem( new CMenuForwarder(g_PluginList->getName(count), true, "", StreamFeaturesChanger, id, false, (cnt== 0) ? CRCInput::RC_blue : CRCInput::RC_nokey, (cnt== 0)?"blau.raw":""), (cnt == 0) );
+#warning TODO: make sure g_PluginList->getName(count) is UTF-8 encoded
+			StreamFeatureSelector.addItem( new CMenuForwarder((g_PluginList->getName(count)).c_str(), true, "", StreamFeaturesChanger, id, false, (cnt== 0) ? CRCInput::RC_blue : CRCInput::RC_nokey, (cnt== 0)?"blau.raw":""), (cnt == 0) );
 			cnt++;
 		}
 	}
@@ -3573,7 +3575,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 //	printf("OptionName: %s\n",OptionName.c_str());
 	if(OptionName.substr(0,9).compare("fontsize.") == 0)
 	{
-	 	CHintBox* hintBox= new CHintBox( "messagebox.info", g_Locale->getText("fontsize.hint"), "info.raw", 450 );
+		CHintBox * hintBox = new CHintBox("messagebox.info", g_Locale->getText("fontsize.hint"), "info.raw", 450, true); // UTF-8
 		hintBox->paint();
 
 		SetupFonts();

@@ -33,42 +33,45 @@
 #ifndef __hintbox__
 #define __hintbox__
 
-#include <string>
-#include <vector>
-
 #include <driver/framebuffer.h>
 #include <driver/fontrenderer.h>
 
 #include "menue.h"
 
-
-using namespace std;
+#include <string>
+#include <vector>
 
 class CHintBox
 {
-	private:
-		CFrameBuffer			*frameBuffer;
-		int				width;
-		int				height;
-		int				x;
-		int				y;
-		int				fheight;
-		int				theight;
-		string				caption;
-		vector<string>			text;
-		string				iconfile;
+ private:
+	CFrameBuffer *           frameBuffer;
+	int                      width;
+	int                      height;
+	int                      x;
+	int                      y;
+	int                      fheight;
+	int                      theight;
+	std::string              caption;
+	std::vector<std::string> text;
+	std::string              iconfile;
+	
+	unsigned char *          pixbuf;
+	bool                     utf8;        // utf8_encoded: Text
+	
+ public:
+	// Caption always UTF-8 encoded
+	CHintBox(const std::string Caption, std::string Text, std::string Icon="info.raw", int Width = 500, const bool utf8_encoded = false);
 
-		unsigned char*			pixbuf;
-
-
-	public:
-		CHintBox( string Caption, string Text, string Icon="info.raw", int Width = 500 );
-
-		void paint( bool saveScreen = true );
-		void hide();
+	void paint( bool saveScreen = true );
+	void hide();
 };
 
-int ShowHint ( string Caption, string Text, string Icon="info.raw", int Width = 450, int timeout = -1 );
+// Caption always UTF-8 encoded
+int ShowHint(const std::string Caption, const std::string Text, std::string Icon="info.raw", int Width = 450, int timeout = -1, const bool utf8_encoded = false);
+inline int ShowHintUTF(const std::string Caption, const std::string Text, std::string Icon="info.raw", int Width = 450, int timeout = -1)
+{
+	return ShowHint(Caption, Text, Icon, Width, timeout, true);
+}
 
 
 #endif

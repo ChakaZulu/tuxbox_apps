@@ -149,7 +149,7 @@ class CMenuSeparator : public CMenuItem
 		};
 
 
-		CMenuSeparator(int Type=0, std::string Text="");
+		CMenuSeparator(const int Type = 0, const char * const Text = ""); // UTF-8
 
 		int paint(bool selected=false);
 		int getHeight(void) const
@@ -169,8 +169,9 @@ class CMenuForwarder : public CMenuItem
 		bool		localizing;
 	public:
 
-		CMenuForwarder(std::string Text, bool Active=true, const char * const Option=NULL, CMenuTarget* Target=NULL, std::string ActionKey="", bool Localizing= true, uint DirectKey= CRCInput::RC_nokey, std::string IconName= "");
-		CMenuForwarder(std::string Text, bool Active, const std::string &Option, CMenuTarget* Target=NULL, std::string ActionKey="", bool Localizing= true, uint DirectKey= CRCInput::RC_nokey, std::string IconName= "");
+		// Text must be UTF-8 encoded:
+		CMenuForwarder(const char * const Text, const bool Active=true, const char * const Option=NULL, CMenuTarget* Target=NULL, std::string ActionKey="", bool Localizing= true, uint DirectKey= CRCInput::RC_nokey, std::string IconName= "");
+		CMenuForwarder(const char * const Text, const bool Active, const std::string &Option, CMenuTarget* Target=NULL, std::string ActionKey="", bool Localizing= true, uint DirectKey= CRCInput::RC_nokey, std::string IconName= "");
 		int paint(bool selected=false);
 		int getHeight(void) const
 		{
@@ -205,7 +206,7 @@ class CMenuOptionChooser : public CMenuItem
 
 		void addOption(const int key, const char * const value_utf8_encoded); // UTF-8
 		void removeAllOptions();
-		void setOptionValue(int val);
+		void setOptionValue(const int newvalue);
 		int getOptionValue(void) const;
 
 		int paint(bool selected);
@@ -231,7 +232,8 @@ class CMenuOptionStringChooser : public CMenuItem
 		bool                     localizing;
 
 	public:
-		CMenuOptionStringChooser(std::string OptionName, char* OptionValue, bool Active = false, CChangeObserver* Observ = NULL, bool Localizing= true);
+		// OptionName: UTF-8 encoded
+		CMenuOptionStringChooser(const char * const OptionName, char* OptionValue, bool Active = false, CChangeObserver* Observ = NULL, bool Localizing= true);
 		~CMenuOptionStringChooser();
 
 		void addOption(std::string value);
@@ -282,7 +284,8 @@ class CMenuWidget : public CMenuTarget
 			onPaintNotifier=NULL;
 			iconOffset= 0;
 		};
-		CMenuWidget(std::string Name, std::string Icon="", int mwidth=400, int mheight=576, bool Localizing=true);
+		// Name must be UTF-8 encoded:
+		CMenuWidget(const char * const Name, const std::string Icon = "", const int mwidth = 400, const int mheight = 576, const bool Localizing = true);
 		~CMenuWidget();
 
 		virtual void addItem(CMenuItem* menuItem, bool defaultselected=false);
@@ -330,7 +333,7 @@ class CLockedMenuForwarder : public CMenuForwarder, public CPINProtection
 	protected:
 		virtual CMenuTarget* getParent(){ return Parent;};
 	public:
-		CLockedMenuForwarder(std::string Text, char* validPIN, bool alwaysAsk=false, bool Active=true, char *Option=NULL,
+		CLockedMenuForwarder(const char * const Text, char* validPIN, bool alwaysAsk=false, const bool Active=true, char *Option=NULL,
 		                     CMenuTarget* Target=NULL, std::string ActionKey="", bool Localizing= true,
 		                     uint DirectKey= CRCInput::RC_nokey, std::string IconName= "")
 

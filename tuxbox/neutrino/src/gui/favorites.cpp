@@ -59,7 +59,7 @@ int CFavorites::addChannelToFavorites()
 	if (!bouquetList) return status;
 
 	// -- get Favorites Bouquetname  from Locales
-	fav_bouquetname = (char *) g_Locale->getText("favorites.bouquetname").c_str();
+	fav_bouquetname = (char *) CZapitClient::Utf8_to_Latin1(g_Locale->getText("favorites.bouquetname")).c_str();
 
 	//
 	// -- check if Favorite Bouquet exists: if not, create it.

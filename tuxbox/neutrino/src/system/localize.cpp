@@ -137,65 +137,63 @@ void CLocaleManager::loadLocale(std::string locale)
 				}
 			} while ( ( pos != -1 ) );
 
+#warning NFS/CIFS is missing in locales and should be UTF-8 encoded 
 			if (
-			    (strncmp(keystr, "file", 4) != 0) &&  // filebrowser.head (FIXME)
-			    (strncmp(keystr, "flashupdate.title", 17) != 0) &&
-			    (strncmp(keystr, "flashupdate.u", 13) != 0) &&
-			    (strncmp(keystr, "lcdmenu.i", 9) != 0) &&
-			    (strncmp(keystr, "lcdmenu.p", 9) != 0) &&
-			    (strncmp(keystr, "lcdmenu.s", 9) != 0) &&
-			    (strncmp(keystr, "mainmenu.pa", 11) != 0) &&
-			    (strncmp(keystr, "mainmenu.re", 11) != 0) &&
-			    (strncmp(keystr, "mp3player", 9) != 0) &&
-			    (strncmp(keystr, "nfs.au", 6) != 0) &&
-			    (strncmp(keystr, "nfs.t", 5) != 0) &&
-			    (strncmp(keystr, "parentallock.locka", 18) != 0) &&
+			    (strncmp(keystr, "apidselector", 12) != 0) &&
+			    (strncmp(keystr, "audiomenu", 9) != 0) &&
+			    (strncmp(keystr, "bouqueteditor", 13) != 0) &&
+			    (strncmp(keystr, "cablesetup", 10) != 0) &&
+			    (strncmp(keystr, "colormenu", 9) != 0) &&
+			    (strncmp(keystr, "colorstatusbar", 14) != 0) &&
+			    (strncmp(keystr, "colorthememenu", 14) != 0) &&
+			    (strncmp(keystr, "file", 4) != 0) &&
+			    (strncmp(keystr, "fontmenu", 8) != 0) &&
+			    (strncmp(keystr, "fontsize", 8) != 0) &&
+			    (strncmp(keystr, "keychooser", 10) != 0) &&
+			    (strncmp(keystr, "languagesetup", 13) != 0) &&
+			    (strncmp(keystr, "lcdcontroler", 12) != 0) &&
+			    (strncmp(keystr, "lcdmenu", 7) != 0) &&
+			    (strncmp(keystr, "mainmenu", 8) != 0) &&
+			    (strncmp(keystr, "messagebox", 10) != 0) &&
+			    (strncmp(keystr, "miscsettings", 12) != 0) &&
+			    (strncmp(keystr, "mp3", 3) != 0) &&
+			    (strncmp(keystr, "networkmenu", 11) != 0) &&
+			    (strncmp(keystr, "nfs", 3) != 0) &&
+			    (strncmp(keystr, "nvodselector", 12) != 0) &&
+			    (strncmp(keystr, "options", 7) != 0) &&
+			    (strncmp(keystr, "parentallock", 12) != 0) &&
 			    (strncmp(keystr, "pictureviewer", 13) != 0) &&
-			    (strncmp(keystr, "recordingmenu.n", 15) != 0) &&
-			    (strncmp(keystr, "recordingmenu.o", 15) != 0) &&
-			    (strncmp(keystr, "recordingmenu.r", 15) != 0) &&
-			    (strncmp(keystr, "recordingmenu.st", 16) != 0) &&
-			    (strncmp(keystr, "recordingmenu.v", 15) != 0) &&
-			    (strncmp(keystr, "satsetup.mi", 11) != 0) &&
-			    (strncmp(keystr, "satsetup.n", 10) != 0) &&
-			    (strncmp(keystr, "satsetup.d", 10) != 0) &&
+			    (strncmp(keystr, "recordingmenu", 13) != 0) &&
+			    (strncmp(keystr, "satsetup", 8) != 0) &&
+			    (strncmp(keystr, "scants", 6) != 0) &&
+			    (strncmp(keystr, "streamfeatures", 14) != 0) &&
 			    (strncmp(keystr, "streaminfo", 10) != 0) &&
-			    (strncmp(keystr, "streamingmenu.o", 15) != 0) &&
-			    (strncmp(keystr, "timerlist.d", 11) != 0) &&
-			    (strncmp(keystr, "timerlist.modi", 14) != 0) &&
-			    (strncmp(keystr, "timerlist.n", 11) != 0) &&
-			    (strncmp(keystr, "timerlist.p", 11) != 0) &&
-			    (strncmp(keystr, "timerlist.r", 11) != 0) &&
-			    (strncmp(keystr, "timerlist.sta", 13) != 0) &&
-			    (strncmp(keystr, "timerlist.t", 11) != 0) &&
-			    (strncmp(keystr, "videomenu.v", 11) != 0) &&
-			    ((strncmp(keystr, "audiomenu", 9) != 0) || (strcmp(keystr, "audiomenu.head") == 0)) &&
-			    ((strncmp(keystr, "miscsettings", 12) != 0) || ((strncmp(keystr, "miscsettings.h", 14) == 0) || (strncmp(keystr, "miscsettings.g", 14) == 0))) &&
-			    ((strncmp(keystr, "options", 7) != 0) || (strcmp(keystr, "options.default") == 0)) &&
-			    ((strncmp(keystr, "scants", 6) != 0) || (strncmp(keystr, "scants.s", 8) == 0)) &&
+			    (strncmp(keystr, "streamingmenu", 13) != 0) &&
+			    (strncmp(keystr, "timersettings", 13) != 0) &&
+			    (strncmp(keystr, "timing", 6) != 0) &&
+			    (strncmp(keystr, "videomenu", 9) != 0) &&
+			    ((strncmp(keystr, "flashupdate", 11) != 0) || 
+			     ((strcmp(keystr, "flashupdate.actionreadflash") == 0) ||
+			      (strcmp(keystr, "flashupdate.getinfofile") == 0) ||
+			      (strcmp(keystr, "flashupdate.getupdatefile") == 0) ||
+			      (strcmp(keystr, "flashupdate.md5check") == 0) ||
+			      (strncmp(keystr, "flashupdate.msgbox", 18) == 0) ||
+			      (strcmp(keystr, "flashupdate.ready") == 0) ||
+			      (strcmp(keystr, "flashupdate.reallyflashmtd") == 0) ||
+			      (strcmp(keystr, "flashupdate.savesuccess") == 0) ||
+			      (strcmp(keystr, "flashupdate.versioncheck") == 0))) &&
+			    ((strncmp(keystr, "keybindingmenu", 14) != 0) || (strncmp(keystr, "keybindingmenu.repeatblock", 26) == 0)) &&
+			    ((strncmp(keystr, "mainsettings", 12) != 0) || (strcmp(keystr, "mainsettings.savesettingsnow_hint") == 0)) &&
+			    ((strncmp(keystr, "servicemenu", 11) != 0) || (strcmp(keystr, "servicemenu.reload_hint") == 0)) &&
+			    ((strncmp(keystr, "timerlist", 9) != 0) || (strncmp(keystr, "timerlist.weekdays.hint", 23) == 0)) &&
 			    (strcmp(keystr, "bouquetlist.head") != 0) &&
 			    (strcmp(keystr, "channellist.head") != 0) &&
-			    (strcmp(keystr, "colormenu.fade") != 0) &&
 			    (strcmp(keystr, "dhcp") != 0) &&
 			    (strcmp(keystr, "epglist.head") != 0) &&
-			    (strcmp(keystr, "flashupdate.head") != 0) &&
-			    (strcmp(keystr, "keybindingmenu.allchannels_on_ok") != 0) &&
-			    (strcmp(keystr, "keybindingmenu.bouquethandling") != 0) &&
-			    (strcmp(keystr, "keybindingmenu.bouquetchannels_on_ok") != 0) &&
-			    (strcmp(keystr, "keybindingmenu.bouquetlist_on_ok") != 0) &&
-			    (strcmp(keystr, "messagebox.no") != 0) &&
-			    (strcmp(keystr, "messagebox.yes") != 0) &&
-			    (strcmp(keystr, "networkmenu.setuponstartup") != 0) &&
-			    (strcmp(keystr, "nvodselector.directormode") != 0) &&
-			    (strcmp(keystr, "parentallock.changetolocked") != 0) &&
-			    (strcmp(keystr, "parentallock.never") != 0) &&
-			    (strcmp(keystr, "parentallock.onsignal") != 0) &&
-			    (strcmp(keystr, "parentallock.onstart") != 0) &&
-			    (strcmp(keystr, "parentallock.prompt") != 0) &&
-			    (strcmp(keystr, "recordingmenu.server") != 0) &&
-			    (strcmp(keystr, "recordingmenu.server_wakeup") != 0) &&
-			    (strcmp(keystr, "streamingmenu.streaming_type") != 0)
-			    )
+			    (strcmp(keystr, "menu.back") != 0) &&
+			    (strcmp(keystr, "sleeptimerbox.title") != 0) &&
+			    (strcmp(keystr, "ucodecheck.head") != 0)
+			     )
 				text = CZapitClient::Utf8_to_Latin1(text);
 			localeData[keystr] = text;
 		}

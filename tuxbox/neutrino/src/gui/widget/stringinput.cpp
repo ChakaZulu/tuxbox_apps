@@ -43,7 +43,7 @@
 #include "stringinput.h"
 
 
-CStringInput::CStringInput(string Name, char* Value, int Size,  string Hint_1, string Hint_2, char* Valid_Chars, CChangeObserver* Observ, string Icon )
+CStringInput::CStringInput(const char * const Name, char* Value, int Size,  string Hint_1, string Hint_2, char* Valid_Chars, CChangeObserver* Observ, string Icon )
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	name =  Name;
@@ -61,7 +61,7 @@ CStringInput::CStringInput(string Name, char* Value, int Size,  string Hint_1, s
 	if (width<420)
 		width = 420;
 
-	int neededWidth = g_Fonts->menu_title->getRenderWidth( g_Locale->getText(name).c_str() );
+	int neededWidth = g_Fonts->menu_title->getRenderWidth(g_Locale->getText(name), true); // UTF-8
 	if ( iconfile != "" )
 		neededWidth += 28;
 	if (neededWidth+20> width)
@@ -245,7 +245,7 @@ int CStringInput::exec( CMenuTarget* parent, string )
 		else if ( (msg==CRCInput::RC_home) || (msg==CRCInput::RC_timeout) )
 		{
 			if ( ( strcmp(value, oldval) != 0) &&
-			     ( ShowMsg(name, g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel, "", 380 ) == CMessageBox::mbrCancel ) )
+			     ( ShowMsg(name, g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel, "", 380, -1, true) == CMessageBox::mbrCancel ) ) // UTF-8
 				continue;
 
 			strcpy(value, oldval);
@@ -311,7 +311,7 @@ void CStringInput::paint()
 	frameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD);
 
 	int iconoffset= (iconfile!="")?28:0;
-	g_Fonts->menu_title->RenderString(x+ 10+ iconoffset, y+ hheight, width- 10- iconoffset, g_Locale->getText(name).c_str(), COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+ 10+ iconoffset, y+ hheight, width- 10- iconoffset, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
 	if ( iconoffset> 0 )
 		frameBuffer->paintIcon(iconfile.c_str(),x+8,y+5);
 
@@ -359,7 +359,7 @@ void CStringInput::paintChar(int pos)
 		paintChar(pos, value[pos]);
 }
 
-CStringInputSMS::CStringInputSMS(string Name, char* Value, int Size, string Hint_1, string Hint_2, char* Valid_Chars, CChangeObserver* Observ, string Icon)
+CStringInputSMS::CStringInputSMS(const char * const Name, char* Value, int Size, string Hint_1, string Hint_2, char* Valid_Chars, CChangeObserver* Observ, string Icon)
 		: CStringInput(Name, Value, Size, Hint_1, Hint_2, Valid_Chars, Observ, Icon)
 {
 	lastKey = -1;				// no key pressed yet

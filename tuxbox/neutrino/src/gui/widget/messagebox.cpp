@@ -63,7 +63,7 @@ CMessageBox::CMessageBox(const std::string Caption, std::string Text, CMessageBo
 	width  = (Width < 450) ? 450 : Width;
 	height = (theight + 0) + fheight * (text.size() + 3);
 
-	int nw= g_Fonts->menu_title->getRenderWidth(g_Locale->getText(caption).c_str(), utf8_encoded) + 20; // UTF-8
+	int nw= g_Fonts->menu_title->getRenderWidth(g_Locale->getText(caption), true) + 20; // UTF-8
 	if ( iconfile!="" )
 		nw+= 30;
 	if ( nw> width )
@@ -71,7 +71,7 @@ CMessageBox::CMessageBox(const std::string Caption, std::string Text, CMessageBo
 
 	for (unsigned int i= 0; i< text.size(); i++)
 	{
-		int nw= g_Fonts->menu->getRenderWidth(text[i].c_str(), utf8_encoded) + 20; // UTF-8
+		int nw= g_Fonts->menu->getRenderWidth(text[i], utf8_encoded) + 20; // UTF-8
 		if ( nw> width )
 			width= nw;
 	}
@@ -111,10 +111,10 @@ void CMessageBox::paintHead()
 	if ( iconfile!= "" )
 	{
 		window->paintIcon(iconfile.c_str(), 8, 5);
-		window->RenderString(g_Fonts->menu_title, 40, theight + 0, width - 40, g_Locale->getText(caption), (CFBWindow::color_t)COL_MENUHEAD, 0, utf8); // UTF-8
+		window->RenderString(g_Fonts->menu_title, 40, theight + 0, width - 40, g_Locale->getText(caption), (CFBWindow::color_t)COL_MENUHEAD, 0, true); // UTF-8
 	}
 	else
-		window->RenderString(g_Fonts->menu_title, 10, theight + 0, width - 10, g_Locale->getText(caption), (CFBWindow::color_t)COL_MENUHEAD, 0, utf8); // UTF-8
+		window->RenderString(g_Fonts->menu_title, 10, theight + 0, width - 10, g_Locale->getText(caption), (CFBWindow::color_t)COL_MENUHEAD, 0, true); // UTF-8
 
 	window->paintBoxRel(0, theight + 0, width, height - (theight + 0), (CFBWindow::color_t)COL_MENUCONTENT);
 	for (unsigned int i = 0; i < text.size(); i++)
@@ -125,7 +125,7 @@ void CMessageBox::paintHead()
 void CMessageBox::paintButtons()
 {
 	//irgendwann alle vergleichen - aber cancel ist sicher der längste
-	int MaxButtonTextWidth = g_Fonts->infobar_small->getRenderWidth(g_Locale->getText("messagebox.cancel").c_str());
+	int MaxButtonTextWidth = g_Fonts->infobar_small->getRenderWidth(g_Locale->getText("messagebox.cancel"), true); // UTF-8
 
 	int ButtonWidth = 20 + 33 + MaxButtonTextWidth;
 
@@ -169,7 +169,7 @@ void CMessageBox::paintButtons()
 
 		window->paintBoxRel(xpos, height-fheight-20, ButtonWidth, fheight, (CFBWindow::color_t)color);
 		window->paintIcon("home.raw", xpos+10, height-fheight-19);
-		window->RenderString(g_Fonts->infobar_small, xpos + 43, height-fheight+4, ButtonWidth- 53, g_Locale->getText( ( showbuttons & mbCancel ) ? "messagebox.cancel" : "messagebox.back" ), (CFBWindow::color_t)color);
+		window->RenderString(g_Fonts->infobar_small, xpos + 43, height-fheight+4, ButtonWidth- 53, g_Locale->getText( ( showbuttons & mbCancel ) ? "messagebox.cancel" : "messagebox.back" ), (CFBWindow::color_t)color, 0, true); // UTF-8
 	}
 }
 

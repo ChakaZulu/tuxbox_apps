@@ -37,7 +37,7 @@
 #include "keychooser.h"
 
 
-CKeyChooser::CKeyChooser( int* Key, string title, string Icon )
+CKeyChooser::CKeyChooser( int* Key, const char * const title, string Icon )
 		: CMenuWidget(title, Icon)
 {
 	frameBuffer = CFrameBuffer::getInstance();
@@ -70,7 +70,7 @@ void CKeyChooser::paint()
 }
 
 //*****************************
-CKeyChooserItem::CKeyChooserItem(string Name, int *Key)
+CKeyChooserItem::CKeyChooserItem(const char * const Name, int *Key)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	name = Name;
@@ -134,10 +134,10 @@ void CKeyChooserItem::paint()
 {
 
 	frameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+ 10, y+ hheight, width, g_Locale->getText(name).c_str(), COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+ 10, y+ hheight, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintBoxRel(x, y+ hheight, width, height-hheight, COL_MENUCONTENT);
 
 	//paint msg...
-	g_Fonts->menu->RenderString(x+ 10, y+ hheight+ mheight, width, g_Locale->getText("keychooser.text1").c_str(), COL_MENUCONTENT);
-	g_Fonts->menu->RenderString(x+ 10, y+ hheight+ mheight* 2, width, g_Locale->getText("keychooser.text2").c_str(), COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+ 10, y+ hheight+ mheight, width, g_Locale->getText("keychooser.text1"), COL_MENUCONTENT, 0, true); // UTF-8
+	g_Fonts->menu->RenderString(x+ 10, y+ hheight+ mheight* 2, width, g_Locale->getText("keychooser.text2"), COL_MENUCONTENT, 0, true); // UTF-8
 }

@@ -127,16 +127,16 @@ void CBEChannelWidget::paintFoot()
 	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW);
 
 	frameBuffer->paintIcon("rot.raw", x+width- 4* ButtonWidth+ 8, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- 4* ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.delete").c_str(), COL_INFOBAR);
+	g_Fonts->infobar_small->RenderString(x+width- 4* ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.delete"), COL_INFOBAR, 0, true); // UTF-8
 
 	frameBuffer->paintIcon("gruen.raw", x+width- 3* ButtonWidth+ 8, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.add").c_str(), COL_INFOBAR);
+	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.add"), COL_INFOBAR, 0, true); // UTF-8
 
 	frameBuffer->paintIcon("gelb.raw", x+width- 2* ButtonWidth+ 8, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- 2* ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.move").c_str(), COL_INFOBAR);
+	g_Fonts->infobar_small->RenderString(x+width- 2* ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.move"), COL_INFOBAR, 0, true); // UTF-8
 
 	frameBuffer->paintIcon("blau.raw", x+width- ButtonWidth+ 8, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.switchmode").c_str(), COL_INFOBAR);
+	g_Fonts->infobar_small->RenderString(x+width- ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.switchmode"), COL_INFOBAR, 0, true); // UTF-8
 }
 
 void CBEChannelWidget::hide()
