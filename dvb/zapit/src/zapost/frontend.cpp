@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.30 2002/11/02 17:21:15 obi Exp $
+ * $Id: frontend.cpp,v 1.31 2002/11/02 21:46:06 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -237,6 +237,8 @@ void CFrontend::discardEvents ()
 
 void CFrontend::setFrontend (dvb_frontend_parameters *feparams)
 {
+	tuned = false;
+
 	std::cout << __PRETTY_FUNCTION__ << ": freq " << feparams->frequency << std::endl;
 
 	discardEvents();
@@ -255,7 +257,7 @@ const dvb_frontend_parameters *CFrontend::getFrontend ()
 }
 
 
-const bool CFrontend::getEvent ()
+struct dvb_frontend_event CFrontend::getEvent ()
 {
 	struct dvb_frontend_event event;
 	struct pollfd pfd[1];
@@ -263,7 +265,7 @@ const bool CFrontend::getEvent ()
 	pfd[0].fd = fd;
 	pfd[0].events = POLLIN;
 
-	switch (poll(pfd, 1, 10000)) {
+	switch (poll(pfd, 1, 5000)) {
 	case -1:
 		perror("poll");
 		failed = true;
@@ -289,6 +291,7 @@ const bool CFrontend::getEvent ()
 				std::cout << __PRETTY_FUNCTION__ << ": NO LOCK: " << event.status << std::endl;
 			}
 		}
+
 		else {
 			std::cerr << __PRETTY_FUNCTION__ << ": pfd[0].revents: " << pfd[0].revents << std::endl;
 		}
@@ -296,11 +299,12 @@ const bool CFrontend::getEvent ()
 	}
 
 	if (!tuned) {
+		std::cout << "hoooo?" << std::endl;
 		currentFrequency = 0;
 		currentTsidOnid = 0;
 	}
 
-	return tuned;
+	return event;
 }
 
 
@@ -447,18 +451,24 @@ CFrontend::tuneChannel (CZapitChannel *channel)
 	if (transponder == transponders.end())
 		return false;
 
+	currentTsidOnid = channel->getTsidOnid();
+
 	return tuneFrequency(&(transponder->second.feparams), transponder->second.polarization, transponder->second.DiSEqC);
 }
 
+
+struct dvb_frontend_event
+CFrontend::blockingTune (dvb_frontend_parameters *feparams)
+{
+	setFrontend(feparams);
+	return getEvent();
+}
+	
 
 const bool
 CFrontend::tuneFrequency (dvb_frontend_parameters *feparams, uint8_t polarization, uint8_t diseqc)
 {
 	int freq_offset = 0;
-
-	tuned = false;
-
-	std::cout << __PRETTY_FUNCTION__ << ": " << feparams->frequency << std::endl;
 
 	/* sec */
 	if (info->type == FE_QPSK) {
@@ -479,70 +489,92 @@ CFrontend::tuneFrequency (dvb_frontend_parameters *feparams, uint8_t polarizatio
 		setSec (diseqc, polarization, high_band, feparams->frequency);
 	}
 
+
+	/*
+	 * frontends which can not handle auto inversion but
+	 * are set to auto inversion will try without first
+	 */
+
 	if ((!(info->caps & FE_CAN_INVERSION_AUTO)) && (feparams->inversion == INVERSION_AUTO))
 		feparams->inversion = INVERSION_OFF;
 
-	/* tune */
-	setFrontend(feparams);
 
-	/* wait for completion */
-	getEvent();
+	bool retry = false;
+	uint32_t real_tsid_onid = 0;
+	struct dvb_frontend_event event;
+	bool wrong_ts;
 
+	do {
+		wrong_ts = false;
 
-	/*
-	 * software auto inversion for stupid frontends
-	 */
+		event = blockingTune(feparams);
 
-	if ((!tuned) && (!(info->caps & FE_CAN_INVERSION_AUTO))) {
-		switch (feparams->inversion) {
-		case INVERSION_OFF:
-			feparams->inversion = INVERSION_ON;
-			break;
-		case INVERSION_ON:
-			feparams->inversion = INVERSION_OFF;
-			break;
+		/*
+		 * maybe the frontend got lock at a different frequency
+		 * than requested, so we need to look up the tsid/onid.
+		 *
+		 * FIXME: be somewhat tolerant about this since fe_bend_frequency
+		 * prevents exact tuning
+		 */
+
+		if (event.parameters.frequency != feparams->frequency) {
+			real_tsid_onid = get_sdt_TsidOnid();
+			if (currentTsidOnid != real_tsid_onid)
+				wrong_ts = true;
 		}
 
-		setFrontend(feparams);
-		getEvent();
-	}
+		/*
+		 * software auto inversion for stupid frontends
+		 * (retry tuning only once)
+		 */
 
-	/*
-	 * the frontend got lock at a different frequency
-	 * than requested, so we need to look up the tsid/onid.
-	 *
-	 * FIXME: be somewhat tolerant about this since fe_bend_frequency
-	 * prevents exact tuning
-	 */
-
-	if ((tuned) && (currentFrequency != feparams->frequency)) {
-
-		uint32_t tsid_onid = get_sdt_TsidOnid();
-
-		if (currentTsidOnid != tsid_onid) {
-			if (!(info->caps & FE_CAN_INVERSION_AUTO)) {
-				switch (feparams->inversion) {
-				case INVERSION_OFF:
-					feparams->inversion = INVERSION_ON;
-					break;
-				case INVERSION_ON:
-					feparams->inversion = INVERSION_OFF;
-					break;
-				}
-
-				setFrontend(feparams);
-				getEvent();
-
-				if ((tuned) && (currentFrequency != feparams->frequency))
-					tsid_onid = get_sdt_TsidOnid();
+		if ((!(info->caps & FE_CAN_INVERSION_AUTO)) && (!retry))
+			if ((!tuned) || (wrong_ts)) {
+				feparams->inversion = (fe_spectral_inversion_t) ((~feparams->inversion) & 0x01);
+				retry = true;
+				continue;
 			}
 
-			currentTsidOnid = tsid_onid;
+	} while (0);
+
+
+	if (tuned) {
+		
+		if (wrong_ts) {
+			
+			/*
+			 * zapit shall know about the frontend's mistake.
+			 * of course it is not its own fault ;)
+			 */
+
+			currentTsidOnid = real_tsid_onid;
 		}
+
+		else {
+
+			/*
+			 * if everything went ok, then it is a good idea to copy the real
+			 * frontend parameters, so we can update the service list, if it differs.
+			 *
+			 * TODO: set a flag to indicate a change in the service list
+			 */
+
+			if (memcmp(feparams, &event.parameters, sizeof(struct dvb_frontend_parameters)))
+				memcpy(feparams, &event.parameters, sizeof(struct dvb_frontend_parameters));
+		}
+
 	}
+
+
+	/*
+	 * add the frequency offset to the frontend parameters again
+	 * because they are used for the channel list and were given
+	 * to this method as a pointer
+	 */
 
 	if (info->type == FE_QPSK)
 		feparams->frequency += freq_offset;
+
 
 	return tuned;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.h,v 1.17 2002/11/02 17:21:15 obi Exp $
+ * $Id: frontend.h,v 1.18 2002/11/02 21:46:21 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -99,7 +99,8 @@ class CFrontend
 		void setFrontend (dvb_frontend_parameters *feparams);
 		const dvb_frontend_parameters * getFrontend ();
 		void discardEvents ();
-		const bool getEvent ();
+		struct dvb_frontend_event getEvent ();
+		struct dvb_frontend_event blockingTune (dvb_frontend_parameters *feparams);
 
 		unsigned int getFrequency ();
 		unsigned char getPolarization ();
