@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.111 2002/04/08 18:46:06 Simplex Exp $
+//  $Id: sectionsd.cpp,v 1.112 2002/04/10 16:40:46 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.112  2002/04/10 16:40:46  field
+//  Timeset verändert, timerd (einstweilen) auskommentiert
+//
 //  Revision 1.111  2002/04/08 18:46:06  Simplex
 //  checks availability of timerd
 //
@@ -585,17 +588,16 @@ static void addEvent(const SIevent &evt)
         }
     }
 
-//    else
-//    {
-// auskommentiert, damit die Events beim Base-Channel UND beim Sub-Channel in der Liste stehen!
+	// normales Event
+	mySIeventsOrderUniqueKey.insert(std::make_pair(e->uniqueKey(), e));
+	if(e->times.size())
+	{
+		// diese beiden Mengen enthalten nur Events mit Zeiten
+		mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.insert(std::make_pair(e, e));
+		mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.insert(std::make_pair(e, e));
 
-        // normales Event
-        mySIeventsOrderUniqueKey.insert(std::make_pair(e->uniqueKey(), e));
-        if(e->times.size())
-        {
-            // diese beiden Mengen enthalten nur Events mit Zeiten
-            mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.insert(std::make_pair(e, e));
-            mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.insert(std::make_pair(e, e));
+/*      auskommentiert - das ist ein Performance-WAHNSINN
+		*g* da muss eine bessere Lösung her
 
             if (timerd)
             {
@@ -611,7 +613,7 @@ static void addEvent(const SIevent &evt)
                 	::time(&actTime_t);
                 	if (it->startzeit + it->dauer > actTime_t)
                 	{
-                		time_t kurzvorStartzeit = it->startzeit/* - 60*/;
+                		time_t kurzvorStartzeit = it->startzeit; // - 60;
                 		struct tm* startTime = localtime( &(kurzvorStartzeit));
                 		timerdClient->addTimerEvent(
                 			CTimerdClient::TIMER_NEXTPROGRAM,
@@ -623,9 +625,9 @@ static void addEvent(const SIevent &evt)
                 	}
                 }
             }
-        }
-//    }
+*/
 
+	}
 }
 
 static void addNVODevent(const SIevent &evt)
@@ -842,40 +844,49 @@ size_t j;
 // das lock warten
 class DMX {
   public:
-    DMX(unsigned char p, unsigned char f1, unsigned char m1, unsigned char f2, unsigned char m2, unsigned short bufferSizeInKB, int nCRC=0) {
-      fd=0;
-      isScheduled=false;
-      lastChanged=0;
-      pID=p;
-      filter1=f1;
-      mask1=m1;
-      filter2=f2;
-      mask2=m2;
-      dmxBufferSizeInKB=bufferSizeInKB;
-      noCRC=nCRC;
-      sem_init(&dmxsem, 0, 1); // 1 -> nicht locked
-      pthread_mutex_init(&pauselock, NULL); // default = fast mutex
-      pthread_mutex_init(&start_stop_mutex, NULL); // default = fast mutex
-      pthread_cond_init( &change_cond, NULL );
-      pauseCounter=0;
-      real_pauseCounter=0;
-    }
-    ~DMX() {
-      closefd();
-      sem_destroy(&dmxsem); // ist bei Linux ein dummy
-      pthread_mutex_destroy(&pauselock); // ist bei Linux ein dummy
-      pthread_mutex_destroy(&start_stop_mutex); // ist bei Linux ein dummy
-      pthread_cond_destroy(&change_cond);
-    }
-    int start(void); // calls unlock at end
-    int read(char *buf, const size_t buflength, unsigned timeoutInSeconds) {
-      return readNbytes(fd, buf, buflength, timeoutInSeconds);
-    }
-    void closefd(void) {
+    DMX(unsigned char p, unsigned short bufferSizeInKB, int nCRC=0)
+    {
+		fd=0;
+		lastChanged=0;
+		filter_index=0;
+		pID=p;
+		dmxBufferSizeInKB=bufferSizeInKB;
+		noCRC=nCRC;
+		pthread_mutex_init(&pauselock, NULL); // default = fast mutex
+		pthread_mutex_init(&start_stop_mutex, NULL); // default = fast mutex
+		pthread_cond_init( &change_cond, NULL );
+		pauseCounter=0;
+		real_pauseCounter=0;
+	}
+
+	~DMX()
+	{
+		closefd();
+		pthread_mutex_destroy(&pauselock); // ist bei Linux ein dummy
+		pthread_mutex_destroy(&start_stop_mutex); // ist bei Linux ein dummy
+		pthread_cond_destroy(&change_cond);
+	}
+
+	int start(void); // calls unlock at end
+	int read(char *buf, const size_t buflength, unsigned timeoutInSeconds)
+	{
+		return readNbytes(fd, buf, buflength, timeoutInSeconds);
+	}
+
+    void closefd(void)
+    {
       if(fd) {
         close(fd);
         fd=0;
       }
+    }
+
+    void addfilter(unsigned char filter, unsigned char mask)
+    {
+    	s_filters	tmp;
+		tmp.filter = filter;
+		tmp.mask = mask;
+		filters.insert(filters.end(), tmp);
     }
 
 	int stop(void)
@@ -901,30 +912,39 @@ class DMX {
 
     int change(bool set_Scheduled); // locks while changing
 
-    void lock(void) {
-      //sem_wait(&dmxsem); // Wir nehmen Semaphoren da die ueber Thread-Grenzen hinweg funktionieren
-      pthread_mutex_lock( &start_stop_mutex );
-    }
+	void lock(void)
+	{
+		pthread_mutex_lock( &start_stop_mutex );
+	}
 
-    void unlock(void) {
-      //sem_post(&dmxsem);
-      pthread_mutex_unlock( &start_stop_mutex );
-    }
+	void unlock(void)
+	{
+		pthread_mutex_unlock( &start_stop_mutex );
+	}
 
-    bool isScheduled;
-    time_t lastChanged;
-    bool isOpen(void) {
-      return fd ? true : false;
-    }
+	struct s_filters
+	{
+		unsigned char filter;
+		unsigned char mask;
+	};
+
+	std::vector<s_filters> filters;
+	int		filter_index;
+	time_t	lastChanged;
+
+	bool isOpen(void)
+	{
+		return fd ? true : false;
+	}
+
     int pauseCounter;
     int real_pauseCounter;
 	pthread_cond_t	change_cond;
 	pthread_mutex_t	start_stop_mutex;
   private:
     int fd;
-    sem_t dmxsem;
     pthread_mutex_t pauselock;
-    unsigned char pID, filter1, mask1, filter2, mask2;
+    unsigned char pID;
     unsigned short dmxBufferSizeInKB;
     int noCRC; // = 1 -> der 2. Filter hat keine CRC
 
@@ -962,8 +982,8 @@ int DMX::start(void)
   	memset (&flt, 0, sizeof (struct dmxSctFilterParams));
 //  memset (&flt.filter, 0, sizeof (struct dmxFilter));
   	flt.pid              = pID;
-  	flt.filter.filter[0] = filter1; // current/next
-  	flt.filter.mask[0]   = mask1; // -> 4e und 4f
+  	flt.filter.filter[0] = filters[0].filter; // current/next
+  	flt.filter.mask[0]   = filters[0].mask; // -> 4e und 4f
   	flt.flags            = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
 
   	if (ioctl (fd, DMX_SET_FILTER, &flt) == -1)
@@ -974,7 +994,7 @@ int DMX::start(void)
     	return 4;
   	}
 
-  	isScheduled=false;
+  	filter_index= 0;
   	if(timeset) // Nur wenn ne richtige Uhrzeit da ist
     	lastChanged=time(NULL);
   	pthread_mutex_unlock( &start_stop_mutex );
@@ -1075,10 +1095,14 @@ int DMX::unpause(void)
 
 int DMX::change(bool set_Scheduled)
 {
+	int new_filter_index= 0;
+	if(set_Scheduled)
+	    new_filter_index= 1;
+
 	if (!fd)
 		return 1;
 
-	if (set_Scheduled== isScheduled)
+	if (new_filter_index == filter_index)
 	{
 		// do wakeup only... - no change neccessary
 		pthread_cond_signal( &change_cond );
@@ -1106,31 +1130,15 @@ int DMX::change(bool set_Scheduled)
 
 	struct dmxSctFilterParams flt;
 	memset (&flt, 0, sizeof (struct dmxSctFilterParams));
-	if(!set_Scheduled)
-	{
-    	flt.pid              = pID;
-    	flt.filter.filter[0] = filter1; // current/next
-    	flt.filter.mask[0]   = mask1; // -> 4e und 4f
-    	flt.flags            = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
-  	}
-  	else
-  	{
-    	flt.pid              = pID;
-    	flt.filter.filter[0] = filter2; // schedule
-    	flt.filter.mask[0]   = mask2; // -> 5x
-	/*    if (filter2==0x50)
-    	{
-        	// quick hack - BUH!
-        	flt.filter.filter[1] = 0x60; // schedule
-        	flt.filter.mask[1]   = mask2; // -> 5x
-    	}
-	*/
-    	flt.flags            = DMX_IMMEDIATE_START;
-    	if(!noCRC)
-      		flt.flags|=DMX_CHECK_CRC;
-	}
 
-	isScheduled=set_Scheduled;
+    flt.pid              = pID;
+    flt.filter.filter[0] = filters[filter_index].filter;
+    flt.filter.mask[0]   = filters[filter_index].filter;
+    flt.flags            = DMX_IMMEDIATE_START;
+    if ( ( filter_index!= 0 ) && (!noCRC) )
+      		flt.flags|=DMX_CHECK_CRC;
+    filter_index = new_filter_index;
+
 	pthread_cond_signal( &change_cond );
 
 	if (ioctl (fd, DMX_SET_FILTER, &flt) == -1)
@@ -1150,9 +1158,14 @@ int DMX::change(bool set_Scheduled)
 
 // k.A. ob volatile im Kampf gegen Bugs trotz mutex's was bringt,
 // falsch ist es zumindest nicht
+/*
 static DMX dmxEIT(0x12, 0x4f, (0xff- 0x01), 0x50, (0xff- 0x0f), 384);
 static DMX dmxSDT(0x11, 0x42, 0xff, 0x42, 0xff, 256);
 static DMX dmxTOT(0x14, 0x73, 0xff, 0x70, (0xff- 0x03), 256, 1);
+*/
+static DMX dmxEIT(0x12, 384);
+static DMX dmxSDT(0x11, 256);
+static DMX dmxTOT(0x14, 256, 1);
 
 //------------------------------------------------------------
 // misc. functions
@@ -1547,7 +1560,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.111 2002/04/08 18:46:06 Simplex Exp $\n"
+    "$Id: sectionsd.cpp,v 1.112 2002/04/10 16:40:46 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -2809,6 +2822,7 @@ static void *sdtThread(void *)
 struct SI_section_header header;
 char *buf;
 const unsigned timeoutInSeconds=2;
+    dmxSDT.addfilter(0x42, 0xff);
 
 	try
 	{
@@ -2993,8 +3007,12 @@ static void parseDescriptors(const char *des, unsigned len, const char *countryC
 */
 static void *timeThread(void *)
 {
-unsigned timeoutInSeconds= 31;
-char *buf;
+	unsigned timeoutInSeconds= 31;
+	char *buf;
+	struct timeval tv;
+
+	dmxTOT.addfilter(0x73, 0xff);
+	dmxTOT.addfilter(0x70, (0xff- 0x03));
 
 	try
 	{
@@ -3051,15 +3069,19 @@ char *buf;
                 	time_t tim=changeUTCtoCtime(((const unsigned char *)&tdt_tot_header)+3);
     				if(tim)
     				{
+						gettimeofday( &tv, NULL );
+
       					if(stime(&tim)< 0)
       					{
         					perror("[sectionsd] cannot set date");
 							dmxTOT.closefd();
       					}
-
-	      				timeset=1;
-    	  				time_t t=time(NULL);
-      					dprintf("TDT/TOT: local time: %s", ctime(&t));
+                        else
+                        {
+	      					timeset=1;
+    	  					time_t t=time(NULL);
+      						dprintf("TDT/TOT: local time: %s", ctime(&t));
+      					}
     				}
 
     				break;
@@ -3069,7 +3091,7 @@ char *buf;
 			}
   		} while (timeset!=1);
 
-  		eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD );
+  		eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD, &tv, sizeof(tv) );
 
 		dmxTOT.closefd();
 		dprintf("dmxTOT: changing from TDT/TOT to TOT.\n");
@@ -3182,6 +3204,8 @@ static void *eitThread(void *)
 	char *buf;
 	unsigned timeoutInSeconds=1;
 	bool sendToSleepNow= false;
+    dmxEIT.addfilter( 0x4f, (0xff- 0x01) );
+    dmxEIT.addfilter( 0x50, (0xff- 0x0f) );
 
     try
     {
@@ -3207,13 +3231,13 @@ static void *eitThread(void *)
                 if(si!=mySIservicesOrderUniqueKey.end())
                 {
                     //dprintf("timeoutsDMX -Flags: %d - %d\n", si->second->eitPresentFollowingFlag(), si->second->eitScheduleFlag());
-                    if (((!si->second->eitScheduleFlag())&&(dmxEIT.isScheduled)) ||
-                        ((!si->second->eitPresentFollowingFlag())&&(!dmxEIT.isScheduled)))
+                    if (((!si->second->eitScheduleFlag())&&(dmxEIT.filter_index==1)) ||
+                        ((!si->second->eitPresentFollowingFlag())&&(dmxEIT.filter_index==0)))
                     {
                         timeoutsDMX=0;
                         dprintf("[eitThread] timeoutsDMX for 0x%x reset to 0 (not broadcast)\n", messaging_current_ServiceKey );
 
-                		if(!dmxEIT.isScheduled) // try with scheduled-epg
+                		if(dmxEIT.filter_index==0) // try with scheduled-epg
                 		{
 	                        dmxEIT.change( true );
 						}
@@ -3268,7 +3292,7 @@ static void *eitThread(void *)
 
             if(timeset)
             { // Nur wenn ne richtige Uhrzeit da ist
-                if(dmxEIT.isScheduled)
+                if(dmxEIT.filter_index==1)
                 {
                     if( (zeit>dmxEIT.lastChanged+TIME_EIT_SCHEDULED) || (sendToSleepNow) )
                     {
@@ -3581,7 +3605,7 @@ int main(int argc, char **argv)
 	int rc;
 	struct sockaddr_in serverAddr;
 
-	printf("$Id: sectionsd.cpp,v 1.111 2002/04/08 18:46:06 Simplex Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.112 2002/04/10 16:40:46 field Exp $\n");
 	try
 	{
 
