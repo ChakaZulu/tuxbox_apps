@@ -25,6 +25,7 @@
 #endif
 
 #include <stdio.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/fcntl.h>
 #include <sys/ioctl.h>
@@ -62,6 +63,7 @@ void CAViAExt::iecOn()
 	res = ioctl(fd, AVIA_EXT_IEC_SET, 1);
 	if (res<0)
 		perror("aviaext: ioctl");
+	close(fd);
 }
 
 void CAViAExt::iecOff()
@@ -81,6 +83,7 @@ void CAViAExt::iecOff()
 	res = ioctl(fd, AVIA_EXT_IEC_SET, 0);
 	if (res<0)
 		perror("aviaext: ioctl");
+	close(fd);
 }
 
 int CAViAExt::iecState()
@@ -104,6 +107,7 @@ int CAViAExt::iecState()
 		perror("aviaext: ioctl");
 		return -1;
 	}
+	close(fd);
 	return param;
 }	
 
