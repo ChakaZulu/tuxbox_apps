@@ -216,6 +216,18 @@ void		RcGetActCode( void )
 			case 0x1c :
 				FBPrintScreen();
 				break;
+			case 'b' :
+				actcode=RC_BLUE;
+				break;
+			case 'r' :
+				actcode=RC_RED;
+				break;
+			case 'g' :
+				actcode=RC_GREEN;
+				break;
+			case 'y' :
+				actcode=RC_YELLOW;
+				break;
 			}
 		}
 	}
