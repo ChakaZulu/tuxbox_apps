@@ -142,13 +142,14 @@ int eFrontend::setFrontend()
 	bool doSavePower=false;
 	eServiceHandler *handler= 
 		eServiceInterface::getInstance()->getService();
-	if ( handler && handler->getID() != eServiceReference::idDVB )
+	if ( handler )
 	{
-		
-		if ( !eDVB::getInstance()->recorder && !eDVB::getInstance()->getScanAPI() )
+		if ( handler->getID() != eServiceReference::idDVB && !eDVB::getInstance()->recorder )
 			doSavePower=true;
 	}
-	if ( doSavePower )
+	else
+		doSavePower=true;
+	if ( doSavePower && !eDVB::getInstance()->getScanAPI() )
 	{
 		eDebug("no running dvb service.. disable frontend (2)");
 		savePower();
