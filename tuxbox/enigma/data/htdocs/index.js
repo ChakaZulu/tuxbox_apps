@@ -58,7 +58,7 @@ function admin(xy)
 
 function vcontrol(xy)
 {
-	NewWindow('/videocontrol?command='+xy, 'vcontrol', '200', '100', 'no', '300');
+	NewWindow('/cgi-bin/videocontrol?command='+xy, 'vcontrol', '200', '100', 'no', '300');
 }
 
 function openSI()
