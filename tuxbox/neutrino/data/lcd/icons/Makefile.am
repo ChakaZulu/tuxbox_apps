@@ -1,6 +1,9 @@
 installdir = $(DATADIR)/lcdd/icons
 
 install_DATA = \
-	neutrino_lcd.raw neutrino_lcd2.raw neutrino_lcd3.raw neutrino_power.raw \
-	neutrino_setup.raw 
+	lcd.png \
+	lcd2.png \
+	lcd3.png \
+	power.png \
+	setup.png
 

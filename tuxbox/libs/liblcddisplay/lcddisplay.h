@@ -70,6 +70,7 @@ class CLCDDisplay
 		bool paintIcon(std::string filename, int x, int y, bool invert);
 		void dump_screen(raw_display_t *screen);
 		void load_screen(const raw_display_t * const screen);
+		bool load_png(const char * const filename);
 };
 
 

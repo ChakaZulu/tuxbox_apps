@@ -87,6 +87,20 @@ void CLCD::init(const char * fontfile, const char * fontname, const bool _setlcd
 	}
 }
 
+#define NUMBER_OF_BACKGROUNDS 5
+const char * const background[NUMBER_OF_BACKGROUNDS] = {
+	"setup",
+	"power",
+	"lcd2",
+	"lcd3",
+	"lcd"      /* lcd must be last since we use that one at startup */
+};
+#define NUMBER_OF_PATHS 2
+const char * const background_path[NUMBER_OF_PATHS] = {
+	"/var/tuxbox/neutrino/lcd/",
+	DATADIR "/lcdd/icons/"
+};
+
 bool CLCD::lcdInit(const char * fontfile, const char * fontname, const bool _setlcdparameter)
 {
 	fontRenderer = new LcdFontRenderClass(&display);
@@ -101,49 +115,36 @@ bool CLCD::lcdInit(const char * fontfile, const char * fontname, const bool _set
 	if (_setlcdparameter)
 		setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
 
-	display.setIconBasePath( DATADIR "/lcdd/icons/");
-
 	if(!display.isAvailable())
 	{
 		printf("exit...(no lcd-support)\n");
 		return false;
 	}
 
-	if (!display.paintIcon("neutrino_setup.raw",0,0,false))
-	{
-		printf("exit...(no neutrino_setup.raw)\n");
-		return false;
-	}
-	display.dump_screen(&icon_setup);
+	raw_display_t * background_storage[NUMBER_OF_BACKGROUNDS] = {
+		&icon_setup,
+		&icon_power,
+		&icon_lcd2,
+		&icon_lcd3,
+		&icon_lcd
+	};
 
-	if (!display.paintIcon("neutrino_power.raw",0,0,false))
+	for (int i = 0; i < NUMBER_OF_BACKGROUNDS; i++)
 	{
-		printf("exit...(no neutrino_power.raw)\n");
+		for (int j = 0; j < NUMBER_OF_PATHS; j++)
+		{
+			std::string file = background_path[j];
+			file += background[i];
+			file += ".png";
+			if (display.load_png(file.c_str()))
+				goto found;
+		}
+		printf("[neutrino/lcd] no valid %s background.\n", background[i]);
 		return false;
+	found:
+		display.dump_screen(background_storage[i]);
 	}
-	display.dump_screen(&icon_power);
 
-	if (!display.paintIcon("neutrino_lcd2.raw",0,0,false))
-	{
-		printf("exit...(no neutrino_lcd2.raw)\n");
-		return false;
-	}
-	display.dump_screen(&icon_lcd2);
-	
-	if (!display.paintIcon("neutrino_lcd3.raw",0,0,false))
-	{
-		printf("exit...(no neutrino_lcd2.raw)\n");
-		return false;
-	}
-	display.dump_screen(&icon_lcd3);
-
-	if (!display.paintIcon("neutrino_lcd.raw",0,0,false))
-	{
-		printf("exit...(no neutrino_lcd.raw)\n");
-		return false;
-	}
-	display.dump_screen(&icon_lcd);
-	
 	mode = MODE_TVRADIO;
 	showServicename("Booting...");
 	showclock=true;

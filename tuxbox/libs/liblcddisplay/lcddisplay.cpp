@@ -26,6 +26,8 @@
 
 #include "lcddisplay.h"
 
+#include <png.h>
+
 #include <stdint.h> /* uint8_t */
 #include <fcntl.h>
 #include <stdio.h>
@@ -343,4 +345,69 @@ void CLCDDisplay::dump_screen(raw_display_t *screen) {
 
 void CLCDDisplay::load_screen(const raw_display_t * const screen) {
 	memcpy(raw, screen, sizeof(raw_display_t));
+}
+
+bool CLCDDisplay::load_png(const char * const filename)
+{
+	png_structp  png_ptr;
+	png_infop    info_ptr;
+	unsigned int i;
+	unsigned int pass;
+	unsigned int number_passes;
+	int          bit_depth;
+	int          color_type;
+	int          interlace_type;
+	png_uint_32  width;
+	png_uint_32  height;
+	png_byte *   fbptr;
+	FILE *       fh;
+	bool         ret_value = false;
+
+	if ((fh = fopen(filename, "rb")))
+	{
+		if ((png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL)))
+		{
+			if (!(info_ptr = png_create_info_struct(png_ptr)))
+				png_destroy_read_struct(&png_ptr, (png_infopp)NULL, (png_infopp)NULL);
+			else
+			{
+				if (!(setjmp(png_ptr->jmpbuf)))
+				{
+					png_init_io(png_ptr,fh);
+					
+					png_read_info(png_ptr, info_ptr);
+					png_get_IHDR(png_ptr, info_ptr, &width, &height, &bit_depth, &color_type, &interlace_type, NULL, NULL);
+					
+					if (
+						(color_type == PNG_COLOR_TYPE_PALETTE) &&
+						(bit_depth  == 1                     ) &&
+						(width      == LCD_COLS              ) &&
+						(height     == (LCD_ROWS * 8))
+						)
+					{
+						png_set_packing(png_ptr); /* expand to 1 byte blocks */
+						
+						number_passes = png_set_interlace_handling(png_ptr);
+						png_read_update_info(png_ptr,info_ptr);
+						
+						if (width == png_get_rowbytes(png_ptr, info_ptr))
+						{
+							ret_value = true;
+							
+							for (pass = 0; pass < number_passes; pass++)
+							{
+								fbptr = (png_byte *)raw;
+								for (i = 0; i < height; i++, fbptr += width)
+									png_read_row(png_ptr, fbptr, NULL);
+							}
+							png_read_end(png_ptr, info_ptr);
+						}
+					}
+				}
+				png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
+			}
+		}
+		fclose(fh);
+	}
+	return ret_value;	
 }
