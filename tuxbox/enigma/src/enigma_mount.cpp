@@ -42,6 +42,7 @@ eMountPoint::eMountPoint(CConfigFile *config, int i)
 	mp.wsize = config->getInt32(eString().sprintf("wsize_%d",i), 4096);
 	mp.options = config->getString(eString().sprintf("options_%d", i));
 	mp.ownOptions = config->getString(eString().sprintf("ownoptions_%d", i));
+	mp.description = config->getString(eString().sprintf("description_%d", i));
 	eString sip = config->getString(eString().sprintf("ip_%d", i));
 	sscanf(sip.c_str(), "%d.%d.%d.%d", &mp.ip[0], &mp.ip[1], &mp.ip[2], &mp.ip[3]);
 	mp.mounted = isMounted();
@@ -64,6 +65,7 @@ void eMountPoint::save(FILE *out, int pid)
 	fprintf(out,"password_%d=%s\n", mp.id, mp.password.c_str());
 	fprintf(out,"options_%d=%s\n", mp.id, mp.options.c_str());
 	fprintf(out,"ownoptions_%d=%s\n", mp.id, mp.ownOptions.c_str());
+	fprintf(out,"description_%d=%s\n", mp.id, mp.description.c_str());
 	fprintf(out,"automount_%d=%d\n", mp.id, mp.automount);
 	fprintf(out,"rsize_%d=%d\n", mp.id, mp.rsize);
 	fprintf(out,"wsize_%d=%d\n", mp.id, mp.wsize);
@@ -432,6 +434,7 @@ eString eMountMgr::listMountPoints(eString skelleton)
 			tmp.strReplace("#OPTIONS#", mp_it->mp.options);
 			tmp.strReplace("#RSIZE#", (mp_it->mp.rsize != -1) ? eString().sprintf("%d", mp_it->mp.rsize) : "");
 			tmp.strReplace("#WSIZE#", (mp_it->mp.wsize != -1) ? eString().sprintf("%d", mp_it->mp.wsize) : "");
+			tmp.strReplace("#DESCRIPTION#", mp_it->mp.description);
 			result += tmp + "\n";
 		}
 	else
@@ -473,18 +476,19 @@ void eMountMgr::addMountedFileSystems()
 				if (mountDev.find("/dev") != eString::npos)
 				{
 					sscanf(mountDev.c_str(), "%d.%d.%d.%d:%*s", &mp.ip[0], &mp.ip[1], &mp.ip[2], &mp.ip[3]);
-					mp.mountDir   = getRight(mountDev, ':');
-					mp.localDir   = mountOn;
-					mp.fstype     = 0;
-					mp.password   = "";
-					mp.userName   = "";
-					mp.automount  = 0;
-					mp.rsize      = 0;
-					mp.wsize      = 0;
-					mp.options    = "";
+					mp.mountDir = getRight(mountDev, ':');
+					mp.localDir = mountOn;
+					mp.fstype = 0;
+					mp.password = "";
+					mp.userName = "";
+					mp.automount = 0;
+					mp.rsize = 0;
+					mp.wsize = 0;
+					mp.options = "";
 					mp.ownOptions = "";
-					mp.mounted    = true;
-					mp.id         = -1; //don't care
+					mp.description = "";
+					mp.mounted = true;
+					mp.id = -1; //don't care
 					addMountPoint(mp);
 				}
 			}
@@ -492,19 +496,20 @@ void eMountMgr::addMountedFileSystems()
 			if (mountType.upper() == "CIFS")
 			{
 				sscanf(mountDev.c_str(), "//%d.%d.%d.%d/%*s", &mp.ip[0], &mp.ip[1], &mp.ip[2], &mp.ip[3]);
-				mountDev       = mountDev.right(2); //strip off leading slashes
-				mp.mountDir   = getRight(mountDev, '/');
-				mp.localDir   = mountOn;
-				mp.fstype     = 1;
-				mp.password   = "";
-				mp.userName   = "";
-				mp.automount  = 0;
-				mp.rsize      = 0;
-				mp.wsize      = 0;
-				mp.options    = "";
+				mountDev = mountDev.right(2); //strip off leading slashes
+				mp.mountDir = getRight(mountDev, '/');
+				mp.localDir = mountOn;
+				mp.fstype = 1;
+				mp.password = "";
+				mp.userName = "";
+				mp.automount = 0;
+				mp.rsize = 0;
+				mp.wsize = 0;
+				mp.options = "";
 				mp.ownOptions = "";
-				mp.mounted    = true;
-				mp.id         = -1; //don't care
+				mp.description = "";
+				mp.mounted = true;
+				mp.id = -1; //don't care
 				addMountPoint(mp);
 			}
 			else
@@ -513,18 +518,19 @@ void eMountMgr::addMountedFileSystems()
 			{
 				//other file system
 				sscanf("//0.0.0.0/nothing", "//%d.%d.%d.%d/%*s", &mp.ip[0], &mp.ip[1], &mp.ip[2], &mp.ip[3]);
-				mp.mountDir   = mountDev;
-				mp.localDir   = mountOn;
-				mp.fstype     = 2;
-				mp.password   = "";
-				mp.userName   = "";
-				mp.automount  = 0;
-				mp.rsize      = 0;
-				mp.wsize      = 0;
-				mp.options    = "";
+				mp.mountDir = mountDev;
+				mp.localDir = mountOn;
+				mp.fstype = 2;
+				mp.password = "";
+				mp.userName = "";
+				mp.automount = 0;
+				mp.rsize = 0;
+				mp.wsize = 0;
+				mp.options = "";
 				mp.ownOptions = "";
-				mp.mounted    = true;
-				mp.id         = -1; //don't care
+				mp.description = "";
+				mp.mounted = true;
+				mp.id = -1; //don't care
 				addMountPoint(mp);
 			}
 		}

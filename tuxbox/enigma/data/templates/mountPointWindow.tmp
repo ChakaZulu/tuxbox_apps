@@ -5,11 +5,15 @@
 <body onUnload="parent.window.opener.location.reload(true)">
 <form name="mountpoint" action="#ACTION#">
 	<input name="action" type="hidden" value="#CMD#">
-	<input type="hidden" name="id" value="#ID#">
+	<input name="id" type="hidden" value="#ID#">
 	<table border=0 cellspacing=5 cellpadding=0>
 	<tr>
 		<td>
 			<table border=0 cellspacing=5 cellpadding=0>
+			<tr>
+				<td>Description: </td>
+				<td><input name="description" type="text" size="50" maxlength="50" value="#DESCRIPTION#"></td>
+			</tr>
 			<tr>
 				<td>Filesystem Type: </td>
 				<td><input name="fstype" type="text" size="1" maxlength="1" value="#FSTYPE#">&nbsp;&nbsp;(0 = NFS, 1 = CIFS, 2 = DEVICE)</td>

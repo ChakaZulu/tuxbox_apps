@@ -68,6 +68,7 @@ static eString addChangeMountPoint(eString request, eString dirpath, eString opt
 	eString intr = opt["intr"];
 	eString soft = opt["soft"];
 	eString udp = opt["udp"];
+	mp.description = opt["description"];
 
 	if (async == "on")
 		mp.options += "async,";
@@ -242,6 +243,7 @@ static eString mountPointWindow(eString request, eString dirpath, eString opts, 
 	result.strReplace("#INTR#", intr);
 	result.strReplace("#SOFT#", soft);
 	result.strReplace("#UDP#", udp);
+	result.strReplace("#DESCRIPTION#", mp.description);
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
