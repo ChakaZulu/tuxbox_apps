@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.120 2002/04/05 15:12:13 rasc Exp $
+  $Id: zapit.cpp,v 1.121 2002/04/05 16:29:46 obi Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -93,6 +93,9 @@
 
 
 $Log: zapit.cpp,v $
+Revision 1.121  2002/04/05 16:29:46  obi
+small fixes
+
 Revision 1.120  2002/04/05 15:12:13  rasc
 -- existsChannelInBouquet  (True/False)
 
@@ -122,7 +125,6 @@ Revision 1.115  2002/04/04 14:41:08  rasc
 #define debug(fmt, args...) { if (debug) printf(fmt, ## args); }
 #define dputs(str) { if (debug) puts(str); }
 
-#define CAM_DEV "/dev/dbox/cam0"
 #define VBI_DEV	"/dev/dbox/vbi0"
 
 struct rmsg {
@@ -158,11 +160,8 @@ CEventServer *eventServer;
 static int debug = 0;
 
 extern uint16_t old_tsid;
-uint curr_onid_sid = 0;
+uint32_t curr_onid_sid = 0;
 bool OldAC3 = false;
-
-/* pids */
-uint16_t vpid, apid, pmt = 0;
 
 /* near video on demand */
 extern map<uint, channel> nvodchannels;
@@ -202,12 +201,7 @@ extern short scan_runs;
 
 /* videotext */
 bool use_vtxtd = false;
-int vtxt_pid;
-
-void start_scan();
-
-void sendBouquetList();
-void sendChannelListOfBouquet( uint nBouquet);
+dvb_pid_t vtxt_pid;
 
 CBouquetManager* g_BouquetMan;
 
@@ -235,7 +229,7 @@ void termination_handler (int signum)
 }
 
 #ifndef DVBS
-int set_vtxt (uint16_t teletext_pid)
+int set_vtxt (dvb_pid_t teletext_pid)
 {
 	int fd;
 	int vtxtsock;
@@ -264,7 +258,7 @@ int set_vtxt (uint16_t teletext_pid)
 		}
 		else
 		{
-			if (vpid == 0)
+			if (teletext_pid == 0)
 			{
 				fprintf(vtxtfd,"stop\n");
 				debug("[zapit] vtxtd returned: %s\n", fgets(vtxtbuf, 255, vtxtfd));
@@ -422,24 +416,20 @@ void *decode_thread(void *ptr)
 }
 #endif /* USE_EXTERNAL_CAMD */
 
-int zapit (uint onid_sid, bool in_nvod)
+int zapit (uint32_t onid_sid, bool in_nvod)
 {
 	dmxPesFilterParams pes_filter;
 	videoStatus video_status;
-	uint16_t Pmt;
-	uint16_t Vpid;
-	uint16_t PCRpid;
-	uint16_t Apid;
 	pids parse_pmt_pids;
 	std::map<uint, channel>::iterator cit;
 	bool do_search_emmpid;
 #ifndef USE_EXTERNAL_CAMD
 	bool do_cam_reset = false;
 #else
-	char vpidbuf[5];
-	char apidbuf[5];
-	char pmtpidbuf[5];
-	char cadescrbuf[13];
+	char *vpidbuf;
+	char *apidbuf;
+	char *pmtpidbuf;
+	char *cadescrbuf;
 #endif /* USE_EXTERNAL_CAMD */
 
 	if (in_nvod)
@@ -639,11 +629,6 @@ int zapit (uint onid_sid, bool in_nvod)
 	{
 		pids_desc = parse_pmt_pids;
 
-		Vpid = cit->second.vpid;
-		Apid = cit->second.apid;
-		Pmt = cit->second.pmt;
-		PCRpid = cit->second.pcrpid;
-
 		debug("[zapit] zapping to sid: %04x %s. VPID: 0x%04x. APID: 0x%04x, PCRPID: 0x%04x, PMT: 0x%04x\n", cit->second.sid, cit->second.name.c_str(), cit->second.vpid, cit->second.apid, cit->second.pcrpid, cit->second.pmt);
 
 #ifdef USE_EXTERNAL_CAMD
@@ -653,13 +638,21 @@ int zapit (uint onid_sid, bool in_nvod)
 			perror("[zapit] unable to fork() for camd");
 			break;
 		case 0:
-			sprintf(vpidbuf, "%x", Vpid);
-			sprintf(apidbuf, "%x", Apid);
-			sprintf(pmtpidbuf, "%x", Pmt);
+			vpidbuf = (char*) malloc(5);
+			sprintf(vpidbuf, "%x", cit->second.vpid);
+			apidbuf = (char*) malloc(5);
+			sprintf(apidbuf, "%x", cit->second.apid);
+			pmtpidbuf = (char*) malloc(5);
+			sprintf(pmtpidbuf, "%x", cit->second.pmt);
 			if ((cit->second.ecmpid > 0x0000) && (cit->second.ecmpid < 0x1FFF))
+			{
+				cadescrbuf = (char*) malloc(13);
 				sprintf(cadescrbuf, "0904%04x%04x", caid, cit->second.ecmpid);
+			}
 			else
-				sprintf(cadescrbuf, "");
+			{
+				cadescrbuf = NULL;
+			}
 
 			if (execlp("/bin/camd", "camd", vpidbuf, apidbuf, pmtpidbuf, cadescrbuf, NULL) < 0)
 			{
@@ -803,7 +796,7 @@ int zapit (uint onid_sid, bool in_nvod)
 		}
 
 		/* setup vpid */
-		pes_filter.pid = Vpid;
+		pes_filter.pid = cit->second.vpid;
 		pes_filter.input = DMX_IN_FRONTEND;
 		pes_filter.output = DMX_OUT_DECODER;
 		pes_filter.pesType = DMX_PES_VIDEO;
@@ -816,8 +809,7 @@ int zapit (uint onid_sid, bool in_nvod)
 		}
 		else
 		{
-			debug("[zapit] video pid set to %04x\n", Vpid);
-			vpid = Vpid;
+			debug("[zapit] video pid set to %04x\n", cit->second.vpid);
 		}
 	}
 
@@ -842,7 +834,7 @@ int zapit (uint onid_sid, bool in_nvod)
 		}
 
 		/* setup pcrpid and start demuxing */
-		pes_filter.pid = PCRpid;
+		pes_filter.pid = cit->second.pcrpid;
 		pes_filter.input = DMX_IN_FRONTEND;
 		pes_filter.output = DMX_OUT_DECODER;
 		pes_filter.pesType = DMX_PES_PCR;
@@ -855,7 +847,7 @@ int zapit (uint onid_sid, bool in_nvod)
 		}
 		else
 		{
-			debug("[zapit] pcr pid set to %04x and demux started\n", PCRpid);
+			debug("[zapit] pcr pid set to %04x and demux started\n", cit->second.pcrpid);
 		}
 	}
 
@@ -880,7 +872,7 @@ int zapit (uint onid_sid, bool in_nvod)
 		}
 
 		/* setup apid and start demuxing */
-		pes_filter.pid     = Apid;
+		pes_filter.pid     = cit->second.apid;
 		pes_filter.input   = DMX_IN_FRONTEND;
 		pes_filter.output  = DMX_OUT_DECODER;
 		pes_filter.pesType = DMX_PES_AUDIO;
@@ -893,8 +885,7 @@ int zapit (uint onid_sid, bool in_nvod)
 		}
 		else
 		{
-			debug("[zapit] audio pid set to %04x and demux started\n", Apid);
-			apid = Apid;
+			debug("[zapit] audio pid set to %04x and demux started\n", cit->second.apid);
 		}
 	}
 
@@ -1084,8 +1075,7 @@ int changeapid(uint8_t pid_nr)
 		}
 		else
 		{
-			apid = pids_desc.apids[pid_nr].pid;
-			debug("[zapit] apid changed to %04x\n", apid);
+			debug("[zapit] apid changed to %04x\n", pids_desc.apids[pid_nr].pid);
 			return 8;
 		}
 	}
@@ -1203,7 +1193,7 @@ int sleepBox()
 		return -4;
 	}
 
-	if (ioctl(device, FE_SET_POWER_STATE, FE_POWER_SUSPEND) != 0)
+	if (ioctl(device, FE_SET_POWER_STATE, FE_POWER_OFF) != 0)
 	{
 		perror("[zapit] FE_SET_POWER_STATE");
 		return -4;
@@ -2327,7 +2317,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.120 2002/04/05 15:12:13 rasc Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.121 2002/04/05 16:29:46 obi Exp $\n\n");
 
 	if (argc > 1)
 	{

@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.h,v 1.46 2002/04/04 23:40:55 obi Exp $
+ * $Id: zapit.h,v 1.47 2002/04/05 16:29:46 obi Exp $
  */
 
 #ifndef __zapit_h__
@@ -39,6 +39,9 @@ typedef struct decode_struct {
 
 int LoadServices();
 void *start_scanthread(void *);
+void start_scan();
+void sendBouquetList();
+void sendChannelListOfBouquet( uint nBouquet);
 
 /**************************************************************/
 /*  functions for new command handling via CZapitClient       */
