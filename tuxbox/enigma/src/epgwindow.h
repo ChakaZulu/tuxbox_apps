@@ -1,7 +1,7 @@
 #ifndef __epgwindow_h
 #define __epgwindow_h
 
-#include "eListBox.h"
+#include "listbox.h"
 #include "epgcache.h"
 #include <libsig_comp.h>
 

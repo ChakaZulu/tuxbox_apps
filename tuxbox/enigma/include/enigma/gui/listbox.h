@@ -1,5 +1,5 @@
-#ifndef __eListBox_h
-#define __eListBox_h
+#ifndef __listbox_h
+#define __listbox_h
 
 #include <core/driver/rc.h>
 #include <core/gdi/grc.h>

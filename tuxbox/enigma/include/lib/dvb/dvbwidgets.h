@@ -2,7 +2,7 @@
 #define __src_core_dvb_dvbwidgets_h
 
 #include <core/gui/ewidget.h>
-#include <core/gui/eListBox.h>
+#include <core/gui/listbox.h>
 
 class eNumber;
 class eTransponder;

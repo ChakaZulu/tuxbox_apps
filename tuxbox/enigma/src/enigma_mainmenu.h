@@ -1,7 +1,7 @@
 #ifndef __enigma_mainmenu_h
 #define __enigma_mainmenu_h
 
-#include <core/gui/eListBox.h>
+#include <core/gui/listbox.h>
 #include <include/libsig_comp.h>
 
 class eMainMenu: public Object

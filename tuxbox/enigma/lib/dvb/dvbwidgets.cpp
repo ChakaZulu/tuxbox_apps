@@ -1,7 +1,7 @@
 #include "dvbwidgets.h"
 #include <core/gui/eskin.h>
 #include <core/gui/enumber.h>
-#include <core/gui/eListBox.h>
+#include <core/gui/listbox.h>
 #include <core/gui/echeckbox.h>
 #include "dvb.h"
 
