@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.39 2001/10/16 19:21:30 field Exp $
+// $Id: infoviewer.cpp,v 1.40 2001/10/18 21:03:14 field Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.40  2001/10/18 21:03:14  field
+// EPG Previous/Next
+//
 // Revision 1.39  2001/10/16 19:21:30  field
 // NVODs! Zeitanzeige geht noch nicht
 //
@@ -190,9 +193,6 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
     else
     	BoxStartY = BoxEndY- InfoHeightY;
 
-    is_visible = true;
-    KillShowEPG = false;
-
     pthread_mutex_unlock( &epg_mutex );
 
 
@@ -254,8 +254,12 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
         showButtonAudio();
     }
 
+    pthread_mutex_lock( &epg_mutex );
+    is_visible = true;
+    KillShowEPG = false;
+    pthread_mutex_unlock( &epg_mutex );
+
     pthread_cond_signal( &epg_cond );
-//    pthread_cond_signal( &lang_cond );
 
     usleep(50);
 

@@ -1,7 +1,10 @@
 //
-// $Id: epgview.cpp,v 1.18 2001/10/18 17:14:08 field Exp $
+// $Id: epgview.cpp,v 1.19 2001/10/18 21:03:14 field Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.19  2001/10/18 21:03:14  field
+// EPG Previous/Next
+//
 // Revision 1.18  2001/10/18 17:14:08  field
 // bugfix
 //
@@ -172,15 +175,21 @@ void CEpgData::showText( int startPos, int ypos )
 
 }
 
-void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long long id, time_t* startzeit )
+void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long long id, time_t* startzeit, bool doLoop )
 {
 	int height;
 	height = g_Fonts->epg_date->getHeight();
-	g_FrameBuffer->paintBoxRel(g_settings.screen_StartX, g_settings.screen_StartY, 50, height+5, COL_INFOBAR);
-	g_Fonts->epg_date->RenderString(g_settings.screen_StartX+10, g_settings.screen_StartY+height, 40, "-@-", COL_INFOBAR);
+    if (doLoop)
+    {
+    	g_FrameBuffer->paintBoxRel(g_settings.screen_StartX, g_settings.screen_StartY, 50, height+5, COL_INFOBAR);
+    	g_Fonts->epg_date->RenderString(g_settings.screen_StartX+10, g_settings.screen_StartY+height, 40, "-@-", COL_INFOBAR);
+    }
 
 	GetEPGData( channelName, onid_tsid, id, startzeit );
-	g_FrameBuffer->paintBoxRel(g_settings.screen_StartX, g_settings.screen_StartY, 50, height+5, COL_BACKGROUND);
+    if (doLoop)
+    {
+    	g_FrameBuffer->paintBoxRel(g_settings.screen_StartX, g_settings.screen_StartY, 50, height+5, COL_BACKGROUND);
+    }
 
 	if(strlen(epgData.title)==0)
 	{
@@ -200,6 +209,8 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
 		return;
 	}
 
+    int oldx= ox;
+    int oldsx= sx;
     // Variable Breite, falls der Text zu lang' ist...
     ox = g_Fonts->epg_title->getRenderWidth( epgData.title )+ 15;
     if (ox < 500 )
@@ -208,6 +219,12 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
         ox = ( g_settings.screen_EndX- g_settings.screen_StartX - 20);
 
 	sx = (((g_settings.screen_EndX-g_settings.screen_StartX) -ox) / 2) + g_settings.screen_StartX;
+
+    if ( (oldx> ox) && (!doLoop) )
+    {
+        g_FrameBuffer->paintBoxRel (oldsx, sy, sx- oldsx, oy+10, 255);
+        g_FrameBuffer->paintBoxRel (sx+ ox, sy, sx- oldsx, oy+10, 255);
+    }
 
 	if(strlen(epgData.info1)!=0)
 	{
@@ -233,9 +250,9 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
 	int widthl,widthr;
 	strcpy(fromto,epgData.start); strcat(fromto," - "); strcat(fromto,epgData.end);
 	widthl = g_Fonts->epg_date->getRenderWidth(fromto);
-	g_Fonts->epg_date->RenderString(sx+10,  sy+oy-3, widthl, fromto, COL_MENUHEAD);
+	g_Fonts->epg_date->RenderString(sx+40,  sy+oy-3, widthl, fromto, COL_MENUHEAD);
 	widthr = g_Fonts->epg_date->getRenderWidth(epgData.date);
-	g_Fonts->epg_date->RenderString(sx+ox-10-widthr,  sy+oy-3, widthr, epgData.date, COL_MENUHEAD);
+	g_Fonts->epg_date->RenderString(sx+ox-40-widthr,  sy+oy-3, widthr, epgData.date, COL_MENUHEAD);
 
 	int showPos = 0;
 	int textCount = epgText.size();
@@ -252,46 +269,76 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
     	g_FrameBuffer->paintBoxRel(pbx+2, sy+oy-height+2, progress, height-10, COL_MENUHEAD+5);
     }
 
-	bool loop=true;
-	int scrollCount;
-	while(loop)
-	{
-		int key = g_RCInput->getKey(40);
+    GetPrevNextEPGData(current_id, &current_zeit);
+    if (prev_id != 0)
+    {
+        g_FrameBuffer->paintBoxRel(sx+ 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT+ 3);
+        g_Fonts->epg_date->RenderString(sx+ 10, sy+ oy- 3, widthr, "<", COL_MENUCONTENT+ 3);
+    }
 
-		scrollCount = medlinecount;
-//		if(showPos==0)	//titleinfo exists
-//			scrollCount--;
+    if (next_id != 0)
+    {
+        g_FrameBuffer->paintBoxRel(sx+ ox- botboxheight+ 8- 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT+ 3);
+        g_Fonts->epg_date->RenderString(sx+ ox- botboxheight+ 8, sy+ oy- 3, widthr, ">", COL_MENUCONTENT+ 3);
+    }
 
-		if (key==CRCInput::RC_down)
-		{
-			if(showPos+scrollCount<textCount)
-			{
-				showPos += scrollCount;
-				showText(showPos,textypos);
-			}
-		}
-		else if (key==CRCInput::RC_up)
-		{
-			showPos -= scrollCount;
-			bool toShow = true;
-			if(showPos<0)
-			{
-				showPos = 0;
-				toShow = false;
-			}
-			if((showPos==0) && (scrollCount==medlinecount))
-			{
-				toShow = true;
-			}
-			if (toShow)
-				showText(showPos,textypos);
-		}
-		else if ( (key==CRCInput::RC_ok) || (key==CRCInput::RC_help)  || (key==g_settings.key_channelList_cancel) || (key==CRCInput::RC_left))
-		{
-			loop = false;
-		}
-	}
-	hide();
+    if ( doLoop )
+    {
+    	bool loop=true;
+    	int scrollCount;
+    	while(loop)
+    	{
+    		int key = g_RCInput->getKey(40);
+
+    		scrollCount = medlinecount;
+
+    		if (key==CRCInput::RC_left)
+    		{
+                if (prev_id != 0)
+                {
+                    g_FrameBuffer->paintBoxRel(sx+ 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT+ 1);
+                    g_Fonts->epg_date->RenderString(sx+ 10, sy+ oy- 3, widthr, "<", COL_MENUCONTENT+ 1);
+
+                    show("", 0, prev_id, &prev_zeit, false);
+                }
+
+    		}
+            else
+            if (key==CRCInput::RC_right)
+    		{
+                if (next_id != 0)
+                {
+                    g_FrameBuffer->paintBoxRel(sx+ ox- botboxheight+ 8- 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT+ 1);
+                    g_Fonts->epg_date->RenderString(sx+ ox- botboxheight+ 8, sy+ oy- 3, widthr, ">", COL_MENUCONTENT+ 1);
+
+                    show("", 0, next_id, &next_zeit, false);
+                }
+
+    		}
+            else
+    		if (key==CRCInput::RC_down)
+    		{
+    			if(showPos+scrollCount<textCount)
+    			{
+    				showPos += scrollCount;
+    				showText(showPos,textypos);
+    			}
+    		}
+    		else if (key==CRCInput::RC_up)
+    		{
+    			showPos -= scrollCount;
+    			if(showPos<0)
+    				showPos = 0;
+                else
+    				showText(showPos,textypos);
+    		}
+    		else if ( (key==CRCInput::RC_ok) || (key==CRCInput::RC_help)  || (key==g_settings.key_channelList_cancel) || (key==CRCInput::RC_left) || (key==CRCInput::RC_timeout))
+    		{
+    			loop = false;
+    		}
+    	}
+    	hide();
+    }
 }
 
 void CEpgData::hide()
@@ -369,16 +416,16 @@ void CEpgData::GetEPGData( string channelName, unsigned int onid_tsid, unsigned 
 			char* pData = new char[nBufSize] ;
 			read(sock_fd, pData, nBufSize);
 
-            unsigned long long          tmp_id;
             sectionsd::sectionsdTime    epg_times;
             char* dp = pData;
 
-            sscanf(dp, "%012llx\xFF", &tmp_id);
+            sscanf(dp, "%012llx\xFF", &current_id);
             dp+= 13;
             dp = ocopyStringto( dp, epgData.title, sizeof(epgData.title) );
             dp = ocopyStringto( dp, epgData.info1, sizeof(epgData.info1) );
 			dp = ocopyStringto( dp, epgData.info2, sizeof(epgData.info2) );
             sscanf(dp, "%08lx\xFF%08x\xFF", &epg_times.startzeit, &epg_times.dauer );
+            current_zeit= epg_times.startzeit;
 
             struct tm *pStartZeit = localtime(&epg_times.startzeit);
             int nSDay(pStartZeit->tm_mday), nSMon(pStartZeit->tm_mon+1), nSYear(pStartZeit->tm_year+1900),
@@ -497,6 +544,69 @@ void CEpgData::GetEPGData( string channelName, unsigned int onid_tsid, unsigned 
 	#endif
 
 	//printf("exit epg-get\n\n");
+	close(sock_fd);
+}
+
+void CEpgData::GetPrevNextEPGData( unsigned long long id, time_t* startzeit )
+{
+	int sock_fd;
+	SAI servaddr;
+	char rip[]="127.0.0.1";
+
+    prev_id= 0;
+    next_id= 0;
+//        time_t* prev_zeit;
+//        time_t* next_zeit;
+
+	sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	memset(&servaddr,0,sizeof(servaddr));
+	servaddr.sin_family=AF_INET;
+	servaddr.sin_port=htons(sectionsd::portNumber);
+	inet_pton(AF_INET, rip, &servaddr.sin_addr);
+
+	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
+	{
+		perror("Couldn't connect to server!");
+		return;
+	}
+
+    // query PrevNext für bestimmtes Event
+    sectionsd::msgRequestHeader req;
+    req.version = 2;
+    req.command = sectionsd::getEPGPrevNext;
+    req.dataLength = 12;
+    write(sock_fd,&req,sizeof(req));
+
+    write(sock_fd, &id, sizeof(id));
+    write(sock_fd, startzeit, sizeof(*startzeit));
+    printf("query prev/next for evt_id >%llx<, time %lx\n", id, *startzeit);
+
+    sectionsd::msgResponseHeader resp;
+    memset(&resp, 0, sizeof(resp));
+	read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader));
+
+	int nBufSize = resp.dataLength;
+	if(nBufSize>0)
+	{
+        char* pData = new char[nBufSize] ;
+        read(sock_fd, pData, nBufSize);
+
+        char* dp = pData;
+        //printf("%s \n", dp);
+        sscanf(dp, "%012llx\xFF", &prev_id);
+        dp+= 13;
+        sscanf(dp, "%08lx\xFF", &prev_zeit);
+        dp+= 9;
+        sscanf(dp, "%012llx\xFF", &next_id);
+        dp+= 13;
+        sscanf(dp, "%08lx\xFF", &next_zeit);
+
+        //printf("got prev evt_id >%llx<, time %x\n", prev_id, prev_zeit);
+        //printf("got next evt_id >%llx<, time %x\n", next_id, next_zeit);
+
+		delete[] pData;
+	}
+
 	close(sock_fd);
 }
 

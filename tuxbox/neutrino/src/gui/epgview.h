@@ -52,6 +52,14 @@ class CEpgData
 	private:
 		EPGData			epgData;
 
+        unsigned long long prev_id;
+        time_t prev_zeit;
+        unsigned long long next_id;
+        time_t next_zeit;
+
+        unsigned long long current_id;
+        time_t current_zeit;
+
 		int			ox, oy, sx, sy;
 		int			emptyLineCount, info1_lines;
 		vector<string>		epgText;
@@ -60,6 +68,7 @@ class CEpgData
 		int			medlineheight,medlinecount;
 
 		void GetEPGData( string channelName, unsigned int onid_tsid, unsigned long long id, time_t* startzeit );
+        void GetPrevNextEPGData( unsigned long long id, time_t* startzeit );
 		void addTextToArray( string text );
 		void processTextToArray( char* text );
 		void showText( int startPos, int ypos );
@@ -68,7 +77,7 @@ class CEpgData
 
 		CEpgData();
 		void start( );
-		void show( string channelName, unsigned int onid_tsid, unsigned long long id = 0, time_t* startzeit = NULL);
+		void show( string channelName, unsigned int onid_tsid, unsigned long long id = 0, time_t* startzeit = NULL, bool doLoop = true);
 		void hide();
 };
 
