@@ -56,7 +56,12 @@
 
 using namespace std;
 
-#define WEBIFVERSION "2.3.0"
+#define WEBIFVERSION "2.3.1"
+
+#define KEYBOARDNORMAL 0
+#define KEYBOARDVIDEO 1
+
+int keyboardMode = KEYBOARDNORMAL;
 
 int pdaScreen = 0;
 int screenWidth = 1024;
@@ -3577,6 +3582,35 @@ void sendKey(int evd, unsigned int code, unsigned int value)
 	write (evd, &iev, sizeof(iev));
 }
 
+int translateKey(int key)
+{
+	if (key == 393) // video
+	{
+		keyboardMode = (keyboardMode) ? 0 : 1;
+	}
+	else
+	if (key == 66) // text
+	{
+		keyboardMode = KEYBOARDVIDEO;
+	}
+	else
+	{
+		if (keyboardMode == KEYBOARDVIDEO)
+		{
+			switch (key)
+			{
+				case 385: key = 128; break; // stop
+				case 377: key = 167; break; // record
+				case 398: key = 168; break; // rewind
+				case 399: key = 207; break; // play
+				case 400: key = 119; break; // pause
+				case 401: key = 208; break; // forward
+			}
+		}
+	}
+	return key;
+}
+
 static eString remoteControl(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	enum
@@ -3642,6 +3676,7 @@ static eString remoteControl(eString request, eString dirpath, eString opts, eHT
 		unsigned long time = duration * 1000 / reptime;
 
 		int key = atoi(keyS.c_str());
+		key = translateKey(key);
 		int evd = open("/dev/input/event0", O_RDWR);
 		if (evd)
 		{

@@ -55,8 +55,8 @@
 		<area shape="circle" coords="80, 200, 6" href="javascript:key(401)" alt="blue">
 		
 		<area shape="circle" coords="30, 220, 6" href="javascript:key(385)" alt="TV">
-		<area shape="circle" coords="40, 220, 6" href="javascript:key(392)" alt="radio">
-		<area shape="circle" coords="60, 220, 6" href="javascript:key(388)" alt="text">
+		<area shape="circle" coords="40, 220, 6" href="javascript:key(377)" alt="radio">
+		<area shape="circle" coords="60, 220, 6" href="javascript:key(66)" alt="text">
 		<area shape="circle" coords="75, 220, 6" href="javascript:key(138)" alt="help">
 	</map>
 	<table width="100%" border="0" cellspacing="0" cellpadding="0">

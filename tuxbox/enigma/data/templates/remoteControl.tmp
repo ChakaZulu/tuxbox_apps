@@ -55,8 +55,8 @@
 		<area shape="circle" coords="158, 421, 10" href="javascript:key(401)" alt="blue">
 		
 		<area shape="circle" coords="61, 460, 10" href="javascript:key(385)" alt="tv">
-		<area shape="circle" coords="90, 461, 10" href="javascript:key(392)" alt="radio">
-		<area shape="circle" coords="123, 461, 10" href="javascript:key(388)" alt="text">
+		<area shape="circle" coords="90, 461, 10" href="javascript:key(377)" alt="radio">
+		<area shape="circle" coords="123, 461, 10" href="javascript:key(66)" alt="text">
 		<area shape="circle" coords="153, 460, 10" href="javascript:key(138)" alt="help">
 	</map>
 	<img src="rc_big.jpg" height="607" width="220" border="0" alt="Remote Control" usemap="#remotecontrol">
