@@ -66,6 +66,9 @@ struct Ssettings
 	char volume;
 	char videotype;
 	char videoformat;
+
+	char boxtype;
+	char lastmode;
 }settings;
 
 
@@ -200,6 +203,38 @@ void setVideoFormat(int format)
 	}
 	close(fd);
 }
+
+void routeVideo(int a, int b, int nothing)
+{
+	int fd;
+	
+	if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
+	{
+		perror("open");
+		return;
+	}
+
+	if (ioctl(fd,AVSIOSVSW1,&a)< 0)
+	{
+		perror("AVSIOSVSW1:");
+		return;
+	}
+
+	if (ioctl(fd,AVSIOSASW1,&b)< 0)
+	{
+		perror("AVSIOSASW1:");
+		return;
+	}
+
+	if (ioctl(fd,AVSIOSVSW2,&nothing)< 0)
+	{
+		perror("AVSIOSVSW2:");
+		return;
+	}
+
+	close(fd);
+}
+
 
 void setVolume(char volume)
 {
