@@ -33,14 +33,13 @@
 #ifndef __alphasetup__
 #define __alphasetup__
 
-#include <string>
-
-#include <driver/framebuffer.h>
 
 #include "widget/menue.h"
 
+#include <driver/framebuffer.h>
 
-using namespace std;
+#include <string>
+
 
 class CAlphaSetup : public CMenuTarget
 {
@@ -56,20 +55,20 @@ class CAlphaSetup : public CMenuTarget
 		unsigned char *alpha2;
 
 
-		string	name;
+		std::string name;
 
 		CChangeObserver* observer;
 
 		void paint();
 		void setAlpha();
-		void paintSlider(int x, int y, unsigned char *spos, string text, string iconname, bool selected);
+		void paintSlider(const int x, const int y, const unsigned char * const spos, const std::string text, const std::string iconname, const bool selected); // UTF-8
 
 	public:
 
 		CAlphaSetup(const char * const Name, unsigned char* Alpha1, unsigned char* Alpha2, CChangeObserver* Observer = NULL); // UTF-8
 
 		void hide();
-		int exec( CMenuTarget* parent, string actionKey );
+		int exec( CMenuTarget* parent, std::string actionKey);
 
 };
 

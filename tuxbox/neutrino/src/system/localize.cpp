@@ -135,6 +135,7 @@ void CLocaleManager::loadLocale(std::string locale)
 #warning NFS/CIFS is missing in locales (used in neutrino.cpp)
 			if (
 			    (buf[0] != 'c') &&
+			    (buf[0] != 'g') &&
 			    (buf[0] != 'k') &&
 			    (buf[0] != 'l') &&
 			    (buf[0] != 'n') &&

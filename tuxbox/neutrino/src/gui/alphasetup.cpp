@@ -29,6 +29,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "alphasetup.h"
+
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -51,7 +53,6 @@
 #include "widget/messagebox.h"
 
 #include "color.h"
-#include "alphasetup.h"
 
 
 CAlphaSetup::CAlphaSetup(const char * const Name, unsigned char* Alpha1, unsigned char* Alpha2, CChangeObserver* Observer)
@@ -91,7 +92,7 @@ void CAlphaSetup::setAlpha()
 	close(fd);
 }
 
-int CAlphaSetup::exec(CMenuTarget* parent, string)
+int CAlphaSetup::exec(CMenuTarget* parent, std::string)
 {
 	int res = menu_return::RETURN_REPAINT;
 	if (parent)
@@ -251,18 +252,18 @@ void CAlphaSetup::paint()
 	paintSlider(x+10, y+hheight+mheight, alpha2,g_Locale->getText("gtxalpha.alpha2"),"green", false);
 }
 
-void CAlphaSetup::paintSlider(int x, int y, unsigned char *spos, string text, string iconname, bool selected)
+void CAlphaSetup::paintSlider(const int x, const int y, const unsigned char * const spos, const std::string text, const std::string iconname, const bool selected) // UTF-8
 {
 	if (!spos)
 		return;
 	int sspos = (*spos)*100/8;
 	frameBuffer->paintBoxRel(x+70,y,120,mheight, COL_MENUCONTENT);
 	frameBuffer->paintIcon("volumebody.raw",x+70,y+2+mheight/4);
-	string iconfile = "volumeslider2";
+	std::string iconfile = "volumeslider2";
 	if (selected)
 		iconfile += iconname;
 	iconfile +=".raw";
 	frameBuffer->paintIcon(iconfile,x+73+sspos,y+mheight/4);
 
-	g_Fonts->menu->RenderString(x,y+mheight, width, text.c_str(), COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x,y+mheight, width, text.c_str(), COL_MENUCONTENT, 0, true); // UTF-8
 }
