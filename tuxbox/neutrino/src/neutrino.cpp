@@ -3564,7 +3564,6 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.481 2003/08/01 08:17:49 obi Exp $\n\n");
 
 	tzset();
 	initGlobals();
