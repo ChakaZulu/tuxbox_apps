@@ -39,7 +39,7 @@
 #include "vcrcontrol.h"
 #include "neutrino.h"
 
-#define LIRCDIR "/var/tuxbox/config/"
+#define LIRCDIR "/var/tuxbox/config/lirc/"
 
 #define SA struct sockaddr
 #define SAI struct sockaddr_in

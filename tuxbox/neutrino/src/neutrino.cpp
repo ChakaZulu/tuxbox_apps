@@ -2499,12 +2499,22 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 			return messages_return::cancel_all | messages_return::handled;
 		}
 	}
-	else if( ( msg == CRCInput::RC_plus ) ||
-				( msg == CRCInput::RC_minus ) )
+	else if( msg == CRCInput::RC_plus )
+   {
+		//volume
+		setVolume( msg, ( mode != mode_scart ) );
+		//additinal volume setting via lirc
+		CIRSend irs("volplus");
+		irs.Send();
+		return messages_return::handled;
+	}
+	else if( msg == CRCInput::RC_minus ) 
 	{
 		//volume
 		setVolume( msg, ( mode != mode_scart ) );
-		return messages_return::handled;
+		//additinal volume setting via lirc
+		CIRSend irs("volminus");
+		irs.Send();
 	}
 	else if( msg == CRCInput::RC_spkr )
 	{
@@ -3250,7 +3260,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.364 2002/11/25 19:13:07 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.365 2002/11/26 22:09:59 Zwen Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

@@ -5,6 +5,11 @@
 	License: GPL
 
 	Aenderungen: $Log: irsend.cpp,v $
+	Aenderungen: Revision 1.2  2002/11/26 22:10:00  Zwen
+	Aenderungen: - changed config dir for *.lirc files to /var/tuxbox/config/lirc/
+	Aenderungen: - support for lirc actions on pressing volume +/- (volplus.lirc/volminus.lirc)
+	Aenderungen:   e.g. for sending volume change commands to amplifier via ir
+	Aenderungen:
 	Aenderungen: Revision 1.1  2002/11/24 19:55:56  Zwen
 	Aenderungen: - send ir signals on sleeptimer event (see timer docu)
 	Aenderungen:
@@ -17,7 +22,7 @@
 #include "irsend.h"
 #include "liblircdclient.h"
 
-#define LIRCDIR "/var/tuxbox/config/"
+#define LIRCDIR "/var/tuxbox/config/lirc/"
 
 CIRSend::CIRSend(string configfile)
 {
@@ -81,7 +86,7 @@ bool CIRSend::Send()
 	}
 	else
 	{
-		printf("konnte datei %s nicht oeffnen\n",m_configFile.c_str());
+//		printf("konnte datei %s nicht oeffnen\n",m_configFile.c_str());
 		return false;
 	}
 	return (status==0);
