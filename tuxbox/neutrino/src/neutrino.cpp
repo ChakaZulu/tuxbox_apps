@@ -154,7 +154,6 @@ CNeutrinoApp::CNeutrinoApp()
 	frameBuffer = CFrameBuffer::getInstance();
 	frameBuffer->setIconBasePath(DATADIR "/neutrino/icons/");
 
-	g_fontRenderer = new FBFontRenderClass();
 	SetupFrameBuffer();
 
 	mode = mode_unknown;
@@ -1067,6 +1066,12 @@ void CNeutrinoApp::SetupFrameBuffer()
 
 void CNeutrinoApp::SetupFonts()
 {
+	if (g_fontRenderer != NULL)
+		delete g_fontRenderer;
+
+	g_fontRenderer = new FBFontRenderClass();
+
+
 	g_fontRenderer->AddFont((fontFile + ".ttf").c_str());
 
 	const char * bold_style_name;
@@ -3735,7 +3740,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 bool CNeutrinoApp::changeNotify(const std::string & OptionName, void *Data)
 {
 //	printf("OptionName: %s\n",OptionName.c_str());
-	if(OptionName.substr(0,9).compare("fontsize.") == 0)
+	if (strncmp(OptionName.c_str(), "fontsize.", 9) == 0)
 	{
 		CHintBox * hintBox = new CHintBox("messagebox.info", g_Locale->getText("fontsize.hint")); // UTF-8
 		hintBox->paint();
@@ -3745,7 +3750,7 @@ bool CNeutrinoApp::changeNotify(const std::string & OptionName, void *Data)
 		hintBox->hide();
 		delete hintBox;
 	}
-	else if(OptionName.substr(0,7).compare("timing.") == 0)
+	else if (strncmp(OptionName.c_str(), "timing.", 7) == 0)
 	{
 		g_settings.timing_menu = atoi(g_settings.timing_menu_string);
 		g_settings.timing_chanlist = atoi(g_settings.timing_chanlist_string);
@@ -3755,13 +3760,13 @@ bool CNeutrinoApp::changeNotify(const std::string & OptionName, void *Data)
 
 	}
 
-	else if(OptionName.substr(0,3).compare("mp3.") == 0)
+	else if (strncmp(OptionName.c_str(), "mp3.", 4) == 0)
 	{
 // this code will never be reached
 		CMP3Player::getInstance()->init();
 	}
 
-	else if(OptionName.substr(0,18).compare("mainmenu.recording") == 0)
+	else if (strncmp(OptionName.c_str(), "mainmenu.recording", 18) == 0)
 	{
 		CTimerd::RecordingInfo eventinfo;
 
