@@ -63,6 +63,8 @@ int snake_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 			MoveSnake();
 		}
 
+		FreeSnake();
+
 		if ( doexit != 3 )
 		{
 			actcode=0xee;

@@ -91,6 +91,8 @@ int main( int argc, char ** argv )
 #endif
 		}
 
+		FreeSnake();
+
 		if ( doexit != 3 )
 		{
 			actcode=0xee;

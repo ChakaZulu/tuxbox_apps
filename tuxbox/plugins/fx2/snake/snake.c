@@ -76,6 +76,12 @@ static	void	SetNewGoodi()
 	count = 100;
 }
 
+void	FreeSnake( void )
+{
+	free( snake );
+	snake = 0;
+}
+
 static	void	InitSnake( void )
 {
 	int		i;
@@ -115,11 +121,11 @@ static	void	DrawScore( void )
 	for( ; *p; p++ )
 	{
 		h = (*p - 48);
-		FBCopyImage( x, 64, ww[h], 32, nn[h] );
+		FBCopyImage( x, 56, ww[h], 32, nn[h] );
 		x += ww[h];
 	}
-	FBFillRect(x,64,16,16,BLACK);
-	FBFillRect(x,80,16,16,STEELBLUE);
+	FBFillRect(x,56,16,24,BLACK);
+	FBFillRect(x,80,16,8,STEELBLUE);
 }
 
 void	DrawSnake( void )
@@ -134,7 +140,8 @@ void	DrawSnake( void )
 
 void	MoveSnake( void )
 {
-	int		i;
+	int			i;
+	snake_ele	*snake2;
 
 	memmove(snake+1,snake,sizeof(snake_ele)*(snake_len-1));
 	switch( actcode )
@@ -176,7 +183,15 @@ void	MoveSnake( void )
 		score += 100;
 		DrawScore();
 		snake_len++;
-		snake=realloc(snake,sizeof(snake_ele)*snake_len);
+		snake2=realloc(snake,sizeof(snake_ele)*snake_len);
+		if ( snake2 )
+		{
+			snake=snake2;
+		}
+		else
+		{
+			snake_len--;
+		}
 		SetNewGoodi();
 	}
 	else

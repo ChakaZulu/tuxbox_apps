@@ -5,5 +5,6 @@ extern	void	DrawMaze( void );
 extern	void	MoveSnake( void );
 extern	void	DrawGameOver( void );
 extern	void	DrawFinalScore( void );
+extern	void	FreeSnake( void );
 
 #endif
