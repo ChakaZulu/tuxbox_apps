@@ -30,6 +30,7 @@
 #include <ost/video.h>
 #include <ost/ca.h>
 #include <ost/audio.h>
+#include <dbox/avia_vbi.h>
 
 #include "bouquets.h"
 #include "getservices.h"

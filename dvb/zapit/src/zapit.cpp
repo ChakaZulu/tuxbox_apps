@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.80 2002/02/20 18:48:33 obi Exp $
+  $Id: zapit.cpp,v 1.81 2002/02/22 22:09:04 field Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -177,9 +177,6 @@ void termination_handler (int signum)
 }
 
 #ifndef DVBS
-// nachdem #include "gen_vbi.h" noch nicht geht (noch nicht offiziell im cdk...)
-#define VBI_START_VTXT 1
-#define VBI_STOP_VTXT 2
 
 int set_vtxt (uint vpid)
 {
@@ -237,7 +234,7 @@ int set_vtxt (uint vpid)
 
 		if (vpid == 0)
 		{
-			if (ioctl(fd, VBI_STOP_VTXT, vpid) < 0)
+			if (ioctl(fd, AVIA_VBI_STOP_VTXT, vpid) < 0)
 			{
 				close(fd);
 				perror("[zapit] VBI_STOP_VTXT");
@@ -246,17 +243,17 @@ int set_vtxt (uint vpid)
 		}
 		else
 		{
-			if (ioctl(fd, VBI_START_VTXT, vpid) < 0)
+			if (ioctl(fd, AVIA_VBI_START_VTXT, vpid) < 0)
 			{
 				close(fd);
 				perror("[zapit] VBI_START_VTXT");
 				return 1;
 			}
 		}
-		
+
 		close(fd);
 	}
-	
+
 	return 0;
 }
 #endif /* DVBS */
@@ -288,7 +285,7 @@ int parsePMTInfo (unsigned char *buffer, int len, int ca_system_id)
 			{
 				ca_pid = invalid_ecmpid_found;
 			}
-			
+
 	  		count+=2;
 			count+=(len2-4);
 		}
@@ -297,7 +294,7 @@ int parsePMTInfo (unsigned char *buffer, int len, int ca_system_id)
 			count+=len2;
 		}
 	}
-	
+
 	return ca_pid;
 }
 
@@ -348,14 +345,16 @@ pids parse_pmt (int pid, int ca_system_id)
 		close(fd);
 		return ret_pids;
 	}
-	
+
 	dmx_fd.fd = fd;
 	dmx_fd.events = POLLIN;
 	dmx_fd.revents = 0;
 
 	// wenn er ordentlich tuned, dann hat er nach 250ms die pmt, wenn nicht, dann hilft längeres warten auch nicht....
 	// Bei mir kommt trotzdem manchmal nen timeout. Setze auf 400 (faralla)
-	pt = poll(&dmx_fd, 1, 400);  // war 500;
+
+	// neuer Versuch - 1000 - vielleicht hilfts
+	pt = poll(&dmx_fd, 1, 1000);
 
 	if (!pt)
 	{
@@ -394,10 +393,10 @@ pids parse_pmt (int pid, int ca_system_id)
 			fclose(file);
 		}
 		*/
-		
+
 		PMTInfoLen = ((buffer[10] & 0xF) << 8) | buffer[11];
 		dp= 12;
-		
+
 		if (PMTInfoLen > 0)
 		{
 			ecm_pid = parsePMTInfo(&buffer[12], PMTInfoLen, ca_system_id);
@@ -417,7 +416,7 @@ pids parse_pmt (int pid, int ca_system_id)
 
 			epid = ((buffer[dp] & 0x1F) << 8) | buffer[dp+1];
 			dp += 2;
-			
+
 			esinfo = ((buffer[dp] & 0x0F) << 8) | buffer[dp+1];
 			dp += 2;
 
@@ -444,13 +443,13 @@ pids parse_pmt (int pid, int ca_system_id)
 				{
 					tag_type = buffer[i_pt++];
 					tag_len = buffer[i_pt++];
-					
+
 					switch (tag_type)
 					{
 					case 0x6A: // AC3
 						ret_pids.apids[ap_count].is_ac3 = true;
 						break;
-						
+
 					case 0x0A: // LangDescriptor
 						if (ret_pids.apids[ap_count].desc[0] == 0)
 						{
@@ -458,7 +457,7 @@ pids parse_pmt (int pid, int ca_system_id)
 							memcpy(ret_pids.apids[ap_count].desc, &(buffer[i_pt]), tag_len);
 						}
 						break;
-						
+
 					case 0x52: // STREAM_IDENTIFIER_DESCR
 						ret_pids.apids[ap_count].component_tag = buffer[i_pt];
 						break;
@@ -480,7 +479,7 @@ pids parse_pmt (int pid, int ca_system_id)
 						sprintf(ret_pids.apids[ap_count].desc, "%02d", ap_count+ 1);
 
 					ret_pids.apids[ap_count].pid = epid;
-					
+
 					if (ap_count <max_num_apids )
 						ap_count++;
 				}
@@ -490,7 +489,7 @@ pids parse_pmt (int pid, int ca_system_id)
 				dp+= esinfo;
 			}
 		}
-		
+
 		ret_pids.count_apids = ap_count;
 		ret_pids.count_vpids = vp_count;
 		ret_pids.ecmpid = ecm_pid;
@@ -509,7 +508,7 @@ int find_emmpid (int ca_system_id)
 	int section_length;
 	int count;
 	struct dmxSctFilterParams flt;
-	
+
 	if ((fd = open(DEMUX_DEV, O_RDWR)) < 0)
 	{
 		perror("[zapit] unable to open demux device");
@@ -518,7 +517,7 @@ int find_emmpid (int ca_system_id)
 
 	memset(&flt.filter.filter, 0, DMX_FILTER_SIZE);
 	memset(&flt.filter.mask, 0, DMX_FILTER_SIZE);
-	
+
 	flt.pid = 0x0001;
 	flt.filter.filter[0] = 0x01;
 	flt.filter.mask[0] = 0xFF;
@@ -542,7 +541,7 @@ int find_emmpid (int ca_system_id)
 	close(fd);
 
 	section_length = ((buffer[1] & 0x0F) << 8) | buffer[2];
-	
+
 	count = 8;
 
 	while (count < (section_length - 1))
@@ -622,7 +621,7 @@ void _writecamnu (int cmd, unsigned char *data, int len)
 		for (i = 0; i < len; i++) printf("%02X ", buffer[i]);
 		printf("\n");
 	}
-	
+
 	cam_pfd.fd = camfd;
 	cam_pfd.events = POLLIN;
 	cam_pfd.revents = 0;
@@ -695,7 +694,7 @@ void descramble (int onID, int serviceID, int unknown, int caID, int ecmpid, pid
 		buffer[p++] = 0x80;
 		buffer[p++] = 0;
 	}
-	
+
 	writecam(buffer, p);
 
 #if 0
@@ -848,7 +847,7 @@ void *decode_thread(void *ptr)
 			dprintf("[zapit] no emmpid found...\n");
 		}
 	}
-	
+
 	free(vals);
 	dprintf("[zapit] ending decode_thread\n");
 	pthread_exit(0);
@@ -879,7 +878,7 @@ int zapit (uint onid_sid, bool in_nvod)
 	if (in_nvod)
 	{
 		current_is_nvod = true;
-		
+
 		if (nvodchannels.count(onid_sid) > 0)
 		{
 			cit = nvodchannels.find(onid_sid);
@@ -893,7 +892,7 @@ int zapit (uint onid_sid, bool in_nvod)
 	else
 	{
 		current_is_nvod = false;
-		
+
 		if (Radiomode_on)
 		{
 			if (allchans_radio.count(onid_sid) > 0)
@@ -931,7 +930,7 @@ int zapit (uint onid_sid, bool in_nvod)
 	}
 
 	dprintf("[zapit] stop video queue\n");
-	
+
 	if (dmx_video_fd >= 0)
 	{
 		ioctl(dmx_video_fd, DMX_STOP, 0);
@@ -940,7 +939,7 @@ int zapit (uint onid_sid, bool in_nvod)
 	}
 
 	dprintf("[zapit] stop audio queue\n");
-	
+
 	if (dmx_audio_fd >= 0)
 	{
 		ioctl(dmx_audio_fd, DMX_STOP,0);
@@ -955,13 +954,13 @@ int zapit (uint onid_sid, bool in_nvod)
 		do_cam_reset = true;
 #endif /* USE_EXTERNAL_CAMD */
 		dprintf("[zapit] tunig to tsid %04x\n", cit->second.tsid);
-		
+
 		if (tune(cit->second.tsid) < 0)
 		{
 			dprintf("[zapit] no transponder with tsid %04x found\nHave to look it up in nit\n", cit->second.tsid);
 			return -3;
 		}
-		
+
 		do_search_emmpid = true;
 	}
 	else
@@ -981,7 +980,7 @@ int zapit (uint onid_sid, bool in_nvod)
 	if ((cit->second.pmt == 0) && (cit->second.service_type != 4))
 	{
 		dprintf("[zapit] trying to find pmt for sid %04x, onid %04x\n", cit->second.sid, cit->second.onid);
-		
+
 		if (in_nvod)
 		{
 			pat(cit->second.onid, &nvodchannels);
@@ -1018,12 +1017,12 @@ int zapit (uint onid_sid, bool in_nvod)
 	if (parse_pmt_pids.count_vpids > 0)
 	{
 		cit->second.vpid = parse_pmt_pids.vpid;
-		
+
 		if (cit->second.vpid == 0)
 		{
 			cit->second.vpid = 0x1fff;
 		}
-		
+
 		//cit->second.last_update = current_time;
 	}
 	else
@@ -1119,7 +1118,7 @@ int zapit (uint onid_sid, bool in_nvod)
 			perror("[zapit] unable to open video device");
 			exit(1);
 		}
-		
+
 		dprintf("[zapit] start decoding\n");
 
 		if (ioctl(video_fd, VIDEO_SELECT_SOURCE, (videoStreamSource_t)VIDEO_SOURCE_DEMUX) < 0)
@@ -1133,11 +1132,11 @@ int zapit (uint onid_sid, bool in_nvod)
 		}
 
 		dprintf("[zapit] set audio mode\n");
-		
+
 		if (parse_pmt_pids.apids[0].is_ac3 != OldAC3)
 		{
 			OldAC3 = parse_pmt_pids.apids[0].is_ac3;
-			
+
 			if ((ac3d = open(AUDIO_DEV, O_RDWR)) < 0)
 			{
 				perror("[zapit] unable to open audio device");
@@ -1168,7 +1167,7 @@ int zapit (uint onid_sid, bool in_nvod)
 		pes_filter.output = DMX_OUT_DECODER;
 		pes_filter.pesType = DMX_PES_VIDEO;
 		pes_filter.flags = 0;
-		
+
 		if (ioctl(dmx_video_fd, DMX_SET_PES_FILTER, &pes_filter) < 0)
 		{
 			perror("[zapit] unable to set dmx pes filter");
@@ -1186,14 +1185,14 @@ int zapit (uint onid_sid, bool in_nvod)
 		}
 
 		dprintf("[zapit] setting apid %04x\n", Apid);
-		
+
 		/* apid */
 		pes_filter.pid     = Apid;
 		pes_filter.input   = DMX_IN_FRONTEND;
 		pes_filter.output  = DMX_OUT_DECODER;
 		pes_filter.pesType = DMX_PES_AUDIO;
 		pes_filter.flags   = 0;
-		
+
 		if (ioctl(dmx_audio_fd, DMX_SET_PES_FILTER, &pes_filter) < 0)
 		{
 			perror("[zapit] unable to set dmx pes filter");
@@ -1205,7 +1204,7 @@ int zapit (uint onid_sid, bool in_nvod)
 		}
 
 		dprintf("[zapit] starting dmx\n");
-		
+
 
 		if (ioctl(dmx_audio_fd, DMX_START, 0) < 0)
 		{
@@ -1216,7 +1215,7 @@ int zapit (uint onid_sid, bool in_nvod)
 		{
 			perror("[zapit] unable to start video demux");
 		}
-		
+
 		dprintf("[zapit] playing\n");
 
 
@@ -1229,7 +1228,7 @@ int zapit (uint onid_sid, bool in_nvod)
 #endif /* DVBS */
 		dprintf("[zapit] saving settings\n");
 		curr_onid_sid = onid_sid;
-		
+
 		if (!in_nvod)
 		{
 			save_settings();
@@ -1374,13 +1373,13 @@ int changeapid(ushort pid_nr)
 		{
 			perror("[zapit] unable to set demux pes filter");
 		}
-		
+
 		apid = pids_desc.apids[pid_nr].pid;
 
 		if (pids_desc.apids[pid_nr].is_ac3 != OldAC3)
 		{
 			OldAC3 = pids_desc.apids[pid_nr].is_ac3;
-			
+
 			if ((ac3d = open(AUDIO_DEV, O_RDWR)) < 0)
 			{
 				perror("[zapit] unable to open audio device");
@@ -1389,12 +1388,12 @@ int changeapid(ushort pid_nr)
 			else
 			{
 				dprintf("Setting audiomode to %d", ( OldAC3 )?0:1);
-				
+
 				if (ioctl(ac3d, AUDIO_SET_BYPASS_MODE, (OldAC3)?0:1) < 0)
 				{
 					perror("[zapit] unable to set audio mode");
 				}
-				
+
 				close(ac3d);
 			}
 		}
@@ -1423,7 +1422,7 @@ void display_pic()
 	char *picture;
 	int pic_fd;
 	struct stat pic_desc;
-	
+
 	if ((pic_fd = open("/root/ilogo.mpeg", O_RDONLY)) < 0)
 	{
 		perror("open still picture");
@@ -1548,7 +1547,7 @@ void setTVMode()
 int prepare_channels()
 {
 	int ls;
-	
+
 	std::map<uint, uint>::iterator numit;
 	std::map<std::string, uint>::iterator nameit;
 	std::map<uint, channel>::iterator cit;
@@ -2473,7 +2472,7 @@ int main (int argc, char **argv)
 	}
 
 	system("cp " CONFIGDIR "/zapit/last_chan /tmp/zapit_last_chan");
-	printf("Zapit $Id: zapit.cpp,v 1.80 2002/02/20 18:48:33 obi Exp $\n\n");
+	printf("Zapit $Id: zapit.cpp,v 1.81 2002/02/22 22:09:04 field Exp $\n\n");
 	scan_runs = 0;
 	found_transponders = 0;
 	found_channels = 0;
@@ -2570,7 +2569,7 @@ int main (int argc, char **argv)
 		parse_command();
 		close(connfd);
 	}
-	
+
 	return 0;
 }
 
