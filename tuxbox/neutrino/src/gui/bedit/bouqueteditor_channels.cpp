@@ -206,33 +206,36 @@ int CBEChannelWidget::exec(CMenuTarget* parent, const std::string & actionKey)
 		//
 		else if (msg==CRCInput::RC_up || msg==(neutrino_msg_t)g_settings.key_channelList_pageup)
 		{
-			int step = 0;
-			int prev_selected = selected;
+			if (!(Channels.empty()))
+			{
+				int step = 0;
+				int prev_selected = selected;
 
-			step = (msg==(neutrino_msg_t)g_settings.key_channelList_pageup) ? listmaxshow : 1;  // browse or step 1
-			selected -= step;
-			if((prev_selected-step) < 0)		// because of uint
-			{
-				selected = Channels.size()-1;
-			}
+				step = (msg==(neutrino_msg_t)g_settings.key_channelList_pageup) ? listmaxshow : 1;  // browse or step 1
+				selected -= step;
+				if((prev_selected-step) < 0)		// because of uint
+				{
+					selected = Channels.size() - 1;
+				}
 
-			if (state == beDefault)
-			{
-				paintItem(prev_selected - liststart);
-				unsigned int oldliststart = liststart;
-				liststart = (selected/listmaxshow)*listmaxshow;
-				if(oldliststart!=liststart)
+				if (state == beDefault)
 				{
-					paint();
+					paintItem(prev_selected - liststart);
+					unsigned int oldliststart = liststart;
+					liststart = (selected/listmaxshow)*listmaxshow;
+					if(oldliststart!=liststart)
+					{
+						paint();
+					}
+					else
+					{
+						paintItem(selected - liststart);
+					}
 				}
-				else
+				else if (state == beMoving)
 				{
-					paintItem(selected - liststart);
+					internalMoveChannel(prev_selected, selected);
 				}
-			}
-			else if (state == beMoving)
-			{
-				internalMoveChannel(prev_selected, selected);
 			}
 		}
 		else if (msg==CRCInput::RC_down || msg==(neutrino_msg_t)g_settings.key_channelList_pagedown)
@@ -300,8 +303,10 @@ int CBEChannelWidget::exec(CMenuTarget* parent, const std::string & actionKey)
 		}
 		else if(msg==CRCInput::RC_ok)
 		{
-			if (state == beDefault) {
-				g_Zapit->zapTo_serviceID(Channels[selected].channel_id);
+			if (state == beDefault)
+			{
+				if (selected < Channels.size()) /* Channels.size() might be 0 */
+					g_Zapit->zapTo_serviceID(Channels[selected].channel_id);
 
 			} else if (state == beMoving) {
 				finishMoveChannel();
@@ -333,11 +338,14 @@ int CBEChannelWidget::exec(CMenuTarget* parent, const std::string & actionKey)
 
 void CBEChannelWidget::deleteChannel()
 {
-	g_Zapit->removeChannelFromBouquet( bouquet, Channels[selected].channel_id);
+	if (selected >= Channels.size()) /* Channels.size() might be 0 */
+		return;
+
+	g_Zapit->removeChannelFromBouquet(bouquet, Channels[selected].channel_id);
 	Channels.clear();
-	g_Zapit->getBouquetChannels( bouquet, Channels, mode);
+	g_Zapit->getBouquetChannels(bouquet, Channels, mode);
 	if (selected >= Channels.size())
-		selected--;
+		selected = Channels.empty() ? 0 : (Channels.size() - 1);
 	channelsChanged = true;
 	paint();
 }
