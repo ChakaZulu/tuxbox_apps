@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.35 2003/01/04 15:51:44 dirch Exp $
+	$Id: request.cpp,v 1.36 2003/01/15 00:43:30 pumuckel Exp $
 
 	License: GPL
 
@@ -31,6 +31,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <iostream>
 
 #include "request.h"
 #include "webdbox.h"
@@ -75,14 +76,12 @@ bool CWebserverRequest::Authenticate()			// check if authentication is required
 
 	if(CheckAuth())
 		return true;
-	else
-	{
-		SocketWriteLn("HTTP/1.0 401 Unauthorized");
-		SocketWriteLn("WWW-Authenticate: Basic realm=\"dbox\"\r\n");
-		if (Method != M_HEAD)
-			SocketWriteLn("Access denied.");
-		return false;
-	}
+
+	SocketWriteLn("HTTP/1.0 401 Unauthorized");
+	SocketWriteLn("WWW-Authenticate: Basic realm=\"dbox\"\r\n");
+	if (Method != M_HEAD)
+		SocketWriteLn("Access denied.");
+	return false;
 }
 
 //-------------------------------------------------------------------------
@@ -90,13 +89,15 @@ bool CWebserverRequest::CheckAuth()			// check if given username an pssword are 
 {
 	if(HeaderList["Authorization"] == "")
 		return false;
+
 	string encodet = HeaderList["Authorization"].substr(6,HeaderList["Authorization"].length() - 6);
 	string decodet = b64decode((char *)encodet.c_str());
 	int pos = decodet.find_first_of(':');
 	string user = decodet.substr(0,pos);
 	string passwd = decodet.substr(pos + 1, decodet.length() - pos - 1);
 
-	return (user.compare(Parent->AuthUser) == 0 && passwd.compare(Parent->AuthPassword) == 0);
+	return (user.compare(Parent->AuthUser) == 0 &&
+	        passwd.compare(Parent->AuthPassword) == 0);
 }
 
 //-------------------------------------------------------------------------
@@ -115,57 +116,55 @@ bool CWebserverRequest::GetRawRequest()
 	return true;
 }
 //-------------------------------------------------------------------------
-void CWebserverRequest::SplitParameter(string param_str)
+void CWebserverRequest::SplitParameter(char *param_copy)
 {
-string nummer = "1";
-	if(param_str.length() > 0)
-	{
-		int pos = param_str.find('=');
-		if(pos != -1)
-		{
-			if (ParameterList[param_str.substr(0,pos)] == "")
-				ParameterList[param_str.substr(0,pos)] = param_str.substr(pos+1,param_str.length() - (pos+1));
-			else {
-				ParameterList[param_str.substr(0,pos)] += ",";
-				ParameterList[param_str.substr(0,pos)] += param_str.substr(pos+1,param_str.length() - (pos+1));
-			}
-		}
-		else
-		{
-			ParameterList[nummer] = param_str;
-			nummer[0]++;
-		}
+        if (param_copy == NULL)
+		return;
+	
+	char *p = strchr(param_copy, '=');
+	if(p == NULL) {
+		char number_buf[20];
+ 		sprintf(number_buf, "%d", ParameterList.size()+1); 
+		ParameterList[number_buf] = param_copy;
+		return;
+        }
+	*p = '\0';
+	if (ParameterList[param_copy].length() == 0)
+		ParameterList[param_copy] = p + 1;
+	else {
+		*p  = ',';
+		ParameterList[param_copy] += p;
 	}
 }
 //-------------------------------------------------------------------------
 
 bool CWebserverRequest::ParseParams(string param_string)			// parse parameter string
 {
-string name,value,param;
-string param_str;
-int pos;
-bool ende = false;
-
 	if(param_string.length() <= 0)
 		return false;
+	char *param_copy = new char[param_string.length()+1];
+	memcpy(param_copy, param_string.c_str(), param_string.length()+1);
 
-	param_str = param_string;
-	while(!ende)
-	{
-		pos = param_str.find_first_of("&");
-		if(pos > 0)
+	// instead of copying and allocating strings again and again,
+	// we just copy once, move pointers
+	// around and set '\0' chars. is faster and less memory is used.
+        char *param; // this is the param
+	char *ptr1;  // points to the begin of param
+        char *ptr2;  // points to the '&' sign
+
+        ptr1 = param_copy;
+        ptr2 = ptr1;
+	while(ptr2 && *ptr1) {
+                param  = ptr1;
+		ptr2 = strchr(ptr1, '&');
+		if(ptr2 != NULL)
 		{
-			param = param_str.substr(0,pos);	
-			param_str = param_str.substr(pos+1,param_str.length() - (pos+1));
+			*ptr2 = '\0';
+			ptr1  = ptr2+1;
 		}
-		else
-		{
-			param = param_str;
-			ende = true;
-		}
-//		dprintf("param: '%s' param_str: '%s'\n",param.c_str(),param_str.c_str());
 		SplitParameter(param);
 	}
+	delete[] param_copy;
 	return true;
 };
 //-------------------------------------------------------------------------
@@ -458,7 +457,7 @@ void CWebserverRequest::SendHTMLFooter()
 	SocketWriteLn("</body></html>");
 }
 //-------------------------------------------------------------------------
-void CWebserverRequest::Send302(char *URI)
+void CWebserverRequest::Send302(char const *URI)
 {
 	printf("HTTP/1.0 302 Moved Permanently\r\nLocation: %s\r\nContent-Type: text/html\r\n\r\n",URI);
 	if (Method != M_HEAD) {
@@ -609,19 +608,19 @@ void CWebserverRequest::printf ( const char *fmt, ... )
 
 
 //-------------------------------------------------------------------------
-bool CWebserverRequest::SocketWrite(char *text)
+bool CWebserverRequest::SocketWrite(char const *text)
 {
 	return SocketWriteData(text, strlen(text));
 }
 //-------------------------------------------------------------------------
-bool CWebserverRequest::SocketWriteLn(char *text)
+bool CWebserverRequest::SocketWriteLn(char const *text)
 {
 	if(!SocketWriteData(text, strlen(text)))
 		return false;
 	return SocketWriteData("\r\n",2);
 }
 //-------------------------------------------------------------------------
-bool CWebserverRequest::SocketWriteData( char* data, long length )
+bool CWebserverRequest::SocketWriteData( char const * data, long length )
 {
 	if(RequestCanceled)
 		return false;
