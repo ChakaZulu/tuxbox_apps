@@ -728,7 +728,7 @@ public:
 		if (!(e.flags & eServiceReference::isDirectory))
 		{
 			result += "<a href=\'javascript:openEPG(\"" + ref2string(e) + "\")\'>[EPG]</a>";
-			result += "<a href=\"/?path=" + ref2string(e) + "\">[PLAY]</a> ";
+			result += "<a href=\'javascript:switchChannel(\"" + ref2string(e) + "\")\'>[PLAY]</a> ";
 		}
 		else
 			result+=eString("<a href=\"/")+ "?path=" + ref2string(e) + "\">";
@@ -779,7 +779,8 @@ static eString getZapContent(eString mode, eString path)
 		{
 			eZapMain::getInstance()->playService(current_service, eZapMain::psSetMode|eZapMain::psDontAdd);
 //			iface->play(current_service);
-			result += "Done. Please select ZAP to refresh screen.";
+//			result += "Done. Please select ZAP to refresh screen.";
+			result += "<script language=\"javascript\">window.close();</script>";
 		}
 		else
 		{

@@ -67,9 +67,9 @@ function unMute()
 	parent.setTimeout("reload()", 100);
 }
 
-function switchtoChannel(xy)
+function switchChannel(xy)
 {
-	win=window.open("/switchTo?service="+xy, "switchStatus","width=1,height=1,left=0,top=0");
+	win=window.open("?path="+xy, "switchStatus","width=1,height=1,left=0,top=0");
 	win.focus();
 	parent.setTimeout("reload()", 3000);
 }
