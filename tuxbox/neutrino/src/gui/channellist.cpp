@@ -546,7 +546,7 @@ void CChannelList::zapTo(int pos)
 		tuned = pos;
 		g_RemoteControl->zapTo_onid_sid( chan->onid_sid, chan->name );
 	}
-	g_RCInput->postMsg( messages::SHOW_INFOBAR, 0 );
+	g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
 
 	if (bouquetList != NULL)
 		bouquetList->adjustToChannel( getActiveChannelNumber());

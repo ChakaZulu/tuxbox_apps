@@ -1,5 +1,5 @@
 /*
-$Id: bouqueteditor_bouquets.cpp,v 1.21 2002/04/02 19:59:14 rasc Exp $
+$Id: bouqueteditor_bouquets.cpp,v 1.22 2002/04/14 08:36:05 Simplex Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@ $Id: bouqueteditor_bouquets.cpp,v 1.21 2002/04/02 19:59:14 rasc Exp $
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 $Log: bouqueteditor_bouquets.cpp,v $
+Revision 1.22  2002/04/14 08:36:05  Simplex
+renamed enum messages to avoid naming conflict
+
 Revision 1.21  2002/04/02 19:59:14  rasc
 -- browsing/page function for bouquet channel editor list box
 -- This enables quicker moving/sorting of your bouquet favorites.
@@ -214,7 +217,7 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 				cancelMoveBouquet();
 			}
 		}
-		// 
+		//
 		// -- For more convenience: include browsing of list (paging)  (rasc, 2002-04-02)
 		// -- The keys should be configurable. Problem is: red/green key, which is the
 		// -- default in neutrino is used as a function key here... so use left/right
@@ -250,7 +253,7 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 				internalMoveBouquet(prev_selected, selected);
 			}
 		}
-		else if (msg==CRCInput::RC_down || msg==CRCInput::RC_right) 
+		else if (msg==CRCInput::RC_down || msg==CRCInput::RC_right)
 		{
 			int step = 0;
 			int prev_selected = selected;
@@ -461,7 +464,7 @@ void CBEBouquetWidget::saveChanges()
 	hintBox->hide();
 	delete hintBox;
 
-	g_RCInput->postMsg( messages::EVT_BOUQUETSCHANGED, 0 );
+	g_RCInput->postMsg( NeutrinoMessages::EVT_BOUQUETSCHANGED, 0 );
 }
 
 void CBEBouquetWidget::discardChanges()
