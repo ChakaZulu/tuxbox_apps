@@ -5,7 +5,7 @@ options.on ein
 options.serial seriell
 options.fb framebuffer
 options.null nou
-options.default Vorischtöuigä bruuchä
+options.default Vorischtöuige bruuchä
 
 mainmenu.head Houptmenü
 mainmenu.tvmode TV-Modus
@@ -14,8 +14,8 @@ mainmenu.scartmode Scart-Iigang
 mainmenu.games Schpili
 mainmenu.mp3player MP3 Player
 mainmenu.sleeptimer SleepTimer
-mainmenu.shutdown Usschautä
-mainmenu.settings Ischtöuigä
+mainmenu.shutdown Usschaute
+mainmenu.settings Ischtöuige
 mainmenu.service Service
 mainmenu.recording Ufnäh
 mainmenu.recording_start Schtart
@@ -28,29 +28,29 @@ servicemenu.head Service
 servicemenu.update Software-Aktualisierig
 servicemenu.scants Kanausuächi
 servicemenu.ucodecheck UCodes überprüäfe
-servicemenu.reload Kanauischtä nöi ladä
-servicemenu.reload_hint Kanaulischtä wärde nöi gladä,\nbitte wartä...
+servicemenu.reload Kanaulischtä nöi lade
+servicemenu.reload_hint Kanaulischtä wärde nöi glade,\nbitte wartä...
 
 cablesetup.provider Kabuabiäter
 
 satsetup.diseqc DiSEqC
 satsetup.satellite Satellit
-satsetup.extended DiSEqC-Ischtöuigä
-satsetup.extended_lnb LNB-Ischtöuigä
-satsetup.extended_motor Motor-Ischtöuigä
+satsetup.extended DiSEqC-Ischtöuige
+satsetup.extended_lnb LNB-Ischtöuige
+satsetup.extended_motor Motor-Ischtöuige
 satsetup.nodiseqc Keis DiSEqC
 satsetup.minidiseqc Mini-DiSEqC
 satsetup.diseqc10 DiSEqC 1.0
 satsetup.diseqc11 DiSEqC 1.1
 satsetup.diseqc12 DiSEqC 1.2
 satsetup.smatvremote SMATV Remote Tuning
-satsetup.diseqcrepeat DiSEqC-Widerholigä
-satsetup.savesettingsnow Ischtöuigä jetzt schpicherä
+satsetup.diseqcrepeat DiSEqC-Widerholige
+satsetup.savesettingsnow Ischtöuigä jetzt schpichere
 satsetup.motorcontrol Manuells Motor-Setup
 
-mainsettings.head Ischtöuigä
-mainsettings.savesettingsnow Ischtöuigä jetzt schpicherä
-mainsettings.savesettingsnow_hint Ischtöuigä wärde jetzt gschpicherät,\nbitte wartä...
+mainsettings.head Ischtöuige
+mainsettings.savesettingsnow Ischtöuige jetzt schpichere
+mainsettings.savesettingsnow_hint Ischtöuige wärde jetzt gschpicheret,\nbitte wartä...
 mainsettings.language Schprooch
 mainsettings.audio Audio
 mainsettings.video Video
@@ -58,28 +58,28 @@ mainsettings.network Netzwärk
 mainsettings.recording Ufnahm
 mainsettings.streaming Movieplayer
 mainsettings.colors Farbä / Themes / Schrift
-mainsettings.plugins Plugin Ischtöuigä
+mainsettings.plugins Plugin Ischtöuige
 mainsettings.lcd LC-Display
-mainsettings.keybinding Taschtä Ischtöuigä
-mainsettings.misc Diversi Ischtöuigä
+mainsettings.keybinding Taschtä Ischtöuige
+mainsettings.misc Diversi Ischtöuige
 mainsettings.scan Ischtöuigä Kanausuäch
 
 mp3picsettings.general MP3 Player / Böudbetrachter
 
-miscsettings.head Diversi Ischtöuigä
+miscsettings.head Diversi Ischtöuige
 miscsettings.shutdown_real Standbymodus
 miscsettings.shutdown_real_rcdelay Verzögertä Shutdown
-miscsettings.boxtype DBox Härschtöuär
+miscsettings.boxtype DBox Härschtöuer
 miscsettings.bootinfo Infos bim Boote azeige
-miscsettings.startbhdriver BH-Mode Triiber ladä
+miscsettings.startbhdriver BH-Mode Triiber lade
 miscsettings.general Augemein
 miscsettings.fb_destination EXPERT! Boot-Konsole
 miscsettings.infobar_sat_display Infobar Satelliteazeig
 
-languagesetup.head Schproochiischtöuigä
+languagesetup.head Schproochiischtöuige
 languagesetup.select Schprooch
 
-audiomenu.head Audio-Ischtöuigä
+audiomenu.head Audio-Ischtöuige
 audiomenu.analogout Analog-Usgang
 audiomenu.monoright mono rächts
 audiomenu.monoleft mono links
@@ -89,10 +89,10 @@ audiomenu.avs_control Volume Schtüürig avs/ost
 audiomenu.avs avs
 audiomenu.ost ost
 audiomenu.lirc lirc
-audiomenu.PCMOffset Lutschterchisänkig PCM
+audiomenu.PCMOffset Lutschterkisänkig PCM
 
-videomenu.head Video-Ischtöuigä
-videomenu.screensetup Böudbeeich ischtöuä
+videomenu.head Video-Ischtöuige
+videomenu.screensetup Böudbereich ischtöue
 videomenu.videosignal Video Signauart
 videomenu.videosignal_rgb RGB + CVBS
 videomenu.videosignal_svideo S-Video
@@ -106,24 +106,24 @@ videomenu.videoformat_169 16:9
 videomenu.videoformat_autodetect outomatisch
 videomenu.vcrswitch Scart-Iigang outomatisch
 
-networkmenu.head Netzwärk Ischtöuigä
-networkmenu.test Netzwärk teschtä
+networkmenu.head Netzwärk Ischtöuige
+networkmenu.test Netzwärk teschte
 networkmenu.show aktivi Netzwärkischtöuigä zeigä
-networkmenu.setupnow Netzwärkischtöuigä jetzt zuäwisä
-networkmenu.setuponstartup Bim schtartä Netzwärk setzä
+networkmenu.setupnow Netzwärkischtöuigä jetzt zuäwise
+networkmenu.setuponstartup Bim schtartä Netzwärk setze
 networkmenu.ipaddress IP-Adrässi
 networkmenu.netmask Netzmaske
 networkmenu.broadcast Broadcast
 networkmenu.gateway Schtandard Gateway
 networkmenu.nameserver Namesörver
 
-recordingmenu.head Ufnahm Ischtöuigä
+recordingmenu.head Ufnahm Ischtöuige
 recordingmenu.recording_type Ufnahme Grät
 recordingmenu.server_ip Ufnahmesörver IP
 recordingmenu.server_port Ufnahmesörver Port
-recordingmenu.stopplayback Playbäck aahautä
-recordingmenu.stopsectionsd Sectionsd aahautä
-recordingmenu.vcr_devicename VCR Name (lirc)
+recordingmenu.stopplayback Playbäck aahaute
+recordingmenu.stopsectionsd Sectionsd aahaute
+recordingmenu.vcr_devicename VCR Namä (lirc)
 recordingmenu.off aus
 recordingmenu.server Sörver
 recordingmenu.vcr Videorekorder
@@ -132,14 +132,14 @@ recordingmenu.server_mac Mac Adrässi
 recordingmenu.setupnow Ischtöuigä jetzt übernää
 recordingmenu.no_scart Ungerdrücke Scart-Umschautig
 
-streamingmenu.head Movieplayer Iischt�e
-streamingmenu.streaming_type Streamings�r
-streamingmenu.server_ip Streamings�r IP
-streamingmenu.server_port Streamings�r Port
-streamingmenu.streaming_server_cddrive DVD Loufw㱣h
+streamingmenu.head Movieplayer Iischtöue
+streamingmenu.streaming_type Streamingsörver
+streamingmenu.server_ip Streamingsörver IP
+streamingmenu.server_port Streamingsörver Port
+streamingmenu.streaming_server_cddrive DVD Loufwärk
 streamingmenu.streaming_server_startdir Verzeichnis (VLC)
 streamingmenu.streaming_videorate Daterate Video
-streamingmenu.streaming_audiorate DateFrate Audio
+streamingmenu.streaming_audiorate Daterate Audio
 streamingmenu.streaming_ac3_enabled AC3 Ungerschtützig
 streamingmenu.off Deaktiviert
 streamingmenu.on Aktiviert
@@ -175,39 +175,39 @@ colorthememenu.neutrino_theme Neutrino Theme
 colorthememenu.classic_theme Klassik
 
 colormenusetup.head Menüfarbä
-colormenusetup.menuhead Tituleischtä
+colormenusetup.menuhead Tituleischte
 colormenusetup.menucontent Fäischterinhaut
 colormenusetup.menucontent_inactive Fäischterinhaut deaktiviert
 colormenusetup.menucontent_selected Fäischterinhaut selektiert
 
-colorstatusbar.head Schtatusbaukä-Farbe
+colorstatusbar.head Schtatusbaukä-Farb
 colorstatusbar.text Schtatusbaukä
 
 timing.head OSD Timeouts
 timing.menu Menü
 timing.chanlist Kanaulischtä
-timing.epg Epg
+timing.epg EPG
 timing.infobar Infobar
 timing.filebrowser Filebrowser
-timing.hint_1 Ibländzyt i Sek., diä das OSD
+timing.hint_1 Ibländzyt i Sek., wiä lang s'OSD
 timing.hint_2 uf äm TV aazeiget wird
 
 repeatblocker.hint_1 Mindeschtzyt (in ms) zwüschä 2 Taschtädrück
 repeatblocker.hint_2 0 schautet dä Blocker us (Rot isch " ")
 
 keybindingmenu.RC Färnbediänig
-keybindingmenu.repeatblock Widerhouverzögärig
+keybindingmenu.repeatblock Widerhouverzögerig
 keybindingmenu.repeatblockgeneric Aafangsverzögerig
-keybindingmenu.head Taschtä-Ischtöuigä
+keybindingmenu.head Taschtä-Ischtöuige
 keybindingmenu.modechange Modus wächsle
 keybindingmenu.channellist Kanaulischtä
 keybindingmenu.quickzap Schnäuumschautig
 keybindingmenu.tvradiomode Fernseh-/Radio-Modus
 keybindingmenu.tvradiomode_head Fernseh-/Radio-Modus
-keybindingmenu.pageup Sitä hochbletterä
-keybindingmenu.pageup_head Sitä hochbletterä
-keybindingmenu.pagedown Sitä abäbletterä
-keybindingmenu.pagedown_head Sitä abäbletterä
+keybindingmenu.pageup Sitä uechäblettere
+keybindingmenu.pageup_head Sitä uechäblettere
+keybindingmenu.pagedown Sitä abäblettere
+keybindingmenu.pagedown_head Sitä abäblettere
 keybindingmenu.cancel Kanaulischtä schliässe
 keybindingmenu.cancel_head Kanaulischtä schliässe
 keybindingmenu.sort Sortierreiäfoug ändere
@@ -219,12 +219,12 @@ keybindingmenu.addremind_head Umschaut-Timer däzuäfüege
 keybindingmenu.channelup Kanau uäche
 keybindingmenu.channelup_head Kanau uäche Taschte
 keybindingmenu.channeldown Kanau abä
-keybindingmenu.channeldown_head Kanau abä Taschtä
+keybindingmenu.channeldown_head Kanau abä Taschte
 keybindingmenu.bouquetup Bouquet witer
-keybindingmenu.bouquetup_head Bouquet witer Taschtä
+keybindingmenu.bouquetup_head Bouquet witer Taschte
 keybindingmenu.bouquetdown Bouquet zrugg
-keybindingmenu.bouquetdown_head Bouquet zrugg Taschtä
-keybindingmenu.bouquethandling OK-Taschtä für
+keybindingmenu.bouquetdown_head Bouquet zrugg Taschte
+keybindingmenu.bouquethandling OK-Taschte für
 keybindingmenu.bouquetchannels_on_ok Bouquet-Kanäu
 keybindingmenu.bouquetlist_on_ok Bouquetlischtä
 keybindingmenu.allchannels_on_ok Kanaulischtä
@@ -244,21 +244,21 @@ lcdmenu.power Power
 lcdmenu.autodimm Outomatisch dimme
 lcdmenu.lcdcontroler Kontrascht / Häuigkeit
 lcdmenu.statusline Schtatuszilä
-lcdmenu.statusline.volume Lutschtärchi
+lcdmenu.statusline.volume Lutschterchi
 lcdmenu.statusline.playtime Sändigsvortschritt
-lcdmenu.statusline.both Lutschtärchi / Fortschritt
+lcdmenu.statusline.both Lutschterchi / Fortschritt
 
 lcdcontroler.head LCD Ischtöuigä
 lcdcontroler.contrast Kontrascht
 lcdcontroler.brightness normali Häuigkeit
 lcdcontroler.brightnessstandby Standby Häuigkeit
 
-keychoosermenu.setnew Nöii Taschtä ischtöuä
-keychoosermenu.setnone kei Taschtä
-keychoosermenu.currentkey Momentani Taschtä
+keychoosermenu.setnew Nöii Taschte ischtöuä
+keychoosermenu.setnone kei Taschte
+keychoosermenu.currentkey Momentani Taschte
 
-keychooser.head Nöii Taschtä iischtöuä
-keychooser.text1 Bitte Taschtä drücke
+keychooser.head Nöii Taschte iischtöuä
+keychooser.text1 Bitte Taschte drücke
 keychooser.text2 Zum abbräche wartä..
 
 screensetup.upperleft rot = Böudrand obä, links
@@ -267,36 +267,36 @@ screensetup.lowerright grün = Böudrand ungä, rächts
 bouquetlist.head Bouquets
 
 channellist.head Aui Kanäu
-channellist.nonefound äs si keini Kanäu gfungä wordä!\nBitte füär ä Kanausuächi dürä\n(dbox-Taschtä -> Service)
+channellist.nonefound äs si kei Kanäu gfungä wordä!\nBitte füär ä Kanausuächi dürä\n(dbox-Taschtä -> Service)
 channellist.since sit %02d:%02d
 
-infoviewer.epgnotload Informationä no nid gladä...
-infoviewer.epgwait Wartä uf EPG-Informationä...
+infoviewer.epgnotload Informatione no nid glade...
+infoviewer.epgwait Warte uf EPG-Informatione...
 infoviewer.streaminfo Features
 infoviewer.eventlist Programm
 infoviewer.languages Tonwau
 infoviewer.notavailable Kanau (zur Zyt) nid verfüägbar
 infoviewer.cantdecode Kanau cha nid entschlüsslet wärde
-infoviewer.selecttime Schtartzytä
-infoviewer.nocurrent Kei Infos zum loufendä Programm
+infoviewer.selecttime Schtartzyte
+infoviewer.nocurrent Kei Infos zum loufende Programm
 infoviewer.noepg Kei EPG-Informationä verfüegbar
 infoviewer.subservice Böudregie
 infoviewer.waittime Wartä uf d'Uhrzyt...
 infoviewer.motor_moving Antennäpositioniärig
 
-epgviewer.notfound kei Programminformationä (EPG) gfungä
+epgviewer.notfound kei Programminformationä (EPG) gfunge
 epgviewer.nodetailed Kei usfüärlichi Informationä verfüägbar
 epgviewer.More_Screenings Witäri Termin uf däm Kanau
 epglist.head Vorschou - %s
 epglist.noevents Kei EPG-Informationä verfüägbar.
 
-streaminfo.head Informationä
+streaminfo.head Informatione
 streaminfo.resolution Uflösig
 streaminfo.bitrate Bitrate
 streaminfo.aratio Verhäutnis
 streaminfo.aratio_unknown Verhäutnis: unbekannt
-streaminfo.framerate Böudratä
-streaminfo.framerate_unknown Böudratä: unbekannt
+streaminfo.framerate Böudrate
+streaminfo.framerate_unknown Böudrate: unbekannt
 streaminfo.audiotype Audiotyp
 streaminfo.audiotype_unknown Audiotyp: unbekannt
 streaminfo.not_crypted nid verschlüsslet
@@ -304,12 +304,12 @@ streaminfo.ecm_invalid ungöutigs CA-System
 streaminfo.not_available nid verfüegbar
 
 streamfeatures.head Features
-streamfeatures.info Stream-Informationä
+streamfeatures.info Stream-Informatione
 
 apidselector.head Schproochuswau
 
 nvodselector.head Aafangszyt uswähle
-nvodselector.subservice Pepschpektivä
+nvodselector.subservice Perschpektivä
 nvodselector.directormode Böudregie-Modus
 
 ucodecheck.head UCode überprüäfig
@@ -340,7 +340,7 @@ date.Nov  Nov
 date.Dec  Dez
 
 nvod.starting (Beginn i %d min)
-nvod.proz (%d%% vörbi)
+nvod.proz (%d%% vürbi)
 
 scants.head Kanausuächi
 scants.startnow Kanausuächi schtartä
@@ -361,7 +361,7 @@ scants.bouquet_create nöi erschtöuä
 scants.bouquet_erase lösche
 scants.bouquet_satellite Satelliten-Bouquet
 scants.bouquet_update erneuere
-scants.failed Kanausuächi fäugschlagä!
+scants.failed Kanausuächi fäugschlage!
 scants.finished Kanausuächi erfougrich beändet!
 
 motorcontrol.head Motor-Setup
@@ -400,42 +400,42 @@ flashupdate.proxyserver_hint1 Gib ä Proxyname oder IP i (Host:Port)
 flashupdate.proxyserver_hint2 ä läre Iitrag bedütet kei Proxy
 flashupdate.proxyusername Benutzername
 flashupdate.proxyusername_hint1 Gib ä Proxy-Benutzername i
-flashupdate.proxyusername_hint2 ä lääre Iitrag bedütet kei Authentifiziärig
+flashupdate.proxyusername_hint2 ä lääre Iitrag bedütet kei Authentifizierig
 flashupdate.proxypassword Passwort
 flashupdate.proxypassword_hint1 Gib s'Proxy-Passwort i
 flashupdate.proxypassword_hint2
 flashupdate.selectimage Verfüegbari Images
-flashupdate.msgbox äs isch fougendes nöis Image gfungä wordä:\nDatum: %s, %s\nBasisImage: %s\nImageTyp: %s\n\nWosch diä version jetzt abeladä\nu inschtaliäre?
-flashupdate.msgbox_manual äs isch äs nöis Image gfungä worde:\nDatum: %s, %s\nBasisImage: %s\nImageTyp: %s\n\nWosch diä Version jetzt inschtalliäre?
+flashupdate.msgbox äs isch fougendes nöis Image gfunge wordä:\nDatum: %s, %s\nBasisImage: %s\nImageTyp: %s\n\nWosch diä Version jetzt abelade\nu inschtaliäre?
+flashupdate.msgbox_manual äs isch äs nöis Image gfunge worde:\nDatum: %s, %s\nBasisImage: %s\nImageTyp: %s\n\nWosch diä Version jetzt inschtalliäre?
 flashupdate.expertfunctions Expertä-Funktione
 flashupdate.readflash ganzes Flashimage usläse
-flashupdate.writeflash ganzes Flashimage iischpilä
-flashupdate.readflashmtd einzälni Partition usläse
-flashupdate.writeflashmtd einzälni Partition iischpilä
+flashupdate.writeflash ganzes Flashimage iischpile
+flashupdate.readflashmtd einzelni Partition usläse
+flashupdate.writeflashmtd einzelni Partition iischpile
 flashupdate.savesuccess s'Image isch erfougrich ungerem\nDateiname %s gschpicheret worde.
 flashupdate.mtdselector Partitions-Uswau
 flashupdate.titlereadflash Flash usläse
-flashupdate.actionreadflash lisä flash
+flashupdate.actionreadflash lisä Flash
 flashupdate.fileselector Datei-Uswau
-flashupdate.titlewriteflash Flash schribä
+flashupdate.titlewriteflash Flash schribe
 flashupdate.actionwriteflash schribä flash
-flashupdate.flashreadyreboot s'Image isch erfougrich gflascht wordä.\nd'DBox wird jetzt nöi gschtartet.
-flashupdate.reallyflashmtd Wosch dä Flashvorgang würklech düräfüerä?\n\nFaus ä Fähler uftritt oder s'Image nid\nfunktionstüchtig isch, wird dini Box nüm bootä.\n\nImagename: %s\nZiel: %s
+flashupdate.flashreadyreboot s'Image isch erfougrich gflasht worde.\nd'Box wird jetzt nöi gschtartet.
+flashupdate.reallyflashmtd Wosch dä Flashvorgang würklech düräfüere?\n\nFaus ä Fähler uftritt oder s'Image nid\nfunktionstüchtig isch, wird dini Box nüm bootä.\n\nImagename: %s\nZiel: %s
 flashupdate.wrongbase s'Releasezyklus wiicht ab, bitte\nzersch äs nöis Komplett-Image inschtaliäre!
-flashupdate.experimentalimage Du hesch ä Snapshot usgwäut, bitte beacht,\ndass diä Version nid teschtet isch u\neventuell dini Box nochem update\nnümfunktionsfähig isch.\n\nosch diä Version wörklech installiere?
+flashupdate.experimentalimage Du hesch ä Snapshot usgwäut, bitte beacht,\ndass diä Version nid teschtet isch u\neventuell dini Box nochem Update\nnüm funktionsfähig isch.\n\Wosch diä Version würklech installiere?
 
 bouqueteditor.name Bouquet-Verwautig
-bouqueteditor.delete Löschä
-bouqueteditor.add Derzuäfüäge
-bouqueteditor.move Vörschiäbe
+bouqueteditor.delete Lösche
+bouqueteditor.add Dezuäfüäge
+bouqueteditor.move Vürschiäbe
 bouqueteditor.rename Umbenänne
 bouqueteditor.hide Vörschteckä
-bouqueteditor.lock Schperrä
+bouqueteditor.lock Schperre
 bouqueteditor.newbouquetname Nöiä Name vom Bouquet
 bouqueteditor.bouquetname Name vom Bouquet
-bouqueteditor.savechanges? Söuä d'änderigä gschpicheret wärde?
-bouqueteditor.savingchanges änderigä wärde gschpicheret. Bitte warte ...
-bouqueteditor.discardingchanges änderigä wärde verworfe. Bitte warte ...
+bouqueteditor.savechanges? Söue d'änderige gschpicheret wärde?
+bouqueteditor.savingchanges änderige wärde gschpicheret. Bitte warte ...
+bouqueteditor.discardingchanges änderige wärde verworfe. Bitte warte ...
 bouqueteditor.switch Kanau ufnä/entfärne
 bouqueteditor.switchmode TV/Radio
 bouqueteditor.return Fertig
@@ -445,11 +445,11 @@ messagebox.no Nei
 messagebox.cancel Abbruch
 messagebox.back Zrugg
 messagebox.error Fähler
-messagebox.discard Wosch d'änderigä verwärfe?
-messagebox.info Informationä
+messagebox.discard Wosch d'änderige verwärfe?
+messagebox.info Informatione
 
-settings.noconffile d'Neutrino Ischtöuigä si nid gfungä\nworde. äs wärde d'Standartwärt bruucht.
-settings.missingoptionsconffile d'Neutrino-Ischtöuigä si erwitert worde.\nDiä nöiä Wärt wärde uf Standart gsetzt.
+settings.noconffile d'Neutrino Ischtöuige si nid gfungä\nworde. äs wärde d'Standartwärt bruucht.
+settings.missingoptionsconffile d'Neutrino-Ischtöuige si erwitert worde.\nDi nöiä Wärt wärde uf Standart gsetzt.
 
 cam.wrong Achtung, d' CAM_ALPHA.BIN passt\nnid zu dinere Smart-Card!!!\n\nWosch diä Warnig wider gsee?
 ucodes.failure Achtung, d'µCodes si NID gfunge worde!\n\nBitte per FTP (oder DBox-BootManager)\nuploade, u d'Box nöi schtarte!
@@ -457,14 +457,14 @@ ucodes.failure Achtung, d'µCodes si NID gfunge worde!\n\nBitte per FTP (oder DB
 stringinput.caps Gross-/Chlibuächschtabe
 stringinput.clear Aues lösche
 
-streamingserver.noconnect Ke verbindig zum Streamingsörver.\nd'Ufnahm wird abbroche.
+streamingserver.noconnect Kei verbindig zum Streamingsörver.\nd'Ufnahm wird abbroche.
 
 GENRE.MOVIE.0 Spöuföum / Drama
 GENRE.MOVIE.1 Krimi/Thriller
 GENRE.MOVIE.2 Abentürföum/Western/Chriägsföum
 GENRE.MOVIE.3 Science-Fiction/Fäntäsy/Horror
 GENRE.MOVIE.4 Comedy
-GENRE.MOVIE.5 Soap/Melodrama/Fouklore
+GENRE.MOVIE.5 Soap/Melodrama/Folklore
 GENRE.MOVIE.6 Romantik
 GENRE.MOVIE.7 serious/classical/religious/historical movie/drama
 GENRE.MOVIE.8 adult movie/Drama
@@ -481,7 +481,7 @@ GENRE.SHOW.2 varietee
 GENRE.SHOW.3 Talkshow
 
 GENRE.SPORTS.0 Schport
-GENRE.SPORTS.1 Grossereigniss (Olympischi Schpöu, Wäutmeischterschaft usw.)
+GENRE.SPORTS.1 Grossereigniss (Olympischi Schpiu, Wäutmeischterschaft usw.)
 GENRE.SPORTS.2 Schportmagazin
 GENRE.SPORTS.3 Schutte
 GENRE.SPORTS.4 Tennis
@@ -490,8 +490,8 @@ GENRE.SPORTS.6 Liächtathletik
 GENRE.SPORTS.7 Motorschport
 GENRE.SPORTS.8 Wasserschport
 GENRE.SPORTS.9 Winterschport
-GENRE.SPORTS.10 equestrian
-GENRE.SPORTS.11 martial sports
+GENRE.SPORTS.10 Equestrian
+GENRE.SPORTS.11 Martial Sports
 
 GENRE.CHILDRENs_PROGRAMMES.0 Chinder / Jugendprogramm
 GENRE.CHILDRENs_PROGRAMMES.1 Programm für Vorschouching
@@ -509,13 +509,13 @@ GENRE.MUSIC_DANCE.5 Musical/Oper
 GENRE.MUSIC_DANCE.6 Ballet
 
 GENRE.ARTS.0 Kunscht / Kultur
-GENRE.ARTS.1 Darschtöuendi Künscht
-GENRE.ARTS.2 fine arts
+GENRE.ARTS.1 Darschtöuendi Kunscht
+GENRE.ARTS.2 Fine Arts
 GENRE.ARTS.3 Religion
-GENRE.ARTS.4 Voukskunst
+GENRE.ARTS.4 Voukskunscht
 GENRE.ARTS.5 Literatur
 GENRE.ARTS.6 Föum/Kino
-GENRE.ARTS.7 experimental föum/video
+GENRE.ARTS.7 Experimental Föum/Video
 GENRE.ARTS.8 Rundfunk/Presse
 GENRE.ARTS.9 Nöi Mediä
 GENRE.ARTS.10 Kunst-/Kultur-Magazin
@@ -529,7 +529,7 @@ GENRE.SOZIAL_POLITICAL.3 Bsungeri Mönsche
 GENRE.DOCUS_MAGAZINES.0 Doku/Magazin
 GENRE.DOCUS_MAGAZINES.1 Natur/Tiär/Umwäut
 GENRE.DOCUS_MAGAZINES.2 Naturwüsseschaft und Technik
-GENRE.DOCUS_MAGAZINES.3 Medizin/Psüchologie/Psüchologie
+GENRE.DOCUS_MAGAZINES.3 Medizin/Psüchologie/Psychologie
 GENRE.DOCUS_MAGAZINES.4 Usland/Expeditions
 GENRE.DOCUS_MAGAZINES.5 Soziau- u Geischteswüsseschaft
 GENRE.DOCUS_MAGAZINES.6 Witerböudig
@@ -541,7 +541,7 @@ GENRE.TRAVEL_HOBBIES.2 Handicraft
 GENRE.TRAVEL_HOBBIES.3 Motor
 GENRE.TRAVEL_HOBBIES.4 Fitness u Gsundheit
 GENRE.TRAVEL_HOBBIES.5 Chochä
-GENRE.TRAVEL_HOBBIES.6 Ichouf
+GENRE.TRAVEL_HOBBIES.6 Iichouf
 GENRE.TRAVEL_HOBBIES.7 Garte
 
 GENRE.UNKNOWN Unbekannt
@@ -579,12 +579,12 @@ favorites.finalhint \nUs Versehä däzuegfüegti Kanäu chöi mit\ndr Bouquetver
 
 sleeptimerbox.title Sleeptimer
 sleeptimerbox.hint1 Usschautzyt i Min. (000=aus)
-sleeptimerbox.hint2 d'Dbox2 schautet sich nach derä Zyt uus.
+sleeptimerbox.hint2 d'Box schautet sich noch derä Zyt uus.
 sleeptimerbox.announce Sleeptimer i 1 min
 
 zaptotimer.announce I einer Minute wird umgschautet
 recordtimer.announce d'Ufnahm beginnt i wenige Minute
-shutdowntimer.announce d'Box wird i 1 Minute abägfahre.\nShutdown abbräche?
+shutdowntimer.announce d'Box wird i einer Minute abägfahre.\nShutdown abbräche?
 
 timerbar.channelswitch Umschaute
 timerbar.recordevent Ufnä
@@ -642,8 +642,8 @@ timerlist.apids Audio PIDs
 timerlist.bouquetselect Bouquet wähle
 timerlist.channelselect Kanau wähle
 timerlist.modeselect Modus-Uswau
-timerlist.modetv TV Kanäle
-timerlist.moderadio Radio Kanäle
+timerlist.modetv TV Kanäu
+timerlist.moderadio Radio Kanäu
 timersettings.separator Timerischtöuige
 timersettings.record_safety_time_before Ufnahmeschtart-Korrektur
 timersettings.record_safety_time_before.hint_1 Korrekturzyt i Min. (00=us), diä bim Schtart
