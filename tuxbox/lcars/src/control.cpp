@@ -606,9 +606,10 @@ int control::runCommand(command_class command, bool val)
 
 			ioctl(fpfd, FP_IOCTL_SET_WAKEUP_TIMER, &on_time);
 			ioctl(fpfd, FP_IOCTL_GET_WAKEUP_TIMER, &on_time);
-			sleep(1);
-			ioctl(fpfd,FP_IOCTL_POWEROFF);
 			close(fpfd);
+			sleep(1);
+			reboot(RB_POWER_OFF);
+			exit(0);
 		}
 		else if (command.command == C_Switch)
 		{
