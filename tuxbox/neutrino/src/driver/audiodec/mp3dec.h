@@ -59,7 +59,7 @@ private:
 	signed short MadFixedToSShort(const mad_fixed_t Fixed);
 	void			 CreateInfo();
 	void         GetMP3Info(FILE* in, bool nice, CAudioMetaData* m);
-	void         GetID3(FILE* in, CAudioMetaData* m);
+	bool         GetID3(FILE* in, CAudioMetaData* m);
 
 public:
 	static CMP3Dec* getInstance();

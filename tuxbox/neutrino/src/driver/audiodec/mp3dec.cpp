@@ -640,8 +640,9 @@ CMP3Dec* CMP3Dec::getInstance()
 bool CMP3Dec::GetMetaData(FILE *in, bool nice, CAudioMetaData* m)
 {
 	GetMP3Info(in, nice, m);
-	GetID3(in, m);
-	fclose(in);
+	bool fileClosed=GetID3(in, m);
+	if(!fileClosed)
+		fclose(in);
 	return true;
 }
 
@@ -714,7 +715,7 @@ void CMP3Dec::GetMP3Info(FILE* in, bool nice, CAudioMetaData *m)
 
 
 //------------------------------------------------------------------------
-void CMP3Dec::GetID3(FILE* in, CAudioMetaData* m)
+bool CMP3Dec::GetID3(FILE* in, CAudioMetaData* m)
 {
 	unsigned int i;
 	struct id3_frame const *frame;
@@ -888,12 +889,14 @@ void CMP3Dec::GetID3(FILE* in, CAudioMetaData* m)
 			printf("error open id3 tag\n");
 
 		id3_file_close(id3file);
+		return true;
 	}
-
+	return false;
 	if(0)
 	{
 	fail:
 		printf("id3: not enough memory to display tag");
+		return false;
 	}
 }
 
