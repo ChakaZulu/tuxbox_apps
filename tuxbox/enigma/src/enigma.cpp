@@ -443,6 +443,9 @@ int main(int argc, char **argv)
 
 		if (res == 4)  // when reboot is requeste set no deepstandbywakeup timer
 			eTimerManager::getInstance()->disableDeepstandbyWakeup();
+
+		if ( !res )  // only when shutdown disable pin8 voltage
+			eAVSwitch::getInstance()->setActive(0);
 	}
 
 	Decoder::Flush();

@@ -11,6 +11,9 @@
 #include <lib/dvb/edvb.h>
 #include <lib/system/info.h>
 #include <lib/gdi/font.h>
+#include <lib/gdi/epng.h>
+#include <lib/gdi/gfbdc.h>
+#include <lib/gdi/fb.h>
 #include <libmd5sum.h>
 
 #include <sys/mman.h>
@@ -488,6 +491,9 @@ void eUpgrade::abortDownload()
 
 bool erase(char mtd[30], const char *titleText);
 
+static int flashext=0; 
+// when you will use the external flashtool you must set this here to 1
+
 void eUpgrade::flashImage(int checkmd5)
 {
 	setStatus(_("checking consistency of file..."));
@@ -582,75 +588,176 @@ void eUpgrade::flashImage(int checkmd5)
 					box.show();
 					box.exec();
 					box.hide();
-					close(0);
 					return;
 				}
+				close(fd1);
 
-				// without this nice we have not enough priority for
-				// file operations... then the update ist very slow on the
-				// dreambox
-				nice(-10);
-				eEPGCache::getInstance()->messages.send(eEPGCache::Message(eEPGCache::Message::pause));
-
-				system("cp /sbin/rebootSE /tmp/reboot");
-
-				if(!erase(mtd,_("Erasing Flash...")))
+				if ( flashext )
 				{
+					__u8 data[720*576];
+					gPixmap pixmap;
+					pixmap.x=720;
+					pixmap.y=576;
+					pixmap.bpp=8;
+					pixmap.bypp=1;
+					pixmap.stride=720;
+					pixmap.data=data;
+					pixmap.clut.colors=256;
+					pixmap.clut.data=gFBDC::getInstance()->getPixmap().clut.data;
+					gPixmapDC outputDC(&pixmap);
+					eWidget virtualRoot;
+					virtualRoot.move(ePoint(0, 0));
+					virtualRoot.resize(eSize(720, 576));
+					virtualRoot.setTarget(&outputDC);
+					virtualRoot.makeRoot();
+					virtualRoot.setBackgroundColor(gColor(0));
+					virtualRoot.show();
+					{
+						eMessageBox mb(
+							_("Please wait... do NOT switch off the receiver!"),
+							_("upgrade in progress"), eMessageBox::iconInfo);
+						mb.show();
+						ProgressWindow wnd(_("Erasing Flash..."));
+						wnd.show();
+						while(gRC::getInstance().mustDraw())
+							usleep(1000);
+//						if ( !savePNG("/tmp/update1.png", &pixmap) )
+//							eDebug("saved update pic 1");
+						int fd = open("/tmp/update1.raw", O_CREAT|O_WRONLY|O_TRUNC);
+						if ( fd >= 0 )
+						{
+							ePoint pos = wnd.progress.getAbsolutePosition();
+							int x = 2+pos.x(); // borderwidth+xpos..
+							int y = 2+pos.y(); // borderwidth+ypos..
+							int fillColor = eSkin::getActive()->queryScheme("eProgress.left").color;
+							int width = wnd.progress.getSize().width()-4;
+							int height = wnd.progress.getSize().height()-4;
+							write(fd, &x, sizeof(x));
+							write(fd, &y, sizeof(y));
+							write(fd, &width, sizeof(width));
+							write(fd, &height, sizeof(height));
+							write(fd, &fillColor, sizeof(fillColor));
+							write(fd, pixmap.data, 720*576*pixmap.bpp/8);
+							close(fd);
+						}
+					}
+					{
+						eMessageBox mb(
+							_("Please wait... do NOT switch off the receiver!"),
+							_("upgrade in progress"), eMessageBox::iconInfo);
+						mb.show();
+						ProgressWindow wnd(_("Writing Software to Flash..."));
+						wnd.show();
+						while(gRC::getInstance().mustDraw())
+							usleep(1000);
+//						if ( !savePNG("/tmp/update2.png", &pixmap) )
+//							eDebug("saved update pic 2");
+						int fd = open("/tmp/update2.raw", O_CREAT|O_WRONLY|O_TRUNC);
+						if ( fd >= 0 )
+						{
+							ePoint pos = wnd.progress.getAbsolutePosition();
+							int x = 2+pos.x(); // borderwidth+xpos..
+							int y = 2+pos.y(); // borderwidth+ypos..
+							int fillColor = eSkin::getActive()->queryScheme("eProgress.left").color;
+							int width = wnd.progress.getSize().width()-4;
+							int height = wnd.progress.getSize().height()-4;
+							write(fd, &x, sizeof(x));
+							write(fd, &y, sizeof(y));
+							write(fd, &width, sizeof(width));
+							write(fd, &height, sizeof(height));
+							write(fd, &fillColor, sizeof(fillColor));
+							write(fd, pixmap.data, 720*576*pixmap.bpp/8);
+							close(fd);
+						}
+					}
+					int fd = open("/tmp/mtd.txt", O_WRONLY|O_CREAT|O_TRUNC);
+					if ( fd >= 0 )
+					{
+						write(fd, mtd, strlen(mtd));
+						close(fd);
+					}
+					struct fb_cmap* cmap = fbClass::getInstance()->CMAP();
+					fd = open("/tmp/cmap", O_WRONLY|O_CREAT|O_TRUNC);
+					if ( fd >= 0 )
+					{
+						write(fd, &cmap->start, sizeof(cmap->start));
+						write(fd, &cmap->len, sizeof(cmap->len));
+						write(fd, cmap->red, cmap->len*sizeof(__u16));
+						write(fd, cmap->green, cmap->len*sizeof(__u16));
+						write(fd, cmap->blue, cmap->len*sizeof(__u16));
+						write(fd, cmap->transp, cmap->len*sizeof(__u16));
+						close(fd);
+					}
+					eZap::getInstance()->getDesktop(eZap::desktopFB)->makeRoot();
+				}
+				else
+				{
+					// without this nice we have not enough priority for
+					// file operations... then the update ist very slow on the
+					// dreambox
+					nice(-10);
+					eEPGCache::getInstance()->messages.send(eEPGCache::Message(eEPGCache::Message::pause));
+
+					system("cp /sbin/rebootSE /tmp/reboot");
+
+					if(!erase(mtd,_("Erasing Flash...")))
+					{
+						mb.hide();
+						eMessageBox box(_("Erase error!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK );
+						box.show();
+						box.exec();
+						box.hide();
+						close(0);
+						return;
+					}
+
+					if( (fd2 = open(mtd, O_RDWR )) < 0 )
+					{
+						mb.hide();
+						eMessageBox box(_("Can't open mtd!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK );
+						box.show();
+						box.exec();
+						box.hide();
+						close(0);
+						return;
+					}
+
+					mtd_info_t meminfo;
+					if( ioctl( fd2, MEMGETINFO, &meminfo ) != 0 )
+					{
+						close(0);
+						return;
+					}
+
+					ProgressWindow wnd(_("Writing Software to Flash..."));
+					wnd.show();
+
+					char buf[meminfo.erasesize];
+
+					int fsize=filesize;
+
+					eDebug("flashing now...");
+
+					int rbytes=0;
+					while( ( rbytes = read( fd1, buf, sizeof(buf) ) ) )
+					{
+						fsize -= write( fd2, buf, rbytes );
+						wnd.progress.setPerc( ((filesize-fsize)*100)/filesize );
+					}
+
+					nice(0);
+
 					mb.hide();
-					eMessageBox box(_("Erase error!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK );
-					box.show();
-					box.exec();
-					box.hide();
-					close(0);
-					return;
+					wnd.hide();
+
+					eMessageBox mbend(
+						_("upgrade successful!\nrestarting..."),
+						_("upgrade ok"),
+					eMessageBox::btOK|eMessageBox::iconInfo);
+					mbend.show();
+					mbend.exec();
+					mbend.hide();
 				}
-
-				if( (fd2 = open(mtd, O_RDWR )) < 0 )
-				{
-					mb.hide();
-					eMessageBox box(_("Can't open mtd!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK );
-					box.show();
-					box.exec();
-					box.hide();
-					close(0);
-					return;
-				}
-
-				mtd_info_t meminfo;
-				if( ioctl( fd2, MEMGETINFO, &meminfo ) != 0 )
-				{
-					close(0);
-					return;
-				}
-
-				ProgressWindow wnd(_("Writing Software to Flash..."));
-				wnd.show();
-
-				char buf[meminfo.erasesize];
-
-				int fsize=filesize;
-
-				eDebug("flashing now...");
-
-				int rbytes=0;
-				while( ( rbytes = read( fd1, buf, sizeof(buf) ) ) )
-				{
-					fsize -= write( fd2, buf, rbytes );
-					wnd.progress.setPerc( ((filesize-fsize)*100)/filesize );
-				}
-
-				nice(0);
-
-				mb.hide();
-				wnd.hide();
-
-				eMessageBox mbend(
-					_("upgrade successful!\nrestarting..."),
-					_("upgrade ok"),
-				eMessageBox::btOK|eMessageBox::iconInfo);
-				mbend.show();
-				mbend.exec();
-				mbend.hide();
 				eZap::getInstance()->quit(3);
 //				system("/sbin/reboot");
 //				system("/bin/reboot");

@@ -154,7 +154,6 @@ eDVB::~eDVB()
 	recEnd();
 #endif // DISABLE_FILE
 
-	eAVSwitch::getInstance()->setActive(0);
 	delete eAVSwitch::getInstance();
 
 #ifdef ENABLE_RFMOD
