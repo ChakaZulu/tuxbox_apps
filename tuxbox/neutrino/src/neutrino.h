@@ -33,6 +33,10 @@
 #ifndef __neutrino__
 #define __neutrino__
 
+// hat beides hier drin nix verloren
+#define DVB_API_VERSION 1
+#include "zapit/getservices.h"
+
 #include "neutrinoMessages.h"
 #include "driver/framebuffer.h"
 #include "system/setting_helpers.h"

@@ -33,7 +33,6 @@
 #define __remotecontrol__
 
 
-#include "zapit/getservices.h"
 #include "sections/sectionsdMsg.h"
 #include "zapitclient.h"
 
