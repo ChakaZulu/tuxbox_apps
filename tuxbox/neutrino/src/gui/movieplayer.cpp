@@ -3,6 +3,8 @@
 
 	Movieplayer (c) 2003 by giggo
 	Based on code by Dirch, obi and the Metzler Bros. Thanks.
+        
+        $Id: movieplayer.cpp,v 1.23 2003/07/15 21:37:21 gagga Exp $
 
 	Homepage: http://www.giggo.de/dbox
 
@@ -111,7 +113,7 @@
 static int playstate;
 static bool isTS;
 int speed = 1;
-
+static long fileposition;
 
 //------------------------------------------------------------------------
 
@@ -264,13 +266,14 @@ void* Play_Thread( void* filename )
 	if( ioctl(dmxv, DMX_SET_PES_FILTER, &p) < 0)
 		failed = true;
 
-	if( isTS && !failed )
+	fileposition = 0;
+        if( isTS && !failed )
 	{
 		while( (r = read(fd, buf, cache)) > 0 && playstate >= PLAY )
 		{
 			done = 0;
 			wr = 0;
-
+                        fileposition+=r;
 			switch( playstate )
 			{
 				case PAUSE:
@@ -284,6 +287,7 @@ void* Play_Thread( void* filename )
 				case REW:
 					ioctl(dmxa, DMX_STOP);
 					lseek( fd, cache*speed, SEEK_CUR );
+					fileposition += cache*speed;
 					break;
 
 				case SOFTRESET:
@@ -459,6 +463,15 @@ void CMoviePlayerGui::PlayStream( void )
 		  		update_lcd = true;
 		  		playstate = SOFTRESET;
 		  	}
+		}
+		else if( msg == CRCInput::RC_blue )
+		{
+			FILE *bookmarkfile;
+                        char bookmarkfilename[] = "/var/tuxbox/config/movieplayer.bookmarks";
+                        bookmarkfile = fopen (bookmarkfilename, "a");
+                        fprintf(bookmarkfile, "%s\n", filename);
+                        fprintf(bookmarkfile, "%d\n", fileposition);
+                        fclose(bookmarkfile);
 		}
 		else if( msg == CRCInput::RC_left )
 		{
