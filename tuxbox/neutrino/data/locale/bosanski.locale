@@ -105,6 +105,8 @@ videomenu.videoformat_431 4:3 (ps)
 videomenu.videoformat_169 16:9
 videomenu.videoformat_autodetect automatično
 videomenu.vcrswitch automatični av-scart ulaz
+videomenu.rgb_centering centriranje rgbea
+videomenu.csync namjescenje sinkronizacije
 
 networkmenu.head namjestiti mrežu
 networkmenu.test provjeriti mrežu
@@ -140,15 +142,19 @@ streamingmenu.streaming_server_cddrive dvd
 streamingmenu.streaming_server_startdir direktorij (vlc)
 streamingmenu.streaming_videorate brzina videa
 streamingmenu.streaming_audiorate brzina audia
-streamingmenu.streaming_ac3_enabled podržavati ac3
 streamingmenu.off ugaseno
 streamingmenu.on upaljeno
-streamingmenu.streaming_force_transcode silno transkodiranje
 streamingmenu.streaming_resolution resolucija
 streamingmenu.352x288 352x288
 streamingmenu.352x576 352x576
 streamingmenu.480x576 480x576
 streamingmenu.704x576 704x576
+streamingmenu.streaming_transcode_audio transkod. audio (dvd/vcd/mpg)
+streamingmenu.streaming_force_avi_rawaudio prisili ac3 kod avia
+streamingmenu.streaming_force_transcode_video transkod. i mpg/vcd video
+streamingmenu.streaming_transcode_video_codec mpeg video vodec
+streamingmenu.mpeg1 mpeg1
+streamingmenu.mpeg2 mpeg2
 
 ping.ok pristupan (ping)
 ping.unreachable nije pristupan (unreachable)
@@ -727,6 +733,21 @@ movieplayer.pleasewait Uspostavlja se veza sa streamingserverom.\nČekajte molim
 movieplayer.nostreamingserver Nije bilo moguće\nuspostaviti vezu sa streamingserverom.
 movieplayer.defdir početni direktorij
 movieplayer.buffering predraditi...
+movieplayer.tsplayback odigrati ts
+movieplayer.pesplayback odigrati pes (eksperimentalno)
+movieplayer.fileplayback datoteka preko vlcea
+movieplayer.dvdplayback dvd
+movieplayer.vcdplayback (s)vcd
+movieplayer.tshelp crveno/kuci stop\nzeleno resync\nzuto pausa/dalje\nplavo zapamtiti mjesto\n1 oko 1 minuta nazad\n3 oko 1 minuta naprijed\n4 oko 5 minuta nazad\n6 oko5 minuta naprijed\n7 oko 10 minuta nazad\n9 oko 10 minuta naprijed\npomoc:http://www.giggo.de/dbox2/movieplayer.html\n
+movieplayer.vlchelp crveno/kuci stop\nzeleno resync\nzuto pausa/dalje\nplavo zapamtiti mjesto\n1 oko 1 minuta nazad\n3 oko 1 minuta naprijed\n4 oko 5 minuta nazad\n6 oko5 minuta naprijed\n7 oko 10 minuta nazad\n9 oko 10 minuta naprijed\npomoc:http://www.giggo.de/dbox2/movieplayer.html\n
+movieplayer.toomanybookmarks Previse mjesta su zapamcena.\nMora se prvo jedno drugo izbrisati.
+movieplayer.bookmarkname ime zapamcenog mjesta
+movieplayer.bookmarkname_hint1 Imenujte novo zapamceno mjesto
+movieplayer.bookmarkname_hint2
+movieplayer.goto Skacem prema ...
+movieplayer.goto.h1 = -> absolutni skok
+movieplayer.goto.h2 +,- -> relativni skok
+movieplayer.wrongvlcversion funkcije nije moguca sa trenutacno upotrijebito verziji vlca
 
 filebrowser.head pretraživač datoteka
 filebrowser.filter.active upaljen filter
@@ -735,7 +756,13 @@ filebrowser.select izabrati
 filebrowser.mark označiti
 filebrowser.scan pretraži direktorije
 filebrowser.sort.name (ime datoteke)
+filebrowser.sort.namedirsfirst (ime datoteke 2)
 filebrowser.sort.date (datum)
+filebrowser.sort.type (tip)
+filebrowser.sort.size (velicina)
+filebrowser.nextpage strana naprijed
+filebrowser.prevpage strana nazad
+filebrowser.showrights prava datoteke pokazati
 
 nfs.mount montira nfs/cifs direktorij
 nfs.ip ip nfs/cifs servera
@@ -769,3 +796,8 @@ pictureviewer.slideshow pokazivanje slika
 pictureviewer.slide_time trajanje pokazivanja slika
 pictureviewer.scaling skaliranje
 pictureviewer.defdir početni direktorij
+
+rclock.menueadd fb sperovati
+rclock.title daljinsku sperovati
+rclock.lockmsg Speruje se daljinska dbox2.\n Za prekid spere, molim\n<crveno> i <dbox> na daljinskoj\n pretisnuti.
+rclock.unlockmsg dbox2 daljinska je reaktivirana...
