@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.56 2002/08/27 16:02:23 obi Exp $
+ * $Id: scan.cpp,v 1.57 2002/08/29 18:21:57 obi Exp $
  */
 
 #include <clientlib/zapitclient.h>
@@ -221,7 +221,6 @@ void write_bouquets()
 
 	else
 	{
-		scanBouquetManager->cleanUp();
 		scanBouquetManager->saveBouquets();
 	}
 }

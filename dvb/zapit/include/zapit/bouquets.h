@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.25 2002/08/29 17:04:03 thegoodguy Exp $
+ * $Id: bouquets.h,v 1.26 2002/08/29 18:21:57 obi Exp $
  */
 
 #ifndef __bouquets_h__
@@ -115,7 +115,6 @@ class CBouquetManager
 		void saveBouquets();
 		void loadBouquets( bool ignoreBouquetFile = false);
 		void restoreBouquets();
-		void cleanUp();
 		void renumServices();
 
 		CBouquet* addBouquet( string name);
