@@ -62,15 +62,14 @@ char old_timestr[10];
 
 CInfoViewer::CInfoViewer()
 {
-	frameBuffer = CFrameBuffer::getInstance();
+	frameBuffer      = CFrameBuffer::getInstance();
 
-	BoxStartX= BoxStartY= BoxEndX= BoxEndY=0;
-	recordModeActive= false;
-	is_visible		= false;
-	showButtonBar	= false;
-	gotTime 		= g_Sectionsd->getIsTimeSet();
-	CurrentChannel	= "";
-	CA_Status		= false;
+	BoxStartX        = BoxStartY = BoxEndX = BoxEndY = 0;
+	recordModeActive = false;
+	is_visible       = false;
+	showButtonBar    = false;
+	gotTime          = g_Sectionsd->getIsTimeSet();
+	CA_Status        = false;
 }
 
 void CInfoViewer::start()
@@ -130,7 +129,7 @@ void CInfoViewer::paintTime( bool show_dot, bool firstPaint )
 	}
 }
 
-void CInfoViewer::showRecordIcon( bool show )
+void CInfoViewer::showRecordIcon(const bool show)
 {
 	if(recordModeActive)
 	{
@@ -146,11 +145,10 @@ void CInfoViewer::showRecordIcon( bool show )
 	}
 }
 
-void CInfoViewer::showTitle( int ChanNum, string Channel, const t_channel_id new_channel_id, bool calledFromNumZap )
+void CInfoViewer::showTitle(const int ChanNum, const std::string Channel, const t_channel_id new_channel_id, const bool calledFromNumZap)
 {
 	CNeutrinoApp *neutrino = CNeutrinoApp::getInstance();
 
-        CurrentChannel = Channel;
         channel_id = new_channel_id;
         showButtonBar = !calledFromNumZap;
 
@@ -208,7 +206,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, const t_channel_id new
 		paintTime( false, true );
 
 		// ... with channel name
-        g_Fonts->infobar_channame->RenderString(ChanNameX+ 10, ChanNameY+ time_height, BoxEndX- (ChanNameX+ 20)- time_width- 15, Channel.c_str(), COL_INFOBAR);
+        g_Fonts->infobar_channame->RenderString(ChanNameX+ 10, ChanNameY+ time_height, BoxEndX- (ChanNameX+ 20)- time_width- 15, Channel.c_str(), COL_INFOBAR, 0, true); // UTF-8
 
         ChanInfoX = BoxStartX + (ChanWidth / 3);
         int ChanInfoY = BoxStartY + ChanHeight+ 10;
@@ -487,12 +485,12 @@ void CInfoViewer::showSubchan()
 }
 
 
-void CInfoViewer::showIcon_16_9()
+void CInfoViewer::showIcon_16_9() const
 {
 	frameBuffer->paintIcon( ( aspectRatio == 3 )?"16_9.raw":"16_9_gray.raw", BoxEndX- 2* ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 }
 
-void CInfoViewer::showIcon_VTXT()
+void CInfoViewer::showIcon_VTXT() const
 {
 	if ( g_RemoteControl->current_PIDs.PIDs.vtxtpid != 0 )
 		frameBuffer->paintIcon("vtxt.raw", BoxEndX- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
@@ -881,7 +879,7 @@ void CInfoViewer::killTitle()
 	}
 }
 
-void CInfoViewer::showIcon_CA_Status()
+void CInfoViewer::showIcon_CA_Status() const
 {
 	frameBuffer->paintIcon( ( CA_Status)?"ca.raw":"fta.raw", BoxEndX- 3* ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 }

@@ -42,70 +42,69 @@
 
 #include "gui/color.h"
 
+#include <string>
 
-using namespace std;
 
 class CInfoViewer
 {
-	private:
-		CFrameBuffer	*frameBuffer;
+ private:
+	CFrameBuffer * frameBuffer;
+	
+	bool           gotTime;
+	bool           recordModeActive;
+	bool           CA_Status;
+	
+	int            InfoHeightY;
+	int            InfoHeightY_Info;
+	bool           showButtonBar;
 
-		bool	gotTime;
-		bool	recordModeActive;
-		bool	CA_Status;
+	int            BoxEndX;
+	int            BoxEndY;
+	int            BoxStartX;
+	int            BoxStartY;
+	int            ButtonWidth;
 
-		int		InfoHeightY;
-		int		InfoHeightY_Info;
-		bool	showButtonBar;
+	int            ChanWidth;
+	int            ChanHeight;
+	int            ChanInfoX;
 
-		int		BoxEndX;
-		int		BoxEndY;
-		int		BoxStartX;
-		int		BoxStartY;
-		int		ButtonWidth;
+	CSectionsdClient::CurrentNextInfo info_CurrentNext;
+        t_channel_id   channel_id;
 
-		int		ChanWidth;
-		int		ChanHeight;
-		int		ChanInfoX;
+	char           aspectRatio;
 
-		string	CurrentChannel;
-		CSectionsdClient::CurrentNextInfo	info_CurrentNext;
-        t_channel_id	channel_id;
+	uint           sec_timer_id;
+	uint           fadeTimer;
+	
 
-		char	aspectRatio;
+	void show_Data( bool calledFromEvent = false );
+	void paintTime( bool show_dot, bool firstPaint );
+	
+	void showButton_Audio();
+	void showButton_SubServices();
+	
+	void showIcon_16_9()      const;
+	void showIcon_CA_Status() const;
+	void showIcon_VTXT()      const;
+	void showRecordIcon(const bool show);
+	
+	void showFailure();
 
-		uint	sec_timer_id;
-		uint	fadeTimer;
+ public:
+	bool	is_visible;
 
-		void	show_Data( bool calledFromEvent = false );
-		void	paintTime( bool show_dot, bool firstPaint );
+	CInfoViewer();
 
+	void	start();
 
-		void	showButton_Audio();
-		void	showButton_SubServices();
-
-		void	showIcon_16_9();
-		void	showIcon_CA_Status();
-		void	showIcon_VTXT();
-		void	showRecordIcon( bool show );
-
-		void	showFailure();
-	public:
-
-		bool	is_visible;
-
-		CInfoViewer();
-
-		void	start();
-
-		void	showTitle( int ChanNum, string Channel, const t_channel_id new_channel_id = 0, bool calledFromNumZap = false );
-		void	killTitle();
-		CSectionsdClient::CurrentNextInfo	getEPG(const t_channel_id for_channel_id);
-
-		void	showSubchan();
-		void	Set_CA_Status(int Status);
-
-		int		handleMsg(uint msg, uint data);
+	void	showTitle(const int ChanNum, const std::string Channel, const t_channel_id new_channel_id = 0, const bool calledFromNumZap = false); // Channel must be UTF-8 encoded
+	void	killTitle();
+	CSectionsdClient::CurrentNextInfo getEPG(const t_channel_id for_channel_id);
+	
+	void	showSubchan();
+	void	Set_CA_Status(int Status);
+	
+	int     handleMsg(uint msg, uint data);
 };
 
 
