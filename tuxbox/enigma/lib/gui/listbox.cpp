@@ -18,7 +18,8 @@ eListBoxBase::eListBoxBase(eWidget* parent, const eWidget* descr, const char *de
 		flags(0),
 		columns(1),
 		in_atomic(0),
-		movemode(0)
+		movemode(0),
+		MaxEntries(0)
 {
 }
 

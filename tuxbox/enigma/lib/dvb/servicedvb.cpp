@@ -660,6 +660,8 @@ eService *eServiceHandlerDVB::createService(const eServiceReference &node)
 	{
 		eString path=node.path.mid(node.path.rfind('/')+1);
 		path=path.left(path.rfind('.'));
+		if (node.descr)
+			path=node.descr;
 		if (!path)
 			path="movie";
 
