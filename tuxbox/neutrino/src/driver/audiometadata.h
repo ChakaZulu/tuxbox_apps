@@ -32,43 +32,52 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#include <string>
 
 
-#ifndef __MP3_DEC__
-#define __MP3_DEC__
+#ifndef __AUDIO_METADATA__
+#define __AUDIO_METADATA__
 
-#include <mad.h>
-#include <stdio.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <pthread.h>
-#include <driver/audioplay.h>
-
-class CMP3Dec : public CBaseDec
+class CAudioMetaData
 {
-private:
-	enum mad_layer m_layer;
-   enum mad_mode m_mode;
-   enum mad_emphasis m_emphasis;
-   unsigned long m_bitrate;
-   unsigned int m_samplerate;
-   bool m_vbr;
-	unsigned int m_filesize;
-
-	const char*  MadErrorString(const struct mad_stream *Stream);
-	signed short MadFixedToSShort(const mad_fixed_t Fixed);
-	void			 CreateInfo();
-	void         GetMP3Info(FILE* in, bool nice, CAudioMetaData* m);
-	void         GetID3(FILE* in, CAudioMetaData* m);
-
 public:
-	static CMP3Dec* getInstance();
-	virtual int Decoder(FILE *InputFp,int OutputFd, State* state);
-	bool GetMetaData(FILE *in, bool nice, CAudioMetaData* m);
-	CMP3Dec(){};
-
+	enum AudioType
+   {
+		NONE,
+		MP3,
+		OGG,
+		PCM
+	};
+	AudioType type;
+	std::string type_info;
+	unsigned int bitrate;
+	unsigned int samplerate;
+	time_t total_time;
+	bool vbr;
+	std::string artist;
+	std::string title;
+	std::string album;
+	std::string sc_station;
+	std::string date;
+	std::string genre;
+	std::string track;
+	bool changed;
+	void clear()
+	{
+		type=NONE;
+		type_info="";
+		bitrate=0;
+		samplerate=0;
+		total_time=0;
+		vbr=false;
+		artist="";
+		title="";
+		album="";
+		sc_station="";
+		date="";
+		genre="";
+		track="";
+		changed=false;
+	}
 };
-
-
 #endif
-

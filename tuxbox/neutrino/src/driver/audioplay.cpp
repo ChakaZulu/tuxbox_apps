@@ -93,7 +93,7 @@ void* CAudioPlayer::PlayThread(void * filename)
 			/* add callback function for shoutcast */
 			if (fstatus(fp, ShoutcastCallback) < 0)
 			{
-				fprintf(stderr,"Error adding shoutcast callback!\n%s",err_txt);
+				//fprintf(stderr,"Error adding shoutcast callback!\n%s",err_txt);
 			}
          
 			/* Decode stdin to stdout. */
@@ -197,35 +197,36 @@ void CAudioPlayer::clearMetaData()
 	m_sc_buffered=0;
 }
 
-CAudioPlayer::MetaData CAudioPlayer::getMetaData()
+CAudioMetaData CAudioPlayer::getMetaData()
 {
-	MetaData m = m_MetaData;
+	CAudioMetaData m = m_MetaData;
 	m_MetaData.changed=false;
 	return m;
 }
 
-CAudioPlayer::MetaData CAudioPlayer::readMetaData(const char* filename, bool nice)
+CAudioMetaData CAudioPlayer::readMetaData(const char* filename, bool nice)
 {
 	FILE* fp;
-	clearMetaData();
+	CAudioMetaData m;
+	m.clear();
 	fp = ::fopen((char *)filename,"r");
 	if (fp!=NULL)
 	{
 		/* add callback function for shoutcast */
 		if (fstatus(fp, ShoutcastCallback) < 0)
 		{
-			fprintf(stderr,"Error adding shoutcast callback!\n%s",err_txt);
+			//fprintf(stderr,"Error adding shoutcast callback!\n%s",err_txt);
 		}
 
 		/* Decode stdin to stdout. */
 		bool Status;
 		if(ftype(fp, "ogg"))
 		{
-			Status = COggDec::getInstance()->GetMetaData(fp, nice);
+			Status = COggDec::getInstance()->GetMetaData(fp, nice, &m);
 		}
 		else
 		{
-			Status = CMP3Dec::getInstance()->GetMetaData(fp, nice);
+			Status = CMP3Dec::getInstance()->GetMetaData(fp, nice, &m);
 		}
 
 		if(!Status)
@@ -235,6 +236,6 @@ CAudioPlayer::MetaData CAudioPlayer::readMetaData(const char* filename, bool nic
 	else
 		fprintf(stderr,"Error opening file %s\n",(char *) filename);
 	
-	return m_MetaData;
+	return m;
 }
 

@@ -30,56 +30,13 @@
 #include <driver/audiodec/basedec.h>
 #include <driver/audiodec/mp3dec.h>
 #include <driver/audiodec/oggdec.h>
+#include <driver/audiometadata.h>
 #include <string>
 
 class CAudioPlayer
 {
 	friend class CMP3Dec;
 	friend class COggDec;
-public:
-	class MetaData
-	{
-		public:
-			enum AudioType
-			{
-				NONE,
-				MP3,
-				OGG,
-				PCM
-			};
-			AudioType type;
-			std::string type_info;
-			unsigned int bitrate;
-			unsigned int samplerate;
-			time_t total_time;
-			bool vbr;
-			std::string artist;
-			std::string title;
-			std::string album;
-			std::string sc_station;
-			std::string date;
-			std::string genre;
-			std::string track;
-			bool changed;
-			void clear()
-			{
-				type=NONE;
-				type_info="";
-				bitrate=0;
-				samplerate=0;
-				total_time=0;
-				vbr=false;
-				artist="";
-				title="";
-				album="";
-				sc_station="";
-				date="";
-				genre="";
-				track="";
-				changed=false;
-			};
-	}; 
-
 private:
 	time_t m_played_time;
 	int  m_sc_buffered;
@@ -91,7 +48,7 @@ private:
 	void clearMetaData();
 
 protected: 
-	MetaData m_MetaData;
+	CAudioMetaData m_MetaData;
 	bool SetDSP(int soundfd, int fmt, unsigned int dsp_speed, unsigned int channels);
 	void setTimePlayed(time_t t){m_played_time = t;}
 
@@ -103,8 +60,8 @@ public:
 	void init();
    void ff();
    void rev();
-   MetaData getMetaData();
-	MetaData readMetaData(const char*, bool);
+   CAudioMetaData getMetaData();
+	CAudioMetaData readMetaData(const char*, bool);
    time_t getTimePlayed(){return m_played_time;}
    time_t getTimeTotal(){return m_MetaData.total_time;}
 	int getScBuffered(){return m_sc_buffered;}

@@ -30,6 +30,7 @@
 #define __BASE_DEC__
 
 #include <stdio.h>
+#include <driver/audiometadata.h>
 
 class CBaseDec
 {
@@ -37,7 +38,7 @@ public:
 	enum State {STOP = 0, STOP_REQ, PLAY, PAUSE, FF, REV};
 
 	virtual int Decoder(FILE *InputFp,int OutputFd, State* state) = 0;
-	virtual bool GetMetaData(FILE *in, bool nice) = 0;
+	virtual bool GetMetaData(FILE *in, bool nice, CAudioMetaData* m) = 0;
 
 	CBaseDec(){};
 	static bool SetDSP(int soundfd, int fmt, unsigned int dsp_speed, unsigned int channels);

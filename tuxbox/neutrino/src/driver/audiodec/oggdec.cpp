@@ -34,6 +34,10 @@
 #include <sstream>
 
 #define ProgName "OggDec"
+// nr of msecs to skip in ff/rev mode
+#define MSECS_TO_SKIP 3000
+// nr of msecs to play in ff/rev mode
+#define MSECS_TO_PLAY 200
 
 /* at first, define our own callback functions used in */
 /* tremor to access the data. These functions are simple mappers */
@@ -57,63 +61,108 @@ long ogg_tell(void *data)
   return ftell((FILE*)data);
 }
 
-#define PCMBUFFER 4096 //max for libtremor
+#define PCMBUFFER 4096 //4096 max for libtremor
 #define MAX_OUTPUT_SAMPLES 1022 /* AVIA_GT_PCM_MAX_SAMPLES-1 */
 
 int COggDec::Decoder(FILE *in, int OutputFd, State* state)
 {
   OggVorbis_File vf;
   int bitstream, rval;
-  int Status=0;
-  char pcmbuf[PCMBUFFER];
-  
+  ogg_int64_t jumptime=0;
+  Status=0;
+  mOutputFd = OutputFd;
+
   if (!Open(in, &vf))
   {
 	  fclose(in);
 	  return false;
   }
 
-  SetMetaData(&vf);
+  SetMetaData(&vf, &CAudioPlayer::getInstance()->m_MetaData);
 
   if (SetDSP(OutputFd, AFMT_S16_BE, 
-				 ov_info(&vf,-1)->rate , ov_info(&vf,-1)->channels))
+				 ov_info(&vf,0)->rate , ov_info(&vf,0)->channels))
   {
+	  fclose(in);
 	  Status=1;
 	  return Status;
   }
   
   /* up and away ... */
-  const int OUTPUT_BUFFER_SIZE = MAX_OUTPUT_SAMPLES * 2 * ov_info(&vf,-1)->channels;
-  char outbuf[OUTPUT_BUFFER_SIZE];
-  char* pOutPtr=outbuf;
-  const char *pOutPtrEnd=outbuf+OUTPUT_BUFFER_SIZE;
-  char* pPcmPtr;
-  int pcm_rest;
+  mSlotSize = MAX_OUTPUT_SAMPLES * 2 * ov_info(&vf,0)->channels;
+  for(int i = 0 ; i < DECODE_SLOTS ; i++)
+  {
+	  if ((mPcmSlots[i] = (char*) malloc(mSlotSize)) == NULL)
+	  {
+		  fclose(in);
+		  Status=4;
+		  return Status;
+	  }
+	  mSlotTime[i]=0;
+  }
+  mReadSlot=mWriteSlot=0;
+
+  pthread_t OutputThread;
+  if (pthread_create (&OutputThread, 0, OutputDsp, (void *) this) != 0 )
+  {
+	  fclose(in);
+	  Status=5;
+	  return Status;
+  }
+
+  int bytes;
+  State oldstate=*state;
   do
   {
-	  rval = ov_read(&vf, pcmbuf, PCMBUFFER, &bitstream);
-	  // why does this segfault? CAudioPlayer::getInstance()->setTimePlayed((int)(ov_time_tell(&vf)/1000));
-	  pcm_rest=rval;
-	  pPcmPtr = pcmbuf;
-	  while(pcm_rest > 0)
+	  // clear buffer on state change
+	  if(oldstate!=*state)
 	  {
-			  *((unsigned short*) pOutPtr) = *((unsigned short*) pPcmPtr);
-			  pOutPtr+=2;
-			  pPcmPtr+=2;
-			  pcm_rest-=2;
-           
-			  if(pOutPtr == pOutPtrEnd)
-			  {
-				  if (write(OutputFd, outbuf, OUTPUT_BUFFER_SIZE) != OUTPUT_BUFFER_SIZE)
-				  {
-					  fprintf(stderr,"%s: PCM write error (%s).\n", ProgName, strerror(errno));
-					  Status = 2;
-					  break;
-				  }
-				  pOutPtr=outbuf;
-			  }
+		  mWriteSlot=mReadSlot=0;
+		  oldstate=*state;
 	  }
+	  while((mWriteSlot+1)%DECODE_SLOTS == mReadSlot)
+	  {
+		  usleep(10000);
+	  }
+	  bytes=0;
+	  if(mSeekable)
+		  mSlotTime[mWriteSlot]=ov_time_tell(&vf);
+	  do
+	  {
+		  rval = ov_read(&vf, mPcmSlots[mWriteSlot]+bytes, mSlotSize-bytes, &bitstream);
+		  bytes+=rval;
+	  } while (rval > 0 && bytes !=mSlotSize);
+	  if((*state==FF || *state==REV) && mSeekable )
+	  {
+		  if((std::abs(mSlotTime[mWriteSlot]-jumptime)) > MSECS_TO_PLAY)
+		  {
+			  if(*state==FF)
+			  {
+				  ov_time_seek_page(&vf, mSlotTime[mWriteSlot] + MSECS_TO_SKIP);
+				  jumptime=mSlotTime[mWriteSlot]+MSECS_TO_SKIP;
+			  }
+			  else
+			  {
+				  if(mSlotTime[mWriteSlot] < MSECS_TO_SKIP)
+				  {
+					  ov_time_seek(&vf, 0);
+					  *state=PLAY;
+				  }
+				  else
+				  {
+					  ov_time_seek_page(&vf, mSlotTime[mWriteSlot] - MSECS_TO_SKIP);
+					  jumptime=mSlotTime[mWriteSlot]-MSECS_TO_SKIP;
+				  }
+			  }
+		  }
+	  }
+	  if(bytes == mSlotSize)
+		  mWriteSlot=(mWriteSlot+1) % DECODE_SLOTS;
   } while (rval != 0 && *state!=STOP_REQ && Status==0);
+  pthread_cancel(OutputThread);
+
+  for(int i = 0 ; i < DECODE_SLOTS ; i++)
+	  free(mPcmSlots[i]);
 
   /* clean up the junk from the party */
   ov_clear(&vf);
@@ -122,7 +171,28 @@ int COggDec::Decoder(FILE *in, int OutputFd, State* state)
   return Status;
 }
 
-bool COggDec::GetMetaData(FILE *in, bool nice)
+void* COggDec::OutputDsp(void * arg)
+{
+	COggDec* dec = (COggDec*) arg;
+	while(true)
+	{
+		while(dec->mReadSlot==dec->mWriteSlot)
+		{
+			usleep(10000);
+		}
+		if (write(dec->mOutputFd, dec->mPcmSlots[dec->mReadSlot], dec->mSlotSize) != dec->mSlotSize)
+		{
+			fprintf(stderr,"%s: PCM write error (%s).\n", ProgName, strerror(errno));
+			dec->Status=6;
+			break;
+		}
+		CAudioPlayer::getInstance()->setTimePlayed((int)(dec->mSlotTime[dec->mReadSlot]/1000));
+		dec->mReadSlot=(dec->mReadSlot+1)%DECODE_SLOTS;
+	}
+	return NULL;
+}
+
+bool COggDec::GetMetaData(FILE *in, bool nice, CAudioMetaData* m)
 {
 	OggVorbis_File vf;
 	if (!Open(in, &vf))
@@ -130,7 +200,7 @@ bool COggDec::GetMetaData(FILE *in, bool nice)
 		fclose(in);
 		return false;
 	}
-	SetMetaData(&vf);
+	SetMetaData(&vf, m);
 	ov_clear(&vf);
 	return true;
 }
@@ -145,39 +215,40 @@ COggDec* COggDec::getInstance()
 	return OggDec;
 }
 
-void COggDec::ParseUserComments(vorbis_comment* vc)
+void COggDec::ParseUserComments(vorbis_comment* vc, CAudioMetaData* m)
 {
 	for(int i=0; i < vc->comments ; i++)
 	{
 		char* search;
 		if((search=strstr(vc->user_comments[i],"Artist"))!=NULL)
-			CAudioPlayer::getInstance()->m_MetaData.artist = search+7;
+			m->artist = search+7;
 		else if((search=strstr(vc->user_comments[i],"Album"))!=NULL)
-			CAudioPlayer::getInstance()->m_MetaData.album = search+6;
+			m->album = search+6;
 		else if((search=strstr(vc->user_comments[i],"Title"))!=NULL)
-			CAudioPlayer::getInstance()->m_MetaData.title = search+6;
+			m->title = search+6;
 		else if((search=strstr(vc->user_comments[i],"Genre"))!=NULL)
-			CAudioPlayer::getInstance()->m_MetaData.genre = search+6;
+			m->genre = search+6;
 		else if((search=strstr(vc->user_comments[i],"Date"))!=NULL)
-			CAudioPlayer::getInstance()->m_MetaData.date = search+5;
+			m->date = search+5;
 		else if((search=strstr(vc->user_comments[i],"TrackNumber"))!=NULL)
-			CAudioPlayer::getInstance()->m_MetaData.track = search+12;
+			m->track = search+12;
 	}
 }
 
 
-void COggDec::SetMetaData(OggVorbis_File* vf)
+void COggDec::SetMetaData(OggVorbis_File* vf, CAudioMetaData* m)
 {
 	/* Set Metadata */
-	CAudioPlayer::getInstance()->m_MetaData.type = CAudioPlayer::MetaData::OGG;
-	CAudioPlayer::getInstance()->m_MetaData.bitrate = ov_info(vf,-1)->bitrate_nominal;
-	CAudioPlayer::getInstance()->m_MetaData.samplerate = ov_info(vf,-1)->rate;
-	// Why does this segfault? CAudioPlayer::getInstance()->m_MetaData.total_time = (time_t) ov_time_total(vf, -1);
+	m->type = CAudioMetaData::OGG;
+	m->bitrate = ov_info(vf,0)->bitrate_nominal;
+	m->samplerate = ov_info(vf,0)->rate;
+	if(mSeekable)
+		m->total_time = (time_t) ov_time_total(vf, 0)/1000;
 	std::stringstream ss;
-	ss << "OGG V." << ov_info(vf,-1)->version << " / " <<  ov_info(vf,-1)->channels << "channel(s)";
-	CAudioPlayer::getInstance()->m_MetaData.type_info = ss.str();
-	ParseUserComments(ov_comment(vf, -1));
-	CAudioPlayer::getInstance()->m_MetaData.changed=true;
+	ss << "OGG V." << ov_info(vf,0)->version << " / " <<  ov_info(vf,0)->channels << "channel(s)";
+	m->type_info = ss.str();
+	ParseUserComments(ov_comment(vf, 0), m);
+	m->changed=true;
 }
 
 bool COggDec::Open(FILE* in, OggVorbis_File* vf)
@@ -196,7 +267,8 @@ bool COggDec::Open(FILE* in, OggVorbis_File* vf)
 	cb.tell_func  = ogg_tell;
 
 	/* test the dope ... */
-	rval = ov_test_callbacks((void*)in, vf, NULL, 0, cb);
+	//rval = ov_test_callbacks((void*)in, vf, NULL, 0, cb);
+	rval = ov_open_callbacks(in, vf, NULL, 0, cb);
 
 	/* and tell our friends about the quality of the stuff */
 	// initialize the sound device here
@@ -217,6 +289,13 @@ bool COggDec::Open(FILE* in, OggVorbis_File* vf)
 	}
 
 	/* finish the opening and ignite the joint */
-	ov_test_open(vf);
+	//ov_test_open(vf);
+
+	if(ov_seekable(vf)) 
+		mSeekable = true;
+	else
+		mSeekable = false;
+	
 	return true;
 }
+

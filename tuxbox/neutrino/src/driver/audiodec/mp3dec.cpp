@@ -227,7 +227,7 @@ void CMP3Dec::CreateInfo()
    else
       Vbr="";
 
-	CAudioPlayer::getInstance()->m_MetaData.type = CAudioPlayer::MetaData::MP3;
+	CAudioPlayer::getInstance()->m_MetaData.type = CAudioMetaData::MP3;
 	CAudioPlayer::getInstance()->m_MetaData.bitrate = m_bitrate;
 	CAudioPlayer::getInstance()->m_MetaData.samplerate = m_samplerate;
 	CAudioPlayer::getInstance()->m_MetaData.total_time = m_filesize * 8 / m_bitrate;
@@ -637,16 +637,16 @@ CMP3Dec* CMP3Dec::getInstance()
 	return MP3Dec;
 }
 
-bool CMP3Dec::GetMetaData(FILE *in, bool nice)
+bool CMP3Dec::GetMetaData(FILE *in, bool nice, CAudioMetaData* m)
 {
-	GetMP3Info(in, nice);
-	GetID3(in);
+	GetMP3Info(in, nice, m);
+	GetID3(in, m);
 	fclose(in);
 	return true;
 }
 
 #define BUFFER_SIZE 2100
-void CMP3Dec::GetMP3Info(FILE* in, bool nice)
+void CMP3Dec::GetMP3Info(FILE* in, bool nice, CAudioMetaData *m)
 {
 	struct mad_stream	Stream;
 	struct mad_header	Header;
@@ -695,7 +695,7 @@ void CMP3Dec::GetMP3Info(FILE* in, bool nice)
 		mad_stream_buffer(&Stream,InputBuffer,ReadSize);
 		mad_header_decode(&Header,&Stream);
 
-		CAudioPlayer::getInstance()->m_MetaData.vbr=false;
+		m->vbr=false;
 
 		if(nice)
 			usleep(15000);
@@ -704,17 +704,17 @@ void CMP3Dec::GetMP3Info(FILE* in, bool nice)
 		fseek(in, 0, SEEK_END);
 		filesize=ftell(in);
 
-		CAudioPlayer::getInstance()->m_MetaData.total_time=filesize*8/Header.bitrate;
+		m->total_time=filesize*8/Header.bitrate;
 	}
 	else
 	{
-		CAudioPlayer::getInstance()->m_MetaData.total_time=0;
+		m->total_time=0;
 	}
 }
 
 
 //------------------------------------------------------------------------
-void CMP3Dec::GetID3(FILE* in)
+void CMP3Dec::GetID3(FILE* in, CAudioMetaData* m)
 {
 	unsigned int i;
 	struct id3_frame const *frame;
@@ -788,15 +788,15 @@ void CMP3Dec::GetID3(FILE* in)
 					if (j == 0 && name)
 					{
 						if(strcmp(name,"Title") == 0)
-							CAudioPlayer::getInstance()->m_MetaData.title = (char *) utf8;
+							m->title = (char *) utf8;
 						if(strcmp(name,"Artist") == 0)
-							CAudioPlayer::getInstance()->m_MetaData.artist = (char *) utf8;
+							m->artist = (char *) utf8;
 						if(strcmp(name,"Year") == 0)
-							CAudioPlayer::getInstance()->m_MetaData.date = (char *) utf8;
+							m->date = (char *) utf8;
 						if(strcmp(name,"Album") == 0)
-							CAudioPlayer::getInstance()->m_MetaData.album = (char *) utf8;
+							m->album = (char *) utf8;
 						if(strcmp(name,"Genre") == 0)
-							CAudioPlayer::getInstance()->m_MetaData.genre = (char *) utf8;
+							m->genre = (char *) utf8;
 					}
 					else
 					{

@@ -499,7 +499,7 @@ int CMP3PlayerGui::show()
 			}
 			else
 			{
-				if(curr_audiofile.FileType == CFile::FILE_MP3)
+				if(curr_audiofile.FileType != CFile::STREAM_MP3)
 					rev();
 			}
 		}
@@ -543,7 +543,7 @@ int CMP3PlayerGui::show()
 			}
 			else
 			{
-				if(curr_audiofile.FileType == CFile::FILE_MP3)
+				if(curr_audiofile.FileType != CFile::STREAM_MP3)
 					ff();
 			}
 
@@ -1141,7 +1141,7 @@ void CMP3PlayerGui::updateMetaData()
 
 	if(m_state!=CMP3PlayerGui::STOP)
 	{
-		CAudioPlayer::MetaData metaData = CAudioPlayer::getInstance()->getMetaData();
+		CAudioMetaData metaData = CAudioPlayer::getInstance()->getMetaData();
 		if(metaData.changed || m_metainfo.empty())
 		{
 			std::string info = metaData.type_info;
@@ -1308,9 +1308,9 @@ void CMP3PlayerGui::screensaver(bool on)
 
 void CMP3PlayerGui::GetMetaData(CAudiofile *File)
 {
-	CAudioPlayer::MetaData m=CAudioPlayer::getInstance()->readMetaData(File->Filename.c_str(), 
-																							  m_state!=CMP3PlayerGui::STOP && 
-																							  !g_settings.mp3player_highprio);
+	CAudioMetaData m=CAudioPlayer::getInstance()->readMetaData(File->Filename.c_str(), 
+																				  m_state!=CMP3PlayerGui::STOP && 
+																				  !g_settings.mp3player_highprio);
 
 	File->Title = m.title;
 	File->Artist = m.artist;
