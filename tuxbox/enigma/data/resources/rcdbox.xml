@@ -4,7 +4,7 @@
 		<email>tmbinc@gmx.net</email>
 	</author>
 
-	<device identifier="DBox" >
+	<device identifier="DBOX-2 FP IR" >
 		<keys>
 			<key name="0" code="2" />
 			<key name="1" code="3" />
