@@ -2,11 +2,9 @@
 #include "eskin.h"
 #include "eavswitch.h"
 #include "emessage.h"
-#include "scan.h"
-#include "streaminfo.h"
 #include "enigma_setup.h"
 #include "enigma_plugins.h"
-#include "showbnversion.h"
+#include "enigma_info.h"
 #include "enigma_lcd.h"
 #include "elabel.h"
 #include "epgcache.h"
@@ -19,24 +17,13 @@ eMainMenu::eMainMenu()
 	window=new eLBWindow("enigma" , eListbox::tBorder, 12, eSkin::getActive()->queryValue("fontsize", 20), 400);
 	window->setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 	window->move(ePoint(70, 150));
-	CONNECT((new eListboxEntryText(window->list, _("TV mode")))->selected, eMainMenu::sel_close);
+//	CONNECT((new eListboxEntryText(window->list, _("TV mode")))->selected, eMainMenu::sel_close);
+	CONNECT((new eListboxEntryText(window->list, _("[back]")))->selected, eMainMenu::sel_close);
 	CONNECT((new eListboxEntryText(window->list, _("VCR mode")))->selected, eMainMenu::sel_vcr);
-	CONNECT((new eListboxEntryText(window->list, _("Transponder scan")))->selected, eMainMenu::sel_scan);
+	CONNECT((new eListboxEntryText(window->list, _("Plugins")))->selected, eMainMenu::sel_plugins);	
+	CONNECT((new eListboxEntryText(window->list, _("Infos")))->selected, eMainMenu::sel_info);
 	CONNECT((new eListboxEntryText(window->list, _("Setup")))->selected, eMainMenu::sel_setup);
-	CONNECT((new eListboxEntryText(window->list, _("Streaminfo")))->selected, eMainMenu::sel_streaminfo);
-	CONNECT((new eListboxEntryText(window->list, _("Show BN version")))->selected, eMainMenu::sel_bnversion);
-	CONNECT((new eListboxEntryText(window->list, _("Plugins")))->selected, eMainMenu::sel_plugins);
-	CONNECT((new eListboxEntryText(window->list, _("Quit enigma")))->selected, eMainMenu::sel_quit);
-	CONNECT((new eListboxEntryText(window->list, _("About...")))->selected, eMainMenu::sel_about);
-/*	connect(new eListboxEntryText(window->list, "TV Mode"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_close(eListboxEntry*)));
-	connect(new eListboxEntryText(window->list, "VCR Mode"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_vcr(eListboxEntry*)));
-	connect(new eListboxEntryText(window->list, "Transponder Scan"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_scan(eListboxEntry*)));
-	connect(new eListboxEntryText(window->list, "Setup"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_setup(eListboxEntry*)));
-	connect(new eListboxEntryText(window->list, "Streaminfo"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_streaminfo(eListboxEntry*)));
-	connect(new eListboxEntryText(window->list, "Show BN version"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_bnversion(eListboxEntry*)));
-	connect(new eListboxEntryText(window->list, "Plugins"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_plugins(eListboxEntry*)));
-	connect(new eListboxEntryText(window->list, "Quit enigma"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_quit(eListboxEntry*)));
-	connect(new eListboxEntryText(window->list, "About..."), SIGNAL(selected(eListboxEntry*)), SLOT(sel_about(eListboxEntry*)));*/
+	CONNECT((new eListboxEntryText(window->list, _("Shutdown")))->selected, eMainMenu::sel_quit);	
 }
 
 int eMainMenu::exec()
@@ -74,21 +61,15 @@ void eMainMenu::sel_vcr(eListboxEntry *lbe)
 	window->show();
 }
 
-void eMainMenu::sel_scan(eListboxEntry *)
+void eMainMenu::sel_info(eListboxEntry *)
 {
-	TransponderScan ts;
+	eZapLCD *pLCD=eZapLCD::getInstance();
+	eZapInfo info;
+	info.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 	window->hide();
-	ts.exec();
-	window->show();
-}
-
-void eMainMenu::sel_streaminfo(eListboxEntry *)
-{
-	eStreaminfo si;
-	window->hide();
-	si.show();
-	si.exec();
-	si.hide();
+	info.show();
+	info.exec();
+	info.hide();
 	window->show();
 }
 
@@ -117,28 +98,6 @@ void eMainMenu::sel_quit(eListboxEntry *)
 {
 	window->close(1);
 }
-
-void eMainMenu::sel_bnversion(eListboxEntry *)
-{
-	ShowBNVersion bn;
-	window->hide();
-	bn.show();
-	bn.exec();
-	bn.hide();
-	window->show();
-}
-
-void eMainMenu::sel_about(eListboxEntry *)
-{
-	window->hide();
-	eMessageBox msgbox(
-	"insert non-peinlichen ABOUT text here...",
-	"About enigma");
-	msgbox.show();
-	msgbox.exec();
-	msgbox.hide();
-	window->show();
-};
 
 void eMainMenu::setLCD(eWidget *a, eWidget *b)
 {

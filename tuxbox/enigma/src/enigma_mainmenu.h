@@ -12,13 +12,10 @@ class eMainMenu: public Object
 private:
 	void sel_close(eListboxEntry *);
 	void sel_vcr(eListboxEntry *);
-	void sel_scan(eListboxEntry *);
 	void sel_setup(eListboxEntry *);
-	void sel_streaminfo(eListboxEntry *);
+	void sel_info(eListboxEntry *);	
 	void sel_quit(eListboxEntry *);
-	void sel_bnversion(eListboxEntry *);
 	void sel_plugins(eListboxEntry *);
-	void sel_about(eListboxEntry *);
 public:
 	eMainMenu();
 	~eMainMenu();

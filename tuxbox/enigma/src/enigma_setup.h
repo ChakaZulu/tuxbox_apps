@@ -9,11 +9,10 @@ class eZapSetup: public eLBWindow
 {
 private:
 	void sel_close(eListboxEntry *);
-	void sel_bouquet(eListboxEntry *);
+	void sel_channels(eListboxEntry *);	
 	void sel_network(eListboxEntry *);
 	void sel_sound(eListboxEntry *);
 	void sel_video(eListboxEntry *);
-	void sel_satconfig(eListboxEntry *);
 	void sel_language(eListboxEntry *);
 public:
 	eZapSetup();
