@@ -35,8 +35,6 @@ int camfd;
 
 */
 
-#define __DEBUG__
-
 void DebugOut(const char* fmt, ...)
 {
 #ifdef __DEBUG__
