@@ -51,8 +51,9 @@ struct st_audio_info
 
 class CRemoteControl
 {
-		st_rmsg	remotemsg;
-        st_audio_info audio_chans_int;
+
+	st_rmsg		remotemsg;
+        st_audio_info	audio_chans_int;
         unsigned int    ecm_pid;
 
 		void send();
@@ -74,6 +75,7 @@ class CRemoteControl
         void setAPID(int APID);
 		void shutdown();
 		void setZapper (bool zapper);
+		bool getZapper(){return zapit_mode;}
 		void radioMode();
 		void tvMode();
 

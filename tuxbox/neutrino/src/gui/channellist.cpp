@@ -1,7 +1,10 @@
 //
-// $Id: channellist.cpp,v 1.31 2001/10/11 21:04:58 rasc Exp $
+// $Id: channellist.cpp,v 1.32 2001/10/13 00:46:48 McClean Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.32  2001/10/13 00:46:48  McClean
+// nstreamzapd-support broken - repaired
+//
 // Revision 1.31  2001/10/11 21:04:58  rasc
 // - EPG:
 //   Event: 2 -zeilig: das passt aber noch nicht  ganz (read comments!).
@@ -393,22 +396,32 @@ bool CChannelList::showInfo(int pos)
 
 void CChannelList::zapTo(int pos)
 {
-    if ( (pos >= (signed int) chanlist.size()) || (pos< 0) )
-    {
-        return;
-    }
-    selected= pos;
+	if ( (pos >= (signed int) chanlist.size()) || (pos< 0) )
+	{
+		return;
+	}
+	selected= pos;
   	channel* chan = chanlist[selected];
-    if ( pos!=(int)tuned )
+	if ( pos!=(int)tuned )
 	{
 		lasttuned = tuned;
 		tuned = pos;
-        if ( g_settings.epg_byname == 0 )
-            g_RemoteControl->zapTo_onid_sid( chan->onid_sid );
-        else
-            g_RemoteControl->zapTo( chan->name );
-    }
-    g_InfoViewer->showTitle(selected+ 1, chan->name, chan->onid_sid);
+
+
+		if (!g_RemoteControl->getZapper())
+		{
+			g_RemoteControl->zapTo( chan->name );
+		}
+		else
+		{	//zapit-mode
+			if ( g_settings.epg_byname == 0 )
+				g_RemoteControl->zapTo_onid_sid( chan->onid_sid );
+			else
+				g_RemoteControl->zapTo( chan->name );
+
+		}
+	}
+	g_InfoViewer->showTitle(selected+ 1, chan->name, chan->onid_sid);
 }
 
 void CChannelList::numericZap(int key)

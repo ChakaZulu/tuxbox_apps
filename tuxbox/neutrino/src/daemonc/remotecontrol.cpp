@@ -1,7 +1,10 @@
 //
-// $Id: remotecontrol.cpp,v 1.16 2001/10/10 17:17:13 field Exp $
+// $Id: remotecontrol.cpp,v 1.17 2001/10/13 00:46:48 McClean Exp $
 //
 // $Log: remotecontrol.cpp,v $
+// Revision 1.17  2001/10/13 00:46:48  McClean
+// nstreamzapd-support broken - repaired
+//
 // Revision 1.16  2001/10/10 17:17:13  field
 // zappen auf onid_sid umgestellt
 //
@@ -18,6 +21,9 @@
 
 #include "remotecontrol.h"
 #include "../global.h"
+
+
+string NZDchannelname = "";  //suxx!
 
 CRemoteControl::CRemoteControl()
 {
@@ -298,7 +304,10 @@ void * CRemoteControl::RemoteControlThread (void *arg)
                 servaddr.sin_port=htons(1500);
                 if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))!=-1)
                 {
-//                    printf("CRemoteControl: before write to socket %s\n", r_msg.param3);
+		    r_msg.version=1;
+	            r_msg.cmd=3;
+		    strcpy(r_msg.param3, NZDchannelname.c_str() );
+
                     write(sock_fd, &r_msg, sizeof(r_msg) );
 
                     usleep(1500000);
@@ -309,6 +318,9 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 
             pthread_mutex_trylock( &RemoteControl->send_mutex );
             redo= memcmp(&r_msg, &RemoteControl->remotemsg, sizeof(r_msg)) != 0;
+            if ( !RemoteControl->zapit_mode )
+		redo = false;
+
 
         } while ( redo );
 	}
@@ -359,7 +371,6 @@ void CRemoteControl::setAPID(int APID)
 void CRemoteControl::zapTo_onid_sid( unsigned int onid_sid )
 {
     pthread_mutex_lock( &send_mutex );
-
     remotemsg.version=1;
     remotemsg.cmd= 'd';
     snprintf( (char*) &remotemsg.param3, 10, "%x", onid_sid);
@@ -379,6 +390,7 @@ void CRemoteControl::zapTo(string chnlname )
     remotemsg.cmd=3;
     remotemsg.param=0x0100;
     strcpy( remotemsg.param3, chnlname.c_str() );
+    NZDchannelname = chnlname;
 
     memset(&audio_chans_int, 0, sizeof(audio_chans_int));
 
