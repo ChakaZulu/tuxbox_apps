@@ -3983,8 +3983,9 @@ struct listContent: public Object
 {
 	eString &result;
 	eServiceInterface *iface;
-	listContent(const eServiceReference &service, eString &result)
-		:result(result), iface(eServiceInterface::getInstance())
+	bool listCont;
+	listContent(const eServiceReference &service, eString &result, bool listCont)
+		:result(result), iface(eServiceInterface::getInstance()), listCont(listCont)
 	{
 		Signal1<void, const eServiceReference&> cbSignal;
 		CONNECT(cbSignal, listContent::addToString);
@@ -4033,6 +4034,8 @@ struct listContent: public Object
 		result += "\n";
 		if (service)
 			iface->removeRef(ref);
+		if ( listCont && ref.flags & eServiceReference::isDirectory )
+			listContent(ref, result, false);
 	}
 };
 
@@ -4044,9 +4047,11 @@ static eString getServices(eString request, eString dirpath, eString opt, eHTTPC
 	if ( !opts["ref"] )
 		return "E: no ref given";
 
+	bool listCont = opts["listContent"] == "true";
+
 	eString result;
 	eServiceReference ref(opts["ref"]);
-	listContent t(ref, result);
+	listContent t(ref, result, listCont);
 
 	if ( result )
 		return result;
