@@ -1,7 +1,7 @@
 #ifndef __LIBSIG_COMP_H
 #define __LIBSIG_COMP_H
 
-#include <sigc++/signal_system.h>
+#include <sigc++/sigc++.h>
 #include <sigc++/bind.h>
 
 #ifdef SIGC_CXX_NAMESPACES
