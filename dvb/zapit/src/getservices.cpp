@@ -249,7 +249,6 @@ void ParseTransponder(XMLTreeNode *transponder) {
   uint curr_symbolrate = 0;	
   ushort curr_polarity = 0;
   ushort curr_fec = 0;
-  uint curr_servid = 0;
   
   for (XMLTreeNode *services=transponder->GetChild(); services; services=services->GetNext())
     {

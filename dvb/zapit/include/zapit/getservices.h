@@ -36,12 +36,17 @@ typedef struct channel_msg_struct_2 {
     unsigned int onid_tsid;
 } channel_msg_2;
 
+typedef struct apid_struct_2 {
+    uint    pid;
+    char    desc[30];
+    int     is_ac3;
+}apid_struct;
+
 typedef struct pids{
 	ushort count_vpids;
 	uint vpid;
 	ushort count_apids;
-	uint apid[5];
-	char apid_desc[5][30];
+	apid_struct apids[5];
 	uint ecmpid;
 }pids;
 

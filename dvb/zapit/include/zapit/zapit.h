@@ -15,6 +15,7 @@
 #include <ost/sec.h>
 #include <ost/video.h>
 #include <ost/ca.h>
+#include <ost/audio.h>
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -39,6 +40,8 @@
 #define DEMUX_DEV "/dev/ost/demux0"
 #define SEC_DEV   "/dev/ost/sec0"
 #define VIDEO_DEV   "/dev/ost/video0"
+#define AUDIO_DEV "/dev/ost/audio0"
+
 int dvb_device;
 
 typedef enum {

@@ -170,8 +170,8 @@ void * CRemoteControl::RemoteControlThread (void *arg)
                                         // printf("%d - %d - %d - %d - %d\n", apid_return_buf.apid[0], apid_return_buf.apid[1], apid_return_buf.apid[2], apid_return_buf.apid[3], apid_return_buf.apid[4] );
                                         for(int count=0;count<apid_return_buf.count_apids;count++)
                                         {
-                                            printf("%s \n", apid_return_buf.apid_desc[count]);
-                                            strcpy(RemoteControl->apids.apid_names[count], apid_return_buf.apid_desc[count]);
+//                                            printf("%s \n", apid_return_buf.apids[count].desc);
+                                            strcpy(RemoteControl->apids.apid_names[count], apid_return_buf.apids[count].desc);
                                         }
 
                                         pthread_cond_signal( &g_InfoViewer->lang_cond );
