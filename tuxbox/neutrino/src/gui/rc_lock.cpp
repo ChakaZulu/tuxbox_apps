@@ -72,13 +72,12 @@ int CRCLock::exec(CMenuTarget* parent, const std::string &)
 
 
 
-void CRCLock::lockBox (void)
+void CRCLock::lockBox(void)
 {
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
 	unsigned long long timeoutEnd;
-	uint 		msg;
-	uint 		data;
-
-
 
 
 	// -- Loop until release key pressed
@@ -88,12 +87,12 @@ void CRCLock::lockBox (void)
 	while  (1) {
 
 		timeoutEnd = CRCInput::calcTimeoutEnd( 9999999 );
-		g_RCInput->getMsgAbsoluteTimeout( &msg, (uint*) (&data), &timeoutEnd );
+		g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd);
 
 
 		if ( msg == CRCInput::RC_red)  {
 			timeoutEnd = CRCInput::calcTimeoutEnd( 5 );
-			g_RCInput->getMsgAbsoluteTimeout( &msg, (uint*) (&data), &timeoutEnd );
+			g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd);
 
 			if ( msg == CRCInput::RC_setup)  break;
 		}
@@ -104,7 +103,7 @@ void CRCLock::lockBox (void)
 		// -- so be it...
 
 		if ( msg >  CRCInput::RC_MaxRC ) {
-			CNeutrinoApp::getInstance()->handleMsg( msg, data ); 
+			CNeutrinoApp::getInstance()->handleMsg(msg, data); 
 		}
 
 	}

@@ -82,7 +82,7 @@ CRemoteControl::CRemoteControl()
 	is_video_started = true;
 }
 
-int CRemoteControl::handleMsg(uint msg, uint data)
+int CRemoteControl::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 {
 	if ( zap_completion_timeout != 0 )
 	{

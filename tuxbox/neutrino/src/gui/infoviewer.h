@@ -114,7 +114,7 @@ class CInfoViewer
 	void	Set_CA_Status(int Status);
 #endif
 	
-	int     handleMsg(uint msg, uint data);
+	int     handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data);
 };
 
 

@@ -308,8 +308,8 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 		frameBuffer->paintBox(BoxEndX, ChanNameY+ SHADOW_OFFSET, BoxEndX+ SHADOW_OFFSET, BoxEndY, COL_INFOBAR_SHADOW);
 		frameBuffer->paintBox(ChanInfoX+ SHADOW_OFFSET, BoxEndY, BoxEndX+ SHADOW_OFFSET, BoxEndY+ SHADOW_OFFSET, COL_INFOBAR_SHADOW);
 
-		uint msg;
-		uint data;
+		neutrino_msg_t      msg;
+		neutrino_msg_data_t data;
 
 		CNeutrinoApp *neutrino = CNeutrinoApp::getInstance();
 
@@ -393,8 +393,8 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 						res = messages_return::cancel_info;
 					}
 				}
-				else if ( ( msg == (uint) g_settings.key_quickzap_up ) ||
-					  ( msg == (uint) g_settings.key_quickzap_down ) ||
+				else if ( ( msg == (neutrino_msg_t)g_settings.key_quickzap_up  ) ||
+					  ( msg == (neutrino_msg_t)g_settings.key_quickzap_down) ||
 					  ( msg == CRCInput::RC_0 ) ||
 					  ( msg == NeutrinoMessages::SHOW_INFOBAR ) )
        				{
@@ -405,7 +405,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 				else if ( msg == NeutrinoMessages::EVT_TIMESET )
 	       			{
 					// Handle anyway!
-					neutrino->handleMsg( msg, data );
+					neutrino->handleMsg(msg, data);
 					g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
 					hideIt = false;
 					res = messages_return::cancel_all;
@@ -418,7 +418,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 				}
 				else
 				{
-					res = neutrino->handleMsg( msg, data );
+					res = neutrino->handleMsg(msg, data);
 
 					if ( res & messages_return::unhandled )
 					{
@@ -501,7 +501,9 @@ void CInfoViewer::showSubchan()
 
 		unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( 2 );
 		int res = messages_return::none;
-		uint msg; uint data;
+
+		neutrino_msg_t      msg;
+		neutrino_msg_data_t data;
 
 		while ( ! ( res & ( messages_return::cancel_info | messages_return::cancel_all ) ) )
 		{
@@ -513,7 +515,7 @@ void CInfoViewer::showSubchan()
 			}
 			else
 			{
-				res = neutrino->handleMsg( msg, data );
+				res = neutrino->handleMsg(msg, data);
 
 				if ( res & messages_return::unhandled )
 				{
@@ -563,7 +565,7 @@ void CInfoViewer::showMotorMoving(int duration)
 	ShowHintUTF("messagebox.info", text, g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(text) + 10, duration); // UTF-8
 }
 
-int CInfoViewer::handleMsg(uint msg, uint data)
+int CInfoViewer::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 {
 	if ( ( msg == NeutrinoMessages::EVT_CURRENTNEXT_EPG ) ||
 		  ( msg == NeutrinoMessages::EVT_NEXTPROGRAM ) )

@@ -83,8 +83,9 @@ CKeyChooserItem::CKeyChooserItem(const char * const Name, int *Key)
 
 int CKeyChooserItem::exec(CMenuTarget* parent, const std::string &)
 {
-	uint msg;
-	uint data;
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
 	unsigned long long timeoutEnd;
 
 	int res = menu_return::RETURN_REPAINT;

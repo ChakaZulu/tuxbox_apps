@@ -2727,11 +2727,14 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 {
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
 	dprintf(DEBUG_NORMAL, "initialized everything\n");
+
 	while( true )
 	{
-		uint msg; uint data;
-		g_RCInput->getMsg(&msg, &data, 100 );	// 10 secs..
+		g_RCInput->getMsg(&msg, &data, 100);	// 10 secs..
 
 		if( ( mode == mode_tv ) || ( ( mode == mode_radio ) ) )
 		{
@@ -2742,7 +2745,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				g_EpgData->show( channelList->getActiveChannel_ChannelID() );
 
 			}
-			else if( msg == (uint) g_settings.key_tvradio_mode )
+			else if( msg == (neutrino_msg_t) g_settings.key_tvradio_mode )
 			{
 				if( mode == mode_tv )
 				{
@@ -2800,7 +2803,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			{	// NVODs
 				SelectNVOD();
 			}
-			else if( ( msg == (uint) g_settings.key_quickzap_up ) || ( msg == (uint) g_settings.key_quickzap_down ) )
+			else if( ( msg == (neutrino_msg_t) g_settings.key_quickzap_up ) || ( msg == (neutrino_msg_t) g_settings.key_quickzap_down ) )
 			{
 				//quickzap
 				channelList->quickZap( msg );
@@ -2821,19 +2824,19 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				else
 					channelList->numericZap( msg );
 			}
-			else if( msg == (uint) g_settings.key_subchannel_up )
+			else if( msg == (neutrino_msg_t) g_settings.key_subchannel_up )
 			{
 				g_RemoteControl->subChannelUp();
 				g_InfoViewer->showSubchan();
 			}
-			else if( msg == (uint) g_settings.key_subchannel_down )
+			else if( msg == (neutrino_msg_t) g_settings.key_subchannel_down )
 			{
 				g_RemoteControl->subChannelDown();
 				g_InfoViewer->showSubchan();
 			}
 			else
 			{
-				handleMsg( msg, data );
+				handleMsg(msg, data);
 			}
 
 		}
@@ -2862,13 +2865,13 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			}
 			else
 			{
-				handleMsg( msg, data );
+				handleMsg(msg, data);
 			}
 		}
 	}
 }
 
-int CNeutrinoApp::handleMsg(uint msg, uint data)
+int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 {
 	int res = 0;
 
@@ -2898,7 +2901,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	{
 		if (data == 0)
 		{
-			uint new_msg;
+			neutrino_msg_t new_msg;
 
 			/* Note: pressing the power button on the dbox (not the remote control) over 1 second */
 			/*       shuts down the system even if !g_settings.shutdown_real_rcdelay (see below)  */
@@ -2918,10 +2921,10 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 
 				if ((g_settings.shutdown_real_rcdelay))
 				{
-					uint msg;
-					uint data;
-					struct timeval endtime;
-					time_t seconds;
+					neutrino_msg_t      msg;
+					neutrino_msg_data_t data;
+					struct timeval      endtime;
+					time_t              seconds;
 
 					int timeout = 0;
 					int timeout1 = 0;
@@ -3370,17 +3373,17 @@ void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
    }
 }
 
-void CNeutrinoApp::setVolume(const uint key, const bool bDoPaint)
+void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 {
-	uint msg = key;
+	neutrino_msg_t msg = key;
 	if(g_settings.audio_avs_Control==2) //lirc
 	{
-		if(msg==CRCInput::RC_plus)
+		if (msg == CRCInput::RC_plus)
 		{
 			CIRSend irs("volplus");
 			irs.Send();
 		}
-		else if(msg==CRCInput::RC_minus)
+		else if (msg == CRCInput::RC_minus)
 		{
 			CIRSend irs("volminus");
 			irs.Send();
@@ -3403,7 +3406,7 @@ void CNeutrinoApp::setVolume(const uint key, const bool bDoPaint)
 			frameBuffer->paintIcon("volume.raw",x,y, COL_INFOBAR);
 		}
 
-		uint data;
+		neutrino_msg_data_t data;
 
 		unsigned long long timeoutEnd;
 
@@ -3456,7 +3459,7 @@ void CNeutrinoApp::setVolume(const uint key, const bool bDoPaint)
 			}
 
 			CLCD::getInstance()->showVolume(current_volume);
-			if( msg != CRCInput::RC_timeout )
+			if (msg != CRCInput::RC_timeout)
 			{
 				g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd );
 			}

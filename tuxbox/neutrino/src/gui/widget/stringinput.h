@@ -73,7 +73,7 @@ class CStringInput : public CMenuTarget
 		virtual void keyLeftPressed();
 		virtual void keyRightPressed();
 
-		virtual int handleOthers( uint msg, uint data );
+		virtual int handleOthers(const neutrino_msg_t msg, const neutrino_msg_data_t data);
 
 	public:
 
@@ -125,7 +125,7 @@ class CPLPINInput : public CPINInput
 	protected:
 		int	fsk;
 
-		virtual int handleOthers( uint msg, uint data );
+		virtual int handleOthers(const neutrino_msg_t msg, const neutrino_msg_data_t data);
 	public:
 		CPLPINInput(const char * const Name, char* Value, int Size, const char * const Hint_1, int FSK )
 		 : CPINInput(Name, Value, Size, " ", Hint_1) { fsk= FSK; };

@@ -33,6 +33,8 @@
 #ifndef __remotecontrol__
 #define __remotecontrol__
 
+#include <driver/rcinput.h> /* neutrino_msg_t, neutrino_msg_data_t */
+
 #include <zapit/client/zapitclient.h>
 
 #include <vector>
@@ -111,7 +113,7 @@ public:
 	void radioMode();
 	void tvMode();
 
-	int handleMsg(uint msg, uint data);
+	int handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data);
 	std::string getCurrentChannelName(){ return current_channel_name; }
 };
 

@@ -195,6 +195,9 @@ int CChannelList::getActiveChannelNumber()
 
 int CChannelList::show()
 {
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
 	int res = -1;
 
 	if (chanlist.empty())
@@ -221,24 +224,23 @@ int CChannelList::show()
 	int zapOnExit = false;
 	bool bShowBouquetList = false;
 
-	uint msg; uint data;
 	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_chanlist );
 
 	bool loop=true;
 	while (loop)
 	{
-		g_RCInput->getMsgAbsoluteTimeout( &msg, (uint*) (&data), &timeoutEnd );
+		g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd );
 
 		if ( msg <= CRCInput::RC_MaxRC )
 			timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_chanlist );
 
 		if ( ( msg == CRCInput::RC_timeout ) ||
-			 ( msg == (uint) g_settings.key_channelList_cancel) )
+			 ( msg == (neutrino_msg_t)g_settings.key_channelList_cancel) )
 		{
 			selected = oldselected;
 			loop=false;
 		}
-		else if ( msg == (uint) g_settings.key_channelList_pageup )
+		else if ( msg == (neutrino_msg_t)g_settings.key_channelList_pageup )
 		{
 			selected+=listmaxshow;
 			if (selected>chanlist.size()-1)
@@ -246,7 +248,7 @@ int CChannelList::show()
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paint();
 		}
-		else if ( msg == (uint) g_settings.key_channelList_pagedown )
+		else if ( msg == (neutrino_msg_t)g_settings.key_channelList_pagedown )
 		{
 			if ((int(selected)-int(listmaxshow))<0)
 				selected=chanlist.size()-1;
@@ -292,7 +294,7 @@ int CChannelList::show()
 				paintItem(selected - liststart);
 			}
 		}
-		else if ( ( msg == (uint) g_settings.key_bouquet_up ) && ( bouquetList != NULL ) )
+		else if ( ( msg == (neutrino_msg_t)g_settings.key_bouquet_up ) && ( bouquetList != NULL ) )
 		{
 			if (bouquetList->Bouquets.size() > 0)
 			{
@@ -302,7 +304,7 @@ int CChannelList::show()
 				loop = false;
 			}
 		}
-		else if ( ( msg == (uint) g_settings.key_bouquet_down ) && ( bouquetList != NULL ) )
+		else if ( ( msg == (neutrino_msg_t)g_settings.key_bouquet_down ) && ( bouquetList != NULL ) )
 		{
 			if (bouquetList->Bouquets.size() > 0)
 			{
@@ -414,7 +416,7 @@ bool CChannelList::showInfo(int pos)
 	return true;
 }
 
-int CChannelList::handleMsg(uint msg, uint data)
+int CChannelList::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 {
 	if ( msg == NeutrinoMessages::EVT_PROGRAMLOCKSTATUS)
 	{
@@ -434,7 +436,7 @@ int CChannelList::handleMsg(uint msg, uint data)
 				// CHANGETOLOCK mode and channel/bouquet is pre locked (0x100)
 				// ONSIGNAL mode and fsk(data) is beyond configured value
 				// if programm has already been unlocked, dont require pin
-				if ((data >= (uint)g_settings.parentallock_lockage) &&
+				if ((data >= (neutrino_msg_data_t)g_settings.parentallock_lockage) &&
 					 ((chanlist[selected]->last_unlocked_EPGid != g_RemoteControl->current_EPGid) || (g_RemoteControl->current_EPGid == 0)) &&
 					 ((g_settings.parentallock_prompt != PARENTALLOCK_PROMPT_CHANGETOLOCKED) || (data >= 0x100)))
 				{
@@ -529,6 +531,9 @@ void CChannelList::zapTo(int pos)
 
 int CChannelList::numericZap(int key)
 {
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
 	int res = menu_return::RETURN_REPAINT;
 
 	if(chanlist.size()==0)
@@ -562,7 +567,6 @@ int CChannelList::numericZap(int key)
 	int chn = CRCInput::getNumericValue(key);
 	int pos = 1;
 	int lastchan= -1;
-	uint msg; uint data;
 	bool doZap = true;
 	bool showEPG = false;
 
@@ -618,7 +622,7 @@ int CChannelList::numericZap(int key)
 			}
 			break;
 		}
-		else if ( msg == (uint) g_settings.key_quickzap_down )
+		else if ( msg == (neutrino_msg_t)g_settings.key_quickzap_down )
 		{
 			if ( chn == 1 )
 				chn = chanlist.size();
@@ -630,7 +634,7 @@ int CChannelList::numericZap(int key)
 					chn = (int)chanlist.size();
 			}
 		}
-		else if ( msg == (uint) g_settings.key_quickzap_up )
+		else if ( msg == (neutrino_msg_t)g_settings.key_quickzap_up )
 		{
 			chn++;
 

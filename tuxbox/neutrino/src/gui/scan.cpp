@@ -63,9 +63,9 @@ CScanTs::CScanTs()
 
 int CScanTs::exec(CMenuTarget* parent, const std::string &)
 {
-	diseqc_t diseqcType = NO_DISEQC;
-	uint msg = 0;
-	uint data = 0;
+	diseqc_t            diseqcType = NO_DISEQC;
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
 	
 	success = false;
 	
@@ -110,13 +110,13 @@ int CScanTs::exec(CMenuTarget* parent, const std::string &)
 		paintRadar();
 
 		unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd_MS( 250 );
-		msg = CRCInput::RC_nokey;
 
-		while (!(msg == CRCInput::RC_timeout))
+		do
 		{
 			g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd);
 			msg = handleMsg(msg, data);
 		}
+		while (!(msg == CRCInput::RC_timeout));
 	}
 
 	hide();
@@ -128,7 +128,7 @@ int CScanTs::exec(CMenuTarget* parent, const std::string &)
 	return menu_return::RETURN_REPAINT;
 }
 
-int CScanTs::handleMsg(uint msg, uint data)
+int CScanTs::handleMsg(neutrino_msg_t msg, neutrino_msg_data_t data)
 {
 	char buffer[32];
 	

@@ -201,11 +201,12 @@ int CMP3PlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 
 int CMP3PlayerGui::show()
 {
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
 	int res = -1;
 
 	CLCD::getInstance()->setMode(CLCD::MODE_MP3);
-
-	uint msg; uint data;
 
 	bool loop=true;
 	bool update=true;

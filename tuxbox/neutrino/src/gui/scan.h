@@ -68,7 +68,7 @@ class CScanTs : public CMenuTarget
 		void paintLine(int x, int * y, int width, char * txt);
 		void paintLine(int x, int y, int width, char * txt);
 		void paintRadar(void);
-		int handleMsg(uint msg, uint data);
+		int handleMsg(neutrino_msg_t msg, neutrino_msg_data_t data);
 		int greater_xpos(int xpos, char * txt);
 
 	public:

@@ -122,6 +122,9 @@ void EventList::readEvents(const t_channel_id channel_id)
 
 int EventList::exec(const t_channel_id channel_id, const std::string& channelname) // UTF-8
 {
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
 	int res = menu_return::RETURN_REPAINT;
 
 	name = channelname;
@@ -138,18 +141,17 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 		g_ActionLog->println(buf);
 	#endif
 
-	uint msg; uint data;
 	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_chanlist );
 
 	bool loop=true;
 	while (loop)
 	{
-		g_RCInput->getMsgAbsoluteTimeout( &msg, (uint*) (&data), &timeoutEnd );
+		g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd);
 
 		if ( msg <= CRCInput::RC_MaxRC )
 			timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_chanlist );
 
-		if ( msg == (uint) g_settings.key_channelList_pageup )
+		if (msg == (neutrino_msg_t)g_settings.key_channelList_pageup)
 		{
 			selected+=listmaxshow;
 			if (selected>evtlist.size()-1)
@@ -157,7 +159,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paint();
 		}
-		else if ( msg == (uint) g_settings.key_channelList_pagedown )
+		else if (msg == (neutrino_msg_t)g_settings.key_channelList_pagedown)
 		{
 			if ((int(selected)-int(listmaxshow))<0)
 				selected=evtlist.size()-1;
@@ -166,7 +168,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paint();
 		}
-		else if ( msg == (uint) g_settings.key_channelList_sort )
+		else if (msg == (neutrino_msg_t)g_settings.key_channelList_sort)
 		{
 			unsigned long long selected_id = evtlist[selected].eventID;
 			if(sort_mode==0)
@@ -204,7 +206,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 //  --- either set addrecord timer key to "no key" and leave eventlist with red (default now),
 //  --- or set addrecord timer key to "red key" (zwen 2003-07-29)
 
-		else if ( msg == (uint) g_settings.key_channelList_addrecord )
+		else if (msg == (neutrino_msg_t)g_settings.key_channelList_addrecord)
 		{
 			if(g_settings.recording_type > 0)
 			{
@@ -229,7 +231,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 					printf("timerd not available\n");
 			}					
 		}
-		else if ( msg == (uint) g_settings.key_channelList_addremind )
+		else if ( msg == (neutrino_msg_t) g_settings.key_channelList_addremind )
 	   {
 			CTimerdClient timerdclient;
 			if(timerdclient.isTimerdAvailable())
@@ -287,8 +289,8 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 				paintItem(selected - liststart);
 			}
 		}
-		else if ( ( msg == CRCInput::RC_timeout ) ||
-			 	  ( msg == (uint) g_settings.key_channelList_cancel ) )
+		else if ((msg == CRCInput::RC_timeout                             ) ||
+			 (msg == (neutrino_msg_t)g_settings.key_channelList_cancel))
 		{
 			selected = oldselected;
 			loop=false;

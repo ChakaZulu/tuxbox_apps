@@ -68,6 +68,9 @@ void CRGBCSyncControler::setCSync()
 
 int CRGBCSyncControler::exec(CMenuTarget* parent, const std::string &)
 {
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
 	int res = menu_return::RETURN_REPAINT;
 	unsigned char csync_alt;
 
@@ -80,7 +83,6 @@ int CRGBCSyncControler::exec(CMenuTarget* parent, const std::string &)
 	setCSync();
 	paint();
 
-	uint msg; uint data;
 	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_menu );
 
 	bool loop=true;

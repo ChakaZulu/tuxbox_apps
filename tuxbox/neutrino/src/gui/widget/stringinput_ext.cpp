@@ -114,6 +114,9 @@ void CExtendedInput::calculateDialog()
 
 int CExtendedInput::exec( CMenuTarget* parent, const std::string & )
 {
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
 	onBeforeExec();
 	int res = menu_return::RETURN_REPAINT;
 	char oldval[inputFields.size()+10], dispval[inputFields.size()+10];
@@ -126,7 +129,6 @@ int CExtendedInput::exec( CMenuTarget* parent, const std::string & )
 	strcpy(oldval, value);
 	paint();
 
-	uint msg; uint data;
 	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_menu );
 
 	bool loop=true;
@@ -138,7 +140,7 @@ int CExtendedInput::exec( CMenuTarget* parent, const std::string & )
 			strcpy(dispval, value);
 		}
 
-		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd, true );
+		g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd, true );
 
 		if (msg==CRCInput::RC_left)
 		{

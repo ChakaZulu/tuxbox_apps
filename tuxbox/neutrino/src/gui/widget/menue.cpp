@@ -111,6 +111,9 @@ void CMenuWidget::setOnPaintNotifier( COnPaintNotifier* nf )
 
 int CMenuWidget::exec(CMenuTarget* parent, const std::string &)
 {
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
 	int pos;
 
 	if (parent)
@@ -122,12 +125,11 @@ int CMenuWidget::exec(CMenuTarget* parent, const std::string &)
 	paint();
 	int retval = menu_return::RETURN_REPAINT;
 
-	uint msg; uint data;
 	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_menu );
 
 	do
 	{
-		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+		g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd);
 
 
 		if ( msg <= CRCInput::RC_MaxRC )
@@ -140,7 +142,8 @@ int CMenuWidget::exec(CMenuTarget* parent, const std::string &)
 		for (unsigned int i= 0; i< items.size(); i++)
 		{
 			CMenuItem* titem = items[i];
-			if ( ((uint)titem->directKey!= CRCInput::RC_nokey) && ((uint)titem->directKey==msg) )
+			if ((titem->directKey != CRCInput::RC_nokey) &&
+			    (titem->directKey == msg))
 			{
 				if (titem->isSelectable())
 				{
@@ -394,7 +397,7 @@ void CMenuWidget::paintItems()
 
 
 
-CMenuOptionChooser::CMenuOptionChooser(const char * const OptionName, int * const OptionValue, const bool Active, CChangeObserver * const Observ, const bool Localizing, const uint DirectKey, const std::string & IconName)
+CMenuOptionChooser::CMenuOptionChooser(const char * const OptionName, int * const OptionValue, const bool Active, CChangeObserver * const Observ, const bool Localizing, const neutrino_msg_t DirectKey, const std::string & IconName)
 {
 	height = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
 	optionName = OptionName;
@@ -601,7 +604,7 @@ int CMenuOptionStringChooser::paint( bool selected )
 
 
 //-------------------------------------------------------------------------------------------------------------------------------
-CMenuForwarder::CMenuForwarder(const char * const Text, const bool Active, const char * const Option, CMenuTarget* Target, const char * const ActionKey, const bool Localizing, uint DirectKey, const char * const IconName)
+CMenuForwarder::CMenuForwarder(const char * const Text, const bool Active, const char * const Option, CMenuTarget* Target, const char * const ActionKey, const bool Localizing, neutrino_msg_t DirectKey, const char * const IconName)
 {
 	option = Option;
 	option_string = NULL;
@@ -614,7 +617,7 @@ CMenuForwarder::CMenuForwarder(const char * const Text, const bool Active, const
 	iconName = IconName ? IconName : "";
 }
 
-CMenuForwarder::CMenuForwarder(const char * const Text, const bool Active, const std::string &Option, CMenuTarget* Target, const char * const ActionKey, const bool Localizing, uint DirectKey, const char * const IconName)
+CMenuForwarder::CMenuForwarder(const char * const Text, const bool Active, const std::string &Option, CMenuTarget* Target, const char * const ActionKey, const bool Localizing, neutrino_msg_t DirectKey, const char * const IconName)
 {
 	option = NULL;
 	option_string = &Option;

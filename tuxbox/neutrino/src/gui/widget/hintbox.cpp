@@ -148,13 +148,15 @@ void CHintBox::hide(void)
 
 int ShowHintUTF(const char * const Caption, const char * const Text, const int Width, int timeout)
 {
+	neutrino_msg_t msg;
+	neutrino_msg_data_t data;
+
  	CHintBox * hintBox = new CHintBox(Caption, Text, Width);
 	hintBox->paint();
 
 	if ( timeout == -1 )
 		timeout = g_settings.timing_infobar ;
 
-	uint msg; uint data;
 	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( timeout );
 
 	int res = messages_return::none;
@@ -163,18 +165,20 @@ int ShowHintUTF(const char * const Caption, const char * const Text, const int W
 	{
     	g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 
-		if((msg==CRCInput::RC_timeout) || (msg==CRCInput::RC_home) || (msg==CRCInput::RC_ok))
+		if ((msg == CRCInput::RC_timeout) ||
+		    (msg == CRCInput::RC_home) ||
+		    (msg == CRCInput::RC_ok))
 		{
 				res = messages_return::cancel_info;
 		}
 		else
 		{
-	        res = CNeutrinoApp::getInstance()->handleMsg( msg, data );
+	        res = CNeutrinoApp::getInstance()->handleMsg(msg, data);
 			if ( res & messages_return::unhandled )
 			{
 
 				// raus hier und darüber behandeln...
-				g_RCInput->postMsg(  msg, data );
+				g_RCInput->postMsg(msg, data);
 				res = messages_return::cancel_info;
 			}
 		}

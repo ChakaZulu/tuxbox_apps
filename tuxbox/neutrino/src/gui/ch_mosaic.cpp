@@ -168,9 +168,11 @@ void CChMosaic::doMosaic()
 	// -- try 4 times (4 * 0,5 sec) to get a captured frame 
 	for (j=0; j < 4; j++) {
 
-		uint msg; uint data;
+		neutrino_msg_t      msg;
+		neutrino_msg_data_t data;
+
 		unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd(500);
-		g_RCInput->getMsgAbsoluteTimeout( &msg, (uint*) (&data), &timeoutEnd );
+		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 		printf ("pig inner loop: %d - %d \n",i,j);
 
 

@@ -495,6 +495,9 @@ CGameList::~CGameList()
 
 int CGameList::exec(CMenuTarget* parent, const std::string & actionKey)
 {
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
 	int res = menu_return::RETURN_REPAINT;
 
 	if (parent)
@@ -527,7 +530,6 @@ int CGameList::exec(CMenuTarget* parent, const std::string & actionKey)
 
 	paint();
 
-    uint msg; uint data;
 	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_menu );
 
 	bool loop=true;
@@ -539,11 +541,11 @@ int CGameList::exec(CMenuTarget* parent, const std::string & actionKey)
 			timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_menu );
 
 		if ( ( msg == CRCInput::RC_timeout ) ||
-			 ( msg == (uint) g_settings.key_channelList_cancel ) )
+			 ( msg == (neutrino_msg_t)g_settings.key_channelList_cancel ) )
 		{
 			loop=false;
 		}
-		else if ( msg == (uint) g_settings.key_channelList_pageup )
+		else if ( msg == (neutrino_msg_t)g_settings.key_channelList_pageup )
 		{
 			if ((int(selected)-int(listmaxshow))<0)
 				selected=0;
@@ -552,7 +554,7 @@ int CGameList::exec(CMenuTarget* parent, const std::string & actionKey)
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paintItems();
 		}
-		else if ( msg == (uint) g_settings.key_channelList_pagedown )
+		else if ( msg == (neutrino_msg_t)g_settings.key_channelList_pagedown )
 		{
 			selected+=listmaxshow;
 			if (selected>gamelist.size()-1)
@@ -614,10 +616,10 @@ int CGameList::exec(CMenuTarget* parent, const std::string & actionKey)
 				 (msg==CRCInput::RC_blue)  ||
 		         (CRCInput::isNumeric(msg)) )
 		{
-			g_RCInput->postMsg( msg, data );
+			g_RCInput->postMsg(msg, data);
 			loop=false;
 		}
-		else if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
+		else if ( CNeutrinoApp::getInstance()->handleMsg(msg, data) & messages_return::cancel_all )
 		{
 			loop = false;
 			res = menu_return::RETURN_EXIT_ALL;

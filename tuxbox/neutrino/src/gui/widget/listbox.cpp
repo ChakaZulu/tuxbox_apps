@@ -130,6 +130,9 @@ void CListBox::paintItem(unsigned int itemNr, int paintNr, bool selected)
 
 int CListBox::exec(CMenuTarget* parent, const std::string & actionKey)
 {
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
 	int res = menu_return::RETURN_REPAINT;
 	selected=0;
 
@@ -146,10 +149,10 @@ int CListBox::exec(CMenuTarget* parent, const std::string & actionKey)
 	modified = false;
 	while (loop)
 	{
-		uint msg; uint data;
 		g_RCInput->getMsg( &msg, &data, g_settings.timing_epg );
 
-		if (( msg == (uint) g_settings.key_channelList_cancel) || ( msg ==CRCInput::RC_home))
+		if (( msg == (neutrino_msg_t)g_settings.key_channelList_cancel) ||
+		    ( msg == CRCInput::RC_home))
 		{
 			loop = false;
 		}
@@ -196,7 +199,7 @@ int CListBox::exec(CMenuTarget* parent, const std::string & actionKey)
 				}
 			}
 		}
-		else if ( msg == (uint) g_settings.key_channelList_pageup)
+		else if ( msg == (neutrino_msg_t)g_settings.key_channelList_pageup)
 		{
 			selected+=listmaxshow;
 			if (selected>getItemCount()-1)
@@ -204,7 +207,7 @@ int CListBox::exec(CMenuTarget* parent, const std::string & actionKey)
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paint();
 		}
-		else if ( msg == (uint) g_settings.key_channelList_pagedown)
+		else if ( msg == (neutrino_msg_t)g_settings.key_channelList_pagedown)
 		{
 			if ((int(selected)-int(listmaxshow))<0)
 				selected=getItemCount()-1;

@@ -138,7 +138,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void radioMode( bool rezap = true );
 		void scartMode( bool bOnOff );
 		void standbyMode( bool bOnOff );
-		void setVolume(const uint key, const bool bDoPaint = true);
+		void setVolume(const neutrino_msg_t key, const bool bDoPaint = true);
 		void AudioMute( bool newValue, bool isEvent= false );
 
 
@@ -200,7 +200,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		bool changeNotify(const std::string & OptionName, void * data);
 		bool changeNotify(const char * const OptionName, void * data);
 
-		int handleMsg(uint msg, uint data);
+		int handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data);
 
 		int getMode() {return mode;}
 		int getLastMode() {return lastMode;}

@@ -86,6 +86,9 @@ void CColorChooser::setColor()
 
 int CColorChooser::exec(CMenuTarget* parent, const std::string &)
 {
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
 	int res = menu_return::RETURN_REPAINT;
 	if (parent)
 	{
@@ -109,13 +112,12 @@ int CColorChooser::exec(CMenuTarget* parent, const std::string &)
 
 	int selected = 0;
 
-	uint msg; uint data;
 	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_menu );
 
 	bool loop=true;
 	while (loop)
 	{
-		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd, true );
+		g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd, true);
 
 		if ( msg <= CRCInput::RC_MaxRC )
 			timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_menu );

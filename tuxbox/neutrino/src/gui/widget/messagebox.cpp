@@ -95,6 +95,9 @@ void CMessageBox::paintButtons()
 
 int CMessageBox::exec(int timeout)
 {
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
 	int res = menu_return::RETURN_REPAINT;
 
 	CHintBox::paint();
@@ -110,7 +113,6 @@ int CMessageBox::exec(int timeout)
 		timeout = g_settings.timing_epg ;
 
 	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( timeout );
-	uint msg; uint data;
 
 	bool loop=true;
 	while (loop)
@@ -118,7 +120,8 @@ int CMessageBox::exec(int timeout)
 
 		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 
-		if (((msg == CRCInput::RC_timeout) || (msg  == (uint)g_settings.key_channelList_cancel)) &&
+		if (((msg == CRCInput::RC_timeout) ||
+		     (msg  == (neutrino_msg_t)g_settings.key_channelList_cancel)) &&
 		    (showbuttons & (mbCancel | mbBack)))
 		{
 			result = (showbuttons & mbCancel) ? mbrCancel : mbrBack;

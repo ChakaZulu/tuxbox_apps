@@ -287,7 +287,10 @@ void CRCInput::restartInput()
 
 int CRCInput::messageLoop( bool anyKeyCancels, int timeout )
 {
-    int res = menu_return::RETURN_REPAINT;
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
+	int res = menu_return::RETURN_REPAINT;
 
 	bool doLoop = true;
 
@@ -295,7 +298,6 @@ int CRCInput::messageLoop( bool anyKeyCancels, int timeout )
 		timeout = g_settings.timing_menu ;
 
 	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( timeout );
-	uint msg; uint data;
 
 	while (doLoop)
 	{
@@ -451,7 +453,7 @@ long long CRCInput::calcTimeoutEnd_MS(const int timeout_in_milliseconds)
 }
 
 
-void CRCInput::getMsgAbsoluteTimeout(uint *msg, uint* data, unsigned long long *TimeoutEnd, bool bAllowRepeatLR)
+void CRCInput::getMsgAbsoluteTimeout(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsigned long long *TimeoutEnd, bool bAllowRepeatLR)
 {
 	struct timeval tv;
 
@@ -477,17 +479,17 @@ void CRCInput::getMsgAbsoluteTimeout(uint *msg, uint* data, unsigned long long *
 	}
 }
 
-void CRCInput::getMsg(uint *msg, uint *data, int Timeout, bool bAllowRepeatLR)
+void CRCInput::getMsg(neutrino_msg_t * msg, neutrino_msg_data_t * data, int Timeout, bool bAllowRepeatLR)
 {
-	getMsg_us( msg, data, (unsigned long long) Timeout * 100* 1000, bAllowRepeatLR );
+	getMsg_us(msg, data, (unsigned long long) Timeout * 100 * 1000, bAllowRepeatLR);
 }
 
-void CRCInput::getMsg_ms(uint *msg, uint *data, int Timeout, bool bAllowRepeatLR)
+void CRCInput::getMsg_ms(neutrino_msg_t * msg, neutrino_msg_data_t * data, int Timeout, bool bAllowRepeatLR)
 {
-	getMsg_us( msg, data, (unsigned long long) Timeout * 1000, bAllowRepeatLR );
+	getMsg_us(msg, data, (unsigned long long) Timeout * 1000, bAllowRepeatLR);
 }
 
-void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool bAllowRepeatLR)
+void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsigned long long Timeout, bool bAllowRepeatLR)
 {
 	static unsigned long long last_keypress = 0ULL;
 	unsigned long long getKeyBegin;
@@ -592,11 +594,15 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 
 		if(FD_ISSET(fd_pipe_high_priority[0], &rfds))
 		{
-			uint buf[2];
+			struct event buf;
+
 			read(fd_pipe_high_priority[0], &buf, sizeof(buf));
-			*msg = buf[0];
-			*data = buf[1];
-//printf("got event from high-pri pipe %x %x\n", *msg, *data );
+
+			*msg  = buf.msg;
+			*data = buf.data;
+
+			// printf("got event from high-pri pipe %x %x\n", *msg, *data );
+
 			return;
 		}
 
@@ -1178,11 +1184,15 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 
 		if(FD_ISSET(fd_pipe_low_priority[0], &rfds))
 		{
-			uint buf[2];
+			struct event buf;
+
 			read(fd_pipe_low_priority[0], &buf, sizeof(buf));
-			*msg = buf[0];
-			*data = buf[1];
-//printf("got event from low-pri pipe %x %x\n", *msg, *data );
+
+			*msg  = buf.msg;
+			*data = buf.data;
+
+			// printf("got event from low-pri pipe %x %x\n", *msg, *data );
+
 			return;
 		}
 
@@ -1211,13 +1221,15 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 	}
 }
 
-void CRCInput::postMsg(uint msg, uint data, bool Priority)
+void CRCInput::postMsg(const neutrino_msg_t msg, const neutrino_msg_data_t data, const bool Priority)
 {
 //	printf("postMsg %x %x %d\n", msg, data, Priority );
-	uint buf[2];
-	buf[0] = msg;
-	buf[1] = data;
-	if ( Priority )
+
+	struct event buf;
+	buf.msg  = msg;
+	buf.data = data;
+
+	if (Priority)
 		write(fd_pipe_high_priority[1], &buf, sizeof(buf));
 	else
 		write(fd_pipe_low_priority[1], &buf, sizeof(buf));

@@ -190,6 +190,9 @@ void CStringInput::keyRightPressed()
 
 int CStringInput::exec( CMenuTarget* parent, const std::string & )
 {
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
 	int res = menu_return::RETURN_REPAINT;
 	char oldval[size], dispval[size];
 
@@ -202,7 +205,6 @@ int CStringInput::exec( CMenuTarget* parent, const std::string & )
 
 	paint();
 
-	uint msg; uint data;
 	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing_menu);
 
 	bool loop=true;
@@ -214,7 +216,7 @@ int CStringInput::exec( CMenuTarget* parent, const std::string & )
 			strcpy(dispval, value);
 		}
 
-		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd, true );
+		g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd, true );
 
 		if ( msg <= CRCInput::RC_MaxRC )
 			timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_menu );
@@ -316,7 +318,7 @@ int CStringInput::exec( CMenuTarget* parent, const std::string & )
 	return res;
 }
 
-int CStringInput::handleOthers( uint msg, uint data )
+int CStringInput::handleOthers(const neutrino_msg_t msg, const neutrino_msg_data_t data)
 {
 	return messages_return::unhandled;
 }
@@ -536,6 +538,9 @@ void CPINInput::paintChar(int pos)
 
 int CPINInput::exec( CMenuTarget* parent, const std::string & )
 {
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
 	int res = menu_return::RETURN_REPAINT;
 
 	if (parent)
@@ -547,7 +552,6 @@ int CPINInput::exec( CMenuTarget* parent, const std::string & )
 	paint();
 
 	bool loop = true;
-	uint msg; uint data;
 
 	while(loop)
 	{
@@ -581,7 +585,7 @@ int CPINInput::exec( CMenuTarget* parent, const std::string & )
 		}
 		else
 		{
-			int r = handleOthers( msg, data );
+			int r = handleOthers(msg, data);
 			if (r & (messages_return::cancel_all | messages_return::cancel_info))
 			{
 				res = (r & messages_return::cancel_all) ? menu_return::RETURN_EXIT_ALL : menu_return::RETURN_EXIT;
@@ -620,16 +624,16 @@ int CPINInput::exec( CMenuTarget* parent, const std::string & )
 	return res;
 }
 
-int CPLPINInput::handleOthers( uint msg, uint data )
+int CPLPINInput::handleOthers(neutrino_msg_t msg, neutrino_msg_data_t data)
 {
 	int res = messages_return::unhandled;
 
 	if ( msg == NeutrinoMessages::EVT_PROGRAMLOCKSTATUS )
 	{
 		// trotzdem handlen
-		CNeutrinoApp::getInstance()->handleMsg( msg, data );
+		CNeutrinoApp::getInstance()->handleMsg(msg, data);
 
-		if ( data != (uint) fsk )
+		if (data != (neutrino_msg_data_t) fsk)
 			res = messages_return::cancel_info;
 	}
 
