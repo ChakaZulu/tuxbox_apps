@@ -27,11 +27,13 @@ struct uniqueEPGKey
 {
 	int sid, onid, opos;
 	uniqueEPGKey( const eServiceReferenceDVB &ref )
-	    :sid( ref.data[1] ), onid( ref.data[3] ), opos( (ref.data[4]&0x00FF0000) >> 16 )
+		:sid( ref.type != eServiceReference::idInvalid ? ref.data[1] : -1 )
+		,onid( ref.type != eServiceReference::idInvalid ? ref.data[3] : -1 )
+		,opos( ref.type != eServiceReference::idInvalid ? (ref.data[4]&0x00FF0000) >> 16 : -1 )
 	{
 	}
 	uniqueEPGKey()
-		:sid(0), onid(0), opos(0)
+		:sid(-1), onid(-1), opos(-1)
 	{
 	}
 	uniqueEPGKey( int sid, int onid, int opos )
@@ -41,6 +43,10 @@ struct uniqueEPGKey
 	bool operator <(const uniqueEPGKey &a) const
 	{
 		return memcmp( &sid, &a.sid, sizeof(int)*3)<0;
+	}
+	operator bool() const
+	{ 
+		return !(sid == -1 && onid == -1 && opos == -1); 
 	}
 	struct equal
 	{
@@ -214,7 +220,7 @@ public:
 			quit
 		};
 		int type;
-		eServiceReferenceDVB service;
+		uniqueEPGKey service;
 		union { 
 			int err; 
 			time_t time; 
@@ -255,11 +261,11 @@ private:
 	eTimer abortTimer;
 	bool finishEPG();
 	void abortNonAvail();
-	void flushEPG(const eServiceReferenceDVB& s=eServiceReferenceDVB());
+	void flushEPG(const uniqueEPGKey & s=uniqueEPGKey());
 	void startEPG();
 
-	void changedService(const eServiceReferenceDVB &, int);
-	void abortEPG(const eServiceReferenceDVB& s=eServiceReferenceDVB());
+	void changedService(const uniqueEPGKey &, int);
+	void abortEPG();
 
 	// called from other thread context !!
 	void enterService(const eServiceReferenceDVB &, int);

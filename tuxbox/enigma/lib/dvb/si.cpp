@@ -803,7 +803,7 @@ BouquetNameDescriptor::BouquetNameDescriptor(descr_gen_t *descr)
 	__u8 *data=(__u8*)descr;
 	int len=descr->descriptor_length;
 	data+=2;
-	if (len)
+	if (len > 0)
 		name.assign((char*)data, len);
 }
 

@@ -33,7 +33,7 @@ eEPGCache::eEPGCache()
 
 	CONNECT(messages.recv_msg, eEPGCache::gotMessage);
 	CONNECT(eDVB::getInstance()->switchedService, eEPGCache::enterService);
-	CONNECT(eDVB::getInstance()->leaveService, eEPGCache::abortEPG);
+	CONNECT(eDVB::getInstance()->leaveService, eEPGCache::leaveService);
 	CONNECT(eDVB::getInstance()->timeUpdated, eEPGCache::timeUpdated);
 	CONNECT(zapTimer.timeout, eEPGCache::startEPG);
 	CONNECT(CleanTimer.timeout, eEPGCache::cleanLoop);
@@ -52,6 +52,8 @@ void eEPGCache::timeUpdated()
 
 int eEPGCache::sectionRead(__u8 *data, int source)
 {
+	if ( !data )
+		return -ECANCELED;
 	eit_t *eit = (eit_t*) data;
 	int len=HILO(eit->section_length)-1;//+3-4;
 	int ptr=EIT_SIZE;
@@ -244,8 +246,9 @@ bool eEPGCache::finishEPG()
 	return false;
 }
 
-void eEPGCache::flushEPG(const eServiceReferenceDVB& s)
+void eEPGCache::flushEPG(const uniqueEPGKey & s)
 {
+	eDebug("[EPGC] flushEPG %d", (int)(bool)s);
 	Lock();
 	if (s)  // clear only this service
 	{
@@ -276,11 +279,12 @@ void eEPGCache::flushEPG(const eServiceReferenceDVB& s)
 				delete i->second;
 			evMap.clear();
 			tmMap.clear();
-			serviceLastUpdated.clear();
-			startEPG();
 		}
+		serviceLastUpdated.clear();
 		eventDB.clear();
+		startEPG();
 	}
+	eDebug("[EPGC] %i bytes for cache used", eventData::CacheSize);
 	Unlock();
 }
 
@@ -295,8 +299,6 @@ void eEPGCache::cleanLoop()
 
 		time_t TM,
 					 now = time(0)+eDVB::getInstance()->time_difference;
-
-		tmpMap temp;
 
 		for (eventCache::iterator DBIt = eventDB.begin(); DBIt != eventDB.end(); DBIt++)
 		{
@@ -349,7 +351,8 @@ removeEntry:
 					// remove entry from timeMap
 					DBIt->second.second.erase(TM);
 					// add this (changed) service to temp map...
-					temp[DBIt->first]=std::pair<time_t, int>(now, NOWNEXT);
+					if ( temp.find(DBIt->first) == temp.end() )
+						temp[DBIt->first]=std::pair<time_t, int>(now, NOWNEXT);
 					It=DBIt->second.second.begin();  // start at begin
 				}
 				else  // valid entry found
@@ -534,7 +537,6 @@ void eEPGCache::startEPG()
 		paused++;
 		return;
 	}
-
 	if (eDVB::getInstance()->time_difference)
 	{
 		if ( firstStart )
@@ -544,7 +546,6 @@ void eEPGCache::startEPG()
 				return;
 			firstStart=0;
 		}
-
 		temp.clear();
 		eDebug("[EPGC] start caching events");
 		firstScheduleEvent.invalidate();
@@ -583,6 +584,19 @@ void eEPGCache::abortNonAvail()
 
 void eEPGCache::enterService(const eServiceReferenceDVB& ref, int err)
 {
+	if ( ref.path )
+		err = 2222;
+	else if ( ref.getServiceType() == 7 )
+		switch ( eSystemInfo::getInstance()->getHwType() )
+		{
+			case eSystemInfo::dbox2Nokia:
+			case eSystemInfo::dbox2Sagem:
+			case eSystemInfo::dbox2Philips:
+				err = 1111; //faked
+			default:
+				break;
+		}
+
 	messages.send(Message(Message::enterService, ref, err));
 	// -> gotMessage -> changedService
 }
@@ -593,9 +607,9 @@ void eEPGCache::leaveService(const eServiceReferenceDVB& ref)
 	// -> gotMessage -> abortEPG
 }
 
-void eEPGCache::changedService(const eServiceReferenceDVB &service, int err)
+void eEPGCache::changedService(const uniqueEPGKey &service, int err)
 {
-	if ( service.path )
+	if ( err == 2222 )
 	{
 		eDebug("[EPGC] dont start ... its a replay");
 		/*emit*/ EPGAvail(0);
@@ -610,16 +624,6 @@ void eEPGCache::changedService(const eServiceReferenceDVB &service, int err)
 // check if this is a subservice and this is only a dbox2
 // then we dont start epgcache on subservice change..
 // ever and ever..
-	if ( service.getServiceType() == 7 )
-		switch ( eSystemInfo::getInstance()->getHwType() )
-		{
-			case eSystemInfo::dbox2Nokia:
-			case eSystemInfo::dbox2Sagem:
-			case eSystemInfo::dbox2Philips:
-				err = 1111; //faked
-			default:
-				break;
-		}
 
 	if ( !err || err == -ENOCASYS || err == -ENVOD )
 	{
@@ -651,7 +655,7 @@ void eEPGCache::changedService(const eServiceReferenceDVB &service, int err)
 	}
 }
 
-void eEPGCache::abortEPG(const eServiceReferenceDVB&)
+void eEPGCache::abortEPG()
 {
 	abortTimer.stop();
 	zapTimer.stop();   
@@ -687,7 +691,9 @@ void eEPGCache::gotMessage( const Message &msg )
 			changedService(msg.service, msg.err);
 			break;
 		case Message::leaveService:
+			// msg.service is valid.. but not needed
 			abortEPG();
+			break;
 		case Message::pause:
 			pauseEPG();
 			break;
