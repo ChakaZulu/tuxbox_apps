@@ -247,14 +247,21 @@ eService &eTransponderList::createService(int transport_stream_id, int original_
 	{
 		if (chnum==-1)
 			chnum=beautifyChannelNumber(transport_stream_id, original_network_id, service_id);
-			
-		if ((chnum==-1) || (channel_number.find(chnum)!=channel_number.end()))
+		
+		if (chnum==-1)
 		{
 			if (channel_number.end()==channel_number.begin())
 				chnum=200;
 			else
-				chnum=(channel_number.end()--)->first+1;	// letzte kanalnummer +1
+			{
+				std::map<int,eService*>::iterator i=channel_number.end();
+				--i;
+				chnum=i->first+1;	// letzte kanalnummer +1
+			}
 		}
+		
+		while (channel_number.find(chnum)!=channel_number.end())
+			chnum++;
 
 		eService *n=&services.insert(
 					std::pair<sref,eService>
