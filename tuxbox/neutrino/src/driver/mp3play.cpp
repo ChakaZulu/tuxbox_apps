@@ -240,7 +240,7 @@ void CMP3Player::CreateInfo()
 /****************************************************************************
  * Main decoding loop. This is where mad is used.							*
  ****************************************************************************/
-#define INPUT_BUFFER_SIZE	(5*8192)
+#define INPUT_BUFFER_SIZE	(2*8192)
 #define OUTPUT_BUFFER_SIZE	2048 /* Must be an integer multiple of 4. */
 int CMP3Player::MpegAudioDecoder(FILE *InputFp,FILE *OutputFp)
 {
