@@ -2478,67 +2478,70 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	}
 	else if( msg == CRCInput::RC_standby )
 	{
-		// trigger StandBy
-		struct timeval tv;
-		gettimeofday( &tv, NULL );
-		standby_pressed_at = (tv.tv_sec*1000000) + tv.tv_usec;
-
-		if( mode == mode_standby )
+		if (data == 0)
 		{
-			g_RCInput->postMsg( NeutrinoMessages::STANDBY_OFF, 0 );
-		}
-		else if( !g_settings.shutdown_real )
-		{
-			int timeout = 5;
-			int timeout1 = 5;
-
-			sscanf(g_settings.repeat_blocker, "%d", &timeout);
-			timeout = int(timeout/100.0) + 5;
-			sscanf(g_settings.repeat_genericblocker, "%d", &timeout1);
-			timeout1 = int(timeout1/100.0) + 5;
-			if(timeout1>timeout)
-				timeout=timeout1;
-
-			uint msg; uint data;
-			int diff = 0;
-			long long endtime;
-
-			do
+			// trigger StandBy
+			struct timeval tv;
+			gettimeofday( &tv, NULL );
+			standby_pressed_at = (tv.tv_sec*1000000) + tv.tv_usec;
+			
+			if( mode == mode_standby )
 			{
-				g_RCInput->getMsg( &msg, &data, timeout );
+				g_RCInput->postMsg( NeutrinoMessages::STANDBY_OFF, 0 );
+			}
+			else if( !g_settings.shutdown_real )
+			{
+				int timeout = 5;
+				int timeout1 = 5;
+				
+				sscanf(g_settings.repeat_blocker, "%d", &timeout);
+				timeout = int(timeout/100.0) + 5;
+				sscanf(g_settings.repeat_genericblocker, "%d", &timeout1);
+				timeout1 = int(timeout1/100.0) + 5;
+				if(timeout1>timeout)
+					timeout=timeout1;
 
-				if( msg != CRCInput::RC_timeout )
+				uint msg; uint data;
+				int diff = 0;
+				long long endtime;
+				
+				do
 				{
-					gettimeofday( &tv, NULL );
-					endtime = (tv.tv_sec*1000000) + tv.tv_usec;
-					diff = int((endtime - standby_pressed_at)/100000. );
-				}
+					g_RCInput->getMsg( &msg, &data, timeout );
+					
+					if( msg != CRCInput::RC_timeout )
+					{
+						gettimeofday( &tv, NULL );
+						endtime = (tv.tv_sec*1000000) + tv.tv_usec;
+						diff = int((endtime - standby_pressed_at)/100000. );
+					}
+					
+				} while( ( msg != CRCInput::RC_timeout ) && ( diff < 10 ) );
 
-			} while( ( msg != CRCInput::RC_timeout ) && ( diff < 10 ) );
-
-			g_RCInput->postMsg( ( diff >= 10 ) ? NeutrinoMessages::SHUTDOWN : NeutrinoMessages::STANDBY_ON, 0 );
-		}
-		else
-		{
-			g_RCInput->postMsg( NeutrinoMessages::SHUTDOWN, 0 );
-		}
-		return messages_return::cancel_all | messages_return::handled;
-	}
-	else if( msg == CRCInput::RC_standby_release )
-	{
-		struct timeval tv;
-		gettimeofday( &tv, NULL );
-		long long endtime = (tv.tv_sec*1000000) + tv.tv_usec;
-		int diff = int((endtime - standby_pressed_at)/100000. );
-		if( diff >= 10 )
-		{
-			g_RCInput->postMsg( NeutrinoMessages::SHUTDOWN, 0 );
+				g_RCInput->postMsg( ( diff >= 10 ) ? NeutrinoMessages::SHUTDOWN : NeutrinoMessages::STANDBY_ON, 0 );
+			}
+			else
+			{
+				g_RCInput->postMsg( NeutrinoMessages::SHUTDOWN, 0 );
+			}
 			return messages_return::cancel_all | messages_return::handled;
+		}
+		else /* data == 1: Standby button released */
+		{
+			struct timeval tv;
+			gettimeofday( &tv, NULL );
+			long long endtime = (tv.tv_sec*1000000) + tv.tv_usec;
+			int diff = int((endtime - standby_pressed_at)/100000. );
+			if( diff >= 10 )
+			{
+				g_RCInput->postMsg( NeutrinoMessages::SHUTDOWN, 0 );
+				return messages_return::cancel_all | messages_return::handled;
+			}
 		}
 	}
 	else if( msg == CRCInput::RC_plus ||
-				msg == CRCInput::RC_minus )
-   {
+		 msg == CRCInput::RC_minus )
+	{
 		//volume
 		setVolume( msg, ( mode != mode_scart ) );
 		return messages_return::handled;
@@ -3338,7 +3341,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.391 2003/01/23 23:48:53 zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.392 2003/01/26 11:47:48 thegoodguy Exp $\n\n");
 	//LCD-Init
 	CLCD::getInstance()->init();
 
