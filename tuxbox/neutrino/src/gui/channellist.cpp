@@ -578,6 +578,8 @@ int CChannelList::numericZap(int key)
 	// -- quickzap "0" to last seen channel...
 	// -- (remains for those who want to avoid the channel history menue)
 	// -- (--> girl friend complained about the history menue, so be it...)
+	// -- we should be able to configure this in the future, so "0"
+	// -- will do quizap or history...
 	if (key == CRCInput::RC_0) {
 		int  ch;
 
