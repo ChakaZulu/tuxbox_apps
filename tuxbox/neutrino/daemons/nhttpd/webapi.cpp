@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.32 2003/02/21 19:23:49 dirch Exp $
+	$Id: webapi.cpp,v 1.33 2003/03/04 19:27:43 dirch Exp $
 
 	License: GPL
 
@@ -182,9 +182,9 @@ bool CWebAPI::ShowBouquets(CWebserverRequest* request)
 // show the bouquet list
 {
 string classname;
+string actual;
+
 	request->SendPlainHeader("text/html");
-//	ShowBouquets(request,(request->ParameterList["bouquet"] != "")?atoi(request->ParameterList["bouquet"].c_str()):0);
-//	return true;
 	int BouquetNr = (request->ParameterList["bouquet"] != "")?atoi(request->ParameterList["bouquet"].c_str()):0;
 	bool javascript = (request->ParameterList["js"].compare("1") == 0);
 	request->SocketWriteLn("<HTML>\n<HEAD><title>DBOX2-Neutrino Bouquetliste</title><link rel=\"stylesheet\" TYPE=\"text/css\" HREF=\"../global.css\">");
@@ -192,9 +192,20 @@ string classname;
 
 	request->SocketWriteLn("<TABLE cellspacing=0 cellpadding=0 border=0 width=\"100%\">");
 	request->SocketWriteLn("<TR><TD><A CLASS=\"blist\" HREF=\"/bouquetedit/main\" TARGET=\"content\">Bouqueteditor</A></TD></TR>\n<TR><TD><HR></TD></TR>");
-	classname = (BouquetNr == 0)?" CLASS=\"bouquet\"":"";
+
+	if(BouquetNr == 0)
+	{
+		actual = "<a name=\"akt\"></a>";
+		classname = " CLASS=\"bouquet\"";
+	}
+	else
+	{
+		actual = "";
+		classname = "";
+	}
+
 	if(javascript)
-		request->SocketWrite("<TR height=20"+ classname + "><TD><a CLASS=\"blist\" HREF=\"javascript:go_to('/fb/channellist.dbox2#akt','/fb/bouquetlist.dbox2?bouquet=0')\">Alle Kanäle</a></TD></TR>\n");
+		request->SocketWrite("<TR height=20"+ classname + "><TD><a CLASS=\"blist\" HREF=\"javascript:go_to('/fb/channellist.dbox2#akt','/fb/bouquetlist.dbox2?bouquet=0#akt')\">Alle Kanäle</a></TD></TR>\n");
 	else
 		request->SocketWrite("<TR height=20"+ classname + "><TD><a CLASS=\"blist\" HREF=\"/fb/channellist.dbox2#akt\" TARGET=\"content\">Alle Kanäle</a></TD></TR>\n");
 	request->SocketWrite("<TR><TD><HR></TD></TR>\n");
@@ -203,11 +214,20 @@ string classname;
 	{
 		if(!bouquet->hidden)
 		{
-			classname = ((bouquet->bouquet_nr + 1) == (uint) BouquetNr)?" CLASS=\"bouquet\"":"";
-			if(javascript)
-				request->printf("<tr height=\"20\"%s><TD><NOBR><a CLASS=\"blist\" HREF=\"javascript:go_to('/fb/channellist.dbox2?bouquet=%d#akt','/fb/bouquetlist.dbox2?js=1&bouquet=%d');\">%s</a></NOBR></TD></TR>\n",classname.c_str(),(bouquet->bouquet_nr + 1),(bouquet->bouquet_nr + 1),bouquet->name);
+			if((bouquet->bouquet_nr + 1) == (uint) BouquetNr)
+			{
+				actual = "<a name=\"akt\"></a>";
+				classname = " CLASS=\"bouquet\"";
+			}
 			else
-				request->printf("<tr height=\"20\"%s><TD><NOBR><a CLASS=\"blist\" HREF=\"/fb/channellist.dbox2?bouquet=%d#akt\" TARGET=\"content\">%s</a></NOBR></TD></TR>\n",classname.c_str(),(bouquet->bouquet_nr + 1),bouquet->name);
+			{
+				actual = "";
+				classname = "";
+			}
+			if(javascript)
+				request->printf("<tr height=\"20\"%s><TD>%s<NOBR><a CLASS=\"blist\" HREF=\"javascript:go_to('/fb/channellist.dbox2?bouquet=%d#akt','/fb/bouquetlist.dbox2?js=1&bouquet=%d#akt');\">%s</a></NOBR></TD></TR>\n",classname.c_str(),actual.c_str(),(bouquet->bouquet_nr + 1),(bouquet->bouquet_nr + 1),bouquet->name);
+			else
+				request->printf("<tr height=\"20\"%s><TD>%s<NOBR><a CLASS=\"blist\" HREF=\"/fb/channellist.dbox2?bouquet=%d#akt\" TARGET=\"content\">%s</a></NOBR></TD></TR>\n",classname.c_str(),actual.c_str(),(bouquet->bouquet_nr + 1),bouquet->name);
 		}
 	}
 	request->SocketWrite("</TABLE>\n");
