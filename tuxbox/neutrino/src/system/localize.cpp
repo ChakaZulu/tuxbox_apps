@@ -152,11 +152,9 @@ void CLocaleManager::loadLocale(std::string locale)
 			    (strncmp(buf, "parentallock", 12) != 0) &&
 			    (strncmp(buf, "pictureviewer", 13) != 0) &&
 			    (strncmp(buf, "recordingmenu", 13) != 0) &&
-			    (strncmp(buf, "satsetup", 8) != 0) &&
-			    (strncmp(buf, "scants", 6) != 0) &&
-			    (strncmp(buf, "streamfeatures", 14) != 0) &&
-			    (strncmp(buf, "streaminfo", 10) != 0) &&
-			    (strncmp(buf, "streamingmenu", 13) != 0) &&
+			    (strncmp(buf, "sa", 2) != 0) &&
+			    (strncmp(buf, "sc", 2) != 0) &&
+			    (strncmp(buf, "st", 2) != 0) &&
 			    (strncmp(buf, "timersettings", 13) != 0) &&
 			    (strncmp(buf, "timing", 6) != 0) &&
 			    (buf[0] != 'v') &&
@@ -171,7 +169,7 @@ void CLocaleManager::loadLocale(std::string locale)
 			      (strcmp(buf, "flashupdate.savesuccess") == 0) ||
 			      (strcmp(buf, "flashupdate.versioncheck") == 0))) &&
 			    ((strncmp(buf, "mainsettings", 12) != 0) || (strcmp(buf, "mainsettings.savesettingsnow_hint") == 0)) &&
-			    ((strncmp(buf, "servicemenu", 11) != 0) || (strcmp(buf, "servicemenu.reload_hint") == 0)) &&
+			    ((strncmp(buf, "se", 2) != 0) || (strcmp(buf, "servicemenu.reload_hint") == 0)) &&
 			    ((strncmp(buf, "timerlist", 9) != 0) || (strncmp(buf, "timerlist.weekdays.hint", 23) == 0)) &&
 			    (strcmp(buf, "bouquetlist.head") != 0) &&
 			    (strcmp(buf, "dhcp") != 0) &&

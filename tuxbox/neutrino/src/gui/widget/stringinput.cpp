@@ -453,9 +453,9 @@ void CStringInputSMS::paint()
 	frameBuffer->paintHLine(x, x+width,  y+height-25, COL_INFOBAR_SHADOW);
 
 	frameBuffer->paintIcon("rot.raw", x+8, y+height-25+1);
-	g_Fonts->infobar_small->RenderString(x+28, y+height-25+24 - 2, width, g_Locale->getText("stringinput.caps").c_str(), COL_INFOBAR);
+	g_Fonts->infobar_small->RenderString(x+28, y+height-25+24 - 2, width, g_Locale->getText("stringinput.caps"), COL_INFOBAR, 0, true); // UTF-8
 	frameBuffer->paintIcon("gelb.raw", x+238, y+height-25+1);
-	g_Fonts->infobar_small->RenderString(x+258, y+height-25+24 - 2, width, g_Locale->getText("stringinput.clear").c_str(), COL_INFOBAR);
+	g_Fonts->infobar_small->RenderString(x+258, y+height-25+24 - 2, width, g_Locale->getText("stringinput.clear"), COL_INFOBAR, 0, true); // UTF-8
 }
 
 void CPINInput::paintChar(int pos)

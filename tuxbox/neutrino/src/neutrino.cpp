@@ -2429,13 +2429,13 @@ int CNeutrinoApp::run(int argc, char **argv)
 	{
 		dprintf(DEBUG_INFO, "config file missing\n");
 		saveSetup();
-		ShowHint ( "messagebox.info", g_Locale->getText("settings.noconffile") );
+		ShowHintUTF("messagebox.info", g_Locale->getText("settings.noconffile"));
 	}
 	else if(loadSettingsErg==2)
 	{
 		dprintf(DEBUG_INFO, "parts of configfile missing\n");
 		saveSetup();
-		ShowHint ( "messagebox.info", g_Locale->getText("settings.missingoptionsconffile") );
+		ShowHintUTF("messagebox.info", g_Locale->getText("settings.missingoptionsconffile"));
 	}
 
 	CLCD::getInstance()->showServicename("Waiting...");
