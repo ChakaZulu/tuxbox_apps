@@ -1,5 +1,5 @@
 /*
- * $Id: channel.h,v 1.24 2003/06/03 08:27:01 digi_casi Exp $
+ * $Id: channel.h,v 1.25 2003/06/16 19:43:26 digi_casi Exp $
  *
  * (C) 2002 Steffen Hehn <mcclean@berlios.de>
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
@@ -65,7 +65,7 @@ class CZapitChannel
 		t_original_network_id		original_network_id;
 		t_network_id			network_id;
 		unsigned char			DiSEqC;
-		int32_t 			satellitePosition;
+		t_satellite_position		satellitePosition;
 
 		/* read/write properties (write possibility needed by scan) */
 		unsigned char			serviceType;
