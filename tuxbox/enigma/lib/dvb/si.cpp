@@ -922,7 +922,7 @@ ComponentDescriptor::ComponentDescriptor(descr_component_struct *descr)
 	language_code[2]=descr->lang_code3;
 	int llen = len - sizeof(descr_component_struct); 
 	if ( llen > 0 )
-		text.assign((char*)(descr+1), llen);
+		text=convertDVBUTF8((unsigned char*)(descr+1), llen, getEncodingTable(language_code));
 }
 
 #ifdef SUPPORT_XML
