@@ -29,7 +29,9 @@ work in progress   (rasc)
 
 //
 //  -- Picture in Graphics  Control
-//  --  adapted source from fx2  (;-) )
+//  -- This module is a Class to provide a PIG abstraction layer
+//  --
+//  --  some source grabbed from fx2  (;-) )
 //  --  2002-11  rasc
 //
 
@@ -41,11 +43,19 @@ work in progress   (rasc)
 
 void CPIG::CPIG(int pig_nr)
 {
+    fd = -1;
+    status = CLOSED;
     fd = open_pig (pig_nr);
 }
 
-void CPIG::CPIG(int x, int y, int w, int h)
+
+void CPIG::CPIG(int pig_nr, int x, int y, int w, int h)
 {
+    fd = -1;
+    status = CLOSED;
+    fd = open_pig (pig_nr);
+    set_coord (x,y, w,h);
+
 }
 
 
@@ -61,9 +71,10 @@ int CPIG::open_pig (int pig_nr)
     
 	if (fd == -1) {
 		fd = open( pigdevs[pig_nr], O_RDONLY );
-
-		is_active = false;
-		px = py = pw = ph = 0;
+		if (fd >= 0) {
+			status = HIDE;
+			px = py = pw = ph = 0;
+		}
 		return fd;
 	}
 
@@ -82,13 +93,109 @@ void CPIG::close_pig (int pig_nr)
    if (fd != -1) {
 	close (fd);
 	fd = -1;
-	is_active = false;
+	status = CLOSED;
 	px = py = pw = ph = 0;
    }
    return;
 }
 
 
+//
+// -- set PIG Position
+// -- routines should be self explaining
+//
+
+void CPIG::set_coord (int x, int y, int w, int h)
+{
+	set_xy (x,y);
+	set_size (w,h);
+}
 
 
+void CPIG::set_xy (int x, int y)
+{
 
+	if (fd == -1) return;
+
+	if (( x != px ) || ( y != py )) {
+		avia_pig_set_pos(fd,x,y);
+		px = x;
+		py = y;
+	}
+
+}
+
+
+void CPIG::set_size (int w, int h)
+{
+
+	if (fd == -1) return;
+
+	if (( w != pw ) || ( h != ph )) {
+		avia_pig_set_size(fd,width,height);
+		pw = w;
+		ph = h;
+	}
+
+}
+
+// $$$ ???? what this for?
+
+void CPIG::set_source (int x, int y)
+{
+
+	if (fd == -1) return;
+
+	if (( w != pw ) || ( h != ph )) {
+		avia_pig_set_source(fd,x,y);
+	}
+
+}
+
+
+//
+// -- routine set's stack position of PIG on display
+//
+
+void CPIG::set_stack (int pos)
+
+{
+	if (fd == -1) return;
+
+	avia_pig_set_stack(fd,pos);
+	stackpos = pos;
+}
+
+
+//
+// -- Show PIG or hide PIG
+//
+
+void CPIG::show (int x, int y, int w, int h)
+{
+	set_coord (x,y, w,h);
+	show (void);
+}
+
+void CPIG::show (void)
+{
+	if ( fd != -1 ) {
+		avia_pig_show(fd);
+		status = SHOW;
+	}
+}
+
+void CPIG::hide (void)
+{
+	if ( fd != -1 ) {
+		avia_pig_hide(fd);
+		status = HIDE;
+	}
+}
+
+
+CPIG::PigStatus  CPIG::getStatus(void)
+{
+	return status;
+
+}

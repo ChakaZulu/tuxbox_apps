@@ -43,17 +43,24 @@ class CPIG
 		void CPIG (int pig_nr, int x, int y, int w, int h);
 		void ~CPIG (void);
 
-		void set  (int x, int y, int w, int h);
-		int  show (void);
-		int  show (int x, int y, int w, int h);
-		int  hide (void);
+		void set_coord (int x, int y, int w, int h);
+		void set_xy    (int x, int y);
+		void set_size  (int w, int h);
+		void set_stackpos  (int pos);
+		void show (void);
+		void show (int x, int y, int w, int h);
+		void hide (void);
 
 		void copy2buf (.....);
+
+		enum PigStatus { CLOSED, HIDE, SHOW };
+		PigStatus getStatus(void);
 
 	private:
 		int	fd;			// io descriptor
 		int	px, py, pw, ph;		// pig frame
-		int	is_active;		// on display?
+		int	stackpos;		// Order (Framebuffer, PIGs)
+		PigStatus  status;		// on display?
 
 		int  open_pig (int nr);
 		void close_pig (void);
