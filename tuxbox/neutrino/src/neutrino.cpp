@@ -2499,22 +2499,12 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 			return messages_return::cancel_all | messages_return::handled;
 		}
 	}
-	else if( msg == CRCInput::RC_plus )
+	else if( msg == CRCInput::RC_plus ||
+				msg == CRCInput::RC_minus )
    {
 		//volume
 		setVolume( msg, ( mode != mode_scart ) );
-		//additinal volume setting via lirc
-		CIRSend irs("volplus");
-		irs.Send();
 		return messages_return::handled;
-	}
-	else if( msg == CRCInput::RC_minus ) 
-	{
-		//volume
-		setVolume( msg, ( mode != mode_scart ) );
-		//additinal volume setting via lirc
-		CIRSend irs("volminus");
-		irs.Send();
 	}
 	else if( msg == CRCInput::RC_spkr )
 	{
@@ -2903,6 +2893,9 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 				current_volume += 5;
 			}
 			g_Controld->setVolume(current_volume,(g_settings.audio_avs_Control));
+			//additinal volume setting via lirc
+			CIRSend irs("volplus");
+			irs.Send();
 		}
 		else if(msg==CRCInput::RC_minus)
 		{
@@ -2911,6 +2904,9 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 				current_volume -= 5;
 			}
 			g_Controld->setVolume(current_volume,(g_settings.audio_avs_Control));
+			//additinal volume setting via lirc
+			CIRSend irs("volminus");
+			irs.Send();
 		}
 		else
 		{
@@ -3049,6 +3045,10 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 
 		lastMode = mode;
 		mode = mode_standby;
+		
+		//Send ir 
+		CIRSend irs("sbon");
+		irs.Send();
 	}
 	else
 	{
@@ -3057,6 +3057,10 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 		g_lcdd->setMode(CLcddTypes::MODE_TVRADIO);
 		g_Controld->videoPowerDown(false);
 
+		//Send ir 
+		CIRSend irs("sboff");
+		irs.Send();
+		
 		mode = mode_unknown;
 
 		//re-set mode
@@ -3260,7 +3264,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.365 2002/11/26 22:09:59 Zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.366 2002/11/28 22:20:40 Zwen Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
