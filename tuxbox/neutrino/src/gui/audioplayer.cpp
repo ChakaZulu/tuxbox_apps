@@ -338,8 +338,8 @@ int CAudioPlayerGui::show()
 				if(selected!=playlist.size()-1 && !playlist.empty())
 				{
 					selected+=listmaxshow;
-					if (selected>playlist.size()-1)
-						selected=0;
+					if (selected >= playlist.size())
+						selected = 0;
 					liststart = (selected/listmaxshow)*listmaxshow;
 					update=true;
 				}
@@ -366,7 +366,7 @@ int CAudioPlayerGui::show()
 				paintItem(selected - liststart);
 			}
 		}
-		else if( msg == CRCInput::RC_down && !playlist.empty() > 0)
+		else if( msg == CRCInput::RC_down && !playlist.empty())
 		{
 			int prevselected=selected;
 			selected = (selected+1)%playlist.size();
@@ -382,12 +382,12 @@ int CAudioPlayerGui::show()
 				paintItem(selected - liststart);
 			}
 		}
-		else if( msg == CRCInput::RC_ok && !playlist.empty())
+		else if (msg == CRCInput::RC_ok)
 		{
-			// OK button
-			play(selected);
+			if (!playlist.empty())
+				play(selected);
 		}
-		else if(msg==CRCInput::RC_red )
+		else if (msg == CRCInput::RC_red)
 		{
 			if(key_level==0)
 			{
@@ -1179,7 +1179,7 @@ int CAudioPlayerGui::getNext()
 	int ret=current+1;
 	if(playlist.empty())
 		return -1;
-	if((unsigned)ret+1 > playlist.size())
+	if((unsigned)ret >= playlist.size())
 		ret=0;
 	return ret;
 }

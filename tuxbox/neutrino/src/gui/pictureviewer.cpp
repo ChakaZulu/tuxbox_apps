@@ -210,49 +210,54 @@ int CPictureViewerGui::show()
 			else
 				loop=false;
 		}
-		else if( msg == CRCInput::RC_timeout )
+		else if (msg == CRCInput::RC_timeout)
 		{
-			// do nothing
-			if(m_state==SLIDESHOW)
+			if(m_state == SLIDESHOW)
 			{
 				m_time=(long)time(NULL);
-				unsigned int next=selected+1;
-				if( next+1 > playlist.size())
-					next=0;
+				unsigned int next = selected + 1;
+				if (next >= playlist.size())
+					next = 0;
 				view(next);
 			}
 		}
-		else if(( msg == CRCInput::RC_left) && (m_state!=MENU))
+		else if (msg == CRCInput::RC_left)
 		{
-				view((selected == 0) ? (playlist.size() - 1) : (selected - 1));
-		}
-		else if(( msg == CRCInput::RC_left) && (m_state==MENU))
-		{
-			if ((int(selected)-int(listmaxshow))<0)
-				selected=playlist.size()-1;
+			if (m_state == MENU)
+			{
+				if ((int(selected)-int(listmaxshow))<0)
+					selected=playlist.size()-1;
+				else
+					selected -= listmaxshow;
+				liststart = (selected/listmaxshow)*listmaxshow;
+				paint();
+			}
 			else
-				selected -= listmaxshow;
-			liststart = (selected/listmaxshow)*listmaxshow;
-			paint();
+			{
+				view((selected == 0) ? (playlist.size() - 1) : (selected - 1));
+			}
 		}
-		else if(( msg == CRCInput::RC_right) && (m_state!=MENU))
+		else if (msg == CRCInput::RC_right)
 		{
-			unsigned int next=selected+1;
-			if( next+1 > playlist.size())
-				next=0;
-			view(next);
+			if (m_state == MENU)
+			{
+				selected += listmaxshow;
+				if (selected >= playlist.size())
+					selected=0;
+				liststart = (selected/listmaxshow)*listmaxshow;
+				paint();
+			}
+			else
+			{
+				unsigned int next = selected + 1;
+				if (next >= playlist.size())
+					next = 0;
+				view(next);
+			}
 		}
-		else if (( msg == CRCInput::RC_right) && (m_state==MENU))
+		else if (msg == CRCInput::RC_up)
 		{
-			selected+=listmaxshow;
-			if (selected>playlist.size()-1)
-			selected=0;
-			liststart = (selected/listmaxshow)*listmaxshow;
-			paint();
-		}
-		else if( msg == CRCInput::RC_up && playlist.size() > 0)
-		{
-			if(m_state==MENU)
+			if ((m_state == MENU) && (!playlist.empty()))
 			{
 				int prevselected=selected;
 				if(selected==0)
@@ -274,9 +279,9 @@ int CPictureViewerGui::show()
 				}
 			}
 		}
-		else if( msg == CRCInput::RC_down && playlist.size() > 0)
+		else if (msg == CRCInput::RC_down)
 		{
-			if(m_state==MENU)
+			if ((m_state == MENU) && (!playlist.empty()))
 			{
 				int prevselected=selected;
 				selected = (selected+1)%playlist.size();
@@ -293,28 +298,22 @@ int CPictureViewerGui::show()
 				}
 			}
 		}
-		else if( msg == CRCInput::RC_ok && playlist.size() > 0)
+		else if (msg == CRCInput::RC_ok)
 		{
-			if(m_state==MENU)
-			{
+			if (!playlist.empty())
 				view(selected);
-			}
-			else
-			{
-            view(selected);
-			}
 		}
-		else if(msg==CRCInput::RC_red )
+		else if (msg == CRCInput::RC_red)
 		{
-			if(m_state==MENU)
+			if (m_state == MENU)
 			{
-				if (playlist.size() > 0)
+				if (!playlist.empty())
 				{
 					CViewList::iterator p = playlist.begin()+selected;
 					playlist.erase(p);
-					if(selected > playlist.size()-1)
+					if (selected >= playlist.size())
 						selected = playlist.size()-1;
-					update=true;
+					update = true;
 				}
 			}
 		}
@@ -371,7 +370,7 @@ int CPictureViewerGui::show()
 		}
 		else if(msg==CRCInput::RC_blue)
 		{
-			if(m_state==MENU && playlist.size() > 0)
+			if ((m_state == MENU) && (!playlist.empty()))
 			{
 				m_time=(long)time(NULL);
 				view(selected);
