@@ -170,6 +170,9 @@ void eTransponder::setSatellite(int frequency, int symbol_rate, int polarisation
 
 void eTransponder::setCable(int frequency, int symbol_rate, int inversion, int modulation)
 {
+        if (frequency > 1000*1000)
+                frequency=frequency/1000; //transponderlist was read from tuxbox
+
 	cable.frequency=frequency;
 	cable.symbol_rate=symbol_rate;
 	cable.inversion=inversion;
