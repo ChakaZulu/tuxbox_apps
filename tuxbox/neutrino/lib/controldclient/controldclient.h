@@ -64,23 +64,23 @@ class CControldClient
 	}	remotemsg;
 
 	int send(bool closesock);
-	bool bCallBackRegistered;
 
 	public:
 
 		CControldClient();
 		void setVolume(char volume );
 		char getVolume();
-		void setVideoFormat(char, bool bDoUnregister = true);
+		void setVideoFormat(char);
 		void setVideoOutput(char);
 		void setBoxType(char);
 		void setScartMode(char);
 
 		void Mute();
 		void UnMute();
+		void setMute( bool );
+		char getMute();
 
 		void shutdown();
-		static void videoFormatCallback( void* arg, int format);
 };
 
 #endif

@@ -35,7 +35,6 @@
 CControldClient::CControldClient()
 {
 	memset(&remotemsg, 0, sizeof(remotemsg) );
-	bCallBackRegistered = false;
 }
 
 int CControldClient::send(bool closesock)
@@ -120,20 +119,7 @@ char CControldClient::getVolume()
 	return volume;
 }
 
-void CControldClient::videoFormatCallback( void* arg, int format)
-{	CControldClient* Controld = (CControldClient*)arg;
-
-	printf("In VideoFormat-CallBack: %d \n", format);
-	int nNeutrinoFormat = 1;
-	switch (format)
-	{
-		case 2 : nNeutrinoFormat = 2; break;
-		case 3 : nNeutrinoFormat = 1; break;
-	}
-	Controld->setVideoFormat(nNeutrinoFormat, false);
-}
-
-void CControldClient::setVideoFormat(char format, bool bDoUnregister = true)
+void CControldClient::setVideoFormat(char format)
 {
 	remotemsg.version=1;
 	remotemsg.cmd=5;
@@ -170,4 +156,23 @@ void CControldClient::UnMute()
 	send(true);
 }
 
+void CControldClient::setMute( bool mute)
+{
+	if (mute)
+		Mute();
+	else
+		UnMute();
+}
 
+char CControldClient::getMute()
+{
+        char mute = 0;
+        int sockfd = -1;
+
+        remotemsg.version=1;
+        remotemsg.cmd=129;
+        sockfd = send(false);
+        read(sockfd, &mute, sizeof(mute));
+        close(sockfd);
+        return mute;    
+}
