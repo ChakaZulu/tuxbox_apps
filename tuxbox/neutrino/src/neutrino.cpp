@@ -3506,6 +3506,8 @@ void CNeutrinoApp::tvMode( bool rezap )
 	g_ActionLog->println("mode: tv");
 #endif
 
+	if(g_settings.video_Format != CControldClient::VIDEOFORMAT_4_3)
+		g_Controld->setVideoFormat(g_settings.video_Format);
 
 	//printf( "tv-mode\n" );
 
@@ -3641,6 +3643,9 @@ void CNeutrinoApp::radioMode( bool rezap)
 #ifdef USEACTIONLOG
 	g_ActionLog->println("mode: radio");
 #endif
+
+	if(g_settings.video_Format != CControldClient::VIDEOFORMAT_4_3)
+		g_Controld->setVideoFormat(CControldClient::VIDEOFORMAT_4_3);
 
 	frameBuffer->loadPal("radiomode.pal", 18, COL_MAXFREE);
 	frameBuffer->loadBackground("radiomode.raw");

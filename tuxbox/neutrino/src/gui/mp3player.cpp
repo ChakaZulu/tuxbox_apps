@@ -154,6 +154,9 @@ int CMP3PlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 		parent->hide();
 	}
 
+	if(g_settings.video_Format != CControldClient::VIDEOFORMAT_4_3)
+		g_Controld->setVideoFormat(CControldClient::VIDEOFORMAT_4_3);
+
 	bool usedBackground = frameBuffer->getuseBackground();
 	if (usedBackground)
 		frameBuffer->saveBackgroundImage();

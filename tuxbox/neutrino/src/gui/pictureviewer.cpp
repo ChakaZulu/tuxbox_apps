@@ -30,7 +30,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
 
 #include <gui/pictureviewer.h>
 
@@ -160,13 +162,6 @@ int CPictureViewerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 	// Start Sectionsd
 	g_Sectionsd->setPauseScanning(false);
 
-	// reset mode to auto if appl.
-	if(g_settings.video_Format==0)
-	{
-		CControldClient cdc;
-		cdc.setVideoFormat(CControldClient::VIDEOFORMAT_AUTO);
-	}
-	
 	// Restore last mode
 	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , m_LastMode );
 

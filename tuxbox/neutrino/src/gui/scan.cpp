@@ -72,6 +72,9 @@ int CScanTs::exec(CMenuTarget* parent, const std::string &)
 	if (!frameBuffer->getActive())
 		return menu_return::RETURN_EXIT_ALL;
 
+	if(g_settings.video_Format != CControldClient::VIDEOFORMAT_4_3)
+		g_Controld->setVideoFormat(CControldClient::VIDEOFORMAT_4_3);
+
 	frameBuffer->loadPal("scan.pal", 37, COL_MAXFREE);
 	frameBuffer->loadPicture2FrameBuffer("scan.raw");
 
@@ -124,6 +127,9 @@ int CScanTs::exec(CMenuTarget* parent, const std::string &)
 	g_Sectionsd->setPauseScanning(false);
 	
 	ShowMsgUTF("messagebox.info", success ? g_Locale->getText("scants.finished") : g_Locale->getText("scants.failed"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+
+	if(g_settings.video_Format != CControldClient::VIDEOFORMAT_4_3)
+		g_Controld->setVideoFormat(g_settings.video_Format);
 
 	return menu_return::RETURN_REPAINT;
 }
