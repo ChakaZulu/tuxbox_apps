@@ -119,7 +119,7 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 	bool loop=true;
 	while (loop)
 	{
-		int key = g_RCInput->getKey(g_settings.timing_chanlist);
+		int key = g_RCInput->getKey();
 		if ((key==CRCInput::RC_timeout) || (key==g_settings.key_channelList_cancel))
 		{
 			if (state == beDefault)
@@ -132,24 +132,7 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 				cancelMoveBouquet();
 			}
 		}
-/*		else if (key==g_settings.key_channelList_pageup)
-		{
-			selected+=listmaxshow;
-			if (selected>Bouquets.size()-1)
-				selected=0;
-			liststart = (selected/listmaxshow)*listmaxshow;
-			paint();
-		}
-		else if (key==g_settings.key_channelList_pagedown)
-		{
-			if ((int(selected)-int(listmaxshow))<0)
-				selected=Bouquets.size()-1;
-			else
-				selected -= listmaxshow;
-			liststart = (selected/listmaxshow)*listmaxshow;
-			paint();
-		}
-*/		else if (key==CRCInput::RC_up)
+		else if (key==CRCInput::RC_up)
 		{
 			if (state == beDefault)
 			{
@@ -259,15 +242,15 @@ void CBEBouquetWidget::deleteBouquet()
 	g_Zapit->getBouquets(Bouquets, true);
 	if (selected >= Bouquets.size())
 		selected--;
-//	hide();
-//	paintHead();
+	hide();
+	paintHead();
 	paint();
-//	paintFoot();
+	paintFoot();
 }
 
 void CBEBouquetWidget::addBouquet()
 {
-	string newName = inputName("");
+	string newName = inputName("", "bouqueteditor.bouquetname");
 	if (newName != "")
 	{
 		g_Zapit->addBouquet( newName);
@@ -275,7 +258,9 @@ void CBEBouquetWidget::addBouquet()
 		g_Zapit->getBouquets(Bouquets, true);
 		selected = Bouquets.size() - 1;
 	}
+	paintHead();
 	paint();
+	paintFoot();
 }
 
 void CBEBouquetWidget::beginMoveBouquet()
@@ -305,14 +290,16 @@ void CBEBouquetWidget::cancelMoveBouquet()
 
 void CBEBouquetWidget::renameBouquet()
 {
-	string newName = inputName( Bouquets[selected].name);
+	string newName = inputName( Bouquets[selected].name, "bouqueteditor.newbouquetname");
 	g_Zapit->renameBouquet( selected + 1, newName);
 	Bouquets.clear();
 	g_Zapit->getBouquets(Bouquets, true);
+	paintHead();
 	paint();
+	paintFoot();
 }
 
-string CBEBouquetWidget::inputName( string defaultName)
+string CBEBouquetWidget::inputName( string defaultName, string caption)
 {
 	char Name[30] = "";
 	if (defaultName != "")
@@ -320,8 +307,8 @@ string CBEBouquetWidget::inputName( string defaultName)
 		strncpy( Name, defaultName.c_str(), 30);
 	}
 
-	CStringInputSMS* nameInput = new CStringInputSMS("", Name, 29,
-													 "" /* hint 1*/, "" /*hint2*/,
+	CStringInputSMS* nameInput = new CStringInputSMS(caption, Name, 29,
+												 "" /* hint 1*/, "" /*hint2*/,
 													 "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
 	nameInput->exec(this, "");
 	return( Name);

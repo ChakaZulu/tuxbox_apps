@@ -51,7 +51,7 @@ using namespace std;
 		void internalMoveBouquet( unsigned int fromPosition, unsigned int toPosition);
 		void renameBouquet();
 
-		string inputName( string defaultName);
+		string inputName( string defaultName, string caption);
 
 	public:
 		CBEBouquetWidget();
