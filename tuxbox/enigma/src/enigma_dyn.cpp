@@ -70,6 +70,43 @@ eString zap[4][5] =
 	{"Recordings", ";4097:7:0:1:0:0:0:0:0:0:", /* Satellites */ "", /* Providers */ "", /* Bouquets */ ""}
 };
 
+eString removeBadChars(eString s)
+{
+//	s.strReplace("\x00", "");
+	s.strReplace("\x01", "");
+	s.strReplace("\x02", "");
+	s.strReplace("\x03", "");
+	s.strReplace("\x04", "");
+	s.strReplace("\x05", "");
+	s.strReplace("\x06", "");
+	s.strReplace("\x07", "");
+	s.strReplace("\x08", "");
+	s.strReplace("\x09", "");
+	s.strReplace("\x0a", "");
+	s.strReplace("\x0b", "");
+	s.strReplace("\x0c", "");
+	s.strReplace("\x0d", "");
+	s.strReplace("\x0e", "");
+	s.strReplace("\x0f", "");
+	s.strReplace("\x10", "");
+	s.strReplace("\x11", "");
+	s.strReplace("\x12", "");
+	s.strReplace("\x13", "");
+	s.strReplace("\x14", "");
+	s.strReplace("\x15", "");
+	s.strReplace("\x16", "");
+	s.strReplace("\x17", "");
+	s.strReplace("\x18", "");
+	s.strReplace("\x19", "");
+	s.strReplace("\x1a", "");
+	s.strReplace("\x1b", "");
+	s.strReplace("\x1c", "");
+	s.strReplace("\x1d", "");
+	s.strReplace("\x1e", "");
+	s.strReplace("\x1f", "");
+	return s;
+}
+
 eString firmwareLevel(eString verid)
 {
 	eString result = "unknown";
@@ -471,7 +508,7 @@ static eString selectAudio(eString request, eString dirpath, eString opts, eHTTP
 			else
 				audioChannels += eString().sprintf("<option value=\"0x%04x\">", it->pmtentry->elementary_PID);
 
-			audioChannels += it->text;
+			audioChannels += removeBadChars(it->text);
 			audioChannels += "</option>";
 		}
 	}
@@ -490,40 +527,44 @@ static eString selectSubChannel(eString request, eString dirpath, eString opts, 
 	eString subChannels = "<option>no subchannels available</option>";
 
 	eString curServiceRef = ref2string(eServiceInterface::getInstance()->service);
+	printf("[SELECTSUBCHANNEL] curService = %s\n", curServiceRef.c_str());
 	if (curServiceRef)
 	{
-		char nspace[128];
-		sscanf(curServiceRef.c_str(), "%*s:%*s:%*s:%*s:%*s:%*s:%s:%*s:%*s:%*s", nspace);
+		eString s1 = curServiceRef; int pos; eString nspace;
+		for (int i = 0; i < 7 && s1.find(":") != eString::npos; i++)
+		{
+			pos = s1.find(":");
+			nspace = s1.substr(0, pos);
+			s1 = s1.substr(pos + 1);
+		}
 		EIT *eit = eDVB::getInstance()->getEIT();
 		if (eit)
 		{
 			subChannels = "";
-			int service_id = eit->service_id;
-			int original_network_id = eit->original_network_id;
-			int transport_stream_id = eit->transport_stream_id;
 			ePtrList<EITEvent>::iterator s(eit->events);
 			for (ePtrList<Descriptor>::iterator d(s->descriptor); d != s->descriptor.end(); ++d)
 			{
-				if (d->Tag() == DESCR_PRIV_DATA_SPEC)
+				if (d->Tag() == DESCR_LINKAGE)
 				{
 					char tmp[256];
 					LinkageDescriptor *ld =(LinkageDescriptor *)*d;
 					if ((unsigned int)ld->priv_len < sizeof(tmp))
+					{
 						strncpy(tmp, (char *)ld->private_data, ld->priv_len);
+						tmp[ld->priv_len] = '\0';
+					}
 					else
 						strcpy(tmp, "buffer too small");
 					eString subService(tmp);
 
-					eString subServiceRef = "1:0:7:" + eString().sprintf("%04x", service_id) + eString().sprintf("%04x", transport_stream_id) + eString().sprintf("%04x", original_network_id)
-							  + eString(nspace) + ":0:0:0";
-
-					printf("[SELECTSUBCHANNEL] %s|%s|%s\n", curServiceRef.c_str(), subServiceRef.c_str(), subService.c_str());
+					eString subServiceRef = "1:0:7:" + eString().sprintf("%x", ld->service_id) + ":" + eString().sprintf("%x", ld->transport_stream_id) + ":" + eString().sprintf("%x", ld->original_network_id) + ":"
+							  + eString(nspace) + ":0:0:0:";
 
 					if (subServiceRef == curServiceRef)
 						subChannels += "<option selected value=\"" + subServiceRef + "\">";
 					else
 						subChannels += "<option value=\"" + subServiceRef + "\">";
-					subChannels += subService;
+					subChannels += removeBadChars(subService);
 					subChannels += "</option>";
 				}
 			}
@@ -1748,16 +1789,16 @@ static eString getUSBInfo(void)
 void activateSwapFile(eString swapFile)
 {
 	eString cmd;
-	cmd = "mkswap" + swapFile;
+	cmd = "mkswap " + swapFile;
 	system(cmd.c_str());
-	cmd = "swapon" + swapFile;
+	cmd = "swapon " + swapFile;
 	system(cmd.c_str());
 }
 
 void deactivateSwapFile(eString swapFile)
 {
 	eString cmd;
-	cmd = "swapoff" + swapFile;
+	cmd = "swapoff " + swapFile;
 	system(cmd.c_str());
 }
 
