@@ -749,6 +749,11 @@ movieplayer.goto.h1 = -> absoluter Sprung
 movieplayer.goto.h2 +,- -> relativer Sprung
 movieplayer.wrongvlcversion Des is mit ehnara VLC-Version ne drin
 
+bookmarkmanager.name Lesezeichn
+bookmarkmanager.delete Löschn
+bookmarkmanager.rename Umbnenna
+bookmarkmanager.select Auswäihn
+
 filebrowser.head Datiesucha
 filebrowser.filter.active Fuita o
 filebrowser.filter.inactive Fuita aus
@@ -763,6 +768,9 @@ filebrowser.sort.size (Greaß)
 filebrowser.nextpage Seitn viri
 filebrowser.prevpage Seitn zruck
 filebrowser.showrights Dateirechte ozoang
+filebrowser.delete Löschn
+filebrowser.dodelete1 Soi
+filebrowser.dodelete2 glöscht wern?
 
 nfs.mount NFS/CIFS Verzeichnis mountn
 nfs.ip NFS/CIFS Serva IP
@@ -782,6 +790,7 @@ nfs.type_cifs CIFS
 nfs.username CIFS Benutzanama
 nfs.password CIFS Passwort
 nfs.mounterror_notsup Mit dem Dateisystem kon i nix ofanga
+nfs.remount Verzeichniss nomoi mountn
 nfsmenu.head NFS/CIFS Eistellunga
 
 apids.hint_1 Gems de APIDs zu streama getrend
@@ -801,3 +810,16 @@ rclock.menueadd FB sperrn
 rclock.title Fernbedienung sperrn
 rclock.lockmsg D Fernbedienung von da dbox2 werd gsperrt.\n Um die Sperrn aufzhem, bitte\n <ROT> und <DBOX> auf da Fernbedienung\ndrucka. 
 rclock.unlockmsg DBOX2 Fernbedienung reaktiviert...
+
+EPGMenu.head EPG - Programm Informationa
+EPGMenu.eventinfo Info zur Sendung
+EPGMenu.eventlist Vorschau aktuells Programm
+EPGMenu.epgplus Vorschau Übersicht
+EPGMenu.streaminfo technische Informationa
+
+EPGPlus.head Vorschau Übasicht (EPG Plus)
+EPGPlus.record Aufnema
+EPGPlus.refresh_epg Aktualisiern
+EPGPlus.remind Vormerkn
+EPGPlus.scroll_mode Roin 
+EPGPlus.stretch_mode Streckn

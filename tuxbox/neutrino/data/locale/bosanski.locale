@@ -749,6 +749,11 @@ movieplayer.goto.h1 = -> absolutni skok
 movieplayer.goto.h2 +,- -> relativni skok
 movieplayer.wrongvlcversion funkcije nije moguca sa trenutacno upotrijebito verziji vlca
 
+bookmarkmanager.name zapamcena mjesta
+bookmarkmanager.delete izbrisati
+bookmarkmanager.rename preimenovati
+bookmarkmanager.select izabrati
+
 filebrowser.head pretraživač datoteka
 filebrowser.filter.active upaljen filter
 filebrowser.filter.inactive ugašen filter
@@ -763,6 +768,9 @@ filebrowser.sort.size (velicina)
 filebrowser.nextpage strana naprijed
 filebrowser.prevpage strana nazad
 filebrowser.showrights prava datoteke pokazati
+filebrowser.delete izbrisati
+filebrowser.dodelete1 Hocete
+filebrowser.dodelete2 li izbrisati?
 
 nfs.mount montira nfs/cifs direktorij
 nfs.ip ip nfs/cifs servera
@@ -782,6 +790,7 @@ nfs.type_cifs cifs
 nfs.username ime korisnika za cifs
 nfs.password lozinka za cifs
 nfs.mounterror_notsup ne podnosi se sistem datoteka
+nfs.remount direktorije ponovno montirati
 nfsmenu.head namješćenje nfsa/cifsa
 
 apids.hint_1 Utipkajte heksadecimalne apids
@@ -801,3 +810,16 @@ rclock.menueadd fb sperovati
 rclock.title daljinsku sperovati
 rclock.lockmsg Speruje se daljinska dbox2.\n Za prekid spere, molim\n<crveno> i <dbox> na daljinskoj\n pretisnuti.
 rclock.unlockmsg dbox2 daljinska je reaktivirana...
+
+EPGMenu.head epg - informacije o programu
+EPGMenu.eventinfo informacije o emisiji
+EPGMenu.eventlist predvidanje trenutacnog programa
+EPGMenu.epgplus pregled predvidanja
+EPGMenu.streaminfo tehnicke informacije
+
+EPGPlus.head pregled predvidanja (epg plus)
+EPGPlus.record snimanje
+EPGPlus.refresh_epg obnoviti
+EPGPlus.remind zapamtiti
+EPGPlus.scroll_mode scroll modus
+EPGPlus.stretch_mode stretch modus
