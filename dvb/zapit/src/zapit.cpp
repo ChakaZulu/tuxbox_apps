@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.94 2002/03/17 21:14:43 obi Exp $
+  $Id: zapit.cpp,v 1.95 2002/03/18 12:34:03 happydude Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -1555,6 +1555,21 @@ void setRadioMode()
 {
 	debug("[zapit] switching to radio-mode\n");
 	Radiomode_on = true;
+
+	if (video_fd >= 0)
+	{
+		ioctl(video_fd, VIDEO_STOP, (boolean)1);
+		close(video_fd);
+		video_fd = -1;
+	}
+
+	if (dmx_video_fd >= 0)
+	{
+		ioctl(dmx_video_fd, DMX_STOP, 0);
+		close(dmx_video_fd);
+		dmx_video_fd = -1;
+	}
+
 	return;
 }
 
@@ -2569,7 +2584,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("Zapit $Id: zapit.cpp,v 1.94 2002/03/17 21:14:43 obi Exp $\n\n");
+	printf("Zapit $Id: zapit.cpp,v 1.95 2002/03/18 12:34:03 happydude Exp $\n\n");
 
 	if (argc > 1)
 	{
