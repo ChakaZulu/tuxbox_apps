@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.37 2004/12/25 23:56:38 chakazulu Exp $
+ * $Id: locals_intern.h,v 1.38 2005/01/12 20:57:16 chakazulu Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -595,6 +595,7 @@ const char * locale_real_names[] =
 	"nfs.localdir",
 	"nfs.mount",
 	"nfs.mount_options",
+	"nfs.mountok",
 	"nfs.mounterror",
 	"nfs.mounterror_notsup",
 	"nfs.mountnow",
@@ -679,9 +680,11 @@ const char * locale_real_names[] =
 	"rclock.menueadd",
 	"rclock.title",
 	"rclock.unlockmsg",
+	"recordingmenu.choose_direct_rec_dir",
 	"recordingmenu.defdir",
+	"recordingmenu.epg_for_filename",
 	"recordingmenu.file",
-	"recordingmenu.filesettingsseparator",
+	"recordingmenu.filesettings",
 	"recordingmenu.head",
 	"recordingmenu.help",
 	"recordingmenu.no_scart",
@@ -837,6 +840,7 @@ const char * locale_real_names[] =
 	"timerlist.new",
 	"timerlist.plugin",
 	"timerlist.program.unknown",
+	"timerlist.recording_dir",
 	"timerlist.reload",
 	"timerlist.repeat",
 	"timerlist.repeat.biweekly",
