@@ -347,7 +347,7 @@ void CMP3PlayerGui::paintItem(int pos)
 
 void CMP3PlayerGui::paintHead()
 {
-	string strCaption = g_Locale->getText("mp3player.name");
+	string strCaption = g_Locale->getText("mp3player.head");
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
 	frameBuffer->paintIcon("mp3.raw",x+5,y+4);
 	g_Fonts->menu_title->RenderString(x+35,y+theight+0, width- 45, strCaption.c_str(), COL_MENUHEAD);

@@ -520,7 +520,7 @@ void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
 	{
 		actual_file = &filelist[liststart+pos];
 		if(actual_file->Marked)
-			color = color+1;
+			color = color+2;
 
 		frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, color);
 
