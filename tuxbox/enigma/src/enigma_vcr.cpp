@@ -35,7 +35,8 @@ enigmaVCR::enigmaVCR(eString string, eString caption)
 
 void enigmaVCR::switchBack()
 {
-	close(0);
+	if ( in_loop )
+		close(0);
 }
 
 int enigmaVCR::eventHandler(const eWidgetEvent &event)
@@ -61,7 +62,6 @@ int enigmaVCR::eventHandler(const eWidgetEvent &event)
 
 enigmaVCR::~enigmaVCR()
 {
-	instance=0;
 	eAVSwitch::getInstance()->setInput(0);
 	if ( eZapStandby::getInstance() )
 		eAVSwitch::getInstance()->setTVPin8(0);
@@ -70,6 +70,7 @@ enigmaVCR::~enigmaVCR()
 		eAVSwitch::getInstance()->setTVPin8(-1); // reset prev voltage
 		eStreamWatchdog::getInstance()->reloadSettings();
 	}
+	instance=0;
 }
 
 void enigmaVCR::volumeUp()
