@@ -85,7 +85,7 @@ Installation:
       ./autogen.sh	# e.g. on "dbox2" cdk, use if needed
       ./configure
     
-    or you may specify path to DVB API include files
+    or you may specify a path to DVB API include files
       ./configure CPPFLAGS=-I/path/to/dvb-kernel/linux/include
 
   - compile 
@@ -94,6 +94,14 @@ Installation:
 
   - test
       dvbsnoop -help
+
+  - PROBLEMS compiling dvbsnoop?
+      dvbsnoop should compile smoothly on any ANSI-C-Compiler. But it was
+      tested on GCC (gcc-3.x) only.
+      If you see any problems during 'autoconf.sh' or 'configure' execution,
+      please check if you have the latest versions of 'autoconf' and 'configure'
+      installed. In cases, please update your system (check packages 
+      automake, autoconf and libtool).
 
 
 
@@ -132,19 +140,19 @@ Bugs, requests:
 
 Keywords:
 =========
-   DVB stream analyzer mpeg stream analyzer, TS stream analyzer, MPEG,
-   MPG, descriptor, digital television, satellite TV, cable TV, DVB-C,
-   DVB-S, DVB-T, MHP, DSM-CC, SI, PES, TOT, PAT, PMT, SDT, EIT, NIT,
-   TDST, RST, SIT, DIT, BAT, EMM, ECM, PSI, SI tables, SSU, INT, UNT, datagram,
-   sections, transport stream analyzer, packetized elementary stream, demux,
-   ISO/IEC 13818-1, ISO/IEC 13818-6, ETSI EN 300468, ETSI EN 301162,
-   ETSI TS 102006, ETSI EN 301192, ETSI TR 101202, ITU H.222.0,
-   data carousel, object carousel, dvb snoop 
+    DVB stream analyzer mpeg stream analyzer, TS stream analyzer, MPEG,
+    MPG, descriptor, digital television, satellite TV, cable TV, DVB-C,
+    DVB-S, DVB-T, MHP, DSM-CC, SI, PES, TOT, PAT, PMT, SDT, EIT, NIT,
+    TDST, RST, SIT, DIT, BAT, EMM, ECM, PSI, SI tables, SSU, INT, UNT, datagram,
+    sections, transport stream analyzer, packetized elementary stream, demux,
+    ISO/IEC 13818-1, ISO/IEC 13818-6, ETSI EN 300468, ETSI EN 301162,
+    ETSI TS 102006, ETSI EN 301192, ETSI TR 101202, ITU H.222.0,
+    data carousel, object carousel, dvb snoop 
 
 
    
 
 
 (c) 2001-2004   Rainer Scherg (Rainer.Scherg@gmx.de)
-
+http://dvbsnoop.sourceforge.net
 
