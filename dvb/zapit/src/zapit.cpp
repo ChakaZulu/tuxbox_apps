@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.323 2003/06/10 17:52:39 digi_casi Exp $
+ * $Id: zapit.cpp,v 1.324 2003/06/11 19:12:17 digi_casi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -687,7 +687,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	case CZapitMessages::CMD_REINIT_CHANNELS:
 	{
 		CZapitMessages::responseCmd response;
-		prepare_channels(frontend->getInfo()->type, (diseqc_t)config.getInt32("diseqcType", NO_DISEQC));
+		prepare_channels(frontend->getInfo()->type, diseqcType);
 		response.cmd = CZapitMessages::CMD_READY;
 		CBasicServer::send_data(connfd, &response, sizeof(response));
 		eventServer->sendEvent(CZapitClient::EVT_BOUQUETS_CHANGED, CEventServer::INITID_ZAPIT);
@@ -1514,7 +1514,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.323 2003/06/10 17:52:39 digi_casi Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.324 2003/06/11 19:12:17 digi_casi Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
@@ -1555,8 +1555,11 @@ int main(int argc, char **argv)
 		setRadioMode();
 	else
 		setTVMode();
+	
+	if (!frontend)
+		frontend = new CFrontend();
 
-	if (prepare_channels(frontend->getInfo()->type, (diseqc_t)config.getInt32("diseqcType", NO_DISEQC)) < 0)
+	if (prepare_channels(frontend->getInfo()->type, diseqcType) < 0)
 		WARN("error parsing services");
 	else
 		INFO("channels have been loaded succesfully");
