@@ -19,6 +19,10 @@
 */
 
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "flashtool.h"
 
 #include <stdio.h>
@@ -184,7 +188,7 @@ bool CFlashTool::program( std::string filename, int globalProgressEndErase, int 
 	if(statusViewer)
 	{
 		statusViewer->showLocalStatus(0);
-		statusViewer->showStatusMessage(g_Locale->getText("flashupdate.eraseingflash"), true); // UTF-8
+		statusViewer->showStatusMessageUTF(g_Locale->getText("flashupdate.eraseingflash")); // UTF-8
 	}
 
 	//jetzt wirds kritisch - daher filehandle auf fp öffen um reset machen zu können
@@ -206,7 +210,7 @@ bool CFlashTool::program( std::string filename, int globalProgressEndErase, int 
 			statusViewer->showGlobalStatus(globalProgressEndErase);
 		}
 		statusViewer->showLocalStatus(0);
-		statusViewer->showStatusMessage(g_Locale->getText("flashupdate.programmingflash"), true); // UTF-8
+		statusViewer->showStatusMessageUTF(g_Locale->getText("flashupdate.programmingflash")); // UTF-8
 	}
 
 	if( (fd2 = open( mtdDevice.c_str(), O_WRONLY )) < 0 )
@@ -481,9 +485,14 @@ int CMTDInfo::getMTDCount()
 	return mtdData.size();
 }
 
-std::string CMTDInfo::getMTDName( int pos )
+std::string CMTDInfo::getMTDName(const int pos)
 {
+#warning TODO: check /proc/mtd specification to determine mtdname encoding
+#ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
+	return Latin1_to_UTF8(mtdData[pos]->name);
+#else
 	return mtdData[pos]->name;
+#endif
 }
 
 std::string CMTDInfo::getMTDFileName( int pos )

@@ -34,6 +34,9 @@
 #endif
 
 #include "filebrowser.h"
+
+#include <driver/encoding.h>
+
 #include "widget/messagebox.h"
 
 #include <algorithm>
@@ -649,9 +652,9 @@ void CFileBrowser::addRecursiveDir(CFileList * re_filelist, std::string rpath, b
 		if(progress)
 		{
 #ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
-			progress->showStatusMessage(rpath, false); // ISO-8859-1
+			progress->showStatusMessageUTF(Latin1_to_UTF8(rpath)); // ISO-8859-1
 #else
-			progress->showStatusMessage(rpath, true); // UTF-8
+			progress->showStatusMessageUTF(rpath); // UTF-8
 #endif
 		}
 		for(int i = 0; i < n;i++)

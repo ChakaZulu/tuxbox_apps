@@ -30,10 +30,11 @@
 */
 
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
 
 #include "localize.h"
-#include <zapit/client/zapitclient.h> /* CZapitClient::Utf8_to_Latin1 */
 
 #include <fstream>
 #include <iostream>
@@ -91,34 +92,28 @@ void CLocaleManager::loadLocale(std::string locale)
 	localeData.clear();
 
 	char buf[1000];
-	char valstr[1000];
 
 	while(!feof(fd))
 	{
 		if(fgets(buf,sizeof(buf),fd)!=NULL)
 		{
-			char* tmpptr=buf;
-			char* val= (char*) &valstr;
-			bool keyfound = false;
+			char * val    = NULL;
+			char * tmpptr = buf;
+
 			for(; (*tmpptr!=10) && (*tmpptr!=13);tmpptr++)
 			{
-				if((*tmpptr==' ') && (!keyfound))
+				if ((*tmpptr == ' ') && (val == NULL))
 				{
-					keyfound=true;
-					*tmpptr = 0;
-				}
-				else
-				{
-					if (keyfound)
-					{
-						*val = *tmpptr;
-						val++;
-					}
+					*tmpptr  = 0;
+					val      = tmpptr + 1;
 				}
 			}
-			*val = 0;
+			*tmpptr = 0;
 
-			std::string text= valstr;
+			if (val == NULL)
+				continue;
+
+			std::string text = val;
 
 			int pos;
 			do
@@ -133,15 +128,7 @@ void CLocaleManager::loadLocale(std::string locale)
 #warning cam.wrong is defined as locale but never used
 #warning dhcp     is missing in locales (used in neutrino.cpp)
 #warning NFS/CIFS is missing in locales (used in neutrino.cpp)
-			if (
-			    ((buf[0] == 'e') && (
-						 (strcmp(buf, "epglist.noevents") == 0)
-						 )) ||
-			    ((buf[0] == 'f') && (
-						 (strcmp(buf, "flashupdate.actionreadflash") == 0)
-						 ))
-			    )
-				text = CZapitClient::Utf8_to_Latin1(text);
+
 			localeData[buf] = text;
 		}
 	}

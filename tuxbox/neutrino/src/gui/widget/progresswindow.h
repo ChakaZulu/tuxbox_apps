@@ -51,7 +51,6 @@ class CProgressWindow : public CMenuTarget, public CProgress_StatusViewer
 		int globalstatusY;
 		int localstatusY;
 		int statusTextY;
-		bool utf8encoded;
 		std::string statusText;
 
 
@@ -70,7 +69,7 @@ class CProgressWindow : public CMenuTarget, public CProgress_StatusViewer
 		virtual void showGlobalStatus(const unsigned int prog);
 		virtual unsigned int getGlobalStatus(void);
 		virtual void showLocalStatus(const unsigned int prog);
-		virtual void showStatusMessage(const std::string text, const bool utf8_encoded = false);
+		virtual void showStatusMessageUTF(const std::string text); // UTF-8
 };
 
 

@@ -42,7 +42,6 @@ CProgressWindow::CProgressWindow()
 	height = hheight+5*mheight+20;
 
 	global_progress = local_progress = 101;
-	utf8encoded = true;
 	statusText = "";
 
 	x= ( ( ( g_settings.screen_EndX- g_settings.screen_StartX ) - width ) >> 1 ) + g_settings.screen_StartX;
@@ -99,12 +98,11 @@ void CProgressWindow::showLocalStatus(const unsigned int prog)
 	frameBuffer->paintBox(pos, localstatusY, x+width-10, localstatusY+10, COL_MENUCONTENT +2);
 }
 
-void CProgressWindow::showStatusMessage(const std::string text, const bool utf8_encoded)
+void CProgressWindow::showStatusMessageUTF(const std::string text)
 {
-	utf8encoded = utf8_encoded;
 	statusText = text;
 	frameBuffer->paintBox(x, statusTextY-mheight, x+width, statusTextY,  COL_MENUCONTENT);
-	g_Fonts->menu->RenderString(x+10, statusTextY, width-20, text, COL_MENUCONTENT, 0, utf8encoded);
+	g_Fonts->menu->RenderString(x+10, statusTextY, width-20, text, COL_MENUCONTENT, 0, true); // UTF-8
 }
 
 
@@ -128,7 +126,7 @@ void CProgressWindow::paint()
 
 	ypos+= hheight + (mheight >>1);
 	statusTextY = ypos+mheight;
-	showStatusMessage(statusText.c_str(), utf8encoded);
+	showStatusMessageUTF(statusText);
 
 	ypos+= mheight;
 	localstatusY = ypos+ mheight-20;
