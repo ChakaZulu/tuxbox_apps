@@ -8,7 +8,7 @@
 class eTimeCorrectionEditWindow: public eWindow
 {
 	eTimer updateTimer;
-	eLabel *lCurTransponderTime, *lCurTransponderDate;
+	eLabel *lCurTime, *lCurDate, *lTpTime, *lTpDate;
 	eComboBox *cday, *cmonth, *cyear;
 	eButton *bSet, *bReject;
 	eNumber *nTime;
@@ -16,7 +16,7 @@ class eTimeCorrectionEditWindow: public eWindow
 	tsref transponder;
 	int eventHandler( const eWidgetEvent &e );
 	void savePressed();
-	void updateTPTimeDate();
+	void updateTimeDate();
 	void monthChanged( eListBoxEntryText* );
 	void yearChanged( eListBoxEntryText* );
 	void fieldSelected(int *){focusNext(eWidget::focusDirNext);}

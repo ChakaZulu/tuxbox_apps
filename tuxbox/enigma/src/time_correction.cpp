@@ -12,20 +12,28 @@ eTimeCorrectionEditWindow::eTimeCorrectionEditWindow( tsref tp )
 	eLabel *l = new eLabel(this);
 	l->move( ePoint(10,10) );
 	l->resize( eSize(200,30));
-	l->setText(_("Transponder Time:"));
+	l->setText(_("Receiver Time:"));
 
-	lCurTransponderTime = new eLabel(this);
-	lCurTransponderTime->move( ePoint(210,10) );
-	lCurTransponderTime->resize( eSize(150,30) );
+	lCurTime = new eLabel(this);
+	lCurTime->move( ePoint(210,10) );
+	lCurTime->resize( eSize(90,30) );
+
+	lCurDate = new eLabel(this);
+	lCurDate->move( ePoint(320,10) );
+	lCurDate->resize( eSize(120,30) );
 
 	l = new eLabel(this);
 	l->move( ePoint(10,50) );
 	l->resize( eSize(200,30));
-	l->setText(_("Transponder Date:"));
+	l->setText(_("Transponder Time:"));
 
-	lCurTransponderDate = new eLabel(this);
-	lCurTransponderDate->move( ePoint(210,50) );
-	lCurTransponderDate->resize( eSize(150,30) );
+	lTpTime = new eLabel(this);
+	lTpTime->move( ePoint(210,50) );
+	lTpTime->resize( eSize(90,30) );
+
+	lTpDate = new eLabel(this);
+	lTpDate->move( ePoint(320,50) );
+	lTpDate->resize( eSize(120,30) );
 
 	l = new eLabel(this);
 	l->setText(_("New Time:"));
@@ -95,7 +103,7 @@ eTimeCorrectionEditWindow::eTimeCorrectionEditWindow( tsref tp )
 	sbar->move( ePoint(0, clientrect.height()-50) );
 	sbar->resize( eSize( clientrect.width(), 50) );
 	sbar->loadDeco();
-	CONNECT( updateTimer.timeout, eTimeCorrectionEditWindow::updateTPTimeDate );
+	CONNECT( updateTimer.timeout, eTimeCorrectionEditWindow::updateTimeDate );
 }
 
 void eTimeCorrectionEditWindow::savePressed()
@@ -103,8 +111,7 @@ void eTimeCorrectionEditWindow::savePressed()
 	eDVB &dvb = *eDVB::getInstance();
 	std::map<tsref,int> &tOffsMap=
 		eTransponderList::getInstance()->TimeOffsetMap;
-	time_t oldTime = time(0);
-	time_t now = oldTime+dvb.time_difference;
+	time_t now = time(0)+dvb.time_difference;
 
 	tm nowTime = *localtime( &now );
 	nowTime.tm_hour = nTime->getNumber(0);
@@ -126,8 +133,7 @@ void eTimeCorrectionEditWindow::savePressed()
 	settimeofday(&tnow, 0);
 	for (ePtrList<eMainloop>::iterator it(eMainloop::existing_loops)
 		;it != eMainloop::existing_loops.end(); ++it)
-		// only difference in linux time are interesting for us..
-		it->setTimerOffset(newTime-oldTime);
+		it->setTimerOffset(newTime-now);
 
 	/*emit*/ dvb.timeUpdated();
 
@@ -139,12 +145,25 @@ void eTimeCorrectionEditWindow::savePressed()
 	close(0);
 }
 
-void eTimeCorrectionEditWindow::updateTPTimeDate()
+void eTimeCorrectionEditWindow::updateTimeDate()
 {
 	time_t now = time(0)+eDVB::getInstance()->time_difference;
 	tm ltime = *localtime( &now );
-	lCurTransponderTime->setText(eString().sprintf("%02d:%02d:%02d", ltime.tm_hour, ltime.tm_min, ltime.tm_sec));
-	lCurTransponderDate->setText(eString().sprintf("%02d.%02d.%04d", ltime.tm_mday, ltime.tm_mon+1, 1900+ltime.tm_year));
+	lCurTime->setText(eString().sprintf("%02d:%02d:%02d", ltime.tm_hour, ltime.tm_min, ltime.tm_sec));
+	lCurDate->setText(eString().sprintf("%02d.%02d.%04d", ltime.tm_mday, ltime.tm_mon+1, 1900+ltime.tm_year));
+	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
+	if ( sapi && sapi->tdt && sapi->transponder )
+	{
+		time_t tpTime = now + sapi->lastTpTimeDifference;
+		tm ltime = *localtime( &tpTime );
+		lTpTime->setText(eString().sprintf("%02d:%02d:%02d", ltime.tm_hour, ltime.tm_min, ltime.tm_sec));
+		lTpDate->setText(eString().sprintf("%02d.%02d.%04d", ltime.tm_mday, ltime.tm_mon+1, 1900+ltime.tm_year));
+	}
+	else
+	{
+		lTpTime->setText(_("no transponder time"));
+		lTpDate->setText("");
+	}
 }
 
 int eTimeCorrectionEditWindow::eventHandler( const eWidgetEvent &event )
