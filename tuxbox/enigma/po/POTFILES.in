@@ -85,7 +85,6 @@
 ./lib/system/httpd.cpp
 ./lib/system/init.cpp
 ./lib/system/nconfig.cpp
-./lib/system/nxml.cpp
 ./lib/system/xmlrpc.cpp
 ./src/channelinfo.cpp
 ./src/download.cpp
