@@ -1583,11 +1583,11 @@ printf("kein boden on %d, %d\n",s->x,s->y+s->height);
 								if ( s->dir )
 								{
 									unsigned char *data = GetMirrorPic(34);
-									bg2CopyImage(s->x,s->y+2,5,14,data);
+									bg2CopyImage(s->x+1,s->y+2,6,14,data);
 								}
 								else
 								{
-									inBg(34,0,s->x+12,s->y+2);
+									inBg(34,0,s->x+11,s->y+2);
 								}
 							}
 							if ( !s->ani )

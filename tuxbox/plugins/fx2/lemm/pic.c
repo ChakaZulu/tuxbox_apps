@@ -15,7 +15,7 @@
 #include <malloc.h>
 
 #include <pics.h>
-#define	COMPSZ	7882
+#define	COMPSZ	7886
 
 extern	int		doexit;
 
@@ -68,7 +68,7 @@ static	Pic	pics[] = {
 { 0,	0,  17, 9,  13 },	// 31 lemming - builder
 { 0,	0,  8, 	8,  11 },	// 32 lemming - builder - ende
 { 0,	0,	22,	17,	17 },	// 33 lemming - hacke
-{ 0,	0,	1,	5,	14 }	// 34 maske hacke
+{ 0,	0,	1,	6,	14 }	// 34 maske hacke
 };
 
 static	int		piccolors[] = {
