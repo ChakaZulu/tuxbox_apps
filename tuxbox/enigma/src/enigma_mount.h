@@ -56,7 +56,7 @@ public:
 	void save();
 	void init();
 
-	static eMountMgr *getInstance() {return (instance) ? instance : new eMountMgr();}
+	static eMountMgr *getInstance() {return (instance) ? instance : instance = new eMountMgr();}
 
 	eMountMgr();
 	~eMountMgr();
