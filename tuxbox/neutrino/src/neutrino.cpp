@@ -1095,7 +1095,6 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 			ojDiseqcRepeats->addOption(i, ii);
 		}
 
-		CMenuForwarder* ojExtMotorControl = new CMenuForwarder("satsetup.motorcontrol", (scanSettings.diseqcMode == DISEQC_1_2), "", new CMotorControl());
 		CMenuWidget* extSatSettings = new CMenuWidget("satsetup.extended", "settings.raw");
 		extSatSettings->addItem( new CMenuSeparator() );
 		extSatSettings->addItem( new CMenuForwarder("menu.back") );
@@ -1119,7 +1118,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		extMotorSettings->addItem( new CMenuSeparator() );
 		extMotorSettings->addItem( new CMenuForwarder("menu.back") );
 		extMotorSettings->addItem( new CMenuForwarder("satsetup.savesettingsnow", true, "", this, "savesettings") );
-		extMotorSettings->addItem( ojExtMotorControl );
+		extMotorSettings->addItem( new CMenuForwarder("satsetup.motorcontrol", (scanSettings.diseqcMode == DISEQC_1_2), "", new CMotorControl()) );
 		extMotorSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 		
 		CMenuForwarder* ojExtMotorSettings = new CMenuForwarder("satsetup.extended_motor", (scanSettings.diseqcMode == DISEQC_1_2), "", extMotorSettings);
@@ -1137,7 +1136,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 			extMotorSettings->addItem(oj);
 		}
 
-		CMenuOptionChooser* ojDiseqc = new CMenuOptionChooser("satsetup.disqeqc", (int *)&scanSettings.diseqcMode, true, new CSatDiseqcNotifier( ojSat, ojExtSatSettings, ojExtMotorSettings, ojExtMotorControl, ojDiseqcRepeats));
+		CMenuOptionChooser* ojDiseqc = new CMenuOptionChooser("satsetup.disqeqc", (int *)&scanSettings.diseqcMode, true, new CSatDiseqcNotifier( ojSat, ojExtSatSettings, ojExtMotorSettings, ojDiseqcRepeats));
 		ojDiseqc->addOption( NO_DISEQC,   "satsetup.nodiseqc");
 		ojDiseqc->addOption( MINI_DISEQC, "satsetup.minidiseqc");
 		ojDiseqc->addOption( DISEQC_1_0,  "satsetup.diseqc10");
@@ -3425,7 +3424,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.460 2003/06/02 22:45:47 digi_casi Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.461 2003/06/04 16:44:25 digi_casi Exp $\n\n");
 
 	tzset();
 	initGlobals();
