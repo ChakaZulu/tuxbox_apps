@@ -125,8 +125,8 @@ int CMP3PlayerGui::exec(CMenuTarget* parent, std::string actionKey)
 	bool usedBackground = frameBuffer->getuseBackground();
 	if (usedBackground)
 		frameBuffer->saveBackgroundImage();
-	frameBuffer->loadPal("scan.pal", 37, COL_MAXFREE);
-	frameBuffer->loadBackground("scan.raw");
+	frameBuffer->loadPal("radiomode.pal", 18, COL_MAXFREE);
+	frameBuffer->loadBackground("radiomode.raw");
 	frameBuffer->useBackground(true);
 	frameBuffer->paintBackground();
 
