@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.120 2002/04/18 13:09:53 field Exp $
+//  $Id: sectionsd.cpp,v 1.121 2002/04/19 07:04:44 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.121  2002/04/19 07:04:44  field
+//  Zeit-setzen verbessert
+//
 //  Revision 1.120  2002/04/18 13:09:53  field
 //  Sectionsd auf clientlib umgestellt :)
 //
@@ -1634,7 +1637,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.120 2002/04/18 13:09:53 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.121 2002/04/19 07:04:44 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1931,6 +1934,7 @@ static int 		messaging_sections_max_ID [0x22];			// 0x4e .. 0x6f
 static int 		messaging_sections_got_all [0x22];			// 0x4e .. 0x6f
 static bool		messaging_wants_current_next_Event = false;
 static time_t 	messaging_last_requested = time(NULL);
+static bool		messaging_neutrino_sets_time = false;
 
 static void commandserviceChanged(struct connectionData *client, char *data, const unsigned dataLength)
 {
@@ -2805,6 +2809,7 @@ static void commandGetIsTimeSet(struct connectionData *client, char *data, const
 }
 
 
+
 static void (*connectionCommands[sectionsd::numberOfCommands]) (struct connectionData *, char *, const unsigned)  = {
 	commandActualEPGchannelName,
 	commandEventListTV,
@@ -2888,6 +2893,10 @@ static void *connectionThread(void *conn)
 					//printf("[connectionThread]: read bytes  %d/%d\n", readresult,  sizeof(msg));
 					//printf("[connectionThread]: register event (%d) to: %d - %s\n", msg.eventID, msg.clientID, msg.udsName);
 					eventServer->registerEvent2(msg.eventID, msg.clientID, msg.udsName);
+
+					if ( msg.eventID == CSectionsdClient::EVT_TIMESET )
+						messaging_neutrino_sets_time = true;
+
 					//eventServer->registerEvent( connfd );
 				}
 				else if ( header.command == sectionsd::CMD_unregisterEvents )
@@ -3169,12 +3178,14 @@ static void *timeThread(void *)
                 	tim=changeUTCtoCtime(((const unsigned char *)&tdt_tot_header)+3);
     				if(tim)
     				{
-    					// alles herausgetan, das macht jetzt das neutrino!
-/*      					if(stime(&tim)< 0)
-      					{
-        					perror("[sectionsd] cannot set date");
-							dmxTOT.closefd();
-      					}
+    					if ( !messaging_neutrino_sets_time )
+	      					if(stime(&tim)< 0)
+    	  					{
+        						perror("[sectionsd] cannot set date");
+								dmxTOT.closefd();
+								continue;
+      						}
+/*
                         else
                         {
                         	struct timeval tv_n;
@@ -3277,6 +3288,14 @@ static void *timeThread(void *)
 				time_t t=time(NULL);
       			dprintf("TOT: local time: %s", ctime(&t));
 */
+				if ( !messaging_neutrino_sets_time )
+					if(stime(&tim)< 0)
+    				{
+        				perror("[sectionsd] cannot set date");
+						dmxTOT.closefd();
+						continue;
+      				}
+
 				eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD, &tim, sizeof(tim) );
     		}
 
@@ -3806,7 +3825,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.120 2002/04/18 13:09:53 field Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.121 2002/04/19 07:04:44 field Exp $\n");
 	try
 	{
 
