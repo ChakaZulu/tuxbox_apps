@@ -62,6 +62,7 @@ class CMP3
 	std::string Genre;
 	bool VBR;
 	int Index;
+	CFile::FileType FileType;
 };
 
 typedef std::vector<CMP3> CPlayList;

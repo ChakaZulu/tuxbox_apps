@@ -45,6 +45,9 @@
 #include <neutrino.h>
 #include <driver/mp3play.h>
 #include <dbox/avs_core.h>
+
+#include <driver/netfile.h>
+
 #define AVS_DEVICE "/dev/dbox/avs0"
 
 // Frames to skip in ff/rev mode

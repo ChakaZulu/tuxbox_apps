@@ -105,6 +105,7 @@ CMP3PlayerGui::CMP3PlayerGui()
 	mp3filter.addFilter("mpa");
 	mp3filter.addFilter("mp2");
 	mp3filter.addFilter("m3u");
+	mp3filter.addFilter("url");
 	filebrowser->Filter = &mp3filter;
 	if(strlen(g_settings.network_nfs_mp3dir)!=0)
 		Path = g_settings.network_nfs_mp3dir;
@@ -416,6 +417,24 @@ int CMP3PlayerGui::show()
 						{
 							CMP3 mp3;
 							mp3.Filename = files->Name;
+							mp3.FileType = CFile::FILE_MP3;
+							playlist.push_back(mp3);
+						}
+						if(files->getType() == CFile::STREAM_MP3)
+						{
+							CMP3 mp3;
+							mp3.FileType = CFile::STREAM_MP3;
+							mp3.Filename = files->Name;
+							mp3.Artist = "Shoutcast";
+							std::string tmp = mp3.Filename.substr(mp3.Filename.rfind('/')+1);
+							tmp = tmp.substr(0,tmp.length()-4);	//remove .url
+							mp3.Title = tmp;
+							char url[81];
+							FILE* f=fopen(files->Name.c_str(), "r");
+							fgets(url, 80, f);
+							if(url[strlen(url)-1] == '\n') url[strlen(url)-1]=0;
+							if(url[strlen(url)-1] == '\r') url[strlen(url)-1]=0;
+							mp3.Album = url;
 							playlist.push_back(mp3);
 						}
 						else if(files->getType() == CFile::FILE_MP3_PLAYLIST)
@@ -454,6 +473,7 @@ int CMP3PlayerGui::show()
 												p++;
 										}
 										CMP3 mp3;
+										mp3.FileType = CFile::FILE_MP3;
 										mp3.Filename = filename;
 										playlist.push_back(mp3);
 									}
@@ -470,7 +490,8 @@ int CMP3PlayerGui::show()
 			}
 			else
 			{
-				rev();
+				if(curr_mp3.FileType == CFile::FILE_MP3)
+					rev();
 			}
 		}
 		else if(msg==CRCInput::RC_yellow)
@@ -513,7 +534,8 @@ int CMP3PlayerGui::show()
 			}
 			else
 			{
-				ff();
+				if(curr_mp3.FileType == CFile::FILE_MP3)
+					ff();
 			}
 
 		}

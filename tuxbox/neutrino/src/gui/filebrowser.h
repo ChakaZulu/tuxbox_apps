@@ -90,14 +90,16 @@ public:
 class CFile
 {
 public:
-	enum 
+	enum FileType
 	{
 		FILE_UNKNOWN = 0,
 		FILE_DIR,
 		FILE_TEXT,
 		FILE_MP3,
 		FILE_MP3_PLAYLIST,
-		FILE_PICTURE
+		STREAM_MP3,
+		FILE_PICTURE,
+		STREAM_PICTURE
 	};
 
 	int		getType(void) const;

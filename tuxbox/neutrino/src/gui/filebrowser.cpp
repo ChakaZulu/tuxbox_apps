@@ -101,11 +101,15 @@ int CFile::getType(void) const
 			return FILE_MP3;
 		if (strcasecmp(extension.c_str(),"m3u") == 0)
 			return FILE_MP3_PLAYLIST;
+		if (strcasecmp(extension.c_str(),"url") == 0)
+			return STREAM_MP3;
 		if ((strcasecmp(extension.c_str(),"txt") == 0) || (strcasecmp(extension.c_str(),"sh") == 0))
 			return FILE_TEXT;
 		if ((strcasecmp(extension.c_str(),"jpg") == 0) || (strcasecmp(extension.c_str(),"jpeg") == 0) || (strcasecmp(extension.c_str(),"png") == 0) || 
 		    (strcasecmp(extension.c_str(),"bmp") == 0) || (strcasecmp(extension.c_str(),"gif") == 0))
 			return FILE_PICTURE;
+		if (strcasecmp(extension.c_str(),"imu") == 0)
+			return STREAM_PICTURE;
 	}
 	return FILE_UNKNOWN;
 }
