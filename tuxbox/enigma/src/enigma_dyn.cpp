@@ -60,7 +60,7 @@
 
 using namespace std;
 
-#define WEBIFVERSION "2.7.0"
+#define WEBIFVERSION "2.7.1"
 
 #define KEYBOARDNORMAL 0
 #define KEYBOARDVIDEO 1
@@ -231,6 +231,8 @@ static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConn
 			result += "ON";
 		else
 			result += "OFF";
+#else
+	result += "<tr><td>Recording:</td><td>OFF";
 #endif
 	result += "</td></tr>\n";
 	result += "<tr><td>Mode:</td><td>" + eString().sprintf("%d", eZapMain::getInstance()->getMode()) + "</td></tr>\n";
