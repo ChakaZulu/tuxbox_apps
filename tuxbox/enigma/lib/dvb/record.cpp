@@ -84,39 +84,34 @@ int eDVBRecorder::flushBuffer()
 		return 0;
 	int towrite = splitsize-size>bufptr ? bufptr : splitsize-size;
 	int wr = ::write(outfd, buf, towrite);
-	if ( wr < towrite )
-	{
-		eDebug("recording write error, maybe disk full");
-		state = stateError;
-		rmessagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::rWriteError));
-		return -1;
-	}
+
+	if ( wr < towrite )  // to less bytes written?
+		goto Error;
+
 	size+=wr;
 	if (size >= splitsize)
 	{
-		if ( openFile(++splits) )
-		{
-			eDebug("create new file failed, maybe disk full");
-			state = stateError;
-			rmessagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::rWriteError));
-			return -1;
-		}
+		if ( openFile(++splits) ) // file creation failed?
+			goto Error;
+
 		if ( wr < bufptr )  // must flush remaining bytes from buffer..
 		{
 			towrite=bufptr-wr;
 			wr = ::write(outfd, buf+wr, towrite);
-			if ( wr < towrite )
-			{
-				eDebug("recording write error, maybe disk full");
-				state = stateError;
-				rmessagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::rWriteError));
-				return -1;
-			}
+
+			if ( wr < towrite ) // to less bytes written?
+				goto Error;
+
 			size+=wr;
 		}
 	}
 	bufptr=0;
 	return 0;
+Error:
+	eDebug("recording write error, maybe disk full");
+	state = stateError;
+	rmessagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::rWriteError));
+	return -1;
 }
 
 void SAHandler(int ptr)
@@ -143,10 +138,7 @@ void eDVBRecorder::thread()
 			writePatPmt=false;
 		}
 		else if ( bufptr > 65423 )
-		{
-			if (flushBuffer())
-				state = stateError;
-		}
+			flushBuffer();
 	}
 	alarm(0);
 	signal(SIGALRM, SIG_DFL );
