@@ -722,30 +722,21 @@ CXXPROJECT_DEFINES =
 # ----------------------------------------------------------------------
 # start of Imakefile
 
-all:: pacman.so pac
+all:: libfx2.so
 
 PREF=powerpc-linux-
 CC=$(PREF)gcc
 STRIP=$(PREF)strip
 CDEBUGFLAGS=-g -O2 -Wall -pedantic
-INCLUDES=-I. -I../lib
-OBJS=maze.o
+INCLUDES=-I.
+OBJS=draw.o rcinput.o
 
-pac: main.o $(OBJS)
-	$(RM) $@
-	$(CCLINK) -o $@ $(LDOPTIONS) main.o $(OBJS)  $(LDLIBS) -L../lib -lfx2 $(EXTRA_LOAD_FLAGS)
-
-clean::
-	$(RM) pac
-
-maze.o: pics.h text.h
-
-pacman.so: somain.o $(OBJS)
-	$(CC) -o pacman.so -shared -Wl,-soname,pacman.so somain.o $(OBJS)
-	$(STRIP) pacman.so
+libfx2.so: $(OBJS)
+	$(CC) -o libfx2.so -shared -Wl,-soname,libfx2.so $(OBJS)
+	$(STRIP) libfx2.so
 
 clean::
-	rm -f pacman.so
+	rm -f libfx2.so
 
 # ----------------------------------------------------------------------
 # common rules for all Makefiles - do not edit

@@ -724,14 +724,16 @@ CXXPROJECT_DEFINES =
 
 all:: tetris tetris.so
 
-CC=powerpc-linux-gcc
+PREF=powerpc-linux-
+CC=$(PREF)gcc
+STRIP=$(PREF)strip
 CDEBUGFLAGS=-g -O2 -Wall -pedantic
-INCLUDES=-I.
-OBJS=rcinput.o draw.o board.o
+INCLUDES=-I. -I../lib
+OBJS=board.o
 
 tetris: main.o $(OBJS)
 	$(RM) $@
-	$(CCLINK) -o $@ $(LDOPTIONS) main.o $(OBJS)  $(LDLIBS)  $(EXTRA_LOAD_FLAGS)
+	$(CCLINK) -o $@ $(LDOPTIONS) main.o $(OBJS)  $(LDLIBS) -L../lib -lfx2 $(EXTRA_LOAD_FLAGS)
 
 clean::
 	$(RM) tetris
@@ -740,6 +742,7 @@ board.o: pics.h text.h
 
 tetris.so: somain.o $(OBJS)
 	$(CC) -o tetris.so -shared -Wl,-soname,tetris.so somain.o $(OBJS)
+	$(STRIP) tetris.so
 
 clean::
 	rm -f tetris.so

@@ -23,6 +23,8 @@ static	int		fd_is_ext = 0;
 
 int	RcInitialize( int extfd )
 {
+	char	buf[32];
+
 	if ( extfd == -1 )
 	{
 		fd_is_ext = 0;
@@ -41,6 +43,10 @@ int	RcInitialize( int extfd )
 		fd = extfd;
 		fcntl(fd, F_SETFL, O_NONBLOCK );
 	}
+
+/* clear rc-buffer */
+	read( fd, buf, 32 );
+
 	return 0;
 }
 
@@ -115,7 +121,7 @@ static  unsigned short cw=0;
 	{
 	case RC_HELP:
 		if ( !cw )
-			write_xpm();
+			FBPrintScreen();
 		cw=1;
 		break;
 	case RC_UP:
@@ -123,6 +129,7 @@ static  unsigned short cw=0;
 	case RC_RIGHT:
 	case RC_LEFT:
 	case RC_OK:
+		cw=0;
 		actcode=code;
 		break;
 	case RC_HOME:
@@ -207,7 +214,7 @@ void		RcGetActCode( void )
 				actcode=RC_OK;
 				break;
 			case 0x1c :
-				write_xpm();
+				FBPrintScreen();
 				break;
 			}
 		}

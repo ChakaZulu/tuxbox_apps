@@ -8,6 +8,7 @@
 #include <draw.h>
 #include <sys/time.h>
 #include <rcinput.h>
+#include <colors.h>
 #include <pics.h>
 #include <text.h>
 

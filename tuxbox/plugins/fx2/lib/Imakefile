@@ -1,0 +1,15 @@
+all:: libfx2.so
+
+PREF=powerpc-linux-
+CC=$(PREF)gcc
+STRIP=$(PREF)strip
+CDEBUGFLAGS=-g -O2 -Wall -pedantic
+INCLUDES=-I.
+OBJS=draw.o rcinput.o
+
+libfx2.so: $(OBJS)
+	$(CC) -o libfx2.so -shared -Wl,-soname,libfx2.so $(OBJS)
+	$(STRIP) libfx2.so
+
+clean::
+	rm -f libfx2.so

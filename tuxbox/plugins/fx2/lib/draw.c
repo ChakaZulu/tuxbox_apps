@@ -37,15 +37,17 @@ static	unsigned short				red[ 256 ];
 static	unsigned short				green[ 256 ];
 static	unsigned short				blue[ 256 ];
 static	unsigned short				trans[ 256 ];
+static	int							lastcolor=0;
 
-typedef unsigned char	uchar;
-
-static	void	SetColor( int idx, uchar r, uchar g, uchar b )
+void	FBSetColor( int idx, uchar r, uchar g, uchar b )
 {
 	red[idx] = r<<8;
 	green[idx] = g<<8;
 	blue[idx] = b<<8;
 	trans[idx] = 0;
+
+	if ( idx > lastcolor )
+		lastcolor=idx;
 }
 
 int	FBInitialize( int xRes, int yRes, int nbpp, int extfd )
@@ -88,109 +90,22 @@ int	FBInitialize( int xRes, int yRes, int nbpp, int extfd )
 	memset(blue,100,sizeof(unsigned short)*256);
 	memset(trans,0xffff,sizeof(unsigned short)*256);
 
-	SetColor( BNR0, 1, 1, 1 );
-	SetColor( BLACK, 1, 1, 1 );
-	SetColor( WHITE, 255, 255, 255 );
-	SetColor( YELLOW, 255, 255, 0 );
-	SetColor( GREEN, 0, 255, 0 );
-	SetColor( RED, 255, 0, 0 );
-	SetColor( STEELBLUE, 0, 0, 180 );
-	SetColor( BLUE, 130, 130, 255 );
-	SetColor( GRAY, 130, 130, 130 );
-	SetColor( DARK, 60, 60, 60 );
-	SetColor( RED1, 198, 131, 131 );
-	SetColor( RED2, 216, 34, 49 );
-
-/* magenta */
-	SetColor( 30, 216, 175, 216);
-	SetColor( 31, 205, 160, 207);
-	SetColor( 32, 183, 131, 188);
-	SetColor( 33, 230, 196, 231);
-	SetColor( 34, 159, 56, 171);
-	SetColor( 35, 178, 107, 182);
-	SetColor( 36, 172, 85, 180);
-	SetColor( 37, 180, 117, 184);
-	SetColor( 38, 120, 1, 127);
-	SetColor( 39, 89, 1, 98);
-/* blue */
-	SetColor( 40, 165, 172, 226);
-	SetColor( 41, 148, 156, 219);
-	SetColor( 42, 119, 130, 200);
-	SetColor( 43, 189, 196, 238);
-	SetColor( 44, 81, 90, 146);
-	SetColor( 45, 104, 114, 185);
-	SetColor( 46, 91, 103, 174);
-	SetColor( 47, 109, 119, 192);
-	SetColor( 48, 46, 50, 81);
-	SetColor( 49, 34, 38, 63);
-/* cyan */
-	SetColor( 50, 157, 218, 234);
-	SetColor( 51, 140, 208, 227);
-	SetColor( 52, 108, 186, 211);
-	SetColor( 53, 184, 233, 243);
-	SetColor( 54, 55, 143, 172);
-	SetColor( 55, 92, 171, 197);
-	SetColor( 56, 78, 160, 187);
-	SetColor( 57, 98, 177, 203);
-	SetColor( 58, 7, 98, 120);
-	SetColor( 59, 1, 78, 98);
-/* green */
-	SetColor( 60, 173, 218, 177);
-	SetColor( 61, 158, 209, 165);
-	SetColor( 62, 130, 189, 140);
-	SetColor( 63, 195, 232, 199);
-	SetColor( 64, 89, 138, 98);
-	SetColor( 65, 115, 174, 122);
-	SetColor( 66, 102, 163, 112);
-	SetColor( 67, 121, 180, 129);
-	SetColor( 68, 50, 77, 55);
-	SetColor( 69, 38, 59, 41);
-/* red */
-	SetColor( 70, 239, 157, 152);
-	SetColor( 71, 231, 141, 136);
-	SetColor( 72, 210, 112, 109);
-	SetColor( 73, 246, 184, 181);
-	SetColor( 74, 153, 76, 74);
-	SetColor( 75, 197, 97, 92);
-	SetColor( 76, 184, 86, 81);
-	SetColor( 77, 202, 101, 99);
-	SetColor( 78, 95, 33, 32);
-	SetColor( 79, 78, 20, 19);
-/* yellow */
-	SetColor( 80, 238, 239, 152);
-	SetColor( 81, 230, 231, 136);
-	SetColor( 82, 207, 214, 105);
-	SetColor( 83, 246, 246, 181);
-	SetColor( 84, 148, 157, 70);
-	SetColor( 85, 194, 200, 89);
-	SetColor( 86, 180, 189, 76);
-	SetColor( 87, 199, 206, 95);
-	SetColor( 88, 88, 93, 34);
-	SetColor( 89, 69, 75, 22);
-/* orange */
-	SetColor( 90, 243, 199, 148);
-	SetColor( 91, 237, 185, 130);
-	SetColor( 92, 220, 159, 99);
-	SetColor( 93, 249, 220, 178);
-	SetColor( 94, 184, 113, 43);
-	SetColor( 95, 208, 144, 81);
-	SetColor( 96, 198, 132, 67);
-	SetColor( 97, 213, 150, 88);
-	SetColor( 98, 127, 63, 1);
-	SetColor( 99, 98, 46, 1);
-
 	if (ioctl(fd, FBIOPUT_VSCREENINFO, &screeninfo)<0)
 		perror("FBSetMode");
 	if (ioctl(fd, FBIOGET_VSCREENINFO, &screeninfo)<0)
 		perror("failed - FBIOGET_VSCREENINFO");
 
+	FBSetColor( BLACK, 1, 1, 1 );
+    FBSetColor( BNR0, 1, 1, 1 ); 
+    FBSetColor( WHITE, 255, 255, 255 );
+
+	if (ioctl(fd, FBIOPUTCMAP, &cmap )<0)
+		perror("FBSetCMap");
+
 	bpp = screeninfo.bits_per_pixel;
 
 	if ( bpp != 8 )
 		return(-1);
-
-	if (ioctl(fd, FBIOPUTCMAP, &cmap )<0)
-		perror("FBSetCMap");
 
 	if (ioctl(fd, FBIOGET_FSCREENINFO, &fix)<0)
 	{
@@ -208,16 +123,21 @@ int	FBInitialize( int xRes, int yRes, int nbpp, int extfd )
 		return(-1);
 	}
 
-	/* clear screen */
 	memset(lfb,BLACK,stride * screeninfo.yres);
 
 	return 0;
 }
 
+void	FBSetupColors( void )
+{
+	if (ioctl(fd, FBIOPUTCMAP, &cmap )<0)
+		perror("FBSetCMap");
+}
+
 void	FBClose( void )
 {
 	/* clear screen */
-	memset(lfb,BNR0,stride * screeninfo.yres);
+	memset(lfb,0,stride * screeninfo.yres);
 
 	if (available)
 	{
@@ -435,13 +355,15 @@ void	FBOverlayImage( int x, int y, int dx, int dy,
 	}
 }
 
-void	write_xpm( void )
+void	FBPrintScreen( void )
 {
 	FILE			*fp;
 	unsigned char	*p = lfb;
-	int				i;
 	int				y;
-	int				x;
+	int				x=0;
+
+#define H(x)	((x/26)+65)
+#define L(x)	((x%26)+65)
 
 	fp = fopen( "/var/tmp/screen.xpm", "w" );
 	if ( !fp )
@@ -449,21 +371,36 @@ void	write_xpm( void )
 		return;
 	}
 	fprintf(fp,"/* XPM */\n");
-	fprintf(fp,"static char *pacman[] = {\n");
-	fprintf(fp,"\"  %d    %d   100    1\"",screeninfo.xres,screeninfo.yres);
-	for( i=0; i < 100; i++ )
-		fprintf(fp,",\n\"%c c #%02x%02x%02x\"",i+97,
-			(unsigned char)(red[i]>>8),
-			(unsigned char)(green[i]>>8),
-			(unsigned char)(blue[i]>>8));
+	fprintf(fp,"static char *screen[] = {\n");
+	fprintf(fp,"\"  %d    %d   %d    %d\"",screeninfo.xres,screeninfo.yres,
+			lastcolor+1,lastcolor<=100?1:2);
+	for( x=0; x < lastcolor; x++ )
+	{
+		if ( lastcolor <= 100 )
+			fprintf(fp,",\n\"%c",x+65);
+		else
+			fprintf(fp,",\n\"%c%c",H(x),L(x));
+
+		fprintf(fp, " c #%02x%02x%02x\"",
+			(unsigned char)(red[x]>>8),
+			(unsigned char)(green[x]>>8),
+			(unsigned char)(blue[x]>>8));
+	}
 	for( y=0; y < screeninfo.yres; y++ )
 	{
 		fprintf(fp,",\n\"");
 		for( x=0; x < screeninfo.xres; x++, p++ )
-			fprintf(fp,"%c",(*p)+97);
+		{
+			if ( lastcolor <= 100 )
+				fprintf(fp,"%c",(*p)+65);
+			else
+				fprintf(fp,"%c%c",H(*p),L(*p));
+		}
 		fprintf(fp,"\"");
+		fflush(fp);
 	}
-	fprintf(fp," };");
+	fprintf(fp," };\n");
+	fflush(fp);
 
 	fclose(fp);
 }

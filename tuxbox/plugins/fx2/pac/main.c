@@ -12,6 +12,7 @@
 #include <rcinput.h>
 #include <draw.h>
 #include <maze.h>
+#include <colors.h>
 
 	int		doexit = 0;
 	int		debug = 0;
@@ -21,6 +22,18 @@ extern	unsigned short	actcode;
 
 #define Debug	if(debug)printf
 
+static	void	setup_colors( void )
+{
+	FBSetColor( YELLOW, 255, 255, 0 );
+	FBSetColor( GREEN, 0, 255, 0 );
+	FBSetColor( RED, 255, 0, 0 );
+	FBSetColor( STEELBLUE, 0, 0, 180 );
+	FBSetColor( BLUE, 130, 130, 255 );
+	FBSetColor( GRAY, 130, 130, 130 );
+	FBSetColor( DARK, 60, 60, 60 );
+
+	FBSetupColors( );
+}
 
 static	void	sigproc( int snr )
 {
@@ -48,6 +61,8 @@ int main( int argc, char ** argv )
 	Debug("initialize framebuffer...\n");
 	if ( FBInitialize( 720, 576, 8, -1 ) < 0 )
 		return -1;
+
+	setup_colors();
 
 	Debug("initialize input-device...\n");
 	if ( RcInitialize(-1) < 0 )
