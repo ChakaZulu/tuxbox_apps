@@ -1,5 +1,5 @@
 /*
- * $Id: nit.cpp,v 1.26 2002/09/11 20:24:03 thegoodguy Exp $
+ * $Id: nit.cpp,v 1.27 2002/09/20 16:53:39 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -32,6 +32,7 @@
 /* zapit */
 #include <getservices.h>
 #include <zapost/dmx.h>
+#include <settings.h>  // DEMUX_DEV
 
 #include "descriptors.h"
 #include "nit.h"

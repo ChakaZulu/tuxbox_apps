@@ -1,11 +1,12 @@
 /*
- * $Id: getservices.cpp,v 1.49 2002/09/19 10:24:50 thegoodguy Exp $
+ * $Id: getservices.cpp,v 1.50 2002/09/20 16:55:22 thegoodguy Exp $
  */
 
 #include <stdio.h>
 
 #include <zapost/frontend.h>
 
+#include "settings.h"
 #include "bouquets.h"
 #include "channel.h"
 #include "getservices.h"
@@ -156,7 +157,7 @@ void FindTransponder (XMLTreeNode *search)
 
 int LoadServices(void)
 {
-	XMLTreeParser *parser = parseXmlFile(string(CONFIGDIR "/zapit/services.xml"));
+	XMLTreeParser *parser = parseXmlFile(string(SERVICES_XML));
 
 	if (parser == NULL)
 		return -1;

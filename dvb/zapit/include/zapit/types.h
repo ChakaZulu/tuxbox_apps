@@ -1,7 +1,10 @@
 /*
- * $Id: dmx.h,v 1.8 2002/09/20 16:53:39 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/types.h,v 1.1 2002/09/20 16:55:22 thegoodguy Exp $
  *
- * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
+ * zapit's types - d-box2 linux project
+ * these types are used by the clientlib and zapit itself
+ *
+ * (C) 2002 by thegoodguy <thegoodguy@berlios.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,19 +22,27 @@
  *
  */
 
-#ifndef __dmx_h__
-#define __dmx_h__
+#ifndef __zapit__types_h__
+#define __zapit__types_h__
 
-/* system c */
+
 #include <stdint.h>
-#include <time.h>
 
-/* nokia api */
-#include <ost/dmx.h>
 
-int setDmxSctFilter (int fd, unsigned short pid, unsigned char * filter, unsigned char * mask);
-int setDmxPesFilter (int fd, dmxOutput_t output, dmxPesType_t pesType, unsigned short pid);
-int startDmxFilter (int fd);
-int stopDmxFilter (int fd);
+/* unique channel identification */
+typedef uint32_t t_channel_id;
+#define CREATE_CHANNEL_ID ((original_network_id << 16) | service_id)
 
-#endif /* __dmx_h__ */
+
+/* diseqc types */
+enum diseqc_t
+{
+	NO_DISEQC,
+	MINI_DISEQC,
+	DISEQC_1_0,
+	DISEQC_1_1,
+	SMATV_REMOTE_TUNING
+};
+
+
+#endif /* __zapit__types_h__ */

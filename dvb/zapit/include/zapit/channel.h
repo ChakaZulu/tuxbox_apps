@@ -1,5 +1,5 @@
 /*
- * $Id: channel.h,v 1.11 2002/09/11 21:14:22 thegoodguy Exp $
+ * $Id: channel.h,v 1.12 2002/09/20 16:55:22 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *	& Steffen Hehn <mcclean@berlios.de>
@@ -29,9 +29,7 @@
 
 /* zapit */
 #include <zapci/ci.h>
-
-typedef uint32_t t_channel_id;
-#define CREATE_CHANNEL_ID ((original_network_id << 16) | service_id)
+#include "types.h"
 
 class CZapitAudioChannel
 {

@@ -18,8 +18,6 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "zapitclient.h"
-
 #include <stdio.h>
 #include <unistd.h>
 
@@ -28,6 +26,15 @@
 #include <sys/un.h>
 
 #include <sys/socket.h>
+
+
+/* libevent */
+#include <eventserver.h>
+
+
+#include "zapitclient.h"
+
+
 
 CZapitClient::CZapitClient()
 {

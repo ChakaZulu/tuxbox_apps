@@ -1,5 +1,5 @@
 /*
- * $Id: pat.cpp,v 1.34 2002/09/18 20:00:05 thegoodguy Exp $
+ * $Id: pat.cpp,v 1.35 2002/09/20 16:53:39 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org> jaja :)
  *
@@ -22,6 +22,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+
+/* libevent */
+#include <eventserver.h>
 
 #include <clientlib/zapitclient.h>
 #include <scan.h>

@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.h,v 1.14 2002/08/27 20:01:38 obi Exp $
+ * $Id: frontend.h,v 1.15 2002/09/20 16:53:39 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -33,15 +33,6 @@
 #include <channel.h>
 
 #define MAX_LNBS	4
-
-enum diseqc_t
-{
-	NO_DISEQC,
-	MINI_DISEQC,
-	DISEQC_1_0,
-	DISEQC_1_1,
-	SMATV_REMOTE_TUNING
-};
 
 class CFrontend
 {

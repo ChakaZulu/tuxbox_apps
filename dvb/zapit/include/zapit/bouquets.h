@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.40 2002/09/19 10:24:50 thegoodguy Exp $
+ * $Id: bouquets.h,v 1.41 2002/09/20 16:55:22 thegoodguy Exp $
  */
 
 #ifndef __bouquets_h__
@@ -15,12 +15,6 @@
 
 #include "channel.h"
 #include "xmlinterface.h"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#else
-#define CONFIGDIR "/var/tuxbox/config/zapit"
-#endif
 
 using namespace std;
 

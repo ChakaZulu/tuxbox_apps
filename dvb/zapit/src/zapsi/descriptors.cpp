@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.38 2002/09/18 23:02:16 thegoodguy Exp $
+ * $Id: descriptors.cpp,v 1.39 2002/09/20 16:53:39 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -22,6 +22,9 @@
 #include <stdio.h>
 #include <map>
 #include <string>
+
+/* libevent */
+#include <eventserver.h>
 
 #include <clientlib/zapitclient.h>
 #include <zapost/frontend.h>

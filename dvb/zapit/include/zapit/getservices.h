@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.h,v 1.46 2002/09/19 13:12:01 thegoodguy Exp $
+ * $Id: getservices.h,v 1.47 2002/09/20 16:55:22 thegoodguy Exp $
  */
 
 #ifndef __getservices_h__
@@ -19,12 +19,6 @@
 #include <zapci/ci.h>
 #include <zapsi/descriptors.h>
 #include <zapsi/sdt.h>
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#else
-#define CONFIGDIR "/var/tuxbox/config"
-#endif
 
 #define zapped_chan_is_nvod 0x80
 

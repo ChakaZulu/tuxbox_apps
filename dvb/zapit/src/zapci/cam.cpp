@@ -1,5 +1,5 @@
 /*
- * $Id: cam.cpp,v 1.20 2002/08/27 21:12:36 thegoodguy Exp $
+ * $Id: cam.cpp,v 1.21 2002/09/20 16:53:39 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -31,7 +31,8 @@
 
 #include "cam.h"
 
-#define CAMD_UDS_NAME "/tmp/camd.socket"
+/* zapit */
+#include <settings.h>   // CAMD_UDS_NAME
 
 CCam::CCam ()
 {

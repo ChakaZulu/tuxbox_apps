@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.cpp,v 1.29 2002/09/18 23:02:16 thegoodguy Exp $
+ * $Id: sdt.cpp,v 1.30 2002/09/20 16:53:39 thegoodguy Exp $
  */
 
 /* system c */
@@ -12,6 +12,7 @@
 
 /* zapit */
 #include <zapost/dmx.h>
+#include <settings.h>  // DEMUX_DEV
 
 #include "descriptors.h"
 #include "sdt.h"
