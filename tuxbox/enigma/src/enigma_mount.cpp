@@ -189,7 +189,8 @@ int eMountPoint::mount()
 				system(eString("mkdir " + mp.localDir).c_str());
 			if (access(mp.localDir.c_str(), R_OK) == 0)
 			{
-				useoptions = mp.options + mp.ownOptions;
+				if (mp.ownOptions)
+					useoptions = mp.options + "," + mp.ownOptions;
 				if (useoptions[useoptions.length() - 1] == ',') //remove?
 					useoptions = useoptions.left(useoptions.length() - 1); //remove?
 				ip.sprintf("%d.%d.%d.%d", mp.ip[0], mp.ip[1], mp.ip[2], mp.ip[3]);
@@ -200,7 +201,10 @@ int eMountPoint::mount()
 						{
 							cmd = "mount -t nfs ";
 							cmd += ip + ":" + mp.mountDir + " " + mp.localDir + " -o ";
-							cmd += eString().sprintf("rsize=%d,wsize=%d", mp.rsize, mp.wsize);
+							if (mp.rsize != -1)
+								cmd += eString().sprintf("rsize=%d", mp.rsize);
+							if (mp.wsize != -1)
+								cmd += eString().sprintf(",wsize=%d", mp.wsize);
 							if (useoptions)
 								cmd += "," + useoptions;
 						}
