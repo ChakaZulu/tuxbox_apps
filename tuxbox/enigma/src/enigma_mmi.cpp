@@ -1,4 +1,5 @@
 #include <src/enigma_mmi.h>
+#include <src/enigma_main.h>
 #include <lib/gui/elabel.h>
 #include <lib/gui/echeckbox.h>
 #include <lib/gui/ebutton.h>
@@ -96,12 +97,10 @@ long LengthField(unsigned char *lengthfield,long maxlength,int *fieldlen)
 
 void enigmaMMI::showWaitForAnswer(int ret)
 {
-	eDebug("showWaitForAnswer(%d)", ret);
 	if ( ret != -1 )
 	{
 		if ( conn.connected() )
 		{
-			eDebug("showWaitForAnswer->show", ret);
 			show();
 			responseTimer.start(10000,true);
 		}
@@ -204,11 +203,10 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 		{
 			open->hide();
 			open->close(-2);
-			// we must delay executing of the next mmi window while
-			// the open mmi window is still executed... open->close()
+			// we must to delay exec'uting the next mmi window while
+			// the open mmi window is still in execution... open->close()
 			// set only the app_exit_loop boolean in the mainloop... but
-			// this takes not effect while the mainloop is busy...
-
+			// this takes no effect while the mainloop is busy...
 			scheduledData = data;
 			delayTimer.start(0,true);
 			return false;
@@ -264,11 +262,10 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 		{
 			open->hide();
 			open->close(-2);
-			// we must delay executing of the next mmi window while
-			// the open mmi window is still executed... open->close()
+			// we must to delay exec'uting the next mmi window while
+			// the open mmi window is still in execution... open->close()
 			// set only the app_exit_loop boolean in the mainloop... but
-			// this takes not effect while the mainloop is busy...
-
+			// this takes no effect while the mainloop is busy...
 			scheduledData = data;
 			delayTimer.start(0,true);
 			return false;
