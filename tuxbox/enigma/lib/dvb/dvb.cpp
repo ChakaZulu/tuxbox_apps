@@ -1154,13 +1154,26 @@ void eTransponderList::readLNBData()
 		{
 			eString tmp = tmpStr;
 			free(tmpStr);
-			for (unsigned int i=0; i < tmp.length(); i+=7)
+ 			if (!(tmp.length() % 7))
+ 			{
+				for (unsigned int i=0; i < tmp.length(); i+=7)
+				{
+					eString cur = tmp.mid(i);
+	 				int x = atoi( cur.mid(0,4).c_str() );
+	 				int y = atoi( cur.mid(4,3).c_str() ); 
+	//				eDebug("satpos = %d, pos=%d", y,x);
+					lnb.getDiSEqC().RotorTable[x] = y;
+				}
+			} else
 			{
-				eString cur = tmp.mid(i);
-				int x = atoi( cur.mid(0,4).c_str() );
-				int y = atoi( cur.mid(4,3).c_str() );
-//				eDebug("satpos = %d, pos=%d", y,x);
-				lnb.getDiSEqC().RotorTable[x] = y;
+				for (unsigned int i=0; i < tmp.length(); i+=8)
+				{
+					eString cur = tmp.mid(i);
+	 				int x = atoi( cur.mid(0,5).c_str() );
+	 				int y = atoi( cur.mid(5,3).c_str() ); 
+	//				eDebug("satpos = %d, pos=%d", y,x);
+					lnb.getDiSEqC().RotorTable[x] = y;
+				}
 			}
 		}
                                                                    
@@ -1309,9 +1322,9 @@ void eTransponderList::writeLNBData()
 		for ( std::map<int,int>::iterator i( it->getDiSEqC().RotorTable.begin() ); i != it->getDiSEqC().RotorTable.end(); ++i )
 		{
 			if ( i->first > 0 )
-				tmpStr+=eString().sprintf("+%03d%03d", i->first, i->second );
+				tmpStr+=eString().sprintf("+%04d%03d", i->first, i->second );
 			else
-				tmpStr+=eString().sprintf("%04d%03d", i->first, i->second );
+				tmpStr+=eString().sprintf("%05d%03d", i->first, i->second );
 		}
 //		eDebug("satpos %s",tmpStr.c_str());
 
