@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.85 2002/03/11 20:50:50 Simplex Exp $
+  $Id: zapit.cpp,v 1.86 2002/03/14 20:16:38 McClean Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -2232,6 +2232,20 @@ void parse_command()
 				send(connfd, &response, sizeof(response), 0);
 			break;
 
+			case CZapitClient::CMD_SCANSTART :
+				CZapitClient::commandStartScan msgStartScan;
+				read( connfd, &msgStartScan, sizeof(msgStartScan));
+		        start_scan(msgStartScan.satelliteMask);
+			break;
+
+			case CZapitClient::CMD_SCANREADY :
+				CZapitClient::responseIsScanReady msgResponseIsScanReady;
+				msgResponseIsScanReady.satellite   = curr_sat;
+				msgResponseIsScanReady.transponder = found_transponders;
+				msgResponseIsScanReady.services    = found_channels;
+				write( connfd, &msgStartScan, sizeof(msgStartScan));
+			break;
+			
 			case CZapitClient::CMD_BQ_ADD_BOUQUET :
 				CZapitClient::commandAddBouquet msgAddBouquet;
 				read( connfd, &msgAddBouquet, sizeof(msgAddBouquet));
@@ -2478,7 +2492,7 @@ int main (int argc, char **argv)
 	}
 
 	system("cp " CONFIGDIR "/zapit/last_chan /tmp/zapit_last_chan");
-	printf("Zapit $Id: zapit.cpp,v 1.85 2002/03/11 20:50:50 Simplex Exp $\n\n");
+	printf("Zapit $Id: zapit.cpp,v 1.86 2002/03/14 20:16:38 McClean Exp $\n\n");
 	scan_runs = 0;
 	found_transponders = 0;
 	found_channels = 0;
