@@ -428,6 +428,18 @@ static eString admin(eString request, eString dirpath, eString opts, eHTTPConnec
 	return "<html>" CHARSETMETA "<head><title>Error</title></head><body>Unknown admin command.(valid commands are: shutdown, reboot, restart, standby, wakeup) </body></html>";
 }
 
+static eString videocontrol(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	std::map<eString,eString> opt=getRequestOptions(opts);
+	eString command=opt["command"];
+	eString requester=opt["requester"];
+	if (command)
+	{
+		int i = 0;
+	}
+}
+
 static eString audio(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
@@ -765,7 +777,6 @@ static eString getStats()
 
 static eString getVolBar()
 {
-// returns the volumebar
 	eString result;
 	int volume = atoi(getVolume().c_str());
 
@@ -790,13 +801,39 @@ static eString getVolBar()
 	{
 		result += "<a class=\"mute\" href=\"javascript:Mute()\">";
 		result += "<img src=\"speak_off.gif\" border=0></a>";
-	} 
+	}
 	else
 	{
 		result += "<a class=\"mute\" href=\"javascript:unMute()\">";
 		result += "<img src=\"speak_on.gif\" border=0></a>";
 	}
 	result += "</td>";
+
+	result += "</tr>";
+	result += "</table>";
+	return result;
+}
+
+static eString getVideoBar()
+{
+	eString result;
+	int videopos = 0;
+
+	result += "<table cellspacing=\"0\" cellpadding=\"0\" border=\"0\">";
+	result += "<tr>";
+
+	for (int i = 1; i <= (videopos / 10); i++)
+	{
+		result += "<td width=15 height=8><a class=\"vidblue\" href=\"javascript:setVid(";
+		result += eString().setNum(i, 10);
+		result += ")\"><img src=\"trans.gif\" border=0></a></span></td>";
+	}
+	for (int i = (videopos / 10) + 1; i <= 10; i++)
+	{
+		result += "<td width=15 height=8><a class=\"vidnot\" href=\"javascript:setVid(";
+		result += eString().setNum(i, 10);
+  		result += ")\"><img src=\"trans.gif\" border=0></a></span></td>";
+	}
 
 	result += "</tr>";
 	result += "</table>";
@@ -871,20 +908,16 @@ static eString getZapContent(eString mode, eString path)
 
 	unsigned int pos = 0, lastpos = 0, temp = 0;
 
-	if ((path.find(";", 0)) == eString::npos )
+	if ((path.find(";", 0)) == eString::npos)
 		path = ";" + path;
 
-	while ((pos = path.find(";", lastpos)) != eString::npos )
+	while ((pos = path.find(";", lastpos)) != eString::npos)
 	{
 		lastpos = pos + 1;
-		if ((temp = path.find(";", lastpos)) != eString::npos )
-		{
+		if ((temp = path.find(";", lastpos)) != eString::npos)
 			tpath = path.mid(lastpos, temp - lastpos);
-		}
 		else
-		{
 			tpath = path.mid(lastpos, strlen(path.c_str()) - lastpos);
-		}
 
 		eServiceReference current_service=string2ref(tpath);
 		eServiceInterface *iface = eServiceInterface::getInstance();
@@ -1341,6 +1374,20 @@ static eString getContent(eString mode, eString path)
 		{
 			DELETE(#OPS#);
 		}
+#ifndef DISABLE_FILE
+		if (path == ";4097:7:0:1:0:0:0:0:0:0:")
+		{
+			eString tmpFile = read_file(TEMPLATE_DIR + "videocontrols.tmp");
+			tmpFile.strReplace("#VIDEOBAR#", getVideoBar());
+			result.strReplace("#VIDEOCONTROLS#", tmpFile);
+		}
+		else
+		{
+#endif
+			DELETE(#VIDEOCONTROLS#);
+#ifndef DISABLE_FILE
+		}
+#endif
 		result += zap_result;
 	}
 	else
@@ -1377,7 +1424,7 @@ static eString getContent(eString mode, eString path)
 	if (mode == "about")
 	{
 		result = getTitle("About");
-		result += "Enigma Web Control<br>Version 0.4";
+		result += "Enigma Web Control<br>Version 0.5";
 	}
 	else
 	if (mode == "aboutDreambox")
@@ -1633,18 +1680,14 @@ public:
 	{
 		std::stringstream result;
 
-		int tablePos = 0;
-
 		result << "<table width=" << tableWidth << " border=1 rules=all>"
 			"<tr>"
 			"<td width=200>Channel</td>";
 
-		time_t i = start;
-		for (tablePos = 200; tablePos < tableWidth; tablePos += 15 * d_min)
+		for (time_t i = start; i < end; i += 15 * 60)
 		{
 			tm* t = localtime(&i);
 			result << "<td width=" << d_min * 15 << ">"
-//				<< tablePos << "<br>"
 				<< std::setfill('0')
 				<< std::setw(2) << t->tm_mday << '.'
 				<< std::setw(2) << t->tm_mon+1 << "."
@@ -1652,7 +1695,6 @@ public:
 				<< std::setw(2) << t->tm_hour << ':'
 				<< std::setw(2) << t->tm_min << ' '
 				<< "</td>";
-			i += 15 * 60;
 		}
 
 		result << "</tr>"
@@ -1730,10 +1772,10 @@ public:
 								colWidth = eventDuration  / 60 * d_min;
 								if (colWidth > 0)
 								{
-									tm* t2 = localtime(&tableTime);
 									result << "<td width=" << colWidth << ">"
 										<< "<span class=\"epg\">";
 #if 0
+									tm* t2 = localtime(&tableTime);
 									result << tablePos << "/" << colWidth << ":"
 										<< std::setfill('0')
 										<< std::setw(2) << t2->tm_mday << '.'
@@ -1804,8 +1846,7 @@ static eString getMultiEPG(eString request, eString dirpath, eString opts, eHTTP
 	eServiceReference bouquetRef = string2ref(refs);
 
 	mepg.start = time(0) + eDVB::getInstance()->time_difference;
-	unsigned int tmp = mepg.start % 900;  // align to 15 min
-	mepg.start -= (tmp + 60 * 60); // start 1 hour before now
+	mepg.start -= ((mepg.start % 900) + (60 * 60)); // align to 15 mins & start 1 hour before now
 	mepg.end = mepg.start + mepg.hours * 3600;
 	mepg.tableWidth = ((mepg.end - mepg.start) / 60 * mepg.d_min) + 200;
 	mepg.multiEPG = "";
@@ -1891,7 +1932,7 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 		}
 	}
 
-	eString tmp2 = read_file(TEMPLATE_DIR+"epg.tmp");
+	eString tmp2 = read_file(TEMPLATE_DIR + "epg.tmp");
 	tmp2.strReplace("#CHANNEL#", filter_string(current->service_name));
 	tmp2.strReplace("#BODY#", result.str());
 	return tmp2;
@@ -1957,13 +1998,13 @@ static eString getsi(eString request, eString dirpath, eString opts, eHTTPConnec
 		switch (aspect)
 		{
 		case 1:
-			vidform+="square"; break;
+			vidform += "(square)"; break;
 		case 2:
-			vidform+="4:3"; break;
+			vidform += "(4:3)"; break;
 		case 3:
-			vidform+="16:9"; break;
+			vidform += "(16:9)"; break;
 		case 4:
-			vidform+="20:9"; break;
+			vidform += "(20:9)"; break;
 		}
 	}
 
@@ -2664,6 +2705,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/pause", pause);
 	dyn_resolver->addDyn("GET", "/cgi-bin/play", play);
 	dyn_resolver->addDyn("GET", "/cgi-bin/record", record);
+	dyn_resolver->addDyn("GET", "/cgi-bin/videocontrol", videocontrol);
 #endif
 	dyn_resolver->addDyn("GET", "/setVolume", setVolume);
 	dyn_resolver->addDyn("GET", "/showTimerList", showTimerList, true);
