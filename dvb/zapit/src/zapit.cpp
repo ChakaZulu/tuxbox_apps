@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.203 2002/08/29 11:28:04 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.204 2002/08/29 13:36:18 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -571,8 +571,10 @@ int prepare_channels ()
 	{
 		return -1;
 	}
+	printf("[zapit] services have been loaded successfully\n");
 
 	bouquetManager->loadBouquets();
+	printf("[zapit] bouquets have been loaded successfully\n");
 	bouquetManager->renumServices();
 
 	return 0;
@@ -1133,7 +1135,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.203 2002/08/29 11:28:04 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.204 2002/08/29 13:36:18 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{

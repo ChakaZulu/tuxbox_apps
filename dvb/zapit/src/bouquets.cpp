@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.35 2002/08/29 12:29:30 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.36 2002/08/29 13:36:18 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -798,7 +798,7 @@ CBouquetManager::ChannelIterator CBouquetManager::ChannelIterator::operator ++(i
 		c++;
 		if ((unsigned int) c >= getBouquet()->size())
 		{
-			for (; b < Owner->Bouquets.size(); b++)
+			for (b++; b < Owner->Bouquets.size(); b++)
 				if (getBouquet()->size() != 0)
 				{
 					c = 0;
