@@ -1,4 +1,4 @@
-menu.back wróc
+menu.back wrÃ³c
 
 options.off wyl
 options.on wla
@@ -6,7 +6,7 @@ options.serial szeregowy
 options.fb ekran
 options.null brak
 
-mainmenu.head Menu glówne
+mainmenu.head Menu glÃ³wne
 mainmenu.tvmode Telewizja
 mainmenu.radiomode Radio
 mainmenu.scartmode Tryb Euro
@@ -35,9 +35,9 @@ satsetup.minidiseqc Mini-DiSEqC
 satsetup.diseqc10 DiSEqC 1.0
 satsetup.diseqc11 DiSEqC 1.1
 satsetup.smatvremote Strojenie SMATV
-satsetup.diseqcrepeat DiSEqC-powtórzenia
+satsetup.diseqcrepeat DiSEqC-powtÃ³rzenia
 
-mainsettings.head Glówne ustawienia
+mainsettings.head GlÃ³wne ustawienia
 mainsettings.savesettingsnow Zapisz natychmiast ustawienia
 mainsettings.language Jezyk
 mainsettings.audio Dzwiek
@@ -55,7 +55,7 @@ miscsettings.head Inne Ustawienia
 miscsettings.shutdown_real Zalacz Standby
 miscsettings.boxtype Tyb DBox'a
 miscsettings.startneutrinodirect Bezposrednio Neutrino
-miscsettings.general Glówne
+miscsettings.general GlÃ³wne
 miscsettings.fb_destination Ekspert! -konsola
 
 languagesetup.head Wybor jezyka
@@ -115,10 +115,10 @@ ping.unreachable nieosiagalny
 ping.protocol nieosiagalny (blad hosta lub protokolu )
 ping.socket nieosiagalny (socket error)
 
-ipsetup.hint_1 Klawisze 0...9, albo Góra/Dól,
+ipsetup.hint_1 Klawisze 0...9, albo GÃ³ra/DÃ³l,
 ipsetup.hint_2 OK zapisuje, Home wychodzi
 
-colormenu.head Ustawienia kolorów
+colormenu.head Ustawienia kolorÃ³w
 colormenu.statusbar Listwa statusowa
 colormenu.themeselect Wybor tematu
 colormenu.font Czcionka
@@ -145,11 +145,11 @@ colorstatusbar.text Listwa Statusowa
 
 timing.head Czas wyswietlania OSD
 timing.menu Menu
-timing.chanlist Lista kanalów
+timing.chanlist Lista kanalÃ³w
 timing.epg EPG
 timing.infobar Info
-timing.filebrowser Przegldarka plików
-timing.hint_1 Czas w sekundach po którym
+timing.filebrowser Przegldarka plikÃ³w
+timing.hint_1 Czas w sekundach po ktÃ³rym
 timing.hint_2 listwa info zostanie wygaszona
 
 pluginmenu.head Menu dodatki
@@ -157,24 +157,24 @@ tuxnews.size Rozmiar
 tuxnews_size.small Maly
 tuxnews_size.medium Sredni
 tuxnews_size.large Duzy
-tuxnews.speed Prêdkoœæ
+tuxnews.speed PrÃªdkoœÃ¦
 tuxnews_speed.slow Wolno
 tuxnews_speed.medium Srednio
 tuxnews_speed.fast Szybko
 tuxnews.position Pozycja
-tuxnews_position.top Góra
+tuxnews_position.top GÃ³ra
 tuxnews_position.center Srodek
-tuxnews_position.bottom Dól
+tuxnews_position.bottom DÃ³l
 
 repeatblocker.hint_1 czas (w ms) pomiedzy nacisnieciami klawisza
 repeatblocker.hint_2 0 wylacza blokade (czerwony jest " ")
 
 keybindingmenu.RC Pilot
-keybindingmenu.repeatblock opóznienie samopotarzania
-keybindingmenu.repeatblockgeneric podstawowe opóznienie
+keybindingmenu.repeatblock opÃ³znienie samopotarzania
+keybindingmenu.repeatblockgeneric podstawowe opÃ³znienie
 keybindingmenu.head Ustawienia klawiszy
 keybindingmenu.modechange Zmiana Trybu
-keybindingmenu.channellist Lista kanalów
+keybindingmenu.channellist Lista kanalÃ³w
 keybindingmenu.quickzap Szybkie przelaczanie
 keybindingmenu.tvradiomode Telewizja/radio
 keybindingmenu.tvradiomode_head Telewizja/radio
@@ -186,22 +186,22 @@ keybindingmenu.cancel Zamknij liste kanalow
 keybindingmenu.cancel_head Zamknij liste kanalow
 keybindingmenu.sort Sortuj
 keybindingmenu.sort_head Sortuj
-keybindingmenu.channelup Kanal do góry
-keybindingmenu.channelup_head Kanal do góry
+keybindingmenu.channelup Kanal do gÃ³ry
+keybindingmenu.channelup_head Kanal do gÃ³ry
 keybindingmenu.channeldown Kanal na dol
-keybindingmenu.channeldown_head Kanal na dól
+keybindingmenu.channeldown_head Kanal na dÃ³l
 keybindingmenu.bouquetup Nastepny bukiet
 keybindingmenu.bouquetup_head Nastepny bukiet
 keybindingmenu.bouquetdown Poprzedni bukiet
 keybindingmenu.bouquetdown_head Poprzedni bukiet
-keybindingmenu.bouquethandling Kontrola bukietów
+keybindingmenu.bouquethandling Kontrola bukietÃ³w
 keybindingmenu.bouquetchannels_on_ok Biezacy bukiet
-keybindingmenu.bouquetlist_on_ok Lista bukietów
+keybindingmenu.bouquetlist_on_ok Lista bukietÃ³w
 keybindingmenu.allchannels_on_ok Wszystkie programy
-keybindingmenu.subchannelup Podprogram do góry
-keybindingmenu.subchannelup_head Podprogram do góry
-keybindingmenu.subchanneldown Podprogram na dól
-keybindingmenu.subchanneldown_head Podprogram na dól
+keybindingmenu.subchannelup Podprogram do gÃ³ry
+keybindingmenu.subchannelup_head Podprogram do gÃ³ry
+keybindingmenu.subchanneldown Podprogram na dÃ³l
+keybindingmenu.subchanneldown_head Podprogram na dÃ³l
 
 colorchooser.red czer.
 colorchooser.green ziel.
@@ -248,7 +248,7 @@ infoviewer.waittime Oczekiwanie na czas...
 
 epgviewer.notfound EPG-Informacje nie znalezione
 epgviewer.nodetailed Informacje nie sa dostepne
-epgviewer.More_Screenings Powtórki na tym kanale:
+epgviewer.More_Screenings PowtÃ³rki na tym kanale:
 epglist.head Przeglad - %s
 epglist.noevents EPG niedostepne...
 
@@ -395,7 +395,7 @@ bouqueteditor.return Gotowy
 messagebox.yes tak
 messagebox.no nie
 messagebox.cancel anuluj
-messagebox.back wróc
+messagebox.back wrÃ³c
 messagebox.error blad
 messagebox.discard anulowac zmiany?
 messagebox.info informacje
@@ -404,7 +404,7 @@ settings.noconffile Nie znaleziono ustawien.\nUzyje fabrycznych.
 settings.missingoptionsconffile Ustawienia Neutrino zaktualizowane.\nNowe opcje zostana dodane do fabrycznych.
 
 cam.wrong UWAGA, TWOJA KARTA \nJEST NIEZGODNA  Z CAMALPHA.BIN!!\n\Czy ponawiac to ostrzezenie?
-ucodes.failure UWAGA, brak µCodes!\n\nWyslij je przez FTP (lub przez DBox-BootManager),\npotem zrestartuj DBox'a!
+ucodes.failure UWAGA, brak ÂµCodes!\n\nWyslij je przez FTP (lub przez DBox-BootManager),\npotem zrestartuj DBox'a!
 
 stringinput.caps duze/male
 stringinput.clear usun wszystko
@@ -446,11 +446,11 @@ GENRE.SPORTS.10 jazda konna
 GENRE.SPORTS.11 sporty wojskowe
 
 GENRE.CHILDRENs_PROGRAMMES.0 dla dzieci/mlodziezy
-GENRE.CHILDRENs_PROGRAMMES.1 programy dla przedszkolaków
+GENRE.CHILDRENs_PROGRAMMES.1 programy dla przedszkolakÃ³w
 GENRE.CHILDRENs_PROGRAMMES.2 programy rozrywkowe od 6 do 14 lat
 GENRE.CHILDRENs_PROGRAMMES.3 programy rozrywkowe od 10 do 16 lat
 GENRE.CHILDRENs_PROGRAMMES.4 programy edukacyjne/szkolne
-GENRE.CHILDRENs_PROGRAMMES.5 kreskówki
+GENRE.CHILDRENs_PROGRAMMES.5 kreskÃ³wki
 
 GENRE.MUSIC_DANCE.0 muzyka/balet/taniec
 GENRE.MUSIC_DANCE.1 rock/pop
@@ -487,8 +487,8 @@ GENRE.DOCUS_MAGAZINES.5 nauki spoleczne/duchowe
 GENRE.DOCUS_MAGAZINES.6 szkolnictwo wyzsze
 GENRE.DOCUS_MAGAZINES.7 jezyki
 
-GENRE.TRAVEL_HOBBIES.0 Podróze i wolny czas
-GENRE.TRAVEL_HOBBIES.1 turystyka/podróze
+GENRE.TRAVEL_HOBBIES.0 PodrÃ³ze i wolny czas
+GENRE.TRAVEL_HOBBIES.1 turystyka/podrÃ³ze
 GENRE.TRAVEL_HOBBIES.2 rzemioslo
 GENRE.TRAVEL_HOBBIES.3 motoryzacja
 GENRE.TRAVEL_HOBBIES.4 fitness i zdrowie
@@ -521,10 +521,10 @@ pinprotection.wrongcode Bledny PIN-kod! Popraw.
 pinprotection.head Wprowadz kod PIN
 
 favorites.bouquetname Moje Ulubione
-favorites.nobouquets Ulubione dostepne sa wylacznie dla aktywnych Bukietów.
+favorites.nobouquets Ulubione dostepne sa wylacznie dla aktywnych BukietÃ³w.
 favorites.addchannel Biezacy kanal zostanie dodany \ndo bukietu "Moje Ulubione". \n To moze potrwac kilka sekund...
 favorites.menueadd Dodaj kanal do ulubionych
-favorites.bqcreated Bukiuet "Moje Ulubione" zosta³ utworzony...\n
+favorites.bqcreated Bukiuet "Moje Ulubione" zostaÂ³ utworzony...\n
 favorites.chadded Bierzacy kanal zostal dodany do ulubionych...\n
 favorites.chalreadyinbq Ten kanal jest juz w twoich ulubionych...\n
 favorites.finalhint \nUzyj edytora bukietow aby zmienic twoje ulubione.\n
@@ -540,7 +540,7 @@ shutdowntimer.announce Dbox wylaczy sie za minute\nZatrzymac wylaczanie ?
 
 timerbar.channelswitch Przeglad
 timerbar.recordevent Nagrywanie
-timer.eventtimed.title Przeglad eventów
+timer.eventtimed.title Przeglad eventÃ³w
 timer.eventtimed.msg Eventy ustaione.\nDbox wlaczy sie i\nustawi na tym kanale o czasie.
 timer.eventrecord.title Przeglad nagran
 timer.eventrecord.msg ... Zrobione, lub nie zrobione... 
@@ -593,7 +593,7 @@ timerlist.message Wiadomosc
 timerlist.apids Audio PIDs
 timerlist.bouquetselect Wybierz bukiet
 timerlist.channelselect Wybierz kanal
-timerlist.modeselect Wybór trybu
+timerlist.modeselect WybÃ³r trybu
 timerlist.modetv Kanaly TV
 timerlist.moderadio Kanaly radiowe
 timersettings.separator Ustawienia timera
@@ -616,7 +616,7 @@ fontsize.eventlist_title Tytul
 fontsize.eventlist_itemlarge duzy
 fontsize.eventlist_itemsmall maly
 fontsize.eventlist_datetime data / czas
-fontsize.channellist Lista kanalów
+fontsize.channellist Lista kanalÃ³w
 fontsize.channellist_descr Opis
 fontsize.channellist_number Numer
 fontsize.channel_num_zap bez zaplisty

@@ -227,7 +227,7 @@ keychooser.text1 Please press the new key
 keychooser.text2 wait a few seconds for abort
 
 screensetup.upperleft rot = setup upper left
-screensetup.lowerright grün = setup lower right
+screensetup.lowerright grÃ¼n = setup lower right
 
 channellist.head All Services
 channellist.nonefound No channels were found!\nPlease execute a scan\n(dbox-key -> service)
@@ -404,7 +404,7 @@ settings.noconffile No neutrino-settings found.\nUseing defaults.
 settings.missingoptionsconffile The neutrino-settings have been updated.\nNew Options will be set to default.
 
 cam.wrong ATTENTION, YOUR CARD \nDOES NOT MATCH CAMALPHA.BIN!!\n\nDo you whish to get this warning again?
-ucodes.failure ATTENTION, µCodes could NOT be found!\n\nPlease upload them via FTP (or DBox-BootManager),\nthen restart your DBox!
+ucodes.failure ATTENTION, ÂµCodes could NOT be found!\n\nPlease upload them via FTP (or DBox-BootManager),\nthen restart your DBox!
 
 stringinput.caps caps / no caps
 stringinput.clear clear all

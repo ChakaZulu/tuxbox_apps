@@ -1,4 +1,4 @@
-menu.back Zurück
+menu.back ZurÃ¼ck
 
 options.off aus
 options.on ein
@@ -6,7 +6,7 @@ options.serial seriell
 options.fb framebuffer
 options.null null
 
-mainmenu.head Hauptmenü
+mainmenu.head HauptmenÃ¼
 mainmenu.tvmode TV-Modus
 mainmenu.radiomode Radio-Modus
 mainmenu.scartmode Scart-Eingang
@@ -23,7 +23,7 @@ mainmenu.recording_stop Stopp
 servicemenu.head Service
 servicemenu.update Software-Aktualisierung
 servicemenu.scants Kanalsuche
-servicemenu.ucodecheck UCodes überprüfen
+servicemenu.ucodecheck UCodes Ã¼berprÃ¼fen
 
 cablesetup.provider Kabelanbieter
 
@@ -96,7 +96,7 @@ networkmenu.gateway Standard Gateway
 networkmenu.nameserver Nameserver
 
 recordingmenu.head Aufnahme Einstellungen
-recordingmenu.recording_type Aufnahme Gerät
+recordingmenu.recording_type Aufnahme GerÃ¤t
 recordingmenu.server_ip Aufnahmeserver IP
 recordingmenu.server_port Aufnahmeserver Port
 recordingmenu.stopplayback Playback anhalten
@@ -107,8 +107,8 @@ recordingmenu.server Server
 recordingmenu.vcr Video Rekorder
 recordingmenu.server_wakeup Aufnahmeserver WOL
 recordingmenu.server_mac Mac Adresse
-recordingmenu.setupnow Einstellungen jetzt übernehmen
-recordingmenu.no_scart Unterdrücke Scart-Umschaltung
+recordingmenu.setupnow Einstellungen jetzt Ã¼bernehmen
+recordingmenu.no_scart UnterdrÃ¼cke Scart-Umschaltung
 
 ping.ok ist erreichbar (ping)
 ping.unreachable ist nicht erreichbar (unreachable)
@@ -120,21 +120,21 @@ ipsetup.hint_2 OK speichert, Home bricht ab
 
 colormenu.head Farb-Einstellungen
 colormenu.statusbar Statusbalken
-colormenu.themeselect Theme auswählen
-colormenu.font Schriftgrösse
-colormenu.menucolors Menüfarben
+colormenu.themeselect Theme auswÃ¤hlen
+colormenu.font SchriftgrÃ¶sse
+colormenu.menucolors MenÃ¼farben
 colormenu.background Hintergrundfarbe
 colormenu.background_head Hintergrundfarbe
 colormenu.textcolor Textfarbe
 colormenu.textcolor_head Textfarbe
-colormenu.fade Menüs faden
+colormenu.fade MenÃ¼s faden
 colormenu.timing OSD Timeouts
 
-colorthememenu.head Theme auswählen
+colorthememenu.head Theme auswÃ¤hlen
 colorthememenu.neutrino_theme Neutrino Theme
 colorthememenu.classic_theme Klassik
 
-colormenusetup.head Menüfarben
+colormenusetup.head MenÃ¼farben
 colormenusetup.menuhead Titelleiste
 colormenusetup.menucontent Fensterinhalt
 colormenusetup.menucontent_inactive Fensterinhalt deaktiviert
@@ -153,7 +153,7 @@ timing.hint_1 Einblendzeit in Sek., die das OSD
 timing.hint_2 auf dem TV angezeigt wird
 
 pluginmenu.head Plugin Einstellungen
-tuxnews.size Tuxnews Größe
+tuxnews.size Tuxnews GrÃ¶ÃŸe
 tuxnews_size.small klein
 tuxnews_size.medium mittel
 tuxnews_size.large gross
@@ -166,45 +166,45 @@ tuxnews_position.top oben
 tuxnews_position.center mitte
 tuxnews_position.bottom unten
 
-repeatblocker.hint_1 Mindestzeit (in ms) zwischen 2 Tastendrücken
+repeatblocker.hint_1 Mindestzeit (in ms) zwischen 2 TastendrÃ¼cken
 repeatblocker.hint_2 0 schaltet den Blocker aus (Rot ist " ")
 
 keybindingmenu.RC Fernbedienung
-keybindingmenu.repeatblock Wiederholungsverzögerung
-keybindingmenu.repeatblockgeneric Anfangsverzögerung
+keybindingmenu.repeatblock WiederholungsverzÃ¶gerung
+keybindingmenu.repeatblockgeneric AnfangsverzÃ¶gerung
 keybindingmenu.head Tasten-Einstellungen
 keybindingmenu.modechange Modus wechsel
 keybindingmenu.channellist Kanalliste
 keybindingmenu.quickzap Schnellumschaltung
 keybindingmenu.tvradiomode Fernseh-/Radio-Modus
 keybindingmenu.tvradiomode_head Fernseh-/Radio-Modus
-keybindingmenu.pageup Seite hochblättern
-keybindingmenu.pageup_head Seite hochblättern
-keybindingmenu.pagedown Seite runterblättern
-keybindingmenu.pagedown_head Seite runterblättern
-keybindingmenu.cancel Kanalliste schließen
-keybindingmenu.cancel_head Kanalliste schließen
-keybindingmenu.sort Sortierreihenfolge ändern
-keybindingmenu.sort_head Sortierreihenfolge ändern
+keybindingmenu.pageup Seite hochblÃ¤ttern
+keybindingmenu.pageup_head Seite hochblÃ¤ttern
+keybindingmenu.pagedown Seite runterblÃ¤ttern
+keybindingmenu.pagedown_head Seite runterblÃ¤ttern
+keybindingmenu.cancel Kanalliste schlieÃŸen
+keybindingmenu.cancel_head Kanalliste schlieÃŸen
+keybindingmenu.sort Sortierreihenfolge Ã¤ndern
+keybindingmenu.sort_head Sortierreihenfolge Ã¤ndern
 keybindingmenu.channelup Kanal hoch
 keybindingmenu.channelup_head Kanal hoch Taste
 keybindingmenu.channeldown Kanal runter
 keybindingmenu.channeldown_head Kanal runter Taste
 keybindingmenu.bouquetup Bouquet weiter
 keybindingmenu.bouquetup_head Bouquet weiter Taste
-keybindingmenu.bouquetdown Bouquet zurück
-keybindingmenu.bouquetdown_head Bouquet zurück Taste
-keybindingmenu.bouquethandling OK-Taste für
-keybindingmenu.bouquetchannels_on_ok Bouquet-Kanäle
+keybindingmenu.bouquetdown Bouquet zurÃ¼ck
+keybindingmenu.bouquetdown_head Bouquet zurÃ¼ck Taste
+keybindingmenu.bouquethandling OK-Taste fÃ¼r
+keybindingmenu.bouquetchannels_on_ok Bouquet-KanÃ¤le
 keybindingmenu.bouquetlist_on_ok Bouquetliste
 keybindingmenu.allchannels_on_ok Kanalliste
 keybindingmenu.subchannelup Unterkanal weiter
 keybindingmenu.subchannelup_head Unterkanal weiter
-keybindingmenu.subchanneldown Unterkanal zurück
-keybindingmenu.subchanneldown_head Unterkanal zurück
+keybindingmenu.subchanneldown Unterkanal zurÃ¼ck
+keybindingmenu.subchanneldown_head Unterkanal zurÃ¼ck
 
 colorchooser.red rot
-colorchooser.green grün
+colorchooser.green grÃ¼n
 colorchooser.blue blau
 colorchooser.alpha alpha
 
@@ -223,14 +223,14 @@ keychoosermenu.setnone Keine Taste
 keychoosermenu.currentkey Derzeitige Taste
 
 keychooser.head Neue Taste einstellen
-keychooser.text1 Bitte Taste drücken
+keychooser.text1 Bitte Taste drÃ¼cken
 keychooser.text2 Zum abbrechen warten..
 
 screensetup.upperleft rot = Bildrand oben, links
-screensetup.lowerright grün = Bildrand unten, rechts
+screensetup.lowerright grÃ¼n = Bildrand unten, rechts
 
 channellist.head Alle KanÃ¤le
-channellist.nonefound Es wurden keine Kanäle gefunden!\nFühren Sie bitte eine Kanalsuche durch\n(dbox-Taste -> Service)
+channellist.nonefound Es wurden keine KanÃ¤le gefunden!\nFÃ¼hren Sie bitte eine Kanalsuche durch\n(dbox-Taste -> Service)
 channellist.since seit %02d:%02d
 
 infoviewer.epgnotload Informationen noch nicht geladen...
@@ -238,43 +238,43 @@ infoviewer.epgwait Warte auf EPG-Informationen...
 infoviewer.streaminfo Features
 infoviewer.eventlist Programm
 infoviewer.languages Tonwahl
-infoviewer.notavailable Kanal (zur Zeit) nicht verfügbar
-infoviewer.cantdecode Kanal kann nicht entschlüsselt werden
+infoviewer.notavailable Kanal (zur Zeit) nicht verfÃ¼gbar
+infoviewer.cantdecode Kanal kann nicht entschlÃ¼sselt werden
 infoviewer.selecttime Startzeiten
 infoviewer.nocurrent Keine Info zu laufendem Programm
-infoviewer.noepg Keine EPG-Information verfügbar
+infoviewer.noepg Keine EPG-Information verfÃ¼gbar
 infoviewer.subservice Bildregie
 infoviewer.waittime Warte auf Uhrzeit...
 
 epgviewer.notfound keine Programminformationen (EPG) gefunden
-epgviewer.nodetailed Keine ausführlichen Informationen verfügbar
+epgviewer.nodetailed Keine ausfÃ¼hrlichen Informationen verfÃ¼gbar
 epgviewer.More_Screenings Weitere Termine auf diesem Kanal
 epglist.head Vorschau - %s
-epglist.noevents Keine EPG-Information verfügbar.
+epglist.noevents Keine EPG-Information verfÃ¼gbar.
 
 streaminfo.head Informationen
-streaminfo.resolution Auflösung
+streaminfo.resolution AuflÃ¶sung
 streaminfo.bitrate Bitrate
-streaminfo.aratio Verhältnis
-streaminfo.aratio_unknown Verhältnis: unbekannt
+streaminfo.aratio VerhÃ¤ltnis
+streaminfo.aratio_unknown VerhÃ¤ltnis: unbekannt
 streaminfo.framerate Bildrate
 streaminfo.framerate_unknown Bildrate: unbekannt
 streaminfo.audiotype Audiotyp
 streaminfo.audiotype_unknown Audiotyp: unbekannt
-streaminfo.not_crypted nicht verschlüsselt
-streaminfo.ecm_invalid ungültiges CA-System
-streaminfo.not_available nicht verfügbar
+streaminfo.not_crypted nicht verschlÃ¼sselt
+streaminfo.ecm_invalid ungÃ¼ltiges CA-System
+streaminfo.not_available nicht verfÃ¼gbar
 
 streamfeatures.head Features
 streamfeatures.info Stream-Information
 
 apidselector.head Sprachauswahl
 
-nvodselector.head Anfangszeit auswählen
+nvodselector.head Anfangszeit auswÃ¤hlen
 nvodselector.subservice Perspektiven
 nvodselector.directormode Bildregie-Modus
 
-ucodecheck.head UCode Überprüfung
+ucodecheck.head UCode ÃœberprÃ¼fung
 ucodecheck.avia500 Avia 500
 ucodecheck.avia600 Avia 600
 ucodecheck.ucode UCode
@@ -290,7 +290,7 @@ date.Sun  So
 
 date.Jan  Jan
 date.Feb  Feb
-date.Mar  Mär
+date.Mar  MÃ¤r
 date.Apr  Apr
 date.May  Mai
 date.Jun  Jun
@@ -317,9 +317,9 @@ scants.tuerksat Tuerksat
 scants.transponders Transponder:
 scants.services Services:
 scants.bouquet Bouquets
-scants.bouquet_leave nicht ändern
+scants.bouquet_leave nicht Ã¤ndern
 scants.bouquet_create neu erstellen
-scants.bouquet_erase löschen
+scants.bouquet_erase lÃ¶schen
 scants.finished Kanalsuche erfolgreich beendet!
 
 flashupdate.head Aktualisierung
@@ -329,11 +329,11 @@ flashupdate.getinfofile lade Versioninfo
 flashupdate.getinfofileerror kann Info nicht laden
 flashupdate.getupdatefile lade Update
 flashupdate.getupdatefileerror kann Update nicht laden
-flashupdate.cantopenfile kann Datei nicht öffnen
-flashupdate.fileis0bytes die Dateigröße ist 0 Byte
-flashupdate.eraseingflash lösche Flash
+flashupdate.cantopenfile kann Datei nicht Ã¶ffnen
+flashupdate.fileis0bytes die DateigrÃ¶ÃŸe ist 0 Byte
+flashupdate.eraseingflash lÃ¶sche Flash
 flashupdate.programmingflash programmiere Flash
-flashupdate.cantopenmtd kann das MTD-Device nicht öffen
+flashupdate.cantopenmtd kann das MTD-Device nicht Ã¶ffen
 flashupdate.ready fertig
 flashupdate.reboot Die DBox wird neu gestartet
 flashupdate.updatemode Updatemodus
@@ -345,9 +345,9 @@ flashupdate.currentversiontime Uhrzeit
 flashupdate.currentversionbaseversion Basisimage
 flashupdate.currentversionsnapshot ImageTyp
 flashupdate.checkupdate nach neuer Version suchen
-flashupdate.versioncheck Versionsüberprüfung
-flashupdate.nonewversion keine neue Version verfügbar
-flashupdate.md5check Imageprüfung
+flashupdate.versioncheck VersionsÃ¼berprÃ¼fung
+flashupdate.nonewversion keine neue Version verfÃ¼gbar
+flashupdate.md5check ImageprÃ¼fung
 flashupdate.md5sumerror Das Image ist fehlerhaft
 flashupdate.proxyserver_sep Proxyserver
 flashupdate.proxyserver Proxyname
@@ -374,20 +374,20 @@ flashupdate.fileselector Datei-Auswahl
 flashupdate.titlewriteflash Flash schreiben
 flashupdate.actionwriteflash schreibe flash
 flashupdate.flashreadyreboot Das Image wurde erfolgreich geflasht.\nIhre DBox wird jetzt neu gestartet.
-flashupdate.reallyflashmtd Wollen Sie den Flashvorgang wirklich durchführen?\n\nFalls ein Fehler auftritt oder das Image nicht\nfunktionfähig ist, wird Ihre DBox nicht mehr booten.\n\nImagename: %s\nZiel: %s
+flashupdate.reallyflashmtd Wollen Sie den Flashvorgang wirklich durchfÃ¼hren?\n\nFalls ein Fehler auftritt oder das Image nicht\nfunktionfÃ¤hig ist, wird Ihre DBox nicht mehr booten.\n\nImagename: %s\nZiel: %s
 
 bouqueteditor.name Bouquet-Verwaltung
-bouqueteditor.delete Löschen
-bouqueteditor.add Hinzufügen
+bouqueteditor.delete LÃ¶schen
+bouqueteditor.add HinzufÃ¼gen
 bouqueteditor.move Verschieben
 bouqueteditor.rename Umbenennen
 bouqueteditor.hide Verstecken
 bouqueteditor.lock Sperren
 bouqueteditor.newbouquetname Neuer Name des Bouquets
 bouqueteditor.bouquetname Name des Bouquets
-bouqueteditor.savechanges? Sollen die Änderungen gespeichert werden?
-bouqueteditor.savingchanges Änderungen werden gespeichert. Bitte warten ...
-bouqueteditor.discardingchanges Änderungen werden verworfen. Bitte warten ...
+bouqueteditor.savechanges? Sollen die Ã„nderungen gespeichert werden?
+bouqueteditor.savingchanges Ã„nderungen werden gespeichert. Bitte warten ...
+bouqueteditor.discardingchanges Ã„nderungen werden verworfen. Bitte warten ...
 bouqueteditor.switch Kanal aufnehmen/entfernen
 bouqueteditor.switchmode TV/Radio
 bouqueteditor.return Fertig
@@ -395,19 +395,19 @@ bouqueteditor.return Fertig
 messagebox.yes Ja
 messagebox.no Nein
 messagebox.cancel Abbruch
-messagebox.back Zurück
+messagebox.back ZurÃ¼ck
 messagebox.error Fehler
-messagebox.discard Wollen Sie die Änderungen verwerfen?
+messagebox.discard Wollen Sie die Ã„nderungen verwerfen?
 messagebox.info Information
 
 settings.noconffile Die Neutrino-Einstellungen wurden nicht\ngefunden. Es werden Standardwerte benutzt.
 settings.missingoptionsconffile Die Neutrino-Einstellungen wurden erweitert.\nDie neuen Werte werden auf Standard gesetzt.
 
 cam.wrong Achtung, Ihre CAM_ALPHA.BIN passt\nnicht zu Ihrer Smart-Card!!!\n\nWollen Sie diese Warnung wieder sehen?
-ucodes.failure Achtung, die µCodes wurden NICHT gefunden!\n\nBitte per FTP (oder DBox-BootManager)\nuploaden, und die DBox neu starten!
+ucodes.failure Achtung, die ÂµCodes wurden NICHT gefunden!\n\nBitte per FTP (oder DBox-BootManager)\nuploaden, und die DBox neu starten!
 
-stringinput.caps Groß-/Kleinbuchstaben
-stringinput.clear Alles löschen
+stringinput.caps GroÃŸ-/Kleinbuchstaben
+stringinput.clear Alles lÃ¶schen
 
 streamingserver.noconnect Keine Verbindung zum Streamingserver.\nAufnahme wird abgebrochen.
 
@@ -433,9 +433,9 @@ GENRE.SHOW.2 varietee
 GENRE.SHOW.3 Talkshow
 
 GENRE.SPORTS.0 Sport
-GENRE.SPORTS.1 Großereignisse (Olympische Spiele, Weltmeisterschaften usw.)
+GENRE.SPORTS.1 GroÃŸereignisse (Olympische Spiele, Weltmeisterschaften usw.)
 GENRE.SPORTS.2 Sportsmagazine
-GENRE.SPORTS.3 Fußball
+GENRE.SPORTS.3 FuÃŸball
 GENRE.SPORTS.4 Tennis
 GENRE.SPORTS.5 Mannschaftssport
 GENRE.SPORTS.6 Leichtathletik
@@ -446,9 +446,9 @@ GENRE.SPORTS.10 equestrian
 GENRE.SPORTS.11 martial sports
 
 GENRE.CHILDRENs_PROGRAMMES.0 Kinder / Jugendprogramm
-GENRE.CHILDRENs_PROGRAMMES.1 Programm für Vorschulkinder
-GENRE.CHILDRENs_PROGRAMMES.2 Unterhaltungsprogramm für 6 bis 14-Jährige
-GENRE.CHILDRENs_PROGRAMMES.3 Unterhaltungsprogramm für 10 bis 16-Jährige
+GENRE.CHILDRENs_PROGRAMMES.1 Programm fÃ¼r Vorschulkinder
+GENRE.CHILDRENs_PROGRAMMES.2 Unterhaltungsprogramm fÃ¼r 6 bis 14-JÃ¤hrige
+GENRE.CHILDRENs_PROGRAMMES.3 Unterhaltungsprogramm fÃ¼r 10 bis 16-JÃ¤hrige
 GENRE.CHILDRENs_PROGRAMMES.4 Informations- und Bildungsprogramm
 GENRE.CHILDRENs_PROGRAMMES.5 Trickfilm
 
@@ -461,7 +461,7 @@ GENRE.MUSIC_DANCE.5 Musical/Oper
 GENRE.MUSIC_DANCE.6 Ballet
 
 GENRE.ARTS.0 Kunst / Kultur
-GENRE.ARTS.1 Darstellende Künste
+GENRE.ARTS.1 Darstellende KÃ¼nste
 GENRE.ARTS.2 fine arts
 GENRE.ARTS.3 Religion
 GENRE.ARTS.4 Volkskunst
@@ -521,13 +521,13 @@ pinprotection.wrongcode Geben Sie den Code nocheinmal ein!
 pinprotection.head PIN-Abfrage
 
 favorites.bouquetname Meine Favoriten
-favorites.nobouquets Favoriten sind nur mit aktivierten Bouquets möglich
-favorites.addchannel Der aktuelle Kanal wird dem Bouquet \n"Meine Favoriten" hinzugefügt. \nDie Speicherung benötigt einen Moment...
-favorites.menueadd Kanal Favoriten hinzufügen
+favorites.nobouquets Favoriten sind nur mit aktivierten Bouquets mÃ¶glich
+favorites.addchannel Der aktuelle Kanal wird dem Bouquet \n"Meine Favoriten" hinzugefÃ¼gt. \nDie Speicherung benÃ¶tigt einen Moment...
+favorites.menueadd Kanal Favoriten hinzufÃ¼gen
 favorites.bqcreated Bouquet "Meine Favoriten" wurde angelegt...\n
-favorites.chadded Der aktuelle Kanal wurde Ihren Favoriten hinzugefügt...\n
+favorites.chadded Der aktuelle Kanal wurde Ihren Favoriten hinzugefÃ¼gt...\n
 favorites.chalreadyinbq Der aktuelle Kanal ist bereits in Ihren Favoriten...\n
-favorites.finalhint \nVersehentlich hinzugefügte Kanäle können mit\nder Bouquetverwaltung korrigiert werden.\n
+favorites.finalhint \nVersehentlich hinzugefÃ¼gte KanÃ¤le kÃ¶nnen mit\nder Bouquetverwaltung korrigiert werden.\n
 
 sleeptimerbox.title Sleeptimer
 sleeptimerbox.hint1 Ausschaltzeit in Min. (000=aus)
@@ -545,10 +545,10 @@ timer.eventtimed.msg Die Sendung wurde vorgemerkt
 timer.eventrecord.title Aufnahme vormerken
 timer.eventrecord.msg Die Sendung wurde zur Aufnahme vergemerkt
 timerlist.name Timerliste
-timerlist.delete Löschen
+timerlist.delete LÃ¶schen
 timerlist.empty Es gibt momentan keine Timer
 timerlist.type.shutdown Shutdown
-timerlist.type.nextprogram Nächstes Programm
+timerlist.type.nextprogram NÃ¤chstes Programm
 timerlist.type.zapto Umschalten
 timerlist.type.standby Standby
 timerlist.type.record Aufnahme
@@ -556,10 +556,10 @@ timerlist.type.remind Erinnerung
 timerlist.type.sleeptimer Sleeptimer
 timerlist.type.unknown Unbekannt
 timerlist.repeat.once einmalig
-timerlist.repeat.daily täglich
-timerlist.repeat.weekly wöchentlich
-timerlist.repeat.biweekly 2-wöchentlich
-timerlist.repeat.fourweekly 4-wöchentlich
+timerlist.repeat.daily tÃ¤glich
+timerlist.repeat.weekly wÃ¶chentlich
+timerlist.repeat.biweekly 2-wÃ¶chentlich
+timerlist.repeat.fourweekly 4-wÃ¶chentlich
 timerlist.repeat.monthly monatlich
 timerlist.repeat.byeventdescription siehe timer
 timerlist.repeat.unknown unbekannt
@@ -591,11 +591,11 @@ timerlist.reload Aktualisieren
 timerlist.modify Bearbeiten
 timerlist.message Nachricht
 timerlist.apids Audio PIDs
-timerlist.bouquetselect Bouquet wählen
-timerlist.channelselect Kanal wählen
+timerlist.bouquetselect Bouquet wÃ¤hlen
+timerlist.channelselect Kanal wÃ¤hlen
 timerlist.modeselect Modus-Auswahl
-timerlist.modetv TV Kanäle
-timerlist.moderadio Radio Kanäle
+timerlist.modetv TV KanÃ¤le
+timerlist.moderadio Radio KanÃ¤le
 timersettings.separator Timereinstellungen
 timersettings.record_safety_time_before Aufnahmestart-Korrektur
 timersettings.record_safety_time_before.hint_1 Korrekturzeit in Min. (00=aus), die beim Start
@@ -613,7 +613,7 @@ fontsize.epg_info2 EPG Info 2
 fontsize.epg_date EPG Datum
 fontsize.alert Alert
 fontsize.eventlist_title Eventlist Titel
-fontsize.eventlist_itemlarge Eventlist groß
+fontsize.eventlist_itemlarge Eventlist groÃŸ
 fontsize.eventlist_itemsmall Eventlist klein
 fontsize.eventlist_datetime Eventlist Datum / Zeit
 fontsize.channellist Kanalliste
@@ -624,11 +624,11 @@ fontsize.infobar_number Infobar Nummer
 fontsize.infobar_channame Infobar Kanal
 fontsize.infobar_info Infobar Info
 fontsize.infobar_small Infobar klein
-fontsize.gamelist_itemLarge groß
+fontsize.gamelist_itemLarge groÃŸ
 fontsize.gamelist_itemSmall klein
 fontsize.filebrowser_item Dateibrowser-Eintrag
 
-fontmenu.head Schriftgrössen Einstellungen
+fontmenu.head SchriftgrÃ¶ssen Einstellungen
 fontmenu.channellist Kanalliste
 fontmenu.eventlist Eventlist
 fontmenu.epg EPG
@@ -642,12 +642,12 @@ gtxalpha.alpha2 Alpha 2
 mp3player.name MP3 Player
 mp3player.head Mp3 Playlist
 mp3player.play Abspielen
-mp3player.add Hinzufügen
-mp3player.delete Löschen
+mp3player.add HinzufÃ¼gen
+mp3player.delete LÃ¶schen
 mp3player.stop Stopp
 mp3player.playall Alle abspielen
 mp3player.shuffle Shuffle
-mp3player.deleteall Alle löschen
+mp3player.deleteall Alle lÃ¶schen
 mp3player.title Titel
 mp3player.artist Interpret
 mp3player.playing Aktueller Track
@@ -658,7 +658,7 @@ mp3player.pause Pause
 
 filebrowser.head Filebrowser
 filebrowser.filter Filter
-filebrowser.select Auswählen
+filebrowser.select AuswÃ¤hlen
 filebrowser.mark Markieren
 filebrowser.scan Durchsuche Verzeichnisse
 

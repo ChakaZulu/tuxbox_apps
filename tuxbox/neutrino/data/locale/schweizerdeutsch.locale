@@ -2,11 +2,11 @@ menu.back z'ruck
 
 options.off us 
 options.on ii 
-options.serial s‰riell 
+options.serial s√§riell 
 options.fb frembaffer 
 options.null null 
 
-mainmenu.head Haupdmen¸ 
+mainmenu.head Haupdmen√º 
 mainmenu.tvmode TV-Modus 
 mainmenu.radiomode Radio-Modus 
 mainmenu.scartmode Scart-Igang 
@@ -15,14 +15,14 @@ mainmenu.mp3player MP3 Player
 mainmenu.sleeptimer Schloofschalder 
 mainmenu.shutdown Usschalde 
 mainmenu.settings Ischalde 
-mainmenu.service Sˆrvis 
+mainmenu.service S√∂rvis 
 mainmenu.recording Sdreaming (ufnehh) 
 mainmenu.recording_start un los 
 mainmenu.recording_stop hald 
 
-servicemenu.head Sˆrvis 
-servicemenu.update Software-÷bdaede 
-servicemenu.scants Kanals¸rchi 
+servicemenu.head S√∂rvis 
+servicemenu.update Software-√ñbdaede 
+servicemenu.scants Kanals√ºrchi 
 servicemenu.ucodecheck UCodes tschegge 
 
 cablesetup.provider Kabelabieder 
@@ -42,19 +42,19 @@ mainsettings.savesettingsnow Iischdellige jetz speichere
 mainsettings.language Sprooch 
 mainsettings.audio Audio 
 mainsettings.video Video 
-mainsettings.network Netzw‰rk 
-mainsettings.recording Sdreamingsˆrfer 
+mainsettings.network Netzw√§rk 
+mainsettings.recording Sdreamings√∂rfer 
 mainsettings.colors Farbe / Theme / Schrifd 
 mainsettings.plugins Plugin Iischdellige 
 mainsettings.lcd LC-Display 
 mainsettings.keybinding Taste-Iischdellige 
 mainsettings.misc Diversi Iischdellige 
-mainsettings.scan Iischdellige Kanals¸rch 
+mainsettings.scan Iischdellige Kanals√ºrch 
 
 miscsettings.head Diverse Iischdellige 
-miscsettings.shutdown_real Sd‰ndbymodus 
+miscsettings.shutdown_real Sd√§ndbymodus 
 miscsettings.boxtype DBox Hersdeller 
-miscsettings.startneutrinodirect Neutrino dir‰kt starte 
+miscsettings.startneutrinodirect Neutrino dir√§kt starte 
 miscsettings.general Allg'mein 
 miscsettings.fb_destination EXPERT! Boot-Chonsole 
 
@@ -63,11 +63,11 @@ languagesetup.select Sprooch
 
 audiomenu.head Audio-Iischdellige 
 audiomenu.analogout Analog-Usgang 
-audiomenu.monoright mono r‰chts 
+audiomenu.monoright mono r√§chts 
 audiomenu.monoleft mono lings 
 audiomenu.stereo stereo 
 audiomenu.dolbydigital Dolby Digidaal 
-audiomenu.avs_control Luutst‰rgi St¸¸rig avs/os 
+audiomenu.avs_control Luutst√§rgi St√º√ºrig avs/os 
 audiomenu.avs avs 
 audiomenu.ost ost 
 
@@ -84,11 +84,11 @@ videomenu.videoformat_169 16:9
 videomenu.videoformat_autodetect audomaddisch 
 videomenu.vcrswitch Scart-Eingang audomaddisch 
 
-networkmenu.head Netzw‰erk Iischdellige 
-networkmenu.test Netzw‰rk deschde 
-networkmenu.show aktive Netzw‰rkIischdellige zeige 
-networkmenu.setupnow Netzw‰rkIischdellige jetz zuewiise 
-networkmenu.setuponstartup Bim Starte Netzw‰rk setze 
+networkmenu.head Netzw√§erk Iischdellige 
+networkmenu.test Netzw√§rk deschde 
+networkmenu.show aktive Netzw√§rkIischdellige zeige 
+networkmenu.setupnow Netzw√§rkIischdellige jetz zuewiise 
+networkmenu.setuponstartup Bim Starte Netzw√§rk setze 
 networkmenu.ipaddress IP-Adress' 
 networkmenu.netmask Netzmaske 
 networkmenu.broadcast Broadcast 
@@ -96,18 +96,18 @@ networkmenu.gateway Standard Gateway
 networkmenu.nameserver Nameserver 
 
 recordingmenu.head Streamingserver Iischdellige 
-recordingmenu.recording_type Uffnahme g'r‰t 
-recordingmenu.server_ip Uffnahmesˆrfer IP 
-recordingmenu.server_port Uffnahmesˆrfer Port 
+recordingmenu.recording_type Uffnahme g'r√§t 
+recordingmenu.server_ip Uffnahmes√∂rfer IP 
+recordingmenu.server_port Uffnahmes√∂rfer Port 
 recordingmenu.stopplayback Abspiele a'halde 
 recordingmenu.stopsectionsd Sectionsd a'halde 
 recordingmenu.vcr_devicename VCR Name (lirc) 
 recordingmenu.off uss 
-recordingmenu.server sˆrfer 
+recordingmenu.server s√∂rfer 
 recordingmenu.vcr Videorecorder 
-recordingmenu.server_wakeup Uffnahmesˆrfer WOL 
-recordingmenu.server_mac Mac Adr‰ss 
-recordingmenu.setupnow Iinsdellige jetz ¸berneh 
+recordingmenu.server_wakeup Uffnahmes√∂rfer WOL 
+recordingmenu.server_mac Mac Adr√§ss 
+recordingmenu.setupnow Iinsdellige jetz √ºberneh 
 recordingmenu.no_scart  Scart-Umschaldig underdrugge 
 
 ping.ok isch erreichbar (ping) 
@@ -119,21 +119,21 @@ ipsetup.hint_2 OK speichert, Home bricht ab
 
 colormenu.head Farb-Iischdellige 
 colormenu.statusbar Statusbalke 
-colormenu.themeselect Theme ussw‰hle 
-colormenu.font Schriftgrˆssi 
-colormenu.menucolors Men¸farb 
+colormenu.themeselect Theme ussw√§hle 
+colormenu.font Schriftgr√∂ssi 
+colormenu.menucolors Men√ºfarb 
 colormenu.background Hintergrundfarb 
 colormenu.background_head Hintergrundfarb 
 colormenu.textcolor Textfarb 
 colormenu.textcolor_head Textfarb 
-colormenu.fade Men¸s faden 
+colormenu.fade Men√ºs faden 
 colormenu.timing OSD Timeouts 
 
-colorthememenu.head Theme ussw‰hle 
+colorthememenu.head Theme ussw√§hle 
 colorthememenu.neutrino_theme Neutrino Theme 
 colorthememenu.classic_theme Klassik 
 
-colormenusetup.head Men¸farbe 
+colormenusetup.head Men√ºfarbe 
 colormenusetup.menuhead Titelleischde 
 colormenusetup.menucontent Fenschderinhalt 
 colormenusetup.menucontent_inactive Fenschderinhalt deaktiviert 
@@ -148,43 +148,43 @@ timing.chanlist Kanallischde
 timing.epg Epg 
 timing.infobar Infobar 
 timing.filebrowser Filebrowser 
-timing.hint_1 Iinbl‰ndzit in Sek., di's OSD 
+timing.hint_1 Iinbl√§ndzit in Sek., di's OSD 
 timing.hint_2 uffem TV a'zeigt wird 
 
 pluginmenu.head Plugin Iischdellige 
-tuxnews.size Tuxnews Grˆﬂi 
+tuxnews.size Tuxnews Gr√∂√üi 
 tuxnews_size.small chlei 
 tuxnews_size.medium middel 
 tuxnews_size.large gross 
 tuxnews.speed Tuxnews Gschwindigkeit 
 tuxnews_speed.slow lahm 
 tuxnews_speed.medium middel 
-tuxnews_speed.fast schn‰ll 
+tuxnews_speed.fast schn√§ll 
 tuxnews.position Tuxnews Position 
 tuxnews_position.top obe 
 tuxnews_position.center mitti 
 tuxnews_position.bottom unde 
 
-repeatblocker.hint_1 Mindeschtzit (in ms) zw¸sche 2 Tastedr¸ck' 
+repeatblocker.hint_1 Mindeschtzit (in ms) zw√ºsche 2 Tastedr√ºck' 
 repeatblocker.hint_2 0 schaldet de Blocker us (Rot isch " ") 
 
 keybindingmenu.RC Fernbedienig 
-keybindingmenu.repeatblock Wiederholigsverzˆgerig 
-keybindingmenu.repeatblockgeneric Afangsverzˆgerig 
+keybindingmenu.repeatblock Wiederholigsverz√∂gerig 
+keybindingmenu.repeatblockgeneric Afangsverz√∂gerig 
 keybindingmenu.head Tasten-Iischdellige 
-keybindingmenu.modechange Modus w‰ggsle 
+keybindingmenu.modechange Modus w√§ggsle 
 keybindingmenu.channellist Kanallischde 
-keybindingmenu.quickzap Schn‰llumschaldig 
+keybindingmenu.quickzap Schn√§llumschaldig 
 keybindingmenu.tvradiomode Fernseh-/Radio-Modus 
 keybindingmenu.tvradiomode_head Fernseh-/Radio-Modus 
-keybindingmenu.pageup Sidde uffe bl‰ttere 
-keybindingmenu.pageup_head Sidde uffe bl‰ttere 
-keybindingmenu.pagedown Sidde abe bl‰tter 
-keybindingmenu.pagedown_head Sidde abe bl‰ttere 
+keybindingmenu.pageup Sidde uffe bl√§ttere 
+keybindingmenu.pageup_head Sidde uffe bl√§ttere 
+keybindingmenu.pagedown Sidde abe bl√§tter 
+keybindingmenu.pagedown_head Sidde abe bl√§ttere 
 keybindingmenu.cancel Kanallischde zuemache 
 keybindingmenu.cancel_head Kanallischde zuemache 
-keybindingmenu.sort Sortierreihefolg ‰ndere 
-keybindingmenu.sort_head  Sortierreihefolg ‰ndere 
+keybindingmenu.sort Sortierreihefolg √§ndere 
+keybindingmenu.sort_head  Sortierreihefolg √§ndere 
 keybindingmenu.channelup Kanal uffe 
 keybindingmenu.channelup_head Kanal uffe Taste 
 keybindingmenu.channeldown Kanal abe 
@@ -193,8 +193,8 @@ keybindingmenu.bouquetup Bouquet widder
 keybindingmenu.bouquetup_head Bouquet widder Taste 
 keybindingmenu.bouquetdown Bouquet z'ruck 
 keybindingmenu.bouquetdown_head Bouquet z'ruck Taste 
-keybindingmenu.bouquethandling OK-Taste f¸r 
-keybindingmenu.bouquetchannels_on_ok Bouquet-Kan‰l 
+keybindingmenu.bouquethandling OK-Taste f√ºr 
+keybindingmenu.bouquetchannels_on_ok Bouquet-Kan√§l 
 keybindingmenu.bouquetlist_on_ok Bouquetlische 
 keybindingmenu.allchannels_on_ok Kanallischde 
 keybindingmenu.subchannelup Underkanal wiider 
@@ -210,7 +210,7 @@ colorchooser.alpha alpha
 lcdmenu.head LCD Iistellige 
 lcdmenu.inverse Inverdiere 
 lcdmenu.power Pfuus 
-lcdmenu.lcdcontroler Kontrast / H‰lligkeit 
+lcdmenu.lcdcontroler Kontrast / H√§lligkeit 
 
 lcdcontroler.head LCD Stettings 
 lcdcontroler.contrast Kontrast 
@@ -226,10 +226,10 @@ keychooser.text1 Bitte Taste drucke
 keychooser.text2 Zuem abbreche warde.. 
 
 screensetup.upperleft rot = Bildrand obe, links 
-screensetup.lowerright gr¸n = Bildrand unde, rechts 
+screensetup.lowerright gr√ºn = Bildrand unde, rechts 
 
 channellist.head Alle Kan√§le 
-channellist.nonefound M'r h‰nn keine Kan‰l g'funde!\nMach e Kanals¸chi\n(dbox-Taste -> Service) 
+channellist.nonefound M'r h√§nn keine Kan√§l g'funde!\nMach e Kanals√ºchi\n(dbox-Taste -> Service) 
 channellist.since sidd %02d:%02d 
 
 infoviewer.epgnotload Informatione no'nidd g'lade... 
@@ -238,7 +238,7 @@ infoviewer.streaminfo Fiitschrs
 infoviewer.eventlist Programm 
 infoviewer.languages Tonwahl 
 infoviewer.notavailable Kanal (zur Zit) nidd verfieegbar 
-infoviewer.cantdecode Kanal ka nidd entschl¸sselt werde 
+infoviewer.cantdecode Kanal ka nidd entschl√ºsselt werde 
 infoviewer.selecttime Startzite 
 infoviewer.nocurrent Kei Info zuem laufende Programm 
 infoviewer.noepg Kei EPG-Information verfuigbar 
@@ -246,22 +246,22 @@ infoviewer.subservice Bildregie
 infoviewer.waittime Wart' uff'd Uhrzeit... 
 
 epgviewer.notfound keini Programminformatione (EPG) g'funde 
-epgviewer.nodetailed Keini usf¸hrliche Informationen verfuigbar 
-epgviewer.More_Screenings wiidere Termine uf d‰mm Kanal 
+epgviewer.nodetailed Keini usf√ºhrliche Informationen verfuigbar 
+epgviewer.More_Screenings wiidere Termine uf d√§mm Kanal 
 epglist.head Vorschau - %s 
 epglist.noevents Keini EPG-Informatione verfuigbar. 
 
 streaminfo.head Informatione 
-streaminfo.resolution Uflˆsig 
+streaminfo.resolution Ufl√∂sig 
 streaminfo.bitrate Bitrate 
-streaminfo.aratio Verh‰ltnis 
-streaminfo.aratio_unknown Verh‰ltnis: unbekannt 
+streaminfo.aratio Verh√§ltnis 
+streaminfo.aratio_unknown Verh√§ltnis: unbekannt 
 streaminfo.framerate Bildrate 
 streaminfo.framerate_unknown Bildrate: unbekannt 
 streaminfo.audiotype Audiotyp 
 streaminfo.audiotype_unknown Audiotyp: unbekannt 
-streaminfo.not_crypted nidd verschl¸ssld 
-streaminfo.ecm_invalid ig¸ldiges CA-Syschdem 
+streaminfo.not_crypted nidd verschl√ºssld 
+streaminfo.ecm_invalid ig√ºldiges CA-Syschdem 
 streaminfo.not_available nidd verfuigbar 
 
 streamfeatures.head Fiitschrs 
@@ -269,7 +269,7 @@ streamfeatures.info Stream-Informatione
 
 apidselector.head Sproochuswahl 
 
-nvodselector.head Anfangszit ussw‰hle 
+nvodselector.head Anfangszit ussw√§hle 
 nvodselector.subservice Perspektive 
 nvodselector.directormode Bildregie-Modus 
 
@@ -279,7 +279,7 @@ ucodecheck.avia600 Avia 600
 ucodecheck.ucode UCode 
 ucodecheck.cam-alpha Cam-Alpha 
 
-date.Mon  M‰ 
+date.Mon  M√§ 
 date.Tue  Ts 
 date.Wed  Mi 
 date.Thu  Du 
@@ -289,7 +289,7 @@ date.Sun  Su
 
 date.Jan  Jan 
 date.Feb  Feb 
-date.Mar  M‰r 
+date.Mar  M√§r 
 date.Apr  Apr 
 date.May  Mai 
 date.Jun  Jun 
@@ -307,7 +307,7 @@ scants.head Kanalsuechi
 scants.startnow Kanalsuechi starde 
 scants.actsatellite Sadellid: 
 scants.astra Astra 
-scants.hotbird Hotbˆrd 
+scants.hotbird Hotb√∂rd 
 scants.kopernikus Kopernikus 
 scants.sirius Sirius 
 scants.thor Thor 
@@ -316,26 +316,26 @@ scants.tuerksat Tuerksat
 scants.transponders Transponder: 
 scants.services Services: 
 scants.bouquet Bouquets 
-scants.bouquet_leave nidd ‰ndere 
+scants.bouquet_leave nidd √§ndere 
 scants.bouquet_create neu mache 
-scants.bouquet_erase lˆsche 
-scants.finished Kanalsueche erfolgrich be‰ndet! 
+scants.bouquet_erase l√∂sche 
+scants.finished Kanalsueche erfolgrich be√§ndet! 
 
 flashupdate.head Aktualisierig 
 flashupdate.action Aktion: 
 flashupdate.globalprogress G'samtstatus: 
 flashupdate.getinfofile lade Versioninfo 
 flashupdate.getinfofileerror ka Info nidd lade 
-flashupdate.getupdatefile lade ÷pdate 
-flashupdate.getupdatefileerror ka ÷pdate nidd lade 
+flashupdate.getupdatefile lade √ñpdate 
+flashupdate.getupdatefileerror ka √ñpdate nidd lade 
 flashupdate.cantopenfile ka Datei nidd uffmache 
-flashupdate.fileis0bytes d'Dateigrˆﬂi isch 0 Byte 
-flashupdate.eraseingflash lˆsch' grad s'Fl‰sh 
-flashupdate.programmingflash programmier grad s'Fl‰sh 
+flashupdate.fileis0bytes d'Dateigr√∂√üi isch 0 Byte 
+flashupdate.eraseingflash l√∂sch' grad s'Fl√§sh 
+flashupdate.programmingflash programmier grad s'Fl√§sh 
 flashupdate.cantopenmtd ka's MTD-Device nidd uffmache 
 flashupdate.ready ferdig 
 flashupdate.reboot Die DBox wird neu g'starded 
-flashupdate.updatemode ÷pdatemodus 
+flashupdate.updatemode √ñpdatemodus 
 flashupdate.updatemode_manual manuell (ftp) 
 flashupdate.updatemode_internet internet 
 flashupdate.currentversion_sep Installierdi Version 
@@ -351,42 +351,42 @@ flashupdate.md5sumerror Des Image isch fehlerhaft
 flashupdate.proxyserver_sep Proxyserver 
 flashupdate.proxyserver Proxyname 
 flashupdate.proxyserver_hint1 Gib de Proxyname oder d'IP ii (Host:Port) 
-flashupdate.proxyserver_hint2 E leere Iintrag bed¸ded kei Proxy 
+flashupdate.proxyserver_hint2 E leere Iintrag bed√ºded kei Proxy 
 flashupdate.proxyusername Benutzername 
 flashupdate.proxyusername_hint1 Gib de Proxy-Benutzername ii 
-flashupdate.proxyusername_hint2 E leere Iintrag bed¸ded kei Authentifizierig 
+flashupdate.proxyusername_hint2 E leere Iintrag bed√ºded kei Authentifizierig 
 flashupdate.proxypassword Passwort 
 flashupdate.proxypassword_hint1 Gib's Proxy-Passwort Ii 
 flashupdate.proxypassword_hint2 
 flashupdate.msgbox S'het folgendi neui Images:\nDatum: %s, %s\nBasisImage: %s\nImageTyp: %s\n\nWillsch die neui Version jetz abelade\nund installiere? 
 flashupdate.msgbox_manual S'het s'folgend neu Image:\nDatum: %s, %s\nBasisImage: %s\nImageTyp: %s\n\nWillsch die neui Version jetz installiere? 
 flashupdate.expertfunctions Experte-Funktione 
-flashupdate.readflash ganzes Flashimage usl‰se 
+flashupdate.readflash ganzes Flashimage usl√§se 
 flashupdate.writeflash ganzes Flashimage i'spile 
-flashupdate.readflashmtd einzelni Partition usl‰se 
+flashupdate.readflashmtd einzelni Partition usl√§se 
 flashupdate.writeflashmtd einzelni Partition i'spile 
 flashupdate.savesuccess S'Image sich erfolgriich unterm \nDateiname %s gspeichrt. 
 flashupdate.mtdselector Partitions-Usswahl 
-flashupdate.titlereadflash Flash ussl‰se 
+flashupdate.titlereadflash Flash ussl√§se 
 flashupdate.actionreadflash lese flash 
 flashupdate.fileselector Datei-Usswahl 
 flashupdate.titlewriteflash Flash schriibe 
 flashupdate.actionwriteflash schrieb grad s'flash 
 flashupdate.flashreadyreboot S'Image isch erfolgriich g'flasht.\nd'DBox wird jetz neu g'starded. 
-flashupdate.reallyflashmtd Willsch d‰ Flashvorgang wirklich mache?\n\nFalls es e'Fehler gitt odder s'Image nidd\nfunktionf‰‰hig isch, wird d'DBox n¸mmi boote.\n\nImagename: %s\nZiel: %s 
+flashupdate.reallyflashmtd Willsch d√§ Flashvorgang wirklich mache?\n\nFalls es e'Fehler gitt odder s'Image nidd\nfunktionf√§√§hig isch, wird d'DBox n√ºmmi boote.\n\nImagename: %s\nZiel: %s 
 
 bouqueteditor.name Bouquet-Verwaltig 
-bouqueteditor.delete Lˆsche 
+bouqueteditor.delete L√∂sche 
 bouqueteditor.add d'zuemache 
 bouqueteditor.move Vschiebe 
 bouqueteditor.rename Umbenenne 
-bouqueteditor.hide Verst‰cke 
-bouqueteditor.lock Sp‰‰re 
-bouqueteditor.newbouquetname Neue Name f¸rs Bouquet' 
+bouqueteditor.hide Verst√§cke 
+bouqueteditor.lock Sp√§√§re 
+bouqueteditor.newbouquetname Neue Name f√ºrs Bouquet' 
 bouqueteditor.bouquetname Name vom Bouquet' 
-bouqueteditor.savechanges? Solle die ƒnderige g'speicheret werde? 
-bouqueteditor.savingchanges ƒnderige werde gspeicheret. Bitte warte ... 
-bouqueteditor.discardingchanges ƒnderige werde verworfe. Bitte warte ... 
+bouqueteditor.savechanges? Solle die √Ñnderige g'speicheret werde? 
+bouqueteditor.savingchanges √Ñnderige werde gspeicheret. Bitte warte ... 
+bouqueteditor.discardingchanges √Ñnderige werde verworfe. Bitte warte ... 
 bouqueteditor.switch Kanal uffneh/entferne 
 bouqueteditor.switchmode TV/Radio 
 bouqueteditor.return Feddig 
@@ -396,19 +396,19 @@ messagebox.no Nei
 messagebox.cancel Abbruch 
 messagebox.back z'ruck 
 messagebox.error Fehler 
-messagebox.discard Willsch d'ƒnderige verw‰rfe? 
+messagebox.discard Willsch d'√Ñnderige verw√§rfe? 
 messagebox.info Informatione 
 
 settings.noconffile D'Neutrino-Iischdellige wurde nidd\ngfunde. S'werde d'Standardwert gno. 
-settings.missingoptionsconffile D'Neutrino-Iischdellige wurde erwiidered.\nDie neue W‰rt werde uff Standard g'setzt. 
+settings.missingoptionsconffile D'Neutrino-Iischdellige wurde erwiidered.\nDie neue W√§rt werde uff Standard g'setzt. 
 
-cam.wrong Achtig, Ihr CAM_ALPHA.BIN basst\nnidd zu Ihrer Smart-Card!!!\n\nW‰nn Sie die Warnig widder seh? 
-ucodes.failure Achtig, die µCodes wurde nidd gefunde!\n\nBitte per FTP (oder DBox-BootManager)\nˆploaden, un d'DBox neu starte! 
+cam.wrong Achtig, Ihr CAM_ALPHA.BIN basst\nnidd zu Ihrer Smart-Card!!!\n\nW√§nn Sie die Warnig widder seh? 
+ucodes.failure Achtig, die ¬µCodes wurde nidd gefunde!\n\nBitte per FTP (oder DBox-BootManager)\n√∂ploaden, un d'DBox neu starte! 
 
-stringinput.caps Groﬂ-/Chleiueuchstabe 
+stringinput.caps Gro√ü-/Chleiueuchstabe 
 stringinput.clear OSD Timeouts
 
-streamingserver.noconnect Kei Verbindig zuem Streamingsˆrver.\nd'Uffnahm' wird abbroche. 
+streamingserver.noconnect Kei Verbindig zuem Streamings√∂rver.\nd'Uffnahm' wird abbroche. 
 
 GENRE.MOVIE.0 Spielfilm / Drama 
 GENRE.MOVIE.1 Kriminalfilm/Thriller 
@@ -432,9 +432,9 @@ GENRE.SHOW.2 varietee
 GENRE.SHOW.3 Talkshow 
 
 GENRE.SPORTS.0 Sport 
-GENRE.SPORTS.1 Groﬂereigniss (Olympische Spiele, Weltmeischerschafte usw.) 
+GENRE.SPORTS.1 Gro√üereigniss (Olympische Spiele, Weltmeischerschafte usw.) 
 GENRE.SPORTS.2 Sportsmagazine 
-GENRE.SPORTS.3 Fuﬂball 
+GENRE.SPORTS.3 Fu√üball 
 GENRE.SPORTS.4 Tennis 
 GENRE.SPORTS.5 Mannschaftssport 
 GENRE.SPORTS.6 Leichtathletik 
@@ -445,9 +445,9 @@ GENRE.SPORTS.10 equestrian
 GENRE.SPORTS.11 martial sports 
 
 GENRE.CHILDRENs_PROGRAMMES.0 Chinder / Jugendprogramm 
-GENRE.CHILDRENs_PROGRAMMES.1 Programm f¸r Vorschuelchinder 
-GENRE.CHILDRENs_PROGRAMMES.2 Unterhaltigsprogramm f¸r 6 bis 14-J‰hrigi 
-GENRE.CHILDRENs_PROGRAMMES.3 Unterhaltigsprogramm f¸r 10 bis 16-J‰hrigi 
+GENRE.CHILDRENs_PROGRAMMES.1 Programm f√ºr Vorschuelchinder 
+GENRE.CHILDRENs_PROGRAMMES.2 Unterhaltigsprogramm f√ºr 6 bis 14-J√§hrigi 
+GENRE.CHILDRENs_PROGRAMMES.3 Unterhaltigsprogramm f√ºr 10 bis 16-J√§hrigi 
 GENRE.CHILDRENs_PROGRAMMES.4 Informations- un Bildigsprogramm 
 GENRE.CHILDRENs_PROGRAMMES.5 Trickfilm 
 
@@ -460,7 +460,7 @@ GENRE.MUSIC_DANCE.5 Musical/Oper
 GENRE.MUSIC_DANCE.6 Ballet 
 
 GENRE.ARTS.0 Chunschd / Kultur 
-GENRE.ARTS.1 Darstellendi Ch¸nschd 
+GENRE.ARTS.1 Darstellendi Ch√ºnschd 
 GENRE.ARTS.2 fine arts 
 GENRE.ARTS.3 Religion 
 GENRE.ARTS.4 Volkskunst 
@@ -468,14 +468,14 @@ GENRE.ARTS.5 Literatur
 GENRE.ARTS.6 Film/Kino 
 GENRE.ARTS.7 experimental film/video 
 GENRE.ARTS.8 Rundfunk/Presse 
-GENRE.ARTS.9 Neui Medi‰ 
+GENRE.ARTS.9 Neui Medi√§ 
 GENRE.ARTS.10 Chunschd-/Kultur-Magazin 
 GENRE.ARTS.11 Mode 
 
 GENRE.SOZIAL_POLITICAL.0 Sozial & Politikereignisse / Wirtschaft 
 GENRE.SOZIAL_POLITICAL.1 Magazin/Report/Dokumentation 
 GENRE.SOZIAL_POLITICAL.2 Wirtschaft un Soziales 
-GENRE.SOZIAL_POLITICAL.3 Bsunderi M‰nsche 
+GENRE.SOZIAL_POLITICAL.3 Bsunderi M√§nsche 
 
 GENRE.DOCUS_MAGAZINES.0 Doku/Magazin 
 GENRE.DOCUS_MAGAZINES.1 Natur/Tiere/Umwelt 
@@ -504,8 +504,8 @@ parentallock.never Nie
 parentallock.onstart Bim Start 
 parentallock.changetolocked Bi vorgsperrte Bouquets 
 parentallock.onsignal Bi gsendeter Vorsperri 
-parentallock.lockedsender Vorgesperrte S‰nder... 
-parentallock.lockedprogram Gsp‰rrtes Programm (FSK ab %d) 
+parentallock.lockedsender Vorgesperrte S√§nder... 
+parentallock.lockedprogram Gsp√§rrtes Programm (FSK ab %d) 
 parentallock.head Goofe'schutz PIN 
 
 parentallock.lockage Sendige 
@@ -520,13 +520,13 @@ pinprotection.wrongcode Gib de Code nonemol ii!
 pinprotection.head PIN-Abfroog 
 
 favorites.bouquetname Mieni Favoridde 
-favorites.nobouquets Favoridde sin numme mit aktivierte Bouquets m‰glich 
-favorites.addchannel De aktuelle Kanal wirdm Bouquet \n"Mieni Favoridde" a'gh‰ngt. \nS'speichere gooht e Moment... 
+favorites.nobouquets Favoridde sin numme mit aktivierte Bouquets m√§glich 
+favorites.addchannel De aktuelle Kanal wirdm Bouquet \n"Mieni Favoridde" a'gh√§ngt. \nS'speichere gooht e Moment... 
 favorites.menueadd Kanal Favoridde d'zue'due 
 favorites.bqcreated Bouquet "Miini Favoridde" isch a'gelegt...\n 
 favorites.chadded De aktuelle Kanal isch Ihre Favoridde hinzugefuegt worde...\n 
 favorites.chalreadyinbq De aktuelle Kanal isch bereits in Ihre Favoridde...\n 
-favorites.finalhint \nVersehentlich dezuef¸gti Kan‰l chˆnne mit\nd'r Bouquetverwaltig korrigiert werde.\n 
+favorites.finalhint \nVersehentlich dezuef√ºgti Kan√§l ch√∂nne mit\nd'r Bouquetverwaltig korrigiert werde.\n 
 
 sleeptimerbox.title Schloofuhr 
 sleeptimerbox.hint1 Ussschaltzit in Min. (000=aus) 
@@ -535,7 +535,7 @@ sleeptimerbox.announce Ussschaltzit in 1 min
 
 zaptotimer.announce In einere Minudde wird umgeschalde 
 recordtimer.announce D'Ufnahm beginnt in weniga Minudde 
-shutdowntimer.announce In einere Minudde wird d'Chischte abe'gfahre.\nShutdown abbr‰che? 
+shutdowntimer.announce In einere Minudde wird d'Chischte abe'gfahre.\nShutdown abbr√§che? 
 
 timerbar.channelswitch Umschalte 
 timerbar.recordevent Ufneh 
@@ -544,10 +544,10 @@ timer.eventtimed.msg Die Sendig isch vorgmerkt
 timer.eventrecord.title Uffnahm vormerke 
 timer.eventrecord.msg   D'Sendig isch zuer Aufnahm vorgmerkt 
 timerlist.name timerliste 
-timerlist.delete Lˆsche 
+timerlist.delete L√∂sche 
 timerlist.empty S'git momentan kei Timer 
 timerlist.type.shutdown Abe fahre 
-timerlist.type.nextprogram N‰ggschdes Programm 
+timerlist.type.nextprogram N√§ggschdes Programm 
 timerlist.type.zapto Umschalte 
 timerlist.type.standby Standby 
 timerlist.type.record Uffnahm 
@@ -564,14 +564,14 @@ timerlist.repeat.byeventdescription lueg under timer
 timerlist.repeat.unknown chenne m'r nid 
 timerlist.repeat.weekdays An Wuchedaag 
 timerlist.repeat.sunday Su 
-timerlist.repeat.monday M‰ 
+timerlist.repeat.monday M√§ 
 timerlist.repeat.tuesday Ts 
 timerlist.repeat.wednesday Mi 
 timerlist.repeat.thursday Du 
 timerlist.repeat.friday Fr 
 timerlist.repeat.saturday Sa 
 timerlist.weekdays Wuchedaag 
-timerlist.weekdays.hint_1 M‰ Ts Mi Du Fr Sa Su 
+timerlist.weekdays.hint_1 M√§ Ts Mi Du Fr Sa Su 
 timerlist.weekdays.hint_2 'X'=Timer '-' kei Timer 
 timerlist.program.unknown Programm chenne m'r nid 
 timerlist.standby.off Uff Standby goh 
@@ -587,19 +587,19 @@ timerlist.standby SB Modus
 timerlist.channel Kanal 
 timerlist.menunew Neue Timer 
 timerlist.reload Aktualisiere 
-timerlist.modify ÷pdate 
+timerlist.modify √ñpdate 
 timerlist.message Noochricht 
 timerlist.apids Audio PIDs 
-timerlist.bouquetselect Bouquet w‰hle 
-timerlist.channelselect Kanal w‰hle 
+timerlist.bouquetselect Bouquet w√§hle 
+timerlist.channelselect Kanal w√§hle 
 timerlist.modeselect Modus Usswahl 
-timerlist.modetv TV-Kan‰l 
-timerlist.moderadio Radio-Kan‰l 
+timerlist.modetv TV-Kan√§l 
+timerlist.moderadio Radio-Kan√§l 
 timersettings.separator Timeriischdellige 
 timersettings.record_safety_time_before Uffnahmestart-Korrekdur 
 timersettings.record_safety_time_before.hint_1 Korregdurzit in Min. (00=aus), die bim Start 
-timersettings.record_safety_time_before.hint_2 vom jewilige Timer abzoge w‰rde 
-timersettings.record_safety_time_after Uffnahme‰nd-Korrekdur 
+timersettings.record_safety_time_before.hint_2 vom jewilige Timer abzoge w√§rde 
+timersettings.record_safety_time_after Uffnahme√§nd-Korrekdur 
 timersettings.record_safety_time_after.hint_1 Korrekdurzit in Min. (00=aus), die uff'd End- 
 timersettings.record_safety_time_after.hint_2 zit vom jewilige Timer dezuezellt wird 
 
@@ -627,50 +627,50 @@ fontsize.gamelist_itemLarge gross
 fontsize.gamelist_itemSmall chlei 
 fontsize.filebrowser_item Dateibrowser-Iidrag
 
-fontmenu.head Schriftgrˆssen Iischdellige 
+fontmenu.head Schriftgr√∂ssen Iischdellige 
 fontmenu.channellist Kanallischde 
 fontmenu.eventlist Eventlist 
 fontmenu.epg EPG 
 fontmenu.infobar Infobar 
 fontmenu.gamelist Gameliste 
 
-colormenu.gtx_alpha Transpar‰nz (GTX) 
+colormenu.gtx_alpha Transpar√§nz (GTX) 
 gtxalpha.alpha1 Alpha 1 
 gtxalpha.alpha2 Alpha 2 
 
 mp3player.name MP3 Player 
 mp3player.head Mp3 
 mp3player.play Abspiele 
-mp3player.add A'h‰nge 
-mp3player.delete Lˆsche 
+mp3player.add A'h√§nge 
+mp3player.delete L√∂sche 
 mp3player.stop A'halte 
 mp3player.playall Alles abspiele 
-mp3player.shuffle Zuef‰llig mische 
-mp3player.deleteall Alles lˆsche 
+mp3player.shuffle Zuef√§llig mische 
+mp3player.deleteall Alles l√∂sche 
 mp3player.title Titel 
-mp3player.artist Pˆrformer 
+mp3player.artist P√∂rformer 
 mp3player.playing aktuelle track 
-mp3player.id3scan sc‰nn ID3-Tags 
+mp3player.id3scan sc√§nn ID3-Tags 
 mp3player.keylevel undef
 mp3player.fastforward undef
 mp3player.pause undef
 
 filebrowser.head Filebrowser 
 filebrowser.filter Filder 
-filebrowser.select Ussw‰hle 
+filebrowser.select Ussw√§hle 
 filebrowser.mark Markiere 
-filebrowser.scan Verzeichnisse durchs¸rche 
+filebrowser.scan Verzeichnisse durchs√ºrche 
 
-nfs.mount Verzeichniss i'h‰nge 
+nfs.mount Verzeichniss i'h√§nge 
 nfs.ip NFS Server IP 
 nfs.dir NFS Server Verzeichniss 
 nfs.localdir lokales Verzeichniss 
-nfs.automount Biem Start i'h‰nge 
-nfs.mountnow Jetz i'h‰nge 
-nfs.mounterror I'h‰ng - Fehler 
-nfs.umount NFS Verzeichniss abh‰nge 
-nfs.umounterror Abh‰ng-Fehler 
-nfs.alreadymounted Verzeichnis bereits a'gh‰ngt
+nfs.automount Biem Start i'h√§nge 
+nfs.mountnow Jetz i'h√§nge 
+nfs.mounterror I'h√§ng - Fehler 
+nfs.umount NFS Verzeichniss abh√§nge 
+nfs.umounterror Abh√§ng-Fehler 
+nfs.alreadymounted Verzeichnis bereits a'gh√§ngt
 
 apids.hint_1 Gib z'erschd d'zschdriemendi APIDs ii,
 apids.hint_2 abdrennd durch ' ' in hexadezimaler Form

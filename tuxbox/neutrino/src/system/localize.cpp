@@ -34,6 +34,7 @@
 
 #include "localize.h"
 #include "iso639.h"
+#include <zapit/client/zapitclient.h> /* CZapitClient::Utf8_to_Latin1 */
 
 
 char* getISO639Description(char *iso)
@@ -49,9 +50,9 @@ char* getISO639Description(char *iso)
 	return iso;
 }
 
-void CLocaleManager::loadLocale(string locale)
+void CLocaleManager::loadLocale(std::string locale)
 {
-	string filename[] = {"/var/tuxbox/config/locale/" + locale + ".locale",DATADIR  "/neutrino/locale/" + locale + ".locale"};
+	std::string filename[] = {"/var/tuxbox/config/locale/" + locale + ".locale",DATADIR  "/neutrino/locale/" + locale + ".locale"};
 	FILE* fd = fopen(filename[0].c_str(), "r");
 	if(!fd)
 	{
@@ -101,7 +102,7 @@ void CLocaleManager::loadLocale(string locale)
 			*val = 0;
 			*key = 0;
 
-			string text= valstr;
+			std::string text= valstr;
 
 			int pos;
 			do
@@ -113,16 +114,19 @@ void CLocaleManager::loadLocale(string locale)
 				}
 			} while ( ( pos != -1 ) );
 
-			localeData[keystr] = text;
+			if ((strcmp(keystr, "epglist.head") != 0) && (strcmp(keystr, "channellist.head") != 0))
+				localeData[CZapitClient::Utf8_to_Latin1(std::string(keystr))] = text;
+			else
+				localeData[keystr] = text;
 		}
 	}
 	fclose(fd);
 }
 
 
-string CLocaleManager::getText(string keyName)
+std::string CLocaleManager::getText(std::string keyName)
 {
-	string erg = localeData[keyName];
+	std::string erg = localeData[keyName];
 	if (erg == "")
 		return keyName;
 	else
