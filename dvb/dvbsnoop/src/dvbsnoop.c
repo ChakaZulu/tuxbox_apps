@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.c,v 1.21 2004/01/02 02:18:33 rasc Exp $
+$Id: dvbsnoop.c,v 1.22 2004/01/03 15:40:45 rasc Exp $
 
  DVBSNOOP
 
@@ -14,6 +14,9 @@ $Id: dvbsnoop.c,v 1.21 2004/01/02 02:18:33 rasc Exp $
 
 
 $Log: dvbsnoop.c,v $
+Revision 1.22  2004/01/03 15:40:45  rasc
+simple frontend signal status query added "-s signal"
+
 Revision 1.21  2004/01/02 02:18:33  rasc
 more DSM-CC  INT/UNT descriptors
 
@@ -101,6 +104,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "dvb_api/dmx_ts.h"
 #include "dvb_api/dmx_tspidscan.h"
 #include "dvb_api/dmx_tspidbandwidth.h"
+#include "dvb_api/fe_signal.h"
 
 
 
@@ -141,6 +145,7 @@ int main(int argc, char **argv)
 	}
 	out_nl (9, "   DEMUX : %s",opt.devDemux);
 	out_nl (9, "   DVR   : %s",opt.devDvr);
+	out_nl (9, "   FRONTEND: %s",opt.devFE);
      }
   }
 
@@ -168,6 +173,10 @@ int main(int argc, char **argv)
 
 		case PIDBANDWIDTH:
 			err = ts_pidbandwidth (&opt);
+			break;
+
+		case SIGNALSCAN:
+			err = do_SignalStrength (&opt);
 			break;
 
 		default:

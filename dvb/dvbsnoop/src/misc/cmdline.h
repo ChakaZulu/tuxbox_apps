@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.h,v 1.13 2004/01/01 20:09:26 rasc Exp $
+$Id: cmdline.h,v 1.14 2004/01/03 15:40:47 rasc Exp $
 
 
  DVBSNOOP
@@ -23,7 +23,7 @@ $Id: cmdline.h,v 1.13 2004/01/01 20:09:26 rasc Exp $
  -- defs...
 */
 
-enum PACKET_MODE  {SECT, TS, PES, PIDSCAN, PIDBANDWIDTH};
+enum PACKET_MODE  {SECT, TS, PES, PIDSCAN, PIDBANDWIDTH, SIGNALSCAN};
 enum TIME_MODE    {NO_TIME, FULL_TIME, DELTA_TIME};
 
 typedef struct _OPTIONS {
@@ -35,6 +35,7 @@ typedef struct _OPTIONS {
   char        *inpPidFile;		// read from file instead of dmux if not NULL
   char        *devDemux;
   char        *devDvr;
+  char        *devFE;
   u_int       pid;
   u_int       filter;
   u_int       mask;

@@ -1,5 +1,5 @@
 /*
-$Id: dvb_api.h,v 1.2 2004/01/01 20:09:23 rasc Exp $
+$Id: dvb_api.h,v 1.3 2004/01/03 15:40:45 rasc Exp $
 
 
  DVBSNOOP
@@ -24,22 +24,32 @@ $Id: dvb_api.h,v 1.2 2004/01/01 20:09:23 rasc Exp $
 
 #if defined(HAVE_LINUX_DVB_DMX_H)
 
+// API 3
+#define	DVB_API_3
+
 #include <linux/dvb/dmx.h>
-#define DEMUX_DEVICE "/dev/dvb/adapter0/demux0"
-#define DVR_DEVICE   "/dev/dvb/adapter0/dvr0"
+#define DEMUX_DEVICE    "/dev/dvb/adapter0/demux0"
+#define DVR_DEVICE      "/dev/dvb/adapter0/dvr0"
+#include <linux/dvb/frontend.h> 
+#define FRONTEND_DEVICE "/dev/dvb/adapter0/frontend0"
 
 #elif defined(HAVE_OST_DMX_H)
 
+// API 1
+#undef	DVB_API_3
+
 #include <ost/dmx.h>
-#define DEMUX_DEVICE "/dev/dvb/card0/demux0"
-#define DVR_DEVICE   "/dev/dvb/card0/dvr0"
+#define DEMUX_DEVICE   "/dev/dvb/card0/demux0"
+#define DVR_DEVICE     "/dev/dvb/card0/dvr0"
 #define dmx_pes_filter_params dmxPesFilterParams
 #define dmx_sct_filter_params dmxSctFilterParams
 #define pes_type pesType
+#include <ost/frontend.h> 
+#define FRONTEND_DEVICE "/dev/dvb/card0/frontend0"
+#define fe_status_t FrontendStatus
 
 #endif
 
 
 #endif
-
 

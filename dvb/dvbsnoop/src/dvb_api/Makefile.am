@@ -8,7 +8,8 @@ noinst_HEADERS = \
 	dmx_ts.h \
 	dmx_tspidscan.h \
 	dmx_tspidbandwidth.h \
-	dmx_error.h 
+	dmx_error.h \
+	fe_signal.h
 
 
 libdvbapi_a_SOURCES = \
@@ -17,7 +18,8 @@ libdvbapi_a_SOURCES = \
 	dmx_ts.c \
 	dmx_tspidscan.c \
 	dmx_tspidbandwidth.c \
-	dmx_error.c 
+	dmx_error.c \
+	fe_signal.c
 	
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.20 2004/01/01 20:09:26 rasc Exp $
+$Id: cmdline.c,v 1.21 2004/01/03 15:40:47 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: cmdline.c,v 1.20 2004/01/01 20:09:26 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.21  2004/01/03 15:40:47  rasc
+simple frontend signal status query added "-s signal"
+
 Revision 1.20  2004/01/01 20:09:26  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -128,6 +131,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
   opt->inpPidFile = (char *) NULL;
   opt->devDemux = DEMUX_DEVICE;
   opt->devDvr = DVR_DEVICE;
+  opt->devFE = FRONTEND_DEVICE;
   opt->pid = INVALID_PID;
   opt->filter = 0;
   opt->mask = 0;
@@ -151,6 +155,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
 
      if (!strcmp (argv[i],"-demux")) opt->devDemux = argv[++i];
      else if (!strcmp (argv[i],"-dvr")) opt->devDvr = argv[++i];
+     else if (!strcmp (argv[i],"-frontend")) opt->devFE = argv[++i];
      else if (!strcmp (argv[i],"-f")) opt->filter = str2i(argv[++i]);
      else if (!strcmp (argv[i],"-m")) opt->mask = str2i(argv[++i]);
      else if (!strcmp (argv[i],"-crc")) opt->crc = 1;
@@ -179,6 +184,9 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
          else if (!strcmp (s,"bandwidth")) opt->packet_mode = PIDBANDWIDTH;
          else if (!strcmp (s,"pidscan")) {
 		 	opt->packet_mode = PIDSCAN;
+			opt->pid = DUMMY_PID;	// dummy to avoid usage output
+	 } else if (!strcmp (s,"signal")) {
+		 	opt->packet_mode = SIGNALSCAN;
 			opt->pid = DUMMY_PID;	// dummy to avoid usage output
 	 } else opt->help = 1;
      } else if (isdigit (argv[i][0])) {
@@ -243,11 +251,13 @@ static void usage (void)
     printf("Options:  \n");
     printf("   -demux device: demux device [%s]\n",DEMUX_DEVICE);
     printf("   -dvr device:   dvr device [%s]\n",DVR_DEVICE);
+    printf("   -frontend device: frontend   device [%s]\n",FRONTEND_DEVICE);
     printf("   -s [type]:    snoop type  [-s sec]\n");
     printf("                   type: stream type (sec, pes or ts),\n");
     printf("                   or special scan type:\n");
     printf("                         pidscan = transponder pid scan,\n");
     printf("                         bandwidth = data rate statistics for pid\n");
+    printf("                         signal = signal rate statistics \n");
     printf("                 stream type or pidscan\n");
     printf("   -f filter:    filtervalue for 'sec' demux [-f 0]\n");
     printf("   -f maxdmx:    max demux filters to use in pidscan mode\n");
