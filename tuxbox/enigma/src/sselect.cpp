@@ -1050,7 +1050,8 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 					{
 						path.down( p->service );
 						fillServiceList( p->service );
-						selectService( eServiceInterface::getInstance()->service );
+						if (!selectService( eServiceInterface::getInstance()->service ))
+						next();
 					}
 				}
 				services->endAtomic();
@@ -1085,7 +1086,8 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 					{
 						path.down( p->service );
 						fillServiceList( p->service );
-						selectService( eServiceInterface::getInstance()->service );
+						if (!selectService( eServiceInterface::getInstance()->service ))
+						next();
 					}
 				}
 				services->endAtomic();
