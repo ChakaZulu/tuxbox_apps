@@ -41,7 +41,8 @@ eSystemInfo::eSystemInfo()
 					break;
 				default:
 				case FE_OFDM:
-					fetype = feTerrestrial;
+					eDebug("COOL: dvb-t is out. less cool: enigma doesn't support it yet...");
+					fetype = feCable;
 					break;
 			}
 			::close (fd);
@@ -51,6 +52,52 @@ eSystemInfo::eSystemInfo()
 	}
 	else
 		eDebug("open demod failed (%m)");
+
+#else
+	if ( eSystemInfo::getInstance()->getHwType() < eSystemInfo::DM7000 )
+	{
+		switch (atoi(getInfo("fe").c_str()))
+		{
+			case 0: // DBOX_FE_CABLE
+				fetype=feCable;
+				break;
+			case 1: // DBOX_FE_SATELLITE
+				fetype=feSatellite;
+				break;
+			default:
+				fetype=feSatellite;
+		}
+	}
+	else
+	{
+		int fd=::open(DEMOD_DEV, O_RDWR);
+		if (fd>=0)
+		{
+			FrontendInfo info;
+			if ( ::ioctl(fd, FE_GET_INFO, &info) >= 0 )
+			{
+				switch (info.type)
+				{
+					case FE_QPSK:
+						fetype = feSatellite;
+						break;
+					case FE_QAM:
+						fetype = feCable;
+						break;
+					default:
+					case FE_OFDM:
+						eDebug("COOL: dvb-t is out. less cool: enigma doesn't support it yet...");
+						fetype = feCable;
+						break;
+				}
+			}
+			else
+				eDebug("FE_GET_INFO failed (%m)");
+			::close (fd);
+		}
+	}
+#endif
+#if HAVE_DVB_API_VERSION==3
 	std::set<int> caids;
 	hasnegfilter=1;
 	switch (tuxbox_get_submodel())
@@ -239,47 +286,6 @@ eSystemInfo::eSystemInfo()
 		if ( ::ioctl( fd, DMX_SET_NEGFILTER_MASK, 0 ) >= 0 )
 			hasnegfilter=1;
 		close(fd);
-	}
-	if ( hwtype < DM7000 )
-	{
-		switch (atoi(getInfo("fe").c_str()))
-		{
-			case 0: // DBOX_FE_CABLE
-				fetype=feCable;
-				break;
-			case 1: // DBOX_FE_SATELLITE
-				fetype=feSatellite;
-				break;
-			default:
-				fetype=feSatellite;
-		}
-	}
-	else
-	{
-		int fd=::open(DEMOD_DEV, O_RDWR);
-		if (fd>=0)
-		{
-			FrontendInfo info;
-			if ( ::ioctl(fd, FE_GET_INFO, &info) >= 0 )
-			{
-				switch (info.type)
-				{
-//					case FE_QPSK:
-//						fetype = feSatellite;
-//						break;
-//					case FE_QAM:
-//						fetype = feCable;
-//						break;
-					default:
-					case FE_OFDM:
-						fetype = feTerrestrial;
-						break;
-				}
-			}
-			else
-				eDebug("FE_GET_INFO failed (%m)");
-			::close (fd);
-		}
 	}
 #endif
 }
