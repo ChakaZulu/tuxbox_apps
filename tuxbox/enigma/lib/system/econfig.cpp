@@ -3,6 +3,7 @@
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
 #include <sys/stat.h>
+#include <dirent.h>
 
 eConfig *eConfig::instance;
 
@@ -10,7 +11,7 @@ eConfig::eConfig()
 {
 	if (!instance)
 		instance=this;
-
+	DIR *configdir;
 	FILE *f = fopen(CONFIGDIR "/enigma/config", "r");
 	if (f)
 	{
@@ -62,7 +63,14 @@ eConfig::eConfig()
 		}
 		fclose(f);
 	}
-
+	else   if ((configdir = opendir(CONFIGDIR "/enigma")) == 0)
+		  {
+			if(mkdir(CONFIGDIR "/enigma", S_IRWXU) == -1)
+    			{
+			eFatal("error while opening configdir or creating - " CONFIGDIR "/enigma");
+			}
+		  }
+	
 	locked=1;
 	ppin=0;
 	getKey("/elitedvb/pins/parentallock", ppin );
