@@ -13,14 +13,6 @@
 				<tr>
 					<td>Start:</d>
 					<td>
-						<select name="sday" size="1">
-							#SDAYOPTS#
-						</select>
-						.
-						<select name="smonth" size="1">
-							#SMONTHOPTS#
-						</select>
-						&nbsp;-&nbsp;
 						<select name="shour" size="1">
 							#SHOUROPTS#
 						</select>
@@ -33,14 +25,6 @@
 				<tr>
 					<td>End:</d>
 					<td>
-						<select name="eday" size="1">
-							#EDAYOPTS#
-						</select>
-						.
-						<select name="emonth" size="1">
-							#EMONTHOPTS#
-						</select>
-						&nbsp;-&nbsp;
 						<select name="ehour" size="1">
 							#EHOUROPTS#
 						</select>
@@ -48,6 +32,18 @@
 						<select name="emin" size="1">
 							#EMINOPTS#
 						</select>
+					</td>
+				</tr>
+				<tr>
+					<td>Days:</d>
+					<td>
+						<input type="checkbox" name="mo" value="on" #MO#>&nbsp;Mo&nbsp;&nbsp;
+						<input type="checkbox" name="tu" value="on" #TU#>&nbsp;Tu&nbsp;&nbsp;
+						<input type="checkbox" name="we" value="on" #WE#>&nbsp;We&nbsp;&nbsp;
+						<input type="checkbox" name="th" value="on" #TH#>&nbsp;Th&nbsp;&nbsp;
+						<input type="checkbox" name="fr" value="on" #FR#>&nbsp;Fr&nbsp;&nbsp;
+						<input type="checkbox" name="sa" value="on" #SA#>&nbsp;Sa&nbsp;&nbsp;
+						<input type="checkbox" name="so" value="on" #SO#>&nbsp;Su&nbsp;&nbsp;
 					</td>
 				</tr>
 				<tr>

@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>Add Timer Event</title>
+		<title>Add Repeating Timer Event</title>
 		<link rel="stylesheet" type="text/css" href="#CSS#">
 		<script language="javascript" type="text/javascript" src="window.js"></script>
 		<script language="javascript" type="text/javascript" src="timer.js"></script>
@@ -25,14 +25,6 @@
 				<tr>
 					<td>Start:</d>
 					<td>
-						<select name="sday" size="1">
-							#SDAYOPTS#
-						</select>
-						.
-						<select name="smonth" size="1">
-							#SMONTHOPTS#
-						</select>
-						&nbsp;-&nbsp;
 						<select name="shour" size="1">
 							#SHOUROPTS#
 						</select>
@@ -45,14 +37,6 @@
 				<tr>
 					<td>End:</d>
 					<td>
-						<select name="eday" size="1">
-							#EDAYOPTS#
-						</select>
-						.
-						<select name="emonth" size="1">
-							#EMONTHOPTS#
-						</select>
-						&nbsp;-&nbsp;
 						<select name="ehour" size="1">
 							#EHOUROPTS#
 						</select>
@@ -60,6 +44,18 @@
 						<select name="emin" size="1">
 							#EMINOPTS#
 						</select>
+					</td>
+				</tr>
+				<tr>
+					<td>Days:</d>
+					<td>
+						<input type="checkbox" name="mo" value="on">&nbsp;Mo&nbsp;&nbsp;
+						<input type="checkbox" name="tu" value="on">&nbsp;Tu&nbsp;&nbsp;
+						<input type="checkbox" name="we" value="on">&nbsp;We&nbsp;&nbsp;
+						<input type="checkbox" name="th" value="on">&nbsp;Th&nbsp;&nbsp;
+						<input type="checkbox" name="fr" value="on">&nbsp;Fr&nbsp;&nbsp;
+						<input type="checkbox" name="sa" value="on">&nbsp;Sa&nbsp;&nbsp;
+						<input type="checkbox" name="su" value="on">&nbsp;Su&nbsp;&nbsp;
 					</td>
 				</tr>
 				<tr>
@@ -81,7 +77,7 @@
 						&nbsp;
 					</td>
 					<td>
-						<input type="button" name="add" onClick="javascript:addTimerEvent('regular')" value="Add" style="width: 100px; height: 22px; color: #ffffff; background-color: #12259E">
+						<input type="button" name="add" onClick="javascript:addTimerEvent('repeating')" value="Add" style="width: 100px; height: 22px; color: #ffffff; background-color: #12259E">
 					</td>
 				</tr>
 
