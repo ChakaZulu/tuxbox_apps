@@ -546,7 +546,7 @@ void CMP3PlayerGui::paintHead()
 	string strCaption = g_Locale->getText("mp3player.head");
 	frameBuffer->paintBoxRel(x,y+title_height, width,theight, COL_MENUHEAD);
 	frameBuffer->paintIcon("mp3.raw",x+7,y+title_height+10);
-	g_Fonts->menu_title->RenderString(x+35,y+theight+title_height+0, width- 45, strCaption.c_str(), COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+35,y+theight+title_height+0, width- 45, strCaption.c_str(), COL_MENUHEAD, 0, true); // UTF-8
 	if( CNeutrinoApp::getInstance()->isMuted() )
 	{
 		int xpos=x+width-40;
@@ -574,13 +574,13 @@ void CMP3PlayerGui::paintFoot()
 	{
 		frameBuffer->paintIcon("ok.raw", x + 1* ButtonWidth2 + 25, y+(height-info_height-buttonHeight)-3);
 		g_Fonts->infobar_small->RenderString(x + 1 * ButtonWidth2 + 53 , y+(height-info_height-buttonHeight)+24 - 4, 
-														 ButtonWidth2- 28, g_Locale->getText("mp3player.play").c_str(), COL_INFOBAR);
+						     ButtonWidth2- 28, g_Locale->getText("mp3player.play").c_str(), COL_INFOBAR, 0, true); // UTF-8
 	}
 	if(m_state!=STOP)
 	{
 		frameBuffer->paintIcon("help.raw", x+ 0* ButtonWidth + 25, y+(height-info_height-buttonHeight)-3);
 		g_Fonts->infobar_small->RenderString(x+ 0* ButtonWidth +53 , y+(height-info_height-buttonHeight)+24 - 4, 
-															 ButtonWidth2- 28, g_Locale->getText("mp3player.keylevel").c_str(), COL_INFOBAR);
+						     ButtonWidth2- 28, g_Locale->getText("mp3player.keylevel").c_str(), COL_INFOBAR, 0, true); // UTF-8
 	}
 
 	if(key_level==0)
@@ -589,39 +589,39 @@ void CMP3PlayerGui::paintFoot()
 		{
 			frameBuffer->paintIcon("rot.raw", x+ 0* ButtonWidth + 10, y+(height-info_height-2*buttonHeight)+4);
 			g_Fonts->infobar_small->RenderString(x + 0* ButtonWidth + 30, y+(height-info_height-2*buttonHeight)+24 - 1, 
-															 ButtonWidth- 20, g_Locale->getText("mp3player.delete").c_str(), COL_INFOBAR);
+							     ButtonWidth- 20, g_Locale->getText("mp3player.delete").c_str(), COL_INFOBAR, 0, true); // UTF-8
 
 			frameBuffer->paintIcon("gelb.raw", x+ 2* ButtonWidth + 10, y+(height-info_height-2*buttonHeight)+4);
 			g_Fonts->infobar_small->RenderString(x+ 2* ButtonWidth + 30, y+(height-info_height-2*buttonHeight)+24 - 1, 
-															 ButtonWidth- 20, g_Locale->getText("mp3player.deleteall").c_str(), COL_INFOBAR);
+							     ButtonWidth- 20, g_Locale->getText("mp3player.deleteall").c_str(), COL_INFOBAR, 0, true); // UTF-8
 
 			frameBuffer->paintIcon("blau.raw", x+ 3* ButtonWidth + 10, y+(height-info_height-2*buttonHeight)+4);
 			g_Fonts->infobar_small->RenderString(x+ 3* ButtonWidth +30 , y+(height-info_height-2*buttonHeight)+24 - 1, 
-															 ButtonWidth- 20, g_Locale->getText("mp3player.shuffle").c_str(), COL_INFOBAR);
+							     ButtonWidth- 20, g_Locale->getText("mp3player.shuffle").c_str(), COL_INFOBAR, 0, true); // UTF-8
 		}
 
 		frameBuffer->paintIcon("gruen.raw", x+ 1* ButtonWidth + 10, y+(height-info_height-2*buttonHeight)+4);
 		g_Fonts->infobar_small->RenderString(x+ 1* ButtonWidth +30, y+(height-info_height-2*buttonHeight)+24 - 1, 
-														 ButtonWidth- 20, g_Locale->getText("mp3player.add").c_str(), COL_INFOBAR);
+						     ButtonWidth- 20, g_Locale->getText("mp3player.add").c_str(), COL_INFOBAR, 0, true); // UTF-8
 	}
 	else
 	{
 
 		frameBuffer->paintIcon("rot.raw", x+ 0* ButtonWidth + 10, y+(height-info_height-2*buttonHeight)+4);
 		g_Fonts->infobar_small->RenderString(x + 0* ButtonWidth + 30, y+(height-info_height-2*buttonHeight)+24 - 1, 
-														 ButtonWidth- 20, g_Locale->getText("mp3player.stop").c_str(), COL_INFOBAR);
+						     ButtonWidth- 20, g_Locale->getText("mp3player.stop").c_str(), COL_INFOBAR, 0, true); // UTF-8
 
 		frameBuffer->paintIcon("gruen.raw", x+ 1* ButtonWidth + 10, y+(height-info_height-2*buttonHeight)+4);
 		g_Fonts->infobar_small->RenderString(x+ 1* ButtonWidth +30, y+(height-info_height-2*buttonHeight)+24 - 1, 
-														 ButtonWidth- 20, g_Locale->getText("mp3player.fastforward").c_str(), COL_INFOBAR);
+						     ButtonWidth- 20, g_Locale->getText("mp3player.fastforward").c_str(), COL_INFOBAR, 0, true); // UTF-8
 		
 		frameBuffer->paintIcon("gelb.raw", x+ 2* ButtonWidth + 10, y+(height-info_height-2*buttonHeight)+4);
 		g_Fonts->infobar_small->RenderString(x+ 2* ButtonWidth + 30, y+(height-info_height-2*buttonHeight)+24 - 1, 
-														 ButtonWidth- 20, g_Locale->getText("mp3player.pause").c_str(), COL_INFOBAR);
+						     ButtonWidth- 20, g_Locale->getText("mp3player.pause").c_str(), COL_INFOBAR, 0, true); // UTF-8
 
 		frameBuffer->paintIcon("blau.raw", x+ 3* ButtonWidth + 10, y+(height-info_height-2*buttonHeight)+4);
 		g_Fonts->infobar_small->RenderString(x+ 3* ButtonWidth +30 , y+(height-info_height-2*buttonHeight)+24 - 1, 
-														 ButtonWidth- 20, g_Locale->getText("mp3player.shuffle").c_str(), COL_INFOBAR);
+						     ButtonWidth- 20, g_Locale->getText("mp3player.shuffle").c_str(), COL_INFOBAR, 0, true); // UTF-8
 	}
 //	printf("paintFoot}\n");
 }
@@ -638,11 +638,11 @@ void CMP3PlayerGui::paintInfo()
 		char sNr[20];
 		sprintf(sNr, ": %2d", current+1);
 		string tmp=g_Locale->getText("mp3player.playing") + sNr ;
-		int w=g_Fonts->menu->getRenderWidth(tmp);
+		int w=g_Fonts->menu->getRenderWidth(tmp, true); // UTF-8
 		int xstart=(width-w)/2;
 		if(xstart < 10)
 			xstart=10;
-		g_Fonts->menu->RenderString(x+xstart, y + 4 + 1*fheight, width- 20, tmp, COL_MENUCONTENTSELECTED);
+		g_Fonts->menu->RenderString(x+xstart, y + 4 + 1*fheight, width- 20, tmp, COL_MENUCONTENTSELECTED, 0, true); // UTF-8
 		if(playlist[current].Title!="" && playlist[current].Artist!="")
 			tmp=playlist[current].Title + " / " + playlist[current].Artist;
 		else
