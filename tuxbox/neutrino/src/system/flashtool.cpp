@@ -311,11 +311,11 @@ void CMTDInfo::getPartitionInfo()
 			int mtdsize=0;
 			int mtderasesize=0;
 			sscanf(buf, "mtd%d: %x %x \"%s\"\n", &mtdnr, &mtdsize, &mtderasesize, mtdname);
-			printf("-%d-%d-%d-%s-\n", mtdnr, mtdsize, mtderasesize, mtdname);
 			SMTDPartition* tmp = new SMTDPartition;
 				tmp->size = mtdsize;
 				tmp->erasesize = mtderasesize;
-				tmp->name = mtdname;
+				string tmpstr = buf;
+				tmp->name = tmpstr.substr( tmpstr.find("\"")+1, tmpstr.rfind("\"")-tmpstr.find("\"")-1);
 				sprintf((char*) &buf, "/dev/mtd/%d", mtdnr);
 				tmp->filename = buf;
 			mtdData.insert( mtdData.end(), tmp);
