@@ -1,5 +1,5 @@
 /*
- * $Id: nit.cpp,v 1.27 2002/09/20 16:53:39 thegoodguy Exp $
+ * $Id: nit.cpp,v 1.28 2002/09/21 20:20:05 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -32,7 +32,7 @@
 /* zapit */
 #include <getservices.h>
 #include <zapost/dmx.h>
-#include <settings.h>  // DEMUX_DEV
+#include <settings.h>  // DEMUX_DEVICE
 
 #include "descriptors.h"
 #include "nit.h"
@@ -69,9 +69,9 @@ int parse_nit (unsigned char DiSEqC)
 	mask[0] = 0xFF;
 	mask[4] = 0xFF;
 
-	if ((demux_fd = open(DEMUX_DEV, O_RDWR)) < 0)
+	if ((demux_fd = open(DEMUX_DEVICE, O_RDWR)) < 0)
 	{
-		perror("[nit.cpp] " DEMUX_DEV);
+		perror("[nit.cpp] " DEMUX_DEVICE);
 		return -1;
 	}
 

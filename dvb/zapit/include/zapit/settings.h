@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/settings.h,v 1.1 2002/09/20 16:55:22 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/settings.h,v 1.2 2002/09/21 20:20:05 thegoodguy Exp $
  *
  * zapit's settings - d-box2 linux project
  *
@@ -24,24 +24,30 @@
 #ifndef __zapit__settings_h__
 #define __zapit__settings_h__
 
+
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include                "config.h"
 #else
-#define CONFIGDIR "/var/tuxbox/config"
+#define CONFIGDIR       "/var/tuxbox/config"
 #endif
 
-#define CONFIGFILE     CONFIGDIR "/zapit/zapit.conf"
-#define SATELLITES_XML CONFIGDIR "/satellites.xml"
-#define CABLES_XML     CONFIGDIR "/cables.xml"
-#define SERVICES_XML   CONFIGDIR "/zapit/services.xml"
-#define BOUQUETS_XML   CONFIGDIR "/zapit/bouquets.xml"
+
+#define CONFIGFILE      CONFIGDIR "/zapit/zapit.conf"
+#define SATELLITES_XML  CONFIGDIR "/satellites.xml"
+#define CABLES_XML      CONFIGDIR "/cables.xml"
+#define SERVICES_XML    CONFIGDIR "/zapit/services.xml"
+#define BOUQUETS_XML    CONFIGDIR "/zapit/bouquets.xml"
 
 
-#define DEMUX_DEV      "/dev/dvb/card0/demux0"
+#define AUDIO_DEVICE    "/dev/dvb/card0/audio0"
+#define DEMUX_DEVICE    "/dev/dvb/card0/demux0"
+#define FRONTEND_DEVICE "/dev/dvb/card0/frontend0"
+#define SEC_DEVICE      "/dev/dvb/card0/sec0"
+#define VIDEO_DEVICE    "/dev/dvb/card0/video0"
 
 
 #ifdef DBOX2
-#define VBI_DEV        "/dev/dbox/vbi0"
+#define VBI_DEVICE      "/dev/dbox/vbi0"
 #endif
 
 

@@ -1,5 +1,5 @@
 /*
- * $Id: video.cpp,v 1.1 2002/05/16 02:33:07 obi Exp $
+ * $Id: video.cpp,v 1.2 2002/09/21 20:20:05 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -27,6 +27,7 @@
 #include <unistd.h>
 
 #include "video.h"
+#include "settings.h"
 
 CVideo::CVideo ()
 {

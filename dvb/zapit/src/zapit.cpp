@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.235 2002/09/21 12:47:10 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.236 2002/09/21 20:20:05 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -182,9 +182,9 @@ int startVbi ()
 		return -1;
 	}
 
-	if ((vbi_fd == -1) && ((vbi_fd = open(VBI_DEV, O_RDWR)) < 0))
+	if ((vbi_fd == -1) && ((vbi_fd = open(VBI_DEVICE, O_RDWR)) < 0))
 	{
-		perror ("[zapit] " VBI_DEV);
+		perror ("[zapit] " VBI_DEVICE);
 		return -1;
 	}
 
@@ -386,9 +386,9 @@ int zapit(const t_channel_id channel_id, bool in_nvod)
 		debug("[zapit] looking up pids for onid:sid %04x:%04x\n", channel->getOriginalNetworkId(), channel->getServiceId());
 
 		/* open demux device */
-		if ((dmx_sct_fd = open(DEMUX_DEV, O_RDWR)) < 0)
+		if ((dmx_sct_fd = open(DEMUX_DEVICE, O_RDWR)) < 0)
 		{
-			perror("[zapit] " DEMUX_DEV);
+			perror("[zapit] " DEMUX_DEVICE);
 			return -1;
 		}
 
@@ -1052,7 +1052,7 @@ int main (int argc, char **argv)
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.235 2002/09/21 12:47:10 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.236 2002/09/21 20:20:05 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1369,21 +1369,21 @@ int startPlayBack()
 	if (playbackStopForced == true)
 		return -1;
 
-	if ((dmx_pcr_fd == -1) && (dmx_pcr_fd = open(DEMUX_DEV, O_RDWR)) < 0)
+	if ((dmx_pcr_fd == -1) && (dmx_pcr_fd = open(DEMUX_DEVICE, O_RDWR)) < 0)
 	{
-		perror("[zapit] " DEMUX_DEV);
+		perror("[zapit] " DEMUX_DEVICE);
 		return -1;
 	}
 
-	if ((dmx_audio_fd == -1) && (dmx_audio_fd = open(DEMUX_DEV, O_RDWR)) < 0)
+	if ((dmx_audio_fd == -1) && (dmx_audio_fd = open(DEMUX_DEVICE, O_RDWR)) < 0)
 	{
-		perror("[zapit] " DEMUX_DEV);
+		perror("[zapit] " DEMUX_DEVICE);
 		return -1;
 	}
 
-	if ((dmx_video_fd == -1) && (dmx_video_fd = open(DEMUX_DEV, O_RDWR)) < 0)
+	if ((dmx_video_fd == -1) && (dmx_video_fd = open(DEMUX_DEVICE, O_RDWR)) < 0)
 	{
-		perror("[zapit] " DEMUX_DEV);
+		perror("[zapit] " DEMUX_DEVICE);
 		return -1;
 	}
 
@@ -1410,9 +1410,9 @@ int startPlayBack()
 
 #if 0
 
-	if ((dmx_general_fd == -1) && (dmx_general_fd = open(DEMUX_DEV, O_RDWR)))
+	if ((dmx_general_fd == -1) && (dmx_general_fd = open(DEMUX_DEVICE, O_RDWR)))
 	{
-		perror("[zapit] " DEMUX_DEV);
+		perror("[zapit] " DEMUX_DEVICE);
 		return -1;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * $Id: video.h,v 1.2 2002/08/21 09:59:23 obi Exp $
+ * $Id: video.h,v 1.3 2002/09/21 20:20:05 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -25,7 +25,6 @@
 #include <time.h>
 
 #include <ost/video.h>
-#define VIDEO_DEVICE "/dev/dvb/card0/video0"
 
 class CVideo
 {

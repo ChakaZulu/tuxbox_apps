@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.cpp,v 1.30 2002/09/20 16:53:39 thegoodguy Exp $
+ * $Id: sdt.cpp,v 1.31 2002/09/21 20:20:05 thegoodguy Exp $
  */
 
 /* system c */
@@ -12,7 +12,7 @@
 
 /* zapit */
 #include <zapost/dmx.h>
-#include <settings.h>  // DEMUX_DEV
+#include <settings.h>  // DEMUX_DEVICE
 
 #include "descriptors.h"
 #include "sdt.h"
@@ -37,9 +37,9 @@ unsigned int get_sdt_TsidOnid ()
 	filter[0] = 0x42;
 	mask[0] = 0xFF;
 	
-	if ((demux_fd = open(DEMUX_DEV, O_RDWR)) < 0)
+	if ((demux_fd = open(DEMUX_DEVICE, O_RDWR)) < 0)
 	{
-		perror("[sdt.cpp] " DEMUX_DEV);
+		perror("[sdt.cpp] " DEMUX_DEVICE);
 		return 0;
 	}
 
@@ -91,9 +91,9 @@ int parse_sdt ()
 	mask[0] = 0xFF;
 	mask[4] = 0xFF;
 
-	if ((demux_fd = open(DEMUX_DEV, O_RDWR)) < 0)
+	if ((demux_fd = open(DEMUX_DEVICE, O_RDWR)) < 0)
 	{
-		perror("[sdt.cpp] " DEMUX_DEV);
+		perror("[sdt.cpp] " DEMUX_DEVICE);
 		return -1;
 	}
 
