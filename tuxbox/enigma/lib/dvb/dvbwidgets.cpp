@@ -3,6 +3,8 @@
 #include <core/gui/enumber.h>
 #include <core/gui/listbox.h>
 #include <core/gui/echeckbox.h>
+#include <core/gui/eprogress.h>
+#include "frontend.h"
 #include "dvb.h"
 
 eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type): eWidget(parent), edit(edit), type(type)
@@ -101,4 +103,48 @@ int eTransponderWidget::setTransponder(eTransponder *transponder)
 	}
 	}
 	return 0;
+}
+
+int eFEStatusWidget::eventHandler(const eWidgetEvent &event)
+{
+	switch (event.type)
+	{
+	case eWidgetEvent::willShow:
+		updatetimer.start(500);
+		update();
+		break;
+	case eWidgetEvent::willHide:
+		updatetimer.stop();
+		break;
+	}
+	return eWidget::eventHandler(event);
+}
+
+eFEStatusWidget::eFEStatusWidget(eWidget *parent, eFrontend *fe): eWidget(parent), fe(fe), updatetimer(eApp)
+{
+	p_snr=new eProgress(this);
+	p_snr->setName("snr");
+	
+	p_agc=new eProgress(this);
+	p_agc->setName("agc");
+	
+	c_sync=new eCheckbox(this);
+	c_sync->setName("sync");
+	
+	c_lock=new eCheckbox(this);
+	c_lock->setName("lock");
+	
+	CONNECT(updatetimer.timeout, eFEStatusWidget::update);
+
+	if (eSkin::getActive()->build(this, "eFEStatusWidget"))
+		return;
+}
+
+void eFEStatusWidget::update()
+{
+	p_agc->setPerc(fe->SignalStrength()*100/65536);
+	p_snr->setPerc((65536-fe->SNR())*100/65536);
+	int status=fe->Status();
+	c_lock->setCheck(!!(status & FE_HAS_LOCK));
+	c_sync->setCheck(!!(status & FE_HAS_SYNC));
 }

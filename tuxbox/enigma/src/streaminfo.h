@@ -15,6 +15,7 @@ protected:
 	int eventHandler(const eWidgetEvent &event);
 public:
 	eStreaminfo(int mode=0, decoderParameters *parms=0);
+	~eStreaminfo();
 };
 
 #endif

@@ -23,6 +23,8 @@ void eCheckbox::sel()
 
 void eCheckbox::setCheck(int c)
 {
+	if (ischecked == c)
+		return;
 	ischecked=c;
 	gPixmap *pm=eSkin::getActive()->queryImage(ischecked?"eCheckbox.checked":"eCheckbox.unchecked");
 	setPixmap(pm);

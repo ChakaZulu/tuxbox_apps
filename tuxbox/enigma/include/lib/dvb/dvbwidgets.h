@@ -3,10 +3,13 @@
 
 #include <core/gui/ewidget.h>
 #include <core/gui/listbox.h>
+#include <core/base/ebase.h>
 
 class eNumber;
 class eTransponder;
 class eCheckbox;
+class eProgress;
+class eFrontend;
 
 class eTransponderWidget: public eWidget
 {
@@ -26,6 +29,18 @@ public:
 	eTransponderWidget(eWidget *parent, int edit, int type);
 	int load();
 	int setTransponder(eTransponder *transponder);
+};
+
+class eFEStatusWidget: public eWidget
+{
+	eProgress *p_snr, *p_agc;
+	eCheckbox *c_sync, *c_lock;
+	eFrontend *fe;
+	eTimer updatetimer;
+	void update();
+	int eventHandler(const eWidgetEvent &);
+public:
+	eFEStatusWidget(eWidget *parent, eFrontend *fe);
 };
 
 #endif

@@ -113,6 +113,11 @@ int eFrontend::SignalStrength()
 {
 	int32_t strength=-1;
 	ioctl(fd, FE_READ_SIGNAL_STRENGTH, &strength);
+	if ((strength<0) || (strength>65535))
+	{
+		strength=0;
+		eWarning("buggy SNR driver (or old version)");
+	}
 	return strength;
 }
 
@@ -120,6 +125,11 @@ int eFrontend::SNR()
 {
 	int32_t snr=-1;
 	ioctl(fd, FE_READ_SNR, &snr);
+	if ((snr<0) || (snr>65535))
+	{
+		snr=0;
+		eWarning("buggy SNR driver (or old version)");
+	}
 	return snr;
 }
 

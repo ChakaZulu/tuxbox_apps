@@ -16,6 +16,11 @@
 
 class eTransponder;
 
+/**
+ * \brief A frontend, delivering TS.
+ *
+ * A frontend is something like a tuner. You can tune to a transponder (or channel, as called with DVB-C).
+ */
 class eFrontend: public Object
 {
 	uint32_t lnbfreq_low, lnbfreq_hi, threshold;
@@ -55,7 +60,17 @@ public:
 	int Locked() { return Status()&FE_HAS_LOCK; }
 	
 	uint32_t BER();
+	/**
+	 * \brief Returns the signal strength (or AGC).
+	 *
+	 * Range is 0..65535 in linear scale.
+	 */
 	int SignalStrength();
+	/**
+	 * \brief Returns the signal-to-noise ratio.
+	 *
+	 * Range is 0..65535 in linear scale.
+	 */
 	int SNR();
 	uint32_t UncorrectedBlocks();
 	uint32_t NextFrequency();

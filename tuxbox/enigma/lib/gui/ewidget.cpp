@@ -107,10 +107,12 @@ void eWidget::_willHide()
 
 void eWidget::willShow()
 {
+	event(eWidgetEvent(eWidgetEvent::willShow));
 }
 
 void eWidget::willHide()
 {
+	event(eWidgetEvent(eWidgetEvent::willHide));
 }
 
 void eWidget::setPalette()

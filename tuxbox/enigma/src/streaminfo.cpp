@@ -9,6 +9,7 @@
 #include <core/gui/eskin.h>
 #include <core/gui/guiactions.h>
 #include <core/dvb/dvbwidgets.h>
+#include <core/dvb/frontend.h>
 
 int eStreaminfo::eventHandler(const eWidgetEvent &event)
 {
@@ -24,6 +25,12 @@ int eStreaminfo::eventHandler(const eWidgetEvent &event)
 		else
 			break;
 		return 1;
+	case eWidgetEvent::execBegin:
+		takeFocus();
+		break;
+	case eWidgetEvent::execDone:
+		releaseFocus();
+		break;
 	}
 	return eWindow::eventHandler(event);
 }
@@ -352,14 +359,26 @@ eStreaminfo::eStreaminfo(int mode, decoderParameters *parms): eWindow(1)
 
 	mp.addPage(w);
 	
-	eTransponderWidget *t=new eTransponderWidget(this, 0, eTransponderWidget::deliverySatellite);
+	eWidget *n=new eWidget(this);
+	n->move(ePoint(0, 0));
+	n->resize(clientrect.size());
+	n->hide();
+
+	eTransponderWidget *t=new eTransponderWidget(n, 0, eTransponderWidget::deliverySatellite);
 	t->move(ePoint(0, 0));
-	t->resize(clientrect.size());
-	t->hide();
+	t->resize(eSize(clientrect.width(), 200));
 	t->load();
 	t->setTransponder(eDVB::getInstance()->transponder);
+
+	eWidget *fe=new eFEStatusWidget(n, eFrontend::fe());
+	fe->move(ePoint(0, 200));
+	fe->resize(eSize(clientrect.width(), 100));
 	
-	mp.addPage(t);
+	mp.addPage(n);
 	
 	mp.first();
+}
+
+eStreaminfo::~eStreaminfo()
+{
 }

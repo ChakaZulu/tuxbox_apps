@@ -79,14 +79,15 @@
 	</object>
 	
 	<object name="tsManual">
-		<tsManual position="0:0" size="e:300">
-			<eButton text="start scan" name="start" position="10:e-40" size="200:30" />
-			<eButton text="abort" name="abort" position="e-100:e-40" size="90:30" />
+		<tsManual position="0:0" size="e:400">
+			<eTranspondersettings name="transponder" position="0:0" size="400:200" />
+			<eFEStatus name="festatus" position="0:200" size="400:100" />
+			<eButton text="start scan" name="start" position="10:e-30" size="200:30" />
+			<eButton text="abort" name="abort" position="e-100:e-30" size="90:30" />
 			<eCheckbox text="use ONIT" name="useonit" position="10:e-100" size="200:30" />
 			<eCheckbox text="use BAT" name="usebat" position="210:e-100" size="e:30" />
 			<eCheckbox text="clear list before" name="clearlist" position="10:e-70" size="200:30" />
 			<eCheckbox text="network search" name="searchnit" position="210:e-70" size="e:30" />
-			<eTranspondersettings name="transponder" position="0:0" size="400:200" />
 		</tsManual>
 	</object>
 	
@@ -123,4 +124,14 @@
 		</eTranspondersettings>
 	</object>
 
+	<object name="eFEStatusWidget">
+		<eFEStatusWidget size="400:100">
+			<eProgress name="snr" position="80:5" size="e-10:20" />
+			<eProgress name="agc" position="80:30" size="e-10:20" />
+			<eLabel text="SNR" position="10:5" size="70:25" />
+			<eLabel text="AGC" position="10:30" size="70:25" />
+			<eCheckbox text="Lock" name="lock" position="10:55" size="80:30" />
+			<eCheckbox text="Sync" name="sync" position="95:55" size="e:30" />
+		</eFEStatusWidget>
+	</object>
 </eskin>
