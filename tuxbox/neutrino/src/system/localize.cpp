@@ -135,11 +135,16 @@ void CLocaleManager::loadLocale(std::string locale)
 	fclose(fd);
 }
 
-std::string CLocaleManager::getText(std::string keyName)
+std::string CLocaleManager::getText(const char * const keyName)
 {
-	std::string erg = localeData[keyName];
-	if (erg == "")
+	return getText(std::string(keyName));
+}
+
+std::string CLocaleManager::getText(const std::string keyName)
+{
+	mapLocaleData::const_iterator it = localeData.find(keyName);
+	if (it == localeData.end())
 		return keyName;
 	else
-		return erg;
+		return it->second;
 }

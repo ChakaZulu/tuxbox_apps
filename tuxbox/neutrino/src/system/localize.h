@@ -49,7 +49,8 @@ class CLocaleManager
 	public:
 		void loadLocale(std::string locale);
 
-		std::string getText(std::string keyName);
+		std::string getText(const std::string keyName);
+		std::string getText(const char * const keyName);
 };
 
 
