@@ -1,5 +1,5 @@
 /*
- * $Id: audio.cpp,v 1.3 2002/05/13 17:17:04 obi Exp $
+ * $Id: audio.cpp,v 1.4 2002/05/16 02:33:26 obi Exp $
  *
  * (C) 2002 by Steffen Hehn 'McClean' &
  *	Andreas Oberritter <obi@tuxbox.org>
@@ -33,6 +33,9 @@ CAudio::CAudio()
 {
 	initialized = false;
 
+	mixer.volume_left = 0;
+	mixer.volume_right = 0;
+
 	if ((fd = open(AUDIO_DEV, O_RDWR)) < 0)
 	{
 		perror(AUDIO_DEV);
@@ -40,6 +43,11 @@ CAudio::CAudio()
 	else if (ioctl(fd, AUDIO_GET_STATUS, &status) < 0)
 	{
 		perror("AUDIO_GET_STATUS");
+		close(fd);
+	}
+	else if (ioctl(fd, AUDIO_SET_MIXER, &mixer) < 0)
+	{
+		perror("AUDIO_SET_MIXER");
 		close(fd);
 	}
 	else
@@ -56,74 +64,133 @@ CAudio::~CAudio()
 	}
 }
 
-bool CAudio::setBypassMode (bool enable)
+int CAudio::setBypassMode (bool enable)
 {
 	if (ioctl(fd, AUDIO_SET_BYPASS_MODE, enable ? 0 : 1) < 0)
 	{
 		perror("AUDIO_SET_BYPASS_MODE");
-		return false;
+		return -1;
 	}
 
 	status.bypassMode = enable;
-	return true;
+
+	return 0;
 }
 
-bool CAudio::setMute (bool enable)
+int CAudio::setMute (bool enable)
 {
 	if (ioctl(fd, AUDIO_SET_MUTE, enable) < 0)
 	{
-		perror("[zapit] AUDIO_SET_MUTE");
-		return false;
+		perror("AUDIO_SET_MUTE");
+		return -1;
 	}
 
 	status.muteState = enable;
-	return true;
+
+	return 0;
 }
 
-bool CAudio::mute()
+int CAudio::mute ()
 {
 	if (status.muteState == false)
+	{
 		return setMute(true);
+	}
 	else
-		return false;
+	{
+		return -1;
+	}
 
 }
 
-bool CAudio::unmute()
+int CAudio::unmute ()
 {
 	if (status.muteState == true)
+	{
 		return setMute(false);
+	}
 	else
-		return false;
+	{
+		return -1;
+	}
 }
 
-bool CAudio::enableBypass()
+int CAudio::enableBypass ()
 {
 	if (status.bypassMode == false)
+	{
 		return setBypassMode(true);
+	}
 	else
-		return false;
+	{
+		return -1;
+	}
 }
 
-bool CAudio::disableBypass()
+int CAudio::disableBypass ()
 {
 	if (status.bypassMode == true)
+	{
 		return setBypassMode(false);
+	}
 	else
-		return false;
+	{
+		return -1;
+	}
 }
 
-bool CAudio::setVolume (unsigned char left, unsigned char right)
+int CAudio::setVolume (unsigned char left, unsigned char right)
 {
+	if ((mixer.volume_left == left) && (mixer.volume_right == right))
+	{
+		return 0;
+	}
+
 	mixer.volume_left = left;
 	mixer.volume_right = right;
 
 	if (ioctl(fd, AUDIO_SET_MIXER, &mixer) < 0)
 	{
 		perror("AUDIO_SET_MIXER");
-		return false;
+		return -1;
 	}
 
-	return true;
+	return -1;
+}
+
+int CAudio::start ()
+{
+	if (status.playState == AUDIO_PLAYING)
+	{
+		return 0;
+	}
+
+	if (ioctl(fd, AUDIO_PLAY) < 0)
+	{
+		perror("AUDIO_PLAY");
+		return -1;
+	}
+
+	status.playState = AUDIO_PLAYING;
+
+	return 0;
+}
+
+int CAudio::stop ()
+{
+	if (status.playState == AUDIO_STOPPED)
+	{
+		return 0;
+	}
+
+	if (ioctl(fd, AUDIO_STOP) < 0)
+	{
+		perror("AUDIO_STOP");
+		return -1;
+	}
+
+	status.playState = AUDIO_STOPPED;
+
+	return 0;
 }
 

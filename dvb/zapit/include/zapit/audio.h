@@ -1,5 +1,5 @@
 /*
- * $Id: audio.h,v 1.4 2002/05/15 20:51:44 obi Exp $
+ * $Id: audio.h,v 1.5 2002/05/16 02:33:26 obi Exp $
  *
  * (C) 2002 by Steffen Hehn 'McClean' &
  *	Andreas Oberritter <obi@tuxbox.org>
@@ -43,8 +43,8 @@ class CAudio
 		struct audioMixer mixer;
 
 		/* internal methods */
-		bool setMute (bool mute);
-		bool setBypassMode (bool bypass);
+		int setMute (bool mute);
+		int setBypassMode (bool bypass);
 
 		/* true if constructor had success */
 		bool initialized;
@@ -55,18 +55,22 @@ class CAudio
 		~CAudio();
 
 		/* check if initialitation failed before rocking */
-		bool isInitialized() { return initialized; }
+		bool isInitialized () { return initialized; }
 
 		/* shut up */
-		bool mute();
-		bool unmute();
+		int mute ();
+		int unmute ();
 
 		/* bypass audio to external decoder */
-		bool enableBypass();
-		bool disableBypass();
+		int enableBypass ();
+		int disableBypass ();
 
-		/* volume, min = 0, max = 64 */
-		bool setVolume (unsigned char left, unsigned char right);
+		/* volume, min = 0, max = 255 */
+		int setVolume (unsigned char left, unsigned char right);
+
+		/* start and stop audio */
+		int start ();
+		int stop ();
 };
 
 #endif /* __audio_h__ */
