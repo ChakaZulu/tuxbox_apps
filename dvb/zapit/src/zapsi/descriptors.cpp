@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.48 2002/10/30 23:57:26 thegoodguy Exp $
+ * $Id: descriptors.cpp,v 1.49 2002/10/31 10:10:36 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -39,7 +39,7 @@ std::map <uint32_t, transpondermap> scantransponders;
 std::string curr_chan_name;
 uint32_t found_transponders;
 uint32_t found_channels;
-CDVBString lastProviderName(NULL, 0);
+std::string lastProviderName;
 std::map <t_channel_id, uint8_t> service_types;
 
 extern CFrontend *frontend;
@@ -421,8 +421,39 @@ uint8_t service_descriptor (uint8_t *buffer, const t_service_id service_id, cons
 	uint8_t service_type = buffer[2];
 	uint8_t service_provider_name_length = buffer[3];
 
-	CDVBString providerName = CDVBString((const char*)&(buffer[4]), service_provider_name_length);
-	CDVBString serviceName  = CDVBString((const char*)&(buffer[4 + service_provider_name_length + 1]), (2 + buffer[1]) - (4 + service_provider_name_length + 1));
+	std::string providerName((const char*)&(buffer[4]), service_provider_name_length);
+	std::string serviceName;
+
+	bool in_blacklist = false;
+
+	if (providerName == "CanalSat\xE9lite")
+	{
+		providerName = "CanalSat\xC3\xA9lite";
+		in_blacklist = true;
+	}
+	else if (providerName == "Chambre des D\xE9" "put\xE9" "es")
+	{
+		providerName = "Chambre des D\xC3\xA9" "put\xC3\xA9" "es";
+		in_blacklist = true;
+	}
+	else if (providerName == "PREMIERE")
+	{
+		providerName = "Premiere"; // well the name PREMIERE itself is not a problem
+		in_blacklist = true;
+	}
+	
+	if (in_blacklist)
+	{
+		if (((unsigned char)buffer[4 + service_provider_name_length + 1]) >= 0x20) // no encoding info
+			serviceName  = CDVBString(("\x05" + std::string((const char*)&(buffer[4 + service_provider_name_length + 1]), (2 + buffer[1]) - (4 + service_provider_name_length + 1))).c_str(), (2 + buffer[1]) - (4 + service_provider_name_length + 1) + 1).getContent(); // add artificial encoding info
+		else
+			serviceName  = CDVBString((const char*)&(buffer[4 + service_provider_name_length + 1]), (2 + buffer[1]) - (4 + service_provider_name_length + 1)).getContent();
+	}
+	else
+	{
+		providerName = CDVBString((const char*)&(buffer[4]), service_provider_name_length).getContent();
+		serviceName  = CDVBString((const char*)&(buffer[4 + service_provider_name_length + 1]), (2 + buffer[1]) - (4 + service_provider_name_length + 1)).getContent();
+	}
 
 	found_channels++;
 
@@ -441,7 +472,7 @@ uint8_t service_descriptor (uint8_t *buffer, const t_service_id service_id, cons
 			CREATE_CHANNEL_ID,
 			CZapitChannel
 			(
-				serviceName.getContent(),
+				serviceName,
 				service_id,
 				transport_stream_id,
 				original_network_id,
@@ -453,13 +484,13 @@ uint8_t service_descriptor (uint8_t *buffer, const t_service_id service_id, cons
 
 #define UNKNOWN_PROVIDER_NAME "Unknown Provider"
 
-	if (providerName.getContent() == "")
-		providerName = CDVBString(UNKNOWN_PROVIDER_NAME, strlen(UNKNOWN_PROVIDER_NAME));
+	if (providerName == "")
+		providerName = CDVBString(UNKNOWN_PROVIDER_NAME, strlen(UNKNOWN_PROVIDER_NAME)).getContent();
 
 	if (lastProviderName != providerName)
 	{
 		lastProviderName = providerName;
-		eventServer->sendEvent(CZapitClient::EVT_SCAN_PROVIDER, CEventServer::INITID_ZAPIT, (void *) lastProviderName.getContent().c_str(), lastProviderName.getContent().length() + 1);
+		eventServer->sendEvent(CZapitClient::EVT_SCAN_PROVIDER, CEventServer::INITID_ZAPIT, (void *) lastProviderName.c_str(), lastProviderName.length() + 1);
 	}
 
 	switch (service_type)
@@ -471,14 +502,14 @@ uint8_t service_descriptor (uint8_t *buffer, const t_service_id service_id, cons
 		CBouquet* bouquet;
 		int bouquetId;
 
-		bouquetId = scanBouquetManager->existsBouquet(providerName.getContent());
+		bouquetId = scanBouquetManager->existsBouquet(providerName);
 
 		if (bouquetId == -1)
-			bouquet = scanBouquetManager->addBouquet(providerName.getContent());
+			bouquet = scanBouquetManager->addBouquet(providerName);
 		else
 			bouquet = scanBouquetManager->Bouquets[bouquetId];
 
-		bouquet->addService(new CZapitChannel(serviceName.getContent(), service_id, transport_stream_id, original_network_id, service_type, 0));
+		bouquet->addService(new CZapitChannel(serviceName, service_id, transport_stream_id, original_network_id, service_type, 0));
 		break;
 	}
 
