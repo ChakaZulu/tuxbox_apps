@@ -278,14 +278,15 @@ void CPlugins::startPlugin(int number)
 	if (plugin_list[number].vtxtpid)
 	{
 		// cout << "With VTXTPID " << params.find(P_ID_VTXTPID)->second.c_str() << endl;
-
 		// versuche, den gtx/enx_vbi zu stoppen
+#if 0
         int fd = open("/dev/dbox/vbi0", O_RDWR);
 		if (fd > 0)
 		{
 			ioctl(fd, AVIA_VBI_STOP_VTXT, 0);
 			close(fd);
 		}
+#endif
 		startparam = makeParam(P_ID_VTXTPID, startparam);
 	}
 	if (plugin_list[number].needoffset)
@@ -391,6 +392,7 @@ void CPlugins::startPlugin(int number)
     		frameBuffer->paintBackgroundBox(0,0,720,576);
     	}
 
+#if 0
     	if (plugin_list[number].vtxtpid)
     	{
     		int vtpid= atoi(params.find(P_ID_VTXTPID)->second.c_str());
@@ -405,7 +407,7 @@ void CPlugins::startPlugin(int number)
 				}
 			}
 		}
-
+#endif
 		//redraw menue...
 		break;	// break every time - never loop - run once !!!
 	}
