@@ -1,5 +1,5 @@
 /*
- * $Id: lcdmenu.h,v 1.11 2002/04/14 23:20:38 obi Exp $
+ * $Id: lcdmenu.h,v 1.12 2002/06/03 22:09:08 obi Exp $
  *
  * Copyright (C) 2001, 2002 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -96,6 +96,7 @@ class CLCDMenu : public CLCDDisplay
 		int lineSpacing;
 		int textAlign;
 		bool showNumbers;
+		int timeoutValue;
 
 		int selectedEntry;
 		int entryCount;

@@ -54,7 +54,7 @@ show_numbers=false
 pin=__lUISdFwUYjg
 
 #
-# option menu_items (string, ...)
+# option: menu_items (string, ...)
 # default: EliteDVB,Neutrino,Lcars,Maintenance
 #
 menu_items=Enigma,Neutrino,Lcars,Maintenance
@@ -64,3 +64,10 @@ menu_items=Enigma,Neutrino,Lcars,Maintenance
 # default: 4
 #
 pin_protect=4
+
+#
+# option: timeout
+# default: 10 seconds
+#
+timeout=10
+
