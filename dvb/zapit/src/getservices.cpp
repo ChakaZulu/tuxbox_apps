@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.81 2003/07/21 12:07:58 digi_casi Exp $
+ * $Id: getservices.cpp,v 1.82 2003/10/14 12:48:59 thegoodguy Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -231,7 +231,7 @@ int LoadSatellitePositions(void)
 	
 	satellitePositions.clear();
 	
-	xmlDocPtr parser = parseXmlFile(string(SATELLITES_XML));
+	xmlDocPtr parser = parseXmlFile(SATELLITES_XML);
 
 	if (parser == NULL)
 	{
@@ -272,7 +272,7 @@ int LoadServices(fe_type_t frontendType, diseqc_t diseqcType)
 			LoadMotorPositions();
 	}
 	
-	xmlDocPtr parser = parseXmlFile(string(SERVICES_XML));
+	xmlDocPtr parser = parseXmlFile(SERVICES_XML);
 
 	if (parser == NULL)
 		return -1;

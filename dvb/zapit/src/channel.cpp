@@ -1,5 +1,5 @@
 /*
- * $Id: channel.cpp,v 1.16 2003/06/03 08:27:01 digi_casi Exp $
+ * $Id: channel.cpp,v 1.17 2003/10/14 12:48:59 thegoodguy Exp $
  *
  * (C) 2002 by Steffen Hehn <mcclean@berlios.de>
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
@@ -22,7 +22,7 @@
 
 #include <zapit/channel.h>
 
-CZapitChannel::CZapitChannel (std::string p_name, t_service_id p_sid, t_transport_stream_id p_tsid, t_original_network_id p_onid, unsigned char p_service_type, unsigned char p_DiSEqC, t_satellite_position p_satellite_position)
+CZapitChannel::CZapitChannel(const std::string & p_name, t_service_id p_sid, t_transport_stream_id p_tsid, t_original_network_id p_onid, unsigned char p_service_type, unsigned char p_DiSEqC, t_satellite_position p_satellite_position)
 {
 	name = p_name;
 	service_id = p_sid;
@@ -68,7 +68,7 @@ unsigned short CZapitChannel::getAudioPid(unsigned char index)
 	return retval;
 }
 
-int CZapitChannel::addAudioChannel(unsigned short pid, bool isAc3, std::string description, unsigned char componentTag)
+int CZapitChannel::addAudioChannel(const unsigned short pid, const bool isAc3, const std::string & description, const unsigned char componentTag)
 {
 	std::vector <CZapitAudioChannel *>::iterator aI;
 
@@ -81,7 +81,7 @@ int CZapitChannel::addAudioChannel(unsigned short pid, bool isAc3, std::string d
 	tmp->isAc3 = isAc3;
 	tmp->description = description;
 	tmp->componentTag = componentTag;
-	audioChannels.insert(audioChannels.end(), tmp);
+	audioChannels.push_back(tmp);
 	return 0;
 }
 

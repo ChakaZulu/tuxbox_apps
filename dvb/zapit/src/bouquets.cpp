@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.93 2003/09/18 15:57:19 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.94 2003/10/14 12:48:59 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -399,7 +399,7 @@ void CBouquetManager::loadBouquets(bool ignoreBouquetFile)
 
 	if (ignoreBouquetFile == false)
 	{
-		parser = parseXmlFile(string(BOUQUETS_XML));
+		parser = parseXmlFile(BOUQUETS_XML);
 
 		if (parser != NULL)
 		{
@@ -479,7 +479,7 @@ void CBouquetManager::renumServices()
 		makeRemainingChannelsBouquet();
 }
 
-CBouquet* CBouquetManager::addBouquet( string name)
+CBouquet* CBouquetManager::addBouquet(const std::string & name)
 {
 	CBouquet* newBouquet = new CBouquet(name);
 	Bouquets.push_back(newBouquet);
@@ -510,7 +510,7 @@ void CBouquetManager::deleteBouquet(const CBouquet* bouquet)
 // -- Find Bouquet-Name, if BQ exists   (2002-04-02 rasc)
 // -- Return: Bouqet-ID (found: 0..n)  or -1 (Bouquet does not exist)
 //
-int CBouquetManager::existsBouquet( string name)
+int CBouquetManager::existsBouquet(const std::string & name)
 {
 	unsigned int i;
 	for (i=0; (i<Bouquets.size()) && (Bouquets[i]->Name != name); i++);

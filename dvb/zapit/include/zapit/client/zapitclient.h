@@ -247,7 +247,7 @@ class CZapitClient:public CBasicClient
 	void getLastChannel(unsigned int &channumber, char &mode);
 
 	/* audiochan set */
-	void setAudioChannel( unsigned channel );
+	void setAudioChannel(const unsigned int channel);
 
 	/* gets all bouquets */
 	/* bouquets are numbered starting at 0 */
@@ -283,7 +283,7 @@ class CZapitClient:public CBasicClient
 	void setSubServices( subServiceList& subServices );
 
 	/* set Mode */
-	void setMode( channelsMode mode );
+	void setMode(const channelsMode mode);
 
 	/* set Mode */
 	int getMode();
@@ -303,7 +303,7 @@ class CZapitClient:public CBasicClient
 	/* get dvb transmission type */
 	delivery_system_t getDeliverySystem(void);
 
-	void zaptoNvodSubService(int num);
+	void zaptoNvodSubService(const int num);
 	
 	/* send diseqc 1.2 motor command */
 	void sendMotorCommand(uint8_t cmdtype, uint8_t address, uint8_t cmd, uint8_t num_parameters, uint8_t param1, uint8_t param2);
@@ -329,13 +329,13 @@ class CZapitClient:public CBasicClient
 	void setScanMotorPosList( ScanMotorPosList& motorPosList );
 
 	/* set diseqcType*/
-	void setDiseqcType( diseqc_t diseqc);
+	void setDiseqcType(const diseqc_t diseqc);
 
 	/* set diseqcRepeat*/
-	void setDiseqcRepeat( uint32_t repeat);
+	void setDiseqcRepeat(const uint32_t repeat);
 
 	/* set diseqcRepeat*/
-	void setScanBouquetMode( bouquetMode mode);
+	void setScanBouquetMode(const bouquetMode mode);
 
 	/****************************************/
 	/*					*/
@@ -344,7 +344,7 @@ class CZapitClient:public CBasicClient
 	/****************************************/
 
 	/* adds bouquet at the end of the bouquetlist*/
-	void addBouquet(const std::string name);
+	void addBouquet(const std::string & name);
 
 	/* moves a bouquet from one position to another */
 	/* bouquets are numbered starting at 0 */
@@ -355,7 +355,7 @@ class CZapitClient:public CBasicClient
 
 	/* assigns new name to bouquet*/
 	/* bouquets are numbered starting at 0 */
-	void renameBouquet(const unsigned int bouquet, std::string newName);
+	void renameBouquet(const unsigned int bouquet, const std::string & newName);
 
 	/* moves a channel of a bouquet from one position to another, channel lists begin at position=1*/
 	/* bouquets are numbered starting at 0 */
@@ -364,7 +364,7 @@ class CZapitClient:public CBasicClient
 	// -- check if Bouquet-Name exists (2002-04-02 rasc)
 	// -- Return bq_id or -1
 	/* bouquets are numbered starting at 0 */
-	signed int existsBouquet(const std::string name);
+	signed int existsBouquet(const std::string & name);
 
 
 	// -- check if Channel already in Bouquet (2002-04-05 rasc)
@@ -433,7 +433,7 @@ class CZapitClient:public CBasicClient
 
 
 	// Conversion routine:
-	static std::string Utf8_to_Latin1(const std::string s);
+	static std::string Utf8_to_Latin1(const std::string & s);
 };
 
 

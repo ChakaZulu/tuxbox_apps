@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.331 2003/09/28 12:40:13 alexw Exp $
+ * $Id: zapit.cpp,v 1.332 2003/10/14 12:48:59 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -475,15 +475,15 @@ void parseScanInputXml(void)
 {
 	switch (frontend->getInfo()->type) {
 	case FE_QPSK:
-		scanInputParser = parseXmlFile(string(SATELLITES_XML));
+		scanInputParser = parseXmlFile(SATELLITES_XML);
 		break;
 
 	case FE_QAM:
-		scanInputParser = parseXmlFile(string(CABLES_XML));
+		scanInputParser = parseXmlFile(CABLES_XML);
 		break;
 
 	case FE_OFDM:
-		scanInputParser = parseXmlFile(string(TERRESTRIAL_XML));
+		scanInputParser = parseXmlFile(TERRESTRIAL_XML);
 		break;
 
 	default:
@@ -1545,7 +1545,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.331 2003/09/28 12:40:13 alexw Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.332 2003/10/14 12:48:59 thegoodguy Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {

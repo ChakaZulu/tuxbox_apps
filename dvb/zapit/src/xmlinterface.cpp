@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.22 2003/05/07 16:47:20 digi_casi Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.23 2003/10/14 12:48:59 thegoodguy Exp $
  *
  * xmlinterface for zapit - d-box2 linux project
  *
@@ -128,16 +128,16 @@ std::string convert_to_UTF8(const std::string s)
 }
 
 #ifdef USE_LIBXML
-xmlDocPtr parseXmlFile(const std::string filename)
+xmlDocPtr parseXmlFile(const char * filename)
 {
 	xmlDocPtr doc;
 	xmlNodePtr cur;
 	
-	doc = xmlParseFile(filename.c_str());
+	doc = xmlParseFile(filename);
 
 	if (doc == NULL)
 	{
-		WARN("Error parsing \"%s\"", filename.c_str());
+		WARN("Error parsing \"%s\"", filename);
 		return NULL;
 	}
 	else
@@ -154,7 +154,7 @@ xmlDocPtr parseXmlFile(const std::string filename)
 	}
 }
 #else /* USE_LIBXML */
-xmlDocPtr parseXmlFile(const std::string filename)
+xmlDocPtr parseXmlFile(const char * filename)
 {
 	char buffer[2048];
 	XMLTreeParser* tree_parser;
@@ -162,11 +162,11 @@ xmlDocPtr parseXmlFile(const std::string filename)
 	size_t length;
 	FILE* xml_file;
 
-	xml_file = fopen(filename.c_str(), "r");
+	xml_file = fopen(filename, "r");
 
 	if (xml_file == NULL)
 	{
-		perror(filename.c_str());
+		perror(filename);
 		return NULL;
 	}
 
@@ -180,7 +180,7 @@ xmlDocPtr parseXmlFile(const std::string filename)
 		if (!tree_parser->Parse(buffer, length, done))
 		{
 			WARN("Error parsing \"%s\": %s at line %d",
-			       filename.c_str(),
+			       filename,
 			       tree_parser->ErrorString(tree_parser->GetErrorCode()),
 			       tree_parser->GetCurrentLineNumber());
 
