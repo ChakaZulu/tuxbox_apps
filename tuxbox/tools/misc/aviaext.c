@@ -1,9 +1,9 @@
 /*
  * Tool for testing the infamous Avia extension device
  *
- * $Id: aviaext.c,v 1.1 2004/07/03 01:45:25 carjay Exp $
+ * $Id: aviaext.c,v 1.2 2005/01/05 06:02:59 carjay Exp $
  *
- * Copyright (C) 2004 Carsten Juttner <carjay@gmx.met>
+ * Copyright (C) 2004,2005 Carsten Juttner <carjay@gmx.met>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
-#include <sys/fcntl.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include <sys/ioctl.h>
 #include <errno.h>
 #include <dbox/aviaEXT.h>
@@ -34,17 +36,23 @@
 const char *digon = "Digital audio output turned on\n";
 const char *digoff = "Digital audio output turned off\n";
 const char *digset = "Digital audio output state (0=off,1=on):\n";
+const char *spts = "Avia playback mode set to SPTS\n";
+const char *dualpes = "Avia playback mode set to DualPES\n";
 
 void usage(const char *s)
 {
-	printf ("%s version 1.0\n"
+	printf ("%s version 1.1\n"
 			"commandline tool for the aviaEXT-module\n\n"
 			"Usage: %s <command>\n"
 			"Commands:\n"
-			"    --help      : displays this text\n\n"
-			"    --iec-on    : turn optical output on\n"
-			"    --iec-off   : turn optical output off\n"
-			"    --iec-state : returns state of IEC\n\n",s,s);
+			"    --help                     : displays this text\n\n"
+			"    --iec-on                   : turn optical output on\n"
+			"    --iec-off                  : turn optical output off\n"
+			"    --iec-state                : returns state of IEC\n"
+			"    --avia-dualpes             : sets Avia to DualPES mode\n"
+			"    --avia-spts                : sets Avia to SPTS mode\n"
+			"    --avia-playback-mode-state : returns current Avia playback mode\n"
+			"\n",s,s);
 	exit(0);
 }
 
@@ -52,7 +60,7 @@ int main (int argc, char **argv)
 {
 	int i,fd;
 	unsigned int cmd=0,param;
-	int *ptr = NULL;
+	void *ptr = NULL;
 	const char *msg = NULL;
 	
 	if ((fd = open(AVIAEXT_DEV,O_RDWR))<0){
@@ -78,10 +86,21 @@ int main (int argc, char **argv)
 			msg = digoff;
 			cmd = AVIA_EXT_IEC_SET;
 			param = 0;
-		} else if (!strncmp(argv[i],"--iec-state",9)){
+		} else if (!strncmp(argv[i],"--iec-state",11)){
 			msg = digset;
 			cmd = AVIA_EXT_IEC_GET;
-			ptr = &param;
+			ptr = (void*)&param;
+		} else if (!strncmp(argv[i],"--avia-dualpes",14)){
+			msg = dualpes;
+			cmd = AVIA_EXT_AVIA_PLAYBACK_MODE_SET;
+			param = 0;
+		} else if (!strncmp(argv[i],"--avia-spts",11)){
+			msg = spts;
+			cmd = AVIA_EXT_AVIA_PLAYBACK_MODE_SET;
+			param = 1;
+		} else if (!strncmp(argv[i],"--avia-playback-mode-state",26)){
+			cmd = AVIA_EXT_AVIA_PLAYBACK_MODE_GET;
+			ptr = (void*)&param;
 		} else {
 			printf ("unknown command: %s\n",argv[i]);
 		}
@@ -98,8 +117,15 @@ int main (int argc, char **argv)
 		};
 		if (msg)
 			printf (msg);
-		if (ptr)
-			printf ("%d\n",*ptr);
+		if (ptr&&(cmd==AVIA_EXT_IEC_GET)){
+			printf ("%d\n",*(int *)ptr);
+		} else if (ptr&&(cmd==AVIA_EXT_AVIA_PLAYBACK_MODE_GET)){
+			if (*((int*)ptr))
+				printf ("%s\n",spts);
+			else
+				printf ("%s\n",dualpes);
+		}
 	}
+	close (fd);
 	return 0;
 }
