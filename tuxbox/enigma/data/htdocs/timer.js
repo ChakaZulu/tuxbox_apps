@@ -87,7 +87,7 @@ function addTimerEvent(timer)
 
 function showAddTimerEventWindow(timer)
 {
-	NewWindow("/showAddTimerEventWindow?timer=" + timer, 'addTimer', '780', '290', 'no');
+	NewWindow("/showAddTimerEventWindow?timer=" + timer, 'addTimer', '780', '320', 'no');
 }
 
 
