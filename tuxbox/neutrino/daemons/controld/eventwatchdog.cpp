@@ -75,7 +75,7 @@ void CEventWatchDog::videoModeChanged( int nNewVideoMode )
 	{
 		((CAspectRatioNotifier*)(*notifiers)[i])->aspectRatioChanged( nNewVideoMode );
 	}
-	eventServer->sendEvent(CControldClient::EVT_MODECHANGED, 0, &nNewVideoMode, sizeof(nNewVideoMode));
+	eventServer->sendEvent(CControldClient::EVT_MODECHANGED, CEventServer::INITID_CONTROLD, &nNewVideoMode, sizeof(nNewVideoMode));
 }
 
 void CEventWatchDog::vcrModeChanged( int nNewVCRMode )
@@ -85,7 +85,7 @@ void CEventWatchDog::vcrModeChanged( int nNewVCRMode )
 	{
 		((CVCRModeNotifier*)(*notifiers)[i])->VCRModeChanged( nNewVCRMode );
 	}
-	eventServer->sendEvent(CControldClient::EVT_VCRCHANGED, 0, &nNewVCRMode, sizeof(nNewVCRMode));
+	eventServer->sendEvent(CControldClient::EVT_VCRCHANGED, CEventServer::INITID_CONTROLD, &nNewVCRMode, sizeof(nNewVCRMode));
 }
 
 void* CEventWatchDog::watchdogThread (void *arg)

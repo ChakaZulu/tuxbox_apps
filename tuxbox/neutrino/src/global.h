@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: global.h,v 1.24 2002/02/28 15:03:55 field Exp $
+// $Id: global.h,v 1.25 2002/03/07 18:32:34 field Exp $
 //
 // $Log: global.h,v $
+// Revision 1.25  2002/03/07 18:32:34  field
+// Bugfix, weitere Umstellungen ;)
+//
 // Revision 1.24  2002/02/28 15:03:55  field
 // Weiter Updates :)
 //
@@ -102,7 +105,8 @@
 #include "neutrino.h"
 #include "controldclient.h"
 #include "lcddclient.h"
-#include <zapitclient.h>
+#include "zapitclient.h"
+#include "sectionsdclient.h"
 #include "daemonc/remotecontrol.h"
 
 #include "driver/fontrenderer.h"
@@ -135,6 +139,7 @@ NEUTRINO_CPP  SNeutrinoSettings   g_settings;
 NEUTRINO_CPP  CLcddClient		*g_lcdd;
 NEUTRINO_CPP  CControldClient	*g_Controld;
 NEUTRINO_CPP  CZapitClient		*g_Zapit;
+NEUTRINO_CPP  CSectionsdClient	*g_Sectionsd;
 NEUTRINO_CPP  CRemoteControl	*g_RemoteControl;
 
 NEUTRINO_CPP  fontRenderClass	*g_fontRenderer;

@@ -625,7 +625,7 @@ void setVolume(char volume)
 
 
 	lcdd.setVolume(volume);
-	eventServer->sendEvent( CControldClient::EVT_VOLUMECHANGED, 0, &volume, sizeof(volume) );
+	eventServer->sendEvent( CControldClient::EVT_VOLUMECHANGED, CEventServer::INITID_CONTROLD, &volume, sizeof(volume) );
 }
 
 void Mute()
@@ -649,7 +649,7 @@ void Mute()
 	close(fd);
 
 	lcdd.setMute(true);
-	eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, 0, &settings.mute, sizeof(settings.mute));
+	eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute, sizeof(settings.mute));
 }
 
 void UnMute()
@@ -673,7 +673,7 @@ void UnMute()
 	close(fd);
 
 	lcdd.setMute(false);
-	eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, 0, &settings.mute, sizeof(settings.mute));
+	eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute, sizeof(settings.mute));
 }
 
 
@@ -799,7 +799,7 @@ void sig_catch(int)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.47 2002/03/07 15:15:36 field Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.48 2002/03/07 18:32:34 field Exp $\n\n");
 
 	if (fork() != 0)
 		return 0;

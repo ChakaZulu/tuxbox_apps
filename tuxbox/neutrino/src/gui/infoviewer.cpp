@@ -446,6 +446,11 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 					g_RCInput->pushbackMsg(  msg, data );
 					res = messages_return::cancel_info;
 				}
+				else if ( msg == messages::EVT_TIMESET )
+				{
+        			g_RCInput->pushbackMsg( messages::SHOW_INFOBAR, 0 );
+					res = messages_return::cancel_info;
+				}
 				else
 				{
             		res = neutrino->handleMsg( msg, data );

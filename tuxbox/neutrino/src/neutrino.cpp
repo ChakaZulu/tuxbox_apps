@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.190 2002/03/07 15:14:30 field Exp $
+        $Id: neutrino.cpp,v 1.191 2002/03/07 18:32:34 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1504,6 +1504,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_RCInput = new CRCInput;
 	g_lcdd = new CLcddClient;
 	g_Zapit = new CZapitClient;
+	g_Sectionsd = new CSectionsdClient;
 
 	g_RemoteControl = new CRemoteControl;
 	g_EpgData = new CEpgData;
@@ -1611,6 +1612,8 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	g_Controld->registerEvent(CControldClient::EVT_MODECHANGED, 222, NEUTRINO_UDS_NAME);
 	g_Controld->registerEvent(CControldClient::EVT_VCRCHANGED, 222, NEUTRINO_UDS_NAME);
+
+	g_Sectionsd->registerEvent(CSectionsdClient::EVT_TIMESET, 222, NEUTRINO_UDS_NAME);
 
 	RealRun(mainMenu);
 
@@ -2305,7 +2308,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.190 2002/03/07 15:14:30 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.191 2002/03/07 18:32:34 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

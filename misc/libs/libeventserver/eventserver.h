@@ -53,6 +53,12 @@ class CEventServer
 
 	public:
 
+		enum initiators
+		{
+			INITID_CONTROLD,
+			INITID_SECTIONSD
+		};
+
 		struct commandRegisterEvent
 		{
 			unsigned int eventID;
@@ -73,11 +79,10 @@ class CEventServer
 			unsigned int dataSize;
 		};
 
-		void registerEvent(unsigned int eventID, unsigned int ClientID, string udsName);
+		void registerEvent2(unsigned int eventID, unsigned int ClientID, string udsName);
 		void registerEvent(int fd);
-		void unRegisterEvent(unsigned int eventID, unsigned int ClientID);
+		void unRegisterEvent2(unsigned int eventID, unsigned int ClientID);
 		void unRegisterEvent(int fd);
-
 		void sendEvent(unsigned int eventID, unsigned int initiatorID, void* eventbody=NULL, unsigned int eventbodysize=0);
 
 };

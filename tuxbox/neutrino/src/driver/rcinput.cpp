@@ -286,33 +286,49 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 				if ( read_bytes == sizeof(emsg) )
 				{
                     unsigned char* p;
-					p= new unsigned char[ emsg.dataSize ];
+					p= new unsigned char[ emsg.dataSize + 1 ];
 					if ( p!=NULL )
 					{
 						read_bytes= recv(fd_eventclient, p, emsg.dataSize, MSG_WAITALL);
 						//printf("[neutrino] eventbody read %d bytes\n", read_bytes );
 
-						if (emsg.eventID==CControldClient::EVT_VOLUMECHANGED)
-						{
-							*msg = messages::EVT_VOLCHANGED;
-							*data = *(char*) p;
+                        if ( emsg.initiatorID == CEventServer::INITID_CONTROLD )
+                        {
+							if (emsg.eventID==CControldClient::EVT_VOLUMECHANGED)
+							{
+								*msg = messages::EVT_VOLCHANGED;
+								*data = *(char*) p;
+							}
+							else if (emsg.eventID==CControldClient::EVT_MUTECHANGED)
+							{
+								*msg = messages::EVT_MUTECHANGED;
+								*data = *(bool*) p;
+							}
+							else if (emsg.eventID==CControldClient::EVT_VCRCHANGED)
+							{
+            		            *msg = messages::EVT_VCRCHANGED;
+								*data = *(int*) p;
+							}
+							else if (emsg.eventID==CControldClient::EVT_MODECHANGED)
+							{
+        	    	            *msg = messages::EVT_MODECHANGED;
+								*data = *(int*) p;
+							}
+							else
+								printf("[neutrino] event INITID_CONTROLD - unknown eventID 0x%x\n",  emsg.eventID );
 						}
-
-						if (emsg.eventID==CControldClient::EVT_MUTECHANGED)
-						{
-							*msg = messages::EVT_MUTECHANGED;
-							*data = *(bool*) p;
+						else if ( emsg.initiatorID == CEventServer::INITID_SECTIONSD )
+                        {
+							if (emsg.eventID==CSectionsdClient::EVT_TIMESET)
+							{
+								*msg = messages::EVT_TIMESET;
+								*data = 0;
+							}
+							else
+								printf("[neutrino] event INITID_SECTIONSD - unknown eventID 0x%x\n",  emsg.eventID );
 						}
-						else if (emsg.eventID==CControldClient::EVT_VCRCHANGED)
-						{
-            	            *msg = messages::EVT_VCRCHANGED;
-							*data = *(int*) p;
-						}
-						else if (emsg.eventID==CControldClient::EVT_MODECHANGED)
-						{
-            	            *msg = messages::EVT_MODECHANGED;
-							*data = *(int*) p;
-						}
+						else
+							printf("[neutrino] event - unknown initiatorID 0x%x\n",  emsg.initiatorID);
 
 						delete p;
 						p= NULL;
