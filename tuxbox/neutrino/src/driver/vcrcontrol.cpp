@@ -172,7 +172,12 @@ bool CVCRControl::CVCRDevice::Stop()
 //-------------------------------------------------------------------------
 bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, int mode, unsigned long long epgid, const std::string & apids)
 {
-	printf("Record channel_id: %x epg: %llx, apids %s mode \n", channel_id, epgid, apids.c_str());
+	printf("Record channel_id: "
+	       PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+	       " epg: %llx, apids %s mode \n",
+	       channel_id,
+	       epgid,
+	       apids.c_str());
 	// leave menu (if in any)
 	g_RCInput->postMsg( CRCInput::RC_timeout, 0 );
 	
@@ -270,7 +275,13 @@ bool CVCRControl::CServerDevice::Stop()
 //-------------------------------------------------------------------------
 bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode, unsigned long long epgid, const std::string & apids) 
 {
-	printf("Record channel_id: %x epg: %llx, apids %s mode %d\n", channel_id, epgid, apids.c_str(),mode);
+	printf("Record channel_id: "
+	       PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+	       " epg: %llx, apids %s mode %d\n",
+	       channel_id,
+	       epgid,
+	       apids.c_str(),
+	       mode);
 	if(channel_id != 0)		// wenn ein channel angegeben ist
 	{
 		last_mode = CNeutrinoApp::getInstance()->getMode();
@@ -331,7 +342,12 @@ void CVCRControl::CServerDevice::serverDisconnect()
 //-------------------------------------------------------------------------
 bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channel_id channel_id, unsigned long long epgid, const std::string & apids)
 {
-	printf("Send command: %d channel_id: %x epgid: %llx\n",command, channel_id, epgid);
+	printf("Send command: %d channel_id: "
+	       PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+	       " epgid: %llx\n",
+	       command,
+	       channel_id,
+	       epgid);
 	if(serverConnect())
 	{
 		char tmp[40];

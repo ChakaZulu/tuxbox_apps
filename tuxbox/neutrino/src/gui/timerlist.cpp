@@ -220,8 +220,13 @@ int CTimerList::exec(CMenuTarget* parent, const std::string & actionKey)
 	}
 	else if(actionKey.substr(0,4)=="SCT:")
 	{
-		sscanf(actionKey.substr(4,10).c_str(),"%u",&timerNew.channel_id);
-		strncpy(timerNew_channel_name,actionKey.substr(14).c_str(),30);
+		int delta;
+		sscanf(actionKey.substr(4).c_str(),
+		       SCANF_CHANNEL_ID_TYPE
+		       "%n",
+		       &timerNew.channel_id,
+		       &delta);
+		strncpy(timerNew_channel_name,actionKey.substr(4 + delta + 1).c_str(),30);
 		timerNew.mode=CTimerd::MODE_TV;
 		g_RCInput->postMsg(CRCInput::RC_timeout,0); // leave underlying menu also
 		g_RCInput->postMsg(CRCInput::RC_timeout,0); // leave underlying menu also
@@ -229,8 +234,13 @@ int CTimerList::exec(CMenuTarget* parent, const std::string & actionKey)
 	}
 	else if(actionKey.substr(0,4)=="SCR:")
 	{
-		sscanf(actionKey.substr(4,10).c_str(),"%u",&timerNew.channel_id);
-		strncpy(timerNew_channel_name,actionKey.substr(14).c_str(),30);
+		int delta;
+		sscanf(actionKey.substr(4).c_str(),
+		       SCANF_CHANNEL_ID_TYPE
+		       "%n",
+		       &timerNew.channel_id,
+		       &delta);
+		strncpy(timerNew_channel_name,actionKey.substr(4 + delta + 1).c_str(),30);
 		timerNew.mode=CTimerd::MODE_RADIO;
 		g_RCInput->postMsg(CRCInput::RC_timeout,0); // leave underlying menu also
 		g_RCInput->postMsg(CRCInput::RC_timeout,0); // leave underlying menu also
@@ -799,9 +809,13 @@ int CTimerList::newTimer()
 		CZapitClient::BouquetChannelList::iterator channel = subchannellist.begin();
 		for(; channel != subchannellist.end();channel++)
 		{
-			char cChannelId[11];
-			sprintf(cChannelId,"%010u",channel->channel_id);
-			mwtv->addItem(new CMenuForwarder(channel->name, true, NULL, this, (std::string("SCT:") + cChannelId + channel->name).c_str()));
+			char cChannelId[4+16+1+1];
+			sprintf(cChannelId,
+				"SCT:"
+				PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+				",",
+				channel->channel_id);
+			mwtv->addItem(new CMenuForwarder(channel->name, true, NULL, this, (std::string(cChannelId) + channel->name).c_str()));
 		}
 		if (!subchannellist.empty())
 			mctv.addItem(new CMenuForwarder(bouquet->name, true, NULL, mwtv));
@@ -810,9 +824,13 @@ int CTimerList::newTimer()
 		channel = subchannellist.begin();
 		for(; channel != subchannellist.end();channel++)
 		{
-			char cChannelId[11];
-			sprintf(cChannelId,"%010u",channel->channel_id);
-			mwradio->addItem(new CMenuForwarder(channel->name, true, NULL, this, (std::string("SCR:") + cChannelId + channel->name).c_str()));
+			char cChannelId[4+16+1+1];
+			sprintf(cChannelId,
+				"SCR:"
+				PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+				",",
+				channel->channel_id);
+			mwradio->addItem(new CMenuForwarder(channel->name, true, NULL, this, (std::string(cChannelId) + channel->name).c_str()));
 		}
 		if (!subchannellist.empty())
 			mcradio.addItem(new CMenuForwarder(bouquet->name, true, NULL, mwradio));
