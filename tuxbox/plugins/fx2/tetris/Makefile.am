@@ -9,7 +9,7 @@ libtetris_la_LDFLAGS = -rpath $(PLUGINDIR)
 
 tetris_SOURCES = board.c main.c somain.c
 
-tetris_LDADD = -lfx2
+tetris_LDADD = ../lib/libfx2.la
 
 install-exec-local:
 	install -d $(PLUGINDIR)
