@@ -6,13 +6,15 @@ noinst_HEADERS = \
 	descriptor.h \
 	dvb_descriptor.h \
 	mpeg_descriptor.h \
-	dsm_descriptor.h
+	dsm_descriptor.h \
+	dsm_int_unt_descriptor.h
 
 
 libdescriptors_a_SOURCES = \
 	descriptor.c \
 	dvb_descriptor.c \
 	mpeg_descriptor.c \
-	dsm_descriptor.c
+	dsm_descriptor.c \
+	dsm_int_unt_descriptor.c
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: pespacket.c,v 1.6 2003/10/24 22:17:20 rasc Exp $
+$Id: pespacket.c,v 1.7 2003/10/29 20:54:56 rasc Exp $
 
    -- PES Decode/Table section
 
@@ -7,6 +7,9 @@ $Id: pespacket.c,v 1.6 2003/10/24 22:17:20 rasc Exp $
 
 
 $Log: pespacket.c,v $
+Revision 1.7  2003/10/29 20:54:56  rasc
+more PES stuff, DSM descriptors, testdata
+
 Revision 1.6  2003/10/24 22:17:20  rasc
 code reorg...
 
@@ -146,8 +149,6 @@ int  PES_decode2 (u_char *b, int len, int pid)
 
 
  PES2_Packet  p;
- //int          len2;
- //int          n;
 
 
  p.reserved1				= getBits (b, 0,  0, 2);
@@ -210,10 +211,12 @@ int  PES_decode2 (u_char *b, int len, int pid)
    out_SB_NL  (3,"Reserved: ", getBits (b, 0,  0, 2) );
    print_xTS_field (b, 2) ;
    out_SW_NL  (3,"ESCR_extension: ", getBits (b, 0, 38, 9) );
-   out_SW_NL  (3,"marker_bit: ",     getBits (b, 0, 47, 1) );
+   out_SB_NL  (3,"marker_bit: ",     getBits (b, 0, 47, 1) );
    indent (-1);
    b += 6;
  }
+
+
 
  if (p.ES_rate_flag == 0x01) {
    out_nl (3,"ES_rate_flag: ");
@@ -225,9 +228,116 @@ int  PES_decode2 (u_char *b, int len, int pid)
    b += 3;
  }
 
+ if (p.DSM_trick_mode_flag == 0x01) {
+   u_int  trick_mode_control;
+   u_int  field_id;
+   u_int  intra_slice_refresh;
+   u_int  frequency_truncation;
+   u_int  rep_control;
+   u_int  reserved;
+
+   out_nl (3,"Trick_mode_control: ");
+   indent (+1);
+
+   trick_mode_control			= getBits (b, 0,  0,  3);
+   out_S2B_NL  (3,"trick_mode_control: ", trick_mode_control,
+		   dvbstrPESTrickModeControl (trick_mode_control) );
+
+   if ( (trick_mode_control == 0x0) ||			/* fast forward */
+        (trick_mode_control == 0x3) ) {			/* fast reverse */
+
+	   field_id 			= getBits (b, 0,  3,  2);
+	   intra_slice_refresh		= getBits (b, 0,  5,  1);
+	   frequency_truncation		= getBits (b, 0,  6,  2);
+
+   	   out_SB_NL  (3,"field_id: ", field_id);	/* $$$ Table */
+   	   out_SB_NL  (3,"intra_slice_refresh: ", intra_slice_refresh);
+   	   out_SB_NL  (3,"frequency_truncation: ", frequency_truncation);
+
+   } else if ( (trick_mode_control == 0x1) ||		/* slow motion  */
+               (trick_mode_control == 0x4) ) {		/* slow reverse */
+
+	   rep_control 			= getBits (b, 0,  3,  5);
+
+   	   out_SB_NL  (3,"rep_control: ", rep_control);
+
+   } else if (trick_mode_control == 0x2) {		/* freeze frame */
+
+	   field_id 			= getBits (b, 0,  3,  2);
+	   reserved 			= getBits (b, 0,  3,  5);
+
+   	   out_SB_NL  (3,"field_id: ", field_id);	/* $$$ Table */
+   	   out_SB_NL  (6,"reserved: ", reserved);
+
+   } else {						/* reserved     */
+
+	   reserved 			= getBits (b, 0,  3,  8);
+   	   out_SB_NL  (6,"reserved: ", reserved);
+
+   }
+
+   indent (-1);
+   b += 1;
+
+ }  /* p.DSM_trick_mode_flag  */
+
+
+ if (p.additional_copy_info_flag == 0x01) {
+
+   out_nl (3,"additional_copy_info_flag: ");
+   indent (+1);
+   	out_SB_NL  (3,"marker_bit: ", getBits (b, 0,  0,  1) );
+   	out_SB_NL  (3,"additional_copy_info: ", getBits (b, 0,  1,  7) );
+   b += 1;
+   indent (-1);
+
+ }
+
+
+ if (p.PES_CRC_flag == 0x01) {
+
+   out_nl (3,"PES_CRC_flag: ");
+   indent (+1);
+   	out_SW_NL  (3,"previous_PES_packet_CRC: ", getBits (b, 0,  0, 16) );
+   b += 2;
+   indent (-1);
+
+ }
+
+
+ if (p.PES_extension_flag == 0x01) {
+
+   out_nl (3,"PES_extension_flag: ");
+   indent (+1);
+
+   out_SB_NL  (3,"PES_private_data_flag: ",       getBits (b, 0,  0,  1) );
+   out_SB_NL  (3,"pack_header_field_flag: ",      getBits (b, 0,  1,  1) );
+   out_SB_NL  (3,"program_packet_sequence_counter_flag: ",  getBits (b, 0,  2,  1) );
+   out_SB_NL  (3,"P-STD_buffer_flag: ",           getBits (b, 0,  3,  1) );
+   out_SB_NL  (6,"reserved: ",                    getBits (b, 0,  4,  3) );
+   out_SB_NL  (3,"PES_extension_flag2: ",         getBits (b, 0,  7,  1) );
+
+
+
+
+
+
+   b += 1;   /* $$$$  - --------------------------------------------- */
+   indent (-1);
+
+
+ } /* p.PES_extension_flag */
+
+
+
+
+
+
+
 
 
  out_nl (3,".... rest still unimplemented.... ");
+ // $$$ TODO
  // $$$ hier muss auch noch einiges gemacht werden (aber zur Zeit
  // $$$ so gut wie keine Zeit
 

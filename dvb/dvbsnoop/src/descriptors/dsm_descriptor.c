@@ -1,5 +1,5 @@
 /*
-$Id: dsm_descriptor.c,v 1.7 2003/10/26 22:02:53 rasc Exp $ 
+$Id: dsm_descriptor.c,v 1.8 2003/10/29 20:54:56 rasc Exp $ 
 
 
   dvbsnoop
@@ -12,28 +12,8 @@ $Id: dsm_descriptor.c,v 1.7 2003/10/26 22:02:53 rasc Exp $
 
 
 $Log: dsm_descriptor.c,v $
-Revision 1.7  2003/10/26 22:02:53  rasc
-fix
-
-Revision 1.6  2003/10/26 21:36:18  rasc
-private DSM-CC descriptor Tags started,
-INT-Section completed..
-
-Revision 1.5  2003/10/26 19:06:27  rasc
-no message
-
-Revision 1.4  2003/10/24 23:01:41  rasc
-code reorg...
-
-Revision 1.3  2003/10/24 22:45:04  rasc
-code reorg...
-
-Revision 1.2  2003/10/24 22:17:17  rasc
-code reorg...
-
-Revision 1.1  2003/07/08 19:59:50  rasc
-restructuring... some new, some fixes,
-trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18313-1 to spare?
+Revision 1.8  2003/10/29 20:54:56  rasc
+more PES stuff, DSM descriptors, testdata
 
 
 
@@ -53,7 +33,7 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 
 /*
   determine descriptor type and print it...
-  !!! DSMCC descriptors are in a provate tag space !!!
+  !!! DSMCC descriptors are in a private tag space !!!
 
   return byte length
 */
@@ -69,8 +49,8 @@ int  descriptorDSMCCPrivate  (u_char *b)
   len = ((int) b[1]) + 2;
 
   out_NL (4);
-  out_S2B_NL (4,"DSM_CC-DescriptorTag: ",id,
-		  dsmccStrDSMCCPrivateDescriptorTAG(id));
+  out_S2B_NL (4,"DSM_CC-Private-DescriptorTag: ",id,
+		  dsmccStrDSMCC_Private_DescriptorTAG(id));
   out_SB_NL  (5,"Descriptor_length: ",b[1]);
   /* $$$$ TODO */
 out_nl (1," ... TODO... $$$ not yet done");

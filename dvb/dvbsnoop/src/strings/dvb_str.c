@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.20 2003/10/27 22:43:50 rasc Exp $
+$Id: dvb_str.c,v 1.21 2003/10/29 20:54:57 rasc Exp $
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -15,6 +15,9 @@ $Id: dvb_str.c,v 1.20 2003/10/27 22:43:50 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.21  2003/10/29 20:54:57  rasc
+more PES stuff, DSM descriptors, testdata
+
 Revision 1.20  2003/10/27 22:43:50  rasc
 carousel info descriptor and more
 
@@ -680,6 +683,7 @@ char *dvbstrDataBroadcast_ID (u_int flag)
 	{ 0x0007, 0x0007,   "Object Carousel" },
 	{ 0x0008, 0x0008,   "DVB ATM streams" },
 	{ 0x0009, 0x0009,   "Higher Protocols based on asynchronous data streams" },
+	// $$$ 0x0A = System Software Update   $$$ TODO TR 102 006
 	{ 0x000A, 0x00ef,   "Reserved for future use by DVB" },
 	{ 0x00F0, 0x00F0,   "MHP Object Carousel" },
 	{ 0x00F1, 0x00F1,   "reserved for MHP Multi Protocol Encapsulation" },
@@ -2305,6 +2309,32 @@ char *dvbstrBouquetTable_ID (u_int i)
   return findTableID (Table, i);
 }
 
+
+
+
+
+
+
+/*
+  -- Trick Mode Control
+  -- ISO 13818-1
+*/
+
+char *dvbstrPESTrickModeControl (u_int i)
+
+{
+  STR_TABLE  Table[] = {
+	{ 0x0, 0x0,   "fast forward" },
+	{ 0x1, 0x1,   "slow motion" },
+	{ 0x2, 0x2,   "freeze frame" },
+	{ 0x3, 0x3,   "fast reverse" },
+	{ 0x4, 0x4,   "slow reverse" },
+	{ 0x5, 0x7,   "reserved" },
+     	{  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
 
 
 

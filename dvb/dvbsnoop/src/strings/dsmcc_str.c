@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.3 2003/10/26 21:36:20 rasc Exp $
+$Id: dsmcc_str.c,v 1.4 2003/10/29 20:54:57 rasc Exp $
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -9,6 +9,9 @@ $Id: dsmcc_str.c,v 1.3 2003/10/26 21:36:20 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.4  2003/10/29 20:54:57  rasc
+more PES stuff, DSM descriptors, testdata
+
 Revision 1.3  2003/10/26 21:36:20  rasc
 private DSM-CC descriptor Tags started,
 INT-Section completed..
@@ -65,13 +68,34 @@ static char *findTableID (STR_TABLE *t, u_int id)
 
 
 
-
 /*
- * -- LinkageDescriptor0x0C Table_type  EN301192
- *
+  -- DSM-CC  Descriptors
+  -- Private Tag Space
+  -- see EN 192
  */
 
-char *dsmccStrDSMCCPrivateDescriptorTAG (u_int i)
+char *dsmccStrDSMCC_Private_DescriptorTAG (u_int i)
+
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "reserved" },
+     {  0xFF, 0xFF,  "reserved" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+
+/*
+  -- DSM-CC  INT (UNT, SSU-UNT) Descriptors
+  -- Private INT, UNT, SSU-UNT Tag Space
+  -- see EN 192
+ */
+
+char *dsmccStrDSMCC_INT_UNT_DescriptorTAG (u_int i)
 
 {
   STR_TABLE  Table[] = {

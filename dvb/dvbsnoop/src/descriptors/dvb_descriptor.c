@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.12 2003/10/26 21:36:19 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.13 2003/10/29 20:54:56 rasc Exp $ 
 
 
   dvbsnoop
@@ -14,6 +14,9 @@ $Id: dvb_descriptor.c,v 1.12 2003/10/26 21:36:19 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.13  2003/10/29 20:54:56  rasc
+more PES stuff, DSM descriptors, testdata
+
 Revision 1.12  2003/10/26 21:36:19  rasc
 private DSM-CC descriptor Tags started,
 INT-Section completed..
@@ -2747,6 +2750,10 @@ void descriptorDVB_DataBroadcast (u_char *b)
  } else if (d.data_broadcast_id == 0x0009) {
 	 /* $$$ TODO EN 301 192 10.2.1 */
  			out_nl    (4,"TODO higher_protocol_asynchronous_data_info:");
+		 	printhexdump_buf (4,  b, d.selector_length);
+ } else if (d.data_broadcast_id == 0x000A) {
+	 /* $$$ TODO TR 102 006 */
+ 			out_nl    (4,"TODO Software_update_info:");
 		 	printhexdump_buf (4,  b, d.selector_length);
  } else {
  	out_nl    (4,"Selector-Bytes:");

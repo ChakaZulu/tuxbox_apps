@@ -1,5 +1,5 @@
 /*
-$Id: sectables.c,v 1.10 2003/10/26 23:00:43 rasc Exp $
+$Id: sectables.c,v 1.11 2003/10/29 20:54:57 rasc Exp $
 
  --  For more information please see: ISO 13818 (-1) and ETSI 300 468
  -- Verbose Level >= 2
@@ -7,6 +7,9 @@ $Id: sectables.c,v 1.10 2003/10/26 23:00:43 rasc Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.11  2003/10/29 20:54:57  rasc
+more PES stuff, DSM descriptors, testdata
+
 Revision 1.10  2003/10/26 23:00:43  rasc
 fix
 
@@ -62,6 +65,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "userdef.h"
 #include "datacarousel/datagram.h"
 #include "datacarousel/ints.h"
+#include "testdata/test0x1d.h"
 
 
 
@@ -141,7 +145,7 @@ void decodeSections_buf (u_char *buf, int len, u_int pid)
 		break; 
 
 	case  0x01D:		/* Measurement */
-		// $$$$
+		decode_TESTDATA  (buf, len);
 		break; 
 
 	case  0x01E:		/* DIT */

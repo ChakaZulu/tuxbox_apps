@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.h,v 1.11 2003/10/25 19:11:50 rasc Exp $ 
+$Id: dvb_str.h,v 1.12 2003/10/29 20:54:57 rasc Exp $ 
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -8,6 +8,9 @@ $Id: dvb_str.h,v 1.11 2003/10/25 19:11:50 rasc Exp $
 
 
 $Log: dvb_str.h,v $
+Revision 1.12  2003/10/29 20:54:57  rasc
+more PES stuff, DSM descriptors, testdata
+
 Revision 1.11  2003/10/25 19:11:50  rasc
 no message
 
@@ -90,6 +93,8 @@ char *dvbstrTS_ScramblingCtrl_TYPE (u_int id);
 
 char *dvbstrPESstream_ID(u_int id);
 char *dvbstrPESscrambling_ctrl_TYPE(u_int id);
+char *dvbstrPESTrickModeControl (u_int i);
+
 
 
 /* -- Div Stuff */
