@@ -1,5 +1,5 @@
 /*
- * $Id: streamts.c,v 1.5 2002/08/03 23:13:18 obi Exp $
+ * $Id: streamts.c,v 1.6 2002/08/11 01:44:09 obi Exp $
  * 
  * inetd style daemon for streaming avpes, ps and ts
  * 
@@ -326,7 +326,7 @@ int main(int argc, char **argv)
 		if (demuxfd_count != 2)
 		{
 			usage();
-			return 0;
+			bye(0);
 		}
 
 		dvr_to_ps(dvrfd, pids[0], pids[1], mode);
