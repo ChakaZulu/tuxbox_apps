@@ -955,7 +955,9 @@ static eString getTopNavi(eString mode, eString path)
 	result += button(100, "CONTROL", TOPNAVICOLOR, "?mode=control");
 	if (pdaScreen == 0)
 	{
+#if ENABLE_DYN_MOUNT || ENABLE_DYN_CONF || ENABLE_DYN_FLASH
 		result += button(100, "CONFIG", TOPNAVICOLOR, "?mode=config");
+#endif
 		result += button(100, "UPDATES", TOPNAVICOLOR, "?mode=updates");
 	}
 	result += button(100, "HELP", TOPNAVICOLOR, "?mode=help");
