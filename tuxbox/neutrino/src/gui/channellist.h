@@ -51,9 +51,9 @@ class CChannelList
 			private:
 				unsigned long long	last_unlocked_EPGid;
 				string      	        name;
+				int         	        key;
 
 			public:
-				int         	key;
 				int         	number;
 				t_channel_id    channel_id;
 				CChannelEvent	currentEvent;
