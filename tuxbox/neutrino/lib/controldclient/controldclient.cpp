@@ -139,27 +139,12 @@ void CControldClient::setVideoFormat(char format, bool bDoUnregister = true)
 	callBack.call = &videoFormatCallback;
 	callBack.arg = this;
 
-	if (format==0) // autodetect
-	{
-		printf("setting VideoFormat to auto \n");
-		g_WatchDog->registerCallback(WDE_VIDEOMODE, callBack);
-		bCallBackRegistered = true;
-	}
-	else
-	{
-		remotemsg.version=1;
-		remotemsg.cmd=5;
-		remotemsg.param=format;
-		printf("sending VideoFormat: %d \n", format);
+	remotemsg.version=1;
+	remotemsg.cmd=5;
+	remotemsg.param=format;
+	printf("sending VideoFormat: %d \n", format);
+	send(true);
 
-		if ((bCallBackRegistered) && (bDoUnregister))
-		{
-			g_WatchDog->unregisterCallback(WDE_VIDEOMODE, callBack);
-			bCallBackRegistered = false;
-		}
-
-		send(true);
-	}
 }
 
 void CControldClient::setVideoOutput(char format)
