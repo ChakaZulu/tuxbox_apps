@@ -165,7 +165,12 @@ void showSubchan(string subChannelName)
 		g_RCInput->pushbackMsg( msg, data );
 		g_FrameBuffer->paintBackgroundBoxRel(x,y, dx,dy);
 	}
+	else
+	{
+		g_RCInput->pushbackMsg( CRCInput::RC_help, 0 );
+	}
 }
+
 
 int CNVODChangeExec::exec(CMenuTarget* parent, string actionKey)
 {
@@ -173,16 +178,8 @@ int CNVODChangeExec::exec(CMenuTarget* parent, string actionKey)
 	unsigned sel= atoi(actionKey.c_str());
 	string sc = g_RemoteControl->setSubChannel(sel);
 
-	if(sc!="")
-	{	//wenn subchan einen namen hat kurzinfo oben malen
-		parent->hide();
-		showSubchan(sc);
-	}
-	else
-	{	//wenn nicht ganze infobar
-		g_RCInput->pushbackMsg( CRCInput::RC_help, 0 );
-	}
-
+	parent->hide();
+	showSubchan(sc);
 	return menu_return::RETURN_EXIT;
 }
 
