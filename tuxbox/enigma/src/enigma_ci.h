@@ -34,7 +34,7 @@ class eMMIEnqWindow : public eWindow
 	int eventHandler( const eWidgetEvent &e );
 	void okPressed(int*);
 public:
-	eMMIEnqWindow( eString windowText, int num, bool blind );
+	eMMIEnqWindow( const eString& titleBarText, const eString &windowText, int num, bool blind );
 	eString getAnswer();
 };
 
@@ -44,7 +44,7 @@ class eMMIListWindow : public eListBoxWindow<eListBoxEntryText>
 	int eventHandler( const eWidgetEvent &e );
 public:
 	void entrySelected( eListBoxEntryText* e );
-	eMMIListWindow(eString title, eString subtitle, eString bottomText, std::list< std::pair< eString, int> > &entrys );
+	eMMIListWindow(const eString &titleBarText, const eString &title, const eString &subtitle, const eString &bottomText, std::list< std::pair< eString, int> > &entrys );
 	int getSelected() { return (int) list.getCurrent()->getKey(); }
 };
 
@@ -61,6 +61,7 @@ protected:
 	enum AnswerType { ENQAnswer, MENUAnswer, LISTAnswer };
 	enigmaMMI();
 public:
+	
 	bool connected() { return conn.connected(); }
 	int eventHandler( const eWidgetEvent &e );
 	virtual bool handleMMIMessage(const char *data);

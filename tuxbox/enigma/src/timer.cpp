@@ -381,7 +381,7 @@ void eTimerManager::actionHandler()
 				eZapMain::getInstance()->toggleTimerMode();
 				// now in eZapMain the RemoteControl should be handled for TimerMode...
 				// any service change stops now the Running Event and set it to userAborted
-				conn = CONNECT( eDVB::getInstance()->leaveService, eTimerManager::leaveService );
+//				conn = CONNECT( eDVB::getInstance()->leaveService, eTimerManager::leaveService );
 			}
 			if ( nextStartingEvent->type & ePlaylistEntry::isSmartTimer )
 			{
@@ -1087,6 +1087,7 @@ bool eTimerManager::removeEventFromTimerList( eWidget *sel, const ePlaylistEntry
 				str2 = _("Update event in timerlist");
 				str3 = _("Really update this event?");
 			}
+			
 /*			// show messageBox blasel.. running event...
 			if ( &(*nextStartingEvent) == &entry && entry.type & ePlaylistEntry::stateRunning  )
 			{
@@ -1095,11 +1096,22 @@ bool eTimerManager::removeEventFromTimerList( eWidget *sel, const ePlaylistEntry
 				box.exec();
 				box.hide();
 			}*/
-			eMessageBox box(str1+'\n'+str3, str2, eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btNo);
-			box.show();
-			int r=box.exec();
-			box.hide();
-			if (r == eMessageBox::btYes)
+			int ret = eMessageBox::btNo;
+			if ( &(*nextStartingEvent) == &entry && entry.type & ePlaylistEntry::stateRunning  )
+			{
+				eMessageBox box(str1+'\n'+str3, str2, eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btNo);
+				box.show();
+				ret=box.exec();
+				box.hide();
+			}
+			else
+			{
+				eMessageBox box(str3, str2, eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btNo);
+				box.show();
+				ret=box.exec();
+				box.hide();
+			}
+			if (ret == eMessageBox::btYes)
 			{
 				timerlist->getList().erase(i);
 				if ( &(*nextStartingEvent) == &entry )

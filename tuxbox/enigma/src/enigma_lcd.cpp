@@ -42,8 +42,9 @@ eZapLCD::~eZapLCD()
 	delete lcdMenu;
 	delete lcdScart;
 	delete lcdStandby;
-	delete lcdShutdown;
 	delete lcdSatfind;
+	lcdShutdown->show();
+	delete lcdShutdown;
 }
 
 eZapLCDMain::eZapLCDMain(eWidget *parent)

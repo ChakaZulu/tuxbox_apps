@@ -77,21 +77,17 @@ static void SetECM(int vpid, int apid, int pmtpid, int descriptor_length, __u8 *
 		waitpid(lastpid, 0, 0);
 		lastpid=-1;
 	}
-
+ 
 	if (!descriptor_length)
 		return;
 
 	char buffer[3][5];
 	sprintf(buffer[0], "%x", vpid);
 	sprintf(buffer[1], "%x", apid);
-#if HAVE_DVB_API_VERSION < 3
-	sprintf(buffer[2], "%x", pmtpid);
-#else
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (!sapi)
 		return;
 	sprintf(buffer[2], "%x", sapi->service.getServiceID().get());
-#endif
 
 	char descriptor[2048];
 	

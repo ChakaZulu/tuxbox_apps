@@ -864,8 +864,11 @@ eStoreWindow::eStoreWindow(eLNB *lnb, int orbital_pos)
 				break;
 
 		if (it != lnb->getDiSEqC().RotorTable.end() )
-			continue;
-			
+		{
+			if ( it->first != orbital_pos )
+				continue;
+		}
+
 		StorageLoc->setNumber(i);
 		break;
 	}
@@ -881,24 +884,27 @@ void eStoreWindow::onStorePressed()
 	std::map<int,int>::iterator it = lnb->getDiSEqC().RotorTable.find( orbital_pos );
 	if ( it != lnb->getDiSEqC().RotorTable.end() )
 	{
-		eMessageBox mb( eString().sprintf(_("%d.%d\xC2\xB0%c is currently stored at location %d!\nWhen you store this now at Location %d, we must remove the old Location.\nAre you sure you want to do this?"),abs(orbital_pos)/10, abs(orbital_pos)%10, orbital_pos>0?'E':'W', it->second, StorageLoc->getNumber() ), _("Warning"), eMessageBox::iconWarning|eMessageBox::btYes|eMessageBox::btNo, eMessageBox::btNo );
-		hide();
-		mb.show();
-		switch( mb.exec() )
+		int ret = eMessageBox::btYes;
+		if ( StorageLoc->getNumber() != it->second )
+		{
+			eMessageBox mb( eString().sprintf(_("%d.%d\xC2\xB0%c is currently stored at location %d!\nWhen you store this now at Location %d, we must remove the old Location.\nAre you sure you want to do this?"),abs(orbital_pos)/10, abs(orbital_pos)%10, orbital_pos>0?'E':'W', it->second, StorageLoc->getNumber() ), _("Warning"), eMessageBox::iconWarning|eMessageBox::btYes|eMessageBox::btNo, eMessageBox::btNo );
+			hide();
+			mb.show();
+			ret = mb.exec();
+			mb.hide();
+			show();
+		}
+		switch( ret )
 		{
 			case eMessageBox::btYes:
 				lnb->getDiSEqC().RotorTable.erase(it);
 				lnb->getDiSEqC().useGotoXX=0;
 				lnb->getDiSEqC().RotorTable[orbital_pos] = StorageLoc->getNumber();
-				mb.hide();
-				show();
 				close(StorageLoc->getNumber());
 			break;
 			case eMessageBox::btNo:
-				mb.hide();
-				show();
-				return;
-			break;
+			default:
+				break;
 		}
 	}
 	else

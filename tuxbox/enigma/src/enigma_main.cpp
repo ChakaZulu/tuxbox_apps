@@ -1284,7 +1284,7 @@ void eZapMain::reloadPaths(int reset)
 		if ( !reset && !eConfig::getInstance()->getKey( eString().sprintf("/ezap/ui/modes/%d/path0", m).c_str(), str ) )
 		{
 			modeLast[m].setString(str);
-			//			eDebug(str);
+//			eDebug(str);
 			free(str);
 		}
 		else  // no path in registry... create default..
@@ -1626,7 +1626,7 @@ void eZapMain::receiveMMIMessageCI2( const char* data, int len )
 
 void eZapMain::handleMMIMessage( const eMMIMessage &msg )
 {
-	eDebug("eZapMain::handleMMIMessage");
+//	eDebug("eZapMain::handleMMIMessage");
 	enigmaMMI *p = enigmaCIMMI::getInstance(msg.from);
 
 	if ( !memcmp( msg.data, "\x9f\x88\x00", 3 ) )
@@ -3372,6 +3372,9 @@ void eZapMain::addServiceToCurUserBouquet(const eServiceReference& service)
 void eZapMain::playService(const eServiceReference &service, int flags)
 {
 	int first=0;
+
+	if ( !service || ( service.path && service.path == "/" ) )
+	    return;
 
 	if (flags&psSetMode)
 	{

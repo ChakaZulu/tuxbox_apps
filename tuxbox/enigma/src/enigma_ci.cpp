@@ -201,7 +201,7 @@ void enigmaMMI::gotMMIData( const char* data, int len )
 	char *dest = new char[len];
 	memcpy( dest, data, len );
 /*	for (int i=0; i < len; i++)
-		eDebugNoNewLine("%02x ", data[i]);
+		eDebugNoNewLine("%x ", data[i]);
 	eDebug("");*/
 	mmi_messages.send( eMMIMsg( dest, len ) );
 }
@@ -334,17 +334,32 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 
 	if( !memcmp(data+rp,TAG_MMI_CLOSE,TAG_LENGTH) )
 	{
-		eDebug("mmi_close");
 		rp += 3;
-		if ( *(data+rp) ) // timeout is set
+		int LengthBytes;
+		int size=LengthField((unsigned char*)data+rp, MAX_LENGTH_BYTES, &LengthBytes);
+		rp+=LengthBytes;
+		if ( *(data+rp) == 1 ) // timeout is set
 		{
-			int delay = *(data+rp+1);
-			delay = delay ? delay * 1000 : 1;
+			if ( size > 1 )
+			{
+				eDebug("timed mmi_close");
+				int delay = *(data+rp+1);
+				delay = delay ? delay * 1000 : 1;
 //			eDebug("start closeTimer %d", delay );
-			closeTimer.start( delay, true );
+				closeTimer.start( delay, true );
+			}
+			else
+			{
+				eDebug("invalid close tag... 9f 88 00 LEN 01 .. but no timeout is given!!");
+				closeMMI();
+			}
 		}
 		else
+		{
+			eDebug("immediate mmi_close");
 			closeMMI();
+		}
+		rp+=size;
 	}
 	else if( !memcmp(data+rp,TAG_MMI_ENQ,TAG_LENGTH) )
 	{
@@ -369,7 +384,6 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 
 		int LengthBytes;
 		int size=LengthField((unsigned char*)data+rp, MAX_LENGTH_BYTES, &LengthBytes);
-
 		rp+=LengthBytes;
 
 		int blind=data[rp++] & 1;  //blind_answer
@@ -383,9 +397,9 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 		memset(text,0,size-1);
 		memcpy(text,data+rp,size-2);
 
-		eDebug("TEXT:%s",text);
+//		eDebug("TEXT:%s",text);
 		hideWaitForAnswer();
-		eMMIEnqWindow wnd(text, nrcount, blind );
+		eMMIEnqWindow wnd(this->text, text, nrcount, blind );
 		open = &wnd;
 		int ret = wnd.exec();
 		open = 0;
@@ -491,7 +505,7 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 				break;
 		}
 		hideWaitForAnswer();
-		eMMIListWindow wnd(titleText, subTitleText, bottomText, entrys );
+		eMMIListWindow wnd(text, titleText, subTitleText, bottomText, entrys );
 		open = &wnd;
 		int ret = wnd.exec();
 		open = 0;
@@ -521,12 +535,12 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 	return true;
 }
 
-eMMIEnqWindow::eMMIEnqWindow( eString text, int num, bool blind )
+eMMIEnqWindow::eMMIEnqWindow( const eString &titleBarText, const eString &text, int num, bool blind )
 	:num(num)
 {
 	cmove( ePoint(120,140) );
 	cresize( eSize(520,250) );
-	setText(_("Common Interface Module - mmi"));
+	setText(titleBarText);
 
 	int valinit[num];
 	memset(valinit,0,sizeof(valinit));
@@ -598,8 +612,8 @@ eString eMMIEnqWindow::getAnswer()
 	return ret;
 }
 
-eMMIListWindow::eMMIListWindow(eString titleTextT, eString subtitleTextT, eString bottomTextT, std::list< std::pair< eString, int> > &entrys )
-	:eListBoxWindow<eListBoxEntryText>(_("Common Interface Module - mmi"), entrys.size() > 8 ? 8 : entrys.size() , 520, false)
+eMMIListWindow::eMMIListWindow(const eString & titleBarText, const eString &titleTextT, const eString &subtitleTextT, const eString &bottomTextT, std::list< std::pair< eString, int> > &entrys )
+	:eListBoxWindow<eListBoxEntryText>(titleBarText, entrys.size() > 8 ? 8 : entrys.size() , 520, false)
 {
 	cmove(ePoint(120, 130));
 

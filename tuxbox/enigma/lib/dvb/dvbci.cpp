@@ -204,9 +204,9 @@ void eDVBCI::mmi_enqansw(unsigned char *buf)
 	unsigned char buffer[ buf[0]+8 ];
 	memcpy(buffer,"\x90\x2\x0\x4\x9f\x88\x08",7);
 	memcpy(buffer+7, buf, buf[0]+1 );
-	for (int i=0; i < buf[0]+8; i++ )
-		eDebugNoNewLine("%02x ", buffer[i]);
-	eDebug("");
+//	for (int i=0; i < buf[0]+8; i++ )
+//		eDebugNoNewLine("%02x ", buffer[i]);
+//	eDebug("");
 	sendTPDU(0xA0,buf[0]+8,1,buffer);
 }
 
