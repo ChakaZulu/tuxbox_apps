@@ -20,9 +20,7 @@ unsigned char * simple_resize(unsigned char * orgin,int ox,int oy,int dx,int dy)
 		for(i=0,k=0;i<dx;i++,k+=3)
 		{
 			ip=i*ox/dx*3;
-			l[k]=p[ip];
-			l[k+1]=p[ip+1];
-			l[k+2]=p[ip+2];
+			memcpy(l+k, p+ip, 3);
 		}
 	}
 	free(orgin);
@@ -34,8 +32,9 @@ unsigned char * color_average_resize(unsigned char * orgin,int ox,int oy,int dx,
 {
 //   dbout("color_average_resize{\n");
 	unsigned char *cr,*p,*q;
-	int i,j,k,l,xa,xb,ya,yb;
+	int i,j,k,l,ya,yb;
 	int sq,r,g,b;
+	float q1,q2;
 	cr=(unsigned char*) malloc(dx*dy*3); 
 	if(cr==NULL)
 	{
@@ -44,19 +43,29 @@ unsigned char * color_average_resize(unsigned char * orgin,int ox,int oy,int dx,
 		return(orgin);
 	}
 	p=cr;
+	q1=ox/dx;            
+	q2=oy/dy; 
 
+	int xa_v[dx];
+	for(i=0;i<dx;i++)
+		xa_v[i] = (int)(i*q1);
+	int xb_v[dx+1];
+	for(i=0;i<dx;i++)
+	{
+		xb_v[i]= (int)((i+1)*q1);
+		if(xb_v[i]>=ox)
+			xb_v[i]=ox-1;
+	}
 	for(j=0;j<dy;j++)
 	{
+		ya= (int)(j*q2);
+		yb= (int)((j+1)*q2); if(yb>=oy) yb=oy-1;
 		for(i=0;i<dx;i++,p+=3)
 		{
-			xa=i*ox/dx;
-			ya=j*oy/dy;
-			xb=(i+1)*ox/dx; if(xb>=ox)	xb=ox-1;
-			yb=(j+1)*oy/dy; if(yb>=oy)	yb=oy-1;
 			for(l=ya,r=0,g=0,b=0,sq=0;l<=yb;l++)
 			{
-				q=orgin+((l*ox+xa)*3);
-				for(k=xa;k<=xb;k++,q+=3,sq++)
+				q=orgin+((l*ox+xa_v[i])*3);
+				for(k=xa_v[i];k<=xb_v[i];k++,q+=3,sq++)
 				{
 					r+=q[0]; g+=q[1]; b+=q[2];
 				}
