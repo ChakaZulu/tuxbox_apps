@@ -1426,8 +1426,8 @@ void eDVB::configureNetwork()
 			eDebug("'%s' failed.", buffer.c_str());
 		else
 		{
-			system("/bin/route del default 2> /dev/null");
-			buffer.sprintf("/bin/route add default gw %d.%d.%d.%d", gateway[0], gateway[1], gateway[2], gateway[3]);
+			system("/sbin/route del default 2> /dev/null");
+			buffer.sprintf("/sbin/route add default gw %d.%d.%d.%d", gateway[0], gateway[1], gateway[2], gateway[3]);
 			if (system(buffer.c_str())>>8)
 				eDebug("'%s' failed", buffer.c_str());
 		}
