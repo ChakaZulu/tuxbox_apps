@@ -140,15 +140,16 @@ gl_copybox(int xsrc, int ysrc, int w, int h, int x, int y) {
 
 void
 gl_fillbox(int x, int y, int w, int h, int col) {
-	int i, j;
+	int i, j, col2;
 	IMPORT_FRAMEBUFFER_VARS
 
+	col2 = 0x8000 | ((col & 0xFF) << 8) | ((col & 0xFF00) >> 8);
 	for (j=0; j<h; j++) {
 		Pixel *buf = v_buf + (y+j) * v_xsize + x;
 		
 		for (i=0; i<w; i++) {
 //			*(buf++) = col;
-			*(buf++) = 0x8000 | ((col & 0xF8) << 8) | ((col & 3) << 8) | ((col & 0xE000) >> 8) | ((col & 0x1F00) >> 8);
+			*(buf++) = col2;
 		}
 	}
 	redraw_virt(x, y, w, h);
@@ -168,7 +169,7 @@ gl_putbox(int x, int y, int w, int h, CARD8 *buf) {
 //		memcpy(dst, src, w * sizeof(Pixel));
 		for(k=0; k < w ; k++)
 		{
-			dst[k] = 0x8000 | ((src[k] & 0xF8) << 8) | ((src[k] & 3) << 8) | ((src[k] & 0xE000) >> 8) | ((src[k] & 0x1F00) >> 8);
+			dst[k] = 0x8000 | ((src[k] & 0xFF) << 8) | (src[k] >> 8) ;
 		}
 		src += w;
 		dst += v_xsize;
