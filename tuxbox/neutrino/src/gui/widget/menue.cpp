@@ -608,12 +608,11 @@ int CMenuOptionStringChooser::exec(CMenuTarget*)
 {
 	bool wantsRepaint = false;
 	//select next value
-	for(unsigned int count=0;count<options.size();count++)
+	for(unsigned int count = 0; count < options.size(); count++)
 	{
-		std::string actOption = options[count];
-		if(!strcmp( actOption.c_str(), optionValue))
+		if (strcmp(options[count].c_str(), optionValue) == 0)
 		{
-			strcpy(optionValue, options[ (count+1)%options.size() ].c_str());
+			strcpy(optionValue, options[(count + 1) % options.size()].c_str());
 			break;
 		}
 	}
