@@ -34,14 +34,14 @@
 
 CControldClient::CControldClient()
 {
-	memset(&remotemsg, 0, sizeof(remotemsg) );
+	sock_fd = 0;
 }
 
-int CControldClient::send(bool closesock)
+bool CControldClient::controld_connect()
 {
-	int sock_fd;
+	controld_close();
 
-	struct sockaddr_un servaddr, cliaddr;
+	struct sockaddr_un servaddr;
 	int clilen;
 	memset(&servaddr, 0, sizeof(struct sockaddr_un));
 	servaddr.sun_family = AF_UNIX;
@@ -50,57 +50,83 @@ int CControldClient::send(bool closesock)
 	
 	if ((sock_fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
 	{
-		perror("socket");
+		perror("controldclient: socket");
+		return false;
 	}	
 
 	if(connect(sock_fd, (struct sockaddr*) &servaddr, clilen) <0 )
 	{
-  		perror("controldclient: connect(controld)");
-		return -1;
+  		perror("controldclient: connect");
+		return false;
 	}
+	return true;
+}
 
-	write(sock_fd, &remotemsg, sizeof(remotemsg));
-	if(closesock)
+bool CControldClient::controld_close()
+{
+	if(sock_fd!=0)
+	{
 		close(sock_fd);
-	memset(&remotemsg, 0, sizeof(remotemsg));
-	return sock_fd;
+	}
+}
+
+bool CControldClient::send(char* data, int size)
+{
+	write(sock_fd, data, size);
+}
+
+bool CControldClient::receive(char* data, int size)
+{
+	read(sock_fd, data, size);
 }
 
 void  CControldClient::shutdown()
 {
-	remotemsg.version=1;
-	remotemsg.cmd=1;
-
-	send(true);
+	commandHead msg;
+	msg.version=ACTVERSION;
+	msg.cmd=CMD_SHUTDOWN;
+	controld_connect();
+	send((char*)&msg, sizeof(msg));
+	controld_close();
 }
 
 void CControldClient::setBoxType(char type)
 {
-	remotemsg.version=1;
-	remotemsg.cmd=7;
-	remotemsg.param=type;
-	send(true);
+	commandHead msg;
+	commandBoxType msg2;
+	msg.version=ACTVERSION;
+	msg.cmd=CMD_SETBOXTYPE;
+	msg2.boxtype = type;
+	controld_connect();
+	send((char*)&msg, sizeof(msg));
+	send((char*)&msg2, sizeof(msg2));
+	controld_close();
 }
 
 char CControldClient::getBoxType()
 {
-	char boxtype = 0;
-	int sockfd = -1;
-
-	remotemsg.version=1;
-	remotemsg.cmd=132;
-	sockfd = send(false);
-	read(sockfd, &boxtype, sizeof(boxtype));
-	close(sockfd);
-	return boxtype;
+	commandHead msg;
+	responseBoxType rmsg;
+	msg.version=ACTVERSION;
+	msg.cmd=CMD_GETBOXTYPE;
+	controld_connect();
+	send((char*)&msg, sizeof(msg));
+	receive((char*)&rmsg, sizeof(rmsg));
+	controld_close();
+	return rmsg.boxtype;
 }
 
-void CControldClient::setScartMode(char mode)
+void CControldClient::setScartMode(bool mode)
 {
-	remotemsg.version=1;
-	remotemsg.cmd=8;
-	remotemsg.param=mode;
-	send(true);
+	commandHead msg;
+	commandScartMode msg2;
+	msg.version=ACTVERSION;
+	msg.cmd=CMD_SETSCARTMODE;
+	msg2.mode = mode;
+	controld_connect();
+	send((char*)&msg, sizeof(msg));
+	send((char*)&msg2, sizeof(msg2));
+	controld_close();
 }
 
 /*
@@ -120,82 +146,101 @@ char CControldClient::getScartMode()
 
 void CControldClient::setVolume(char volume )
 {
-	remotemsg.version=1;
-	remotemsg.cmd=2;
-	remotemsg.param=volume;
-	send(true);
+	commandHead msg;
+	commandVolume msg2;
+	msg.version=ACTVERSION;
+	msg.cmd=CMD_SETVOLUME;
+	msg2.volume = volume;
+	controld_connect();
+	send((char*)&msg, sizeof(msg));
+	send((char*)&msg2, sizeof(msg2));
+	controld_close();
 }
 
 char CControldClient::getVolume()
 {
-	char volume = 0;
-	int sockfd = -1;
-
-	remotemsg.version=1;
-	remotemsg.cmd=128;
-	sockfd = send(false);
-	read(sockfd, &volume, sizeof(volume));
-	close(sockfd);
-	return volume;
+	commandHead msg;
+	responseVolume rmsg;
+	msg.version=ACTVERSION;
+	msg.cmd=CMD_GETVOLUME;
+	controld_connect();
+	send((char*)&msg, sizeof(msg));
+	receive((char*)&rmsg, sizeof(rmsg));
+	controld_close();
+	return rmsg.volume;
 }
 
 void CControldClient::setVideoFormat(char format)
 {
-	remotemsg.version=1;
-	remotemsg.cmd=5;
-	remotemsg.param=format;
-	send(true);
+	commandHead msg;
+	commandVideoFormat msg2;
+	msg.version=ACTVERSION;
+	msg.cmd=CMD_SETVIDEOFORMAT;
+	msg2.format = format;
+	controld_connect();
+	send((char*)&msg, sizeof(msg));
+	send((char*)&msg2, sizeof(msg2));
+	controld_close();
 }
 
 char CControldClient::getVideoFormat()
 {
-	char videoformat = 0;
-	int sockfd = -1;
-
-	remotemsg.version=1;
-	remotemsg.cmd=130;
-	sockfd = send(false);
-	read(sockfd, &videoformat, sizeof(videoformat));
-	close(sockfd);
-	return videoformat;
+	commandHead msg;
+	responseVideoFormat rmsg;
+	msg.version=ACTVERSION;
+	msg.cmd=CMD_GETVIDEOFORMAT;
+	controld_connect();
+	send((char*)&msg, sizeof(msg));
+	receive((char*)&rmsg, sizeof(rmsg));
+	controld_close();
+	return rmsg.format;
 }
 
-void CControldClient::setVideoOutput(char format)
+void CControldClient::setVideoOutput(char output)
 {
-	remotemsg.version=1;
-	remotemsg.cmd=6;
-	remotemsg.param=format;
-	send(true);
+	commandHead msg;
+	commandVideoOutput msg2;
+	msg.version=ACTVERSION;
+	msg.cmd=CMD_SETVIDEOOUTPUT;
+	msg2.output = output;
+	controld_connect();
+	send((char*)&msg, sizeof(msg));
+	send((char*)&msg2, sizeof(msg2));
+	controld_close();
 }
 
 char CControldClient::getVideoOutput()
 {
-	char videooutput = 0;
-	int sockfd = -1;
-
-	remotemsg.version=1;
-	remotemsg.cmd=131;
-	sockfd = send(false);
-	read(sockfd, &videooutput, sizeof(videooutput));
-	close(sockfd);
-	return videooutput;
+	commandHead msg;
+	responseVideoOutput rmsg;
+	msg.version=ACTVERSION;
+	msg.cmd=CMD_GETVIDEOOUTPUT;
+	controld_connect();
+	send((char*)&msg, sizeof(msg));
+	receive((char*)&rmsg, sizeof(rmsg));
+	controld_close();
+	return rmsg.output;
 }
 
 
 void CControldClient::Mute()
 {
-	remotemsg.version=1;
-	remotemsg.cmd=3;
-
-	send(true);
+	commandHead msg;
+	msg.version=ACTVERSION;
+	msg.cmd=CMD_MUTE;
+	controld_connect();
+	send((char*)&msg, sizeof(msg));
+	controld_close();
 }
 
 void CControldClient::UnMute()
 {
-	remotemsg.version=1;
-	remotemsg.cmd=4;
-
-	send(true);
+	commandHead msg;
+	msg.version=ACTVERSION;
+	msg.cmd=CMD_UNMUTE;
+	controld_connect();
+	send((char*)&msg, sizeof(msg));
+	controld_close();
 }
 
 void CControldClient::setMute( bool mute)
@@ -206,15 +251,15 @@ void CControldClient::setMute( bool mute)
 		UnMute();
 }
 
-char CControldClient::getMute()
+bool CControldClient::getMute()
 {
-        char mute = 0;
-        int sockfd = -1;
-
-        remotemsg.version=1;
-        remotemsg.cmd=129;
-        sockfd = send(false);
-        read(sockfd, &mute, sizeof(mute));
-        close(sockfd);
-        return mute;    
+	commandHead msg;
+	responseMute rmsg;
+	msg.version=ACTVERSION;
+	msg.cmd=CMD_GETMUTESTATUS;
+	controld_connect();
+	send((char*)&msg, sizeof(msg));
+	receive((char*)&rmsg, sizeof(rmsg));
+	controld_close();
+	return rmsg.mute;
 }

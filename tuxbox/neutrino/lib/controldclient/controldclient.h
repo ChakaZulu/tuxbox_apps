@@ -49,19 +49,98 @@ using namespace std;
 
 class CControldClient
 {
+		int sock_fd;
 
-	struct ctrl_rmsg
-	{
-		unsigned char version;
-		unsigned char cmd;
-		unsigned char param;
-		unsigned short param2;
-		char param3[30];
-	}	remotemsg;
-
-	int send(bool closesock);
+		bool controld_connect();
+		bool send(char* data, int size);
+		bool receive(char* data, int size);
+		bool controld_close();
 
 	public:
+
+		static const char ACTVERSION = 2;
+
+		enum commands
+		{
+			CMD_SETVOLUME = 1,
+			CMD_GETVOLUME,
+			CMD_MUTE,
+			CMD_UNMUTE,
+			CMD_GETMUTESTATUS,
+			CMD_SETVIDEOFORMAT,
+			CMD_GETVIDEOFORMAT,
+			CMD_SETVIDEOOUTPUT,
+			CMD_GETVIDEOOUTPUT,
+			CMD_SETBOXTYPE,
+			CMD_GETBOXTYPE,
+			CMD_SETSCARTMODE,
+			CMD_GETSCARTMODE,
+			CMD_SHUTDOWN
+		};
+
+		//command structures
+		struct commandHead
+		{
+			unsigned char version;
+			unsigned char cmd;
+		};
+
+		struct commandVolume
+		{
+			unsigned char volume;
+		};
+
+		struct commandVideoFormat
+		{
+			unsigned char format;
+		};
+
+		struct commandVideoOutput
+		{
+			unsigned char output;
+		};
+
+		struct commandBoxType
+		{
+			unsigned char boxtype;
+		};
+
+		struct commandScartMode
+		{
+			unsigned char mode;
+		};
+
+		//response structures
+		struct responseVolume
+		{
+			unsigned char volume;
+		};
+
+		struct responseMute
+		{
+			bool mute;
+		};
+
+		struct responseVideoFormat
+		{
+			unsigned char format;
+		};
+
+		struct responseVideoOutput
+		{
+			unsigned char output;
+		};
+
+		struct responseBoxType
+		{
+			unsigned char boxtype;
+		};
+
+		struct responseScartMode
+		{
+			unsigned char mode;
+		};
+
 
 		//VideoFormat
 		static const char VIDEOFORMAT_AUTO = 0;
@@ -104,7 +183,7 @@ class CControldClient
 			           VOLUME_UNMUTE = ton an
 		*/
 		void setMute( bool );
-		char getMute();
+		bool getMute();
 
 		/*
 			Mute() : Ton ausschalten
@@ -151,7 +230,7 @@ class CControldClient
 
 	
 		*/
-		void setScartMode(char);
+		void setScartMode(bool);
 
 		/*
 			die Dbox herunterfahren

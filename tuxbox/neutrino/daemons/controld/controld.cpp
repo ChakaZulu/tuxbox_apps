@@ -52,19 +52,10 @@
 #define CONF_FILE CONFIGDIR "/controld.conf"
 
 
-struct rmsg {
-  unsigned char version;
-  unsigned char cmd;
-  unsigned short param;
-  unsigned short param2;
-  char param3[30];
-
-} rmsg;
-
 struct Ssettings
 {
 	char volume;
-	char mute;
+	bool mute;
 	char videotype;
 	char videoformat;
 
@@ -422,87 +413,93 @@ void UnMute()
 }
 
 
-void parse_command(int connfd)
+void parse_command(int connfd, CControldClient::commandHead* rmessage)
 {
-  //byteorder!!!!!!
-  rmsg.param = ((rmsg.param & 0x00ff) << 8) | ((rmsg.param & 0xff00) >> 8);
-  rmsg.param2 = ((rmsg.param2 & 0x00ff) << 8) | ((rmsg.param2 & 0xff00) >> 8);
 
-/*
-  printf("[controld] Command received\n");
-  printf("[controld]   Version: %d\n", rmsg.version);
-  printf("[controld]   Command: %d\n", rmsg.cmd);
-  printf("[controld]   Param: %d\n", rmsg.param);
-  printf("[controld]   Param2: %d\n", rmsg.param2);
-  printf("[controld]   Param3: %s\n", rmsg.param3);
-*/
-
-  if(rmsg.version!=1)
+  if(rmessage->version!=CControldClient::ACTVERSION)
   {
     perror("[controld] unknown version\n");
     return;
   }
-
-  switch (rmsg.cmd)
+  switch (rmessage->cmd)
   {
-    case 1:
+    case CControldClient::CMD_SHUTDOWN:
       printf("[controld] shutdown\n");
       shutdownBox();
       break;
-    case 2:
+    case CControldClient::CMD_SETVOLUME:
       printf("[controld] set volume\n");
-      setVolume(rmsg.param);
+      CControldClient::commandVolume msg;
+	  read(connfd, &msg, sizeof(msg));
+      setVolume(msg.volume);
       break;
-    case 3:
+	case CControldClient::CMD_MUTE:
       printf("[controld] mute\n");
       Mute();
       break;
-    case 4:
+    case CControldClient::CMD_UNMUTE:
       printf("[controld] unmute\n");
       UnMute();
       break;
-    case 5:
+    case CControldClient::CMD_SETVIDEOFORMAT:
       printf("[controld] set videoformat\n");
-      setVideoFormat(rmsg.param);
+      CControldClient::commandVideoFormat msg2;
+	  read(connfd, &msg2, sizeof(msg2));
+	  setVideoFormat(msg2.format);
       break;
-    case 6:
-      printf("[controld] set videotype\n");
-      setVideoType(rmsg.param);
+    case CControldClient::CMD_SETVIDEOOUTPUT:
+      printf("[controld] set videooutput\n");
+      CControldClient::commandVideoOutput msg3;
+	  read(connfd, &msg3, sizeof(msg3));
+	  setVideoType(msg3.output);
       break;
-    case 7:
+	  
+    case CControldClient::CMD_SETBOXTYPE:
       printf("[controld] set boxtype\n");
-      setBoxType(rmsg.param);
+      CControldClient::commandBoxType msg4;
+	  read(connfd, &msg4, sizeof(msg4));
+	  setBoxType(msg4.boxtype);
       break;
-    case 8:
+    case CControldClient::CMD_SETSCARTMODE:
       printf("[controld] set scartmode\n");
-      setScartMode(rmsg.param);
+      CControldClient::commandScartMode msg5;
+	  read(connfd, &msg5, sizeof(msg5));
+      setScartMode(msg5.mode);
       break;
 
-	case 128:
+	case CControldClient::CMD_GETVOLUME:
 		printf("[controld] get volume\n");
-		write(connfd,&settings.volume,sizeof(settings.volume));
+		CControldClient::responseVolume msg6;
+		msg6.volume = settings.volume;
+		write(connfd,&msg6,sizeof(msg6));
 		break;
-	case 129:
+	case CControldClient::CMD_GETMUTESTATUS:
 		printf("[controld] get mute\n");
-		write(connfd,&settings.mute,sizeof(settings.mute));
+		CControldClient::responseMute msg7;
+		msg7.mute = settings.mute;
+		write(connfd,&msg7,sizeof(msg7));
 		break;
-	case 130:
+	case CControldClient::CMD_GETVIDEOFORMAT:
 		printf("[controld] get videoformat (fnc)\n");
-		write(connfd,&settings.videoformat,sizeof(settings.videoformat));
+		CControldClient::responseVideoFormat msg8;
+		msg8.format = settings.videoformat;
+		write(connfd,&msg8,sizeof(msg8));
 		break;
-	case 131:
-		printf("[controld] get videotype (fblk)\n");
-		write(connfd,&settings.videotype,sizeof(settings.videotype));
+	case CControldClient::CMD_GETVIDEOOUTPUT:
+		printf("[controld] get videooutput (fblk)\n");
+		CControldClient::responseVideoOutput msg9;
+		msg9.output = settings.videotype;
+		write(connfd,&msg9,sizeof(msg9));
 		break;
-	case 132:
+	case CControldClient::CMD_GETBOXTYPE:
 		printf("[controld] get boxtype\n");
-		write(connfd,&settings.boxtype,sizeof(settings.boxtype));
+		CControldClient::responseBoxType msg0;
+		msg0.boxtype = settings.boxtype;
+		write(connfd,&msg0,sizeof(msg0));
 		break;
-
     default:
 		printf("[controld] unknown command\n");
   }
-
 }
 
 
@@ -568,14 +565,15 @@ int main(int argc, char **argv)
 	setVolume(settings.volume);
 	setVideoType(settings.videotype);
 	setVideoFormat(settings.videoformat);
+
+	struct CControldClient::commandHead rmessage;
 	while(1)
 	{
 		connfd = accept(listenfd, (struct sockaddr*) &servaddr, (socklen_t*) &clilen);
+		memset(&rmessage, 0, sizeof(rmessage));
+		read(connfd,&rmessage,sizeof(rmessage));
 
-		memset(&rmsg, 0, sizeof(rmsg));
-		read(connfd,&rmsg,sizeof(rmsg));
-
-		parse_command(connfd);
+		parse_command(connfd, &rmessage);
 
 		close(connfd);
   }
