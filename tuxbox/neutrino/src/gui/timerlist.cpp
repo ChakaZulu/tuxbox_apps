@@ -222,8 +222,6 @@ int CTimerList::show()
 {
 	int res = -1;
 
-/*!!!	g_lcdd->setMode(CLcddClient::MODE_MENU, g_Locale->getText(name) );*/
-
 	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
 	uint msg; uint data;
 
@@ -335,7 +333,7 @@ int CTimerList::show()
 	}
 	hide();
 
-	/*!!!g_lcdd->setMode(CLcddClient::MODE_TVRADIO, g_Locale->getText(name) );*/
+	//g_lcdd->setMode(CLcddClient::MODE_TVRADIO, g_Locale->getText(name) );
 
 	return(res);
 }
@@ -401,6 +399,36 @@ void CTimerList::paintItem(int pos)
 			default:{}
 		}
 		g_Fonts->menu->RenderString(x+170,ypos+2*fheight, 320, zAddData, color, fheight);
+		// LCD Display
+		if (liststart+pos==selected)
+		{
+			string line1 = convertTimerType2String(timer.eventType);
+			string line2 = zAlarmTime;
+			switch(timer.eventType)
+			{
+				case CTimerEvent::TIMER_RECORD :
+					line2+= " -";
+				   line2+= zStopTime+6;
+				case CTimerEvent::TIMER_NEXTPROGRAM :
+				case CTimerEvent::TIMER_ZAPTO :
+				{
+					line1+=" ";
+					line1+=convertChannelId2String(timer.onidSid);
+				}
+				break;
+				case CTimerEvent::TIMER_STANDBY :
+				{
+					if(timer.standby_on)
+						line1+=" ON";
+					else
+						line1+=" OFF";
+				}
+				break;
+				default:{}
+			}
+			g_lcdd->setMenuText(0, line1 );
+			g_lcdd->setMenuText(1, line2 );
+		}
 	}
 }
 
@@ -443,6 +471,8 @@ void CTimerList::paintFoot()
 void CTimerList::paint()
 {
 	liststart = (selected/listmaxshow)*listmaxshow;
+	
+	g_lcdd->setMode(CLcddClient::MODE_MENU, g_Locale->getText("timerlist.name") );
 
 	paintHead();
 	for(unsigned int count=0;count<listmaxshow;count++)
