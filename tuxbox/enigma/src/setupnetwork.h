@@ -13,6 +13,38 @@ class eComboBox;
 class eTextInputField;
 class eListBoxEntryText;
 
+#ifndef DISABLE_NFS
+class eNFSSetup: public eWindow
+{
+        eButton *ok, *mount, *umount, *prev, *next;
+	eCheckbox *doamount;
+	eComboBox *combo_fstype, *combo_options;
+	eLabel *lpass , *luser;
+	eNumber *ip;
+	eStatusBar *sbar;
+	eString cmd,headline;
+	eTextInputField *sdir, *ldir, *user, *pass, *extraoptions;
+	int cur_entry;
+    
+	void fieldSelected(int *number) { focusNext(eWidget::focusDirNext); }
+	void fstypeChanged(eListBoxEntryText *le);
+    
+	void load_config();
+    
+	void okPressed();
+	void prevPressed();
+	void nextPressed();
+	void mountPressed();
+	void umountPressed();
+	bool ismounted();
+public:
+	eNFSSetup();
+	~eNFSSetup(){};
+    
+	void automount();
+};
+#endif
+
 class eZapNetworkSetup: public eWindow
 {
 	eNumber *ip, *netmask, *dns, *gateway, *port;
@@ -29,6 +61,10 @@ class eZapNetworkSetup: public eWindow
 	eLabel *lLogin, *lPassword;
 	eString secrets;
 #endif
+	
+#ifndef DISABLE_NFS
+	eButton *nfs;
+#endif
 private:
 	void fieldSelected(int *number);
 	void okPressed();
@@ -38,6 +74,9 @@ private:
 	void passwordSelected();
 	void loginSelected();
 	void tdslPressed();
+#endif
+#ifndef DISABLE_NFS
+	void nfsPressed();
 #endif
 public:
 	eZapNetworkSetup();
