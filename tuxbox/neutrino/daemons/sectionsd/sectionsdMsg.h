@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.34 2002/04/17 15:58:24 field Exp $
+//  $Id: sectionsdMsg.h,v 1.35 2002/04/18 10:43:56 field Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -25,6 +25,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsdMsg.h,v $
+//  Revision 1.35  2002/04/18 10:43:56  field
+//  Clientlib
+//
 //  Revision 1.34  2002/04/17 15:58:24  field
 //  Anpassungen
 //
@@ -177,7 +180,7 @@ struct sectionsd
 		epgEPGid,
 		epgEPGidShort,
 		ComponentTagsUniqueKey,
-		allEventsChannelID,
+		allEventsChannelID_,
 		timesNVODservice,
 		getEPGPrevNext,
 		getIsTimeSet,

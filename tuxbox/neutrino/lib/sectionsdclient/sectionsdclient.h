@@ -69,7 +69,7 @@ class CEPGData
 class CChannelEvent
 {
 	public:
-		unsigned	serviceID;
+		unsigned			serviceID( void ) const { return ( eventID>>16 ); }
 		unsigned long long	eventID;
 		string		description;
 		string		text;
@@ -112,6 +112,8 @@ class CSectionsdClient
 		void setServiceChanged( unsigned ServiceKey, bool requestEvent );
 
 		CChannelEventList getChannelEvents();
+
+		CChannelEventList getEventsServiceKey( unsigned serviceKey );
 
 		bool CSectionsdClient::getEPGid( unsigned long long eventid,time_t starttime,CEPGData * epgdata);
 

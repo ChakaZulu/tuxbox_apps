@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.118 2002/04/17 15:58:24 field Exp $
+//  $Id: sectionsd.cpp,v 1.119 2002/04/18 10:43:56 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.119  2002/04/18 10:43:56  field
+//  Clientlib
+//
 //  Revision 1.118  2002/04/17 15:58:24  field
 //  Anpassungen
 //
@@ -1485,57 +1488,104 @@ static void commandSetHoursToCache(struct connectionData *client, char *data, co
   return;
 }
 
-static void sendAllEvents(struct connectionData *client, unsigned serviceUniqueKey)
+static void sendAllEvents(struct connectionData *client, unsigned serviceUniqueKey, bool oldFormat = true )
 {
-  char *evtList=new char[65*1024]; // 65kb should be enough and dataLength is unsigned short
-  if(!evtList) {
-    fprintf(stderr, "low on memory!\n");
-    return;
-  }
-  *evtList=0;
-  if(serviceUniqueKey!=0) {
-    // service Found
-    if(dmxEIT.pause()) {
-      delete[] evtList;
-      return;
-    }
-    lockEvents();
-    int serviceIDfound=0;
-    for(MySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey::iterator e=mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.begin(); e!=mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.end(); e++) {
-      if(SIservice::makeUniqueKey(e->first->originalNetworkID, e->first->serviceID)==serviceUniqueKey) {
-        serviceIDfound=1;
-        for(SItimes::iterator t=e->first->times.begin(); t!=e->first->times.end(); t++) {
-          char strZeit[50];
-          sprintf(strZeit, "%012llx ", e->first->uniqueKey());
-          strcat(evtList, strZeit);
-          struct tm *tmZeit;
-          tmZeit=localtime(&(t->startzeit));
-          sprintf(strZeit, "%02d.%02d %02d:%02d %u ",
-            tmZeit->tm_mday, tmZeit->tm_mon+1, tmZeit->tm_hour, tmZeit->tm_min, e->first->times.begin()->dauer/60);
-          strcat(evtList, strZeit);
-          strcat(evtList, e->first->name.c_str());
-          strcat(evtList, "\n");
-        }
-      } // if = serviceID
-      else if(serviceIDfound)
-        break; // sind nach serviceID und startzeit sortiert -> nicht weiter suchen
-    }
-    unlockEvents();
-    if(dmxEIT.unpause()) {
-      delete[] evtList;
-      return;
-    }
-  }
-  struct sectionsd::msgResponseHeader responseHeader;
-  responseHeader.dataLength=strlen(evtList)+1;
-  if(writeNbytes(client->connectionSocket, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS)>0) {
-    if(responseHeader.dataLength)
-      writeNbytes(client->connectionSocket, evtList, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
-  }
-  else
-    dputs("[sectionsd] Fehler/Timeout bei write");
-  delete[] evtList;
-  return;
+	char *evtList=new char[65*1024]; // 65kb should be enough and dataLength is unsigned short
+	if(!evtList)
+	{
+		fprintf(stderr, "low on memory!\n");
+		return;
+	}
+
+	dprintf("sendAllEvents for %x\n", serviceUniqueKey);
+	*evtList=0;
+	char *liste=evtList;
+
+	if(serviceUniqueKey!=0)
+	{
+		// service Found
+		if( dmxEIT.pause() )
+		{
+			delete[] evtList;
+			return;
+		}
+
+		lockEvents();
+		int serviceIDfound=0;
+
+		for(MySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey::iterator e=mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.begin(); e!=mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.end(); e++) {
+			if(SIservice::makeUniqueKey(e->first->originalNetworkID, e->first->serviceID)==serviceUniqueKey)
+			{
+				serviceIDfound = 1;
+				for(SItimes::iterator t=e->first->times.begin(); t!=e->first->times.end(); t++)
+				{
+					if ( oldFormat )
+					{
+						char strZeit[50];
+						sprintf(strZeit, "%012llx ", e->first->uniqueKey());
+						strcat(liste, strZeit);
+						struct tm *tmZeit;
+						tmZeit=localtime(&(t->startzeit));
+						sprintf(strZeit, "%02d.%02d %02d:%02d %u ",
+							tmZeit->tm_mday, tmZeit->tm_mon+1, tmZeit->tm_hour, tmZeit->tm_min, e->first->times.begin()->dauer/60);
+						strcat(liste, strZeit);
+						strcat(liste, e->first->name.c_str());
+						strcat(liste, "\n");
+					}
+					else
+					{
+        				*((unsigned long long *)liste)=e->first->uniqueKey();
+                        liste+=8;
+                        *((unsigned *)liste)=t->startzeit;
+                        liste+=4;
+                        *((unsigned *)liste)=t->dauer;
+                        liste+=4;
+                        strcpy(liste, e->first->name.c_str());
+                        liste+=strlen(liste);
+                        liste++;
+                        if (e->first->text== "" )
+                        {
+                        	strcpy(liste, e->first->extendedText.substr(0, 40).c_str());
+                        	liste+=strlen(liste);
+                        }
+                        else
+                        {
+                        	strcpy(liste, e->first->text.c_str());
+                        	liste+=strlen(liste);
+                        }
+                        liste++;
+					}
+				}
+			} // if = serviceID
+      		else if ( serviceIDfound )
+				break; // sind nach serviceID und startzeit sortiert -> nicht weiter suchen
+		}
+
+		unlockEvents();
+
+		if(dmxEIT.unpause())
+		{
+			delete[] evtList;
+			return;
+		}
+	}
+	struct sectionsd::msgResponseHeader responseHeader;
+	responseHeader.dataLength = liste- evtList;
+	dprintf("[sectionsd] all events - response-size: 0x%x\n", responseHeader.dataLength);
+
+	if ( responseHeader.dataLength == 1 )
+		responseHeader.dataLength = 0;
+
+	if(writeNbytes(client->connectionSocket, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS)>0)
+	{
+		if(responseHeader.dataLength)
+			writeNbytes(client->connectionSocket, evtList, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
+	}
+	else
+		dputs("[sectionsd] Fehler/Timeout bei write");
+
+	delete[] evtList;
+	return;
 }
 
 static void commandAllEventsChannelName(struct connectionData *client, char *data, const unsigned dataLength)
@@ -1555,7 +1605,7 @@ static void commandAllEventsChannelID(struct connectionData *client, char *data,
     return;
   unsigned serviceUniqueKey=*(unsigned *)data;
   dprintf("Request of all events for 0x%x\n", serviceUniqueKey);
-  sendAllEvents(client, serviceUniqueKey);
+  sendAllEvents(client, serviceUniqueKey, false);
   return;
 }
 
@@ -1581,7 +1631,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.118 2002/04/17 15:58:24 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.119 2002/04/18 10:43:56 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -2345,34 +2395,31 @@ static void commandActualEPGchannelName(struct connectionData *client, char *dat
 
 static void sendEventList(struct connectionData *client, const unsigned char serviceTyp1, const unsigned char serviceTyp2=0, int sendServiceName=1)
 {
-  char *evtList=new char[128* 1024]; // 256kb..? should be enough and dataLength is unsigned short
-  if(!evtList) {
-    fprintf(stderr, "low on memory!\n");
-    return;
-  }
-  *evtList=0;
-  if(dmxEIT.pause()) {
-    delete[] evtList;
-    return;
-  }
-  if(dmxSDT.pause()) {
-    delete[] evtList;
-    dmxEIT.unpause();
-    return;
-  }
-  char *liste=evtList;
-  lockServices();
-  lockEvents();
-/*
-//  for(MySIservicesOrderServiceName::iterator s=mySIservicesOrderServiceName.begin(); s!=mySIservicesOrderServiceName.end(); s++)
-  for(MySIservicesOrderUniqueKey::iterator s=mySIservicesOrderUniqueKey.begin(); s!=mySIservicesOrderUniqueKey.end(); s++)
-    if(s->second->serviceTyp==serviceTyp1 || (serviceTyp2 && s->second->serviceTyp==serviceTyp2)) {
-      SItime zeit(0, 0);
-//      dprintf("Servicename: '%s', Servicetyp: 0x%hhx, uniqueKey: %08x\n", s->second->serviceName.c_str(), s->second->serviceTyp, s->first);
-      const SIevent &evt=findActualSIeventForServiceUniqueKey(s->first, zeit);
-*/
+	char *evtList=new char[128* 1024]; // 256kb..? should be enough and dataLength is unsigned short
+	if(!evtList)
+	{
+		fprintf(stderr, "low on memory!\n");
+		return;
+	}
 
-// aufgeraumt und umgestellt - sollte VIEEL schneller sein!
+	*evtList=0;
+	if(dmxEIT.pause())
+	{
+		delete[] evtList;
+		return;
+	}
+
+	if(dmxSDT.pause())
+	{
+		delete[] evtList;
+		dmxEIT.unpause();
+		return;
+	}
+
+	char *liste=evtList;
+	lockServices();
+	lockEvents();
+
     unsigned    uniqueNow= 0;
     unsigned    uniqueOld= 0;
     bool        found_already= false;
@@ -2426,8 +2473,6 @@ static void sendEventList(struct connectionData *client, const unsigned char ser
                     } // if sendServiceName
                     else
                     {
-                        *((unsigned *)liste)=uniqueNow;
-                        liste+=4;
                         *((unsigned long long *)liste)=e->first->uniqueKey();
                         liste+=8;
                         *((unsigned *)liste)=t->startzeit;
@@ -2461,24 +2506,28 @@ static void sendEventList(struct connectionData *client, const unsigned char ser
         *liste=0;
         liste++;
     }
+
     unlockEvents();
     unlockServices();
+
     dmxSDT.unpause();
     dmxEIT.unpause();
-  struct sectionsd::msgResponseHeader msgResponse;
-  msgResponse.dataLength=liste-evtList;
-  dprintf("sectionsd: all channels - response-size: 0x%x\n", liste-evtList);
 
-//  msgResponse.dataLength=strlen(evtList)+1;
-  if(msgResponse.dataLength==1)
-    msgResponse.dataLength=0;
-  if(writeNbytes(client->connectionSocket, (const char *)&msgResponse, sizeof(msgResponse), TIMEOUT_CONNECTIONS)>0) {
-    if(msgResponse.dataLength)
-      writeNbytes(client->connectionSocket, evtList, msgResponse.dataLength, TIMEOUT_CONNECTIONS);
-  }
-  else
-    dputs("[sectionsd] Fehler/Timeout bei write");
-  delete[] evtList;
+	struct sectionsd::msgResponseHeader msgResponse;
+	msgResponse.dataLength = liste- evtList;
+	dprintf("[sectionsd] all channels - response-size: 0x%x\n", msgResponse.dataLength);
+
+	if ( msgResponse.dataLength == 1 )
+		msgResponse.dataLength = 0;
+
+	if(writeNbytes(client->connectionSocket, (const char *)&msgResponse, sizeof(msgResponse), TIMEOUT_CONNECTIONS)>0)
+	{
+		if(msgResponse.dataLength)
+			writeNbytes(client->connectionSocket, evtList, msgResponse.dataLength, TIMEOUT_CONNECTIONS);
+	}
+	else
+		dputs("[sectionsd] Fehler/Timeout bei write");
+	delete[] evtList;
 }
 
 // Sendet ein short EPG, unlocked die events, unpaused dmxEIT
@@ -3755,7 +3804,7 @@ int main(int argc, char **argv)
 	int rc;
 	struct sockaddr_in serverAddr;
 
-	printf("$Id: sectionsd.cpp,v 1.118 2002/04/17 15:58:24 field Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.119 2002/04/18 10:43:56 field Exp $\n");
 	try
 	{
 
