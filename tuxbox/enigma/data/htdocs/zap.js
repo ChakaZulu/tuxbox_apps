@@ -2,15 +2,17 @@ function channelChange()
 {
 	var channel = "";
 	var j = document.channelselector.channel.selectedIndex;
+	currentChannel = j;
 	if (j >= 0)
 	{
 		channel = document.channelselector.channel.options[j].value;
-		switchChannel(channel);
+		switchChannel(channel, currentBouquet, currentChannel);
 	}
 }
 function bouquetChange()
 {
 	var i = document.channelselector.bouquet.selectedIndex;
+	currentBouquet = i;
 	loadChannels(i);
 }
 function epg()
@@ -31,11 +33,11 @@ function mepg()
 	var bouquet = document.channelselector.bouquet.options[i].value;
 	openMultiEPG(bouquet);
 }
-function loadChannels(bouquet)
+function loadChannels(bouquet, channel)
 {
 	deleteChannelOptions();
 	addChannelOptions(bouquet);
-	document.channelselector.channel.selectedIndex = -1;
+	document.channelselector.channel.selectedIndex = channel;
 }
 function addChannelOptions(bouquet)
 {
@@ -51,12 +53,12 @@ function deleteChannelOptions()
 	for (var i = j - 1 ; i >= 0; i--)
 		document.channelselector.channel.options[i] = null;
 }
-function loadBouquets()
+function loadBouquets(bouquet)
 {
 	for (var i = 0; i < bouquets.length; i++)
 	{
 		newOption = new Option(bouquets[i], bouquetRefs[i], false, true);
 		document.channelselector.bouquet.options[i] = newOption;
 	}
-	document.channelselector.bouquet.selectedIndex = 0;
+	document.channelselector.bouquet.selectedIndex = bouquet;
 }

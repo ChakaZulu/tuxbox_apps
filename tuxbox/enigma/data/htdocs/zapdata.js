@@ -6,12 +6,14 @@ var bouquets = new Array(
 var bouquetRefs = new Array(
 		#BOUQUETREFS#
 		);
+var currentBouquet = #CURRENTBOUQUET#;
+var currentChannel = #CURRENTCHANNEL#;
 			
 function init()
 {	
 	#CHANNELS#
 	#CHANNELREFS#
-					
-	loadBouquets();
-	loadChannels(0);
+
+	loadBouquets(currentBouquet);
+	loadChannels(currentBouquet, currentChannel);
 }

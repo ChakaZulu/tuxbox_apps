@@ -63,6 +63,9 @@ using namespace std;
 
 #define WEBXFACEVERSION "0.9"
 
+static int currentBouquet = 0;
+static int currentChannel = -1;
+
 extern eString getRight(const eString&, char); // implemented in timer.cpp
 extern eString getLeft(const eString&, char);  // implemented in timer.cpp
 extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
@@ -1494,12 +1497,12 @@ static eString getZapContent2(eString mode, eString path)
 		eDebug("exited");
 		printf("[GETZAPCONTENT2] collected bouquetrefs: %s", bouquetrefs.c_str());
 		printf("[GETZAPCONTENT2] collected bouquets: %s", bouquets.c_str());
-		
+
 		// go thru all bouquets to get the channels
 		int i = 0;
 		while (tmp)
 		{
-			result1 = ""; result2 ="";
+			result1 = ""; result2 =""; tpath = "";
 			tmp >> tpath;
 			if (tpath)
 			{
@@ -1525,7 +1528,7 @@ static eString getZapContent2(eString mode, eString path)
 				channels += ");";
 				channelrefs += result1.left(result1.length() - 2);
 				channelrefs += ");";
-				
+
 				eDebug("entered");
 				iface->leaveDirectory(current_service);
 				eDebug("exited");
@@ -1534,13 +1537,15 @@ static eString getZapContent2(eString mode, eString path)
 		}
 		printf("[GETZAPCONTENT2] collected channelrefs: %s", channelrefs.c_str());
 		printf("[GETZAPCONTENT2] collected channels: %s", channels.c_str());
-		
+
 		eString tmpFile = readFile(HTDOCS_DIR + "zapdata.js");
 		tmpFile.strReplace("#BOUQUETS#", bouquets);
 		tmpFile.strReplace("#BOUQUETREFS#", bouquetrefs);
 		tmpFile.strReplace("#CHANNELS#", channels);
 		tmpFile.strReplace("#CHANNELREFS#", channelrefs);
-		
+		tmpFile.strReplace("#CURRENTBOUQUET#", eString().sprintf("%d", currentBouquet));
+		tmpFile.strReplace("#CURRENTCHANNEL#", eString().sprintf("%d", currentChannel));
+
 		result = readFile(TEMPLATE_DIR + "zap.tmp");
 		result.strReplace("#ZAPDATA#", tmpFile);
 	}
@@ -2808,6 +2813,9 @@ static eString save_userBouquets(eString request, eString dirpath, eString opt, 
 	return "+ok";
 }
 
+#if 0
+is this still used???
+
 #define NAVIGATOR_PATH "/cgi-bin/navigator"
 
 class eNavigatorListDirectory: public Object
@@ -2899,7 +2907,7 @@ static eString navigator(eString request, eString dirpath, eString opt, eHTTPCon
 		eZapMain::getInstance()->playService(current_service, eZapMain::psSetMode|eZapMain::psDontAdd);
 //		iface->play(current_service);
 		res += "+ok, hear the music..";
-	} 
+	}
 	else
 	{
 		eNavigatorListDirectory navlist(res, spath + ";" + current + ";", *iface);
@@ -2916,6 +2924,7 @@ static eString navigator(eString request, eString dirpath, eString opt, eHTTPCon
 
 	return res;
 }
+#endif
 
 static eString getCurrentServiceRef(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
@@ -2933,6 +2942,12 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 
 	eString mode = opt["mode"];
 	eString spath = opt["path"];
+	eString curBouquet = opt["curBouquet"];
+	eString curChannel = opt["curChannel"];
+	if (opts.find("curBouquet") != eString::npos)
+		currentBouquet = atoi(curBouquet.c_str());
+	if (opts.find("curChannel") != eString::npos)
+		currentChannel = atoi(curChannel.c_str());
 
 	eDebug("[ENIGMA_DYN] web_root: mode = %s, spath = %s", mode.c_str(), spath.c_str());
 
@@ -3434,7 +3449,7 @@ static eString EPGDetails(eString request, eString dirpath, eString opts, eHTTPC
 void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 {
 	dyn_resolver->addDyn("GET", "/", web_root, true);
-	dyn_resolver->addDyn("GET", NAVIGATOR_PATH, navigator, true);
+//	dyn_resolver->addDyn("GET", NAVIGATOR_PATH, navigator, true);
 
 	dyn_resolver->addDyn("GET", "/cgi-bin/ls", listDirectory);
 	dyn_resolver->addDyn("GET", "/cgi-bin/mkdir", makeDirectory, true);
