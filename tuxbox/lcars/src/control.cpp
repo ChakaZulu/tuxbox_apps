@@ -1183,12 +1183,25 @@ void control::loadModes()
 	std::ifstream inFile;
 	std::vector<std::string> line;
 
-	inFile.open(CONFIGDIR "/lcars/modes.lcars");
+
+	int fd;
+	std::string path;
+	path = CONFIGDIR "/lcars/modes.lcars";
+	if ((fd = open(path.c_str(), O_RDONLY)) < 0)
+	{
+		path = DATADIR "/lcars/modes.lcars";
+		if ((fd = open(path.c_str(), O_RDONLY)) < 0)
+		{
+			perror("modes.lcars");
+			exit(1);
+		}
+	}
+	close(fd);
+	inFile.open(path.c_str());
 	if (!inFile)
 	{
-		inFile.open(DATADIR "/lcars/modes.lcars");
-		if (!inFile)
-			perror("modes.lcars");
+		perror("modes.lcars");
+		exit(0);
 	}
 
 	std::string tmp_string;
@@ -1288,12 +1301,24 @@ void control::loadSubs()
 	std::vector<std::string> line;
 	subs.clear();
 
-	inFile.open(CONFIGDIR "/lcars/subs.lcars");
+	int fd;
+	std::string path;
+	path = CONFIGDIR "/lcars/subs.lcars";
+	if ((fd = open(path.c_str(), O_RDONLY)) < 0)
+	{
+		path = DATADIR "/lcars/subs.lcars";
+		if ((fd = open(path.c_str(), O_RDONLY)) < 0)
+		{
+			perror("subs.lcars");
+			exit(1);
+		}
+	}
+	close(fd);
+	inFile.open(path.c_str());
 	if (!inFile)
 	{
-		inFile.open(DATADIR "/lcars/subs.lcars");
-		if (!inFile)
-			perror("subs.lcars");
+		perror("subs.lcars");
+		exit(1);
 	}
 
 	std::string tmp_string;
@@ -1419,12 +1444,24 @@ void control::loadMenus()
 	std::ifstream inFile;
 	std::vector<std::string> line;
 
-	inFile.open(CONFIGDIR "/lcars/menus.lcars");
+	int fd;
+	std::string path;
+	path = CONFIGDIR "/lcars/menus.lcars";
+	if ((fd = open(path.c_str(), O_RDONLY)) < 0)
+	{
+		path = DATADIR "/lcars/menus.lcars";
+		if ((fd = open(path.c_str(), O_RDONLY)) < 0)
+		{
+			perror("menus.lcars");
+			exit(1);
+		}
+	}
+	close(fd);
+	inFile.open(path.c_str());
 	if (!inFile)
 	{
-		inFile.open(DATADIR "/lcars/menus.lcars");
-		if (!inFile)
-			perror("menus.lcars");
+		perror("menus.lcars");
+		exit(1);
 	}
 
 	std::string tmp_string;
