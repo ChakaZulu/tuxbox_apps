@@ -528,14 +528,17 @@ void CTimerList::paintItem(int pos)
 		}
 		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+160,ypos+fheight, (real_width-160)/2-5, convertTimerRepeat2String(timer.eventRepeat), color, fheight, true); // UTF-8
 
-		char srepeatcount[25] = {0};
-		if (timer.repeatCount == 0)
+		if (timer.eventRepeat != CTimerd::TIMERREPEAT_ONCE)
+		{
+			char srepeatcount[25] = {0};
+			if (timer.repeatCount == 0)
 // Unicode 8734 (hex: 221E) not available in all fonts
 // 			sprintf(srepeatcount,"∞");
- 			sprintf(srepeatcount,"00");
- 		else
-			sprintf(srepeatcount,"%ux",timer.repeatCount);
-		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+160+(real_width-300)/2,ypos+fheight, (real_width-160)/2-5, srepeatcount, color, fheight, true); // UTF-8
+				sprintf(srepeatcount,"00");
+			else
+				sprintf(srepeatcount,"%ux",timer.repeatCount);
+			g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+160+(real_width-300)/2,ypos+fheight, (real_width-160)/2-5, srepeatcount, color, fheight, true); // UTF-8
+		}
 		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+160+(real_width-160)/2,ypos+fheight, (real_width-160)/2-5, convertTimerType2String(timer.eventType), color, fheight, true); // UTF-8
 		std::string zAddData("");
 		switch(timer.eventType)
