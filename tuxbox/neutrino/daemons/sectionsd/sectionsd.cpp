@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.11 2001/07/15 11:58:20 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.12 2001/07/15 15:05:09 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.12  2001/07/15 15:05:09  fnbrd
+//  Speichert jetzt alle Events die bis zu 24h in der Zukunft liegen.
+//
 //  Revision 1.11  2001/07/15 11:58:20  fnbrd
 //  Vergangene Zeit in Prozent beim EPG
 //
@@ -90,13 +93,41 @@
 #include "SIsections.hpp"
 
 #define PORT_NUMBER 1600
+// Wieviele Stunden EPG gecached werden sollen
+#define HOURS_TO_CACHE 24
 
 static SIevents events; // die Menge mit den epg's
 static SIservices services; // die Menge mit den services (aus der sdt)
 
 static pthread_mutex_t eventsLock=PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge events geschrieben und gelesen wird
 static pthread_mutex_t servicesLock=PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge services geschrieben und gelesen wird
+static pthread_mutex_t dmxEITlock=PTHREAD_MUTEX_INITIALIZER;
+static int dmxEITfd=0;
 
+static int stopDMXeit(void)
+{
+  pthread_mutex_lock(&dmxEITlock);
+  if (ioctl (dmxEITfd, DMX_STOP, 0) == -1) {
+    close(dmxEITfd);
+    dmxEITfd=0;
+    perror ("DMX_STOP");
+    return -1;
+  }
+  return 0;
+}
+
+static int startDMXeit(void)
+{
+  if (ioctl (dmxEITfd, DMX_START, 0) == -1) {
+    close(dmxEITfd);
+    dmxEITfd=0;
+    perror ("DMX_START");
+    pthread_mutex_unlock(&dmxEITlock);
+    return -1;
+  }
+  pthread_mutex_unlock(&dmxEITlock);
+  return 0;
+}
 
 static const SIevent &findActualSIeventForServiceName(const char *serviceName)
 {
@@ -196,7 +227,12 @@ static void commandActualEPGchannelName(struct connectionData *client, char *dat
   data[dataLength-1]=0; // to be sure it has an trailing 0
   printf("Request of actual EPG for '%s'\n", data);
 
+  if(stopDMXeit())
+    return;
+  pthread_mutex_lock(&eventsLock);
+  pthread_mutex_lock(&servicesLock);
   const SIevent &evt=findActualSIeventForServiceName(data);
+  pthread_mutex_unlock(&servicesLock);
 
 //  readSection(request.Name, &pResultData, &nResultDataSize);
 
@@ -228,6 +264,8 @@ static void commandActualEPGchannelName(struct connectionData *client, char *dat
   }
   else
     printf("actual EPG not found!\n");
+  pthread_mutex_unlock(&eventsLock);
+  startDMXeit();
 
   // response
   struct msgSectionsdResponseHeader pmResponse;
@@ -248,6 +286,10 @@ static void commandEventListTV(struct connectionData *client, char *data, unsign
     return;
   }
   *evtList=0;
+  if(stopDMXeit())
+    return;
+  pthread_mutex_lock(&servicesLock);
+  pthread_mutex_lock(&eventsLock);
   for(SIservices::iterator s=services.begin(); s!=services.end(); s++)
     if(s->serviceTyp==0x01) { // TV
       const SIevent &evt=findActualSIeventForService(*s);
@@ -258,6 +300,9 @@ static void commandEventListTV(struct connectionData *client, char *data, unsign
         strcat(evtList, evt.name.c_str());
       strcat(evtList, "\n");
     } // if TV
+  pthread_mutex_unlock(&eventsLock);
+  pthread_mutex_unlock(&servicesLock);
+  startDMXeit();
   struct msgSectionsdResponseHeader msgResponse;
   msgResponse.dataLength=strlen(evtList)+1;
   if(msgResponse.dataLength==1)
@@ -488,6 +533,7 @@ int fd;
 struct dmxSctFilterParams flt;
 const unsigned timeoutInSeconds=31;
 char *buf;
+int timeset=0;
 
   printf("time-thread started.\n");
   memset (&flt.filter, 0, sizeof (struct dmxFilter));
@@ -518,12 +564,13 @@ char *buf;
 	close(fd);
 	return 0;
       }
+      timeset=1;
       time_t t=time(NULL);
       printf("local time: %s", ctime(&t));
     }
   }
   }
-  if (ioctl (fd, DMX_STOP, &flt) == -1) {
+  if (ioctl (fd, DMX_STOP, 0) == -1) {
     close(fd);
     perror ("DMX_STOP");
     return 0;
@@ -587,15 +634,19 @@ char *buf;
         perror("cannot set date");
 	break;
       }
+      timeset=1;
       time_t t=time(NULL);
       printf("local time: %s", ctime(&t));
     }
     delete[] buf;
     close(fd);
     fd=0;
-    rc=60*30;
+    if(timeset)
+      rc=60*30;  // sleep 30 minutes
+    else
+      rc=60;  // sleep 1 minute
     while(rc)
-      rc=sleep(rc); // sleep 30 minutes
+      rc=sleep(rc);
   } // for
   printf("time-thread ended\n");
   return 0;
@@ -607,7 +658,6 @@ char *buf;
 //*********************************************************************
 static void *eitThread(void *)
 {
-int fd;
 struct SI_section_header header;
 struct dmxSctFilterParams flt;
 char *buf;
@@ -616,45 +666,59 @@ const unsigned timeoutInSeconds=2;
   printf("eit-thread started.\n");
   memset (&flt.filter, 0, sizeof (struct dmxFilter));
   flt.pid              = 0x12;
-  flt.filter.filter[0] = 0x4e; // present/following
-  flt.filter.mask[0]   = 0xfe; // -> 4e und 4f
+//  flt.filter.filter[0] = 0x4e; // present/following
+//  flt.filter.mask[0]   = 0xfe; // -> 4e und 4f
+  flt.filter.filter[0] = 0x50; // schedule
+  flt.filter.mask[0]   = 0xf0; // -> 5x
   flt.timeout          = 0;
   flt.flags            = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
 
-  if ((fd = open("/dev/ost/demux0", O_RDWR)) == -1) {
+  if ((dmxEITfd = open("/dev/ost/demux0", O_RDWR)) == -1) {
     perror ("/dev/ost/demux0");
     return 0;
 //    return 1;
   }
-  if (ioctl (fd, DMX_SET_FILTER, &flt) == -1) {
-    close(fd);
+  if (ioctl (dmxEITfd, DMX_SET_BUFFER_SIZE, 512*1024) == -1) {
+    close(dmxEITfd);
+    dmxEITfd=0;
+    perror ("DMX_SET_BUFFER_SIZE");
+    return 0;
+//    return 2;
+  }
+  if (ioctl (dmxEITfd, DMX_SET_FILTER, &flt) == -1) {
+    close(dmxEITfd);
+    dmxEITfd=0;
     perror ("DMX_SET_FILTER");
     return 0;
 //    return 2;
   }
   for(;;) {
-    int rc=readNbytes(fd, (char *)&header, sizeof(header), timeoutInSeconds);
+    pthread_mutex_lock(&dmxEITlock);
+    int rc=readNbytes(dmxEITfd, (char *)&header, sizeof(header), timeoutInSeconds);
     if(!rc) {
 //      close(fd);
 //      return 0; // timeout -> kein EPG
       continue; // timeout -> kein EPG
     }
     else if(rc<0) {
-      close(fd);
+      close(dmxEITfd);
+      dmxEITfd=0;
 //      perror ("read header");
       break;
 //      return 3;
     }
     buf=new char[sizeof(header)+header.section_length-5];
     if(!buf) {
-      close(fd);
+      close(dmxEITfd);
+      dmxEITfd=0;
       fprintf(stderr, "Not enough memory!\n");
       break;
 //      return 4;
     }
     // Den Header kopieren
     memcpy(buf, &header, sizeof(header));
-    rc=readNbytes(fd, buf+sizeof(header), header.section_length-5, timeoutInSeconds);
+    rc=readNbytes(dmxEITfd, buf+sizeof(header), header.section_length-5, timeoutInSeconds);
+    pthread_mutex_unlock(&dmxEITlock);
     if(!rc) {
 //      close(fd);
       delete[] buf;
@@ -662,7 +726,8 @@ const unsigned timeoutInSeconds=2;
 //      return 0; // timeout -> kein EPG
     }
     else if(rc<0) {
-      close(fd);
+      close(dmxEITfd);
+      dmxEITfd=0;
 //      perror ("read section");
       delete[] buf;
       break;
@@ -673,9 +738,17 @@ const unsigned timeoutInSeconds=2;
       SIsectionEIT eit(SIsection(sizeof(header)+header.section_length-5, buf));
 //      SIsection section(sizeof(header)+header.section_length-5, buf);
 //      SIsectionEIT eit(section);
-      pthread_mutex_lock(&eventsLock);
-      events.insert(eit.events().begin(), eit.events().end());
-      pthread_mutex_unlock(&eventsLock);
+      time_t zeit=time(NULL);
+      // Nich alle Events speichern
+      for(SIevents::iterator e=eit.events().begin(); e!=eit.events().end(); e++)
+        if(e->times.size()>0) {
+	  if(e->times.begin()->startzeit<zeit+(long)HOURS_TO_CACHE*60L*60L) {
+            pthread_mutex_lock(&eventsLock);
+            events.insert(*e);
+            pthread_mutex_unlock(&eventsLock);
+          }
+	}
+//      events.insert(eit.events().begin(), eit.events().end());
     } // if
     else
       delete[] buf;
@@ -697,6 +770,8 @@ static void *houseKeepingThread(void *)
     while(rc)
       rc=sleep(rc); // sleep 60 seconds
     printf("housekeeping.\n");
+    if(stopDMXeit())
+      return 0;
     pthread_mutex_lock(&eventsLock);
     unsigned anzEventsAlt=events.size();
     events.mergeAndRemoveTimeShiftedEvents(services);
@@ -711,6 +786,8 @@ static void *houseKeepingThread(void *)
     pthread_mutex_lock(&servicesLock);
     printf("Number of services: %u\n", services.size());
     pthread_mutex_unlock(&servicesLock);
+    if(startDMXeit())
+      return 0;
     // Speicher-Info abfragen
     struct mallinfo speicherinfo=mallinfo();
     printf("total size of memory occupied by chunks handed out by malloc: %d\n", speicherinfo.uordblks);
@@ -725,7 +802,7 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.11 2001/07/15 11:58:20 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.12 2001/07/15 15:05:09 fnbrd Exp $\n");
 
   tzset(); // TZ auswerten
 
@@ -800,4 +877,3 @@ struct sockaddr_in serverAddr;
   printf("sectionsd ended\n");
   return 0;
 }
-
