@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.35 2001/07/24 20:26:46 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.36 2001/07/25 11:42:15 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.36  2001/07/25 11:42:15  fnbrd
+//  Added support for 'unique keys' in services and events.
+//
 //  Revision 1.35  2001/07/24 20:26:46  fnbrd
 //  Fixed some nasty bugs introduced with (too) quickly implemented writeNBytes().
 //
@@ -164,8 +167,6 @@
 #include "SIevents.hpp"
 #include "SIsections.hpp"
 
-#define PORT_NUMBER 1600
-
 // Zeit die fuer die scheduled eit's benutzt wird (in Sekunden)
 #define TIME_EIT_SCHEDULED 50
 
@@ -221,26 +222,26 @@ static const SIevent nullEvt; // Null-Event
 typedef boost::shared_ptr<class SIevent>
   SIeventPtr;
 
-// Mengen mit SIeventPtr sortiert nach Event-ID
-typedef std::map<unsigned short, SIeventPtr, std::less<unsigned short> > MySIeventsOrderEventID;
-static MySIeventsOrderEventID mySIeventsOrderEventID;
+// Mengen mit SIeventPtr sortiert nach UniqueKey
+typedef std::map<unsigned long long, SIeventPtr, std::less<unsigned long long> > MySIeventsOrderUniqueKey;
+static MySIeventsOrderUniqueKey mySIeventsOrderUniqueKey;
 
 // Mengen mit SIeventPtr sortiert nach Event-ID fuer NVOD-Events (mehrere Zeiten)
-static MySIeventsOrderEventID mySIeventsNVODorderEventID;
+static MySIeventsOrderUniqueKey mySIeventsNVODorderUniqueKey;
 
-struct OrderServiceIDFirstStartTimeEventID
+struct OrderServiceUniqueKeyFirstStartTimeEventID
 {
   bool operator()(const SIeventPtr &p1, const SIeventPtr &p2) {
     return
-      p1->serviceID == p2->serviceID ?
+      SIservice::makeUniqueKey(p1->originalNetworkID, p1->serviceID) == SIservice::makeUniqueKey(p2->originalNetworkID, p2->serviceID) ?
       (p1->times.begin()->startzeit == p2->times.begin()->startzeit ? p1->eventID < p2->eventID : p1->times.begin()->startzeit < p2->times.begin()->startzeit )
       :
-      (p1->serviceID < p2->serviceID );
+      (SIservice::makeUniqueKey(p1->originalNetworkID, p1->serviceID) < SIservice::makeUniqueKey(p2->originalNetworkID, p2->serviceID) );
   }
 };
 
-typedef std::map<const SIeventPtr, SIeventPtr, OrderServiceIDFirstStartTimeEventID > MySIeventsOrderServiceIDFirstStartTimeEventID;
-static MySIeventsOrderServiceIDFirstStartTimeEventID mySIeventsOrderServiceIDFirstStartTimeEventID;
+typedef std::map<const SIeventPtr, SIeventPtr, OrderServiceUniqueKeyFirstStartTimeEventID > MySIeventsOrderServiceUniqueKeyFirstStartTimeEventID;
+static MySIeventsOrderServiceUniqueKeyFirstStartTimeEventID mySIeventsOrderServiceUniqueKeyFirstStartTimeEventID;
 
 struct OrderFirstEndTimeServiceIDEventID
 {
@@ -257,21 +258,21 @@ typedef std::map<const SIeventPtr, SIeventPtr, OrderFirstEndTimeServiceIDEventID
 static MySIeventsOrderFirstEndTimeServiceIDEventID mySIeventsOrderFirstEndTimeServiceIDEventID;
 
 // Hier landen alle Service-Ids von Meta-Events inkl. der zugehoerigen Event-ID (nvod)
-// d.h. key ist Service-Id des Meta-Events und Data ist die Event-ID
-typedef std::map<unsigned short, unsigned short, std::less<unsigned short> > MySIeventIDsMetaOrderServiceID;
-static MySIeventIDsMetaOrderServiceID mySIeventIDsMetaOrderServiceID;
+// d.h. key ist der Unique Service-Key des Meta-Events und Data ist der unique Event-Key
+typedef std::map<unsigned, unsigned long long, std::less<unsigned> > MySIeventUniqueKeysMetaOrderServiceUniqueKey;
+static MySIeventUniqueKeysMetaOrderServiceUniqueKey mySIeventUniqueKeysMetaOrderServiceUniqueKey;
 
 // Loescht ein Event aus allen Mengen
-static void deleteEvent(const unsigned short eventID)
+static void deleteEvent(const unsigned long long uniqueKey)
 {
-  MySIeventsOrderEventID::iterator e=mySIeventsOrderEventID.find(eventID);
-  if(e!=mySIeventsOrderEventID.end()) {
+  MySIeventsOrderUniqueKey::iterator e=mySIeventsOrderUniqueKey.find(uniqueKey);
+  if(e!=mySIeventsOrderUniqueKey.end()) {
     if(e->second->times.size()) {
       mySIeventsOrderFirstEndTimeServiceIDEventID.erase(e->second);
-      mySIeventsOrderServiceIDFirstStartTimeEventID.erase(e->second);
+      mySIeventsOrderServiceUniqueKeyFirstStartTimeEventID.erase(e->second);
     }
-    mySIeventsOrderEventID.erase(eventID);
-    mySIeventsNVODorderEventID.erase(eventID);
+    mySIeventsOrderUniqueKey.erase(uniqueKey);
+    mySIeventsNVODorderUniqueKey.erase(uniqueKey);
   }
 /*
   for(MySIeventIDsMetaOrderServiceID::iterator i=mySIeventIDsMetaOrderServiceID.begin(); i!=mySIeventIDsMetaOrderServiceID.end(); i++)
@@ -286,24 +287,24 @@ static void addEvent(const SIevent &e)
   SIeventPtr s(new SIevent(e));
   // Damit in den nicht nach Event-ID sortierten Mengen
   // Mehrere Events mit gleicher ID sind, diese vorher loeschen
-  deleteEvent(s->eventID);
+  deleteEvent(s->uniqueKey());
   // Pruefen ob es ein Meta-Event ist
-  MySIeventIDsMetaOrderServiceID::iterator i=mySIeventIDsMetaOrderServiceID.find(s->serviceID);
-  if(i!=mySIeventIDsMetaOrderServiceID.end()) {
+  MySIeventUniqueKeysMetaOrderServiceUniqueKey::iterator i=mySIeventUniqueKeysMetaOrderServiceUniqueKey.find(SIservice::makeUniqueKey(s->originalNetworkID, s->serviceID));
+  if(i!=mySIeventUniqueKeysMetaOrderServiceUniqueKey.end()) {
     // ist ein MetaEvent, d.h. mit Zeiten fuer NVOD-Event
     if(s->times.size()) {
       // D.h. wir fuegen die Zeiten in das richtige Event ein
-      MySIeventsOrderEventID::iterator ie=mySIeventsOrderEventID.find(i->second);
-      if(ie!=mySIeventsOrderEventID.end()) {
+      MySIeventsOrderUniqueKey::iterator ie=mySIeventsOrderUniqueKey.find(i->second);
+      if(ie!=mySIeventsOrderUniqueKey.end()) {
         // Event vorhanden
         // Falls das Event in den beiden Mengen mit Zeiten nicht vorhanden
         // ist, dieses dort einfuegen
-	      MySIeventsOrderServiceIDFirstStartTimeEventID::iterator i2=mySIeventsOrderServiceIDFirstStartTimeEventID.find(ie->second);
-	      if(i2==mySIeventsOrderServiceIDFirstStartTimeEventID.end()) {
-	        // nicht vorhanden -> einfuegen
-          mySIeventsOrderServiceIDFirstStartTimeEventID.insert(std::make_pair(ie->second, ie->second));
+        MySIeventsOrderServiceUniqueKeyFirstStartTimeEventID::iterator i2=mySIeventsOrderServiceUniqueKeyFirstStartTimeEventID.find(ie->second);
+	if(i2==mySIeventsOrderServiceUniqueKeyFirstStartTimeEventID.end()) {
+	  // nicht vorhanden -> einfuegen
+          mySIeventsOrderServiceUniqueKeyFirstStartTimeEventID.insert(std::make_pair(ie->second, ie->second));
           mySIeventsOrderFirstEndTimeServiceIDEventID.insert(std::make_pair(ie->second, ie->second));
-   	    }
+   	}
         // Und die Zeiten im Event updaten
         ie->second->times.insert(s->times.begin(), s->times.end());
       }
@@ -311,10 +312,10 @@ static void addEvent(const SIevent &e)
   }
   else {
     // normales Event
-    mySIeventsOrderEventID.insert(std::make_pair(s->eventID, s));
+    mySIeventsOrderUniqueKey.insert(std::make_pair(s->uniqueKey(), s));
     if(s->times.size()) {
       // diese beiden Mengen enthalten nur Events mit Zeiten
-      mySIeventsOrderServiceIDFirstStartTimeEventID.insert(std::make_pair(s, s));
+      mySIeventsOrderServiceUniqueKeyFirstStartTimeEventID.insert(std::make_pair(s, s));
       mySIeventsOrderFirstEndTimeServiceIDEventID.insert(std::make_pair(s, s));
     }
   }
@@ -323,19 +324,19 @@ static void addEvent(const SIevent &e)
 static void addNVODevent(const SIevent &e)
 {
   SIeventPtr s(new SIevent(e));
-  MySIeventsOrderEventID::iterator e2=mySIeventsOrderEventID.find(s->eventID);
-  if(e2!=mySIeventsOrderEventID.end()) {
+  MySIeventsOrderUniqueKey::iterator e2=mySIeventsOrderUniqueKey.find(s->uniqueKey());
+  if(e2!=mySIeventsOrderUniqueKey.end()) {
     // bisher gespeicherte Zeiten retten
     s->times.insert(e2->second->times.begin(), e2->second->times.end());
   }
   // Damit in den nicht nach Event-ID sortierten Mengen
   // Mehrere Events mit gleicher ID sind, diese vorher loeschen
-  deleteEvent(s->eventID);
-  mySIeventsOrderEventID.insert(std::make_pair(s->eventID, s));
-  mySIeventsNVODorderEventID.insert(std::make_pair(s->eventID, s));
+  deleteEvent(s->uniqueKey());
+  mySIeventsOrderUniqueKey.insert(std::make_pair(s->uniqueKey(), s));
+  mySIeventsNVODorderUniqueKey.insert(std::make_pair(s->uniqueKey(), s));
   if(s->times.size()) {
     // diese beiden Mengen enthalten nur Events mit Zeiten
-    mySIeventsOrderServiceIDFirstStartTimeEventID.insert(std::make_pair(s, s));
+    mySIeventsOrderServiceUniqueKeyFirstStartTimeEventID.insert(std::make_pair(s, s));
     mySIeventsOrderFirstEndTimeServiceIDEventID.insert(std::make_pair(s, s));
   }
 }
@@ -346,7 +347,7 @@ static void removeOldEvents(const long seconds)
   time_t zeit=time(NULL);
   for(MySIeventsOrderFirstEndTimeServiceIDEventID::iterator e=mySIeventsOrderFirstEndTimeServiceIDEventID.begin(); e!=mySIeventsOrderFirstEndTimeServiceIDEventID.end(); e++)
     if(e->first->times.begin()->startzeit+(long)e->first->times.begin()->dauer<zeit-seconds)
-      deleteEvent(e->first->eventID);
+      deleteEvent(e->first->uniqueKey());
     else
       break; // sortiert nach Endzeit, daher weiteres Suchen unnoetig
   return;
@@ -358,13 +359,13 @@ static void removeOldEvents(const long seconds)
 typedef boost::shared_ptr<class SIservice>
   SIservicePtr;
 
-// Key ist unsigned short (Sevice-ID), data ist ein SIservicePtr
-typedef std::map<unsigned short, SIservicePtr, std::less<unsigned short> > MySIservicesOrderServiceID;
-static MySIservicesOrderServiceID mySIservicesOrderServiceID;
+// Key ist unsigned  (Unique Service-ID), data ist ein SIservicePtr
+typedef std::map<unsigned, SIservicePtr, std::less<unsigned> > MySIservicesOrderUniqueKey;
+static MySIservicesOrderUniqueKey mySIservicesOrderUniqueKey;
 
-// Key ist unsigned short (Sevice-ID), data ist ein SIservicePtr
-typedef std::map<unsigned short, SIservicePtr, std::less<unsigned short> > MySIservicesNVODorderServiceID;
-static MySIservicesNVODorderServiceID mySIservicesNVODorderServiceID;
+// Key ist unsigned (Unique Sevice-ID), data ist ein SIservicePtr
+typedef std::map<unsigned, SIservicePtr, std::less<unsigned> > MySIservicesNVODorderUniqueKey;
+static MySIservicesNVODorderUniqueKey mySIservicesNVODorderUniqueKey;
 
 // Hier sollte man die hash-funktion fuer strings der stl benutzen
 // Muss mal schauen ob es die auch fuer 'ignore_case' gibt
@@ -400,9 +401,9 @@ static void addService(const SIservice &s)
   servicename[sizeof(servicename)-1]=0;
   removeControlCodes(servicename);
   sptr->serviceName=servicename;
-  mySIservicesOrderServiceID.insert(std::make_pair(sptr->serviceID, sptr));
+  mySIservicesOrderUniqueKey.insert(std::make_pair(sptr->uniqueKey(), sptr));
   if(sptr->nvods.size())
-    mySIservicesNVODorderServiceID.insert(std::make_pair(sptr->serviceID, sptr));
+    mySIservicesNVODorderUniqueKey.insert(std::make_pair(sptr->uniqueKey(), sptr));
   mySIservicesOrderServiceName.insert(std::make_pair(sptr, sptr));
 }
 
@@ -503,6 +504,11 @@ size_t j;
 // class DMX<>
 //------------------------------------------------------------
 
+// zum stoppen/starten des DMX waehrend eines TCP/IP-Requests
+// sollte man evtl. semaphoren nehmen, da momentan
+// durch das lock waehrend eines requests praktisch nur eine
+// Anfrage bearbeitet werden kann da andere requests auf
+// das lock warten
 class DMX {
   public:
     DMX(unsigned char p, unsigned char f1, unsigned char m1, unsigned char f2, unsigned char m2, unsigned short bufferSizeInKB, int nCRC=0) {
@@ -671,6 +677,7 @@ static DMX dmxSDT(0x11, 0x42, 0xff, 0x42, 0xff, 256);
 
 // Liefert die ServiceID zu einem Namen
 // 0 bei Misserfolg
+/*
 static unsigned short findServiceIDforServiceName(const char *serviceName)
 {
   SIservicePtr s(new SIservice((unsigned short)0));
@@ -682,14 +689,27 @@ static unsigned short findServiceIDforServiceName(const char *serviceName)
   dputs("Service not found");
   return 0;
 }
+*/
 
-static const SIevent &findActualSIeventForServiceID(const unsigned serviceID, SItime& zeit)
+static unsigned findServiceUniqueKeyforServiceName(const char *serviceName)
+{
+  SIservicePtr s(new SIservice((unsigned short)0, (unsigned short)0));
+  s->serviceName=serviceName;
+  dprintf("Search for Service '%s'\n", serviceName);
+  MySIservicesOrderServiceName::iterator si=mySIservicesOrderServiceName.find(s);
+  if(si!=mySIservicesOrderServiceName.end())
+    return si->first->uniqueKey();
+  dputs("Service not found");
+  return 0;
+}
+
+static const SIevent &findActualSIeventForServiceUniqueKey(const unsigned serviceUniqueKey, SItime& zeit)
 {
   time_t azeit=time(NULL);
   // Event (serviceid) suchen
   int serviceIDfound=0;
-  for(MySIeventsOrderServiceIDFirstStartTimeEventID::iterator e=mySIeventsOrderServiceIDFirstStartTimeEventID.begin(); e!=mySIeventsOrderServiceIDFirstStartTimeEventID.end(); e++)
-    if(e->first->serviceID==serviceID) {
+  for(MySIeventsOrderServiceUniqueKeyFirstStartTimeEventID::iterator e=mySIeventsOrderServiceUniqueKeyFirstStartTimeEventID.begin(); e!=mySIeventsOrderServiceUniqueKeyFirstStartTimeEventID.end(); e++)
+    if(SIservice::makeUniqueKey(e->first->originalNetworkID, e->first->serviceID)==serviceUniqueKey) {
       serviceIDfound=1;
       for(SItimes::iterator t=e->first->times.begin(); t!=e->first->times.end(); t++)
         if(t->startzeit<=azeit && azeit<=(long)(t->startzeit+t->dauer)) {
@@ -704,16 +724,16 @@ static const SIevent &findActualSIeventForServiceID(const unsigned serviceID, SI
 
 static const SIevent &findActualSIeventForServiceName(const char *serviceName, SItime& zeit)
 {
-  unsigned short serviceID=findServiceIDforServiceName(serviceName);
-  if(serviceID)
-    return findActualSIeventForServiceID(serviceID, zeit);
+  unsigned serviceUniqueKey=findServiceUniqueKeyforServiceName(serviceName);
+  if(serviceUniqueKey)
+    return findActualSIeventForServiceUniqueKey(serviceUniqueKey, zeit);
   return nullEvt;
 }
 
-static const SIevent &findNextSIevent(const unsigned short eventID, SItime &zeit)
+static const SIevent &findNextSIevent(const unsigned long long uniqueKey, SItime &zeit)
 {
-  MySIeventsOrderEventID::iterator eFirst=mySIeventsOrderEventID.find(eventID);
-  if(eFirst!=mySIeventsOrderEventID.end()) {
+  MySIeventsOrderUniqueKey::iterator eFirst=mySIeventsOrderUniqueKey.find(uniqueKey);
+  if(eFirst!=mySIeventsOrderUniqueKey.end()) {
     if(eFirst->second->times.size()>1) {
       // Wir haben ein NVOD-Event
       // d.h. wir suchen die aktuelle Zeit und nehmen die naechste davon, falls existent
@@ -727,10 +747,10 @@ static const SIevent &findNextSIevent(const unsigned short eventID, SItime &zeit
           break; // ganz normal naechstes Event suchen
         }
     }
-    MySIeventsOrderServiceIDFirstStartTimeEventID::iterator eNext=mySIeventsOrderServiceIDFirstStartTimeEventID.find(eFirst->second);
+    MySIeventsOrderServiceUniqueKeyFirstStartTimeEventID::iterator eNext=mySIeventsOrderServiceUniqueKeyFirstStartTimeEventID.find(eFirst->second);
     eNext++;
-    if(eNext!=mySIeventsOrderServiceIDFirstStartTimeEventID.end()) {
-      if(eNext->second->serviceID==eFirst->second->serviceID) {
+    if(eNext!=mySIeventsOrderServiceUniqueKeyFirstStartTimeEventID.end()) {
+      if(SIservice::makeUniqueKey(eNext->second->originalNetworkID, eNext->second->serviceID)==SIservice::makeUniqueKey(eFirst->second->originalNetworkID, eFirst->second->serviceID)) {
         zeit=*(eNext->second->times.begin());
         return *(eNext->second);
       }
@@ -820,7 +840,7 @@ static void commandAllEventsChannelName(struct connectionData *client, char *dat
   data[dataLength-1]=0; // to be sure it has an trailing 0
   dprintf("Request of all events for '%s'\n", data);
   lockServices();
-  unsigned short serviceID=findServiceIDforServiceName(data);
+  unsigned serviceUniqueKey=findServiceUniqueKeyforServiceName(data);
   unlockServices();
   char *evtList=new char[65*1024]; // 65kb should be enough and dataLength is unsigned short
   if(!evtList) {
@@ -828,7 +848,7 @@ static void commandAllEventsChannelName(struct connectionData *client, char *dat
     return;
   }
   *evtList=0;
-  if(serviceID!=0) {
+  if(serviceUniqueKey!=0) {
     // service Found
     if(dmxEIT.pause()) {
       delete[] evtList;
@@ -836,8 +856,8 @@ static void commandAllEventsChannelName(struct connectionData *client, char *dat
     }
     lockEvents();
     int serviceIDfound=0;
-    for(MySIeventsOrderServiceIDFirstStartTimeEventID::iterator e=mySIeventsOrderServiceIDFirstStartTimeEventID.begin(); e!=mySIeventsOrderServiceIDFirstStartTimeEventID.end(); e++)
-      if(e->first->serviceID==serviceID) {
+    for(MySIeventsOrderServiceUniqueKeyFirstStartTimeEventID::iterator e=mySIeventsOrderServiceUniqueKeyFirstStartTimeEventID.begin(); e!=mySIeventsOrderServiceUniqueKeyFirstStartTimeEventID.end(); e++)
+      if(SIservice::makeUniqueKey(e->first->originalNetworkID, e->first->serviceID)==serviceUniqueKey) {
         serviceIDfound=1;
         char strZeit[50];
         struct tm *tmZeit;
@@ -874,13 +894,13 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
     return;
   dputs("Request of status information");
   lockEvents();
-  unsigned anzEvents=mySIeventsOrderEventID.size();
-  unsigned anzNVODevents=mySIeventsNVODorderEventID.size();
-  unsigned anzMetaServices=mySIeventIDsMetaOrderServiceID.size();
+  unsigned anzEvents=mySIeventsOrderUniqueKey.size();
+  unsigned anzNVODevents=mySIeventsNVODorderUniqueKey.size();
+  unsigned anzMetaServices=mySIeventUniqueKeysMetaOrderServiceUniqueKey.size();
   unlockEvents();
   lockServices();
-  unsigned anzServices=mySIservicesOrderServiceID.size();
-  unsigned anzNVODservices=mySIservicesNVODorderServiceID.size();
+  unsigned anzServices=mySIservicesOrderUniqueKey.size();
+  unsigned anzNVODservices=mySIservicesNVODorderUniqueKey.size();
 //  unsigned anzServices=services.size();
   unlockServices();
   struct mallinfo speicherinfo=mallinfo();
@@ -935,7 +955,7 @@ static void commandCurrentNextInfoChannelName(struct connectionData *client, cha
   if(evt.serviceID!=0) {//Found
     dprintf("current EPG found.\n");
     SItime zeitEvt2(zeitEvt1);
-    const SIevent &nextEvt=findNextSIevent(evt.eventID, zeitEvt2);
+    const SIevent &nextEvt=findNextSIevent(evt.uniqueKey(), zeitEvt2);
     if(nextEvt.serviceID!=0) {
       dprintf("next EPG found.\n");
       // Folgendes ist grauenvoll, habs aber einfach kopiert aus epgd
@@ -1064,7 +1084,16 @@ static void sendEventList(struct connectionData *client, const unsigned char ser
   for(MySIservicesOrderServiceName::iterator s=mySIservicesOrderServiceName.begin(); s!=mySIservicesOrderServiceName.end(); s++)
     if(s->first->serviceTyp==serviceTyp1 || (serviceTyp2 && s->first->serviceTyp==serviceTyp2)) {
       SItime zeit(0, 0);
-      const SIevent &evt=findActualSIeventForServiceID(s->first->serviceID, zeit);
+      const SIevent &evt=findActualSIeventForServiceUniqueKey(s->first->uniqueKey(), zeit);
+/*
+      if(evt.serviceID!=0) {
+        char id[100];
+        sprintf(id, "%llx ", evt.uniqueKey());
+        strcat(evtList, id);
+      }
+      else
+        strcat(evtList, "0 ");
+*/
       strcat(evtList, s->first->serviceName.c_str());
       strcat(evtList, "\n");
       if(evt.serviceID!=0)
@@ -1510,12 +1539,12 @@ const unsigned timeoutInSeconds=2;
         else {
           // pruefen ob nvod event
           lockServices();
-          MySIservicesNVODorderServiceID::iterator si=mySIservicesNVODorderServiceID.find(e->serviceID);
-          if(si!=mySIservicesNVODorderServiceID.end()) {
+          MySIservicesNVODorderUniqueKey::iterator si=mySIservicesNVODorderUniqueKey.find(SIservice::makeUniqueKey(e->originalNetworkID, e->serviceID));
+          if(si!=mySIservicesNVODorderUniqueKey.end()) {
             // Ist ein nvod-event
             lockEvents();
             for(SInvodReferences::iterator i=si->second->nvods.begin(); i!=si->second->nvods.end(); i++)
-              mySIeventIDsMetaOrderServiceID.insert(std::make_pair(i->serviceID, e->eventID));
+              mySIeventUniqueKeysMetaOrderServiceUniqueKey.insert(std::make_pair(i->uniqueKey(), e->uniqueKey()));
             unlockServices();
             addNVODevent(*e);
             unlockEvents();
@@ -1549,12 +1578,10 @@ static void *houseKeepingThread(void *)
     if(stopDMXsdt())
       return 0;
 */
-    if(debug) {
+    struct mallinfo speicherinfo1;
+    if(debug)
       // Speicher-Info abfragen
-      struct mallinfo speicherinfo=mallinfo();
-      dprintf("total size of memory occupied by chunks handed out by malloc: %d\n", speicherinfo.uordblks);
-      dprintf("total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %.2fMB)\n",speicherinfo.arena, speicherinfo.arena/1024, (float)speicherinfo.arena/(1024.*1024));
-    }
+      speicherinfo1=mallinfo();
     lockEvents();
 //    unsigned anzEventsAlt=events.size();
 /*
@@ -1564,20 +1591,23 @@ static void *houseKeepingThread(void *)
     if(events.size()!=anzEventsAlt)
       printf("Removed %d time-shifted events.\n", anzEventsAlt-events.size());
 */
-    unsigned anzEventsAlt=mySIeventsOrderEventID.size();
+    unsigned anzEventsAlt=mySIeventsOrderUniqueKey.size();
     removeOldEvents(oldEventsAre); // alte Events
-    if(mySIeventsOrderEventID.size()!=anzEventsAlt)
-      dprintf("Removed %d old events.\n", anzEventsAlt-mySIeventsOrderEventID.size());
-    dprintf("Number of sptr events (event-ID): %u\n", mySIeventsOrderEventID.size());
-    dprintf("Number of sptr events (service-id, start time, event-id): %u\n", mySIeventsOrderServiceIDFirstStartTimeEventID.size());
+    if(mySIeventsOrderUniqueKey.size()!=anzEventsAlt) {
+      dprintf("total size of memory occupied by chunks handed out by malloc: %d\n", speicherinfo1.uordblks);
+      dprintf("total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %.2fMB)\n",speicherinfo1.arena, speicherinfo1.arena/1024, (float)speicherinfo1.arena/(1024.*1024));
+      dprintf("Removed %d old events.\n", anzEventsAlt-mySIeventsOrderUniqueKey.size());
+    }
+    dprintf("Number of sptr events (event-ID): %u\n", mySIeventsOrderUniqueKey.size());
+    dprintf("Number of sptr events (service-id, start time, event-id): %u\n", mySIeventsOrderServiceUniqueKeyFirstStartTimeEventID.size());
     dprintf("Number of sptr events (end time, service-id, event-id): %u\n", mySIeventsOrderFirstEndTimeServiceIDEventID.size());
-    dprintf("Number of sptr nvod events (event-ID): %u\n", mySIeventsNVODorderEventID.size());
-    dprintf("Number of cached meta-services: %u\n", mySIeventIDsMetaOrderServiceID.size());
+    dprintf("Number of sptr nvod events (event-ID): %u\n", mySIeventsNVODorderUniqueKey.size());
+    dprintf("Number of cached meta-services: %u\n", mySIeventUniqueKeysMetaOrderServiceUniqueKey.size());
     unlockEvents();
     if(debug) {
       lockServices();
-      dprintf("Number of services: %u\n", mySIservicesOrderServiceID.size());
-      dprintf("Number of cached nvod-services: %u\n", mySIservicesNVODorderServiceID.size());
+      dprintf("Number of services: %u\n", mySIservicesOrderUniqueKey.size());
+      dprintf("Number of cached nvod-services: %u\n", mySIservicesNVODorderUniqueKey.size());
 //      dprintf("Number of services: %u\n", services.size());
       unlockServices();
     }
@@ -1608,7 +1638,7 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.35 2001/07/24 20:26:46 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.36 2001/07/25 11:42:15 fnbrd Exp $\n");
 
   if(argc!=1 && argc!=2) {
     printHelp();
@@ -1636,7 +1666,7 @@ struct sockaddr_in serverAddr;
   memset( &serverAddr, 0, sizeof(serverAddr) );
   serverAddr.sin_family = AF_INET;
   serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-  serverAddr.sin_port = htons(PORT_NUMBER);
+  serverAddr.sin_port = htons(SECTIONSD_PORT_NUMBER);
   if(bind(listenSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr) )) {
     perror("[sectionsd] bind");
     return 2;
