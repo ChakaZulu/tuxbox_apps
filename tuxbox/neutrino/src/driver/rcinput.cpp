@@ -667,6 +667,18 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 			case '9':
 				trkey = RC_9;
 				break;
+			case 'a':
+				trkey = KEY_A;
+				break;
+			case 'u':
+				trkey = KEY_U;
+				break;
+			case '/':
+				trkey = KEY_SLASH;
+				break;
+			case '\\':
+				trkey = KEY_BACKSLASH;
+				break;
 			default:
 				trkey = RC_nokey;
 			}
@@ -1225,6 +1237,24 @@ int CRCInput::getNumericValue(const unsigned int key)
 }
 
 /**************************************************************************
+*       getUnicodeValue - return unicode value of the key or -1
+*
+**************************************************************************/
+#define UNICODE_VALUE_SIZE 54
+static const int unicode_value[UNICODE_VALUE_SIZE] = {-1 , -1 , '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', -1 , -1 ,
+						      'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', -1 , -1 , 'A', 'S',
+						      'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', -1 /* FIXME */, -1 /* FIXME */, -1 , '\\', 'Z', 'X', 'C', 'V',
+						      'B', 'N', 'M', ',', '.', '/'};
+
+int CRCInput::getUnicodeValue(const unsigned int key)
+{
+	if (key < UNICODE_VALUE_SIZE)
+		return unicode_value[key];
+	else
+		return -1;
+}
+
+/**************************************************************************
 *       transforms the rc-key to std::string
 *
 **************************************************************************/
@@ -1408,43 +1438,9 @@ int CRCInput::translate(int code)
 	
 	return RC_nokey;
 #else /* OLD_RC_API */
-	switch (code)
-	{
-	case KEY_0:
-	case KEY_1:
-	case KEY_2:
-	case KEY_3:
-	case KEY_4:
-	case KEY_5:
-	case KEY_6:
-	case KEY_7:
-	case KEY_8:
-	case KEY_9:
-	case KEY_HOME:
-	case KEY_UP:
-	case KEY_PAGEUP:
-	case KEY_LEFT:
-	case KEY_RIGHT:
-	case KEY_DOWN:
-	case KEY_PAGEDOWN:
-	case KEY_MUTE:
-	case KEY_VOLUMEDOWN:
-	case KEY_VOLUMEUP:
-	case KEY_POWER:
-	case KEY_HELP:
-	case KEY_SETUP:
-	case KEY_OK:
-	case KEY_RED:
-	case KEY_GREEN:
-	case KEY_YELLOW:
-	case KEY_BLUE:
-	case KEY_TOPLEFT:
-	case KEY_TOPRIGHT:
-	case KEY_BOTTOMLEFT:
-	case KEY_BOTTOMRIGHT:
+	if ((code >= 0) && (code <= KEY_MAX))
 		return code;
-	default:
+	else
 		return RC_nokey;
-	}
 #endif /* OLD_RC_API */
 }

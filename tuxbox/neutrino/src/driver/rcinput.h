@@ -177,7 +177,8 @@ class CRCInput
 
 
 		static bool isNumeric(const unsigned int key);
-		static int  getNumericValue(const unsigned int key);
+		static int getNumericValue(const unsigned int key);
+		static int getUnicodeValue(const unsigned int key);
 
 		static std::string getKeyName(int);
 

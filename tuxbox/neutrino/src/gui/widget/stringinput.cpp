@@ -82,17 +82,20 @@ CStringInput::CStringInput(const char * const Name, char* Value, int Size,  stri
 	selected = 0;
 }
 
-void CStringInput::key0_9Pressed(const int numericvalue)
+void CStringInput::NormalKeyPressed(const unsigned int key)
 {
-	value[selected]=validchars[numericvalue];
-
-	if (selected < (size - 1))
+	if (CRCInput::isNumeric(key))
 	{
-		selected++;
-		paintChar(selected - 1);
+		value[selected] = validchars[CRCInput::getNumericValue(key)];
+
+		if (selected < (size - 1))
+		{
+			selected++;
+			paintChar(selected - 1);
+		}
+		
+		paintChar(selected);
 	}
-  
-	paintChar(selected);
 }
 
 void CStringInput::keyRedPressed()
@@ -206,9 +209,9 @@ int CStringInput::exec( CMenuTarget* parent, string )
 		{
 			keyRightPressed();
 		}
-		else if (CRCInput::isNumeric(msg))
+		else if (CRCInput::getUnicodeValue(msg) != -1)
 		{
-			key0_9Pressed(CRCInput::getNumericValue(msg));
+			NormalKeyPressed(msg);
 		}
 		else if (msg==CRCInput::RC_red)
 		{
@@ -390,23 +393,33 @@ CStringInputSMS::CStringInputSMS(const char * const Name, char* Value, int Size,
 }
 
 
-void CStringInputSMS::key0_9Pressed(const int numericvalue)
+void CStringInputSMS::NormalKeyPressed(const unsigned int key)
 {
-	if (last_digit != numericvalue)
+	if (CRCInput::isNumeric(key))
 	{
-		if ((last_digit != -1) &&	// there is a last key
-			(selected < (size- 1)))	// we can shift the cursor one field to the right
+		int numericvalue = CRCInput::getNumericValue(key);
+		if (last_digit != numericvalue)
 		{
-			selected++;
-			paintChar(selected - 1);
+			if ((last_digit != -1) &&	// there is a last key
+			    (selected < (size- 1)))	// we can shift the cursor one field to the right
+			{
+				selected++;
+				paintChar(selected - 1);
+			}
+			keyCounter = 0;
 		}
-		keyCounter = 0;
+		else
+			keyCounter = (keyCounter + 1) % arraySizes[numericvalue];
+		value[selected] = Chars[numericvalue][keyCounter];
+		last_digit = numericvalue;
+		paintChar(selected);
 	}
 	else
-		keyCounter = (keyCounter + 1) % arraySizes[numericvalue];
-	value[selected] = Chars[numericvalue][keyCounter];
-	paintChar(selected);
-	last_digit = numericvalue;
+	{
+		value[selected] = (char)CRCInput::getUnicodeValue(key);
+		keyRedPressed();   /* to lower, paintChar */
+		keyRightPressed(); /* last_digit = -1, move to next position */
+	}
 }
 
 void CStringInputSMS::keyRedPressed()		// switch between lower & uppercase
@@ -418,7 +431,7 @@ void CStringInputSMS::keyRedPressed()		// switch between lower & uppercase
 	paintChar(selected);
 }
 
-void CStringInputSMS::keyYellowPressed()		// switch between lower & uppercase
+void CStringInputSMS::keyYellowPressed()		// clear all
 {
 	last_digit = -1;
 	CStringInput::keyYellowPressed();
@@ -491,7 +504,7 @@ int CPINInput::exec( CMenuTarget* parent, string )
 		else if (CRCInput::isNumeric(msg))
 		{
 			int old_selected = selected;
-			key0_9Pressed(CRCInput::getNumericValue(msg));
+			NormalKeyPressed(msg);
 			if ( old_selected == ( size- 1 ) )
 				loop=false;
 		}

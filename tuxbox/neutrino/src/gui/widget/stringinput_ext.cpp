@@ -182,7 +182,7 @@ int CExtendedInput::exec( CMenuTarget* parent, string )
 				}
 			}
 		}
-		else if ( (CRCInput::isNumeric(msg)) || (msg == CRCInput::RC_red) || (msg == CRCInput::RC_green) || (msg == CRCInput::RC_blue) || (msg == CRCInput::RC_yellow)
+		else if ( (CRCInput::getUnicodeValue(msg) != -1) || (msg == CRCInput::RC_red) || (msg == CRCInput::RC_green) || (msg == CRCInput::RC_blue) || (msg == CRCInput::RC_yellow)
 					|| (msg == CRCInput::RC_up) || (msg == CRCInput::RC_down))
 		{
 			inputFields[selectedChar]->keyPressed(msg);
@@ -326,14 +326,14 @@ int CExtendedInput_Item_Char::getCharID( char ch )
 	return allowedChars.find(ch);
 }
 
-void CExtendedInput_Item_Char::keyPressed( int key )
+void CExtendedInput_Item_Char::keyPressed(const int key)
 {
-	if (CRCInput::isNumeric(key))
+	int value = CRCInput::getUnicodeValue(key);
+	if (value != -1)
 	{
-		char c = '0' + CRCInput::getNumericValue(key);
-		if (isAllowedChar(c))
+		if (isAllowedChar((char)value))
 		{
-			*data = c;
+			*data = (char)value;
 			g_RCInput->postMsg( CRCInput::RC_right, 0 );
 		}
 	}
