@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.297 2003/03/02 11:22:46 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.298 2003/03/02 22:05:16 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -688,18 +688,22 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 				break;
 		}
 
-                CZapitClient::responseGetSatelliteList msgResponseGetSatelliteList;
+		uint32_t   satnamelength;
+		char *     satname;
+		xmlNodePtr search       = xmlDocGetRootElement(scanInputParser)->xmlChildrenNode;
+		char *     frontendname = getFrontendName();
 
-                xmlNodePtr search       = xmlDocGetRootElement(scanInputParser)->xmlChildrenNode;
-                char *     frontendname = getFrontendName();
-
-                if (frontendname != NULL)
-		    while ((search = xmlGetNextOccurence(search, frontendname)) != NULL)
-                        {
-                                strncpy(msgResponseGetSatelliteList.satName, xmlGetAttribute(search, "name"), sizeof(msgResponseGetSatelliteList.satName));
-                                CBasicServer::send_data(connfd, &msgResponseGetSatelliteList, sizeof(msgResponseGetSatelliteList));
-                                search = search->xmlNextNode;
-                        }
+		if (frontendname != NULL)
+			while ((search = xmlGetNextOccurence(search, frontendname)) != NULL)
+			{
+				satname = xmlGetAttribute(search, "name");
+				satnamelength = strlen(satname);
+				CBasicServer::send_data(connfd, &satnamelength, sizeof(satnamelength));
+				CBasicServer::send_data(connfd, satname, satnamelength);
+				search = search->xmlNextNode;
+			}
+		satnamelength = SATNAMES_END_MARKER;
+		CBasicServer::send_data(connfd, &satnamelength, sizeof(satnamelength));
 		break;
 	}
 
@@ -1061,7 +1065,7 @@ void sendBouquets(int connfd, const bool emptyBouquetsToo)
 			}
 		}
 	}
-	msgBouquet.bouquet_nr = 0xFFFF; /* <- end marker */
+	msgBouquet.bouquet_nr = RESPONSE_GET_BOUQUETS_END_MARKER;
 	if (CBasicServer::send_data(connfd, &msgBouquet, sizeof(msgBouquet)) == false)
 	{
 		ERROR("could not send end marker");
@@ -1418,7 +1422,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.297 2003/03/02 11:22:46 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.298 2003/03/02 22:05:16 thegoodguy Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
