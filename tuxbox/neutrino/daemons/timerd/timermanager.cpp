@@ -24,6 +24,7 @@
 */
 
 #include "timermanager.h"
+#include "timerdclient.h"
 #include "debug.h"
 
 
@@ -83,6 +84,7 @@ CTimerEvent* CTimerManager::getNextEvent()
 int CTimerManager::addEvent(CTimerEvent* evt)
 {
 	eventID++;
+	evt->eventID = eventID;
 	events[eventID] = evt;
 	return eventID;
 }
@@ -98,6 +100,11 @@ void CTimerManager::removeEvent(int eventID)
 
 
 //------------------------------------------------------------
+
+CTimerEvent_Shutdown::CTimerEvent_Shutdown()
+{
+	eventType = CTimerdClient::TIMER_SHUTDOWN;
+}
 
 void CTimerEvent_Shutdown::fireEvent()
 {

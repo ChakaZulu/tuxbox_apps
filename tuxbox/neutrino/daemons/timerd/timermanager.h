@@ -38,8 +38,8 @@ class CTimerManager
 {
 	//singleton
 	private:
+		int					eventID;
 		CTimerManager();
-		int				eventID;
 		std::map<int, CTimerEvent*>	events;
 		CTimerEvent			*nextEvent();
 		pthread_t			thrTimer;
@@ -58,7 +58,8 @@ class CTimerManager
 class CTimerEvent
 {
 	public:
-		void*			eventData;
+		int				eventID;
+		int				eventType;
 		struct tm		alarmtime;
 
 		virtual void fireEvent(){};
@@ -67,6 +68,7 @@ class CTimerEvent
 class CTimerEvent_Shutdown : public CTimerEvent
 {
 	public:
+		CTimerEvent_Shutdown();
 		virtual void fireEvent();
 };
 
