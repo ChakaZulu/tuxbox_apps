@@ -38,6 +38,8 @@ function deleteMovie()
 
 function openEPG(xy)
 {
+	if (xy == undefined)
+		xy = "";
 	NewWindow('/getcurrentepg2?ref='+xy, 'EPG', screen.width, screen.height, 'yes');
 }
 

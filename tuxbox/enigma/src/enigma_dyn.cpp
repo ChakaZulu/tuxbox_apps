@@ -2920,13 +2920,13 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString,eString> opt=getRequestOptions(opts);
-	eString serviceRef = opt["ref"];
 
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (!sapi)
 		return "No EPG available";
 
-	if (opts.find("ref") == eString::npos)
+	eString serviceRef = opt["ref"];
+	if (!serviceRef)
 		ref = sapi->service;
 	else
 		ref = string2ref(serviceRef);
