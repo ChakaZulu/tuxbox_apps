@@ -331,8 +331,8 @@ class CScanSettings
 
 	void useDefaults(const delivery_system_t _delivery_system);
 
-	bool loadSettings(const std::string & fileName, const delivery_system_t _delivery_system);
-	bool saveSettings(const std::string & fileName);
+	bool loadSettings(const char * const fileName, const delivery_system_t _delivery_system);
+	bool saveSettings(const char * const fileName);
 };
 
 

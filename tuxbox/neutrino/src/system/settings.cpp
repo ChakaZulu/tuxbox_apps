@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.31 2003/09/27 11:48:37 thegoodguy Exp $
+        $Id: settings.cpp,v 1.32 2004/01/05 23:22:00 thegoodguy Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -175,12 +175,8 @@ void CScanSettings::useDefaults(const delivery_system_t _delivery_system)
 	}
 }
 
-bool CScanSettings::loadSettings(const std::string & fileName, const delivery_system_t _delivery_system)
+bool CScanSettings::loadSettings(const char * const fileName, const delivery_system_t _delivery_system)
 {
-	int satCount = 0;
-	int i = 0;
-	char tmp[20] = "";
-	
 	useDefaults(_delivery_system);
 
 	if(!configfile.loadConfig(fileName))
@@ -197,11 +193,12 @@ bool CScanSettings::loadSettings(const std::string & fileName, const delivery_sy
 	diseqcRepeat = configfile.getInt32("diseqcRepeat", diseqcRepeat);
 	bouquetMode = (CZapitClient::bouquetMode) configfile.getInt32("bouquetMode" , bouquetMode);
 	strcpy(satNameNoDiseqc, configfile.getString("satNameNoDiseqc", satNameNoDiseqc).c_str());
-	satCount = configfile.getInt32("satCount", MAX_SATELLITES);
 
 	if (diseqcMode != NO_DISEQC)
 	{
-		satCount = configfile.getInt32("satCount", 0);
+		char tmp[20];
+		int i;
+		int satCount = configfile.getInt32("satCount", 0);
 		for (i = 0; i < satCount; i++)
 		{
 			sprintf((char*)&tmp, "SatName%d", i);
@@ -219,21 +216,20 @@ bool CScanSettings::loadSettings(const std::string & fileName, const delivery_sy
 	return true;
 }
 
-bool CScanSettings::saveSettings(const std::string & fileName)
+bool CScanSettings::saveSettings(const char * const fileName)
 {
-	int satCount = 0;
-	char tmp[20] = "";
-	int i = 0;
-	
 	configfile.setInt32("delivery_system", delivery_system);
 	configfile.setInt32( "diseqcMode", diseqcMode );
 	configfile.setInt32( "diseqcRepeat", diseqcRepeat );
 	configfile.setInt32( "bouquetMode", bouquetMode );
 	configfile.setString( "satNameNoDiseqc", satNameNoDiseqc );
 	
-	if (diseqcMode != NO_DISEQC)
+	if (diseqcMode != NO_DISEQC)	
 	{
-		satCount = 0;
+		char tmp[20];
+		int i;
+		int satCount = 0;
+
 		for (i = 0; i < MAX_SATELLITES; i++)
 			if (satName[i][0] != 0)
 				satCount++;
