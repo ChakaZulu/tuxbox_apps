@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.31 2003/02/05 13:06:43 thegoodguy Exp $
+	$Id: webapi.cpp,v 1.32 2003/02/21 19:23:49 dirch Exp $
 
 	License: GPL
 
@@ -241,34 +241,31 @@ int mode;
 		if(!request->Authenticate())
 				return false;
 
-		if( request->ParameterList["1"] == "volumemute")
+		if( request->ParameterList["1"].compare("volumemute") == 0)
 		{
 			bool mute = Parent->Controld->getMute();
 			Parent->Controld->setMute( !mute );
-			dprintf("mute\n");
 		}
-		else if( request->ParameterList["1"] == "volumeplus")
+		else if( request->ParameterList["1"].compare("volumeplus") == 0)
 		{
 			char vol = Parent->Controld->getVolume();
-			vol+=5;
+			vol+=10;
 			if (vol>100)
 				vol=100;
 			Parent->Controld->setVolume(vol);
-			dprintf("Volume plus: %d\n",vol);
 		}
-		else if( request->ParameterList["1"] == "volumeminus")
+		else if( request->ParameterList["1"].compare("volumeminus") == 0)
 		{
 			char vol = Parent->Controld->getVolume();
-			if (vol>0)
-				vol-=5;
+			if (vol>=10)
+				vol-=10;
 			Parent->Controld->setVolume(vol);
-			dprintf("Volume minus: %d\n",vol);
 		}
-		else if( request->ParameterList["1"] == "standby")
+		else if( request->ParameterList["1"].compare("standby") == 0)
 		{
 			Parent->EventServer->sendEvent(NeutrinoMessages::STANDBY_TOGGLE, CEventServer::INITID_HTTPD);
 		}
-		else if(request->ParameterList["1"] == "tvmode")				// switch to tv mode
+		else if( request->ParameterList["1"].compare("tvmode") == 0)	// switch to tv mode
 		{
 			mode = NeutrinoMessages::mode_tv;
 			Parent->EventServer->sendEvent(NeutrinoMessages::CHANGEMODE, CEventServer::INITID_HTTPD, (void *)&mode,sizeof(int));
@@ -277,7 +274,7 @@ int mode;
 			request->Send302("channellist.dbox2#akt");
 			return true;
 		}
-		else if(request->ParameterList["1"] == "radiomode")				// switch to radio mode
+		else if(request->ParameterList["1"].compare("radiomode") == 0)	// switch to radio mode
 		{
 			if(!request->Authenticate())
 				return false;
@@ -320,7 +317,6 @@ bool CWebAPI::EPG(CWebserverRequest* request)
 		if(request->ParameterList["1"] == "eventlist")				// s.a.
 		{
 			request->SendPlainHeader("text/html");
-			dprintf("service id: %u\n",Parent->Zapit->getCurrentServiceID());
 			ShowEventList( request, Parent->Zapit->getCurrentServiceID() );
 			return true;
 		}

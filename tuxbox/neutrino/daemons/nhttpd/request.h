@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: request.h,v 1.22 2003/01/15 00:43:16 pumuckel Exp $
+        $Id: request.h,v 1.23 2003/02/21 19:23:49 dirch Exp $
 
         License: GPL
 
@@ -82,9 +82,9 @@ public:
 	bool SocketWrite( char const * text);
 	bool SocketWriteLn( char const * text);
 	bool SocketWriteData( char const * data, long length );
-	bool SocketWrite(string text){return SocketWrite( text.c_str());}
-	bool SocketWriteLn(string text){return SocketWriteLn( text.c_str());}
-	bool SendFile(string path,string filename);
+	bool SocketWrite(const string text){return SocketWrite( text.c_str());}
+	bool SocketWriteLn(const string text){return SocketWriteLn( text.c_str());}
+	bool SendFile(const string path,const string filename);
 
 	void SendHTMLFooter();
 	void SendHTMLHeader(string Titel);
@@ -95,8 +95,11 @@ public:
 
 	bool Authenticate();
 
-	bool ParseFile(string filename,CStringList params);
-	string ParseLine(string line,CStringList params);
+	long ParseBuffer(char *file_buffer, long file_length, char *out_buffer, long out_buffer_size,CStringList &params);
+	bool ParseFile(const string filename, CStringList &params);
+
+//	bool ParseFile2(const string filename, const CStringList params);
+//	string ParseLine(const string line,const CStringList params);
 
 	int Method;
 	int HttpStatus;

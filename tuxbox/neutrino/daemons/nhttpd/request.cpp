@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.36 2003/01/15 00:43:30 pumuckel Exp $
+	$Id: request.cpp,v 1.37 2003/02/21 19:23:49 dirch Exp $
 
 	License: GPL
 
@@ -657,7 +657,7 @@ string ctype;
 
 //-------------------------------------------------------------------------
 
-bool CWebserverRequest::SendFile(string path,string filename)
+bool CWebserverRequest::SendFile(const string path,const string filename)
 {
 	
 	if( (tmpint = OpenFile(path, filename) ) != -1 )		
@@ -743,12 +743,13 @@ int CWebserverRequest::OpenFile(string path, string filename)
 
 //-------------------------------------------------------------------------
 
-bool CWebserverRequest::ParseFile(string filename,CStringList params)		// replace all parameters if file
+bool CWebserverRequest::ParseFile(const string filename,CStringList &params)
 {
-	FILE * fd;
-	char zeile[1024];
-	if(RequestCanceled)
-		return false;
+char *file_buffer, *out_buffer;
+long file_length= 0,out_buffer_size = 0;
+int out_len = 0;
+FILE * fd;
+
 	tmpstring = GetFileName("/",filename);
 	if(tmpstring.length() > 0)
 	{
@@ -758,40 +759,66 @@ bool CWebserverRequest::ParseFile(string filename,CStringList params)		// replac
 			return false;
 		}
 
-		while(!feof(fd))
-		{
-			if(fgets(zeile,sizeof(zeile),fd))
-			{
-				SocketWrite(ParseLine(zeile,params));
-			}
-		};
-		fclose(fd);
-		return true;
-	}
-	else
-		return false;
-}
-//-------------------------------------------------------------------------
+		// get filesize
+		fseek(fd, 0, SEEK_END);
+		file_length = ftell(fd);
+		rewind(fd);
 
-string CWebserverRequest::ParseLine(string line,CStringList params)		// replaces %%xx%% with string in params["xx"]
-{					
-	int a = 0,e = 0,anfang = 0, ende = 0;
-	if((a = line.find_first_of('%')) >= 0)
-	{
-		if(line[a] == '%')
-		{
-			anfang = a;
-			string rest = line.substr(a+2,line.length() - (a+2));
-			if((e = rest.find_first_of('%')) > 0)
-				if(rest[e] == '%')
-				{
-					ende = a + 2 + e + 2;					
-					return line.substr(0,anfang) + ((params[rest.substr(0,e)].length() > 0)?params[rest.substr(0,e)]:"param '"+rest.substr(0,e)+"' not found") + line.substr(ende, line.length() - ende);
-				}
-		}
+		file_buffer = new char[file_length];		// allocate buffer for file
+
+		out_buffer_size = file_length + 2048;		
+		out_buffer = new char[out_buffer_size];		// allocate output buffer
+		
+		fread(file_buffer, file_length, 1, fd);		// read file
+
+		if((out_len = ParseBuffer(file_buffer, file_length, out_buffer, out_buffer_size, params)) > 0)
+			SocketWriteData(out_buffer,out_len);
+		
+		fclose(fd);
+
+		delete[] out_buffer;
+		delete[] file_buffer;
 	}
-	return line;
+	return true;
 }
+
+
+//-------------------------------------------------------------------------
+long CWebserverRequest::ParseBuffer(char *file_buffer, long file_length, char *out_buffer, long out_buffer_size, CStringList &params)
+{
+long pos = 0, outpos = 0, endpos = 0;
+string parameter = "";
+
+	while(pos < file_length && outpos < out_buffer_size)
+	{
+		if(file_buffer[pos] == '%' && file_buffer[pos+1] == '%')	// begin of parameter
+		{
+			endpos = pos + 2;		// skip start seperators
+			parameter = "";			
+			while((endpos < (file_length -2)) && !((file_buffer[endpos] == '%') && (file_buffer[endpos+1] == '%')))  
+			{	// search for end of parameter
+				parameter += file_buffer[endpos++];
+			}
+			if(params[parameter].length() > 0)
+			{	// if parameter found in param array
+				strcpy(&out_buffer[outpos],params[parameter].c_str());
+				outpos += params[parameter].length();
+			}
+			else
+			{
+				strcpy(&out_buffer[outpos],"%%NOT_FOUND%%");
+				outpos += 13;
+			}
+			pos = endpos + 2;	// skip end seperators
+		}
+		else
+			out_buffer[outpos++] = file_buffer[pos++];		
+	}
+	out_buffer[outpos] = 0;
+
+	return outpos;
+}
+
 //-------------------------------------------------------------------------
 // Decode URLEncoded string
 void CWebserverRequest::URLDecode(string &encodedString) 

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.16 2003/01/09 23:26:46 dirch Exp $
+	$Id: controlapi.cpp,v 1.17 2003/02/21 19:23:49 dirch Exp $
 
 	License: GPL
 
@@ -387,29 +387,28 @@ bool CControlAPI::VolumeCGI(CWebserverRequest *request)
 	else
 	if (request->ParameterList.size() == 1)
 	{
-		if(request->ParameterList["mute"] != "")
+		if(request->ParameterList["1"].compare("mute") == 0)
 		{
 			Parent->Controld->setMute(true);
 			request->SendOk();					// muten
 			return true;
 		}
 		else
-		if(request->ParameterList["unmute"] != "")
+		if(request->ParameterList["1"].compare("unmute") == 0)
 		{
 			Parent->Controld->setMute(false);
 			request->SendOk();					// unmuten
 			return true;
 		}
 		else
-		if(request->ParameterList["status"] != "")
+		if(request->ParameterList["1"].compare("status") == 0)
 		{
 			request->SocketWrite( (char *) (Parent->Controld->getMute()?"1":"0") );	//  mute
 			return true;
 		}
 		else
 		{	//set volume
-			char vol = atol( request->ParameterList[0].c_str() );
-			request->SocketWrite((char*) request->ParameterList[0].c_str() );
+			char vol = atol( request->ParameterList["1"].c_str() );
 			Parent->Controld->setVolume(vol);
 			request->SendOk();
 			return true;

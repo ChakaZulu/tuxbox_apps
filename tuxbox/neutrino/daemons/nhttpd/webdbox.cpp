@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.45 2003/01/04 23:26:46 dirch Exp $
+	$Id: webdbox.cpp,v 1.46 2003/02/21 19:23:49 dirch Exp $
 
 	License: GPL
 
@@ -65,12 +65,18 @@ void CWebDbox::ZapTo(string target)
 	t_channel_id channel_id = atoi(target.c_str());
 	if(channel_id == Zapit->getCurrentServiceID())
 	{
-		dprintf("Kanal ist aktuell\n");
+//		printf("Kanal ist aktuell\n");
 		return;
 	}
-	Zapit->zapTo_serviceID(channel_id);
-	Sectionsd->setServiceChanged(channel_id,false);
-
+	unsigned int status = Zapit->zapTo_serviceID(channel_id);
+	if(status != CZapitClient::ZAP_INVALID_PARAM)
+	{
+		if(status == CZapitClient::ZAP_IS_NVOD)
+		{
+			Zapit->zaptoNvodSubService(1);
+		}
+		Sectionsd->setServiceChanged(channel_id,false);
+	}
 }
 //-------------------------------------------------------------------------
 
