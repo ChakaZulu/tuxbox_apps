@@ -1259,7 +1259,7 @@ void CAudioPlayerGui::updateTimes(const bool force)
 		}
 		if((updatePlayed || updateTotal) && m_time_total!=0)
 		{
-			CLCD::getInstance()->showAudioProgress((int)(100.0 * m_time_played / m_time_total));
+			CLCD::getInstance()->showAudioProgress((int)(100.0 * m_time_played / m_time_total), CNeutrinoApp::getInstance()->isMuted());
 		}
 	}
 }
@@ -1270,15 +1270,15 @@ void CAudioPlayerGui::paintLCD()
 	{
 	case CAudioPlayerGui::STOP:
 		CLCD::getInstance()->showAudioPlayMode(CLCD::AUDIO_MODE_STOP);
-	   CLCD::getInstance()->showAudioProgress(0);
+	   CLCD::getInstance()->showAudioProgress(0, CNeutrinoApp::getInstance()->isMuted());
 		break;
 	case CAudioPlayerGui::PLAY:
 		CLCD::getInstance()->showAudioPlayMode(CLCD::AUDIO_MODE_PLAY);
 		CLCD::getInstance()->showAudioTrack(curr_audiofile.Artist, curr_audiofile.Title, curr_audiofile.Album);
 		if(m_time_total!=0)
-			CLCD::getInstance()->showAudioProgress((int)(100.0 * m_time_played / m_time_total));
+			CLCD::getInstance()->showAudioProgress((int)(100.0 * m_time_played / m_time_total), CNeutrinoApp::getInstance()->isMuted());
 		else
-			CLCD::getInstance()->showAudioProgress(0);
+			CLCD::getInstance()->showAudioProgress(0, CNeutrinoApp::getInstance()->isMuted());
 		break;
 	case CAudioPlayerGui::PAUSE:
 		CLCD::getInstance()->showAudioPlayMode(CLCD::AUDIO_MODE_PAUSE);
