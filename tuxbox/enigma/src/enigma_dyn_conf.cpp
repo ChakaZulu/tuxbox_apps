@@ -47,41 +47,45 @@ using namespace std;
 eString getConfigSwapFile(void)
 {
 	eString result;
-	result = readFile(TEMPLATE_DIR + "configSwapFile.tmp");
 	eString th1, th2, th3, th4, th5;
 	eString td1, td2, td3, td4, td5;
 
 	int swapfile = 0;
 	eString procswaps = readFile("/proc/swaps");
-	std::stringstream tmp;
-	tmp.str(procswaps);
-	tmp >> th1 >> th2 >> th3 >> th4 >> th5 >> td1 >> td2 >> td3 >> td4 >> td5;
-	if (!td1)
+	if (procswaps)
 	{
-		th1 = "&nbsp;"; th2 = th3 = th4 = th5 = "&nbsp;";
-		td1 = "none"; td2 = td3 = td4 = td5 = "&nbsp;";
+		result = readFile(TEMPLATE_DIR + "configSwapFile.tmp");
+		std::stringstream tmp;
+		tmp.str(procswaps);
+		tmp >> th1 >> th2 >> th3 >> th4 >> th5 >> td1 >> td2 >> td3 >> td4 >> td5;
+		
+		result.strReplace("#TH1#", th1);
+		result.strReplace("#TH2#", th2);
+		result.strReplace("#TH3#", th3);
+		result.strReplace("#TH4#", th4);
+		result.strReplace("#TH5#", th5);
+		result.strReplace("#TD1#", td1);
+		result.strReplace("#TD2#", td2);
+		result.strReplace("#TD3#", td3);
+		result.strReplace("#TD4#", td4);
+		result.strReplace("#TD5#", td5);
 	}
+	else
+		result = "No swap file active.";
+	
+	result += readFile(TEMPLATE_DIR + "configSwapFileMenu.tmp");
 	eConfig::getInstance()->getKey("/extras/swapfile", swapfile);
-	char *swapfilename=0;
+	char *swapfilename = 0;
 	eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename);
 	result.strReplace("#SWAP#", (swapfile == 1) ? "checked" : "");
-	eString rpl="";
-	if ( swapfilename )
+	eString rpl;
+	if (swapfilename)
 	{
-		rpl=swapfilename;
+		rpl = swapfilename;
 		free(swapfilename);
 	}
 	result.strReplace("#SWAPFILE#", rpl);
-	result.strReplace("#TH1#", th1);
-	result.strReplace("#TH2#", th2);
-	result.strReplace("#TH3#", th3);
-	result.strReplace("#TH4#", th4);
-	result.strReplace("#TH5#", th5);
-	result.strReplace("#TD1#", td1);
-	result.strReplace("#TD2#", td2);
-	result.strReplace("#TD3#", td3);
-	result.strReplace("#TD4#", td4);
-	result.strReplace("#TD5#", td5);
+	
 	return result;
 }
 
@@ -210,7 +214,6 @@ eString setConfigSettings(eString request, eString dirpath, eString opts, eHTTPC
 	int oldac = 0;
 	eConfig::getInstance()->getKey("/extras/hdparm-m", oldac);
 
-//	eConfig::getInstance()->setKey("/extras/fastshutdown", (fastshutdown == "on" ? 1 : 0));
 	eConfig::getInstance()->setKey("/elitedvb/network/samba", (samba == "on" ? 1 : 0));
 	
 	int webLock1 = 0;

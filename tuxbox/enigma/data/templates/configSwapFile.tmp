@@ -1,4 +1,4 @@
-<table border=1 cellspacing=0 cellpadding=5>
+<table border="1" cellspacing="0" cellpadding="5">
 <thead>
 <th>#TH1#</th>
 <th>#TH2#</th>
@@ -16,16 +16,3 @@
 </tr>
 </tbody>
 </table>
-<form name="swapfileconfig">
-	<table border=0 cellspacing=5 cellpadding=0>
-		<tr>
-			<td><input type="checkbox" name="swap" value="on" #SWAP#></td>
-			<td>Use Swap File:</td>
-			<td><input style="color: #000000" name="swapfile" type="text" size="50" maxlength="50" value="#SWAPFILE#"></td>
-		</tr>
-	</table>
-	<br>
-	<input type="button" style="width:100px; height:22px; color:#000000;" value="Configure" onClick="javascript:configSwapFile()">
-</form>
-<br><br>
-Please note that this version does not automatically create the swap file. You have to create it manually before you can assign it.
