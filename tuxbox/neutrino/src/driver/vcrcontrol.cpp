@@ -302,7 +302,7 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command,unsigned onidsi
 		for (unsigned int i= 0; i< g_RemoteControl->current_PIDs.APIDs.size(); i++)
 		{
 			sprintf(tmp, "%u",  g_RemoteControl->current_PIDs.APIDs[i].pid );
-			extMessage +="            <audio pid=\"" + string(tmp) + "\" name=\"" + string(g_RemoteControl->current_PIDs.APIDs[i].desc)  + "\">\n";
+			extMessage +="            <audio pid=\"" + string(tmp) + "\" name=\"" + string(g_RemoteControl->current_PIDs.APIDs[i].desc)  + "\"/>\n";
 		}
 		extMessage +="        </audiopids>\n";
 		extMessage +="    </record>\n";
