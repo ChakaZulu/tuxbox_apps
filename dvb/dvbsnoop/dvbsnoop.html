@@ -12,7 +12,7 @@
 	 <META NAME="Author" CONTENT="Rainer Scherg"> 
   </HEAD> 
   <BODY> 
-	 <H1>dvbsnoop - A DVB Stream Analyzer Tool</H1>
+	 <H1>dvbsnoop - A DVB Stream Analyzer Tool</H1> 
 	 <P><BR></P> 
 	 <H2>What is dvbsnoop?</H2> 
 	 <P>dvbsnoop is a DVB sniffer and monitoring program. <BR><BR>Its purpose is
@@ -24,7 +24,7 @@
 		the DVB protocol structures and streams sent via sattelites. Out of this
 		reason, the programm ist not performance optimized, but it will hopefully do
 		its job.<BR><BR>Author: Rainer Scherg (rasc@users.sourceforge.net)</P> 
-	 <P><BR></P>
+	 <P><BR></P> 
 	 <H2>Under what Licence is dvbsnoop?</H2> 
 	 <P>dvbsnoop is published under GPL with extension:</P> 
 	 <PRE>
@@ -48,7 +48,7 @@ License:
 		software without prior written permission by the author. It is also not allowed
 		to bundle this software for commercial purpose without prior written permission
 		by the author. This includes also offers in online auctions...</P> 
-	 <P><BR></P>
+	 <P><BR></P> 
 	 <H2>Is there any disclaimer?</H2> 
 	 <P>Yes, the standard disclaimer for all non-commercial software (;-)):<BR>
 		You may use this program freely, but on your own risk.<BR>There is no garantee,
@@ -57,107 +57,118 @@ License:
 		your cat.</P> 
 	 <P>By the way: It is strictly forbidden to use this program for hacking
 		encrypted TV channels.</P> 
-	 <P><BR></P>
+	 <P><BR></P> 
 	 <H2>How to use dvbsnoop?</H2> 
 	 <P>dvbsnoop is a commandline tool.<BR>To tune in a transponder, use a
 		proper tuning program like <I>dvbtune</I> (see:
 		<A HREF="http://www.linuxtv.org">http://www.linuxtv.org</A>) or a GUI based DVB
 		program like <I>Neutrino</I> or <I>Enigma</I> which is running on a dbox2 or on
 		a Linux-PC (see: <A
-		HREF="http://www.tuxbox.org">http://www.tuxbox.org</A>).</P>
-	 <H3>Command Line Options:</H3>
-	 <TABLE BGCOLOR="#e0e0e0">
-		<TR BGCOLOR="#c0c0c0">
-		  <TD><B>Option</B></TD>
-		  <TD>&nbsp;</TD>
-		  <TD><B>Description</B></TD>
-		</TR>
+		HREF="http://www.tuxbox.org">http://www.tuxbox.org</A>).</P> 
+	 <H3>The Command Line</H3> 
+	 <P><B>dvbsnoop&nbsp;&nbsp; [options] &nbsp;&nbsp;pid</B><BR><BR>pid can be
+		any unsigned number within the legal pid number range.<BR>The PID can be
+		specified in hex, octal or decimal version (using C-syntax -notation).<BR>e.g.:
+		hex: 0x1A, octal: 0722 , decimal: 6932</P>
+	 <TABLE BGCOLOR="#e0e0e0"> 
+		<TR BGCOLOR="#c0c0c0"> 
+		  <TD><B>Options</B></TD> 
+		  <TD>&nbsp;</TD> 
+		  <TD><B>Description</B></TD> 
+		</TR> 
 		<TR>
-		  <TD>-demux device</TD>
 		  <TD></TD>
-		  <TD>demux device [/dev/dvb/adapter0/demux0]</TD>
-		</TR>
-		<TR>
-		  <TD>-dvr device</TD>
 		  <TD></TD>
-		  <TD>dvr device [/dev/dvb/adapter0/dvr0]</TD>
-		</TR>
-		<TR>
-		  <TD>-s [sec|ts|pes]</TD>
 		  <TD></TD>
-		  <TD>stream type [-s sec]</TD>
 		</TR>
-		<TR>
-		  <TD>-f filter</TD>
-		  <TD></TD>
-		  <TD>filtervalue for 'sec' demux [-f 0]</TD>
-		</TR>
-		<TR>
-		  <TD> -m mask</TD>
-		  <TD></TD>
-		  <TD>maskvalue for 'sec' demux [-m 0]</TD>
-		</TR>
-		<TR>
-		  <TD>-crc</TD>
-		  <TD></TD>
-		  <TD>CRC check when reading 'sec'</TD>
-		</TR>
-		<TR>
-		  <TD>-nocrc</TD>
-		  <TD></TD>
-		  <TD>No CRC check when reading 'sec' [-nocrc]</TD>
-		</TR>
-		<TR>
-		  <TD>-n count</TD>
-		  <TD></TD>
-		  <TD>receive count packets (0=no limit) [-n 0]</TD>
-		</TR>
-		<TR>
-		  <TD>-b</TD>
-		  <TD></TD>
-		  <TD>binary output of packets (disables other output)</TD>
-		</TR>
-		<TR>
-		  <TD>-if</TD>
-		  <TD>&nbsp;</TD>
-		  <TD>input file, reads from binary file instead of demux device</TD>
-		</TR>
-		<TR>
-		  <TD VALIGN="TOP"> -ph mode</TD>
-		  <TD>&nbsp;</TD>
+		<TR> 
+		  <TD>-demux device</TD> 
+		  <TD></TD> 
+		  <TD>demux device [/dev/dvb/adapter0/demux0]</TD> 
+		</TR> 
+		<TR> 
+		  <TD>-dvr device</TD> 
+		  <TD></TD> 
+		  <TD>dvr device [/dev/dvb/adapter0/dvr0]</TD> 
+		</TR> 
+		<TR> 
+		  <TD>-s [sec|ts|pes]</TD> 
+		  <TD></TD> 
+		  <TD>stream type [-s sec]</TD> 
+		</TR> 
+		<TR> 
+		  <TD>-f filter</TD> 
+		  <TD></TD> 
+		  <TD>filtervalue for 'sec' demux [-f 0]</TD> 
+		</TR> 
+		<TR> 
+		  <TD> -m mask</TD> 
+		  <TD></TD> 
+		  <TD>maskvalue for 'sec' demux [-m 0]</TD> 
+		</TR> 
+		<TR> 
+		  <TD>-crc</TD> 
+		  <TD></TD> 
+		  <TD>CRC check when reading 'sec'</TD> 
+		</TR> 
+		<TR> 
+		  <TD>-nocrc</TD> 
+		  <TD></TD> 
+		  <TD>No CRC check when reading 'sec' [-nocrc]</TD> 
+		</TR> 
+		<TR> 
+		  <TD>-n count</TD> 
+		  <TD></TD> 
+		  <TD>receive count packets (0=no limit) [-n 0]</TD> 
+		</TR> 
+		<TR> 
+		  <TD>-b</TD> 
+		  <TD></TD> 
+		  <TD>binary output of packets (disables other output)</TD> 
+		</TR> 
+		<TR> 
+		  <TD>-if</TD> 
+		  <TD>&nbsp;</TD> 
+		  <TD>input file, reads from binary file instead of demux device</TD> 
+		</TR> 
+		<TR> 
+		  <TD VALIGN="TOP"> -ph mode</TD> 
+		  <TD>&nbsp;</TD> 
 		  <TD>print hex buffer, modes: [-ph 1]<BR> &nbsp; 0=none, 1=hexdump,
-			 2=hex line 3=ascii line</TD>
-		</TR>
-		<TR>
-		  <TD>-nph</TD>
-		  <TD>&nbsp;</TD>
-		  <TD>don't print hex buffer (= -ph 0)</TD>
-		</TR>
-		<TR>
-		  <TD>-pd verbose</TD>
-		  <TD>&nbsp;</TD>
-		  <TD>print stream decode (verbose level 0..9) [-pd 7]</TD>
-		</TR>
-		<TR>
-		  <TD>-npd</TD>
-		  <TD>&nbsp;</TD>
-		  <TD>don't print decoded stream (= -pd 0) </TD>
-		</TR>
-		<TR>
-		  <TD>-t[n|d|f]</TD>
-		  <TD>&nbsp;</TD>
-		  <TD>print timestamp (no, delta, full) [-tf] </TD>
-		</TR>
-	 </TABLE>
-	 <P>(default values are in square brackets...)</P>
-	 <P></P>
-	 <H3>Examples:</H3>
+			 2=hex line 3=ascii line</TD> 
+		</TR> 
+		<TR> 
+		  <TD>-nph</TD> 
+		  <TD>&nbsp;</TD> 
+		  <TD>don't print hex buffer (= -ph 0)</TD> 
+		</TR> 
+		<TR> 
+		  <TD>-pd verbose</TD> 
+		  <TD>&nbsp;</TD> 
+		  <TD>print stream decode (verbose level 0..9) [-pd 7]</TD> 
+		</TR> 
+		<TR> 
+		  <TD>-npd</TD> 
+		  <TD>&nbsp;</TD> 
+		  <TD>don't print decoded stream (= -pd 0) </TD> 
+		</TR> 
+		<TR> 
+		  <TD>-t[n|d|f]</TD> 
+		  <TD>&nbsp;</TD> 
+		  <TD>print timestamp (no, delta, full) [-tf] </TD> 
+		</TR> 
+	 </TABLE> 
+	 <P>(default values are in square brackets...)</P> 
+	 <P></P> 
+	 <H3>Examples:</H3> 
 	 <H4>dvbsnoop 0x10</H4>
-	 <P>dump PID 0x10 (sections mode). This command will dump the NIT
-		transmission within the dvb data stream.</P>
-	 <TABLE>
-		<TR>
-		  <TD BGCOLOR="#e0e0e0">
+	 <H4>dvbsnoop 020</H4>
+	 <H4>dvbsnoop 16</H4> 
+	 <P>dump PID Hex 10 (sections mode). This command will dump the NIT
+		transmission within the dvb data stream.</P> 
+	 <TABLE> 
+		<TR> 
+		  <TD BGCOLOR="#e0e0e0"> 
 			 <PRE>~/bin &gt; ./dvbsnoop 0x10 | more
 DvbSnoop   Vers. 1.0a   -- (c) Rainer Scherg
 
@@ -248,18 +259,18 @@ Transport_stream_loop_length: 266 (0x010a)
         Frequency: 19341685 (=  12.72175 GHz)
         Orbital_position: 402 (=  19.2)
         West_East_flag: 1 (0x01)  [= EAST]
-</PRE><B>[...]</B></TD>
-		</TR>
-	 </TABLE>
-	 <P></P>
-	 <H4>dvbsnoop -n 10 -td -f 0x50 -m 0xff -nph -pd 3 0x12</H4>
+</PRE><B>[...]</B></TD> 
+		</TR> 
+	 </TABLE> 
+	 <P></P> 
+	 <H4>dvbsnoop -n 10 -td -f 0x50 -m 0xff -nph -pd 3 0x12</H4> 
 	 <P>dump 10 packets of PID 0x12 (EIT, ...) in sections mode, using the fpid
 		filter 0x50 and pid mask 0xff.<BR>-nph and -pd 3 tells dvbsnoop not to print a
 		hexdump and restrict output to print decoded streams at verbose level 3.
-		Timestamps should be printed in 'delta'-mode...</P>
-	 <TABLE>
-		<TR>
-		  <TD BGCOLOR="#e0e0e0">
+		Timestamps should be printed in 'delta'-mode...</P> 
+	 <TABLE> 
+		<TR> 
+		  <TD BGCOLOR="#e0e0e0"> 
 			 <PRE>~/bin &gt; ./dvbsnoop -n 10 -td -f 0x50 -m 0xff -nph -pd 3 0x12
 DvbSnoop   Vers. 1.0a   -- (c) Rainer Scherg
 
@@ -312,121 +323,124 @@ section_syntax_indicator: 1 (0x01)
 Service_ID: 12040 (0x2f08)  [=  --&gt; refers to PMS program_number]
 Version_number: 6 (0x06)
 Current_next_indicator: 1 (0x01)
-</PRE><B>[...]</B></TD>
-		</TR>
-	 </TABLE>
-	 <P></P>
-	 <H4>dvbsnoop -n 200 -s ts -b 0x00 &gt; ts-stream.pid0x1000.file</H4>
+</PRE><B>[...]</B></TD> 
+		</TR> 
+	 </TABLE> 
+	 <P></P> 
+	 <H4>dvbsnoop -n 200 -s ts -b 0x00 &gt; ts-stream.pid0x1000.file</H4> 
 	 <P>Dump 200 packets of PID 0x00 in transport stream mode to an image
 		file.<BR>The raw datastream will be dumped in the specified stream mode (PES,
 		SECTION or TS).<BR>This file can be used, to postprocess dvb the data
-		streams.</P>
-	 <H4>dvbsnoop -if ts-stream.pid0x1000.file &nbsp; -s ts 0x00</H4>
+		streams.</P> 
+	 <H4>dvbsnoop -if ts-stream.pid0x1000.file &nbsp; -s ts 0x00</H4> 
 	 <P>Read a data stream from filea and analyze ithe stream.<BR>It is
-		important that you specify which mode an which pid!</P>
-	 <P><BR></P>
-	 <H2>Related Topic and Links</H2>
-	 <P>Please visit the following websites for more information:</P>
-	 <TABLE>
-		<TR>
+		important that you specify which mode an which pid!</P> 
+	 <P><BR></P> 
+	 <H2>Related Topic and Links</H2> 
+	 <P>Please visit the following websites for more information:</P> 
+	 <TABLE> 
+		<TR> 
 		  <TD VALIGN="TOP"><A
 			 HREF="http://sourceforge.net/projects/dvbsnoop">http://sourceforge.net/projects/dvbsnoop</A></TD>
-		  <TD>&nbsp;</TD>
+		  
+		  <TD>&nbsp;</TD> 
 		  <TD>The project homepage of dvbsnoop, currently dvbsnoop is hosted at
 			 <B>www.tuxbox.org</B>. To check out the source, read the cvs information on
-			 tuxbox.org</TD>
-		</TR>
-		<TR>
+			 tuxbox.org</TD> 
+		</TR> 
+		<TR> 
 		  <TD VALIGN="TOP"><A
-			 HREF="http://www.tuxbox.org">http://www.tuxbox.org</A></TD>
-		  <TD>&nbsp;</TD>
+			 HREF="http://www.tuxbox.org">http://www.tuxbox.org</A></TD> 
+		  <TD>&nbsp;</TD> 
 		  <TD>Website for linux on a <B><I>dbox2</I></B> (a set top box mainly
 			 sold in Europe or provided by the German pay tv provider "Premiere").<BR> Here
-			 you will also find a support forum for linux@dbox2.</TD>
-		</TR>
-		<TR>
+			 you will also find a support forum for linux@dbox2.</TD> 
+		</TR> 
+		<TR> 
 		  <TD VALIGN="TOP"><B><A
-			 HREF="http://cvs.tuxbox.org/">cvs.tuxbox.org</A></B></TD>
-		  <TD>&nbsp;</TD>
+			 HREF="http://cvs.tuxbox.org/">cvs.tuxbox.org</A></B></TD> 
+		  <TD>&nbsp;</TD> 
 		  <TD>The CVS for linux@dbox2. dvbsnoop is part of the linux@dbox2
-			 project applications...</TD>
-		</TR>
-		<TR>
+			 project applications...</TD> 
+		</TR> 
+		<TR> 
 		  <TD VALIGN="TOP"><A
-			 HREF="http://tuxbox.berlios.de">http://tuxbox.berlios.de</A></TD>
-		  <TD>&nbsp;</TD>
+			 HREF="http://tuxbox.berlios.de">http://tuxbox.berlios.de</A></TD> 
+		  <TD>&nbsp;</TD> 
 		  <TD>The old dbox2@linux homepage.<BR>For more links on this topic, have
 			 a look on the <A HREF="http://tuxbox.org/forum/">FAQ-Section of the
-			 forum</A>!</TD>
-		</TR>
-		<TR>
-		  <TD><A HREF="http://www.linuxtv.org">http://www.linuxtv.org</A></TD>
-		  <TD>&nbsp;</TD>
-		  <TD>Linux based TV</TD>
-		</TR>
-		<TR>
-		  <TD><A HREF="http://www.dvb.org">http://www.dvb.org</A></TD>
-		  <TD>&nbsp;</TD>
-		  <TD>Information about DVB</TD>
-		</TR>
-		<TR>
-		  <TD><A HREF="http://www.mhp.org">http://www.mhp.org</A></TD>
-		  <TD>&nbsp;</TD>
-		  <TD>Information about MHP</TD>
-		</TR>
-		<TR>
-		  <TD><A HREF="http://www.etsi.org">http://www.etsi.org</A></TD>
-		  <TD>&nbsp;</TD>
-		  <TD>Standards documents</TD>
-		</TR>
-		<TR>
-		  <TD VALIGN="TOP">irc:#dbox2</TD>
-		  <TD>&nbsp;</TD>
+			 forum</A>!</TD> 
+		</TR> 
+		<TR> 
+		  <TD><A HREF="http://www.linuxtv.org">http://www.linuxtv.org</A></TD> 
+		  <TD>&nbsp;</TD> 
+		  <TD>Linux based TV</TD> 
+		</TR> 
+		<TR> 
+		  <TD><A HREF="http://www.dvb.org">http://www.dvb.org</A></TD> 
+		  <TD>&nbsp;</TD> 
+		  <TD>Information about DVB</TD> 
+		</TR> 
+		<TR> 
+		  <TD><A HREF="http://www.mhp.org">http://www.mhp.org</A></TD> 
+		  <TD>&nbsp;</TD> 
+		  <TD>Information about MHP</TD> 
+		</TR> 
+		<TR> 
+		  <TD><A HREF="http://www.etsi.org">http://www.etsi.org</A></TD> 
+		  <TD>&nbsp;</TD> 
+		  <TD>Standards documents</TD> 
+		</TR> 
+		<TR> 
+		  <TD VALIGN="TOP">irc:#dbox2</TD> 
+		  <TD>&nbsp;</TD> 
 		  <TD>IRC Support channel for dbox2. (use e.g. IRC server
-			 irc.freenet.de:6667)</TD>
-		</TR>
-		<TR>
+			 irc.freenet.de:6667)</TD> 
+		</TR> 
+		<TR> 
 		  <TD VALIGN="TOP"><A
-			 HREF="http://www.linuxstb.org/">http://www.linuxstb.org/</A></TD>
-		  <TD>&nbsp;</TD>
-		  <TD>another very good site, with a punch of good tools!</TD>
-		</TR>
-		<TR>
+			 HREF="http://www.linuxstb.org/">http://www.linuxstb.org/</A></TD> 
+		  <TD>&nbsp;</TD> 
+		  <TD>another very good site, with a punch of good tools!</TD> 
+		</TR> 
+		<TR> 
 		  <TD VALIGN="TOP"><A
 			 HREF="http://www.magicality.org/code/dvbdata/">http://www.magicality.org/code/dvbdata/</A></TD>
-		  <TD>&nbsp;</TD>
+		  
+		  <TD>&nbsp;</TD> 
 		  <TD>A tool for saving data from the Data Carousell. (from Richard
-			 Palmer )</TD>
-		</TR>
-		<TR>
+			 Palmer )</TD> 
+		</TR> 
+		<TR> 
 		  <TD VALIGN="TOP"><A
-			 HREF="http://www.linuxdvb.tv/">http://www.linuxdvb.tv/</A></TD>
-		  <TD>&nbsp;</TD>
-		  <TD>... just have a look</TD>
-		</TR>
-		<TR>
+			 HREF="http://www.linuxdvb.tv/">http://www.linuxdvb.tv/</A></TD> 
+		  <TD>&nbsp;</TD> 
+		  <TD>... just have a look</TD> 
+		</TR> 
+		<TR> 
 		  <TD VALIGN="TOP"><A
 			 HREF="http://www.cadsoft.de/people/kls/vdr/">http://www.cadsoft.de/people/kls/vdr/</A></TD>
-		  <TD>&nbsp;</TD>
+		  
+		  <TD>&nbsp;</TD> 
 		  <TD>... not directly related with dvbsnoop, but mui mucho cool! a DVB
-			 personal video recorder... </TD>
-		</TR>
-	 </TABLE>
+			 personal video recorder... </TD> 
+		</TR> 
+	 </TABLE> 
 	 <P><B>Remark:</B><BR>In 2003 the development <B>CVS has been moved</B> from
 		cvs.berlios.de (German sourceforge clone) to <B><A
 		HREF="http://cvs.tuxbox.org/">cvs.tuxbox.org</A></B>! This was necessary due to
-		uptime problems at <A HREF="http://www.berlios.de">berlios.de</A>.</P>
-	 <P><BR></P>
-	 <H2>Thanks...</H2>
+		uptime problems at <A HREF="http://www.berlios.de">berlios.de</A>.</P> 
+	 <P><BR></P> 
+	 <H2>Thanks...</H2> 
 	 <P><B>Thanks</B> a lot to all the members and developers of the
 		tuxbox@dbox2 project!!!<BR>These heros do great support and also bugfixing -
-		see the history information in the source!! ;-)</P>
-	 <P><BR><BR></P>
-	 <H2>Where to send bugreports?</H2>
+		see the history information in the source!! ;-)</P> 
+	 <P><BR><BR></P> 
+	 <H2>Where to send bugreports?</H2> 
 	 <P>Please send bugreports with a detailed description to: &nbsp;&nbsp;
 		<A
 		 HREF="mailto:rasc@users.sourceforge.net?DVBSNOOP - Bugreport...">rasc@users.sourceforge.net</A><BR>Do
 		NOT send saved stream files via email!</P> 
-	 <P></P>
-	 <P><BR><BR><BR>Rainer Scherg</P></BODY>
+	 <P></P> 
+	 <P><BR><BR><BR>Rainer Scherg</P> </BODY>
 </HTML>
