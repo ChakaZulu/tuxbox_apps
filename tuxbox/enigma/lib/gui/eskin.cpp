@@ -435,6 +435,10 @@ void eSkin::setPalette(gPixmapDC *pal)
 
 gColor eSkin::queryColor(const QString &name) const
 {
+	char *end;
+	int numcol=strtol(name, &end, 10);
+	if (!*end)
+		return gColor(numcol);
 	eNamedColor *col=searchColor(name);
 	if (!col)
 	{
