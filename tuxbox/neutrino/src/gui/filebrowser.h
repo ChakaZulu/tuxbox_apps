@@ -39,7 +39,6 @@
 #include <string.h>
 
 
-#include <daemonc/remotecontrol.h>
 #include <driver/framebuffer.h>
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>

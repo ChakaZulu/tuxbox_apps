@@ -42,6 +42,7 @@
 #include "system/setting_helpers.h"
 #include "system/configure_network.h"
 #include "timerdclient/timerdtypes.h"
+#include <daemonc/remotecontrol.h> /* st_rmsg */
 
 #include <string>
 

@@ -33,11 +33,8 @@
 #ifndef __EVENTLIST_HPP__
 #define __EVENTLIST_HPP__
 
-#include <string>
-
 #include <sectionsdclient/sectionsdclient.h>
 
-#include <daemonc/remotecontrol.h>
 #include <driver/framebuffer.h>
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
@@ -47,6 +44,8 @@
 #include "infoviewer.h"
 
 #include "widget/menue.h"
+
+#include <string>
 
 
 class EventList
