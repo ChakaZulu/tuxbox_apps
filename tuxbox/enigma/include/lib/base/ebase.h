@@ -4,11 +4,14 @@
 #include <vector>
 #include <list>
 #include <map>
-
 #include <libsig_comp.h>
 #include <sys/poll.h>
 #include <sys/time.h>
 #include <time.h>
+
+class eApplication;
+
+extern eApplication* eApp;
 
 static inline bool operator<( const timeval &t1, const timeval &t2 )
 {
@@ -142,21 +145,21 @@ class eMainloop;
 class eSocketNotifier
 {
 public:
-	enum Type { Read=POLLIN, Write=POLLOUT };
+	enum { Read=POLLIN, Write=POLLOUT };
 private:
 	eMainloop &context;
 	int fd;
 	int state;
 	int requested;		// requested events (POLLIN, ...)
 public:
-	Signal0<void> activated;
+	Signal1<void, int> activated;
 
-	eSocketNotifier(eMainloop &context, int fd, int req);
+	eSocketNotifier(eMainloop *context, int fd, int req);
 	~eSocketNotifier();
 	
 	void start();
 	void stop();
-	void activate(int what);
+	void activate(int what) { /*emit*/ activated(fd); }
 
 	int getFD() { return fd; }
 	int getRequested() { return requested; }
@@ -171,7 +174,7 @@ class eTimer
 	bool bSingleShot;
 	bool bActive;
 public:
-	eTimer(eMainloop &context): bActive(false), context(context) { }
+	eTimer(eMainloop *context=(eMainloop*)	eApp): bActive(false), context(*context) { }
 	~eTimer()	{		if (bActive) stop();	}
 	Signal0<void> timeout;
 	void activate();
@@ -190,13 +193,16 @@ public:
 };
 
 			// werden in einer mainloop verarbeitet
-class eMainloop
+class eMainloop : public Object
 {
-	std::vector<pollfd> pfd;
 	std::map<int,eSocketNotifier*> notifiers;
 	std::list<eTimer*> TimerList;
 	void processOneEvent();
+	bool app_exit_loop;
+	bool app_quit_now;
+	int loop_level;
 public:
+	eMainloop():loop_level(0)	{	}
 	void addSocketNotifier(eSocketNotifier *sn);
 	void removeSocketNotifier(eSocketNotifier *sn);
 
@@ -206,12 +212,31 @@ public:
 		TimerList.sort(eTimer::less());
 	}
 	void removeTimer(eTimer* e)	{		TimerList.remove(e);	}	
+	int looplevel() { return loop_level; }
+	
+	void enter_loop();
+	void exit_loop();
 
 	int exec();		// recursive enter the loop
-	int leave();		// leave the loop
 	
-	void quit(); // leave all pending loops (recursive leave())
+	void quit();	// leave all pending loops (recursive leave())
 };
+
+
+class eApplication: public eMainloop
+{
+public:
+	eApplication()
+	{
+		if (!eApp)
+			eApp = this;
+	}
+	~eApplication()
+	{
+		eApp = 0;
+	}
+};
+
 
 class eMessagePump
 {

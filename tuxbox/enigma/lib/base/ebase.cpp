@@ -3,8 +3,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "qglobal.h"
-
 void *eThread::wrapper(void *ptr)
 {
 	((eThread*)ptr)->thread();
@@ -18,11 +16,11 @@ eThread::eThread()
 
 eThread::~eThread()
 {
-	qDebug("waiting for thread shutdown");
+	printf("waiting for thread shutdown");
 	pthread_join(thread_id, 0);
 }
 
-eSocketNotifier::eSocketNotifier(eMainloop &context, int fd, int requested): context(context), requested(requested)
+eSocketNotifier::eSocketNotifier(eMainloop *context, int fd, int requested): context(*context), requested(requested)
 {
 	state=0;
 }
@@ -111,8 +109,9 @@ void eMainloop::removeSocketNotifier(eSocketNotifier *sn)
 
 void eMainloop::processOneEvent()
 {
-	qDebug("wir haben FDs:");
-	pfd.clear();
+	std::vector<pollfd> pfd;
+	printf("wir haben FDs:");
+//	pfd.clear();
 	for (std::map<int,eSocketNotifier*>::iterator i(notifiers.begin()); i!=notifiers.end(); ++i)
 	{
 		pollfd p;
@@ -121,7 +120,7 @@ void eMainloop::processOneEvent()
 		p.revents=0;
 		
 		pfd.push_back(p);
-		qDebug("%d (%x)", i->first, i->second->getRequested());
+		printf("%d (%x)", i->first, i->second->getRequested());
 	}
 
 			// process pending timers...
@@ -138,7 +137,7 @@ void eMainloop::processOneEvent()
 	int ret=poll(&(*pfd.begin()), pfd.size(), usec);
 	if (ret>0)
 	{
-		qDebug("bin aussem poll raus und da war was");
+		printf("bin aussem poll raus und da war was");
 		for (std::vector<pollfd>::iterator i(pfd.begin()); i != pfd.end(); ++i)
 		{
 			if (i->revents)
@@ -150,12 +149,55 @@ void eMainloop::processOneEvent()
 		}
 	} else if (ret<0)
 	{
-		qDebug("poll made error");
+		printf("poll made error");
 	}
-
-			// das ist noch doof hier
-	while (!TimerList.empty() && (usec = timeout_usec( (*TimerList.begin())->getNextActivation() ) ) <= 0 )
+		// das ist noch doof hier
+	while (!TimerList.empty() && (timeout_usec( (*TimerList.begin())->getNextActivation() ) ) <= 0 )
 		(*TimerList.begin())->activate();
+}
+
+int eMainloop::exec()
+{
+		if (!loop_level)
+		{
+			app_quit_now = false;
+			enter_loop();
+		}
+}
+
+void eMainloop::enter_loop()
+{
+	loop_level++;
+
+	// Status der vorhandenen Loop merken
+	bool old_exit_loop = app_exit_loop;
+	
+	app_exit_loop = false;
+
+	while (!app_exit_loop && !app_quit_now)
+	{
+		processOneEvent();
+	}	
+
+	// wiederherstellen der vorherigen app_exit_loop
+	app_exit_loop = old_exit_loop;
+
+	loop_level--;
+
+	if (!loop_level)
+	{
+			// do something here on exit the last loop
+	}
+}
+
+void eMainloop::exit_loop()  // call this to leave the current loop
+{
+	app_exit_loop = true;	
+}
+
+void eMainloop::quit()   // call this to leave all loops
+{
+	app_quit_now = true;
 }
 
 int eMessagePump::send(void *data, int len)
@@ -176,3 +218,5 @@ int eMessagePump::recv(void *data, int len)
 	}
 	return 0;
 }
+
+eApplication* eApp = 0;
