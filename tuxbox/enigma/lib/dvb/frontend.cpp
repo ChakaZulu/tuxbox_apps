@@ -1526,14 +1526,13 @@ int eFrontend::tune_qpsk(eTransponder *trans,
 		return 0;
 	}
 
+	eSecCmdSequence seq;
+#if HAVE_DVB_API_VERSION < 3
 #define SEC_12V_OUT_OFF 0x10
 #define SEC_12V_OUT_ON 0x11
 	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020 &&
 		ioctl(secfd, SEC_SET_VOLTAGE, lnb->get12VOut() ? SEC_12V_OUT_ON : SEC_12V_OUT_OFF) < 0 )
 			eDebug("SEC_SET_VOLTAGE (12V Out) failed (%m)");
-
-	eSecCmdSequence seq;
-#if HAVE_DVB_API_VERSION < 3
 	secCommand *commands=0; // pointer to all sec commands
 #else
 	dvb_diseqc_master_cmd *commands=0;
