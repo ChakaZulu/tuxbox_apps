@@ -194,8 +194,6 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 								break;
 							case menu_return::RETURN_REPAINT:
 								paint();
-								// recalculate timeout
-								timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
 								break;
 						}
 					}
@@ -229,6 +227,13 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 						retval = menu_return::RETURN_EXIT_ALL;
 						msg = CRCInput::RC_timeout;
 					}
+			}
+
+
+			if ( msg <= CRCInput::RC_MaxRC )
+			{
+				// recalculate timeout für RC-Tasten
+				timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
 			}
 		}
 
