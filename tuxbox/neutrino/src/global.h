@@ -47,10 +47,8 @@
 
 #include "widget/bouquetlist.h"
 #include "helpers/settings.h"
-#include "helpers/scan.h"
 #include "widget/eventlist.hpp"
 #include "helpers/locale.h"
-#include "helpers/update.h"
 #include "widget/gamelist.h"
 
 
@@ -77,8 +75,6 @@ NEUTRINO_CPP  CRCInput			*g_RCInput;
 NEUTRINO_CPP  CEpgData			*g_EpgData;
 NEUTRINO_CPP  CInfoViewer		*g_InfoViewer;
 NEUTRINO_CPP  EventList			*g_EventList;
-NEUTRINO_CPP  CScanTs			*g_ScanTS;
-NEUTRINO_CPP  CFlashUpdate		*g_Update;
 
 NEUTRINO_CPP CLocaleManager		*g_Locale;
 
