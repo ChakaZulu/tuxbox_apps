@@ -9,7 +9,7 @@ mainmenu.radiomode Radio-modus
 mainmenu.scartmode Scart-modus
 mainmenu.games Hry
 mainmenu.shutdown vypnut dbox
-mainmenu.settings nastavenia 
+mainmenu.settings nastavenia
 mainmenu.service service menu
 mainmenu.streaming Streaming (nahravat)
 mainmenu.streaming_start start
@@ -19,10 +19,17 @@ servicemenu.head service menu
 servicemenu.update aktualizovat software
 servicemenu.scants hladat kanaly
 servicemenu.ucodecheck preskusat UCodes
-servicemenu.cablesetup nastavenia pre kabelovu TV
 
 cablesetup.spectralInversion use spectral inversion
 cablesetup.spectralInversionWarning nastartujte znovu Vas dbox, aby ste aktivovali zmeny
+cablesetup.provider cable provider
+
+satsetup.disqeqc DiSEqC
+satsetup.satellite Satellite
+satsetup.extended DiSEqC-setings
+satsetup.nodiseqc no DiSEqC
+satsetup.minidiseqc Mini-DiSEqC
+satsetup.stddiseqc DiSEqC
 
 mainsettings.head nastavenia
 mainsettings.savesettingsnow nastavenia zachovat
@@ -33,6 +40,7 @@ mainsettings.network Siet
 mainsettings.colors Farby
 mainsettings.keybinding nastavenie klavesnice
 mainsettings.misc ine nastavenia
+mainsettings.scan Scan settings
 
 miscsettings.head ine nastavenia
 miscsettings.shutdown_real soft standby
@@ -127,9 +135,9 @@ keybindingmenu.channelup predchadzajuci kanal
 keybindingmenu.channelup_head predchadzajuci kanal
 keybindingmenu.channeldown nasledujuci kanal
 keybindingmenu.channeldown_head nasledujuci kanal
-keybindingmenu.bouquetup nasledujuce bouquet 
+keybindingmenu.bouquetup nasledujuce bouquet
 keybindingmenu.bouquetup_head nasledujuce bouquet
-keybindingmenu.bouquetdown predchadzajuce bouquet 
+keybindingmenu.bouquetdown predchadzajuce bouquet
 keybindingmenu.bouquetdown_head predchadzajuce bouquet
 keybindingmenu.bouquethandling OK ukazuje
 keybindingmenu.bouquetchannels_on_ok bouquet-kanaly
@@ -173,7 +181,7 @@ infoviewer.noepg EPG nie je k dispozicii
 infoviewer.subservice podkanaly
 infoviewer.waittime cakam na cas...
 
-epgviewer.notfound EPG nebolo najdene 
+epgviewer.notfound EPG nebolo najdene
 epgviewer.nodetailed podrobna informacia nie je k dispozicii
 epglist.head Prehlad programu - %s
 epglist.noevents EPG informacia nie je k dispozicii
@@ -419,7 +427,7 @@ pinprotection.wrongcode Prosim, zadajte este raz novy PIN!
 pinprotection.head PIN
 
 favorites.bouquetname My Favorites
-favorites.addchannel The current channel will be added \nto the bouquet "My Favorites". \n This will take a few seconds... 
+favorites.addchannel The current channel will be added \nto the bouquet "My Favorites". \n This will take a few seconds...
 favorites.menueadd add channel to favorites
 favorites.bqcreated Bouquet "My Favorites" has been created...\n
 favorites.chadded The current channel has been added to your favorites...\n

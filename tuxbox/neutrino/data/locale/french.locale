@@ -19,10 +19,17 @@ servicemenu.head Service
 servicemenu.update Software Update
 servicemenu.scants Servicescan
 servicemenu.ucodecheck Check ucodes
-servicemenu.cablesetup Cable settings
 
 cablesetup.spectralInversion use spectral inversion
 cablesetup.spectralInversionWarning You have to reboot to activate changes
+cablesetup.provider cable provider
+
+satsetup.disqeqc DiSEqC
+satsetup.satellite Satellite
+satsetup.extended DiSEqC-setings
+satsetup.nodiseqc no DiSEqC
+satsetup.minidiseqc Mini-DiSEqC
+satsetup.stddiseqc DiSEqC
 
 mainsettings.head Settings
 mainsettings.savesettingsnow save settings now
@@ -33,6 +40,7 @@ mainsettings.network Réseau
 mainsettings.colors  Couleurs / Thèmes
 mainsettings.keybinding Ajuster des clés
 mainsettings.misc Misc Settings
+mainsettings.scan Scan settings
 
 miscsettings.head Misc Settings
 miscsettings.shutdown_real Enable Standby
@@ -423,7 +431,7 @@ pinprotection.wrongcode PIN-Code was wrong! Try again.
 pinprotection.head Enter PIN code
 
 favorites.bouquetname My Favorites
-favorites.addchannel The current channel will be added \nto the bouquet "My Favorites". \n This will take a few seconds... 
+favorites.addchannel The current channel will be added \nto the bouquet "My Favorites". \n This will take a few seconds...
 favorites.menueadd add channel to favorites
 favorites.bqcreated Bouquet "My Favorites" has been created...\n
 favorites.chadded The current channel has been added to your favorites...\n

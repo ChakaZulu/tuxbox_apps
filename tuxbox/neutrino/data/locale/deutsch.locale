@@ -19,10 +19,17 @@ servicemenu.head Service
 servicemenu.update Software-Aktualisierung
 servicemenu.scants Transponderscan
 servicemenu.ucodecheck UCodes überprüfen
-servicemenu.cablesetup Kabel-Einstellungen
 
 cablesetup.spectralInversion Spectrale Inversion
-cablesetup.spectralInversionWarning Sie müssen rebooten um die Änderungen zu aktivieren
+cablesetup.spectralInversionWarning Sie müssen rebooten, um die Änderungen zu aktivieren!
+cablesetup.provider Kabelanbieter
+
+satsetup.disqeqc DiSEqC
+satsetup.satellite Satellit
+satsetup.extended DiSEqC-Einstellung
+satsetup.nodiseqc Kein DiSEqC
+satsetup.minidiseqc Mini-DiSEqC
+satsetup.stddiseqc DiSEqC
 
 mainsettings.head Einstellungen
 mainsettings.savesettingsnow Einstellung jetzt speichern
@@ -33,6 +40,7 @@ mainsettings.network Netzwerk
 mainsettings.colors Farben / Themes
 mainsettings.keybinding Tasten-Einstellungen
 mainsettings.misc Diverse Einstellungen
+mainsettings.scan Einstellungen Kanalsuche
 
 miscsettings.head Diverse Einstellungen
 miscsettings.shutdown_real Standbymodus
@@ -424,4 +432,4 @@ favorites.menueadd Kanal Favoriten hinzufügen
 favorites.bqcreated Bouquet "Meine Favoriten" wurde angelegt...\n
 favorites.chadded Der aktuelle Kanal wurde Ihren Favoriten hinzugefügt...\n
 favorites.chalreadyinbq Der aktuelle Kanal ist bereits in Ihren Favoriten...\n
-favorites.finalhint \nVersehentlich hinzugefügte Kanäle können mit\nder Bouquetverwaltung korrigiert werden.\n 
+favorites.finalhint \nVersehentlich hinzugefügte Kanäle können mit\nder Bouquetverwaltung korrigiert werden.\n
