@@ -62,11 +62,16 @@ eString getConfigSwapFile(void)
 		td1 = "none"; td2 = td3 = td4 = td5 = "&nbsp;";
 	}
 	eConfig::getInstance()->getKey("/extras/swapfile", swapfile);
-	char *swapfilename;
-	if (eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename))
-		swapfilename = "";
+	char *swapfilename=0;
+	eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename);
 	result.strReplace("#SWAP#", (swapfile == 1) ? "checked" : "");
-	result.strReplace("#SWAPFILE#", eString(swapfilename));
+	eString rpl="";
+	if ( swapfilename )
+	{
+		rpl=swapfilename;
+		free(swapfilename);
+	}
+	result.strReplace("#SWAPFILE#", rpl);
 	result.strReplace("#TH1#", th1);
 	result.strReplace("#TH2#", th2);
 	result.strReplace("#TH3#", th3);
@@ -176,10 +181,15 @@ eString getConfigSettings(void)
 	int hddac = 160;
 	eConfig::getInstance()->getKey("/extras/hdparm-m", hddac);
 	result.strReplace("#HDDACOUSTICS#", eString().sprintf("%d", hddac));
-	char *audiochannelspriority;
-	if (eConfig::getInstance()->getKey("/extras/audiochannelspriority", audiochannelspriority))
-		audiochannelspriority = "";
-	result.strReplace("#AUDIOCHANNELSPRIORITY#", eString(audiochannelspriority));
+	char *audiochannelspriority=0;
+	eConfig::getInstance()->getKey("/extras/audiochannelspriority", audiochannelspriority);
+	eString rpl="";
+	if ( audiochannelspriority )
+	{
+		rpl = audiochannelspriority;
+		free(audiochannelspriority);
+	}
+	result.strReplace("#AUDIOCHANNELSPRIORITY#", rpl);
 	return result;
 }
 

@@ -882,13 +882,12 @@ int priorityApid(int apid)
 	int apid2 = apid;
 	apid = 0;
 
-	char *audiochannelspriority;
-	if (eConfig::getInstance()->getKey("/extras/audiochannelspriority", audiochannelspriority))
-		audiochannelspriority = "";
+	char *audiochannelspriority=0;
+	eConfig::getInstance()->getKey("/extras/audiochannelspriority", audiochannelspriority);
 
 	eString audiochannel;
 
-	if (strlen(audiochannelspriority) > 0)
+	if (audiochannelspriority)
 	{
 		std::stringstream audiochannels;
 		eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
@@ -902,7 +901,6 @@ int priorityApid(int apid)
 				for (std::list<eDVBServiceController::audioStream>::iterator it(astreams.begin())
 					;it != astreams.end(); ++it)
 				{
-
 					if (audiochannel == it->text)
 					{
 						apid = it->pmtentry->elementary_PID;
@@ -911,6 +909,7 @@ int priorityApid(int apid)
 				}
 			}
 		}
+		free(audiochannelspriority);
 	}
 	if (apid == 0)
 		apid = apid2;
