@@ -4,6 +4,9 @@
  *             (c) Thomas "LazyT" Loewe 2002-2003 (LazyT@gmx.net)             *
  ******************************************************************************
  * $Log: tuxtxt.c,v $
+ * Revision 1.56  2004/02/13 12:52:30  alexw
+ * background also must be black in screenmode 1
+ *
  * Revision 1.55  2004/02/06 01:59:45  ghostrider
  * tuxtxt is now ready for old and new dvb api
  *
@@ -64,7 +67,7 @@
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.55 $", versioninfo[16];
+	char cvs_revision[] = "$Revision: 1.56 $", versioninfo[16];
 
 	//show versioninfo
 
@@ -2212,7 +2215,7 @@ void SwitchScreenMode()
 
 	//clear backbuffer
 
-		memset(&backbuffer, screenmode?transp:black, sizeof(backbuffer));
+		memset(&backbuffer, black, sizeof(backbuffer));
 
 	//set mode
 
