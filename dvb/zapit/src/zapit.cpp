@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.56 2002/01/04 22:52:31 Simplex Exp $
+  $Id: zapit.cpp,v 1.57 2002/01/05 16:39:32 Simplex Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -92,6 +92,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.57  2002/01/05 16:39:32  Simplex
+  completed commands for bouquet-editor
+
   Revision 1.56  2002/01/04 22:52:31  Simplex
   prepared zapitclient,
   added new command structure (version 2),
@@ -2176,6 +2179,24 @@ void parse_command()
 				g_BouquetMan->addBouquet(msgAddBouquet.name);
 			break;
 
+			case CZapitClient::CMD_BQ_DELETE_BOUQUET :
+				CZapitClient::commandDeleteBouquet msgDeleteBouquet;
+				read( connfd, &msgDeleteBouquet, sizeof(msgDeleteBouquet));
+				g_BouquetMan->deleteBouquet(msgDeleteBouquet.bouquet-1);
+			break;
+
+			case CZapitClient::CMD_BQ_RENAME_BOUQUET :
+				CZapitClient::commandRenameBouquet msgRenameBouquet;
+				read( connfd, &msgRenameBouquet, sizeof(msgRenameBouquet));
+				g_BouquetMan->Bouquets[msgRenameBouquet.bouquet-1]->Name = msgRenameBouquet.name;
+			break;
+
+			case CZapitClient::CMD_BQ_MOVE_BOUQUET :
+				CZapitClient::commandMoveBouquet msgMoveBouquet;
+				read( connfd, &msgMoveBouquet, sizeof(msgMoveBouquet));
+				g_BouquetMan->moveBouquet(msgMoveBouquet.bouquet-1, msgMoveBouquet.newPos-1);
+			break;
+
 			case CZapitClient::CMD_BQ_ADD_CHANNEL_TO_BOUQUET :
 				CZapitClient::commandAddChannelToBouquet msgAddChannelToBouquet;
 				read( connfd, &msgAddChannelToBouquet, sizeof(msgAddChannelToBouquet));
@@ -2183,12 +2204,22 @@ void parse_command()
 			break;
 
 			case CZapitClient::CMD_BQ_REMOVE_CHANNEL_FROM_BOUQUET :
-				printf("should remove channel\n");
 				CZapitClient::commandRemoveChannelFromBouquet msgRemoveChannelFromBouquet;
-				printf("reading ...\n");
 				read( connfd, &msgRemoveChannelFromBouquet, sizeof(msgRemoveChannelFromBouquet));
-				printf("done\n");
 				removeChannelFromBouquet(msgRemoveChannelFromBouquet.bouquet, msgRemoveChannelFromBouquet.onid_sid);
+			break;
+
+			case CZapitClient::CMD_BQ_MOVE_CHANNEL :
+				CZapitClient::commandMoveChannel msgMoveChannel;
+				read( connfd, &msgMoveChannel, sizeof(msgMoveChannel));
+				g_BouquetMan->Bouquets[ msgMoveChannel.bouquet-1]->moveService(
+					msgMoveChannel.oldPos-1,
+					msgMoveChannel.newPos-1,
+					Radiomode_on ? 2 : 1);
+			break;
+
+			case CZapitClient::CMD_BQ_RENUM_CHANNELLIST :
+				g_BouquetMan->renumServices();
 			break;
 
 			default:
@@ -2362,7 +2393,7 @@ int main(int argc, char **argv) {
     }
 
   system("cp " CONFIGDIR "/zapit/last_chan /tmp/zapit_last_chan");
-  printf("Zapit $Id: zapit.cpp,v 1.56 2002/01/04 22:52:31 Simplex Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.57 2002/01/05 16:39:32 Simplex Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
@@ -2466,6 +2497,7 @@ void removeChannelFromBouquet(unsigned int bouquet, unsigned int onid_sid)
 {
 	printf("removing %d in bouquet %d \n", onid_sid, bouquet);
 	g_BouquetMan->Bouquets[bouquet]->removeService( onid_sid);
+	printf("removing %d in bouquet %d done\n", onid_sid, bouquet);
 }
 
 void sendBouquets(bool emptyBouquetsToo)

@@ -26,6 +26,7 @@ class CBouquet
 		ChannelList tvChannels;
 
 		CBouquet( string name) { Name=name; }
+		~CBouquet();
 
 		void addService( channel* newChannel);
 
@@ -49,10 +50,11 @@ class CBouquetManager
 
 		void saveBouquets();
 		void loadBouquets();
+		void renumServices();
 
 		CBouquet* addBouquet( string name);
-		void removeBouquet( uint id);
-		void removeBouquet( string name);
+		void deleteBouquet( uint id);
+		void deleteBouquet( string name);
 		void moveBouquet( uint oldId, uint newId);
 
 		void saveAsLast( uint BouquetId, uint channelNr);
