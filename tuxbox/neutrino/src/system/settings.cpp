@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.9 2002/08/31 22:30:28 obi Exp $
+        $Id: settings.cpp,v 1.10 2002/09/01 23:15:09 Homar Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -62,7 +62,7 @@ char* CScanSettings::satOfDiseqc(int diseqc) const{
 	if(diseqc >= 0 && diseqc < MAX_SATELLITES) {
 		for(int i=0; i<MAX_SATELLITES;i++) {
 			if(diseqc == satDiseqc[i]) return (char*)&satName[i];
-		}	
+		}
 	}
 	return "Unknown Satellite";
 }
@@ -100,7 +100,7 @@ void CScanSettings::useDefaults()
 	if (g_info.fe==1)
 		strcpy( satNameNoDiseqc, "Astra 19.2E");
 	else
-		strcpy( satNameNoDiseqc, "Telekom");
+		strcpy( satNameNoDiseqc, "Telekom/Ish");
 }
 
 bool CScanSettings::loadSettings( string fileName )
@@ -122,7 +122,7 @@ bool CScanSettings::loadSettings( string fileName )
 	diseqcRepeat = configfile.getInt32( "diseqcRepeat", 0 );
 	bouquetMode = (CZapitClient::bouquetMode) configfile.getInt32( "bouquetMode", CZapitClient::BM_DONTTOUCHBOUQUETS );
 
-	strcpy( satNameNoDiseqc, configfile.getString( "satNameNoDiseqc", g_info.fe==1?"Astra 19.2E":"Telekom").c_str() );
+	strcpy( satNameNoDiseqc, configfile.getString( "satNameNoDiseqc", g_info.fe==1?"Astra 19.2E":"Telekom/Ish").c_str() );
 
 	if (diseqcMode != NO_DISEQC)
 	{
@@ -171,7 +171,7 @@ bool CScanSettings::saveSettings( string fileName )
 			}
 		}
 	}
-	
+
 	if(configfile.getModifiedFlag())
 	{
 		printf("saveing neutrino scan-config\n");
