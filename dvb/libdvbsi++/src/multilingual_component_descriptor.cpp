@@ -1,5 +1,5 @@
 /*
- * $Id: multilingual_component_descriptor.cpp,v 1.1 2004/02/13 15:27:47 obi Exp $
+ * $Id: multilingual_component_descriptor.cpp,v 1.2 2004/06/18 19:23:21 sestegra Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -42,7 +42,7 @@ MultilingualComponentDescriptor::MultilingualComponentDescriptor(const uint8_t *
 {
 	componentTag = buffer[2];
 
-	for (size_t i = 0; i < descriptorLength - 1; i += buffer[i + 4] + 2)
+	for (size_t i = 0; i < descriptorLength - 1; i += buffer[i + 6] + 4)
 		multilingualComponents.push_back(new MultilingualComponent(&buffer[i + 3]));
 }
 
