@@ -1,8 +1,9 @@
 /*
- * $Id: getservices.cpp,v 1.37 2002/05/12 00:44:32 obi Exp $
+ * $Id: getservices.cpp,v 1.38 2002/05/12 01:56:18 obi Exp $
  */
 
-#include "frontend.h"
+#include <zapost/frontend.h>
+
 #include "getservices.h"
 
 uint8_t curr_diseqc = 0;

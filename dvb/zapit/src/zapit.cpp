@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.179 2002/05/12 00:58:37 obi Exp $
+ * $Id: zapit.cpp,v 1.180 2002/05/12 01:56:18 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -23,9 +23,7 @@
  *
  */
 
-// TODO: write a CZapit class
-
-#include <dbox/avia_gt_vbi.h>
+/* system headers */
 #include <fcntl.h>
 #include <ost/audio.h>
 #include <ost/video.h>
@@ -36,14 +34,24 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#include "configfile.h"
-#include "cam.h"
-#include "dmx.h"
-#include "frontend.h"
+/* d-box specific headers */
+#ifdef DBOX2
+#include <dbox/avia_gt_vbi.h>
+#endif
+
+/* tuxbox headers */
+#include <configfile.h>
+#include <lcddclient.h>
+
+/* zapit library headers */
+#include <zapci/cam.h>
+#include <zapost/dmx.h>
+#include <zapost/frontend.h>
+#include <zapsi/pat.h>
+#include <zapsi/pmt.h>
+
+/* zapit headers */
 #include "getservices.h"
-#include "lcddclient.h"
-#include "pat.h"
-#include "pmt.h"
 #include "zapit.h"
 
 #define debug(fmt, args...) { if (debug) printf(fmt, ## args); }
@@ -1200,7 +1208,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.179 2002/05/12 00:58:37 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.180 2002/05/12 01:56:18 obi Exp $\n\n");
 
 	if (argc > 1)
 	{

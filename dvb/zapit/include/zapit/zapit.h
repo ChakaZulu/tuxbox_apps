@@ -1,12 +1,13 @@
 /*
- * $Id: zapit.h,v 1.57 2002/05/12 00:07:16 obi Exp $
+ * $Id: zapit.h,v 1.58 2002/05/12 01:56:18 obi Exp $
  */
 
 #ifndef __zapit_h__
 #define __zapit_h__
 
+#include <clientlib/zapitclient.h>
+
 #include "bouquets.h"
-#include "zapitclient.h"
 
 typedef struct decode_struct
 {
@@ -15,7 +16,7 @@ typedef struct decode_struct
 } decode_vals;
 
 int prepare_channels();
-int save_settings (bool write);
+void save_settings (bool write);
 void *start_scanthread(void *);
 int start_scan();
 

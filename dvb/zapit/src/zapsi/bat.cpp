@@ -1,8 +1,8 @@
 /*
- * $Id: bat.cpp,v 1.1 2002/05/05 01:52:36 obi Exp $
+ * $Id: bat.cpp,v 1.2 2002/05/12 01:56:19 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -20,7 +20,6 @@
  */
 
 #include <fcntl.h>
-#include <ost/dmx.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -31,15 +30,15 @@
 /* debug */
 #include <stdlib.h>
 
+#include <zapost/dmx.h>
+
 #include "bat.h"
 #include "descriptors.h"
 
 #define DEMUX_DEV "/dev/ost/demux0"
 
-int parse_bat ()
+int parse_bat (int demux_fd)
 {
-	struct dmxSctFilterParams flt;
-	int demux_fd;
 	uint8_t buffer[1024];
 	uint8_t section = 0;
 
@@ -56,34 +55,17 @@ int parse_bat ()
 	uint16_t transport_stream_id;
 	uint16_t original_network_id;
 	uint16_t transport_descriptors_length;
-  
-	if ((demux_fd = open(DEMUX_DEV, O_RDWR)) < 0)
-	{
-		perror("[bat.cpp] " DEMUX_DEV);
-		return -1;
-	}
-
-	memset (&flt.filter, 0, sizeof(struct dmxFilter));
-
-	flt.pid = 0x0011;
-	flt.filter.filter[0] = 0x4A;
-	flt.filter.mask[0] = 0xFF;
-	flt.timeout = 10000;
-	flt.flags = DMX_CHECK_CRC | DMX_IMMEDIATE_START;
-
-	if (ioctl(demux_fd, DMX_SET_FILTER, &flt) < 0)
-	{
-		perror("[bat.cpp] DMX_SET_FILTER");
-		close(demux_fd);
-		return -1;
-	}
 
 	do
 	{
+		if (setDmxSctFilter(demux_fd, 0x0011, 0x4A) < 0)
+		{
+			return -1;
+		}
+
 		if (read(demux_fd, buffer, sizeof(buffer)) < 0)
 		{
 			perror("[bat.cpp] read");
-			close(demux_fd);
 			return -1;
 		}
 
@@ -149,8 +131,7 @@ int parse_bat ()
 		}
 	}
 	while (section++ != buffer[7]);
- 
-	close(demux_fd);
+
 	return 0;
 }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: pat.cpp,v 1.22 2002/05/09 20:14:00 obi Exp $
+ * $Id: pat.cpp,v 1.23 2002/05/12 01:56:19 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org> jaja :)
  *
@@ -19,13 +19,16 @@
  *
  */
 
-#include "dmx.h"
-#include "pat.h"
-#include "scan.h"
-#include "zapitclient.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+
+#include <clientlib/zapitclient.h>
+#include <zapost/dmx.h>
+
+#include <scan.h>
+
+#include "pat.h"
 
 #define DEMUX_DEV "/dev/ost/demux0"
 

@@ -1,19 +1,20 @@
 /*
- * $Id: scan.cpp,v 1.49 2002/05/08 14:32:57 faralla Exp $
+ * $Id: scan.cpp,v 1.50 2002/05/12 01:56:18 obi Exp $
  */
 
-#include "frontend.h"
-#include "nit.h"
-#include "scan.h"
-#include "sdt.h"
-#include "xml/xmltree.h"
-#include "zapit.h"
-#include "zapitclient.h"
+#include <clientlib/zapitclient.h>
+#include <xml/xmltree.h>
+#include <zapost/frontend.h>
+#include <zapsi/nit.h>
+#include <zapsi/pat.h>
+#include <zapsi/sdt.h>
+
 #include "bouquets.h"
-#include "pat.h"
+#include "scan.h"
+#include "zapit.h"
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #else
 #define CONFIGDIR "/var/tuxbox/config"
 #endif
@@ -95,7 +96,7 @@ void build_bf_transponder(uint32_t frequency, uint32_t symbol_rate, CodeRate FEC
 	feparams.u.qam.SymbolRate = symbol_rate;
 	feparams.u.qam.FEC_inner = FEC_inner;
 	feparams.u.qam.QAM = modulation;
-	
+
 	if (frontend->tuneFrequency(feparams, 0, 0) == true)
 	{
 		uint16_t onid = get_onid();
@@ -289,7 +290,7 @@ void *start_scanthread(void *param)
 	uint8_t polarization;
 	uint8_t fec_inner;
 	uint8_t modulation;
-	
+
 	bool satfeed = false;
 
 	scanBouquetManager = new CBouquetManager();
@@ -358,8 +359,8 @@ void *start_scanthread(void *param)
 		if (!strcmp(type, "cable") && search->GetAttributeValue("satfeed"))
 			if (!strcmp(search->GetAttributeValue("satfeed"),"true"))
 				satfeed = true;
-				
-		
+
+
 		/* increase sat counter */
 		curr_sat++;
 

@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.h,v 1.4 2002/05/05 01:52:36 obi Exp $
+ * $Id: pmt.h,v 1.5 2002/05/12 01:56:19 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -22,8 +22,8 @@
 #ifndef __pmt_h__
 #define __pmt_h__
 
-#include "ci.h"
-#include "getservices.h"
+#include <getservices.h>
+#include <zapci/ci.h>
 
 int parse_pmt (int demux_fd, CZapitChannel * channel);
 unsigned short parse_ES_info (unsigned char *buffer, CZapitChannel * channel, CCaPmt * caPmt);

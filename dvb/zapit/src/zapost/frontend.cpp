@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.15 2002/05/05 01:52:36 obi Exp $
+ * $Id: frontend.cpp,v 1.16 2002/05/12 01:56:18 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -31,8 +31,9 @@
 
 #include <iostream>
 
+#include <zapsi/nit.h>
+
 #include "frontend.h"
-#include "nit.h"
 
 #define FRONTEND_DEVICE	"/dev/ost/frontend0"
 #define SEC_DEVICE	"/dev/ost/sec0"

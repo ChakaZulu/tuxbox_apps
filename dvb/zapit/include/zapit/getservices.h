@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.h,v 1.39 2002/05/05 01:52:36 obi Exp $
+ * $Id: getservices.h,v 1.40 2002/05/12 01:56:18 obi Exp $
  */
 
 #ifndef __getservices_h__
@@ -13,11 +13,12 @@
 #include <iostream>
 #include <string>
 
-#include "ci.h"
-#include "descriptors.h"
-#include "eventserver.h"
-#include "sdt.h"
-#include "xml/xmltree.h"
+#include <eventserver.h>
+
+#include <xml/xmltree.h>
+#include <zapci/ci.h>
+#include <zapsi/descriptors.h>
+#include <zapsi/sdt.h>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"

@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.14 2002/05/11 22:09:27 obi Exp $
+ * $Id: pmt.cpp,v 1.15 2002/05/12 01:56:19 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -26,8 +26,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include <zapost/dmx.h>
+
 #include "descriptors.h"
-#include "dmx.h"
 #include "pmt.h"
 
 #define DEMUX_DEV "/dev/ost/demux0"
