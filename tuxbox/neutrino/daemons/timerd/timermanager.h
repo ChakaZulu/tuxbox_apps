@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.h,v 1.12 2002/05/31 20:27:38 dirch Exp $
+	$Id: timermanager.h,v 1.13 2002/06/11 21:19:03 dirch Exp $
 
 	License: GPL
 
@@ -77,8 +77,6 @@ class CTimerEvent
 		{
 			unsigned long long epgID;
 			int      onidSid;
-			char     name[50];
-			int      fsk;
 		};
 		
 		enum CTimerEventRepeat 

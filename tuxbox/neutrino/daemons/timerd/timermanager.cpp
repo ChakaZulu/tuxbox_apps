@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.cpp,v 1.16 2002/05/31 20:27:38 dirch Exp $
+	$Id: timermanager.cpp,v 1.17 2002/06/11 21:19:03 dirch Exp $
 
 	License: GPL
 
@@ -293,7 +293,11 @@ void CTimerEvent::printEvent(void)
 	switch(eventType)
 	{		
 		case CTimerEvent::TIMER_ZAPTO :
-			dprintf("Zapto: %u\n",static_cast<CTimerEvent_NextProgram*>(this)->eventInfo.onidSid);
+			dprintf("Zapto: %x epg: %llx\n",static_cast<CTimerEvent_NextProgram*>(this)->eventInfo.onidSid,static_cast<CTimerEvent_NextProgram*>(this)->eventInfo.epgID);
+		break;
+
+		case CTimerEvent::TIMER_RECORD :
+			dprintf("Record: %x epg: %llx\n",static_cast<CTimerEvent_NextProgram*>(this)->eventInfo.onidSid,static_cast<CTimerEvent_NextProgram*>(this)->eventInfo.epgID);
 		break;
 
 		case CTimerEvent::TIMER_STANDBY :
@@ -393,7 +397,8 @@ void CTimerEvent_Record::fireEvent()
 {
 	CTimerManager::getInstance()->getEventServer()->sendEvent(
 		CTimerdClient::EVT_RECORD_START,
-		CEventServer::INITID_TIMERD);
+		CEventServer::INITID_TIMERD,
+		&eventInfo, sizeof(CTimerEvent::EventInfo));
 	dprintf("Record Timer fired\n"); 
 }
 
