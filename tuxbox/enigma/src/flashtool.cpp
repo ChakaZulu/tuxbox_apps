@@ -1,6 +1,6 @@
 /**********************************************
 *
-*	$Revision: 1.3 $
+*	$Revision: 1.4 $
 *
 **********************************************/
 
@@ -26,10 +26,10 @@ class FlashProgressWindow: public eWindow
 {
 public:
 	eProgress progress;
-	FlashProgressWindow( const char * );
+	FlashProgressWindow(const char *);
 };
 
-FlashProgressWindow::FlashProgressWindow( const char *wtext )
+FlashProgressWindow::FlashProgressWindow(const char *wtext)
 	:eWindow(0), progress(this)
 {
 	move(ePoint(100,250));
@@ -44,15 +44,14 @@ eFlashtoolMain::eFlashtoolMain()
 	:eListBoxWindow<eListBoxEntryText>(_("Flashtool"), 2, 350)
 {
 	move(ePoint(150, 100));
-	//new eListBoxEntryText(&list, _("back"), (void*)-1);
-	new eListBoxEntryText(&list, _("Save image or part of it"), (void*)0);
-	new eListBoxEntryText(&list, _("Flash image or part of it"), (void*)1);
+	new eListBoxEntryText(&list, _("Save image or part of it"), (void *)0);
+	new eListBoxEntryText(&list, _("Flash image or part of it"), (void *)1);
 	CONNECT(list.selected, eFlashtoolMain::sel_item);
 }
 
 void eFlashtoolMain::sel_item(eListBoxEntryText *sel)
 {
-	if(sel)
+	if (sel)
 	{
 		int flashtool=(int)sel->getKey();
 		/*if (flashtool==-1)
@@ -83,36 +82,36 @@ eFlashtool::eFlashtool(int direction)
 
 	flashimage = direction;
 	move(ePoint(150, 100));
-	//new eListBoxEntryText(&list, _("back"), (void*)-1);
+	//new eListBoxEntryText(&list, _("back"), (void *)-1);
 
 	FILE* fd = fopen("/proc/mtd", "r");
-	if(!fd)
+	if (!fd)
 	{
 		perror("cannot read /proc/mtd");
 		return;
 	}
 
-	int entrys=0;
+	int entries = 0;
 	char buf[1000];
-	fgets(buf,sizeof(buf),fd);
+	fgets(buf,sizeof(buf), fd);
 	while(!feof(fd))
 	{
-		if(fgets(buf,sizeof(buf),fd)!=NULL)
+		if (fgets(buf, sizeof(buf), fd) != NULL)
 		{
-			char mtdname[50]="";
-			int mtdnr=0;
-			int mtdsize=0;
-			int mtderasesize=0;
+			char mtdname[50] = "";
+			int mtdnr = 0;
+			int mtdsize = 0;
+			int mtderasesize = 0;
 			sscanf(buf, "mtd%d: %x %x \"%[a-zA-Z0-9 =/+`äö<>@^°!?'.:,_-()#\\]\"\n", &mtdnr, &mtdsize, &mtderasesize, mtdname);
 			new eListBoxEntryText(&list, _(mtdname), (void*)mtdnr);
-			entrys++;
+			entries++;
 		}
 	}
 	fclose(fd);
 
-	cresize( eSize(400, 10+entrys * eListBoxEntryText::getEntryHeight() ) );
+	cresize(eSize(400, 10 + entries * eListBoxEntryText::getEntryHeight()));
 	list.move(ePoint(10, 5));
-	list.resize(eSize(getClientSize().width()-20, getClientSize().height()-(5) ));
+	list.resize(eSize(getClientSize().width() - 20, getClientSize().height() - 5));
 
 	CONNECT(list.selected, eFlashtool::sel_item);
 }
@@ -123,11 +122,11 @@ eFlashtool::~eFlashtool()
 
 void eFlashtool::sel_item(eListBoxEntryText *sel)
 {
-	if(sel)
+	if (sel)
 	{
-		mtd=(int)sel->getKey();
+		mtd = (int)sel->getKey();
 
-		/*if(mtd==-1)
+		/*if (mtd == -1)
 		{
 			eWidget::accept();
 			return;
@@ -138,18 +137,18 @@ void eFlashtool::sel_item(eListBoxEntryText *sel)
 		char destination[100];
 		eFlashtoolSource imagesource(flashimage);
 		imagesource.show();
-		int res=imagesource.exec();
+		int res = imagesource.exec();
 		imagesource.hide();
-		strcpy(destination,imagesource.getDestination());
+		strcpy(destination, imagesource.getDestination());
 
-		if (res==2)
-			if (flashimage==0)
+		if (res == 2)
+			if (flashimage == 0)
 				readmtd(destination);
 			else
 			{
-				eMessageBox box(_("Do you really want to flash a new image now?"), _("Flash"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconWarning, eMessageBox::btNo );
+				eMessageBox box(_("Do you really want to flash a new image now?"), _("Flash"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconWarning, eMessageBox::btNo);
 				box.show();
-				int res=box.exec();
+				int res = box.exec();
 				box.hide();
 				if (res == eMessageBox::btYes)
 					programm(destination);
@@ -162,39 +161,39 @@ void eFlashtool::programm(char filename[])
 {
 	char mtddev[20];
 
-	sprintf(mtddev,"/dev/mtd/%d",mtd);
+	sprintf(mtddev,"/dev/mtd/%d", mtd);
 
-	if (access(filename,0)==0)
+	if (access(filename, R_OK) == 0)
 	{
-		int		fd1, fd2;
-		unsigned long	filesize;
+		int fd1, fd2;
+		unsigned long filesize;
 
 		hide();
 
-		if( (fd1 = open( filename, O_RDONLY )) < 0 )
+		if ((fd1 = open(filename, O_RDONLY)) < 0)
 		{
-			eMessageBox box(_("Can't read image!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK );
+			eMessageBox box(_("Can't read image!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK);
 			box.show();
 			box.exec();
 			box.hide();
 			return;
 		}
 
-		filesize = lseek( fd1, 0, SEEK_END);
-		lseek( fd1, 0, SEEK_SET);
+		filesize = lseek(fd1, 0, SEEK_END);
+		lseek(fd1, 0, SEEK_SET);
 
-		if(filesize==0)
+		if (filesize==0)
 		{
-			eMessageBox box(_("Image has filesize of 0byte!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK );
+			eMessageBox box(_("Image has file size of 0 bytes!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK);
 			box.show();
 			box.exec();
 			box.hide();
 			return;
 		}
 
-		if( (fd2 = open(mtddev, O_WRONLY )) < 0 )
+		if ((fd2 = open(mtddev, O_WRONLY)) < 0)
 		{
-			eMessageBox box(_("Can't open mtd!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK );
+			eMessageBox box(_("Can't open mtd!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK);
 			box.show();
 			box.exec();
 			box.hide();
@@ -203,14 +202,14 @@ void eFlashtool::programm(char filename[])
 		}
 
 		mtd_info_t meminfo;
-		if( ioctl( fd2, MEMGETINFO, &meminfo ) != 0 )
+		if (ioctl(fd2, MEMGETINFO, &meminfo) != 0)
 		{
 			return;
 		}
 
 		if (filesize > meminfo.size)
 		{
-			eMessageBox box(_("Imagesize is to big! Can't flash!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK );
+			eMessageBox box(_("Image size is too big! Can't flash!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK);
 			box.show();
 			box.exec();
 			box.hide();
@@ -219,7 +218,7 @@ void eFlashtool::programm(char filename[])
 
 		if (filesize < ((meminfo.size/100)*70))
 		{
-			eMessageBox box(_("Imagesize to small! Do you really want to flash it?"), _("Flash"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconWarning, eMessageBox::btNo );
+			eMessageBox box(_("Image size is too small! Do you really want to flash it?"), _("Flash"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconWarning, eMessageBox::btNo);
 			box.show();
 			int res=box.exec();
 			box.hide();
@@ -229,7 +228,7 @@ void eFlashtool::programm(char filename[])
 			}
 		}
 
-		eMessageBox mb(_("Please wait... do NOT switch off the receiver!"),_("upgrade in progress"), eMessageBox::iconInfo);
+		eMessageBox mb(_("Please wait... do NOT switch off the receiver!"),_("flashing in progress"), eMessageBox::iconInfo);
 		mb.show();
 
 		sync();
@@ -242,33 +241,33 @@ void eFlashtool::programm(char filename[])
 
 		printf("Starting erasing %s...\n",mtddev);
 
-		if(!erase())
+		if (!erase())
 		{
-			eMessageBox box(_("Erase error!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK );
+			eMessageBox box(_("Erase error!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK);
 			box.show();
 			box.exec();
 			box.hide();
 			return;
 		}
 
-		FlashProgressWindow wnd(_("Writing Software to Flash...\n"));
+		FlashProgressWindow wnd(_("Writing image to flash...\n"));
 		wnd.show();
 
 		char buf[meminfo.erasesize];
 		long fsize = filesize;
 
 		printf("flashing now...\n");
-		while(fsize>0)
+		while (fsize > 0)
 		{
 			long block = fsize;
-			if(block>(long)sizeof(buf))
+			if (block>(long)sizeof(buf))
 			{
 				block = sizeof(buf);
 			}
-			read( fd1, buf, block);
-			write( fd2, buf, block);
+			read(fd1, buf, block);
+			write(fd2, buf, block);
 			fsize -= block;
-			wnd.progress.setPerc( ((filesize-fsize)*100)/filesize );
+			wnd.progress.setPerc(((filesize - fsize) * 100) / filesize);
 		}
 
 		close(fd1);
@@ -276,8 +275,8 @@ void eFlashtool::programm(char filename[])
 		wnd.hide();
 		mb.hide();
 		printf("finished\n");
-		eMessageBox mbend(_("upgrade successful! restarting..."),
-				_("upgrade ok"),eMessageBox::btOK|eMessageBox::iconInfo);
+		eMessageBox mbend(_("Flashing successful! restarting..."),
+				_("flashing ok"),eMessageBox::btOK|eMessageBox::iconInfo);
 		mbend.show();
 		mbend.exec();
 		mbend.hide();
@@ -287,7 +286,7 @@ void eFlashtool::programm(char filename[])
 	}
 	else
 	{
-		eMessageBox box(_("Image not found!"), _("Flash"), eMessageBox::iconWarning|eMessageBox::btOK );
+		eMessageBox box(_("Image not found!"), _("Flash"), eMessageBox::iconWarning|eMessageBox::btOK);
 		box.show();
 		box.exec();
 		box.hide();
@@ -296,35 +295,35 @@ void eFlashtool::programm(char filename[])
 
 bool eFlashtool::erase()
 {
-	int				fd;
-	mtd_info_t		meminfo;
-	erase_info_t	erase;
+	int fd;
+	mtd_info_t meminfo;
+	erase_info_t erase;
 
-	char mtddev[20];
-	sprintf(mtddev,"/dev/mtd/%d",mtd);
+	eString mtddev;
+	mtddev.sprintf("/dev/mtd/%d", mtd);
 
-	if( (fd = open( mtddev, O_RDWR )) < 0 )
+	if ((fd = open(mtddev.c_str(), O_RDWR)) < 0)
 	{
 		return false;
 	}
 
-	if( ioctl( fd, MEMGETINFO, &meminfo ) != 0 )
+	if (ioctl(fd, MEMGETINFO, &meminfo) != 0)
 	{
 		return false;
 	}
 
-	FlashProgressWindow wnd(_("Erasing Flash..."));
+	FlashProgressWindow wnd(_("Erasing flash..."));
 	wnd.show();
 	erase.length = meminfo.erasesize;
-	for (erase.start = 0; erase.start < meminfo.size;erase.start += meminfo.erasesize)
+	for (erase.start = 0; erase.start < meminfo.size; erase.start += meminfo.erasesize)
 	{
 
-		printf( "\rErasing %u Kibyte @ %x -- %2u %% complete.",
-		                 meminfo.erasesize/1024, erase.start,
-		                 erase.start*100/meminfo.size );
+		printf("\rErasing %u KByte @ %x -- %2u %% complete.",
+		                 meminfo.erasesize / 1024, erase.start,
+		                 erase.start * 100 / meminfo.size);
 
-		wnd.progress.setPerc( erase.start*100/meminfo.size );
-		if(ioctl( fd, MEMERASE, &erase) != 0)
+		wnd.progress.setPerc(erase.start * 100 / meminfo.size);
+		if (ioctl(fd, MEMERASE, &erase) != 0)
 		{
 			close(fd);
 			return false;
@@ -338,48 +337,46 @@ bool eFlashtool::erase()
 
 bool eFlashtool::readmtd(char destination[])
 {
-	int		fd1, fd2;
-	char 	mtddev[50];
-	long	filesize;
-	mtd_info_t		meminfo;
+	int fd1, fd2;
+	char mtddev[50];
+	long filesize;
+	mtd_info_t meminfo;
 
-	FILE *fd = fopen("/.version","r");
+	FILE *fd = fopen("/.version", "r");
 
 	char filename[50];
-	sprintf(filename,"%s/mtd%d.img",destination,mtd);
+	sprintf(filename, "%s/mtd%d.img", destination, mtd);
 	if (fd)
 	{
 		char buffer[100];
-		fgets(buffer,sizeof(buffer),fd);
+		fgets(buffer, sizeof(buffer), fd);
 		fclose(fd);
 		char date[9];
 		char time[5];
-		sscanf(buffer,"version=%*2s%*2s%8s%4s",date,time);
-		sprintf(filename,"%s/%s_%s_mtd%d.img",destination,date,time,mtd);
+		sscanf(buffer,"version=%*2s%*2s%8s%4s", date, time);
+		sprintf(filename,"%s/%s_%s_mtd%d.img", destination, date, time, mtd);
 	}
 
-	sprintf(mtddev,"/dev/mtd/%d",mtd);
+	sprintf(mtddev, "/dev/mtd/%d", mtd);
 
-	if( (fd1 = open( mtddev, O_RDONLY )) < 0 )
+	if ((fd1 = open(mtddev, O_RDONLY)) < 0)
 	{
-		eMessageBox box(_("Can't open mtd device!"), _("Flash"), eMessageBox::iconWarning|eMessageBox::btOK );
+		eMessageBox box(_("Can't open mtd device!"), _("Flash"), eMessageBox::iconWarning|eMessageBox::btOK);
 		box.show();
 		box.exec();
 		box.hide();
 		return false;
 	}
 
-	if( ioctl( fd1, MEMGETINFO, &meminfo ) != 0 )
+	if (ioctl(fd1, MEMGETINFO, &meminfo) != 0)
 	{
 		return false;
 	}
 
-
-	if( (fd2 = open( filename, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR  |  S_IRGRP | S_IWGRP  |  S_IROTH | S_IWOTH)) < 0 )
+	if ((fd2 = open(filename, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR  |  S_IRGRP | S_IWGRP  |  S_IROTH | S_IWOTH)) < 0)
 	{
-		char message[100];
-		sprintf(message,"Can't open %s to write!",destination);
-		eMessageBox box(message, _("Flash"), eMessageBox::iconWarning|eMessageBox::btOK );
+		eString message = eString(_("Can't open ")) + eString(destination) + eString(_(" for writing!"));
+		eMessageBox box(message.c_str(), _("Flash"), eMessageBox::iconWarning|eMessageBox::btOK);
 		box.show();
 		box.exec();
 		box.hide();
@@ -389,32 +386,29 @@ bool eFlashtool::readmtd(char destination[])
 
 	filesize = meminfo.size;
 
-	eMessageBox mb(_("Please wait while saving partition..."),_("saving in progress"), eMessageBox::iconInfo);
+	eMessageBox mb(_("Please wait while partition is being saved..."),_("saving in progress"), eMessageBox::iconInfo);
 	mb.show();
 
 	FlashProgressWindow wnd(_("Read Flash..."));
 	wnd.show();
 	char buf[meminfo.erasesize];
 	long fsize = filesize;
-	while(fsize>0)
+	while(fsize > 0)
 	{
 		long block = fsize;
-		if(block>(long)sizeof(buf))
-		{
+		if (block > (long)sizeof(buf))
 			block = sizeof(buf);
-		}
-		read( fd1, &buf, block);
-		write( fd2, &buf, block);
+		read(fd1, &buf, block);
+		write(fd2, &buf, block);
 		fsize -= block;
-		wnd.progress.setPerc( ((filesize-fsize)*100)/filesize );
+		wnd.progress.setPerc(((filesize - fsize) * 100) / filesize);
 	}
 	close(fd1);
 	close(fd2);
 	wnd.hide();
 
-	char message_saved[100];
-	sprintf(message_saved,_("Image saved to %s!"),filename);
-	eMessageBox boxend(message_saved, _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK );
+	eString message = eString(_("Image saved to: ")) + eString(filename);
+	eMessageBox boxend(message.c_str(), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK);
 	boxend.show();
 	boxend.exec();
 	boxend.hide();
@@ -425,64 +419,64 @@ bool eFlashtool::readmtd(char destination[])
 }
 
 eFlashtoolImageView::eFlashtoolImageView(char folder[])
-	:eListBoxWindow<eListBoxEntryText>(_("Imagelist"), 11, 530)
+	:eListBoxWindow<eListBoxEntryText>(_("Image list"), 11, 530)
 {
-	new eListBoxEntryText(&list, _("back"), (void*)new eString("back"), 0, "choose your image and press OK...");
+	new eListBoxEntryText(&list, _("back"), (void *)new eString("back"), 0, "Choose your image and press OK...");
 
 	move(ePoint(100, 100));
-	int entrys=2;
+	int entries = 2;
 	struct dirent **namelist;
 	int n = scandir(folder, &namelist, 0, alphasort);
 	if (n < 0)
 	{
-		perror("no flashimages available");
+		perror("no flash images available");
 	}
 	else
 	{
-		for(int count=0;count<n;count++)
+		for(int count = 0; count < n; count++)
 		{
 			eString filen = namelist[count]->d_name;
 			int pos = filen.find(".img");
-			if(pos!=-1)
+			if (pos != -1)
 			{
 				char tmp[100];
 				char helptext[100];
 				int fd1;
-				sprintf(tmp,"%s/%s",folder,filen.c_str());
-				if( (fd1 = open( tmp, O_RDONLY )) < 0 )
-					sprintf(helptext,"WARNING: can't open this image!");
+				sprintf(tmp, "%s/%s", folder, filen.c_str());
+				if ((fd1 = open(tmp, O_RDONLY)) < 0)
+					sprintf(helptext, "WARNING: can't open this image!");
 				else
 				{
-					int filesize = lseek( fd1, 0, SEEK_END);
-					lseek( fd1, 0, SEEK_SET);
-					sprintf(helptext,"Imagesize: %d byte\n",filesize);
+					int filesize = lseek(fd1, 0, SEEK_END);
+					lseek(fd1, 0, SEEK_SET);
+					sprintf(helptext, "Image size: %d byte\n", filesize);
 					::close(fd1);
 				}
 
 				new eListBoxEntryText(&list, filen, (void *)new eString(tmp), 0, helptext);
-				entrys++;
+				entries++;
 			}
 			free(namelist[count]);
 		}
 		free(namelist);
 	}
 
-	cresize( eSize(530, 10+(entrys>10?10:entrys) * eListBoxEntryText::getEntryHeight() ) );
+	cresize(eSize(530, 10 + (entries > 10 ? 10 : entries) * eListBoxEntryText::getEntryHeight()));
 	list.move(ePoint(10, 5));
-	list.resize(eSize(getClientSize().width()-20, getClientSize().height()-(30) ));
+	list.resize(eSize(getClientSize().width() - 20, getClientSize().height() - 30));
 
 	CONNECT(list.selected, eFlashtoolImageView::sel_item);
 
-	statusbar=new eStatusBar(this);
-	statusbar->move( ePoint(0, clientrect.height()-30 ) );
-	statusbar->resize( eSize( clientrect.width(), 30) );
+	statusbar = new eStatusBar(this);
+	statusbar->move(ePoint(0, clientrect.height() - 30));
+	statusbar->resize(eSize(clientrect.width(), 30));
 	statusbar->setText("");
 	statusbar->loadDeco();
 }
 
 void eFlashtoolImageView::sel_item(eListBoxEntryText *sel)
 {
-	if(sel)
+	if (sel)
 	{
 		sprintf(buffer,((eString *)sel->getKey())->c_str());
 		close(1);
@@ -507,33 +501,37 @@ eFlashtoolSource::eFlashtoolSource(int direction)
 	:eListBoxWindow<eListBoxEntryText>(_("Save to..."), 3, 400)
 #endif
 {
-	flash=false;
+	flash = false;
 
-	if (direction==1)
+	if (direction == 1)
 	{
 		setText(_("Select source..."));
-		flash=true;
+		flash = true;
 	}
 
 	move(ePoint(150, 100));
-	//new eListBoxEntryText(&list, _("back"), (void*)"back");
-	new eListBoxEntryText(&list, "tmp", (void*)"/tmp");
+	//new eListBoxEntryText(&list, _("back"), (void *)"back");
+	new eListBoxEntryText(&list, "tmp", (void *)"/tmp");
 #ifndef DISABLE_FILE
-	new eListBoxEntryText(&list, "HDD", (void*)"/hdd/images");
-	new eListBoxEntryText(&list, "USB", (void*)"/var/mnt/USB/images");
+	if (access("/hdd/images", W_OK) == 0)
+		new eListBoxEntryText(&list, "HDD", (void *)"/hdd/images");
+	if (access("/var/mnt/USB/images", W_OK) == 0)
+		new eListBoxEntryText(&list, "USB", (void *)"/var/mnt/USB/images");
 #endif
-	new eListBoxEntryText(&list, "NFS", (void*)"/var/mnt/NFS/images");
-	new eListBoxEntryText(&list, "CIFS", (void*)"/var/mnt/CIFS/images");
+	if (access("/var/mnt/NFS/images", W_OK) == 0)
+		new eListBoxEntryText(&list, "NFS", (void *)"/var/mnt/NFS/images");
+	if (access("/var/mnt/CIFS/images", W_OK) == 0)
+		new eListBoxEntryText(&list, "CIFS", (void *)"/var/mnt/CIFS/images");
 	CONNECT(list.selected, eFlashtoolSource::sel_item);
 }
 
 void eFlashtoolSource::sel_item(eListBoxEntryText *sel)
 {
-	if(sel)
+	if (sel)
 	{
-		strcpy(buffer,(char *)sel->getKey());
+		strcpy(buffer, (char *)sel->getKey());
 
-		if(strcmp(buffer,"back")==0)
+		if (strcmp(buffer, "back") == 0)
 		{
 			close(1);
 			return;
@@ -541,16 +539,16 @@ void eFlashtoolSource::sel_item(eListBoxEntryText *sel)
 
 		hide();
 
-		int res=1;
+		int res = 1;
 		if (flash)
 		{
 			eFlashtoolImageView image(buffer);
 			image.show();
-			res=image.exec();
+			res = image.exec();
 			image.hide();
-			strcpy(buffer,image.getFilename());
+			strcpy(buffer, image.getFilename());
 		}
-		if (strcmp(buffer,"back")==0 || res==0)
+		if (strcmp(buffer, "back") == 0 || res == 0)
 			show();
 		else
 			close(2);
@@ -565,6 +563,3 @@ char* eFlashtoolSource::getDestination()
 eFlashtoolSource::~eFlashtoolSource()
 {
 }
-
-
-
