@@ -1,4 +1,11 @@
-TODO: lots ;-)
+TODO: 
+- scaling (client side)
+- automatic panning of screen when cursor reaches screen boarders
+- bgr233 mode
+- virtual overlay keyboard
+- support for IR keyboard
+
+lots more;-)
 
 DONE: 
 - get rid of reuqired lib ofbis
