@@ -16,7 +16,7 @@ struct SNeutrinoSettings
 	int audio_DolbyDigital;
 
 	//language
-	char language[20];
+	char language[25];
 
 	//colors
 	unsigned char menu_Head_alpha;
