@@ -73,6 +73,11 @@ AC_SUBST(targetprefix)
 AC_SUBST(targetdatadir)
 AC_SUBST(targetsysconfdir)
 AC_SUBST(targetlocalstatedir)
+
+check_path () {
+	return `perl -e "if(\"$1\"=~m#^/usr/(local/)?bin#){print \"0\"}else{print \"1\";}"`
+}
+
 ])
 
 AC_DEFUN_ONCE([TUXBOX_APPS_DIRECTORY],[
@@ -118,6 +123,17 @@ AC_CHECK_HEADERS(endian.h)
 AC_C_BIGENDIAN
 ])
 
+AC_DEFUN_ONCE([TUXBOX_APPS_DRIVER],[
+AC_ARG_WITH(driver,
+	[  --with-driver=PATH      path for driver sources[[NONE]]],
+	[DRIVER="$withval"],[DRIVER=""])
+
+if test -z "$DRIVER"; then
+	AC_MSG_ERROR([can't find driver sources])
+fi
+AC_SUBST(DRIVER)
+])
+
 AC_DEFUN_ONCE([TUXBOX_APPS_DVB],[
 AC_ARG_WITH(dvbincludes,
 	[  --with-dvbincludes=PATH path for dvb includes[[NONE]]],
@@ -146,5 +162,54 @@ OST_DMX_H=
 CFLAGS="$orig_CFLAGS -I$DVBINCLUDES"
 CPPFLAGS="$orig_CPPFLAGS -I$DVBINCLUDES"
 CXXFLAGS="$CXXFLAGS -I$DVBINCLUDES"
+])
+
+AC_DEFUN([_TUXBOX_APPS_LIB_CONFIG_CHECK],[
+AC_PATH_PROG($2_CONFIG,$3,no)
+
+if test "$$2_CONFIG" = "no"; then
+	AC_MSG_$1([could not find $3]);
+else
+	if test "$TARGET" = "cdk" && check_path "$$2_CONFIG"; then
+		AC_MSG_$1([could not find a suitable version of $3]);
+	else
+		$2_CFLAGS=`$$2_CONFIG --cflags`
+		$2_LIBS=`$$2_CONFIG --libtool`
+	fi
+fi
+
+AC_SUBST($2_CFLAGS)
+AC_SUBST($2_LIBS)
+])
+
+AC_DEFUN([TUXBOX_APPS_LIB_CONFIG_CHECK],[
+_TUXBOX_APPS_LIB_CONFIG_CHECK(ERROR,$1,$2)
+])
+
+AC_DEFUN([TUXBOX_APPS_LIB_CONFIG_CHECK_WARN],[
+_TUXBOX_APPS_LIB_CONFIG_CHECK(WARN,$1,$2)
+])
+
+AC_DEFUN([_TUXBOX_APPS_LIB_PKGCONFIG_CHECK],[
+if test -z "$PKG_CONFIG"; then
+	AC_PATH_PROG(PKG_CONFIG, pkg-config,no)
+fi
+
+if test "$PKG_CONFIG" = "no" ; then
+	AC_MSG_$1([could not find pkg-config]);
+else
+	AC_MSG_CHECKING(for $3)
+	if $PKG_CONFIG --exists "$3" ; then
+		AC_MSG_RESULT(yes)
+		$2_CFLAGS=`$PKG_CONFIG --cflags "$3"`
+		$2_LIBS=`$PKG_CONFIG --libs "$3"`
+	else
+		AC_MSG_RESULT(no)
+		AC_MSG_$1([could not find $3]);
+	fi
+fi
+
+AC_SUBST($2_CFLAGS)
+AC_SUBST($2_LIBS)
 ])
 
