@@ -2359,8 +2359,8 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	{
 		unsigned int old_id = channelList->getActiveChannelOnid_sid();
 
-		channelsInit();
-		tvMode( true );
+		channelsInit();  // <- this is done by tvMode(true);, too - except for the case that we were in tvMode
+//		tvMode( true );  // ???? what is the sense of that action ???? (update in case of scart & standby mode?)
 
 		if ( ! channelList->zapToOnidSid ( old_id ) )
 			channelList->zapTo( 0 );
@@ -2670,7 +2670,6 @@ void CNeutrinoApp::radioMode( bool rezap)
 
 	if ( rezap )
 	{
-		firstChannel();
 		g_RemoteControl->radioMode();
 		firstChannel();
 		channelsInit();
@@ -2785,7 +2784,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.314 2002/09/04 00:16:52 dirch Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.315 2002/09/04 13:57:39 thegoodguy Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

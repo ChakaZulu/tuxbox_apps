@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.215 2002/09/04 11:52:55 obi Exp $
+ * $Id: zapit.cpp,v 1.216 2002/09/04 13:57:39 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -242,20 +242,16 @@ void save_settings (bool write)
 	}
 }
 
-channel_msg load_settings()
+channel_msg load_settings()  // ATTENTION: output_msg.name is returned undefined!
 {
 	channel_msg output_msg;
-	string valueName;
+
 	if (config->getInt32("lastChannelMode", 0))
-	{
 		output_msg.mode = 'r';
-	}
 	else
-	{
 		output_msg.mode = 't';
-	}
-	valueName = (currentMode & RADIO_MODE) ? "lastChannelRadio" : "lastChannelTV";
-	output_msg.chan_nr = config->getInt32(valueName, 1);
+
+	output_msg.chan_nr = config->getInt32((currentMode & RADIO_MODE) ? "lastChannelRadio" : "lastChannelTV", 1);
 
 	return output_msg;
 }
@@ -633,11 +629,7 @@ void parseScanInputXml ()
 
 void parse_command (CZapitClient::commandHead &rmsg)
 {
-#ifdef DEBUG
-	debug("Command received\n");
-	debug("  Version: %d\n", rmsg.version);
-	debug("  Command: %d\n", rmsg.cmd);
-#endif
+	debug("[zapit] cmd %d (version %d) received\n", rmsg.cmd, rmsg.version);
 
 	if (rmsg.version == CZapitClient::ACTVERSION)
 	{
@@ -678,9 +670,10 @@ void parse_command (CZapitClient::commandHead &rmsg)
 			case CZapitClient::CMD_GET_LAST_CHANNEL:
 			{
 				channel_msg mysettings;
-				mysettings = load_settings();
+				mysettings = load_settings();                                // ATTENTION: value of mysettings.name is undefined
 				CZapitClient::responseGetLastChannel responseGetLastChannel;
-				strcpy(responseGetLastChannel.channelName, mysettings.name);
+//				strcpy(responseGetLastChannel.channelName, mysettings.name);
+				responseGetLastChannel.channelName[0] = 0;                   // return empty channel name as a temporary solution
 				responseGetLastChannel.channelNumber = mysettings.chan_nr;
 				responseGetLastChannel.mode = mysettings.mode;
 				send(connfd, &responseGetLastChannel, sizeof(responseGetLastChannel), 0);
@@ -1078,9 +1071,7 @@ void parse_command (CZapitClient::commandHead &rmsg)
 		perror("[zapit] unknown cmd version\n");
 		return;
 	}
-#ifdef DEBUG
-	debug("[zapit] Command %d processed.\n", rmsg.cmd);
-#endif
+	debug("[zapit] cmd %d processed\n", rmsg.cmd);
 }
 
 int main (int argc, char **argv)
@@ -1092,7 +1083,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.215 2002/09/04 11:52:55 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.216 2002/09/04 13:57:39 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1140,7 +1131,7 @@ int main (int argc, char **argv)
 	/* create bouquet manager */
 	bouquetManager = new CBouquetManager();
 
-	testmsg = load_settings();
+	testmsg = load_settings();  // ATTENTION: value of testmsg.name is undefined
 
 	if (testmsg.mode == 'r')
 	{
