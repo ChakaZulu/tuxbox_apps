@@ -33,12 +33,13 @@
 #include <config.h>
 #endif
 
-#include "filebrowser.h"
-
-#include <driver/encoding.h>
+/* include <config.h> before <gui/filebrowser.h> to enable 64 bit file offsets */
+#include <gui/filebrowser.h>
 
 #include <gui/widget/icons.h>
-#include "widget/messagebox.h"
+#include <gui/widget/messagebox.h>
+
+#include <driver/encoding.h>
 
 #include <algorithm>
 #include <iostream>
@@ -59,9 +60,10 @@ typedef struct dirent64 dirent_struct;
 #define my_alphasort alphasort64
 #define my_scandir scandir64
 #else
+#warning not using 64 bit file offsets
 typedef struct dirent dirent_struct;
 #define my_alphasort alphasort
-#define my_scandir scandir64
+#define my_scandir scandir
 #endif
 
 //------------------------------------------------------------------------
@@ -754,11 +756,11 @@ void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
 				std::string modestring;
 				for(int m = 2; m >=0;m--)
 				{
-					modestring += std::string((actual_file->Mode & (4 << (m*3)))?"r":"-");
-					modestring += std::string((actual_file->Mode & (2 << (m*3)))?"w":"-");
-					modestring += std::string((actual_file->Mode & (1 << (m*3)))?"x":"-");
+					modestring += (actual_file->Mode & (4 << (m*3)))?'r':'-';
+					modestring += (actual_file->Mode & (2 << (m*3)))?'w':'-';
+					modestring += (actual_file->Mode & (1 << (m*3)))?'x':'-';
 				}
-				g_Fonts->filebrowser_item->RenderString(x + width - 180 , ypos+ fheight, 80, modestring.c_str(), color);
+				g_Fonts->filebrowser_item->RenderString(x + width - 180 , ypos+ fheight, 80, modestring, color, 0, true); // UTF-8
 
 				char tmpstr[256];
             if((double)actual_file->Size / (1024. * 1024 * 1024) > 1)
@@ -810,7 +812,7 @@ void CFileBrowser::paintHead()
 	snprintf(l_name, sizeof(l_name), "%s %s", CZapitClient::Utf8_to_Latin1(g_Locale->getText("filebrowser.head")).c_str(), name.c_str()); // ISO-8859-1
 	g_Fonts->eventlist_title->RenderString(x+10,y+theight+1, width-11, l_name, COL_MENUHEAD); // ISO-8859-1
 #else
-	snprintf(l_name, sizeof(l_name), "%s %s", (g_Locale->getText("filebrowser.head")), name.c_str()); // UTF-8
+	snprintf(l_name, sizeof(l_name), "%s %s", g_Locale->getText("filebrowser.head"), name.c_str()); // UTF-8
 	g_Fonts->eventlist_title->RenderString(x+10,y+theight+1, width-11, l_name, COL_MENUHEAD, 0, true); // UTF-8
 #endif
 }
@@ -843,7 +845,7 @@ void CFileBrowser::paintFoot()
 			nextsort = g_Locale->getText("filebrowser.sort.name");
 		else
 			nextsort = g_Locale->getText("filebrowser.sort.date");
-		g_Fonts->infobar_small->RenderString(x + 35 + (1 * dx), ty, dx - 35, nextsort.c_str(), COL_INFOBAR, 0, true); // UTF-8
+		g_Fonts->infobar_small->RenderString(x + 35 + (1 * dx), ty, dx - 35, nextsort, COL_INFOBAR, 0, true); // UTF-8
 
 		if(Multi_Select)
 		{

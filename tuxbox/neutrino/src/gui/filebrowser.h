@@ -33,39 +33,39 @@
 #ifndef __FILEBROWSER_HPP__
 #define __FILEBROWSER_HPP__
 
+#include <driver/framebuffer.h>
+#include <driver/fontrenderer.h>
+#include <driver/rcinput.h>
+
+#include <gui/color.h>
+#include <gui/infoviewer.h>
+
+#include <gui/widget/menue.h>
+#include <gui/widget/progresswindow.h>
+
+#include <system/settings.h>
+
 #include <string>
 #include <vector>
 
 #include <string.h>
 
 
-#include <driver/framebuffer.h>
-#include <driver/fontrenderer.h>
-#include <driver/rcinput.h>
-#include <system/settings.h>
-
-#include "color.h"
-#include "infoviewer.h"
-
-#include "widget/menue.h"
-#include "widget/progresswindow.h"
-
 #define VLC_URI "vlc://"
 
-using namespace std;
 
 class CFileFilter
 {
-	vector<string> Filter;
+	std::vector<std::string> Filter;
 public:
-	void addFilter(string filter){Filter.push_back(filter);};
-	bool matchFilter(string name)
+	void addFilter(std::string filter){Filter.push_back(filter);};
+	bool matchFilter(std::string name)
 	{
 		int ext_pos = 0;
 		ext_pos = name.rfind(".");
 		if( ext_pos > 0)
 		{
-			string extension;
+			std::string extension;
 			extension = name.substr(ext_pos + 1, name.length() - ext_pos);
 			for(unsigned int i = 0; i < Filter.size();i++)
 				if(strcasecmp(Filter[i].c_str(),extension.c_str()) == 0)
@@ -89,18 +89,18 @@ public:
 	};
 
 	int		getType();
-	string	getFileName();
-	string	getPath();
+	std::string	getFileName();
+	std::string	getPath();
 
 	CFile(){Marked = false; Size=0;Mode=0;Time=0;};
 	off_t Size;
-	string Name;
+	std::string Name;
 	mode_t Mode;
 	bool Marked;
 	time_t Time;
 };
 
-typedef vector<CFile> CFileList;
+typedef std::vector<CFile> CFileList;
 
 class CFileBrowser
 {
@@ -109,10 +109,10 @@ class CFileBrowser
 
 		CFileList		filelist;
 		CFileList		selected_filelist;
-		bool			readDir(string dirname, CFileList* flist);
-		bool			readDir_vlc(string dirname, CFileList* flist);
-		bool			readDir_std(string dirname, CFileList* flist);
-		void			addRecursiveDir(CFileList * re_filelist, string path, bool bRootCall, CProgressWindow * progress = NULL);
+		bool			readDir(std::string dirname, CFileList* flist);
+		bool			readDir_vlc(std::string dirname, CFileList* flist);
+		bool			readDir_std(std::string dirname, CFileList* flist);
+		void			addRecursiveDir(CFileList * re_filelist, std::string path, bool bRootCall, CProgressWindow * progress = NULL);
 
 		unsigned int		selected;
 		unsigned int		liststart;
@@ -122,7 +122,7 @@ class CFileBrowser
 		int			foheight;	// Hoehe der button leiste
 		int			smode;		// Sortierungsart
 
-		string			name;
+		std::string		name;
 		std::string		m_baseurl;
 		int 			width;
 		int 			height;
@@ -132,7 +132,7 @@ class CFileBrowser
 		int 			x;
 		int 			y;
 
-		void ChangeDir(string filename);
+		void ChangeDir(std::string filename);
 
 		void paintItem(unsigned pos, unsigned int spalte = 0);
 		void paint();
@@ -141,7 +141,7 @@ class CFileBrowser
 		void hide();
 
 	public:
-		string			Path;
+		std::string		Path;
 		bool			Multi_Select;
 		bool			Dirs_Selectable;
 		bool        Dir_Mode;
@@ -150,10 +150,10 @@ class CFileBrowser
 		CFileBrowser();
 		~CFileBrowser();
 
-		bool		exec(string Dirname);
+		bool		exec(std::string Dirname);
 		CFile		*getSelectedFile();
 		CFileList	*getSelectedFiles();
-		string getCurrentDir() {return Path;}
+		std::string getCurrentDir() {return Path;}
 //		size_t CurlWriteToString(void *ptr, size_t size, size_t nmemb, void *data);
 };
 
