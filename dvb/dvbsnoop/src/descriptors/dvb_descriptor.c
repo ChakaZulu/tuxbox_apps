@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.10 2003/10/25 19:11:49 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.11 2003/10/26 19:06:27 rasc Exp $ 
 
 
   dvbsnoop
@@ -14,6 +14,9 @@ $Id: dvb_descriptor.c,v 1.10 2003/10/25 19:11:49 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.11  2003/10/26 19:06:27  rasc
+no message
+
 Revision 1.10  2003/10/25 19:11:49  rasc
 no message
 
@@ -81,7 +84,7 @@ int  descriptorDVB  (u_char *b)
 
   out_NL (4);
   out_S2B_NL (4,"DVB-DescriptorTag: ",id, dvbstrDVBDescriptorTAG(id));
-  out_SW_NL  (5,"Descriptor_length: ",b[1]);
+  out_SB_NL  (5,"Descriptor_length: ",b[1]);
 
   // empty ??
   len = ((int)b[1]) + 2;
@@ -132,7 +135,7 @@ int  descriptorDVB  (u_char *b)
      case 0x62:  descriptorDVB_FrequencyList (b);  break;
      case 0x63:  descriptorDVB_PartialTransportStream(b);  break;
      case 0x64:  descriptorDVB_DataBroadcast(b);  break;
-     case 0x65:  descriptorDVB_CASystem(b);  break;
+     case 0x65:  descriptorDVB_CASystem(b);  break;    /* $$$ reserved now ?? */
      case 0x66:  descriptorDVB_DataBroadcastID(b);  break;
      case 0x67:  descriptorDVB_TransportStream(b);  break;
      case 0x68:  descriptorDVB_DSNG(b);  break;
@@ -3503,9 +3506,3 @@ void descriptorDVB_ServiceAvailability (u_char *b)
 
 
 
-
-/*
- * $$$ TODO // Reminder
- *   EN 301 192 datagram section (Table 3) = 0x3E
- *
- */

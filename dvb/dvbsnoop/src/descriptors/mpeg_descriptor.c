@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.c,v 1.6 2003/10/25 19:11:49 rasc Exp $
+$Id: mpeg_descriptor.c,v 1.7 2003/10/26 19:06:27 rasc Exp $
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -9,6 +9,9 @@ $Id: mpeg_descriptor.c,v 1.6 2003/10/25 19:11:49 rasc Exp $
 
 
 $Log: mpeg_descriptor.c,v $
+Revision 1.7  2003/10/26 19:06:27  rasc
+no message
+
 Revision 1.6  2003/10/25 19:11:49  rasc
 no message
 
@@ -64,7 +67,7 @@ int  descriptorMPEG  (u_char *b)
 
   out_NL (4);
   out_S2B_NL (4,"MPEG-DescriptorTag: ",id, dvbstrMPEGDescriptorTAG(id));
-  out_SW_NL  (5,"Descriptor_length: ",b[1]);
+  out_SB_NL  (5,"Descriptor_length: ",b[1]);
 
   // empty ??
   len = ((int)b[1]) + 2;
