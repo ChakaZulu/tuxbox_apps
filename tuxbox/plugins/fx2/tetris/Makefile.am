@@ -10,6 +10,7 @@ tetris_la_LIBADD = h.lo
 
 install-exec-local:
 	install -d $(PLUGINDIR)
+	install -d $(CONFIGDIR)
 	install .libs/tetris.so $(PLUGINDIR)
 	install -m 0644  tetris.cfg $(PLUGINDIR)
 	install -m 0644  games.cfg $(CONFIGDIR)
