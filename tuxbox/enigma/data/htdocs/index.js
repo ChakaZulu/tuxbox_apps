@@ -68,7 +68,7 @@ function DVRrecord(xy)
 
 function startPlugin(xy)
 {
-	win=window.open("/cgi-bin/startPlugin?requester=webif&path=/lib/tuxbox/plugins&name="+xy, "switchStatus","width=1,height=1,left=0,top=0");
+	win=window.open("/cgi-bin/startPlugin?requester=webif&name="+xy, "switchStatus","width=1,height=1,left=0,top=0");
 }
 
 function stopPlugin()
