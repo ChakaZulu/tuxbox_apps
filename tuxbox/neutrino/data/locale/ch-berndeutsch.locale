@@ -394,6 +394,7 @@ flashupdate.versioncheck Versionsüberprüäfig
 flashupdate.nonewversion ke nöii version verfüegbar
 flashupdate.md5check Imageprüäfig
 flashupdate.md5sumerror s'Image isch fählerhaft
+flashupdate.url_file unset
 flashupdate.proxyserver_sep Proxysörver
 flashupdate.proxyserver Proxyname
 flashupdate.proxyserver_hint1 Gib ä Proxynamä oder IP i (Host:Port)
@@ -404,6 +405,7 @@ flashupdate.proxyusername_hint2 ä lääre Iitrag bedütet kei Authentifiziärig
 flashupdate.proxypassword Passwort
 flashupdate.proxypassword_hint1 Gib s'Proxy-Passwort i
 flashupdate.proxypassword_hint2
+flashupdate.selectimage unset
 flashupdate.msgbox äs isch fougendes nöis Image gfungä wordä:\nDatum: %s, %s\nBasisImage: %s\nImageTyp: %s\n\nWosch diä version jetzt abeladä\nu inschtaliäre?
 flashupdate.msgbox_manual äs isch äs nöis Image gfungä worde:\nDatum: %s, %s\nBasisImage: %s\nImageTyp: %s\n\nWosch diä Version jetzt inschtalliäre?
 flashupdate.expertfunctions Expertä-Funktione
@@ -421,6 +423,7 @@ flashupdate.actionwriteflash schribä flash
 flashupdate.flashreadyreboot s'Image isch erfougrich gflasht wordä.\nd'DBox wird jetzt nöi gschtartet.
 flashupdate.reallyflashmtd Wosch dä Flashvorgang würklech düräfüerä?\n\nFaus ä Fähler uftritt oder s'Image nid\nfunktionstüchtig isch, wird dini Box nüm bootä.\n\nImagenamä: %s\nZiel: %s
 flashupdate.wrongbase s'Basisimage wiicht ab, bitte\nzersch äs nöis Basisimage inschtaliäre!
+flashupdate.experimentalimage unset
 
 bouqueteditor.name Bouquet-Verwautig
 bouqueteditor.delete Löschä

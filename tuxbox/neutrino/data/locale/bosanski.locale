@@ -394,6 +394,7 @@ flashupdate.versioncheck provjeriti verziju
 flashupdate.nonewversion nema nove verzije
 flashupdate.md5check provjera imidža
 flashupdate.md5sumerror imidž ima greške
+flashupdate.url_file unset
 flashupdate.proxyserver_sep proxyserver
 flashupdate.proxyserver proxyname
 flashupdate.proxyserver_hint1 utipkajte ime proxya ili ip adresu (host:port)
@@ -404,6 +405,7 @@ flashupdate.proxyusername_hint2 prazno znači da nema provjere
 flashupdate.proxypassword lozinka
 flashupdate.proxypassword_hint1 utipkajte lozinku za proxy
 flashupdate.proxypassword_hint2
+flashupdate.selectimage unset
 flashupdate.msgbox Nađen je novi imidž:\nDatum: %s, %s\nOsnovni imidž: %s\nvrsta imidža: %s\n\nHoćete li ovu verziju sada preuzeti\nsa interneta i instalirati?
 flashupdate.msgbox_manual Nađen je novi imidž:\nDatum: %s, %s\nOsnovni imidž: %s\nVrsta imidža: %s\n\nHoćete li ovu verziju sada instalirati?
 flashupdate.expertfunctions funkcije za majstore
@@ -421,6 +423,7 @@ flashupdate.actionwriteflash piše se fleš
 flashupdate.flashreadyreboot Imidž je uspješno flešovan.\nVaš dbox2 startuje sada ponovno.
 flashupdate.reallyflashmtd Hoćete li stvarno nastaviti flešovanje?\n\nAko se desi greška ili imidž nije\nu redu, onda vaš dbox2 neće više raditi.\n\nIme imidža: %s\nPozicija: %s
 flashupdate.wrongbase Verzija osnovnog imidža ne paše više,\ntreba se instalirati novi osnovni imidž!
+flashupdate.experimentalimage unset
 
 bouqueteditor.name namjestiti buket
 bouqueteditor.delete izbrisati

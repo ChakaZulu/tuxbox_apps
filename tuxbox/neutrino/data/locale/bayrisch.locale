@@ -394,6 +394,7 @@ flashupdate.versioncheck Version obcheckn
 flashupdate.nonewversion koa neie Version do
 flashupdate.md5check Image obchecken
 flashupdate.md5sumerror Des Image is hi
+flashupdate.url_file unset
 flashupdate.proxyserver_sep Proxyserva
 flashupdate.proxyserver Proxyname
 flashupdate.proxyserver_hint1 Gems an Proxynama oderd IP ei (Host:Port)
@@ -422,6 +423,7 @@ flashupdate.actionwriteflash schreib in flash
 flashupdate.flashreadyreboot Des Imag is gflasht worn.\nJetz start ma de Box nei.
 flashupdate.reallyflashmtd Woins echt flashen?\n\nWann was schiaflaft oder des Image hi is\wer de Box nimma startn.\n\nImagenama: %s\nZiel: %s
 flashupdate.wrongbase Des Baseimage hot net de richtige Version, bitte an andres Baseimage installiern
+flashupdate.experimentalimage unset
 
 bouqueteditor.name Bouquets verwoitn
 bouqueteditor.delete Wegmacha

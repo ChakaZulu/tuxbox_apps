@@ -394,6 +394,7 @@ flashupdate.versioncheck Controllo Versione
 flashupdate.nonewversion Nessuna Versione Nuova
 flashupdate.md5check Controllo Image
 flashupdate.md5sumerror Image e difettosa
+flashupdate.url_file unset
 flashupdate.proxyserver_sep Proxyserver
 flashupdate.proxyserver Proxynome
 flashupdate.proxyserver_hint1 Inserire Proxynome oppure IP  (Host:Port)
@@ -404,6 +405,7 @@ flashupdate.proxyusername_hint2 Un Inserimento Vuoto non vuol dire una Identific
 flashupdate.proxypassword Password
 flashupdate.proxypassword_hint1 Inserire la Proxy-Passwort
 flashupdate.proxypassword_hint2
+flashupdate.selectimage unset
 flashupdate.msgbox Sono state trovate queste Image:\nData: %s, %s\nBasisImage: %s\nImageTipo: %s\n\nVuole scaricare questa versione\ned Installarla?
 flashupdate.msgbox_manual E stata trovata una nuova Image:\nData: %s, %s\nBasisImage: %s\nImageTipo: %s\n\nVuole Installare questa Versione?
 flashupdate.expertfunctions Funzione-Esperti
@@ -421,6 +423,7 @@ flashupdate.actionwriteflash Scrivo-Flash
 flashupdate.flashreadyreboot La Image e stata scritta con Successo.\nIl vostro DBox verra Riavviato.
 flashupdate.reallyflashmtd Vuole veramente scrivere il Flash?\n\nIn caso di un errore\nil vostro, DBox non potra piu riavviarsi.\n\nImagename: %s\nZiel: %s
 flashupdate.wrongbase Versione Baseimage errata\nPrima istallare una nuova Versione!
+flashupdate.experimentalimage unset
 
 bouqueteditor.name Gestione-Bouquet
 bouqueteditor.delete Cancella

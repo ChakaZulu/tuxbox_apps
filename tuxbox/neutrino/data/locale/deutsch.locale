@@ -394,7 +394,7 @@ flashupdate.versioncheck Versionsüberprüfung
 flashupdate.nonewversion keine neue Version verfügbar
 flashupdate.md5check Imageprüfung
 flashupdate.md5sumerror Das Image ist fehlerhaft
-flashupdate.url_file Configfile
+flashupdate.url_file Konfigfile
 flashupdate.proxyserver_sep Proxyserver
 flashupdate.proxyserver Proxyname
 flashupdate.proxyserver_hint1 Geben Sie den Proxynamen oder IP ein (Host:Port)
@@ -423,6 +423,7 @@ flashupdate.actionwriteflash schreibe flash
 flashupdate.flashreadyreboot Das Image wurde erfolgreich geflasht.\nIhre DBox wird jetzt neu gestartet.
 flashupdate.reallyflashmtd Wollen Sie den Flashvorgang wirklich durchführen?\n\nFalls ein Fehler auftritt oder das Image nicht\nfunktionfähig ist, wird Ihre DBox nicht mehr booten.\n\nImagename: %s\nZiel: %s
 flashupdate.wrongbase Die Basisimage Version weicht ab, bitte\nzuerst neues Basisimage installieren!
+flashupdate.experimentalimage Sie haben einen Snapshot ausgewählt, bitte beachten Sie, dass\ndiese Version ungetestet ist und u.U. Ihre Box nach dem Update\nnicht mehr funktionsfähig ist.\n\nSoll diese Version wirklich installiert werden?
 
 bouqueteditor.name Bouquet-Verwaltung
 bouqueteditor.delete Löschen

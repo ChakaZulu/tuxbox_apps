@@ -396,6 +396,7 @@ flashupdate.versioncheck Sprawdzam wersje
 flashupdate.nonewversion nowa wersja nie dostepna
 flashupdate.md5check sprawdzam  image
 flashupdate.md5sumerror image zawiera bledy
+flashupdate.url_file unset
 flashupdate.proxyserver_sep Serwer Proxy
 flashupdate.proxyserver Nazwa Hosta
 flashupdate.proxyserver_hint1 Wprowadz nazwe lub IP hosta, uzyj host:port
@@ -406,6 +407,7 @@ flashupdate.proxyusername_hint2 pusty - bez proxy
 flashupdate.proxypassword Haslo
 flashupdate.proxypassword_hint1 Wprowadz haslo proxyserwera
 flashupdate.proxypassword_hint2
+flashupdate.selectimage unset
 flashupdate.msgbox Znaleziono nastepujacy nowy image:\nData: %s, %s\nBaseImage: %s\nTyp Image: %s\n\nCzy chcesz pobrac i zainstalowac image ?
 flashupdate.msgbox_manual Znaleziono nastepujacy nowy image:\nData: %s, %s\nBaseImage: %s\nTyp Image: %s\n\nCzy chcesz pobrac i zainstalowac image ?
 flashupdate.expertfunctions Zaawansowane (ekspert)
@@ -423,6 +425,7 @@ flashupdate.actionwriteflash zapis
 flashupdate.flashreadyreboot Image prawidlowo zapisany.\nDBox zresetuje sie.
 flashupdate.reallyflashmtd Napewno chcesz uaktualnic?\n\nJezeli wystapi blad lub plik image jest\nwadliwy, Dbox nie uruchomi sie.\n\nNazwa Image: %s\nCel: %s
 flashupdate.wrongbase Ta wersja Baseimage jest zbyt stara, \nprosze wgrac nowsza wersje!
+flashupdate.experimentalimage unset
 
 bouqueteditor.name Edytor Bukietów
 bouqueteditor.delete Kasuj

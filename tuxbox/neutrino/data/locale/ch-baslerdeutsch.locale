@@ -394,6 +394,7 @@ flashupdate.versioncheck Versionsueberpruefig
 flashupdate.nonewversion kei neue Version verfuigbar
 flashupdate.md5check Imagepruefig
 flashupdate.md5sumerror Des Image isch fehlerhaft
+flashupdate.url_file unset
 flashupdate.proxyserver_sep Proxyserver
 flashupdate.proxyserver Proxyname
 flashupdate.proxyserver_hint1 Gib de Proxyname oder d'IP ii (Host:Port)
@@ -404,6 +405,7 @@ flashupdate.proxyusername_hint2 E leere Iintrag bedüded kei Authentifizierig
 flashupdate.proxypassword Passwort
 flashupdate.proxypassword_hint1 Gib's Proxy-Passwort Ii
 flashupdate.proxypassword_hint2
+flashupdate.selectimage unset
 flashupdate.msgbox S'het folgendi neui Images:\nDatum: %s, %s\nBasisImage: %s\nImageTyp: %s\n\nWillsch die neui Version jetz abelade\nund installiere?
 flashupdate.msgbox_manual S'het s'folgend neu Image:\nDatum: %s, %s\nBasisImage: %s\nImageTyp: %s\n\nWillsch die neui Version jetz installiere?
 flashupdate.expertfunctions Experte-Funktione
@@ -421,6 +423,7 @@ flashupdate.actionwriteflash schrieb grad s'flash
 flashupdate.flashreadyreboot S'Image isch erfolgriich g'flasht.\nd'DBox wird jetz neu g'starded.
 flashupdate.reallyflashmtd Willsch dä Flashvorgang wirklich mache?\n\nFalls es e'Fehler gitt odder s'Image nidd\nfunktionfäähig isch, wird d'DBox nümmi boote.\n\nImagename: %s\nZiel: %s
 flashupdate.wrongbase Die Basisimage Version weicht ab, bitte\nzuerst neues Basisimage installieren!
+flashupdate.experimentalimage unset
 
 bouqueteditor.name Bouquet-Verwaltig
 bouqueteditor.delete Lösche
