@@ -663,8 +663,8 @@ fontsize.infobar_number Numer
 fontsize.infobar_channame Nazwa kanalu
 fontsize.infobar_info Info
 fontsize.infobar_small maly
-fontsize.gamelist_itemLarge duzy
-fontsize.gamelist_itemSmall maly
+fontsize.gamelist_itemlarge duzy
+fontsize.gamelist_itemsmall maly
 fontsize.filebrowser_item element przeglad.
 fontsize.hint Inicjalizuje czcionki,\nprosze czekaj...
 

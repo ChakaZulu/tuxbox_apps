@@ -663,8 +663,8 @@ fontsize.infobar_number Numeri Infobar
 fontsize.infobar_channame nomi canali infobar
 fontsize.infobar_info info su Infobar
 fontsize.infobar_small Infobar stretto
-fontsize.gamelist_itemLarge infobar lango
-fontsize.gamelist_itemSmall infobar piccolo
+fontsize.gamelist_itemlarge infobar lango
+fontsize.gamelist_itemsmall infobar piccolo
 fontsize.filebrowser_item Vedi-Filebrowser
 fontsize.hint Font viene inizializzato,\nPrego attendere...
 

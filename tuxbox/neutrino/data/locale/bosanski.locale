@@ -663,8 +663,8 @@ fontsize.infobar_number infromativna traka za broj
 fontsize.infobar_channame infromativna traka za kanal
 fontsize.infobar_info infromativna traka za informaciju
 fontsize.infobar_small mala infromativna traka
-fontsize.gamelist_itemLarge veliko
-fontsize.gamelist_itemSmall malo
+fontsize.gamelist_itemlarge veliko
+fontsize.gamelist_itemsmall malo
 fontsize.filebrowser_item dio pretraživača datoteka
 fontsize.hint slova se namjesćaju,\nčekajte molim ...
 
