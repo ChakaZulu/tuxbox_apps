@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.85 2001/11/15 13:25:58 field Exp $
+//  $Id: sectionsd.cpp,v 1.86 2001/11/22 12:53:38 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.86  2001/11/22 12:53:38  field
+//  Kleinere Updates
+//
 //  Revision 1.85  2001/11/15 13:25:58  field
 //  Bugfix, zeigt endlich auch die Events im gleichen Bouquet
 //
@@ -1055,16 +1058,16 @@ static const SIevent& findActualSIeventForServiceUniqueKey(const unsigned servic
         if(SIservice::makeUniqueKey(e->first->originalNetworkID, e->first->serviceID)==serviceUniqueKey)
         {
             if (flag!=0)
-                *flag|= 1; // überhaupt was da...
+                *flag|= sectionsd::epg_has_anything; // überhaupt was da...
             for(SItimes::reverse_iterator t=e->first->times.rend(); t!=e->first->times.rbegin(); t--)
                 if ((long)(azeit+plusminus)<=(long)(t->startzeit+t->dauer))
                 {
                     if (flag!=0)
-                        *flag|= 2; // spätere events da...
+                        *flag|= sectionsd::epg_has_later; // spätere events da...
                     if (t->startzeit<=(long)(azeit+ plusminus))
                     {
                         if (flag!=0)
-                            *flag|= 4; // aktuelles event da...
+                            *flag|= sectionsd::epg_has_current; // aktuelles event da...
                         zeit=*t;
                         return *(e->first);
                     }
@@ -1386,7 +1389,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.85 2001/11/15 13:25:58 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.86 2001/11/22 12:53:38 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1581,10 +1584,10 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
         if(si!=mySIservicesOrderUniqueKey.end())
         {
             dprintf("[sectionsd] current service has%s scheduled events, and has%s present/following events\n", si->second->eitScheduleFlag()?"":"no ", si->second->eitPresentFollowingFlag()?"":"no " );
-            if ( ( !si->second->eitScheduleFlag() ) &&
+            if ( /*( !si->second->eitScheduleFlag() ) && */
                  ( !si->second->eitPresentFollowingFlag() ) )
             {
-                flag|=8;
+                flag|= sectionsd::epg_not_broadcast;
             }
         }
     }
@@ -1693,7 +1696,7 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
     {
         dprintf("[sectionsd] current/next EPG not found!\n");
     }
-    currentNextWasOk=(flag&4);
+    currentNextWasOk= ( flag & sectionsd::epg_has_current );
     currentServiceKey= *uniqueServiceKey;
     return;
 }
@@ -3062,7 +3065,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.85 2001/11/15 13:25:58 field Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.86 2001/11/22 12:53:38 field Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
