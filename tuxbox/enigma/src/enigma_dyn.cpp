@@ -3687,7 +3687,7 @@ static eString getCurrentVpidApid(eString request, eString dirpath, eString opt,
 		return eString().sprintf("%u\n%u\n", Decoder::current.vpid, Decoder::current.apid);
 }
 
-static eString neutrino_suck_getonidsid(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+static eString neutrino_getonidsid(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (!sapi || !sapi->service)
@@ -3745,16 +3745,23 @@ static eString getTransponderServices(eString request, eString dirpath, eString 
 	return "E: no DVB service is running.. or this is a playback";
 }
 
+#if 0
 class treeNode
 {
 public:
 	eString serviceNode;
 	eString serviceName;
-	treeNode(eString sname, eString snode)
+	bool isDirectory;
+	eServiceReference serviceReference;
+	int nodeID;
+	treeNode(int node, bool isdir, eString sname, eString snode, eServiceReference ref)
 	{
 //		eDebug("new Service: %s - %s", sname.c_str(), snode.c_str());
 		serviceName = sname;
 		serviceNode = snode;
+		isDirectory = isdir;
+		serviceReference = ref;
+		nodeID = node;
 	};
 	~treeNode() {};
 	bool operator < (const treeNode &a) const {return serviceName < a.serviceName;}
@@ -3782,21 +3789,29 @@ struct listChannels: public Object
 	eString &result;
 	std::list <treeNode> myList;
 	eServiceInterface *iface;
+	int &nodeID;
+	int anchor;
 	bool sort;
+	bool addEPG;
 
-	listChannels(const eServiceReference &service, eString &result, bool sort)
-		:result(result), iface(eServiceInterface::getInstance()), sort(sort)
+	listChannels(const eServiceReference &service, eString &result, int &nodeID, int anchor, bool sort, bool addEPG)
+		:result(result), myList(myList), iface(eServiceInterface::getInstance()), nodeID(nodeID), anchor(anchor), sort(sort), addEPG(addEPG)
 	{
-		myList.clear();
+		std::list <treeNode>::iterator myIt;
 		Signal1<void, const eServiceReference&> cbSignal;
 		CONNECT(cbSignal, listChannels::addTreeNode);
 		iface->enterDirectory(service, cbSignal);
 		iface->leaveDirectory(service);
+		result += genNodes(sort, myList);
+		for (myIt = myList.begin(); myIt != myList.end(); ++myIt)
+			if (myIt->isDirectory)
+				listChannels(myIt->serviceReference, result, nodeID, myIt->nodeID, sort, addEPG);
 	}
 
 	void addTreeNode(const eServiceReference& ref)
 	{
-		eString serviceReference, serviceName, orbitalPosition;
+		eString serviceReference, serviceName, serviceDescription, serviceNode, orbitalPosition;
+		
 		// sorry.. at moment we dont show any directory.. or locked service in webif
 		if (ref.isLocked() && eConfig::getInstance()->pLockActive())
 			return;
@@ -3804,8 +3819,7 @@ struct listChannels: public Object
 		eService *service = iface ? iface->addRef(ref) : 0;
 
 		serviceReference = ref.toString();
-		if (ref.descr)
-			serviceName = filter_string(ref.descr);
+		if (ref.descr) serviceName = filter_string(ref.descr);
 		else
 		{
 			if (service)
@@ -3830,13 +3844,18 @@ struct listChannels: public Object
 				orbitalPosition = 0;
 		}
 
-
-		if (ref.flags & eServiceReference::isDirectory)
-			listChannels(ref, result, sort);
+		eString epg;
+		if (addEPG && epg)
+			serviceDescription = serviceName + " - " + epg;
 		else
-			myList.push_back(treeNode("ab", "ab"));
+			serviceDescription = serviceName;
+			
+		serviceDescription.strReplace("'", "\\\'");
+		serviceNode = "d.add(" + eString().sprintf("%d", ++nodeID) + "," + eString().sprintf("%d", anchor) + ",'" + serviceDescription + "','javascript:switchChannel(\"" +  serviceReference + "\")');";
+		myList.push_back(treeNode(nodeID, ref.flags & eServiceReference::isDirectory, serviceName, serviceNode, ref));
 	}
 };
+#endif
 
 struct listContent: public Object
 {
@@ -3918,6 +3937,30 @@ static eString getServices(eString request, eString dirpath, eString opt, eHTTPC
 	return "E: error during list services";
 }
 
+#if 0
+static eString getChannels(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/plain; charset=utf-8";
+	std::map<eString,eString> opts=getRequestOptions(opt, '&');
+
+	eString sref;
+	if (opts["ref"])
+		sref = opts["ref"];
+	else
+		sref = zap[0][1];
+
+	eString result = "d.add(0,-1,'" + zap[0][0] + "');\n";
+	eServiceReference ref(sref);
+	int nodeID = 0;
+	listChannels t(ref, result, nodeID, 0, false, false);
+
+	if (result)
+		return result;
+
+	return "E: error during list channels";
+}
+#endif
+
 struct appendonidsidnamestr
 {
 	eString &str;
@@ -3933,7 +3976,7 @@ struct appendonidsidnamestr
 	}
 };
 
-static eString neutrino_suck_getchannellist(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+static eString neutrino_getchannellist(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	eString channelstring;
 
@@ -4893,9 +4936,10 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/videoChannels", videoChannels, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/currentTransponderServices", getTransponderServices, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getServices", getServices, lockWeb);
+//	dyn_resolver->addDyn("GET", "/cgi-bin/getChannels", getChannels, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/zapto", getCurrentVpidApid, false); // this dont really zap.. only used to return currently used pids;
-	dyn_resolver->addDyn("GET", "/control/getonidsid", neutrino_suck_getonidsid, lockWeb);
-	dyn_resolver->addDyn("GET", "/control/channellist", neutrino_suck_getchannellist, lockWeb);
+	dyn_resolver->addDyn("GET", "/control/getonidsid", neutrino_getonidsid, lockWeb);
+	dyn_resolver->addDyn("GET", "/control/channellist", neutrino_getchannellist, lockWeb);
 	ezapWapInitializeDyn(dyn_resolver, lockWeb);
 #ifdef ENABLE_DYN_MOUNT
 	ezapMountInitializeDyn(dyn_resolver, lockWeb);
