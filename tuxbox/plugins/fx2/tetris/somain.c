@@ -20,6 +20,8 @@
 #include <curl/types.h>
 #include <curl/easy.h>
 
+#include <config.h>
+
 extern	int				debug;
 extern	int				doexit;
 extern	unsigned short	actcode;
@@ -29,6 +31,7 @@ extern	long			score;
 static	char			*proxy_addr=0;
 static	char			*proxy_user=0;
 static	char			*hscore=0;
+static	char			isalloc=0;
 static	int				localuser=-1;
 
 typedef struct _HScore
@@ -47,10 +50,7 @@ static	void	LoadHScore( void )
 	CURLcode		res;
 	FILE			*fp;
 	char			url[ 512 ];
-	char			*user=0;
-	int				x;
 	char			*p;
-	struct timeval	tv;
 	int				i;
 
 	FBDrawString( 150,32,32,"try load high score from",GRAY,0);
@@ -420,6 +420,9 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 	int				x;
 	int				i;
 	int				fd;
+	FILE			*fp;
+	char			*line;
+	char			*p;
 
 	if ( FBInitialize( 720, 576, 8, fdfb ) < 0 )
 		return -1;
@@ -428,6 +431,39 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 
 	if ( RcInitialize( fdrc ) < 0 )
 		return -1;
+
+/* load setup */
+	fp = fopen( CONFIGDIR "/games.cfg", "r" );
+	if ( fp )
+	{
+		line=malloc(128);
+		isalloc=1;
+		proxy_addr=0;
+		proxy_user=0;
+		hscore=0;
+		while( fgets( line, 128, fp ) )
+		{
+			if ( *line == '#' )
+				continue;
+			if ( *line == ';' )
+				continue;
+			p=strchr(line,'\n');
+			if ( p )
+				*p=0;
+			p=strchr(line,'=');
+			if ( !p )
+				continue;
+			*p=0;
+			p++;
+			if ( !strcmp(line,"proxy") )
+				proxy_addr=strdup(p);
+			else if ( !strcmp(line,"proxy_user") )
+				proxy_user=strdup(p);
+			else if ( !strcmp(line,"hscore") )
+				hscore=strdup(p);
+		}
+		fclose(fp);
+	}
 
 	fd = open( "/var/games/tetris.hscore", O_RDONLY );
 	if ( fd == -1 )
@@ -524,6 +560,16 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 	{
 		write( fd, hsc, sizeof(hsc) );
 		close(fd);
+	}
+
+	if ( isalloc )
+	{
+		if ( proxy_addr )
+			free ( proxy_addr );
+		if ( proxy_user )
+			free ( proxy_user );
+		if ( hscore )
+			free ( hscore );
 	}
 
 	return 0;

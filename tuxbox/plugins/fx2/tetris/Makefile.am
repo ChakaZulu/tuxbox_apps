@@ -10,8 +10,10 @@ install-exec-local:
 	install -d $(PLUGINDIR)
 	install .libs/tetris.so $(PLUGINDIR)
 	install -m 0644  tetris.cfg $(PLUGINDIR)
+	install -m 0644  games.cfg $(CONFIGDIR)
 
 uninstall-local:
+	-rm $(CONFIGDIR)/games.cfg
 	-rm $(PLUGINDIR)/tetris.so
 	-rm $(PLUGINDIR)/tetris.cfg
 	-rmdir $(PLUGINDIR)
