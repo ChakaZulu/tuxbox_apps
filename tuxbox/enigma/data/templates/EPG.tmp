@@ -22,7 +22,7 @@
 
 		function EPGDetails(xy)
 		{
-			NewWindow('/EPGDetails?'+xy, 'EPGDetails', '200', '200', 'no');
+			NewWindow('/EPGDetails?'+xy, 'EPGDetails', '600', '700', 'no');
 		}
 	</script>
 </head>
