@@ -135,44 +135,49 @@ bool CLCD::lcdInit(const char * fontfile, const char * fontname, const bool _set
 	return true;
 }
 
-void CLCD::setlcdparameter(int dimm, int contrast, int power, int inverse)
+void CLCD::setlcdparameter(int dimm, const int contrast, const int power, const int inverse)
 {
-	int fp, fd;
-	if (power==0)
-		dimm=0;
+	int fd;
+	if (power == 0)
+		dimm = 0;
 
-	if ((fp = open("/dev/dbox/fp0",O_RDWR)) <= 0)
+	if ((fd = open("/dev/dbox/fp0", O_RDWR)) == -1)
 	{
-		perror("[lcdd] pen '/dev/dbox/fp0' failed!");
+		perror("[lcdd] open '/dev/dbox/fp0' failed");
 	}
-
-	if ((fd = open("/dev/dbox/lcd0",O_RDWR)) <= 0)
+	else
 	{
-		perror("[lcdd] open '/dev/dbox/lcd0' failed!");
-	}
+		if (ioctl(fd, FP_IOCTL_LCD_DIMM, &dimm) < 0)
+		{
+			perror("[lcdd] set dimm failed!");
+		}
 
-	if (ioctl(fp,FP_IOCTL_LCD_DIMM, &dimm) < 0)
-	{
-		perror("[lcdd] set dimm failed!");
+		close(fd);
 	}
 	
-	if (ioctl(fd,LCD_IOCTL_SRV, &contrast) < 0)
+	if ((fd = open("/dev/dbox/lcd0", O_RDWR)) == -1)
 	{
-		perror("[lcdd] set contrast failed!");
+		perror("[lcdd] open '/dev/dbox/lcd0' failed");
 	}
-
-	if (ioctl(fd,LCD_IOCTL_ON, &power) < 0)
+	else
 	{
-		perror("[lcdd] set power failed!");
-	}
+		if (ioctl(fd, LCD_IOCTL_SRV, &contrast) < 0)
+		{
+			perror("[lcdd] set contrast failed!");
+		}
 
-	if (ioctl(fd,LCD_IOCTL_REVERSE, &inverse) < 0)
-	{
-		perror("[lcdd] set invert failed!");
-	}
+		if (ioctl(fd, LCD_IOCTL_ON, &power) < 0)
+		{
+			perror("[lcdd] set power failed!");
+		}
 
-	close(fp);
-	close(fd);
+		if (ioctl(fd, LCD_IOCTL_REVERSE, &inverse) < 0)
+		{
+			perror("[lcdd] set invert failed!");
+		}
+
+		close(fd);
+	}
 }
 
 void CLCD::setlcdparameter(void)
