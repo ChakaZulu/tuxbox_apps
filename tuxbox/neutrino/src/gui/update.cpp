@@ -448,8 +448,8 @@ void CFlashUpdate::paint()
 		return;
 	}
 	showGlobalStatus(25);
+
 	//md5check...
-	/*
 	unsigned char   md5buffer[16];
 	char            md5string[40]="";
 	
@@ -470,7 +470,7 @@ void CFlashUpdate::paint()
 		showStatusMessage(g_Locale->getText("flashupdate.md5sumerror") );
 		return;
 	}
-	*/
+	
 	showGlobalStatus(50);
 	//flash it...
 	CFlashTool ft;
