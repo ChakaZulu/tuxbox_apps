@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <ost/ca.h>
+#include <ost/dmx.h>
 
 int camfd;
 /*
@@ -162,12 +163,99 @@ void set_key(void)
   fclose(fp);
 }
 
+int descriptor(char *buffer, int len, int ca_system_id) {
+  int count=0;
+  int desc,len2,ca_id,ca_pid=0;
+
+  while(count<len) {
+    desc=buffer[count++];
+    len2=buffer[count++];
+    if (desc == 0x09) {
+      ca_id=(buffer[count]<<8)|buffer[count+1];
+      count+=2;
+      if ((ca_id == ca_system_id) && ((ca_id>>8) == ((0x18|0x27)&0xD7)))
+	ca_pid=((buffer[count]&0x1F)<<8)|buffer[count+1];
+      count+=2;
+      count+=(len2-4);
+    }
+    else count+=len2;
+  }
+  return ca_pid;
+}
+
+int find_ecmpid(int pid,int ca_system_id) {
+  char buffer[1000];
+  int fd, r=1000,ecm_pid=0;
+  struct dmxSctFilterParams flt;
+
+  fd=open("/dev/ost/demux0", O_RDONLY);
+  if (fd<0)
+  {
+    perror("/dev/ost/demux0");
+    return -fd;
+  }
+
+  memset(&flt.filter.filter, 0, DMX_FILTER_SIZE);
+  memset(&flt.filter.mask, 0, DMX_FILTER_SIZE);
+
+  flt.pid=pid;
+  flt.filter.filter[0]=2;
+
+  flt.filter.mask[0]  =0xFF;
+  flt.timeout=10000;
+  flt.flags=DMX_ONESHOT;
+
+  flt.flags=0;
+  if (ioctl(fd, DMX_SET_FILTER, &flt)<0)
+  {
+    perror("DMX_SET_FILTER");
+    return 1;
+  }
+
+  ioctl(fd, DMX_START, 0);
+  if ((r=read(fd, buffer, r))<=0)
+  {
+    perror("read");
+    return 1;
+  }
+
+  {
+    int pilen, dp;
+    pilen=((buffer[10]&0xF)<<8)|buffer[11];
+    dp=12;
+    while (dp<(pilen+12)) {
+      if (ecm_pid == 0)
+	ecm_pid=descriptor(&buffer[12],pilen,ca_system_id);
+      if (ecm_pid != 0)
+	return ecm_pid;
+      dp+=pilen;
+    }
+    while (dp<r-4)
+    {
+      int epid, esinfo;
+      buffer[dp++];
+      //printf("stream type: %x\n", buffer[dp]);
+      epid=(buffer[dp++]&0x1F)<<8;
+      epid|=buffer[dp++];
+      esinfo=(buffer[dp++]&0xF)<<8;
+      esinfo|=buffer[dp++];
+      if (ecm_pid == 0)
+	ecm_pid=descriptor(&buffer[dp],esinfo,ca_system_id);
+      if (ecm_pid != 0)
+	return ecm_pid;
+      dp+=esinfo;
+    }
+  }
+  close(fd);
+  return 0;
+}
 
 int main(int argc, char **argv)
 {
   ca_msg_t ca_msg;
-  int initok=0, caid=0x1722;
-  int SID=9, ONID=0x85, ECMPID=0x150A, EMMPID=0x1500, VPID=0x1FF, APID=0x200;
+  char cmd=0x03;
+  int initok=0, caid=0;
+  int SID=9, ONID=0x85, ECMPID=0, EMMPID=0x1500, VPID=0x1FF, APID=0x200,pmt=0;
   
   camfd=open("/dev/ost/ca0", O_RDWR);
 
@@ -181,7 +269,7 @@ int main(int argc, char **argv)
   {
     sscanf(argv[1], "%x", &VPID);
     sscanf(argv[2], "%x", &APID);
-    sscanf(argv[3], "%x", &ECMPID);
+    sscanf(argv[3], "%x", &pmt);
   }
   
   if (argc>=5)
@@ -198,6 +286,8 @@ int main(int argc, char **argv)
 //  msg.length = 0;
 //  msg.msg
 
+
+  writecam(&cmd,1);
   while (1)
   {
     char buffer[128];
@@ -279,18 +369,34 @@ int main(int argc, char **argv)
         break;
       case 0x89:
       {
+	if (caid == 0) break;
         printf("status89: %02x\n", buffer[5]);
         setemm(0x104, caid, EMMPID);
+	if (ECMPID == 0) {
+	  printf("searching ECM-pid for ca_system_ID %04X\n",caid);
+	  ECMPID=find_ecmpid(pmt,caid);
+	  if (ECMPID == 0) {
+	    printf("no ECM-pid found for ca_system_ID %04X\n",caid);
+	    exit(0);
+	  }
+	  else
+	    printf("ECM-pid found: %04X\n",ECMPID);
+	}
         descramble(ONID, SID, 0x104, caid, ECMPID, APID, VPID);
         break;
       }
       case 0x83:
       {
         int newcaid=(buffer[6]<<8)|buffer[7];
+	if ((caid != 0) && (newcaid != caid)) {
+	  reset();
+	  exit(0);
+	}
         if (newcaid!=caid)
         {
-          printf("setting new CAID (from %x to %x) (NORMALLY this would require a patched cam :)\n", caid, newcaid);
+	  printf("CAID is: %04X\n",newcaid);
           caid=newcaid;
+	  reset();
         }
         break;
       }
