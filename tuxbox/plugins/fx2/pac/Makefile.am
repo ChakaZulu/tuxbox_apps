@@ -6,7 +6,7 @@ libpac_la_SOURCES = main.c maze.c somain.c
 
 install-libLTLIBRARIES:
 	install -d $(PLUGINDIR)
-	install -m 0644  .libs/pac.so $(PLUGINDIR)/
+	install -m 0644  .libs/libpac.so $(PLUGINDIR)/pac.so
 
 uninstall-libLTLIBRARIES:
 	-rm $(PLUGINDIR)/pac.so
