@@ -29,6 +29,20 @@ eDVBNamespace eTransponder::buildNamespace(eOriginalNetworkID onid, eTransportSt
 	return eDVBNamespace(dvb_namespace);
 }
 
+bool eDVBScanController::abort()
+{
+	if (!knownTransponder.size())
+		return false;
+	dvb.tPAT.abort();
+	dvb.tSDT.abort();
+	dvb.tNIT.abort();
+	dvb.tONIT.abort();
+	dvb.tBAT.abort();
+	cancel=1;
+	return true;
+}
+
+
 eDVBScanController::eDVBScanController(eDVB &dvb): eDVBController(dvb)
 {
 	cancel=0;

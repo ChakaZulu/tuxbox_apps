@@ -338,9 +338,11 @@ void eDVBCI::newService(int update)
 					break;
 				case 2:				//Descriptor
 					unsigned int x=0;
-					for(x=0;x<caidcount;x++)
-						if(caids[x]==(i->descriptor[2]<<8)|(i->descriptor[3]))
+					for(;x<caidcount;x++)
+					{
+						if(caids[x] == ((i->descriptor[2]<<8)|(i->descriptor[3])))
 							break;
+					}
 
 					if(x!=caidcount)
 					{
@@ -371,7 +373,7 @@ void eDVBCI::newService(int update)
 #if 0
 		printf("CAPMT-LEN:%d\n",wp);
 
-		for(int i=9;i<wp;i++)
+		for(int i=0;i<wp;i++)
 			printf("%02x ",capmt[i]);
 		printf("\n");
 #endif
@@ -428,7 +430,7 @@ void eDVBCI::clearCAIDs()
 	lock.lock();
 	sapi->clearCAlist();
 	lock.unlock();
-	
+
 	caidcount=0;
 }
 
