@@ -77,8 +77,10 @@ struct ePlaylistEntry
 	{
 		if ( type == PlaylistEntry )
 			return e.service == service;
-		else if ( e.event_id != -1 && event_id != -1 )
-			return e.service == service && e.event_id == event_id;
+		else if ( type & isRepeating )
+			return (e.service == service) 
+				&& (e.time_begin == time_begin) 
+				&& ((e.type & (Su|Mo|Tue|Wed|Thu|Fr|Sa)) == (type & (Su|Mo|Tue|Wed|Thu|Fr|Sa)));
 		else
 			return e.service == service && e.time_begin == time_begin;
 	}

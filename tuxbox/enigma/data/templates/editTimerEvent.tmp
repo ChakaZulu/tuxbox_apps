@@ -7,6 +7,8 @@
 		<form action="/changeTimerEvent">
 			<input type="hidden" name="ID" value="#EVENTID#">
 			<input type="hidden" name="ref" value="#SERVICEREF#">
+			<input type="hidden" name="old_type" value="#OLD_TYPE#">
+			<input type="hidden" name="old_stime" value="#OLD_STIME#">
 			<table width=100% border=0 cellpadding=0 cellspacing=10>
 				<tr>
 					<td>Start:</d>
@@ -45,6 +47,14 @@
 						:
 						<select name="emin" size="1">
 							#EMINOPTS#
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td>#AFTERTEXT#</d>
+					<td>
+						<select name="after_event" size="1">
+							#AFTEROPTS#
 						</select>
 					</td>
 				</tr>

@@ -3,6 +3,7 @@
 
 #include <lib/dvb/serviceplaylist.h>
 #include <lib/gui/listbox.h>
+#include <lib/gui/emessage.h>
 #include <sselect.h>
 #include <epgwindow.h>
 
@@ -39,7 +40,7 @@ class eTimerManager: public Object
 	eServiceReference timerlistref;
 	eServiceReference playbackRef;
 
-// nextStarting event, or the current running Event
+//	nextStarting event, or the current running Event
 	std::list<ePlaylistEntry>::iterator nextStartingEvent;
 
 // all methods are NOT always connected to the eDVB Signals
@@ -64,8 +65,8 @@ public:
 	bool addEventToTimerList( eWidget *w, const eServiceReference *ref, const EITEvent *evt, int type = ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR|ePlaylistEntry::stateWaiting, const ePlaylistEntry *exclude=0 );
 	bool addEventToTimerList( eWidget *w, const ePlaylistEntry& entry, const ePlaylistEntry *exclude=0 );
 	int addEventToTimerList(const ePlaylistEntry& entry);
-	void deleteEventFromTimerList(const eServiceReference *ref, const EITEvent *evt);
-	void modifyEventInTimerList(const eServiceReference *ref, const EITEvent *evt, eString description);
+	void deleteEventFromTimerList(const ePlaylistEntry& entry);
+	void modifyEventInTimerList(const ePlaylistEntry& old_entry, const ePlaylistEntry& new_entry);
 	bool eventAlreadyInList( eWidget *w, EITEvent &e, eServiceReference &ref );
 	void abortEvent(int err);
 	void loadTimerList();
@@ -121,7 +122,7 @@ public:
 class eTimerEditView: public eWindow
 {
 	eCheckbox *multiple, *cMo, *cTue, *cWed, *cThu, *cFr, *cSa, *cSu;
-	eComboBox *bday, *bmonth, *byear, *eday, *emonth, *eyear, *type;
+	eComboBox *bday, *bmonth, *byear, *eday, *emonth, *eyear, *type, *after_event;
 	eTextInputField *event_name;
 	eLabel *lBegin, *lEnd;
 	eNumber *btime, *etime;

@@ -346,7 +346,7 @@ private:
 
 	eTimer timeout, clocktimer, messagetimeout,
 					progresstimer, volumeTimer, recStatusBlink,
-					doubleklickTimer, delayedStandbyTimer;
+					doubleklickTimer, unusedTimer;
 
 	Connection doubleklickTimerConnection;
 
@@ -385,7 +385,7 @@ private:
 
 	ePlaylist *addUserBouquet( ePlaylist*, const eString&, const eString&, eServiceReference &, bool );
 
-  	int wasSleeping;
+	int timeshift;
 	int playlistmode; // curlist is a list controlled by the user (not just a history).
 	int entered_playlistmode;
 
@@ -434,7 +434,6 @@ private:
 	timeval standbyTime;
 	int standby_nomenu;
 
-	void delayedStandby();
 	void standbyPress(int nomenu);
 	void standbyRepeat();
 	void standbyRelease();
@@ -575,7 +574,7 @@ public:
 	void toggleTimerMode(int state);
 	int toggleEditMode(eServiceSelector *, int mode=-1);
 	void toggleMoveMode(eServiceSelector *);
-	void handleStandby(int i=0);
+	int handleStandby(int i=0);
 
 	void setServiceSelectorPath(eServicePath path);
 	void getServiceSelectorPath(eServicePath &path);

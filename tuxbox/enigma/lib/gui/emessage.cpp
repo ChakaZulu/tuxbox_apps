@@ -136,11 +136,22 @@ eMessageBox::eMessageBox(eString message, eString caption, int flags, int def, i
 					this->def = b;
 
 				xpos += bSize.width()+20;
-				if ( xpos+20 > ext.width() )
-					cresize( eSize( xpos+20, ext.height() + bSize.height() + 20 ) );
-				else
-					cresize( eSize( ext.width(), ext.height() + bSize.height() + 20 ) );
 			}
+		
+		if ( timeout )
+		{
+			lTimeout = new eLabel(this);
+			lTimeout->setText( eString().sprintf("%d", timeout) );
+			lTimeout->resize( eSize(50, fontsize+4+10) );       
+			lTimeout->move( ePoint( xpos+10, ext.height() ) );
+			lTimeout->setFlags(eLabel::flagVCenter);
+			xpos += lTimeout->getSize().width()+10;
+		}
+
+		if ( xpos+20 > ext.width() )
+			cresize( eSize( xpos+20, ext.height() + fontsize + 4 + 10 + 20 ) );
+		else
+			cresize( eSize( ext.width(), ext.height() + fontsize + 4 + 10 + 20 ) );
 	}
 	else
 		cresize( ext );
@@ -152,17 +163,23 @@ int eMessageBox::eventHandler( const eWidgetEvent &e )
 	switch (e.type)
 	{
 		case eWidgetEvent::evtAction:
-			if ( timer )
+			if ( timer && timer->isActive() )
+			{
 				timer->stop();
+				delete sectimer;
+				updateTimeoutLabel();
+			}
 			break;
 		case eWidgetEvent::execBegin:
 			if ( def )
-			{
 				setFocus(def);
-				return 1;
-			}
 			if ( timeout )
-				timer->start(timeout, true);
+			{
+				timer->start(timeout*1000, true);
+				sectimer = new eTimer(eApp);
+				CONNECT( sectimer->timeout, eMessageBox::updateTimeoutLabel );
+				sectimer->start(1000);
+			}
 		default:
 			break;
 	}
@@ -196,7 +213,18 @@ void eMessageBox::pressedYes()
 void eMessageBox::pressedNo()
 {
 	if ( in_loop )
-	  close(btNo);
+		close(btNo);
 	else
 		hide();
+}
+
+void eMessageBox::updateTimeoutLabel()
+{
+	if ( timeout )
+	{
+		--timeout;
+		lTimeout->setText(eString().sprintf("%d", timeout));
+	}
+	else
+		lTimeout->hide();
 }

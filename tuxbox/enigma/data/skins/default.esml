@@ -710,30 +710,31 @@
 	</object>
 
 	<object name="eTimerEditView">
-		<eTimerEditView cposition="70:100" csize="590:330" text="Timer Edit">
+		<eTimerEditView cposition="70:100" csize="590:335" text="Timer Edit">
 			<eTextInputField name="event_name" position="10:10" size="e-10:40" loadDeco="eNumber" helptext="press ok to change event name manually" />
 			<eLabel name="lBegin" text="Starttime" position="405:102" size="103:30" />
 			<eLabel name="lEnd" text="Endtime" position="405:148" size="103:30" />
 			<eCheckbox name="multiple" position="10:60" size="280:30" text="Repeated timer" helptext="for a multiple event enable this" loadDeco="" />
-			<eCheckbox name="Mo" position="300:60" size="280:30" text="Mo" helptext="Monday" loadDeco="" />
-			<eCheckbox name="Tue" position="10:100" size="125:30" text="Tue" helptext="Tuesday" loadDeco="" />
-			<eCheckbox name="Wed" position="145:100" size="145:30" text="Wed" helptext="Wednesday" loadDeco="" />
-			<eCheckbox name="Thu" position="300:100" size="90:30" text="Thu" helptext="Thursday" loadDeco="" />
-			<eCheckbox name="Fr" position="10:145" size="125:30" text="Fr" helptext="Friday" loadDeco="" />
-			<eCheckbox name="Sa" position="145:145" size="145:30" text="Sa" helptext="Saturday" loadDeco="" />
-			<eCheckbox name="Su" position="300:145" size="90:30" text="Su" helptext="Sunday" loadDeco="" />
-			<eComboBox name="b_year" openEntries="5" position="10:100" size="90:35" helptext="select year (ok)" loadDeco="" />
-			<eComboBox name="b_month" openEntries="6" position="110:100" size="150:35" helptext="select month (ok)" loadDeco="" />
-			<eComboBox name="b_day" openEntries="8" position="270:100" size="e-92:35" helptext="select day (ok)" loadDeco="" />
-			<eNumber name="b_time" position="e-82:100" size="72:35" helptext="edit the start time (0..9, left, right)" loadDeco="" />
-			<eComboBox name="e_year" openEntries="5" position="10:145" size="90:35" helptext="select year (ok)" loadDeco="" />
-			<eComboBox name="e_month" openEntries="6" position="110:145" size="150:35" helptext="select month (ok)" loadDeco="" />
-			<eComboBox name="e_day" openEntries="8" position="270:145" size="e-92:35" helptext="select day (ok)" loadDeco="" />
-			<eNumber name="e_time" position="e-82:145" size="72:35" helptext="edit the end time (0..9, left, right)" loadDeco="" />
-			<eComboBox name="type" openEntries="3" position="10:190" size="250:35" helptext="select the timer type (ok)" loadDeco="" />
-			<eButton name="select_service" position="270:190" size="e-10:35" helptext="to change service press ok" loadDeco="" />
-			<eButton name="apply" text="apply" position="10:235" size="250:35" shortcut="green" helptext="save data and close window" loadDeco="" />
-			<eButton name="scanEPG" text="scan EPG" position="270:235" size="e-10:35" shortcut="blue" helptext="search event name for this beg-/end time in epg" loadDeco="" />
+			<eCheckbox name="Mo" position="300:60" size="90:30" text="Mo" helptext="Monday" loadDeco="" />
+			<eComboBox name="after_event" position="405:60" size="e-10:35" loadDeco="" helptext="select what todo after event" showEntryHelp="" />
+			<eCheckbox name="Tue" position="10:105" size="125:30" text="Tue" helptext="Tuesday" loadDeco="" />
+			<eCheckbox name="Wed" position="145:105" size="145:30" text="Wed" helptext="Wednesday" loadDeco="" />
+			<eCheckbox name="Thu" position="300:105" size="90:30" text="Thu" helptext="Thursday" loadDeco="" />
+			<eCheckbox name="Fr" position="10:150" size="125:30" text="Fr" helptext="Friday" loadDeco="" />
+			<eCheckbox name="Sa" position="145:150" size="145:30" text="Sa" helptext="Saturday" loadDeco="" />
+			<eCheckbox name="Su" position="300:150" size="90:30" text="Su" helptext="Sunday" loadDeco="" />
+			<eComboBox name="b_year" openEntries="5" position="10:105" size="90:35" helptext="select year (ok)" loadDeco="" />
+			<eComboBox name="b_month" openEntries="6" position="110:105" size="150:35" helptext="select month (ok)" loadDeco="" />
+			<eComboBox name="b_day" openEntries="8" position="270:105" size="e-92:35" helptext="select day (ok)" loadDeco="" />
+			<eNumber name="b_time" position="e-82:105" size="72:35" helptext="edit the start time (0..9, left, right)" loadDeco="" />
+			<eComboBox name="e_year" openEntries="5" position="10:150" size="90:35" helptext="select year (ok)" loadDeco="" />
+			<eComboBox name="e_month" openEntries="6" position="110:150" size="150:35" helptext="select month (ok)" loadDeco="" />
+			<eComboBox name="e_day" openEntries="8" position="270:150" size="e-92:35" helptext="select day (ok)" loadDeco="" />
+			<eNumber name="e_time" position="e-82:150" size="72:35" helptext="edit the end time (0..9, left, right)" loadDeco="" />
+			<eComboBox name="type" openEntries="3" position="10:195" size="250:35" helptext="select the timer type (ok)" loadDeco="" />
+			<eButton name="select_service" position="270:195" size="e-10:35" helptext="to change service press ok" loadDeco="" />
+			<eButton name="apply" text="apply" position="10:240" size="250:35" shortcut="green" helptext="save data and close window" loadDeco="" />
+			<eButton name="scanEPG" text="scan EPG" position="270:240" size="e-10:35" shortcut="blue" helptext="search event name for this beg-/end time in epg" loadDeco="" />
 			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
 		</eTimerEditView>
 	</object>

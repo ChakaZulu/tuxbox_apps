@@ -11,15 +11,16 @@ class eTimer;
  */
 class eMessageBox: public eWindow
 {
-	eTimer *timer;
-	eLabel *text, *icon;
+	eTimer *timer, *sectimer;
+	eLabel *text, *icon, *lTimeout;
 	eWidget *def;
 	int timeout;
-public:
 	void pressedOK();
 	void pressedCancel();
 	void pressedYes();
 	void pressedNo();
+	void updateTimeoutLabel();
+protected:	
 	int eventHandler( const eWidgetEvent & );
 public:
 	enum { btOK=1, btCancel=2, btYes=4, btNo=8, btMax};

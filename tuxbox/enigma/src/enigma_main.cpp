@@ -791,7 +791,7 @@ eAudioSelector::eAudioSelector()
 	else
 	{
 		list.resize(eSize(getClientSize().width()-20, getClientSize().height()-40));
-		m_subtitles->move(ePoint(getClientSize().height()-35, 10));
+		m_subtitles->move(ePoint(10, getClientSize().height()-35));
 	}
 	
 	m_subtitles->resize(eSize(getClientSize().width()-20, 35));
@@ -1464,8 +1464,9 @@ eZapMain::eZapMain()
 	,epg_messages(eApp, 1)
 	,timeout(eApp)
 	,clocktimer(eApp), messagetimeout(eApp), progresstimer(eApp)
-	,volumeTimer(eApp), recStatusBlink(eApp), doubleklickTimer(eApp), delayedStandbyTimer(eApp)
-	,currentSelectedUserBouquet(0), wasSleeping(0), state(0)
+	,volumeTimer(eApp), recStatusBlink(eApp), doubleklickTimer(eApp)
+	,unusedTimer(eApp), currentSelectedUserBouquet(0), timeshift(0)
+	,state(0)
 {
 	if (!instance)
 		instance=this;
@@ -1641,8 +1642,6 @@ eZapMain::eZapMain()
 	CONNECT(recStatusBlink.timeout, eZapMain::blinkRecord);
 #endif
 
-	CONNECT(delayedStandbyTimer.timeout, eZapMain::delayedStandby);
-
 	CONNECT( eFrontend::getInstance()->s_RotorRunning, eZapMain::onRotorStart );
 	CONNECT( eFrontend::getInstance()->s_RotorStopped, eZapMain::onRotorStop );
 	CONNECT( eFrontend::getInstance()->s_RotorTimeout, eZapMain::onRotorTimeout );
@@ -1714,9 +1713,12 @@ eZapMain::eZapMain()
 	if ( eConfig::getInstance()->getKey("/ezap/ui/playlistmode", playlistmode ) )
 		playlistmode = 0;  // default TV Mode
 
-	int fastzap;
+	int fastzap=0;
 	if ( eConfig::getInstance()->getKey("/elitedvb/extra/fastzapping", fastzap ) )
-		fastzap=0;
+	{
+		fastzap = 1;
+		eConfig::getInstance()->setKey("/elitedvb/extra/fastzapping", fastzap );
+	}
 
 	Decoder::setFastZap(fastzap);
 
@@ -3161,13 +3163,8 @@ void eZapMain::stopSkip(int dir)
 	}
 #endif
 	{
-		if ( state & stateInTimerMode && state & stateRecording && wasSleeping )
-		{
-			eDebug("before recording enigma was in standby..\n"
-						"but the user wants timeshifting..\n"
-						"dont go to standby after recordings");
-			wasSleeping=0;
-		}
+		if ( state & stateInTimerMode && state & stateRecording )
+			timeshift=1;
 		eServiceHandler *handler=eServiceInterface::getInstance()->getService();
 		if (handler)
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekEnd));
@@ -3179,54 +3176,61 @@ void eZapMain::stopSkip(int dir)
 
 #endif //DISABLE_FILE
 
-void eZapMain::handleStandby(int i)
+int eZapMain::handleStandby(int i)
 {
-	if ( i )
+	int force=0;	
+	if ( !i )
 	{
-		if ( state & stateSleeping )  // we are already sleeping
-			return;
-		if ( i > 0 )
-			wasSleeping = i;
-	}
-
-	if (state & stateSleeping)
-	{
-		wasSleeping=1;
-		eZapStandby::getInstance()->wakeUp(1);
-		// this breakes the eZapStandby mainloop...
-		// and enigma wakes up
-	}
-	else if ( i )
-	{
-		switch(wasSleeping) // before record we was in sleep mode...
+		if ( state & stateSleeping )
 		{
-			case 1: // delayed standby
-				if ( delayedStandbyTimer.isActive() )
-					delayedStandbyTimer.stop();
-				else // delayed Standby after 10min
-					delayedStandbyTimer.start( 1000 * 60 * 10, true );
-				break;
-			case 2: // complete Shutdown
-			// we do hardly shutdown the box..
-			// any pending timers are ignored
-				message_notifier.send(eZapMain::messageShutdown);
-				break;
-			case 3: // immediate go to standby
-				delayedStandby();
-				break;
-			default:
-				break;
+			eZapStandby::getInstance()->wakeUp(1);
+			// this breakes the eZapStandby mainloop...
+			// and enigma wakes up
+			return 3;
 		}
+		int wasDeepstandby=0;
+		eConfig::getInstance()->getKey("/ezap/timer/deepstandbywakeupset", wasDeepstandby );
+		eConfig::getInstance()->delKey("/ezap/timer/deepstandbywakeupset");
+		return wasDeepstandby ? 2 : 0;
 	}
-}
-
-void eZapMain::delayedStandby()
-{
-	wasSleeping=0;
-	// use message_notifier to goto sleep...
-	// we will not block the mainloop...
-	if (!eServiceInterface::getInstance()->service.path)
-		message_notifier.send(eZapMain::messageGoSleep);
+	else switch(i) // before record we was in sleep mode...
+	{
+		case 4: // force .. ( Sleeptimer )
+			force=1;
+		case 2: // complete Shutdown
+		{
+			if ( !force && (eServiceInterface::getInstance()->service.path || timeshift) )
+				break;
+			eMessageBox mb(_("Shutdown your Receiver now?"),_("Timer Message"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btYes, 30);
+			mb.show();
+			int ret = mb.exec();
+			mb.hide();
+			if (ret == eMessageBox::btYes)
+		// we do hardly shutdown the box..
+		// any pending timers are ignored
+				message_notifier.send(eZapMain::messageShutdown);
+			break;
+		}
+		case 6: // force .. ( Sleeptimer )
+			force=1;
+		case 3: // immediate go to standby
+		{
+			if ( !force && (eServiceInterface::getInstance()->service.path || timeshift) )
+				break;
+			eMessageBox mb(_("Go to Standby now?"),_("Timer Message"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btYes, 30 );
+			mb.show();
+			int ret = mb.exec();
+			mb.hide();
+			if (ret == eMessageBox::btYes)
+				// use message_notifier to goto sleep...
+				// we will not block the mainloop...
+					message_notifier.send(eZapMain::messageGoSleep);
+			break;
+		}
+		default:
+			break;
+	}
+	return 0;
 }
 
 ePlaylist *eZapMain::addUserBouquet( ePlaylist *list, const eString &path, const eString &name, eServiceReference& ref, bool save )
@@ -4501,13 +4505,6 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		int num=0;
 		stopMessages();
 
-		// any user action stops pending delayedStandbyTimer
-		if ( delayedStandbyTimer.isActive() )
-		{
-			delayedStandbyTimer.stop();
-			wasSleeping=0;
-		}
-
 		if (event.action == &i_enigmaMainActions->showMainMenu)
 		{
 			int oldmode=mode;
@@ -5553,6 +5550,7 @@ void eZapMain::timeOut()
 
 void eZapMain::leaveService()
 {
+	timeshift=0;
 	cur_start=cur_duration=cur_event_id=-1;
 	
 	ButtonGreenDis->show();
