@@ -5,7 +5,6 @@ INCLUDES = \
 	-I$(top_srcdir)/edvb/miniqt \
 	-I$(top_srcdir)/enigma/src/core/driver \
 	-I$(top_srcdir)/enigma/src/core/system \
-	-I/home/tmbinc/dreambox/pallas2-linux_drv-20020128/include/
 
 lib_LTLIBRARIES = libdvb.la
 
