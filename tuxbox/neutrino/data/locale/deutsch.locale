@@ -98,10 +98,10 @@ GENRE.SHOW.0 Show / Gameshow
 GENRE.SHOW.1 Gameshow/Quiz
 GENRE.SHOW.2 Varietee
 GENRE.SHOW.3 Talkshow
-GENRE.SOZIAL_POLITICAL.0 Sozial & Politikereignisse / Wirtschaft
-GENRE.SOZIAL_POLITICAL.1 Magazin/Report/Dokumentation
-GENRE.SOZIAL_POLITICAL.2 Wirtschaft und Soziales
-GENRE.SOZIAL_POLITICAL.3 Besondere Menschen
+GENRE.SOCIAL_POLITICAL.0 Sozial & Politikereignisse / Wirtschaft
+GENRE.SOCIAL_POLITICAL.1 Magazin/Report/Dokumentation
+GENRE.SOCIAL_POLITICAL.2 Wirtschaft und Soziales
+GENRE.SOCIAL_POLITICAL.3 Besondere Menschen
 GENRE.SPORTS.0 Sport
 GENRE.SPORTS.1 Großereignisse (Olympische Spiele, Weltmeisterschaften usw.)
 GENRE.SPORTS.10 equestrian
@@ -137,8 +137,22 @@ audiomenu.monoleft mono links
 audiomenu.monoright mono rechts
 audiomenu.ost ost
 audiomenu.stereo stereo
+audioplayer.add Hinzufügen
+audioplayer.artist_title Interpret, Titel
+audioplayer.defdir Start-Verz.
+audioplayer.delete Löschen
+audioplayer.deleteall Alle löschen
+audioplayer.display_order Anzeige
+audioplayer.fastforward schneller Vorl.
+audioplayer.follow Selektiere akt. Track
 audioplayer.head Audio Playlist
+audioplayer.highprio Hohe Decodier-Priorität
+audioplayer.id3scan Scanne ID3-Tags
+audioplayer.keylevel Tasten-Umschaltung
 audioplayer.name Audioplayer
+audioplayer.pause Pause
+audioplayer.play Abspielen
+audioplayer.playing Aktueller Track
 audioplayer.playlist_fileerror_msg Datei kann nicht erstellt werden:
 audioplayer.playlist_fileerror_title Fehler
 audioplayer.playlist_fileoverwrite_msg Soll diese Datei überschrieben werden:
@@ -146,7 +160,12 @@ audioplayer.playlist_fileoverwrite_title Überschreiben?
 audioplayer.playlist_name Dateiname der Playlist
 audioplayer.playlist_name_hint1 Geben Sie den Dateinamen der Playlist ein
 audioplayer.playlist_name_hint2 Die Erweiterung .m3u wird automatisch angehängt
+audioplayer.rewind schneller Rückl.
 audioplayer.save_playlist Playlist speichern
+audioplayer.screensaver_timeout Bildschirmschoner (min, 0=aus)
+audioplayer.shuffle Shuffle
+audioplayer.stop Stopp
+audioplayer.title_artist Titel, Interpret
 audioplayerpicsettings.general Audioplayer / Bildbetrachter
 bookmarkmanager.delete Löschen
 bookmarkmanager.name Bookmarks
@@ -264,7 +283,7 @@ flashupdate.currentversiondate Datum
 flashupdate.currentversionsnapshot ImageTyp
 flashupdate.currentversiontime Uhrzeit
 flashupdate.erasefailed Flash löschen fehlgeschlagen
-flashupdate.eraseingflash lösche Flash
+flashupdate.erasing lösche Flash
 flashupdate.experimentalimage Sie haben einen Snapshot ausgewählt, bitte beachten Sie,\ndass diese Version ungetestet ist und u.U. Ihre Box\nnach dem Update nicht mehr funktionsfähig ist.\n\nSoll diese Version wirklich installiert werden?
 flashupdate.expertfunctions Experten-Funktionen
 flashupdate.fileis0bytes die Dateigröße ist 0 Byte
@@ -484,25 +503,6 @@ movieplayer.tsplayback TS Abspielen
 movieplayer.vcdplayback (S)VCD
 movieplayer.vlchelp ROT/Home Stop\nGRÜN Resync\nGELB Pause/Weiter\nBLAU Bookmark setzen\nd-box Zeit einblenden\nv Sprung\n1 ca. 1 Minute zurück\n3 ca. 1 Minute vor\n4 ca. 5 Minuten zurück\n6 ca. 5 Minuten vor\n7 ca. 10 Minuten zurück\n9 ca. 10 Minuten vor\nHilfe: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.wrongvlcversion Funktion ist mit der benutzten Version des VLC nicht möglich
-mp3player.add Hinzufügen
-mp3player.artist_title Interpret, Titel
-mp3player.defdir Start-Verz.
-mp3player.delete Löschen
-mp3player.deleteall Alle löschen
-mp3player.display_order Anzeige
-mp3player.fastforward schneller Vorl.
-mp3player.follow Selektiere akt. Track
-mp3player.highprio Hohe Decodier-Priorität
-mp3player.id3scan Scanne ID3-Tags
-mp3player.keylevel Tasten-Umschaltung
-mp3player.pause Pause
-mp3player.play Abspielen
-mp3player.playing Aktueller Track
-mp3player.rewind schneller Rückl.
-mp3player.screensaver_timeout Bildschirmschoner (min, 0=aus)
-mp3player.shuffle Shuffle
-mp3player.stop Stopp
-mp3player.title_artist Titel, Interpret
 networkmenu.broadcast Broadcast
 networkmenu.dhcp DHCP
 networkmenu.gateway Standard Gateway
@@ -535,7 +535,7 @@ nfs.umount NFS/CIFS Verzeichnis unmounten
 nfs.umounterror Umount-Fehler
 nfs.username CIFS Benutzername
 nfsmenu.head NFS/CIFS Einstellungen
-nvod.proz (%d%% vorbei)
+nvod.percentage (%d%% vorbei)
 nvod.starting (Beginn in %d min)
 nvodselector.directormode Bildregie-Modus
 nvodselector.head Anfangszeit auswählen
@@ -554,8 +554,8 @@ parentallock.lockage Sendungen
 parentallock.lockage12 ab 12 Jahren sperren
 parentallock.lockage16 ab 16 Jahren sperren
 parentallock.lockage18 ab 18 Jahren sperren
+parentallock.lockedchannel Vorgesperrter Sender...
 parentallock.lockedprogram Gesperrtes Programm (FSK ab %d)
-parentallock.lockedsender Vorgesperrter Sender...
 parentallock.never Nie
 parentallock.onsignal Bei gesendeter Vorsperre
 parentallock.parentallock Jugendschutz
@@ -599,6 +599,7 @@ recordingmenu.splitsize Max. Dateigröße (MB)
 recordingmenu.stopplayback Playback anhalten
 recordingmenu.stopsectionsd Sectionsd anhalten
 recordingmenu.stream_all_audio_pids Alle Audiopids aufzeichnen
+recordingmenu.stream_vtxt_pid Videotext aufzeichnen
 recordingmenu.use_o_sync Synchrones Schreiben (O_SYNC)
 recordingmenu.vcr Videorekorder
 recordtimer.announce Die Aufnahme beginnt in wenigen Minuten.

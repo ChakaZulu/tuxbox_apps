@@ -60,10 +60,10 @@ GENRE.SHOW.0 Show / Gameshow
 GENRE.SHOW.1 Gameshow/Quiz
 GENRE.SHOW.2 varietee
 GENRE.SHOW.3 Talkshow
-GENRE.SOZIAL_POLITICAL.0 Sozial & Politikereignisse / Wirtschaft
-GENRE.SOZIAL_POLITICAL.1 Magazin/Report/Dokumentation
-GENRE.SOZIAL_POLITICAL.2 Wirtschaft und Soziales
-GENRE.SOZIAL_POLITICAL.3 Besondere Menschen
+GENRE.SOCIAL_POLITICAL.0 Sozial & Politikereignisse / Wirtschaft
+GENRE.SOCIAL_POLITICAL.1 Magazin/Report/Dokumentation
+GENRE.SOCIAL_POLITICAL.2 Wirtschaft und Soziales
+GENRE.SOCIAL_POLITICAL.3 Besondere Menschen
 GENRE.SPORTS.0 Sport
 GENRE.SPORTS.1 Großereignisse (Olympische Spiele, Weltmeisterschaften usw.)
 GENRE.SPORTS.10 equestrian
@@ -99,6 +99,24 @@ audiomenu.monoleft mono links
 audiomenu.monoright mono rechts
 audiomenu.ost ost
 audiomenu.stereo stereo
+audioplayer.add dazuadoa
+audioplayer.artist_title Interpret, Titl
+audioplayer.defdir Start-Verz.
+audioplayer.delete löschn
+audioplayer.deleteall olle löschn
+audioplayer.display_order Ozoagn
+audioplayer.fastforward schnei vieri
+audioplayer.follow aktuelle Liad
+audioplayer.id3scan ID3-Tags durchsuacha
+audioplayer.keylevel Tasdn-Umschoitung
+audioplayer.pause Pause
+audioplayer.play obspuin
+audioplayer.playing Spuin
+audioplayer.rewind rewind
+audioplayer.screensaver_timeout Buidschirmschona (minutn, 0=aus)
+audioplayer.shuffle wias kumt
+audioplayer.stop stopn
+audioplayer.title_artist Titl, Interpret
 audioplayerpicsettings.general Musi spuin / Buidl schaugn
 bookmarkmanager.delete Löschn
 bookmarkmanager.name Lesezeichn
@@ -200,9 +218,7 @@ filebrowser.sort.name (Nama)
 filebrowser.sort.namedirsfirst (Dateinama2)
 filebrowser.sort.size (Greaß)
 filebrowser.sort.type (Typ)
-flashupdate.action Jetzad:
 flashupdate.actionreadflash flash lesn
-flashupdate.actionwriteflash schreib in flash
 flashupdate.cantopenfile kon de Datei ned aufmacha
 flashupdate.cantopenmtd kon des MTD-Device ned aufmacha
 flashupdate.checkupdate nach ner neien Versio suacha
@@ -212,7 +228,7 @@ flashupdate.currentversiondate Datum
 flashupdate.currentversionsnapshot ImageTyp
 flashupdate.currentversiontime Uhrzeit
 flashupdate.erasefailed Flash löschn is schiafganga
-flashupdate.eraseingflash lösch des Flash
+flashupdate.erasing lösch des Flash
 flashupdate.experimentalimage Sie ham an Schnappshuss ausgwaiht,\nbitte bedenkens, dass de Version ned durchprobiert is.\n Wenns bled laft, geht Ihr Box danoch nimma.\n\nWoins de Version wirklich hernemma?
 flashupdate.expertfunctions Experten-Funktionen
 flashupdate.fileis0bytes de Datei hod 0 Byte
@@ -244,7 +260,6 @@ flashupdate.readflash ganzes Flashimage aussalesn
 flashupdate.readflashmtd einzelne Partition aussalesn
 flashupdate.ready hobs
 flashupdate.reallyflashmtd Woins echt flashen?\n\nWann was schiaflaft oder des Image hi is\wer de Box nimma startn.\n\nImagenama: %s\nZiel: %s
-flashupdate.reboot Kloana Moment, mir startn numoi de Box
 flashupdate.savesuccess Des Image is unter\nDateinamen %s gspeichat worn.
 flashupdate.selectimage Vorhandne Images
 flashupdate.titlereadflash Flash auslesn
@@ -287,7 +302,6 @@ fontsize.menu_info Menu Info
 fontsize.menu_title Menutitl
 gtxalpha.alpha1 tr1
 gtxalpha.alpha2 tr2
-infoviewer.cantdecode Senda kon ned aufgsperrt wern
 infoviewer.epgnotload Informationen no ned glon...
 infoviewer.epgwait Wart no aufs EPG...
 infoviewer.eventlist Programm
@@ -383,11 +397,9 @@ mainsettings.language Sproch
 mainsettings.lcd LC-Disbläi
 mainsettings.misc No a boar Eistellunga
 mainsettings.network Netzwerk
-mainsettings.plugins Plugins Eistellunga
 mainsettings.recording Streamingserva
 mainsettings.savesettingsnow Eistellunga jetz speichan
 mainsettings.savesettingsnow_hint De Eistellunga wern jezt gespeichat,\noan Moment bitte...
-mainsettings.scan Eistellunga Senda-suacha
 mainsettings.streaming Movieplayer
 mainsettings.video Video
 menu.back Zruck
@@ -399,7 +411,6 @@ messagebox.info Information
 messagebox.no Ned
 messagebox.yes Scho
 miscsettings.bootinfo Informationa beim Startn zoang
-miscsettings.boxtype DBox Hersteller
 miscsettings.fb_destination EXPERT! Boot-Konsole
 miscsettings.general Allgemein
 miscsettings.head Diverse Eistellunga
@@ -428,24 +439,6 @@ movieplayer.tsplayback TS Abspuin
 movieplayer.vcdplayback (S)VCD
 movieplayer.vlchelp ROT/Hoam Stop\nGREA Resync\nGELB Pause/Weida\nBLAU Merkal setzn\n1 ca. 1 Minutn zruck\n3 ca. 1 Minutn viri\n4 ca. 5 Minutn zruck\n6 ca. 5 Minutn viri\n7 ca. 10 Minutn zruck\n9 ca. 10 Minutn viri\nHuif: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.wrongvlcversion Des is mit ehnara VLC-Version ne drin
-mp3player.add dazuadoa
-mp3player.artist_title Interpret, Titl
-mp3player.defdir Start-Verz.
-mp3player.delete löschn
-mp3player.deleteall olle löschn
-mp3player.display_order Ozoagn
-mp3player.fastforward schnei vieri
-mp3player.follow aktuelle Liad
-mp3player.id3scan ID3-Tags durchsuacha
-mp3player.keylevel Tasdn-Umschoitung
-mp3player.pause Pause
-mp3player.play obspuin
-mp3player.playing Spuin
-mp3player.rewind rewind
-mp3player.screensaver_timeout Buidschirmschona (minutn, 0=aus)
-mp3player.shuffle wias kumt
-mp3player.stop stopn
-mp3player.title_artist Titl, Interpret
 networkmenu.broadcast Broadcast
 networkmenu.gateway Standard Gateway
 networkmenu.head Netzwerk Eistellunga
@@ -476,7 +469,7 @@ nfs.umount NFS/CIFS Verzeichnis freigem
 nfs.umounterror Fähla beim Freigem
 nfs.username CIFS Benutzanama
 nfsmenu.head NFS/CIFS Eistellunga
-nvod.proz (%d%% vorbei)
+nvod.percentage (%d%% vorbei)
 nvod.starting (Fangt in %d min o)
 nvodselector.directormode Bildregie-Modus
 nvodselector.head Anfangszeid auswaehn
@@ -495,11 +488,10 @@ parentallock.lockage Sendunga
 parentallock.lockage12 ab 12 Jahr sperrn
 parentallock.lockage16 ab 16 Jahr sperrn
 parentallock.lockage18 ab 18 Jahr sperrn
+parentallock.lockedchannel Gsperrda Senda
 parentallock.lockedprogram Gperde Sendung(FSK ab %d)
-parentallock.lockedsender Gsperrda Senda
 parentallock.never Nia
 parentallock.onsignal Wann a Vorsperre gsendet werd
-parentallock.onstart Beim Startn
 parentallock.parentallock Jugendschutz
 parentallock.prompt PIN eigem
 pictureviewer.defdir Start-Verz.
@@ -534,7 +526,6 @@ recordingmenu.setupnow los moachs !
 recordingmenu.stopplayback Fuim ohoitn
 recordingmenu.stopsectionsd Sectionsd ohoitn
 recordingmenu.vcr Video Recorda
-recordingmenu.vcr_devicename Nama vom VCR (lirc)
 recordtimer.announce In weniga Minutn werd aufgnomma
 repeatblocker.hint_1 Mindestzeit (ms) zwischn zwoa Dasdndrucka
 repeatblocker.hint_2 0 schoitt an Blocka aus (Rot is " ")
@@ -544,7 +535,6 @@ satsetup.diseqc11 DiSEqC 1.1
 satsetup.diseqc12 DiSEqC 1.2
 satsetup.diseqcrepeat DiSEqC-Wiederholunga
 satsetup.extended DiSEqC-Eistellunga
-satsetup.extended_lnb LNB-Eistellunga
 satsetup.extended_motor Motor-Eistellunga
 satsetup.minidiseqc Mini-DiSEqC
 satsetup.motorcontrol Manuelle Motor-Eistellunga
@@ -570,7 +560,6 @@ scants.numberofradioservices Radio
 scants.numberoftotalservices Gesamt
 scants.numberoftvservices TV
 scants.provider Anbieter:
-scants.services Services:
 scants.startnow Ofanga mim Senda suacha
 scants.transponders Transponder:
 screensetup.lowerright grün = Buidlrand untn, rechts
@@ -589,18 +578,15 @@ sleeptimerbox.hint1 Einschlofzeit in Min. (000=aus)
 sleeptimerbox.hint2 De Box schoit si noch der Zeid aus.
 sleeptimerbox.title Eischloftimer
 streamfeatures.head Features
-streamfeatures.info Stream-Information
 streaminfo.aratio Verhältnis
 streaminfo.aratio_unknown Verhältnis: ken i ned
 streaminfo.audiotype Audiotyp
 streaminfo.audiotype_unknown Audiotyp: ken i ned
 streaminfo.bitrate Bitrate
-streaminfo.ecm_invalid ungültiges CA-System
 streaminfo.framerate Bildrate
 streaminfo.framerate_unknown Bildrate: ken i ned
 streaminfo.head Informationen
 streaminfo.not_available kumt nix
-streaminfo.not_crypted ned verschlüsselt
 streaminfo.resolution Auflösung
 streamingmenu.352x288 352x288
 streamingmenu.352x576 352x576
@@ -638,7 +624,6 @@ timerlist.bouquetselect Bouquet auswäihn
 timerlist.channel Kanoi
 timerlist.channelselect Senda auswäihn
 timerlist.delete wegmacha
-timerlist.empty Grod hammer koane Timer
 timerlist.menumodify Timer bearbeitn
 timerlist.menunew Neia Timer
 timerlist.message Nochricht

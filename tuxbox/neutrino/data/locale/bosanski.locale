@@ -60,10 +60,10 @@ GENRE.SHOW.0 show / gameshow
 GENRE.SHOW.1 gameshow / kviz
 GENRE.SHOW.2 variete
 GENRE.SHOW.3 talkshow
-GENRE.SOZIAL_POLITICAL.0 socialni & politički dogadaji / privreda
-GENRE.SOZIAL_POLITICAL.1 magazin/report/dokumentacija
-GENRE.SOZIAL_POLITICAL.2 privreda i socialno
-GENRE.SOZIAL_POLITICAL.3 naročiti ljudi
+GENRE.SOCIAL_POLITICAL.0 socialni & politički dogadaji / privreda
+GENRE.SOCIAL_POLITICAL.1 magazin/report/dokumentacija
+GENRE.SOCIAL_POLITICAL.2 privreda i socialno
+GENRE.SOCIAL_POLITICAL.3 naročiti ljudi
 GENRE.SPORTS.0 sport
 GENRE.SPORTS.1 veledogađaji (olimpijada, svjetsko prvenstvo itd.)
 GENRE.SPORTS.10 jahanje
@@ -99,6 +99,24 @@ audiomenu.monoleft mono lijevo
 audiomenu.monoright mono desno
 audiomenu.ost ost
 audiomenu.stereo stereo
+audioplayer.add dodati
+audioplayer.artist_title pjevač, pjesma
+audioplayer.defdir pocetni direktorij
+audioplayer.delete izbrisati
+audioplayer.deleteall sve izbrisati
+audioplayer.display_order redoslijed
+audioplayer.fastforward brzo naprijed
+audioplayer.follow izabjere ovu pjesmu
+audioplayer.id3scan čitaj id3-tag
+audioplayer.keylevel promijeniti tipke
+audioplayer.pause pauza
+audioplayer.play igrati
+audioplayer.playing pjesma
+audioplayer.rewind brzo natrag
+audioplayer.screensaver_timeout štititi ekran (min, 0=ugašeno)
+audioplayer.shuffle slučaj
+audioplayer.stop zaustaviti
+audioplayer.title_artist pjesma, pjevač
 bookmarkmanager.delete izbrisati
 bookmarkmanager.name zapamcena mjesta
 bookmarkmanager.rename preimenovati
@@ -211,7 +229,7 @@ flashupdate.currentversiondate datum
 flashupdate.currentversionsnapshot vrsta imidža
 flashupdate.currentversiontime vrijeme
 flashupdate.erasefailed brisanje flesa nije uspjelo
-flashupdate.eraseingflash briše se fleš
+flashupdate.erasing briše se fleš
 flashupdate.experimentalimage Izabrali ste snapshot,\novo je verzija za pokusavanje i mozda vas\ndbox2 poslije obnavljanja nece vise raditi.\n\nHocete li stvarno sa ovom verzijom obnoviti softver?
 flashupdate.expertfunctions funkcije za majstore
 flashupdate.fileis0bytes veličina datoteke je 0 bajtova
@@ -427,24 +445,6 @@ movieplayer.tsplayback odigrati ts
 movieplayer.vcdplayback (s)vcd
 movieplayer.vlchelp crveno/kuci stop\nzeleno resync\nzuto pausa/dalje\nplavo zapamtiti mjesto\n1 oko 1 minuta nazad\n3 oko 1 minuta naprijed\n4 oko 5 minuta nazad\n6 oko5 minuta naprijed\n7 oko 10 minuta nazad\n9 oko 10 minuta naprijed\npomoc:http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.wrongvlcversion funkcije nije moguca sa trenutacno upotrijebito verziji vlca
-mp3player.add dodati
-mp3player.artist_title pjevač, pjesma
-mp3player.defdir pocetni direktorij
-mp3player.delete izbrisati
-mp3player.deleteall sve izbrisati
-mp3player.display_order redoslijed
-mp3player.fastforward brzo naprijed
-mp3player.follow izabjere ovu pjesmu
-mp3player.id3scan čitaj id3-tag
-mp3player.keylevel promijeniti tipke
-mp3player.pause pauza
-mp3player.play igrati
-mp3player.playing pjesma
-mp3player.rewind brzo natrag
-mp3player.screensaver_timeout štititi ekran (min, 0=ugašeno)
-mp3player.shuffle slučaj
-mp3player.stop zaustaviti
-mp3player.title_artist pjesma, pjevač
 networkmenu.broadcast broadcast
 networkmenu.gateway standard gateway
 networkmenu.head namjestiti mrežu
@@ -475,7 +475,7 @@ nfs.umount nfs/cifs direktorij sada demontirati
 nfs.umounterror greška pri demontiranju
 nfs.username ime korisnika za cifs
 nfsmenu.head namješćenje nfsa/cifsa
-nvod.proz (%d%% prošlo)
+nvod.percentage (%d%% prošlo)
 nvod.starting (početak za %d minuta)
 nvodselector.directormode režija slike
 nvodselector.head izabrati početak
@@ -494,8 +494,8 @@ parentallock.lockage emisije
 parentallock.lockage12 zabraniti od 12 godina
 parentallock.lockage16 zabraniti od 16 godina
 parentallock.lockage18 zabraniti od 18 godina
+parentallock.lockedchannel ako je kanal zabranjen
 parentallock.lockedprogram zabranjen program (od %d godina)
-parentallock.lockedsender ako je kanal zabranjen
 parentallock.never nikada
 parentallock.onsignal ako ima privremena špera na kanalu
 parentallock.onstart pri startu

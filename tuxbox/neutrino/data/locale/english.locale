@@ -60,10 +60,10 @@ GENRE.SHOW.0 Show / Gameshow
 GENRE.SHOW.1 game show/quiz/contest
 GENRE.SHOW.2 variety show
 GENRE.SHOW.3 talk show
-GENRE.SOZIAL_POLITICAL.0 social & politic events / business
-GENRE.SOZIAL_POLITICAL.1 magazines/reports/documentary
-GENRE.SOZIAL_POLITICAL.2 economics/social advisory
-GENRE.SOZIAL_POLITICAL.3 remarkable people
+GENRE.SOCIAL_POLITICAL.0 social & politic events / business
+GENRE.SOCIAL_POLITICAL.1 magazines/reports/documentary
+GENRE.SOCIAL_POLITICAL.2 economics/social advisory
+GENRE.SOCIAL_POLITICAL.3 remarkable people
 GENRE.SPORTS.0 sports
 GENRE.SPORTS.1 special events (Olympic Games,World Cup etc.)
 GENRE.SPORTS.10 equestrian
@@ -99,8 +99,22 @@ audiomenu.monoleft mono left
 audiomenu.monoright mono right
 audiomenu.ost ost
 audiomenu.stereo stereo
+audioplayer.add Add
+audioplayer.artist_title Artist, Title
+audioplayer.defdir start dir.
+audioplayer.delete Delete
+audioplayer.deleteall delete all
+audioplayer.display_order display order
+audioplayer.fastforward fast forw.
+audioplayer.follow auto select current
 audioplayer.head Audio Playlist
+audioplayer.highprio High decode priority
+audioplayer.id3scan Scanning ID3 tags
+audioplayer.keylevel key level
 audioplayer.name Audioplayer
+audioplayer.pause pause
+audioplayer.play Play
+audioplayer.playing Current Track
 audioplayer.playlist_fileerror_msg File could not be created:
 audioplayer.playlist_fileerror_title Error
 audioplayer.playlist_fileoverwrite_msg Do you want to overwrite this file:
@@ -108,7 +122,12 @@ audioplayer.playlist_fileoverwrite_title Overwrite?
 audioplayer.playlist_name filename of the play list
 audioplayer.playlist_name_hint1 Please enter the filename of the playlist
 audioplayer.playlist_name_hint2 The extension .m3u will be added automatically
+audioplayer.rewind rewind
 audioplayer.save_playlist save play list
+audioplayer.screensaver_timeout screensaver timeout (min, 0=off)
+audioplayer.shuffle shuffle
+audioplayer.stop Stop
+audioplayer.title_artist Title, Artist
 audioplayerpicsettings.general audioplayer / picviewer
 bookmarkmanager.delete delete
 bookmarkmanager.name bookmarks
@@ -226,7 +245,7 @@ flashupdate.currentversiondate Date
 flashupdate.currentversionsnapshot ImageType
 flashupdate.currentversiontime Time
 flashupdate.erasefailed erasure of flash failed
-flashupdate.eraseingflash erasing flash
+flashupdate.erasing erasing flash
 flashupdate.experimentalimage The image you have selected is an untested version, this means\nyour box maybe fail to boot after update.\n\nDo you really want to update to this version?
 flashupdate.expertfunctions Expert-functions
 flashupdate.fileis0bytes the filesize is 0 Bytes
@@ -446,25 +465,6 @@ movieplayer.tsplayback Play TS
 movieplayer.vcdplayback (S)VCD
 movieplayer.vlchelp Red/Home Stop\nGREEN Resync\nYELLOW Pause/Continue\nBLUE Create bookmark\nd-box Show progress\n1 approx. 1 minute back\n3 skip approx. 1 minute\n4 approx. 5 minutes back\n6 skip approx. 5 minutes\n7 approx. 10 minutes back\n9 skip approx. 10 minutes\nHelp: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.wrongvlcversion This feature is not support by your current version of VLC
-mp3player.add Add
-mp3player.artist_title Artist, Title
-mp3player.defdir start dir.
-mp3player.delete Delete
-mp3player.deleteall delete all
-mp3player.display_order display order
-mp3player.fastforward fast forw.
-mp3player.follow auto select current
-mp3player.highprio High decode priority
-mp3player.id3scan Scanning ID3 tags
-mp3player.keylevel key level
-mp3player.pause pause
-mp3player.play Play
-mp3player.playing Current Track
-mp3player.rewind rewind
-mp3player.screensaver_timeout screensaver timeout (min, 0=off)
-mp3player.shuffle shuffle
-mp3player.stop Stop
-mp3player.title_artist Title, Artist
 networkmenu.broadcast Broadcast
 networkmenu.dhcp DHCP
 networkmenu.gateway default gateway
@@ -497,7 +497,7 @@ nfs.umount Umount NFS/CIFS volume
 nfs.umounterror error umounting volume
 nfs.username CIFS username
 nfsmenu.head NFS/CIFS settings
-nvod.proz (%d%% over)
+nvod.percentage (%d%% over)
 nvod.starting (starting in %d min)
 nvodselector.directormode Direct-Mode
 nvodselector.head Select starting-time
@@ -516,8 +516,8 @@ parentallock.lockage lock program
 parentallock.lockage12 from 12 years up
 parentallock.lockage16 from 16 years up
 parentallock.lockage18 from 18 years up
+parentallock.lockedchannel Locked sender...
 parentallock.lockedprogram Locked program (from %d years up)
-parentallock.lockedsender Locked sender...
 parentallock.never never
 parentallock.onsignal on broadcasted lock
 parentallock.parentallock Youth protection
@@ -561,6 +561,7 @@ recordingmenu.splitsize Max. file size (MB)
 recordingmenu.stopplayback stop playback
 recordingmenu.stopsectionsd stop sectionsd
 recordingmenu.stream_all_audio_pids record all audio pids
+recordingmenu.stream_vtxt_pid record videotext
 recordingmenu.use_o_sync write synchronous (O_SYNC)
 recordingmenu.vcr vcr
 recordtimer.announce Recording starts in a few minutes

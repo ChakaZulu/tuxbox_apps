@@ -68,33 +68,23 @@ extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
 
-CVCRControl* CVCRControl::getInstance()
-{
-	static CVCRControl* vcrControl = NULL;
+static CVCRControl vcrControl;
 
-	if(!vcrControl)
-	{
-		vcrControl = new CVCRControl();
-		printf("[neutrino] vcrControl Instance created\n");
-	}
-	else
-	{
-		//printf("[neutrino] vcrControl Instace requested\n");
-	}
-	return vcrControl;
+CVCRControl * CVCRControl::getInstance()
+{
+	return &vcrControl;
 }
 
 //-------------------------------------------------------------------------
 CVCRControl::CVCRControl()
 {
-	Device=NULL;
+	Device = NULL;
 }
 
 //-------------------------------------------------------------------------
 CVCRControl::~CVCRControl()
 {
-	if(Device)
-		delete Device;
+	unregisterDevice();
 }
 
 //-------------------------------------------------------------------------
@@ -110,8 +100,7 @@ void CVCRControl::unregisterDevice()
 //-------------------------------------------------------------------------
 void CVCRControl::registerDevice(CDevice * const device)
 {
-	if (Device)
-		unregisterDevice();
+	unregisterDevice();
 	
 	Device = device;
 }
@@ -411,6 +400,11 @@ std::string CVCRControl::CFileAndServerDevice::getCommandString(const CVCRComman
 		}*/
 	extMessage += 
 		"\t\t</audiopids>\n"
+		"\t\t<vtxtpid>";
+	sprintf(tmp, "%u", si.vtxtpid);
+	extMessage += tmp;
+	extMessage +=
+		"</vtxtpid>\n"
 		"\t</record>\n"
 		"</neutrino>\n";
 
@@ -500,6 +494,10 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 				}
 			}
 		}
+	}
+	if ((StreamVTxtPid) && (si.vtxtpid != 0))
+	{
+		pids[numpids++] = si.vtxtpid;
 	}
 
 	char filename[512]; // UTF-8

@@ -159,6 +159,7 @@ struct SNeutrinoSettings
 	char recording_splitsize[10];
 	int  recording_use_o_sync;
 	int  recording_stream_all_audio_pids;
+	int  recording_stream_vtxt_pid;
 
 	//streaming
 	int  streaming_type;

@@ -98,10 +98,10 @@ GENRE.SHOW.0 Show / Gameshow
 GENRE.SHOW.1 Gameshow/Quiz
 GENRE.SHOW.2 varietee
 GENRE.SHOW.3 Talkshow
-GENRE.SOZIAL_POLITICAL.0 Sozial & Politikereigniss / Wirtschaft
-GENRE.SOZIAL_POLITICAL.1 Magazin/Report/Dokumentation
-GENRE.SOZIAL_POLITICAL.2 Wirtschaft u Soziales
-GENRE.SOZIAL_POLITICAL.3 Bsungeri Mönsche
+GENRE.SOCIAL_POLITICAL.0 Sozial & Politikereigniss / Wirtschaft
+GENRE.SOCIAL_POLITICAL.1 Magazin/Report/Dokumentation
+GENRE.SOCIAL_POLITICAL.2 Wirtschaft u Soziales
+GENRE.SOCIAL_POLITICAL.3 Bsungeri Mönsche
 GENRE.SPORTS.0 Schport
 GENRE.SPORTS.1 Grossereigniss (Olympischi Schpiu, Wäutmeischterschaft usw.)
 GENRE.SPORTS.10 Equestrian
@@ -137,8 +137,27 @@ audiomenu.monoleft mono links
 audiomenu.monoright mono rächts
 audiomenu.ost ost
 audiomenu.stereo stereo
+audioplayer.add Däzuefüege
+audioplayer.artist_title Interpret, Titu
+audioplayer.defdir Schtart-Verz.
+audioplayer.delete Lösche
+audioplayer.deleteall Aui lösche
+audioplayer.display_order Azeig
+audioplayer.fastforward schnäue Vorl.
+audioplayer.follow Selektiere akt. Track
 audioplayer.head Audio Playlist
+audioplayer.highprio Höchi Decodier-Priorität
+audioplayer.id3scan Scanne ID3-Tags
+audioplayer.keylevel Taschte-Umschautig
 audioplayer.name Audioplayer
+audioplayer.pause Pouse
+audioplayer.play Abschpile
+audioplayer.playing Aktuelle Track
+audioplayer.rewind schnäue Rückl.
+audioplayer.screensaver_timeout Böudschirmschoner (min, 0=us)
+audioplayer.shuffle Shuffle
+audioplayer.stop Schtopp
+audioplayer.title_artist Titu, Interpret
 audioplayerpicsettings.general Audioplayer / Böudbetrachter
 bookmarkmanager.delete Lösche
 bookmarkmanager.name Bookmarks
@@ -255,7 +274,7 @@ flashupdate.currentversiondate Datum
 flashupdate.currentversionsnapshot ImageTyp
 flashupdate.currentversiontime Uhrzyt
 flashupdate.erasefailed Flash lösche fäugschlage
-flashupdate.eraseingflash lösche Flash
+flashupdate.erasing lösche Flash
 flashupdate.experimentalimage Du hesch ä Snapshot usgwäut, bitte beacht,\ndass diä Version nid teschtet isch u\neventuell dini Box nochem Update\nnüm funktionsfähig isch.\n\Wosch diä Version würklech installiere?
 flashupdate.expertfunctions Expertä-Funktione
 flashupdate.fileis0bytes d'Dateigrössi isch 0 Byte
@@ -474,25 +493,6 @@ movieplayer.tsplayback TS Absschpile
 movieplayer.vcdplayback (S)VCD
 movieplayer.vlchelp ROT/Home Stop\nGRÜN Resync\nGELB Pouse/Wyter\nBLAU Bookmark setze\n1 ca. 1 Minute zrugg\n3 ca. 1 Minute vor\n4 ca. 5 Minuten zrugg\n6 ca. 5 Minuten vor\n7 ca. 10 Minuten zrugg\n9 ca. 10 Minuten vor\nHilfe: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.wrongvlcversion Funktion isch mit dere Version vom VLC nid müglech
-mp3player.add Däzuefüege
-mp3player.artist_title Interpret, Titu
-mp3player.defdir Schtart-Verz.
-mp3player.delete Lösche
-mp3player.deleteall Aui lösche
-mp3player.display_order Azeig
-mp3player.fastforward schnäue Vorl.
-mp3player.follow Selektiere akt. Track
-mp3player.highprio Höchi Decodier-Priorität
-mp3player.id3scan Scanne ID3-Tags
-mp3player.keylevel Taschte-Umschautig
-mp3player.pause Pouse
-mp3player.play Abschpile
-mp3player.playing Aktuelle Track
-mp3player.rewind schnäue Rückl.
-mp3player.screensaver_timeout Böudschirmschoner (min, 0=us)
-mp3player.shuffle Shuffle
-mp3player.stop Schtopp
-mp3player.title_artist Titu, Interpret
 networkmenu.broadcast Broadcast
 networkmenu.dhcp DHCP
 networkmenu.gateway Schtandard Gateway
@@ -525,7 +525,7 @@ nfs.umount NFS/CIFS Verzeichnis unmounte
 nfs.umounterror Umount-Fähler
 nfs.username CIFS Benutzername
 nfsmenu.head NFS/CIFS Ischtöuige
-nvod.proz (%d%% vürbi)
+nvod.percentage (%d%% vürbi)
 nvod.starting (Beginn i %d min)
 nvodselector.directormode Böudregie-Modus
 nvodselector.head Aafangszyt uswähle
@@ -544,8 +544,8 @@ parentallock.lockage Sändige
 parentallock.lockage12 ab 12 Johr sperre
 parentallock.lockage16 ab 16 Johr sperre
 parentallock.lockage18 ab 18 Johr sperre
+parentallock.lockedchannel Vorgschperrte Sänder...
 parentallock.lockedprogram Gschperrts Programm (FSK ab %d)
-parentallock.lockedsender Vorgschperrte Sänder...
 parentallock.never Niä
 parentallock.onsignal Bi gsändeter Vorschperri
 parentallock.parentallock Jugendschutz

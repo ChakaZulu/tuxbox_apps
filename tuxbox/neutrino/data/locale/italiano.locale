@@ -60,10 +60,10 @@ GENRE.SHOW.0 Show / Gameshow
 GENRE.SHOW.1 Gameshow/Quiz
 GENRE.SHOW.2 Varieta
 GENRE.SHOW.3 Talkshow
-GENRE.SOZIAL_POLITICAL.0 Sociale & Eventi Politici
-GENRE.SOZIAL_POLITICAL.1 Magazin/Report/Dokumentation
-GENRE.SOZIAL_POLITICAL.2 Economia ed Sociale
-GENRE.SOZIAL_POLITICAL.3 Persone Speciali
+GENRE.SOCIAL_POLITICAL.0 Sociale & Eventi Politici
+GENRE.SOCIAL_POLITICAL.1 Magazin/Report/Dokumentation
+GENRE.SOCIAL_POLITICAL.2 Economia ed Sociale
+GENRE.SOCIAL_POLITICAL.3 Persone Speciali
 GENRE.SPORTS.0 Sport
 GENRE.SPORTS.1 Grandi eventi (Giochi Olimpiadi, Campionati ecc.)
 GENRE.SPORTS.10 equestrian
@@ -99,6 +99,24 @@ audiomenu.monoleft mono sinistro
 audiomenu.monoright mono destro
 audiomenu.ost ost
 audiomenu.stereo stereo
+audioplayer.add aggiungi
+audioplayer.artist_title Artista, Titolo
+audioplayer.defdir Start-Directory.
+audioplayer.delete rimuovi
+audioplayer.deleteall Cancella tutti
+audioplayer.display_order Visore
+audioplayer.fastforward Avanti svelto
+audioplayer.follow Selezionare Track attuale
+audioplayer.id3scan leggo ID3-Tags
+audioplayer.keylevel Cambio-Tasti
+audioplayer.pause Pausa
+audioplayer.play play 
+audioplayer.playing Brano attuale
+audioplayer.rewind Indietro svelto
+audioplayer.screensaver_timeout Salvaschermo_Timeout
+audioplayer.shuffle shuffle 
+audioplayer.stop stop 
+audioplayer.title_artist Titolo, Artista
 bookmarkmanager.delete Cancellare
 bookmarkmanager.name Bookmarks
 bookmarkmanager.rename Rinominare
@@ -211,7 +229,7 @@ flashupdate.currentversiondate Data
 flashupdate.currentversionsnapshot ImageTipo
 flashupdate.currentversiontime Orario
 flashupdate.erasefailed Cancellazione Fallita
-flashupdate.eraseingflash Cancella Flash
+flashupdate.erasing Cancella Flash
 flashupdate.experimentalimage Ai scelto un Snapshot sperimentale,\nprego di fare attenzione che questa versione non e stata provata,e provabile\nche dopo un\n\nUpdate il suo Box non funziona piu,vuole veramente installare questa\nVersione?
 flashupdate.expertfunctions Funzione-Esperti
 flashupdate.fileis0bytes il File e 0 Byte
@@ -427,24 +445,6 @@ movieplayer.tsplayback TS playback
 movieplayer.vcdplayback (S)VCD
 movieplayer.vlchelp ROSSo/Home Stop\nVERDE Resync\nGIALLO Pausa/avanti\nBLU Inserire Bookmark\n1 ca. 1 Minuto indietro\n3 ca. 1 Minuto avanti\n4 ca. 5 Minuti indietro\n6 ca. 5 Minuti avanti\n7 ca. 10 Minuti indietro\n9 ca. 10 Minuti avanti\nAiuto: http://www.giggo.de/dbox2/movieplayer.html\nmovieplayer.toomanybookmarks Ha Inserito troppi Bookmarks.\nprima cancellare uno vecchio.
 movieplayer.wrongvlcversion Funzione con questa Versione di VLC non possibbile
-mp3player.add aggiungi
-mp3player.artist_title Artista, Titolo
-mp3player.defdir Start-Directory.
-mp3player.delete rimuovi
-mp3player.deleteall Cancella tutti
-mp3player.display_order Visore
-mp3player.fastforward Avanti svelto
-mp3player.follow Selezionare Track attuale
-mp3player.id3scan leggo ID3-Tags
-mp3player.keylevel Cambio-Tasti
-mp3player.pause Pausa
-mp3player.play play 
-mp3player.playing Brano attuale
-mp3player.rewind Indietro svelto
-mp3player.screensaver_timeout Salvaschermo_Timeout
-mp3player.shuffle shuffle 
-mp3player.stop stop 
-mp3player.title_artist Titolo, Artista
 networkmenu.broadcast Broadcast
 networkmenu.gateway Standard Gateway
 networkmenu.head Impostazioni Rete
@@ -475,7 +475,7 @@ nfs.umount scarica NFS/CIFS
 nfs.umounterror errore scarica NFS/CIFS
 nfs.username ime korisnika za cifs
 nfsmenu.head Impostazioni NFS /CIFS
-nvod.proz (%d%% passati)
+nvod.percentage (%d%% passati)
 nvod.starting (Inizio in %d min)
 nvodselector.directormode Modo regia-Video
 nvodselector.head Scelgliere Orario Inizio
@@ -494,8 +494,8 @@ parentallock.lockage Trasmissioni
 parentallock.lockage12 da 12 Anni Bloccare
 parentallock.lockage16 da 16 Anni Bloccare
 parentallock.lockage18 da 18 Anni Bloccare
-parentallock.lockedprogram  Programmma Bloccato (FSK a %d)
-parentallock.lockedsender Canali Bloccati
+parentallock.lockedchannel Canali Bloccati
+parentallock.lockedprogram Programmma Bloccato (FSK a %d)
 parentallock.never Mai
 parentallock.onsignal Blocco al segnale
 parentallock.onstart All avvio

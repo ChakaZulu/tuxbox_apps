@@ -60,10 +60,10 @@ GENRE.SHOW.0 Show / Spelshow
 GENRE.SHOW.1 game show/quiz/contest
 GENRE.SHOW.2 varieteit show
 GENRE.SHOW.3 talk show
-GENRE.SOZIAL_POLITICAL.0 sociale en politieke evenementen/zaken
-GENRE.SOZIAL_POLITICAL.1 magazines/verslagen/documentaire
-GENRE.SOZIAL_POLITICAL.2 economische /sociale adviezen
-GENRE.SOZIAL_POLITICAL.3 Opmerkzame personen
+GENRE.SOCIAL_POLITICAL.0 sociale en politieke evenementen/zaken
+GENRE.SOCIAL_POLITICAL.1 magazines/verslagen/documentaire
+GENRE.SOCIAL_POLITICAL.2 economische /sociale adviezen
+GENRE.SOCIAL_POLITICAL.3 Opmerkzame personen
 GENRE.SPORTS.0 sport
 GENRE.SPORTS.1 speciale evenementen (Olympische spelen,Wereldbeker, etc.)
 GENRE.SPORTS.10 paardensport
@@ -99,8 +99,27 @@ audiomenu.monoleft mono links
 audiomenu.monoright mono rechts
 audiomenu.ost ost
 audiomenu.stereo stereo
+audioplayer.add Voeg toe
+audioplayer.artist_title Artiest, Titel
+audioplayer.defdir Startdirectory
+audioplayer.delete Wis
+audioplayer.deleteall Wis alles
+audioplayer.display_order display order
+audioplayer.fastforward Vooruitspoelen
+audioplayer.follow auto Kies huidig
 audioplayer.head Audio Speellijst
+audioplayer.highprio Hoge decoderingsprioriteit
+audioplayer.id3scan Scannen van ID3 tags
+audioplayer.keylevel key level
 audioplayer.name Audioplayer
+audioplayer.pause pauze
+audioplayer.play Play
+audioplayer.playing Huidig nummer
+audioplayer.rewind terugspoelen
+audioplayer.screensaver_timeout screensaver timeout (min, 0=uit)
+audioplayer.shuffle shuffle
+audioplayer.stop Stop
+audioplayer.title_artist Titel, Artiest
 audioplayerpicsettings.general Audioplayer/ beeldviewer
 bookmarkmanager.delete Verwijderen
 bookmarkmanager.name Favorieten
@@ -217,7 +236,7 @@ flashupdate.currentversiondate Datum
 flashupdate.currentversionsnapshot Type Image
 flashupdate.currentversiontime Tijd
 flashupdate.erasefailed Wissen van de flash mislukt
-flashupdate.eraseingflash Wissen van de flash
+flashupdate.erasing Wissen van de flash
 flashupdate.experimentalimage De gekozen image is nog niet getest.D.w.z.dat\nuw ontvanger misschien niet opstart na de update.\n\nWilt u echt deze versie updaten?
 flashupdate.expertfunctions Expert-functie's
 flashupdate.fileis0bytes De grootte van het bestand is 0 Byte
@@ -436,25 +455,6 @@ movieplayer.tsplayback Speel TS
 movieplayer.vcdplayback (S)VCD
 movieplayer.vlchelp ROOD/Home Stop\nGROEN Resync\nGEEL Pause/verder\nBLAUW Favoriet instellen\n1 ca. 1 Minuut terug\n3 ca. 1 Minuut vooruit\n4 ca. 5 Minuten terug\n6 ca. 5 Minuten vooruit\n7 ca. 10 Minuten terug\n9 ca. 10 Minuten vooruit\nHelp: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.wrongvlcversion Functie is niet mogelijk met de gebruikte VLC-versie
-mp3player.add Voeg toe
-mp3player.artist_title Artiest, Titel
-mp3player.defdir Startdirectory
-mp3player.delete Wis
-mp3player.deleteall Wis alles
-mp3player.display_order display order
-mp3player.fastforward Vooruitspoelen
-mp3player.follow auto Kies huidig
-mp3player.highprio Hoge decoderingsprioriteit
-mp3player.id3scan Scannen van ID3 tags
-mp3player.keylevel key level
-mp3player.pause pauze
-mp3player.play Play
-mp3player.playing Huidig nummer
-mp3player.rewind terugspoelen
-mp3player.screensaver_timeout screensaver timeout (min, 0=uit)
-mp3player.shuffle shuffle
-mp3player.stop Stop
-mp3player.title_artist Titel, Artiest
 networkmenu.broadcast Broadcast
 networkmenu.dhcp DHCP
 networkmenu.gateway Standaard Gateway
@@ -487,7 +487,7 @@ nfs.umount Umount NFS/CIFS volume
 nfs.umounterror umountingfout: volume
 nfs.username Gebruikersnaam Common Internet File System (CIFS)
 nfsmenu.head NFS/CIFS instellingen
-nvod.proz (%d%% over)
+nvod.percentage (%d%% over)
 nvod.starting (start binnen %d minuten)
 nvodselector.directormode Direct-Mode
 nvodselector.head Kies starttijd
@@ -507,7 +507,6 @@ parentallock.lockage12 Voor jonger dan 12j
 parentallock.lockage16 Voor jonger dan 16j
 parentallock.lockage18 Voor jonger dan 18j
 parentallock.lockedprogram Gesloten programma (vanaf %d jaar en hoger)
-parentallock.lockedsender Locked sender...
 parentallock.never nooit
 parentallock.onsignal Bij uitzenden op slot
 parentallock.parentallock Kinderslot

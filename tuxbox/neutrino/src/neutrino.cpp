@@ -644,16 +644,17 @@ int CNeutrinoApp::loadSetup()
 
 	//recording (server + vcr)
 	g_settings.recording_type = configfile.getInt32("recording_type", RECORDING_OFF);
-	g_settings.recording_stopplayback = configfile.getInt32( "recording_stopplayback", 0 );
-	g_settings.recording_stopsectionsd = configfile.getInt32( "recording_stopsectionsd", 1 );
+	g_settings.recording_stopplayback          = configfile.getBool("recording_stopplayback"             , false);
+	g_settings.recording_stopsectionsd         = configfile.getBool("recording_stopsectionsd"            , true );
 	g_settings.recording_server_ip = configfile.getString("recording_server_ip", "10.10.10.10");
 	strcpy( g_settings.recording_server_port, configfile.getString( "recording_server_port", "4000").c_str() );
 	g_settings.recording_server_wakeup = configfile.getInt32( "recording_server_wakeup", 0 );
 	strcpy( g_settings.recording_server_mac, configfile.getString( "recording_server_mac", "11:22:33:44:55:66").c_str() );
 	g_settings.recording_vcr_no_scart = configfile.getInt32( "recording_vcr_no_scart", false);
 	strcpy( g_settings.recording_splitsize, configfile.getString( "recording_splitsize", "2048").c_str() );
-	g_settings.recording_use_o_sync            = configfile.getBool("recordingmenu.use_o_sync"           , true);
-	g_settings.recording_stream_all_audio_pids = configfile.getBool("recordingmenu.stream_all_audio_pids", true);
+	g_settings.recording_use_o_sync            = configfile.getBool("recordingmenu.use_o_sync"           , true );
+	g_settings.recording_stream_all_audio_pids = configfile.getBool("recordingmenu.stream_all_audio_pids", true );
+	g_settings.recording_stream_vtxt_pid       = configfile.getBool("recordingmenu.stream_vtxt_pid"      , false);
 
 	//streaming (server)
 	g_settings.streaming_type = configfile.getInt32( "streaming_type", 0 );
@@ -960,8 +961,8 @@ void CNeutrinoApp::saveSetup()
 
 	//recording (server + vcr)
 	configfile.setInt32 ("recording_type",                      g_settings.recording_type);
-	configfile.setInt32 ("recording_stopplayback",              g_settings.recording_stopplayback);
-	configfile.setInt32 ("recording_stopsectionsd",             g_settings.recording_stopsectionsd);
+	configfile.setBool  ("recording_stopplayback"             , g_settings.recording_stopplayback         );
+	configfile.setBool  ("recording_stopsectionsd"            , g_settings.recording_stopsectionsd        );
 	configfile.setString("recording_server_ip",                 g_settings.recording_server_ip);
 	configfile.setString("recording_server_port",               g_settings.recording_server_port);
 	configfile.setInt32 ("recording_server_wakeup",             g_settings.recording_server_wakeup);
@@ -970,6 +971,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString("recording_splitsize",                 g_settings.recording_splitsize);
 	configfile.setBool  ("recordingmenu.use_o_sync"           , g_settings.recording_use_o_sync           );
 	configfile.setBool  ("recordingmenu.stream_all_audio_pids", g_settings.recording_stream_all_audio_pids);
+	configfile.setBool  ("recordingmenu.stream_vtxt_pid"      , g_settings.recording_stream_vtxt_pid      );
 
 	//streaming
 	configfile.setInt32 ( "streaming_type", g_settings.streaming_type );
@@ -2021,8 +2023,10 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	CMenuOptionChooser* oj6 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_USE_O_SYNC, &g_settings.recording_use_o_sync, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, (g_settings.recording_type == RECORDING_FILE));
 	
 	CMenuOptionChooser* oj7 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_STREAM_ALL_AUDIO_PIDS, &g_settings.recording_stream_all_audio_pids, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, (g_settings.recording_type == RECORDING_FILE));
+
+	CMenuOptionChooser* oj8 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_STREAM_VTXT_PID, &g_settings.recording_stream_vtxt_pid, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, (g_settings.recording_type == RECORDING_FILE));
 	
-	CRecordingNotifier *RecordingNotifier = new CRecordingNotifier(mf1,mf2,oj2,mf3,oj3,oj4,oj5,mf7,mf8,oj6, oj7);
+	CRecordingNotifier *RecordingNotifier = new CRecordingNotifier(mf1,mf2,oj2,mf3,oj3,oj4,oj5,mf7,mf8,oj6, oj7, oj8);
 
 	CMenuOptionChooser* oj1 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_RECORDING_TYPE, &g_settings.recording_type, RECORDINGMENU_RECORDING_TYPE_OPTIONS, RECORDINGMENU_RECORDING_TYPE_OPTION_COUNT, true, RecordingNotifier);
 
@@ -2046,8 +2050,9 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	recordingSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_RECORDINGMENU_FILESETTINGSSEPARATOR));
 	recordingSettings.addItem( mf7);
 	recordingSettings.addItem( mf8);
-	recordingSettings.addItem( oj6);
-	recordingSettings.addItem( oj7);
+	recordingSettings.addItem(oj6);
+	recordingSettings.addItem(oj7);
+	recordingSettings.addItem(oj8);
 
 	recordingstatus = 0;
 }
@@ -2723,7 +2728,7 @@ void CNeutrinoApp::setupRecordingDevice(void)
 		unsigned int port;
 		sscanf(g_settings.recording_server_port, "%u", &port);
 
-		recordingdevice = new CVCRControl::CServerDevice((g_settings.recording_stopplayback == 1), (g_settings.recording_stopsectionsd == 1), g_settings.recording_server_ip.c_str(), port);
+		recordingdevice = new CVCRControl::CServerDevice(g_settings.recording_stopplayback, g_settings.recording_stopsectionsd, g_settings.recording_server_ip.c_str(), port);
 
 		CVCRControl::getInstance()->registerDevice(recordingdevice);
 	}
@@ -2732,7 +2737,7 @@ void CNeutrinoApp::setupRecordingDevice(void)
 		unsigned int splitsize;
 		sscanf(g_settings.recording_splitsize, "%u", &splitsize);
 		
-		recordingdevice = new CVCRControl::CFileDevice((g_settings.recording_stopplayback == 1), (g_settings.recording_stopsectionsd == 1), g_settings.network_nfs_recordingdir, splitsize, g_settings.recording_use_o_sync, g_settings.recording_stream_all_audio_pids);
+		recordingdevice = new CVCRControl::CFileDevice(g_settings.recording_stopplayback, g_settings.recording_stopsectionsd, g_settings.network_nfs_recordingdir, splitsize, g_settings.recording_use_o_sync, g_settings.recording_stream_all_audio_pids, g_settings.recording_stream_vtxt_pid);
 
 		CVCRControl::getInstance()->registerDevice(recordingdevice);
 	}

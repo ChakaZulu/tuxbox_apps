@@ -60,10 +60,10 @@ GENRE.SHOW.0 Show / Gameshow
 GENRE.SHOW.1 game show/quiz
 GENRE.SHOW.2 variety show
 GENRE.SHOW.3 talk show
-GENRE.SOZIAL_POLITICAL.0 publicystyka/polityka
-GENRE.SOZIAL_POLITICAL.1 magazyny/raporty/dokumentacja
-GENRE.SOZIAL_POLITICAL.2 ekonomia/socjologia
-GENRE.SOZIAL_POLITICAL.3 ludzie
+GENRE.SOCIAL_POLITICAL.0 publicystyka/polityka
+GENRE.SOCIAL_POLITICAL.1 magazyny/raporty/dokumentacja
+GENRE.SOCIAL_POLITICAL.2 ekonomia/socjologia
+GENRE.SOCIAL_POLITICAL.3 ludzie
 GENRE.SPORTS.0 sport
 GENRE.SPORTS.1 imprezy specjalne(Olimpiada,Puchar swiata itd.)
 GENRE.SPORTS.10 jazda konna
@@ -99,6 +99,25 @@ audiomenu.monoleft lewy mono
 audiomenu.monoright prawy mono
 audiomenu.ost ost
 audiomenu.stereo stereo
+audioplayer.add Dodaj
+audioplayer.artist_title Interpretacja, Tytul
+audioplayer.defdir folder startowy
+audioplayer.delete Kasuj
+audioplayer.deleteall Kasuj wszystkie
+audioplayer.display_order Kolejnosc
+audioplayer.fastforward przewin.
+audioplayer.follow Auto-wybór biezacy
+audioplayer.highprio Wysokie pierwschenstwo rozkodowywania
+audioplayer.id3scan Skanuj ID3 info
+audioplayer.keylevel poziom
+audioplayer.pause pauza
+audioplayer.play Start
+audioplayer.playing Biezacy
+audioplayer.rewind cofnij
+audioplayer.screensaver_timeout wygaszacz za:(min, 0=off)
+audioplayer.shuffle Losowo
+audioplayer.stop Zatrzymaj
+audioplayer.title_artist Tytul, Interpretacja
 bookmarkmanager.delete Zmazac
 bookmarkmanager.name Zaznaczenia
 bookmarkmanager.rename Zmienic nazwe
@@ -214,7 +233,7 @@ flashupdate.currentversiondate Data
 flashupdate.currentversionsnapshot Typ Image
 flashupdate.currentversiontime Czas
 flashupdate.erasefailed kasowanie nie udane
-flashupdate.eraseingflash kasuje flash
+flashupdate.erasing kasuje flash
 flashupdate.experimentalimage Wybrany image nie byl testowany, to\n oznacza, ze twój box moze nie\ndzialac po aktualizacji.\n\nCzy jestes pewny ze chcesz\ngo aktualizowac? na ta wersje?
 flashupdate.expertfunctions Zaawansowane (ekspert)
 flashupdate.fileis0bytes rozmiar pliku 0 Bajtow
@@ -434,25 +453,6 @@ movieplayer.tsplayback Odtwarzaj TS
 movieplayer.vcdplayback (S)VCD
 movieplayer.vlchelp CZERW./Home Stop\nZIEL. Resync\nZOLTY Przerwa/Dalej\nNIEBIE. zaznaczyc\nd-box Czas wysfietlic\nv Skok\n1 cofnij ok.1 minute\n3 przyspiesz ok.1 minute\n4 cofnij ok.5 minut\n6 przyspiesz ok.5 minut\n7 cofnij ok.10 minut\n9 przyspiesz ok.10 minut\nPomoc: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.wrongvlcversion Funkcja jest z terazniejsza wersja VLC niedostepna
-mp3player.add Dodaj
-mp3player.artist_title Interpretacja, Tytul
-mp3player.defdir folder startowy
-mp3player.delete Kasuj
-mp3player.deleteall Kasuj wszystkie
-mp3player.display_order Kolejnosc
-mp3player.fastforward przewin.
-mp3player.follow Auto-wybór biezacy
-mp3player.highprio Wysokie pierwschenstwo rozkodowywania
-mp3player.id3scan Skanuj ID3 info
-mp3player.keylevel poziom
-mp3player.pause pauza
-mp3player.play Start
-mp3player.playing Biezacy
-mp3player.rewind cofnij
-mp3player.screensaver_timeout wygaszacz za:(min, 0=off)
-mp3player.shuffle Losowo
-mp3player.stop Zatrzymaj
-mp3player.title_artist Tytul, Interpretacja
 networkmenu.broadcast adres rozgloszeniowy
 networkmenu.gateway brama
 networkmenu.head Ustawienia Sieci
@@ -482,7 +482,7 @@ nfs.umount Odmontuj volumin NFS/CIFS
 nfs.umounterror blad odmontowania voluminu
 nfs.username CIFS uzytkownik
 nfsmenu.head ustawienia NFS/CIFS
-nvod.proz (%d%% po starcie)
+nvod.percentage (%d%% po starcie)
 nvod.starting (start za %d min)
 nvodselector.directormode Tryb bezposredni
 nvodselector.head Czas rozpoczecia
@@ -502,7 +502,6 @@ parentallock.lockage12 od 12 lat w zwyz
 parentallock.lockage16 od 16 lat w zwyz
 parentallock.lockage18 od 18 lat w zwyz
 parentallock.lockedprogram Program zablokowany (od %d lat w zwyz)
-parentallock.lockedsender Locked sender...
 parentallock.never nigdy
 parentallock.onsignal na zabezpieczeniu nadawcy
 parentallock.onstart przy starcie

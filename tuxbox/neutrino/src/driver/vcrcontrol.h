@@ -128,6 +128,7 @@ class CVCRControl
 			unsigned int SplitSize;
 			bool         Use_O_Sync;
 			bool         StreamAllAudioPids;
+			bool         StreamVTxtPid;
 				
 			virtual CVCRDevices getDeviceType(void) const
 				{
@@ -137,7 +138,7 @@ class CVCRControl
 			virtual bool Stop(); 
 			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, const std::string & apids = "");	
 
-			CFileDevice(const bool stopplayback, const bool stopsectionsd, const char * const directory, const unsigned int splitsize, const bool use_o_sync, const bool stream_all_audio_pids)
+			CFileDevice(const bool stopplayback, const bool stopsectionsd, const char * const directory, const unsigned int splitsize, const bool use_o_sync, const bool stream_all_audio_pids, const bool stream_vtxt_pid)
 				{
 					StopPlayBack       = stopplayback;
 					StopSectionsd      = stopsectionsd;
@@ -145,6 +146,7 @@ class CVCRControl
 					SplitSize          = splitsize;
 					Use_O_Sync         = use_o_sync;
 					StreamAllAudioPids = stream_all_audio_pids;
+					StreamVTxtPid      = stream_vtxt_pid;
 				};
 			virtual ~CFileDevice()
 				{

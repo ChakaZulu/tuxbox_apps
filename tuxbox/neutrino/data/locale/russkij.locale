@@ -60,10 +60,10 @@ GENRE.SHOW.0 Шоу / Игровое шоу
 GENRE.SHOW.1 игровое шоу/викторина/конкурс
 GENRE.SHOW.2 варьете
 GENRE.SHOW.3 разговорное шоу
-GENRE.SOZIAL_POLITICAL.0 социальные & политические события / бизнес
-GENRE.SOZIAL_POLITICAL.1 журналы/отчеты/документалистика
-GENRE.SOZIAL_POLITICAL.2 экономика/общественные консультации
-GENRE.SOZIAL_POLITICAL.3 замечательные люди
+GENRE.SOCIAL_POLITICAL.0 социальные & политические события / бизнес
+GENRE.SOCIAL_POLITICAL.1 журналы/отчеты/документалистика
+GENRE.SOCIAL_POLITICAL.2 экономика/общественные консультации
+GENRE.SOCIAL_POLITICAL.3 замечательные люди
 GENRE.SPORTS.0 спорт
 GENRE.SPORTS.1 специальные (Олимпийские игры,Мировые чемпионаты etc.)
 GENRE.SPORTS.10 конный спорт 
@@ -99,6 +99,25 @@ audiomenu.monoleft левое моно
 audiomenu.monoright правое моно
 audiomenu.ost ost
 audiomenu.stereo стерео
+audioplayer.add Добавить
+audioplayer.artist_title Артист, Название
+audioplayer.defdir Начальная директория.
+audioplayer.delete Удалить
+audioplayer.deleteall Удалить все
+audioplayer.display_order Сортировка
+audioplayer.fastforward fast forw.
+audioplayer.follow auto Выбрать текущую
+audioplayer.highprio высокая декодировка
+audioplayer.id3scan Сканировать ID3 теги
+audioplayer.keylevel key level
+audioplayer.pause Пауза
+audioplayer.play Играть
+audioplayer.playing Текущий трек
+audioplayer.rewind rewind
+audioplayer.screensaver_timeout Таймаут скринсейвера (мин, 0=выкл)
+audioplayer.shuffle shuffle
+audioplayer.stop Остановить
+audioplayer.title_artist Название, Артист
 bookmarkmanager.delete Удалить
 bookmarkmanager.name Bookmarks
 bookmarkmanager.rename Переименовать
@@ -214,7 +233,7 @@ flashupdate.currentversiondate Дата
 flashupdate.currentversionsnapshot Тип прошивки
 flashupdate.currentversiontime Время
 flashupdate.erasefailed не могу стереть флеш
-flashupdate.eraseingflash стирание флеша
+flashupdate.erasing стирание флеша
 flashupdate.experimentalimage Выбраная прошивка не проверена и ваш\nтюнер возможно не загрузится после обновления.\n\nВы действительно хотите обновить до этой версии?
 flashupdate.expertfunctions Экспертные функции
 flashupdate.fileis0bytes размер файла 0 байт
@@ -434,25 +453,6 @@ movieplayer.tsplayback Play TS
 movieplayer.vcdplayback (S)VCD
 movieplayer.vlchelp КРАСНАЯ/Home Стоп\nЗЕЛЕНАЯ Ресинхронизазия\nЖЕЛТАЯ Пауза/Продолжить\nСИНЯЯ Create bookmark\nd-box время высветить\n1 примерно на 1 мин. назад\n3 пропустить около 1 мин.\n4 примерно на 5 мин. назад \n6 пропустить около 5 мин.\n7 примерно на 10 мин. назад\n9 пропустить около 10 мин.\nHelp: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.wrongvlcversion Эта функция не поддерживается текущей версией VLC 
-mp3player.add Добавить
-mp3player.artist_title Артист, Название
-mp3player.defdir Начальная директория.
-mp3player.delete Удалить
-mp3player.deleteall Удалить все
-mp3player.display_order Сортировка
-mp3player.fastforward fast forw.
-mp3player.follow auto Выбрать текущую
-mp3player.highprio высокая декодировка
-mp3player.id3scan Сканировать ID3 теги
-mp3player.keylevel key level
-mp3player.pause Пауза
-mp3player.play Играть
-mp3player.playing Текущий трек
-mp3player.rewind rewind
-mp3player.screensaver_timeout Таймаут скринсейвера (мин, 0=выкл)
-mp3player.shuffle shuffle
-mp3player.stop Остановить
-mp3player.title_artist Название, Артист
 networkmenu.broadcast Broadcast
 networkmenu.gateway Default Gateway
 networkmenu.head Настройки сети
@@ -483,7 +483,7 @@ nfs.umount Размонтировать NFS/CIFS раздел
 nfs.umounterror Ошибка размонтирования раздела
 nfs.username CIFS имя пользователя
 nfsmenu.head NFS/CIFS настройки
-nvod.proz (%d%% над)
+nvod.percentage (%d%% над)
 nvod.starting (Старт через %d минут)
 nvodselector.directormode Директ режим
 nvodselector.head Выбор времени старта
@@ -503,7 +503,6 @@ parentallock.lockage12 до 12 лет
 parentallock.lockage16 до 16 лет
 parentallock.lockage18 до 18 лет
 parentallock.lockedprogram Закрыть программы (с %d лет по)
-parentallock.lockedsender Locked sender...
 parentallock.never никогда
 parentallock.onsignal широковещательный
 parentallock.onstart при старте

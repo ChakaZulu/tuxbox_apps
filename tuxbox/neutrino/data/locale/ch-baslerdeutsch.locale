@@ -60,10 +60,10 @@ GENRE.SHOW.0 Show / Gameshow
 GENRE.SHOW.1 Gameshow/Quiz
 GENRE.SHOW.2 varietee
 GENRE.SHOW.3 Talkshow
-GENRE.SOZIAL_POLITICAL.0 Sozial & Politikereignisse / Wirtschaft
-GENRE.SOZIAL_POLITICAL.1 Magazin/Report/Dokumentation
-GENRE.SOZIAL_POLITICAL.2 Wirtschaft un Soziales
-GENRE.SOZIAL_POLITICAL.3 Bsunderi Mänsche
+GENRE.SOCIAL_POLITICAL.0 Sozial & Politikereignisse / Wirtschaft
+GENRE.SOCIAL_POLITICAL.1 Magazin/Report/Dokumentation
+GENRE.SOCIAL_POLITICAL.2 Wirtschaft un Soziales
+GENRE.SOCIAL_POLITICAL.3 Bsunderi Mänsche
 GENRE.SPORTS.0 Sport
 GENRE.SPORTS.1 Großereigniss (Olympische Spiele, Weltmeischerschafte usw.)
 GENRE.SPORTS.10 equestrian
@@ -99,6 +99,24 @@ audiomenu.monoleft mono lings
 audiomenu.monoright mono rächts
 audiomenu.ost ost
 audiomenu.stereo stereo
+audioplayer.add A'hänge
+audioplayer.artist_title Interpret, Titel
+audioplayer.defdir Start-Verz.
+audioplayer.delete Lösche
+audioplayer.deleteall Alles lösche
+audioplayer.display_order Anzeig'
+audioplayer.fastforward schnälle Vorl.
+audioplayer.follow Selektiere akt. Track
+audioplayer.id3scan scänn ID3-Tags
+audioplayer.keylevel Taschde-Umschaldig
+audioplayer.pause Pause
+audioplayer.play Abspiele
+audioplayer.playing aktuelle track
+audioplayer.rewind schnälle Rückl.
+audioplayer.screensaver_timeout Bildschirmschoner (min, 0=aus)
+audioplayer.shuffle Zuefällig mische
+audioplayer.stop A'halte
+audioplayer.title_artist Titel, Interpret
 bookmarkmanager.delete Lösche
 bookmarkmanager.name Bookmarks
 bookmarkmanager.rename Umbenenne
@@ -211,7 +229,7 @@ flashupdate.currentversiondate Datum
 flashupdate.currentversionsnapshot ImageTyp
 flashupdate.currentversiontime Uhrzit
 flashupdate.erasefailed Flash lösche fehlg'schlage
-flashupdate.eraseingflash lösch' grad s'Fläsh
+flashupdate.erasing lösch' grad s'Fläsh
 flashupdate.experimentalimage Sie henn ä Snapshot usgwählt, bitte beachte Sie, dass\ndie Version untestet isch un u.U. Ihre Box nach dem Update\nnümmi funktionsfähig isch.\n\nSoll die Version wirklich installiert werde?
 flashupdate.expertfunctions Experte-Funktione
 flashupdate.fileis0bytes d'Dateigrößi isch 0 Byte
@@ -427,24 +445,6 @@ movieplayer.tsplayback TS Abspiele
 movieplayer.vcdplayback (S)VCD
 movieplayer.vlchelp ROT/Home Stop\nGRÜN Resync\nGELB Paus/Widdr\nBLAU Bookmark setze\nd-box Ziit iiblände\nv Sprung\n1 ca. 1 Minute zruck\n3 ca. 1 Minute vor\n4 ca. 5 Minute zruck\n6 ca. 5 Minute vor\n7 ca. 10 Minute zruck\n9 ca. 10 Minute vor\nHilfe: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.wrongvlcversion Funktion isch mit dr benutzte Version vom VLC nit möglich
-mp3player.add A'hänge
-mp3player.artist_title Interpret, Titel
-mp3player.defdir Start-Verz.
-mp3player.delete Lösche
-mp3player.deleteall Alles lösche
-mp3player.display_order Anzeig'
-mp3player.fastforward schnälle Vorl.
-mp3player.follow Selektiere akt. Track
-mp3player.id3scan scänn ID3-Tags
-mp3player.keylevel Taschde-Umschaldig
-mp3player.pause Pause
-mp3player.play Abspiele
-mp3player.playing aktuelle track
-mp3player.rewind schnälle Rückl.
-mp3player.screensaver_timeout Bildschirmschoner (min, 0=aus)
-mp3player.shuffle Zuefällig mische
-mp3player.stop A'halte
-mp3player.title_artist Titel, Interpret
 networkmenu.broadcast Broadcast
 networkmenu.gateway Standard Gateway
 networkmenu.head Netzwäerk Iischdellige
@@ -475,7 +475,7 @@ nfs.umount NFS/CIFS Verzeichniss abhänge
 nfs.umounterror Abhäng-Fehler
 nfs.username CIFS Benutzername
 nfsmenu.head NFS/CIFS Iischdellige
-nvod.proz (%d%% umme)
+nvod.percentage (%d%% umme)
 nvod.starting (Goht los in %d min)
 nvodselector.directormode Bildregie-Modus
 nvodselector.head Anfangszit usswähle
@@ -494,8 +494,8 @@ parentallock.lockage Sendige
 parentallock.lockage12 ab 12 Joohr sperre
 parentallock.lockage16 ab 16 Joohr sperre
 parentallock.lockage18 ab 18 Joohr sperre
+parentallock.lockedchannel Vorgesperrte Sänder...
 parentallock.lockedprogram Gspärrtes Programm (FSK ab %d)
-parentallock.lockedsender Vorgesperrte Sänder...
 parentallock.never Nie
 parentallock.onsignal Bi gsendeter Vorsperri
 parentallock.onstart Bim Start
