@@ -1592,10 +1592,13 @@ static eString getDiskInfo(void)
 #ifndef DISABLE_FILE
 static eString getConfigHDD(void)
 {
-	eString result = getDiskInfo();
-	result += "<br><br>";
-	result += readFile(TEMPLATE_DIR + "configUSB.tmp");
-	return result;
+	std::stringstream result;
+	result  << "<table border=0 cellspacing=0 cellpadding=0>"
+		<< getDiskInfo()
+		<< "</table>"
+		<< "<br>"
+		<< readFile(TEMPLATE_DIR + "configHDD.tmp");
+	return result.str();
 }
 #endif
 
@@ -1674,11 +1677,15 @@ struct countTimer
 	void operator()(ePlaylistEntry *se)
 	{
 		if (se->type&ePlaylistEntry::isRepeating)
+		{
 			if (repeating)
 				++count;
-		else 
+		}
+		else
+		{
 			if (!repeating)
 				++count;
+		}
 	}
 };
 
@@ -1716,17 +1723,17 @@ struct getEntryString
 		description = getRight(description, '/');
 		if (!description)
 			description = _("No description available");
-		
+
 		result << "<tr>";
-		if (!se->type & ePlaylistEntry::isRepeating)
+		if (!repeating)
 		{
 			result  << "<td><a href=\"javascript:deleteTimerEvent(\'"
 				<< "ref=" << ref2string(se->service)
 				<< "&ID=" << std::hex << se->event_id << std::dec
-				<< "&start=" << se->time_begin 
-				<< "&duration=" << se->duration 
+				<< "&start=" << se->time_begin
+				<< "&duration=" << se->duration
 				<< "\')\"><img src=\"trash.gif\" border=0 height=20></a></td>";
-				
+
 			result << "<td><a href=\"javascript:editTimerEvent(\'"
 				<< "ref=" << ref2string(se->service)
 				<< "start=" << se->time_begin
@@ -1808,8 +1815,8 @@ static eString getControlTimerList()
 	eTimerManager::getInstance()->forEachEntry(countTimer(count, false));
 	if (count)
 		tableBody = genTimerListTableBody(0);
-	else 
-		tableBody = "<tr><td>" + eString(_("No regular timer events available")) + "</td></tr>";
+	else
+		tableBody = "<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>" + eString(_("No regular timer events available")) + "</td></tr>";
 	result.strReplace("#TIMER_REGULAR#", tableBody);
 	
 	// repeated timers
@@ -1818,7 +1825,7 @@ static eString getControlTimerList()
 	if (count)
 		tableBody = genTimerListTableBody(1);
 	else
-		tableBody = "<tr><td>" + eString(_("No repeated timer events available")) + "</td></tr>";
+		tableBody = "<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>" + eString(_("No repeated timer events available")) + "</td></tr>";
 	result.strReplace("#TIMER_REPEATED#", tableBody);
 	
 	// buttons
@@ -3100,6 +3107,7 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	eString eventID = opt["ID"];
 	eString eventStartTime = opt["start"];
 	eString eventDuration = opt["duration"];
+	eString channel = httpUnescape(opt["channel"]);
 	eString description = httpUnescape(opt["descr"]);
 	if (description == "")
 		description = _("No description available");
@@ -3117,7 +3125,7 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 
 	ePlaylistEntry entry(string2ref(serviceRef), start, duration, eventid, ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR);
 	eDebug("[ENIGMA_DYN] description = %s", description.c_str());
-	entry.service.descr = description;
+	entry.service.descr = channel + "/" + description;
 
 	if (eTimerManager::getInstance()->addEventToTimerList(entry) == -1)
 		result += _("Timer event could not be added because time of the event overlaps with an already existing event.");
