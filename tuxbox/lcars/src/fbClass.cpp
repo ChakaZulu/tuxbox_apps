@@ -6,8 +6,8 @@ fbClass::fbClass(variables *v, int x, int y, int bpp)
 	vars = v;
 
 	// In den Grafikmode gehen wenn die Konsole auf dem fb ist
-	if ((fd = open("/dev/console", O_RDWR)) < 0)
-		perror ("/dev/console");
+	if ((fd = open("/dev/vc/0", O_RDWR)) < 0)
+		perror ("/dev/vc/0");
 	else if (ioctl(fd, KDSETMODE, KD_GRAPHICS) < 0)
 		//else if (ioctl(fd, KDSETMODE, KD_TEXT) < 0)
 		perror("KDSETMODE");
