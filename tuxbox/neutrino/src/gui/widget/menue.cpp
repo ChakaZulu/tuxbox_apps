@@ -30,16 +30,17 @@
 */
 
 
-#include <global.h>
-#include <neutrino.h>
+#include <gui/widget/menue.h>
 
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
 
 #include <gui/color.h>
 
-#include "menue.h"
-#include "stringinput.h"
+#include <gui/widget/stringinput.h>
+
+#include <global.h>
+#include <neutrino.h>
 
 #include <cctype>
 
@@ -325,7 +326,7 @@ void CMenuWidget::paint()
 
 	frameBuffer->paintBoxRel(x,y, width+sb_width,hheight, COL_MENUHEAD);
 	g_Fonts->menu_title->RenderString(x+38,y+hheight+1, width-40, l_name, COL_MENUHEAD, 0, true); // UTF-8
-	frameBuffer->paintIcon(iconfile.c_str(),x+8,y+5);
+	frameBuffer->paintIcon(iconfile, x + 8, y + 5);
 
 	item_start_y = y+hheight;
 	paintItems();
@@ -468,7 +469,7 @@ int CMenuOptionChooser::paint( bool selected )
 
 	if (iconName!="")
 	{
-		frameBuffer->paintIcon(iconName.c_str(), x + 10, y+ ((height- 20)>>1) );
+		frameBuffer->paintIcon(iconName, x + 10, y + ((height - 20) >> 1));
 	}
 	else if (CRCInput::isNumeric(directKey))
 	{
@@ -573,12 +574,12 @@ int CMenuOptionStringChooser::paint( bool selected )
 	else
 		l_option = optionValue;
 
-	int stringwidth = g_Fonts->menu->getRenderWidth(l_option.c_str());
+	int stringwidth = g_Fonts->menu->getRenderWidth(l_option);
 	int stringstartposName = x + offx + 10;
 	int stringstartposOption = x + dx - stringwidth - 10; //+ offx
 
 	g_Fonts->menu->RenderString(stringstartposName,   y+height,dx- (stringstartposName - x), l_optionName, color, 0, true); // UTF-8
-	g_Fonts->menu->RenderString(stringstartposOption, y+height,dx- (stringstartposOption - x), l_option.c_str(), color);
+	g_Fonts->menu->RenderString(stringstartposOption, y+height,dx- (stringstartposOption - x), l_option, color);
 
 	if(selected)
 	{
@@ -665,7 +666,7 @@ int CMenuForwarder::paint(bool selected)
 
 	if (iconName!="")
 	{
-		frameBuffer->paintIcon(iconName.c_str(), x + 10, y+ ((height- 20)>>1) );
+		frameBuffer->paintIcon(iconName, x + 10, y+ ((height- 20)>>1) );
 	}
 	else if (CRCInput::isNumeric(directKey))
 	{
