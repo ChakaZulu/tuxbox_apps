@@ -124,8 +124,8 @@
 			<eWidget position="14:65" size="113:10" backgroundColor="osd_shadowcol" />
 			<eWidget position="117:15" size="10:60" backgroundColor="osd_shadowcol" />
 			<eWidget position="127:15" size="488:25" backgroundColor="osd_shadowcol" />
-			<eWidget position="44:150" size="601:10" backgroundColor="osd_shadowcol" />
-			<eWidget position="613:30" size="10:125" backgroundColor="osd_shadowcol" />
+			<eWidget position="44:150" size="579:10" backgroundColor="osd_shadowcol" />
+			<eWidget position="613:15" size="10:135" backgroundColor="osd_shadowcol" />
 
 			<!--
 			<eWidget position="560:49" size="95:20" backgroundColor="osd_timebarborder" />
@@ -136,7 +136,7 @@
 			<eLabel position="10:5" size="100:50" font="NimbusSansL-Regular Sans L Regular;50" name="ch_number" align="center"
 				backgroundColor="osd_normal"/>
 
-			<eLabel position="130:41" size="410:35" font="NimbusSansL-Regular Sans L Regular;35" name="ch_name"
+			<eLabel position="140:41" size="400:35" font="NimbusSansL-Regular Sans L Regular;35" name="ch_name"
 				backgroundColor="osd_normal"/>
 
 			<eLabel position="50:82" size="75:27" font="NimbusSansL-Regular Sans L Regular;25" name="e_now_time"
@@ -144,9 +144,9 @@
 			<eLabel position="50:114" size="75:27" font="NimbusSansL-Regular Sans L Regular;25" name="e_next_time"
 				backgroundColor="osd_epg"/>
 
-			<eLabel position="130:82" size="375:35" font="NimbusSansL-Regular Sans L Regular;25" name="e_now_title"
+			<eLabel position="140:82" size="365:35" font="NimbusSansL-Regular Sans L Regular;25" name="e_now_title"
 				backgroundColor="osd_epg"/>
-			<eLabel position="130:114" size="375:35" font="NimbusSansL-Regular Sans L Regular;25" name="e_next_title"
+			<eLabel position="140:114" size="365:35" font="NimbusSansL-Regular Sans L Regular;25" name="e_next_title"
 				backgroundColor="osd_epg"/>
 
 			<eLabel position="505:82" size="95:35" font="NimbusSansL-Regular Sans L Regular;25" name="e_now_duration" align="right"
