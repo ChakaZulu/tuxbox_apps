@@ -3418,6 +3418,7 @@ void CNeutrinoApp::setVolume(const uint key, const bool bDoPaint)
 				}
 				else
 				{
+					g_RCInput->postMsg(msg, data);
 					break;
 				}
 
@@ -3433,7 +3434,7 @@ void CNeutrinoApp::setVolume(const uint key, const bool bDoPaint)
 			else if (handleMsg(msg, data) & messages_return::unhandled)
 			{
 				g_RCInput->postMsg(msg, data);
-				msg = CRCInput::RC_timeout;
+				break;
 			}
 
 			if (bDoPaint)
