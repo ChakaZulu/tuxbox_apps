@@ -812,14 +812,14 @@ int control::runCommand(command_class command, bool val)
 			if (command.args[0] == "Number")
 			{
 				channels_obj->setCurrentChannel(atoi(command.args[1].c_str()));
-				channels_obj->setCurrentOSDProgramInfo(osd_obj);
+				channels_obj->setCurrentOSDProgramInfo();
 				channels_obj->receiveCurrentEIT();
 				//channels_obj->setCurrentChannel(atoi(command.args[1].c_str()));
 			}
 			else if (command.args[0] == "Last")
 			{
 				channels_obj->zapLastChannel();
-				channels_obj->setCurrentOSDProgramInfo(osd_obj);
+				channels_obj->setCurrentOSDProgramInfo();
 				channels_obj->receiveCurrentEIT();
 
 			}
@@ -830,7 +830,7 @@ int control::runCommand(command_class command, bool val)
 				if (cn >= channels_obj->numberChannels())
 					cn = 0;
 				channels_obj->setCurrentChannel(cn);
-				channels_obj->setCurrentOSDProgramInfo(osd_obj);
+				channels_obj->setCurrentOSDProgramInfo();
 				channels_obj->receiveCurrentEIT();
 
 			}
@@ -841,7 +841,7 @@ int control::runCommand(command_class command, bool val)
 				if (cn < 0)
 					cn = channels_obj->numberChannels() - 1;
 				channels_obj->setCurrentChannel(cn);
-				channels_obj->setCurrentOSDProgramInfo(osd_obj);
+				channels_obj->setCurrentOSDProgramInfo();
 				channels_obj->receiveCurrentEIT();
 
 			}

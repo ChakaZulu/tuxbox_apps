@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: network.h,v $
+Revision 1.8  2002/06/02 14:23:36  TheDOC
+some fixes and changes
+
 Revision 1.7  2002/06/02 12:18:47  TheDOC
 source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
 
@@ -64,11 +67,21 @@ public:
 	std::string replace_vars(std::string tmp_string);
 	std::string getfile(std::string name);
 	bool update_enabled;
-	//xmlrpc xmlrpc_obj;
-	container cont;
+
 	rc *rc_obj;
+	zap *zap_obj;
+	channels *channels_obj;
+	fbClass *fb_obj;
+	osd *osd_obj;
+	settings *setting;
+	tuner *tuner_obj;
+	pat *pat_obj;
+	pmt *pmt_obj;
+	eit *eit_obj;
+	scan *scan_obj;
+
 	void writetext(std::string text);
-	network(container &container, rc *r, control *c, variables *v);
+	network(zap *z, channels *c, fbClass *f, osd *o, settings *s, tuner *t, pat *pa, pmt *pm, eit *e, scan *sc, rc *r, control *c, variables *v);
 	int fd;
 	int inbound_connection;
 	static void *startlistening(void *object);

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: network.cpp,v $
+Revision 1.9  2002/06/02 14:23:36  TheDOC
+some fixes and changes
+
 Revision 1.8  2002/06/02 12:18:47  TheDOC
 source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
 
@@ -77,12 +80,20 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include "pat.h"
 #include "pmt.h"
 
-network::network(container &contain, rc *r, control *c, variables *v) : cont(contain)
+network::network(zap *z, channels *c1, fbClass *f, osd *o, settings *s, tuner *t, pat *pa, pmt *pm, eit *e, scan *sc, rc *r, control *c, variables *v)
 {
-	//xmlrpc_obj.setObjects(&cont);
 	rc_obj = r;
 	control_obj = c;
 	vars = v;
+	zap_obj = z;
+	channels_obj = c1;
+	fb_obj = f;
+	setting = s;
+	tuner_obj = t;
+	pat_obj = pa;
+	pmt_obj = pm;
+	eit_obj = e;
+	scan_obj = sc;
 }
 
 std::string network::replace_vars(std::string tmp_string)
@@ -113,9 +124,9 @@ std::string network::replace_vars(std::string tmp_string)
 					std::string http3 = getfile(CONFIGDIR "/lcars/http/channels3.htm");
 					std::string http4 = getfile(CONFIGDIR "/lcars/http/channels4.htm");
 					std::stringstream iss;
-					for (int count = 0; count < cont.channels_obj->numberChannels(); count++)
+					for (int count = 0; count < channels_obj->numberChannels(); count++)
 					{
-						iss << http1 << count << http2 << "/channels/zapto/" << count << http3 << cont.channels_obj->getServiceName(count) << http4;
+						iss << http1 << count << http2 << "/channels/zapto/" << count << http3 << channels_obj->getServiceName(count) << http4;
 					}
 					iss << std::ends;
 					tmp_string.replace(tmp_string.find(var), var.length(), iss.str());
@@ -280,7 +291,7 @@ void *network::startlistening(void *object)
 				{
 					//printf("GET root\n");
 					write(inbound_connection, headerok.c_str(), headerok.length());
-					write(inbound_connection, (*n->cont.settings_obj).getVersion().c_str(), (*n->cont.settings_obj).getVersion().length());
+					write(inbound_connection, (*n->setting).getVersion().c_str(), (*n->setting).getVersion().length());
 					strcpy(writebuffer, "<br><br><a href=\"/channels/gethtmlchannels\">Channellist</a>");
 					write(inbound_connection, writebuffer, strlen(writebuffer));
 					n->writetext("<br><br><a href=\"command\">Command-Parser</a>");
@@ -304,22 +315,31 @@ void *network::startlistening(void *object)
 					{
 						std::ifstream inFile;
 						std::string httpfile;
-
 						inFile.open(filename.c_str());
-
-						std::string tmp_string;
-						while(getline(inFile, tmp_string))
-							httpfile.append(tmp_string);
-						httpfile = n->replace_vars(httpfile);
-						write(inbound_connection, httpfile.c_str(), httpfile.length());
+						if (!inFile)
+						{
+								write(inbound_connection, headerfailed.c_str(), headerfailed.length());
+						}
+						else
+						{
+							std::string tmp_string;
+							while(getline(inFile, tmp_string))
+								httpfile.append(tmp_string);
+							httpfile = n->replace_vars(httpfile);
+							write(inbound_connection, httpfile.c_str(), httpfile.length());
+						}
 					}
 					else
 					{
-
 						int fd = open(filename.c_str(), O_RDONLY);
-						char c;
-						while(read(fd, &c, 1))
-							write(inbound_connection, &c, 1);
+						if (fd == -1)
+							write(inbound_connection, headerfailed.c_str(), headerfailed.length());
+						else
+						{
+							char c;
+							while(read(fd, &c, 1))
+								write(inbound_connection, &c, 1);
+						}
 						close(fd);
 					}
 
@@ -328,29 +348,29 @@ void *network::startlistening(void *object)
 				else if (path[1] == "version")
 				{
 					write(inbound_connection, headerok.c_str(), headerok.length());
-					write(inbound_connection, (*n->cont.settings_obj).getVersion().c_str(), (*n->cont.settings_obj).getVersion().length());
+					write(inbound_connection, (*n->setting).getVersion().c_str(), (*n->setting).getVersion().length());
 				}
 				else if (path[1] == "channels")
 				{
 					if (path[2] == "getcurrent")
 					{
 						write(inbound_connection, headerok.c_str(), headerok.length());
-						sprintf(writebuffer, "%d", (*n->cont.channels_obj).getCurrentChannelNumber());
+						sprintf(writebuffer, "%d", (*n->channels_obj).getCurrentChannelNumber());
 						write(inbound_connection, writebuffer, strlen(writebuffer));
 					}
 					else if (path[2] == "numberchannels")
 					{
 						write(inbound_connection, headerok.c_str(), headerok.length());
-						sprintf(writebuffer, "%d", (*n->cont.channels_obj).numberChannels());
+						sprintf(writebuffer, "%d", (*n->channels_obj).numberChannels());
 						write(inbound_connection, writebuffer, strlen(writebuffer));
 					}
 					else if (path[2] == "gethtmlchannels")
 					{
 						write(inbound_connection, headerok.c_str(), headerok.length());
 						write(inbound_connection, "<table>", 7);
-						for (int count = 0; count < (*n->cont.channels_obj).numberChannels(); count++)
+						for (int count = 0; count < (*n->channels_obj).numberChannels(); count++)
 						{
-							sprintf(writebuffer, "<tr><td>%d</td><td><a href=\"zapto/%d\">%s</a></td></tr>\n", count, count, (*n->cont.channels_obj).getServiceName(count).c_str());
+							sprintf(writebuffer, "<tr><td>%d</td><td><a href=\"zapto/%d\">%s</a></td></tr>\n", count, count, (*n->channels_obj).getServiceName(count).c_str());
 							write(inbound_connection, writebuffer, strlen(writebuffer));
 						}
 						write(inbound_connection, "</table>", 8);
@@ -358,9 +378,9 @@ void *network::startlistening(void *object)
 					else if (path[2] == "getchannels")
 					{
 						write(inbound_connection, headerok.c_str(), headerok.length());
-						for (int count = 0; count < (*n->cont.channels_obj).numberChannels(); count++)
+						for (int count = 0; count < (*n->channels_obj).numberChannels(); count++)
 						{
-							channel tmp_chan = (*n->cont.channels_obj).getChannelByNumber(count);
+							channel tmp_chan = (*n->channels_obj).getChannelByNumber(count);
 							sprintf(writebuffer, "%d %s<br>\n", count, tmp_chan.serviceName);
 							write(inbound_connection, writebuffer, strlen(writebuffer));
 						}
@@ -369,36 +389,35 @@ void *network::startlistening(void *object)
 					{
 						std::string header = "HTTP/1.1 200 OK\nConnection: close\nAccept-Ranges: bytes\nContent-Type: application/octet-stream\n\r\n";
 						write(inbound_connection, header.c_str(), header.length());
-						for (int count = 0; count < (*n->cont.channels_obj).numberChannels(); count++)
+						for (int count = 0; count < (*n->channels_obj).numberChannels(); count++)
 						{
-							dvbchannel tmp_chan = (*n->cont.channels_obj).getDVBChannel(count);
+							dvbchannel tmp_chan = (*n->channels_obj).getDVBChannel(count);
 							write(inbound_connection, &tmp_chan, sizeof(dvbchannel));
 						}
 					}
 					else if (path[2] == "scan")
 					{
-						(*n->cont.scan_obj).scanChannels();
+						(*n->scan_obj).scanChannels();
 					}
 					else if (path[2] == "zapto")
 					{
 						int number = atoi(path[3].c_str());
-
-						(*n->cont.channels_obj).setCurrentChannel(number);
-
-						(*n->cont.channels_obj).zapCurrentChannel();
-						(*n->cont.channels_obj).setCurrentOSDProgramInfo(n->cont.osd_obj);
-
-						(*n->cont.channels_obj).receiveCurrentEIT();
-						(*n->cont.channels_obj).setCurrentOSDProgramEIT(n->cont.osd_obj);
-						(*n->cont.channels_obj).updateCurrentOSDProgramAPIDDescr(n->cont.osd_obj);
-
+						
+						(*n->channels_obj).setCurrentChannel(number);
+						
+						(*n->channels_obj).zapCurrentChannel();
+						(*n->channels_obj).setCurrentOSDProgramInfo();
+						(*n->channels_obj).receiveCurrentEIT();
+						(*n->channels_obj).setCurrentOSDProgramEIT();
+						(*n->channels_obj).updateCurrentOSDProgramAPIDDescr();
+						
 						write(inbound_connection, headerok.c_str(), headerok.length());
 						write(inbound_connection, "Done!<br>\n", 10);
 
-						if ((*n->cont.channels_obj).getCurrentAPIDcount() == 1)
-							sprintf(writebuffer, "VPID: %x APID: %x<br>\n", (*n->cont.channels_obj).getCurrentVPID(), (*n->cont.channels_obj).getCurrentAPID(0));
+						if ((*n->channels_obj).getCurrentAPIDcount() == 1)
+							sprintf(writebuffer, "VPID: %x APID: %x<br>\n", (*n->channels_obj).getCurrentVPID(), (*n->channels_obj).getCurrentAPID(0));
 						else
-							sprintf(writebuffer, "VPID: %x APID: %x APID: %x<br>\n", (*n->cont.channels_obj).getCurrentVPID(), (*n->cont.channels_obj).getCurrentAPID(0), (*n->cont.channels_obj).getCurrentAPID(1));
+							sprintf(writebuffer, "VPID: %x APID: %x APID: %x<br>\n", (*n->channels_obj).getCurrentVPID(), (*n->channels_obj).getCurrentAPID(0), (*n->channels_obj).getCurrentAPID(1));
 						write(inbound_connection, writebuffer, strlen(writebuffer));
 
 						n->writetext("<br><hr>\n");
@@ -406,7 +425,7 @@ void *network::startlistening(void *object)
 						char text[100];
 						for (int i = 0; i < 2; i++)
 						{
-							tmp_event = (i == 0) ? (*n->cont.eit_obj).getNow() : (*n->cont.eit_obj).getNext();
+							tmp_event = (i == 0) ? (*n->eit_obj).getNow() : (*n->eit_obj).getNext();
 
 							sprintf(text, "%s - <a href=/epg/%s>%s</a><br>\n", ctime(&tmp_event.starttime), (i == 0) ? "now" : "next", tmp_event.event_name);
 							n->writetext(text);
@@ -422,14 +441,14 @@ void *network::startlistening(void *object)
 				{
 					if (path[2] == "stop")
 					{
-						(*n->cont.zap_obj).dmx_stop();
+						(*n->zap_obj).dmx_stop();
 
 						write(inbound_connection, headerok.c_str(), headerok.length());
 						write(inbound_connection, "Done!", 6);
 					}
 					else if (path[2] == "start")
 					{
-						(*n->cont.zap_obj).dmx_start();
+						(*n->zap_obj).dmx_start();
 
 						write(inbound_connection, headerok.c_str(), headerok.length());
 						write(inbound_connection, "Done!", 6);
@@ -442,7 +461,7 @@ void *network::startlistening(void *object)
 					char text[1000];
 					n->writetext(headerok);
 					event tmp_event;
-					tmp_event = (path[2] == "now") ? (*n->cont.eit_obj).getNext() : (*n->cont.eit_obj).getNow();
+					tmp_event = (path[2] == "now") ? (*n->eit_obj).getNext() : (*n->eit_obj).getNow();
 					sprintf(text, "Starttime: %s<br>\n", ctime(&tmp_event.starttime));
 					n->writetext(text);
 					sprintf(text, "Dauer: %d min<br>\n", (int)(tmp_event.duration / 60));

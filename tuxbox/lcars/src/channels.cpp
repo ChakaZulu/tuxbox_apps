@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: channels.cpp,v $
+Revision 1.12  2002/06/02 14:23:36  TheDOC
+some fixes and changes
+
 Revision 1.11  2002/06/02 12:18:47  TheDOC
 source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
 
@@ -304,14 +307,15 @@ void channels::zapLastChannel()
 	setCurrentChannel(numb);
 }
 
-void channels::setCurrentOSDProgramInfo(osd *osd_obj)
+void channels::setCurrentOSDProgramInfo()
 {
-	(*osd_obj).createProgramInfo();
+	osd_obj->createProgramInfo();
+	
 	char text[100];
 	sprintf(text, "COMMAND proginfo set_service_name %s", getCurrentServiceName().c_str());
-	(*osd_obj).addCommand(text);
+	osd_obj->addCommand(text);
 	sprintf(text, "COMMAND proginfo set_service_number %d", cur_pos);
-	(*osd_obj).addCommand(text);
+	osd_obj->addCommand(text);
 }
 
 void channels::receiveCurrentEIT()
@@ -324,7 +328,7 @@ void channels::receiveCurrentEIT()
 	(*eit_obj).addCommand(cmd_text);
 }
 
-void channels::setCurrentOSDProgramEIT(osd *osd_obj)
+void channels::setCurrentOSDProgramEIT()
 {
 	if (getCurrentAPIDcount() > 1)
 		(*osd_obj).setLanguage(audio_description);
@@ -337,16 +341,16 @@ void channels::setCurrentOSDProgramEIT(osd *osd_obj)
 	(*osd_obj).setNextTime(next.starttime);
 }
 
-void channels::updateCurrentOSDProgramEIT(osd *osd_obj)
+void channels::updateCurrentOSDProgramEIT()
 {
 	if (next.starttime <= time(0))
 	{
 		getCurrentEIT();
-		setCurrentOSDProgramEIT(osd_obj);
+		setCurrentOSDProgramEIT();
 	}
 }
 
-void channels::setCurrentOSDEvent(osd *osd_obj)
+void channels::setCurrentOSDEvent()
 {
 	(*osd_obj).setEPGEventName(now.event_name);
 	(*osd_obj).setEPGEventShortText(now.event_short_text);
@@ -392,7 +396,7 @@ void channels::zapCurrentAudio(int pid)
 
 }
 
-void channels::updateCurrentOSDProgramAPIDDescr(osd *osd_obj)
+void channels::updateCurrentOSDProgramAPIDDescr()
 {
 	if (getCurrentAPIDcount() > 1)
 		(*osd_obj).setLanguage(audio_description);

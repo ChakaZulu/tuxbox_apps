@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: timer.cpp,v $
+Revision 1.9  2002/06/02 14:23:36  TheDOC
+some fixes and changes
+
 Revision 1.8  2002/06/02 12:18:47  TheDOC
 source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
 
@@ -148,13 +151,13 @@ void timer::runTimer()
 		(*channels_obj).zapCurrentChannel();
 		/*if (act_timer.duration != 0)
 			addTimer(time(0) + act_timer.duration, 2, 0, last_channel);*/
-		(*channels_obj).setCurrentOSDProgramInfo(osd_obj);
+		(*channels_obj).setCurrentOSDProgramInfo();
 		(*hardware_obj).fnc(0);
 		(*hardware_obj).fnc(2);
 
 		(*channels_obj).receiveCurrentEIT();
-		(*channels_obj).setCurrentOSDProgramEIT(osd_obj);
-		(*channels_obj).updateCurrentOSDProgramAPIDDescr(osd_obj);
+		(*channels_obj).setCurrentOSDProgramEIT();
+		(*channels_obj).updateCurrentOSDProgramAPIDDescr();
 
 		vars->addEvent("VCR_START");
 		//std::cout << "Starttime: " << act_timer.starttime << std::endl << "Duration: " << act_timer.duration << std::endl;

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: channels.h,v $
+Revision 1.10  2002/06/02 14:23:36  TheDOC
+some fixes and changes
+
 Revision 1.9  2002/06/02 12:18:47  TheDOC
 source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
 
@@ -202,14 +205,14 @@ public:
 
 	void zapCurrentChannel();
 	void zapLastChannel();
-	void setCurrentOSDProgramInfo(osd *osd_obj);
+	void setCurrentOSDProgramInfo();
 	void receiveCurrentEIT();
-	void setCurrentOSDProgramEIT(osd *osd_obj);
-	void setCurrentOSDEvent(osd *osd_obj);
-	void updateCurrentOSDProgramEIT(osd *osd_obj);
+	void setCurrentOSDProgramEIT();
+	void setCurrentOSDEvent();
+	void updateCurrentOSDProgramEIT();
 	void zapCurrentAudio(int apid);
 	int getCurrentAudio() { return apid; }
-	void updateCurrentOSDProgramAPIDDescr(osd *osd_obj);
+	void updateCurrentOSDProgramAPIDDescr();
 
 	event getCurrentNow() { return now; }
 	event getCurrentNext() { return next; }

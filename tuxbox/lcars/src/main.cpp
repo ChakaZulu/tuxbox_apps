@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: main.cpp,v $
+Revision 1.21  2002/06/02 14:23:36  TheDOC
+some fixes and changes
+
 Revision 1.20  2002/06/02 12:18:47  TheDOC
 source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
 
@@ -97,7 +100,6 @@ Revision 1.6  2001/11/15 00:43:45  TheDOC
 #include "osd.h"
 #include "fbClass.h"
 #include "checker.h"
-#include "container.h"
 #include "teletext.h"
 #include "network.h"
 #include "scan.h"
@@ -270,7 +272,7 @@ int main(int argc, char **argv)
 		channels.saveDVBChannels();
 		channels.saveTS();
 	}
-	container container(&zap, &channels, &fb, &osd, &settings, &tuner, &pat, &pmt, &eit, &scan);
+	//container container(&zap, &channels, &fb, &osd, &settings, &tuner, &pat, &pmt, &eit, &scan);
 
 	channels.setBeginTS();
 	while (channels.getCurrentFrequency() == 0)
@@ -336,8 +338,8 @@ int main(int argc, char **argv)
 	rc.start_thread(true);
 
 	control control(&osd, &rc, &hardware, &settings, &scan, &channels, &eit, &cam, &zap, &tuner, &update, &timer, &plugins, &checker, &fb, &variables, &ir, &pig, &teletext);
-
-	network network(container, &rc, &control, &variables);
+	
+	network network(&zap, &channels, &fb, &osd, &settings, &tuner, &pat, &pmt, &eit, &scan, &rc, &control, &variables);
 	network.startThread();
 
 
