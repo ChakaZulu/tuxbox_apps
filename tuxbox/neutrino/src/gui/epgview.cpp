@@ -167,8 +167,8 @@ void CEpgData::show( string channelName  )
 	//show progessbar
 	int progress = atoi(epgData.done);
 	printf("prog: %d\n", progress);
-	frameBuffer->paintBoxRel(sx+200, sy+oy-15, 102, 9, COL_MENUHEAD+5);
-	frameBuffer->paintBoxRel(sx+201, sy+oy-14, 100, 7, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(sx+200, sy+oy-15, 102, 9, COL_MENUHEAD+7);
+	frameBuffer->paintBoxRel(sx+201, sy+oy-14, 100, 7, COL_MENUHEAD+2);
 	frameBuffer->paintBoxRel(sx+201, sy+oy-14, progress, 7, COL_MENUHEAD+5);
 
 
