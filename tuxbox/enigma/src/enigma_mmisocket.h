@@ -12,19 +12,21 @@
 
 class eSocketMMIHandler: public Object
 {
-	int listenfd, clilen;
+	int listenfd, connfd, clilen;
 	struct sockaddr_un servaddr;
-	eSocketNotifier *sn;
-	void dataAvail(int what);
+	eSocketNotifier *listensn, *connsn;
+	void listenDataAvail(int what);
+	void connDataAvail(int what);
 	void initiateMMI();
 	void setupOpened( eSetupWindow *setup, int *entrynum );
+	void closeConn();
 	const char *sockname;
-	const char *name;
+	char *name;
 public:
 	const char *getName() const { return name; }
 	Signal2<void, const char*, int> mmi_progress;
 	int send_to_mmisock( void *, size_t );
-	eSocketMMIHandler( const char *sockname, const char *name );
+	eSocketMMIHandler();
 	~eSocketMMIHandler();
 };
 
@@ -40,15 +42,3 @@ public:
 };
 
 #endif // __ENIGMA_MMISOCKET_H_
-
-
-#ifdef DREAMCRYPT_MMI
-class eDreamcryptMMI : public eSocketMMIHandler
-{
-public:
-	eDreamcryptMMI()
-		:eSocketMMIHandler("/tmp/dc.mmi.socket", "Dreamcrypt" )
-	{
-	}
-};
-#endif

@@ -1,6 +1,7 @@
 #include <enigma_mmisocket.h>
 #include <enigma.h>
 #include <unistd.h>
+#include <string.h>
 #include <lib/base/eerror.h>
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
@@ -8,28 +9,22 @@
 
 int eSocketMMIHandler::send_to_mmisock( void* buf, size_t len)
 {
-	if ( connect(listenfd, (struct sockaddr *) &servaddr, clilen) < 0 )
+	if ( connsn )
 	{
-		eDebug("[eSocketMMIHandler] connect (%m)");
-		return -1;
-	}
-	else
-	{
-		fcntl(listenfd, F_SETFL, O_NONBLOCK);
-		int val=1;
-		setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &val, 4);
-		int ret = write(listenfd, buf, len);
+		int ret = write(connfd, buf, len);
 		if ( ret < 0 )
 			eDebug("[eSocketMMIHandler] write (%m)");
 		else if ( (uint)ret != len )
 			eDebug("[eSocketMMIHandler] only %d bytes sent.. %d bytes should be sent", ret, len );
 		return ret;
 	}
+	else
+		eDebug("no connection (mmi client)");
 	return 0;
 }
 
-eSocketMMIHandler::eSocketMMIHandler( const char *sockname, const char *name)
-	:sockname(sockname), name(name)
+eSocketMMIHandler::eSocketMMIHandler()
+	:connfd(-1), connsn(0), sockname("/tmp/mmi.socket"), name(0)
 {
 	memset(&servaddr, 0, sizeof(struct sockaddr_un));
 	servaddr.sun_family = AF_UNIX;
@@ -51,15 +46,17 @@ eSocketMMIHandler::eSocketMMIHandler( const char *sockname, const char *name)
 		eDebug("[eSocketMMIHandler] listen (%m)");
 		return;
 	}
-	sn = new eSocketNotifier( eApp, listenfd, POLLIN|POLLPRI|POLLHUP ); // POLLIN/POLLPRI/POLLHUP
-	sn->start();
-	CONNECT( sn->activated, eSocketMMIHandler::dataAvail );
+	listensn = new eSocketNotifier( eApp, listenfd, POLLIN ); // POLLIN
+	listensn->start();
+	CONNECT( listensn->activated, eSocketMMIHandler::listenDataAvail );
 	eDebug("[eSocketMMIHandler] created successfully");
 	CONNECT( eZapSetup::setupHook, eSocketMMIHandler::setupOpened );
 }
 
 void eSocketMMIHandler::setupOpened( eSetupWindow* setup, int *entrynum )
 {
+	if ( !connsn )  // no mmi connection...
+		return;
 	eListBox<eListBoxEntryMenu> *list = setup->getList();
 	CONNECT((
 			new eListBoxEntryMenu(list,
@@ -68,7 +65,47 @@ void eSocketMMIHandler::setupOpened( eSetupWindow* setup, int *entrynum )
 				))->selected, eSocketMMIHandler::initiateMMI);
 }
 
-void eSocketMMIHandler::dataAvail(int what)
+#define CMD_SET_NAME "\x01\x02\x03\x04"
+
+void eSocketMMIHandler::listenDataAvail(int what)
+{
+	switch(what)
+	{
+		case POLLIN:
+		{
+			if ( connsn )
+				return;
+			char msgbuffer[256];
+			connfd=accept(listenfd, (struct sockaddr *) &servaddr, (socklen_t *) &clilen);
+			ssize_t length = read(connfd, msgbuffer, sizeof(msgbuffer));
+//			eDebug("got %d bytes", length);
+			if ( !length || length < 4
+				|| strncmp(msgbuffer, CMD_SET_NAME, 4) )
+			{
+				eDebug("CMD_SET_NAME not found");
+				closeConn();
+				break;
+			}
+			length-=4;
+			if ( !length )
+			{
+				eDebug("CMD_SET_NAME ... no more characters for name left");
+				closeConn();
+				break;
+			}
+			name = new char[length+1];
+			memcpy(name, msgbuffer+4, length);
+			name[length]=0;
+			fcntl(connfd, F_SETFL, O_NONBLOCK);
+			int val=1;
+			setsockopt(connfd, SOL_SOCKET, SO_REUSEADDR, &val, 4);
+			connsn = new eSocketNotifier( eApp, connfd, POLLIN|POLLPRI|POLLHUP|POLLERR );
+			CONNECT( connsn->activated, eSocketMMIHandler::connDataAvail );
+		}
+	}
+}
+
+void eSocketMMIHandler::connDataAvail(int what)
 {
 	switch(what)
 	{
@@ -76,13 +113,12 @@ void eSocketMMIHandler::dataAvail(int what)
 		case POLLPRI:
 		{
 			char msgbuffer[4096];
-			int connfd =
-				accept(listenfd, (struct sockaddr *) &servaddr, (socklen_t *) &clilen);
 			ssize_t length = read(connfd, msgbuffer, sizeof(msgbuffer));
-			if ( !length )
+			if ( !length || ( length == -1 && errno != EAGAIN ) )
+			{
+				closeConn();
 				break;
-//			eDebug("got %d bytes", length);
-			close(connfd);
+			}
 			if ( eSocketMMI::getInstance(this)->connected() )
 				eSocketMMI::getInstance(this)->gotMMIData(msgbuffer, length);
 			else
@@ -99,13 +135,36 @@ void eSocketMMIHandler::dataAvail(int what)
 			break;
 		}
 		default:
+		case POLLERR:
+		case POLLHUP:
+			closeConn();
 			break;
+	}
+}
+
+void eSocketMMIHandler::closeConn()
+{
+	if ( connfd != -1 )
+	{
+		close(connfd);
+		connfd=-1;
+	}
+	if ( connsn )
+	{
+		delete connsn;
+		connsn=0;
+	}
+	if ( name )
+	{
+		delete [] name;
+		name=0;
 	}
 }
 
 eSocketMMIHandler::~eSocketMMIHandler()
 {
-	delete sn;
+	closeConn();
+	delete listensn;
 	unlink(sockname);
 }
 
@@ -181,6 +240,4 @@ void eSocketMMI::beginExec()
 	conn = CONNECT(handler->mmi_progress, enigmaMMI::gotMMIData );
 }
 
-#ifdef DREAMCRYPT_MMI
-eAutoInitP0<eDreamcryptMMI> init_eDreamcryptMMI(eAutoInitNumbers::osd-2, "dreamcrypt mmi socket");
-#endif
+eAutoInitP0<eSocketMMIHandler> init_eSocketMMIHandler(eAutoInitNumbers::osd-2, "socket mmi handler");
