@@ -313,7 +313,7 @@ void CFlashExpert::readmtd(int readmtd)
 	{
 		//ganzes flashimage lesen
 		filename = "/tmp/flashimage.img";
-		readmtd = 5;
+		readmtd = 4;
 	}
 	setTitle(g_Locale->getText("flashupdate.titlereadflash"));
 	paint();
@@ -462,8 +462,8 @@ int CFlashExpert::exec( CMenuTarget* parent, string actionKey )
 		{
 			if(selectedMTD==-1)
 			{
-				//ganzes Image schreiben -> mtd 5
-				writemtd("flashimage.img", 5);
+				//ganzes Image schreiben -> mtd 4
+				writemtd("flashimage.img", 4);
 			}
 			else
 			{
