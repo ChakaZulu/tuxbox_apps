@@ -564,6 +564,7 @@ int CChannelList::numericZap(int key)
 	int lastchan= -1;
 	uint msg; uint data;
 	bool doZap = true;
+	bool showEPG = false;
 
 
 	while(1)
@@ -644,6 +645,16 @@ int CChannelList::numericZap(int key)
 			doZap = false;
 			break;
 		}
+		else if ( msg == CRCInput::RC_red )
+		{
+			// Rote Taste zeigt EPG fuer gewaehlten Kanal an
+			if ( ( chn <= (signed int) chanlist.size() ) && ( chn != 0 ) )
+			{
+				doZap = false;
+				showEPG = true;
+				break;
+			}
+		}
 		else if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
 		{
 			doZap = false;
@@ -654,16 +665,20 @@ int CChannelList::numericZap(int key)
 
 	frameBuffer->paintBackgroundBoxRel(ox, oy, sx, sy);
 
+	chn--;
+	if (chn<0)
+		chn=0;
 	if ( doZap )
 	{
-		chn--;
-		if (chn<0)
-			chn=0;
 		zapTo( chn );
 	}
 	else
 	{
 		g_InfoViewer->killTitle();
+
+		// Rote Taste zeigt EPG fuer gewaehlten Kanal an
+		if ( showEPG )
+			g_EventList->exec(chanlist[chn]->channel_id, chanlist[chn]->name);
 	}
 
 	return res;
