@@ -51,6 +51,10 @@ char *dvbstrTSpid_ID (u_int id);
 char *dvbstrTS_AdaptionField_TYPE (u_int id);
 char *dvbstrTS_ScramblingCtrl_TYPE (u_int id);
 
+/* -- PES stuff */
+
+char *dvbstrPESstream_ID(u_int id);
+
 
 
 // Todo: 

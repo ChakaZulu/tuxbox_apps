@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.c,v 1.1 2001/09/30 13:05:20 rasc Exp $
+$Id: dvbsnoop.c,v 1.2 2001/10/02 21:52:44 rasc Exp $
 
  -- dvbsnoop
  -- a dvb sniffer tool
@@ -25,6 +25,11 @@ $Id: dvbsnoop.c,v 1.1 2001/09/30 13:05:20 rasc Exp $
 
 
 $Log: dvbsnoop.c,v $
+Revision 1.2  2001/10/02 21:52:44  rasc
+- init der time_delta
+- PES erweitert, PES arbeitet im read() noch nicht richtig!!
+- muss tmbinc fragem, ob ich Mist baue, oder der Treiber (??)
+
 Revision 1.1  2001/09/30 13:05:20  rasc
 dvbsnoop v0.7  -- Commit to CVS
 
@@ -73,6 +78,9 @@ int main(int argc, char **argv)
      out_nl (9, "   DEMUX : %s",opt.devDemux);
      out_nl (9, "   DVR   : %s",opt.devDvr);
   }
+
+
+  init_receive_time ();
 
 
 	  switch (opt.packet_mode) {

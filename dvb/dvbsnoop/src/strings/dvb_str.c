@@ -1,10 +1,15 @@
 /*
-$Id: dvb_str.c,v 1.1 2001/09/30 13:05:20 rasc Exp $
+$Id: dvb_str.c,v 1.2 2001/10/02 21:52:44 rasc Exp $
 
   -- dvb decoder helper functions
 
 
 $Log: dvb_str.c,v $
+Revision 1.2  2001/10/02 21:52:44  rasc
+- init der time_delta
+- PES erweitert, PES arbeitet im read() noch nicht richtig!!
+- muss tmbinc fragem, ob ich Mist baue, oder der Treiber (??)
+
 Revision 1.1  2001/09/30 13:05:20  rasc
 dvbsnoop v0.7  -- Commit to CVS
 
@@ -1393,5 +1398,45 @@ char *dvbstrTS_AdaptionField_TYPE (u_int i)
 
 
 
+/*
+ ------------------------------------------------------------------------
+  PES   Stuff
+ ------------------------------------------------------------------------
+*/
+
+
+/*
+  -- PES Stream_id  ISO 13818-1  2.4.3.6
+*/
+
+char *dvbstrPESstream_ID (u_int i)
+
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0xBB,  "???? report!" },
+     {  0xBC, 0xBC,  "program_stream_map" },
+     {  0xBD, 0xBD,  "private_stream_1" },
+     {  0xBE, 0xBE,  "padding_stream" },
+     {  0xBF, 0xBF,  "private_stream_2" },
+     {  0xC0, 0xDF,  "ISO/IEC 13818-3 or ISO/IEC 11172-3 audioi stream" },
+     {  0xE0, 0xEF,  "ITU-T Rec. H.262 | ISO/IEC 13818-2 or ISO/IEC 11172-2 video stream" },
+     {  0xF0, 0xF0,  "ECM_stream" },
+     {  0xF1, 0xF1,  "EMM_stream" },
+     {  0xF2, 0xF2,  "ITU-T Rec. H.222.0 | ISO/IEC 13818-1 Annex-A or ISO/IEC 13818-6_DSMCC stream" },
+     {  0xF3, 0xF3,  "ISO/IEC 13522 stream" },
+     {  0xF4, 0xF4,  "ITU-T Rec. H.222.1 type A" },
+     {  0xF5, 0xF5,  "ITU-T Rec. H.222.1 type B" },
+     {  0xF6, 0xF6,  "ITU-T Rec. H.222.1 type C" },
+     {  0xF7, 0xF7,  "ITU-T Rec. H.222.1 type D" },
+     {  0xF8, 0xF8,  "ITU-T Rec. H.222.1 type E" },
+     {  0xF9, 0xF9,  "ancillary_stream" },
+     {  0xFA, 0xFE,  "reserved data stream" },
+     {  0xFF, 0xFF,  "program_stream_directory" },
+     {  0,0, NULL }
+  };
+
+
+  return findTableID (Table, i);
+}
 
 
