@@ -470,15 +470,19 @@ int CNFSUmountGui::menu()
 }
 
 
-void CNFSUmountGui::umount(std::string dir)
+void CNFSUmountGui::umount(const std::string dir)
 {
-	if(dir!= "")
-	if(umount2(dir.c_str(),MNT_FORCE)!=0)
-		ShowHintUTF("messagebox.info", g_Locale->getText("nfs.umounterror")); // UTF-8
+	if (dir != "")
+	{
+		if (umount2(dir.c_str(), MNT_FORCE) != 0)
+		{
+			ShowHintUTF("messagebox.info", g_Locale->getText("nfs.umounterror")); // UTF-8
+		}
+	}
 	else
 	{
 		char buffer[200+1],mountDev[100],mountOn[100],mountType[20];
-		ifstream in;
+		std::ifstream in;
 		in.open("/proc/mounts",ifstream::in);
 		while(in.good())
 		{
@@ -489,7 +493,7 @@ void CNFSUmountGui::umount(std::string dir)
 			sscanf(buffer,"%s %s %s ", mountDev, mountOn, mountType);
 			if(strcmp(mountType,"nfs")==0 && strcmp(mountOn,"/")==0)
 			{
-				if(umount2(mountOn,MNT_FORCE)!=0)
+				if (umount2(mountOn,MNT_FORCE) != 0)
 					printf("[neutrino]: Error umounting %s\n",mountDev);
 			}
 		}
