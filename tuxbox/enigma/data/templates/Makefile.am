@@ -9,5 +9,5 @@ EXTRA_DIST = eit.tmp index.tmp helpDMMSites.tmp helpOtherSites.tmp helpForums.tm
 	root.tmp
 
 install-data-local:
-	install -d $(DESTDIR)$(DATADIR)/enigma/templates
-	install -m 0644 $(EXTRA_DIST) $(DESTDIR)$(DATADIR)/enigma/templates
+	install -d $(DESTDIR)$(TUXBOXDATADIR)/enigma/templates
+	install -m 0644 $(EXTRA_DIST) $(DESTDIR)$(TUXBOXDATADIR)/enigma/templates

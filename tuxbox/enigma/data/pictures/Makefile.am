@@ -1,6 +1,6 @@
 SUBDIRS = mainmenu chk_stone chk_silver chk_v2 neutrino shortcut countries keypics small
 
-installdir = $(DATADIR)/enigma/pictures
+installdir = $(TUXBOXDATADIR)/enigma/pictures
 
 install_DATA = \
 	checked.png format_on_small.png dolby_on.png \

@@ -1,4 +1,4 @@
-installdir = $(DATADIR)/enigma/pictures/keypics
+installdir = $(TUXBOXDATADIR)/enigma/pictures/keypics
 
 install_DATA = \
 	button_0.png button_1.png button_2.png button_3.png button_4.png button_5.png \

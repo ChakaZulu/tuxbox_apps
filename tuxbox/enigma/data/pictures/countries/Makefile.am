@@ -1,4 +1,4 @@
-installdir = $(DATADIR)/enigma/pictures/countries
+installdir = $(TUXBOXDATADIR)/enigma/pictures/countries
 
 install_DATA = \
 	ae.png de.png es.png en.png fi.png no.png se.png cz.png gr.png fr.png \

@@ -12,5 +12,5 @@ EXTRA_DIST = \
 	locked.png unlocked.png
 
 install-data-local:
-	install -d $(DESTDIR)$(DATADIR)/enigma/htdocs
-	install -m 0644 $(EXTRA_DIST) $(DESTDIR)$(DATADIR)/enigma/htdocs
+	install -d $(DESTDIR)$(TUXBOXDATADIR)/enigma/htdocs
+	install -m 0644 $(EXTRA_DIST) $(DESTDIR)$(TUXBOXDATADIR)/enigma/htdocs

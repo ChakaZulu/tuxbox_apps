@@ -1,6 +1,6 @@
 SUBDIRS = mainmenu
 
-installdir = $(DATADIR)/enigma/pictures/chk_silver
+installdir = $(TUXBOXDATADIR)/enigma/pictures/chk_silver
 
 install_DATA = \
 	3D_border_unselected_corner.png 3D_border_unselected_corner_dark.png \

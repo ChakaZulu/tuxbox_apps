@@ -1,4 +1,4 @@
-installdir = $(DATADIR)/enigma/skins
+installdir = $(TUXBOXDATADIR)/enigma/skins
 
 install_DATA = \
 	default.esml \

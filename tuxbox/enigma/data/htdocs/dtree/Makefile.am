@@ -4,5 +4,5 @@ EXTRA_DIST = \
 	page.gif plus.gif plusbottom.gif question.gif trash.gif
 
 install-data-local:
-	install -d $(DESTDIR)$(DATADIR)/enigma/htdocs
-	install -m 0644 $(EXTRA_DIST) $(DESTDIR)$(DATADIR)/enigma/htdocs
+	install -d $(DESTDIR)$(TUXBOXDATADIR)/enigma/htdocs
+	install -m 0644 $(EXTRA_DIST) $(DESTDIR)$(TUXBOXDATADIR)/enigma/htdocs

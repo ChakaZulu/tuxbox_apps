@@ -1,4 +1,4 @@
-installdir = $(DATADIR)/enigma/pictures/chk_v2
+installdir = $(TUXBOXDATADIR)/enigma/pictures/chk_v2
 
 install_DATA = \
 	bl2.png bl.png b.png br2.png br.png crypt_off.png crypt_on.png \

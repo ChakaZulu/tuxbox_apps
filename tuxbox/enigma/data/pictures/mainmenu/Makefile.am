@@ -1,4 +1,4 @@
-installdir = $(DATADIR)/enigma/pictures/mainmenu
+installdir = $(TUXBOXDATADIR)/enigma/pictures/mainmenu
 
 install_DATA = \
 	background-fs8.png games-fs8.png games_sel-fs8.png info-fs8.png \
