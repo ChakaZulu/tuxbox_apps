@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: pmt.cpp,v $
+Revision 1.8  2002/09/18 17:31:03  TheDOC
+replaced O_RDONLY with O_RDWR on demux-device-open, stupid me
+
 Revision 1.7  2002/09/18 10:48:37  obi
 use devfs devices
 
@@ -56,7 +59,7 @@ pmt_data pmt::readPMT(int pmt_pid)
 	unsigned char buffer[BSIZE];
 
 	// Lies den PMT
-	fd=open("/dev/dvb/card0/demux0", O_RDONLY);
+	fd=open("/dev/dvb/card0/demux0", O_RDWR);
 
 	memset (&flt.filter, 0, sizeof (struct dmxFilter));
 	r = BSIZE;

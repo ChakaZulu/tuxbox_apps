@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: tot.cpp,v $
+Revision 1.6  2002/09/18 17:31:03  TheDOC
+replaced O_RDONLY with O_RDWR on demux-device-open, stupid me
+
 Revision 1.5  2002/09/18 10:48:37  obi
 use devfs devices
 
@@ -74,8 +77,8 @@ void* tot::start_timereader( void * this_ptr )
 	while(1)
 	{
 		// Lies den TOT
-		if ((fd=open("/dev/dvb/card0/demux0", O_RDONLY)) < 0)
-			perror("TDT open");
+		if ((fd=open("/dev/dvb/card0/demux0", O_RDWR)) < 0)
+			perror("TOT open");
 
 		memset (&flt.filter, 0, sizeof (struct dmxFilter));
 		r = BSIZE;

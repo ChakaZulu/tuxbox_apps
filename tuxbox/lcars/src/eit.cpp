@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: eit.cpp,v $
+Revision 1.12  2002/09/18 17:31:03  TheDOC
+replaced O_RDONLY with O_RDWR on demux-device-open, stupid me
+
 Revision 1.11  2002/09/18 10:48:37  obi
 use devfs devices
 
@@ -157,7 +160,7 @@ void eit::receiveNow(int SID)
 	//printf("Checking mutex\n");
 	pthread_mutex_lock( &mutex );
 	//printf("Mutex passed\n");
-	fd=open("/dev/dvb/card0/demux0", O_RDONLY);
+	fd=open("/dev/dvb/card0/demux0", O_RDWR);
 
 	memset (&flt.filter, 0, sizeof (struct dmxFilter));
 
@@ -702,7 +705,7 @@ void eit::dumpSchedule(int SID, osd *osd)
 	osd->addCommand("SHOW perspective");
 
 	pthread_mutex_lock( &mutex );
-	fd=open("/dev/dvb/card0/demux0", O_RDONLY);
+	fd=open("/dev/dvb/card0/demux0", O_RDWR);
 
 	memset (&flt.filter, 0, sizeof (struct dmxFilter));
 

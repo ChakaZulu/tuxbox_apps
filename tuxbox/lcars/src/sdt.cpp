@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: sdt.cpp,v $
+Revision 1.8  2002/09/18 17:31:03  TheDOC
+replaced O_RDONLY with O_RDWR on demux-device-open, stupid me
+
 Revision 1.7  2002/09/18 10:48:37  obi
 use devfs devices
 
@@ -57,7 +60,7 @@ int sdt::getChannels(channels *channels)
 	unsigned char buffer[BSIZE];
 
 	// Lies den SDT
-	fd=open("/dev/dvb/card0/demux0", O_RDONLY);
+	fd=open("/dev/dvb/card0/demux0", O_RDWR);
 
 	memset (&flt.filter, 0, sizeof (struct dmxFilter));
 	r = BSIZE;
@@ -171,7 +174,7 @@ void sdt::getNVODs(channels *channels)
 	// Lies den SDT
 	//printf("Reading SDT\n");
 	//printf("looking for SID %x\n", (*channels).getCurrentSID());
-	fd=open("/dev/dvb/card0/demux0", O_RDONLY);
+	fd=open("/dev/dvb/card0/demux0", O_RDWR);
 
 	memset (&flt.filter, 0, sizeof (struct dmxFilter));
 	r = BSIZE;
