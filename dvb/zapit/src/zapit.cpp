@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.101 2002/03/23 19:03:39 field Exp $
+  $Id: zapit.cpp,v 1.102 2002/03/24 09:12:01 happydude Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -325,7 +325,7 @@ uint16_t parse_ES_info(uint8_t *buffer, pids *ret_pids, uint16_t ca_system_id)
 				break;
 
 			case 0x09: /* CA_descriptor */
-				if ((ecm_pid = no_ecmpid_found) || (ecm_pid == invalid_ecmpid_found))
+				if ((ecm_pid == no_ecmpid_found) || (ecm_pid == invalid_ecmpid_found))
 					ecm_pid = _(&buffer[descr_pos], descriptor_length, ca_system_id);
 				break;
 
@@ -2796,7 +2796,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("Zapit $Id: zapit.cpp,v 1.101 2002/03/23 19:03:39 field Exp $\n\n");
+	printf("Zapit $Id: zapit.cpp,v 1.102 2002/03/24 09:12:01 happydude Exp $\n\n");
 
 	if (argc > 1)
 	{
