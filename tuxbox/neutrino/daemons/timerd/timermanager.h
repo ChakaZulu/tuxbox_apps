@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.h,v 1.20 2002/09/24 21:10:42 Zwen Exp $
+	$Id: timermanager.h,v 1.21 2002/09/27 07:34:23 Zwen Exp $
 
 	License: GPL
 
@@ -113,7 +113,7 @@ class CTimerEvent
 
 		int remain_min(time_t t){return (t - time(NULL)) / 60;};
 		void printEvent(void);
-		void Reschedule();
+		virtual void Reschedule();
 
 		virtual void fireEvent(){};
 		virtual void stopEvent(){};
@@ -169,11 +169,12 @@ class CTimerEvent_Record : public CTimerEvent
 
 		CTimerEvent_Record( time_t announceTime, time_t alarmTime, time_t stopTime, CTimerEventRepeat evrepeat = TIMERREPEAT_ONCE) :
 			CTimerEvent(TIMER_RECORD, announceTime, alarmTime, stopTime, evrepeat){};
-                CTimerEvent_Record(CConfigFile *config, int iId);
+			CTimerEvent_Record(CConfigFile *config, int iId);
 		virtual void fireEvent();
 		virtual void announceEvent();
 		virtual void stopEvent();
-                virtual void saveToConfig(CConfigFile *config);
+		virtual void saveToConfig(CConfigFile *config);
+		virtual void Reschedule();
 };
 
 class CTimerEvent_NextProgram : public CTimerEvent

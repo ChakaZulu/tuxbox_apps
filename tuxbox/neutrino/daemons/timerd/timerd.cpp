@@ -4,7 +4,7 @@
    Copyright (C) 2001 Steffen Hehn 'McClean'
    Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timerd.cpp,v 1.21 2002/09/25 21:15:39 Zwen Exp $
+   $Id: timerd.cpp,v 1.22 2002/09/27 07:34:23 Zwen Exp $
 
    License: GPL
 
@@ -204,10 +204,10 @@ void loadTimersFromConfig()
       }
    }
    delete config;
-	char cmd[80];
+/*	char cmd[80];
 	sprintf(cmd,"cp /var/tuxbox/config/timerd.conf /var/tuxbox/config/timerd.conf.%d",
 			  (int) time(NULL));
-	system(cmd);
+	system(cmd);*/
    CTimerManager::getInstance()->saveEventsToConfig();
 }
 
@@ -555,7 +555,7 @@ int main(int argc, char **argv)
 
 	if(!no_wait)
 	{
-		sleep(60);
+		sleep(30); // wait for correct date to be set...
 	}
    loadTimersFromConfig();
    

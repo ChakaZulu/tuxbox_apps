@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.cpp,v 1.31 2002/09/24 21:33:19 Zwen Exp $
+	$Id: timermanager.cpp,v 1.32 2002/09/27 07:34:23 Zwen Exp $
 
 	License: GPL
 
@@ -32,7 +32,7 @@
 #include "timermanager.h"
 #include "debug.h"
 #include "clientlib/timerdclient.h"
-
+#include "sectionsdclient.h"
 
 //CTimerEvent_NextProgram::EventMap CTimerEvent_NextProgram::events;
 
@@ -561,7 +561,8 @@ void CTimerEvent_Record::announceEvent()
 {
 	CTimerManager::getInstance()->getEventServer()->sendEvent(
 		CTimerdClient::EVT_ANNOUNCE_RECORD,
-		CEventServer::INITID_TIMERD);
+		CEventServer::INITID_TIMERD,
+		&eventInfo, sizeof(CTimerEvent::EventInfo));
 	dprintf("Record announcement\n"); 
 }
 //------------------------------------------------------------
@@ -576,6 +577,17 @@ void CTimerEvent_Record::stopEvent()
 
 void CTimerEvent_Record::fireEvent()
 {
+	// Set EPG-ID if not set
+	if(eventInfo.epgID == 0)
+	{
+		dprintf("EPG-ID not set, trying now\n");
+		CSectionsdClient* sdc = new CSectionsdClient();
+		CEPGData e;
+		sdc->getActualEPGServiceKey(eventInfo.channel_id, &e );
+		dprintf("EPG-ID found %llu:%d(%s)\n",e.eventID,(int)e.epg_times.startzeit,e.title.c_str());
+		
+		eventInfo.epgID = e.eventID ;
+	}
 	CTimerManager::getInstance()->getEventServer()->sendEvent(
 		CTimerdClient::EVT_RECORD_START,
 		CEventServer::INITID_TIMERD,
@@ -592,6 +604,13 @@ void CTimerEvent_Record::saveToConfig(CConfigFile *config)
    string id=ostr.str();
    config->setInt64("EVENT_INFO_EPG_ID_"+id,eventInfo.epgID);
    config->setInt32("EVENT_INFO_ONID_SID_"+id,eventInfo.channel_id);
+}
+//------------------------------------------------------------
+void CTimerEvent_Record::Reschedule()
+{
+	// clear eogId on reschedule
+	eventInfo.epgID = 0;
+	CTimerEvent::Reschedule();
 }
 //=============================================================
 // Zapto Event
