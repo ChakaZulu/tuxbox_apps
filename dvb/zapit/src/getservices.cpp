@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.80 2003/06/12 09:26:01 digi_casi Exp $
+ * $Id: getservices.cpp,v 1.81 2003/07/21 12:07:58 digi_casi Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -227,7 +227,7 @@ int LoadSatellitePositions(void)
 	string satelliteName;
 	t_satellite_position satellitePosition;
 	
-	printf("[getservices] loading satellite positions...\n");
+//	printf("[getservices] loading satellite positions...\n");
 	
 	satellitePositions.clear();
 	

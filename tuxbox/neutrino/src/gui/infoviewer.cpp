@@ -223,7 +223,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string Channel, const 
        				strcpy(satelliteName, satList_it->satName);
        				break;
        			}
-		printf("satelliteName = %s, satellitePosition = %d\n", satelliteName, satellitePosition);
+//		printf("satelliteName = %s, satellitePosition = %d\n", satelliteName, satellitePosition);
 		
        		int satNameWidth = g_Fonts->infobar_small->getRenderWidth(satelliteName);
        		if (satNameWidth > ChanWidth)
