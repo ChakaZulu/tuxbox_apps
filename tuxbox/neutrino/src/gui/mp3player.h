@@ -113,6 +113,7 @@ class CMP3PlayerGui : public CMenuTarget
 	int            m_LastMode;
    int            m_idletime;
    bool           m_screensaver;
+	bool           m_vol_ost;
 
 	void paintItem(int pos);
 	void paint();

@@ -118,8 +118,8 @@ CMP3PlayerGui::~CMP3PlayerGui()
 {
 	playlist.clear();
 	g_Zapit->setStandby (false);
-        g_Sectionsd->setPauseScanning (false);
-        delete filebrowser;
+	g_Sectionsd->setPauseScanning (false);
+	delete filebrowser;
 }
 
 //------------------------------------------------------------------------
@@ -167,6 +167,11 @@ int CMP3PlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 
 	// set zapit in standby mode
 	g_Zapit->setStandby(true);
+	if(g_settings.audio_avs_Control == CControld::TYPE_OST)
+	{
+		m_vol_ost = true;
+		g_settings.audio_avs_Control = CControld::TYPE_AVS;
+	}
 
 	// tell neutrino we're in mp3_mode
 	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , NeutrinoMessages::mode_mp3 );
@@ -190,6 +195,11 @@ int CMP3PlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 	//t_channel_id channel_id=CNeutrinoApp::getInstance()->channelList->getActiveChannel_ChannelID();
 	//g_Zapit->zapTo_serviceID(channel_id);
 	g_Zapit->setStandby(false);
+	if(m_vol_ost)
+	{
+		g_Controld->setVolume(100, CControld::TYPE_AVS);
+		g_settings.audio_avs_Control = CControld::TYPE_OST;
+	}
 
 	// Start Sectionsd
 	g_Sectionsd->setPauseScanning(false);
