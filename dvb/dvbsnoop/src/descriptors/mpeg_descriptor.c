@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.c,v 1.20 2004/07/24 11:44:44 rasc Exp $
+$Id: mpeg_descriptor.c,v 1.21 2004/07/25 20:12:58 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,12 @@ $Id: mpeg_descriptor.c,v 1.20 2004/07/24 11:44:44 rasc Exp $
 
 
 $Log: mpeg_descriptor.c,v $
+Revision 1.21  2004/07/25 20:12:58  rasc
+ - New: content_identifier_descriptor (TS 102 323)
+ - New: TVA_id_descriptor (TS 102 323)
+ - New: related_content_descriptor (TS 102 323)
+ - New: default_authority_descriptor (TS 102 323)
+
 Revision 1.20  2004/07/24 11:44:44  rasc
 EN 301 192 update
  - New: ECM_repetition_rate_descriptor (EN 301 192 v1.4.1)
@@ -186,6 +192,10 @@ int  descriptorMPEG  (u_char *b)
      case 0x22:  descriptorMPEG_FMXBufferSize (b);  break; 
      case 0x23:  descriptorMPEG_MultiplexBuffer (b);  break; 
      case 0x24:  descriptorMPEG_FlexMuxTiming (b);  break; 
+
+     /* TV ANYTIME, TS 102 323 */
+     case 0x25:  descriptorMPEG_TVA_metadata_pointer (b);  break; 
+     case 0x26:  descriptorMPEG_TVA_metadata (b);  break; 
 
      default: 
 	if (b[0] < 0x80) {
@@ -1491,14 +1501,14 @@ void descriptorMPEG_External_ES_ID (u_char *b)
 void descriptorMPEG_MuxCode (u_char *b)
 
 {
-  int descriptor_length;
+  int len;
 
-  // d.descriptor_tag		 = b[0];
-  descriptor_length       	 = b[1];
+  // tag		 = b[0];
+  len       	 = b[1];
 
 
 
- print_databytes (4,"MuxCodeTableEntry", b+2, descriptor_length-2); // $$$ TODO
+  print_databytes (4,"MuxCodeTableEntry", b+2, len); // $$$ TODO
 
    // $$$ TODO  defined in subclause 11.2.4.3 of ISO/IEC 14496-1.
    // Muxcode_descriptor () {
@@ -1521,16 +1531,15 @@ void descriptorMPEG_MuxCode (u_char *b)
 void descriptorMPEG_FMXBufferSize (u_char *b)
 
 {
-  int descriptor_length;
+  int len;
 
-  // d.descriptor_tag		 = b[0];
-  descriptor_length       	 = b[1];
+  // tag	 = b[0];
+  len       	 = b[1];
 
 
 
-  out_nl (4,"($$$TODO):");
   indent (+1);
-  printhex_buf (4, b+2, descriptor_length-2);
+  printhex_buf (4, b+2, len);  // $$$ TODO
   indent (-1);
 
 
@@ -1583,6 +1592,53 @@ void descriptorMPEG_FlexMuxTiming (u_char *b)
  outBit_Sx_NL   (4,"FCRLength: ",  	b,64, 8);
  outBit_Sx_NL   (4,"FCRRateLength: ",  	b,72, 8);
 
+}
+
+
+
+
+
+
+
+
+/*
+  0x25  TVA metadata pointer descriptor
+  TS 102 323  TV ANYTIME 
+*/
+
+void descriptorMPEG_TVA_metadata_pointer (u_char *b)
+
+{
+  int  len;
+
+  // tag	= b[0];
+  len		= b[1];
+
+
+  indent (+1);
+  printhex_buf (4, b+2, len);  // $$$ TODO
+  indent (-1);
+}
+
+
+
+/*
+  0x26  TVA metadata pointer descriptor
+  TS 102 323  TV ANYTIME 
+*/
+
+void descriptorMPEG_TVA_metadata (u_char *b)
+
+{
+  int  len;
+
+  // tag	= b[0];
+  len		= b[1];
+
+
+  indent (+1);
+  printhex_buf (4, b+2, len);  // $$$ TODO
+  indent (-1);
 }
 
 

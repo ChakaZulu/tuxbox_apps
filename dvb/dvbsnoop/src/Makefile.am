@@ -6,13 +6,14 @@ INCLUDES = \
 
 
 SUBDIRS = \
-	datacarousel \
-	descriptors \
 	dvb_api \
 	pes \
 	sections \
 	ts \
+	datacarousel \
+	tvanytime \
 	testdata \
+	descriptors \
 	ebu \
 	strings \
 	misc
@@ -32,6 +33,7 @@ dvbsnoop_LDADD = \
 	$(top_builddir)/src/sections/libsections.a \
 	$(top_builddir)/src/ts/libts.a \
 	$(top_builddir)/src/datacarousel/libdatacarousel.a \
+	$(top_builddir)/src/tvanytime/libtvanytime.a \
 	$(top_builddir)/src/testdata/libtestdata.a \
 	$(top_builddir)/src/descriptors/libdescriptors.a \
 	$(top_builddir)/src/ebu/libebu.a \

@@ -1,8 +1,13 @@
- 
- - Bugfixes
+
+[- New: resolution_authority/provider_notification_section (TS 102 323)]
+ - New: content_identifier_descriptor (TS 102 323)
+ - New: TVA_id_descriptor (TS 102 323)
+ - New: related_content_descriptor (TS 102 323)
+ - New: default_authority_descriptor (TS 102 323)
  - New: ECM_repetition_rate_descriptor (EN 301 192 v1.4.1)
  - New: time_slice_fec_identifier_descriptor (EN 301 192 v1.4.1)
  - New: Section MPE_FEC  EN 301 192 v1.4.1
+ - Bugfixes
 
  - Bugfixes
  - New: TS filter single pids from multi-pid ts-input-file  (e.g.: -if file 0x10)

@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.h,v 1.8 2004/01/15 21:27:22 rasc Exp $ 
+$Id: mpeg_descriptor.h,v 1.9 2004/07/25 20:12:58 rasc Exp $ 
 
 
  DVBSNOOP
@@ -15,6 +15,12 @@ $Id: mpeg_descriptor.h,v 1.8 2004/01/15 21:27:22 rasc Exp $
 
 
 $Log: mpeg_descriptor.h,v $
+Revision 1.9  2004/07/25 20:12:58  rasc
+ - New: content_identifier_descriptor (TS 102 323)
+ - New: TVA_id_descriptor (TS 102 323)
+ - New: related_content_descriptor (TS 102 323)
+ - New: default_authority_descriptor (TS 102 323)
+
 Revision 1.8  2004/01/15 21:27:22  rasc
 DSM-CC stream descriptors
 
@@ -93,6 +99,12 @@ void  descriptorMPEG_MuxCode (u_char *b);
 void  descriptorMPEG_FMXBufferSize (u_char *b);
 void  descriptorMPEG_MultiplexBuffer (u_char *b);
 void  descriptorMPEG_FlexMuxTiming (u_char *b);
+
+
+     /* TV ANYTIME, TS 102 323 */
+void descriptorMPEG_TVA_metadata_pointer (u_char *b);
+void descriptorMPEG_TVA_metadata (u_char *b);
+
 
 
 #endif

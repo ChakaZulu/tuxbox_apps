@@ -1,5 +1,5 @@
 /*
-$Id: sectables.c,v 1.22 2004/07/24 11:44:45 rasc Exp $
+$Id: sectables.c,v 1.23 2004/07/25 20:12:59 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,12 @@ $Id: sectables.c,v 1.22 2004/07/24 11:44:45 rasc Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.23  2004/07/25 20:12:59  rasc
+ - New: content_identifier_descriptor (TS 102 323)
+ - New: TVA_id_descriptor (TS 102 323)
+ - New: related_content_descriptor (TS 102 323)
+ - New: default_authority_descriptor (TS 102 323)
+
 Revision 1.22  2004/07/24 11:44:45  rasc
 EN 301 192 update
  - New: ECM_repetition_rate_descriptor (EN 301 192 v1.4.1)
@@ -123,6 +129,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "datacarousel/ints.h"
 #include "datacarousel/unts.h"
 #include "datacarousel/mpe_fec.h"
+#include "tvanytime/rnt.h"
 #include "testdata/test0x1d.h"
 
 #include "strings/dvb_str.h"
@@ -160,7 +167,7 @@ void decodeSections_buf (u_char *buf, int len, u_int pid)
 
   switch (pid) {
 	  // $$$ TODO ...
-	  // $$$ we should only prinbt what tables are expected and go to guess table...
+	  // $$$ we should only print what tables are expected and go to guess table...
 
 	case  0x000:		/* PAT  Program Association Table */
 		decode_PAT  (buf, len);
@@ -209,9 +216,8 @@ void decodeSections_buf (u_char *buf, int len, u_int pid)
 		break; 
 
 	case  0x016:		/* resolution notification section (TS102323) */
-//$$$  TODO		if      (table_id == 0x74) decode_RNT  (buf,len);
-//$$$		else 	                   guess_table (buf, len, pid);
-                guess_table (buf, len, pid);
+		if      (table_id == 0x74) decode_RNT  (buf,len);
+		else 	                   guess_table (buf, len, pid);
 		break; 
 
 	case  0x01C:		/* Inband Signalling  */
@@ -307,14 +313,13 @@ static TABLE_ID_FUNC table_id_func[] = {
      {  0x73, 0x73,  decode_TOT },
      {  0x74, 0x74,  decode_MHP_AIT },
 
-// collisison mit AIT ??? $$$ TODO
-// 0x74 resolution notification section (TS 102 323 [36])  (RNT)
+// $$$ TODO
 // 0x75 container section (TS 102 323 [36])
 // 0x76 related content section (TS 102 323 [36])
 // 0x77 content identifier section (TS 102 323 [36])  (CIT)
 
-
      {  0x78, 0x78,  decode_MPE_FEC },		// EN 301 192 v1.4.1
+     {  0x79, 0x79,  decode_RNT },		// TS 102 323
 
      /* res. */
      {  0x7E, 0x7E,  decode_DIT },
@@ -363,6 +368,10 @@ void  guess_table (u_char *buf, int len, u_int pid)
   (*(t->func))(buf,len);		/* exec decode function */
   return;
 }
+
+
+
+
 
 
 

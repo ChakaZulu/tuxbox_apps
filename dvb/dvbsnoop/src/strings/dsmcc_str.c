@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.33 2004/07/24 11:44:45 rasc Exp $
+$Id: dsmcc_str.c,v 1.34 2004/07/25 20:12:59 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,12 @@ $Id: dsmcc_str.c,v 1.33 2004/07/24 11:44:45 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.34  2004/07/25 20:12:59  rasc
+ - New: content_identifier_descriptor (TS 102 323)
+ - New: TVA_id_descriptor (TS 102 323)
+ - New: related_content_descriptor (TS 102 323)
+ - New: default_authority_descriptor (TS 102 323)
+
 Revision 1.33  2004/07/24 11:44:45  rasc
 EN 301 192 update
  - New: ECM_repetition_rate_descriptor (EN 301 192 v1.4.1)
@@ -456,7 +462,7 @@ char *dsmccStrPlatform_ID (u_int id)
 
 {
   STR_TABLE  TableIDs[] = {
-	  /* $$$ TODO   ... */
+	  /* $$$ TODO   Platform ID ETR 162 ... */
       {  0,0, NULL }
   };
 
@@ -1181,6 +1187,8 @@ char *dsmccStrIOP_ProfileID (u_int id)
   return findTableID (TableIDs, id);
 }
 
+
+// $$$ TODO
 // IOP::component_IDs
 //	{ 0x49534f40, 0x49534f40,   "TAG_ConnBinder" },
 //	{ 0x49534f41, 0x49534f41,   "TAG_IIOPAddr" },

@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.52 2004/07/24 11:44:45 rasc Exp $
+$Id: dvb_str.c,v 1.53 2004/07/25 20:12:59 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,12 @@ $Id: dvb_str.c,v 1.52 2004/07/24 11:44:45 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.53  2004/07/25 20:12:59  rasc
+ - New: content_identifier_descriptor (TS 102 323)
+ - New: TVA_id_descriptor (TS 102 323)
+ - New: related_content_descriptor (TS 102 323)
+ - New: default_authority_descriptor (TS 102 323)
+
 Revision 1.52  2004/07/24 11:44:45  rasc
 EN 301 192 update
  - New: ECM_repetition_rate_descriptor (EN 301 192 v1.4.1)
@@ -220,6 +226,7 @@ dvbsnoop v0.7  -- Commit to CVS
  TR 102 006
  RE 101 202
  ISO 13818-1
+ TS 102 323
 */
 
 char *dvbstrTableID (u_int id)
@@ -269,7 +276,7 @@ char *dvbstrTableID (u_int id)
      {  0x77, 0x77,  "Content Identifier Table (CIT)" }, 	/* TS 102 323 */
      {  0x78, 0x78,  "MPE-FEC Table (MFT)" }, 			/* EN 301 192 v1.4.1*/
      {  0x79, 0x79,  "Resolution Notification Table (RNT)" },	/* TS 102 323 */
-     {  0x79, 0x7D,  "reserved" },
+     {  0x80, 0x7D,  "reserved" },
      {  0x7E, 0x7E,  "Discontinuity Information Table (DIT)" },
      {  0x7F, 0x7F,  "Selection Information Table (SIT)" },
      {  0x80, 0x8F,  "DVB CA message section (EMM/ECM)" },   /* ITU-R BT.1300 ref. */
@@ -285,14 +292,15 @@ char *dvbstrTableID (u_int id)
 
 
 /*
-  -- Descriptor table tags
+  -- ISO Descriptor table tags
+  -- ISO 13818-1, etc.
 */
 
 char *dvbstrMPEGDescriptorTAG (u_int tag)
 
 {
   STR_TABLE  Tags[] = {
-// ISO 13818-1
+	// ISO 13818-1
      {  0x00, 0x01,  "Reserved" },
      {  0x02, 0x02,  "video_stream_descriptor" },
      {  0x03, 0x03,  "audio_stream_descriptor" },
@@ -332,8 +340,11 @@ char *dvbstrMPEGDescriptorTAG (u_int tag)
      {  0x22, 0x22,  "FMXBufferSize_descriptor" },
      {  0x23, 0x23,  "MultiplexBuffer_descriptor" },
      {  0x24, 0x24,  "FlexMuxTiming_descriptor" },
+     	/* TV ANYTIME TS 102 323 descriptors */
+     {  0x25, 0x25,  "metadata_pointer_descriptor" },
+     {  0x26, 0x26,  "metadata_descriptor" },
 
-     {  0x25, 0x3F,  "ITU-T.Rec.H.222.0|ISO/IEC13818-1 Reserved" },
+     {  0x27, 0x3F,  "ITU-T.Rec.H.222.0|ISO/IEC13818-1 Reserved" },
 
      {  0x40, 0xFF,  "Forbidden descriptor in MPEG context" },	// DVB Context
      {  0,0, NULL }
@@ -352,7 +363,7 @@ char *dvbstrDVBDescriptorTAG (u_int tag)
   STR_TABLE  Tags[] = {
      {  0x00, 0x3F,  "Forbidden descriptor in DVB context" },   // MPEG Context
 
-// ETSI 300 468
+	// ETSI 300 468
      {  0x40, 0x40,  "network_name_descriptor" },
      {  0x41, 0x41,  "service_list_descriptor" },
      {  0x42, 0x42,  "stuffing_descriptor" },
@@ -404,10 +415,10 @@ char *dvbstrDVBDescriptorTAG (u_int tag)
      {  0x70, 0x70,  "adaptation_field_data_descriptor" },
      {  0x71, 0x71,  "service_identifier_descriptor" },
      {  0x72, 0x72,  "service_availability_descriptor" },
-     {  0x73, 0x73,  "default_authority_descriptor" }, 		// EN 300 468 v1.6.1, TS 102 323
-     {  0x74, 0x74,  "related_content_descriptor" }, 		// EN 300 468 v1.6.1, TS 102 323
-     {  0x75, 0x75,  "TVA_id_descriptor" }, 			// EN 300 468 v1.6.1, TS 102 323
-     {  0x76, 0x76,  "content_identifier_descriptor" }, 	// EN 300 468 v1.6.1, TS 102 323
+     {  0x73, 0x73,  "default_authority_descriptor" }, 		// TS 102 323
+     {  0x74, 0x74,  "related_content_descriptor" }, 		// TS 102 323
+     {  0x75, 0x75,  "TVA_id_descriptor" }, 			// TS 102 323
+     {  0x76, 0x76,  "content_identifier_descriptor" }, 	// TS 102 323
      {  0x77, 0x77,  "time_slice_fec_identifier_descriptor" }, 	// EN 300 468 v1.6.1
      {  0x78, 0x78,  "ECM_repetition_rate_descriptor" }, 	// EN 300 468 v1.6.1
      {  0x79, 0x7F,  "reserved_descriptor" },
@@ -3015,7 +3026,67 @@ char *dvbstrMPE_FEC_table_frame_boundary (u_int i)
 
 
 
+/*
+ -- Running Status  (TV ANYTIME)
+ -- ETSI TS 102 323 v1.1.1  TV ANYTIME
+*/
 
+char *dvbstrTVA_RunningStatus(u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "reserved" },
+     {  0x01, 0x01,  "not yet running" },
+     {  0x02, 0x02,  "(re-)starts shortly" },
+     {  0x03, 0x03,  "paused" },
+     {  0x04, 0x04,  "running" },
+     {  0x05, 0x05,  "cancelled" },
+     {  0x06, 0x07,  "reserved" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+/*
+ -- CRID type  (TV ANYTIME)
+ -- ETSI TS 102 323 v1.1.1  TV ANYTIME
+*/
+
+char *dvbstrTVA_crid_type (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "not defined" },
+     {  0x01, 0x01,  "CRID references the item of content that this event is an instance of" },
+     {  0x02, 0x02,  "CRID references a series that this event belongs to" },
+     {  0x03, 0x03,  "CRID references a recommendation. This CRID can be a group or a single item of content" },
+     {  0x04, 0x1F,  "DVB reserved" },
+     {  0x20, 0x3F,  "user defined" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+/*
+ -- CRID location (TV ANYTIME)
+ -- ETSI TS 102 323 v1.1.1  TV ANYTIME
+*/
+
+char *dvbstrTVA_crid_location (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "Carried explicitly within descriptor" },
+     {  0x01, 0x01,  "Carried in Content Identifier Table (CIT)" },
+     {  0x02, 0x03,  "DVB reserved" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
 
 
 

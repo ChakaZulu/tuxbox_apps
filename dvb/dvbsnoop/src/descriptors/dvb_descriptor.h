@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.h,v 1.10 2004/07/24 11:44:44 rasc Exp $ 
+$Id: dvb_descriptor.h,v 1.11 2004/07/25 20:12:58 rasc Exp $ 
 
 
  DVBSNOOP
@@ -15,6 +15,12 @@ $Id: dvb_descriptor.h,v 1.10 2004/07/24 11:44:44 rasc Exp $
 
 
 $Log: dvb_descriptor.h,v $
+Revision 1.11  2004/07/25 20:12:58  rasc
+ - New: content_identifier_descriptor (TS 102 323)
+ - New: TVA_id_descriptor (TS 102 323)
+ - New: related_content_descriptor (TS 102 323)
+ - New: default_authority_descriptor (TS 102 323)
+
 Revision 1.10  2004/07/24 11:44:44  rasc
 EN 301 192 update
  - New: ECM_repetition_rate_descriptor (EN 301 192 v1.4.1)
@@ -118,10 +124,12 @@ void  descriptorDVB_ApplicationSignalling(u_char *b);
 void  descriptorDVB_AdaptationFieldData(u_char *b);
 void  descriptorDVB_ServiceIdentifier(u_char *b);
 void  descriptorDVB_ServiceAvailability(u_char *b);
+		 // TV ANYTIME  TS 102 323
 void  descriptorDVB_DefaultAuthority (u_char *b);
 void  descriptorDVB_RelatedContent(u_char *b);
 void  descriptorDVB_TVA_ID(u_char *b);
 void  descriptorDVB_ContentIdentifier(u_char *b);
+		 // EN 301 192 v1.4.1  MPE_FEC
 void  descriptorDVB_TimesliceFecIdentifier(u_char *b);
 void  descriptorDVB_ECM_RepetitionRate(u_char *b);
 

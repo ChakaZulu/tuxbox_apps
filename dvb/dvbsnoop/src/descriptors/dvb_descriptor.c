@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.32 2004/07/24 11:44:44 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.33 2004/07/25 20:12:58 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,12 @@ $Id: dvb_descriptor.c,v 1.32 2004/07/24 11:44:44 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.33  2004/07/25 20:12:58  rasc
+ - New: content_identifier_descriptor (TS 102 323)
+ - New: TVA_id_descriptor (TS 102 323)
+ - New: related_content_descriptor (TS 102 323)
+ - New: default_authority_descriptor (TS 102 323)
+
 Revision 1.32  2004/07/24 11:44:44  rasc
 EN 301 192 update
  - New: ECM_repetition_rate_descriptor (EN 301 192 v1.4.1)
@@ -237,10 +243,12 @@ int  descriptorDVB  (u_char *b)
      case 0x70:  descriptorDVB_AdaptationFieldData(b);  break;
      case 0x71:  descriptorDVB_ServiceIdentifier(b);  break;
      case 0x72:  descriptorDVB_ServiceAvailability(b);  break;
+		 // TV ANYTIME  TS 102 323
      case 0x73:  descriptorDVB_DefaultAuthority(b);  break;
      case 0x74:  descriptorDVB_RelatedContent(b);  break;
      case 0x75:  descriptorDVB_TVA_ID(b);  break;
      case 0x76:  descriptorDVB_ContentIdentifier(b);  break;
+		 // EN 301 192 v1.4.1  MPE_FEC
      case 0x77:  descriptorDVB_TimesliceFecIdentifier(b);  break;
      case 0x78:  descriptorDVB_ECM_RepetitionRate(b);  break;
 
@@ -3786,7 +3794,12 @@ void descriptorDVB_ServiceAvailability (u_char *b)
 
 void descriptorDVB_DefaultAuthority (u_char *b)
 {
-  descriptor_any (b);   // $$$ TODO
+  int len;
+
+  // tag	 = b[0];
+  len       	 = b[1];
+
+  print_std_ascii (4, "Default_authority: ", b+2, len);  // a DNS name
 }
 
 
@@ -3799,7 +3812,9 @@ void descriptorDVB_DefaultAuthority (u_char *b)
 
 void descriptorDVB_RelatedContent (u_char *b)
 {
-  descriptor_any (b);   // $$$ TODO
+  // -- related content descriptor seems to be empty 
+  // -- (TS 102 323  v1.1.1, p10.3)
+  descriptor_any (b);   
 }
 
 
@@ -3813,7 +3828,23 @@ void descriptorDVB_RelatedContent (u_char *b)
 
 void descriptorDVB_TVA_ID (u_char *b)
 {
-  descriptor_any (b);   // $$$ TODO
+  int len;
+
+  // tag	 = b[0];
+  len       	 = b[1];
+
+
+  b += 2;
+  while (len > 0) {
+  	outBit_Sx_NL  (4,"TVA_id: ",		b,  0, 16);
+  	outBit_Sx_NL  (6,"reserved: ",		b, 16,  5);
+  	outBit_S2x_NL (4,"running_status: ", 	b, 21,  3,
+		 	(char *(*)(u_long)) dvbstrTVA_RunningStatus );
+	b   += 3;
+	len -= 3;
+	out_NL (4);
+  }
+
 }
 
 
@@ -3827,7 +3858,42 @@ void descriptorDVB_TVA_ID (u_char *b)
 
 void descriptorDVB_ContentIdentifier (u_char *b)
 {
-  descriptor_any (b);   // $$$ TODO
+  int len;
+
+  // tag	 = b[0];
+  len       	 = b[1];
+
+
+  b += 2;
+  while (len > 0) {
+	int cloc;
+
+  	outBit_S2x_NL      (4,"crid_type: ",		b,  0,  6,
+		 	(char *(*)(u_long)) dvbstrTVA_crid_type );
+  	cloc = outBit_S2x_NL (4,"crid_location: ",	b,  6,  2,
+		 	(char *(*)(u_long)) dvbstrTVA_crid_location );
+
+	b++;
+	len--;
+
+	if (cloc == 0x00) {
+		int clen;
+
+  		clen = outBit_Sx_NL (4,"crid_len: ",	b,  0,  8);
+  		print_std_ascii (4, "crid_bytes: ", 	b+1, clen);
+		b   += clen+1;
+		len -= clen+1;
+	}
+
+	if (cloc == 0x01) {
+  		outBit_Sx_NL  (4,"crid_ref: ",		b,  0,  16);
+		b   += 2;
+		len -= 2;
+	}
+
+	out_NL (4);
+  }
+
 }
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: descriptor.c,v 1.24 2004/07/24 11:44:44 rasc Exp $
+$Id: descriptor.c,v 1.25 2004/07/25 20:12:58 rasc Exp $
 
 
  DVBSNOOP
@@ -10,11 +10,18 @@ $Id: descriptor.c,v 1.24 2004/07/24 11:44:44 rasc Exp $
  (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
 
 
- -- Descriptor Section
+ -- Descriptors 
+
 
 
 
 $Log: descriptor.c,v $
+Revision 1.25  2004/07/25 20:12:58  rasc
+ - New: content_identifier_descriptor (TS 102 323)
+ - New: TVA_id_descriptor (TS 102 323)
+ - New: related_content_descriptor (TS 102 323)
+ - New: default_authority_descriptor (TS 102 323)
+
 Revision 1.24  2004/07/24 11:44:44  rasc
 EN 301 192 update
  - New: ECM_repetition_rate_descriptor (EN 301 192 v1.4.1)
@@ -139,7 +146,7 @@ int  descriptor  (u_char *b, DTAG_SCOPE scope)
   		descriptorDSMCC_CAROUSEL (b);
 		break;
 
-     case DSMCC_INT_UNT:
+     case DSMCC_INT_UNT:	// EN 301 192, TS 102 006
   		if (id < 0x40)	descriptorDSMCC_INT_UNT (b);
 		else 		descriptorDVB (b);
 		break;
@@ -149,7 +156,8 @@ int  descriptor  (u_char *b, DTAG_SCOPE scope)
 		break;
 
      case TVA_RNT:		// TS 102 323
-//$$$ TODO		descriptorTVA_RNT (b);
+  		if (id < 0x40)	descriptorMPEG (b);
+//$$$ TODO		else		descriptorTVA_RNT (b);
 		break;
 
      case MPEG:

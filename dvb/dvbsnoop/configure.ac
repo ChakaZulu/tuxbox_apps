@@ -1,4 +1,4 @@
-AC_INIT([dvbsnoop],[1.3.41],[rasc@users.sourceforge.net])
+AC_INIT([dvbsnoop],[1.3.44],[rasc@users.sourceforge.net])
 AM_INIT_AUTOMAKE([dist-bzip2 no-define])
 
 AC_PROG_CC
@@ -28,5 +28,6 @@ src/sections/Makefile
 src/strings/Makefile
 src/testdata/Makefile
 src/ts/Makefile
+src/tvanytime/Makefile
 ])
 

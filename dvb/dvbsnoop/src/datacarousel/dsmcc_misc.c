@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_misc.c,v 1.16 2004/04/15 03:38:50 rasc Exp $
+$Id: dsmcc_misc.c,v 1.17 2004/07/25 20:12:58 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,12 @@ $Id: dsmcc_misc.c,v 1.16 2004/04/15 03:38:50 rasc Exp $
 
 
 $Log: dsmcc_misc.c,v $
+Revision 1.17  2004/07/25 20:12:58  rasc
+ - New: content_identifier_descriptor (TS 102 323)
+ - New: TVA_id_descriptor (TS 102 323)
+ - New: related_content_descriptor (TS 102 323)
+ - New: default_authority_descriptor (TS 102 323)
+
 Revision 1.16  2004/04/15 03:38:50  rasc
 new: TransportStream sub-decoding (ts2PES, ts2SEC)  [-tssubdecode]
 checks for continuity errors, etc. and decode in TS enclosed sections/pes packets
@@ -128,7 +134,6 @@ int dsmcc_pto_descriptor_loop (u_char *name, u_char *b)
 	 i   = descriptor (b, DSMCC_INT_UNT);
 	 b   += i;
 	 len -= i;
-	
      }
 
    indent (-2);

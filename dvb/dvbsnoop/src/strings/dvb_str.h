@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.h,v 1.22 2004/07/24 11:44:45 rasc Exp $ 
+$Id: dvb_str.h,v 1.23 2004/07/25 20:12:59 rasc Exp $ 
 
 
  DVBSNOOP
@@ -15,6 +15,12 @@ $Id: dvb_str.h,v 1.22 2004/07/24 11:44:45 rasc Exp $
 
 
 $Log: dvb_str.h,v $
+Revision 1.23  2004/07/25 20:12:59  rasc
+ - New: content_identifier_descriptor (TS 102 323)
+ - New: TVA_id_descriptor (TS 102 323)
+ - New: related_content_descriptor (TS 102 323)
+ - New: default_authority_descriptor (TS 102 323)
+
 Revision 1.22  2004/07/24 11:44:45  rasc
 EN 301 192 update
  - New: ECM_repetition_rate_descriptor (EN 301 192 v1.4.1)
@@ -189,6 +195,12 @@ char *dvbstrMPE_FEC_frame_rows (u_int i);
 char *dvbstrMPE_FEC_max_average_rate (u_int i);
 char *dvbstrMPE_FEC_table_frame_boundary (u_int i);
 
+
+/* TS 102 323 v1.1.1  TV ANYTIME */
+
+char *dvbstrTVA_RunningStatus(u_int i);
+char *dvbstrTVA_crid_type (u_int i);
+char *dvbstrTVA_crid_location (u_int i);
 
 
 
