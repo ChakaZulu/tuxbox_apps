@@ -71,8 +71,6 @@ int fh_png_load(const char *name,unsigned char *buffer,int x,int y)
 		png_set_background(png_ptr, (png_color_16*)&my_background, PNG_BACKGROUND_GAMMA_SCREEN, 0, 1.0);
 	}
 
-	printf("MASK_ALPHA: %d (%s)\n", (color_type & PNG_COLOR_MASK_ALPHA), name);
-
 	if (color_type & PNG_COLOR_MASK_ALPHA)
 		png_set_strip_alpha(png_ptr);
 
