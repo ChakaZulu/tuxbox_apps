@@ -1,5 +1,7 @@
 if BOXTYPE_DREAMBOX
 sbin_PROGRAMS = streampes streamts streamsec udpstreamts udpstreampes
+udpstreampes_LDADD = -lpthread
+udpstreampes_SOURCES = udpstreampes.cpp
 else
 sbin_PROGRAMS = streampes streamts streamsec udpstreamts streamfile fserver
 INCLUDES = @MPEGTOOLS_CFLAGS@
@@ -12,5 +14,4 @@ streampes_SOURCES = streampes.c
 streamts_SOURCES = streamts.c
 streamsec_SOURCES = streamsec.c
 udpstreamts_SOURCES = udpstreamts.c
-udpstreampes_LDADD = -lpthread
-udpstreampes_SOURCES = udpstreampes.cpp 
+
