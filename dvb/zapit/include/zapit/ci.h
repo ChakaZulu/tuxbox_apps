@@ -1,5 +1,5 @@
 /*
- * $Id: ci.h,v 1.4 2002/08/27 21:12:36 thegoodguy Exp $
+ * $Id: ci.h,v 1.5 2002/12/07 13:37:07 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -23,8 +23,6 @@
 #define __ci_h__
 
 #include <vector>
-
-unsigned int write_length_field (unsigned char * buffer);
 
 class CCaDescriptor
 {

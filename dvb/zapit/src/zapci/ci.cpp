@@ -1,5 +1,5 @@
 /*
- * $Id: ci.cpp,v 1.9 2002/10/12 20:19:44 obi Exp $
+ * $Id: ci.cpp,v 1.10 2002/12/07 13:37:07 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -20,37 +20,7 @@
  */
 
 #include <zapit/ci.h>
-
-unsigned int write_length_field (unsigned char * buffer, unsigned int length)
-{
-        if (length < 128)
-        {
-                buffer[0] = length;
-                return 1;
-        }
-        else
-        {
-                unsigned int pos = 0;
-                unsigned int shiftby = 8;
-                unsigned char length_field_size = 1;
-
-                while ((length >> shiftby) != 0)
-                {
-                        length_field_size++;
-                        shiftby += 8;
-                }
-
-                buffer[pos++] = ((1 << 7) | length_field_size);
-
-                while (shiftby != 0)
-                {
-			shiftby -= 8;
-                        buffer[pos++] = length >> shiftby;
-                }
-                return pos;
-        }
-
-}
+#include <connection/messagetools.h>
 
 /*
  * conditional access descriptors
