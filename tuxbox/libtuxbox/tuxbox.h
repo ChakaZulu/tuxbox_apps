@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: tuxbox.h,v 1.6 2003/03/05 09:58:08 waldi Exp $
+ * $Id: tuxbox.h,v 1.7 2003/03/08 17:30:55 waldi Exp $
  */
 
 #ifndef TUXBOX_H
@@ -29,6 +29,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+int tuxbox_read_proc (char *type);
 
 tuxbox_capabilities_t tuxbox_get_capabilities (void);
 tuxbox_model_t tuxbox_get_model (void);
@@ -43,3 +45,15 @@ const char *tuxbox_get_vendor_str (void);
 #endif
 
 #endif /* TUXBOX_H */
+
+#if defined(need_TUXBOX_GET) && !defined(TUXBOX_GET)
+#define TUXBOX_GET(type) \
+tuxbox_##type##_t tuxbox_get_##type (void) \
+{ \
+	static tuxbox_##type##_t tuxbox_##type; \
+	if (!tuxbox_##type) \
+		tuxbox_##type = (tuxbox_##type##_t) tuxbox_read_proc (#type); \
+	return tuxbox_##type; \
+}
+#endif /* need_TUXBOX_GET && !TUXBOX_GET */
+
