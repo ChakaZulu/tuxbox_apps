@@ -1290,16 +1290,19 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 			}
 			else if (event.action == &i_serviceSelectorActions->showSatellites && !movemode)
 			{
-				if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )
-				{
-					if ( this == eZap::getInstance()->getServiceSelector() )
-						enterPath = /*emit*/ getRoot(listSatellites,-1);
-					else
-						enterPath = /*emit*/ getRoot(listSatellites, path.bottom().data[1] == (1<<2) ? eZapMain::modeRadio :
-						path.bottom().data[1] == (1<<1)|(1<<4) ? eZapMain::modeTV : eZapMain::modeFile );
-					if ( style == styleCombiColumn && eZapMain::getInstance()->getMode() != eZapMain::modeFile )
-						enterPath.down(eServiceReference());
-				}
+				if ( this == eZap::getInstance()->getServiceSelector() )
+					enterPath = /*emit*/ getRoot(listSatellites,-1);
+				else
+					enterPath = /*emit*/ getRoot(listSatellites, path.bottom().data[1] == (1<<2) ? eZapMain::modeRadio :
+					path.bottom().data[1] == (1<<1)|(1<<4) ? eZapMain::modeTV : eZapMain::modeFile );
+
+				// On Cable and Terrestrial Boxes dont handle green button.. expect in file mode..
+				if ( eSystemInfo::getInstance()->getFEType() != eSystemInfo::feSatellite && enterPath.size() &&
+					enterPath.bottom().data[0] == -4 ) // Satellite list..
+					enterPath.up(); // clear enterPath
+
+				if ( style == styleCombiColumn && eZapMain::getInstance()->getMode() != eZapMain::modeFile )
+					enterPath.down(eServiceReference());
 			}
 			else if (event.action == &i_serviceSelectorActions->showProvider && !movemode)
 			{
