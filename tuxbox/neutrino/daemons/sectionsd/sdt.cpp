@@ -1,5 +1,5 @@
 //
-// $Id: sdt.cpp,v 1.5 2002/10/16 01:14:06 woglinde Exp $
+// $Id: sdt.cpp,v 1.6 2003/03/14 04:27:55 obi Exp $
 //
 // Beispiel zur Benutzung der SI class lib (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: sdt.cpp,v $
+// Revision 1.6  2003/03/14 04:27:55  obi
+// make it compileable with -W -Werror
+//
 // Revision 1.5  2002/10/16 01:14:06  woglinde
 //
 //
@@ -57,7 +60,7 @@
 #include "SIsections.hpp"
 
 
-int main(int argc, char **argv)
+int main(int /*argc*/, char** /*argv*/)
 {
   time_t starttime, endtime;
   SIsectionsSDT sdtset;

@@ -1,5 +1,5 @@
 //
-// $Id: epg.cpp,v 1.16 2001/09/20 09:14:07 fnbrd Exp $
+// $Id: epg.cpp,v 1.17 2003/03/14 04:27:55 obi Exp $
 //
 // Beispiel zur Benutzung der SI class lib (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: epg.cpp,v $
+// Revision 1.17  2003/03/14 04:27:55  obi
+// make it compileable with -W -Werror
+//
 // Revision 1.16  2001/09/20 09:14:07  fnbrd
 // Small changes.
 //
@@ -80,7 +83,7 @@
 #include "SIevents.hpp"
 #include "SIsections.hpp"
 
-int main(int argc, char **argv)
+int main(int /*argc*/, char** /*argv*/)
 {
   time_t starttime, endtime;
   SIsectionsSDT sdtset;

@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.165 2003/03/06 19:45:13 obi Exp $
+//  $Id: sectionsd.cpp,v 1.166 2003/03/14 04:27:55 obi Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -788,11 +788,8 @@ static void commandPauseSorting(int connfd, char *data, const unsigned dataLengt
 	return ;
 }
 
-static void commandDumpAllServices(int connfd, char *data, const unsigned dataLength)
+static void commandDumpAllServices(int connfd, char* /*data*/, const unsigned /*dataLength*/)
 {
-	if (dataLength)
-		return ;
-
 	dputs("Request of service list.\n");
 
 	char *serviceList = new char[65*1024]; // 65kb should be enough and dataLength is unsigned short
@@ -1016,11 +1013,8 @@ static void commandAllEventsChannelID(int connfd, char *data, const unsigned dat
 	return ;
 }
 
-static void commandDumpStatusInformation(int connfd, char *data, const unsigned dataLength)
+static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsigned /*dataLength*/)
 {
-	if (dataLength)
-		return ;
-
 	dputs("Request of status information");
 
 	lockEvents();
@@ -1052,7 +1046,7 @@ static void commandDumpStatusInformation(int connfd, char *data, const unsigned 
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.165 2003/03/06 19:45:13 obi Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.166 2003/03/14 04:27:55 obi Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -2200,56 +2194,30 @@ static void commandGetNextShort(int connfd, char *data, const unsigned dataLengt
 		responseHeader.dataLength = 0;
 		writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
 	}
-
-	return ;
 }
 
-static void commandEventListTV(int connfd, char *data, const unsigned dataLength)
+static void commandEventListTV(int connfd, char* /*data*/, const unsigned /*dataLength*/)
 {
-	if (dataLength)
-		return ;
-
 	dputs("Request of TV event list.\n");
-
 	sendEventList(connfd, 0x01, 0x04);
-
-	return ;
 }
 
-static void commandEventListTVids(int connfd, char *data, const unsigned dataLength)
+static void commandEventListTVids(int connfd, char* /*data*/, const unsigned /*dataLength*/)
 {
-	if (dataLength)
-		return ;
-
 	dputs("Request of TV event list (IDs).\n");
-
 	sendEventList(connfd, 0x01, 0x04, 0);
-
-	return ;
 }
 
-static void commandEventListRadio(int connfd, char *data, const unsigned dataLength)
+static void commandEventListRadio(int connfd, char* /*data*/, const unsigned /*dataLength*/)
 {
-	if (dataLength)
-		return ;
-
 	dputs("Request of radio event list.\n");
-
 	sendEventList(connfd, 0x02);
-
-	return ;
 }
 
-static void commandEventListRadioIDs(int connfd, char *data, const unsigned dataLength)
+static void commandEventListRadioIDs(int connfd, char* /*data*/, const unsigned /*dataLength*/)
 {
-	if (dataLength)
-		return ;
-
 	dputs("Request of radio event list (IDs).\n");
-
 	sendEventList(connfd, 0x02, 0, 0);
-
-	return ;
 }
 
 static void commandEPGepgID(int connfd, char *data, const unsigned dataLength)
@@ -2308,14 +2276,14 @@ static void commandEPGepgID(int connfd, char *data, const unsigned dataLength)
 static void commandEPGepgIDshort(int connfd, char *data, const unsigned dataLength)
 {
 	if (dataLength != 8)
-		return ;
+		return;
 
 	unsigned long long* epgID = (unsigned long long*)data;
 
 	dprintf("Request of actual EPG for 0x%llx\n", *epgID);
 
 	if (dmxEIT.pause()) // -> lock
-		return ;
+		return;
 
 	lockEvents();
 
@@ -2442,11 +2410,8 @@ static void commandTimesNVODservice(int connfd, char *data, const unsigned dataL
 }
 
 
-static void commandGetIsTimeSet(int connfd, char *data, const unsigned dataLength)
+static void commandGetIsTimeSet(int connfd, char* /*data*/, const unsigned /*dataLength*/)
 {
-	if (dataLength)
-		return ;
-
 	sectionsd::responseIsTimeSet rmsg;
 
 	rmsg.IsTimeSet = timeset;
@@ -2463,12 +2428,10 @@ static void commandGetIsTimeSet(int connfd, char *data, const unsigned dataLengt
 	}
 	else
 		dputs("[sectionsd] Fehler/Timeout bei write");
-
-	return ;
 }
 
 
-static void commandRegisterEventClient(int connfd, char *data, const unsigned dataLength)
+static void commandRegisterEventClient(int /*connfd*/, char *data, const unsigned dataLength)
 {
 	if (dataLength == sizeof(CEventServer::commandRegisterEvent))
 	{
@@ -2481,7 +2444,7 @@ static void commandRegisterEventClient(int connfd, char *data, const unsigned da
 
 
 
-static void commandUnRegisterEventClient(int connfd, char *data, const unsigned dataLength)
+static void commandUnRegisterEventClient(int /*connfd*/, char *data, const unsigned dataLength)
 {
 	if (dataLength == sizeof(CEventServer::commandUnRegisterEvent))
 		eventServer->unRegisterEvent2(((CEventServer::commandUnRegisterEvent*)data)->eventID, ((CEventServer::commandUnRegisterEvent*)data)->clientID);
@@ -3491,7 +3454,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.165 2003/03/06 19:45:13 obi Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.166 2003/03/14 04:27:55 obi Exp $\n");
 
 	try {
 		if (argc != 1 && argc != 2) {
