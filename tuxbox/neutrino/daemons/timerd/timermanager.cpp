@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.cpp,v 1.19 2002/07/25 22:15:59 woglinde Exp $
+	$Id: timermanager.cpp,v 1.20 2002/08/27 15:27:39 dirch Exp $
 
 	License: GPL
 
@@ -142,7 +142,7 @@ int CTimerManager::addEvent(CTimerEvent* evt)
 //------------------------------------------------------------
 bool CTimerManager::removeEvent(int eventID)
 {
-	if(events[eventID])							// if i have a event with this id
+	if(events.find(eventID)!=events.end())	// if i have a event with this id
 	{
 		if( (events[eventID]->eventState == CTimerEvent::TIMERSTATE_ISRUNNING) && (events[eventID]->stopTime > 0) )	
 			events[eventID]->stopEvent();	// if event is running an has stopTime 
@@ -175,7 +175,7 @@ bool CTimerManager::listEvents(CTimerEventMap &Events)
 
 int CTimerManager::modifyEvent(int eventID, time_t announceTime, time_t alarmTime, time_t stopTime)
 {
-	if(events[eventID])
+	if(events.find(eventID)!=events.end())
 	{
 		CTimerEvent *event = events[eventID];
 		event->announceTime = announceTime;
@@ -188,7 +188,7 @@ int CTimerManager::modifyEvent(int eventID, time_t announceTime, time_t alarmTim
 
 int CTimerManager::rescheduleEvent(int eventID, time_t announceTime, time_t alarmTime, time_t stopTime)
 {
-	if(events[eventID])
+	if(events.find(eventID)!=events.end())
 	{
 		CTimerEvent *event = events[eventID];
 		if(event->announceTime > 0)
@@ -423,8 +423,9 @@ void CTimerEvent_Zapto::fireEvent()
 	CTimerManager::getInstance()->getEventServer()->sendEvent(
 		CTimerdClient::EVT_ZAPTO,
 		CEventServer::INITID_TIMERD,
-		&eventInfo.onidSid,
-		sizeof(eventInfo.onidSid));
+		&eventInfo,
+		sizeof(CTimerEvent::EventInfo));
+	dprintf("gefeuert\n");
 }
 
 //=============================================================
