@@ -9,9 +9,7 @@ void eInit::add(int trl, eAutoInit *c)
 	if (!cl)
 	{
 		cl=new std::list<std::pair<int,eAutoInit*> >;
-		printf("creating list..\n");
 	}
-	printf("add %d (%s)\n", trl, c->getDescription());
 	cl->push_back(std::pair<int,eAutoInit*>(trl, c));
 	if (rl>=trl)
 		c->initNow();
