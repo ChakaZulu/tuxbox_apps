@@ -55,8 +55,8 @@ CBouquetList::CBouquetList()
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	selected    =   0;
-	//width       = 500;
-	//height      = 440;
+	width  = w_max (500, 0);
+	height = h_max (440, 50);
 
 	theight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
 	fheight     = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getHeight();
