@@ -94,6 +94,11 @@ void eServiceHandler::removeRef(const eServiceReference &service)
 {
 }
 
+eString eServiceHandler::getInfo(int id)
+{
+	return "";
+}
+
 eServiceInterface *eServiceInterface::instance;
 
 eServiceInterface *eServiceInterface::getInstance()

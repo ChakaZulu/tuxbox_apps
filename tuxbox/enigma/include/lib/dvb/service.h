@@ -23,6 +23,9 @@ public:
 		evtGotSDT,
 		evtGotEIT,
 		
+		evtStatus, 		// have (new) status
+ 		evtInfoUpdated, // updated info..
+		
 		evtStateChanged,
 		evtFlagsChanged,
 		
@@ -123,6 +126,9 @@ public:
 		posQueryRealCurrent // service specific current position, e.g. file position in bytes
 	};
 	virtual int getPosition(int what);	// -1 means: not available
+	
+			// simple "info" functions..
+	virtual eString getInfo(int id); // 0: status, 1+2 upper/lower line :)
 
 	Signal1<void, const eServiceEvent &> serviceEvent;
 

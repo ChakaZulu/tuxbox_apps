@@ -49,7 +49,8 @@ eHTTPStream::~eHTTPStream()
 void eHTTPStream::processMetaData()
 {
 	metadata[metadatapointer]=0;
-	eDebug("processing metadata! %s", metadata);
+	metaDataUpdated((const char*)metadata);
+//	eDebug("processing metadata! %s", metadata);
 	
 	metadatapointer=0;
 }
@@ -127,8 +128,6 @@ eMP3Decoder::eMP3Decoder(const char *filename, eServiceHandlerMP3 *handler): han
 			filename+=7;
 		else
 		{
-			eDebug("I AM STREAMING...");
-			
 			http=eHTTPConnection::doRequest(filename, this, &error);
 			if (!http)
 			{
@@ -140,7 +139,8 @@ eMP3Decoder::eMP3Decoder(const char *filename, eServiceHandlerMP3 *handler): han
 				http->local_header["User-Agent"]="enigma-mp3/1.0.0";
 				http->local_header["Icy-MetaData"]="1"; // enable ICY metadata
 				http->start();
-				eDebug("starting http streaming.");
+				http_status=_("Connecting...");
+				handler->messages.send(eServiceHandlerMP3::eMP3DecoderMessage(eServiceHandlerMP3::eMP3DecoderMessage::status));
 			}
 			filename=0;
 		}
@@ -196,11 +196,54 @@ eMP3Decoder::eMP3Decoder(const char *filename, eServiceHandlerMP3 *handler): han
 	run();
 }
 
+		// we got (http) metadata.
+void eMP3Decoder::metaDataUpdated(eString meta)
+{
+	{
+		eLocker locker(poslock);
+		eString streamTitle, streamUrl;
+		if (meta.left(6) == "Stream")
+			while (!meta.empty())
+			{
+				int eq=meta.find('=');
+				if (eq == eString::npos)
+						break;
+				eString left=meta.left(eq);
+				meta=meta.mid(eq+1); // skip until =
+				eq=meta.find(';');
+				if (eq == eString::npos)
+					break;
+				eString right=meta.left(eq);
+				meta=meta.mid(eq+1);
+				if (left=="StreamTitle")
+					streamTitle=right;
+				else if (left == "StreamUrl")
+					streamUrl=right;
+				else
+					eDebug("unknown tag: %s = %s", left.c_str(), right.c_str());			
+			}
+		else
+			streamTitle=meta;
+
+		metadata[0]=streamTitle;
+		metadata[1]=streamUrl;
+	}
+
+	handler->messages.send(eServiceHandlerMP3::eMP3DecoderMessage(eServiceHandlerMP3::eMP3DecoderMessage::infoUpdated));
+}
+
 void eMP3Decoder::streamingDone(int err)
 {
 	if (err || !http || http->code != 200)
 	{
-		eDebug("error !!!");
+		eLocker locker(poslock);
+		if (err)
+			http_status.sprintf("error %d while connecting.", err);
+		else if (http->code)
+			http_status.sprintf("error: %d (%s)", http->code, http->code_descr.c_str());
+		else	
+			http_status="unknown";
+		handler->messages.send(eServiceHandlerMP3::eMP3DecoderMessage(eServiceHandlerMP3::eMP3DecoderMessage::status));
 	} else
 	{
 		state=stateFileEnd;
@@ -214,6 +257,9 @@ eHTTPDataSource *eMP3Decoder::createStreamSink(eHTTPConnection *conn)
 {
 	stream=new eHTTPStream(conn, input);
 	CONNECT(stream->dataAvailable, eMP3Decoder::decodeMoreHTTP);
+	CONNECT(stream->metaDataUpdated, eMP3Decoder::metaDataUpdated);
+	http_status=_("playing...");
+	handler->messages.send(eServiceHandlerMP3::eMP3DecoderMessage(eServiceHandlerMP3::eMP3DecoderMessage::status));
 	return stream;
 }
 
@@ -486,6 +532,21 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 	}
 }
 
+eString eMP3Decoder::getInfo(int id)
+{
+	eLocker l(poslock);
+	switch (id)
+	{
+	case 0:
+		return http_status;
+	case 1:
+		return metadata[0];
+	case 2:
+		return metadata[1];
+	}
+	return "";
+}
+
 int eMP3Decoder::getPosition(int real)
 {
 	if (sourcefd < 0)
@@ -512,7 +573,10 @@ void eServiceHandlerMP3::gotMessage(const eMP3DecoderMessage &message)
 	{
 		state=stateStopped;
 		serviceEvent(eServiceEvent(eServiceEvent::evtEnd));
-	}
+	} else if (message.type == eMP3DecoderMessage::status)
+		serviceEvent(eServiceEvent(eServiceEvent::evtStatus));
+	else if (message.type == eMP3DecoderMessage::infoUpdated)
+		serviceEvent(eServiceEvent(eServiceEvent::evtInfoUpdated));
 }
 
 eService *eServiceHandlerMP3::createService(const eServiceReference &service)
@@ -654,6 +718,13 @@ int eServiceHandlerMP3::getPosition(int what)
 	default:
 		return -1;
 	}
+}
+
+eString eServiceHandlerMP3::getInfo(int id)
+{
+	if (!decoder)
+		return "";
+	return decoder->getInfo(id);
 }
 
 eServiceMP3::eServiceMP3(const char *filename): eService("")

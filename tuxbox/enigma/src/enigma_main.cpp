@@ -2393,7 +2393,25 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 			eDebug("ende im gelaende.");
 		break;
 	}
+	case eServiceEvent::evtStatus:
+	{
+		eServiceHandler *sapi=eServiceInterface::getInstance()->getService();
+		if (!sapi)
+			return;
+		showDVRFunctions(0);
+		EINow->setText(sapi->getInfo(0));
+		break;
 	}
+	case eServiceEvent::evtInfoUpdated:
+	{
+		eServiceHandler *sapi=eServiceInterface::getInstance()->getService();
+		if (!sapi)
+			return;
+		showDVRFunctions(0);
+		EINow->setText(sapi->getInfo(1));
+		EINext->setText(sapi->getInfo(2));
+		break;
+	}	}
 }
 
 void eZapMain::startService(const eServiceReference &_serviceref, int err)

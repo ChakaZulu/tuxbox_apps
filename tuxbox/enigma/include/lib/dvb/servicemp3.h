@@ -26,7 +26,7 @@ public:
 	~eHTTPStream();
 	void haveData(void *data, int len);
 	Signal0<void> dataAvailable;
-	Signal0<void> metaDataUpdated;
+	Signal1<void,eString> metaDataUpdated;
 };
 
 class eMP3Decoder: public eThread, public eMainloop, public Object
@@ -46,6 +46,10 @@ class eMP3Decoder: public eThread, public eMainloop, public Object
 	int sourcefd;
 	eHTTPStream *stream;
 	eHTTPConnection *http;
+	eString http_status;
+	eString metadata[2];
+	
+	void metaDataUpdated(eString metadata);
 	
 	int error;
 	int outputbr;
@@ -88,6 +92,7 @@ public:
 	eFixedMessagePump<eMP3DecoderMessage> messages;
 	
 	void gotMessage(const eMP3DecoderMessage &message);
+	eString getInfo(int id);
 	
 	eMP3Decoder(const char *filename, eServiceHandlerMP3 *handler);
 	~eMP3Decoder();
@@ -111,6 +116,7 @@ class eServiceHandlerMP3: public eServiceHandler
 		enum
 		{
 			done,
+			infoUpdated,
 			status
 		};
 		int type;
@@ -133,6 +139,8 @@ public:
 
 	int play(const eServiceReference &service);
 	int serviceCommand(const eServiceCommand &cmd);
+	
+	eString getInfo(int id);
 
 	int getFlags();
 	int getState();
