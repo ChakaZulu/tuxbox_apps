@@ -28,3 +28,12 @@ void eDebug(const char* fmt, ...)
 #endif //__DEBUG__
 }
 
+void eWarning(const char* fmt, ...)
+{
+	char buf[1024];
+	va_list ap;
+	va_start(ap, fmt);
+	vsnprintf(buf, 1024, fmt, ap);
+	va_end(ap);
+	fprintf(stderr, "%s\n",buf );
+}

@@ -3,6 +3,7 @@
 
 void eFatal(const char* fmt, ...);
 void eDebug(const char* fmt, ...);
+void eWarning(const char* fmt, ...);
 
 #endif // __E_ERROR__
 
