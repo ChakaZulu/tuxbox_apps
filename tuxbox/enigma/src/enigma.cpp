@@ -215,6 +215,7 @@ eZap::eZap(int argc, char **argv)
 	setlocale(LC_ALL, language);
 	free(language);
 
+#ifdef ENABLE_DYN_CONF
 #ifndef DISABLE_FILE
 	extern void initHDDSettings(void);
 	initHDDSettings();
@@ -226,6 +227,7 @@ eZap::eZap(int argc, char **argv)
 		swapfilename = "";
 	extern void activateSwapFile(eString);
 	activateSwapFile(eString(swapfilename));
+#endif
 #endif
 	eDVB::getInstance()->configureNetwork();
 
