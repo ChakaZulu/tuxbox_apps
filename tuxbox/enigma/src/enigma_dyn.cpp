@@ -169,7 +169,7 @@ static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConn
 static eString switchService(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	
+
 	int service_id=-1, dvb_namespace=-1, original_network_id=-1, transport_stream_id=-1, service_type=-1;
 	unsigned int optval=opt.find("=");
 	if (optval!=eString::npos)
@@ -177,7 +177,7 @@ static eString switchService(eString request, eString dirpath, eString opt, eHTT
 	if (opt.length())
 		sscanf(opt.c_str(), "%x:%x:%x:%x:%x", &service_id, &dvb_namespace, &transport_stream_id, &original_network_id, &service_type);
 	eString result="";
-	
+
 	if ((service_id!=-1) && (original_network_id!=-1) && (transport_stream_id!=-1) && (service_type!=-1))
 	{
 		eServiceInterface *iface=eServiceInterface::getInstance();
@@ -373,7 +373,7 @@ static eString read_file(eString filename)
 	fd=open(filename.c_str(), O_RDONLY);
 	if(!fd)
 		return eString("file: "+filename+" not found\n");
-	
+
 	int size=0;
 
 	char tempbuf[BLOCKSIZE+200];
@@ -416,7 +416,7 @@ static eString getIP()
 		return "?.?.?.?-ioctl-error";
 	}
 	close(sd);
-	
+
 	tmp.sprintf("%s", inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr) );
 	return tmp;
 }
@@ -518,13 +518,10 @@ public:
 	}
 };
 
-static eString getWatchContent(eString mode, eString path)
+static eString getZapContent(eString mode, eString path)
 {
 	eString result("");
 	eString tpath;
-
-	if(mode!="zap")
-		return "";
 
 	int pos=0, lastpos=0, temp=0;
 
@@ -551,30 +548,113 @@ static eString getWatchContent(eString mode, eString path)
 			eZapMain::getInstance()->playService(current_service, eZapMain::psSetMode|eZapMain::psDontAdd);
 //			iface->play(current_service);
 //			result+="ok, hear the music..";
-		} else
+		}
+		else
 		{
 			eWebNavigatorListDirectory navlist(result, path, tpath, *iface);
 			Signal1<void,const eServiceReference&> signal;
 			signal.connect(slot(navlist, &eWebNavigatorListDirectory::addEntry));
-	
-			result+="<table width=\"100%%\">\n";
+				result+="<table width=\"100%%\">\n";
 			iface->enterDirectory(current_service, signal);
-			result+="</table>\n";
+				result+="</table>\n";
 			eDebug("entered");
 			iface->leaveDirectory(current_service);
-			eDebug("leaved");
+			eDebug("exited");
 		}
 	}
+
 	return result;
 }
 
 static eString getContent(eString mode, eString path)
 {
 	eString result("");
-	result=getWatchContent(mode, path);
+	if (mode == "zap")
+	{
+		result = getZapContent(mode, path);
+	}
+	else
+	if (mode == "links")
+	{
+		result = "no links available.";
+	}
+	else
+	if (mode == "about")
+	{
+		result = "Enigma Web Control Version 0.2";
+	}
+	else
+	if (mode == "aboutDreambox")
+	{
+		result = "This is a d(ream)box.";
+	}
+	else
+	if (mode == "aboutDMM")
+	{
+		result = "DMM is a multimedia company.";
+	}
+	else
+	if (mode == "menuShutdown")
+	{
+		eZap::getInstance()->quit();
+		result = "Enigma is shutting down...";
+	}
+	else
+	if (mode == "menu")
+	{
+		result = "Control your box using the commands on the left.";
+	}
+	else
+	if (mode == "menuReboot")
+	{
+		eZap::getInstance()->quit(4);
+		result = "Enigma is rebooting...";
+	}
+	else
+	if (mode == "menuRestart")
+	{
+		eZap::getInstance()->quit(2);
+		result = "Enigma is restarting...";
+	}
+	else
+	if (mode == "menuWakeup")
+	{
+		if ( eZapStandby::getInstance() )
+		{
+			eZapStandby::getInstance()->wakeUp(0);
+			result = "Enigma is waking up...";
+		}
+		else
+		{
+			result = "Enigma is already awake.";
+		}
+	}
+	else
+	if (mode == "menuStandby" )
+	{
+		if (eZapStandby::getInstance())
+		{
+			result = "Enigma is already sleeping.";
+		}
+		else
+		{
+			eZapMain::getInstance()->gotoStandby();
+			result = "Enigma is going to sleep...";
+		}
+	}
+	else
+	if (mode == "menuFBShot")
+	{
+		result = "     ";
+	}
+	else
+	if (mode == "menuScreenShot")
+	{
+		result = "     ";
+	}
 
-	if(result.length()<3)
-		result="not ready yet";
+	if (result.length() < 3)
+		result = "not available yet...";
 
 	return result;
 }
@@ -586,7 +666,7 @@ static eString getCurService()
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (!sapi)
 		return "n/a";
-		
+
 	eService *current=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
 	if(current)
 		return current->service_name.c_str();
@@ -599,7 +679,7 @@ static eString getEITC()
 	eString result;
 
 	EIT *eit=eDVB::getInstance()->getEIT();
-	
+
 	if(eit)
 	{
 		eString now_time="", now_duration="", now_text="", now_longtext="";
@@ -664,7 +744,8 @@ static eString getEITC()
 		 	}
 		}
 
-		if(now_time!="") {
+		if(now_time!="")
+		{
 			result=read_file(TEMPLATE_DIR+"eit.tmp");
 			result.strReplace("#NOWT#", now_time);
 			result.strReplace("#NOWD#", now_duration);
@@ -674,9 +755,11 @@ static eString getEITC()
 			result.strReplace("#NEXTD#", next_duration);
 			result.strReplace("#NEXTST#", next_text);
 			result.strReplace("#NEXTLT#", filter_string(next_longtext));
-		} else {
+		}
+		else
+		{
 			result="eit undefined";
-		}	
+		}
 		eit->unlock();
 	}
 	else
@@ -703,7 +786,7 @@ static eString getStats()
 	result+="</span> | ";
 
 	tmp=read_file("/proc/mounts");
-	if(tmp.find("cramfs")!=eString::npos)
+	if ((tmp.find("cramfs") != eString::npos) || (tmp.find("/dev/root / jffs2") != eString::npos))
 	{
 		result+="<span class=\"white\">running from flash</span>";
 	}
@@ -981,7 +1064,7 @@ static eString xmessage(eString request, eString dirpath, eString opt, eHTTPConn
 		type=atoi(opts["type"].c_str());
 	
 	int timeout=atoi(opts["timeout"].c_str());
-	
+
 	eZapMain::getInstance()->postMessage(eZapMessage(1, opts["caption"], opts["body"], timeout), type != -1);
 
 	return eString("OK\n");
@@ -1242,18 +1325,18 @@ static eString screenshot(eString request, eString dirpath, eString opts, eHTTPC
 	else
 #endif
 		p=&gFBDC::getInstance()->getPixmap();
-	
+
 	if (!p)
 		return "no\n";
-	
+
 	if (!savePNG("/tmp/screenshot.png", p))
 	{
 		content->local_header["Location"]="/root/tmp/screenshot.png";
 		content->code=307;
 		return "ok\n";
 	}
-	
-	return "nixging\n";
+
+	return "not ok\n";
 }
 
 static eString neutrino_suck_zapto(eString request, eString dirpath, eString opt, eHTTPConnection *content)
