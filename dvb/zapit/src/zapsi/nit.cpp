@@ -1,5 +1,5 @@
 /*
- * $Id: nit.cpp,v 1.35 2004/02/17 16:26:07 thegoodguy Exp $
+ * $Id: nit.cpp,v 1.36 2004/04/17 19:44:04 derget Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -110,7 +110,7 @@ int parse_nit(unsigned char DiSEqC)
 		transport_stream_loop_length = ((buffer[pos] & 0x0F) << 8) | buffer[pos + 1];
 
 		if (!transport_stream_loop_length)
-			return -3;
+			continue;
 
 		for (pos += 2; pos < section_length - 3; pos += transport_descriptors_length + 6)
 		{
