@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.51 2002/01/15 20:55:14 McClean Exp $
+// $Id: channellist.cpp,v 1.52 2002/01/16 02:09:04 McClean Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.52  2002/01/16 02:09:04  McClean
+// cleanups+quickzap-fix
+//
 // Revision 1.51  2002/01/15 20:55:14  McClean
 // zapinterface changed
 //
@@ -541,7 +544,7 @@ bool CChannelList::showInfo(int pos)
 	}
 	selected=pos;
 	channel* chan = chanlist[selected];
-	g_InfoViewer->showTitle(selected+1, chan->name, chan->onid_sid, true);
+	g_InfoViewer->showTitle(selected+1, chan->name, chan->onid_sid );
 	return true;
 }
 
@@ -680,21 +683,38 @@ void CChannelList::quickZap(int key)
 		return;
 	}
 
-	//	printf("quickzap start\n");
-	if (key==g_settings.key_quickzap_down)
+	int timeout = 2;
+	int timeout1 = 2;
+
+	sscanf(g_settings.repeat_blocker, "%d", &timeout);
+	timeout = int(timeout/100.0)+6;
+	sscanf(g_settings.repeat_genericblocker, "%d", &timeout1);
+	timeout1 = int(timeout1/100.0)+6;
+	if(timeout1>timeout)
 	{
-		if(selected==0)
-			selected = chanlist.size()-1;
-		else
-			selected--;
-		//				channel* chan = chanlist[selected];
+		timeout=timeout1;
 	}
-	else if (key==g_settings.key_quickzap_up)
+	printf("quickzap timeout is %d\n", timeout);
+
+	do
 	{
-		selected = (selected+1)%chanlist.size();
-		//			channel* chan = chanlist[selected];
+		if (key==g_settings.key_quickzap_down)
+		{
+			if(selected==0)
+				selected = chanlist.size()-1;
+			else
+				selected--;
+		}
+		else if (key==g_settings.key_quickzap_up)
+		{
+			selected = (selected+1)%chanlist.size();
+		}
+		channel* chan = chanlist[selected];
+		g_InfoViewer->showTitle(selected+ 1, chan->name, chan->onid_sid);
+		
+		key = g_RCInput->getKey(timeout);
 	}
-	;
+	while ((key==g_settings.key_quickzap_down) || (key==g_settings.key_quickzap_up ));
 
 	zapTo( selected );
 }

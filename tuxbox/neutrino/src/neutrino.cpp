@@ -1,6 +1,6 @@
 /*
  
-        $Id: neutrino.cpp,v 1.132 2002/01/15 23:17:59 McClean Exp $
+        $Id: neutrino.cpp,v 1.133 2002/01/16 02:09:04 McClean Exp $
  
 	Neutrino-GUI  -   DBoxII-Project
  
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  
   $Log: neutrino.cpp,v $
+  Revision 1.133  2002/01/16 02:09:04  McClean
+  cleanups+quickzap-fix
+
   Revision 1.132  2002/01/15 23:17:59  McClean
   cleanup
 
@@ -1989,30 +1992,36 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 		{
 			if (key==CRCInput::RC_ok)
 			{
-				g_InfoViewer->killTitle();
-				int bouqMode = g_settings.bouquetlist_mode;//bsmChannels;
-
-				if ((bouquetList!=NULL) && (bouquetList->Bouquets.size() == 0 ))
+				if ( g_InfoViewer->is_visible )
 				{
-					printf("bouquets are empty\n");
-					bouqMode = bsmAllChannels;
-				}
-				if ((bouquetList!=NULL) && (bouqMode == 1/*bsmBouquets*/))
-				{
-					bouquetList->exec(true);
-				}
-				else if ((bouquetList!=NULL) && (bouqMode == 0/*bsmChannels*/))
-				{
-					int nNewChannel = bouquetList->Bouquets[bouquetList->getActiveBouquetNumber()]->channelList->show();
-					if (nNewChannel>-1)
-					{
-						channelList->zapTo(bouquetList->Bouquets[bouquetList->getActiveBouquetNumber()]->channelList->getKey(nNewChannel)-1);
-					}
+					g_InfoViewer->killTitle();
 				}
 				else
 				{
-					printf("using all channels\n");
-					channelList->exec();
+					int bouqMode = g_settings.bouquetlist_mode;//bsmChannels;
+
+					if ((bouquetList!=NULL) && (bouquetList->Bouquets.size() == 0 ))
+					{
+						printf("bouquets are empty\n");
+						bouqMode = bsmAllChannels;
+					}
+					if ((bouquetList!=NULL) && (bouqMode == 1/*bsmBouquets*/))
+					{
+						bouquetList->exec(true);
+					}
+					else if ((bouquetList!=NULL) && (bouqMode == 0/*bsmChannels*/))
+					{
+						int nNewChannel = bouquetList->Bouquets[bouquetList->getActiveBouquetNumber()]->channelList->show();
+						if (nNewChannel>-1)
+						{
+							channelList->zapTo(bouquetList->Bouquets[bouquetList->getActiveBouquetNumber()]->channelList->getKey(nNewChannel)-1);
+						}
+					}
+					else
+					{
+						printf("using all channels\n");
+						channelList->exec();
+					}
 				}
 			}
 			else if (key==CRCInput::RC_red)
@@ -2049,9 +2058,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				{
 					g_InfoViewer->showTitle( channelList->getActiveChannelNumber(),
 					                         channelList->getActiveChannelName(),
-					                         channelList->getActiveChannelOnid_sid(),
-					                         false
-					                       );
+					                         channelList->getActiveChannelOnid_sid() );
 				}
 			}
 			else if ((key>=0) && (key<=9))
@@ -2349,7 +2356,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.132 2002/01/15 23:17:59 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.133 2002/01/16 02:09:04 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

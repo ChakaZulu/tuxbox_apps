@@ -134,7 +134,7 @@ class CInfoViewer
 
 		void start();
 
-		void showTitle( int ChanNum, string Channel, unsigned int onid_tsid = 0, bool CalledFromNumZap = false );
+		void showTitle( int ChanNum, string Channel, unsigned int onid_tsid = 0 );
 		void killTitle();
 
 		void setDuration( int Duration );

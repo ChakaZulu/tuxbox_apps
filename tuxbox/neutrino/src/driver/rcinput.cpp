@@ -30,12 +30,15 @@
 */
 
 /*
- $Id: rcinput.cpp,v 1.24 2002/01/10 12:45:09 McClean Exp $
+ $Id: rcinput.cpp,v 1.25 2002/01/16 02:09:04 McClean Exp $
  
  Module for Remote Control Handling
  
 History:
  $Log: rcinput.cpp,v $
+ Revision 1.25  2002/01/16 02:09:04  McClean
+ cleanups+quickzap-fix
+
  Revision 1.24  2002/01/10 12:45:09  McClean
  fix rc-timeout-prob
 
@@ -274,7 +277,11 @@ int CRCInput::getKey(int Timeout)
 				}
 			}
 		}
-		if(tvslectp != NULL)
+		if(Timeout2==0)
+		{//nicht warten wenn kein key da ist
+			return RC_timeout;
+		}
+		else if(tvslectp != NULL)
 		{//timeout neu kalkulieren
 			gettimeofday( &tv, NULL );
 			long long getKeyNow = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);

@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: infoviewer.cpp,v 1.59 2002/01/15 23:17:59 McClean Exp $
+// $Id: infoviewer.cpp,v 1.60 2002/01/16 02:09:04 McClean Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.60  2002/01/16 02:09:04  McClean
+// cleanups+quickzap-fix
+//
 // Revision 1.59  2002/01/15 23:17:59  McClean
 // cleanup
 //
@@ -274,19 +277,28 @@ const std::string CInfoViewer::getActiveChannelID()
 	return s_id;
 }
 
-void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid, bool CalledFromNumZap )
+void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid )
 {
+	if((Channel==CurrentChannel) && (is_visible))
+	{
+		pthread_mutex_lock( &epg_mutex );
+		is_visible = true;
+		KillShowEPG = false;
+		pthread_mutex_unlock( &epg_mutex );
+
+		pthread_cond_signal( &epg_cond );
+
+		return;
+	}
+	
 	pthread_mutex_lock( &epg_mutex );
 
 	CurrentChannel = Channel;
 	Current_onid_tsid = onid_tsid;
 
-	ShowInfo_Info = !CalledFromNumZap;
+	ShowInfo_Info = true; //!CalledFromNumZap;
 
-	if ( CalledFromNumZap )
-		EPG_NotFound_Text = (char*) g_Locale->getText("infoviewer.epgnotload").c_str();
-	else
-		EPG_NotFound_Text =  (char*) g_Locale->getText("infoviewer.epgwait").c_str();
+	EPG_NotFound_Text =  (char*) g_Locale->getText("infoviewer.epgwait").c_str();
 
 	BoxStartX = g_settings.screen_StartX+ 20;
 	BoxEndX   = g_settings.screen_EndX- 20;
@@ -294,18 +306,16 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 
 
 	if ( ShowInfo_Info )
+	{
 		BoxStartY = BoxEndY- InfoHeightY- InfoHeightY_Info+ 6;
+	}
 	else
+	{
 		BoxStartY = BoxEndY- InfoHeightY;
+	}
 
 	KillShowEPG = false;
 	pthread_mutex_unlock( &epg_mutex );
-
-
-	//frameBuffer->paintVLine(settings->screen_StartX,0,576, 3);
-	//frameBuffer->paintVLine(settings->screen_EndX,0,576, 3);
-	//frameBuffer->paintHLine(0,719, settings->screen_EndY,3);
-
 
 	g_FrameBuffer->paintBackgroundBox(BoxStartX, BoxStartY+ ChanHeight, BoxStartX + (ChanWidth >>1), BoxStartY+ ChanHeight+ InfoHeightY_Info+ 10);
 
@@ -362,49 +372,6 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 	pthread_mutex_unlock( &epg_mutex );
 
 	pthread_cond_signal( &epg_cond );
-
-	usleep(50);
-
-	int key;
-
-	if ( !CalledFromNumZap )
-	{
-		do
-		{
-			key = g_RCInput->getKey( intShowDuration* 5 );
-
-			// Auskommentiert - wird von Hauptschleife aufgerufen...?
-			/*            if ( key == CRCInput::RC_blue )
-			            {
-			                g_StreamInfo->exec(NULL, "");
-			                key = CRCInput::RC_timeout;
-			            }
-			 
-			            else if ( key == CRCInput::RC_yellow )
-			            {
-			                killTitle();
-			                g_EventList->exec(Channel);
-			                key = CRCInput::RC_timeout;
-			            }
-			*/
-		}
-		while (false);
-
-		if ( ( key != CRCInput::RC_timeout ) &&
-		        ( ( key != CRCInput::RC_ok ) || ( CalledFromNumZap ) ) &&
-		        ( ( key != CRCInput::RC_home ) || ( CalledFromNumZap ) ) )
-		{
-			g_RCInput->pushbackKey(key);
-		};
-
-		if ( ( key != g_settings.key_quickzap_up ) &&
-		        ( key != g_settings.key_quickzap_down ) &&
-		        ( key != CRCInput::RC_help ) &&
-		        ( !CalledFromNumZap ) )
-		{
-			killTitle();
-		};
-	};
 }
 
 
@@ -682,7 +649,7 @@ void * CInfoViewer::InfoViewerThread (void *arg)
 		{
 			gotEPG = true;
 			repCount = 10;
-
+			//printf("infoViewer -> visible\n");
 			do
 			{
 				if ( !gotEPG )
@@ -690,8 +657,8 @@ void * CInfoViewer::InfoViewerThread (void *arg)
 					if ( repCount > 0 )
 						InfoViewer->showWarte();
 
-					//                    printf("CInfoViewer::InfoViewerThread before waiting long\n");
-					//                    usleep( 1000000 );
+					//printf("CInfoViewer::InfoViewerThread before waiting long\n");
+					//usleep( 1000000 );
 
 					gettimeofday(&now, NULL);
 					TIMEVAL_TO_TIMESPEC(&now, &abs_wait);
@@ -700,7 +667,7 @@ void * CInfoViewer::InfoViewerThread (void *arg)
 					pthread_mutex_trylock( &InfoViewer->epg_mutex );
 					pthread_cond_timedwait( &InfoViewer->epg_cond, &InfoViewer->epg_mutex, &abs_wait );
 
-					//                    printf("CInfoViewer::InfoViewerThread after waiting long\n");
+					//printf("CInfoViewer::InfoViewerThread after waiting long\n");
 
 					repCount--;
 				}
@@ -711,7 +678,7 @@ void * CInfoViewer::InfoViewerThread (void *arg)
 				pthread_mutex_unlock( &InfoViewer->epg_mutex );
 
 
-				//                printf("CInfoViewer::InfoViewerThread getEPGData for %s\n", query.c_str());
+				//printf("CInfoViewer::InfoViewerThread getEPGData for %s\n", query.c_str());
 
 				gotEPG = InfoViewer->getEPGData(query, query_onid_tsid);
 				// gotEPG = gotEPG || ( InfoViewer->Flag & sectionsd::epg_not_broadcast );
@@ -744,12 +711,12 @@ void * CInfoViewer::InfoViewerThread (void *arg)
 
 				if ( ( !requeryEPG) && ( InfoViewer->is_visible ) && ( !InfoViewer->KillShowEPG) )
 				{
-					//                    printf("CInfoViewer::InfoViewerThread success\n");
+					//printf("CInfoViewer::InfoViewerThread success\n");
 					InfoViewer->showData();
 				}
 				else
 				{
-					//                    printf("CInfoViewer::InfoViewerThread unsuccessful\n");
+					//printf("CInfoViewer::InfoViewerThread unsuccessful\n");
 				}
 				pthread_mutex_unlock( &InfoViewer->epg_mutex );
 
