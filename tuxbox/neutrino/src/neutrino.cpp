@@ -1681,6 +1681,10 @@ int CNeutrinoApp::run(int argc, char **argv)
 	sscanf(getenv("fe"), "%x", &g_info.fe);
 	//printf("box_Type: %d, gtxID: %d, enxID: %d, fe: %d\n", g_info.box_Type, g_info.gtx_ID, g_info.enx_ID, g_info.fe);
 
+
+	g_Timer = new CTimer;		// internal Timer (init prio to load settings!)
+
+
 	int loadSettingsErg = loadSetup();
 
 	//timing  (Einheit= 1 sec )
@@ -1702,7 +1706,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_Zapit = new CZapitClient;
 	g_Sectionsd = new CSectionsdClient;
 	g_Timerd = new CTimerdClient;
-	g_Timer = new CTimer;		// internal Timer
 
 	g_RemoteControl = new CRemoteControl;
 	g_EpgData = new CEpgData;
@@ -2192,10 +2195,7 @@ void CNeutrinoApp::ExitRun()
 	frameBuffer->loadPal("shutdown.pal");
 
 	saveSetup();
-
-	// -- Set Wakeup of Box for next TimerEvent... (120 secs time for startup)
 	g_Timer->setBoxWakeupTime (g_Timer->getNextTimerEventStart() -120);
-
 	g_Controld->shutdown();
 	sleep(55555);
 }
@@ -2573,7 +2573,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.277 2002/05/20 11:46:44 rasc Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.278 2002/05/20 20:13:03 rasc Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
