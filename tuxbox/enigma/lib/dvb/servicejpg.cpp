@@ -1,5 +1,4 @@
 #ifndef DISABLE_FILE
-#ifdef PICVIEWER
 
 #include <config.h>
 #include <lib/dvb/servicejpg.h>
@@ -76,5 +75,4 @@ void eServiceHandlerJPG::removeRef(const eServiceReference &service)
 
 eAutoInitP0<eServiceHandlerJPG> i_eServiceHandlerJPG(eAutoInitNumbers::service + 2, "eServiceHandlerJPG");
 
-#endif
 #endif //DISABLE_FILE
