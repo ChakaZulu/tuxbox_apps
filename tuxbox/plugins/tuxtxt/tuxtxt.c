@@ -725,6 +725,7 @@ void Prev100()
 
 	lastpage = page;
 	page = prev_100;
+	if(page == 0) page = lastpage;
 	subpage = subpagetable[page];
 	pageupdate = 1;
 
@@ -741,6 +742,7 @@ void Prev10()
 
 	lastpage = page;
 	page = prev_10;
+	if(page == 0) page = lastpage;
 	subpage = subpagetable[page];
 	pageupdate = 1;
 
@@ -757,6 +759,7 @@ void Next10()
 
 	lastpage = page;
 	page = next_10;
+	if(page == 0) page = lastpage;
 	subpage = subpagetable[page];
 	pageupdate = 1;
 
@@ -773,6 +776,7 @@ void Next100()
 
 	lastpage = page;
 	page = next_100;
+	if(page == 0) page = lastpage;
 	subpage = subpagetable[page];
 	pageupdate = 1;
 
@@ -1047,9 +1051,9 @@ void SwitchScreenMode()
 			fontwidth  =  8;
 			fontheight = 21;
 
-			avia_pig_set_pos(pig, (StartX+322-55), StartY);
+			avia_pig_set_pos(pig, (StartX+322), StartY);
 			avia_pig_set_size(pig, 320, 526);
-			avia_pig_set_stack(pig, 1);
+			avia_pig_set_stack(pig, 2);
 			avia_pig_show(pig);
 		}
 		else
