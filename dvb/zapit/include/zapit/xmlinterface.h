@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/Attic/xmlinterface.h,v 1.17 2002/12/27 16:58:49 obi Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/Attic/xmlinterface.h,v 1.18 2003/05/07 16:46:58 digi_casi Exp $
  *
  * xmlinterface for zapit - d-box2 linux project
  *
@@ -51,6 +51,7 @@ inline char*      xmlGetName          (xmlNodePtr cur)                 { return 
 
 
 unsigned long xmlGetNumericAttribute  (const xmlNodePtr node, char *name, const int base);
+long xmlGetSignedNumericAttribute     (const xmlNodePtr node, char *name, const int base);
 xmlNodePtr xmlGetNextOccurence        (xmlNodePtr cur, const char * s);
 
 std::string Unicode_Character_to_UTF8(const int character);

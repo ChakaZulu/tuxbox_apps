@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.21 2003/03/14 07:31:51 obi Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.22 2003/05/07 16:47:20 digi_casi Exp $
  *
  * xmlinterface for zapit - d-box2 linux project
  *
@@ -45,6 +45,15 @@ unsigned long xmlGetNumericAttribute(const xmlNodePtr node, char *name, const in
 	return strtoul(ptr, 0, base);
 }
 
+long xmlGetSignedNumericAttribute(const xmlNodePtr node, char *name, const int base)
+{
+	char *ptr = xmlGetAttribute(node, name);
+
+	if (!ptr)
+		return 0;
+
+	return strtol(ptr, 0, base);
+}
 
 xmlNodePtr xmlGetNextOccurence(xmlNodePtr cur, const char * s)
 {
