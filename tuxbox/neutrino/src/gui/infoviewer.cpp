@@ -1,3 +1,12 @@
+//
+// $Id: infoviewer.cpp,v 1.7 2001/08/16 00:19:44 fnbrd Exp $
+//
+// $Log: infoviewer.cpp,v $
+// Revision 1.7  2001/08/16 00:19:44  fnbrd
+// Removed debug output.
+//
+//
+
 #include "infoviewer.h"
 
 
@@ -230,7 +239,7 @@ bool CInfoViewer::getEPGData( string channelName )
 		{
 			char* pData = new char[nBufSize+1] ;
 			read(sock_fd, pData, nBufSize);
-			printf("data: %s\n\n", pData);
+//			printf("data: %s\n\n", pData);
 			char tmpPercent[10];
 			char tmp[20];
 

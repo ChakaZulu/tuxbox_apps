@@ -1,3 +1,12 @@
+//
+// $Id: epgview.cpp,v 1.5 2001/08/16 00:19:44 fnbrd Exp $
+//
+// $Log: epgview.cpp,v $
+// Revision 1.5  2001/08/16 00:19:44  fnbrd
+// Removed debug output.
+//
+//
+
 #include "epgdata.h"
 
 
@@ -280,16 +289,16 @@ void CEpgData::GetEPGData( string channelName )
 		int nBufSize = resp.dataLength;
 		if(nBufSize>0)
 		{
-			printf("neutrino nBufsize: %d\n", nBufSize);
+//			printf("neutrino nBufsize: %d\n", nBufSize);
 			char* pData = new char[nBufSize] ;
 			read(sock_fd, pData, nBufSize);
-			printf("neutrino epgdata: \n%s\n", pData);
+//			printf("neutrino epgdata: \n%s\n", pData);
 
 			char tmp[20];
 			char *pos = ocopyStringto( pData, tmp, sizeof(tmp));
-			printf("id: %s\n", tmp);
+//			printf("id: %s\n", tmp);
 			pos = ocopyStringto( pos, epgData.title, sizeof(epgData.title));
-			printf("title: %s\n", epgData.title);
+//			printf("title: %s\n", epgData.title);
 			pos = ocopyStringto( pos, epgData.info1, sizeof(epgData.info1) );
 			pos = ocopyStringto( pos, epgData.info2, sizeof(epgData.info2));
 			pos = ocopyStringto( pos, epgData.date, sizeof(epgData.date));
@@ -298,7 +307,7 @@ void CEpgData::GetEPGData( string channelName )
 			pos = ocopyStringto( pos, epgData.done, sizeof(epgData.done));
 
 			delete[] pData;
-			printf("copied\n");
+//			printf("copied\n");
 		}
 	#else
 		//for old epgd users
@@ -328,7 +337,7 @@ void CEpgData::GetEPGData( string channelName )
 
 		read(sock_fd, pData, nBufSize);
 
-		printf("neutrino epgdata: %i: %s\n", rep.version, rep.sizeOfBuffer);
+//		printf("neutrino epgdata: %i: %s\n", rep.version, rep.sizeOfBuffer);
 
 		if( nBufSize > 0 )
 		{
