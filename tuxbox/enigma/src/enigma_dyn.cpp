@@ -63,6 +63,8 @@ using namespace std;
 extern eString getRight(const eString&, char); // implemented in timer.cpp
 extern eString getLeft(const eString&, char);  // implemented in timer.cpp
 
+eString multiEPG;
+
 static eString getVersionInfo(const char *info)
 {
 	FILE *f=fopen("/.version", "rt");
@@ -1598,9 +1600,78 @@ static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPCon
 	return result;
 }
 
+static eString getcurepg3(eServiceReference ref)
+{
+	std::stringstream result;
+	result << std::setfill('0');
+
+	eService* current;
+
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (!sapi)
+		return "sapi is not available.";
+
+	current = eDVB::getInstance()->settings->getTransponders()->searchService(ref);
+
+	if (!current)
+		return "EPG is not yet ready.";
+
+	const timeMap* evt = eEPGCache::getInstance()->getTimeMap((eServiceReferenceDVB&)ref);
+
+	if (!evt)
+		result << "EPG is not yet available.";
+	else
+	{
+		timeMap::const_iterator It;
+
+		for(It=evt->begin(); It!= evt->end(); It++)
+		{
+			EITEvent event(*It->second);
+			for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
+			{
+				Descriptor *descriptor=*d;
+				if (descriptor->Tag() == DESCR_SHORT_EVENT)
+				{
+					eString rec = "javascript:record(\"ref=";
+						rec += ref2string(ref).c_str();
+						rec += "&ID=";
+						rec += eString().sprintf("%d", event.event_id);
+						rec += "&start=";
+						rec += eString().sprintf("%d", event.start_time);
+						rec += "&duration=";
+						rec += eString().sprintf("%d", event.duration);
+						rec += "\")";
+					tm* t = localtime(&event.start_time);
+					result << "<span class=\"epg\">";
+#ifndef DISABLE_FILE
+					result << button(50, "REC", RED, rec);
+					result << "&nbsp;&nbsp;"
+#endif
+						<< std::setw(2) << t->tm_mday << '.'
+						<< std::setw(2) << t->tm_mon+1 << ". - "
+						<< std::setw(2) << t->tm_hour << ':'
+						<< std::setw(2) << t->tm_min << ' '
+						<< "<a href=\'javascript:EPGDetails(\"ref=" << ref2string(ref)
+						<< "&ID=" << event.event_id
+						<< "\")\'>"
+						<< ((ShortEventDescriptor*)descriptor)->event_name
+						<< "</a></span></u><br>\n";
+				}
+			}
+		}
+	}
+
+	eString tmp2 = read_file(TEMPLATE_DIR+"EPG.tmp");
+	tmp2.strReplace("#CHANNEL#", filter_string(current->service_name));
+	tmp2.strReplace("#BODY#", result.str());
+	return tmp2;
+}
+
 void callbackFunction(const eServiceReference& s)
 {
 	printf("[ENIGMA_DYN] fetching EPG %s\n", ref2string(s).c_str());
+	multiEPG += getcurepg3(s);
+	multiEPG += "<br>";
 }
 
 static eString getMultiEPG(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -1614,7 +1685,7 @@ static eString getMultiEPG(eString request, eString dirpath, eString opts, eHTTP
 	cbSignal.connect(slot(callbackFunction));
 	eServiceInterface::getInstance()->enterDirectory(bouquetRef, cbSignal);
 	eServiceInterface::getInstance()->leaveDirectory(bouquetRef);
-	return "<html>" CHARSETMETA "<head><title>Multi-EPG</title></head><body>Coming soon...</body></html>";
+	return "<html>" CHARSETMETA "<head><title>Multi-EPG</title></head><body>" + multiEPG + "</body></html>";
 }
 
 static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPConnection *content)
