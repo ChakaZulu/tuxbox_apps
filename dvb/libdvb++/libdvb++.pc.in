@@ -6,5 +6,5 @@ includedir=@includedir@
 Name: libdvb++
 Description: C++ DVB PSI parsing and API abstraction library
 Version: @VERSION@
-Libs: -L${libdir} -lpthread
+Libs: -L${libdir} -ldvb++ -lpthread
 Cflags: -I${includedir}
