@@ -324,8 +324,8 @@ messagebox.error Fehler
 messagebox.discard Wollen Sie die Änderungen verwerfen?
 messagebox.info Information
 
-settings.noconffile Die Neutirno-Einstellungen wurden nicht\ngefunden. Es werden Standardwerte benutzt.
-settings.missingoptionsconffile Die Neutirno-Einstellungen wurden erweitert.\nDie neuen Werte werden auf Standard gesetzt.
+settings.noconffile Die Neutrino-Einstellungen wurden nicht\ngefunden. Es werden Standardwerte benutzt.
+settings.missingoptionsconffile Die Neutrino-Einstellungen wurden erweitert.\nDie neuen Werte werden auf Standard gesetzt.
 
 cam.wrong Achtung, Ihre CAM_ALPHA.BIN passt\nnicht zu Ihrer Smart-Card!!!\n\nWollen Sie diese Warnung wieder sehen?
 ucodes.failure Achtung, die µCodes wurden NICHT gefunden!\n\nBitte per FTP (oder DBox-BootManager)\nuploaden, und die DBox neu starten!
