@@ -29,7 +29,7 @@ servicemenu.update Software-Aktualisierung
 servicemenu.scants Kanalsuche
 servicemenu.ucodecheck UCodes überprüfen
 servicemenu.reload Kanallisten neu laden
-servicemenu.reload_hint Kanallisten werden neu laden,\nbitte warten...
+servicemenu.reload_hint Kanallisten werden neu geladen,\nbitte warten...
 
 cablesetup.provider Kabelanbieter
 
@@ -378,7 +378,7 @@ flashupdate.fileis0bytes die Dateigröße ist 0 Byte
 flashupdate.eraseingflash lösche Flash
 flashupdate.erasefailed Flash löschen fehlgeschlagen
 flashupdate.programmingflash programmiere Flash
-flashupdate.cantopenmtd kann das MTD-Device nicht öffen
+flashupdate.cantopenmtd kann das MTD-Device nicht öffnen
 flashupdate.ready fertig
 flashupdate.reboot Die DBox wird neu gestartet
 flashupdate.updatemode Updatemodus
@@ -477,7 +477,7 @@ GENRE.NEWS.4 Diskussion/Interview/Debatte
 
 GENRE.SHOW.0 Show / Gameshow
 GENRE.SHOW.1 Gameshow/Quiz
-GENRE.SHOW.2 varietee
+GENRE.SHOW.2 Varietee
 GENRE.SHOW.3 Talkshow
 
 GENRE.SPORTS.0 Sport
