@@ -11,5 +11,7 @@ TUXBOX_APPS_DVB
 
 AC_OUTPUT([
 Makefile
+skyscan/Makefile
+stream/Makefile
 ])
 

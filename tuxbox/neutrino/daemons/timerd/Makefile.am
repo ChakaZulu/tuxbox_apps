@@ -1,8 +1,7 @@
 INCLUDES = \
 	-I$(top_srcdir)/libs \
 	@EVENTSERVER_CFLAGS@ \
-	@ZAPITCLIENT_CFLAGS@ \
-	-I@DRIVER@/include
+	@ZAPITCLIENT_CFLAGS@
 
 bin_PROGRAMS = timerd
 

@@ -5,7 +5,6 @@ INCLUDES = \
 	@CONFIGFILE_CFLAGS@ \
 	@FREETYPE_CFLAGS@ \
 	@LCDDISPLAY_CFLAGS@ \
-	-I@DRIVER@/include \
 	-I@DRIVER@/lcd
 
 bin_PROGRAMS = lcdd

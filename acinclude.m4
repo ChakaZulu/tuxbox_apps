@@ -133,6 +133,7 @@ AC_ARG_WITH(driver,
 if test -z "$DRIVER"; then
 	AC_MSG_ERROR([can't find driver sources])
 fi
+CPPFLAGS="$CPPFLAGS -I$DRIVER/include"
 AC_SUBST(DRIVER)
 ])
 
@@ -141,13 +142,10 @@ AC_ARG_WITH(dvbincludes,
 	[  --with-dvbincludes=PATH  path for dvb includes[[NONE]]],
 	[DVBINCLUDES="$withval"],[DVBINCLUDES=""])
 
-orig_CFLAGS=$CFLAGS
 orig_CPPFLAGS=$CPPFLAGS
 if test "$DVBINCLUDES"; then
-	CFLAGS="-I$DVBINCLUDES"
 	CPPFLAGS="-I$DVBINCLUDES"
 else
-	CFLAGS=""
 	CPPFLAGS=""
 fi
 AC_CHECK_HEADERS(dvb/version.h,[DVB_VERSION_H="yes"])
@@ -161,9 +159,7 @@ else
 fi
 DVB_VERSION_H=
 OST_DMX_H=
-CFLAGS="$orig_CFLAGS -I$DVBINCLUDES"
 CPPFLAGS="$orig_CPPFLAGS -I$DVBINCLUDES"
-CXXFLAGS="$CXXFLAGS -I$DVBINCLUDES"
 ])
 
 AC_DEFUN(_TUXBOX_APPS_LIB_CONFIG,[

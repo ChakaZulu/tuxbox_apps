@@ -1,6 +1,6 @@
 #!/bin/sh
 
-package="tuxbox-apps-dvb-dvbsnoop"
+package="dvbsnoop"
 
 srcdir=`dirname $0`
 test -z "$srcdir" && srcdir=.

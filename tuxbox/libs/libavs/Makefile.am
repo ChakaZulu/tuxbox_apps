@@ -1,5 +1,3 @@
-INCLUDES = -I@DRIVER@/include
-
 lib_LTLIBRARIES = libavs.la
 
 libavs_la_SOURCES = libavs.c
