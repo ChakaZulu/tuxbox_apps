@@ -1,0 +1,238 @@
+<!DOCTYPE skin SYSTEM "skin.dtd" [
+<!ENTITY lt "<">
+<!ENTITY gt ">">
+<!ENTITY auml "&#228;">
+<!ENTITY ouml "&#246;">
+<!ENTITY uuml "&#252;">
+<!ENTITY Auml "&#196;">
+<!ENTITY Ouml "&#214;">
+<!ENTITY Uuml "&#220;">
+<!ENTITY szlig "&#223;">
+]>
+<eskin>
+	<author>
+		<name>Felix Domke</name>
+		<email>tmbinc@gmx.net</email>
+	</author>
+	
+	<colors>
+		<color name="background" color="#FF000000" />
+
+		<color name="header" color="#000000" end="#FFFFFF" size="16" />
+		<color name="content" color="#20FFFFFF" end="#101010" size="16" />
+		<color name="content_selected" color="#90A0FF" end="#F8F8F8" size="16" />
+
+		<color name="osd_normal" color="#11000F9A" end="#ffffff" size="16" />
+		<color name="osd_epg" color="#11000F9A" end="#9090e0" size="16" />
+		<color name="osd_shadowcol" color="#11030320" />
+		<color name="osd_shadow" color="#11030320" end="#B1B2D9" size="16" />
+		<color name="osd_timebar" color="#1010AA"/>
+		<color name="osd_timebarborder" color="#ffffff"/>
+
+		<color name="shadow_red" color="#11030320" end="#ff0303" size="16" />
+		<color name="shadow_green" color="#11030320" end="#03ff03" size="16" />
+		<color name="shadow_yellow" color="#11030320" end="#ffff03" size="16" />
+		<color name="shadow_blue" color="#11030320" end="#0303ff" size="16" />
+		<color name="shadow_gray" color="#11030320" end="#282828" size="16" />
+		
+		<color name="orange_trans" color="#FF9200" end="#FFFFFFFF" size="4" />
+		<color name="black_trans"  color="#000000" end="#FF000000" size="4" />
+		<color name="orange_white" color="#FF9200" end="#19FFFFFF" size="4" />
+		<color name="orange_black" color="#FF9200" end="#00FFFFFF" size="4" />
+	</colors>
+	
+	<colorscheme>
+		<map name="backgroundColor" color="content" />
+
+		<map name="eServiceSelector.highlight" color="content_selected" />
+		<map name="focusedColor" color="content_selected" />
+
+		<map name="fgColor" color="content" />
+		<map name="fgColorDisabled" color="content" />
+
+		<map name="eWindow.titleBarColor" color="header" />
+
+		<map name="eProgress.border" color="osd_normal+15" />
+		<map name="eProgress.left" color="osd_normal+10" />
+		<map name="eProgress.right" color="osd_normal+5" />
+	</colorscheme>
+	
+	 <values>
+		<value name="eWindow.titleFontSize" value="25" />
+		<value name="eWindow.borderTop" value="72" />
+		<value name="eWindow.borderLeft" value="38" />
+		<value name="eWindow.borderRight" value="0" />
+		<value name="eWindow.borderBottom" value="5" />
+		<value name="eWindow.titleOffsetX" value="114" />
+		<value name="eWindow.titleOffsetY" value="15" />
+		<value name="eWindow.titleHeight" value="36" />  <!-- das feld wo der titel drin steht -->
+		<value name="eWindow.titleBorderY" value="15" />	<!-- im normalfall so gross wie das rechte pixmap -->
+		<value name="fontsize" value="24" />
+	</values>
+
+	<images basepath="" target="fb">
+		<img name="osd_crypt_on" src="crypt_on.png" />
+		<img name="osd_format_on" src="format_on.png" />
+		<img name="osd_dolby_on" src="dolby_on.png" />
+		<img name="osd_dolby_off" src="dolby_off.png" />
+		<img name="osd_crypt_off" src="crypt_off.png" />
+		<img name="osd_format_off" src="format_off.png" />
+		<img name="enigma_logo" src="enigma2.png" nomerge="yes" />
+		<img name="lcd_menu" src="lcdmenu.png" nomerge="yes" />
+		<img name="lcd_scart" src="video.png" nomerge="yes" />
+		
+		<img name="eCheckbox.checked" src="checked.png" />
+		<img name="eCheckbox.unchecked" src="unchecked.png" />
+
+		<img name="eWindow.top" src="decoration/oben_mitte-fs8.png" />
+		<img name="eWindow.topLeft" src="decoration/oben_links-fs8.png" />
+		<img name="eWindow.topRight" src="decoration/oben_rechts-fs8.png" />
+		<img name="eWindow.left" src="decoration/left-fs8.png" />
+<!--		<img name="eWindow.right" src="header.png" />
+		<img name="eWindow.bottomLeft" src="bottom.png" />
+		<img name="eWindow.bottom" src="bottom.png" />
+		<img name="eWindow.bottomRight" src="bottom.png" />
+		-->
+	</images>
+
+	<object name="eventview">
+		<eWindow cposition="50:80" csize="590:400" name="title">
+			<eLabel position="10:5" size="e:e-30" name="epg_description" font="NimbusSansL-Regular Sans L Regular;24" backgroundColor="content" wrap="on"/>
+			<eWidget position="0:e-30" size="600:e" backgroundColor="osd_shadowcol" />
+			<eLabel position="10:e-30" size="130:e" name="date" font="NimbusSansL-Regular Sans L Regular;18" backgroundColor="osd_shadow"/>
+			<eLabel position="130:e-30" size="230:e" name="time" font="NimbusSansL-Regular Sans L Regular;18" backgroundColor="osd_shadow"/>
+			<eLabel position="360:e-30" size="230:e" name="channel" font="NimbusSansL-Regular Sans L Regular;18" backgroundColor="osd_shadow" align="right"/>
+		</eWindow>
+	</object>
+
+	<object name="enigma_lcd_main">
+		<eZapLCDMain position="0:0" size="120:64">
+			<eLabel position="0:0" size="120:17" pixmap="enigma_logo" />
+			<eLabel position="0:17" size="120:34" font="NimbusSansL-Regular Sans L Regular;16" wrap="on" name="service_name" />
+			<eLabel position="74:51" size="46:13" font="NimbusSansL-Regular Sans L Regular;14" name="clock" align="right" />
+			<eProgress position="0:56" size="70:6" name="volume_bar" foregroundColor="255" leftColor="255" rightColor="0" border="1" />
+		</eZapLCDMain>
+	</object> 
+
+	<object name="enigma_lcd_menu">
+		<eZapLCDMenu position="0:0" size="120:64">
+			<eLabel position="0:0" size="120:18" font="NimbusSansL-Regular Sans L Regular;14" name="title" />
+		  <eLabel position="0:18" size="120:3" pixmap="lcd_menu" />
+			<eLabel position="0:22" size="120:43" font="NimbusSansL-Regular Sans L Regular;14" name="element" wrap="on" />
+			<!--eLabel position="0:61" size="120:3" pixmap="lcd_menu" /-->
+		</eZapLCDMenu>
+	</object>
+
+	<object name="enigma_lcd_scart">
+		<eZapLCDScart position="0:0" size="120:64">
+			<eLabel position="0:0" size="120:17" pixmap="enigma_logo" />
+		  <eLabel position="4:24" size="112:38" pixmap="lcd_scart" />	
+		</eZapLCDScart>
+	</object>
+
+	<object name="eDownloadWindow">
+		<eDownloadWindow position="50:70" size="600:300" text="HTTP Download">
+			<eProgress position="0:50" size="100:20" name="progress" />
+		</eDownloadWindow>
+	</object>
+
+	<object name="ezap_main">
+		<eZapMain position="50:355" size="670:180">
+
+			<!--kanalnummer-->
+			<eWidget position="4:3" size="113:82" backgroundColor="osd_normal" />
+
+			<!--hauptbox-->
+			<eWidget position="127:60" size="468:35" backgroundColor="osd_normal" />
+			<eWidget position="34:95" size="561:75" backgroundColor="osd_normal" />
+
+			<!--schatten-->
+			<eWidget position="14:85" size="113:10" backgroundColor="osd_shadowcol" />
+			<eWidget position="117:15" size="10:80" backgroundColor="osd_shadowcol" />
+			<eWidget position="127:35" size="478:25" backgroundColor="osd_shadowcol" />
+			<eWidget position="44:170" size="561:10" backgroundColor="osd_shadowcol" />
+			<eWidget position="595:35" size="10:135" backgroundColor="osd_shadowcol" />
+
+			<!--
+			<eWidget position="560:69" size="95:20" backgroundColor="osd_timebarborder" />
+			<eWidget position="562:71" size="91:16" backgroundColor="osd_timebar" />
+			-->
+
+			<!--texte-->
+			<eLabel position="10:5" size="100:50" font="NimbusSansL-Regular Sans L Regular;50" name="ch_number" align="center"
+				backgroundColor="osd_normal"/>
+
+			<eLabel position="140:61" size="445:40" font="NimbusSansL-Regular Sans L Regular;34" name="ch_name"
+				backgroundColor="osd_normal"/>
+
+			<eLabel position="50:102" size="75:27" font="NimbusSansL-Regular Sans L Regular;25" name="e_now_time"
+				backgroundColor="osd_epg"/>
+			<eLabel position="50:134" size="75:27" font="NimbusSansL-Regular Sans L Regular;25" name="e_next_time"
+				backgroundColor="osd_epg"/>
+
+			<eLabel position="140:102" size="345:35" font="NimbusSansL-Regular Sans L Regular;25" name="e_now_title"
+				backgroundColor="osd_epg"/>
+			<eLabel position="140:134" size="345:35" font="NimbusSansL-Regular Sans L Regular;25" name="e_next_title"
+				backgroundColor="osd_epg"/>
+
+			<eLabel position="495:102" size="90:35" font="NimbusSansL-Regular Sans L Regular;25" name="e_now_duration" align="right"
+				backgroundColor="osd_epg"/>
+			<eLabel position="495:134" size="90:35" font="NimbusSansL-Regular Sans L Regular;25" name="e_next_duration" align="right"
+				backgroundColor="osd_epg"/>
+
+			<eLabel position="521:35" size="65:21" font="NimbusSansL-Regular Sans L Regular;21" name="time" align="right"
+				backgroundColor="osd_shadow"/>
+
+			<eProgress position="14:62" size="95:17" name="progress_bar" foregroundColor="osd_normal" border="1" />
+
+			<eLabel position="140:37" size="104:24" pixmap="osd_crypt_on" name="osd_crypt_on" />
+			<eLabel position="163:39" size="104:24" pixmap="osd_format_on" name="osd_format_on"/>
+			<eLabel position="208:41" size="104:24" pixmap="osd_dolby_on" name="osd_dolby_on"/>
+			<eLabel position="163:39" size="104:24" pixmap="osd_format_off" name="osd_format_off"/>
+			<eLabel position="208:41" size="104:24" pixmap="osd_dolby_off" name="osd_dolby_off"/>
+			<eLabel position="140:37" size="104:24" pixmap="osd_crypt_off" name="osd_crypt_off"/>
+			<eLabel name="description" />
+			
+			<eLabel name="button_red_enabled" position="243:39" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_red" />
+			<eLabel name="button_green_enabled" position="263:39" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_green"  />
+			<eLabel name="button_yellow_enabled" position="283:39" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_yellow"  />
+			<eLabel name="button_blue_enabled" position="303:39" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_blue" />
+
+			<eLabel name="button_red_disabled" position="243:39" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
+			<eLabel name="button_green_disabled" position="263:39" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
+			<eLabel name="button_yellow_disabled" position="283:39" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
+			<eLabel name="button_blue_disabled" position="303:39" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
+	
+		</eZapMain>
+	</object>
+	
+	<object name="eSatelliteConfigurationManager">
+		<eSatelliteConfigurationManager position="120:80" size="500:370" text="Satellitenkonfiguration">
+			<eLabel text="Satelliten:" position="0:0" size="400:30" font="NimbusSansL-Regular Sans L Regular;25" />
+			<eListbox name="list" position="0:30" size="400:300" />
+			<eButton name="close" position="300:300" size="50:30" text="[OK]"/>
+			<eButton name="new" position="50:300" size="50:30" text="Neu..."/>
+			<eButton name="delete" position="0:300" size="50:30" text="Loeschen..."/>
+		</eSatelliteConfigurationManager>
+	</object>
+	
+	<object name="tsSelectType">
+		<tsSelectType position="0:0" size="e:e-30">
+			<eLabel text="Sendersuchlauf" position="0:0" size="e:30" font="NimbusSansL-Regular Sans L Regular;25" />
+			<eListbox name="menu" position="10:40" size="e-10:e-10" />
+		</tsSelectType>
+	</object>
+	
+	<object name="tsManual">
+		<tsManual position="0:0" size="e:e-30">
+			<eCheckbox position="0:0" size="e:30" text="Liste vorher komplett löschen" name="clearlist" />
+			<eCheckbox position="0:30" size="e:30" text="Rekursiv NITs durchsuchen" name="searchnit" />
+			<eCheckbox position="0:60" size="e:30" text="ONITs beachten" name="useonit" />
+			<eCheckbox position="0:90" size="e:30" text="BATs durchsuchen" name="usebat" />
+			<eListbox name="transponders" position="10:120" size="e-10:e-40" />
+			<eButton position="0:e-30" size="50:e" name="add" text="Add." />
+			<eButton position="60:e-30" size="50:e" name="start" text="Start..." />
+			<eButton position="120:e-30" size="50:e" name="abort" text="Abbruch" />
+		</tsManual>
+	</object>
+</eskin>
