@@ -15,6 +15,10 @@ public:
 	bool needfb, needrc, needlcd, needvtxtpid, needoffsets, showpig;
 	int posx, posy, sizex, sizey;
 	ePlugin(eListBox<ePlugin> *parent, const char *cfgfile, const char* descr=0);
+	bool operator < ( const ePlugin & e ) const 
+	{
+		return cfgname < e.cfgname;
+	}
 };
 
 class eZapPlugins: public eListBoxWindow<ePlugin>

@@ -189,6 +189,7 @@ int eZapPlugins::find(bool ignore_requires)
 		}
 		closedir(d);
 	}
+	list.sort();
 	return cnt;
 }
 
