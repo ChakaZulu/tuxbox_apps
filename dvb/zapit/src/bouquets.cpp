@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.65 2002/09/20 16:55:22 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.66 2002/10/04 10:24:25 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -26,6 +26,9 @@
 #include <map>
 #include <ext/hash_set>
 
+/* tuxbox headers */
+#include <configfile.h>
+
 #include <zapsi/sdt.h>
 
 #include "settings.h"
@@ -33,6 +36,7 @@
 #include "xmlinterface.h"
 
 extern tallchans allchans;   //  defined in zapit.cpp
+extern CConfigFile * config; //  defined in zapit.cpp
 
 /**** class CBouquet ********************************************************/
 
@@ -304,8 +308,6 @@ void CBouquetManager::makeRemainingChannelsBouquet()
 	ChannelList unusedChannels;
 	__gnu_cxx::hash_set<t_channel_id> chans_processed;
 
-	deleteBouquet(remainChannels);
-
 	for (vector<CBouquet*>::iterator it = Bouquets.begin(); it != Bouquets.end(); it++)
 	{
 		for (vector<CZapitChannel*>::iterator jt = (*it)->tvChannels.begin(); jt != (*it)->tvChannels.end(); jt++)
@@ -334,7 +336,11 @@ void CBouquetManager::makeRemainingChannelsBouquet()
 
 void CBouquetManager::renumServices()
 {
-	makeRemainingChannelsBouquet();
+	deleteBouquet(remainChannels);
+	
+	if (config->getBool("makeRemainingChannelsBouquet", true))
+	    makeRemainingChannelsBouquet();
+
 	storeBouquets();
 }
 
