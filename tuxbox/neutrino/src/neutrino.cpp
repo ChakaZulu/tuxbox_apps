@@ -2639,6 +2639,24 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 			ShowMsg ( "messagebox.info", string((char *) data) , CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw" );
 			return messages_return::handled;
 		}
+		else if ( msg == NeutrinoMessages::CHANGEMODE )
+		{
+			if(data == mode_radio)
+			{
+				if ( mode == mode_tv )
+					radioMode();
+			}
+			if(data == mode_tv)				
+			{
+				if ( mode == mode_radio )
+					tvMode();
+			}
+			if(data == mode_standby)
+			{
+				if(mode != mode_standby)
+					standbyMode( true );
+			}
+		}
 
 	if ( ( msg>= CRCInput::RC_WithData ) && ( msg< CRCInput::RC_WithData+ 0x10000000 ) )
 		delete (unsigned char*) data;
@@ -3065,7 +3083,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.333 2002/09/28 23:24:48 Zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.334 2002/10/03 22:01:51 dirch Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
