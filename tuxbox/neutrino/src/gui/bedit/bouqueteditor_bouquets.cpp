@@ -1,6 +1,7 @@
 #include "bouqueteditor_bouquets.h"
 #include "messagebox.h"
 #include "hintbox.h"
+#include "bouqueteditor_channels.h"
 #include "../global.h"
 
 CBEBouquetWidget::CBEBouquetWidget(CBouquetEditorEvents* EventHandler = NULL)
@@ -237,6 +238,14 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 		{
 			if (state == beDefault)
 			{
+				CBEChannelWidget* channelWidget = new CBEChannelWidget( Bouquets[ selected].name, selected + 1);
+				channelWidget->exec( this, "");
+				if (channelWidget->hasChanged())
+					bouquetsChanged = true;
+				delete channelWidget;
+				paintHead();
+				paint();
+				paintFoot();
 			}
 			else if (state == beMoving)
 			{
