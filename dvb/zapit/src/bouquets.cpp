@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.91 2003/09/17 10:49:52 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.92 2003/09/17 12:04:20 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -336,7 +336,7 @@ void CBouquetManager::saveBouquets(CZapitClient::bouquetMode bouquetMode, char *
 				for (j = 0; j < Bouquets[i]->tvChannels.size(); j++)
 					Bouquets[i]->tvChannels[j] = new CZapitChannel(*(Bouquets[i]->tvChannels[j]));
 				for (j = 0; j < Bouquets[i]->radioChannels.size(); j++)
-					Bouquets[i]->radioChannels[j] = new CZapitChannel(*(Bouquets[i]->tvChannels[j]));
+					Bouquets[i]->radioChannels[j] = new CZapitChannel(*(Bouquets[i]->radioChannels[j]));
 			}
 				
 			allchans.clear();
@@ -349,14 +349,28 @@ void CBouquetManager::saveBouquets(CZapitClient::bouquetMode bouquetMode, char *
 					while (!(storedBouquets[0]->tvChannels.empty()))
 					{
 						if (!(existsChannelInBouquet(dest, storedBouquets[0]->tvChannels[0]->getChannelID())))
+						{
 							Bouquets[dest]->addService(storedBouquets[0]->tvChannels[0]);
-						storedBouquets[0]->removeService(storedBouquets[0]->tvChannels[0]);
+							storedBouquets[0]->removeService(storedBouquets[0]->tvChannels[0]);
+						}
+						else
+						{
+							delete storedBouquets[0]->tvChannels[0];
+							storedBouquets[0]->tvChannels.erase(storedBouquets[0]->tvChannels.begin());
+						}
 					}
 					while (!(storedBouquets[0]->radioChannels.empty()))
 					{
 						if (!(existsChannelInBouquet(dest, storedBouquets[0]->radioChannels[0]->getChannelID())))
+						{
 							Bouquets[dest]->addService(storedBouquets[0]->radioChannels[0]);
-						storedBouquets[0]->removeService(storedBouquets[0]->radioChannels[0]);
+							storedBouquets[0]->removeService(storedBouquets[0]->radioChannels[0]);
+						}
+						else
+						{
+							delete storedBouquets[0]->radioChannels[0];
+							storedBouquets[0]->radioChannels.erase(storedBouquets[0]->radioChannels.begin());
+						}
 					}
 					delete storedBouquets[0];
 				}
