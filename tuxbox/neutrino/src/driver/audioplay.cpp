@@ -33,6 +33,7 @@
  ****************************************************************************/
 #include "global.h"
 #include <stdio.h>
+#include <fcntl.h>
 #include <sched.h>
 
 #include <neutrino.h>
@@ -97,22 +98,14 @@ void* CAudioPlayer::PlayThread(void * filename)
 			}
          
 			/* Decode stdin to stdout. */
-			int Status;
-			if(ftype(fp, "ogg"))
-			{
-				Status = COggDec::getInstance()->Decoder(fp,soundfd,&CAudioPlayer::getInstance()->state);
-			}
-			else if(ftype(fp, "wav"))
-			{
-				Status = CWavDec::getInstance()->Decoder(fp,soundfd,&CAudioPlayer::getInstance()->state);
-			}
-			else
-			{
-				Status = CMP3Dec::getInstance()->Decoder(fp,soundfd,&CAudioPlayer::getInstance()->state);
-			}
-			// DECODER CLOSES STREAM
-			if(Status > 0)
-				fprintf(stderr,"Error %d occured during decoding.\n",Status);
+			CBaseDec::RetCode Status;
+			printf("CAudioPlayer: Decoding %s ", filename);
+			Status = CBaseDec::DecoderBase(fp,soundfd,&getInstance()->state, 
+													 &getInstance()->m_MetaData,
+													 &getInstance()->m_played_time);
+			fclose(fp);
+			if(Status != CBaseDec::OK)
+				fprintf(stderr,"Error %d occured during decoding.\n",(int)Status);
 	
 		}
 		else
@@ -122,7 +115,7 @@ void* CAudioPlayer::PlayThread(void * filename)
 	else
 		fprintf(stderr,"Error opening /dev/sound/dsp\n");
 		
-	CAudioPlayer::getInstance()->state = CBaseDec::STOP;
+	getInstance()->state = CBaseDec::STOP;
 	pthread_exit(0);
 	return NULL;
 }
@@ -130,7 +123,7 @@ void* CAudioPlayer::PlayThread(void * filename)
 bool CAudioPlayer::play(const char *filename, bool highPrio)
 {
 	stop();
-	CAudioPlayer::getInstance()->clearMetaData();
+	getInstance()->clearMetaData();
 	state = CBaseDec::PLAY;
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
@@ -225,23 +218,11 @@ CAudioMetaData CAudioPlayer::readMetaData(const char* filename, bool nice)
 
 		/* Decode stdin to stdout. */
 		bool Status;
-		if(ftype(fp, "ogg"))
-		{
-			Status = COggDec::getInstance()->GetMetaData(fp, nice, &m);
-		}
-		else if(ftype(fp, "wav"))
-		{
-			Status = CWavDec::getInstance()->GetMetaData(fp, nice, &m);
-		}
-		else
-		{
-			Status = CMP3Dec::getInstance()->GetMetaData(fp, nice, &m);
-		}
-
+		Status = CBaseDec::GetMetaDataBase(fp, nice, &m);
 		if(!Status)
 			fprintf(stderr,"Error occured during meta data reading.\n");
 
-		//		fclose(fp); /* netfile has 20 slots only -> maybe we have more than 20 file in our list */
+		fclose(fp);
 	}
 	else
 		fprintf(stderr,"Error opening file %s\n",(char *) filename);

@@ -36,9 +36,14 @@ class CBaseDec
 {
 public:
 	enum State {STOP = 0, STOP_REQ, PLAY, PAUSE, FF, REV};
+	enum RetCode { OK = 0, READ_ERR, WRITE_ERR, DSPSET_ERR, DATA_ERR, INTERNAL_ERR };
 
-	virtual int Decoder(FILE *InputFp,int OutputFd, State* state) = 0;
-	virtual bool GetMetaData(FILE *in, bool nice, CAudioMetaData* m) = 0;
+	// the follwing two methods have to be implemented for new decoders
+	virtual RetCode Decoder(FILE *InputFp,int OutputFd, State* state, CAudioMetaData* m, time_t* t)=0;
+	virtual bool GetMetaData(FILE *in, bool nice, CAudioMetaData* m)=0;
+	
+	static RetCode DecoderBase(FILE *InputFp,int OutputFd, State* state, CAudioMetaData* m, time_t* t);
+	static bool GetMetaDataBase(FILE *in, bool nice, CAudioMetaData* m);
 	static void Init();
 
 	CBaseDec(){};

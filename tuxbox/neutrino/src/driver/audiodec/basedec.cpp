@@ -27,14 +27,57 @@
 #define DBOX
 
 #include <basedec.h>
+#include <mp3dec.h>
+#include <oggdec.h>
+#include <wavdec.h>
 #include <linux/soundcard.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <dbox/avs_core.h>
+#include <driver/netfile.h>
 #define AVS_DEVICE "/dev/dbox/avs0"
 
 unsigned int CBaseDec::mSamplerate=0;
+
+CBaseDec::RetCode CBaseDec::DecoderBase(FILE *InputFp,int OutputFd, State* state, CAudioMetaData* md, time_t* t)
+{
+	RetCode Status;
+	if(ftype(InputFp, "ogg"))
+	{
+		printf("(ogg)\n");
+		Status = COggDec::getInstance()->Decoder(InputFp, OutputFd, state, md, t);
+	}
+	else if(ftype(InputFp, "wav"))
+	{
+		printf("(wav)\n");
+		Status = CWavDec::getInstance()->Decoder(InputFp, OutputFd, state, md, t);
+	}
+	else
+	{
+		printf("(mp3)\n");
+		Status = CMP3Dec::getInstance()->Decoder(InputFp, OutputFd, state, md, t);
+	}
+	return Status;
+}
+
+bool CBaseDec::GetMetaDataBase(FILE *in, bool nice, CAudioMetaData* m)
+{
+	bool Status;
+	if(ftype(in, "ogg"))
+	{
+		Status = COggDec::getInstance()->GetMetaData(in, nice, m);
+	}
+	else if(ftype(in, "wav"))
+	{
+		Status = CWavDec::getInstance()->GetMetaData(in, nice, m);
+	}
+	else
+	{
+		Status = CMP3Dec::getInstance()->GetMetaData(in, nice, m);
+	}
+	return Status;
+}
 
 bool CBaseDec::SetDSP(int soundfd, int fmt, unsigned int dsp_speed, unsigned int channels)
 {

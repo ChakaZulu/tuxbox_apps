@@ -34,23 +34,26 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <pthread.h>
-#include <driver/audioplay.h>
+#include <basedec.h>
+#include <driver/audiometadata.h>
 #include <tremor/ogg.h>
 #include <tremor/ivorbisfile.h>
+
 #define DECODE_SLOTS 30
+
 class COggDec : public CBaseDec
 {
 
 public:
 	static COggDec* getInstance();
-	virtual int Decoder(FILE *,int , State* );
+	virtual RetCode Decoder(FILE *,int , State* , CAudioMetaData* m, time_t* t);
 	bool GetMetaData(FILE *in, bool nice, CAudioMetaData* m);
 	COggDec(){};
 private:
 	void ParseUserComments(vorbis_comment*, CAudioMetaData*);
 	bool Open(FILE* , OggVorbis_File*);
 	void SetMetaData(OggVorbis_File*, CAudioMetaData*);
-	int Status;
+	RetCode Status;
 	char* mPcmSlots[DECODE_SLOTS];
 	ogg_int64_t mSlotTime[DECODE_SLOTS];
 	int mWriteSlot;
@@ -59,6 +62,7 @@ private:
 	int mOutputFd;
 	State* mState;
 	bool mSeekable;
+	time_t* mTimePlayed;
 	static void* OutputDsp(void *);
 };
 

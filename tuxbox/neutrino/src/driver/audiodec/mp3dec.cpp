@@ -193,7 +193,7 @@ inline signed short CMP3Dec::MadFixedToSShort(const mad_fixed_t Fixed)
 /****************************************************************************
  * Print human readable informations about an audio MPEG frame.             *
  ****************************************************************************/
-void CMP3Dec::CreateInfo()
+void CMP3Dec::CreateInfo(CAudioMetaData* m)
 {
 	const char	*Layer,
 				   *Mode,
@@ -258,14 +258,14 @@ void CMP3Dec::CreateInfo()
    else
       Vbr="";
 
-	CAudioPlayer::getInstance()->m_MetaData.type = CAudioMetaData::MP3;
-	CAudioPlayer::getInstance()->m_MetaData.bitrate = m_bitrate;
-	CAudioPlayer::getInstance()->m_MetaData.samplerate = m_samplerate;
-	CAudioPlayer::getInstance()->m_MetaData.total_time = m_filesize * 8 / m_bitrate;
+	m->type = CAudioMetaData::MP3;
+	m->bitrate = m_bitrate;
+	m->samplerate = m_samplerate;
+	m->total_time = m_filesize * 8 / m_bitrate;
 	std::stringstream ss;
 	ss << "MPEG Layer " << Layer << " / " << Mode;
-	CAudioPlayer::getInstance()->m_MetaData.type_info = ss.str();
-	CAudioPlayer::getInstance()->m_MetaData.changed=true;
+	m->type_info = ss.str();
+	m->changed=true;
 }
 
 /****************************************************************************
@@ -273,7 +273,7 @@ void CMP3Dec::CreateInfo()
  ****************************************************************************/
 #define INPUT_BUFFER_SIZE	(2*8192)
 #define OUTPUT_BUFFER_SIZE	1022*4 /* AVIA_GT_PCM_MAX_SAMPLES-1 */
-int CMP3Dec::Decoder(FILE *InputFp,int OutputFd, State* state)
+CBaseDec::RetCode CMP3Dec::Decoder(FILE *InputFp,int OutputFd, State* state, CAudioMetaData* meta_data, time_t* time_played)
 {
 	struct mad_stream	Stream;
 	struct mad_frame	Frame;
@@ -283,8 +283,8 @@ int CMP3Dec::Decoder(FILE *InputFp,int OutputFd, State* state)
 						OutputBuffer[OUTPUT_BUFFER_SIZE],
 						*OutputPtr=OutputBuffer;
 	const unsigned char	*OutputBufferEnd=OutputBuffer+OUTPUT_BUFFER_SIZE;
-	int					Status=0,
-						ret;
+	RetCode				Status=OK;
+	int 					ret;
 	unsigned long		FrameCount=0;
 
 	/* Calc file length */
@@ -361,7 +361,7 @@ int CMP3Dec::Decoder(FILE *InputFp,int OutputFd, State* state)
 				{
 					fprintf(stderr,"%s: read error on bitstream (%s)\n",
 							ProgName,strerror(errno));
-					Status=1;
+					Status=READ_ERR;
 				}
 				if(feof(InputFp))
 					fprintf(stderr,"%s: end of input stream\n",ProgName);
@@ -442,7 +442,7 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 					Timer.seconds=0;
 					Timer.fraction=0;
 				}
-				CAudioPlayer::getInstance()->setTimePlayed(Timer.seconds);
+				*time_played=Timer.seconds;
 				FrameCount-=FRAMES_TO_SKIP + FRAMES_TO_PLAY;
 			}
 			Stream.buffer=NULL;
@@ -471,7 +471,7 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 				{
 					fprintf(stderr,"%s: unrecoverable frame level error (%s).\n",
 						ProgName,MadErrorString(&Stream));
-					Status=1;
+					Status=DATA_ERR;
 					break;
 				}
 		}
@@ -485,7 +485,7 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 		{
 			if (SetDSP(OutputFd, AFMT_S16_NE, Frame.header.samplerate, 2))
 			{
-				Status=1;
+				Status=DSPSET_ERR;
 				break;
 			}
 			m_samplerate=Frame.header.samplerate;
@@ -494,7 +494,7 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 			m_layer=Frame.header.layer;
 			m_emphasis=Frame.header.emphasis;
 			m_vbr=false;
-			CreateInfo();
+			CreateInfo(meta_data);
 		}
 		else
 		{
@@ -503,15 +503,15 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 				m_vbr = true;
 				m_bitrate -= m_bitrate / FrameCount;
 				m_bitrate += Frame.header.bitrate / FrameCount;
-				CreateInfo();
+				CreateInfo(meta_data);
 			}
 		}
 
 		// if played time was modified from outside, take this value...
-		if(CAudioPlayer::getInstance()->getTimePlayed()!=Timer.seconds)
+		if(*time_played!=Timer.seconds)
 		{
 			mad_timer_reset(&Timer);
-			Timer.seconds = CAudioPlayer::getInstance()->getTimePlayed();
+			Timer.seconds = *time_played;
 		}
 		
 		/* Accounting. The computed frame duration is in the frame
@@ -526,7 +526,7 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 		mad_timer_add(&Timer,Frame.header.duration);
 		//mad_timer_string(Timer,m_timePlayed,"%lu:%02lu",
       //                 MAD_UNITS_MINUTES,MAD_UNITS_MILLISECONDS,0);
-		CAudioPlayer::getInstance()->setTimePlayed(Timer.seconds);
+		*time_played = Timer.seconds;
 
 				
 		// decode 5 frames each 75 frames in ff mode
@@ -567,7 +567,7 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 						if (write(OutputFd, OutputBuffer, OUTPUT_BUFFER_SIZE) != OUTPUT_BUFFER_SIZE)
 						{
 							fprintf(stderr,"%s: PCM write error (%s).\n", ProgName, strerror(errno));
-							Status = 2;
+							Status = WRITE_ERR;
 							break;
 						}
 						
@@ -593,7 +593,7 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 						if (write(OutputFd, OutputBuffer, OUTPUT_BUFFER_SIZE) != OUTPUT_BUFFER_SIZE)
 						{
 							fprintf(stderr,"%s: PCM write error (%s).\n", ProgName, strerror(errno));
-							Status = 2;
+							Status = WRITE_ERR;
 							break;
 						}
 						
@@ -614,7 +614,7 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 	/* If the output buffer is not empty and no error occured during
      * the last write, then flush it.
 	 */
-	if(OutputPtr!=OutputBuffer && Status!=2)
+	if(OutputPtr!=OutputBuffer && Status!=WRITE_ERR)
 	{
 		ssize_t	BufferSize=OutputPtr-OutputBuffer;
 
@@ -622,12 +622,12 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
   		{
 			fprintf(stderr,"%s: PCM write error (%s).\n",
 					ProgName,strerror(errno));
-			Status=2;
+			Status=WRITE_ERR;
 		}
 	}
 
 	/* Accounting report if no error occured. */
-	if(!Status)
+	if(Status==OK)
 	{
 		/* The duration timer is converted to a human readable string
 		 * with the versatile but still constrained mad_timer_string()
@@ -647,15 +647,14 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 		 */
 	   //		mad_timer_string(Timer,m_timePlayed,"%lu:%02lu",
 		//				 MAD_UNITS_MINUTES,MAD_UNITS_MILLISECONDS,0);
-		CAudioPlayer::getInstance()->setTimePlayed(Timer.seconds);
+		*time_played = Timer.seconds;
 
 //		      fprintf(stderr,"%s: %lu frames decoded (%s).\n",
 //				ProgName,FrameCount,Buffer);
 	}
 
 	/* That's the end of the world (in the H. G. Wells way). */
-	fclose(InputFp);
-	return(Status);
+	return Status;
 }
 
 CMP3Dec* CMP3Dec::getInstance()
@@ -671,9 +670,7 @@ CMP3Dec* CMP3Dec::getInstance()
 bool CMP3Dec::GetMetaData(FILE *in, bool nice, CAudioMetaData* m)
 {
 	GetMP3Info(in, nice, m);
-	bool fileClosed=GetID3(in, m);
-	if(!fileClosed)
-		fclose(in);
+	GetID3(in, m);
 	return true;
 }
 
@@ -746,7 +743,7 @@ void CMP3Dec::GetMP3Info(FILE* in, bool nice, CAudioMetaData *m)
 
 
 //------------------------------------------------------------------------
-bool CMP3Dec::GetID3(FILE* in, CAudioMetaData* m)
+void CMP3Dec::GetID3(FILE* in, CAudioMetaData* m)
 {
 	unsigned int i;
 	struct id3_frame const *frame;
@@ -919,16 +916,12 @@ bool CMP3Dec::GetID3(FILE* in, CAudioMetaData* m)
 		else
 			printf("error open id3 tag\n");
 
-		fclose(in);
 		id3_finish_file(id3file);
-		return true;
 	}
-	return false;
 	if(0)
 	{
-	fail:
-		printf("id3: not enough memory to display tag");
-		return false;
+		fail:
+			printf("id3: not enough memory to display tag");
 	}
 }
 

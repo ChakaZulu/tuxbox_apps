@@ -28,17 +28,11 @@
 
 #include <pthread.h>
 #include <driver/audiodec/basedec.h>
-#include <driver/audiodec/mp3dec.h>
-#include <driver/audiodec/oggdec.h>
-#include <driver/audiodec/wavdec.h>
 #include <driver/audiometadata.h>
 #include <string>
 
 class CAudioPlayer
 {
-	friend class CMP3Dec;
-	friend class COggDec;
-	friend class CWavDec;
 private:
 	time_t m_played_time;
 	int  m_sc_buffered;
@@ -52,7 +46,6 @@ private:
 protected: 
 	CAudioMetaData m_MetaData;
 	bool SetDSP(int soundfd, int fmt, unsigned int dsp_speed, unsigned int channels);
-	void setTimePlayed(time_t t){m_played_time = t;}
 
 public:
 	static CAudioPlayer* getInstance();

@@ -37,7 +37,7 @@ class CWavDec : public CBaseDec
 
 public:
 	static CWavDec* getInstance();
-	virtual int Decoder(FILE *,int , State* );
+	virtual RetCode Decoder(FILE *,int , State* , CAudioMetaData* m, time_t* t);
 	bool GetMetaData(FILE *in, bool nice, CAudioMetaData* m);
 	CWavDec(){};
 private:

@@ -68,16 +68,14 @@ int endianTest=1;
 
 #define MAX_OUTPUT_SAMPLES 1022 /* AVIA_GT_PCM_MAX_SAMPLES-1 */
 
-int CWavDec::Decoder(FILE *in, int OutputFd, State* state)
+CBaseDec::RetCode CWavDec::Decoder(FILE *in, int OutputFd, State* state, CAudioMetaData* meta_data, time_t* time_played)
 {
 	char* buffer;
-	int Status=0;
-	CAudioMetaData* m = &CAudioPlayer::getInstance()->m_MetaData;
+	RetCode Status=OK; 
 
-	if (!SetMetaData(in, m))
+	if (!SetMetaData(in, meta_data))
 	{
-		fclose(in);
-		Status=2;
+		Status=DATA_ERR;
 		return Status;
 	}
 	fseek(in, 44, SEEK_SET);
@@ -90,21 +88,19 @@ int CWavDec::Decoder(FILE *in, int OutputFd, State* state)
 			break;
 		default:
 			printf("%s: wrong bits per sample (%d)\n", ProgName, mBitsPerSample);
-			Status=3;
-			fclose(in);
+			Status=DATA_ERR;
 			return Status;
 	}
 
-	if (SetDSP(OutputFd, fmt, m->samplerate , mChannels))
+	if (SetDSP(OutputFd, fmt, meta_data->samplerate , mChannels))
 	{
-		fclose(in);
-		Status=1;
+		Status=DSPSET_ERR;
 		return Status;
 	}
 	int jumppos=0;
 	int bytes;
-	int bytes_to_play = (int) (1.0 * MSECS_TO_PLAY / 1000 * m->bitrate / 8);
-	int bytes_to_skip = (int) (1.0 * MSECS_TO_SKIP / 1000 * m->bitrate / 8);
+	int bytes_to_play = (int) (1.0 * MSECS_TO_PLAY / 1000 * meta_data->bitrate / 8);
+	int bytes_to_skip = (int) (1.0 * MSECS_TO_SKIP / 1000 * meta_data->bitrate / 8);
 	int buffersize = MAX_OUTPUT_SAMPLES * mChannels * mBitsPerSample / 8;
 	buffer = (char*) malloc (buffersize);
 	do
@@ -141,11 +137,10 @@ int CWavDec::Decoder(FILE *in, int OutputFd, State* state)
 		if (write(OutputFd, buffer, bytes) != bytes)
 		{
 			fprintf(stderr,"%s: PCM write error (%s).\n", ProgName, strerror(errno));
-			Status=6;
+			Status=WRITE_ERR;
 		}  
-		CAudioPlayer::getInstance()->setTimePlayed((ftell(in)-44)*8/m->bitrate);
-	} while (bytes > 0 && *state!=STOP_REQ && Status==0);
-	fclose(in);
+		*time_played = (meta_data->bitrate!=0) ? (ftell(in)-44)*8/meta_data->bitrate : 0;
+	} while (bytes > 0 && *state!=STOP_REQ && Status==OK);
 	free(buffer);
 	return Status;
 }
@@ -187,7 +182,7 @@ bool CWavDec::SetMetaData(FILE* in, CAudioMetaData* m)
 	m->samplerate = Swap32IfBE(wh.SampleRate);
 	mBitsPerSample = Swap16IfBE(wh.BitsPerSample);
 	mChannels = Swap16IfBE(wh.NumChannels);
-	m->total_time = (filesize-44)*8 / m->bitrate;
+	m->total_time = (m->bitrate!=0) ? (filesize-44)*8 / m->bitrate : 0;
 	std::stringstream ss;
 	ss << "Riff/Wave / " << mChannels << "channel(s) / " << mBitsPerSample << "bit";
 	m->type_info = ss.str();

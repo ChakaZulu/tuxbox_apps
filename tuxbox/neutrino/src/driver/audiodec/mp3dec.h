@@ -42,7 +42,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <pthread.h>
-#include <driver/audioplay.h>
+#include <basedec.h>
+#include <driver/audiometadata.h>
 
 class CMP3Dec : public CBaseDec
 {
@@ -57,13 +58,13 @@ private:
 
 	const char*  MadErrorString(const struct mad_stream *Stream);
 	signed short MadFixedToSShort(const mad_fixed_t Fixed);
-	void			 CreateInfo();
+	void			 CreateInfo(CAudioMetaData* m);
 	void         GetMP3Info(FILE* in, bool nice, CAudioMetaData* m);
-	bool         GetID3(FILE* in, CAudioMetaData* m);
+	void         GetID3(FILE* in, CAudioMetaData* m);
 
 public:
 	static CMP3Dec* getInstance();
-	virtual int Decoder(FILE *InputFp,int OutputFd, State* state);
+	virtual RetCode Decoder(FILE *InputFp,int OutputFd, State* state, CAudioMetaData* m, time_t* t);
 	bool GetMetaData(FILE *in, bool nice, CAudioMetaData* m);
 	CMP3Dec(){};
 
