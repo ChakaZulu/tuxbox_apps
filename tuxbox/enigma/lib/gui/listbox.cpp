@@ -41,8 +41,13 @@ eListBoxBase::eListBoxBase(eWidget* parent, const eWidget* descr, int takefocus,
 
 eListBoxBase::~eListBoxBase()
 {
-	while (childs.begin() != childs.end())
-		delete childs.front();
+	ePtrList<eListBoxEntry>::iterator it(childs.begin());
+	while (it != childs.end())
+	{
+		it->clearLB();
+		delete *it;
+		childs.erase(it++);
+	}
 }
 
 void eListBoxBase::setFlags(int _flags)	
@@ -398,8 +403,13 @@ void eListBoxBase::take(eListBoxEntry* entry, bool holdCurrent)
 
 void eListBoxBase::clearList()
 {
-	while (!childs.empty())
-		delete childs.first();
+	ePtrList<eListBoxEntry>::iterator it(childs.begin());
+	while (it != childs.end())
+	{
+		it->clearLB();
+		delete *it;
+		childs.erase(it++);
+	}
 	current = top = bottom = childs.end();
 	if (!in_atomic)
 	{
@@ -413,6 +423,7 @@ void eListBoxBase::clearList()
 		atomic_new=0;
 		atomic_old=0;
 	}
+	current = top = bottom = childs.end();
 }
 
 eListBoxEntry *eListBoxBase::goNext()
