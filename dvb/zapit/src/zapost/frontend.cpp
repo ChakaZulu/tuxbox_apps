@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.46 2003/03/14 07:31:51 obi Exp $
+ * $Id: frontend.cpp,v 1.47 2003/04/21 20:41:17 obi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -483,7 +483,7 @@ int CFrontend::setParameters(struct dvb_frontend_parameters *feparams, const uin
 
 	if (tuned) {
 		ret = diff(event.parameters.frequency, feparams->frequency);
-#if 0
+#if 1
 		/*
 		 * if everything went ok, then it is a good idea to copy the real
 		 * frontend parameters, so we can update the service list, if it differs.
@@ -520,7 +520,7 @@ void CFrontend::setSec(const uint8_t sat_no, const uint8_t pol, const bool high_
 
 	fe_sec_voltage_t v = pol ? SEC_VOLTAGE_13 : SEC_VOLTAGE_18;
 	fe_sec_tone_mode_t t = high_band ? SEC_TONE_ON : SEC_TONE_OFF;
-	fe_sec_mini_cmd_t b = ((sat_no /* / 4 */) % 2) ? SEC_MINI_B : SEC_MINI_A;
+	fe_sec_mini_cmd_t b = (sat_no & 1) ? SEC_MINI_B : SEC_MINI_A;
 
 	/*
 	 * [0] from master, no reply, 1st transmission
