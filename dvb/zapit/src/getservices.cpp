@@ -349,7 +349,8 @@ void FindBouquets(XMLTreeNode *root)
 			itChannel = allchans_tv.find((onid << 16) + sid);
 			if (itChannel != allchans_tv.end())
 			{
-				chan = &(itChannel->second);
+//				chan = &(itChannel->second);
+				chan = new channel(itChannel->second);
 				channelType = isTVChannel;
 			}
 			else
@@ -357,7 +358,8 @@ void FindBouquets(XMLTreeNode *root)
 				itChannel = allchans_radio.find((onid << 16) + sid);
 				if (itChannel != allchans_radio.end())
 				{
-					chan = &(itChannel->second);
+//					chan = &(itChannel->second);
+					chan = new channel(itChannel->second);
 					channelType = isRadioChannel;
 				}
 				else
