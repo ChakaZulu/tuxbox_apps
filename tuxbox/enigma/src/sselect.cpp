@@ -21,8 +21,8 @@ struct serviceSelectorActions
 	eAction nextBouquet, prevBouquet, showBouquetSelector, showEPGSelector, showAllServices;
 	serviceSelectorActions():
 		map("serviceSelector", _("service selector")),
-		prevBouquet(map, "prevBouquet", _("switch to previous bouquet"), eAction::prioDialog),
-		nextBouquet(map, "nextBouquet", _("switch to next bouquet"), eAction::prioDialog),
+		prevBouquet(map, "prevBouquet", _("switch to previous bouquet"), eAction::prioDialogHi),
+		nextBouquet(map, "nextBouquet", _("switch to next bouquet"), eAction::prioDialogHi),
 		showBouquetSelector(map, "showBouquetSelector", _("shows the bouquet selector"), eAction::prioDialog),
 		showEPGSelector(map, "showEPGSelector", _("shows the EPG selector for the highlighted channel"), eAction::prioDialog),
 		showAllServices(map, "showAllServices", _("switch to all services"), eAction::prioDialog)

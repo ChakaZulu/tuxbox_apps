@@ -89,5 +89,12 @@
 			<action name="volumeDown" key="voldown" flags="mr" />
 			<action name="toggleMute" key="mute" flags="mr" />
 		</actionmap>
+		<actionmap name="serviceSelector">
+			<action name="nextBouquet" key="next" flags="mr" />
+			<action name="prevBouquet" key="prev" flags="mr" />
+			<action name="showBouquetSelector" key="guide" flags="m" />
+			<action name="showEPGSelector" key="info" flags="m" />
+			<action name="showAllServices" key="tv" flags="m" />
+		</actionmap>
 	</device>
 </rcdefaults>
