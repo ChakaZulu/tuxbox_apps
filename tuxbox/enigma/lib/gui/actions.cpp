@@ -237,7 +237,7 @@ int eActionMapList::loadDevice(eRCDevice *device)
 
 	if (!node)
 	{
-		eFatal("couldn't load key bindings for device %s", device->getDescription());
+		eDebug("couldn't load key bindings for device %s", device->getDescription());
 		return -1;
 	}
 
