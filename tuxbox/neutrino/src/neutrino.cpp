@@ -53,6 +53,8 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 
+#include <tuxbox/tuxbox.h>
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -1635,7 +1637,7 @@ void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fo
 	colorSettings.addItem( new CMenuForwarder("colorstatusbar.head", true, "", colorSettings_statusbarColors) );
 
 	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	if(getenv("gtxID")=="ffffffff")
+	if(tuxbox_get_manufacturer() != TUXBOX_MANUFACTURER_NOKIA)
 	{
 		//menuefaden nur bei enx-chips!
 		CMenuOptionChooser* oj = new CMenuOptionChooser("colormenu.fade", &g_settings.widget_fade, true );
@@ -2027,27 +2029,25 @@ int CNeutrinoApp::run(int argc, char **argv)
 {
 	CmdParser(argc, argv);
 
-	char* mID = getenv("mID");
-	if (mID == NULL)
-	{
-		dprintf( DEBUG_NORMAL, "[neutrino] Fatal Error: Environment variable mID not set. Bye.\n\n");
-		return 1;
+	switch(tuxbox_get_manufacturer()) {
+		case TUXBOX_MANUFACTURER_NOKIA:
+			g_info.box_Type = 1;
+			break;
+		case TUXBOX_MANUFACTURER_PHILIPS:
+			g_info.box_Type = 2;
+			break;
+		case TUXBOX_MANUFACTURER_SAGEM:
+			g_info.box_Type = 3;
+			break;
+		default:
+			g_info.box_Type = 3;
 	}
-	g_info.box_Type = atoi(mID);
-
-	g_info.gtx_ID = -1;
-	if (!getEnvironment("gtxID", &g_info.gtx_ID))
-		return 1;
-
-	g_info.enx_ID = -1;
-	if (!getEnvironment("enxID", &g_info.enx_ID))
-		return 1;
-
+	
 	g_info.fe = 0;
 	if (!getEnvironment("fe", &g_info.fe))
 		return 1;
 
-	dprintf( DEBUG_DEBUG, "[neutrino] box_Type: %d, gtxID: %d, enxID: %d, fe: %d\n", g_info.box_Type, g_info.gtx_ID, g_info.enx_ID, g_info.fe);
+	dprintf( DEBUG_DEBUG, "[neutrino] box_Type: %d (%s %s), fe: %d\n", g_info.box_Type, tuxbox_get_manufacturer_str(), tuxbox_get_model_str(), g_info.fe);
 
 
 
@@ -3285,7 +3285,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.382 2002/12/24 12:34:18 Zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.383 2003/01/02 00:25:52 Jolt Exp $\n\n");
 	//LCD-Init
 	CLCD::getInstance()->init();
 

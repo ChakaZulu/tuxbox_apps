@@ -153,7 +153,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string Channel, const 
         showButtonBar = !calledFromNumZap;
 
         bool fadeIn = ( ( !is_visible ) && showButtonBar &&
-        			    ( g_info.enx_ID != -1 ) && ( g_settings.widget_fade ) ); // only enx
+        			    ( g_info.box_Type != 1 ) && ( g_settings.widget_fade ) ); // only enx
         bool fadeOut = false;
         int fadeValue;
 
@@ -331,7 +331,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string Channel, const 
     					fadeIn = false;
     				}
     				if ( (!fadeOut) &&
-    					 ( g_info.enx_ID != -1 ) && ( g_settings.widget_fade ) )
+    					 ( g_info.box_Type != 1 ) && ( g_settings.widget_fade ) )
     				{
                     	fadeOut = true;
                     	fadeTimer = g_RCInput->addTimer( FADE_TIME, false );
