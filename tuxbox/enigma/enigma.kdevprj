@@ -34,7 +34,7 @@ configure_args=\s--build=i386-linux --host=i386-linux --target=i386-linux\s
 dir_where_make_will_be_called=./
 email=
 kdevprj_version=1.3
-lfv_open_groups=XML Files
+lfv_open_groups=
 make_options=\s-j1 install
 makefiles=Makefile.am,enigma/Makefile.am,enigma/docs/Makefile.am,enigma/docs/en/Makefile.am,src/Makefile.am,lib/base/Makefile.am,lib/Makefile.am,lib/driver/Makefile.am,lib/dvb/lowlevel/Makefile.am,lib/dvb/Makefile.am,lib/gdi/Makefile.am,lib/gui/Makefile.am,lib/socket/Makefile.am,lib/system/Makefile.am,include/Makefile.am,include/lib/base/Makefile.am,include/lib/Makefile.am,include/lib/driver/Makefile.am,include/lib/dvb/Makefile.am,include/lib/gdi/Makefile.am,include/lib/gui/Makefile.am,include/lib/socket/Makefile.am,include/lib/system/Makefile.am,include/lib/dvb/lowlevel/Makefile.am,po/Makefile.am,data/skins/Makefile.am,data/Makefile.am,data/resources/Makefile.am,lib/codecs/Makefile.am,include/lib/codecs/Makefile.am
 modifyMakefiles=false

@@ -837,7 +837,7 @@ int eDVBServiceController::checkCA(ePtrList<CA> &list, const ePtrList<Descriptor
 #ifndef DISABLE_CI 
 			if ( DVBCI )
 			{
-				unsigned  char *buf=new unsigned char[ca->data[1]+2];
+				unsigned char *buf=new unsigned char[ca->data[1]+2];
 				memcpy(buf, ca->data, ca->data[1]+2);
 				DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTaddDescriptor, buf));
 			}

@@ -392,22 +392,33 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 		open = &wnd;
 		int ret = wnd.exec();
 		open = 0;
+		eDebug("raus aus eMMIEnq. ret = %d", ret );
 
 		unsigned char buf[ret == -1 ? 2 : 2 + nrcount];
+		eDebug("bufsize = %d", ret == -1 ? 2 : 2 + nrcount );
 		buf[1] = ret == -1 ? 0 : 1; // answer ok.. or user canceled
-		buf[0] = buf[1] ? nrcount : 1;  // length
+		eDebug("answer type = %d", buf[1] );
+		buf[0] = buf[1] ? nrcount+1 : 1;  // length
+		eDebug("answer bytes = %d", buf[0] );
 		// when user have cancelled only one byte is answered to the ci
 
 		eString atext = wnd.getAnswer();  // get Answer from number
 
-		for (uint i=0; i < nrcount; ++i )  // copy user input to answer
+		if ( buf[1] )
+			eDebugNoNewLine("answer is %02x %02x ", buf[0], buf[1]);
+		for (uint i=0; i < buf[0]-1; ++i )  // copy user input to answer
+		{
+			eDebugNoNewLine("%02x ", buf[2+i]);
 			buf[2+i] = atext[i];
+		}
+		if ( buf[1] )
+			eDebug("");
 
+		eDebug("sent Answer");
 		ci->messages.send( eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_enqansw, buf));
 
+		eDebug("showWaitForCIAnswer");
 		showWaitForCIAnswer(ret);
-
-		rp+=size;
 	}
 	else if( memcmp(data+rp,TAG_MMI_MENU_LAST,TAG_LENGTH)==0 ||
 		 memcmp(data+rp,TAG_MMI_LIST_LAST,TAG_LENGTH)==0)
@@ -497,7 +508,7 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 		open = &wnd;
 		int ret = wnd.exec();
 		open = 0;
-		eDebug("ret = %d",ret);
+//		eDebug("ret = %d",ret);
 		if ( ret > -2 )
 		{
 			if ( ret == -1 )

@@ -156,7 +156,6 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 	case eDVBCIMessage::PMTaddDescriptor:
 //		eDebug("[DVBCI] got PMTaddDescriptor message..");
 		PMTaddDescriptor(message.data);
-		delete[] message.data;
 		break;
 	}
 }
@@ -200,18 +199,18 @@ void eDVBCI::mmi_menuansw(int val)
 void eDVBCI::PMTflush(int program)
 {
 	//eDebug("got new PMT for Program:%x",program);
-	for(int i=0;i<tempPMTentrys-1;i++)
+	for(int i=1; i<tempPMTentrys; ++i)
 	{
 		if(tempPMT[i].type==2)
 		{
-			free(tempPMT[i].descriptor);
+			delete [] tempPMT[i].descriptor;
 			tempPMT[i].type=0;
 		}
 	}
 
 	tempPMT[0].type=0;
 	tempPMT[0].pid=program;	
-	tempPMTentrys=1;		
+	tempPMTentrys=1;
 }
 
 void eDVBCI::PMTaddPID(int pid, int streamtype)
@@ -228,8 +227,7 @@ void eDVBCI::PMTaddDescriptor(unsigned char *data)
 	//eDebug("got new CA-Descr. for CAID:%.2x%.2x",data[2],data[3]);
 
 	tempPMT[tempPMTentrys].type=2;
-	tempPMT[tempPMTentrys].descriptor=(unsigned char*)malloc(data[1]+2);
-	memcpy(tempPMT[tempPMTentrys++].descriptor,data,data[1]+2);
+	tempPMT[tempPMTentrys++].descriptor=data;
 }
 
 void eDVBCI::newService()
@@ -267,7 +265,7 @@ void eDVBCI::newService()
 	int first=1;
 	int wp=15;
 
-	for(int i=0;i<tempPMTentrys;i++)
+	for(int i=1;i<tempPMTentrys;i++)
 	{
 		switch(tempPMT[i].type)
 		{
