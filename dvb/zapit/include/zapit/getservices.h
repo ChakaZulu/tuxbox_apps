@@ -44,6 +44,7 @@ typedef struct apid_struct_2 {
 }apid_struct;
 
 #define max_num_apids 10
+#define no_ecmpid_found 0x10000
 
 typedef struct pids{
 	ushort count_vpids;
