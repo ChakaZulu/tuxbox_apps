@@ -1511,6 +1511,22 @@ void CNeutrinoApp::InitMp3PicSettings(CMenuWidget &mp3PicSettings)
 	mp3PicSettings.addItem( oj );
 
 }
+
+#if HAVE_DVB_API_VERSION == 1
+#define MISC_SETTING_FILES_COUNT 4
+#else
+#define MISC_SETTING_FILES_COUNT 3
+#endif
+const char * misc_setting_files[MISC_SETTING_FILES_COUNT][4] =
+{
+	{"miscsettings.bootinfo"     , "/var/etc/.cdkVcInfo"  , "options.on" , "options.off"},
+#if HAVE_DVB_API_VERSION == 1
+	{"miscsettings.startbhdriver", "/var/etc/.bh"         , "options.off", "options.on" },
+#endif
+	{"miscsettings.sptsmode"     , "/var/etc/.spts_mode"  , "options.off", "options.on" },
+	{"miscsettings.hwsections"   , "/var/etc/.hw_sections", "options.on" , "options.off"}
+};
+
 void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 {
 	dprintf(DEBUG_DEBUG, "init miscsettings\n");
@@ -1529,58 +1545,26 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	oj->addOption(0, "options.on");
 	miscSettings.addItem( oj );
 
-	if(fromflash)
+	if (fromflash)
 	{
-		static int dummy = 0;
-		FILE* fd = fopen("/var/etc/.cdkVcInfo", "r");
-		if(fd)
-		{
-			dummy=1;
-			fclose(fd);
-		}
-		oj = new CMenuOptionChooser("miscsettings.bootinfo", &dummy, true, new CShowBootInfoNotifier );
-		oj->addOption(0, "options.on");
-		oj->addOption(1, "options.off");
-		miscSettings.addItem( oj );
+		static int misc_option[MISC_SETTING_FILES_COUNT];
 
-#if HAVE_DVB_API_VERSION == 1
-		static int dummy2 = 0;
-		fd = fopen("/var/etc/.bh", "r");
-		if(fd)
+		for (int i = 0; i < MISC_SETTING_FILES_COUNT; i++)
 		{
-			dummy2=1;
-			fclose(fd);
-		}
-		oj = new CMenuOptionChooser("miscsettings.startbhdriver", &dummy2, true, new CBHDriverNotifier );
-		oj->addOption(0, "options.off");
-		oj->addOption(1, "options.on");
-		miscSettings.addItem( oj );
-#endif
+			FILE * fd = fopen(misc_setting_files[i][1], "r");
+			if (fd)
+			{
+				fclose(fd);
+				misc_option[i] = 1;
+			}
+			else
+				misc_option[i] = 0;
 
-		static int dummy3 = 0;
-		fd = fopen("/var/etc/.spts_mode", "r");
-		if(fd)
-		{
-			dummy3=1;
-			fclose(fd);
+			oj = new CMenuOptionChooser(misc_setting_files[i][0], &(misc_option[i]), true, new CTouchFileNotifier(misc_setting_files[i][1]));
+			oj->addOption(0, misc_setting_files[i][2]);
+			oj->addOption(1, misc_setting_files[i][3]);
+			miscSettings.addItem(oj);
 		}
-		oj = new CMenuOptionChooser("miscsettings.sptsmode", &dummy3, true, new CSPTSModeNotifier );
-		oj->addOption(0, "options.off");
-		oj->addOption(1, "options.on");
-		miscSettings.addItem( oj );
-
-		static int dummy4 = 1;
-		fd = fopen("/var/etc/.hw_sections", "r");
-		if(fd)
-		{
-			dummy4=0;
-			fclose(fd);
-		}
-		oj = new CMenuOptionChooser("miscsettings.hwsections", &dummy4, true, new CHWSectionsNotifier );
-		oj->addOption(0, "options.off");
-		oj->addOption(1, "options.on");
-		miscSettings.addItem( oj );
-
 
 		oj = new CMenuOptionChooser("miscsettings.fb_destination", &g_settings.uboot_console, true, ConsoleDestinationChanger );
 		oj->addOption(0, "options.null");

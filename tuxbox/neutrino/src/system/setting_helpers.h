@@ -123,28 +123,15 @@ class CPauseSectionsdNotifier : public CChangeObserver
 		bool changeNotify(const std::string & OptionName, void*);
 };
 
-class CShowBootInfoNotifier : public CChangeObserver
+class CTouchFileNotifier : public CChangeObserver
 {
-	public:
-		bool changeNotify(const std::string & OptionName, void*);
-};
-
-class CBHDriverNotifier : public CChangeObserver
-{
-	public:
-		bool changeNotify(const std::string & OptionName, void*);
-};
-
-class CSPTSModeNotifier : public CChangeObserver
-{
-	public:
-		bool changeNotify(const std::string & OptionName, void*);
-};
-
-class CHWSectionsNotifier : public CChangeObserver
-{
-	public:
-		bool changeNotify(const std::string & OptionName, void*);
+	const char * filename;
+ public:
+	inline CTouchFileNotifier(const char * file_to_modify)
+		{
+			filename = file_to_modify;
+		};
+	bool changeNotify(const std::string & OptionName, void *);
 };
 
 class CColorSetupNotifier : public CChangeObserver

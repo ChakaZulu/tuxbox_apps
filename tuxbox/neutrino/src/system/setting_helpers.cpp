@@ -250,82 +250,20 @@ bool CPauseSectionsdNotifier::changeNotify(const std::string & OptionName, void*
 	return true;
 }
 
-bool CShowBootInfoNotifier::changeNotify(const std::string & OptionName, void* Data)
+bool CTouchFileNotifier::changeNotify(const std::string & OptionName, void * data)
 {
-	if( *((int*) Data)!=0)
-	{	//file anlegen (direktstart)
-		FILE* fd = fopen("/var/etc/.cdkVcInfo", "w");
-		if(fd)
-		{
+	if ((*(int *)data) != 0)
+	{
+		FILE * fd = fopen(filename, "w");
+		if (fd)
 			fclose(fd);
-		}
 		else
 			return false;
 	}
 	else
-	{
-		remove("/var/etc/.cdkVcInfo");
-	}
+		remove(filename);
 	return true;
 }
-
-bool CBHDriverNotifier::changeNotify(const std::string & OptionName, void* Data)
-{
-	if( *((int*) Data)!=0)
-	{	//file anlegen (BH Treiber laden)
-		FILE* fd = fopen("/var/etc/.bh", "w");
-		if(fd)
-		{
-			fclose(fd);
-		}
-		else
-			return false;
-	}
-	else
-	{
-		remove("/var/etc/.bh");
-	}
-	return true;
-}
-
-bool CSPTSModeNotifier::changeNotify(const std::string & OptionName, void* Data)
-{
-	if( *((int*) Data)!=0)
-	{	//file anlegen (SPTS-Mode)
-		FILE* fd = fopen("/var/etc/.spts_mode", "w");
-		if(fd)
-		{
-			fclose(fd);
-		}
-		else
-			return false;
-	}
-	else
-	{
-		remove("/var/etc/.spts_mode");
-	}
-	return true;
-}
-
-bool CHWSectionsNotifier::changeNotify(const std::string & OptionName, void* Data)
-{
-	if( *((int*) Data)!=1)
-	{	//file anlegen (KEINE hw-sections)
-		FILE* fd = fopen("/var/etc/.hw_sections", "w");
-		if(fd)
-		{
-			fclose(fd);
-		}
-		else
-			return false;
-	}
-	else
-	{
-		remove("/var/etc/.hw_sections");
-	}
-	return true;
-}
-
 
 bool CIPChangeNotifier::changeNotify(const std::string & OptionName, void* Data)
 {
