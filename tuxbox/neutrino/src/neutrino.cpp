@@ -1517,8 +1517,7 @@ void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
 	languageSettings.addItem(GenericMenuBack);
 	languageSettings.addItem(GenericMenuSeparatorLine);
 
-	languageSetupNotifier = new CLanguageSetupNotifier;
-	CMenuOptionStringChooser* oj = new CMenuOptionStringChooser("languagesetup.select", (char*)&g_settings.language, true, languageSetupNotifier, false);
+	CMenuOptionStringChooser* oj = new CMenuOptionStringChooser("languagesetup.select", (char*)&g_settings.language, true, this, false);
 	//search available languages....
 
 	struct dirent **namelist;
@@ -3793,7 +3792,6 @@ bool CNeutrinoApp::changeNotify(const char * const OptionName, void * data)
 		g_settings.timing_filebrowser = atoi(g_settings.timing_filebrowser_string);
 
 	}
-
 	else if (strncmp(OptionName, "mainmenu.recording", 18) == 0)
 	{
 		CTimerd::RecordingInfo eventinfo;
@@ -3830,6 +3828,20 @@ bool CNeutrinoApp::changeNotify(const char * const OptionName, void * data)
 		}
 		else
 			printf("Keine Streamingdevices registriert\n");
+	}
+	else if (strcmp(OptionName, "languagesetup.select") == 0)
+	{
+		bool use_true_unicode_font = g_Locale->loadLocale(g_settings.language);
+
+		if (fontName == predefined_font[(!use_true_unicode_font)].name)
+		{
+			fontName = predefined_font[use_true_unicode_font].name;
+			fontFile = predefined_font[use_true_unicode_font].filename;
+			fontsSizeOffset = predefined_font[use_true_unicode_font].size_offset;
+			SetupFonts();
+#warning TODO: reload LCD fonts, too
+		}
+		return true;
 	}
 	return false;
 }

@@ -109,7 +109,6 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		CColorSetupNotifier		*colorSetupNotifier;
 		CAudioSetupNotifier		*audioSetupNotifier;
 		CVideoSetupNotifier		*videoSetupNotifier;
-		CLanguageSetupNotifier  	*languageSetupNotifier;
 		CKeySetupNotifier       	*keySetupNotifier;
 		CAPIDChangeExec         	*APIDChanger;
 		CNVODChangeExec         	*NVODChanger;

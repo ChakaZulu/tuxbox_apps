@@ -165,12 +165,6 @@ class CVideoSetupNotifier : public CChangeObserver
 		bool changeNotify(const std::string & OptionName, void*);
 };
 
-class CLanguageSetupNotifier : public CChangeObserver
-{
-	public:
-		bool changeNotify(const std::string & OptionName, void*);
-};
-
 class CKeySetupNotifier : public CChangeObserver
 {
 	public:

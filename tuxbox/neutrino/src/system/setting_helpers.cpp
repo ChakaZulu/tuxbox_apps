@@ -412,13 +412,6 @@ bool CVideoSetupNotifier::changeNotify(const std::string & OptionName, void*)
 	return false;
 }
 
-bool CLanguageSetupNotifier::changeNotify(const std::string & OptionName, void*)
-{
-	//	printf("language notify: %s - %s\n", OptionName.c_str(), g_settings.language );
-	g_Locale->loadLocale(g_settings.language);
-	return true;
-}
-
 bool CKeySetupNotifier::changeNotify(const std::string & OptionName, void*)
 {
 	//    printf("CKeySetupNotifier notify: %s\n", OptionName.c_str() );
