@@ -186,9 +186,7 @@ eString button(int width, eString buttonText, eString buttonColor, eString butto
 
 eString getTitle(eString title)
 {
-	std::stringstream result;
-	result << "<h1>" << title << "</h1>";
-	return result.str();
+	return "<h1>" + title + "</h1>";
 }
 
 eString getMsgWindow(eString title, eString msg)
@@ -385,8 +383,8 @@ static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConn
 	result="<html>\n"
 		CHARSETMETA
 		"<head>\n"
-		"  <title>enigma status</title>\n"
-		"  <link rel=stylesheet type=\"text/css\" href=\"/webif.css\">\n"
+		"<title>enigma status</title>\n"
+		"<link rel=stylesheet type=\"text/css\" href=\"/webif.css\">\n"
 		"</head>\n"
 		"<body>\n"
 		"<h1>Enigma status</h1>\n"
@@ -2994,7 +2992,8 @@ static eString wapEPG(void)
 	{
 		timeMap::const_iterator It;
 
-		for(It=evt->begin(); It!= evt->end(); It++)
+		int i = 0;
+		for(It=evt->begin(); (It!= evt->end()) && (i < 50); It++)
 		{
 //			ext_description = "";
 			EITEvent event(*It->second);
@@ -3023,6 +3022,7 @@ static eString wapEPG(void)
 						<< "\">"
 						<< filter_string(description)
 						<< "</a><br/>\n";
+			i++;
 		}
 	}
 	eEPGCache::getInstance()->Unlock();
@@ -3852,12 +3852,13 @@ static eString deleteTimerEvent(eString request, eString dirpath, eString opts, 
 
 	int ret = eTimerManager::getInstance()->deleteEventFromTimerList(e, (force == "yes"));
 
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+
 	if ( ret == -1 )  // event currently running...
 	{
 		// ask user if he really wants to do this..
 		// then call deleteEventFromtTimerList again.. with true as second parameter..
 		// then the running event will aborted
-		content->local_header["Content-Type"]="text/html; charset=utf-8";
 		result = readFile(TEMPLATE_DIR + "queryDeleteTimer.tmp");
 		opts.strReplace("force=no", "force=yes");
 		if (opts.find("?") != 0)
@@ -3865,12 +3866,9 @@ static eString deleteTimerEvent(eString request, eString dirpath, eString opts, 
 		result.strReplace("#URL#", "/deleteTimerEvent" + opts);
 	}
 	else
-	{
-		eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
-		content->code=204;
-		content->code_descr="No Content";
-		result = NOCONTENT;
-	}
+		result = "<html><body>Timer event deleted successfully.</body></html>";
+
+	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
 
 	return result;
 }

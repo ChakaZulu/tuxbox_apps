@@ -5,7 +5,7 @@
 		<script>
 			function yes()
 			{
-				document.location = #URL#;
+				document.location = "#URL#";
 			}
 			function no()
 			{
@@ -17,8 +17,8 @@
 		<b>ATTENTION</b>: This timer event is currently active. 
 		<br>
 		Do you really want to delete this timer event?
-		<br>
-		<input name="yes" type="button" style="width: 100px; height: 22px; background-color: #12259E" value="YES" onClick=javascript:yes()>
+		<br><br>
+		<input name="yes" type="button" style="width: 100px; height: 22px; background-color: #1FCB12" value="YES" onClick=javascript:yes()>
 		<input name="no" type="button" style="width: 100px; height: 22px; background-color: #CB0303" value="NO" onClick=javascript:no()>
 	</body>
 </html>

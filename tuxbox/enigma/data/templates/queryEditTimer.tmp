@@ -5,7 +5,7 @@
 		<script>
 			function yes()
 			{
-				document.location = #URL#;
+				document.location = "#URL#";
 			}
 			function no()
 			{
@@ -19,8 +19,8 @@
 		Only timer end time and post-event action can be changed.
 		<br>
 		Do you want to do this?
-		<br>
-		<input name="yes" type="button" style="width: 100px; height: 22px; background-color: #12259E" value="YES" onClick=javascript:yes()>
+		<br><br>
+		<input name="yes" type="button" style="width: 100px; height: 22px; background-color: #1FCB12" value="YES" onClick=javascript:yes()>
 		<input name="no" type="button" style="width: 100px; height: 22px; background-color: #CB0303" value="NO" onClick=javascript:no()>
 	</body>
 </html>
