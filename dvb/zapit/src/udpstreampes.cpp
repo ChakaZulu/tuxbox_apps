@@ -16,6 +16,7 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+// Stand: 01.02.2004
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -56,6 +57,7 @@ typedef struct {
 } StreamType;
 
 StreamType Stream[MAX_PID_NUM];
+char ExtraAVString[MAX_PID_NUM+1], AVString[MAX_PID_NUM+1];
 unsigned StreamNum, StreamThreadNum;
 int StreamStop;   
 pid_t mainProcessID;
@@ -194,42 +196,6 @@ void * DmxTSReader( void * Ptr )
    BufSize = (CurStream->BufPacketNum) * NET_DATA_PER_PACKET;
    int fd_dvr;  
 	unsigned u;
-	
-
-   for (u = 0; u < StreamNum; u++) {
-		Stream[u].fd = open("/dev/dvb/adapter0/demux0", O_RDWR);
-		if (-1 == Stream[u].fd) {
-			perror("ERROR: main() - demux0 open");
-			fprintf(stderr, "EXIT\n");
-			fflush(stderr);
-			exit(-1);
-		}
-		if ( -1 == ioctl(CurStream->fd, DMX_SET_BUFFER_SIZE, // 1024*1024) ) { 
-			 CurStream->BufPacketNum * NET_DATA_PER_PACKET * DMX_BUF_FACTOR) ) { 
-			perror("ERROR: main() - dmx set buffer ioctl");
-			fprintf(stderr, "EXIT\n");
-			fflush(stderr);
-			exit(-1);
-		}
-
-		Stream[u].Filter.input=DMX_IN_FRONTEND;
-		Stream[u].Filter.output=DMX_OUT_TS_TAP;
-		Stream[u].Filter.pes_type=DMX_PES_OTHER;
-		//Stream[u].Filter.flags=0;
-		Stream[u].Filter.flags=DMX_IMMEDIATE_START;
-		if (-1==ioctl(Stream[u].fd, DMX_SET_PES_FILTER, &(Stream[u].Filter)) ) {
-			perror("ERROR: main() - DMX_SET_PES_FILTER ioctl");
-			fprintf(stderr, "EXIT\n");
-			fflush(stderr);
-			exit(-1);
-		}
-		if ( -1==ioctl(Stream[u].fd, DMX_START, 0) ) {
-			perror("ERROR: DmxReader() - DMX_START ioctl");
-			fprintf(stderr, "EXIT\n");
-			fflush(stderr);
-			exit(-1);
-		} 
-	}
 
    fd_dvr = open("/dev/dvb/adapter0/dvr0", O_RDONLY);
    if (-1 == fd_dvr) {
@@ -238,10 +204,73 @@ void * DmxTSReader( void * Ptr )
       fflush(stderr);
       exit(-1);
    }
+	
+	for (u = 0; u < StreamNum; u++) {
+		Stream[u].fd = open("/dev/dvb/adapter0/demux0", O_RDWR);
+		if (-1 == Stream[u].fd) {
+			perror("ERROR: main() - demux0 open");
+			fprintf(stderr, "EXIT\n");
+			fflush(stderr);
+			exit(-1);
+		}
+		if ( -1 == ioctl(Stream[u].fd, DMX_SET_BUFFER_SIZE, //256*1024) ) { 
+			Stream[u].BufPacketNum * NET_DATA_PER_PACKET * DMX_BUF_FACTOR) ) { 
+			perror("ERROR: main() - dmx set buffer ioctl");
+			fprintf(stderr, "EXIT\n");
+			fflush(stderr);
+			exit(-1);
+		}
+	}
 
    printf("INFO: DmxTSReader() - Pid %u %i %i\n", 
          BufSize, CurStream->WriteBuf, CurStream->ReadBuf);
    fflush(stdout); 
+	
+	for (u = 0; u < StreamNum; u++) {
+		if (AVString[u] != 'a') continue;
+		
+		Stream[u].Filter.input=DMX_IN_FRONTEND;
+		Stream[u].Filter.output=DMX_OUT_TS_TAP;
+		Stream[u].Filter.pes_type=DMX_PES_OTHER;
+		Stream[u].Filter.flags=0;
+		//Stream[u].Filter.flags=DMX_IMMEDIATE_START;
+		if (-1==ioctl(Stream[u].fd, DMX_SET_PES_FILTER, &(Stream[u].Filter)) ) {
+			perror("ERROR: main() - DMX_SET_PES_FILTER ioctl");
+			fprintf(stderr, "EXIT\n");
+			fflush(stderr);
+			exit(-1);
+		}
+
+		if ( -1==ioctl(Stream[u].fd, DMX_START, 0) ) {
+			perror("ERROR: DmxReader() - DMX_START ioctl");
+			fprintf(stderr, "EXIT\n");
+			fflush(stderr);
+			exit(-1);
+		} 
+	}
+	
+	for (u = 0; u < StreamNum; u++) {
+		if (AVString[u] != 'v') continue;
+		
+		Stream[u].Filter.input=DMX_IN_FRONTEND;
+		Stream[u].Filter.output=DMX_OUT_TS_TAP;
+		Stream[u].Filter.pes_type=DMX_PES_OTHER;
+		Stream[u].Filter.flags=0;
+		//Stream[u].Filter.flags=DMX_IMMEDIATE_START;
+		if (-1==ioctl(Stream[u].fd, DMX_SET_PES_FILTER, &(Stream[u].Filter)) ) {
+			perror("ERROR: main() - DMX_SET_PES_FILTER ioctl");
+			fprintf(stderr, "EXIT\n");
+			fflush(stderr);
+			exit(-1);
+		}
+
+		if ( -1==ioctl(Stream[u].fd, DMX_START, 0) ) {
+			perror("ERROR: DmxReader() - DMX_START ioctl");
+			fprintf(stderr, "EXIT\n");
+			fflush(stderr);
+			exit(-1);
+		} 
+	}
 
    BufLen = 0;
    while( !StreamStop ) {
@@ -473,7 +502,6 @@ int main ()
    int RadioMode;
    int ExtraPidNum;
    unsigned ExtraPid[MAX_PID_NUM];
-   char ExtraAVString[MAX_PID_NUM+1], AVString[MAX_PID_NUM+1];
    unsigned StoppedDmxReaders, EmptyStreamBuffers;
    char CmdString[100];
    char TcpString[STRING_SIZE];
@@ -537,10 +565,10 @@ int main ()
       exit(-1);
    }
 
-   CZapitClient zapit;
 	
    StreamNum = 0;
    if ( Bouquet != 0 ) {
+   	CZapitClient zapit;
       // Programm umschalten
       CZapitClient::responseGetPIDs pids;
  
@@ -565,13 +593,16 @@ int main ()
          AVString[StreamNum] = 'a';
          Stream[StreamNum++].BufPacketNum = AUDIO_BUF_PACKET_NUM;
       }
-      if (TSMode) {
+		
+      /* if (TSMode) {
 			// PMT-Pid wird benotigt nicht ServiceID!!
          //Stream[StreamNum].Filter.pid = zapit.getCurrentServiceID();
          //AVString[StreamNum] = 'a';
          //Stream[StreamNum++].BufPacketNum = AUDIO_BUF_PACKET_NUM;
-			zapit.stopPlayBack();  // TS-Streaming geht sonst nicht!
-      }
+			//zapit.stopPlayBack();  
+				// TS-Streaming geht nur im SPTS-Mode mit Playback!
+				// sonst ist der Stream "nicht richtig gemuxt"
+      }*/
    }
 
    //if (TSMode) {
@@ -797,9 +828,10 @@ int main ()
    while ( !StreamStop ) usleep(15000);
    printf("EXIT\n" );
    fflush(stdout);
-
+	/* siehe stopPlayBack  
 	if (Bouquet != 0 && TSMode) {
-		zapit.startPlayBack();  // TS-Streaming geht sonst nicht!
+		zapit.startPlayBack();  
 	}
+	*/
    return 0;
 }
