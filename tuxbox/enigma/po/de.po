@@ -1,0 +1,105 @@
+# Copyright (C) 2002 tuxbox project
+# Bastian Blank <waldi@tuxbox.org>, 2002.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: tuxbox-enigma 0.1\n"
+"POT-Creation-Date: 2002-05-01 09:00+0200\n"
+"PO-Revision-Date: 2002-05-01 09:13+0200\n"
+"Last-Translator: Bastian Blank <waldi@tuxbox.org>\n"
+"Language-Team: German <de@tuxbox.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: enigma/src/apps/enigma/enigma_mainmenu.cpp:22
+msgid "TV mode"
+msgstr "TV Modus"
+
+#: enigma/src/apps/enigma/enigma_mainmenu.cpp:23
+msgid "VCR mode"
+msgstr "VCR Modus"
+
+#: enigma/src/apps/enigma/enigma_mainmenu.cpp:24
+#: enigma/src/apps/enigma/scan.cpp:352 enigma/src/apps/enigma/scan.cpp:364
+msgid "Transponder scan"
+msgstr "Kanalsuche"
+
+#: enigma/src/apps/enigma/enigma_mainmenu.cpp:25
+#: enigma/src/apps/enigma/enigma_setup.cpp:14
+msgid "Setup"
+msgstr "Einstellungen"
+
+#: enigma/src/apps/enigma/enigma_mainmenu.cpp:26
+msgid "Streaminfo"
+msgstr ""
+
+#: enigma/src/apps/enigma/enigma_mainmenu.cpp:27
+msgid "Show BN version"
+msgstr ""
+
+#: enigma/src/apps/enigma/enigma_mainmenu.cpp:28
+msgid "Plugins"
+msgstr ""
+
+#: enigma/src/apps/enigma/enigma_mainmenu.cpp:29
+msgid "Quit enigma"
+msgstr "Beenden"
+
+#: enigma/src/apps/enigma/enigma_mainmenu.cpp:30
+msgid "About..."
+msgstr "Über..."
+
+#: enigma/src/apps/enigma/enigma_setup.cpp:17
+msgid "[back]"
+msgstr "[Zurück]"
+
+#: enigma/src/apps/enigma/enigma_setup.cpp:18
+msgid "Bouquets..."
+msgstr "Bouquets..."
+
+#: enigma/src/apps/enigma/enigma_setup.cpp:19
+msgid "Network..."
+msgstr "Netzwerk..."
+
+#. 	CONNECT((list, _("Audio...")))->selected, sel_sound);
+#: enigma/src/apps/enigma/enigma_setup.cpp:21
+msgid "Video..."
+msgstr "Video..."
+
+#: enigma/src/apps/enigma/enigma_setup.cpp:22
+msgid "Satellites..."
+msgstr "Satelliten..."
+
+#: enigma/src/apps/enigma/scan.cpp:84
+msgid "scanning"
+msgstr ""
+
+#: enigma/src/apps/enigma/scan.cpp:284
+#, c-format
+msgid "%d minutes and %02d seconds left"
+msgstr "noch %d Minuten und %02d Sekunden"
+
+#: enigma/src/apps/enigma/scan.cpp:337
+#, c-format
+msgid "%d\ttransponders found"
+msgstr "%d\tTransponder gefunden"
+
+#: enigma/src/apps/enigma/scan.cpp:338
+#, c-format
+msgid "%d\ttransponders scanned"
+msgstr "%d\tTransponder gescannt"
+
+#: enigma/src/apps/enigma/scan.cpp:339
+#, c-format
+msgid "%d\tknown services"
+msgstr "%d\tbekannte Services"
+
+#: enigma/src/apps/enigma/setupnetwork.cpp:31
+msgid "Network setup"
+msgstr "Netzwerkeinstellungen"
+
+#: enigma/src/apps/enigma/setupvideo.cpp:62
+msgid "Video Setup"
+msgstr "Videoeinstellungen"

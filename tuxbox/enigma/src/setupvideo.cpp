@@ -9,6 +9,9 @@
 #include "eskin.h"
 #include "eavswitch.h"
 #include "streamwd.h"
+
+#include <core/base/i18n.h>
+
 #include <core/system/econfig.h>
 
 void eZapVideoSetup::setPin8(int w)
@@ -56,7 +59,7 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 
 	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 
-	setText("Video Setup");
+	setText(_("Video Setup"));
 	move(ePoint(150, 136));
 	resize(eSize(350, 250));
 

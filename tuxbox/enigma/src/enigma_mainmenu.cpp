@@ -11,21 +11,23 @@
 #include "elabel.h"
 #include "epgcache.h"
 
+#include <core/base/i18n.h>
+
 eMainMenu::eMainMenu()
 {
 	eZapLCD *pLCD=eZapLCD::getInstance();
 	window=new eLBWindow("enigma" , eListbox::tBorder, 12, eSkin::getActive()->queryValue("fontsize", 20), 400);
 	window->setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 	window->move(ePoint(70, 150));
-	CONNECT((new eListboxEntryText(window->list, "TV Mode"))->selected, eMainMenu::sel_close);
-	CONNECT((new eListboxEntryText(window->list, "VCR Mode"))->selected, eMainMenu::sel_vcr);
-	CONNECT((new eListboxEntryText(window->list, "Transponder Scan"))->selected, eMainMenu::sel_scan);
-	CONNECT((new eListboxEntryText(window->list, "Setup"))->selected, eMainMenu::sel_setup);
-	CONNECT((new eListboxEntryText(window->list, "Streaminfo"))->selected, eMainMenu::sel_streaminfo);
-	CONNECT((new eListboxEntryText(window->list, "Show BN version"))->selected, eMainMenu::sel_bnversion);
-	CONNECT((new eListboxEntryText(window->list, "Plugins"))->selected, eMainMenu::sel_plugins);
-	CONNECT((new eListboxEntryText(window->list, "Quit enigma"))->selected, eMainMenu::sel_quit);
-	CONNECT((new eListboxEntryText(window->list, "About..."))->selected, eMainMenu::sel_about);
+	CONNECT((new eListboxEntryText(window->list, _("TV mode")))->selected, eMainMenu::sel_close);
+	CONNECT((new eListboxEntryText(window->list, _("VCR mode")))->selected, eMainMenu::sel_vcr);
+	CONNECT((new eListboxEntryText(window->list, _("Transponder scan")))->selected, eMainMenu::sel_scan);
+	CONNECT((new eListboxEntryText(window->list, _("Setup")))->selected, eMainMenu::sel_setup);
+	CONNECT((new eListboxEntryText(window->list, _("Streaminfo")))->selected, eMainMenu::sel_streaminfo);
+	CONNECT((new eListboxEntryText(window->list, _("Show BN version")))->selected, eMainMenu::sel_bnversion);
+	CONNECT((new eListboxEntryText(window->list, _("Plugins")))->selected, eMainMenu::sel_plugins);
+	CONNECT((new eListboxEntryText(window->list, _("Quit enigma")))->selected, eMainMenu::sel_quit);
+	CONNECT((new eListboxEntryText(window->list, _("About...")))->selected, eMainMenu::sel_about);
 /*	connect(new eListboxEntryText(window->list, "TV Mode"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_close(eListboxEntry*)));
 	connect(new eListboxEntryText(window->list, "VCR Mode"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_vcr(eListboxEntry*)));
 	connect(new eListboxEntryText(window->list, "Transponder Scan"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_scan(eListboxEntry*)));

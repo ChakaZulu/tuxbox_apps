@@ -7,6 +7,9 @@
 #include "echeckbox.h"
 #include "rc.h"
 #include "eskin.h"
+
+#include <core/base/i18n.h>
+
 #include <core/system/econfig.h>
 
 static void unpack(__u32 l, int *t)
@@ -25,7 +28,7 @@ static void pack(__u32 &l, int *t)
 eZapNetworkSetup::eZapNetworkSetup():
 	eWindow(0)
 {
-	setText("Network Setup");
+	setText(_("Network setup"));
 	move(ePoint(150, 136));
 	resize(eSize(420, 290));
 

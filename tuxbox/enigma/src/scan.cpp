@@ -12,6 +12,8 @@
 #include "edvb.h"
 #include "rc.h"
 
+#include <core/base/i18n.h>
+
 tsText::tsText(QString sheadline, QString sbody, eWidget *parent): eWidget(parent, 1)
 {
 	headline=new eLabel(this);
@@ -97,7 +99,7 @@ int tsFindInit::eventFilter(const eWidgetEvent &event)
 		switch (eFrontend::fe()->Type())
 		{
 		case eFrontend::feCable:
-			p=new tpPacket("Kabel", SCAN_SKIP);
+			p=new tpPacket("Cable", SCAN_SKIP);
 			for (f=330000; f<460000; f+=8000)
 			{
 				t=new eTransponder(-1, f/8000); t->setCable(f, 6900000);
@@ -279,7 +281,7 @@ void tsDoScan::updateETA()
 	if (left<0)
 		left=0;
 		
-	eta->setText(QString().sprintf("Left: %d Minutes and %02d Seconds", (int)left/60, (int)left%60));
+	eta->setText(QString().sprintf(_("%d minutes and %02d seconds left"), (int)left/60, (int)left%60));
 }
 
 tsDoScan::tsDoScan(tsFindInit *init, eWidget *parent): eWidget(parent, 1), init(init), etatimer(eApp)
@@ -332,9 +334,9 @@ void tsDoScan::updateStats()
 {
 	int transponders, scanned, services;
 	eDVB::getInstance()->getTransponders()->updateStats(transponders, scanned, services);
-	transp_found->setText(QString().sprintf("%d\ttransponders found", transponders));
-	transp_scanned->setText(QString().sprintf("%d\ttransponders scanned", scanned));
-	known_services->setText(QString().sprintf("%d\tknown services", services));
+	transp_found->setText(QString().sprintf(_("%d\ttransponders found"), transponders));
+	transp_scanned->setText(QString().sprintf(_("%d\ttransponders scanned"), scanned));
+	known_services->setText(QString().sprintf(_("%d\tknown services"), services));
 	if (transponders)
 		bar->setPerc(scanned*100/transponders);
 }
@@ -347,7 +349,7 @@ void tsDoScan::redrawWidget()
 TransponderScan::TransponderScan()
 {
 	window=new eWindow(0);
-	window->setText("Transponder Scan");
+	window->setText(_("Transponder scan"));
 	window->move(ePoint(100, 100));
 	window->resize(eSize(460, 300));
 	
@@ -359,7 +361,7 @@ TransponderScan::TransponderScan()
 	progress_text->move(ePoint(0, window->getClientSize().height()-30));
 	progress_text->resize(eSize(50, 30));
 
-	eWidget *s=new tsText("Kanalsuche", "Willkommen bei der Kanalsuche.\n"
+	eWidget *s=new tsText(_("Transponder scan"), "Willkommen bei der Kanalsuche.\n"
 			"OK zum fortfahren, ? zum Abbruch", window);
 	s->move(ePoint(0, 0));
 	s->resize(eSize(

@@ -10,6 +10,7 @@ INCLUDES = \
 	-I$(top_srcdir)/enigma/src/core/driver \
 	-I$(top_srcdir)/enigma/src/core/xml \
 	-I$(top_srcdir)/enigma/src/include \
+	-I$(top_srcdir)/intl \
 	-I$(top_srcdir)/include
 
 bin_PROGRAMS = enigma
@@ -30,7 +31,7 @@ enigma_LDADD = \
 	$(top_builddir)/enigma/src/core/system/libsystem.la \
 	$(top_builddir)/enigma/src/core/xml/libxml.la \
 	$(top_builddir)/edvb/miniqt/libminiqt.la \
-	$(LIBSIGC_LIBS) \
+	$(LIBSIGC_LIBS) @INTLLIBS@ \
 	-ldl -lpthread
 
 enigma_LDFLAGS = -rpath $(LIBDIR)/enigma

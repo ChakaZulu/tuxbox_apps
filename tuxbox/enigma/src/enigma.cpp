@@ -23,6 +23,8 @@
 
 #include "actions.h"
 
+#include <core/base/i18n.h>
+
 #include <core/driver/rc.h>
 #include <core/system/econfig.h>
 
@@ -219,6 +221,11 @@ int main(int argc, char **argv)
 	time_t t=0;
 	stime(&t);
 	fprintf(stderr, "%s", copyright);
+
+	setlocale (LC_ALL, "");
+	bindtextdomain ("tuxbox-enigma", "/share/locale");
+	textdomain ("tuxbox-enigma");
+
 	{
 		eZap ezap(argc, argv);
 		ezap.exec();

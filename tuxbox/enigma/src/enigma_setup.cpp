@@ -8,16 +8,18 @@
 #include "elabel.h"
 #include "satconfig.h"
 
+#include <core/base/i18n.h>
+
 eZapSetup::eZapSetup()
-	:eLBWindow("Setup", eListbox::tBorder, 8, eSkin::getActive()->queryValue("fontsize", 20), 220)
+	:eLBWindow(_("Setup"), eListbox::tBorder, 8, eSkin::getActive()->queryValue("fontsize", 20), 220)
 {
 	move(ePoint(150, 136));
-	CONNECT((new eListboxEntryText(list, "[Zurück]"))->selected, eZapSetup::sel_close);
-	CONNECT((new eListboxEntryText(list, "Bouquets..."))->selected, eZapSetup::sel_bouquet);
-	CONNECT((new eListboxEntryText(list, "Network..."))->selected, eZapSetup::sel_network);
-//	CONNECT((list, "Audio..."))->selected, sel_sound);
-	CONNECT((new eListboxEntryText(list, "Video..."))->selected, eZapSetup::sel_video);
-	CONNECT((new eListboxEntryText(list, "Satelliten..."))->selected, eZapSetup::sel_satconfig);
+	CONNECT((new eListboxEntryText(list, _("[back]")))->selected, eZapSetup::sel_close);
+	CONNECT((new eListboxEntryText(list, _("Bouquets...")))->selected, eZapSetup::sel_bouquet);
+	CONNECT((new eListboxEntryText(list, _("Network...")))->selected, eZapSetup::sel_network);
+//	CONNECT((list, _("Audio...")))->selected, sel_sound);
+	CONNECT((new eListboxEntryText(list, _("Video...")))->selected, eZapSetup::sel_video);
+	CONNECT((new eListboxEntryText(list, _("Satellites...")))->selected, eZapSetup::sel_satconfig);
 /*	connect(new eListboxEntryText(list, "[Zurück]"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_close(eListboxEntry*)));
 	connect(new eListboxEntryText(list, "Bouquets..."), SIGNAL(selected(eListboxEntry*)), SLOT(sel_bouquet(eListboxEntry*)));
 	connect(new eListboxEntryText(list, "Network..."), SIGNAL(selected(eListboxEntry*)), SLOT(sel_network(eListboxEntry*)));
