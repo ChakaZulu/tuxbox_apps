@@ -52,10 +52,12 @@ class CMP3
 	std::string Album;
 	std::string Year;
 	std::string Comment;
+#ifdef INCLUDE_UNUSED_STUFF
 	std::string ChannelMode;
 	std::string Bitrate;
 	std::string Samplerate;
 	std::string Layer;
+#endif
 	std::string Duration;
 	std::string Genre;
 	bool VBR;

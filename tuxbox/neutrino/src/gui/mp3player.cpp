@@ -426,7 +426,9 @@ int CMP3PlayerGui::show()
                            cLine[strlen(cLine)-1]=0;
                         if(strlen(cLine) > 0 && cLine[0]!='#') 
                         {
-                           std::string filename = sPath + '/' + cLine;
+                           std::string filename = sPath;
+			   filename += '/';
+			   filename += cLine;
                            
                            unsigned int pos;
                            while((pos=filename.find('\\'))!=std::string::npos)
@@ -627,58 +629,74 @@ void CMP3PlayerGui::hide()
 void CMP3PlayerGui::paintItem(int pos)
 {
 //	printf("paintItem{\n");
-	int ypos = y+ +title_height+theight+0 + pos*fheight;
+	int ypos = y + title_height + theight + pos*fheight;
 	int color;
-	if( (liststart+pos < playlist.size()) && (pos % 2) )
-		color = COL_MENUCONTENTDARK;
-	else
-		color	= COL_MENUCONTENT;
 
-	if(liststart+pos==selected)
+	pos += liststart;
+
+	if ((pos) == selected)
 		color = COL_MENUCONTENTSELECTED;
+	else
+		if (((pos) < playlist.size()) && (pos & 1))
+			color = COL_MENUCONTENTDARK;
+		else
+			color = COL_MENUCONTENT;
+	
+	if (pos == (unsigned)current)
+		color += 2;
 
-	if(liststart+pos==(unsigned)current)
-		color = color+2;
+	frameBuffer->paintBoxRel(x, ypos, width - 15, fheight, color);
 
-	frameBuffer->paintBoxRel(x,ypos, width-15, fheight, color);
-	if(liststart+pos<playlist.size())
+	if (pos < playlist.size())
 	{
-		if (playlist[liststart+pos].Title.empty())
+		if (playlist[pos].Title.empty())
 		{
 			// id3tag noch nicht geholt
-			get_id3(&playlist[liststart+pos]);
-			get_mp3info(&playlist[liststart+pos]);
+			get_id3(&playlist[pos]);
+			get_mp3info(&playlist[pos]);
 			if(m_state!=CMP3PlayerGui::STOP)
 				usleep(100*1000);
 		}
 		char sNr[20];
-		sprintf(sNr, "%2d : ", liststart+pos+1);
+		sprintf(sNr, "%2d : ", pos + 1);
 		std::string tmp=sNr;
  		std::string artist="Aritst?";
-      std::string title="Title?";
-      std::string album="";
-      
-      if (!playlist[liststart+pos].Artist.empty())
-         artist=playlist[liststart+pos].Artist;
-      if (!playlist[liststart+pos].Title.empty())
-			title= playlist[liststart+pos].Title;
-      if (!playlist[liststart+pos].Album.empty())
-         album=" (" + playlist[liststart+pos].Album + ')';
-      if(g_settings.mp3player_display == TITLE_ARTIST)
-         tmp += title + ", " + artist + album;
-      else //if(g_settings.mp3player_display == ARTIST_TITLE)
-         tmp += artist + ", " + title + album;
+		std::string title="Title?";
+		
+		if (!playlist[pos].Artist.empty())
+			artist = playlist[pos].Artist;
+		if (!playlist[pos].Title.empty())
+			title = playlist[pos].Title;
+		if(g_settings.mp3player_display == TITLE_ARTIST)
+		{
+			tmp += title;
+			tmp += ", ";
+			tmp += artist;
+		}
+		else //if(g_settings.mp3player_display == ARTIST_TITLE)
+		{
+			tmp += artist;
+			tmp += ", ";
+			tmp += title;
+		}
 
-		int w=g_Fonts->menu->getRenderWidth(playlist[liststart+pos].Duration)+5;
+		if (!playlist[pos].Album.empty())
+		{
+			tmp += " (";
+			tmp += playlist[pos].Album;
+			tmp += ')';
+		}
+		
+		int w=g_Fonts->menu->getRenderWidth(playlist[pos].Duration)+5;
 		g_Fonts->menu->RenderString(x+10,ypos+fheight, width-30-w, tmp, color, fheight, true); // UTF-8
-		g_Fonts->menu->RenderString(x+width-15-w,ypos+fheight, w, playlist[liststart+pos].Duration, color, fheight);
-
-		if(liststart+pos==selected)
+		g_Fonts->menu->RenderString(x+width-15-w,ypos+fheight, w, playlist[pos].Duration, color, fheight);
+		
+		if(pos==selected)
 			paintItemID3DetailsLine(pos);
 		
-		if(liststart+pos==selected && m_state==CMP3PlayerGui::STOP)
-			CLCD::getInstance()->showMP3(playlist[liststart+pos].Artist, playlist[liststart+pos].Title, playlist[liststart+pos].Album);
-
+		if(pos==selected && m_state==CMP3PlayerGui::STOP)
+			CLCD::getInstance()->showMP3(playlist[pos].Artist, playlist[pos].Title, playlist[pos].Album);
+		
 	}
 //	printf("paintItem}\n");
 }
@@ -779,25 +797,36 @@ void CMP3PlayerGui::paintInfo()
 		if(xstart < 10)
 			xstart=10;
 		g_Fonts->menu->RenderString(x+xstart, y + 4 + 1*fheight, width- 20, tmp, COL_MENUCONTENTSELECTED, 0, true); // UTF-8
-		if (playlist[current].Title.empty() || playlist[current].Artist.empty())
-			tmp=playlist[current].Title + playlist[current].Artist;
-      else if(g_settings.mp3player_display == TITLE_ARTIST)
-			tmp=playlist[current].Title + " / " + playlist[current].Artist;
-      else //if(g_settings.mp3player_display == ARTIST_TITLE)
-			tmp=playlist[current].Artist + " / " + playlist[current].Title;
+		if (playlist[current].Title.empty())
+			tmp = playlist[current].Artist;
+		else if (playlist[current].Artist.empty())
+			tmp = playlist[current].Title;
+		else if (g_settings.mp3player_display == TITLE_ARTIST)
+		{
+			tmp = playlist[current].Title;
+			tmp += " / ";
+			tmp += playlist[current].Artist;
+		}
+		else //if(g_settings.mp3player_display == ARTIST_TITLE)
+		{
+			tmp = playlist[current].Artist;
+			tmp += " / ";
+			tmp += playlist[current].Title;
+		}
 
 		w=g_Fonts->menu->getRenderWidth(tmp, true); // UTF-8
 		xstart=(width-w)/2;
 		if(xstart < 10)
 			xstart=10;
 		g_Fonts->menu->RenderString(x+xstart, y +4+ 2*fheight, width- 20, tmp, COL_MENUCONTENTSELECTED, 0, true); // UTF-8
-		tmp = playlist[current].Bitrate + " / " + playlist[current].Samplerate + " / " + playlist[current].ChannelMode + 
-			" / " + playlist[current].Layer;
+#ifdef INCLUDE_UNUSED_STUFF
+		tmp = playlist[current].Bitrate + " / " + playlist[current].Samplerate + " / " + playlist[current].ChannelMode + " / " + playlist[current].Layer;
+#endif
 		// reset so fields get painted always
-      m_mp3info="";
-      m_time_total="0:00";
-      m_time_played="0:00";
-      updateMP3Infos();
+		m_mp3info="";
+		m_time_total="0:00";
+		m_time_played="0:00";
+		updateMP3Infos();
 		updateTimes(true);
 	}
 }
@@ -896,12 +925,15 @@ void CMP3PlayerGui::get_mp3info(CMP3 *mp3)
       fclose(in);
 
       char tmp[20];
+#ifdef INCLUDE_UNUSED_STUFF
       sprintf(tmp,"%lu kbps",Header.bitrate / 1000);
       mp3->Bitrate=tmp;
       sprintf(tmp,"%u kHz",Header.samplerate / 1000);
       mp3->Samplerate=tmp;
+#endif
       sprintf(tmp, "%lu:%02lu", filesize*8/Header.bitrate/60, filesize*8/Header.bitrate%60);
       mp3->Duration=tmp;
+#ifdef INCLUDE_UNUSED_STUFF
       /* Convert the layer number to it's printed representation. */
       switch(Header.layer)
       {
@@ -931,6 +963,7 @@ void CMP3PlayerGui::get_mp3info(CMP3 *mp3)
             mp3->ChannelMode="normal stereo";
             break;
       }
+#endif
    }
    else
    {
