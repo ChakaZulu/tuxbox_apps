@@ -1,14 +1,13 @@
 #ifndef __FONT_H
 #define __FONT_H
 
-#include <freetype/freetype.h>
-#include <freetype/ftcache.h>
-#include <freetype/cache/ftcglyph.h>
-#include <freetype/cache/ftcimage.h>
-#include <freetype/cache/ftcmanag.h>
-#include <freetype/cache/ftcsbits.h>
-#include <freetype/cache/ftlru.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include FT_CACHE_H
+#include FT_CACHE_IMAGE_H
+#include FT_CACHE_SMALL_BITMAPS_H
 #include <vector>
+
 
 #include <lib/gdi/fb.h>
 #include <lib/base/esize.h>
