@@ -225,13 +225,13 @@ static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConn
 		else
 			result += "OFF";
 	result += "</td></tr>\n";
-	result += "<tr><td>Recording:</td><td>";
 #ifndef DISABLE_FILE
+	result += "<tr><td>Recording:</td><td>";
 		if (eZapMain::getInstance()->isRecording())
 			result += "ON";
 		else
-#endif
 			result += "OFF";
+#endif
 	result += "</td></tr>\n";
 	result += "<tr><td>Mode:</td><td>" + eString().sprintf("%d", eZapMain::getInstance()->getMode()) + "</td></tr>\n";
 
@@ -436,7 +436,11 @@ static eString admin(eString request, eString dirpath, eString opts, eHTTPConnec
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString command = opt["command"];
-	eString result =  "Unknown admin command. (valid commands are: shutdown, reboot, restart, standby, wakeup)";
+	eString result;
+	if (eSystemInfo::getInstance()->canShutdown())
+		result =  "Unknown admin command. (valid commands are: shutdown, reboot, restart, standby, wakeup)";
+	else
+		result =  "Unknown admin command. (valid commands are: reboot, restart, standby, wakeup)";
 	if (command == "shutdown")
 	{
 		if (eSystemInfo::getInstance()->canShutdown())
@@ -864,9 +868,9 @@ static eString getLeftNavi(eString mode, bool javascript)
 #ifndef DISABLE_FILE
 			result += button(110, "Movies", OCKER, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODERECORDINGS) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODECATEGORY) + post, "#FFFFFF");
 			result += "<br>";
-#endif
 			result += button(110, "Root", PINK, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODEROOT) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODECATEGORY) + post, "#FFFFFF");
 			result += "</span>";
+#endif
 			result += "<br><br>";
 			if (zap[zapMode][ZAPSUBMODESATELLITES])
 			{
@@ -929,9 +933,9 @@ static eString getLeftNavi(eString mode, bool javascript)
 		result += button(110, "Message", LEFTNAVICOLOR, "javascript:sendMessage2TV()");
 		result += "<br>";
 		result += button(110, "Plugins", LEFTNAVICOLOR, pre + "?mode=controlPlugins" + post);
+#ifndef DISABLE_FILE
 		result += "<br>";
 		result += button(110, "Timer", LEFTNAVICOLOR, pre + "?mode=controlTimerList" + post);
-#ifndef DISABLE_FILE
 		result += "<br>";
 		result += button(110, "Recover Movies", LEFTNAVICOLOR, "javascript:recoverMovies()");
 #endif
@@ -939,23 +943,23 @@ static eString getLeftNavi(eString mode, bool javascript)
 		result += button(110, "Logging", LEFTNAVICOLOR, "javascript:logging()");
 		result += "<br>";
 		result += button(110, "Satfinder", LEFTNAVICOLOR, pre + "?mode=controlSatFinder" + post);
-		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000
-			|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
+		switch ( eSystemInfo::getInstance()->getHwType() )
 		{
-			result += "<br>";
-			result += button(110, "Remote Control", LEFTNAVICOLOR, "javascript:remoteControl('dreambox')");
-		}
-		else
-		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Nokia
-		 || eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Sagem
-		 || eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Philips)
-		{
-			result += "<br>";
-			result += button(110, "Remote Control", LEFTNAVICOLOR, "javascript:remoteControl('dbox2')");
+			case eSystemInfo::DM7000:
+			case eSystemInfo::DM7020:
+				result += "<br>";
+				result += button(110, "Remote Control", LEFTNAVICOLOR, "javascript:remoteControl('dreambox')");
+				break;
+			case eSystemInfo::dbox2Nokia:
+			case eSystemInfo::dbox2Sagem:
+			case eSystemInfo::dbox2Philips:
+				result += "<br>";
+				result += button(110, "Remote Control", LEFTNAVICOLOR, "javascript:remoteControl('dbox2')");
+			default:
+				break;
 		}
 	}
 	else
-
 	if (mode.find("config") == 0)
 	{
 #ifndef DISABLE_FILE
