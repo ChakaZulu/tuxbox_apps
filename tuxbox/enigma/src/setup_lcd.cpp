@@ -14,25 +14,26 @@ void eZapLCDSetup::brightnessChanged( int i )
 {
 	eDebug("Brightness changed to %i", i);
 	lcdbrightness = i;
-	update();
+	update(lcdbrightness, lcdcontrast);
 }
 
 void eZapLCDSetup::contrastChanged( int i )
 {
 	eDebug("contrast changed to %i", i);
 	lcdcontrast = i;
-	update();
+	update(lcdbrightness, lcdcontrast);
 }
 
 void eZapLCDSetup::standbyChanged( int i )
 {
 	eDebug("standby changed to %i", i);
 	lcdstandby = i;
+	update(lcdstandby, lcdcontrast);
 }
 
-void eZapLCDSetup::update()
+void eZapLCDSetup::update(int brightness, int contrast)
 {
-	eDBoxLCD::getInstance()->setLCDParameter(lcdbrightness, lcdcontrast);
+	eDBoxLCD::getInstance()->setLCDParameter(brightness, contrast);
 }
 
 eZapLCDSetup::eZapLCDSetup(): eWindow(0)
@@ -121,6 +122,7 @@ void eZapLCDSetup::okPressed()
 	eConfig::getInstance()->setKey("/ezap/lcd/contrast", lcdcontrast);
 	eConfig::getInstance()->setKey("/ezap/lcd/standby", lcdstandby);
 	eConfig::getInstance()->flush();
+	update(lcdbrightness, lcdcontrast);
 	close(1);
 }
 
@@ -128,6 +130,6 @@ void eZapLCDSetup::abortPressed()
 {
 	eConfig::getInstance()->getKey("/ezap/lcd/brightness", lcdbrightness);
 	eConfig::getInstance()->getKey("/ezap/lcd/contrast", lcdcontrast);
-	update();
+	update(lcdbrightness, lcdcontrast);
 	close(0);
 }
