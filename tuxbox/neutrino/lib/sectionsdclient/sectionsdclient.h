@@ -36,12 +36,15 @@ class CSectionsdClient
 	public:
 		enum events
 		{
-			EVT_TIMESET
+			EVT_TIMESET,
+			EVT_GOT_CN_EPG
 		};
 
 		bool getIsTimeSet();
 
 		void setPauseScanning( bool doPause );
+
+		void setServiceChanged( unsigned ServiceKey, bool requestEvent );
 
 		/*
 			ein beliebiges Event anmelden

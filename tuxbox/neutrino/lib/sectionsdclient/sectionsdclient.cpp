@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.4 2002/03/18 09:32:51 field Exp $
+  $Id: sectionsdclient.cpp,v 1.5 2002/03/18 15:08:50 field Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: sectionsdclient.cpp,v $
+  Revision 1.5  2002/03/18 15:08:50  field
+  Updates...
+
   Revision 1.4  2002/03/18 09:32:51  field
   nix bestimmtes...
 
@@ -174,6 +177,26 @@ void CSectionsdClient::setPauseScanning( bool doPause )
 	sectionsd_connect();
 	send((char*)&msg, sizeof(msg));
 	send((char*)&PauseIt, msg.dataLength);
+	readResponse();
+	sectionsd_close();
+}
+
+void CSectionsdClient::setServiceChanged( unsigned ServiceKey, bool requestEvent )
+{
+	sectionsd::msgRequestHeader msg;
+
+	msg.version = 2;
+	msg.command = sectionsd::serviceChanged;
+	msg.dataLength = 8;
+
+	char* pData = new char[msg.dataLength];
+    *((unsigned *)pData) = ServiceKey;
+    *((bool *)(pData + 4)) = requestEvent;
+
+	sectionsd_connect();
+	send((char*)&msg, sizeof(msg));
+	send(pData, msg.dataLength);
+	delete[] pData;
 	readResponse();
 	sectionsd_close();
 }
