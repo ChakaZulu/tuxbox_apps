@@ -16,6 +16,9 @@ The programm was mainly written to learn and understand the DVB
 protocol structures and streams. This program is not performance optimized.
 
 
+Docs/examples can be found at: http://dvbsnoop.sourceforge.net
+
+
 
 Important:
   This program may not be used to hack pay tv or encrypted dvb services

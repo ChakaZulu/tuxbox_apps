@@ -1,5 +1,5 @@
 /*
-$Id: descriptor.c,v 1.12 2003/10/24 22:45:04 rasc Exp $
+$Id: descriptor.c,v 1.13 2003/12/29 22:14:53 rasc Exp $
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -13,6 +13,9 @@ $Id: descriptor.c,v 1.12 2003/10/24 22:45:04 rasc Exp $
 
 
 $Log: descriptor.c,v $
+Revision 1.13  2003/12/29 22:14:53  rasc
+more dsm-cc INT UNT descriptors
+
 Revision 1.12  2003/10/24 22:45:04  rasc
 code reorg...
 
@@ -63,6 +66,7 @@ kleiner Fehler
 */
 
 int  descriptor  (u_char *b)
+	// $$$ TODO    scope sollte mit uebergeben werden (DSMCC, MPEG, DVB_SI, DSMCC_INT_UNT)
 
 {
  int len;

@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.12 2003/12/28 22:53:41 rasc Exp $
+$Id: dsmcc_str.c,v 1.13 2003/12/29 22:14:54 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dsmcc_str.c,v 1.12 2003/12/28 22:53:41 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.13  2003/12/29 22:14:54  rasc
+more dsm-cc INT UNT descriptors
+
 Revision 1.12  2003/12/28 22:53:41  rasc
 some minor changes/cleanup
 
@@ -160,9 +163,10 @@ char *dsmccStrDSMCC_INT_UNT_DescriptorTAG (u_int i)
      {  0x10, 0x10,  "target_IP_source_slash_descriptor" },
      {  0x11, 0x11,  "target_IPv6_slash_descriptor" },
      {  0x12, 0x12,  "target_IPv6_source_slash_descriptor" },
-     {  0x13, 0x13,  "ISP_access_mode_descriptor" },
-     {  0x14, 0x3F,  "reserved" },
-     //     {  0x40, 0x7F,  "DVB-SI scope" },  Telphone, private_data_spec
+     {  0x13, 0x13,  "IP/MAC_stream_location_descriptor" },
+     {  0x14, 0x14,  "ISP_access_mode_descriptor" },
+     {  0x15, 0x3F,  "reserved" },
+     //     {  0x40, 0x7F,  "DVB-SI scope" },  Telphone, private_data_spec  $$$ TODO
      {  0x80, 0xFE,  "user_private_descriptor" },
      {  0xFF, 0xFF,  "reserved" },
      {  0,0, NULL }

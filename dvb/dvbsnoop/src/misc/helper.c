@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.15 2003/12/27 22:02:44 rasc Exp $
+$Id: helper.c,v 1.16 2003/12/29 22:14:53 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: helper.c,v 1.15 2003/12/27 22:02:44 rasc Exp $
 
 
 $Log: helper.c,v $
+Revision 1.16  2003/12/29 22:14:53  rasc
+more dsm-cc INT UNT descriptors
+
 Revision 1.15  2003/12/27 22:02:44  rasc
 dsmcc INT UNT descriptors started
 
@@ -420,5 +423,24 @@ void displ_IPv4_addr (int v, u_long ip)
    out (v,"%d.%d.%d.%d",
 	(ip>>24) & 0xFF, (ip>>16) & 0xFF, (ip>>8) & 0xFF, ip & 0xFF);
 }
+
+
+
+/*
+ * -- display IPv6-Address format
+ *  -- input: IPv6-Addr. 
+ */
+
+void displ_IPv6_addr (int v, struct IPv6ADDR *a)
+{
+   out (v,"%x.%x.%x.%x.%x.%x.%x.%x",
+	(a->ip[0]>>16) & 0xFFFF, (a->ip[0]) & 0xFFFF,
+	(a->ip[1]>>16) & 0xFFFF, (a->ip[1]) & 0xFFFF,
+	(a->ip[2]>>16) & 0xFFFF, (a->ip[2]) & 0xFFFF,
+	(a->ip[3]>>16) & 0xFFFF, (a->ip[3]) & 0xFFFF
+       );
+}
+
+
 
 

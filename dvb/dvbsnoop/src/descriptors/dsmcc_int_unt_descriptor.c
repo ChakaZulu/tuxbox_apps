@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_int_unt_descriptor.c,v 1.6 2003/12/28 00:01:14 rasc Exp $ 
+$Id: dsmcc_int_unt_descriptor.c,v 1.7 2003/12/29 22:14:53 rasc Exp $ 
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: dsmcc_int_unt_descriptor.c,v 1.6 2003/12/28 00:01:14 rasc Exp $
 
 
 $Log: dsmcc_int_unt_descriptor.c,v $
+Revision 1.7  2003/12/29 22:14:53  rasc
+more dsm-cc INT UNT descriptors
+
 Revision 1.6  2003/12/28 00:01:14  rasc
 some minor changes/adds...
 
@@ -50,6 +53,7 @@ more PES stuff, DSM descriptors, testdata
 #include "strings/dsmcc_str.h"
 #include "misc/hexprint.h"
 #include "misc/output.h"
+#include "misc/helper.h"
 
 
 
@@ -95,19 +99,20 @@ int  descriptorDSMCC_INT_UNT_Private  (u_char *b)
 //     {  0x04, 0x04,  "message_descriptor" },
 //     {  0x05, 0x05,  "ssu_event_name_descriptor" },
      case 0x06:  descriptorDSMCC_target_smartcard (b); break;
-     case 0x07:  descriptorDSMCC_MAC_address (b); break;
+     case 0x07:  descriptorDSMCC_target_MAC_address (b); break;
      case 0x08:  descriptorDSMCC_target_serial_number (b); break;
-     case 0x09:  descriptorDSMCC_IP_address (b); break;
-//     {  0x0A, 0x0A,  "target_IPv6_address_descriptor" },
+     case 0x09:  descriptorDSMCC_target_IP_address (b); break;
+     case 0x0A:  descriptorDSMCC_target_IPv6_address (b); break;
 //     {  0x0B, 0x0B,  "ssu_subgroup_association_descriptor" },
      case 0x0C:  descriptorDSMCC_IP_MAC_platform_name (b); break;
      case 0x0D:  descriptorDSMCC_IP_MAC_platform_provider_name (b); break;
-     case 0x0E:  descriptorDSMCC_MAC_address_range (b); break;
-     case 0x0F:  descriptorDSMCC_IP_slash (b); break;
-//     {  0x10, 0x10,  "target_IP_source_slash_descriptor" },
-//     {  0x11, 0x11,  "target_IPv6_slash_descriptor" },
-//     {  0x12, 0x12,  "target_IPv6_source_slash_descriptor" },
-//     {  0x13, 0x13,  "ISP_access_mode_descriptor" },
+     case 0x0E:  descriptorDSMCC_target_MAC_address_range (b); break;
+     case 0x0F:  descriptorDSMCC_target_IP_slash (b); break;
+     case 0x10:  descriptorDSMCC_target_IP_source_slash (b); break;
+     case 0x11:  descriptorDSMCC_target_IPv6_slash (b); break;
+     case 0x12:  descriptorDSMCC_target_IPv6_source_slash (b); break;
+//     0x13 IP/MAC stream_location_descriptor
+//     {  0x14, 0x14,  "ISP_access_mode_descriptor" },	/// ???? $$$ TODO
 //     {  0x14, 0x3F,  "reserved" },
 //     {  0x80, 0xFE,  "user_private_descriptor" },
 
@@ -156,6 +161,17 @@ int  descriptorDSMCC_INT_UNT_Private  (u_char *b)
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 /*
   0x06 - target_smartcard 
   ETSI EN 301 192  (ISO 13818-6)
@@ -183,7 +199,7 @@ void descriptorDSMCC_target_smartcard (u_char *b)
   ETSI EN 301 192  (ISO 13818-6)
 */
 
-void descriptorDSMCC_MAC_address (u_char *b)
+void descriptorDSMCC_target_MAC_address (u_char *b)
 {
  int  len;
  long mac_H, mac_L;
@@ -239,7 +255,7 @@ void descriptorDSMCC_target_serial_number (u_char *b)
   ETSI EN 301 192  (ISO 13818-6)
 */
 
-void descriptorDSMCC_IP_address (u_char *b)
+void descriptorDSMCC_target_IP_address (u_char *b)
 {
  int    len;
  u_long ip;
@@ -264,6 +280,73 @@ void descriptorDSMCC_IP_address (u_char *b)
  }
 
 }
+
+
+
+
+
+/*
+  0x0A - IPv6_address
+  ETSI EN 301 192  (ISO 13818-6)
+*/
+
+static struct IPv6ADDR *_getIPv6Addr (u_char *b, struct IPv6ADDR *x);
+
+void descriptorDSMCC_target_IPv6_address (u_char *b)
+{
+ int    len;
+ struct IPv6ADDR  x;
+
+ // descriptor_tag	= b[0];
+ len			= b[1];
+
+ _getIPv6Addr (b, &x);
+ out (4,"IPv6_addr_mask: %08lx%08lx%08lx%08lx [= ",
+		 x.ip[0], x.ip[1], x.ip[2], x.ip[3] );
+  	displ_IPv6_addr (4, &x);
+	out_nl (4,"]");
+ b += 18;
+ len -= 16;
+
+ while (len > 0) {
+ 	_getIPv6Addr (b, &x);
+	out (4,"IPv6_addr_mask: %08lx%08lx%08lx%08lx [= ",
+		 	x.ip[0], x.ip[1], x.ip[2], x.ip[3] );
+	  	displ_IPv6_addr (4, &x);
+		out_nl (4,"]");
+ 	b += 16;
+	len -= 16;
+ }
+
+}
+
+
+static struct IPv6ADDR *_getIPv6Addr (u_char *b, struct IPv6ADDR *x)
+{
+ 	x->ip[0] = getBits (b, 0,   0, 32);
+	x->ip[1] = getBits (b, 0,  32, 32);
+	x->ip[2] = getBits (b, 0,  64, 32);
+	x->ip[3] = getBits (b, 0,  96, 32);
+	return x;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -316,7 +399,7 @@ void descriptorDSMCC_IP_MAC_platform_provider_name (u_char *b)
   ETSI EN 301 192  (ISO 13818-6)
 */
 
-void descriptorDSMCC_MAC_address_range (u_char *b)
+void descriptorDSMCC_target_MAC_address_range (u_char *b)
 {
  int  len;
  long mac_H, mac_L;
@@ -354,7 +437,7 @@ void descriptorDSMCC_MAC_address_range (u_char *b)
   ETSI EN 301 192  (ISO 13818-6)
 */
 
-void descriptorDSMCC_IP_slash (u_char *b)
+void descriptorDSMCC_target_IP_slash (u_char *b)
 {
  int    len;
 
@@ -366,7 +449,7 @@ void descriptorDSMCC_IP_slash (u_char *b)
  	u_long ip;
 	int    mask;
 
-	ip   = outBit_Sx_NL (4,"IPv4_slash_mask: ",  b, 0,32);
+	ip   = outBit_Sx_NL (4,"IPv4_addr: ",        b, 0,32);
 	mask = outBit_Sx_NL (4,"IPv4_slash_mask: ",  b,32, 8);
  	out (4,"  [= ");
 		displ_IPv4_addr (4, ip);
@@ -383,10 +466,128 @@ void descriptorDSMCC_IP_slash (u_char *b)
 
 
 
+/*
+  0x10 - IP_source_slash
+  ETSI EN 301 192  (ISO 13818-6)
+*/
+
+void descriptorDSMCC_target_IP_source_slash (u_char *b)
+{
+ int    len;
+
+ // descriptor_tag	= b[0];
+ len			= b[1];
+ b += 2;
+
+ while (len > 0) {
+ 	u_long ip;
+	int    mask;
+
+	ip   = outBit_Sx_NL (4,"IPv4_source_addr: ",        b, 0,32);
+	mask = outBit_Sx_NL (4,"IPv4_source_slash_mask: ",  b,32, 8);
+ 	out (4,"  [= ");
+		displ_IPv4_addr (4, ip);
+		out_nl (4,"/%d]",mask);
+
+	ip   = outBit_Sx_NL (4,"IPv4_dest_addr: ",          b,40,32);
+	mask = outBit_Sx_NL (4,"IPv4_dest_slash_mask: ",    b,72, 8);
+ 	out (4,"  [= ");
+		displ_IPv4_addr (4, ip);
+		out_nl (4,"/%d]",mask);
+
+ 	b += 10;
+	len -= 10;
+ }
+
+}
 
 
 
 
+
+
+/*
+  0x11 - IPv6_slash
+  ETSI EN 301 192  (ISO 13818-6)
+*/
+
+
+void descriptorDSMCC_target_IPv6_slash (u_char *b)
+{
+ int    len;
+
+ // descriptor_tag	= b[0];
+ len			= b[1];
+ b += 2;
+
+ while (len > 0) {
+ 	struct IPv6ADDR  x;
+	int    mask;
+
+ 	_getIPv6Addr (b, &x);
+	out_nl (4,"IPv6_addr_mask: %08lx%08lx%08lx%08lx",
+		 	x.ip[0], x.ip[1], x.ip[2], x.ip[3] );
+
+	mask = outBit_Sx_NL (4,"IPv6_slash_mask: ",  b,128, 8);
+ 	out (4,"  [= ");
+		displ_IPv6_addr (4, &x);
+		out_nl (4,"/%d]",mask);
+
+ 	b += 17;
+	len -= 17;
+ }
+
+}
+
+
+
+
+
+/*
+  0x12 - IPv6_source_slash
+  ETSI EN 301 192  (ISO 13818-6)
+*/
+
+void descriptorDSMCC_target_IPv6_source_slash (u_char *b)
+{
+ int    len;
+
+ // descriptor_tag	= b[0];
+ len			= b[1];
+ b += 2;
+
+ while (len > 0) {
+ 	struct IPv6ADDR  x;
+	int    mask;
+
+ 	_getIPv6Addr (b, &x);
+	out_nl (4,"IPv6_source_addr: %08lx%08lx%08lx%08lx",
+		 	x.ip[0], x.ip[1], x.ip[2], x.ip[3] );
+
+	mask = outBit_Sx_NL (4,"IPv6_source_slash_mask: ",  b,128, 8);
+ 	out (4,"  [= ");
+		displ_IPv6_addr (4, &x);
+		out_nl (4,"/%d]",mask);
+
+ 	b += 17;
+	len -= 17;
+
+
+ 	_getIPv6Addr (b, &x);
+	out_nl (4,"IPv6_dest_addr: %08lx%08lx%08lx%08lx",
+		 	x.ip[0], x.ip[1], x.ip[2], x.ip[3] );
+
+	mask = outBit_Sx_NL (4,"IPv6_dest_slash_mask: ",  b,128, 8);
+ 	out (4,"  [= ");
+		displ_IPv6_addr (4, &x);
+		out_nl (4,"/%d]",mask);
+
+ 	b += 17;
+	len -= 17;
+
+ }
+
+}
 
 
 

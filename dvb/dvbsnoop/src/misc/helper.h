@@ -31,8 +31,15 @@ long str2i (char *s);
 char *str_cell_latitude (long latitude);
 char *str_cell_longitude (long longitude);
 
+
+
+struct IPv6ADDR {
+	u_long  ip[4];		// 32 bit: ip[0] ip[1] ip[2] ip[3]
+};
+
 void displ_mac_addr (int v, long mac_H24, long mac_L24);
 void displ_IPv4_addr (int v, u_long ip);
+void displ_IPv6_addr (int v, struct IPv6ADDR *ip);
 
 
 
