@@ -1,10 +1,10 @@
 /*
- * $Id: bouquets.cpp,v 1.26 2002/04/24 21:25:12 Simplex Exp $
+ * $Id: bouquets.cpp,v 1.27 2002/05/13 14:48:49 obi Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
  * (C) 2002 by Simplex <simplex@berlios.de>,
- *             rasc <rasc@berlios.de>
+ *	     rasc <rasc@berlios.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -239,14 +239,21 @@ string CBouquetManager::convertForXML( string s)
 			r += "&quot;";
 		  break;
 		  default:
+			r += s[i];
+			break;
+#if 0
+			// comparison is always true due to limited range of data type
 			if ((s[i]>=32) && (s[i]<128))
 				r += s[i];
+
+			// comparison is always false due to limited range of data type
 			else if (s[i] > 128)
 			{
 				char val[5];
 				sprintf(val, "%d", s[i]);
 				r = r + "&#" + val + ";";
 			}
+#endif
 		}
 	}
 	return(r);
@@ -270,9 +277,9 @@ void CBouquetManager::saveBouquets()
 		if (Bouquets[i] != remainChannels)
 		{
 			fprintf(bouq_fd, "\t<Bouquet name=\"%s\" hidden=\"%d\" locked=\"%d\">\n",
-			        convertForXML(Bouquets[i]->Name).c_str(),
-			        Bouquets[i]->bHidden ? 1 : 0,
-			        Bouquets[i]->bLocked ? 1 : 0);
+				convertForXML(Bouquets[i]->Name).c_str(),
+				Bouquets[i]->bHidden ? 1 : 0,
+				Bouquets[i]->bLocked ? 1 : 0);
 			for ( uint j=0; j<Bouquets[i]->tvChannels.size(); j++)
 			{
 				fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" onid=\"%04x\"/>\n",
@@ -572,7 +579,7 @@ void CBouquetManager::renumServices()
 		}
 	}
 
-	map<uint, uint>::iterator        numit;
+	map<uint, uint>::iterator	numit;
 	map<std::string, uint>::iterator nameit;
 	map<uint, CZapitChannel>::iterator     cit;
 
@@ -801,15 +808,15 @@ CBouquetManager::tvChannelIterator CBouquetManager::tvChannelIterator::operator 
 	if ((b==-1) && (c==-1))
 		return(*this);
 	c++;
-	if (c >= Owner->Bouquets[b]->tvChannels.size())
+	if ((unsigned int) c >= Owner->Bouquets[b]->tvChannels.size())
 	{
 		c = 0;
 		do
 		{
 			b++;
-		} while ((b < Owner->Bouquets.size()) && (Owner->Bouquets[b]->tvChannels.size()==0));
+		} while (((unsigned int) b < Owner->Bouquets.size()) && (Owner->Bouquets[b]->tvChannels.size()==0));
 	}
-	if ( b >= Owner->Bouquets.size())
+	if ((unsigned int) b >= Owner->Bouquets.size())
 	{
 		b=-1; c=-1;
 	}
@@ -856,15 +863,15 @@ CBouquetManager::radioChannelIterator CBouquetManager::radioChannelIterator::ope
 	if ((b==-1) && (c==-1))
 		return(*this);
 	c++;
-	if (c >= Owner->Bouquets[b]->radioChannels.size())
+	if ((unsigned int) c >= Owner->Bouquets[b]->radioChannels.size())
 	{
 		c = 0;
 		do
 		{
 			b++;
-		} while ((b < Owner->Bouquets.size()) && (Owner->Bouquets[b]->radioChannels.size()==0));
+		} while (((unsigned int) b < Owner->Bouquets.size()) && (Owner->Bouquets[b]->radioChannels.size()==0));
 	}
-	if ( b >= Owner->Bouquets.size())
+	if ((unsigned int) b >= Owner->Bouquets.size())
 	{
 		b=-1; c=-1;
 	}
