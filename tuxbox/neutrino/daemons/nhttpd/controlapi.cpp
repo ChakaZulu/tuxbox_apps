@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.15 2003/01/04 15:51:44 dirch Exp $
+	$Id: controlapi.cpp,v 1.16 2003/01/09 23:26:46 dirch Exp $
 
 	License: GPL
 
@@ -285,6 +285,7 @@ bool CControlAPI::GetChannel_IDCGI(CWebserverRequest *request) // sendet die akt
 
 bool CControlAPI::MessageCGI(CWebserverRequest *request)
 {
+	request->SendPlainHeader("text/plain");          // Standard httpd header senden
 	string message;
 	int event = 0;
 
