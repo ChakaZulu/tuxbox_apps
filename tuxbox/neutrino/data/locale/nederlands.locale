@@ -105,6 +105,8 @@ videomenu.videoformat_431 4:3 (PS)
 videomenu.videoformat_169 16:9
 videomenu.videoformat_autodetect autodetect
 videomenu.vcrswitch Switch Scart automatisch
+videomenu.rgb_centering RGB-centering
+videomenu.csync Sync.-correctie
 
 networkmenu.head Netwerkinstellingen
 networkmenu.test Test nu het netwerk
@@ -140,15 +142,19 @@ streamingmenu.streaming_server_cddrive DVD Drive
 streamingmenu.streaming_server_startdir Directory (VLC)
 streamingmenu.streaming_videorate Datarate Beeld
 streamingmenu.streaming_audiorate Datarate Geluid
-streamingmenu.streaming_ac3_enabled ondersteuning AC3
 streamingmenu.off Uit
 streamingmenu.on Aan
-streamingmenu.streaming_force_transcode Force Transcoding
 streamingmenu.streaming_resolution Resolutie
 streamingmenu.352x288 352x288
 streamingmenu.352x576 352x576
 streamingmenu.480x576 480x576
 streamingmenu.704x576 704x576
+streamingmenu.streaming_transcode_audio Transcod. Audio (dvd/vcd/mpg)
+streamingmenu.streaming_force_avi_rawaudio AC3 met avi
+streamingmenu.streaming_force_transcode_video Transcod. ook mpg/vcd Video
+streamingmenu.streaming_transcode_video_codec MPEG Video Codec
+streamingmenu.mpeg1 MPEG1
+streamingmenu.mpeg2 MPEG2
 
 ping.ok Bereikbaar door Ping
 ping.unreachable Onbereikbaar door Ping
@@ -728,9 +734,20 @@ movieplayer.nostreamingserver De streamserver kon niet gevonden worden
 movieplayer.defdir startdirectory
 movieplayer.buffering Bufferen...
 movieplayer.tsplayback Speel TS
+movieplayer.pesplayback PES Afspelen (Experiment)
 movieplayer.fileplayback Bestand via VLC
 movieplayer.dvdplayback DVD
 movieplayer.vcdplayback (S)VCD
+movieplayer.tshelp ROOD/Home Stop\nGROEN Resync\nGEEL Pause/verder\nBLAUW Favoriet instellen\n1 ca. 1 Minuut terug\n3 ca. 1 Minuut vooruit\n4 ca. 5 Minuten terug\n6 ca. 5 Minuten vooruit\n7 ca. 10 Minuten terug\n9 ca. 10 Minuten vooruit\nHelp: http://www.giggo.de/dbox2/movieplayer.html\n
+movieplayer.vlchelp ROOD/Home Stop\nGROEN Resync\nGEEL Pause/verder\nBLAUW Favoriet instellen\n1 ca. 1 Minuut terug\n3 ca. 1 Minuut vooruit\n4 ca. 5 Minuten terug\n6 ca. 5 Minuten vooruit\n7 ca. 10 Minuten terug\n9 ca. 10 Minuten vooruit\nHelp: http://www.giggo.de/dbox2/movieplayer.html\n
+movieplayer.toomanybookmarks U heeft te veel favorieten.\nEr moet een andere favoriet gewist worden.
+movieplayer.bookmarkname Bookmark Naam
+movieplayer.bookmarkname_hint1 Geef de naam voor de nieuwe favoriet in
+movieplayer.bookmarkname_hint2
+movieplayer.goto Ga naar...
+movieplayer.goto.h1 = -> absolute sprong
+movieplayer.goto.h2 +,- -> relatieve sprong
+movieplayer.wrongvlcversion Functie is niet mogelijk met de gebruikte VLC-versie
 
 filebrowser.head Browser
 filebrowser.filter.active Filter aan
@@ -739,7 +756,13 @@ filebrowser.select Kies
 filebrowser.mark Markeer
 filebrowser.scan Folders doorzoeken
 filebrowser.sort.name (bestandsname)
+filebrowser.sort.namedirsfirst (Dateiname2)
 filebrowser.sort.date (datum)
+filebrowser.sort.type (Type)
+filebrowser.sort.size (Grootte)
+filebrowser.nextpage Volgende pagina
+filebrowser.prevpage Vorige pagina
+filebrowser.showrights Toon rechten
 
 nfs.mount Mount NFS/CIFS volume
 nfs.ip NFS/CIFS Server IP
