@@ -1590,38 +1590,30 @@ public:
 		}
 #endif
 		eString short_description;
-		eService* current;
-		eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-		if (sapi)
-		{
-			current = eDVB::getInstance()->settings->getTransponders()->searchService(e);
-			if (current)
-			{
-				eEPGCache::getInstance()->Lock();
-				const timeMap* evt = eEPGCache::getInstance()->getTimeMap((eServiceReferenceDVB&)e);
-				if (evt)
-				{
-					timeMap::const_iterator It;
-					for (It = evt->begin(); It != evt->end(); It++)
-					{
-						EITEvent event(*It->second);
-						for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
-						{
-							Descriptor *descriptor=*d;
-							if (descriptor->Tag() == DESCR_SHORT_EVENT)
-							{
-								short_description = ((ShortEventDescriptor*)descriptor)->event_name;
-							}
-						}
-					}
-				}
-				eEPGCache::getInstance()->Unlock();
-			}
-		}
-
 		eService *service = iface.addRef(e);
 		if (service)
 		{
+			eEPGCache::getInstance()->Lock();
+			const timeMap* evt = eEPGCache::getInstance()->getTimeMap((eServiceReferenceDVB&)e);
+			if (evt)
+			{
+				timeMap::const_iterator It;
+				for (It = evt->begin(); It != evt->end(); It++)
+				{
+					EITEvent event(*It->second);
+					for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
+					{
+						Descriptor *descriptor=*d;
+						if (descriptor->Tag() == DESCR_SHORT_EVENT)
+						{
+							short_description = ((ShortEventDescriptor*)descriptor)->event_name;
+						}
+					}
+				}
+			}
+			eEPGCache::getInstance()->Unlock();
+			
+			
 			result1 += "\"" + ref2string(e) + "\", ";
 			eString tmp = filter_string(service->service_name);
 			tmp.strReplace("\"", "'");
