@@ -26,7 +26,6 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include <errno.h>
-#include <stdio.h>
 #include <unistd.h>
 #include <wavdec.h>
 #include <sstream>
@@ -160,7 +159,7 @@ CBaseDec::RetCode CWavDec::Decoder(FILE *in, int OutputFd, State* state, CAudioM
 	return Status;
 }
 
-bool CWavDec::GetMetaData(FILE *in, bool nice, CAudioMetaData* m)
+bool CWavDec::GetMetaData(FILE *in, const bool nice, CAudioMetaData* m)
 {
 	return SetMetaData(in, m);
 }

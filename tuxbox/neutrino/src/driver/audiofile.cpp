@@ -1,3 +1,4 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: non-nil; c-basic-offset: 4 -*- */
 /*
   Neutrino-GUI  -   DBoxII-Project
 
@@ -29,30 +30,38 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __AUDIOFILE_H__
-#define __AUDIOFILE_H__
+#include <driver/audiofile.h>
 
-#include <string>
-#include <vector>
-#include "driver/audiometadata.h"
-#include "driver/file.h"
-
-class CAudiofile
+/* default constructor */
+CAudiofile::CAudiofile()
+  : MetaData(), Filename(), FileType( CFile::FILE_UNKNOWN )
 {
- public:
-	/* constructors */
-	CAudiofile();
-	CAudiofile( std::string name, CFile::FileType type );
-	CAudiofile( const CAudiofile& src );
+}
 
-	void operator=( const CAudiofile& src );
-	void clear();
+/* constructor */
+CAudiofile::CAudiofile( std::string name, CFile::FileType type )
+	: MetaData(), Filename( name ), FileType( type )
+{
+}
 
-	CAudioMetaData MetaData;
-	std::string Filename;
-	CFile::FileType FileType;
-};
+/* copy constructor */
+CAudiofile::CAudiofile( const CAudiofile& src )
+  : MetaData( src.MetaData ), Filename( src.Filename ),
+	FileType( src.FileType )
+{
+}
 
-typedef std::vector<CAudiofile> CPlayList;
+/* assignment operator */
+void CAudiofile::operator=( const CAudiofile& src )
+{
+	MetaData = src.MetaData;
+	Filename = src.Filename;
+	FileType = src.FileType;
+}
 
-#endif /* __AUDIOFILE_H__ */
+void CAudiofile::clear()
+{
+	MetaData.clear();
+	Filename.clear();
+	FileType = CFile::FILE_UNKNOWN;
+}

@@ -35,7 +35,6 @@
 
 #include "driver/framebuffer.h"
 #include "driver/audiofile.h"
-#include "driver/audioplay.h"
 #include "gui/filebrowser.h"
 #include "gui/widget/menue.h"
 
@@ -113,7 +112,7 @@ class CAudioPlayerGui : public CMenuTarget
 	void ff(unsigned int seconds=0);
 	void rev(unsigned int seconds=0);
 	int getNext();
-	void GetMetaData(CAudiofile *File);
+	void GetMetaData(CAudiofile* const File);
 	void updateMetaData();
 	void updateTimes(const bool force = false);
 	void showMetaData();

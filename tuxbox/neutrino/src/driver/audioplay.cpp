@@ -41,7 +41,6 @@
 
 #include <neutrino.h>
 #include <driver/audioplay.h>
-#include <driver/netfile.h>
 
 void CAudioPlayer::stop()
 {
@@ -81,39 +80,28 @@ CAudioPlayer* CAudioPlayer::getInstance()
 	return AudioPlayer;
 }
 
-void ShoutcastCallback(void *arg)
-{
-	CAudioPlayer::getInstance()->sc_callback(arg);
-}
-
-void* CAudioPlayer::PlayThread(void * filename)
+void* CAudioPlayer::PlayThread( void* dummy )
 {
 	int soundfd = ::open("/dev/sound/dsp",O_WRONLY);
 	if (soundfd != -1)
 	{
-		FILE* fp = ::fopen( static_cast<char*>(filename), "r" );
-		if (fp!=NULL)
+		/* Decode stdin to stdout. */
+		CBaseDec::RetCode Status =
+			CBaseDec::DecoderBase( &getInstance()->m_Audiofile, soundfd,
+								   &getInstance()->state,
+								   &getInstance()->m_played_time,
+								   &getInstance()->m_SecondsToSkip );
+
+		if (Status != CBaseDec::OK)
 		{
-			/* add callback function for shoutcast */
-			if (fstatus(fp, ShoutcastCallback) < 0)
-			{
-				//fprintf(stderr,"Error adding shoutcast callback!\n%s",err_txt);
-			}
-         
-			/* Decode stdin to stdout. */
-			CBaseDec::RetCode Status;
-			printf("CAudioPlayer: Decoding %s ", (char*) filename);
-			Status = CBaseDec::DecoderBase(fp,soundfd,&getInstance()->state, 
-						       &getInstance()->m_MetaData,
-						       &getInstance()->m_played_time,
-						       &getInstance()->m_SecondsToSkip);
-			fclose(fp);
-			if(Status != CBaseDec::OK)
-				fprintf(stderr,"Error %d occured during decoding.\n",(int)Status);
-	
+			fprintf( stderr, "Error during decoding: %s.\n",
+					 ( Status == CBaseDec::READ_ERR ) ? "READ_ERR" :
+					 ( Status == CBaseDec::WRITE_ERR ) ? "WRITE_ERR" :
+					 ( Status == CBaseDec::DSPSET_ERR ) ? "DSPSET_ERR" :
+					 ( Status == CBaseDec::DATA_ERR ) ? "DATA_ERR" :
+					 ( Status == CBaseDec::INTERNAL_ERR ) ? "INTERNAL_ERR" :
+					 "unknown" );
 		}
-		else
-			fprintf(stderr,"Error opening file %s\n",(char *) filename);
 		close(soundfd);
 	}
 	else
@@ -124,19 +112,18 @@ void* CAudioPlayer::PlayThread(void * filename)
 	return NULL;
 }
 
-bool CAudioPlayer::play(const CAudiofile* file, bool highPrio)
+bool CAudioPlayer::play(const CAudiofile* file, const bool highPrio)
 {
 	stop();
-	getInstance()->clearMetaData();
+	getInstance()->clearFileData();
 
-	/* + transfer information from CAudiofile to
-	   Audiometadata, so that it does not have to be
-	   gathered again
-	   + this assignment is important, otherwise the player
-	   would crash if the file currently played was
-	   deleted
+	/* + transfer information from CAudiofile to member variable,
+		 so that it does not have to be gathered again
+	   + this assignment is important, otherwise the player would
+		 crash if the file currently played was deleted from the
+		 playlist
 	*/
-	m_MetaData = file->MetaData;
+	m_Audiofile = *file;
 
 	state = CBaseDec::PLAY;
 	pthread_attr_t attr;
@@ -149,11 +136,12 @@ bool CAudioPlayer::play(const CAudiofile* file, bool highPrio)
 		param.sched_priority=1;
 		pthread_attr_setschedparam(&attr, &param);
 		usleep(100000); // give the event thread some time to handle his stuff
-							 // without this sleep there were duplicated events...
+						// without this sleep there were duplicated events...
 	}
 
 	bool ret = true;
-	if (pthread_create (&thrPlay, &attr, PlayThread, (void*)file->Filename.c_str()) != 0 )
+#warning fixme: There must be a way to call the playing thread without arguments. (NULL did not work for me)
+	if (pthread_create (&thrPlay, &attr, PlayThread, (void*)&ret) != 0 )
 	{
 		perror("audioplay: pthread_create(PlayThread)");
 		ret = false;
@@ -174,28 +162,33 @@ void CAudioPlayer::init()
 	state = CBaseDec::STOP;
 }
 
+#ifdef INCLUDE_UNUSED_STUFF
+/* Currently commented out because I could not find a stream where
+ * request_file() from netfile.cpp set meta_int to a value > 0,
+ * which is necessary for adding the Shoutcast callback.
+ */
 void CAudioPlayer::sc_callback(void *arg)
 {
   bool changed=false;
   CSTATE *stat = (CSTATE*)arg;
-  if(m_MetaData.artist != stat->artist)
+  if(m_Audiofile.MetaData.artist != stat->artist)
   {
-	  m_MetaData.artist = stat->artist;
+	  m_Audiofile.MetaData.artist = stat->artist;
 	  changed=true;
   }
-  if (m_MetaData.title != stat->title)
+  if (m_Audiofile.MetaData.title != stat->title)
   {
-	  m_MetaData.title = stat->title;
+	  m_Audiofile.MetaData.title = stat->title;
 	  changed=true;
   }
-  if (m_MetaData.sc_station != stat->station)
+  if (m_Audiofile.MetaData.sc_station != stat->station)
   {
-	  m_MetaData.sc_station = stat->station;
+	  m_Audiofile.MetaData.sc_station = stat->station;
 	  changed=true;
   }
-  if (m_MetaData.genre != stat->genre)
+  if (m_Audiofile.MetaData.genre != stat->genre)
   {
-	  m_MetaData.genre = stat->genre;
+	  m_Audiofile.MetaData.genre = stat->genre;
 	  changed=true;
   }
   if(changed)
@@ -203,52 +196,34 @@ void CAudioPlayer::sc_callback(void *arg)
 	  m_played_time = 0;
   }
   m_sc_buffered = stat->buffered;
-  m_MetaData.changed = changed;
+  m_Audiofile.MetaData.changed = changed;
   //printf("Callback %s %s %s %d\n",stat->artist, stat->title, stat->station, stat->buffered);
 }
+#endif /* INCLUDE_UNUSED_STUFF */
 
-void CAudioPlayer::clearMetaData()
+void CAudioPlayer::clearFileData()
 {
-	m_MetaData.clear();
+	m_Audiofile.clear();
 	m_played_time=0;
+#ifdef INCLUDE_UNUSED_STUFF
 	m_sc_buffered=0;
+#endif /* INCLUDE_UNUSED_STUFF */
 }
 
 CAudioMetaData CAudioPlayer::getMetaData()
 {
-	CAudioMetaData m = m_MetaData;
-	m_MetaData.changed=false;
+	CAudioMetaData m = m_Audiofile.MetaData;
+	m_Audiofile.MetaData.changed=false;
 	return m;
 }
 
 bool CAudioPlayer::hasMetaDataChanged()
 {
-	return m_MetaData.changed;
+	return m_Audiofile.MetaData.changed;
 }
 
-CAudioMetaData CAudioPlayer::readMetaData(const char* filename, bool nice)
+bool CAudioPlayer::readMetaData(CAudiofile* const file, const bool nice)
 {
-	FILE* fp;
-	CAudioMetaData m;
-	m.clear();
-	fp = ::fopen((char *)filename,"r");
-	if (fp!=NULL)
-	{
-		/* add callback function for shoutcast */
-		if (fstatus(fp, ShoutcastCallback) < 0)
-		{
-			//fprintf(stderr,"Error adding shoutcast callback!\n%s",err_txt);
-		}
-
-		/* Decode stdin to stdout. */
-		if( !CBaseDec::GetMetaDataBase(fp, nice, &m) )
-			fprintf(stderr,"Error occured during meta data reading.\n");
-
-		fclose(fp);
-	}
-	else
-		fprintf(stderr,"Error opening file %s\n",(char *) filename);
-	
-	return m;
+	return CBaseDec::GetMetaDataBase(file, nice);
 }
 

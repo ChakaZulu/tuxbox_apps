@@ -36,17 +36,17 @@
 /****************************************************************************
  * Includes																	*
  ****************************************************************************/
-#include <stdio.h>
 #include <string.h>
 #include <errno.h>
 #include <string>
 #include <driver/audiodec/mp3dec.h>
-#include <driver/netfile.h>
 #include <linux/soundcard.h>
 #include <assert.h>
 #include <cmath>
 
 #include <id3tag.h>
+
+#include <driver/audiodec/netfile.h>
 
 /* libid3tag extension: This is neccessary in order to call fclose
    on the file. Normally libid3tag closes the file implicit.
@@ -283,9 +283,13 @@ void CMP3Dec::CreateInfo(CAudioMetaData* m, int FrameNumber)
 /****************************************************************************
  * Main decoding loop. This is where mad is used.                           *
  ****************************************************************************/
-#define INPUT_BUFFER_SIZE	(2*8192)
+#define INPUT_BUFFER_SIZE	(5*8192) /* enough to skip big id3 tags */
 #define OUTPUT_BUFFER_SIZE	1022*4 /* AVIA_GT_PCM_MAX_SAMPLES-1 */
-CBaseDec::RetCode CMP3Dec::Decoder(FILE *InputFp,int OutputFd, State* state, CAudioMetaData* meta_data, time_t* time_played, unsigned int* secondsToSkip)
+CBaseDec::RetCode CMP3Dec::Decoder(FILE *InputFp, const int OutputFd,
+								   State* const state,
+								   CAudioMetaData* meta_data,
+								   time_t* const time_played,
+								   unsigned int* const secondsToSkip)
 {
 	struct mad_stream	Stream;
 	struct mad_frame	Frame;
@@ -766,7 +770,7 @@ bool CMP3Dec::GetMetaData(FILE* in, const bool nice, CAudioMetaData* const m)
 	if ( in && m )
 	{
 		res = GetMP3Info(in, nice, m);
-	GetID3(in, m);
+		GetID3(in, m);
 	}
 	else
 	{
@@ -777,16 +781,17 @@ bool CMP3Dec::GetMetaData(FILE* in, const bool nice, CAudioMetaData* const m)
 }
 
 /*
- * Scans MP3 header for Xing, Info and Lame tag.  Returns false on failure,
- * true on success.
+ * Scans MP3 header for Xing, Info and Lame tag.  Returns -1 on failure,
+ * >= 0 on success.  The returned value specifies the location of the
+ * first audio frame.
  *
  * @author Christian Schlotter
  * @date   2004
  *
  * Based on scan_header() from Robert Leslie's "MAD Plug-in for Winamp".
  */
-#define BUFFER_SIZE 2560
-bool CMP3Dec::scanHeader( FILE* input, struct mad_header* const header,
+#define BUFFER_SIZE (5*8192) // big enough to skip id3 tags containing jpegs
+long CMP3Dec::scanHeader( FILE* input, struct mad_header* const header,
 						  struct tag* const ftag, const bool nice )
 {
 	struct mad_stream stream;
@@ -794,14 +799,14 @@ bool CMP3Dec::scanHeader( FILE* input, struct mad_header* const header,
 	unsigned char buffer[BUFFER_SIZE];
 	unsigned int buflen = 0;
 	int count = 0;
-	bool allowRefill = true;
-	bool result = true;
+	short refillCount = 4; /* buffer may be refilled refillCount times */
+	long filePos = 0; /* return value */
 
 	mad_stream_init( &stream );
 	mad_frame_init( &frame );
 
 	if ( ftag )
-	  tag_init( ftag );
+		tag_init( ftag );
 
 	while ( true )
 	{
@@ -810,13 +815,19 @@ bool CMP3Dec::scanHeader( FILE* input, struct mad_header* const header,
 			if ( nice )
 				usleep( 15000 );
 
+			filePos = ftell( input ); /* remember where reading started */
+			if ( filePos == -1 )
+			{
+				perror( "ftell()" );
+			}
+
 			/* fill buffer */
 			int readbytes = fread( buffer+buflen, 1, sizeof(buffer)-buflen,
 								   input );
 			if ( readbytes <= 0 )
 			{
 				if ( readbytes == -1 )
-					result = false;
+					filePos = -1;
 				break;
 			}
 
@@ -826,9 +837,10 @@ bool CMP3Dec::scanHeader( FILE* input, struct mad_header* const header,
 		mad_stream_buffer( &stream, buffer, buflen );
 
 		while ( true )
-	{
-			if ( mad_frame_decode( &frame, &stream ) == -1 )
 		{
+			const unsigned char* const actualFrame = stream.this_frame;
+			if ( mad_frame_decode( &frame, &stream ) == -1 )
+			{
 				if ( !MAD_RECOVERABLE( stream.error ) )
 					break;
 
@@ -838,37 +850,45 @@ bool CMP3Dec::scanHeader( FILE* input, struct mad_header* const header,
 								   stream.bufend - stream.this_frame );
 
 				if ( tagsize > 0 ) /* id3 tag recognized */
-			{
+				{
 					mad_stream_skip( &stream, tagsize );
 					continue;
-			}
+				}
 				else if ( mad_stream_sync( &stream ) != -1 ) /* try to sync */
 				{
 					continue;
-		}
+				}
 				else /* syncing attempt failed */
-		{
+				{
 					/* we have to set some limit here, otherwise we would scan
-					   junk files completely -- the following allows to refill
-					   the buffer one-time */
-					if ( allowRefill )
+					   junk files completely */
+					if ( refillCount-- )
 					{
-						allowRefill = false;
 						stream.error = MAD_ERROR_BUFLEN;
 					}
 					break;
-		}
-	}
+				}
+			}
 
 			if ( count++ || ( ftag && tag_parse(ftag, &stream) == -1 ) )
+			{
+				filePos += actualFrame - buffer; /* start of audio data */
 				break;
+			}
 		}
 
 		if ( count || stream.error != MAD_ERROR_BUFLEN )
 			break;
 
-		memmove( buffer, stream.next_frame,
-				 buflen = &buffer[buflen] - stream.next_frame );
+		if ( refillCount-- )
+		{
+			memmove( buffer, stream.next_frame,
+					 buflen = &buffer[buflen] - stream.next_frame );
+		}
+		else
+		{
+			break;
+		}
 	}
 
 	if ( count )
@@ -880,13 +900,13 @@ bool CMP3Dec::scanHeader( FILE* input, struct mad_header* const header,
 	}
 	else
 	{
-		result = false;
+		filePos = -1;
 	}
 
 	mad_frame_finish( &frame );
 	mad_stream_finish( &stream );
 
-	return result;
+	return filePos;
 }
 
 /*
@@ -904,7 +924,8 @@ bool CMP3Dec::GetMP3Info( FILE* input, const bool nice,
 	tag_init( &ftag );
 	bool result = true;
 
-	if ( scanHeader(input, &header, &ftag, nice) )
+	if ( ( meta->audio_start_pos = scanHeader(input, &header, &ftag, nice) )
+		 != -1 )
 	{
 		meta->type = CAudioMetaData::MP3;
 		meta->bitrate = header.bitrate;
@@ -917,13 +938,14 @@ bool CMP3Dec::GetMP3Info( FILE* input, const bool nice,
 			perror( "fseek()" );
 			result = false;
 		}
-		meta->filesize = ftell( input ) * 8;
+		/* this is still not 100% accurate, because it does not take
+		   id3 tags at the end of the file in account */
+		meta->filesize = ( ftell( input ) - meta->audio_start_pos ) * 8;
 
 		/* valid Xing vbr tag present? */
 		if ( ( ftag.flags & TAG_XING ) &&
 			 ( ftag.xing.flags & TAG_XING_FRAMES ) )
 		{
-			printf( "File has Xing/Info tag\n" );
 			meta->hasInfoOrXingTag = true;
 			mad_timer_t timer = header.duration;
 			mad_timer_multiply( &timer, ftag.xing.frames );
@@ -932,7 +954,6 @@ bool CMP3Dec::GetMP3Info( FILE* input, const bool nice,
 		}
 		else /* no valid Xing vbr tag present */
 		{
-			printf( "File has no Xing/Info tag\n" );
 			meta->total_time = header.bitrate != 0
 				? meta->filesize / header.bitrate : 0;
 		}
@@ -945,7 +966,7 @@ bool CMP3Dec::GetMP3Info( FILE* input, const bool nice,
 				? static_cast<int>( round( static_cast<double>(meta->filesize)
 										   / meta->total_time ) )
 				: 0;
-	}
+		}
 		else /* we do not know wether the file is vbr or not */
 		{
 			meta->vbr = false;

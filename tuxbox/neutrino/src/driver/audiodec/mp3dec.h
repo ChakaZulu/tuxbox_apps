@@ -63,12 +63,14 @@ private:
 	void CreateInfo(CAudioMetaData* const, const int);
 	bool GetMP3Info(FILE*, const bool, CAudioMetaData* const);
 	void GetID3(FILE*, CAudioMetaData* const);
-	bool scanHeader( FILE*, struct mad_header* const, struct tag* const,
+	long scanHeader( FILE*, struct mad_header* const, struct tag* const,
 					 const bool );
 
 public:
 	static CMP3Dec* getInstance();
-	virtual RetCode Decoder(FILE *InputFp,int OutputFd, State* state, CAudioMetaData* m, time_t* t, unsigned int* secondsToSkip);
+	virtual RetCode Decoder(FILE *InputFp, const int OutputFd,
+							State* const state, CAudioMetaData* m,
+							time_t* const t, unsigned int* const secondsToSkip);
 	bool GetMetaData(FILE *in, const bool nice, CAudioMetaData* const m);
 	CMP3Dec(){};
 

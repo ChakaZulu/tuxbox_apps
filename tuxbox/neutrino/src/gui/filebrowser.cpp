@@ -86,28 +86,6 @@ size_t CurlWriteToString(void *ptr, size_t size, size_t nmemb, void *data)
 	return size*nmemb;
 }
 
-/* ATTENTION: the array file_extension_list MUST BE SORTED ASCENDING (cf. sort, man bsearch) - otherwise bsearch will not work correctly! */
-const char * const file_extension_list[] =
-{
-	"bmp"                , "cdr"                , "crw"                , "gif"                , "imu"                ,
-	"jpeg"               , "jpg"                , "m2a"                , "m3u"                , "mp2"                ,
-	"mp3"                , "mpa"                , "ogg"                , "png"                , "sh"                 ,
-	"txt"                , "url"                , "wav"                ,
-};
-/* ATTENTION: the array file_extension_list MUST BE SORTED ASCENDING (cf. sort, man bsearch) - otherwise bsearch will not work correctly! */
-
-const CFile::FileType file_type_list[] =
-{
-	CFile::FILE_PICTURE  , CFile::FILE_CDR      , CFile::FILE_PICTURE  , CFile::FILE_PICTURE  , CFile::STREAM_PICTURE,
-	CFile::FILE_PICTURE  , CFile::FILE_PICTURE  , CFile::FILE_MP3      , CFile::FILE_PLAYLIST , CFile::FILE_MP3      ,
-	CFile::FILE_MP3      , CFile::FILE_MP3      , CFile::FILE_OGG      , CFile::FILE_PICTURE  , CFile::FILE_TEXT     ,
-	CFile::FILE_TEXT     , CFile::STREAM_MP3    , CFile::FILE_WAV      ,
-};
-
-int mycasecmp(const void * a, const void * b)
-{
-	return strcasecmp(*(const char * *)a, *(const char * *)b);
-}
 //------------------------------------------------------------------------
 //------------------------------------------------------------------------
 
@@ -272,46 +250,6 @@ void SMSKeyInput::setTimeout(int timeout)
 	m_timeout = timeout;
 }
 
-
-//------------------------------------------------------------------------
-//------------------------------------------------------------------------
-
-CFile::FileType CFile::getType(void) const
-{
-	if(S_ISDIR(Mode))
-		return FILE_DIR;
-
-	std::string::size_type ext_pos = Name.rfind('.');
-
-	if (ext_pos != std::string::npos)
-	{
-		const char * key = &(Name.c_str()[ext_pos + 1]);
-
-		void * result = ::bsearch(&key, file_extension_list, sizeof(file_extension_list) / sizeof(const char *), sizeof(const char *), mycasecmp);
-		
-		if (result != NULL)
-			return file_type_list[(const char * *)result - (const char * *)&file_extension_list];
-	}
-	return FILE_UNKNOWN;
-}
-
-//------------------------------------------------------------------------
-
-std::string CFile::getFileName(void) const  // return name.extension or folder name without trailing /
-{
-	std::string::size_type namepos = Name.rfind('/');
-
-	return (namepos == std::string::npos) ? Name : Name.substr(namepos + 1);
-}
-
-//------------------------------------------------------------------------
-
-std::string CFile::getPath(void) const      // return complete path including trailing /
-{
-	int pos = 0;
-
-	return ((pos = Name.rfind('/')) > 1) ? Name.substr(0, pos + 1) : "/";
-}
 
 //------------------------------------------------------------------------
 //------------------------------------------------------------------------

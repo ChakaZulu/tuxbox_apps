@@ -27,12 +27,11 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include <errno.h>
-#include <stdio.h>
 #include <oggdec.h>
-#include <driver/netfile.h>
 #include <linux/soundcard.h>
 #include <algorithm>
 #include <sstream>
+#include <driver/audiodec/netfile.h>
 
 #define ProgName "OggDec"
 // nr of msecs to skip in ff/rev mode
@@ -65,7 +64,7 @@ long ogg_tell(void *data)
 #define PCMBUFFER 4096 //4096 max for libtremor
 #define MAX_OUTPUT_SAMPLES 1022 /* AVIA_GT_PCM_MAX_SAMPLES-1 */
 
-CBaseDec::RetCode COggDec::Decoder(FILE *in, int OutputFd, State* state, CAudioMetaData* meta_data, time_t* time_played, unsigned int* secondsToSkip)
+CBaseDec::RetCode COggDec::Decoder(FILE *in, const int OutputFd, State* const state, CAudioMetaData* meta_data, time_t* const time_played, unsigned int* const secondsToSkip)
 {
   OggVorbis_File vf;
   int bitstream, rval;
@@ -212,7 +211,7 @@ void* COggDec::OutputDsp(void * arg)
 	return NULL;
 }
 
-bool COggDec::GetMetaData(FILE *in, bool nice, CAudioMetaData* m)
+bool COggDec::GetMetaData(FILE *in, const bool nice, CAudioMetaData* m)
 {
 	OggVorbis_File vf;
 	if (!Open(in, &vf))
@@ -300,6 +299,7 @@ bool COggDec::Open(FILE* in, OggVorbis_File* vf)
 	{
 	  switch(rval)
 	  {
+	  /* err_txt from netfile.cpp */
 	  case OV_EREAD:	sprintf(err_txt, "media read error"); break;
 	  case OV_ENOTVORBIS:	sprintf(err_txt, "no vorbis stream"); break;
 	  case OV_EVERSION:	sprintf(err_txt, "incompatible vorbis version"); break;

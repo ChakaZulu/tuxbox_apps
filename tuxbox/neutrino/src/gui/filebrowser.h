@@ -37,12 +37,7 @@
 #include <config.h>
 #endif
 
-#include <features.h> /* make sure off_t has size 8 in __USE_FILE_OFFSET64 mode */
-
-#ifndef __USE_FILE_OFFSET64
-#warning not using 64 bit file offsets
-#endif
-
+#include <driver/file.h>
 #include <driver/framebuffer.h>
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
@@ -57,11 +52,6 @@
 
 #include <string>
 #include <vector>
-
-#include <string.h>
-
-#include <unistd.h> /* off_t */
-
 
 #define VLC_URI "vlc://"
 
@@ -144,39 +134,6 @@ public:
 	};
 };
 //------------------------------------------------------------------------
-
-class CFile
-{
-public:
-	enum FileType
-	{
-		FILE_UNKNOWN = 0,
-		FILE_DIR,
-		FILE_TEXT,
-		FILE_CDR,
-		FILE_MP3,
-		FILE_OGG,
-		FILE_WAV,
-		FILE_PLAYLIST,
-		STREAM_MP3,
-		FILE_PICTURE,
-		STREAM_PICTURE
-	};
-
-	FileType	getType(void) const;
-	std::string	getFileName(void) const;
-	std::string	getPath(void) const;
-
-	CFile(){Marked = false; Size=0;Mode=0;Time=0;};
-	off_t Size;
-	std::string Name;
-	mode_t Mode;
-	bool Marked;
-	time_t Time;
-};
-//------------------------------------------------------------------------
-
-typedef std::vector<CFile> CFileList;
 
 #define FILEBROWSER_NUMBER_OF_SORT_VARIANTS 5
 

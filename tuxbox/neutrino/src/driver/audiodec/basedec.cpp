@@ -36,59 +36,152 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <dbox/avs_core.h>
-#include <driver/netfile.h>
+#ifdef INCLUDE_UNUSED_STUFF
+#include <driver/audioplay.h> // for ShoutcastCallback()
+#endif /* INCLUDE_UNUSED_STUFF */
 #ifdef DBOX
 #include <driver/aviaext.h>
 #endif
 #define AVS_DEVICE "/dev/dbox/avs0"
+#include <driver/audiodec/netfile.h>
 
 unsigned int CBaseDec::mSamplerate=0;
 
-CBaseDec::RetCode CBaseDec::DecoderBase(FILE *InputFp,int OutputFd, State* state, CAudioMetaData* md, time_t* t, unsigned int* secondsToSkip)
+#ifdef INCLUDE_UNUSED_STUFF
+/* see comment on sc_callback() in audioplay.cpp */
+void ShoutcastCallback(void *arg)
 {
-	RetCode Status;
-	if(ftype(InputFp, "ogg"))
+	CAudioPlayer::getInstance()->sc_callback(arg);
+}
+#endif /* INCLUDE_UNUSED_STUFF */
+
+CBaseDec::RetCode CBaseDec::DecoderBase(CAudiofile* const in,
+										const int OutputFd, State* const state,
+										time_t* const t,
+										unsigned int* const secondsToSkip)
+{
+	RetCode Status = OK;
+
+	FILE* fp = fopen( in->Filename.c_str(), "r" );
+	if ( fp == NULL )
 	{
-		printf("(ogg)\n");
-		Status = COggDec::getInstance()->Decoder(InputFp, OutputFd, state, md, t, secondsToSkip);
+		fprintf( stderr, "Error opening file %s for decoding.\n",
+				 in->Filename.c_str() );
+		Status = INTERNAL_ERR;
 	}
-	else if(ftype(InputFp, "cdr"))
+	/* jump to first audio frame; audio_start_pos is only set for FILE_MP3 */
+	else if ( in->MetaData.audio_start_pos &&
+			  fseek( fp, in->MetaData.audio_start_pos, SEEK_SET ) == -1 )
 	{
-		printf("(cdr)\n");
-		Status = CCdrDec::getInstance()->Decoder(InputFp, OutputFd, state, md, t, secondsToSkip);
+		fprintf( stderr, "fseek() failed.\n" );
+		Status = INTERNAL_ERR;
 	}
-	else if(ftype(InputFp, "wav"))
+
+	if ( Status == OK )
 	{
-		printf("(wav)\n");
-		Status = CWavDec::getInstance()->Decoder(InputFp, OutputFd, state, md, t, secondsToSkip);
+		if( in->FileType == CFile::FILE_MP3 ||
+			in->FileType == CFile::STREAM_MP3 )
+		{
+#ifdef INCLUDE_UNUSED_STUFF
+			/* add callback function for shoutcast */
+			if ( in->FileType == CFile::STREAM_MP3 &&
+				 fstatus( fp, ShoutcastCallback ) < 0 )
+			{
+				fprintf( stderr, "Error adding shoutcast callback: %s",
+						 err_txt );
+			}
+#endif /* INCLUDE_UNUSED_STUFF */
+
+			Status = CMP3Dec::getInstance()->Decoder( fp, OutputFd, state,
+													  &in->MetaData, t,
+													  secondsToSkip );
+		}
+		else if( in->FileType == CFile::FILE_OGG )
+		{
+			Status = COggDec::getInstance()->Decoder( fp, OutputFd, state,
+													  &in->MetaData, t,
+													  secondsToSkip );
+		}
+		else if( in->FileType == CFile::FILE_WAV )
+		{
+			Status = CWavDec::getInstance()->Decoder( fp, OutputFd, state,
+													  &in->MetaData, t,
+													  secondsToSkip );
+		}
+		else if( in->FileType == CFile::FILE_CDR )
+		{
+			Status = CCdrDec::getInstance()->Decoder( fp, OutputFd, state,
+													  &in->MetaData, t,
+													  secondsToSkip );
+		}
+		else
+		{
+			fprintf( stderr, "DecoderBase: Supplied filetype is not " );
+			fprintf( stderr, "supported by Audioplayer.\n" );
+			Status = INTERNAL_ERR;
+		}
+
+		if ( fclose( fp ) == EOF )
+		{
+			fprintf( stderr, "Could not close file %s.\n",
+					 in->Filename.c_str() );
+		}
 	}
-	else
-	{
-		printf("(mp3)\n");
-		Status = CMP3Dec::getInstance()->Decoder(InputFp, OutputFd, state, md, t, secondsToSkip);
-	}
+
 	return Status;
 }
 
-bool CBaseDec::GetMetaDataBase(FILE *in, bool nice, CAudioMetaData* m)
+bool CBaseDec::GetMetaDataBase(CAudiofile* const in, const bool nice)
 {
-	bool Status;
-	if(ftype(in, "ogg"))
+	bool Status = true;
+
+	if ( in->FileType == CFile::FILE_MP3 || in->FileType == CFile::FILE_OGG ||
+		 in->FileType == CFile::FILE_WAV || in->FileType == CFile::FILE_CDR )
 	{
-		Status = COggDec::getInstance()->GetMetaData(in, nice, m);
-	}
-	else if(ftype(in, "cdr"))
-	{
-		Status = CCdrDec::getInstance()->GetMetaData(in, nice, m);
-	}
-	else if(ftype(in, "wav"))
-	{
-		Status = CWavDec::getInstance()->GetMetaData(in, nice, m);
+		FILE* fp = fopen( in->Filename.c_str(), "r" );
+		if ( fp == NULL )
+		{
+			fprintf( stderr, "Error opening file %s for meta data reading.\n",
+					 in->Filename.c_str() );
+			Status = false;
+		}
+		else
+		{
+			if(in->FileType == CFile::FILE_MP3)
+			{
+				Status = CMP3Dec::getInstance()->GetMetaData(fp, nice,
+															 &in->MetaData);
+			}
+			else if(in->FileType == CFile::FILE_OGG)
+			{
+				Status = COggDec::getInstance()->GetMetaData(fp, nice,
+															 &in->MetaData);
+			}
+			else if(in->FileType == CFile::FILE_WAV)
+			{
+				Status = CWavDec::getInstance()->GetMetaData(fp, nice,
+															 &in->MetaData);
+			}
+			else if(in->FileType == CFile::FILE_CDR)
+			{
+				Status = CCdrDec::getInstance()->GetMetaData(fp, nice,
+															 &in->MetaData);
+			}
+
+			if ( fclose( fp ) == EOF )
+			{
+				fprintf( stderr, "Could not close file %s.\n",
+						 in->Filename.c_str() );
+			}
+		}
 	}
 	else
 	{
-		Status = CMP3Dec::getInstance()->GetMetaData(in, nice, m);
+		fprintf( stderr, "GetMetaDataBase: Filetype is not supported for " );
+		fprintf( stderr, "meta data reading.\n" );
+		Status = false;
 	}
+
 	return Status;
 }
 

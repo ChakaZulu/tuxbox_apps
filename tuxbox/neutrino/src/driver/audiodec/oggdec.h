@@ -53,8 +53,8 @@ class COggDec : public CBaseDec
 
 public:
 	static COggDec* getInstance();
-	virtual RetCode Decoder(FILE *,int , State* , CAudioMetaData* m, time_t* t, unsigned int* secondsToSkip);
-	bool GetMetaData(FILE *in, bool nice, CAudioMetaData* m);
+	virtual RetCode Decoder(FILE *, const int, State* const, CAudioMetaData*, time_t* const, unsigned int* const);
+	bool GetMetaData(FILE *in, const bool nice, CAudioMetaData* m);
 	COggDec(){};
 private:
 	void ParseUserComments(vorbis_comment*, CAudioMetaData*);

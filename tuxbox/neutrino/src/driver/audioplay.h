@@ -36,22 +36,24 @@ class CAudioPlayer
 {
 private:
 	time_t m_played_time;
+#ifdef INCLUDE_UNUSED_STUFF
 	int  m_sc_buffered;
+#endif /* INCLUDE_UNUSED_STUFF */
 	FILE		*soundfd;
 	pthread_t	thrPlay;
 	FILE		*fp;
 	CBaseDec::State state;
 	static void* PlayThread(void*);
-	void clearMetaData();
+	void clearFileData();
 	unsigned int m_SecondsToSkip;
 
 protected: 
-	CAudioMetaData m_MetaData;
+	CAudiofile m_Audiofile;
 	bool SetDSP(int soundfd, int fmt, unsigned int dsp_speed, unsigned int channels);
 
 public:
 	static CAudioPlayer* getInstance();
-	bool play(const CAudiofile*, bool highPrio=false);
+	bool play(const CAudiofile*, const bool highPrio=false);
 	void stop();
 	void pause();
 	void init();
@@ -59,13 +61,15 @@ public:
 	void rev(unsigned int seconds=0);
 	CAudioMetaData getMetaData();
 	bool hasMetaDataChanged();
-	CAudioMetaData readMetaData(const char*, bool);
+	bool readMetaData(CAudiofile* const, const bool);
 	time_t getTimePlayed(){return m_played_time;}
-	time_t getTimeTotal(){return m_MetaData.total_time;}
+	time_t getTimeTotal(){return m_Audiofile.MetaData.total_time;}
+#ifdef INCLUDE_UNUSED_STUFF
 	int getScBuffered(){return m_sc_buffered;}
+	void sc_callback(void *arg); // see comment in .cpp
+#endif /* INCLUDE_UNUSED_STUFF */
 	CBaseDec::State getState(){return state;}
 
-	void sc_callback(void *arg);
 	CAudioPlayer();
 	~CAudioPlayer();
 

@@ -944,8 +944,12 @@ FILE *f_open(const char *filename, const char *acctype)
 			    /* is willing to serve us */
 			    for(i=0, fd = NULL; ((fd == NULL) && (i<25)); i++)
 			    {
-			      sprintf(url.url, "icy%s", strstr(servers[i], "://"));
-			      fd = f_open(url.url, "r");
+				  const char* const chptr = strstr(servers[i], "://");
+				  if(chptr)
+				  {
+					sprintf(url.url, "icy%s", chptr);
+					fd = f_open(url.url, "r");
+				  }
 			    }
 			 }
 			 break;

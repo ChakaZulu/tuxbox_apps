@@ -32,18 +32,26 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#include <string>
-#include <mad.h>
-
 
 #ifndef __AUDIO_METADATA__
 #define __AUDIO_METADATA__
 
+#include <string>
+#include <mad.h>
+
 class CAudioMetaData
 {
 public:
+	// constructor
+	CAudioMetaData();
+	// copy constructor
+	CAudioMetaData( const CAudioMetaData& src );
+	// assignment operator
+	void CAudioMetaData::operator=( const CAudioMetaData& src );
+	void clear();
+
 	enum AudioType
-   {
+	{
 		NONE,
 		CDR,
 		MP3,
@@ -53,7 +61,7 @@ public:
 	AudioType type;
 	std::string type_info;
 
-	long filesize; /* filesize in bits */
+	long filesize; /* filesize in bits (for mp3: without leading id3 tag) */
 
 	unsigned int bitrate; /* overall bitrate, vbr file: current bitrate */
 	unsigned int avg_bitrate; /* average bitrate in case of vbr file */
@@ -61,6 +69,7 @@ public:
 	enum mad_layer layer;
 	enum mad_mode mode;
 	time_t total_time;
+	long audio_start_pos; /* position of first audio frame */
 	bool vbr;
 	/* if the variable hasInfoOrXingTag is true, this means the values of
 	   VBR and Duration are correct and should not be changed by the
@@ -75,73 +84,5 @@ public:
 	std::string genre;
 	std::string track;
 	bool changed;
-
-	// constructor
-	CAudioMetaData()
-		{
-			clear();
-		}
-
-	// copy constructor
-	CAudioMetaData( const CAudioMetaData& src )
-		: type( src.type ), type_info( src.type_info ),
-		filesize( src.filesize ), bitrate( src.bitrate ),
-		avg_bitrate( src.avg_bitrate ), samplerate( src.samplerate ),
-		layer( src.layer ), mode( src.mode ), total_time( src.total_time ),
-		vbr( src.vbr ), hasInfoOrXingTag( src.hasInfoOrXingTag ),
-		artist( src.artist ), title( src.title ), album( src.album ),
-		sc_station( src.sc_station ), date( src.date ),
-		genre( src.genre ), track( src.track ), changed( src.changed )
-		{
-		}
-
-	// assignment operator
-	void operator=( const CAudioMetaData& src )
-		{
-			// self assignment check
-			if ( &src == this )
-				return;
-
-			type = src.type;
-			type_info = src.type_info;
-			filesize = src.filesize;
-			bitrate = src.bitrate;
-			avg_bitrate = src.avg_bitrate;
-			samplerate = src.samplerate;
-			layer = src.layer;
-			mode = src.mode;
-			total_time = src.total_time;
-			vbr = src.vbr;
-			hasInfoOrXingTag = src.hasInfoOrXingTag;
-			artist = src.artist;
-			title = src.title;
-			album = src.album;
-			date = src.date;
-			genre = src.genre;
-			track = src.track;
-			sc_station = src.sc_station;
-			changed = src.changed;
-		}
-
-	void clear()
-	{
-		type=NONE;
-		type_info="";
-			filesize=0;
-		bitrate=0;
-			avg_bitrate=0;
-		samplerate=0;
-		total_time=0;
-		vbr=false;
-			hasInfoOrXingTag=false;
-		artist="";
-		title="";
-		album="";
-		sc_station="";
-		date="";
-		genre="";
-		track="";
-		changed=false;
-	}
 };
-#endif
+#endif /* __AUDIO_METADATA__ */
