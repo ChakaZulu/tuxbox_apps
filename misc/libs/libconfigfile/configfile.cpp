@@ -1,5 +1,5 @@
 /*
- * $Id: configfile.cpp,v 1.13 2002/12/11 16:39:34 thegoodguy Exp $
+ * $Id: configfile.cpp,v 1.14 2003/01/11 20:05:36 obi Exp $
  *
  * configuration object for the d-box 2 linux project
  *
@@ -61,11 +61,7 @@ const bool CConfigFile::loadConfig(const std::string filename)
 				break;
 
 			std::string::size_type i = s.find('=');
-			if (i == std::string::npos)
-			{
-				std::cerr << filename << ": skipping line " << linenr << ": " << s << std::endl;
-			}
-			else
+			if (i != std::string::npos)
 			{
 				std::string::size_type j = s.find('#');
 				if (j == std::string::npos)
