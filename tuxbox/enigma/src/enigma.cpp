@@ -229,14 +229,17 @@ eZap::eZap(int argc, char **argv)
 	if (eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename))
 		swapfilename = strdup("");
 	extern void activateSwapFile(eString);
-	activateSwapFile(eString(swapfilename));
+	if (swapfile == 1)
+		activateSwapFile(eString(swapfilename));
 	free(swapfilename);
 #endif
 #endif
 	eDVB::getInstance()->configureNetwork();
 
 #ifdef ENABLE_DYN_MOUNT
-	eMountMgr::getInstance()->automountMountPoints();
+	eMountMgr *mountMgr = new eMountMgr();
+	mountMgr->automountMountPoints();
+	delete mountMgr;
 #endif
 
 	// build Service Selector

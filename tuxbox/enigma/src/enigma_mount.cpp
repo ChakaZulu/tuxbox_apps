@@ -297,6 +297,8 @@ eMountMgr::eMountMgr()
 
 eMountMgr::~eMountMgr()
 {
+	mountPoints.clear();
+	instance = NULL;
 }
 
 int eMountMgr::addMountPoint(t_mount pmp)
