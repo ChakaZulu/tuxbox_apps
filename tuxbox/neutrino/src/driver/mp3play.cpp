@@ -552,16 +552,28 @@ CMP3Player* CMP3Player::getInstance()
 void* CMP3Player::PlayThread(void * filename)
 {
 	CMP3Player::getInstance()->state = PLAY;
-	FILE *fp = fopen((char *)filename,"r");
-	FILE *soundfd=::fopen("/dev/sound/dsp","w");
-
-	/* Decode stdin to stdout. */
-	int Status = CMP3Player::getInstance()->MpegAudioDecoder(fp,soundfd);
-	if(Status > 0)
-		fprintf(stderr,"Error %d occured during decoding.\n",Status);
+	FILE *fp;
+	FILE *soundfd;
+	soundfd=::fopen("/dev/sound/dsp","w");
+	if (soundfd!=NULL)
+	{
+		fp = fopen((char *)filename,"r");
+		if (fp!=NULL)
+		{
+			/* Decode stdin to stdout. */
+			int Status = CMP3Player::getInstance()->MpegAudioDecoder(fp,soundfd);
+			if(Status > 0)
+				fprintf(stderr,"Error %d occured during decoding.\n",Status);
 	
-	fclose(fp);
-	fclose(soundfd);
+			fclose(fp);
+		}
+		else
+			fprintf(stderr,"Error opening file %s\n",(char *) filename);
+		fclose(soundfd);
+	}
+	else
+		fprintf(stderr,"Error opening /dev/sound/dsp\n");
+		
 	CMP3Player::getInstance()->state = STOP;
 	pthread_exit(0);
 	return NULL;
