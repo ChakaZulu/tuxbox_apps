@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.19 2003/03/14 07:20:01 obi Exp $
+	$Id: controlapi.cpp,v 1.20 2003/03/27 00:35:04 dirch Exp $
 
 	License: GPL
 
@@ -25,6 +25,8 @@
 
 // system
 #include <unistd.h>
+#include <string>
+#include <cctype>
 
 // tuxbox
 #include <neutrinoMessages.h>
@@ -40,10 +42,14 @@ bool CControlAPI::Execute(CWebserverRequest* request)
 	{
 		"timer","setmode","standby","getdate","gettime","settings","getservicesxml",
 		"getbouquetsxml","getonidsid","message","info","shutdown","volume",
-		"channellist","getbouquet","getbouquets","epg","version","zapto", NULL
+		"channellist","getbouquet","getbouquets","epg","version","zapto", "startplugin", NULL
 	};
 
 	dprintf("Execute CGI : %s\n",request->Filename.c_str());
+
+	// tolower(filename)
+	for(unsigned int i = 0; i < request->Filename.length(); i++)
+		request->Filename[i] = tolower(request->Filename[i]);
 
 	while (operations[operation])
 	{
@@ -106,6 +112,8 @@ bool CControlAPI::Execute(CWebserverRequest* request)
 		return VersionCGI(request);
 	case 18:
 		return ZaptoCGI(request);
+	case 19:
+		return StartPluginCGI(request);
 	default:
 		request->SendError();
 		return false;
@@ -666,6 +674,35 @@ bool CControlAPI::ZaptoCGI(CWebserverRequest *request)
 	request->SendError();
 	return false;
 }
+//-------------------------------------------------------------------------
+
+bool CControlAPI::StartPluginCGI(CWebserverRequest *request)
+{
+	string pluginname;
+	if (request->ParameterList.size() == 1)
+	{
+
+		if (request->ParameterList["name"] != "")
+		{
+			pluginname = request->ParameterList["name"];
+			request->URLDecode(pluginname);
+			Parent->EventServer->sendEvent(NeutrinoMessages::EVT_START_PLUGIN, 
+				CEventServer::INITID_HTTPD, 
+				(void *) pluginname.c_str(), 
+				pluginname.length() + 1);
+
+			request->SendOk();
+			return true;
+		}
+	}
+	
+	request->SendError();
+	return false;
+
+	
+}
+
+
 
 //-------------------------------------------------------------------------
 // Send functions (for ExecuteCGI)

@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: controlapi.h,v 1.4 2003/03/14 07:20:01 obi Exp $
+        $Id: controlapi.h,v 1.5 2003/03/27 00:35:04 dirch Exp $
 
         License: GPL
 
@@ -65,6 +65,7 @@ class CControlAPI
 		bool EpgCGI(CWebserverRequest *request);
 		bool VersionCGI(CWebserverRequest *request);
 		bool ZaptoCGI(CWebserverRequest *request);
+		bool StartPluginCGI(CWebserverRequest *request);
 
 	public:
 		CControlAPI(CWebDbox *parent) { Parent = parent; };

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.36 2003/03/14 07:22:56 obi Exp $
+	$Id: webapi.cpp,v 1.37 2003/03/27 00:35:04 dirch Exp $
 
 	License: GPL
 
@@ -813,7 +813,7 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 		request->printf("<TD CLASS=\"%ctimer\" align=center>%s</TD>", classname, zRep);
 		char zType[20+1];
 		Parent->timerEventType2Str(timer->eventType,zType,sizeof(zType)-1);
-		request->printf("<TD CLASS=\"%ctimer\" align=center>%s", classname, zType);
+		request->printf("<TD CLASS=\"%ctimer\" align=center>%s</TD>", classname, zType);
 
 		// Add Data
 		string sAddData="";
