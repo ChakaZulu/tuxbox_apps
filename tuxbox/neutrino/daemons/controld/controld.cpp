@@ -580,31 +580,28 @@ void setBoxType()
 
 
 // input:  0 <=     volume           <= 100
-// output: 0 <= map_volume(., true)  <= 63
+// output: 63 <= map_volume(., true)  <= 0
 // output: 0 <= map_volume(., false) <= 255 (well rather <= 0xFC)
 const unsigned char map_volume(const unsigned char volume, const bool to_AVS)
 {
-	int i = volume; 
-
-	if (volume != 0)
+	int res = 0;
+	if( to_AVS )
 	{
-		i = lrint(64 - 32 * log(volume/13.5)) & 0xFFFFFFFF;
-	}
-	else 
-	{                   
-		i = 63;
-	}
+		res = lrint(64 - 32 * log(volume/13.5)) & 0xFFFFFFFF;
+		if (res < 0)
+		{
+			res = 0;
+		}
+		else if (res > 63)
+		{
+			res = 63;
+		}
 
-	if (i < 0)
-	{
-		i = 0;
 	}
-	else if (i > 63)
-	{
-		i = 63;
-	}
+	else
+		res = (int) (volume * 2.55);
 
-	return (to_AVS) ? i : (i << 2);
+	return res;
 }
 
 
@@ -781,7 +778,7 @@ void sig_catch(int signal)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.74 2002/10/17 19:43:28 thegoodguy Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.75 2002/10/17 21:56:37 dirch Exp $\n\n");
 	
 	switch (fork())
 	{
