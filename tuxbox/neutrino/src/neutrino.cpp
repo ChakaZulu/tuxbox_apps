@@ -1479,7 +1479,7 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 	streamingSettings.addItem( oj );
 
 	CIPInput*	streamingSettings_streamingserver= new CIPInput("streamingmenu.streamingserver",  g_settings.network_streamingserver, "ipsetup.hint_1", "ipsetup.hint_2");
-	CStringInput*	streamingSettings_streamingserverport= new CStringInput("streamingmenu.streamingserverport", g_settings.network_streamingserverport, 6, "ipsetup.hint_1", "ipsetup.hint_2","1234567890 ");
+	CStringInput*	streamingSettings_streamingserverport= new CStringInput("streamingmenu.streamingserverport", g_settings.network_streamingserverport, 6, "ipsetup.hint_1", "ipsetup.hint_2","0123456789 ");
 
 	streamingSettings.addItem( new CMenuForwarder("streamingmenu.streamingserver", true, g_settings.network_streamingserver,streamingSettings_streamingserver));
 	streamingSettings.addItem( new CMenuForwarder("streamingmenu.streamingserverport", true, g_settings.network_streamingserverport,streamingSettings_streamingserverport));
@@ -1501,7 +1501,7 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 void CNeutrinoApp::AddFontSettingItem(CMenuWidget &fontSettings, string menuname, char *value)
 {
 	CStringInput *fontSize;
-	fontSize = new CStringInput(menuname, value, 3, "ipsetup.hint_1", "ipsetup.hint_2","1234567890 ",this);
+	fontSize = new CStringInput(menuname, value, 3, "ipsetup.hint_1", "ipsetup.hint_2","0123456789 ",this);
 	fontSettings.addItem( new CMenuForwarder(menuname, true, value ,fontSize));
 }
 
@@ -3052,7 +3052,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.323 2002/09/15 16:25:11 alexw Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.324 2002/09/16 11:52:51 alexw Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
