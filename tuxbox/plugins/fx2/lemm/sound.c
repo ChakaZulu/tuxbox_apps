@@ -1,11 +1,13 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <fcntl.h>
 #include <pthread.h>
-#include <sounds.h>
-#include <sys/soundcard.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/ioctl.h>
+#include <sys/soundcard.h>
 #include <unistd.h>
+
+#include "sounds.h"
 
 static	unsigned char	*sounds[6] =
 { snd_die, snd_door, snd_oing, snd_ohno, snd_explode, snd_letsgo };
@@ -19,11 +21,11 @@ static	int				playidx=0;
 static	pthread_cond_t	cond;
 static	pthread_mutex_t	mutex;
 
-static	void	_run_sound( void *ptr )
+void * _run_sound( void *ptr )
 {
 	int				sz;
 	int				i;
-	int				dores=1;
+	//int				dores=1;
 	unsigned char	*data;
 	struct timeval	tv;
 
@@ -61,7 +63,7 @@ static	void	_run_sound( void *ptr )
 	}
 	if ( sound_fd >= 0 )
 		close( sound_fd );
-	return;
+	return NULL;
 }
 
 void	SoundStart( void )
