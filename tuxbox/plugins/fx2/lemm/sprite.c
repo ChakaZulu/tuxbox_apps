@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <draw.h>
 #include <sys/time.h>
 #include <rcinput.h>
 #include <colors.h>
@@ -19,6 +18,7 @@ extern	unsigned short	actcode;
 
 extern	unsigned char	*GetPic( int idx,int *maxani,int *width, int *height );
 extern	unsigned char *GetMirrorPic( char picid );
+extern	void	dblCopyImage( int x1, int y1, int dx,int dy,unsigned char *src);
 
 static	Sprite	*root=0;
 static	Sprite	*last=0;
@@ -26,21 +26,7 @@ extern	int		main_x;
 
 void	DrawSprite( Sprite *s )
 {
-	int		x;
-	int		y;
-
-	x=s->x;
-	y=s->y;
-
-	if (( x+s->width<main_x ) ||
-		( x>main_x+328 ))
-			return;
-
-	x-=main_x;
-	x<<=1;
-	y<<=1;
-
-	FB2CopyImage( x+32, y+32, s->width, s->height, s->data+s->ani*s->sz, 1 );
+	dblCopyImage( s->x-main_x, s->y, s->width, s->height,s->data+s->ani*s->sz);
 }
 
 int SpriteCollide( Sprite *s, int x, int y )

@@ -40,15 +40,13 @@ static	void	_run_sound( void *ptr )
 
 		data=sounds[i];
 		sz=ssz[i];
-
 		while( sz )
 		{
-		   i=sz>1022?1022:sz;
-		   write(sound_fd, data, i);
-		   sz-=i;
-		   data+=i;
+			i=sz>1022?1022:sz;
+			write(sound_fd,data,i);
+			sz-=i;
+			data+=i;
 		}
-
 		i=1;
 		if ( !playidx )
 			ioctl(sound_fd,SNDCTL_DSP_SYNC,&i);
@@ -66,7 +64,11 @@ void	SoundStart( void )
 	int speed = 11025;
 
 	if ( sound_fd == -1 )
+#ifdef __i386__
+		sound_fd=open("/dev/dsp",O_WRONLY);
+#else
 		sound_fd=open("/dev/sound/dsp",O_WRONLY);
+#endif
 	if ( sound_fd == -1 )
 		sound_fd = -2;
 
