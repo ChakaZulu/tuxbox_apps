@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.55 2002/01/29 23:23:06 field Exp $
+// $Id: channellist.cpp,v 1.56 2002/01/30 14:11:27 field Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.56  2002/01/30 14:11:27  field
+// Anzeigeverbesserungen :)
+//
 // Revision 1.55  2002/01/29 23:23:06  field
 // Mehr Details in Channellist (sectionsd updaten)
 //
@@ -201,7 +204,7 @@
 #include "../include/debug.h"
 #include "../global.h"
 
-#define info_height 62
+#define info_height 60
 
 static char* copyStringto(const char* from, char* to, int len)
 {
@@ -735,31 +738,34 @@ void CChannelList::paintDetails(int index)
 
 		string text1= chanlist[index]->currentEvent.description;
 		string text2= chanlist[index]->currentEvent.text_1;
-		string text3= "";
 
-		if ( text2 == "" )
+		int xstart = 10;
+		if ( g_Fonts->channellist->getRenderWidth(text1.c_str())> (width - 30 - seit_len) )
 		{
-			// 2. Zeile leer und
-			if ( g_Fonts->channellist->getRenderWidth(text1.c_str())> (width - 30 - seit_len) )
-			{
-				// zu breit, Umbruch versuchen...
-				int pos = text1.find(" ");
-				if (pos == -1)
-					pos = text1.find("-");
-				if (pos == -1)
-					pos = text1.find(".");
-				if(pos!=-1)
-				{
-					text3 = text1;
-					text1 = text3.substr(0,pos);
-					text2 = text3.substr(pos+1, text3.length()-(pos+1) );
+			// zu breit, Umbruch versuchen...
+		    int pos;
+		    do
+		    {
+				pos = text1.find_last_of("[ -.]+");
+				if ( pos!=-1 )
+					text1 = text1.substr( 0, pos );
+			} while ( ( pos != -1 ) && ( g_Fonts->channellist->getRenderWidth(text1.c_str())> (width - 30 - seit_len) ) );
 
-					g_Fonts->channellist->RenderString(x+ 10, y+ height+ 10+ 2* fheight, width - 30- noch_len, text2.c_str(), COL_MENUCONTENT);
-				}
-			}
+			string text3= chanlist[index]->currentEvent.description.substr(text1.length()+ 1, -1).c_str();
+			if ( text2 != "" )
+				text3= text3+ " · ";
+
+			xstart+= g_Fonts->channellist->getRenderWidth(text3.c_str())+ 5;
+			g_Fonts->channellist->RenderString(x+ 10, y+ height+ 10+ 2* fheight, width - 30- noch_len, text3.c_str(), COL_MENUCONTENT);
 		}
-		if ( text3=="" )
-			g_Fonts->channellist_descr->RenderString(x+ 10, y+ height+ 10+ 2* fheight, width - 30- noch_len, text2.c_str(), COL_MENUCONTENT);
+
+		if ( text2 != "" )
+		{
+			while ( text2.find_first_of("[ -.+*#?=!$%&/]+") == 0 )
+				text2 = text2.substr( 1, -1 );
+			text2 = text2.substr( 0, text2.find("\n") );
+			g_Fonts->channellist_descr->RenderString(x+ xstart, y+ height+ 10+ 2* fheight, width- xstart- 10- noch_len, text2.c_str(), COL_MENUCONTENT);
+		}
 
 		g_Fonts->channellist->RenderString(x+ 10, y+ height+ 10+ fheight, width - 30 - seit_len, text1.c_str(), COL_MENUCONTENT);
 		g_Fonts->channellist_descr->RenderString(x+ width- 10- seit_len, y+ height+ 10+ fheight, seit_len, cSeit, COL_MENUCONTENT);

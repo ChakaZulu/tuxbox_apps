@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: infoviewer.cpp,v 1.67 2002/01/29 17:26:51 field Exp $
+// $Id: infoviewer.cpp,v 1.68 2002/01/30 14:11:27 field Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.68  2002/01/30 14:11:27  field
+// Anzeigeverbesserungen :)
+//
 // Revision 1.67  2002/01/29 17:26:51  field
 // Jede Menge Updates :)
 //
@@ -466,14 +469,16 @@ void CInfoViewer::showData()
 
                                 unsigned sel= subChannels.selected;
                                 unsigned dauer= subChannels.list[sel].dauer/ 60;
-                                sprintf((char*) &runningDuration, "%d min", dauer);
+                                //sprintf((char*) &runningDuration, "%d min", dauer);
 
                                 struct      tm *pStartZeit = localtime(&subChannels.list[sel].startzeit);
                                 sprintf((char*) &runningStart, "%02d:%02d", pStartZeit->tm_hour, pStartZeit->tm_min);
                                 runningPercent=(unsigned)((float)(time(NULL)-subChannels.list[sel].startzeit)/(float)subChannels.list[sel].dauer*100.);
 
+        						unsigned seit = ( time(NULL) - subChannels.list[sel].startzeit ) / 60;
                                 unsigned rest = ( (subChannels.list[sel].startzeit + subChannels.list[sel].dauer) - time(NULL) ) / 60;
-								sprintf((char*) &runningRest, "%d min", rest);
+
+								sprintf((char*) &runningRest, "%d / %d min", seit, rest);
                                 if (runningPercent>100)
                                         runningPercent=0;
 
@@ -628,7 +633,7 @@ void CInfoViewer::showWarte()
         int xStart= BoxStartX + ChanWidth + 30;
 
         pthread_mutex_trylock( &epg_mutex );
-        if ( !KillShowEPG )
+        if ( ( !KillShowEPG ) && ( is_visible ) )
                 g_Fonts->infobar_info->RenderString(xStart, ChanInfoY, BoxEndX- xStart, EPG_NotFound_Text, COL_INFOBAR);
         pthread_mutex_unlock( &epg_mutex );
 }
@@ -783,6 +788,7 @@ bool CInfoViewer::getEPGData( string channelName, unsigned int onid_tsid )
         strcpy( runningStart, "");
         strcpy( nextStart, "");
         strcpy( runningDuration, "");
+        strcpy( runningRest, "");
         strcpy( nextDuration, "");
         runningPercent = 0;
         Flag= 0;
@@ -837,8 +843,11 @@ bool CInfoViewer::getEPGData( string channelName, unsigned int onid_tsid )
 
                         unsigned dauer = epg_times->dauer / 60;
                         unsigned rest = ( (epg_times->startzeit + epg_times->dauer) - time(NULL) ) / 60;
-                        sprintf((char*) &runningDuration, "%d min", dauer);
-                        sprintf((char*) &runningRest, "%d min", rest);
+                        //sprintf((char*) &runningDuration, "%d min", dauer);
+
+                        unsigned seit = ( time(NULL) - epg_times->startzeit ) / 60;
+						sprintf((char*) &runningRest, "%d / %d min", seit, rest);
+                        //sprintf((char*) &runningRest, "%d min", rest);
 
                         struct      tm *pStartZeit = localtime(&epg_times->startzeit);
                         sprintf((char*) &runningStart, "%02d:%02d", pStartZeit->tm_hour, pStartZeit->tm_min);
