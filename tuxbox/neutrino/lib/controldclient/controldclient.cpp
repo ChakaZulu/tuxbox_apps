@@ -222,13 +222,13 @@ bool CControldClient::getMute(const bool avs)
 	return rmsg.mute;
 }
 
-void CControldClient::registerEvent(unsigned int eventID, unsigned int clientID, string udsName)
+void CControldClient::registerEvent(unsigned int eventID, unsigned int clientID, const char * const udsName)
 {
 	CEventServer::commandRegisterEvent msg2;
 
 	msg2.eventID = eventID;
 	msg2.clientID = clientID;
-	strcpy(msg2.udsName, udsName.c_str());
+	strcpy(msg2.udsName, udsName);
 
 	send(CControld::CMD_REGISTEREVENT, (char*)&msg2, sizeof(msg2));
 

@@ -343,7 +343,7 @@ int CRCInput::addTimer(unsigned long long Interval, bool oneshot, bool correct_t
 
 	//printf("adding timer %d (0x%llx, 0x%llx)\n", _newtimer.id, _newtimer.times_out, Interval);
 
-	vector<timer>::iterator e;
+	std::vector<timer>::iterator e;
 	for ( e= timers.begin(); e!= timers.end(); ++e )
 		if ( e->times_out> _newtimer.times_out )
 			break;
@@ -366,7 +366,7 @@ int CRCInput::addTimer(const time_t *Timeout)
 void CRCInput::killTimer(uint id)
 {
 	//printf("killing timer %d\n", id);
-	vector<timer>::iterator e;
+	std::vector<timer>::iterator e;
 	for ( e= timers.begin(); e!= timers.end(); ++e )
 		if ( e->id == id )
 		{
@@ -384,7 +384,7 @@ int CRCInput::checkTimers()
 	unsigned long long timeNow = (unsigned long long) tv.tv_usec + (unsigned long long)((unsigned long long) tv.tv_sec * (unsigned long long) 1000000);
 
 
-	vector<timer>::iterator e;
+	std::vector<timer>::iterator e;
 	for ( e= timers.begin(); e!= timers.end(); ++e )
 		if ( e->times_out< timeNow+ 2000 )
 		{
@@ -812,7 +812,7 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 									*(long long*) p = timeNew - timeOld;
 
 									// Timer anpassen
-									for ( vector<timer>::iterator e= timers.begin(); e!= timers.end(); ++e )
+									for(std::vector<timer>::iterator e = timers.begin(); e != timers.end(); ++e)
 										if (e->correct_time)
 											e->times_out+= *(long long*) p;
 

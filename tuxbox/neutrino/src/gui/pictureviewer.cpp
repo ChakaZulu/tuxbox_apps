@@ -110,7 +110,7 @@ int CPictureViewerGui::exec(CMenuTarget* parent, std::string actionKey)
 	height = 570;
 	if((g_settings.screen_EndY- g_settings.screen_StartY) < height)
 		height=(g_settings.screen_EndY- g_settings.screen_StartY);
-	buttonHeight = min(25,g_Fonts->infobar_small->getHeight());
+	buttonHeight = std::min(25,g_Fonts->infobar_small->getHeight());
 	theight= g_Fonts->menu_title->getHeight();
 	fheight= g_Fonts->menu->getHeight();
 	sheight= g_Fonts->infobar_small->getHeight();

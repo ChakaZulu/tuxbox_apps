@@ -132,7 +132,7 @@ int CMP3PlayerGui::exec(CMenuTarget* parent, std::string actionKey)
 	height = 570;
 	if((g_settings.screen_EndY- g_settings.screen_StartY) < height)
 		height=(g_settings.screen_EndY- g_settings.screen_StartY);
-	buttonHeight = min(25,g_Fonts->infobar_small->getHeight());
+	buttonHeight = std::min(25,g_Fonts->infobar_small->getHeight());
 	theight= g_Fonts->menu_title->getHeight();
 	fheight= g_Fonts->menu->getHeight();
 	sheight= g_Fonts->infobar_small->getHeight();
@@ -416,7 +416,7 @@ int CMP3PlayerGui::show()
                      std::string sPath = files->Name.substr(0, files->Name.rfind('/'));
                      std::ifstream infile;
                      char cLine[256];
-                     infile.open (files->Name.c_str(), ifstream::in);
+                     infile.open(files->Name.c_str(), std::ifstream::in);
                      while (infile.good())
                      {
                         infile.getline(cLine, 255);
@@ -432,7 +432,7 @@ int CMP3PlayerGui::show()
                               filename[pos]='/';
 
                            std::ifstream testfile;
-                           testfile.open(filename.c_str(), ifstream::in);
+                           testfile.open(filename.c_str(), std::ifstream::in);
                            if(testfile.good())
                            {
                               // Check for duplicates and remove (playlist has higher prio)
@@ -544,7 +544,7 @@ int CMP3PlayerGui::show()
 				g_RCInput->getMsg( &msg, &data, 100 ); 
 			} while (g_RCInput->isNumeric(msg) && val < 1000000);
 			if(msg==CRCInput::RC_ok)
-				selected=min((int)playlist.size(), val)-1;
+				selected=std::min((int)playlist.size(), val)-1;
 			update=true;
 		}
 		else if(msg==CRCInput::RC_0)

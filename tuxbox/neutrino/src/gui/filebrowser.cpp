@@ -168,7 +168,7 @@ CFileBrowser::CFileBrowser()
 	fheight = g_Fonts->filebrowser_item->getHeight();
 
 
-	listmaxshow = max(1,(int)(height - theight - foheight)/fheight);
+	listmaxshow = std::max(1,(int)(height - theight - foheight)/fheight);
 
 	height = theight+foheight+listmaxshow*fheight; // recalc height
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
@@ -294,7 +294,7 @@ bool CFileBrowser::readDir_vlc(std::string dirname, CFileList* flist)
 	char *dir_escaped = curl_escape(dirname.substr(strlen(VLC_URI)).c_str(), 0);
 	std::string url = m_baseurl + dir_escaped;
 	curl_free(dir_escaped);
-	cout << "[FileBrowser] vlc URL: " << url << endl;
+	std::cout << "[FileBrowser] vlc URL: " << url << std::endl;
 	CURL *curl_handle;
 	CURLcode httpres;
 	/* init the curl session */
@@ -317,7 +317,7 @@ bool CFileBrowser::readDir_vlc(std::string dirname, CFileList* flist)
 	/* Convert \ to / */
 	for( unsigned int pos=answer.find('\\'); pos!=std::string::npos ; pos=answer.find('\\'))
 		answer[pos]='/';
-	// cout << "Answer:" << endl << "----------------" << endl << answer << endl;
+	// std::cout << "Answer:" << std::endl << "----------------" << std::endl << answer << std::endl;
 	/*!!! TODO check httpres and display error */
 	if (!answer.empty() && !httpres)
 	{
@@ -326,7 +326,7 @@ bool CFileBrowser::readDir_vlc(std::string dirname, CFileList* flist)
 		{
 			CFile file;
 			std::string entry = answer.substr(start, pos-start);
-			//cout << "Entry" << entry << endl;
+			//std::cout << "Entry" << entry << std::endl;
 			if (entry.find("DIR:")==0) 
 				file.Mode = S_IFDIR + 0777 ;
 			else
@@ -340,14 +340,14 @@ bool CFileBrowser::readDir_vlc(std::string dirname, CFileList* flist)
 				flist->push_back(file);
 			}
 			else
-				cout << "Error misformed path " << entry << endl;
+				std::cout << "Error misformed path " << entry << std::endl;
 			start=pos+1;
 		}
 		return true;
 	}
 	else
 	{
-		cout << "Error reading vlc dir" << endl;
+		std::cout << "Error reading vlc dir" << std::endl;
 		/* since all CURL error messages use only US-ASCII characters, when can safely print them as if they were UTF-8 encoded */
 		DisplayErrorMessage(error); // UTF-8
 		CFile file;

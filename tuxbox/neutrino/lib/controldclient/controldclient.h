@@ -24,11 +24,7 @@
 #ifndef __controldclient__
 #define __controldclient__
 
-#include <string>
-
 #include <connection/basicclient.h>
-
-using namespace std;
 
 
 #define VCR_STATUS_OFF 0
@@ -170,7 +166,7 @@ class CControldClient:private CBasicClient
 		/*
 			ein beliebiges Event anmelden
 		*/
-		void registerEvent(unsigned int eventID, unsigned int clientID, string udsName);
+		void registerEvent(unsigned int eventID, unsigned int clientID, const char * const udsName);
 
 		/*
 			ein beliebiges Event abmelden

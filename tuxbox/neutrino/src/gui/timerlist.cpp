@@ -772,7 +772,7 @@ int CTimerList::modifyTimer()
 
 int CTimerList::newTimer()
 {
-	vector<CMenuWidget*>	toDelete;
+	std::vector<CMenuWidget *> toDelete;
 	// Defaults
 	timerNew.eventType = CTimerd::TIMER_SHUTDOWN ;
 	timerNew.eventRepeat = CTimerd::TIMERREPEAT_ONCE ;
