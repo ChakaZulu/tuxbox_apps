@@ -7,7 +7,7 @@ mainmenu.head Menu principal
 mainmenu.tvmode TV-Mode
 mainmenu.radiomode Radio-Mode
 mainmenu.scartmode Scart-Mode
-mainmenu.games Play Games
+mainmenu.games Games
 mainmenu.shutdown mettre hors circuit
 mainmenu.settings Settings
 mainmenu.service Service
