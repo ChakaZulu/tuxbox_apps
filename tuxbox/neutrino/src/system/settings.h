@@ -190,13 +190,7 @@ const int PARENTALLOCK_PROMPT_ONSIGNAL       = 3;
 class CScanSettings
 {
 	public:
-		enum
-		{
-			createBouquets,
-			deleteBouquets,
-			donttouchBouquets,
-			appendBouquets         // not yet supported
-		} bouquetMode;
+		CZapitClient::bouquetMode bouquetMode;
 
 		diseqc_t diseqcMode;
 
@@ -207,9 +201,10 @@ class CScanSettings
 		char satName[30][MAX_SATELLITES];
 
 		CScanSettings();
-		void useDefaults(bool cable = false);
+		void useDefaults();
 		int* diseqscOfSat( char* satname);
 
+		void toSatList( CZapitClient::ScanSatelliteList& ) const;
 		friend ostream& operator<<(ostream&, const CScanSettings&);
 		friend istream& operator>>(istream&, CScanSettings&);
 };

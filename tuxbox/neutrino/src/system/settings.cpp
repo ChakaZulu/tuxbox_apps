@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.2 2002/04/14 19:57:48 Simplex Exp $
+        $Id: settings.cpp,v 1.3 2002/04/20 12:03:16 Simplex Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -37,17 +37,16 @@ CScanSettings::CScanSettings()
 	}
 }
 
-void CScanSettings::useDefaults( bool cable = false)
+void CScanSettings::useDefaults()
 {
-	bouquetMode = donttouchBouquets;
+	bouquetMode = CZapitClient::BM_DONTTOUCHBOUQUETS;
 	diseqcMode = NO_DISEQC;
 	diseqcRepeat = 0;
 
-	if (cable)
-		strcpy( satNameNoDiseqc, "Telekom");
-	else
+	if (atoi(getenv("fe"))==1)
 		strcpy( satNameNoDiseqc, "Astra 19.2E");
-
+	else
+		strcpy( satNameNoDiseqc, "Telekom");
 }
 
 int* CScanSettings::diseqscOfSat( char* satname)
@@ -65,6 +64,30 @@ int* CScanSettings::diseqscOfSat( char* satname)
 		}
 	}
 	return(NULL);
+}
+
+void CScanSettings::toSatList( CZapitClient::ScanSatelliteList& satList) const
+{
+	satList.clear();
+	CZapitClient::commandSetScanSatelliteList sat;
+	if ( diseqcMode == NO_DISEQC)
+	{
+		strncpy( sat.satName, satNameNoDiseqc, 30);
+		sat.diseqc = 0;
+		satList.insert( satList.end(), sat);
+	}
+	else
+	{
+		for( int i=0; i<MAX_SATELLITES; i++)
+		{
+			if ( satDiseqc[i] != -1)
+			{
+				strncpy( sat.satName, satName[i], 30);
+				sat.diseqc = satDiseqc[i];
+				satList.insert( satList.end(), sat);
+			}
+		}
+	}
 }
 
 ostream &operator<<(ostream& os, const CScanSettings& settings)
@@ -98,27 +121,12 @@ ostream &operator<<(ostream& os, const CScanSettings& settings)
 
 istream &operator>>(istream& is, CScanSettings& settings)
 {
-	string token;
-	is >> (int)settings.bouquetMode;
-	is >> (int)settings.diseqcMode;
-	is >> settings.diseqcRepeat;
-	if (settings.diseqcMode == NO_DISEQC)
+	try
 	{
-		string token, satname = "";
-		do
-		{
-			is >> token;
-			satname += token + " ";
-		}
-		while (token[ token.length()-1] != '"');
-		strncpy( settings.satNameNoDiseqc, satname.substr( 1, satname.length()-3).c_str(), 30);
-	}
-	else
-	{
-		int satCount;
-		is >> satCount;
-		cout << "have to read " << satCount << " sats" <<endl;
-		for (int i=0; i<satCount; i++)
+		is >> (int)settings.bouquetMode;
+		is >> (int)settings.diseqcMode;
+		is >> settings.diseqcRepeat;
+		if (settings.diseqcMode == NO_DISEQC)
 		{
 			string token, satname = "";
 			do
@@ -127,20 +135,50 @@ istream &operator>>(istream& is, CScanSettings& settings)
 				satname += token + " ";
 			}
 			while (token[ token.length()-1] != '"');
-			strncpy( settings.satName[i], satname.substr( 1, satname.length()-3).c_str(), 30);
-			if (i==0)
-			{
-				strncpy( settings.satNameNoDiseqc, settings.satName[i], 30);
-			}
-			is >> settings.satDiseqc[i];
-			cout << "read " << settings.satName[i] << " "<<settings.satDiseqc[i] <<endl;
+			strncpy( settings.satNameNoDiseqc, satname.substr( 1, satname.length()-3).c_str(), 30);
 		}
-		for (int i=satCount; i<MAX_SATELLITES; i++)
+		else
 		{
-			settings.satName[i][0] = 0;
-			settings.satDiseqc[i] = -1;
+			int satCount;
+			is >> satCount;
+			cout << "have to read " << satCount << " sats" <<endl;
+			for (int i=0; i<satCount; i++)
+			{
+				string token, satname = "";
+				do
+				{
+					is >> token;
+					satname += token + " ";
+				}
+				while (token[ token.length()-1] != '"');
+				strncpy( settings.satName[i], satname.substr( 1, satname.length()-3).c_str(), 30);
+				if (i==0)
+				{
+					strncpy( settings.satNameNoDiseqc, settings.satName[i], 30);
+				}
+				is >> settings.satDiseqc[i];
+				cout << "read " << settings.satName[i] << " "<<settings.satDiseqc[i] <<endl;
+			}
+			for (int i=satCount; i<MAX_SATELLITES; i++)
+			{
+				settings.satName[i][0] = 0;
+				settings.satDiseqc[i] = -1;
+			}
+		}
+		if (is.bad() || is.fail())
+		{
+			cout << "Error while loading scansettings! Using default." << endl;
+			settings.useDefaults();
+		}
+		else
+		{
+			cout << "Loaded scansettings:" << endl << settings << endl;
 		}
 	}
-	cout << "Loaded scansettings:" << endl << settings << endl;
+	catch (...)
+	{
+		cout << "Exception while loading scansettings! Using default." << endl;
+		settings.useDefaults();
+	}
 	return is;
 }
