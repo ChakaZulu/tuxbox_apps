@@ -118,7 +118,7 @@ void* CEventWatchDog::watchdogThread (void *arg)
 		{
 			//printf("[controld] before read\n", status);
 			status = read(fd_ev, &event, sizeof(event));
-			//printf("[controld] read result <%d>\n", status);
+			printf("[controld] read result <%d>\n", status);
 			if ( status == sizeof(event) )
 			{
 				if (event.event == EVENT_ARATIO_CHANGE)

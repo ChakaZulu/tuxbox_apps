@@ -70,12 +70,12 @@ struct Ssettings
 	char lastmode;
 } settings;
 
-int	nokia_scart[4];
-int	nokia_dvb[4];
-int	sagem_scart[4];
-int	sagem_dvb[4];
-int	philips_scart[4];
-int	philips_dvb[4];
+int	nokia_scart[6];
+int	nokia_dvb[6];
+int	sagem_scart[6];
+int	sagem_dvb[6];
+int	philips_scart[6];
+int	philips_dvb[6];
 char aspectRatio;
 
 char BoxNames[4][10] = {"","Nokia", "Sagem", "Philips"};
@@ -334,6 +334,50 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 
 void LoadScart_Settings()
 {
+	// scart
+	sagem_scart[0]= 2;
+	sagem_scart[1]= 1;
+	sagem_scart[2]= 0;
+	sagem_scart[3]= 0;
+	sagem_scart[4]= 0;
+	sagem_scart[5]= 0;
+
+	nokia_scart[0]= 3;
+	nokia_scart[1]= 2;
+	nokia_scart[2]= 1;
+	nokia_scart[3]= 0;
+	nokia_scart[4]= 1;
+	nokia_scart[5]= 1;
+
+	philips_scart[0]= 2;
+	philips_scart[1]= 2;
+	philips_scart[2]= 3;
+	philips_scart[3]= 0;
+	philips_scart[4]= 3;
+	philips_scart[5]= 0;
+
+	// dvb
+	sagem_dvb[0]= 0;
+	sagem_dvb[1]= 0;
+	sagem_dvb[2]= 0;
+	sagem_dvb[3]= 0;
+	sagem_dvb[4]= 0;
+	sagem_dvb[5]= 0;
+
+	nokia_dvb[0]= 5;
+	nokia_dvb[1]= 1;
+	nokia_dvb[2]= 1;
+	nokia_dvb[3]= 0;
+	nokia_dvb[4]= 1;
+	nokia_dvb[5]= 0;
+
+	philips_dvb[0]= 1;
+	philips_dvb[1]= 1;
+	philips_dvb[2]= 1;
+	philips_dvb[3]= 0;
+	philips_dvb[4]= 1;
+	philips_dvb[5]= 0;
+
 	FILE* fd = fopen(CONFIGDIR"/scart.conf", "r");
 	if(fd)
 	{
@@ -344,32 +388,32 @@ void LoadScart_Settings()
 
 		if(fgets(buf,sizeof(buf),fd)!=NULL)
 		{
-			sscanf( buf, "nokia_scart: %d %d %d %d\n", &nokia_scart[0], &nokia_scart[1], &nokia_scart[2], &nokia_scart[3] );
+			sscanf( buf, "nokia_scart: %d %d %d %d %d %d\n", &nokia_scart[0], &nokia_scart[1], &nokia_scart[2], &nokia_scart[3], &nokia_scart[4], &nokia_scart[5] );
 			//printf( buf );
 		}
 		if(fgets(buf,sizeof(buf),fd)!=NULL)
 		{
-			sscanf( buf, "nokia_dvb: %d %d %d %d\n", &nokia_dvb[0], &nokia_dvb[1], &nokia_dvb[2], &nokia_dvb[3] );
+			sscanf( buf, "nokia_dvb: %d %d %d %d %d %d\n", &nokia_dvb[0], &nokia_dvb[1], &nokia_dvb[2], &nokia_dvb[3], &nokia_dvb[4], &nokia_dvb[5] );
 			//printf( buf );
 		}
 		if(fgets(buf,sizeof(buf),fd)!=NULL)
 		{
-			sscanf( buf, "sagem_scart: %d %d %d %d\n", &sagem_scart[0], &sagem_scart[1], &sagem_scart[2], &sagem_scart[3] );
+			sscanf( buf, "sagem_scart: %d %d %d %d %d %d\n", &sagem_scart[0], &sagem_scart[1], &sagem_scart[2], &sagem_scart[3], &sagem_scart[4], &sagem_scart[5] );
 			//printf( buf );
 		}
 		if(fgets(buf,sizeof(buf),fd)!=NULL)
 		{
-			sscanf( buf, "sagem_dvb: %d %d %d %d\n", &sagem_dvb[0], &sagem_dvb[1], &sagem_dvb[2], &sagem_dvb[3] );
+			sscanf( buf, "sagem_dvb: %d %d %d %d %d %d\n", &sagem_dvb[0], &sagem_dvb[1], &sagem_dvb[2], &sagem_dvb[3], &sagem_dvb[4], &sagem_dvb[5] );
 			//printf( buf );
 		}
 		if(fgets(buf,sizeof(buf),fd)!=NULL)
 		{
-			sscanf( buf, "philips_scart: %d %d %d %d\n", &philips_scart[0], &philips_scart[1], &philips_scart[2], &philips_scart[3] );
+			sscanf( buf, "philips_scart: %d %d %d %d %d %d\n", &philips_scart[0], &philips_scart[1], &philips_scart[2], &philips_scart[3], &philips_scart[4], &philips_scart[5] );
 			//printf( buf );
 		}
 		if(fgets(buf,sizeof(buf),fd)!=NULL)
 		{
-			sscanf( buf, "philips_dvb: %d %d %d %d\n", &philips_dvb[0], &philips_dvb[1], &philips_dvb[2], &philips_dvb[3] );
+			sscanf( buf, "philips_dvb: %d %d %d %d %d %d\n", &philips_dvb[0], &philips_dvb[1], &philips_dvb[2], &philips_dvb[3], &philips_dvb[4], &philips_dvb[5] );
 			//printf( buf );
 		}
 		fclose(fd);
@@ -377,43 +421,11 @@ void LoadScart_Settings()
 	else
 	{
 		printf("[controld]: failed to load scart-config (scart.conf), using standard-values\n");
-
-		// scart
-		sagem_scart[0]= 2;
-		sagem_scart[1]= 1;
-		sagem_scart[2]= 0;
-		sagem_scart[3]= 0;
-
-		nokia_scart[0]= 3;
-		nokia_scart[1]= 2;
-		nokia_scart[2]= 1;
-		nokia_scart[3]= 0;
-
-		philips_scart[0]= 2;
-		philips_scart[1]= 2;
-		philips_scart[2]= 3;
-		philips_scart[3]= 0;
-
-		// dvb
-		sagem_dvb[0]= 0;
-		sagem_dvb[1]= 0;
-		sagem_dvb[2]= 0;
-		sagem_dvb[3]= 0;
-
-		nokia_dvb[0]= 5;
-		nokia_dvb[1]= 1;
-		nokia_dvb[2]= 1;
-		nokia_dvb[3]= 0;
-
-		philips_dvb[0]= 1;
-		philips_dvb[1]= 1;
-		philips_dvb[2]= 1;
-		philips_dvb[3]= 0;
 	}
 }
 
 
-void routeVideo(int v1, int a1, int v2, int a2, int fblk)
+void routeVideo(int v1, int a1, int v2, int a2, int v3, int a3, int fblk)
 {
 	int fd;
 
@@ -453,6 +465,18 @@ void routeVideo(int v1, int a1, int v2, int a2, int fblk)
 		return;
 	}
 
+	if (ioctl(fd,AVSIOSVSW3,&v3)< 0)
+	{
+		perror("AVSIOSVSW3:");
+		return;
+	}
+
+	if (ioctl(fd,AVSIOSASW3,&a3)< 0)
+	{
+		perror("AVSIOSASW3:");
+		return;
+	}
+
 	close(fd);
 }
 
@@ -466,15 +490,15 @@ void switch_vcr( bool vcr_on)
 		printf("[controld]: switch to scart-input... (%s)\n", BoxNames[settings.boxtype]);
 		if (settings.boxtype == 2) // Sagem
 		{
-			routeVideo(sagem_scart[0], sagem_scart[1], sagem_scart[2], sagem_scart[3], 0);
+			routeVideo(sagem_scart[0], sagem_scart[1], sagem_scart[2], sagem_scart[3], sagem_scart[4], sagem_scart[5], 0);
 		}
 		else if (settings.boxtype == 1) // Nokia
 		{
-			routeVideo(nokia_scart[0], nokia_scart[1], nokia_scart[2], nokia_scart[3], 2);
+			routeVideo(nokia_scart[0], nokia_scart[1], nokia_scart[2], nokia_scart[3], nokia_scart[4], nokia_scart[5], 2);
 		}
 		else if (settings.boxtype == 3) // Philips
 		{
-			routeVideo(philips_scart[0], philips_scart[1], philips_scart[2], philips_scart[3], 2);
+			routeVideo(philips_scart[0], philips_scart[1], philips_scart[2], philips_scart[3], philips_scart[4], philips_scart[5], 2);
 		}
 	}
 	else
@@ -482,15 +506,15 @@ void switch_vcr( bool vcr_on)
 		printf("[controld]: switch to dvb-input... (%s)\n", BoxNames[settings.boxtype]);
 		if (settings.boxtype == 2) // Sagem
 		{
-			routeVideo( sagem_dvb[0], sagem_dvb[1], sagem_dvb[2], sagem_dvb[3], settings.videooutput);
+			routeVideo( sagem_dvb[0], sagem_dvb[1], sagem_dvb[2], sagem_dvb[3], sagem_dvb[4], sagem_dvb[5], settings.videooutput);
 		}
 		else if (settings.boxtype == 1) // Nokia
 		{
-			routeVideo( nokia_dvb[0], nokia_dvb[1], nokia_dvb[2], nokia_dvb[3], settings.videooutput);
+			routeVideo( nokia_dvb[0], nokia_dvb[1], nokia_dvb[2], nokia_dvb[3], nokia_dvb[4], nokia_dvb[5], settings.videooutput);
 		}
 		else if (settings.boxtype == 3) // Philips
 		{
-			routeVideo( philips_dvb[0], philips_dvb[1], philips_dvb[2], philips_dvb[3], settings.videooutput);
+			routeVideo( philips_dvb[0], philips_dvb[1], philips_dvb[2], philips_dvb[3], philips_dvb[4], philips_dvb[5], settings.videooutput);
 		}
 	}
 }
@@ -575,7 +599,7 @@ void setBoxType()
 			settings.boxtype= CControldClient::BOXTYPE_NOKIA;
 	}
 
-	printf("Boxtype detected: (%s, %d, %d, %s)\n", strmID, mID, settings.boxtype, BoxNames[settings.boxtype]);
+	printf("[controld] Boxtype detected: (%s, %d, %d, %s)\n", strmID, mID, settings.boxtype, BoxNames[settings.boxtype]);
 }
 
 void setVolume(char volume)
@@ -783,7 +807,7 @@ void sig_catch(int)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.52 2002/03/15 18:05:58 McClean Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.53 2002/03/18 15:05:29 field Exp $\n\n");
 
 	//printf("[controld] mainThread-pid: %d\n", getpid());
 	if (fork() != 0)
