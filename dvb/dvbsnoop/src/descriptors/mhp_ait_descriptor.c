@@ -1,5 +1,5 @@
 /*
-$Id: mhp_ait_descriptor.c,v 1.1 2004/02/07 01:28:01 rasc Exp $ 
+$Id: mhp_ait_descriptor.c,v 1.2 2004/02/09 21:24:58 rasc Exp $ 
 
 
  DVBSNOOP
@@ -17,6 +17,10 @@ $Id: mhp_ait_descriptor.c,v 1.1 2004/02/07 01:28:01 rasc Exp $
 
 
 $Log: mhp_ait_descriptor.c,v $
+Revision 1.2  2004/02/09 21:24:58  rasc
+AIT descriptors
+minor redesign on output routines
+
 Revision 1.1  2004/02/07 01:28:01  rasc
 MHP Application  Information Table
 some AIT descriptors
@@ -77,8 +81,8 @@ int  descriptorMHP_AIT (u_char *b)
      case 0x00:  descriptorMHP_AIT_application (b); break;
      case 0x01:  descriptorMHP_AIT_application_name (b); break;
      case 0x02:  descriptorMHP_AIT_transport_protocol (b); break;
-//     {  0x03, 0x03,  "DVB-J application descriptor" },
-//     {  0x04, 0x04,  "DVB-J application location descriptor" },
+     case 0x03:  descriptorMHP_AIT_dvb_j_application (b); break;
+     case 0x04:  descriptorMHP_AIT_dvb_j_application_location (b); break;
 //     {  0x05, 0x05,  "External application authorisation descriptor" },
 //     {  0x06, 0x06,  "Routing Descriptor IPv4" },
 //     {  0x07, 0x07,  "Routing Descriptor IPv6" },
@@ -95,6 +99,8 @@ int  descriptorMHP_AIT (u_char *b)
 //     {  0x5F, 0x5F,  "private data specifier descriptor" },
 //     {  0x60, 0x7F,  "reserved to MHP" },
 //     {  0x80, 0xFF,  "user defined" },
+//
+// data_broadcast_id descr..  10.1
 
      default: 
 	if (b[0] < 0x80) {
@@ -126,7 +132,7 @@ int  descriptorMHP_AIT (u_char *b)
 
 /*
   0x00 - application
-  ETSI EN 301 192  (ISO 13818-6)
+  ETSI  TS 102 812
 */
 
 void descriptorMHP_AIT_application (u_char *b)
@@ -180,7 +186,7 @@ void descriptorMHP_AIT_application (u_char *b)
 
 /*
   0x01 - application name
-  ETSI EN 301 192  (ISO 13818-6)
+  ETSI  TS 102 812
 */
 
 void descriptorMHP_AIT_application_name (u_char *b)
@@ -193,6 +199,7 @@ void descriptorMHP_AIT_application_name (u_char *b)
   len		        = b[1];
   b += 2;
 
+  indent (+1);
   while (len > 0) {
 	int len2;
 
@@ -200,13 +207,14 @@ void descriptorMHP_AIT_application_name (u_char *b)
 	out_nl (4,"ISO639_language_code:  %3.3s", ISO639_language_code);
 
  	len2 = outBit_Sx_NL (4,"application_name_length: ",	b, 24, 8);
-  	out (4,"application_name: ");
- 		print_name2 (4, b+4, len2);
-		out_NL (4);
+ 	print_text_468A (4, "application_name: ", b+4, len2);
 
 	b += 4 + len2;
 	len -= 4 + len2;
+
+	out_NL (4);
   }
+  indent (-1);
 
 }
 
@@ -219,7 +227,7 @@ void descriptorMHP_AIT_application_name (u_char *b)
 
 /*
   0x02 - transport_protocol
-  ETSI EN 301 192  (ISO 13818-6)
+  ETSI  TS 102 812
 */
 
 void descriptorMHP_AIT_transport_protocol (u_char *b)
@@ -281,8 +289,7 @@ void descriptorMHP_AIT_transport_protocol (u_char *b)
 			out_NL (4);
 			len2 = outBit_Sx_NL (4,"URL_length: ",	b,  0,  8);
   			out (4,"URL: ");
-		 		print_name2 (4, b+1, len2);
-				out_NL (4);
+	 		print_std_ascii (4, "URL: ", b+1, len2);
 			b += 1+len2;
 			len -= 1+len2;
 		}
@@ -297,9 +304,7 @@ void descriptorMHP_AIT_transport_protocol (u_char *b)
 
 	out_NL (4);
 	len2 = outBit_Sx_NL (4,"URL_base_length: ",	b,  0,  8);
-  	out (4,"URL_base: ");
- 		print_name2 (4, b+1, len2);
-		out_NL (4);
+	print_std_ascii (4, "URL_base: ", b+1, len2);
 	b += 1+len2;
 	len -= 1+len2;
 
@@ -309,9 +314,7 @@ void descriptorMHP_AIT_transport_protocol (u_char *b)
 
 		out_NL (4);
 		len2 = outBit_Sx_NL (4,"URL_extension_length: ", b,  0,  8);
-  		out (4,"URL_extension: ");
-	 		print_name2 (4, b+1, len2);
-			out_NL (4);
+		print_std_ascii (4, "URL_extension: ", b+1, len2);
 		b += 1+len2;
 		len -= 1+len2;
 	}
@@ -324,6 +327,79 @@ void descriptorMHP_AIT_transport_protocol (u_char *b)
 
 
 }
+
+
+
+
+
+
+
+/*
+  0x03 -  DVB-J Application
+  ETSI  TS 102 812
+*/
+
+void descriptorMHP_AIT_dvb_j_application (u_char *b)
+{
+  int  len;
+
+
+  // descriptor_tag	= b[0];
+  len		        = b[1];
+  b += 2;
+
+  indent (+1);
+  while  (len > 0) {
+	int len2;
+
+  	len2 = outBit_Sx_NL (4,"parameter_length: ",	b, 0, 8);
+	print_std_ascii (4, "Parameter: ", b+1, len2);
+
+	b += len2+1;
+	len -= len2+1;
+  }
+  indent (-1);
+}
+
+
+
+
+
+/*
+  0x04 -  DVB-J Application Location
+  ETSI  TS 102 812
+*/
+
+void descriptorMHP_AIT_dvb_j_application_location (u_char *b)
+{
+  int  len;
+  int  len2;
+
+
+  // descriptor_tag	= b[0];
+  len		        = b[1];
+  b += 2;
+
+
+  len2 = outBit_Sx_NL (4,"base_directory_length: ",	b, 0, 8);
+  print_std_ascii (4, "base_directory: ", b+1, len2);
+  b += len2+1;
+  len -= len2+1;
+
+  len2 = outBit_Sx_NL (4,"classpath_extension_length: ",	b, 0, 8);
+  print_std_ascii (4, "classpath_extension: ", b+1, len2);
+  b += len2+1;
+  len -= len2+1;
+
+  print_std_ascii (4, "initial_class: ", b, len);
+
+}
+
+
+
+
+
+
 
 
 

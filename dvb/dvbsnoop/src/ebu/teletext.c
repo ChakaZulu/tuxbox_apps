@@ -1,5 +1,5 @@
 /*
-$Id: teletext.c,v 1.5 2004/02/07 01:28:03 rasc Exp $
+$Id: teletext.c,v 1.6 2004/02/09 21:24:59 rasc Exp $
 
 
 
@@ -17,6 +17,10 @@ $Id: teletext.c,v 1.5 2004/02/07 01:28:03 rasc Exp $
 
 
 $Log: teletext.c,v $
+Revision 1.6  2004/02/09 21:24:59  rasc
+AIT descriptors
+minor redesign on output routines
+
 Revision 1.5  2004/02/07 01:28:03  rasc
 MHP Application  Information Table
 some AIT descriptors
@@ -284,9 +288,7 @@ int  print_teletext_control_decode (int v, u_char *b, int len)
 
 	unParityTeletextData (b+10, len-10);
 	print_teletext_data_x0_x25 (v,"page header display string:", b+10, len-10);
-	// out (v,"page header display string: ");
-	// print_std_ascii (v, b+10, len-10);
-	// out_NL (v);
+	// print_std_ascii (v, "page header dispay string: ", b+10, len-10);
 
 
 	return len;
@@ -302,7 +304,7 @@ void print_teletext_data_x0_x25 (int v, char *s, u_char *b, int len)
 {
 
   // $$$ TODO  -- decode display codes c < 0x20
-  print_databytes (v,s, b, len);
+  print_databytes (v, s, b, len);
 
 }
 

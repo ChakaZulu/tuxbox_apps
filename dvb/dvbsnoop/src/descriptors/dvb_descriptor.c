@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.26 2004/01/02 16:40:34 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.27 2004/02/09 21:24:57 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,10 @@ $Id: dvb_descriptor.c,v 1.26 2004/01/02 16:40:34 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.27  2004/02/09 21:24:57  rasc
+AIT descriptors
+minor redesign on output routines
+
 Revision 1.26  2004/01/02 16:40:34  rasc
 DSM-CC  INT/UNT descriptors complete
 minor changes and fixes
@@ -252,30 +256,12 @@ void descriptorDVB_NetName (u_char *b)
 {
  /* ETSI 300 468 */
 
- typedef struct  _descNND {
-    u_int      descriptor_tag;
-    u_int      descriptor_length;		
+  int  len;
 
-    u_char     *network_name;   // with controls
+  // tag	 = b[0];
+  len       	 = b[1];
 
-
- } descNND;
-
- descNND  d;
-
-
-
- d.descriptor_tag		 = b[0];
- d.descriptor_length       	 = b[1];
- // d.network_name to be assigned 
-
-
- out (4,"Network_name:  ");
- b += 2;
-
- print_name (4, b,d.descriptor_length);
- out_NL (4);
-
+  print_text_468A (4, "Network_name: ", b+2,len);
 }
 
 
@@ -613,27 +599,12 @@ void descriptorDVB_VBI_Teletext (u_char *b)
 void descriptorDVB_BouquetName  (u_char *b)
 
 {
+  int len;
 
- typedef struct  _descBouquetName {
-    u_int      descriptor_tag;
-    u_int      descriptor_length;		
+  // tag	 = b[0];
+  len       	 = b[1];
 
-    // N   ... char name
-
- } descBouquetName;
-
-
- descBouquetName d;
-
-
-
- d.descriptor_tag		 = b[0];
- d.descriptor_length       	 = b[1];
-
- out (4,"BouquetName: ");
- print_name (4, b+2,d.descriptor_length);
- out_NL (4);
-
+  print_text_468A (4, "BouquetName: ", b+2,len);
 }
 
 
@@ -685,9 +656,7 @@ void descriptorDVB_Service  (u_char *b)
  out_S2B_NL (4,"Service_type: ",d.service_type,
 	dvbstrService_TYPE(d.service_type));
  out_SB_NL (5,"Service_provider_name_length: ",d.service_provider_name_length);
- out (4,"Service_provider_name: ");
-        print_name (4, b,d.service_provider_name_length);
- out_NL (4);
+ print_text_468A (4, "Service_provider_name: ", b,d.service_provider_name_length);
  
 
  b += d.service_provider_name_length;
@@ -695,9 +664,7 @@ void descriptorDVB_Service  (u_char *b)
  b += 1;
 
  out_SW_NL (5,"Service_name_length: ",d.service_name_length);
- out (4,"Service_name: ");
-        print_name (4, b,d.service_name_length);
- out_NL (4);
+ print_text_468A (4, "Service_name: ", b,d.service_name_length);
 
 }
 
@@ -962,7 +929,7 @@ void sub_descriptorDVB_Linkage0x0B (u_char *b, int len)			 /* $$$ TODO */
  int		  len_loop1;
 
 
- /* $$$ */ out_nl (4, "-----> $$$$ Check this output !!! not verified, may be buggy ");
+
  d.platform_id_data_length     	 = b[0];
  out_SB_NL  (4,"Platform_ID_data_length: ",d.platform_id_data_length);
 
@@ -970,7 +937,7 @@ void sub_descriptorDVB_Linkage0x0B (u_char *b, int len)			 /* $$$ TODO */
  b++;
  len--;
 
-
+ indent (+1);
  while (len_loop1 > 0) {
 
 	int		 len_loop2;
@@ -987,26 +954,26 @@ void sub_descriptorDVB_Linkage0x0B (u_char *b, int len)			 /* $$$ TODO */
 	len_loop1 -= 4;
         len_loop2 = d.platform_name_loop_length;
 
+	indent (+1);
 	while (len_loop2 > 0) {
 
 	 	getISO639_3 (d.ISO639_2_language_code, b);	
+ 		out_nl (4,"  ISO639_language_code:  %3.3s", d.ISO639_2_language_code);
         	d.platform_name_length  = getBits (b, 0, 24,  8);
-		b += 4;
-		len -= 4;
-		len_loop2 -= 4;
+ 		print_text_468A (4, "Platform_name: ", b+4,d.platform_name_length);
 
- 		print_name (4, b,d.platform_name_length);
+		b +=  d.platform_name_length + 4;
+		len -= d.platform_name_length + 4;
+		len_loop2 -= d.platform_name_length + 4;
+
 		out_NL (4);
-
-		b +=  d.platform_name_length;
-		len -= d.platform_name_length;
-		len_loop2 -= d.platform_name_length;
-
 	}
+	indent (-1);
 
         len_loop1 -= d.platform_name_loop_length;
 
  }
+ indent (-1);
 
 
  print_private_data (4, b,len);
@@ -1181,7 +1148,6 @@ void descriptorDVB_ShortEvent  (u_char *b)
  descShortEvent d;
 
 
-
  d.descriptor_tag		 = b[0];
  d.descriptor_length       	 = b[1];
 
@@ -1193,18 +1159,14 @@ void descriptorDVB_ShortEvent  (u_char *b)
  b += 6;
 
  out_SB_NL (5,"Event_name_length: ",d.event_name_length);
- out       (4,"Event_name: ");
-	print_name (4, b,d.event_name_length);
-	out_NL (4);
+ print_text_468A (4, "Event_name: ", b,d.event_name_length);
 
  b += d.event_name_length;
 
  d.text_length			 = getBits (b, 0, 0, 8);
  b += 1;
  out_SB_NL (5,"Text_length: ",d.text_length);
- 	out (4,"Text: ");
- 	print_name (4, b,d.text_length);
-	out_NL (4);
+ print_text_468A (4, "Text: ", b,d.text_length);
 
 }
 
@@ -1277,18 +1239,14 @@ void descriptorDVB_ExtendedEvent  (u_char *b)
    d2.item_description_length	 = getBits (b, 0, 0, 8);
    out_NL (4);
    out_SB_NL (5,"Item_description_length: ",d2.item_description_length);
-   out_nl (4,"Item_description: ");
-      print_name (4, b+1, d2.item_description_length);
-	out_NL (4);
+   print_text_468A (4, "Item_description: ", b+1, d2.item_description_length);
 
    b += 1 + d2.item_description_length;
    
 
    d2.item_length	 	 = getBits (b, 0, 0, 8);
    out_SB_NL (5,"Item_length: ",d2.item_length);
-   out (4,"Item: ");
-      print_name (4, b+1, d2.item_length);
-	out_NL (4);
+   print_text_468A (4, "Item: ", b+1, d2.item_length);
 
    b += 1 + d2.item_length;
 
@@ -1307,10 +1265,7 @@ void descriptorDVB_ExtendedEvent  (u_char *b)
 
 
    out_SB_NL (5,"Text_length: ",d.text_length);
-   out (4,"Text: ");
-	print_name (4, b,d.text_length);
-	out_NL (4);
-
+   print_text_468A (4, "Text: ", b,d.text_length);
 
 }
 
@@ -1409,9 +1364,7 @@ void descriptorDVB_Component  (u_char *b)
  out_SB_NL (4,"Component_tag: ",d.component_tag);
  out_nl    (4,"ISO639_2_language_code:  %3.3s", d.ISO639_2_language_code);
 
- out       (4,"Component-Description: ");
-	print_name (4, b+8,d.descriptor_length - 6);
- 	out_NL (4);
+ print_text_468A (4, "Component-Description: ", b+8,d.descriptor_length - 6);
 
 }
 
@@ -2221,14 +2174,12 @@ void descriptorDVB_MultilingNetworkName (u_char *b)
 
     out_nl    (4,"ISO639_2_language_code:  %3.3s", d2.ISO639_2_language_code);
     out_SB_NL (5,"Network_name_length: ",d2.network_name_length);
-    out       (4,"Network_name: ");
-	print_name (4, b+4,d2.network_name_length);
- 	out_NL (4);
-    out_NL (4);
+    print_text_468A (4, "Network_name: ", b+4,d2.network_name_length);
 
     len1 -= (4 + d2.network_name_length);
     b    +=  4 + d2.network_name_length;
 
+    out_NL (4);
  }
  indent (-1);
 
@@ -2289,14 +2240,12 @@ void descriptorDVB_MultilingBouquetName (u_char *b)
 
     out_nl    (4,"ISO639_2_language_code:  %3.3s", d2.ISO639_2_language_code);
     out_SB_NL (5,"Bouquet_name_length: ",d2.bouquet_name_length);
-    out       (4,"Bouquet_name: ");
-	print_name (4, b+4,d2.bouquet_name_length);
- 	out_NL (4);
-    out_NL (4);
+    print_text_468A (4, "Bouquet_name: ", b+4,d2.bouquet_name_length);
 
     len1 -= (4 + d2.bouquet_name_length);
     b    +=  4 + d2.bouquet_name_length;
 
+    out_NL (4);
  }
  indent (-1);
 
@@ -2359,9 +2308,7 @@ void descriptorDVB_MultilingServiceName (u_char *b)
 
     out_nl    (4,"ISO639_2_language_code:  %3.3s", d2.ISO639_2_language_code);
     out_SB_NL (5,"Service_provider_name_length: ",d2.service_provider_name_length);
-    out       (4,"Service_provider_name: ");
-	print_name (4, b+4,d2.service_provider_name_length);
- 	out_NL (4);
+    print_text_468A (4, "Service_provider_name: ", b+4,d2.service_provider_name_length);
 
     len1 -= (4 + d2.service_provider_name_length);
     b    +=  4 + d2.service_provider_name_length;
@@ -2369,9 +2316,7 @@ void descriptorDVB_MultilingServiceName (u_char *b)
 
     d2.service_name_length	 = getBits (b, 0, 24, 8);
     out_SB_NL (5,"Service_name_length: ",d2.service_name_length);
-    out       (4,"Service_name: ");
-	print_name (4, b+4,d2.service_name_length);
- 	out_NL (4);
+    print_text_468A (4, "Service_name: ", b+4,d2.service_name_length);
 
     len1 -= (4 + d2.service_name_length);
     b    +=  4 + d2.service_name_length;
@@ -2443,14 +2388,12 @@ void descriptorDVB_MultilingComponent (u_char *b)
 
     out_nl    (4,"ISO639_2_language_code:  %3.3s", d2.ISO639_2_language_code);
     out_SB_NL (5,"Text_description_length: ",d2.text_description_length);
-    out       (4,"Text_description: ");
-	print_name (4, b+4,d2.text_description_length);
- 	out_NL (4);
-    out_NL (4);
+    print_text_468A (4, "Text_description: ", b+4,d2.text_description_length);
 
     len1 -= (4 + d2.text_description_length);
     b    +=  4 + d2.text_description_length;
 
+    out_NL (4);
  }
  indent (-1);
 
@@ -2903,9 +2846,7 @@ void descriptorDVB_DataBroadcast (u_char *b)
 
 			out_nl    (5,"ISO639_2_language_code:  %3.3s", ISO639_2_language_code);
 			out_SB_NL (5,"object_name_length: ",object_name_length);
-			out       (5,"object_name: ");
-				print_name (5, b1+4,object_name_length);
-			 	out_NL (5);
+			print_text_468A (5, "object_name: ", b1+4,object_name_length);
 
 			b1   += (4 + object_name_length);
 			len1 -= (4 + object_name_length);
@@ -2982,6 +2923,10 @@ void descriptorDVB_DataBroadcast (u_char *b)
     		}
 
  } else {
+	// 0x0002 == asynchronous Data Streaming
+	// 0x0003 == indicate a synchronous data stream
+	// 0x0004 == synchronised data streams
+	// ...
  	print_databytes (4,"Selector bytes:",  b, d.selector_length);
  }
  indent (-1);
@@ -2993,9 +2938,7 @@ void descriptorDVB_DataBroadcast (u_char *b)
 
  out_nl    (4,"ISO639_2_language_code:  %3.3s", d.ISO639_2_language_code);
  out_SB_NL (5,"Text_length: ",d.text_length);
- out       (4,"Text: ");
-	print_name (4, b+4,d.text_length);
- 	out_NL (4);
+ print_text_468A (4, "Text: ", b+4,d.text_length);
 
 }
 

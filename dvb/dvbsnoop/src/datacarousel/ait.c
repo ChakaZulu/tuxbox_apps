@@ -1,5 +1,5 @@
 /*
-$Id: ait.c,v 1.1 2004/02/07 01:28:00 rasc Exp $
+$Id: ait.c,v 1.2 2004/02/09 21:24:57 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,10 @@ $Id: ait.c,v 1.1 2004/02/07 01:28:00 rasc Exp $
 
 
 $Log: ait.c,v $
+Revision 1.2  2004/02/09 21:24:57  rasc
+AIT descriptors
+minor redesign on output routines
+
 Revision 1.1  2004/02/07 01:28:00  rasc
 MHP Application  Information Table
 some AIT descriptors
@@ -144,20 +148,5 @@ int  mhp_application_identifier (int  v, u_char *b)
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-// $$$ TODO
-// Unless otherwise speci .ed,all .elds interpreted as text strings in the
-// AIT shall be encoded as UTF8 (see 7.1.5, "Monomedia format for text"on page
-// 70).See also 14.5,"Text encoding of application identi .ers"on page 377.
 
 

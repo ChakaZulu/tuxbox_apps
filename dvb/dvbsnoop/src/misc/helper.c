@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.23 2004/01/17 23:06:09 rasc Exp $
+$Id: helper.c,v 1.24 2004/02/09 21:25:00 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,10 @@ $Id: helper.c,v 1.23 2004/01/17 23:06:09 rasc Exp $
 
 
 $Log: helper.c,v $
+Revision 1.24  2004/02/09 21:25:00  rasc
+AIT descriptors
+minor redesign on output routines
+
 Revision 1.23  2004/01/17 23:06:09  rasc
 minor stuff, some restructs in output
 
@@ -418,33 +422,33 @@ u_char *getISO639_3 (u_char *str, u_char *buf)
 
 
 /*
-  -- print_name_Short 
-  -- print_name_Long
+  -- print_text_468A 
   -- ETSI EN 300 468  Annex A
-
   -- evaluate string and look on DVB control codes
   -- print the string
 
 */
 
-void print_name (int v, u_char *b, u_int len)
+static void print_text2_468A (int v, u_char *b, u_int len);
+
+void print_text_468A (int v, const char *s,  u_char *b, u_int len)
 {
- //int i;
+
+ out (v, s);
 
  if (len <= 0) {
-    out (v,"\"\"");
+    out_nl (v,"\"\"");
  } else {
     out (v,"\"");
-    print_name2 (v, b,len);
+    print_text2_468A (v, b,len);
     out (v,"\"");
-    out (v,"  -- Charset: %s", dvbstrTextCharset_TYPE (*b));
+    out_nl (v,"  -- Charset: %s", dvbstrTextCharset_TYPE (*b));
  }
 
 }
 
 
-
-void print_name2 (int v, u_char *b, u_int len)
+static void print_text2_468A (int v, u_char *b, u_int len)
 {
   int    in_emphasis = 0;
   int    i;
@@ -479,18 +483,20 @@ void print_name2 (int v, u_char *b, u_int len)
 }
 
 
-void print_std_ascii (int v, u_char *b, u_int len)
+
+
+void print_std_ascii (int v, const char *s, u_char *b, u_int len)
 {
   int    i;
   u_char c;
  
-  out (v,"\"");
+  out (v,"%s\"",s);
   for (i=0; i<len; i++) {
     c = b[i];
     if (!isprint (c)) c = '.';
     out (v, "%c", c);
   } 
-  out (v,"\"");
+  out_nl (v,"\"");
 
 }
 

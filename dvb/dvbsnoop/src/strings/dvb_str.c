@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.41 2004/02/04 22:36:29 rasc Exp $
+$Id: dvb_str.c,v 1.42 2004/02/09 21:25:01 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,10 @@ $Id: dvb_str.c,v 1.41 2004/02/04 22:36:29 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.42  2004/02/09 21:25:01  rasc
+AIT descriptors
+minor redesign on output routines
+
 Revision 1.41  2004/02/04 22:36:29  rasc
 more EBU/teletext stuff
 
@@ -392,11 +396,7 @@ char *dvbstrDVBDescriptorTAG (u_int tag)
      {  0x72, 0x72,  "service_availability_descriptor" },
      {  0x73, 0x7F,  "reserved_descriptor" },
      {  0x80, 0xAF,  "ATSC reserved" },		/* ETR 211e02 */
-     {  0xB0, 0xEF,  "User defined" },
-     	{  0xf0, 0xf0,  "$$$ MHP Object Carousel" },	// $$$ TODO
-     	{  0xf1, 0xf1,  "$$$ MHP Multiprotocol Encapsulation" },
-	{  0xf2, 0xFE,  "reserved MHP" },
-
+     {  0xB0, 0xFE,  "User defined" },
      {  0xFF, 0xFF,  "Forbidden" },
      {  0,0, NULL }
   };
@@ -792,7 +792,7 @@ char *dvbstrDataBroadcast_ID (u_int flag)
 	{ 0x000A, 0x000A,   "System Software Update" }, // TR 102 006
 
 	{ 0x000B, 0x00ef,   "Reserved for future use by DVB" },
-	{ 0x00F0, 0x00F0,   "MHP Object Carousel" },
+	{ 0x00F0, 0x00F0,   "MHP Object Carousel" },	//  from registration at www.dvb.org
 	{ 0x00F1, 0x00F1,   "reserved for MHP Multi Protocol Encapsulation" },
 	{ 0x00F2, 0x00Fe,   "Reserved for MHP use" },
 	{ 0x00FF, 0x00FF,   "Reserved for future use by DVB" },

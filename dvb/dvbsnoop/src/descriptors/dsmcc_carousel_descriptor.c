@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_carousel_descriptor.c,v 1.16 2004/01/22 22:58:29 rasc Exp $ 
+$Id: dsmcc_carousel_descriptor.c,v 1.17 2004/02/09 21:24:57 rasc Exp $ 
 
 
  DVBSNOOP
@@ -17,6 +17,10 @@ $Id: dsmcc_carousel_descriptor.c,v 1.16 2004/01/22 22:58:29 rasc Exp $
 
 
 $Log: dsmcc_carousel_descriptor.c,v $
+Revision 1.17  2004/02/09 21:24:57  rasc
+AIT descriptors
+minor redesign on output routines
+
 Revision 1.16  2004/01/22 22:58:29  rasc
 deleting modul  (again?)
 somehow  obsolete module re-appeared??? (or I forgot something)
@@ -165,9 +169,7 @@ void descriptorDSMCC_type (u_char *b)
   // descriptor_tag	= b[0];
   len		        = b[1];
 
-  out (4,"Text: ");
- 	print_std_ascii (4, b+2, len);
-	out_NL (4);
+  print_std_ascii (4, "Text: ", b+2, len);
 }
 
 
@@ -185,9 +187,7 @@ void descriptorDSMCC_name (u_char *b)
   // descriptor_tag	= b[0];
   len		        = b[1];
 
-  out (4,"Text: ");
- 	print_name (4, b+2, len);
-	out_NL (4);
+  print_text_468A (4, "Text: ", b+2, len);
 }
 
 
@@ -209,9 +209,7 @@ void descriptorDSMCC_info (u_char *b)
   getISO639_3 (ISO639_language_code, b+2);
   out_nl (4,"  ISO639_language_code:  %3.3s", ISO639_language_code);
 
-  out (4,"Text: ");
- 	print_name (4, b+5, len-3);
-	out_NL (4);
+  print_text_468A (4, "Text: ", b+5, len-3);
 }
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_int_unt_descriptor.c,v 1.14 2004/01/03 00:30:06 rasc Exp $ 
+$Id: dsmcc_int_unt_descriptor.c,v 1.15 2004/02/09 21:24:57 rasc Exp $ 
 
 
  DVBSNOOP
@@ -17,6 +17,10 @@ $Id: dsmcc_int_unt_descriptor.c,v 1.14 2004/01/03 00:30:06 rasc Exp $
 
 
 $Log: dsmcc_int_unt_descriptor.c,v $
+Revision 1.15  2004/02/09 21:24:57  rasc
+AIT descriptors
+minor redesign on output routines
+
 Revision 1.14  2004/01/03 00:30:06  rasc
 DSM-CC  STREAM descriptors module (started)
 
@@ -321,11 +325,7 @@ void descriptorDSMCC_message(u_char *b)
 
   getISO639_3 (ISO639_language_code, b+3);
   out_nl (4,"  ISO639_language_code:  %3.3s", ISO639_language_code);
-
-  out (4,"Text: ");
- 	print_name (4, b+6, len-4);
-	out_NL (4);
-
+  print_text_468A (4, "Text: ", b+6, len-4);
 }
 
 
@@ -352,15 +352,11 @@ void descriptorDSMCC_ssu_event_name (u_char *b)
   out_nl (4,"  ISO639_language_code:  %3.3s", ISO639_language_code);
 
   len = outBit_Sx_NL (4,"name_length: ",	  b,40, 8);
-  out (4,"SSU_event_name: ");
- 	print_name (4, b+6, len);
-	out_NL (4);
+  print_std_ascii (4, "SSU_event_name: ", b+6, len);
   b += 6+len;
   
   len = outBit_Sx_NL (4,"text_length: ",	  b, 0, 8);
-  out (4,"MessageText: ");
- 	print_name (4, b+1, len);
-	out_NL (4);
+  print_text_468A (4, "MessageText: ", b+1, len);
 
 }
 
@@ -576,11 +572,7 @@ void descriptorDSMCC_IP_MAC_platform_name (u_char *b)
 
   getISO639_3 (ISO639_language_code, b+2);
   out_nl (4,"  ISO639_language_code:  %3.3s", ISO639_language_code);
-
-  out (4,"Text: ");
- 	print_name (4, b+2+3, len-3);
-	out_NL (4);
-
+  print_text_468A (4, "Text: ", b+2+3, len-3);
 }
 
 
