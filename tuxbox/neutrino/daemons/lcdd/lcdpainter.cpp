@@ -170,16 +170,16 @@ void CLCDPainter::show_volume(char vol)
 	volume = vol;
 	if ((mode==CLcddClient::MODE_TVRADIO) || (mode==CLcddClient::MODE_SCART))
 	{
-		display.draw_fill_rect (1,52,73,61, CLCDDisplay::PIXEL_OFF);
+		display.draw_fill_rect (11,53,73,61, CLCDDisplay::PIXEL_OFF);
 		//strichlin
 		if (muted)
 		{
-			display.draw_line (1,52,73,61, CLCDDisplay::PIXEL_ON);
+			display.draw_line (12,55,73,60, CLCDDisplay::PIXEL_ON);
 		}
 		else
 		{
 			int dp = int( vol/100.0*72.0+1.0);
-			display.draw_fill_rect (1,53,dp,60, CLCDDisplay::PIXEL_ON);
+			display.draw_fill_rect (11,54,dp,60, CLCDDisplay::PIXEL_ON);
 		}
 
 		display.update();
