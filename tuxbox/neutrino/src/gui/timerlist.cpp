@@ -498,8 +498,8 @@ void CTimerList::paintItem(int pos)
 					break;
 				default:{}
 			}
-			g_lcdd->setMenuText(0, line1 );
-			g_lcdd->setMenuText(1, line2 );
+			CLCD::getInstance()->showMenuText(0, line1 );
+			CLCD::getInstance()->showMenuText(1, line2 );
 		}
 	}
 }
@@ -554,7 +554,7 @@ void CTimerList::paint()
 {
 	liststart = (selected/listmaxshow)*listmaxshow;
 
-	g_lcdd->setMode(CLcddTypes::MODE_MENU, g_Locale->getText("timerlist.name") );
+	CLCD::getInstance()->setMode(CLCD::MODE_MENU, g_Locale->getText("timerlist.name") );
 
 	paintHead();
 	for(unsigned int count=0;count<listmaxshow;count++)

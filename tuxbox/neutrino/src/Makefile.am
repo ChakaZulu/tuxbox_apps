@@ -6,6 +6,8 @@ INCLUDES = \
 	@CONNECTION_CFLAGS@ \
 	@EVENTSERVER_CFLAGS@ \
 	@FREETYPE_CFLAGS@ \
+	@LCDDISPLAY_CFLAGS@ \
+	@CONFIGFILE_CFLAGS@ \
 	@NET_CFLAGS@ \
 	@ZAPIT_CFLAGS@
 
@@ -25,7 +27,6 @@ neutrino_LDADD = \
 	system/libneutrino_system.a \
 	gui/libneutrino_gui2.a \
 	$(top_builddir)/lib/controldclient/libcontroldclient.la \
-	$(top_builddir)/lib/lcddclient/liblcddclient.la \
 	$(top_builddir)/lib/sectionsdclient/libsectionsdclient.la \
 	$(top_builddir)/lib/timerdclient/libtimerdclient.la \
 	@CONFIGFILE_LIBS@ \
@@ -38,6 +39,7 @@ neutrino_LDADD = \
 	@UCODES_LIBS@ \
 	@ZAPIT_LIBS@ \
 	@LIRCDCLIENT_LIBS@ \
+	@LCDDISPLAY_LIBS@ \
 	-lmad \
 	-lpthread -lz
 

@@ -267,7 +267,7 @@ void CPlugins::startPlugin(int number)
 	if (plugin_list[number].lcd)
 	{
 		// cout << "With LCD " << endl;
-		g_lcdd->pause();
+		CLCD::getInstance()->pause();
 		if( (lcd_fd=open("/dev/dbox/lcd0", O_RDWR)) < 0 )
 			setlcd( 0 );
 		else
@@ -383,7 +383,7 @@ void CPlugins::startPlugin(int number)
 	{
 		if(lcd_fd != -1)
 			close(lcd_fd);
-		g_lcdd->resume();
+		CLCD::getInstance()->resume();
 	}
 
     	if (plugin_list[number].fb)

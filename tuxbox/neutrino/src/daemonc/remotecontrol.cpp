@@ -85,6 +85,7 @@ int CRemoteControl::handleMsg(uint msg, uint data)
     		// warte auf keine Meldung vom ZAPIT -> jemand anderer hat das zappen ausgelöst...
     		if ( data != current_channel_id )
     		{
+				CLCD::getInstance()->showServicename(current_channel_name);
     			current_channel_id = data;
 				is_video_started= true;
 
@@ -209,6 +210,7 @@ int CRemoteControl::handleMsg(uint msg, uint data)
 	{
 		if ( data == (( msg == NeutrinoMessages::EVT_ZAP_COMPLETE )?current_channel_id:current_sub_channel_id) )
 		{
+			CLCD::getInstance()->showServicename(current_channel_name);
 			g_Zapit->getPIDS( current_PIDs );
 			g_RCInput->postMsg( NeutrinoMessages::EVT_ZAP_GOTPIDS, current_channel_id, false );
 
@@ -221,7 +223,7 @@ int CRemoteControl::handleMsg(uint msg, uint data)
 		if ( data == current_channel_id )
 		{
 		    needs_nvods = true;
-
+			CLCD::getInstance()->showServicename(string("["+current_channel_name+"]"));
 			if ( current_EPGid != 0)
 			{
 				getNVODs();

@@ -57,18 +57,18 @@ CLcdControler::CLcdControler(string Name, CChangeObserver* Observer)
 	x=((720-width) >> 1) -20;
 	y=(576-height)>>1;
 
-	contrast = g_lcdd->getContrast();
-	brightness = g_lcdd->getBrightness();
-	brightnessstandby = g_lcdd->getBrightnessStandby();
+	contrast = CLCD::getInstance()->getContrast();
+	brightness = CLCD::getInstance()->getBrightness();
+	brightnessstandby = CLCD::getInstance()->getBrightnessStandby();
 }
 
 void CLcdControler::setLcd()
 {
 	printf("contrast: %d brightness: %d brightness standby: %d\n", contrast, brightness, brightnessstandby);
-	g_lcdd->setBrightness(brightness);
-	g_lcdd->setBrightnessStandby(brightnessstandby);
-	g_lcdd->setContrast(contrast);
-	g_lcdd->update();
+	CLCD::getInstance()->setBrightness(brightness);
+	CLCD::getInstance()->setBrightnessStandby(brightnessstandby);
+	CLCD::getInstance()->setContrast(contrast);
+//	g_lcdd->update();
 }
 
 int CLcdControler::exec(CMenuTarget* parent, string)
@@ -215,9 +215,9 @@ int CLcdControler::exec(CMenuTarget* parent, string)
 					break;
 
 				// sonst abbruch...
-				g_lcdd->setContrast(contrast_alt);
-				g_lcdd->setBrightness(brightness_alt);
-				g_lcdd->setBrightnessStandby(brightnessstandby_alt);
+				CLCD::getInstance()->setContrast(contrast_alt);
+				CLCD::getInstance()->setBrightness(brightness_alt);
+				CLCD::getInstance()->setBrightnessStandby(brightnessstandby_alt);
 
 			case CRCInput::RC_timeout:
 			case CRCInput::RC_ok:

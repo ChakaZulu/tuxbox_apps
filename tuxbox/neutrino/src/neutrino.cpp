@@ -117,7 +117,6 @@ static void initGlobals(void)
 	g_Fonts =    NULL;
 
 	g_RCInput =    NULL;
-	g_lcdd =    NULL;
 	g_Controld =   NULL;
 	g_Timerd =  NULL;
 	g_Zapit =   NULL;
@@ -146,7 +145,7 @@ CNeutrinoApp::CNeutrinoApp()
 
 //	vcrControl = CVCRControl::getInstance();
 
-	g_fontRenderer = new fontRenderClass;
+	g_fontRenderer = new FBFontRenderClass();
 	SetupFrameBuffer();
 
 	settingsFile = CONFIGDIR "/neutrino.conf";
@@ -1779,8 +1778,8 @@ void CNeutrinoApp::InitColorSettingsTiming(CMenuWidget &colorSettings_timing)
 
 void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
 {
-	static int lcdpower = g_lcdd->getPower()?1:0;
-	static int lcdinverse = g_lcdd->getInverse()?1:0;
+	static int lcdpower = CLCD::getInstance()->getPower()?1:0;
+	static int lcdinverse = CLCD::getInstance()->getInverse()?1:0;
 	dprintf(DEBUG_DEBUG, "init lcdsettings\n");
 	lcdSettings.addItem( new CMenuSeparator() );
 
@@ -2093,7 +2092,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_Controld = new CControldClient;
 	g_Locale = new CLocaleManager;
 	g_RCInput = new CRCInput;
-	g_lcdd = new CLcddClient;
 	g_Zapit = new CZapitClient;
 	g_Sectionsd = new CSectionsdClient;
 	g_Timerd = new CTimerdClient;
@@ -2246,7 +2244,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 		ShowHint ( "messagebox.info", g_Locale->getText("settings.missingoptionsconffile") );
 	}
 
-	g_lcdd->setServiceName("Waiting...");
+	CLCD::getInstance()->showServicename("Waiting...");
 	//init programm
 	InitZapper();
 
@@ -2533,15 +2531,15 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		if( mode == mode_standby )
 		{
 			//switch lcd off/on
-			if ( g_lcdd->getPower() == 1 )
+			if ( CLCD::getInstance()->getPower() == 1 )
 			{
-				g_lcdd->setPower(0);
-				g_lcdd->update();
+				CLCD::getInstance()->setPower(0);
+				//CLCD::getInstance()->update();
 			}
 			else
 			{
-				g_lcdd->setPower(1);
-				g_lcdd->setMode(CLcddTypes::MODE_STANDBY);
+				CLCD::getInstance()->setPower(1);
+				CLCD::getInstance()->setMode(CLCD::MODE_STANDBY);
 			}
 		}
 		else
@@ -2809,7 +2807,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 			scartMode( true );
 		}
 		else // sonst nur lcd akt.
-			g_lcdd->setMode(CLcddTypes::MODE_SCART);
+			CLCD::getInstance()->setMode(CLCD::MODE_SCART);
 	}
 
 	else if( msg == NeutrinoMessages::VCR_OFF )
@@ -2986,7 +2984,7 @@ void CNeutrinoApp::tvMode( bool rezap )
 	}
 	else if( mode == mode_standby )
 	{
-		g_lcdd->setMode(CLcddTypes::MODE_TVRADIO);
+		CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
 		g_Controld->videoPowerDown(false);
 	}
 
@@ -3067,7 +3065,7 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 	if( bOnOff )
 	{
 		// STANDBY AN
-		lcdpower = g_lcdd->getPower()?1:0;
+		lcdpower = CLCD::getInstance()->getPower()?1:0;
 
 		if( mode == mode_scart )
 		{
@@ -3077,7 +3075,7 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 		if(frameBuffer->getActive())
 			memset(frameBuffer->getFrameBufferPointer(), 255, frameBuffer->getStride()*576);
 
-		g_lcdd->setMode(CLcddTypes::MODE_STANDBY);
+		CLCD::getInstance()->setMode(CLCD::MODE_STANDBY);
 		g_Controld->videoPowerDown(true);
 
 		lastMode = mode;
@@ -3091,8 +3089,8 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 	{
 		// STANDBY AUS
 
-		g_lcdd->setPower(lcdpower);
-		g_lcdd->setMode(CLcddTypes::MODE_TVRADIO);
+		CLCD::getInstance()->setPower(lcdpower);
+		CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
 		g_Controld->videoPowerDown(false);
 
 		//Send ir
@@ -3125,7 +3123,7 @@ void CNeutrinoApp::radioMode( bool rezap)
 	}
 	else if( mode == mode_standby )
 	{
-		g_lcdd->setMode(CLcddTypes::MODE_TVRADIO);
+		CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
 		g_Controld->videoPowerDown(false);
 	}
 
@@ -3292,7 +3290,9 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.373 2002/12/10 00:44:17 Homar Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.374 2002/12/17 22:17:37 McClean Exp $\n\n");
+	//LCD-Init
+	CLCD::getInstance()->init();
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

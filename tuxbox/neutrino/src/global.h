@@ -35,13 +35,13 @@
 #include <zapit/client/zapitclient.h>
 
 #include <controldclient/controldclient.h>
-#include <lcddclient/lcddclient.h>
 #include <sectionsdclient/sectionsdclient.h>
 #include <timerdclient/timerdclient.h>
 #include "daemonc/remotecontrol.h"
 
 #include "driver/fontrenderer.h"
 #include "driver/rcinput.h"
+#include "driver/lcdd.h"
 
 #include "system/localize.h"
 #include "system/settings.h"
@@ -60,14 +60,13 @@
 NEUTRINO_CPP  SNeutrinoSettings	g_settings;
 NEUTRINO_CPP  SglobalInfo		g_info;
 
-NEUTRINO_CPP  CLcddClient		*g_lcdd;
-NEUTRINO_CPP  CControldClient		*g_Controld;
+NEUTRINO_CPP  CControldClient	*g_Controld;
 NEUTRINO_CPP  CZapitClient		*g_Zapit;
-NEUTRINO_CPP  CSectionsdClient		*g_Sectionsd;
+NEUTRINO_CPP  CSectionsdClient	*g_Sectionsd;
 NEUTRINO_CPP  CTimerdClient		*g_Timerd;
-NEUTRINO_CPP  CRemoteControl		*g_RemoteControl;
+NEUTRINO_CPP  CRemoteControl	*g_RemoteControl;
 
-NEUTRINO_CPP  fontRenderClass		*g_fontRenderer;
+NEUTRINO_CPP  FBFontRenderClass	*g_fontRenderer;
 NEUTRINO_CPP  FontsDef			*g_Fonts;
 
 NEUTRINO_CPP  CRCInput			*g_RCInput;
@@ -84,5 +83,5 @@ NEUTRINO_CPP CPlugins   		*g_PluginList;
 
 #ifdef USEACTIONLOG
 	#include "helpers/actionlog.h"
-	NEUTRINO_CPP CActionLog	  *g_ActionLog;
+	NEUTRINO_CPP CActionLog		*g_ActionLog;
 #endif

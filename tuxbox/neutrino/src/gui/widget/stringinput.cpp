@@ -180,7 +180,7 @@ int CStringInput::exec( CMenuTarget* parent, string )
 	{
 		if ( strcmp(value, dispval) != 0)
 		{
-			g_lcdd->setMenuText(1, value, selected+1);
+			CLCD::getInstance()->showMenuText(1, value, selected+1);
 			strcpy(dispval, value);
 		}
 

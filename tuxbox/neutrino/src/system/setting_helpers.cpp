@@ -204,9 +204,9 @@ CLcdNotifier::CLcdNotifier(int *lcdPowerSetting,int *lcdInverseSetting)
 
 bool CLcdNotifier::changeNotify(string OptionName, void *Data)
 {
-	g_lcdd->setPower(*LcdPowerSetting == 1);
-	g_lcdd->setInverse(*LcdInverseSetting == 1);
-	g_lcdd->update();
+	CLCD::getInstance()->setPower(*LcdPowerSetting == 1);
+	CLCD::getInstance()->setInverse(*LcdInverseSetting == 1);
+	//CLCD::getInstance()->update();
 	return true;
 }
 

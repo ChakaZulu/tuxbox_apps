@@ -256,7 +256,7 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 	hide();
 	if(!parent)
 	{
-		g_lcdd->setMode(CLcddTypes::MODE_TVRADIO, g_Locale->getText(name));
+		CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO, g_Locale->getText(name));
 	}
 
 	return retval;
@@ -274,7 +274,7 @@ void CMenuWidget::paint()
 	{
 		l_name = g_Locale->getText(name);
 	}
-	g_lcdd->setMode(CLcddTypes::MODE_MENU, l_name);
+	CLCD::getInstance()->setMode(CLCD::MODE_MENU, l_name);
 
 	height=wanted_height;
 	if(height > (g_settings.screen_EndY - g_settings.screen_StartY))
@@ -510,8 +510,8 @@ int CMenuOptionChooser::paint( bool selected )
 
 	if(selected)
 	{
-		g_lcdd->setMenuText(0, l_optionName);
-		g_lcdd->setMenuText(1, l_option);
+		CLCD::getInstance()->showMenuText(0, l_optionName);
+		CLCD::getInstance()->showMenuText(1, l_option);
 	}
 
 	return y+height;
@@ -596,8 +596,8 @@ int CMenuOptionStringChooser::paint( bool selected )
 
 	if(selected)
 	{
-		g_lcdd->setMenuText(0, l_optionName);
-		g_lcdd->setMenuText(1, l_option);
+		CLCD::getInstance()->showMenuText(0, l_optionName);
+		CLCD::getInstance()->showMenuText(1, l_option);
 	}
 
 	return y+height;
@@ -646,12 +646,12 @@ int CMenuForwarder::paint(bool selected)
 
 	if(selected)
 	{
-		g_lcdd->setMenuText(0, l_text);
+		CLCD::getInstance()->showMenuText(0, l_text);
 
 		if (option)
-			g_lcdd->setMenuText(1, option);
+			CLCD::getInstance()->showMenuText(1, option);
 		else
-			g_lcdd->setMenuText(1, "");
+			CLCD::getInstance()->showMenuText(1, "");
 	}
 
 	unsigned char color = COL_MENUCONTENT;
@@ -745,8 +745,8 @@ int CMenuSeparator::paint(bool selected)
 
 		if(selected)
 		{
-			g_lcdd->setMenuText(0, l_text);
-			g_lcdd->setMenuText(1, "");
+			CLCD::getInstance()->showMenuText(0, l_text);
+			CLCD::getInstance()->showMenuText(1, "");
 		}
 	}
 	return y+ height;

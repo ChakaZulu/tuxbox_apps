@@ -47,7 +47,7 @@
 
 
 class Font;
-class fontRenderClass
+class FBFontRenderClass
 {
 		struct fontListEntry
 		{
@@ -81,8 +81,8 @@ class fontRenderClass
 
 		int AddFont(const char *filename);
 
-		fontRenderClass();
-		~fontRenderClass();
+		FBFontRenderClass();
+		~FBFontRenderClass();
 
 		friend class Font;
 };
@@ -91,7 +91,7 @@ class Font
 {
 		CFrameBuffer	*frameBuffer;
 		FTC_Image_Desc	font;
-		fontRenderClass *renderer;
+		FBFontRenderClass *renderer;
 		FT_Face		face;
 		FT_Size		size;
 
@@ -108,7 +108,7 @@ class Font
 		int getRenderWidth(string text);
 		int getHeight(void);
 
-		Font(fontRenderClass *render, FTC_FaceID faceid, int isize);
+		Font(FBFontRenderClass *render, FTC_FaceID faceid, int isize);
 		~Font(){}
 };
 

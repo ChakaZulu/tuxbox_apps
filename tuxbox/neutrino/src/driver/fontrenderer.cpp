@@ -46,16 +46,16 @@
 #include "system/debug.h"
 
 
-FT_Error fontRenderClass::myFTC_Face_Requester(FTC_FaceID  face_id,
+FT_Error FBFontRenderClass::myFTC_Face_Requester(FTC_FaceID  face_id,
         FT_Library  library,
         FT_Pointer  request_data,
         FT_Face*    aface)
 {
-	return ((fontRenderClass*)request_data)->FTC_Face_Requester(face_id, aface);
+	return ((FBFontRenderClass*)request_data)->FTC_Face_Requester(face_id, aface);
 }
 
 
-fontRenderClass::fontRenderClass()
+FBFontRenderClass::FBFontRenderClass()
 {
 	dprintf(DEBUG_DEBUG, "[FONT] initializing core...\n");
 	if (FT_Init_FreeType(&library))
@@ -93,13 +93,13 @@ fontRenderClass::fontRenderClass()
 	pthread_mutex_init( &render_mutex, NULL );
 }
 
-fontRenderClass::~fontRenderClass()
+FBFontRenderClass::~FBFontRenderClass()
 {
 	FTC_Manager_Done(cacheManager);
 	FT_Done_FreeType(library);
 }
 
-FT_Error fontRenderClass::FTC_Face_Requester(FTC_FaceID face_id, FT_Face* aface)
+FT_Error FBFontRenderClass::FTC_Face_Requester(FTC_FaceID face_id, FT_Face* aface)
 {
 	fontListEntry *font=(fontListEntry *)face_id;
 	if (!font)
@@ -115,7 +115,7 @@ FT_Error fontRenderClass::FTC_Face_Requester(FTC_FaceID face_id, FT_Face* aface)
 	return 0;
 }
 
-FTC_FaceID fontRenderClass::getFaceID(const char *family, const char *style)
+FTC_FaceID FBFontRenderClass::getFaceID(const char *family, const char *style)
 {
 	for (fontListEntry *f=font; f; f=f->next)
 	{
@@ -125,12 +125,12 @@ FTC_FaceID fontRenderClass::getFaceID(const char *family, const char *style)
 	return 0;
 }
 
-FT_Error fontRenderClass::getGlyphBitmap(FTC_Image_Desc *font, FT_ULong glyph_index, FTC_SBit *sbit)
+FT_Error FBFontRenderClass::getGlyphBitmap(FTC_Image_Desc *font, FT_ULong glyph_index, FTC_SBit *sbit)
 {
 	return FTC_SBit_Cache_Lookup(sbitsCache, font, glyph_index, sbit);
 }
 
-int fontRenderClass::AddFont(const char *filename)
+int FBFontRenderClass::AddFont(const char *filename)
 {
 	fflush(stdout);
 	int error;
@@ -153,14 +153,14 @@ int fontRenderClass::AddFont(const char *filename)
 	return 0;
 }
 
-fontRenderClass::fontListEntry::~fontListEntry()
+FBFontRenderClass::fontListEntry::~fontListEntry()
 {
 	delete[] filename;
 	delete[] family;
 	delete[] style;
 }
 
-Font *fontRenderClass::getFont(const char *family, const char *style, int size)
+Font *FBFontRenderClass::getFont(const char *family, const char *style, int size)
 {
 	FTC_FaceID id=getFaceID(family, style);
 	if (!id)
@@ -168,7 +168,7 @@ Font *fontRenderClass::getFont(const char *family, const char *style, int size)
 	return new Font(this, id, size);
 }
 
-Font::Font(fontRenderClass *render, FTC_FaceID faceid, int isize)
+Font::Font(FBFontRenderClass *render, FTC_FaceID faceid, int isize)
 {
 	frameBuffer 		= CFrameBuffer::getInstance();
 	renderer 		= render;
