@@ -1,5 +1,5 @@
 bin_PROGRAMS = 	analclock aniplay bcdclock bmp_show drunken_dennis \
-               	lcdstars life myclock myclockasy outdoor lcdcirc \
+               	lcdstars life myclock myclockasy lcdcirc \
 		observe
 
 analclock_SOURCES = analclock.c
@@ -13,5 +13,3 @@ lcdstars_SOURCES = lcdstars.c
 life_SOURCES = life.c
 myclock_SOURCES = myclock.c
 myclockasy_SOURCES = myclockasy.c
-outdoor_SOURCES = outdoor.c
-outdoor_LDADD = -lpthread
