@@ -67,7 +67,7 @@ class CStringInput : public CMenuTarget
 		virtual void paintChar(int pos, char c);
 		virtual void paintChar(int pos);
 
-		virtual void key0_9Pressed(int key);
+		virtual void key0_9Pressed(const int numericvalue);
 		virtual void keyRedPressed();
 		virtual void keyYellowPressed();
 		virtual void keyUpPressed();
@@ -94,9 +94,9 @@ class CStringInputSMS : public CStringInput
 		char	Chars[10][9];					// maximal 9 character in one CharList entry!
 
 		int keyCounter;
-		int lastKey;
+		int last_digit;
 
-		virtual void key0_9Pressed(int key);
+		virtual void key0_9Pressed(const int numericvalue);
 		virtual void keyRedPressed();
 		virtual void keyYellowPressed();
 		virtual void keyUpPressed();

@@ -328,11 +328,14 @@ int CExtendedInput_Item_Char::getCharID( char ch )
 
 void CExtendedInput_Item_Char::keyPressed( int key )
 {
-	if(isAllowedChar( (char) '0' + key))
+	if (CRCInput::isNumeric(key))
 	{
-		*data = (char) '0' + key;
-		g_RCInput->postMsg( CRCInput::RC_right, 0 );
-		return;
+		char c = '0' + CRCInput::getNumericValue(key);
+		if (isAllowedChar(c))
+		{
+			*data = c;
+			g_RCInput->postMsg( CRCInput::RC_right, 0 );
+		}
 	}
 	else
 	{

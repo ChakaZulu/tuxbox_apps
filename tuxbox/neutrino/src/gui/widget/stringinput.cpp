@@ -362,7 +362,7 @@ void CStringInput::paintChar(int pos)
 CStringInputSMS::CStringInputSMS(const char * const Name, char* Value, int Size, string Hint_1, string Hint_2, char* Valid_Chars, CChangeObserver* Observ, string Icon)
 		: CStringInput(Name, Value, Size, Hint_1, Hint_2, Valid_Chars, Observ, Icon)
 {
-	lastKey = -1;				// no key pressed yet
+	last_digit = -1;				// no key pressed yet
 	const char CharList[10][10] = { "0 -/()<>=",	// 9 characters
 					"1.,:!?",
 					"abc2ä",
@@ -390,13 +390,11 @@ CStringInputSMS::CStringInputSMS(const char * const Name, char* Value, int Size,
 }
 
 
-void CStringInputSMS::key0_9Pressed(int key)
+void CStringInputSMS::key0_9Pressed(const int numericvalue)
 {
-	int numericvalue = CRCInput::getNumericValue(key);
-
-	if (lastKey != key)
+	if (last_digit != numericvalue)
 	{
-		if ((lastKey != -1) &&		// there is a last key
+		if ((last_digit != -1) &&	// there is a last key
 			(selected < (size- 1)))	// we can shift the cursor one field to the right
 		{
 			selected++;
@@ -408,7 +406,7 @@ void CStringInputSMS::key0_9Pressed(int key)
 		keyCounter = (keyCounter + 1) % arraySizes[numericvalue];
 	value[selected] = Chars[numericvalue][keyCounter];
 	paintChar(selected);
-	lastKey = key;
+	last_digit = numericvalue;
 }
 
 void CStringInputSMS::keyRedPressed()		// switch between lower & uppercase
@@ -422,7 +420,7 @@ void CStringInputSMS::keyRedPressed()		// switch between lower & uppercase
 
 void CStringInputSMS::keyYellowPressed()		// switch between lower & uppercase
 {
-	lastKey=-1;
+	last_digit = -1;
 	CStringInput::keyYellowPressed();
 }
 void CStringInputSMS::keyUpPressed()
@@ -433,13 +431,13 @@ void CStringInputSMS::keyDownPressed()
 
 void CStringInputSMS::keyLeftPressed()
 {
-	lastKey = -1;				// no key pressed yet
+	last_digit = -1;				// no key pressed yet
 	CStringInput::keyLeftPressed();
 }
 
 void CStringInputSMS::keyRightPressed()
 {
-	lastKey = -1;				// no key pressed yet
+	last_digit = -1;				// no key pressed yet
 	CStringInput::keyRightPressed();
 }
 
@@ -493,7 +491,7 @@ int CPINInput::exec( CMenuTarget* parent, string )
 		else if (CRCInput::isNumeric(msg))
 		{
 			int old_selected = selected;
-			key0_9Pressed(msg);
+			key0_9Pressed(CRCInput::getNumericValue(msg));
 			if ( old_selected == ( size- 1 ) )
 				loop=false;
 		}
