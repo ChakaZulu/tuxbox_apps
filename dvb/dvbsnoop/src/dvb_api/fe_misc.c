@@ -1,5 +1,5 @@
 /*
-$Id: fe_misc.c,v 1.3 2004/03/27 22:34:03 rasc Exp $
+$Id: fe_misc.c,v 1.4 2004/04/01 23:02:10 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: fe_misc.c,v 1.3 2004/03/27 22:34:03 rasc Exp $
 
 
 $Log: fe_misc.c,v $
+Revision 1.4  2004/04/01 23:02:10  rasc
+clear structures in cases these are not completly filled...
+
 Revision 1.3  2004/03/27 22:34:03  rasc
 - frontend info  current parameters
 
@@ -209,7 +212,7 @@ int  print_FE_BasicCapabilities (int v, int fd_fe)
      out_nl (v,"Frequency (min):     %d.%03d %s", fi.frequency_min / 1000, fi.frequency_min % 1000, sf);
      out_nl (v,"Frequency (max):     %d.%03d %s", fi.frequency_max / 1000, fi.frequency_max % 1000, sf);
      out_nl (v,"Frequency stepsiz:   %d.%03d %s", fi.frequency_stepsize / 1000, fi.frequency_stepsize % 1000, sf);
-     out_nl (v,"Frequency tolerance: %d.%03d %s", fi.frequency_tolerance/ 1000, fi.frequency_tolerance% 1000, sf);
+     out_nl (v,"Frequency tolerance: %d", fi.frequency_tolerance);
 
    }
 
@@ -379,6 +382,7 @@ fe_type_t  read_FEType(int f)
 {
   struct dvb_frontend_info fi;
 
+  memset (&fi, 0, sizeof(struct dvb_frontend_info));
   read_FEInfo(f, &fi);
   return fi.type;
 }
@@ -394,6 +398,7 @@ int read_FEInfo(int f, struct dvb_frontend_info *fi)
   int err = 0;
 
 
+  memset (fi, 0, sizeof(struct dvb_frontend_info));
   err = ioctl(f, FE_GET_INFO, fi);
   if (err < 0) {
 	IO_error ("frontend ioctl");
@@ -413,6 +418,7 @@ int read_FEParam(int f, struct dvb_frontend_parameters *p)
   int err = 0;
 
 
+  memset (p, 0, sizeof(struct dvb_frontend_parameters));
   err = ioctl(f, FE_GET_FRONTEND, p);
   if (err < 0) {
 	IO_error ("frontend ioctl");
