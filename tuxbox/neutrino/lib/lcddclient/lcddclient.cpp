@@ -40,7 +40,7 @@ CLcddClient::CLcddClient()
 bool CLcddClient::lcdd_connect()
 {
 	lcdd_close();
-
+	//printf("[lcddclient] try connect\n");
 	struct sockaddr_un servaddr;
 	int clilen;
 	memset(&servaddr, 0, sizeof(struct sockaddr_un));
@@ -66,7 +66,9 @@ bool CLcddClient::lcdd_close()
 {
 	if(sock_fd!=0)
 	{
+		//printf("[lcddclient] close\n");
 		close(sock_fd);
+		sock_fd=0;
 	}
 }
 
@@ -87,7 +89,7 @@ void CLcddClient::setMode(char mode, string head="")
 	msg.version=ACTVERSION;
 	msg.cmd=CMD_SETMODE;
 	msg2.mode = mode;
-	strcpy( msg2.text, head.c_str() );
+	strcpy( msg2.text, head.substr(0, sizeof(msg2.text)-2).c_str() );
 	lcdd_connect();
 	send((char*)&msg, sizeof(msg));
 	send((char*)&msg2, sizeof(msg2));
@@ -102,7 +104,7 @@ void CLcddClient::setMenuText(char pos, string text, char highlight)
 	msg.cmd=CMD_SETMENUTEXT;
 	msg2.position = pos;
 	msg2.highlight = highlight;
-	strcpy( msg2.text, text.c_str() );
+	strcpy( msg2.text, text.substr(0, sizeof(msg2.text)-2).c_str() );
 	lcdd_connect();
 	send((char*)&msg, sizeof(msg));
 	send((char*)&msg2, sizeof(msg2));
@@ -115,7 +117,7 @@ void CLcddClient::setServiceName(string name)
 	commandServiceName msg2;
 	msg.version=ACTVERSION;
 	msg.cmd=CMD_SETSERVICENAME;
-	strcpy( msg2.servicename, name.c_str() );
+	strcpy( msg2.servicename, name.substr(0, sizeof(msg2.servicename)-2).c_str() );
 	lcdd_connect();
 	send((char*)&msg, sizeof(msg));
 	send((char*)&msg2, sizeof(msg2));
