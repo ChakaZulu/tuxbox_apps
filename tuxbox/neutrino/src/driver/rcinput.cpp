@@ -328,6 +328,14 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 								//printf("[neutrino] event - CSectionsdClient::EVT_TIMESET\n");
 							}
 							else
+							if (emsg.eventID==CSectionsdClient::EVT_GOT_CN_EPG)
+							{
+								*msg = messages::EVT_CURRENTNEXT_EPG;
+								*data = *(unsigned*) p;
+								printf("[neutrino] event - CSectionsdClient::EVT_CURRENTNEXT_EPG (for %x)\n", *(unsigned*)data );
+							}
+
+							else
 								printf("[neutrino] event INITID_SECTIONSD - unknown eventID 0x%x\n",  emsg.eventID );
 						}
 						else

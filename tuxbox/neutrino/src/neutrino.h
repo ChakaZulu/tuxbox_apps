@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.65 2002/03/14 22:05:19 McClean Exp $
+//  $Id: neutrino.h,v 1.66 2002/03/20 18:57:34 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -98,15 +98,6 @@ using namespace std;
 /* (libevent) */
 class CNeutrinoApp;
 
-class CNeutrinoBouquetEditorEvents : public CBouquetEditorEvents
-{
-	private:
-		CNeutrinoApp* neutrino;
-	public:
-		CNeutrinoBouquetEditorEvents( CNeutrinoApp* owner) { neutrino = owner;};
-		void onBouquetsChanged();
-	};
-
 struct messages_return {
 	enum
 		{
@@ -129,11 +120,14 @@ struct messages {
 			STANDBY_OFF	= CRCInput::RC_Messages + 6,
 			SHUTDOWN	= CRCInput::RC_Messages + 7,
 
-			EVT_VOLCHANGED 	= CRCInput::RC_Events + 1,
-			EVT_MUTECHANGED	= CRCInput::RC_Events + 2,
-			EVT_VCRCHANGED	= CRCInput::RC_Events + 3,
-			EVT_MODECHANGED = CRCInput::RC_Events + 4,
-			EVT_TIMESET 	= CRCInput::RC_Events + 5
+			EVT_VOLCHANGED 	= 		CRCInput::RC_Events + 1,
+			EVT_MUTECHANGED	= 		CRCInput::RC_Events + 2,
+			EVT_VCRCHANGED	= 		CRCInput::RC_Events + 3,
+			EVT_MODECHANGED = 		CRCInput::RC_Events + 4,
+			EVT_TIMESET 	= 		CRCInput::RC_Events + 5,
+			EVT_BOUQUETSCHANGED =	CRCInput::RC_Events + 6,
+			EVT_SERVICESCHANGED =	CRCInput::RC_Events + 7,
+			EVT_CURRENTNEXT_EPG =	CRCInput::RC_Events + 8
 		};
 };
 

@@ -84,8 +84,6 @@ class CInfoViewer
 		bool		KillShowEPG;
 		bool		gotTime;
 
-		pthread_t	thrViewer;
-		pthread_cond_t	epg_cond;
 		pthread_mutex_t	epg_mutex;
 
 		pthread_t	thrLangViewer;
@@ -119,12 +117,10 @@ class CInfoViewer
 
 		char aspectRatio;
 
-		static void * InfoViewerThread (void *arg);
 		static void * LangViewerThread (void *arg);
-		bool getEPGData( string channelName, unsigned int onid_tsid );
+		bool getEPGData( unsigned int onid_tsid );
 
-		void showData();
-		void showWarte();
+		void showData( bool calledFromEvent = false );
 		void showButtonAudio();
 		void showButtonNVOD( bool CalledFromShowData = false );
 		void show16_9( bool showAnyWay = false );

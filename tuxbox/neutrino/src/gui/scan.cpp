@@ -147,7 +147,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 
 
 	hide();
-	neutrino->channelsInit();
+	g_RCInput->insertMsgAtTop( messages::EVT_SERVICESCHANGED, 0 );
 	g_Sectionsd->setPauseScanning( false );
 	return menu_return::RETURN_REPAINT;
 }

@@ -60,8 +60,6 @@ using namespace std;
 			beMoving
 		} state;
 
-		CBouquetEditorEvents* eventHandler;
-
 		unsigned int		selected;
 		unsigned int		origPosition;
 		unsigned int		newPosition;
@@ -100,7 +98,7 @@ using namespace std;
 		string inputName( string defaultName, string caption);
 
 	public:
-		CBEBouquetWidget( CBouquetEditorEvents* EventHandler = NULL);
+		CBEBouquetWidget();
 
 		CZapitClient::BouquetList	Bouquets;
 		int exec(CMenuTarget* parent, string actionKey);

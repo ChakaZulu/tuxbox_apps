@@ -60,21 +60,6 @@ CInfoViewer::CInfoViewer()
         runningPercent = 0;
         CurrentChannel = "";
 
-        pthread_cond_init( &epg_cond, NULL );
-        pthread_mutexattr_t   mta;
-
-	    if (pthread_mutexattr_init(&mta) != 0 )
-    		perror("CInfoViewer: pthread_mutexattr_init failed\n");
-    	if (pthread_mutexattr_settype( &mta, PTHREAD_MUTEX_ERRORCHECK ) != 0 )
-			perror("CInfoViewer: pthread_mutexattr_settype failed\n");
-		if (pthread_mutex_init( &epg_mutex, &mta ) != 0)
-			perror("CInfoViewer: pthread_mutex_init failed\n");
-
-
-        if (pthread_create (&thrViewer, NULL, InfoViewerThread, (void *) this) != 0 )
-        {
-                perror("CInfoViewer::CInfoViewer create thrViewer failed\n");
-        }
 
         pthread_cond_init( &cond_PIDs_available, NULL );
 
@@ -170,61 +155,57 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
         g_Fonts->infobar_channame->RenderString(ChanNameX+ 10, ChanNameY+height, BoxEndX- (ChanNameX+ 20)- timewidth- 15, Channel.c_str(), COL_INFOBAR);
 
         ChanInfoX = BoxStartX + (ChanWidth / 3);
-        int ChanInfoY = BoxStartY + ChanHeight+10;
+        int ChanInfoY = BoxStartY + ChanHeight+ 10;
 
         g_FrameBuffer->paintBox(ChanInfoX, ChanInfoY, ChanNameX, BoxEndInfoY, COL_INFOBAR);
 
+		getEPGData( Current_onid_tsid );
+		if ( !( Flag & ( sectionsd::epg_has_later | sectionsd::epg_has_current |  sectionsd::epg_not_broadcast ) ) )
+		{
+			g_Fonts->infobar_info->RenderString(ChanNameX+ 10, ChanInfoY+ 2* g_Fonts->infobar_info->getHeight()+ 5, BoxEndX- (ChanNameX+ 20), EPG_NotFound_Text, COL_INFOBAR);
+		}
+		else
+			showData();
+
         if ( showButtonBar )
         {
-        		if ( BOTTOM_BAR_OFFSET> 0 )
-	        		g_FrameBuffer->paintBackgroundBox(ChanInfoX, BoxEndInfoY, BoxEndX, BoxEndInfoY+ BOTTOM_BAR_OFFSET);
-        		g_FrameBuffer->paintBox(ChanInfoX, BoxEndInfoY+ BOTTOM_BAR_OFFSET, BoxEndX, BoxEndY, COL_INFOBAR_BUTTONS);
+			if ( BOTTOM_BAR_OFFSET> 0 )
+	        	g_FrameBuffer->paintBackgroundBox(ChanInfoX, BoxEndInfoY, BoxEndX, BoxEndInfoY+ BOTTOM_BAR_OFFSET);
+       		g_FrameBuffer->paintBox(ChanInfoX, BoxEndInfoY+ BOTTOM_BAR_OFFSET, BoxEndX, BoxEndY, COL_INFOBAR_BUTTONS);
 
-                ButtonWidth = (BoxEndX- ChanInfoX- ICON_OFFSET)>> 2;
+			ButtonWidth = (BoxEndX- ChanInfoX- ICON_OFFSET)>> 2;
 
-                //g_FrameBuffer->paintHLine(ChanInfoX, BoxEndX,  BoxEndY-InfoHeightY_Info, COL_INFOBAR_SHADOW);
-                //g_FrameBuffer->paintHLine(ChanInfoX, BoxEndX,  BoxEndY-InfoHeightY_Info+1, COL_INFOBAR_SHADOW); 2Lines wegen scanline?
+			// blau
+			g_FrameBuffer->paintIcon("blau.raw", BoxEndX- ICON_OFFSET- ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+			g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.streaminfo").c_str(), COL_INFOBAR_BUTTONS);
 
-                // blau
-                g_FrameBuffer->paintIcon("blau.raw", BoxEndX- ICON_OFFSET- ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-                g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.streaminfo").c_str(), COL_INFOBAR_BUTTONS);
+			g_FrameBuffer->paintIcon("dd_gray.raw", BoxEndX- ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+			g_FrameBuffer->paintIcon("vtxt_gray.raw", BoxEndX- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 
-				// gelb
-				//g_FrameBuffer->paintIcon("gray.raw", BoxEndX- ICON_OFFSET- 2* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-				//g_Fonts->infobar_small->RenderString(BoxEndX- 2* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.subservice").c_str(), COL_INFOBAR_BUTTONS_GRAY);
+			g_RemoteControl->CopyPIDs();
+			showButtonAudio();
+			show16_9( true );
 
-				// grün
-				//g_FrameBuffer->paintIcon("gray.raw", BoxEndX- ICON_OFFSET- 3* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-				//g_Fonts->infobar_small->RenderString(BoxEndX- 3* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.languages").c_str(), COL_INFOBAR_BUTTONS_GRAY);
-
-				// rot
-				//g_FrameBuffer->paintIcon("gray.raw", BoxEndX- ICON_OFFSET- 4* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-				//g_Fonts->infobar_small->RenderString(BoxEndX- 4* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.eventlist").c_str(), COL_INFOBAR_BUTTONS_GRAY);
-
-                g_FrameBuffer->paintIcon("dd_gray.raw", BoxEndX- ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-                g_FrameBuffer->paintIcon("vtxt_gray.raw", BoxEndX- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-
-                showButtonNVOD(true);
-
-                g_RemoteControl->CopyPIDs();
-                showButtonAudio();
-                show16_9( true );
-
-                g_Sectionsd->setServiceChanged( onid_tsid, true );
+			if ( ( ( Flag & sectionsd::epg_has_next ) && ( Flag & ( sectionsd::epg_has_current | sectionsd::epg_has_no_current ) ) ) ||
+				 ( Flag & sectionsd::epg_not_broadcast ) )
+			{
+				// alles was nötig ist, ist da!
+				g_Sectionsd->setServiceChanged( onid_tsid, false );
+			}
+			else
+			{
+				// EVENT anfordern!
+				g_Sectionsd->setServiceChanged( onid_tsid, true );
+			}
         }
 
 		// Schatten
         g_FrameBuffer->paintBox(BoxEndX, ChanNameY+ SHADOW_OFFSET, BoxEndX+ SHADOW_OFFSET, BoxEndY, COL_INFOBAR_SHADOW);
         g_FrameBuffer->paintBox(ChanInfoX+ SHADOW_OFFSET, BoxEndY, BoxEndX+ SHADOW_OFFSET, BoxEndY+ SHADOW_OFFSET, COL_INFOBAR_SHADOW);
 
-
         pthread_mutex_lock( &epg_mutex );
         is_visible = true;
         pthread_mutex_unlock( &epg_mutex );
-
-        pthread_cond_signal( &epg_cond );
-
-        usleep(50);
 
         uint msg; uint data;
 
@@ -289,7 +270,16 @@ void CInfoViewer::show16_9( bool showAnyWay )
 
 int CInfoViewer::handleMsg(uint msg, uint data)
 {
-
+    if ( msg == messages::EVT_CURRENTNEXT_EPG )
+	{
+		if ( data == Current_onid_tsid )
+		{
+			getEPGData( Current_onid_tsid );
+			showData( true );
+		}
+	    return messages_return::handled;
+	}
+    else
     if ( msg == messages::EVT_MODECHANGED )
 	{
         aspectRatio = data;
@@ -326,7 +316,7 @@ void CInfoViewer::showButtonNVOD(bool CalledFromShowData = false)
         };
 }
 
-void CInfoViewer::showData()
+void CInfoViewer::showData( bool calledFromEvent = false )
 {
         int is_nvod= false;
 
@@ -408,10 +398,10 @@ void CInfoViewer::showData()
         height = g_Fonts->infobar_info->getHeight();
         int xStart= BoxStartX + ChanWidth;// + 20;
 
-//        if ( is_nvod )
-                g_FrameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR);
+		g_FrameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR);
 
-        if ( Flag & sectionsd::epg_not_broadcast )
+        if ( ( Flag & sectionsd::epg_not_broadcast ) ||
+        	 ( ( calledFromEvent ) && !( Flag & ( sectionsd::epg_has_next | sectionsd::epg_has_current ) ) ) )
         {
                 // kein EPG verfügbar
                 ChanInfoY += height;
@@ -461,10 +451,6 @@ void CInfoViewer::showData()
                                 g_Fonts->infobar_info->RenderString(duration2TextPos,            ChanInfoY+height, duration2Width, nextDuration, COL_INFOBAR);
                         }
                 }
-        }
-        if (!is_visible)
-        {
-                killTitle();
         }
 }
 
@@ -531,19 +517,6 @@ void CInfoViewer::showButtonAudio()
         };
 }
 
-void CInfoViewer::showWarte()
-{
-
-        int height = g_Fonts->infobar_info->getHeight();
-        int ChanInfoY = BoxStartY + ChanHeight+ 15+ 2* height;
-        int xStart= BoxStartX + ChanWidth + 20;
-
-        pthread_mutex_lock( &epg_mutex );
-        if ( ( !KillShowEPG ) && ( is_visible ) )
-                g_Fonts->infobar_info->RenderString(xStart, ChanInfoY, BoxEndX- xStart, EPG_NotFound_Text, COL_INFOBAR);
-        pthread_mutex_unlock( &epg_mutex );
-}
-
 void CInfoViewer::killTitle()
 {
         pthread_mutex_lock( &epg_mutex );
@@ -576,104 +549,8 @@ void * CInfoViewer::LangViewerThread (void *arg)
         }
 }
 
-void * CInfoViewer::InfoViewerThread (void *arg)
-{
-	int repCount;
-	string query = "";
-	string old_query = "";
-	unsigned int    query_onid_tsid;
-	bool gotEPG, requeryEPG;
-	struct timespec abs_wait;
-	struct timeval now;
-	char old_flags;
 
-	CInfoViewer* InfoViewer = (CInfoViewer*) arg;
-	while(1)
-	{
-		pthread_mutex_lock( &InfoViewer->epg_mutex );
-		pthread_cond_wait( &InfoViewer->epg_cond, &InfoViewer->epg_mutex );
-
-		if ( ( InfoViewer->is_visible ) )
-		{
-			gotEPG = true;
-			repCount = 10;
-            query = "";
-			do
-			{
-				if ( !gotEPG )
-				{
-					if ( ( repCount > 0 ) &&
-					     !( InfoViewer->Flag & ( sectionsd::epg_has_later | sectionsd::epg_has_current ) ) )
-						InfoViewer->showWarte();
-
-					gettimeofday(&now, NULL);
-					TIMEVAL_TO_TIMESPEC(&now, &abs_wait);
-					abs_wait.tv_sec += 1;
-
-					pthread_mutex_lock( &InfoViewer->epg_mutex );
-					pthread_cond_timedwait( &InfoViewer->epg_cond, &InfoViewer->epg_mutex, &abs_wait );
-
-					repCount--;
-				}
-
-				old_flags = InfoViewer->Flag;
-				old_query = query;
-
-				pthread_mutex_lock( &InfoViewer->epg_mutex );
-				query = InfoViewer->CurrentChannel;
-				query_onid_tsid = InfoViewer->Current_onid_tsid;
-				pthread_mutex_unlock( &InfoViewer->epg_mutex );
-
-				gotEPG = ( ( InfoViewer->getEPGData(query, query_onid_tsid) ) &&
-				           ( InfoViewer->Flag & sectionsd::epg_has_next ) &&
-						   ( ( InfoViewer->Flag & sectionsd::epg_has_current ) || ( InfoViewer->Flag & sectionsd::epg_has_no_current ) ) );
-
-				pthread_mutex_lock( &InfoViewer->epg_mutex );
-
-				if ( ( InfoViewer->Flag & ( sectionsd::epg_has_later | sectionsd::epg_has_current ) ) && (!gotEPG) )
-				{
-					if (!InfoViewer->showButtonBar)
-					{
-						gotEPG= true;
-					}
-					else
-					if ( ( (query!=old_query) ||
-						   ( (InfoViewer->Flag & sectionsd::epg_has_current) != (old_flags & sectionsd::epg_has_current) ) ||
-						   ( (InfoViewer->Flag & sectionsd::epg_has_later) != (old_flags & sectionsd::epg_has_later) ) ) &&
-						 ( !InfoViewer->KillShowEPG ) && ( InfoViewer->is_visible ) )
-					{
-						InfoViewer->showData();
-					}
-				}
-				else
-				{
-					gotEPG= gotEPG || ( InfoViewer->Flag & sectionsd::epg_not_broadcast );
-				}
-
-				requeryEPG = ( ( (!gotEPG) || (query!=InfoViewer->CurrentChannel) ) &&
-				               ( InfoViewer->is_visible ) );
-
-				if (query!=InfoViewer->CurrentChannel)
-					repCount = 10;
-
-				if ( InfoViewer->KillShowEPG )
-					repCount = 0;
-
-
-				if ( ( !requeryEPG) && ( InfoViewer->is_visible ) && ( !InfoViewer->KillShowEPG) )
-					InfoViewer->showData();
-
-				pthread_mutex_unlock( &InfoViewer->epg_mutex );
-
-			} while ( ( requeryEPG ) && (repCount > 0) );
-		}
-
-	}
-    return NULL;
-}
-
-
-bool CInfoViewer::getEPGData( string channelName, unsigned int onid_tsid )
+bool CInfoViewer::getEPGData( unsigned int onid_tsid )
 {
         int sock_fd;
         SAI servaddr;
@@ -709,28 +586,23 @@ bool CInfoViewer::getEPGData( string channelName, unsigned int onid_tsid )
                 return false;
         }
 
-        if ( ( onid_tsid != 0 ) )
-        {
-                // query mit onid_tsid...
+		sectionsd::msgRequestHeader req;
+		req.version = 2;
+		req.command = sectionsd::currentNextInformationID;
+		req.dataLength = 4;
+		write(sock_fd,&req,sizeof(req));
 
-                sectionsd::msgRequestHeader req;
-                req.version = 2;
-                req.command = sectionsd::currentNextInformationID;
-                req.dataLength = 4;
-                write(sock_fd,&req,sizeof(req));
+		write(sock_fd, &onid_tsid, sizeof(onid_tsid));
+		printf("[infoviewer]: query epg for >%x<\n", onid_tsid );
 
-                write(sock_fd, &onid_tsid, sizeof(onid_tsid));
-                //            char    num_evts = 2;
-                //            write(sock_fd, &num_evts, 1);
-                printf("[infoviewer]: query epg for >%x< (%s)\n", onid_tsid, channelName.c_str());
+		sectionsd::msgResponseHeader resp;
+		memset(&resp, 0, sizeof(resp));
 
-                sectionsd::msgResponseHeader resp;
-                memset(&resp, 0, sizeof(resp));
+		read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader));
 
-                read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader));
+		int nBufSize = resp.dataLength;
 
-                int nBufSize = resp.dataLength;
-                if(nBufSize>0)
+				if(nBufSize>0)
                 {
 
                         char* pData = new char[nBufSize+1] ;
@@ -800,8 +672,8 @@ bool CInfoViewer::getEPGData( string channelName, unsigned int onid_tsid )
                         delete[] pData;
                         retval = true;
 
-                }
-        }
+		}
+
         close(sock_fd);
         return retval;
 }

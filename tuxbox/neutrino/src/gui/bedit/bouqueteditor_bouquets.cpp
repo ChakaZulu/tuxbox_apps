@@ -35,7 +35,7 @@
 #include "bouqueteditor_channels.h"
 #include "../global.h"
 
-CBEBouquetWidget::CBEBouquetWidget(CBouquetEditorEvents* EventHandler = NULL)
+CBEBouquetWidget::CBEBouquetWidget()
 {
 	selected = 0;
 	width = 500;
@@ -49,7 +49,6 @@ CBEBouquetWidget::CBEBouquetWidget(CBouquetEditorEvents* EventHandler = NULL)
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
 	liststart = 0;
 	state = beDefault;
-	eventHandler = EventHandler;
 }
 
 void CBEBouquetWidget::paintItem(int pos)
@@ -425,8 +424,8 @@ void CBEBouquetWidget::saveChanges()
 	g_Zapit->reinitChannels();
 	hintBox->hide();
 	delete hintBox;
-	if (eventHandler)
-		eventHandler->onBouquetsChanged();
+
+	g_RCInput->insertMsgAtTop( messages::EVT_BOUQUETSCHANGED, 0 );
 }
 
 void CBEBouquetWidget::discardChanges()
