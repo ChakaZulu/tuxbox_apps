@@ -3,7 +3,7 @@ EXTRA_DIST = \
 	speak_off.gif speak_on.gif topbalk.png trans.gif squ.png kalarm.png \
 	index.js epg.js player_eject.png player_end.png player_fwd.png \
 	player_pause.png player_play.png player_rew.png player_start.png \
-	player_stop.png edittrash.png
+	player_stop.png edittrash.png dm7000.jpg
 
 install-data-local:
 	install -d $(DATADIR)/enigma/htdocs
