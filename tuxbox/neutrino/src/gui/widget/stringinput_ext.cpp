@@ -248,8 +248,8 @@ void CExtendedInput::hide()
 
 void CExtendedInput::paint()
 {
-	frameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD);
-	frameBuffer->paintBoxRel(x, y + hheight, width, height - hheight, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD_PLUS_0);
+	frameBuffer->paintBoxRel(x, y + hheight, width, height - hheight, COL_MENUCONTENT_PLUS_0);
 
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+ 10, y+ hheight, width- 10, localizing ? g_Locale->getText(name) : name, COL_MENUHEAD, 0, true); // UTF-8
 
@@ -297,12 +297,22 @@ void CExtendedInput_Item_Char::paint(int x, int y, bool focusGained )
 	int startx = ix + x;
 	int starty = iy + y;
 
-	int color = COL_MENUCONTENT;
+	uint8_t    color;
+	fb_pixel_t bgcolor;
+	
 	if (focusGained)
-		color = COL_MENUCONTENTSELECTED;
+	{
+		color   = COL_MENUCONTENTSELECTED;
+		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
+	}
+	else
+	{
+		color   = COL_MENUCONTENT;
+		bgcolor = COL_MENUCONTENT_PLUS_0;
+	}
 
 	frameBuffer->paintBoxRel( startx, starty, idx, idy, COL_MENUCONTENT_PLUS_4);
-	frameBuffer->paintBoxRel( startx+1, starty+1, idx-2, idy-2, color);
+	frameBuffer->paintBoxRel( startx+1, starty+1, idx-2, idy-2, bgcolor);
 
 	char text[2];
 	text[0] = *data;

@@ -101,7 +101,7 @@ void CProgressWindow::showLocalStatus(const unsigned int prog)
 void CProgressWindow::showStatusMessageUTF(const std::string & text)
 {
 	statusText = text;
-	frameBuffer->paintBox(x, statusTextY-mheight, x+width, statusTextY,  COL_MENUCONTENT);
+	frameBuffer->paintBox(x, statusTextY-mheight, x+width, statusTextY,  COL_MENUCONTENT_PLUS_0);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10, statusTextY, width-20, text, COL_MENUCONTENT, 0, true); // UTF-8
 }
 
@@ -120,9 +120,9 @@ void CProgressWindow::hide()
 void CProgressWindow::paint()
 {
 	int ypos=y;
-	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD_PLUS_0);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10, ypos+ hheight, width- 10, g_Locale->getText(caption), COL_MENUHEAD, 0, true); // UTF-8
-	frameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT_PLUS_0);
 
 	ypos+= hheight + (mheight >>1);
 	statusTextY = ypos+mheight;

@@ -73,15 +73,15 @@ void CListBox::paint()
 
 void CListBox::paintHead()
 {
-	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+theight+0, width, caption.c_str() , COL_MENUHEAD);
 }
 
 void CListBox::paintFoot()
 {
 	int ButtonWidth = width / 4;
-	frameBuffer->paintBoxRel(x,y+height, width,ButtonHeight, COL_MENUHEAD);
-	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW);
+	frameBuffer->paintBoxRel(x,y+height, width,ButtonHeight, COL_MENUHEAD_PLUS_0);
+	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW_PLUS_0);
 
 	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, x+width- 4* ButtonWidth+ 8, y+height+1);
 	g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+width- 4* ButtonWidth+ 38, y+height+24 - 2, width, "edit", COL_INFOBAR);
@@ -119,12 +119,19 @@ int CListBox::getItemHeight()
 void CListBox::paintItem(unsigned int itemNr, int paintNr, bool selected)
 {
 	int ypos = y+ theight + paintNr*getItemHeight();
-	int color = COL_MENUCONTENT;
+
 	if (selected)
 	{
-		color = COL_MENUCONTENTSELECTED;
+		color   = COL_MENUCONTENTSELECTED;
+		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
 	}
-	frameBuffer->paintBoxRel(x,ypos, width- 15, getItemHeight(), color);
+	else
+	{
+		color   = COL_MENUCONTENT;
+		bgcolor = COL_MENUCONTENT_PLUS_0;
+	}
+
+	frameBuffer->paintBoxRel(x,ypos, width- 15, getItemHeight(), bgcolor);
 	g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x + 10, ypos+ fheight, width-20, "demo", color);
 }
 

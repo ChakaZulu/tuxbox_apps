@@ -79,7 +79,7 @@ void CColorChooser::setColor()
 	/*
 	char colorstr[30];
 	sprintf((char*)&colorstr, "%02x.%02x.%02x", *r, *g, *b);
-	frameBuffer->paintBoxRel(x+218,y+107, 80, 20, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x+218,y+107, 80, 20, COL_MENUCONTENT_PLUS_0);
 	fonts->epg_date->RenderString(x+218,y+120, 80, colorstr, COL_MENUCONTENT);
 	*/
 }
@@ -214,9 +214,9 @@ void CColorChooser::hide()
 
 void CColorChooser::paint()
 {
-	frameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD_PLUS_0);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+hheight, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
-	frameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT_PLUS_0);
 
 	const char * names[4] = {
 		g_Locale->getText("colorchooser.red"),
@@ -228,7 +228,10 @@ void CColorChooser::paint()
 		paintSlider(x + 10, y + hheight + mheight * i, value[i], names[i], iconnames[i], (i == 0));
 
 	//color preview
-	frameBuffer->paintBoxRel(x+220,y+hheight+5,    mheight*4,   mheight*4-10,   COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x+220,y+hheight+5,    mheight*4,   mheight*4-10, COL_MENUHEAD_PLUS_0);
+#ifndef FB_USE_PALETTE
+#warning the next line does not really make sense in 16 bit mode
+#endif
 	frameBuffer->paintBoxRel(x+222,y+hheight+2+5,  mheight*4-4 ,mheight*4-4-10, 254);
 }
 
@@ -236,7 +239,7 @@ void CColorChooser::paintSlider(int x, int y, unsigned char *spos, const char * 
 {
 	if (!spos)
 		return;
-	frameBuffer->paintBoxRel(x+70,y,120,mheight, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x+70,y,120,mheight, COL_MENUCONTENT_PLUS_0);
 	frameBuffer->paintIcon("volumebody.raw",x+70,y+2+mheight/4);
 	std::string iconfile = "volumeslider2";
 	if (selected)

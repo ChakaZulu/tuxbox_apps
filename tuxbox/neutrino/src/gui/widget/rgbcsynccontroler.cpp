@@ -156,9 +156,9 @@ void CRGBCSyncControler::hide()
 
 void CRGBCSyncControler::paint()
 {
-	frameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD_PLUS_0);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+hheight, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
-	frameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT_PLUS_0);
 
 	paintSlider(x+10, y+hheight, *csync, CSYNCFACTOR, g_Locale->getText("videomenu.csync"),"", true);
 
@@ -170,7 +170,7 @@ void CRGBCSyncControler::paintSlider(int x, int y, unsigned int spos, float fact
 	int startx = 200;
 	char wert[5];
 
-	frameBuffer->paintBoxRel(x + startx, y, 120, mheight, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x + startx, y, 120, mheight, COL_MENUCONTENT_PLUS_0);
 	frameBuffer->paintIcon("volumebody.raw", x + startx, y+2+mheight/4);
 	std::string iconfile = "volumeslider2";
 	if (selected)
@@ -180,6 +180,6 @@ void CRGBCSyncControler::paintSlider(int x, int y, unsigned int spos, float fact
 
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x, y+mheight, width, text, COL_MENUCONTENT, 0, true); // UTF-8
 	sprintf(wert, "%3d", spos); // UTF-8 encoded
-	frameBuffer->paintBoxRel(x + startx + 120 + 10, y, 50, mheight, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x + startx + 120 + 10, y, 50, mheight, COL_MENUCONTENT_PLUS_0);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x + startx + 120 + 10, y+mheight, width, wert, COL_MENUCONTENT, 0, true); // UTF-8
 }

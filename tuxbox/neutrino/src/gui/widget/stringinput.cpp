@@ -332,8 +332,8 @@ void CStringInput::paint()
 {
 	int iconoffset;
 
-	frameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD);
-	frameBuffer->paintBoxRel(x, y + hheight, width, height - hheight, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD_PLUS_0);
+	frameBuffer->paintBoxRel(x, y + hheight, width, height - hheight, COL_MENUCONTENT_PLUS_0);
 
 	if (!(iconfile.empty()))
 	{
@@ -366,12 +366,22 @@ void CStringInput::paintChar(int pos, const char c)
 
 	char ch[2] = {c, 0};
 
-	int color = COL_MENUCONTENT;
-	if (pos==selected)
-		color = COL_MENUCONTENTSELECTED;
+	uint8_t    color;
+	fb_pixel_t bgcolor;
+	
+	if (pos == selected)
+	{
+		color   = COL_MENUCONTENTSELECTED;
+		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
+	}
+	else
+	{
+		color   = COL_MENUCONTENT;
+		bgcolor = COL_MENUCONTENT_PLUS_0;
+	}
 
 	frameBuffer->paintBoxRel(xpos, ypos, xs, ys, COL_MENUCONTENT_PLUS_4);
-	frameBuffer->paintBoxRel(xpos+ 1, ypos+ 1, xs- 2, ys- 2, color);
+	frameBuffer->paintBoxRel(xpos+ 1, ypos+ 1, xs- 2, ys- 2, bgcolor);
 
 	int xfpos = xpos + ((xs- g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(ch))>>1);
 
@@ -525,8 +535,8 @@ void CStringInputSMS::paint()
 
 	frameBuffer->paintIcon("numericpad.raw", x+20+140, y+ hheight+ mheight+ iheight* 3+ 30, COL_MENUCONTENT);
 
-	frameBuffer->paintBoxRel(x,y+height-25, width,25, COL_MENUHEAD);
-	frameBuffer->paintHLine(x, x+width,  y+height-25, COL_INFOBAR_SHADOW);
+	frameBuffer->paintBoxRel(x,y+height-25, width,25, COL_MENUHEAD_PLUS_0);
+	frameBuffer->paintHLine(x, x+width,  y+height-25, COL_INFOBAR_SHADOW_PLUS_0);
 
 	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 8, y+height-25+1, 230, 2, CStringInputSMSButtons);
 }
