@@ -438,6 +438,7 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 	{
 		int i = 0;
 	}
+	return "<html>" CHARSETMETA "<head><title>Video</title></head><body>User error ;-)</body></html>";
 }
 
 static eString audio(eString request, eString dirpath, eString opts, eHTTPConnection *content)
