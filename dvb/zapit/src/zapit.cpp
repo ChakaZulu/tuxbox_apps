@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.367 2005/02/20 06:06:24 metallica Exp $
+ * $Id: zapit.cpp,v 1.368 2005/03/01 09:54:54 diemade Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -552,7 +552,11 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 
 	if ((standby) && 
 			((rmsg.cmd != CZapitMessages::CMD_SET_STANDBY) &&
-			(rmsg.cmd != CZapitMessages::CMD_SHUTDOWN))) {
+			(rmsg.cmd != CZapitMessages::CMD_SHUTDOWN) &&
+			(rmsg.cmd != CZapitMessages::CMD_SET_AE_IEC_ON) &&
+			(rmsg.cmd != CZapitMessages::CMD_SET_AE_IEC_OFF) &&
+			(rmsg.cmd != CZapitMessages::CMD_GET_AE_IEC_STATE) &&
+			(rmsg.cmd != CZapitMessages::CMD_GET_AE_PLAYBACK_STATE))) {
 		WARN("cmd %d refused in standby mode", rmsg.cmd);
 		return true;
 	}
@@ -1641,10 +1645,6 @@ void enterStandby(void)
 		delete videoDecoder;
 		videoDecoder = NULL;
 	}
-	if (aviaExtDriver) {
-		delete aviaExtDriver;
-		aviaExtDriver = NULL;
-	}
 
 	tuned_transponder_id = TRANSPONDER_ID_NOT_TUNED;
 }
@@ -1761,7 +1761,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.367 2005/02/20 06:06:24 metallica Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.368 2005/03/01 09:54:54 diemade Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
