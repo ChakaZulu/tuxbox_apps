@@ -5394,12 +5394,12 @@ eSleepTimerContextMenu::eSleepTimerContextMenu( eWidget* lcdTitle, eWidget *lcdE
 #endif
 	move(ePoint(150, 200));
 	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5600 )
+		new eListBoxEntryText(&list, _("reboot now"), (void*)1);		//use this type to reboot (with complete unmount)
+	else
 	{
 		new eListBoxEntryText(&list, _("shutdown now"), (void*)1);
 		new eListBoxEntryText(&list, _("restart"), (void*)4);
 	}
-	else	
-		new eListBoxEntryText(&list, _("reboot now"), (void*)1);		//use this type to reboot (with complete unmount)
 	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 	new eListBoxEntryText(&list, _("goto standby"), (void*)2);
 	new eListBoxEntryText(&list, _("set sleeptimer"), (void*)3);
