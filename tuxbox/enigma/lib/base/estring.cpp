@@ -371,9 +371,35 @@ eString convertUTF8DVB(const eString &string)
 		// now search it in table
 		if(c>=0x80){
 			for(unsigned int j=0;j<128;j++){
-				if(c88599[j]==c){            // now only 8859-9 ....
-					c=0x80+j;
-					break;
+				if ( table = 1 ) {
+					if(c88595[j]==c){            // now 8859-5 ....
+						c=0x80+j;
+						break;
+					}
+				}
+				if ( table = 2 ) {
+					if(c88596[j]==c){            // now 8859-6 ....
+						c=0x80+j;
+						break;
+					}
+				}
+				if ( table = 3 ) {
+					if(c88597[j]==c){            // now 8859-7 ....
+						c=0x80+j;
+						break;
+					}
+				}
+				if ( table = 4 ) {
+					if(c88598[j]==c){            // now 8859-8 ....
+						c=0x80+j;
+						break;
+					}
+				}
+				if ( table = 5 ) {
+					if(c88599[j]==c){            // now 8859-9 ....
+						c=0x80+j;
+						break;
+					}
 				}
 			}
 		}
