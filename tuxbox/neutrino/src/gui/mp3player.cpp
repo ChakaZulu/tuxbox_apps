@@ -1136,48 +1136,55 @@ void CMP3PlayerGui::paintItemID3DetailsLine (int pos)
 
 
 	// Clear
-	frameBuffer->paintBackgroundBoxRel(xpos,y, ConnectLineBox_Width, height - title_height);
-	frameBuffer->paintBackgroundBoxRel(x,ypos2, width,info_height);
+	frameBuffer->paintBackgroundBoxRel(xpos - 1, y + title_height, ConnectLineBox_Width + 1, height - title_height);
 
 	// paint Line if detail info (and not valid list pos)
-	if(playlist.size() > 0)
-		if(pos >= 0)
-		{
-			// 1. col thick line
-			frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos1, 4,fheight,     col1);
-			frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos2, 4,info_height, col1);
+	if ((playlist.size() > 0) && (pos >= 0))
+	{
+		// 1. col thick line
+		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos1, 4,fheight,     col1);
+		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos2, 4,info_height, col1);
+		
+		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 4,ypos2a-ypos1a, col1);
+		
+		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 12,4, col1);
+		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos2a, 12,4, col1);
+		
+		// 2. col small line
+		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos1, 1,fheight,     col2);
+		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos2, 1,info_height, col2);
+		
+		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 1,ypos2a-ypos1a+4, col2);
 
-			frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 4,ypos2a-ypos1a, col1);
+		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 12,1, col2);
+		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-12, ypos2a, 8,1, col2);
+		
+		// -- small Frame around infobox
+		frameBuffer->paintBoxRel(x, ypos2, width, 2, col1);
+		frameBuffer->paintBoxRel(x, ypos2 + 2, 2, info_height - 4, col1);
+		frameBuffer->paintBoxRel(x + width - 2, ypos2 + 2, 2, info_height - 4, col1);
+		frameBuffer->paintBoxRel(x, ypos2 + info_height - 2, width, 2, col1);
+//		frameBuffer->paintBoxRel(x, ypos2, width, info_height, col1);
 
-			frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 12,4, col1);
-			frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos2a, 12,4, col1);
-
-			// 2. col small line
-			frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos1, 1,fheight,     col2);
-			frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos2, 1,info_height, col2);
-
-			frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 1,ypos2a-ypos1a+4, col2);
-
-			frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 12,1, col2);
-			frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-12, ypos2a, 8,1, col2);
-
-			// -- small Frame around infobox
-			frameBuffer->paintBoxRel(x,         ypos2, width ,info_height, col1);
-			// paint id3 infobox 
-			frameBuffer->paintBoxRel(x+2, ypos2 +2 , width-4, info_height-4, COL_MENUCONTENTDARK);
-			g_Fonts->menu->RenderString(x+10, ypos2 + 2 + 1*fheight, width- 80, playlist[selected].Title.c_str(), COL_MENUCONTENTDARK, 0, true); // UTF-8
-			std::string tmp;
-			if (playlist[selected].Genre.empty() || playlist[selected].Year.empty())
-				tmp = playlist[selected].Genre + playlist[selected].Year;
-			else
-				tmp = playlist[selected].Genre + " / " + playlist[selected].Year;
-			int w=g_Fonts->menu->getRenderWidth(tmp, true) + 10; // UTF-8
-			g_Fonts->menu->RenderString(x+width-w-5, ypos2 + 2 + 1*fheight, w, tmp, COL_MENUCONTENTDARK, 0, true); // UTF-8
- 			tmp = playlist[selected].Artist;
-			if (!(playlist[selected].Album.empty()))
-				tmp += " (" + playlist[selected].Album + ")";
-			g_Fonts->menu->RenderString(x+10, ypos2 + 2*fheight-2, width- 20, tmp, COL_MENUCONTENTDARK, 0, true); // UTF-8
-		}
+		// paint id3 infobox 
+		frameBuffer->paintBoxRel(x+2, ypos2 +2 , width-4, info_height-4, COL_MENUCONTENTDARK);
+		g_Fonts->menu->RenderString(x+10, ypos2 + 2 + 1*fheight, width- 80, playlist[selected].Title, COL_MENUCONTENTDARK, 0, true); // UTF-8
+		std::string tmp;
+		if (playlist[selected].Genre.empty() || playlist[selected].Year.empty())
+			tmp = playlist[selected].Genre + playlist[selected].Year;
+		else
+			tmp = playlist[selected].Genre + " / " + playlist[selected].Year;
+		int w=g_Fonts->menu->getRenderWidth(tmp, true) + 10; // UTF-8
+		g_Fonts->menu->RenderString(x+width-w-5, ypos2 + 2 + 1*fheight, w, tmp, COL_MENUCONTENTDARK, 0, true); // UTF-8
+		tmp = playlist[selected].Artist;
+		if (!(playlist[selected].Album.empty()))
+			tmp += " (" + playlist[selected].Album + ")";
+		g_Fonts->menu->RenderString(x+10, ypos2 + 2*fheight-2, width- 20, tmp, COL_MENUCONTENTDARK, 0, true); // UTF-8
+	}
+	else
+	{
+		frameBuffer->paintBackgroundBoxRel(x, ypos2, width, info_height);
+	}
 }
 
 void CMP3PlayerGui::stop()
