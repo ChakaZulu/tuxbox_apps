@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: x509.cpp,v 1.4 2002/05/30 11:43:18 waldi Exp $
+ * $Id: x509.cpp,v 1.5 2002/06/29 13:04:05 waldi Exp $
  */
 
 #include <main.hpp>
@@ -88,7 +88,7 @@ void Crypto::x509::cert::print ( std::ostream & stream ) const
   libcrypto::X509_print ( bio, _cert );
 }
 
-int Crypto::x509::cert::verify ( store & store, int ( * callback ) ( int, libcrypto::X509_STORE_CTX * ) ) throw ( std::bad_alloc )
+int Crypto::x509::cert::verify ( store & store, int ( * callback ) ( int, libcrypto::X509_STORE_CTX * ) ) throw ( std::bad_alloc, Crypto::exception::undefined_libcrypto_error )
 {
   libcrypto::X509_STORE * _store = store;
   libcrypto::X509_STORE_CTX * ctx = libcrypto::X509_STORE_CTX_new();
@@ -96,38 +96,17 @@ int Crypto::x509::cert::verify ( store & store, int ( * callback ) ( int, libcry
   if ( ! ctx )
     throw std::bad_alloc ();
   
-  _store -> verify_cb = callback;
+  X509_STORE_set_verify_cb_func ( _store, callback );
   libcrypto::X509_STORE_CTX_init ( ctx, _store, _cert, NULL );
   int ret = libcrypto::X509_verify_cert ( ctx );
   libcrypto::X509_STORE_CTX_free ( ctx );
 
-  if ( ret == 1 )
+  if ( ret > 0 )
     return 1;
   if ( ret == -1 )
     throw Crypto::exception::undefined_libcrypto_error ();
   else
-    return -ctx -> error;
-}
-
-int Crypto::x509::cert::verify_callback ( int ok, libcrypto::X509_STORE_CTX * ctx ) throw ()
-{
-  if ( ! ok )
-  {
-    std::cerr << "error " << ctx -> error << " at " << ctx -> error_depth
-      << " depth lookup: " << libcrypto::X509_verify_cert_error_string ( ctx -> error ) << std::endl;
-
-    switch ( ctx -> error )
-    {
-      case X509_V_ERR_CERT_HAS_EXPIRED:
-      case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
-      case X509_V_ERR_INVALID_CA:
-      case X509_V_ERR_PATH_LENGTH_EXCEEDED:
-      case X509_V_ERR_INVALID_PURPOSE:
-        return 1;
-    }
-  }
-
-  return 0;
+    return 0;
 }
 
 Crypto::x509::extension::extension ( ctx & ctx, const std::string & name, const std::string & value ) throw ( Crypto::exception::undefined_libcrypto_error )

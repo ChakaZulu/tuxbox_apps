@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: x509.hpp,v 1.3 2002/05/30 11:43:18 waldi Exp $
+ * $Id: x509.hpp,v 1.4 2002/06/29 13:04:05 waldi Exp $
  */
 
 #ifndef __LIBCRYPTO__X509_HPP
@@ -84,12 +84,10 @@ namespace Crypto
         void add_extension ( extension & ) throw ();
 
         void sign ( Crypto::evp::key::privatekey &, Crypto::evp::md::md & ) throw ();
-        int verify ( store &, int (*) ( int, libcrypto::X509_STORE_CTX * ) = verify_callback ) throw ( std::bad_alloc );
+        int verify ( store &, int (*) ( int, libcrypto::X509_STORE_CTX * ) = NULL ) throw ( std::bad_alloc, Crypto::exception::undefined_libcrypto_error );
 
       protected:
         operator libcrypto::X509 * () throw ();
-
-        static int verify_callback ( int ok, libcrypto::X509_STORE_CTX * ctx ) throw ();
 
         libcrypto::X509 * _cert;
 
