@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.20 2002/07/17 03:06:16 obi Exp $
+ * $Id: frontend.cpp,v 1.21 2002/07/17 03:28:47 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -398,6 +398,11 @@ const bool CFrontend::getEvent ()
 			std::cerr << "[CFrontend::getEvent] pfd[0].revents: " << pfd[0].revents << std::endl;
 		}
 		break;
+	}
+
+	if ((tuned == false) && (getStatus() & FE_HAS_LOCK))
+	{
+		tuned = true;
 	}
 
 	delete event;
