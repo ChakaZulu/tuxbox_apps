@@ -92,13 +92,13 @@ class CLCD
 		~CLCD();
 
 		static void* TimeThread(void*);
-		bool lcdInit();
+		bool lcdInit(char * fontfile, char * fontname);
 		void setlcdparameter(int dimm, int contrast, int power, int inverse);
 
 	public:
 
 		static CLCD* getInstance();
-		void init();
+		void init(char * fontfile, char * fontname);
 
 		void setMode(MODES m, std::string title="");
 

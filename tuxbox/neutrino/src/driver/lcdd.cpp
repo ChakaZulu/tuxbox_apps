@@ -63,13 +63,12 @@ void* CLCD::TimeThread(void *)
 	return NULL;
 }
 
-void CLCD::init()
+void CLCD::init(char * fontfile, char * fontname)
 {
 	InitNewClock();
 
-	if(!lcdInit())
+	if(!lcdInit(fontfile, fontname))
 	{
-		//fehler beim lcd-init aufgetreten
 		printf("LCD-Init failed!\n");
 		return;
 	}
@@ -81,17 +80,16 @@ void CLCD::init()
 	}
 }
 
-bool CLCD::lcdInit()
+bool CLCD::lcdInit(char * fontfile, char * fontname)
 {
-	fontRenderer = new LcdFontRenderClass( &display );
-	fontRenderer->AddFont(FONTDIR "/micron.ttf");
+	fontRenderer = new LcdFontRenderClass(&display);
+	fontRenderer->AddFont(fontfile);
 	fontRenderer->InitFontCache();
 
-	#define FONTNAME "Micron"
-	fonts.channelname=fontRenderer->getFont(FONTNAME, "Regular", 15);
-	fonts.time=fontRenderer->getFont(FONTNAME, "Regular", 14);
-	fonts.menutitle=fontRenderer->getFont(FONTNAME, "Regular", 15);
-	fonts.menu=fontRenderer->getFont(FONTNAME, "Regular", 12);
+	fonts.channelname = fontRenderer->getFont(fontname, "Regular", 15);
+	fonts.time        = fontRenderer->getFont(fontname, "Regular", 14);
+	fonts.menutitle   = fontRenderer->getFont(fontname, "Regular", 15);
+	fonts.menu        = fontRenderer->getFont(fontname, "Regular", 12);
 
 	setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
 	display.setIconBasePath( DATADIR "/lcdd/icons/");
