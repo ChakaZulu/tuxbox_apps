@@ -57,10 +57,10 @@ pin=__lUISdFwUYjg
 # option menu_items (string, ...)
 # default: EliteDVB,Neutrino,Lcars,Maintenance
 #
-menu_items=EliteDVB,Neutrino,Lcars,Maintenance
+menu_items=Enigma,Neutrino,Lcars,Maintenance
 
 #
 # option: pin_protect (number, ...)
 # default: 4
 #
-pin_protect=1,2,3,4
+pin_protect=4
