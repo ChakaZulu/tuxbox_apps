@@ -494,7 +494,7 @@ struct listChannels: public Object
 	bool addEPG;
 
 	listChannels(int submode, const eServiceReference &service, eString &result, bool sort, bool addEPG)
-		:myList(myList), submode(submode), iface(eServiceInterface::getInstance()), result(result), sort(sort), addEPG(addEPG)
+		:myList(myList), iface(eServiceInterface::getInstance()), submode(submode), result(result), sort(sort), addEPG(addEPG)
 	{
 		std::list <treeNode>::iterator myIt;
 		Signal1<void, const eServiceReference&> cbSignal;
