@@ -8,8 +8,8 @@ vierg_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
 install-exec-local:
 	install -d $(PLUGINDIR)
-	install .libs/vierg.so $(PLUGINDIR)
-	install -m 0644  vierg.cfg $(PLUGINDIR)
+	$(LIBTOOL) install vierg.la $(PLUGINDIR)
+	install -m 0644 $(srcdir)/vierg.cfg $(PLUGINDIR)
 
 uninstall-local:
 	-rm $(PLUGINDIR)/vierg.so
