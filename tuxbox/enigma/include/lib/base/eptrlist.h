@@ -45,11 +45,13 @@ public:
 
 // added methods for current implementation
 	inline T* take();
+	inline void take(T* t);
 	inline T* current();
 	inline T* next();
 	inline T* prev();
 	inline T* first();
 	inline T* last();
+	inline T* setCurrent(const T*) const;
 	inline const T* current() const;
 	inline const T* next() const;
 	inline const T* prev() const;
@@ -305,13 +307,25 @@ inline void ePtrList<T>::sort()
 template <class T>
 inline void ePtrList<T>::remove(T* t)
 {
-// 	Remove all items, equals to t, if auto-deletion is enabled, than the list call delete for all removed items
+// 	Remove all items that, equals to t, if auto-deletion is enabled, than the list call delete for the removed items
 //  If current is equal to one of the removed items, current is set to the next valid item
-	for (std::list<T*>::iterator it(std::list<T*>::begin()); it != std::list<T*>::end();)
+	std::list<T*>::iterator it(std::list<T*>::begin());
+
+	while (it != std::list<T*>::end())
 		if (*it == t)
+		{
 			it=erase(it);
+			break;  // one item is complete removed an deleted
+		}
 		else
 			it++;
+	
+	while (it != std::list<T*>::end())
+		if (*it == t)
+			it = std::list<T*>::erase(it);  // remove all other items that equals to t (no delete is called..)
+		else
+			it++;
+			
 }
 
 /////////////////// ePtrList erase(iterator) ///////////////////////
@@ -394,13 +408,37 @@ inline void ePtrList<T>::push_front(T* x)
 template <class T>
 inline T* ePtrList<T>::take()
 {
-// Takes the item at position index out of the list without deleting it (even if auto-deletion is enabled).
+// Takes the current item out of the list without deleting it (even if auto-deletion is enabled).
 // Returns a pointer to the item taken out of the list, or null if the index is out of range.
 // The item after the taken item becomes the new current list item if the taken item is not the last item in the list. If the last item is taken, the new last item becomes the current item.
 // The current item is set to null if the list becomes empty.
 	T* tmp = *cur;
  	cur = std::list<T*>::erase(cur);
  	return tmp;
+}
+
+/////////////////// ePtrList take(T*) ////////////////////
+template <class T>
+inline void ePtrList<T>::take(T* t)
+{
+// Takes all item with T* out of the list without deleting it (even if auto-deletion is enabled).
+ 	std::list<T*>::remove(t);
+}
+
+/////////////////// ePtrList setCurrent(T*) ////////////////////
+template <class T>
+inline T* ePtrList<T>::setCurrent(const T* t) const
+{
+	// Sets the internal current iterator to the first element that equals to t, and returns t when a item is found,
+	// otherwise it returns 0 !
+	for (std::list<T*>::iterator it(std::list<T*>::begin()); it != std::list<T*>::end(); it++)
+		if (*it == t)
+		{
+			current = it;
+			return *it;
+		}
+
+	return 0;
 }
 
 /////////////////// ePtrList current() ////////////////////

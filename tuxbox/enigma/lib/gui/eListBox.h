@@ -16,7 +16,7 @@ class eListBox: public eWidget
 	ePtrList<T>::iterator top, bottom, current;
 
 	int entries, font_size, item_height;
-	gColor col_active;													
+	gColor col_active;
 	gFont entryFnt;
 
 	void geometryChanged();
@@ -29,7 +29,6 @@ public:
 	void remove(T* e);
 	const gFont& getEntryFnt()	{		return entryFnt;	}
 	eListBox(eWidget *parent, int FontSize=20);
-	~eListBox();
 
 	void keyDown(int rc);
 	void keyUp(int rc);
@@ -74,7 +73,7 @@ protected:
 	eString text;
 public:
 	eListBoxEntryText(eListBox<eListBoxEntryText>* lb, const char* txt=0)
-		:eListBoxEntry((eListBox<eListBoxEntry>*)lb), text(0)
+		:eListBoxEntry((eListBox<eListBoxEntry>*)lb), text(txt)
 	{		
 	
 	}
@@ -85,14 +84,16 @@ public:
 	}
 
 protected:
-	void redraw(gPainter *rc, const eRect& rect, const gColor& active, const gColor& normal, bool highlited) const
+	void redraw(gPainter *rc, const eRect& rect, const gColor& coActive, const gColor& coNormal, bool highlited) const
 	{
-		eDebug("Hier in redraw von eListboxEntryText");
 /*	if (parent && parent->LCDElement && entry && (entry == *current) )
 		parent->LCDElement->setText( entry->getText(0) );*/
-			rc->setForegroundColor(highlited?active:normal);
+			rc->setForegroundColor(highlited?coActive:coNormal);
 			rc->setFont(listBox->getEntryFnt());
-			rc->fill(rect);
+
+			if ((coNormal != -1 && !highlited) || (highlited && coActive != -1))
+					rc->fill(rect);
+
 			rc->renderText(rect, text);
 			rc->flush();
 	}
@@ -130,7 +131,7 @@ inline void eListBox<T>::append(T* entry)
 template <class T>
 inline void eListBox<T>::remove(T* entry)
 {
-		childs.remove(entry);
+		childs.take(entry);
 
 //	if (auto_actualize)
 		actualize();
@@ -175,11 +176,6 @@ inline void eListBox<T>::invalidateEntry(int n)
 }
 
 template <class T>
-inline eListBox<T>::~eListBox()
-{
-}
-
-template <class T>
 inline int eListBox<T>::setProperty(const eString &prop, const eString &value)
 {
 	if (prop=="col_active")
@@ -215,9 +211,7 @@ inline T* eListBox<T>::goPrev()
 template <class T>
 inline eListBox<T>::eListBox(eWidget *parent, int ih)
 	 :eWidget(parent, 1),
-		top(childs.end()),
-		bottom(childs.end()),
-		current(childs.end()),
+		top(childs.end()), bottom(childs.end()), current(childs.end()),
 		col_active(eSkin::getActive()->queryScheme("focusedColor")),
 		font_size(ih),
 		item_height(ih+2),
@@ -230,8 +224,6 @@ inline eListBox<T>::eListBox(eWidget *parent, int ih)
 template <class T>
 inline void eListBox<T>::redrawWidget(gPainter *target, const eRect &where)
 {
- 	eDebug("redrawWidget");
-
 	ePtrList<T>::iterator entry(top);
 
 	for (int i=0 ; have_focus && i < entries && entry != childs.end() ; i++, entry++)
@@ -241,7 +233,6 @@ inline void eListBox<T>::redrawWidget(gPainter *target, const eRect &where)
 		if (!where.contains(rect))
 			continue;
 
-		eDebug("Paint entry");
 		entry->redraw(target, rect, col_active, getBackgroundColor(), *entry == *current);
 
 		if (*entry == *current)  // than the item is the new highlited item
@@ -307,7 +298,7 @@ inline void eListBox<T>::keyDown(int rc)
 	int cs=1;
 	
 	T *oldptr = *current,
-							*oldtop = *top;
+		*oldtop = *top;
 
 	switch (rc)
 	{
