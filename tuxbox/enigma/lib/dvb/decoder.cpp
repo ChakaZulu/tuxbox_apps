@@ -185,10 +185,10 @@ int Decoder::Set()
 #ifdef DBOX
 			eDebug("VIDEO_STOP");
 			if (ioctl(fd.video, VIDEO_STOP, 1)<0)
-				perror("VIDEO_STOP\n");
+				perror("VIDEO_STOP");
 #else
 			if (ioctl(fd.video, MPEG_VID_STOP, 1)<0)
-				perror("MPEG_VID_STOP\n");
+				perror("MPEG_VID_STOP");
 #endif
 			close(fd.video);
 			fd.video=-1;
@@ -227,12 +227,12 @@ int Decoder::Set()
 			pes_filter.pesType=DMX_PES_PCR;
 			pes_filter.flags=0;
 			if (ioctl(fd.demux_pcr, DMX_SET_PES_FILTER, &pes_filter)<0)
-				perror("DMX_SET_PES_FILTER - PCR\n");
+				perror("DMX_SET_PES_FILTER - PCR");
 #else
 			pes_filter.output=OUT_DECODER;
 			pes_filter.pesType=DMX_PES_PCR;
 			if (ioctl(fd.demux_pcr, DEMUX_FILTER_PES_SET, &pes_filter)<0)
-				perror("DEMUX_FILTER_PES_SET - PCR\n");
+				perror("DEMUX_FILTER_PES_SET - PCR");
 			if (ioctl(fd.demux_pcr, DEMUX_START)<0)
 				perror("DEMUX_START");
 #endif
@@ -254,18 +254,18 @@ int Decoder::Set()
 			videoStatus status;
 			eDebug("VIDEO_GET_STATUS, VIDEO_SELECT_SOURCE, VIDEO_PLAY");
 			if (ioctl(fd.video, VIDEO_GET_STATUS, &status)<0)
-				perror("VIDEO_GET_STATUS\n");
+				perror("VIDEO_GET_STATUS");
 //			if (status.streamSource != (videoStreamSource_t)VIDEO_SOURCE_DEMUX)//
 				if (ioctl(fd.video, VIDEO_SELECT_SOURCE, (videoStreamSource_t)VIDEO_SOURCE_DEMUX)<0)
-					perror("VIDEO_SELECT_SOURCE\n");
+					perror("VIDEO_SELECT_SOURCE");
 			if (ioctl(fd.video, VIDEO_PLAY, 0)<0)
-				perror("VIDEO_PLAY\n");
+				perror("VIDEO_PLAY");
 #else
 			eDebug("VIDEO_SELECT_SOURCE, VIDEO_PLAY");
 			if (ioctl(fd.video, MPEG_VID_SELECT_SOURCE, 0)<0)
-				perror("MPEG_VID_SELECT_SOURCE\n");
+				perror("MPEG_VID_SELECT_SOURCE");
 			if (ioctl(fd.video, MPEG_VID_SET_BLANK, 0)<0)
-				perror("MPEG_VID_SET_BLANK\n");
+				perror("MPEG_VID_SET_BLANK");
 			if (ioctl(fd.video, MPEG_VID_PLAY, 0)<0)
 				perror("MPEG_VID_PLAY");
 #endif
@@ -301,11 +301,11 @@ int Decoder::Set()
 			if (fd.audio<0)
 				eDebug((parms.audio_type==DECODE_AUDIO_MPEG)?AUDIO_DEV_MPEG:AUDIO_DEV_AC3);
 			if (ioctl(fd.audio, MPEG_AUD_SELECT_SOURCE, 0)<0)
-				perror("MPEG_AUD_SELECT_SOURCE\n");
+				perror("MPEG_AUD_SELECT_SOURCE");
 			if (ioctl(fd.audio, MPEG_AUD_SET_STREAM_TYPE, AUD_STREAM_TYPE_PES) < 0)
-				perror("MPEG_AUD_SET_STREAM_TYPE\n");
+				perror("MPEG_AUD_SET_STREAM_TYPE");
 			if (ioctl(fd.audio, MPEG_AUD_PLAY, 0)<0)
-				perror("MPEG_AUD_PLAY\n");
+				perror("MPEG_AUD_PLAY");
 		}
 	}
 #endif
@@ -322,12 +322,12 @@ int Decoder::Set()
 			pes_filter.pesType = DMX_PES_VIDEO;
 			pes_filter.flags	 = 0;
 			if (ioctl(fd.demux_video, DMX_SET_PES_FILTER, &pes_filter)<0)
-				perror("DMX_SET_PES_FILTER - video\n");
+				perror("DMX_SET_PES_FILTER - video");
 #else
 			pes_filter.output  = OUT_DECODER;
 			pes_filter.pesType = DMX_PES_VIDEO;		// ok, es ist *KEIN* zufall :)
 			if (ioctl(fd.demux_video, DEMUX_FILTER_PES_SET, &pes_filter)<0)
-				perror("DMX_FILTER_PES_SET - video\n");
+				perror("DMX_FILTER_PES_SET - video");
 #endif
 		}
 
@@ -343,12 +343,12 @@ int Decoder::Set()
 			pes_filter.pesType = DMX_PES_AUDIO;
 			pes_filter.flags	 = 0;
 			if (ioctl(fd.demux_audio, DMX_SET_PES_FILTER, &pes_filter)<0)
-				perror("DMX_SET_PES_FILTER - audio\n");
+				perror("DMX_SET_PES_FILTER - audio");
 #else
 			pes_filter.output  = OUT_DECODER;
 			pes_filter.pesType = DMX_PES_AUDIO;
 			if (ioctl(fd.demux_audio, DEMUX_FILTER_PES_SET, &pes_filter)<0)
-				perror("DMX_FILTER_PES_SET - audio\n");
+				perror("DMX_FILTER_PES_SET - audio");
 #endif
 		}
 
@@ -358,10 +358,10 @@ int Decoder::Set()
 			eDebug("start pcr");
 #ifdef DBOX
 			if (ioctl(fd.demux_pcr, DMX_START,0)<0)	
-				perror("DMX_START\n");
+				perror("DMX_START");
 #else
 			if (ioctl(fd.demux_pcr, DEMUX_START,0)<0)
-				perror("DEMUX_START\n");
+				perror("DEMUX_START");
 #endif
 		}
 
@@ -371,10 +371,10 @@ int Decoder::Set()
 			eDebug("start video");
 #ifdef DBOX
 			if (ioctl(fd.demux_video, DMX_START,0)<0)
-				perror("DMX_START\n");
+				perror("DMX_START");
 #else
 			if (ioctl(fd.demux_video, DEMUX_START,0)<0)
-				perror("DEMUX_START\n");
+				perror("DEMUX_START");
 #endif
 		}
 
@@ -384,10 +384,10 @@ int Decoder::Set()
 			eDebug("start audio");
 #ifdef DBOX
 			if (ioctl(fd.demux_audio, DMX_START,0)<0)
-				perror("DMX_START\n");
+				perror("DMX_START");
 #else
 			if (ioctl(fd.demux_audio, DEMUX_START,0)<0)
-				perror("DEMUX_START\n");
+				perror("DEMUX_START");
 #endif
 		}
 

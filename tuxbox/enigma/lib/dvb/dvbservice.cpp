@@ -280,12 +280,17 @@ void eDVBServiceController::TDTready(int error)
 int eDVBServiceController::switchService(const eServiceReferenceDVB &newservice)
 {
 	if (newservice == service)
+	{
+		eDebug("is same service..");
 		return 0;
+	}
+	
 	/*emit*/ dvb.leaveService(service);
-
+	
 	service=newservice;
-	dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceSwitch));
-	eDebug("<--- switch service event");
+	
+	if (service)
+		dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceSwitch));
 	return 1;
 }
 
