@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
   
-  $Id: zapit.cpp,v 1.21 2001/10/18 23:04:48 field Exp $
+  $Id: zapit.cpp,v 1.22 2001/10/25 17:20:50 field Exp $
   
   Done 2001 by Philipp Leusmann using many parts of code from older 
   applications by the DBoxII-Project.
@@ -70,6 +70,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   $Log: zapit.cpp,v $
+  Revision 1.22  2001/10/25 17:20:50  field
+  Umlaute gefixt! (unbedingt make clean)
+
   Revision 1.21  2001/10/18 23:04:48  field
   vtxt-neues cmd
 
@@ -169,7 +172,7 @@
 
 
 #include "zapit.h"
-#include "../../apps//mczap/lcdd/lcdd.h"
+#include "../../apps/mczap/lcdd/lcdd.h"
 
 extern uint16_t old_tsid;
 uint curr_onid_sid = 0;
@@ -1852,7 +1855,7 @@ int main(int argc, char **argv) {
   }
   
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.21 2001/10/18 23:04:48 field Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.22 2001/10/25 17:20:50 field Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
