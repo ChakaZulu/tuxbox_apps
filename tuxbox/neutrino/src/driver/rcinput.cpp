@@ -30,12 +30,15 @@
 */
 
 /*
- $Id: rcinput.cpp,v 1.22 2002/01/09 00:05:08 McClean Exp $
+ $Id: rcinput.cpp,v 1.23 2002/01/10 01:23:22 McClean Exp $
  
  Module for Remote Control Handling
  
 History:
  $Log: rcinput.cpp,v $
+ Revision 1.23  2002/01/10 01:23:22  McClean
+ optimize rc-routines
+
  Revision 1.22  2002/01/09 00:05:08  McClean
  secure-...
 
@@ -170,10 +173,15 @@ void CRCInput::restartInput()
 int CRCInput::getKey(int Timeout)
 {
 	static long long last_keypress=0;
+	long long getKeyBegin;
 	static __u16 rc_last_key = 0;
 	static __u16 rc_last_repeat_key = 0;
+
+	struct timeval tv, tvselect;
+	struct timeval *tvslectp;
+	int Timeout2 = Timeout;
+	fd_set rfds;
 	__u16 rc_key;
-	bool exit=false;
 
 	//es ist ein key im pushback-Buffer - diesen zurückgeben
 	if(pb_keys.available())
@@ -182,72 +190,100 @@ int CRCInput::getKey(int Timeout)
 		return pb_keys.read();
 	}
 
-	while(!exit)
+	if(Timeout==-1)
 	{
-		int status = read(fd, &rc_key, sizeof(rc_key));
-		if (status==2)
-		{	//loslassen bei alten nokia fb's
-			if(rc_key!=0x5cfe)
-			{
-				//printf("got key native key: %04x %04x\n", rc_key, rc_key&0x1f );
-				struct timeval tv;
-				long long now_pressed;
-				bool keyok = true;
+		tvslectp = NULL;
+	}
+	else
+	{
+		tvslectp = &tvselect;
+	}
 
-				gettimeofday( &tv, NULL );
-				now_pressed = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
-				//printf("diff: %lld - %lld = %lld should: %d\n", now_pressed, last_keypress, now_pressed-last_keypress, repeat_block);
-				
-				//alter nokia-rc-code - lastkey löschen weil sonst z.b. nicht zweimal nacheinander ok gedrückt werden kann
-				if((rc_key&0xff00)==0x5c00)
+	// wiederholung reinmachen - dass wirklich die ganze zeit gis timeout gewartet wird!
+	gettimeofday( &tv, NULL );
+	getKeyBegin = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
+	while(1)
+	{
+		//nicht genau - verbessern!
+	    tvselect.tv_sec = Timeout / 10;
+		tvselect.tv_usec = 0;
+		
+		FD_ZERO(&rfds);
+		FD_SET(fd, &rfds);
+		int status =  select(fd+1, &rfds, NULL, NULL, tvslectp);
+		if(status)
+		{
+			status = read(fd, &rc_key, sizeof(rc_key));
+			if (status==2)
+			{	//loslassen bei alten nokia fb's
+				if(rc_key!=0x5cfe)
 				{
-					rc_last_key = 0;
-				}
-				//test auf wiederholenden key (gedrückt gehalten)
-				if (rc_key == rc_last_key)
-				{
-					keyok = false;
-					//nur diese tasten sind wiederholbar 
-					int trkey = translate(rc_key);
-					if ((trkey==RC_up) || (trkey==RC_down) || (trkey==RC_plus) || (trkey==RC_minus) || (trkey==RC_standby))
+					//printf("got key native key: %04x %04x\n", rc_key, rc_key&0x1f );
+					long long now_pressed;
+					bool keyok = true;
+
+					gettimeofday( &tv, NULL );
+					now_pressed = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
+					//printf("diff: %lld - %lld = %lld should: %d\n", now_pressed, last_keypress, now_pressed-last_keypress, repeat_block);
+					
+					//alter nokia-rc-code - lastkey löschen weil sonst z.b. nicht zweimal nacheinander ok gedrückt werden kann
+					if((rc_key&0xff00)==0x5c00)
 					{
-						if( rc_last_repeat_key!=rc_key)
+						rc_last_key = 0;
+					}
+					//test auf wiederholenden key (gedrückt gehalten)
+					if (rc_key == rc_last_key)
+					{
+						keyok = false;
+						//nur diese tasten sind wiederholbar 
+						int trkey = translate(rc_key);
+						if ((trkey==RC_up) || (trkey==RC_down) || (trkey==RC_plus) || (trkey==RC_minus) || (trkey==RC_standby))
 						{
-							if(abs(now_pressed-last_keypress)>repeat_block)
+							if( rc_last_repeat_key!=rc_key)
 							{
-								keyok = true;
-								rc_last_repeat_key = rc_key;
+								if(abs(now_pressed-last_keypress)>repeat_block)
+								{
+									keyok = true;
+									rc_last_repeat_key = rc_key;
+								}
+							}
+							else
+							{
+									keyok = true;
 							}
 						}
-						else
+					}
+					else
+					{
+						rc_last_repeat_key = 0;
+					}
+					rc_last_key = rc_key;
+
+					if(abs(now_pressed-last_keypress)>repeat_block_generic)
+					{
+						if(keyok)
 						{
-								keyok = true;
+							last_keypress = now_pressed;
+							return translate(rc_key);
 						}
 					}
+					//printf("!!!!!!!eat  native key: %04x %04x\n", rc_key, rc_key&0x1f );
 				}
-				else
-				{
-					rc_last_repeat_key = 0;
-				}
-				rc_last_key = rc_key;
+			}
 
-				if(abs(now_pressed-last_keypress)>repeat_block_generic)
+			if(tvslectp != NULL)
+			{//timeout neu kalkulieren
+				gettimeofday( &tv, NULL );
+				long long getKeyNow = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
+				long long diff = abs( (getKeyNow - getKeyBegin) / 1000000 );
+				//printf("diff timeout: %lld\n", diff);
+				if(diff>=Timeout2)
 				{
-					if(keyok)
-					{
-						last_keypress = now_pressed;
-						return translate(rc_key);
-					}
+					return RC_timeout;
 				}
-				//printf("!!!!!!!eat  native key: %04x %04x\n", rc_key, rc_key&0x1f );
+				Timeout -= diff;
 			}
 		}
-		Timeout--;
-		if (Timeout==-1)
-		{
-			return RC_timeout;
-		}
-		usleep(100000);
 	}
 	return rc_key;
 }
