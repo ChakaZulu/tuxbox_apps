@@ -732,7 +732,7 @@ static eString aboutDreambox(void)
 	result += sharddisks;
 #endif //DISABLE_FILE
 
-	result += "<tr><td>Firmware:</td><td><td>&nbsp;</td>";
+	result += "<tr><td>Firmware:</td><td>&nbsp;</td>";
 	eString verid=getVersionInfo("version");
 	if (!verid)
 	{
