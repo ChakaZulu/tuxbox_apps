@@ -751,7 +751,8 @@ void eTransponderList::removeOrbitalPosition(int orbital_position)
 							(ref.getDVBNamespace() == dvbnamespace))
 					{
 //						eDebug("removing service");
-						services.erase(sit++);
+						services.erase(sit);
+						sit=services.begin();
 					}
 					else
 						++sit;
@@ -1366,10 +1367,10 @@ void eTransponderList::writeLNBData()
 	eDebug("%i LNBs written", lnbwrite);
 	// we must delete no more exist lnbs from registry
 	unsigned int tmp;
-		while (	!eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbwrite)+"/lofH").c_str(), tmp) )	// erase no more exist lnbs...
+	while (	!eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbwrite)+"/lofH").c_str(), tmp) )	// erase no more exist lnbs...
 	{
 		eConfig::getInstance()->delKey( (basepath+eString().setNum(lnbwrite++)).c_str() );
-		eDebug("delete lnb");		
+		eDebug("delete lnb");	
 	}
 	////////////////////////
 	eConfig::getInstance()->flush();
