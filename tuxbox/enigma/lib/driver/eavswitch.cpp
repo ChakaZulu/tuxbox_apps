@@ -179,7 +179,7 @@ bool eAVSwitch::loadScartConfig()
 	FILE* fd = fopen(CONFIGDIR"/scart.conf", "r");
 	if(fd)
 	{
-		eDebug("[eAVSwitch] loading scart-config (scart.conf)\n");
+		eDebug("[eAVSwitch] loading scart-config (scart.conf)");
 
 		char buf[1000];
 		fgets(buf,sizeof(buf),fd);
@@ -214,6 +214,6 @@ bool eAVSwitch::loadScartConfig()
 	}
 	else
 	{
-		eDebug("[eAVSwitch] failed to load scart-config (scart.conf), using standard-values\n");
+		eDebug("[eAVSwitch] failed to load scart-config (scart.conf), using standard-values");
 	}
 }
