@@ -54,7 +54,7 @@ void process_section(int fd)
 	bytes = read(fd, buf, sizeof(buf));
 	if (bytes < 0) {
 		perror("read");
-		if (bytes != ETIMEDOUT)
+		if (errno != EOVERFLOW)
 			exit(1);
 	}
 	hex_dump(buf, bytes);
@@ -83,7 +83,7 @@ int set_filter(int fd, unsigned int pid, unsigned int tid)
 		f.filter.mask[0]   = 0xff;
 	}
 	f.timeout = 0;
-	f.flags = DMX_IMMEDIATE_START;
+	f.flags = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
 
 	if (ioctl(fd, DMX_SET_FILTER, &f) == -1) {
 		perror("DMX_SET_FILTER");
