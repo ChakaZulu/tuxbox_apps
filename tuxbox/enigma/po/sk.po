@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxbox-enigma 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-06-06 01:27+0200\n"
-"PO-Revision-Date: Sat Jun 5 16:31:01 CEST 2004\n"
+"POT-Creation-Date: 2004-06-24 20:52+0200\n"
+"PO-Revision-Date: Thu Jun 24 20:48:42 CEST 2004\n"
 "Last-Translator: unknown\n"
 "Language-Team: Slovakian / Michal Harajda <root@unlockers.sk>\n"
 "MIME-Version: 1.0\n"
@@ -20,7 +20,7 @@ msgstr ""
 msgid "FF "
 msgstr "FF"
 
-#: default.esml:844
+#: default.esml:851
 msgid "&#53;"
 msgstr ""
 
@@ -36,7 +36,7 @@ msgstr "Intenzita sig."
 msgid "Pause "
 msgstr "pauza"
 
-#: default.esml:445
+#: default.esml:443
 msgid "motor power input difference between running and not running"
 msgstr "rozdiel vstupného prúdu motora v klude a pocas prevádzky"
 
@@ -44,7 +44,7 @@ msgstr "rozdiel vstupného prúdu motora v klude a pocas prevádzky"
 msgid "send the complete DiSEqC sequence twice"
 msgstr "posli celú DiSEqC sekvenciu dvakrát"
 
-#: default.esml:431 default.esml:481 default.esml:577 src/rotorconfig.cpp:603
+#: default.esml:431 default.esml:479 default.esml:584 src/rotorconfig.cpp:588
 msgid "Satellite:"
 msgstr "Druzica"
 
@@ -52,7 +52,7 @@ msgstr "Druzica"
 msgid "send no DiSEqC when only Hi/Lo or H/V changes"
 msgstr "neposielaj DiSEqC ked sú zmeny iba v Hi/Lo alebo H/V "
 
-#: default.esml:619
+#: default.esml:626
 msgid "SNR"
 msgstr "SNR"
 
@@ -60,7 +60,7 @@ msgstr "SNR"
 msgid "Uncommitted Switch:"
 msgstr "Uncommitted Switch:"
 
-#: default.esml:583
+#: default.esml:590
 msgid "enable/disable inversion here (ok)"
 msgstr "povolte/zakázte negáciu (ok)"
 
@@ -72,19 +72,19 @@ msgstr "predch.str"
 msgid "LOF/L:"
 msgstr "LOF/L:"
 
-#: default.esml:720 src/timer.cpp:2289
+#: default.esml:728 src/timer.cpp:2424
 msgid "Wednesday"
 msgstr "Streda"
 
-#: default.esml:814
+#: default.esml:821
 msgid "Partition Check"
 msgstr "Kontrola partície"
 
-#: default.esml:762 default.esml:786
+#: default.esml:769 default.esml:793
 msgid "enter recording end time (0..9, left, right, ok)"
 msgstr "cas ukoncenia nahrávania (0..9, < >, ok)"
 
-#: default.esml:725 default.esml:729
+#: default.esml:733 default.esml:737
 msgid "select year (ok)"
 msgstr "nastavte rok (ok)"
 
@@ -92,27 +92,28 @@ msgstr "nastavte rok (ok)"
 msgid "increased voltage"
 msgstr "zvýsene napájanie"
 
-#: default.esml:419 default.esml:622
+#: default.esml:419 default.esml:629
+#, fuzzy
 msgid "LOCK"
-msgstr "LOCK"
+msgstr "OK"
 
-#: default.esml:513
+#: default.esml:511
 msgid "enable/disable use BAT for scan (if exists)"
 msgstr "povolí/zakáze pouzitie funkcie BAT"
 
-#: default.esml:567
+#: default.esml:574
 msgid "Skin Selector"
 msgstr "ponuka vzhladov"
 
-#: default.esml:547
+#: default.esml:554
 msgid "transponder scanned:"
 msgstr "prehladaných transpondérov:"
 
-#: default.esml:714
+#: default.esml:721
 msgid "press ok to change event name manually"
 msgstr "Ok pre manuálnu zmenu názvu"
 
-#: default.esml:785
+#: default.esml:792
 msgid "recording end time:"
 msgstr "cas konca nahrávania:"
 
@@ -120,50 +121,55 @@ msgstr "cas konca nahrávania:"
 msgid "Use motor input power for running detection.. else use timeout"
 msgstr "Pre detekciu pouzi napájanie motora, alebo pouzi cas. limit"
 
-#: default.esml:527
+#: default.esml:525
 msgid "no circ polariz."
 msgstr "bez kruhovej polar."
 
-#: default.esml:465 default.esml:486
+#: default.esml:463 default.esml:484
 msgid "Direction:"
 msgstr "Smer:"
 
-#: default.esml:582 default.esml:600
+#: default.esml:589 default.esml:607
 msgid "MHz"
 msgstr "Mhz"
 
-#: default.esml:546
+#: default.esml:553
 msgid "services scanned     :"
 msgstr "najdených kanálov:"
 
-#: default.esml:570 src/parentallock.cpp:101 src/setup_lcd.cpp:112
+#: default.esml:577 src/parentallock.cpp:101 src/setup_lcd.cpp:112
 #: src/setup_osd.cpp:263 src/setup_rc.cpp:121 src/setup_timezone.cpp:42
-#: src/setupengrab.cpp:102 src/setupnetwork.cpp:607 src/setupvideo.cpp:172
+#: src/setupengrab.cpp:102 src/setupnetwork.cpp:609 src/setupvideo.cpp:172
 #: src/setupvideo.cpp:410 src/tpeditwindow.cpp:118 src/tpeditwindow.cpp:162
 msgid "save changes and return"
 msgstr "uloz zmeny a vrát sa"
 
-#: default.esml:469 default.esml:705 default.esml:865 default.esml:902
+#: default.esml:535
+#, fuzzy
+msgid "aborts the transponder scan"
+msgstr "zacni vyhladávanie"
+
+#: default.esml:467 default.esml:712 default.esml:872 default.esml:909
 msgid "remove"
 msgstr "vymaz"
 
-#: default.esml:441 default.esml:478
+#: default.esml:441 default.esml:476
 msgid "Motor Config"
 msgstr "Natavenie motora"
 
-#: default.esml:599
+#: default.esml:606
 msgid "enter frequency (0..9, left, right)"
 msgstr "zadajte frekvenciu (0..9 < >)"
 
-#: default.esml:469
+#: default.esml:467
 msgid "remove selected entry"
 msgstr "vymaz oznacenú polozku"
 
-#: default.esml:860
+#: default.esml:867
 msgid "abc &lt;-&gt; ABC"
 msgstr ""
 
-#: default.esml:854
+#: default.esml:861
 msgid "&lt;"
 msgstr ""
 
@@ -179,72 +185,72 @@ msgstr "Zamen prikazy"
 msgid "enter LNB threshold frequency (0..9, ok)"
 msgstr "zadajte maximálnu frekveciu LNB (0..9)"
 
-#: default.esml:494
+#: default.esml:492
 msgid "close motor setup"
 msgstr "zanechaj nastavenie motora"
 
-#: default.esml:460
+#: default.esml:458
 msgid "insert rotor memory cell for this orbital position"
 msgstr "Zadajte pamatove miesto na ktorom je ulozena druzicova pozicia"
 
-#: default.esml:526 default.esml:537
+#: default.esml:524 default.esml:544
 msgid "add only unscrambled services"
 msgstr "pridaj iba dekódovatelné kanály"
 
-#: default.esml:829
+#: default.esml:535 default.esml:836
 msgid "abort"
 msgstr "zrus"
 
-#: default.esml:808
+#: default.esml:815
 msgid "select filsystem to format"
 msgstr "Vyberte systém súborov k formátovaniu"
 
-#: default.esml:817
+#: default.esml:824
 msgid "close window"
 msgstr "zatvor okno"
 
-#: default.esml:427 default.esml:621
+#: default.esml:427 default.esml:628
 msgid "BER"
 msgstr "BER"
 
-#: default.esml:488
+#: default.esml:486
 msgid "Recalc Params:"
 msgstr "Prepocítaj:"
 
-#: default.esml:581
+#: default.esml:588
 msgid "enter transponder frequeny (0..9, left, right)"
 msgstr "zadajte frekvenciu transpondéra (0..9 < >)"
 
-#: default.esml:468 default.esml:706 default.esml:900
+#: default.esml:466 default.esml:713 default.esml:907
 msgid "add"
 msgstr "pridaj"
 
-#: default.esml:516
+#: default.esml:514
 msgid "start the transponder scan"
 msgstr "zacni vyhladávanie"
 
-#: default.esml:516 default.esml:528 default.esml:539 default.esml:562
+#: default.esml:514 default.esml:526 default.esml:546 default.esml:569
 msgid "start scan"
 msgstr "vyhladávaj"
 
-#: default.esml:806
+#: default.esml:813
 msgid "check"
 msgstr "over"
 
-#: default.esml:635 default.esml:642 default.esml:649 default.esml:657
-#: default.esml:668 default.esml:679
+#: default.esml:642 default.esml:649 default.esml:656 default.esml:664
+#: default.esml:675 default.esml:686
 msgid "Services"
 msgstr "Kanály:"
 
-#: default.esml:846
+#: default.esml:853
 msgid "&#54;"
 msgstr ""
 
-#: default.esml:840
+#: default.esml:847
 msgid "&#51;"
 msgstr ""
 
-#: default.esml:607
+#: default.esml:614
 msgid "enable/disable inversion (ok)"
 msgstr "povol/zakáz negáciu (ok)"
 
@@ -252,19 +258,19 @@ msgstr "povol/zakáz negáciu (ok)"
 msgid "subservices"
 msgstr "SubKanály"
 
-#: default.esml:522 default.esml:534
+#: default.esml:520 default.esml:541
 msgid "Network:"
 msgstr "Siet:"
 
-#: default.esml:858
+#: default.esml:865
 msgid "&gt;"
 msgstr ""
 
-#: default.esml:726 default.esml:730
+#: default.esml:734 default.esml:738
 msgid "select month (ok)"
 msgstr "nastav mesiac"
 
-#: default.esml:454
+#: default.esml:452
 msgid "enter your latitude (0..9, +, -, ok)"
 msgstr "zadajte svoju zem. sírku (0..9, +, -)"
 
@@ -276,15 +282,15 @@ msgstr "Mod DiSEqC:"
 msgid "LNB Configuration"
 msgstr "Nastavenie LNB"
 
-#: default.esml:545 src/scan.cpp:535
+#: default.esml:532 default.esml:552 src/scan.cpp:662
 msgid "scanning..."
 msgstr "hladám..."
 
-#: default.esml:491
+#: default.esml:489
 msgid "calc param 3 (see your motor manual or let it 00)"
 msgstr "parameter 3 (00 alebo pozrite manuál k motoru)"
 
-#: default.esml:620
+#: default.esml:627
 msgid "AGC"
 msgstr "AGC"
 
@@ -296,11 +302,11 @@ msgstr "select uncommitted input"
 msgid "Use Motor Input Power"
 msgstr "pouzi napájanie motora"
 
-#: default.esml:448
+#: default.esml:446
 msgid "when the motor support this, then use"
 msgstr "ak to motor podporuje, pouzi funkciu"
 
-#: default.esml:715
+#: default.esml:722
 msgid "Starttime"
 msgstr "zaciatok"
 
@@ -312,27 +318,28 @@ msgstr "HTTP Download"
 msgid "goto prev page (LNB)"
 msgstr "predch.str (LNB)"
 
-#: default.esml:448
+#: default.esml:446
 msgid "Use gotoXX Function"
 msgstr "Pouzi gotoXX "
 
-#: default.esml:862
+#: default.esml:869
 msgid "vol+"
-msgstr ""
+msgstr "hlas+"
 
-#: default.esml:717
+#: default.esml:724
 msgid "for a multiple event enable this"
 msgstr "pre mnohonásobnu udalost povol toto"
 
-#: default.esml:704
+#: default.esml:711
 msgid "press ok to select another event"
 msgstr "Ok pre výber inej relácie"
 
-#: default.esml:764 default.esml:776 default.esml:788
+#: default.esml:771 default.esml:783 default.esml:795
+#, fuzzy
 msgid "shutdown  "
-msgstr "vypni"
+msgstr "vypnut !"
 
-#: default.esml:434 default.esml:484
+#: default.esml:434 default.esml:482
 msgid "Transponder:"
 msgstr "Transpondér:"
 
@@ -340,7 +347,7 @@ msgstr "Transpondér:"
 msgid "22Khz"
 msgstr "22Khz"
 
-#: default.esml:787
+#: default.esml:794
 msgid "o'clock"
 msgstr "hodín"
 
@@ -348,31 +355,27 @@ msgstr "hodín"
 msgid "LOF/H:"
 msgstr "LOF/H:"
 
-#: default.esml:838
+#: default.esml:845
 msgid "&#50;"
 msgstr ""
 
-#: default.esml:443
-msgid "motor drive speed, in degrees per second"
-msgstr "rýchlost motora, v stupnoch za sekundu"
-
-#: default.esml:742 src/enigma_info.cpp:53
+#: default.esml:750 src/enigma_info.cpp:52
 msgid "About..."
 msgstr "info..."
 
-#: default.esml:706
+#: default.esml:713
 msgid "add new Timer (ok)"
 msgstr "pridaj nový casovac"
 
-#: default.esml:734
+#: default.esml:742
 msgid "to change service press ok"
 msgstr "pre zmenu programu (ok)"
 
-#: default.esml:848
+#: default.esml:855
 msgid "&#55;"
 msgstr ""
 
-#: default.esml:736
+#: default.esml:744
 msgid "scan EPG"
 msgstr "hladaj EPG"
 
@@ -380,7 +383,7 @@ msgstr "hladaj EPG"
 msgid "audio track"
 msgstr "jazyk zvuku"
 
-#: default.esml:724
+#: default.esml:732
 msgid "Su"
 msgstr "Ned"
 
@@ -388,7 +391,7 @@ msgstr "Ned"
 msgid "new"
 msgstr "nový"
 
-#: default.esml:773
+#: default.esml:780
 msgid "duration:"
 msgstr "Trvanie:"
 
@@ -396,178 +399,174 @@ msgstr "Trvanie:"
 msgid "Fast DiSEqC"
 msgstr "rychly DiSEqC"
 
-#: default.esml:720 src/epgwindow.cpp:115 src/timer.cpp:181
+#: default.esml:728 src/epgwindow.cpp:115 src/timer.cpp:181
 msgid "Wed"
 msgstr "Str"
 
-#: default.esml:450
+#: default.esml:448
 msgid "Longitude:"
 msgstr "Zem.dlzka:"
 
-#: default.esml:452 default.esml:455 default.esml:466
+#: default.esml:450 default.esml:453 default.esml:464
 msgid "choose direction"
 msgstr "vyberte smer"
 
-#: default.esml:799
+#: default.esml:806
 msgid "capacity:"
 msgstr "kapacita:"
 
-#: default.esml:489
+#: default.esml:487
 msgid "calc param 1 (see your motor manual or let it 00)"
 msgstr "parameter 1 (00 alebo pozrite manuál k motoru)"
 
-#: default.esml:494
+#: default.esml:492
 msgid "prev page"
 msgstr "predch.str."
 
-#: default.esml:721 src/epgwindow.cpp:115 src/timer.cpp:181
+#: default.esml:729 src/epgwindow.cpp:115 src/timer.cpp:181
 msgid "Thu"
 msgstr "Stv"
 
-#: default.esml:776
+#: default.esml:783
 msgid "shutdown the box to deepstandby (ok)"
 msgstr "Vypni box do hlbokého spánku"
 
-#: default.esml:732
+#: default.esml:740
 msgid "edit the end time (0..9, left, right)"
 msgstr "cas ukoncenia... (0..9 < >)"
 
-#: default.esml:719 src/timer.cpp:2289
+#: default.esml:727 src/timer.cpp:2424
 msgid "Tuesday"
 msgstr "Utorok"
 
-#: default.esml:761
+#: default.esml:768
 msgid "recording duration:"
 msgstr "dlzka nahrávania:"
 
-#: default.esml:707
-#, fuzzy
+#: default.esml:714
 msgid "delete expired timer (ok)"
-msgstr "vymaz oznacené nacasovanie (ok)"
+msgstr "vymaž expirované položky (ok)"
 
-#: default.esml:435 default.esml:485
+#: default.esml:435 default.esml:483
 msgid "choose the Transponder you wish to find"
 msgstr "vyberte transpondér, ktory chcete nájst"
 
-#: default.esml:900
+#: default.esml:907
 msgid "add new Transponder to selected sat (ok)"
 msgstr "pridaj transpondér k zvolenej druzici"
 
-#: default.esml:721 src/timer.cpp:2290
+#: default.esml:729 src/timer.cpp:2425
 msgid "Thursday"
 msgstr "Stvrtok"
 
-#: default.esml:778
+#: default.esml:785
 msgid "set sleeptimer and close window (ok)"
 msgstr "zadajte cas spánku a zatvor okno (ok)"
-
-#: default.esml:444
-msgid "/sec"
-msgstr "/sec"
 
 #: default.esml:367
 msgid "add a new Satellite"
 msgstr "Pridaj druzicu"
 
-#: default.esml:496
+#: default.esml:494
 msgid "open transponder scan"
 msgstr "prehladat transpondér"
 
-#: default.esml:763 default.esml:775
+#: default.esml:770 default.esml:782
 msgid "min"
 msgstr "min"
 
-#: default.esml:446
+#: default.esml:444
 msgid "mA"
 msgstr "mA"
 
-#: default.esml:606
+#: default.esml:613
 msgid "Inversion:"
 msgstr "Inverzia:"
 
-#: default.esml:472
+#: default.esml:470
 msgid "goto advanced motor setup"
 msgstr "rozsírené nastavenie motora"
 
-#: default.esml:718 src/timer.cpp:2289
+#: default.esml:725 src/timer.cpp:2424
 msgid "Monday"
 msgstr "Pondelok"
 
-#: default.esml:805
+#: default.esml:812
 msgid "format"
 msgstr "formát"
 
-#: default.esml:528 default.esml:539
+#: default.esml:526 default.esml:546
 msgid "starts the transponder scan"
 msgstr "zacni vyhladávanie"
 
-#: default.esml:899
+#: default.esml:906
+#, fuzzy
 msgid "sat"
-msgstr "sob"
+msgstr "nastav"
 
 #: default.esml:363
 msgid "Voltage"
 msgstr "Napatie"
 
-#: default.esml:628
+#: default.esml:635
 msgid "Help"
 msgstr "Pomoc"
 
-#: default.esml:863
-#, fuzzy
+#: default.esml:870
 msgid "insert"
-msgstr "nastav"
+msgstr "vlož"
 
-#: default.esml:736
+#: default.esml:744
 msgid "search event name for this beg-/end time in epg"
 msgstr "hladaj meno programu v EPG na zistenie zaciatku a konca nahrávania."
 
-#: default.esml:366 default.esml:390 default.esml:411 default.esml:471
-#: default.esml:570 src/parentallock.cpp:96 src/setup_lcd.cpp:107
+#: default.esml:366 default.esml:390 default.esml:411 default.esml:469
+#: default.esml:577 src/parentallock.cpp:96 src/setup_lcd.cpp:107
 #: src/setup_osd.cpp:258 src/setup_rc.cpp:116 src/setup_rfmod.cpp:128
-#: src/setup_timezone.cpp:37 src/setupengrab.cpp:97 src/setupnetwork.cpp:602
-#: src/setupnetwork.cpp:1037 src/setupvideo.cpp:167 src/setupvideo.cpp:405
+#: src/setup_timezone.cpp:37 src/setupengrab.cpp:97 src/setupnetwork.cpp:604
+#: src/setupnetwork.cpp:1039 src/setupvideo.cpp:167 src/setupvideo.cpp:405
 #: src/tpeditwindow.cpp:112 src/tpeditwindow.cpp:159
 msgid "save"
 msgstr "uloz"
 
-#: default.esml:719 src/epgwindow.cpp:115 src/timer.cpp:181
+#: default.esml:727 src/epgwindow.cpp:115 src/timer.cpp:181
 msgid "Tue"
 msgstr "Uto"
 
 #: chk_blue2.esml:314
+#, fuzzy
 msgid "Play "
-msgstr "prehraj"
+msgstr "Prehraj"
 
-#: default.esml:432 default.esml:482
+#: default.esml:432 default.esml:480
 msgid "choose the Satellite you wish to find"
 msgstr "vyberte druzicu, ktorú chcete nájst"
 
-#: default.esml:457
+#: default.esml:455
 msgid "choose entry to edit or remove"
 msgstr "vyberte polozku pre editáciu alebo vymazanie"
 
-#: default.esml:745
+#: default.esml:753
 msgid "processor: "
 msgstr "procesor"
 
-#: default.esml:716
+#: default.esml:723
 msgid "Endtime"
 msgstr "Ukoncenie"
 
-#: default.esml:842
+#: default.esml:849
 msgid "&#52;"
 msgstr ""
 
-#: default.esml:468
+#: default.esml:466
 msgid "add to table/existing will be overwritten"
 msgstr "pridaj do tabulky/pôvodná bude prepísana"
 
-#: default.esml:746
+#: default.esml:754
 msgid "frontend: "
 msgstr "frontend: "
 
-#: default.esml:852
+#: default.esml:859
 msgid "&#57;"
 msgstr ""
 
@@ -579,39 +578,40 @@ msgstr "AGC"
 msgid "Toneburst:"
 msgstr "Prepínac 12V:"
 
-#: default.esml:765 default.esml:777 default.esml:789
+#: default.esml:772 default.esml:784 default.esml:796
 msgid "standby  "
 msgstr "standby "
 
-#: default.esml:587
+#: default.esml:594
 msgid "FEC:"
 msgstr "FEC:"
 
-#: default.esml:424 default.esml:623
+#: default.esml:424 default.esml:630
 msgid "SYNC"
 msgstr "Sync"
 
-#: default.esml:453
+#: default.esml:451
 msgid "Latitude:"
 msgstr "Zem. Sírka"
 
-#: default.esml:568
+#: default.esml:575
 msgid "Skins:"
 msgstr "Vzhlad"
 
-#: default.esml:752
+#: default.esml:760
+#, fuzzy
 msgid "ok"
-msgstr "ok"
+msgstr "zámok"
 
-#: default.esml:586
+#: default.esml:593
 msgid "choose polarity (left, right)"
 msgstr "vyberte polaritu (< >)"
 
-#: default.esml:583
+#: default.esml:590
 msgid "Inv:"
 msgstr "Inv:"
 
-#: default.esml:728
+#: default.esml:736
 msgid "edit the start time (0..9, left, right)"
 msgstr "cas zaciatku... (0..9 < >)"
 
@@ -620,18 +620,24 @@ msgid "enter LNB lowband offset frequency (0..9, ok)"
 msgstr "zadaj spodnú frekvenciu LNB (0..9, ok)"
 
 #: chk_blue2.esml:318
+#, fuzzy
 msgid "Record "
-msgstr "Nahrávaj"
+msgstr "Nahrávanie"
 
-#: default.esml:722 src/timer.cpp:2290
+#: default.esml:730 src/timer.cpp:2425
 msgid "Friday"
 msgstr "Piatok"
 
-#: default.esml:836
+#: default.esml:843
 msgid "&#49;"
 msgstr ""
 
-#: default.esml:462 src/tpeditwindow.cpp:71
+#: default.esml:726
+#, fuzzy
+msgid "select what todo after event"
+msgstr "Ok pre výber inej relácie"
+
+#: default.esml:460 src/tpeditwindow.cpp:71
 msgid "Orbital Position:"
 msgstr "Pozicia na orbite"
 
@@ -643,31 +649,31 @@ msgstr "DiSEqC opakovani:"
 msgid "enter LNB highband offset frequency (0..9, ok)"
 msgstr "zadajte hornú frekvenciu LNB (0..9)"
 
-#: default.esml:764 default.esml:788
+#: default.esml:771 default.esml:795
 msgid "shutdown the box after recording (ok)"
 msgstr "vypni box po skoncení nahrávania"
 
-#: default.esml:760 default.esml:784
+#: default.esml:767 default.esml:791
 msgid "Stop Record"
 msgstr "Zastav nahrávanie"
 
-#: default.esml:888
+#: default.esml:895
 msgid "Please choose your DiSEqC-Configuration:"
 msgstr "Vyberte si vasu konfiguráciu pripojenia paraboly"
 
-#: default.esml:707
+#: default.esml:714
 msgid "cleanup"
-msgstr ""
+msgstr "vyčisti"
 
-#: default.esml:479
+#: default.esml:477
 msgid "Mode:"
 msgstr "Mód:"
 
-#: default.esml:592 default.esml:604
+#: default.esml:599 default.esml:611
 msgid "KSymb/s"
 msgstr "KSymb/s"
 
-#: default.esml:550
+#: default.esml:557
 msgid "Progress:"
 msgstr "Pracujem:"
 
@@ -679,7 +685,7 @@ msgstr "SNR:"
 msgid "Satellite Configuration"
 msgstr "Nastavenie druzice"
 
-#: default.esml:735
+#: default.esml:743
 msgid "save data and close window"
 msgstr "uloz údaje a zatvor okno"
 
@@ -692,26 +698,27 @@ msgid "save changes"
 msgstr "uloz zmeny"
 
 #: stone.esml:465 silver.esml:472
+#, fuzzy
 msgid "plugins"
 msgstr "Plugins"
 
-#: default.esml:495
+#: default.esml:493
 msgid "save in motor"
 msgstr "uloz do motora"
 
-#: default.esml:901
+#: default.esml:908
 msgid "edit selected transponder (ok)"
 msgstr "uprav transpondér (OK)"
 
-#: default.esml:585
+#: default.esml:592
 msgid "Polarity:"
 msgstr "Polarita:"
 
-#: default.esml:806
+#: default.esml:813
 msgid "do a filesystem check"
 msgstr "kontrola disku"
 
-#: default.esml:805
+#: default.esml:812
 msgid "initialize the disk for use with the dreambox"
 msgstr "priprav disk na pouzitie v DreamBoxe"
 
@@ -719,7 +726,7 @@ msgstr "priprav disk na pouzitie v DreamBoxe"
 msgid "LNB"
 msgstr "LNB"
 
-#: default.esml:718
+#: default.esml:725
 msgid "Mo"
 msgstr "Pon"
 
@@ -727,27 +734,27 @@ msgstr "Pon"
 msgid "select DiSEqC parameter (ok)"
 msgstr "nastav DiSEqC parameter (ok)"
 
-#: default.esml:817
+#: default.esml:824
 msgid "close"
 msgstr "zatvor"
 
-#: default.esml:580 default.esml:598
+#: default.esml:587 default.esml:605
 msgid "Frequency:"
 msgstr "Frekvencia:"
 
-#: default.esml:902
+#: default.esml:909
 msgid "remove selected satellite"
 msgstr "vymaz oznacenú druzicu"
 
-#: default.esml:591 default.esml:603
+#: default.esml:598 default.esml:610
 msgid "enter symbol rate (0..9, left, right)"
 msgstr "zadajte prenosovú rýchlost (SR)"
 
-#: default.esml:872
+#: default.esml:879
 msgid "press ok to enter the name"
 msgstr "Ok pre zadanie mena"
 
-#: default.esml:705
+#: default.esml:712
 msgid "delete the current selected timer (ok)"
 msgstr "vymaz oznacené nacasovanie (ok)"
 
@@ -755,15 +762,15 @@ msgstr "vymaz oznacené nacasovanie (ok)"
 msgid "select MiniDiSEqC parameter (ok)"
 msgstr "nastav parameter MiniDiSEqC (ok)"
 
-#: default.esml:749
+#: default.esml:757
 msgid "Software Version:"
 msgstr "verzia SW:"
 
-#: default.esml:451
+#: default.esml:449
 msgid "enter your longitude (0..9, +, -, ok)"
 msgstr "zadaj svoju zem. sírku (0..9, +, -)"
 
-#: default.esml:861
+#: default.esml:868
 msgid "abc2 &lt;-&gt; 2abc"
 msgstr ""
 
@@ -771,31 +778,31 @@ msgstr ""
 msgid "remove the selected Satellite"
 msgstr "vymaz oznacenú druzicu"
 
-#: default.esml:777
+#: default.esml:784
 msgid "goto standby (ok)"
 msgstr "spánok"
 
-#: default.esml:578
+#: default.esml:585
 msgid "choose wished satellite (ok)"
 msgstr "vyberte si druzicu (ok)"
 
-#: default.esml:807
+#: default.esml:814
 msgid "show extended configuration"
 msgstr "zobrazí rozsírene nastavenia"
 
-#: default.esml:480
+#: default.esml:478
 msgid "choose what you want to do"
 msgstr "vyberte si, co chcete robit"
 
-#: default.esml:724 src/timer.cpp:2289
+#: default.esml:732 src/timer.cpp:2424
 msgid "Sunday"
 msgstr "Nedela"
 
-#: default.esml:459
+#: default.esml:457
 msgid "Number in motor:"
 msgstr "Cislo v motore:"
 
-#: default.esml:797
+#: default.esml:804
 msgid "model:"
 msgstr "model:"
 
@@ -815,7 +822,7 @@ msgstr "Priradenie Sat/LNB:"
 msgid "save changes and use current selected LNB for the chosen satellite"
 msgstr "uloz zmeny a nastavenie LNB pre vybranú druzicu"
 
-#: default.esml:471
+#: default.esml:469
 msgid ""
 "save changes and use the selected LNB (in first page) for the choosen "
 "satellite"
@@ -830,48 +837,50 @@ msgstr "DiSEqC Parameter:"
 msgid "0,5V higher LNB Voltage (for long cables) (ok)"
 msgstr "zvýsenie napajania LNB o 0,5V (ak je dlhý kábel)"
 
-#: default.esml:512
+#: default.esml:510
 msgid "enable/disable check ONIT on any transponder"
 msgstr "povol/zakaz kontrolu ONIT na transpondéroch"
 
-#: default.esml:747
+#: default.esml:755
 msgid "harddisk: "
 msgstr "harddisk:"
 
-#: default.esml:751
-#, fuzzy
+#: default.esml:759
 msgid "FP Version:"
-msgstr "Inverzia:"
+msgstr "Verzia FP:"
 
-#: default.esml:803
+#: default.esml:810
 msgid "status:"
 msgstr "stav:"
 
-#: default.esml:513
+#: default.esml:511
+#, fuzzy
 msgid "use BAT"
 msgstr "pouzi BAT"
 
-#: default.esml:602
+#: default.esml:609
 msgid "Symbolrate:"
 msgstr "SR:"
 
-#: default.esml:772
+#: default.esml:779
+#, fuzzy
 msgid "Set Sleeptimer"
-msgstr "Nastavte vypnutie boxu"
+msgstr "nastavenie rezimu spánku"
 
-#: default.esml:561
+#: default.esml:568
 msgid "press ok to change"
 msgstr "Ok pre zmenu"
 
 #: chk_blue2.esml:313
+#, fuzzy
 msgid "FR "
-msgstr "FR"
+msgstr "FF"
 
-#: default.esml:896
+#: default.esml:903
 msgid "Transponders"
 msgstr "Transpondéry"
 
-#: default.esml:766 default.esml:790
+#: default.esml:773 default.esml:797
 msgid "set recording end time and close window (ok)"
 msgstr "zadajte cas konca nahrávania a zatvor okno (ok)"
 
@@ -879,68 +888,63 @@ msgstr "zadajte cas konca nahrávania a zatvor okno (ok)"
 msgid "close Satellite Configuration"
 msgstr "Zavtvor nastavenie druzic"
 
-#: default.esml:697 default.esml:703 stone.esml:462 silver.esml:469
+#: default.esml:704 default.esml:710 stone.esml:462 silver.esml:469
 msgid "EPG"
 msgstr "EPG"
 
-#: default.esml:901
+#: default.esml:908
 msgid "edit"
 msgstr "uprav"
 
-#: default.esml:723
+#: default.esml:731
 msgid "Sa"
 msgstr "Sob"
 
-#: default.esml:801
+#: default.esml:808
 msgid "connected:"
 msgstr "pripojeny:"
 
-#: default.esml:391 default.esml:472
+#: default.esml:391 default.esml:470
 msgid "next page"
 msgstr "nasl. str."
 
-#: default.esml:590
+#: default.esml:597
 msgid "Symbol Rate:"
 msgstr "SR:"
 
-#: default.esml:766 default.esml:778 default.esml:790
+#: default.esml:773 default.esml:785 default.esml:797
 msgid "set"
 msgstr "nastav"
 
-#: default.esml:487
+#: default.esml:485
 msgid "press left or right to move motor"
 msgstr "pre pohyb motora stlacte < >"
 
-#: default.esml:753
-#, fuzzy
-msgid "Upgrade FP"
-msgstr "Upgrade v poriadku"
-
-#: default.esml:490
+#: default.esml:488
 msgid "calc param 2 (see your motor manual or let it 00)"
 msgstr "parameter 2 (00 alebo pozrite manuál k motoru)"
 
-#: default.esml:733
+#: default.esml:741
 msgid "select the timer type (ok)"
 msgstr "nastavte typ casovaca"
 
-#: default.esml:523 default.esml:535
+#: default.esml:521 default.esml:542
 msgid "choose satellite/cable provider (ok)"
 msgstr "vyber poskytovatela sluzieb"
 
-#: default.esml:512
+#: default.esml:510
 msgid "use ONIT"
 msgstr "ONIT"
 
-#: default.esml:496
+#: default.esml:494
 msgid "search"
 msgstr "hladaj"
 
-#: default.esml:492
+#: default.esml:490
 msgid "Counter(Movement)"
 msgstr "Pocítadlo(pohybu)"
 
-#: default.esml:515
+#: default.esml:513
 msgid "enable/disable initiate network search"
 msgstr "povol/zakáz spustenie sietoveho hladania"
 
@@ -952,7 +956,7 @@ msgstr "Stop"
 msgid "select your configuration here"
 msgstr "Vyberte si svoju konfiguráciu"
 
-#: default.esml:850
+#: default.esml:857
 msgid "&#56;"
 msgstr ""
 
@@ -960,31 +964,31 @@ msgstr ""
 msgid "select DiSEqC repeats (ok)"
 msgstr "nastavte DiSEqC opakovania"
 
-#: default.esml:588
+#: default.esml:595
 msgid "choose the FEC (left, right)"
 msgstr "vyberte FEC (< >)"
 
-#: default.esml:823
+#: default.esml:830
 msgid "Software upgrade..."
 msgstr "Software upgrade.."
 
-#: default.esml:879 src/system_settings.cpp:58
+#: default.esml:886 src/system_settings.cpp:60
 msgid "OSD Language"
 msgstr "Jazyk OSD"
 
-#: default.esml:569
+#: default.esml:576
 msgid "select skin and press ok or choose save"
 msgstr "vyberte vzhlad a ulozte"
 
-#: default.esml:887
+#: default.esml:894
 msgid "DiSEqC..."
 msgstr "DiSEqC..."
 
-#: default.esml:727 default.esml:731
+#: default.esml:735 default.esml:739
 msgid "select day (ok)"
 msgstr "nastavte den"
 
-#: default.esml:527
+#: default.esml:525
 msgid "change circular to linear polarization"
 msgstr "zamen kruhovú za lineárnu polarizáciu"
 
@@ -992,32 +996,32 @@ msgstr "zamen kruhovú za lineárnu polarizáciu"
 msgid "goto next page (DiSEqC)"
 msgstr "nasl. strana  (DiSEqC)"
 
-#: default.esml:899
+#: default.esml:906
 msgid "select sat(up/down), ok(edit), green(add new), red(delete)"
 msgstr ""
 "Nastav sat(hore/dole), ok (editacia), zelene (pridat novy), cervene(zmaz)"
 
-#: default.esml:713
+#: default.esml:720
 msgid "Timer Edit"
 msgstr "Editácia casovaca"
 
-#: default.esml:735
+#: default.esml:743
 msgid "apply"
 msgstr "vykonaj"
 
-#: default.esml:856
+#: default.esml:863
 msgid "&#48;"
 msgstr ""
 
-#: default.esml:722
+#: default.esml:730
 msgid "Fr"
 msgstr "Pia"
 
-#: default.esml:717
+#: default.esml:724
 msgid "Repeated timer"
 msgstr "Opakovaný casovac"
 
-#: default.esml:483
+#: default.esml:481
 msgid "enter stored satellite pos"
 msgstr "zadajte ulozené poz. druzic"
 
@@ -1025,31 +1029,31 @@ msgstr "zadajte ulozené poz. druzic"
 msgid "Sequence repeat"
 msgstr "opakovanie sekvencie"
 
-#: default.esml:815
+#: default.esml:822
 msgid "status output:"
 msgstr "stav výstupu:"
 
-#: default.esml:796
+#: default.esml:803
 msgid "Harddisk"
 msgstr "Harddisk"
 
-#: default.esml:493
+#: default.esml:491
 msgid "bla"
 msgstr "bla"
 
-#: default.esml:765 default.esml:789
+#: default.esml:772 default.esml:796
 msgid "goto standby after recording (ok)"
 msgstr "vypni po skoncení nahrávania"
 
-#: default.esml:514 default.esml:526 default.esml:537
+#: default.esml:512 default.esml:524 default.esml:544
 msgid "only Free"
 msgstr "iba volné"
 
-#: default.esml:723 src/timer.cpp:2290
+#: default.esml:731 src/timer.cpp:2425
 msgid "Saturday"
 msgstr "Sobota"
 
-#: default.esml:774
+#: default.esml:781
 msgid "(0..9, left, right, ok)"
 msgstr "(0..9,< >, ok)"
 
@@ -1057,23 +1061,25 @@ msgstr "(0..9,< >, ok)"
 msgid "swaps committed and uncommitted DiSEqC Commands"
 msgstr "swaps committed and uncommitted DiSEqC Commands"
 
-#: default.esml:864
+#: default.esml:871
 msgid "vol-"
-msgstr ""
+msgstr "hlas-"
 
-#: default.esml:515
+#: default.esml:513
+#, fuzzy
 msgid "network search"
-msgstr "sietov. hladanie"
+msgstr "sietové hladanie"
 
-#: default.esml:514
+#: default.esml:512
 msgid "add only not scrambled services"
 msgstr "pridaj iba nekódované kanály"
 
-#: lib/dvb/dvbci.cpp:108 lib/dvb/dvbci.cpp:123 lib/dvb/dvbci.cpp:1241
+#: lib/dvb/dvbci.cpp:108 lib/dvb/dvbci.cpp:123 lib/dvb/dvbci.cpp:1242
 msgid "no module"
 msgstr "ziadny modul"
 
 #: lib/dvb/dvbwidgets.cpp:53
+#, fuzzy
 msgid "vertical"
 msgstr "vertikálny"
 
@@ -1082,60 +1088,60 @@ msgid "horizontal"
 msgstr "horizontálny"
 
 #: lib/dvb/service.cpp:202 lib/dvb/service.cpp:232 src/enigma_bouquet.cpp:212
-#: src/enigma_main.cpp:3792 src/enigma_main.cpp:3804 src/parentallock.cpp:123
-#: src/parentallock.cpp:155 src/timer.cpp:2013
+#: src/enigma_main.cpp:3876 src/enigma_main.cpp:3888 src/parentallock.cpp:123
+#: src/parentallock.cpp:155 src/timer.cpp:2147
 msgid "parental"
 msgstr "Rodicovské"
 
-#: lib/dvb/servicedvb.cpp:685
+#: lib/dvb/servicedvb.cpp:591
 msgid "Providers (TV)"
 msgstr "Poskytovatelia (TV)"
 
-#: lib/dvb/servicedvb.cpp:689
+#: lib/dvb/servicedvb.cpp:595
 msgid "Providers (Radio)"
 msgstr "Poskytovatelia (rádia)"
 
-#: lib/dvb/servicedvb.cpp:693
+#: lib/dvb/servicedvb.cpp:599
 msgid "Providers (Data)"
 msgstr "Poskytovatelia (DATA)"
 
-#: lib/dvb/servicedvb.cpp:698
+#: lib/dvb/servicedvb.cpp:604
 msgid "All services (TV)"
 msgstr "Vsetky kanály (TV)"
 
-#: lib/dvb/servicedvb.cpp:702
+#: lib/dvb/servicedvb.cpp:608
 msgid "All services (Radio)"
 msgstr "Vsetky kanály (Radio)"
 
-#: lib/dvb/servicedvb.cpp:706
+#: lib/dvb/servicedvb.cpp:612
 msgid "All services (Data)"
 msgstr "Vsetky kanály (DATA)"
 
-#: lib/dvb/servicedvb.cpp:713
+#: lib/dvb/servicedvb.cpp:619
 msgid "Satellites (TV)"
 msgstr "Druzice (TV)"
 
-#: lib/dvb/servicedvb.cpp:717
+#: lib/dvb/servicedvb.cpp:623
 msgid "Satellites (Radio)"
 msgstr "Druzice (radio)"
 
-#: lib/dvb/servicedvb.cpp:721
+#: lib/dvb/servicedvb.cpp:627
 msgid "Satellites (Data)"
 msgstr "Druzice (data)"
 
-#: lib/dvb/servicedvb.cpp:1100
+#: lib/dvb/servicedvb.cpp:1001
 msgid " - provider"
 msgstr "- poskytovatel"
 
-#: lib/dvb/servicedvb.cpp:1108
+#: lib/dvb/servicedvb.cpp:1009
 msgid " - services"
 msgstr "- programy"
 
-#: lib/dvb/servicemp3.cpp:160
+#: lib/dvb/servicemp3.cpp:177
 msgid "Connecting..."
 msgstr "Pripájam..."
 
-#: lib/dvb/servicemp3.cpp:359
+#: lib/dvb/servicemp3.cpp:377
 msgid "playing..."
 msgstr "prehrávam"
 
@@ -1154,10 +1160,12 @@ msgid "TV mode"
 msgstr "mód TV"
 
 #: lib/dvb/servicestructure.cpp:12
+#, fuzzy
 msgid "Radio Mode"
-msgstr "mód rádia"
+msgstr "Mód rádia"
 
 #: lib/dvb/servicestructure.cpp:14
+#, fuzzy
 msgid "File Mode"
 msgstr "Súborový mód"
 
@@ -1165,7 +1173,7 @@ msgstr "Súborový mód"
 msgid "TV/Radio"
 msgstr "TV/Rádio"
 
-#: lib/dvb/servicestructure.cpp:17 src/enigma_main.cpp:6735
+#: lib/dvb/servicestructure.cpp:17 src/enigma_main.cpp:6829
 #: src/sselect.cpp:369 src/sselect.cpp:376
 msgid "Bouquets"
 msgstr "Pakety"
@@ -1186,7 +1194,8 @@ msgstr "Áno"
 msgid "No"
 msgstr "Nie"
 
-#: lib/gui/listbox.cpp:772 src/enigma_main.cpp:2915
+#: lib/gui/listbox.cpp:785 src/enigma_main.cpp:3010
+#, fuzzy
 msgid "no description available"
 msgstr "Popis nie je k dispozícii"
 
@@ -1207,23 +1216,20 @@ msgid "remove the character at the cursor position"
 msgstr "zmaz znak na pozícii kurzora"
 
 #: lib/gui/textinput.cpp:23
-#, fuzzy
 msgid "remove the character before the cursor position"
-msgstr "zmaz znak na pozícii kurzora"
+msgstr "zmaž znak pred pozíciou kurzora"
 
 #: lib/gui/textinput.cpp:24
 msgid "shows the textinputfield help"
-msgstr ""
+msgstr "zobrazí riadok pre vstup textu"
 
 #: lib/gui/textinput.cpp:35
-#, fuzzy
 msgid "press ok to save (help is available)"
-msgstr "OK pre výber inej druzice"
+msgstr "OK pre uloženie (nápoveda prístupná)"
 
 #: lib/gui/textinput.cpp:56
-#, fuzzy
 msgid "press ok to save"
-msgstr "Ok pre zmenu"
+msgstr "OK pre uloženie"
 
 #: src/channelinfo.cpp:72
 msgid "Movie"
@@ -1555,7 +1561,7 @@ msgid "Filename: "
 msgstr "názov:"
 
 #: src/engrab.cpp:36 src/enigma_event.cpp:283 src/enigma_event.cpp:292
-#: src/timer.cpp:1957
+#: src/timer.cpp:2084
 msgid "no description is available"
 msgstr "Popis nie je k dispozícii"
 
@@ -1595,8 +1601,9 @@ msgid "Service Organising"
 msgstr "Usporiadanie kanálov"
 
 #: src/enigma_bouquet.cpp:42
+#, fuzzy
 msgid "Create new bouquet"
-msgstr "vytvor noý paket"
+msgstr "vytvor nový paket"
 
 #: src/enigma_bouquet.cpp:42
 msgid "create new empty bouquet"
@@ -1659,13 +1666,12 @@ msgid "enter Common Interface menu (mmi)"
 msgstr "Vstup do menu CI"
 
 #: src/enigma_ci.cpp:107
-#, fuzzy
 msgid "can handle two services"
-msgstr "Zmaz nahrávku"
+msgstr "dokáže spracovať dve služby"
 
 #: src/enigma_ci.cpp:108
 msgid "can your CI descramble two services at the same time?"
-msgstr ""
+msgstr "dokáže váš Ci modul dekóovať dva programy v rovnakom čase ?"
 
 #: src/enigma_ci.cpp:166 src/enigma_ci.cpp:172
 msgid "resetting....please wait"
@@ -1679,45 +1685,59 @@ msgstr "CAM modul"
 msgid "waiting for CI answer..."
 msgstr "cakám na odpoved modulu"
 
-#: src/enigma_dyn.cpp:1982
-#, fuzzy
+#: src/enigma_dyn.cpp:1916
 msgid "No channel available"
-msgstr "Info o zmenach je nedostupne."
+msgstr "Žiadny kanál nie je k dispozícii"
 
-#: src/enigma_dyn.cpp:1986 src/enigma_dyn.cpp:3518 src/enigma_dyn.cpp:3766
-#, fuzzy
+#: src/enigma_dyn.cpp:1920 src/enigma_dyn.cpp:3476 src/enigma_dyn.cpp:3836
 msgid "No description available"
 msgstr "Popis nie je k dispozícii"
 
-#: src/enigma_dyn.cpp:2062
-#, fuzzy
+#: src/enigma_dyn.cpp:1996
 msgid "No timer events available"
-msgstr "Popis nie je k dispozícii"
+msgstr "Neexistujú načasované udalosti"
 
-#: src/enigma_dyn.cpp:2080
-#, fuzzy
+#: src/enigma_dyn.cpp:2014
 msgid "No regular timer events available"
-msgstr "Popis nie je k dispozícii"
+msgstr "Neexistujú načasované udalosti"
 
-#: src/enigma_dyn.cpp:2089
-#, fuzzy
+#: src/enigma_dyn.cpp:2023
 msgid "No repeating timer events available"
-msgstr "Popis nie je k dispozícii"
+msgstr "Opakujúce sa časovacie položky nie sú k dispozícii"
 
-#: src/enigma_dyn.cpp:3535
+#: src/enigma_dyn.cpp:3493 src/enigma_dyn.cpp:3708
 msgid ""
 "Timer event could not be added because time of the event overlaps with an "
 "already existing event."
 msgstr ""
+"Výber nemohol byť do časovača pridaný, lebo je na jej mieste iná položka."
 
-#: src/enigma_dyn.cpp:3537
+#: src/enigma_dyn.cpp:3495 src/enigma_dyn.cpp:3711
 msgid "Timer event was created successfully."
+msgstr "Položka v časovači bola úspešne vytvorená"
+
+#: src/enigma_dyn.cpp:3725 src/timer.cpp:1931
+#, fuzzy
+msgid "Nothing"
+msgstr "[nic]"
+
+#: src/enigma_dyn.cpp:3731 src/timer.cpp:1932
+#, fuzzy
+msgid "Standby"
+msgstr "Standby:"
+
+#: src/enigma_dyn.cpp:3737 src/enigma_mainmenu.cpp:69
+#: src/enigma_mainmenu.cpp:200 src/timer.cpp:1934
+msgid "Shutdown"
+msgstr "Vypnút"
+
+#: src/enigma_dyn.cpp:3770 src/enigma_dyn.cpp:3807
+msgid "After Event:"
 msgstr ""
 
-#: src/enigma_dyn.cpp:3800
-#, fuzzy
+#: src/enigma_dyn.cpp:3870
 msgid "No detailed description available"
-msgstr "Popis nie je k dispozícii"
+msgstr "Detailný popis nie je k dispozícii"
 
 #: src/enigma_epg.cpp:82
 msgid "press 1 ... 6 to select count of visible hours"
@@ -1734,67 +1754,68 @@ msgstr "Zatvori prehladávac"
 #: src/enigma_event.cpp:221
 #, c-format
 msgid "Original duration: %d min"
-msgstr ""
+msgstr "Pôvodná dĺžka: %d minút"
 
 #: src/enigma_event.cpp:272 src/streaminfo.cpp:570 src/streaminfo.cpp:621
 msgid "no information is available"
 msgstr "Informácie niesu k dispozícii"
 
-#: src/enigma_info.cpp:41
+#: src/enigma_info.cpp:40
 msgid "Infos"
 msgstr "Info"
 
-#: src/enigma_info.cpp:44 src/streaminfo.cpp:539
+#: src/enigma_info.cpp:43 src/streaminfo.cpp:539
 msgid "Streaminfo"
 msgstr "Streaminfo"
 
-#: src/enigma_info.cpp:44
+#: src/enigma_info.cpp:43
 msgid "open the Streaminfo"
 msgstr "otvori sa okno Streaminfo"
 
-#: src/enigma_info.cpp:50
+#: src/enigma_info.cpp:49
 msgid "Show BN version"
 msgstr "Verzia BN"
 
-#: src/enigma_info.cpp:50
+#: src/enigma_info.cpp:49
 msgid "show the Current Version of the Betanova FW"
 msgstr "Zobraz aktuálnu verziu firmware BetaNova"
 
-#: src/enigma_info.cpp:53
+#: src/enigma_info.cpp:52
 msgid "open the about dialog"
 msgstr "Info box"
 
-#: src/enigma_info.cpp:202
+#: src/enigma_info.cpp:170
 msgid "Frontend: Satellite"
 msgstr "Vybrané: Satelitné vysielanie"
 
-#: src/enigma_info.cpp:205
+#: src/enigma_info.cpp:173
 msgid "Frontend: Cable"
 msgstr "Vybrane: Kablovka"
 
-#: src/enigma_info.cpp:208
+#: src/enigma_info.cpp:176
 msgid "Frontend: Terrestrial"
 msgstr "Vybrane: Terestrial"
 
-#: src/enigma_info.cpp:257 src/streaminfo.cpp:271 src/streaminfo.cpp:282
+#: src/enigma_info.cpp:225 src/streaminfo.cpp:271 src/streaminfo.cpp:282
 #: src/streaminfo.cpp:294 src/streaminfo.cpp:306 src/streaminfo.cpp:318
 #: src/streaminfo.cpp:470 src/streaminfo.cpp:509
+#, fuzzy
 msgid "none"
 msgstr "ziadny"
 
-#: src/enigma_info.cpp:263 src/timer.cpp:2354 src/upgrade.cpp:267
+#: src/enigma_info.cpp:231 src/timer.cpp:2489 src/upgrade.cpp:267
 msgid "unknown"
 msgstr "neznáma"
 
-#: src/enigma_info.cpp:268
+#: src/enigma_info.cpp:236
 msgid "release"
 msgstr "verzia"
 
-#: src/enigma_info.cpp:269
+#: src/enigma_info.cpp:237
 msgid "beta"
 msgstr "beta"
 
-#: src/enigma_info.cpp:270
+#: src/enigma_info.cpp:238
 msgid "internal"
 msgstr "internal"
 
@@ -1918,7 +1939,7 @@ msgstr "prerus prehrávanie"
 msgid "resume playback"
 msgstr "obnov prehrávanie"
 
-#: src/enigma_main.cpp:118 src/enigma_main.cpp:131 src/enigma_main.cpp:2905
+#: src/enigma_main.cpp:118 src/enigma_main.cpp:131 src/enigma_main.cpp:3000
 msgid "record"
 msgstr "nahrávaj"
 
@@ -1962,15 +1983,15 @@ msgstr "otvori sa prehlad kanálov a zobrazí nahrané programy"
 msgid "open the serviceselector and shows the playlist"
 msgstr "otvori sa prehlad kanálov a zobrazí sa playlist"
 
-#: src/enigma_main.cpp:146 src/sselect.cpp:114
+#: src/enigma_main.cpp:146 src/sselect.cpp:115
 msgid "switch to TV mode"
 msgstr "prepni do módu TV"
 
-#: src/enigma_main.cpp:147 src/sselect.cpp:115
+#: src/enigma_main.cpp:147 src/sselect.cpp:116
 msgid "switch to Radio mode"
 msgstr "prepni do módu rádia"
 
-#: src/enigma_main.cpp:148 src/sselect.cpp:116
+#: src/enigma_main.cpp:148 src/sselect.cpp:117
 msgid "switch to File mode"
 msgstr "prepni do súboroveho módu"
 
@@ -2010,146 +2031,155 @@ msgstr "NVOD"
 msgid "Video"
 msgstr "Obraz"
 
-#: src/enigma_main.cpp:650 src/enigma_main.cpp:771
+#: src/enigma_main.cpp:658 src/enigma_main.cpp:817
 msgid "Audio"
 msgstr "Zvuk"
 
-#: src/enigma_main.cpp:661 src/enigma_main.cpp:807
-#, fuzzy
-msgid "press left or right to change"
-msgstr "pre pohyb motora stlacte < >"
-
-#: src/enigma_main.cpp:662 src/enigma_main.cpp:808
+#: src/enigma_main.cpp:674 src/enigma_main.cpp:833
 msgid "   Left Mono  >"
-msgstr ""
+msgstr "mono v ľavo >"
 
-#: src/enigma_main.cpp:663 src/enigma_main.cpp:809
-#, fuzzy
+#: src/enigma_main.cpp:675 src/enigma_main.cpp:834
 msgid "<  Stereo  >"
-msgstr "STOP"
+msgstr "< Stereo >"
 
-#: src/enigma_main.cpp:664 src/enigma_main.cpp:810
+#: src/enigma_main.cpp:676 src/enigma_main.cpp:835
 msgid "<  Right Mono  "
-msgstr ""
+msgstr "< mono v pravo "
 
-#: src/enigma_main.cpp:675
+#: src/enigma_main.cpp:704
 msgid "Audiotrack(AC3)"
 msgstr "zvuková stopa (AC3)"
 
-#: src/enigma_main.cpp:675
+#: src/enigma_main.cpp:704
 msgid "Audiotrack"
 msgstr "Zvuková stopa"
 
-#: src/enigma_main.cpp:817
+#: src/enigma_main.cpp:871
 msgid "no subtitles"
-msgstr ""
+msgstr "bez titulkov"
 
-#: src/enigma_main.cpp:859
+#: src/enigma_main.cpp:913
 msgid "multiple Services"
 msgstr "viac subkanálov"
 
-#: src/enigma_main.cpp:870 src/enigma_main.cpp:921 src/enigma_main.cpp:937
+#: src/enigma_main.cpp:924 src/enigma_main.cpp:975 src/enigma_main.cpp:991
 msgid "enable quickzap"
 msgstr "povol quickzap"
 
-#: src/enigma_main.cpp:878
+#: src/enigma_main.cpp:932
 msgid "add to bouquet"
 msgstr "pridaj do paketu"
 
-#: src/enigma_main.cpp:917
+#: src/enigma_main.cpp:971
 msgid "disable quickzap"
 msgstr "zakáz quickzap"
 
-#: src/enigma_main.cpp:1036
+#: src/enigma_main.cpp:1090
 msgid "Channel"
 msgstr "Kanál"
 
-#: src/enigma_main.cpp:1041
+#: src/enigma_main.cpp:1095
 msgid "Channel:"
 msgstr "Kanál:"
 
-#: src/enigma_main.cpp:1116
+#: src/enigma_main.cpp:1170
 #, c-format
 msgid "Please wait while the motor is turning to %d.%d°%c ...."
 msgstr "Cakajte kým motor natocí pozíciu %d.%d°%c ...."
 
-#: src/enigma_main.cpp:1116
+#: src/enigma_main.cpp:1170
 msgid "Message"
 msgstr "Oznam"
 
-#: src/enigma_main.cpp:1210
+#: src/enigma_main.cpp:1264
 msgid "recorded movies"
 msgstr "nahrané filmy"
 
-#: src/enigma_main.cpp:1322
+#: src/enigma_main.cpp:1376
 msgid "Bouquets (TV)"
 msgstr "TV pakety"
 
-#: src/enigma_main.cpp:1333
+#: src/enigma_main.cpp:1387
 msgid "Bouquets (File)"
 msgstr "Pakety (súbor)"
 
-#: src/enigma_main.cpp:1345
+#: src/enigma_main.cpp:1399
 msgid "Bouquets (Radio)"
 msgstr "Pakety rádia"
 
-#: src/enigma_main.cpp:1387
+#: src/enigma_main.cpp:1441
 msgid "Favourites (TV)"
 msgstr "Oblúbené (TV)"
 
-#: src/enigma_main.cpp:1392
+#: src/enigma_main.cpp:1446
 msgid "Favourites (Radio)"
 msgstr "Oblúbené (Rádia)"
 
-#: src/enigma_main.cpp:1397
+#: src/enigma_main.cpp:1451
 msgid "Favourites (File)"
 msgstr "Oblúbené (subor)"
 
-#: src/enigma_main.cpp:1783
+#: src/enigma_main.cpp:1846
 msgid "please wait while initializing Common Interface ..."
 msgstr "Cakajte kým pripravím CI modul"
 
-#: src/enigma_main.cpp:2094
+#: src/enigma_main.cpp:2157
 msgid "no EPG available"
 msgstr "EPG nedostupná"
 
-#: src/enigma_main.cpp:2719
+#: src/enigma_main.cpp:2814
 msgid "ShutdownTimer"
 msgstr "Casovac vypnutia"
 
-#: src/enigma_main.cpp:2719
+#: src/enigma_main.cpp:2814
 msgid "SleepTimer"
 msgstr "Casovac spánku"
 
-#: src/enigma_main.cpp:2905
+#: src/enigma_main.cpp:3000
 msgid "Sorry, you cannot record this service."
 msgstr "Prepácte, ale toto nemozete nahrat"
 
-#: src/enigma_main.cpp:3088
+#: src/enigma_main.cpp:3184
 msgid "Show recorded movies?"
 msgstr "Zobrazit nahrávky ?"
 
-#: src/enigma_main.cpp:3088
+#: src/enigma_main.cpp:3184
 msgid "recording finished"
 msgstr "nahrávanie je ukoncené"
 
-#: src/enigma_main.cpp:3292
+#: src/enigma_main.cpp:3301
+#, fuzzy
+msgid "Shutdown your Receiver now?"
+msgstr "Vypne dreambox"
+
+#: src/enigma_main.cpp:3301 src/enigma_main.cpp:3317
+#, fuzzy
+msgid "Timer Message"
+msgstr "Oznam"
+
+#: src/enigma_main.cpp:3317
+#, fuzzy
+msgid "Go to Standby now?"
+msgstr "spánok"
+
+#: src/enigma_main.cpp:3376
 msgid "Enter new name:"
 msgstr "Zadajte nové meno:"
 
-#: src/enigma_main.cpp:3293
+#: src/enigma_main.cpp:3377
 msgid "Rename entry"
 msgstr "Premenuj polozku"
 
-#: src/enigma_main.cpp:3347
+#: src/enigma_main.cpp:3431
 msgid "Sorry, you cannot delete this service."
 msgstr "Prepácte, ale toto nemozete zmazat"
 
-#: src/enigma_main.cpp:3347
+#: src/enigma_main.cpp:3431
 msgid "delete service"
 msgstr "Zmaz nahrávku"
 
-#: src/enigma_main.cpp:3374 src/enigma_main.cpp:3460
+#: src/enigma_main.cpp:3458 src/enigma_main.cpp:3544
 #, c-format
 msgid ""
 "You are trying to delete '%s'.\n"
@@ -2158,11 +2188,11 @@ msgstr ""
 "Pokúsate sa zmazat '%s'.\n"
 "Naozaj to chcete?"
 
-#: src/enigma_main.cpp:3375
+#: src/enigma_main.cpp:3459
 msgid "Delete recorded stream"
 msgstr "Zmaz nahraný záznam"
 
-#: src/enigma_main.cpp:3406
+#: src/enigma_main.cpp:3490
 msgid ""
 "This is a complete Bouquet!\n"
 "Really delete?"
@@ -2170,63 +2200,65 @@ msgstr ""
 "Toto je celý paket programov.\n"
 "Naozaj to zmazat?"
 
-#: src/enigma_main.cpp:3407
+#: src/enigma_main.cpp:3491
 msgid "Delete bouquet"
 msgstr "Premenuj paket"
 
-#: src/enigma_main.cpp:3461
+#: src/enigma_main.cpp:3545
+#, fuzzy
 msgid "Delete File"
-msgstr "Zmaz súbor"
+msgstr "zmaz súbor"
 
-#: src/enigma_main.cpp:3516
+#: src/enigma_main.cpp:3600
 msgid "Enter new Filename:"
 msgstr "Zadajte nové meno:"
 
-#: src/enigma_main.cpp:3517
+#: src/enigma_main.cpp:3601
+#, fuzzy
 msgid "Rename File"
-msgstr "Premenuj súbor"
+msgstr "premenuj súbor"
 
-#: src/enigma_main.cpp:3580
+#: src/enigma_main.cpp:3664
 msgid "Enter new name for the bouquet:"
 msgstr "Zadaj meno pre paket:"
 
-#: src/enigma_main.cpp:3581
+#: src/enigma_main.cpp:3665
 msgid "Rename bouquet"
 msgstr "Premenuj paket"
 
-#: src/enigma_main.cpp:3606
+#: src/enigma_main.cpp:3690
 msgid "Enter name for the new bouquet:"
 msgstr "Zadaj meno nového paketu:"
 
-#: src/enigma_main.cpp:3607
+#: src/enigma_main.cpp:3691
 msgid "Add new bouquet"
 msgstr "Pridaj nový paket"
 
-#: src/enigma_main.cpp:3652
+#: src/enigma_main.cpp:3736
 msgid "unnamed"
 msgstr "bez mena"
 
-#: src/enigma_main.cpp:3653
+#: src/enigma_main.cpp:3737
 msgid "Enter marker name:"
 msgstr "Zadajte meno zálozky"
 
-#: src/enigma_main.cpp:3654
+#: src/enigma_main.cpp:3738
 msgid "create marker"
 msgstr "vytvor zálozku"
 
-#: src/enigma_main.cpp:3692
+#: src/enigma_main.cpp:3776
 msgid "unnamed bouquet"
 msgstr "paket bez mena"
 
-#: src/enigma_main.cpp:4019 src/enigma_main.cpp:4020
+#: src/enigma_main.cpp:4103 src/enigma_main.cpp:4104
 msgid "This directory doesn't contain anything playable!"
 msgstr "Tento adresár nemoze obsahovat nic prehratelné!"
 
-#: src/enigma_main.cpp:4020
+#: src/enigma_main.cpp:4104
 msgid "Play"
 msgstr "Prehraj"
 
-#: src/enigma_main.cpp:4399
+#: src/enigma_main.cpp:4483
 msgid ""
 "A timer based recording is currently in progress!\n"
 "This stops the timer, and recording!"
@@ -2234,7 +2266,7 @@ msgstr ""
 "Práve prebieha načasované nahrávanie!\n"
 "Tento Vás krok zastaví casovac, a samozrejme aj nahrávanie!"
 
-#: src/enigma_main.cpp:4409
+#: src/enigma_main.cpp:4493
 msgid ""
 "A recording is currently in progress!\n"
 "This stops the recording!"
@@ -2242,7 +2274,7 @@ msgstr ""
 "Práve prebieha nahrávanie!.\n"
 "Tento vás krok nahrávanie zastaví!"
 
-#: src/enigma_main.cpp:4421
+#: src/enigma_main.cpp:4505
 msgid ""
 "A timer event is currently in progress!\n"
 "This stops the timer event!"
@@ -2250,325 +2282,324 @@ msgstr ""
 "Práve prebieha nacasovaná úloha!\n"
 "Tento vás krok ju prerusí!"
 
-#: src/enigma_main.cpp:4429
+#: src/enigma_main.cpp:4513
 msgid "Really do this?"
 msgstr "Ste si istý ?"
 
-#: src/enigma_main.cpp:4504
+#: src/enigma_main.cpp:4588
 msgid "please wait until the timer has started the recording (max 10 seconds)"
-msgstr ""
+msgstr "prosím čakajte, dokiaľ časovač nespustí nahrávanie (max 10 sekúnd)"
 
-#: src/enigma_main.cpp:4505
+#: src/enigma_main.cpp:4589
 #, fuzzy
 msgid "information"
 msgstr "Informácie"
 
-#: src/enigma_main.cpp:5124
+#: src/enigma_main.cpp:5204
 msgid "Record failed due to inaccessable storage."
-msgstr ""
+msgstr "Nemôžem nahrávať. Žiadne zariadenie nie je prístupné."
 
-#: src/enigma_main.cpp:5126
+#: src/enigma_main.cpp:5206
 msgid ""
 "Record stopped due to full harddisk. Delete some recordings and try again."
-msgstr ""
+msgstr "Harddisk je plný. Nahrávanie bolo zastavené"
 
-#: src/enigma_main.cpp:5128
+#: src/enigma_main.cpp:5208
 msgid ""
 "Record failed due to an write error during recording. Check for filesystem "
 "corruption."
 msgstr ""
+"Nahrávanie bolo zastavené kvôli chybe zápisu na zariadenie. Skontrolujte "
+"súborový systém."
 
-#: src/enigma_main.cpp:5130
-#, fuzzy
+#: src/enigma_main.cpp:5210
 msgid "record failed"
-msgstr "nahrávanie je ukoncené"
+msgstr "nahrávanie zlyhalo"
 
-#: src/enigma_main.cpp:5350 src/enigma_main.cpp:5351
+#: src/enigma_main.cpp:5432 src/enigma_main.cpp:5433
 msgid "One moment please..."
 msgstr "Momentík..."
 
-#: src/enigma_main.cpp:5351 src/enigma_main.cpp:5355 src/enigma_main.cpp:5363
-#: src/enigma_main.cpp:5370 src/enigma_main.cpp:5376 src/enigma_main.cpp:5381
-#: src/enigma_main.cpp:5386 src/timer.cpp:1901
+#: src/enigma_main.cpp:5433 src/enigma_main.cpp:5437 src/enigma_main.cpp:5445
+#: src/enigma_main.cpp:5452 src/enigma_main.cpp:5458 src/enigma_main.cpp:5463
+#: src/enigma_main.cpp:5468 src/timer.cpp:2028
 msgid "switch"
 msgstr "prepni"
 
-#: src/enigma_main.cpp:5354 src/enigma_main.cpp:5355
+#: src/enigma_main.cpp:5436 src/enigma_main.cpp:5437
 msgid "Service could not be found !"
 msgstr "Kanál nenájdený!"
 
-#: src/enigma_main.cpp:5362 src/enigma_main.cpp:5363
+#: src/enigma_main.cpp:5444 src/enigma_main.cpp:5445
 msgid "This service could not be descrambled"
 msgstr "Kanál nemoze byt dekódovaný!"
 
-#: src/enigma_main.cpp:5369 src/enigma_main.cpp:5370
+#: src/enigma_main.cpp:5451 src/enigma_main.cpp:5452
 msgid "This service doesn't currently send a signal"
 msgstr "Tento kanál momentálne nevysiela"
 
-#: src/enigma_main.cpp:5374 src/enigma_main.cpp:5376
+#: src/enigma_main.cpp:5456 src/enigma_main.cpp:5458
 msgid "This content could not be displayed"
 msgstr "Toto nemozem zobrazit"
 
-#: src/enigma_main.cpp:5379 src/enigma_main.cpp:5381
+#: src/enigma_main.cpp:5461 src/enigma_main.cpp:5463
 msgid "NVOD Service - please select a starttime"
 msgstr "NVOD kanál - zadajde cas zaciatku sledovania"
 
-#: src/enigma_main.cpp:5384 src/enigma_main.cpp:5386
+#: src/enigma_main.cpp:5466 src/enigma_main.cpp:5468
 msgid "Unknown error!!"
 msgstr "Prapodivná chyba!!"
 
-#: src/enigma_main.cpp:5861 src/sselect.cpp:375
+#: src/enigma_main.cpp:5944 src/sselect.cpp:375
 msgid "Playlist"
 msgstr "Playlist"
 
-#: src/enigma_main.cpp:5863
+#: src/enigma_main.cpp:5946
 msgid "History"
 msgstr "história"
 
-#: src/enigma_main.cpp:6287
+#: src/enigma_main.cpp:6382
 msgid "Service Menu"
 msgstr "Servisné menu"
 
-#: src/enigma_main.cpp:6299 src/sselect.cpp:112
+#: src/enigma_main.cpp:6394 src/sselect.cpp:113
 msgid "add service to playlist"
 msgstr "zarad do playlistu"
 
-#: src/enigma_main.cpp:6299
+#: src/enigma_main.cpp:6394
 msgid "add selected service to the playlist"
 msgstr "zarad vybraný kanál do playlistu"
 
-#: src/enigma_main.cpp:6308
+#: src/enigma_main.cpp:6403
 msgid "create new bouquet"
 msgstr "vytvor nový paket"
 
-#: src/enigma_main.cpp:6308
+#: src/enigma_main.cpp:6403
 msgid "select to create a new bouquet"
 msgstr "oznacte polozky pre vytvorenie nového paketu"
 
-#: src/enigma_main.cpp:6320
+#: src/enigma_main.cpp:6415
 msgid "duplicate bouquet"
 msgstr "Skopíruj paket"
 
-#: src/enigma_main.cpp:6320
+#: src/enigma_main.cpp:6415
 msgid "duplicate the complete bouquet with all content"
 msgstr "Duplikuj cely paket"
 
-#: src/enigma_main.cpp:6326 src/enigma_main.cpp:6380 src/enigma_main.cpp:6385
-#: src/enigma_main.cpp:6393
+#: src/enigma_main.cpp:6421 src/enigma_main.cpp:6474 src/enigma_main.cpp:6479
+#: src/enigma_main.cpp:6488
 msgid "add to specific bouquet"
 msgstr "pridaj do zadaného paketu"
 
-#: src/enigma_main.cpp:6326
+#: src/enigma_main.cpp:6421
 msgid "add the selected service to another bouquet"
 msgstr "Pridaj oznacený kanál do iného paketu"
 
-#: src/enigma_main.cpp:6328
+#: src/enigma_main.cpp:6423
 msgid "add marker"
 msgstr "pridaj zálozku"
 
-#: src/enigma_main.cpp:6328
+#: src/enigma_main.cpp:6423
 msgid "create a new marker in the current bouquet"
 msgstr "Vytvorte novú zálozku v tomto pakete"
 
-#: src/enigma_main.cpp:6337 src/enigma_main.cpp:6351 src/sselect.cpp:354
+#: src/enigma_main.cpp:6432 src/enigma_main.cpp:6446 src/sselect.cpp:354
 msgid "rename"
 msgstr "premenuj"
 
-#: src/enigma_main.cpp:6337
+#: src/enigma_main.cpp:6432
 msgid "rename the current selected bouquet"
 msgstr "premenuj oznacený paket"
 
-#: src/enigma_main.cpp:6351
+#: src/enigma_main.cpp:6446
 msgid "rename the current selected service/movie"
 msgstr "vymaz oznaceny kanál  / nahrávku"
 
-#: src/enigma_main.cpp:6355 src/sselect.cpp:352
+#: src/enigma_main.cpp:6450 src/sselect.cpp:352
 msgid "delete"
 msgstr "vymaz"
 
-#: src/enigma_main.cpp:6355
+#: src/enigma_main.cpp:6450
 msgid "delete the current selected service/movie"
 msgstr "vymaz oznacený kanál / film"
 
-#: src/enigma_main.cpp:6362
+#: src/enigma_main.cpp:6457
 msgid "disable move mode"
 msgstr "zakáz mód pohybu"
 
-#: src/enigma_main.cpp:6362
+#: src/enigma_main.cpp:6457
 msgid "switch move mode off"
 msgstr "vypni mod presunu "
 
-#: src/enigma_main.cpp:6364
+#: src/enigma_main.cpp:6459
 msgid "enable move mode"
 msgstr "povol mód pohybu"
 
-#: src/enigma_main.cpp:6364
+#: src/enigma_main.cpp:6459
 msgid "activate mode to simply change the entry order"
 msgstr "Aktivuj mod jednoduchej zmeny názvu casovaca"
 
-#: src/enigma_main.cpp:6373
+#: src/enigma_main.cpp:6468
 msgid "copy to bouquet list"
 msgstr "Prekopíruj do prehladu paketov"
 
-#: src/enigma_main.cpp:6373
+#: src/enigma_main.cpp:6468
 msgid "copy the selected provider to the bouquet list"
 msgstr "prekopíruj vybraného poskytovatela k paketom"
 
-#: src/enigma_main.cpp:6380 src/enigma_main.cpp:6385
+#: src/enigma_main.cpp:6474 src/enigma_main.cpp:6479
 msgid "add the selected service to a selectable bouquet"
 msgstr "pridaj vybraný kanál do zadaného paketu"
 
-#: src/enigma_main.cpp:6393
-#, fuzzy
+#: src/enigma_main.cpp:6488
 msgid "add the selected file to a selectable bouquet"
-msgstr "pridaj vybraný kanál do zadaného paketu"
+msgstr "pridaj vybraný súbor do paketu"
 
-#: src/enigma_main.cpp:6395
+#: src/enigma_main.cpp:6490
 msgid "delete file"
 msgstr "zmaz súbor"
 
-#: src/enigma_main.cpp:6395
+#: src/enigma_main.cpp:6490
 msgid "delete the selected file (and all corresponding ts files"
 msgstr "Zmaz túto nahravku a vsetky jej .TS podsúbory"
 
-#: src/enigma_main.cpp:6396
+#: src/enigma_main.cpp:6491
 msgid "rename file"
 msgstr "premenuj súbor"
 
-#: src/enigma_main.cpp:6396
+#: src/enigma_main.cpp:6491
 msgid "rename the selected file (and all corresponding ts files"
 msgstr "premenuj vybraný súbor a vsetky jeho .TS podsúbory"
 
-#: src/enigma_main.cpp:6408
+#: src/enigma_main.cpp:6503
 msgid "disable edit mode"
 msgstr "zakáz mód editácie"
 
-#: src/enigma_main.cpp:6408
+#: src/enigma_main.cpp:6503
 msgid "disable the edit mode"
 msgstr "zakáz mód editácie"
 
-#: src/enigma_main.cpp:6410
+#: src/enigma_main.cpp:6505
 msgid "enable edit mode"
 msgstr "povol mód editácie"
 
-#: src/enigma_main.cpp:6410
+#: src/enigma_main.cpp:6505
 msgid "activate mode to simply add many services to a selectable bouquet"
 msgstr "Aktivuj mod jednoduchého pridávania mnozstva kanálov do paketu"
 
-#: src/enigma_main.cpp:6420
+#: src/enigma_main.cpp:6515
 msgid "unlock"
 msgstr "odomkni"
 
-#: src/enigma_main.cpp:6420
+#: src/enigma_main.cpp:6515
 msgid "do parental-unlock the selected service or file"
 msgstr "odomkni vybraný kanál alebo súbor"
 
-#: src/enigma_main.cpp:6422
+#: src/enigma_main.cpp:6517
 msgid "lock"
 msgstr "zámok"
 
-#: src/enigma_main.cpp:6422
+#: src/enigma_main.cpp:6517
 msgid "do parentallock the selected service or file"
 msgstr "zamkni vybraný kanal alebo súbor"
 
-#: src/enigma_main.cpp:6426
+#: src/enigma_main.cpp:6521
 msgid "disable parental lock"
 msgstr "zakáz rodicovský zámok"
 
-#: src/enigma_main.cpp:6426
+#: src/enigma_main.cpp:6521
 msgid "temporary disable the parental locking"
 msgstr "okamzite zakáz rodicovský zámok"
 
-#: src/enigma_main.cpp:6428
+#: src/enigma_main.cpp:6523
 msgid "enable parental lock"
 msgstr "povol rodicovský zámok"
 
-#: src/enigma_main.cpp:6428
+#: src/enigma_main.cpp:6523
 msgid "re-enable the parental locking"
 msgstr "opät povol rodicovksý zámok"
 
-#: src/enigma_main.cpp:6446
+#: src/enigma_main.cpp:6541
 msgid "Shutdown/Standby Menu"
 msgstr "Menu vypnutia/spánku"
 
-#: src/enigma_main.cpp:6457 src/enigma_main.cpp:6460
+#: src/enigma_main.cpp:6552 src/enigma_main.cpp:6555
 msgid "reboot now"
 msgstr "Restartuj !"
 
-#: src/enigma_main.cpp:6457 src/enigma_main.cpp:6465
+#: src/enigma_main.cpp:6552 src/enigma_main.cpp:6560
 msgid "restart your dreambox"
 msgstr "restartuje dreambox"
 
-#: src/enigma_main.cpp:6460
-#, fuzzy
+#: src/enigma_main.cpp:6555
 msgid "restart your receiver"
-msgstr "restartuje dreambox"
+msgstr "reštartuje prijímač"
 
-#: src/enigma_main.cpp:6464 src/enigma_main.cpp:6468
+#: src/enigma_main.cpp:6559 src/enigma_main.cpp:6563
 msgid "shutdown now"
 msgstr "vypnut !"
 
-#: src/enigma_main.cpp:6464
+#: src/enigma_main.cpp:6559
 msgid "shutdown your dreambox"
 msgstr "Vypne dreambox"
 
-#: src/enigma_main.cpp:6465 src/enigma_main.cpp:6469
+#: src/enigma_main.cpp:6560 src/enigma_main.cpp:6564
 msgid "restart"
 msgstr "restart"
 
-#: src/enigma_main.cpp:6468
+#: src/enigma_main.cpp:6563
 msgid "shutdown your dbox-2"
 msgstr "Vypne dbox-2"
 
-#: src/enigma_main.cpp:6469
+#: src/enigma_main.cpp:6564
 msgid "restart your dbox-2"
 msgstr "restartuje dbox-2"
 
-#: src/enigma_main.cpp:6473
+#: src/enigma_main.cpp:6568
 msgid "goto standby"
 msgstr "standby"
 
-#: src/enigma_main.cpp:6473
+#: src/enigma_main.cpp:6568
 msgid "goto standby mode"
 msgstr "Prepne do standby módu"
 
-#: src/enigma_main.cpp:6474
+#: src/enigma_main.cpp:6569
 msgid "set sleeptimer"
 msgstr "nastavenie rezimu spánku"
 
-#: src/enigma_main.cpp:6474
+#: src/enigma_main.cpp:6569
 msgid "set a sleep timer"
 msgstr "nastavenie rezimu spánku"
 
-#: src/enigma_main.cpp:6595
+#: src/enigma_main.cpp:6689
 msgid "Record Menu"
 msgstr "Menu nahrávania"
 
-#: src/enigma_main.cpp:6601
+#: src/enigma_main.cpp:6695
 msgid "stop record now"
 msgstr "zastav nahrávanie!"
 
-#: src/enigma_main.cpp:6601
+#: src/enigma_main.cpp:6695
 msgid "immediate stop the recording"
 msgstr "okamzite zastav nahravanie"
 
-#: src/enigma_main.cpp:6603
+#: src/enigma_main.cpp:6697
 msgid "set record duration"
 msgstr "zadajte dlzku nahrávania"
 
-#: src/enigma_main.cpp:6603
+#: src/enigma_main.cpp:6697
 msgid "set the recording time (in minutes)"
 msgstr "Zadajte dĺzku nahrávania (v minútach)"
 
-#: src/enigma_main.cpp:6604
+#: src/enigma_main.cpp:6698
 msgid "set record stop time"
 msgstr "zadajte cas konca nahrávania"
 
-#: src/enigma_main.cpp:6604
+#: src/enigma_main.cpp:6698
 msgid "set the recording end time"
 msgstr "cas konca nahrávania:"
 
-#: src/enigma_main.cpp:6699
+#: src/enigma_main.cpp:6793
 msgid "press ok to start edit mode"
 msgstr "OK pre mód editácie"
 
@@ -2598,22 +2629,19 @@ msgstr "Súborový mód"
 
 #: src/enigma_mainmenu.cpp:66 src/enigma_mainmenu.cpp:85
 #: src/enigma_mainmenu.cpp:198 src/enigma_mainmenu.cpp:208
-#: src/rotorconfig.cpp:923 src/timer.cpp:2333
+#: src/rotorconfig.cpp:908 src/timer.cpp:2468
 msgid "Information"
 msgstr "Informácie"
-
-#: src/enigma_mainmenu.cpp:69 src/enigma_mainmenu.cpp:200
-msgid "Shutdown"
-msgstr "Vypnút"
 
 #: src/enigma_mainmenu.cpp:72 src/enigma_mainmenu.cpp:88
 #: src/enigma_mainmenu.cpp:196 src/enigma_mainmenu.cpp:206
 #: src/enigma_setup.cpp:36
+#, fuzzy
 msgid "Setup"
-msgstr "Nastavenia"
+msgstr "Nastavenie"
 
 #: src/enigma_mainmenu.cpp:75 src/enigma_mainmenu.cpp:197
-#: src/enigma_plugins.cpp:121
+#: src/enigma_plugins.cpp:120
 msgid "Games"
 msgstr "Hry"
 
@@ -2637,36 +2665,35 @@ msgstr "Menu"
 msgid "setup"
 msgstr "Nastavenie"
 
-#: src/enigma_plugins.cpp:121
+#: src/enigma_plugins.cpp:120
 msgid "Plugins"
 msgstr "Plugins"
 
-#: src/enigma_plugins.cpp:126
+#: src/enigma_plugins.cpp:125
 msgid "select plugin and press ok"
 msgstr "vyberte plugin (ok)"
 
-#: src/enigma_plugins.cpp:145
+#: src/enigma_plugins.cpp:144
 #, c-format
 msgid "Couldn't read plugin directory %s"
 msgstr "Nemozem cítat plugins adresár %s"
 
-#: src/enigma_plugins.cpp:149
+#: src/enigma_plugins.cpp:148
 msgid "Error"
 msgstr "Chyba"
 
-#: src/enigma_plugins.cpp:218
+#: src/enigma_plugins.cpp:217
 msgid "E: currently another plugin is running..."
-msgstr ""
+msgstr "E: momentálne je spustený iný plugin..."
 
-#: src/enigma_plugins.cpp:224
+#: src/enigma_plugins.cpp:223
 #, c-format
 msgid "plugin '%s' not found"
 msgstr "plugin '%s' sa nenasiel"
 
-#: src/enigma_plugins.cpp:227
-#, fuzzy
+#: src/enigma_plugins.cpp:226
 msgid "E: no name given"
-msgstr "nazadané meno"
+msgstr "E: nezadané meno"
 
 #: src/enigma_scan.cpp:40 src/enigma_setup.cpp:41
 msgid "Service Searching"
@@ -2728,7 +2755,7 @@ msgstr ""
 "Viac ako jeden LNB má povolený DiSEqC 1.2, vyberte LNB, ktorý je pripojený k "
 "motoru"
 
-#: src/enigma_scan.cpp:135 src/setupnetwork.cpp:833
+#: src/enigma_scan.cpp:135 src/setupnetwork.cpp:835
 msgid "Info"
 msgstr "Info"
 
@@ -2740,7 +2767,7 @@ msgstr ""
 "Nenájdený LNB, ktorý by mal povolený rezim DiSEqC 1.2,\n"
 "najprv prosím povolte rezim DiSEqC 1.2"
 
-#: src/enigma_scan.cpp:149 src/rotorconfig.cpp:698 src/rotorconfig.cpp:899
+#: src/enigma_scan.cpp:149 src/rotorconfig.cpp:683 src/rotorconfig.cpp:884
 msgid "Warning"
 msgstr "Pozor"
 
@@ -2778,6 +2805,7 @@ msgid "open common interface menu"
 msgstr "Menu common interface "
 
 #: src/enigma_setup.cpp:48
+#, fuzzy
 msgid "Parental Lock"
 msgstr "Rodicovský zámok"
 
@@ -2918,168 +2946,168 @@ msgstr ""
 "Zadaný PIN nie je správny.\n"
 "Chcete zadat este raz ?"
 
-#: src/rotorconfig.cpp:58 src/rotorconfig.cpp:102 src/tpeditwindow.cpp:83
+#: src/rotorconfig.cpp:50 src/rotorconfig.cpp:94 src/tpeditwindow.cpp:83
 msgid "East"
 msgstr "Východ"
 
-#: src/rotorconfig.cpp:59 src/rotorconfig.cpp:103 src/tpeditwindow.cpp:84
+#: src/rotorconfig.cpp:51 src/rotorconfig.cpp:95 src/tpeditwindow.cpp:84
 msgid "West"
 msgstr "Západ"
 
-#: src/rotorconfig.cpp:73
+#: src/rotorconfig.cpp:65
 msgid "North"
 msgstr "Sever"
 
-#: src/rotorconfig.cpp:74
+#: src/rotorconfig.cpp:66
 msgid "South"
 msgstr "Juh"
 
-#: src/rotorconfig.cpp:123 src/tpeditwindow.cpp:73
+#: src/rotorconfig.cpp:115 src/tpeditwindow.cpp:73
 msgid "enter orbital position without dot (19.2° = 192)"
 msgstr "zadajte orbit. pozíciu bez bodiek (19.2° = 192)"
 
-#: src/rotorconfig.cpp:299 src/rotorconfig.cpp:355
+#: src/rotorconfig.cpp:283 src/rotorconfig.cpp:340
 msgid "delete me"
 msgstr "zmaz ma"
 
-#: src/rotorconfig.cpp:392 src/rotorconfig.cpp:395
+#: src/rotorconfig.cpp:377 src/rotorconfig.cpp:380
 msgid "drive Motor East"
 msgstr "toc na východ"
 
-#: src/rotorconfig.cpp:393
+#: src/rotorconfig.cpp:378
 msgid "drive Motor East.. one step"
 msgstr "toc na východ (krokuj)"
 
-#: src/rotorconfig.cpp:394
+#: src/rotorconfig.cpp:379
 msgid "stop Motor drive East"
 msgstr "zastav natácanie"
 
-#: src/rotorconfig.cpp:396
+#: src/rotorconfig.cpp:381
 msgid "drive Motor West.. one step"
 msgstr "toc na západ (krokuj)"
 
-#: src/rotorconfig.cpp:397
+#: src/rotorconfig.cpp:382
 msgid "stop Motor drive West"
 msgstr "zastav natácanie na západ"
 
-#: src/rotorconfig.cpp:468
+#: src/rotorconfig.cpp:453
 msgid "position"
 msgstr "pozicia"
 
-#: src/rotorconfig.cpp:468
+#: src/rotorconfig.cpp:453
 msgid "store new sat positions"
 msgstr "uloz novú pozíciu"
 
-#: src/rotorconfig.cpp:469
+#: src/rotorconfig.cpp:454
 msgid "drive to stored pos"
 msgstr "natoc na ulozenú poz."
 
-#: src/rotorconfig.cpp:469
+#: src/rotorconfig.cpp:454
 msgid "drive to stored position"
 msgstr "natoc na ulozenú pozic."
 
-#: src/rotorconfig.cpp:470
+#: src/rotorconfig.cpp:455
 msgid "drive to satellite"
 msgstr "natácam na druzicu..."
 
-#: src/rotorconfig.cpp:470
+#: src/rotorconfig.cpp:455
 msgid "drive to stored satellite"
 msgstr "natácam na ulozenú druzicu"
 
-#: src/rotorconfig.cpp:471
+#: src/rotorconfig.cpp:456
 msgid "drive to 0°"
 msgstr "chod na poz. 0"
 
-#: src/rotorconfig.cpp:471
+#: src/rotorconfig.cpp:456
 msgid "drives to 0"
 msgstr "natoc na 0"
 
-#: src/rotorconfig.cpp:472
+#: src/rotorconfig.cpp:457
 msgid "recalculate"
 msgstr "prerátaj"
 
-#: src/rotorconfig.cpp:472
+#: src/rotorconfig.cpp:457
 msgid "recalculate stored positions rel. to current pos"
 msgstr "prerátaj ulozené pozície vzhladom na túto poz."
 
-#: src/rotorconfig.cpp:473
+#: src/rotorconfig.cpp:458
 msgid "set east limit"
 msgstr "nastav východny limit"
 
-#: src/rotorconfig.cpp:473
+#: src/rotorconfig.cpp:458
 msgid "set east soft limit"
 msgstr "nastav východný sw limit"
 
-#: src/rotorconfig.cpp:474
+#: src/rotorconfig.cpp:459
 msgid "set west limit"
 msgstr "nastav západný sw limit"
 
-#: src/rotorconfig.cpp:474
+#: src/rotorconfig.cpp:459
 msgid "set west soft limit"
 msgstr "nastav západný limit"
 
-#: src/rotorconfig.cpp:475
+#: src/rotorconfig.cpp:460
 msgid "disable limits"
 msgstr "zakáz limity"
 
-#: src/rotorconfig.cpp:475 src/rotorconfig.cpp:537
+#: src/rotorconfig.cpp:460 src/rotorconfig.cpp:522
 msgid "disable soft limits"
 msgstr "zakaz sw limity"
 
-#: src/rotorconfig.cpp:476
+#: src/rotorconfig.cpp:461
 msgid "enable limits"
 msgstr "povol limity"
 
-#: src/rotorconfig.cpp:476 src/rotorconfig.cpp:541
+#: src/rotorconfig.cpp:461 src/rotorconfig.cpp:526
 msgid "enable soft limits"
 msgstr "povol sw limity"
 
-#: src/rotorconfig.cpp:513
+#: src/rotorconfig.cpp:498
 msgid "store current pos in motor"
 msgstr "uloz túto pozíciu do motora"
 
-#: src/rotorconfig.cpp:514 src/rotorconfig.cpp:530 src/rotorconfig.cpp:534
-#: src/rotorconfig.cpp:859
+#: src/rotorconfig.cpp:499 src/rotorconfig.cpp:515 src/rotorconfig.cpp:519
+#: src/rotorconfig.cpp:844
 msgid "store"
 msgstr "uloz"
 
-#: src/rotorconfig.cpp:517
+#: src/rotorconfig.cpp:502
 msgid "drive motor to stored pos"
 msgstr "natoc na ulozenú poziciu"
 
-#: src/rotorconfig.cpp:518 src/rotorconfig.cpp:522 src/rotorconfig.cpp:546
+#: src/rotorconfig.cpp:503 src/rotorconfig.cpp:507 src/rotorconfig.cpp:531
 msgid "go"
 msgstr "spust"
 
-#: src/rotorconfig.cpp:521
+#: src/rotorconfig.cpp:506
 msgid "drive motor to reference position"
 msgstr "natoc motor na východziu pozíciu"
 
-#: src/rotorconfig.cpp:525
+#: src/rotorconfig.cpp:510
 msgid "recalculate all stored positions"
 msgstr "prerátaj ulozené pozície"
 
-#: src/rotorconfig.cpp:526
+#: src/rotorconfig.cpp:511
 msgid "recalc"
 msgstr "prerátaj"
 
-#: src/rotorconfig.cpp:529
+#: src/rotorconfig.cpp:514
 msgid "store current pos as east soft limit"
 msgstr "uloz túto poz. ako východný limit"
 
-#: src/rotorconfig.cpp:533
+#: src/rotorconfig.cpp:518
 msgid "store current pos as west soft limit"
 msgstr "uloz túto poz. ako západný limit"
 
-#: src/rotorconfig.cpp:538 src/rotorconfig.cpp:542
+#: src/rotorconfig.cpp:523 src/rotorconfig.cpp:527
 msgid "do it"
 msgstr "vykonaj"
 
-#: src/rotorconfig.cpp:545
+#: src/rotorconfig.cpp:530
 msgid "drive motor to satellite"
 msgstr "natoc motor na druzicu"
 
-#: src/rotorconfig.cpp:697
+#: src/rotorconfig.cpp:682
 msgid ""
 "Wrong use of this function can corrupt all stored sat positions.\n"
 "Are you sure you want to use this function?"
@@ -3087,35 +3115,35 @@ msgstr ""
 "Ak pouzijete funkciu nesprávne, znicíte ulozené pozície.\n"
 "Naozaj pouzit funkciu ?"
 
-#: src/rotorconfig.cpp:763
+#: src/rotorconfig.cpp:748
 msgid "one step East..."
 msgstr "o krok na východ"
 
-#: src/rotorconfig.cpp:772
+#: src/rotorconfig.cpp:757
 msgid "one step west..."
 msgstr "o krok na západ"
 
-#: src/rotorconfig.cpp:786
+#: src/rotorconfig.cpp:771
 msgid "turning to east..."
 msgstr "natácam východne"
 
-#: src/rotorconfig.cpp:797
+#: src/rotorconfig.cpp:782
 msgid "turning to west..."
 msgstr "natácam západne"
 
-#: src/rotorconfig.cpp:810
+#: src/rotorconfig.cpp:795
 msgid "<    Stop    >"
 msgstr "STOP"
 
-#: src/rotorconfig.cpp:847
+#: src/rotorconfig.cpp:832
 msgid "Storage Location:"
 msgstr "Ulozená pozícia:"
 
-#: src/rotorconfig.cpp:849
+#: src/rotorconfig.cpp:834
 msgid "change storage Location or store"
 msgstr "zmen pozíciu a uloz ju"
 
-#: src/rotorconfig.cpp:899
+#: src/rotorconfig.cpp:884
 #, c-format
 msgid ""
 "%d.%d°%c is currently stored at location %d!\n"
@@ -3126,7 +3154,7 @@ msgstr ""
 "Ak ju teraz ulozíte na %d, musím zmazat povodné umiestnenie.\n"
 "Mám to vykonat?"
 
-#: src/rotorconfig.cpp:921
+#: src/rotorconfig.cpp:906
 #, c-format
 msgid ""
 "Store %d.%d°%c at location %d.\n"
@@ -3533,7 +3561,11 @@ msgstr "select uncommitted switch Input 16"
 msgid "manual scan.."
 msgstr "manuálne hladanie..."
 
-#: src/scan.cpp:232
+#: src/scan.cpp:220
+msgid "Waiting for tuner lock on:"
+msgstr ""
+
+#: src/scan.cpp:353
 msgid ""
 "To begin searching for a valid satellite press OK, or choose your desired "
 "satellite manually and press OK"
@@ -3541,7 +3573,7 @@ msgstr ""
 "Aby som zacal vyhladávanie známych druzic stlacte OK, alebo si vyberte "
 "druzicu rucne"
 
-#: src/scan.cpp:235
+#: src/scan.cpp:356
 msgid ""
 "To begin searching for a valid cable provider press OK, or choose your "
 "desired cable provider manually and press OK"
@@ -3549,12 +3581,12 @@ msgstr ""
 "Pre vyhladávanie známych káblovych operátorov stlacte OK, alebo zadajte "
 "operátora manuálne"
 
-#: src/scan.cpp:333
+#: src/scan.cpp:452
 msgid ""
 "A valid transponder has been found. Verify that the right network is selected"
 msgstr "Bol nájdený aktívny transpondér, potvrdte správnost druzice."
 
-#: src/scan.cpp:404
+#: src/scan.cpp:531
 msgid ""
 "All known transponders have been tried, but no lock was possible. Verify "
 "antenna-/cable-setup or try manual search if its some obscure satellite/"
@@ -3564,7 +3596,7 @@ msgstr ""
 "nastavenia prijímaca, ak sa jedná o neznámu siet skúste manuálne "
 "vyhladávanie."
 
-#: src/scan.cpp:412
+#: src/scan.cpp:539
 msgid ""
 "All known transponders have been tried, but no lock was possible. Verify "
 "antenna-/cable-setup or try another satellite/network."
@@ -3572,45 +3604,50 @@ msgstr ""
 "Vsetky transpondéry boli vyskúsané, ale nie je mozné zamerat sluzbu. Overte "
 "nastavenia prijímaca, alebo skúste inú druzicu"
 
-#: src/scan.cpp:421
+#: src/scan.cpp:548
 msgid "Search in progress "
 msgstr "Vyhladávam..."
 
-#: src/scan.cpp:587
+#: src/scan.cpp:714
 #, c-format
 msgid "%02i minutes and %02i seconds left"
 msgstr "este %02i minút a %02i sekúnd"
 
-#: src/scan.cpp:589
+#: src/scan.cpp:716
 #, c-format
 msgid "%02i seconds left"
 msgstr "este %02i sekúnd"
 
-#: src/scan.cpp:663
+#: src/scan.cpp:790
 msgid "Vertical"
 msgstr "vertikálny"
 
-#: src/scan.cpp:724
+#: src/scan.cpp:851
 msgid "[only free]"
 msgstr "[iba volne]"
 
-#: src/scan.cpp:725
+#: src/scan.cpp:852
 msgid "[all]"
 msgstr "[vsetko]"
 
-#: src/scan.cpp:725
+#: src/scan.cpp:852
 msgid "[nothing]"
 msgstr "[nic]"
 
-#: src/scan.cpp:829
+#: src/scan.cpp:956
 msgid "Transponder Scan"
 msgstr "Vyhladávanie"
 
-#: src/scan.cpp:1125 src/scan.cpp:1173
+#: src/scan.cpp:1230
+#, fuzzy
+msgid "Waiting for tuner lock... please wait"
+msgstr "Vyhladávam... Cakajte"
+
+#: src/scan.cpp:1278 src/scan.cpp:1326
 msgid "Scan is in progress... please wait"
 msgstr "Vyhladávam... Cakajte"
 
-#: src/scan.cpp:1146 src/scan.cpp:1177
+#: src/scan.cpp:1299 src/scan.cpp:1330
 #, c-format
 msgid ""
 "The transponder scan has finished and found \n"
@@ -3626,15 +3663,15 @@ msgstr ""
 " %i rádií a %i nových dátových sluzieb.\n"
 "%i Transpondérov, na ktorých bezí %i sluzieb"
 
-#: src/scan.cpp:1189
+#: src/scan.cpp:1342
 msgid "Done."
 msgstr "Hotovo."
 
-#: src/scan.cpp:1196
+#: src/scan.cpp:1349
 msgid "Scan is in finished, press ok to close window"
 msgstr "Hladanie skoncilo, stlacte OK"
 
-#: src/scan.cpp:1202
+#: src/scan.cpp:1355
 #, c-format
 msgid ""
 "Do you want\n"
@@ -3645,131 +3682,161 @@ msgstr ""
 "iný\n"
 "%s?"
 
-#: src/scan.cpp:1202
+#: src/scan.cpp:1355
 #, c-format
 msgid "Transponder"
 msgstr "Transpondér"
 
-#: src/scan.cpp:1202
+#: src/scan.cpp:1355
 #, c-format
 msgid "Satellite"
 msgstr "Druzica"
 
-#: src/scan.cpp:1203
+#: src/scan.cpp:1356
 msgid "Scan finished"
 msgstr "Dohladané..."
 
-#: src/setup_extra.cpp:41
+#: src/setup_extra.cpp:45
+#, fuzzy
 msgid "Communication Setup"
 msgstr "Nastavenie komunikácie"
 
-#: src/setup_extra.cpp:41
+#: src/setup_extra.cpp:45
 msgid "open communication setup"
 msgstr "Otvoria sa nastavenia sietovej komunikácie"
 
-#: src/setup_extra.cpp:42
+#: src/setup_extra.cpp:46
 msgid "Ngrab Streaming Setup"
 msgstr "Nastavenie NGrab "
 
-#: src/setup_extra.cpp:42
+#: src/setup_extra.cpp:46
 msgid "open ngrab server setup"
 msgstr "ngrab server setup"
 
-#: src/setup_extra.cpp:43 src/software_update.cpp:29
+#: src/setup_extra.cpp:47 src/software_update.cpp:29
 msgid "Software Update"
 msgstr "Software updade.."
 
-#: src/setup_extra.cpp:43
+#: src/setup_extra.cpp:47
 msgid "open software update"
 msgstr "otvor soft update"
 
-#: src/setup_extra.cpp:46
+#: src/setup_extra.cpp:50
 msgid "Remote Control"
 msgstr "Dialkový ovládac"
 
-#: src/setup_extra.cpp:46
+#: src/setup_extra.cpp:50
 msgid "open remote control setup"
 msgstr "Otvorí sa okno nastavenie dialkového ovládaca"
 
-#: src/setup_extra.cpp:48
+#: src/setup_extra.cpp:52 src/setup_extra.cpp:150
+msgid "Factory reset"
+msgstr ""
+
+#: src/setup_extra.cpp:52
+msgid "all settings will set to factory defaults"
+msgstr ""
+
+#: src/setup_extra.cpp:54
 msgid "Serviceselector help buttons"
 msgstr "Pomocné tlacidlá v prehlade kanálov"
 
-#: src/setup_extra.cpp:48
+#: src/setup_extra.cpp:54
 msgid "show colored help buttons in service selector"
 msgstr "Zobraz farebné tlacidlá v prehlade kanálov"
 
-#: src/setup_extra.cpp:49
+#: src/setup_extra.cpp:55
 msgid "Skip confirmations"
 msgstr "Nezobrazuj okná potvrdzovania"
 
-#: src/setup_extra.cpp:49
+#: src/setup_extra.cpp:55
 msgid "enable/disable confirmations"
 msgstr "povol/zakáz potvrdzovanie"
 
-#: src/setup_extra.cpp:50
+#: src/setup_extra.cpp:56
 msgid "Hide error windows"
 msgstr "Nezobrazuj chybové okná"
 
-#: src/setup_extra.cpp:50
+#: src/setup_extra.cpp:56
 msgid "don't show zap error messages"
 msgstr "Nezobrazuj chybove hlasenia prepinania"
 
-#: src/setup_extra.cpp:51
+#: src/setup_extra.cpp:57
 msgid "Auto show Infobar"
 msgstr "Automatické zobrazovanie infookna"
 
-#: src/setup_extra.cpp:51
+#: src/setup_extra.cpp:57
 msgid "always show infobar when new event info is avail"
 msgstr "Zobraz infookno ak existujú informácie o nasledujúcej relácii"
 
-#: src/setup_extra.cpp:52
+#: src/setup_extra.cpp:58
 msgid "Show remaining Time"
 msgstr "Zobraz cas do skoncenia"
 
-#: src/setup_extra.cpp:52
+#: src/setup_extra.cpp:58
 msgid "show event remaining time in the infobar"
 msgstr "Zobrazí cas do skoncenia programu v infookne"
 
-#: src/setup_extra.cpp:53
+#: src/setup_extra.cpp:59
+msgid "Use http authentification"
+msgstr ""
+
+#: src/setup_extra.cpp:59
+msgid "enables the http (user/password) authentification"
+msgstr ""
+
+#: src/setup_extra.cpp:60
 msgid "Don't open serial port"
-msgstr ""
+msgstr "Neotváraj sériový port"
 
-#: src/setup_extra.cpp:53
+#: src/setup_extra.cpp:60
 msgid "don't write debug messages to /dev/tts/0"
-msgstr ""
+msgstr "nezapisuj debug správy do /dev/tts/0"
 
-#: src/setup_extra.cpp:54
+#: src/setup_extra.cpp:61
 msgid "Auto bouquet change"
 msgstr "Automaticka zmena paketu"
 
-#: src/setup_extra.cpp:54
+#: src/setup_extra.cpp:61
 msgid "change into next bouquet when end of current bouquet is reached"
-msgstr ""
+msgstr "preskočí do nasledujúceho paketu, ak ste na konci ponuky súčastného"
 
-#: src/setup_extra.cpp:57
+#: src/setup_extra.cpp:64
 msgid "Enable fast zapping"
-msgstr ""
+msgstr "Povoľ rýchle prepínanie"
 
-#: src/setup_extra.cpp:57
+#: src/setup_extra.cpp:64
 msgid "enables faster zapping.. but with visible sync"
+msgstr "enables faster zapping.. but with visible sync"
+
+#: src/setup_extra.cpp:146
+msgid ""
+"When you do a factory reset, you will lost ALL your configuration data\n"
+"(including bouquets, services, satellite data ...)\n"
+"After finishing the factory reset, your receiver restarts automatically!\n"
+"\n"
+"Really do factory reset?"
 msgstr ""
 
-#: src/setup_harddisk.cpp:183
+#: src/setup_extra.cpp:165
+msgid "Factory reset..."
+msgstr ""
+
+#: src/setup_harddisk.cpp:184
 msgid "Harddisk Setup"
 msgstr "Nastavenie harddisku"
 
-#: src/setup_harddisk.cpp:300
+#: src/setup_harddisk.cpp:301
 msgid "Are you SURE that you want to format this disk?\n"
 msgstr "Ste si istý, ze chcete disk sformátovat?\n"
 
-#: src/setup_harddisk.cpp:301 src/setup_harddisk.cpp:314
-#: src/setup_harddisk.cpp:336 src/setup_harddisk.cpp:346
-#: src/setup_harddisk.cpp:393 src/setup_harddisk.cpp:405
+#: src/setup_harddisk.cpp:302 src/setup_harddisk.cpp:315
+#: src/setup_harddisk.cpp:337 src/setup_harddisk.cpp:347
+#: src/setup_harddisk.cpp:394 src/setup_harddisk.cpp:406
 msgid "formatting harddisk..."
 msgstr "formátujem disk..."
 
-#: src/setup_harddisk.cpp:312
+#: src/setup_harddisk.cpp:313
 msgid ""
 "There's data on this harddisk.\n"
 "You will lose that data. Proceed?"
@@ -3777,7 +3844,7 @@ msgstr ""
 "Na disku sa nachádzajú údaje.\n"
 "Tieto sa stratia. Mám pokracovat ?"
 
-#: src/setup_harddisk.cpp:335
+#: src/setup_harddisk.cpp:336
 msgid ""
 "please wait while initializing harddisk.\n"
 "This might take some minutes.\n"
@@ -3785,54 +3852,54 @@ msgstr ""
 "Cakajte kým pripravím disk.\n"
 "To moze trvat pár minút.\n"
 
-#: src/setup_harddisk.cpp:345
+#: src/setup_harddisk.cpp:346
 msgid "sorry, couldn't find sfdisk utility to partition harddisk."
 msgstr "Prepácte, nemozem nájst utilitu k úprave disku"
 
-#: src/setup_harddisk.cpp:392
+#: src/setup_harddisk.cpp:393
 msgid "creating filesystem failed."
 msgstr "Vytvorenie súborového sytému zlyhalo."
 
-#: src/setup_harddisk.cpp:404
+#: src/setup_harddisk.cpp:405
 msgid "successfully formatted your disk!"
 msgstr "disk bol uspesne naformátovaný!"
 
-#: src/setup_harddisk.cpp:435
+#: src/setup_harddisk.cpp:436
 msgid "(error reading information)"
 msgstr "(chyba pri cítani informácií)"
 
-#: src/setup_harddisk.cpp:437
+#: src/setup_harddisk.cpp:438
 msgid "uninitialized - format it to use!"
 msgstr "HDD nie je naformátovaný, najskor naformátujte!"
 
-#: src/setup_harddisk.cpp:439
+#: src/setup_harddisk.cpp:440
 #, c-format
 msgid "in use, %d.%03d GB (~%d minutes) free"
 msgstr "pouziva sa, %d.%03d GB (~%d minút) volných"
 
-#: src/setup_harddisk.cpp:441
+#: src/setup_harddisk.cpp:442
 msgid "initialized, but unknown filesystem"
 msgstr "HDD je pripojený, ale jeho súborový systém je neznámy"
 
-#: src/setup_harddisk.cpp:524
+#: src/setup_harddisk.cpp:525
 msgid "could not unmount the filesystem... "
 msgstr "nemozem odpojit súborový systém..."
 
-#: src/setup_harddisk.cpp:525 src/setup_harddisk.cpp:538
-#: src/setup_harddisk.cpp:561 src/setup_harddisk.cpp:580
+#: src/setup_harddisk.cpp:526 src/setup_harddisk.cpp:539
+#: src/setup_harddisk.cpp:562 src/setup_harddisk.cpp:581
 msgid "check filesystem..."
 msgstr "overujem súborový systém..."
 
-#: src/setup_harddisk.cpp:537
+#: src/setup_harddisk.cpp:538
 msgid "sorry, couldn't find fsck.ext3 utility to check the ext3 filesystem."
 msgstr "prepácte ale nemozem nájst utilitu na overenie ext3 súborového systému"
 
-#: src/setup_harddisk.cpp:560
+#: src/setup_harddisk.cpp:561
 msgid ""
 "sorry, couldn't find reiserfsck utility to check the reiserfs filesystem."
 msgstr "prepácte ale nemozem nájst utilitu na overenie súborového systému"
 
-#: src/setup_harddisk.cpp:579
+#: src/setup_harddisk.cpp:580
 msgid "not supported filesystem for check."
 msgstr "Súborový systém na HDD nie je podporovaný"
 
@@ -3894,7 +3961,7 @@ msgid ""
 "for more infos press help"
 msgstr "teraz mozete vycentrovat okno teletextu... pre informácie stlacte help"
 
-#: src/setup_osd.cpp:182 src/system_settings.cpp:57
+#: src/setup_osd.cpp:182 src/system_settings.cpp:59
 msgid "OSD Settings"
 msgstr "OSD nastavenia"
 
@@ -3915,9 +3982,8 @@ msgid "change the contrast"
 msgstr "zmen kontrast"
 
 #: src/setup_osd.cpp:229
-#, fuzzy
 msgid "Show Mainmenu like Listbox"
-msgstr "zobraz hlavné menu v bežnom listbox štýle"
+msgstr "zobrazí hlavné menu v listbox štýle"
 
 #: src/setup_osd.cpp:230
 msgid "show the Mainmenu in normal listbox style"
@@ -4060,18 +4126,16 @@ msgid "select your time zone (ok)"
 msgstr "Nastavte si svoju casovú zónu (ok)"
 
 #: src/setup_timezone.cpp:86
-#, fuzzy
 msgid ""
 "You have to restart enigma to apply the new Timezone\n"
 "Restart now?"
 msgstr ""
-"Aby som mal nový vzhlad musíte ma restartovat\n"
-"Restartovat teraz ?"
+"Pre aplikáciu novej časovej zóny je potrebný reštart enigmy\n"
+" Reštartovať ?"
 
 #: src/setup_timezone.cpp:86
-#, fuzzy
 msgid "Timezone changed"
-msgstr "Vzhlad menu zmenený"
+msgstr "Časová zóna upravená"
 
 #: src/setupengrab.cpp:25
 msgid "Ngrab Server"
@@ -4115,7 +4179,7 @@ msgstr "zadaj IP adresu boxu (0..9 < >)"
 
 #: src/setupnetwork.cpp:425
 msgid "get Network data from a DHCP Server in the local Network"
-msgstr ""
+msgstr "Získaj parametre siete od DHCP servera"
 
 #: src/setupnetwork.cpp:438
 msgid "enter netmask of your network (0..9, left, right)"
@@ -4125,177 +4189,166 @@ msgstr "zadajte sietovú masku (0..9 < >)"
 msgid "press ok to change connection type"
 msgstr "Ok pre zmenu typu pripojenia"
 
-#: src/setupnetwork.cpp:456 src/setupnetwork.cpp:464
+#: src/setupnetwork.cpp:458 src/setupnetwork.cpp:466
 msgid "LAN"
 msgstr "LAN"
 
-#: src/setupnetwork.cpp:456 src/setupnetwork.cpp:464
+#: src/setupnetwork.cpp:458 src/setupnetwork.cpp:466
 msgid "communicate to Local Area Network"
 msgstr "Komunikácia cez LAN siet"
 
-#: src/setupnetwork.cpp:458 src/setupnetwork.cpp:465
+#: src/setupnetwork.cpp:460 src/setupnetwork.cpp:467
 msgid "WAN(PPPoE)"
 msgstr "WAN(PPPoE)"
 
-#: src/setupnetwork.cpp:458 src/setupnetwork.cpp:465
+#: src/setupnetwork.cpp:460 src/setupnetwork.cpp:467
 msgid "communicate to the Internet via DSL"
 msgstr "Pripojenie do internetu cez DSL"
 
-#: src/setupnetwork.cpp:474
+#: src/setupnetwork.cpp:476
 msgid "T-Online User press ok here"
 msgstr "pouzívatelia T-online stlacte OK"
 
-#: src/setupnetwork.cpp:488
+#: src/setupnetwork.cpp:490
 msgid "enter your domain name server (0..9, left, right)"
 msgstr "zadajte IP dns servera (0..9 < >)"
 
-#: src/setupnetwork.cpp:494
+#: src/setupnetwork.cpp:496
 msgid "Login:"
 msgstr "Login:"
 
-#: src/setupnetwork.cpp:506
+#: src/setupnetwork.cpp:508
 msgid "press ok to edit your provider login name"
 msgstr "Ok pre zmenu loginu na internet"
 
-#: src/setupnetwork.cpp:523
+#: src/setupnetwork.cpp:525
 msgid "enter your gateways IP Address (0..9, left, right)"
 msgstr "zadajte IP vasej sietovej brány (0..9 < >)"
 
-#: src/setupnetwork.cpp:529
+#: src/setupnetwork.cpp:531
 msgid "Password:"
 msgstr "Heslo:"
 
-#: src/setupnetwork.cpp:538
+#: src/setupnetwork.cpp:540
 msgid "press ok to edit your provider password"
 msgstr "Ok pre zadanie hesla k internetu"
 
-#: src/setupnetwork.cpp:544
-#, fuzzy
+#: src/setupnetwork.cpp:546
 msgid "Enable Network"
-msgstr "pridaj novú siet"
+msgstr "Povoľ sieť"
 
-#: src/setupnetwork.cpp:547
-#, fuzzy
+#: src/setupnetwork.cpp:549
 msgid "enable/disable network (ok)"
-msgstr "povol/zakaz konfiguráciu siete"
+msgstr "povoľ/zakáť sieťové pripojenie"
 
-#: src/setupnetwork.cpp:558
-#, fuzzy
+#: src/setupnetwork.cpp:560
 msgid "enter port of the Web Interface (0..9, left, right)"
-msgstr "Zadajte  IP Adresu Ngrab Servera (0..9 < >)"
+msgstr "Zadajte port web rozhrania (0..9 < >)"
 
-#: src/setupnetwork.cpp:569
+#: src/setupnetwork.cpp:571
 msgid "reject incoming connections on port 80"
 msgstr "odmietni vsetky pripojenia na porte 80"
 
-#: src/setupnetwork.cpp:583
+#: src/setupnetwork.cpp:585
 msgid "reject incoming connections on port 23"
 msgstr "odmietni vsetky pripojenia na porte 23"
 
-#: src/setupnetwork.cpp:590
+#: src/setupnetwork.cpp:592
 msgid "reject incoming connections on ports 137,138,139"
 msgstr "odmietni vsetky pripojenia na portoch 137,138,139"
 
-#: src/setupnetwork.cpp:597
+#: src/setupnetwork.cpp:599
 msgid "reject incoming connections on ports 21"
 msgstr "odmietni vsetky pripojenia na porte 21"
 
-#: src/setupnetwork.cpp:615
+#: src/setupnetwork.cpp:617
 msgid "mounts"
-msgstr ""
+msgstr "pripojenia"
 
-#: src/setupnetwork.cpp:620
+#: src/setupnetwork.cpp:622
 msgid "here you can setup nfs/cifs mounts"
-msgstr ""
+msgstr "tu môžete nastaviť nfs/cifs pripojenia"
 
-#: src/setupnetwork.cpp:881
-#, fuzzy
+#: src/setupnetwork.cpp:883
 msgid "enter IP Address (0..9, left, right)"
-msgstr "zadaj IP adresu boxu (0..9 < >)"
+msgstr "zadajte IP adresu (0..9 < >)"
 
-#: src/setupnetwork.cpp:889
-#, fuzzy
+#: src/setupnetwork.cpp:891
 msgid "press ok to change mount type"
 msgstr "Ok pre zmenu typu pripojenia"
 
-#: src/setupnetwork.cpp:908
+#: src/setupnetwork.cpp:910
 msgid "enter the name of the share without trailing slash"
-msgstr ""
+msgstr "zadajte meno zdieľaného prostriedku"
 
-#: src/setupnetwork.cpp:922
+#: src/setupnetwork.cpp:924
 msgid "enter name of the local mount point with trailing slash"
-msgstr ""
+msgstr "zadajte meno lokalneho bodu pripojenia"
 
-#: src/setupnetwork.cpp:935
-#, fuzzy
+#: src/setupnetwork.cpp:937
 msgid "press ok to change mount options"
-msgstr "Ok pre zmenu smeru"
+msgstr "Ok pre zmenu nastavení pripojenia"
 
-#: src/setupnetwork.cpp:965
-#, fuzzy
+#: src/setupnetwork.cpp:967
 msgid "press ok to edit extra options"
-msgstr "Ok pre zmenu smeru"
+msgstr "Ok pre editáciu extra nastavení"
 
-#: src/setupnetwork.cpp:979
-#, fuzzy
+#: src/setupnetwork.cpp:981
 msgid "press ok to edit username"
-msgstr "Ok pre zadanie mena"
+msgstr "Ok pre editáciu užívatľského mena"
 
-#: src/setupnetwork.cpp:993
+#: src/setupnetwork.cpp:995
 msgid "press ok to edit password"
 msgstr "Ok pre editáciu hesla"
 
-#: src/setupnetwork.cpp:1001
-#, fuzzy
+#: src/setupnetwork.cpp:1003
 msgid "enable/disable automount (ok)"
-msgstr "povol/zakáz ac3 výstup."
+msgstr "povoľ/zakáž automatické pripájanie (ok)"
 
-#: src/setupnetwork.cpp:1010
-#, fuzzy
+#: src/setupnetwork.cpp:1012
 msgid "go to previous share"
-msgstr "prepni na predchadzajúci index"
+msgstr "choď na predchadzajúce zdieľanie"
 
-#: src/setupnetwork.cpp:1018
-#, fuzzy
+#: src/setupnetwork.cpp:1020
 msgid "press ok to unmount this share"
-msgstr "Ok pre zadanie mena"
+msgstr "Ok odpojí zdieľaný prostriedok"
 
-#: src/setupnetwork.cpp:1028
-#, fuzzy
+#: src/setupnetwork.cpp:1030
 msgid "press ok to mount this share"
-msgstr "Ok pre zadanie mena"
+msgstr "OK pripojí zdieľaný prostriedok"
 
-#: src/setupnetwork.cpp:1038
-#, fuzzy
+#: src/setupnetwork.cpp:1040
 msgid "press ok to save this share"
-msgstr "Ok pre zadanie mena"
+msgstr "OK uloží toto zdieľanie"
 
-#: src/setupnetwork.cpp:1049
+#: src/setupnetwork.cpp:1051
 msgid "go to next share"
 msgstr "choď na nasledujúce zdieľanie"
 
-#: src/setupnetwork.cpp:1185 src/setupnetwork.cpp:1224
+#: src/setupnetwork.cpp:1187 src/setupnetwork.cpp:1226
 msgid "invalid or missing dir or local dir"
-msgstr ""
+msgstr "nesprávne meno/adresár neexistuje"
 
-#: src/setupnetwork.cpp:1203
+#: src/setupnetwork.cpp:1205
 msgid "NFS/CIFS-Entry stored. Further entry?\n"
-msgstr ""
+msgstr "NFS/CIFS- položka uložená. Zadať ďalšiu?\n"
 
-#: src/setupnetwork.cpp:1204
+#: src/setupnetwork.cpp:1206
 msgid "NFS/CIFS-Setup..."
 msgstr "nastavenie NFS/CIFS"
 
-#: src/setupnetwork.cpp:1231
+#: src/setupnetwork.cpp:1233
 msgid "NFS/CIFS mount error already mounted"
-msgstr ""
+msgstr "Pripojenie NFS/CIFS zlyhalo, pravdepodobne je už pripojené"
 
-#: src/setupnetwork.cpp:1355
+#: src/setupnetwork.cpp:1357
 msgid ""
 "Recording on CIFS shares is unstable.\n"
 "Therefore CIFS support is not included in the standard distribution. Use it "
 "at your own risk!"
 msgstr ""
+"nahrávanie na zdieľané prostriedky nie je stabilné.\n"
+" Iba na vlastnú zodpovednosť !!!"
 
 #: src/setupvideo.cpp:51 src/system_settings.cpp:43
 msgid "A/V Settings"
@@ -4382,13 +4435,12 @@ msgid "auto switch to VCR connector"
 msgstr "Automaticky prepni na VCR konektor"
 
 #: src/setupvideo.cpp:178
-#, fuzzy
 msgid "test"
-msgstr "Západ"
+msgstr "test"
 
 #: src/setupvideo.cpp:183
 msgid "show testpicture"
-msgstr ""
+msgstr "zobraz testovací obrazec"
 
 #: src/setupvideo.cpp:358
 msgid "TV System Wizard"
@@ -4403,6 +4455,7 @@ msgid "open internet update"
 msgstr "Internet Update"
 
 #: src/software_update.cpp:35
+#, fuzzy
 msgid "Manual Update"
 msgstr "manuálny update"
 
@@ -4432,108 +4485,108 @@ msgstr ""
 msgid "Manual update"
 msgstr "manuálny update"
 
-#: src/sselect.cpp:43
+#: src/sselect.cpp:44
 msgid "EPG Style Selector"
 msgstr "ponuka stýlu EPG"
 
-#: src/sselect.cpp:44
+#: src/sselect.cpp:45
 msgid "open the EPG with selected style"
 msgstr "otvorí EPG s vybraným stýlom"
 
-#: src/sselect.cpp:54
+#: src/sselect.cpp:55
 msgid "EPG Style"
 msgstr "Stýl EPG"
 
-#: src/sselect.cpp:61
+#: src/sselect.cpp:62
 msgid "Channel EPG"
 msgstr "EPG pre kanál"
 
-#: src/sselect.cpp:61
+#: src/sselect.cpp:62
 msgid "open EPG for selected Channel"
 msgstr "Otvorí EPG pre vybraný kanál"
 
-#: src/sselect.cpp:62
+#: src/sselect.cpp:63
 msgid "Multi EPG"
 msgstr "Multi EPG"
 
-#: src/sselect.cpp:62
+#: src/sselect.cpp:63
 msgid "open EPG for next five channels"
 msgstr "zobraz epg pre dalsích 5 kanálov"
 
-#: src/sselect.cpp:106
+#: src/sselect.cpp:107
 msgid "service selector"
 msgstr "Prehliadac kanálov"
 
-#: src/sselect.cpp:107
+#: src/sselect.cpp:108
 msgid "switch to next bouquet"
 msgstr "prepni na nasl. paket"
 
-#: src/sselect.cpp:108
+#: src/sselect.cpp:109
 msgid "switch to previous bouquet"
 msgstr "prepni na predchadz. paket"
 
-#: src/sselect.cpp:109
+#: src/sselect.cpp:110
 msgid "go up a directory"
 msgstr "o adresár hore"
 
-#: src/sselect.cpp:110
+#: src/sselect.cpp:111
 msgid "shows the EPG selector for the highlighted channel"
 msgstr "zobrazi EPG pre vybraný kanál"
 
-#: src/sselect.cpp:111
+#: src/sselect.cpp:112
 msgid "show service selector menu"
 msgstr "zobraz menu prehliadaca kanálov"
 
-#: src/sselect.cpp:113
+#: src/sselect.cpp:114
 msgid "add service to a specific bouquet"
 msgstr "Pridaj kanál do zadaného paketu"
 
-#: src/sselect.cpp:117
+#: src/sselect.cpp:118
 msgid "toggle between classic and multi column style"
 msgstr "prepni medzi klasickým a prehladávacím stýlom"
 
-#: src/sselect.cpp:118
+#: src/sselect.cpp:119
 msgid "toggle focus between service and bouquet list (in combi column style)"
 msgstr "prepni sa medzi prehladom kanálov a paketov"
 
-#: src/sselect.cpp:119
+#: src/sselect.cpp:120
 msgid "go to the prev Marker if exist.. else goto first service"
 msgstr "Chod na predchadzajúcu zálozku, ak existuje... inak skoc na prvý kanál"
 
-#: src/sselect.cpp:120
+#: src/sselect.cpp:121
 msgid "go to the next Marker if exist.. else goto last service"
 msgstr ""
 "Chod na nasledujúcu zálozku, ak existuje... inak skoc na posledný kanál"
 
-#: src/sselect.cpp:122
+#: src/sselect.cpp:123
 msgid "show all services"
 msgstr "zobraz vsetky kanály"
 
-#: src/sselect.cpp:123
+#: src/sselect.cpp:124
 msgid "show satellite list"
 msgstr "zobraz druzice"
 
-#: src/sselect.cpp:124
+#: src/sselect.cpp:125
 msgid "show provider list"
 msgstr "Zobraz zoznam poskytovatelov"
 
-#: src/sselect.cpp:125
+#: src/sselect.cpp:126
 msgid "show bouquet list"
 msgstr "zobraz zoznam paketov"
 
-#: src/sselect.cpp:127
+#: src/sselect.cpp:128
 msgid "delete selected entry"
 msgstr "vymaz oznacenú polozku"
 
-#: src/sselect.cpp:128
+#: src/sselect.cpp:129
 msgid "mark selected entry for move"
 msgstr "oznac polozku k presunu"
 
-#: src/sselect.cpp:129
+#: src/sselect.cpp:130
 msgid "rename selected entry"
 msgstr "premenuj oznacenú polozku"
 
-#: src/sselect.cpp:130
+#: src/sselect.cpp:131
 msgid "create new marker entry"
 msgstr "Vytvorte novú zálozku"
 
@@ -4573,11 +4626,11 @@ msgstr "Root"
 msgid "Movies"
 msgstr "Filmy"
 
-#: src/sselect.cpp:809
+#: src/sselect.cpp:811
 msgid "Select No or press Abort to lock/unlock the complete directory"
 msgstr "Vyberte NIE alebo stlacte LAME pre za/odomknutie celého adresára"
 
-#: src/sselect.cpp:809
+#: src/sselect.cpp:811
 msgid "Enter Directory"
 msgstr "Zadajte adresár"
 
@@ -4641,60 +4694,63 @@ msgstr "Info o systéme kódovania (v lavo, v pravo)"
 msgid "Transponder information (left)"
 msgstr "Transponder info (v lavo)"
 
-#: src/timer.cpp:228
+#: src/timer.cpp:241
 msgid "Timerlist"
 msgstr "Casovac"
 
-#: src/timer.cpp:1242
+#: src/timer.cpp:1333
+#, fuzzy
 msgid ""
-"You would to delete the running event..\n"
+"You would delete the running event..\n"
 "this stops the timer mode (recording)!"
 msgstr ""
 "Chystáte sa zmenit prebiehajúci proces..\n"
 "Týmto zastavíte nacasovanie (nahrávanie)!"
 
-#: src/timer.cpp:1243
-msgid "Delete the event from the timerlist"
+#: src/timer.cpp:1334
+#, fuzzy
+msgid "Delete the event from the timer list"
 msgstr "Zmaze sa úloha z casovaca."
 
-#: src/timer.cpp:1244
+#: src/timer.cpp:1335
 msgid "Really delete this event?"
 msgstr "Naozaj zmazat polozku?"
 
-#: src/timer.cpp:1248
+#: src/timer.cpp:1339
+#, fuzzy
 msgid ""
-"You would to update the running event.. \n"
+"You would update the running event.. \n"
 "this stops the timer mode (recording)!"
 msgstr ""
 "Chystáte sa zmenit prebiehajúci proces..\n"
 "Týmto zastavíte nacasovanie (nahrávanie)!"
 
-#: src/timer.cpp:1249 src/timer.cpp:2115 src/timer.cpp:2130 src/timer.cpp:2143
-#: src/timer.cpp:2164
-msgid "Update event in timerlist"
+#: src/timer.cpp:1340
+#, fuzzy
+msgid "Update event in timer list"
 msgstr "Uprav polozku v casovaci"
 
-#: src/timer.cpp:1250 src/timer.cpp:2111
+#: src/timer.cpp:1341 src/timer.cpp:2246
 msgid "Really update this event?"
 msgstr "Naozaj to mám upravit ?"
 
-#: src/timer.cpp:1372
+#: src/timer.cpp:1491
 msgid "This event is already in the timerlist."
 msgstr "Táto polozka sa uz v casovaci nachádza."
 
-#: src/timer.cpp:1373 src/timer.cpp:1424
+#: src/timer.cpp:1492 src/timer.cpp:1543
 msgid "Add event to timerlist"
 msgstr "Pridaj do casovaca"
 
-#: src/timer.cpp:1413
+#: src/timer.cpp:1532
 msgid "The Endtime overlaps with another event in the timerlist"
 msgstr "Naháavanie skoncí neskor, ako skoncí TV relácia"
 
-#: src/timer.cpp:1413
+#: src/timer.cpp:1532
 msgid "Set Stop Time"
 msgstr "Nastav cas konca"
 
-#: src/timer.cpp:1422
+#: src/timer.cpp:1541
 msgid ""
 "This event cannot added to the timerlist.\n"
 "The event overlaps with another event in the timerlist\n"
@@ -4703,122 +4759,142 @@ msgstr ""
 "Táto úloha nemoze byt zaradená do casovaca.\n"
 "Prelína sa totiz z inou predtým zadanou úlohou."
 
-#: src/timer.cpp:1501
+#: src/timer.cpp:1620
 msgid "timerView"
 msgstr "Casovac"
 
-#: src/timer.cpp:1502
+#: src/timer.cpp:1621
 msgid "add new event to Timerlist"
 msgstr "Pridaj do casovaca"
 
-#: src/timer.cpp:1503
+#: src/timer.cpp:1622
 msgid "remove this entry from timer list"
 msgstr "vymaz polozku z casovaca"
 
-#: src/timer.cpp:1701
+#: src/timer.cpp:1821
 msgid "Timer list"
 msgstr "Casovac"
 
-#: src/timer.cpp:1779
+#: src/timer.cpp:1899
 msgid "Timer Edit View"
 msgstr "editácia casovaca"
 
-#: src/timer.cpp:1780
+#: src/timer.cpp:1900
 msgid "increase the event begin time in 1 minute steps"
 msgstr "zvýs cas zaciatku nahrávania o 1 minútu"
 
-#: src/timer.cpp:1781
+#: src/timer.cpp:1901
 msgid "decrease the event begin time in 1 minute steps"
 msgstr "zníz cas zaciatku nahrávania o 1 minútu"
 
-#: src/timer.cpp:1782
+#: src/timer.cpp:1902
 msgid "increase the event end time in 1 minute steps"
 msgstr "zvýs cas konca nahravánia o 1 minútu"
 
-#: src/timer.cpp:1783
+#: src/timer.cpp:1903
 msgid "decrease the event end time in 1 minute steps"
 msgstr "zniz cas konca nahravania o 1 minutu"
 
-#: src/timer.cpp:1792
+#: src/timer.cpp:1912
 msgid "January"
 msgstr "Január"
 
-#: src/timer.cpp:1792
+#: src/timer.cpp:1912
 msgid "February"
 msgstr "Február"
 
-#: src/timer.cpp:1792
+#: src/timer.cpp:1912
 msgid "March"
 msgstr "Marec"
 
-#: src/timer.cpp:1793
+#: src/timer.cpp:1913
 msgid "April"
 msgstr "April"
 
-#: src/timer.cpp:1793
+#: src/timer.cpp:1913
 msgid "May"
 msgstr "Máj"
 
-#: src/timer.cpp:1793
+#: src/timer.cpp:1913
 msgid "June"
 msgstr "Jún"
 
-#: src/timer.cpp:1793
+#: src/timer.cpp:1913
 msgid "July"
 msgstr "Júl"
 
-#: src/timer.cpp:1794
+#: src/timer.cpp:1914
 msgid "August"
 msgstr "August"
 
-#: src/timer.cpp:1794
+#: src/timer.cpp:1914
 msgid "September"
 msgstr "September"
 
-#: src/timer.cpp:1794
+#: src/timer.cpp:1914
 msgid "October"
 msgstr "Október"
 
-#: src/timer.cpp:1795
+#: src/timer.cpp:1915
 msgid "November"
 msgstr "November"
 
-#: src/timer.cpp:1795
+#: src/timer.cpp:1915
 msgid "December"
 msgstr "December"
 
-#: src/timer.cpp:1904
+#: src/timer.cpp:1931
+#, fuzzy
+msgid "do nothing"
+msgstr "[nic]"
+
+#: src/timer.cpp:1932
+#, fuzzy
+msgid "put box into standby"
+msgstr "standby"
+
+#: src/timer.cpp:1934
+#, fuzzy
+msgid "put box into deep standby"
+msgstr "Vypni box do hlbokého spánku"
+
+#: src/timer.cpp:2031
 msgid "record DVR"
 msgstr "nahraj"
 
-#: src/timer.cpp:1908
+#: src/timer.cpp:2035
 msgid "Ngrab"
 msgstr "Ngrab"
 
-#: src/timer.cpp:1914
+#: src/timer.cpp:2041
 msgid "Record VCR"
 msgstr "Nahrávanie"
 
-#: src/timer.cpp:1977
+#: src/timer.cpp:2111
 msgid "unknown service"
 msgstr "neznáma sluzba"
 
-#: src/timer.cpp:2109
+#: src/timer.cpp:2244
 msgid ""
 "The new endtime is before now time!\n"
 "This stops the running timer(recording)\n"
 msgstr ""
+"Nastavenie ukončenia nahrávania je v minulosti,\n"
+" potvrdením zastavíte nahrávanie\n"
 
-#: src/timer.cpp:2129
+#: src/timer.cpp:2250 src/timer.cpp:2265 src/timer.cpp:2278 src/timer.cpp:2299
+msgid "Update event in timerlist"
+msgstr "Uprav polozku v casovaci"
+
+#: src/timer.cpp:2264
 msgid "New endtime are now adjusted"
 msgstr "Bol zmenený čas konca."
 
-#: src/timer.cpp:2142
-#, fuzzy
+#: src/timer.cpp:2277
 msgid "The event has already finished... you can not change endtime!"
-msgstr "Táto polozka sa uz v casovaci nachádza."
+msgstr "Tento program sa už ukončil... nemôžete zmeniť čas konca"
 
-#: src/timer.cpp:2164
+#: src/timer.cpp:2299
 msgid ""
 "Invalid begin or end time.!\n"
 "Please check time and date"
@@ -4826,7 +4902,7 @@ msgstr ""
 "chybný cas zaciatku alebo konca.!\n"
 "Overte to prosím."
 
-#: src/timer.cpp:2333
+#: src/timer.cpp:2468
 msgid ""
 "Sorry, you can not add a time shifted service manually to the timer.\n"
 "Please close the Timer and use the EPG of the service you wish to add!"
@@ -4834,7 +4910,7 @@ msgstr ""
 "Prepácte, ale program nemozete pridat do casovaca manuálne.\n"
 " Prosim Vás ak chcete zaradit tento program pouzite prírucku (EPG)"
 
-#: src/timer.cpp:2394
+#: src/timer.cpp:2529
 msgid "no description found"
 msgstr "Popis nie je k dispozícii"
 
@@ -4955,72 +5031,76 @@ msgstr "stahujem image..."
 msgid "Please select version to upgrade or LAME! to abort"
 msgstr "Vyberte si verziu k upgrade, alebo stlacte LAME!"
 
-#: src/upgrade.cpp:417 src/upgrade.cpp:490 src/upgrade.cpp:504
+#: src/upgrade.cpp:419 src/upgrade.cpp:494 src/upgrade.cpp:508
 msgid "Error!"
 msgstr "Chyba"
 
-#: src/upgrade.cpp:473
+#: src/upgrade.cpp:475
 msgid "Download aborted."
 msgstr "Stahovanie zrusene."
 
-#: src/upgrade.cpp:483
+#: src/upgrade.cpp:487
 msgid "checking consistency of file..."
 msgstr "Overujem pravost suboru..."
 
-#: src/upgrade.cpp:487 src/upgrade.cpp:489
+#: src/upgrade.cpp:491 src/upgrade.cpp:493
 msgid "write error while downloading..."
 msgstr "chyba zapisu pri stahovani..."
 
-#: src/upgrade.cpp:501 src/upgrade.cpp:503
+#: src/upgrade.cpp:505 src/upgrade.cpp:507
 msgid "Data error. The checksum didn't match."
 msgstr "Chybné udaje! Checksum nesúhlasí."
 
-#: src/upgrade.cpp:513
+#: src/upgrade.cpp:517
 msgid "Checksum OK. Ready to upgrade."
 msgstr "Checksum OK. Som pripravený na upgrade."
 
-#: src/upgrade.cpp:515
+#: src/upgrade.cpp:519
 msgid "Are you sure you want to upgrade to this new version?"
 msgstr "Naozaj chcete nahrat túto novú verziu firmware ?"
 
-#: src/upgrade.cpp:516
+#: src/upgrade.cpp:520
 msgid "Ready to upgrade"
 msgstr "Pripravený k upgrade"
 
-#: src/upgrade.cpp:526
+#: src/upgrade.cpp:530
 msgid "Please wait... do NOT switch off the receiver!"
 msgstr "Prosim cakajte... Nevypínajte box !!!"
 
-#: src/upgrade.cpp:527
+#: src/upgrade.cpp:531
 msgid "upgrade in progress"
 msgstr "prebieha upgrade"
 
-#: src/upgrade.cpp:557
+#: src/upgrade.cpp:561
 msgid "Can't read flashimage.img!"
 msgstr "Nemozem precitat flashimage.img!"
 
-#: src/upgrade.cpp:557 src/upgrade.cpp:571 src/upgrade.cpp:590
-#: src/upgrade.cpp:601
+#: src/upgrade.cpp:561 src/upgrade.cpp:575 src/upgrade.cpp:594
+#: src/upgrade.cpp:605
 msgid "Flash"
 msgstr "Flash"
 
-#: src/upgrade.cpp:571
+#: src/upgrade.cpp:575
 msgid "flashimage.img has filesize of 0byte!"
 msgstr "flashimage.img ma nulovu velkost"
 
-#: src/upgrade.cpp:590
+#: src/upgrade.cpp:591
+msgid "Erasing Flash..."
+msgstr "Mazem flash..."
+
+#: src/upgrade.cpp:594
 msgid "Erase error!"
 msgstr "Chyba pri mazaní!"
 
-#: src/upgrade.cpp:601
+#: src/upgrade.cpp:605
 msgid "Can't open mtd!"
 msgstr "Nemozem otvorit mtd!"
 
-#: src/upgrade.cpp:616
+#: src/upgrade.cpp:620
 msgid "Writing Software to Flash..."
 msgstr "Zapisujem software do flash..."
 
-#: src/upgrade.cpp:638
+#: src/upgrade.cpp:642
 msgid ""
 "upgrade successful!\n"
 "restarting..."
@@ -5028,31 +5108,27 @@ msgstr ""
 "Upgrade sa podaril!\n"
 "restartujem..."
 
-#: src/upgrade.cpp:639
+#: src/upgrade.cpp:643
 msgid "upgrade ok"
 msgstr "Upgrade v poriadku"
 
-#: src/upgrade.cpp:666
-msgid "Erasing Flash..."
-msgstr "Mazem flash..."
-
-#: src/upgrade.cpp:700
+#: src/upgrade.cpp:704
 msgid "This is the currently installed release."
 msgstr "Tento FW mate prave v prijimaci."
 
-#: src/upgrade.cpp:703
+#: src/upgrade.cpp:707
 msgid "This is an older release."
 msgstr "Toto je starsie vydanie."
 
-#: src/upgrade.cpp:706
+#: src/upgrade.cpp:710
 msgid "No changelog data available."
 msgstr "Info o zmenach je nedostupne."
 
-#: src/upgrade.cpp:720
+#: src/upgrade.cpp:724
 msgid "No new features were added in this release."
 msgstr "V tejto verzii sa nenachadzaju nove fukcie."
 
-#: src/upgrade.cpp:723
+#: src/upgrade.cpp:727
 msgid "The following new features were added in this release:\n"
 msgstr "Tato verzia FW obsahuje nasledujuce nove funkcie:\n"
 
@@ -5096,45 +5172,43 @@ msgstr "UHF Modulator"
 msgid "open UHF-Modulator setup"
 msgstr "nastavenie UHF  modulátora"
 
-#: src/system_settings.cpp:50
+#: src/system_settings.cpp:51
 msgid "Harddisc Setup"
 msgstr "Nastavenie harddisku"
 
-#: src/system_settings.cpp:50
+#: src/system_settings.cpp:51
 msgid "open harddisc setup"
 msgstr "nastavenie harddisku..."
 
-#: src/system_settings.cpp:54
-#, fuzzy
+#: src/system_settings.cpp:56
 msgid "Keyboard Setup"
-msgstr "Nastavenie harddisku"
+msgstr "Klávesnica"
 
-#: src/system_settings.cpp:54
-#, fuzzy
+#: src/system_settings.cpp:56
 msgid "open keyboard setup"
-msgstr "nastavenie harddisku..."
+msgstr "nastavenia klávesnice"
 
-#: src/system_settings.cpp:57
+#: src/system_settings.cpp:59
 msgid "open on screen display settings"
 msgstr "Ponuka nastavení OSD"
 
-#: src/system_settings.cpp:58
+#: src/system_settings.cpp:60
 msgid "open language selector"
 msgstr "Nastavenie jazyka menu"
 
-#: src/system_settings.cpp:61
+#: src/system_settings.cpp:63
 msgid "LCD Settings"
 msgstr "Nastavenia LCD"
 
-#: src/system_settings.cpp:61
+#: src/system_settings.cpp:63
 msgid "open LCD settings"
 msgstr "Otvorí sa nastavenie LCD displeja na dreamboxe"
 
-#: src/system_settings.cpp:123
+#: src/system_settings.cpp:126
 msgid "sorry, no harddisks found!"
 msgstr "Harddisk sa nenasiel !"
 
-#: src/system_settings.cpp:123
+#: src/system_settings.cpp:126
 msgid "Harddisk setup..."
 msgstr "Nastavenie harddisku"
 
@@ -5154,44 +5228,23 @@ msgstr "korekcia casu"
 msgid "open time correction window"
 msgstr "otvori nastavenia casu"
 
-#: src/time_settings.cpp:83
+#: src/time_settings.cpp:72
 msgid "To change time correction you must tune first to any transponder"
 msgstr ""
 "Aby ste nastavili korekciu casu, musíte najprv vyhladat aktívny transpodér"
 
-#: src/time_settings.cpp:83
+#: src/time_settings.cpp:72
 msgid "time correction change error"
 msgstr "chyba pri korigovaní casu"
 
-#~ msgid "Automatically adjust clock for daylight saving changes"
-#~ msgstr "Automaticky nastav hodiny pri zmene na zimný/letný cas"
+#~ msgid "/sec"
+#~ msgstr "/sec"
 
-#~ msgid "enter correct time here"
-#~ msgstr "Zadajte správny cas"
+#~ msgid "motor drive speed, in degrees per second"
+#~ msgstr "rýchlost motora, v stupnoch za sekundu"
 
-#~ msgid "New Date:"
-#~ msgstr "Nový dátum:"
+#~ msgid "press left or right to change"
+#~ msgstr "pre zmenu stlačte < >"
 
-#~ msgid "New Time:"
-#~ msgstr "Nový cas:"
-
-#~ msgid "press ok to select another day"
-#~ msgstr "Ok pre nastavenie iného dna"
-
-#~ msgid "press ok to select another month"
-#~ msgstr "Ok pre nastavenie iného mesiaca"
-
-#~ msgid "press ok to select another year"
-#~ msgstr "Ok pre nastavenie iného roku"
-
-#~ msgid "set new time and close window"
-#~ msgstr "nastav cas a zatvor okno"
-
-#~ msgid "Transponder Date:"
-#~ msgstr "Dátum na trasnpondéry:"
-
-#~ msgid "Transponder Time:"
-#~ msgstr "Cas na Transpondéry:"
-
-#~ msgid "use automatically daylight saving time"
-#~ msgstr "letný/zimný cas prepni automaticky"
+#~ msgid "Upgrade FP"
+#~ msgstr "Upgrade FP"
