@@ -152,6 +152,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		eDebug("[TUNE] tune failed");
 		service_state=ENOENT;
 		dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceFailed));
+		transponder=0;
 		break;
 	case eDVBServiceEvent::eventServiceGotPAT:
 	{

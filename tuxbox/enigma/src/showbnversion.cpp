@@ -5,6 +5,7 @@
 #include <core/gui/elabel.h>
 #include <core/dvb/dvbservice.h>
 #include <core/gui/guiactions.h>
+#include <core/gdi/font.h>
 
 /*
 	was hier fehlt: parsen der BAT (batid: 5001) auf 0001:0085. daher wird 0001:0085:0F03 assumed.
@@ -152,6 +153,7 @@ ShowBNVersion::ShowBNVersion(): eWindow(1)
 	text=new eLabel(this);
 	text->move(ePoint(10, 40));
 	text->resize(eSize(380, 60));
+	text->setFlags(RS_WRAP);
 	
 	res1=new eLabel(this);
 	res1->move(ePoint(10, 100));
