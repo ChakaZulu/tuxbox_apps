@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.303 2003/03/14 07:31:51 obi Exp $
+ * $Id: zapit.cpp,v 1.304 2003/03/26 09:57:40 mws Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -102,6 +102,7 @@ tallchans allchans;             //  tallchans defined in "bouquets.h"
 std::map <uint32_t, transponder>transponders;
 pthread_t scan_thread;
 extern int found_transponders;
+extern int processed_transponders;
 extern int found_channels;
 extern short curr_sat;
 extern short scan_runs;
@@ -673,6 +674,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		CZapitMessages::responseIsScanReady msgResponseIsScanReady;
 		msgResponseIsScanReady.satellite = curr_sat;
 		msgResponseIsScanReady.transponder = found_transponders;
+		msgResponseIsScanReady.processed_transponder = processed_transponders;
 		msgResponseIsScanReady.services = found_channels;
 		if (scan_runs > 0)
 			msgResponseIsScanReady.scanReady = false;
@@ -1426,7 +1428,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.303 2003/03/14 07:31:51 obi Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.304 2003/03/26 09:57:40 mws Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
