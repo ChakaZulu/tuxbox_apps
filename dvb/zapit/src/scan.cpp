@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.109 2003/05/06 13:09:08 digi_casi Exp $
+ * $Id: scan.cpp,v 1.110 2003/05/06 16:49:37 digi_casi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -35,6 +35,8 @@
 #include <zapit/settings.h>
 #include <zapit/xmlinterface.h>
 
+#define SERVICES_TMP "/tmp/services.tmp"
+
 short scan_runs;
 short curr_sat;
 static int status = 0;
@@ -58,6 +60,50 @@ extern xmlDocPtr scanInputParser;
 extern std::map <uint8_t, std::string> scanProviders;
 extern CZapitClient::bouquetMode bouquetMode;
 extern CEventServer *eventServer;
+
+void cp(char * from, char * to)
+{
+	char cmd[256] = "cp -f ";
+	strcat(cmd, from);
+	strcat(cmd, " ");
+	strcat(cmd, to);
+	system(cmd);
+}
+
+void copy_to_satellite(FILE * fd, FILE * fd1, char * providerName)
+{
+	//copies services from previous services.xml file from start up to the sat that is being scanned...
+	char buffer[256] = "";
+	
+	//look for sat to be scanned... or end of file
+	fgets(buffer, 255, fd);
+	while(!feof(fd1) && !((strstr(buffer, "sat name") && strstr(buffer, providerName)) || strstr(buffer, "</zapit>")))
+	{
+		fputs(buffer, fd);
+		fgets(buffer, 255, fd1);
+	}
+	
+	// if not end of file
+	if (!feof(fd1) && !strstr(buffer, "</zapit>"))
+		// skip to end of satellite
+		while (!feof(fd1) && !strstr(buffer, "</sat>"))
+			fgets(buffer, 255, fd1);
+}
+
+void copy_to_end(FILE * fd, FILE * fd1, char * providerName)
+{
+	//copies the services from previous services.xml file from the end of sat being scanned to the end of the file...
+	char buffer[256] ="";
+	
+	fgets(buffer, 255, fd1);
+	while(!feof(fd1) && !strstr(buffer, "</zapit>"))
+	{
+		fputs(buffer, fd);
+		fgets(buffer, 255, fd1);
+	}
+	fclose(fd1);
+	unlink(SERVICES_TMP);
+}
 
 char *getFrontendName(void)
 {
@@ -177,30 +223,15 @@ int get_sdts(void)
 	return 0;
 }
 
-FILE *write_xml_header(const char *filename)
+void write_xml_header(FILE * fd, const char *filename)
 {
-	FILE *fd = fopen(filename, "w");
-
-	if (fd == NULL)
-	{
-		ERROR(filename);
-		stop_scan(false);
-		pthread_exit(0);
-	}
-
 	fprintf(fd, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<zapit>\n");
-
-	return fd;
 }
 
-int write_xml_footer(FILE *fd)
+void write_xml_footer(FILE *fd)
 {
-	if (fd != NULL)	{
-		fprintf(fd, "</zapit>\n");
-		return fclose(fd);
-	}
-
-	return -1;
+	fprintf(fd, "</zapit>\n");
+	fclose(fd);
 }
 
 void write_bouquets(void)
@@ -288,16 +319,12 @@ void write_transponder(FILE *fd, t_transport_stream_id transport_stream_id, t_or
 	return;
 }
 
-FILE *write_provider(FILE *fd, const char *type, const char *provider_name, const uint8_t DiSEqC)
+int write_provider(FILE *fd, const char *type, const char *provider_name, const uint8_t DiSEqC)
 {
+	int status = -1;
+	
 	if (!scantransponders.empty())
 	{
-		/* create new file if needed */
-		if (fd == NULL)
-		{
-			fd = write_xml_header(SERVICES_XML);
-		}
-
 		/* cable tag */
 		if (!strcmp(type, "cable"))
 		{
@@ -318,13 +345,14 @@ FILE *write_provider(FILE *fd, const char *type, const char *provider_name, cons
 
 		/* end tag */
 		fprintf(fd, "\t</%s>\n", type);
+		status = 0; // this indicates that services have been found and that bouquets should be written...
 	}
 
 	/* clear results for next provider */
 	allchans.clear();                  // different provider may have the same onid/sid pair // FIXME
 	scantransponders.clear();
 
-	return fd;
+	return status;
 }
 
 int scan_transponder(xmlNodePtr transponder, bool satfeed, uint8_t diseqc_pos)
@@ -435,10 +463,12 @@ void scan_provider(xmlNodePtr search, char * providerName, bool satfeed, uint8_t
 void *start_scanthread(void *)
 {
 	FILE *fd = NULL;
+	FILE *fd1 = NULL;
 	char providerName[32] = "";
 	char *type = NULL;
 	uint8_t diseqc_pos = 0;
 	bool satfeed = false;
+	int scan_status = -1;
 
 	scanBouquetManager = new CBouquetManager();
 	processed_transponders = 0;
@@ -487,14 +517,36 @@ void *start_scanthread(void *)
 			/* increase sat counter */
 			curr_sat++;
 
-			/* satellite receivers might need diseqc */
-			if (frontend->getInfo()->type == FE_QPSK)
-				diseqc_pos = spI->first;
-			
-			scan_provider(search, providerName, satfeed, diseqc_pos);
+			/* copy services.xml to /tmp directory */
+			cp(SERVICES_XML, SERVICES_TMP);
 		
-			/* write services */
-			fd = write_provider(fd, type, providerName, diseqc_pos);
+			if ((fd = fopen(SERVICES_XML, "w")))
+			{
+				if ((fd1 = fopen(SERVICES_TMP, "r")))
+					copy_to_satellite(fd, fd1, providerName);
+				else
+					write_xml_header(fd, SERVICES_XML);
+					
+				/* satellite receivers might need diseqc */
+				if (frontend->getInfo()->type == FE_QPSK)
+					diseqc_pos = spI->first;
+						
+				scan_provider(search, providerName, satfeed, diseqc_pos);
+					
+				/* write services */
+				scan_status = write_provider(fd, type, providerName, diseqc_pos);
+			
+				if (fd1)		
+					copy_to_end(fd, fd1, providerName);
+					
+				write_xml_footer(fd);
+			}
+			else
+			{
+				ERROR(SERVICES_XML);
+				stop_scan(false);
+				pthread_exit(0);
+			}
 		}
 
 		/* go to next satellite */
@@ -505,12 +557,9 @@ void *start_scanthread(void *)
 	delete transponder;
 	delete search;
 
-	/* close xml tags */
-	if (write_xml_footer(fd) != -1)
-	{
-		/* write bouquets if channels did not fail */
+	/* write bouquets if services were found */
+	if (scan_status != -1)
 		write_bouquets();
-	}
 
 	/* report status */
 	INFO("found %d transponders and %d channels", found_transponders, found_channels);
