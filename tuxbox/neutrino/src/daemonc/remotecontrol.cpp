@@ -1,9 +1,9 @@
 //
-// $Id: remotecontrol.cpp,v 1.21 2001/10/16 17:22:39 field Exp $
+// $Id: remotecontrol.cpp,v 1.22 2001/10/16 17:32:15 field Exp $
 //
 // $Log: remotecontrol.cpp,v $
-// Revision 1.21  2001/10/16 17:22:39  field
-// NVODs funktionieren (mit jeder Menge Fehler, speziell im EPG/Zeiten...)
+// Revision 1.22  2001/10/16 17:32:15  field
+// NVOD-Liste besser
 //
 // Revision 1.20  2001/10/16 17:00:13  faralla
 // nvod nearly ready
@@ -106,13 +106,13 @@ static void getNVODs(unsigned onidSid, st_nvod_info *nvods )
             {
                 nvods->count_nvods+= 1;
                 unsigned onidsid2=*(unsigned *)p;
-                printf("onid_sid: 0x%x\n", onidsid2);
-                nvods->nvods[nvods->count_nvods].onid_sid = onidsid2;
+//                printf("onid_sid: 0x%x\n", onidsid2);
+                nvods->nvods[nvods->count_nvods- 1].onid_sid = onidsid2;
 
                 p+=4;
                 unsigned short tsid=*(unsigned short *)p;
-                printf("tsid: 0x%x\n", tsid);
-                nvods->nvods[nvods->count_nvods].tsid = tsid;
+//                printf("tsid: 0x%x\n", tsid);
+                nvods->nvods[nvods->count_nvods- 1].tsid = tsid;
 
                 p+=2;
                 unsigned char numberOfTimes=*p;
@@ -121,9 +121,9 @@ static void getNVODs(unsigned onidSid, st_nvod_info *nvods )
                 {
                     time_t zeit=*(time_t *)p;
                     p+=4;
-                    printf("%s", ctime(&zeit));
+//                    printf("%s", ctime(&zeit));
                     if (i == 0)
-                        nvods->nvods[nvods->count_nvods].startzeit = zeit;
+                        nvods->nvods[nvods->count_nvods- 1].startzeit = zeit;
                 }
             }
         }
