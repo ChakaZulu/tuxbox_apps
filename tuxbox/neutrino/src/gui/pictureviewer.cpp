@@ -32,28 +32,29 @@
 
 #include <config.h>
 
-#include "pictureviewer.h"
+#include <gui/pictureviewer.h>
 
 #include <global.h>
 #include <neutrino.h>
 
+#include <daemonc/remotecontrol.h>
+
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
-#include <daemonc/remotecontrol.h>
+
+#include <gui/nfs.h>
 #include <gui/widget/icons.h>
+#include <gui/widget/menue.h>
+#include <gui/widget/messagebox.h>
+#include <gui/widget/hintbox.h>
+#include <gui/widget/stringinput.h>
+
 #include <system/settings.h>
-
-
-#include "nfs.h"
-
-#include "widget/menue.h"
-#include "widget/messagebox.h"
-#include "widget/hintbox.h"
-#include "widget/stringinput.h"
 
 #include <algorithm>
 #include <sys/stat.h>
 #include <sys/time.h>
+
 
 //------------------------------------------------------------------------
 bool sortByDate (const CPicture& a, const CPicture& b)
