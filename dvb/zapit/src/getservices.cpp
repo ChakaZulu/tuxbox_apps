@@ -41,7 +41,7 @@ void ParseTransponder(XMLTreeNode *transponder) {
       
       if (!strcmp("cable", type)){
 	//printf("Frequency: %s\n", services->GetAttributeValue("frequency"));
-	sscanf(services->GetAttributeValue("frequency"),"%hu", &curr_freq);
+	sscanf(services->GetAttributeValue("frequency"),"%u", &curr_freq);
 	sscanf(services->GetAttributeValue("symbolRate"), "%u", &curr_symbolrate);
 	sscanf(services->GetAttributeValue("Fec"), "%hu", &curr_fec);
 	curr_symbolrate = curr_symbolrate * 1000;

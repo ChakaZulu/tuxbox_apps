@@ -7,7 +7,7 @@ typedef struct channelstruct {
 	uint vpid;
 	uint apid;
 	uint pmt;
-	ushort frequency;
+	uint frequency;
 	uint symbolrate;
 	ushort Polarity;
 	ushort Diseqc;
