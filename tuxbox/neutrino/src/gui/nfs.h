@@ -54,7 +54,8 @@ class CNFSMountGui : public CMenuTarget
 	enum FSType
 		{
 			NFS  = 0,
-			CIFS = 1
+			CIFS = 1,
+			LUFS = 2
 		};
 	
  private:
@@ -68,6 +69,7 @@ class CNFSMountGui : public CMenuTarget
 
 	FS_Support m_nfs_sup;
 	FS_Support m_cifs_sup;
+	FS_Support m_lufs_sup;
 
  public:
 	CNFSMountGui();

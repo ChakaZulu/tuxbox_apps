@@ -2,7 +2,7 @@
 #define __locals__
 
 /*
- * $Id: locals.h,v 1.29 2004/12/15 10:56:21 diemade Exp $
+ * $Id: locals.h,v 1.30 2004/12/17 14:52:31 diemade Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -600,6 +600,7 @@ typedef enum
 	LOCALE_NFS_REMOUNT,
 	LOCALE_NFS_TYPE,
 	LOCALE_NFS_TYPE_CIFS,
+	LOCALE_NFS_TYPE_LUFS,
 	LOCALE_NFS_TYPE_NFS,
 	LOCALE_NFS_UMOUNT,
 	LOCALE_NFS_UMOUNTERROR,

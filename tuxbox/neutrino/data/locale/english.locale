@@ -513,7 +513,7 @@ networkmenu.dhcp DHCP
 networkmenu.gateway default gateway
 networkmenu.head Network Settings
 networkmenu.ipaddress IP address
-networkmenu.mount NFS/CIFS
+networkmenu.mount NFS/CIFS/FTPFS
 networkmenu.nameserver name server
 networkmenu.netmask netmask
 networkmenu.setupnow setup network now
@@ -523,23 +523,24 @@ networkmenu.test test network now
 nfs.alreadymounted directory already mounted
 nfs.automount mount on startup
 nfs.dir directory/share
-nfs.ip NFS/CIFS Server IP
+nfs.ip Server IP
 nfs.localdir local dir
-nfs.mount Mount NFS/CIFS volume
+nfs.mount Mount Network volume
 nfs.mount_options mount options
 nfs.mounterror mount error
 nfs.mounterror_notsup filesystem type not supported
 nfs.mountnow mount now
 nfs.mounttimeout mount error: timeout
-nfs.password CIFS password
+nfs.password password
 nfs.remount remount directories
 nfs.type type
 nfs.type_cifs CIFS
+nfs.type_lufs FTPFS
 nfs.type_nfs NFS
-nfs.umount Umount NFS/CIFS volume
+nfs.umount Umount Network volume
 nfs.umounterror error umounting volume
-nfs.username CIFS username
-nfsmenu.head NFS/CIFS settings
+nfs.username username
+nfsmenu.head NFS/CIFS/FTPFS settings
 nvod.percentage (%d%% over)
 nvod.starting (starting in %d min)
 nvodselector.directormode Direct-Mode

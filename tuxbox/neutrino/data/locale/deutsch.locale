@@ -551,7 +551,7 @@ networkmenu.dhcp DHCP
 networkmenu.gateway Standard Gateway
 networkmenu.head Netzwerk Einstellungen
 networkmenu.ipaddress IP-Adresse
-networkmenu.mount NFS/CIFS
+networkmenu.mount NFS/CIFS/FTPFS
 networkmenu.nameserver Nameserver
 networkmenu.netmask Netzmaske
 networkmenu.setupnow Netzwerkeinstellungen jetzt zuweisen
@@ -561,23 +561,24 @@ networkmenu.test Netzwerk testen
 nfs.alreadymounted Verzeichnis bereits gemountet.
 nfs.automount Beim Start mounten
 nfs.dir Verzeichnis/Freigabe
-nfs.ip NFS/CIFS Server IP
+nfs.ip Server IP
 nfs.localdir lokales Verzeichnis
-nfs.mount NFS/CIFS Verzeichnis mounten
+nfs.mount Netzwerk Verzeichnis mounten
 nfs.mount_options Mount-Optionen
 nfs.mounterror Mount-Fehler
 nfs.mounterror_notsup Dateisystem-Typ wird nicht unterstützt.
 nfs.mountnow Jetzt mounten
 nfs.mounttimeout Mount-Fehler: Timeout
-nfs.password CIFS Passwort
+nfs.password Passwort
 nfs.remount Verzeichnisse erneut mounten
 nfs.type Typ
 nfs.type_cifs CIFS
+nfs.type_lufs FTPFS
 nfs.type_nfs NFS
-nfs.umount NFS/CIFS Verzeichnis unmounten
+nfs.umount Netzwerk Verzeichnis unmounten
 nfs.umounterror Umount-Fehler
-nfs.username CIFS Benutzername
-nfsmenu.head NFS/CIFS Einstellungen
+nfs.username Benutzername
+nfsmenu.head NFS/CIFS/FTPFS Einstellungen
 nvod.percentage (%d%% vorbei)
 nvod.starting (Beginn in %d min)
 nvodselector.directormode Bildregie-Modus
