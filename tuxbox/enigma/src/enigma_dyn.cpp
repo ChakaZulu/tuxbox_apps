@@ -24,6 +24,7 @@
 #include <core/gdi/fb.cpp>
 #include <core/dvb/decoder.h>
 #include <core/dvb/dvbservice.h>
+#include <core/driver/eavswitch.h>
 
 #define TEMPLATE_DIR DATADIR+eString("/enigma/templates/")
 
@@ -173,17 +174,16 @@ static eString audio(eString request, eString path, eString opts, eHTTPConnectio
 	if (volume)
 	{
 		int vol=atoi(volume.c_str());
-		eDVB::getInstance()->changeVolume(1, vol);
+		eAVSwitch::getInstance()->changeVolume(1, vol);
 		result+="Volume set.<br>\n";
 	}
 	eString mute=opt["mute"];
 	if (mute)
 	{
-		int m=atoi(mute.c_str());
-		eDVB::getInstance()->changeVolume(3, m);
+		eAVSwitch::getInstance()->toggleMute();
 		result+="mute set<br>\n";
 	}
-	result+=eString().sprintf("volume: %d<br>\nmute: %d<br>\n", eDVB::getInstance()->volume, eDVB::getInstance()->mute);
+	result+=eString().sprintf("volume: %d<br>\nmute: %d<br>\n", eAVSwitch::getInstance()->getVolume(), eAVSwitch::getInstance()->getMute());
 	return result;
 }
 
@@ -241,7 +241,7 @@ static eString channels_getcurrent(eString request, eString path, eString opt, e
 
 static eString getVolume()
 {
-	return eString().setNum((63-eDVB::getInstance()->volume)*100/63, 10);
+	return eString().setNum((63-eAVSwitch::getInstance()->getVolume())*100/63, 10);
 }
 
 static eString setVolume(eString request, eString path, eString opts, eHTTPConnection *content)
@@ -261,7 +261,7 @@ static eString setVolume(eString request, eString path, eString opts, eHTTPConne
 	if(!mute) {
 		mut=0;
 	} else {
-		eDVB::getInstance()->changeVolume(2,1);
+		eAVSwitch::getInstance()->changeVolume(2,1);
 		result+="[mute OK]";
 		return result;
 	}
@@ -279,7 +279,7 @@ static eString setVolume(eString request, eString path, eString opts, eHTTPConne
 	temp=temp*6.3;
 	vol=(int)temp;
 
-	eDVB::getInstance()->changeVolume(1, 63-vol);
+	eAVSwitch::getInstance()->changeVolume(1, 63-vol);
 	result+="[volume OK]";
 
 	return result;
@@ -372,7 +372,7 @@ static eString getVolBar()
 
 	result+="<td>";
 
-	if(eDVB::getInstance()->mute==1) {
+	if(eAVSwitch::getInstance()->getMute()==1) {
 		result+="<a class=\"mute\" href=\"javascript:unMute()\">";
 		result+="unmute";
 	} else {

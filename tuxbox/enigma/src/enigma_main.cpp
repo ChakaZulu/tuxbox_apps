@@ -434,7 +434,7 @@ void eZapMain::eraseBackground(gPainter *painter, const eRect &where)
 {
 }
 
-eZapMain::eZapMain(): eWidget(0, 1), timeout(eApp), pMsg(0), clocktimer(eApp)
+eZapMain::eZapMain(): eWidget(0, 1), pMsg(0), timeout(eApp), clocktimer(eApp)
 {
 	isVT=0;
 	eSkin *skin=eSkin::getActive();
@@ -504,7 +504,7 @@ eZapMain::eZapMain(): eWidget(0, 1), timeout(eApp), pMsg(0), clocktimer(eApp)
 	CONNECT(clocktimer.timeout, eZapMain::clockUpdate);
 
 	CONNECT(eDVB::getInstance()->timeUpdated, eZapMain::clockUpdate);
-	CONNECT(eDVB::getInstance()->volumeChanged, eZapMain::updateVolume);
+	CONNECT(eAVSwitch::getInstance()->volumeChanged, eZapMain::updateVolume);
 
 	actual_eventDisplay=0;
 
@@ -765,7 +765,7 @@ void eZapMain::prevService()
 
 void eZapMain::volumeUp()
 {
-	eDVB::getInstance()->changeVolume(0, -4);
+	eAVSwitch::getInstance()->changeVolume(0, -4);
 //		if (!isVisible())
 //			show();
 //		timeout.start(1000, 1);
@@ -773,7 +773,7 @@ void eZapMain::volumeUp()
 
 void eZapMain::volumeDown()
 {
-	eDVB::getInstance()->changeVolume(0, +4);
+	eAVSwitch::getInstance()->changeVolume(0, +4);
 //		if (!isVisible())
 //			show();
 //		timeout.start(1000, 1);
@@ -781,7 +781,7 @@ void eZapMain::volumeDown()
 
 void eZapMain::toggleMute()
 {
-	eDVB::getInstance()->changeVolume(2, 1);
+	eAVSwitch::getInstance()->toggleMute();
 }
 
 void eZapMain::showMainMenu()
@@ -1246,7 +1246,7 @@ void eZapMain::startService(const eServiceReference &serviceref, int err)
 		show();
 
 // Quick und Dirty ... damit die aktuelle Volume sofort angezeigt wird.
-	eDVB::getInstance()->changeVolume(0, 0);
+	eAVSwitch::getInstance()->changeVolume(0, 0);
 
 	eServiceHandler *sapi=eServiceInterface::getInstance()->getService();
 	if (!sapi)

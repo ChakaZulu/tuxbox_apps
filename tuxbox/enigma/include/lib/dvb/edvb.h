@@ -128,7 +128,6 @@ public:
 	Signal1<void, const eDVBEvent&> eventOccured;
 
 		// -> noch woanders hin
-	Signal1<void, int> volumeChanged;
 	Signal0<void> timeUpdated;
 	
 public:
@@ -146,20 +145,6 @@ public:
 	EIT *getEIT();
 	SDT *getSDT();
 
-		// -> decoder
-	int volume, mute;	
-	/**
-	 * \brief Changes the volume.
-	 *
-	 * \param abs What to change:
-	 * \arg \c 0 Volume, relative
-	 * \arg \c 1 Volume, absolute
-	 * \arg \c 2 Mute, set
-	 * \arg \c 3 Mute, change
-	 * \param vol The volume/muteflag to set. In case of volume, 0 means max and 63 means min.
-	 */
-	void changeVolume(int abs, int vol);
-	
 	/**
 	 * \brief Configures the network.
 	 *

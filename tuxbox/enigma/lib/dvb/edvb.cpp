@@ -130,15 +130,6 @@ eDVB::eDVB(): state(eDVBState::stateIdle)
 		// init stream watchdog
 	eStreamWatchdog::getInstance()->reloadSettings();
 
-		// initial volume settings
-	int vol, m;
-	if (eConfig::getInstance()->getKey("/elitedvb/audio/volume", vol))
-		vol=10;
-	if (eConfig::getInstance()->getKey("/elitedvb/audio/mute", m))
-		m=0;
-	changeVolume(1, vol);
-	changeVolume(3, m);
-	
 //	tMHWEIT=0;
 
 		// init dvb recorder
@@ -154,8 +145,6 @@ eDVB::~eDVB()
 
 	eAVSwitch::getInstance()->setActive(0);
 	delete eAVSwitch::getInstance();
-	eConfig::getInstance()->setKey("/elitedvb/audio/volume", volume);
-	eConfig::getInstance()->setKey("/elitedvb/audio/mute", mute);
 	Decoder::Close();
 
 	eFrontend::close();
@@ -200,37 +189,6 @@ EIT *eDVB::getEIT()
 SDT *eDVB::getSDT()
 {
 	return tSDT.ready()?tSDT.getCurrent():0;
-}
-
-void eDVB::changeVolume(int abs, int vol)
-{
-	switch (abs)
-	{
-		case 0:
-			volume+=vol;
-			mute=0;
-		break;
-		case 1:
-			volume=vol;
-			mute=0;
-		break;
-		case 2:
-			if (vol)
-			mute=!mute;
-		break;
-		case 3:
-			mute=vol;
-		break;
-	}
-	
-	if (volume<0)
-		volume=0;
-	if (volume>63)
-		volume=63;
-
-	eAVSwitch::getInstance()->setVolume(mute?0:((63-volume)*65536/64));
-
-	/*emit*/ volumeChanged(mute?63:volume);
 }
 
 static void unpack(__u32 l, int *t)
