@@ -1,5 +1,5 @@
 /*
-$Id: sectables.c,v 1.24 2004/08/01 21:33:09 rasc Exp $
+$Id: sectables.c,v 1.25 2004/08/04 19:54:39 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: sectables.c,v 1.24 2004/08/01 21:33:09 rasc Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.25  2004/08/04 19:54:39  rasc
+Bugfix: UNT/INT table mixup  (reported by  Karsten Siebert)
+
 Revision 1.24  2004/08/01 21:33:09  rasc
 minor TVA stuff (TS 102 323)
 
@@ -310,7 +313,7 @@ static TABLE_ID_FUNC table_id_func[] = {
      {  0x46, 0x46,  decode_SDT	},
      /* res. */
      {  0x4A, 0x4A,  decode_BAT	},
-     {  0x4C, 0x4C,  decode_DSMCC_UNT },
+     {  0x4B, 0x4B,  decode_DSMCC_UNT },
      {  0x4C, 0x4C,  decode_DSMCC_INT },
      {  0x4E, 0x6E,  decode_EIT	},  /*  4 different types */
      {  0x70, 0x70,  decode_TDT },

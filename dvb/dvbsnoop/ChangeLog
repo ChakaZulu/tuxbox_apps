@@ -1,4 +1,5 @@
 
+ - Bugfix: UNT/INT table mixup  (tnx to Karsten Siebert)
  - Update: misc. tables
  - New: resolution_authority/provider_notification_section (TS 102 323)
  - New: content_identifier_descriptor (TS 102 323)
@@ -11,6 +12,7 @@
  - Bugfixes
 
  - Bugfixes
+ - Bugfix: AIT transport protocol label fix (tnx to Stéphane Esté-Gracias)
  - New: TS filter single pids from multi-pid ts-input-file  (e.g.: -if file 0x10)
  - Changed: PMT: some brainded section check
  - NEW: TS subdecoding (ts2PES, ts2SEC)  [-tssubdecode]
