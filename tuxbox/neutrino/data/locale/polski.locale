@@ -52,7 +52,7 @@ mainsettings.keybinding Wybor klawiszy
 mainsettings.misc Inne Ustawienia
 mainsettings.scan Ustawienia Strojenia
 
-mp3picsettings.general unset
+mp3picsettings.general Odtwarzacz MP3 / Przegladarka
 
 miscsettings.head Inne Ustawienia
 miscsettings.shutdown_real Zalacz Standby
@@ -60,7 +60,7 @@ miscsettings.boxtype Tyb DBox'a
 miscsettings.startneutrinodirect Bezposrednio Neutrino
 miscsettings.general Glówne
 miscsettings.fb_destination Ekspert! -konsola
-miscsettings.infobar_sat_display unset
+miscsettings.infobar_sat_display Nazwa satelity na pasku
 
 languagesetup.head Wybor jezyka
 languagesetup.select jezyk
@@ -222,9 +222,9 @@ lcdmenu.head Ustawienia LCD
 lcdmenu.inverse Inversja
 lcdmenu.power Wl / Wyl
 lcdmenu.lcdcontroler Kontrast / Jasnosc
-lcdmenu.statusline unset
-lcdmenu.statusline.volume unset
-lcdmenu.statusline.playtime unset
+lcdmenu.statusline Linia Statusowa
+lcdmenu.statusline.volume Glosnosc
+lcdmenu.statusline.playtime Czas odtwarzania
 
 lcdcontroler.head Ustawienia LCD
 lcdcontroler.contrast Kontrast
@@ -320,7 +320,7 @@ nvod.proz (%d%% po starcie)
 scants.head Strojenie
 scants.startnow Rozpocznij Strojenie
 scants.actsatellite Satelity:
-scants.actcable unset:
+scants.actcable Kabel:
 scants.astra Astra
 scants.hotbird Hotbird
 scants.kopernikus Kopernikus
@@ -329,8 +329,8 @@ scants.thor Thor
 scants.digituerk digiturk
 scants.tuerksat Turksat
 scants.transponders Transpondery:
-scants.freqdata	unset
-scants.servicenames	unset
+scants.freqdata Czestotliwosc
+scants.servicenames TV     Radio  Dane
 scants.services Kanaly:
 scants.bouquet Bukiety
 scants.bouquet_leave pozostaw obecne
@@ -392,7 +392,7 @@ flashupdate.titlewriteflash Zapis Flasha
 flashupdate.actionwriteflash zapis
 flashupdate.flashreadyreboot Image prawidlowo zapisany.\nDBox zresetuje sie.
 flashupdate.reallyflashmtd Napewno chcesz uaktualnic?\n\nJezeli wystapi blad lub plik image jest\nwadliwy, Dbox nie uruchomi sie.\n\nNazwa Image: %s\nCel: %s
-flashupdate.wrongbase unset
+flashupdate.wrongbase Ta wersja Baseimage jest zbyt stara, \nprosze wgrac nowsza wersje!
 
 bouqueteditor.name Edytor Bukietow
 bouqueteditor.delete Kasuj
@@ -674,19 +674,19 @@ mp3player.keylevel poziom
 mp3player.fastforward przewin.
 mp3player.pause pauza
 mp3player.rewind rewind
-mp3player.artist_title unset
-mp3player.title_artist unset
-mp3player.display_order unset
-mp3player.follow unset
+mp3player.artist_title Interpretacja, Tytul
+mp3player.title_artist Tytul, Interpretacja
+mp3player.display_order Kolejnosc
+mp3player.follow Auto-wybór biezacy
 
 filebrowser.head Przegladarka
-filebrowser.filter.active unset
-filebrowser.filter.inactive unset
+filebrowser.filter.active Filtr wlaczony
+filebrowser.filter.inactive Filtr wylaczony
 filebrowser.select Wybierz
 filebrowser.mark Zaznacz
 filebrowser.scan Skanuj folder
-filebrowser.sort.name unset
-filebrowser.sort.date unset
+filebrowser.sort.name (Nazwa)
+filebrowser.sort.date (Dane)
 
 nfs.mount Zamontuj volumin NFS
 nfs.ip NFS IP serwera
