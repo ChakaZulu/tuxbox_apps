@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdtypes.h,v 1.16 2004/12/25 23:56:37 chakazulu Exp $
+	$Id: timerdtypes.h,v 1.17 2005/01/12 20:28:40 chakazulu Exp $
 
 	License: GPL
 
@@ -32,8 +32,11 @@
 
 #include <vector>
 
+
 #define REMINDER_MESSAGE_MAXLEN 31
-#define EXEC_PLUGIN_MESSAGE_MAXLEN 255
+#define EXEC_PLUGIN_NAME_MAXLEN 31
+#define RECORD_DIR_MAXLEN 100
+
 #define TIMERD_APIDS_MAXLEN 50
 
 class CTimerd
@@ -81,7 +84,7 @@ class CTimerd
 			std::string  apids;
 			bool         recordingSafety;
 		};
-		
+
 		struct TransferEventInfo
 		{
 			event_id_t   epgID;
@@ -90,7 +93,12 @@ class CTimerd
 			char         apids[TIMERD_APIDS_MAXLEN];
 			bool         recordingSafety;
 		};
-		
+
+		struct TransferRecordingInfo : TransferEventInfo
+		{
+			char         recordingDir[RECORD_DIR_MAXLEN];			
+		};
+
 		class RecordingInfo : public EventInfo
 			{
 			public:
@@ -112,6 +120,7 @@ class CTimerd
 					}
 				char apids[TIMERD_APIDS_MAXLEN];
 				int eventID;
+				char recordingDir[RECORD_DIR_MAXLEN];
 			};
 
 		struct RecordingStopInfo
@@ -134,8 +143,10 @@ class CTimerd
 			time_t            epg_starttime;                    //only filled if applicable
 			char              apids[TIMERD_APIDS_MAXLEN];       //only filled if applicable
 			bool              standby_on;                       //only filled if applicable
-			char              message[REMINDER_MESSAGE_MAXLEN]; //only filled if applicable
-			char              pluginName[EXEC_PLUGIN_MESSAGE_MAXLEN]; //only filled if applicable
+			char              message[REMINDER_MESSAGE_MAXLEN];         //only filled if applicable
+			char              pluginName[EXEC_PLUGIN_NAME_MAXLEN];      //only filled if applicable
+			char              recordingDir[RECORD_DIR_MAXLEN];       //only filled if applicable
+			
 			bool operator< (const responseGetTimer& a) const
 			{
 				return this->alarmTime < a.alarmTime ;
