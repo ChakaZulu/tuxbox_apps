@@ -83,7 +83,7 @@ void parse_command()
 void show_channelname( char * name)
 {
 	display.draw_fill_rect (0,26,120,50, CLCDDisplay::PIXEL_OFF);
-	fonts.channelname->RenderString(1,42, 130, name, CLCDDisplay::PIXEL_ON);
+	fonts.channelname->RenderString(1,43, 130, name, CLCDDisplay::PIXEL_ON);
 	display.update();
 }
 
