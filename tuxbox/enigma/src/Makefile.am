@@ -25,8 +25,8 @@ enigma_LDADD = \
 	$(top_srcdir)/enigma/src/core/driver/libdriver.a \
 	$(top_srcdir)/enigma/src/core/dvb/libdvb.a \
 	$(top_srcdir)/enigma/src/core/dvb/lowlevel/liblowlevel.a \
-	$(top_srcdir)/enigma/src/core/gdi/libgdi.a \
 	$(top_srcdir)/enigma/src/core/gui/libgui.a \
+	$(top_srcdir)/enigma/src/core/gdi/libgdi.a \
 	$(top_srcdir)/enigma/src/core/system/libsystem.a \
 	$(top_srcdir)/enigma/src/core/xml/libxml.a \
 	$(top_srcdir)/edvb/miniqt/libminiqt.a \
