@@ -27,7 +27,6 @@
 #include <string>
 
 #include <zapit/basicclient.h>
-#include <controldclient/controldMsg.h>
 
 using namespace std;
 

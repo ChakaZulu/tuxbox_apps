@@ -33,7 +33,7 @@ class CControld
 
 	public:
 
-		static const char ACTVERSION = 0;
+		static const char ACTVERSION = 1;
 
 		enum commands
 		{
