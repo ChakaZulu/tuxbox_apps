@@ -1,5 +1,5 @@
 /*
-$Id: output.h,v 1.9 2004/01/02 16:40:37 rasc Exp $
+$Id: output.h,v 1.10 2004/01/13 21:04:21 rasc Exp $
 
 
  DVBSNOOP
@@ -14,6 +14,9 @@ $Id: output.h,v 1.9 2004/01/02 16:40:37 rasc Exp $
 
 
 $Log: output.h,v $
+Revision 1.10  2004/01/13 21:04:21  rasc
+BUGFIX: getbits overflow fixed...
+
 Revision 1.9  2004/01/02 16:40:37  rasc
 DSM-CC  INT/UNT descriptors complete
 minor changes and fixes
@@ -55,6 +58,15 @@ void out_nl2(int verbose);
 void print_indent(void);
 
 
+/*
+ * Warning: following macros are violating C conventions:
+ *          macro params are used more than once in a macro!!
+ *          avoid  stuff like  out_L (4,"xxx",i++);
+ * $$$                                        ^^^^
+ *	    (but i use this for convenience...)
+ */
+
+
 #define out_NL(v)      out_nl2(v)
 
 
@@ -64,6 +76,7 @@ void print_indent(void);
 // B = Byte     ( 8 bit) 
 
 /* out "128 (0x80)"  */
+#define out_LL(v,hex)  out((v),"%lld (0x%llx)",(long long)(hex),(long long)(hex))
 #define out_L(v,hex)   out((v),"%lu (0x%08lx)",(hex),(hex))
 #define out_T(v,hex)   out((v),"%lu (0x%06x)",(hex),(hex))
 #define out_W(v,hex)   out((v),"%u (0x%04x)",(hex),(hex))
@@ -71,6 +84,7 @@ void print_indent(void);
 
 
 /* out "String 128 (=0x80)"  */
+#define out_SLL(v,str,hex)  out((v),"%s%lld (0x%llx)",(str),(long long)(hex),(long long)(hex))
 #define out_SL(v,str,hex)   out((v),"%s%lu (0x%08lx)",(str),(hex),(hex))
 #define out_ST(v,str,hex)   out((v),"%s%lu (0x%06x)",(str),(hex),(hex))
 #define out_SW(v,str,hex)   out((v),"%s%u (0x%04x)",(str),(hex),(hex))
@@ -78,6 +92,7 @@ void print_indent(void);
 
 
 /* out "String 128 (=0x80)\n"  */
+#define out_SLL_NL(v,str,hex)  out_nl((v),"%s%lld (0x%llx)",(str),(long long)(hex),(long long)(hex))
 #define out_SL_NL(v,str,hex)   out_nl((v),"%s%lu (0x%08lx)",(str),(hex),(hex))
 #define out_ST_NL(v,str,hex)   out_nl((v),"%s%lu (0x%06x)",(str),(hex),(hex))
 #define out_SW_NL(v,str,hex)   out_nl((v),"%s%u (0x%04x)",(str),(hex),(hex))
@@ -85,6 +100,7 @@ void print_indent(void);
 
 
 /* out "String 128 (=0x80)  [=string]\n"  */
+#define out_S2LL_NL(v,str,hex,str2)   out_nl((v),"%s%lld (0x%llx)  [= %s]",(str),(long long)(hex),(long long)(hex),(str2))
 #define out_S2L_NL(v,str,hex,str2)   out_nl((v),"%s%lu (0x%08lx)  [= %s]",(str),(hex),(hex),(str2))
 #define out_S2T_NL(v,str,hex,str2)   out_nl((v),"%s%lu (0x%06x)  [= %s]",(str),(hex),(hex),(str2))
 #define out_S2W_NL(v,str,hex,str2)   out_nl((v),"%s%u (0x%04x)  [= %s]",(str),(hex),(hex),(str2))

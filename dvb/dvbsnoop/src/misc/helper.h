@@ -23,6 +23,8 @@ u_long outBit_S2x_NL (int verbosity, const char *text, u_char *buf, int startbit
 
 
 u_long getBits (u_char *buf, int byte_offset, int startbit, int bitlen);
+long long getBits48 (u_char *buf, int byte_offset, int startbit, int bitlen);
+
 u_char *getISO639_3 (u_char *str, u_char *buf);
 
 void print_name (int verbose, u_char *b, u_int len);

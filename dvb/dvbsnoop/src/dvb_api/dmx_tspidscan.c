@@ -1,5 +1,5 @@
 /*
-$Id: dmx_tspidscan.c,v 1.13 2004/01/11 21:01:32 rasc Exp $
+$Id: dmx_tspidscan.c,v 1.14 2004/01/13 21:04:20 rasc Exp $
 
 
  DVBSNOOP
@@ -14,6 +14,9 @@ $Id: dmx_tspidscan.c,v 1.13 2004/01/11 21:01:32 rasc Exp $
 
 
 $Log: dmx_tspidscan.c,v $
+Revision 1.14  2004/01/13 21:04:20  rasc
+BUGFIX: getbits overflow fixed...
+
 Revision 1.13  2004/01/11 21:01:32  rasc
 PES stream directory, PES restructured
 
@@ -75,6 +78,7 @@ pidscan on transponder
 
 #include "dvbsnoop.h"
 #include "misc/cmdline.h"
+#include "misc/helper.h"
 #include "misc/output.h"
 
 #include "dvb_api.h"
@@ -331,6 +335,7 @@ static int analyze_ts_pid (u_char *buf, int len)
 		}
 	}
 
+
   	return found;
 }
 
@@ -340,3 +345,5 @@ static int analyze_ts_pid (u_char *buf, int len)
  * $$$ TODO 
  *  display PID content (Section Table, PES-streamID)
  */
+
+

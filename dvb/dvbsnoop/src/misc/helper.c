@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.20 2004/01/02 22:25:38 rasc Exp $
+$Id: helper.c,v 1.21 2004/01/13 21:04:21 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: helper.c,v 1.20 2004/01/02 22:25:38 rasc Exp $
 
 
 $Log: helper.c,v $
+Revision 1.21  2004/01/13 21:04:21  rasc
+BUGFIX: getbits overflow fixed...
+
 Revision 1.20  2004/01/02 22:25:38  rasc
 DSM-CC  MODULEs descriptors complete
 
@@ -92,6 +95,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <assert.h>
 
 
 #include "helper.h"
@@ -111,7 +115,6 @@ dvbsnoop v0.7  -- Commit to CVS
  */
 
 u_long outBit_Sx (int verbosity, const char *text, u_char *buf, int startbit, int bitlen)
-
 {
    u_long value;
 
@@ -132,7 +135,6 @@ u_long outBit_Sx (int verbosity, const char *text, u_char *buf, int startbit, in
 
 
 u_long outBit_Sx_NL (int verbosity, const char *text, u_char *buf, int startbit, int bitlen)
-
 {
   u_long value;
 
@@ -146,7 +148,6 @@ u_long outBit_Sx_NL (int verbosity, const char *text, u_char *buf, int startbit,
 
 
 u_long outBit_S2x_NL (int verbosity, const char *text, u_char *buf, int startbit, int bitlen, char *(*f)(u_long) )
-
 {
    u_long value;
 
@@ -174,36 +175,75 @@ u_long outBit_S2x_NL (int verbosity, const char *text, u_char *buf, int startbit
 
 
 /* 
-  -- get bits out of buffer
-  -- (getting more than 24 bits is not save)
+  -- get bits out of buffer (max 32 bit!!!)
   -- return: value
+  $$$ TODO  to be performance optimized!!
 */
 
 unsigned long getBits (u_char *buf, int byte_offset, int startbit, int bitlen)
-
 {
  u_char *b;
  unsigned long  v;
  unsigned long mask;
  unsigned long tmp_long;
 
+
  b = &buf[byte_offset + (startbit / 8)];
  startbit %= 8;
 
- tmp_long = (unsigned long)( ((*b)<<24) + (*(b+1)<<16) +
-		 (*(b+2)<<8) + *(b+3) );
+ if (bitlen > 24) {
+   return (unsigned long) getBits48 (b, 0, startbit, bitlen);
+ }
+
+
+ tmp_long = (unsigned long)(
+		 (*(b  )<<24) + (*(b+1)<<16) +
+		 (*(b+2)<< 8) +  *(b+3) );
 
  startbit = 32 - startbit - bitlen;
 
  tmp_long = tmp_long >> startbit;
-
  // ja, das ULL muss so sein (fuer bitlen == 32 z.b.)...
  mask = (1ULL << bitlen) - 1;
-
  v = tmp_long & mask;
 
  return v;
 }
+
+
+/*
+  -- get bits out of buffer
+  -- extended bitrange, so it's slower (max 48 bit!)
+  -- return: value
+ */
+
+long long getBits48 (u_char *buf, int byte_offset, int startbit, int bitlen)
+{
+ u_char *b;
+ unsigned long long v;
+ unsigned long long mask;
+ unsigned long long tmp;
+
+ b = &buf[byte_offset + (startbit / 8)];
+ startbit %= 8;
+
+ tmp = (unsigned long long)(
+		 ((unsigned long long)*(b  )<<48) + ((unsigned long long)*(b+1)<<40) +
+		 ((unsigned long long)*(b+2)<<32) + ((unsigned long long)*(b+3)<<24) +
+		 (*(b+4)<<16) + (*(b+5)<< 8) + *(b+6) );
+
+ startbit = 56 - startbit - bitlen;
+
+ tmp  = tmp >> startbit;
+ mask = (1ULL << bitlen) - 1;
+ v    = tmp & mask;
+
+ return v;
+}
+
+
+
+
 
 
 
@@ -214,7 +254,6 @@ unsigned long getBits (u_char *buf, int byte_offset, int startbit, int bitlen)
  */
 
 u_char *getISO639_3 (u_char *str, u_char *buf)
-
 {
   int i;
 
@@ -245,7 +284,6 @@ u_char *getISO639_3 (u_char *str, u_char *buf)
 */
 
 void print_name (int v, u_char *b, u_int len)
-
 {
  //int i;
 
@@ -263,7 +301,6 @@ void print_name (int v, u_char *b, u_int len)
 
 
 void print_name2 (int v, u_char *b, u_int len)
-
 {
   int    in_emphasis = 0;
   int    i;
@@ -299,7 +336,6 @@ void print_name2 (int v, u_char *b, u_int len)
 
 
 void print_std_ascii (int v, u_char *b, u_int len)
-
 {
   int    i;
   u_char c;
@@ -325,7 +361,6 @@ void print_std_ascii (int v, u_char *b, u_int len)
 */ 
 
 void print_time40 (int v, u_long mjd, u_long utc)
-
 {
 
  out (v, "0x%lx%06lx (=",mjd, utc);
@@ -380,6 +415,8 @@ void print_private_data (int v, u_char *b, u_int len)
 
 
 
+
+
 /*
    -- str2i
    -- string to integer
@@ -390,7 +427,6 @@ void print_private_data (int v, u_char *b, u_int len)
 */
 
 long  str2i  (char *s)
-
 {
  long v;
   
@@ -398,6 +434,9 @@ long  str2i  (char *s)
  return v;
 
 }
+
+
+
 
 
 
@@ -412,7 +451,6 @@ long  str2i  (char *s)
 static char *_str_cell_latitude_longitude (long ll, int angle);
 
 char *str_cell_latitude (long latitude)
-
 {
  // cell_latitude: This 16-bit field, coded as a two's complement number,
  // shall specify the latitude of the corner of a spherical rectangle that
@@ -426,7 +464,6 @@ char *str_cell_latitude (long latitude)
 
 
 char *str_cell_longitude (long longitude)
-
 {
  // cell_longitude: This 16-bit field, coded as a two's complement number, shall
  // specify the longitude of the corner of a spherical rectangle that approximately
@@ -439,7 +476,6 @@ char *str_cell_longitude (long longitude)
 
 
 static char *_str_cell_latitude_longitude (long ll, int angle)
-
 {
  long long  x;
  long       g1,g2;
