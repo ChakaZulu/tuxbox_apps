@@ -131,6 +131,7 @@ int eAVSwitch::setInput(int v)
 	switch (v)
 	{
 	case 0:	//	Switch to DVB
+		v = 63;
 		ioctl(fd, AVSIOSVSW1, dvb);
 		ioctl(fd, AVSIOSASW1, dvb+1);
 		ioctl(fd, AVSIOSVSW2, dvb+2);
@@ -139,6 +140,8 @@ int eAVSwitch::setInput(int v)
 		ioctl(fd, AVSIOSASW3, dvb+5);
 		if (!eDVB::getInstance()->mute)
 			ioctl(fd, AVSIOSVOL, &eDVB::getInstance()->volume);
+		else
+			ioctl(fd, AVSIOSVOL, &v);
 		reloadSettings();
 		break;
 	case 1:   // Switch to VCR
@@ -184,37 +187,46 @@ bool eAVSwitch::loadScartConfig()
 		char buf[1000];
 		fgets(buf,sizeof(buf),fd);
 
-		eString readline = "_scart: %d %d %d %d %d %d\n";
+		eString readline_scart = "_scart: %d %d %d %d %d %d\n";
+		eString readline_dvb = "_dvb: %d %d %d %d %d %d\n";
 
 		switch (Type)
 		{
 			case NOKIA:
-				readline.insert(0, "nokia");
+				readline_scart.insert(0, "nokia");
+				readline_dvb.insert(0, "nokia");
 			break;
 			case PHILIPS:
-				readline.insert(0, "philips");
+				readline_scart.insert(0, "philips");
+				readline_dvb.insert(0, "philips");
 			break;
 			case SAGEM:
-				readline.insert(0, "sagem");
+				readline_scart.insert(0, "sagem");
+				readline_dvb.insert(0, "sagem");
 			break;
 		}
-		if(fgets(buf,sizeof(buf),fd)!=NULL)
+
+		int i=0;
+
+		while ( fgets(buf,sizeof(buf),fd) != NULL && i != 3)
 		{
-			sscanf( buf, readline.c_str(), &scart[0], &scart[1], &scart[2], &scart[3], &scart[4], &scart[5] );
-			eDebug("[eAVSwitch] readed scart conf : %i %i %i %i %i %i", scart[0], scart[1], scart[2], scart[3], scart[4], scart[5] );
+			if ( !(i&1) && sscanf( buf, readline_scart.c_str(), &scart[0], &scart[1], &scart[2], &scart[3], &scart[4], &scart[5] ) == 6)
+				i &= 1;
+			else if( !(i&2) && sscanf( buf, readline_dvb.c_str(), &dvb[0], &dvb[1], &dvb[2], &dvb[3], &dvb[4], &dvb[5] ) == 6)
+				i &= 2;
 		}
-		if(fgets(buf,sizeof(buf),fd)!=NULL)
-		{
-			int i = readline.find("_scart");
-			readline.replace(i, 6,"_dvb");
-			sscanf( buf, readline.c_str(), &dvb[0], &dvb[1], &dvb[2], &dvb[3], &dvb[4], &dvb[5] );
-			eDebug("[eAVSwitch] readed dvb conf : %i %i %i %i %i %i", dvb[0], dvb[1], dvb[2], dvb[3], scart[4], scart[5] );
-		}
+
+		if ( i &= 3)
+			eDebug( "[eAVSwitch] failed to parse scart-config (scart.conf), using default-values" );
+
+		eDebug("[eAVSwitch] readed scart conf : %i %i %i %i %i %i", scart[0], scart[1], scart[2], scart[3], scart[4], scart[5] );
+		eDebug("[eAVSwitch] readed dvb conf : %i %i %i %i %i %i", dvb[0], dvb[1], dvb[2], dvb[3], scart[4], scart[5] );
+	
 		fclose(fd);
 	}
 	else
 	{
-		eDebug("[eAVSwitch] failed to load scart-config (scart.conf), using standard-values");
+		eDebug("[eAVSwitch] failed to load scart-config (scart.conf), using default-values");
 	}
 	return 0;
 }

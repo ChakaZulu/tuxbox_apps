@@ -67,18 +67,18 @@ public:
 	eAVSwitchPhilips()
 	{
 		Type = PHILIPS;
-		scart[0] = 2;
-		scart[1] = 2;
-		scart[2] = 3;
-		scart[3] = 0;
+		scart[0] = 3;
+		scart[1] = 3;
+		scart[2] = 2;
+		scart[3] = 2;
 		scart[4] = 3;
-		scart[5] = 0;
-		dvb[0] = 5;
+		scart[5] = 2;
+		dvb[0] = 1;
 		dvb[1] = 1;
 		dvb[2] = 1;
-		dvb[3] = 0;
+		dvb[3] = 1;
 		dvb[4] = 1;
-		dvb[5] = 0;
+		dvb[5] = 1;
 		loadScartConfig();
 	}
 };
