@@ -32,6 +32,7 @@ zapit_LDADD = \
 	zapsi/libzapsi.la \
 	-lpthread
 
+AM_CPPFLAGS = -pedantic -Werror
 AM_CXXFLAGS = -fno-rtti -fno-exceptions
 
 install-data-local:
