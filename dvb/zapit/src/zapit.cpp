@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.290 2003/02/17 14:31:42 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.291 2003/02/24 21:15:04 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -907,14 +907,17 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 
 	case CZapitMessages::CMD_GETPIDS:
 	{
-		CZapitClient::responseGetOtherPIDs responseGetOtherPIDs;
-		responseGetOtherPIDs.vpid = channel->getVideoPid();
-		responseGetOtherPIDs.ecmpid = NONE; // TODO: remove
-		responseGetOtherPIDs.vtxtpid = channel->getTeletextPid();
-		responseGetOtherPIDs.pcrpid = channel->getPcrPid();
-		responseGetOtherPIDs.selected_apid = channel->getAudioChannelIndex();
-		send(connfd, &responseGetOtherPIDs, sizeof(responseGetOtherPIDs), 0);
-		sendAPIDs(connfd);
+		if (channel)
+		{
+			CZapitClient::responseGetOtherPIDs responseGetOtherPIDs;
+			responseGetOtherPIDs.vpid = channel->getVideoPid();
+			responseGetOtherPIDs.ecmpid = NONE; // TODO: remove
+			responseGetOtherPIDs.vtxtpid = channel->getTeletextPid();
+			responseGetOtherPIDs.pcrpid = channel->getPcrPid();
+			responseGetOtherPIDs.selected_apid = channel->getAudioChannelIndex();
+			send(connfd, &responseGetOtherPIDs, sizeof(responseGetOtherPIDs), 0);
+			sendAPIDs(connfd);
+		}
 		break;
 	}
 
@@ -1387,7 +1390,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.290 2003/02/17 14:31:42 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.291 2003/02/24 21:15:04 thegoodguy Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
