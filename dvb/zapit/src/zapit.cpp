@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.241 2002/09/26 14:29:04 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.242 2002/09/26 14:45:26 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -593,14 +593,14 @@ void parse_command (CZapitMessages::commandHead &rmsg)
 			{
 				CZapitMessages::commandZapto msgZapto;
 				read(connfd, &msgZapto, sizeof(msgZapto));
-				zapTo(msgZapto.bouquet, msgZapto.channel);
+				zapTo(msgZapto.bouquet - 1, msgZapto.channel - 1);
 				break;
 			}
 			case CZapitMessages::CMD_ZAPTO_CHANNELNR:
 			{
 				CZapitMessages::commandZaptoChannelNr msgZaptoChannelNr;
 				read(connfd, &msgZaptoChannelNr, sizeof(msgZaptoChannelNr));
-				zapTo(msgZaptoChannelNr.channel);
+				zapTo(msgZaptoChannelNr.channel - 1);
 				break;
 			}
 			case CZapitMessages::CMD_ZAPTO_SERVICEID:
@@ -1060,7 +1060,7 @@ int main (int argc, char **argv)
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.241 2002/09/26 14:29:04 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.242 2002/09/26 14:45:26 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1510,9 +1510,9 @@ int stopPlayBack()
 	return 0;
 }
 
-unsigned zapTo (unsigned int bouquet, unsigned int channel)
+unsigned zapTo(const unsigned int bouquet, const unsigned int channel)
 {
-	if ((bouquet < 1) || (bouquet > bouquetManager->Bouquets.size()))
+	if (bouquet >= bouquetManager->Bouquets.size())
 	{
 		printf("[zapit] Invalid bouquet %d\n", bouquet);
 		return CZapitClient::ZAP_INVALID_PARAM;
@@ -1521,17 +1521,17 @@ unsigned zapTo (unsigned int bouquet, unsigned int channel)
 	ChannelList* channels;
 
 	if (currentMode & RADIO_MODE)
-		channels = &(bouquetManager->Bouquets[bouquet - 1]->radioChannels);
+		channels = &(bouquetManager->Bouquets[bouquet]->radioChannels);
 	else
-		channels = &(bouquetManager->Bouquets[bouquet - 1]->tvChannels);
+		channels = &(bouquetManager->Bouquets[bouquet]->tvChannels);
 
-	if ((channel < 1) || (channel > channels->size()))
+	if (channel >= channels->size())
 	{
 		printf("[zapit] Invalid channel %d in bouquet %d\n", channel, bouquet);
 		return CZapitClient::ZAP_INVALID_PARAM;
 	}
 
-	return zapTo_ChannelID((*channels)[channel - 1]->getChannelID(), false);
+	return zapTo_ChannelID((*channels)[channel]->getChannelID(), false);
 }
 
 unsigned int zapTo_ChannelID(t_channel_id channel_id, bool isSubService)
@@ -1563,7 +1563,7 @@ unsigned int zapTo_ChannelID(t_channel_id channel_id, bool isSubService)
 
 unsigned zapTo(const unsigned int channel)
 {
-	CBouquetManager::ChannelIterator cit = ((currentMode & RADIO_MODE) ? bouquetManager->radioChannelsBegin() : bouquetManager->tvChannelsBegin()).FindChannelNr(channel - 1);
+	CBouquetManager::ChannelIterator cit = ((currentMode & RADIO_MODE) ? bouquetManager->radioChannelsBegin() : bouquetManager->tvChannelsBegin()).FindChannelNr(channel);
 	if (!(cit.EndOfChannels()))
 		return zapTo_ChannelID((*cit)->getChannelID(), false);
 	else
