@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.22 2002/07/20 20:06:48 wjoost Exp $
+	$Id: request.cpp,v 1.23 2002/07/20 20:15:44 wjoost Exp $
 
 	License: GPL
 
@@ -66,8 +66,10 @@ bool CWebserverRequest::Authenticate()			// check if authentication is required
 		{
 			if(Parent->DEBUG) printf("Authenticate\n");
 			SocketWriteLn("HTTP/1.0 401 Unauthorized");
-			SocketWriteLn("WWW-Authenticate: Basic realm=\"dbox\"\r\n\r\n");
-			SocketWriteLn("Access denied\n");
+			SocketWriteLn("WWW-Authenticate: Basic realm=\"dbox\"\r\n");
+			if (Method != M_HEAD) {
+				SocketWriteLn("Access denied.");
+			}
 			return false;
 		}
 		else
@@ -671,7 +673,7 @@ void CWebserverRequest::SocketWrite(char *text)
 void CWebserverRequest::SocketWriteLn(char *text)
 {
 	write(Socket, text, strlen(text) );
-	write(Socket,"\n",1);
+	write(Socket,"\r\n",2);
 }
 //-------------------------------------------------------------------------
 void CWebserverRequest::SocketWriteData( char* data, long length )
