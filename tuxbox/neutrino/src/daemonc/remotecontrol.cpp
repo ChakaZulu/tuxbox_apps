@@ -34,6 +34,35 @@
 #include "remotecontrol.h"
 #include "neutrino.h"
 
+
+CSubService::CSubService(const t_original_network_id anoriginal_network_id, const t_service_id aservice_id, const t_transport_stream_id atransport_stream_id, const std::string &asubservice_name)
+{
+	service.original_network_id = anoriginal_network_id;
+	service.service_id          = aservice_id;
+	service.transport_stream_id = atransport_stream_id;
+	startzeit                   = 0;
+	dauer                       = 0;
+	subservice_name             = asubservice_name;
+}
+
+CSubService::CSubService(const t_original_network_id anoriginal_network_id, const t_service_id aservice_id, const t_transport_stream_id atransport_stream_id, const time_t astartzeit, const unsigned adauer)
+{
+	service.original_network_id = anoriginal_network_id;
+	service.service_id          = aservice_id;
+	service.transport_stream_id = atransport_stream_id;
+	startzeit                   = astartzeit;
+	dauer                       = adauer;
+	subservice_name             = "";
+}
+
+t_channel_id CSubService::getChannelID(void) const
+{
+	t_original_network_id original_network_id = service.original_network_id;
+	t_service_id          service_id          = service.service_id;
+	return CREATE_CHANNEL_ID;
+}
+
+
 CRemoteControl::CRemoteControl()
 {
 	current_channel_id = 	0;
@@ -122,7 +151,7 @@ int CRemoteControl::handleMsg(uint msg, uint data)
 				current_sub_channel_id = data;
 
 				for( unsigned int i= 0; i< subChannels.size(); i++)
-					if ((((uint32_t)subChannels[i].original_network_id << 16) | subChannels[i].service_id) == data )
+					if (subChannels[i].getChannelID() == data)
 					{
 						selected_subchannel = i;
 						break;
@@ -265,10 +294,11 @@ void CRemoteControl::getSubChannels()
 				are_subchannels = true;
 				for (unsigned int i=0; i< linkedServices.size(); i++)
 				{
-					subChannels.push_back(CSubService(linkedServices[i].serviceId,
-									  linkedServices[i].transportStreamId,
-									  linkedServices[i].originalNetworkId,
-									  linkedServices[i].name));
+					subChannels.push_back(CSubService(
+								      linkedServices[i].originalNetworkId,
+								      linkedServices[i].serviceId,
+								      linkedServices[i].transportStreamId,
+								      linkedServices[i].name));
 				}
 				copySubChannelsToZapit();
 				g_RCInput->postMsg( NeutrinoMessages::EVT_ZAP_GOT_SUBSERVICES, current_channel_id, false );
@@ -289,11 +319,12 @@ void CRemoteControl::getNVODs()
 			{
 				if ( NVODs[i].zeit.dauer> 0 )
 				{
-					CSubService newService (NVODs[i].service_id,
-								NVODs[i].transport_stream_id,
-								NVODs[i].original_network_id,
-								NVODs[i].zeit.startzeit, 
-								NVODs[i].zeit.dauer);
+					CSubService newService(
+						NVODs[i].original_network_id,
+						NVODs[i].service_id,
+						NVODs[i].transport_stream_id,
+						NVODs[i].zeit.startzeit, 
+						NVODs[i].zeit.dauer);
 
 					CSubServiceListSorted::iterator e= subChannels.begin();
 					for(; e!=subChannels.end(); ++e)
@@ -414,17 +445,12 @@ void CRemoteControl::processAPIDnames()
 
 void CRemoteControl::copySubChannelsToZapit(void)
 {
-	CZapitClient::subServiceList 		zapitList;
-	CZapitClient::commandAddSubServices	zapitSubChannel;
+	CZapitClient::subServiceList zapitList;
 
 	for (CSubServiceListSorted::const_iterator e = subChannels.begin(); e != subChannels.end(); e++)
-	{
-		zapitSubChannel.original_network_id = e->original_network_id;
-		zapitSubChannel.service_id          = e->service_id;
-		zapitSubChannel.transport_stream_id = e->transport_stream_id;
-		zapitList.push_back(zapitSubChannel);
-	}
-	g_Zapit->setSubServices( zapitList );
+		zapitList.push_back(e->getAsZapitSubService());
+
+	g_Zapit->setSubServices(zapitList);
 }
 
 
@@ -451,11 +477,7 @@ std::string CRemoteControl::setSubChannel(const int numSub, const bool force_zap
 		return "";
 
 	selected_subchannel = numSub;
-
-	t_original_network_id original_network_id = subChannels[numSub].original_network_id;
-	t_service_id          service_id          = subChannels[numSub].service_id;
-	current_sub_channel_id                    = CREATE_CHANNEL_ID;
-
+	current_sub_channel_id = subChannels[numSub].getChannelID();
 	g_Zapit->zapTo_subServiceID_NOWAIT( current_sub_channel_id );
 
 	std::string perspectiveName = subChannels[numSub].subservice_name;

@@ -49,32 +49,19 @@ struct st_rmsg
 
 class CSubService
 {
-public:
-	CSubService(const t_service_id &aservice_id, const t_transport_stream_id &atransport_stream_id, const t_original_network_id &aoriginal_network_id, const std::string &asubservice_name)
-	{
-		original_network_id = aoriginal_network_id;
-		service_id          = aservice_id;
-		transport_stream_id = atransport_stream_id;
-		startzeit = 0;
-		dauer =     0;
-		subservice_name= asubservice_name;
-	}
-	CSubService(const t_service_id &aservice_id, const t_transport_stream_id &atransport_stream_id, const t_original_network_id &aoriginal_network_id, const time_t &astartzeit, const unsigned adauer)
-	{
-		original_network_id = aoriginal_network_id;
-		service_id          = aservice_id;
-		transport_stream_id = atransport_stream_id;
-		startzeit=astartzeit;
-		dauer=adauer;
-		subservice_name= "";
-	}
+ private:
+	struct CZapitClient::commandAddSubServices service;
 
-	t_service_id          service_id;
-	t_transport_stream_id transport_stream_id;
-	t_original_network_id original_network_id;
-	time_t                startzeit;
-	unsigned              dauer;
-	std::string           subservice_name;
+ public:
+	time_t      startzeit;
+	unsigned    dauer;
+	std::string subservice_name;
+
+	CSubService(const t_original_network_id, const t_service_id, const t_transport_stream_id, const std::string &asubservice_name);
+	CSubService(const t_original_network_id, const t_service_id, const t_transport_stream_id, const time_t astartzeit, const unsigned adauer);
+
+	             t_channel_id                               getChannelID        (void) const;
+	inline const struct CZapitClient::commandAddSubServices getAsZapitSubService(void) const { return service;           }
 };
 
 typedef std::vector<CSubService> CSubServiceListSorted;
