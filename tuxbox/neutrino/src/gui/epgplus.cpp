@@ -55,8 +55,7 @@ EpgPlus::CHeader::CHeader ( CFrameBuffer* frameBuffer , int x , int y , int widt
 	this->width   = width;
 	this->height  = height;
 
-	this->textColor = COL_MENUHEAD;
-	this->backColor = COL_MENUHEAD_PLUS_0;
+	this->color = COL_MENUHEAD;
 }
 
 EpgPlus::CHeader::~CHeader()
@@ -71,7 +70,7 @@ void EpgPlus::CHeader::paint()
 		, this->y
 		, this->width
 		, this->height
-		, this->backColor
+		, this->color
 		);
 
 	// display new text
@@ -80,7 +79,7 @@ void EpgPlus::CHeader::paint()
 		, this->y + this->height
 		, this->width
 		, g_Locale->getText(LOCALE_EPGPLUS_HEAD)
-		, this->textColor
+		, this->color
 		, 0
 		, true
 		); // UTF-8
@@ -109,12 +108,10 @@ EpgPlus::CTimeLine::CTimeLine
 	this->durationX = durationX;
 	this->gridHeight = gridHeight;
 
-	this->backColor1     = COL_MENUCONTENT_PLUS_1;
-	this->backColor2     = COL_MENUCONTENT_PLUS_2;
-	this->dateColor      = COL_MENUHEAD;
+	this->color1         = COL_MENUCONTENT_PLUS_1;
+	this->color2         = COL_MENUCONTENT_PLUS_2;
 	this->markColor      = COL_MENUCONTENTSELECTED;
-	this->backMarkColor  = COL_MENUCONTENT;
-	this->textColor      = COL_MENUCONTENT_PLUS_1;
+	this->backMarkColor  = COL_MENUCONTENT; 
 	this->gridColor      = COL_MENUCONTENT_PLUS_5;
 }
 
@@ -144,7 +141,7 @@ void EpgPlus::CTimeLine::paint ( time_t startTime , int    duration)
 		, this->y
 		, this->width
 		, this->height1
-		, toggleColor?this->backColor2:this->backColor1
+		, this->color1
 		);
 
 	g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_ITEMSMALL]->RenderString
@@ -152,7 +149,7 @@ void EpgPlus::CTimeLine::paint ( time_t startTime , int    duration)
 		, this->y + this->height1
 		, this->width
 		, EpgPlus::getTimeString(startTime, "%d-%b")
-		, dateColor
+		, color1
 		, 0
 		, true
 		); // UTF-8
@@ -175,7 +172,7 @@ void EpgPlus::CTimeLine::paint ( time_t startTime , int    duration)
 			, this->y
 			, xWidth
 			, this->height1
-			, toggleColor?this->backColor1:this->backColor2
+			, toggleColor?this->color1:this->color2
 			);
 
 		std::string timeStr = EpgPlus::getTimeString(tickTime, "%H");
@@ -188,7 +185,7 @@ void EpgPlus::CTimeLine::paint ( time_t startTime , int    duration)
 			, this->y + this->height1
 			, textWidth
 			, timeStr
-			, this->textColor
+			, toggleColor?this->color2:this->color1
 			, 0
 			, true
 			); // UTF-8
@@ -199,7 +196,7 @@ void EpgPlus::CTimeLine::paint ( time_t startTime , int    duration)
 			, this->y + this->height1
 			, textWidth
 			, timeStr
-			, this->textColor
+			, toggleColor?this->color1:this->color2
 			, 0
 			, true
 			); // UTF-8
@@ -264,7 +261,7 @@ void EpgPlus::CTimeLine::paintMark ( time_t startTime , int    duration , int   
 		, this->y + this->height1 + this->height2
 		, textWidth
 		, timeStr
-		, this->textColor
+		, this->backMarkColor
 		, 0
 		, true
 		); // UTF-8
@@ -280,7 +277,7 @@ void EpgPlus::CTimeLine::paintMark ( time_t startTime , int    duration , int   
 			, this->y + this->height1 + this->height2
 			, textWidth
 			, timeStr
-			, this->textColor
+			, this->backMarkColor
 			, 0
 			, true
 			); // UTF-8
@@ -293,7 +290,7 @@ void EpgPlus::CTimeLine::paintMark ( time_t startTime , int    duration , int   
 			, this->y + this->height1 + this->height2
 			, textWidth
 			, timeStr
-			, this->textColor
+			, this->backMarkColor
 			, 0
 			, true
 			); // UTF-8
@@ -488,9 +485,7 @@ EpgPlus::CFooter::CFooter ( CFrameBuffer* frameBuffer , int x , int y , int widt
 	this->height2 = height2;
 	this->height3 = height3;
 
-	this->textColor = COL_MENUHEAD;
-	this->backColor = COL_MENUHEAD_PLUS_0;
-
+	this->color = COL_MENUHEAD;
 
 }
 
@@ -506,7 +501,7 @@ void EpgPlus::CFooter::paintEventDetails ( const std::string& description , cons
 		, this->y
 		, this->width
 		, this->height1
-		, this->backColor
+		, this->color
 		);
 
 	// display new text
@@ -515,7 +510,7 @@ void EpgPlus::CFooter::paintEventDetails ( const std::string& description , cons
 		, this->y + this->height1
 		, this->width - 20
 		, description
-		, this->textColor
+		, this->color
 		, 0
 		, false
 		);
@@ -526,7 +521,7 @@ void EpgPlus::CFooter::paintEventDetails ( const std::string& description , cons
 		, this->y + this->height1
 		, this->width
 		, this->height2
-		, this->backColor
+		, this->color
 		);
 
 	// display new text
@@ -535,7 +530,7 @@ void EpgPlus::CFooter::paintEventDetails ( const std::string& description , cons
 		, this->y + this->height1 + this->height2
 		, this->width
 		, shortDescription
-		, this->textColor
+		, this->color
 		, 0
 		, false
 		);

@@ -79,8 +79,7 @@ private:
                 int width;
                 int height;
 
-                int textColor;
-                int backColor;
+                int color;
         };
 
 
@@ -136,12 +135,10 @@ private:
                 int durationX;
                 int gridHeight;
 
-                int backColor1;
-                int backColor2;
-                int dateColor;
+                int color1;
+                int color2;
                 int markColor;
                 int backMarkColor;
-                int textColor;
                 int gridColor;
         };
 
@@ -276,8 +273,7 @@ private:
                 int height2;
                 int height3;
 
-                int textColor;
-                int backColor;
+                int color;
         };
 
 //// construction / destruction
