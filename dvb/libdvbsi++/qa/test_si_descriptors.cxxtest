@@ -1,0 +1,1371 @@
+#include <cxxtest/TestSuite.h>
+
+#include <dvbsi++/byte_stream.h>
+
+#include "test_si_descriptors.h"
+
+class testDescriptorSuite : public CxxTest::TestSuite
+{
+public:
+	void testNetworkNameDescriptor(void)
+	{
+		NetworkNameDescriptor *descriptor = new NetworkNameDescriptor((uint8_t *) networkNameDescriptor1);
+		std::string networkName = descriptor->getNetworkName();
+		TS_ASSERT_SAME_DATA(networkName.c_str(), stringTest.c_str(), stringTest.length());
+		delete descriptor;
+
+		descriptor = new NetworkNameDescriptor((uint8_t *) networkNameDescriptor2);
+		networkName = descriptor->getNetworkName();
+		TS_ASSERT_EQUALS(networkName.length(), 0x00);
+		delete descriptor;
+	}
+
+	void testServiceListDescriptor(void)
+	{
+		ServiceListDescriptor *descriptor = new ServiceListDescriptor((uint8_t *) serviceListDescriptor1);
+		const ServiceListItemVector *list = descriptor->getServiceList();
+
+		ServiceListItemConstIterator i = list->begin();
+		uint16_t serviceId = (* i)->getServiceId();
+		uint8_t serviceType = (* i)->getServiceType();
+		TS_ASSERT_EQUALS(serviceId, 0x1234);
+		TS_ASSERT_EQUALS(serviceType, 0x56);
+
+		i++;
+		serviceId = (* i)->getServiceId();
+		serviceType = (* i)->getServiceType();
+		TS_ASSERT_EQUALS(serviceId, 0x789A);
+		TS_ASSERT_EQUALS(serviceType, 0xBC);
+
+		i++;
+		serviceId = (* i)->getServiceId();
+		serviceType = (* i)->getServiceType();
+		TS_ASSERT_EQUALS(serviceId, 0xDEF0);
+		TS_ASSERT_EQUALS(serviceType, 0x12);
+
+		i++;
+		TS_ASSERT_EQUALS(i, list->end());
+
+		delete descriptor;
+
+
+		descriptor = new ServiceListDescriptor((uint8_t *) serviceListDescriptor2);
+		list = descriptor->getServiceList();
+
+		i = list->begin();
+		TS_ASSERT_EQUALS(i, list->end());
+
+		delete descriptor;
+	}
+
+	void testStuffingDescriptor(void)
+	{
+		StuffingDescriptor *descriptor = new StuffingDescriptor((uint8_t *) stuffingDescriptor1);
+		// Nothing to test
+		delete descriptor;
+	}
+
+	void testSatelliteDeliverySystemDescriptor(void)
+	{
+		SatelliteDeliverySystemDescriptor *descriptor = new SatelliteDeliverySystemDescriptor((uint8_t *) satelliteDeliverySystemDescriptor1);
+		uint32_t frequency = descriptor->getFrequency();
+		int16_t orbitalPosition = descriptor->getOrbitalPosition();
+		uint8_t westEastFlag = descriptor->getWestEastFlag();
+		uint8_t polarization = descriptor->getPolarization();
+		uint8_t modulation = descriptor->getModulation();
+		uint32_t symbolRate = descriptor->getSymbolRate();
+		uint8_t fecInner = descriptor->getFecInner();
+		TS_ASSERT_EQUALS(frequency, 12345678);
+		TS_ASSERT_EQUALS((uint16_t) orbitalPosition, 0x9ABC);
+		TS_ASSERT_EQUALS(westEastFlag, (0xDE & 0x80) >> 7);
+		TS_ASSERT_EQUALS(polarization, (0xDE & 0x60) >> 5);
+		TS_ASSERT_EQUALS(modulation, 0xDE & 0x1F);
+		TS_ASSERT_EQUALS(symbolRate, 1012345);
+		TS_ASSERT_EQUALS(fecInner, 0x6);
+
+		delete descriptor;
+	}
+
+	void testCableDeliverySystemDescriptor(void)
+	{
+		CableDeliverySystemDescriptor *descriptor = new CableDeliverySystemDescriptor((uint8_t *) cableDeliverySystemDescriptor1);
+		uint32_t frequency = descriptor->getFrequency();
+		uint8_t fecOuter = descriptor->getFecOuter();
+		uint8_t modulation = descriptor->getModulation();
+		uint32_t symbolRate = descriptor->getSymbolRate();
+		uint8_t fecInner = descriptor->getFecInner();
+		TS_ASSERT_EQUALS(frequency, 12345678);
+		TS_ASSERT_EQUALS(fecOuter, 0xC);
+		TS_ASSERT_EQUALS(modulation, 0xDE);
+		TS_ASSERT_EQUALS(symbolRate, 1012345);
+		TS_ASSERT_EQUALS(fecInner, 0x6);
+
+		delete descriptor;
+	}
+
+	void testVbiDataDescriptor(void)
+	{
+		VbiDataDescriptor *descriptor = new VbiDataDescriptor((uint8_t *) vbiDataDescriptor1);
+		const VbiDataServiceVector *dataServices = descriptor->getVbiDataServices();
+
+		VbiDataServiceConstIterator dataService = dataServices->begin();
+		uint8_t dataServiceId = (*dataService)->getDataServiceId();
+		TS_ASSERT_EQUALS(dataServiceId, 0x01);
+
+		const VbiDataLineVector *dataLines = (*dataService)->getVbiDataLines();
+
+		VbiDataLineConstIterator dataLine = dataLines->begin();
+		uint8_t fieldParity = (*dataLine)->getFieldParity();
+		uint8_t lineOffset = (*dataLine)->getLineOffset();
+		TS_ASSERT_EQUALS(fieldParity, (0x12 & 0x20) >> 5);
+		TS_ASSERT_EQUALS(lineOffset, 0x12 & 0x1F);
+
+		dataLine++;
+		fieldParity = (*dataLine)->getFieldParity();
+		lineOffset = (*dataLine)->getLineOffset();
+		TS_ASSERT_EQUALS(fieldParity, (0x34 & 0x20) >> 5);
+		TS_ASSERT_EQUALS(lineOffset, 0x34 & 0x1F);
+
+		dataLine++;
+		fieldParity = (*dataLine)->getFieldParity();
+		lineOffset = (*dataLine)->getLineOffset();
+		TS_ASSERT_EQUALS(fieldParity, (0x56 & 0x20) >> 5);
+		TS_ASSERT_EQUALS(lineOffset, 0x56 & 0x1F);
+
+		dataLine++;
+		TS_ASSERT_EQUALS(dataLine, dataLines->end());
+
+
+		dataService++;
+		dataServiceId = (*dataService)->getDataServiceId();
+		TS_ASSERT_EQUALS(dataServiceId, 0x02);
+
+		dataLines = (*dataService)->getVbiDataLines();
+
+		dataLine = dataLines->begin();
+		fieldParity = (*dataLine)->getFieldParity();
+		lineOffset = (*dataLine)->getLineOffset();
+		TS_ASSERT_EQUALS(fieldParity, (0x78 & 0x20) >> 5);
+		TS_ASSERT_EQUALS(lineOffset, 0x78 & 0x1F);
+
+		dataLine++;
+		fieldParity = (*dataLine)->getFieldParity();
+		lineOffset = (*dataLine)->getLineOffset();
+		TS_ASSERT_EQUALS(fieldParity, (0x9A & 0x20) >> 5);
+		TS_ASSERT_EQUALS(lineOffset, 0x9A & 0x1F);
+
+		dataLine++;
+		TS_ASSERT_EQUALS(dataLine, dataLines->end());
+
+
+		dataService++;
+		dataServiceId = (*dataService)->getDataServiceId();
+		TS_ASSERT_EQUALS(dataServiceId, 0x04);
+
+		dataLines = (*dataService)->getVbiDataLines();
+
+		dataLine = dataLines->begin();
+		fieldParity = (*dataLine)->getFieldParity();
+		lineOffset = (*dataLine)->getLineOffset();
+		TS_ASSERT_EQUALS(fieldParity, (0xBC & 0x20) >> 5);
+		TS_ASSERT_EQUALS(lineOffset, 0xBC & 0x1F);
+
+		dataLine++;
+		TS_ASSERT_EQUALS(dataLine, dataLines->end());
+
+
+		dataService++;
+		dataServiceId = (*dataService)->getDataServiceId();
+		TS_ASSERT_EQUALS(dataServiceId, 0x05);
+
+		dataLines = (*dataService)->getVbiDataLines();
+
+		dataLine = dataLines->begin();
+		TS_ASSERT_EQUALS(dataLine, dataLines->end());
+
+
+		dataService++;
+		dataServiceId = (*dataService)->getDataServiceId();
+		TS_ASSERT_EQUALS(dataServiceId, 0x06);
+
+		dataLines = (*dataService)->getVbiDataLines();
+
+		dataLine = dataLines->begin();
+		fieldParity = (*dataLine)->getFieldParity();
+		lineOffset = (*dataLine)->getLineOffset();
+		TS_ASSERT_EQUALS(fieldParity, (0xDE & 0x20) >> 5);
+		TS_ASSERT_EQUALS(lineOffset, 0xDE & 0x1F);
+
+		dataLine++;
+		TS_ASSERT_EQUALS(dataLine, dataLines->end());
+
+
+		dataService++;
+		dataServiceId = (*dataService)->getDataServiceId();
+		TS_ASSERT_EQUALS(dataServiceId, 0x07);
+
+		dataLines = (*dataService)->getVbiDataLines();
+
+		dataLine = dataLines->begin();
+		fieldParity = (*dataLine)->getFieldParity();
+		lineOffset = (*dataLine)->getLineOffset();
+		TS_ASSERT_EQUALS(fieldParity, (0xF0 & 0x20) >> 5);
+		TS_ASSERT_EQUALS(lineOffset, 0xF0 & 0x1F);
+
+		dataLine++;
+		fieldParity = (*dataLine)->getFieldParity();
+		lineOffset = (*dataLine)->getLineOffset();
+		TS_ASSERT_EQUALS(fieldParity, (0x12 & 0x20) >> 5);
+		TS_ASSERT_EQUALS(lineOffset, 0x12 & 0x1F);
+
+		dataLine++;
+		TS_ASSERT_EQUALS(dataLine, dataLines->end());
+
+
+		dataService++;
+		dataServiceId = (*dataService)->getDataServiceId();
+		TS_ASSERT_EQUALS(dataServiceId, 0x55);
+
+		dataLines = (*dataService)->getVbiDataLines();
+
+		dataLine = dataLines->begin();
+		TS_ASSERT_EQUALS(dataLine, dataLines->end());
+
+
+		dataService++;
+		TS_ASSERT_EQUALS(dataService, dataServices->end());
+
+
+		delete descriptor;
+	}
+
+	void testVbiTeletextDescriptor(void)
+	{
+		VbiTeletextDescriptor *descriptor = new VbiTeletextDescriptor((uint8_t *) vbiTeletextDescriptor1);
+		const VbiTeletextVector *teletexts = descriptor->getVbiTeletexts();
+
+		VbiTeletextConstIterator i = teletexts->begin();
+		std::string code = (* i)->getIso639LanguageCode();
+        uint8_t type = (* i)->getTeletextType();
+		uint8_t magazine = (* i)->getTeletextMagazineNumber();
+		uint8_t pageNumber = (* i)->getTeletextPageNumber();
+		TS_ASSERT_SAME_DATA(code.c_str(), eng.c_str(), eng.length());
+		TS_ASSERT_EQUALS(type, (0x12 & 0xF8) >> 3);
+		TS_ASSERT_EQUALS(magazine, 0x12 & 0x07);
+		TS_ASSERT_EQUALS(pageNumber, 0x34);
+
+		i++;
+		code = (* i)->getIso639LanguageCode();
+		type = (* i)->getTeletextType();
+		magazine = (* i)->getTeletextMagazineNumber();
+		pageNumber = (* i)->getTeletextPageNumber();
+		TS_ASSERT_SAME_DATA(code.c_str(), fra.c_str(), fra.length());
+		TS_ASSERT_EQUALS(type, (0x56 & 0xF8) >> 3);
+		TS_ASSERT_EQUALS(magazine, 0x56 & 0x07);
+		TS_ASSERT_EQUALS(pageNumber, 0x78);
+
+		i++;
+		code = (* i)->getIso639LanguageCode();
+		type = (* i)->getTeletextType();
+		magazine = (* i)->getTeletextMagazineNumber();
+		pageNumber = (* i)->getTeletextPageNumber();
+		TS_ASSERT_SAME_DATA(code.c_str(), deu.c_str(), deu.length());
+		TS_ASSERT_EQUALS(type, (0x9A & 0xF8) >> 3);
+		TS_ASSERT_EQUALS(magazine, 0x9A & 0x07);
+		TS_ASSERT_EQUALS(pageNumber, 0xBC);
+
+		i++;
+		TS_ASSERT_EQUALS(i, teletexts->end());
+
+		delete descriptor;
+
+
+		descriptor = new VbiTeletextDescriptor((uint8_t *) vbiTeletextDescriptor2);
+		teletexts = descriptor->getVbiTeletexts();
+
+		i = teletexts->begin();
+		TS_ASSERT_EQUALS(i, teletexts->end());
+
+		delete descriptor;
+	}
+
+	void testBouquetNameDescriptor(void)
+	{
+		BouquetNameDescriptor *descriptor = new BouquetNameDescriptor((uint8_t *) bouquetNameDescriptor1);
+		std::string bouquetName = descriptor->getBouquetName();
+		TS_ASSERT_SAME_DATA(bouquetName.c_str(), stringTest.c_str(), stringTest.length());
+		delete descriptor;
+
+		descriptor = new BouquetNameDescriptor((uint8_t *) bouquetNameDescriptor2);
+		bouquetName = descriptor->getBouquetName();
+		TS_ASSERT_EQUALS(bouquetName.length(), 0x00);
+		delete descriptor;
+	}
+
+	void testServiceDescriptor(void)
+	{
+		ServiceDescriptor *descriptor = new ServiceDescriptor((uint8_t *) serviceDescriptor1);
+		uint8_t serviceType = descriptor->getServiceType();
+		std::string providerName = descriptor->getServiceProviderName();
+		std::string serviceName = descriptor->getServiceName();
+		TS_ASSERT_EQUALS(serviceType, 0x01);
+		TS_ASSERT_SAME_DATA(providerName.c_str(), stringTest.c_str(), stringTest.length());
+		TS_ASSERT_SAME_DATA(serviceName.c_str(), stringTest.c_str(), stringTest.length());
+		delete descriptor;
+
+		descriptor = new ServiceDescriptor((uint8_t *) serviceDescriptor2);
+		serviceType = descriptor->getServiceType();
+		providerName = descriptor->getServiceProviderName();
+		serviceName = descriptor->getServiceName();
+		TS_ASSERT_EQUALS(serviceType, 0x02);
+		TS_ASSERT_EQUALS(providerName.length(), 0x00);
+		TS_ASSERT_SAME_DATA(serviceName.c_str(), stringTest.c_str(), stringTest.length());
+		delete descriptor;
+
+		descriptor = new ServiceDescriptor((uint8_t *) serviceDescriptor3);
+		serviceType = descriptor->getServiceType();
+		providerName = descriptor->getServiceProviderName();
+		serviceName = descriptor->getServiceName();
+		TS_ASSERT_EQUALS(serviceType, 0x03);
+		TS_ASSERT_SAME_DATA(providerName.c_str(), stringTest.c_str(), stringTest.length());
+		TS_ASSERT_EQUALS(serviceName.length(), 0x00);
+		delete descriptor;
+
+		descriptor = new ServiceDescriptor((uint8_t *) serviceDescriptor4);
+		serviceType = descriptor->getServiceType();
+		providerName = descriptor->getServiceProviderName();
+		serviceName = descriptor->getServiceName();
+		TS_ASSERT_EQUALS(serviceType, 0x04);
+		TS_ASSERT_EQUALS(providerName.length(), 0x00);
+		TS_ASSERT_EQUALS(serviceName.length(), 0x00);
+		delete descriptor;
+	}
+
+	void testCountryAvailabilityDescriptor(void)
+	{
+		CountryAvailabilityDescriptor *descriptor = new CountryAvailabilityDescriptor((uint8_t *) countryAvailabilityDescriptor1);
+		uint8_t countryAvailabilityFlag = descriptor->getCountryAvailabilityFlag();
+		TS_ASSERT_EQUALS(countryAvailabilityFlag, (0x80 & 0x80) >> 7);
+		const CountryCodeVector *list = descriptor->getCountryCodes();
+
+		CountryCodeConstIterator code = list->begin();
+		TS_ASSERT_SAME_DATA((* code).c_str(), eng.c_str(), eng.length());
+
+		code++;
+		TS_ASSERT_SAME_DATA((* code).c_str(), fra.c_str(), fra.length());
+
+		code++;
+		TS_ASSERT_SAME_DATA((* code).c_str(), deu.c_str(), deu.length());
+
+		code++;
+		TS_ASSERT_EQUALS(code, list->end());
+
+		delete descriptor;
+
+
+		descriptor = new CountryAvailabilityDescriptor((uint8_t *) countryAvailabilityDescriptor2);
+		countryAvailabilityFlag = descriptor->getCountryAvailabilityFlag();
+		TS_ASSERT_EQUALS(countryAvailabilityFlag, (0x00 & 0x80) >> 7);
+		list = descriptor->getCountryCodes();
+
+		code = list->begin();
+		TS_ASSERT_EQUALS(code, list->end());
+
+		delete descriptor;
+	}
+
+	void testLinkageDescriptor(void)
+	{
+		LinkageDescriptor *descriptor = new LinkageDescriptor((uint8_t *) linkageDescriptor1);
+		uint16_t transportStreamId = descriptor->getTransportStreamId();
+		uint16_t originalNetworkId = descriptor->getOriginalNetworkId();
+		uint16_t serviceId = descriptor->getServiceId();
+		uint8_t linkageType = descriptor->getLinkageType();
+		uint8_t handOverType = descriptor->getHandOverType();
+		uint8_t originType = descriptor->getOriginType();
+		uint16_t networkId = descriptor->getNetworkId();
+		uint16_t initialServiceId = descriptor->getInitialServiceId();
+		TS_ASSERT_EQUALS(transportStreamId, r16(&linkageDescriptor1[2]));
+		TS_ASSERT_EQUALS(originalNetworkId, r16(&linkageDescriptor1[4]));
+		TS_ASSERT_EQUALS(serviceId, r16(&linkageDescriptor1[6]));
+		TS_ASSERT_EQUALS(linkageType, linkageDescriptor1[8]);
+		TS_ASSERT_EQUALS(handOverType, (linkageDescriptor1[9] & 0xF0) >> 4);
+		TS_ASSERT_EQUALS(originType, linkageDescriptor1[9] & 0x01);
+		TS_ASSERT_EQUALS(networkId, r16(&linkageDescriptor1[10]));
+		TS_ASSERT_EQUALS(initialServiceId, r16(&linkageDescriptor1[12]));
+		delete(descriptor);
+
+		descriptor = new LinkageDescriptor((uint8_t *) linkageDescriptor2);
+		transportStreamId = descriptor->getTransportStreamId();
+		originalNetworkId = descriptor->getOriginalNetworkId();
+		serviceId = descriptor->getServiceId();
+		linkageType = descriptor->getLinkageType();
+		handOverType = descriptor->getHandOverType();
+		originType = descriptor->getOriginType();
+		initialServiceId = descriptor->getInitialServiceId();
+		TS_ASSERT_EQUALS(transportStreamId, r16(&linkageDescriptor2[2]));
+		TS_ASSERT_EQUALS(originalNetworkId, r16(&linkageDescriptor2[4]));
+		TS_ASSERT_EQUALS(serviceId, r16(&linkageDescriptor2[6]));
+		TS_ASSERT_EQUALS(linkageType, linkageDescriptor2[8]);
+		TS_ASSERT_EQUALS(handOverType, (linkageDescriptor2[9] & 0xF0) >> 4);
+		TS_ASSERT_EQUALS(originType, linkageDescriptor2[9] & 0x01);
+		TS_ASSERT_EQUALS(initialServiceId, r16(&linkageDescriptor2[10]));
+		delete(descriptor);
+
+		descriptor = new LinkageDescriptor((uint8_t *) linkageDescriptor3);
+		transportStreamId = descriptor->getTransportStreamId();
+		originalNetworkId = descriptor->getOriginalNetworkId();
+		serviceId = descriptor->getServiceId();
+		linkageType = descriptor->getLinkageType();
+		handOverType = descriptor->getHandOverType();
+		originType = descriptor->getOriginType();
+		networkId = descriptor->getNetworkId();
+		TS_ASSERT_EQUALS(transportStreamId, r16(&linkageDescriptor3[2]));
+		TS_ASSERT_EQUALS(originalNetworkId, r16(&linkageDescriptor3[4]));
+		TS_ASSERT_EQUALS(serviceId, r16(&linkageDescriptor3[6]));
+		TS_ASSERT_EQUALS(linkageType, linkageDescriptor3[8]);
+		TS_ASSERT_EQUALS(handOverType, (linkageDescriptor3[9] & 0xF0) >> 4);
+		TS_ASSERT_EQUALS(originType, linkageDescriptor3[9] & 0x01);
+		TS_ASSERT_EQUALS(networkId, r16(&linkageDescriptor3[10]));
+		delete(descriptor);
+
+		descriptor = new LinkageDescriptor((uint8_t *) linkageDescriptor4);
+		transportStreamId = descriptor->getTransportStreamId();
+		originalNetworkId = descriptor->getOriginalNetworkId();
+		serviceId = descriptor->getServiceId();
+		linkageType = descriptor->getLinkageType();
+		handOverType = descriptor->getHandOverType();
+		originType = descriptor->getOriginType();
+		TS_ASSERT_EQUALS(transportStreamId, r16(&linkageDescriptor4[2]));
+		TS_ASSERT_EQUALS(originalNetworkId, r16(&linkageDescriptor4[4]));
+		TS_ASSERT_EQUALS(serviceId, r16(&linkageDescriptor4[6]));
+		TS_ASSERT_EQUALS(linkageType, linkageDescriptor4[8]);
+		TS_ASSERT_EQUALS(handOverType, (linkageDescriptor4[9] & 0xF0) >> 4);
+		TS_ASSERT_EQUALS(originType, linkageDescriptor4[9] & 0x01);
+		delete(descriptor);
+	}
+
+	void testNvodReferenceDescriptor(void)
+	{
+		NvodReferenceDescriptor *descriptor = new NvodReferenceDescriptor((uint8_t *) nvodReferenceDescriptor1);
+		const NvodReferenceVector *nvods = descriptor->getNvodReferences();
+
+		NvodReferenceConstIterator i = nvods->begin();
+		uint16_t transportStreamId = (*i)->getTransportStreamId();
+		uint16_t originalNetworkId = (*i)->getOriginalNetworkId();
+		uint16_t serviceId = (*i)->getServiceId();
+		TS_ASSERT_EQUALS(transportStreamId, r16(&nvodReferenceDescriptor1[2]));
+		TS_ASSERT_EQUALS(originalNetworkId, r16(&nvodReferenceDescriptor1[4]));
+		TS_ASSERT_EQUALS(serviceId, r16(&nvodReferenceDescriptor1[6]));
+
+		i++;
+		transportStreamId = (*i)->getTransportStreamId();
+		originalNetworkId = (*i)->getOriginalNetworkId();
+		serviceId = (*i)->getServiceId();
+		TS_ASSERT_EQUALS(transportStreamId, r16(&nvodReferenceDescriptor1[8]));
+		TS_ASSERT_EQUALS(originalNetworkId, r16(&nvodReferenceDescriptor1[10]));
+		TS_ASSERT_EQUALS(serviceId, r16(&nvodReferenceDescriptor1[12]));
+
+		i++;
+		transportStreamId = (*i)->getTransportStreamId();
+		originalNetworkId = (*i)->getOriginalNetworkId();
+		serviceId = (*i)->getServiceId();
+		TS_ASSERT_EQUALS(transportStreamId, r16(&nvodReferenceDescriptor1[14]));
+		TS_ASSERT_EQUALS(originalNetworkId, r16(&nvodReferenceDescriptor1[16]));
+		TS_ASSERT_EQUALS(serviceId, r16(&nvodReferenceDescriptor1[18]));
+
+		i++;
+		TS_ASSERT_EQUALS(i, nvods->end());
+
+		delete(descriptor);
+
+
+		descriptor = new NvodReferenceDescriptor((uint8_t *) nvodReferenceDescriptor2);
+		nvods = descriptor->getNvodReferences();
+
+		i = nvods->begin();
+		TS_ASSERT_EQUALS(i, nvods->end());
+
+		delete(descriptor);
+	}
+
+	void testTimeShiftedServiceDescriptor(void)
+	{
+    	TimeShiftedServiceDescriptor *descriptor = new TimeShiftedServiceDescriptor((uint8_t *) timeShiftedServiceDescriptor1);
+		uint16_t referenceServiceId = descriptor->getReferenceServiceId();
+		TS_ASSERT_EQUALS(referenceServiceId, r16(&bytes[0]));
+		delete descriptor;
+	}
+
+	void testShortEventDescriptor(void)
+	{
+		ShortEventDescriptor *descriptor = new ShortEventDescriptor((uint8_t *) shortEventDescriptor1);
+		std::string code = descriptor->getIso639LanguageCode();
+		std::string eventName = descriptor->getEventName();
+		std::string text = descriptor->getText();
+		TS_ASSERT_SAME_DATA(code.c_str(), eng.c_str(), eng.length());
+		TS_ASSERT_SAME_DATA(eventName.c_str(), stringTest.c_str(), stringTest.length());
+		TS_ASSERT_SAME_DATA(text.c_str(), stringTest.c_str(), stringTest.length());
+		delete descriptor;
+
+		descriptor = new ShortEventDescriptor((uint8_t *) shortEventDescriptor2);
+		code = descriptor->getIso639LanguageCode();
+		eventName = descriptor->getEventName();
+		text = descriptor->getText();
+		TS_ASSERT_SAME_DATA(code.c_str(), eng.c_str(), eng.length());
+		TS_ASSERT_EQUALS(eventName.length(), 0x00);
+		TS_ASSERT_SAME_DATA(text.c_str(), stringTest.c_str(), stringTest.length());
+		delete descriptor;
+
+		descriptor = new ShortEventDescriptor((uint8_t *) shortEventDescriptor3);
+		code = descriptor->getIso639LanguageCode();
+		eventName = descriptor->getEventName();
+		text = descriptor->getText();
+		TS_ASSERT_SAME_DATA(code.c_str(), eng.c_str(), eng.length());
+		TS_ASSERT_SAME_DATA(eventName.c_str(), stringTest.c_str(), stringTest.length());
+		TS_ASSERT_EQUALS(text.length(), 0x00);
+		delete descriptor;
+
+		descriptor = new ShortEventDescriptor((uint8_t *) shortEventDescriptor4);
+		code = descriptor->getIso639LanguageCode();
+		eventName = descriptor->getEventName();
+		text = descriptor->getText();
+		TS_ASSERT_SAME_DATA(code.c_str(), eng.c_str(), eng.length());
+		TS_ASSERT_EQUALS(eventName.length(), 0x00);
+		TS_ASSERT_EQUALS(text.length(), 0x00);
+		delete descriptor;
+	}
+
+	void testExtendedEventDescriptor(void)
+	{
+		ExtendedEventDescriptor *descriptor = new ExtendedEventDescriptor((uint8_t *) extendedEventDescriptor1);
+		uint8_t descriptorNumber = descriptor->getDescriptorNumber();
+		uint8_t lastDescriptorNumber = descriptor->getLastDescriptorNumber();
+		TS_ASSERT_EQUALS(descriptorNumber, (extendedEventDescriptor1[2] >> 4) & 0x0F);
+		TS_ASSERT_EQUALS(lastDescriptorNumber, extendedEventDescriptor1[2] & 0x0F);
+
+		const ExtendedEventVector *items = descriptor->getItems();
+		ExtendedEventConstIterator i = items->begin();
+		std::string itemDescription = (*i)->getItemDescription();
+		std::string item = (*i)->getItem();
+		TS_ASSERT_SAME_DATA(itemDescription.c_str(), stringTest.c_str(), stringTest.length());
+		TS_ASSERT_SAME_DATA(item.c_str(), stringTest.c_str(), stringTest.length());
+
+		i++;
+		itemDescription = (*i)->getItemDescription();
+		item = (*i)->getItem();
+		TS_ASSERT_SAME_DATA(itemDescription.c_str(), stringTest.c_str(), stringTest.length());
+		TS_ASSERT_SAME_DATA(item.c_str(), stringTest.c_str(), stringTest.length());
+
+		i++;
+		itemDescription = (*i)->getItemDescription();
+		item = (*i)->getItem();
+		TS_ASSERT_SAME_DATA(itemDescription.c_str(), stringTest.c_str(), stringTest.length());
+		TS_ASSERT_SAME_DATA(item.c_str(), stringTest.c_str(), stringTest.length());
+
+		i++;
+		TS_ASSERT_EQUALS(i, items->end());
+
+		std::string text = descriptor->getText();
+		TS_ASSERT_SAME_DATA(text.c_str(), stringTest.c_str(), stringTest.length());
+		delete descriptor;
+
+
+		descriptor = new ExtendedEventDescriptor((uint8_t *) extendedEventDescriptor2);
+		descriptorNumber = descriptor->getDescriptorNumber();
+		lastDescriptorNumber = descriptor->getLastDescriptorNumber();
+		TS_ASSERT_EQUALS(descriptorNumber, (extendedEventDescriptor1[2] >> 4) & 0x0F);
+		TS_ASSERT_EQUALS(lastDescriptorNumber, extendedEventDescriptor1[2] & 0x0F);
+
+		items = descriptor->getItems();
+		i = items->begin();
+		itemDescription = (*i)->getItemDescription();
+		item = (*i)->getItem();
+		TS_ASSERT_SAME_DATA(itemDescription.c_str(), stringTest.c_str(), stringTest.length());
+		TS_ASSERT_SAME_DATA(item.c_str(), stringTest.c_str(), stringTest.length());
+
+		i++;
+		itemDescription = (*i)->getItemDescription();
+		item = (*i)->getItem();
+		TS_ASSERT_SAME_DATA(itemDescription.c_str(), stringTest.c_str(), stringTest.length());
+		TS_ASSERT_SAME_DATA(item.c_str(), stringTest.c_str(), stringTest.length());
+
+		i++;
+		itemDescription = (*i)->getItemDescription();
+		item = (*i)->getItem();
+		TS_ASSERT_SAME_DATA(itemDescription.c_str(), stringTest.c_str(), stringTest.length());
+		TS_ASSERT_SAME_DATA(item.c_str(), stringTest.c_str(), stringTest.length());
+
+		i++;
+		TS_ASSERT_EQUALS(i, items->end());
+
+		text = descriptor->getText();
+		TS_ASSERT_EQUALS(text.length(), 0);
+		delete descriptor;
+
+
+		descriptor = new ExtendedEventDescriptor((uint8_t *) extendedEventDescriptor3);
+		descriptorNumber = descriptor->getDescriptorNumber();
+		lastDescriptorNumber = descriptor->getLastDescriptorNumber();
+		TS_ASSERT_EQUALS(descriptorNumber, (extendedEventDescriptor1[2] >> 4) & 0x0F);
+		TS_ASSERT_EQUALS(lastDescriptorNumber, extendedEventDescriptor1[2] & 0x0F);
+
+		items = descriptor->getItems();
+		i = items->begin();
+		TS_ASSERT_EQUALS(i, items->end());
+
+		text = descriptor->getText();
+		TS_ASSERT_SAME_DATA(text.c_str(), stringTest.c_str(), stringTest.length());
+		delete descriptor;
+
+
+		descriptor = new ExtendedEventDescriptor((uint8_t *) extendedEventDescriptor4);
+		descriptorNumber = descriptor->getDescriptorNumber();
+		lastDescriptorNumber = descriptor->getLastDescriptorNumber();
+		TS_ASSERT_EQUALS(descriptorNumber, (extendedEventDescriptor1[2] >> 4) & 0x0F);
+		TS_ASSERT_EQUALS(lastDescriptorNumber, extendedEventDescriptor1[2] & 0x0F);
+
+		items = descriptor->getItems();
+		i = items->begin();
+		TS_ASSERT_EQUALS(i, items->end());
+
+		text = descriptor->getText();
+		TS_ASSERT_EQUALS(text.length(), 0);
+		delete descriptor;
+	}
+
+	void testTimeShiftedEventDescriptor(void)
+	{
+		/*TimeShiftedEventDescriptor *descriptor = new TimeShiftedEventDescriptor((uint8_t *) timeShiftedEventDescriptor1);
+		uint16_t referenceServiceId = descriptor->getReferenceServiceId();
+		TS_ASSERT_EQUALS(referenceServiceId, r16(&bytes[0]));
+		uint16_t referenceEventId = descriptor->getReferenceEventId();
+		TS_ASSERT_EQUALS(referenceEventId, r16(&bytes[2]));
+		delete descriptor;*/
+    }
+
+	void testComponentDescriptor(void)
+	{
+		ComponentDescriptor *descriptor = new ComponentDescriptor((uint8_t *) componentDescriptor1);
+		uint8_t streamContent = descriptor->getStreamContent();
+		uint8_t componentType = descriptor->getComponentType();
+		uint8_t componentTag = descriptor->getComponentTag();
+		std::string code = descriptor->getIso639LanguageCode();
+		std::string text = descriptor->getText();
+		TS_ASSERT_EQUALS(streamContent, componentDescriptor1[2] & 0x0F);
+		TS_ASSERT_EQUALS(componentType, componentDescriptor1[3]);
+		TS_ASSERT_EQUALS(componentTag, componentDescriptor1[4]);
+		TS_ASSERT_SAME_DATA(code.c_str(), eng.c_str(), eng.length());
+		TS_ASSERT_SAME_DATA(text.c_str(), stringTest.c_str(), stringTest.length());
+		delete(descriptor);
+
+		descriptor = new ComponentDescriptor((uint8_t *) componentDescriptor2);
+		streamContent = descriptor->getStreamContent();
+		componentType = descriptor->getComponentType();
+		componentTag = descriptor->getComponentTag();
+		code = descriptor->getIso639LanguageCode();
+		text = descriptor->getText();
+		TS_ASSERT_EQUALS(streamContent, componentDescriptor1[2] & 0x0F);
+		TS_ASSERT_EQUALS(componentType, componentDescriptor1[3]);
+		TS_ASSERT_EQUALS(componentTag, componentDescriptor1[4]);
+		TS_ASSERT_SAME_DATA(code.c_str(), eng.c_str(), eng.length());
+		TS_ASSERT_EQUALS(text.length(), 0);
+		delete(descriptor);
+	}
+
+	void testMosaicDescriptor(void)
+	{
+		MosaicDescriptor *descriptor = new MosaicDescriptor((uint8_t *) mosaicDescriptor1);
+		uint8_t mosaicEntryPoint = descriptor->getMosaicEntryPoint();
+		uint8_t numberOfHorizontalElementaryCells = descriptor->getNumberOfHorizontalElementaryCells();
+		uint8_t numberOfVerticalElementaryCells = descriptor->getNumberOfVerticalElementaryCells();
+		TS_ASSERT_EQUALS(mosaicEntryPoint, (mosaicDescriptor1[2] >> 7) & 0x01);
+		TS_ASSERT_EQUALS(numberOfHorizontalElementaryCells, (mosaicDescriptor1[2] >> 4) & 0x07);
+		TS_ASSERT_EQUALS(numberOfVerticalElementaryCells, mosaicDescriptor1[2] & 0x07);
+
+		const MosaicCellVector *cells = descriptor->getMosaicCells();
+		MosaicCellConstIterator cell = cells->begin();
+		uint8_t logicalCellId = (*cell)->getLogicalCellId();
+		uint8_t logicalCellPresentationInfo = (*cell)->getLogicalCellPresentationInfo();
+		TS_ASSERT_EQUALS(logicalCellId, (mosaicDescriptor1[3] >> 2) & 0x3F);
+		TS_ASSERT_EQUALS(logicalCellPresentationInfo, mosaicDescriptor1[4] & 0x07);
+
+		const ElementaryCellFieldVector *fields = (*cell)->getElementaryCellFields();
+		ElementaryCellFieldConstIterator field = fields->begin();
+		uint8_t elementaryCellId = (*field)->getElementaryCellId();
+		TS_ASSERT_EQUALS(elementaryCellId, mosaicDescriptor1[6] & 0x3F);
+		field++;
+		elementaryCellId = (*field)->getElementaryCellId();
+		TS_ASSERT_EQUALS(elementaryCellId, mosaicDescriptor1[7] & 0x3F);
+		field++;
+		elementaryCellId = (*field)->getElementaryCellId();
+		TS_ASSERT_EQUALS(elementaryCellId, mosaicDescriptor1[8] & 0x3F);
+		field++;
+		TS_ASSERT_EQUALS(field, fields->end());
+
+		uint8_t cellLinkageInfo = (*cell)->getCellLinkageInfo();
+		uint16_t bouquetId = (*cell)->getBouquetId();
+		TS_ASSERT_EQUALS(cellLinkageInfo, mosaicDescriptor1[9]);
+		TS_ASSERT_EQUALS(bouquetId, r16(&mosaicDescriptor1[10]));
+
+
+		cell++;
+		logicalCellId = (*cell)->getLogicalCellId();
+		logicalCellPresentationInfo = (*cell)->getLogicalCellPresentationInfo();
+		TS_ASSERT_EQUALS(logicalCellId, (mosaicDescriptor1[12] >> 2) & 0x3F);
+		TS_ASSERT_EQUALS(logicalCellPresentationInfo, mosaicDescriptor1[13] & 0x07);
+		fields = (*cell)->getElementaryCellFields();
+		field = fields->begin();
+		TS_ASSERT_EQUALS(field, fields->end());
+		cellLinkageInfo = (*cell)->getCellLinkageInfo();
+		uint16_t originalNetworkId = (*cell)->getOriginalNetworkId();
+		uint16_t transportStreamId = (*cell)->getTransportStreamId();
+		uint16_t serviceId = (*cell)->getServiceId();
+		TS_ASSERT_EQUALS(cellLinkageInfo, mosaicDescriptor1[15]);
+		TS_ASSERT_EQUALS(originalNetworkId, r16(&mosaicDescriptor1[16]));
+		TS_ASSERT_EQUALS(transportStreamId, r16(&mosaicDescriptor1[18]));
+		TS_ASSERT_EQUALS(serviceId, r16(&mosaicDescriptor1[20]));
+
+		cell++;
+		logicalCellId = (*cell)->getLogicalCellId();
+		logicalCellPresentationInfo = (*cell)->getLogicalCellPresentationInfo();
+		TS_ASSERT_EQUALS(logicalCellId, (mosaicDescriptor1[22] >> 2) & 0x3F);
+		TS_ASSERT_EQUALS(logicalCellPresentationInfo, mosaicDescriptor1[23] & 0x07);
+		fields = (*cell)->getElementaryCellFields();
+		field = fields->begin();
+		TS_ASSERT_EQUALS(field, fields->end());
+		cellLinkageInfo = (*cell)->getCellLinkageInfo();
+		originalNetworkId = (*cell)->getOriginalNetworkId();
+		transportStreamId = (*cell)->getTransportStreamId();
+		serviceId = (*cell)->getServiceId();
+		TS_ASSERT_EQUALS(cellLinkageInfo, mosaicDescriptor1[25]);
+		TS_ASSERT_EQUALS(originalNetworkId, r16(&mosaicDescriptor1[26]));
+		TS_ASSERT_EQUALS(transportStreamId, r16(&mosaicDescriptor1[28]));
+		TS_ASSERT_EQUALS(serviceId, r16(&mosaicDescriptor1[30]));
+
+		cell++;
+		logicalCellId = (*cell)->getLogicalCellId();
+		logicalCellPresentationInfo = (*cell)->getLogicalCellPresentationInfo();
+		TS_ASSERT_EQUALS(logicalCellId, (mosaicDescriptor1[32] >> 2) & 0x3F);
+		TS_ASSERT_EQUALS(logicalCellPresentationInfo, mosaicDescriptor1[33] & 0x07);
+		fields = (*cell)->getElementaryCellFields();
+		field = fields->begin();
+		TS_ASSERT_EQUALS(field, fields->end());
+		cellLinkageInfo = (*cell)->getCellLinkageInfo();
+		originalNetworkId = (*cell)->getOriginalNetworkId();
+		transportStreamId = (*cell)->getTransportStreamId();
+		serviceId = (*cell)->getServiceId();
+		uint16_t eventId = (*cell)->getEventId();
+		TS_ASSERT_EQUALS(cellLinkageInfo, mosaicDescriptor1[35]);
+		TS_ASSERT_EQUALS(originalNetworkId, r16(&mosaicDescriptor1[36]));
+		TS_ASSERT_EQUALS(transportStreamId, r16(&mosaicDescriptor1[38]));
+		TS_ASSERT_EQUALS(serviceId, r16(&mosaicDescriptor1[40]));
+		TS_ASSERT_EQUALS(eventId, r16(&mosaicDescriptor1[42]));
+
+		cell++;
+		TS_ASSERT_EQUALS(cell, cells->end());
+
+		delete(descriptor);
+	}
+
+	void testStreamIdentifierDescriptor(void)
+	{
+		StreamIdentifierDescriptor *descriptor = new StreamIdentifierDescriptor((uint8_t *) streamIdentifierDescriptor1);
+		uint8_t componentTag = descriptor->getComponentTag();
+		TS_ASSERT_EQUALS(componentTag, bytes[0]);
+		delete descriptor;
+	}
+
+	void testCaIdentifierDescriptor(void)
+	{
+		CaIdentifierDescriptor *descriptor = new CaIdentifierDescriptor((uint8_t *) caIdentifierDescriptor1);
+		const CaSystemIdVector *systemIds = descriptor->getCaSystemIds();
+		CaSystemIdConstIterator systemId = systemIds->begin();
+		TS_ASSERT_EQUALS(*systemId, r16(&caIdentifierDescriptor1[2]));
+		systemId++;
+		TS_ASSERT_EQUALS(*systemId, r16(&caIdentifierDescriptor1[4]));
+		systemId++;
+		TS_ASSERT_EQUALS(*systemId, r16(&caIdentifierDescriptor1[6]));
+		systemId++;
+		TS_ASSERT_EQUALS(systemId, systemIds->end());
+
+		descriptor = new CaIdentifierDescriptor((uint8_t *) caIdentifierDescriptor2);
+		systemIds = descriptor->getCaSystemIds();
+		systemId = systemIds->begin();
+		TS_ASSERT_EQUALS(systemId, systemIds->end());
+
+		delete(descriptor);
+	}
+
+	void testContentDescriptor(void)
+	{
+		ContentDescriptor *descriptor = new ContentDescriptor((uint8_t *) contentDescriptor1);
+		const ContentClassificationVector *nibbles = descriptor->getClassifications();
+		ContentClassificationConstIterator nibble = nibbles->begin();
+		uint8_t contentNibbleLevel1 = (*nibble)->getContentNibbleLevel1();
+		uint8_t contentNibbleLevel2 = (*nibble)->getContentNibbleLevel2();
+		uint8_t userNibble1 = (*nibble)->getUserNibble1();
+		uint8_t userNibble2 = (*nibble)->getUserNibble2();
+		TS_ASSERT_EQUALS(contentNibbleLevel1, (contentDescriptor1[2] >> 4) & 0x0F);
+		TS_ASSERT_EQUALS(contentNibbleLevel2, contentDescriptor1[2] & 0x0F);
+		TS_ASSERT_EQUALS(userNibble1, (contentDescriptor1[3] >> 4) & 0x0F);
+		TS_ASSERT_EQUALS(userNibble2, contentDescriptor1[3] & 0x0F);
+
+		nibble++;
+		contentNibbleLevel1 = (*nibble)->getContentNibbleLevel1();
+		contentNibbleLevel2 = (*nibble)->getContentNibbleLevel2();
+		userNibble1 = (*nibble)->getUserNibble1();
+		userNibble2 = (*nibble)->getUserNibble2();
+		TS_ASSERT_EQUALS(contentNibbleLevel1, (contentDescriptor1[4] >> 4) & 0x0F);
+		TS_ASSERT_EQUALS(contentNibbleLevel2, contentDescriptor1[4] & 0x0F);
+		TS_ASSERT_EQUALS(userNibble1, (contentDescriptor1[5] >> 4) & 0x0F);
+		TS_ASSERT_EQUALS(userNibble2, contentDescriptor1[5] & 0x0F);
+
+		nibble++;
+		contentNibbleLevel1 = (*nibble)->getContentNibbleLevel1();
+		contentNibbleLevel2 = (*nibble)->getContentNibbleLevel2();
+		userNibble1 = (*nibble)->getUserNibble1();
+		userNibble2 = (*nibble)->getUserNibble2();
+		TS_ASSERT_EQUALS(contentNibbleLevel1, (contentDescriptor1[6] >> 4) & 0x0F);
+		TS_ASSERT_EQUALS(contentNibbleLevel2, contentDescriptor1[6] & 0x0F);
+		TS_ASSERT_EQUALS(userNibble1, (contentDescriptor1[7] >> 4) & 0x0F);
+		TS_ASSERT_EQUALS(userNibble2, contentDescriptor1[7] & 0x0F);
+
+		nibble++;
+		TS_ASSERT_EQUALS(nibble, nibbles->end());
+
+
+		descriptor = new ContentDescriptor((uint8_t *) contentDescriptor2);
+		nibbles = descriptor->getClassifications();
+		nibble = nibbles->begin();
+		TS_ASSERT_EQUALS(nibble, nibbles->end());
+
+		delete(descriptor);
+	}
+
+	void testParentalRatingDescriptor(void)
+	{
+		ParentalRatingDescriptor *descriptor = new ParentalRatingDescriptor((uint8_t *) parentalRatingDescriptor1);
+		const ParentalRatingVector *ratings = descriptor->getParentalRatings();
+		ParentalRatingConstIterator rating = ratings->begin();
+		std::string code = (*rating)->getCountryCode();
+		uint8_t rate = (*rating)->getRating();
+		TS_ASSERT_SAME_DATA(code.c_str(), eng.c_str(), eng.length());
+		TS_ASSERT_EQUALS(rate, parentalRatingDescriptor1[5]);
+
+		rating++;
+		code = (*rating)->getCountryCode();
+		rate = (*rating)->getRating();
+		TS_ASSERT_SAME_DATA(code.c_str(), fra.c_str(), fra.length());
+		TS_ASSERT_EQUALS(rate, parentalRatingDescriptor1[9]);
+
+		rating++;
+		code = (*rating)->getCountryCode();
+		rate = (*rating)->getRating();
+		TS_ASSERT_SAME_DATA(code.c_str(), deu.c_str(), deu.length());
+		TS_ASSERT_EQUALS(rate, parentalRatingDescriptor1[13]);
+
+		rating++;
+		TS_ASSERT_EQUALS(rating, ratings->end());
+
+		delete(descriptor);
+
+
+		descriptor = new ParentalRatingDescriptor((uint8_t *) parentalRatingDescriptor2);
+		ratings = descriptor->getParentalRatings();
+		rating = ratings->begin();
+		TS_ASSERT_EQUALS(rating, ratings->end());
+
+		delete(descriptor);
+	}
+
+	void testTeletextDescriptor(void)
+	{
+		TeletextDescriptor *descriptor = new TeletextDescriptor((uint8_t *) teletextDescriptor1);
+		const VbiTeletextVector *teletexts = descriptor->getVbiTeletexts();
+
+		VbiTeletextConstIterator i = teletexts->begin();
+		std::string code = (* i)->getIso639LanguageCode();
+        uint8_t type = (* i)->getTeletextType();
+		uint8_t magazine = (* i)->getTeletextMagazineNumber();
+		uint8_t pageNumber = (* i)->getTeletextPageNumber();
+		TS_ASSERT_SAME_DATA(code.c_str(), eng.c_str(), eng.length());
+		TS_ASSERT_EQUALS(type, (0x12 & 0xF8) >> 3);
+		TS_ASSERT_EQUALS(magazine, 0x12 & 0x07);
+		TS_ASSERT_EQUALS(pageNumber, 0x34);
+
+		i++;
+		code = (* i)->getIso639LanguageCode();
+		type = (* i)->getTeletextType();
+		magazine = (* i)->getTeletextMagazineNumber();
+		pageNumber = (* i)->getTeletextPageNumber();
+		TS_ASSERT_SAME_DATA(code.c_str(), fra.c_str(), fra.length());
+		TS_ASSERT_EQUALS(type, (0x56 & 0xF8) >> 3);
+		TS_ASSERT_EQUALS(magazine, 0x56 & 0x07);
+		TS_ASSERT_EQUALS(pageNumber, 0x78);
+
+		i++;
+		code = (* i)->getIso639LanguageCode();
+		type = (* i)->getTeletextType();
+		magazine = (* i)->getTeletextMagazineNumber();
+		pageNumber = (* i)->getTeletextPageNumber();
+		TS_ASSERT_SAME_DATA(code.c_str(), deu.c_str(), deu.length());
+		TS_ASSERT_EQUALS(type, (0x9A & 0xF8) >> 3);
+		TS_ASSERT_EQUALS(magazine, 0x9A & 0x07);
+		TS_ASSERT_EQUALS(pageNumber, 0xBC);
+
+		i++;
+		TS_ASSERT_EQUALS(i, teletexts->end());
+
+		delete descriptor;
+
+
+		descriptor = new TeletextDescriptor((uint8_t *) teletextDescriptor2);
+		teletexts = descriptor->getVbiTeletexts();
+
+		i = teletexts->begin();
+		TS_ASSERT_EQUALS(i, teletexts->end());
+
+		delete descriptor;
+	}
+
+	void testTelephoneDescriptor(void)
+	{
+		TelephoneDescriptor *descriptor = new TelephoneDescriptor((uint8_t *) telephoneDescriptor1);
+		uint8_t foreignAvailability = descriptor->getForeignAvailability();
+		uint8_t connectionType = descriptor->getConnectionType();
+		const std::string countryPrefix = descriptor->getCountryPrefix();
+		const std::string internationalAreaCode = descriptor->getInternationalAreaCode();
+		const std::string operatorCode = descriptor->getOperatorCode();
+		const std::string nationalAreaCode = descriptor->getNationalAreaCode();
+		const std::string coreNumber = descriptor->getCoreNumber();
+		TS_ASSERT_EQUALS(foreignAvailability, telephoneDescriptor1[2] & 0x20);
+		TS_ASSERT_EQUALS(connectionType, telephoneDescriptor1[2] & 0x1F);
+		TS_ASSERT_SAME_DATA(countryPrefix.c_str(), &telephoneDescriptor1[5], 2);
+		TS_ASSERT_SAME_DATA(internationalAreaCode.c_str(), &telephoneDescriptor1[7], 1);
+		TS_ASSERT_SAME_DATA(operatorCode.c_str(), &telephoneDescriptor1[8], 2);
+		TS_ASSERT_SAME_DATA(nationalAreaCode.c_str(), &telephoneDescriptor1[10], 1);
+		TS_ASSERT_SAME_DATA(coreNumber.c_str(), &telephoneDescriptor1[11], 6);
+		delete(descriptor);
+	}
+
+	void testLocalTimeOffsetDescriptor(void)
+	{
+		LocalTimeOffsetDescriptor *descriptor = new LocalTimeOffsetDescriptor((uint8_t *) localTimeOffsetDescriptor1);
+		const LocalTimeOffsetVector *offsets = descriptor->getLocalTimeOffsets();
+		LocalTimeOffsetConstIterator offset = offsets->begin();
+		std::string code = (*offset)->getCountryCode();
+		uint8_t regionId = (*offset)->getCountryRegionId();
+		uint8_t polarity = (*offset)->getLocalTimeOffsetPolarity();
+		uint16_t timeOffset = (*offset)->getLocalTimeOffset();
+		uint16_t timeOfChangeMjd = (*offset)->getTimeOfChangeMjd();
+		uint32_t timeOfChangeBcd = (*offset)->getTimeOfChangeBcd();
+		uint16_t nextTimeOffset = (*offset)->getNextTimeOffset();
+		TS_ASSERT_SAME_DATA(code.c_str(), eng.c_str(), eng.length());
+		TS_ASSERT_EQUALS(regionId, (localTimeOffsetDescriptor1[5] >> 2) & 0x3F);
+		TS_ASSERT_EQUALS(polarity, localTimeOffsetDescriptor1[5] & 0x01);
+		TS_ASSERT_EQUALS(timeOffset, r16(&localTimeOffsetDescriptor1[6]));
+		TS_ASSERT_EQUALS(timeOfChangeMjd, r16(&localTimeOffsetDescriptor1[8]));
+		TS_ASSERT_EQUALS(timeOfChangeBcd, r16(&localTimeOffsetDescriptor1[10]) << 8 | localTimeOffsetDescriptor1[12]);
+		TS_ASSERT_EQUALS(nextTimeOffset, r16(&localTimeOffsetDescriptor1[13]));
+
+		offset++;
+		code = (*offset)->getCountryCode();
+		regionId = (*offset)->getCountryRegionId();
+		polarity = (*offset)->getLocalTimeOffsetPolarity();
+		timeOffset = (*offset)->getLocalTimeOffset();
+		timeOfChangeMjd = (*offset)->getTimeOfChangeMjd();
+		timeOfChangeBcd = (*offset)->getTimeOfChangeBcd();
+		nextTimeOffset = (*offset)->getNextTimeOffset();
+		TS_ASSERT_SAME_DATA(code.c_str(), fra.c_str(), fra.length());
+		TS_ASSERT_EQUALS(regionId, (localTimeOffsetDescriptor1[18] >> 2) & 0x3F);
+		TS_ASSERT_EQUALS(polarity, localTimeOffsetDescriptor1[18] & 0x01);
+		TS_ASSERT_EQUALS(timeOffset, r16(&localTimeOffsetDescriptor1[19]));
+		TS_ASSERT_EQUALS(timeOfChangeMjd, r16(&localTimeOffsetDescriptor1[21]));
+		TS_ASSERT_EQUALS(timeOfChangeBcd, r16(&localTimeOffsetDescriptor1[23]) << 8 | localTimeOffsetDescriptor1[12]);
+		TS_ASSERT_EQUALS(nextTimeOffset, r16(&localTimeOffsetDescriptor1[26]));
+
+		offset++;
+		code = (*offset)->getCountryCode();
+		regionId = (*offset)->getCountryRegionId();
+		polarity = (*offset)->getLocalTimeOffsetPolarity();
+		timeOffset = (*offset)->getLocalTimeOffset();
+		timeOfChangeMjd = (*offset)->getTimeOfChangeMjd();
+		timeOfChangeBcd = (*offset)->getTimeOfChangeBcd();
+		nextTimeOffset = (*offset)->getNextTimeOffset();
+		TS_ASSERT_SAME_DATA(code.c_str(), deu.c_str(), deu.length());
+		TS_ASSERT_EQUALS(regionId, (localTimeOffsetDescriptor1[31] >> 2) & 0x3F);
+		TS_ASSERT_EQUALS(polarity, localTimeOffsetDescriptor1[31] & 0x01);
+		TS_ASSERT_EQUALS(timeOffset, r16(&localTimeOffsetDescriptor1[32]));
+		TS_ASSERT_EQUALS(timeOfChangeMjd, r16(&localTimeOffsetDescriptor1[34]));
+		TS_ASSERT_EQUALS(timeOfChangeBcd, r16(&localTimeOffsetDescriptor1[36]) << 8 | localTimeOffsetDescriptor1[12]);
+		TS_ASSERT_EQUALS(nextTimeOffset, r16(&localTimeOffsetDescriptor1[39]));
+
+		offset++;
+		TS_ASSERT_EQUALS(offset, offsets->end());
+
+		delete(descriptor);
+	}
+
+	void testSubtitlingDescriptor(void)
+	{
+		SubtitlingDescriptor *descriptor = new SubtitlingDescriptor((uint8_t *) subtitlingDescriptor1);
+		const SubtitlingVector *subtitlings = descriptor->getSubtitlings();
+		SubtitlingConstIterator subtitling = subtitlings->begin();
+		std::string code = (*subtitling)->getIso639LanguageCode();
+		uint8_t subtitlingType = (*subtitling)->getSubtitlingType();
+		uint16_t compositionPageId = (*subtitling)->getCompositionPageId();
+		uint16_t ancillaryPageId = (*subtitling)->getAncillaryPageId();
+		TS_ASSERT_SAME_DATA(code.c_str(), eng.c_str(), eng.length());
+		TS_ASSERT_EQUALS(subtitlingType, (uint8_t) subtitlingDescriptor1[5]);
+		TS_ASSERT_EQUALS(compositionPageId, r16(&subtitlingDescriptor1[6]));
+		TS_ASSERT_EQUALS(ancillaryPageId, r16(&subtitlingDescriptor1[8]));
+
+		subtitling++;
+		code = (*subtitling)->getIso639LanguageCode();
+		subtitlingType = (*subtitling)->getSubtitlingType();
+		compositionPageId = (*subtitling)->getCompositionPageId();
+		ancillaryPageId = (*subtitling)->getAncillaryPageId();
+		TS_ASSERT_SAME_DATA(code.c_str(), fra.c_str(), fra.length());
+		TS_ASSERT_EQUALS(subtitlingType, (uint8_t) subtitlingDescriptor1[13]);
+		TS_ASSERT_EQUALS(compositionPageId, r16(&subtitlingDescriptor1[14]));
+		TS_ASSERT_EQUALS(ancillaryPageId, r16(&subtitlingDescriptor1[16]));
+
+		subtitling++;
+		code = (*subtitling)->getIso639LanguageCode();
+		subtitlingType = (*subtitling)->getSubtitlingType();
+		compositionPageId = (*subtitling)->getCompositionPageId();
+		ancillaryPageId = (*subtitling)->getAncillaryPageId();
+		TS_ASSERT_SAME_DATA(code.c_str(), deu.c_str(), deu.length());
+		TS_ASSERT_EQUALS(subtitlingType, (uint8_t) subtitlingDescriptor1[21]);
+		TS_ASSERT_EQUALS(compositionPageId, r16(&subtitlingDescriptor1[22]));
+		TS_ASSERT_EQUALS(ancillaryPageId, r16(&subtitlingDescriptor1[24]));
+
+		subtitling++;
+		TS_ASSERT_EQUALS(subtitling, subtitlings->end());
+
+		delete(descriptor);
+	}
+
+	void testTerrestrialDeliverySystemDescriptor(void)
+	{
+		TerrestrialDeliverySystemDescriptor *descriptor = new TerrestrialDeliverySystemDescriptor((uint8_t *) terrestrialDeliverySystemDescriptor1);
+		uint32_t centralFrequency = descriptor->getCentreFrequency();
+		uint8_t bandwidth = descriptor->getBandwidth();
+		uint8_t constellation = descriptor->getConstellation();
+		uint8_t hierarchyInformation = descriptor->getHierarchyInformation();
+		uint8_t codeRateHpStream = descriptor->getCodeRateHpStream();
+		uint8_t codeRateLpStream = descriptor->getCodeRateLpStream();
+		uint8_t guardInterval = descriptor->getGuardInterval();
+		uint8_t transmissionMode = descriptor->getTransmissionMode();
+		uint8_t otherFrequencyFlag = descriptor->getOtherFrequencyFlag();
+		TS_ASSERT_EQUALS(centralFrequency, r32(&terrestrialDeliverySystemDescriptor1[2]));
+		TS_ASSERT_EQUALS(bandwidth, (terrestrialDeliverySystemDescriptor1[6] >> 5) & 0x07);
+		TS_ASSERT_EQUALS(constellation, (terrestrialDeliverySystemDescriptor1[7] >> 6) & 0x03);
+		TS_ASSERT_EQUALS(hierarchyInformation, (terrestrialDeliverySystemDescriptor1[7] >> 3) & 0x07);
+		TS_ASSERT_EQUALS(codeRateHpStream, terrestrialDeliverySystemDescriptor1[7] & 0x07);
+		TS_ASSERT_EQUALS(codeRateLpStream, (terrestrialDeliverySystemDescriptor1[8] >> 5) & 0x07);
+		TS_ASSERT_EQUALS(guardInterval, (terrestrialDeliverySystemDescriptor1[8] >> 3) & 0x03);
+		TS_ASSERT_EQUALS(transmissionMode, (terrestrialDeliverySystemDescriptor1[8] >> 1) & 0x03);
+		TS_ASSERT_EQUALS(otherFrequencyFlag, terrestrialDeliverySystemDescriptor1[8] & 0x01);
+		delete(descriptor);
+	}
+
+	void testMultilingualNetworkNameDescriptor(void)
+	{
+		MultilingualNetworkNameDescriptor *descriptor = new MultilingualNetworkNameDescriptor((uint8_t *) multilingualNetworkNameDescriptor1);
+		const MultilingualNetworkNameVector *names = descriptor->getMultilingualNetworkNames();
+
+		MultilingualNetworkNameConstIterator i = names->begin();
+		std::string code = (* i)->getIso639LanguageCode();
+		std::string name = (* i)->getNetworkName();
+		TS_ASSERT_SAME_DATA(code.c_str(), eng.c_str(), eng.length());
+		TS_ASSERT_SAME_DATA(name.c_str(), stringTestEng.c_str(), stringTestEng.length());
+
+		i++;
+		code = (* i)->getIso639LanguageCode();
+		name = (* i)->getNetworkName();
+		TS_ASSERT_SAME_DATA(code.c_str(), fra.c_str(), fra.length());
+		TS_ASSERT_SAME_DATA(name.c_str(), stringTestFra.c_str(), stringTestFra.length());
+
+		i++;
+		code = (* i)->getIso639LanguageCode();
+		name = (* i)->getNetworkName();
+		TS_ASSERT_SAME_DATA(code.c_str(), deu.c_str(), deu.length());
+		TS_ASSERT_SAME_DATA(name.c_str(), stringTestDeu.c_str(), stringTestDeu.length());
+
+		i++;
+		TS_ASSERT_EQUALS(i, names->end());
+
+		delete descriptor;
+
+
+		descriptor = new MultilingualNetworkNameDescriptor((uint8_t *) multilingualNetworkNameDescriptor2);
+		names = descriptor->getMultilingualNetworkNames();
+
+		i = names->begin();
+		TS_ASSERT_EQUALS(i, names->end());
+
+		delete descriptor;
+	}
+
+	void testMultilingualBouquetNameDescriptor(void)
+	{
+		MultilingualBouquetNameDescriptor *descriptor = new MultilingualBouquetNameDescriptor((uint8_t *) multilingualBouquetNameDescriptor1);
+		const MultilingualBouquetNameVector *names = descriptor->getMultilingualBouquetNames();
+
+		MultilingualBouquetNameConstIterator i = names->begin();
+		std::string code = (* i)->getIso639LanguageCode();
+		std::string name = (* i)->getBouquetName();
+		TS_ASSERT_SAME_DATA(code.c_str(), eng.c_str(), eng.length());
+		TS_ASSERT_SAME_DATA(name.c_str(), stringTestEng.c_str(), stringTestEng.length());
+
+		i++;
+		code = (* i)->getIso639LanguageCode();
+		name = (* i)->getBouquetName();
+		TS_ASSERT_SAME_DATA(code.c_str(), fra.c_str(), fra.length());
+		TS_ASSERT_SAME_DATA(name.c_str(), stringTestFra.c_str(), stringTestFra.length());
+
+		i++;
+		code = (* i)->getIso639LanguageCode();
+		name = (* i)->getBouquetName();
+		TS_ASSERT_SAME_DATA(code.c_str(), deu.c_str(), deu.length());
+		TS_ASSERT_SAME_DATA(name.c_str(), stringTestDeu.c_str(), stringTestDeu.length());
+
+		i++;
+		TS_ASSERT_EQUALS(i, names->end());
+
+		delete descriptor;
+
+
+		descriptor = new MultilingualBouquetNameDescriptor((uint8_t *) multilingualBouquetNameDescriptor2);
+		names = descriptor->getMultilingualBouquetNames();
+
+		i = names->begin();
+		TS_ASSERT_EQUALS(i, names->end());
+
+		delete descriptor;
+	}
+
+	void testMultilingualServiceNameDescriptor(void)
+	{
+		MultilingualServiceNameDescriptor *descriptor = new MultilingualServiceNameDescriptor((uint8_t *) multilingualServiceNameDescriptor1);
+		const MultilingualServiceNameVector *names = descriptor->getMultilingualServiceNames();
+
+		MultilingualServiceNameConstIterator i = names->begin();
+		std::string code = (* i)->getIso639LanguageCode();
+		std::string provider = (* i)->getServiceProviderName();
+		std::string name = (* i)->getServiceName();
+		TS_ASSERT_SAME_DATA(code.c_str(), eng.c_str(), eng.length());
+		TS_ASSERT_SAME_DATA(provider.c_str(), stringTest.c_str(), stringTest.length());
+		TS_ASSERT_SAME_DATA(name.c_str(), stringTestEng.c_str(), stringTestEng.length());
+
+		i++;
+		code = (* i)->getIso639LanguageCode();
+		provider = (* i)->getServiceProviderName();
+		name = (* i)->getServiceName();
+		TS_ASSERT_SAME_DATA(code.c_str(), fra.c_str(), fra.length());
+		TS_ASSERT_SAME_DATA(provider.c_str(), stringTest.c_str(), stringTest.length());
+		TS_ASSERT_SAME_DATA(name.c_str(), stringTestFra.c_str(), stringTestFra.length());
+
+		i++;
+		code = (* i)->getIso639LanguageCode();
+		provider = (* i)->getServiceProviderName();
+		name = (* i)->getServiceName();
+		TS_ASSERT_SAME_DATA(code.c_str(), deu.c_str(), deu.length());
+		TS_ASSERT_SAME_DATA(provider.c_str(), stringTest.c_str(), stringTest.length());
+		TS_ASSERT_SAME_DATA(name.c_str(), stringTestDeu.c_str(), stringTestDeu.length());
+
+		i++;
+		TS_ASSERT_EQUALS(i, names->end());
+
+		delete descriptor;
+
+
+		descriptor = new MultilingualServiceNameDescriptor((uint8_t *) multilingualServiceNameDescriptor2);
+		names = descriptor->getMultilingualServiceNames();
+
+		i = names->begin();
+		TS_ASSERT_EQUALS(i, names->end());
+
+		delete descriptor;
+	}
+
+	void testMultilingualComponentDescriptor(void)
+	{
+		MultilingualComponentDescriptor *descriptor = new MultilingualComponentDescriptor((uint8_t *) multilingualComponentDescriptor1);
+		uint8_t tag = descriptor->getComponentTag();
+		TS_ASSERT_EQUALS(tag, multilingualComponentDescriptor1[2]);
+		const MultilingualComponentVector *components = descriptor->getMultilingualComponents();
+
+		MultilingualComponentConstIterator i = components->begin();
+		std::string code = (* i)->getIso639LanguageCode();
+		std::string text = (* i)->getText();
+		TS_ASSERT_SAME_DATA(code.c_str(), eng.c_str(), eng.length());
+		TS_ASSERT_SAME_DATA(text.c_str(), stringTestEng.c_str(), stringTestEng.length());
+
+		i++;
+		code = (* i)->getIso639LanguageCode();
+		text = (* i)->getText();
+		TS_ASSERT_SAME_DATA(code.c_str(), fra.c_str(), fra.length());
+		TS_ASSERT_SAME_DATA(text.c_str(), stringTestFra.c_str(), stringTestFra.length());
+
+		i++;
+		code = (* i)->getIso639LanguageCode();
+		text = (* i)->getText();
+		TS_ASSERT_SAME_DATA(code.c_str(), deu.c_str(), deu.length());
+		TS_ASSERT_SAME_DATA(text.c_str(), stringTestDeu.c_str(), stringTestDeu.length());
+
+		i++;
+		TS_ASSERT_EQUALS(i, components->end());
+
+		delete descriptor;
+
+
+		descriptor = new MultilingualComponentDescriptor((uint8_t *) multilingualComponentDescriptor2);
+		tag = descriptor->getComponentTag();
+		TS_ASSERT_EQUALS(tag, multilingualComponentDescriptor1[2]);
+		components = descriptor->getMultilingualComponents();
+
+		i = components->begin();
+		TS_ASSERT_EQUALS(i, components->end());
+
+		delete descriptor;
+	}
+
+	void testPrivateDataSpecifierDescriptor(void)
+	{
+		PrivateDataSpecifierDescriptor *descriptor = new PrivateDataSpecifierDescriptor((uint8_t *) privateDataSpecifierDescriptor1);
+		uint32_t privateDataSpecifier = descriptor->getPrivateDataSpecifier();
+		TS_ASSERT_EQUALS(privateDataSpecifier, r32(&bytes[0]));
+		delete descriptor;
+	}
+
+	void testServiceMoveDescriptor(void)
+	{
+        ServiceMoveDescriptor *descriptor = new ServiceMoveDescriptor((uint8_t *) serviceMoveDescriptor1);
+		uint16_t newOriginalNetwork = descriptor->getNewOriginalNetworkId();
+		uint16_t newTransportStreamId = descriptor->getNewTransportStreamId();
+		uint16_t newServiceId = descriptor->getNewServiceId();
+		TS_ASSERT_EQUALS(newOriginalNetwork, r16(&serviceMoveDescriptor1[2]));
+		TS_ASSERT_EQUALS(newTransportStreamId, r16(&serviceMoveDescriptor1[4]));
+		TS_ASSERT_EQUALS(newServiceId, r16(&serviceMoveDescriptor1[6]));
+		delete(descriptor);
+	}
+
+	void testShortSmoothingBufferDescriptor(void)
+	{
+		// TODO
+	}
+
+	void testFrequencyListDescriptor(void)
+	{
+		FrequencyListDescriptor *descriptor = new FrequencyListDescriptor((uint8_t *) frequencyListDescriptor1);
+		uint8_t codingType = descriptor->getCodingType();
+		TS_ASSERT_EQUALS(codingType, frequencyListDescriptor1[2] & 0x03);
+		const CentreFrequencyVector *centreFrequencies = descriptor->getCentreFrequencies();
+		CentreFrequencyConstIterator centreFrequency = centreFrequencies->begin();
+		TS_ASSERT_EQUALS(*centreFrequency, r32(&frequencyListDescriptor1[3]));
+
+		centreFrequency++;
+		TS_ASSERT_EQUALS(*centreFrequency, r32(&frequencyListDescriptor1[7]));
+
+		centreFrequency++;
+		TS_ASSERT_EQUALS(*centreFrequency, r32(&frequencyListDescriptor1[11]));
+
+		centreFrequency++;
+		TS_ASSERT_EQUALS(centreFrequency, centreFrequencies->end());
+
+		delete(descriptor);
+
+
+		descriptor = new FrequencyListDescriptor((uint8_t *) frequencyListDescriptor2);
+		codingType = descriptor->getCodingType();
+		TS_ASSERT_EQUALS(codingType, frequencyListDescriptor2[2] & 0x03);
+		centreFrequencies = descriptor->getCentreFrequencies();
+		centreFrequency = centreFrequencies->begin();
+		TS_ASSERT_EQUALS(centreFrequency, centreFrequencies->end());
+		delete(descriptor);
+	}
+
+	void testPartialTransportStreamDescriptor(void)
+	{
+		// TODO
+	}
+
+	void testDataBroadcastDescriptor(void)
+	{
+		// TODO
+	}
+
+	void testDataBroadcastIdDescriptor(void)
+	{
+		// TODO
+	}
+
+	void testTransportStreamDescriptor(void)
+	{
+		// TODO
+	}
+
+	void testDsngDescriptor(void)
+	{
+		// TODO
+	}
+
+	void testPdcDescriptor(void)
+	{
+		PdcDescriptor *descriptor = new PdcDescriptor((uint8_t *) pdcDescriptor1);
+		uint32_t programmeIdentificationLabel = descriptor->getProgrammeIdentificationLabel();
+		TS_ASSERT_EQUALS(programmeIdentificationLabel, ((bytes[0] << 16) | r16(&bytes[1])) & 0x0FFFFF);
+		delete descriptor;
+    }
+
+	void testAc3Descriptor(void)
+	{
+		// TODO
+	}
+
+	void testAncillaryDataDescriptor(void)
+	{
+		AncillaryDataDescriptor *descriptor = new AncillaryDataDescriptor((uint8_t *) ancillaryDataDescriptor1);
+		uint8_t ancillaryDataIdentifier = descriptor->getAncillaryDataIdentifier();
+		TS_ASSERT_EQUALS(ancillaryDataIdentifier, bytes[0]);
+		delete descriptor;
+	}
+
+	void testCellListDescriptor(void)
+	{
+		// TODO
+	}
+
+	void testCellFrequencyLinkDescriptor(void)
+	{
+		// TODO
+	}
+
+	void testAnnouncementSupportDescriptor(void)
+	{
+		// TODO
+	}
+
+	void testApplicationSignallingDescriptor(void)
+	{
+		// TODO	
+	}
+
+	void testAdaptationFieldDescriptor(void)
+	{
+		// TODO
+	}
+
+	void testServiceIdentifierDescriptor(void)
+	{
+		// TODO
+	}
+
+	void testServiceAvailabilityDescriptor(void)
+	{
+		// TODO
+	}
+};
