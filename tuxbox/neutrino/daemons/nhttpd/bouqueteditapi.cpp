@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: bouqueteditapi.cpp,v 1.25 2004/04/08 18:35:10 thegoodguy Exp $
+	$Id: bouqueteditapi.cpp,v 1.26 2004/04/08 18:53:52 thegoodguy Exp $
 
 	License: GPL
 
@@ -127,34 +127,34 @@ bool CBouqueteditAPI::showBouquets(CWebserverRequest* request)
 	{
 		char classname = ((bouquet->bouquet_nr & 1) == 0) ? 'a' : 'b';
 		
-		request->printf("<tr class=\"%c\">\n<td>",(selected == (int) bouquet->bouquet_nr + 1)?'c':classname);
+		request->printf("<tr class=\"%c\">\n<td align=\"center\">",(selected == (int) bouquet->bouquet_nr + 1)?'c':classname);
 		if (selected == (int) (bouquet->bouquet_nr + 1))
 			request->SocketWrite("<a name=\"akt\"></a>");
 		// lock/unlock
 		if (bouquet->locked)
-			request->printf("<center><a href=\"set?selected=%i&action=unlock#akt\"><img border=\"0\" src=\"../images/lock.gif\" title=\"Bouquet entsperren\" /></a></center></td>\n", bouquet->bouquet_nr + 1);
+			request->printf("<a href=\"set?selected=%i&amp;action=unlock#akt\"><img src=\"../images/lock.gif\" alt=\"entsperren\" style=\"border: 0px\" /></a></td>\n", bouquet->bouquet_nr + 1);
 		else
-			request->printf("<center><a href=\"set?selected=%i&action=lock#akt\"><img border=\"0\" src=\"../images/unlock.gif\" title=\"Bouquet sperren\" /></a></center></td>\n", bouquet->bouquet_nr + 1);
+			request->printf("<a href=\"set?selected=%i&amp;action=lock#akt\"><img src=\"../images/unlock.gif\" alt=\"sperren\" style=\"border: 0px\" /></a></td>\n", bouquet->bouquet_nr + 1);
 
 		// hide/show
 		if (bouquet->hidden)
-			request->printf("<td><center><a href=\"set?selected=%i&action=show#akt\"><img border=\"0\" src=\"../images/hidden.gif\" title=\"Bouquet verstecken\" /></a></center></td>\n", bouquet->bouquet_nr + 1);
+			request->printf("<td align=\"center\"><a href=\"set?selected=%i&amp;action=show#akt\"><img src=\"../images/hidden.gif\" alt=\"verstecken\" style=\"border: 0px\" />\n", bouquet->bouquet_nr + 1);
 		else
-			request->printf("<td><center><a href=\"set?selected=%i&action=hide#akt\"><img border=\"0\" src=\"../images/visible.gif\" title=\"Bouquet anzeigen\" /></a></center></td>\n", bouquet->bouquet_nr + 1);
+			request->printf("<td align=\"center\"><a href=\"set?selected=%i&amp;action=hide#akt\"><img src=\"../images/visible.gif\" alt=\"anzeigen\" style=\"border: 0px\" />\n", bouquet->bouquet_nr + 1);
 
-		request->printf("<td><a href=\"edit?selected=%i&name=%s\">%s</A></td>", bouquet->bouquet_nr + 1, bouquet->name, bouquet->name);
-		request->printf("<td width=\"100\"><NOBR><a href=\"rename?selected=%i&name=%s\"><img border=\"0\" src=\"../images/modify.png\" title=\"Bouquet umbenennen\" /></a>&nbsp;\n", bouquet->bouquet_nr + 1, bouquet->name);
-		request->printf("<a href=\"delete?selected=%i&name=%s\"><img border=\"0\" src=\"../images/remove.png\" title=\"Bouquet l&ouml;schen\"></a>&nbsp;\n",
+		request->printf("</a></td><td><a href=\"edit?selected=%i&amp;name=%s\">%s</a></td>", bouquet->bouquet_nr + 1, bouquet->name, bouquet->name);
+		request->printf("<td width=\"100\"><nobr><a href=\"rename?selected=%i&amp;name=%s\"><img src=\"../images/modify.png\" alt=\"umbenennen\" style=\"border: 0px\" /></a>&nbsp;\n", bouquet->bouquet_nr + 1, bouquet->name);
+		request->printf("<a href=\"delete?selected=%i&amp;name=%s\"><img src=\"../images/remove.png\" alt=\"l&ouml;schen\" style=\"border: 0px\" /></a>&nbsp;\n",
 			bouquet->bouquet_nr + 1, bouquet->name);
 		
 
 		// move down
 		if (bouquet->bouquet_nr + 1 < bouquetSize)
-			request->printf("<a href=\"move?selected=%i&action=down#akt\"><img border=\"0\" src=\"../images/arrowdown.gif\" title=\"nach unten\" /></a>&nbsp;\n", bouquet->bouquet_nr + 1);
+			request->printf("<a href=\"move?selected=%i&amp;action=down#akt\"><img src=\"../images/arrowdown.gif\" alt=\"nach unten\" style=\"border: 0px\" /></a>&nbsp;\n", bouquet->bouquet_nr + 1);
 
 		//move up
 		if (bouquet->bouquet_nr > 0)
-			request->printf("<a href=\"move?selected=%i&action=up#akt\"><img border=\"0\" src=\"../images/arrowup.gif\" title=\"nach oben\"></a>\n", bouquet->bouquet_nr + 1);
+			request->printf("<a href=\"move?selected=%i&amp;action=up#akt\"><img src=\"../images/arrowup.gif\" alt=\"nach oben\" style=\"border: 0px\" /></a>\n", bouquet->bouquet_nr + 1);
 
 		request->SocketWrite("</nobr></td></tr>\n");
 	}
@@ -215,7 +215,7 @@ bool CBouqueteditAPI::addBouquet(CWebserverRequest* request)
 			request->URLDecode(request->ParameterList["name"]);
 			request->SocketWrite(request->ParameterList["name"].c_str());
 			request->SocketWrite("<BR>Error! Bouquet already exists!\n");
-			request->SocketWrite("<BR><A href=\"main#akt\">back</A>\n");
+			request->SocketWrite("<BR><a href=\"main#akt\">back</a>\n");
 			request->SendHTMLFooter();
 		}
 	}
@@ -269,7 +269,7 @@ bool CBouqueteditAPI::deleteBouquet(CWebserverRequest* request)
 		request->SocketWrite(request->ParameterList["name"]);
 		request->SocketWrite("</B><BR>\n");
 		
-		request->printf("Sure? <A href=\"delete?selected=%i&sure=yes\">[Yep!]</A> <A href=\"main\">[no way!!!]</A>", selected);
+		request->printf("Sure? <A href=\"delete?selected=%i&amp;sure=yes\">[Yep!]</A> <A href=\"main\">[no way!!!]</A>", selected);
 		request->SendHTMLFooter();
 	} else {
 		Parent->Zapit->deleteBouquet(selected - 1);
