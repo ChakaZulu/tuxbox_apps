@@ -27,7 +27,7 @@ typedef struct _Channel
 {
 	char			*name;
 	char			flag;
-	struct _Lines	*line;
+	char			*line;
 } Channel;
 
 static	Channel	*tv_ch=0;
