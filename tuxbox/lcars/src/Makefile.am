@@ -2,7 +2,8 @@ INCLUDES = \
 	@CURL_CFLAGS@ \
 	@FREETYPE_CFLAGS@ \
 	@PLUGINS_CFLAGS@ \
-	@TUXBOX_CFLAGS@
+	@TUXBOX_CFLAGS@ \
+	@COMMONCPLUSPLUS_CFLAGS@
 
 bin_PROGRAMS = lcars
 
@@ -21,7 +22,8 @@ lcars_CFLAGS = -Werror
 lcars_LDADD = \
 	@CURL_LIBS@ \
 	@FREETYPE_LIBS@ \
-	@TUXBOX_LIBS@
+	@TUXBOX_LIBS@ \
+	@COMMONCPLUSPLUS_LIBS@ \
 	-lpthread -ldl
 
 install-data-local:
