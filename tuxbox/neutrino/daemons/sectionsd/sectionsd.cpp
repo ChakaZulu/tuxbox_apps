@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.62 2001/10/04 19:25:59 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.63 2001/10/04 20:12:59 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.63  2001/10/04 20:12:59  fnbrd
+//  Removed duplicate code.
+//
 //  Revision 1.62  2001/10/04 19:25:59  fnbrd
 //  Neues Kommando allEventsChannelID.
 //
@@ -1038,13 +1041,8 @@ static void commandSetHoursToCache(struct connectionData *client, char *data, co
   return;
 }
 
-static void commandAllEventsChannelName(struct connectionData *client, char *data, const unsigned dataLength)
+static void sendAllEvents(struct connectionData *client, unsigned serviceUniqueKey)
 {
-  data[dataLength-1]=0; // to be sure it has an trailing 0
-  dprintf("Request of all events for '%s'\n", data);
-  lockServices();
-  unsigned serviceUniqueKey=findServiceUniqueKeyforServiceName(data);
-  unlockServices();
   char *evtList=new char[65*1024]; // 65kb should be enough and dataLength is unsigned short
   if(!evtList) {
     fprintf(stderr, "low on memory!\n");
@@ -1096,12 +1094,26 @@ static void commandAllEventsChannelName(struct connectionData *client, char *dat
   return;
 }
 
+static void commandAllEventsChannelName(struct connectionData *client, char *data, const unsigned dataLength)
+{
+  data[dataLength-1]=0; // to be sure it has an trailing 0
+  dprintf("Request of all events for '%s'\n", data);
+  lockServices();
+  unsigned uniqueServiceKey=findServiceUniqueKeyforServiceName(data);
+  unlockServices();
+  sendAllEvents(client, uniqueServiceKey);
+  return;
+}
+
 static void commandAllEventsChannelID(struct connectionData *client, char *data, const unsigned dataLength)
 {
   if(dataLength!=4)
     return;
   unsigned serviceUniqueKey=*(unsigned *)data;
   dprintf("Request of all events for 0x%x\n", serviceUniqueKey);
+  sendAllEvents(client, serviceUniqueKey);
+  return;
+/*
   char *evtList=new char[65*1024]; // 65kb should be enough and dataLength is unsigned short
   if(!evtList) {
     fprintf(stderr, "low on memory!\n");
@@ -1151,6 +1163,7 @@ static void commandAllEventsChannelID(struct connectionData *client, char *data,
     dputs("[sectionsd] Fehler/Timeout bei write");
   delete[] evtList;
   return;
+*/
 }
 
 static void commandDumpStatusInformation(struct connectionData *client, char *data, const unsigned dataLength)
@@ -1175,7 +1188,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.62 2001/10/04 19:25:59 fnbrd Exp $\n"
+    "$Id: sectionsd.cpp,v 1.63 2001/10/04 20:12:59 fnbrd Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -2475,7 +2488,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.62 2001/10/04 19:25:59 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.63 2001/10/04 20:12:59 fnbrd Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
