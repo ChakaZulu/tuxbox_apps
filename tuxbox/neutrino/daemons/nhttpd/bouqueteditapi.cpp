@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: bouqueteditapi.cpp,v 1.11 2003/02/07 18:03:51 dirch Exp $
+	$Id: bouqueteditapi.cpp,v 1.12 2003/02/18 10:29:11 dirch Exp $
 
 	License: GPL
 
@@ -121,29 +121,29 @@ bool CBouqueteditAPI::showBouquets(CWebserverRequest* request)
 			request->SocketWrite("<A NAME=\"akt\"></A>");
 		// lock/unlock
 		if (bouquet->locked)
-			request->printf("<CENTER><A HREF=\"set?selected=%i&action=unlock#akt\"><IMG border=0 src=\"../images/lock.gif\" ALT=\"Bouquet entsperren\"></A></CENTER></TD>\n", bouquet->bouquet_nr + 1);
+			request->printf("<CENTER><A HREF=\"set?selected=%i&action=unlock#akt\"><IMG border=0 src=\"../images/lock.gif\" TITLE=\"Bouquet entsperren\"></A></CENTER></TD>\n", bouquet->bouquet_nr + 1);
 		else
-			request->printf("<CENTER><A HREF=\"set?selected=%i&action=lock#akt\"><IMG border=0 src=\"../images/unlock.gif\" ALT=\"Bouquet sperren\"></A></CENTER></TD>\n", bouquet->bouquet_nr + 1);
+			request->printf("<CENTER><A HREF=\"set?selected=%i&action=lock#akt\"><IMG border=0 src=\"../images/unlock.gif\" TITLE=\"Bouquet sperren\"></A></CENTER></TD>\n", bouquet->bouquet_nr + 1);
 
 		// hide/show
 		if (bouquet->hidden)
-			request->printf("<TD><CENTER><A HREF=\"set?selected=%i&action=show#akt\"><IMG border=0 src=\"../images/hidden.gif\" ALT=\"Bouquet verstecken\"></A></CENTER></TD>\n", bouquet->bouquet_nr + 1);
+			request->printf("<TD><CENTER><A HREF=\"set?selected=%i&action=show#akt\"><IMG border=0 src=\"../images/hidden.gif\" TITLE=\"Bouquet verstecken\"></A></CENTER></TD>\n", bouquet->bouquet_nr + 1);
 		else
-			request->printf("<TD><CENTER><A HREF=\"set?selected=%i&action=hide#akt\"><IMG border=0 src=\"../images/visible.gif\" ALT=\"Bouquet anzeigen\"></A></CENTER></TD>\n", bouquet->bouquet_nr + 1);
+			request->printf("<TD><CENTER><A HREF=\"set?selected=%i&action=hide#akt\"><IMG border=0 src=\"../images/visible.gif\" TITLE=\"Bouquet anzeigen\"></A></CENTER></TD>\n", bouquet->bouquet_nr + 1);
 
 		request->printf("<TD><A HREF=\"edit?selected=%i&name=%s\">%s</A></TD>", bouquet->bouquet_nr + 1, bouquet->name, bouquet->name);
-		request->printf("<TD WIDTH=\"100\"><NOBR><A HREF=\"rename?selected=%i&name=%s\"><IMG border=0 SRC=\"../images/modify.png\" ALT=\"Bouquet umbenennen\"></a>&nbsp;\n",bouquet->bouquet_nr + 1, bouquet->name);
-		request->printf("<A HREF=\"delete?selected=%i&name=%s\"><IMG border=0 src=\"../images/remove.png\" ALT=\"Bouquet löschen\"></A>&nbsp;\n",
+		request->printf("<TD WIDTH=\"100\"><NOBR><A HREF=\"rename?selected=%i&name=%s\"><IMG border=0 SRC=\"../images/modify.png\" TITLE=\"Bouquet umbenennen\"></a>&nbsp;\n",bouquet->bouquet_nr + 1, bouquet->name);
+		request->printf("<A HREF=\"delete?selected=%i&name=%s\"><IMG border=0 src=\"../images/remove.png\" TITLE=\"Bouquet löschen\"></A>&nbsp;\n",
 			bouquet->bouquet_nr + 1, bouquet->name);
 		
 
 		// move down
 		if (bouquet->bouquet_nr + 1 < bouquetSize)
-			request->printf("<A HREF=\"move?selected=%i&action=down#akt\"><IMG border=0 src=\"../images/arrowdown.gif\" ALT=\"nach unten\"></A>&nbsp;\n", bouquet->bouquet_nr + 1);
+			request->printf("<A HREF=\"move?selected=%i&action=down#akt\"><IMG border=0 src=\"../images/arrowdown.gif\" TITLE=\"nach unten\"></A>&nbsp;\n", bouquet->bouquet_nr + 1);
 
 		//move up
 		if (bouquet->bouquet_nr > 0)
-			request->printf("<A HREF=\"move?selected=%i&action=up#akt\"><IMG border=0 src=\"../images/arrowup.gif\" ALT=\"nach oben\"></A>\n", bouquet->bouquet_nr + 1);
+			request->printf("<A HREF=\"move?selected=%i&action=up#akt\"><IMG border=0 src=\"../images/arrowup.gif\" TITLE=\"nach oben\"></A>\n", bouquet->bouquet_nr + 1);
 
 		request->SocketWrite("</NOBR></TD></TR>\n");
 	}
