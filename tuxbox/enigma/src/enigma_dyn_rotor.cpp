@@ -46,20 +46,22 @@ using namespace std;
 eString getRotorConfig(void)
 {
 	eString result = readFile(TEMPLATE_DIR + "rotor.tmp");
+	eString tmp;
 	
 	for (std::list<eLNB>::iterator it(eTransponderList::getInstance()->getLNBs().begin()); it != eTransponderList::getInstance()->getLNBs().end(); it++)
 	{
 		// go thru all satellites...
 		for (ePtrList<eSatellite>::iterator s (it->getSatelliteList().begin()); s != it->getSatelliteList().end(); s++)
 		{
-			result += "<tr>";
-			result += "<td>" + s->getDescription() + "</td>";
-			result += "<td>" + eString().sprintf("%d", s->getOrbitalPosition()) + "</td>";
+			tmp += "<tr>";
+			tmp += "<td>" + s->getDescription() + "</td>";
+			tmp += "<td>" + eString().sprintf("%d", s->getOrbitalPosition()) + "</td>";
 			int motorPosition = it->getDiSEqC().RotorTable[s->getOrbitalPosition()];
-			result += "<td>" + eString().sprintf("%d", motorPosition) + "</td>";
-			result += "</tr>";
+			tmp += "<td>" + eString().sprintf("%d", motorPosition) + "</td>";
+			tmp += "</tr>";
 		}
 	}
+	result.strReplace("#MOTORPOSITIONS#", tmp);
 
 	return result;
 }
