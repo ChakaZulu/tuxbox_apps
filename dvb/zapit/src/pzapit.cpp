@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.17 2002/05/08 13:02:00 obi Exp $
+ * $Id: pzapit.cpp,v 1.18 2002/05/08 16:10:26 obi Exp $
  *
  * simple commandline client for zapit
  *
@@ -48,6 +48,7 @@ int usage (std::string basename)
 	std::cout << std::endl;
 	std::cout << "mute audio: " << basename << " -mute" << std::endl;
 	std::cout << "unmute audio: " << basename << " -unmute" << std::endl;
+	std::cout << "set volume: " << basename << " -vol <0..64>" << std::endl;
 	return -1;
 }
 
@@ -64,7 +65,8 @@ int main (int argc, char** argv)
 	int diseqcType = -1;
 	int satmask = 0;
 	int audio = 0;
-	int mute = 0;
+	int mute = -1;
+	int volume = -1;
 	char* channelName = NULL;
 
 	bool playback = false;
@@ -185,8 +187,19 @@ int main (int argc, char** argv)
 		}
 		else if (!strncmp(argv[i], "-unmute", 7))
 		{
-			mute = 2;
+			mute = 0;
 			continue;
+		}
+		else if (!strncmp(argv[i], "-vol", 4))
+		{
+			if (i < argc - 1)
+			{
+				sscanf(argv[++i], "%d", &volume);
+			}
+			else
+			{
+				return usage(argv[0]);
+			}
 		}
 		else if (i < argc - 1)
 		{
@@ -220,17 +233,18 @@ int main (int argc, char** argv)
 	}
 
 	/* audio mute */
-	if (mute == 1)
+	if (mute != -1)
 	{
-		std::cout << "mute" << std::endl;
-		zapit->muteAudio(true);
+		std::cout << "mute/unmute" << std::endl;
+		zapit->muteAudio(mute);
 		delete zapit;
 		return 0;
 	}
-	else if (mute == 2)
+
+	if (volume != -1)
 	{
-		std::cout << "unmute" << std::endl;
-		zapit->muteAudio(false);
+		std::cout << "set volume" << std::endl;
+		zapit->setVolume(volume, volume);
 		delete zapit;
 		return 0;
 	}

@@ -439,6 +439,23 @@ void CZapitClient::muteAudio (bool mute)
 
 }
 
+void CZapitClient::setVolume (unsigned int left, unsigned int right)
+{
+	commandHead msgHead;
+	commandVolume msg;
+
+	msg.left = left;
+	msg.right = right;
+
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_SET_VOLUME;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+	send((char*)&msg, sizeof(msg));
+	zapit_close();
+}
+
 
 /***********************************************/
 /*					     */
