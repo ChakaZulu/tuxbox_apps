@@ -20,6 +20,8 @@ mainmenu.recording Streaming (Registrazione)
 mainmenu.recording_start start
 mainmenu.recording_stop stop
 mainmenu.pictureviewer Lettore immaggini
+mainmenu.movieplayer unset
+mainmenu.pausesectionsd unset
 
 servicemenu.head Service
 servicemenu.update Aggiornamento-Software
@@ -265,6 +267,7 @@ infoviewer.nocurrent Nessuna Informazione sul Programma
 infoviewer.noepg Nessuna Informazione-EPG
 infoviewer.subservice Regia Video
 infoviewer.waittime Attendo Orario...
+infoviewer.motor_moving unset
 
 epgviewer.notfound Nessuna Informazione-(EPG) trovati
 epgviewer.nodetailed Nessuna Informazione
@@ -328,21 +331,20 @@ scants.head Ricerca Canali
 scants.startnow Start Ricerca Canali
 scants.actsatellite Satellite:
 scants.actcable Cavo:
-scants.astra Astra
-scants.hotbird Hotbird
-scants.kopernikus Kopernikus
-scants.sirius Sirius
-scants.thor Thor
-scants.digituerk Digituerk
-scants.tuerksat Tuerksat
 scants.transponders Transponder:
 scants.freqdata Frequenza:
-scants.servicenames TV     Radio  Data
+scants.provider unset
+scants.channel unset
+scants.numberoftvservices TV
+scants.numberofradioservices Radio
+scants.numberofdataservices Data
+scants.numberoftotalservices unset
 scants.services Services:
 scants.bouquet Bouquets
 scants.bouquet_leave Non Cambiare
 scants.bouquet_create Crea Nuovi
 scants.bouquet_erase Cancellare
+scants.bouquet_satellite unset
 scants.failed Ricerca Canali fallita!
 scants.finished Ricerca Canali finita con Successo!
 
@@ -687,6 +689,14 @@ mp3player.artist_title Artista, Titolo
 mp3player.title_artist Titolo, Artista
 mp3player.display_order Visore
 mp3player.follow Selezionare Track attuale
+
+movieplayer.name unset
+movieplayer.head unset
+movieplayer.play unset
+movieplayer.choosets unset
+movieplayer.chooseps unset
+movieplayer.choosepes unset
+movieplayer.bookmark unset
 
 filebrowser.head filebrowser
 filebrowser.filter.active Filtro on

@@ -21,6 +21,7 @@ mainmenu.recording_start Start
 mainmenu.recording_stop Stopp
 mainmenu.pictureviewer Bildbetrachter
 mainmenu.movieplayer Movieplayer
+mainmenu.pausesectionsd EPG auslesen
 
 servicemenu.head Service
 servicemenu.update Software-Aktualisierung

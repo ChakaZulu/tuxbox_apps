@@ -20,6 +20,8 @@ mainmenu.recording Sdreaming (ufnehh)
 mainmenu.recording_start un los
 mainmenu.recording_stop hald
 mainmenu.pictureviewer Bildbedrachder
+mainmenu.movieplayer unset
+mainmenu.pausesectionsd unset
 
 servicemenu.head Sörvis
 servicemenu.update Software-Öbdaede
@@ -265,6 +267,7 @@ infoviewer.nocurrent Kei Info zuem laufende Programm
 infoviewer.noepg Kei EPG-Information verfuigbar
 infoviewer.subservice Bildregie
 infoviewer.waittime Wart' uff'd Uhrzeit...
+infoviewer.motor_moving unset
 
 epgviewer.notfound keini Programminformatione (EPG) g'funde
 epgviewer.nodetailed Keini usführliche Informationen verfuigbar
@@ -328,21 +331,20 @@ scants.head Kanalsuechi
 scants.startnow Kanalsuechi starde
 scants.actsatellite Sadellid:
 scants.actcable Kabel:
-scants.astra Astra
-scants.hotbird Hotbörd
-scants.kopernikus Kopernikus
-scants.sirius Sirius
-scants.thor Thor
-scants.digituerk Digituerk
-scants.tuerksat Tuerksat
 scants.transponders Transponder:
 scants.freqdata Frequenz:
-scants.servicenames TV     Radio  Data
+scants.provider unset
+scants.channel unset
+scants.numberoftvservices TV
+scants.numberofradioservices Radio
+scants.numberofdataservices Data
+scants.numberoftotalservices unset
 scants.services Services:
 scants.bouquet Bouquets
 scants.bouquet_leave nidd ändere
 scants.bouquet_create neu mache
 scants.bouquet_erase lösche
+scants.bouquet_satellite unset
 scants.failed Kanalsuechii fehlg'schlage!
 scants.finished Kanalsueche erfolgrich beändet!
 
@@ -687,6 +689,14 @@ mp3player.artist_title Interpret, Titel
 mp3player.title_artist Titel, Interpret
 mp3player.display_order Anzeig'
 mp3player.follow Selektiere akt. Track
+
+movieplayer.name unset
+movieplayer.head unset
+movieplayer.play unset
+movieplayer.choosets unset
+movieplayer.chooseps unset
+movieplayer.choosepes unset
+movieplayer.bookmark unset
 
 filebrowser.head Filebrowser
 filebrowser.filter.active Filter aah

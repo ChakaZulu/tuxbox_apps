@@ -20,6 +20,8 @@ mainmenu.recording Streaming (aufnemma)
 mainmenu.recording_start ofanga
 mainmenu.recording_stop aufhearn
 mainmenu.pictureviewer Buidlschauga
+mainmenu.movieplayer unset
+mainmenu.pausesectionsd EPG aussalesn
 
 servicemenu.head Service
 servicemenu.update Software-aktualisiern
@@ -265,6 +267,7 @@ infoviewer.nocurrent Koa Information zum Programm
 infoviewer.noepg Koa EPG do
 infoviewer.subservice Bildregie
 infoviewer.waittime Wart no aufd Uhrzeit...
+infoviewer.motor_moving Antennenpositionierung
 
 epgviewer.notfound Koa EPG gfundn
 epgviewer.nodetailed Koane bessan Informationen gfundn
@@ -328,21 +331,20 @@ scants.head Senda suacha
 scants.startnow Ofanga mim Senda suacha
 scants.actsatellite Satellit:
 scants.actcable Kabi:
-scants.astra Astra
-scants.hotbird Hotbird
-scants.kopernikus Kopernikus
-scants.sirius Sirius
-scants.thor Thor
-scants.digituerk Digituerk
-scants.tuerksat Tuerksat
 scants.transponders Transponder:
-scants.freqdata	Frequenz:
-scants.servicenames	TV     Radio  Data
+scants.freqdata Frequenz:
+scants.provider Anbieter:
+scants.channel Kanal:
+scants.numberoftvservices TV
+scants.numberofradioservices Radio
+scants.numberofdataservices Data
+scants.numberoftotalservices Gesamt
 scants.services Services:
 scants.bouquet Bouquets
 scants.bouquet_leave ned olanga
 scants.bouquet_create nei macha
 scants.bouquet_erase wegmacha
+scants.bouquet_satellite Satelliten-Bouquet
 scants.failed Sendasuacha is gescheitat
 scants.finished Senda sand gfundn worn!
 
@@ -687,6 +689,14 @@ mp3player.artist_title Interpret, Titl
 mp3player.title_artist Interpret
 mp3player.display_order Ozoagn
 mp3player.follow aktuelle Liad
+
+movieplayer.name unset
+movieplayer.head unset
+movieplayer.play unset
+movieplayer.choosets unset
+movieplayer.chooseps unset
+movieplayer.choosepes unset
+movieplayer.bookmark unset
 
 filebrowser.head Datiesucha
 filebrowser.filter.active Fuita o

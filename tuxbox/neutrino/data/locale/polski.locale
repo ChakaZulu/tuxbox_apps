@@ -20,6 +20,8 @@ mainmenu.recording Nagrywanie
 mainmenu.recording_start rozpocznij
 mainmenu.recording_stop zatrzymaj
 mainmenu.pictureviewer Przegladarka obrazów
+mainmenu.movieplayer unset
+mainmenu.pausesectionsd unset
 
 servicemenu.head Ustawienia
 servicemenu.update Aktualizacja oprogramowania
@@ -265,6 +267,7 @@ infoviewer.nocurrent INFO nie dostepne dla tego kanalu
 infoviewer.noepg EPG nie dostepne
 infoviewer.subservice Subservices
 infoviewer.waittime Oczekiwanie na czas...
+infoviewer.motor_moving unset
 
 epgviewer.notfound EPG-Informacje nie znalezione
 epgviewer.nodetailed Informacje nie sa dostepne
@@ -328,21 +331,20 @@ scants.head Strojenie
 scants.startnow Rozpocznij Strojenie
 scants.actsatellite Satelity:
 scants.actcable Kabel:
-scants.astra Astra
-scants.hotbird Hotbird
-scants.kopernikus Kopernikus
-scants.sirius Sirius
-scants.thor Thor
-scants.digituerk digiturk
-scants.tuerksat Turksat
 scants.transponders Transpondery:
-scants.freqdata Czestotliwosc
-scants.servicenames TV     Radio  Dane
+scants.freqdata Czestotliwosc:
+scants.provider unset
+scants.channel unset
+scants.numberoftvservices TV
+scants.numberofradioservices Radio
+scants.numberofdataservices Dane
+scants.numberoftotalservices unset
 scants.services Kanaly:
 scants.bouquet Bukiety
 scants.bouquet_leave pozostaw obecne
 scants.bouquet_create utworz nowe
 scants.bouquet_erase kasuj wszystkie
+scants.bouquet_satellite unset
 scants.failed Brak transpondera!
 scants.finished Strojenie zakonczone sukcesem!
 
@@ -687,6 +689,14 @@ mp3player.artist_title Interpretacja, Tytul
 mp3player.title_artist Tytul, Interpretacja
 mp3player.display_order Kolejnosc
 mp3player.follow Auto-wybór biezacy
+
+movieplayer.name unset
+movieplayer.head unset
+movieplayer.play unset
+movieplayer.choosets unset
+movieplayer.chooseps unset
+movieplayer.choosepes unset
+movieplayer.bookmark unset
 
 filebrowser.head Przegladarka
 filebrowser.filter.active Filtr wlaczony

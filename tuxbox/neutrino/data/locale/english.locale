@@ -20,6 +20,8 @@ mainmenu.recording Recording
 mainmenu.recording_start start
 mainmenu.recording_stop stop
 mainmenu.pictureviewer Picture viewer
+mainmenu.movieplayer Movieplayer
+mainmenu.pausesectionsd Read EPG
 
 servicemenu.head Service
 servicemenu.update Software Update
@@ -265,6 +267,7 @@ infoviewer.nocurrent No info for current program available
 infoviewer.noepg EPG not available
 infoviewer.subservice Subservices
 infoviewer.waittime Waiting for time...
+infoviewer.motor_moving Antenna positioning
 
 epgviewer.notfound no epg found
 epgviewer.nodetailed No detailed informations available
@@ -328,21 +331,20 @@ scants.head Scan transponder
 scants.startnow start scan
 scants.actsatellite Satellite:
 scants.actcable Cable:
-scants.astra Astra
-scants.hotbird Hotbird
-scants.kopernikus Kopernikus
-scants.sirius Sirius
-scants.thor Thor
-scants.digituerk Digituerk
-scants.tuerksat Tuerksat
 scants.transponders Transponders:
-scants.freqdata	Frequency:
-scants.servicenames	TV     Radio  Data
+scants.freqdata Frequency:
+scants.provider Provider:
+scants.channel Channel:
+scants.numberoftvservices TV
+scants.numberofradioservices Radio
+scants.numberofdataservices Data
+scants.numberoftotalservices Total
 scants.services Services:
 scants.bouquet Bouquet
 scants.bouquet_leave leave current
 scants.bouquet_create create new
 scants.bouquet_erase erase all
+scants.bouquet_satellite Satellite-Bouquet
 scants.failed Transponderscan failed!
 scants.finished Transponderscan finished successfully!
 
@@ -687,6 +689,14 @@ mp3player.artist_title Artist, Title
 mp3player.title_artist Title, Artist
 mp3player.display_order display order
 mp3player.follow auto select current
+
+movieplayer.name Movieplayer
+movieplayer.head Movieplayer
+movieplayer.play Play
+movieplayer.choosets Play TS
+movieplayer.chooseps Play PS
+movieplayer.choosepes Play PES
+movieplayer.bookmark Bookmarks
 
 filebrowser.head Filebrowser
 filebrowser.filter.active Filter on

@@ -20,6 +20,8 @@ mainmenu.recording snimanje
 mainmenu.recording_start start
 mainmenu.recording_stop stop
 mainmenu.pictureviewer promatrac slika
+mainmenu.movieplayer unset
+mainmenu.pausesectionsd unset
 
 servicemenu.head servis
 servicemenu.update obnoviti softver
@@ -265,6 +267,7 @@ infoviewer.nocurrent nema informacije o ovom programu
 infoviewer.noepg nema epg informacije
 infoviewer.subservice rezija slike
 infoviewer.waittime ceka se na vrijeme ...
+infoviewer.motor_moving unset
 
 epgviewer.notfound nisu nadjene informacije o programu (epg)
 epgviewer.nodetailed nema opsirnih informacija
@@ -328,22 +331,21 @@ scants.head trazenje kanala
 scants.startnow poceti trazenje kanala
 scants.actsatellite satelit:
 scants.actcable kablo:
-scants.astra astra
-scants.hotbird hotbird
-scants.kopernikus kopernikus
-scants.sirius sirius
-scants.thor thor
-scants.digituerk digituerk
-scants.tuerksat tuerksat
 scants.transponders transponderi:
 scants.freqdata frekvencija:
-scants.servicenames tv     radio  data
+scants.provider unset
+scants.channel unset
+scants.numberoftvservices tv
+scants.numberofradioservices radio
+scants.numberofdataservices data
+scants.numberoftotalservices unset
 scants.services servisi:
 scants.bouquet bukete
 scants.bouquet_leave ne promijeniti
 scants.bouquet_create novo sastaviti
-scants.failed Neuspjesno trazenje kanala!
 scants.bouquet_erase izbrisati
+scants.bouquet_satellite unset
+scants.failed Neuspjesno trazenje kanala!
 scants.finished Uspjesno izvrseno trazenje kanala!
 
 motorcontrol.head namjescenje motora
@@ -687,6 +689,14 @@ mp3player.artist_title pjevac, pjesma
 mp3player.title_artist pjesma, pjevac
 mp3player.display_order redoslijed
 mp3player.follow izabjere ovu pjesmu
+
+movieplayer.name unset
+movieplayer.head unset
+movieplayer.play unset
+movieplayer.choosets unset
+movieplayer.chooseps unset
+movieplayer.choosepes unset
+movieplayer.bookmark unset
 
 filebrowser.head pretrazivac datoteka
 filebrowser.filter.active upaljen filter
