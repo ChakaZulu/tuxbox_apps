@@ -684,34 +684,34 @@ void	FBPause( void )
 
 	memcpy(trans_sav, trans, 256 * sizeof( unsigned short) );
 
-	FBGetImage( 50, 50, 100, 42, img_sav );
-
 	Fx2PigPause();
 
-	/* dimm out */
-	for( i = 0; i < 129; i++ )
+	if (available)
 	{
-		for( j = 0; j < 256; j++ )
+		//save image
+		FBGetImage( 50, 50, 100, 42, img_sav );
+
+		/* dimm out */
+		for( i = 0; i < 129; i++ )
 		{
-			if( (trans[j]>>8) < 128 )
+			for( j = 0; j < 256; j++ )
 			{
-				trans[j] += 0x100;
-			}
-  		}
+				if( (trans[j]>>8) < 128 )
+				{
+					trans[j] += 0x100;
+				}
+  			}
+			FBSetupColors();
+		}
+
+		FBSetColor( RESERVED, 150, 210, 210 );
 		FBSetupColors();
+		FBDrawString( 50, 50, 42, "Pause", RESERVED, 0 );
 	}
-
-
-	FBSetColor( RESERVED, 150, 210, 210 );
-	FBSetupColors();
-
-	FBDrawString( 50, 50, 42, "Pause", RESERVED, 0 );
 
 	while( realcode != 0xee )
 		RcGetActCode();
-
 	actcode = 0xee;
-
 	while( realcode == 0xee )
 	{
 		tv.tv_usec = 100000;
@@ -720,23 +720,24 @@ void	FBPause( void )
 		RcGetActCode();
 	}
 
-	//restore image
-
-	FBCopyImage( 50, 50, 100, 42, img_sav );
-
-	/* dimm in */
-	for( i = 0; i < 129; i++ )
+	if (available)
 	{
-		for( j = 0; j < 256; j++ )
-		{
-			if( trans[j] > trans_sav[j] )
-			{
-				trans[j]-= 0x100;
-			}
-		}
-		FBSetupColors();
-	}
+		//restore image
+		FBCopyImage( 50, 50, 100, 42, img_sav );
 
+		/* dimm in */
+		for( i = 0; i < 129; i++ )
+		{
+			for( j = 0; j < 256; j++ )
+			{
+				if( trans[j] > trans_sav[j] )
+				{
+					trans[j]-= 0x100;
+				}
+			}
+			FBSetupColors();
+		}
+	}
 
 	while( realcode != 0xee )
 		RcGetActCode();
