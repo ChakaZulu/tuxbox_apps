@@ -350,9 +350,9 @@ static int getInfo(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 	return 0;
 }
 
-void ezapInitializeXMLRPC(eHTTPDynPathResolver *dyn_resolver)
+void ezapInitializeXMLRPC(eHTTPD *httpd)
 {
-	xmlrpc_initialize(dyn_resolver);
+	xmlrpc_initialize(httpd);
 	xmlrpc_addMethod("test.test", testrpc);
 	xmlrpc_addMethod("getList", getList);
 	xmlrpc_addMethod("zapTo", zapTo);

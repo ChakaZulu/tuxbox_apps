@@ -2,7 +2,6 @@
 #include <qmap.h>
 #include "xmltree.h"
 #include "enigma.h"
-#include "http_dyn.h"
 #include "dvb.h"
 #include "edvb.h"
 #include "xmlrpc.h"
@@ -258,35 +257,40 @@ static eXMLRPCVariant *fromXML(XMLTreeNode *n)
 	return 0;
 }
 
-static QString xmlrpc(QString request, QString path, QString opt, const eHTTPConnection *conn)
+eXMLRPCResponse::eXMLRPCResponse(eHTTPConnection *c): 
+	eHTTPDataSource(c), parser("ISO-8859-1")
 {
-	if (conn->options["Content-Type"]!="text/xml")
-	{
-		qDebug("xmlrpc: wrong content-type");
-		return 0;
-	}
-	XMLTreeParser parser("ISO-8859-1");
-	if (!parser.Parse((const char*)conn->content, conn->content_length, 1))
-	{
-		qDebug("xml parse error");
-		return 0;
-	}
-	
-	QString result;
+	// size etc. setzen aber erst NACH data-phase
+	connection->localstate=eHTTPConnection::stateWait;
+}
 
+eXMLRPCResponse::~eXMLRPCResponse()
+{
+}
+
+int eXMLRPCResponse::doCall()
+{
+	qDebug("doing call");
+	result="";
 		// get method name
 	QString methodName=0;
+	
+	if (connection->remote_header["Content-Type"]!="text/xml")
+	{
+		qDebug("remote header failure (%s != text/xml)", (connection->remote_header["Content-Type"]).c_str());
+		return -3;
+	}
 	
 	XMLTreeNode *methodCall=parser.RootNode();
 	if (!methodCall)
 	{
 		qDebug("empty xml");
-		return 0;
+		return -1;
 	}
 	if (strcmp(methodCall->GetType(), "methodCall"))
 	{
 		qDebug("no methodCall found");
-		return 0;
+		return -2;
 	}
 
 	QList<eXMLRPCVariant> params;
@@ -311,7 +315,7 @@ static QString xmlrpc(QString request, QString path, QString opt, const eHTTPCon
 	if (!methodName)
 	{
 		qDebug("no methodName found!");
-		return 0;
+		return -3;
 	}
 	
 	qDebug("methodName: %s", (const char*)methodName);
@@ -354,15 +358,62 @@ static QString xmlrpc(QString request, QString path, QString opt, const eHTTPCon
 		result+="</params>";
 	}
 	result+="</methodResponse>";
-	qDebug("done");
-	QString header="Content-Type: text/xml\r\nContent-Length: " + QString().setNum(result.length()) + "\r\n\r\n";
-	result.prepend(header);
-	return result;
+	char buffer[10];
+	snprintf(buffer, 10, "%d", size=result.length());
+	wptr=0;
+	connection->local_header["Content-Type"]="text/xml";
+	connection->local_header["Content-Length"]=buffer;
+	connection->code=200;
+	connection->code_descr="OK";
+	connection->localstate=eHTTPConnection::stateResponse;
 }
 
-void xmlrpc_initialize(eHTTPDynPathResolver *dyn_resolver)
+int eXMLRPCResponse::doWrite(int hm)
 {
-	dyn_resolver->addDyn("POST", "/RPC2", xmlrpc);
+	int tw=size-wptr;
+	if (tw>hm)
+		tw=hm;
+	if (tw<=0)
+		return -1;
+	connection->writeBlock(((const char*)result.latin1())+wptr, tw);
+	wptr+=tw;
+	return tw;
+}
+
+void eXMLRPCResponse::haveData(void *data, int len)
+{
+	if (result)
+		return;
+	int err=0;
+
+	if (len)
+	{
+		if (!parser.Parse((char*)data, len, 1))
+		{
+			qDebug("xml parse error");
+			err=1;
+		}
+	} else
+		err=doCall();
+
+	if (err)
+	{
+		qDebug("schade: %d", err);
+		connection->code=400;
+		connection->code_descr="Bad request";
+		char buffer[10];
+		snprintf(buffer, 10, "%d", size=result.length());
+		wptr=0;
+		connection->local_header["Content-Type"]="text/html";
+		connection->local_header["Content-Length"]=buffer;
+		result.sprintf("XMLRPC error %d\n", err);
+		connection->localstate=eHTTPConnection::stateResponse;
+	}
+}
+
+void xmlrpc_initialize(eHTTPD *httpd)
+{
+	httpd->addResolver(new eHTTPXMLRPCResolver);
 }
 
 void xmlrpc_addMethod(QString methodName, int (*proc)(const QVector<eXMLRPCVariant>&, QList<eXMLRPCVariant>&))
@@ -426,5 +477,16 @@ int xmlrpc_checkArgs(QString args, const QVector<eXMLRPCVariant> &parm, QList<eX
 		xmlrpc_fault(res, -501, QString().sprintf("parameter type mismatch, expected %c as #%d", args[i].latin1(), i));
 		return 1;
 	}
+	return 0;
+}
+
+eHTTPXMLRPCResolver::eHTTPXMLRPCResolver()
+{
+}
+
+eHTTPDataSource *eHTTPXMLRPCResolver::getDataSource(QString request, QString path, eHTTPConnection *conn)
+{
+	if ((path=="/RPC2") && (request=="POST"))
+		return new eXMLRPCResponse(conn);
 	return 0;
 }

@@ -1,13 +1,15 @@
 #ifndef __xmlrpc_h_
 #define __xmlrpc_h_
 
-class eHTTPDynPathResolver;
 #include <asm/types.h>
 #include <qmap.h>
 #include <qstring.h>
 #include <qvector.h>
 #include <qdatetime.h>
 #include <qlist.h>
+
+#include "xmltree.h"
+#include "httpd.h"
 
 class eXMLRPCVariant
 {
@@ -43,9 +45,31 @@ public:
 	void toXML(QString &);
 };
 
-void xmlrpc_initialize(eHTTPDynPathResolver *dyn_resolver);
+class eXMLRPCResponse: public eHTTPDataSource
+{
+	XMLTreeParser parser;
+	QString result;
+	int size;
+	int wptr;
+	int doCall();
+public:
+	eXMLRPCResponse(eHTTPConnection *c);
+	~eXMLRPCResponse();
+	
+	int doWrite(int);
+	void haveData(void *data, int len);
+};
+
+void xmlrpc_initialize(eHTTPD *httpd);
 void xmlrpc_addMethod(QString methodName, int (*)(const QVector<eXMLRPCVariant>&, QList<eXMLRPCVariant>&));
 void xmlrpc_fault(QList<eXMLRPCVariant> &res, int faultCode, QString faultString);
 int xmlrpc_checkArgs(QString args, const QVector<eXMLRPCVariant>&, QList<eXMLRPCVariant> &res);
+
+class eHTTPXMLRPCResolver: public eHTTPPathResolver
+{
+public:
+	eHTTPXMLRPCResolver();
+	eHTTPDataSource *getDataSource(QString request, QString path, eHTTPConnection *conn);
+};
 
 #endif

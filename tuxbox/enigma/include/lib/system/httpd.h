@@ -5,66 +5,111 @@
 #include <qfile.h>
 #include <qlist.h>
 #include <qserversocket.h>
-#include <qmap.h>
+#include <map>
+#include <string>
+#include <qtimer.h>
 
 class eHTTPConnection;
 class eHTTPDataSource;
 class eHTTPD;
 
+class eHTTPGarbage: public QObject
+{
+	Q_OBJECT
+	QTimer garbage;
+	QList<eHTTPConnection> *conn;
+	static eHTTPGarbage *instance;
+public slots:
+	void doGarbage();
+public:
+	void destruct(eHTTPConnection *c);
+	eHTTPGarbage();
+	~eHTTPGarbage();
+	static eHTTPGarbage *getInstance() { return instance; }
+};
+
 class eHTTPPathResolver
 {
 public:
 	virtual ~eHTTPPathResolver() {}; 
-	virtual eHTTPDataSource *getDataSource(QString request, QString path, const eHTTPConnection *conn)=0;
+	virtual eHTTPDataSource *getDataSource(QString request, QString path, eHTTPConnection *conn)=0;
 };
 
 class eHTTPDataSource
 {
+protected:
+	eHTTPConnection *connection;
 public:
+	eHTTPDataSource(eHTTPConnection *c);
 	virtual ~eHTTPDataSource();
-	virtual int getCode()=0;
-	virtual int writeData(eHTTPConnection *conn)=0;
-	virtual int haveData(eHTTPConnection *conn)=0;
+	virtual void haveData(void *data, int len);
+	virtual int doWrite(int bytes)=0;	// number of written bytes, -1 for "no more"
 };
 
 class eHTTPError: public eHTTPDataSource
 {
 	int errcode;
 public:
-	eHTTPError(int errcode);
+	eHTTPError(eHTTPConnection *c, int errcode);
 	~eHTTPError() { } 
-	int getCode();
-	int writeData(eHTTPConnection *conn);
-	int haveData(eHTTPConnection *conn);
+	void haveData();
+	int doWrite(int bytes);
 };
 
 class eHTTPConnection: public QSocket
 {
 	Q_OBJECT
-	void doResponse();
-	void processResponse(QString request, QString path);
 	void doError(int error);
+	
+	int getLine(QString &line);
+	
+	int processLocalState();
+	int processRemoteState();
+	void writeString(const char *string);
+	
 	eHTTPDataSource *data;
 	eHTTPD *parent;
+	
+	int buffersize, dying;
 private slots:
 	void readData();
 	void gotError();
-public slots:
-	void deleteMyself();
+	void bytesWritten(int);
 public:
 	enum
 	{
-		stateRequest, stateOptions, stateData, stateDataIn
+		/*
+		
+		< GET / HTTP/1.0
+		< If-modified-since: bla
+		<
+		< Data
+		> 200 OK HTTP/1.0
+		> Content-Type: text/html
+		> 
+		> Data
+		*/
+	
+		stateWait, stateRequest, stateResponse, stateHeader, stateData, stateDone, stateClose
 	};
-	int httpstate;
-	__u8 *content;
-	int content_length, content_read;
+	int localstate, remotestate;
+	
 	eHTTPConnection(int socket, eHTTPD *parent);
 	~eHTTPConnection();
 	
+		// stateRequest
 	QString request, requestpath, httpversion;
 	int is09;
-	QMap<QString,QString> options;
+	
+		// stateResponse
+	
+	int code;
+	QString code_descr;
+	
+	std::map<std::string,std::string> remote_header, local_header;
+	
+		// stateData
+	int content_length, content_length_remaining;
 };
 
 class eHTTPD: public QServerSocket

@@ -5,17 +5,12 @@
 
 class eHTTPFile: public eHTTPDataSource
 {
-	int errcode;
-	QFile file;
-	int err;
-	int wroteheader;
-	QString mime;
+	int fd, size;
+	const char *mime;
 public:
-	eHTTPFile(QString file);
+	eHTTPFile(eHTTPConnection *c, int fd, const char *mime);
 	~eHTTPFile();
-	int getCode();
-	int writeData(eHTTPConnection *conn);
-	int haveData(eHTTPConnection *conn);
+	int doWrite(int);
 };
 
 class eHTTPFilePathResolver: public eHTTPPathResolver
@@ -31,7 +26,7 @@ class eHTTPFilePathResolver: public eHTTPPathResolver
 	QList<eHTTPFilePath> translate;
 public:
 	eHTTPFilePathResolver();
-	eHTTPDataSource *getDataSource(QString request, QString path, const eHTTPConnection *conn);
+	eHTTPDataSource *getDataSource(QString request, QString path, eHTTPConnection *conn);
 	void addTranslation(QString path, QString root);
 };
 

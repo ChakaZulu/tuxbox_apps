@@ -1,61 +1,40 @@
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
 #include "http_file.h"
 
-eHTTPFile::eHTTPFile(QString path)
+eHTTPFile::eHTTPFile(eHTTPConnection *c, int _fd, const char *mime): eHTTPDataSource(c)
 {
-	file.setName(path);
-	QString ext=path.mid(path.findRev('.'));
-	mime="text/unknown";
-	if ((ext==".html") || (ext==".htm"))
-		mime="text/html";
-	else if ((ext==".jpeg") || (ext==".jpg"))
-		mime="image/jpeg";
-	else if (ext==".gif")
-		mime="image/gif";
-	else if (ext==".css")
-		mime="text/css";
-	if (file.open(IO_ReadOnly))
-		err=200;
-	else
-		err=404;
-	wroteheader=0;
+	fd=_fd;
+	c->local_header["Content-Type"]=mime;
+	size=lseek(fd, 0, SEEK_END);
+	char asize[10];
+	snprintf(asize, 10, "%d", size);
+	lseek(fd, 0, SEEK_SET);
+	c->local_header["Content-Length"]=asize;
+	connection->code_descr="OK";
+	connection->code=200;
 }
 
-int eHTTPFile::getCode()
+int eHTTPFile::doWrite(int bytes)
 {
-	return err;
-}
-
-int eHTTPFile::writeData(eHTTPConnection *conn)
-{
-	if (err!=200)
-		qFatal("ich sagte doch, dass das nicht geht.");
-	if (!wroteheader)
-	{
-		if (!conn->is09)
-		{
-			QString header="Content-Type: "+mime+"\r\n";
-			header+="Content-Length: "+QString().setNum(file.size())+"\r\n";
-			header+="\r\n";
-			conn->writeBlock((const char*)header.latin1(), header.length());
-		}
-		wroteheader=1;
-	}
-	char buff[8192];
-	int len=file.readBlock(buff, 8192);
+	qDebug("doWrite(%d)", bytes);
+	char buff[bytes];
+	if (!size)
+		return -1;
+	int len=bytes;
+	if (len>size)
+		len=size;
+	len=read(fd, buff, len);
 	if (!len)
 		return -1;
-	conn->writeBlock(buff, len);
+	size-=connection->writeBlock(buff, len);
 	return len;
-}
-
-int eHTTPFile::haveData(eHTTPConnection *conn)
-{
-	return 0;
 }
 
 eHTTPFile::~eHTTPFile()
 {
-	file.close();
+	close(fd);
 }
 
 eHTTPFilePathResolver::eHTTPFilePathResolver()
@@ -63,10 +42,10 @@ eHTTPFilePathResolver::eHTTPFilePathResolver()
 	translate.setAutoDelete(true);
 }
 
-eHTTPDataSource *eHTTPFilePathResolver::getDataSource(QString request, QString path, const eHTTPConnection *conn)
+eHTTPDataSource *eHTTPFilePathResolver::getDataSource(QString request, QString path, eHTTPConnection *conn)
 {
 	if (path.find("../")!=-1)		// evil hax0r
-		return new eHTTPError(403);
+		return new eHTTPError(conn, 403);
 	if (path[0]!='/')		// prepend '/'
 		path.prepend('/');
 	if (path[path.length()-1]=='/')
@@ -79,14 +58,38 @@ eHTTPDataSource *eHTTPFilePathResolver::getDataSource(QString request, QString p
 			QString newpath=i.current()->path+path.mid(i.current()->root.length());
 			if (newpath.find('?'))
 				newpath=newpath.left(newpath.find('?'));
-/*			qDebug("translated %s to %s", (const char*)path, (const char*)newpath); */
-			data=new eHTTPFile(newpath);
-			if ((data->getCode()/100)!=2)
+			qDebug("translated %s to %s", (const char*)path, (const char*)newpath);
+
+			int fd=open(newpath, O_RDONLY);
+			if (fd==-1)
 			{
-				int code=data->getCode();
-				delete data;
-				data=new eHTTPError(code);
+				switch (errno)
+				{
+				case ENOENT:
+					data=new eHTTPError(conn, 404);
+					break;
+				case EACCES:
+					data=new eHTTPError(conn, 403);
+					break;
+				default:
+					data=new eHTTPError(conn, 401); // k.a.
+					break;
+				}
+				break;
 			}
+			
+			QString ext=path.mid(path.findRev('.'));
+			const char *mime="text/unknown";
+			if ((ext==".html") || (ext==".htm"))
+				mime="text/html";
+			else if ((ext==".jpeg") || (ext==".jpg"))
+				mime="image/jpeg";
+			else if (ext==".gif")
+				mime="image/gif";
+			else if (ext==".css")
+				mime="text/css";
+
+			data=new eHTTPFile(conn, fd, mime);
 			break;
 		}
 	}
