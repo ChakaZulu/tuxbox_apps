@@ -437,7 +437,6 @@ public:
 	void skipLoop();
 	enum { skipForward, skipReverse };
 	int isRecording() {return state & stateRecording;}
-	void setFakeRecordingState(int on) {if (on) state |= stateRecording; else state &= ~stateRecording;}
 	int dvrActive(void) {return dvrfunctions;}
 #endif
 	int isSleeping() {return state & stateSleeping;}
