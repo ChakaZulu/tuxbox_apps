@@ -53,6 +53,7 @@ class CTimerList : public CMenuTarget
 		int					fheight; // Fonthoehe Timerlist-Inhalt
 		int					theight; // Fonthoehe Timerlist-Titel
 		int               buttonHeight;
+		bool				visible;			
 
 		CTimerdClient *Timer;
 		CTimerd::TimerList timerlist;             // List of timers		

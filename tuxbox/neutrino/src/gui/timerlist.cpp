@@ -58,7 +58,7 @@
 CTimerList::CTimerList()
 {
 	frameBuffer = CFrameBuffer::getInstance();
-
+	visible = false;
 	selected = 0;
 	width = 505;
 	buttonHeight = 25;
@@ -140,7 +140,7 @@ int CTimerList::show()
 	{
 		if(update)
 		{
-//			hide();
+			hide();
 			updateEvents();
 			update=false;
 			if(timerlist.size()==0)
@@ -238,7 +238,11 @@ int CTimerList::show()
 
 void CTimerList::hide()
 {
-	frameBuffer->paintBackgroundBoxRel(x, y, width, height+ info_height+ 5);
+	if(visible)
+	{
+		frameBuffer->paintBackgroundBoxRel(x, y, width, height+ info_height+ 5);
+		visible = false;
+	}
 }
 
 void CTimerList::paintItem(int pos)
@@ -361,6 +365,7 @@ void CTimerList::paint()
 
 	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
 	paintFoot();
+	visible = true;
 }
 
 string CTimerList::convertTimerType2String(CTimerEvent::CTimerEventTypes type)
