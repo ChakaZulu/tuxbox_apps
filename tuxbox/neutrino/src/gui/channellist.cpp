@@ -1,7 +1,10 @@
 //
-// $Id: channellist.cpp,v 1.12 2001/09/03 03:34:04 tw-74 Exp $
+// $Id: channellist.cpp,v 1.13 2001/09/06 12:04:10 McClean Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.13  2001/09/06 12:04:10  McClean
+// fix neutrino-crash (no chanlist)
+//
 // Revision 1.12  2001/09/03 03:34:04  tw-74
 // cosmetic fixes, own "Mg" fontmetrics
 //
@@ -171,6 +174,11 @@ int CChannelList::getActiveChannelNumber()
 
 void CChannelList::exec(CFrameBuffer* frameBuffer, CRCInput* rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, SNeutrinoSettings* settings)
 {
+	if(chanlist.size()==0)
+	{
+		//evtl. anzeige dass keine kanalliste....
+		return;
+	}
 	paintHead(frameBuffer);
 	updateEvents();
 	paint(frameBuffer);
@@ -283,64 +291,76 @@ void CChannelList::zapTo(CRemoteControl *remoteControl, CInfoViewer *infoViewer,
 
 void CChannelList::numericZap(CFrameBuffer *frameBuffer, CRCInput *rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, int key)
 {
-  int ox=300, oy=200;
-  int sx=fonts->channellist->getRenderWidth("000")+14, sy=fonts->channellist->getHeight()+6;
-  char valstr[10];
-  int chn=key;
-  int pos=1;
+        if(chanlist.size()==0)
+        {
+                //evtl. anzeige dass keine kanalliste....
+                return;
+        }
+ 
+	int ox=300, oy=200;
+	int sx=fonts->channellist->getRenderWidth("000")+14, sy=fonts->channellist->getHeight()+6;
+	char valstr[10];
+	int chn=key;
+	int pos=1;
 
-  while(1)
-  {
-    sprintf((char*) &valstr, "%d",chn);
-    while(strlen(valstr)<3)
-    {
-      strcat(valstr,"-");
-    }
-    frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR);
-    fonts->channellist->RenderString(ox+7, oy+sy-3, sx, valstr, COL_INFOBAR);
-	if(!showInfo(infoViewer, chn-1))
-	{	//channelnumber out of bounds
-		infoViewer->killTitle(); //warum tut das net?
-		usleep(100000);		
-		frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_BACKGROUND);
-		return;
-	}
+	while(1)
+	{
+		sprintf((char*) &valstr, "%d",chn);
+		while(strlen(valstr)<3)
+		{
+ 			strcat(valstr,"-");
+		}
+		frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR);
+		fonts->channellist->RenderString(ox+7, oy+sy-3, sx, valstr, COL_INFOBAR);
+		if(!showInfo(infoViewer, chn-1))
+		{	//channelnumber out of bounds
+			infoViewer->killTitle(); //warum tut das net?
+			usleep(100000);		
+			frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_BACKGROUND);
+			return;
+		}
 	
-    if ((key=rcInput->getKey(30))==-1)
-      break;
+		if ((key=rcInput->getKey(30))==-1)
+		break;
 
-    if ((key>=0) && (key<=9))
-    { //numeric
-      chn=chn*10+key;
-      pos++;
-      if(pos==3)
-      {
-        break;
-      }
-    }
-    else if (key==CRCInput::RC_ok)
-    {
-      break;
-    }
-  }
-  //channel selected - show+go
-  frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR);
-  sprintf((char*) &valstr, "%d",chn);
-  while(strlen(valstr)<3)
-  {
-    strcat(valstr,"-");
-  }
-  fonts->channellist->RenderString(ox+7, oy+sy-3, sx, valstr, COL_INFOBAR);
-  usleep(100000);
-  frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_BACKGROUND);
-  chn--;
-  if (chn<0)
-    chn=0;
-  zapTo( remoteControl, infoViewer, chn);
+		if ((key>=0) && (key<=9))
+		{ //numeric
+			chn=chn*10+key;
+			pos++;
+			if(pos==3)
+			{
+				break;
+			}
+		}
+		else if (key==CRCInput::RC_ok)
+		{
+			break;
+		}
+	}
+	//channel selected - show+go
+	frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR);
+	sprintf((char*) &valstr, "%d",chn);
+	while(strlen(valstr)<3)
+	{
+		strcat(valstr,"-");
+	}
+	fonts->channellist->RenderString(ox+7, oy+sy-3, sx, valstr, COL_INFOBAR);
+	usleep(100000);
+	frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_BACKGROUND);
+	chn--;
+	if (chn<0)
+		chn=0;
+	zapTo( remoteControl, infoViewer, chn);
 }
 
 void CChannelList::quickZap(CFrameBuffer* frameBuffer, CRCInput* rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, SNeutrinoSettings* settings, int key)
 {
+        if(chanlist.size()==0)
+        {
+                //evtl. anzeige dass keine kanalliste....
+                return;
+        }
+ 
 	printf("quickzap start\n");
 	while(1)
 	{
