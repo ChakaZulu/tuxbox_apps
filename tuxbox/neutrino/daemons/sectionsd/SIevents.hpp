@@ -1,7 +1,7 @@
 #ifndef SIEVENTS_HPP
 #define SIEVENTS_HPP
 //
-// $Id: SIevents.hpp,v 1.13 2001/07/23 00:21:23 fnbrd Exp $
+// $Id: SIevents.hpp,v 1.14 2001/07/25 11:39:17 fnbrd Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -24,6 +24,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.hpp,v $
+// Revision 1.14  2001/07/25 11:39:17  fnbrd
+// Added unique keys to Events and Services
+//
 // Revision 1.13  2001/07/23 00:21:23  fnbrd
 // removed using namespace std.
 //
@@ -243,7 +246,7 @@ class SIevent {
     // Std-Copy
     SIevent(const SIevent &);
     SIevent(void) {
-      serviceID=eventID=0;
+      serviceID=eventID=originalNetworkID=0;
 //      dauer=0;
 //      startzeit=0;
     }
@@ -258,13 +261,19 @@ class SIevent {
 //    time_t startzeit; // lokale Zeit, 0 -> time shifted (cinedoms)
 //    unsigned dauer; // in Sekunden, 0 -> time shifted (cinedoms)
     unsigned short serviceID;
+    unsigned short originalNetworkID; // braucht man, wenn man events mehrerer Networks in einer Menge speichert, innerhalb einer section ist das unnoetig
+    static unsigned long long makeUniqueKey(unsigned short onID, unsigned short sID, unsigned short eID) {
+      return (((unsigned long long)onID)<<32) + (((unsigned)sID)<<16) + eID;
+    }
+    unsigned long long uniqueKey(void) const {
+      return makeUniqueKey(originalNetworkID, serviceID, eventID);
+    }
     SIcomponents components;
     SIparentalRatings ratings;
     SItimes times;
     // Der Operator zum sortieren
     bool operator < (const SIevent& e) const {
-      // Erst nach Service-ID, dann nach Event-ID sortieren
-      return serviceID!=e.serviceID ? serviceID < e.serviceID : eventID < e.eventID;
+      return uniqueKey()<e.uniqueKey();
     }
     int saveXML(FILE *file) const { // saves the event
       return saveXML0(file) || saveXML2(file);
@@ -301,7 +310,7 @@ struct saveSIeventXMLwithServiceName : public std::unary_function<SIevent, void>
   const SIservices *s;
   saveSIeventXMLwithServiceName(FILE *fi, const SIservices &svs) {f=fi; s=&svs;}
   void operator() (const SIevent &e) {
-    SIservices::iterator k=s->find(SIservice(e.serviceID));
+    SIservices::iterator k=s->find(SIservice(e.serviceID, e.originalNetworkID));
     if(k!=s->end()) {
       if(k->serviceName.length())
       e.saveXML(f, k->serviceName.c_str());
@@ -316,7 +325,7 @@ struct printSIeventWithService : public std::unary_function<SIevent, void>
 {
   printSIeventWithService(const SIservices &svs) { s=&svs;}
   void operator() (const SIevent &e) {
-    SIservices::iterator k=s->find(SIservice(e.serviceID));
+    SIservices::iterator k=s->find(SIservice(e.serviceID, e.originalNetworkID));
     if(k!=s->end()) {
       char servicename[50];
       strncpy(servicename, k->serviceName.c_str(), sizeof(servicename)-1);
@@ -325,8 +334,8 @@ struct printSIeventWithService : public std::unary_function<SIevent, void>
       printf("Service-Name: %s\n", servicename);
 //      printf("Provider-Name: %s\n", k->providerName.c_str());
     }
-//    e.dump();
-    e.dumpSmall();
+    e.dump();
+//    e.dumpSmall();
     printf("\n");
   }
   const SIservices *s;

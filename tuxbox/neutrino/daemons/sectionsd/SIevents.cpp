@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.10 2001/07/16 15:19:32 fnbrd Exp $
+// $Id: SIevents.cpp,v 1.11 2001/07/25 11:39:17 fnbrd Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.cpp,v $
+// Revision 1.11  2001/07/25 11:39:17  fnbrd
+// Added unique keys to Events and Services
+//
 // Revision 1.10  2001/07/16 15:19:32  fnbrd
 // removeOldEvents beschleunigt.
 //
@@ -81,7 +84,7 @@ SIevent::SIevent(const struct eit_event *e)
       (((e->duration)>>4)&0x0f)*10+((e->duration)&0x0f);
   if(startzeit && dauer)
     times.insert(SItime(startzeit, dauer));
-  serviceID=0;
+  serviceID=originalNetworkID=0;
 }
 
 // Std-Copy
@@ -94,6 +97,7 @@ SIevent::SIevent(const SIevent &e)
 //  dauer=e.dauer;
   times=e.times;
   serviceID=e.serviceID;
+  originalNetworkID=e.originalNetworkID;
   itemDescription=e.itemDescription;
   item=e.item;
   extendedText=e.extendedText;
@@ -173,6 +177,9 @@ int SIevent::saveXML2(FILE *file) const
 
 void SIevent::dump(void) const
 {
+  printf("Unique key: %llx\n", uniqueKey());
+  if(originalNetworkID)
+    printf("Original-Network-ID: %hu\n", originalNetworkID);
   if(serviceID)
     printf("Service-ID: %hu\n", serviceID);
   printf("Event-ID: %hu\n", eventID);
@@ -430,7 +437,7 @@ void SIevents::mergeAndRemoveTimeShiftedEvents(const SIservices &services)
   for(;;) {
     int erased=0;
     for(iterator e=begin(); e!=end(); e++) {
-      SIservices::iterator s=services.find(e->serviceID);
+      SIservices::iterator s=services.find(SIservice(e->serviceID, e->originalNetworkID));
       if(s!=services.end())
         if(s->serviceTyp==0) {
 	  erase(e); // -> e wird ungueltig

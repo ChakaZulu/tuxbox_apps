@@ -1,7 +1,7 @@
 #ifndef SISERVICES_HPP
 #define SISERVICES_HPP
 //
-// $Id: SIservices.hpp,v 1.5 2001/07/23 00:21:23 fnbrd Exp $
+// $Id: SIservices.hpp,v 1.6 2001/07/25 11:39:17 fnbrd Exp $
 //
 // classes SIservices and SIservices (dbox-II-project)
 //
@@ -24,6 +24,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIservices.hpp,v $
+// Revision 1.6  2001/07/25 11:39:17  fnbrd
+// Added unique keys to Events and Services
+//
 // Revision 1.5  2001/07/23 00:21:23  fnbrd
 // removed using namespace std.
 //
@@ -72,12 +75,15 @@ class SInvodReference
     }
     bool operator < (const SInvodReference& ref) const {
       // nach Service-ID sortieren
-      return serviceID < ref.serviceID;
+      return uniqueKey() < ref.uniqueKey();
     }
     void dump(void) const {
       printf("NVOD Ref. Service-ID: %hu\n", serviceID);
       printf("NVOD Ref. Transport-Stream-ID: %hu\n", transportStreamID);
       printf("NVOD Ref. Original-Network-ID: %hu\n", originalNetworkID);
+    }
+    unsigned uniqueKey(void) const {
+      return (((unsigned)originalNetworkID)<<16) + serviceID;
     }
     unsigned short serviceID;
     unsigned short transportStreamID;
@@ -96,6 +102,7 @@ class SIservice {
   public:
     SIservice(const struct sdt_service *s) {
       serviceID=s->service_id;
+      originalNetworkID=0;
       serviceTyp=0;
       flags.EIT_schedule_flag=s->EIT_schedule_flag;
       flags.EIT_present_following_flag=s->EIT_present_following_flag;
@@ -103,14 +110,16 @@ class SIservice {
       flags.free_CA_mode=s->free_CA_mode;
     }
     // Um einen service zum Suchen zu erstellen
-    SIservice(unsigned short sid) {
+    SIservice(unsigned short sid, unsigned short onid) {
       serviceID=sid;
+      originalNetworkID=onid;
       serviceTyp=0;
       memset(&flags, 0, sizeof(flags));
     }
     // Std-Copy
     SIservice(const SIservice &s) {
       serviceID=s.serviceID;
+      originalNetworkID=s.originalNetworkID;
       serviceTyp=s.serviceTyp;
       providerName=s.providerName;
       serviceName=s.serviceName;
@@ -118,6 +127,7 @@ class SIservice {
       nvods=s.nvods;
     }
     unsigned short serviceID;
+    unsigned short originalNetworkID; // Ist innerhalb einer section unnoetig
     unsigned char serviceTyp;
     SInvodReferences nvods;
     std::string serviceName; // Name aus dem Service-Descriptor
@@ -128,10 +138,16 @@ class SIservice {
     int freeCAmode(void) {return (int)flags.free_CA_mode;}
     // Der Operator zum sortieren
     bool operator < (const SIservice& s) const {
-      // nach Service-ID sortieren
-      return serviceID < s.serviceID;
+      return uniqueKey() < s.uniqueKey();
+    }
+    static unsigned makeUniqueKey(unsigned short onID, unsigned short sID) {
+      return (((unsigned)onID)<<16) + sID;
+    }
+    unsigned uniqueKey(void) const {
+      return makeUniqueKey(originalNetworkID, serviceID);
     }
     void dump(void) const {
+      printf("Original-Network-ID: %hu\n", originalNetworkID);
       printf("Service-ID: %hu\n", serviceID);
       printf("Service-Typ: %hhu\n", serviceTyp);
       if(providerName.length())

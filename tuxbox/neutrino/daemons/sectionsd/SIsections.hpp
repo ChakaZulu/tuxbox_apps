@@ -1,7 +1,7 @@
 #ifndef SISECTIONS_HPP
 #define SISECTIONS_HPP
 //
-// $Id: SIsections.hpp,v 1.8 2001/07/23 00:21:23 fnbrd Exp $
+// $Id: SIsections.hpp,v 1.9 2001/07/25 11:39:17 fnbrd Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -24,6 +24,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.hpp,v $
+// Revision 1.9  2001/07/25 11:39:17  fnbrd
+// Added unique keys to Events and Services
+//
 // Revision 1.8  2001/07/23 00:21:23  fnbrd
 // removed using namespace std.
 //
@@ -349,8 +352,11 @@ class SIsectionEIT : public SIsection
       parsed=s.parsed;
     }
 
-    unsigned serviceID(void) const {
-      return buffer ? ((struct SI_section_EIT_header *)buffer)->service_id : (unsigned)-1;
+    unsigned short serviceID(void) const {
+      return buffer ? ((struct SI_section_EIT_header *)buffer)->service_id : (unsigned short)-1;
+    }
+    unsigned short originalNetworkID(void) const {
+      return buffer ? ((struct SI_section_EIT_header *)buffer)->original_network_id : (unsigned short)-1;
     }
     struct SI_section_EIT_header const *header(void) const {
       return buffer ? (struct SI_section_EIT_header *)buffer : (struct SI_section_EIT_header *)0;
@@ -446,6 +452,9 @@ class SIsectionSDT : public SIsection
     }
     struct SI_section_SDT_header const *header(void) const {
       return buffer ? (struct SI_section_SDT_header *)buffer : (struct SI_section_SDT_header *)0;
+    }
+    unsigned short originalNetworkID(void) const {
+      return buffer ? ((struct SI_section_SDT_header *)buffer)->original_network_id : (unsigned short)-1;
     }
     static void dump(const struct SI_section_SDT_header *header) {
       SIsection::dump1((const struct SI_section_header *)header);

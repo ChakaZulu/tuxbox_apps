@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.15 2001/07/23 00:21:23 fnbrd Exp $
+// $Id: SIsections.cpp,v 1.16 2001/07/25 11:39:17 fnbrd Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.cpp,v $
+// Revision 1.16  2001/07/25 11:39:17  fnbrd
+// Added unique keys to Events and Services
+//
 // Revision 1.15  2001/07/23 00:21:23  fnbrd
 // removed using namespace std.
 //
@@ -232,6 +235,7 @@ void SIsectionEIT::parse(void)
     struct eit_event *evt=(struct eit_event *)actPos;
     SIevent e(evt);
     e.serviceID=serviceID();
+    e.originalNetworkID=originalNetworkID();
 //    printf("actpos: %p buf+bl: %p evtid: %hu desclen: %hu\n", actPos, buffer+bufferLength, evt->event_id, evt->descriptors_loop_length);
     parseDescriptors(((const char *)evt)+sizeof(struct eit_event), evt->descriptors_loop_length, e);
     evts.insert(e);
@@ -307,6 +311,7 @@ void SIsectionSDT::parse(void)
   while(actPos<=buffer+bufferLength-sizeof(struct sdt_service)) {
     struct sdt_service *sv=(struct sdt_service *)actPos;
     SIservice s(sv);
+    s.originalNetworkID=originalNetworkID();
 //    printf("actpos: %p buf+bl: %p sid: %hu desclen: %hu\n", actPos, buffer+bufferLength, sv->service_id, sv->descriptors_loop_length);
     parseDescriptors(((const char *)sv)+sizeof(struct sdt_service), sv->descriptors_loop_length, s);
     svs.insert(s);
