@@ -7,8 +7,8 @@
 eString& eString::sprintf(char *fmt, ...)
 {
 // Implements the normal sprintf method, to use format strings with eString
-// The max length of the result string is 2048 char.
-	static char buf[1024];
+// The max length of the result string is 1024 char.
+	char buf[1024];
 	va_list ap;
 	va_start(ap, fmt);
 	std::vsnprintf(buf, 1024, fmt, ap);
