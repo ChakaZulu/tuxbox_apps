@@ -52,7 +52,7 @@ public:
 	void setActiveColor(gColor active);
 	enum
 	{
-		dirPageDown, dirPageUp, dirDown, dirUp
+		dirPageDown, dirPageUp, dirDown, dirUp, dirFirst
 	};
 	int moveSelection(int dir);
 	
@@ -436,7 +436,13 @@ inline int eListBox<T>::moveSelection(int dir)
 						if ( bottom == childs.end() )
 							break;
 				}
-		break;
+			break;
+		case dirFirst:
+			top = current = bottom = childs.begin(); 	// goto first;
+			for (int i = 0; i < entries; i++, bottom++)
+				if ( bottom == childs.end() )
+					break;
+			break;
 		default:
 			return 0;
 	}
