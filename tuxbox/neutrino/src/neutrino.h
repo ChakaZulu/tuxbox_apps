@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.29 2001/11/15 11:42:41 McClean Exp $
+//  $Id: neutrino.h,v 1.30 2001/11/19 22:53:33 Simplex Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -12,7 +12,7 @@
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-	
+
 
 	License: GPL
 
@@ -25,12 +25,16 @@
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.30  2001/11/19 22:53:33  Simplex
+//  Neutrino can handle bouquets now.
+//  There are surely some bugs and todo's but it works :)
+//
 //  Revision 1.29  2001/11/15 11:42:41  McClean
 //  gpl-headers added
 //
@@ -105,6 +109,7 @@
 #include "widget/color.h"
 #include "widget/menue.h"
 #include "widget/channellist.h"
+#include "widget/bouquetlist.h"
 #include "widget/colorchooser.h"
 #include "widget/keychooser.h"
 #include "widget/stringinput.h"
@@ -152,7 +157,7 @@ class CNeutrinoApp : public CMenuTarget
 	bool				nRun;
 	int				    mode;
 	bool				mute;
-		
+
     channel_msg         firstchannel;
 	st_rmsg				sendmessage;
 
@@ -165,6 +170,7 @@ class CNeutrinoApp : public CMenuTarget
     CNVODChangeExec         *NVODChanger;
 
 	CChannelList		*channelList;
+	CBouquetList		*bouquetList;
 
 	void PluginDemo(); //demo only --- remove!
 

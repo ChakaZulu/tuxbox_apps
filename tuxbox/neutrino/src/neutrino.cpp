@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.76 2001/11/05 16:04:25 field Exp $
+        $Id: neutrino.cpp,v 1.77 2001/11/19 22:53:33 Simplex Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -13,7 +13,7 @@
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-	
+
 
 	License: GPL
 
@@ -26,12 +26,16 @@
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.77  2001/11/19 22:53:33  Simplex
+  Neutrino can handle bouquets now.
+  There are surely some bugs and todo's but it works :)
+
   Revision 1.76  2001/11/05 16:04:25  field
   nvods/subchannels ver"c++"ed
 
@@ -236,7 +240,6 @@
 
 
 */
-
 #include "neutrino.h"
 #include "include/debug.h"
 
@@ -274,8 +277,6 @@ static void initGlobals(void)
 // Ende globale Variablen
 
 
-
-
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 +                                                                                     +
 +          CNeutrinoApp - Constructor, initialize g_fontRenderer                        +
@@ -293,6 +294,7 @@ CNeutrinoApp::CNeutrinoApp()
 
 	mode = 0;
 	channelList = NULL;
+	bouquetList = NULL;
 }
 
 /*-------------------------------------------------------------------------------------
@@ -499,7 +501,7 @@ bool CNeutrinoApp::loadSetup()
 {
 	int fd;
 	fd = open(settingsFile.c_str(), O_RDONLY );
-	
+
 	if (fd==-1)
 	{
 		printf("error while loading settings: %s\n", settingsFile.c_str() );
@@ -527,7 +529,7 @@ void CNeutrinoApp::saveSetup()
 {
 	int fd;
 	fd = open(settingsFile.c_str(), O_WRONLY | O_CREAT );
-	
+
 	if (fd==-1)
 	{
 		printf("error while saving settings: %s\n", settingsFile.c_str() );
@@ -549,7 +551,7 @@ void CNeutrinoApp::firstChannel()
 	SAI servaddr;
 	char rip[]="127.0.0.1";
 	char *return_buf;
-	
+
 	sendmessage.version=1;
 	sendmessage.cmd = 'a';
 
@@ -573,14 +575,14 @@ void CNeutrinoApp::firstChannel()
 	write(sock_fd, &sendmessage, sizeof(sendmessage));
 	return_buf = (char*) malloc(4);
 	memset(return_buf, 0, 4);
-	
+
 	if (recv(sock_fd, return_buf, 3,0) <= 0 ) {
 		perror("recv(zapit)");
 		exit(-1);
 	}
-	
+
 //	printf("That was returned: %s\n", return_buf);
-	
+
 	if (strncmp(return_buf,"00a",3))
 	{
 		printf("Wrong Command was sent for firstChannel(). Exiting.\n");
@@ -588,8 +590,8 @@ void CNeutrinoApp::firstChannel()
 		return;
 	}
 	free(return_buf);
-	
-	
+
+
 	memset(&firstchannel, 0, sizeof(firstchannel));
 	if (recv(sock_fd, &firstchannel, sizeof(firstchannel),0) <= 0 ) {
 		perror("Nothing could be received\n");
@@ -605,7 +607,7 @@ void CNeutrinoApp::firstChannel()
 **************************************************************************************/
 void CNeutrinoApp::channelsInit()
 {
-	if (zapit) 
+	if (zapit)
 	{
  		int sock_fd;
 		SAI servaddr;
@@ -617,7 +619,7 @@ void CNeutrinoApp::channelsInit()
         //deleting old channelList for mode-switching.
     	delete channelList;
     	channelList = new CChannelList(1, "channellist.head");
-		
+
 		sendmessage.version=1;
         // neu! war 5, mit neuem zapit holen wir uns auch die onid_tsid
 		sendmessage.cmd = 'c';
@@ -635,7 +637,7 @@ void CNeutrinoApp::channelsInit()
 
 		if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
 		{
- 	 		perror("neutrino: connect(zapit)");
+			perror("neutrino: connect(zapit)");
 			exit(-1);
 		}
 
@@ -646,9 +648,9 @@ void CNeutrinoApp::channelsInit()
 			perror("recv(zapit)");
 			exit(-1);
 		}
-	
+
 //		printf("That was returned: %s\n", return_buf);
-	
+
 		if ( strcmp(return_buf, "00c")!= 0 )
 		{
             free(return_buf);
@@ -664,12 +666,123 @@ void CNeutrinoApp::channelsInit()
 			channelList->addChannel( zapitchannel.chan_nr, zapitchannel.chan_nr, channel_name, zapitchannel.onid_tsid );
 		}
 		printf("All channels received\n");
-			
 		close(sock_fd);
+
+		bouquet_msg   zapitbouquet;
+		//deleting old bouquetList for mode-switching.
+		delete bouquetList;
+		bouquetList = new CBouquetList(1, "bouquetlist.head");
+		bouquetList->orgChannelList = channelList;
+
+		sendmessage.version=1;
+		sendmessage.cmd = 'q';
+
+		sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+		memset(&servaddr,0,sizeof(servaddr));
+		servaddr.sin_family=AF_INET;
+		servaddr.sin_port=htons(1505);
+		inet_pton(AF_INET, rip, &servaddr.sin_addr);
+
+		#ifdef HAS_SIN_LEN
+ 			servaddr.sin_len = sizeof(servaddr); // needed ???
+		#endif
+
+
+		if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
+		{
+			perror("neutrino: connect(zapit)");
+			exit(-1);
+		}
+
+		write(sock_fd, &sendmessage, sizeof(sendmessage));
+		return_buf = (char*) malloc(4);
+		memset(return_buf, 0, 4);
+		if (recv(sock_fd, return_buf, 3,0) <= 0 ) {
+			perror("recv(zapit)");
+			exit(-1);
+		}
+		if ( strcmp(return_buf, "00q")!= 0 )
+		{
+            free(return_buf);
+			printf("Wrong Command was send for channelsInit(). Exiting.\n");
+			return;
+		}
+        free(return_buf);
+
+		printf("receiving bouquets...\n");
+
+		uint nBouquetCount = 0;
+		recv(sock_fd, &nBouquetCount, sizeof(&nBouquetCount),0);
+
+		memset(&zapitbouquet,0,sizeof(zapitbouquet));
+		for (uint i=0; i<nBouquetCount; i++)
+		{
+			recv(sock_fd, &zapitbouquet, sizeof(zapitbouquet),0);
+			CBouquet* bouquet;
+			char bouquet_name[30];
+
+			strncpy(bouquet_name, zapitbouquet.name,30);
+			bouquet = bouquetList->addBouquet( zapitbouquet.name );
+//			printf("%s\n", zapitbouquet.name);
+		}
+		printf("All bouquets received (%d). Receiving channels... \n", nBouquetCount);
+		close(sock_fd);
+
+		for ( uint i=0; i< bouquetList->Bouquets.size(); i++ )
+		{
+			sendmessage.version=1;
+			sendmessage.cmd = 'r';
+			sendmessage.param = i+1;
+
+			sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+			memset(&servaddr,0,sizeof(servaddr));
+			servaddr.sin_family=AF_INET;
+			servaddr.sin_port=htons(1505);
+			inet_pton(AF_INET, rip, &servaddr.sin_addr);
+
+			#ifdef HAS_SIN_LEN
+				servaddr.sin_len = sizeof(servaddr); // needed ???
+			#endif
+
+
+			if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
+			{
+				perror("neutrino: connect(zapit)");
+				exit(-1);
+			}
+
+			write(sock_fd, &sendmessage, sizeof(sendmessage));
+			return_buf = (char*) malloc(4);
+			memset(return_buf, 0, 4);
+			if (recv(sock_fd, return_buf, 3,0) <= 0 )
+			{
+				perror("recv(zapit)");
+				exit(-1);
+			}
+			if ( strcmp(return_buf, "00r")!= 0 )
+			{
+				free(return_buf);
+				printf("Wrong Command was send for channelsInit(). Exiting.\n");
+				return;
+			}
+			free(return_buf);
+
+			memset(&zapitchannel,0,sizeof(zapitchannel));
+			printf("receiving channels for %s\n", bouquetList->Bouquets[i]->name.c_str());
+			while (recv(sock_fd, &zapitchannel, sizeof(zapitchannel),0)>0)
+			{
+				char channel_name[30];
+				strncpy(channel_name, zapitchannel.name,30);
+				bouquetList->Bouquets[i]->channelList->addChannel(zapitchannel.chan_nr, zapitchannel.chan_nr, channel_name, zapitchannel.onid_tsid);
+			}
+			close(sock_fd);
+		}
+		printf("All bouquets-channels received\n");
+
 	}
-	else 
+	else
 	{
- 	
+
 		char buffer[128];
 		FILE *fp=popen("pzap --dump", "r");
 
@@ -741,7 +854,7 @@ void CNeutrinoApp::SetupFonts()
     g_Fonts->menu_info =    g_fontRenderer->getFont("Arial", "Regular", 16);
 
     g_Fonts->epg_title =    g_fontRenderer->getFont("Arial", "Regular", 30);
-	
+
 	g_Fonts->epg_info1=g_fontRenderer->getFont("Arial", "Italic", 17); // info1 must be same size as info2, but italic
 	g_Fonts->epg_info2=g_fontRenderer->getFont("Arial", "Regular", 17);
 
@@ -758,7 +871,7 @@ void CNeutrinoApp::SetupFonts()
 	g_Fonts->channellist=g_fontRenderer->getFont("Arial", "Regular", 20);
 	g_Fonts->channellist_number=g_fontRenderer->getFont("Arial", "Regular", 14);
 	g_Fonts->channel_num_zap=g_fontRenderer->getFont("Arial", "Regular", 40);
-	
+
 	g_Fonts->infobar_number=g_fontRenderer->getFont("Arial", "Regular", 50);
 	g_Fonts->infobar_channame=g_fontRenderer->getFont("Arial", "Regular", 30);
 	g_Fonts->infobar_info=g_fontRenderer->getFont("Arial", "Regular", 20);
@@ -840,14 +953,15 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 		oj->addOption(0, "options.off");
 		oj->addOption(1, "options.on");
 	miscSettings.addItem( oj );
-	
+
 	oj = new CMenuOptionChooser("miscsettings.boxtype", &g_settings.box_Type, true);
 		oj->addOption(1, "miscsettings.boxtype_nokia");
 		oj->addOption(2, "miscsettings.boxtype_sagem");
 		oj->addOption(3, "miscsettings.boxtype_philips");
 	miscSettings.addItem( oj );
-	
+
 	miscSettings.addItem( new CMenuForwarder("miscsettings.ucodecheck", true, "", g_UcodeCheck ) );
+//	miscSettings.addItem( new CMenuForwarder("miscsettings.reload_services", true, "", g_ReloadServices ) );
 }
 
 
@@ -860,7 +974,7 @@ void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
     languageSetupNotifier = new CLanguageSetupNotifier;
 	CMenuOptionStringChooser* oj = new CMenuOptionStringChooser("languagesetup.select", (char*)&g_settings.language, true, languageSetupNotifier, false);
 		//search available languages....
-		
+
 		struct dirent **namelist;
 		int n;
 //		printf("scanning locale dir now....(perhaps)\n");
@@ -940,7 +1054,7 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 		oj->addOption(0, "options.off");
 		oj->addOption(1, "options.on");
 
-	networkSettings.addItem( oj );	
+	networkSettings.addItem( oj );
 
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
@@ -1267,11 +1381,11 @@ void CNeutrinoApp::InitZapper()
 
 	if (!zapit)
 		channelsInit();
-		
+
 	g_InfoViewer->start();
 	g_EpgData->start();
-		
-	if (zapit) 
+
+	if (zapit)
 	{
 		firstChannel();
 		if (firstchannel.mode == 't')
@@ -1290,6 +1404,7 @@ void CNeutrinoApp::InitZapper()
 		channelList->zapTo(0);
         mode = mode_tv;
     }
+	bouquetList->adjustToChannel( channelList->getActiveChannelNumber());
 }
 
 void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
@@ -1315,7 +1430,56 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 		{
 			if (key==CRCInput::RC_ok)
 			{	//channellist
-				channelList->exec();
+//				channelList->exec();
+//				BouquetSwitchMode bouqMode = bsmBouquets;
+				BouquetSwitchMode bouqMode = bsmChannels;
+//				BouquetSwitchMode bouqMode = bsmAllChannels;
+//				TODO: get Value from options, whether to show bouquetlist
+//				or channellist
+
+				if (bouquetList->Bouquets.size() == 0 )
+				{
+					printf("bouquets are empty\n");
+					bouqMode = bsmAllChannels;
+                }
+				if (bouqMode == bsmBouquets)
+				{
+					bouquetList->exec(true);
+				}
+				else if (bouqMode == bsmChannels)
+				{
+					int nNewChannel = bouquetList->Bouquets[bouquetList->getActiveBouquetNumber()]->channelList->show();
+					if (nNewChannel>-1)
+					{
+						channelList->zapTo(bouquetList->Bouquets[bouquetList->getActiveBouquetNumber()]->channelList->getKey(nNewChannel)-1);
+					}
+				}
+				else
+				{
+					printf("using all channels\n");
+					channelList->exec();
+				}
+			}
+			else if (key==CRCInput::RC_right)
+			{
+				if (bouquetList->Bouquets.size() > 0)
+				{
+					int nNext = (bouquetList->getActiveBouquetNumber()+1) % bouquetList->Bouquets.size();
+					bouquetList->activateBouquet(nNext);
+					if ( bouquetList->showChannelList())
+						bouquetList->adjustToChannel( channelList->getActiveChannelNumber());
+
+				}
+			}
+			else if (key==CRCInput::RC_left)
+			{
+				if (bouquetList->Bouquets.size() > 0)
+				{
+					int nNext = (bouquetList->getActiveBouquetNumber()+bouquetList->Bouquets.size()-1) % bouquetList->Bouquets.size();
+					bouquetList->activateBouquet(nNext);
+					if ( bouquetList->showChannelList())
+						bouquetList->adjustToChannel( channelList->getActiveChannelNumber());
+				}
 			}
 			else if (key==CRCInput::RC_red)
 			{	// eventlist
@@ -1338,6 +1502,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			{
 				//quickzap
 				channelList->quickZap( key );
+				bouquetList->adjustToChannel( channelList->getActiveChannelNumber());
 			}
 			else if (key==CRCInput::RC_help)
 			{	//epg
@@ -1359,6 +1524,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			else if ((key>=0) && (key<=9))
 			{ //numeric zap
 				channelList->numericZap( key );
+				bouquetList->adjustToChannel( channelList->getActiveChannelNumber());
 			}
 			else if (key==CRCInput::RC_spkr)
 			{	//mute
@@ -1403,7 +1569,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 		printf("using defaults...\n\n");
 	}
 
-    g_Fonts = new FontsDef;	
+    g_Fonts = new FontsDef;
 	SetupFonts();
 
 	ClearFrameBuffer();
@@ -1465,7 +1631,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	//network Setup
 	InitNetworkSettings(networkSettings);
-	
+
 	//color Setup
 	InitColorSettings(colorSettings);
 
@@ -1545,7 +1711,7 @@ void CNeutrinoApp::setVolume(int key)
 				volume -= 5;
 			}
 		}
-        else 
+        else
         {
             if (key!=CRCInput::RC_ok)
               g_RCInput->pushbackKey(key);
@@ -1606,8 +1772,9 @@ void CNeutrinoApp::radioMode()
 		firstChannel();
 		g_RemoteControl->radioMode();
 		channelsInit();
+//		bouquetList->activateBouquet(0,false);
 		channelList->zapTo( 0 );
-	} 
+	}
 }
 
 
@@ -1663,7 +1830,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.76 2001/11/05 16:04:25 field Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.77 2001/11/19 22:53:33 Simplex Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;
