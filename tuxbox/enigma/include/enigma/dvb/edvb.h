@@ -216,6 +216,14 @@ public:
 	PMT *getPMT();
 	EIT *getEIT();
 	
+	/**
+	 * \brief Returns a pointer to the currently tuned in transponder.
+	 */
+	eTransponder *getCurrentTransponder()
+	{
+		return currentTransponder;
+	}
+	
 	void sortInChannels();
 
 	void saveServices();

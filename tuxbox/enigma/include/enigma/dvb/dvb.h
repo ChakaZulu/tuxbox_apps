@@ -23,8 +23,9 @@ struct tsref: public std::pair<int,int>
 	{
 		if (first < c.first)
 			return 1;
-		if (second < c.second)
-			return 1;
+		else if (first == c.first)
+			if (second < c.second)
+				return 1;
 		return 0;
 	}
 	tsref(int a, int b): std::pair<int,int>(a,b)
@@ -38,8 +39,9 @@ struct sref: public std::pair<int,int>
 	{
 		if (first < c.first)
 			return 1;
-		if (second < c.second)
-			return 1;
+		else if (first == c.first)			
+			if (second < c.second)
+				return 1;
 		return 0;
 	}
 	sref(int a, int b): std::pair<int,int>(a,b)
@@ -63,7 +65,7 @@ public:
 	struct satellite
 	{
 		int valid;
-		int frequency, symbol_rate, polarisation, fec, inversion, sat;
+		int frequency, symbol_rate, polarisation, fec, inversion, lnb;
 		void set(const SatelliteDeliverySystemDescriptor *descriptor);
 		int tune(eTransponder *);
 		int isValid() { return valid; }
@@ -71,14 +73,17 @@ public:
 	eTransponder(int transport_stream_id, int original_network_id);
 	void setSatellite(SatelliteDeliverySystemDescriptor *descr) { satellite.set(descr); }
 	void setCable(CableDeliverySystemDescriptor *descr) { cable.set(descr); }
-	void setSatellite(int frequency, int symbol_rate, int polarisation, int fec, int sat);
+	void setSatellite(int frequency, int symbol_rate, int polarisation, int fec, int lnb);
 	void setCable(int frequency, int symbol_rate);
 	
-	void set(const eTransponder &ref)
+	eTransponder &operator=(const eTransponder &ref)
 	{
 		cable=ref.cable;
 		satellite=ref.satellite;
 		state=ref.state;
+		transport_stream_id=ref.transport_stream_id;
+		original_network_id=ref.original_network_id;
+		return *this;
 	}
 	int tune();
 	int isValid(); 
@@ -94,8 +99,9 @@ public:
 	{
 		if (original_network_id < c.original_network_id)
 			return 1;
-		if (transport_stream_id < c.transport_stream_id)
-			return 1;
+		else if (original_network_id == c.original_network_id)
+			if (transport_stream_id < c.transport_stream_id)
+				return 1;
 		return 0;
 	}
 
@@ -119,8 +125,9 @@ public:
 	{
 		if (original_network_id < c.original_network_id)
 			return 1;
-		if (service_id < c.service_id)
-			return 1;
+		else if (original_network_id == c.original_network_id)
+			if (service_id < c.service_id)
+				return 1;
 		return 0;
 	}
 };

@@ -97,15 +97,15 @@ void eTransponder::satellite::set(const SatelliteDeliverySystemDescriptor *descr
 	symbol_rate=descriptor->symbol_rate;
 	polarisation=descriptor->polarisation;
 	fec=descriptor->FEC_inner;
-	sat=0;	// TODO: lookupSatellite(descr->orbital_position, descr->west_east_flag);
+	lnb=0;	// TODO: lookupSatellite(descr->orbital_position, descr->west_east_flag);
 	valid=1;
 }
 
 int eTransponder::satellite::tune(eTransponder *trans)
 {
-	printf("[TUNE] tuning to %d/%d/%s/%d@%d\n", frequency, symbol_rate, polarisation?"V":"H", fec, sat);
+	printf("[TUNE] tuning to %d/%d/%s/%d@%d\n", frequency, symbol_rate, polarisation?"V":"H", fec, lnb);
 	int inv=0;
-	return eFrontend::fe()->tune_qpsk(trans, frequency, polarisation, symbol_rate, fec, inv, sat);
+	return eFrontend::fe()->tune_qpsk(trans, frequency, polarisation, symbol_rate, fec, inv, lnb);
 }
 
 eService::eService(int transport_stream_id, int original_network_id, int service_id, int service_number):
@@ -139,13 +139,13 @@ eTransponder::eTransponder(int transport_stream_id, int original_network_id):
 	state=stateListed;
 }
 
-void eTransponder::setSatellite(int frequency, int symbol_rate, int polarisation, int fec, int sat)
+void eTransponder::setSatellite(int frequency, int symbol_rate, int polarisation, int fec, int lnb)
 {
 	satellite.frequency=frequency;
 	satellite.symbol_rate=symbol_rate;
 	satellite.polarisation=polarisation;
 	satellite.fec=fec;
-	satellite.sat=sat;
+	satellite.lnb=lnb;
 	satellite.valid=1;
 }
 
