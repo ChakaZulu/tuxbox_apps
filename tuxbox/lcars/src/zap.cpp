@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: zap.cpp,v $
+Revision 1.14  2003/01/26 00:00:20  thedoc
+mv bugs /dev/null
+
 Revision 1.13  2003/01/05 19:28:45  TheDOC
 lcars should be old-api-compatible again
 
@@ -178,34 +181,41 @@ void zap::zap_to(pmt_data pmt, int VPID, int APID, int PCR, int ECM, int SID, in
 		APID = 0x1fff;
 	if (PCR == 0)
 		PCR = 0x1fff;
-	
-	zap_allstop();
-		
-	if (usevideo)
-	{
-		close(vid);
-		close(video);
-	}
-	if (useaudio)
-	{
-		close(aud);
-		close(audio);
-	}
-	if (usepcr)
-		close(pcr);
 
-	if ((VPID >= 0x20) && (VPID <= 0x1FFB))
+	if (ECM != 0)
 	{
-		usevideo = true;
+		std::cout << "Doing CA" << std::endl;
+		ca.initialize();
+		if (VPID != 0x1fff)
+		{
+			ca.addPID(VPID);
+		}
+		ca.addPID(APID);
+		ca.setECM(ECM);
+		ca.setSID(SID);
+		ca.setONID(ONID);
+		ca.setPMTentry(pmt);
+		if (PID1 != -1)
+		{
+			ca.addPID(PID1);
+		}
+		if (PID2 != -1)
+			ca.addPID(PID2);
+
+		if (old_TS != TS)
+		{
+			ca.reset();
+			ca.setEMM(setting.getEMMpid());
+			ca.startEMM();
+		}
+		ca.descramble();
 	}
-	if ((PCR >= 0x20) && (PCR <= 0x1FFB))
-	{
-		usepcr = true;
-	}
-	if ((APID >= 0x20) && (APID <= 0x1FFB))
-	{
-		useaudio = true;
-	}
+
+	usevideo = ((VPID >= 0x20) && (VPID <= 0x1FFB));		
+	
+	usepcr = ((PCR >= 0x20) && (PCR <= 0x1FFB));
+
+	useaudio = ((APID >= 0x20) && (APID <= 0x1FFB));
 
 	std::cout << "Start Zapping" << std::endl;
 
@@ -361,35 +371,6 @@ void zap::zap_to(pmt_data pmt, int VPID, int APID, int PCR, int ECM, int SID, in
 	//ioctl(audio,AUDIO_SET_BYPASS_MODE, 1);
 
 	//printf("Zapping...\n");
-	if (ECM != 0)
-	{
-		std::cout << "Doing CA" << std::endl;
-		ca.initialize();
-		if (VPID != 0x1fff)
-		{
-			ca.addPID(VPID);
-		}
-		ca.addPID(APID);
-		ca.setECM(ECM);
-		ca.setSID(SID);
-		ca.setONID(ONID);
-		ca.setPMTentry(pmt);
-		if (PID1 != -1)
-		{
-			ca.addPID(PID1);
-		}
-		if (PID2 != -1)
-			ca.addPID(PID2);
-
-		if (old_TS != TS)
-		{
-			ca.reset();
-			ca.setEMM(setting.getEMMpid());
-			ca.startEMM();
-		}
-		ca.descramble();
-	}
-
 	old_TS = TS;
 	std::cout << "Zapping done" << std::endl;
 }
@@ -439,4 +420,23 @@ void zap::dmx_stop()
 	ioctl(audio,DMX_STOP,0);
 	ioctl(vid, VIDEO_STOP);
 }
+
+void zap::stop()
+{
+	zap_allstop();
+
+	if (usevideo)
+	{
+		close(vid);
+		close(video);
+	}
+	if (useaudio)
+	{
+		close(aud);
+		close(audio);
+	}
+	if (usepcr)
+		close(pcr);
+}
+
 

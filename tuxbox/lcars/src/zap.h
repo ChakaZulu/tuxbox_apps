@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: zap.h,v $
+Revision 1.8  2003/01/26 00:00:20  thedoc
+mv bugs /dev/null
+
 Revision 1.7  2003/01/05 19:28:45  TheDOC
 lcars should be old-api-compatible again
 
@@ -63,6 +66,7 @@ public:
 	~zap();
 
 	void zap_allstop();
+	void stop();
 	void zap_to(pmt_data pmt, int VPID, int APID, int PCR, int ECM, int SID, int ONID, int TS, int PID1 = -1, int PID2 = -1);
 	void zap_audio(int VPID, int APID, int ECM, int SID, int ONID);
 	void close_dev();

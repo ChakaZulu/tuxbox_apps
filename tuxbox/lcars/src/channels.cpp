@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: channels.cpp,v $
+Revision 1.22  2003/01/26 00:00:19  thedoc
+mv bugs /dev/null
+
 Revision 1.21  2003/01/05 06:49:59  TheDOC
 lcars should work now with the new drivers more properly
 
@@ -198,6 +201,7 @@ void channels::setPerspective(int number)
 	
 	pmt_data pmt_entry;
 
+	zap_obj->stop();
 	curr_perspective = number;
 	if (current_mode == LINKAGE)
 	{
@@ -338,6 +342,8 @@ void channels::zapCurrentChannel()
 	linkage_perspectives.clear();
 
 	current_mode = CHANNEL;
+
+	zap_obj->stop();
 
 	if (tune(getCurrentTS(), getCurrentONID()))
 	{

@@ -16,6 +16,9 @@
 /*
 
 $Log: tuner.cpp,v $
+Revision 1.23  2003/01/26 00:00:20  thedoc
+mv bugs /dev/null
+
 Revision 1.22  2003/01/05 22:22:09  TheDOC
 stupid drivers
 
@@ -255,7 +258,7 @@ bool tuner::tune(unsigned int frequ, unsigned int symbol, int polarization, int 
 	return (event.status & FE_HAS_LOCK);
 #elif HAVE_OST_DMX_H
 
-int device;
+	int device;
 	int frontend;
 	struct secCmdSequence seq;
 	struct secCommand cmd;

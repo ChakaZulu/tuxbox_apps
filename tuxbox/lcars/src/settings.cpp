@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: settings.cpp,v $
+Revision 1.13  2003/01/26 00:00:20  thedoc
+mv bugs /dev/null
+
 Revision 1.12  2003/01/05 21:37:07  TheDOC
 setting ips is now possible
 
@@ -171,10 +174,9 @@ int settings::find_emmpid(int ca_system_id) {
 		perror(DEMUX_DEV);
 		return -fd;
 	}
-
-	memset(&flt.filter.filter, 0, DMX_FILTER_SIZE);
-	memset(&flt.filter.mask, 0, DMX_FILTER_SIZE);
-
+	
+	memset (&flt.filter, 0, sizeof (struct dmx_filter));
+	
 	flt.pid=1;
 	flt.filter.filter[0]=1;
 	flt.filter.mask[0]  =0xFF;
@@ -190,7 +192,7 @@ int settings::find_emmpid(int ca_system_id) {
 	//ioctl(fd, DMX_START, 0);
 	if ((r=read(fd, buffer, r))<=0)
 	{
-		perror("read");
+		perror("[settings.cpp] read (find_emmpid)");
 		return 1;
 	}
 
