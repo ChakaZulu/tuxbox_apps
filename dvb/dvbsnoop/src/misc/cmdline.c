@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.14 2003/12/15 20:09:49 rasc Exp $
+$Id: cmdline.c,v 1.15 2003/12/15 22:29:27 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: cmdline.c,v 1.14 2003/12/15 20:09:49 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.15  2003/12/15 22:29:27  rasc
+pidscan improved, problems with max filters on demux
+
 Revision 1.14  2003/12/15 20:09:49  rasc
 no message
 
@@ -206,6 +209,7 @@ void usage (void)
     printf("                         bandwidth = data rate statistics for pid\n");
     printf("                 stream type or pidscan\n");
     printf("   -f filter:    filtervalue for 'sec' demux [-f 0]\n");
+    printf("   -f maxdmx:    max demux filters to use in pidscan mode\n");
     printf("   -m mask:      maskvalue for 'sec' demux [-m 0]\n");
     printf("   -crc:         CRC check when reading 'sec'\n");
     printf("   -nocrc:       No CRC check when reading 'sec' [-nocrc]\n");

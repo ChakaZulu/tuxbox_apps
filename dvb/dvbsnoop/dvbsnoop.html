@@ -157,16 +157,17 @@ make
 		  <TD>dvr device [/dev/dvb/adapter0/dvr0]</TD> 
 		</TR> 
 		<TR> 
-		  <TD VALIGN="TOP">-s [sec|ts|pes|pidscan]</TD> 
+		  <TD VALIGN="TOP">-s [sec|ts|pes|pidscan|bandwidth]</TD> 
 		  <TD></TD> 
 		  <TD>snoop type [-s sec]<BR>&nbsp;sec = Sections,<BR>&nbsp; ts =
 			 Transport Stream<BR>&nbsp;pes = Packetized Elementary Stream.,<BR>&nbsp;pidscan
-			 = transponder PID scan</TD> 
+			 = transponder PID scan<BR>&nbsp;bandwidth = pid data rate statistics</TD> 
 		</TR> 
 		<TR> 
-		  <TD>-f filter</TD> 
+		  <TD VALIGN="TOP">-f filter</TD> 
 		  <TD></TD> 
-		  <TD>filtervalue for 'sec' demux [-f 0]</TD> 
+		  <TD>filtervalue for 'sec' demux [-f 0]<BR>max demux filter usage value
+			 in "-s bandwidth"</TD> 
 		</TR> 
 		<TR> 
 		  <TD> -m mask</TD> 
@@ -540,11 +541,19 @@ CRC: 3952000829 (0xeb8ebf3d)
 		that you specify mode (si, pes, ...) and pid!</P> 
 	 <P></P> 
 	 <H4>dvbsnoop -pd 9 -s pidscan</H4> 
-	 <P>Scan tuned transponder for PIDs. This may take 1-3 minutes.<BR>This mode
-		tries to reveal all pids transmitted on a transponder, even pids which are not
-		present in PAT, PMT, etc.<BR><BR>Remark: The PID-SCAN snoop will only detect
-		pids, which are transmitted during the scan phase. Pids with a low repetition
-		rate may not be detected.</P>
+	 <H4>dvbsnoop -pd 9 -f 24 -s pidscan</H4> 
+	 <P>Scan tuned transponder for PIDs. <BR>This mode tries to reveal all pids
+		transmitted on a transponder, even pids which are not present in PAT, PMT,
+		etc.<BR><BR>This scan may take 1-3 minutes, depending on how many demux filters
+		dvbsnoop is using. By default dvbsnoop tries to get all demux filters it can
+		allocate! On some dvb cards this can result in <I>strange</I> behavior. To
+		avoid this you can use the "-f"-option to set maximum filter usage by dvbsnoop
+		(less filters takes more time to complete the scan).<BR><BR>A good practice
+		would be to check how many dmx filters dvbsnoop can allocate on your dvb card
+		(-pd 9 option) and then lower this number by at least 4 filters (using -f
+		option).<BR><BR>Remark: The PID-SCAN snoop will only detect pids, which are
+		transmitted during the scan phase. Pids with a low repetition rate or pids
+		grabbed by other applications may not be detected.</P> 
 	 <P></P> 
 	 <H4>dvbsnoop -pd 2 -n 1000 -s bandwidth</H4> 
 	 <P>Analyze bandwidth usage of a PID.<BR>In this example, stop if more than

@@ -1,5 +1,5 @@
 /*
-$Id: dmx_tspidscan.c,v 1.7 2003/12/15 20:09:48 rasc Exp $
+$Id: dmx_tspidscan.c,v 1.8 2003/12/15 22:29:27 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dmx_tspidscan.c,v 1.7 2003/12/15 20:09:48 rasc Exp $
 
 
 $Log: dmx_tspidscan.c,v $
+Revision 1.8  2003/12/15 22:29:27  rasc
+pidscan improved, problems with max filters on demux
+
 Revision 1.7  2003/12/15 20:09:48  rasc
 no message
 
@@ -101,6 +104,8 @@ int ts_pidscan (OPTION *opt)
   int 		timeout;
   int		pid,pid_low;
   int    	i;
+  int		filters;
+  int		max_pid_filter;
   int		pid_found;
   int		rescan;
 
@@ -116,8 +121,13 @@ int ts_pidscan (OPTION *opt)
 
 
 
-  // alloc pids
-  pidArray = (int *) malloc ( (MAX_PID+1) * sizeof(int) );
+   //  -- max demux filters to use...
+   max_pid_filter = MAX_PID_FILTER;
+   if (opt->filter > 0) max_pid_filter = opt->filter;	// -f opt
+
+
+   // alloc pids
+   pidArray = (int *) malloc ( (MAX_PID+1) * sizeof(int) );
   	if (!pidArray) {
 		perror("malloc");
 		return -1;
@@ -134,7 +144,7 @@ int ts_pidscan (OPTION *opt)
 		return -1;
 	}
 
-	for (i = 0; i < MAX_PID_FILTER; i++)
+	for (i = 0; i < max_pid_filter; i++)
 		dmxfd[i] = -1;
 
 
@@ -143,10 +153,10 @@ int ts_pidscan (OPTION *opt)
    while (pid <= MAX_PID) {
 
 	pid_low = pid;
-	rescan = 0;
 
 	do {
 		pid = pid_low;
+		rescan = 0;
 	   
 		// -- open DVR device for reading
 	   	pfd.events = POLLIN | POLLPRI;
@@ -158,75 +168,98 @@ int ts_pidscan (OPTION *opt)
    		}
 
 
-		// set multi PID filter
+		// -- set multi PID filter
+		// -- try to get as many dmx filters as possible
+		// -- error messages only if filter 0 fails
 
-		for (i = 0; (i < MAX_PID_FILTER) && (pid <= MAX_PID); i++) {
+		filters = 0;
+		for (i = 0; (i < max_pid_filter) && (pid <= MAX_PID); i++) {
 			if (dmxfd[i] < 0) {
-				// -- try to get as much pid into the filter
-				// -- as the demux can handle...
-				if ((dmxfd[i]=open(opt->devDemux,O_RDWR)) < 0) 
+				if ((dmxfd[i]=open(opt->devDemux,O_RDWR)) < 0)  {
+					// -- no filters???
+					if (i == 0) perror(opt->devDemux);
 					break;
+				}
 			}
 
 			// ioctl (dmxfd[i],DMX_SET_BUFFER_SIZE, sizeof(buf));
 
 			// -- skip already scanned pids (rescan-mode)
-			while (pidArray[pid] != 0) pid++;
+			while ( (pidArray[pid] != 0) && (pid < MAX_PID) ) pid++;
 	
-			flt.pid = pid++;
+			flt.pid = pid;
 			flt.input = DMX_IN_FRONTEND;
 			flt.output = DMX_OUT_TS_TAP;
 			flt.pes_type = DMX_PES_OTHER;
 			flt.flags = DMX_IMMEDIATE_START;
 			if (ioctl(dmxfd[i], DMX_SET_PES_FILTER, &flt) < 0) {
-				perror("DMX_SET_PES_FILTER");
+				if (i == 0) perror("DMX_SET_PES_FILTER");
 				break;
 			}
+			pid ++;
+			filters ++;
 		}
 
-		if (rescan) out (9,"re-");
-		out_nl (9,"scanning pid   0x%04x to 0x%04x",pid_low, pid-1);
 
 
-		// -- calc timeout;
-		// -- on lower pids: higher timeout
-		// -- (e.g. TOT/TDT will be sent within 30 secs)
+
+		// -- ieek, no dmx filters available???
+		// -- there is something terribly wrong here... - abort
+		if (filters == 0) {
+
+			pid = MAX_PID+1;	// abort criteria for loop
+
+		} else {
+
+
+			if (rescan) out (7,"re-");
+			out (7,"scanning pid   0x%04x to 0x%04x",pid_low, pid-1);
+			out (8,"  (got %d dmx filters) ",filters);
+			out_NL (7);
+
+
+
+
+			// -- calc timeout;
+			// -- on lower pids: higher timeout
+			// -- (e.g. TOT/TDT will be sent within 30 secs)
 	
-		timeout = PID_TIMEOUT_LOW;
-		if ( (pid_low) < 0x20) timeout = PID_TIMEOUT_HIGH;
+			timeout = PID_TIMEOUT_LOW;
+			if ( (pid_low) < 0x20) timeout = PID_TIMEOUT_HIGH;
 
-		// give read a chance to collect some pids
-		usleep ((unsigned long) PID_TIME_WAIT);
+			// give read a chance to collect some pids
+			usleep ((unsigned long) PID_TIME_WAIT);
 
-		pid_found = 0;
-		if (poll(&pfd, 1, timeout) > 0) {
-			if (pfd.revents & POLLIN) {
-				int len; 
-				len = read(pfd.fd, buf, sizeof(buf));
-				if (len >= TS_LEN) {
-					pid_found = analyze_ts_pid (buf, len);
+			pid_found = 0;
+			if (poll(&pfd, 1, timeout) > 0) {
+				if (pfd.revents & POLLIN) {
+					int len; 
+					len = read(pfd.fd, buf, sizeof(buf));
+					if (len >= TS_LEN) {
+						pid_found = analyze_ts_pid (buf, len);
+					}
 				}
 			}
-		}
+	
 
-
-		// rescan should to be done?
-		rescan = 0;
-		if (pid_found) {
-		  int x;
-		  for (x=pid_low; x<pid; x++) {
-			  if (pidArray[x] > 0) {
-				  rescan = 1;
-				  break;
+			// rescan should to be done?
+			if (pid_found) {
+			  int x;
+			  for (x=pid_low; x<pid; x++) {
+				  if (pidArray[x] > 0) {
+					  rescan = 1;
+					  break;
+				  }
 			  }
-		  }
-		}
+			}
+
+		} // if (filters==0)
 
 
-		for (i = 0; i < MAX_PID_FILTER; i++) {
+		// -- close dmx, filters
+		for (i = 0; i < max_pid_filter; i++) {
 			if (dmxfd[i] >= 0) {
-				if (ioctl(dmxfd[i], DMX_STOP) < 0)
-					perror("DMX_STOP");
+				ioctl(dmxfd[i], DMX_STOP);  // ignore any errors
 				close(dmxfd[i]);
 				dmxfd[i] = -1;
 			}
