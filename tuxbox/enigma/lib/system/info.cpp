@@ -102,7 +102,7 @@ eSystemInfo::eSystemInfo()
 	{
 		case TUXBOX_SUBMODEL_DREAMBOX_DM7000:
 			defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR;
-			canupdatetransponder = canrecordts = hashdd =
+			canupdateTransponder = canrecordts = hashdd =
 			haslcd = hasnetwork = canmeasurelnbcurrent =
 			hasci = 1;
 			hwtype = DM7000;
