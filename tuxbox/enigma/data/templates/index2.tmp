@@ -3,7 +3,6 @@
 		<link rel="stylesheet" type="text/css" href="webif.css">
 		<script language="javascript" type="text/javascript" src="window.js"></script>
 		<script language="javascript" type="text/javascript" src="index.js"></script>
-		<script language="javascript" type="text/javascript" src="index2.js"></script>
 		<script language="javascript" type="text/javascript" src="timer.js"></script>
 	</head>
 	<body #ONLOAD# leftmargin=0 topmargin=0 marginwidth=0 marginheight=0 id="mainbody">
