@@ -200,9 +200,9 @@ static void unpack(__u32 l, int *t)
 
 void eDVB::configureNetwork()
 {
-	__u32 sip=0, snetmask=0, sdns=0, sgateway=0, maxmtu=0;
+	__u32 sip=0, snetmask=0, sdns=0, sgateway=0;
 	int ip[4], netmask[4], dns[4], gateway[4];
-	int sdosetup=0;
+	int sdosetup=0, maxmtu=0;
 
 	eConfig::getInstance()->getKey("/elitedvb/network/ip", sip);
 	eConfig::getInstance()->getKey("/elitedvb/network/netmask", snetmask);
