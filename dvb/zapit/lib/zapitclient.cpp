@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: zapitclient.cpp,v 1.10 2002/03/03 20:40:35 Simplex Exp $
+  $Id: zapitclient.cpp,v 1.11 2002/03/14 19:57:35 McClean Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapitclient.cpp,v $
+  Revision 1.11  2002/03/14 19:57:35  McClean
+  add ts-scan functions to clientlib
+
   Revision 1.10  2002/03/03 20:40:35  Simplex
   handling locked and hidden bouquets
 
@@ -233,6 +236,40 @@ void CZapitClient::reinitChannels()
 	receive((char* )&response, sizeof(response));
 	zapit_close();
 }
+
+/* start TS-Scan */
+void CZapitClient::startScan()
+{
+	commandHead msgHead;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_SCANSTART;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+
+	zapit_close();
+}
+
+/* query if ts-scan is ready - response gives status */
+bool CZapitClient::isScanReady(int &satellite, int &transponder, int &services )
+{
+	commandHead msgHead;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_SCANREADY;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+
+	responseIsScanReady response;
+	receive((char* )&response, sizeof(response));
+
+	satellite = response.satellite;
+	transponder = response.transponder;
+	services = response.services;
+
+	zapit_close();
+}
+
 
 /***********************************************/
 /*                                             */
