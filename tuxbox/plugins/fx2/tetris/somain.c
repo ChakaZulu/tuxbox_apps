@@ -52,11 +52,17 @@ static	void	LocalSave( void )
 	if ( i==8 )
 		return;
 
+	Fx2PigPause();
+
+	FBFillRect( 500,32,3*52,4*52+4,BLACK );
+
 	FBFillRect( 150,420,470,64,BLACK );
 	FBDrawRect( 149,419,472,66,WHITE );
 	FBDrawRect( 148,418,474,68,WHITE );
 	x=FBDrawString( 154,420,64,"name : ",WHITE,0);
 	user=FBEnterWord(154+x,420,64,9,WHITE);
+
+	Fx2PigResume();
 
 	if ( i < 7 )
 		memmove( hsc+i+1,hsc+i,sizeof(HScore)*(7-i) );
@@ -110,9 +116,13 @@ static	void	SaveGame( void )
 	if ( doexit )
 		return;
 
+	Fx2PigPause();
+
 	FBFillRect( 150,350,570,64,BLACK );
 	x=FBDrawString( 150,350,64,"name : ",WHITE,0);
 	user=FBEnterWord(150+x,350,64,9,WHITE);
+
+	Fx2PigResume();
 
 /* clean name */
 	x = strlen(user);
@@ -175,8 +185,6 @@ static	void	ShowHScore( void )
 	char			pp[64];
 
 	FBFillRect( 0, 0, 720, 576, BLACK );
-
-	FBDrawString( 170, 200, 64, "play again with OK",GRAY,0);
 
 	FBDrawString( 190, 32, 64, "HighScore", RED, BLACK );
 	for( i=0; i < 8; i++ )
@@ -318,7 +326,6 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 	{
 		BoardInitialize();
 		DrawBoard( );	/* 0 = all */
-
 		NextItem();
 
 		doexit=0;
