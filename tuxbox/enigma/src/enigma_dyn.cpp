@@ -211,7 +211,7 @@ static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConn
 
 static eString switchService(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	printf("[ENIGMA_DYN] switchService...\n");
+	eDebug("[ENIGMA_DYN] switchService...");
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
 	int service_id=-1, dvb_namespace=-1, original_network_id=-1, transport_stream_id=-1, service_type=-1;
@@ -1428,7 +1428,7 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 
 	eServiceReference ref = (serviceRef == "undefined") ? sapi->service : string2ref(serviceRef);
 
-	printf("[ENIGMA_DYN] getcurepg2: opts = %s, serviceRef = %s\n", opts.c_str(), serviceRef.c_str());
+	eDebug("[ENIGMA_DYN] getcurepg2: opts = %s, serviceRef = %s", opts.c_str(), serviceRef.c_str());
 
 	current = eDVB::getInstance()->settings->getTransponders()->searchService(ref);
 
@@ -1487,18 +1487,18 @@ static eString EPGDetails(eString request, eString dirpath, eString opt, eHTTPCo
 
 static eString getsi(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	eString result("");
-	eString name("");
-	eString provider("");
-	eString vpid("");
-	eString apid("");
-	eString pcrpid("");
-	eString tpid("");
-	eString vidform("n/a");
-	eString tsid("");
-	eString onid("");
-	eString sid("");
-	eString pmt("");
+	std::stringstream result;
+	eString name,
+					provider,
+					vpid,
+					apid,
+					pcrpid,
+					tpid,
+					vidform("n/a"),
+					tsid,
+					onid,
+					sid,
+					pmt;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
@@ -1553,24 +1553,24 @@ static eString getsi(eString request, eString dirpath, eString opt, eHTTPConnect
 		}
 	}
 
-	result+=eString("<html>" CHARSETMETA "<head><title>streaminfo</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/si.css\"></head><body bgcolor=#000000>");
-	result += "<!-- " + sapi->service.toString() + "-->\n";
+	result << "<html>" CHARSETMETA "<head><title>streaminfo</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/si.css\"></head><body bgcolor=#000000>"
+						"<!-- " << sapi->service << "-->" << std::endl <<
+						"<table cellspacing=0 cellpadding=0 border=0>"
+						"<tr><td>name:</td><td>" << name << "</td></tr>" <<
+						"<tr><td>provider:</td><td>" << provider << "</td></tr>" <<
+						"<tr><td>vpid:</td><td>" << vpid << "</td></tr>" <<
+						"<tr><td>apid:</td><td>" << apid << "</td></tr>" <<
+						"<tr><td>pcrpid:</td><td>" << pcrpid << "</td></tr>" <<
+						"<tr><td>tpid:</td><td>" << tpid << "</td></tr>" <<
+						"<tr><td>tsid:</td><td>" << tsid << "</td></tr>" <<
+						"<tr><td>onid:</td><td>" << onid << "</td></tr>" <<
+						"<tr><td>sid:</td><td>" << sid << "</td></tr>" <<
+						"<tr><td>pmt:</td><td>" << pmt << "</td></tr>" <<
+						"<tr><td>vidformat:<td>" << vidform << "</td></tr>" <<
+						"</table>" <<
+						"</body></html>";
 
-	result+=eString("<table cellspacing=0 cellpadding=0 border=0>");
-	result+=eString("<tr><td>name:</td><td>"+name+"</td></tr>");
-	result+=eString("<tr><td>provider:</td><td>"+provider+"</td></tr>");
-	result+=eString("<tr><td>vpid:</td><td>"+vpid+"</td></tr>");
-	result+=eString("<tr><td>apid:</td><td>"+apid+"</td></tr>");
-	result+=eString("<tr><td>pcrpid:</td><td>"+pcrpid+"</td></tr>");
-	result+=eString("<tr><td>tpid:</td><td>"+tpid+"</td></tr>");
-	result+=eString("<tr><td>tsid:</td><td>"+tsid+"</td></tr>");
-	result+=eString("<tr><td>onid:</td><td>"+onid+"</td></tr>");
-	result+=eString("<tr><td>sid:</td><td>"+sid+"</td></tr>");
-	result+=eString("<tr><td>pmt:</td><td>"+pmt+"</td></tr>");
-	result+=eString("<tr><td>vidformat:<td>"+vidform+"</td></tr>");
-	result+=eString("</table>");
-	result+=eString("</body></html>");
-	return result;
+	return result.str();
 }
 
 static eString message(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -1635,7 +1635,7 @@ static eString xmessage(eString request, eString dirpath, eString opt, eHTTPConn
 	int type=-1;
 	if (opts.find("type") != opts.end())
 		type=atoi(opts["type"].c_str());
-	
+
 	int timeout=atoi(opts["timeout"].c_str());
 
 	eZapMain::getInstance()->postMessage(eZapMessage(1, opts["caption"], opts["body"], timeout), type != -1);
@@ -1802,7 +1802,7 @@ static eString navigator(eString request, eString dirpath, eString opt, eHTTPCon
 	eServiceReference current_service=string2ref(current);
 
 	eString res;
-	
+
 	res="<html>\n"
 		CHARSETMETA
 		"<head><title>Enigma Navigator</title></head>\n"
@@ -1852,7 +1852,7 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 	eString mode = opt["mode"];
 	eString spath = opt["path"];
 
-	printf("[ENIGMA_DYN] web_root: mode = %s, spath = %s\n", mode.c_str(), spath.c_str());
+	eDebug("[ENIGMA_DYN] web_root: mode = %s, spath = %s", mode.c_str(), spath.c_str());
 
 	if (!spath)
 		spath=eServiceStructureHandler::getRoot(eServiceStructureHandler::modeTV).toString();
@@ -2134,7 +2134,7 @@ static eString clearTimerList(eString request, eString dirpath, eString opt, eHT
 
 static eString addTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	eString result = "";
+	eString result;
 	eService *current = NULL;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
@@ -2146,36 +2146,30 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	eString eventDuration = opt["duration"];
 	eString description = "No description available";
 
-	printf("[ENIGMA_DYN] addTimerEvent: serviceRef = %s, ID = %s, start = %s, duration = %s\n", serviceRef.c_str(), eventID.c_str(), eventStartTime.c_str(), eventDuration.c_str());
+	eDebug("[ENIGMA_DYN] addTimerEvent: serviceRef = %s, ID = %s, start = %s, duration = %s\n", serviceRef.c_str(), eventID.c_str(), eventStartTime.c_str(), eventDuration.c_str());
 
 	// search for the event... to get the description...
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (sapi)
 	{
-		eServiceReference ref = string2ref(serviceRef);
+		eServiceReference ref(serviceRef);
 		current = eDVB::getInstance()->settings->getTransponders()->searchService(ref);
 		if(current)
 		{
-			const timeMap* evt = eEPGCache::getInstance()->getTimeMap((eServiceReferenceDVB&)ref);
-			if(evt)
+			EITEvent *event = eEPGCache::getInstance()->lookupEvent((eServiceReferenceDVB&)ref, eventid );
+			if(event)
 			{
-				timeMap::const_iterator It;
-
-				for(It=evt->begin(); It!= evt->end(); It++)
+				for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
 				{
-					EITEvent event(*It->second);
-					for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
+					if (d->Tag() == DESCR_SHORT_EVENT)
 					{
-						Descriptor *descriptor=*d;
-						if ((descriptor->Tag() == DESCR_SHORT_EVENT) && (eventid == event.event_id))
-						{
-							// ok, we probably found the event...
-							description = ((ShortEventDescriptor*)descriptor)->event_name;
-							printf("[ENIGMA_DYN] addTimerEvent: found description = %s\n", description.c_str());
-							break;
-						}
+						// ok, we probably found the event...
+						description = ((ShortEventDescriptor*)*d)->event_name;
+						eDebug("[ENIGMA_DYN] addTimerEvent: found description = %s\n", description.c_str());
+						break;
 					}
 				}
+				delete event;
 			}
 		}
 	}
@@ -2190,7 +2184,7 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	int duration = atoi(eventDuration.c_str()) + (2 * timeroffset * 60);
 
 	ePlaylistEntry entry(string2ref(serviceRef), start, duration, atoi(eventID.c_str()), ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR);
-	printf("[ENIGMA_DYN] description = %s\n", description.c_str());
+	eDebug("[ENIGMA_DYN] description = %s\n", description.c_str());
 	entry.service.descr = description;
 
 	if (eTimerManager::getInstance()->addEventToTimerList(entry) == -1)
