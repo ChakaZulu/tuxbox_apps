@@ -34,7 +34,6 @@ public:
 	int load();
 	int setTransponder(const eTransponder *transponder);
 	int getTransponder(eTransponder *transponder);
-	void updateText(const eWidget*);
 };
 
 class eFEStatusWidget: public eWidget

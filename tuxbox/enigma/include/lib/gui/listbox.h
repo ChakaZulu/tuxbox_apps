@@ -331,9 +331,6 @@ inline eListBox<T>::~eListBox()
 template <class T>
 inline void eListBox<T>::redrawWidget(gPainter *target, const eRect &where)
 {
-	if ( !isVisible() )
-		return;
-
 	eRect rc = where;
 
 	eListBoxBase::redrawBorder(target, rc);
