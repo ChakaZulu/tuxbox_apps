@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapittools.cpp,v 1.3 2004/04/04 13:22:13 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapittools.cpp,v 1.4 2004/04/26 10:08:50 thegoodguy Exp $
  *
  * some tools for zapit and its clients - d-box2 linux project
  *
@@ -72,7 +72,11 @@ namespace ZapitTools {
 	
 		while ((*s) != 0)
 		{
-			/* cf. http://www.w3.org/TR/xhtml1/dtds.html */
+			/* cf.
+			 * http://www.w3.org/TR/2004/REC-xml-20040204/#syntax
+			 * and
+			 * http://www.w3.org/TR/2004/REC-xml-20040204/#sec-predefined-ent
+			 */
 			switch (*s)
 			{
 			case '<':           
