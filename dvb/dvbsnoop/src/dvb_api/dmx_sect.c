@@ -1,5 +1,5 @@
 /*
-$Id: dmx_sect.c,v 1.9 2003/11/26 16:27:46 rasc Exp $
+$Id: dmx_sect.c,v 1.10 2003/12/10 22:46:34 obi Exp $
 
 
 
@@ -22,6 +22,9 @@ $Id: dmx_sect.c,v 1.9 2003/11/26 16:27:46 rasc Exp $
 
 
 $Log: dmx_sect.c,v $
+Revision 1.10  2003/12/10 22:46:34  obi
+tiny section filter fixes
+
 Revision 1.9  2003/11/26 16:27:46  rasc
 - mpeg4 descriptors
 - simplified bit decoding and output function
@@ -111,7 +114,7 @@ int  doReadSECT (OPTION *opt)
     flt.pid = opt->pid;
     flt.filter.filter[0] = opt->filter;
     flt.filter.mask[0] = opt->mask;
-    flt.timeout = 60000;
+    flt.timeout = 0;
     flt.flags = DMX_IMMEDIATE_START;
     if (opt->crc) flt.flags |= DMX_CHECK_CRC;
 
@@ -199,7 +202,6 @@ int  doReadSECT (OPTION *opt)
   */
 
   if (dmxMode) {
-    ioctl (fd, DMX_SET_FILTER, 0);
     ioctl (fd, DMX_STOP, 0);
   }
 
