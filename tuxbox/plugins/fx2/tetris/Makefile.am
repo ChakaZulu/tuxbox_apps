@@ -11,8 +11,8 @@ tetris_LDADD = -lfx2
 
 install-libLTLIBRARIES:
 	install -d $(PLUGINDIR)
-	install -m 0644  .libs/libtetris.so $(PLUGINDIR)/
+	install -m 0644  .libs/tetris.so $(PLUGINDIR)/
 
 uninstall-libLTLIBRARIES:
-	-rm $(PLUGINDIR)/libtetris.so
+	-rm $(PLUGINDIR)/tetris.so
 	-rmdir $(PLUGINDIR)
