@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_setup.cpp,v 1.34 2003/02/19 13:14:30 obi Exp $
+ * $Id: enigma_setup.cpp,v 1.35 2003/02/19 17:07:22 waldi Exp $
  */
 
 #include <enigma_setup.h>
@@ -41,44 +41,29 @@
 #include <lib/dvb/edvb.h>
 #include <lib/gui/eskin.h>
 #include <lib/gui/elabel.h>
-#include <libtuxbox.h>
+#include <tuxbox.h>
 #include "upgrade.h"
 
 eZapSetup::eZapSetup()
 	:eListBoxWindow<eListBoxEntryMenu>(_("Setup"), 8, 450, true)
 {
 	move(ePoint(135, 120));
-	int havenetwork, haveci, haveharddisk, havelcd, haverfmod;
-	switch (tuxbox_get_model())
-	{
-	case TUXBOX_MODEL_DBOX2:
-		havenetwork=1;
-		haveci=0;
-		haveharddisk=0;
-		havelcd=1;
-		haverfmod=0;
-		break;
-	case TUXBOX_MODEL_DREAMBOX_DM7000:
-		havenetwork=1;
-		haveci=1;
-		haveharddisk=1;
-		havelcd=1;
-		haverfmod=0;
-		break;
-	case TUXBOX_MODEL_DREAMBOX_DM5600:
-		havenetwork=0;
-		haveci=1;
-		haveharddisk=0;
-		havelcd=0;
+
+	int havenetwork = 0, haveci = 0, haveharddisk = 0, havelcd = 0, haverfmod = 0;
+
+	tuxbox_capabilities_t caps = tuxbox_get_capabilities ();
+	if (caps & TUXBOX_CAPABILITIES_NETWORK)
+		havenetwork = 1;
+	if (caps & TUXBOX_CAPABILITIES_CAM_CI)
+		haveci = 1;
+	if (caps & TUXBOX_CAPABILITIES_HDD)
+		haveharddisk = 1;
+	if (caps & TUXBOX_CAPABILITIES_LCD)
+		havelcd = 1;
+
+	tuxbox_submodel_t submodel = tuxbox_get_submodel ();
+	if (submodel == TUXBOX_SUBMODEL_DREAMBOX_DM7000)
 		haverfmod=1;
-		break;
-	default:		//have noch weniger
-		havenetwork=0;
-		haveci=0;
-		haveharddisk=0;
-		havelcd=0;
-		haverfmod=0;
-	}
 	
 	list.setColumns(2);
 	addActionMap(&i_shortcutActions->map);

@@ -12,7 +12,7 @@
 #include <lib/system/econfig.h>
 #include <lib/dvb/dvbservice.h>
 #include <lib/dvb/dvbci.h>
-#include <libtuxbox.h>
+#include <tuxbox.h>
 
 eCImmi::eCImmi(eWidget *parent): eWidget(parent)
 {
@@ -398,7 +398,7 @@ enigmaCI::enigmaCI(): eWindow(0)
 
 	DVBCI=eDVB::getInstance()->DVBCI;
 	
-	if (tuxbox_get_model() == TUXBOX_MODEL_DREAMBOX_DM5600)
+	if (tuxbox_get_submodel() == TUXBOX_SUBMODEL_DREAMBOX_DM5600)
 	{
 		setText(_("Common Interface Modules"));
 		move(ePoint(150, 80));

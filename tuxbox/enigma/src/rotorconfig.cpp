@@ -12,7 +12,7 @@
 #include <lib/dvb/frontend.h>
 #include <lib/dvb/dvbwidgets.h>
 #include <lib/dvb/edvb.h>
-#include <libtuxbox.h>
+#include <tuxbox.h>
 
 RotorConfig::RotorConfig(eLNB *lnb )
 	:lnb(lnb)

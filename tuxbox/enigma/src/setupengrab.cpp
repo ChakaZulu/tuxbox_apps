@@ -38,7 +38,7 @@ ENgrabSetup::ENgrabSetup():
 	l->move(ePoint(10, 20));
 	l->resize(eSize(150, fd+4));
 
-	eNumber::unpack(sinet_address.s_addr, de);
+	eNumber::unpack(sinet_address, de);
 	inet_address=new eNumber(this, 4, 0, 255, 3, de, 0, l);
 	inet_address->move(ePoint(160, 20));
 	inet_address->resize(eSize(200, fd+10));
@@ -98,7 +98,7 @@ void ENgrabSetup::okPressed()
 	for (int i=0; i<4; i++)
 		einet_address[i] = inet_address->getNumber(i);
 
-	eNumber::pack(sinet_address.s_addr, einet_address);
+	eNumber::pack(sinet_address, einet_address);
 
 	nsrvport = srvport->getNumber();
 

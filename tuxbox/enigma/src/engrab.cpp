@@ -166,7 +166,7 @@ void ENgrab::sending()
 
 	eConfig::getInstance()->getKey("/elitedvb/network/nserver", sinet_address.s_addr);
 	eConfig::getInstance()->getKey("/elitedvb/network/nservport", port);
-	eNumber::unpack(sinet_address.s_addr, de);
+	eNumber::unpack(sinet_address, de);
 	hostname=eString().sprintf("%d.%d.%d.%d", de[0], de[1], de[2], de[3]);
 
 	if (!sd)

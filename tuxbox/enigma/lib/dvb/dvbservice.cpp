@@ -3,7 +3,7 @@
 #include <errno.h>
 #include <lib/dvb/decoder.h>
 #include <lib/dvb/dvbci.h>
-#include <libtuxbox.h>
+#include <tuxbox.h>
 #include <lib/dvb/eaudio.h>
 
 eDVBServiceController::eDVBServiceController(eDVB &dvb)
@@ -407,7 +407,7 @@ void eDVBServiceController::scanPMT()
 	
 	int isca=0;
 
-	if (tuxbox_get_model() == TUXBOX_MODEL_DREAMBOX_DM7000)
+	if (tuxbox_get_submodel() == TUXBOX_SUBMODEL_DREAMBOX_DM7000)
 		calist.clear();
 
 	usedCASystems.clear();
@@ -708,7 +708,7 @@ int eDVBServiceController::checkCA(ePtrList<CA> &list, const ePtrList<Descriptor
 void eDVBServiceController::initCAlist()
 {
 	availableCASystems.clear();
-	if (tuxbox_get_vendor() != TUXBOX_VENDOR_DREAM_MM)  // no dreambox
+	if (tuxbox_get_vendor() != TUXBOX_VENDOR_DREAM_MM) // no dreambox
 	{
 		availableCASystems.insert(0x1702);	// BetaCrypt C (sat)
 		availableCASystems.insert(0x1722);	// BetaCrypt D (cable)

@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dbox/info.h>
-#include <libtuxbox.h>
+#include <tuxbox.h>
 #include <algorithm>
 #include <string.h>
 #include <sys/types.h>
@@ -136,15 +136,19 @@ eDVB::eDVB()
 			break;
 		}
 	break;
-	case TUXBOX_MODEL_DREAMBOX_DM5600:
-		new eRFmod;
-		eRFmod::getInstance()->init();
-	case TUXBOX_MODEL_DREAMBOX_DM7000:
-		new eAVSwitchNokia;
-		break;
-	default:
-		new eAVSwitchNokia;
-		break;
+	case TUXBOX_MODEL_DREAMBOX:
+		switch (tuxbox_get_submodel())
+		{
+		case TUXBOX_SUBMODEL_DREAMBOX_DM5600:
+			new eRFmod;
+			eRFmod::getInstance()->init();
+		case TUXBOX_SUBMODEL_DREAMBOX_DM7000:
+			new eAVSwitchNokia;
+			break;
+		default:
+			new eAVSwitchNokia;
+			break;
+		}
 	}
 
 	// init stream watchdog
@@ -232,12 +236,6 @@ EIT *eDVB::getEIT()
 SDT *eDVB::getSDT()
 {
 	return tSDT.ready()?tSDT.getCurrent():0;
-}
-
-static void unpack(__u32 l, int *t)
-{
-	for (int i=0; i<4; i++)
-		*t++=(l>>((3-i)*8))&0xFF;
 }
 
 void eDVB::configureNetwork()

@@ -7,7 +7,7 @@
 #include <lib/dvb/servicestructure.h>
 #include <lib/gui/emessage.h>
 #include <lib/gdi/font.h>
-#include <libtuxbox.h>
+#include <tuxbox.h>
 #include <engrab.h>
 
 eTimerManager* eTimerManager::instance=0;
@@ -920,14 +920,13 @@ eTimerView::eTimerView( ePlaylistEntry* e)
 		new eListBoxEntryText( *emonth, monthStr[i], (void*) i );
 
 	new eListBoxEntryText( *type, _("switch"), (void*) ePlaylistEntry::SwitchTimerEntry );
-	switch( tuxbox_get_model() )
-	{
-		case TUXBOX_MODEL_DREAMBOX_DM7000:
-			new eListBoxEntryText( *type, _("record DVR"), (void*) (ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR) );
-		case TUXBOX_MODEL_DBOX2:
-			new eListBoxEntryText( *type, _("Ngrab"), (void*) (ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recNgrab) );
-			//new eListBoxEntryText( *type, _("record VCR"), (void*) ePlaylistEntry::RecTimerEntry|ePlaylisteEntry::recVCR );
-	}
+
+	tuxbox_capabilities caps = tuxbox_get_capabilities();
+	if (caps & TUXBOX_CAPABILITIES_HDD)
+		new eListBoxEntryText( *type, _("record DVR"), (void*) (ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR) );
+	if (caps & TUXBOX_CAPABILITIES_NETWORK)
+		new eListBoxEntryText( *type, _("Ngrab"), (void*) (ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recNgrab) );
+		//new eListBoxEntryText( *type, _("record VCR"), (void*) ePlaylistEntry::RecTimerEntry|ePlaylisteEntry::recVCR );
 
 	if (e)
 	{
@@ -1090,17 +1089,13 @@ void eTimerView::selChanged( eListBoxEntryTimer *entry )
 		tm tmp = *localtime( &now );
 		updateDateTime( tmp, tmp );
 
-		switch( tuxbox_get_model() )
-		{
-			case TUXBOX_MODEL_DREAMBOX_DM7000:
-				type->setCurrent( (void*)(ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR) );
-				break;
-			case TUXBOX_MODEL_DBOX2:
-				type->setCurrent( (void*)(ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recNgrab) );
-				break;
-			default:
-				type->setCurrent( (void*)ePlaylistEntry::SwitchTimerEntry );
-		}
+		tuxbox_capabilities caps = tuxbox_get_capabilities();
+		if (caps & TUXBOX_CAPABILITIES_HDD)
+			type->setCurrent( (void*)(ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR) );
+		else if (caps & TUXBOX_CAPABILITIES_NETWORK)
+			type->setCurrent( (void*)(ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recNgrab) );
+		else
+			type->setCurrent( (void*)ePlaylistEntry::SwitchTimerEntry );
 
 		eServiceReference ref = eServiceInterface::getInstance()->service;
 

@@ -11,7 +11,7 @@
 #include <libmd5sum.h>
 #include <lib/dvb/edvb.h>
 #include <sys/mman.h>
-#include <libtuxbox.h>
+#include <tuxbox.h>
 
 #define TMP_IMAGE "/var/tmp/root.cramfs"
 #define TMP_IMAGE_ALT "/var/tmp/cdk.cramfs"
@@ -504,12 +504,11 @@ void eUpgrade::flashImage(int checkmd5)
 				eString mtd;
 				switch ( tuxbox_get_model() )
 				{
-				case TUXBOX_MODEL_DBOX2:		// d-box2
+				case TUXBOX_MODEL_DBOX2:
 					mtd="2";
 					mtdsize=0x6e0000;
 					break;
-				case TUXBOX_MODEL_DREAMBOX_DM5600:// dreambox
-				case TUXBOX_MODEL_DREAMBOX_DM7000:
+				case TUXBOX_MODEL_DREAMBOX:
 					mtd="0";
 					mtdsize=0x700000;
 					break;

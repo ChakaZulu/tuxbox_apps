@@ -14,7 +14,7 @@
 #include <lib/dvb/edvb.h>
 #include <lib/dvb/decoder.h>
 
-#include <libtuxbox.h>
+#include <tuxbox.h>
 
 /* sucks */
 
@@ -109,7 +109,7 @@ int eAVSwitch::setVolume(int vol)
 	if (vol>63)
 		vol=63;
 
-	if (tuxbox_get_model() != TUXBOX_MODEL_DBOX2)
+	if (tuxbox_get_model() == TUXBOX_MODEL_DREAMBOX)
 	{
 		if ((vol == 63) && !mute)
 		{
