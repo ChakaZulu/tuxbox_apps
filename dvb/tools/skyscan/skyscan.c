@@ -103,11 +103,11 @@ int main(int argc, char **argv) {
     else if(strncmp(command,"address",7) == 0) {
       for(count=7;(count<strlen(command))&&(command[count]==0x20);count++) {}
       if(strcmp(&command[count],"any") == 0)
-	diseqc.addr=0x31;
+	diseqc.addr=0x30;
       else if (strcmp(&command[count],"polar") == 0)
-	diseqc.addr=0x32;
+	diseqc.addr=0x31;
       else if (strcmp(&command[count],"elevation") == 0)
-	diseqc.addr=0x33;
+	diseqc.addr=0x32;
       else
 	printf("illegal address - valid are: any polar elevation\n");
     }
