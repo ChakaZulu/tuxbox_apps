@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.89 2003/09/16 08:58:39 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.90 2003/09/17 09:54:44 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -311,8 +311,9 @@ void CBouquetManager::saveBouquets(CZapitClient::bouquetMode bouquetMode, char *
 	
 	diseqcType = frontend->getDiseqcType();
 	frontendType = getFrontendName();
-	
-	if (diseqcType != DISEQC_1_2)
+
+/*	if (diseqcType != DISEQC_1_2) */
+	if (bouquetMode != CZapitClient::BM_CREATESATELLITEBOUQUET)
 	{
 		// not diseqc 1.2 or (diseqc 1.2 and no bouquets.xml file exists)
 
@@ -320,6 +321,7 @@ void CBouquetManager::saveBouquets(CZapitClient::bouquetMode bouquetMode, char *
 		{
 			storeBouquets();
 
+			clearAll();
 			loadBouquets();
 			deleteBouquet(remainChannels);
 			remainChannels = NULL;
@@ -355,6 +357,7 @@ void CBouquetManager::saveBouquets(CZapitClient::bouquetMode bouquetMode, char *
 	}
 	else
 	{
+/*
 		//diseqc 1.2
 		//just replace existings bouquets
 		
@@ -379,6 +382,7 @@ void CBouquetManager::saveBouquets(CZapitClient::bouquetMode bouquetMode, char *
 			}
 		}
 		else
+*/
 		if (bouquetMode == CZapitClient::BM_CREATESATELLITEBOUQUET)
 		{
 			if (providerName != NULL)
