@@ -76,6 +76,10 @@
 			function init()
 			{
 				data.location = "data";
+				var refresh = 10000;
+				if (data.updateCycleTime)
+					refresh = data.updateCycleTime;
+				setTimeout("init()", refresh);
 			}
 		</script>
 	</head>
@@ -136,11 +140,11 @@
 									<td width="190px" align="right">
 										<img id="recording" width="12" border="0" src="trans.gif">
 										<img height="0" width="5" border="0" src="trans.gif">
-										<img id="imgDolby" src="dolby_off.png" border="0">
-										<img height="0" width="5" border="0" src="trans.gif">
 										<img id="imgCrypt" src="crypt_off.png" border="0">
 										<img height="0" width="5" border="0" src="trans.gif">
 										<img id="imgFormat" src="format_off.png" border="0">
+										<img height="0" width="5" border="0" src="trans.gif">
+										<img id="imgDolby" src="dolby_off.png" border="0">
 									</td>
 								</tr>
 								</table>
