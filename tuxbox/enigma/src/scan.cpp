@@ -76,8 +76,7 @@ void tsFindInit::scanPacket()
 	{
 		state=sFailed;
 		body->setText("Tja, leider konnte kein einziger Transponder gefunden werden. Vielleicht sollte die Antenne angeschlossen werden..."
-		"\nIm Ernst: es tut mir wirklich leid, aber da IST NICHTS. Evtl. bringt's was, den frequencyOffset in der /var/elitedvb/elitedvb.ini korrekt"
-		" zu setzen, wenn der LNB schief in der Frequenz liegt.");
+		"\nIm Ernst: es tut mir wirklich leid, aber da IST NICHTS.");
 		return;
 	}
 	body->setText("scanning " + packets.current()->name);
