@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.81 2001/11/23 16:58:41 McClean Exp $
+        $Id: neutrino.cpp,v 1.82 2001/11/23 17:09:22 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.82  2001/11/23 17:09:22  McClean
+  dont know
+
   Revision 1.81  2001/11/23 16:58:41  McClean
   update-functions
 
@@ -624,6 +627,7 @@ void CNeutrinoApp::firstChannel()
 
 void CNeutrinoApp::isCamValid()
 {
+
 	int sock_fd;
 	SAI servaddr;
 	char rip[]="127.0.0.1";
@@ -678,7 +682,7 @@ void CNeutrinoApp::isCamValid()
 	{
 		printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n!!\t\t\t\t\t\t\t!!\n!!\tATTENTION, YOUR CARD DOES NOT MATCH CAMALPHA.BIN!!\n!!\t\t\t\t\t\t\t!!\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
 	}
-	 
+
 }
 
 		
@@ -1964,7 +1968,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.81 2001/11/23 16:58:41 McClean Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.82 2001/11/23 17:09:22 McClean Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;
