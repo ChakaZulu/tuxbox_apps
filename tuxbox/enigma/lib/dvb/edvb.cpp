@@ -21,6 +21,7 @@
 #include "init.h"
 #include "config.h"
 #include <algorithm>
+#include "streamwd.h"
 
 eDVB *eDVB::instance;
 
@@ -966,6 +967,7 @@ eDVB::eDVB()
 	printf("instance: %p\n",  eAVSwitch::getInstance());
 	eAVSwitch::getInstance()->setInput(0);
 	eAVSwitch::getInstance()->setActive(1);
+	eStreamWatchdog::getInstance()->reloadSettings();
 
 	int vol, m;
 	if (config.getKey("/elitedvb/audio/volume", vol))
