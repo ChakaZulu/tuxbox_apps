@@ -1025,9 +1025,9 @@ static void pes_in_ts(p2p *p)
 }
 
 
-void write_out(uint8_t *buf, int count,void  *p)
+void write_out(uint8_t *buf, int count,p2p  *p)
 {
-	write(STDOUT_FILENO, buf, count);
+	write(p->fd1, buf, count);
 }
 
 
@@ -1049,9 +1049,7 @@ void pes_to_ts2( int fdin, int fdout, uint16_t pida, uint16_t pidv)
 	p.count1 = 0;
 	p.count0 = 0;
 	p.func = write_out;
-		
 	if (fdin != STDIN_FILENO) verb = 1; 
-
 	if (verb) {
 		length = lseek(fdin, 0, SEEK_END);
 		lseek(fdin,0,SEEK_SET);
@@ -1061,8 +1059,8 @@ void pes_to_ts2( int fdin, int fdout, uint16_t pida, uint16_t pidv)
 		count = read(fdin,buf,SIZE);
 		l += count;
 		if (verb)
-			fprintf(stderr,"Writing TS  %2.2f %%\r",
-				100.*l/length);
+			//fprintf(stdout,"Writing TS  %2.2f %%\r",
+			//	100.*l/length);
 
 		get_pes(buf,count,&p,pes_in_ts);
 	}
