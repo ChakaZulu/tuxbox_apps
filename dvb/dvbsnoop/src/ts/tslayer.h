@@ -1,5 +1,5 @@
 /*
-$Id: tslayer.h,v 1.5 2004/01/01 20:09:43 rasc Exp $
+$Id: tslayer.h,v 1.6 2004/04/05 17:32:14 rasc Exp $
 
 
    
@@ -19,8 +19,8 @@ $Id: tslayer.h,v 1.5 2004/01/01 20:09:43 rasc Exp $
 
 
 void decodeTS_buf (u_char *b, int len, int pid);
-int  ts_adaption_field (u_char *b);
-int  ts_adaption_field_extension (u_char *b);
+int  ts_adaptation_field (u_char *b);
+int  ts_adaptation_field_extension (u_char *b);
 
 
 #endif

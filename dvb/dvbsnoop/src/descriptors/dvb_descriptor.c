@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.29 2004/02/10 22:57:54 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.30 2004/04/05 17:32:13 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dvb_descriptor.c,v 1.29 2004/02/10 22:57:54 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.30  2004/04/05 17:32:13  rasc
+mass typo fix adaption --> adaptation
+
 Revision 1.29  2004/02/10 22:57:54  rasc
 MHP descriptor, missing DVB descriptor done
 
@@ -220,7 +223,7 @@ int  descriptorDVB  (u_char *b)
      case 0x6D:  descriptorDVB_CellFrequencyLink(b);  break;
      case 0x6E:  descriptorDVB_AnnouncementSupport(b);  break;
      case 0x6F:  descriptorDVB_ApplicationSignalling(b);  break;
-     case 0x70:  descriptorDVB_AdaptionFieldData(b);  break;
+     case 0x70:  descriptorDVB_AdaptationFieldData(b);  break;
      case 0x71:  descriptorDVB_ServiceIdentifier(b);  break;
      case 0x72:  descriptorDVB_ServiceAvailability(b);  break;
 
@@ -3641,27 +3644,27 @@ void descriptorDVB_ApplicationSignalling (u_char *b)
 
 
 /*
-  0x70  Adaption Field Data descriptor 
+  0x70  Adaptation Field Data descriptor 
   ETSI EN 300 468     6.2.x
 */
 
-void descriptorDVB_AdaptionFieldData (u_char *b)
+void descriptorDVB_AdaptationFieldData (u_char *b)
 
 {
 
- typedef struct  _descAdaptionFieldData {
+ typedef struct  _descAdaptationFieldData {
     u_int      descriptor_tag;
     u_int      descriptor_length;		
 
-    u_int      adaptionFieldDataIdentifier;
+    u_int      adaptationFieldDataIdentifier;
 
     // ? .. 
 
- } descAdaptionFieldData;
+ } descAdaptationFieldData;
 
 
 
- descAdaptionFieldData     d;
+ descAdaptationFieldData     d;
  int                       len;
  int                       i;
 
@@ -3670,16 +3673,16 @@ void descriptorDVB_AdaptionFieldData (u_char *b)
  d.descriptor_tag		 = b[0];
  d.descriptor_length       	 = b[1];
 
- d.adaptionFieldDataIdentifier   = getBits (b, 0, 16, 8);
+ d.adaptationFieldDataIdentifier   = getBits (b, 0, 16, 8);
 
  b   += 3;
  len = d.descriptor_length - 1;
 
 
- out_SB_NL (4,"Adaption field data identifier: ",
-        d.adaptionFieldDataIdentifier);
+ out_SB_NL (4,"Adaptation field data identifier: ",
+        d.adaptationFieldDataIdentifier);
   indent (+1);
-   i = d.adaptionFieldDataIdentifier;
+   i = d.adaptationFieldDataIdentifier;
    if (i & 0x01) out_nl (4,"[= announcement switching data field]");
    if (i & 0xFE) out_nl (4,"[= reserved]");
  indent (-1);

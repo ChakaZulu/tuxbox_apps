@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.h,v 1.8 2004/01/01 20:31:22 rasc Exp $ 
+$Id: dvb_descriptor.h,v 1.9 2004/04/05 17:32:13 rasc Exp $ 
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dvb_descriptor.h,v 1.8 2004/01/01 20:31:22 rasc Exp $
 
 
 $Log: dvb_descriptor.h,v $
+Revision 1.9  2004/04/05 17:32:13  rasc
+mass typo fix adaption --> adaptation
+
 Revision 1.8  2004/01/01 20:31:22  rasc
 PES program stream map, minor descriptor cleanup
 
@@ -105,7 +108,7 @@ void  descriptorDVB_CellList(u_char *b);
 void  descriptorDVB_CellFrequencyLink(u_char *b);
 void  descriptorDVB_AnnouncementSupport(u_char *b);
 void  descriptorDVB_ApplicationSignalling(u_char *b);
-void  descriptorDVB_AdaptionFieldData(u_char *b);
+void  descriptorDVB_AdaptationFieldData(u_char *b);
 void  descriptorDVB_ServiceIdentifier(u_char *b);
 void  descriptorDVB_ServiceAvailability(u_char *b);
 

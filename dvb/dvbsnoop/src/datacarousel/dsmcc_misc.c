@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_misc.c,v 1.14 2004/02/29 20:42:55 rasc Exp $
+$Id: dsmcc_misc.c,v 1.15 2004/04/05 17:32:12 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: dsmcc_misc.c,v 1.14 2004/02/29 20:42:55 rasc Exp $
 
 
 $Log: dsmcc_misc.c,v $
+Revision 1.15  2004/04/05 17:32:12  rasc
+mass typo fix adaption --> adaptation
+
 Revision 1.14  2004/02/29 20:42:55  rasc
 no message
 
@@ -235,7 +238,7 @@ static int subDescriptor (u_char *b)
  * ISO/IEC 13818-6
  * dsmccMessageHeader() 
  * returns some header info in DSM_MSG_HD struct
- * (msg_len is len after read header incl. adaption field)
+ * (msg_len is len after read header incl. adaptation field)
  */
 
 int dsmcc_MessageHeader (int v, u_char *b, int len,  DSMCC_MSG_HD *d)
@@ -274,7 +277,7 @@ int dsmcc_MessageHeader (int v, u_char *b, int len,  DSMCC_MSG_HD *d)
 
 
   		      outBit_Sx_NL (v,"reserved: ", 		b+8, 0,  8);
-  	adapt_len   = outBit_Sx_NL (v,"adaptionLength: ",	b+9, 0,  8);
+  	adapt_len   = outBit_Sx_NL (v,"adaptationLength: ",	b+9, 0,  8);
   	d->msg_len  = outBit_Sx_NL (v,"messageLength: ",	b+10,0, 16);
 	b += 12;
 	// len -= 12;

@@ -1,5 +1,5 @@
 /*
-$Id: tslayer.c,v 1.16 2004/01/06 20:06:36 rasc Exp $
+$Id: tslayer.c,v 1.17 2004/04/05 17:32:14 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: tslayer.c,v 1.16 2004/01/06 20:06:36 rasc Exp $
 
 
 $Log: tslayer.c,v $
+Revision 1.17  2004/04/05 17:32:14  rasc
+mass typo fix adaption --> adaptation
+
 Revision 1.16  2004/01/06 20:06:36  rasc
 revert a change for -s signal + small adaptions
 (frontend.h uses enums instead of #defines, so committ didn't work...)
@@ -100,10 +103,10 @@ void decodeTS_buf (u_char *b, int len, int pid)
     u_int      transport_priority;		
     u_int      pid;		
     u_int      transport_scrambling_control;		
-    u_int      adaption_field_control;		
+    u_int      adaptation_field_control;		
     u_int      continuity_counter;		
 
-    // adaption field
+    // adaptation field
     // or N ... data bytes
 
  } TS_PackLayer;
@@ -131,7 +134,7 @@ void decodeTS_buf (u_char *b, int len, int pid)
  t.transport_priority		 = getBits (b, 0,10, 1);
  t.pid				 = getBits (b, 0,11, 13);
  t.transport_scrambling_control	 = getBits (b, 0,24, 2);
- t.adaption_field_control	 = getBits (b, 0,26, 2);
+ t.adaptation_field_control	 = getBits (b, 0,26, 2);
  t.continuity_counter		 = getBits (b, 0,28, 4);
 
 
@@ -152,9 +155,9 @@ void decodeTS_buf (u_char *b, int len, int pid)
 	t.transport_scrambling_control,
 	dvbstrTS_ScramblingCtrl_TYPE (t.transport_scrambling_control) );
 
- out_S2B_NL (3,"adaption_field_control: ",
-	t.adaption_field_control,
-	dvbstrTS_AdaptionField_TYPE (t.adaption_field_control) );
+ out_S2B_NL (3,"adaptation_field_control: ",
+	t.adaptation_field_control,
+	dvbstrTS_AdaptationField_TYPE (t.adaptation_field_control) );
 
  out_SB_NL (3,"continuity_counter: ",t.continuity_counter);
 
@@ -163,11 +166,11 @@ void decodeTS_buf (u_char *b, int len, int pid)
  b   += 4;
 
 
- if (t.adaption_field_control & 0x2) {
+ if (t.adaptation_field_control & 0x2) {
     indent (+1);
-    out_nl (3,"Adaption_field: ");
+    out_nl (3,"Adaptation_field: ");
     	indent (+1);
-    	n = ts_adaption_field (b);
+    	n = ts_adaptation_field (b);
     	b   += n;
     	len -= n;
     	indent (-1);
@@ -175,7 +178,7 @@ void decodeTS_buf (u_char *b, int len, int pid)
  }
 
  
- if (t.adaption_field_control & 0x1) {
+ if (t.adaptation_field_control & 0x1) {
 
     indent (+1);
     out_nl (3,"Payload: (len: %d)",len);
@@ -212,12 +215,12 @@ void decodeTS_buf (u_char *b, int len, int pid)
 
 
 
-int ts_adaption_field (u_char  *b)
+int ts_adaptation_field (u_char  *b)
 
 {
 
- typedef struct  _TS_AdaptionField {
-    u_int      adaption_field_length;
+ typedef struct  _TS_AdaptationField {
+    u_int      adaptation_field_length;
 
     // if length > 0
     u_int      discontinuity_indicator;
@@ -227,7 +230,7 @@ int ts_adaption_field (u_char  *b)
     u_int      OPCR_flag;
     u_int      splicing_point_flag;
     u_int      transport_private_data_flag;
-    u_int      adaption_field_extension_flag;
+    u_int      adaptation_field_extension_flag;
 
     // PCR_flag == 1
     u_long     program_clock_reference_baseH;
@@ -248,29 +251,29 @@ int ts_adaption_field (u_char  *b)
     u_int      transport_private_data_length;
 	// N   data bytes
 
-    // adaption_field_extension_flag == 1
+    // adaptation_field_extension_flag == 1
    
-	// N2  adaption_field_extension  
+	// N2  adaptation_field_extension  
 
     // N stuffing bytes...
 
 
 
- } TS_AdaptionField;
+ } TS_AdaptationField;
 
 
- TS_AdaptionField  a;
+ TS_AdaptationField  a;
  int               len,n;
 
 
 
- a.adaption_field_length   	 		= b[0];
+ a.adaptation_field_length   	 		= b[0];
 
- out_SB_NL (5,"Adaption_field_length: ",a.adaption_field_length);
+ out_SB_NL (5,"Adaptation_field_length: ",a.adaptation_field_length);
  b  += 1;
- len = a.adaption_field_length;
+ len = a.adaptation_field_length;
 
- if (a.adaption_field_length == 0)
+ if (a.adaptation_field_length == 0)
     return 1;
 
 
@@ -281,7 +284,7 @@ int ts_adaption_field (u_char  *b)
  a.OPCR_flag					= getBits (b, 0, 4, 1);
  a.splicing_point_flag				= getBits (b, 0, 5, 1);
  a.transport_private_data_flag			= getBits (b, 0, 6, 1);
- a.adaption_field_extension_flag		= getBits (b, 0, 7, 1);
+ a.adaptation_field_extension_flag		= getBits (b, 0, 7, 1);
 
  b   += 1;
  len -= 1;
@@ -293,7 +296,7 @@ int ts_adaption_field (u_char  *b)
  out_SB_NL (3,"OPCR_flag: ",a.OPCR_flag);
  out_SB_NL (3,"splicing_point_flag: ",a.splicing_point_flag);
  out_SB_NL (3,"transport_private_data_flag: ",a.transport_private_data_flag);
- out_SB_NL (3,"adaption_field_extension_flag: ",a.adaption_field_extension_flag);
+ out_SB_NL (3,"adaptation_field_extension_flag: ",a.adaptation_field_extension_flag);
 
   if (a.PCR_flag) {
      a.program_clock_reference_baseH		= getBits (b, 0, 0,  1);
@@ -356,10 +359,10 @@ int ts_adaption_field (u_char  *b)
 
    // Extension
 
-  if (a.adaption_field_extension_flag) {
+  if (a.adaptation_field_extension_flag) {
       indent (+1);
 
-      n = ts_adaption_field_extension (b);
+      n = ts_adaptation_field_extension (b);
       b   += n;
       len -= n;
 
@@ -375,7 +378,7 @@ int ts_adaption_field (u_char  *b)
    }
 
 
- return (a.adaption_field_length + 1);
+ return (a.adaptation_field_length + 1);
 }
 
 
@@ -383,12 +386,12 @@ int ts_adaption_field (u_char  *b)
 
 
 
-int ts_adaption_field_extension (u_char  *b)
+int ts_adaptation_field_extension (u_char  *b)
 
 {
 
- typedef struct  _TS_AdaptionExtField {
-    u_int      adaption_field_extension_length;
+ typedef struct  _TS_AdaptationExtField {
+    u_int      adaptation_field_extension_length;
     u_int      ltw_flag;
     u_int      piecewise_rate_flag;
     u_int      seamless_splice_flag;
@@ -413,22 +416,22 @@ int ts_adaption_field_extension (u_char  *b)
 
     // N ... Reserved
 
- } TS_AdaptionExtField;
+ } TS_AdaptationExtField;
 
 
- TS_AdaptionExtField  a;
+ TS_AdaptationExtField  a;
  int                  len;
 
 
- a.adaption_field_extension_length  		= b[0];
+ a.adaptation_field_extension_length  		= b[0];
 
- out_SB_NL (5,"Adaption_field_extension_length: ",
-	a.adaption_field_extension_length);
+ out_SB_NL (5,"Adaptation_field_extension_length: ",
+	a.adaptation_field_extension_length);
  b  += 1;
- if (a.adaption_field_extension_length == 0)
+ if (a.adaptation_field_extension_length == 0)
     return 1;
 
- len = a.adaption_field_extension_length;
+ len = a.adaptation_field_extension_length;
 
 
   a.ltw_flag				= getBits (b, 0, 0,  1);
@@ -499,5 +502,5 @@ int ts_adaption_field_extension (u_char  *b)
   }
 
 
- return a.adaption_field_extension_length + 1;
+ return a.adaptation_field_extension_length + 1;
 }

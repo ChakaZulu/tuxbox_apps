@@ -1,5 +1,5 @@
 /*
-$Id: fe_signal.c,v 1.10 2004/03/21 13:20:07 rasc Exp $
+$Id: fe_signal.c,v 1.11 2004/04/05 17:32:13 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: fe_signal.c,v 1.10 2004/03/21 13:20:07 rasc Exp $
 
 
 $Log: fe_signal.c,v $
+Revision 1.11  2004/04/05 17:32:13  rasc
+mass typo fix adaption --> adaptation
+
 Revision 1.10  2004/03/21 13:20:07  rasc
 more -feinfo, some restructs on FE code
 
@@ -33,7 +36,7 @@ Revision 1.6  2004/01/06 20:35:14  rasc
 no message
 
 Revision 1.5  2004/01/06 20:06:36  rasc
-revert a change for -s signal + small adaptions
+revert a change for -s signal + small adaptations
 (frontend.h uses enums instead of #defines, so commit didn't work...)
 
 Revision 1.4  2004/01/05 02:03:42  rasc

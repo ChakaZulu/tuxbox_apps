@@ -1,5 +1,5 @@
 /*
-$Id: dmx_tspidscan.c,v 1.15 2004/01/31 01:24:26 rasc Exp $
+$Id: dmx_tspidscan.c,v 1.16 2004/04/05 17:32:13 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dmx_tspidscan.c,v 1.15 2004/01/31 01:24:26 rasc Exp $
 
 
 $Log: dmx_tspidscan.c,v $
+Revision 1.16  2004/04/05 17:32:13  rasc
+mass typo fix adaption --> adaptation
+
 Revision 1.15  2004/01/31 01:24:26  rasc
 PIDSCAN  redesign,
 try to show pid content  (PES streamID, SECTION tableID)
@@ -405,12 +408,12 @@ static TS_PID *ts_payload_check (u_char *b, TS_PID *tspid)
 		int scrambled		= getBits (b, 0,24, 2);
 
 	  	if (err_bit == 0 && scrambled == 0) {
-	  		int adaption_field_ctrl	= getBits (b, 0,26, 2);
+	  		int adaptation_field_ctrl	= getBits (b, 0,26, 2);
 
 			j = 4;
-			if (adaption_field_ctrl & 0x2)  j += b[j] + 1;	// add adapt.field.len
+			if (adaptation_field_ctrl & 0x2)  j += b[j] + 1;	// add adapt.field.len
 
-			if (adaption_field_ctrl & 0x1) {
+			if (adaptation_field_ctrl & 0x1) {
 				if (b[j]==0x00 && b[j+1]==0x00 && b[j+2]==0x01 && b[j+3]>=0xBC) {
 					// -- PES
 					tspid->type = TS_PES;

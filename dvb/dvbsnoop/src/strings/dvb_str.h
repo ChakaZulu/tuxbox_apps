@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.h,v 1.20 2004/03/31 21:14:23 rasc Exp $ 
+$Id: dvb_str.h,v 1.21 2004/04/05 17:32:13 rasc Exp $ 
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dvb_str.h,v 1.20 2004/03/31 21:14:23 rasc Exp $
 
 
 $Log: dvb_str.h,v $
+Revision 1.21  2004/04/05 17:32:13  rasc
+mass typo fix adaption --> adaptation
+
 Revision 1.20  2004/03/31 21:14:23  rasc
 New: Spider section pids  (snoop referenced section pids),
 some minor changes
@@ -132,7 +135,7 @@ char *dvbstrAnnouncementReference_TYPE(u_int id);
 /* -- Transport Stream Stuff */
 
 char *dvbstrTSpid_ID (u_int id);
-char *dvbstrTS_AdaptionField_TYPE (u_int id);
+char *dvbstrTS_AdaptationField_TYPE (u_int id);
 char *dvbstrTS_ScramblingCtrl_TYPE (u_int id);
 
 /* -- PES stuff */

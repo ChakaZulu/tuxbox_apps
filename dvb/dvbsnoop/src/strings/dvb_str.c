@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.49 2004/03/31 21:14:23 rasc Exp $
+$Id: dvb_str.c,v 1.50 2004/04/05 17:32:13 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.49 2004/03/31 21:14:23 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.50  2004/04/05 17:32:13  rasc
+mass typo fix adaption --> adaptation
+
 Revision 1.49  2004/03/31 21:14:23  rasc
 New: Spider section pids  (snoop referenced section pids),
 some minor changes
@@ -414,7 +417,7 @@ char *dvbstrDVBDescriptorTAG (u_int tag)
      {  0x6D, 0x6D,  "cell_frequency_list_descriptor" },
      {  0x6E, 0x6E,  "announcement_support_descriptor" },
      {  0x6F, 0x6F,  "application_signalling_descriptor" },
-     {  0x70, 0x70,  "adaption_field_data_descriptor" },
+     {  0x70, 0x70,  "adaptation_field_data_descriptor" },
      {  0x71, 0x71,  "service_identifier_descriptor" },
      {  0x72, 0x72,  "service_availability_descriptor" },
      {  0x73, 0x7F,  "reserved_descriptor" },
@@ -1951,17 +1954,17 @@ char *dvbstrTS_ScramblingCtrl_TYPE (u_int i)
 
 
 /*
-  -- Adaption Field Type  ISO 13818-1  2.4.3.2
+  -- Adaptation Field Type  ISO 13818-1  2.4.3.2
 */
 
-char *dvbstrTS_AdaptionField_TYPE (u_int i)
+char *dvbstrTS_AdaptationField_TYPE (u_int i)
 
 {
   STR_TABLE  Table[] = {
      {  0x00, 0x00,  "reserved" },
-     {  0x01, 0x01,  "no adaption_field, payload only" },
-     {  0x02, 0x02,  "adaption_field only, no payload" },
-     {  0x03, 0x03,  "adaption_field followed by payload" },
+     {  0x01, 0x01,  "no adaptation_field, payload only" },
+     {  0x02, 0x02,  "adaptation_field only, no payload" },
+     {  0x03, 0x03,  "adaptation_field followed by payload" },
      {  0,0, NULL }
   };
 
