@@ -1,7 +1,7 @@
 #ifndef SISECTIONS_HPP
 #define SISECTIONS_HPP
 //
-// $Id: SIsections.hpp,v 1.4 2001/05/21 22:44:44 fnbrd Exp $
+// $Id: SIsections.hpp,v 1.5 2001/06/10 23:00:45 fnbrd Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -24,6 +24,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.hpp,v $
+// Revision 1.5  2001/06/10 23:00:45  fnbrd
+// Nur ein Kommentar mehr (in Beschreibung von readSections)
+//
 // Revision 1.4  2001/05/21 22:44:44  fnbrd
 // Timeout verbessert.
 //
@@ -314,9 +317,10 @@ class SIsections : public set <SIsection, less<SIsection> >
   public:
     // Liefert 0 falls kein Fehler
     // Algo:
-    // (1) Segement lesen (wird zum ersten Segment deklariert)
-    // (2) alle Segment lesen bis erstes wieder kommt
-    // (3) fehlende Segmente (s. last_section_number) versuchen zu lesen
+    // (1) Segment lesen (wird zum ersten Segment deklariert)
+    // (2) Falls Segmentnummer = letze Segmentnummer = 0 dann fertig, sonst
+    // (3) alle Segment lesen bis erstes wieder kommt
+    // (4) fehlende Segmente (s. last_section_number) versuchen zu lesen
     // Der Timeout gilt fuer jeden der 3 Abschnitte, d.h. maximal dauert
     // es 3 x timeout.
     // Mit readNext=0 werden nur aktuelle Sections gelesen (current_next_indicator = 1)
