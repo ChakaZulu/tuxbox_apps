@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.h,v 1.19 2002/09/24 20:59:12 thegoodguy Exp $
+	$Id: timermanager.h,v 1.20 2002/09/24 21:10:42 Zwen Exp $
 
 	License: GPL
 
@@ -231,6 +231,7 @@ class CTimerManager
 		int modifyEvent(int eventID, time_t announceTime, time_t alarmTime, time_t stopTime, CTimerEvent::CTimerEventRepeat evrepeat = CTimerEvent::TIMERREPEAT_ONCE);
 		int rescheduleEvent(int eventID, time_t announceTime, time_t alarmTime, time_t stopTime);
 		void saveEventsToConfig();
+		bool shutdown();
 };
 
 #endif

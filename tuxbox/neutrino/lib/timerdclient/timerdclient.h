@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdclient.h,v 1.17 2002/09/24 20:59:12 thegoodguy Exp $
+	$Id: timerdclient.h,v 1.18 2002/09/24 21:10:42 Zwen Exp $
 
 	License: GPL
 
@@ -149,6 +149,9 @@ class CTimerdClient
 			// keine ahnung ob / was hier noch fehlt
 			return addTimerEvent(CTimerEvent::TIMER_NEXTPROGRAM, &eventInfo, alarmtime, announcetime, stoptime);
 		};
+
+		// Exit timerd and programm wakeup
+		bool shutdown();
 };
 
 #endif

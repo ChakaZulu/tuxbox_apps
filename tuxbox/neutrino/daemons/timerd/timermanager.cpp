@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.cpp,v 1.29 2002/09/24 20:59:12 thegoodguy Exp $
+	$Id: timermanager.cpp,v 1.30 2002/09/24 21:10:42 Zwen Exp $
 
 	License: GPL
 
@@ -23,7 +23,11 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include <unistd.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
 #include <sstream>
+
+#include "dbox/fp.h"
 
 #include "timermanager.h"
 #include "debug.h"
@@ -241,6 +245,53 @@ void CTimerManager::saveEventsToConfig()
     config->saveConfig(CONFIGFILE);
     delete config;
     
+}
+//------------------------------------------------------------
+bool CTimerManager::shutdown()
+{
+	time_t nextAnnounceTime=0;
+	CTimerEventMap::iterator pos = events.begin();
+	for(;pos != events.end();pos++)
+	{
+		CTimerEvent *event = pos->second;
+		if(event->eventType == CTimerEvent::TIMER_RECORD ||
+			event->eventType == CTimerEvent::TIMER_ZAPTO )
+		{
+			// Wir wachen nur für Records und Zaptos wieder auf
+			if(event->announceTime < nextAnnounceTime || nextAnnounceTime==0)
+			{
+				nextAnnounceTime=event->announceTime;
+			}
+		}
+	}
+	if(nextAnnounceTime!=0)
+	{
+		int minutes,x;
+		minutes=((nextAnnounceTime-time(NULL))/60)+5; //Wakeup 5 min befor next announce
+		int fd = open("/dev/dbox/fp0", O_RDWR);
+		if ((x=ioctl(fd, FP_IOCTL_SET_WAKEUP_TIMER, &minutes))<0)
+		{
+			if(x==-1) // Wakeup not supported
+			{
+				dprintf("Wakeup not supported (%d min.)\n",minutes);
+			}
+			else
+			{
+				dprintf("Error setting wakeup (%d)\n",x);
+			}
+			return false;
+		}
+		else
+		{
+			dprintf("wakeup in %d min. programmed\n",minutes);
+			return true;
+		}
+	}
+	else
+	{
+		dprintf("no wakeup timed\n");
+		return false;
+	}
 }
 
 //------------------------------------------------------------

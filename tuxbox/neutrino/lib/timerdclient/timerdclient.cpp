@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.19 2002/09/23 17:19:57 Zwen Exp $
+	$Id: timerdclient.cpp,v 1.20 2002/09/24 21:10:42 Zwen Exp $
 
 	License: GPL
 
@@ -370,6 +370,22 @@ bool CTimerdClient::isTimerdAvailable()
 		return false;
 	}
 	timerd_close();
+}
+//-------------------------------------------------------------------------
+bool CTimerdClient::shutdown()
+{
+	CTimerd::commandHead msg;
+	msg.version=CTimerd::ACTVERSION;
+	msg.cmd=CTimerd::CMD_SHUTDOWN;
+ 
+	timerd_connect();
+	send((char*)&msg, sizeof(msg));
+	
+	CTimerd::responseStatus response;
+	receive((char*)&response, sizeof(response));
+
+	timerd_close();
+	return response.status;
 }
 //-------------------------------------------------------------------------
 

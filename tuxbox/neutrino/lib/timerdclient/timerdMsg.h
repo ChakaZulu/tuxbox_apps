@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 
-	$Id: timerdMsg.h,v 1.16 2002/09/24 20:59:12 thegoodguy Exp $
+	$Id: timerdMsg.h,v 1.17 2002/09/24 21:10:42 Zwen Exp $
 
 	License: GPL
 
@@ -63,7 +63,8 @@ class CTimerd
 
 			CMD_REGISTEREVENT,
 			CMD_UNREGISTEREVENT,
-			CMD_TIMERDAVAILABLE
+			CMD_TIMERDAVAILABLE,
+			CMD_SHUTDOWN
 		};
 
 
