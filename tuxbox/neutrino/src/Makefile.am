@@ -36,5 +36,6 @@ neutrino_LDADD = \
 	@UCODES_LIBS@ \
 	@ZAPIT_LIBS@ \
 	@LIRCDCLIENT_LIBS@ \
+	-lmad \
 	-lpthread -lz
 
