@@ -36,6 +36,7 @@
 /* include <config.h> before <gui/filebrowser.h> to enable 64 bit file offsets */
 #include <gui/filebrowser.h>
 
+#include <gui/widget/buttons.h>
 #include <gui/widget/icons.h>
 #include <gui/widget/messagebox.h>
 
@@ -77,7 +78,7 @@ size_t CurlWriteToString(void *ptr, size_t size, size_t nmemb, void *data)
 	return size*nmemb;
 }
 //------------------------------------------------------------------------
-int CFile::getType()
+int CFile::getType(void) const
 {
 	if(S_ISDIR(Mode))
 		return FILE_DIR;
@@ -103,7 +104,7 @@ int CFile::getType()
 
 //------------------------------------------------------------------------
 
-std::string CFile::getFileName()	const	// return name.extension or folder name without trailing /
+std::string CFile::getFileName(void) const  // return name.extension or folder name without trailing /
 {
 	std::string::size_type namepos = Name.rfind('/');
 
@@ -112,7 +113,7 @@ std::string CFile::getFileName()	const	// return name.extension or folder name w
 
 //------------------------------------------------------------------------
 
-std::string CFile::getPath() const			// return complete path including trailing /
+std::string CFile::getPath(void) const      // return complete path including trailing /
 {
 	int pos = 0;
 
@@ -147,7 +148,7 @@ bool sortByName (const CFile& a, const CFile& b)
 */
 }
 
-bool sortByNameDirsFirst(CFile a, CFile b)
+bool sortByNameDirsFirst(const CFile& a, const CFile& b)
 // Sorts alphabetically with Directories first
 {
 	int typea, typeb;
@@ -195,6 +196,25 @@ bool sortBySize (const CFile& a, const CFile& b)
       return false;
 	return a.Size < b.Size;
 }
+
+#define FILEBROWSER_NUMBER_OF_SORT_VARIANTS 5
+bool (* const sortBy[FILEBROWSER_NUMBER_OF_SORT_VARIANTS])(const CFile& a, const CFile& b) =
+{
+	&sortByName,
+	&sortByNameDirsFirst,
+	&sortByType,
+	&sortByDate,
+	&sortBySize
+};
+
+const char * sortByNames[FILEBROWSER_NUMBER_OF_SORT_VARIANTS] =
+{
+	"filebrowser.sort.name",
+	"filebrowser.sort.namedirsfirst",
+	"filebrowser.sort.type",
+	"filebrowser.sort.date",
+	"filebrowser.sort.size"
+};
 
 //------------------------------------------------------------------------
 
@@ -285,7 +305,7 @@ void CFileBrowser::ChangeDir(const std::string & filename)
       newpath.length() == 0 ||
 		newpath == VLC_URI)
 	{
-		newpath = newpath + '/';
+		newpath += '/';
 	}
 	filelist.clear();
 	Path = newpath;
@@ -310,16 +330,7 @@ void CFileBrowser::ChangeDir(const std::string & filename)
 		filelist.push_back(*file);
 	}
 	// sort result
-	if (smode == 0)
-		sort(filelist.begin(), filelist.end(), sortByName);
-	else if (smode == 1)
-		sort(filelist.begin(), filelist.end(), sortByNameDirsFirst);
-	else if (smode == 2)
-		sort(filelist.begin(), filelist.end(), sortByType);
-	else if (smode == 3)
-		sort(filelist.begin(), filelist.end(), sortByDate);
-	else
-		sort(filelist.begin(), filelist.end(), sortBySize);
+	sort(filelist.begin(), filelist.end(), sortBy[smode]);
 
 	selected = 0;
 	paintHead();
@@ -619,20 +630,12 @@ bool CFileBrowser::exec(std::string Dirname)
 		}
 		else if (msg==CRCInput::RC_help)
 		{
-			smode++;
-			if (smode > 4)
+			if (smode >= 4)
 				smode = 0;
-			// sort result
-			if (smode == 0)
-				sort(filelist.begin(), filelist.end(), sortByName);
-			else if (smode == 1)
-				sort(filelist.begin(), filelist.end(), sortByNameDirsFirst);
-			else if (smode == 2)
-				sort(filelist.begin(), filelist.end(), sortByType);
-			else if (smode == 3)
-				sort(filelist.begin(), filelist.end(), sortByDate);
 			else
-				sort(filelist.begin(), filelist.end(), sortBySize);
+				smode++;
+
+			sort(filelist.begin(), filelist.end(), sortBy[smode]);
 
 			paint();
 		}
@@ -895,13 +898,21 @@ void CFileBrowser::paintHead()
 
 //------------------------------------------------------------------------
 
+const struct button_label FileBrowserButtons[3] =
+{
+	{ NEUTRINO_ICON_BUTTON_RED   , "filebrowser.nextpage"        },
+	{ NEUTRINO_ICON_BUTTON_GREEN , "filebrowser.prevpage"        },
+	{ NEUTRINO_ICON_BUTTON_YELLOW, "filebrowser.mark"            },
+};
+const struct button_label FileBrowserFilterButton[2] = 
+{
+	{ NEUTRINO_ICON_BUTTON_BLUE  , "filebrowser.filter.inactive" },
+	{ NEUTRINO_ICON_BUTTON_BLUE  , "filebrowser.filter.active"   },
+};
+
 void CFileBrowser::paintFoot()
 {
 	int dx = (width-20) / 4;
-	int type;
-	//First Line (bottom, top)
-	int by = y + height - 2 * (foheight - 4);
-	int ty = by + g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getHeight();
   //Second Line (bottom, top)
 	int by2 = y + height - (foheight - 4);
 	int ty2 = by2 + g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getHeight();
@@ -911,32 +922,15 @@ void CFileBrowser::paintFoot()
 
 	if (!(filelist.empty()))
 	{
-		std::string currentsort;
-		type = filelist[selected].getType();
+		int by = y + height - 2 * (foheight - 4);
 
-		//Red Button
-		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, x + 3, by + 1);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 20, ty, dx - 20, g_Locale->getText("filebrowser.nextpage"), COL_INFOBAR, 0, true); // UTF-8
-    //Green Button
-		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_GREEN, x + (1 * dx), by + 1);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 20 + (1 * dx), ty, dx - 20, g_Locale->getText("filebrowser.prevpage"), COL_INFOBAR, 0, true); // UTF-8
+		::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 10, by, dx, Multi_Select ? 3 : 2, FileBrowserButtons);
 
-    //Yellow Button
-		if(Multi_Select)
-		{
-			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x + (2 * dx), by + 1);
-			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 20 + (2 * dx), ty, dx - 20, g_Locale->getText("filebrowser.mark"), COL_INFOBAR, 0, true); // UTF-8
-		}
-
-    //Blue Button
 		if(Filter != NULL)
-		{
-			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_BLUE, x + (3 * dx), by + 1);
-			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 20 + (3 * dx), ty, dx - 20, use_filter?g_Locale->getText("filebrowser.filter.inactive"):g_Locale->getText("filebrowser.filter.active"), COL_INFOBAR, 0, true); // UTF-8
-		}
+			::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 10 + (3 * dx), by, dx, 1, &(FileBrowserFilterButton[use_filter?0:1]));
 
 		//OK-Button
-		if( (type != CFile::FILE_UNKNOWN) || (S_ISDIR(filelist[selected].Mode)) )
+		if( (filelist[selected].getType() != CFile::FILE_UNKNOWN) || (S_ISDIR(filelist[selected].Mode)) )
 		{
 			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, x +3 , by2 - 3);
 			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 35, ty2, dx - 35, g_Locale->getText("filebrowser.select"), COL_INFOBAR, 0, true); // UTF-8
@@ -944,23 +938,12 @@ void CFileBrowser::paintFoot()
 
 		//?-Button
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x + (1 * dx), by2 - 3);
-		if (smode == 0)
-			currentsort = g_Locale->getText("filebrowser.sort.namedirsfirst");
-		else if (smode == 1)
-			currentsort = g_Locale->getText("filebrowser.sort.type");
-		else if (smode == 2)
-			currentsort = g_Locale->getText("filebrowser.sort.date");
-		else if (smode == 3)
-			currentsort = g_Locale->getText("filebrowser.sort.size");
-		else
-			currentsort = g_Locale->getText("filebrowser.sort.name");
-
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 35 + (1 * dx), ty2, dx - 35, currentsort, COL_INFOBAR, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 35 + (1 * dx), ty2, dx - 35, g_Locale->getText(sortByNames[(smode + 1) % FILEBROWSER_NUMBER_OF_SORT_VARIANTS]), COL_INFOBAR, 0, true); // UTF-8
 
       if(m_oldKey!=0)
       {
          char cKey[2]={m_oldKey,0};
-         g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + width - 16, ty +4 , 16, cKey, COL_MENUHEAD, 0, true); // UTF-8
+         g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + width - 16, by2 , 16, cKey, COL_MENUHEAD, 0, true); // UTF-8
       }
 	}
 }

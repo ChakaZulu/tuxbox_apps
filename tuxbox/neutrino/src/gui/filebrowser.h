@@ -100,9 +100,9 @@ public:
 		FILE_PICTURE
 	};
 
-	int		getType();
-	std::string	getFileName() const;
-	std::string	getPath() const;
+	int		getType(void) const;
+	std::string	getFileName(void) const;
+	std::string	getPath(void) const;
 
 	CFile(){Marked = false; Size=0;Mode=0;Time=0;};
 	off_t Size;
@@ -132,7 +132,7 @@ class CFileBrowser
 		int 			fheight;	// Fonthoehe Filelist-Inhalt
 		int 			theight;	// Fonthoehe Filelist-Titel
 		int			foheight;	// Hoehe der button leiste
-		int			smode;		// Sortierungsart
+		unsigned		smode;		// Sortierungsart
 
 		std::string		name;
 		std::string		m_baseurl;
