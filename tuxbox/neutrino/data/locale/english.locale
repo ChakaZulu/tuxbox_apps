@@ -727,6 +727,10 @@ movieplayer.pleasewait Please wait.\nConnecting to the streaming server...
 movieplayer.nostreamingserver The streaming server could not be reached.
 movieplayer.defdir start dir.
 movieplayer.buffering Buffering...
+movieplayer.tsplayback Play TS
+movieplayer.fileplayback File via VLC
+movieplayer.dvdplayback DVD
+movieplayer.vcdplayback (S)VCD
 
 filebrowser.head Filebrowser
 filebrowser.filter.active Filter on
