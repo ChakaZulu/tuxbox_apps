@@ -41,7 +41,7 @@
 #include <dbox/saa7126_core.h>
 #include <ost/video.h>
 
-#include <zapit/zapitclient.h>
+#include <zapit/client/zapitclient.h>
 #include <eventserver.h>
 
 #include <configfile.h>
@@ -773,7 +773,7 @@ void sig_catch(int signal)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.76 2002/10/17 22:54:55 thegoodguy Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.77 2002/10/19 21:47:44 obi Exp $\n\n");
 	
 	switch (fork())
 	{

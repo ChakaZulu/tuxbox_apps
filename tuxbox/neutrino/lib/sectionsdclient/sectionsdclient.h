@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include <zapit/basicclient.h>
+#include <zapit/client/basicclient.h>
 
 
 using namespace std;

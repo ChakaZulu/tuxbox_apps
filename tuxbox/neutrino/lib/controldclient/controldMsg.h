@@ -25,7 +25,7 @@
 #define __controld__
 
 
-#include <zapit/basicmessage.h>
+#include <zapit/client/basicmessage.h>
 
 
 #define CONTROLD_UDS_NAME "/tmp/controld.sock"

@@ -5,6 +5,7 @@ INCLUDES = \
 	@EVENTSERVER_CFLAGS@ \
 	@FREETYPE_CFLAGS@ \
 	@NET_CFLAGS@ \
+	@PLUGINS_CFLAGS@ \
 	@ZAPIT_CFLAGS@
 
 noinst_LIBRARIES = libneutrino_gui_widget_basic.a libneutrino_gui_widget.a libneutrino_gui_widget2.a 

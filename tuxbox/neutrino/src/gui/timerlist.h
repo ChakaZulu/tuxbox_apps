@@ -34,7 +34,7 @@
 #define __timerlist__
 
 #include <timerdclient/timerdclient.h>
-#include <zapit/zapitclient.h>
+#include <zapit/client/zapitclient.h>
 
 #include "driver/framebuffer.h"
 #include "gui/widget/menue.h"

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.32 2002/10/18 12:58:57 thegoodguy Exp $
+	$Id: timerdclient.cpp,v 1.33 2002/10/19 21:47:45 obi Exp $
 
 	License: GPL
 
@@ -26,7 +26,7 @@
 
 #include <eventserver.h>
 #include <timerdclient/timerdclient.h>
-#include <zapit/basicmessage.h>
+#include <zapit/client/basicmessage.h>
 
 
 bool CTimerdClient::send(const unsigned char command, char* data = NULL, const unsigned int size = 0)

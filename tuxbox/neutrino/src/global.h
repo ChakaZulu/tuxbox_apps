@@ -32,7 +32,7 @@
 
 //#define USEACTIONLOG
 
-#include <zapit/zapitclient.h>
+#include <zapit/client/zapitclient.h>
 
 #include <controldclient/controldclient.h>
 #include <lcddclient/lcddclient.h>

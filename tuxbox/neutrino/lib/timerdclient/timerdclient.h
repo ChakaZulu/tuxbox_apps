@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdclient.h,v 1.27 2002/10/18 12:58:57 thegoodguy Exp $
+	$Id: timerdclient.h,v 1.28 2002/10/19 21:47:45 obi Exp $
 
 	License: GPL
 
@@ -29,7 +29,7 @@
 
 #include <string>
 
-#include <zapit/basicclient.h>
+#include <zapit/client/basicclient.h>
 
 #include <timerdclient/timerdtypes.h>
 

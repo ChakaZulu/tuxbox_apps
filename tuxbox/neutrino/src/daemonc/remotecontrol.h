@@ -37,7 +37,7 @@
 #include <set>
 #include <string>
 
-#include <zapit/zapitclient.h>
+#include <zapit/client/zapitclient.h>
 
 #include <sectionsdclient/sectionsdMsg.h>
 

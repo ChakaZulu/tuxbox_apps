@@ -34,7 +34,7 @@
 
 #include <string>
 
-#include <zapit/basicclient.h>
+#include <zapit/client/basicclient.h>
 #include <lcddclient/lcddtypes.h>
 
 class CLcddClient:private CBasicClient

@@ -37,7 +37,7 @@
 
 #include <configfile.h>
 
-#include <zapit/zapitclient.h>
+#include <zapit/client/zapitclient.h>
 
 #include "neutrinoMessages.h"
 #include "driver/framebuffer.h"

@@ -25,7 +25,7 @@
 */
 
 
-#include <zapit/zapitclient.h>
+#include <zapit/client/zapitclient.h>
 
 #include <global.h>
 #include <neutrino.h>

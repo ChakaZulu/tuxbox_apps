@@ -36,7 +36,7 @@
 #include <vector>
 
 #include <configfile.h>
-#include <zapit/zapitclient.h>
+#include <zapit/client/zapitclient.h>
 
 using namespace std;
 

@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: webdbox.h,v 1.33 2002/10/18 12:51:02 thegoodguy Exp $
+        $Id: webdbox.h,v 1.34 2002/10/19 21:47:44 obi Exp $
 
         License: GPL
 
@@ -35,7 +35,7 @@
 
 #include <map>
 
-#include <zapit/zapitclient.h>
+#include <zapit/client/zapitclient.h>
 #include <eventserver.h>
 #include <controldclient/controldclient.h>
 #include <sectionsdclient/sectionsdMsg.h>
