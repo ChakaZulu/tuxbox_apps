@@ -1,5 +1,5 @@
 /*
-$Id: dmx_tspidscan.c,v 1.8 2003/12/15 22:29:27 rasc Exp $
+$Id: dmx_tspidscan.c,v 1.9 2003/12/15 22:41:28 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dmx_tspidscan.c,v 1.8 2003/12/15 22:29:27 rasc Exp $
 
 
 $Log: dmx_tspidscan.c,v $
+Revision 1.9  2003/12/15 22:41:28  rasc
+pidscan improved, problems with max filters on demux
+
 Revision 1.8  2003/12/15 22:29:27  rasc
 pidscan improved, problems with max filters on demux
 
@@ -212,10 +215,10 @@ int ts_pidscan (OPTION *opt)
 		} else {
 
 
-			if (rescan) out (7,"re-");
-			out (7,"scanning pid   0x%04x to 0x%04x",pid_low, pid-1);
-			out (8,"  (got %d dmx filters) ",filters);
-			out_NL (7);
+			if (rescan) out (8,"re-");
+			out (8,"scanning pid   0x%04x to 0x%04x",pid_low, pid-1);
+			out (9,"  (got %d dmx filters) ",filters);
+			out_NL (8);
 
 
 
