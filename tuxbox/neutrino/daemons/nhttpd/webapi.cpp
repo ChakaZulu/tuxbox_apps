@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.1 2002/09/24 08:09:19 dirch Exp $
+	$Id: webapi.cpp,v 1.2 2002/09/24 17:45:18 Zwen Exp $
 
 	License: GPL
 
@@ -707,13 +707,13 @@ char *buffer = new char[300];
    request->SendHTMLHeader("TIMERLIST");
    request->SocketWrite("<center>\n");
    request->SocketWrite("<table border=0>\n");
-   request->SocketWrite("<tr><td class=\"cepg\" align=\"center\"><b>Timer ID</td>\n");
+   request->SocketWrite("<tr>\n");
    request->SocketWrite("<td class=\"cepg\" align=\"left\"><b>Alarm Time</td>\n");
    request->SocketWrite("<td class=\"cepg\" align=\"left\"><b>Stop Time</td>\n");
    request->SocketWrite("<td class=\"cepg\" align=\"left\"><b>Repeat</td>\n");
-   request->SocketWrite("<td class=\"cepg\" align=\"left\"><b>Event Type</td>\n");
+   request->SocketWrite("<td class=\"cepg\" align=\"left\"><b>Type</td>\n");
    request->SocketWrite("<td class=\"cepg\" align=\"left\"><b>Add. Data</td>\n");
-   request->SocketWrite("<td class=\"cepg\">\n");
+   request->SocketWrite("<td class=\"cepg\"><td class=\"cepg\"></tr>\n");
 
    int i = 1;
    char classname= 'a';
@@ -737,9 +737,9 @@ char *buffer = new char[300];
          strftime(zStopTime,20,"%d.%m. %H:%M",stopTime);     
       }
 
-      sprintf(buffer, "<tr><td class=\"%cepg\" align=center>%d</td>",classname, timer->eventID);
-	  request->SocketWrite(buffer);
-      sprintf(buffer, "<td class=\"%cepg\" align=left>%s</td>", classname, zAlarmTime);
+     // sprintf(buffer, "<tr><td class=\"%cepg\" align=center>%d</td>",classname, timer->eventID);
+	  //request->SocketWrite(buffer);
+      sprintf(buffer, "<tr><td class=\"%cepg\" align=left>%s</td>", classname, zAlarmTime);
   	  request->SocketWrite(buffer);
       sprintf(buffer, "<td class=\"%cepg\" align=left>%s</td>", classname, zStopTime);
   	  request->SocketWrite(buffer);
@@ -788,23 +788,27 @@ char *buffer = new char[300];
       sprintf(buffer, "<td class=\"%cepg\" align=left>%s\n",
              classname, zAddData);
 	  request->SocketWrite(buffer);
-      sprintf(buffer, "<td class=\"%cepg\" align=center><nobr><a href=\"/fb/timer.dbox2?action=remove&id=%d\">\n",
+      sprintf(buffer, "<td class=\"%cepg\" align=center><a href=\"/fb/timer.dbox2?action=remove&id=%d\">\n",
              classname, timer->eventID);
 	  request->SocketWrite(buffer);
-   	  request->SocketWrite("<img src=\"../images/remove.gif\" alt=\"Timer löschen\" border=0></a>\n");
-      sprintf(buffer, "&nbsp;<a href=\"/fb/timer.dbox2?action=modify-form&id=%d\">", timer->eventID);
+   	  request->SocketWrite("<img src=\"../images/remove.gif\" alt=\"Timer löschen\" border=0></a></td>\n");
+      sprintf(buffer, "<td class=\"%cepg\" align=center><a href=\"/fb/timer.dbox2?action=modify-form&id=%d\">", 
+				  classname, timer->eventID);
 	  request->SocketWrite(buffer);
       sprintf(buffer,"<img src=\"../images/modify.gif\" alt=\"Timer ändern\" border=0></a><nobr></td><tr>\n");
 	  request->SocketWrite(buffer);
 
    }
    classname = (i++&1)?'a':'b';
-   sprintf(buffer, "<tr><td class=\"%cepg\" colspan=6></td>\n<td class=\"%cepg\" align=\"center\">\n",classname,classname);
+   sprintf(buffer, "<tr><td class=\"%cepg\" colspan=5></td>\n<td class=\"%cepg\" align=\"center\">\n",classname,classname);
+   request->SocketWrite(buffer);
+   request->SocketWrite("<a href=\"javascript:location.reload()\">\n");
+   request->SocketWrite("<img src=\"../images/reload.gif\" alt=\"neuer Timer\" border=0></a></td>\n");   
+	sprintf(buffer, "<td class=\"%cepg\" align=\"center\">\n",classname);
    request->SocketWrite(buffer);
    request->SocketWrite("<a href=\"/fb/timer.dbox2?action=new-form\">\n");
    request->SocketWrite("<img src=\"../images/new.gif\" alt=\"neuer Timer\" border=0></a></td></tr>\n");
    request->SocketWrite("</table>\n");
-   request->SocketWrite("<CENTER><A HREF=\"javascript:location.reload()\">Aktualisieren</A></CENTER>");
    request->SendHTMLFooter();
    delete[] buffer;
    return true;
@@ -873,7 +877,14 @@ void CWebAPI::modifyTimerForm(CWebserverRequest *request, unsigned timerId)
 	{
 		char zRep[21];
 		Parent->timerEventRepeat2Str((CTimerEvent::CTimerEventRepeat) i, zRep, sizeof(zRep)-1);
-		sprintf(buffer,"<option value=\"%d\">%s\n",i,zRep);
+		sprintf(buffer,"<option value=\"%d\"",i);
+		request->SocketWrite(buffer);
+		if(((int)timer.eventRepeat) == i)
+		{
+			sprintf(buffer," selected");
+			request->SocketWrite(buffer);
+		}
+		sprintf(buffer,">%s\n",zRep);
 		request->SocketWrite(buffer);
 	}
 	request->SocketWrite("</select></TD></TR>\n");
@@ -1059,6 +1070,7 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 	for(; channel != channellist.end();channel++)
 	{
 		sprintf(buffer,"<option value=\"%d\"",channel->channel_id);
+		request->SocketWrite(buffer);
 		if(channel->channel_id == current_channel)
 			request->SocketWrite(" selected");
 		sprintf(buffer,">%s\n",channel->name);
