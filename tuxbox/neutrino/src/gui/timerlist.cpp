@@ -176,14 +176,14 @@ int CTimerList::exec(CMenuTarget* parent, const std::string & actionKey)
 		timerlist[selected].announceTime = timerlist[selected].alarmTime -60;
 		if(timerlist[selected].eventRepeat >= CTimerd::TIMERREPEAT_WEEKDAYS)
 			Timer->getWeekdaysFromStr((int *)&timerlist[selected].eventRepeat, m_weekdaysStr);
+		if(timerlist[selected].eventType == CTimerd::TIMER_RECORD)
+		{
+			timerlist[selected].announceTime -= 120; // 2 more mins for rec timer
+			Timer->modifyTimerAPid(timerlist[selected].eventID,timerlist[selected].apids);
+		}
 		Timer->modifyTimerEvent (timerlist[selected].eventID, timerlist[selected].announceTime, 
 										 timerlist[selected].alarmTime, 
 										 timerlist[selected].stopTime, timerlist[selected].eventRepeat);
-		if(timerlist[selected].eventType == CTimerd::TIMER_RECORD)
-		{
-			timerlist[selected].alarmTime -= 120; // 2 more mins for rec timer
-			Timer->modifyTimerAPid(timerlist[selected].eventID,timerlist[selected].apids);
-		}
 		return menu_return::RETURN_EXIT;
 	}
 	else if(actionKey=="newtimer")
