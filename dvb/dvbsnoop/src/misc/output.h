@@ -1,12 +1,18 @@
 /*
- -- Output Module
+$Id: output.h,v 1.4 2003/07/08 19:59:50 rasc Exp $
 
- -- rasc
-   (c) rasc
+  dvbsnoop
+  (c) Rainer Scherg 2001-2003
+
+  Output Module
+
+$Log: output.h,v $
+Revision 1.4  2003/07/08 19:59:50  rasc
+restructuring... some new, some fixes,
+trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18313-1 to spare?
 
 
 */
-
 
 void indent (int v);
 void setVerboseLevel (int v);
@@ -42,5 +48,6 @@ void print_indent(void);
 #define out_S2L_NL(v,str,hex,str2)   out_nl((v),"%s%lu (0x%08lx)  [= %s]",(str),(hex),(hex),(str2))
 #define out_S2W_NL(v,str,hex,str2)   out_nl((v),"%s%u (0x%04x)  [= %s]",(str),(hex),(hex),(str2))
 #define out_S2B_NL(v,str,hex,str2)   out_nl((v),"%s%u (0x%02x)  [= %s]",(str),(hex),(hex),(str2))
+
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.h,v 1.7 2003/07/06 05:28:52 obi Exp $
+$Id: dvbsnoop.h,v 1.8 2003/07/08 19:59:50 rasc Exp $
 
  -- dvbsnoop
  -- a dvb sniffer tool
@@ -8,6 +8,10 @@ $Id: dvbsnoop.h,v 1.7 2003/07/06 05:28:52 obi Exp $
    (c) rasc
 
 $Log: dvbsnoop.h,v $
+Revision 1.8  2003/07/08 19:59:50  rasc
+restructuring... some new, some fixes,
+trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18313-1 to spare?
+
 Revision 1.7  2003/07/06 05:28:52  obi
 compatibility stuff.. now there is only one version for old and new drivers
 which selects the api at configure time
@@ -33,7 +37,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 */
 
-#define DVBSNOOP_VERSION  "0.9b"
+#define DVBSNOOP_VERSION  "0.9c"
 
 
 #include <stdio.h>

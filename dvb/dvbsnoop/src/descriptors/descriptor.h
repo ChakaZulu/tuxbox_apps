@@ -1,75 +1,22 @@
+/*
+$Id: descriptor.h,v 1.4 2003/07/08 19:59:50 rasc Exp $ 
+
+  dvbsnoop
+  (c) Rainer Scherg 2001-2003
+
+  Descriptors Section
+
+
+$Log: descriptor.h,v $
+Revision 1.4  2003/07/08 19:59:50  rasc
+restructuring... some new, some fixes,
+trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18313-1 to spare?
+
+
+*/
 
 
 int   descriptor (u_char *b);
 void  descriptor_any (u_char *b);
 
-void  descriptor_VideoStream (u_char *b);
-void  descriptor_AudioStream (u_char *b);
-void  descriptor_Hierarchy (u_char *b);
-void  descriptor_Registration (u_char *b);
-void  descriptor_DataStreamAlignment (u_char *b);
-void  descriptor_TargetBackgroundGrid (u_char *b);
-void  descriptor_VideoWindow (u_char *b);
-void  descriptor_CA (u_char *b);
-void  descriptor_ISO639_Lang (u_char *b);
-void  descriptor_SystemClock (u_char *b);
-void  descriptor_MultiplexBufUtil (u_char *b);
-void  descriptor_Copyright (u_char *b);
-void  descriptor_MaxBitrate (u_char *b);
-void  descriptor_PrivateDataIndicator (u_char *b);
-void  descriptor_SmoothingBuf (u_char *b);
-void  descriptor_STD (u_char *b);
-void  descriptor_IBP (u_char *b);
-
-void  descriptor_NetName (u_char *b);
-void  descriptor_ServList (u_char *b);
-void  descriptor_Stuffing (u_char *b);
-void  descriptor_SatDelivSys (u_char *b);
-void  descriptor_CableDelivSys (u_char *b);
-void  descriptor_VBI_Data (u_char *b);
-void  descriptor_VBI_Teletext (u_char *b);
-void  descriptor_BouquetName (u_char *b);
-void  descriptor_Service (u_char *b);
-void  descriptor_CountryAvail (u_char *b);
-void  descriptor_Linkage (u_char *b);
-void  descriptor_NVOD_Reference (u_char *b);
-void  descriptor_TimeShiftedService (u_char *b);
-void  descriptor_ShortEvent (u_char *b);
-void  descriptor_ExtendedEvent (u_char *b);
-void  descriptor_TimeShiftedEvent (u_char *b);
-void  descriptor_Component (u_char *b);
-void  descriptor_Mosaic (u_char *b);
-void  descriptor_StreamIdent (u_char *b);
-void  descriptor_CAIdentifier (u_char *b);
-void  descriptor_Content(u_char *b);
-void  descriptor_ParentalRating(u_char *b);
-void  descriptor_Teletext (u_char *b);
-void  descriptor_Telephone(u_char *b);
-void  descriptor_LocalTimeOffset (u_char *b);
-void  descriptor_Subtitling(u_char *b);
-void  descriptor_TerrestDelivSys (u_char *b);
-void  descriptor_MultilingNetworkName (u_char *b);
-void  descriptor_MultilingBouquetName (u_char *b);
-void  descriptor_MultilingServiceName (u_char *b);
-void  descriptor_MultilingComponent (u_char *b);
-void  descriptor_PrivateDataSpecifier (u_char *b);
-void  descriptor_ServiceMove (u_char *b);
-void  descriptor_FrequencyList (u_char *b);
-void  descriptor_ShortSmoothingBuffer(u_char *b);
-void  descriptor_PartialTransportStream(u_char *b);
-void  descriptor_DataBroadcast (u_char *b);
-void  descriptor_CASystem(u_char *b);
-void  descriptor_DataBroadcastID(u_char *b);
-void  descriptor_TransportStream(u_char *b);
-void  descriptor_DSNG(u_char *b);
-void  descriptor_PDC(u_char *b);
-void  descriptor_AC3(u_char *b);
-void  descriptor_AncillaryData(u_char *b);
-void  descriptor_CellList(u_char *b);
-void  descriptor_CellFrequencyLink(u_char *b);
-void  descriptor_AnnouncementSupport(u_char *b);
-void  descriptor_ApplicationSignalling(u_char *b);
-void  descriptor_AdaptionFieldData(u_char *b);
-void  descriptor_ServiceIdentifier(u_char *b);
-void  descriptor_ServiceAvailability(u_char *b);
 

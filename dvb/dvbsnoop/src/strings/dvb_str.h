@@ -1,11 +1,24 @@
 /*
-  -- dvb decoder helper functions
-  -- (c) rasc Rainer.Scherg@t-online.de
+$Id: dvb_str.h,v 1.7 2003/07/08 19:59:50 rasc Exp $ 
+
+  dvbsnoop
+  (c) Rainer Scherg 2001-2003
+
+  dvb decoder helper functions
+
+
+$Log: dvb_str.h,v $
+Revision 1.7  2003/07/08 19:59:50  rasc
+restructuring... some new, some fixes,
+trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18313-1 to spare?
+
+
 */
 
 char *dvbstrStreamContent_Component_TYPE (u_int i);
 char *dvbstrTableID (u_int id);
-char *dvbstrDescriptorTAG (u_int tag);
+char *dvbstrMPEGDescriptorTAG (u_int tag);
+char *dvbstrDVBDescriptorTAG (u_int tag);
 char *dvbstrWEST_EAST_FLAG (u_int tag);
 char *dvbstrPolarisation_FLAG (u_int tag);
 char *dvbstrModulationCable_FLAG(u_int flag);

@@ -1,12 +1,18 @@
 /*
-$Id: dvb_str.c,v 1.9 2003/06/24 23:51:03 rasc Exp $
+$Id: dvb_str.c,v 1.10 2003/07/08 19:59:50 rasc Exp $
+
+  dvbsnoop
+  (c) Rainer Scherg 2001-2003
 
   -- DVB-Strings
   -- dvb decoder helper functions
-  -- (c) rasc Rainer.Scherg@t-online.de
 
 
 $Log: dvb_str.c,v $
+Revision 1.10  2003/07/08 19:59:50  rasc
+restructuring... some new, some fixes,
+trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18313-1 to spare?
+
 Revision 1.9  2003/06/24 23:51:03  rasc
 bugfixes and enhancements
 
@@ -129,7 +135,7 @@ char *dvbstrTableID (u_int id)
   -- Descriptor table tags
 */
 
-char *dvbstrDescriptorTAG (u_int tag)
+char *dvbstrMPEGDescriptorTAG (u_int tag)
 
 {
   STR_TABLE  Tags[] = {
@@ -153,6 +159,23 @@ char *dvbstrDescriptorTAG (u_int tag)
      {  0x11, 0x11,  "STD_descriptor" },
      {  0x12, 0x12,  "IBP_descriptor" },
      {  0x13, 0x3F,  "ITU-T.Rec.H.222.0|ISO/IEC13818-1 Reserved" },
+
+     {  0x40, 0xFF,  "Forbidden descriptor in MPEG context" },	// DVB Context
+     {  0,0, NULL }
+  };
+
+
+  return findTableID (Tags, tag);
+}
+/*
+  -- Descriptor table tags
+*/
+
+char *dvbstrDVBDescriptorTAG (u_int tag)
+
+{
+  STR_TABLE  Tags[] = {
+     {  0x00, 0x3F,  "Forbidden descriptor in DVB context" },   // MPEG Context
 
 // ETSI 300 468
      {  0x40, 0x40,  "network_name_descriptor" },
@@ -216,6 +239,7 @@ char *dvbstrDescriptorTAG (u_int tag)
 
   return findTableID (Tags, tag);
 }
+
 
 
 

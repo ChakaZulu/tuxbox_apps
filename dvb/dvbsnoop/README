@@ -1,10 +1,10 @@
 dvbsnoop
 
-a dvb sniffer tool, to trace network traffic on DVB-S (Satellite),
-DVB-C (Cable) & DVB-T (Terrestric) broadcast networks.
+a DVB sniffer tool, to trace network traffic on DVB-S (Satellite),
+DVB-C (Cable) & DVB-T (Terrestric) digital TV broadcast networks.
 
 
-The programm was mainly written to learn and understand the dvb
+The programm was mainly written to learn and understand the DVB 
 protocol structures and streams. This program is not performance
 optimized, but was itself part of the learning process... ;-)
 
@@ -17,10 +17,11 @@ Important:
 
 Disclaimer:
 
-   Program is written under GPL.
-   You may use it at your own risk!
+  You are using this program at your own risk!
 
-	License: GPL
+
+
+License: 
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -41,5 +42,6 @@ It is not allowed to sell this or parts of this software without prior written
 permission by the author. It is also not allowed to bundle this software for
 commercial purpose without prior written permission by the author. This
 includes also offers in online auctions...
+
 
 

@@ -1,16 +1,16 @@
 /*
-$Id: output.c,v 1.2 2001/10/06 18:19:18 Toerli Exp $
- -- Output Module
+$Id: output.c,v 1.3 2003/07/08 19:59:50 rasc Exp $
 
-   (c) rasc
+  dvbsnoop
+  (c) Rainer Scherg 2001-2003
+
+  Output Module
 
 
 $Log: output.c,v $
-Revision 1.2  2001/10/06 18:19:18  Toerli
-Steuerzeichen entfernt. rasc wuerdest du mal bitte nen gescheiten unix-konformen Editor verwenden... windows editoren sind ungeeignet
-
-Revision 1.1  2001/09/30 13:05:20  rasc
-dvbsnoop v0.7  -- Commit to CVS
+Revision 1.3  2003/07/08 19:59:50  rasc
+restructuring... some new, some fixes,
+trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18313-1 to spare?
 
 
 */
