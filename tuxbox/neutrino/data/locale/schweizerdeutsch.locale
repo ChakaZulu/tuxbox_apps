@@ -651,10 +651,10 @@ mp3player.title Titel
 mp3player.artist Pörformer 
 mp3player.playing aktuelle track 
 mp3player.id3scan scänn ID3-Tags 
-mp3player.keylevel undef
-mp3player.fastforward undef
-mp3player.pause undef
-mp3player.rewind rewind
+mp3player.keylevel Taschde-Umschaldig
+mp3player.fastforward schnälle Vorl.
+mp3player.pause Pause
+mp3player.rewind schnälle Rückl.
 
 filebrowser.head Filebrowser 
 filebrowser.filter Filder 
