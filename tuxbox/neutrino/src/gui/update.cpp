@@ -64,7 +64,7 @@ CFlashUpdate::CFlashUpdate()
 	setTitle( g_Locale->getText("flashupdate.head") );
 
 	BasePath = "http://dboxupdate.berlios.de/update/";
-	ImageFile = "cramfs.img";
+	ImageFile = "cdk.cramfs";
 	VersionFile = "version";
 	//use other path?
 	FILE* fd = fopen("/var/etc/update.conf", "r");
