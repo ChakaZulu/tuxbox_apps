@@ -28,15 +28,11 @@
 
 #include <linux/fb.h>
 #include <linux/vt.h>
-#include <stdint.h>
-#include <dbox/fb.h>
 
 #include <string>
 
 #include <gui/widget/component.h>
 
-
-using namespace std;
 
 /** Ausführung als Singleton */
 class CFrameBuffer
@@ -53,14 +49,14 @@ class CFrameBuffer
 			unsigned char b;
 		};
 
-		string			iconBasePath;
+		std::string	iconBasePath;
 
 		int			fd, tty;
 		unsigned char	*lfb;
 		int		available;
 		unsigned char	*background;
 		int			backgroundColor;
-		string			backgroundFilename;
+		std::string			backgroundFilename;
 		bool			useBackgroundPaint;
 		unsigned int	xRes, yRes, stride, bpp;
 		struct fb_var_screeninfo screeninfo, oldscreen;
@@ -78,7 +74,7 @@ class CFrameBuffer
 
 		static CFrameBuffer* getInstance();
 
-		void init(string fbDevice="/dev/fb/0");
+		void init(std::string fbDevice="/dev/fb/0");
 		int setMode(unsigned int xRes, unsigned int yRes, unsigned int bpp);
 
 
@@ -111,16 +107,16 @@ class CFrameBuffer
 		void paintHLineRel(int x, int dx, int y, unsigned char col);
 
 
-		bool paintIcon(string filename, int x, int y, unsigned char offset=1);
-		bool paintIcon8(string filename, int x, int y, unsigned char offset=0);
-		void loadPal(string filename, unsigned char offset=0, unsigned char endidx=255 );
-		void setIconBasePath(string);
+		bool paintIcon(std::string filename, int x, int y, unsigned char offset=1);
+		bool paintIcon8(std::string filename, int x, int y, unsigned char offset=0);
+		void loadPal(std::string filename, unsigned char offset=0, unsigned char endidx=255 );
+		void setIconBasePath(std::string);
 
-		bool loadPicture2Mem(string filename, unsigned char* memp);
-		bool savePictureFromMem(string filename, unsigned char* memp);
+		bool loadPicture2Mem(std::string filename, unsigned char* memp);
+		bool savePictureFromMem(std::string filename, unsigned char* memp);
 
 		void setBackgroundColor(int color);
-		bool loadBackground(string filename, unsigned char col = 0);
+		bool loadBackground(std::string filename, unsigned char col = 0);
 		void useBackground(bool);
 
 		void paintBackgroundBox(int xa, int ya, int xb, int yb);

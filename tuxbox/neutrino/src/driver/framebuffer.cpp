@@ -23,7 +23,6 @@
 
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <sys/ioctl.h>
@@ -33,7 +32,8 @@
 
 #include <linux/kd.h>
 
-#include <global.h>
+#include <stdint.h>
+#include <dbox/fb.h>
 
 #include "framebuffer.h"
 
@@ -73,7 +73,7 @@ CFrameBuffer* CFrameBuffer::getInstance()
 	return frameBuffer;
 }
 
-void CFrameBuffer::init(string fbDevice)
+void CFrameBuffer::init(std::string fbDevice)
 {
 	fd=open(fbDevice.c_str(), O_RDWR);
 	if (fd<0)
@@ -375,12 +375,12 @@ void CFrameBuffer::paintHLineRel(int x, int dx, int y, unsigned char col)
 	memset(pos, col, dx);
 }
 
-void CFrameBuffer::setIconBasePath(string iconPath)
+void CFrameBuffer::setIconBasePath(std::string iconPath)
 {
 	iconBasePath = iconPath;
 }
 
-bool CFrameBuffer::paintIcon8(string filename, int x, int y, unsigned char offset)
+bool CFrameBuffer::paintIcon8(std::string filename, int x, int y, unsigned char offset)
 {
 	if (!active)
 		return false;
@@ -430,7 +430,7 @@ bool CFrameBuffer::paintIcon8(string filename, int x, int y, unsigned char offse
 	return true;
 }
 
-bool CFrameBuffer::paintIcon(string filename, int x, int y, unsigned char offset)
+bool CFrameBuffer::paintIcon(std::string filename, int x, int y, unsigned char offset)
 {
 	if (!active)
 		return false;
@@ -488,7 +488,7 @@ bool CFrameBuffer::paintIcon(string filename, int x, int y, unsigned char offset
 	close(fd);
 	return true;
 }
-void CFrameBuffer::loadPal(string filename, unsigned char offset, unsigned char endidx )
+void CFrameBuffer::loadPal(std::string filename, unsigned char offset, unsigned char endidx )
 {
 	if (!active)
 		return;
@@ -621,7 +621,7 @@ void CFrameBuffer::setBackgroundColor(int color)
 	backgroundColor = color;
 }
 
-bool CFrameBuffer::loadPicture2Mem(string filename, unsigned char* memp)
+bool CFrameBuffer::loadPicture2Mem(std::string filename, unsigned char* memp)
 {
 	short width, height;
 	unsigned char tr;
@@ -649,7 +649,7 @@ bool CFrameBuffer::loadPicture2Mem(string filename, unsigned char* memp)
 	return true;
 }
 
-bool CFrameBuffer::savePictureFromMem(string filename, unsigned char* memp)
+bool CFrameBuffer::savePictureFromMem(std::string filename, unsigned char* memp)
 {
 	short width = 720;
 	short height = 576;
@@ -678,7 +678,7 @@ bool CFrameBuffer::savePictureFromMem(string filename, unsigned char* memp)
 	return true;
 }
 
-bool CFrameBuffer::loadBackground(string filename, unsigned char col)
+bool CFrameBuffer::loadBackground(std::string filename, unsigned char col)
 {
 	if(backgroundFilename==filename)
 	{
