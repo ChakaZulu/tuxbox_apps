@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.40 2001/09/20 00:36:32 field Exp $
+        $Id: neutrino.cpp,v 1.41 2001/09/20 14:10:10 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.41  2001/09/20 14:10:10  field
+  neues EPG-Handling abschaltbar
+
   Revision 1.40  2001/09/20 00:36:32  field
   epg mit zaopit zum grossteil auf onid & s_id umgestellt
 
@@ -339,6 +342,7 @@ void CNeutrinoApp::setupDefaults()
 	//video
 	g_settings.video_Signal = 0;
 	g_settings.video_Format = 0;
+    g_settings.epg_byname   = 0;
 
 	//audio
 	g_settings.audio_Stereo = 1;
@@ -747,7 +751,7 @@ void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNoti
 	audioSettings.addItem( new CMenuForwarder("menu.back") );
 	audioSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
-		CMenuOptionChooser* oj = new CMenuOptionChooser("audiomenu.stereo", &g_settings.audio_Stereo, true, audioSetupNotifier);
+	CMenuOptionChooser* oj = new CMenuOptionChooser("audiomenu.stereo", &g_settings.audio_Stereo, true, audioSetupNotifier);
 		oj->addOption(0, "options.off");
 		oj->addOption(1, "options.on");
 	audioSettings.addItem( oj );
@@ -774,6 +778,11 @@ void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNoti
 		oj->addOption(0, "videomenu.videoformat_43");
 		oj->addOption(1, "videomenu.videoformat_169");
 
+	videoSettings.addItem( oj );
+
+	oj = new CMenuOptionChooser("videomenu.epgold", &g_settings.epg_byname, true);
+		oj->addOption(0, "options.off");
+		oj->addOption(1, "options.on");
 	videoSettings.addItem( oj );
 }
 
@@ -1325,7 +1334,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.40 2001/09/20 00:36:32 field Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.41 2001/09/20 14:10:10 field Exp $\n\n");
     tzset();
 
     initGlobals();

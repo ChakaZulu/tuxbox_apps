@@ -1,7 +1,10 @@
 //
-// $Id: channellist.cpp,v 1.20 2001/09/20 13:44:57 field Exp $
+// $Id: channellist.cpp,v 1.21 2001/09/20 14:10:10 field Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.21  2001/09/20 14:10:10  field
+// neues EPG-Handling abschaltbar
+//
 // Revision 1.20  2001/09/20 13:44:57  field
 // epg-Anzeige verbessert
 //
@@ -72,7 +75,7 @@ void CChannelList::updateEvents(void)
 {
 	char rip[]="127.0.0.1";
 
-printf("\n START CChannelList::updateEvents \n\n");
+//printf("\n START CChannelList::updateEvents \n\n");
 	int sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	SAI servaddr;
 	memset(&servaddr,0,sizeof(servaddr));
@@ -109,7 +112,7 @@ printf("\n START CChannelList::updateEvents \n\n");
     return;
   }
   close(sock_fd);
-printf("\n read finished CChannelList::updateEvents \n\n");
+//printf("\n read finished CChannelList::updateEvents \n\n");
   for(unsigned int count=0;count<chanlist.size();count++)
     chanlist[count]->currentEvent="";
   char epgID[20];
@@ -136,7 +139,7 @@ printf("\n read finished CChannelList::updateEvents \n\n");
     }
   }
   delete[] pData;
-printf("\n END CChannelList::updateEvents \n\n");
+//printf("\n END CChannelList::updateEvents \n\n");
   return;
 }
 

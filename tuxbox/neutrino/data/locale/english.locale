@@ -36,6 +36,7 @@ videomenu.videosignal_composite Composite
 videomenu.videoformat Format
 videomenu.videoformat_43 4:3
 videomenu.videoformat_169 16:9
+videomenu.epgold EPG the old way...
 
 networkmenu.head Network Settings
 networkmenu.setupnow setup network now
