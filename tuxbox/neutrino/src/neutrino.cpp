@@ -1541,7 +1541,6 @@ void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
 
 void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNotifier* audioSetupNotifier)
 {
-	dprintf(DEBUG_DEBUG, "init audiosettings\n");
 	audioSettings.addItem(GenericMenuSeparator);
 	audioSettings.addItem(GenericMenuBack);
 	audioSettings.addItem(GenericMenuSeparatorLine);
@@ -1567,7 +1566,6 @@ void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNoti
 
 void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNotifier* videoSetupNotifier)
 {
-	dprintf(DEBUG_DEBUG, "init videosettings\n");
 	videoSettings.addItem(GenericMenuSeparator);
 	videoSettings.addItem(GenericMenuBack);
 	videoSettings.addItem(GenericMenuSeparatorLine);
@@ -1605,7 +1603,6 @@ void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNoti
 
 void CNeutrinoApp::InitParentalLockSettings(CMenuWidget &parentallockSettings)
 {
-	dprintf(DEBUG_DEBUG, "init parentallocksettings\n");
 	parentallockSettings.addItem(GenericMenuSeparator);
 	parentallockSettings.addItem(GenericMenuBack);
 	parentallockSettings.addItem(GenericMenuSeparatorLine);
@@ -1629,7 +1626,6 @@ void CNeutrinoApp::InitParentalLockSettings(CMenuWidget &parentallockSettings)
 
 void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 {
-	dprintf(DEBUG_DEBUG, "init networksettings\n");
 	networkSettings.addItem(GenericMenuSeparator);
 	networkSettings.addItem(GenericMenuBack);
 	networkSettings.addItem(GenericMenuSeparatorLine);
@@ -1949,7 +1945,6 @@ void CNeutrinoApp::InitFontSettings(CMenuWidget &fontSettings)
 
 void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fontSettings )
 {
-	dprintf(DEBUG_DEBUG, "init colorsettings\n");
 	colorSettings.addItem(GenericMenuSeparator);
 	colorSettings.addItem(GenericMenuBack);
 	colorSettings.addItem(GenericMenuSeparatorLine);
@@ -1990,7 +1985,6 @@ void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fo
 
 void CNeutrinoApp::InitColorThemesSettings(CMenuWidget &colorSettings_Themes)
 {
-	dprintf(DEBUG_DEBUG, "init themesettings\n");
 	colorSettings_Themes.addItem(GenericMenuSeparator);
 	colorSettings_Themes.addItem(GenericMenuBack);
 	colorSettings_Themes.addItem(GenericMenuSeparatorLine);
@@ -2000,7 +1994,6 @@ void CNeutrinoApp::InitColorThemesSettings(CMenuWidget &colorSettings_Themes)
 
 void CNeutrinoApp::InitColorSettingsMenuColors(CMenuWidget &colorSettings_menuColors)
 {
-	dprintf(DEBUG_DEBUG, "init colormenuesettings\n");
 	colorSettings_menuColors.addItem(GenericMenuSeparator);
 	colorSettings_menuColors.addItem(GenericMenuBack);
 
@@ -2036,7 +2029,6 @@ void CNeutrinoApp::InitColorSettingsMenuColors(CMenuWidget &colorSettings_menuCo
 
 void CNeutrinoApp::InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_statusbarColors)
 {
-	dprintf(DEBUG_DEBUG, "init colorstatusbarsettings\n");
 	colorSettings_statusbarColors.addItem(GenericMenuSeparator);
 
 	colorSettings_statusbarColors.addItem(GenericMenuBack);
@@ -2053,7 +2045,6 @@ void CNeutrinoApp::InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_s
 
 void CNeutrinoApp::InitColorSettingsTiming(CMenuWidget &colorSettings_timing)
 {
-	dprintf(DEBUG_DEBUG, "init colorsettingstiming\n");
 	sprintf(g_settings.timing_menu_string,"%d",g_settings.timing_menu);
 	sprintf(g_settings.timing_chanlist_string,"%d",g_settings.timing_chanlist);
 	sprintf(g_settings.timing_menu_string,"%d",g_settings.timing_menu);
@@ -2089,7 +2080,6 @@ void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
 	static int lcdinverse = CLCD::getInstance()->getInverse()?1:0;
 	static int lcdautodimm = CLCD::getInstance()->getAutoDimm()?1:0;
 
-	dprintf(DEBUG_DEBUG, "init lcdsettings\n");
 	lcdSettings.addItem(GenericMenuSeparator);
 
 	lcdSettings.addItem(GenericMenuBack);
@@ -2131,7 +2121,6 @@ void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
 
 void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 {
-	dprintf(DEBUG_DEBUG, "init keysettings\n");
 	keySettings.addItem(GenericMenuSeparator);
 	keySettings.addItem(GenericMenuBack);
 
@@ -3676,7 +3665,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 		hintBox->hide();
 		delete hintBox;
 	}
-	else if(actionKey.substr(0, 10).compare("fontsize.d") == 0)
+	else if(strncmp(actionKey.c_str(), "fontsize.d", 10) == 0)
 	{
 		for (int i = 0; i < 6; i++)
 		{
@@ -3737,10 +3726,14 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 *          changeNotify - features menu recording start / stop                        *
 *                                                                                     *
 **************************************************************************************/
-bool CNeutrinoApp::changeNotify(const std::string & OptionName, void *Data)
+bool CNeutrinoApp::changeNotify(const std::string & OptionName, void * data)
 {
-//	printf("OptionName: %s\n",OptionName.c_str());
-	if (strncmp(OptionName.c_str(), "fontsize.", 9) == 0)
+	return changeNotify(OptionName.c_str(), data);
+}
+
+bool CNeutrinoApp::changeNotify(const char * const OptionName, void * data)
+{
+	if (strncmp(OptionName, "fontsize.", 9) == 0)
 	{
 		CHintBox * hintBox = new CHintBox("messagebox.info", g_Locale->getText("fontsize.hint")); // UTF-8
 		hintBox->paint();
@@ -3750,7 +3743,7 @@ bool CNeutrinoApp::changeNotify(const std::string & OptionName, void *Data)
 		hintBox->hide();
 		delete hintBox;
 	}
-	else if (strncmp(OptionName.c_str(), "timing.", 7) == 0)
+	else if (strncmp(OptionName, "timing.", 7) == 0)
 	{
 		g_settings.timing_menu = atoi(g_settings.timing_menu_string);
 		g_settings.timing_chanlist = atoi(g_settings.timing_chanlist_string);
@@ -3760,13 +3753,7 @@ bool CNeutrinoApp::changeNotify(const std::string & OptionName, void *Data)
 
 	}
 
-	else if (strncmp(OptionName.c_str(), "mp3.", 4) == 0)
-	{
-// this code will never be reached
-		CMP3Player::getInstance()->init();
-	}
-
-	else if (strncmp(OptionName.c_str(), "mainmenu.recording", 18) == 0)
+	else if (strncmp(OptionName, "mainmenu.recording", 18) == 0)
 	{
 		CTimerd::RecordingInfo eventinfo;
 

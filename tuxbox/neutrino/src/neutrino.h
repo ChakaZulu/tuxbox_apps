@@ -196,7 +196,8 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		//callback for menue
 		bool onPaintNotify(const std::string & MenuName);
 		//onchange
-		bool changeNotify(const std::string & OptionName, void *Data);
+		bool changeNotify(const std::string & OptionName, void * data);
+		bool changeNotify(const char * const OptionName, void * data);
 
 		int handleMsg(uint msg, uint data);
 
