@@ -224,6 +224,8 @@ static eString osdshot(eString request, eString dirpath, eString opts, eHTTPConn
 
 static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
+	eString name, provider, vpid, apid, pcrpid, tpid, vidform("n/a"), tsid, onid, sid, pmt;
+	
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eString result;
 	time_t atime;
@@ -251,8 +253,72 @@ static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConn
 		else
 #endif
 			result += "OFF";
-	result += "</td></tr>\n"
-		"</table>\n"
+	result += "</td></tr>\n";
+	result += "<tr></td>Mode:</td><td>" + eString().sprintf("%d", eZapMain::getInstance()->getMode()) + "</td></tr>";
+	
+	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
+	if (sapi)
+	{
+		eServiceDVB *service=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
+		if (service)
+		{
+			name = filter_string(service->service_name);
+			provider = filter_string(service->service_provider);
+		}
+	}
+	vpid = eString().sprintf("%04xh (%dd)", Decoder::current.vpid, Decoder::current.vpid);
+	apid = eString().sprintf("%04xh (%dd)", Decoder::current.apid, Decoder::current.apid);
+	pcrpid = eString().sprintf("%04xh (%dd)", Decoder::current.pcrpid, Decoder::current.pcrpid);
+	tpid = eString().sprintf("%04xh (%dd)", Decoder::current.tpid, Decoder::current.tpid);
+	tsid = eString().sprintf("%04xh", sapi->service.getTransportStreamID().get());
+	onid = eString().sprintf("%04xh", sapi->service.getOriginalNetworkID().get());
+	sid = eString().sprintf("%04xh", sapi->service.getServiceID().get());
+	pmt = eString().sprintf("%04xh", Decoder::current.pmtpid);
+
+	FILE *bitstream = 0;
+
+	if (Decoder::current.vpid != -1)
+		bitstream = fopen("/proc/bus/bitstream", "rt");
+	if (bitstream)
+	{
+		char buffer[100];
+		int xres = 0, yres = 0, aspect = 0;
+		while (fgets(buffer, 100, bitstream))
+		{
+			if (!strncmp(buffer, "H_SIZE:  ", 9))
+				xres=atoi(buffer+9);
+			if (!strncmp(buffer, "V_SIZE:  ", 9))
+				yres=atoi(buffer+9);
+			if (!strncmp(buffer, "A_RATIO: ", 9))
+				aspect=atoi(buffer+9);
+		}
+		fclose(bitstream);
+		vidform.sprintf("%dx%d ", xres, yres);
+		switch (aspect)
+		{
+			case 1:
+				vidform += "(square)"; break;
+			case 2:
+				vidform += "(4:3)"; break;
+			case 3:
+				vidform += "(16:9)"; break;
+			case 4:
+				vidform += "(20:9)"; break;
+		}
+	}
+	result += "<tr><td>name:</td><td>" + name + "</td></tr>";
+	result += "<tr><td>provider:</td><td>" + provider + "</td></tr>";
+	result += "<tr><td>vpid:</td><td>" + vpid + "</td></tr>";
+	result += "<tr><td>apid:</td><td>" + apid + "</td></tr>";
+	result += "<tr><td>pcrpid:</td><td>" + pcrpid + "</td></tr>";
+	result += "<tr><td>tpid:</td><td>" + tpid + "</td></tr>";
+	result += "<tr><td>tsid:</td><td>" + tsid + "</td></tr>";
+	result += "<tr><td>onid:</td><td>" + onid + "</td></tr>";
+	result += "<tr><td>sid:</td><td>" + sid + "</td></tr>";
+	result += "<tr><td>pmt:</td><td>" + pmt + "</td></tr>";
+	result += "<tr><td>vidformat:<td>" + vidform + "</td></tr>";
+	
+	result += "</table>\n"
 		"</body>\n"
 		"</html>\n";
 	return result;
