@@ -115,7 +115,7 @@ class eDVBServiceController
 {
 	Signal0<void> freeCheckFinishedCallback;
 	void freeCheckFinished();
-// for linkage handling	
+// for linkage handling
 	eServiceReferenceDVB parentservice,prevservice;
 	MHWEIT *tMHWEIT;
 	eTimer updateTDTTimer;
@@ -154,7 +154,7 @@ public:
 		int isDTS;
 	};
 	std::list<audioStream> audioStreams;
-	
+
 	ePtrList<PMTEntry> videoStreams;
 	ePtrList<PMTEntry> subtitleStreams;
 
@@ -170,6 +170,7 @@ public:
 
 	// set pids... detect used ca systems
 	void scanPMT( PMT *pmt );
+	PMTEntry *priorityAudio(PMTEntry *);
 
 	void PATready(int error);
 	void SDTready(int error);

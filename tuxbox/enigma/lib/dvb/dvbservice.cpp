@@ -31,7 +31,7 @@ std::set<eDVBCaPMTClient*> eDVBCaPMTClientHandler::capmtclients;
 pthread_mutex_t eDVBServiceController::availCALock =
 	PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
 
-PMTEntry *priorityAudio(PMTEntry *audio)
+PMTEntry *eDVBServiceController::priorityAudio(PMTEntry *audio)
 {
 	PMTEntry *audio2 = audio;
 	audio = 0;
@@ -45,24 +45,20 @@ PMTEntry *priorityAudio(PMTEntry *audio)
 	{
 //		printf(">>>%s\n", audiochannelspriority);
 		std::stringstream audiochannels;
-		eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
-		if (sapi)
+
+		audiochannels.clear();
+		audiochannels.str(eString(audiochannelspriority));
+		while (audiochannels && audio == 0)
 		{
-			std::list<eDVBServiceController::audioStream> &astreams(sapi->audioStreams);
-			audiochannels.clear();
-			audiochannels.str(eString(audiochannelspriority));
-			while (audiochannels && audio == 0)
+			audiochannels >> audiochannel;
+			for (std::list<eDVBServiceController::audioStream>::iterator it(audioStreams.begin())
+				;it != audioStreams.end(); ++it)
 			{
-				audiochannels >> audiochannel;
-				for (std::list<eDVBServiceController::audioStream>::iterator it(astreams.begin())
-					;it != astreams.end(); ++it)
+//				printf("  -comparing:%s:%s:\n", audiochannel.c_str(), it->text.c_str());
+				if (audiochannel == it->text)
 				{
-//					printf("comparing:%s:%s:\n", audiochannel.c_str(), it->text.c_str());
-					if (audiochannel == it->text)
-					{
-						audio = it->pmtentry;
-						break;
-					}
+					audio = it->pmtentry;
+					break;
 				}
 			}
 		}
@@ -70,7 +66,7 @@ PMTEntry *priorityAudio(PMTEntry *audio)
 	}
 	if (audio == 0)
 		audio = audio2;
-//	printf("returning:%d\n", audio->elementary_PID);
+//	printf("<<<%d\n", audio->elementary_PID);
 	return audio;
 }
 
