@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.262 2002/10/17 20:51:18 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.263 2002/10/17 22:33:19 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -26,13 +26,7 @@
 /* system headers */
 #include <fcntl.h>
 #include <signal.h>
-#include <sys/ioctl.h>
-#include <sys/poll.h>
 #include <sys/socket.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/un.h>
-#include <sys/wait.h>
 #include <unistd.h>
 
 #ifdef HAVE_CONFIG_H
@@ -1018,7 +1012,7 @@ int main (int argc, char **argv)
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.262 2002/10/17 20:51:18 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.263 2002/10/17 22:33:19 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1162,7 +1156,7 @@ int main (int argc, char **argv)
 	CBasicServer zapit_server;
 	zapit_server.run(ZAPIT_UDS_NAME, parse_command);
 
-	CZapitDestructor();
+	CZapitDestructor(); // <- should not return
 
 	sleep(5);
 
