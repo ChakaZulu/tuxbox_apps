@@ -175,7 +175,7 @@
 			<action name="showInfobarEPG" key="info" flags="m" />
 			<action name="hideInfobar" key="LAME" flags="m" />
 			<action name="showServiceSelector" key="ok" flags="m" />
-			<action name="toggleDVRFunctions" key="video" flasg="m" />
+			<action name="toggleDVRFunctions" key="video" flags="m" />
 		</actionmap>
 
 		<actionmap name="enigmaGlobal">
