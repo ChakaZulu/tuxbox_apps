@@ -1,5 +1,5 @@
 /*
-$Id: dsm_int_unt_descriptor.c,v 1.9 2004/01/01 20:31:22 rasc Exp $ 
+$Id: dsm_int_unt_descriptor.c,v 1.10 2004/01/02 02:18:34 rasc Exp $ 
 
 
  DVBSNOOP
@@ -11,12 +11,15 @@ $Id: dsm_int_unt_descriptor.c,v 1.9 2004/01/01 20:31:22 rasc Exp $
 
 
  -- Private TAG Space  DSM-CC INT UNT
- -- DSM-CC Descriptors  ISO 13818-6  // TR 102 006
+ -- DSM-CC Descriptors  ISO 13818-6  // EN 301 192 // TS 102 006
 
 
 
 
 $Log: dsm_int_unt_descriptor.c,v $
+Revision 1.10  2004/01/02 02:18:34  rasc
+more DSM-CC  INT/UNT descriptors
+
 Revision 1.9  2004/01/01 20:31:22  rasc
 PES program stream map, minor descriptor cleanup
 
@@ -113,11 +116,11 @@ int  descriptorDSMCC_INT_UNT_Private  (u_char *b)
 
   switch (b[0]) {
 
-// {  0x01, 0x01,  "scheduling_descriptor" },	// $$$ TODO
-//     {  0x02, 0x02,  "update_descriptor" },	// $$$ TODO
-//     {  0x03, 0x03,  "ssu_location_descriptor" },	// $$$ TODO
-//     {  0x04, 0x04,  "message_descriptor" },	// $$$ TODO
-//     {  0x05, 0x05,  "ssu_event_name_descriptor" },	// $$$ TODO
+     case 0x01:  descriptorDSMCC_scheduling (b); break;
+     case 0x02:  descriptorDSMCC_update (b); break;
+     case 0x03:  descriptorDSMCC_ssu_location (b); break;
+     case 0x04:  descriptorDSMCC_message (b); break;
+     case 0x05:  descriptorDSMCC_ssu_event_name (b); break;
      case 0x06:  descriptorDSMCC_target_smartcard (b); break;
      case 0x07:  descriptorDSMCC_target_MAC_address (b); break;
      case 0x08:  descriptorDSMCC_target_serial_number (b); break;
@@ -156,23 +159,30 @@ int  descriptorDSMCC_INT_UNT_Private  (u_char *b)
 
 
 
-
-
-
-
-
-/* $$$ TODO   EN 301 192  / TR 102 006
- *
+/*
+ * EN 301 192  / TR 102 006
  * private DSM-CC INT UNT descriptors
- *
- * */
-
-
-// EN 301 192  S. 26  $$$
+ */
 
 
 
 
+/*
+  0x01 - scheduling
+  ETSI TS 102 006  (ISO 13818-6)
+*/
+
+void descriptorDSMCC_scheduling (u_char *b)
+{
+ int len;
+
+ // descriptor_tag	= b[0];
+ len			= b[1];
+
+
+ descriptor_any (b);		// $$$ TODO  scheduling descriptor (INT UNT)
+
+}
 
 
 
@@ -182,6 +192,143 @@ int  descriptorDSMCC_INT_UNT_Private  (u_char *b)
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+  0x02 - update
+  ETSI TS 102 006  (ISO 13818-6)
+*/
+
+void descriptorDSMCC_update (u_char *b)
+{
+ int len;
+
+ // descriptor_tag	= b[0];
+ len			= b[1];
+
+ outBit_S2x_NL (4,"update_flag: ",	  b,16, 2,
+                        (char *(*)(u_long)) dsmccStr_UpdateFlag );     
+ outBit_S2x_NL (4,"update_method: ",	  b,18, 4,
+                        (char *(*)(u_long)) dsmccStr_UpdateMethod );     
+ outBit_Sx     (4,"update_priority: ",	  b,22, 2);
+ 		out_nl (4,"  [0=highest]");
+ 
+ out_nl (4,"Private Data:");
+	indent (+1);
+	printhexdump_buf (4,b+3,len-1);
+	indent (-1);
+}
+
+
+
+
+
+
+/*
+  0x03 - ssu_location
+  ETSI TS 102 006  (ISO 13818-6)
+*/
+
+void descriptorDSMCC_ssu_location (u_char *b)
+{
+ int len;
+ int id;
+
+ // descriptor_tag	= b[0];
+ len			= b[1];
+
+ id = outBit_S2x_NL (4,"data_broadcast_id: ",	  b,16, 16,
+                        (char *(*)(u_long)) dvbstrDataBroadcast_ID );
+
+ if (id == 0x000A) {
+ 	outBit_Sx_NL (4,"association_tag: ",	  b,32, 16);
+	len -= 2;
+	b += 2;
+ }
+
+ out_nl (4,"Private Data:");
+	indent (+1);
+	printhexdump_buf (4,b+4,len-2);
+	indent (-1);
+}
+
+
+
+
+
+
+/*
+  0x04 - message
+  ETSI EN 301 192  (ISO 13818-6)
+*/
+
+void descriptorDSMCC_message(u_char *b)
+{
+  int        len;
+  u_char     ISO639_language_code[4];
+
+
+  // descriptor_tag	= b[0];
+  len		        = b[1];
+
+  outBit_Sx_NL (4,"descriptor_number: ",  	b,16, 4);
+  outBit_Sx_NL (4,"last_descriptor_number: ",  	b,20, 4);
+
+
+  getISO639_3 (ISO639_language_code, b+3);
+  out_nl (4,"  ISO639_language_code:  %3.3s", ISO639_language_code);
+
+  out (4,"Text: ");
+ 	print_name (4, b+6, len-4);
+	out_NL (4);
+
+}
+
+
+
+
+
+
+
+/*
+  0x05 - ssu_event_name
+  ETSI EN 301 192  (ISO 13818-6)
+*/
+
+void descriptorDSMCC_ssu_event_name (u_char *b)
+{
+  int        len;
+  u_char     ISO639_language_code[4];
+
+  // descriptor_tag		 = b[0];
+  // len		       	 = b[1];
+
+
+  getISO639_3 (ISO639_language_code, b+2);
+  out_nl (4,"  ISO639_language_code:  %3.3s", ISO639_language_code);
+
+  len = outBit_Sx_NL (4,"name_length: ",	  b,40, 8);
+  out (4,"SSU_event_name: ");
+ 	print_name (4, b+6, len);
+	out_NL (4);
+  b += 6+len;
+  
+  len = outBit_Sx_NL (4,"text_length: ",	  b, 0, 8);
+  out (4,"MessageText: ");
+ 	print_name (4, b+1, len);
+	out_NL (4);
+
+}
 
 
 
@@ -203,7 +350,9 @@ void descriptorDSMCC_target_smartcard (u_char *b)
  outBit_Sx_NL (4,"Super_CA_system_id: ",  b,16,32);  // $$$ TODO ? TS 101 197
 
  out_nl (4,"Private Data:");
- printhexdump_buf (4,b+6,len-4);
+	indent (+1);
+	printhexdump_buf (4,b+6,len-4);
+	indent (-1);
 }
 
 
@@ -259,7 +408,9 @@ void descriptorDSMCC_target_serial_number (u_char *b)
  len			= b[1];
 
  out_nl (4,"Serial Data Bytes:");
- printhexdump_buf (4,b+2,len);
+	indent(+1);
+	printhexdump_buf (4,b+2,len);
+	indent (-1);
 }
 
 

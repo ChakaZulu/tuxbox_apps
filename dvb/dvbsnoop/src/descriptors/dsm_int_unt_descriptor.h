@@ -1,5 +1,5 @@
 /*
-$Id: dsm_int_unt_descriptor.h,v 1.8 2004/01/01 20:31:22 rasc Exp $ 
+$Id: dsm_int_unt_descriptor.h,v 1.9 2004/01/02 02:18:34 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: dsm_int_unt_descriptor.h,v 1.8 2004/01/01 20:31:22 rasc Exp $
 
 
 $Log: dsm_int_unt_descriptor.h,v $
+Revision 1.9  2004/01/02 02:18:34  rasc
+more DSM-CC  INT/UNT descriptors
+
 Revision 1.8  2004/01/01 20:31:22  rasc
 PES program stream map, minor descriptor cleanup
 
@@ -52,10 +55,13 @@ more PES stuff, DSM descriptors, testdata
 #define __DSM_INT_UNT_DESCRIPTOR_H 1
 
 
-int   descriptorDSMCC_INT_UNT_Private (u_char *b);
+int  descriptorDSMCC_INT_UNT_Private (u_char *b);
 
-
-
+void descriptorDSMCC_scheduling (u_char *b);
+void descriptorDSMCC_update (u_char *b);
+void descriptorDSMCC_ssu_location (u_char *b);
+void descriptorDSMCC_message(u_char *b);
+void descriptorDSMCC_ssu_event_name (u_char *b);
 void descriptorDSMCC_target_smartcard (u_char *b);
 void descriptorDSMCC_target_MAC_address (u_char *b);
 void descriptorDSMCC_target_serial_number (u_char *b);

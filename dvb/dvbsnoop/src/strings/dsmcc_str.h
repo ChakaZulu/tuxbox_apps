@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.h,v 1.12 2004/01/01 20:09:40 rasc Exp $ 
+$Id: dsmcc_str.h,v 1.13 2004/01/02 02:18:34 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: dsmcc_str.h,v 1.12 2004/01/01 20:09:40 rasc Exp $
 
 
 $Log: dsmcc_str.h,v $
+Revision 1.13  2004/01/02 02:18:34  rasc
+more DSM-CC  INT/UNT descriptors
+
 Revision 1.12  2004/01/01 20:09:40  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -92,6 +95,8 @@ char *dsmccStr_DescriptorType (u_int id);
 char *dsmccStr_SpecifierType (u_int id);
 char *dsmccStr_AccessMode (u_int id);
 
+char *dsmccStr_UpdateFlag (u_int id);
+char *dsmccStr_UpdateMethod (u_int id);
 
 
 

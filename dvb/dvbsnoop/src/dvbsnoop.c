@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.c,v 1.20 2004/01/01 20:09:15 rasc Exp $
+$Id: dvbsnoop.c,v 1.21 2004/01/02 02:18:33 rasc Exp $
 
  DVBSNOOP
 
@@ -14,6 +14,9 @@ $Id: dvbsnoop.c,v 1.20 2004/01/01 20:09:15 rasc Exp $
 
 
 $Log: dvbsnoop.c,v $
+Revision 1.21  2004/01/02 02:18:33  rasc
+more DSM-CC  INT/UNT descriptors
+
 Revision 1.20  2004/01/01 20:09:15  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -132,9 +135,10 @@ int main(int argc, char **argv)
 
      if (! opt.inpPidFile) {
 	out_nl (9, "   PID   : %d (0x%04x)",opt.pid,opt.pid);
-	out_nl (9, "   Filter: %d (0x%04x)",opt.filter,opt.filter);
-	out_nl (9, "   Mask  : %d (0x%04x)",opt.mask,opt.mask);
-     
+	if (opt.packet_mode == SECT) {		// filter are only for sections
+		out_nl (9, "   Filter: %d (0x%04x)",opt.filter,opt.filter);
+		out_nl (9, "   Mask  : %d (0x%04x)",opt.mask,opt.mask);
+	}
 	out_nl (9, "   DEMUX : %s",opt.devDemux);
 	out_nl (9, "   DVR   : %s",opt.devDvr);
      }

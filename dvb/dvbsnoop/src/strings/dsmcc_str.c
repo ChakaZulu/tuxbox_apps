@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.14 2004/01/01 20:09:40 rasc Exp $
+$Id: dsmcc_str.c,v 1.15 2004/01/02 02:18:34 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dsmcc_str.c,v 1.14 2004/01/01 20:09:40 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.15  2004/01/02 02:18:34  rasc
+more DSM-CC  INT/UNT descriptors
+
 Revision 1.14  2004/01/01 20:09:40  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -606,6 +609,49 @@ char *dsmccStr_AccessMode (u_int id)
 
 
 
+
+/*
+  -- DSM-CC (INT) Update_flag
+  --  e.g. from ISO 13818-6 // TS 102 006
+  --  
+*/
+
+char *dsmccStr_UpdateFlag (u_int id)
+
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x00, 0x00,   "to be activated manually" },
+	{ 0x01, 0x01,   "may be performed automatically" },
+	{ 0x02, 0x03,   "reserved" },
+      	{  0,0, NULL }
+  };
+
+  return findTableID (TableIDs, id);
+}
+
+
+
+/*
+  -- DSM-CC (INT) Update_method
+  --  e.g. from ISO 13818-6 // TS 102 006
+  --  
+*/
+
+char *dsmccStr_UpdateMethod (u_int id)
+
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x00, 0x00,   "immediate update: performed whatever the IRD state" },
+	{ 0x01, 0x01,   "IRD available: the update is available in the stream; it will be taken into account when it does not interfere with the normal user operation" },
+	{ 0x02, 0x02,   "next restart: the update is available in the stream; it will be taken into account at the next IRD restart" },
+	{ 0x03, 0x07,   "reserved" },
+	{ 0x08, 0x0E,   "private use" },
+	{ 0x0F, 0x0F,   "reserved" },
+      	{  0,0, NULL }
+  };
+
+  return findTableID (TableIDs, id);
+}
 
 
 
