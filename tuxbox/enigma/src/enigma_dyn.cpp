@@ -687,7 +687,7 @@ static eString getContent(eString mode, eString path)
 	else
 	if (mode == "menuScreenShot")
 	{
-		if (access("/dev/grabber", 0) == 0)
+		if (access("/dev/grabber", R_OK) == 0)
 		{
 			eString cmd("cat /dev/grabber > /tmp/screenshot.bmp");
 			system(cmd.c_str());
