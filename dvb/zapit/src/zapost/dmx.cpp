@@ -1,5 +1,5 @@
 /*
- * $Id: dmx.cpp,v 1.1 2002/05/05 01:52:36 obi Exp $
+ * $Id: dmx.cpp,v 1.2 2002/07/17 03:28:28 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -145,7 +145,7 @@ int setDmxSctFilter (int fd, dvb_pid_t pid, uint8_t filter0, uint8_t filter1, ui
 
 	case 0x42: /* service_description_section - actual_transport_stream */
 		sctFilterParams.filter.mask[0] = 0xFF;
-		sctFilterParams.timeout = 2000;
+		sctFilterParams.timeout = 10000;
 		break;
 
 	case 0x43 ... 0x45: /* reserved for future use */
