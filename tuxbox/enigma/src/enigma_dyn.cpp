@@ -687,7 +687,17 @@ static eString getContent(eString mode, eString path)
 	else
 	if (mode == "menuScreenShot")
 	{
-		result = " ";
+		if (access("/dev/grabber", 0) == 0)
+		{
+			eString cmd("cat /dev/grabber > /tmp/screenshot.bmp");
+			system(cmd.c_str());
+
+			result = "<img width=\"650\" src=\"/root/tmp/screenshot.bmp\" border=0>";
+		}
+		else
+		{
+			result = "Module grabber.o is required but not installed";
+		}
 	}
 	else
 		result = mode + " is not available yet";
