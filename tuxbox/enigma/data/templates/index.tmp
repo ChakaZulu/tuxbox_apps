@@ -93,7 +93,7 @@ function clearTimerList()
 			<TABLE BORDER=0 CELLPADDING=0 CELLSPACING=0>
 				<TR>
 					<TD><IMG SRC="filler.png" WIDTH=110 HEIGHT=22></TD>
-						#TOPNAVI#
+					<td>#TOPNAVI#</td>
 					<TD><IMG SRC="filler.png" WIDTH=170 HEIGHT=22></TD>
 				</TR>
 			</TABLE>
