@@ -232,6 +232,9 @@ struct SNeutrinoSettings
 	int	lcd_contrast;
 	int	lcd_power;
 	int	lcd_inverse;
+
+	// pictureviewer
+	char   picviewer_slide_time[3];
 };
 
 struct SglobalInfo

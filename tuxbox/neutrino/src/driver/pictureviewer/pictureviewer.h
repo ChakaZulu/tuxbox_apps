@@ -38,7 +38,7 @@ class CPictureViewer
 struct cformathandler 
 {
     struct cformathandler *next;
-    int (*get_size)(const char *,int *,int*);
+    int (*get_size)(const char *,int *,int*,int);
     int (*get_pic)(const char *,unsigned char *,int,int);
     int (*id_pic)(const char *);
 };
@@ -53,10 +53,12 @@ public:
 	};
 	CPictureViewer();
 	~CPictureViewer(){};
-	bool ShowImage(std::string filename);
-   bool DecodeImage(std::string);
+	bool ShowImage(std::string filename, int startx, int endx, int starty, int endy);
+	bool DecodeImage(std::string name, int startx, int endx, int starty, int endy, bool showBusySign=false);
    bool DisplayImage();
 	void SetScaling(ScalingMode s){m_scaling=s;}
+	void showBusy(int sx, int sy, int width, char r, char g, char b);
+	void hideBusy();
 	
 private:
 	CFormathandler *fh_root;
@@ -70,9 +72,15 @@ private:
    int m_Pic_XPan;
    int m_Pic_YPan;
 	
-	CFormathandler * fh_getsize(const char *name,int *x,int *y);
+	unsigned char* m_busy_buffer;
+	int m_busy_x;
+	int m_busy_y;
+	int m_busy_width;
+	int m_busy_cpp;
+	
+	CFormathandler * fh_getsize(const char *name,int *x,int *y, int width_wanted);
 	void init_handlers(void);
-	void add_format(int (*picsize)(const char *,int *,int*),int (*picread)(const char *,unsigned char *,int,int), int (*id)(const char*));
+	void add_format(int (*picsize)(const char *,int *,int*,int),int (*picread)(const char *,unsigned char *,int,int), int (*id)(const char*));
 
 };
 

@@ -681,7 +681,9 @@ apids.hint_2 in hex notation seperated by ' '
 mainmenu.pictureviewer Picture viewer
 pictureviewer.head Picture viewer
 pictureviewer.sortorder change sort order
+pictureviewer.sortorder.date (date)
+pictureviewer.sortorder.filename (filename)
 pictureviewer.show show
 pictureviewer.slideshow slideshow
-
+pictureviewer.slide_time slideshow display time
 

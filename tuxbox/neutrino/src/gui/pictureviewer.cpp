@@ -67,6 +67,7 @@ CPictureViewerGui::CPictureViewerGui()
 	visible = false;
 	selected = 0;
 
+	m_sort = FILENAME;
 	m_viewer = new CPictureViewer();
 	m_viewer->SetScaling(CPictureViewer::SIMPLE);
 	m_filebrowser = new CFileBrowser();
@@ -115,30 +116,38 @@ int CPictureViewerGui::exec(CMenuTarget* parent, string actionKey)
 	}
 
 	// set radio mode background
-	bool usedBackground = frameBuffer->getuseBackground();
-	if (usedBackground)
-		frameBuffer->saveBackgroundImage();
-	frameBuffer->useBackground(false);
-	frameBuffer->setBackgroundColor(0);
-	frameBuffer->paintBackground();
-
+	//	if(frameBuffer->getActive())
+	//	memset(frameBuffer->getFrameBufferPointer(), 0, frameBuffer->getStride()*576);
+	//	int bgcolor = frameBuffer->getBackgroundColor();
+	//	frameBuffer->setBackgroundColor(1);
+	//	frameBuffer->setTransparency(0);
+	//	frameBuffer->paintBackgroundBox(0,0,720,576);
+	//	frameBuffer->useBackground(true);
+	//	frameBuffer->paintBackground();
 
 	// tell neutrino we're in pic_mode
 	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , NeutrinoMessages::mode_pic );
 	// remember last mode
 	m_LastMode=(CNeutrinoApp::getInstance()->getLastMode() /*| NeutrinoMessages::norezap*/);
-
+	// halt playback
+	bool pb = g_Zapit->isPlayBackActive();
+	if(pb)
+		g_Zapit->stopPlayBack();
 	// Stop sectionsd
 	g_Sectionsd->setPauseScanning(true); 
 
 	show();
 
-	// Restore previous background
-	if (usedBackground)
-		frameBuffer->restoreBackgroundImage();
-	frameBuffer->useBackground(usedBackground);
-	frameBuffer->paintBackground();
+	// Restore normal background
+	// frameBuffer->setBackgroundColor(bgcolor);
+	//frameBuffer->useBackground(false);
+	//if(frameBuffer->getActive())
+	//	memset(frameBuffer->getFrameBufferPointer(), 255, frameBuffer->getStride()*576);
 
+	//Start Playback again if halted
+	if(pb)
+		g_Zapit->startPlayBack();
+	
 	// Start Sectionsd
 	g_Sectionsd->setPauseScanning(false);
 
@@ -177,7 +186,7 @@ int CPictureViewerGui::show()
 			timeout=50; // egal
 		else
 		{
-			timeout=(m_time+10-(long)time(NULL))*10;
+			timeout=(m_time+atoi(g_settings.picviewer_slide_time)-(long)time(NULL))*10;
 			if(timeout <0 )
 				timeout=1;
 		}
@@ -320,7 +329,11 @@ int CPictureViewerGui::show()
 						}
 						else
 							printf("Wrong Filetype %s:%d\n",files->Name.c_str(), files->getType());
-						sort(playlist.begin(),playlist.end(),sortByFilename);
+						
+						if(m_sort==FILENAME)
+							sort(playlist.begin(),playlist.end(),sortByFilename);
+						else if(m_sort==DATE)
+							sort(playlist.begin(),playlist.end(),sortByDate);
 					}
 				}
 	//				CLCD::getInstance()->setMode(CLCD::MODE_MP3);
@@ -347,7 +360,16 @@ int CPictureViewerGui::show()
 		}
 		else if(msg==CRCInput::RC_help)
 		{
-			sort(playlist.begin(),playlist.end(),sortByDate);
+			if(m_sort==FILENAME)
+			{
+				m_sort=DATE;
+				sort(playlist.begin(),playlist.end(),sortByDate);
+			}
+			else if(m_sort==DATE)
+			{
+				m_sort=FILENAME;
+				sort(playlist.begin(),playlist.end(),sortByFilename);
+			}
 			update=true;
 		}
 		else if( ( msg >= CRCInput::RC_1 ) && ( msg <= CRCInput::RC_9 ) && playlist.size() > 0)
@@ -486,12 +508,15 @@ void CPictureViewerGui::paintFoot()
 		frameBuffer->paintIcon("ok.raw", x + 1* ButtonWidth2 + 25, y+(height-buttonHeight)-3);
 		g_Fonts->infobar_small->RenderString(x + 1 * ButtonWidth2 + 53 , y+(height-buttonHeight)+24 - 4, 
 						     ButtonWidth2- 28, g_Locale->getText("pictureviewer.show").c_str(), COL_INFOBAR, 0, true); // UTF-8
-	}
-	frameBuffer->paintIcon("help.raw", x+ 0* ButtonWidth + 25, y+(height-buttonHeight)-3);
-	g_Fonts->infobar_small->RenderString(x+ 0* ButtonWidth +53 , y+(height-buttonHeight)+24 - 4, 
-													 ButtonWidth2- 28, g_Locale->getText("pictureviewer.sortorder").c_str(), COL_INFOBAR, 0, true); // UTF-8
-	if(playlist.size()>0)
-	{
+		frameBuffer->paintIcon("help.raw", x+ 0* ButtonWidth2 + 25, y+(height-buttonHeight)-3);
+		string tmp = g_Locale->getText("pictureviewer.sortorder") + " ";
+		if(m_sort==FILENAME)
+			tmp += g_Locale->getText("pictureviewer.sortorder.date");
+		else if(m_sort==DATE)
+			tmp += g_Locale->getText("pictureviewer.sortorder.filename");
+		g_Fonts->infobar_small->RenderString(x+ 0* ButtonWidth2 +53 , y+(height-buttonHeight)+24 - 4, 
+														 ButtonWidth2- 28, tmp.c_str(), COL_INFOBAR, 0, true); // UTF-8
+
 		frameBuffer->paintIcon("rot.raw", x+ 0* ButtonWidth + 10, y+(height-2*buttonHeight)+4);
 		g_Fonts->infobar_small->RenderString(x + 0* ButtonWidth + 30, y+(height-2*buttonHeight)+24 - 1, 
 														 ButtonWidth- 20, g_Locale->getText("mp3player.delete").c_str(), COL_INFOBAR, 0, true); // UTF-8
@@ -547,27 +572,20 @@ void CPictureViewerGui::view(unsigned int index)
 	selected=index;
 	if(m_state == MENU)
 		frameBuffer->setMode(720,576,16);
-	m_viewer->ShowImage(playlist[index].Filename);
+	m_viewer->ShowImage(playlist[index].Filename,g_settings.screen_StartX, g_settings.screen_EndX,
+							  g_settings.screen_StartY, g_settings.screen_EndY);
 	//Decode next
 	unsigned int next=selected+1;
 	if(next > playlist.size()-1)
 		next=0;
-	m_viewer->DecodeImage(playlist[next].Filename);
 	if(m_state==MENU)
 		m_state=VIEW;
-	// Show red block for "next ready" in view state
 	if(m_state==VIEW)
-	{
-		unsigned char* fb = frameBuffer->getFrameBufferPointer();
-		for(int y=g_settings.screen_StartY+3 ; y< g_settings.screen_StartY+13; y++)
-		{
-			for(int x=g_settings.screen_StartX+3 ; x< g_settings.screen_StartX+13; x++)
-			{
-				fb[y*720*2 + x*2    ]=0x80;
-				fb[y*720*2 + x*2 + 1]=0x1F;
-			}
-		}
-	}
+		m_viewer->DecodeImage(playlist[next].Filename,g_settings.screen_StartX, g_settings.screen_EndX,
+									 g_settings.screen_StartY, g_settings.screen_EndY, true);
+	else
+		m_viewer->DecodeImage(playlist[next].Filename,g_settings.screen_StartX, g_settings.screen_EndX,
+									 g_settings.screen_StartY, g_settings.screen_EndY, false);
 }
 
 void CPictureViewerGui::endView()
@@ -575,9 +593,7 @@ void CPictureViewerGui::endView()
 	if(m_state != MENU)
 	{
 		frameBuffer->setMode(720,576,8);
-		frameBuffer->loadPal("radiomode.pal", 18, COL_MAXFREE);
-		frameBuffer->setBackgroundColor(0);
-		frameBuffer->paintBackgroundBox(0,0,720,576);
+		frameBuffer->ClearFrameBuffer();
 		m_state=MENU;
 	}
 }

@@ -10,9 +10,9 @@
 #include <asm/types.h>
 #include <string.h>
 #include <errno.h>
+#include "fb_display.h"
 #include "pictureviewer.h"
 #include "driver/framebuffer.h"
-
 /*
  * FrameBuffer Image Display Function
  * (c) smoku/2000
@@ -43,7 +43,6 @@ int openFB(const char *name);
 //void setVarScreenInfo(int fh, struct fb_var_screeninfo *var);
 void getFixScreenInfo(struct fb_fix_screeninfo *fix);
 void set332map();
-void* convertRGB2FB(unsigned char *rgbbuff, unsigned long count, int bpp, int *cpp);
 void blit2FB(void *fbbuff,
 	unsigned int pic_xs, unsigned int pic_ys,
 	unsigned int scr_xs, unsigned int scr_ys,

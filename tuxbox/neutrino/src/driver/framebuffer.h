@@ -132,6 +132,7 @@ class CFrameBuffer
 		bool loadPictureToMem       (const std::string filename, const uint16_t width, const uint16_t height, const uint16_t stride, uint8_t * memp);
 		bool savePictureFromMem     (const std::string filename, uint8_t * memp);
 
+		int getBackgroundColor() { return backgroundColor;}
 		void setBackgroundColor(int color);
 		bool loadBackground(const std::string filename, const unsigned char col = 0);
 		void useBackground(bool);

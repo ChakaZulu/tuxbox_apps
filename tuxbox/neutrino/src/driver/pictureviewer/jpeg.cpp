@@ -49,10 +49,9 @@ int fh_jpeg_load(const char *filename,unsigned char *buffer,int x,int y)
 	struct jpeg_decompress_struct *ciptr;
 	struct r_jpeg_error_mgr emgr;
 	unsigned char *bp;
-	int px,py,c,i;
+	int px,py,c;
 	FILE *fh;
 	JSAMPLE *lb;
-	struct rend_jpeg_mgr *rjpg;
 
 	ciptr=&cinfo;
 	if(!(fh=fopen(filename,"rb"))) return(FH_ERROR_FILE);
@@ -71,7 +70,7 @@ int fh_jpeg_load(const char *filename,unsigned char *buffer,int x,int y)
 	jpeg_stdio_src(ciptr,fh);
 	jpeg_read_header(ciptr,TRUE);
 	ciptr->out_color_space=JCS_RGB;
-	if(x==ciptr->image_width)
+	if(x==(int)ciptr->image_width)
 		ciptr->scale_denom=1;
 	else if(abs(x*2 - ciptr->image_width) < 2)
 		ciptr->scale_denom=2;
@@ -107,16 +106,16 @@ int fh_jpeg_load(const char *filename,unsigned char *buffer,int x,int y)
 	return(FH_ERROR_OK);
 }
 
-int fh_jpeg_getsize(const char *filename,int *x,int *y)
+int fh_jpeg_getsize(const char *filename,int *x,int *y, int wanted_width)
 {
 //	dbout("fh_jpeg_getsize {\n");
 	struct jpeg_decompress_struct cinfo;
 	struct jpeg_decompress_struct *ciptr;
 	struct r_jpeg_error_mgr emgr;
-	unsigned char *bp;
+
 	int px,py,c;
 	FILE *fh;
-	struct rend_jpeg_mgr *rjpg;
+	
 	ciptr=&cinfo;
 	if(!(fh=fopen(filename,"rb"))) return(FH_ERROR_FILE);
 
@@ -136,11 +135,11 @@ int fh_jpeg_getsize(const char *filename,int *x,int *y)
 	jpeg_read_header(ciptr,TRUE);
 	ciptr->out_color_space=JCS_RGB;
 	// should be more flexible...
-	if(ciptr->image_width/8 > 720)
+	if((int)ciptr->image_width/8 >= wanted_width)
 		ciptr->scale_denom=8;
-	else if(ciptr->image_width/4 > 720)
+	else if((int)ciptr->image_width/4 >= wanted_width)
 		ciptr->scale_denom=4;
-	else if(ciptr->image_width/2 > 720)
+	else if((int)ciptr->image_width/2 >= wanted_width)
 		ciptr->scale_denom=2;
 	else
 		ciptr->scale_denom=1;

@@ -57,7 +57,8 @@ int CFile::getType()
 			return FILE_MP3;
 		if((strcasecmp(extension.c_str(),"txt") == 0) || (strcasecmp(extension.c_str(),"sh") == 0))
 			return FILE_TEXT;
-		if((strcasecmp(extension.c_str(),"jpg") == 0) || (strcasecmp(extension.c_str(),"png") == 0) || (strcasecmp(extension.c_str(),"bmp") == 0))
+		if((strcasecmp(extension.c_str(),"jpg") == 0) || (strcasecmp(extension.c_str(),"png") == 0) || 
+			(strcasecmp(extension.c_str(),"bmp") == 0) || (strcasecmp(extension.c_str(),"gif") == 0))
 			return FILE_PICTURE;
 	}
 	return FILE_UNKNOWN;

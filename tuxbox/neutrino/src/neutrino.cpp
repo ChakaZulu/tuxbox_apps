@@ -552,6 +552,8 @@ int CNeutrinoApp::loadSetup()
 	g_settings.lcd_power = configfile.getInt32("lcd_power", 0x01);
 	g_settings.lcd_inverse = configfile.getInt32("lcd_inverse", 0x00);
 
+	strcpy( g_settings.picviewer_slide_time, configfile.getString( "picviewer_slide_time", "10" ).c_str() );
+	
 	if(configfile.getUnknownKeyQueryedFlag() && (erg==0))
 	{
 		erg = 2;
@@ -776,6 +778,8 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "lcd_contrast", g_settings.lcd_contrast );
 	configfile.setInt32( "lcd_power", g_settings.lcd_power );
 	configfile.setInt32( "lcd_inverse", g_settings.lcd_inverse );
+
+	configfile.setString( "picviewer_slide_time", g_settings.picviewer_slide_time );
 
 	if(configfile.getModifiedFlag())
 	{
@@ -1344,8 +1348,11 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 
 	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.RC") );
 	miscSettings.addItem( new CMenuForwarder("keybindingmenu.repeatblock", true, "", keySettings_repeatBlocker ));
-	miscSettings.addItem( new CMenuForwarder("keybindingmenu.repeatblockgeneric", true, "", keySettings_repeat_genericblocker ));
-
+ 	miscSettings.addItem( new CMenuForwarder("keybindingmenu.repeatblockgeneric", true, "", keySettings_repeat_genericblocker ));
+	
+	CStringInput*  pic_timeout= new CStringInput("pictureviewer.slide_time", g_settings.picviewer_slide_time, 2, "", "", "0123456789 ");
+	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "pictureviewer.head") );
+	miscSettings.addItem( new CMenuForwarder("pictureviewer.slide_time", true, g_settings.picviewer_slide_time, pic_timeout ));
 }
 
 
@@ -3372,7 +3379,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.405 2003/02/12 14:27:26 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.406 2003/02/12 22:02:37 zwen Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

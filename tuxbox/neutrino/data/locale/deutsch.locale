@@ -680,7 +680,10 @@ apids.hint_2 getrennt durch ' ' in hexadezimaler Form
 
 mainmenu.pictureviewer Bildbetrachter
 pictureviewer.head Bildbetrachter
-pictureviewer.sortorder Sortierreihenfolge ändern
+pictureviewer.sortorder Sort.reihenf. ändern
+pictureviewer.sortorder.date (Datum)
+pictureviewer.sortorder.filename (Dateiname)
 pictureviewer.show Anzeigen
 pictureviewer.slideshow Diaschau
+pictureviewer.slide_time Diaschau-Anzeigedauer
 

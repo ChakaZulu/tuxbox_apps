@@ -1,8 +1,11 @@
 #include "config.h"
 #include "pictureviewer.h"
+#include "fb_display.h"
+#include "driver/framebuffer.h"
 
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <termios.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -11,40 +14,32 @@
 #define min(a,b) ((a) < (b) ? (a) : (b))
 #define max(a,b) ((a) > (b) ? (a) : (b))
 
-extern void fb_display(unsigned char *rgbbuff,
-    int x_size, int y_size,
-    int x_pan, int y_pan,
-    int x_offs, int y_offs);
-
-extern void getCurrentRes(int *x,int *y);
-
-
 extern unsigned char * simple_resize(unsigned char * orgin,int ox,int oy,int dx,int dy);
 extern unsigned char * color_average_resize(unsigned char * orgin,int ox,int oy,int dx,int dy);
 
 
 #ifdef FBV_SUPPORT_GIF
-    extern int fh_gif_getsize(const char *,int *,int*);
+    extern int fh_gif_getsize(const char *,int *,int*,int);
     extern int fh_gif_load(const char *,unsigned char *,int,int);
     extern int fh_gif_id(const char *);
 #endif
 #ifdef FBV_SUPPORT_JPEG
-    extern int fh_jpeg_getsize(const char *,int *,int*);
+    extern int fh_jpeg_getsize(const char *,int *,int*,int);
     extern int fh_jpeg_load(const char *,unsigned char *,int,int);
     extern int fh_jpeg_id(const char *);
 #endif
 #ifdef FBV_SUPPORT_PNG
-    extern int fh_png_getsize(const char *,int *,int*);
+    extern int fh_png_getsize(const char *,int *,int*,int);
     extern int fh_png_load(const char *,unsigned char *,int,int);
     extern int fh_png_id(const char *);
 #endif
 #ifdef FBV_SUPPORT_BMP
-    extern int fh_bmp_getsize(const char *,int *,int*);
+    extern int fh_bmp_getsize(const char *,int *,int*,int);
     extern int fh_bmp_load(const char *,unsigned char *,int,int);
     extern int fh_bmp_id(const char *);
 #endif
 
-void CPictureViewer::add_format(int (*picsize)(const char *,int *,int*),int (*picread)(const char *,unsigned char *,int,int), int (*id)(const char*))
+void CPictureViewer::add_format(int (*picsize)(const char *,int *,int*,int ),int (*picread)(const char *,unsigned char *,int,int), int (*id)(const char*))
 {
     CFormathandler *fhn;
     fhn=(CFormathandler *) malloc(sizeof(CFormathandler));
@@ -71,23 +66,29 @@ void CPictureViewer::init_handlers(void)
 #endif
 }
 
-CPictureViewer::CFormathandler * CPictureViewer::fh_getsize(const char *name,int *x,int *y)
+CPictureViewer::CFormathandler * CPictureViewer::fh_getsize(const char *name,int *x,int *y, int width_wanted)
 {
 	CFormathandler *fh;
     for(fh=fh_root;fh!=NULL;fh=fh->next)
     {
 	if(fh->id_pic(name))
-	    if(fh->get_size(name,x,y)==FH_ERROR_OK) return(fh);
+	    if(fh->get_size(name,x,y,width_wanted)==FH_ERROR_OK) return(fh);
     }
     return(NULL);
 }
 
-bool CPictureViewer::DecodeImage(std::string name)
+bool CPictureViewer::DecodeImage(std::string name, int startx, int endx, int starty, int endy, bool showBusySign)
 {
-   dbout("DecodeImage {\n"); 
+//   dbout("DecodeImage {\n"); 
 	int x,y,xs,ys,imx,imy;
-   CFormathandler *fh;
-   if((fh=fh_getsize(name.c_str(),&x,&y)))
+	getCurrentRes(&xs,&ys);
+	
+	// Show red block for "next ready" in view state
+	if(showBusySign)
+		showBusy(startx+3,starty+3,10,0xff,00,00);
+   
+	CFormathandler *fh;
+   if((fh=fh_getsize(name.c_str(),&x,&y,endx-startx)))
    {
       if(m_Pic_Buffer!=NULL)
       {
@@ -100,40 +101,37 @@ bool CPictureViewer::DecodeImage(std::string name)
       else
          m_Pic_Buffer=(unsigned char *) malloc(x*y*3);
 		
-      dbout("---Decoding Start(%d/%d)\n",x,y);
+//      dbout("---Decoding Start(%d/%d)\n",x,y);
 		if(fh->get_pic(name.c_str(),m_Pic_Buffer,x,y)==FH_ERROR_OK)
 		{
-			dbout("---Decoding Done\n");
-			getCurrentRes(&xs,&ys);
-			if((x>xs || y>ys) && m_scaling!=NONE)
+//			dbout("---Decoding Done\n");
+			if((x>(endx-startx) || y>(endy-starty)) && m_scaling!=NONE)
 			{
-				if( (y*xs/x) <= ys)
+				if( (y*(endx-startx)/x) <= (endy-starty))
 				{
-					imx=xs;
-					imy=y*xs/x;
+					imx=(endx-startx);
+					imy=y*(endx-startx)/x;
 				}
 				else
 				{
-					imx=x*ys/y;
-					imy=ys;
+					imx=x*(endy-starty)/y;
+					imy=(endy-starty);
 				}
-				dbout("---Scaling Start\n");
 				if(m_scaling==SIMPLE)
 					m_Pic_Buffer=simple_resize(m_Pic_Buffer,x,y,imx,imy);
 				else
 					m_Pic_Buffer=color_average_resize(m_Pic_Buffer,x,y,imx,imy);
-				dbout("---Scaling Done\n");
 				x=imx; y=imy;
 			}
          m_Pic_Name = name;
          m_Pic_X=x;
          m_Pic_Y=y;
 			if(x<xs) 
-            m_Pic_XPos=(xs-x)/2; 
+            m_Pic_XPos=(endx-startx-x)/2+startx; 
          else 
-            m_Pic_XPos=0;
+            m_Pic_XPos=startx;
 			if(y<ys) 
-            m_Pic_YPos=(ys-y)/2; 
+            m_Pic_YPos=(endy-starty-y)/2+starty; 
          else 
             m_Pic_YPos=0;
 			if(x > xs)
@@ -149,10 +147,10 @@ bool CPictureViewer::DecodeImage(std::string name)
       {
 			printf("Unable to read file !\n");
          free(m_Pic_Buffer);
-			m_Pic_Buffer=(unsigned char *) malloc(x*y*3);
-			memset(m_Pic_Buffer, 0 , x*y*3);
-         m_Pic_X=0;
-         m_Pic_Y=0;
+			m_Pic_Buffer=(unsigned char *) malloc(xs*ys*3);
+			memset(m_Pic_Buffer, 0 , xs*ys*3);
+         m_Pic_X=xs;
+         m_Pic_Y=ys;
 			m_Pic_XPos=0;
 			m_Pic_YPos=0;
 			m_Pic_XPan=0;
@@ -165,30 +163,32 @@ bool CPictureViewer::DecodeImage(std::string name)
       {
          free(m_Pic_Buffer);
       }
-		m_Pic_Buffer=(unsigned char *) malloc(x*y*3);
-		memset(m_Pic_Buffer, 0 , x*y*3);
-		m_Pic_X=0;
-		m_Pic_Y=0;
+		m_Pic_Buffer=(unsigned char *) malloc(xs*ys*3);
+		memset(m_Pic_Buffer, 0 , xs*ys*3);
+		m_Pic_X=xs;
+		m_Pic_Y=ys;
 		m_Pic_XPos=0;
 		m_Pic_YPos=0;
 		m_Pic_XPan=0;
 		m_Pic_YPan=0;
 		printf("Unable to read file or format not recognized!\n");
    }
-	
-   dbout("DecodeImage }\n"); 
+	hideBusy();
+//   dbout("DecodeImage }\n"); 
 	return(m_Pic_Buffer!=NULL);
 }
 
 
-bool CPictureViewer::ShowImage(std::string filename)
+bool CPictureViewer::ShowImage(std::string filename, int startx, int endx, int starty, int endy)
 {
+//	dbout("Show Image {\n");
    if(filename!=m_Pic_Name)
    {
       // Picture not yet decoded
-      DecodeImage(filename);
+      DecodeImage(filename,startx,endx,starty,endy,false);
    }
    DisplayImage();
+//	dbout("Show Image }\n");
    return true;
 }
 bool CPictureViewer::DisplayImage()
@@ -211,7 +211,64 @@ CPictureViewer::CPictureViewer()
    m_Pic_YPos=0;
    m_Pic_XPan=0;
    m_Pic_YPan=0;
-
+	
 	init_handlers();																     
 }
 
+void CPictureViewer::showBusy(int sx, int sy, int width, char r, char g, char b)
+{
+//	dbout("Show Busy{\n");
+	unsigned char rgb_buffer[3];
+	unsigned char* fb_buffer;
+	unsigned char* busy_buffer_wrk;
+	int cpp;
+	struct fb_var_screeninfo *var;
+	var = CFrameBuffer::getInstance()->getScreenInfo();
+	
+	rgb_buffer[0]=r;
+	rgb_buffer[1]=g;
+	rgb_buffer[2]=b;
+
+	fb_buffer = (unsigned char*) convertRGB2FB(rgb_buffer, 1, var->bits_per_pixel, &cpp);
+	m_busy_buffer = (unsigned char*) malloc(width*width*cpp);
+	busy_buffer_wrk = m_busy_buffer;
+	unsigned char* fb = CFrameBuffer::getInstance()->getFrameBufferPointer();
+	for(int y=sy ; y < sy+width; y++)
+   {
+		for(int x=sx ; x< sx+width; x++)
+	   {
+			memcpy(busy_buffer_wrk, fb+y*var->xres*cpp + x*cpp, cpp);
+			busy_buffer_wrk+=cpp;
+			memcpy(fb+y*var->xres*cpp + x*cpp, fb_buffer, cpp);
+		}
+	}
+	m_busy_x = sx;
+	m_busy_y = sy;
+	m_busy_width = width;
+	m_busy_cpp = cpp;
+	free(fb_buffer);
+//	dbout("Show Busy}\n");
+}
+void CPictureViewer::hideBusy()
+{
+//	dbout("Hide Busy{\n");
+	if(m_busy_buffer!=NULL)
+	{
+		struct fb_var_screeninfo *var;
+		var = CFrameBuffer::getInstance()->getScreenInfo();
+		unsigned char* fb = CFrameBuffer::getInstance()->getFrameBufferPointer();
+		unsigned char* busy_buffer_wrk = m_busy_buffer;
+
+		for(int y=m_busy_y ; y < m_busy_y+m_busy_width; y++)
+		{
+			for(int x=m_busy_x ; x< m_busy_x+m_busy_width; x++)
+			{
+				memcpy(fb+y*var->xres*m_busy_cpp + x*m_busy_cpp, busy_buffer_wrk, m_busy_cpp);
+				busy_buffer_wrk+=m_busy_cpp;
+			}
+		}
+		free(m_busy_buffer);
+		m_busy_buffer=NULL;
+	}
+//	dbout("Hide Busy}\n");
+}

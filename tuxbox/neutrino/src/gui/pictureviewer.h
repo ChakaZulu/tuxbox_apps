@@ -61,6 +61,12 @@ class CPictureViewerGui : public CMenuTarget
 			MENU,
 			SLIDESHOW
 		};
+		enum SortOrder
+		{
+			DATE=0,
+			FILENAME,
+			NAME
+		};
 	private:
 		CFrameBuffer		*frameBuffer;
 		CFileBrowser		*m_filebrowser;
@@ -74,6 +80,7 @@ class CPictureViewerGui : public CMenuTarget
 		int					buttonHeight;
 		bool				visible;			
 		State          m_state;
+		SortOrder      m_sort;
 
 		CViewList			playlist;
 		string				Path;
