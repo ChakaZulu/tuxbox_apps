@@ -1187,6 +1187,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 	service.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	service.addItem( new CMenuForwarder("bouqueteditor.name", true, "", new CBEBouquetWidget()));
 	service.addItem( new CMenuForwarder("servicemenu.scants", true, "", &scanSettings ) );
+	service.addItem( new CMenuForwarder("servicemenu.reload", true, "", this, "reloadchannels" ) );
 	service.addItem( new CMenuForwarder("servicemenu.ucodecheck", true, "", UCodeChecker ) );
 
 	//softupdate
@@ -3356,8 +3357,13 @@ int CNeutrinoApp::exec(CMenuTarget* parent, std::string actionKey)
 	}
 	else if(actionKey=="recording")
 	{
-      setupRecordingDevice();
-   }
+		setupRecordingDevice();
+	}
+	else if(actionKey=="reloadchannels")
+	{
+		dprintf(DEBUG_INFO, "reloading channels...\n");
+		g_Zapit->reinitChannels();
+	}
 	return returnval;
 }
 
@@ -3436,7 +3442,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.471 2003/06/18 13:21:59 alexw Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.472 2003/06/26 05:11:46 alexw Exp $\n\n");
 
 	tzset();
 	initGlobals();
