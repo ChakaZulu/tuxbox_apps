@@ -391,7 +391,6 @@ flashupdate.currentversionbaseversion Basisimage
 flashupdate.currentversionsnapshot ImageTyp
 flashupdate.checkupdate nach neuer Version suchen
 flashupdate.versioncheck Versionsüberprüfung
-flashupdate.nonewversion keine neue Version verfügbar
 flashupdate.md5check Imageprüfung
 flashupdate.md5sumerror Das Image ist fehlerhaft
 flashupdate.url_file Konfigfile

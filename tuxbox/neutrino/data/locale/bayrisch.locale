@@ -391,7 +391,6 @@ flashupdate.currentversionbaseversion Basisimage
 flashupdate.currentversionsnapshot ImageTyp
 flashupdate.checkupdate nach ner neien Versio suacha
 flashupdate.versioncheck Version obcheckn
-flashupdate.nonewversion koa neie Version do
 flashupdate.md5check Image obchecken
 flashupdate.md5sumerror Des Image is hi
 flashupdate.url_file Eistellungsdatei

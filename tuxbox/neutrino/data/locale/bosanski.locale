@@ -391,7 +391,6 @@ flashupdate.currentversionbaseversion osnovni imidž
 flashupdate.currentversionsnapshot vrsta imidža
 flashupdate.checkupdate tražiti novu verziju
 flashupdate.versioncheck provjeriti verziju
-flashupdate.nonewversion nema nove verzije
 flashupdate.md5check provjera imidža
 flashupdate.md5sumerror imidž ima greške
 flashupdate.url_file unset

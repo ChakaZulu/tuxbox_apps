@@ -391,7 +391,6 @@ flashupdate.currentversionbaseversion Baseimage
 flashupdate.currentversionsnapshot Typ Image
 flashupdate.checkupdate Szukaj nowej wersji
 flashupdate.versioncheck Sprawdzam wersje
-flashupdate.nonewversion nowa wersja nie dostepna
 flashupdate.md5check sprawdzam  image
 flashupdate.md5sumerror image zawiera bledy
 flashupdate.url_file unset

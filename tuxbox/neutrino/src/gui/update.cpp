@@ -77,8 +77,6 @@ CFlashUpdate::CFlashUpdate()
 	:CProgressWindow()
 {
 	setTitle(g_Locale->getText("flashupdate.head")); // UTF-8
-
-	installedVersion = g_settings.softupdate_currentversion;
 }
 
 
@@ -215,12 +213,6 @@ bool CFlashUpdate::checkVersion4Update()
 
 		printf("internet version: %s\n", newVersion.c_str());
 
-		if (newVersion == installedVersion)
-		{
-			ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.nonewversion")); // UTF-8
-			return false;
-		}
-	
 		showLocalStatus(100);
 		showGlobalStatus(20);
 		hide();

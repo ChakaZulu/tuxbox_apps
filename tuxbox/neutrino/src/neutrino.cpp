@@ -531,7 +531,6 @@ int CNeutrinoApp::loadSetup()
 
 	//Software-update
 	g_settings.softupdate_mode = configfile.getInt32( "softupdate_mode", 1 );
-	strcpy(g_settings.softupdate_currentversion, configfile.getString("softupdate_currentversion", "" ).c_str());
 	strcpy(g_settings.softupdate_url_file, configfile.getString("softupdate_url_file", "/etc/cramfs.urls").c_str());
 	strcpy(g_settings.softupdate_proxyserver, configfile.getString("softupdate_proxyserver", "" ).c_str());
 	strcpy(g_settings.softupdate_proxyusername, configfile.getString("softupdate_proxyusername", "" ).c_str());
@@ -848,7 +847,6 @@ void CNeutrinoApp::saveSetup()
 
 	//Software-update
 	configfile.setInt32 ("softupdate_mode"          , g_settings.softupdate_mode          );
-	configfile.setString("softupdate_currentversion", g_settings.softupdate_currentversion);
 	configfile.setString("softupdate_url_file"      , g_settings.softupdate_url_file      );
 	configfile.setString("softupdate_proxyserver"   , g_settings.softupdate_proxyserver   );
 	configfile.setString("softupdate_proxyusername" , g_settings.softupdate_proxyusername );
@@ -1365,24 +1363,17 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		updateSettings->addItem( oj );
 
 
-		//get current flash-version SBBBYYYYMMTTHHMM -- formatsting
+		/* show current version */
+		updateSettings->addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "flashupdate.currentversion_sep"));
+
+		/* get current version SBBBYYYYMMTTHHMM -- formatsting */
 		CConfigFile configfile('\t');
-		if(!configfile.loadConfig("/.version"))
-		{
-			//error default
-			strcpy(g_settings.softupdate_currentversion, "????????????????");
-		}
-		else
-		{
-			strcpy(g_settings.softupdate_currentversion, configfile.getString( "version", "????????????????").c_str());
-		}
-		dprintf(DEBUG_INFO, "current flash-version: %s\n", g_settings.softupdate_currentversion);
 
-		//aktuelle Version anzeigen
-		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "flashupdate.currentversion_sep") );
+		const char * versionString = (configfile.loadConfig("/.version")) ? (configfile.getString( "version", "????????????????").c_str()) : "????????????????";
 
-		//updateSettings->addItem( new CMenuForwarder("flashupdate.currentversion", false, (char*) &g_settings.softupdate_currentversion, NULL ));
-		CFlashVersionInfo versionInfo(g_settings.softupdate_currentversion);
+		dprintf(DEBUG_INFO, "current flash-version: %s\n", versionString);
+
+		CFlashVersionInfo versionInfo(versionString);
 		static char date[50];
 		strcpy(date, versionInfo.getDate());
 		updateSettings->addItem( new CMenuForwarder("flashupdate.currentversiondate", false, (char*) &date, NULL ));
@@ -1392,9 +1383,8 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		static char baseimage[50];
 		strcpy(baseimage, versionInfo.getBaseImageVersion());
 		updateSettings->addItem( new CMenuForwarder("flashupdate.currentversionbaseversion", false, (char*) &baseimage, NULL ));
-		static char releasetype[50];
-		strcpy(releasetype, versionInfo.getType());
-		updateSettings->addItem( new CMenuForwarder("flashupdate.currentversionsnapshot", false, (char*) &releasetype, NULL ));
+		/* versionInfo.getType() returns const char * which is never deallocated */
+		updateSettings->addItem(new CMenuForwarder("flashupdate.currentversionsnapshot", false, versionInfo.getType(), NULL));
 
 		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "flashupdate.proxyserver_sep") );
 

@@ -391,7 +391,6 @@ flashupdate.currentversionbaseversion Basisimage
 flashupdate.currentversionsnapshot ImageTipo
 flashupdate.checkupdate Cercare nuove Versioni
 flashupdate.versioncheck Controllo Versione
-flashupdate.nonewversion Nessuna Versione Nuova
 flashupdate.md5check Controllo Image
 flashupdate.md5sumerror Image e difettosa
 flashupdate.url_file File Configurazione

@@ -391,7 +391,6 @@ flashupdate.currentversionbaseversion Baseimage
 flashupdate.currentversionsnapshot ImageType
 flashupdate.checkupdate search for new version
 flashupdate.versioncheck checking version
-flashupdate.nonewversion no new version available
 flashupdate.md5check checking image
 flashupdate.md5sumerror image has errors
 flashupdate.url_file config file
