@@ -253,4 +253,3 @@ int eNumber::getNumber()
 	}
 	return n;
 }
-    
