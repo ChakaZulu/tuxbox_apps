@@ -1,5 +1,6 @@
 <html>
 	<head>
+		<META HTTP-EQUIV="pragma" CONTENT="no-cache">
 		<title>Enigma PDA Web Interface</title>
 		<link rel="stylesheet" type="text/css" href="webif_small.css">
 		<script language="javascript" type="text/javascript" src="window.js"></script>
