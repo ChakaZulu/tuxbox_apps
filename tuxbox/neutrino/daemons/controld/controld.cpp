@@ -23,6 +23,7 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <config.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -50,7 +51,7 @@
 #include "../lcdd/lcdd.h"
 
 
-#define CONF_FILE "/var/controld.conf"
+#define CONF_FILE CONFIGDIR "/controld.conf"
 
 
 struct rmsg {

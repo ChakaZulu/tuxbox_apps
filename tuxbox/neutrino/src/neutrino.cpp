@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.99 2001/12/14 16:56:42 faralla Exp $
+        $Id: neutrino.cpp,v 1.100 2001/12/15 13:52:22 obi Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.100  2001/12/15 13:52:22  obi
+  moved configuation files to CONFIGDIR
+
   Revision 1.99  2001/12/14 16:56:42  faralla
   better bouquet-key handling
 
@@ -360,7 +363,7 @@ CNeutrinoApp::CNeutrinoApp()
 	g_fontRenderer = new fontRenderClass;
 	SetupFrameBuffer();
 
-	settingsFile = "/var/neutrino.conf";
+	settingsFile = CONFIGDIR "/neutrino.conf";
 
 	mode = 0;
 	channelList = NULL;
@@ -1999,7 +2002,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.99 2001/12/14 16:56:42 faralla Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.100 2001/12/15 13:52:22 obi Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;
