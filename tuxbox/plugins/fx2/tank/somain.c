@@ -52,7 +52,7 @@ int tank_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 	if ( RcInitialize( fdrc ) < 0 )
 		return -1;
 
-//	Fx2ShowPig( 440, 360, 160, 144 );
+	Fx2ShowPig( 64-51, 32+10, 200, 180 );
 
 	while( doexit != 3 )
 	{
@@ -96,7 +96,7 @@ int tank_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 		}
 	}
 
-//	Fx2StopPig();
+	Fx2StopPig();
 
 	RcClose();
 	FBClose();

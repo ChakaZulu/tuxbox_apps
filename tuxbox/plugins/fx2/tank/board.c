@@ -134,8 +134,8 @@ void	TankInitialize( void )
 	cang[1]=45;
 
 /* label */
-	FBDrawString( 64, 64, 64, "Player 1", WHITE, 0 );
-	FBDrawString( 464, 64, 64, "Player 2", SAIR, 0 );
+	FBDrawString( 500, 64, 64, "Player 1", WHITE, 0 );
+	FBDrawString( 500, 128, 64, "Player 2", SAIR, 0 );
 
 /* middle */
 	FBFillRect( 300, 500, 120, 12, BROWN );
@@ -388,7 +388,7 @@ static	void	Bomb( void )
 				break;
 		if ( o==5 )
 		{
-			FBDrawString( 200, 300, 64, "Player 2 won the game", RED, 0 );
+			FBDrawString( 200, 360, 64, "Player 2 won the game", RED, 0 );
 			doexit=4;
 		}
 		for( o=5; o<10; o++ )
@@ -396,7 +396,7 @@ static	void	Bomb( void )
 				break;
 		if ( o==10 )
 		{
-			FBDrawString( 200, 300, 64, "Player 1 won the game", RED, 0 );
+			FBDrawString( 200, 360, 64, "Player 1 won the game", RED, 0 );
 			doexit=4;
 		}
 	}
@@ -433,11 +433,11 @@ void	Play( void )
 		if ( !doexit )
 		{
 			DrawCanon(0);
-			FBDrawString( player ? 464 : 64, 64, 64,
+			FBDrawString( 500, player?128:64, 64,
 					player ? "Player 2" : "Player 1", SAIR, 0 );
 			player=!player;
 			DrawCanon(1);
-			FBDrawString( player ? 464 : 64, 64, 64,
+			FBDrawString( 500, player?128:64, 64,
 					player ? "Player 2" : "Player 1", WHITE, 0 );
 		}
 		break;
