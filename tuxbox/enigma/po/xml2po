@@ -1,24 +1,27 @@
 #! /usr/bin/perl
+use strict;
+use warnings;
 
 my %used;
+my ($list, $fh);
 
-open($list, @ARGV[0]) or die "cannot open list";
+open($list, $ARGV[0]) or die "cannot open list";
 
-chdir "@ARGV[1]";
+chdir $ARGV[1];
 
 while (<$list>) {
-	$xmlpath=$_;
-	$xmlfile=`basename $xmlpath`;
+        my $xmlpath=$_;
+	my $xmlfile=`basename $xmlpath`;
 	chomp $xmlfile;
 
 	open ($fh, "<$xmlpath") or die "cannot open file $xmlpath";
 
-	$line=1;
+	my $line=1;
 	while (<$fh>) {
 		while (s/(\w+)=\"(.*?)\"//) {
 			if ($1 eq "text" or $1 eq "helptext")
 			{
-				$used{$2} = $used{$2} . "#: $xmlfile:$line\n";
+				$used{$2} .= "#: $xmlfile:$line\n";
 			}
 		} 
 		$line++;
