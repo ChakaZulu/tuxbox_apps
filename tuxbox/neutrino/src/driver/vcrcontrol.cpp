@@ -59,6 +59,8 @@
 
 
 #include <daemonc/remotecontrol.h>
+#include <zapit/client/zapittools.h>
+
 extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
 
@@ -447,9 +449,9 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channe
 			}
 		}
 		
-		extMessage += ext_channel_name;
+		extMessage += ZapitTools::UTF8_to_UTF8XML(ext_channel_name.c_str());
 		extMessage += "</channelname>\n\t\t<epgtitle>";
-		extMessage += extEPGTitle;
+		extMessage += ZapitTools::UTF8_to_UTF8XML(extEPGTitle.c_str());
 		extMessage += "</epgtitle>\n\t\t<id>";
 		sprintf(tmp, PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS, channel_id);
 		extMessage += tmp;
@@ -478,7 +480,7 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channe
 			sprintf(tmp, "%u", pids.APIDs[i].pid);
 			extMessage += tmp;
 			extMessage += "\" name=\"";
-			extMessage += g_RemoteControl->current_PIDs.APIDs[i].desc;
+			extMessage += ZapitTools::UTF8_to_UTF8XML(g_RemoteControl->current_PIDs.APIDs[i].desc);
 			extMessage += "\"/>\n";
 /*			if(pids.APIDs[i].pid==apid)
 				apidFound=true;*/
