@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.230 2002/09/18 23:02:16 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.231 2002/09/19 10:24:50 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -53,6 +53,7 @@
 
 /* zapit headers */
 #include "getservices.h"
+#include "xmlinterface.h"
 #include "zapit.h"
 
 #define debug(fmt, args...) { if (debug) { printf(fmt, ## args); fflush(stdout); } }
@@ -558,64 +559,20 @@ int start_scan ()
 	return 0;
 }
 
-void parseScanInputXml ()
+void parseScanInputXml()
 {
-	char buffer[2048];
-	char filename[32];
-	size_t done;
-	size_t length;
-	FILE *transponder_xml;
-
 	switch (frontend->getInfo()->type)
 	{
 			case FE_QPSK:
-			strcpy(filename, CONFIGDIR "/satellites.xml");
+			scanInputParser = parseXmlFile(string(CONFIGDIR "/satellites.xml"));
 			break;
 
 			case FE_QAM:
-			strcpy(filename, CONFIGDIR "/cables.xml");
+			scanInputParser = parseXmlFile(string(CONFIGDIR "/cables.xml"));
 			break;
 
 			default:
 			return;
-	}
-
-	transponder_xml = fopen(filename, "r");
-
-	if (transponder_xml == NULL)
-	{
-		perror(filename);
-		return;
-	}
-
-	scanInputParser = new XMLTreeParser("ISO-8859-1");
-
-	do
-	{
-		length = fread(buffer, 1, sizeof(buffer), transponder_xml);
-		done = length < sizeof(buffer);
-
-		if (!scanInputParser->Parse(buffer, length, done))
-		{
-			printf("[zapit] parse error: %s at line %d\n",
-			       scanInputParser->ErrorString(scanInputParser->GetErrorCode()),
-			       scanInputParser->GetCurrentLineNumber());
-
-			fclose(transponder_xml);
-			delete scanInputParser;
-			scanInputParser = NULL;
-			return;
-		}
-	}
-	while (!done);
-
-	fclose(transponder_xml);
-
-	if (!scanInputParser->RootNode())
-	{
-		delete scanInputParser;
-		scanInputParser = NULL;
-		return;
 	}
 }
 
@@ -797,9 +754,7 @@ void parse_command (CZapitClient::commandHead &rmsg)
 					parseScanInputXml();
 
 					if (scanInputParser == NULL)
-					{
 						break;
-					}
 				}
 
 				CZapitClient::responseGetSatelliteList msgResponseGetSatelliteList;
@@ -1101,7 +1056,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.230 2002/09/18 23:02:16 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.231 2002/09/19 10:24:50 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{

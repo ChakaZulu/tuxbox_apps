@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.h,v 1.44 2002/08/21 09:59:23 obi Exp $
+ * $Id: getservices.h,v 1.45 2002/09/19 10:24:50 thegoodguy Exp $
  */
 
 #ifndef __getservices_h__
@@ -15,7 +15,7 @@
 
 #include <eventserver.h>
 
-#include <xml/xmltree.h>
+#include "xmlinterface.h"
 #include <zapci/ci.h>
 #include <zapsi/descriptors.h>
 #include <zapsi/sdt.h>

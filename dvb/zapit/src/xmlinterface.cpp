@@ -1,13 +1,11 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.1 2002/09/18 13:26:18 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.2 2002/09/19 10:24:50 thegoodguy Exp $
  */
+
 #include "xmlinterface.h"
 
-#ifdef MASK_SPECIAL_CHARACTERS
 #include <stdio.h>
-#endif
 
-#include <stdio.h>
 
 std::string convertForXML(const std::string s)
 {
@@ -50,6 +48,7 @@ std::string convertForXML(const std::string s)
 	return r;
 }
 
+
 std::string Utf8_to_Latin1(const std::string s)  // only works correct if we had latin1 in the parsed xml-file
 {
 	std::string r;
@@ -64,4 +63,52 @@ std::string Utf8_to_Latin1(const std::string s)  // only works correct if we had
 	    else r += s[i];
 	}
 	return r;
+}
+
+
+XMLTreeParser* parseXmlFile(const std::string filename)
+{
+	char buffer[2048];
+	XMLTreeParser* tree_parser;
+	size_t done;
+	size_t length;
+	FILE* xml_file;
+
+	xml_file = fopen(filename.c_str(), "r");
+
+	if (xml_file == NULL)
+	{
+		perror(filename.c_str());
+		return NULL;
+	}
+
+	tree_parser = new XMLTreeParser("ISO-8859-1");
+
+	do
+	{
+		length = fread(buffer, 1, sizeof(buffer), xml_file);
+		done = length < sizeof(buffer);
+
+		if (!tree_parser->Parse(buffer, length, done))
+		{
+			printf("[xmlinterface.cpp] Error parsing \"%s\": %s at line %d\n",
+			       filename.c_str(),
+			       tree_parser->ErrorString(tree_parser->GetErrorCode()),
+			       tree_parser->GetCurrentLineNumber());
+
+			fclose(xml_file);
+			delete tree_parser;
+			return NULL;
+		}
+	}
+	while (!done);
+
+	fclose(xml_file);
+
+	if (!tree_parser->RootNode())
+	{
+		delete tree_parser;
+		return NULL;
+	}
+	return tree_parser;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.63 2002/09/18 13:26:18 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.64 2002/09/19 10:24:50 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -255,47 +255,16 @@ void CBouquetManager::parseBouquetsXml(const XMLTreeNode *root)
 
 void CBouquetManager::loadBouquets(bool ignoreBouquetFile)
 {
-	FILE * in;
-	XMLTreeParser * parser;
+	XMLTreeParser* parser;
 
 	if (ignoreBouquetFile == false)
 	{
-		char buf[2048];
-		int done;
+		parser = parseXmlFile(string(CONFIGDIR "/zapit/bouquets.xml"));
 
-		in = fopen(CONFIGDIR "/zapit/bouquets.xml", "r");
-
-		if (!in)
+		if (parser != NULL)
 		{
-			perror("[zapit] " CONFIGDIR "/zapit/bouquets.xml");
-		}
-		else
-		{
-			parser = new XMLTreeParser("ISO-8859-1");
-
-			do
-			{
-				unsigned int len = fread(buf, 1, sizeof(buf), in);
-				done = len < sizeof(buf);
-
-				if (!parser->Parse(buf, len, done))
-				{
-					printf("[zapit] parse error: %s at line %d\n",
-					parser->ErrorString(parser->GetErrorCode()),
-					parser->GetCurrentLineNumber());
-					fclose(in);
-					delete parser;
-					return;
-				}
-			}
-			while (!done);
-
-			if (parser->RootNode())
-				parseBouquetsXml(parser->RootNode());
-
+			parseBouquetsXml(parser->RootNode());
 			delete parser;
-
-			fclose(in);
 		}
 	}
 	renumServices();

@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.65 2002/09/18 23:02:16 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.66 2002/09/19 10:24:50 thegoodguy Exp $
  */
 
 #include <fcntl.h>
@@ -7,7 +7,6 @@
 #include <sys/types.h>
 
 #include <clientlib/zapitclient.h>
-#include <xml/xmltree.h>
 #include <zapost/frontend.h>
 #include <zapsi/bat.h>
 #include <zapsi/nit.h>

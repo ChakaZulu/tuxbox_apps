@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.39 2002/09/18 13:26:18 thegoodguy Exp $
+ * $Id: bouquets.h,v 1.40 2002/09/19 10:24:50 thegoodguy Exp $
  */
 
 #ifndef __bouquets_h__
@@ -14,7 +14,7 @@
 #include <stdio.h>
 
 #include "channel.h"
-#include "xml/xmltree.h"
+#include "xmlinterface.h"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
