@@ -22,7 +22,7 @@
 			<key name="bouqup" code="0d" />
 			<key name="bouqdown" code="0e" />
 			<key name="power" code="0f" />
-			<key name="dream" code="20" picture="key.13" />
+			<key name="menu" code="20" picture="key.32" />
 			<key name="up" code="21" />
 			<key name="down" code="22" />
 			<key name="left" code="23" />
@@ -46,7 +46,7 @@
 			<key name="prev" code="51" picture="key.24" />
 			<key name="LAME" code="54" picture="key.21" />
 			<key name="radio" code="53" picture="key.16" />
-			<key name="help" code="123" picture="key.23" />
+			<key name="help" code="52" picture="key.23" />
 			<key name="discrete_off" code="b4"/>
 			<key name="discrete_on" code="e8"/>
 		</keys>
@@ -72,7 +72,7 @@
 		</actionmap>
 
 		<actionmap name="mainmenu">
-			<action name="close" key="dream" flags="m" />
+			<action name="close" key="menu" flags="m" />
 			<action name="prev" key="left" flags="mr" />
 			<action name="next" key="right" flags="mr" />
 		</actionmap>
@@ -85,6 +85,7 @@
 			<action name="ok" key="ok" flags="m" />
 			<action name="cancel" key="LAME" flags="mr" />
 			<action name="help" key="info" flags="m" />
+			<action name="help" key="help" flags="m" />
 		</actionmap>
 
 		<actionmap name="textedit">
@@ -92,12 +93,14 @@
 			<action name="deletechar" key="red" flags="mr" />
 			<action name="capslock" key="yellow" flags="mr" />
 			<action name="swapnum" key="blue" flags="mr" />
-			<action name="showHelp" key="info" flags="mr" />
+			<action name="showHelp" key="info" flags="m" />
+			<action name="showHelp" key="help" flags="m" />
 		</actionmap>
 
 		<actionmap name="helpwindow">
 			<action name="close" key="ok" flags="m" />
 			<action name="close" key="help" flags="m" />
+			<action name="close" key="info" flags="m" />
 			<action name="up" key="up" flags="mr" />
 			<action name="down" key="down" flags="mr" />
 		</actionmap>
@@ -117,7 +120,7 @@
 		</actionmap>
 
 		<actionmap name="enigmaMain">
-			<action name="showMainMenu" key="dream"  flags="m" />
+			<action name="showMainMenu" key="menu"  flags="m" />
 			<action name="standby_press" key="power" flags="m" />
 			<action name="standby_repeat" key="power" flags="r" />
 			<action name="standby_release" key="power" flags="b" />
@@ -206,7 +209,7 @@
 			<action name="showSatellites" key="green" flags="m" />
 			<action name="showProvider" key="yellow" flags="m" />
 			<action name="showBouquets" key="blue" flags="m" />
-			<action name="showMenu" key="dream" flags="m" />
+			<action name="showMenu" key="menu" flags="m" />
 			<action name="toggleStyle" key="video" flags="m" />
 			<action name="toggleFocus" key="audio" flags="m" />
 		</actionmap>
