@@ -1,5 +1,5 @@
 /*
-$Id: teletext.c,v 1.6 2004/02/09 21:24:59 rasc Exp $
+$Id: teletext.c,v 1.7 2005/01/17 19:41:22 rasc Exp $
 
 
 
@@ -8,7 +8,7 @@ $Id: teletext.c,v 1.6 2004/02/09 21:24:59 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
 
 
  -- misc routines for EBU teletext
@@ -17,6 +17,9 @@ $Id: teletext.c,v 1.6 2004/02/09 21:24:59 rasc Exp $
 
 
 $Log: teletext.c,v $
+Revision 1.7  2005/01/17 19:41:22  rasc
+Bugfix: data broadcast descriptor (tnx to Sergio SAGLIOCCO, SecureLAB)
+
 Revision 1.6  2004/02/09 21:24:59  rasc
 AIT descriptors
 minor redesign on output routines
@@ -73,25 +76,9 @@ added EBU module (teletext), providing basic teletext decoding
 //
 // ==> 
 //  - Some codes are protected by Hamming code 8/4.
+//  - Some codes are protected by Hamming code 24/18.
 //
 
-
-
-
-
-
-
-// -- reset parity bit 
-// -- buffer needs to be "normalized" before.
-
-void unParityTeletextData (u_char *b, int len)
-{
-  int i;
-
-  for (i=0; i<len; i++) {
-	*(b+i) = *(b+i) & 0x7F; 
-  }
-}
 
 
 
@@ -138,7 +125,7 @@ int  print_teletext_control_decode (int v, u_char *b, int len)
 	x = unhamW84(*b,*(b+1));
 	packet_nr =  (x >> 3) & 0x1F;
 	mag_nr = x & 7;
-	if (! mag_nr) mag_nr = 8;
+	if (! mag_nr) mag_nr = 8; // $$$ TODO  is this really correct?
 
 	out_SB_NL  (v,"magazine number (X): ",mag_nr);
 	out_S2W_NL (v,"packet number (Y): ",packet_nr, dvbstrTELETEXT_packetnr(packet_nr) );
@@ -168,8 +155,23 @@ int  print_teletext_control_decode (int v, u_char *b, int len)
 		designation = unhamB84(*(b+2))  & 0x0F;
 		out_SB_NL  (v,"designation code: ",designation);
 
-		// $$$ TODO   hamming24_18 triplets
 		print_databytes (4,"packet data (hamming 24/18):", b+3, len-3);
+
+		// $$$ TODO   hamming24_18 triplets
+		// ... unham24_18 b+3,len-3
+		// packet_x26_to_m29 (packet_nr, mag_nr, designation, unhamed_buffer);
+
+		// $$$ TODO $$ DEBUG
+//		{
+//			u_char xx[len];
+//			u_char *xb = b+3;
+//			int  xlen = len-3;
+//			out_nl (4," DEBUG $$$: len %d ", len-3);
+//			while (xlen > 0) {
+//........
+//			}
+//
+//		}
 		return len;
 	}
 
@@ -229,7 +231,7 @@ int  print_teletext_control_decode (int v, u_char *b, int len)
 	
 
 	// -- Control bits   S. 26 EN 300 706
-	// -- don't do unham, get bits directly
+	// -- don't do unham, get bits directly out of hamming code
 	
 	{
 	  u_char x;

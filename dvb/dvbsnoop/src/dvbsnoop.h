@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.h,v 1.22 2004/11/16 23:02:50 rasc Exp $
+$Id: dvbsnoop.h,v 1.23 2005/01/17 19:41:21 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: dvbsnoop.h,v 1.22 2004/11/16 23:02:50 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de
+ (c) 2001-2005   Rainer.Scherg@gmx.de
 
 
 
@@ -17,6 +17,9 @@ $Id: dvbsnoop.h,v 1.22 2004/11/16 23:02:50 rasc Exp $
 
 
 $Log: dvbsnoop.h,v $
+Revision 1.23  2005/01/17 19:41:21  rasc
+Bugfix: data broadcast descriptor (tnx to Sergio SAGLIOCCO, SecureLAB)
+
 Revision 1.22  2004/11/16 23:02:50  rasc
 cmd option "-tsraw" for full/raw TS read (if supported by hard-/firmware)
 

@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.40 2004/11/03 21:00:50 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.41 2005/01/17 19:41:22 rasc Exp $ 
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: dvb_descriptor.c,v 1.40 2004/11/03 21:00:50 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
 
 
 
@@ -18,6 +18,9 @@ $Id: dvb_descriptor.c,v 1.40 2004/11/03 21:00:50 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.41  2005/01/17 19:41:22  rasc
+Bugfix: data broadcast descriptor (tnx to Sergio SAGLIOCCO, SecureLAB)
+
 Revision 1.40  2004/11/03 21:00:50  rasc
  - New: "premiere.de" private tables and descriptors (tnx to Peter.Pavlov, Premiere)
  - New: cmd option "-privateprovider <provider name>"
@@ -2847,10 +2850,12 @@ void descriptorDVB_DataBroadcastID  (u_char *b)
  		len2 = outBit_Sx_NL (5,"selector_length: ",	b,40, 8);
 		b += 6;
 		len -= 6;
+		i   -= 6;
 
 	     	print_databytes (5,"Selector bytes:", b, len2);
 		b += len2;
 		len -= len2;
+		i   -= len2;
 
 		indent (-1);
 	}

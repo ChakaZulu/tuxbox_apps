@@ -1,3 +1,7 @@
+
+
+ - Bugfix: data broadcast descriptor (tnx to Sergio SAGLIOCCO, SecureLAB)
+
  - New: bad ts packet counter  on -s bandwidth (tnx to W.J. Beksi, setabox for basic patch)
  - New: large file support (>2 GB), applies to -if  option (tnx to K. Zheng, Philips)
  - New: full/raw transport stream read (option -tsraw)

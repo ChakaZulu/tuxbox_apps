@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_int_unt_descriptor.h,v 1.11 2004/01/03 00:30:06 rasc Exp $ 
+$Id: dsmcc_int_unt_descriptor.h,v 1.12 2005/01/17 19:41:22 rasc Exp $ 
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: dsmcc_int_unt_descriptor.h,v 1.11 2004/01/03 00:30:06 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
 
 
  -- Private TAG Space  DSM-CC   INT, UNT, ...
@@ -16,6 +16,9 @@ $Id: dsmcc_int_unt_descriptor.h,v 1.11 2004/01/03 00:30:06 rasc Exp $
 
 
 $Log: dsmcc_int_unt_descriptor.h,v $
+Revision 1.12  2005/01/17 19:41:22  rasc
+Bugfix: data broadcast descriptor (tnx to Sergio SAGLIOCCO, SecureLAB)
+
 Revision 1.11  2004/01/03 00:30:06  rasc
 DSM-CC  STREAM descriptors module (started)
 

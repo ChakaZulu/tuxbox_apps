@@ -1,5 +1,5 @@
 /*
-$Id: ebu_misc.c,v 1.3 2004/11/04 19:21:11 rasc Exp $
+$Id: ebu_misc.c,v 1.4 2005/01/17 19:41:22 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: ebu_misc.c,v 1.3 2004/11/04 19:21:11 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de  (rasc)
+ (c) 2001-2005   Rainer.Scherg@gmx.de  (rasc)
 
 
 
@@ -19,6 +19,9 @@ $Id: ebu_misc.c,v 1.3 2004/11/04 19:21:11 rasc Exp $
 
 
 $Log: ebu_misc.c,v $
+Revision 1.4  2005/01/17 19:41:22  rasc
+Bugfix: data broadcast descriptor (tnx to Sergio SAGLIOCCO, SecureLAB)
+
 Revision 1.3  2004/11/04 19:21:11  rasc
 Fixes and changes on "premiere.de" private sections
 Cleaning up "premiere.de" private descriptors (should be final now)
@@ -57,8 +60,13 @@ more EBU/teletext stuff
 
 
 
+//
+// Inverttab 
+//  -- LSb... MSb  -> MSb...LSb
+//  -- shift transmission order of
+//  -- bits  (12345678) ->  cpu order (87654321)
+//
 
-// LSb... MSb  -> MSb...LSb
 static u_char invtab[256] = {
   0x00, 0x80, 0x40, 0xc0, 0x20, 0xa0, 0x60, 0xe0, 
   0x10, 0x90, 0x50, 0xd0, 0x30, 0xb0, 0x70, 0xf0, 
@@ -96,8 +104,9 @@ static u_char invtab[256] = {
 
 
 
-
+//
 // -- Invert Character/Buffer (LSb/MSb)
+// -- bitreverse character/buffer (per char)
 //
 
 u_char invertChar (u_char *b)
@@ -122,9 +131,35 @@ void invertBuffer (u_char *b, int len)
 
 
 
+// -- reset parity bit 
+// -- buffer needs to be "normalized" before.
+// 
+//  Bit 1  2  3  4  5  6  7  8  (transmission order)
+//      D1 D2 D3 D4 D5 D6 D7 P
+// 
+
+void unParityTeletextData (u_char *b, int len)
+{
+  int i;
+
+  for (i=0; i<len; i++) {
+	*(b+i) = *(b+i) & 0x7F; 
+  }
+
+}
+
+
+
 
 
 // -- Hamming 8/4 table
+//
+//  Bit 1  2  3  4  5  6  7  8    (transmission order)
+//      P1 D1 P2 D2 P3 D3 P4 D4
+//
+//      P = Control/Parity bit,  D = Data bit
+//
+
 static u_char unham84tab[256] = {
   0x01, 0xff, 0x01, 0x01, 0xff, 0x00, 0x01, 0xff, 
   0xff, 0x02, 0x01, 0xff, 0x0a, 0xff, 0xff, 0x07, 
@@ -186,14 +221,38 @@ u_char unhamB84 (u_char c)
 }
 
 
+
+
+//
 // -- simple unham Triplet 24_18  (3 bytes -> 18 bit)
 // -- teletext data needs to be 'normalized'
+//
+// -- Hamming Code (24:18)
+// 
+//    Byte N                    Byte N + 1                  Byte N + 2
+//bit 1  2  3  4  5  6  7  8  | 9  10 11 12 13 14  15  16 | 17  18  19  20  21  22  23  24
+//    P1 P2 D1 P3 D2 D3 D4 P4 | D5 D6 D7 D8 D9 D10 D11 P5 | D12 D13 D14 D15 D16 D17 D18 P6
+//
+// P = Control/Parity bit,  D = Data bit
+//
+// because we are on "digital TV", I will keep this simple,
+// we don't need to mess with parity bits. TS-Packets should do the integrity
+// protection... (hopefully)
+//
 
 u_long unhamT24_18 (u_char lsb, u_char msb1, u_char msb2)
 {
-	// $$$ TODO
-        u_char x = ' ';
-	return x;
+   u_long  v; 
+
+	// Hamming Code (24:18)
+   v = 0;
+   v |= (lsb & 0x04) >> 2;  	// D1
+   v |= (lsb & 0x70) >> 3;  	// D2..D4
+   v |= ((msb1 & 0x7F ) << 8);	// D5..D11
+   v |= ((msb2 & 0x7F ) << 16);	// D12..D18
+
+   // $$$ TODO parity check, etc.
+   return v;
 }
 
 

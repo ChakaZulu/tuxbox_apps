@@ -1,5 +1,5 @@
 /*
-$Id: ebu_misc.h,v 1.2 2004/02/05 10:30:56 rasc Exp $
+$Id: ebu_misc.h,v 1.3 2005/01/17 19:41:22 rasc Exp $
 
    
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: ebu_misc.h,v 1.2 2004/02/05 10:30:56 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
 
 
 
@@ -15,6 +15,9 @@ $Id: ebu_misc.h,v 1.2 2004/02/05 10:30:56 rasc Exp $
 
 #ifndef __EBU_MISC_H
 #define __EBU_MISC_H
+
+
+void   unParityTeletextData (u_char *b, int len);
 
 u_char unhamB84 (u_char c);
 u_char unhamW84  (u_char lsb, u_char msb);

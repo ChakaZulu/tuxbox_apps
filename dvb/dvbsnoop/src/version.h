@@ -1,5 +1,5 @@
 /*
-$Id: version.h,v 1.17 2004/01/01 20:09:15 rasc Exp $
+$Id: version.h,v 1.18 2005/01/17 19:41:21 rasc Exp $
 
 
  DVBSNOOP
@@ -7,14 +7,14 @@ $Id: version.h,v 1.17 2004/01/01 20:09:15 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de
+ (c) 2001-2005   Rainer.Scherg@gmx.de
 
 
 
 */
 
 #ifndef __VERSION_H
-#define __VERSION_H 1
+#define __VERSION_H 
 
 /*
  * Version set in configure.ac
@@ -24,7 +24,7 @@ $Id: version.h,v 1.17 2004/01/01 20:09:15 rasc Exp $
 
 
 #define DVBSNOOP_URL         "http://dvbsnoop.sourceforge.net/"
-#define DVBSNOOP_COPYRIGHT   "(c) 2001-2004  Rainer Scherg  (rasc)"
+#define DVBSNOOP_COPYRIGHT   "(c) 2001-2005  Rainer Scherg  (rasc)"
 
 
 #endif

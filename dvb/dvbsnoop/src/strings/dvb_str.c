@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.62 2004/09/01 20:20:34 rasc Exp $
+$Id: dvb_str.c,v 1.63 2005/01/17 19:41:24 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.62 2004/09/01 20:20:34 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.63  2005/01/17 19:41:24  rasc
+Bugfix: data broadcast descriptor (tnx to Sergio SAGLIOCCO, SecureLAB)
+
 Revision 1.62  2004/09/01 20:20:34  rasc
 new cmdline option: -buffersize KB  (set demux buffersize in KBytes)
 
@@ -806,6 +809,7 @@ char *dvbstrStream_TYPE (u_int flag)
 /*
  -- Programm Map Table   Stream Type  (Short String ID: ""=Unkown, "S"=Section, "P"=PES)
  -- only important types...
+ -- (short string used for spidering PIDs)
 */
 char *dvbstrStream_TYPE_SHORT (u_int flag)
 {
@@ -1198,7 +1202,8 @@ char *dvbstrNetworkIdent_ID (u_int i)
      {  0x052E, 0x052F,  "Eutelsat Satellite System  8.5W / Satellite / ETSO" },
 
 	//$$$ lots are missing
-     {  0x0530, 0xFFFF,  "--> please lookup at http://www.dvb.org" },
+     {  0x0530, 0xFEFF,  "--> please lookup at http://www.dvb.org" },
+     {  0xFF00, 0xFFFF,  "Private temporary use" },
 
      {  0,0, NULL }
   };
@@ -2144,6 +2149,7 @@ char *dvbstrPESstream_ID (u_int i)
 	// -- updated 2004-08-11  from ITU-T Rec H.222.0 AMD3
 	//
      // on changes:  adapt dmx_pes.c!!! etc. (search for PESstream_ID)
+     // $$$ TODO streamID 00-B8 (ISO 13818-2)
      {  0x00, 0xB8,  "!!!unknown or PES stream not in sync... (!!!)" },
      // special PS_stream_IDs (these are not PES stream IDs)
      {  0xB9, 0xB9,  "MPEG_program_stream_end" },
