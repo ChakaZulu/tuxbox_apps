@@ -599,24 +599,27 @@ static eString selectSubChannel(eString request, eString dirpath, eString opts, 
 				{
 					char tmp[256];
 					LinkageDescriptor *ld =(LinkageDescriptor *)*d;
-					if ((unsigned int)ld->priv_len < sizeof(tmp))
+					if (ld->linkage_type == 0xB0) //subchannel
 					{
-						strncpy(tmp, (char *)ld->private_data, ld->priv_len);
-						tmp[ld->priv_len] = '\0';
+						if ((unsigned int)ld->priv_len < sizeof(tmp))
+						{
+							strncpy(tmp, (char *)ld->private_data, ld->priv_len);
+							tmp[ld->priv_len] = '\0';
+						}
+						else
+							strcpy(tmp, "buffer too small");
+						eString subService(tmp);
+
+						eString subServiceRef = "1:0:7:" + eString().sprintf("%x", ld->service_id) + ":" + eString().sprintf("%x", ld->transport_stream_id) + ":" + eString().sprintf("%x", ld->original_network_id) + ":"
+								  + eString(nspace) + ":0:0:0:";
+
+						if (subServiceRef == curServiceRef)
+							subChannels += "<option selected value=\"" + subServiceRef + "\">";
+						else
+							subChannels += "<option value=\"" + subServiceRef + "\">";
+						subChannels += removeBadChars(subService);
+						subChannels += "</option>";
 					}
-					else
-						strcpy(tmp, "buffer too small");
-					eString subService(tmp);
-
-					eString subServiceRef = "1:0:7:" + eString().sprintf("%x", ld->service_id) + ":" + eString().sprintf("%x", ld->transport_stream_id) + ":" + eString().sprintf("%x", ld->original_network_id) + ":"
-							  + eString(nspace) + ":0:0:0:";
-
-					if (subServiceRef == curServiceRef)
-						subChannels += "<option selected value=\"" + subServiceRef + "\">";
-					else
-						subChannels += "<option value=\"" + subServiceRef + "\">";
-					subChannels += removeBadChars(subService);
-					subChannels += "</option>";
 				}
 			}
 			eit->unlock();
@@ -775,11 +778,7 @@ static eString getLeftNavi(eString mode, eString path)
 			result += button(110, "Radio", LEFTNAVICOLOR, "?path=;0:7:2:0:0:0:0:0:0:0:");
 			result += "<br>";
 			result += button(110, "Data", LEFTNAVICOLOR, "?path=;0:7:6:0:0:0:0:0:0:0:");
-			result += "<br>";
-			result += button(110, "Root", LEFTNAVICOLOR, "?path=;2:47:0:0:0:0:%2f");
 #ifndef DISABLE_FILE
-			result += "<br>";
-			result += button(110, "Harddisk", LEFTNAVICOLOR, "?path=;2:47:0:0:0:0:%2fhdd%2f");
 			result += "<br>";
 			result += button(110, "Recordings", LEFTNAVICOLOR, "?path=;4097:7:0:1:0:0:0:0:0:0:");
 #endif
@@ -1429,7 +1428,7 @@ public:
 			}
 			else
 				result += "&#160;";
-			result += "</td><td><a href=\'javascript:switchChannel(\"" + serviceRef + "\")\'>";
+			result += "</td><td><a href=\'javascript:switchChannel(\"" + serviceRef + "\", \"0\", \"-1\")\'>";
 		}
 		else
 		{
@@ -1716,7 +1715,8 @@ static eString getZap(eString mode, eString path)
 {
 	eString result;
 
-	result += getZapNavi(mode, path);
+	if (smallScreen == 0)
+		result += getZapNavi(mode, path);
 #ifndef DISABLE_FILE
 	if (path == ";4097:7:0:1:0:0:0:0:0:0:") // recordings
 	{
@@ -2695,7 +2695,7 @@ public:
 								<< " (" << event.duration / 60 << " min)"
 								<< "</span>"
 								<< "<br><b>"
-								<< "<a href=\'javascript:switchChannel(\"" << ref2string(ref) << "\")\'>"
+								<< "<a href=\'javascript:switchChannel(\"" << ref2string(ref) << "\", \"0\", \"-1\")\'>"
 								<< "<span class=\"event\">"
 								<< short_description
 								<< "</span>"
@@ -3326,6 +3326,52 @@ static eString getCurrentServiceRef(eString request, eString dirpath, eString op
 		return "E:no service running";
 }
 
+eString getPDAContent(eString mode, eString spath)
+{
+	eString result;
+
+	if (!spath)
+		spath = eServiceStructureHandler::getRoot(eServiceStructureHandler::modeTV).toString();
+	if (!mode)
+		mode = "zap";
+
+	result = readFile(TEMPLATE_DIR + "index_small.tmp");
+	result.strReplace("#CONTENT#", getContent(mode, spath));
+	result.strReplace("#VOLBAR#", getVolBar());
+	result.strReplace("#MUTE#", getMute());
+	result.strReplace("#TOPNAVI#", getTopNavi(mode, spath));
+	result.strReplace("#CHANNAVI#", getChannelNavi());
+	result.strReplace("#LEFTNAVI#", getLeftNavi(mode, spath));
+	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
+		result.strReplace("#TOPBALK#", "topbalk_small.png");
+	else
+	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Nokia)
+		result.strReplace("#TOPBALK#", "topbalk2_small.png");
+	else
+	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Sagem)
+		result.strReplace("#TOPBALK#", "topbalk3_small.png");
+	else
+//	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Philips)
+		result.strReplace("#TOPBALK#", "topbalk4_small.png");
+	return result;
+}
+
+static eString pda_root(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	eString result;
+
+	smallScreen = 1;
+
+	std::map<eString,eString> opt = getRequestOptions(opts, '&');
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+
+	eString mode = opt["mode"];
+	eString spath = opt["path"];
+	result = getPDAContent(mode, spath);
+
+	return result;
+}
+
 static eString web_root(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	eString result;
@@ -3358,32 +3404,7 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 	{
 		eString mode = opt["mode"];
 		eString spath = opt["path"];
-
-		eDebug("[ENIGMA_DYN] web_root_small: mode = %s, spath = %s", mode.c_str(), spath.c_str());
-
-		if (!spath)
-			spath = eServiceStructureHandler::getRoot(eServiceStructureHandler::modeTV).toString();
-
-		if (!mode)
-			mode = "zap";
-
-		result = readFile(TEMPLATE_DIR + "index_small.tmp");
-		result.strReplace("#CONTENT#", getContent(mode, spath));
-		result.strReplace("#VOLBAR#", getVolBar());
-		result.strReplace("#TOPNAVI#", getTopNavi(mode, spath));
-		result.strReplace("#CHANNAVI#", getChannelNavi());
-		result.strReplace("#LEFTNAVI#", getLeftNavi(mode, spath));
-		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
-			result.strReplace("#TOPBALK#", "topbalk_small.png");
-		else
-		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Nokia)
-			result.strReplace("#TOPBALK#", "topbalk2_small.png");
-		else
-		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Sagem)
-			result.strReplace("#TOPBALK#", "topbalk3_small.png");
-		else
-//		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Philips)
-			result.strReplace("#TOPBALK#", "topbalk4_small.png");
+		result = getPDAContent(mode, spath);
 	}
 
 	return result;
@@ -4147,6 +4168,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	bool lockWeb = (lockWebIf == 1) ? true : false;
 
 	dyn_resolver->addDyn("GET", "/", web_root, lockWeb);
+	dyn_resolver->addDyn("GET", "/pda", pda_root, lockWeb);
 //	dyn_resolver->addDyn("GET", NAVIGATOR_PATH, navigator, lockWeb);
 
 	dyn_resolver->addDyn("GET", "/cgi-bin/ls", listDirectory, lockWeb);
