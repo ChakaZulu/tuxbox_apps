@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.92 2002/03/16 18:15:58 happydude Exp $
+  $Id: zapit.cpp,v 1.93 2002/03/17 17:10:13 obi Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -168,7 +168,6 @@ CBouquetManager* g_BouquetMan;
 
 #ifdef USE_EXTERNAL_CAMD
 static int camdpid = -1;
-static int lastpmt = -1;
 #endif /* USE_EXTERNAL_CAMD */
 
 void termination_handler (int signum)
@@ -350,7 +349,7 @@ pids parse_pmt (uint16_t pid, uint16_t ca_system_id, uint16_t program_number)
 	if (program_info_length > 0)
 		ecm_pid = _(&buffer[12], program_info_length, ca_system_id);
 	else
-		ecm_pid = 0;
+		ecm_pid = no_ecmpid_found;
 
 	for (pos = 12 + program_info_length; pos < section_length - 1; pos += ES_info_length + 5)
 	{
@@ -360,18 +359,12 @@ pids parse_pmt (uint16_t pid, uint16_t ca_system_id, uint16_t program_number)
 
 		if (elementary_PID != 0)
 		{
+			debug("stream_type: %x\n", stream_type);
+
 			switch (stream_type)
 			{
 			case 0x01: /* ISO/IEC 11172 Video */
 			case 0x02: /* ITU-T Rec. H.262 | ISO/IEC 13818-2 Video or ISO/IEC 11172-2 constrained parameter video stream */
-				if (ecm_pid == 0)
-					ecm_pid = _(&buffer[pos + 5], ES_info_length, ca_system_id);
-
-				ret_pids.vpid = elementary_PID;
-				vp_count++;
-				break;
-
-			case 0x06: /* ITU-T Rec. H.222.0 | ISO/IEC 13818-1 PES packets containing private data */
 				for (descr_pos = pos + 5; descr_pos < pos + 5 + ES_info_length; descr_pos += descriptor_length + 2)
 				{
 					descriptor_tag = buffer[descr_pos];
@@ -379,14 +372,46 @@ pids parse_pmt (uint16_t pid, uint16_t ca_system_id, uint16_t program_number)
 
 					switch (descriptor_tag)
 					{
-					case 0x56: /* teletext_descriptor */
-						ret_pids.vtxtpid = elementary_PID;
-						break;
+						case 0x02: /* video_stream_descriptor */
+							break;
 
-					default:
-						break;
+						case 0x07: /* target_background_grid_descriptor */
+							break;
+
+						case 0x09: /* CA_descriptor */
+							if ((ecm_pid == no_ecmpid_found) || (ecm_pid == invalid_ecmpid_found))
+								ecm_pid = _(&buffer[descr_pos], descriptor_length, ca_system_id);
+							break;
+
+						case 0x0A: /* ISO_639_language_descriptor */
+							break;
+
+						case 0x0E: /* maximum bitrate descriptor */
+							break;
+
+						case 0x11: /* STD_descriptor */
+							break;
+
+						case 0x52: /* stream_identifier_descriptor */
+							break;
+
+						case 0xB1: /* User Private descriptor - used in BetaDigital */
+							break;
+
+						default:
+							{
+								int i;
+								debug("stream type 0x01/0x02 descriptor tag: %x\n", descriptor_tag);
+								debug("data: ");
+								for (i = 0; i < descriptor_length + 2; i++) debug("%02x ", buffer[descr_pos + i]);
+								debug("\n");
+							}
+							break;
 					}
 				}
+
+				ret_pids.vpid = elementary_PID;
+				vp_count++;
 				break;
 
 			case 0x03: /* ISO/IEC 11172 Audio */
@@ -404,6 +429,14 @@ pids parse_pmt (uint16_t pid, uint16_t ca_system_id, uint16_t program_number)
 
 						switch (descriptor_tag)
 						{
+						case 0x03: /* audio_stream_descriptor */
+							break;
+
+						case 0x09: /* CA_descriptor */
+							if ((ecm_pid == no_ecmpid_found) || (ecm_pid == invalid_ecmpid_found))
+								ecm_pid = _(&buffer[descr_pos], descriptor_length, ca_system_id);
+							break;
+
 						case 0x0A: /* ISO_639_language_descriptor */
 							if (ret_pids.apids[ap_count].desc[0] == 0)
 							{
@@ -412,12 +445,14 @@ pids parse_pmt (uint16_t pid, uint16_t ca_system_id, uint16_t program_number)
 							}
 							break;
 
+						case 0x0F: /* private data indicator descriptor - used in FUN Promo */
+							break;
+
 						case 0x52: /* stream_identifier_descriptor */
 							ret_pids.apids[ap_count].component_tag = buffer[descr_pos + 2];
 							break;
 
-						case 0x6A: /* AC-3_descriptor */
-							ret_pids.apids[ap_count].is_ac3 = true;
+						case 0xC0: /* User Private descriptor - does anyone know what it's good for? used in Canal+ */
 							break;
 
 						case 0xC5: /* Canal+ Radio descriptor */
@@ -428,16 +463,91 @@ pids parse_pmt (uint16_t pid, uint16_t ca_system_id, uint16_t program_number)
 							}
 							break;
 
+						case 0xFE: /* User Private descriptor - does anyone know what it's good for? used in FUN Promo */
+							break;
+
 						default:
+							{
+								int i;
+								debug("stream type 0x03/0x04 descriptor tag: %x\n", descriptor_tag);
+								debug("data: ");
+								for (i = 0; i < descriptor_length + 2; i++) debug("%02x ", buffer[descr_pos + i]);
+								debug("\n");
+							}
 							break;
 						}
 					}
 
 					if (ret_pids.apids[ap_count].desc[0] == 0)
+					{
 						sprintf(ret_pids.apids[ap_count].desc, "%02d", ap_count + 1);
-
+					}
 					ret_pids.apids[ap_count].pid = elementary_PID;
+					ap_count++;
+				}
+				break;
 
+			case 0x06: /* ITU-T Rec. H.222.0 | ISO/IEC 13818-1 PES packets containing private data, e.g. teletext or ac3 */
+
+				ret_pids.apids[ap_count].component_tag = -1;
+				ret_pids.apids[ap_count].is_ac3 = false;
+				ret_pids.apids[ap_count].desc[0] = 0;
+
+				for (descr_pos = pos + 5; descr_pos < pos + 5 + ES_info_length; descr_pos += descriptor_length + 2)
+				{
+
+					descriptor_tag = buffer[descr_pos];
+					descriptor_length = buffer[descr_pos + 1];
+
+					switch (descriptor_tag)
+					{
+					case 0x09: /* CA_descriptor */
+						if ((ecm_pid == no_ecmpid_found) || (ecm_pid == invalid_ecmpid_found))
+							ecm_pid = _(&buffer[descr_pos], descriptor_length, ca_system_id);
+						break;
+
+					case 0x0A: /* ISO_639_language_descriptor */
+						if (ret_pids.apids[ap_count].desc[0] == 0)
+						{
+							buffer[descr_pos + 5] = 0; // quick'n'dirty
+							memcpy(ret_pids.apids[ap_count].desc, &(buffer[descr_pos + 2]), descriptor_length);
+						}
+						break;
+
+					case 0x0E: /* maximum bitrate descriptor */
+						break;
+
+					case 0x52: /* stream_identifier_descriptor */
+						ret_pids.apids[ap_count].component_tag = buffer[descr_pos + 2];
+						break;
+
+					case 0x56: /* teletext_descriptor */
+						ret_pids.vtxtpid = elementary_PID;
+						break;
+
+					case 0x6A: /* AC-3_descriptor */
+						ret_pids.apids[ap_count].is_ac3 = true;
+						break;
+
+					default:
+						{
+							int i;
+							debug("stream type 0x06 descriptor tag: %x\n", descriptor_tag);
+							debug("data: ");
+							for (i = 0; i < descriptor_length + 2; i++) debug("%02x ", buffer[descr_pos + i]);
+							debug("\n");
+						}
+						break;
+					}
+				}
+
+				if ((ret_pids.apids[ap_count].is_ac3 == true) && (ap_count < max_num_apids))
+				{
+					if (ret_pids.apids[ap_count].desc[0] == 0)
+					{
+						sprintf(ret_pids.apids[ap_count].desc, "%02d", ap_count + 1);
+					}
+					ret_pids.apids[ap_count].pid = elementary_PID;
 					ap_count++;
 				}
 				break;
@@ -454,8 +564,6 @@ pids parse_pmt (uint16_t pid, uint16_t ca_system_id, uint16_t program_number)
 
 	return ret_pids;
 }
-
-
 
 int find_emmpid (int id)
 {
@@ -1042,7 +1150,7 @@ int zapit (uint onid_sid, bool in_nvod)
 		}
 #endif /* USE_EXTERNAL_CAMD */
 
-		debug("[zapit] open decoder\n");
+		debug("[zapit] open video device\n");
 
 		if ((video_fd = open(VIDEO_DEV, O_RDWR)) < 0)
 		{
@@ -1054,12 +1162,12 @@ int zapit (uint onid_sid, bool in_nvod)
 
 		if (ioctl(video_fd, VIDEO_SELECT_SOURCE, (videoStreamSource_t)VIDEO_SOURCE_DEMUX) < 0)
 		{
-			perror("[zapit] unable to select video source");
+			perror("[zapit] VIDEO_SELECT_SOURCE");
 		}
 
 		if (ioctl(video_fd, VIDEO_PLAY) < 0)
 		{
-			perror("[zapit] unable to play video");
+			perror("[zapit] VIDEO_PLAY");
 		}
 
 		debug("[zapit] set audio mode\n");
@@ -1077,9 +1185,8 @@ int zapit (uint onid_sid, bool in_nvod)
 			{
 				if(ioctl(ac3d, AUDIO_SET_BYPASS_MODE, ( OldAC3 )?0:1) < 0)
 				{
-					perror("[zapit] unable to set audio mode");
+					perror("[zapit] AUDIO_SET_BYPASS_MODE");
 				}
-
 				close(ac3d);
 			}
 		}
@@ -1087,7 +1194,7 @@ int zapit (uint onid_sid, bool in_nvod)
 		if ((dmx_video_fd = open(DEMUX_DEV, O_RDWR)) < 0)
 		{
 			perror("[zapit] unable to open demux device");
-			exit(1);
+			return -3;
 		}
 
 		debug("[zapit] setting vpid %04x\n", Vpid);
@@ -1101,8 +1208,8 @@ int zapit (uint onid_sid, bool in_nvod)
 
 		if (ioctl(dmx_video_fd, DMX_SET_PES_FILTER, &pes_filter) < 0)
 		{
-			perror("[zapit] unable to set dmx pes filter");
-			exit(1);
+			perror("[zapit] DMX_SET_PES_FILTER (video)");
+			return -3;
 		}
 		else
 		{
@@ -1112,7 +1219,7 @@ int zapit (uint onid_sid, bool in_nvod)
 		if((dmx_audio_fd = open(DEMUX_DEV, O_RDWR)) < 0)
 		{
 			perror("[zapit] unable open demux device");
-			exit(1);
+			return -3;
 		}
 
 		debug("[zapit] setting apid %04x\n", Apid);
@@ -1126,8 +1233,8 @@ int zapit (uint onid_sid, bool in_nvod)
 
 		if (ioctl(dmx_audio_fd, DMX_SET_PES_FILTER, &pes_filter) < 0)
 		{
-			perror("[zapit] unable to set dmx pes filter");
-			exit(1);
+			perror("[zapit] DMX_SET_PES_FILTER (audio)");
+			return -3;
 		}
 		else
 		{
@@ -1136,15 +1243,14 @@ int zapit (uint onid_sid, bool in_nvod)
 
 		debug("[zapit] starting dmx\n");
 
-
 		if (ioctl(dmx_audio_fd, DMX_START, 0) < 0)
 		{
-			perror("[zapit] unable to start audio demux");
+			perror("[zapit] DMX_START (audio)");
 		}
 
 		if (ioctl(dmx_video_fd, DMX_START ,0) < 0)
 		{
-			perror("[zapit] unable to start video demux");
+			perror("[zapit] DMX_START (video)");
 		}
 
 		debug("[zapit] playing\n");
@@ -1164,11 +1270,6 @@ int zapit (uint onid_sid, bool in_nvod)
 		{
 			save_settings();
 		}
-#ifndef USE_EXTERNAL_CAMD
-		//wait for decode_thread to exit
-		//debug("[zapit] waiting for decode_thread\n");
-		//pthread_join(dec_thread,0);
-#endif /* USE_EXTERNAL_CAMD */
 	}
 	else
 	{
@@ -1180,66 +1281,71 @@ int zapit (uint onid_sid, bool in_nvod)
 }
 
 
-int numzap(int channel_number) {
-  std::map<uint, uint>::iterator cit;
+int numzap(int channel_number)
+{
+	std::map<uint, uint>::iterator cit;
 
-  nvodchannels.clear();
-  if (Radiomode_on)
-    {
-      if (allnumchannels_radio.count(channel_number) == 0)
+	nvodchannels.clear();
+	if (Radiomode_on)
 	{
-	  debug("[zapit] given channel not found");
-	  return -2;
+		if (allnumchannels_radio.count(channel_number) == 0)
+		{
+			debug("[zapit] given channel not found");
+			return -2;
+		}
+		cit  = allnumchannels_radio.find(channel_number);
 	}
-      cit  = allnumchannels_radio.find(channel_number);
-    }
-  else
-    {
-      if (allnumchannels_tv.count(channel_number) == 0)
+	else
 	{
-	  debug("[zapit] given channel not found");
-	  return -2;
+		if (allnumchannels_tv.count(channel_number) == 0)
+		{
+			debug("[zapit] given channel not found");
+			return -2;
+		}
+		cit = allnumchannels_tv.find(channel_number);
 	}
-      cit = allnumchannels_tv.find(channel_number);
-    }
 
-  debug("[zapit] zapping to onid_sid %04x\n", cit->second);
-  if (zapit(cit->second,false) > 0)
-    return 2;
-  else
-    return -2;
+	debug("[zapit] zapping to onid_sid %04x\n", cit->second);
+
+	if (zapit(cit->second, false) > 0)
+		return 2;
+	else
+		return -2;
 }
 
 
-int namezap(std::string channel_name) {
-  std::map<std::string,uint>::iterator cit;
+int namezap(std::string channel_name)
+{
+	std::map<std::string,uint>::iterator cit;
 
-  nvodchannels.clear();
-  // Search current channel
-  if (Radiomode_on)
-    {
-      if (allnamechannels_radio.count(channel_name) == 0)
-	{
-	  debug("[zapit] given channel not found");
-	  return -2;
-	}
-      cit  = allnamechannels_radio.find(channel_name);
-    }
-  else
-    {
-      if (allnamechannels_tv.count(channel_name) == 0)
-	{
-	  debug("[zapit] given channel not found");
-	  return -2;
-	}
-      cit = allnamechannels_tv.find(channel_name);
-    }
+	nvodchannels.clear();
 
-  debug("[zapit] zapping to onid_sid %04x\n", cit->second);
-  if (zapit(cit->second,false) > 0)
-    return 3;
-  else
-    return -3;
+	// Search current channel
+	if (Radiomode_on)
+	{
+		if (allnamechannels_radio.count(channel_name) == 0)
+		{
+			debug("[zapit] given channel not found");
+			return -2;
+		}
+		cit  = allnamechannels_radio.find(channel_name);
+	}
+	else
+	{
+		if (allnamechannels_tv.count(channel_name) == 0)
+		{
+			debug("[zapit] given channel not found");
+			return -2;
+		}
+		cit = allnamechannels_tv.find(channel_name);
+	}
+
+	debug("[zapit] zapping to onid_sid %04x\n", cit->second);
+
+	if (zapit(cit->second, false) > 0)
+		return 3;
+	else
+		return -3;
 }
 
 int changeapid(ushort pid_nr)
@@ -1267,21 +1373,6 @@ int changeapid(ushort pid_nr)
 
 	if (pid_nr <= pids_desc.count_apids)
 	{
-		//if (dmx_audio_fd >= 0)
-		//{
-		//	close(dmx_audio_fd);
-		//	dmx_audio_fd = -1;
-		//}
-#ifndef USE_EXTERNAL_CAMD
-		//descramble(0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff);
-
-		//if ((cit->second.ecmpid > 0) && (cit->second.ecmpid < no_ecmpid_found))
-		//{
-			//cam_reset();
-			//descramble(cit->second.onid, cit->second.tsid, 0x104, caid, cit->second.ecmpid, pids_desc.apids[pid_nr].pid, vpid);
-		//}
-#endif /* DVBS */
-
 		if ((dmx_audio_fd == -1) && ((dmx_audio_fd = open(DEMUX_DEV, O_RDWR)) < 0))
 		{
 			perror("[zapit] unable to open demux device");
@@ -2480,7 +2571,7 @@ int main (int argc, char **argv)
 	int channelcount;
 #endif /* DEBUG */
 
-	printf("Zapit $Id: zapit.cpp,v 1.92 2002/03/16 18:15:58 happydude Exp $\n\n");
+	printf("Zapit $Id: zapit.cpp,v 1.93 2002/03/17 17:10:13 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
