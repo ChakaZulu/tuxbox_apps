@@ -140,10 +140,12 @@ int eDVRPlayerThread::openFile(int slice)
 			slicesize=lseek64(sourcefd, 0, SEEK_END);
 			if (slicesize <= 0)
 				slicesize=1024*1024*1024;
+			singleLock s(poslock);
 			position=lseek64(sourcefd, 0, SEEK_SET);
 		} else
 		{
 			slicesize=1024*1024*1024;
+			singleLock s(poslock);
 			position=lseek64(sourcefd, 0, SEEK_CUR);
 		}
 	}
@@ -237,8 +239,12 @@ void eDVRPlayerThread::readMore(int what)
 	if (buffer.size() < maxBufferSize)
 	{
 		int rd = 0;
-		rd = buffer.fromfile(sourcefd, maxBufferSize);
-		position+=rd;
+
+		{
+			singleLock s(poslock);
+			rd = buffer.fromfile(sourcefd, maxBufferSize);
+			position+=rd;
+		}
 
 		if ( rd < maxBufferSize)
 		{
@@ -332,6 +338,7 @@ void eDVRPlayerThread::updatePosition()
 
 int eDVRPlayerThread::getPosition(int real)
 {
+	singleLock s(poslock);
 	int ret = (position / 1880) + slice * (slicesize/1880);
 	if (!real)
 		ret /= 250;
@@ -451,6 +458,7 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 
 		if (state != stateError)
 		{
+			singleLock s(poslock);
 			position=::lseek64(sourcefd, offset%slicesize, SEEK_SET);
 			dvrFlush();
 			buffer.clear();
