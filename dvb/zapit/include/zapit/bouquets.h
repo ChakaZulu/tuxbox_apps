@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.30 2002/09/01 09:23:48 thegoodguy Exp $
+ * $Id: bouquets.h,v 1.31 2002/09/01 09:37:58 thegoodguy Exp $
  */
 
 #ifndef __bouquets_h__
@@ -62,7 +62,6 @@ class CBouquet
 		void removeService (CZapitChannel* oldChannel);
 		void removeService (unsigned int onidSid, unsigned char serviceType = 0)			{removeService( getChannelByOnidSid( onidSid, serviceType));}
 
-		void moveService (char* serviceName, unsigned int newPosition, unsigned char serviceType);
 //		void moveService (unsigned int onidSid, unsigned int newPosition);
 		void moveService (unsigned int oldPosition, unsigned int newPosition, unsigned char serviceType);
 

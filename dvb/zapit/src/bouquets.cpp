@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.46 2002/09/01 09:23:48 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.47 2002/09/01 09:37:58 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -118,30 +118,6 @@ void CBouquet::removeService (CZapitChannel* oldChannel)
 			delete oldChannel;
 		}
 	}
-}
-
-void CBouquet::moveService (char* serviceName, unsigned int newPosition, unsigned char serviceType)
-{
-	ChannelList* channels = &tvChannels;
-	switch (serviceType)
-	{
-		case 1:
-		case 4: channels = &tvChannels; break;
-		case 2: channels = &radioChannels; break;
-	}
-
-	unsigned int i=0;
-	ChannelList::iterator it = channels->begin();
-	while ((it<=channels->end()) && ((*it)->getName() != string(serviceName)))
-	{
-		it++;
-		i++;
-	}
-	if (it<channels->end())
-	{
-		moveService( i, newPosition, serviceType);
-	}
-
 }
 
 /*
