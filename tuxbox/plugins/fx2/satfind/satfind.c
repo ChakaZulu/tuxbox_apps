@@ -33,21 +33,30 @@
 #include <stdint.h>
 
 #include <dbox/lcd-ks0713.h>
+#include <config.h>
 
 #include "icons.h"
 #include "font.h"
 
+#if HAVE_DVB_API_VERSION >= 3
 #include <linux/dvb/dmx.h> 
 #include <linux/dvb/frontend.h> 
+#define DMX "/dev/dvb/adapter0/demux0"
+#define FE "/dev/dvb/adapter0/frontend0"
+#else
+#include <ost/dmx.h> 
+#include <ost/frontend.h> 
+#define DMX "/dev/dvb/card0/demux0"
+#define FE "/dev/dvb/card0/frontend0"
+#define fe_status_t FrontendStatus
+#define dmx_sct_filter_params dmxSctFilterParams
+#endif
+#define LCD "/dev/dbox/lcd0"
 
 #include <rcinput.h>
 #include <plugin.h>
 extern	int	doexit;
 extern	unsigned short	actcode;
-
-#define LCD "/dev/dbox/lcd0"
-#define DMX "/dev/dvb/adapter0/demux0"
-#define FE "/dev/dvb/adapter0/frontend0"
 
 typedef unsigned char screen_t[LCD_BUFFER_SIZE];
 
@@ -256,7 +265,11 @@ int satfind_exec() {
   struct timeval tv;
   struct signal signal_quality,old_signal;
   struct dmx_sct_filter_params flt;
+#if HAVE_DVB_API_VERSION >= 3
   struct dvb_frontend_info info;
+#else
+  FrontendInfo info;
+#endif
   unsigned char buf[1024];
   char network_name[31],old_name[31];
 
@@ -296,8 +309,13 @@ int satfind_exec() {
   
   /* initialize demux to get the NIT */
  
+#if HAVE_DVB_API_VERSION >= 3
   memset(&flt, 0, sizeof(flt));
-  
+#else
+  memset(&flt.filter.filter, 0, DMX_FILTER_SIZE);
+  memset(&flt.filter.mask, 0, DMX_FILTER_SIZE);
+#endif
+
   flt.pid=0x10;
   flt.filter.filter[0]=0x40;
   flt.filter.mask[0]=0xFF;

@@ -33,16 +33,25 @@
 #include <stdint.h>
 
 #include <dbox/lcd-ks0713.h>
+#include <config.h>
 
 #include "icons.h"
 #include "font.h"
 
+#if HAVE_DVB_API_VERSION >= 3
 #include <linux/dvb/dmx.h> 
 #include <linux/dvb/frontend.h> 
-
-#define LCD "/dev/dbox/lcd0"
 #define DMX "/dev/dvb/adapter0/demux0"
 #define FE "/dev/dvb/adapter0/frontend0"
+#else
+#include <ost/dmx.h> 
+#include <ost/frontend.h> 
+#define DMX "/dev/dvb/card0/demux0"
+#define FE "/dev/dvb/card0/frontend0"
+#define fe_status_t FrontendStatus
+#define dmx_sct_filter_params dmxSctFilterParams
+#endif
+#define LCD "/dev/dbox/lcd0"
 
 typedef unsigned char screen_t[LCD_BUFFER_SIZE];
 
@@ -251,6 +260,11 @@ int main(int argc, char **argv) {
   struct timeval tv;
   struct signal signal_quality,old_signal;
   struct dmx_sct_filter_params flt;
+#if HAVE_DVB_API_VERSION >= 3
+  struct dvb_frontend_info info;
+#else
+  FrontendInfo info;
+#endif
   unsigned char buf[1024];
   char network_name[31],old_name[31];
   int lcd;
@@ -271,7 +285,15 @@ int main(int argc, char **argv) {
   }
   
   if((fe_fd=open(FE,O_RDONLY))<0) {
-    fprintf(stderr,"frontend open - Can't open Tuner: %d\n",errno);
+    perror("[satfind.c] Can't open Tuner");
+    return 1;
+  }
+  if(ioctl(fe_fd, FE_GET_INFO, &info) < 0) {
+    perror("[satfind.c] error ioctl FE_GET_INFO");
+    return 1;
+  }
+  if (info.type != FE_QPSK) {
+    fprintf(stderr,"[satfind.c] Fehler: Keine Satbox gefunden.\n");
     return 1;
   }
 
@@ -288,7 +310,12 @@ int main(int argc, char **argv) {
   
   /* initialize demux to get the NIT */
  
+#if HAVE_DVB_API_VERSION >= 3
   memset(&flt, 0, sizeof(flt));
+#else
+  memset(&flt.filter.filter, 0, DMX_FILTER_SIZE);
+  memset(&flt.filter.mask, 0, DMX_FILTER_SIZE);
+#endif
   
   flt.pid=0x10;
   flt.filter.filter[0]=0x40;
