@@ -31,11 +31,14 @@
 
 /*
 
-$Id: framebuffer.cpp,v 1.10 2001/11/15 11:42:41 McClean Exp $
+$Id: framebuffer.cpp,v 1.11 2001/12/17 01:28:26 McClean Exp $
 
 
 
 $Log: framebuffer.cpp,v $
+Revision 1.11  2001/12/17 01:28:26  McClean
+accelerate radiomode-logo-paint
+
 Revision 1.10  2001/11/15 11:42:41  McClean
 gpl-headers added
 
@@ -601,5 +604,16 @@ void CFrameBuffer::paintBackgroundBoxRel(int x, int y, int dx, int dy)
 	}
 }
 
+void CFrameBuffer::paintBackground()
+{
+	if(!useBackgroundPaint)
+	{
+		memset(g_FrameBuffer->lfb, 255, g_FrameBuffer->Stride()*576);
+	}
+	else
+	{
+		memcpy(g_FrameBuffer->lfb, background, g_FrameBuffer->Stride()*576);
+	}
+}
 
 

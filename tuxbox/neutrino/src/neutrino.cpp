@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.101 2001/12/16 23:38:33 McClean Exp $
+        $Id: neutrino.cpp,v 1.102 2001/12/17 01:28:26 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.102  2001/12/17 01:28:26  McClean
+  accelerate radiomode-logo-paint
+
   Revision 1.101  2001/12/16 23:38:33  McClean
   change scartmode-behavior
 
@@ -1943,9 +1946,9 @@ void CNeutrinoApp::radioMode()
 	mode = mode_radio;
 
 	g_FrameBuffer->loadPal("dboxradio.pal", 18, 199);
-	g_FrameBuffer->paintIcon8("dboxradio.raw",0,0, 18);
 	g_FrameBuffer->loadBackground("dboxradio.raw", 18);
 	g_FrameBuffer->useBackground(true);
+	g_FrameBuffer->paintBackground(); //BoxRel(0,0, 719,575);
 
 	firstChannel();
 	g_RemoteControl->radioMode();
@@ -2017,7 +2020,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.101 2001/12/16 23:38:33 McClean Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.102 2001/12/17 01:28:26 McClean Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;

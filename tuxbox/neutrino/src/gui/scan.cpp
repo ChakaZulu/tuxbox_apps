@@ -250,11 +250,15 @@ int CScanTs::exec(CMenuTarget* parent, string)
 void CScanTs::hide()
 {
 	g_FrameBuffer->paintBackgroundBoxRel(x,y, width,height);
+	//g_FrameBuffer->paintBackgroundBoxRel(0,0, 719,575);
 }
 
 
 void CScanTs::paint()
 {
+	//g_FrameBuffer->loadPal("scan.pal", 18, 199);
+	//g_FrameBuffer->paintIcon8("scan.raw",0,0, 18);
+
 	int ypos=y;
 	g_FrameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD);
 	g_Fonts->menu_title->RenderString(x+10, ypos+ hheight, width, g_Locale->getText("scants.head").c_str(), COL_MENUHEAD);
