@@ -12,7 +12,7 @@
 #include <errno.h>
 #include "fb_display.h"
 #include <lib/picviewer/pictureviewer.h>
-#include "lib/gdi/fb.h"
+#include <lib/gdi/fb.h>
 /*
  * FrameBuffer Image Display Function
  * (c) smoku/2000
