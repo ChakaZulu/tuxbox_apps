@@ -21,11 +21,14 @@
  *
  *
  *   $Log: switch.c,v $
- *   Revision 1.1  2001/03/03 00:11:15  gillem
- *   Initial revision
+ *   Revision 1.2  2001/03/03 11:17:03  gillem
+ *   - bugfix
+ *
+ *   Revision 1.1.1.1  2001/03/03 00:11:15  gillem
  *
  *
- *   $Revision: 1.1 $
+ *
+ *   $Revision: 1.2 $
  *
  */
 
@@ -34,7 +37,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 
-#include "cxa2092.h"
+#include "avs_core.h"
 
 #define VERSION "0.1"
 
