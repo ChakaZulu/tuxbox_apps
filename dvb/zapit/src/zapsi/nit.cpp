@@ -1,5 +1,5 @@
 /*
- * $Id: nit.cpp,v 1.17 2002/05/13 17:17:05 obi Exp $
+ * $Id: nit.cpp,v 1.18 2002/05/15 21:00:21 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -35,8 +35,6 @@
 
 #include "descriptors.h"
 #include "nit.h"
-
-#define DEMUX_DEV "/dev/ost/demux0"
 
 extern std::map <unsigned int, transponder> transponders;
 
