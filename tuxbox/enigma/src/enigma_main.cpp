@@ -5787,20 +5787,17 @@ eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eSe
 	else if (ref) // not in a playlist
 	{
 		// not in file mode
-		if ( eZapMain::getInstance()->getMode() != eZapMain::modeFile )
+		// add current service to favourite
+		if ( (ref.type == eServiceReference::idFile) || !(ref.flags & eServiceReference::flagDirectory) )
 		{
-			// add current service to favourite
-			if ( !(ref.flags & eServiceReference::flagDirectory) )
-			{
-				prev = new eListBoxEntryText(&list, _("add to specific bouquet"), (void*)4, 0, _("add the selected service to a selectable bouquet"));
-				prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
-			}
-			// copy provider to bouquet list
-			else if (ref.data[0] == -2 || ref.data[0] == -3 )
-			{
-				prev = new eListBoxEntryText(&list, _("copy to bouquet list"), (void*)8, 0, _("copy the selected provider to the bouquet list"));
-				prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
-			}
+			prev = new eListBoxEntryText(&list, _("add to specific bouquet"), (void*)4, 0, _("add the selected service to a selectable bouquet"));
+			prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+		}
+		// copy provider to bouquet list
+		else if (ref.data[0] == -2 || ref.data[0] == -3 )
+		{
+			prev = new eListBoxEntryText(&list, _("copy to bouquet list"), (void*)8, 0, _("copy the selected provider to the bouquet list"));
+			prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 		}
 #ifndef DISABLE_FILE
 		else if ( (ref.type == eServiceReference::idDVB && ref.path)
