@@ -41,6 +41,9 @@
 
 #include <utime.h>
 #include <stdlib.h>
+#ifdef KEYBOARD_INSTEAD_OF_REMOTE_CONTROL
+#include <termio.h>
+#endif /* KEYBOARD_INSTEAD_OF_REMOTE_CONTROL */
 #include <unistd.h>
 #include <fcntl.h>
 
@@ -153,7 +156,11 @@ void CRCInput::open()
 	fcntl(fd_rc, F_SETFL, O_NONBLOCK );
 
 	//+++++++++++++++++++++++++++++++++++++++
+#ifdef KEYBOARD_INSTEAD_OF_REMOTE_CONTROL
+	fd_keyb = STDIN_FILENO;
+#else
 	fd_keyb = 0;
+#endif /* KEYBOARD_INSTEAD_OF_REMOTE_CONTROL */
 	/*
 	::open("/dev/dbox/rc0", O_RDONLY);
 	if (fd_keyb<0)
@@ -162,9 +169,25 @@ void CRCInput::open()
 		exit(-1);
 	}
 	*/
+#ifdef KEYBOARD_INSTEAD_OF_REMOTE_CONTROL
+	fcntl(fd_keyb, F_SETFL, O_NONBLOCK );
+
+	struct termio tio, tin;
+
+	ioctl( 0, TCGETA, &tio );
+
+	tin = tio;
+	tin.c_lflag &= ~(ICANON|ECHO);
+	tin.c_cc[VMIN]=1;
+	tin.c_cc[VTIME]=0;
+	ioctl( 0, TCSETA, &tin );
+
+	//	ioctl( 0, TCSETA, &tio );
+#else
 	//fcntl(fd_keyb, F_SETFL, O_NONBLOCK );
 
 	//+++++++++++++++++++++++++++++++++++++++
+#endif /* KEYBOARD_INSTEAD_OF_REMOTE_CONTROL */
 
 	calculateMaxFd();
 }
@@ -498,7 +521,11 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 		FD_ZERO(&rfds);
 		if (fd_rc> 0)
 			FD_SET(fd_rc, &rfds);
+#ifdef KEYBOARD_INSTEAD_OF_REMOTE_CONTROL
+		if (true)
+#else
 		if (fd_keyb> 0)
+#endif /* KEYBOARD_INSTEAD_OF_REMOTE_CONTROL */
 			FD_SET(fd_keyb, &rfds);
 
 		FD_SET(fd_event, &rfds);
@@ -548,14 +575,107 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 			return;
 		}
 
-/*
-		if(FD_ISSET(fd_keyb, &rfds))
+
+#ifdef KEYBOARD_INSTEAD_OF_REMOTE_CONTROL
+		if (FD_ISSET(fd_keyb, &rfds))
 		{
+			int trkey;
 			char key = 0;
 			read(fd_keyb, &key, sizeof(key));
-			printf("keyboard: %d\n", rc_key);
+
+			switch(key)
+			{
+			case 27: // <- Esc
+				trkey = KEY_HOME;
+				break;
+			case 10: // <- Return
+			case 'o':
+				trkey = KEY_OK;
+				break;
+			case 'p':
+				trkey = KEY_POWER;
+				break;
+			case 's':
+				trkey = KEY_SETUP;
+				break;
+			case 'h':
+				trkey = KEY_HELP;
+				break;
+			case 'i':
+				trkey = KEY_UP;
+				break;
+			case 'm':
+				trkey = KEY_DOWN;
+				break;
+			case 'j':
+				trkey = KEY_LEFT;
+				break;
+			case 'k':
+				trkey = KEY_RIGHT;
+				break;
+			case 'r':
+				trkey = KEY_RED;
+				break;
+			case 'g':
+				trkey = KEY_GREEN;
+				break;
+			case 'y':
+				trkey = KEY_YELLOW;
+				break;
+			case 'b':
+				trkey = KEY_BLUE;
+				break;
+			case '0':
+				trkey = RC_0;
+				break;
+			case '1':
+				trkey = RC_1;
+				break;
+			case '2':
+				trkey = RC_2;
+				break;
+			case '3':
+				trkey = RC_3;
+				break;
+			case '4':
+				trkey = RC_4;
+				break;
+			case '5':
+				trkey = RC_5;
+				break;
+			case '6':
+				trkey = RC_6;
+				break;
+			case '7':
+				trkey = RC_7;
+				break;
+			case '8':
+				trkey = RC_8;
+				break;
+			case '9':
+				trkey = RC_9;
+				break;
+			default:
+				trkey = RC_nokey;
+			}
+			if (trkey != RC_nokey)
+			{
+				*msg = trkey;
+				*data = 0; /* <- button pressed */
+				return;
+			}
 		}
+#else
+/*
+                if(FD_ISSET(fd_keyb, &rfds))
+                {
+                        char key = 0;
+                        read(fd_keyb, &key, sizeof(key));
+                        printf("keyboard: %d\n", rc_key);
+                }
 */
+#endif /* KEYBOARD_INSTEAD_OF_REMOTE_CONTROL */
+
 		if(FD_ISSET(fd_event, &rfds))
 		{
 			//printf("[neutrino] event - accept!\n");
@@ -855,7 +975,11 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 			}
 		}
 
+#ifdef KEYBOARD_INSTEAD_OF_REMOTE_CONTROL
+		if (false)
+#else
 		if(FD_ISSET(fd_rc, &rfds))
+#endif /* KEYBOARD_INSTEAD_OF_REMOTE_CONTROL */
 		{
 			status = read(fd_rc, &ev, sizeof(struct input_event));
 			if (status==sizeof(struct input_event))
