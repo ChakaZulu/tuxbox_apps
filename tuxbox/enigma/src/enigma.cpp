@@ -456,6 +456,7 @@ int main(int argc, char **argv)
 	}
 
 	Decoder::Flush();
+	signal(SIGCHLD, SIG_DFL);
 	exit(res);
 //	mcheck_check_all();
 //	muntrace();

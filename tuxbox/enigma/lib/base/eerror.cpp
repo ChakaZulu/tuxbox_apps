@@ -9,7 +9,7 @@
 #ifdef MEMLEAK_CHECK
 AllocList *allocList;
 pthread_mutex_t memLock = 
-	PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
+	PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
 #else
 	#include <lib/system/elock.h>
 #endif
