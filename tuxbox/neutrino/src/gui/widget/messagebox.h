@@ -28,8 +28,10 @@ using namespace std;
 		string					caption;
 		string					text;
 		CMessageBoxNotifier*	notifier;
+		int						selected;
 
-		void paint();
+		void paintHead();
+		void paintButtons();
 		void hide();
 
 		void yes();

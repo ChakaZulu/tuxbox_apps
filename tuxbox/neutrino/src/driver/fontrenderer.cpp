@@ -30,11 +30,14 @@
 */
 
 /*
-$Id: fontrenderer.cpp,v 1.21 2002/02/05 11:34:40 field Exp $
+$Id: fontrenderer.cpp,v 1.22 2002/02/10 14:17:34 McClean Exp $
 
 -- misc font / text rendering functions
 
 $Log: fontrenderer.cpp,v $
+Revision 1.22  2002/02/10 14:17:34  McClean
+simplify usage (part 2)
+
 Revision 1.21  2002/02/05 11:34:40  field
 VTxt Icon
 
@@ -265,7 +268,7 @@ int Font::getHeight(void)
 	return height;
 }
 
-void Font::RenderString(int x, int y, int width, const char *string, unsigned char color, int boxheight)
+void Font::RenderString(int x, int y, int width, const char *text, unsigned char color, int boxheight)
 {
 	pthread_mutex_lock( &renderer->render_mutex );
 
@@ -322,15 +325,15 @@ void Font::RenderString(int x, int y, int width, const char *string, unsigned ch
 	FT_Vector kerning;
 	int pen1=-1; // "pen" positions for kerning, pen2 is "x"
 
-	for (; *string; string++)
+	for (; *text; text++)
 	{
 		FTC_SBit glyph;
-		if (*string=='\n')
+		if (*text=='\n')
 		{
 			x  = left;
 			y += step_y;
 		}
-		int index=FT_Get_Char_Index(face, *string);
+		int index=FT_Get_Char_Index(face, *text);
 		if (!index)
 			continue;
 		if (getGlyphBitmap(index, &glyph))
@@ -385,7 +388,12 @@ void Font::RenderString(int x, int y, int width, const char *string, unsigned ch
 	pthread_mutex_unlock( &renderer->render_mutex );
 }
 
-int Font::getRenderWidth(const char *string)
+void Font::RenderString(int x, int y, int width, string text, unsigned char color, int boxheight=0)
+{
+	RenderString( x, y, width, text.c_str(), color, boxheight);
+}
+
+int Font::getRenderWidth(const char *text)
 {
 	pthread_mutex_lock( &renderer->render_mutex );
 
@@ -400,11 +408,11 @@ int Font::getRenderWidth(const char *string)
 	int lastindex=0; // 0==missing glyph (never has kerning)
 	FT_Vector kerning;
 	int pen1=-1; // "pen" positions for kerning, pen2 is "x"
-	for (; *string; string++)
+	for (; *text; text++)
 	{
 		FTC_SBit glyph;
 
-		int index=FT_Get_Char_Index(face, *string);
+		int index=FT_Get_Char_Index(face, *text);
 		if (!index)
 			continue;
 		if (getGlyphBitmap(index, &glyph))
@@ -430,5 +438,8 @@ int Font::getRenderWidth(const char *string)
 	return x;
 }
 
-
+int Font::getRenderWidth(string text)
+{
+	getRenderWidth( text.c_str() );
+}
 

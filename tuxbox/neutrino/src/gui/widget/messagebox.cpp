@@ -12,30 +12,52 @@ CMessageBox::CMessageBox( string Caption, string Text, CMessageBoxNotifier* Noti
 	caption = Caption;
 	text = Text;
 	notifier = Notifier;
+	selected = 0;
 }
 
-void CMessageBox::paint()
+void CMessageBox::paintHead()
 {
-	int ButtonWidth = width / 3;
 
 	g_FrameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width, g_Locale->getText(caption).c_str(), COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width, g_Locale->getText(caption), COL_MENUHEAD);
 
 	g_FrameBuffer->paintBoxRel(x,y+theight+0, width,height - theight + 0, COL_MENUCONTENT);
-	g_Fonts->menu_info->RenderString(x+10,y+theight+0+20, width, g_Locale->getText(text).c_str(), COL_MENUCONTENT);
+	g_Fonts->menu_info->RenderString(x+10,y+theight+20+20, width, g_Locale->getText(text), COL_MENUCONTENT);
 
-	g_FrameBuffer->paintHLine(x, x+width, y+height-fheight, COL_INFOBAR_SHADOW);
-	g_FrameBuffer->paintBoxRel(x,y+height-fheight, width,fheight+0, COL_MENUHEAD);
+}
 
-	g_FrameBuffer->paintIcon("ok.raw", x+width- 3* ButtonWidth+ 8, y+height+1-fheight);
-	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth+ 38, y+height+24-fheight, ButtonWidth- 26, g_Locale->getText("messagebox.yes").c_str(), COL_INFOBAR);
+void CMessageBox::paintButtons()
+{
+	//irgendwann alle vergleichen - aber cancel ist sicher der längste
+	int MaxButtonTextWidth = g_Fonts->infobar_small->getRenderWidth(g_Locale->getText("messagebox.cancel").c_str());
 
-	g_FrameBuffer->paintIcon("rot.raw", x+width- 2* ButtonWidth+ 8, y+height+4-fheight);
-	g_Fonts->infobar_small->RenderString(x+width- 2* ButtonWidth+ 29, y+height+24-fheight, ButtonWidth- 26, g_Locale->getText("messagebox.no").c_str(), COL_INFOBAR);
+	int ButtonSpacing = 40;
+	int ButtonWidth = 20 + 33 + MaxButtonTextWidth;
+	int startpos = x + (width - ((ButtonWidth*3)+(ButtonSpacing*2))) / 2;
+	
+	int xpos = startpos;
+	int color = COL_INFOBAR_SHADOW;
+	if(selected==0)
+		color = COL_MENUCONTENTSELECTED;
+	g_FrameBuffer->paintBoxRel(xpos, y+height-fheight-20, ButtonWidth, fheight, color);
+	g_FrameBuffer->paintIcon("gruen.raw", xpos+14, y+height-fheight-15);
+	g_Fonts->infobar_small->RenderString(xpos + 43, y+height-fheight+4, ButtonWidth- 53, g_Locale->getText("messagebox.yes"), color);
 
-	g_FrameBuffer->paintIcon("home.raw", x+width- ButtonWidth+ 8, y+height+1-fheight);
-	g_Fonts->infobar_small->RenderString(x+width- ButtonWidth+ 38, y+height+24-fheight, ButtonWidth- 26, g_Locale->getText("messagebox.cancel").c_str(), COL_INFOBAR);
+	color = COL_INFOBAR_SHADOW;
+	if(selected==1)
+		color = COL_MENUCONTENTSELECTED;
+	xpos = startpos+ButtonWidth+ButtonSpacing;
+	g_FrameBuffer->paintBoxRel(xpos, y+height-fheight-20, ButtonWidth, fheight, color);
+	g_FrameBuffer->paintIcon("rot.raw", xpos+14, y+height-fheight-15);
+	g_Fonts->infobar_small->RenderString(xpos + 43, y+height-fheight+4, ButtonWidth- 53, g_Locale->getText("messagebox.no"), color);
 
+	color = COL_INFOBAR_SHADOW;
+	if(selected==2)
+		color = COL_MENUCONTENTSELECTED;
+	xpos = startpos+ButtonWidth*2+ButtonSpacing*2;
+	g_FrameBuffer->paintBoxRel(xpos, y+height-fheight-20, ButtonWidth, fheight, color);
+	g_FrameBuffer->paintIcon("home.raw", xpos+10, y+height-fheight-19);
+	g_Fonts->infobar_small->RenderString(xpos + 43, y+height-fheight+4, ButtonWidth- 53, g_Locale->getText("messagebox.cancel"), color);
 }
 
 void CMessageBox::yes()
@@ -68,7 +90,8 @@ int CMessageBox::exec(CMenuTarget* parent, string actionKey)
 	{
 		parent->hide();
 	}
-	paint();
+	paintHead();
+	paintButtons();
 	bool loop=true;
 	while (loop)
 	{
@@ -84,20 +107,47 @@ int CMessageBox::exec(CMenuTarget* parent, string actionKey)
 			no();
 			loop=false;
 		}
-		else if(key==CRCInput::RC_ok)
+		else if(key==CRCInput::RC_green)
 		{
 			yes();
 			loop=false;
 		}
-
-		else if( (key==CRCInput::RC_spkr) || (key==CRCInput::RC_plus) || (key==CRCInput::RC_minus)
-		         || (key==CRCInput::RC_standby)
-		         || (CRCInput::isNumeric(key)) )
+		else if(key==CRCInput::RC_right)
 		{
-			cancel();
-			g_RCInput->pushbackKey (key);
+			if(selected<2)
+			{
+				selected++;
+				paintButtons();
+			}
+
+		}
+		else if(key==CRCInput::RC_left)
+		{
+			if(selected>0)
+			{
+				selected--;
+				paintButtons();
+			}
+
+		}
+		else if(key==CRCInput::RC_left)
+		{
+		}
+		else if(key==CRCInput::RC_ok)
+		{
+			//exec selected;
+			switch (selected)
+			{
+				case 0: yes();
+					break;
+				case 1: no();
+					break;
+				case 2: cancel();
+					break;
+			}
 			loop=false;
 		}
+
 	}
 	hide();
 	return RETURN_REPAINT;

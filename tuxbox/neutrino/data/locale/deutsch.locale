@@ -275,7 +275,7 @@ bouqueteditor.return fertig
 
 messagebox.yes Ja
 messagebox.no Nein
-messagebox.cancel Abbrechen
+messagebox.cancel Abbruch
 
 GENRE.MOVIE.0 Spielfilm / Drama
 GENRE.MOVIE.1 detective/thriller

@@ -30,10 +30,13 @@
 */
 
 /*
-$Id: fontrenderer.h,v 1.18 2002/01/29 17:26:51 field Exp $
+$Id: fontrenderer.h,v 1.19 2002/02/10 14:17:34 McClean Exp $
 
 
 $Log: fontrenderer.h,v $
+Revision 1.19  2002/02/10 14:17:34  McClean
+simplify usage (part 2)
+
 Revision 1.18  2002/01/29 17:26:51  field
 Jede Menge Updates :)
 
@@ -68,6 +71,7 @@ Revision 1.11  2001/09/26 16:24:17  rasc
 
 #include "framebuffer.h"
 #include "pthread.h"
+#include <string>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -141,9 +145,11 @@ class Font
 		int height,ascender,descender,upper,lower;
 
 	public:
-		void RenderString(int x, int y, int width, const char *string, unsigned char color, int boxheight=0);
+		void RenderString(int x, int y, int width, const char *text, unsigned char color, int boxheight=0);
+		void RenderString(int x, int y, int width, string text, unsigned char color, int boxheight=0);
 
-		int getRenderWidth(const char *string);
+		int getRenderWidth(const char *text);
+		int getRenderWidth(string text);
 		int getHeight(void);
 
 		Font(fontRenderClass *render, FTC_FaceID faceid, int isize);

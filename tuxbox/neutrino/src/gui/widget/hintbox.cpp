@@ -22,7 +22,7 @@ void CHintBox::paint()
 	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width, g_Locale->getText(caption).c_str(), COL_MENUHEAD);
 
 	g_FrameBuffer->paintBoxRel(x,y+theight+0, width,height - theight + 0, COL_MENUCONTENT);
-	g_Fonts->menu_info->RenderString(x+10,y+theight+0+20, width, g_Locale->getText(text).c_str(), COL_MENUCONTENT);
+	g_Fonts->menu_info->RenderString(x+10,y+theight+20+20, width, g_Locale->getText(text).c_str(), COL_MENUCONTENT);
 }
 
 void CHintBox::hide( bool showParent=true)

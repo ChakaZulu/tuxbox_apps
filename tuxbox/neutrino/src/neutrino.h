@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.44 2002/02/04 23:26:36 Simplex Exp $
+//  $Id: neutrino.h,v 1.45 2002/02/10 14:17:34 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.45  2002/02/10 14:17:34  McClean
+//  simplify usage (part 2)
+//
 //  Revision 1.44  2002/02/04 23:26:36  Simplex
 //  bouquet-editor now saves changes
 //
@@ -176,6 +179,7 @@
 #include "helpers/streaminfo.h"
 #include "helpers/locale.h"
 #include "helpers/ucodecheck.h"
+#include "widget/messagebox.h"
 
 #include <string>
 #include <vector>
