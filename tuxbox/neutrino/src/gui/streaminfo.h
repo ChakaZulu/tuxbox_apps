@@ -32,10 +32,7 @@
 #ifndef __streaminfo__
 #define __streaminfo__
 
-#include <stdio.h>
 #include "driver/framebuffer.h"
-#include "driver/fontrenderer.h"
-#include "driver/rcinput.h"
 
 #include "gui/widget/menue.h"
 #include "gui/color.h"

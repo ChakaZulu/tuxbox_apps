@@ -33,7 +33,7 @@
 #include "setting_helpers.h"
 
 #include "libnet.h"
-#include "helpers/streaminfo.h"
+#include "gui/streaminfo.h"
 #include "gui/widget/messagebox.h"
 #include "libucodes/libucodes.h"
 
