@@ -28,7 +28,6 @@ using namespace std;
 
 class TWebDbox;
 class TWebserverRequest;
-//class TTimerList;
 
 struct Tmconnect
 {
@@ -37,7 +36,7 @@ struct Tmconnect
 };
 
 //----------------------------------------------------------------------
-class TWebserver
+class CWebserver
 {
 	int				Port;
 	int				ListenSocket;
@@ -46,10 +45,11 @@ class TWebserver
 	pthread_t		Thread1;
 	pthread_t		timerthread;
 	bool			THREADS;
-//	TTimerList		*TimerList;
+	bool			NewGui;
 
 
 public:
+	bool			STOP;
 	bool			DEBUG;
 	bool			VERBOSE;
 	bool			MustAuthenticate;
@@ -57,11 +57,10 @@ public:
 	CEventServer	EventServer;
 	CConfigFile		*Config;
 
-	TWebserver();
-	~TWebserver();
+	CWebserver();
+	~CWebserver();
 
-//	bool Init(int port,string publicdocumentroot,bool debug, bool verbose,bool threads,bool auth);
-	bool Init();
+	bool Init(bool debug);
 	bool Start();
 	void DoLoop();
 	void Stop();
