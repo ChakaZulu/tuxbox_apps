@@ -53,6 +53,7 @@
 #include <enigma_dyn_conf.h>
 #include <enigma_dyn_flash.h>
 #include <enigma_dyn_rotor.h>
+#include <enigma_dyn_xml.h>
 
 using namespace std;
 
@@ -4985,6 +4986,9 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 #endif
 #ifdef ENABLE_DYN_ROTOR
 	ezapRotorInitializeDyn(dyn_resolver, lockWeb);
+#endif
+#ifdef ENABLE_DYN_XML
+	ezapXMLInitializeDyn(dyn_resolver, lockWeb);
 #endif
 }
 
