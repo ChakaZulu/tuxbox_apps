@@ -52,7 +52,7 @@ class CLCDD
 		static void* TimeThread(void*);
 		static void sig_catch(int);
 
-		void parse_command(int connfd, CLcddMsg::commandHead rmsg);
+		void parse_command(int connfd, CLcddMsg::Header rmsg);
 		
 	public:
 

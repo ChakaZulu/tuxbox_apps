@@ -37,7 +37,7 @@
 
 bool CLcddClient::send(const unsigned char command, char* data = NULL, const unsigned int size = 0)
 {
-	CLcddMsg::commandHead msgHead;
+	CLcddMsg::Header msgHead;
 	msgHead.version = CLcddMsg::ACTVERSION;
 	msgHead.cmd     = command;
 
