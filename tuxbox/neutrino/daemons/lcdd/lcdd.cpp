@@ -54,7 +54,7 @@ raw_display_t		icon_power;
 
 char			channelname[30];
 unsigned char		volume;
-bool			muted;
+bool			muted, shall_exit;
 
 void show_channelname(char *);
 void show_volume(unsigned char);
@@ -98,7 +98,7 @@ void parse_command(lcdd_msg rmsg) {
 		break;
 	case LC_POWEROFF:
 		set_mode(LCDM_POWEROFF);
-		exit(0);
+		shall_exit = true;
 		break;
 	default: 
 		printf("unknown command %i\n", rmsg.cmd);
@@ -270,7 +270,8 @@ int main(int argc, char **argv)
 	/* alles geladen, daemonize Now! ;) */
 	if (fork() != 0) return 0;
 
-	while(1)
+	shall_exit = false;
+	while(!shall_exit)
 	{
 		clilen = sizeof(cliaddr);
 		connfd = accept(listenfd, (SA *) &cliaddr, &clilen);
@@ -280,6 +281,6 @@ int main(int argc, char **argv)
 		parse_command(rmsg);
 		close(connfd);
 	}
-
+	close(listenfd);
 }
 
