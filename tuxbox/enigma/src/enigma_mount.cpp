@@ -475,13 +475,13 @@ void eMountMgr::addMountedFileSystems()
 			}
 			else
 			if (!((mountOn == "/") ||(mountOn == "/dev") || (mountOn == "/tmp") || (mountOn == "/proc") || (mountOn == "/dev/pts") ||
-			     (mountDev == "/dev/mtdblock") || (mountOn == "")))
+			     (mountDev.find("/dev/mtdblock") != eString::npos) || (mountOn == "")))
 			{
 				//other file system
 				sscanf("//0.0.0.0/nothing", "//%d.%d.%d.%d/%*s", &mp.ip[0], &mp.ip[1], &mp.ip[2], &mp.ip[3]);
 				mp.mountDir   = mountDev;
 				mp.localDir   = mountOn;
-				mp.fstype     = 1;
+				mp.fstype     = 2;
 				mp.password   = "";
 				mp.userName   = "";
 				mp.automount  = 0;
@@ -524,8 +524,11 @@ void eMountMgr::save()
 		int i = 0;
 		for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
 		{
-			mp_it->save(out, i);
-			i++;
+			if ((mp_it->mp.fstype < 2) || (mp_it->mp.mountDir.find("disc") != eString::npos) || (mp_it->mp.mountDir.find("part1") != eString::npos)) // just save NFS and CIFS
+			{
+				mp_it->save(out, i);
+				i++;
+			}
 		}
 		fclose(out);
 	}
