@@ -1,11 +1,12 @@
-#include <sys/ioctl.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <sys/poll.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 #include <time.h>
 #include <unistd.h>
-#include <sys/poll.h>
 
 #include <dbox/saa7126_core.h>
 

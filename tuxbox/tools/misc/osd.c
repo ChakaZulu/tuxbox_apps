@@ -21,6 +21,9 @@
  *
  *
  *   $Log: osd.c,v $
+ *   Revision 1.3  2002/08/21 08:37:05  obi
+ *   no more compile warnings
+ *
  *   Revision 1.2  2001/03/07 19:18:00  gillem
  *   - change some lines
  *
@@ -29,24 +32,26 @@
  *
  *
  *
- *   $Revision: 1.2 $
+ *   $Revision: 1.3 $
  *
  */
 
 /* ---------------------------------------------------------------------- */
 
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
 #include <fcntl.h>
-#include <linux/types.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
 
 #include "dbox/avia_osd.h"
 #include "tuxbox.h"
 
 /* ---------------------------------------------------------------------- */
 
-void rgb2crycb( int r, int g, int b, int blend, __u32 * pale )
+void rgb2crycb( int r, int g, int b, int blend, uint32_t * pale )
 {
 	int cr,y,cb;
 
@@ -67,14 +72,13 @@ void rgb2crycb( int r, int g, int b, int blend, __u32 * pale )
 int main (int argc, char **argv)
 {
 	int fd;
-	int x,y,z,a;
+	int x,y,z;
 
 	struct sosd_create_frame osdf;
-	__u32 palette[16];
-	__u32 bitmap[20000];
-	__u32 i;
-	__u32 pale;
-	unsigned char rgb[3];
+	uint32_t palette[16];
+	uint32_t bitmap[20000];
+	uint32_t i;
+	uint32_t pale;
 	unsigned char r,g,b;
 
 	if ((fd = open("/dev/dbox/osd0",O_RDWR)) <= 0)

@@ -21,6 +21,9 @@
  *
  *
  *   $Log: switch.c,v $
+ *   Revision 1.13  2002/08/21 08:39:35  obi
+ *   no more compile warnings
+ *
  *   Revision 1.12  2002/07/25 00:17:38  woglinde
  *
  *
@@ -58,16 +61,18 @@
  *
  *
  *
- *   $Revision: 1.12 $
+ *   $Revision: 1.13 $
  *
  */
 
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
 #include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
 
-#include "dbox/avs_core.h"
+#include <dbox/avs_core.h>
 
 #define VERSION "0.1"
 
@@ -349,7 +354,7 @@ void ycm_set(int i) {
 
 int main (int argc, char **argv) {
 
-  int count,i;
+  int count;
   int type;
 
   if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0) {
