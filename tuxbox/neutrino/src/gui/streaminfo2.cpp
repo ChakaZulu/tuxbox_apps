@@ -242,7 +242,7 @@ void CStreamInfo2::paint_signal_fe(struct feSignal  s)
 	sigBox_pos = (++sigBox_pos) % sigBox_w;
 
 	frameBuffer->paintVLine(sigBox_x+sigBox_pos,sigBox_y,sigBox_y+sigBox_h,COL_WHITE);
-	frameBuffer->paintVLine(sigBox_x+x_now,sigBox_y,sigBox_y+sigBox_h,COL_BLACK);
+	frameBuffer->paintVLine(sigBox_x+x_now,sigBox_y,sigBox_y+sigBox_h+1,COL_BLACK);
 
 
 	if (s.ber != s.old_ber) {
@@ -273,6 +273,8 @@ void CStreamInfo2::paint_signal_fe(struct feSignal  s)
 int CStreamInfo2::y_signal_fe(int value, int max_value, int max_y)
 {
 	long  l;
+
+	if (!max_value) max_value = 1;
 
     	l = ((long) max_y * (long) value ) / (long) max_value;
 	if (l > max_y) l = max_y;

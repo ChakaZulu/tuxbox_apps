@@ -122,7 +122,6 @@
 #ifdef __EXPERIMENTAL_CODE__
 
 #include "gui/ch_mosaic.h"
-#include "gui/streaminfo2.h"
 
 #endif
 
