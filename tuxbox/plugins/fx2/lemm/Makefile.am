@@ -1,4 +1,4 @@
-INCLUDES = -I$(srcdir)/../lib -I$(top_srcdir)/include
+AM_CPPFLAGS = -I$(srcdir)/../lib -I$(top_srcdir)/include
 
 noinst_LTLIBRARIES = lemmings.la
 
@@ -8,7 +8,7 @@ lemmings_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version @CURL_LIBS@ -lz
 
 install-exec-local:
 	install -d $(DESTDIR)$(PLUGINDIR)
-	$(LIBTOOL) install lemmings.la $(DESTDIR)$(PLUGINDIR)
+	$(LIBTOOL) --mode=install install lemmings.la $(DESTDIR)$(PLUGINDIR)
 	install -m 0644 $(srcdir)/lemmings.cfg $(DESTDIR)$(PLUGINDIR)
 
 uninstall-local:

@@ -1,4 +1,4 @@
-INCLUDES = -I$(srcdir)/../lib -I$(top_srcdir)/include
+AM_CPPFLAGS = -I$(srcdir)/../lib -I$(top_srcdir)/include
 
 noinst_LTLIBRARIES = solitair.la
 
@@ -17,11 +17,11 @@ solitair_la_SOURCES = \
 	pnm_res.cpp \
 	backbuffer.cpp
 
-solitair_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version -lz
+solitair_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version -lz -lsupc++ -lgcc_eh
 
 install-exec-local:
 	install -d $(DESTDIR)$(PLUGINDIR)
-	$(LIBTOOL) install solitair.la $(DESTDIR)$(PLUGINDIR)
+	$(LIBTOOL) --mode=install install solitair.la $(DESTDIR)$(PLUGINDIR)
 	install -m 0644 $(srcdir)/solitair.cfg $(DESTDIR)$(PLUGINDIR)
 
 uninstall-local:

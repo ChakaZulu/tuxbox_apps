@@ -1,4 +1,4 @@
-INCLUDES = -I$(srcdir)/../lib -I$(top_srcdir)/include
+AM_CPPFLAGS = -I$(srcdir)/../lib -I$(top_srcdir)/include
 
 noinst_LTLIBRARIES = pacman.la
 
@@ -8,7 +8,7 @@ pacman_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
 install-exec-local:
 	install -d $(DESTDIR)$(PLUGINDIR)
-	$(LIBTOOL) install pacman.la $(DESTDIR)$(PLUGINDIR)
+	$(LIBTOOL) --mode=install install pacman.la $(DESTDIR)$(PLUGINDIR)
 	install -m 0644 $(srcdir)/pacman.cfg $(DESTDIR)$(PLUGINDIR)
 
 uninstall-local:

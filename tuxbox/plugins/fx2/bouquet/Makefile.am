@@ -1,4 +1,4 @@
-INCLUDES = -I$(srcdir)/../lib -I$(top_srcdir)/include
+AM_CPPFLAGS = -I$(srcdir)/../lib -I$(top_srcdir)/include
 
 noinst_LTLIBRARIES = bouquet.la
 

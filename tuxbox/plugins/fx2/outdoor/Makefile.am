@@ -1,4 +1,4 @@
-INCLUDES = -I$(srcdir)/../lib -I$(top_srcdir)/include -I$(DRIVER)/include
+AM_CPPFLAGS = -I$(srcdir)/../lib -I$(top_srcdir)/include -I$(DRIVER)/include
 
 noinst_LTLIBRARIES = outdoor.la
 
@@ -8,7 +8,7 @@ outdoor_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
 install-exec-local:
 	install -d $(DESTDIR)$(PLUGINDIR)
-	$(LIBTOOL) install outdoor.la $(DESTDIR)$(PLUGINDIR)
+	$(LIBTOOL) --mode=install install outdoor.la $(DESTDIR)$(PLUGINDIR)
 	install -m 0644 $(srcdir)/outdoor.cfg $(DESTDIR)$(PLUGINDIR)
 
 uninstall-local:

@@ -1,4 +1,4 @@
-INCLUDES = -I$(srcdir)/../lib -I$(top_srcdir)/include
+AM_CPPFLAGS = -I$(srcdir)/../lib -I$(top_srcdir)/include
 
 noinst_LTLIBRARIES = tetris.la
 
@@ -9,12 +9,12 @@ tetris_la_LIBADD =       \
 	@CURL_LIBS@
 
 
-tetris_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
+tetris_la_LDFLAGS = -rpath $(PLUGINDIR) -R$(TARGET_PLUGINDIR) -module -avoid-version
 
 install-exec-local:
 	install -d $(DESTDIR)$(PLUGINDIR)
 	install -d $(DESTDIR)$(CONFIGDIR)
-	$(LIBTOOL) install tetris.la $(DESTDIR)$(PLUGINDIR)
+	$(LIBTOOL) --mode=install install tetris.la $(DESTDIR)$(PLUGINDIR)
 	install -m 0644 $(srcdir)/tetris.cfg $(DESTDIR)$(PLUGINDIR)
 	install -m 0644 $(srcdir)/games.cfg $(DESTDIR)$(CONFIGDIR)
 
