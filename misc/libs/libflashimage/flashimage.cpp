@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: flashimage.cpp,v 1.1 2002/05/28 18:51:27 waldi Exp $
+ * $Id: flashimage.cpp,v 1.2 2002/05/30 11:43:45 waldi Exp $
  */
 
 #include <flashimage.hpp>
@@ -27,6 +27,8 @@
 
 #include <libcrypto++/bio.hpp>
 #include <libcrypto++/x509.hpp>
+
+std::map < int, std::string > FlashImage::FlashImage::errors;
 
 FlashImage::FlashImage::FlashImage ( FlashImageFS & fs )
 : fs ( fs )
@@ -63,7 +65,41 @@ FlashImage::FlashImage::FlashImage ( FlashImageFS & fs )
     throw std::runtime_error ( std::string ( "Digest: unknown:" ) + control["Digest"] );
 }
 
-int FlashImage::FlashImage::verify_image ()
+bool FlashImage::FlashImage::verify_cert ( const std::string & certchain )
+{
+  std::map < int, std::string > temp;
+  return verify_cert ( certchain, temp );
+}
+
+bool FlashImage::FlashImage::verify_cert ( const std::string & certchain, std::map < int, std::string > & reterrors )
+{
+  std::stringstream stream;
+  Crypto::x509::cert cert;
+
+  try
+  {
+    fs.file ( "signcert", stream );
+    cert.read ( stream );
+  }
+
+  catch ( std::runtime_error & )
+  {
+    throw std::runtime_error ( "verification failed: no certificate" );
+  }
+
+  Crypto::x509::store store;
+
+  errors.clear ();
+
+  cert.verify ( store, &verify_cert_callback );
+
+  for ( std::map < int, std::string > ::iterator it = errors.begin (); it != errors.end (); ++it )
+    reterrors.insert ( *it );
+
+  return errors.size () == 0;
+}
+
+bool FlashImage::FlashImage::verify_image ()
 {
   std::stringstream stream;
   std::stringstream stream_out;
@@ -119,6 +155,30 @@ std::map < std::string, std::string > FlashImage::FlashImage::parse_control ( st
   }
 
   return fields;
+}
+
+int FlashImage::FlashImage::verify_cert_callback ( int ok, libcrypto::X509_STORE_CTX * ctx ) throw ()
+{
+  if ( ! ok )
+  {
+    switch ( ctx -> error )
+    {
+      case X509_V_ERR_CERT_HAS_EXPIRED:
+        errors.insert ( std::pair < int, std::string > ( ctx -> error, "cert expired" ) );
+        return 1;
+      case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
+        errors.insert ( std::pair < int, std::string > ( ctx -> error, "selfsigned cert" ) );
+        return 1;
+      case X509_V_ERR_INVALID_CA:
+        errors.insert ( std::pair < int, std::string > ( ctx -> error, "invalid CA" ) );
+        return 1;
+      case X509_V_ERR_INVALID_PURPOSE:
+        errors.insert ( std::pair < int, std::string > ( ctx -> error, "invalid purpose" ) );
+        return 1;
+    }
+  }
+
+  return 0;
 }
 
 #ifndef INLINE

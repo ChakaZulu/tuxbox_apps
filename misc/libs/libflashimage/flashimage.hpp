@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: flashimage.hpp,v 1.1 2002/05/28 18:51:27 waldi Exp $
+ * $Id: flashimage.hpp,v 1.2 2002/05/30 11:43:45 waldi Exp $
  */
 
 #ifndef __LIBFLASHIMAGE__LIBFLASHIMAGE_HPP
@@ -25,10 +25,11 @@
 
 #define INLINE
 
-#include <istream>
+#include <iostream>
 #include <map>
 #include <string>
 
+#include <libcrypto++/x509.hpp>
 #include <libflashimage/flashimagefs.hpp>
 
 namespace FlashImage
@@ -40,14 +41,17 @@ namespace FlashImage
 
       std::string get_control_field ( std::string );
 
-      int verify_cert ();
-      int verify_image ();
+      bool verify_cert ( const std::string & certchain );
+      bool verify_cert ( const std::string & certchain, std::map < int, std::string > & );
+      bool verify_image ();
 
     protected:
+      static int verify_cert_callback ( int ok, libcrypto::X509_STORE_CTX * ctx ) throw ();
       std::map < std::string, std::string > parse_control ( std::istream & stream );
 
       FlashImageFS & fs;
       std::map < std::string, std::string > control;
+      static std::map < int, std::string > errors;
   };
 }
 

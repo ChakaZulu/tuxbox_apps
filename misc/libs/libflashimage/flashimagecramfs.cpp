@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: flashimagecramfs.cpp,v 1.2 2002/05/28 18:52:32 waldi Exp $
+ * $Id: flashimagecramfs.cpp,v 1.3 2002/05/30 11:43:45 waldi Exp $
  */
 
 #include <flashimagecramfs.hpp>
@@ -89,6 +89,12 @@ void FlashImage::FlashImageCramFS::file ( const std::string & name, std::ostream
 
     unsigned long offset = readdir ( stream, CRAMFS_GET_OFFSET ( & ( super -> root ) ) << 2, CRAMFS_24 ( super -> root.size ), filename );
     decompress ( stream, out, offset );
+  }
+
+  catch ( std::runtime_error & )
+  {
+    delete buf;
+    throw std::runtime_error ( std::string ( "cramfs: can't find file " ) + name );
   }
 
   catch ( ... )
