@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.24 2003/05/21 20:36:50 digi_casi Exp $
+        $Id: settings.cpp,v 1.25 2003/05/22 20:37:12 digi_casi Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -134,9 +134,12 @@ void CScanSettings::toMotorPosList(CZapitClient::ScanMotorPosList& motorPosList)
 	
 	for (int i = 0; i < MAX_SATELLITES; i++)
 	{
-		strncpy(sat.satName, satName[i], 30);
-		sat.motorPos = satMotorPos[i];
-		motorPosList.insert(motorPosList.end(), sat);
+		if (satName[i][0] != 0)
+		{
+			strncpy(sat.satName, satName[i], 30);
+			sat.motorPos = satMotorPos[i];
+			motorPosList.insert(motorPosList.end(), sat);
+		}	
 	}
 }
 
@@ -243,19 +246,7 @@ bool CScanSettings::saveSettings(const std::string fileName)
 	}
 
 	if(configfile.getModifiedFlag())
-	{
-		printf("saving neutrino scan-config\n");
 		configfile.saveConfig(fileName);
-		
-		/* write motor.conf file */
-		if (diseqcMode == DISEQC_1_2)
-		{
-			fd = fopen(MOTORCONFIGFILE, "w");
-			for (i = 0; i < satCount; i++)
-				fprintf(fd, "%s:%d\n", satName[i], satMotorPos[i]);
-			fclose(fd);
-		}
-	}
 
 	return true;
 }
