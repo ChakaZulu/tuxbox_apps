@@ -15,6 +15,10 @@
  ***************************************************************************/
 /*
 $Log: scan.cpp,v $
+Revision 1.3  2001/12/07 14:10:33  rasc
+Fixes for SAT tuning and Diseqc. Diseqc doesn't work properly for me (diseqc 2.0 switch).
+Someone should check this please..
+
 Revision 1.2  2001/11/15 00:43:45  TheDOC
  added
 
@@ -139,7 +143,7 @@ channels scan::scanChannels(bool full = false, int start_frequency = -1, int sta
 		}
 		max_chans = co;
 
-		for (int dis = 1; dis < 3; dis++)
+		for (int dis = 0; dis < 3; dis++)
 		{
 			printf("Diseqc: %d\n", dis);		
 			int i = 0;

@@ -14,7 +14,12 @@
  *                                                                         *
  ***************************************************************************/
 /*
+
 $Log: tuner.cpp,v $
+Revision 1.3  2001/12/07 14:10:33  rasc
+Fixes for SAT tuning and Diseqc. Diseqc doesn't work properly for me (diseqc 2.0 switch).
+Someone should check this please..
+
 Revision 1.2  2001/11/15 00:43:45  TheDOC
  added
 
@@ -44,7 +49,7 @@ tuner::tuner(settings &s) : setting(s)
 }
 
 // polarization = 0 -> H, polarization = 1 -> V
-int tuner::tune(int frequ, int symbol, int polarization = -1, int fec = -1, int dis = 1)
+int tuner::tune(int frequ, int symbol, int polarization = -1, int fec = -1, int dis = 0)
 {
 	int device;
 	int frontend;
@@ -52,31 +57,39 @@ int tuner::tune(int frequ, int symbol, int polarization = -1, int fec = -1, int 
 	struct secCommand cmd;
 	struct secDiseqcCmd diseqc;
 	struct qpskParameters front;
-	unsigned char bits;
+
 
 	if (setting.boxIsSat())
 	{
-		bits |= 0;
-		diseqc.addr=0x10;
-		diseqc.cmd=0x38;
-		diseqc.numParams=1;
-		if (dis == 1)
-			diseqc.params[0]=0xF7;
-		else if (dis == 2)
-			diseqc.params[0]=0xF1;
 
 		cmd.type=SEC_CMDTYPE_DISEQC;
-		seq.continuousTone = SEC_TONE_ON;
-		if (polarization == 0)
-		{
+		cmd.u.diseqc=diseqc;
+		seq.miniCommand=SEC_MINI_NONE;
+		seq.numCommands=1;
+		seq.commands=&cmd;
+
+// $$$ rasc
+// Das Verhalten von Sectone (22KHz) sollte konfigurierbar sein.
+// Ebenso die ZF fuer die LNBs (1 + 2) fuer jeweils Hi und Lo - Band
+// die Werte hier sind Standard fuer das Ku-Band, allerdings waere es
+// interessant auch andere Werte zu haben (z.B. 10 GHz ZF, oder 4 GHz ZF)
+// Dies ist sinnvoll, wenn man die dbox fuer den Sat-DX Empfang, oder
+// aeltere LNBs (naja) nutzen moechte.  
+
+		if (frequ > 11700) {
+			front.iFrequency = (frequ * 1000)-10600000;
+			seq.continuousTone = SEC_TONE_ON;
+		} else {
+			front.iFrequency = (frequ * 1000)-9750000;
+			seq.continuousTone = SEC_TONE_OFF;
+		}
+
+		if (polarization == 0) {
 			seq.voltage=SEC_VOLTAGE_18;
-			bits|=2;
-		}
-		else
-		{
+		} else {
 			seq.voltage=SEC_VOLTAGE_13;	
-			bits|=0;
 		}
+
 		switch (fec)
 		{
 			case 1:
@@ -98,14 +111,20 @@ int tuner::tune(int frequ, int symbol, int polarization = -1, int fec = -1, int 
 				front.FEC_inner = FEC_AUTO;
 				break;
 		}
-		cmd.u.diseqc=diseqc;
-		seq.miniCommand=SEC_MINI_NONE;
-		seq.numCommands=1;
-		seq.commands=&cmd;
-		front.iFrequency = (frequ * 1000)-10600000;
-		seq.continuousTone = SEC_TONE_ON;
-		bits|=1;
-	    
+
+
+		// diseqc Group Byte  (dis: 0..3)
+		// 2001-12-06 rasc
+		diseqc.addr=0x10;
+		diseqc.cmd=0x38;
+		diseqc.numParams=1;
+		diseqc.params[0]=0xF0 
+				| ((dis*4) & 0x0F) 
+				| ((seq.voltage == SEC_VOLTAGE_18)     ? 2 : 0)
+				| ((seq.continuousTone == SEC_TONE_ON) ? 1 : 0);
+
+
+
 		if((device = open("/dev/ost/sec0", O_RDWR)) < 0)
 		{
 			exit(1);
@@ -115,9 +134,10 @@ int tuner::tune(int frequ, int symbol, int polarization = -1, int fec = -1, int 
 		close(device);
 
 	}
+
 	
 	if (setting.boxIsCable())
-	{	
+	{
 		front.iFrequency = frequ * 100;
 		front.FEC_inner = 0;
 	}
@@ -127,16 +147,31 @@ int tuner::tune(int frequ, int symbol, int polarization = -1, int fec = -1, int 
 	frontend = open("/dev/ost/qpskfe0", O_RDWR);
 	ioctl(frontend, QPSK_TUNE, &front);
 
+
 	int i, status;
 
 	for (i = 0; i < 200; i++)
 	{
 		
 		ioctl(frontend, FE_READ_STATUS, &status);
-		if (status & 2)
+		// normaly  FE_HAS_LOCK|FE_HAS_SIGNAL    (rasc)
+		if (status & (FE_HAS_SIGNAL))
 			break;
 		usleep(100);
 	}
+
+// $$$ rasc: Debug
+      printf (" Frequ: %ld   ifreq: %ld  Pol: %d  FEC: %d  Sym: %ld  dis: %d  (param: 0x%02x)\n",
+	   (long)frequ,(long)front.iFrequency,(int)polarization ,(int)fec,
+	   (long)symbol, (int)dis,(int)diseqc.params[0]);
+
+	printf ("... Tuner-Lock Status: %ld\n",status);
+      long state1,state2;
+	ioctl(frontend, FE_READ_SNR, &state1); 
+	ioctl(frontend, FE_READ_SIGNAL_STRENGTH, &state2);    
+	printf ("... S/N: %ld  SigStrength: %ld \n",state1,state2);
+// $$$
+
 	close(frontend);
-	return (i != 200);
+	return (status == (FE_HAS_SIGNAL));
 }

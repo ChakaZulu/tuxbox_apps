@@ -15,6 +15,10 @@
  ***************************************************************************/
 /*
 $Log: tuner.h,v $
+Revision 1.3  2001/12/07 14:10:33  rasc
+Fixes for SAT tuning and Diseqc. Diseqc doesn't work properly for me (diseqc 2.0 switch).
+Someone should check this please..
+
 Revision 1.2  2001/11/15 00:43:45  TheDOC
  added
 
@@ -29,7 +33,7 @@ class tuner
 	settings setting;
 public:
 	tuner(settings &s);
-	int tune(int frequ, int symbol, int polarization = -1, int fec = -1, int diseqc = 1);
+	int tune(int frequ, int symbol, int polarization = -1, int fec = -1, int diseqc = 0);
 };
 
 #endif
