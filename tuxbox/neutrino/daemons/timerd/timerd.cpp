@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerd.cpp,v 1.47 2003/02/26 14:58:30 thegoodguy Exp $
+	$Id: timerd.cpp,v 1.48 2003/03/01 15:28:10 zwen Exp $
 
 	License: GPL
 
@@ -35,6 +35,8 @@
 
 #include <connection/basicserver.h>
 #include <timerdclient/timerdmsg.h>
+
+int timerd_debug = 0;
 
 static void signalHandler(int signum)
 {
@@ -378,10 +380,13 @@ int main(int argc, char **argv)
 	{
 		for(int i = 1; i < argc; i++)
 		{
-
 			if(strncmp(argv[i], "-f", 2) == 0)
 			{
 				do_fork = false;
+			}
+			if(strncmp(argv[i], "-d", 2) == 0)
+			{
+				timerd_debug = 1;
 			}
 		}
 	}

@@ -26,9 +26,9 @@
 #ifndef __timerd_debug__
 #define __timerd_debug__
 
-static int debug = 0;
+extern int timerd_debug;
 
-#define dprintf(fmt, args...) {if(debug) printf( "[timerd] " fmt, ## args);}
+#define dprintf(fmt, args...) {if(timerd_debug) printf( "[timerd] " fmt, ## args);}
 #define dperror(str) {perror("[timerd] " str);}
 
 

@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.64 2003/02/26 14:58:30 thegoodguy Exp $
+   $Id: timermanager.cpp,v 1.65 2003/03/01 15:28:10 zwen Exp $
 
 	License: GPL
 
@@ -71,7 +71,7 @@ void* CTimerManager::timerThread(void *arg)
 	struct timespec wait;
 
 	CTimerManager *timerManager = (CTimerManager*) arg;
-	int sleeptime=(debug)?10:20;
+	int sleeptime=(timerd_debug)?10:20;
 	while(1)
 	{
 		if(!timerManager->m_isTimeSet)
@@ -102,7 +102,7 @@ void* CTimerManager::timerThread(void *arg)
 			for(;pos != timerManager->events.end();pos++)
 			{
 				event = pos->second;
-				if(debug) event->printEvent();					// print all events (debug)
+				if(timerd_debug) event->printEvent();					// print all events (debug)
 
 				if(event->announceTime > 0 && event->eventState == CTimerd::TIMERSTATE_SCHEDULED ) // if event wants to be announced
 					if( event->announceTime <= now )	// check if event announcetime has come
@@ -466,15 +466,15 @@ void CTimerManager::saveEventsToConfig()
 {
 	CConfigFile config(',');
 	config.clear();
-	printf("[Timerd] save %d events to config ... saving ", events.size());
+	dprintf("[Timerd] save %d events to config ... saving ", events.size());
 	CTimerEventMap::iterator pos = events.begin();
 	for(;pos != events.end();pos++)
 	{
 		CTimerEvent *event = pos->second;
-		printf("%d ",event->eventID);
+		dprintf("%d ",event->eventID);
 		event->saveToConfig(&config);
 	}
-	printf("\n");
+	dprintf("\n");
 	config.saveConfig(CONFIGFILE);
 }
 //------------------------------------------------------------
