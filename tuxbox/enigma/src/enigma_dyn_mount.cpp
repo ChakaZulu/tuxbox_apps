@@ -48,90 +48,81 @@
 
 using namespace std;
 
-#define TEMPLATE_DIR DATADIR+eString("/enigma/templates/")
-#define HTDOCS_DIR DATADIR+eString("/enigma/htdocs/")
-#define CHARSETMETA "<META http-equiv=Content-Type content=\"text/html; charset=UTF-8\">\n"
-
-#define BLUE "#12259E"
-#define RED "#CB0303"
-#define GREEN "#1FCB12"
-#define YELLOW "#F5FF3C"
-#define LIGHTGREY "#F4F4EC"
-#define DARKGREY "#D9E0E7"
-#define LEFTNAVICOLOR ""
-#define TOPNAVICOLOR ""
-#define OCKER "#FFCC33"
-#define PINK "#95077C"
-#define NOCOLOR ""
-
-#define NOCONTENT "<? header(\"HTTP/1.0 204 No Content\"); ?>"
-
-#define WEBXFACEVERSION "1.3.1"
-
 extern int smallScreen;
 
 extern eString getRight(const eString&, char); // implemented in timer.cpp
 extern eString getLeft(const eString&, char);  // implemented in timer.cpp
 extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
-extern eString button(int width, eString buttonText, eString buttonColor, eString buttonRef); 
+extern eString button(int width, eString buttonText, eString buttonColor, eString buttonRef);
 extern eString httpUnescape(const eString &string);
 extern eString filter_string(eString string);
 extern eString httpEscape(const eString &string);
 extern std::map<eString, eString> getRequestOptions(eString, char);
 
-eString addMountPoint(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+static eString addMountPoint(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	
 	return "+ok";
 }
 
-eString removeMountPoint(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+static eString removeMountPoint(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	
 	return "+ok";
 }
 
-eString editMountPoint(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+static eString editMountPoint(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	
 	return "+ok";
 }
 
-eString showMountPoints(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+static eString showMountPoints(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	
 	return "+ok";
 }
 
-eString addMountPointWindow(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+static eString addMountPointWindow(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	
 	return "+ok";
 }
 
-eString editMountPointWindow(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+static eString editMountPointWindow(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	
 	return "+ok";
 }
 
-eString mountMountPoint(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+static eString mountMountPoint(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	
 	return "+ok";
 }
-eString unmountMountPoint(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+static eString unmountMountPoint(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	
 	return "+ok";
 }
 
+void ezapMountInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
+{
+	dyn_resolver->addDyn("GET", "/control/addMountPoint", addMountPoint, lockWeb);
+	dyn_resolver->addDyn("GET", "/control/removeMountPoint", removeMountPoint, lockWeb);
+	dyn_resolver->addDyn("GET", "/control/addMountPointWindow", addMountPointWindow, lockWeb);
+	dyn_resolver->addDyn("GET", "/control/editMountPoint", editMountPoint, lockWeb);
+	dyn_resolver->addDyn("GET", "/control/editMountPointWindow", addMountPointWindow, lockWeb);
+	dyn_resolver->addDyn("GET", "/control/showMountPoints", showMountPoints, lockWeb);
+	dyn_resolver->addDyn("GET", "/control/mountMountPoint", mountMountPoint, lockWeb);
+	dyn_resolver->addDyn("GET", "/control/unmountMountPoint", unmountMountPoint, lockWeb);
+}
 

@@ -48,41 +48,12 @@
 
 using namespace std;
 
-#define TEMPLATE_DIR DATADIR+eString("/enigma/templates/")
-#define HTDOCS_DIR DATADIR+eString("/enigma/htdocs/")
-#define CHARSETMETA "<META http-equiv=Content-Type content=\"text/html; charset=UTF-8\">\n"
-
-#define BLUE "#12259E"
-#define RED "#CB0303"
-#define GREEN "#1FCB12"
-#define YELLOW "#F5FF3C"
-#define LIGHTGREY "#F4F4EC"
-#define DARKGREY "#D9E0E7"
-#define LEFTNAVICOLOR ""
-#define TOPNAVICOLOR ""
-#define OCKER "#FFCC33"
-#define PINK "#95077C"
-#define NOCOLOR ""
-
-#define NOCONTENT "<? header(\"HTTP/1.0 204 No Content\"); ?>"
-
-#define WEBXFACEVERSION "1.3.1"
+#define WEBXFACEVERSION "1.3.2"
 
 static int smallScreen = 0;
 
 static int currentBouquet = 0;
 static int currentChannel = -1;
-
-#define ZAPMODETV 0
-#define ZAPMODERADIO 1
-#define ZAPMODEDATA 2
-#define ZAPMODERECORDINGS 3
-
-#define ZAPMODENAME 0
-#define ZAPMODECATEGORY 1
-#define ZAPSUBMODESATELLITES 2
-#define ZAPSUBMODEPROVIDERS 3
-#define ZAPSUBMODEBOUQUETS 4
 
 static int zapMode = ZAPMODETV;
 static int zapSubMode = ZAPSUBMODEBOUQUETS;
@@ -4596,13 +4567,6 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/control/getonidsid", neutrino_suck_getonidsid, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/channellist", neutrino_suck_getchannellist, lockWeb);
 #endif
-	dyn_resolver->addDyn("GET", "/control/addMountPoint", addMountPoint, lockWeb);
-	dyn_resolver->addDyn("GET", "/control/removeMountPoint", removeMountPoint, lockWeb);
-	dyn_resolver->addDyn("GET", "/control/addMountPointWindow", addMountPointWindow, lockWeb);
-	dyn_resolver->addDyn("GET", "/control/editMountPoint", editMountPoint, lockWeb);
-	dyn_resolver->addDyn("GET", "/control/editMountPointWindow", addMountPointWindow, lockWeb);
-	dyn_resolver->addDyn("GET", "/control/showMountPoints", showMountPoints, lockWeb);
-	dyn_resolver->addDyn("GET", "/control/mountMountPoint", mountMountPoint, lockWeb);
-	dyn_resolver->addDyn("GET", "/control/unmountMountPoint", unmountMountPoint, lockWeb);
+	ezapMountInitializeDyn(dyn_resolver, lockWeb);
 }
 
