@@ -1,5 +1,5 @@
 /*
-$Id: teletext.c,v 1.1 2004/02/02 23:37:54 rasc Exp $
+$Id: teletext.c,v 1.2 2004/02/03 00:11:49 rasc Exp $
 
 
 
@@ -17,6 +17,9 @@ $Id: teletext.c,v 1.1 2004/02/02 23:37:54 rasc Exp $
 
 
 $Log: teletext.c,v $
+Revision 1.2  2004/02/03 00:11:49  rasc
+no message
+
 Revision 1.1  2004/02/02 23:37:54  rasc
 added EBU module (teletext), providing basic teletext decoding
 
@@ -252,7 +255,7 @@ int  print_teletext_control_decode (int v, u_char *b, int len)
 	if (packet_nr > 0 && packet_nr <= 25) {
 
 		unParityTeletextData (b+2, len-2);
-		print_databytes (v,"data:", b+2, len-2);
+		print_databytes (v,"packet data (parity stripped):", b+2, len-2);
 
 		return len;
 	}
@@ -364,29 +367,16 @@ int  print_teletext_control_decode (int v, u_char *b, int len)
 	 // represent a real-time clock.
 
 
-
-	/// $$$$ TODO this is still wrong here...
-
-
-
 	// -- timestring, etc.
 
 	unParityTeletextData (b+10, len-10);
-	
-	out (v,"display string: ");
-	// $$$ TODO start value wrong...
-	print_std_ascii (v, b+10, 24);
-	out_NL (v);
-
-	out (v,"realtime clock string: ");
-	// $$$ TODO start value wrong...
-	print_std_ascii (v, b+34, len-34);
-	out_NL (v);
-
+	print_databytes (v,"page header display string:", b+10, len-10);
+	// out (v,"page header display string: ");
+	// print_std_ascii (v, b+10, len-10);
+	// out_NL (v);
 
 
 	return len;
-
 }
 
 
