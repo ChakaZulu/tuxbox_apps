@@ -30,11 +30,14 @@
 */
 
 /*
-$Id: menue.cpp,v 1.42 2002/02/27 22:51:13 field Exp $
+$Id: menue.cpp,v 1.43 2002/02/28 12:05:34 field Exp $
 
 
 History:
  $Log: menue.cpp,v $
+ Revision 1.43  2002/02/28 12:05:34  field
+ Kleinigkeiten
+
  Revision 1.42  2002/02/27 22:51:13  field
  Tasten kaputt gefixt - sollte wieder gehen :)
 
@@ -338,10 +341,8 @@ void CMenuWidget::paint()
 		}
 	}
 
-	//	x=((720-width)>>1) -20;
-	y=(576-height)>>1;
-	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
-	//	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
+	y= ( 576 - height ) >> 1;
+	x= ( ( ( g_settings.screen_EndX- g_settings.screen_StartX ) - width ) >> 1 ) + g_settings.screen_StartX;
 
 
 	int hheight = g_Fonts->menu_title->getHeight();

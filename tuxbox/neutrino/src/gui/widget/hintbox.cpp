@@ -1,9 +1,11 @@
 #include "hintbox.h"
 #include "../global.h"
 
-CHintBox::CHintBox( CMenuWidget* Parent, string Caption, string Text)
+#define borderwidth 4
+
+CHintBox::CHintBox( CMenuWidget* Parent, string Caption, string Text, int Width )
 {
-	width = 500;
+	width = Width;
 	height = 150;
 	theight= g_Fonts->menu_title->getHeight();
 	fheight= g_Fonts->channellist->getHeight();
@@ -24,9 +26,15 @@ void CHintBox::paint( bool saveScreen = true )
 	}
 	else
 	{
-		pixbuf= new unsigned char[width* height];
+		pixbuf= new unsigned char[(width+ 2* borderwidth) * (height+ 2* borderwidth)];
 		if (pixbuf!= NULL)
-			g_FrameBuffer->SaveScreen(x, y, width, height, pixbuf);
+			g_FrameBuffer->SaveScreen(x- borderwidth, y- borderwidth, width+ 2* borderwidth, height+ 2* borderwidth, pixbuf);
+
+		// clear border
+		g_FrameBuffer->paintBackgroundBoxRel(x- borderwidth, y- borderwidth, width+ 2* borderwidth, borderwidth);
+		g_FrameBuffer->paintBackgroundBoxRel(x- borderwidth, y+ height, width+ 2* borderwidth, borderwidth);
+		g_FrameBuffer->paintBackgroundBoxRel(x- borderwidth, y, borderwidth, height);
+		g_FrameBuffer->paintBackgroundBoxRel(x+ width, y, borderwidth, height);
 	}
 
 	g_FrameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
@@ -40,7 +48,7 @@ void CHintBox::hide()
 {
 	if (pixbuf!= NULL)
 	{
-		g_FrameBuffer->RestoreScreen(x, y, width, height, pixbuf);
+		g_FrameBuffer->RestoreScreen(x- borderwidth, y- borderwidth, width+ 2* borderwidth, height+ 2* borderwidth, pixbuf);
 		delete pixbuf;
 		pixbuf= NULL;
 	}

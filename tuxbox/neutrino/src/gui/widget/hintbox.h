@@ -26,7 +26,7 @@ using namespace std;
 
 
 	public:
-		CHintBox( CMenuWidget* Parent, string Caption, string Text);
+		CHintBox( CMenuWidget* Parent, string Caption, string Text, int Width = 500 );
 
 		void paint( bool saveScreen = true );
 		void hide();

@@ -100,17 +100,15 @@ int CKeyChooserItem::exec(CMenuTarget* parent, string)
 			doLoop = false;
 		else
 		{
-			switch ( neutrino->handleMsg( msg, data ) )
+			if ( ( msg >= 0 ) && ( msg <= CRCInput::RC_MaxRC ) )
 			{
-				case messages_return::cancel_all:
-					res = menu_return::RETURN_EXIT_ALL;
-					doLoop = false;
-					break;
-
-				case messages_return::unhandled:
-					doLoop = false;
-					*key = msg;
-					break;
+				doLoop = false;
+				*key = msg;
+			}
+			else if ( neutrino->handleMsg( msg, data ) == messages_return::cancel_all )
+			{
+				res = menu_return::RETURN_EXIT_ALL;
+				doLoop = false;
 			}
 		}
 	}

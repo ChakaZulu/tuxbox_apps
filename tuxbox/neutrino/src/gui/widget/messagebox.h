@@ -29,6 +29,7 @@ using namespace std;
 		string					text;
 		CMessageBoxNotifier*	notifier;
 		int						selected;
+		int						showbuttons;
 
 		void paintHead();
 		void paintButtons();
@@ -39,15 +40,24 @@ using namespace std;
 		void cancel();
 
 	public:
-		CMessageBox( string Caption, string Text, CMessageBoxNotifier* Notifier);
-		int exec(CMenuTarget* parent, string actionKey);
-
 		enum result_
 		{
 			mbrYes,
 			mbrNo,
 			mbrCancel
 		} result;
+
+		enum buttons_
+		{
+			mbYes= 0x01,
+			mbNo = 0x02,
+			mbCancel = 0x04,
+			mbAll = 0x07
+		} buttons;
+
+		CMessageBox( string Caption, string Text, CMessageBoxNotifier* Notifier, int Width = 500, uint Default= mbrYes, uint ShowButtons= mbAll );
+		int exec(CMenuTarget* parent, string actionKey);
+
 	};
 
 #endif

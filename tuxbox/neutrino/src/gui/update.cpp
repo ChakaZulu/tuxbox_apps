@@ -349,11 +349,12 @@ bool CHTTPUpdater::getFile( string version )
 
 CFlashUpdate::CFlashUpdate()
 {
-	width = 550;
+	width = 430;
 	hheight = g_Fonts->menu_title->getHeight();
 	mheight = g_Fonts->menu->getHeight();
 	height = hheight+5*mheight+20;
-	x=((720-width) >> 1) -20;
+
+	x= ( ( ( g_settings.screen_EndX- g_settings.screen_StartX ) - width ) >> 1 ) + g_settings.screen_StartX;
 	y=(576-height)>>1;
 }
 

@@ -1,9 +1,11 @@
 #include "messagebox.h"
 #include "../global.h"
 
-CMessageBox::CMessageBox( string Caption, string Text, CMessageBoxNotifier* Notifier)
+#define borderwidth 4
+
+CMessageBox::CMessageBox( string Caption, string Text, CMessageBoxNotifier* Notifier, int Width, uint Default, uint ShowButtons )
 {
-	width = 500;
+	width = Width;
 	height = 150;
 	theight= g_Fonts->menu_title->getHeight();
 	fheight= g_Fonts->channellist->getHeight();
@@ -12,7 +14,19 @@ CMessageBox::CMessageBox( string Caption, string Text, CMessageBoxNotifier* Noti
 	caption = Caption;
 	text = Text;
 	notifier = Notifier;
-	selected = 0;
+	switch (Default)
+	{
+		case mbrYes:
+			selected = 0;
+			break;
+		case mbrNo:
+			selected = 1;
+			break;
+		case mbrCancel:
+			selected = 2;
+			break;
+	}
+	showbuttons= ShowButtons;
 }
 
 void CMessageBox::paintHead()
@@ -37,27 +51,40 @@ void CMessageBox::paintButtons()
 
 	int xpos = startpos;
 	int color = COL_INFOBAR_SHADOW;
-	if(selected==0)
-		color = COL_MENUCONTENTSELECTED;
-	g_FrameBuffer->paintBoxRel(xpos, y+height-fheight-20, ButtonWidth, fheight, color);
-	g_FrameBuffer->paintIcon("gruen.raw", xpos+14, y+height-fheight-15);
-	g_Fonts->infobar_small->RenderString(xpos + 43, y+height-fheight+4, ButtonWidth- 53, g_Locale->getText("messagebox.yes"), color);
 
-	color = COL_INFOBAR_SHADOW;
-	if(selected==1)
-		color = COL_MENUCONTENTSELECTED;
+	if ( showbuttons & mbYes )
+	{
+		if(selected==0)
+			color = COL_MENUCONTENTSELECTED;
+		g_FrameBuffer->paintBoxRel(xpos, y+height-fheight-20, ButtonWidth, fheight, color);
+		g_FrameBuffer->paintIcon("rot.raw", xpos+14, y+height-fheight-15);
+		g_Fonts->infobar_small->RenderString(xpos + 43, y+height-fheight+4, ButtonWidth- 53, g_Locale->getText("messagebox.yes"), color);
+	}
+
 	xpos = startpos+ButtonWidth+ButtonSpacing;
-	g_FrameBuffer->paintBoxRel(xpos, y+height-fheight-20, ButtonWidth, fheight, color);
-	g_FrameBuffer->paintIcon("rot.raw", xpos+14, y+height-fheight-15);
-	g_Fonts->infobar_small->RenderString(xpos + 43, y+height-fheight+4, ButtonWidth- 53, g_Locale->getText("messagebox.no"), color);
 
-	color = COL_INFOBAR_SHADOW;
-	if(selected==2)
-		color = COL_MENUCONTENTSELECTED;
-	xpos = startpos+ButtonWidth*2+ButtonSpacing*2;
-	g_FrameBuffer->paintBoxRel(xpos, y+height-fheight-20, ButtonWidth, fheight, color);
-	g_FrameBuffer->paintIcon("home.raw", xpos+10, y+height-fheight-19);
-	g_Fonts->infobar_small->RenderString(xpos + 43, y+height-fheight+4, ButtonWidth- 53, g_Locale->getText("messagebox.cancel"), color);
+	if ( showbuttons & mbNo )
+	{
+		color = COL_INFOBAR_SHADOW;
+		if(selected==1)
+			color = COL_MENUCONTENTSELECTED;
+
+		g_FrameBuffer->paintBoxRel(xpos, y+height-fheight-20, ButtonWidth, fheight, color);
+		g_FrameBuffer->paintIcon("gruen.raw", xpos+14, y+height-fheight-15);
+		g_Fonts->infobar_small->RenderString(xpos + 43, y+height-fheight+4, ButtonWidth- 53, g_Locale->getText("messagebox.no"), color);
+    }
+
+    xpos = startpos+ButtonWidth*2+ButtonSpacing*2;
+    if ( showbuttons & mbCancel )
+	{
+		color = COL_INFOBAR_SHADOW;
+		if(selected==2)
+			color = COL_MENUCONTENTSELECTED;
+
+		g_FrameBuffer->paintBoxRel(xpos, y+height-fheight-20, ButtonWidth, fheight, color);
+		g_FrameBuffer->paintIcon("home.raw", xpos+10, y+height-fheight-19);
+		g_Fonts->infobar_small->RenderString(xpos + 43, y+height-fheight+4, ButtonWidth- 53, g_Locale->getText("messagebox.cancel"), color);
+	}
 }
 
 void CMessageBox::yes()
@@ -86,9 +113,16 @@ void CMessageBox::hide()
 
 int CMessageBox::exec(CMenuTarget* parent, string actionKey)
 {
+
 	int res = menu_return::RETURN_REPAINT;
-    unsigned char pixbuf[width* height];
-	g_FrameBuffer->SaveScreen(x, y, width, height, pixbuf);
+    unsigned char pixbuf[(width+ 2* borderwidth) * (height+ 2* borderwidth)];
+	g_FrameBuffer->SaveScreen(x- borderwidth, y- borderwidth, width+ 2* borderwidth, height+ 2* borderwidth, pixbuf);
+
+	// clear border
+	g_FrameBuffer->paintBackgroundBoxRel(x- borderwidth, y- borderwidth, width+ 2* borderwidth, borderwidth);
+	g_FrameBuffer->paintBackgroundBoxRel(x- borderwidth, y+ height, width+ 2* borderwidth, borderwidth);
+	g_FrameBuffer->paintBackgroundBoxRel(x- borderwidth, y, borderwidth, height);
+	g_FrameBuffer->paintBackgroundBoxRel(x+ width, y, borderwidth, height);
 
 	paintHead();
 	paintButtons();
@@ -99,42 +133,73 @@ int CMessageBox::exec(CMenuTarget* parent, string actionKey)
 		uint msg; uint data;
 		g_RCInput->getMsg( &msg, &data, g_settings.timing_epg );
 
-		if ( (msg==CRCInput::RC_timeout) ||
-			 (msg==g_settings.key_channelList_cancel) )
+		if ( ( (msg==CRCInput::RC_timeout) ||
+			   (msg==g_settings.key_channelList_cancel) ) &&
+			 ( showbuttons & mbCancel ) )
 		{
 			cancel();
 			loop=false;
 		}
-		else if(msg==CRCInput::RC_red)
+		else if ( (msg==CRCInput::RC_green) && ( showbuttons & mbNo ) )
 		{
 			no();
 			loop=false;
 		}
-		else if(msg==CRCInput::RC_green)
+		else if ( (msg==CRCInput::RC_red) && ( showbuttons & mbYes ) )
 		{
 			yes();
 			loop=false;
 		}
 		else if(msg==CRCInput::RC_right)
 		{
-			if(selected<2)
+			bool ok = false;
+			while (!ok)
 			{
 				selected++;
-				paintButtons();
+				switch (selected)
+				{
+					case 3:
+						selected= -1;
+					    break;
+					case 0:
+						ok = ( showbuttons & mbYes );
+						break;
+					case 1:
+						ok = ( showbuttons & mbNo );
+						break;
+					case 2:
+						ok = ( showbuttons & mbCancel );
+						break;
+				}
 			}
 
+			paintButtons();
 		}
 		else if(msg==CRCInput::RC_left)
 		{
-			if(selected>0)
+			bool ok = false;
+			while (!ok)
 			{
 				selected--;
-				paintButtons();
+				switch (selected)
+				{
+					case -1:
+						selected= 3;
+					    break;
+					case 0:
+						ok = ( showbuttons & mbYes );
+						break;
+					case 1:
+						ok = ( showbuttons & mbNo );
+						break;
+					case 2:
+						ok = ( showbuttons & mbCancel );
+						break;
+				}
 			}
 
-		}
-		else if(msg==CRCInput::RC_left)
-		{
+			paintButtons();
+
 		}
 		else if(msg==CRCInput::RC_ok)
 		{
@@ -158,7 +223,7 @@ int CMessageBox::exec(CMenuTarget* parent, string actionKey)
 
 	}
 
-	g_FrameBuffer->RestoreScreen(x, y, width, height, pixbuf);
+	g_FrameBuffer->RestoreScreen(x- borderwidth, y- borderwidth, width+ 2* borderwidth, height+ 2* borderwidth, pixbuf);
 	return res;
 }
 

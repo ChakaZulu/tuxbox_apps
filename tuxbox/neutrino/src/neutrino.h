@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.55 2002/02/28 01:49:27 field Exp $
+//  $Id: neutrino.h,v 1.56 2002/02/28 12:05:34 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.56  2002/02/28 12:05:34  field
+//  Kleinigkeiten
+//
 //  Revision 1.55  2002/02/28 01:49:27  field
 //  Ein/Aus Handling verbessert, SectionsD gepaused beim Update
 //
@@ -315,7 +318,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void setupColors_classic();
 		void setupColors_neutrino();
 		void setupNetwork( bool force= false );
-		void testNetwork( bool force= false );
+		void testNetwork();
 
 		void saveSetup();
 		bool loadSetup(SNeutrinoSettings* load2=NULL);
