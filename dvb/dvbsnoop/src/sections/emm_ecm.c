@@ -1,5 +1,5 @@
 /*
-$Id: emm_ecm.c,v 1.3 2001/10/16 18:05:43 rasc Exp $
+$Id: emm_ecm.c,v 1.4 2002/08/17 20:36:12 obi Exp $
 
 
    -- EMM / ECM Data packet
@@ -8,6 +8,9 @@ $Id: emm_ecm.c,v 1.3 2001/10/16 18:05:43 rasc Exp $
 
 
 $Log: emm_ecm.c,v $
+Revision 1.4  2002/08/17 20:36:12  obi
+no more compiler warnings
+
 Revision 1.3  2001/10/16 18:05:43  rasc
 no message
 
@@ -26,6 +29,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 #include "dvbsnoop.h"
 #include "emm_ecm.h"
+#include "hexprint.h"
 
 
 
@@ -47,7 +51,7 @@ void decode_EMM_ECM (u_char *b, int len)
 
 
  EMM_ECM  e;
- int n;
+ //int n;
 
 
  

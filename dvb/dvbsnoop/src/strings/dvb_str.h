@@ -2,10 +2,12 @@
   -- dvb decoder helper functions
 */
 
+char *dvbstrStreamContent_Component_TYPE (u_int i);
 char *dvbstrTableID (u_int id);
 char *dvbstrDescriptorTAG (u_int tag);
 char *dvbstrWEST_EAST_FLAG (u_int tag);
 char *dvbstrPolarisation_FLAG (u_int tag);
+char *dvbstrModulationCable_FLAG(u_int flag);
 char *dvbstrModulationSAT_FLAG (u_int tag);
 char *dvbstrFECinner_SCHEME (u_int tag);
 char *dvbstrFECouter_SCHEME (u_int tag);

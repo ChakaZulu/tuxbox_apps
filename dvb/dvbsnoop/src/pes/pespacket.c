@@ -1,5 +1,5 @@
 /*
-$Id: pespacket.c,v 1.4 2001/12/06 15:33:18 rasc Exp $
+$Id: pespacket.c,v 1.5 2002/08/17 20:36:12 obi Exp $
 
    -- PES Decode/Table section
 
@@ -7,6 +7,9 @@ $Id: pespacket.c,v 1.4 2001/12/06 15:33:18 rasc Exp $
 
 
 $Log: pespacket.c,v $
+Revision 1.5  2002/08/17 20:36:12  obi
+no more compiler warnings
+
 Revision 1.4  2001/12/06 15:33:18  rasc
 some small work on pespacket.c
 
@@ -29,6 +32,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 #include "dvbsnoop.h"
 #include "pespacket.h"
+#include "hexprint.h"
 
 
 int PES_decode2 (u_char *b, int len, int pid);
@@ -139,8 +143,8 @@ int  PES_decode2 (u_char *b, int len, int pid)
 
 
  PES2_Packet  p;
- int          len2;
- int          n;
+ //int          len2;
+ //int          n;
 
 
  p.reserved1				= getBits (b, 0,  0, 2);
@@ -224,7 +228,7 @@ int  PES_decode2 (u_char *b, int len, int pid)
  // $$$ hier muss auch noch einiges gemacht werden (aber zur Zeit
  // $$$ so gut wie keine Zeit
 
-
+ return 0;
 }
 
 

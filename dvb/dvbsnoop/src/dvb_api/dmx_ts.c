@@ -1,5 +1,5 @@
 /*
-$Id: dmx_ts.c,v 1.2 2001/10/06 18:19:18 Toerli Exp $
+$Id: dmx_ts.c,v 1.3 2002/08/17 20:36:12 obi Exp $
 
  -- (c) 2001 rasc
  -- Transport Streams
@@ -9,6 +9,9 @@ $Id: dmx_ts.c,v 1.2 2001/10/06 18:19:18 Toerli Exp $
  -- Verbose Level >= 1
 
 $Log: dmx_ts.c,v $
+Revision 1.3  2002/08/17 20:36:12  obi
+no more compiler warnings
+
 Revision 1.2  2001/10/06 18:19:18  Toerli
 Steuerzeichen entfernt. rasc wuerdest du mal bitte nen gescheiten unix-konformen Editor verwenden... windows editoren sind ungeeignet
 
@@ -172,7 +175,7 @@ int  doReadTS (OPTION *opt)
 
   close(fd);
   close(fd_dvr);
-  return;
+  return 0;
 }
 
 

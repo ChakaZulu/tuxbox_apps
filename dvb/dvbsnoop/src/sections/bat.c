@@ -1,5 +1,5 @@
 /*
-$Id: bat.c,v 1.3 2001/12/01 12:34:44 rasc Exp $
+$Id: bat.c,v 1.4 2002/08/17 20:36:12 obi Exp $
 
    -- BAT section
    -- Bouquet Allocation Table
@@ -9,6 +9,9 @@ $Id: bat.c,v 1.3 2001/12/01 12:34:44 rasc Exp $
 
 
 $Log: bat.c,v $
+Revision 1.4  2002/08/17 20:36:12  obi
+no more compiler warnings
+
 Revision 1.3  2001/12/01 12:34:44  rasc
 pespacket weitergestrickt, leider z.Zt. zuwenig Zeit um es richtig fertig zu machen.
 
@@ -27,6 +30,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 #include "dvbsnoop.h"
 #include "bat.h"
+#include "descriptor.h"
 
 
 

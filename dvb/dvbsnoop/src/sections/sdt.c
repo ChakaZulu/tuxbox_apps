@@ -1,5 +1,5 @@
 /*
-$Id: sdt.c,v 1.2 2001/10/06 18:19:18 Toerli Exp $
+$Id: sdt.c,v 1.3 2002/08/17 20:36:12 obi Exp $
 
    -- SDT section 
    -- Service Description Table
@@ -9,6 +9,9 @@ $Id: sdt.c,v 1.2 2001/10/06 18:19:18 Toerli Exp $
 
 
 $Log: sdt.c,v $
+Revision 1.3  2002/08/17 20:36:12  obi
+no more compiler warnings
+
 Revision 1.2  2001/10/06 18:19:18  Toerli
 Steuerzeichen entfernt. rasc wuerdest du mal bitte nen gescheiten unix-konformen Editor verwenden... windows editoren sind ungeeignet
 
@@ -24,6 +27,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 #include "dvbsnoop.h"
 #include "sdt.h"
+#include "descriptor.h"
 
 
 /*

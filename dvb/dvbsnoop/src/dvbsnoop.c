@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.c,v 1.2 2001/10/02 21:52:44 rasc Exp $
+$Id: dvbsnoop.c,v 1.3 2002/08/17 20:36:12 obi Exp $
 
  -- dvbsnoop
  -- a dvb sniffer tool
@@ -25,6 +25,9 @@ $Id: dvbsnoop.c,v 1.2 2001/10/02 21:52:44 rasc Exp $
 
 
 $Log: dvbsnoop.c,v $
+Revision 1.3  2002/08/17 20:36:12  obi
+no more compiler warnings
+
 Revision 1.2  2001/10/02 21:52:44  rasc
 - init der time_delta
 - PES erweitert, PES arbeitet im read() noch nicht richtig!!
@@ -42,6 +45,8 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "dmx_sect.h"
 #include "dmx_pes.h"
 #include "dmx_ts.h"
+#include "hexprint.h"
+#include "pkt_time.h"
 
 
 
@@ -97,7 +102,7 @@ int main(int argc, char **argv)
 			break;
 
 		default:
-			fprintf (stderr,"unknown Stream Type selected...\n",0);
+			fprintf (stderr,"unknown Stream Type selected...\n");
 			break;
 
 	  }

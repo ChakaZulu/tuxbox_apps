@@ -1,5 +1,5 @@
 /*
-$Id: pmt.c,v 1.2 2001/10/06 18:19:18 Toerli Exp $
+$Id: pmt.c,v 1.3 2002/08/17 20:36:12 obi Exp $
 
    -- PMT section
 
@@ -7,6 +7,9 @@ $Id: pmt.c,v 1.2 2001/10/06 18:19:18 Toerli Exp $
 
 
 $Log: pmt.c,v $
+Revision 1.3  2002/08/17 20:36:12  obi
+no more compiler warnings
+
 Revision 1.2  2001/10/06 18:19:18  Toerli
 Steuerzeichen entfernt. rasc wuerdest du mal bitte nen gescheiten unix-konformen Editor verwenden... windows editoren sind ungeeignet
 
@@ -22,6 +25,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 #include "dvbsnoop.h"
 #include "pmt.h"
+#include "descriptor.h"
 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: descriptor.c,v 1.3 2001/12/01 12:34:31 rasc Exp $
+$Id: descriptor.c,v 1.4 2002/08/17 20:36:12 obi Exp $
 
  -- Descriptor Section
  -- (c) rasc
@@ -8,6 +8,9 @@ $Id: descriptor.c,v 1.3 2001/12/01 12:34:31 rasc Exp $
  -- all descriptors are returning their length used in buffer
 
 $Log: descriptor.c,v $
+Revision 1.4  2002/08/17 20:36:12  obi
+no more compiler warnings
+
 Revision 1.3  2001/12/01 12:34:31  rasc
 pespacket weitergestrickt, leider z.Zt. zuwenig Zeit um es richtig fertig zu machen.
 
@@ -23,6 +26,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 #include "dvbsnoop.h"
 #include "descriptor.h"
+#include "hexprint.h"
 
 
 
@@ -1117,7 +1121,7 @@ void descriptor_SatDelivSys (u_char *b)
  } descSDS;
 
  descSDS  d;
- int      i;
+ //int      i;
 
 
 
@@ -1185,7 +1189,7 @@ void descriptor_CableDelivSys (u_char *b)
  } descCDS;
 
  descCDS  d;
- int      i;
+ //int      i;
 
 
 
@@ -2656,7 +2660,7 @@ void descriptor_TerrestDelivSys (u_char *b)
  } descTDS;
 
  descTDS  d;
- int      i;
+ //int      i;
 
 
 

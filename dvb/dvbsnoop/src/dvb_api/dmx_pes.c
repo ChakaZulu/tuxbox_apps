@@ -1,5 +1,5 @@
 /*
-$Id: dmx_pes.c,v 1.2 2001/10/06 18:19:18 Toerli Exp $
+$Id: dmx_pes.c,v 1.3 2002/08/17 20:36:12 obi Exp $
 
  -- (c) 2001 rasc
  -- PE Streams
@@ -10,6 +10,9 @@ $Id: dmx_pes.c,v 1.2 2001/10/06 18:19:18 Toerli Exp $
 
 
 $Log: dmx_pes.c,v $
+Revision 1.3  2002/08/17 20:36:12  obi
+no more compiler warnings
+
 Revision 1.2  2001/10/06 18:19:18  Toerli
 Steuerzeichen entfernt. rasc wuerdest du mal bitte nen gescheiten unix-konformen Editor verwenden... windows editoren sind ungeeignet
 
@@ -178,7 +181,7 @@ int  doReadPES (OPTION *opt)
 
 
   close(fd);
-  return;
+  return 0;
 }
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: tot.c,v 1.2 2001/10/06 18:19:18 Toerli Exp $
+$Id: tot.c,v 1.3 2002/08/17 20:36:12 obi Exp $
 
    -- TOT section
    -- Time Offset Table
@@ -8,6 +8,9 @@ $Id: tot.c,v 1.2 2001/10/06 18:19:18 Toerli Exp $
    (c) rasc
 
 $Log: tot.c,v $
+Revision 1.3  2002/08/17 20:36:12  obi
+no more compiler warnings
+
 Revision 1.2  2001/10/06 18:19:18  Toerli
 Steuerzeichen entfernt. rasc wuerdest du mal bitte nen gescheiten unix-konformen Editor verwenden... windows editoren sind ungeeignet
 
@@ -22,6 +25,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 #include "dvbsnoop.h"
 #include "tot.h"
+#include "descriptor.h"
 
 
 

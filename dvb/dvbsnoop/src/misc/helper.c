@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.2 2001/10/06 18:19:18 Toerli Exp $
+$Id: helper.c,v 1.3 2002/08/17 20:36:12 obi Exp $
 
  -- dvbsnoop
  -- a dvb sniffer tool
@@ -9,6 +9,9 @@ $Id: helper.c,v 1.2 2001/10/06 18:19:18 Toerli Exp $
 
 
 $Log: helper.c,v $
+Revision 1.3  2002/08/17 20:36:12  obi
+no more compiler warnings
+
 Revision 1.2  2001/10/06 18:19:18  Toerli
 Steuerzeichen entfernt. rasc wuerdest du mal bitte nen gescheiten unix-konformen Editor verwenden... windows editoren sind ungeeignet
 
@@ -27,6 +30,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 #include "helper.h"
 #include "output.h"
+#include "dvb_str.h"
 
 
 
@@ -47,8 +51,8 @@ unsigned long getBits (u_char *buf, int byte_offset, int startbit, int bitlen)
  int           bytepos;
  unsigned long mask;
  unsigned long tmp_long;
- int           i;
- int           xstartbit;
+ //int           i;
+ //int           xstartbit;
 
 
 //printf ("\ngetbits: byteoffset: %d , start: %d, len: %d\n", byte_offset, startbit, bitlen);
@@ -100,7 +104,7 @@ unsigned long getBits (u_char *buf, int byte_offset, int startbit, int bitlen)
 void print_name (int v, u_char *b, u_int len)
 
 {
- int i;
+ //int i;
 
  if (len <= 0) {
     out (v,"\"\"");
