@@ -4,7 +4,7 @@
 #include "font.h"
 #include "elabel.h"
 #include "enigma.h"
-
+#include "eskin.h"
 
 void eEventDisplay::keyDown(int rc)
 {
@@ -35,6 +35,9 @@ void eEventDisplay::keyUp(int rc)
 	}
 }
 
+#define ASSIGN(v, t, n)	\
+	v =(t*)search(n); if (! v ) { qWarning("skin has undefined element: %s", n); v=new t(this); }
+
 eEventDisplay::eEventDisplay(QString service, const QList<EITEvent> &e): eWindow(1), service(service)
 	/*
 			kleine anmerkung:
@@ -53,13 +56,23 @@ eEventDisplay::eEventDisplay(QString service, const QList<EITEvent> &e): eWindow
 {
 	eventlist=0;
 	events=0;
-	move(QPoint(54, 70));
-	resize(QSize(612, 430));
-		// search for the components
-	text=new eLabel(this);
-	text->setFlags(RS_WRAP);
-	text->move(QPoint(0, 0));
-	text->resize(getClientSize());
+
+	eSkin *skin=eSkin::getActive();
+	if (skin->build(this, "eventview"))
+		qFatal("skin load of \"eventview\" failed");
+
+
+	ASSIGN(long_description, eLabel, "epg_description");
+	long_description->setFlags(RS_WRAP);
+	ASSIGN(title, eLabel, "title");
+	ASSIGN(eventTime, eLabel, "time");
+	ASSIGN(eventDate, eLabel, "date");
+
+	
+	title->setText("");
+	long_description->setText("");
+	eventDate->setText("");
+	eventTime->setText("");
 
 	setList(e);
 }
@@ -75,58 +88,53 @@ void eEventDisplay::setEvent(EITEvent *event)
 
 	if (event)
 	{
-		QString title=0, long_description="";
-		QString eventDate="";
-		QString eventTime="";
+		QString _title=0, _long_description="";
+		QString _eventDate="";
+		QString _eventTime="";
 
 		tm *begin=event->start_time!=-1?localtime(&event->start_time):0;
 		time_t endtime=event->start_time+event->duration;
 		tm *end=event->start_time!=-1?localtime(&endtime):0;
 
 		if (begin)
-			eventTime.sprintf("%02d:%02d", begin->tm_hour, begin->tm_min);
+			_eventTime.sprintf("%02d:%02d", begin->tm_hour, begin->tm_min);
 		if (end)
-			eventTime+=QString().sprintf(" - %02d:%02d", end->tm_hour, end->tm_min);
+			_eventTime+=QString().sprintf(" - %02d:%02d", end->tm_hour, end->tm_min);
 
 		if (begin)
-			eventDate=QString().sprintf("%d.%d.%4d", begin->tm_mday, begin->tm_mon+1, begin->tm_year+1900);
+			_eventDate=QString().sprintf("%d.%d.%4d", begin->tm_mday, begin->tm_mon+1, begin->tm_year+1900);
 	
-
 		for (QListIterator<Descriptor> d(event->descriptor); d.current(); ++d)
 		{
 			if (d.current()->Tag()==DESCR_SHORT_EVENT)
 			{
 				ShortEventDescriptor *s=(ShortEventDescriptor*)d.current();
-				title=s->event_name;
-				if ((s->text.length() > 0) && (s->text!=title))
+				_title=s->event_name;
+				if ((s->text.length() > 0) && (s->text!=_title))
 				{
-					long_description+=s->text;
-					long_description+="\n\n";
+					_long_description+=s->text;
+					_long_description+="\n\n";
 				}
 			} else if (d.current()->Tag()==DESCR_EXTENDED_EVENT)
 			{
 				ExtendedEventDescriptor *ss=(ExtendedEventDescriptor*)d.current();
-				long_description+=ss->item_description;
+				_long_description+=ss->item_description;
 			}
 		}
 
-		QString str="";
-		if (!title)
-			title ="keine Information verfügbar";
+		if (!_title)
+			_title ="keine Information verfügbar";
 
+		eventTime->setText(_eventTime);
+		eventDate->setText(_eventDate);
 
-		str = long_description;
-	    if (eventDate.length())
-			str+="\n\nSendezeit: " + eventDate+ ", " + eventTime;
-
-		qDebug("setting string: %s", (const char*)long_description);
-		setText(title);
-		text->setText(str);
+		title->setText(_title);
+		long_description->setText(_long_description);
 	} 
 	else
 	{
-		setText(service);
-		text->setText("keine Beschreibung verfügbar");
+		title->setText(service);
+		long_description->setText("keine Beschreibung verfügbar");
 	}
 }
 

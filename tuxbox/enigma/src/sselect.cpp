@@ -97,9 +97,9 @@ int eServiceSelector::eventFilter(const eWidgetEvent &event)
 	return 0;
 }
 
-eServiceSelector::eServiceSelector(): eLBWindow("Select Service...", eListbox::tLitebar, 17, eZap::FontSize, 400)
+eServiceSelector::eServiceSelector(): eLBWindow("Select Service...", eListbox::tLitebar, 16, eZap::FontSize, 400)
 {
-	move(QPoint(70, 50));
+	move(QPoint(70, 60));
 	
 	list->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight"));
 

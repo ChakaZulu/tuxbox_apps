@@ -11,10 +11,15 @@ class eLabel;
 class eEventDisplay: public eWindow
 {
 	Q_OBJECT
-	eLabel *text;
 	QString service;
 	QListIterator<EITEvent> *events;
 	QList<EITEvent> *eventlist;
+
+	eLabel *title;
+	eLabel *long_description;
+	eLabel *eventDate;
+	eLabel *eventTime;
+
 protected:
 	void keyDown(int rc);
 	void keyUp(int rc);
