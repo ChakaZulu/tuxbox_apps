@@ -387,7 +387,7 @@ flashupdate.updatemode_internet internet
 flashupdate.currentversion_sep Versione Installata
 flashupdate.currentversiondate Data
 flashupdate.currentversiontime Orario
-flashupdate.currentreleasecycle unset
+flashupdate.currentreleasecycle Release cycle
 flashupdate.currentversionsnapshot ImageTipo
 flashupdate.checkupdate Cercare nuove Versioni
 flashupdate.versioncheck Controllo Versione
@@ -421,7 +421,7 @@ flashupdate.titlewriteflash Scrivo-Flash
 flashupdate.actionwriteflash Scrivo-Flash
 flashupdate.flashreadyreboot La Image e stata scritta con Successo.\nIl vostro DBox verra Riavviato.
 flashupdate.reallyflashmtd Vuole veramente scrivere il Flash?\n\nIn caso di un errore\nil vostro, DBox non potra piu riavviarsi.\n\nImagename: %s\nZiel: %s
-flashupdate.wrongbase Versione Baseimage errata\nPrima istallare una nuova Versione!
+flashupdate.wrongbase Versione Release cycle errata\nPrima istallare una nuova Versione!
 flashupdate.experimentalimage Ai scelto un Snapshot sperimentale,\nprego di fare attenzione che questa versione non e stata provata,e provabile\nche dopo un\n\nUpdate il suo Box non funziona piu,vuole veramente installare questa\nVersione?
 
 bouqueteditor.name Gestione-Bouquet

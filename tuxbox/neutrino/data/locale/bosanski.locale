@@ -387,7 +387,7 @@ flashupdate.updatemode_internet sa interneta
 flashupdate.currentversion_sep instalirana verzija
 flashupdate.currentversiondate datum
 flashupdate.currentversiontime vrijeme
-flashupdate.currentreleasecycle unset
+flashupdate.currentreleasecycle Release cycle
 flashupdate.currentversionsnapshot vrsta imidža
 flashupdate.checkupdate tražiti novu verziju
 flashupdate.versioncheck provjeriti verziju

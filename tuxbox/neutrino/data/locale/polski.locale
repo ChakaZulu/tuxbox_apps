@@ -387,7 +387,7 @@ flashupdate.updatemode_internet internet
 flashupdate.currentversion_sep Biezaca wersja
 flashupdate.currentversiondate Data
 flashupdate.currentversiontime Czas
-flashupdate.currentreleasecycle unset
+flashupdate.currentreleasecycle Release cycle
 flashupdate.currentversionsnapshot Typ Image
 flashupdate.checkupdate Szukaj nowej wersji
 flashupdate.versioncheck Sprawdzam wersje
@@ -421,7 +421,7 @@ flashupdate.titlewriteflash Zapis Flasha
 flashupdate.actionwriteflash zapis
 flashupdate.flashreadyreboot Image prawidlowo zapisany.\nDBox zresetuje sie.
 flashupdate.reallyflashmtd Napewno chcesz uaktualnic?\n\nJezeli wystapi blad lub plik image jest\nwadliwy, Dbox nie uruchomi sie.\n\nNazwa Image: %s\nCel: %s
-flashupdate.wrongbase Ta wersja Baseimage jest zbyt stara, \nprosze wgrac nowsza wersje!
+flashupdate.wrongbase Ta wersja Release cycle jest zbyt stara, \nprosze wgrac nowsza wersje!
 flashupdate.experimentalimage Wybrany image nie byl testowany, to\n oznacza, ze twój box moze nie\ndzialac po aktualizacji.\n\nCzy jestes pewny ze chcesz\ngo aktualizowac do tej wersji?
 
 bouqueteditor.name Edytor Bukietów

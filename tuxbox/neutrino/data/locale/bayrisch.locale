@@ -387,7 +387,7 @@ flashupdate.updatemode_internet internet
 flashupdate.currentversion_sep De Version host
 flashupdate.currentversiondate Datum
 flashupdate.currentversiontime Uhrzeit
-flashupdate.currentreleasecycle unset
+flashupdate.currentreleasecycle Releasezyklus
 flashupdate.currentversionsnapshot ImageTyp
 flashupdate.checkupdate nach ner neien Versio suacha
 flashupdate.versioncheck Version obcheckn
@@ -421,7 +421,7 @@ flashupdate.titlewriteflash Flash schreim
 flashupdate.actionwriteflash schreib in flash
 flashupdate.flashreadyreboot Des Imag is gflasht worn.\nJetz start ma de Box nei.
 flashupdate.reallyflashmtd Woins echt flashen?\n\nWann was schiaflaft oder des Image hi is\wer de Box nimma startn.\n\nImagenama: %s\nZiel: %s
-flashupdate.wrongbase Des Baseimage hot net de richtige Version, bitte an andres Baseimage installiern
+flashupdate.wrongbase De Releasezyklus hot net de richtige Version, bitte an andres Komplett-Image installiern
 flashupdate.experimentalimage Sie ham an Schnappshuss ausgwaiht,\nbitte bedenkens, dass de Version ned durchprobiert is.\n Wenns bled laft, geht Ihr Box danoch nimma.\n\nWoins de Version wirklich hernemma?
 
 bouqueteditor.name Bouquets verwoitn

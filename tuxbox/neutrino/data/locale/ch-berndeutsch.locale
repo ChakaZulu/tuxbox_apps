@@ -387,7 +387,7 @@ flashupdate.updatemode_internet internet
 flashupdate.currentversion_sep Installierti Version
 flashupdate.currentversiondate Datum
 flashupdate.currentversiontime Uhrzyt
-flashupdate.currentreleasecycle unset
+flashupdate.currentreleasecycle Releasezyklus
 flashupdate.currentversionsnapshot ImageTyp
 flashupdate.checkupdate noch nöiere version suäche
 flashupdate.versioncheck Versionsüberprüäfig
@@ -421,7 +421,7 @@ flashupdate.titlewriteflash Flash schribä
 flashupdate.actionwriteflash schribä flash
 flashupdate.flashreadyreboot s'Image isch erfougrich gflasht wordä.\nd'DBox wird jetzt nöi gschtartet.
 flashupdate.reallyflashmtd Wosch dä Flashvorgang würklech düräfüerä?\n\nFaus ä Fähler uftritt oder s'Image nid\nfunktionstüchtig isch, wird dini Box nüm bootä.\n\nImagenamä: %s\nZiel: %s
-flashupdate.wrongbase s'Basisimage wiicht ab, bitte\nzersch äs nöis Basisimage inschtaliäre!
+flashupdate.wrongbase s'Releasezyklus wiicht ab, bitte\nzersch äs nöis Komplett-Image inschtaliäre!
 flashupdate.experimentalimage Du hesch ä Snapshot usgwäut, bitte beacht,\ndass diä Version nid teschtet isch u\neventuell dini Box nochem update\nnümfunktionsfähig isch.\n\nosch diä Version wörklech installiere?
 
 bouqueteditor.name Bouquet-Verwautig

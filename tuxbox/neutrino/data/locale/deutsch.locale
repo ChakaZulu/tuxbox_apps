@@ -421,7 +421,7 @@ flashupdate.titlewriteflash Flash schreiben
 flashupdate.actionwriteflash schreibe flash
 flashupdate.flashreadyreboot Das Image wurde erfolgreich geflasht.\nIhre DBox wird jetzt neu gestartet.
 flashupdate.reallyflashmtd Wollen Sie den Flashvorgang wirklich durchführen?\n\nFalls ein Fehler auftritt oder das Image nicht\nfunktionfähig ist, wird Ihre DBox nicht mehr booten.\n\nImagename: %s\nZiel: %s
-flashupdate.wrongbase Die Basisimage Version weicht ab, bitte\nzuerst neues Basisimage installieren!
+flashupdate.wrongbase Die Releasezyklus Version weicht ab, bitte\nzuerst neues Komplett-Image installieren!
 flashupdate.experimentalimage Sie haben einen Snapshot ausgewählt, bitte beachten Sie, dass\ndiese Version ungetestet ist und u.U. Ihre Box nach dem Update\nnicht mehr funktionsfähig ist.\n\nSoll diese Version wirklich installiert werden?
 
 bouqueteditor.name Bouquet-Verwaltung

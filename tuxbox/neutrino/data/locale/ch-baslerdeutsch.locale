@@ -387,7 +387,7 @@ flashupdate.updatemode_internet internet
 flashupdate.currentversion_sep Installierdi Version
 flashupdate.currentversiondate Datum
 flashupdate.currentversiontime Uhrzit
-flashupdate.currentreleasecycle unset
+flashupdate.currentreleasecycle Releasezyklus
 flashupdate.currentversionsnapshot ImageTyp
 flashupdate.checkupdate nach neuer Version sueche
 flashupdate.versioncheck Versionsueberpruefig
@@ -421,7 +421,7 @@ flashupdate.titlewriteflash Flash schriibe
 flashupdate.actionwriteflash schrieb grad s'flash
 flashupdate.flashreadyreboot S'Image isch erfolgriich g'flasht.\nd'DBox wird jetz neu g'starded.
 flashupdate.reallyflashmtd Willsch dä Flashvorgang wirklich mache?\n\nFalls es e'Fehler gitt odder s'Image nidd\nfunktionfäähig isch, wird d'DBox nümmi boote.\n\nImagename: %s\nZiel: %s
-flashupdate.wrongbase Die Basisimage Version weicht ab, bitte\nzuerst neues Basisimage installieren!
+flashupdate.wrongbase Die Releasezyklus Version weicht ab, bitte\nzuerst neues Komplett-Image installieren!
 flashupdate.experimentalimage Sie henn ä Snapshot usgwählt, bitte beachte Sie, dass\ndie Version untestet isch un u.U. Ihre Box nach dem Update\nnümmi funktionsfähig isch.\n\nSoll die Version wirklich installiert werde?
 
 bouqueteditor.name Bouquet-Verwaltig
