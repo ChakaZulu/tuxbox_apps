@@ -1,5 +1,5 @@
 /*
- * $Id: configfile.cpp,v 1.10 2002/08/31 22:29:01 obi Exp $
+ * $Id: configfile.cpp,v 1.11 2002/10/16 16:47:59 thegoodguy Exp $
  *
  * configuration object for the d-box 2 linux project
  *
@@ -161,7 +161,7 @@ bool CConfigFile::getBool (const std::string key, const bool defaultVal)
 		storeBool(key, defaultVal);
 	}
 
-	return (configData[key] == "true");
+	return !((configData[key] == "false") || (configData[key] == "0"));
 }
 
 int32_t CConfigFile::getInt32 (const std::string key, const int32_t defaultVal)
