@@ -103,7 +103,6 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		int				lastMode;
 		bool				softupdate;
 		bool				fromflash;
-		int				recordingstatus;
 		int				recording_id;
 		CTimerd::RecordingInfo* nextRecordingInfo;
 		//bool				record_mode;
@@ -213,6 +212,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		int getMode() {return mode;}
 		int getLastMode() {return lastMode;}
 		bool isMuted() {return current_muted;}
+		int recordingstatus;
 };
 
 

@@ -29,6 +29,7 @@
 #include <driver/lcdd.h>
 
 #include <global.h>
+#include <neutrino.h>
 #include <system/settings.h>
 
 #include <driver/newclock.h>
@@ -60,7 +61,7 @@ void* CLCD::TimeThread(void *)
 {
 	while(1)
 	{
-		sleep(10);
+		sleep(1);
 		CLCD::getInstance()->showTime();
 	}
 	return NULL;
@@ -254,9 +255,9 @@ void CLCD::showServicename(const std::string & name) // UTF-8
 	{
 		fonts.channelname->RenderString(1,37, 130, name.c_str(), CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
 	}
+	
 	display.update();
 }
-
 
 void CLCD::showTime()
 {
@@ -277,7 +278,16 @@ void CLCD::showTime()
 		}
 		else
 		{
-			strftime((char*) &timestr, 20, "%H:%M", t);
+			if (CNeutrinoApp::getInstance ()->recordingstatus && clearClock == 1)
+			{
+				strcat(timestr,"  :  ");
+				clearClock = 0;
+			}
+			else
+			{
+				strftime((char*) &timestr, 20, "%H:%M", t);
+				clearClock = 1;
+			}
 
 			display.draw_fill_rect (77, 50, 120, 64, CLCDDisplay::PIXEL_OFF);
 
@@ -320,6 +330,7 @@ void CLCD::showVolume(const char vol, const bool perform_update)
 		  display.update();
 	}
 }
+
 void CLCD::showPercentOver(const unsigned char perc, const bool perform_update)
 {
 	percentOver = perc;

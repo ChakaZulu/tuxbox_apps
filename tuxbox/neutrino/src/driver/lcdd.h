@@ -85,6 +85,7 @@ class CLCD
 		CConfigFile			configfile;
 		pthread_t			thrTime;
 		int                             last_toggle_state_power;
+		int				clearClock;
 
 		CLCD();
 
