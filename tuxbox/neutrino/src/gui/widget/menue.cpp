@@ -113,9 +113,13 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 	do
 	{
 		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+		printf("[neutrino] menue: mesage (%x %x)\n", msg, data);
+
 
 		if ( msg <= CRCInput::RC_MaxRC )
+		{
 			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
+		}
 
 		int handled= false;
 
@@ -180,8 +184,8 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 					{
 						//exec this item...
 						CMenuItem* item = items[selected];
-
-						switch ( item->exec( this ) )
+						int rv = item->exec( this );
+						switch ( rv )
 						{
 							case menu_return::RETURN_EXIT_ALL:
 								retval = menu_return::RETURN_EXIT_ALL;
@@ -193,6 +197,7 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 								paint();
 								break;
 						}
+						printf("[neutrino] menue: item execd return is(%x)\n", rv);
 					}
 					break;
 
@@ -218,17 +223,6 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 					}
 					break;
 
-/*				//pushback only these Keys
-				case (CRCInput::RC_red):
-				case (CRCInput::RC_green):
-				case (CRCInput::RC_yellow):
-				case (CRCInput::RC_blue):
-					{
-						g_RCInput->postMsg( msg, data );
-						msg = CRCInput::RC_timeout;
-					}
-					break;
-*/
 				default:
 					if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
 					{
