@@ -3,6 +3,16 @@ TuxCom:
 History:
 ---------
 
+11.08.2004 Version 1.4a
+ - support of usb-keyboards (needs kernel-module hid.ko from BoxMan)
+ - read .ftp-files even when created by windows
+ - BugFix: inserting new line in empty file in editor
+ - minor bugfixes in Editor
+ - many bugfixes in ftp-client
+ - changes in keyboard routine
+ - BugFix: wrong display after pressing red button (clear) while editing
+ - BugFix: crash when leaving plugin with open ftp-connection
+
 25.07.2004 Version 1.4
  - Taskmanager added (on Info-Button)
  - scrolling back/forward possible when executing commands or scripts
@@ -178,3 +188,16 @@ port=<ftpport>  	(optional, default 21)
 dir=<directory>		(optional, default /)
 3.) select file and press OK . 
 you are connected to the specified adress.
+
+buttons for usb-keyboard:
+-------------------------
+lame		Esc
+volume+/-	PgUp/PgDn
+OK		Enter
+red		F5
+green		F6
+yellow		F7
+blue		F8
+dream		F9
+info		F10
+mute		F11

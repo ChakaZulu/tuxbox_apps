@@ -3,6 +3,16 @@ TuxCom:
 Historie:
 ---------
 
+11.08.2004 Version 1.4a
+ - Unterstützung für USB-Tastaturen (benötigt wird das Kernel-Modul hid.ko von BoxMan)
+ - Lesen von .ftp-Dateien, auch wenn sie über Windows erstellt wurden...
+ - Bugfix: Einfügen einer Zeile in eine leere Datei im Editor
+ - kleinere Bugfixes im Editor
+ - eine Menge Bugfixes in FTP-Client
+ - Änderungen an Tastaturabfrage 
+ - BugFix: Falsche Anzeige nach drücken von rot (löschen) beim Editieren
+ - BugFix: Absturz bei Verlassen des Plugins mit offener FTP-Verbindung
+
 25.07.2004 Version 1.4
  - Taskmanager eingebaut (über Info-Taste aufrufbar)
  - vor-/zurück-scrollen bei Kommandoausführung/Skriptausführung möglich
@@ -179,3 +189,17 @@ port=<ftpport>  	(optional, standardmässig 21)
 dir=<Unterverzeichnis>	(optional, standardmässig /)
 3.) Datei auswählen und OK drücken. 
 Es wird eine FTP-Verbindung zur angegebenen Adresse aufgebaut.
+
+
+Tastaturbelegung für USB-Tastaturen:
+------------------------------------
+lame		Esc
+volume+/-	PgUp/PgDn
+OK		Enter
+rot		F5
+grün		F6
+gelb		F7
+blau		F8
+dream		F9
+info		F10
+mute		F11

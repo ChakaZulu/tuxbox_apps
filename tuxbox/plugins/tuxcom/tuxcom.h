@@ -4,6 +4,16 @@
  *             (c) dbluelle 2004 (dbluelle@blau-weissoedingen.de)             *
  ******************************************************************************
 
+	11.08.2004 Version 1.4a
+	 - support of usb-keyboards (needs kernel-module hid.ko from BoxMan)
+	 - read .ftp-files even when created by windows
+	 - BugFix: inserting new line in empty file in editor
+	 - minor bugfixes in Editor
+	 - many bugfixes in ftp-client
+	 - changes in keyboard routine
+	 - BugFix: wrong display after pressing red button (clear) while editing
+	 - BugFix: crash when leaving plugin with open ftp-connection
+
 	25.07.2004 Version 1.4
 	 - Taskmanager added (on Info-Button)
 	 - scrolling back/forward possible when executing commands or scripts
@@ -116,7 +126,7 @@
 
 #define FILEBUFFER_SIZE (100 * 1024) // Edit files up to 100k
 
-#define MSG_VERSION    "Tuxbox Commander Version 1.4\n"
+#define MSG_VERSION    "Tuxbox Commander Version 1.4a\n"
 #define MSG_COPYRIGHT  "© dbluelle 2004"
 //rc codes
 
@@ -149,6 +159,49 @@
 #define KEY_YELLOW	0x5C52
 #define KEY_GREEN	0x5C55
 #define KEY_HELP	0x5C82
+/*
+#define KEY_0 0x0000
+#define KEY_1 0x0001
+#define KEY_2 0x0002
+#define KEY_3 0x0003
+#define KEY_4 0x0004
+#define KEY_5 0x0005
+#define KEY_6 0x0006
+#define KEY_7 0x0007
+#define KEY_8 0x0008
+#define KEY_9 0x0009
+#define KEY_VOLUMEUP 0x000a // Wheel left
+#define KEY_VOLUMEDOWN 0x000b // Wheel right
+#define KEY_TV 0x000c // Document info
+#define KEY_BOUQUP 0x000d // Wheel up
+#define KEY_BOUQDOWN 0x000e // Wheel down
+#define KEY_POWER 0x000f
+#define KEY_SETUP 0x0020 // Escape
+#define KEY_UP 0x0021 // Mouse up
+#define KEY_DOWN 0x0022 // Mouse down
+#define KEY_LEFT 0x0023 // Mouse left
+#define KEY_RIGHT 0x0024 // Mouse right
+#define KEY_OK 0x0025 // Mouse leftclick
+#define KEY_AUDIO 0x0026 // Cursor down
+#define KEY_VIDEO 0x0027 // Space
+#define KEY_INFO 0x0028 // Cursor up
+//#define KEY_SHIFT_RED 0x0030
+//#define KEY_SHIFT_GREEN 0x0031
+//#define KEY_SHIFT_YELLOW 0x0032
+//#define KEY_SHIFT_BLUE 0x0033
+//#define KEY_RECORD 0x0035
+#define KEY_RED 0x0040 // z - go back
+#define KEY_GREEN 0x0041 // reload
+#define KEY_YELLOW 0x0042 // Kill all connections
+#define KEY_BLUE 0x0043 // Enter
+#define KEY_MUTE 0x0044 // Backspace
+#define KEY_TEXT 0x0045 // g - Goto url
+#define KEY_NEXT 0x0050 // Cursor right
+#define KEY_PREV 0x0051 // Cursor left
+#define KEY_HOME 0x0052 // Escape
+#define KEY_RADIO 0x0053 // d - Download Link
+#define KEY_HELP 0x0054 // s - Bookmark Manager
+*/
 #endif
 #define	RC_0		0x00
 #define	RC_1		0x01
@@ -185,7 +238,7 @@
 #define FONT2 "/var/tuxbox/config/enigma/fonts/pakenham.ttf"
 
 enum {LANG_INT,LANG_DE};
-enum {SCROLL_NORMAL,SCROLL_GREEN, NOSCROLL_LEFTRIGHT};
+enum {RC_NORMAL,RC_EDIT};
 enum {LEFT, CENTER, RIGHT};
 enum {VERY_SMALL, SMALL, BIG};
 
@@ -530,5 +583,5 @@ void 			  	ReadZip(int typ);
 int					CheckZip(char* szName);
 FILE*				OpenPipe(char* szAction);
 void 				OpenFTP();
-void 				ReadFTPDir();
-int					FTPcmd(const char *s1, const char *s2, char *buf);
+void 				ReadFTPDir(int frame, char* seldir);
+int					FTPcmd(int frame, const char *s1, const char *s2, char *buf);
