@@ -15,6 +15,7 @@
 #define IOCTL_SET_SOUNDENABLE       2
 #define IOCTL_SET_SOUNDSUBCARRIER   3
 #define IOCTL_SET_FINETUNE          4
+#define IOCTL_SET_STANDBY           5
 
 #define C0	3
 #define C1	2
@@ -57,10 +58,16 @@ void eRFmod::init()
 		eConfig::getInstance()->setKey("/elitedvb/rfmod/finetune", finetune);
 	}
 
+	if (eConfig::getInstance()->getKey("/elitedvb/rfmod/standby", standby))
+	{
+		standby=0;
+		eConfig::getInstance()->setKey("/elitedvb/rfmod/standby", standby);
+	}
 	setSoundSubCarrier(soundsubcarrier);
 	setSoundEnable(soundenable);
 	setChannel(channel);
 	setFinetune(finetune);
+	setStandby(standby);
 }
 
 eRFmod *eRFmod::getInstance()
@@ -77,7 +84,7 @@ eRFmod::~eRFmod()
 
 	if (rfmodfd>=0)
 		close(rfmodfd);
-}
+}	
 
 int	eRFmod::save()
 {
@@ -85,6 +92,7 @@ int	eRFmod::save()
 	eConfig::getInstance()->setKey("/elitedvb/rfmod/so", soundenable);
 	eConfig::getInstance()->setKey("/elitedvb/rfmod/channel", channel);
 	eConfig::getInstance()->setKey("/elitedvb/rfmod/finetune", finetune);
+	eConfig::getInstance()->setKey("/elitedvb/rfmod/standby", standby);
 	eConfig::getInstance()->flush();
 	return 0;
 }
@@ -98,6 +106,16 @@ int	eRFmod::setSoundEnable(int val)
 		ioctl(rfmodfd,IOCTL_SET_SOUNDENABLE,&soundenable);
 		
 	return 0;	
+}
+
+int	eRFmod::setStandby(int val)
+{
+	standby = val;
+
+	if(rfmodfd > 0)
+		ioctl(rfmodfd,IOCTL_SET_STANDBY,&standby);
+
+	return 0;
 }
 
 int eRFmod::setChannel(int val)

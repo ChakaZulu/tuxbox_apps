@@ -13,30 +13,25 @@ class eCheckbox;
 
 class eZapRFmodSetup: public eWindow
 {
-	eButton *abort, *ok;
+	eButton *ok;
 	eStatusBar *status;
 
-	eCheckbox* TestPatternEnable;
-	eCheckbox* SoundEnable;
-	
-	eListBox<eListBoxEntryText> *SoundSubcarrier;
-	eListBox<eListBoxEntryText> *Channel;
-	eListBox<eListBoxEntryText> *FineTune;
-	
-private:
-	void okPressed();
-	void abortPressed();
+	eLabel *sscl, *cl, *ftl;
+	eCheckbox *TestPatternEnable, *SoundEnable, *Standby;
+	eListBox<eListBoxEntryText> *SoundSubcarrier, *Channel, *FineTune;
+
 	void TestPatternEnable_selected();
 	void SoundEnable_selected();
+	void Standby_selected();
 	void SoundSubcarrier_selected(eListBoxEntryText* entry);
 	void Channel_selected(eListBoxEntryText* entry);
 	void FineTune_selected(eListBoxEntryText* entry);
+	int eventHandler( const eWidgetEvent& );
 
-	int chan,soundenable,ssc,finetune;
+	int chan,soundenable,ssc,finetune,standby;
 
 public:
 	eZapRFmodSetup();
-	~eZapRFmodSetup();
 };
 
 #endif

@@ -20,13 +20,24 @@ eZapRFmodSetup::eZapRFmodSetup()
 //	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 
 	setText(_("UHF-Modulator Setup"));
-	move(ePoint(150, 86));
-	cresize(eSize(390, 340));
-		
+	move(ePoint(150, 66));
+	cresize(eSize(390, 390));
+
+	standby=0;
+	eConfig::getInstance()->getKey("/elitedvb/rfmod/standby", standby);
+	Standby=new eCheckbox(this);
+	Standby->setText(_("UHF Modulator on"));
+	Standby->move(ePoint(70, 20));
+	Standby->resize(eSize(250, 40));
+	Standby->setHelpText(_("enable UHF Modulator"));
+	CONNECT(Standby->selected, eZapRFmodSetup::Standby_selected);
+	if (!standby)
+		Standby->setCheck(!standby);
+
 	TestPatternEnable=new eCheckbox(this);
 	TestPatternEnable->setText(_("Test Pattern"));
-	TestPatternEnable->move(ePoint(80, 20));
-	TestPatternEnable->resize(eSize(200, 40));
+	TestPatternEnable->move(ePoint(70, 60));
+	TestPatternEnable->resize(eSize(250, 40));
 	TestPatternEnable->setHelpText(_("enable test pattern"));
 	TestPatternEnable->loadDeco();
 	CONNECT(TestPatternEnable->selected, eZapRFmodSetup::TestPatternEnable_selected);		
@@ -35,17 +46,17 @@ eZapRFmodSetup::eZapRFmodSetup()
 	eConfig::getInstance()->getKey("/elitedvb/rfmod/so",soundenable);
 	SoundEnable=new eCheckbox(this);
 	SoundEnable->setText(_("Sound enable"));
-	SoundEnable->move(ePoint(80, 60));
-	SoundEnable->resize(eSize(200, 40));
+	SoundEnable->move(ePoint(70, 100));
+	SoundEnable->resize(eSize(250, 40));
 	SoundEnable->setHelpText(_("enable Sound"));
 	SoundEnable->loadDeco();
 	if(!soundenable)
 		SoundEnable->setCheck(1);
 	CONNECT(SoundEnable->selected, eZapRFmodSetup::SoundEnable_selected);		
-		
-	eLabel *sscl=new eLabel(this);
-	sscl->setText("Sound Subcarrier:");
-	sscl->move(ePoint(40,105));
+
+	sscl=new eLabel(this);
+	sscl->setText(_("Sound Subcarrier:"));
+	sscl->move(ePoint(50,155));
 	sscl->resize(eSize(200,40));
 
 	ssc=5500;
@@ -53,7 +64,7 @@ eZapRFmodSetup::eZapRFmodSetup()
 	SoundSubcarrier=new eListBox<eListBoxEntryText>(this,sscl);
 	SoundSubcarrier->loadDeco();
 	SoundSubcarrier->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
-	SoundSubcarrier->move(ePoint(220, 105));
+	SoundSubcarrier->move(ePoint(230, 155));
 	SoundSubcarrier->resize(eSize(100,34));
 	eListBoxEntryText* sscentrys[4];
 	sscentrys[0]=new eListBoxEntryText(SoundSubcarrier,_("4.5 MHz"),(void*)4500,eTextPara::dirCenter);
@@ -72,9 +83,9 @@ eZapRFmodSetup::eZapRFmodSetup()
 	SoundSubcarrier->setHelpText(_("change sound subcarrier frequency"));
 	CONNECT(SoundSubcarrier->selchanged, eZapRFmodSetup::SoundSubcarrier_selected);		
 
-	eLabel *cl=new eLabel(this);
-	cl->setText("Channel:");
-	cl->move(ePoint(40,145));
+	cl=new eLabel(this);
+	cl->setText(_("Channel Nr.:"));
+	cl->move(ePoint(50,195));
 	cl->resize(eSize(200,40));
 
 	chan=21;
@@ -83,7 +94,7 @@ eZapRFmodSetup::eZapRFmodSetup()
 	Channel=new eListBox<eListBoxEntryText>(this,cl);
 	Channel->loadDeco();
 	Channel->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
-	Channel->move(ePoint(220, 145));
+	Channel->move(ePoint(230,195));
 	Channel->resize(eSize(100,34));
 
 	eListBoxEntryText* clentrys[49];
@@ -97,19 +108,19 @@ eZapRFmodSetup::eZapRFmodSetup()
 	Channel->setHelpText(_("change channel"));
 	CONNECT(Channel->selchanged, eZapRFmodSetup::Channel_selected);		
 
-	eLabel *fl=new eLabel(this);
-	fl->setText("Fine Tune:");
-	fl->move(ePoint(40,185));
-	fl->resize(eSize(200,40));
+	ftl=new eLabel(this);
+	ftl->setText(_("Fine Tune:"));
+	ftl->move(ePoint(50,235));
+	ftl->resize(eSize(200,40));
 
 	finetune=0;
 	eConfig::getInstance()->getKey("/elitedvb/rfmod/finetune",finetune);
-	FineTune=new eListBox<eListBoxEntryText>(this,fl);
+	FineTune=new eListBox<eListBoxEntryText>(this,ftl);
 	FineTune->loadDeco();
 	FineTune->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
-	FineTune->move(ePoint(220, 185));
+	FineTune->move(ePoint(230, 235));
 	FineTune->resize(eSize(100,34));
-		
+
 	eListBoxEntryText* flentrys[81];
 
 	for(int i=-40;i<41;i++)
@@ -122,33 +133,24 @@ eZapRFmodSetup::eZapRFmodSetup()
 
 	FineTune->setCurrent(flentrys[finetune+40]);
 	FineTune->setHelpText(_("250Khz steps"));
-	CONNECT(FineTune->selchanged, eZapRFmodSetup::FineTune_selected);		
-	
+	CONNECT(FineTune->selchanged, eZapRFmodSetup::FineTune_selected);
+
 	ok=new eButton(this);
 	ok->setText(_("save"));
 	ok->setShortcut("green");
 	ok->setShortcutPixmap("green");
-
-	ok->move(ePoint(20, 230));
+	ok->move(ePoint(20, 285));
 	ok->resize(eSize(220, 40));
 	ok->setHelpText(_("save settings and leave rf setup"));
 	ok->loadDeco();
-	CONNECT(ok->selected, eZapRFmodSetup::okPressed);		
+	CONNECT(ok->selected, eWidget::accept);
 
 	status = new eStatusBar(this);	
 	status->move( ePoint(0, clientrect.height()-50) );
 	status->resize( eSize( clientrect.width(), 50) );
 	status->loadDeco();
-}
 
-eZapRFmodSetup::~eZapRFmodSetup()
-{
-}
-
-void eZapRFmodSetup::okPressed()
-{
-	eRFmod::getInstance()->save();
-	close(0);
+	Standby_selected();
 }
 
 void eZapRFmodSetup::TestPatternEnable_selected()
@@ -170,12 +172,67 @@ void eZapRFmodSetup::SoundEnable_selected()
 	int val;
 	
 	if(SoundEnable->isChecked())
-		val=0;
+		val=0;	
 	else
 		val=1;		
 		
 	eRFmod::getInstance()->setSoundEnable(val);		
 }
+
+void eZapRFmodSetup::Standby_selected()
+{
+	int val;
+
+	if(Standby->isChecked())
+	{
+		sscl->show();
+		cl->show();
+		ftl->show();
+		TestPatternEnable->show();
+		SoundEnable->show();
+		SoundSubcarrier->show();
+		Channel->show();
+		FineTune->show();
+		SoundEnable_selected();
+		val=0;
+	}
+	else
+	{
+		sscl->hide();
+		cl->hide();
+		ftl->hide();
+		TestPatternEnable->hide();
+		SoundEnable->hide();
+		SoundSubcarrier->hide();
+		Channel->hide();
+		FineTune->hide();
+		val=1;
+	}
+	eRFmod::getInstance()->setStandby(val);
+}
+
+int eZapRFmodSetup::eventHandler( const eWidgetEvent &e)
+{
+	switch(e.type)
+	{
+		case eWidgetEvent::wantClose:
+			if ( !e.parameter )
+				eRFmod::getInstance()->save();  // store values in registry..
+			else
+			{
+				// reset original values..
+				eRFmod::getInstance()->setSoundEnable(soundenable);
+				eRFmod::getInstance()->setSoundSubCarrier(ssc);
+				eRFmod::getInstance()->setChannel(chan);
+				eRFmod::getInstance()->setFinetune(finetune);
+				eRFmod::getInstance()->setStandby(standby);
+			}
+		default:
+			return eWindow::eventHandler( e );
+	}
+	return 1;
+}
+
 
 void eZapRFmodSetup::SoundSubcarrier_selected(eListBoxEntryText* entry)
 {
