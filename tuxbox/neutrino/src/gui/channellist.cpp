@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.50 2002/01/03 20:03:20 McClean Exp $
+// $Id: channellist.cpp,v 1.51 2002/01/15 20:55:14 McClean Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.51  2002/01/15 20:55:14  McClean
+// zapinterface changed
+//
 // Revision 1.50  2002/01/03 20:03:20  McClean
 // cleanup
 //
@@ -555,7 +558,7 @@ void CChannelList::zapTo(int pos)
 	if ( pos!=(int)tuned )
 	{
 		tuned = pos;
-		g_RemoteControl->zapTo_onid_sid( chan->onid_sid );
+		g_RemoteControl->zapTo_onid_sid( chan->onid_sid, chan->name );
 	}
 	g_InfoViewer->showTitle(selected+ 1, chan->name, chan->onid_sid);
 	if (bouquetList != NULL)
