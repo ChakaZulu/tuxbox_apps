@@ -234,7 +234,7 @@ void eTimerManager::writeToLogfile( eString str )
 #endif
 
 eTimerManager::eTimerManager()
-	:actionTimer(eApp), timer(eApp)
+	:actionTimer(eApp), timer(eApp), setdeepstandbywakeup(true)
 {
 	if (!instance)
 		instance = this;
@@ -265,6 +265,7 @@ eTimerManager::eTimerManager()
 
 	int deepstandbywakeup=0;
 	eConfig::getInstance()->getKey("/ezap/timer/deepstandbywakeupset", deepstandbywakeup);
+	eDebug("[eTimerManager] deepstandbywakeup is %d", deepstandbywakeup);
 	if ( deepstandbywakeup )
 	{
 		if (eSystemInfo::getInstance()->hasStandbyWakeupTimer())
@@ -275,16 +276,19 @@ eTimerManager::eTimerManager()
 			{
 				if ( ::ioctl(fd, FP_IOCTL_IS_WAKEUP, &isWakeup) < 0 )
 					eDebug("FP_IOCTL_IS_WAKEUP failed(%m)");
+				eDebug("[eTimerManager] isWakeup is %d", isWakeup);
 				close(fd);
 			}
 			else
 				eDebug("couldn't open FP !!");
-			if ( isWakeup )
-				deepstandbywakeup=1;
+			if ( !isWakeup )
+				deepstandbywakeup=0;
 		}
 		else
 			deepstandbywakeup=0;
 	}
+
+	eDebug("[eTimerManager] now deepstandbywakeup is %d", deepstandbywakeup);
 
 	if (eSystemInfo::getInstance()->hasStandbyWakeupTimer())
 	{
@@ -303,6 +307,7 @@ eTimerManager::eTimerManager()
 
 	if (!deepstandbywakeup)
 	{
+		eDebug("[eTimerManager] delKey deepstandbywakeup");
 		eConfig::getInstance()->delKey("/ezap/timer/deepstandbywakeupset");
 		eConfig::getInstance()->flush();
 	}
@@ -946,10 +951,18 @@ void eTimerManager::actionHandler()
 				{
 					if ( prevEvent->type&ePlaylistEntry::stateError && 
 							 prevEvent->type&ePlaylistEntry::errorUserAborted )
+					{
+						// must clear wasSleeping flag in enigma_main.cpp
+						eDebug("user has aborted the previous event handleStandby returns %d",
+							eZapMain::getInstance()->handleStandby(1) );
 						writeToLogfile("don't handleStandby.. user has aborted the previous event");
+					}
 					else if ( prevEvent->type&ePlaylistEntry::stateWaiting ||
 						!(prevEvent->type&ePlaylistEntry::stateFinished) )
+					{
 						writeToLogfile("don't handleStandby.. prev event is not finished.. or was waiting");
+						eDebug("don't handleStandby.. prev event is not finished.. or was waiting");
+					}
 					else if ( nextStartingEvent == timerlist->getConstList().end() || getSecondsToBegin() > 10*60 )
 					{
 						int i=-1;
@@ -959,14 +972,15 @@ void eTimerManager::actionHandler()
 							i=3;
 
 						// is sleeptimer?
-						if ( prevEvent->type & ePlaylistEntry::doFinishOnly && 
+						if ( prevEvent->type & ePlaylistEntry::doFinishOnly &&
 							!prevEvent->service )
 							i*=2; // force.. look in eZapMain::handleStandby
 
-						// this gets wasSleeping from enigma.. 
+						// this gets wasSleeping from enigma..
 						// 2 -> enigma was Wakedup from timer
 						// 3 -> enigma was coming up from deepstandby.. initiated by timer
 						int enigmaState = eZapMain::getInstance()->handleStandby(1);
+						eDebug("call eZapMain::handleStandby(1) .. returned is %d, i was %d", enigmaState, i );
 						writeToLogfile(eString().sprintf("call eZapMain::handleStandby(1) .. returned is %d, i was %d", enigmaState, i ) );
 
 						if ( i == -1 )
@@ -975,11 +989,15 @@ void eTimerManager::actionHandler()
 						if ( prevEvent != timerlist->getConstList().end() 
 							&& prevEvent->type & ePlaylistEntry::stateFinished )
 						{
+							eDebug("call eZapMain::handleStandby(%d)", i);
 							writeToLogfile(eString().sprintf("call eZapMain::handleStandby(%d)", i));
 							eZapMain::getInstance()->handleStandby(i);
 						}
 						else
-							writeToLogfile(eString().sprintf("dont call handleStandby"));
+						{
+							eDebug("dont call handleStandby");
+							writeToLogfile("dont call handleStandby");
+						}
 					}
 					if ( prevEvent->type & ePlaylistEntry::isRepeating 
 						&& prevEvent->type & ePlaylistEntry::stateFinished
@@ -1281,7 +1299,7 @@ long eTimerManager::getSecondsToEnd()
 eTimerManager::~eTimerManager()
 {
 	int setWakeupKey=0;
-	if ( eSystemInfo::getInstance()->hasStandbyWakeupTimer() )
+	if ( setdeepstandbywakeup && eSystemInfo::getInstance()->hasStandbyWakeupTimer() )
 	{
 		int fd = open("/dev/dbox/fp0", O_RDWR);
 		if ( nextStartingEvent != timerlist->getList().end() )

@@ -1547,6 +1547,7 @@ eZapMain::eZapMain()
 	eConfig::getInstance()->delKey("/ezap/timer/deepstandbywakeupset");
 	eConfig::getInstance()->flush();
 	wasSleeping = wasDeepstandby ? 2 : 0;
+	eDebug("[eZapMain]wasSleeping is %d, wasDeepStandby is %d", wasSleeping, wasDeepstandby);
 
 // Mute Symbol
 	gPixmap *pm = eSkin::getActive()->queryImage("mute_symbol");

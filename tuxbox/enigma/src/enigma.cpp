@@ -40,6 +40,7 @@
 #include <enigma_dyn.h>
 #include <enigma_xmlrpc.h>
 #include <enigma_main.h>
+#include <timer.h>
 
 // #include <mcheck.h>
 
@@ -439,6 +440,9 @@ int main(int argc, char **argv)
 			res=ezap.exec();
 		else
 			res=2;  // restart... (timezone changed)
+
+		if (res == 4)  // when reboot is requeste set no deepstandbywakeup timer
+			eTimerManager::getInstance()->disableDeepstandbyWakeup();
 	}
 
 	Decoder::Flush();

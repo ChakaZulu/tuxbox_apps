@@ -43,6 +43,8 @@ class eTimerManager: public Object
 //	nextStarting event, or the current running Event
 	std::list<ePlaylistEntry>::iterator nextStartingEvent;
 
+	bool setdeepstandbywakeup;
+
 // all methods are NOT always connected to the eDVB Signals
 	void switchedService( const eServiceReferenceDVB&, int err );
 	void leaveService( const eServiceReferenceDVB& );
@@ -74,6 +76,7 @@ public:
 	void timeChanged();
 	int getTimerCount() { return timerlist->getConstList().size(); }
 	ePlaylistEntry* findEvent( eServiceReference *service, EITEvent *evt );
+	void disableDeepstandbyWakeup() { setdeepstandbywakeup=false; }
 	template <class Z>
 	void forEachEntry(Z ob)
 	{
