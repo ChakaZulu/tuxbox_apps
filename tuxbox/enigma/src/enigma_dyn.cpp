@@ -66,7 +66,8 @@ static QString switchService(QString request, QString path, QString opt, eHTTPCo
 	int service_id=-1, original_network_id=-1, transport_stream_id=-1, service_type=-1;
 	if (opt.find("="))
 		opt=opt.mid(opt.find("=")+1);
-	sscanf(opt, "%x:%x:%x:%x", &service_id, &transport_stream_id, &original_network_id, &service_type);
+	if (opt.length())
+		sscanf(opt, "%x:%x:%x:%x", &service_id, &transport_stream_id, &original_network_id, &service_type);
 	QString result="";
 	
 	if ((service_id!=-1) && (original_network_id!=-1) && (transport_stream_id!=-1) && (service_type!=-1))
