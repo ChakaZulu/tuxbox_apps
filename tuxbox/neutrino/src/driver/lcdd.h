@@ -89,7 +89,9 @@ class CLCD
 		CLCD();
 
 		static void* TimeThread(void*);
-		bool lcdInit(const char * fontfile, const char * fontname);
+		bool lcdInit(const char * fontfile1, const char * fontname1, 
+		             const char * fontfile2=NULL, const char * fontname2=NULL,
+		             const char * fontfile3=NULL, const char * fontname3=NULL);
 		void setlcdparameter(int dimm, int contrast, int power, int inverse);
 
 	public:
@@ -97,7 +99,9 @@ class CLCD
 		void setlcdparameter(void);
 
 		static CLCD* getInstance();
-		void init(const char * fontfile, const char * fontname);
+		void init(const char * fontfile, const char * fontname,
+		          const char * fontfile2=NULL, const char * fontname2=NULL,
+		          const char * fontfile3=NULL, const char * fontname3=NULL);
 
 		void setMode(const MODES m, const char * const title = "");
 

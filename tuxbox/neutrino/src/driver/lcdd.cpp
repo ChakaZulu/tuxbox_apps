@@ -66,11 +66,13 @@ void* CLCD::TimeThread(void *)
 	return NULL;
 }
 
-void CLCD::init(const char * fontfile, const char * fontname)
+void CLCD::init(const char * fontfile, const char * fontname,
+                const char * fontfile2, const char * fontname2,
+                const char * fontfile3, const char * fontname3)
 {
 	InitNewClock();
 
-	if (!lcdInit(fontfile, fontname))
+	if (!lcdInit(fontfile, fontname, fontfile2, fontname2, fontfile3, fontname3 ))
 	{
 		printf("LCD-Init failed!\n");
 		return;
@@ -103,16 +105,33 @@ const char * const background_path[NUMBER_OF_PATHS] = {
 	DATADIR "/lcdd/icons/"
 };
 
-bool CLCD::lcdInit(const char * fontfile, const char * fontname)
+bool CLCD::lcdInit(const char * fontfile, const char * fontname,
+						 const char * fontfile2, const char * fontname2,
+						 const char * fontfile3, const char * fontname3)
 {
 	fontRenderer = new LcdFontRenderClass(&display);
 	const char * style_name = fontRenderer->AddFont(fontfile);
+	const char *style_name2,*style_name3;
+	if(fontfile2!=NULL)
+		style_name2 = fontRenderer->AddFont(fontfile2);
+	else
+	{
+		style_name2 = style_name;
+		fontname2   = fontname;
+	}
+	if(fontfile3!=NULL)
+		style_name3 = fontRenderer->AddFont(fontfile3);
+	else
+	{
+		style_name3 = style_name;
+		fontname3   = fontname;
+	}
 	fontRenderer->InitFontCache();
 
-	fonts.channelname = fontRenderer->getFont(fontname, style_name, 15);
-	fonts.time        = fontRenderer->getFont(fontname, style_name, 14);
-	fonts.menutitle   = fontRenderer->getFont(fontname, style_name, 15);
-	fonts.menu        = fontRenderer->getFont(fontname, style_name, 12);
+	fonts.menu        = fontRenderer->getFont(fontname,  style_name , 12);
+	fonts.time        = fontRenderer->getFont(fontname2, style_name2, 14);
+	fonts.channelname = fontRenderer->getFont(fontname3, style_name3, 15);
+	fonts.menutitle   = fonts.channelname;
 
 	setAutoDimm(g_settings.lcd_setting[SNeutrinoSettings::LCD_AUTODIMM]);
 
@@ -458,7 +477,7 @@ void CLCD::setMode(const MODES m, const char * const title)
 	case MODE_MENU_UTF8:
 		showclock = false;
 		display.load_screen(&(background[BACKGROUND_SETUP]));
-		fonts.menutitle->RenderString(-1,28, 140, title, CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
+		fonts.menutitle->RenderString(0,28, 140, title, CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
 		display.update();
 		break;
 	case MODE_SHUTDOWN:

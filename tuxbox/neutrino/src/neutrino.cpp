@@ -1131,6 +1131,12 @@ const neutrino_font_descr_struct predefined_font[2] =
 	{"MD King KhammuRabi", {FONTDIR "/md_khmurabi_10.ttf", NULL                      , NULL                        }, 0}
 };
 
+const char* predefined_lcd_font[2][6] = 
+{
+	{FONTDIR "/12.pcf.gz", "Fix12", FONTDIR "/14B.pcf.gz", "Fix14", FONTDIR "/15B.pcf.gz", "Fix15"},
+	{"MD King KhammuRabi", FONTDIR "/md_khmurabi_10.ttf", NULL, NULL,  NULL, NULL}
+};
+
 void CNeutrinoApp::SetupFonts()
 {
 	const char * style[3];
@@ -2551,9 +2557,18 @@ int CNeutrinoApp::run(int argc, char **argv)
 	bool use_true_unicode_font = g_Locale->loadLocale(g_settings.language);
 
 	if (font.name == NULL) /* no font specified in command line */
+	{
 		font = predefined_font[use_true_unicode_font];
+		CLCD::getInstance()->init(predefined_lcd_font[use_true_unicode_font][0], 
+		                          predefined_lcd_font[use_true_unicode_font][1],
+		                          predefined_lcd_font[use_true_unicode_font][2],
+		                          predefined_lcd_font[use_true_unicode_font][3],
+		                          predefined_lcd_font[use_true_unicode_font][4],
+		                          predefined_lcd_font[use_true_unicode_font][5]);
+	}
+	else
+		CLCD::getInstance()->init(font.filename[0], font.name);
 
-	CLCD::getInstance()->init(font.filename[0], font.name);
 	CLCD::getInstance()->showVolume(g_Controld->getVolume((CControld::volume_type)g_settings.audio_avs_Control));
 	CLCD::getInstance()->setMuted(g_Controld->getMute((CControld::volume_type)g_settings.audio_avs_Control));
 
