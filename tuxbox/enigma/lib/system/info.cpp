@@ -25,7 +25,7 @@ eSystemInfo::eSystemInfo()
 {
 	instance=this;
 #if HAVE_DVB_API_VERSION == 3
-	int fd=::open(DEMOD_DEV, O_RDWR);
+	int fd=::open(DEMOD_DEV, O_RDONLY);
 	if (fd>=0)
 	{
 		dvb_frontend_info info;
@@ -44,10 +44,10 @@ eSystemInfo::eSystemInfo()
 					fetype = feTerrestrial;
 					break;
 			}
-			::close (fd);
 		}
 		else
 			eDebug("FE_GET_INFO failed (%m)");
+		::close (fd);
 	}
 	else
 		eDebug("open demod failed (%m)");
@@ -257,10 +257,11 @@ eSystemInfo::eSystemInfo()
 	}
 	else
 	{
-		int fd=::open(DEMOD_DEV, O_RDWR);
+		int fd=::open(DEMOD_DEV, O_RDONLY);
 		if (fd>=0)
 		{
 			FrontendInfo info;
+			fetype = feSatellite;	// default
 			if ( ::ioctl(fd, FE_GET_INFO, &info) >= 0 )
 			{
 				switch (info.type)
@@ -271,7 +272,6 @@ eSystemInfo::eSystemInfo()
 					case FE_QAM:
 						fetype = feCable;
 						break;
-					default:
 					case FE_OFDM:
 						fetype = feTerrestrial;
 						break;
