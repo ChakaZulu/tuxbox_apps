@@ -1,5 +1,3 @@
-#include <enigma_dyn.h>
-
 #include <map>
 #include <time.h>
 #include <fcntl.h>
@@ -45,6 +43,8 @@
 #include <lib/system/econfig.h>
 #include <lib/system/info.h>
 #include <lib/system/dmfp.h>
+#include <enigma_dyn.h>
+#include <enigma_dyn_mount.h>
 
 using namespace std;
 
@@ -3699,6 +3699,8 @@ static eString createSymlink(eString request, eString dirpath, eString opt, eHTT
 	return "E: invalid command";
 }
 
+#if 0
+is this still used???
 static eString neutrino_suck_zapto(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	if (opt != "getpids")
@@ -3718,6 +3720,7 @@ static eString neutrino_suck_getonidsid(eString request, eString dirpath, eStrin
 
 	return eString().sprintf("%d\n", onidsid);
 }
+#endif
 
 struct addToString
 {
@@ -4586,8 +4589,18 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 #ifndef DISABLE_FILE
 	dyn_resolver->addDyn("GET", "/cgi-bin/setFakeRecordingState", setFakeRecordingState, lockWeb);
 #endif
+#if 0
 	dyn_resolver->addDyn("GET", "/control/zapto", neutrino_suck_zapto, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/getonidsid", neutrino_suck_getonidsid, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/channellist", neutrino_suck_getchannellist, lockWeb);
+#endif
+	dyn_resolver->addDyn("GET", "/control/addMountPoint", addMountPoint, lockWeb);
+	dyn_resolver->addDyn("GET", "/control/removeMountPoint", removeMountPoint, lockWeb);
+	dyn_resolver->addDyn("GET", "/control/addMountPointWindow", addMountPointWindow, lockWeb);
+	dyn_resolver->addDyn("GET", "/control/editMountPoint", editMountPoint, lockWeb);
+	dyn_resolver->addDyn("GET", "/control/editMountPointWindow", addMountPointWindow, lockWeb);
+	dyn_resolver->addDyn("GET", "/control/showMountPoints", showMountPoints, lockWeb);
+	dyn_resolver->addDyn("GET", "/control/mountMountPoint", mountMountPoint, lockWeb);
+	dyn_resolver->addDyn("GET", "/control/unmountMountPoint", unmountMountPoint, lockWeb);
 }
 

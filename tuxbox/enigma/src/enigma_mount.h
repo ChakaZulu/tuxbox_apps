@@ -24,7 +24,7 @@ public:
 	int automount;		//mount at startup
 	eString options;	//rw, intr, soft, udp, nolock
 	eString ownOptions;	//rw, intr, soft, udp, nolock
-	bool mounted;	//if already mounted or not
+	bool mounted;		//if already mounted or not
 	int rsize;		//read size
 	int wsize;		//write size
 
