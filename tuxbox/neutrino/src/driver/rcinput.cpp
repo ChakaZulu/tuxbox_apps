@@ -1048,11 +1048,23 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 					{
 						if (read_bytes == sizeof(stream2file_status_t))
 						{
-							char * msgbody = new char[50];
+							const char * msgbody;
 
-							sprintf(msgbody, "[stream2file] pthreads exit code: %u\n", * (stream2file_status_t *) p);
+							if ((* (stream2file_status_t *) p) == STREAM2FILE_STATUS_IDLE)
+								msgbody = g_Locale->getText("streaming.success");
+							else if ((* (stream2file_status_t *) p) == STREAM2FILE_STATUS_BUFFER_OVERFLOW)
+								msgbody = g_Locale->getText("streaming.buffer_overflow");
+							else if ((* (stream2file_status_t *) p) == STREAM2FILE_STATUS_WRITE_OPEN_FAILURE)
+								msgbody = g_Locale->getText("streaming.write_error_open");
+							else if ((* (stream2file_status_t *) p) == STREAM2FILE_STATUS_WRITE_FAILURE)
+								msgbody = g_Locale->getText("streaming.write_error");
+							else
+								goto skip_message;
+
 							*msg  = NeutrinoMessages::EVT_EXTMSG;
-							*data = (neutrino_msg_data_t) msgbody;
+							*data = (neutrino_msg_data_t) strdup(msgbody);
+						skip_message:
+							;
 						}
 					}
 					else if (emsg.initiatorID == CEventServer::INITID_GENERIC_INPUT_EVENT_PROVIDER)
