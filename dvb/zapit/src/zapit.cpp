@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
   
-  $Id: zapit.cpp,v 1.16 2001/10/16 19:22:06 field Exp $
+  $Id: zapit.cpp,v 1.17 2001/10/16 20:36:00 field Exp $
   
   Done 2001 by Philipp Leusmann using many parts of code from older 
   applications by the DBoxII-Project.
@@ -70,6 +70,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   $Log: zapit.cpp,v $
+  Revision 1.17  2001/10/16 20:36:00  field
+  Audio decoding beim Umschalten beschleunigt
+
   Revision 1.16  2001/10/16 19:22:06  field
   Anpassung fuer NVODs
 
@@ -540,30 +543,52 @@ void writecam(unsigned char *data, int len)
   _writecam(0x23, data, len);
 }
 
-void descramble(int onID, int serviceID, int unknown, int caID, int ecmpid, int vpid, int apid)
+void descramble(int onID, int serviceID, int unknown, int caID, int ecmpid, pids *decode_pids)
 {
-  unsigned char buffer[20];
-  buffer[0]=0x0D;
-  buffer[1]=onID>>8;
-  buffer[2]=onID&0xFF;
-  buffer[3]=serviceID>>8;
-  buffer[4]=serviceID&0xFF;
-  buffer[5]=unknown>>8;
-  buffer[6]=unknown&0xFF;
-  buffer[7]=caID>>8;
-  buffer[8]=caID&0xFF;
-  buffer[9]=ecmpid>>8;
-  buffer[10]=ecmpid&0xFF;
-  buffer[11]=0x02;
-  buffer[12]=vpid>>8;
+    unsigned char buffer[100];
+
+    buffer[0]=0x0D;
+    buffer[1]=onID>>8;
+    buffer[2]=onID&0xFF;
+    buffer[3]=serviceID>>8;
+    buffer[4]=serviceID&0xFF;
+    buffer[5]=unknown>>8;
+    buffer[6]=unknown&0xFF;
+    buffer[7]=caID>>8;
+    buffer[8]=caID&0xFF;
+    buffer[9]=ecmpid>>8;
+    buffer[10]=ecmpid&0xFF;
+    buffer[11]=decode_pids->count_vpids+ decode_pids->count_apids;
+
+    int p= 12;
+
+    for(int i=0; i< decode_pids->count_vpids; i++)
+  	{
+		buffer[p++]=decode_pids->vpid>>8;
+		buffer[p++]=decode_pids->vpid&0xFF;
+		buffer[p++]=0x80;
+		buffer[p++]=0;
+	}
+
+    for(int i=0; i< decode_pids->count_apids; i++)
+  	{
+		buffer[p++]=decode_pids->apids[i].pid>>8;
+		buffer[p++]=decode_pids->apids[i].pid&0xFF;
+		buffer[p++]=0x80;
+		buffer[p++]=0;
+	}
+    writecam(buffer, p);
+/*  buffer[12]=vpid>>8;
   buffer[13]=vpid&0xFF;
   buffer[14]=0x80;
   buffer[15]=0;
+
+
   buffer[16]=apid>>8;
   buffer[17]=apid&0xFF;
   buffer[18]=0x80;
   buffer[19]=0;
-  writecam(buffer, 20);
+  writecam(buffer, 20);*/
 }
 
 void cam_reset(void)
@@ -795,7 +820,7 @@ else
     {
       cit->second.vpid = parse_pmt_pids.vpid;
       if (cit->second.vpid == 0)
-	cit->second.vpid = 0x1fff;
+	       cit->second.vpid = 0x1fff;
       //  cit->second.last_update = current_time;
     }
   else
@@ -835,7 +860,7 @@ else
       cam_reset();
       if ( ( cit->second.ecmpid > 0 ) && ( cit->second.ecmpid != no_ecmpid_found ) )
 	{
-	  descramble(cit->second.onid, cit->second.tsid, 0x104, caid, cit->second.ecmpid, Apid, Vpid);
+	  descramble(cit->second.onid, cit->second.tsid, 0x104, caid, cit->second.ecmpid, &parse_pmt_pids);
 	  if (do_search_emmpid)
 	    {
 	      if((emmpid = find_emmpid(caid)) != 0)
@@ -1014,9 +1039,9 @@ int changeapid(ushort pid_nr)
       
       if ( ( cit->second.ecmpid > 0 ) && ( cit->second.ecmpid != no_ecmpid_found ) )
         {
-	  cam_reset();
+/*	  cam_reset();
 	  descramble(cit->second.onid, cit->second.tsid, 0x104, caid, cit->second.ecmpid,  pids_desc.apids[pid_nr].pid , vpid);
-        }
+ */       }
       
 
       //        printf("Changing APID of %s. VPID: 0x%04x. APID: 0x%04x, PMT: 0x%04x\n", current->name, current->vpid, pids_desc.apid[pid_nr], current->pmt);
@@ -1772,7 +1797,7 @@ int main(int argc, char **argv) {
   }
   
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.16 2001/10/16 19:22:06 field Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.17 2001/10/16 20:36:00 field Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
@@ -1835,7 +1860,14 @@ int main(int argc, char **argv) {
 //  signal (SIGHUP, SIG_IGN);
   
   /* Main program loop */
-  descramble(0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff);
+
+//  descramble(0xffff,0xffff,0xffff,0xffff,0xffff, 0xffff,0xffff);
+    pids _pids;
+    _pids.count_vpids= 1;
+    _pids.vpid= 0xffff;
+    _pids.count_apids= 1;
+    _pids.apids[0].pid= 0xffff;
+    descramble(0xffff,0xffff,0xffff,0xffff,0xffff, &_pids);
 
   while (keep_going)
     {      
