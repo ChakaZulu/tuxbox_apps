@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.53 2004/02/09 16:30:57 metallica Exp $
+	$Id: webdbox.cpp,v 1.54 2004/02/10 15:30:39 metallica Exp $
 
 	License: GPL
 
@@ -104,12 +104,15 @@ CWebDbox::CWebDbox(CWebserver *server)
 	Dbox_Hersteller[1] = "Nokia";
 	Dbox_Hersteller[2] = "Philips";
 	Dbox_Hersteller[3] = "Sagem";
-	videooutput_names[0] = "Composite";
-	videooutput_names[1] = "RGB";
+	videooutput_names[0] = "CVBS";
+	videooutput_names[1] = "RGB with CVBS";
 	videooutput_names[2] = "S-Video";
+	videooutput_names[3] = "YUV with VBS";
+	videooutput_names[4] = "YUV with CVBS";
 	videoformat_names[0] = "automatic";
 	videoformat_names[1] = "16:9";
-	videoformat_names[2] = "4:3";
+	videoformat_names[2] = "4:3 (LB)";
+	videoformat_names[3] = "4:3 (PS)";
 	audiotype_names[1] =  "single channel";
 	audiotype_names[2] = "dual channel";
 	audiotype_names[3] = "joint stereo";

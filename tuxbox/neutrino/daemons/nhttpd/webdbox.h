@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: webdbox.h,v 1.37 2003/03/14 07:20:01 obi Exp $
+        $Id: webdbox.h,v 1.38 2004/02/10 15:30:39 metallica Exp $
 
         License: GPL
 
@@ -82,8 +82,8 @@ class CWebDbox
 
 	// some constants
 	std::string Dbox_Hersteller[4];
-	std::string videooutput_names[3];
-	std::string videoformat_names[3];
+	std::string videooutput_names[5];
+	std::string videoformat_names[4];
 	std::string audiotype_names[5];
 
 	// get functions to collect data
