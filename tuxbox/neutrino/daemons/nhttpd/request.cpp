@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.19 2002/05/30 19:50:04 dirch Exp $
+	$Id: request.cpp,v 1.20 2002/06/09 19:55:39 Leahcim Exp $
 
 	License: GPL
 
@@ -125,7 +125,12 @@ string nummer = "1";
 		int pos = param_str.find('=');
 		if(pos != -1)
 		{
-			ParameterList[param_str.substr(0,pos)] = param_str.substr(pos+1,param_str.length() - (pos+1));
+			if (ParameterList[param_str.substr(0,pos)] == "")
+				ParameterList[param_str.substr(0,pos)] = param_str.substr(pos+1,param_str.length() - (pos+1));
+			else {
+				ParameterList[param_str.substr(0,pos)] += ",";
+				ParameterList[param_str.substr(0,pos)] += param_str.substr(pos+1,param_str.length() - (pos+1));
+			}
 		}
 		else
 		{
