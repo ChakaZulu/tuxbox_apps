@@ -55,7 +55,7 @@ class CChannelList
 				int         	key;
 				int         	number;
 				string      	name;
-				unsigned int 	onid_sid;
+				t_channel_id    channel_id;
 				CChannelEvent	currentEvent;
 
 				// flag that tells if channel is staticly locked by bouquet-locking
@@ -98,7 +98,7 @@ class CChannelList
 	public:
 		CChannelList( const std::string& Name="" );
 		~CChannelList();
-		void addChannel(int key, int number, const std::string& name, unsigned int ids = 0);
+		void addChannel(int key, int number, const std::string& name, t_channel_id ids = 0);
 		void addChannel(CChannel* chan);
 		CChannel* getChannel( int number);
 		CChannel* operator[]( uint index) { if (chanlist.size() > index) return chanlist[index]; else return NULL;};
@@ -106,11 +106,11 @@ class CChannelList
 		int getKey(int);
 		string getActiveChannelName();
 		int getActiveChannelNumber();
-		unsigned int CChannelList::getActiveChannelOnid_sid();
-		const string getActiveChannelID();
-		CChannel* getChannelFromOnidSid(unsigned int onidSid);
+		t_channel_id CChannelList::getActiveChannel_ChannelID();
+//		const string getActiveChannelID();
+		CChannel* getChannelFromChannelID(const t_channel_id channel_id);
 		void zapTo(int pos);
-		bool zapToOnidSid(unsigned int onid_sid);
+		bool zapTo_ChannelID(const t_channel_id channel_id);
 		bool adjustToChannelID(const t_channel_id channel_id);
 		bool showInfo(int pos);
 		void updateEvents(void);

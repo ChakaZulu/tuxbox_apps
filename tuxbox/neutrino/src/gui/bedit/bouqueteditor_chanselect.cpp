@@ -57,7 +57,7 @@ bool CBEChannelSelectWidget::isChannelInBouquet( int index)
 {
 	for (unsigned int i=0; i<bouquetChannels.size(); i++)
 	{
-		if (bouquetChannels[i].onid_sid == Channels[index].onid_sid)
+		if (bouquetChannels[i].channel_id == Channels[index].channel_id)
 		{
 			return true;
 		}
@@ -100,13 +100,9 @@ void CBEChannelSelectWidget::onOkKeyPressed()
 {
 	setModified();
 	if (isChannelInBouquet(selected))
-	{
-		g_Zapit->removeChannelFromBouquet( bouquet, Channels[selected].onid_sid);
-	}
+		g_Zapit->removeChannelFromBouquet( bouquet, Channels[selected].channel_id);
 	else
-	{
-		g_Zapit->addChannelToBouquet( bouquet, Channels[selected].onid_sid);
-	}
+		g_Zapit->addChannelToBouquet( bouquet, Channels[selected].channel_id);
 	bouquetChannels.clear();
 	g_Zapit->getBouquetChannels( bouquet, bouquetChannels, mode);
 	

@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.h,v 1.59 2002/09/11 14:41:20 thegoodguy Exp $
+ * $Id: zapit.h,v 1.60 2002/09/18 23:02:16 thegoodguy Exp $
  */
 
 #ifndef __zapit_h__
@@ -26,7 +26,6 @@ int start_scan();
 /**************************************************************/
 
 void addChannelToBouquet (unsigned int bouquet, t_channel_id channel_id);
-void removeChannelFromBouquet (unsigned int bouquet, t_channel_id channel_id);
 void sendBouquets (bool emptyBouquetsToo);
 void internalSendChannels (ChannelList* channels);
 void sendBouquetChannels (unsigned int bouquet, CZapitClient::channelsMode mode = CZapitClient::MODE_CURRENT);

@@ -315,7 +315,7 @@ int CBEChannelWidget::exec(CMenuTarget* parent, string actionKey)
 
 void CBEChannelWidget::deleteChannel()
 {
-	g_Zapit->removeChannelFromBouquet( bouquet, Channels[selected].onid_sid);
+	g_Zapit->removeChannelFromBouquet( bouquet, Channels[selected].channel_id);
 	Channels.clear();
 	g_Zapit->getBouquetChannels( bouquet, Channels, mode);
 	if (selected >= Channels.size())

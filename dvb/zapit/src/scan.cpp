@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.64 2002/09/18 13:26:18 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.65 2002/09/18 23:02:16 thegoodguy Exp $
  */
 
 #include <fcntl.h>
@@ -31,7 +31,7 @@ CBouquetManager* scanBouquetManager;
 
 extern int found_transponders;
 extern int found_channels;
-extern std::map <uint32_t, uint8_t> service_types;
+extern std::map <t_channel_id, uint8_t> service_types;
 
 /* zapit.cpp */
 extern CFrontend *frontend;
@@ -472,7 +472,7 @@ void *start_scanthread(void *param)
 		 * some channels set the service_type in the BAT or the NIT.
 		 * should the NIT be parsed on every transponder?
 		 */
-		std::map <uint32_t, uint8_t>::iterator stI;
+		std::map <t_channel_id, uint8_t>::iterator stI;
 		for (stI = service_types.begin(); stI != service_types.end(); stI++)
 		{
 			sciterator scI = scanchannels.find(stI->first);

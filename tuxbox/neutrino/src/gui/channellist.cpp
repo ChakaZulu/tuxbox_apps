@@ -120,20 +120,20 @@ void CChannelList::updateEvents(void)
 
 	for (uint count=0; count<chanlist.size(); count++)
 		for ( CChannelEventList::iterator e= events.begin(); e != events.end(); ++e )
-			if (chanlist[count]->onid_sid == e->serviceID() )
+			if (chanlist[count]->channel_id == e->serviceID() )
 			{
 				chanlist[count]->currentEvent= *e;
 				break;
 			}
 }
 
-void CChannelList::addChannel(int key, int number, const std::string& name, unsigned int ids)
+void CChannelList::addChannel(int key, int number, const std::string& name, t_channel_id ids)
 {
 	CChannel* tmp = new CChannel();
 	tmp->key=key;
 	tmp->number=number;
 	tmp->name=name;
-	tmp->onid_sid=ids;
+	tmp->channel_id = ids;
 	tmp->bAlwaysLocked = false;
 	chanlist.insert(chanlist.end(), tmp);
 }
@@ -172,19 +172,21 @@ string CChannelList::getActiveChannelName()
 		return "";
 }
 
+/*
 const std::string CChannelList::getActiveChannelID()
 {
 	string  id;
 	char anid[10];
-	snprintf( anid, 10, "%x", getActiveChannelOnid_sid() );
+	snprintf( anid, 10, "%x", getActiveChannel_ChannelID() );
 	id= anid;
 	return id;
 }
+*/
 
-unsigned int CChannelList::getActiveChannelOnid_sid()
+t_channel_id CChannelList::getActiveChannel_ChannelID()
 {
 	if (selected< chanlist.size())
-		return chanlist[selected]->onid_sid;
+		return chanlist[selected]->channel_id;
 	else
 		return 0;
 }
@@ -338,7 +340,7 @@ int CChannelList::show()
 		{
 			hide();
 
-			if ( g_EventList->exec(chanlist[selected]->onid_sid, chanlist[selected]->name ) == menu_return::RETURN_EXIT_ALL )
+			if ( g_EventList->exec(chanlist[selected]->channel_id, chanlist[selected]->name ) == menu_return::RETURN_EXIT_ALL )
 			{
 				res = -2;
 				loop = false;
@@ -403,7 +405,7 @@ bool CChannelList::showInfo(int pos)
 	}
 
 	CChannel* chan = chanlist[pos];
-	g_InfoViewer->showTitle(pos+1, chan->name, chan->onid_sid, true );
+	g_InfoViewer->showTitle(pos+1, chan->name, chan->channel_id, true );
 	return true;
 }
 
@@ -454,14 +456,12 @@ int CChannelList::handleMsg(uint msg, uint data)
 
 
 //
-// -- Zap to channel with onid_sid
-// -- 2002-04-14 rasc
+// -- Zap to channel with channel_id
 //
-//
-bool CChannelList::zapToOnidSid (unsigned int onid_sid)
+bool CChannelList::zapTo_ChannelID(const t_channel_id channel_id)
 {
 	for (unsigned int i=0; i<chanlist.size(); i++) {
-		if (chanlist[i]->onid_sid == onid_sid) {
+		if (chanlist[i]->channel_id == channel_id) {
 			zapTo (i);
 			return true;
 		}
@@ -475,7 +475,7 @@ bool CChannelList::adjustToChannelID(const t_channel_id channel_id)
 	unsigned int i;
 
 	for (i=0; i<chanlist.size(); i++) {
-		if (chanlist[i]->onid_sid == channel_id)
+		if (chanlist[i]->channel_id == channel_id)
 		{
 			selected= i;
 //			CChannel* chan = chanlist[selected];
@@ -509,7 +509,7 @@ void CChannelList::zapTo(int pos)
 	if ( pos!=(int)tuned )
 	{
 		tuned = pos;
-		g_RemoteControl->zapTo_onid_sid( chan->onid_sid, chan->name, !chan->bAlwaysLocked );
+		g_RemoteControl->zapTo_onid_sid(chan->channel_id, chan->name, !chan->bAlwaysLocked );
 	}
 	g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
 
@@ -931,11 +931,11 @@ void CChannelList::paint()
 	g_Sectionsd->setPauseSorting( false );
 }
 
-CChannelList::CChannel* CChannelList::getChannelFromOnidSid(unsigned int onidSid)
+CChannelList::CChannel* CChannelList::getChannelFromChannelID(const t_channel_id channel_id)
 {
 	for (uint i=0; i< chanlist.size();i++)
 	{
-		if (chanlist[i]->onid_sid == onidSid)
+		if (chanlist[i]->channel_id == channel_id)
 			return chanlist[i];
 	}
 	return(NULL);

@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.cpp,v 1.28 2002/09/10 18:34:26 obi Exp $
+ * $Id: sdt.cpp,v 1.29 2002/09/18 23:02:16 thegoodguy Exp $
  */
 
 /* system c */
@@ -120,9 +120,9 @@ int parse_sdt ()
 			service_id = (buffer[pos] << 8) | buffer[pos + 1];
 			descriptors_loop_length = ((buffer[pos + 3] & 0x0F) << 8) | buffer[pos + 4];
 
-			for (pos2 = pos + 5; pos2 < pos + descriptors_loop_length + 5; pos2 += buffer[pos2 + 1] + 2)
+			for (pos2 = pos + 5; pos2 < pos + descriptors_loop_length + 5; pos2 += ((sdt_generic_descriptor*)(&buffer[pos2]))->descriptor_length + sizeof(sdt_generic_descriptor))
 			{
-				switch (buffer[pos2])
+				switch (((sdt_generic_descriptor*)(&buffer[pos2]))->descriptor_tag)
 				{
 				case 0x0A:
 					ISO_639_language_descriptor(buffer + pos2);

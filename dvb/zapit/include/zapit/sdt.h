@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.h,v 1.8 2002/09/04 11:52:56 obi Exp $
+ * $Id: sdt.h,v 1.9 2002/09/18 23:02:16 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -41,6 +41,11 @@ enum service_type_e
 	RCS_MAP,
 	RCS_FLS,
 	DVB_MHP_SERVICE
+};
+
+struct sdt_generic_descriptor {
+        u_char  descriptor_tag                  : 8;
+        u_char  descriptor_length               : 8;
 };
 
 int parse_sdt ();

@@ -762,7 +762,7 @@ void CNeutrinoApp::channelsInit()
 	g_Zapit->getChannels( zapitChannels );
 	for (uint i=0; i<zapitChannels.size(); i++)
 	{
-		channelList->addChannel( zapitChannels[i].nr, zapitChannels[i].nr, zapitChannels[i].name, zapitChannels[i].onid_sid );
+		channelList->addChannel( zapitChannels[i].nr, zapitChannels[i].nr, zapitChannels[i].name, zapitChannels[i].channel_id);
 	}
 	dprintf(DEBUG_DEBUG, "got channels\n");
 
@@ -2155,7 +2155,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 		{
 			CTimerEvent::EventInfo * eventinfo; 
 			eventinfo = (CTimerEvent::EventInfo *) data;
-			channelList->zapToOnidSid(eventinfo->onidSid);
+			channelList->zapTo_ChannelID(eventinfo->onidSid);
 		}
 
 		if ( msg == NeutrinoMessages::ANNOUNCE_ZAPTO)
@@ -2255,7 +2255,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				{
 					// show EPG
 
-					g_EpgData->show( channelList->getActiveChannelOnid_sid() );
+					g_EpgData->show( channelList->getActiveChannel_ChannelID() );
 
 				}
 				else if ( msg == (uint) g_settings.key_tvradio_mode )
@@ -2302,7 +2302,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				}
 				else if ( msg == CRCInput::RC_red )
 				{	// eventlist
-					g_EventList->exec(channelList->getActiveChannelOnid_sid(), channelList->getActiveChannelName());
+					g_EventList->exec(channelList->getActiveChannel_ChannelID(), channelList->getActiveChannelName());
 				}
 				else if ( msg == CRCInput::RC_blue )
 				{	// streaminfo
@@ -2327,7 +2327,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 					// show Infoviewer
 					g_InfoViewer->showTitle( channelList->getActiveChannelNumber(),
 					                         channelList->getActiveChannelName(),
-				    	                     channelList->getActiveChannelOnid_sid() );
+				    	                     channelList->getActiveChannel_ChannelID() );
 				}
 				else if ( ( msg >= CRCInput::RC_0 ) && ( msg <= CRCInput::RC_9 ))
 				{ //numeric zap
@@ -2510,7 +2510,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 //		  ( msg == NeutrinoMessages::EVT_SERVICESCHANGED ) )    // EVT_SERVICESCHANGED: no longer used
 	else if ( msg == NeutrinoMessages::EVT_BOUQUETSCHANGED )        // EVT_BOUQUETSCHANGED: initiated by zapit
 	{
-		t_channel_id old_id = channelList->getActiveChannelOnid_sid();
+		t_channel_id old_id = channelList->getActiveChannel_ChannelID();
 
 		channelsInit();
 
@@ -3051,7 +3051,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.325 2002/09/16 22:03:29 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.326 2002/09/18 23:02:17 thegoodguy Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.229 2002/09/18 20:00:05 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.230 2002/09/18 23:02:16 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1101,7 +1101,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.229 2002/09/18 20:00:05 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.230 2002/09/18 23:02:16 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1341,7 +1341,7 @@ void internalSendChannels(ChannelList* channels, const unsigned int first_channe
 
 		CZapitClient::responseGetBouquetChannels response;
 		strncpy(response.name, (*channels)[i]->getName().c_str(),30);
-		response.onid_sid = (*channels)[i]->getChannelID();
+		response.channel_id = (*channels)[i]->getChannelID();
 		response.nr = first_channel_nr + i;
 
 		if (send(connfd, &response, sizeof(response),0) == -1)

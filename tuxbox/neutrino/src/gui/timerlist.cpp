@@ -292,7 +292,7 @@ void CTimerList::paintItem(int pos)
 				CZapitClient::BouquetChannelList::iterator channel = channellist.begin();
 				for(; channel != channellist.end();channel++)
 				{
-					if(channel->onid_sid==timer.onidSid)
+					if(channel->channel_id==timer.onidSid)
 				   {
 						zAddData = channel->name;
 						break;
