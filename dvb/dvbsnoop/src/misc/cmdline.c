@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.23 2004/01/22 22:26:35 rasc Exp $
+$Id: cmdline.c,v 1.24 2004/01/29 22:34:49 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: cmdline.c,v 1.23 2004/01/22 22:26:35 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.24  2004/01/29 22:34:49  rasc
+-sync: default now
+
 Revision 1.23  2004/01/22 22:26:35  rasc
 pes_pack_header
 section read timeout
@@ -145,7 +148,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
   opt->timeout_ms = 0;		// no timeout (0) or default timeout in ms (SECTIONS)
   opt->crc = 0;
   opt->packet_count = 0;
-  opt->packet_header_sync = 0;
+  opt->packet_header_sync = 1;
   opt->packet_mode = SECT;
   opt->time_mode = FULL_TIME;
   opt->hide_copyright= 0;
@@ -272,10 +275,10 @@ static void usage (void)
     printf("   -f filter:    filtervalue for 'sec' demux [-f 0]\n");
     printf("   -f maxdmx:    max demux filters to use in pidscan mode\n");
     printf("   -m mask:      maskvalue for 'sec' demux [-m 0]\n");
-    printf("   -crc:         CRC check when reading 'sec'\n");
+    printf("   -crc:         CRC check when reading 'sec' [-nocrc]\n");
     printf("   -nocrc:       No CRC check when reading 'sec' [-nocrc]\n");
-    printf("   -sync:        Simple packet header sync when reading 'ts' or 'pes' [-nosnyc]\n");
-    printf("   -nosync:      No header sync when reading 'ts' or 'pes' [-nosnyc]\n");
+    printf("   -sync:        Simple packet header sync when reading 'ts' or 'pes' [-snyc]\n");
+    printf("   -nosync:      No header sync when reading 'ts' or 'pes' [-snyc]\n");
     printf("   -n count:     receive count packets (0=no limit) [-n 0]\n");
     printf("   -b:           binary output of packets (disables other output)\n");
     printf("   -if:          input file, reads from binary file instead of demux device\n");
