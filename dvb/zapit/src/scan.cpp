@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.40 2002/04/14 06:06:31 obi Exp $
+ * $Id: scan.cpp,v 1.41 2002/04/14 10:55:25 obi Exp $
  */
 
 #include "scan.h"
@@ -14,7 +14,9 @@ short curr_sat;
 extern int found_transponders;
 extern int found_channels;
 
-int get_nits (CFrontend *frontend, uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, uint8_t polarity, uint8_t DiSEqC, Modulation modulation)
+extern CFrontend *frontend;
+
+int get_nits (uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, uint8_t polarity, uint8_t DiSEqC, Modulation modulation)
 {
 	FrontendParameters feparams;
 	feparams.Frequency = frequency;
@@ -44,7 +46,7 @@ int get_nits (CFrontend *frontend, uint32_t frequency, uint32_t symbol_rate, Cod
 	}
 }
 
-void get_sdts(CFrontend *frontend)
+void get_sdts()
 {
 	stiterator tI;
 
@@ -277,34 +279,28 @@ void *start_scanthread(void *param)
 	curr_sat = 0;
 	scan_runs = 1;
 
-	CFrontend *frontend = new (nothrow) CFrontend();
-
 	if ((frontend == NULL) || (frontend->isInitialized() == false))
 	{
-		printf("[scan.cpp] unable to open frontend devices. bye.\n");
+		printf("[scan.cpp] unable not scan without a frontend \n");
 		stop_scan();
 		pthread_exit(0);
 	}
 
-	/* cable constants */
-	if (frontend->getInfo()->type == FE_QAM)
+	switch (frontend->getInfo()->type)
 	{
-		strcpy(filename, CONFIGDIR "/cables.xml");
-		strcpy(type, "cable");
-		polarization = 0;
-	}
-
-	/* satellite constants */
-	else if (frontend->getInfo()->type == FE_QPSK)
-	{
+	case FE_QPSK:	/* satellite frontend */
 		strcpy(filename, CONFIGDIR "/satellites.xml");
 		strcpy(type, "sat");
 		modulation = 0;
-	}
+		break;
 
-	/* unsupported tuner */
-	else
-	{
+	case FE_QAM:	/* cable frontend */
+		strcpy(filename, CONFIGDIR "/cables.xml");
+		strcpy(type, "cable");
+		polarization = 0;
+		break;
+	
+	default:	/* unsupported frontend */
 		stop_scan();
 		pthread_exit(0);
 	}
@@ -398,14 +394,14 @@ void *start_scanthread(void *param)
 				}
 
 				/* read network information table */
-				get_nits(frontend, frequency, symbol_rate, getFEC(fec_inner), polarization, diseqc_pos, getModulation(modulation));
+				get_nits(frequency, symbol_rate, getFEC(fec_inner), polarization, diseqc_pos, getModulation(modulation));
 
 				/* next transponder */
 				transponder = transponder->GetNext();
 			}
 
 			/* read service description table */
-			get_sdts(frontend);
+			get_sdts();
 
 			/* write services */
 			fd = write_provider(fd, type, providerName, diseqc_pos);
@@ -416,7 +412,6 @@ void *start_scanthread(void *param)
 	}
 
 	/* clean up - should this be done before every GetNext() ? */
-	delete frontend;
 	delete transponder;
 	delete search;
 	delete parser;

@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.128 2002/04/14 10:16:46 Simplex Exp $
+ * $Id: zapit.cpp,v 1.129 2002/04/14 10:55:25 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1981,13 +1981,13 @@ frontend->getInfo()->type == FE_QAM //bei kabel
 			case CZapitClient::CMD_SCANSETDISEQCTYPE :
 				diseqc_t diseqc;
 				read( connfd, &diseqc, sizeof(diseqc));
-				// todo
+				frontend->setDiseqcType(diseqc);
 			break;
 
 			case CZapitClient::CMD_SCANSETDISEQCREPEAT :
-				int repeat;
+				uint32_t repeat;
 				read( connfd, &repeat, sizeof(repeat));
-				// todo
+				frontend->setDiseqcRepeats(repeat);
 			break;
 
 			case CZapitClient::CMD_BQ_ADD_BOUQUET :
@@ -2260,7 +2260,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.128 2002/04/14 10:16:46 Simplex Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.129 2002/04/14 10:55:25 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
