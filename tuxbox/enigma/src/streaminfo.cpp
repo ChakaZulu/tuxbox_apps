@@ -104,7 +104,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 
 	service_name[1]=new eLabel(this);
 	service_name[1]->setText(cservice?(cservice->service_name):QString("--"));
-	service_name[1]->setFont(gFont("Courier New Bold", eZap::FontSize));
+	service_name[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", eZap::FontSize));
 	service_name[1]->move(QPoint(185, yOffs+2));
 	service_name[1]->resize(QSize(260, eZap::FontSize+5));
 	yOffs+=eZap::FontSize+5;
@@ -116,7 +116,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	
 	service_provider[1]=new eLabel(this);
 	service_provider[1]->setText(cservice?(cservice->service_provider):QString("--"));
-	service_provider[1]->setFont(gFont("Courier New Bold", eZap::FontSize));
+	service_provider[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", eZap::FontSize));
 	service_provider[1]->move(QPoint(185, yOffs+2));
 	service_provider[1]->resize(QSize(260, eZap::FontSize+5));
 	yOffs+=eZap::FontSize+5;
@@ -127,7 +127,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	vpid[0]->resize(QSize(140, eZap::FontSize+5));
 	
 	vpid[1]=new eLabel(this);
-	vpid[1]->setFont(gFont("Courier New Bold", eZap::FontSize));
+	vpid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", eZap::FontSize));
 	vpid[1]->setText((parms.vpid==-1)?QString("keine"):QString().sprintf("%04xh  (%dd)", parms.vpid, parms.vpid));
 	vpid[1]->move(QPoint(185, yOffs+2));
 	vpid[1]->resize(QSize(260, eZap::FontSize+5));
@@ -142,7 +142,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	apid[1]->setText((parms.apid==-1)?QString("keine"):QString().sprintf("%04xh  (%dd)", parms.apid, parms.apid));
 	apid[1]->move(QPoint(185, yOffs+2));
 	apid[1]->resize(QSize(260, eZap::FontSize+5));
-	apid[1]->setFont(gFont("Courier New Bold", eZap::FontSize));
+	apid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", eZap::FontSize));
 	yOffs+=eZap::FontSize+5;
 
 	pcrpid[0]=new eLabel(this);
@@ -154,7 +154,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	pcrpid[1]->setText((parms.pcrpid==-1)?QString("keine"):QString().sprintf("%04xh  (%dd)", parms.pcrpid, parms.pcrpid));
 	pcrpid[1]->move(QPoint(185, yOffs+2));
 	pcrpid[1]->resize(QSize(260, eZap::FontSize+5));
-	pcrpid[1]->setFont(gFont("Courier New Bold", eZap::FontSize));
+	pcrpid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", eZap::FontSize));
 	yOffs+=eZap::FontSize+5;
 
 	tpid[0]=new eLabel(this);
@@ -166,7 +166,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	tpid[1]->setText((parms.tpid==-1)?QString("keine"):QString().sprintf("%04xh  (%dd)", parms.tpid, parms.tpid));
 	tpid[1]->move(QPoint(185, yOffs+2));
 	tpid[1]->resize(QSize(260, eZap::FontSize+5));
-	tpid[1]->setFont(gFont("Courier New Bold", eZap::FontSize));
+	tpid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", eZap::FontSize));
 	yOffs+=eZap::FontSize+5;
 	
 	QString vformat="n/a";
@@ -211,7 +211,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	vform[1]->setText(vformat);
 	vform[1]->move(QPoint(185, yOffs));
 	vform[1]->resize(QSize(260, eZap::FontSize));
-	vform[1]->setFont(gFont("Courier New Bold", eZap::FontSize));
+	vform[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", eZap::FontSize));
 	yOffs+=eZap::FontSize+5;
 
 	tsid[0]=new eLabel(this);
@@ -223,7 +223,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	tsid[1]->setText(QString().sprintf("%04xh", eDVB::getInstance()->transport_stream_id));
 	tsid[1]->move(QPoint(280, yOffs));
 	tsid[1]->resize(QSize(130, eZap::FontSize+5));
-	tsid[1]->setFont(gFont("Courier New Bold", eZap::FontSize));
+	tsid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", eZap::FontSize));
 	yOffs+=eZap::FontSize+5;
 
 	onid[0]=new eLabel(this);
@@ -235,7 +235,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	onid[1]->setText(QString().sprintf("%04xh", eDVB::getInstance()->original_network_id));
 	onid[1]->move(QPoint(280, yOffs));
 	onid[1]->resize(QSize(130, eZap::FontSize+5));
-	onid[1]->setFont(gFont("Courier New Bold", eZap::FontSize));
+	onid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", eZap::FontSize));
 	yOffs+=eZap::FontSize+5;
 
 	sid[0]=new eLabel(this);
@@ -247,7 +247,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	sid[1]->setText(QString().sprintf("%04xh", eDVB::getInstance()->service_id));
 	sid[1]->move(QPoint(280, yOffs));
 	sid[1]->resize(QSize(130, eZap::FontSize+5));
-	sid[1]->setFont(gFont("Courier New Bold", eZap::FontSize));
+	sid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", eZap::FontSize));
 }
 
 void siPID::redrawWidget()
