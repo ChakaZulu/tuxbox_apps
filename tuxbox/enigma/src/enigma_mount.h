@@ -5,8 +5,11 @@
 
 #include <configfile.h>
 #include <string.h>
+#include <lib/gui/listbox.h>
 
 #define	MOUNTCONFIGFILE	"/var/tuxbox/config/enigma/mount.conf"
+
+class eListBoxEntryMount;
 
 typedef struct
 {
@@ -53,9 +56,10 @@ private:
 	std::vector <eMountPoint>::iterator mp_it;
 	void addMountedFileSystems(void);
 public:
-	eString listMountPoints(eString);
+	eString listMountPoints(eString); // for webif
+	void listMountPoints(eListBox<eListBoxEntryMount> *); // for osd
 	void removeMountPoint(int);
-	void addMountPoint(t_mount);
+	int addMountPoint(t_mount);
 	void changeMountPoint(int, t_mount);
 	t_mount getMountPointData(int);
 	int mountMountPoint(int);

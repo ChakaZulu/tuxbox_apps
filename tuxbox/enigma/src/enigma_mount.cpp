@@ -14,6 +14,7 @@
 #include <configfile.h>
 #include <enigma_dyn_utils.h>
 #include <enigma_mount.h>
+#include <enigma_osd_mount.h>
 
 using namespace std;
 
@@ -270,11 +271,12 @@ eMountMgr::~eMountMgr()
 
 }
 
-void eMountMgr::addMountPoint(t_mount pmp)
+int eMountMgr::addMountPoint(t_mount pmp)
 {
 	pmp.id = mountPoints.size();
 	mountPoints.push_back(eMountPoint(pmp));
 	save();
+	return pmp.id;
 }
 
 t_mount eMountMgr::getMountPointData(int pid)
@@ -404,6 +406,13 @@ eString eMountMgr::listMountPoints(eString skelleton)
 		result = "<tr><td>No mount points available.</td></tr>";
 
 	return result;
+}
+
+void eMountMgr::listMountPoints(eListBox<eListBoxEntryMount> *mountList)
+{
+	if (mountPoints.size() > 0)
+		for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
+			new eListBoxEntryMount(mountList, mp_it->mp.id);
 }
 
 void eMountMgr::addMountedFileSystems()
