@@ -64,9 +64,10 @@ struct SNeutrinoSettings
 	int timing_epg;
 	int timing_infobar;
 
-	//colors
+	//widget settings
 	int	widget_fade;
 
+	//colors
 	unsigned char menu_Head_alpha;
 	unsigned char menu_Head_red;
 	unsigned char menu_Head_green;
