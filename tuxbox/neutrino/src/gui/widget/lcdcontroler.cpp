@@ -75,7 +75,7 @@ void CLcdControler::setLcd()
 int CLcdControler::exec(CMenuTarget* parent, std::string)
 {
 	int selected, res = menu_return::RETURN_REPAINT;
-	unsigned int contrast_alt, brightness_alt, brightnessstandby_alt;
+	unsigned int contrast_alt, brightness_alt, brightnessstandby_alt, autodimm_alt;
 
 	if (parent)
 	{
@@ -84,9 +84,11 @@ int CLcdControler::exec(CMenuTarget* parent, std::string)
 	contrast_alt = CLCD::getInstance()->getContrast();
 	brightness_alt = CLCD::getInstance()->getBrightness();
 	brightnessstandby_alt = CLCD::getInstance()->getBrightnessStandby();
+	autodimm_alt = CLCD::getInstance()->getAutoDimm();
 	selected = 0;
 
 	setLcd();
+	CLCD::getInstance()->setAutoDimm(0);	// autodimm deactivated to control and see the real settings
 	paint();
 
 	uint msg; uint data;
@@ -278,6 +280,7 @@ int CLcdControler::exec(CMenuTarget* parent, std::string)
 		}
 	}
 
+	CLCD::getInstance()->setAutoDimm(autodimm_alt);
 	hide();
 
 	if(observer)
