@@ -1987,14 +1987,14 @@ int eFrontend::tune_qam(eTransponder *trans,
 #if HAVE_DVB_API_VERSION < 3
 	front.Inversion=(Inversion == 2 ? INVERSION_AUTO :
 		(Inversion?INVERSION_ON:INVERSION_OFF) );
-	front.Frequency = Frequency;
+	front.Frequency=Frequency;
 	front.u.qam.QAM=getModulation(QAM);
 	front.u.qam.FEC_inner=getFEC(FEC_inner);
 	front.u.qam.SymbolRate=SymbolRate;
 #else
 	front.inversion=(Inversion == 2 ? INVERSION_AUTO :
 		(Inversion?INVERSION_ON:INVERSION_OFF) );
-	front.frequency = Frequency / 1000; // dbox2 v3 drivers need frequency as Mhz
+	front.frequency = Frequency*1000; // dbox2 v3 drivers need frequency as Hz
 	front.u.qam.modulation=getModulation(QAM);
 	front.u.qam.fec_inner=getFEC(FEC_inner);
 	front.u.qam.symbol_rate=SymbolRate;
