@@ -6,5 +6,5 @@ EXTRA_DIST = eit.tmp index.tmp helpDMMSites.tmp helpOtherSites.tmp helpForums.tm
 	mountPoint.tmp mountPoints.tmp mountPointWindow.tmp subChannelSelection.tmp mepg_small.tmp
 
 install-data-local:
-	install -d $(DATADIR)/enigma/templates
-	install -m 0644 $(EXTRA_DIST) $(DATADIR)/enigma/templates
+	install -d $(DESTDIR)$(DATADIR)/enigma/templates
+	install -m 0644 $(EXTRA_DIST) $(DESTDIR)$(DATADIR)/enigma/templates

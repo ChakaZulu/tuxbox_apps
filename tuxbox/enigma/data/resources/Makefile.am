@@ -4,5 +4,5 @@ EXTRA_DIST = rcdboxnew.xml rcdboxold.xml rcdboxbuttons.xml help.xml \
 	keymappings.xml rcdreambox_keyboard.xml
 
 install-data-local:
-	install -d $(DATADIR)/enigma/resources
-	install -m 0644 $(EXTRA_DIST) $(DATADIR)/enigma/resources
+	install -d $(DESTDIR)$(DATADIR)/enigma/resources
+	install -m 0644 $(EXTRA_DIST) $(DESTDIR)$(DATADIR)/enigma/resources

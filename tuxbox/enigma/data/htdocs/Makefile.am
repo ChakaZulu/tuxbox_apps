@@ -13,5 +13,5 @@ EXTRA_DIST = \
 	topbalk4_small.png
 
 install-data-local:
-	install -d $(DATADIR)/enigma/htdocs
-	install -m 0644 $(EXTRA_DIST) $(DATADIR)/enigma/htdocs
+	install -d $(DESTDIR)$(DATADIR)/enigma/htdocs
+	install -m 0644 $(EXTRA_DIST) $(DESTDIR)$(DATADIR)/enigma/htdocs
