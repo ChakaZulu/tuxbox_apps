@@ -5,7 +5,7 @@ options.on wla
 options.serial szeregowy
 options.fb ekran
 options.null brak
-options.default unset
+options.default ustaw fabryczne
 
 mainmenu.head Menu glówne
 mainmenu.tvmode Telewizja
@@ -20,16 +20,16 @@ mainmenu.service Serwis
 mainmenu.recording Nagrywanie
 mainmenu.recording_start rozpocznij
 mainmenu.recording_stop zatrzymaj
-mainmenu.pictureviewer Przegladarka obrazów
-mainmenu.movieplayer unset
-mainmenu.pausesectionsd unset
+mainmenu.pictureviewer Przegladarka zdjec
+mainmenu.movieplayer Odtwarzacz filmow
+mainmenu.pausesectionsd czytaj EPG
 
 servicemenu.head Ustawienia
 servicemenu.update Aktualizacja oprogramowania
 servicemenu.scants Strojenie
 servicemenu.ucodecheck Wersja ucodes
-servicemenu.reload unset
-servicemenu.reload_hint unset
+servicemenu.reload przeladuj liste kanalów
+servicemenu.reload_hint Przeladowje liste,\nprosze czekaj...
 
 cablesetup.provider provider kablowy
 
@@ -50,7 +50,7 @@ satsetup.motorcontrol Silownik-konfiguracja
 
 mainsettings.head Glówne ustawienia
 mainsettings.savesettingsnow Zapisz natychmiast ustawienia
-mainsettings.savesettingsnow_hint unset
+mainsettings.savesettingsnow_hint Zapisuje ustawienia,\nprosze czekaj...
 mainsettings.language Jezyk
 mainsettings.audio Dzwiek
 mainsettings.video Obraz
@@ -67,10 +67,10 @@ mp3picsettings.general Odtwarzacz MP3 / Przegladarka
 
 miscsettings.head Inne Ustawienia
 miscsettings.shutdown_real Zalacz Standby
-miscsettings.shutdown_real_rcdelay unset
+miscsettings.shutdown_real_rcdelay Opóznione wylaczenie
 miscsettings.boxtype Tyb DBox'a
 miscsettings.startneutrinodirect Bezposrednio Neutrino
-miscsettings.startbhdriver unset
+miscsettings.startbhdriver zaladuj drivery BH
 miscsettings.general Glówne
 miscsettings.fb_destination Ekspert! -konsola
 miscsettings.infobar_sat_display Nazwa satelity na pasku
@@ -224,7 +224,7 @@ lcdmenu.lcdcontroler Kontrast / Jasnosc
 lcdmenu.statusline Linia Statusowa
 lcdmenu.statusline.volume Glosnosc
 lcdmenu.statusline.playtime Czas odtwarzania
-lcdmenu.statusline.both change me
+lcdmenu.statusline.both Glosnosc / Czas
 
 lcdcontroler.head Ustawienia LCD
 lcdcontroler.contrast Kontrast
@@ -258,7 +258,7 @@ infoviewer.nocurrent INFO nie dostepne dla tego kanalu
 infoviewer.noepg EPG nie dostepne
 infoviewer.subservice Subservices
 infoviewer.waittime Oczekiwanie na czas...
-infoviewer.motor_moving unset
+infoviewer.motor_moving Ustawianie anteny
 
 epgviewer.notfound EPG-Informacje nie znalezione
 epgviewer.nodetailed Informacje nie sa dostepne
@@ -324,18 +324,18 @@ scants.actsatellite Satelity:
 scants.actcable Kabel:
 scants.transponders Transpondery:
 scants.freqdata Czestotliwosc:
-scants.provider unset
-scants.channel unset
+scants.provider Dostawca
+scants.channel Kanal
 scants.numberoftvservices TV
 scants.numberofradioservices Radio
 scants.numberofdataservices Dane
-scants.numberoftotalservices unset
+scants.numberoftotalservices All
 scants.services Kanaly:
 scants.bouquet Bukiety
 scants.bouquet_leave pozostaw obecne
 scants.bouquet_create utworz nowe
 scants.bouquet_erase kasuj wszystkie
-scants.bouquet_satellite unset
+scants.bouquet_satellite Bukiet satelity
 scants.failed Brak transpondera!
 scants.finished Strojenie zakonczone sukcesem!
 
@@ -441,7 +441,7 @@ GENRE.MOVIE.6 romans
 GENRE.MOVIE.7 serial/klasyka/religia/historia
 GENRE.MOVIE.8 dla doroslych
 
-GENRE.NEWS.0 Wiadomosci
+GENRE.NEWS.0 wiadomosci
 GENRE.NEWS.1 nowosci/pogoda
 GENRE.NEWS.2 magazyn
 GENRE.NEWS.3 dokument
@@ -647,7 +647,7 @@ fontsize.infobar_small maly
 fontsize.gamelist_itemLarge duzy
 fontsize.gamelist_itemSmall maly
 fontsize.filebrowser_item element przeglad.
-fontsize.hint unset
+fontsize.hint Inicjalizuje czcionki,\nprosze czekaj...
 
 fontmenu.head Rozmiar czcionki
 fontmenu.channellist Lista kan.
@@ -662,7 +662,7 @@ gtxalpha.alpha2 Alfa2
 
 mp3player.name Odtwarzacz MP3
 mp3player.head Mp3
-mp3player.play Odtwarzaj
+mp3player.play Start
 mp3player.add Dodaj
 mp3player.delete Kasuj
 mp3player.stop Zatrzymaj
@@ -676,20 +676,20 @@ mp3player.id3scan Skanuj ID3 info
 mp3player.keylevel poziom
 mp3player.fastforward przewin.
 mp3player.pause pauza
-mp3player.rewind rewind
+mp3player.rewind cofnij
 mp3player.artist_title Interpretacja, Tytul
 mp3player.title_artist Tytul, Interpretacja
 mp3player.display_order Kolejnosc
 mp3player.follow Auto-wybór biezacy
-mp3player.screensaver_timeout unset
+mp3player.screensaver_timeout wygaszacz za:(min, 0=off)
 
-movieplayer.name unset
-movieplayer.head unset
-movieplayer.play unset
-movieplayer.choosets unset
-movieplayer.chooseps unset
-movieplayer.choosepes unset
-movieplayer.bookmark unset
+movieplayer.name Odtwarzacz filmów
+movieplayer.head Odtwarzacz filmów 
+movieplayer.play Start
+movieplayer.choosets Odtwarzaj TS
+movieplayer.chooseps Odtwarzaj PS
+movieplayer.choosepes Odtwarzaj PES
+movieplayer.bookmark Ulubione
 
 filebrowser.head Przegladarka
 filebrowser.filter.active Filtr wlaczony

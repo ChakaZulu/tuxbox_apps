@@ -5,33 +5,33 @@ options.on Accendi
 options.serial seriale
 options.fb framebuffer
 options.null null
-options.default unset
+options.default Usare impostazioni standart
 
-mainmenu.head MenÃ¼ Principale
+mainmenu.head Menu Principale
 mainmenu.tvmode Modo-TV
 mainmenu.radiomode Modo-Radio
 mainmenu.scartmode Entrata Scart
 mainmenu.games Giochi
-mainmenu.mp3player mp3player 
+mainmenu.mp3player Mp3player 
 mainmenu.sleeptimer SleepTimer
 mainmenu.shutdown Spegnere
 mainmenu.settings Impostazioni
-mainmenu.service Servizio
+mainmenu.service Service
 mainmenu.recording Streaming (Registrazione)
 mainmenu.recording_start start
 mainmenu.recording_stop stop
 mainmenu.pictureviewer Lettore immaggini
-mainmenu.movieplayer unset
-mainmenu.pausesectionsd unset
+mainmenu.movieplayer Movieplayer
+mainmenu.pausesectionsd Leggere EPG
 
 servicemenu.head Service
 servicemenu.update Aggiornamento-Software
 servicemenu.scants Ricerca Canali
 servicemenu.ucodecheck Controllo UCodes
-servicemenu.reload unset
-servicemenu.reload_hint unset
+servicemenu.reload Nuona lettura lista Canali
+servicemenu.reload_hint Nuona lettura lista Canali,\nPrego attendere
 
-cablesetup.provider Gestore
+cablesetup.provider Gestore Cavo
 
 satsetup.disqeqc DiSEqC
 satsetup.satellite Satellite
@@ -46,16 +46,16 @@ satsetup.diseqc12 DiSEqC 1.2
 satsetup.smatvremote SMATV Remote Tuning
 satsetup.diseqcrepeat DiSEqC-Ripetizioni
 satsetup.savesettingsnow Salvare le impostazioni
-satsetup.motorcontrol Setup-Motore
+satsetup.motorcontrol Setup-Motore antenna
 
 mainsettings.head Impostazioni
 mainsettings.savesettingsnow Salvare le Impostazioni
-mainsettings.savesettingsnow_hint unset
+mainsettings.savesettingsnow_hint Impostazioni vengono salvate,\nPrego attendere
 mainsettings.language Lingua
 mainsettings.audio Audio
 mainsettings.video Video
 mainsettings.network Network
-mainsettings.recording Streamingserver
+mainsettings.recording Registrazione Streaming
 mainsettings.colors Colori / Themes
 mainsettings.plugins plugins 
 mainsettings.lcd LC-Display
@@ -67,9 +67,9 @@ mp3picsettings.general MP3 Player / Visore Immaggine
 
 miscsettings.head Altre Impostazioni
 miscsettings.shutdown_real Modo Standby
-miscsettings.shutdown_real_rcdelay unset
+miscsettings.shutdown_real_rcdelay shutdown ritardato
 miscsettings.boxtype DBox Costruttore
-miscsettings.startneutrinodirect Esecuzione diretta Neutrino
+miscsettings.startneutrinodirect Partenza Neutrino direttamente
 miscsettings.startbhdriver Carica Driver BH-Mode
 miscsettings.general Generale
 miscsettings.fb_destination EXPERT! Boot-Konsole
@@ -78,17 +78,17 @@ miscsettings.infobar_sat_display Infobar Display Satellite
 languagesetup.head Impostazioni Lingua
 languagesetup.select Lingua
 
-audiomenu.head Impostazioni -Audio
+audiomenu.head Impostazioni-Audio
 audiomenu.analogout Uscita-Analogica
 audiomenu.monoright mono destro
 audiomenu.monoleft mono sinistro
 audiomenu.stereo stereo
 audiomenu.dolbydigital Dolby Digitale
-audiomenu.avs_control controllo
+audiomenu.avs_control controllo Volume avs/ost
 audiomenu.avs avs
 audiomenu.ost ost
 
-videomenu.head Impostazioni -Video
+videomenu.head Impostazioni-Video
 videomenu.screensetup Impostazioni Margine Video
 videomenu.videosignal Tipo di segnale Video
 videomenu.videosignal_rgb RGB + CVBS
@@ -107,7 +107,7 @@ networkmenu.head Impostazioni Rete
 networkmenu.test Test Rete
 networkmenu.show Impostazioni Attivi di Rete
 networkmenu.setupnow Attiva Impostazioni Rete
-networkmenu.setuponstartup alla Partenza attivare la Rete
+networkmenu.setuponstartup alla Avvio attivare la Rete
 networkmenu.ipaddress Indirizzo-IP
 networkmenu.netmask Netmask
 networkmenu.broadcast Broadcast
@@ -123,10 +123,10 @@ recordingmenu.stopsectionsd Sectionsd stop
 recordingmenu.vcr_devicename Nome device
 recordingmenu.off Menu off
 recordingmenu.server server 
-recordingmenu.vcr vcr 
+recordingmenu.vcr Videoregistratore 
 recordingmenu.server_wakeup Streamingserver accendi
-recordingmenu.server_mac Mac
-recordingmenu.setupnow setup
+recordingmenu.server_mac Indirizzo Mac
+recordingmenu.setupnow Accettare le Impostazioni
 recordingmenu.no_scart no scart
 
 ping.ok e raggiungibile (ping)
@@ -137,11 +137,11 @@ ping.socket non e raggiungibile (Socket error)
 ipsetup.hint_1 Usare il 0..9 per Alto/Basso
 ipsetup.hint_2 OK Salva, Home Indietro
 
-colormenu.head Impostazioni -Colori
+colormenu.head Impostazioni-Colori
 colormenu.statusbar statusbar
 colormenu.themeselect Sciegli Tema
-colormenu.font Tipo Font
-colormenu.menucolors Colori MenÃ¼
+colormenu.font Tipo grandezza Font
+colormenu.menucolors Colori Menu
 colormenu.background Colori di fondo
 colormenu.background_head Colori di fondo
 colormenu.textcolor Colori Testo
@@ -153,18 +153,18 @@ colorthememenu.head Sciegli Tema
 colorthememenu.neutrino_Theme Neutrino Tema
 colorthememenu.classic_theme Classico
 
-colormenusetup.head Colori MenÃ¼
+colormenusetup.head Colori Menu
 colormenusetup.menuhead Barra Titoli
-colormenusetup.menucontent Contenuto MenÃ¼
-colormenusetup.menucontent_inactive Contenuto MenÃ¼ disattivato
-colormenusetup.menucontent_selected Contenuto MenÃ¼ selezionato
+colormenusetup.menucontent Contenuto Menu
+colormenusetup.menucontent_inactive Contenuto Menu disattivato
+colormenusetup.menucontent_selected Contenuto Menu selezionato
 
-colorstatusbar.head Colori Contenuto MenÃ¼
-colorstatusbar.text Contenuto MenÃ¼
+colorstatusbar.head Colori Contenuto Menu
+colorstatusbar.text Contenuto Menu
 
-timing.head Testa
-timing.menu Menu Timer
-timing.chanlist lista canali
+timing.head OSD Timeouts
+timing.menu Menu Menu 
+timing.chanlist Lista canali
 timing.epg Epg
 timing.infobar Infobar
 timing.filebrowser filebrowser 
@@ -240,7 +240,7 @@ keychooser.text1 Premere il Tasto
 keychooser.text2 Per interrompere aspettare..
 
 screensetup.upperleft rot = Margine Alto, sinistro
-screensetup.lowerright grÃ¼n = Margine Basso, destro
+screensetup.lowerright grÃƒÂ¼n = Margine Basso, destro
 
 channellist.head Tutti i Canali
 channellist.nonefound Non e stato trovato nessun Canale!\nEseguire una nuova Ricerca Canali\n(dbox-Taste -> Servizio)
@@ -258,7 +258,7 @@ infoviewer.nocurrent Nessuna Informazione sul Programma
 infoviewer.noepg Nessuna Informazione-EPG
 infoviewer.subservice Regia Video
 infoviewer.waittime Attendo Orario...
-infoviewer.motor_moving unset
+infoviewer.motor_moving Posizionamento Antenna
 
 epgviewer.notfound Nessuna Informazione-(EPG) trovati
 epgviewer.nodetailed Nessuna Informazione
@@ -324,18 +324,18 @@ scants.actsatellite Satellite:
 scants.actcable Cavo:
 scants.transponders Transponder:
 scants.freqdata Frequenza:
-scants.provider unset
-scants.channel unset
+scants.provider Gestore:
+scants.channel Canale:
 scants.numberoftvservices TV
 scants.numberofradioservices Radio
-scants.numberofdataservices Data
-scants.numberoftotalservices unset
+scants.numberofdataservices Dati
+scants.numberoftotalservices Totale
 scants.services Services:
-scants.bouquet Bouquets
+scants.bouquet Bouquets:
 scants.bouquet_leave Non Cambiare
 scants.bouquet_create Crea Nuovi
 scants.bouquet_erase Cancellare
-scants.bouquet_satellite unset
+scants.bouquet_satellite Bouquets Satellite
 scants.failed Ricerca Canali fallita!
 scants.finished Ricerca Canali finita con Successo!
 
@@ -354,7 +354,7 @@ flashupdate.eraseingflash Cancella Flash
 flashupdate.programmingflash programmo Flash
 flashupdate.cantopenmtd impossibbile aprire MTD-Device
 flashupdate.ready Finito
-flashupdate.reboot Die DBox viene Riavviato
+flashupdate.reboot Il DBox viene Riavviato
 flashupdate.updatemode ModoUpdate
 flashupdate.updatemode_manual manuale (ftp)
 flashupdate.updatemode_internet internet
@@ -367,7 +367,7 @@ flashupdate.checkupdate Cercare nuove Versioni
 flashupdate.versioncheck Controllo Versione
 flashupdate.nonewversion Nessuna Versione Nuova
 flashupdate.md5check Controllo Image
-flashupdate.md5sumerror Image e Corrotta
+flashupdate.md5sumerror Image e difettosa
 flashupdate.proxyserver_sep Proxyserver
 flashupdate.proxyserver Proxynome
 flashupdate.proxyserver_hint1 Inserire Proxynome oppure IP  (Host:Port)
@@ -424,7 +424,7 @@ settings.noconffile Le Impostazioni-Neutrino non sono stati\ntrovati. Verranno u
 settings.missingoptionsconffile Le Impostazioni-Neutrino sono stati avanzati.\n i Nuovi parametri verrano aggiunti al Standart.
 
 cam.wrong Attenzione la vostra CAM_ALPHA.BIN non e adatta\nper la vostra Smart-Card!!!\n\nVuole rivedere questa informazione?
-ucodes.failure Attenzione non sono stati trovati le ÂµCodes !\nCaricarle via FTP (oppure DBox-BootManager)\ e riavviare il  DBox !
+ucodes.failure Attenzione non sono stati trovati le Ã‚ÂµCodes !\nCaricarle via FTP (oppure DBox-BootManager)\ e riavviare il  DBox !
 
 stringinput.caps Caratteri grandi/piccoli
 stringinput.clear Cancellare tutto
@@ -542,7 +542,7 @@ pinprotection.head Richiesta-PIN
 
 favorites.bouquetname Miei Favoriti
 favorites.nobouquets Favoriti sono solamente possibbili nei Bouquet attivi
-favorites.addchannel Il Canale verra aggiuntoal Bouquet \n"Miei Favoriti" . \nOperazione a bisogno un po di tempo..attendere
+favorites.addchannel Il Canale verra aggiunto al Bouquet \n"Miei Favoriti" . \nOperazione a bisogno un po di tempo..attendere
 favorites.menueadd Aggiungere il Canale nei Favoriti
 favorites.bqcreated Bouquet "Miei Favoriti" e stato creato...\n
 favorites.chadded Il Calale attuale e stato aggiunto nei Favoriti...\n
@@ -647,7 +647,7 @@ fontsize.infobar_small Infobar stretto
 fontsize.gamelist_itemLarge infobar lango
 fontsize.gamelist_itemSmall infobar piccolo
 fontsize.filebrowser_item Vedi-Filebrowser
-fontsize.hint unset
+fontsize.hint Font viene inizializzato,\nPrego attendere...
 
 fontmenu.head Impostazioni dei caratteri
 fontmenu.channellist Lista canali
@@ -681,15 +681,15 @@ mp3player.artist_title Artista, Titolo
 mp3player.title_artist Titolo, Artista
 mp3player.display_order Visore
 mp3player.follow Selezionare Track attuale
-mp3player.screensaver_timeout unset
+mp3player.screensaver_timeout Salvaschermo_Timeout
 
-movieplayer.name unset
-movieplayer.head unset
-movieplayer.play unset
-movieplayer.choosets unset
-movieplayer.chooseps unset
-movieplayer.choosepes unset
-movieplayer.bookmark unset
+movieplayer.name movieplayer
+movieplayer.head movieplayer
+movieplayer.play Play
+movieplayer.choosets TS Play
+movieplayer.chooseps PS Play
+movieplayer.choosepes PES Play
+movieplayer.bookmark bookmark
 
 filebrowser.head filebrowser
 filebrowser.filter.active Filtro on

@@ -5,7 +5,7 @@ options.on ii
 options.serial säriell
 options.fb frembaffer
 options.null null
-options.default unset
+options.default Voristellige nee
 
 mainmenu.head Haupdmenü
 mainmenu.tvmode TV-Modus
@@ -21,15 +21,15 @@ mainmenu.recording Sdreaming (ufnehh)
 mainmenu.recording_start un los
 mainmenu.recording_stop hald
 mainmenu.pictureviewer Bildbedrachder
-mainmenu.movieplayer unset
-mainmenu.pausesectionsd unset
+mainmenu.movieplayer Movieplayer
+mainmenu.pausesectionsd EPG uss'läse
 
 servicemenu.head Sörvis
 servicemenu.update Software-Öbdaede
 servicemenu.scants Kanalsürchi
 servicemenu.ucodecheck UCodes tschegge
-servicemenu.reload unset
-servicemenu.reload_hint unset
+servicemenu.reload Kanallischde neu lade
+servicemenu.reload_hint Kannallischde wärde neu g'lade,\ne'Moment warde...
 
 cablesetup.provider Kabelabieder
 
@@ -50,7 +50,7 @@ satsetup.motorcontrol Motor-Setup
 
 mainsettings.head Iischdellige
 mainsettings.savesettingsnow Iischdellige jetz speichere
-mainsettings.savesettingsnow_hint unset
+mainsettings.savesettingsnow_hint Iistellige wärde jetz g'speichered,\ne'Moment warde...
 mainsettings.language Sprooch
 mainsettings.audio Audio
 mainsettings.video Video
@@ -67,7 +67,7 @@ mp3picsettings.general MP3 Player / Bildbetrachter
 
 miscsettings.head Diverse Iischdellige
 miscsettings.shutdown_real Sdändbymodus
-miscsettings.shutdown_real_rcdelay unset
+miscsettings.shutdown_real_rcdelay V'rzögerede Shudown
 miscsettings.boxtype DBox Hersdeller
 miscsettings.startneutrinodirect Neutrino diräkt starte
 miscsettings.startbhdriver BH-Mode Triiber lade
@@ -258,7 +258,7 @@ infoviewer.nocurrent Kei Info zuem laufende Programm
 infoviewer.noepg Kei EPG-Information verfuigbar
 infoviewer.subservice Bildregie
 infoviewer.waittime Wart' uff'd Uhrzeit...
-infoviewer.motor_moving unset
+infoviewer.motor_moving Antennepositionierig
 
 epgviewer.notfound keini Programminformatione (EPG) g'funde
 epgviewer.nodetailed Keini usführliche Informationen verfuigbar
@@ -324,18 +324,18 @@ scants.actsatellite Sadellid:
 scants.actcable Kabel:
 scants.transponders Transponder:
 scants.freqdata Frequenz:
-scants.provider unset
-scants.channel unset
+scants.provider Abieter:
+scants.channel Kanal:
 scants.numberoftvservices TV
 scants.numberofradioservices Radio
 scants.numberofdataservices Data
-scants.numberoftotalservices unset
+scants.numberoftotalservices Alli zämme:
 scants.services Services:
 scants.bouquet Bouquets
 scants.bouquet_leave nidd ändere
 scants.bouquet_create neu mache
 scants.bouquet_erase lösche
-scants.bouquet_satellite unset
+scants.bouquet_satellite Satellite-Bouquet:
 scants.failed Kanalsuechii fehlg'schlage!
 scants.finished Kanalsueche erfolgrich beändet!
 
@@ -647,7 +647,7 @@ fontsize.infobar_small Infobar chlei
 fontsize.gamelist_itemLarge gross
 fontsize.gamelist_itemSmall chlei
 fontsize.filebrowser_item Dateibrowser-Iidrag
-fontsize.hint unset
+fontsize.hint Font wird initialisiert,\ne'Moment warde...
 
 fontmenu.head Schriftgrössen Iischdellige
 fontmenu.channellist Kanallischde
@@ -681,15 +681,15 @@ mp3player.artist_title Interpret, Titel
 mp3player.title_artist Titel, Interpret
 mp3player.display_order Anzeig'
 mp3player.follow Selektiere akt. Track
-mp3player.screensaver_timeout unset
+mp3player.screensaver_timeout Bildschirmschoner (min, 0=aus)
 
-movieplayer.name unset
-movieplayer.head unset
-movieplayer.play unset
-movieplayer.choosets unset
-movieplayer.chooseps unset
-movieplayer.choosepes unset
-movieplayer.bookmark unset
+movieplayer.name Movieplayer
+movieplayer.head Movieplayer
+movieplayer.play Abspiele
+movieplayer.choosets TS abspiele
+movieplayer.chooseps PS abspiele
+movieplayer.choosepes PES abspiele
+movieplayer.bookmark Bookmarks
 
 filebrowser.head Filebrowser
 filebrowser.filter.active Filter aah

@@ -5,7 +5,7 @@ options.on upaljeno
 options.serial serijski
 options.fb framebuffer
 options.null null
-options.default unset
+options.default standardno namjescenje
 
 mainmenu.head glavni izbor
 mainmenu.tvmode tv
@@ -21,15 +21,15 @@ mainmenu.recording snimanje
 mainmenu.recording_start start
 mainmenu.recording_stop stop
 mainmenu.pictureviewer promatrac slika
-mainmenu.movieplayer unset
-mainmenu.pausesectionsd unset
+mainmenu.movieplayer promatrac filmova
+mainmenu.pausesectionsd citati epg
 
 servicemenu.head servis
 servicemenu.update obnoviti softver
 servicemenu.scants traziti kanale
 servicemenu.ucodecheck provjeriti ucodese
-servicemenu.reload unset
-servicemenu.reload_hint unset
+servicemenu.reload liste kanale obnoviti
+servicemenu.reload_hint obnavljaju se liste kanala,\ncekajte trenutak...
 
 cablesetup.provider snabdjevac
 
@@ -50,7 +50,7 @@ satsetup.motorcontrol namjescenje motora
 
 mainsettings.head namjescenje
 mainsettings.savesettingsnow namjescenje sada memorisati
-mainsettings.savesettingsnow_hint unset
+mainsettings.savesettingsnow_hint memorise se namjescenje,\ncekajte trenutak...
 mainsettings.language jezik
 mainsettings.audio ton
 mainsettings.video video
@@ -67,7 +67,7 @@ mp3picsettings.general mp3 igrac / promatrac slika
 
 miscsettings.head namjestiti razne stvari
 miscsettings.shutdown_real pripravnost
-miscsettings.shutdown_real_rcdelay unset
+miscsettings.shutdown_real_rcdelay ugasiti sa zastojanjem
 miscsettings.boxtype proizvodjac dbox2
 miscsettings.startneutrinodirect direktni start neutrina
 miscsettings.startbhdriver startovati bh-mode driver
@@ -258,7 +258,7 @@ infoviewer.nocurrent nema informacije o ovom programu
 infoviewer.noepg nema epg informacije
 infoviewer.subservice rezija slike
 infoviewer.waittime ceka se na vrijeme ...
-infoviewer.motor_moving unset
+infoviewer.motor_moving namjescenje antene
 
 epgviewer.notfound nisu nadjene informacije o programu (epg)
 epgviewer.nodetailed nema opsirnih informacija
@@ -324,18 +324,18 @@ scants.actsatellite satelit:
 scants.actcable kablo:
 scants.transponders transponderi:
 scants.freqdata frekvencija:
-scants.provider unset
-scants.channel unset
+scants.provider snabdjevac:
+scants.channel kanal:
 scants.numberoftvservices tv
 scants.numberofradioservices radio
 scants.numberofdataservices data
-scants.numberoftotalservices unset
+scants.numberoftotalservices ukupno
 scants.services servisi:
 scants.bouquet bukete
 scants.bouquet_leave ne promijeniti
 scants.bouquet_create novo sastaviti
 scants.bouquet_erase izbrisati
-scants.bouquet_satellite unset
+scants.bouquet_satellite satelitski buket
 scants.failed Neuspjesno trazenje kanala!
 scants.finished Uspjesno izvrseno trazenje kanala!
 
@@ -647,7 +647,7 @@ fontsize.infobar_small mala infromativna traka
 fontsize.gamelist_itemLarge veliko
 fontsize.gamelist_itemSmall malo
 fontsize.filebrowser_item dio pretrazivaca datoteka
-fontsize.hint unset
+fontsize.hint slova se namjescaju,\ncekajte trenutak...
 
 fontmenu.head namjescenje velicine slova
 fontmenu.channellist lista kanala
@@ -681,15 +681,15 @@ mp3player.artist_title pjevac, pjesma
 mp3player.title_artist pjesma, pjevac
 mp3player.display_order redoslijed
 mp3player.follow izabjere ovu pjesmu
-mp3player.screensaver_timeout unset
+mp3player.screensaver_timeout stititi ekran (min, 0=ugaseno)
 
-movieplayer.name unset
-movieplayer.head unset
-movieplayer.play unset
-movieplayer.choosets unset
-movieplayer.chooseps unset
-movieplayer.choosepes unset
-movieplayer.bookmark unset
+movieplayer.name promatrac filmova
+movieplayer.head promatrac filmova
+movieplayer.play odigrati
+movieplayer.choosets odigrati ts
+movieplayer.chooseps odigrati ps
+movieplayer.choosepes odigrati pes
+movieplayer.bookmark oznaka
 
 filebrowser.head pretrazivac datoteka
 filebrowser.filter.active upaljen filter
