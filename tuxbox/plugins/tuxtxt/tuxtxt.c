@@ -5,6 +5,7 @@
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
+ *    V1.36: fix lcd-support                                                  *
  *    V1.35: add lcd-support                                                  *
  *    V1.34: add infoline for pagecatching                                    *
  *    V1.33: fix service-switch by wjoost                                     *
@@ -51,7 +52,7 @@ void plugin_exec(PluginParam *par)
 {
 	//show versioninfo
 
-		printf("\nTuxTxt 1.35 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
+		printf("\nTuxTxt 1.36 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
 
 	//get params
 
@@ -1139,6 +1140,7 @@ void PageInput(int Number)
 				}
 				else
 				{
+					subpage = 0;
 					RenderMessage(PageNotFound);
 					printf("TuxTxt <DirectInput => %.3X not found>\n", page);
 				}
@@ -2064,57 +2066,59 @@ void RenderPage()
 {
 	int row, col, byte;
 
-	if(transpmode != 2 && pageupdate && current_page != page && inputcounter == 2)
-	{
-		//reset update flag
-
-			pageupdate = 0;
-
-		//decode page
-
-			if(subpagetable[page] != 0xFF) DecodePage();
-			else
-			{
-				RenderMessage(PageNotFound);
-				return;
-			}
-
-		//render page
-
-			PosY = StartY;
-
-			for(row = 0; row < 24; row++)
-			{
-				PosX = StartX;
-
-				for(col = 0; col < 40; col++)
-				{
-					RenderCharBB(page_char[row*40 + col], page_atrb[row*40 + col]);
-				}
-
-				PosY += fixfontheight;
-			}
-
-		//update framebuffer
-
-			CopyBB2FB();
-	}
-	else if(transpmode != 2 && zoommode != 2)
-	{
-		//update timestring
-
-			PosX = StartX + 32*fontwidth;
-			PosY = StartY;
-
-			for(byte = 0; byte < 8; byte++)
-			{
-				RenderCharFB(timestring[byte], page_atrb[32]);
-			}
-	}
-
 	//update lcd
 
 		UpdateLCD();
+
+	//update page or timestring
+
+		if(transpmode != 2 && pageupdate && current_page != page && inputcounter == 2)
+		{
+			//reset update flag
+
+				pageupdate = 0;
+
+			//decode page
+
+				if(subpagetable[page] != 0xFF) DecodePage();
+				else
+				{
+					RenderMessage(PageNotFound);
+					return;
+				}
+
+			//render page
+
+				PosY = StartY;
+
+				for(row = 0; row < 24; row++)
+				{
+					PosX = StartX;
+
+					for(col = 0; col < 40; col++)
+					{
+						RenderCharBB(page_char[row*40 + col], page_atrb[row*40 + col]);
+					}
+
+					PosY += fixfontheight;
+				}
+
+			//update framebuffer
+
+				CopyBB2FB();
+		}
+		else if(transpmode != 2 && zoommode != 2)
+		{
+			//update timestring
+
+				PosX = StartX + 32*fontwidth;
+				PosY = StartY;
+
+				for(byte = 0; byte < 8; byte++)
+				{
+					RenderCharFB(timestring[byte], page_atrb[32]);
+				}
+		}
 }
 
 /******************************************************************************
