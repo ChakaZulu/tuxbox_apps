@@ -78,5 +78,5 @@ lib/system/Makefile
 lib/picviewer/Makefile
 po/Makefile
 src/Makefile
+enigma.pc
 ])
-
