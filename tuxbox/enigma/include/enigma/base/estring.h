@@ -17,7 +17,7 @@ public:
 	inline eString(const std::string &s);
 // methods
 	inline eString left(unsigned int len) const;
-	inline eString mid(unsigned int index, int len=-1) const;
+	inline eString mid(unsigned int index, unsigned int len=(unsigned)-1) const;
 	inline eString right(unsigned int len) const;
 	bool isNull() const;
 // operators
@@ -66,16 +66,16 @@ inline eString eString::left(unsigned int len) const
 }
 
 //////////////////////////////////////// eString mid ////////////////////////////////////////////////////////////
-inline eString eString::mid(unsigned int index, int len) const
+inline eString eString::mid(unsigned int index, unsigned int len) const
 {
 //	Returns a substring that contains the len characters of this string, starting at position index.
 //	Returns a null string if the string is empty or index is out of range. Returns the whole string from index if index+len exceeds the length of the string.
-	register int strlen = length();
+	register unsigned int strlen = length();
 
 	if (index >= strlen)
 		return eString();
 
-	if (strlen == -1)
+	if (len == (unsigned)-1)
 		return substr(index);
 
 	if (strlen < index + len)
@@ -89,7 +89,7 @@ inline eString eString::right(unsigned int len) const
 {
 //	Returns a substring that contains the len rightmost characters of the string.
 //	The whole string is returned if len exceeds the length of the string.
-	register int strlen = length();
+	register unsigned int strlen = length();
 	return len >= strlen ? *this : substr(strlen-len-1, len);
 }
 

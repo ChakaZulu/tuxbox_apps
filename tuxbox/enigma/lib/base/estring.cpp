@@ -40,7 +40,7 @@ eString& eString::setNum(int val, int sys)
 eString& eString::removeChars(char fchar)
 {
 //	Remove all chars that equal to fchar, and returns a reference to itself
-	int index=0;
+	unsigned int index=0;
 
 	while ( ( index = find(fchar, index) ) != npos )
 		erase(index, 1);
@@ -78,8 +78,8 @@ eString& eString::upper()
 eString& eString::strReplace(const char* fstr, const eString& rstr)
 {
 //	replace all occurrence of fstr with rstr and, and returns a reference to itself
-	int index=0;
-	int fstrlen = strlen(fstr);
+	unsigned int index=0;
+	unsigned int fstrlen = strlen(fstr);
 
 	while ( ( index = find(fstr, index) ) != npos )
 		replace(index++, fstrlen, rstr);
