@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.28 2004/11/03 20:28:03 zwen Exp $
+ * $Id: locals_intern.h,v 1.29 2004/11/07 21:20:39 chakazulu Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -544,11 +544,33 @@ const char * locale_real_names[] =
 	"movieplayer.nostreamingserver",
 	"movieplayer.pleasewait",
 	"movieplayer.toomanybookmarks",
-	"movieplayer.tshelp",
+	"movieplayer.tshelp1",
+	"movieplayer.tshelp10",
+	"movieplayer.tshelp11",
+	"movieplayer.tshelp12",
+	"movieplayer.tshelp2",
+	"movieplayer.tshelp3",
+	"movieplayer.tshelp4",
+	"movieplayer.tshelp5",
+	"movieplayer.tshelp6",
+	"movieplayer.tshelp7",
+	"movieplayer.tshelp8",
+	"movieplayer.tshelp9",
 	"movieplayer.tsplayback",
 	"movieplayer.tsplayback_pc",
 	"movieplayer.vcdplayback",
-	"movieplayer.vlchelp",
+	"movieplayer.vlchelp1",
+	"movieplayer.vlchelp10",
+	"movieplayer.vlchelp11",
+	"movieplayer.vlchelp12",
+	"movieplayer.vlchelp2",
+	"movieplayer.vlchelp3",
+	"movieplayer.vlchelp4",
+	"movieplayer.vlchelp5",
+	"movieplayer.vlchelp6",
+	"movieplayer.vlchelp7",
+	"movieplayer.vlchelp8",
+	"movieplayer.vlchelp9",
 	"movieplayer.wrongvlcversion",
 	"networkmenu.broadcast",
 	"networkmenu.dhcp",

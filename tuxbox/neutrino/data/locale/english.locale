@@ -479,11 +479,33 @@ movieplayer.head Movieplayer
 movieplayer.nostreamingserver The streaming server could not be reached.
 movieplayer.pleasewait Please wait.\nConnecting to the streaming server...
 movieplayer.toomanybookmarks There are too many bookmarks.\nYou need to delete one of them first.
-movieplayer.tshelp Red/Home Stop\nGREEN Select audio track\nYELLOW Pause/Continue\nBLUE Create bookmark\nd-box Show progress\n1 approx. 1 minute back\n3 skip approx. 1 minute\n4 approx. 5 minutes back\n6 skip approx. 5 minutes\n7 approx. 10 minutes back\n9 skip approx. 10 minutes\nHelp: http://www.giggo.de/dbox2/movieplayer.html\n
+movieplayer.tshelp1 Stop
+movieplayer.tshelp10 approx. 10 minutes back
+movieplayer.tshelp11 skip approx. 10 minutes
+movieplayer.tshelp12 Help: http://www.giggo.de/dbox2/movieplayer.html\n
+movieplayer.tshelp2 Select audio track
+movieplayer.tshelp3 Pause/Continue
+movieplayer.tshelp4 Create bookmark
+movieplayer.tshelp5 Show progress
+movieplayer.tshelp6 approx. 1 minute back
+movieplayer.tshelp7 skip approx. 1 minute
+movieplayer.tshelp8 approx. 5 minutes back
+movieplayer.tshelp9 skip approx. 5 minutes
 movieplayer.tsplayback Play TS
 movieplayer.tsplayback_pc Play TS with PIN protect
 movieplayer.vcdplayback (S)VCD
-movieplayer.vlchelp Red/Home Stop\nGREEN Resync\nYELLOW Pause/Continue\nBLUE Create bookmark\nd-box Show progress\n1 approx. 1 minute back\n3 skip approx. 1 minute\n4 approx. 5 minutes back\n6 skip approx. 5 minutes\n7 approx. 10 minutes back\n9 skip approx. 10 minutes\nHelp: http://www.giggo.de/dbox2/movieplayer.html\n
+movieplayer.vlchelp1 Stop
+movieplayer.vlchelp10 approx. 10 minutes back
+movieplayer.vlchelp11 skip approx. 10 minutes
+movieplayer.vlchelp12 Help: http://www.giggo.de/dbox2/movieplayer.html\n
+movieplayer.vlchelp2 Resync
+movieplayer.vlchelp3 Pause/Continue
+movieplayer.vlchelp4 Create bookmark
+movieplayer.vlchelp5 Show progress
+movieplayer.vlchelp6 approx. 1 minute back
+movieplayer.vlchelp7 skip approx. 1 minute
+movieplayer.vlchelp8 approx. 5 minutes back
+movieplayer.vlchelp9 skip approx. 5 minutes
 movieplayer.wrongvlcversion This feature is not support by your current version of VLC
 networkmenu.broadcast Broadcast
 networkmenu.dhcp DHCP
