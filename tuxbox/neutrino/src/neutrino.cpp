@@ -1486,15 +1486,16 @@ void CNeutrinoApp::InitMp3PicSettings(CMenuWidget &mp3PicSettings)
 	mp3PicSettings.addItem(GenericMenuSeparator);
 	mp3PicSettings.addItem(GenericMenuBack);
 	
-	CMenuOptionChooser *oj = new CMenuOptionChooser("pictureviewer.scaling", &g_settings.picviewer_scaling, true );
+	CMenuOptionChooser *oj = new CMenuOptionChooser(LOCALE_PICTUREVIEWER_SCALING, &g_settings.picviewer_scaling, true);
+#warning: TODO: localize pictureviewer scaling option
 	oj->addOption((int)CPictureViewer::SIMPLE, "Simple");
 	oj->addOption((int)CPictureViewer::COLOR, "Color Average");
 	oj->addOption((int)CPictureViewer::NONE, "None");
-	CStringInput * pic_timeout= new CStringInput("pictureviewer.slide_time", g_settings.picviewer_slide_time, 2, NULL, NULL, "0123456789 ");
-	mp3PicSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "pictureviewer.head") );
-	mp3PicSettings.addItem( oj );
-	mp3PicSettings.addItem(new CMenuForwarder("pictureviewer.slide_time", true, g_settings.picviewer_slide_time, pic_timeout));
-	mp3PicSettings.addItem(new CMenuForwarder("pictureviewer.defdir", true, g_settings.network_nfs_picturedir, this, "picturedir"));
+	CStringInput * pic_timeout= new CStringInput(LOCALE_PICTUREVIEWER_SLIDE_TIME, g_settings.picviewer_slide_time, 2, NULL, NULL, "0123456789 ");
+	mp3PicSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_PICTUREVIEWER_HEAD));
+	mp3PicSettings.addItem(oj);
+	mp3PicSettings.addItem(new CMenuForwarder(LOCALE_PICTUREVIEWER_SLIDE_TIME, true, g_settings.picviewer_slide_time, pic_timeout));
+	mp3PicSettings.addItem(new CMenuForwarder(LOCALE_PICTUREVIEWER_DEFDIR, true, g_settings.network_nfs_picturedir, this, "picturedir"));
 
 	oj = new CMenuOptionChooser(LOCALE_MP3PLAYER_DISPLAY_ORDER, &g_settings.mp3player_display, true);
 	oj->addOption((int)CMP3PlayerGui::ARTIST_TITLE, LOCALE_MP3PLAYER_ARTIST_TITLE);
@@ -1790,29 +1791,29 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 
 void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 {
-	CIPInput * recordingSettings_server_ip = new CIPInput("recordingmenu.server_ip", g_settings.recording_server_ip, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
-	CStringInput * recordingSettings_server_port = new CStringInput("recordingmenu.server_port", g_settings.recording_server_port, 6, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2, "0123456789 ");
+	CIPInput * recordingSettings_server_ip = new CIPInput(LOCALE_RECORDINGMENU_SERVER_IP, g_settings.recording_server_ip, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
+	CStringInput * recordingSettings_server_port = new CStringInput(LOCALE_RECORDINGMENU_SERVER_PORT, g_settings.recording_server_port, 6, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2, "0123456789 ");
 
-	CMenuForwarder * mf1 = new CMenuForwarder("recordingmenu.server_ip", (g_settings.recording_type == RECORDING_SERVER), g_settings.recording_server_ip, recordingSettings_server_ip);
-	CMenuForwarder * mf2 = new CMenuForwarder("recordingmenu.server_port", (g_settings.recording_type == RECORDING_SERVER), g_settings.recording_server_port, recordingSettings_server_port);
+	CMenuForwarder * mf1 = new CMenuForwarder(LOCALE_RECORDINGMENU_SERVER_IP, (g_settings.recording_type == RECORDING_SERVER), g_settings.recording_server_ip, recordingSettings_server_ip);
+	CMenuForwarder * mf2 = new CMenuForwarder(LOCALE_RECORDINGMENU_SERVER_PORT, (g_settings.recording_type == RECORDING_SERVER), g_settings.recording_server_port, recordingSettings_server_port);
 
-	CMACInput * recordingSettings_server_mac = new CMACInput("recordingmenu.server_mac",  g_settings.recording_server_mac, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
-	CMenuForwarder * mf3 = new CMenuForwarder("recordingmenu.server_mac", ((g_settings.recording_type == RECORDING_SERVER) && g_settings.recording_server_wakeup==1), g_settings.recording_server_mac, recordingSettings_server_mac);
+	CMACInput * recordingSettings_server_mac = new CMACInput(LOCALE_RECORDINGMENU_SERVER_MAC,  g_settings.recording_server_mac, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
+	CMenuForwarder * mf3 = new CMenuForwarder(LOCALE_RECORDINGMENU_SERVER_MAC, ((g_settings.recording_type == RECORDING_SERVER) && g_settings.recording_server_wakeup==1), g_settings.recording_server_mac, recordingSettings_server_mac);
 	CRecordingNotifier2 * RecordingNotifier2 = new CRecordingNotifier2(mf3);
-	CMenuOptionChooser * oj2 = new CMenuOptionChooser("recordingmenu.server_wakeup", &g_settings.recording_server_wakeup, (g_settings.recording_type == RECORDING_SERVER), RecordingNotifier2);
+	CMenuOptionChooser * oj2 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_SERVER_WAKEUP, &g_settings.recording_server_wakeup, (g_settings.recording_type == RECORDING_SERVER), RecordingNotifier2);
 	oj2->addOption(0, LOCALE_OPTIONS_OFF);
 	oj2->addOption(1, LOCALE_OPTIONS_ON );
 
 
-	CMenuOptionChooser* oj3 = new CMenuOptionChooser("recordingmenu.stopplayback", &g_settings.recording_stopplayback, (g_settings.recording_type == RECORDING_SERVER));
+	CMenuOptionChooser* oj3 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_STOPPLAYBACK, &g_settings.recording_stopplayback, (g_settings.recording_type == RECORDING_SERVER));
 	oj3->addOption(0, LOCALE_OPTIONS_OFF);
 	oj3->addOption(1, LOCALE_OPTIONS_ON );
 
-	CMenuOptionChooser* oj4 = new CMenuOptionChooser("recordingmenu.stopsectionsd", &g_settings.recording_stopsectionsd, (g_settings.recording_type == RECORDING_SERVER));
+	CMenuOptionChooser* oj4 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_STOPSECTIONSD, &g_settings.recording_stopsectionsd, (g_settings.recording_type == RECORDING_SERVER));
 	oj4->addOption(0, LOCALE_OPTIONS_OFF);
 	oj4->addOption(1, LOCALE_OPTIONS_ON );
 
-	CMenuOptionChooser* oj5 = new CMenuOptionChooser("recordingmenu.no_scart", &g_settings.recording_vcr_no_scart, (g_settings.recording_type == RECORDING_VCR));
+	CMenuOptionChooser* oj5 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_NO_SCART, &g_settings.recording_vcr_no_scart, (g_settings.recording_type == RECORDING_VCR));
 	oj5->addOption(0, LOCALE_OPTIONS_OFF);
 	oj5->addOption(1, LOCALE_OPTIONS_ON );
 
@@ -1828,25 +1829,25 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	CMenuForwarder *mf6 = new CMenuForwarder("timersettings.record_safety_time_after", true, g_settings.record_safety_time_after, timerSettings_record_safety_time_after );
 
 	// for direct recording
-	CMenuForwarder* mf7 = new CMenuForwarder("recordingmenu.defdir", (g_settings.recording_type == RECORDING_FILE), g_settings.network_nfs_recordingdir,this,"recordingdir");
-	CStringInput * recordingSettings_splitsize = new CStringInput("recordingmenu.splitsize", g_settings.recording_splitsize, 6, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2, "0123456789 ");
-	CMenuForwarder* mf8 = new CMenuForwarder("recordingmenu.splitsize", (g_settings.recording_type == RECORDING_FILE), g_settings.recording_splitsize,recordingSettings_splitsize);
+	CMenuForwarder* mf7 = new CMenuForwarder(LOCALE_RECORDINGMENU_DEFDIR, (g_settings.recording_type == RECORDING_FILE), g_settings.network_nfs_recordingdir,this,"recordingdir");
+	CStringInput * recordingSettings_splitsize = new CStringInput(LOCALE_RECORDINGMENU_SPLITSIZE, g_settings.recording_splitsize, 6, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2, "0123456789 ");
+	CMenuForwarder* mf8 = new CMenuForwarder(LOCALE_RECORDINGMENU_SPLITSIZE, (g_settings.recording_type == RECORDING_FILE), g_settings.recording_splitsize,recordingSettings_splitsize);
 
-	CMenuOptionChooser* oj6 = new CMenuOptionChooser("recordingmenu.stream_all_audio_pids", &g_settings.recording_stream_all_audio_pids, (g_settings.recording_type == RECORDING_FILE));
+	CMenuOptionChooser* oj6 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_STREAM_ALL_AUDIO_PIDS, &g_settings.recording_stream_all_audio_pids, (g_settings.recording_type == RECORDING_FILE));
 	oj6->addOption(0, LOCALE_OPTIONS_OFF);
 	oj6->addOption(1, LOCALE_OPTIONS_ON );
 	
 	CRecordingNotifier *RecordingNotifier = new CRecordingNotifier(mf1,mf2,oj2,mf3,oj3,oj4,oj5,mf7,mf8,oj6);
 
-	CMenuOptionChooser* oj1 = new CMenuOptionChooser("recordingmenu.recording_type", &g_settings.recording_type, true, RecordingNotifier);
-	oj1->addOption(RECORDING_OFF   , "recordingmenu.off"   );
-	oj1->addOption(RECORDING_SERVER, "recordingmenu.server");
-	oj1->addOption(RECORDING_VCR   , "recordingmenu.vcr"   );
-	oj1->addOption(RECORDING_FILE  , "recordingmenu.file"  );
+	CMenuOptionChooser* oj1 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_RECORDING_TYPE, &g_settings.recording_type, true, RecordingNotifier);
+	oj1->addOption(RECORDING_OFF   , LOCALE_RECORDINGMENU_OFF   );
+	oj1->addOption(RECORDING_SERVER, LOCALE_RECORDINGMENU_SERVER);
+	oj1->addOption(RECORDING_VCR   , LOCALE_RECORDINGMENU_VCR   );
+	oj1->addOption(RECORDING_FILE  , LOCALE_RECORDINGMENU_FILE  );
 
 	recordingSettings.addItem(GenericMenuSeparator);
 	recordingSettings.addItem(GenericMenuBack);
-	recordingSettings.addItem(new CMenuForwarder("recordingmenu.setupnow", true, NULL, this, "recording"));
+	recordingSettings.addItem(new CMenuForwarder(LOCALE_RECORDINGMENU_SETUPNOW, true, NULL, this, "recording"));
 	recordingSettings.addItem(GenericMenuSeparatorLine);
 	recordingSettings.addItem( oj1);
 	recordingSettings.addItem(GenericMenuSeparatorLine);
@@ -1861,7 +1862,7 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "timersettings.separator") );
 	recordingSettings.addItem( mf5);
 	recordingSettings.addItem( mf6);
-	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "recordingmenu.filesettingsseparator") );
+	recordingSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_RECORDINGMENU_FILESETTINGSSEPARATOR));
 	recordingSettings.addItem( mf7);
 	recordingSettings.addItem( mf8);
 	recordingSettings.addItem( oj6);
@@ -2465,7 +2466,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 	StreamFeatureSelector.addItem(GenericMenuSeparatorLine);
 
 	// --  Lock remote control
-	StreamFeatureSelector.addItem(new CMenuForwarder("rclock.menueadd", true, NULL, new CRCLock, id, true, CRCInput::RC_nokey, ""), false);
+	StreamFeatureSelector.addItem(new CMenuForwarder(LOCALE_RCLOCK_MENUEADD, true, NULL, new CRCLock, id, true, CRCInput::RC_nokey, ""), false);
 
 	// -- Sectionsd pause
 	int dummy = g_Sectionsd->getIsScanningActive();
@@ -2648,7 +2649,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget audioSettings       (LOCALE_AUDIOMENU_HEAD           , "audio.raw"           );
 	CMenuWidget parentallockSettings(LOCALE_PARENTALLOCK_PARENTALLOCK, "lock.raw"            , 500);
 	CMenuWidget networkSettings     (LOCALE_NETWORKMENU_HEAD         , "network.raw"         );
-	CMenuWidget recordingSettings   ("recordingmenu.head"            , "recording.raw"       );
+	CMenuWidget recordingSettings   (LOCALE_RECORDINGMENU_HEAD       , "recording.raw"       );
 	CMenuWidget streamingSettings   ("streamingmenu.head"            , "streaming.raw"       );
 	CMenuWidget colorSettings       (LOCALE_COLORMENU_HEAD           , "colors.raw"          );
 	CMenuWidget fontSettings        ("fontmenu.head"                 , "colors.raw"          );
@@ -3210,7 +3211,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 			standbyMode( false );
 		}
 		if( mode != mode_scart )
-			ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_ZAPTOTIMER_ANNOUNCE)); // UTF-8
+			ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_ZAPTOTIMER_ANNOUNCE));
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::ANNOUNCE_RECORD)
@@ -3223,7 +3224,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 				perror("etherwake failed");
 		}
 		if( mode != mode_scart )
-			ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText("recordtimer.announce")); // UTF-8
+			ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_RECORDTIMER_ANNOUNCE));
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::ANNOUNCE_SLEEPTIMER)

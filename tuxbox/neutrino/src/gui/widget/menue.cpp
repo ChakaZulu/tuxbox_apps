@@ -800,10 +800,10 @@ bool CPINProtection::check()
 	do
 	{
 		cPIN[0] = 0;
-		CPINInput* PINInput = new CPINInput( "pinprotection.head", cPIN, 4, hint);
+		CPINInput* PINInput = new CPINInput(LOCALE_PINPROTECTION_HEAD, cPIN, 4, hint);
 		PINInput->exec( getParent(), "");
 		delete PINInput;
-		hint = "pinprotection.wrongcode";
+		hint = LOCALE_PINPROTECTION_WRONGCODE;
 	} while ((strncmp(cPIN,validPIN,4) != 0) && (cPIN[0] != 0));
 	return ( strncmp(cPIN,validPIN,4) == 0);
 }
@@ -824,7 +824,7 @@ bool CZapProtection::check()
 		res = PINInput->exec(getParent(), "");
 		delete PINInput;
 
-		hint2 = "pinprotection.wrongcode";
+		hint2 = LOCALE_PINPROTECTION_WRONGCODE;
 	} while ( (strncmp(cPIN,validPIN,4) != 0) &&
 		  (cPIN[0] != 0) &&
 		  ( res == menu_return::RETURN_REPAINT ) &&

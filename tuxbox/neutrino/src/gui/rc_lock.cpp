@@ -53,8 +53,7 @@ int CRCLock::exec(CMenuTarget* parent, const std::string &)
 		parent->hide();
 
 
-	ShowMsgUTF("rclock.title", g_Locale->getText("rclock.lockmsg"),
-		CMessageBox::mbrYes, CMessageBox::mbYes, "info.raw");
+	ShowMsgUTF(LOCALE_RCLOCK_TITLE, g_Locale->getText(LOCALE_RCLOCK_LOCKMSG  ), CMessageBox::mbrYes , CMessageBox::mbYes , "info.raw");
 
 
 
@@ -64,8 +63,7 @@ int CRCLock::exec(CMenuTarget* parent, const std::string &)
 
 
 
-	ShowMsgUTF("rclock.title", g_Locale->getText("rclock.unlockmsg"),
-		CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
+	ShowMsgUTF(LOCALE_RCLOCK_TITLE, g_Locale->getText(LOCALE_RCLOCK_UNLOCKMSG), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 
 	return  menu_return::RETURN_EXIT_ALL;
 }

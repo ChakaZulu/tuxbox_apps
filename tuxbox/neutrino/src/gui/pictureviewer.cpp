@@ -179,7 +179,7 @@ int CPictureViewerGui::show()
 
 	int res = -1;
 
-	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, g_Locale->getText("pictureviewer.head") );
+	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, g_Locale->getText(LOCALE_PICTUREVIEWER_HEAD));
 	m_state=MENU;
 
 	int timeout;
@@ -465,7 +465,7 @@ int CPictureViewerGui::show()
 				CNFSSmallMenu nfsMenu;
 				nfsMenu.exec(this, "");
 				update=true;
-				CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, g_Locale->getText("pictureviewer.head") );
+				CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, g_Locale->getText(LOCALE_PICTUREVIEWER_HEAD));
 			}
 		}
 		else if(msg == NeutrinoMessages::CHANGEMODE)
@@ -563,7 +563,7 @@ void CPictureViewerGui::paintItem(int pos)
 void CPictureViewerGui::paintHead()
 {
 //	printf("paintHead{\n");
-	std::string strCaption = g_Locale->getText("pictureviewer.head");
+	std::string strCaption = g_Locale->getText(LOCALE_PICTUREVIEWER_HEAD);
 	frameBuffer->paintBoxRel(x,y, width,theight, COL_MENUHEAD_PLUS_0);
 	frameBuffer->paintIcon("mp3.raw",x+7,y+10);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+35,y+theight+0, width- 45, strCaption, COL_MENUHEAD, 0, true); // UTF-8
@@ -580,7 +580,7 @@ const struct button_label PictureViewerButtons[4] =
 	{ NEUTRINO_ICON_BUTTON_RED   , LOCALE_MP3PLAYER_DELETE        },
 	{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_MP3PLAYER_ADD           },
 	{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_MP3PLAYER_DELETEALL     },
-	{ NEUTRINO_ICON_BUTTON_BLUE  , "pictureviewer.slideshow" }
+	{ NEUTRINO_ICON_BUTTON_BLUE  , LOCALE_PICTUREVIEWER_SLIDESHOW }
 };
 
 void CPictureViewerGui::paintFoot()
@@ -594,15 +594,14 @@ void CPictureViewerGui::paintFoot()
 	if (!playlist.empty())
 	{
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, x + 1* ButtonWidth2 + 25, y+(height-buttonHeight)-3);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 1 * ButtonWidth2 + 53 , y+(height-buttonHeight)+24 - 4, 
-						     ButtonWidth2- 28, g_Locale->getText("pictureviewer.show"), COL_INFOBAR, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 1 * ButtonWidth2 + 53 , y+(height-buttonHeight)+24 - 4, ButtonWidth2- 28, g_Locale->getText(LOCALE_PICTUREVIEWER_SHOW), COL_INFOBAR, 0, true); // UTF-8
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ 0* ButtonWidth2 + 25, y+(height-buttonHeight)-3);
-		std::string tmp = g_Locale->getText("pictureviewer.sortorder");
+		std::string tmp = g_Locale->getText(LOCALE_PICTUREVIEWER_SORTORDER);
 		tmp += ' ';
 		if(m_sort==FILENAME)
-			tmp += g_Locale->getText("pictureviewer.sortorder.date");
+			tmp += g_Locale->getText(LOCALE_PICTUREVIEWER_SORTORDER_DATE);
 		else if(m_sort==DATE)
-			tmp += g_Locale->getText("pictureviewer.sortorder.filename");
+			tmp += g_Locale->getText(LOCALE_PICTUREVIEWER_SORTORDER_FILENAME);
 		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+ 0* ButtonWidth2 +53 , y+(height-buttonHeight)+24 - 4, ButtonWidth2- 28, tmp, COL_INFOBAR, 0, true); // UTF-8
 
 

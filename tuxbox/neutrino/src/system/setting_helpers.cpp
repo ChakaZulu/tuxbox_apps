@@ -467,10 +467,10 @@ const char * mypinghost(const char * const host)
 	int retvalue = pinghost(host);
 	switch (retvalue)
 	{
-		case 1: return (g_Locale->getText("ping.ok"));
-		case 0: return (g_Locale->getText("ping.unreachable"));
-		case -1: return (g_Locale->getText("ping.protocol"));
-		case -2: return (g_Locale->getText("ping.socket"));
+		case 1: return (g_Locale->getText(LOCALE_PING_OK));
+		case 0: return (g_Locale->getText(LOCALE_PING_UNREACHABLE));
+		case -1: return (g_Locale->getText(LOCALE_PING_PROTOCOL));
+		case -2: return (g_Locale->getText(LOCALE_PING_SOCKET));
 	}
 	return "";
 }
