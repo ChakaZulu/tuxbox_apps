@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.cpp,v 1.33 2002/09/30 14:44:11 Zwen Exp $
+	$Id: timermanager.cpp,v 1.34 2002/10/03 12:24:20 Zwen Exp $
 
 	License: GPL
 
@@ -509,7 +509,7 @@ void CTimerEvent_Sleeptimer::saveToConfig(CConfigFile *config)
 // Standby Event
 //=============================================================
 CTimerEvent_Standby::CTimerEvent_Standby(CConfigFile *config, int iId):
-CTimerEvent(TIMER_RECORD, config, iId)
+CTimerEvent(TIMER_STANDBY, config, iId)
 {
    stringstream ostr;
    ostr << iId;
@@ -612,7 +612,7 @@ void CTimerEvent_Record::Reschedule()
 // Zapto Event
 //=============================================================
 CTimerEvent_Zapto::CTimerEvent_Zapto(CConfigFile *config, int iId):
-CTimerEvent(TIMER_RECORD, config, iId)
+CTimerEvent(TIMER_ZAPTO, config, iId)
 {
    stringstream ostr;
    ostr << iId;
@@ -654,7 +654,7 @@ void CTimerEvent_Zapto::saveToConfig(CConfigFile *config)
 // NextProgram Event
 //=============================================================
 CTimerEvent_NextProgram::CTimerEvent_NextProgram(CConfigFile *config, int iId):
-CTimerEvent(TIMER_RECORD, config, iId)
+CTimerEvent(TIMER_NEXTPROGRAM, config, iId)
 {
    stringstream ostr;
    ostr << iId;
