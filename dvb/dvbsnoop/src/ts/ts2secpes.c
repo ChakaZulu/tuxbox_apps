@@ -1,5 +1,5 @@
 /*
-$Id: ts2secpes.c,v 1.1 2004/04/15 03:40:39 rasc Exp $
+$Id: ts2secpes.c,v 1.2 2004/04/15 04:08:49 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: ts2secpes.c,v 1.1 2004/04/15 03:40:39 rasc Exp $
 
 
 $Log: ts2secpes.c,v $
+Revision 1.2  2004/04/15 04:08:49  rasc
+no message
+
 Revision 1.1  2004/04/15 03:40:39  rasc
 new: TransportStream sub-decoding (ts2PES, ts2SEC)  [-tssubdecode]
 checks for continuity errors, etc. and decode in TS enclosed sections/pes packets
@@ -123,12 +126,12 @@ int ts2SecPes_AddPacketContinue (int pid, int cc, u_char *b, u_int len)
 
     // -- pid change in stream? (without packet start)
     // -- This is currently not supported   $$$ TODO
-    if (pid != tsd.pid) {
+    if ((tsd.invalid == TSD_no_error) && (pid != tsd.pid)) {
 	tsd.invalid = TSD_pid_change;
     }
 
     // -- discontinuity error in packet ?
-    if (cc != (++tsd.continuity_counter%16)) {
+    if ((tsd.invalid == TSD_no_error) && (cc != (++tsd.continuity_counter%16))) {
 	tsd.invalid = TSD_continuity_error;
     }
 
