@@ -6013,7 +6013,11 @@ eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eSe
 
 			// rename bouquet
 			if ( ref.type == eServicePlaylistHandler::ID )
+			{
+				if ( prev && prev->isSelectable() )
+					prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 				prev = new eListBoxEntryText(&list, _("rename"), (void*)7, 0, _("rename the current selected bouquet"));
+			}
 
 			// rename dvb service
 			if ( (( ref.type == eServiceReference::idDVB )
@@ -6023,7 +6027,11 @@ eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eSe
 								(ref.data[0] ==  eMP3Decoder::codecMP3) ) )
 #endif
 					) )
+			{
+				if ( prev && prev->isSelectable() )
+					prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 				prev = new eListBoxEntryText(&list, _("rename"), (void*)9, 0, _("rename the current selected service/movie"));
+			}
 
 			// all what contain in a playlists is deleteable
 			prev = new eListBoxEntryText(&list, _("delete"), (void*)1, 0, _("delete the current selected service/movie"));
@@ -6039,21 +6047,32 @@ eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eSe
 	}
 	else if (ref) // not in a playlist
 	{
-		// add current service to favourite
-		if ( !(ref.flags & eServiceReference::flagDirectory)
-			&& !(ref.type == eServiceReference::idDVB)
-			&& !ref.path )
-			prev = new eListBoxEntryText(&list, _("add to specific bouquet"), (void*)4, 0, _("add the selected service to a selectable bouquet"));
-		// copy provider to bouquet list
-		if (ref.data[0] == -2 || ref.data[0] == -3 )
+		bool b=true;
+		if ( (ref.flags & eServiceReference::flagDirectory)
+			&& (ref.type == eServiceReference::idDVB)
+			&& (ref.data[0] == -2 || ref.data[0] == -3 ) )
+		{
 			prev = new eListBoxEntryText(&list, _("copy to bouquet list"), (void*)8, 0, _("copy the selected provider to the bouquet list"));
+			b=false;
+		}
 #ifndef DISABLE_FILE
-		else if ( (ref.type == eServiceReference::idDVB && ref.path)
+		else if ( ref.flags & eServiceReference::flagDirectory )
+		{
+			if ( ref.data[0] != -1 )
+				prev = new eListBoxEntryText(&list, _("add to specific bouquet"), (void*)4, 0, _("add the selected service to a selectable bouquet"));
+			b=false;
+		}
+		else if ( ref.type == eServiceReference::idDVB && !ref.path )
+		{
+			prev = new eListBoxEntryText(&list, _("add to specific bouquet"), (void*)4, 0, _("add the selected service to a selectable bouquet"));
+			b=false;
+		}
+		if ( b && (ref.type == eServiceReference::idDVB && ref.path)
 			|| ( ref.type == eServiceReference::idUser
 				&& ( (ref.data[0] == eMP3Decoder::codecMPG)
 				  || (ref.data[0] == eMP3Decoder::codecMP3) ) ) )
 		{// deleteable file
-			prev = new eListBoxEntryText(&list, _("add to specific bouquet"), (void*)4, 0, _("add the selected service to another bouquet"));
+			prev = new eListBoxEntryText(&list, _("add to specific bouquet"), (void*)4, 0, _("add the selected file to a selectable bouquet"));
 			prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 			prev = new eListBoxEntryText(&list, _("delete file"), (void*)14, 0, _("delete the selected file (and all corresponding ts files"));
 			prev = new eListBoxEntryText(&list, _("rename file"), (void*)15, 0, _("rename the selected file (and all corresponding ts files"));
@@ -6064,8 +6083,8 @@ eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eSe
 	// not in File mode
 	if ( eZapMain::getInstance()->getMode() != eZapMain::modeFile )
 	{
-		if ( prev && prev->isSelectable() )
-			new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+/*		if ( prev && prev->isSelectable() )
+			new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );*/
 		// edit Mode ( simple add services to any bouquet(playlist)
 		if ( eZap::getInstance()->getServiceSelector()->editMode )
 			prev = sel = new eListBoxEntryText(&list, _("disable edit mode"), (void*)5, 0, _("disable the edit mode"));
