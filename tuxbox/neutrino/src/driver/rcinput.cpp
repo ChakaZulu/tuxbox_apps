@@ -739,8 +739,16 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 									*msg = NeutrinoMessages::EVT_BOUQUETSCHANGED;
 									*data = 0;
 								break;
-							case CZapitClient::EVT_ZAP_CA_STATUS :
-									*msg = NeutrinoMessages::EVT_ZAP_CA_STATUS;
+							case CZapitClient::EVT_ZAP_CA_CLEAR :
+									*msg = NeutrinoMessages::EVT_ZAP_CA_CLEAR;
+									*data = *(unsigned*) p;
+								break;
+							case CZapitClient::EVT_ZAP_CA_LOCK :
+									*msg = NeutrinoMessages::EVT_ZAP_CA_LOCK;
+									*data = *(unsigned*) p;
+								break;
+							case CZapitClient::EVT_ZAP_CA_FTA :
+									*msg = NeutrinoMessages::EVT_ZAP_CA_FTA;
 									*data = *(unsigned*) p;
 								break;
 							default :

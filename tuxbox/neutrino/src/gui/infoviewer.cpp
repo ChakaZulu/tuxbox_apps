@@ -612,9 +612,19 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 		gotTime = true;
 		return messages_return::handled;
 	}
-	else if ( msg == NeutrinoMessages::EVT_ZAP_CA_STATUS )
+	else if ( msg == NeutrinoMessages::EVT_ZAP_CA_CLEAR )
 	{
-		CA_Status = true;
+		Set_CA_Status(false);
+		return messages_return::handled;
+	}
+	else if ( msg == NeutrinoMessages::EVT_ZAP_CA_LOCK )
+	{
+		Set_CA_Status(true);
+		return messages_return::handled;
+	}
+	else if ( msg == NeutrinoMessages::EVT_ZAP_CA_FTA )
+	{
+		Set_CA_Status(false);
 		return messages_return::handled;
 	}
 

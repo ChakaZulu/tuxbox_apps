@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.272 2002/12/02 13:41:42 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.273 2002/12/10 00:44:00 Homar Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -275,7 +275,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod)
 
 		if (!frontend->tuneChannel(channel))
 			return -1;
-		
+
 		if (channel->getTsidOnid() != frontend->getTsidOnid())
 		{
 			WARN("zigzag tuning probably failed");
@@ -478,11 +478,11 @@ void parseScanInputXml()
 	case FE_QPSK:
 		scanInputParser = parseXmlFile(string(SATELLITES_XML));
 		break;
-		
+
 	case FE_QAM:
 		scanInputParser = parseXmlFile(string(CABLES_XML));
 		break;
-		
+
 	default:
 		WARN("Unknown type %d", frontend->getInfo()->type);
 		return;
@@ -945,7 +945,8 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 						    msgAddSubService.transport_stream_id,
 						    original_network_id,
 						    1,
-						    channel->getDiSEqC()
+						    channel->getDiSEqC(),
+						    channel->getCA_STATUS()
 						)
 					    )
 					);
@@ -998,7 +999,7 @@ int main (int argc, char **argv)
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	fprintf(stdout, "$Id: zapit.cpp,v 1.272 2002/12/02 13:41:42 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.273 2002/12/10 00:44:00 Homar Exp $\n");
 
 	if (argc > 1)
 	{
@@ -1254,13 +1255,13 @@ void sendChannels(int connfd, const CZapitClient::channelsMode mode, const CZapi
 		if (((currentMode & RADIO_MODE) && (mode == CZapitClient::MODE_CURRENT)) || (mode==CZapitClient::MODE_RADIO))
 		{
 			for (tallchans_iterator it = allchans.begin(); it != allchans.end(); it++)
-				if (it->second.getServiceType() == DIGITAL_RADIO_SOUND_SERVICE) 
+				if (it->second.getServiceType() == DIGITAL_RADIO_SOUND_SERVICE)
 					channels.push_back(&(it->second));
 		}
 		else
 		{
 			for (tallchans_iterator it = allchans.begin(); it != allchans.end(); it++)
-				if (it->second.getServiceType() != DIGITAL_RADIO_SOUND_SERVICE) 
+				if (it->second.getServiceType() != DIGITAL_RADIO_SOUND_SERVICE)
 					channels.push_back(&(it->second));
 		}
 		sort(channels.begin(), channels.end(), CmpChannelByChName());
@@ -1339,6 +1340,18 @@ int startPlayBack()
 		audio->setSource(AUDIO_SOURCE_DEMUX);
 		audio->start();
 	}
+
+	if (channel->getCA_STATUS() == CA_STATUS_LOCK)
+	{
+		INFO("CA_LOCK");
+		eventServer->sendEvent(CZapitClient::EVT_ZAP_CA_LOCK, CEventServer::INITID_ZAPIT);
+	}
+	else
+	{
+		INFO("CA_FTA");
+		eventServer->sendEvent(CZapitClient::EVT_ZAP_CA_FTA, CEventServer::INITID_ZAPIT);
+	}
+	// TODO: camauswertung muss noch rein
 
 	/* start demux filters */
 	if (have_pcr) {
@@ -1429,6 +1442,8 @@ unsigned int zapTo_ChannelID(t_channel_id channel_id, bool isSubService)
 	else
 		eventServer->sendEvent(CZapitClient::EVT_ZAP_COMPLETE, CEventServer::INITID_ZAPIT, &channel_id, sizeof(channel_id));
 
+	channel->setCA_STATUS(get_sdt_free_CA_mode(channel_id & 0xFFFF)?CA_STATUS_FTA:CA_STATUS_LOCK);
+INFO("STATUS gesetzt");
 	return result;
 }
 

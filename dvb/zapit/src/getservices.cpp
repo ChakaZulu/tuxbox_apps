@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.58 2002/11/28 23:45:32 obi Exp $
+ * $Id: getservices.cpp,v 1.59 2002/12/10 00:44:00 Homar Exp $
  */
 
 #include <stdio.h>
@@ -128,7 +128,8 @@ void ParseChannels (XMLTreeNode *node, t_transport_stream_id transport_stream_id
 						transport_stream_id,
 						original_network_id,
 						service_type,
-						DiSEqC
+						DiSEqC,
+						CA_STATUS_FTA
 					)
 				)
 			);

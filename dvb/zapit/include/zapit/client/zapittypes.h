@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/zapittypes.h,v 1.4 2002/12/07 23:07:18 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/zapittypes.h,v 1.5 2002/12/10 00:44:00 Homar Exp $
  *
  * zapit's types which are used by the clientlib - d-box2 linux project
  *
@@ -30,6 +30,7 @@
 typedef uint16_t t_service_id;
 typedef uint16_t t_original_network_id;
 typedef uint16_t t_transport_stream_id;
+typedef uint16_t t_network_id;
 
 /* unique channel identification */
 typedef uint32_t t_channel_id;
@@ -49,9 +50,16 @@ typedef enum {
 	DISEQC_2_2
 } diseqc_t;
 
+/* CA_STATUS types */
+typedef enum {
+	CA_STATUS_LOCK,
+	CA_STATUS_CLEAR,
+	CA_STATUS_FTA
+} ca_status_t;
+
 /* video display formats (cf. video_displayformat_t in driver/dvb/include/linux/dvb/video.h): */
-typedef enum {   
-        ZAPIT_VIDEO_PAN_SCAN,       /* use pan and scan format */
+typedef enum {
+	ZAPIT_VIDEO_PAN_SCAN,       /* use pan and scan format */
 	ZAPIT_VIDEO_LETTER_BOX,     /* use letterbox format */
 	ZAPIT_VIDEO_CENTER_CUT_OUT  /* use center cut out format */
 } video_display_format_t;

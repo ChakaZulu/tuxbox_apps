@@ -1,8 +1,8 @@
 /*
- * $Id: descriptors.h,v 1.15 2002/10/12 20:19:44 obi Exp $
+ * $Id: descriptors.h,v 1.16 2002/12/10 00:44:00 Homar Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -60,7 +60,7 @@ uint8_t cable_delivery_system_descriptor (uint8_t *buffer, uint16_t transport_st
 uint8_t VBI_data_descriptor (uint8_t *buffer);
 uint8_t VBI_teletext_descriptor (uint8_t *buffer);
 uint8_t bouquet_name_descriptor (uint8_t *buffer);
-uint8_t service_descriptor (uint8_t *buffer, const t_service_id service_id, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id, const uint8_t DiSEqC);
+uint8_t service_descriptor (uint8_t *buffer, const t_service_id service_id, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id, const uint8_t DiSEqC, bool free_CA_mode);
 uint8_t country_availability_descriptor (uint8_t *buffer);
 uint8_t linkage_descriptor (uint8_t *buffer);
 uint8_t NVOD_reference_descriptor (uint8_t *buffer);

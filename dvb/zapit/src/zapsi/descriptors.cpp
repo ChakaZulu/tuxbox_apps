@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.52 2002/11/18 00:27:57 obi Exp $
+ * $Id: descriptors.cpp,v 1.53 2002/12/10 00:44:00 Homar Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -273,6 +273,11 @@ uint8_t satellite_delivery_system_descriptor (uint8_t *buffer, uint16_t transpor
 		((buffer[5] & 0x0F)	* 10)
 	);
 
+	if (frontend->getInfo()->type == FE_QAM)
+	{
+		if (feparams.frequency > 810000000) return 0;
+	}
+
 	feparams.inversion = INVERSION_AUTO;
 
 	feparams.u.qpsk.symbol_rate =
@@ -337,6 +342,8 @@ uint8_t cable_delivery_system_descriptor (uint8_t *buffer, uint16_t transport_st
 		((buffer[5] >> 4)	* 1000) +
 		((buffer[5] & 0x0F)	* 100)
 	);
+
+	if (feparams.frequency > 810000000) return 0;
 
 	feparams.inversion = INVERSION_AUTO;
 
@@ -403,7 +410,7 @@ uint8_t bouquet_name_descriptor (uint8_t *buffer)
 }
 
 /* 0x48 */
-uint8_t service_descriptor (uint8_t *buffer, const t_service_id service_id, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id, const uint8_t DiSEqC)
+uint8_t service_descriptor (uint8_t *buffer, const t_service_id service_id, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id, const uint8_t DiSEqC, bool free_CA_mode)
 {
 	tallchans_iterator I = allchans.find(CREATE_CHANNEL_ID);
 
@@ -433,7 +440,7 @@ uint8_t service_descriptor (uint8_t *buffer, const t_service_id service_id, cons
 		providerName = "Premiere"; // well the name PREMIERE itself is not a problem
 		in_blacklist = true;
 	}
-	
+
 	if (in_blacklist)
 	{
 		if (((unsigned char)buffer[4 + service_provider_name_length + 1]) >= 0x20) // no encoding info
@@ -469,7 +476,8 @@ uint8_t service_descriptor (uint8_t *buffer, const t_service_id service_id, cons
 				transport_stream_id,
 				original_network_id,
 				service_type,
-				DiSEqC
+				DiSEqC,
+				free_CA_mode?CA_STATUS_FTA:CA_STATUS_LOCK
 			)
 		)
 	);
@@ -501,7 +509,7 @@ uint8_t service_descriptor (uint8_t *buffer, const t_service_id service_id, cons
 		else
 			bouquet = scanBouquetManager->Bouquets[bouquetId];
 
-		bouquet->addService(new CZapitChannel(serviceName, service_id, transport_stream_id, original_network_id, service_type, 0));
+		bouquet->addService(new CZapitChannel(serviceName, service_id, transport_stream_id, original_network_id, service_type, 0, free_CA_mode?CA_STATUS_FTA:CA_STATUS_LOCK));
 		break;
 	}
 

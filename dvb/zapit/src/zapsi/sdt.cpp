@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.cpp,v 1.36 2002/12/03 22:58:22 Homar Exp $
+ * $Id: sdt.cpp,v 1.37 2002/12/10 00:44:00 Homar Exp $
  */
 
 /* system c */
@@ -64,6 +64,58 @@ uint32_t get_sdt_TsidOnid ()
 	original_network_id = (buffer[8] << 8) | buffer[9];
 
 	return ((transport_stream_id << 16) | original_network_id );
+}
+
+bool get_sdt_free_CA_mode ( t_service_id p_service_id)
+{
+	int demux_fd;
+	unsigned char buffer[SDT_SIZE];
+
+	bool free_CA_mode;
+	unsigned short section_length;
+	unsigned short service_id;
+	unsigned short descriptors_loop_length;
+	unsigned short pos;
+
+	unsigned char filter[DMX_FILTER_SIZE];
+	unsigned char mask[DMX_FILTER_SIZE];
+
+	memset(filter, 0x00, DMX_FILTER_SIZE);
+	memset(mask, 0x00, DMX_FILTER_SIZE);
+
+	filter[0] = 0x42;
+	mask[0] = 0xFF;
+
+	if ((demux_fd = open(DEMUX_DEVICE, O_RDWR)) < 0)
+	{
+		ERROR(DEMUX_DEVICE);
+		return 0;
+	}
+
+	if (setDmxSctFilter(demux_fd, 0x0011, filter, mask) < 0)
+	{
+		close(demux_fd);
+		return 0;
+	}
+
+	if (read(demux_fd, buffer, SDT_SIZE) < 0)
+	{
+		ERROR("read");
+		close(demux_fd);
+		return 0;
+	}
+
+	close(demux_fd);
+
+	for (pos = 11; pos < section_length - 1; pos += descriptors_loop_length + 5)
+	{
+		service_id = (buffer[pos] << 8) | buffer[pos + 1];
+		free_CA_mode = buffer [pos + 3] & 0x10;
+		if (service_id == p_service_id) break;
+		descriptors_loop_length = ((buffer[pos + 3] & 0x0F) << 8) | buffer[pos + 4];
+	}
+if(free_CA_mode) {INFO("FTA");} else { INFO("LOCK");};
+	return free_CA_mode;
 }
 
 int parse_sdt(const uint8_t DiSEqC)
@@ -160,7 +212,7 @@ int parse_sdt(const uint8_t DiSEqC)
 					break;
 
 				case 0x48:
-					service_descriptor(buffer + pos2, service_id, transport_stream_id, original_network_id, DiSEqC);
+					service_descriptor(buffer + pos2, service_id, transport_stream_id, original_network_id, DiSEqC, free_CA_mode);
 					break;
 
 				case 0x49:
