@@ -335,7 +335,7 @@ int main(int argc, char **argv)
 {
 	debugoutput = true;
 
-	printf("Network LCD-Driver 0.1\n\n");
+	printf("Network LCD-Driver $Id: lcdd.cpp,v 1.42 2002/03/01 15:27:01 field Exp $\n\n");
 
 	fontRenderer = new fontRenderClass( &display );
 	fontRenderer->AddFont(FONTDIR "/Arial.ttf");
@@ -374,9 +374,9 @@ int main(int argc, char **argv)
 	display.dump_screen(&icon_lcd);
 
 	mode = CLcddClient::MODE_TVRADIO;
-	show_servicename("");
+	show_servicename("Booting...");
 	showclock=true;
-	show_time();
+	//show_time();
 
 
 	//network-setup
