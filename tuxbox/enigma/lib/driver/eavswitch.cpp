@@ -58,6 +58,7 @@ eAVSwitch::eAVSwitch()
 {
 	input=0;
 	active=0;
+	audioChannel=0;
 	if (!instance)
 		instance=this;
 
@@ -128,15 +129,17 @@ void eAVSwitch::selectAudioChannel( int c )
 #endif
 	switch(c)
 	{
-		case 0: // Stereo
-			break;
-		case 1: // Mono Left
+		case 0: // Mono Left
 			chan = AUDIO_MONO_LEFT;
+			break;
+		case 1: // Stereo
 			break;
 		case 2: // Mono Right
 			chan = AUDIO_MONO_RIGHT;
 			break;
 	}
+	audioChannel=c;
+	
 	int fd = Decoder::getAudioDevice();
 
 	if ( fd == -1 )

@@ -635,24 +635,8 @@ void ePSAudioSelector::selected(eListBoxEntryText*l)
 
 void AudioChannelSelectionChanged( eListBoxEntryText *e )
 {
-	int sel=-1;
 	if ( e )
-	{
-		switch (abs((int)e->getKey()))
-		{
-			case 1: // mono left
-				sel=1;
-				break;
-			case 2: // mono right
-				sel=2;
-				break;
-			case 3: // Stereo
-				sel=0; 
-				break;
-		}
-	}
-	if ( sel != -1 )
-		eAVSwitch::getInstance()->selectAudioChannel(sel);
+		eAVSwitch::getInstance()->selectAudioChannel((int)e->getKey());
 }
 
 ePSAudioSelector::ePSAudioSelector()
@@ -672,9 +656,9 @@ ePSAudioSelector::ePSAudioSelector()
 	focuslist->remove(m_stereo_mono);
 	focuslist->push_front(m_stereo_mono);
 
-	new eListBoxEntryText(m_stereo_mono, _("   Left Mono  >"), (void*) -1, (int)eTextPara::dirCenter );
-	new eListBoxEntryText(m_stereo_mono, _("<  Stereo  >"), (void*) -3 , (int)eTextPara::dirCenter );
-	new eListBoxEntryText(m_stereo_mono, _("<  Right Mono  "), (void*) -2, (int)eTextPara::dirCenter );
+	new eListBoxEntryText(m_stereo_mono, _("   Left Mono  >"), (void*) 0, (int)eTextPara::dirCenter );
+	new eListBoxEntryText(m_stereo_mono, _("<  Stereo  >"), (void*) 1, (int)eTextPara::dirCenter );
+	new eListBoxEntryText(m_stereo_mono, _("<  Right Mono  "), (void*) 2, (int)eTextPara::dirCenter );
 	m_stereo_mono->selchanged.connect( slot( AudioChannelSelectionChanged ) );
 	ePoint p(0,40);
 	list.move(m_stereo_mono->getPosition()+p);
@@ -706,13 +690,25 @@ void ePSAudioSelector::add(unsigned int id)
 	list.endAtomic();
 }
 
+
 int ePSAudioSelector::eventHandler(const eWidgetEvent &e)
 {
 	switch (e.type)
 	{
 		case eWidgetEvent::execBegin:
+		{
 			setFocus(&list);
+			int curSel = (int)m_stereo_mono->getCurrent()->getKey();
+			int cur = eAVSwitch::getInstance()->getAudioChannel();
+			while ( cur != curSel )
+			{
+				m_stereo_mono->moveSelection( 
+					curSel > cur ? eListBoxBase::dirUp : eListBoxBase::dirDown
+					,false );
+				curSel = (int)m_stereo_mono->getCurrent()->getKey();
+			}
 			return 1;
+		}
 		default:
 			break;
 	}
@@ -788,10 +784,21 @@ int eAudioSelector::eventHandler(const eWidgetEvent &e)
 	switch (e.type)
 	{
 		case eWidgetEvent::execBegin:
+		{
 			list.forEachEntry(selectCurAudioStream(Decoder::current.apid, list));
 			m_subtitles->forEachEntry(selectCurSubtitleStream(eSubtitleWidget::getInstance()->getCurPid(), *m_subtitles ));
 			setFocus(&list);
+			int curSel = (int)m_stereo_mono->getCurrent()->getKey();
+			int cur = eAVSwitch::getInstance()->getAudioChannel();
+			while ( cur != curSel )
+			{
+				m_stereo_mono->moveSelection( 
+					curSel > cur ? eListBoxBase::dirUp : eListBoxBase::dirDown
+					,false );
+				curSel = (int)m_stereo_mono->getCurrent()->getKey();
+			}
 			return 1;
+		}
 		default:
 			break;
 	}
@@ -831,9 +838,9 @@ eAudioSelector::eAudioSelector()
 	focuslist->remove(m_stereo_mono);
 	focuslist->push_front(m_stereo_mono);
 
-	new eListBoxEntryText(m_stereo_mono, _("   Left Mono  >"), (void*) -1, (int)eTextPara::dirCenter );
-	new eListBoxEntryText(m_stereo_mono, _("<  Stereo  >"), (void*) -3 , (int)eTextPara::dirCenter );
-	new eListBoxEntryText(m_stereo_mono, _("<  Right Mono  "), (void*) -2, (int)eTextPara::dirCenter );
+	new eListBoxEntryText(m_stereo_mono, _("   Left Mono  >"), (void*) 0, (int)eTextPara::dirCenter );
+	new eListBoxEntryText(m_stereo_mono, _("<  Stereo  >"), (void*) 1, (int)eTextPara::dirCenter );
+	new eListBoxEntryText(m_stereo_mono, _("<  Right Mono  "), (void*) 2, (int)eTextPara::dirCenter );
 	m_stereo_mono->selchanged.connect( slot( AudioChannelSelectionChanged ) );
 	ePoint p(0,40);
 	list.move(m_stereo_mono->getPosition()+p);
