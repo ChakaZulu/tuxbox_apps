@@ -1,9 +1,14 @@
 <html>
 <head>
+<script>
+	var timer = 0;
+	var updateNow = 0;
+</script>
 <script type="text/javascript" src="data.js"></script>
 </head>
 <body onLoad="init()">
 <script>
+	<!-- variables set by box -->
 	var updateCycleTime = #UPDATECYCLE#;
 	<!-- power state -->
 	var standby = #STANDBY#;

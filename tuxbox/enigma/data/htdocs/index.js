@@ -22,6 +22,14 @@ function toggleMute(xy)
 		parent.update();
 }
 
+function headerUpdate()
+{
+	if (parent.data.updateNow)
+		parent.data.requestUpdateNow();
+	else
+		setTimeout("headerUpdate()", 250);
+}
+
 function switchChannel(xy, bouquet, channel)
 {
 	if (window.screen.width < 800)
@@ -34,8 +42,9 @@ function switchChannel(xy, bouquet, channel)
 			document.location = "cgi-bin/zapTo?path="+xy+"&curBouquet="+bouquet+"&curChannel="+channel;
 		else
 			document.location = "?path="+xy;
-		setTimeout("zapHeaderReload()", 3000);
-		setTimeout("parent.channavi.location.reload()", 3000);
+			
+		headerUpdate();
+		setTimeout("parent.channavi.location.reload()", 2000);
 	}
 }
 
@@ -64,9 +73,7 @@ function tuneTransponder(transponder)
 		}
 	}
 	else
-	{
 		satFinder(transponder);
-	}
 }
 
 function satFinder(transponder)
@@ -97,13 +104,9 @@ function recoverMovies()
 	if (confirmAction('Do you really want to rebuild the movie playlist?'))
 	{
 		if (window.screen.width < 800)
-		{
 			document.location = "cgi-bin/recoverRecordings";
-		}
 		else
-		{
 			NewWindow("cgi-bin/recoverRecordings", "recoverRecordings", "200", "100", "no", "5000");
-		}
 	}
 }
 

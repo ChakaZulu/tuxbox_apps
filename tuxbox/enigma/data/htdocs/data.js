@@ -1,3 +1,7 @@
+function requestUpdateNow()
+{
+	updateNow = 1;
+}
 function getUpdateCycleTime()
 {
 	return updateCycleTime;
@@ -25,15 +29,37 @@ function updateMute()
 		parent.header.getElem("id", "mute", null).src = "speak_off.gif";
 }
 
-function init(requester)
+function updateHeader()
 {
+	if (parent.header.update)
+		update();
+	else
+		setTimeout("updateHeader()", 250);
+}
+
+function init()
+{
+	timer = timer + 1;
+	
+	if (timer == 1)
+		updateHeader();
+		
+	if (timer > updateCycleTime/500 || updateNow == 1)
+		document.location.reload();
+		
+	window.setTimeout("init()", 500);
+}
+
+function update()
+{
+	init2();
 	<!-- service & epg data -->
 	parent.header.getElem("id", "servicename", null).firstChild.nodeValue = serviceName;
 	parent.header.getElem("id", "nowt", null).firstChild.nodeValue = nowT;
 	parent.header.getElem("id", "nowd", null).firstChild.nodeValue = nowD;
 	parent.header.getElem("id", "nowst", null).firstChild.nodeValue = nowSt;
 	parent.header.getElem("id", "nextt", null).firstChild.nodeValue = nextT;
-	parent.header.getElem("id", "nextd", null).firstChild.nodeValue = nextD;
+ 	parent.header.getElem("id", "nextd", null).firstChild.nodeValue = nextD;
 	parent.header.getElem("id", "nextst", null).firstChild.nodeValue = nextSt;
 	
 	<!-- status bar -->

@@ -1,5 +1,3 @@
-/* DHTML-Bibliothek */
-
 var DHTML = 0, DOM = 0, MS = 0, NS = 0, OP = 0;
 
 function DHTML_init() {
@@ -81,50 +79,6 @@ function getElem(p1,p2,p3) {
    }
    else return void(0);
  }
-}
-
-function getCont(p1,p2,p3) {
-   var Cont;
-   if(DOM && getElem(p1,p2,p3) && getElem(p1,p2,p3).firstChild) {
-     if(getElem(p1,p2,p3).firstChild.nodeType == 3)
-       Cont = getElem(p1,p2,p3).firstChild.nodeValue;
-     else
-       Cont = "";
-     return(Cont);
-   }
-   else if(MS && getElem(p1,p2,p3)) {
-     Cont = getElem(p1,p2,p3).innerText;
-     return(Cont);
-   }
-   else return void(0);
-}
-
-function getAttr(p1,p2,p3,p4) {
-   var Attr;
-   if((DOM || MS) && getElem(p1,p2,p3)) {
-     Attr = getElem(p1,p2,p3).getAttribute(p4);
-     return(Attr);
-   }
-   else if (NS && getElem(p1,p2)) {
-       if (typeof getElem(p1,p2)[p3] == "object")
-        Attr=getElem(p1,p2)[p3][p4]
-       else
-        Attr=getElem(p1,p2)[p4]
-         return Attr;
-       }
-   else return void(0);
-}
-
-function setCont(p1,p2,p3,p4) {
-   if(DOM && getElem(p1,p2,p3) && getElem(p1,p2,p3).firstChild)
-     getElem(p1,p2,p3).firstChild.nodeValue = p4;
-   else if(MS && getElem(p1,p2,p3))
-     getElem(p1,p2,p3).innerText = p4;
-   else if(NS && getElem(p1,p2,p3)) {
-     getElem(p1,p2,p3).document.open();
-     getElem(p1,p2,p3).document.write(p4);
-     getElem(p1,p2,p3).document.close();
-   }
 }
 
 DHTML_init();

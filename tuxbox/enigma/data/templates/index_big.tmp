@@ -4,31 +4,13 @@
 		<link rel="stylesheet" type="text/css" href="webif.css">
 		<script language="javascript" type="text/javascript" src="dhtml.js"></script>
 		<script>
-			var updateCycle = 0;
-			function init()
-			{
-				if (parent.data.updateCycleTime)
-				{
-					updateCycle = parent.data.getUpdateCycleTime();
-					if (updateCycle > 0)
-						window.setTimeout("update()", updateCycle);
-				}
-				else
-					window.setTimeout("init()", 200);
-			}	
-			function update()
-			{
-				if (parent.data.updateCycleTime)
-					parent.data.location.reload();
-				window.setTimeout("update()", updateCycle);
-			}
 			function setTitle(title)
 			{
 				getElem("id", "title", null).firstChild.nodeValue = title;
 			}
 		</script>
 	</head>
-	<body id="index_big" style="margin: 0px; border: 0px; padding: 0px" background="bg.png" onLoad="init()">
+	<body id="index_big" style="margin: 0px; border: 0px; padding: 0px" background="bg.png">
 		<table width="780px" height="100%" align="center" border="0" cellspacing="0" cellpadding="0">
 		<tbody valign="top">
 		<tr>

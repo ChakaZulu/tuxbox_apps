@@ -55,7 +55,7 @@
 
 using namespace std;
 
-#define WEBIFVERSION "2.1.0"
+#define WEBIFVERSION "2.1.1"
 
 int pdaScreen = 0;
 int screenWidth = 1024;
@@ -2708,7 +2708,7 @@ eString getEITC(eString result)
 	eString curSubService = getCurrentSubChannel(curServiceRef);
 	if (curSubService)
 	{
-		if (!curService)
+		if (curService)
 			curService += ": " + curSubService;
 		else
 			curService = curSubService;

@@ -1,25 +1,25 @@
 function cleanupTimerList()
 {
-	document.location = "/cleanupTimerList";
+	document.location = "cleanupTimerList";
 	setTimeout("reload()", 500);
 }
 
 function clearTimerList()
 {
-	document.location = "/clearTimerList";
+	document.location = "clearTimerList";
 	setTimeout("reload()", 500);
 }
 
 function editTimerEvent(xy)
 {
-	NewWindow('/showEditTimerEventWindow?'+xy, 'editTimer', '780', '350', 'no');
+	NewWindow('showEditTimerEventWindow?'+xy, 'editTimer', '780', '350', 'no');
 }
 
 function deleteTimerEvent(xy)
 {
 	if (confirmAction('Do you really want to delete this timer event?'))
 	{
-		NewWindow('/deleteTimerEvent?'+xy, 'deleteTimer', '300', '150', 'no');
+		NewWindow('deleteTimerEvent?'+xy, 'deleteTimer', '300', '150', 'no');
 		setTimeout("reload()", 1000);
 	}
 }
@@ -81,19 +81,17 @@ function addTimerEvent()
 		if (document.channelselector.su.checked)
 			su = "on";
 
-		url = '/addTimerEvent?timer=repeating&ref=' + channel + '&shour=' + shour + '&smin=' + smin + '&ehour=' + ehour + '&emin=' + emin + '&mo=' + mo + '&tu=' + tu + '&we=' + we + '&th=' + th + '&fr=' + fr + '&sa=' + sa + '&su=' + su + '&descr=' + descr + '&after_event=' + after_event;
+		url = 'addTimerEvent?timer=repeating&ref=' + channel + '&shour=' + shour + '&smin=' + smin + '&ehour=' + ehour + '&emin=' + emin + '&mo=' + mo + '&tu=' + tu + '&we=' + we + '&th=' + th + '&fr=' + fr + '&sa=' + sa + '&su=' + su + '&descr=' + descr + '&after_event=' + after_event;
 	}
 	else
-	{
-		url = '/addTimerEvent?timer=regular&ref=' + channel + '&sday=' + sday + '&smonth=' + smonth + '&shour=' + shour + '&smin=' + smin + '&eday=' + eday + '&emonth=' + emonth + '&ehour=' + ehour + '&emin=' + emin + '&descr=' + descr + '&after_event=' + after_event;
-	}
+		url = 'addTimerEvent?timer=regular&ref=' + channel + '&sday=' + sday + '&smonth=' + smonth + '&shour=' + shour + '&smin=' + smin + '&eday=' + eday + '&emonth=' + emonth + '&ehour=' + ehour + '&emin=' + emin + '&descr=' + descr + '&after_event=' + after_event;
 
 	NewWindow(url, 'add', '200', '200', 'no', '5000');
 }
 
 function showAddTimerEventWindow(timer)
 {
-	NewWindow("/showAddTimerEventWindow?timer=" + timer, 'addTimer', '780', '380', 'no');
+	NewWindow("showAddTimerEventWindow?timer=" + timer, 'addTimer', '780', '380', 'no');
 }
 
 
