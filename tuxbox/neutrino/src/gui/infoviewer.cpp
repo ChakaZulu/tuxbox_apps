@@ -1008,6 +1008,7 @@ int CInfoViewerHandler::exec(CMenuTarget* parent, const std::string &actionkey)
 	i = new CInfoViewer;
 
 	channelList = CNeutrinoApp::getInstance()->channelList;
+	i->start();
 	i->showTitle(channelList->getActiveChannelNumber(), channelList->getActiveChannelName(), channelList->getActiveSatellitePosition(), channelList->getActiveChannel_ChannelID()); // UTF-8
 	delete i;
 

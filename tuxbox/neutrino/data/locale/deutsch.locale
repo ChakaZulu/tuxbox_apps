@@ -808,8 +808,9 @@ rclock.title Fernbedienung sperren
 rclock.lockmsg Die Fernbedienung der dbox2 wird gesperrt.\n Um die Sperre aufzuheben, bitte\n <ROT> und <DBOX> auf der Fernbedienung\n druecken.
 rclock.unlockmsg DBOX2 Fernbedienung reaktiviert...
 
-EPGMenu.head EPG
+EPGMenu.head EPG - Programm Information
 EPGMenu.eventinfo Info zur Sendung
 EPGMenu.eventlist Vorschau aktuelles Programm
-EPGMenu.epgplus Vorschau Uersicht
+EPGMenu.epgplus Vorschau Übersicht
+EPGMenu.streaminfo technische Information
 

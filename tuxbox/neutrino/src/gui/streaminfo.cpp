@@ -64,6 +64,8 @@ int CStreamInfo::exec(CMenuTarget* parent, const std::string &)
 	int res = g_RCInput->messageLoop();
 
 	hide();
+
+        res = menu_return::RETURN_EXIT_ALL;
 	return res;
 }
 
