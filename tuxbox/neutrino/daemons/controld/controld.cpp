@@ -231,13 +231,19 @@ void setVideoFormat(int format)
 
 }
 
-void routeVideo(int a, int b, int nothing)
+void routeVideo(int a, int b, int nothing, int fblk)
 {
 	int fd;
 
 	if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
 	{
 		perror("open");
+		return;
+	}
+
+	if (ioctl(fd, AVSIOSFBLK, &fblk)< 0)
+	{
+		perror("AVSIOSFBLK:");
 		return;
 	}
 
@@ -262,6 +268,52 @@ void routeVideo(int a, int b, int nothing)
 	close(fd);
 }
 
+void switch_vcr( bool vcr_on)
+{
+	if (!vcr_on)
+	{
+		//turn to scart-input
+		printf("switch to scart-input...\n");
+		if (settings.boxtype == 2) // Sagem
+		{
+			routeVideo(2, 1, 7, 2);
+		}
+		else if (settings.boxtype == 1) // Nokia
+		{
+			routeVideo(3, 2, 7, 2);
+		}
+		else if (settings.boxtype == 3) // Philips
+		{
+			routeVideo(2, 2, 3, 2);
+		}
+	}
+	else
+	{	//turn to dvb...
+		printf("switch to dvb-input...\n");
+		if (settings.boxtype == 2) // Sagem
+		{
+			routeVideo(0, 0, 0, settings.videotype);
+		}
+		else if (settings.boxtype == 1) // Nokia
+		{
+			routeVideo(5, 1, 7, settings.videotype);
+		}
+		else if (settings.boxtype == 3) // Philips
+		{
+			routeVideo(1, 1, 1, settings.videotype);
+		}
+	}
+}
+
+void setScartMode(char onoff)
+{
+	switch_vcr( onoff==1 );
+}
+
+void setBoxType(char type)
+{
+	settings.boxtype = type;
+}
 
 void setVolume(char volume)
 {
@@ -389,14 +441,23 @@ void parse_command(int connfd)
       printf("[controld] set videotype\n");
       setVideoType(rmsg.param);
       break;
+    case 7:
+      printf("[controld] set boxtype\n");
+      setBoxType(rmsg.param);
+      break;
+    case 8:
+      printf("[controld] set scartmode\n");
+      setScartMode(rmsg.param);
+      break;
+
 	case 128:
 		printf("[controld] get volume\n");
 		write(connfd,&settings.volume,sizeof(settings.volume));
 		break;
 	case 129:
-                printf("[controld] get mute\n");
-                write(connfd,&settings.mute,sizeof(settings.mute));
-                break;
+		printf("[controld] get mute\n");
+		write(connfd,&settings.mute,sizeof(settings.mute));
+		break;
 	case 130:
 		printf("[controld] get videoformat (fnc)\n");
 		write(connfd,&settings.volume,sizeof(settings.videoformat));
@@ -404,6 +465,10 @@ void parse_command(int connfd)
 	case 131:
 		printf("[controld] get videotype (fblk)\n");
 		write(connfd,&settings.volume,sizeof(settings.videotype));
+		break;
+	case 132:
+		printf("[controld] get boxtype\n");
+		write(connfd,&settings.boxtype,sizeof(settings.boxtype));
 		break;
 
     default:
