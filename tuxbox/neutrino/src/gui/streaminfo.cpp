@@ -53,7 +53,7 @@ CStreamInfo::CStreamInfo()
 }
 
 
-int CStreamInfo::exec(CMenuTarget* parent, std::string)
+int CStreamInfo::exec(CMenuTarget* parent, const std::string &)
 {
 	if (parent)
 	{

@@ -83,7 +83,7 @@ class CListBox : public CMenuWidget
 
 	public:
 		CListBox(const char * const Caption); 
-		virtual int exec(CMenuTarget* parent, std::string actionKey);
+		virtual int exec(CMenuTarget* parent, const std::string & actionKey);
 };
 
 

@@ -72,7 +72,7 @@ CPictureViewer::CFormathandler * CPictureViewer::fh_getsize(const char *name,int
     return(NULL);
 }
 
-bool CPictureViewer::DecodeImage(std::string name, bool showBusySign, bool unscaled)
+bool CPictureViewer::DecodeImage(const std::string & name, bool showBusySign, bool unscaled)
 {
 // dbout("DecodeImage {\n"); 
    if(name==m_NextPic_Name)
@@ -203,7 +203,7 @@ void CPictureViewer::SetVisible(int startx, int endx, int starty, int endy)
 }
 
 
-bool CPictureViewer::ShowImage(std::string filename, bool unscaled)
+bool CPictureViewer::ShowImage(const std::string & filename, bool unscaled)
 {
 //	dbout("Show Image {\n");
 	// Wird eh ueberschrieben ,also schonmal freigeben... (wenig speicher)

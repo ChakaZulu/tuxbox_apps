@@ -61,15 +61,15 @@ class CProgressWindow : public CMenuTarget, public CProgress_StatusViewer
 	public:
 
 		CProgressWindow();
-		void setTitle(const std::string title); // UTF-8
+		void setTitle(const std::string & title); // UTF-8
 		virtual void hide();
 
-		virtual int exec( CMenuTarget* parent, std::string actionKey );
+		virtual int exec( CMenuTarget* parent, const std::string & actionKey );
 
 		virtual void showGlobalStatus(const unsigned int prog);
 		virtual unsigned int getGlobalStatus(void);
 		virtual void showLocalStatus(const unsigned int prog);
-		virtual void showStatusMessageUTF(const std::string text); // UTF-8
+		virtual void showStatusMessageUTF(const std::string & text); // UTF-8
 };
 
 

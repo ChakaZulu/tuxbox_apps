@@ -56,7 +56,7 @@ std::string CFlashTool::getErrorMessage()
 	return ErrorMessage;
 }
 
-void CFlashTool::setMTDDevice( std::string mtddevice )
+void CFlashTool::setMTDDevice( const std::string & mtddevice )
 {
 	mtdDevice = mtddevice;
 }
@@ -66,7 +66,7 @@ void CFlashTool::setStatusViewer( CProgress_StatusViewer* statusview )
 	statusViewer = statusview;
 }
 
-bool CFlashTool::readFromMTD( std::string filename, int globalProgressEnd )
+bool CFlashTool::readFromMTD( const std::string & filename, int globalProgressEnd )
 {
 	int		fd1, fd2;
 	long	filesize;
@@ -142,7 +142,7 @@ bool CFlashTool::readFromMTD( std::string filename, int globalProgressEnd )
 	return true;
 }
 
-bool CFlashTool::program( std::string filename, int globalProgressEndErase, int globalProgressEndFlash )
+bool CFlashTool::program( const std::string & filename, int globalProgressEndErase, int globalProgressEndFlash )
 {
 	int		fd1, fd2;
 	long	filesize;
@@ -302,7 +302,7 @@ bool CFlashTool::erase(int globalProgressEnd)
 	return true;
 }
 
-bool CFlashTool::check_cramfs( std::string filename )
+bool CFlashTool::check_cramfs( const std::string & filename )
 {
 	int retVal = cramfs_crc( (char*) filename.c_str() );
 	printf("flashcheck returned: %d\n", retVal);
@@ -325,7 +325,7 @@ void CFlashTool::reboot()
 //-----------------------------------------------------------------------------------------------------------------
 
 
-CFlashVersionInfo::CFlashVersionInfo(const std::string versionString)
+CFlashVersionInfo::CFlashVersionInfo(const std::string & versionString)
 {
 	//SBBBYYYYMMTTHHMM -- formatsting
 
@@ -502,17 +502,17 @@ int CMTDInfo::findMTDNumber(const std::string & filename)
 	return -1;
 }
 
-std::string CMTDInfo::getMTDName(const std::string filename)
+std::string CMTDInfo::getMTDName(const std::string & filename)
 {
 	return getMTDName( findMTDNumber(filename) );
 }
 
-int CMTDInfo::getMTDSize( std::string filename )
+int CMTDInfo::getMTDSize( const std::string & filename )
 {
 	return getMTDSize( findMTDNumber(filename) );
 }
 
-int CMTDInfo::getMTDEraseSize( std::string filename )
+int CMTDInfo::getMTDEraseSize( const std::string & filename )
 {
 	return getMTDEraseSize( findMTDNumber(filename) );
 }

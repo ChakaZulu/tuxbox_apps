@@ -84,7 +84,7 @@ void CColorChooser::setColor()
 	*/
 }
 
-int CColorChooser::exec(CMenuTarget* parent, std::string)
+int CColorChooser::exec(CMenuTarget* parent, const std::string &)
 {
 	int res = menu_return::RETURN_REPAINT;
 	if (parent)
@@ -96,7 +96,7 @@ int CColorChooser::exec(CMenuTarget* parent, std::string)
 	unsigned char b_alt= *value[VALUE_B];
 	unsigned char a_alt = (value[VALUE_ALPHA]) ? (*(value[VALUE_ALPHA])) : 0;
 
-	std::string names[4] = {
+	const char * names[4] = {
 		g_Locale->getText("colorchooser.red"),
 		g_Locale->getText("colorchooser.green"),
 		g_Locale->getText("colorchooser.blue"),
@@ -216,7 +216,7 @@ void CColorChooser::paint()
 	g_Fonts->menu_title->RenderString(x+10,y+hheight, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT);
 
-	std::string names[4] = {
+	const char * names[4] = {
 		g_Locale->getText("colorchooser.red"),
 		g_Locale->getText("colorchooser.green"),
 		g_Locale->getText("colorchooser.blue"),
@@ -230,7 +230,7 @@ void CColorChooser::paint()
 	frameBuffer->paintBoxRel(x+222,y+hheight+2+5,  mheight*4-4 ,mheight*4-4-10, 254);
 }
 
-void CColorChooser::paintSlider(int x, int y, unsigned char *spos, const std::string text, const std::string iconname, const bool selected)
+void CColorChooser::paintSlider(int x, int y, unsigned char *spos, const char * const text, const std::string & iconname, const bool selected)
 {
 	if (!spos)
 		return;

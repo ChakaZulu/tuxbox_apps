@@ -80,8 +80,8 @@ class CPlugins
 
 		void parseCfg(plugin *plugin_data);
 		void scanDir(const char *dir);
-		bool plugin_exists(std::string filename);
-		int find_plugin(std::string filename);
+		bool plugin_exists(const std::string & filename);
+		int find_plugin(const std::string & filename);
 
 
 		std::map<std::string, std::string> params;
@@ -91,12 +91,12 @@ class CPlugins
 
 		void loadPlugins();
 
-		void setPluginDir(std::string dir) { plugin_dir = dir; }
+		void setPluginDir(const std::string & dir) { plugin_dir = dir; }
 
-		PluginParam* makeParam(std::string id, PluginParam *next);
+		PluginParam* makeParam(const std::string & id, PluginParam *next);
 
-		void addParm(std::string cmd, int value);
-		void addParm(std::string cmd, std::string value);
+		void addParm(const std::string & cmd, int value);
+		void addParm(const std::string & cmd, const std::string & value);
 
 		void setfb(int fd);
 		void setrc(int fd);
@@ -117,7 +117,7 @@ class CPlugins
 
 		void startPlugin(int number);
 
-		void startPlugin(std::string filename); // start plugins also by name
+		void startPlugin(const std::string & filename); // start plugins also by name
 };
 
 
@@ -164,7 +164,7 @@ class CGameList : public CMenuTarget
 		~CGameList();
 
 		void hide();
-		int exec(CMenuTarget* parent, std::string actionKey);
+		int exec(CMenuTarget* parent, const std::string & actionKey);
 		void runGame(int selected );
 };
 

@@ -103,7 +103,7 @@ CPictureViewerGui::~CPictureViewerGui()
 }
 
 //------------------------------------------------------------------------
-int CPictureViewerGui::exec(CMenuTarget* parent, std::string actionKey)
+int CPictureViewerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 {
 	selected = 0;
 	width = 710;

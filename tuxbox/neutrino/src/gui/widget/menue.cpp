@@ -66,7 +66,7 @@ bool isNumber(const std::string& str)
 }
 
 
-CMenuWidget::CMenuWidget(const char * const Name, const std::string Icon, const int mwidth, const int mheight, const bool Localizing)
+CMenuWidget::CMenuWidget(const char * const Name, const std::string & Icon, const int mwidth, const int mheight, const bool Localizing)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	onPaintNotifier = NULL;
@@ -109,7 +109,7 @@ void CMenuWidget::setOnPaintNotifier( COnPaintNotifier* nf )
 	onPaintNotifier = nf;
 }
 
-int CMenuWidget::exec(CMenuTarget* parent, std::string)
+int CMenuWidget::exec(CMenuTarget* parent, const std::string &)
 {
 	int pos;
 
@@ -394,7 +394,7 @@ void CMenuWidget::paintItems()
 
 
 
-CMenuOptionChooser::CMenuOptionChooser(const char * const OptionName, int * const OptionValue, const bool Active, CChangeObserver * const Observ, const bool Localizing, const uint DirectKey, const std::string IconName)
+CMenuOptionChooser::CMenuOptionChooser(const char * const OptionName, int * const OptionValue, const bool Active, CChangeObserver * const Observ, const bool Localizing, const uint DirectKey, const std::string & IconName)
 {
 	height= g_Fonts->menu->getHeight();
 	optionName = OptionName;
@@ -539,7 +539,7 @@ CMenuOptionStringChooser::~CMenuOptionStringChooser()
 	options.clear();
 }
 
-void CMenuOptionStringChooser::addOption( std::string value)
+void CMenuOptionStringChooser::addOption( const std::string & value)
 {
 	options.push_back(value);
 }
@@ -648,6 +648,16 @@ int CMenuForwarder::exec(CMenuTarget* parent)
 	}
 }
 
+const char * CMenuForwarder::getOption(void)
+{
+	if (option)
+		return option;
+	else
+		if (option_string)
+			return option_string->c_str();
+		else
+			return NULL;
+}
 
 int CMenuForwarder::paint(bool selected)
 {
@@ -657,18 +667,17 @@ int CMenuForwarder::paint(bool selected)
 
 	int stringstartposX = x + offx + 10;
 
+	const char * option_text = getOption();
+
 	if (selected)
 	{
 		CLCD * lcd = CLCD::getInstance();
 		lcd->showMenuText(0, l_text, -1, true); // UTF-8
 
-		if (option)
-			lcd->showMenuText(1, option);
+		if (option_text != NULL)
+			lcd->showMenuText(1, option_text);
 		else
-			if (option_string)
-				lcd->showMenuText(1, *option_string);
-			else
-				lcd->showMenuText(1, "", -1, true); // UTF-8
+			lcd->showMenuText(1, "", -1, true); // UTF-8
 	}
 
 	unsigned char color = COL_MENUCONTENT;
@@ -680,7 +689,7 @@ int CMenuForwarder::paint(bool selected)
 	frameBuffer->paintBoxRel(x,y, dx, height, color );
 	g_Fonts->menu->RenderString(stringstartposX, y+ height, dx- (stringstartposX - x), l_text, color, 0, true); // UTF-8
 
-	if (iconName!="")
+	if (!iconName.empty())
 	{
 		frameBuffer->paintIcon(iconName, x + 10, y+ ((height- 20)>>1) );
 	}
@@ -689,19 +698,12 @@ int CMenuForwarder::paint(bool selected)
 		g_Fonts->channellist_number->RenderString(x + 10, y+ height, height, CRCInput::getKeyName(directKey), color, height);
 	}
 
-	if (option)
+	if (option_text != NULL)
 	{
-		int stringwidth = g_Fonts->menu->getRenderWidth(option);
+		int stringwidth = g_Fonts->menu->getRenderWidth(option_text);
 		int stringstartposOption = x + dx - stringwidth - 10; //+ offx
 
-		g_Fonts->menu->RenderString(stringstartposOption, y+height,dx- (stringstartposOption- x),  option, color);
-	}
-	else if (option_string != NULL)
-	{
-		int stringwidth = g_Fonts->menu->getRenderWidth(*option_string);
-		int stringstartposOption = x + dx - stringwidth - 10; //+ offx
-
-		g_Fonts->menu->RenderString(stringstartposOption, y+height,dx- (stringstartposOption- x), *option_string, color);
+		g_Fonts->menu->RenderString(stringstartposOption, y+height,dx- (stringstartposOption- x),  option_text, color);
 	}
 
 	return y+ height;

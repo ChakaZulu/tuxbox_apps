@@ -47,7 +47,7 @@ CScreenSetup::CScreenSetup()
 	frameBuffer = CFrameBuffer::getInstance();
 }
 
-int CScreenSetup::exec( CMenuTarget* parent, std::string )
+int CScreenSetup::exec(CMenuTarget* parent, const std::string &)
 {
 	int res = menu_return::RETURN_REPAINT;
 

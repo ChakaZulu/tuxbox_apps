@@ -95,7 +95,7 @@ class CVCRControl
 				CVCRDevices deviceType;
 				CVCRStates  deviceState;
 				virtual bool Stop(){return false;};
-				virtual bool Record(const t_channel_id channel_id = 0, int mode=1, unsigned long long epgid = 0, std::string apids = ""){return false;};
+				virtual bool Record(const t_channel_id channel_id = 0, int mode=1, unsigned long long epgid = 0, const std::string & apids = ""){return false;};
 				virtual bool Pause(){return false;};
 				virtual bool Resume(){return false;};
 				virtual bool IsAvailable(){return false;};
@@ -108,7 +108,7 @@ class CVCRControl
 			public:
 				bool SwitchToScart;
 				virtual bool Stop(); 
-				virtual bool Record(const t_channel_id channel_id = 0, int mode=1, unsigned long long epgid = 0, std::string apids = "");	
+				virtual bool Record(const t_channel_id channel_id = 0, int mode=1, unsigned long long epgid = 0, const std::string & apids = "");	
 				virtual bool Pause();
 				virtual bool Resume();
 				virtual bool IsAvailable(){return true;};
@@ -131,7 +131,7 @@ class CVCRControl
 				bool serverConnect();
 				void serverDisconnect();
 
-				bool sendCommand(CVCRCommand command, const t_channel_id channel_id = 0,unsigned long long epgid = 0, std::string apids = "");
+				bool sendCommand(CVCRCommand command, const t_channel_id channel_id = 0,unsigned long long epgid = 0, const std::string & apids = "");
 
 			public:
 				std::string	ServerAddress;
@@ -140,7 +140,7 @@ class CVCRControl
 				bool	StopSectionsd;
 
 				virtual bool Stop();
-				virtual bool Record(const t_channel_id channel_id = 0, int mode=1, unsigned long long epgid = 0, std::string apids = "");
+				virtual bool Record(const t_channel_id channel_id = 0, int mode=1, unsigned long long epgid = 0, const std::string & apids = "");
 				virtual bool Pause(){return false;};
 				virtual bool Resume(){return false;};
 				virtual bool IsAvailable(){return true;};

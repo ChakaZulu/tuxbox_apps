@@ -74,6 +74,6 @@ class CScanTs : public CMenuTarget
 	public:
 		CScanTs();
 		void hide();
-		int exec(CMenuTarget* parent, std::string actionKey);
+		int exec(CMenuTarget* parent, const std::string & actionKey);
 };
 #endif

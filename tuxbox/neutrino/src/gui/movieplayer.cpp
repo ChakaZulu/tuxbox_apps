@@ -4,7 +4,7 @@
   Movieplayer (c) 2003 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.53 2003/09/23 20:04:23 thegoodguy Exp $
+  $Id: movieplayer.cpp,v 1.54 2003/09/27 11:48:17 thegoodguy Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -169,7 +169,7 @@ CMoviePlayerGui::~CMoviePlayerGui ()
 
 //------------------------------------------------------------------------
 int
-CMoviePlayerGui::exec (CMenuTarget * parent, std::string actionKey)
+CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 {
 	current = -1;
 	selected = 0;
@@ -244,7 +244,7 @@ CMoviePlayerGui::exec (CMenuTarget * parent, std::string actionKey)
 }
 
 //------------------------------------------------------------------------
-CURLcode sendGetRequest (std::string url) {
+CURLcode sendGetRequest (const std::string & url) {
 	CURL *curl;
 	CURLcode httpres;
 

@@ -101,7 +101,7 @@ int CFavorites::addChannelToFavorites()
 // -- Add current channel to Favorites and display user messagebox
 //
 
-int CFavorites::exec(CMenuTarget* parent, std::string)
+int CFavorites::exec(CMenuTarget* parent, const std::string &)
 {
 	int         status;
 	std::string str;

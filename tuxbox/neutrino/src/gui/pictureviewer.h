@@ -110,7 +110,7 @@ class CPictureViewerGui : public CMenuTarget
 		CPictureViewerGui();
 		~CPictureViewerGui();
 		int  show();
-		int  exec(CMenuTarget* parent, std::string actionKey);
+		int  exec(CMenuTarget* parent, const std::string & actionKey);
 };
 
 

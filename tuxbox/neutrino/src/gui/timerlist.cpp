@@ -82,7 +82,7 @@ public:
 		iType=Type;
 		stopTime=time;
 	}
-	bool changeNotify(std::string OptionName, void* dummy)
+	bool changeNotify(const std::string & OptionName, void* dummy)
 	{
 		CTimerd::CTimerEventTypes type = (CTimerd::CTimerEventTypes) *iType;
 		if(type == CTimerd::TIMER_RECORD)
@@ -133,7 +133,7 @@ public:
 		m = a;
 		iRepeat=repeat;
 	}
-	bool changeNotify(std::string OptionName, void* dummy)
+	bool changeNotify(const std::string & OptionName, void* dummy)
 	{
 		if(*iRepeat >= (int)CTimerd::TIMERREPEAT_WEEKDAYS)
 			m->setActive (true);
@@ -169,7 +169,7 @@ CTimerList::~CTimerList()
 	delete Timer;
 }
 
-int CTimerList::exec(CMenuTarget* parent, std::string actionKey)
+int CTimerList::exec(CMenuTarget* parent, const std::string & actionKey)
 {
 	if(actionKey=="modifytimer")
 	{

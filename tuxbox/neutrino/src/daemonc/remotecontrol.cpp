@@ -513,7 +513,7 @@ std::string CRemoteControl::subChannelDown(void)
 	return setSubChannel((selected_subchannel <= 0) ? (subChannels.size() - 1) : (selected_subchannel - 1));
 }
 
-void CRemoteControl::zapTo_ChannelID(const t_channel_id channel_id, const std::string channame, const bool start_video) // UTF-8
+void CRemoteControl::zapTo_ChannelID(const t_channel_id channel_id, const std::string & channame, const bool start_video) // UTF-8
 {
 	current_channel_id = channel_id;
 	current_channel_name = channame;

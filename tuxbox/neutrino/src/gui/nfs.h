@@ -68,7 +68,7 @@ class CNFSMountGui : public CMenuTarget
 
  public:
 	CNFSMountGui();
-	int exec(CMenuTarget* parent, std::string actionKey);
+	int exec(CMenuTarget* parent, const std::string & actionKey);
 	static void mount(const char * const ip, const char * const dir, const char * const local_dir, const FSType fstype, const char * const username, const char * const password, const bool showerror = false);
 	static void automount();
 };
@@ -82,7 +82,7 @@ class CNFSUmountGui : public CMenuTarget
 	public:
 		CNFSUmountGui(){};
 		~CNFSUmountGui(){};
-		int  exec(CMenuTarget* parent, std::string actionKey);
+		int  exec(CMenuTarget* parent, const std::string & actionKey);
 		static void umount(const char * const dir = NULL);
 };
 
@@ -93,7 +93,7 @@ class CNFSSmallMenu : public CMenuTarget
    public:
 		CNFSSmallMenu(){};
 		~CNFSSmallMenu(){};
-		int exec( CMenuTarget* parent, std::string actionKey );
+		int exec( CMenuTarget* parent, const std::string & actionKey );
 };
 
 bool in_proc_filesystems(const char * const fsname);

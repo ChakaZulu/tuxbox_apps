@@ -207,7 +207,7 @@ CFileList *CFileBrowser::getSelectedFiles()
 
 //------------------------------------------------------------------------
 
-void CFileBrowser::ChangeDir(std::string filename)
+void CFileBrowser::ChangeDir(const std::string & filename)
 {
 	std::string newpath;
 	if(filename == "..")
@@ -272,7 +272,7 @@ void CFileBrowser::ChangeDir(std::string filename)
 }
 
 //------------------------------------------------------------------------
-bool CFileBrowser::readDir(std::string dirname, CFileList* flist)
+bool CFileBrowser::readDir(const std::string & dirname, CFileList* flist)
 {
 	bool ret;
 		
@@ -287,7 +287,7 @@ bool CFileBrowser::readDir(std::string dirname, CFileList* flist)
 	return ret;
 }
 
-bool CFileBrowser::readDir_vlc(std::string dirname, CFileList* flist)
+bool CFileBrowser::readDir_vlc(const std::string & dirname, CFileList* flist)
 {
 	printf("readDir_vlc %s\n",dirname.c_str());
 	std::string answer="";
@@ -361,7 +361,7 @@ bool CFileBrowser::readDir_vlc(std::string dirname, CFileList* flist)
 	return false;
 }
 
-bool CFileBrowser::readDir_std(std::string dirname, CFileList* flist)
+bool CFileBrowser::readDir_std(const std::string & dirname, CFileList* flist)
 {
 	printf("readDir_std %s\n",dirname.c_str());
 	struct stat statbuf;

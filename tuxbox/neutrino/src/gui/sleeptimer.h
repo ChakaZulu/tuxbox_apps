@@ -25,15 +25,10 @@
 
 #include <gui/widget/menue.h>
 
-#include <string>
-
-//
-// -- Sleep Timer Input Widget
-//
 class CSleepTimerWidget: public CMenuTarget
 {
  public:
-	int exec(CMenuTarget* parent, std::string actionKey);
+	int exec(CMenuTarget* parent, const std::string & actionKey);
 };
 
 

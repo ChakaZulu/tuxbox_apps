@@ -111,7 +111,7 @@ void CExtendedInput::calculateDialog()
 }
 
 
-int CExtendedInput::exec( CMenuTarget* parent, std::string )
+int CExtendedInput::exec( CMenuTarget* parent, const std::string & )
 {
 	onBeforeExec();
 	int res = menu_return::RETURN_REPAINT;
@@ -260,7 +260,7 @@ void CExtendedInput::paint()
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-CExtendedInput_Item_Char::CExtendedInput_Item_Char(std::string Chars, bool Selectable )
+CExtendedInput_Item_Char::CExtendedInput_Item_Char(const std::string & Chars, bool Selectable )
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	idx = 20;
@@ -276,7 +276,7 @@ void CExtendedInput_Item_Char::init(int &x, int &y)
 	x += idx;
 }
 
-void CExtendedInput_Item_Char::setAllowedChars( std::string ac )
+void CExtendedInput_Item_Char::setAllowedChars( const std::string & ac )
 {
 	allowedChars = ac;
 }
@@ -352,7 +352,7 @@ void CExtendedInput_Item_Char::keyPressed(const int key)
 
 //-----------------------------#################################-------------------------------------------------------
 
-CIPInput::CIPInput(const char * const Name, std::string &Value, const char * const Hint_1, const char * const Hint_2, CChangeObserver* Observ)
+CIPInput::CIPInput(const char * const Name, std::string & Value, const char * const Hint_1, const char * const Hint_2, CChangeObserver* Observ)
 	: CExtendedInput(Name, IP, Hint_1, Hint_2, Observ)
 {
 	ip = &Value;

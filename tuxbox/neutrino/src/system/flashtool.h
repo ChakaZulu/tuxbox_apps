@@ -55,13 +55,13 @@ class CFlashTool
 
 		std::string getErrorMessage();
 
-		void setMTDDevice( std::string mtddevice );
+		void setMTDDevice( const std::string & mtddevice );
 		void setStatusViewer( CProgress_StatusViewer* statusview );
 
-		bool program( std::string filename, int globalProgressEndErase=-1, int globalProgressEndFlash=-1 );
-		bool readFromMTD( std::string filename, int globalProgressEnd=-1 );
+		bool program( const std::string & filename, int globalProgressEndErase=-1, int globalProgressEndFlash=-1 );
+		bool readFromMTD( const std::string & filename, int globalProgressEnd=-1 );
 
-		bool check_cramfs( std::string filename );
+		bool check_cramfs( const std::string & filename );
 
 		void reboot();
 };
@@ -78,7 +78,7 @@ class CFlashVersionInfo
 	
  public:
 	
-	CFlashVersionInfo(const std::string versionString);
+	CFlashVersionInfo(const std::string & versionString);
 	
 	const char * const getDate() const;
 	const char * const getTime() const;
@@ -118,9 +118,9 @@ class CMTDInfo
 		int getMTDEraseSize(const int pos );
 
 		//mtdinfos abfragen (nach mtd-filename)
-		std::string getMTDName(const std::string filename);
-		int getMTDSize( std::string filename );
-		int getMTDEraseSize( std::string filename );
+		std::string getMTDName(const std::string & filename);
+		int getMTDSize( const std::string & filename );
+		int getMTDEraseSize( const std::string & filename );
 
 		int findMTDNumber(const std::string & filename);
 

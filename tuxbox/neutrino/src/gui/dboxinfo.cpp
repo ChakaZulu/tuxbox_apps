@@ -52,7 +52,7 @@ CDBoxInfoWidget::CDBoxInfoWidget()
 }
 
 
-int CDBoxInfoWidget::exec(CMenuTarget* parent, std::string)
+int CDBoxInfoWidget::exec(CMenuTarget* parent, const std::string &)
 {
 	if (parent)
 	{

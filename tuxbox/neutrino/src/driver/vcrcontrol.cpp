@@ -167,7 +167,7 @@ bool CVCRControl::CVCRDevice::Stop()
 }
 
 //-------------------------------------------------------------------------
-bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, int mode, unsigned long long epgid, std::string apids)
+bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, int mode, unsigned long long epgid, const std::string & apids)
 {
 	printf("Record channel_id: %x epg: %llx, apids %s mode \n", channel_id, epgid, apids.c_str());
 	// leave menu (if in any)
@@ -265,7 +265,7 @@ bool CVCRControl::CServerDevice::Stop()
 }
 
 //-------------------------------------------------------------------------
-bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode, unsigned long long epgid, std::string apids) 
+bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode, unsigned long long epgid, const std::string & apids) 
 {
 	printf("Record channel_id: %x epg: %llx, apids %s mode %d\n", channel_id, epgid, apids.c_str(),mode);
 	if(channel_id != 0)		// wenn ein channel angegeben ist
@@ -326,7 +326,7 @@ void CVCRControl::CServerDevice::serverDisconnect()
 }
 
 //-------------------------------------------------------------------------
-bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channel_id channel_id, unsigned long long epgid, std::string apids)
+bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channel_id channel_id, unsigned long long epgid, const std::string & apids)
 {
 	printf("Send command: %d channel_id: %x epgid: %llx\n",command, channel_id, epgid);
 	if(serverConnect())

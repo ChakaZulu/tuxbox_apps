@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.30 2003/09/16 10:40:19 thegoodguy Exp $
+        $Id: settings.cpp,v 1.31 2003/09/27 11:48:37 thegoodguy Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -22,7 +22,8 @@
 */
 
 
-#include "settings.h"
+#include <system/settings.h>
+
 #include <zapit/settings.h>
 
 CScanSettings::CScanSettings(void)
@@ -174,7 +175,7 @@ void CScanSettings::useDefaults(const delivery_system_t _delivery_system)
 	}
 }
 
-bool CScanSettings::loadSettings(const std::string fileName, const delivery_system_t _delivery_system)
+bool CScanSettings::loadSettings(const std::string & fileName, const delivery_system_t _delivery_system)
 {
 	int satCount = 0;
 	int i = 0;
@@ -218,7 +219,7 @@ bool CScanSettings::loadSettings(const std::string fileName, const delivery_syst
 	return true;
 }
 
-bool CScanSettings::saveSettings(const std::string fileName)
+bool CScanSettings::saveSettings(const std::string & fileName)
 {
 	int satCount = 0;
 	char tmp[20] = "";

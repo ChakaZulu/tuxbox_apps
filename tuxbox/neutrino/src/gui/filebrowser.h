@@ -70,8 +70,8 @@ class CFileFilter
 {
 	std::vector<std::string> Filter;
 public:
-	void addFilter(std::string filter){Filter.push_back(filter);};
-	bool matchFilter(const std::string name)
+	void addFilter(const std::string & filter){Filter.push_back(filter);};
+	bool matchFilter(const std::string & name)
 	{
 		int ext_pos = 0;
 		ext_pos = name.rfind('.');
@@ -121,9 +121,9 @@ class CFileBrowser
 
 		CFileList		filelist;
 		CFileList		selected_filelist;
-		bool			readDir(std::string dirname, CFileList* flist);
-		bool			readDir_vlc(std::string dirname, CFileList* flist);
-		bool			readDir_std(std::string dirname, CFileList* flist);
+		bool			readDir(const std::string & dirname, CFileList* flist);
+		bool			readDir_vlc(const std::string & dirname, CFileList* flist);
+		bool			readDir_std(const std::string & dirname, CFileList* flist);
 		void			addRecursiveDir(CFileList * re_filelist, std::string path, bool bRootCall, CProgressWindow * progress = NULL);
 
 		unsigned int		selected;
@@ -144,7 +144,7 @@ class CFileBrowser
 		int 			x;
 		int 			y;
 
-		void ChangeDir(std::string filename);
+		void ChangeDir(const std::string & filename);
 
 		void paintItem(unsigned pos, unsigned int spalte = 0);
 		void paint();

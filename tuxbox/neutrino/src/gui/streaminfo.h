@@ -37,8 +37,6 @@
 
 #include <driver/framebuffer.h>
 
-#include <string>
-
 
 class CStreamInfo : public CMenuTarget
 {
@@ -58,7 +56,7 @@ class CStreamInfo : public CMenuTarget
 		CStreamInfo();
 
 		void hide();
-		int exec( CMenuTarget* parent, std::string actionKey );
+		int exec(CMenuTarget* parent, const std::string & actionKey);
 
 };
 

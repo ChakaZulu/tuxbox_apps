@@ -106,13 +106,13 @@ class CBEBouquetWidget : public CMenuWidget
 		void saveChanges();
 		void discardChanges();
 
-		std::string inputName( std::string defaultName, std::string caption);
+		std::string inputName( const std::string & defaultName, const std::string & caption);
 
 	public:
 		CBEBouquetWidget();
 
 		CZapitClient::BouquetList Bouquets;
-		int exec(CMenuTarget* parent, std::string actionKey);
+		int exec(CMenuTarget* parent, const std::string & actionKey);
 };
 
 

@@ -158,7 +158,7 @@ void CInfoViewer::showRecordIcon(const bool show)
 	}
 }
 
-void CInfoViewer::showTitle(const int ChanNum, const std::string Channel, const t_satellite_position satellitePosition, const t_channel_id new_channel_id, const bool calledFromNumZap)
+void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, const t_satellite_position satellitePosition, const t_channel_id new_channel_id, const bool calledFromNumZap)
 {
 	CNeutrinoApp *neutrino = CNeutrinoApp::getInstance();
 

@@ -21,10 +21,10 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA
 */
 
+#include <gui/widget/listbox.h>
+
 #include <global.h>
 #include <neutrino.h>
-
-#include "listbox.h"
 
 #include <gui/widget/icons.h>
 
@@ -140,7 +140,7 @@ void CListBox::paintItem(unsigned int itemNr, int paintNr, bool selected)
 	g_Fonts->channellist->RenderString(x + 10, ypos+ fheight, width-20, "demo", color);
 }
 
-int CListBox::exec(CMenuTarget* parent, std::string actionKey)
+int CListBox::exec(CMenuTarget* parent, const std::string & actionKey)
 {
 	int res = menu_return::RETURN_REPAINT;
 	selected=0;

@@ -52,12 +52,12 @@ class CFlashUpdate : public CProgressWindow
 		std::string	newVersion;
 
 		bool getInfo();
-		bool getUpdateImage(std::string version);
+		bool getUpdateImage(const std::string & version);
 		bool checkVersion4Update();
 
 	public:
 		CFlashUpdate();
-		int exec( CMenuTarget* parent, std::string actionKey );
+		int exec( CMenuTarget* parent, const std::string & actionKey );
 
 };
 
@@ -66,15 +66,15 @@ class CFlashExpert : public CProgressWindow
 	private:
 		int selectedMTD;
 
-		void showMTDSelector(std::string actionkey);
-		void showFileSelector(std::string actionkey);
+		void showMTDSelector(const std::string & actionkey);
+		void showFileSelector(const std::string & actionkey);
 
 		void readmtd(int readmtd);
-		void writemtd(std::string filename, int mtdNumber);
+		void writemtd(const std::string & filename, int mtdNumber);
 
 	public:
 		CFlashExpert();
-		int exec( CMenuTarget* parent, std::string actionKey );
+		int exec(CMenuTarget* parent, const std::string & actionKey);
 
 };
 

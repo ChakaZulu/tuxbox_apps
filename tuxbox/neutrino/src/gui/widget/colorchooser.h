@@ -56,14 +56,14 @@ class CColorChooser : public CMenuTarget
 
 		void paint();
 		void setColor();
-		void paintSlider(int x, int y, unsigned char *spos, const std::string text, const std::string iconname, const bool selected);
+		void paintSlider(int x, int y, unsigned char *spos, const char * const text, const std::string & iconname, const bool selected);
 
 	public:
 
 		CColorChooser(const char * const Name, unsigned char *R, unsigned char *G, unsigned char *B, unsigned char* Alpha, CChangeObserver* Observer = NULL); // UTF-8
 
 		void hide();
-		int exec(CMenuTarget* parent, std::string actionKey);
+		int exec(CMenuTarget* parent, const std::string & actionKey);
 
 };
 

@@ -91,10 +91,10 @@ class CBEChannelWidget : public CMenuWidget
 		void internalMoveChannel( unsigned int fromPosition, unsigned int toPosition);
 
 	public:
-		CBEChannelWidget( std::string Caption, unsigned int Bouquet);
+		CBEChannelWidget( const std::string & Caption, unsigned int Bouquet);
 
 		CZapitClient::BouquetChannelList	Channels;
-		int exec(CMenuTarget* parent, std::string actionKey);
+		int exec(CMenuTarget* parent, const std::string & actionKey);
 		bool hasChanged();
 };
 

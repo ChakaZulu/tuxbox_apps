@@ -51,7 +51,7 @@ class CSatDiseqcNotifier : public CChangeObserver
 	public:
 		CSatDiseqcNotifier( CMenuItem* SatMenu, CMenuItem* ExtMenu, CMenuItem* ExtMotorMenu, CMenuItem* RepeatMenu) : CChangeObserver()
 		{ satMenu = SatMenu; extMenu = ExtMenu; extMotorMenu = ExtMotorMenu; repeatMenu = RepeatMenu;};
-		bool changeNotify(std::string OptionName, void*);
+		bool changeNotify(const std::string & OptionName, void*);
 };
 
 class CDHCPNotifier : public CChangeObserver
@@ -60,7 +60,7 @@ class CDHCPNotifier : public CChangeObserver
 		CMenuForwarder* toDisable[5];
 	public:
 		CDHCPNotifier( CMenuForwarder*, CMenuForwarder*, CMenuForwarder*, CMenuForwarder*, CMenuForwarder*);
-		bool changeNotify(std::string OptionName, void*);
+		bool changeNotify(const std::string & OptionName, void*);
 };
 class CStreamingNotifier : public CChangeObserver
 {
@@ -68,7 +68,7 @@ class CStreamingNotifier : public CChangeObserver
 		CMenuItem* toDisable[7];
 	public:
 		CStreamingNotifier( CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem* );
-		bool changeNotify(std::string OptionName, void*);
+		bool changeNotify(const std::string & OptionName, void*);
 };
 class CRecordingNotifier : public CChangeObserver
 {
@@ -76,7 +76,7 @@ class CRecordingNotifier : public CChangeObserver
 		CMenuItem* toDisable[7];
 	public:
 		CRecordingNotifier( CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*);
-		bool changeNotify(std::string OptionName, void*);
+		bool changeNotify(const std::string & OptionName, void*);
 };
 
 class CRecordingNotifier2 : public CChangeObserver
@@ -85,7 +85,7 @@ class CRecordingNotifier2 : public CChangeObserver
 		CMenuItem* toDisable[1];
 	public:
 		CRecordingNotifier2( CMenuItem* );
-		bool changeNotify(std::string OptionName, void*);
+		bool changeNotify(const std::string & OptionName, void*);
 };
 
 class CMiscNotifier : public CChangeObserver
@@ -94,14 +94,14 @@ class CMiscNotifier : public CChangeObserver
 		CMenuItem* toDisable[1];
 	public:
 		CMiscNotifier( CMenuItem* );
-		bool changeNotify(std::string OptionName, void*);
+		bool changeNotify(const std::string & OptionName, void*);
 };
 
 /*
 class CCableSpectalInversionNotifier : public CChangeObserver
 {
 	public:
-		bool changeNotify(std::string OptionName, void*);
+		bool changeNotify(const std::string & OptionName, void*);
 };
 */
 
@@ -111,92 +111,92 @@ class CLcdNotifier : public CChangeObserver
 		int *LcdPowerSetting, *LcdInverseSetting, *LcdAutoDimmSetting;
 	public:
 		CLcdNotifier(int *lcdPowerSetting, int *lcdInverseSetting, int *lcdAutoDimmSetting);
-		bool changeNotify(std::string OptionName, void*);
+		bool changeNotify(const std::string & OptionName, void*);
 };
 
 class CPauseSectionsdNotifier : public CChangeObserver
 {
 	public:
-		bool changeNotify(std::string OptionName, void*);
+		bool changeNotify(const std::string & OptionName, void*);
 };
 
 class CStartNeutrinoDirectNotifier : public CChangeObserver
 {
 	public:
-		bool changeNotify(std::string OptionName, void*);
+		bool changeNotify(const std::string & OptionName, void*);
 };
 
 class CBHDriverNotifier : public CChangeObserver
 {
 	public:
-		bool changeNotify(std::string OptionName, void*);
+		bool changeNotify(const std::string & OptionName, void*);
 };
 
 class CColorSetupNotifier : public CChangeObserver
 {
 	public:
-		bool changeNotify(std::string OptionName, void*);
+		bool changeNotify(const std::string & OptionName, void*);
 };
 
 class CAudioSetupNotifier : public CChangeObserver
 {
 	public:
-		bool changeNotify(std::string OptionName, void*);
+		bool changeNotify(const std::string & OptionName, void*);
 };
 
 class CVideoSetupNotifier : public CChangeObserver
 {
 	public:
-		bool changeNotify(std::string OptionName, void*);
+		bool changeNotify(const std::string & OptionName, void*);
 };
 
 class CLanguageSetupNotifier : public CChangeObserver
 {
 	public:
-		bool changeNotify(std::string OptionName, void*);
+		bool changeNotify(const std::string & OptionName, void*);
 };
 
 class CKeySetupNotifier : public CChangeObserver
 {
 	public:
-		bool changeNotify(std::string OptionName, void*);
+		bool changeNotify(const std::string & OptionName, void*);
 };
 
 class CIPChangeNotifier : public CChangeObserver
 {
 	public:
-		bool changeNotify(std::string OptionName, void*);
+		bool changeNotify(const std::string & OptionName, void*);
 };
 
 class CConsoleDestChangeNotifier : public CChangeObserver
 {
 	public:
-		bool changeNotify(std::string OptionName, void*);
+		bool changeNotify(const std::string & OptionName, void*);
 };
 
 class CAPIDChangeExec : public CMenuTarget
 {
 	public:
-		int exec(CMenuTarget* parent, std::string actionKey);
+		int exec(CMenuTarget* parent, const std::string & actionKey);
 };
 
-void showSubchan(std::string subChannelName);
+void showSubchan(const std::string & subChannelName);
 class CNVODChangeExec : public CMenuTarget
 {
 	public:
-		int exec(CMenuTarget* parent, std::string actionKey);
+		int exec(CMenuTarget* parent, const std::string & actionKey);
 };
 
 class CStreamFeaturesChangeExec : public CMenuTarget
 {
 	public:
-		int exec(CMenuTarget* parent, std::string actionKey);
+		int exec(CMenuTarget* parent, const std::string & actionKey);
 };
 
 class CUCodeCheckExec : public CMenuTarget
 {
 	public:
-		int exec(CMenuTarget* parent, std::string actionKey);
+		int exec(CMenuTarget* parent, const std::string & actionKey);
 };
 
 void testNetworkSettings(const char* ip, const char* netmask, const char* broadcast, const char* gateway, const char* nameserver, bool dhcp);

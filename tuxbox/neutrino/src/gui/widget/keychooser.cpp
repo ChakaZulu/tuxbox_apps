@@ -38,7 +38,7 @@
 
 
 
-CKeyChooser::CKeyChooser( int* Key, const char * const title, std::string Icon )
+CKeyChooser::CKeyChooser( int* Key, const char * const title, const std::string & Icon )
 		: CMenuWidget(title, Icon)
 {
 	frameBuffer = CFrameBuffer::getInstance();
@@ -87,7 +87,7 @@ CKeyChooserItem::CKeyChooserItem(const char * const Name, int *Key)
 }
 
 
-int CKeyChooserItem::exec(CMenuTarget* parent, std::string)
+int CKeyChooserItem::exec(CMenuTarget* parent, const std::string &)
 {
 	int res = menu_return::RETURN_REPAINT;
 

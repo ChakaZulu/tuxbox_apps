@@ -61,12 +61,12 @@
 extern CPlugins       * g_PluginList;    /* neutrino.cpp */
 extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
-bool CPlugins::plugin_exists(std::string filename)
+bool CPlugins::plugin_exists(const std::string & filename)
 {
 	return (find_plugin(filename) >= 0);
 }
 
-int CPlugins::find_plugin(std::string filename)
+int CPlugins::find_plugin(const std::string & filename)
 {
 	for(int i = 0; i <  (int) plugin_list.size();i++)
 	{
@@ -125,12 +125,12 @@ CPlugins::~CPlugins()
 	plugin_list.clear();
 }
 
-void CPlugins::addParm(std::string cmd, std::string value)
+void CPlugins::addParm(const std::string & cmd, const std::string & value)
 {
 	params[cmd] = value;
 }
 
-void CPlugins::addParm(std::string cmd, int value)
+void CPlugins::addParm(const std::string & cmd, int value)
 {
 	char aval[10];
 	sprintf( aval, "%d", value );
@@ -236,7 +236,7 @@ void CPlugins::parseCfg(plugin *plugin_data)
 	inFile.close();
 }
 
-PluginParam* CPlugins::makeParam(std::string id, PluginParam *next)
+PluginParam* CPlugins::makeParam(const std::string & id, PluginParam *next)
 {
 	PluginParam *startparam = new PluginParam;
 
@@ -249,7 +249,7 @@ PluginParam* CPlugins::makeParam(std::string id, PluginParam *next)
 	return startparam;
 }
 
-void CPlugins::startPlugin(std::string name)
+void CPlugins::startPlugin(const std::string & name)
 {
 	int pluginnr = find_plugin(name);
 	if( pluginnr > -1)
@@ -493,7 +493,7 @@ CGameList::~CGameList()
 }
 
 
-int CGameList::exec(CMenuTarget* parent, std::string actionKey)
+int CGameList::exec(CMenuTarget* parent, const std::string & actionKey)
 {
 	int res = menu_return::RETURN_REPAINT;
 

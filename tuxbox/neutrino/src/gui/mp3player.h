@@ -140,8 +140,8 @@ class CMP3PlayerGui : public CMenuTarget
  public:
 	CMP3PlayerGui();
 	~CMP3PlayerGui();
-	int  show();
-	int  exec(CMenuTarget* parent, std::string actionKey);
+	int show();
+	int exec(CMenuTarget* parent, const std::string & actionKey);
 };
 
 

@@ -26,11 +26,12 @@
 #include <config.h>
 #endif
 
+#include <driver/lcdd.h>
+
 #include <global.h>
 #include <system/settings.h>
 
-#include "lcdd.h"
-#include "newclock.h"
+#include <driver/newclock.h>
 #include <lcddisplay/lcddisplay.h>
 
 #include <dbox/fp.h>
@@ -200,7 +201,7 @@ void CLCD::setlcdparameter(void)
 	setAutoDimm(g_settings.lcd_autodimm);
 }
 
-void CLCD::showServicename(const std::string name) // UTF-8
+void CLCD::showServicename(const std::string & name) // UTF-8
 {
 	servicename = name;
 	if (mode != MODE_TVRADIO)
@@ -325,7 +326,7 @@ void CLCD::showPercentOver(const unsigned char perc)
 	}
 }
 
-void CLCD::showMenuText(const int position, const std::string text, const int highlight, const bool utf_encoded)
+void CLCD::showMenuText(const int position, const std::string & text, const int highlight, const bool utf_encoded)
 {
 	if (mode != MODE_MENU_UTF8)
 		return;
@@ -336,8 +337,7 @@ void CLCD::showMenuText(const int position, const std::string text, const int hi
 	display.update();
 }
 
-void CLCD::showMP3(const std::string artist, const std::string title,
-						 const std::string album)
+void CLCD::showMP3(const std::string & artist, const std::string & title, const std::string & album)
 {
 	if (mode != MODE_MP3) 
 	{
@@ -388,7 +388,7 @@ void CLCD::showMP3Play(MP3MODES m)
 	}
 	display.update();
 }
-void CLCD::setMode(MODES m, std::string title)
+void CLCD::setMode(MODES m, const std::string & title)
 {
 	switch (m)
 	{

@@ -122,7 +122,7 @@ CMP3PlayerGui::~CMP3PlayerGui()
 }
 
 //------------------------------------------------------------------------
-int CMP3PlayerGui::exec(CMenuTarget* parent, std::string actionKey)
+int CMP3PlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 {
 	m_state=CMP3PlayerGui::STOP;
 	current=-1;

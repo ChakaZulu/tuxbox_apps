@@ -61,14 +61,14 @@ class CAlphaSetup : public CMenuTarget
 
 		void paint();
 		void setAlpha();
-		void paintSlider(const int x, const int y, const unsigned char * const spos, const std::string text, const std::string iconname, const bool selected); // UTF-8
+		void paintSlider(const int x, const int y, const unsigned char * const spos, const char * const text, const char * const iconname, const bool selected); // UTF-8
 
 	public:
 
 		CAlphaSetup(const char * const Name, unsigned char* Alpha1, unsigned char* Alpha2, CChangeObserver* Observer = NULL); // UTF-8
 
 		void hide();
-		int exec( CMenuTarget* parent, std::string actionKey);
+		int exec(CMenuTarget* parent, const std::string & actionKey);
 
 };
 

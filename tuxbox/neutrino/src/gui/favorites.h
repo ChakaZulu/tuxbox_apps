@@ -40,7 +40,7 @@ class CFavorites : public CMenuTarget
 	public:
 
 		int  addChannelToFavorites ();
-		int  exec( CMenuTarget* parent, std::string actionKey);
+		int  exec(CMenuTarget* parent, const std::string & actionKey);
 };
 
 

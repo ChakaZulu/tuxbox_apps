@@ -53,7 +53,7 @@
 // -- Add current channel to Favorites and display user messagebox
 //
 
-int CSleepTimerWidget::exec(CMenuTarget* parent, std::string)
+int CSleepTimerWidget::exec(CMenuTarget* parent, const std::string &)
 {
 	int    res = menu_return::RETURN_EXIT_ALL;
 	int    shutdown_min;

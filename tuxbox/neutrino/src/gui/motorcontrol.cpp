@@ -62,7 +62,7 @@ CMotorControl::CMotorControl()
 	stepDelay = 10;
 }
 
-int CMotorControl::exec(CMenuTarget* parent, std::string)
+int CMotorControl::exec(CMenuTarget* parent, const std::string &)
 {
 	uint msg;
 	uint data;

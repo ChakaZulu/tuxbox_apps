@@ -75,7 +75,7 @@ class CExtendedInput : public CMenuTarget
 		CExtendedInput(const char * const Name, char* Value, const char * const Hint_1 = NULL, const char * const Hint_2 = NULL, CChangeObserver* Observ = NULL, bool Localizing=true);
 
 		void hide();
-		int exec( CMenuTarget* parent, std::string actionKey );
+		int exec( CMenuTarget* parent, const std::string & actionKey );
 		void calculateDialog();
 
 		void addInputField( CExtendedInput_Item* );
@@ -133,9 +133,9 @@ class CExtendedInput_Item_Char : public CExtendedInput_Item
 		int getCharID( char );
 
 	public:
-		CExtendedInput_Item_Char(std::string Chars="", bool Selectable=true );
+		CExtendedInput_Item_Char(const std::string & Chars="", bool Selectable=true );
 		virtual ~CExtendedInput_Item_Char(){};
-		void setAllowedChars( std::string );
+		void setAllowedChars( const std::string & );
 		virtual void init(int &x, int &y);
 		virtual void paint(int x, int y, bool focusGained);
 
@@ -155,7 +155,7 @@ class CIPInput : public CExtendedInput
 		virtual void onAfterExec();
 
 	public:
-		CIPInput(const char * const Name, std::string &Value, const char * const Hint_1 = NULL, const char * const Hint_2 = NULL, CChangeObserver* Observ = NULL);
+		CIPInput(const char * const Name, std::string & Value, const char * const Hint_1 = NULL, const char * const Hint_2 = NULL, CChangeObserver* Observ = NULL);
 };
 
 //----------------------------------------------------------------------------------------------------

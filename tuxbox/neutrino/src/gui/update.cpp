@@ -128,7 +128,7 @@ bool CFlashUpdate::getInfo()
 	return httpTool.downloadFile( gURL, sFileName, 20 );
 }
 
-bool CFlashUpdate::getUpdateImage(std::string version)
+bool CFlashUpdate::getUpdateImage(const std::string & version)
 {
 	CHTTPTool httpTool;
 	httpTool.setStatusViewer( this );
@@ -231,7 +231,7 @@ bool CFlashUpdate::checkVersion4Update()
 	return (ShowMsgUTF("messagebox.info", msg, CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw") == CMessageBox::mbrYes); // UTF-8
 }
 
-int CFlashUpdate::exec(CMenuTarget* parent, std::string)
+int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 {
 	if(parent)
 	{
@@ -350,7 +350,7 @@ void CFlashExpert::readmtd(int readmtd)
 	}
 }
 
-void CFlashExpert::writemtd(std::string filename, int mtdNumber)
+void CFlashExpert::writemtd(const std::string & filename, int mtdNumber)
 {
 	char message[500];
 #ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
@@ -384,7 +384,7 @@ void CFlashExpert::writemtd(std::string filename, int mtdNumber)
 }
 
 
-void CFlashExpert::showMTDSelector(std::string actionkey)
+void CFlashExpert::showMTDSelector(const std::string & actionkey)
 {
 	//mtd-selector erzeugen
 	CMenuWidget* mtdselector = new CMenuWidget("flashupdate.mtdselector", "softupdate.raw");
@@ -401,7 +401,7 @@ void CFlashExpert::showMTDSelector(std::string actionkey)
 	mtdselector->exec(NULL,"");
 }
 
-void CFlashExpert::showFileSelector(std::string actionkey)
+void CFlashExpert::showFileSelector(const std::string & actionkey)
 {
 	CMenuWidget* fileselector = new CMenuWidget("flashupdate.fileselector", "softupdate.raw");
 	fileselector->addItem(GenericMenuSeparator);
@@ -433,7 +433,7 @@ void CFlashExpert::showFileSelector(std::string actionkey)
 }
 
 
-int CFlashExpert::exec( CMenuTarget* parent, std::string actionKey )
+int CFlashExpert::exec(CMenuTarget* parent, const std::string & actionKey)
 {
 	if(parent)
 	{

@@ -80,7 +80,7 @@ class CMotorControl : public CMenuTarget
 
 		CMotorControl();
 		void hide();
-		int exec( CMenuTarget* parent, std::string actionKey );
+		int exec(CMenuTarget* parent, const std::string & actionKey);
 };
 
 

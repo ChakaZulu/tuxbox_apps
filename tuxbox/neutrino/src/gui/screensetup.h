@@ -57,7 +57,7 @@ class CScreenSetup : public CMenuTarget
  public:
     CScreenSetup();
     void hide();
-    int exec(CMenuTarget* parent, std::string actionKey);
+    int exec(CMenuTarget* parent, const std::string & actionKey);
 
 };
 

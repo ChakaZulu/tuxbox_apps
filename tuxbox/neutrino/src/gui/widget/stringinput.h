@@ -80,7 +80,7 @@ class CStringInput : public CMenuTarget
 		CStringInput(const char * const Name, char* Value, int Size, const char * const Hint_1 = NULL, const char * const Hint_2 = NULL, const char * const Valid_Chars= "0123456789. ", CChangeObserver* Observ = NULL, const char * const Icon = NULL);
 
 		void hide();
-		int exec( CMenuTarget* parent, std::string actionKey );
+		int exec( CMenuTarget* parent, const std::string & actionKey );
 
 };
 
@@ -115,7 +115,7 @@ class CPINInput : public CStringInput
 		CPINInput(const char * const Name, char* Value, int Size, const char * const Hint_1 = NULL, const char * const Hint_2 = NULL, char* Valid_Chars= "0123456789", CChangeObserver* Observ = NULL)
 		 : CStringInput(Name, Value, Size, Hint_1, Hint_2, Valid_Chars, Observ, "lock.raw") {};
 
-		 int exec( CMenuTarget* parent, std::string actionKey );
+		 int exec( CMenuTarget* parent, const std::string & actionKey );
 };
 
 class CPLPINInput : public CPINInput
@@ -128,7 +128,7 @@ class CPLPINInput : public CPINInput
 		CPLPINInput(const char * const Name, char* Value, int Size, const char * const Hint_1, int FSK )
 		 : CPINInput(Name, Value, Size, " ", Hint_1) { fsk= FSK; };
 
-		int exec( CMenuTarget* parent, std::string actionKey );
+		int exec( CMenuTarget* parent, const std::string & actionKey );
 };
 
 class CPINChangeWidget : public CStringInput

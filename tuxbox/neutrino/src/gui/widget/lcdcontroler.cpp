@@ -72,7 +72,7 @@ void CLcdControler::setLcd()
 	CLCD::getInstance()->setContrast(contrast);
 }
 
-int CLcdControler::exec(CMenuTarget* parent, std::string)
+int CLcdControler::exec(CMenuTarget* parent, const std::string &)
 {
 	int selected, res = menu_return::RETURN_REPAINT;
 	unsigned int contrast_alt, brightness_alt, brightnessstandby_alt, autodimm_alt;
@@ -310,7 +310,7 @@ void CLcdControler::paint()
 	g_Fonts->menu->RenderString(x+10, y+hheight+mheight*4+mheight/2, width, g_Locale->getText("options.default"), COL_MENUCONTENT, 0, true); // UTF-8
 }
 
-void CLcdControler::paintSlider(int x, int y, unsigned int spos, float factor, std::string text, std::string iconname, bool selected)
+void CLcdControler::paintSlider(int x, int y, unsigned int spos, float factor, const char * const text, const char * const iconname, bool selected)
 {
 	int startx = 200;
 	char wert[5];

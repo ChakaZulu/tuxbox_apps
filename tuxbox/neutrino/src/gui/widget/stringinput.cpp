@@ -172,7 +172,7 @@ void CStringInput::keyRightPressed()
 }
 
 
-int CStringInput::exec( CMenuTarget* parent, std::string )
+int CStringInput::exec( CMenuTarget* parent, const std::string & )
 {
 	int res = menu_return::RETURN_REPAINT;
 	char oldval[size], dispval[size];
@@ -508,7 +508,7 @@ void CPINInput::paintChar(int pos)
 	CStringInput::paintChar(pos, (value[pos] == ' ') ? ' ' : '*');
 }
 
-int CPINInput::exec( CMenuTarget* parent, std::string )
+int CPINInput::exec( CMenuTarget* parent, const std::string & )
 {
 	int res = menu_return::RETURN_REPAINT;
 
@@ -612,7 +612,7 @@ int CPLPINInput::handleOthers( uint msg, uint data )
 
 #define borderwidth 4
 
-int CPLPINInput::exec( CMenuTarget* parent, std::string )
+int CPLPINInput::exec( CMenuTarget* parent, const std::string & )
 {
 
 	unsigned char* pixbuf= new unsigned char[(width+ 2* borderwidth) * (height+ 2* borderwidth)];

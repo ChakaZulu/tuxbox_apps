@@ -66,7 +66,7 @@ public:
 		m_pass = a4;
 		m_type = type;
 	}
-	bool changeNotify(std::string OptionName, void* dummy)
+	bool changeNotify(const std::string & OptionName, void* dummy)
 	{
 		if(*m_type == (int)CNFSMountGui::NFS)
 		{
@@ -176,7 +176,7 @@ CNFSMountGui::FS_Support CNFSMountGui::fsSupported(const CNFSMountGui::FSType fs
 	return CNFSMountGui::FS_UNSUPPORTED;
 }
 
-int CNFSMountGui::exec( CMenuTarget* parent, std::string actionKey )
+int CNFSMountGui::exec( CMenuTarget* parent, const std::string & actionKey )
 {
 //	printf("exec: %s\n", actionKey.c_str());
 	int returnval = menu_return::RETURN_REPAINT;
@@ -461,7 +461,7 @@ void CNFSMountGui::automount()
 	}
 }
 
-int CNFSUmountGui::exec( CMenuTarget* parent, std::string actionKey )
+int CNFSUmountGui::exec( CMenuTarget* parent, const std::string & actionKey )
 {
 	//	printf("ac: %s\n", actionKey.c_str());
 	int returnval;
@@ -548,7 +548,7 @@ void CNFSUmountGui::umount(const char * const dir)
 		remove_modules(CNFSMountGui::NFS);
 }
 
-int CNFSSmallMenu::exec( CMenuTarget* parent, std::string actionKey )
+int CNFSSmallMenu::exec( CMenuTarget* parent, const std::string & actionKey )
 {
 	CMenuWidget menu("nfsmenu.head", "network.raw");
 	CNFSMountGui mountGui;

@@ -60,14 +60,14 @@ class CLcdControler : public CMenuTarget
 
 		void paint();
 		void setLcd();
-		void paintSlider(int x, int y, unsigned int spos, float factor, const std::string text, std::string iconname, bool selected); // text in UTF-8
+		void paintSlider(int x, int y, unsigned int spos, float factor, const char * const text, const char * const iconname, bool selected); // text in UTF-8
 
 	public:
 
 		CLcdControler(const char * const Name, CChangeObserver* Observer=NULL); // UTF-8
 
 		void hide();
-		int exec( CMenuTarget* parent, std::string actionKey );
+		int exec(CMenuTarget* parent, const std::string & actionKey);
 
 };
 

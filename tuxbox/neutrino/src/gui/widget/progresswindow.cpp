@@ -48,7 +48,7 @@ CProgressWindow::CProgressWindow()
 	y=(576-height)>>1;
 }
 
-void CProgressWindow::setTitle(const std::string title)
+void CProgressWindow::setTitle(const std::string & title)
 {
 	caption = title;
 }
@@ -98,7 +98,7 @@ void CProgressWindow::showLocalStatus(const unsigned int prog)
 	frameBuffer->paintBox(pos, localstatusY, x+width-10, localstatusY+10, COL_MENUCONTENT +2);
 }
 
-void CProgressWindow::showStatusMessageUTF(const std::string text)
+void CProgressWindow::showStatusMessageUTF(const std::string & text)
 {
 	statusText = text;
 	frameBuffer->paintBox(x, statusTextY-mheight, x+width, statusTextY,  COL_MENUCONTENT);
@@ -141,7 +141,7 @@ void CProgressWindow::paint()
 	showGlobalStatus(global_progress);
 }
 
-int CProgressWindow::exec( CMenuTarget* parent, std::string actionKey )
+int CProgressWindow::exec(CMenuTarget* parent, const std::string & actionKey)
 {
 	if(parent)
 	{

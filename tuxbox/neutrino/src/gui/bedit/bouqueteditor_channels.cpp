@@ -42,7 +42,7 @@
 #include <zapit/client/zapitclient.h>
 
 
-CBEChannelWidget::CBEChannelWidget(std::string Caption, unsigned int Bouquet)
+CBEChannelWidget::CBEChannelWidget(const std::string & Caption, unsigned int Bouquet)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	selected = 0;
@@ -142,7 +142,7 @@ void CBEChannelWidget::hide()
 	frameBuffer->paintBackgroundBoxRel(x,y, width,height+ButtonHeight);
 }
 
-int CBEChannelWidget::exec(CMenuTarget* parent, std::string actionKey)
+int CBEChannelWidget::exec(CMenuTarget* parent, const std::string & actionKey)
 {
 	int res = menu_return::RETURN_REPAINT;
 

@@ -159,7 +159,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void InitColorSettingsTiming(CMenuWidget &colorSettings_timing);
 		void InitLcdSettings(CMenuWidget &lcdSettings);
 		void InitNetworkSettings(CMenuWidget &networkSettings);
-		void AddFontSettingItem(CMenuWidget &fontSettings, const char * const menuname, char *value);
+		void AddFontSettingItem(CMenuWidget &fontSettings, const SNeutrinoSettings::FONTSIZE_ENTRIES number_of_fontsize_entry);
 		void InitFontSettings(CMenuWidget &fontSettings);
 		void InitRecordingSettings(CMenuWidget &recordingSettings);
 		void InitStreamingSettings(CMenuWidget &streamingSettings);
@@ -198,11 +198,11 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void channelsInit();
 		int run(int argc, char **argv);
 		//callback stuff only....
-		int exec(CMenuTarget* parent, std::string actionKey);
+		int exec(CMenuTarget* parent, const std::string & actionKey);
 		//callback for menue
-		bool onPaintNotify(std::string MenuName);
+		bool onPaintNotify(const std::string & MenuName);
 		//onchange
-		bool changeNotify(std::string OptionName, void *Data);
+		bool changeNotify(const std::string & OptionName, void *Data);
 
 		int handleMsg(uint msg, uint data);
 

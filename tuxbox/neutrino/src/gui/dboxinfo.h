@@ -58,7 +58,7 @@ class CDBoxInfoWidget : public CMenuTarget
 		CDBoxInfoWidget();
 
 		void hide();
-		int exec( CMenuTarget* parent, std::string actionKey );
+		int exec(CMenuTarget* parent, const std::string & actionKey);
 
 };
 

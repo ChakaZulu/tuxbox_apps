@@ -169,7 +169,7 @@ void CBEBouquetWidget::hide()
 	frameBuffer->paintBackgroundBoxRel(x,y, width,height+ButtonHeight);
 }
 
-int CBEBouquetWidget::exec(CMenuTarget* parent, std::string actionKey)
+int CBEBouquetWidget::exec(CMenuTarget* parent, const std::string & actionKey)
 {
 	int res = menu_return::RETURN_REPAINT;
 
@@ -479,7 +479,7 @@ void CBEBouquetWidget::switchLockBouquet()
 	paint();
 }
 
-std::string CBEBouquetWidget::inputName(const std::string defaultName, const std::string caption)
+std::string CBEBouquetWidget::inputName(const std::string & defaultName, const std::string & caption)
 {
 	char Name[30] = "";
 	if (defaultName != "")

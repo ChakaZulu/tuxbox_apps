@@ -65,7 +65,7 @@ void CEpgData::start()
 
 }
 
-void CEpgData::addTextToArray(std::string text) // UTF-8
+void CEpgData::addTextToArray(const std::string & text) // UTF-8
 {
 	//printf("line: >%s<\n", text.c_str() );
 	if (text==" ")
@@ -618,7 +618,7 @@ void CEpgData::GetPrevNextEPGData( unsigned long long id, time_t* startzeit )
 // -- 2002-05-03 rasc
 //
 
-int CEpgData::FollowScreenings (const t_channel_id channel_id, std::string title)
+int CEpgData::FollowScreenings (const t_channel_id channel_id, const std::string & title)
 
 {
   CChannelEventList::iterator e;

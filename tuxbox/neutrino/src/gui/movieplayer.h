@@ -109,8 +109,8 @@ class CMoviePlayerGui : public CMenuTarget
  public:
 	CMoviePlayerGui();
 	~CMoviePlayerGui();
-	int  show();
-	int  exec(CMenuTarget* parent, std::string actionKey);
+	int show();
+	int exec(CMenuTarget* parent, const std::string & actionKey);
 };
 
 

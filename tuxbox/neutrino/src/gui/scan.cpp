@@ -61,7 +61,7 @@ CScanTs::CScanTs()
 	found_transponder = 0;
 }
 
-int CScanTs::exec(CMenuTarget* parent, std::string)
+int CScanTs::exec(CMenuTarget* parent, const std::string &)
 {
 	diseqc_t diseqcType = NO_DISEQC;
 	uint msg = 0;

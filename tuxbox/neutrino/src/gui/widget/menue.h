@@ -54,7 +54,7 @@ class CChangeObserver
 {
 	public:
 		virtual ~CChangeObserver(){}
-		virtual bool changeNotify(std::string OptionName, void *Data)
+		virtual bool changeNotify(const std::string & OptionName, void *Data)
 		{
 			return false;
 		}
@@ -64,7 +64,7 @@ class COnPaintNotifier
 {
 	public:
 		virtual ~COnPaintNotifier(){}
-		virtual bool onPaintNotify(std::string MenuName)
+		virtual bool onPaintNotify(const std::string & MenuName)
 		{
 			return false;
 		}
@@ -77,7 +77,7 @@ class CMenuTarget
 		CMenuTarget(){}
 		virtual ~CMenuTarget(){}
 		virtual void hide(){}
-		virtual int exec(CMenuTarget* parent, std::string actionKey) = 0;
+		virtual int exec(CMenuTarget* parent, const std::string & actionKey) = 0;
 };
 
 
@@ -152,13 +152,18 @@ class CMenuSeparator : public CMenuItem
 
 class CMenuForwarder : public CMenuItem
 {
-		std::string         text;
-		const char *        option;
-		const std::string * option_string;
-		CMenuTarget*	jumpTarget;
-		std::string         actionKey;
-		bool		localizing;
-	public:
+	const char *        option;
+	const std::string * option_string;
+	CMenuTarget *       jumpTarget;
+	std::string         actionKey;
+	bool                localizing;
+
+ protected:
+	std::string          text;
+
+	virtual const char * getOption(void);
+	
+ public:
 
 		// Text must be UTF-8 encoded:
 		CMenuForwarder(const char * const Text, const bool Active=true, const char * const Option=NULL, CMenuTarget* Target=NULL, const char * const ActionKey = NULL, const bool Localizing = true, uint DirectKey= CRCInput::RC_nokey, const char * const IconName = NULL);
@@ -188,7 +193,7 @@ class CMenuOptionChooser : public CMenuItem
 		bool                  localizing;
 
 	public:
-		CMenuOptionChooser(const char * const OptionName, int * const OptionValue, const bool Active = false, CChangeObserver * const Observ = NULL, const bool Localizing = true, const uint DirectKey = CRCInput::RC_nokey, const std::string IconName= ""); // UTF-8
+		CMenuOptionChooser(const char * const OptionName, int * const OptionValue, const bool Active = false, CChangeObserver * const Observ = NULL, const bool Localizing = true, const uint DirectKey = CRCInput::RC_nokey, const std::string & IconName= ""); // UTF-8
 		~CMenuOptionChooser();
 
 
@@ -224,7 +229,7 @@ class CMenuOptionStringChooser : public CMenuItem
 		CMenuOptionStringChooser(const char * const OptionName, char* OptionValue, bool Active = false, CChangeObserver* Observ = NULL, bool Localizing= true);
 		~CMenuOptionStringChooser();
 
-		void addOption(std::string value);
+		void addOption(const std::string & value);
 		int paint(bool selected);
 		int getHeight(void) const
 		{
@@ -273,13 +278,13 @@ class CMenuWidget : public CMenuTarget
 			iconOffset= 0;
 		};
 		// Name must be UTF-8 encoded:
-		CMenuWidget(const char * const Name, const std::string Icon = "", const int mwidth = 400, const int mheight = 576, const bool Localizing = true);
+		CMenuWidget(const char * const Name, const std::string & Icon = "", const int mwidth = 400, const int mheight = 576, const bool Localizing = true);
 		~CMenuWidget();
 
 		virtual void addItem(CMenuItem* menuItem, const bool defaultselected = false);
 		virtual void paint();
 		virtual void hide();
-		virtual int exec(CMenuTarget* parent, std::string actionKey);
+		virtual int exec(CMenuTarget* parent, const std::string & actionKey);
 
 		void setOnPaintNotifier( COnPaintNotifier* );
 };

@@ -306,37 +306,41 @@ void CNeutrinoApp::setupColors_classic()
 typedef struct font_sizes
 {
 	const char * const name;
-	const char * const defaultvalue;
+	const unsigned int defaultsize;
+	const unsigned int style;
+	const unsigned int size_offset;
 } font_sizes_struct;
 
+#define FONT_STYLE_REGULAR 0
+#define FONT_STYLE_BOLD    1
+#define FONT_STYLE_ITALIC  2
 
-const font_sizes_struct neutrino_font_sizes[FONTSIZE_ENTRY_COUNT] = 
+const font_sizes_struct neutrino_font[FONTSIZE_ENTRY_COUNT] = 
 {
-	{"fontsize.menu"               , DEFAULT_FONTSIZE_MENU               },
-	{"fontsize.menu_title"         , DEFAULT_FONTSIZE_MENU_TITLE         },
-	{"fontsize.menu_info"          , DEFAULT_FONTSIZE_MENU_INFO          },
-	{"fontsize.epg_title"          , DEFAULT_FONTSIZE_EPG_TITLE          },
-	{"fontsize.epg_info1"          , DEFAULT_FONTSIZE_EPG_INFO1          },
-	{"fontsize.epg_info2"          , DEFAULT_FONTSIZE_EPG_INFO2          },
-	{"fontsize.epg_date"           , DEFAULT_FONTSIZE_EPG_DATE           },
-	{"fontsize.alert"              , DEFAULT_FONTSIZE_ALERT              },
-	{"fontsize.eventlist_title"    , DEFAULT_FONTSIZE_EVENTLIST_TITLE    },
-	{"fontsize.eventlist_itemlarge", DEFAULT_FONTSIZE_EVENTLIST_ITEMLARGE},
-	{"fontsize.eventlist_itemsmall", DEFAULT_FONTSIZE_EVENTLIST_ITEMSMALL},
-	{"fontsize.eventlist_datetime" , DEFAULT_FONTSIZE_EVENTLIST_DATETIME },
-	{"fontsize.gamelist_itemlarge" , DEFAULT_FONTSIZE_GAMELIST_ITEMLARGE },
-	{"fontsize.gamelist_itemsmall" , DEFAULT_FONTSIZE_GAMELIST_ITEMSMALL },
-	{"fontsize.channellist"        , DEFAULT_FONTSIZE_CHANNELLIST        },
-	{"fontsize.channellist_descr"  , DEFAULT_FONTSIZE_CHANNELLIST_DESCR  },
-	{"fontsize.channellist_number" , DEFAULT_FONTSIZE_CHANNELLIST_NUMBER },
-	{"fontsize.channel_num_zap"    , DEFAULT_FONTSIZE_CHANNEL_NUM_ZAP    },
-	{"fontsize.infobar_number"     , DEFAULT_FONTSIZE_INFOBAR_NUMBER     },
-	{"fontsize.infobar_channame"   , DEFAULT_FONTSIZE_INFOBAR_CHANNAME   },
-	{"fontsize.infobar_info"       , DEFAULT_FONTSIZE_INFOBAR_INFO       },
-	{"fontsize.infobar_small"      , DEFAULT_FONTSIZE_INFOBAR_SMALL      },
-	{"fontsize.filebrowser_item"   , DEFAULT_FONTSIZE_FILEBROWSER_ITEM   }
+	{"fontsize.menu"               ,  20, FONT_STYLE_BOLD   , 0},
+	{"fontsize.menu_title"         ,  30, FONT_STYLE_BOLD   , 0},
+	{"fontsize.menu_info"          ,  16, FONT_STYLE_REGULAR, 0},
+	{"fontsize.epg_title"          ,  25, FONT_STYLE_REGULAR, 1},
+	{"fontsize.epg_info1"          ,  17, FONT_STYLE_ITALIC , 2},
+	{"fontsize.epg_info2"          ,  17, FONT_STYLE_REGULAR, 2},
+	{"fontsize.epg_date"           ,  15, FONT_STYLE_REGULAR, 2},
+	{"fontsize.alert"              , 100, FONT_STYLE_REGULAR, 0},
+	{"fontsize.eventlist_title"    ,  30, FONT_STYLE_REGULAR, 0},
+	{"fontsize.eventlist_itemlarge",  20, FONT_STYLE_BOLD   , 1},
+	{"fontsize.eventlist_itemsmall",  14, FONT_STYLE_REGULAR, 1},
+	{"fontsize.eventlist_datetime" ,  16, FONT_STYLE_REGULAR, 1},
+	{"fontsize.gamelist_itemlarge" ,  20, FONT_STYLE_BOLD   , 1},
+	{"fontsize.gamelist_itemsmall" ,  16, FONT_STYLE_REGULAR, 1},
+	{"fontsize.channellist"        ,  20, FONT_STYLE_BOLD   , 1},
+	{"fontsize.channellist_descr"  ,  20, FONT_STYLE_REGULAR, 1},
+	{"fontsize.channellist_number" ,  14, FONT_STYLE_BOLD   , 2},
+	{"fontsize.channel_num_zap"    ,  40, FONT_STYLE_BOLD   , 0},
+	{"fontsize.infobar_number"     ,  50, FONT_STYLE_BOLD   , 0},
+	{"fontsize.infobar_channame"   ,  30, FONT_STYLE_BOLD   , 0},
+	{"fontsize.infobar_info"       ,  20, FONT_STYLE_REGULAR, 1},
+	{"fontsize.infobar_small"      ,  14, FONT_STYLE_REGULAR, 1},
+	{"fontsize.filebrowser_item"   ,  16, FONT_STYLE_BOLD   , 1}
 };
-
 
 
 /**************************************************************************************
@@ -518,10 +522,6 @@ int CNeutrinoApp::loadSetup()
 	g_settings.screen_StartY = configfile.getInt32( "screen_StartY", 23 );
 	g_settings.screen_EndX = configfile.getInt32( "screen_EndX", 668 );
 	g_settings.screen_EndY = configfile.getInt32( "screen_EndY", 555 );
-
-	//font configuration
-	for (int i = 0; i < FONTSIZE_ENTRY_COUNT; i++)
-		strcpy(g_settings.fontsize[i], configfile.getString(neutrino_font_sizes[i].name, neutrino_font_sizes[i].defaultvalue).c_str());
 
 	//Software-update
 	g_settings.softupdate_mode = configfile.getInt32( "softupdate_mode", 1 );
@@ -829,10 +829,6 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "screen_EndX", g_settings.screen_EndX );
 	configfile.setInt32( "screen_EndY", g_settings.screen_EndY );
 
-	//font configuration
-	for (int i = 0; i < FONTSIZE_ENTRY_COUNT; i++)
-		configfile.setString(neutrino_font_sizes[i].name,g_settings.fontsize[i]);
-
 	//Software-update
 	configfile.setInt32( "softupdate_mode", g_settings.softupdate_mode );
 	configfile.setString( "softupdate_currentversion", g_settings.softupdate_currentversion );
@@ -1058,7 +1054,7 @@ void CNeutrinoApp::SetupFonts()
 {
 	g_fontRenderer->AddFont((fontFile + ".ttf").c_str());
 
-	char * bold_style_name;
+	const char * bold_style_name;
 	if (g_fontRenderer->AddFont((fontFile + "_bold.ttf").c_str()) == 0)
 		bold_style_name = "Bold";
 	else
@@ -1067,36 +1063,37 @@ void CNeutrinoApp::SetupFonts()
 	if (g_fontRenderer->AddFont((fontFile + "_italic.ttf").c_str()) != 0)
 		g_fontRenderer->AddFont((fontFile + ".ttf").c_str(), true);  // make italics
 
-	g_Fonts->menu                = g_fontRenderer->getFont(fontName, bold_style_name, atoi(g_settings.fontsize[SNeutrinoSettings::FONTSIZE_MENU               ])                      );
-	g_Fonts->menu_title          = g_fontRenderer->getFont(fontName, bold_style_name, atoi(g_settings.fontsize[SNeutrinoSettings::FONTSIZE_MENU_TITLE         ])                      );
-	g_Fonts->menu_info           = g_fontRenderer->getFont(fontName, "Regular"      , atoi(g_settings.fontsize[SNeutrinoSettings::FONTSIZE_MENU_INFO          ])                      );
+	Font * * list [FONTSIZE_ENTRY_COUNT] =
+		{
+			&g_Fonts->menu,
+			&g_Fonts->menu_title,
+			&g_Fonts->menu_info,
+			&g_Fonts->epg_title,
+			&g_Fonts->epg_info1,
+			&g_Fonts->epg_info2,
+			&g_Fonts->epg_date,
+			&g_Fonts->alert,
+			&g_Fonts->eventlist_title,
+			&g_Fonts->eventlist_itemLarge,
+			&g_Fonts->eventlist_itemSmall,
+			&g_Fonts->eventlist_datetime,
+			&g_Fonts->gamelist_itemLarge,
+			&g_Fonts->gamelist_itemSmall,
+			&g_Fonts->channellist,
+			&g_Fonts->channellist_descr,
+			&g_Fonts->channellist_number,
+			&g_Fonts->channel_num_zap,
+			&g_Fonts->infobar_number,
+			&g_Fonts->infobar_channame,
+			&g_Fonts->infobar_info,
+			&g_Fonts->infobar_small,
+			&g_Fonts->filebrowser_item
+		};
 
-	g_Fonts->epg_title           = g_fontRenderer->getFont(fontName, "Regular"      , atoi(g_settings.fontsize[SNeutrinoSettings::FONTSIZE_EPG_TITLE          ]) +     fontsSizeOffset);
-	g_Fonts->epg_info1           = g_fontRenderer->getFont(fontName, "Italic"       , atoi(g_settings.fontsize[SNeutrinoSettings::FONTSIZE_EPG_INFO1          ]) + 2 * fontsSizeOffset);
-	g_Fonts->epg_info2           = g_fontRenderer->getFont(fontName, "Regular"      , atoi(g_settings.fontsize[SNeutrinoSettings::FONTSIZE_EPG_INFO2          ]) + 2 * fontsSizeOffset);
-	g_Fonts->epg_date            = g_fontRenderer->getFont(fontName, "Regular"      , atoi(g_settings.fontsize[SNeutrinoSettings::FONTSIZE_EPG_DATE           ]) + 2 * fontsSizeOffset);
+	const char * style[3] = {"Regular", bold_style_name, "Italic"};
 
-	g_Fonts->alert               = g_fontRenderer->getFont(fontName, "Regular"      , atoi(g_settings.fontsize[SNeutrinoSettings::FONTSIZE_ALERT              ])                      );
-
-	g_Fonts->eventlist_title     = g_fontRenderer->getFont(fontName, "Regular"      , atoi(g_settings.fontsize[SNeutrinoSettings::FONTSIZE_EVENTLIST_TITLE    ])                      );
-	g_Fonts->eventlist_itemLarge = g_fontRenderer->getFont(fontName, bold_style_name, atoi(g_settings.fontsize[SNeutrinoSettings::FONTSIZE_EVENTLIST_ITEMLARGE]) +     fontsSizeOffset);
-	g_Fonts->eventlist_itemSmall = g_fontRenderer->getFont(fontName, "Regular"      , atoi(g_settings.fontsize[SNeutrinoSettings::FONTSIZE_EVENTLIST_ITEMSMALL]) +     fontsSizeOffset);
-	g_Fonts->eventlist_datetime  = g_fontRenderer->getFont(fontName, "Regular"      , atoi(g_settings.fontsize[SNeutrinoSettings::FONTSIZE_EVENTLIST_DATETIME ]) +     fontsSizeOffset);
-
-	g_Fonts->gamelist_itemLarge  = g_fontRenderer->getFont(fontName, bold_style_name, atoi(g_settings.fontsize[SNeutrinoSettings::FONTSIZE_GAMELIST_ITEMLARGE ]) +     fontsSizeOffset);
-	g_Fonts->gamelist_itemSmall  = g_fontRenderer->getFont(fontName, "Regular"      , atoi(g_settings.fontsize[SNeutrinoSettings::FONTSIZE_GAMELIST_ITEMSMALL ]) +     fontsSizeOffset);
-
-	g_Fonts->channellist         = g_fontRenderer->getFont(fontName, bold_style_name, atoi(g_settings.fontsize[SNeutrinoSettings::FONTSIZE_CHANNELLIST        ]) +     fontsSizeOffset);
-	g_Fonts->channellist_descr   = g_fontRenderer->getFont(fontName, "Regular"      , atoi(g_settings.fontsize[SNeutrinoSettings::FONTSIZE_CHANNELLIST_DESCR  ]) +     fontsSizeOffset);
-	g_Fonts->channellist_number  = g_fontRenderer->getFont(fontName, bold_style_name, atoi(g_settings.fontsize[SNeutrinoSettings::FONTSIZE_CHANNELLIST_NUMBER ]) + 2 * fontsSizeOffset);
-	g_Fonts->channel_num_zap     = g_fontRenderer->getFont(fontName, bold_style_name, atoi(g_settings.fontsize[SNeutrinoSettings::FONTSIZE_CHANNEL_NUM_ZAP    ])                      );
-
-	g_Fonts->infobar_number      = g_fontRenderer->getFont(fontName, bold_style_name, atoi(g_settings.fontsize[SNeutrinoSettings::FONTSIZE_INFOBAR_NUMBER     ])                      );
-	g_Fonts->infobar_channame    = g_fontRenderer->getFont(fontName, bold_style_name, atoi(g_settings.fontsize[SNeutrinoSettings::FONTSIZE_INFOBAR_CHANNAME   ])                      );
-	g_Fonts->infobar_info        = g_fontRenderer->getFont(fontName, "Regular"      , atoi(g_settings.fontsize[SNeutrinoSettings::FONTSIZE_INFOBAR_INFO       ]) +     fontsSizeOffset);
-	g_Fonts->infobar_small       = g_fontRenderer->getFont(fontName, "Regular"      , atoi(g_settings.fontsize[SNeutrinoSettings::FONTSIZE_INFOBAR_SMALL      ]) +     fontsSizeOffset);
-
-	g_Fonts->filebrowser_item    = g_fontRenderer->getFont(fontName, bold_style_name, atoi(g_settings.fontsize[SNeutrinoSettings::FONTSIZE_FILEBROWSER_ITEM   ]) +     fontsSizeOffset);
+	for (int i = 0; i < FONTSIZE_ENTRY_COUNT; i++)
+		(* list[i]) = g_fontRenderer->getFont(fontName, style[neutrino_font[i].style], configfile.getInt32(neutrino_font[i].name, neutrino_font[i].defaultsize) + neutrino_font[i].size_offset * fontsSizeOffset);
 }
 
 /**************************************************************************************
@@ -1800,9 +1797,47 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 
 }
 
-void CNeutrinoApp::AddFontSettingItem(CMenuWidget &fontSettings, const char * const menuname, char *value)
+
+class CMenuNumberInput : public CMenuForwarder, CMenuTarget
 {
-	fontSettings.addItem(new CMenuForwarder(menuname, true, value, new CStringInput(menuname, value, 3, "ipsetup.hint_1", "ipsetup.hint_2", "0123456789 ", this)));
+private:
+	CChangeObserver * observer;
+	CConfigFile     * configfile;
+	int32_t           defaultvalue;
+	char              value[11];
+
+protected:
+
+	virtual const char * getOption(void)
+		{
+			sprintf(value, "%u", configfile->getInt32(text, defaultvalue));
+			return value;
+		}
+
+public:
+	CMenuNumberInput(const char * const Text, const int32_t DefaultValue, CChangeObserver * const _observer, CConfigFile * const _configfile) : CMenuForwarder(Text, true, NULL, this)
+		{
+			observer     = _observer;
+			configfile   = _configfile;
+			defaultvalue = DefaultValue;
+		}
+
+	int exec(CMenuTarget * parent, const std::string & actionKey)
+		{
+			CStringInput * input;
+			int res;
+
+			input = new CStringInput(text.c_str(), (char *)getOption(), 3, "ipsetup.hint_1", "ipsetup.hint_2", "0123456789 ", observer);
+			res = input->exec(parent, actionKey);
+			configfile->setInt32(text, atoi(value));
+			delete input;
+			return res;
+		}
+};
+
+void CNeutrinoApp::AddFontSettingItem(CMenuWidget &fontSettings, const SNeutrinoSettings::FONTSIZE_ENTRIES number_of_fontsize_entry)
+{
+	fontSettings.addItem(new CMenuNumberInput(neutrino_font[number_of_fontsize_entry].name, neutrino_font[number_of_fontsize_entry].defaultsize, this, &configfile));
 }
 
 
@@ -1876,11 +1911,11 @@ void CNeutrinoApp::InitFontSettings(CMenuWidget &fontSettings)
 	fontSettings.addItem(GenericMenuSeparator);
 	fontSettings.addItem(GenericMenuBack);
 	fontSettings.addItem(GenericMenuSeparatorLine);
-	AddFontSettingItem(fontSettings, "fontsize.alert", g_settings.fontsize[SNeutrinoSettings::FONTSIZE_ALERT]);
+	AddFontSettingItem(fontSettings, SNeutrinoSettings::FONTSIZE_ALERT);
 	fontSettings.addItem(GenericMenuSeparatorLine);
-	AddFontSettingItem(fontSettings, "fontsize.menu", g_settings.fontsize[SNeutrinoSettings::FONTSIZE_MENU]);
-	AddFontSettingItem(fontSettings, "fontsize.menu_title", g_settings.fontsize[SNeutrinoSettings::FONTSIZE_MENU_TITLE]);
-	AddFontSettingItem(fontSettings, "fontsize.menu_info", g_settings.fontsize[SNeutrinoSettings::FONTSIZE_MENU_INFO]);
+	AddFontSettingItem(fontSettings, SNeutrinoSettings::FONTSIZE_MENU);
+	AddFontSettingItem(fontSettings, SNeutrinoSettings::FONTSIZE_MENU_TITLE);
+	AddFontSettingItem(fontSettings, SNeutrinoSettings::FONTSIZE_MENU_INFO);
 	fontSettings.addItem(GenericMenuSeparatorLine);
 
 	for (int i = 0; i < 5; i++)
@@ -1891,8 +1926,7 @@ void CNeutrinoApp::InitFontSettings(CMenuWidget &fontSettings)
 		fontSettingsSubMenu->addItem(GenericMenuSeparatorLine);
 		for (unsigned int j = 0; j < font_sizes_groups[i].count; j++)
 		{
-			SNeutrinoSettings::FONTSIZE_ENTRIES k = font_sizes_groups[i].content[j];
-			AddFontSettingItem(*fontSettingsSubMenu, neutrino_font_sizes[k].name, g_settings.fontsize[k]);
+			AddFontSettingItem(*fontSettingsSubMenu, font_sizes_groups[i].content[j]);
 		}
 		fontSettingsSubMenu->addItem(GenericMenuSeparatorLine);
 		fontSettingsSubMenu->addItem(new CMenuForwarder("options.default", true, NULL, this, font_sizes_groups[i].actionkey, this));
@@ -1900,9 +1934,9 @@ void CNeutrinoApp::InitFontSettings(CMenuWidget &fontSettings)
 		fontSettings.addItem(new CMenuForwarder(font_sizes_groups[i].groupname, true, NULL, fontSettingsSubMenu));
 	}
 
-	AddFontSettingItem(fontSettings, "fontsize.filebrowser_item", g_settings.fontsize[SNeutrinoSettings::FONTSIZE_FILEBROWSER_ITEM]);
+	AddFontSettingItem(fontSettings, SNeutrinoSettings::FONTSIZE_FILEBROWSER_ITEM);
 	fontSettings.addItem(GenericMenuSeparatorLine);
-	fontSettings.addItem( new CMenuForwarder("options.default", true, NULL, this, "fontsize.doth", this) );
+	fontSettings.addItem( new CMenuForwarder("options.default", true, NULL, this, font_sizes_groups[5].actionkey, this) );
 }
 
 void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fontSettings )
@@ -3039,9 +3073,9 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	{
 		std::string text = (char*)data;
 		std::string::size_type pos;
-		while((pos=text.find("/",0))!= std::string::npos)
+		while((pos=text.find('/'))!= std::string::npos)
 		{
-			text.replace(pos,1,"\n");
+			text[pos] = '\n';
 		}
 		if( mode != mode_scart )
 			ShowMsgUTF("timerlist.type.remind", text, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
@@ -3152,7 +3186,7 @@ void CNeutrinoApp::ExitRun()
 	exit(0);
 }
 
-bool CNeutrinoApp::onPaintNotify(std::string MenuName)
+bool CNeutrinoApp::onPaintNotify(const std::string & MenuName)
 {
 	if(MenuName == "videomenu.head")
 	{//aktuelle werte vom controld holen...
@@ -3497,7 +3531,7 @@ void CNeutrinoApp::startNextRecording()
 *          CNeutrinoApp -  exec, menuitem callback (shutdown)                         *
 *                                                                                     *
 **************************************************************************************/
-int CNeutrinoApp::exec(CMenuTarget* parent, std::string actionKey)
+int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 {
 	//	printf("ac: %s\n", actionKey.c_str());
 	int returnval = menu_return::RETURN_REPAINT;
@@ -3592,7 +3626,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, std::string actionKey)
 				for (unsigned int j = 0; j < font_sizes_groups[i].count; j++)
 				{
 					SNeutrinoSettings::FONTSIZE_ENTRIES k = font_sizes_groups[i].content[j];
-					strcpy(g_settings.fontsize[k], neutrino_font_sizes[k].defaultvalue);
+					configfile.setInt32(neutrino_font[k].name, neutrino_font[k].defaultsize);
 				}
 		}
 		changeNotify("fontsize.", NULL);
@@ -3645,7 +3679,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, std::string actionKey)
 *          changeNotify - features menu recording start / stop                        *
 *                                                                                     *
 **************************************************************************************/
-bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
+bool CNeutrinoApp::changeNotify(const std::string & OptionName, void *Data)
 {
 //	printf("OptionName: %s\n",OptionName.c_str());
 	if(OptionName.substr(0,9).compare("fontsize.") == 0)

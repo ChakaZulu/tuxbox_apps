@@ -234,7 +234,6 @@ struct SNeutrinoSettings
 		FONTSIZE_INFOBAR_SMALL       = 21,
 		FONTSIZE_FILEBROWSER_ITEM    = 22
 	};
-	char fontsize[FONTSIZE_ENTRY_COUNT][4];
 
 	// lcdd
 	int lcd_brightness;
@@ -262,36 +261,6 @@ struct SNeutrinoSettings
 };
 
 /* some default Values */
-
-// Font sizes
-#define DEFAULT_FONTSIZE_MENU			"20"
-#define DEFAULT_FONTSIZE_MENU_TITLE		"30"
-#define DEFAULT_FONTSIZE_MENU_INFO		"16"
-
-#define DEFAULT_FONTSIZE_EPG_TITLE		"25"
-#define DEFAULT_FONTSIZE_EPG_INFO1		"17"
-#define DEFAULT_FONTSIZE_EPG_INFO2		"17"
-#define DEFAULT_FONTSIZE_EPG_DATE		"15"
-#define DEFAULT_FONTSIZE_ALERT			"100"
-#define DEFAULT_FONTSIZE_EVENTLIST_TITLE	"30"
-#define DEFAULT_FONTSIZE_EVENTLIST_ITEMLARGE	"20"
-#define DEFAULT_FONTSIZE_EVENTLIST_ITEMSMALL	"14"
-#define DEFAULT_FONTSIZE_EVENTLIST_DATETIME	"16"
-
-#define DEFAULT_FONTSIZE_GAMELIST_ITEMLARGE	"20"
-#define DEFAULT_FONTSIZE_GAMELIST_ITEMSMALL	"16"
-
-#define DEFAULT_FONTSIZE_CHANNELLIST		"20"
-#define DEFAULT_FONTSIZE_CHANNELLIST_DESCR	"20"
-#define DEFAULT_FONTSIZE_CHANNELLIST_NUMBER	"14"
-#define DEFAULT_FONTSIZE_CHANNEL_NUM_ZAP	"40"
-
-#define DEFAULT_FONTSIZE_INFOBAR_NUMBER		"50"
-#define DEFAULT_FONTSIZE_INFOBAR_CHANNAME	"30"
-#define DEFAULT_FONTSIZE_INFOBAR_INFO		"20"
-#define DEFAULT_FONTSIZE_INFOBAR_SMALL		"14"
-
-#define DEFAULT_FONTSIZE_FILEBROWSER_ITEM	"16"
 
 // lcdd
 #define DEFAULT_LCD_BRIGHTNESS			0xff
@@ -351,8 +320,8 @@ class CScanSettings
 
 	void useDefaults(const delivery_system_t _delivery_system);
 
-	bool loadSettings(const std::string fileName, const delivery_system_t _delivery_system);
-	bool saveSettings(const std::string fileName);
+	bool loadSettings(const std::string & fileName, const delivery_system_t _delivery_system);
+	bool saveSettings(const std::string & fileName);
 };
 
 

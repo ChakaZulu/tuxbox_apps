@@ -104,8 +104,8 @@ class CInfoViewer
 
 	void	start();
 
-	void	showTitle(const int ChanNum, const std::string Channel, const t_satellite_position satellitePosition, const t_channel_id new_channel_id = 0, const bool calledFromNumZap = false); // Channel must be UTF-8 encoded
-	void lookAheadEPG(const int ChanNum, const std::string Channel, const t_channel_id new_channel_id = 0, const bool calledFromNumZap = false); //alpha: fix for nvod subchannel update
+	void	showTitle(const int ChanNum, const std::string & Channel, const t_satellite_position satellitePosition, const t_channel_id new_channel_id = 0, const bool calledFromNumZap = false); // Channel must be UTF-8 encoded
+	void lookAheadEPG(const int ChanNum, const std::string & Channel, const t_channel_id new_channel_id = 0, const bool calledFromNumZap = false); //alpha: fix for nvod subchannel update
 	void	killTitle();
 	CSectionsdClient::CurrentNextInfo getEPG(const t_channel_id for_channel_id);
 	
