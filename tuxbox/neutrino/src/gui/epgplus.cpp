@@ -73,7 +73,7 @@ void EpgPlus::CHeader::paint()
 		( this->x + 10
 		, this->y + this->height
 		, this->width
-		, "EPG Plus"
+		, g_Locale->getText("EPGPlus.head")
 		, this->textColor
 		, 0
 		, true
@@ -538,9 +538,9 @@ void EpgPlus::CFooter::paintEventDetails ( const std::string& description , cons
 
 struct button_label channelListButtons[] =
 {
-	{ NEUTRINO_ICON_BUTTON_RED    , "Record"},
-	{ NEUTRINO_ICON_BUTTON_GREEN  , "Refresh EPG"},
-	{ NEUTRINO_ICON_BUTTON_YELLOW , "Remind"},
+	{ NEUTRINO_ICON_BUTTON_RED    , "EPGPlus.record"},
+	{ NEUTRINO_ICON_BUTTON_GREEN  , "EPGPlus.refresh_epg"},
+	{ NEUTRINO_ICON_BUTTON_YELLOW , "EPGPlus.remind"},
 	{ NEUTRINO_ICON_BUTTON_BLUE   , ""},
 };
 
@@ -558,7 +558,7 @@ void EpgPlus::CFooter::paintButtons ( bool isStretchMode)
 		std::cout << "EpgPlus::CFooter::paintButtons2" << std::endl;
 	#endif
 
-	channelListButtons[3].locale = isStretchMode?"Stretch Mode":"Scroll Mode";
+	channelListButtons[3].locale = isStretchMode?"EPGPlus.stretch_mode":"EPGPlus.scroll_mode";
 	::paintButtons(this->frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, this->x + 10, this->y + this->height1 + this->height2 + (this->height3 - buttonHeight) + 3, buttonWidth, sizeof(channelListButtons)/sizeof(button_label), channelListButtons);
 	#ifdef DEBUG_
 		std::cout << "EpgPlus::CFooter::paintButtons3" << std::endl;

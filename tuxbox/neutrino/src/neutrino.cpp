@@ -83,6 +83,7 @@
 #include "gui/gamelist.h"
 #include "gui/infoviewer.h"
 #include "gui/epgview.h"
+#include "gui/epg_menu.h"
 #include "gui/update.h"
 #include "gui/scan.h"
 #include "gui/favorites.h"
@@ -112,12 +113,10 @@
 
 // uncomment if you want to have a "test" menue entry  (rasc)
 
-#define __EXPERIMENTAL_CODE__
+// #define __EXPERIMENTAL_CODE__
 #ifdef __EXPERIMENTAL_CODE__
 
 #include "gui/ch_mosaic.h"
-#include "gui/epgplus.h"
-#include "gui/epg_menu.h"
 
 #endif
 
@@ -2439,10 +2438,11 @@ void CNeutrinoApp::ShowStreamFeatures()
 		oj->addOption(0, "mainmenu.recording_start");
 		oj->addOption(1, "mainmenu.recording_stop");
 		StreamFeatureSelector.addItem( oj );
-		StreamFeatureSelector.addItem(GenericMenuSeparatorLine);
 	}
 	// -- Timer Liste
 	StreamFeatureSelector.addItem(new CMenuForwarder("timerlist.name", true, NULL, new CTimerList(), id, true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW), false);
+
+	StreamFeatureSelector.addItem(GenericMenuSeparatorLine);
 
 	// --  Lock remote control
 	StreamFeatureSelector.addItem(new CMenuForwarder("rclock.menueadd", true, NULL, new CRCLock, id, true, CRCInput::RC_nokey, ""), false);
@@ -2464,11 +2464,8 @@ void CNeutrinoApp::ShowStreamFeatures()
 	// -- Experimental Code
 	// -- rasc (2003-12)
 
-	// StreamFeatureSelector.addItem(new CMenuForwarder("experimental", true, NULL, new CChMosaicHandler(), id, true, CRCInput::RC_nokey, ""), false);
+	StreamFeatureSelector.addItem(new CMenuForwarder("experimental", true, NULL, new CChMosaicHandler(), id, true, CRCInput::RC_nokey, ""), false);
 
-	// -- there will be a new EPG menue (red button) shown EPG CHANNEL (EPGList) & EPG Overview (PLUS) & INFO (=?)
-// 	StreamFeatureSelector.addItem(new CMenuForwarder("experimental", true, NULL, new CEPGplusHandler(), id, true, CRCInput::RC_nokey, ""), false);
-	StreamFeatureSelector.addItem(new CMenuForwarder("experimental", true, NULL, new CEPGMenuHandler(), id, true, CRCInput::RC_setup, NEUTRINO_ICON_BUTTON_DBOX), false);
 
 #endif
 	// ------

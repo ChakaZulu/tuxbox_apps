@@ -803,3 +803,16 @@ rclock.title Lock Remote Control
 rclock.lockmsg Your DBOX2 remote control will be locked.\n To unlock the dbox2, press <RED> \n and <DBOX> on your remote control.
 rclock.unlockmsg DBOX2 remote control reactivated.
 
+EPGMenu.head EPG - Program Information
+EPGMenu.eventinfo Details current program
+EPGMenu.eventlist Eventlist current programm
+EPGMenu.epgplus Eventlist overview
+EPGMenu.streaminfo technical information
+
+EPGPlus.head Eventlist Overview (EPG Plus)
+EPGPlus.record Record
+EPGPlus.refresh_epg Refresh
+EPGPlus.remind Schedule
+EPGPlus.scroll_mode Scroll Mode
+EPGPlus.stretch_mode Stretch Mode
+

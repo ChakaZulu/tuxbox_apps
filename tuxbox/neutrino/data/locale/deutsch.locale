@@ -814,3 +814,10 @@ EPGMenu.eventlist Vorschau aktuelles Programm
 EPGMenu.epgplus Vorschau Übersicht
 EPGMenu.streaminfo technische Information
 
+EPGPlus.head Vorschau Übersicht (EPG Plus)
+EPGPlus.record Aufnahme
+EPGPlus.refresh_epg Aktualisieren
+EPGPlus.remind Vormerken
+EPGPlus.scroll_mode Scroll Mode
+EPGPlus.stretch_mode Stretch Mode
+
