@@ -936,7 +936,7 @@ void CChannelList::paintItem(int pos)
 		CChannel* chan = chanlist[liststart+pos];
 		//number
 		char tmp[10];
-		sprintf((char*) tmp, "%d", this->historyMode?pos:recordStatus ?pos+1: chan->number);
+		sprintf((char*) tmp, "%d", this->historyMode?pos:recordStatus ?liststart+pos+1: chan->number);
 		
 		if (liststart+pos==selected)
 		{
