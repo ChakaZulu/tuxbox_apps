@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.30 2001/07/23 02:43:30 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.31 2001/07/23 09:00:10 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.31  2001/07/23 09:00:10  fnbrd
+//  Fehler behoben.
+//
 //  Revision 1.30  2001/07/23 02:43:30  fnbrd
 //  internal changes.
 //
@@ -405,7 +408,8 @@ int j;
       return -1;
     }
     if(!(ufds.revents&POLLIN)) {
-      // POLLHUP, beim dmx bedeutet das DMXDEV_STATE_TIMEDOUT ?
+      // POLLHUP, beim dmx bedeutet das DMXDEV_STATE_TIMEDOUT
+      // kommt wenn ein Timeout im Filter gesetzt wurde
 //      dprintf("revents: 0x%hx\n", ufds.revents);
       usleep(200*1000UL); // wir warten 200 Millisekunden bevor wir es nochmal probieren
       if(timeoutInSeconds<=200)
@@ -504,7 +508,8 @@ int DMX::start(void)
       return 3;
     }
   struct dmxSctFilterParams flt;
-  memset (&flt.filter, 0, sizeof (struct dmxFilter));
+  memset (&flt, 0, sizeof (struct dmxSctFilterParams));
+//  memset (&flt.filter, 0, sizeof (struct dmxFilter));
   flt.pid              = pID;
   flt.filter.filter[0] = filter1; // current/next
   flt.filter.mask[0]   = mask1; // -> 4e und 4f
@@ -558,7 +563,8 @@ int DMX::change(void)
   if(pause()) // -> lock
     return 2;
   struct dmxSctFilterParams flt;
-  memset (&flt.filter, 0, sizeof (struct dmxFilter));
+  memset (&flt, 0, sizeof (struct dmxSctFilterParams));
+//  memset (&flt.filter, 0, sizeof (struct dmxFilter));
   if(isScheduled) {
     flt.pid              = pID;
     flt.filter.filter[0] = filter1; // current/next
@@ -1511,7 +1517,7 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.30 2001/07/23 02:43:30 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.31 2001/07/23 09:00:10 fnbrd Exp $\n");
 
   if(argc!=1 && argc!=2) {
     printHelp();
