@@ -2889,8 +2889,11 @@ public:
 								<< "ref=" << ref2string(ref)
 								<< "&ID=" << std::hex << event.event_id << std::dec
 								<< "&start=" << event.start_time
-								<< "&duration=" << event.duration
-								<< "&descr=" << short_description
+								<< "&duration=" << event.duration;
+							eString tmp = filter_string(short_description);
+							tmp.strReplace("\'", "\\\'");
+							tmp.strReplace("\"", "\\\"");
+							result  << "&descr=" << tmp
 								<< "&channel=" << filter_string(current->service_name)
 								<< "')\"><img src=\"timer.gif\" border=0></a>"
 								<< "&nbsp;&nbsp;";
@@ -3098,8 +3101,11 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 				<< "ref=" << ref2string(ref)
 				<< "&ID=" << std::hex << event.event_id << std::dec
 				<< "&start=" << event.start_time
-				<< "&duration=" << event.duration
-				<< "&descr=" << filter_string(description)
+				<< "&duration=" << event.duration;
+			eString tmp = filter_string(description);
+			tmp.strReplace("\'", "\\\'");
+			tmp.strReplace("\"", "\\\"");
+			result  << "&descr=" << tmp
 				<< "&channel=" << filter_string(current->service_name)
 				<< "')\"><img src=\"timer.gif\" border=0></a>"
 				<< "</td>";
