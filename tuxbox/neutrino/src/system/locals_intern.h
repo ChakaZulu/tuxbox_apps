@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.29 2004/11/07 21:20:39 chakazulu Exp $
+ * $Id: locals_intern.h,v 1.30 2004/11/29 19:04:29 chakazulu Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -489,6 +489,7 @@ const char * locale_real_names[] =
 	"mainmenu.recording_start",
 	"mainmenu.recording_stop",
 	"mainmenu.scartmode",
+	"mainmenu.scripts",
 	"mainmenu.service",
 	"mainmenu.settings",
 	"mainmenu.shutdown",
@@ -669,6 +670,7 @@ const char * locale_real_names[] =
 	"ping.unreachable",
 	"pinprotection.head",
 	"pinprotection.wrongcode",
+	"plugins.result",
 	"rclock.lockmsg",
 	"rclock.menueadd",
 	"rclock.title",

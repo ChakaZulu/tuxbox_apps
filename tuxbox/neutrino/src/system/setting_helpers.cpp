@@ -50,7 +50,7 @@
 #include <gui/widget/messagebox.h>
 #include <gui/widget/hintbox.h>
 
-#include <gui/gamelist.h>
+#include <gui/plugins.h>
 #include <daemonc/remotecontrol.h>
 extern CPlugins       * g_PluginList;    /* neutrino.cpp */
 extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
