@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.119 2003/06/05 09:08:49 digi_casi Exp $
+ * $Id: scan.cpp,v 1.120 2003/06/06 21:16:54 digi_casi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -67,21 +67,31 @@ extern CZapitClient::bouquetMode bouquetMode;
 extern CEventServer *eventServer;
 extern diseqc_t diseqcType;
 
+extern int motorRotationSpeed;
+
 t_satellite_position driveMotorToSatellitePosition(char * providerName)
 {
 	t_satellite_position currentSatellitePosition = 0;
 	t_satellite_position satellitePosition = 0;
+	int waitForMotor = 0;
 	
 	/* position satellite dish if provider is on a different satellite */
 	currentSatellitePosition = frontend->getCurrentSatellitePosition();
 	satellitePosition = satellitePositions[providerName];
+	printf("[scan] scanning now: %s\n", providerName);
+	printf("[scan] currentSatellitePosition = %d, scanSatellitePosition = %d\n", currentSatellitePosition, satellitePosition);
+	printf("[scan] motorPosition = %d\n", motorPositions[satellitePosition]);
 	if ((currentSatellitePosition != satellitePosition) && (motorPositions[satellitePosition] != 0))
 	{
 		printf("[scan] start_scanthread: moving satellite dish from satellite position %d to %d\n", currentSatellitePosition, satellitePosition);
 		printf("[scan] motorPosition = %d\n", motorPositions[satellitePosition]);
 		frontend->positionMotor(motorPositions[satellitePosition]);
-		frontend->setCurrentSatellitePosition(currentSatellitePosition);
+		waitForMotor = abs(satellitePosition - currentSatellitePosition) / motorRotationSpeed;
+		printf("[zapit] waiting %d seconds for motor to turn satellite dish.\n", waitForMotor);
+		sleep(waitForMotor);
+		frontend->setCurrentSatellitePosition(satellitePosition);
 	}
+	
 	return satellitePosition;
 }
 
