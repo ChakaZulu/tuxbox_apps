@@ -378,8 +378,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 								if ( i->program_map_PID == *it )
 								{
 									pmtpid = *it;
-									service.data[1] = i->program_number;
-									eServiceInterface::getInstance()->service.data[1] = i->program_number;
+									spSID = i->program_number;
 									break;
 								}
 						}
