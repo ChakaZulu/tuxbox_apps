@@ -422,7 +422,7 @@ void RenderClearMenuLineBB(char *p, int attrcol, int attr)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.57 $", versioninfo[16];
+	char cvs_revision[] = "$Revision: 1.58 $", versioninfo[16];
 
 	/* show versioninfo */
 	sscanf(cvs_revision, "%*s %s", versioninfo);
@@ -2573,7 +2573,11 @@ void SwitchScreenMode()
 	pageupdate = 1;
 
 	/* clear backbuffer */
+#ifndef DREAMBOX
 	memset(&backbuffer, black, sizeof(backbuffer));
+#else
+	memset(&backbuffer, screenmode?transp:black, sizeof(backbuffer));
+#endif
 
 	/* set mode */
 	if (screenmode)								 /* split */
