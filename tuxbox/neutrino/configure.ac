@@ -29,7 +29,6 @@ AC_OUTPUT([
 Makefile
 lib/Makefile
 lib/controldclient/Makefile
-lib/lcddclient/Makefile
 lib/sectionsdclient/Makefile
 lib/timerdclient/Makefile
 daemons/Makefile
@@ -38,9 +37,6 @@ daemons/controld/driver/Makefile
 daemons/nhttpd/Makefile
 daemons/nhttpd/data/Makefile
 daemons/nhttpd/data/images/Makefile
-daemons/lcdd/Makefile
-daemons/lcdd/clock/Makefile
-daemons/lcdd/icons/Makefile
 daemons/sectionsd/Makefile
 daemons/timerd/Makefile
 src/Makefile
