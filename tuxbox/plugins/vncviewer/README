@@ -18,6 +18,7 @@ mute: toggle mouse movement/panning mode
 up/down/left/right: move pointer/pan screen
 vol_down: scale++ (zoom out)
 vol_up: scale-- (zoom in)
+red: toggle virtual keyboard
 
 Configfile (CONFIGDIR + vnc.conf) syntax
 =========================================

@@ -10,7 +10,7 @@
 #include "overlay.h"
 #include "icons.h"
 #include "list.h"
-
+extern int sx,ex;
 void
 overlay_destructor(void *p) {
 	fbvnc_overlay_t *this = p;
@@ -30,8 +30,8 @@ typedef struct {
 
 #define KEYBOARD_ROWS 5
 #define KEYBOARD_COLS 30
-#define ROW_HEIGHT 16
-#define COL_WIDTH 8
+#define ROW_HEIGHT 32
+#define COL_WIDTH 16
 
 static fbvnc_overlay_t *ov_keyboard;
 static fbvnc_overlay_t *ov_mousestate;
@@ -1016,19 +1016,19 @@ overlays_init() {
 		ico_battery, FBVNC_EVENT_TS_DOWN | FBVNC_EVENT_TICK_SECOND, ev_battery, 0);
 	*/
 	/* is physical display smaller than logical one? */
-	if (global_framebuffer.pv_xsize * global_framebuffer.pv_ysize < global_framebuffer.v_xsize * global_framebuffer.v_ysize) {
+	/*if (global_framebuffer.pv_xsize * global_framebuffer.pv_ysize < global_framebuffer.v_xsize * global_framebuffer.v_ysize) {
 		add_overlay(
 			0, 0,
 			0, 0,
 			16, 12,
 			ico_pan, FBVNC_EVENT_TS_DOWN | FBVNC_EVENT_TS_MOVE | FBVNC_EVENT_TS_UP, ev_quickpan, 0);
-	}
+	}*/
 
 	init_virt_keyboard();
 	ov_keyboard = add_overlay(
-		0, pv_ysize-80,
-		0, pv_xsize-80,
-		240, 80, 
+		0 + (ex-sx - 480)/2, pv_ysize-160,
+		0, pv_xsize-160,
+		480, 160, 
 		ico_keybd, 
 		FBVNC_EVENT_TS_DOWN | FBVNC_EVENT_TS_UP, ev_keybd, 0);
 	

@@ -1047,6 +1047,10 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched) {
 				mouse_button=4;
 				retval=FBVNC_EVENT_TS_DOWN;
 			}
+			else if(iev.code == KEY_RED)
+			{
+				toggle_keyboard();
+			}
 
 			// action
 			ev->x =rc_x;
@@ -1213,7 +1217,7 @@ show_pnm_image() {
 	activate_viewport(&v_save);
 	vp_pan(0, 0);
 }
-
+#ifndef PLUGIN
 void
 do_calibration() {
 	int xsize = global_framebuffer.p_xsize;
@@ -1251,15 +1255,15 @@ do_calibration() {
 			fbvnc_get_event(&ev, 0);
 		
 			if (ev.evtype == FBVNC_EVENT_BTN_DOWN) {
-				/* abort calibration on button press */
+				// abort calibration on button press
 				tscal = old_cal;
 				return;
 			}
 			if (ev.evtype != FBVNC_EVENT_TS_UP) continue;
 
-			/*
-			fprintf(stderr, "cal: x[%d]=%d y[%d]=%d\n", i, ev.x, i, ev.y);
-			*/
+			
+			//fprintf(stderr, "cal: x[%d]=%d y[%d]=%d\n", i, ev.x, i, ev.y);
+			
 			gx[i] = ev.x;
 			gy[i] = ev.y;
 			break;
@@ -1292,6 +1296,7 @@ do_calibration() {
 	ts_save_calibration();
 	need_calibrate = 0;
 }
+#endif
 #ifdef PLUGIN
 extern "C" {
 void plugin_exec(PluginParam *par) {
@@ -1389,7 +1394,9 @@ int main(int argc, char **argv) {
 		toggle_keyboard();
 	}
 
+#ifndef PLUGIN
 	if (need_calibrate) do_calibration();
+#endif
 
 	if (!SetFormatAndEncodings()) 
 		cleanup_and_exit("encodings", EXIT_ERROR);
@@ -1653,7 +1660,9 @@ int main(int argc, char **argv) {
 						++ pan_toggle_count;
 						if (pan_toggle_count > 7) {
 							pan_toggle_count = 0;
+#ifndef PLUGIN
 							do_calibration();
+#endif
 							vp_pan(0, 0);
 						}
 					} else {
