@@ -785,7 +785,7 @@ int f_close(FILE *stream)
 
 	if(cache[i].fd == stream)
 	{
-		dprintf(stderr, "f_close: removing stream %x from the cache\n", stream);
+		dprintf(stderr, "f_close: removing stream %x from the cache\n", stream->_fileno);
 
 		cache[i].closed = 1;		  /* indicate that tha cache is closed */
 		pthread_join(cache[i].fill_thread, NULL);	/* wait for thread to terminate */
@@ -991,12 +991,12 @@ int push(FILE *fd, char *buf, long len)
 	}
 	else
 	{
-		dprintf(stderr, "push: no cache present for stream %0x\n", fd);
+		dprintf(stderr, "push: no cache present for stream %0x\n", fd->_fileno);
 		rval = -1;
 	}
 
 //  dprintf(stderr, "push: exitstate: [filled: %d of %d], stream: %x\n", cache[i].filled, CACHESIZE, fd);
-	dprintf(stderr, "push: exitstate: [filled: %3.1f %%], stream: %x\r", 100.0 * (float)cache[i].filled / (float)cache[i].csize, fd);
+	dprintf(stderr, "push: exitstate: [filled: %3.1f %%], stream: %x\r", 100.0 * (float)cache[i].filled / (float)cache[i].csize, fd->_fileno);
 
 	return rval;
 }
@@ -1008,7 +1008,7 @@ int pop(FILE *fd, char *buf, long len)
 
 	i = getCacheSlot(fd);
 
-	dprintf(stderr, "pop: %d bytes requested [filled: %d of %d], stream: %x\n", len, cache[i].filled, CACHESIZE, fd);
+	dprintf(stderr, "pop: %ld bytes requested [filled: %ld of %d], stream: %x\n", len, cache[i].filled, CACHESIZE, fd->_fileno);
 
 	if(cache[i].fd == fd)
 	{
@@ -1094,7 +1094,7 @@ int pop(FILE *fd, char *buf, long len)
 	}
 	else
 	{
-		dprintf(stderr, "pop: no cache present for stream %0x\n", fd);
+		dprintf(stderr, "pop: no cache present for stream %0xu\n", fd->_fileno);
 		rval = -1;
 	}
 
@@ -1116,7 +1116,7 @@ void CacheFillThread(void *c)
 	if(cache->closed)
 		return;
 
-	dprintf(stderr, "CacheFillThread: thread started, using stream %8x\n", cache->fd);
+	dprintf(stderr, "CacheFillThread: thread started, using stream %8xu\n", cache->fd->_fileno);
 
 	buf = (char*)malloc(CACHEBTRANS);
 
@@ -1152,7 +1152,7 @@ void CacheFillThread(void *c)
 	pthread_mutex_unlock( &cache->readable );
 
 	/* ... and exit this thread. */
-	dprintf(stderr, "CacheFillThread: thread exited, stream %8x  \n", cache->fd);
+	dprintf(stderr, "CacheFillThread: thread exited, stream %8x  \n", cache->fd->_fileno);
 
 	free(buf);
 	pthread_exit(0);
@@ -1171,7 +1171,7 @@ void ShoutCAST_MetaFilter(STREAM_FILTER *arg)
 	if((*cnt + arg->len) > meta_int)
 		;
 
-	dprintf(stderr, "filter : buffer: %x, len: %d\n", arg->buf, arg->len, (int)arg);
+	dprintf(stderr, "filter : buffer: %x, len: %d\n", (int)arg->buf, arg->len);
 	dprintf(stderr, "filter : meta interval %d (%d)\n", meta_int, *cnt);
 
 	*cnt = *cnt + arg->len;
