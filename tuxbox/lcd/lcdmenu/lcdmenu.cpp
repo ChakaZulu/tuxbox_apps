@@ -1,5 +1,5 @@
 /*
- * $Id: lcdmenu.cpp,v 1.6 2001/11/16 20:49:04 obi Exp $
+ * $Id: lcdmenu.cpp,v 1.7 2001/12/05 20:35:29 obi Exp $
  *
  * A startup menu for the d-box 2 linux project
  *
@@ -20,6 +20,11 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
  * $Log: lcdmenu.cpp,v $
+ * Revision 1.7  2001/12/05 20:35:29  obi
+ * - fix save method in configManager
+ * - remember last selection
+ * - store default_entry c-like, beginnig from 0
+ *
  * Revision 1.6  2001/11/16 20:49:04  obi
  * - option show_numbers now works with config file too
  *
@@ -77,7 +82,7 @@ CLCDMenu::CLCDMenu()
     /* user defineable settings */
     fontSize = config->getInt("font_size");
     lineSpacing = config->getInt("line_spacing");
-    defaultEntry = config->getInt("default_entry") - 1;
+    defaultEntry = config->getInt("default_entry");
     textAlign = config->getInt("text_align");
     showNumbers = config->getBool("show_numbers");
     cryptedPin = config->getString("pin");
@@ -411,7 +416,7 @@ bool CLCDMenu::checkPin(string title)
 int main(int argc, char **argv)
 {
     /* print version information */
-    cout << "$Id: lcdmenu.cpp,v 1.6 2001/11/16 20:49:04 obi Exp $" << endl;
+    cout << "$Id: lcdmenu.cpp,v 1.7 2001/12/05 20:35:29 obi Exp $" << endl;
 
     /* create menu instance */
     CLCDMenu *menu = new CLCDMenu();
@@ -420,16 +425,24 @@ int main(int argc, char **argv)
     menu->drawMenu();
 
     /* select default entry */
-    menu->selectEntry(menu->getDefaultEntry()+1);
+    menu->selectEntry(menu->getDefaultEntry());
 
     /* get command from remote control */
     menu->rcLoop();
-    
+
+    /* remember last selection */
+    if (menu->getSelectedEntry() != menu->getDefaultEntry())
+    {
+	menu->getConfig()->setInt("default_entry", menu->getSelectedEntry());
+	menu->getConfig()->setModifiedFlag(true);
+    }
+
     if (menu->getConfig()->getModifiedFlag())
     {
 	/* save configuraion */
 #ifdef DEBUG
 	cout << "saving configuration..." << endl;
+	menu->getConfig()->dump();
 #endif
 	menu->getConfig()->saveConfig("/var/etc/lcdmenu.conf");
 

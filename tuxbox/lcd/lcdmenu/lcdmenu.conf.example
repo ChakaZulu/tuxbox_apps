@@ -22,12 +22,12 @@ line_spacing=3
 
 #
 # option: default_entry (number)
-# default: 1
+# default: 0
 #
 # sets the default selection when lcdmenu starts by its index.
-# the first index is 1.
+# the first index is 0.
 #
-default_entry=1
+default_entry=0
 
 #
 # option: text_align (number)
