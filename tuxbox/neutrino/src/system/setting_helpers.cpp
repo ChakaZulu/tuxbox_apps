@@ -292,7 +292,7 @@ bool CSPTSModeNotifier::changeNotify(const std::string & OptionName, void* Data)
 {
 	if( *((int*) Data)!=0)
 	{	//file anlegen (SPTS-Mode)
-		FILE* fd = fopen("/var/etc/.spts", "w");
+		FILE* fd = fopen("/var/etc/.spts_mode", "w");
 		if(fd)
 		{
 			fclose(fd);
@@ -302,7 +302,7 @@ bool CSPTSModeNotifier::changeNotify(const std::string & OptionName, void* Data)
 	}
 	else
 	{
-		remove("/var/etc/.spts");
+		remove("/var/etc/.spts_mode");
 	}
 	return true;
 }

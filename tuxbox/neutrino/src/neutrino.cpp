@@ -1558,7 +1558,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 #endif
 
 		static int dummy3 = 0;
-		fd = fopen("/var/etc/.spts", "r");
+		fd = fopen("/var/etc/.spts_mode", "r");
 		if(fd)
 		{
 			dummy3=1;
