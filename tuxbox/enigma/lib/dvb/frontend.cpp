@@ -248,7 +248,11 @@ int eFrontend::tune(eTransponder *trans,
 
 	if ((diseqc.params[0]^lastcsw))		// only when changing satellites or pol.
 	{
+#ifdef SPAUN_NOT_WORKING_BUT_FASTER_ZAP
 		int changelnb=(diseqc.params[0]^lastcsw)&~3;
+#else
+		int changelnb=1;
+#endif
 		
 		lastcsw=diseqc.params[0];
 		
