@@ -160,7 +160,7 @@ int CStringInput::exec( CMenuTarget* parent, string )
 
 void CStringInput::hide()
 {
-	g_FrameBuffer->paintBoxRel(x, y, width, height, COL_BACKGROUND);
+	g_FrameBuffer->paintBackgroundBoxRel(x, y, width, height);
 }
 
 void CStringInput::paint()

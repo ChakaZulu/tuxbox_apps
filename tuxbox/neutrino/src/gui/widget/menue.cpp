@@ -1,9 +1,12 @@
 /*
-$Id: menue.cpp,v 1.22 2001/10/22 21:48:22 McClean Exp $
+$Id: menue.cpp,v 1.23 2001/11/03 23:23:51 McClean Exp $
 
 
 History:
  $Log: menue.cpp,v $
+ Revision 1.23  2001/11/03 23:23:51  McClean
+ radiomode background paint - bugfix
+
  Revision 1.22  2001/10/22 21:48:22  McClean
  design-update
 
@@ -191,6 +194,7 @@ void CMenuWidget::paint()
 			ypos = item->paint(selected==((signed int) count) );
 		}
 	}
+	height = ypos - y;
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------

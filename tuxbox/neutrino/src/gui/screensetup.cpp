@@ -127,7 +127,7 @@ int CScreenSetup::exec( CMenuTarget* parent, string )
 
 void CScreenSetup::hide()
 {
-	memset(g_FrameBuffer->lfb, COL_BACKGROUND, g_FrameBuffer->Stride()*576);
+	g_FrameBuffer->paintBackgroundBox(0,0,720,576);
 }
 
 void CScreenSetup::paintBorderUL()

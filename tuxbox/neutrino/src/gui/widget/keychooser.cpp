@@ -66,7 +66,7 @@ int CKeyChooserItem::exec(CMenuTarget* parent, string)
 
 void CKeyChooserItem::hide()
 {
-	g_FrameBuffer->paintBoxRel(x, y, width, height, COL_BACKGROUND);
+	g_FrameBuffer->paintBackgroundBoxRel(x, y, width, height);
 }
 
 void CKeyChooserItem::paint()
