@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski
 
-	$Id: webserver.cpp,v 1.22 2002/12/09 17:59:27 dirch Exp $
+	$Id: webserver.cpp,v 1.23 2003/01/09 22:36:06 dirch Exp $
 
 	License: GPL
 
@@ -30,6 +30,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h> 
 #include <sys/wait.h> 
+#include <errno.h> 
 
 #include "webserver.h"
 #include "request.h"
@@ -140,6 +141,8 @@ bool CWebserver::Start()
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	servaddr.sin_port = htons(Port);
+
+        SetSockOpts();
 	
 	if ( bind(ListenSocket, (SA *) &servaddr, sizeof(servaddr)) !=0)
 	{
@@ -183,9 +186,9 @@ CWebserverRequest	*req;
 			dperror("Error while parsing request\n");
 
 		dprintf("-- Thread 0x06%X beendet\n",(int)pthread_self());
-		delete req;
-		delete (Cmyconn *) myconn;
 	}
+	delete req;
+	delete (Cmyconn *) myconn;
 	pthread_exit((void *)NULL);
 	return NULL;
 }
@@ -290,4 +293,20 @@ int CWebserver::SocketConnect(Tmconnect * con,int Port)
 	}
 	else
 		return con->sock_fd;
+}
+
+void CWebserver::SetSockOpts() {
+	// if no valid socket, return
+	if (ListenSocket < 0)
+           return;
+
+	int opt;
+
+	// Most important socket opt for us: SO_REUSEADDR, so bindings
+	// on a port after fast restart of webserver do not fail
+#ifdef SO_REUSEADDR
+	opt = 1;
+	if (setsockopt(ListenSocket, SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt)) < 0)
+  	  fprintf(stderr, "setsockopt(SO_REUSEADDR): %s\n", strerror(errno));
+#endif
 }

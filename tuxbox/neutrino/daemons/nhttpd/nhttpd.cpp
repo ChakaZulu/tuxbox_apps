@@ -53,6 +53,10 @@ void sig_catch(int msignal)
 {
 	switch(msignal)
 	{
+		case SIGPIPE:
+                                aprintf("got signal PIPE, nice!\n");
+			break;
+
 		case SIGHUP :
 				aprintf("got signal HUP, reading config\n");
 				webserver->ReadConfig();
@@ -69,6 +73,7 @@ void sig_catch(int msignal)
 				delete(webserver);
 				exit(0);
 	}
+	signal(msignal, sig_catch);
 }
 //-------------------------------------------------------------------------
 
@@ -113,6 +118,7 @@ int main(int argc, char **argv)
 		}
 	}
 
+	signal(SIGPIPE,sig_catch);
 	signal(SIGINT,sig_catch);
 	signal(SIGHUP,sig_catch);
 //	signal(SIGUSR1,sig_catch);

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.25 2002/12/27 18:05:07 Zwen Exp $
+	$Id: webapi.cpp,v 1.26 2003/01/09 22:36:05 dirch Exp $
 
 	License: GPL
 
@@ -531,7 +531,8 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 			request->printf("<TR><TD align=left width=31 CLASS=\"%cepg\">",classname);
 			request->printf("<TABLE border=1 rules=none bordercolor=#000000 heigth=10 width=30 cellspacing=0 cellpadding=0><TR><TD bgcolor=\"#2211FF\" height=10 width=%d></TD><TD bgcolor=\"#EAEBFF\" heigth=10 width=%d></TD></TR></TABLE></TD>",(prozent / 10) * 3,(10 - (prozent / 10))*3);
 			request->printf("<TD CLASS=\"%cepg\">",classname);
-			request->printf("<A CLASS=\"clistsmall\" HREF=epg.dbox2?epgid=%llx&startzeit=%lx>",event->eventID,event->startTime);
+			request->printf("<A CLASS=\"clistsmall\" HREF=epg.dbox2?epgid=%llx>",event->eventID);
+//			request->printf("<A CLASS=\"clistsmall\" HREF=epg.dbox2?epgid=%llx&startzeit=%lx>",event->eventID,event->startTime);
 			request->printf("%s&nbsp;",event->description.c_str()); 
 			request->printf("<font size=-3><NOBR>(%ld von %d min, %d%%)</NOBR></font></a>&nbsp;</TD></TR>\n",(time(NULL) - event->startTime)/60,event->duration / 60,prozent  ); 
 		}

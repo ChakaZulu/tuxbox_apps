@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: webserver.h,v 1.19 2002/12/09 17:59:27 dirch Exp $
+        $Id: webserver.h,v 1.20 2003/01/09 22:36:06 dirch Exp $
 
         License: GPL
 
@@ -86,7 +86,7 @@ public:
 	void Stop();
 
 	int SocketConnect(Tmconnect * con,int Port);
-
+	void SetSockOpts();
 	void SaveConfig();
 	void ReadConfig();
 
