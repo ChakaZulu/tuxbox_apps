@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.304 2003/03/26 09:57:40 mws Exp $
+ * $Id: zapit.cpp,v 1.305 2003/03/30 11:55:54 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -877,7 +877,6 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		bouquetManager->renumServices();
 		break;
 
-	
 	case CZapitMessages::CMD_BQ_SAVE_BOUQUETS:
 	{
 		CZapitMessages::responseCmd response;
@@ -893,7 +892,6 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		startPlayBack(channel);
 		break;
 
-		
 	case CZapitMessages::CMD_SB_STOP_PLAYBACK:
 		stopPlayBack();
 		playbackStopForced = true;
@@ -965,7 +963,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		eventServer->registerEvent(connfd);
 		break;
 
-	case CZapitMessages::CMD_UNREGISTEREVENTS :
+	case CZapitMessages::CMD_UNREGISTEREVENTS:
 		eventServer->unRegisterEvent(connfd);
 		break;
 
@@ -1428,7 +1426,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.304 2003/03/26 09:57:40 mws Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.305 2003/03/30 11:55:54 thegoodguy Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
@@ -1515,8 +1513,7 @@ int main(int argc, char **argv)
 	delete bouquetManager;
 	delete eventServer;
 
-        INFO("shutdown complete");
+	INFO("shutdown complete");
 
 	return 0;
 }
-
