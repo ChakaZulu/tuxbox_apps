@@ -30,9 +30,13 @@
 */
 
 //
-// $Id: global.h,v 1.14 2001/12/14 16:56:42 faralla Exp $
+// $Id: global.h,v 1.15 2001/12/26 16:23:08 Simplex Exp $
 //
 // $Log: global.h,v $
+// Revision 1.15  2001/12/26 16:23:08  Simplex
+// -Streamwatchdog renamed to EventWatchDog and moved to Controld
+// -EventWatchdog now works with notifier-classes instead of callback-functioms
+//
 // Revision 1.14  2001/12/14 16:56:42  faralla
 // better bouquet-key handling
 //
@@ -85,7 +89,6 @@
 #include "widget/eventlist.hpp"
 #include "helpers/locale.h"
 #include "helpers/update.h"
-#include "helpers/streamwatchdog.h"
 
 #ifndef NEUTRINO_CPP
 #define NEUTRINO_CPP extern
@@ -115,8 +118,6 @@ NEUTRINO_CPP  CFlashUpdate    *g_Update;
 NEUTRINO_CPP  CScreenSetup    *g_ScreenSetup;
 
 NEUTRINO_CPP CLocaleManager   *g_Locale;
-
-NEUTRINO_CPP CStreamWatchDog  *g_WatchDog;
 
 NEUTRINO_CPP CBouquetList	*bouquetList;
 

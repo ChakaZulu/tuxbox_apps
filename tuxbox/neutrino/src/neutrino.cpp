@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.108 2001/12/20 00:25:38 McClean Exp $
+        $Id: neutrino.cpp,v 1.109 2001/12/26 16:23:08 Simplex Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,10 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.109  2001/12/26 16:23:08  Simplex
+  -Streamwatchdog renamed to EventWatchDog and moved to Controld
+  -EventWatchdog now works with notifier-classes instead of callback-functioms
+
   Revision 1.108  2001/12/20 00:25:38  McClean
   use libnet
 
@@ -369,7 +373,6 @@ static void initGlobals(void)
   g_UcodeCheck = NULL;
 
   g_Locale = NULL;
-  g_WatchDog = NULL;
 }
 // Ende globale Variablen
 
@@ -973,7 +976,7 @@ void CNeutrinoApp::channelsInit()
 void CNeutrinoApp::CmdParser(int argc, char **argv)
 {
 	softupdate = false;
-		
+
 	for(int x=1; x<argc; x++)
 	{
 		if ( !strcmp(argv[x], "-su"))
@@ -1191,18 +1194,18 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service)
 
 		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "flashupdate.proxyserver_sep") );
 
-		CStringInput*	updateSettings_proxy= new CStringInput("flashupdate.proxyserver", g_settings.softupdate_proxyserver, 23, 
-			                                                   "flashupdate.proxyserver_hint1", "flashupdate.proxyserver_hint2", 
+		CStringInput*	updateSettings_proxy= new CStringInput("flashupdate.proxyserver", g_settings.softupdate_proxyserver, 23,
+			                                                   "flashupdate.proxyserver_hint1", "flashupdate.proxyserver_hint2",
                                                                "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
 		updateSettings->addItem( new CMenuForwarder("flashupdate.proxyserver", true, g_settings.softupdate_proxyserver, updateSettings_proxy ) );
-		
-		CStringInput*	updateSettings_proxyuser= new CStringInput("flashupdate.proxyusername", g_settings.softupdate_proxyusername, 23, 
-			                                                   "flashupdate.proxyusername_hint1", "flashupdate.proxyusername_hint2", 
+
+		CStringInput*	updateSettings_proxyuser= new CStringInput("flashupdate.proxyusername", g_settings.softupdate_proxyusername, 23,
+			                                                   "flashupdate.proxyusername_hint1", "flashupdate.proxyusername_hint2",
                                                                "abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-. ");
 		updateSettings->addItem( new CMenuForwarder("flashupdate.proxyusername", true, g_settings.softupdate_proxyusername, updateSettings_proxyuser ) );
 
-		CStringInput*	updateSettings_proxypass= new CStringInput("flashupdate.proxypassword", g_settings.softupdate_proxypassword, 20, 
-			                                                   "flashupdate.proxypassword_hint1", "flashupdate.proxypassword_hint2", 
+		CStringInput*	updateSettings_proxypass= new CStringInput("flashupdate.proxypassword", g_settings.softupdate_proxypassword, 20,
+			                                                   "flashupdate.proxypassword_hint1", "flashupdate.proxypassword_hint2",
                                                                "abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-. ");
 		updateSettings->addItem( new CMenuForwarder("flashupdate.proxypassword", true, g_settings.softupdate_proxypassword, updateSettings_proxypass ) );
 
@@ -1702,7 +1705,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_ScreenSetup = new CScreenSetup;
 	g_EventList = new EventList;
 	g_Update = new CFlashUpdate;
-	g_WatchDog = new CStreamWatchDog;
 
 	//printf("\nCNeutrinoApp::run - objects initialized...\n\n");
 	g_Locale->loadLocale(g_settings.language);
@@ -2113,7 +2115,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.108 2001/12/20 00:25:38 McClean Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.109 2001/12/26 16:23:08 Simplex Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;
