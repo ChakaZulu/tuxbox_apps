@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.13 2001/09/13 10:12:41 field Exp $
+// $Id: infoviewer.cpp,v 1.14 2001/09/13 17:15:51 field Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.14  2001/09/13 17:15:51  field
+// verbessertes warten aufs epg
+//
 // Revision 1.13  2001/09/13 10:12:41  field
 // Major update! Beschleunigtes zappen & EPG uvm...
 //
@@ -86,6 +89,14 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, bool CalledFromNumZap 
 {
     pthread_mutex_lock( &epg_mutex );
 	CurrentChannel = Channel;
+    if ( CalledFromNumZap )
+    {
+        EPG_NotFound_Text = "EPG noch nicht geladen.";
+    }
+    else
+    {
+        EPG_NotFound_Text =  "Warte auf EPG...";
+    }
     pthread_mutex_unlock( &epg_mutex );
 
 	BoxStartX = settings->screen_StartX+ 20;
@@ -185,7 +196,8 @@ void CInfoViewer::showData()
 	ChanInfoY += height;
 
 	//info next
-    frameBuffer->paintBox(BoxStartX + ChanWidth + 25, ChanInfoY, BoxStartX + ChanWidth+ 225, ChanInfoY+ height , COL_INFOBAR);
+    frameBuffer->paintBox(BoxStartX + ChanWidth + 25, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR);
+
 	int start2width      = fonts->infobar_info->getRenderWidth(nextStart);
 	int duration2Width   = fonts->infobar_info->getRenderWidth(nextDuration); 
 	int duration2TextPos = BoxEndX-duration2Width-10;
@@ -198,7 +210,11 @@ void CInfoViewer::showWarte()
 {
 	int height=fonts->infobar_info->getHeight();
     int ChanInfoY = BoxStartY + ChanHeight+ 15+ 2* height;
-	fonts->infobar_info->RenderString(BoxStartX + ChanWidth + 25, ChanInfoY,  200, "Warte auf EPG...", COL_INFOBAR);
+    int xStart= BoxStartX + ChanWidth + 25;
+
+    pthread_mutex_trylock( &epg_mutex );
+	fonts->infobar_info->RenderString(xStart, ChanInfoY, BoxEndX- xStart, EPG_NotFound_Text, COL_INFOBAR);
+    pthread_mutex_unlock( &epg_mutex );
 }
 
 void CInfoViewer::killTitle()
@@ -213,6 +229,8 @@ void * CInfoViewer::InfoViewerThread (void *arg)
     int repCount;
     string query = "";
     bool gotEPG, requeryEPG;
+    struct timespec abs_wait;
+    struct timeval now;
 
 	CInfoViewer* InfoViewer = (CInfoViewer*) arg;
 	while(1)
@@ -235,7 +253,15 @@ void * CInfoViewer::InfoViewerThread (void *arg)
                         InfoViewer->showWarte();
 
 //                    printf("CInfoViewer::InfoViewerThread before waiting long\n");
-                    usleep( 1000000 );
+//                    usleep( 1000000 );
+
+                    gettimeofday(&now, NULL);
+                    TIMEVAL_TO_TIMESPEC(&now, &abs_wait);
+                    abs_wait.tv_sec += 1;
+
+                    pthread_mutex_trylock( &InfoViewer->epg_mutex );
+                    pthread_cond_timedwait( &InfoViewer->epg_cond, &InfoViewer->epg_mutex, &abs_wait );
+
 //                    printf("CInfoViewer::InfoViewerThread after waiting long\n");
 
                     repCount--;

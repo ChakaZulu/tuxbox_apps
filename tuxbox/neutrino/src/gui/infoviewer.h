@@ -65,6 +65,7 @@ class CInfoViewer
         int                 ChanHeight;
 
 		string				CurrentChannel;
+        char                *EPG_NotFound_Text;
 
 		char				running[50];
 		char				next[50];
