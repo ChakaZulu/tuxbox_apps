@@ -4,8 +4,7 @@ INCLUDES = \
 	-I$(top_srcdir)/lib \
 	@CONFIGFILE_CFLAGS@ \
 	@FREETYPE_CFLAGS@ \
-	@LCDDISPLAY_CFLAGS@ \
-	-I@DRIVER@/lcd
+	@LCDDISPLAY_CFLAGS@
 
 bin_PROGRAMS = lcdd
 

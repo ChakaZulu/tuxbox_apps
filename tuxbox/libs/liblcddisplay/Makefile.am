@@ -1,5 +1,3 @@
-INCLUDES = -I@DRIVER@/lcd
-
 lib_LTLIBRARIES = liblcddisplay.la
 
 pkgincludedir = ${includedir}/tuxbox/lcddisplay
