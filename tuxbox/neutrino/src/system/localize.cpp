@@ -115,9 +115,8 @@ void CLocaleManager::loadLocale(std::string locale)
 			} while ( ( pos != -1 ) );
 
 			if ((strcmp(keystr, "epglist.head") != 0) && (strcmp(keystr, "channellist.head") != 0))
-				localeData[CZapitClient::Utf8_to_Latin1(std::string(keystr))] = text;
-			else
-				localeData[keystr] = text;
+				text = CZapitClient::Utf8_to_Latin1(text);
+			localeData[keystr] = text;
 		}
 	}
 	fclose(fd);
