@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.72 2002/02/05 21:24:04 Simplex Exp $
+  $Id: zapit.cpp,v 1.73 2002/02/06 22:05:31 Simplex Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -92,6 +92,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.73  2002/02/06 22:05:31  Simplex
+  fixed some ugly bugs
+
   Revision 1.72  2002/02/05 21:24:04  Simplex
   implemeted zapto by channelnumber (for clientlib)
 
@@ -2243,7 +2246,7 @@ void parse_command()
 
 			case CZapitClient::CMD_GET_BOUQUET_CHANNELS :
 				CZapitClient::commandGetBouquetChannels msgGetBouquetChannels;
-				read( connfd, &msgGetBouquets, sizeof(msgGetBouquets));
+				read( connfd, &msgGetBouquetChannels, sizeof(msgGetBouquetChannels));
 				sendBouquetChannels(msgGetBouquetChannels.bouquet);
 			break;
 
@@ -2487,7 +2490,7 @@ int main(int argc, char **argv) {
     }
 
   system("cp " CONFIGDIR "/zapit/last_chan /tmp/zapit_last_chan");
-  printf("Zapit $Id: zapit.cpp,v 1.72 2002/02/05 21:24:04 Simplex Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.73 2002/02/06 22:05:31 Simplex Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
@@ -2584,13 +2587,13 @@ void addChannelToBouquet(unsigned int bouquet, unsigned int onid_sid)
 {
 	printf("addChannelToBouquet(%d, %d)\n", bouquet, onid_sid);
 	channel* chan = g_BouquetMan->copyChannelByOnidSid( onid_sid);
-	g_BouquetMan->Bouquets[bouquet]->addService( chan);
+	g_BouquetMan->Bouquets[bouquet-1]->addService( chan);
 }
 
 void removeChannelFromBouquet(unsigned int bouquet, unsigned int onid_sid)
 {
 	printf("removing %d in bouquet %d \n", onid_sid, bouquet);
-	g_BouquetMan->Bouquets[bouquet]->removeService( onid_sid);
+	g_BouquetMan->Bouquets[bouquet-1]->removeService( onid_sid);
 	printf("removing %d in bouquet %d done\n", onid_sid, bouquet);
 }
 
