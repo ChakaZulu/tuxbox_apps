@@ -5,6 +5,8 @@
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
+ *    V1.34: add infoline for pagecatching                                    *
+ *    V1.33: fix service-switch by wjoost                                     *
  *    V1.32: fix 16:9/4:3 (wss override)                                      *
  *    V1.31: damned infobar                                                   *
  *    V1.30: change infobar, fix servicescan (segfault on RTL Shop)           *
@@ -48,7 +50,7 @@ void plugin_exec(PluginParam *par)
 {
 	//show versioninfo
 
-		printf("\nTuxTxt 1.32 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
+		printf("\nTuxTxt 1.34 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
 
 	//get params
 
@@ -893,8 +895,7 @@ void ConfigMenu()
 								{
 									case 1:	if(pids_found > 1)
 											{
-
-												//stop decode-thread
+												//stop old decode-thread
 
 													if(pthread_cancel(thread_id) != 0)
 													{
@@ -965,11 +966,12 @@ void ConfigMenu()
 														perror("TuxTxt <DMX_SET_PES_FILTER>");
 													}
 
+												//start new decode-thread
+
 													if(pthread_create(&thread_id, NULL, CacheThread, NULL) != 0)
 													{
 														perror("TuxTxt <pthread_create>");
 													}
-
 
 												//show new videotext
 
@@ -1406,13 +1408,24 @@ void Next100()
 
 void PageCatching()
 {
-	int val;
+	int val, byte;
+	char line25[] = " яЁ w{hlen   ёЄ anzeigen   єЇ abbrechen иззииииииииииззииииииииииииззиииииииииии";
 
 	//check for pagenumber(s)
 
 		CatchNextPage(1);
 
 		if(!catched_page) return;
+
+	//change line 25
+
+		PosX = StartX;
+		PosY = StartY + 24*fixfontheight;
+
+		for(byte = 0; byte < 40; byte++)
+		{
+			RenderCharFB(line25[byte], line25[byte + 40]);
+		}
 
 	//set blocking mode
 
