@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.21 2003/04/23 18:02:45 zwen Exp $
+	$Id: controlapi.cpp,v 1.22 2003/06/04 14:16:01 digi_casi Exp $
 
 	License: GPL
 
@@ -708,7 +708,7 @@ bool CControlAPI::StartPluginCGI(CWebserverRequest *request)
 // Send functions (for ExecuteCGI)
 //-------------------------------------------------------------------------
 
-void CControlAPI::SendEventList(CWebserverRequest *request,unsigned channel_id)
+void CControlAPI::SendEventList(CWebserverRequest *request, t_channel_id channel_id)
 {
 	int pos;
 
