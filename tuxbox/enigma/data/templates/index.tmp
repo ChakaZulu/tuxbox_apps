@@ -122,10 +122,11 @@
 					<TD><IMG SRC="knop_0.gif" WIDTH=94 HEIGHT=22></TD>
 					<TD><a href="?mode=zap"><IMG SRC="knop_1.gif" WIDTH=111 HEIGHT=22 border=0></a></TD>
 					<TD><a href="?mode=menu"><IMG SRC="knop_2.gif" WIDTH=102 HEIGHT=22 border=0></a></TD>
+					<TD><a href="?mode=share"><IMG SRC="knop_10.gif" WIDTH=102 HEIGHT=22 border=0></a></TD>
 					<TD><a href="?mode=links"><IMG SRC="knop_3.gif" WIDTH=101 HEIGHT=22 border=0></a></TD>
 					<TD><a href="?mode=updates"><IMG SRC="knop_4.gif" WIDTH=120 HEIGHT=22 border=0></a></TD>
 					<TD><a href="?mode=about"><IMG SRC="knop_5.gif" WIDTH=108 HEIGHT=22 border=0></a></TD>
-					<TD><IMG SRC="knop_6.gif" WIDTH=144 HEIGHT=22></TD>
+					<TD><IMG SRC="knop_6.gif" WIDTH=42 HEIGHT=22></TD>
 				</TR>
 			</TABLE>
 		</TD>
@@ -141,8 +142,10 @@
 				document.write("<a href=\"?path=;0:7:1:0:0:0:0:0:0:0:\">TV</a><br><a href=\"?path=;0:7:2:0:0:0:0:0:0:0:\">Radio</a><br><a href=\"?path=;0:7:6:0:0:0:0:0:0:0:\">Data</a><br><a href=\"?path=;2:47:0:0:0:0:%2f\">Root</a><br><a href=\"?path=;2:47:0:0:0:0:%2fhdd%2f\">Harddisk</a><br><a href=\"?path=;4097:7:0:1:0:0:0:0:0:0:\">Recordings</a><br>");
 			}
 			if('#MODE#'.indexOf("MENU") >- 1) {
-				document.write("<a href=\"?mode=menuShutdown\">Shutdown</a><br><a href=\"?mode=menuRestart\">Restart</a><br><a href=\"?mode=menuStandby\">Standby</a><br><a href=\"?mode=menuWakeup\">Wakeup</a><br><br><a href=\"?mode=menuFBShot\">Framebuffershot</a><br><a href=\"?mode=menuScreenShot\">Screenshot</a>");
+				document.write("<a href=\"?mode=menuShutdown\">Shutdown</a><br><a href=\"?mode=menuRestart\">Restart</a><br><a href=\"?mode=menuReboot\">Reboot</a><br><a href=\"?mode=menuStandby\">Standby</a><br><a href=\"?mode=menuWakeup\">Wakeup</a><br><br><a href=\"?mode=menuFBShot\">Framebuffershot</a><br><a href=\"?mode=menuScreenShot\">Screenshot</a>");
 			}
+			if('#MODE#'.indexOf("SHARE") >- 1) {document.write("<a href=\"?mode=shareBuddies\">Buddies</a><br><a href=\"?mode=shareCards\">Cards</a><br><br><a href=\"?mode=shareGboxReset\">GBOX Reset</a>");} 
+
 			if('#MODE#'.indexOf("LINKS") >- 1) {
 				document.write("<a href=\"?mode=linksOfficialSites\">Official sites</a><br><a href=\"?mode=linksOtherSites\">Other sites</a><br><a href=\"?mode=linksForums\">Forums</a>");
 			}
