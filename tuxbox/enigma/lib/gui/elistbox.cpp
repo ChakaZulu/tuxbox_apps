@@ -228,10 +228,10 @@ void eListbox::keyDown(int rc)
 				else if (entry.current()==current->current())
 					cur=i;
 				
-				if (old != -1)
-					invalidateEntry(old);
-				if (cur != -1)
-					invalidateEntry(cur);
+			if (old != -1)
+				invalidateEntry(old);
+			if ((cur != -1) && (cur != old))
+				invalidateEntry(cur);
 		}
 	}
 }
@@ -370,5 +370,5 @@ void eListbox::setActiveColor(gColor active)
 {
 	col_active=active;
 	if (current && current->current())
-		invalidateEntry(active);
+		invalidateEntry(active);		/* das ist ja wohl buggy hier */
 }

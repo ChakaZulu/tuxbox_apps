@@ -12,6 +12,7 @@ public:
 	~ePixmap();
 	
 	void redrawWidget(gPainter *paint, const QRect &area);
+	void eraseBackground(gPainter *target, const QRect &area);
 };
 
 #endif
