@@ -114,6 +114,7 @@ void eMainloop::processOneEvent()
 		pfd[i].events = it->second->getRequested();
 	}
 
+		// MAY BE BUG: wenn im timer nen FD geschlossen wird...
 // process pending timers...
 	long usec;
 
