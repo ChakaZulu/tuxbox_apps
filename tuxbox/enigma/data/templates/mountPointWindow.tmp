@@ -1,0 +1,120 @@
+<html>
+<head>
+	<title>#TITLE#</title>
+</head>
+<body>
+<form name="mountpoint" action="#ACTION#">
+	<table border=0 cellspacing=5 cellpadding=0>
+	<tr>
+		<td>
+			<table border=0 cellspacing=5 cellpadding=0>
+			<tr>
+				<td>ID: </td>
+				<td><input name="id" type="text" size="2" maxlength="2" value="#ID#"></td>
+			</tr>
+			<tr>
+				<td>Filesystem Type: </td>
+				<td><input name="fstype" type="text" size="1" maxlength="1" value="#FSTYPE#">&nbsp;&nbsp;(0 = NFS, 1 = CIFS, 2 = DEVICE)</td>
+			</tr>
+			<tr>
+				<td>Auto Mount: </td>
+				<td><input type="checkbox" name="automount" value="#AUTO#"></td>
+			</tr>
+			<tr>
+				<td>Server Directory: </td>
+				<td><input name="localdir" type="text" size="50" maxlength="50" value="#LDIR#"></td>
+			</tr>
+			<tr>
+				<td>Client Directory: </td>
+				<td><input name="mountdir" type="text" size="50" maxlength="50" value="#MDIR#"></td>
+			</tr>
+			<tr>
+				<td>IP: </td>
+				<td>
+					<input name="ip0" type="text" size="3" maxlength="3" value="#IP0#">.
+					<input name="ip1" type="text" size="3" maxlength="3" value="#IP1#">.
+					<input name="ip2" type="text" size="3" maxlength="3" value="#IP2#">.
+					<input name="ip3" type="text" size="3" maxlength="3" value="#IP3#">
+				</td>
+			</tr>
+			<tr>
+				<td>User Name: </td>
+				<td><input name="username" type="text" size="50" maxlength="50" value="#USER#"></td>
+			</tr>
+			<tr>
+				<td>Password: </td>
+				<td><input name="password" type="text" size="50" maxlength="50" value="#PW#"></td>
+			</tr>
+			<tr>
+				<td>RSize: </td>
+				<td><input name="rsize" type="text" size="10" maxlength="10" value="#RSIZE#"></td>
+			</tr>
+			<tr>
+				<td>WSize: </td>
+				<td><input name="wsize" type="text" size="10" maxlength="10" value="#WSIZE#"></td>
+			</tr>
+			<tr>
+				<td>Own Options: </td>
+				<td><input name="ownoptions" type="text" size="50" maxlength="50" value="#OWNOPTIONS#"></td>
+			</tr>
+			</table>
+		</td>
+		<td>
+			<table border=0 cellspacing=5 cellpadding=0>
+			<tr>
+				<td>Options:</td>
+			</tr>
+			<tr>
+				<td>sync: </td>
+				<td><input type="checkbox" name="sync" value="#SYNC#"></td>
+			</tr>
+			<tr>
+				<td>atime: </td>
+				<td><input type="checkbox" name="atime" value="#ATIME#"></td>
+			</tr>
+			<tr>
+				<td>execm: </td>
+				<td><input type="checkbox" name="execm" value="#EXECM#"></td>
+			</tr>
+			<tr>
+				<td>noexec: </td>
+				<td><input type="checkbox" name="noexec" value="#NOEXEC#"></td>
+			</tr>
+			<tr>
+				<td>ro: </td>
+				<td><input type="checkbox" name="ro" value="#RO#"></td>
+			</tr>
+			<tr>
+				<td>rw: </td>
+				<td><input type="checkbox" name="rw" value="#RW#"></td>
+			</tr>
+			<tr>
+				<td>users: </td>
+				<td><input type="checkbox" name="users" value="#USERS#"></td>
+			</tr>
+			<tr>
+				<td>nolock: </td>
+				<td><input type="checkbox" name="nolock" value="#NOLOCK#"></td>
+			</tr>
+			<tr>
+				<td>intr: </td>
+				<td><input type="checkbox" name="intr" value="#INTR#"></td>
+			</tr>
+			<tr>
+				<td>soft: </td>
+				<td><input type="checkbox" name="soft" value="#SOFT#"></td>
+			</tr>
+			<tr>
+				<td>udp: </td>
+				<td><input type="checkbox" name="udp" value="#UDP#"></td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td colspan=4><input type="submit" style="width:100px; height:22px; color:#000000;" value="Submit"></td>
+	</tr>
+	</table>
+</form>
+</body>
+</html>
