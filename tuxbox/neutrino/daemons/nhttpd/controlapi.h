@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: controlapi.h,v 1.6 2003/07/14 09:48:28 gagga Exp $
+        $Id: controlapi.h,v 1.7 2004/01/06 16:05:54 zwen Exp $
 
         License: GPL
 
@@ -49,6 +49,7 @@ class CControlAPI
 		// CGI functions for ExecuteCGI
 		bool TimerCGI(CWebserverRequest *request);
 		bool SetModeCGI(CWebserverRequest *request);
+		bool GetModeCGI(CWebserverRequest *request);
 		bool StandbyCGI(CWebserverRequest *request);
 		bool GetDateCGI(CWebserverRequest *request);
 		bool GetTimeCGI(CWebserverRequest *request);

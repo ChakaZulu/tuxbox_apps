@@ -12,16 +12,17 @@ Bei Problem oder Fragen Mail an derdirch@web.de oder Dirch in #dbox2
 5. Lautstärke-Steuerung			http://dbox/control/volume
 6. Programm umschalten / Playback	http://dbox/control/zapto
 7. Radio/TV, Record Mode		http://dbox/control/setmode
-8. Datum von der Box abfragen		http://dbox/control/getdate
-9. Uhrzeit von der Box abfragen		http://dbox/control/gettime
-10. Allgemeine Informationen 		http://dbox/control/info
-11. Aktuellen Kanal abfragen		http://dbox/control/getonidsid
-12. services.xml lesen			http://dbox/control/getservicesxml
-13. bouquets.xml auslesen		http://dbox/control/getbouquetsxml
-14. Bouquetlist abfragen		http://dbox/control/getbouquets
-15. Bouquet abfragen			http://dbox/control/getbouquet
-16. Fenster in neutrino			http://dbox/control/message
-17. Timerd Interface			http://dbox/control/timer
+8. Radio/TV Mode Abfrage		http://dbox/control/getmode
+9. Datum von der Box abfragen		http://dbox/control/getdate
+10. Uhrzeit von der Box abfragen	http://dbox/control/gettime
+11. Allgemeine Informationen 		http://dbox/control/info
+12. Aktuellen Kanal abfragen		http://dbox/control/getonidsid
+13. services.xml lesen			http://dbox/control/getservicesxml
+14. bouquets.xml auslesen		http://dbox/control/getbouquetsxml
+15. Bouquetlist abfragen		http://dbox/control/getbouquets
+16. Bouquet abfragen			http://dbox/control/getbouquet
+17. Fenster in neutrino			http://dbox/control/message
+18. Timerd Interface			http://dbox/control/timer
 
 
 **********************************************************************************************
@@ -506,9 +507,24 @@ ok
 ok
 
 
+**********************************************************************************************
+8. Radio/TV Mode Abfrage
+**********************************************************************************************
+Handler: http://dbox/control/getmode
+
+Parameter: 
+Rückgabe: "tv", "radio", "unkown"
+
+Es wird der aktuelle mode zurückgegeben tv / radio / unknown (shouldn't happen)
+
+Beispiel:
+
+>>>http://dbox/control/getmode
+tv
+
 
 **********************************************************************************************
-8. Datum von der Box abfragen
+9. Datum von der Box abfragen
 **********************************************************************************************
 Handler: http://dbox/control/getdate
 
@@ -527,7 +543,7 @@ Beispiel:
  
 
 **********************************************************************************************
-9. Zeit von der Box abfragen
+10. Zeit von der Box abfragen
 **********************************************************************************************
 Handler: http://dbox/control/gettime
 
@@ -557,7 +573,7 @@ Beispiel:
 1046804654
 
 **********************************************************************************************
-10. Allgemeine Informationen abfragen
+11. Allgemeine Informationen abfragen
 **********************************************************************************************
 Handler: http://dbox/control/info
 
@@ -618,8 +634,8 @@ Beispiel:
 
 
 **********************************************************************************************
-11. Aktuellen Kanal abfragen
-**********************************************************************************************
+12. Aktuellen Kanal abfragen
+*********************************************************************************************
 Handler: http://dbox/control/getonidsid
 
 Parameter: 
@@ -639,7 +655,7 @@ Beispiel:
 
 
 **********************************************************************************************
-12. services.xml lesen
+13. services.xml lesen
 **********************************************************************************************
 Handler: http://dbox/control/getservicesxml
 
@@ -664,7 +680,7 @@ Beispiel:
 
 
 **********************************************************************************************
-13. bouquets.xml auslesen
+14. bouquets.xml auslesen
 **********************************************************************************************
 Handler: http://dbox/control/getbouquetsxml
 
@@ -687,7 +703,7 @@ Beispiel:
 
 
 **********************************************************************************************
-14. Bouquetlist abfragen
+15. Bouquetlist abfragen
 **********************************************************************************************
 Handler: http://dbox/control/getbouquets
 
@@ -708,7 +724,7 @@ Beispiel:
 
 
 **********************************************************************************************
-15. Bouquet abfragen
+16. Bouquet abfragen
 **********************************************************************************************
 Handler: http://dbox/control/getbouquet
 
@@ -731,7 +747,7 @@ Beispiel:
 
 
 **********************************************************************************************
-16. Open popup window
+17. Open popup window
 **********************************************************************************************
 Handler: http://dbox/control/message
 
@@ -773,7 +789,7 @@ http://www.google.com/search?q=%C3%A4%20%C3%B6%20%C3%BC%20%C3%84%20%C3%96%20%C3%
 
 
 **********************************************************************************************
-16. Popup-Fenster oeffnen
+17. Popup-Fenster oeffnen
 **********************************************************************************************
 Handler: http://dbox/control/message
 
@@ -815,7 +831,7 @@ http://www.google.com/search?q=%C3%A4%20%C3%B6%20%C3%BC%20%C3%84%20%C3%96%20%C3%
 
 
 **********************************************************************************************
-17. Timerd Interface
+18. Timerd Interface
 **********************************************************************************************
 Handler: http://dbox/control/timer
 
