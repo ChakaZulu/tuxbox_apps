@@ -103,7 +103,7 @@ int CFile::getType()
 
 //------------------------------------------------------------------------
 
-std::string CFile::getFileName()		// return name.extension or folder name without trailing /
+std::string CFile::getFileName()	const	// return name.extension or folder name without trailing /
 {
 	std::string::size_type namepos = Name.rfind('/');
 
@@ -112,7 +112,7 @@ std::string CFile::getFileName()		// return name.extension or folder name withou
 
 //------------------------------------------------------------------------
 
-std::string CFile::getPath()			// return complete path including trailing /
+std::string CFile::getPath() const			// return complete path including trailing /
 {
 	int pos = 0;
 
@@ -180,11 +180,19 @@ bool sortByType (const CFile& a, const CFile& b)
 
 bool sortByDate (const CFile& a, const CFile& b)
 {
+   if(a.getFileName()=="..")
+      return true;
+   if(b.getFileName()=="..")
+      return false;
 	return a.Time < b.Time ;
 }
 
 bool sortBySize (const CFile& a, const CFile& b)
 {
+   if(a.getFileName()=="..")
+      return true;
+   if(b.getFileName()=="..")
+      return false;
 	return a.Size < b.Size;
 }
 
@@ -481,7 +489,12 @@ bool CFileBrowser::exec(std::string Dirname)
 		if ( msg <= CRCInput::RC_MaxRC )
 			timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_filebrowser );
 
-		if ( msg == CRCInput::RC_yellow )
+		if(!CRCInput::isNumeric(msg))
+		{
+			m_oldKey=0;
+		}
+		
+      if ( msg == CRCInput::RC_yellow )
 		{
 			if(Multi_Select)
 			{
@@ -944,6 +957,11 @@ void CFileBrowser::paintFoot()
 
 		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 35 + (1 * dx), ty2, dx - 35, currentsort, COL_INFOBAR, 0, true); // UTF-8
 
+      if(m_oldKey!=0)
+      {
+         char cKey[2]={m_oldKey,0};
+         g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + width - 16, ty +4 , 16, cKey, COL_MENUHEAD, 0, true); // UTF-8
+      }
 	}
 }
 
@@ -1084,10 +1102,8 @@ void CFileBrowser::SMSInput(uint msg)
 			break;
 		}
 	}
-	char cKey[2]={key, 0};
-	int ty = y + height - (foheight -4) + g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getHeight();
-	frameBuffer->paintBoxRel(x+width-20, y+height- (foheight ), 20, (foheight ), COL_MENUHEAD);
-	g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+width-19, ty , 19, cKey, COL_INFOBAR); // ISO-8859-1
+	m_oldKeyTime=keyTime;
+	m_oldKey=key;
 	int prevselected=selected;
 	selected=i;
 	paintItem(prevselected - liststart);
@@ -1101,6 +1117,4 @@ void CFileBrowser::SMSInput(uint msg)
 	{
 		paintItem(selected - liststart);
 	}
-	m_oldKeyTime=keyTime;
-	m_oldKey=key;
 }

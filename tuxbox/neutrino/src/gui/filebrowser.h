@@ -101,8 +101,8 @@ public:
 	};
 
 	int		getType();
-	std::string	getFileName();
-	std::string	getPath();
+	std::string	getFileName() const;
+	std::string	getPath() const;
 
 	CFile(){Marked = false; Size=0;Mode=0;Time=0;};
 	off_t Size;
