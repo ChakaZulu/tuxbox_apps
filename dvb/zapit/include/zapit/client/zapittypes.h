@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/zapittypes.h,v 1.6 2002/12/23 10:35:46 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/zapittypes.h,v 1.7 2003/01/02 13:14:03 obi Exp $
  *
  * zapit's types which are used by the clientlib - d-box2 linux project
  *
@@ -60,6 +60,13 @@ typedef enum {
 	CA_STATUS_CLEAR,
 	CA_STATUS_FTA
 } ca_status_t;
+
+/* dvb transmission types */
+typedef enum {
+	DVB_C,
+	DVB_S,
+	DVB_T
+} delivery_system_t;
 
 /* video display formats (cf. video_displayformat_t in driver/dvb/include/linux/dvb/video.h): */
 typedef enum {

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.9 2002/12/20 19:19:46 obi Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.10 2003/01/02 13:14:03 obi Exp $
  *
  * types used for clientlib <-> zapit communication - d-box2 linux project
  *
@@ -66,6 +66,7 @@ class CZapitMessages
 			CMD_GET_CA_INFO,					// not supported yet
 			CMD_GET_CURRENT_SERVICEID,
 			CMD_GET_CURRENT_SERVICEINFO,
+			CMD_GET_DELIVERY_SYSTEM,
 
 			CMD_SCANSTART,
 			CMD_SCANREADY,
@@ -285,6 +286,11 @@ class CZapitMessages
 		unsigned int satellite;
 		unsigned int transponder;
 		unsigned int services;
+	};
+
+	struct responseDeliverySystem
+	{
+		delivery_system_t system;
 	};
 
 };

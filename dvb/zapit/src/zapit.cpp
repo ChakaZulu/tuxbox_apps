@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.284 2002/12/23 00:51:31 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.285 2003/01/02 13:14:03 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -585,6 +585,24 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		break;
 	}
 	
+	case CZapitMessages::CMD_GET_DELIVERY_SYSTEM:
+	{
+		CZapitMessages::responseDeliverySystem response;
+		switch (frontend->getInfo()->type) {
+		case FE_QAM:
+			response.system = DVB_C;
+			break;
+		case FE_QPSK:
+			response.system = DVB_S;
+			break;
+		case FE_OFDM:
+			response.system = DVB_T;
+			break;
+		}
+		send(connfd, &response, sizeof(response), 0);
+		break;
+	}
+
 	case CZapitMessages::CMD_GET_BOUQUETS:
 	{
 		CZapitMessages::commandGetBouquets msgGetBouquets;
@@ -1413,7 +1431,7 @@ int main (int argc, char **argv)
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	fprintf(stdout, "$Id: zapit.cpp,v 1.284 2002/12/23 00:51:31 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.285 2003/01/02 13:14:03 obi Exp $\n");
 
 	if (argc > 1)
 	{

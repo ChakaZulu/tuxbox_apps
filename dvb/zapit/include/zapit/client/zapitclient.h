@@ -182,7 +182,6 @@ class CZapitClient:public CBasicClient
 	};
 	typedef std::vector<responseGetSatelliteList> SatelliteList;
 
-
  public:
 	/*****************************/
 	/*                           */
@@ -270,6 +269,8 @@ class CZapitClient:public CBasicClient
 	/* set audio volume */
 	void setVolume(const unsigned int left, const unsigned int right);
 
+	/* get dvb transmission type */
+	delivery_system_t getDeliverySystem(void);
 
 	/****************************************/
 	/*					*/

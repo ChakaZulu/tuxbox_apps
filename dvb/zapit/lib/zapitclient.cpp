@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.73 2002/12/20 19:19:46 obi Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.74 2003/01/02 13:14:03 obi Exp $ *
  *
  * Client-Interface für zapit - DBoxII-Project
  *
@@ -407,6 +407,19 @@ void CZapitClient::setVolume(const unsigned int left, const unsigned int right)
 	send(CZapitMessages::CMD_SET_VOLUME, (char*)&msg, sizeof(msg));
 
 	close_connection();
+}
+
+
+delivery_system_t CZapitClient::getDeliverySystem(void)
+{
+	send(CZapitMessages::CMD_GET_DELIVERY_SYSTEM, 0, 0);
+
+	CZapitMessages::responseDeliverySystem response;
+	CBasicClient::receive_data((char* )&response, sizeof(response));
+
+	close_connection();
+
+	return response.system;
 }
 
 
