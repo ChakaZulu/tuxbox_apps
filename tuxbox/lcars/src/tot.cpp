@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: tot.cpp,v $
+Revision 1.5  2002/09/18 10:48:37  obi
+use devfs devices
+
 Revision 1.4  2002/06/02 12:18:47  TheDOC
 source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
 
@@ -71,7 +74,7 @@ void* tot::start_timereader( void * this_ptr )
 	while(1)
 	{
 		// Lies den TOT
-		if ((fd=open("/dev/ost/demux0", O_RDONLY)) < 0)
+		if ((fd=open("/dev/dvb/card0/demux0", O_RDONLY)) < 0)
 			perror("TDT open");
 
 		memset (&flt.filter, 0, sizeof (struct dmxFilter));

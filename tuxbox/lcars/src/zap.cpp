@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: zap.cpp,v $
+Revision 1.8  2002/09/18 10:48:37  obi
+use devfs devices
+
 Revision 1.7  2002/09/17 12:20:24  TheDOC
 start/stop devices
 
@@ -75,17 +78,17 @@ zap::zap(settings &set, osd &o, tuner &t, cam &c) : setting(set), osdd(o), tune(
 {
 	//printf("Initializing zapper...\n");
 
-	vid = open("/dev/ost/video0", O_RDWR);
-	if((video = open("/dev/ost/demux0", O_RDWR)) < 0) {
+	vid = open("/dev/dvb/card0/video0", O_RDWR);
+	if((video = open("/dev/dvb/card0/demux0", O_RDWR)) < 0) {
 		//printf("Cannot open demux device \n");
 		exit(1);
 	}
 
-	if((audio = open("/dev/ost/demux0", O_RDWR)) < 0) {
+	if((audio = open("/dev/dvb/card0/demux0", O_RDWR)) < 0) {
 		//printf("Cannot open demux device\n");
 		exit(1);
 	}
-	aud = open("/dev/ost/audio0", O_RDWR);
+	aud = open("/dev/dvb/card0/audio0", O_RDWR);
 	ioctl(vid, VIDEO_SELECT_SOURCE, (videoStreamSource_t)VIDEO_SOURCE_DEMUX);
 	old_frequ = 0;
 	old_TS = -1;
@@ -128,26 +131,26 @@ void zap::zap_to(pmt_data pmt, int VPID, int APID, int PCR, int ECM, int SID, in
 	close(audio);
 	close(pcr);
 
-	vid = open("/dev/ost/video0", O_RDWR);
+	vid = open("/dev/dvb/card0/video0", O_RDWR);
 	if (vid < 0)
-		perror("/dev/ost/video0");
+		perror("/dev/dvb/card0/video0");
 
-	if((video = open("/dev/ost/demux0", O_RDWR)) < 0) {
-		perror("/dev/ost/demux0");
+	if((video = open("/dev/dvb/card0/demux0", O_RDWR)) < 0) {
+		perror("/dev/dvb/card0/demux0");
 		exit(1);
 	}
 
-	if((pcr = open("/dev/ost/demux0", O_RDWR)) < 0) {
-		perror("/dev/ost/demux0");
+	if((pcr = open("/dev/dvb/card0/demux0", O_RDWR)) < 0) {
+		perror("/dev/dvb/card0/demux0");
 		exit(1);
 	}
 
-	aud = open("/dev/ost/audio0", O_RDWR);
+	aud = open("/dev/dvb/card0/audio0", O_RDWR);
 	if (aud < 0)
-		perror("/dev/ost/audio0");
+		perror("/dev/dvb/card0/audio0");
 
-	if((audio = open("/dev/ost/demux0", O_RDWR)) < 0) {
-		perror("/dev/ost/demux0");
+	if((audio = open("/dev/dvb/card0/demux0", O_RDWR)) < 0) {
+		perror("/dev/dvb/card0/demux0");
 		exit(1);
 	}
 	struct dmxPesFilterParams pes_filter;

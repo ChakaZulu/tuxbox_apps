@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: checker.cpp,v $
+Revision 1.8  2002/09/18 10:48:37  obi
+use devfs devices
+
 Revision 1.7  2002/06/15 02:33:03  TheDOC
 some changes + bruteforce-channelscan for cable
 
@@ -91,7 +94,7 @@ int checker::startEventThread()
 void checker::fnc(int i, int mode_16_9)
 {
 	int	avs = open("/dev/dbox/avs0",O_RDWR);
-	int vid = open("/dev/ost/video0", O_RDWR);
+	int vid = open("/dev/dvb/card0/video0", O_RDWR);
 	ioctl(avs, AVSIOSFNC, &i);
 	if (i == 1)
 		ioctl(vid, VIDEO_SET_DISPLAY_FORMAT, VIDEO_CENTER_CUT_OUT);

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: settings.cpp,v $
+Revision 1.8  2002/09/18 10:48:37  obi
+use devfs devices
+
 Revision 1.7  2002/06/02 12:18:47  TheDOC
 source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
 
@@ -157,10 +160,10 @@ int settings::find_emmpid(int ca_system_id) {
 	int fd, r = 1000, count;
 	struct dmxSctFilterParams flt;
 
-	fd=open("/dev/ost/demux0", O_RDWR);
+	fd=open("/dev/dvb/card0/demux0", O_RDWR);
 	if (fd<0)
 	{
-		perror("/dev/ost/demux0");
+		perror("/dev/dvb/card0/demux0");
 		return -fd;
 	}
 

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: main.cpp,v $
+Revision 1.24  2002/09/18 10:48:37  obi
+use devfs devices
+
 Revision 1.23  2002/06/15 02:33:03  TheDOC
 some changes + bruteforce-channelscan for cable
 
@@ -183,7 +186,7 @@ int main(int argc, char **argv)
 	//printf("Ending OSD\n");
 
 
-	int test = open("/dev/ost/demux0", O_RDWR);
+	int test = open("/dev/dvb/card0/demux0", O_RDWR);
 	if (test < 0)
 	{
 		rc.start_thread(true);

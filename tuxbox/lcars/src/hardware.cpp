@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: hardware.cpp,v $
+Revision 1.8  2002/09/18 10:48:37  obi
+use devfs devices
+
 Revision 1.7  2002/06/02 15:39:40  TheDOC
 video data viewable
 
@@ -366,7 +369,7 @@ void hardware::useDD(bool use)
 {
 	if (old_DD_state == use)
 		return;
-	int fd = open("/dev/ost/audio0", O_RDWR);
+	int fd = open("/dev/dvb/card0/audio0", O_RDWR);
 	if (use)
 	{
 		ioctl(fd, AUDIO_SET_BYPASS_MODE, 0);

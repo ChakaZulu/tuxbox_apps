@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: pmt.cpp,v $
+Revision 1.7  2002/09/18 10:48:37  obi
+use devfs devices
+
 Revision 1.6  2002/06/13 01:35:48  TheDOC
 NVOD should work now
 
@@ -53,7 +56,7 @@ pmt_data pmt::readPMT(int pmt_pid)
 	unsigned char buffer[BSIZE];
 
 	// Lies den PMT
-	fd=open("/dev/ost/demux0", O_RDONLY);
+	fd=open("/dev/dvb/card0/demux0", O_RDONLY);
 
 	memset (&flt.filter, 0, sizeof (struct dmxFilter));
 	r = BSIZE;

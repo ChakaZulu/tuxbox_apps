@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: sdt.cpp,v $
+Revision 1.7  2002/09/18 10:48:37  obi
+use devfs devices
+
 Revision 1.6  2002/06/15 02:33:03  TheDOC
 some changes + bruteforce-channelscan for cable
 
@@ -54,7 +57,7 @@ int sdt::getChannels(channels *channels)
 	unsigned char buffer[BSIZE];
 
 	// Lies den SDT
-	fd=open("/dev/ost/demux0", O_RDONLY);
+	fd=open("/dev/dvb/card0/demux0", O_RDONLY);
 
 	memset (&flt.filter, 0, sizeof (struct dmxFilter));
 	r = BSIZE;
@@ -168,7 +171,7 @@ void sdt::getNVODs(channels *channels)
 	// Lies den SDT
 	//printf("Reading SDT\n");
 	//printf("looking for SID %x\n", (*channels).getCurrentSID());
-	fd=open("/dev/ost/demux0", O_RDONLY);
+	fd=open("/dev/dvb/card0/demux0", O_RDONLY);
 
 	memset (&flt.filter, 0, sizeof (struct dmxFilter));
 	r = BSIZE;

@@ -16,6 +16,9 @@
 /*
 
 $Log: tuner.cpp,v $
+Revision 1.14  2002/09/18 10:48:37  obi
+use devfs devices
+
 Revision 1.13  2002/06/02 12:18:47  TheDOC
 source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
 
@@ -32,7 +35,7 @@ Revision 1.9  2001/12/20 19:20:49  obi
 defined OLD_TUNER_API in Makefile.am instead of tuner.cpp
 
 Revision 1.8  2001/12/17 01:30:02  obi
-use /dev/ost/frontend0 for new tuner api.
+use /dev/dvb/card0/frontend0 for new tuner api.
 code for the new tuner api is still disabled by default.
 
 Revision 1.7  2001/12/16 16:09:16  rasc
@@ -152,7 +155,7 @@ int tuner::tune(int frequ, int symbol, int polarization, int fec, int dis)
 		seq.numCommands=1;
 		seq.commands=&cmd;
 
-		if((device = open("/dev/ost/sec0", O_RDWR)) < 0)
+		if((device = open("/dev/dvb/card0/sec0", O_RDWR)) < 0)
 		{
 			perror("OPEN SEC DEVICE");
 			exit(1);
@@ -189,7 +192,7 @@ int tuner::tune(int frequ, int symbol, int polarization, int fec, int dis)
 	{
 		frontp.Inversion = INVERSION_AUTO;
 	}
-	if ((frontend = open("/dev/ost/frontend0", O_RDWR)) < 0)
+	if ((frontend = open("/dev/dvb/card0/frontend0", O_RDWR)) < 0)
 	{
 		perror("OPEN FRONTEND DEVICE");
 		exit(1);

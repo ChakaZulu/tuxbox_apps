@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: pat.cpp,v $
+Revision 1.7  2002/09/18 10:48:37  obi
+use devfs devices
+
 Revision 1.6  2002/06/15 02:33:03  TheDOC
 some changes + bruteforce-channelscan for cable
 
@@ -55,7 +58,7 @@ bool pat::readPAT()
 	struct dmxSctFilterParams flt;
 	unsigned char buffer[BSIZE];
 
-	fd=open("/dev/ost/demux0", O_RDONLY);
+	fd=open("/dev/dvb/card0/demux0", O_RDONLY);
 	if (fd < 0)
 	{
 		perror("open readPAT-open");

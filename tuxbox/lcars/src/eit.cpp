@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: eit.cpp,v $
+Revision 1.11  2002/09/18 10:48:37  obi
+use devfs devices
+
 Revision 1.10  2002/06/13 01:35:48  TheDOC
 NVOD should work now
 
@@ -154,7 +157,7 @@ void eit::receiveNow(int SID)
 	//printf("Checking mutex\n");
 	pthread_mutex_lock( &mutex );
 	//printf("Mutex passed\n");
-	fd=open("/dev/ost/demux0", O_RDONLY);
+	fd=open("/dev/dvb/card0/demux0", O_RDONLY);
 
 	memset (&flt.filter, 0, sizeof (struct dmxFilter));
 
@@ -477,7 +480,7 @@ void eit::readSchedule(int SID, osd *osd)
 	(*osd).setPerspectiveName("Reading Scheduling Information...");
 	(*osd).showPerspective();
 
-	fd=open("/dev/ost/demux0", O_RDONLY);
+	fd=open("/dev/dvb/card0/demux0", O_RDONLY);
 	
 	memset (&flt.filter, 0, sizeof (struct dmxFilter));
 	
@@ -699,7 +702,7 @@ void eit::dumpSchedule(int SID, osd *osd)
 	osd->addCommand("SHOW perspective");
 
 	pthread_mutex_lock( &mutex );
-	fd=open("/dev/ost/demux0", O_RDONLY);
+	fd=open("/dev/dvb/card0/demux0", O_RDONLY);
 
 	memset (&flt.filter, 0, sizeof (struct dmxFilter));
 

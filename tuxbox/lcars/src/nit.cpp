@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: nit.cpp,v $
+Revision 1.6  2002/09/18 10:48:37  obi
+use devfs devices
+
 Revision 1.5  2002/06/02 12:18:47  TheDOC
 source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
 
@@ -53,7 +56,7 @@ int nit::getTransportStreams(channels *channels, int diseqc)
 	int countTS = 0;
 
 	// Lies den NIT
-	fd=open("/dev/ost/demux0", O_RDONLY);
+	fd=open("/dev/dvb/card0/demux0", O_RDONLY);
 
 	memset (&flt.filter, 0, sizeof (struct dmxFilter));
 
