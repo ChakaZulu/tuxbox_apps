@@ -315,6 +315,50 @@ static eString erc_services(eString request, eString dirpath, eString opt, eHTTP
 	return res;
 }
 
+static void processEvent(eString &res, EITEvent *ev, const eString &search, int wantext)
+{
+	eString title;
+	
+	for (ePtrList<Descriptor>::const_iterator d(ev->descriptor); d != ev->descriptor.end(); ++d)
+		if (d->Tag()==DESCR_SHORT_EVENT)
+		{
+			const ShortEventDescriptor *s=(const ShortEventDescriptor*)*d;
+			title = s->event_name;
+			break;
+		}
+
+	if (title.find(search) != eString::npos)
+	{
+    res += "I: ";
+    res += eString().setNum(ev->event_id, 0x10);
+   	res += "\nB: ";
+		res += eString().setNum(ev->start_time);
+    	res += "\nD: ";
+		res += eString().setNum(ev->duration);
+		res += "\nN: " + title + "\n";
+		for (ePtrList<Descriptor>::const_iterator d(ev->descriptor); d != ev->descriptor.end(); ++d)
+		{
+			if (d->Tag()==DESCR_SHORT_EVENT)
+			{
+				const ShortEventDescriptor *s=(const ShortEventDescriptor*)*d;
+				res += "T: ";
+				res += s->text;
+				res += "\n";
+				if (!wantext)
+					break;
+			} else if (wantext && (d->Tag() == DESCR_EXTENDED_EVENT))
+			{
+				const ExtendedEventDescriptor *e=(ExtendedEventDescriptor*)*d;
+				res += "E: ";
+				eString t = e->item_description;
+				t.strReplace("\n", eString("\\n"));
+				res += t;
+				res +=" \n";
+			}
+		}
+	}
+}
+
 static eString erc_epg(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	std::map<eString,eString> opts=getRequestOptions(opt);
@@ -322,72 +366,64 @@ static eString erc_epg(eString request, eString dirpath, eString opt, eHTTPConne
 	int duration = 0;
 	eString search;
 	eString res;
+	int wantext;
+	int event_id = -1;
 	
 	if (opts.find("service") == opts.end())
 		return "-specify service";
-	if ((opts.find("text") == opts.end()) && (opts.find("begin") == opts.end()))
-		return "-specify text and/or begin";
+	if ((opts.find("text") == opts.end()) && (opts.find("begin") == opts.end()) && (opts.find("event_id") == opts.end()))
+		return "-specify text and/or begin or event_id";
 	eString text = opts["text"];
 	if (opts.find("begin") != opts.end())
 		begin = atoi(opts["begin"].c_str());
 	if (opts.find("duration") != opts.end())
 		duration = atoi(opts["duration"].c_str());
 	search = opts["text"];
+	
+	if (opts.find("extended") != opts.end())
+		wantext = 1;
+	else
+		wantext = 0;
+	
+	if (opts.find("event_id") != opts.end())
+		sscanf(opts["event_id"].c_str(), "%x", &event_id);
 
 	eEPGCache *epgcache=eEPGCache::getInstance();
 	eServiceReference ref(opts["service"]);
-	const timeMap *evmap = epgcache->getTimeMap((eServiceReferenceDVB&)ref);
-	if (!evmap)
-		return "-no events for this service";
-
-	timeMap::const_iterator ibegin = evmap->begin(), iend = evmap->end();
-	if (begin != 0)
-	{
-		ibegin = evmap->lower_bound(begin);
-		if ((ibegin != evmap->end()) && (ibegin != evmap->begin()))
-			--ibegin;
-		else
-			ibegin=evmap->begin();
-
-		timeMap::const_iterator iend = evmap->upper_bound(begin + duration);
-		if (iend != evmap->end())
-			++iend;
-	}
 	
-	for (timeMap::const_iterator event(ibegin); event != iend; ++event)
+	if (event_id == -1)
 	{
-		EITEvent *ev = new EITEvent(*event->second);
-		eString title;
-		
-		for (ePtrList<Descriptor>::const_iterator d(ev->descriptor); d != ev->descriptor.end(); ++d)
-			if (d->Tag()==DESCR_SHORT_EVENT)
-			{
-				const ShortEventDescriptor *s=(const ShortEventDescriptor*)*d;
-				title = s->event_name;
-				break;
-			}
-
-		if (title.find(search) != eString::npos)
+		const timeMap *evmap = epgcache->getTimeMap((eServiceReferenceDVB&)ref);
+		if (!evmap)
+			return "-no events for this service";
+	
+		timeMap::const_iterator ibegin = evmap->begin(), iend = evmap->end();
+		if (begin != 0)
 		{
-      res += "I: ";
-      res += eString().setNum(ev->event_id, 0x10);
-     	res += "\nB: ";
-			res += eString().setNum(ev->start_time);
-     	res += "\nD: ";
-			res += eString().setNum(ev->duration);
-			res += "\nN: " + title + "\n";
-			for (ePtrList<Descriptor>::const_iterator d(ev->descriptor); d != ev->descriptor.end(); ++d)
-				if (d->Tag()==DESCR_SHORT_EVENT)
-				{
-					const ShortEventDescriptor *s=(const ShortEventDescriptor*)*d;
-					res += "T: ";
-					res += s->text;
-					res += "\n";
-					break;
-				}
+			ibegin = evmap->lower_bound(begin);
+			if ((ibegin != evmap->end()) && (ibegin != evmap->begin()))
+				--ibegin;
+			else
+				ibegin=evmap->begin();
+	
+			timeMap::const_iterator iend = evmap->upper_bound(begin + duration);
+			if (iend != evmap->end())
+				++iend;
 		}
 		
-		delete ev;
+		for (timeMap::const_iterator event(ibegin); event != iend; ++event)
+		{
+			EITEvent *ev = new EITEvent(*event->second);
+			processEvent(res, ev, search, wantext);
+			delete ev;
+		}
+	} else
+	{
+		EITEvent *ev = epgcache->lookupEvent((eServiceReferenceDVB&)ref, event_id);
+		if (!ev)
+			return "-service or event_id invalid";
+		else
+			processEvent(res, ev, search, wantext);
 	}
 	
 	return res;

@@ -773,10 +773,11 @@ static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPCon
 			if(descriptor->Tag()==DESCR_SHORT_EVENT)
 			{
 				tm* t = localtime(&event.start_time);
+				result+=eString().sprintf("<!-- ID: %04x -->", event.event_id);
 				tmp.sprintf("<span class=\"epg\">%02d.%02d - %02d:%02d ", t->tm_mday, t->tm_mon+1, t->tm_hour, t->tm_min);
 				result+=tmp;
 				result+=((ShortEventDescriptor*)descriptor)->event_name;
-				result+=eString("</span><br>\n");
+				result+="</span><br>\n";
 			}
 		}
 
