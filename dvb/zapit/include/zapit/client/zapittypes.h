@@ -1,5 +1,5 @@
 /*
- * $Id: zapittypes.h,v 1.16 2003/06/04 08:26:30 digi_casi Exp $
+ * $Id: zapittypes.h,v 1.17 2003/06/04 16:17:01 digi_casi Exp $
  *
  * zapit's types which are used by the clientlib - d-box2 linux project
  *
@@ -37,8 +37,8 @@ typedef uint16_t t_original_network_id;
 typedef uint16_t t_transport_stream_id;
 #define SCANF_TRANSPORT_STREAM_ID_TYPE "%hx"
 
-typedef uint16_t t_satellite_position;
-#define SCANF_SATELLITE_POSITION_TYPE "%hd"
+typedef int16_t t_satellite_position;
+#define SCANF_SATELLITE_POSITION_TYPE "%d"
 
 typedef uint16_t t_network_id;
 
