@@ -1,5 +1,5 @@
 /*
-$Id: pkt_time.c,v 1.6 2003/12/20 05:11:42 obi Exp $
+$Id: pkt_time.c,v 1.7 2003/12/20 08:43:07 obi Exp $
 
 
  DVBSNOOP
@@ -14,6 +14,9 @@ $Id: pkt_time.c,v 1.6 2003/12/20 05:11:42 obi Exp $
 
 
 $Log: pkt_time.c,v $
+Revision 1.7  2003/12/20 08:43:07  obi
+fixed last commit
+
 Revision 1.6  2003/12/20 05:11:42  obi
 simplified timeval to ms conversion
 
@@ -60,6 +63,11 @@ static unsigned long timeval_to_ms(const struct timeval *tv)
 	return (tv->tv_sec * 1000) + ((tv->tv_usec + 500) / 1000);
 }
 
+long delta_time_ms (struct timeval *tv, struct timeval *last_tv)
+{
+	return timeval_to_ms(tv) - timeval_to_ms(last_tv);
+}
+
 void  out_receive_time (int verbose, OPTION *opt)
 
 {
@@ -82,7 +90,7 @@ void  out_receive_time (int verbose, OPTION *opt)
 
     case DELTA_TIME:
             gettimeofday (&tv, NULL);
-	    ms = timeval_to_ms(&tv);
+	    ms = delta_time_ms(&tv, &last_tv);
             out (verbose,"Time (delta) received: %0ld.%03ld (sec)\n", ms / 1000, ms % 1000);
             last_tv.tv_sec  =  tv.tv_sec;
             last_tv.tv_usec =  tv.tv_usec;
@@ -107,10 +115,5 @@ void  init_receive_time (void)
 }
 
 
-
-long delta_time_ms (struct timeval *tv, struct timeval *last_tv)
-{
-	return timeval_to_ms(tv) - timeval_to_ms(last_tv);
-}
 
 
