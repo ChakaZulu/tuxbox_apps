@@ -1,5 +1,5 @@
 /*
-$Id: datagram.c,v 1.5 2003/10/25 19:11:49 rasc Exp $
+$Id: datagram.c,v 1.6 2003/11/09 22:26:11 rasc Exp $
 
    DATAGRAM section
    DSM-CC Data Carousel  EN 301 192 
@@ -8,6 +8,9 @@ $Id: datagram.c,v 1.5 2003/10/25 19:11:49 rasc Exp $
 
 
 $Log: datagram.c,v $
+Revision 1.6  2003/11/09 22:26:11  rasc
+filename change
+
 Revision 1.5  2003/10/25 19:11:49  rasc
 no message
 
@@ -105,7 +108,7 @@ void decode_DATAGRAM_DSMCC (u_char *b, int len)
  len1 = d.section_length - 9;
 
 
- out_nl (3,"DATAGRAM-decoding....");
+ out_nl (3,"DSM-CC DATAGRAM-decoding....");
  out_S2B_NL (3,"Table_ID: ",d.table_id, dvbstrTableID (d.table_id));
  if (d.table_id != 0x3e) {
    out_nl (3,"wrong Table ID");
@@ -118,8 +121,8 @@ void decode_DATAGRAM_DSMCC (u_char *b, int len)
  out_SB_NL (6,"reserved_1: ",d.reserved_1);
  out_SW_NL (5,"Section_length: ",d.section_length);
 
- out_SB_NL (5,"MAC_addr_byte 6: ",d.MAC_addr6);
- out_SB_NL (5,"MAC_addr_byte 5: ",d.MAC_addr5);
+ out_SB_NL (5,"MACaddrbyte/DevicdID 6: ",d.MAC_addr6);
+ out_SB_NL (5,"MACaddrbyte/DeviceID 5: ",d.MAC_addr5);
  out_SB_NL (6,"reserved_2: ",d.reserved_2);
 
  out_S2B_NL (3,"payload_scrambling_control: ",d.payload_scrambling_control,
@@ -133,12 +136,13 @@ void decode_DATAGRAM_DSMCC (u_char *b, int len)
  out_SB_NL (3,"Section_number: ",d.section_number);
  out_SB_NL (3,"Last_Section_number: ",d.last_section_number);
 
- out_SB_NL (5,"MAC_addr_byte 4: ",d.MAC_addr4);
- out_SB_NL (5,"MAC_addr_byte 3: ",d.MAC_addr3);
- out_SB_NL (5,"MAC_addr_byte 2: ",d.MAC_addr2);
- out_SB    (5,"MAC_addr_byte 1: ",d.MAC_addr1);
- out_nl    (3," => MAC-Address: %02x:%02x:%02x:%02x:%02x:%02x", d.MAC_addr1,
-		 d.MAC_addr2,d.MAC_addr3,d.MAC_addr4,d.MAC_addr5,d.MAC_addr6);
+ out_SB_NL (5,"MACaddrbyte/DeviceID 4: ",d.MAC_addr4);
+ out_SB_NL (5,"MACaddrbyte/DeviceID 3: ",d.MAC_addr3);
+ out_SB_NL (5,"MACaddrbyte/DeviceID 2: ",d.MAC_addr2);
+ out_SB    (5,"MACaddrbyte/DeviceID 1: ",d.MAC_addr1);
+ out_nl    (3," => MAC-Address/DeviceID: %02x:%02x:%02x:%02x:%02x:%02x",
+		 d.MAC_addr1,d.MAC_addr2,d.MAC_addr3,
+		 d.MAC_addr4,d.MAC_addr5,d.MAC_addr6);
 
 
  if (d.LLC_SNAP_flag == 0x01) {
