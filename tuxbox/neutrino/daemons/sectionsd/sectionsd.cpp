@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.34 2001/07/24 18:19:06 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.35 2001/07/24 20:26:46 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.35  2001/07/24 20:26:46  fnbrd
+//  Fixed some nasty bugs introduced with (too) quickly implemented writeNBytes().
+//
 //  Revision 1.34  2001/07/24 18:19:06  fnbrd
 //  Scheint stabil zu laufen, daher cache jetzt 5 Tage (und ein paar kleinere interne Aenderungen).
 //
@@ -411,7 +414,7 @@ static void addService(const SIservice &s)
 // Liefert 0 bei timeout
 // und -1 bei Fehler
 // ansonsten die Anzahl gelesener Bytes
-inline int readNbytes(int fd, char *buf, const size_t n, unsigned timeoutInSeconds)
+/* inline */ int readNbytes(int fd, char *buf, const size_t n, unsigned timeoutInSeconds)
 {
 size_t j;
 
@@ -459,9 +462,10 @@ size_t j;
 // Liefert 0 bei timeout
 // und -1 bei Fehler
 // ansonsten die Anzahl geschriebener Bytes
-inline int writeNbytes(int fd, const char *buf, size_t n, unsigned timeoutInSeconds)
+/* inline */ int writeNbytes(int fd, const char *buf, const size_t numberOfBytes, unsigned timeoutInSeconds)
 {
   // Timeouthandling usw fehlt noch
+  int n=numberOfBytes;
   while(n) {
     fd_set readfds, writefds, exceptfds;
     FD_ZERO(&readfds);
@@ -472,10 +476,14 @@ inline int writeNbytes(int fd, const char *buf, size_t n, unsigned timeoutInSeco
     tv.tv_sec=timeoutInSeconds;
     tv.tv_usec=0;
     int f=select(fd+1, &readfds, &writefds, &exceptfds, &tv);
-    if(!f)
+    if(!f) {
+//      dputs("select: timeout");
       return 0; // timeout
-    else if(f==-1 || f>0 && fd==-1)
+    }
+    else if(f==-1 || (f>0 && fd==-1)) {
+//      dputs("select: fehler");
       return -1; // Fehler
+    }
     int rc=write(fd, buf, n);
     if(!rc)
       continue;
@@ -488,6 +496,7 @@ inline int writeNbytes(int fd, const char *buf, size_t n, unsigned timeoutInSeco
     else
       n-=rc;
   }
+  return numberOfBytes;
 }
 
 //------------------------------------------------------------
@@ -772,9 +781,12 @@ static void commandDumpAllServices(struct connectionData *client, char *data, co
   msgResponse.dataLength=strlen(serviceList)+1;
   if(msgResponse.dataLength==1)
     msgResponse.dataLength=0;
-  writeNbytes(client->connectionSocket, (const char *)&msgResponse, sizeof(msgResponse), TIMEOUT_CONNECTIONS);
-  if(msgResponse.dataLength)
-    writeNbytes(client->connectionSocket, serviceList, msgResponse.dataLength, TIMEOUT_CONNECTIONS);
+  if(writeNbytes(client->connectionSocket, (const char *)&msgResponse, sizeof(msgResponse), TIMEOUT_CONNECTIONS)>0) {
+    if(msgResponse.dataLength)
+      writeNbytes(client->connectionSocket, serviceList, msgResponse.dataLength, TIMEOUT_CONNECTIONS);
+  }
+  else
+    dputs("[sectionsd] Fehler/Timeout bei write");
   delete[] serviceList;
   return;
 }
@@ -846,9 +858,12 @@ static void commandAllEventsChannelName(struct connectionData *client, char *dat
   }
   struct msgSectionsdResponseHeader responseHeader;
   responseHeader.dataLength=strlen(evtList)+1;
-  writeNbytes(client->connectionSocket, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
-  if(responseHeader.dataLength)
-    writeNbytes(client->connectionSocket, evtList, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
+  if(writeNbytes(client->connectionSocket, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS)>0) {
+    if(responseHeader.dataLength)
+      writeNbytes(client->connectionSocket, evtList, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
+  }
+  else
+    dputs("[sectionsd] Fehler/Timeout bei write");
   delete[] evtList;
   return;
 }
@@ -888,9 +903,12 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
     );
   struct msgSectionsdResponseHeader responseHeader;
   responseHeader.dataLength=strlen(stati)+1;
-  writeNbytes(client->connectionSocket, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
-  if(responseHeader.dataLength)
-    writeNbytes(client->connectionSocket, stati, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
+  if(writeNbytes(client->connectionSocket, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS)>0) {
+    if(responseHeader.dataLength)
+      writeNbytes(client->connectionSocket, stati, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
+  }
+  else
+    dputs("[sectionsd] Fehler/Timeout bei write");
   return;
 }
 
@@ -954,9 +972,12 @@ static void commandCurrentNextInfoChannelName(struct connectionData *client, cha
   // response
   struct msgSectionsdResponseHeader pmResponse;
   pmResponse.dataLength=nResultDataSize;
-  writeNbytes(client->connectionSocket, (const char *)&pmResponse, sizeof(pmResponse), TIMEOUT_CONNECTIONS);
+  int rc=writeNbytes(client->connectionSocket, (const char *)&pmResponse, sizeof(pmResponse), TIMEOUT_CONNECTIONS);
   if( nResultDataSize > 0 ) {
-    writeNbytes(client->connectionSocket, pResultData, nResultDataSize, TIMEOUT_CONNECTIONS);
+    if(rc>0)
+      writeNbytes(client->connectionSocket, pResultData, nResultDataSize, TIMEOUT_CONNECTIONS);
+    else
+      dputs("[sectionsd] Fehler/Timeout bei write");
     delete[] pResultData;
 #ifdef NO_ZAPD_NEUTRINO_HACK
     currentNextWasOk=1;
@@ -964,6 +985,7 @@ static void commandCurrentNextInfoChannelName(struct connectionData *client, cha
   }
   else
     dprintf("current/next EPG not found!\n");
+  return;
 }
 
 // Mostly copied from epgd (something bugfixed ;) )
@@ -1015,9 +1037,12 @@ static void commandActualEPGchannelName(struct connectionData *client, char *dat
   // response
   struct msgSectionsdResponseHeader pmResponse;
   pmResponse.dataLength=nResultDataSize;
-  writeNbytes(client->connectionSocket, (const char *)&pmResponse, sizeof(pmResponse), TIMEOUT_CONNECTIONS);
+  int rc=writeNbytes(client->connectionSocket, (const char *)&pmResponse, sizeof(pmResponse), TIMEOUT_CONNECTIONS);
   if( nResultDataSize > 0 ) {
-    writeNbytes(client->connectionSocket, pResultData, nResultDataSize, TIMEOUT_CONNECTIONS);
+    if(rc>0)
+      writeNbytes(client->connectionSocket, pResultData, nResultDataSize, TIMEOUT_CONNECTIONS);
+    else
+      dputs("[sectionsd] Fehler/Timeout bei write");
     delete[] pResultData;
   }
 }
@@ -1054,9 +1079,12 @@ static void sendEventList(struct connectionData *client, const unsigned char ser
   msgResponse.dataLength=strlen(evtList)+1;
   if(msgResponse.dataLength==1)
     msgResponse.dataLength=0;
-  writeNbytes(client->connectionSocket, (const char *)&msgResponse, sizeof(msgResponse), TIMEOUT_CONNECTIONS);
-  if(msgResponse.dataLength)
-    writeNbytes(client->connectionSocket, evtList, msgResponse.dataLength, TIMEOUT_CONNECTIONS);
+  if(writeNbytes(client->connectionSocket, (const char *)&msgResponse, sizeof(msgResponse), TIMEOUT_CONNECTIONS)>0) {
+    if(msgResponse.dataLength)
+      writeNbytes(client->connectionSocket, evtList, msgResponse.dataLength, TIMEOUT_CONNECTIONS);
+  }
+  else
+    dputs("[sectionsd] Fehler/Timeout bei write");
   delete[] evtList;
 }
 
@@ -1580,7 +1608,7 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.34 2001/07/24 18:19:06 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.35 2001/07/24 20:26:46 fnbrd Exp $\n");
 
   if(argc!=1 && argc!=2) {
     printHelp();
