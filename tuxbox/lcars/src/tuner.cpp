@@ -16,6 +16,9 @@
 /*
 
 $Log: tuner.cpp,v $
+Revision 1.4  2001/12/07 14:12:51  rasc
+minor fix.
+
 Revision 1.3  2001/12/07 14:10:33  rasc
 Fixes for SAT tuning and Diseqc. Diseqc doesn't work properly for me (diseqc 2.0 switch).
 Someone should check this please..
@@ -173,5 +176,5 @@ int tuner::tune(int frequ, int symbol, int polarization = -1, int fec = -1, int 
 // $$$
 
 	close(frontend);
-	return (status == (FE_HAS_SIGNAL));
+	return (status & (FE_HAS_SIGNAL));
 }
