@@ -58,7 +58,7 @@ void ParseTransponder(XMLTreeNode *xmltransponder) {
 	//printf("Frequency: %s\n", services->GetAttributeValue("frequency"));
 	if (transponders.count(curr_tsid) == 0)
 	  {
-	    printf("No transponder with that tsid found\n");
+	    printf("[zapit] no transponder with that tsid found\n");
 	    exit(0);
 	  }
 	titerator trans = transponders.find(curr_tsid);
@@ -70,7 +70,7 @@ void ParseTransponder(XMLTreeNode *xmltransponder) {
 	//printf("In sat-section\n");
 	if (transponders.count(curr_tsid) == 0)
 	  {
-	    printf("No transponder with that tsid found\n");
+	    printf("[zapit] no transponder with that tsid found\n");
 	    exit(0);
 	  }
 	titerator trans = transponders.find(curr_tsid);
@@ -134,7 +134,7 @@ void ParseTransponder(XMLTreeNode *xmltransponder) {
 	    //printf("Skipping channel %s which is not mode: %d .\n", services->GetAttributeValue("name"),serv_mode);
 	  }
 	}
-      else printf("Not known. Skipping %s\n", services->GetType());	
+      else printf("[zapit] not known. skipping %s\n", services->GetType());
     }
 }
 
@@ -155,7 +155,7 @@ void ParseRoot(XMLTreeNode *root)
 	  transponders.insert(std::pair<uint, transponder>(curr_tsid, transponder(curr_tsid, 0,0,0,0,0,0)));
 	  ParseTransponder(c);
 	} else {
-	  printf("ignoring %s\n", c->GetType());
+	  printf("[zapit] ignoring %s\n", c->GetType());
 	}
       
       
@@ -171,17 +171,17 @@ void FindTransponder(XMLTreeNode *root)
   }
   while (search) {
     if (!(strcmp(search->GetType(), "cable"))) {
-      printf("Scanning a cable section\n");
+      printf("[zapit] scanning a cable section\n");
       while (strcmp(search->GetType(), "transponder")){
 	search = search->GetChild();
       }
       ParseRoot(search);
       search = search->GetParent();
     } else if (!(strcmp(search->GetType(), "satellite"))) {
-      printf("Scanning a satellite section\n");
+      printf("[zapit] scanning a satellite section\n");
       while (!(strcmp(search->GetType(), "satellite"))) {
 	sscanf(search->GetAttributeValue("diseqc"),"%i",&curr_diseqc);
-	printf("Going to parse Satellite %s\n", search->GetAttributeValue("name"));
+	printf("[zapit] going to parse satellite %s\n", search->GetAttributeValue("name"));
 	search = search->GetChild();
 	ParseRoot(search);
 	search = search->GetParent();
@@ -203,7 +203,7 @@ int LoadServices(void)
   FILE *in=fopen("/var/zapit/services.xml", "r");
   if (!in)
     {
-      perror("/var/zapit/services.xml");
+      perror("[zapit] /var/zapit/services.xml");
       return -23;
     }
   
@@ -216,7 +216,7 @@ int LoadServices(void)
       done=len<sizeof(buf);
       if (!parser->Parse(buf, len, done))
 	{
-	  printf("parse error: %s at line %d\n", 
+	  printf("[zapit] parse error: %s at line %d\n", 
 		 parser->ErrorString(parser->GetErrorCode()),
 		 parser->GetCurrentLineNumber());
 	  fclose(in);
