@@ -739,6 +739,16 @@ int Decoder::displayIFrameFromFile(const char *filename)
 #define VIDEO_CLEAR_SCREEN      3
 #define VIDEO_SET_FASTZAP	_IOW('o', 4, int)
 
+#ifndef DMX_GET_STC
+struct dmx_stc 
+{
+	unsigned int num;	/* input : which STC? O..N */
+	unsigned int base;	/* output: divisor for stc to get 90 kHz clock */
+	unsigned long long stc; /* output: src in 'base'*90 kHz units */
+};
+#define DMX_GET_STC		_IOR('o', 50, struct dmx_stc)
+#endif
+
 void Decoder::flushClipBuffer()
 {
 	int wasOpen = fd.mpeg != -1;
