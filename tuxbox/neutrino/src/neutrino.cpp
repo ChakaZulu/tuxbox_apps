@@ -86,7 +86,8 @@
 #include "gui/eventlist.h"
 #include "gui/channellist.h"
 #include "gui/screensetup.h"
-#include "gui/gamelist.h"
+#include "gui/pluginlist.h"
+#include "gui/plugins.h"
 #include "gui/infoviewer.h"
 #include "gui/epgview.h"
 #include "gui/epg_menu.h"
@@ -1321,7 +1322,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_TVMODE, true, NULL, this, "tv", CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED), true);
 	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_RADIOMODE, true, NULL, this, "radio", CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
 	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SCARTMODE, true, NULL, this, "scart", CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
-	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_GAMES, true, NULL, new CGameList(LOCALE_MAINMENU_GAMES), "", CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
+	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_GAMES, true, NULL, new CPluginList(LOCALE_MAINMENU_GAMES,PLUGIN_TYPE_GAME), "", CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 	mainMenu.addItem(GenericMenuSeparatorLine);
 	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_AUDIOPLAYER, true, NULL, new CAudioPlayerGui(), NULL, CRCInput::RC_1));
 
@@ -1346,13 +1347,20 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 #endif
 
 	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_PICTUREVIEWER, true, NULL, new CPictureViewerGui(), NULL, CRCInput::RC_3));
+	int shortcut = 4;
+	if (g_PluginList->hasPlugin(PLUGIN_TYPE_SCRIPT))
+		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SCRIPTS, true, NULL, new CPluginList(LOCALE_MAINMENU_SCRIPTS,PLUGIN_TYPE_SCRIPT), "",
+											CRCInput::convertDigitToKey(shortcut++)));
 	mainMenu.addItem(GenericMenuSeparatorLine);
 	
-	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SETTINGS, true, NULL, &mainSettings, NULL, CRCInput::RC_4));
-	mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_SERVICE, g_settings.parentallock_pincode, false, true, NULL, &service, NULL, CRCInput::RC_5));
+	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SETTINGS, true, NULL, &mainSettings, NULL,
+										CRCInput::convertDigitToKey(shortcut++)));
+	mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_SERVICE, g_settings.parentallock_pincode, false, true, NULL, &service, NULL, 
+											  CRCInput::convertDigitToKey(shortcut++)));
 	mainMenu.addItem(GenericMenuSeparatorLine);
 
-	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SLEEPTIMER, true, NULL, new CSleepTimerWidget, NULL, CRCInput::RC_6));
+	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SLEEPTIMER, true, NULL, new CSleepTimerWidget, NULL,
+										CRCInput::convertDigitToKey(shortcut++)));
 	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SHUTDOWN, true, NULL, this, "shutdown", CRCInput::RC_standby, "power.raw"));
 
 	mainSettings.addItem(GenericMenuSeparator);
@@ -2728,7 +2736,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 
 	for(unsigned int count=0;count < (unsigned int) g_PluginList->getNumberOfPlugins();count++)
 	{
-		if (g_PluginList->getType(count)== PLUGIN_TYPE_TOOL)
+		if (g_PluginList->getType(count)== PLUGIN_TYPE_TOOL && !g_PluginList->isHidden(count))
 		{
 			// zB vtxt-plugins
 
@@ -2903,6 +2911,11 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	g_PluginList = new CPlugins;
 	g_PluginList->setPluginDir(PLUGINDIR);
+
+	//load Pluginlist before main menu (only show script menu if at least one
+    // script is available
+	g_PluginList->loadPlugins();
+
 
 	colorSetupNotifier        = new CColorSetupNotifier;
 	audioSetupNotifier        = new CAudioSetupNotifier;
@@ -3084,9 +3097,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 	InitKeySettings(keySettings);
 
 	AudioMute( g_Controld->getMute((CControld::volume_type)g_settings.audio_avs_Control), true );
-
-	//load Pluginlist
-	g_PluginList->loadPlugins();
 
 	RealRun(mainMenu);
 

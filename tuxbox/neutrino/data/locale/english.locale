@@ -424,6 +424,7 @@ mainmenu.recording Recording
 mainmenu.recording_start start
 mainmenu.recording_stop stop
 mainmenu.scartmode Scart-Mode
+mainmenu.scripts Scripts
 mainmenu.service Service
 mainmenu.settings Settings
 mainmenu.shutdown Shutdown
@@ -604,6 +605,7 @@ ping.socket is unreachable (socket error)
 ping.unreachable is unreachable
 pinprotection.head Enter PIN code
 pinprotection.wrongcode PIN-Code was wrong! Try again.
+plugins.result plugin output
 rclock.lockmsg Your DBOX2 remote control will be locked.\nTo unlock it, press <RED>\nand <DBOX> on your remote control.
 rclock.menueadd Lock RC 
 rclock.title Lock Remote Control
