@@ -75,7 +75,6 @@ int fbClass::showConsole(int state)
 	if(fd>=0)
 	{
 		ioctl(fd, KDSETMODE, state?KD_TEXT:KD_GRAPHICS);
-		eDebug("set console to graphics mode!!!");
 		close(fd);
 	}
 }

@@ -1,6 +1,5 @@
 #include "setup_osd.h"
 
-#include <core/gdi/fb.h>
 #include <core/gui/echeckbox.h>
 #include <core/gui/eskin.h>
 #include <core/system/econfig.h>
