@@ -60,7 +60,7 @@ class CEventServer
 			INITID_SECTIONSD,
 			INITID_ZAPIT,
 			INITID_TIMERD,
-			INITID_NHTTPD	//wird benutzt um shutdown und standby an neutrino zu schicken (kommandos)
+			INITID_THTTPD
 		};
 
 		struct commandRegisterEvent
