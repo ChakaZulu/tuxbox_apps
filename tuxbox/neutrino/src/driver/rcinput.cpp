@@ -724,18 +724,31 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 			 		}
 			 		else if ( emsg.initiatorID == CEventServer::INITID_TIMERD )
 			 		{
-			 			if (emsg.eventID==CTimerdClient::EVT_NEXTPROGRAM)
+/*			 			if (emsg.eventID==CTimerdClient::EVT_NEXTPROGRAM)
 			 			{
-/*			 				*msg = NeutrinoMessages::EVT_NEXTPROGRAM;
+			 				*msg = NeutrinoMessages::EVT_NEXTPROGRAM;
 			 				*data = (unsigned) p;
 			 				dont_delete_p = true;
-*/
 			 			}
+*/
 			 			if (emsg.eventID==CTimerdClient::EVT_SHUTDOWN)
 			 			{
 			 				*msg = NeutrinoMessages::SHUTDOWN;
 			 				*data = 0;
 			 			}
+			 			else if (emsg.eventID==CTimerdClient::EVT_STANDBY_ON)
+			 			{
+			 				*msg = NeutrinoMessages::STANDBY_ON;
+			 				*data = 0;
+			 			}
+			 			else if (emsg.eventID==CTimerdClient::EVT_STANDBY_OFF)
+			 			{
+							*msg = NeutrinoMessages::STANDBY_OFF;
+			 				*data = 0;
+			 			}
+			 			else
+			 				printf("[neutrino] event INITID_TIMERD - unknown eventID 0x%x\n",  emsg.eventID );
+
 			 		}
 			 		else
 			 			printf("[neutrino] event - unknown initiatorID 0x%x\n",  emsg.initiatorID);
