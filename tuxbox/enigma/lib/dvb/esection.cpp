@@ -166,8 +166,6 @@ eSection::eSection(int pid, int tableid, int tableidext, int version, int flags,
 	lockcount=0;
 	timer=new eTimer(eApp);
 	CONNECT(timer->timeout, eSection::timeout);
-	if (!(flags&SECREAD_NOABORT))
-		active.push_back(this);
 }
 
 eSection::eSection()
@@ -180,8 +178,6 @@ eSection::eSection()
 
 eSection::~eSection()
 {
-	if (!(flags&SECREAD_NOABORT))
-		active.remove(this);
 	closeFilter();
 	if (lockcount)
 		printf("deleted still locked table\n");
@@ -196,7 +192,7 @@ int eSection::start()
 
 int eSection::setFilter(int pid, int tableid, int tableidext, int version)
 {
-	reader.close();
+	closeFilter();
 	__u8 data[4], mask[4];
 	data[0]=tableid; mask[0]=tableidmask;
 	data[1]=0; mask[1]=0;
@@ -212,6 +208,8 @@ int eSection::setFilter(int pid, int tableid, int tableidext, int version)
 		data[3]=version; mask[3]=0xFF;
 	}
 
+	if (!(flags&SECREAD_NOABORT))
+		active.push_back(this);
 	reader.open(pid, data, mask, 4, flags);
 	
 	if (notifier)
@@ -226,6 +224,8 @@ void eSection::closeFilter()
 {
 	if (reader.getHandle()>0)
 	{
+		if (!(flags&SECREAD_NOABORT))
+			active.remove(this);
 		delete notifier;
 		notifier=0;
 		timer->stop();
@@ -292,8 +292,8 @@ int eSection::abort()
 
 int eSection::abortAll()
 {
-	for (ePtrList<eSection>::iterator i(active); i != active.end(); ++i)
-		i->abort();
+	while (active.begin() != active.end())
+		active.begin()->abort();
 	return 0;
 }
 
