@@ -2,18 +2,16 @@ a.mute { color:#ffffff; font-size:8pt; font-family:tahoma, arial; }
 a.audio { color:#000000; font-size:8pt; font-family:Verdana; }
 .white { color:#000000; font-size: 8pt; font-family: Verdana; }
 .black { color:#000000; font-size: 9pt; font-family: Verdana; }
-.button { color:#ffffff; font-size: 10pt; font-weight: bold; font-family: Verdana; }
 .servicename { color:#ffffff; font-size:13pt; font-family: tahoma, arial; }
 .epgzeit { color:#000000; font-size:12pt; font-family: tahoma, arial; }
 .epgdur { color:#000000; font-size:10pt; font-family: tahoma, arial; }
 .epgname { color:#000000; font-size:12pt; font-family: tahoma, arial; }
 .epgdesc { color:#000000; font-size:10pt; font-family: tahoma, arial; }
 td.menu { font-family: Verdana; font-size: 10pt; font-weight: bold}
-.title { color:#000000; font-size:13pt; font-weight: bold; font-family: Verdana; background: #d9e0e7; }
 .epg { color:#000000; font-size:10pt; font-family:tahoma,arial; }
 body {
 	font-family: Arial, Helvetica, sans-serif;
-	font-size: 13px;
+	font-size: 8px;
 }
 
 #mainbody {
@@ -21,23 +19,24 @@ body {
 	background-color: #ffffff;
 }
 
-#headbody {
-	background-image: url(bg.png);
-}
-
 h1 {
-	font-size: 20px;
+	font-size: 10px;
+	margin-top: 1px;
+	margin-bottom: 1px;
 }
 
 h2 {
-	font-size: 18px;
+	font-size: 8px;
+	margin-top: 1px;
+	margin-bottom: 1px;
 }
 
 td {
-	font-size: 13px;
+	font-size: 8px;
 }
 
 input {
+	font-size: 8px;
 	font-weight: bold;
 	color: #ffffff;
 }
@@ -52,24 +51,10 @@ a:hover {
 
 #contentcell {
 	background-color: #ffffff;
-	padding-left: 10px;
-	padding-top: 10px;
-	padding-right: 10px;
-	padding-bottom: 10px;
-}
-
-#headercell {
-	padding-left: 10px;
+	padding-left: 5px;
 	padding-top: 5px;
-	padding-right: 10px;
+	padding-right: 5px;
 	padding-bottom: 5px;
-}
-
-#statcell {
-	padding-left: 0px;
-	padding-right: 0px;
-	padding-top: 10px;
-	padding-bottom: 0px;
 }
 
 #contentcell TD {
@@ -83,7 +68,7 @@ a:hover {
 
 
 #topnavi {
-	padding-left: 120px;
+	padding-left: 60px;
 	background-color: #D9E0E7;
 	border-bottom: 1px solid #98A4B6;
 	border-top: 1px solid #98A4B6;
@@ -92,7 +77,7 @@ a:hover {
 }
 
 #channavi {
-	padding-left: 120px;
+	padding-left: 60px;
 	background-color: #D9E0E7;
 	border-bottom: 1px solid #98A4B6;
 	border-top: 1px solid #98A4B6;
@@ -105,12 +90,8 @@ a:hover {
 	color: #000000;
 }
 
-#contentcell .title {
-	font-size:16pt;
-}
-
 #mepg .channel { 
-	font-size: 16px;
+	font-size: 8px;
 	font-weight: bold; 
 }
 
@@ -133,10 +114,10 @@ a:hover {
 	border-top: 1px solid #BBC8D4;
 	border-left: 0px solid #000000;
 	border-right: 1px solid #ffffff;
-	padding-top:3px;
-	padding-bottom:3px;
-	padding-left:3px;
-	padding-right:3px;
+	padding-top:1px;
+	padding-bottom:1px;
+	padding-left:1px;
+	padding-right:1px;
 	vertical-align: top;
 	text-align: left;
 	background-image: url(mepg_grad.png);

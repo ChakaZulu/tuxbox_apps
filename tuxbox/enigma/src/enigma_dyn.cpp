@@ -66,7 +66,7 @@ using namespace std;
 
 #define NOCONTENT "<? header(\"HTTP/1.0 204 No Content\"); ?>"
 
-#define WEBXFACEVERSION "1.2.6"
+#define WEBXFACEVERSION "1.3.0"
 
 static int smallScreen = 0;
 
@@ -161,14 +161,21 @@ eString button(int width, eString buttonText, eString buttonColor, eString butto
 	eString ref1, ref2;
 
 	std::stringstream result;
+	int height = 22;
+	if (smallScreen == 1)
+	{
+		width = width / 2;
+		height = 14;
+	}
+
 	if (buttonRef.find("javascript") == eString::npos)
 	{
 		ref1 = "\"self.location.href='";
 		ref2 = "'\"";
 	}
 	result << "<input name=\"" << buttonText << "\""
-		"type=\"button\" style='width: " << width <<
-		"px; height: 22px;";
+		"type=\"button\" style='width: " << width << "px;"
+		"height:" << height << "px;";
 	if (buttonColor != "")
 		result << "background-color: " << buttonColor;
 	result << "' value=\"" << buttonText <<
@@ -630,6 +637,18 @@ static eString setAudio(eString request, eString dirpath, eString opts, eHTTPCon
 	return "<script language=\"javascript\">window.close();</script>";
 }
 
+static eString setScreen(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	std::map<eString, eString> opt = getRequestOptions(opts);
+	smallScreen = 0;
+	if (opt["size"] == "0")
+	 	smallScreen = 1;
+
+	content->code=204;
+	content->code_descr="No Content";
+	return NOCONTENT;
+}
+
 static eString selectAudio(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString, eString> opt = getRequestOptions(opts);
@@ -749,8 +768,11 @@ static eString getChannelNavi(void)
 		if (getCurService() != "&nbsp;")
 		{
 			result += button(100, "EPG", GREEN, "javascript:openEPG()");
-			result += button(100, "Info", PINK, "javascript:openChannelInfo()");
-			result += button(100, "Stream Info", YELLOW, "javascript:openSI()");
+			if (smallScreen == 0)
+			{
+				result += button(100, "Info", PINK, "javascript:openChannelInfo()");
+				result += button(100, "Stream Info", YELLOW, "javascript:openSI()");
+			}
 #ifndef DISABLE_FILE
 			result += button(100, "Record", RED, "javascript:DVRrecord('start')");
 			result += button(100, "Stop", BLUE, "javascript:DVRrecord('stop')");
@@ -776,15 +798,34 @@ static eString getLeftNavi(eString mode, eString path)
 	eString result;
 	if (mode.find("zap") == 0)
 	{
-		result += button(110, "Satellites", LEFTNAVICOLOR, "?path=" + zap[zapMode][ZAPSUBMODESATELLITES]);
-		result += "<br>";
-		result += button(110, "Providers", LEFTNAVICOLOR, "?path=" + zap[zapMode][ZAPSUBMODEPROVIDERS]);
-		result += "<br>";
-		result += button(110, "Bouquets", LEFTNAVICOLOR, "?path=" + zap[zapMode][ZAPSUBMODEBOUQUETS]);
+		if (smallScreen == 0)
+		{
+			result += button(110, "Satellites", LEFTNAVICOLOR, "?path=" + zap[zapMode][ZAPSUBMODESATELLITES]);
+			result += "<br>";
+			result += button(110, "Providers", LEFTNAVICOLOR, "?path=" + zap[zapMode][ZAPSUBMODEPROVIDERS]);
+			result += "<br>";
+			result += button(110, "Bouquets", LEFTNAVICOLOR, "?path=" + zap[zapMode][ZAPSUBMODEBOUQUETS]);
 #ifndef DISABLE_FILE
-		result += "<br><br>";
-		result += button(110, "Recordings", LEFTNAVICOLOR,  "?path=;4097:7:0:1:0:0:0:0:0:0:");
+			result += "<br><br>";
+			result += button(110, "Recordings", LEFTNAVICOLOR,  "?path=;4097:7:0:1:0:0:0:0:0:0:");
 #endif
+		}
+		else
+		{
+			result += button(110, "TV", LEFTNAVICOLOR, "?path=;0:7:1:0:0:0:0:0:0:0:");
+			result += "<br>";
+			result += button(110, "Radio", LEFTNAVICOLOR, "?path=;0:7:2:0:0:0:0:0:0:0:");
+			result += "<br>";
+			result += button(110, "Data", LEFTNAVICOLOR, "?path=;0:7:6:0:0:0:0:0:0:0:");
+			result += "<br>";
+			result += button(110, "Root", LEFTNAVICOLOR, "?path=;2:47:0:0:0:0:%2f");
+#ifndef DISABLE_FILE
+			result += "<br>";
+			result += button(110, "Harddisk", LEFTNAVICOLOR, "?path=;2:47:0:0:0:0:%2fhdd%2f");
+			result += "<br>";
+			result += button(110, "Recordings", LEFTNAVICOLOR, "?path=;4097:7:0:1:0:0:0:0:0:0:");
+#endif
+		}
 	}
 	else
 	if (mode.find("control") == 0)
@@ -857,8 +898,11 @@ static eString getTopNavi(eString mode, eString path)
 	eString result;
 	result += button(100, "ZAP", TOPNAVICOLOR, "?mode=zap");
 	result += button(100, "CONTROL", TOPNAVICOLOR, "?mode=control");
-	result += button(100, "CONFIG", TOPNAVICOLOR, "?mode=config");
-	result += button(100, "UPDATES", TOPNAVICOLOR, "?mode=updates");
+	if (smallScreen == 0)
+	{
+		result += button(100, "CONFIG", TOPNAVICOLOR, "?mode=config");
+		result += button(100, "UPDATES", TOPNAVICOLOR, "?mode=updates");
+	}
 	result += button(100, "HELP", TOPNAVICOLOR, "?mode=help");
 
 	return result;
@@ -1153,7 +1197,6 @@ static eString getEITC(eString result)
 			if (next_longtext.find("&nbsp;") == 0)
 				next_longtext = next_longtext.right(next_longtext.length() - 6);
 
-			result = readFile(TEMPLATE_DIR + "eit.tmp");
 			result.strReplace("#NOWT#", now_time);
 			result.strReplace("#NOWD#", now_duration);
 			result.strReplace("#NOWST#", now_text);
@@ -1367,7 +1410,6 @@ static eString deleteMovie(eString request, eString dirpath, eString opts, eHTTP
 }
 #endif
 
-#if 0
 struct countDVBServices: public Object
 {
 	int &count;
@@ -1457,7 +1499,6 @@ public:
 		num++;
 	}
 };
-#endif
 
 class eWebNavigatorListDirectory2: public Object
 {
@@ -1493,7 +1534,6 @@ public:
 	}
 };
 
-#if 0
 static eString getZapContent(eString mode, eString path)
 {
 	eString result;
@@ -1536,7 +1576,6 @@ static eString getZapContent(eString mode, eString path)
 
 	return result;
 }
-#endif
 
 static eString getZapContent2(eString mode, eString path)
 {
@@ -1696,8 +1735,17 @@ static eString getZap(eString mode, eString path)
 	else
 #endif
 	{
-		result += getZapNavi(mode, path);
-		result += getZapContent2(mode, path);
+		if (smallScreen == 0)
+		{
+			result += getZapNavi(mode, path);
+			result += getZapContent2(mode, path);
+		}
+		else
+		{
+			result += getEITC(readFile(TEMPLATE_DIR + "eit_small.tmp"));
+			result.strReplace("#SERVICENAME#", filter_string(getCurService()));
+			result += getZapContent(mode, path);
+		}
 	}
 
 	return result;
@@ -2070,6 +2118,8 @@ static eString getControlScreenShot(void)
 
 		FILE *bitstream = 0;
 		int xres = 0, yres = 0, yres2 = 0, aspect = 0, winxres = 650, winyres = 0, rh = 0, rv = 0;
+		if (smallScreen == 1)
+			winxres = 240;
 		if (Decoder::current.vpid != -1)
 			bitstream=fopen("/proc/bus/bitstream", "rt");
 		if (bitstream)
@@ -2114,7 +2164,7 @@ static eString getControlScreenShot(void)
 		result += " (" + eString().sprintf("%d", rh) + ":" + eString().sprintf("%d", rv) + ")";
 	}
 	else
-		result = "Module grabber.o is required but not installed";
+		result = "Module grabber is required but not installed";
 
 	return result;
 }
@@ -2126,28 +2176,32 @@ static eString getContent(eString mode, eString path)
 	if (mode == "zap")
 	{
 		tmp = "ZAP";
-		if (path == ";4097:7:0:1:0:0:0:0:0:0:")
-			tmp += ": Recordings";
-		else
+		if (smallScreen == 0)
 		{
-			if (zapMode >= 0)
-				tmp += ": " + zap[zapMode][ZAPMODENAME];
-			if (zapSubMode >= 0)
+			if (path == ";4097:7:0:1:0:0:0:0:0:0:")
+				tmp += ": Recordings";
+			else
 			{
-				switch(zapSubMode)
+				if (zapMode >= 0)
+					tmp += ": " + zap[zapMode][ZAPMODENAME];
+				if (zapSubMode >= 0)
 				{
-					case ZAPSUBMODESATELLITES:
-						tmp += " - Satellites";
-						break;
-					case ZAPSUBMODEPROVIDERS:
-						tmp += " - Providers";
-						break;
-					case ZAPSUBMODEBOUQUETS:
-						tmp += " - Bouquets";
-						break;
+					switch(zapSubMode)
+					{
+						case ZAPSUBMODESATELLITES:
+							tmp += " - Satellites";
+							break;
+						case ZAPSUBMODEPROVIDERS:
+							tmp += " - Providers";
+							break;
+						case ZAPSUBMODEBOUQUETS:
+							tmp += " - Bouquets";
+							break;
+					}
 				}
 			}
 		}
+
 		result = getTitle(tmp);
 		result += getZap(mode, path);
 	}
@@ -2206,7 +2260,10 @@ static eString getContent(eString mode, eString path)
 	{
 		result = getTitle("CONTROL: OSDShot");
 		if (!getOSDShot("fb"))
-			result += "<img width=\"650\" src=\"/root/tmp/osdshot.png\" border=0>";
+			if (smallScreen == 0)
+				result += "<img width=\"650\" src=\"/root/tmp/osdshot.png\" border=0>";
+			else
+				result += "<img width=\"240\" src=\"/root/tmp/osdshot.png\" border=0>";
 	}
 	else
 #ifndef DISABLE_LCD
@@ -2214,7 +2271,10 @@ static eString getContent(eString mode, eString path)
 	{
 		result = getTitle("CONTROL: LCDShot");
 		if (!getOSDShot("lcd"))
-			result += "<img width=\"650\" src=\"/root/tmp/osdshot.png\" border=0>";
+			if (smallScreen == 0)
+				result += "<img width=\"650\" src=\"/root/tmp/osdshot.png\" border=0>";
+			else
+				result += "<img width=\"240\" src=\"/root/tmp/osdshot.png\" border=0>";
 	}
 	else
 #endif
@@ -3146,32 +3206,50 @@ static eString getCurrentServiceRef(eString request, eString dirpath, eString op
 static eString web_root(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	eString result;
+
 	std::map<eString,eString> opt=getRequestOptions(opts);
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
-	result = readFile(TEMPLATE_DIR + "index.tmp");
+	if (smallScreen == 0)
+	{
+		result = readFile(TEMPLATE_DIR + "index.tmp");
 
-	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
-		result.strReplace("#BOX#", "Dreambox");
+		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
+			result.strReplace("#BOX#", "Dreambox");
+		else
+			result.strReplace("#BOX#", "dBox");
+	}
 	else
-		result.strReplace("#BOX#", "dBox");
+	{
+		eString mode = opt["mode"];
+		eString spath = opt["path"];
 
-	return result;
-}
+		eDebug("[ENIGMA_DYN] web_root_small: mode = %s, spath = %s", mode.c_str(), spath.c_str());
 
-static eString web_root_small(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{
-	eString result;
-	std::map<eString,eString> opt=getRequestOptions(opts);
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
+		if (!spath)
+			spath = eServiceStructureHandler::getRoot(eServiceStructureHandler::modeTV).toString();
 
-	smallScreen = 1;
-	result = readFile(TEMPLATE_DIR + "index_small.tmp");
+		if (!mode)
+			mode = "zap";
 
-	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
-		result.strReplace("#BOX#", "Dreambox");
-	else
-		result.strReplace("#BOX#", "dBox");
+		result = readFile(TEMPLATE_DIR + "index_small.tmp");
+		result.strReplace("#CONTENT#", getContent(mode, spath));
+		result.strReplace("#VOLBAR#", getVolBar());
+		result.strReplace("#TOPNAVI#", getTopNavi(mode, spath));
+		result.strReplace("#CHANNAVI#", getChannelNavi());
+		result.strReplace("#LEFTNAVI#", getLeftNavi(mode, spath));
+		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
+			result.strReplace("#TOPBALK#", "topbalk_small.png");
+		else
+		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Nokia)
+			result.strReplace("#TOPBALK#", "topbalk2_small.png");
+		else
+		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Sagem)
+			result.strReplace("#TOPBALK#", "topbalk3_small.png");
+		else
+//		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Philips)
+			result.strReplace("#TOPBALK#", "topbalk4_small.png");
+	}
 
 	return result;
 }
@@ -3769,6 +3847,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/audio", audio);
 	dyn_resolver->addDyn("GET", "/cgi-bin/selectAudio", selectAudio);
 	dyn_resolver->addDyn("GET", "/cgi-bin/setAudio", setAudio);
+	dyn_resolver->addDyn("GET", "/cgi-bin/setScreen", setScreen);
 #ifndef DISABLE_FILE
 	dyn_resolver->addDyn("GET", "/cgi-bin/setConfigUSB", setConfigUSB);
 	dyn_resolver->addDyn("GET", "/cgi-bin/setConfigHDD", setConfigHDD);
@@ -3784,7 +3863,6 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/header", header);
 	dyn_resolver->addDyn("GET", "/body", body);
 	dyn_resolver->addDyn("GET", "/blank", blank);
-	dyn_resolver->addDyn("GET", "/webrootSmall", web_root_small);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg", getcurepg);
 	dyn_resolver->addDyn("GET", "/getcurrentepg2", getcurepg2);
 	dyn_resolver->addDyn("GET", "/getMultiEPG", getMultiEPG);
