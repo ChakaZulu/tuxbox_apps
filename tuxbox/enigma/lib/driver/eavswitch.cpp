@@ -403,11 +403,11 @@ void eAVSwitch::setVSystem(eVSystem _system)
 	
 	int saa;
 	// we *want* to set _system, but let's see if we support this
-	if ((_system == vsPAL) & (tvsystem & 1))
+	if ((_system == vsPAL) && (tvsystem & 1))
 		saa = SAA_PAL;
-	else if ((_system == vsNTSC) & (tvsystem & 2))
+	else if ((_system == vsNTSC) && (tvsystem & 2))
 		saa = SAA_NTSC;
-	else if ((_system == vsNTSC) & (tvsystem & 4))
+	else if ((_system == vsNTSC) && (tvsystem & 4))
 		saa = SAA_PAL_M;
 				// we give up.
 	else if (tvsystem & 1)
