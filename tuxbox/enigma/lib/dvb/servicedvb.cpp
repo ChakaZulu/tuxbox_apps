@@ -720,7 +720,7 @@ int eServiceHandlerDVB::serviceCommand(const eServiceCommand &cmd)
 		}
 		if ((state == statePlaying) || (state == statePause) || (state == stateStopped) || (state == stateSkipping))
 		{
-			if (cmd.parm < 0)
+			if (cmd.parm < 0 || !decoder)
 				return -1;
 			decoder->messages.send(eDVRPlayerThread::eDVRPlayerThreadMessage(eDVRPlayerThread::eDVRPlayerThreadMessage::setSpeed, cmd.parm));
 			if (cmd.parm == 0)

@@ -390,24 +390,6 @@ int tsAutomatic::nextTransponder(int next)
 	if ( c_nocircular && c_nocircular->isChecked() )
 		current_tp->satellite.polarisation&=1;   // CEDR
 
-	eLNB *lnb=0;
-	if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )
-	{
-		eSatellite *sat = eTransponderList::getInstance()->findSatellite( current_tp->satellite.orbital_position );
-		if ( sat )
-			lnb = sat->getLNB();
-	}
-
-	if ( lnb )
-	{
-		// filter not tuneable transponders
-		if ( abs(lnb->getLOFHi() - current_tp->satellite.frequency) > 2000000 &&
-				 abs(lnb->getLOFLo() - current_tp->satellite.frequency) > 2000000 )
-		{
-			dvbEvent( eDVBScanEvent( eDVBScanEvent::eventTunedIn, -2, &(*current_tp) ) );
-			return 0;
-		}
-	}
 	return current_tp->tune();
 }
 

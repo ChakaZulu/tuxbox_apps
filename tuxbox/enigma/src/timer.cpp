@@ -2075,7 +2075,10 @@ void eTimerEditView::showServiceSelector()
 	sel.setLCD(LCDTitle, LCDElement);
 #endif
 	hide();
-	sel.setPath(eServiceStructureHandler::getRoot(eServiceStructureHandler::modeTvRadio),eServiceReference() );
+	sel.getRoot.connect( slot( *eZapMain::getInstance(), &eZapMain::getRoot) );
+	sel.setPath(eServiceReference(eServiceReference::idDVB,
+				eServiceReference::flagDirectory|eServiceReference::shouldSort,
+				-2, (1<<4)|(1<<1), 0xFFFFFFFF ),eServiceReference() );
 	sel.setStyle(eServiceSelector::styleSingleColumn);
 
 /*	if ( tmpService )

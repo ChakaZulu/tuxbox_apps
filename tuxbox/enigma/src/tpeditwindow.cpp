@@ -433,7 +433,11 @@ void eTransponderEditWindow::removePressed()
 	if ( it == packet->possibleTransponders.end() )
 		return;
 	packet->possibleTransponders.erase(it);
-	transponders->remove( te );
+	if ( transponders->getNext() )
+		transponders->goNext();
+	else
+		transponders->goPrev();
+	transponders->remove( te, true );
 	changed++;
 }
 

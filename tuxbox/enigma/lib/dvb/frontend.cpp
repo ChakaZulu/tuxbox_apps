@@ -141,6 +141,15 @@ void eFrontend::timeout()
 		/*emit*/ tunedIn(transponder, 0);
 	}
 	else
+	{
+		if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite
+			&& eDVB::getInstance()->getScanAPI() && lastLNB )
+		{
+			if ( abs(lastLNB->getLOFHi() - transponder->satellite.frequency) > 2000000 &&
+					 abs(lastLNB->getLOFLo() - transponder->satellite.frequency) > 2000000 )
+				tries=1;
+		}
+
 		if (--tries)
 		{
 			eDebugNoNewLine("-: %x,", Status());
@@ -154,6 +163,7 @@ void eFrontend::timeout()
 			state=stateIdle;
 			/*emit*/ tunedIn(transponder, -ETIMEDOUT);
 		}
+	}
 }
 
 eFrontend::~eFrontend()

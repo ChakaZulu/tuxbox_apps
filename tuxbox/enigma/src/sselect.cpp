@@ -381,19 +381,22 @@ void eServiceSelector::setKeyDescriptions( bool editMode )
 
 void eServiceSelector::addService(const eServiceReference &ref)
 {
-#ifndef DISABLE_FILE
-	if ( eDVB::getInstance()->recorder && eZapMain::getInstance()->getMode() != eZapMain::modeFile )
+	if ( eZap::getInstance()->getServiceSelector() == this )
 	{
-		eServiceReferenceDVB &Ref = (eServiceReferenceDVB&) ref;
-		eServiceReferenceDVB &rec = eDVB::getInstance()->recorder->recRef;
-		if ( rec.getTransportStreamID() != Ref.getTransportStreamID() ||
-				 rec.getOriginalNetworkID() != Ref.getOriginalNetworkID() ||
-				 rec.getDVBNamespace() != Ref.getDVBNamespace() )
-				 return;
-	}
+#ifndef DISABLE_FILE
+		if ( eDVB::getInstance()->recorder && eZapMain::getInstance()->getMode() != eZapMain::modeFile )
+		{
+			eServiceReferenceDVB &Ref = (eServiceReferenceDVB&) ref;
+			eServiceReferenceDVB &rec = eDVB::getInstance()->recorder->recRef;
+			if ( rec.getTransportStreamID() != Ref.getTransportStreamID() ||
+					 rec.getOriginalNetworkID() != Ref.getOriginalNetworkID() ||
+					 rec.getDVBNamespace() != Ref.getDVBNamespace() )
+				return;
+		}
 #endif
-	if ( ref.isLocked() && (eConfig::getInstance()->pLockActive() & 2) )
-		return;
+		if ( ref.isLocked() && (eConfig::getInstance()->pLockActive() & 2) )
+			return;
+	}
 
 	int flags=serviceentryflags;
 
@@ -480,7 +483,8 @@ void eServiceSelector::fillServiceList(const eServiceReference &_ref)
 	if (ref.type == eServicePlaylistHandler::ID) // playlists have own numbers
 		serviceentryflags|=eListBoxEntryService::flagOwnNumber;
 
-	if ( eDVB::getInstance()->recorder
+	if ( eZap::getInstance()->getServiceSelector() == this
+		&& eDVB::getInstance()->recorder
 		&& eZapMain::getInstance()->getMode() != eZapMain::modeFile )
 	{
 		int mask = eZapMain::getInstance()->getMode() == eZapMain::modeTV ? (1<<4)|(1<<1) : ( 1<<2 );
@@ -1018,7 +1022,8 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 				}
 				services->endAtomic();
 			}
-			else if (event.action == &i_serviceSelectorActions->showEPGSelector && !movemode && !editMode)
+			else if (event.action == &i_serviceSelectorActions->showEPGSelector
+				&& !movemode && !editMode && this == eZap::getInstance()->getServiceSelector() )
 			{
 				hide();
 				eEPGStyleSelector e;
@@ -1042,6 +1047,9 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 						break;
 				}
 			}
+			else if (event.action == &i_cursorActions->help
+				&& this != eZap::getInstance()->getServiceSelector() )
+				;  // dont show help when this is not the main service selector
 			else if (event.action == &i_serviceSelectorActions->pathUp)
 				pathUp();
 			else if (event.action == &i_serviceSelectorActions->toggleStyle && !movemode && !editMode)
