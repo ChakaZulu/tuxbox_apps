@@ -12,6 +12,19 @@
 #include <lib/dvb/dvbservice.h>
 #include <lib/dvb/dvbci.h>
 
+void enigmaCImmi::entrySelected(eListBoxMenuEntry *choice)
+{
+	if(!choice)
+	{
+		eDebug("no selection");
+		return;
+	}
+	eDebug("menu_answ: %d",choice->getEntry());	
+
+	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_menuansw,choice->getEntry()));
+
+}
+
 enigmaCImmi::enigmaCImmi(): eWindow(0)
 {
 	int fd=eSkin::getActive()->queryValue("fontsize", 20);
@@ -59,6 +72,8 @@ enigmaCImmi::enigmaCImmi(): eWindow(0)
 	lentrys->move(ePoint(20, 70));
 	lentrys->resize(eSize(460, (fd+4)*6));
 	lentrys->setFlags(eListBoxBase::flagNoPageMovement);
+
+	CONNECT(lentrys->selected, enigmaCImmi::entrySelected);		
 	
 	//for(int i=0;i<4;i++)
 	//	eListBoxMenuEntry *e=new eListBoxMenuEntry(lentrys,"blub");
@@ -89,8 +104,10 @@ void enigmaCImmi::abortPressed()
 
 void enigmaCImmi::getmmi(const char *data)
 {
+	int entry=1;
 	eDebug("new mmi message received");
-	
+
+	lentrys->clearList();		
 	//for(int i=1;i<data[0];i++)
 	//	printf("%02x ",data[i]);
 	//printf("\n");
@@ -133,7 +150,7 @@ void enigmaCImmi::getmmi(const char *data)
 					if(menupos>2)
 					{
 						lentrys->beginAtomic();	
-						eListBoxMenuEntry *e=new eListBoxMenuEntry(lentrys,buffer);
+						eListBoxMenuEntry *e=new eListBoxMenuEntry(lentrys,buffer,entry++);
 						lentrys->endAtomic();	
 
 					}							

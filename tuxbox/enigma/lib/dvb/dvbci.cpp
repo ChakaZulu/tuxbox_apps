@@ -157,7 +157,7 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 		break;
 	case eDVBCIMessage::mmi_menuansw:
 		eDebug("[DVBCI] got mmi_menu_answ message..");
-		//mmi_menuansw();
+		mmi_menuansw((int)message.pid);
 		break;
 	case eDVBCIMessage::exit:
 		eDebug("[DVBCI] got exit message..");
@@ -187,7 +187,11 @@ void eDVBCI::mmi_answ(unsigned char *buf,int len)
 
 void eDVBCI::mmi_menuansw(int val)
 {
-	eDebug("got mmi_menu_answer");
+	eDebug("got mmi_menu_answer %d",val);
+	unsigned char buffer[10];
+	memcpy(buffer,"\x90\x2\x0\x1\x9f\x88\x0B\x1",8);
+	buffer[8]=val&0xff;
+	sendTPDU(0xA0,9,2,buffer);
 }
 
 void eDVBCI::createCAPMT(int type,unsigned char *data)

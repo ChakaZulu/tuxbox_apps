@@ -12,11 +12,14 @@ class eDVBCI;
 class eListBoxMenuEntry: public eListBoxEntryText
 {
 	friend class eListBox<eListBoxMenuEntry>;
+	int entry;
 public:
-	eListBoxMenuEntry(eListBox<eListBoxMenuEntry> *parent, eString name)
-	:eListBoxEntryText((eListBox<eListBoxEntryText>*)parent, name)
+	eListBoxMenuEntry(eListBox<eListBoxMenuEntry> *parent, eString name, int entry)
+	:eListBoxEntryText((eListBox<eListBoxEntryText>*)parent, name),entry(entry)
 	{
 	}
+	
+	const int &getEntry() const {return entry;};
 };	
 
 class enigmaCImmi: public eWindow
@@ -30,7 +33,9 @@ class enigmaCImmi: public eWindow
 private:
 	void okPressed();
 	void abortPressed();
+	void entrySelected(eListBoxMenuEntry *choice);
 	void getmmi(const char *buffer);
+
 	int ci_state;
 
 public:
