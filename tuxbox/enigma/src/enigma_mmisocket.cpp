@@ -1,4 +1,3 @@
-#ifndef DISABLE_CI
 #include <enigma_mmisocket.h>
 #include <enigma.h>
 #include <unistd.h>
@@ -6,9 +5,6 @@
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
 #include <lib/gdi/font.h>
-
-#define TAG_LENGTH 3
-#define MAX_LENGTH_BYTES 4
 
 int eSocketMMIHandler::send_to_mmisock( void* buf, size_t len)
 {
@@ -185,6 +181,6 @@ void eSocketMMI::beginExec()
 	conn = CONNECT(handler->mmi_progress, enigmaMMI::gotMMIData );
 }
 
+#ifdef DREAMCRYPT_MMI
 eAutoInitP0<eDreamcryptMMI> init_eDreamcryptMMI(eAutoInitNumbers::osd-2, "dreamcrypt mmi socket");
-
-#endif // DISABLE_CI
+#endif

@@ -58,7 +58,6 @@ protected:
 	enum AnswerType { ENQAnswer, MENUAnswer, LISTAnswer };
 	enigmaMMI();
 public:
-
 	bool connected() { return conn.connected(); }
 	int eventHandler( const eWidgetEvent &e );
 	virtual bool handleMMIMessage(const char *data);

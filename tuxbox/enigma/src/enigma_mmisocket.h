@@ -1,13 +1,12 @@
-#ifndef DISABLE_CI
-#ifndef __ENIGMA_MMI_H_
-#define __ENIGMA_MMI_H_
+#ifndef __ENIGMA_MMISOCKET_H_
+#define __ENIGMA_MMISOCKET_H_
 
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/un.h>
 #include <map>
 #include <lib/dvb/dvbservice.h>
-#include <enigma_ci.h>
+#include <enigma_mmi.h>
 #include <enigma_main.h>
 #include <enigma_setup.h>
 
@@ -40,6 +39,10 @@ public:
 	eSocketMMI(eSocketMMIHandler *handler);
 };
 
+#endif // __ENIGMA_MMISOCKET_H_
+
+
+#ifdef DREAMCRYPT_MMI
 class eDreamcryptMMI : public eSocketMMIHandler
 {
 public:
@@ -48,6 +51,4 @@ public:
 	{
 	}
 };
-
-#endif // __ENIGMA_MMI_H_
-#endif // DISABLE_CI
+#endif
