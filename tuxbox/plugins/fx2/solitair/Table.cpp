@@ -21,6 +21,8 @@ extern "C"
 #include "backbuffer.h"
 #include <sys/time.h>
 
+#include <config.h>
+
 extern	unsigned short	actcode; //from rcinput
 extern	unsigned short	realcode; //from rcinput
 extern	int				doexit;
@@ -243,7 +245,7 @@ void CTable::MoveCursor(unsigned char _direction)
 
 void CTable::Save()
 {
-	FILE* sav = fopen( "/var/solitair.sav", "wb" );
+	FILE* sav = fopen( GAMESDIR "/solitair.sav", "wb" );
 
 	if( sav == NULL ) return;
 
@@ -389,7 +391,7 @@ void CTable::Load()
 {
 	int SavShowCards = 0;
 
-	FILE* sav = fopen( "/var/solitair.sav", "rb" );
+	FILE* sav = fopen( GAMESDIR "/solitair.sav", "rb" );
 
 	if( sav == NULL ) return;
 
