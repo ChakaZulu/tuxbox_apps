@@ -190,7 +190,7 @@ msgstr "Inv:"
 
 #: default.esml:426
 msgid "&#175;/sec"
-msgstr ""
+msgstr "&#175;/sec"
 
 #: default.esml:708
 msgid "edit the start time (0..9, left, right)"
@@ -322,9 +322,8 @@ msgid "close motor setup"
 msgstr "Cerrar ajustes motor"
 
 #: default.esml:508 default.esml:519
-#, fuzzy
 msgid "add only unscrambled services"
-msgstr "Ocultar canales bloqueados"
+msgstr "Añadir sólo canales libres"
 
 #: default.esml:573 default.esml:585
 msgid "KSymb/s"
@@ -652,9 +651,8 @@ msgid "goto prev page (LNB)"
 msgstr "Ir a página anterior (LNB)"
 
 #: default.esml:542
-#, fuzzy
 msgid "press ok to change"
-msgstr "Pulse OK para cambiar la dirección"
+msgstr "Pulse OK para cambiar"
 
 #: default.esml:840
 msgid "Transponders"
@@ -721,9 +719,8 @@ msgid "set"
 msgstr "guardar"
 
 #: default.esml:445
-#, fuzzy
 msgid "enter orbital position without dot (19.2&#175; = 192)"
-msgstr "posición orbital sin punto (19.2 = 192)"
+msgstr "Posición orbital sin punto (19.2&#175; = 192)"
 
 #: default.esml:469
 msgid "press left or right to move motor"
@@ -959,7 +956,7 @@ msgstr "Elige pos. satélite guardada"
 
 #: default.esml:478
 msgid "open transponder scan"
-msgstr "Abrir busqueda de canales"
+msgstr "Abrir búsqueda de canales"
 
 #: default.esml:774
 msgid "Harddisk"
@@ -991,7 +988,7 @@ msgstr "Lunes"
 
 #: default.esml:496 default.esml:508 default.esml:519
 msgid "only Free"
-msgstr ""
+msgstr "Sólo libres"
 
 #: default.esml:703 src/timer.cpp:1993
 msgid "Saturday"
@@ -1030,9 +1027,8 @@ msgid "Help"
 msgstr "Ayuda"
 
 #: default.esml:496
-#, fuzzy
 msgid "add only not scrambled services"
-msgstr "Ocultar canales bloqueados"
+msgstr "Añadir sólo canales libres"
 
 #: lib/dvb/dvbci.cpp:106 lib/dvb/dvbci.cpp:118 lib/dvb/dvbci.cpp:1105
 msgid "no module"
@@ -1526,7 +1522,7 @@ msgstr "Crear buequete vacío"
 
 #: src/enigma_bouquet.cpp:39
 msgid "create new empty bouquet"
-msgstr "Crear bouquete nuevo vació"
+msgstr "Crear bouquete nuevo vacío"
 
 #: src/enigma_bouquet.cpp:40
 msgid "Add services to bouquet"
@@ -1534,11 +1530,11 @@ msgstr "Añadir servicios a un bouquete"
 
 #: src/enigma_bouquet.cpp:40
 msgid "add multiple services to a specific bouquet"
-msgstr "Añadir multiples servicios a un bouquete específico"
+msgstr "Añadir varios canales a un bouquete determinado"
 
 #: src/enigma_bouquet.cpp:41
 msgid "Edit bouquets"
-msgstr "Editar  bouquetes"
+msgstr "Editar bouquetes"
 
 #: src/enigma_bouquet.cpp:41
 msgid "sort,rename,delete services/bouquets "
@@ -1590,7 +1586,7 @@ msgstr "Reseteando... espere"
 
 #: src/enigma_ci.cpp:184 src/enigma_ci.cpp:535 src/enigma_ci.cpp:608
 msgid "Common Interface Module - mmi"
-msgstr "Módulo Interfaz commun - mmi"
+msgstr "Módulo Interfaz commún - mmi"
 
 #: src/enigma_ci.cpp:189
 msgid "waiting for CI answer..."
@@ -2102,7 +2098,7 @@ msgid ""
 "A digital recording is currently in progress!\n"
 "This stops the digital recording!"
 msgstr ""
-"Está en curso una grabación pogramada!\n"
+"Está en curso una grabación!\n"
 "Eso la va a terminar!"
 
 #: src/enigma_main.cpp:3803
@@ -2273,15 +2269,15 @@ msgstr "Pulse OK para activar modo edición"
 
 #: src/enigma_main.cpp:5671 src/time_settings.cpp:36
 msgid "Time Correction"
-msgstr "Corrección horar del canal "
+msgstr "Corrección hora"
 
 #: src/enigma_main.cpp:5678
 msgid "Transponder Time:"
-msgstr "Hora del canal:"
+msgstr "Hora transpondedor:"
 
 #: src/enigma_main.cpp:5687
 msgid "Transponder Date:"
-msgstr "Fecha del canal:"
+msgstr "Fecha transpondedor:"
 
 #: src/enigma_main.cpp:5694
 msgid "New Time:"
@@ -2289,7 +2285,7 @@ msgstr "Hora nueva:"
 
 #: src/enigma_main.cpp:5707
 msgid "enter correct time here"
-msgstr "Hora local correcta"
+msgstr "Ajustar valor a la hora local correcta"
 
 #: src/enigma_main.cpp:5713
 msgid "New Date:"
@@ -2297,15 +2293,15 @@ msgstr "Fecha nueva:"
 
 #: src/enigma_main.cpp:5722
 msgid "press ok to select another day"
-msgstr "Pulse OK para elegir otro día"
+msgstr "Pulse OK para cambiar el día"
 
 #: src/enigma_main.cpp:5728
 msgid "press ok to select another month"
-msgstr "Pulse OK para elegir otro mes"
+msgstr "Pulse OK para cambiar el mes"
 
 #: src/enigma_main.cpp:5737
 msgid "press ok to select another year"
-msgstr "Pulse OK para elegir año"
+msgstr "Pulse OK para cambiar el año"
 
 #: src/enigma_main.cpp:5753
 msgid "set new time and close window"
@@ -2390,7 +2386,7 @@ msgstr "Ningun nombre facilitado"
 
 #: src/enigma_scan.cpp:39 src/enigma_setup.cpp:41
 msgid "Service Searching"
-msgstr "Busqueda de canales"
+msgstr "Búsqueda de canales"
 
 #: src/enigma_scan.cpp:47
 msgid "open satellite config"
@@ -2406,7 +2402,7 @@ msgstr "Editar transpondedor"
 
 #: src/enigma_scan.cpp:49
 msgid "for automatic transponder scan"
-msgstr "Escanear transpondedores automaticamente"
+msgstr "Editar lista de los transpondedores"
 
 #: src/enigma_scan.cpp:52
 msgid "Automatic Transponder Scan"
@@ -2417,9 +2413,8 @@ msgid "open automatic transponder scan"
 msgstr "Abrir búsqueda automática de canales"
 
 #: src/enigma_scan.cpp:54
-#, fuzzy
 msgid "Automatic Multisat Scan"
-msgstr "Búsqueda automática de canales"
+msgstr "Búsqueda automática de satélites"
 
 #: src/enigma_scan.cpp:56
 msgid "Manual Transponder Scan"
@@ -2486,7 +2481,7 @@ msgstr "Abrir configuración sistema"
 
 #: src/enigma_setup.cpp:46
 msgid "Common Interface"
-msgstr "Interfaz commun"
+msgstr "Interfaz commún"
 
 #: src/enigma_setup.cpp:46
 msgid "open common interface menu"
@@ -3231,11 +3226,11 @@ msgstr "Activar Uncommitted Switch Input 16"
 
 #: src/scan.cpp:37
 msgid "auto scan"
-msgstr "Busqueda automática..."
+msgstr "Búsqueda automática..."
 
 #: src/scan.cpp:38
 msgid "manual scan.."
-msgstr "Busqueda manual..."
+msgstr "Búsqueda manual..."
 
 #: src/scan.cpp:230
 msgid ""
@@ -3291,15 +3286,15 @@ msgstr "Quedan %02i segundos"
 
 #: src/scan.cpp:640
 msgid "[only free]"
-msgstr ""
+msgstr "[sólo libre]"
 
 #: src/scan.cpp:641
 msgid "[all]"
-msgstr ""
+msgstr "[todo]"
 
 #: src/scan.cpp:641
 msgid "[nothing]"
-msgstr ""
+msgstr "[saltar]"
 
 #: src/scan.cpp:743
 msgid "Transponder Scan"
@@ -3320,11 +3315,11 @@ msgid ""
 "%i Transponders within %i Services scanned."
 msgstr ""
 "Búsqueda finalizada - hemos encontrando \n"
-" %i transpondedores nuevos,\n"
-" %i canales TV nuevos,\n"
-" %i canales radio nuevos y\n"
-" %i servicios de datos.\n"
-" %i transpondedores (%i servicios) fueron escaneados."
+"   %i transpondedores nuevos,\n"
+"   %i canales TV nuevos,\n"
+"   %i canales radio nuevos y\n"
+"   %i servicios de datos.\n"
+"%i transpondedores (%i servicios) fueron escaneados."
 
 #: src/scan.cpp:1047
 msgid "Done."
@@ -3362,7 +3357,7 @@ msgstr "Ajustes tarjeta red"
 
 #: src/setup_extra.cpp:37
 msgid "open communication setup"
-msgstr "Abrir configuración de la red"
+msgstr "Abrir configuración de la tarjeta red"
 
 #: src/setup_extra.cpp:38
 msgid "Ngrab Streaming Setup"
@@ -3370,7 +3365,7 @@ msgstr "Ajustes Ngrab"
 
 #: src/setup_extra.cpp:38
 msgid "open ngrab server setup"
-msgstr "Abrir configuración servidor ngrab"
+msgstr "Abrir configuración del servidor ngrab"
 
 #: src/setup_extra.cpp:39 src/software_update.cpp:28
 msgid "Software Update"
@@ -3390,7 +3385,7 @@ msgstr "Abrir configuración de la mando a distancia"
 
 #: src/setup_extra.cpp:43
 msgid "Skip confirmations"
-msgstr "Saltar confimaciones"
+msgstr "Saltar confirmaciones"
 
 #: src/setup_extra.cpp:43
 msgid "enable/disable confirmations"
@@ -3410,7 +3405,7 @@ msgstr "Infobar automático"
 
 #: src/setup_extra.cpp:45
 msgid "show infobar when event info changed"
-msgstr "Mostrar Infobar en cambios del event info"
+msgstr "Mostrar cambios del EPG en la Infobar"
 
 #: src/setup_extra.cpp:46
 msgid "Show remaining Time"
@@ -3418,7 +3413,7 @@ msgstr "Mostrar tiempo restante del evento"
 
 #: src/setup_extra.cpp:46
 msgid "show event remaining time in the infobar"
-msgstr "Mostrar tiempo restante del evento en la Infobar"
+msgstr "Mostrar tiempo restante en la Infobar"
 
 #: src/setup_extra.cpp:47
 msgid "Serviceselector help buttons"
@@ -3426,7 +3421,7 @@ msgstr "Teclas de ayuda"
 
 #: src/setup_extra.cpp:47
 msgid "show colored help buttons in service selector"
-msgstr "Mostrar teclas de apoyo en la lista de canales"
+msgstr "Activar teclas de apoyo en la lista de canales"
 
 #: src/setup_harddisk.cpp:176
 msgid "Harddisk Setup"
@@ -3719,7 +3714,7 @@ msgstr "Elige zona (ok)"
 
 #: src/setup_timezone.cpp:41
 msgid "use automatically daylight saving time"
-msgstr "Conmutación automatica hora verano"
+msgstr "Ajustar automaticamente hora verano"
 
 #: src/setup_timezone.cpp:44
 msgid "Automatically adjust clock for daylight saving changes"
@@ -3843,7 +3838,7 @@ msgstr "Rechazar conexiones entrantes al puerto 21"
 
 #: src/setupvideo.cpp:43 src/system_settings.cpp:42
 msgid "A/V Settings"
-msgstr "Configuración A/V"
+msgstr "Configuración Audio/Video"
 
 #: src/setupvideo.cpp:48
 msgid "Color Format:"
@@ -3915,12 +3910,11 @@ msgstr "Utilizar PAL-M para la reproducción NTSC"
 
 #: src/setupvideo.cpp:112
 msgid "Auto VCR switching"
-msgstr ""
+msgstr "Conector VCR automatico"
 
 #: src/setupvideo.cpp:115
-#, fuzzy
 msgid "auto switch to VCR connector"
-msgstr "Cambiar al modo TV"
+msgstr "Activar euroconnecor Vídeo automaticamente"
 
 #: src/software_update.cpp:33
 msgid "Internet Update"
@@ -4392,7 +4386,7 @@ msgid ""
 "faster scan"
 msgstr ""
 "No escanear NITs de redes conocidos\n"
-"busqueda más rápida"
+"búsqueda más rápida"
 
 #: src/tpeditwindow.cpp:108
 msgid "Use BAT"
@@ -4527,7 +4521,7 @@ msgstr "No acceso a mtd!"
 
 #: src/upgrade.cpp:631
 msgid "Writing Software to Flash..."
-msgstr "Grabando software a la memoria..."
+msgstr "Grabando software en la memoria..."
 
 #: src/upgrade.cpp:653
 msgid ""
@@ -4647,7 +4641,7 @@ msgstr "Abrir lista de zonas horarias"
 
 #: src/time_settings.cpp:36
 msgid "open time correction window"
-msgstr "Para ajustar la hora del transpondedor"
+msgstr "Ajustar la hora del transpondedor"
 
 #: src/time_settings.cpp:82
 msgid "To change time correction you must tune first to any transponder"
