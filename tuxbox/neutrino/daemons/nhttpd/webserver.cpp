@@ -73,28 +73,6 @@ bool TWebserver::Init(int port,char * publicdocumentroot,bool debug,bool verbose
 	return true;
 }
 //-------------------------------------------------------------------------
-/*
-void * TimerThread(void  *timerlist)
-{
-bool ende = false;
-int SleepTime = 10;
-TTimerList *TimerList = (TTimerList *) timerlist;
-
-	do
-	{
-		if(TimerList)
-			if(TimerList->Count > 0)
-			{
-				TimerList->ProcessList();
-				TimerList->PrintList();
-			}
-		sleep(SleepTime);
-	}while(!ende);
-	pthread_exit((void *)NULL);
-//	pthread_detach(pthread_self());
-
-}
-*/
 //-------------------------------------------------------------------------
 bool TWebserver::Start()
 {
@@ -136,8 +114,15 @@ bool TWebserver::Start()
 //-------------------------------------------------------------------------
 void * WebThread(void * request)
 {
+static int ThreadsCount = 0;
 TWebserverRequest *req = (TWebserverRequest *)request;
-	if(req->Parent->DEBUG) printf("*********** Thread %X gestartet\n",(int)pthread_self());
+	ThreadsCount++;
+	while(ThreadsCount > 15)
+	{
+		printf("[nhttpd] Too many requests, waitin one sec\n");
+		sleep(1);
+	}
+	if(req->Parent->DEBUG) printf("*********** Thread %d (%X) gestartet\n",ThreadsCount,(int)pthread_self());	
 	if(req)
 	{
 		if(req->ParseRequest())
@@ -155,7 +140,8 @@ TWebserverRequest *req = (TWebserverRequest *)request;
 		delete req;
 		if(req->Parent->DEBUG) printf("Nach delete req\n");
 	}
-	if(req->Parent->DEBUG) printf("*********** Thread %X beendet\n",(int)pthread_self());
+	ThreadsCount--;
+	if(req->Parent->DEBUG) printf("*********** Thread %X beendet, ThreadCount: %d\n",(int)pthread_self(),ThreadsCount);
 	pthread_exit((void *)NULL);
 //	if(req->Parent->DEBUG) printf("*********** Thread %ld gelöscht\n",(int)pthread_self());
 //	pthread_detach(pthread_self());

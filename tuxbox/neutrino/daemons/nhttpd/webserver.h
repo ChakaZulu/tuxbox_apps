@@ -10,9 +10,6 @@
 #include <netdb.h>
 #include <config.h>
 
-//#include <string>
-//#include <vector>
-
 #include "helper.h"
 #include "pthread.h"
 #include "timer.h"
