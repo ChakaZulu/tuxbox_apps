@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.160 2002/04/23 06:58:51 obi Exp $
+ * $Id: zapit.cpp,v 1.161 2002/04/24 13:45:13 happydude Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1883,7 +1883,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.160 2002/04/23 06:58:51 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.161 2002/04/24 13:45:13 happydude Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -2260,7 +2260,11 @@ int startPlayBack()
 	}
 
 	/* select video source */
+#ifndef ALWAYS_DO_VIDEO_SELECT_SOURCE
 	if ((video_status.streamSource != VIDEO_SOURCE_DEMUX) && (video_status.playState == VIDEO_STOPPED))
+#else
+	if (video_status.playState == VIDEO_STOPPED)
+#endif
 	{
 		if (ioctl(video_fd, VIDEO_SELECT_SOURCE, VIDEO_SOURCE_DEMUX) < 0)
 		{
