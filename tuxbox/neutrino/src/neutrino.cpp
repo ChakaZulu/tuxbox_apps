@@ -80,6 +80,7 @@
 #include "gui/widget/stringinput.h"
 #include "gui/widget/stringinput_ext.h"
 #include "gui/widget/mountchooser.h"
+#include "gui/widget/listview.h"
 
 #include "gui/color.h"
 
@@ -1631,7 +1632,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 	service.addItem(GenericMenuBack);
 	service.addItem(GenericMenuSeparatorLine);
 	service.addItem(new CMenuForwarder(LOCALE_BOUQUETEDITOR_NAME    , true, NULL, new CBEBouquetWidget()                  ));
-	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_SCANTS    , true, NULL, &scanSettings                           ));
+ 	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_SCANTS    , true, NULL, &scanSettings                           ));
 	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_RELOAD    , true, NULL, this                  , "reloadchannels"));
 	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_GETPLUGINS, true, NULL, this                   , "reloadplugins"));
 	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_UCODECHECK, true, NULL, UCodeChecker                            ));
@@ -2904,8 +2905,7 @@ bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer)
 			if (g_settings.recording_type == RECORDING_FILE)
 			{
 				char *recDir = (preselectedDir != NULL) ? preselectedDir : g_settings.network_nfs_recordingdir;
-				// data == NULL -> called after stream problem so do not show a dialog again
-				// but which dir has been chosen?
+				// preselectedDir != NULL -> called after stream problem so do not show a dialog again
 				if(preselectedDir == NULL && g_settings.recording_choose_direct_rec_dir) {
 					int userDecision = -1;
 					
@@ -2915,6 +2915,7 @@ bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer)
 						refreshGui = true;
 						if (userDecision != -1)
 						{
+							recDir = g_settings.network_nfs_local_dir[userDecision];
 							if (!CFSMounter::isMounted(g_settings.network_nfs_local_dir[userDecision]))
 							{
 								CFSMounter::MountRes mres = 
@@ -2926,10 +2927,8 @@ bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer)
 											  g_settings.network_nfs_password[userDecision],
 											  g_settings.network_nfs_mount_options1[userDecision], 
 											  g_settings.network_nfs_mount_options2[userDecision]);
-								if (mres == CFSMounter::MRES_OK)
+								if (mres != CFSMounter::MRES_OK)
 								{
-									recDir = g_settings.network_nfs_local_dir[userDecision];
-								} else {
 									doRecord = false;
 									const char * merr = mntRes2Str(mres);
 									int msglen = strlen(merr) + strlen(g_settings.network_nfs_local_dir[userDecision]) + 7;
