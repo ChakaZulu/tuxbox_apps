@@ -1846,7 +1846,7 @@ static eString getZapContent3(eString mode, eString path)
 	tmpFile.strReplace("#CHANNELREFS#", channelrefs);
 	tmpFile.strReplace("#CURRENTBOUQUET#", eString().sprintf("%d", currentBouquet));
 	tmpFile.strReplace("#CURRENTCHANNEL#", eString().sprintf("%d", currentChannel));
-	result.strReplace("#AUTOBOUQUETCHANGE#", "0");
+	tmpFile.strReplace("#AUTOBOUQUETCHANGE#", "0");
 
 	result = readFile(TEMPLATE_DIR + "rec.tmp");
 	result.strReplace("#ZAPDATA#", tmpFile);
