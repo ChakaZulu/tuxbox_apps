@@ -911,56 +911,52 @@ void eZapMain::setEIT(EIT *eit)
 
 void eZapMain::updateProgress()
 {
-	eZapLCD *pLCD=eZapLCD::getInstance();
+  eZapLCD *pLCD=eZapLCD::getInstance();
 	if (serviceFlags & eServiceHandler::flagSupportPosition)
 	{
-		eServiceHandler *handler=eServiceInterface::getInstance()->getService();
+    eServiceHandler *handler=eServiceInterface::getInstance()->getService();
 		if (!handler)
 			return;
 		int total=handler->getPosition(eServiceHandler::posQueryLength);
 		int current=handler->getPosition(eServiceHandler::posQueryCurrent);
 		if ((total > 0) && (current != -1))
 		{
-			Progress->setPerc(current*100/total);
-			Progress->show();
+      Progress->setPerc(current*100/total);
+      Progress->show();
 			pLCD->lcdMain->Progress->setPerc(current*100/total);
 			pLCD->lcdMain->Progress->show();
-			int min=total-current;
+      int min=total-current;
 			int sec=min%60;
 			min/=60;
 			int sign=-1;
 			ChannelNumber->setText(eString().sprintf("%s%d:%02d", (sign==-1)?"-":"", min, sec));
 		} else
 		{
-			pLCD->lcdMain->Progress->hide();
+      pLCD->lcdMain->Progress->hide();
 			Progress->hide();
 			ChannelNumber->setText("");
 		}
 	}
 	else
 	{
-		time_t c=time(0)+eDVB::getInstance()->time_difference;
+    time_t c=time(0)+eDVB::getInstance()->time_difference;
 		tm *t=localtime(&c);
 		if (t && eDVB::getInstance()->time_difference)
 		{
 			if ((cur_start <= c) && (c < cur_start+cur_duration))
 			{
-				Progress->setPerc((c-cur_start)*100/cur_duration);
-				Progress->show();
+        Progress->setPerc((c-cur_start)*100/cur_duration);
+        Progress->show();
 				pLCD->lcdMain->Progress->setPerc((c-cur_start)*100/cur_duration);
 				pLCD->lcdMain->Progress->show();
 			} else
 			{
-				Progress->clear();
 				Progress->hide();
-				pLCD->lcdMain->Progress->clear();
 				pLCD->lcdMain->Progress->hide();
 			}
 		} else
 		{
-			Progress->clear();
 			Progress->hide();
-			pLCD->lcdMain->Progress->clear();
 			pLCD->lcdMain->Progress->hide();
 		}
 	}
@@ -2020,14 +2016,14 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 		{
 			eDebug("support position query..");
 			progresstimer.start(1000);
-		} else
+  		updateProgress();
+    } else
 		{	
 			eDebug("doesn't support position query");
 			progresstimer.stop();
 		}
-		
 		showDVRFunctions(serviceFlags & eServiceHandler::flagIsSeekable);
-		updateProgress();
+
 		break;
 	}
 	case eServiceEvent::evtAspectChanged:
@@ -2372,8 +2368,8 @@ void eZapMain::leaveService()
 	EINext->setText("");
 	EINextDuration->setText("");
 	EINextTime->setText("");
-	
-	Progress->clear();
+
+  eDebug("PROGRESS HIDE - updateProgress");
 	Progress->hide();
 }
 

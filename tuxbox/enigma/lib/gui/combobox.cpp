@@ -2,7 +2,7 @@
 #include <lib/gdi/font.h>
 
 eComboBox::eComboBox( eWidget* parent, int OpenEntries, eLabel* desc, const char *deco )
-	:eButton(parent, 0, 1, deco), listbox(0), button( this, desc, 0), pm(0), entries(OpenEntries)
+	:eButton(parent, desc, 1, deco), listbox(0), button( this, desc, 0), pm(0), entries(OpenEntries)
 {
 	align=eTextPara::dirLeft;
 	button.loadDeco();

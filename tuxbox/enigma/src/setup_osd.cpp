@@ -8,7 +8,7 @@
 
 eZapOsdSetup::eZapOsdSetup(): eWindow(0)
 {
-	setText("On Screen Display Setup");
+	setText("OSD Setup");
 	move(ePoint(150, 136));
 	resize(eSize(460, 400));
 

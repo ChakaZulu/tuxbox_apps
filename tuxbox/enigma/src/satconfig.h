@@ -61,7 +61,7 @@ class eLNBSetup : public eWindow // Selitor = "Sel"ector + Ed"itor" :-)
   void onPrev() { mp.prev(); }  
   int eventHandler(const eWidgetEvent &event);
 public:
-	eLNBSetup( eSatellite *sat );
+	eLNBSetup( eSatellite *sat, eWidget* lcdTitle, eWidget* lcdElement );
 };
 
 class eLNBPage : public eWidget

@@ -202,8 +202,8 @@
 	<object name="enigma_lcd_main">
 		<eZapLCDMain position="0:0" size="120:64">
 			<eProgress position="7:2" size="65:6" name="progress_bar" foregroundColor="0" leftColor="0" rightColor="255" border="1" />
-			<eLabel position="0:0" size="120:17" pixmap="lcd_enigma_logo" />
-			<eLabel position="2:14" size="120:32" font="lcd.main.service_name" wrap="on" name="service_name" />
+			<eLabel position="0:0" size="120:11" pixmap="lcd_enigma_logo" />
+			<eLabel position="2:10" size="120:40" font="lcd.main.service_name" wrap="on" name="service_name" vcenter="on" />
 			<eLabel position="74:46" size="46:18" font="lcd.main.clock" name="clock" align="right" />
 			<eLabel position="0:53" size="11:13" pixmap="speaker" />
 			<eProgress position="12:56" size="60:6" name="volume_bar" foregroundColor="255" leftColor="255" rightColor="0" border="1" />
@@ -268,7 +268,7 @@
 			<eLabel position="488:44" size="90:26" font="Blue.Regular;26" name="e_now_duration" align="right" backgroundColor="light" foregroundColor="light+15" />
 			<eLabel position="488:83" size="90:26" font="Blue.Regular;26" name="e_next_duration" align="right" backgroundColor="middle" foregroundColor="middle+15" />
                                                                      
-			<eLabel position="104:113" size="50:21" font="Blue.Regular;24" name="time" align="center" backgroundColor="dark" foregroundColor="dark+15" />
+			<eLabel position="104:113" size="56:21" font="Blue.Regular;24" name="time" align="center" backgroundColor="dark" foregroundColor="dark+15" />
 
 			<eProgress position="160:115" size="150:16" name="progress_bar" foregroundColor="middle" border="1" />
 

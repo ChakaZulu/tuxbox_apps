@@ -341,7 +341,7 @@ void eDVBServiceController::scanPMT()
 		case 2: // ITU-T Rec. H.262 | ISO/IEC 13818-2 Video or ISO/IEC 11172-2 constrained parameter video stream
 			if (!video)
 			{
-				video=pe;
+  			video=pe;
         DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::addVideo,pe->elementary_PID));
 			}
 			isca+=checkCA(calist, pe->ES_info);

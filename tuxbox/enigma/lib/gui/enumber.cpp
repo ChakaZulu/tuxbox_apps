@@ -39,7 +39,9 @@ void eNumber::redrawNumber(gPainter *p, int n, const eRect &area)
 	}
 	else
 	{
-		if (base==10)
+    if (flags&flagHideInput)
+      t="*";
+    else if (base==10)
 			t.sprintf("%d", number[n]);
 		else if (base==0x10)
 			t.sprintf("%X", number[n]);

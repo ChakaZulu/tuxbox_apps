@@ -47,7 +47,8 @@ public:
 		flagDrawBoxes=2,
 		flagFillWithZeros=4,
 		flagTime=8,
-    flagPosNeg=16
+    flagPosNeg=16,
+    flagHideInput=32
 	};
 	void setFlags(int flags);
 	void setBase(int base);

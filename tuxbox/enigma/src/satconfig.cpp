@@ -22,7 +22,6 @@ eSatelliteConfigurationManager::eSatelliteConfigurationManager()
 
 	w_buttons=new eWidget(this);
 	w_buttons->setName("buttons");
-	w_buttons->setLCD( LCDTitle, LCDElement );
 
 	eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "eSatelliteConfigurationManager"))
@@ -96,7 +95,6 @@ void eSatelliteConfigurationManager::repositionWidgets()
 		if (it != entryMap.end() )
 			entryMap.erase( it );		
 		deleteThisEntry=0;
-		
 	}
 	int sx=SAT_POS_X, y=POS_Y, hx=HILO_POS_X, vx=VOLTAGE_POS_X, lx=LNB_POS_X, count=0;
 
@@ -142,8 +140,7 @@ void eSatelliteConfigurationManager::createControlElements()
 
 void eSatelliteConfigurationManager::lnbSelected(eButton* who)
 {
-	eLNBSetup sel( getSat4LnbButton(who) );
-	sel.setLCD(LCDTitle, LCDElement);
+	eLNBSetup sel( getSat4LnbButton(who), LCDTitle, LCDElement );
 
 	hide();
 	sel.show();
@@ -331,7 +328,10 @@ int eSatelliteConfigurationManager::eventHandler(const eWidgetEvent &event)
 {
   switch (event.type)
 	{
-	case eWidgetEvent::evtAction:
+  case eWidgetEvent::execBegin:
+  	w_buttons->setLCD( LCDTitle, LCDElement );
+  break;
+  case eWidgetEvent::evtAction:
 		if (event.action == &i_focusActions->left)
 			focusNext(eWidget::focusDirW);
 		else if (event.action == &i_focusActions->right)
@@ -350,7 +350,7 @@ int eSatelliteConfigurationManager::eventHandler(const eWidgetEvent &event)
 	return eWindow::eventHandler(event);
 }
 
-eLNBSetup::eLNBSetup( eSatellite* sat )
+eLNBSetup::eLNBSetup( eSatellite* sat, eWidget* lcdTitle, eWidget* lcdElement )
   :sat(sat)
 {
   eSkin *skin=eSkin::getActive();
@@ -358,8 +358,11 @@ eLNBSetup::eLNBSetup( eSatellite* sat )
 		eFatal("skin load of \"eLNBSetup\" failed");
 
   DiSEqCPage = new eDiSEqCPage( this, sat );
+  DiSEqCPage->setLCD( lcdTitle, lcdElement );
   LNBPage = new eLNBPage( this, sat );
+  LNBPage->setLCD( lcdTitle, lcdElement );
   RotorPage = new eRotorPage( this, sat );
+  RotorPage->setLCD( lcdTitle, lcdElement );
   
   DiSEqCPage->hide();
   LNBPage->hide();
@@ -502,6 +505,9 @@ struct eLNBPage::selectlnb: public std::unary_function<const eListBoxEntryText&,
 eLNBPage::eLNBPage( eWidget *parent, eSatellite* sat )
   :eWidget(parent), sat(sat)
 {
+	LCDTitle=parent->LCDTitle;
+	LCDElement=parent->LCDElement;
+  
   lnb_list = new eListBox<eListBoxEntryText>(this);
 	lnb_list->setFlags( eListBoxBase::flagNoPageMovement );
 	lnb_list->setName("lnblist");
@@ -604,6 +610,9 @@ void eLNBPage::numSelected(int*)
 eDiSEqCPage::eDiSEqCPage( eWidget *parent, eSatellite *sat)
   :eWidget(parent), sat(sat)
 {
+	LCDTitle=parent->LCDTitle;
+	LCDElement=parent->LCDElement;
+
   eLabel *l = new eLabel(this);
   l->setName("lMiniDiSEqCPara");
   MiniDiSEqCParam = new eComboBox( this, 4, l );
@@ -770,6 +779,9 @@ void eDiSEqCPage::lnbChanged( eListBoxEntryText *lnb )
 eRotorPage::eRotorPage( eWidget *parent, eSatellite *sat )
   :eWidget(parent), sat(sat)
 {
+	LCDTitle=parent->LCDTitle;
+	LCDElement=parent->LCDElement;
+
   useGotoXX = new eCheckbox(this);
   useGotoXX->setName("useGotoXX");
 
