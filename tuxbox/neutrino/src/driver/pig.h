@@ -23,24 +23,22 @@
 #ifndef __PIG_CONTROL__
 #define __PIG_CONTROL__
 
-
-#ifdef !_V4L_API_
+using namespace std;
 
 
 //
 //  -- Picture in Graphics  Control
-//  --  adapted source from fx2  (;-) )
 //  --  2002-11  rasc
+//  --  2003-06  rasc   V4L API
 //
 
 
-#include <dbox/avia_gt_pig.h>
+
+#include <linux/videodev.h>
+
+#define PIG_DEV "/dev/v4l/video"		// PigNr will be appended!
 
 
-using namespace std;
-
-
-#define PIG_DEV "/dev/dbox/pig"			// pig_nr will be appended!!
 
 class CPIG
 {
@@ -55,8 +53,8 @@ class CPIG
 		void set_coord (int x, int y, int w, int h);
 		void set_xy    (int x, int y);
 		void set_size  (int w, int h);
-		void set_source(int x, int y);
-		void set_stackpos  (int pos);
+//		void set_source(int x, int y);
+//		void set_stackpos  (int pos);
 		void show (void);
 		void show (int x, int y, int w, int h);
 		void hide (void);
@@ -65,6 +63,8 @@ class CPIG
 		PigStatus getStatus(void);
 
 	private:
+		void _set_window  (int x, int y, int w, int h);
+
 		int	fd;			// io descriptor
 		int	px, py, pw, ph;		// pig frame
 		int	stackpos;		// Order (Framebuffer, PIGs)
@@ -74,18 +74,6 @@ class CPIG
 };
 
 
-
-
-#else
-
-//  Video4Linux API  for PIG
-
-
-//   TODO.....
-
-
-#endif   // _V4L_API_
-
-
-
 #endif
+
+

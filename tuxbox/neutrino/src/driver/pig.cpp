@@ -21,12 +21,6 @@
 
 
 
-#ifdef !_V4L_API_
-
-//  -- altes PIG-API
-
-
-
 
 
 #include <sys/ioctl.h>
@@ -40,12 +34,15 @@
 
 
 
+//  Video4Linux API  for PIG
+//
+
 //
 //  -- Picture in Graphics  Control
 //  -- This module is a Class to provide a PIG abstraction layer
 //  --
-//  --  some source grabbed from fx2  (;-) )
 //  --  2002-11  rasc
+//  --  2003-06  rasc   V4L Api
 //
 
 
@@ -101,10 +98,10 @@ int CPIG::pigopen (int pig_nr)
  };
 		
 
-    if ( (pig_nr<0) || (pig_nr >= (int)(sizeof (pigdevs)/sizeof(char *))) ) {
+    if ( (pig_nr>0) || (pig_nr < (int)(sizeof (pigdevs)/sizeof(char *))) ) {
     
 	if (fd < 0) {
-		fd = open( pigdevs[pig_nr], O_RDONLY );
+		fd = open( pigdevs[pig_nr], O_RDWR );
 		if (fd >= 0) {
 			status = HIDE;
 			px = py = pw = ph = 0;
@@ -139,24 +136,42 @@ void CPIG::pigclose ()
 // -- routines should be self explaining
 //
 
+void CPIG::_set_window (int x, int y, int w, int h)
+{
+  // -- Modul interne Routine
+  struct v4l2_format coord;
+  int    err;
+
+	coord.fmt.win.w.left   = x;
+	coord.fmt.win.w.top    = y;
+	coord.fmt.win.w.width  = w;
+	coord.fmt.win.w.height = h;
+
+	err = ioctl(fd, VIDIOC_S_FMT, &coord);
+}
+
+
 void CPIG::set_coord (int x, int y, int w, int h)
 {
-	set_xy (x,y);
-	set_size (w,h);
+
+	if (( x != px ) || ( y != py )) {
+		px = x;
+		py = y;
+		pw = w;
+		ph = h;
+		_set_window (px,py,pw,ph);
+	}
+
 }
 
 
 void CPIG::set_xy (int x, int y)
 {
 
-	if (fd >= 0) {
-
-		if (( x != px ) || ( y != py )) {
-			avia_pig_set_pos(fd,x,y);
-			px = x;
-			py = y;
-		}
-	
+	if (( x != px ) || ( y != py )) {
+		px = x;
+		py = y;
+		_set_window (px,py,pw,ph);
 	}
 
 }
@@ -165,46 +180,43 @@ void CPIG::set_xy (int x, int y)
 void CPIG::set_size (int w, int h)
 {
 
-	if (fd >= 0) {
-
-		if (( w != pw ) || ( h != ph )) {
-			avia_pig_set_size(fd,w,h);
-			pw = w;
-			ph = h;
-		}
-
+	if (( w != pw ) || ( h != ph )) {
+		pw = w;
+		ph = h;
+		_set_window (px,py,pw,ph);
 	}
 
 }
+
 
 // $$$ ???? what this for?
 
-void CPIG::set_source (int x, int y)
-{
-
-	if (fd >= 0) {
-
-		if (( x != px ) || ( y != py )) {
-			avia_pig_set_source(fd,x,y);
-		}
-
-	}
-
-}
+//void CPIG::set_source (int x, int y)
+//{
+//
+//	if (fd >= 0) {
+//
+//		if (( x != px ) || ( y != py )) {
+//	//		avia_pig_set_source(fd,x,y);
+//		}
+//
+//	}
+//
+//}
 
 
 //
 // -- routine set's stack position of PIG on display
 //
 
-void CPIG::set_stackpos (int pos)
-
-{
-	if (fd >= 0) {
-		avia_pig_set_stack(fd,pos);
-		stackpos = pos;
-	}
-}
+//void CPIG::set_stackpos (int pos)
+//
+//{
+//	if (fd >= 0) {
+//		avia_pig_set_stack(fd,pos);
+//		stackpos = pos;
+//	}
+//}
 
 
 //
@@ -220,7 +232,10 @@ void CPIG::show (int x, int y, int w, int h)
 void CPIG::show (void)
 {
 	if ( fd >= 0 ) {
-		avia_pig_show(fd);
+		int pigmode = 1;
+		int err;
+		err = ioctl(fd, VIDIOC_OVERLAY, &pigmode);
+		// old API: avia_pig_show(fd);
 		status = SHOW;
 	}
 }
@@ -228,7 +243,10 @@ void CPIG::show (void)
 void CPIG::hide (void)
 {
 	if ( fd >= 0 ) {
-		avia_pig_hide(fd);
+		int pigmode = 0;
+		int err;
+		err = ioctl(fd, VIDIOC_OVERLAY, &pigmode);
+		// old API: avia_pig_hide(fd);
 		status = HIDE;
 	}
 }
@@ -242,17 +260,12 @@ CPIG::PigStatus  CPIG::getStatus(void)
 
 
 
-#else
-
-//  Video4Linux API  for PIG
 
 
-
-
-//   Todo.....  (rasc)
-
-
-
-#endif   // _V4L_API_
-
+//
+// ToDo's:
+//   -- Capability unavail check/status
+//   -- Cropping for resizing (possible zoom/scaling?)
+//   -- Capturing
+//
 
