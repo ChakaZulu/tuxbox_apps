@@ -362,10 +362,7 @@ bool CFileBrowser::exec(string Dirname)
 		}
 		else if ( msg == CRCInput::RC_left )
 		{
-			if(S_ISDIR(filelist[selected].Mode))
-			{
-					ChangeDir("..");
-			}
+			ChangeDir("..");
 		}
 		else if ( msg == CRCInput::RC_blue )
 		{
@@ -586,7 +583,7 @@ void CFileBrowser::paintHead()
 	snprintf(l_name, sizeof(l_name), "%s %s", g_Locale->getText("filebrowser.head").c_str(), name.c_str());
 
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
-	g_Fonts->eventlist_title->RenderString(x+10,y+theight+1, width, l_name, COL_MENUHEAD);
+	g_Fonts->eventlist_title->RenderString(x+10,y+theight+1, width-11, l_name, COL_MENUHEAD);
 
 }
 
