@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.46 2003/05/18 13:50:36 digi_casi Exp $
+ * $Id: pzapit.cpp,v 1.47 2003/06/25 04:35:10 alexw Exp $
  *
  * simple commandline client for zapit
  *
@@ -158,7 +158,7 @@ int main (int argc, char** argv)
 			leaveStandby = true;
 			continue;
 		}
-		else if (!strncmp(argv[i], "-m", 2))
+		else if (!strncmp(argv[i], "-motor", 6))
 		{
 			sendMotorCommand = true;
 			if (i < argc - 6)
