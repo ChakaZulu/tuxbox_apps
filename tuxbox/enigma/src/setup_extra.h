@@ -12,6 +12,7 @@ class eExpertSetup: public eSetupWindow
 #endif
 	void rc_setup();
 	void colorbuttonsChanged(bool);
+	void serialDebugChanged(bool);
 public:
 	eExpertSetup();
 };

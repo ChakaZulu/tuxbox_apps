@@ -23,15 +23,16 @@ struct epgSelectorActions
 	{
 		int ret = -1;
 #ifndef DISABLE_FILE
-		if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000
-		 && action == &addDVRTimerEvent )
+		if ( eSystemInfo::getInstance()->canRecordTS()
+			&& action == &addDVRTimerEvent )
 			ret = ePlaylistEntry::RecTimerEntry |
 								ePlaylistEntry::recDVR|
 								ePlaylistEntry::stateWaiting;
 		else
 #endif
 #ifndef DISABLE_NETWORK
-		if ( eSystemInfo::getInstance()->hasNetwork() && action == &addNGRABTimerEvent )
+		if ( eSystemInfo::getInstance()->hasNetwork()
+			&& action == &addNGRABTimerEvent )
 			ret = ePlaylistEntry::RecTimerEntry|
 								ePlaylistEntry::recNgrab|
 								ePlaylistEntry::stateWaiting;

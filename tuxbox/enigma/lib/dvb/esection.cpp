@@ -266,7 +266,7 @@ void eSection::data(int socket)
 			version=buf[5];
 			if ( section == buf[6] )
 				goto doit;   // YES .. GOTO
-			else if ( count > (maxsec*4) )
+			else if ( timer->isActive() && count > (maxsec*4) )
 			{
 				eDebug("incomplete section... abort!");
 				timer->start(0,true);

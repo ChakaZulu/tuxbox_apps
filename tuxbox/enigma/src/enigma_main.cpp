@@ -852,6 +852,8 @@ void eSubServiceSelector::prev()
 	play();
 }
 
+extern bool onSameTP( const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2 ); // implemented in timer.cpp
+
 void eSubServiceSelector::play()
 {
 	SubService* ss = list.getCurrent();
@@ -874,9 +876,7 @@ void eSubServiceSelector::play()
 			else
 			{
 				eServiceReferenceDVB &rec = eDVB::getInstance()->recorder->recRef;
-				if (rec.getTransportStreamID() != ref.getTransportStreamID() ||
-						rec.getOriginalNetworkID() != ref.getOriginalNetworkID() ||
-						rec.getDVBNamespace() != ref.getDVBNamespace() )
+				if (!onSameTP(rec,ref))
 				{
 					if (!eZapMain::getInstance()->handleState())
 						return;
@@ -3159,7 +3159,7 @@ void eZapMain::deleteService( eServiceSelector *sel )
 			{
 			// recorded stream selected ( in recordings.epl )
 				eString str;
-				str.sprintf(_("Really delete '%s'?"), it->service.descr.c_str() );
+				str.sprintf(_("You are trying to delete '%s'.\nReally do this?"), it->service.descr.c_str() );
 				eMessageBox box(str, _("Delete recorded stream"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btNo);
 				box.show();
 				int r=box.exec();
@@ -3690,6 +3690,9 @@ void eZapMain::playService(const eServiceReference &service, int flags)
 	if ( !service || ( service.path && service.path == "/" ) )
 		return;
 
+	if ( flags & psNoUser )
+		goto zap;
+
 #ifndef DISABLE_FILE
 	if ( !service.path && eDVB::getInstance()->recorder
 		&& eDVB::getInstance()->recorder->recRef != service )
@@ -3704,20 +3707,16 @@ void eZapMain::playService(const eServiceReference &service, int flags)
 				goto zap;
 			return;
 		}
-		eServiceReferenceDVB &Ref = (eServiceReferenceDVB&)service;
-		eServiceReferenceDVB &rec = eDVB::getInstance()->recorder->recRef;
-
-		if ( rec.getTransportStreamID() != Ref.getTransportStreamID() ||
-				 rec.getOriginalNetworkID() != Ref.getOriginalNetworkID() ||
-				 rec.getDVBNamespace() != Ref.getDVBNamespace() )
+		if ( !onSameTP(eDVB::getInstance()->recorder->recRef, (eServiceReferenceDVB&)service) )
+		{
 			if ( handleState() )
 				goto zap;
 			else
 				return;
+		}
 	}
-
-zap:
 #endif
+zap:
 	if (flags&psSetMode)
 	{
 		if ( service.type == eServiceReference::idDVB && !service.path )
@@ -5629,9 +5628,7 @@ void eZapMain::setMode(int newmode, int user)
 		{
 			eServiceReferenceDVB &ref = (eServiceReferenceDVB&) cur;
 			eServiceReferenceDVB &rec = eDVB::getInstance()->recorder->recRef;
-			if ( !ref.path && ref.getTransportStreamID() != rec.getTransportStreamID() ||
-				ref.getOriginalNetworkID() != rec.getOriginalNetworkID() ||
-				ref.getDVBNamespace() != rec.getDVBNamespace() )
+			if ( !ref.path && !onSameTP(ref,rec) )
 				user=0;
 			recmode = rec.data[0] & 1 ? modeTV : modeRadio;
 		}
@@ -6015,6 +6012,9 @@ void eZapMain::startNGrabRecord()
 
 void eZapMain::stopNGrabRecord()
 {
+#ifndef DISABLE_FILE
+	if ( !eDVB::getInstance()->recorder )
+#endif
 	state &= ~(stateRecording|recDVR);
 	ENgrab::getNew()->sendstop();
 }
@@ -6197,7 +6197,7 @@ eSleepTimerContextMenu::eSleepTimerContextMenu( eWidget* lcdTitle, eWidget *lcdE
 			new eListBoxEntryText(&list, _("shutdown now"), (void*)1, 0, _("shutdown your dreambox"));
 			new eListBoxEntryText(&list, _("restart"), (void*)4, 0, _("restart your dreambox"));
 			break;
-		default:
+		case eSystemInfo::dbox2Nokia ... eSystemInfo::dbox2Philips:
 			new eListBoxEntryText(&list, _("shutdown now"), (void*)1, 0, _("shutdown your dbox-2"));
 			new eListBoxEntryText(&list, _("restart"), (void*)4, 0, _("restart your dbox-2"));
 			break;
@@ -6259,8 +6259,7 @@ eSleepTimer::eSleepTimer()
 	if (eSkin::getActive()->build(this, "sleeptimer"))
 		eFatal("skin load of \"sleeptimer\" failed");
 	CONNECT( set->selected, eSleepTimer::setPressed );
-	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5600
-    || eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5620 )
+	if ( eSystemInfo::getInstance()->canShutdown() )
 	{
 		Shutdown->hide();
 		Standby->hide();

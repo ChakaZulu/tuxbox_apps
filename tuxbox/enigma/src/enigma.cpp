@@ -269,13 +269,18 @@ void eZap::reconfigureHTTPServer()
 			eDebug("activate enigma serial http interface");
 	}
 
+	if ( tts_fd != -1)
+		::close(tts_fd);
+
 #if 1
-	if ( !SerialConsoleActivated )
+	int serialDebugOutput=1;
+	eConfig::getInstance()->getKey("/ezap/extra/disableSerialOutput", serialDebugOutput);
+	if ( !SerialConsoleActivated && serialDebugOutput )
 	{
 		eDebug("[ENIGMA] starting httpd on serial port...");
-		int fd=::open("/dev/tts/0", O_RDWR);
+		tts_fd=::open("/dev/tts/0", O_RDWR);
 
-		if (fd < 0)
+		if (tts_fd < 0)
 			eDebug("[ENIGMA] serial port error (%m)");
 		else
 		{
@@ -287,16 +292,16 @@ void eZap::reconfigureHTTPServer()
 			tio.c_lflag = 0;
 			tio.c_cc[VTIME] = 0;
 			tio.c_cc[VMIN] = 1;
-			tcflush(fd, TCIFLUSH);
-			tcsetattr(fd, TCSANOW, &tio);
+			tcflush(tts_fd, TCIFLUSH);
+			tcsetattr(tts_fd, TCSANOW, &tio);
 
 			logOutputConsole=0; // disable enigma logging to console
 			klogctl(8, 0, 1); // disable kernel log to serial
 
 			char *banner="Welcome to the enigma serial access.\r\n"
 					"you may start a HTTP session now if you send a \"break \".\r\n";
-			write(fd, banner, strlen(banner));
-			serialhttpd = new eHTTPConnection(fd, 0, httpd, 1);
+			write(tts_fd, banner, strlen(banner));
+			serialhttpd = new eHTTPConnection(tts_fd, 0, httpd, 1);
 //			char *i="GET /version HTTP/1.0\n\n";
 //			char *i="GET /menu.cr HTTP/1.0\n\n";
 			char *i="GET /log/debug HTTP/1.0\n\n";

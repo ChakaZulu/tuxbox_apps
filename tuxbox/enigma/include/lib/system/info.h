@@ -4,6 +4,8 @@
 #include <set>
 #include <config.h>
 
+#include <lib/dvb/serviceplaylist.h>
+
 #if HAVE_DVB_API_VERSION < 3
 #include <ost/dmx.h>
 #ifndef DMX_SET_NEGFILTER_MASK
@@ -17,15 +19,23 @@ class eSystemInfo
 {
 	static eSystemInfo *instance;
 	int hashdd, hasci, hasrfmod, haslcd, hasnetwork,
-	canmeasurelnbcurrent, hwtype, fetype, hasnegfilter;
+		canmeasurelnbcurrent, hwtype, fetype, hasnegfilter,
+		canupdateTransponder, canshutdown, canrecordts,
+		defaulttimertype, alphaincrement;
 	std::set<int> caids;
+	const char *helpstr, *midstr, *modelstr, *manufactstr, *cpustr;
 	eString getInfo(const char *info, bool dreambox=false);
 public:
 	static eSystemInfo *getInstance() { return instance; }
 	eSystemInfo();
-	enum { dbox2Nokia, dbox2Sagem, dbox2Philips, DM7000, DM5600, DM5620, DM500, Unknown };
+	enum { dbox2Nokia, dbox2Sagem, dbox2Philips, DM7000, DM5600, DM5620, DM500, TR_DVB272S, Unknown };
 	enum { feSatellite, feCable, feTerrestrial };
 
+	const char *getHelpStr() { return helpstr; }
+	const char *getmidStr() { return midstr; }
+	const char *getModel() { return modelstr; }
+	const char *getManufacturer() { return manufactstr; }
+	const char *getCPUInfo() { return cpustr; }
 	int hasNegFilter() { return hasnegfilter; }
 	int hasHDD() { return hashdd; }
 	int hasCI() { return hasci; }
@@ -33,7 +43,12 @@ public:
 	int hasLCD() { return haslcd; }
 	int hasNetwork() { return hasnetwork; }
 	int canMeasureLNBCurrent() { return canmeasurelnbcurrent; }
+	int canShutdown() { return canshutdown; }
+	int canRecordTS() { return canrecordts; }
+	int canUpdateTransponder() { return canupdateTransponder; }
 	int getHwType() { return hwtype; }
+	int getAlphaIncrement() { return alphaincrement; }
+	int getDefaultTimerType() { return defaulttimertype; }
 	int getFEType() { return fetype; }
 	const std::set<int> &getCAIDs() { return caids; }
 };

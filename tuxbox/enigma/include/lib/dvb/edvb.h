@@ -198,6 +198,7 @@ public:
 	void UDHCPC_Closed(int);
 	void restartSamba();
 	eConsoleAppContainer *udhcpc;
+	eTimer delayTimer;
 #ifndef DISABLE_NFS
 	void doMounts();
 #endif

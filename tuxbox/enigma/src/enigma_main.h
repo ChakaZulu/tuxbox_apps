@@ -524,7 +524,8 @@ public:
 		psActivate=4, // use existing entry if available
 		psDontAdd=8,  // just play
 		psSeekPos=16, //
-		psSetMode=32
+		psSetMode=32, // change mode ( TV, radio, file )
+		psNoUser=64   // no timer stateCheck and same TP Checking
 	};
 
 	void playService(const eServiceReference &service, int flags);

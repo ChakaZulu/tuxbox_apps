@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.8 2004/03/23 19:08:16 digi_casi Exp $
+ * $Id: setup_extra.cpp,v 1.9 2004/03/24 00:34:13 ghostrider Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -49,6 +49,7 @@ eExpertSetup::eExpertSetup()
 	new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Hide error windows"), "/elitedvb/extra/hideerror", _("don't show zap error messages"));
 	new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Auto show Infobar"), "/ezap/osd/showOSDOnEITUpdate", _("always show infobar when new event info is avail"));
 	new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Show remaining Time"), "/ezap/osd/showCurrentRemaining", _("show event remaining time in the infobar"));
+	CONNECT((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Don't open serial port"), "/ezap/extra/disableSerialOutput", _("don't write debug messages to /dev/tts/0")))->selected, eExpertSetup::serialDebugChanged );
 	CONNECT((new eListBoxEntryCheck((eListBox<eListBoxEntry>*)&list,_("Serviceselector help buttons"),"/ezap/serviceselector/showButtons",_("show colored help buttons in service selector")))->selected, eExpertSetup::colorbuttonsChanged );
 	setHelpID(92);
 }
@@ -57,6 +58,11 @@ void eExpertSetup::colorbuttonsChanged(bool b)
 {
 	eServiceSelector *sel = eZap::getInstance()->getServiceSelector();
 	sel->setStyle( sel->getStyle(), true );
+}
+
+void eExpertSetup::serialDebugChanged(bool b)
+{
+	eZap::getInstance()->reconfigureHTTPServer();
 }
 
 #ifndef DISABLE_NETWORK

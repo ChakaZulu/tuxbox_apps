@@ -1048,27 +1048,7 @@ void eFrontend::updateTransponder( eTransponder *tp )
 {
 	if ( !tp || !transponder || !(*transponder == *tp) )
 		return;  // only update transponder data for current tp
-	int updateTransponder=0;
-	switch ( eSystemInfo::getInstance()->getHwType() )
-	{
-		case eSystemInfo::DM500:
-		case eSystemInfo::DM5600:
-		case eSystemInfo::DM5620:
-		case eSystemInfo::DM7000:
-			updateTransponder=1;
-			break;
-		case eSystemInfo::dbox2Nokia:
-		case eSystemInfo::dbox2Philips:
-		case eSystemInfo::dbox2Sagem:
-/*				eDebug("FE_GET_FRONTEND is stil sucking (dbox2)... "
-				 "until dbox2 head drivers are not fixed we better "
-				 "don't update transponder data !");*/
-			break;
-		default:
-			eDebug("unknown HWType.. don't use FE_GET_FRONTEND");
-			break;
-	}
-	if ( transponder->satellite.valid && updateTransponder )
+	if ( transponder->satellite.valid && eSystemInfo::getInstance()->canUpdateTransponder() )
 	{
 #if HAVE_DVB_API_VERSION < 3
 		FrontendParameters front;

@@ -191,14 +191,8 @@ eZapOsdSetup::eZapOsdSetup()
 	l->move(ePoint(20, 20));
 	l->resize(eSize(110, fd+4));
 	sAlpha = new eSlider( this, l, 0, 512 );
+	sAlpha->setIncrement( eSystemInfo::getInstance()->getAlphaIncrement() ); // Percent !
 
-	if( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5600  //fb on vulcan sucks
-		|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5620 
-		|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM500 )
-		sAlpha->setIncrement( 25 ); // Percent !
-	else
-		sAlpha->setIncrement( 10 ); // Percent !
-		
 	sAlpha->move( ePoint( 150, 20 ) );
 	sAlpha->resize(eSize( 290, fd+4 ) );
 	sAlpha->setHelpText(_("change the transparency correction"));

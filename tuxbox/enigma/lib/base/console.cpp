@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: console.cpp,v 1.6 2003/11/27 15:13:54 ghostrider Exp $
+ * $Id: console.cpp,v 1.7 2004/03/24 00:34:12 ghostrider Exp $
  */
 
 #include <lib/base/console.h>
@@ -158,18 +158,21 @@ eConsoleAppContainer::eConsoleAppContainer( const eString &cmd )
 
 eConsoleAppContainer::~eConsoleAppContainer()
 {
-	if ( running() )
-	{
-		killstate=-1;
-		kill();
-	}
+	kill();
+	delete in;
+	delete out;
+	delete err;
 }
 
 void eConsoleAppContainer::kill()
 {
-	killstate=-1;
-	system( eString().sprintf("kill %d", pid).c_str() );
-	eDebug("user kill console App");
+	if ( killstate != -1 )
+	{
+		eDebug("user kill console App");
+		killstate=-1;
+		system( eString().sprintf("kill %d", pid).c_str() );
+		closePipes();
+	}
 }
 
 void eConsoleAppContainer::closePipes()
@@ -178,11 +181,11 @@ void eConsoleAppContainer::closePipes()
 	out->stop();
 	err->stop();
 	::close(fd[0]);
-	fd[0]=0;
+	fd[0]=-1;
 	::close(fd[1]);
-	fd[1]=0;
+	fd[1]=-1;
 	::close(fd[2]);
-	fd[2]=0;
+	fd[2]=-1;
 	eDebug("pipes closed");
 }
 

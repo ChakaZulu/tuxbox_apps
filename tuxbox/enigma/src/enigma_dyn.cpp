@@ -62,6 +62,7 @@ using namespace std;
 
 extern eString getRight(const eString&, char); // implemented in timer.cpp
 extern eString getLeft(const eString&, char);  // implemented in timer.cpp
+extern bool onSameTP( const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2 ); // implemented in timer.cpp
 
 static int videopos = 0;
 
@@ -340,10 +341,7 @@ static eString switchService(eString request, eString dirpath, eString opt, eHTT
 				delete ref;
 				return "-1";
 			}
-			eServiceReferenceDVB &rec = eDVB::getInstance()->recorder->recRef;
-			if (ref->getTransportStreamID() != rec.getTransportStreamID() ||
-					ref->getOriginalNetworkID() != rec.getOriginalNetworkID() ||
-					ref->getDVBNamespace() != rec.getDVBNamespace())
+			if (!onSameTP(*ref,eDVB::getInstance()->recorder->recRef))
 			{
 				delete ref;
 				return "-1";
@@ -370,9 +368,7 @@ static eString admin(eString request, eString dirpath, eString opts, eHTTPConnec
 	{
 		if (command=="shutdown")
 		{
-			if ( eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM5600 &&
-						eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM5620 &&
-						eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM500)
+			if ( eSystemInfo::getInstance()->canShutdown() )
 			{
 				eZap::getInstance()->quit();
 				if (requester == "webif")
@@ -698,9 +694,7 @@ static eString getNavi(eString mode, eString path)
 	else
 	if (mode.find("menu") == 0)
 	{
-		if ( eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM5600
-				&& eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM5620
-				&& eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM500)
+		if ( eSystemInfo::getInstance()->canShutdown() )
 		{
 			result += button(110, "Shutdown", LEFTNAVICOLOR, "javascript:admin(\'/cgi-bin/admin?command=shutdown\')");
 			result += "<br>";
@@ -938,11 +932,7 @@ public:
 #ifndef DISABLE_FILE
 		if (eDVB::getInstance()->recorder && !e.path && !e.flags)
 		{
-			eServiceReferenceDVB &ref = (eServiceReferenceDVB&)e;
-			eServiceReferenceDVB &rec = eDVB::getInstance()->recorder->recRef;
-			if (rec.getTransportStreamID() != ref.getTransportStreamID() ||
-					 rec.getOriginalNetworkID() != ref.getOriginalNetworkID() ||
-					 rec.getDVBNamespace() != ref.getDVBNamespace())
+			if (!onSameTP(eDVB::getInstance()->recorder->recRef,(eServiceReferenceDVB&)e))
 					 return;
 		}
 #endif
@@ -1035,107 +1025,66 @@ static eString getZapContent(eString mode, eString path)
 
 static eString aboutDreambox(void)
 {
-	eString result;
-	result += "<table border=0>";
+	eString result="<table border=0>";
 
-	switch (eSystemInfo::getInstance()->getHwType())
-	{
-		case eSystemInfo::dbox2Nokia:
-			result += "<tr><td>Model:</td><td>&nbsp;</td><td>d-Box 2</td></tr>";
-			result += "<tr><td>Manufacturer:</td><td>&nbsp;</td><td>Nokia</td></tr>";
-			result += "<tr><td>Processor:</td><td>&nbsp;</td><td>XPC823, 66MHz</td></tr>";
-			break;
-		case eSystemInfo::dbox2Philips:
-			result += "<tr><td>Model:</td><td>&nbsp;</td><td>d-Box 2</td></tr>";
-			result += "<tr><td>Manufacturer</td><td>&nbsp;</td><td>Philips</td></tr>";
-			result += "<tr><td>Processor</td><td>&nbsp;</td><td>XPC823, 66MHz</td></tr>";
-			break;
-		case eSystemInfo::dbox2Sagem:
-			result += "<tr><td>Model:</td><td>&nbsp;</td><td>d-Box 2</td></tr>";
-			result += "<tr><td>Manufacturer:</td><td>&nbsp;</td><td>Sagem</td></tr>";
-			result += "<tr><td>Processor</td><td>&nbsp;</td><td>XPC823, 66MHz</td></tr>";
-			break;
-		case eSystemInfo::DM500:
-			result += "<tr><td>Model:</td><td>&nbsp;</td><td>DM500</td></tr>";
-			result += "<tr><td>Manufacturer</td><td>&nbsp;</td><td>Dream-Multimedia-TV</td></tr>";
-			result += "<tr><td>Processor:</td><td>&nbsp;</td><td>STBx25xx, 252MHz</td></tr>";
-			break;
-		case eSystemInfo::DM5600:
-			result += "<tr><td>Model:</td><td>&nbsp;</td><td>DM5600</td></tr>";
-			result += "<tr><td>Manufacturer</td><td>&nbsp;</td><td>Dream-Multimedia-TV</td></tr>";
-			result += "<tr><td>Processor:</td><td>&nbsp;</td><td>STBx25xx, 252MHz</td></tr>";
-			break;
-		case eSystemInfo::DM5620:
-			result += "<tr><td>Model:</td><td>&nbsp;</td><td>DM5620</td></tr></td></tr>";
-			result += "<tr><td>Manufacturer:</td><td>&nbsp;</td><td>Dream-Multimedia-TV</td></tr>";
-			result += "<tr><td>Processor:</td><td>&nbsp;</td><td>STBx25xx, 252MHz</td></tr>";
-			break;
-		case eSystemInfo::DM7000:
-			result += "<img src=\"dm7000.jpg\" width=\"640\" border=\"0\"><br>";
-			result += "<tr><td>Model:</td><td>&nbsp;</td><td>DM7000</td></tr>";
-			result += "<tr><td>Manufacturer:</td><td>&nbsp;</td><td>Dream-Multimedia-TV</td></tr>";
-			result += "<tr><td>Processor:</td><td>&nbsp;</td><td>STB04500, 252MHz</td></tr>";
-			break;
-	}
+	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
+		result += "<img src=\"dm7000.jpg\" width=\"640\" border=\"0\"><br>";
 
-	switch (eSystemInfo::getInstance()->getFEType())
-	{
-		case eSystemInfo::feSatellite:
-			result += "<tr><td>Frontend:</td><td>&nbsp;</td><td>Satellite</td></tr>";
-			break;
-		case eSystemInfo::feCable:
-			result += "<tr><td>Frontend:</td><td>&nbsp;</td><td>Cable</td></tr>";
-			break;
-		case eSystemInfo::feTerrestrial:
-			result += "<tr><td>Frontend:</td><td>&nbsp;</td><td>Terrestrial</td></tr>";
-			break;
-	}
+	result+=eString().sprintf(
+		"<tr><td>Model:</td><td>&nbsp;</td><td>%s</td></tr>"
+		"<tr><td>Manufacturer:</td><td>&nbsp;</td><td>%s</td></tr>"
+		"<tr><td>Processor:</td><td>&nbsp;</td><td>%s</td></tr>",
+		eSystemInfo::getInstance()->getModel(),
+		eSystemInfo::getInstance()->getManufacturer(),
+		eSystemInfo::getInstance()->getCPUInfo() );
 
 	eString sharddisks;
 #ifndef DISABLE_FILE
-	for (int c='a'; c<'h'; c++)
+	if ( eSystemInfo::getInstance()->hasHDD() )
 	{
-		char line[1024];
-		int ok=1;
-		FILE *f=fopen(eString().sprintf("/proc/ide/hd%c/media", c).c_str(), "r");
-		if (!f)
-			continue;
-		if ((!fgets(line, 1024, f)) || strcmp(line, "disk\n"))
-			ok=0;
-		fclose(f);
-		if (ok)
+		for (int c='a'; c<'h'; c++)
 		{
-			FILE *f=fopen(eString().sprintf("/proc/ide/hd%c/model", c).c_str(), "r");
+			char line[1024];
+			int ok=1;
+			FILE *f=fopen(eString().sprintf("/proc/ide/hd%c/media", c).c_str(), "r");
 			if (!f)
 				continue;
-			*line=0;
-			fgets(line, 1024, f);
+			if ((!fgets(line, 1024, f)) || strcmp(line, "disk\n"))
+				ok=0;
 			fclose(f);
-			if (!*line)
-				continue;
-			line[strlen(line)-1]=0;
-			sharddisks+=line;
-			f=fopen(eString().sprintf("/proc/ide/hd%c/capacity", c).c_str(), "r");
-			if (!f)
-				continue;
-			int capacity=0;
-			fscanf(f, "%d", &capacity);
-			fclose(f);
-			sharddisks+=" (";
-			if (c&1)
-				sharddisks+="master";
-			else
-				sharddisks+="slave";
-			if (capacity)
-				sharddisks+=eString().sprintf(", %d MB", capacity/2048);
-			sharddisks+=")";
+			if (ok)
+			{
+				FILE *f=fopen(eString().sprintf("/proc/ide/hd%c/model", c).c_str(), "r");
+				if (!f)
+					continue;
+				*line=0;
+				fgets(line, 1024, f);
+				fclose(f);
+				if (!*line)
+					continue;
+				line[strlen(line)-1]=0;
+				sharddisks+=line;
+				f=fopen(eString().sprintf("/proc/ide/hd%c/capacity", c).c_str(), "r");
+				if (!f)
+					continue;
+				int capacity=0;
+				fscanf(f, "%d", &capacity);
+				fclose(f);
+				sharddisks+=" (";
+				if (c&1)
+					sharddisks+="master";
+				else
+					sharddisks+="slave";
+				if (capacity)
+					sharddisks+=eString().sprintf(", %d MB", capacity/2048);
+				sharddisks+=")";
+			}
 		}
+		result += "<tr><td>Harddisk:</td><td>&nbsp;</td><td>";
+		if (sharddisks == "")
+			sharddisks="none</td></tr>";
+		result += sharddisks;
 	}
-
-	result += "<tr><td>Harddisk:</td><td>&nbsp;</td><td>";
-	if (sharddisks == "")
-		sharddisks="none</td></tr>";
-	result += sharddisks;
 #endif //DISABLE_FILE
 
 	result += "<tr><td>Firmware:</td><td>&nbsp;</td><td>";
@@ -1154,10 +1103,7 @@ static eString aboutDreambox(void)
 		eString ver=verid.mid(1, 3);
 		eString date=verid.mid(4, 8);
 //		eString time=verid.mid(12, 4);
-		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000
-			|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM500
-			|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5600
-			|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5620)
+		if ( eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000 )
 			result += eString(typea[type%3]) + eString(" ") + ver[0] + "." + ver[1] + "." + ver[2]+ ", " + date.mid(6, 2) + "." + date.mid(4, 2) + "." + date.left(4);
 		else
 			result += eString().sprintf("%s %c.%d. %s", typea[type%3], ver[0], atoi(eString().sprintf("%c%c", ver[1], ver[2]).c_str()	), (date.mid(6, 2) + "." + date.mid(4, 2) + "." + date.left(4)).c_str());
@@ -1738,54 +1684,16 @@ static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPCon
 	return result;
 }
 
-class eMEPG
+class eMEPG: public Object
 {
-public:
+	int hours;
 	int d_min;
 	eString multiEPG;
-	int hours;
 	time_t start;
 	time_t end;
 	int tableWidth;
-
-	eMEPG()
-	{
-		hours = 6; // horizontally visible hours
-		d_min = 10; // distance on time scale for 1 minute
-	}
-
-	eString getMultiEPG()
-	{
-		return multiEPG;
-	}
-
-	eString getTimeScale()
-	{
-		std::stringstream result;
-
-		result << "<table width=" << tableWidth << " border=1 rules=all>"
-			"<tr>"
-			"<td width=200>Channel</td>";
-
-		for (time_t i = start; i < end; i += 15 * 60)
-		{
-			tm* t = localtime(&i);
-			result << "<td width=" << d_min * 15 << ">"
-				<< std::setfill('0')
-				<< std::setw(2) << t->tm_mday << '.'
-				<< std::setw(2) << t->tm_mon+1 << "."
-				<< "<br>"
-				<< std::setw(2) << t->tm_hour << ':'
-				<< std::setw(2) << t->tm_min << ' '
-				<< "</td>";
-		}
-
-		result << "</tr>"
-			"</table>";
-		return result.str();
-	}
-
-	void getcurepg(eServiceReference ref)
+public:
+	void getcurepg(const eServiceReference &ref)
 	{
 		std::stringstream result;
 		result << std::setfill('0');
@@ -1928,14 +1836,50 @@ public:
 			}
 		}
 	}
+	eMEPG( time_t start, const eServiceReference & bouquetRef )
+		:hours(6)   // horizontally visible hours
+		,d_min(10)  // distance on time scale for 1 minute
+		,start(start)
+		,end( start + hours * 3600 )
+		,tableWidth( (end - start) / 60 * d_min + 200 )
+	{
+		Signal1<void, const eServiceReference&> cbSignal;
+		CONNECT( cbSignal, eMEPG::getcurepg);                    
+		eServiceInterface::getInstance()->enterDirectory(bouquetRef, cbSignal );
+		eServiceInterface::getInstance()->leaveDirectory(bouquetRef);
+	}
+
+	eString getMultiEPG()
+	{
+		return multiEPG;
+	}
+
+	eString getTimeScale()
+	{
+		std::stringstream result;
+
+		result << "<table width=" << tableWidth << " border=1 rules=all>"
+			"<tr>"
+			"<td width=200>Channel</td>";
+
+		for (time_t i = start; i < end; i += 15 * 60)
+		{
+			tm* t = localtime(&i);
+			result << "<td width=" << d_min * 15 << ">"
+				<< std::setfill('0')
+				<< std::setw(2) << t->tm_mday << '.'
+				<< std::setw(2) << t->tm_mon+1 << "."
+				<< "<br>"
+				<< std::setw(2) << t->tm_hour << ':'
+				<< std::setw(2) << t->tm_min << ' '
+				<< "</td>";
+		}
+
+		result << "</tr>"
+			"</table>";
+		return result.str();
+	}
 };
-
-eMEPG mepg;
-
-void callbackFunction(const eServiceReference& s)
-{
-	mepg.getcurepg(s);
-}
 
 static eString getMultiEPG(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
@@ -1944,16 +1888,10 @@ static eString getMultiEPG(eString request, eString dirpath, eString opts, eHTTP
 	eString refs = opt["ref"];
 	eServiceReference bouquetRef = string2ref(refs);
 
-	mepg.start = time(0) + eDVB::getInstance()->time_difference;
-	mepg.start -= ((mepg.start % 900) + (60 * 60)); // align to 15 mins & start 1 hour before now
-	mepg.end = mepg.start + mepg.hours * 3600;
-	mepg.tableWidth = ((mepg.end - mepg.start) / 60 * mepg.d_min) + 200;
-	mepg.multiEPG = "";
+	time_t start = time(0) + eDVB::getInstance()->time_difference;
+	start -= ((start % 900) + (60 * 60)); // align to 15 mins & start 1 hour before now
 
-	Signal1<void, const eServiceReference&> cbSignal;
-	cbSignal.connect(slot(callbackFunction));
-	eServiceInterface::getInstance()->enterDirectory(bouquetRef, cbSignal);
-	eServiceInterface::getInstance()->leaveDirectory(bouquetRef);
+	eMEPG mepg( start, bouquetRef );
 
 	eString result = read_file(TEMPLATE_DIR + "mepg.tmp");
 	result.strReplace("#BODY#", mepg.getTimeScale() + mepg.getMultiEPG());

@@ -32,7 +32,7 @@ public:
 	~eConsoleAppContainer();
 	void kill();
 	void write( const char *data, int len );
-	bool running() { return fd[0] && fd[1]; }
+	bool running() { return (fd[0]!=-1) && (fd[1]!=-1) && (fd[2]!=-1); }
 	Signal1<void, eString> dataAvail;
 	Signal1<void,int> dataSent;
 	Signal1<void,int> appClosed;

@@ -161,29 +161,7 @@ eUpgrade::eUpgrade(bool manual)
 	catalog=0;
 	changelog=0;
 
-	switch ( eSystemInfo::getInstance()->getHwType() )
-	{
-		case eSystemInfo::dbox2Philips:
-			mIDStr="2";
-			break;
-		case eSystemInfo::dbox2Sagem:
-			mIDStr="3";
-			break;
-		case eSystemInfo::DM7000:
-			mIDStr="5";
-			break;
-		case eSystemInfo::DM5600:
-		case eSystemInfo::DM5620:
-			mIDStr="6";
-			break;
-		case eSystemInfo::DM500:
-			mIDStr="7";
-			break;
-		case eSystemInfo::dbox2Nokia:
-		default:
-			mIDStr="1";
-			break;
-	}
+	mIDStr=eSystemInfo::getInstance()->getmidStr();
 
 	eString caturl=getVersionInfo("catalog");
 

@@ -138,6 +138,7 @@
 		<img name="ok_symbol" src="event_ok-fs8.png" />
 		<img name="failed_symbol" src="event_failed-fs8.png" />
 		<img name="dreamlogo" src="dreamlogo-fs8.png" />
+		<img name="triaxlogo" src="triaxlogo-fs8.png" />
 		<img name="textinput_white" src="zahlen_w.png" />
 		
 		<img name="diseqc_0" src="diseqc_0-fs8.png" />
@@ -742,13 +743,13 @@
 			<eLabel name="machine" position="30:25" font="eAboutScreen.machine" csize="e:50"/>
 			<eLabel name="processor" text="processor: " position="10:80" csize="e:30" />
 			<eLabel name="frontend" text="frontend: " position="10:110" csize="e:30" />
-			<eLabel name="translation" position="10:140" csize="e:30" />
-			<eLabel name="harddisk_label" text="harddisk: " position="10:170" csize="e:30" />
-			<eLabel name="harddisks" position="10:200" csize="e:60" />
-			<eLabel text="Software Version:" position="10:260" csize="e:30" />
-			<eLabel name="version" position="10:290" csize="e:60" />
-			<eButton name="okButton" position="20:e-50" csize="100:30" text="ok" loadDeco="" shortcut="green" />
-			<eLabel name="dreamlogo" pixmap="dreamlogo" position="e-160:e-95" csize="143:75" alphatest="on" />
+			<eLabel name="harddisk_label" text="harddisk: " position="10:140" csize="e:30" />
+			<eLabel name="harddisks" position="10:170" csize="e:60" />
+			<eLabel text="Software Version:" position="10:230" csize="e:30" />
+			<eLabel name="version" position="10:260" csize="e:60" />
+			<eButton name="okButton" position="20:e-70" csize="100:40" text="ok" loadDeco="" shortcut="green" />
+			<eLabel name="dreamlogo" pixmap="dreamlogo" position="e-160:e-105" csize="143:75" alphatest="on" />
+			<eLabel name="triaxlogo" pixmap="triaxlogo" position="e-277:e-105" csize="260:75" alphatest="on" />
 		</eAboutScreen>
 	</object>
 

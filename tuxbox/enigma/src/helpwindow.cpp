@@ -51,12 +51,6 @@ eHelpWindow::eHelpWindow(ePtrList<eAction> &parseActionHelpList, int helpID):
 	const std::set<eString> styles=eActionMapList::getInstance()->getCurrentStyles();
 
 	int t = eSystemInfo::getInstance()->getHwType();
-	const char *hwstr =
-		(t==eSystemInfo::DM500)?"dreambox" :
-		(t==eSystemInfo::DM5600)?"dreambox" :
-		(t==eSystemInfo::DM5620)?"dreambox" :
-		(t==eSystemInfo::DM7000)?"dreambox" :
-		"dbox2";
 
 	entryBeg.push_back(0);
 	int pageend=visible->height();
@@ -75,7 +69,7 @@ eHelpWindow::eHelpWindow(ePtrList<eAction> &parseActionHelpList, int helpID):
 			for ( keylist::iterator i( keys.begin() ); i != keys.end() ; i++ )
 			{
 				imgheight=0;
-				if ( strstr( i->producer->getDescription(), hwstr ) )
+				if ( strstr( i->producer->getDescription(), eSystemInfo::getInstance()->getHelpStr() ) )
 				{
 					if (i->picture)
 					{

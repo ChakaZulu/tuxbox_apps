@@ -14,6 +14,7 @@
 #include <lib/dvb/servicestructure.h>
 #include <lib/dvb/decoder.h>
 #include <lib/dvb/servicedvb.h>
+#include <lib/dvb/record.h>
 #include <lib/gui/emessage.h>
 #include <lib/gdi/font.h>
 #include <lib/gui/textinput.h>
@@ -43,6 +44,13 @@ eTimerManager* eTimerManager::instance=0;
 void normalize( struct tm & );
 
 bool Overlapping( const ePlaylistEntry &e1, const ePlaylistEntry &e2 );
+
+bool onSameTP( const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2 )
+{
+	return (ref1.getTransportStreamID() == ref2.getTransportStreamID() &&
+				ref1.getOriginalNetworkID() == ref2.getOriginalNetworkID() &&
+				ref1.getDVBNamespace() == ref2.getDVBNamespace() );
+}
 
 static time_t getNextEventStartTime( time_t t, int duration, int type, bool notToday )
 {
@@ -285,7 +293,8 @@ void eTimerManager::actionHandler()
 
 			int canHandleTwoServices=0;
 			eServiceHandler *handler=eServiceInterface::getInstance()->getService();
-			if (handler && handler->getFlags() & eServiceHandlerDVB::flagIsScrambled)
+			if ( (handler && handler->getFlags()&eServiceHandlerDVB::flagIsScrambled)
+				|| (eDVB::getInstance()->recorder && eDVB::getInstance()->recorder->scrambled) )
 			{
 				eConfig::getInstance()->getKey("/ezap/ci/handleTwoServices",
 					canHandleTwoServices);
@@ -296,12 +305,9 @@ void eTimerManager::actionHandler()
 			long t = getSecondsToBegin();
 			if ( (nextStartingEvent->type & ePlaylistEntry::recDVR)
 				&& t > HDD_PREPARE_TIME+10
-				&& rec && ( rec.path || ( canHandleTwoServices &&
-				rec.getTransportStreamID() == Ref.getTransportStreamID() &&
-				rec.getOriginalNetworkID() == Ref.getOriginalNetworkID() &&
-				rec.getDVBNamespace() == Ref.getDVBNamespace() ) ) )
+				&& rec && ( rec.path || ( canHandleTwoServices && onSameTP(rec, Ref) ) ) )
 			{
-				// we dont zap now.. playback is running.. will zap immediate before eventbegin
+		// we dont zap now.. playback is running.. will zap immediate before eventbegin
 				t -= (HDD_PREPARE_TIME+10);
 				eDebug("[eTimerManager] can Zap later... in %d sec", t);
 				nextAction=zap;
@@ -325,7 +331,7 @@ void eTimerManager::actionHandler()
 				eString save = nextStartingEvent->service.descr;
 				nextStartingEvent->service.descr = getLeft( nextStartingEvent->service.descr, '/' );
 
-				// get Parentallocking state
+		// get Parentallocking state
 				int pLockActive = eConfig::getInstance()->pLockActive() && nextStartingEvent->service.isLocked();
 
 				if ( pLockActive ) // P Locking is active ?
@@ -334,13 +340,18 @@ void eTimerManager::actionHandler()
 					eConfig::getInstance()->locked=false;  // then disable for zap
 				}
 #ifndef DISABLE_FILE
-// workaround for start recording in background when a playback
-// is running or the service is on the same transponder and satellite
+				if ( eDVB::getInstance()->recorder
+						&& !(nextStartingEvent->type&ePlaylistEntry::doFinishOnly)
+						&& ( !onSameTP(eDVB::getInstance()->recorder->recRef, Ref)
+							|| nextStartingEvent->type & ePlaylistEntry::recDVR ) )
+				{
+					writeToLogfile("must stop running recording :(");
+					eZapMain::getInstance()->recordDVR(0,0);
+				}
+		// workaround for start recording in background when a playback
+		// is running or the service is on the same transponder and satellite
 				if ( (nextStartingEvent->type & ePlaylistEntry::recDVR)
-					&& rec && ( rec.path || ( canHandleTwoServices &&
-					rec.getTransportStreamID() == Ref.getTransportStreamID() &&
-					rec.getOriginalNetworkID() == Ref.getOriginalNetworkID() &&
-					rec.getDVBNamespace() == Ref.getDVBNamespace() ) ) )
+					&& rec && ( rec.path || ( canHandleTwoServices && onSameTP(rec,Ref) ) ) )
 				{
 					eDebug("[eTimerManager] change to service in background :)");
 					writeToLogfile("zap to correct service in background :)");
@@ -354,8 +365,8 @@ void eTimerManager::actionHandler()
 					eDebug("[eTimerManager] must zap in foreground :(");
 					writeToLogfile("zap to correct service in foreground :(");
 					playbackRef=eServiceReference();
-					// switch to service
-					eZapMain::getInstance()->playService( nextStartingEvent->service, eZapMain::psSetMode );
+		// switch to service
+					eZapMain::getInstance()->playService( nextStartingEvent->service, eZapMain::psNoUser|eZapMain::psSetMode );
 				}
 
 				nextStartingEvent->service.descr=save;
@@ -1754,7 +1765,7 @@ void eTimerEditView::createWidgets()
 
 	new eListBoxEntryText( *type, _("switch"), (void*) ePlaylistEntry::SwitchTimerEntry );
 #ifndef DISABLE_FILE
-	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
+	if ( eSystemInfo::getInstance()->canRecordTS() )
 		new eListBoxEntryText( *type, _("record DVR"), (void*) (ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR) );
 #endif
 #ifndef DISABLE_NETWORK
@@ -1764,9 +1775,7 @@ void eTimerEditView::createWidgets()
 #ifndef DISABLE_LIRC
 	switch ( eSystemInfo::getInstance()->getHwType() )
 	{
-		case eSystemInfo::dbox2Nokia:
-		case eSystemInfo::dbox2Philips:
-		case eSystemInfo::dbox2Sagem:
+		case eSystemInfo::dbox2Nokia ... eSystemInfo::dbox2Philips:
 			new eListBoxEntryText( *type, _("Record VCR"), (void*) (ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recVCR) );
 		default:
 			break;
@@ -1789,20 +1798,7 @@ eTimerEditView::eTimerEditView( ePlaylistEntry* e)
 	{
 		multipleChanged( 0 );
 		time_t now = time(0)+eDVB::getInstance()->time_difference;
-		int type =
-			eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5600 ?
-				ePlaylistEntry::SwitchTimerEntry :
-			eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 ?
-#ifndef DISABLE_FILE
-				ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR :
-#else
-				ePlaylistEntry::SwitchTimerEntry :
-#endif
-#ifndef DISABLE_NETWORK
-				ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recNgrab;
-#else
-				ePlaylistEntry::SwitchTimerEntry;
-#endif
+		int type = eSystemInfo::getInstance()->getDefaultTimerType();
 		fillInData( now, 0, type, eServiceInterface::getInstance()->service );
 	}
 	setHelpID(98);

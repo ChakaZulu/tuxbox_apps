@@ -70,8 +70,17 @@ eDVB::eDVB()
 	, DVBCI(0), DVBCI2(0)
 	#endif
 	,state(eDVBState::stateIdle)
+#ifndef DISABLE_NETWORK
 	,udhcpc(0)
+	,delayTimer(eApp)
+#endif
 {
+#ifndef DISABLE_NETWORK
+	CONNECT(delayTimer.timeout, eDVB::restartSamba);
+#ifndef DISABLE_NFS
+	CONNECT(delayTimer.timeout, eDVB::doMounts);
+#endif
+#endif
 	settings=0;
 	time_difference=0;
 
@@ -636,10 +645,9 @@ void eDVB::UDHCPC_DataAvail(eString str)
 	if ( str.find("lease") != eString::npos
 		&& str.find("obtained") != eString::npos )
 	{
-		restartSamba();
-#ifndef DISABLE_NFS
-		doMounts();
-#endif
+// start timer for execute restartSamba and doMounts in 1 second
+// i don't know why the kernel oopses, when i not do this via timer
+		delayTimer.start(2000,true);
 	}
 }
 
@@ -755,18 +763,17 @@ void eDVB::configureNetwork()
 					gateway[0], gateway[1], gateway[2], gateway[3],
 					dns[0], dns[1], dns[2], dns[3]);
 			}
-			restartSamba();
-#ifndef DISABLE_NFS
-			doMounts();
-#endif
+			delayTimer.start(2000,true);
 		}
 	}
+#if 0
 	else
 	{
 		eDebug("[eDVB] disable Network!");
 		system("/sbin/ifconfig eth0 down");
 		system("killall -9 smbd nmbd");
 	}
+#endif
 }
 #endif
 ///////////////////////////////////////////////////////////////////////////////

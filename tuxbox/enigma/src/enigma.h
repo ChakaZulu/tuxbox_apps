@@ -75,7 +75,8 @@ public:
 		return serviceSelector;
 	}
 	void reconfigureHTTPServer();
-	
+	int tts_fd;
+
 	eZap(int argc, char **argv);
 	~eZap();
 };

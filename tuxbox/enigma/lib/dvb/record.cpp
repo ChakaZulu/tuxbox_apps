@@ -355,9 +355,11 @@ void eDVBRecorder::stop()
 	if ( state == stateStopped )
 		return;
 
-	state = stateStopped;
+	eDebug("eDVBRecorder::stop()");
 
 	PatPmtTimer.stop();
+	state = stateStopped;
+
 	int timeout=20;
 	while ( thread_running() && timeout )
 	{

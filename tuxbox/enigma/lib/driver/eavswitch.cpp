@@ -68,10 +68,7 @@ eAVSwitch::eAVSwitch()
 	system = vsPAL;
 
 	useOst =
-		eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM500 ||
-		eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5600 ||
-		eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5620 ||
-		eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000;
+		eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000;
 }
 
 void eAVSwitch::init()

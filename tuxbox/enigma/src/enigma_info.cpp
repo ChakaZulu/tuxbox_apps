@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_info.cpp,v 1.26 2004/03/13 13:58:05 ghostrider Exp $
+ * $Id: enigma_info.cpp,v 1.27 2004/03/24 00:34:13 ghostrider Exp $
  */
 
 #include <enigma_info.h>
@@ -108,28 +108,12 @@ static eString getVersionInfo(const char *info)
 
 class eAboutScreen: public eWindow
 {
-	eLabel *machine, *processor, *frontend, *harddisks, *vendor, *dreamlogo, *version, *translation;
+	eLabel *machine, *processor, *frontend, *harddisks, *vendor, *logo, *version, *dreamlogo, *triaxlogo;
 	eButton *okButton;
 public:
 	eAboutScreen()
 	{
-		const char *magic="";
-
 		setHelpID(43);
-
-		eString translation_info=gettext(magic);
-		unsigned int i;
-		i=translation_info.find("Language-Team:");
-		if (i != eString::npos)
-		{
-			translation_info=translation_info.mid(i+15);
-			translation_info=translation_info.left(translation_info.find('\n'));
-			if (translation_info.find(" <") != eString::npos)
-				translation_info=translation_info.left(translation_info.find(" <"));
-			if (translation_info.find("/") != eString::npos)
-				translation_info[translation_info.find("/")]=':';
-		} else
-			translation_info="";
 
 		machine=new eLabel(this);
 		machine->setName("machine");
@@ -152,15 +136,17 @@ public:
 		dreamlogo=new eLabel(this);
 		dreamlogo->setName("dreamlogo");
 
+		triaxlogo=new eLabel(this);
+		triaxlogo->setName("triaxlogo");
+
 		version=new eLabel(this);
 		version->setName("version");
 
-		translation=new eLabel(this);
-		translation->setName("translation");
-		translation->setText(translation_info);
-
 		if (eSkin::getActive()->build(this, "eAboutScreen"))
 			eFatal("skin load of \"eAboutScreen\" failed");
+
+		dreamlogo->hide();
+		triaxlogo->hide();
 
 		if ( !eSystemInfo::getInstance()->hasHDD() )
 		{
@@ -170,50 +156,9 @@ public:
 				h->hide();
 		}
 
-		dreamlogo->hide();
-
-		switch ( eSystemInfo::getInstance()->getHwType() )
-		{
-			case eSystemInfo::dbox2Nokia:
-				machine->setText("d-Box 2");
-				vendor->setText("Nokia");
-				processor->setText(_("Processor: XPC823, 66MHz"));
-				break;
-			case eSystemInfo::dbox2Philips:
-				machine->setText("d-Box 2");
-				vendor->setText("Philips");
-				processor->setText(_("Processor: XPC823, 66MHz"));
-				break;
-			case eSystemInfo::dbox2Sagem:
-				machine->setText("d-Box 2");
-				vendor->setText("Sagem");
-				processor->setText(_("Processor: XPC823, 66MHz"));
-				break;
-			case eSystemInfo::DM500:
-				machine->setText("DM500");
-				vendor->setText("Dream-Multimedia-TV");
-				dreamlogo->show();
-				processor->setText(_("Processor: STBx25xx, 252MHz"));
-				break;
-			case eSystemInfo::DM5600:
-				machine->setText("DM5600");
-				vendor->setText("Dream-Multimedia-TV");
-				dreamlogo->show();
-				processor->setText(_("Processor: STBx25xx, 252MHz"));
-				break;
-			case eSystemInfo::DM5620:
-				machine->setText("DM5620");
-				vendor->setText("Dream-Multimedia-TV");
-				dreamlogo->show();
-				processor->setText(_("Processor: STBx25xx, 252MHz"));
-				break;
-			case eSystemInfo::DM7000:
-				machine->setText("DM7000");
-				vendor->setText("Dream-Multimedia-TV");
-				dreamlogo->show();
-				processor->setText(_("Processor: STB04500, 252MHz"));
-				break;
-		}
+		machine->setText(eSystemInfo::getInstance()->getModel());
+		vendor->setText(eSystemInfo::getInstance()->getManufacturer());
+		processor->setText(eString().sprintf("Processor: %s", eSystemInfo::getInstance()->getCPUInfo()));
 
 		switch (eSystemInfo::getInstance()->getFEType())
 		{
@@ -230,42 +175,45 @@ public:
 
 		eString sharddisks;
 #ifndef DISABLE_FILE
-		for (int c='a'; c<'h'; c++)
+		if ( eSystemInfo::getInstance()->hasHDD() )
 		{
-			char line[1024];
-			int ok=1;
-			FILE *f=fopen(eString().sprintf("/proc/ide/hd%c/media", c).c_str(), "r");
-			if (!f)
-				continue;
-			if ((!fgets(line, 1024, f)) || strcmp(line, "disk\n"))
-				ok=0;
-			fclose(f);
-			if (ok)
+			for (int c='a'; c<'h'; c++)
 			{
-				FILE *f=fopen(eString().sprintf("/proc/ide/hd%c/model", c).c_str(), "r");
+				char line[1024];
+				int ok=1;
+				FILE *f=fopen(eString().sprintf("/proc/ide/hd%c/media", c).c_str(), "r");
 				if (!f)
 					continue;
-				*line=0;
-				fgets(line, 1024, f);
+				if ((!fgets(line, 1024, f)) || strcmp(line, "disk\n"))
+					ok=0;
 				fclose(f);
-				if (!*line)
-					continue;
-				line[strlen(line)-1]=0;
-				sharddisks+=line;
-				f=fopen(eString().sprintf("/proc/ide/hd%c/capacity", c).c_str(), "r");
-				if (!f)
-					continue;
-				int capacity=0;
-				fscanf(f, "%d", &capacity);
-				fclose(f);
-				sharddisks+=" (";
-				if (c&1)
-					sharddisks+="master";
-				else
-					sharddisks+="slave";
-				if (capacity)
-					sharddisks+=eString().sprintf(", %d MB", capacity/2048);
-				sharddisks+=")\n";
+				if (ok)
+				{
+					FILE *f=fopen(eString().sprintf("/proc/ide/hd%c/model", c).c_str(), "r");
+					if (!f)
+						continue;
+					*line=0;
+					fgets(line, 1024, f);
+					fclose(f);
+					if (!*line)
+						continue;
+					line[strlen(line)-1]=0;
+					sharddisks+=line;
+					f=fopen(eString().sprintf("/proc/ide/hd%c/capacity", c).c_str(), "r");
+					if (!f)
+						continue;
+					int capacity=0;
+					fscanf(f, "%d", &capacity);
+					fclose(f);
+					sharddisks+=" (";
+					if (c&1)
+						sharddisks+="master";
+					else
+						sharddisks+="slave";
+					if (capacity)
+						sharddisks+=eString().sprintf(", %d MB", capacity/2048);
+					sharddisks+=")\n";
+				}
 			}
 		}
 #endif //DISABLE_FILE
@@ -287,10 +235,7 @@ public:
 				eString ver=verid.mid(1, 3);
 				eString date=verid.mid(4, 8);
 //				eString time=verid.mid(12, 4);
-				if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000
-				|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM500
-				|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5600
-				|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5620 )
+				if ( eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000 )
 					version->setText(
 						eString(typea[type%3]) + eString(" ") + ver[0] + "." + ver[1] + "." + ver[2]
 							+ ", " + date.mid(6, 2) + "." + date.mid(4,2) + "." + date.left(4));
@@ -304,6 +249,11 @@ public:
 													);
 			}
 		}
+
+		if ( !strcmp(eSystemInfo::getInstance()->getManufacturer(),"Triax") )
+			triaxlogo->show();
+		else if ( !strcmp(eSystemInfo::getInstance()->getManufacturer(),"Dream-Multimedia-TV") )
+			dreamlogo->show();
 
 		CONNECT(okButton->selected, eWidget::accept);
 	}

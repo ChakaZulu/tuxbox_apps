@@ -200,19 +200,24 @@ void eSocket::notifier(int what)
 
 int eSocket::writeBlock(const char *data, unsigned int len)
 {
+	int err=0;
 	int w=len;
 	if (issocket && writebuffer.empty())
 	{
 		int tw=::send(getDescriptor(), data, len, MSG_NOSIGNAL);
 		if ((tw < 0) && (errno != EWOULDBLOCK))
-			eDebug("write: %m");
-		
+		{
+			if ( errno == EPIPE )  // broken pipe.. (connection closed)
+				++err;
+			else
+				eDebug("write: %m");
+		}
 		if (tw < 0)
 			tw = 0;
 		data+=tw;
 		len-=tw;
 	}
-	if (len)
+	if (len && !err)
 		writebuffer.write(data, len);
 
 	if (!writebuffer.empty())
