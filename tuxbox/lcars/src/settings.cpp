@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: settings.cpp,v $
+Revision 1.10  2002/11/26 20:03:14  TheDOC
+some debug-output and small fixes
+
 Revision 1.9  2002/11/12 19:09:02  obi
 ported to dvb api v3
 
@@ -175,7 +178,7 @@ int settings::find_emmpid(int ca_system_id) {
 	flt.filter.filter[0]=1;
 	flt.filter.mask[0]  =0xFF;
 	flt.timeout=10000;
-	flt.flags=DMX_ONESHOT;
+	flt.flags=DMX_ONESHOT|DMX_IMMEDIATE_START;
 
 	if (ioctl(fd, DMX_SET_FILTER, &flt)<0)
 	{
@@ -183,7 +186,7 @@ int settings::find_emmpid(int ca_system_id) {
 		return 1;
 	}
 
-	ioctl(fd, DMX_START, 0);
+	//ioctl(fd, DMX_START, 0);
 	if ((r=read(fd, buffer, r))<=0)
 	{
 		perror("read");

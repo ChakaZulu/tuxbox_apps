@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: scan.cpp,v $
+Revision 1.18  2002/11/26 20:03:14  TheDOC
+some debug-output and small fixes
+
 Revision 1.17  2002/10/31 19:53:37  TheDOC
 Cablescan should work now with the current (buggy?) drivers (it actually
 works for me)
@@ -227,7 +230,6 @@ channels scan::scanChannels(int type, int start_frequency, int start_symbol, int
 
 				if (tuner_obj->tune(i, 6900))
 				{
-
 					if (pat_obj->readPAT())
 					{
 						channels tmp_channels2(setting, pat_obj, pmt_obj);

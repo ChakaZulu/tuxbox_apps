@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: channels.cpp,v $
+Revision 1.20  2002/11/26 20:03:14  TheDOC
+some debug-output and small fixes
+
 Revision 1.19  2002/10/20 02:03:37  TheDOC
 Some fixes and stuff
 
@@ -336,22 +339,24 @@ void channels::zapCurrentChannel()
 	if (tune(getCurrentTS(), getCurrentONID()))
 	{
 
-		//fprintf(stderr, "Getting pat\n");
+		fprintf(stderr, "Getting pat\n");
 		pat_obj->readPAT();
-		//fprintf(stderr, "Got it\n");
+		fprintf(stderr, "Got it\n");
 	
 		ECM = 0;
 	
 		apid = 0;
 	
-		//fprintf(stderr, "Getting pmt\n");
 		int tmp_pmt = pat_obj->getPMT(getCurrentSID());
-		//fprintf(stderr, "Got it\n");
 	
 		if (tmp_pmt != 0)
 		{
 			setCurrentPMT(pat_obj->getPMT(getCurrentSID()));
-				pmt_data pmt_entry = (pmt_obj->readPMT(getCurrentPMT()));
+			
+			fprintf(stderr, "Getting pmt\n");
+			pmt_data pmt_entry = (pmt_obj->readPMT(getCurrentPMT()));
+			fprintf(stderr, "Got it\n");
+			
 			setCurrentPMTdata(pmt_entry);
 			deleteCurrentAPIDs();
 			number_components = 0;

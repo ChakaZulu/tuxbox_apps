@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: teletext.cpp,v $
+Revision 1.12  2002/11/26 20:03:14  TheDOC
+some debug-output and small fixes
+
 Revision 1.11  2002/11/12 19:09:02  obi
 ported to dvb api v3
 
@@ -96,8 +99,7 @@ void teletext::stopReinsertion()
 
 	std::cout << "Stop reinsertion" << std::endl;
 	
-	if (ioctl(txtfd, DMX_STOP) < 0)
-		perror("DMX_STOP");
+	if (ioctl(txtfd, DMX_STOP, 0) < 0);
 
 	close(txtfd);
 	txtfd = -1;

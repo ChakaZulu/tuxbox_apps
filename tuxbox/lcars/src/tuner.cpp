@@ -16,6 +16,9 @@
 /*
 
 $Log: tuner.cpp,v $
+Revision 1.20  2002/11/26 20:03:14  TheDOC
+some debug-output and small fixes
+
 Revision 1.19  2002/11/16 02:35:13  obi
 clear event before ioctl
 
@@ -238,6 +241,10 @@ bool tuner::tune(unsigned int frequ, unsigned int symbol, int polarization, int 
 		perror("FE_READ_SIGNAL_STRENGTH");
 
 	printf ("... S/N: %d  SigStrength: %d \n",state1,state2);
+	if (event.status & FE_HAS_LOCK)
+		std::cout << "Has lock" << std::endl;
+	else
+		std::cout << "Doesn't have lock" << std::endl;
 #endif
 
 	return (event.status & FE_HAS_LOCK);

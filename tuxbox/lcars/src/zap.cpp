@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: zap.cpp,v $
+Revision 1.11  2002/11/26 20:03:14  TheDOC
+some debug-output and small fixes
+
 Revision 1.10  2002/11/12 19:09:02  obi
 ported to dvb api v3
 
@@ -118,15 +121,16 @@ void zap::close_dev()
 
 void zap::zap_allstop()
 {
-	ioctl(video,DMX_STOP, true);
-	ioctl(audio,DMX_STOP, true);
-	ioctl(pcr,DMX_STOP, true);
-	ioctl(vid, VIDEO_STOP, true);
-	ioctl(aud, AUDIO_STOP, true);
+	ioctl(video,DMX_STOP, 0);
+	ioctl(audio,DMX_STOP, 0);
+	ioctl(pcr,DMX_STOP, 0);
+	ioctl(vid, VIDEO_STOP, 0);
+	ioctl(aud, AUDIO_STOP, 0);
 }
 
 void zap::zap_to(pmt_data pmt, int VPID, int APID, int PCR, int ECM, int SID, int ONID, int TS, int PID1, int PID2)
 {
+	std::cout << "Start Zapping" << std::endl;
 	zap_allstop();
 
 	close(vid);
@@ -249,7 +253,7 @@ void zap::zap_to(pmt_data pmt, int VPID, int APID, int PCR, int ECM, int SID, in
 	}
 
 	old_TS = TS;
-
+	std::cout << "Zapping done" << std::endl;
 }
 
 void zap::zap_audio(int VPID, int APID, int ECM, int SID, int ONID)
@@ -261,7 +265,7 @@ void zap::zap_audio(int VPID, int APID, int ECM, int SID, int ONID)
 	ioctl(avs,AVSIOSMUTE,&i);
 	close(avs);
 	//ioctl(aud, AUDIO_STOP, true);
-	ioctl(audio, DMX_STOP, true);
+	ioctl(audio, DMX_STOP, 0);
 
 	//printf("Zappe auf\nSID: %04x\nVPID: %04x\nAPID: %04x\nECM: %04x\nONID: %04x\n\n", SID, VPID, APID, ECM, ONID);
 

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: pat.cpp,v $
+Revision 1.10  2002/11/26 20:03:14  TheDOC
+some debug-output and small fixes
+
 Revision 1.9  2002/11/12 19:09:02  obi
 ported to dvb api v3
 
@@ -84,8 +87,6 @@ bool pat::readPAT()
 	}
 	r=read(fd, buffer, r);
 
-	close(fd);
-	close(fd);
 	close(fd);
 
 	int transport_stream_id = (buffer[3] << 8) | buffer[4];
