@@ -46,3 +46,36 @@ int convertSetupAlpha2Alpha(unsigned char alpha)
 	return int( float(0x7777/100.)*float(alpha) );
 }
 
+void recalcColor(unsigned char &orginal, int fade)
+{
+	if(fade==100)
+	{
+		return;
+	}
+	int color =  int( float( float(orginal) * float( float(fade) / 100.0)) );
+	if(color>255)
+		color=255;
+	if(color<0)
+		color=0;
+	orginal = color;
+}
+
+void protectColor( unsigned char &r, unsigned char &g, unsigned char &b, bool protect )
+{
+	if (!protect)
+		return;
+	if ((r==0) && (g==0) && (b==0))
+	{
+		r=1;
+		g=1;
+		b=1;
+	}
+}
+
+void fadeColor(unsigned char &r, unsigned char &g, unsigned char &b, int fade, bool protect)
+{
+	recalcColor(r, fade);
+	recalcColor(g, fade);
+	recalcColor(b, fade);
+	protectColor(r,g,b, protect);
+}

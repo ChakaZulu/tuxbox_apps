@@ -32,15 +32,18 @@
 #ifndef __color__
 #define __color__
 
-#define COL_INFOBAR_GREEN		254-8*5-5
-#define COL_INFOBAR_RED 		254-8*5-4
-#define COL_INFOBAR_YELLOW		254-8*5-3
-#define COL_INFOBAR_BLUE		254-8*5-2
-#define COL_INFOBAR_SHADOW		254-8*5-1
-#define COL_INFOBAR			254-8*5
+#define COL_MAXFREE					254-8*6-5
 
-#define COL_MENUHEAD			254-8*4
-#define COL_MENUCONTENT			254-8*3
+#define COL_INFOBAR_GREEN			254-8*6-5
+#define COL_INFOBAR_RED 			254-8*6-4
+#define COL_INFOBAR_YELLOW			254-8*6-3
+#define COL_INFOBAR_BLUE			254-8*6-2
+#define COL_INFOBAR_SHADOW			254-8*6-1
+
+#define COL_INFOBAR					254-8*6
+#define COL_MENUHEAD				254-8*5
+#define COL_MENUCONTENT				254-8*4
+#define COL_MENUCONTENTDARK			254-8*3
 #define COL_MENUCONTENTSELECTED		254-8*2
 #define COL_MENUCONTENTINACTIVE		254-8*1
 
@@ -49,6 +52,7 @@
 int convertSetupColor2RGB(unsigned char r, unsigned char g, unsigned char b);
 int convertSetupAlpha2Alpha(unsigned char alpha);
 
+void fadeColor(unsigned char &r, unsigned char &g, unsigned char &b, int fade, bool protect=true);
 
 #endif
 

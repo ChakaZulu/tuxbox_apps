@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.57 2002/01/30 14:25:56 field Exp $
+// $Id: channellist.cpp,v 1.58 2002/01/30 17:28:37 McClean Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.58  2002/01/30 17:28:37  McClean
+// new channellist painting
+//
 // Revision 1.57  2002/01/30 14:25:56  field
 // Abstandsfix
 //
@@ -223,13 +226,13 @@ CChannelList::CChannelList(int Key=-1, const std::string &Name)
 	name = Name;
 	selected = 0;
 	width = 520;
-	height = 440;
+	height = 420;
 	theight= g_Fonts->menu_title->getHeight();
 	fheight= g_Fonts->channellist->getHeight();
 	listmaxshow = (height-theight-0)/fheight;
 	height = theight+0+listmaxshow*fheight; // recalc height
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
-	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-( height+ info_height+ 5 ) ) / 2) + g_settings.screen_StartY;
+	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-( height+ info_height) ) / 2) + g_settings.screen_StartY;
 	liststart = 0;
 	tuned=0xfffffff;
 }
@@ -715,12 +718,12 @@ void CChannelList::paintDetails(int index)
 {
 	if ( chanlist[index]->currentEvent.description== "" )
 	{
-		g_FrameBuffer->paintBackgroundBoxRel(x, y+ height+ 5, width, info_height);
+		g_FrameBuffer->paintBackgroundBoxRel(x, y+ height, width, info_height);
 	}
 	else
 	{
 		// löschen
-		g_FrameBuffer->paintBoxRel(x, y+ height+ 5, width, info_height, COL_MENUCONTENT);
+		g_FrameBuffer->paintBoxRel(x, y+ height, width, info_height, COL_MENUCONTENTDARK);
 
 		char cNoch[50];
 		char cSeit[50];
@@ -751,26 +754,26 @@ void CChannelList::paintDetails(int index)
 					text1 = text1.substr( 0, pos );
 			} while ( ( pos != -1 ) && ( g_Fonts->channellist->getRenderWidth(text1.c_str())> (width - 30 - seit_len) ) );
 
-			string text3= chanlist[index]->currentEvent.description.substr(text1.length()+ 1, -1).c_str();
+			string text3= chanlist[index]->currentEvent.description.substr(text1.length()+ 1).c_str();
 			if ( text2 != "" )
 				text3= text3+ " · ";
 
 			xstart+= g_Fonts->channellist->getRenderWidth(text3.c_str());
-			g_Fonts->channellist->RenderString(x+ 10, y+ height+ 10+ 2* fheight, width - 30- noch_len, text3.c_str(), COL_MENUCONTENT);
+			g_Fonts->channellist->RenderString(x+ 10, y+ height+ 5+ 2* fheight, width - 30- noch_len, text3.c_str(), COL_MENUCONTENTDARK);
 		}
 
 		if ( text2 != "" )
 		{
 			while ( text2.find_first_of("[ -.+*#?=!$%&/]+") == 0 )
-				text2 = text2.substr( 1, -1 );
+				text2 = text2.substr( 1 );
 			text2 = text2.substr( 0, text2.find("\n") );
-			g_Fonts->channellist_descr->RenderString(x+ xstart, y+ height+ 10+ 2* fheight, width- xstart- 20- noch_len, text2.c_str(), COL_MENUCONTENT);
+			g_Fonts->channellist_descr->RenderString(x+ xstart, y+ height+ 5+ 2* fheight, width- xstart- 20- noch_len, text2.c_str(), COL_MENUCONTENTDARK);
 		}
 
-		g_Fonts->channellist->RenderString(x+ 10, y+ height+ 10+ fheight, width - 30 - seit_len, text1.c_str(), COL_MENUCONTENT);
-		g_Fonts->channellist_descr->RenderString(x+ width- 10- seit_len, y+ height+ 10+ fheight, seit_len, cSeit, COL_MENUCONTENT);
+		g_Fonts->channellist->RenderString(x+ 10, y+ height+ 5+ fheight, width - 30 - seit_len, text1.c_str(), COL_MENUCONTENTDARK);
+		g_Fonts->channellist_descr->RenderString(x+ width- 10- seit_len, y+ height+ 5+ fheight, seit_len, cSeit, COL_MENUCONTENTDARK);
 
-		g_Fonts->channellist_number->RenderString(x+ width- 10- noch_len, y+ height+ 10+ 2* fheight- 2, noch_len, cNoch, COL_MENUCONTENT);
+		g_Fonts->channellist_number->RenderString(x+ width- 10- noch_len, y+ height+ 5+ 2* fheight- 2, noch_len, cNoch, COL_MENUCONTENTDARK);
 	}
 }
 
