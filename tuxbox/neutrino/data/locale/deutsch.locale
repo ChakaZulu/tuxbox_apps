@@ -141,11 +141,11 @@ audioplayer.head Audio Playlist
 audioplayer.name Audioplayer
 audioplayer.playlist_fileerror_msg Datei kann nicht erstellt werden:
 audioplayer.playlist_fileerror_title Fehler
-audioplayer.playlist_fileoverwrite_msg Soll diese Datei ueberschrieben werden:
-audioplayer.playlist_fileoverwrite_title Ueberschreiben?
+audioplayer.playlist_fileoverwrite_msg Soll diese Datei überschrieben werden:
+audioplayer.playlist_fileoverwrite_title Überschreiben?
 audioplayer.playlist_name Dateiname der Playlist
 audioplayer.playlist_name_hint1 Geben Sie den Dateinamen der Playlist ein
-audioplayer.playlist_name_hint2 Die Erweiterung .m3u wird automatisch angehaengt
+audioplayer.playlist_name_hint2 Die Erweiterung .m3u wird automatisch angehängt
 audioplayer.save_playlist Playlist speichern
 audioplayerpicsettings.general Audioplayer / Bildbetrachter
 bookmarkmanager.delete Löschen
