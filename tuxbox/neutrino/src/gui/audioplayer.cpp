@@ -86,7 +86,7 @@
 #endif
 #define ConnectLineBox_Width	15
 
-#define AUDIOPLAYERGUI_SMSKEY_TIMEOUT 750
+#define AUDIOPLAYERGUI_SMSKEY_TIMEOUT 200
 
 //------------------------------------------------------------------------
 
@@ -97,10 +97,10 @@ CAudioPlayerGui::CAudioPlayerGui()
 	visible = false;
 	selected = 0;
 	m_metainfo = "";
-	m_select_title_by_name = g_settings.mp3player_select_title_by_name==1;
+	m_select_title_by_name = g_settings.audioplayer_select_title_by_name==1;
 
-	if(strlen(g_settings.network_nfs_mp3dir)!=0)
-		Path = g_settings.network_nfs_mp3dir;
+	if(strlen(g_settings.network_nfs_audioplayerdir)!=0)
+		Path = g_settings.network_nfs_audioplayerdir;
 	else
 		Path = "/";
 
@@ -130,7 +130,7 @@ int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 {
 	CAudioPlayer::getInstance()->init();
 	m_state=CAudioPlayerGui::STOP;
-	m_select_title_by_name = g_settings.mp3player_select_title_by_name==1;
+	
 	current=-1;
 	selected = 0;
 	width = 710;
@@ -286,7 +286,7 @@ int CAudioPlayerGui::show()
 		if( msg == CRCInput::RC_timeout  || msg == NeutrinoMessages::EVT_TIMER)
 		{
 			int timeout = time(NULL) - m_idletime;
-			int screensaver_timeout = atoi(g_settings.mp3player_screensaver);
+			int screensaver_timeout = atoi(g_settings.audioplayer_screensaver);
 			if(screensaver_timeout !=0 && timeout > screensaver_timeout*60 && !m_screensaver)
 				screensaver(true);
 		}
@@ -438,7 +438,7 @@ int CAudioPlayerGui::show()
 		{
 			if (key_level == 0)
 			{
-				CFileBrowser filebrowser((g_settings.filebrowser_denydirectoryleave) ? g_settings.network_nfs_mp3dir : "");
+				CFileBrowser filebrowser((g_settings.filebrowser_denydirectoryleave) ? g_settings.network_nfs_audioplayerdir : "");
 
 				filebrowser.Multi_Select    = true;
 				filebrowser.Dirs_Selectable = true;
@@ -867,7 +867,7 @@ void CAudioPlayerGui::paintItem(int pos)
 		{
 			// id3tag noch nicht geholt
 			GetMetaData(&playlist[pos + liststart]);
-			if(m_state!=CAudioPlayerGui::STOP && !g_settings.mp3player_highprio)
+			if(m_state!=CAudioPlayerGui::STOP && !g_settings.audioplayer_highprio)
 				usleep(100*1000);
 		}
 		char sNr[20];
@@ -932,21 +932,21 @@ const struct button_label AudioPlayerButtons[6][4] =
 	},
 	{
 		{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_AUDIOPLAYER_JUMP_BACKWARDS              },
-//		{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_AUDIOPLAYER_BUTTON_SELECT_TITLE_BY_NAME },			
-		{ NEUTRINO_ICON_BUTTON_BLUE  , LOCALE_AUDIOPLAYER_JUMP_FORWARDS               }
-	},
-	{
-		{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_AUDIOPLAYER_JUMP_BACKWARDS              },
 //		{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_AUDIOPLAYER_BUTTON_SELECT_TITLE_BY_ID   },			
 		{ NEUTRINO_ICON_BUTTON_BLUE  , LOCALE_AUDIOPLAYER_JUMP_FORWARDS               }
 	},
 	{
-		{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_AUDIOPLAYER_SAVE_PLAYLIST               },
-		{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_AUDIOPLAYER_BUTTON_SELECT_TITLE_BY_NAME },			
+		{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_AUDIOPLAYER_JUMP_BACKWARDS              },
+//		{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_AUDIOPLAYER_BUTTON_SELECT_TITLE_BY_NAME },			
+		{ NEUTRINO_ICON_BUTTON_BLUE  , LOCALE_AUDIOPLAYER_JUMP_FORWARDS               }
 	},
 	{
 		{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_AUDIOPLAYER_SAVE_PLAYLIST               },
 		{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_AUDIOPLAYER_BUTTON_SELECT_TITLE_BY_ID   },			
+	},
+	{
+		{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_AUDIOPLAYER_SAVE_PLAYLIST               },
+		{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_AUDIOPLAYER_BUTTON_SELECT_TITLE_BY_NAME },			
 	}
 
 };
@@ -1027,13 +1027,13 @@ void CAudioPlayerGui::paintInfo()
 			tmp = curr_audiofile.Artist;
 		else if (curr_audiofile.Artist.empty())
 			tmp = curr_audiofile.Title;
-		else if (g_settings.mp3player_display == TITLE_ARTIST)
+		else if (g_settings.audioplayer_display == TITLE_ARTIST)
 		{
 			tmp = curr_audiofile.Title;
 			tmp += " / ";
 			tmp += curr_audiofile.Artist;
 		}
-		else //if(g_settings.mp3player_display == ARTIST_TITLE)
+		else //if(g_settings.audioplayer_display == ARTIST_TITLE)
 		{
 			tmp = curr_audiofile.Artist;
 			tmp += " / ";
@@ -1237,16 +1237,16 @@ void CAudioPlayerGui::play(int pos)
 	unsigned int old_selected=selected;
 
 	current=pos;
-	if(g_settings.mp3player_follow)
+	if(g_settings.audioplayer_follow)
 		selected=pos;
 
-	if(selected - liststart >= listmaxshow && g_settings.mp3player_follow)
+	if(selected - liststart >= listmaxshow && g_settings.audioplayer_follow)
 	{
 		liststart=selected;
 		if(!m_screensaver)
 			paint();
 	}
-	else if(liststart - selected < 0 && g_settings.mp3player_follow)
+	else if(liststart - selected < 0 && g_settings.audioplayer_follow)
 	{
 		liststart=selected-listmaxshow+1;
 		if(!m_screensaver)
@@ -1264,7 +1264,7 @@ void CAudioPlayerGui::play(int pos)
 			if(!m_screensaver)
 				paintItem(pos - liststart);
 		}
-		if(g_settings.mp3player_follow)
+		if(g_settings.audioplayer_follow)
 		{
 			if(old_selected - liststart >=0 && old_selected - liststart < listmaxshow)
 				if(!m_screensaver)
@@ -1283,7 +1283,7 @@ void CAudioPlayerGui::play(int pos)
 	m_state=CAudioPlayerGui::PLAY;
 	curr_audiofile = playlist[current];
 	// Play
-	CAudioPlayer::getInstance()->play(curr_audiofile.Filename.c_str(), g_settings.mp3player_highprio==1); 
+	CAudioPlayer::getInstance()->play(curr_audiofile.Filename.c_str(), g_settings.audioplayer_highprio==1); 
 	//LCD
 	paintLCD();
 	// Display
@@ -1460,13 +1460,13 @@ void CAudioPlayerGui::getFileInfoToDisplay(std::string& fileInfo, int pos, bool 
 	if (!file.Title.empty())
 		title = file.Title;
 
-	if(g_settings.mp3player_display == TITLE_ARTIST)
+	if(g_settings.audioplayer_display == TITLE_ARTIST)
 	{
 		fileInfo += title;
 		fileInfo += ", ";
 		fileInfo += artist;
 	}
-	else //if(g_settings.mp3player_display == ARTIST_TITLE)
+	else //if(g_settings.audioplayer_display == ARTIST_TITLE)
 	{
 		fileInfo += artist;
 		fileInfo += ", ";
@@ -1543,7 +1543,7 @@ void CAudioPlayerGui::GetMetaData(CAudiofile *File)
 {
 	CAudioMetaData m=CAudioPlayer::getInstance()->readMetaData(File->Filename.c_str(), 
 																				  m_state!=CAudioPlayerGui::STOP && 
-																				  !g_settings.mp3player_highprio);
+																				  !g_settings.audioplayer_highprio);
 
 	File->Title = m.title;
 	File->Artist = m.artist;
@@ -1617,8 +1617,8 @@ void CAudioPlayerGui::savePlaylist()
 	dirFilter.addFilter("m3u");
 	browser.Filter = &dirFilter;
 	// select preferred directory if exists
-	if (strlen(g_settings.network_nfs_mp3dir) != 0)
-		path = g_settings.network_nfs_mp3dir;
+	if (strlen(g_settings.network_nfs_audioplayerdir) != 0)
+		path = g_settings.network_nfs_audioplayerdir;
 	else
 		path = "/";
 	
