@@ -1,12 +1,11 @@
 /*
-        $Header: /cvs/tuxbox/apps/tuxbox/libs/liblcddisplay/fontrenderer.cpp,v 1.7 2003/02/01 03:32:43 zwen Exp $        
+        $Header: /cvs/tuxbox/apps/tuxbox/libs/liblcddisplay/fontrenderer.cpp,v 1.8 2003/02/09 15:04:54 thegoodguy Exp $        
 
 	LCD-Daemon  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
+	Copyright (C) 2003 thegoodguy
 		baseroutines by tmbinc
-	Homepage: http://dbox.cyberphoria.org/
-
 
 
 	License: GPL
@@ -26,17 +25,15 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "fontrenderer.h"
 #include <config.h>
 
-#include <freetype/freetype.h>
+#include "fontrenderer.h"
 
-  /* showing driver name */
-#include <freetype/ftmodule.h>
-#include <freetype/internal/ftobjs.h>
-#include <freetype/internal/ftdriver.h>
+#include <stdio.h>
+#include <string.h>
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
 FT_Error LcdFontRenderClass::myFTC_Face_Requester(FTC_FaceID  face_id,
                             FT_Library  library,
@@ -47,7 +44,7 @@ FT_Error LcdFontRenderClass::myFTC_Face_Requester(FTC_FaceID  face_id,
 }
 
 
-LcdFontRenderClass::LcdFontRenderClass(CLCDDisplay *fb)
+LcdFontRenderClass::LcdFontRenderClass(CLCDDisplay * fb)
 {
 	framebuffer = fb;
 	printf("[LCDFONT] initializing core...");
@@ -138,9 +135,9 @@ int LcdFontRenderClass::AddFont(const char *filename)
 		printf(" failed: %i\n", error);
 		return error;
 	}
-	strcpy(n->filename=new char[strlen(filename)], filename);
-	strcpy(n->family=new char[strlen(filename)], face->family_name);
-	strcpy(n->style=new char[strlen(filename)], face->style_name);
+	n->filename = strdup(filename);
+	n->family   = strdup(face->family_name);
+	n->style    = strdup(face->style_name);
 	FT_Done_Face(face);
 
 	n->next=font;
@@ -164,7 +161,7 @@ LcdFont *LcdFontRenderClass::getFont(const char *family, const char *style, int 
 	return new LcdFont(framebuffer, this, id, size);
 }
 
-LcdFont::LcdFont(CLCDDisplay *fb, LcdFontRenderClass *render, FTC_FaceID faceid, int isize)
+LcdFont::LcdFont(CLCDDisplay * fb, LcdFontRenderClass *render, FTC_FaceID faceid, int isize)
 {
 	framebuffer=fb;
 	renderer=render;
@@ -225,7 +222,7 @@ int UTF8ToUnicode(const char * &text, const bool utf8_encoded) // returns -1 on 
 	return unicode_value;
 }
 
-void LcdFont::RenderString(int x, int y, int width, const char * text, int color, int selected, const bool utf8_encoded)
+void LcdFont::RenderString(int x, int y, const int width, const char * text, const int color, const int selected, const bool utf8_encoded)
 {
 	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
 	{ 
