@@ -2012,7 +2012,7 @@ void eZapMain::updateProgress()
 		tm *t=localtime(&c);
 		if (t && eDVB::getInstance()->time_difference)
 		{
-			if ((cur_start <= c) && (c < cur_start+cur_duration))
+			if ((cur_start <= c) && (c < cur_start+cur_duration) && cur_start != -1)
 			{
 				Progress->setPerc((c-cur_start)*100/cur_duration);
 				int show_current_remaining=1;
@@ -2028,7 +2028,8 @@ void eZapMain::updateProgress()
 #endif
 			} else
 			{
-				EINowDuration->setText(eString().sprintf("%d min", cur_duration / 60));
+				if ( cur_duration != -1 )
+					EINowDuration->setText(eString().sprintf("%d min", cur_duration / 60));
 				Progress->hide();
 #ifndef DISABLE_LCD
 				pLCD->lcdMain->Progress->hide();
@@ -5325,6 +5326,7 @@ void eZapMain::timeOut()
 
 void eZapMain::leaveService()
 {
+	cur_start=cur_duration=cur_event_id=-1;
 	ButtonGreenDis->show();
 	ButtonGreenEn->hide();
 	ButtonYellowDis->show();

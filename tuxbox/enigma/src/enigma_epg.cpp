@@ -40,6 +40,7 @@ eZapEPG::eZapEPG()
 	:eWidget(0,1), offs(0), focusColumn(0), hours(3)
 	,numservices(8), eventWidget(0), NowTimeLineXPos(-1)
 {
+	eConfig::getInstance()->getKey("/elitedvb/multiepg/hours", hours);
 	move(ePoint(70, 50));
 	resize(eSize(590, 470));
 	timeLine.setAutoDelete(true);
@@ -82,6 +83,11 @@ eZapEPG::eZapEPG()
 	l->setFlags( eLabel::flagVCenter );
 
 	setHelpID(13);
+}
+
+eZapEPG::~eZapEPG()
+{
+	eConfig::getInstance()->setKey("/elitedvb/multiepg/hours", hours);
 }
 
 void eZapEPG::addToList( const eServiceReference& ref )

@@ -516,8 +516,10 @@ void eServiceHandlerDVB::scrambledStatusChanged(bool scrambled)
 		serviceEvent(eServiceEvent(eServiceEvent::evtFlagsChanged) );
 }
 
-void eServiceHandlerDVB::switchedService(const eServiceReferenceDVB &, int err)
+void eServiceHandlerDVB::switchedService(const eServiceReferenceDVB &s, int err)
 {
+	if ( !s )
+		return;
 	int oldstate=state;
 	error = err;
 	if (error)
@@ -546,9 +548,10 @@ void eServiceHandlerDVB::gotPMT(PMT *)
 	serviceEvent(eServiceEvent(eServiceEvent::evtGotPMT));
 }
 
-void eServiceHandlerDVB::leaveService(const eServiceReferenceDVB &)
+void eServiceHandlerDVB::leaveService(const eServiceReferenceDVB &e)
 {
-	serviceEvent(eServiceEvent(eServiceEvent::evtStop));
+	if ( e )
+		serviceEvent(eServiceEvent(eServiceEvent::evtStop));
 }
 
 void eServiceHandlerDVB::aspectRatioChanged(int isanamorph)

@@ -66,6 +66,7 @@ public:
 	std::list<serviceentry>::iterator& getCurSelected() { return current_service; }
 	void addToList( const eServiceReference& ref );
 	eZapEPG();
+	~eZapEPG();
 	void buildPage(int direction);
 };
 
