@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: evp.cpp,v 1.2 2002/03/12 19:37:03 waldi Exp $
+ * $Id: evp.cpp,v 1.3 2002/05/24 16:33:33 waldi Exp $
  */
 
 #include <main.hpp>
@@ -43,7 +43,7 @@ Crypto::evp::key::key::item::~item ()
     libcrypto::EVP_PKEY_free ( key );
 }
 
-Crypto::evp::key::key::key ( libcrypto::EVP_PKEY * _key = NULL )
+Crypto::evp::key::key::key ( libcrypto::EVP_PKEY * _key )
 : _item ( new item ( _key ) )
 { }
 
@@ -126,10 +126,10 @@ void Crypto::evp::key::privatekey::read ( std::istream & stream )
   Crypto::bio::istream bio ( stream );
   libcrypto::EVP_PKEY * temp = libcrypto::PEM_read_bio_PrivateKey ( bio, NULL, NULL, NULL );
 
-  _item = new item ( temp );
-
   if ( ! temp )
     throw Crypto::exception::evp::bad_decrypt ( Crypto::lib::get_last_error () );
+
+  _item = new item ( temp );
 }
 
 void Crypto::evp::key::privatekey::read ( std::istream & stream, const std::string & _passphrase )
@@ -145,10 +145,10 @@ void Crypto::evp::key::privatekey::read ( std::istream & stream, const std::stri
   libcrypto::EVP_PKEY * temp = libcrypto::PEM_read_bio_PrivateKey ( bio, NULL, &callback, reinterpret_cast < void * > ( this ) );
   passphrase.clear ();
 
-  _item = new item ( temp );
-
   if ( ! temp )
     throw Crypto::exception::evp::bad_decrypt ( Crypto::lib::get_error () );
+
+  _item = new item ( temp );
 }
 
 void Crypto::evp::key::privatekey::write ( std::ostream & stream )
@@ -324,7 +324,7 @@ std::string Crypto::evp::sign::final ( Crypto::evp::key::privatekey & key )
 
   ret = libcrypto::EVP_SignFinal ( &ctx, buf, &s, key );
 
-  if ( ret == 0 )
+  if ( ! ret )
     throw std::runtime_error ( Crypto::lib::get_error () );
 
   return std::string ( reinterpret_cast < char * > ( buf ), s );

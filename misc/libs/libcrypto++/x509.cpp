@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: x509.cpp,v 1.2 2002/03/12 19:37:03 waldi Exp $
+ * $Id: x509.cpp,v 1.3 2002/05/24 16:33:33 waldi Exp $
  */
 
 #include <main.hpp>
@@ -32,7 +32,7 @@ namespace libcrypto
   #include <openssl/pem.h>
 }
 
-Crypto::x509::cert::cert ( libcrypto::X509 * _cert = NULL ) throw ()
+Crypto::x509::cert::cert ( libcrypto::X509 * _cert ) throw ()
 : _cert ( _cert )
 { }
 

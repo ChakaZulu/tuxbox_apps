@@ -8,6 +8,6 @@ libcrypto___la_SOURCES = \
 	rsa.cpp \
 	x509.cpp
 
-CXXFLAGS = @CXXFLAGS@
-
 libcrypto___la_LDFLAGS = -lcrypto
+
+AM_CXXFLAGS = -fno-rtti
