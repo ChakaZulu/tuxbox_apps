@@ -10,260 +10,14 @@
 int *fbvnc_keymap;
 struct hbtn hbtn;
 static int caps_lock=0;
+/*
+shift_l, shift_r, altgr,
+mouse1, mouse2, mouse3,
+pan, action
+*/                                                                
+
+#ifndef HAVE_DREAMBOX_HARDWARE
 static int keys_sent_map[N_SCANCODE];
-
-static int fbvnc_keymap_ps2_de[N_SCANCODE*4] = {
-	0, 0, 0, 0,				/* 0 */
-	XK_Escape, 0, 0, 0,
-	XK_1, XK_exclam, 0, 0,
-	XK_2, XK_quotedbl, XK_twosuperior, 0,
-	XK_3, XK_section, XK_threesuperior, 0,
-	XK_4, XK_dollar, 0, 0,
-	XK_5, XK_percent, 0, 0,
-	XK_6, XK_ampersand, 0, 0,
-	XK_7, XK_slash, XK_braceleft, 0,
-	XK_8, XK_parenleft, XK_bracketleft, 0,
-	XK_9, XK_parenright, XK_bracketright, 0,		/* 10 */
-	XK_0, XK_equal, XK_braceright, 0,
-	XK_ssharp, XK_question, XK_backslash, 0,
-	XK_apostrophe, XK_grave, 0, 0,
-	XK_BackSpace, 0, 0, 0,
-	XK_Tab, 0, 0, 0,	
-	XK_q, XK_Q, XK_at, 0,
-	XK_w, XK_W, 0, 0,
-	XK_e, XK_E, 0, 0,
-	XK_r, XK_R, 0, 0,
-	XK_t, XK_T, 0, 0,			/* 20 */
-	XK_z, XK_Z, 0, 0,
-	XK_u, XK_U, 0, 0,
-	XK_i, XK_I, 0, 0,
-	XK_o, XK_O, 0, 0,
-	XK_p, XK_P, 0, 0,	
-	XK_udiaeresis, XK_Udiaeresis, 0, 0,
-	XK_plus, XK_asterisk, XK_asciitilde, 0,
-	XK_Return, 0, 0, 0,
-	XK_Control_L, 0, 0, 0,
-	XK_a, XK_A, 0, 0,	/* 30 */
-	XK_s, XK_S, 0, 0,
-	XK_d, XK_D, 0, 0,
-	XK_f, XK_F, 0, 0,
-	XK_g, XK_G, 0, 0,
-	XK_h, XK_H, 0, 0,
-	XK_j, XK_J, 0, 0,
-	XK_k, XK_K, 0, 0,
-	XK_l, XK_L, 0, 0,
-	XK_odiaeresis, XK_Odiaeresis, 0, 0,
-	XK_adiaeresis, XK_Adiaeresis, 0, 0,	/* 40 */
-	XK_asciicircum, XK_degree, 0, 0,
-	XK_Shift_L, 0, 0, 0,
-	XK_numbersign, XK_apostrophe, 0, 0,
-	XK_y, XK_Y, 0, 0,
-	XK_x, XK_X, 0, 0,
-	XK_c, XK_C, 0, 0,
-	XK_v, XK_V, 0, 0,
-	XK_b, XK_B, 0, 0,
-	XK_n, XK_N, 0, 0,
-	XK_m, XK_M, XK_mu, 0,			/* 50 */
-	XK_comma, XK_semicolon, 0, 0,
-	XK_period, XK_colon, 0, 0,
-	XK_minus, XK_underscore, 0, 0,
-	XK_Shift_R, 0, 0, 0,
-	XK_KP_Multiply, 0, 0, 0,
-	XK_Alt_L, 0, 0, 0,
-	XK_space, 0, 0, 0,
-	XK_Control_L /* Caps_Lock */, 0, 0, 0,
-	XK_F1, 0, 0, 0,
-	XK_F2, 0, 0, 0,			/* 60 */
-	XK_F3, 0, 0, 0,
-	XK_F4, 0, 0, 0,
-	XK_F5, 0, 0, 0,
-	XK_F6, 0, 0, 0,
-	XK_F7, 0, 0, 0,
-	XK_F8, 0, 0, 0,
-	XK_F9, 0, 0, 0,
-	XK_F10, 0, 0, 0,
-	XK_Num_Lock, 0, 0, 0,
-	XK_Scroll_Lock, 0, 0, 0,	/* 70 */
-	XK_KP_7, 0, 0, 0,
-	XK_KP_8, 0, 0, 0,
-	XK_KP_9, 0, 0, 0,
-	XK_KP_Subtract, 0, 0, 0,
-	XK_KP_4, 0, 0, 0,
-	XK_KP_5, 0, 0, 0,
-	XK_KP_6, 0, 0, 0,
-	XK_KP_Add, 0, 0, 0,
-	XK_KP_1, 0, 0, 0,
-	XK_KP_2, 0, 0, 0,		/* 80 */
-	XK_KP_3, 0, 0, 0,
-	XK_KP_0, 0, 0, 0,
-	XK_KP_Separator, 0, 0, 0,
-	0, 0, 0, 0,
-	0, 0, 0, 0,
-	XK_less, XK_greater, XK_bar, 0,
-	XK_F11, 0, 0, 0,
-	XK_F12, 0, 0, 0,
-	0, 0, 0, 0,
-	0, 0, 0, 0,				/* 90 */
-	0, 0, 0, 0,
-	0, 0, 0, 0,
-	0, 0, 0, 0,
-	0, 0, 0, 0,
-	0, 0, 0, 0,
-	XK_KP_Enter, 0, 0, 0,
-	XK_Control_R, 0, 0, 0,
-	XK_KP_Divide, 0, 0, 0,
-	XK_Print, 0, 0, 0,
-	0 /* XK_Alt_R */, 0, 0, 0,		/* 100 */
-	XK_Break, 0, 0, 0,
-	XK_Home, 0, 0, 0,
-	XK_Up, 0, 0, 0,
-	XK_Prior, 0, 0, 0,
-	XK_Left, 0, 0, 0,
-	XK_Right, 0, 0, 0,
-	XK_End, 0, 0, 0,
-	XK_Down, 0, 0, 0,
-	XK_Next, 0, 0, 0,
-	XK_Insert, 0, 0, 0,		/* 110 */
-	XK_Delete, 0, 0, 0,
-	0, 0, 0, 0,
-	0, 0, 0, 0,
-	0, 0, 0, 0,
-	0, 0, 0, 0,
-	0, 0, 0, 0,
-	0, 0, 0, 0,
-	0, 0, 0, 0,
-	XK_Pause, 0, 0, 0,
-};
-
-static int fbvnc_keymap_ps2_us[N_SCANCODE*4] = {
-	0, 0, 0, 0,				/* 0 */
-	XK_Escape, 0, 0, 0,
-	XK_1, XK_exclam, 0, 0,
-	XK_2, XK_at, 0, 0,
-	XK_3, XK_numbersign, 0, 0,
-	XK_4, XK_dollar, 0, 0,
-	XK_5, XK_percent, 0, 0,
-	XK_6, XK_asciicircum, 0, 0,
-	XK_7, XK_ampersand, 0, 0,
-	XK_8, XK_asterisk, 0, 0,
-	XK_9, XK_parenleft, 0, 0,		/* 10 */
-	XK_0, XK_parenright, 0, 0,
-	XK_minus, XK_underscore, 0, 0,
-	XK_equal, XK_plus, 0, 0,
-	XK_BackSpace, 0, 0, 0,
-	XK_Tab, 0, 0, 0,	
-	XK_q, XK_Q, 0, 0,
-	XK_w, XK_W, 0, 0,
-	XK_e, XK_E, 0, 0,
-	XK_r, XK_R, 0, 0,
-	XK_t, XK_T, 0, 0,			/* 20 */
-	XK_y, XK_Y, 0, 0,
-	XK_u, XK_U, XK_udiaeresis, XK_Udiaeresis,
-	XK_i, XK_I, 0, 0,
-	XK_o, XK_O, XK_odiaeresis, XK_Odiaeresis,
-	XK_p, XK_P, 0, 0,	
-	XK_bracketleft, XK_braceleft, 0, 0,
-	XK_bracketright, XK_braceright, 0, 0,
-	XK_Return, 0, 0, 0,
-	XK_Control_L, 0, 0, 0,
-	XK_a, XK_A, XK_adiaeresis, XK_Adiaeresis,	/* 30 */
-	XK_s, XK_S, XK_ssharp, 0,
-	XK_d, XK_D, 0, 0,
-	XK_f, XK_F, 0, 0,
-	XK_g, XK_G, 0, 0,
-	XK_h, XK_H, 0, 0,
-	XK_j, XK_J, 0, 0,
-	XK_k, XK_K, 0, 0,
-	XK_l, XK_L, 0, 0,
-	XK_semicolon, XK_colon, 0, 0,
-	XK_apostrophe, XK_quotedbl, 0, 0,	/* 40 */
-	XK_grave, XK_asciitilde, 0, 0,
-	XK_Shift_L, 0, 0, 0,
-	XK_backslash, XK_bar, 0, 0,
-	XK_z, XK_Z, 0, 0,
-	XK_x, XK_X, 0, 0,
-	XK_c, XK_C, 0, 0,
-	XK_v, XK_V, 0, 0,
-	XK_b, XK_B, 0, 0,
-	XK_n, XK_N, 0, 0,
-	XK_m, XK_M, 0, 0,			/* 50 */
-	XK_comma, XK_less, 0, 0,
-	XK_period, XK_greater, 0, 0,
-	XK_slash, XK_question, 0, 0,
-	XK_Shift_R, 0, 0, 0,
-	XK_KP_Multiply, 0, 0, 0,
-	XK_Alt_L, 0, 0, 0,
-	XK_space, 0, 0, 0,
-	XK_Control_L /* Caps_Lock */, 0, 0, 0,
-	XK_F1, 0, 0, 0,
-	XK_F2, 0, 0, 0,			/* 60 */
-	XK_F3, 0, 0, 0,
-	XK_F4, 0, 0, 0,
-	XK_F5, 0, 0, 0,
-	XK_F6, 0, 0, 0,
-	XK_F7, 0, 0, 0,
-	XK_F8, 0, 0, 0,
-	XK_F9, 0, 0, 0,
-	XK_F10, 0, 0, 0,
-	XK_Num_Lock, 0, 0, 0,
-	XK_Scroll_Lock, 0, 0, 0,	/* 70 */
-	XK_KP_7, 0, 0, 0,
-	XK_KP_8, 0, 0, 0,
-	XK_KP_9, 0, 0, 0,
-	XK_KP_Subtract, 0, 0, 0,
-	XK_KP_4, 0, 0, 0,
-	XK_KP_5, 0, 0, 0,
-	XK_KP_6, 0, 0, 0,
-	XK_KP_Add, 0, 0, 0,
-	XK_KP_1, 0, 0, 0,
-	XK_KP_2, 0, 0, 0,		/* 80 */
-	XK_KP_3, 0, 0, 0,
-	XK_KP_0, 0, 0, 0,
-	XK_KP_Separator, 0, 0, 0,
-	0, 0, 0, 0,
-	0, 0, 0, 0,
-	XK_less, XK_greater, XK_bar, 0,
-	XK_F11, 0, 0, 0,
-	XK_F12, 0, 0, 0,
-	0, 0, 0, 0,
-	0, 0, 0, 0,				/* 90 */
-	0, 0, 0, 0,
-	0, 0, 0, 0,
-	0, 0, 0, 0,
-	0, 0, 0, 0,
-	0, 0, 0, 0,
-	XK_KP_Enter, 0, 0, 0,
-	XK_Control_R, 0, 0, 0,
-	XK_KP_Divide, 0, 0, 0,
-	XK_Print, 0, 0, 0,
-	0 /* XK_Alt_R */, 0, 0, 0,		/* 100 */
-	XK_Break, 0, 0, 0,
-	XK_Home, 0, 0, 0,
-	XK_Up, 0, 0, 0,
-	XK_Prior, 0, 0, 0,
-	XK_Left, 0, 0, 0,
-	XK_Right, 0, 0, 0,
-	XK_End, 0, 0, 0,
-	XK_Down, 0, 0, 0,
-	XK_Next, 0, 0, 0,
-	XK_Insert, 0, 0, 0,		/* 110 */
-	XK_Delete, 0, 0, 0,
-	0, 0, 0, 0,
-	0, 0, 0, 0,
-	0, 0, 0, 0,
-	0, 0, 0, 0,
-	0, 0, 0, 0,
-	0, 0, 0, 0,
-	0, 0, 0, 0,
-	XK_Pause, 0, 0, 0,
-};
-
-static struct hbtn
-hbtn_ps2 = {
-	42, 54, 100,
-	-1, -1, -1,
-	119, 97,
-};
 
 static int fbvnc_keymap_dbox[N_SCANCODE*4] = {
 	0, 0, 0, 0,				/* 0 */
@@ -281,7 +35,7 @@ static int fbvnc_keymap_dbox[N_SCANCODE*4] = {
 	XK_ssharp, XK_question, XK_backslash, 0,
 	XK_apostrophe, XK_grave, 0, 0,
 	XK_BackSpace, 0, 0, 0,
-	XK_Tab, 0, 0, 0,	
+	XK_Tab, 0, 0, 0,
 	XK_q, XK_Q, XK_at, 0,
 	XK_w, XK_W, 0, 0,
 	XK_e, XK_E, 0, 0,
@@ -291,7 +45,7 @@ static int fbvnc_keymap_dbox[N_SCANCODE*4] = {
 	XK_u, XK_U, 0, 0,
 	XK_i, XK_I, 0, 0,
 	XK_o, XK_O, 0, 0,
-	XK_p, XK_P, 0, 0,	
+	XK_p, XK_P, 0, 0,
 	XK_udiaeresis, XK_Udiaeresis, 0, 0,
 	XK_plus, XK_asterisk, XK_asciitilde, 0,
 	XK_Return, 0, 0, 0,
@@ -387,11 +141,8 @@ static int fbvnc_keymap_dbox[N_SCANCODE*4] = {
 	0, 0, 0, 0,
 	XK_Pause, 0, 0, 0,
 };
-/*
-shift_l, shift_r, altgr,
-mouse1, mouse2, mouse3,
-pan, action
-*/                                                                
+#endif	
+
 static struct hbtn
 hbtn_dbox = {
 	KEY_LEFTSHIFT, KEY_RIGHTSHIFT, KEY_RIGHTALT,
@@ -402,18 +153,10 @@ hbtn_dbox = {
 void
 init_keyboard(void)
 {
-	if (!strcmp(hwType, "ps2de")) {
-		fbvnc_keymap = fbvnc_keymap_ps2_de;
-		hbtn = hbtn_ps2;
-	} else if (!strcmp(hwType, "ps2us") || !strcmp(hwType, "ps2")) {
-		fbvnc_keymap = fbvnc_keymap_ps2_us;
-		hbtn = hbtn_ps2;
-	} else if (!strcmp(hwType, "dbox")) {
+#ifndef HAVE_DREAMBOX_HARDWARE
 		fbvnc_keymap = fbvnc_keymap_dbox;
+#endif
 		hbtn = hbtn_dbox;
-	} else {
-		cleanup_and_exit("unknown hardware type", EXIT_ERROR);
-	}
 	memset(btn_state,0 , N_SCANCODE);
 }
 
@@ -447,7 +190,6 @@ key_special_action(int key)
 {
 	dprintf("fn_action=%d, btn_state[hbtn.action]=%d\n",
 			fn_action, btn_state[hbtn.action]);
-
 	if (! (fn_action || btn_state[hbtn.action])) return 0;
 
 	if (key==XK_bracketleft || key==XK_Next) {
@@ -482,11 +224,14 @@ key_special_action(int key)
 int  /* keysym */
 key_map(int hwkey)
 {
+#ifdef HAVE_DREAMBOX_HARDWARE
+	fn_action = 0;
+	return hwkey;
+#else
 	int pos;
 	int key;
 
 	if (hwkey < 0 || hwkey >= N_SCANCODE) return 0;
-
 	pos=hwkey*4;
 	if (!fbvnc_keymap[pos]) return 0;
 	
@@ -503,6 +248,7 @@ key_map(int hwkey)
 	key = fbvnc_keymap[pos];
 
 	return key;
+#endif
 }
 
 void
@@ -521,7 +267,9 @@ key_press(int hwkey) {
 		schedule_add(sched, kbdDelay, FBVNC_EVENT_KEYREPEAT);
 	}
 
+#ifndef HAVE_DREAMBOX_HARDWARE
 	keys_sent_map[hwkey] = key;
+#endif
 	dprintf("key_press: hwkey=%d, keysym=%d\n", hwkey, key);
 	SendKeyEvent(key, 1);
 }
@@ -532,9 +280,13 @@ key_release(int hwkey)
 	int key;
 
 	if (fn_action) return;
+#ifdef HAVE_DREAMBOX_HARDWARE
+	key = hwkey;
+#else
 	if (hwkey < 0 || hwkey >= N_SCANCODE) return;
 
 	key = keys_sent_map[hwkey];
+#endif
 	dprintf("key_release: hwkey=%d, keysym=%d\n", hwkey, key);
 	SendKeyEvent(key, 0);
 

@@ -1,8 +1,37 @@
 #ifndef _INPUT_FAKE_H
 #define _INPUT_FAKE_H
 
+
 #include <linux/input.h>
 
+#ifdef HAVE_DREAMBOX_HARDWARE
+#define DREAM_KEY_0		0x5C00
+#define DREAM_KEY_1		0x5C01
+#define DREAM_KEY_2		0x5C02
+#define DREAM_KEY_3		0x5C03
+#define DREAM_KEY_4		0x5C04
+#define DREAM_KEY_5		0x5C05
+#define DREAM_KEY_6		0x5C06
+#define DREAM_KEY_7		0x5C07
+#define DREAM_KEY_8		0x5C08
+#define DREAM_KEY_9		0x5C09
+#define DREAM_KEY_POWER	0x5C0C
+#define DREAM_KEY_UP		0x5C0E
+#define DREAM_KEY_DOWN	0x5C0F
+#define DREAM_KEY_VOLUMEUP	0x5C16
+#define DREAM_KEY_VOLUMEDOWN	0x5C17
+#define DREAM_KEY_HOME	0x5C20
+#define DREAM_KEY_SETUP	0x5C27
+#define DREAM_KEY_MUTE	0x5C28
+#define DREAM_KEY_RED		0x5C2D
+#define DREAM_KEY_RIGHT	0x5C2E
+#define DREAM_KEY_LEFT	0x5C2F
+#define DREAM_KEY_OK		0x5C30
+#define DREAM_KEY_BLUE	0x5C3B
+#define DREAM_KEY_YELLOW	0x5C52
+#define DREAM_KEY_GREEN	0x5C55
+#define DREAM_KEY_HELP	0x5C82
+#endif
 
 #if !defined(KEY_OK)
 

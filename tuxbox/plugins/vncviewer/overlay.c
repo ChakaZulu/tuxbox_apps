@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
@@ -10,13 +11,42 @@
 #include "overlay.h"
 #include "icons.h"
 #include "list.h"
+#include "input_fake.h"
+
+#define FONT FONTDIR "/pakenham.ttf"
+// if font is not in usual place, we look here:
+#define FONT2 "/var/tuxbox/config/enigma/fonts/pakenham.ttf"
+
+enum {LEFT, CENTER, RIGHT};
+Pixel* ico_keybd = NULL;
+Pixel* ico_keybd_shifted = NULL;
+static	FT_Library		library = NULL;
+static	FTC_Manager		manager = NULL;
+static	FTC_SBitCache		cache;
+#ifdef HAVE_DREAMBOX_HARDWARE
+static	FTC_Image_Desc		desc;
+#else
+static	FTC_ImageTypeRec	desc;
+#endif
+static	FT_Face			face;
+
+
+
 extern int sx,ex;
 void
 overlay_destructor(void *p) {
 	fbvnc_overlay_t *this = p;
 
-	/* if(this->pixels) free(this->pixels); */
+	//if(this->pixels) free(this->pixels); 
 	if(this->data) free(this->data);
+    if (manager )
+	FTC_Manager_Done(manager);
+    if (library)
+	FT_Done_FreeType(library);
+	if (ico_keybd        ) {free(ico_keybd        ); ico_keybd         = NULL; }
+	if (ico_keybd_shifted) {free(ico_keybd_shifted); ico_keybd_shifted = NULL; }
+    manager = NULL;
+    library = NULL;
 }
 
 typedef struct {
@@ -30,14 +60,28 @@ typedef struct {
 
 #define KEYBOARD_ROWS 5
 #define KEYBOARD_COLS 30
+#define KEYBOARD_KEYCOLS 16
 #define ROW_HEIGHT 32
 #define COL_WIDTH 16
 
 static fbvnc_overlay_t *ov_keyboard;
-static fbvnc_overlay_t *ov_mousestate;
-static fbvnc_overlay_t *ov_battery;
+//static fbvnc_overlay_t *ov_mousestate;
+//static fbvnc_overlay_t *ov_battery;
 
-static keymap_t keytable[KEYBOARD_ROWS][16] = {
+static char* keyboardlayout[KEYBOARD_ROWS*2][KEYBOARD_KEYCOLS] = {
+{"Esc"  ,"1"  ,"2"    ,"3"  ,"4" ,"5" ,"6" ,"7","8","9","0","-"    ,"="    ,"\\","`","" },
+{"Tab"  ,"q"  ,"w"    ,"e"  ,"r" ,"t" ,"y" ,"u","i","o","p","["    ,"]"    ,"<<" ,"","" },
+{"Ctrl" ,"a"  ,"s"    ,"d"  ,"f" ,"g" ,"h" ,"j","k","l",";","'"    ,"Enter",""  ,"" ,"" },
+{"Shift","z"  ,"x"    ,"c"  ,"v" ,"b" ,"n" ,"m",",",".","/","Shift",""     ,""  ,"" ,"" },
+{"Fn"   ,"Alt","Space","Alt","Fn","<-","->","^","v","" ,"" ,""     ,""     ,""  ,"" ,"" },
+{"Esc"  ,"!"  ,"@"    ,"#"  ,"$" ,"%" ,"^" ,"&","*","(",")","_"    ,"+"    ,"","~",""   },
+{"Tab"  ,"Q"  ,"W"    ,"E"  ,"R" ,"T" ,"Y" ,"U","I","O","P","{"    ,"}"    ,"<<" ,"","" },
+{"Ctrl" ,"A"  ,"S"    ,"D"  ,"F" ,"G" ,"H" ,"J","K","L",":","\""   ,"Enter",""  ,"" ,"" },
+{"Shift","Z"  ,"X"    ,"C"  ,"V" ,"B" ,"N" ,"M","<",">","?","Shift",""     ,""  ,"" ,"" },
+{"Fn"   ,"Alt","Space","Alt","Fn","<-","->","^","v","" ,"" ,""     ,""     ,""  ,"" ,"" }
+};
+
+static keymap_t keytable[KEYBOARD_ROWS][KEYBOARD_KEYCOLS] = {
 {
 	{2,	XK_Escape,	XK_Escape	},
 	{2,	XK_1,		XK_exclam	},
@@ -137,7 +181,6 @@ static keymap_t keytable[KEYBOARD_ROWS][16] = {
 #define MOD_FN		5
 
 static keymap_t *mod_key[NUM_MOD+1];
-
 void
 open_emergency_xterm() {
 	int screen = port - 5900;
@@ -172,6 +215,147 @@ refresh_framerate() {
 
 	fprintf(stderr, "%d.%d fps\n", n/10, n%10);
 }
+
+FT_Error MyFaceRequester(FTC_FaceID face_id, FT_Library library, FT_Pointer request_data, FT_Face *aface)
+{
+	FT_Error result;
+
+	result = FT_New_Face(library, face_id, 0, aface);
+
+	return result;
+}
+
+int RenderChar(Pixel *dest,FT_ULong currentchar, int sx, int sy, int ex, int color, int ovwidth)
+{
+	int row, pitch, bit, x = 0, y = 0;
+	FT_UInt glyphindex;
+	FT_Error error;
+	FTC_SBit		sbit;
+
+	//load char
+
+	if(!(glyphindex = FT_Get_Char_Index(face, currentchar)))
+	{
+		printf("<FT_Get_Char_Index for Char \"%c\" failed\n", (int)currentchar);
+		return 0;
+	}
+
+
+#ifdef HAVE_DREAMBOX_HARDWARE
+	if((error = FTC_SBit_Cache_Lookup(cache, &desc, glyphindex, &sbit)))
+#else
+	FTC_Node anode;
+	if((error = FTC_SBitCache_Lookup(cache, &desc, glyphindex, &sbit, &anode)))
+#endif
+	{
+		printf("<FTC_SBitCache_Lookup for Char \"%c\" failed with Errorcode 0x%.2X>\n", (int)currentchar, error);
+		return 0;
+	}
+
+
+	//render char
+
+	if(color != -1) // don't render char, return charwidth only
+	{
+		if(sx + sbit->xadvance >= ex) return -1; // limit to maxwidth
+		
+
+		for(row = 0; row < sbit->height; row++)
+		{
+		
+			for(pitch = 0; pitch < sbit->pitch; pitch++)
+			{
+				for(bit = 7; bit >= 0; bit--)
+				{
+					if(pitch*8 + 7-bit >= sbit->width) break; // render needed bits only
+
+					
+					 
+					if ((sbit->buffer[row * sbit->pitch + pitch]) & 1<<bit) dest[sx + sbit->left + x + ovwidth*(sy - sbit->top + y - 10)] = color;
+					
+
+					x++;
+				}
+			}
+
+			x = 0;
+			y++;
+		}
+
+	}
+
+	//return charwidth
+
+	return sbit->xadvance+2;
+}
+
+
+int GetStringLen(const char *string)
+{
+	int stringlen = 0;
+
+
+
+	//calc len
+
+	while(*string != '\0')
+	{
+		stringlen += RenderChar(NULL,*string, -1, -1, -1, -1,0);
+		string++;
+	}
+
+	return stringlen;
+}
+
+
+void RenderString(int ovwidth,Pixel *dest,const char *string, int sx, int sy, int maxwidth, int layout, int color, int bgcolor)
+{
+	if (strlen(string) == 0) return;
+	int stringlen, ex, charwidth,i,j;
+	desc.font.pix_width = desc.font.pix_height = ROW_HEIGHT;
+
+	//set alignment
+
+	stringlen = GetStringLen(string);
+	if(layout != LEFT)
+	{
+
+		switch(layout)
+		{
+			case CENTER:	if(stringlen < maxwidth) sx += (maxwidth - stringlen)/2;
+					break;
+
+			case RIGHT:	if(stringlen < maxwidth) sx += maxwidth - stringlen;
+		}
+	}
+
+
+	//render string
+
+	ex = sx + maxwidth;
+	// fill background
+	for(i = 1; i < ROW_HEIGHT-2; i++)
+	{
+	    int in = 0;
+	    switch (i)
+	    {
+		case 1		 : in = 2;break; 
+		case 2		 : in = 1;break;
+		case ROW_HEIGHT-4: in = 1;break;
+		case ROW_HEIGHT-3: in = 2;break;
+	    }
+	    for(j = in; j < stringlen-in; j++)
+		dest[sx + j  + ovwidth*(sy + i- ROW_HEIGHT)] = bgcolor;
+	}
+	while(*string != '\0' && *string != '\n')
+	{
+		if((charwidth = RenderChar(dest,*string, sx+1, sy, ex, color,ovwidth)) == -1) return; // string > maxwidth
+
+		sx += charwidth;
+		string++;
+	}
+}
+
 
 int
 fn_translate(int key) {
@@ -267,11 +451,13 @@ ov_invert(fbvnc_overlay_t *ov, int x, int y, int w, int h) {
 	IMPORT_FRAMEBUFFER_VARS
 
 	for (j=0; j<h; j++) {
-		Pixel *buf_ov = ov->pixels + (y+j)*o_xsize + x;
+		Pixel *buf_ov  = ico_keybd + (y+j)*o_xsize + x;
+		Pixel *buf_ov2 = ico_keybd_shifted + (y+j)*o_xsize + x;
 		int i;
 
 		for (i=0; i<w; i++) {
 			buf_ov[i] ^= ~1;
+			buf_ov2[i] ^= ~1;
 		}
 	}
 }
@@ -303,7 +489,7 @@ invert_key(keymap_t *km, fbvnc_overlay_t *ov) {
 	ov_invert(ov, x, y, w, h);
 	ov_redraw_part(ov, x, y, w, h);
 }
-
+/*
 void
 xor_pixmaps(Pixel *dest, Pixel *a, Pixel *b, int w, int h)
 {
@@ -312,7 +498,24 @@ xor_pixmaps(Pixel *dest, Pixel *a, Pixel *b, int w, int h)
 		*dest++ = (*a++) ^ (*b++);
 	}
 }
+*/
+void print_keyboard(fbvnc_overlay_t *ov, Pixel* dest,int mode)
+{
+	
+	int i,j, sx;
+	for (i=0; i<480*160; i++) dest[i] = ICO_TRANS;
+	for (i = 0; i < KEYBOARD_ROWS; i++)
+	{
+		sx = 0;
+		for (j = 0; j < KEYBOARD_KEYCOLS; j++)
+		{		
+			RenderString(ov->w,dest,keyboardlayout[(mode == MOD_SHIFT ? 1 : 0)*KEYBOARD_ROWS+i][j], sx, (i+1)*ROW_HEIGHT, keytable[i][j].width*COL_WIDTH, CENTER, ICO_WHITE, ICO_BG);
+			sx +=keytable[i][j].width*COL_WIDTH;
+			
 
+		}
+	}
+}
 static void
 init_virt_keyboard() {
 	int row;
@@ -327,13 +530,13 @@ init_virt_keyboard() {
 		}
 	}
 
-	xor_pixmaps(ico_keybd_shifted, ico_keybd_shifted, ico_keybd, 240, 80);
 }
 
 void
 shift_keyboard(fbvnc_overlay_t *ov) {
-	xor_pixmaps(ico_keybd, ico_keybd, ico_keybd_shifted, 240, 80);
-	ov_redraw_part(ov, 0, 0, 240, 80);
+//	xor_pixmaps(ico_keybd, ico_keybd, ico_keybd_shifted, 240, 80);
+	ov->pixels =(ov->pixels == ico_keybd ? ico_keybd_shifted : ico_keybd) ;
+	ov_redraw_part(ov,0,0,480,160);
 }
 
 int
@@ -343,11 +546,13 @@ ev_keybd(fbvnc_event_t *ev, fbvnc_overlay_t *ov) {
 	int mod = 0;
 	static int key = 0;
 	static keymap_t *inverted_key;
+	static keymap_t *move_key = NULL;
 	static int mod_now = 0;
 	static int mod_locked = 0;
 
 	if (ev->evtype == FBVNC_EVENT_TS_UP) {
 		if (key) {
+			move_key = NULL;
 			SendKeyEvent(key, 0);
 			invert_key(inverted_key, ov);
 			key = 0;
@@ -374,6 +579,20 @@ ev_keybd(fbvnc_event_t *ev, fbvnc_overlay_t *ov) {
 
 	if (!km) return 1;
 
+/*	if (ev->evtype == FBVNC_EVENT_TS_MOVE) 
+	{
+		if (key != km->key) 
+		{
+			if (move_key)
+				invert_key(move_key, ov);
+			invert_key(km, ov);
+			move_key = km;
+			key = km->key;
+			ov_redraw_part(ov,0,0,480,160);
+		}
+		return 1;
+	}
+*/
 	key = km->key;
 
 	if (key == XK_Shift_L)   mod=MOD_SHIFT;
@@ -381,6 +600,8 @@ ev_keybd(fbvnc_event_t *ev, fbvnc_overlay_t *ov) {
 	if (key == XK_Alt_L)     mod=MOD_ALT;
 	if (key == XK_Alt_R)     mod=MOD_ALTGR;
 	if (key == XK_Hyper_L)   mod=MOD_FN;
+
+
 
 	if (mod) {
 		int mm = (1<<mod);
@@ -420,7 +641,7 @@ ev_keybd(fbvnc_event_t *ev, fbvnc_overlay_t *ov) {
 			if (mod_now & (1<<m)) {
 				SendKeyEvent(mod_key[m]->key, 0);
 				invert_key(mod_key[m], ov);
-				if (m==MOD_SHIFT) shift_keyboard(ov);
+				if (mod==MOD_SHIFT) shift_keyboard(ov);
 			}
 		}
 		if (mod_now & (1<<MOD_FN)) {
@@ -487,6 +708,7 @@ set_scale(int s) {
 }
 
 int mouse_button;
+
 static bool light=1;
 
 void
@@ -524,6 +746,7 @@ ev_zoom(fbvnc_event_t *ev, fbvnc_overlay_t *ov) {
 
 	return 1;
 }
+/*
 
 #define VOLUME_WIDTH 25
 
@@ -534,7 +757,6 @@ ev_zoom(fbvnc_event_t *ev, fbvnc_overlay_t *ov) {
 	#include <fcntl.h>
 	#include <linux/soundcard.h>
 #endif
-
 int
 ev_volume(fbvnc_event_t *ev, fbvnc_overlay_t *ov) {
 	int percent = ev->x * 100 / VOLUME_WIDTH;
@@ -545,7 +767,7 @@ ev_volume(fbvnc_event_t *ev, fbvnc_overlay_t *ov) {
 
 #ifdef USE_MIXER_DIRECTLY
 	{
-		/* fail silently */
+		// fail silently 
 		int play_fd, devmask_play;
 		play_fd=open("/dev/mixer1", O_RDONLY);
 	  	ioctl(play_fd, SOUND_MIXER_READ_DEVMASK, &devmask_play);
@@ -580,13 +802,12 @@ ev_volume(fbvnc_event_t *ev, fbvnc_overlay_t *ov) {
 
 	return 1;
 }
-
+*/
 void
 toggle_keyboard() {
 	IMPORT_FRAMEBUFFER_VARS
 
 	ov_keyboard->visible ^= 1;
-
 	vp_pan(0,0);
 }
 
@@ -595,7 +816,7 @@ ev_kbd_sel(fbvnc_event_t *ev, fbvnc_overlay_t *ov) {
 	toggle_keyboard();
 	return 1;
 }
-
+/*
 int
 get_battery_percent()
 {
@@ -642,11 +863,11 @@ set_battery_status(int percent) {
 	if (percent <= 10) {
 		blink_state_off ^= 1;
 		if (blink_state_off) {
-			ov_fill(ov_battery, 2, 2, BATTERY_WIDTH-6, 5, 63488 /*red*/);
+			ov_fill(ov_battery, 2, 2, BATTERY_WIDTH-6, 5, 63488 );// red
 			ov_redraw(ov_battery);
 			return;
 		}
-	} else if (percent == shown_percent) return; /* nothing to do */
+	} else if (percent == shown_percent) return; // nothing to do 
 
 	fx = (BATTERY_WIDTH-6)*percent/100;
 
@@ -661,12 +882,12 @@ int
 ev_battery(fbvnc_event_t *ev, fbvnc_overlay_t *ov) {
 	set_battery_status(get_battery_percent());
 #if 1
-	return 0; /* give others a chance to handle the timer */
+	return 0; // give others a chance to handle the timer 
 #else
 	return 1;
 #endif
 }
-
+*/
 int
 ev_quickpan(fbvnc_event_t *ev, fbvnc_overlay_t *ov) {
 	int x0, y0;
@@ -938,7 +1159,8 @@ overlays_init() {
 			ico_pan, FBVNC_EVENT_TS_DOWN | FBVNC_EVENT_TS_MOVE | FBVNC_EVENT_TS_UP, ev_quickpan, 0);
 	}*/
 
-	init_virt_keyboard();
+	ico_keybd = calloc(sizeof(Pixel),480*160);
+	ico_keybd_shifted = calloc(sizeof(Pixel),480*160);
 	ov_keyboard = add_overlay(
 		0 + (ex-sx - 480)/2, pv_ysize-160,
 		0, pv_xsize-160,
@@ -946,5 +1168,158 @@ overlays_init() {
 		ico_keybd, 
 		FBVNC_EVENT_TS_DOWN | FBVNC_EVENT_TS_UP, ev_keybd, 0);
 	
+	init_virt_keyboard();
+	print_keyboard(ov_keyboard,ico_keybd,0);
+	print_keyboard(ov_keyboard,ico_keybd_shifted,1);
+
 }
+
+#define MAXSERVERS 10
+int
+selectServer(char* szServerNr, int rc_fd)
+{
+	//init fontlibrary
+	FT_Error error;
+	if((error = FT_Init_FreeType(&library)))
+	{
+		printf("<FT_Init_FreeType failed with Errorcode 0x%.2X>", error);
+		return 0;
+	}
+
+	if((error = FTC_Manager_New(library, 1, 2, 0, &MyFaceRequester, NULL, &manager)))
+	{
+		printf("<FTC_Manager_New failed with Errorcode 0x%.2X>\n", error);
+		return 0;
+	}
+
+	if((error = FTC_SBitCache_New(manager, &cache)))
+	{
+		printf("<FTC_SBitCache_New failed with Errorcode 0x%.2X>\n", error);
+		return 0;
+	}
+
+	if((error = FTC_Manager_Lookup_Face(manager, FONT, &face)))
+	{
+		if((error = FTC_Manager_Lookup_Face(manager, FONT2, &face)))
+		{
+			printf("<FTC_Manager_Lookup_Face failed with Errorcode 0x%.2X>\n", error);
+			return 0;
+		}
+		else
+			desc.font.face_id = FONT2;
+}
+	else
+		desc.font.face_id = FONT;
+#ifdef HAVE_DREAMBOX_HARDWARE
+	desc.image_type = ftc_image_mono;
+#else
+	desc.flags = FT_LOAD_MONOCHROME;
+#endif
+    char szServers[MAXSERVERS][256];
+    char szServerNrs[MAXSERVERS][10];
+    char line[256], *p;
+    FILE* fp = fopen( CONFIGDIR "/vnc.conf", "r" );
+    if ( !fp )
+    {
+	MessageBox("could not open " CONFIGDIR "/vnc.conf !!!", rc_fd);
+	printf("vncviewer: could not open " CONFIGDIR "/vnc.conf !!!\n");
+    }
+    else    
+    {    
+	int snum = 0;
+	while( snum < MAXSERVERS && fgets( line, 128, fp ) )
+	{
+	    if ( *line == '#' )	continue;
+	    if ( *line == ';' )	continue;
+	    p=strchr(line,'\n');
+	    if ( p ) *p=0;
+	    p=strchr(line,'=');
+	    if ( !p ) continue;
+	    *p=0;
+	    p++;
+	    if( !strncmp(line,"server",6) && strncmp(line,"server_scale",11))
+	    {
+    		sprintf(szServers[snum],"Server %d : %s",snum+1, p);
+    		strcpy(szServerNrs[snum],line+6);
+	        snum++;
+	    }
+	}
+	fclose(fp);
+	if (snum ==1 )
+	{ 
+	    strcpy(szServerNr,szServerNrs[0]);
+	    return 1;
+	}
+	struct input_event iev;
+	int sel = 0;
+	int i, c,u = 1;
+	memset(global_framebuffer.p_buf,0,global_framebuffer.p_xsize*global_framebuffer.p_ysize*2);
+	
+	while(1)
+	{
+	    if (u)
+	    {
+    		for (i = 0 ; i < snum; i++)
+		{
+		    RenderString(global_framebuffer.p_xsize,global_framebuffer.p_buf,szServers[i],0, 100+(i+1)*ROW_HEIGHT, global_framebuffer.p_xsize, CENTER, ICO_BLACK, (i == sel ? ICO_WHITE :ICO_BG));
+		}
+		u = 0;
+	    }	    
+#ifdef HAVE_DREAMBOX_HARDWARE
+    	    unsigned short rckey = 0;
+	    c = read(rc_fd, &rckey, 2);
+	    iev.code = 0;
+	    if (c == 2)
+    	    {
+		switch (rckey)
+		{
+				case DREAM_KEY_UP:		iev.code = KEY_UP;		break;
+				case DREAM_KEY_DOWN:		iev.code = KEY_DOWN;		break;
+				case DREAM_KEY_OK:		iev.code = KEY_OK;		break;
+				case DREAM_KEY_HOME:		iev.code = KEY_HOME;		break;
+    		}
+#else
+	    c = read(rc_fd, &iev, sizeof(struct input_event));
+	    if (c == sizeof(struct input_event) && iev.value==1)
+	    {
+#endif
+	switch (iev.code)
+	{
+		case KEY_UP:	
+		    if (sel > 0){ sel--; u = 1;}
+		    break;
+		case KEY_DOWN:
+		    if (sel < snum-1){ sel++; u = 1;}
+		    break;
+		case KEY_OK:
+		    strcpy(szServerNr,szServerNrs[sel]);
+		    RenderString(global_framebuffer.p_xsize,global_framebuffer.p_buf,"connecting ...",0, 200+2*ROW_HEIGHT, global_framebuffer.p_xsize, CENTER, ICO_BLACK, ICO_WHITE);
+		    return 1;
+		case KEY_HOME: 
+		    return 0;
+	}
+	}
+	}
+	
+    }
+    return 0;
+}
+void MessageBox(const char* szMsg, int rc_fd)
+{
+
+    
+    RenderString(global_framebuffer.p_xsize,global_framebuffer.p_buf,szMsg,0, 300 + 2*ROW_HEIGHT, global_framebuffer.p_xsize, CENTER, ICO_WHITE,ICO_BG);	
+    while (1)
+    {
+#ifdef HAVE_DREAMBOX_HARDWARE
+        unsigned short rckey = 0;
+	if (read(rc_fd, &rckey, 2) == 2 && rckey == DREAM_KEY_HOME)
+#else
+	struct input_event iev;
+	if (read(rc_fd, &iev, sizeof(struct input_event)) == sizeof(struct input_event) && iev.code == KEY_HOME)
+#endif
+	    return;
+    }
+}
+
 

@@ -1,3 +1,9 @@
+#include <config.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include FT_CACHE_H
+#include FT_CACHE_SMALL_BITMAPS_H
+
 typedef struct fbvnc_overlay {
 	/* current coordinates */
 	int x, y;
@@ -61,3 +67,5 @@ extern int ev_mouse(fbvnc_event_t *ev, fbvnc_overlay_t *this_overlay);
 extern int ev_calibrate(fbvnc_event_t *ev, fbvnc_overlay_t *this_overlay);
 extern int ev_battery(fbvnc_event_t *ev, fbvnc_overlay_t *this_overlay);
 
+extern int selectServer(char* szServerNr, int rc_fd);
+extern void MessageBox(const char* szMsg, int rc_fd);

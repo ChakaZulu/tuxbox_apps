@@ -50,7 +50,6 @@ Bool addHextile = True;
 Bool forceOwnCmap = False;
 Bool forceTruecolour = False;
 int requestedDepth = 0;
-char *hwType = 0;
 int kbdDelay = 250; /* milliseconds */
 int kbdRate = 30; /* per second */
 char *pnmFifo = NULL;
@@ -68,7 +67,7 @@ int rcTest=0;
 
 int debug = 0;
 
-
+#if 0
 void
 usage()
 {
@@ -274,3 +273,4 @@ processArgs(int argc, char **argv)
 	    port += SERVERPORT;
     }
 }
+#endif

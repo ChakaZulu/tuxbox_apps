@@ -1,5 +1,4 @@
 TODO: 
-- beautify virtual keyboard / convert to german keyboard
 - support for samsung keyboard
 
 lots more;-)
@@ -17,4 +16,5 @@ DONE:
 - support for IR keyboard
 - fix missing keyboard keys (orig. ir keyboard)
 - mouse support
+- beautify virtual keyboard / convert to german keyboard
 

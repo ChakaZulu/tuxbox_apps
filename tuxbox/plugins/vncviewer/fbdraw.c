@@ -365,7 +365,8 @@ redraw_phys_landscape(int xp, int yp, int wp, int hp)
 	case 4: aa_line = s4aa_line; break;
 	case 23: aa_line = s2_3aa_line; break;
 
-	default:
+		default:
+			printf("Bad Scale: %d\n", v_scale);
 		cleanup_and_exit("bad scale", EXIT_ERROR);
 	}
 

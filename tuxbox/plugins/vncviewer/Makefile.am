@@ -1,13 +1,17 @@
 SUBDIRS = rfb
 
-AM_CPPFLAGS = -I./rfb @CONFIGFILE_CFLAGS@ -I$(top_srcdir)/include
-
+if BOXTYPE_DREAMBOX
+AM_CPPFLAGS = @FREETYPE_CFLAGS@ -I./rfb  -I$(top_srcdir)/include
+vnc_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version @FREETYPE_LIBS@
+else
+AM_CPPFLAGS = -I./rfb @FREETYPE_CFLAGS@ @CONFIGFILE_CFLAGS@ -I$(top_srcdir)/include
+vnc_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version @FREETYPE_LIBS@ @CONFIGFILE_LIBS@
+endif
 noinst_LTLIBRARIES = vnc.la
 
 vnc_la_SOURCES = args.c fbdraw.c fscale.c fbgl.c icons.c keyboard.c \
                  list.c overlay.c rfbproto.c sockets.c fbvnc.cpp 
 
-vnc_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version @CONFIGFILE_LIBS@
 
 vnc_la_LIBADD = rfb/librfb.a
 
