@@ -23,14 +23,19 @@ eListBoxEntryEPG::~eListBoxEntryEPG()
 		paraDescr->destroy();
 }
 
+int eListBoxEntryEPG::getEntryHeight()
+{
+	if (!DescrFont.pointSize && !TimeFont.pointSize)
+	{
+		DescrFont = eSkin::getActive()->queryFont("eEPGSelector.Entry.Description");
+		TimeFont = eSkin::getActive()->queryFont("eEPGSelector.Entry.DateTime");
+	}
+	return calcFontHeight(DescrFont)+4;	
+}
+
 eListBoxEntryEPG::eListBoxEntryEPG(const eit_event_struct* evt, eListBox<eListBoxEntryEPG> *listbox)
 		:eListBoxEntry((eListBox<eListBoxEntry>*)listbox), paraTime(0), paraDescr(0), event(evt)	
 {	
-		if (!DescrFont.pointSize && !TimeFont.pointSize)
-		{
-			DescrFont = eSkin::getActive()->queryFont("eEPGSelector.Entry.Description");
-			TimeFont = eSkin::getActive()->queryFont("eEPGSelector.Entry.DateTime");
-		}
 
 		for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
 		{
@@ -51,21 +56,9 @@ eListBoxEntryEPG::eListBoxEntryEPG(const eit_event_struct* evt, eListBox<eListBo
 
 }
 
-void eListBoxEntryEPG::redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int hilited)
+eString eListBoxEntryEPG::redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int hilited)
 {
-	if ((coNormalB != -1 && !hilited) || (hilited && coActiveB != -1))
-	{
-		rc->setForegroundColor(hilited?coActiveB:coNormalB);
-		rc->fill(rect);
-		rc->setBackgroundColor(hilited?coActiveB:coNormalB);
-	} else
-	{
-		eWidget *w=listbox->getNonTransparentBackground();
-		rc->setForegroundColor(w->getBackgroundColor());
-		rc->fill(rect);
-		rc->setBackgroundColor(w->getBackgroundColor());
-	}
-	rc->setForegroundColor(hilited?coActiveF:coNormalF);
+	drawEntryRect(rc, rect, coActiveB, coActiveF, coNormalB, coNormalF, hilited);
 
 	if (!paraTime && !paraDescr)
 	{
@@ -85,9 +78,7 @@ void eListBoxEntryEPG::redraw(gPainter *rc, const eRect& rect, gColor coActiveB,
 	rc->renderPara(*paraTime, ePoint( rect.left(), rect.top() + TimeYOffs ) );
 	rc->renderPara(*paraDescr, ePoint( rect.left()+DescrXOffs, rect.top() + DescrYOffs ) );
 
-	eWidget* p = listbox->getParent();			
-	if (hilited && p && p->LCDElement)
-		p->LCDElement->setText(time.str()+" "+descr);
+	return time.str()+" "+descr;
 }
 
 void eEPGSelector::fillEPGList()

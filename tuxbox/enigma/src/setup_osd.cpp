@@ -7,9 +7,9 @@
 
 eZapOsdSetup::eZapOsdSetup(): eWindow(0)
 {
-	setText("OSD Setup");
+	setText("On Screen Display Setup");
 	move(ePoint(150, 136));
-	resize(eSize(400, 250));
+	resize(eSize(400, 280));
 
 	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 
@@ -20,6 +20,7 @@ eZapOsdSetup::eZapOsdSetup(): eWindow(0)
 	showOSDOnEITUpdate->setText(_("Show OSD on EIT Update"));
 	showOSDOnEITUpdate->move(ePoint(20, 25));
 	showOSDOnEITUpdate->resize(eSize(fd+4+300, fd+4));
+	showOSDOnEITUpdate->setHelpText(_("shows OSD when now/next info is changed"));
 
 	state=0;
 	eConfig::getInstance()->getKey("/ezap/osd/showConsoleOnFB", state);
@@ -27,11 +28,13 @@ eZapOsdSetup::eZapOsdSetup(): eWindow(0)
 	showConsoleOnFB->setText(_("Show Console on Framebuffer"));
 	showConsoleOnFB->move(ePoint(20, 75));
 	showConsoleOnFB->resize(eSize(fd+4+300, fd+4));
+	showConsoleOnFB->setHelpText(_("shows the linux console on TV"));
 
 	ok=new eButton(this);
 	ok->setText(_("save"));
 	ok->move(ePoint(20, 135));
 	ok->resize(eSize(90, fd+4));
+	ok->setHelpText(_("close window and save changes"));
 	
 	CONNECT(ok->selected, eZapOsdSetup::okPressed);
 
@@ -39,8 +42,14 @@ eZapOsdSetup::eZapOsdSetup(): eWindow(0)
 	abort->setText(_("abort"));
 	abort->move(ePoint(140, 135));
 	abort->resize(eSize(100, fd+4));
+	abort->setHelpText(_("close window (no changes are saved)"));
 
 	CONNECT(abort->selected, eZapOsdSetup::abortPressed);
+
+	statusbar=new eStatusBar(this);
+	statusbar->move( ePoint(0, clientrect.height()-30 ) );
+	statusbar->resize( eSize( clientrect.width(), 30) );
+	statusbar->setFlags( eStatusBar::flagLoadDeco );
 }
 
 eZapOsdSetup::~eZapOsdSetup()

@@ -19,8 +19,8 @@ class eListBoxEntryService: public eListBoxEntry
 	static gFont serviceFont;
 	static gFont descrFont;
 	static gFont numberFont;
-	int getHeight();
 public:
+	static int getEntryHeight();
 	eServiceReference service;
 	eListBoxEntryService(eListBox<eListBoxEntryService> *lb, const eServiceReference &service);
 	~eListBoxEntryService();
@@ -31,7 +31,7 @@ public:
 	}
 
 protected:
-	void redraw(gPainter *rc, const eRect &rect, gColor, gColor, gColor, gColor, int hilited);
+	eString redraw(gPainter *rc, const eRect &rect, gColor, gColor, gColor, gColor, int hilited);
 };
 
 class eServiceSelector: public eWindow

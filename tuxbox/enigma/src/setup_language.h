@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_language.h,v 1.2 2002/06/23 15:51:24 Ghostrider Exp $
+ * $Id: setup_language.h,v 1.3 2002/08/11 00:52:24 Ghostrider Exp $
  */
 
 #ifndef __APPS__ENIGMA__SETUP_LANGUAGE_H
@@ -27,30 +27,25 @@
 #include <string>
 
 #include <core/gui/ewindow.h>
+#include <core/gui/statusbar.h>
+#include <core/gui/ebutton.h>
+#include <core/gui/elabel.h>
+#include <core/gui/listbox.h>
 
-class eNumber;
-class eButton;
-class eCheckbox;
 
 class eZapLanguageSetup: public eWindow
 {
-public:
-	eZapLanguageSetup();
-
-protected:
-	int eventFilter(const eWidgetEvent &event);
-
 private:
 	void okPressed();
 	void abortPressed();
 
-	void setLanguage(std::map<std::string, std::string>::iterator &);
-	void toggleLanguage();
+	eButton *ok, *abort;
+	eListBox<eListBoxEntryText> *language;
+	eStatusBar* statusbar;
 
-	eButton *language, *ok, *abort;
-
-	std::map<std::string, std::string> languages;
-	std::map<std::string, std::string>::iterator v_language;
+public:
+	eZapLanguageSetup();
+	~eZapLanguageSetup();
 };
 
 #endif

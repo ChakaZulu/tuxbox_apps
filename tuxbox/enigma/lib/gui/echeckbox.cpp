@@ -4,9 +4,10 @@
 #include <core/system/init.h>
 #include <core/gui/eskin.h>
 
-eCheckbox::eCheckbox(eWidget *parent, int checked, int takefocus, int Size):
-	eButton(parent, 0, takefocus, false)
+eCheckbox::eCheckbox(eWidget *parent, int checked, int takefocus, bool swapTxtPixmap)
+	:eButton(parent, 0, takefocus, false), swapTxtPixmap(swapTxtPixmap)
 {
+	flags|=flagVCenter;
 	ischecked = -1;
 	setCheck(checked);
 	CONNECT(selected, eCheckbox::sel);
@@ -44,20 +45,41 @@ void eCheckbox::gotFocus()
 	invalidate();
 }
 
+void eCheckbox::lostFocus()
+{
+	if (LCDTmp)
+	{
+		delete LCDTmp;
+		LCDTmp = 0;
+	}
+	eButton::lostFocus();
+}
+
+
 void eCheckbox::setCheck(int c)
 {
 	if (ischecked != -1 && ischecked == c)
 		return;
 
 	ischecked=c;
-	gPixmap *pm=eSkin::getActive()->queryImage(ischecked?"eCheckbox.checked":"eCheckbox.unchecked");
-	setPixmap(pm);
+	
+	setPixmap(eSkin::getActive()->queryImage(ischecked?"eCheckbox.checked":"eCheckbox.unchecked"));
 
 	if (LCDTmp)
+		LCDTmp->setPixmap(eSkin::getActive()->queryImage(ischecked?"eCheckboxLCD.checked":"eCheckboxLCD.unchecked"));
+
+}
+
+int eCheckbox::setProperty(const eString &prop, const eString &value)
+{
+	if (prop=="swaptxtpixmap")	
 	{
-			gPixmap *pm=eSkin::getActive()->queryImage(ischecked?"eCheckboxLCD.checked":"eCheckboxLCD.unchecked");
-			LCDTmp->setPixmap(pm);
+		swapTxtPixmap = (value != "off");
+		event( eWidgetEvent::changedSize );
 	}
+	else
+		return eButton::setProperty(prop, value);
+	return 0;
 }
 
 int eCheckbox::eventFilter(const eWidgetEvent &event)
@@ -65,8 +87,19 @@ int eCheckbox::eventFilter(const eWidgetEvent &event)
 	switch (event.type)
 	{
 	case eWidgetEvent::changedSize:
-		pixmap_position=ePoint(2, (size.height()-20)/2);
-		text_position=ePoint(26, 0);
+		if (swapTxtPixmap)
+		{
+			text_position=ePoint(0,0);
+			invalidate();
+			validate();
+			eRect rc = para->getBoundBox();
+			pixmap_position=ePoint( para->getBoundBox().right()+5, (size.height()-pixmap->y) / 2 );
+		}
+		else
+		{
+			pixmap_position=ePoint(0, (size.height()-pixmap->y)/2);
+			text_position=ePoint((int)(pixmap->x*1.25), 0);
+		}
 		break;
 	default:
 		break;

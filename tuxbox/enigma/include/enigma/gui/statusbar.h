@@ -11,21 +11,23 @@ class eStatusBar : public eWidget
 	eDecoration deco;
 	eLabel client;
 	void update( const eWidget *);
+	const eWidget* current;
 
 	void redrawWidget(gPainter *, const eRect &);
 	int setProperty(const eString &, const eString &);
 	int eventHandler(const eWidgetEvent &event);
 	void loadDeco();
-	void redrawBorder(gPainter *, const eRect &);
 	void initialize();
 public:
 	enum
 	{
 		flagOwnerDraw = 1,
-		flagLoadDeco = 2
+		flagLoadDeco = 2,
+		flagVCenter = 4
 	};
-	eStatusBar( eWidget*, int=0 );
+	eStatusBar( eWidget* );
 	int getFlags() const;
+	eLabel &getLabel()	{	return client; }
 	void setFlags( int );
 };
 

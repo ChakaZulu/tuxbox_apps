@@ -13,7 +13,7 @@ eRect eNumber::getNumberRect(int n)
 	else if (deco)
 		return eRect( deco.borderLeft-1 + n * dspace, deco.borderTop, dspace, crect.height() );
 	else
-		return eRect( n * dspace-1, 0, dspace, height() );
+		return eRect( n * dspace, 0, dspace, height() );
 
 }
 
@@ -116,14 +116,14 @@ int eNumber::eventHandler(const eWidgetEvent &event)
 	return eWidget::eventHandler(event);
 }
 
-eNumber::eNumber(eWidget *parent, int _len, int _min, int _max, int _maxdigits, int *init, int isactive, eLabel* descr, int grabfocus, int loadDeco)
+eNumber::eNumber(eWidget *parent, int _len, int _min, int _max, int _maxdigits, int *init, int isactive, eWidget* descr, int grabfocus, int loadDeco)
 	:eWidget(parent, grabfocus), 
 	active(0), 
 	cursorB(eSkin::getActive()->queryScheme("global.selected.background")),	
 	cursorF(eSkin::getActive()->queryScheme("global.selected.foreground")),	
 	normalB(eSkin::getActive()->queryScheme("global.normal.background")),	
 	normalF(eSkin::getActive()->queryScheme("global.normal.foreground")),	
-	have_focus(0), digit(isactive), isactive(isactive), descr(descr?descr->getText():""), tmpDescr(0)
+	have_focus(0), digit(isactive), isactive(isactive), descr(descr), tmpDescr(0)
 {
 	if (loadDeco)
 	{
@@ -198,9 +198,10 @@ void eNumber::gotFocus()
 	{
 		LCDTmp = new eNumber(parent->LCDElement, len, min, max, maxdigits, &(number[0]), isactive, 0, 0, 0);
 		LCDTmp->hide();
+		((eNumber*)LCDTmp)->setFlags(flags);
 		eSize s = parent->LCDElement->getSize();
 
-		if (descr != "")
+		if (descr)
 		{
 			LCDTmp->move(ePoint(0,s.height()/2));
 			LCDTmp->resize(eSize(s.width(), s.height()/2));
@@ -208,7 +209,7 @@ void eNumber::gotFocus()
 			tmpDescr->hide();
 			tmpDescr->move(ePoint(0,0));
 			tmpDescr->resize(eSize(s.width(), s.height()/2));
-			tmpDescr->setText(descr);
+			tmpDescr->setText(descr->getText());
 			tmpDescr->show();
 		}
 		else

@@ -5,17 +5,18 @@
 #include <core/driver/rc.h>
 #include <core/dvb/dvb.h>
 #include <core/dvb/edvb.h>
-#include <core/gui/elabel.h>
 #include <core/dvb/decoder.h>
+#include <core/gdi/font.h>
 #include <core/gui/multipage.h>
 #include <core/gui/eskin.h>
 #include <core/gui/guiactions.h>
+#include <core/gui/elabel.h>
+#include <core/gui/echeckbox.h>
+#include <core/gui/ebutton.h>
 #include <core/dvb/dvbwidgets.h>
 #include <core/dvb/frontend.h>
 #include <core/dvb/dvbservice.h>
 
-#include <core/gui/echeckbox.h>
-#include <core/gui/ebutton.h>
 
 
 int eStreaminfo::eventHandler(const eWidgetEvent &event)
@@ -26,9 +27,15 @@ int eStreaminfo::eventHandler(const eWidgetEvent &event)
 		if ((event.action == &i_cursorActions->ok))
 			close(0);
 		else if (event.action == &i_cursorActions->right)
-			mp.next();
+		{
+			if (!mp.next())
+				descr->setText( lb->goNext()->getHelpText() );
+		}
 		else if (event.action == &i_cursorActions->left)
-			mp.prev();
+		{
+			if (!mp.prev())
+				descr->setText( lb->goPrev()->getHelpText() );
+		}
 		else if (event.action == &i_cursorActions->up)
 			;
 		else if (event.action == &i_cursorActions->down)
@@ -38,6 +45,7 @@ int eStreaminfo::eventHandler(const eWidgetEvent &event)
 		return 1;
 	case eWidgetEvent::execBegin:
 		takeFocus();
+		lb->invalidate();
 		break;
 	case eWidgetEvent::execDone:
 		releaseFocus();
@@ -361,30 +369,32 @@ void siCA::redrawWidget()
 {
 }
 
-eStreaminfo::eStreaminfo(int mode, decoderParameters *parms): eWindow(1)
+eStreaminfo::eStreaminfo(int mode, decoderParameters *parms): eWindow(1), statusbar(this)
 {
 	addActionMap(&i_cursorActions->map);
 	setText(mode?"Record mode - read manual":"Streaminfo");
 	cmove(ePoint(100, 80));
 	cresize(eSize(450, 450));
+	eSize s(clientrect.size());
+	s.setHeight( s.height() - 40 );
 	
 	eWidget *w=new siPID(parms?*parms:Decoder::parms, this);
 	w->move(ePoint(0, 0));
-	w->resize(clientrect.size());
+	w->resize( s );
 	w->hide();
 
 	mp.addPage(w);
 
 	w=new siCA(this);
 	w->move(ePoint(0, 0));
-	w->resize(clientrect.size());
+	w->resize( s );
 	w->hide();
 
 	mp.addPage(w);
 	
 	eWidget *n=new eWidget(this);
 	n->move(ePoint(0, 0));
-	n->resize(clientrect.size());
+	n->resize( s );
 	n->hide();
 
 	eTransponderWidget *t=new eTransponderWidget(n, 0, eTransponderWidget::deliverySatellite);
@@ -404,6 +414,25 @@ eStreaminfo::eStreaminfo(int mode, decoderParameters *parms): eWindow(1)
 	mp.addPage(n);
 	
 	mp.first();
+
+	statusbar.setFlags( eStatusBar::flagLoadDeco );
+	statusbar.move( ePoint(0, clientrect.height()-40) );
+	statusbar.resize( eSize(clientrect.width(), 40) );
+	eRect rect = statusbar.getClientRect();
+
+	lb = new eListBox<eListBoxEntryMenu>( &statusbar.getLabel() );
+	lb->move( ePoint(rect.width()-50, 2) );
+	lb->resize( eSize(45, rect.height()-5) );
+	lb->setFlags( eListBoxBase::flagNoPageMovement | eListBoxBase::flagNoUpDownMovement/* | eListBoxBase::flagLoadDeco*/ );
+//	const gFont &ft = eSkin::getActive()->queryFont("eStatusBar");
+	new eListBoxEntryMenu( lb, "1/3", _("Service information (right)"), eTextPara::dirCenter/*, ft*/ );
+	new eListBoxEntryMenu( lb, "2/3", _("Scramble system information (left, right)"), eTextPara::dirCenter/*, ft*/ );
+	new eListBoxEntryMenu( lb, "3/3", _("Transponder information (left)"), eTextPara::dirCenter/*, ft*/ );
+	descr = new eLabel( &statusbar.getLabel() );
+	descr->move( ePoint(0,0) );
+	descr->resize( eSize(rect.width() - 50, rect.height()) );
+	descr->setText( lb->getCurrent()->getHelpText() );
+	descr->setFlags( eLabel::flagVCenter );
 }
 
 eStreaminfo::~eStreaminfo()

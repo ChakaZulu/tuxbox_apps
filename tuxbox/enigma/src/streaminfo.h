@@ -3,6 +3,8 @@
 
 #include <core/gui/ewindow.h>
 #include <core/gui/multipage.h>
+#include <core/gui/listbox.h>
+#include <core/gui/statusbar.h>
 
 class eLabel;
 class eMultipage;
@@ -11,6 +13,9 @@ struct decoderParameters;
 class eStreaminfo: public eWindow
 {
 	eMultipage mp;
+	eStatusBar statusbar;
+	eLabel* descr;
+	eListBox<eListBoxEntryMenu>* lb;
 protected:
 	int eventHandler(const eWidgetEvent &event);
 public:

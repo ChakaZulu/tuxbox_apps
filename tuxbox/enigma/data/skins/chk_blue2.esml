@@ -18,8 +18,8 @@
 		<map name="eWindow.Childs" font="Blue.Regular" size="30" />
 
 		<map name="eListBox.EntryText.normal" font="Blue.Regular" size="30" />
-		<map name="eServiceSelector.Entry.Name" font="Blue.Regular" size="32" />
-		<map name="eBouquetSelector.Entry.Name" font="Blue.Regular" size="32" />
+		<map name="eServiceSelector.Entry.Name" font="Blue.Regular" size="30" />
+		<!--map name="eBouquetSelector.Entry.Name" font="Blue.Regular" size="32" /-->
 		<map name="eEPGSelector.Entry.Description" font="Blue.Regular" size="30" />
 		<map name="eEPGSelector.Entry.DateTime" font="Blue.Bold" size="24" />
 
@@ -29,7 +29,7 @@
 		<map name="eventview.channel" font="Blue.Regular" size="30" />
 
 		<map name="lcd.menu.title" font="v5Robusta" size="18" />
-		<map name="lcd.menu.element" font="v5Lixera" size="18" />
+		<map name="lcd.menu.element" font="Blue.Regular" size="18" />
 
 		<map name="lcd.main.service_name" font="v5Robusta" size="18" />
 		<map name="lcd.main.clock" font="v5Robusta" size="18" />
@@ -191,7 +191,6 @@
 		<map name="eListBox.bottomRight" img="3DBorder.unselected.corner.light" />		
 		<map name="eListBox.topRight" img="3DBorder.unselected.corner.darkLight" />
 		<map name="eListBox.bottomLeft" img="3DBorder.unselected.corner.darkLight" />		
-
 	</imagealias>
 	
 	<object name="enigma_lcd_main">
@@ -252,7 +251,7 @@
 			<!--texte         -->
 			<eLabel position="0:79" size="65:30" font="Blue.Bold;32" name="ch_number" align="right" backgroundColor="dark" foregroundColor="dark+15" />
 
-			<eLabel position="96:4" size="479:27" font="Blue.Bold;36" name="ch_name" backgroundColor="white" foregroundColor="white+15" />
+			<eLabel position="96:4" size="479:27" font="Blue.Bold;36" name="ch_name" backgroundColor="white" foregroundColor="white+15" vcenter="on" />
                                                       
 			<eLabel position="90:42" size="55:30" font="Nimbus;22" name="e_now_time" backgroundColor="light" foregroundColor="light+15" />
 			<eLabel position="90:79" size="55:30" font="Nimbus;22" name="e_next_time" backgroundColor="middle" foregroundColor="middle+15" />

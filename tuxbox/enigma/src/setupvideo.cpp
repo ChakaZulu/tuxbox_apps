@@ -17,8 +17,8 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	if (skin->build(this, "setup.video"))
 		qFatal("skin load of \"setup.video\" failed");*/
 
-	cresize( eSize(height(), width()) );
-	cmove( ePoint(0,0) );
+/*	cresize( eSize(height(), width()) );
+	cmove( ePoint(0,0) );*/
 
 	if (eConfig::getInstance()->getKey("/elitedvb/video/colorformat", v_colorformat))
 		v_colorformat = 1;
@@ -26,20 +26,18 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	if (eConfig::getInstance()->getKey("/elitedvb/video/pin8", v_pin8))
 		v_pin8 = 0;
 
-	eDebug("v_pin8 = %i, colorformat = %i", v_pin8, v_colorformat );
-
 	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 
 	setText(_("Video Setup"));
 	move(ePoint(150, 136));
-	resize(eSize(350, 280));
+	resize(eSize(350, 270));
 
 	eLabel *l=new eLabel(this);
 	l->setText("Colorformat:");
 	l->move(ePoint(10, 20));
 	l->resize(eSize(200, fd+4));
 
-	colorformat=new eListBox<eListBoxEntryText>(this);
+	colorformat=new eListBox<eListBoxEntryText>(this, l);
 	colorformat->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement  | eListBox<eListBoxEntryText>::flagLoadDeco);
 	colorformat->move(ePoint(160, 20));
 	colorformat->resize(eSize(120, 35));
@@ -55,12 +53,11 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	l->move(ePoint(10, 65));
 	l->resize(eSize(150, fd+4));
 	
-	pin8=new eListBox<eListBoxEntryText>(this);
+	pin8=new eListBox<eListBoxEntryText>(this, l);
 	pin8->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement | eListBox<eListBoxEntryText>::flagLoadDeco);
 	pin8->move(ePoint(160, 65));
 	pin8->resize(eSize(170, 35));
 	pin8->setHelpText(_("choose aspect ratio ( left, right )"));
-
 	entrys[0]=new eListBoxEntryText(pin8, _("4:3 letterbox"), (void*)0);
 	entrys[1]=new eListBoxEntryText(pin8, _("4:3 panscan"), (void*)1);
 	entrys[2]=new eListBoxEntryText(pin8, _("16:9 (PIN8)"), (void*)2);

@@ -63,7 +63,7 @@ eBouquetSelector::eBouquetSelector()
 	bouquets->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight.background"), eSkin::getActive()->queryScheme("eServiceSelector.highlight.foreground"));
 
 	if (eSkin::getActive()->build(this, "eBouquetSelector"))
-		eWarning("Bouquet selector widget build failed!");
+		eFatal("Bouquet selector widget build failed!");
 	
 	CONNECT(bouquets->selected, eBouquetSelector::entrySelected);
 }

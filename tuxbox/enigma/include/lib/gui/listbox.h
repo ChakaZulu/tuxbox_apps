@@ -11,12 +11,17 @@
 #include <core/gui/ewindow.h>
 #include <core/gui/guiactions.h>
 #include <core/gui/decoration.h>
+#include <core/gui/statusbar.h>
+
+int calcFontHeight( const gFont& font );
 
 class eListBoxBase: public eWidget
 {
 	eDecoration deco, deco_selected;	
 	gPixmap *iArrowUpDown, *iArrowUp, *iArrowDown, *iArrowLeft, *iArrowRight;
 protected:
+	const eWidget* descr;
+	eLabel* tmpDescr; // used for description Label in LCD
 	gColor colorActiveB, colorActiveF;
 	eRect crect, crect_selected;
 	int MaxEntries, item_height, flags;
@@ -29,7 +34,7 @@ public:
 	};
 	void setFlags(int);
 protected:
-	eListBoxBase(eWidget* parent);
+	eListBoxBase(eWidget* parent, const eWidget* descr=0);
 	eRect getEntryRect(int n);
 	int setProperty(const eString &prop, const eString &value);
 	void eraseBackground(gPainter *target, const eRect &clip) { }
@@ -38,7 +43,9 @@ protected:
 	void recalcClientRect();
 	void redrawBorder(gPainter *target, eRect &area);
 	void invalidateEntry(int n){	invalidate(getEntryRect(n));}
-	int focusChanged();
+	int newFocus();
+	void gotFocus();
+	void lostFocus();
 	void loadDeco();
 };
 
@@ -50,9 +57,8 @@ class eListBox: public eListBoxBase
 	ePtrList<T> childs;
 	ePtrList_T_iterator top, bottom, current;
 	int recalced;
-	void recalcEntryHeight(T* entry);
 public:
-	eListBox(eWidget *parent);
+	eListBox(eWidget *parent, const eWidget* descr=0 );
 	~eListBox();
 
 	void init();
@@ -110,34 +116,30 @@ public:
 			listbox->remove(this);
 	}
 
-	virtual int getHeight()
-	{
-		eDebug("--------------------eListBoxEntry getHeight()" );		
-		return 0;
-	};
+	void drawEntryRect( gPainter* rc, const eRect& where, const gColor& coActiveB, const gColor& coActiveF, const gColor& coNormalB, const gColor& coNormalF, int state );
 };
 
 class eListBoxEntryText: public eListBoxEntry
 {
 	friend class eListBox<eListBoxEntryText>;
 protected:
-	eString text; //,oldtext;
+	eString text;
 	void *key;
 	int align;
 	eTextPara *para;
 	int yOffs;
-	gFont font;
+	static gFont font;
 public:
-	eListBoxEntryText(eListBox<eListBoxEntryText>* lb, const char* txt=0, void *key=0, int align=0)
+	static int getEntryHeight();
+
+	eListBoxEntryText(eListBox<eListBoxEntryText>* lb, const char* txt=0, void *key=0, int align=0 )
 		:eListBoxEntry( (eListBox<eListBoxEntry>*)lb ), text(txt), key(key), align(align), para(0)
 	{
-			font = eSkin::getActive()->queryFont("eListBox.EntryText.normal");
 	}
 
-	eListBoxEntryText(eListBox<eListBoxEntryText>* lb, const eString& txt, void* key=0, int align=0)
+	eListBoxEntryText(eListBox<eListBoxEntryText>* lb, const eString& txt, void* key=0, int align=0 )
 		:eListBoxEntry( (eListBox<eListBoxEntry>*)lb ), text(txt), key(key), align(align), para(0)
 	{
-			font = eSkin::getActive()->queryFont("eListBox.EntryText.normal");
 	}
 
 	~eListBoxEntryText();
@@ -150,13 +152,11 @@ public:
 			return key < e.key;
 	}
 	
-	void *getKey() { return key; }
+	void *& getKey() { return key; }
 	const eString& getText() { return text; }
 
-	int getHeight();
-
 protected:
-	void redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state );
+	const eString& redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state );
 };
 
 class eListBoxEntryTextStream: public eListBoxEntry
@@ -164,12 +164,13 @@ class eListBoxEntryTextStream: public eListBoxEntry
 	friend class eListBox<eListBoxEntryTextStream>;
 protected:
 	std::stringstream text;
-	gFont font;
+	static gFont font;
 public:
+	static int getEntryHeight();
+
 	eListBoxEntryTextStream(eListBox<eListBoxEntryTextStream>* lb)
 		:eListBoxEntry((eListBox<eListBoxEntry>*)lb)
 	{		
-			font = eSkin::getActive()->queryFont("eListBox.EntryText.normal");	
 	}
 
 	bool operator < ( const eListBoxEntryTextStream& e) const
@@ -178,17 +179,19 @@ public:
 	}
 
 protected:
-	void redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state );
+	eString redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state );
 };
 
 class eListBoxEntryMenu: public eListBoxEntryText
 {
 	friend class eListBox<eListBoxEntryMenu>;
+	eString helptext;
 public:
+	const eString &getHelpText() const { return helptext; }
 	Signal0<void> selected;
 
-	eListBoxEntryMenu(eListBox<eListBoxEntryMenu>* lb, const char* txt)
-		:eListBoxEntryText((eListBox<eListBoxEntryText>*)lb, txt)
+	eListBoxEntryMenu(eListBox<eListBoxEntryMenu>* lb, const char* txt, const char* hlptxt=0, int align=0 )
+		:eListBoxEntryText((eListBox<eListBoxEntryText>*)lb, txt, 0, align), helptext(hlptxt?hlptxt:_("no description avail") )
 	{
 		if (listbox)
 			CONNECT(listbox->selected, eListBoxEntryMenu::LBSelected);
@@ -206,15 +209,25 @@ public:
 template <class T>
 inline void eListBox<T>::append(T* entry)
 {
+	T* cur = current;
 	childs.push_back(entry);
 	init();
+	if (cur)
+		setCurrent(cur);
 }
 
 template <class T>
 inline void eListBox<T>::remove(T* entry)
 {
+	T* cur = 0;
+	if (current != entry)
+		cur = current;
+		
 	childs.take(entry);
 	init();
+
+	if (cur)
+		setCurrent(cur);
 }
 
 template <class T>
@@ -227,8 +240,11 @@ inline void eListBox<T>::clearList()
 template <class T>
 inline void eListBox<T>::sort()
 {
+	T* cur = current;
 	childs.sort();
 	init();
+	if (cur)
+		setCurrent(cur);
 }
 
 template <class T>
@@ -246,14 +262,15 @@ inline T* eListBox<T>::goPrev()
 }
 
 template <class T>
-inline eListBox<T>::eListBox(eWidget *parent)
-	 :eListBoxBase(parent),
+inline eListBox<T>::eListBox(eWidget *parent, const eWidget* descr)
+	 :eListBoxBase(parent, descr),
 		top(childs.end()), bottom(childs.end()), current(childs.end()), recalced(0)
 {
 	childs.setAutoDelete(false);	// machen wir selber
 
 	addActionMap(&i_cursorActions->map);
 	addActionMap(&i_listActions->map);
+	item_height = T::getEntryHeight();
 }
 
 template <class T>
@@ -261,24 +278,6 @@ inline eListBox<T>::~eListBox()
 {
 	while (childs.begin() != childs.end())
 		delete childs.front();
-}
-
-template <class T>
-inline void eListBox<T>::recalcEntryHeight(T* entry)
-{
-	if (!recalced)
-	{
- 		int i = entry->getHeight();
-
-		if (i)
-			item_height = i;
-
-		recalced=1;
-
-		recalcClientRect();
-		recalcMaxEntries();
-		init();
-	}
 }
 
 template <class T>
@@ -293,16 +292,25 @@ inline void eListBox<T>::redrawWidget(gPainter *target, const eRect &where)
 
 	// rc wird in eListBoxBase ggf auf den neuen Client Bereich ohne Rand verkleinert
 	
-	if ( childs.front() != childs.end() )
-		recalcEntryHeight( childs.front() );
-
 	int i=0;
 	for (ePtrList_T_iterator entry(top); (entry != bottom) && (entry != childs.end()); ++entry)
 	{
 		eRect rect = getEntryRect(i);
 
+		eString s;
+
 		if ( rc.contains(rect) )
-			entry->redraw(target, rect, colorActiveB, colorActiveF, getBackgroundColor(), getForegroundColor(), (entry == current) && have_focus );
+			if ( entry == current )
+			{
+				if ( LCDTmp )
+					LCDTmp->setText( entry->redraw(target, rect, colorActiveB, colorActiveF, getBackgroundColor(), getForegroundColor(), ( have_focus ? 1 : ( MaxEntries > 1 ? 2 : 0 ) ) ) );
+				else if ( parent->LCDElement )
+					parent->LCDElement->setText( entry->redraw(target, rect, colorActiveB, colorActiveF, getBackgroundColor(), getForegroundColor(), ( have_focus ? 1 : ( MaxEntries > 1 ? 2 : 0 ) ) ) );
+				else
+					entry->redraw(target, rect, colorActiveB, colorActiveF, getBackgroundColor(), getForegroundColor(), ( have_focus ? 1 : ( MaxEntries > 1 ? 2 : 0 ) )	);		
+			}
+			else
+				entry->redraw(target, rect, colorActiveB, colorActiveF, getBackgroundColor(), getForegroundColor(), ( have_focus ? 0 : ( MaxEntries > 1 ? 2 : 0 ) )	);
 
 		i++;
 	}
@@ -313,10 +321,12 @@ inline void eListBox<T>::redrawWidget(gPainter *target, const eRect &where)
 template <class T>
 inline void eListBox<T>::gotFocus()
 {
+	eListBoxBase::gotFocus();
+
 	have_focus++;
 
 	if (!childs.empty())
-		if ( eListBoxBase::focusChanged() )   // recalced ?
+		if ( eListBoxBase::newFocus() )   // recalced ?
 		{
 			ePtrList_T_iterator it = current;
 			init();	
@@ -334,10 +344,12 @@ inline void eListBox<T>::gotFocus()
 template <class T>
 inline void eListBox<T>::lostFocus()
 {	
+	eListBoxBase::lostFocus();
+
 	have_focus--;
 
 	if (!childs.empty())
-		if ( eListBoxBase::focusChanged() ) 	//recalced ?
+		if ( eListBoxBase::newFocus() ) 	//recalced ?
 		{
 			ePtrList_T_iterator it = current;
 			init();	
@@ -562,7 +574,7 @@ inline void eListBox<T>::setCurrent(const T *c)
 	{
 		bottom = childs.begin();
 						
-		while (newCurPos == -1 && MaxEntries)
+		while (newCurPos == -1 && MaxEntries )  // MaxEntries is already checked above...
 		{
 			if ( bottom != childs.end() )
 				top = bottom;		// nächster Durchlauf
@@ -608,23 +620,26 @@ class eListBoxWindow: public eWindow
 protected:
 	int Entrys;
 	int width;
-public:
 	eListBox<T> list;
-	eListBoxWindow(eString Title="", int Entrys=0, int width=400);
+	eStatusBar *statusbar;
+public:
+	eListBoxWindow(eString Title="", int Entrys=0, int width=400, bool sbar=0);
 };
 
 template <class T>
-inline eListBoxWindow<T>::eListBoxWindow(eString Title, int Entrys, int width)
-	: eWindow(0), Entrys(Entrys), width(width), list(this)
+inline eListBoxWindow<T>::eListBoxWindow(eString Title, int Entrys, int width, bool sbar)
+	: eWindow(0), Entrys(Entrys), width(width), list(this), statusbar(sbar?new eStatusBar(this):0)
 {
 	setText(Title);
-	cresize(eSize(width, 10+Entrys*(list.getFont().pointSize+4)));
-	
+	cresize( eSize(width, (sbar?40:10)+Entrys*T::getEntryHeight() ) );
 	list.move(ePoint(10, 5));
-	eSize size = getClientSize();
-	size.setWidth(size.width()-20);
-	size.setHeight(size.height()-10);
-	list.resize(size);
+	list.resize(eSize(getClientSize().width()-20, getClientSize().height()-(sbar?35:5) ));
+	if (sbar)
+	{
+		statusbar->move( ePoint(0, getClientRect().bottom()-30) );
+		statusbar->resize( eSize( size.width(), 30) );
+		statusbar->setFlags( eStatusBar::flagLoadDeco );
+	}
 }
 
 #endif

@@ -10,27 +10,35 @@
 eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type)
 	:eWidget(parent), type(type), edit(edit)
 {
-	sat=new eListBox<eListBoxEntryText>(this);
+	LCDTitle=parent->LCDTitle;
+	LCDElement=parent->LCDElement;
+	eLabel *l = new eLabel(this);
+	l->setName( "lSat" );
+	sat=new eListBox<eListBoxEntryText>(this, l);
 	sat->setName("sat");
-	sat->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
 	for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
 		for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
 			new eListBoxEntryText(sat, s->getDescription().c_str(), (void*) *s);
 
+	l = new eLabel(this);
+	l->setName( "lFreq" );
 	int init[5]={1,2,3,4,5};
-	frequency=new eNumber(this, 5, 0, 9, 1, init, 0, 0, edit);
+	frequency=new eNumber(this, 5, 0, 9, 1, init, 0, l, edit);
 	frequency->setName("frequency");
 	
 	inversion=new eCheckbox(this);
 	inversion->setName("inversion");
 
-	polarity=new eListBox<eListBoxEntryText>(this);
+	l = new eLabel(this);
+	l->setName( "lPol" );
+	polarity=new eListBox<eListBoxEntryText>(this, l);
 	polarityEntry[0]=new eListBoxEntryText(polarity, _("vertical"), (void*)0);
 	polarityEntry[1]=new eListBoxEntryText(polarity, _("horizontal"), (void*)1);
 	polarity->setName("polarity");
-	polarity->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
 
-	fec=new eListBox<eListBoxEntryText>(this);
+	l = new eLabel(this);
+	l->setName( "lFec" );
+	fec=new eListBox<eListBoxEntryText>(this, l);
 	fecEntry[0]=new eListBoxEntryText(fec, "Auto", (void*)0);
 	fecEntry[1]=new eListBoxEntryText(fec, "1/2", (void*)1);
 	fecEntry[2]=new eListBoxEntryText(fec, "2/3", (void*)2);
@@ -38,23 +46,21 @@ eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type)
 	fecEntry[4]=new eListBoxEntryText(fec, "5/6", (void*)4);
 	fecEntry[5]=new eListBoxEntryText(fec, "7/8", (void*)5);
 	fec->setName("fec");
-	fec->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
 	
-	symbolrate=new eNumber(this, 5, 0, 9, 1, init, 0, 0, edit);
+	l = new eLabel(this);
+	l->setName( "lSymb" );
+	symbolrate=new eNumber(this, 5, 0, 9, 1, init, 0, l, edit);
 	symbolrate->setName("symbolrate");
 
 	CONNECT(frequency->selected, eTransponderWidget::nextField0);
-	CONNECT(polarity->selected, eTransponderWidget::nextField1);
-	CONNECT(fec->selected, eTransponderWidget::nextField1);
 	CONNECT(symbolrate->selected, eTransponderWidget::nextField0);
-	CONNECT(sat->selected, eTransponderWidget::nextField1);
-	
 	CONNECT(fec->selchanged, eTransponderWidget::updated1);
 	CONNECT(polarity->selchanged, eTransponderWidget::updated1);
-	CONNECT(frequency->numberChanged, eTransponderWidget::updated0);
-	CONNECT(symbolrate->numberChanged, eTransponderWidget::updated0);
+	CONNECT_1_0(frequency->numberChanged, eTransponderWidget::updated2, 0);
+	CONNECT_1_0(symbolrate->numberChanged, eTransponderWidget::updated2, 0);
 	CONNECT(sat->selchanged, eTransponderWidget::updated1);
 	CONNECT(inversion->checked, eTransponderWidget::updated2);
+	CONNECT( focusChanged, eTransponderWidget::updateText);
 }
 
 void eTransponderWidget::nextField0(int *)
@@ -62,17 +68,14 @@ void eTransponderWidget::nextField0(int *)
 	focusNext(eWidget::focusDirNext);
 }
 
-void eTransponderWidget::nextField1(eListBoxEntryText *)
+void eTransponderWidget::updateText(const eWidget* w)  // for Statusbar....
 {
-	focusNext(eWidget::focusDirNext);
+	setHelpText( w->getHelpText() );
+	if (parent)
+		parent->focusChanged( this );
 }
 
 void eTransponderWidget::updated1(eListBoxEntryText *)
-{
-	updated();
-}
-
-void eTransponderWidget::updated0()
 {
 	updated();
 }

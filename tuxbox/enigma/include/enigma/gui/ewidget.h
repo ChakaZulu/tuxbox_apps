@@ -270,14 +270,14 @@ public:
 	 *
 	 * \return Current size of the widget, relative to the position.
 	 */
-	eSize getSize() const { return size; }
+	const eSize& getSize() const { return size; }
 	
 	/** 
 	 * \brief Returns the current position.
 	 *
 	 * \return Current position, relative to the parent's \c clientrect.
 	 */
-	ePoint getPosition() const { return position; }
+	const ePoint& getPosition() const { return position; }
 	
 	/**
 	 * \brief Returns the size of the clientrect.
@@ -291,7 +291,7 @@ public:
 	 *
 	 * \return The area usable for the childwidgets.
 	 */
-	eRect getClientRect() const { return clientrect; }
+	const eRect& getClientRect() const { return clientrect; }
 
 	/**
 	 * \brief Recursive redraw of a widget.
@@ -404,7 +404,7 @@ public:
 	 */
 	void setText(const eString &label);
 	
-	const	eString& getText() { return text; }
+	const	eString& getText() const { return text; }
 	void setBackgroundColor(const gColor& color);
 	void setForegroundColor(const gColor& color);
 	void setPixmap(gPixmap *pmap);

@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <dbox/avs_core.h>
+#include <ost/audio.h>
 #include <sys/ioctl.h>
 
 #include "config.h"
@@ -42,24 +43,31 @@ eAVSwitch::eAVSwitch()
 	active=0;
 	if (!instance)
 		instance=this;
+
 	fd=open("/dev/dbox/avs0", O_RDWR);
+
+	fdost=open("/dev/ost/audio0", O_RDWR);
+
 	saafd=open("/dev/dbox/saa0", O_RDWR);
-	reloadSettings();
+}
 
-		// initial volume settings
-	if (eConfig::getInstance()->getKey("/elitedvb/audio/volume", volume))
-		volume=10;
+void eAVSwitch::init()
+{
+	loadScartConfig();
 
-	if (eConfig::getInstance()->getKey("/elitedvb/audio/VCRvolume", VCRVolume))
-		VCRVolume=10;
+	reloadSettings();  // only Colorsettings...
 
 	if (eConfig::getInstance()->getKey("/elitedvb/audio/mute", mute))
 		mute=0;
 
-	mute = !mute;
-	toggleMute();
-	muteAviaAudio(0);
+	if (eConfig::getInstance()->getKey("/elitedvb/audio/VCRvolume", VCRVolume))
+		VCRVolume=10;
+
+	if (eConfig::getInstance()->getKey("/elitedvb/audio/volume", volume))
+		volume=10;
+
 	setInput(0);
+	setActive(1);		// in setActive is volume or mute set to current state
 }
 
 eAVSwitch *eAVSwitch::getInstance()
@@ -80,8 +88,9 @@ eAVSwitch::~eAVSwitch()
 		close(fd);
 	if (saafd>=0)
 		close(saafd);
+	if (fdost>=0)
+		close(fdost);
 }
-
 
 void eAVSwitch::reloadSettings()
 {
@@ -112,8 +121,6 @@ void eAVSwitch::changeVolume(int abs, int vol)
 		break;
 		case 1:
 			volume=vol;
-			if (mute)
-				toggleMute();
 		break;
 	}
 
@@ -134,13 +141,9 @@ void eAVSwitch::changeVCRVolume(int abs, int vol)
 	{
 		case 0:
 			VCRVolume+=vol;
-			if (mute)
-				toggleMute();
 		break;
 		case 1:
 			VCRVolume=vol;
-			if (mute)
-				toggleMute();
 		break;
 	}
 
@@ -156,6 +159,15 @@ void eAVSwitch::changeVCRVolume(int abs, int vol)
 }
 
 
+void eAVSwitch::muteOstAudio(bool b)
+{
+	if (ioctl(fdost, AUDIO_SET_MUTE, b?1:0) < 0)
+	{
+		perror("OST SET MUTE:");
+		return;
+	}
+}
+
 void eAVSwitch::sendVolumeChanged()
 {
 	/*emit*/ volumeChanged(mute?63:volume);
@@ -164,17 +176,22 @@ void eAVSwitch::sendVolumeChanged()
 void eAVSwitch::toggleMute()
 {
 	mute = !mute;
-
 	if (mute)
 	{
-		setVolume(63);
-		sendVolumeChanged();
+//		setVolume(63);
+//		muteOstAudio(1);
+		muteAvsAudio(1);
 	}
 	else
-		changeVolume(1,volume);
+	{
+//		changeVolume(1,volume);
+//		muteOstAudio(0);
+		muteAvsAudio(0);
+	}
+	sendVolumeChanged();
 }
 
-void eAVSwitch::muteAviaAudio(bool m)
+void eAVSwitch::muteAvsAudio(bool m)
 {
 	int a;
 
@@ -250,7 +267,12 @@ int eAVSwitch::setInput(int v)
 		ioctl(fd, AVSIOSVSW3, dvb+4);
 		ioctl(fd, AVSIOSASW3, dvb+5);
 		changeVolume(1, volume);  // set Volume to TV Volume
-		reloadSettings();
+		if (mute)
+		{
+			muteAvsAudio(1);
+			sendVolumeChanged();
+		}
+		reloadSettings();						// reload ColorSettings
 		break;
 	case 1:   // Switch to VCR
 		v = (Type == SAGEM)? 0 : 2;
@@ -261,6 +283,8 @@ int eAVSwitch::setInput(int v)
 		ioctl(fd, AVSIOSASW2, scart+3);
 		ioctl(fd, AVSIOSVSW3, scart+4);
 		ioctl(fd, AVSIOSASW3, scart+5);
+		if (mute)
+			muteAvsAudio(0);
 		changeVCRVolume(1, VCRVolume);
 		break;
 	}
@@ -274,11 +298,6 @@ int eAVSwitch::setAspectRatio(eAVAspectRatio as)
 	saa = (aspect==r169) ? SAA_WSS_169F : SAA_WSS_43F;
 	ioctl(saafd,SAAIOSWSS,&saa);
 	return setTVPin8(active?((aspect==r169)?6:12):0);
-}
-
-int eAVSwitch::isVCRActive()
-{
-	return 0;
 }
 
 int eAVSwitch::setActive(int a)
@@ -334,8 +353,7 @@ bool eAVSwitch::loadScartConfig()
 		fclose(fd);
 	}
 	else
-	{
 		eDebug("[eAVSwitch] failed to load scart-config (scart.conf), using default-values");
-	}
+
 	return 0;
 }

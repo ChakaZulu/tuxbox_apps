@@ -2,6 +2,7 @@
 #define __apps_enigma_setupskin_h
 
 #include <core/gui/listbox.h>
+#include <core/gui/statusbar.h>
 
 class eButton;
 
@@ -23,9 +24,11 @@ class eSkinSetup: public eWindow
 {
 	eButton *baccept, *breject;
 	eListBox<eListBoxEntrySkin> *lskins;
+	eStatusBar* statusbar;
 	void loadSkins();
 	void accept();
 	void skinSelected(eListBoxEntrySkin *l);
+	int eventHandler(const eWidgetEvent &event);
 public:
 	eSkinSetup();
 	~eSkinSetup();

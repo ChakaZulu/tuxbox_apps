@@ -14,7 +14,6 @@ public:
 	eListBoxEntryBouquet(eListBox<eListBoxEntryBouquet>* lb, eBouquet* b)
 		:eListBoxEntryText((eListBox<eListBoxEntryText>*)lb, b->bouquet_name), bouquet(b)
 	{
-		font = eSkin::getActive()->queryFont("eBouquetSelector.Entry.Name");
 	}
 };
 

@@ -20,9 +20,7 @@ class eTransponderWidget: public eWidget
 	
 	eListBox<eListBoxEntryText> *fec, *polarity, *sat;
 	void nextField0(int *);
-	void nextField1(eListBoxEntryText *);
 	void updated1(eListBoxEntryText *);
-	void updated0();
 	void updated2(int);
 public:
 	enum type
@@ -34,6 +32,7 @@ public:
 	int load();
 	int setTransponder(const eTransponder *transponder);
 	int getTransponder(eTransponder *transponder);
+	void updateText(const eWidget*);
 };
 
 class eFEStatusWidget: public eWidget

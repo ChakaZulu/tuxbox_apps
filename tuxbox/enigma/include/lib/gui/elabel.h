@@ -31,6 +31,7 @@ public:
 	void setAlign(int align);
 
 	eSize getExtend();
+	ePoint getLeftTop();
 
 	ePoint pixmap_position, text_position;
 };

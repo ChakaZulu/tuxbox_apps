@@ -7,7 +7,6 @@
 
 eSatelliteConfigurationManager::eSatelliteConfigurationManager()
 {
-
 	eMessageBox b("Satconfig isn't ready, it has NO function yet", "under construction !!");
 	b.show();
 	b.exec();
@@ -36,6 +35,7 @@ eSatelliteConfigurationManager::eSatelliteConfigurationManager()
 			b->move(ePoint(sx,sy));
 			b->resize(eSize(280, 30));
 			b->setText( s->getDescription() );
+			b->setHelpText( _("press ok to goto Sat config"));
 			CONNECT(b->selected_id, eSatelliteConfigurationManager::satSelected);
 			sy+=40;
 			sat++;
@@ -45,14 +45,15 @@ eSatelliteConfigurationManager::eSatelliteConfigurationManager()
 			eButton* b = new eButton(w_buttons);
 			b->move(ePoint(lx,ly));
 			b->resize(eSize(80, 30));
-
 			b->setText(eString().sprintf("%i", lnb++) );
+			b->setHelpText( _("press ok to goto LNB config"));
 			CONNECT(b->selected_id, eSatelliteConfigurationManager::lnbSelected);
 			ly+=40;
 
 			b = new eButton(w_buttons);
 			b->move(ePoint(dx,dy));
 			b->resize(eSize(80, 30));
+			b->setHelpText( _("press ok to goto DISEqC config"));
 			CONNECT(b->selected_id, eSatelliteConfigurationManager::DISEqCSelected);
 			switch ( it->getDiSEqC().sat )
 			{
@@ -95,8 +96,8 @@ bool eSatelliteConfigurationManager::lnbSelected(eString& descr)
 	int oldlnb = lnbnumber;
 
 	eLNBSelitor sel;
-	
 	sel.setCurrentLNB(lnbnumber);
+	sel.setLCD(LCDTitle, LCDElement);
 	hide();
 	sel.show();
 	if ( !sel.exec() )
@@ -158,18 +159,26 @@ eLNBSelitor::eLNBSelitor()
 	lnb_list = new eListBox<eListBoxEntryText>(this);
 	lnb_list->setFlags( eListBoxBase::flagNoPageMovement );
 	lnb_list->setName("lnblist");
-	lofH = new eNumber(this, 5, 0, 9, 1, init_h, 0, 0, 1 );  // todo descr label im skin mit name versehen für lcd anzeige
-	lofH->setName("lofH");
-	lofL = new eNumber(this, 5, 0, 9, 1, init_l, 0, 0, 1 );  // todo descr label im skin mit name versehen für lcd anzeige
+	eLabel *l = new eLabel(this);
+	l->setName("lLofL");
+	lofL = new eNumber(this, 5, 0, 9, 1, init_l, 0, l, 1 );  // todo descr label im skin mit name versehen für lcd anzeige
 	lofL->setName("lofL");
-	threshold = new eNumber(this, 5, 0 ,9, 1, init_t, 0, 0, 1);
+	l = new eLabel(this);
+	l->setName("lLofH");
+	lofH = new eNumber(this, 5, 0, 9, 1, init_h, 0, l, 1 );  // todo descr label im skin mit name versehen für lcd anzeige
+	lofH->setName("lofH");
+	l = new eLabel(this);
+	l->setName("lThreshold");
+	threshold = new eNumber(this, 5, 0 ,9, 1, init_t, 0, l, 1);
 	threshold->setName("threshold");
-	use = new eButton(this);
-	use->setName("use");
-	apply = new eButton(this);
-	apply->setName("apply");
 	remove = new eButton(this);
 	remove->setName("delete");
+	apply = new eButton(this);
+	apply->setName("apply");
+	cancel = new eButton(this);
+	cancel->setName("cancel");
+	use = new eButton(this);
+	use->setName("use");
 
 	eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "eLNBSelitor"))
@@ -183,4 +192,33 @@ eLNBSelitor::eLNBSelitor()
 
 	// add a None LNB
 	new eListBoxEntryText(lnb_list, _("New"), 0);
+
+	CONNECT( lofL->selected, eLNBSelitor::selected);
+	CONNECT( lofH->selected, eLNBSelitor::selected);
+	CONNECT( cancel->selected, eLNBSelitor::reject);
+	CONNECT( threshold->selected, eLNBSelitor::selected);
+}
+
+void eLNBSelitor::selected(int*)
+{
+	focusNext( eWidget::focusDirNext );
+}
+
+int eLNBSelitor::eventHandler(const eWidgetEvent &event)
+{
+	switch (event.type)
+	{
+	case eWidgetEvent::evtAction:
+		if (event.action == &i_cursorActions->left)
+			focusNext(eWidget::focusDirW);
+		else if (event.action == &i_cursorActions->right)
+			focusNext(eWidget::focusDirE);
+		else
+			break;
+		return 1;
+
+	default:
+		break;
+	}
+	return eWindow::eventHandler(event);
 }

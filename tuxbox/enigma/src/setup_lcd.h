@@ -2,6 +2,7 @@
 #define __setuplcd_h
 
 #include <core/gui/ewindow.h>
+#include <core/gui/statusbar.h>
 
 class eProgress;
 class eButton;
@@ -10,6 +11,7 @@ class eZapLCDSetup: public eWindow
 {
 	eProgress *p_brightness, *p_contrast, *p_standby;
 	eButton *bbrightness, *bcontrast, *bstandby;
+	eStatusBar* statusbar;
 	
 	int lcdbrightness;
 	int lcdcontrast;

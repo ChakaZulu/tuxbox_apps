@@ -123,11 +123,8 @@ eDVB::eDVB(): state(eDVBState::stateIdle)
 		new eAVSwitchNokia;
 		break;
 	}
-	
-	eAVSwitch::getInstance()->setInput(0);
-	eAVSwitch::getInstance()->setActive(1);
-	
-		// init stream watchdog
+
+	// init stream watchdog
 	eStreamWatchdog::getInstance()->reloadSettings();
 
 //	tMHWEIT=0;

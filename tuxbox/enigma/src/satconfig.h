@@ -38,6 +38,9 @@ class eLNBSelitor: public eWindow  // Selitor = "Sel"ector + Ed"itor" :-)
 	eButton *use; 	// use this LNB for Satelite and close LNBSelitor
 	eButton *apply; // apply changed to selected LNB
 	eButton *remove; // remove the selected LNB
+	eButton *cancel; // close the window without apply changes
+	int eventHandler(const eWidgetEvent &event);
+	void selected(int*);
 public:
 	eLNBSelitor();
 

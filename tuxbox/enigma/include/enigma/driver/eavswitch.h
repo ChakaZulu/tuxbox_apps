@@ -19,32 +19,34 @@ enum eAVColorFormat
 class eAVSwitch
 {
 	static eAVSwitch *instance;
-	int setVolume(int vol);	// 0..65535
-	void muteAviaAudio(bool);
 	int volume, VCRVolume, mute;
-public:
-	void sendVolumeChanged();
-	int getVolume() { return volume; }
-	int getMute() { return mute; }
-	Signal1<void, int> volumeChanged;
+
+	int fd, saafd, fdost;
+	eAVAspectRatio aspect;
+	eAVColorFormat colorformat;
+
+	int setVolume(int vol);	// 0..65535
+	void muteAvsAudio(bool);
+	void muteOstAudio(bool);
+	bool loadScartConfig();
+protected:
 	enum {NOKIA, SAGEM, PHILIPS} Type;
 	int scart[6];
 	int dvb[6];
 	int active;
-	int fd, saafd;
-	eAVAspectRatio aspect;
-	eAVColorFormat colorformat;
-	static eAVSwitch *getInstance();
+	void init();
+public:
 	eAVSwitch();
-	int setTVPin8(int vol);
-	int setColorFormat(eAVColorFormat cf);
-	int setAspectRatio(eAVAspectRatio as);
-	int setActive(int active);
-	int isVCRActive();
-	int setInput(int v);	// 0: dbox, 1: vcr
 	~eAVSwitch();
+	Signal1<void, int> volumeChanged;
+
+	static eAVSwitch *getInstance();
+	int getVolume() { return volume; }
+	int getMute() { return mute; }
+
+	void sendVolumeChanged();
 	void reloadSettings();
-	bool loadScartConfig();
+
 	/**
 	 * \brief Changes the volume.
 	 *
@@ -54,6 +56,13 @@ public:
 	 * \param vol The volume/muteflag to set. In case of volume, 0 means max and 63 means min.
 	 */
 	void changeVolume(int abs, int vol);
+
+	int setTVPin8(int vol);
+	int setColorFormat(eAVColorFormat cf);
+	int setAspectRatio(eAVAspectRatio as);
+	int setActive(int active);
+	int setInput(int v);	// 0: dbox, 1: vcr
+
 	void changeVCRVolume(int abs, int vol);
 	void toggleMute();
 };
@@ -76,7 +85,7 @@ public:
 		dvb[3] = 0;
 		dvb[4] = 1;
 		dvb[5] = 1;
-		loadScartConfig();
+		init();
 	}
 };
 
@@ -98,7 +107,7 @@ public:
 		dvb[3] = 1;
 		dvb[4] = 1;
 		dvb[5] = 1;
-		loadScartConfig();
+		init();
 	}
 };
 
@@ -120,7 +129,7 @@ public:
 		dvb[3] = 0;
 		dvb[4] = 0;
 		dvb[5] = 0;
-		loadScartConfig();
+		init();
 	}
 };
 

@@ -46,8 +46,10 @@ void tsSelectType::selected(eListBoxEntryText *entry)
 		close((int)entry->getKey());
 }
 
-tsManual::tsManual(eWidget *parent, const eTransponder &transponder): eWidget(parent), transponder(transponder)
+tsManual::tsManual(eWidget *parent, const eTransponder &transponder, eWidget *LCDTitle, eWidget *LCDElement)
+:eWidget(parent), transponder(transponder)
 {
+	setLCD(LCDTitle, LCDElement);
 	int ft=0;
 	switch (eFrontend::getInstance()->Type())
 	{
@@ -146,7 +148,9 @@ int tsManual::eventHandler(const eWidgetEvent &event)
 
 tsAutomatic::tsAutomatic(eWidget *parent): eWidget(parent)
 {
-	l_network=new eListBox<eListBoxEntryText>(this);
+	eLabel* l = new eLabel(this);
+	l->setName("lNet");
+	l_network=new eListBox<eListBoxEntryText>(this, l);
 	l_network->setName("network");
 	l_network->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
 
@@ -663,22 +667,18 @@ void tsScan::dvbState(const eDVBState &state)
 {
 }
 
-TransponderScan::TransponderScan()
+TransponderScan::TransponderScan( eWidget *LCDTitle, eWidget *LCDElement)
+	:LCDElement(LCDElement), LCDTitle(LCDTitle)
 {
 	window=new eWindow(0);
 	window->setText(_("Transponder Scan"));
 	window->cmove(ePoint(100, 100));
 	window->cresize(eSize(460, 400));
 	
-	eSize size=eSize(window->getClientSize().width(), window->getClientSize().height()-30);
-
-	progress=new eProgress(window);
-	progress->move(ePoint(60, size.height()+5));
-	progress->resize(eSize(window->getClientSize().width()-70, 10));
-
-	progress_text=new eLabel(window);
-	progress_text->move(ePoint(0, size.height()));
-	progress_text->resize(eSize(50, 30));
+	statusbar=new eStatusBar(window);
+	statusbar->setFlags( eStatusBar::flagLoadDeco );
+	statusbar->move(ePoint(0, window->getClientSize().height()-30) );
+	statusbar->resize( eSize( window->getClientSize().width(), 30 ) );
 }
 
 TransponderScan::~TransponderScan()
@@ -709,17 +709,16 @@ int TransponderScan::exec()
 	{
 		int total=stateEnd;
 		
-		progress_text->setText(eString().sprintf("%d/%d", state+1, total));
 		if (total<2)
 			total=2;
 		total--;
-		progress->setPerc(state*100/total);
 
 		switch (state)
 		{
 		case stateMenu:
 		{
 			tsSelectType select(window);
+			select.setLCD( LCDTitle, LCDElement);
 			select.show();
 			switch (select.exec())
 			{
@@ -757,8 +756,7 @@ int TransponderScan::exec()
 					break;
 				}
 
-			tsManual manual_scan(window, transponder);
-			
+			tsManual manual_scan(window, transponder, LCDTitle, LCDElement);
 			manual_scan.show();
 			switch (manual_scan.exec())
 			{
@@ -775,7 +773,7 @@ int TransponderScan::exec()
 		case stateAutomatic:
 		{
 			tsAutomatic automatic_scan(window);
-			
+			automatic_scan.setLCD( LCDTitle, LCDElement);
 			automatic_scan.show();
 			switch (automatic_scan.exec())
 			{
@@ -792,6 +790,7 @@ int TransponderScan::exec()
 		case stateScan:
 		{
 			tsScan scan(window);
+  		scan.setLCD( LCDTitle, LCDElement);
 			scan.move(ePoint(0, 0));
 			scan.resize(size);
 			
@@ -807,7 +806,8 @@ int TransponderScan::exec()
 		case stateDone:
 		{
 			tsText finish(_("Done."), text, window);
-			finish.move(ePoint(0, 0));
+  		finish.setLCD( LCDTitle, LCDElement);
+  		finish.move(ePoint(0, 0));
 			finish.resize(size);
 			finish.show();
 			finish.exec();

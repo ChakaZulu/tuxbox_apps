@@ -4,6 +4,7 @@
 #include <core/dvb/dvb.h>
 #include <core/gui/ewidget.h>
 #include <core/gui/listbox.h>
+#include <core/gui/statusbar.h>
 
 class eWindow;
 class eLabel;
@@ -44,7 +45,7 @@ class tsManual: public eWidget
 	void retune();
 	int eventHandler(const eWidgetEvent &event);
 public:
-	tsManual(eWidget *parent, const eTransponder &transponder);
+	tsManual(eWidget *parent, const eTransponder &transponder, eWidget* LCDTitle, eWidget* LCDElement);
 };
 
 class tsAutomatic: public eWidget
@@ -101,10 +102,11 @@ class TransponderScan
 	eWindow *window;
 	eProgress *progress;
 	eLabel *progress_text;
-	
-	eWidget *select_type, *manual_scan, *automatic_scan;
+	eStatusBar *statusbar;	
+	eWidget *select_type, *manual_scan, *automatic_scan, *LCDElement, *LCDTitle;
+
 public:
-	TransponderScan();
+	TransponderScan( eWidget* LCDTitle, eWidget* LCDElement);
 	~TransponderScan();
 	int exec();
 };

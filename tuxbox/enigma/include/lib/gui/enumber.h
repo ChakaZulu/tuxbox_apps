@@ -26,7 +26,7 @@ private:
 	int min, max, digit, maxdigits, isactive;
 	int flags;
 	int base;
-	eString descr;
+	eWidget* descr;
 	eLabel* tmpDescr; // used for description Label in LCD
 protected:
 	int keyDown(int key);
@@ -35,7 +35,7 @@ protected:
 public:
 	Signal1<void, int*> selected;
 	Signal0<void> numberChanged;
-	eNumber(eWidget *parent, int len, int min, int max, int maxdigits, int *init, int isactive=0, eLabel* descr=0, int grabfocus=1, int DrawDeco=1);
+	eNumber(eWidget *parent, int len, int min, int max, int maxdigits, int *init, int isactive=0, eWidget* descr=0, int grabfocus=1, int DrawDeco=1);
 	~eNumber();
 	int getNumber(int f) { if ((f>=0) && (f<len)) return number[f]; return -1; }
 	void setNumber(int f, int n);

@@ -252,8 +252,13 @@ NVODStream::NVODStream(eListBox<NVODStream> *listbox, const NVODReferenceEntry *
 
 void eNVODSelector::selected(NVODStream* nv)
 {
+	
 	if (nv)
+	{
+//		nv->service.descr = "NVOD";
 		eServiceInterface::getInstance()->play(nv->service);
+	}
+	
 	close(0);
 }
 
@@ -371,7 +376,12 @@ eSubServiceSelector::eSubServiceSelector()
 
 void eSubServiceSelector::selected(SubService *ss)
 {
-	eServiceInterface::getInstance()->play(ss->service);
+	if (ss)
+	{
+		ss->service.setServiceType(5);  // faked service type
+//		ss->service.descr = ss->getText();
+		eServiceInterface::getInstance()->play(ss->service);
+	}
 	close(0);
 }
 
@@ -753,7 +763,7 @@ void eZapMain::showServiceSelector(int dir)
 
 	if (!service)
 		return;
-	
+
 /*	if (*/eServiceInterface::getInstance()->play(*service);/*)
 		startService(*service, -EAGAIN);*/
 }
@@ -1140,6 +1150,7 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 
 		// es wird nur dann versucht einen service als referenz-service zu uebernehmen, wenns den ueberhaupt
 		// gibt.
+
 	if (service)
 		switch (serviceref.getServiceType())
 		{
@@ -1169,8 +1180,8 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 	else
 		switch (serviceref.getServiceType())
 		{
-		case 5: // nvod stream
-			name+="NVOD Stream";
+		case 5: // nvod stream or linkage subservice ( type faked in SubServiceSelector::selected )
+			name+="NVOD";//serviceref.descr;
 		}
 
 	if (!name.length())

@@ -15,7 +15,7 @@
 #ifndef SYNC_PAINT
 void *gRC::thread_wrapper(void *ptr)
 {
-	nice(1);
+	nice(0);
 	return ((gRC*)ptr)->thread();
 }
 #endif

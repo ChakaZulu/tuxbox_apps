@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setupskin.cpp,v 1.7 2002/07/15 10:41:36 Ghostrider Exp $
+ * $Id: setupskin.cpp,v 1.8 2002/08/11 00:52:24 Ghostrider Exp $
  */
 
 #include "setupskin.h"
@@ -102,6 +102,10 @@ eSkinSetup::eSkinSetup()
 	breject->setName("reject");
 	lskins=new eListBox<eListBoxEntrySkin>(this);
 	lskins->setName("skins");
+	lskins->setFlags(eListBoxBase::flagNoPageMovement);
+	statusbar=new eStatusBar(this);
+	statusbar->setName("statusbar");
+
 	CONNECT(baccept->selected, eSkinSetup::accept);
 	CONNECT(breject->selected, eSkinSetup::reject);
 	CONNECT(lskins->selected, eSkinSetup::skinSelected);
@@ -117,4 +121,23 @@ eSkinSetup::eSkinSetup()
 
 eSkinSetup::~eSkinSetup()
 {
+}
+
+int eSkinSetup::eventHandler(const eWidgetEvent &event)
+{
+	switch (event.type)
+	{
+	case eWidgetEvent::evtAction:
+		if (event.action == &i_cursorActions->left)
+			focusNext(eWidget::focusDirW);
+		else if (event.action == &i_cursorActions->right)
+			focusNext(eWidget::focusDirE);
+		else
+			break;
+		return 1;
+
+	default:
+		break;
+	}
+	return eWindow::eventHandler(event);
 }

@@ -9,6 +9,7 @@ class eListBoxEntryEPG:public eListBoxEntry
 {
 	friend class eListBox<eListBoxEntryEPG>;
 public:
+	static int getEntryHeight();
 	static gFont TimeFont;
 	static gFont DescrFont;
 	int TimeYOffs, DescrXOffs, DescrYOffs;
@@ -18,7 +19,7 @@ public:
 	EITEvent event;
 	eListBoxEntryEPG(const eit_event_struct* evt, eListBox<eListBoxEntryEPG> *listbox);
 	~eListBoxEntryEPG();
-	void redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int hilited);
+	eString redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int hilited);
 };
 
 class eEPGSelector: public eWindow

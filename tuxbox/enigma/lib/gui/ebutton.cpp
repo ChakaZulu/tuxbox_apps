@@ -19,9 +19,10 @@ eButton::eButton(eWidget *parent, eLabel* desc, int takefocus, bool loadDeco)
 	}
 
 	if (deco)
+	{
 		align=eTextPara::dirCenter;
-	
-	setFlags( flagVCenter );
+		setFlags( flagVCenter );
+	}
 
 	addActionMap(&i_cursorActions->map);
 }
@@ -122,7 +123,7 @@ int eButton::eventHandler(const eWidgetEvent &event)
 		default:
 		break;
 	}
-	return eWidget::eventHandler(event);
+	return eLabel::eventHandler(event);
 }
 
 void eButton::redrawWidget(gPainter *target, const eRect &area)

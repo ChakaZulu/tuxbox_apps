@@ -121,8 +121,9 @@ ePlugin::ePlugin(eListBox<ePlugin> *parent, const char *cfgfile, const char* des
 }
 
 eZapPlugins::eZapPlugins(eWidget* lcdTitle, eWidget* lcdElement)
-	:eListBoxWindow<ePlugin>(_("Plugins"), 10, 400/*, true*/)
+	:eListBoxWindow<ePlugin>(_("Plugins"), 10, 400, true)
 {
+	setHelpText(_("select plugin and press ok"));
 	move(ePoint(150, 50));
 	setLCD(lcdTitle, lcdElement);
 	new ePlugin(&list, 0);
@@ -242,11 +243,11 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 		}
 	}
 
-	for(PluginParam *par = first; par; par=par->next )
+/*	for(PluginParam *par = first; par; par=par->next )
 	{
 		printf ("id: %s - val: %s\n", par->id, par->val);
 		printf("%p\n", par->next);
-	}
+	}*/
 
 	for (i=0; i<argc; i++)
 	{
@@ -256,6 +257,8 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 		{
 			const char *de=dlerror();
 			eDebug(de);
+			if (isVisible())
+				hide();
 			eMessageBox msg(de, "plugin loading failed");
 			msg.show();
 			msg.exec();
@@ -271,6 +274,8 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 		PluginExec execPlugin = (PluginExec) dlsym(libhandle[i-1], "plugin_exec");
 		if (!execPlugin)
 		{
+			if (isVisible())
+				hide();
 			eMessageBox msg("The symbol " + plugin->pluginname + "_exec" + " was not found. sorry.", "plugin executing failed");
 			msg.show();
 			msg.exec();

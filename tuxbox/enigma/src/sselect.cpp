@@ -64,12 +64,6 @@ eAutoInitP0<numberActions> i_numberActions(5, "number actions");
 eListBoxEntryService::eListBoxEntryService(eListBox<eListBoxEntryService> *lb, const eServiceReference &service)
 	:eListBoxEntry((eListBox<eListBoxEntry>*)lb), service(service)
 {
-	if (!serviceFont.pointSize)
-	{
-		serviceFont = eSkin::getActive()->queryFont("eServiceSelector.Entry.Name");
-		descrFont = eSkin::getActive()->queryFont("eServiceSelector.Entry.Description");
-		numberFont = eSkin::getActive()->queryFont("eServiceSelector.Entry.Number");
-	}
 #if 0
 	sort=eString().sprintf("%06d", service->service_number);
 #else
@@ -83,19 +77,19 @@ eListBoxEntryService::~eListBoxEntryService()
 {
 }
 
-int eListBoxEntryService::getHeight()
+int eListBoxEntryService::getEntryHeight()
 {
-	eTextPara *para;
-	para = new eTextPara( eRect(0,0,100,50) );
-	para->setFont( serviceFont );
-	para->renderString("Mjdyl");
-	int i = para->getBoundBox().height();
-	para->destroy();
-	return i+4;
+	if (!serviceFont.pointSize)
+	{
+		serviceFont = eSkin::getActive()->queryFont("eServiceSelector.Entry.Name");
+		descrFont = eSkin::getActive()->queryFont("eServiceSelector.Entry.Description");
+		numberFont = eSkin::getActive()->queryFont("eServiceSelector.Entry.Number");
+	}
+	return calcFontHeight(serviceFont)+4;
 }
 
 
-void eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int hilited)
+eString eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int hilited)
 {
 	eString sname;
 	if (service.type == eServiceReference::idDVB)
@@ -105,10 +99,6 @@ void eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coActi
 		{
 			sname=pservice->service_name;
 			EITEvent *e=eEPGCache::getInstance()->lookupCurrentEvent((const eServiceReferenceDVB&)service);
-
-			eWidget* p = listbox->getParent();			
-			if (hilited && p && p->LCDElement)
-					p->LCDElement->setText(sort);
 
 			if (e)
 			{
@@ -128,28 +118,17 @@ void eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coActi
 			}
 		}
 		else
-			return;
+			return eString();
 	} else
 		sname="non-DVB";
 	
 	rc->setFont( serviceFont );
 
-	if ((coNormalB != -1 && !hilited) || (hilited && coActiveB != -1))
-	{
-		rc->setForegroundColor(hilited?coActiveB:coNormalB);
-		rc->fill(rect);
-		rc->setBackgroundColor(hilited?coActiveB:coNormalB);
-	} else
-	{
-		eWidget *w=listbox->getNonTransparentBackground();
-		rc->setForegroundColor(w->getBackgroundColor());
-		rc->fill(rect);
-		rc->setBackgroundColor(w->getBackgroundColor());
-	}
-
-	rc->setForegroundColor(hilited?coActiveF:coNormalF);
+	drawEntryRect(rc, rect, coActiveB, coActiveF, coNormalB, coNormalF, hilited );
 
 	rc->renderText(rect, sname);
+
+	return sort;
 }
 
 struct eServiceSelector_addService: public std::unary_function<eServiceReference&,void>
@@ -392,15 +371,16 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 
 void eServiceSelector::actualize()
 {
-		if (pbs->fillBouquetList())  // Bouquets added ?
-			if (eZap::getInstance()->getMode() == eZap::TV)
-			{
-			 	if ( pbs->moveTo(lastTvBouquet) )
-					useBouquet( pbs->current() );
-			}
-			else
-			 	if ( pbs->moveTo(lastRadioBouquet) )
-					useBouquet( pbs->current() );			
+	if ( pbs->fillBouquetList() )  // Bouquets added ?
+	{
+		if (eZap::getInstance()->getMode() == eZap::TV)
+		{
+		 	if ( pbs->moveTo(lastTvBouquet) )
+				useBouquet( pbs->current() );
+		}
+		else if ( pbs->moveTo(lastRadioBouquet) )
+			useBouquet( pbs->current() );			
+	}
 }
 
 eServiceSelector::eServiceSelector()
@@ -426,7 +406,7 @@ eServiceSelector::eServiceSelector()
 	CONNECT(pbs->cancel, eServiceSelector::resetBouquet);
 
 	if (eSkin::getActive()->build(this, "eServiceSelector"))
-		eWarning("Service selector widget build failed!");
+		eFatal("Service selector widget build failed!");
 
 	actualize();
 
@@ -477,7 +457,7 @@ struct selectService: public std::unary_function<const eListBoxEntryService&, vo
 void eServiceSelector::selectCurrentService()
 {
 	if (selected != eDVB::getInstance()->getServiceAPI()->service)
-		services->forEachEntry( selectService( eDVB::getInstance()->getServiceAPI()->service ) );
+		services->forEachEntry( selectService( eDVB::getInstance()->getServiceAPI()->service) );
 }
 
 void eServiceSelector::useBouquet(const eBouquet *bouquet)
@@ -508,7 +488,7 @@ void eServiceSelector::useBouquet(const eBouquet *bouquet)
 		else
 			fillServiceList();
 
-		if (bouquet->bouquet_id >= 0)
+		if (bouquet->bouquet_id >= 0)   // do not sort user defined boquets !
 			services->sort();
 	}
 	services->invalidate();

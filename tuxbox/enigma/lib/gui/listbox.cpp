@@ -2,16 +2,20 @@
 
 #include <core/gdi/font.h>
 
-eListBoxBase::eListBoxBase(eWidget* parent)
+gFont eListBoxEntryText::font;
+gFont eListBoxEntryTextStream::font;
+
+eListBoxBase::eListBoxBase(eWidget* parent, const eWidget* descr)
 :   eWidget(parent, 1),
 		iArrowUpDown(eSkin::getActive()->queryImage("eListBox.arrow.updown")),
 		iArrowUp(eSkin::getActive()->queryImage("eListBox.arrow.up")),
 		iArrowDown(eSkin::getActive()->queryImage("eListBox.arrow.down")),
 		iArrowLeft(eSkin::getActive()->queryImage("eListBox.arrow.left")),
 		iArrowRight(eSkin::getActive()->queryImage("eListBox.arrow.right")),
+		descr(descr),
+		tmpDescr(0),
 		colorActiveB(eSkin::getActive()->queryScheme("global.selected.background")),
 		colorActiveF(eSkin::getActive()->queryScheme("global.selected.foreground")),
-		item_height( font.pointSize ),
 		flags(0)
 {
 }
@@ -133,7 +137,39 @@ int eListBoxBase::eventHandler(const eWidgetEvent &event)
 	return 0;
 }
 
-int eListBoxBase::focusChanged()
+void eListBoxBase::gotFocus()
+{
+	if (parent && parent->LCDElement)  // detect if LCD Avail
+		if (descr)
+		{
+			parent->LCDElement->setText("");
+			LCDTmp = new eLabel(parent->LCDElement);
+			LCDTmp->hide();
+			eSize s = parent->LCDElement->getSize();
+			LCDTmp->move(ePoint(0,s.height()/2));
+			LCDTmp->resize(eSize(s.width(), s.height()/2));
+			LCDTmp->show();
+			tmpDescr = new eLabel(parent->LCDElement);
+			tmpDescr->hide();
+			tmpDescr->move(ePoint(0,0));
+			tmpDescr->resize(eSize(s.width(), s.height()/2));
+			tmpDescr->setText( descr->getText() );
+			tmpDescr->show();
+		}
+}
+
+void eListBoxBase::lostFocus()
+{
+	if ( descr )
+	{
+		delete LCDTmp;
+		LCDTmp=0;
+		delete tmpDescr;
+		tmpDescr=0;
+	}
+}
+
+int eListBoxBase::newFocus()
 {
 	if (deco && deco_selected)
 	{
@@ -147,6 +183,23 @@ int eListBoxBase::focusChanged()
 	return 0;
 }
 
+void eListBoxEntry::drawEntryRect( gPainter* rc, const eRect& rect, const gColor& coActiveB, const gColor& coActiveF, const gColor& coNormalB, const gColor& coNormalF, int state )
+{	
+	if ( (coNormalB != -1 && !state) || (state && coActiveB != -1) )
+	{
+		rc->setForegroundColor(state?coActiveB:coNormalB);
+		rc->fill(rect);
+		rc->setBackgroundColor(state?coActiveB:coNormalB);
+	}else
+	{
+		eWidget *w=listbox->getNonTransparentBackground();
+		rc->setForegroundColor(w->getBackgroundColor());
+		rc->fill(rect);
+		rc->setBackgroundColor(w->getBackgroundColor());
+	}
+	rc->setForegroundColor(state?coActiveF:coNormalF);
+}
+
 eListBoxEntryText::~eListBoxEntryText()
 {
 	if (para)
@@ -156,33 +209,42 @@ eListBoxEntryText::~eListBoxEntryText()
 	}
 }
 
-int eListBoxEntryText::getHeight()
+int eListBoxEntryText::getEntryHeight()
+{
+	if ( !font.pointSize)
+		font = eSkin::getActive()->queryFont("eListBox.EntryText.normal");
+
+	return calcFontHeight( font ) + 4;
+}
+
+int eListBoxEntryTextStream::getEntryHeight()
+{
+	if ( !font.pointSize)
+		font = eSkin::getActive()->queryFont("eListBox.EntryText.normal");
+
+	return calcFontHeight( font ) + 4;
+}
+
+int calcFontHeight( const gFont& font)
 {
 	eTextPara *test;
 	test = new eTextPara( eRect(0,0,100,50) );
 	test->setFont( font );
 	test->renderString("Mjdyl");
-	int i = test->getBoundBox().height();
+	int i =  test->getBoundBox().height();
 	test->destroy();
-	return i+4;
+	return i;
 }
 
-void eListBoxEntryText::redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state)
+const eString& eListBoxEntryText::redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state)
 {
-	if ((coNormalB != -1 && !state) || (state && coActiveB != -1))
-	{
-		rc->setForegroundColor(state?coActiveB:coNormalB);
-		rc->fill(rect);
-		rc->setBackgroundColor(state?coActiveB:coNormalB);
-	} else
-	{
-		eWidget *w=listbox->getNonTransparentBackground();
-		rc->setForegroundColor(w->getBackgroundColor());
-		rc->fill(rect);
-		rc->setBackgroundColor(w->getBackgroundColor());
-	}
-	rc->setForegroundColor(state?coActiveF:coNormalF);
+  bool b;
 
+	if ( (b = (state == 2)) )
+		state = 0;
+
+	drawEntryRect( rc, rect, coActiveB, coActiveF, coNormalB, coNormalF, state );
+	
 	if (!para)
 	{
 		para = new eTextPara( eRect( rect.left(), 0, rect.width(), rect.height() ) );
@@ -191,35 +253,35 @@ void eListBoxEntryText::redraw(gPainter *rc, const eRect& rect, gColor coActiveB
 		para->realign(align);
 		yOffs = ((rect.height() - para->getBoundBox().height()) / 2 + 0) - para->getBoundBox().top() ;
 	}		
- 	
-	rc->renderPara(*para, ePoint(0, rect.top()+yOffs ) );
+	rc->renderPara(*para, ePoint(0, rect.top() + yOffs ) );
 
-	eWidget* p = listbox->getParent();			
-	if (state && p && p->LCDElement)
-		p->LCDElement->setText(text);
+	if (b)
+	{
+		rc->setForegroundColor(coActiveB);
+		rc->line( ePoint(rect.left(), rect.bottom()), ePoint(rect.right(), rect.bottom()) );
+		rc->line( ePoint(rect.left(), rect.top()), ePoint(rect.right(), rect.top()) );
+		rc->line( ePoint(rect.left(), rect.top()), ePoint(rect.left(), rect.bottom()) );
+		rc->line( ePoint(rect.right(), rect.top()), ePoint(rect.right(), rect.bottom()) );
+		rc->line( ePoint(rect.left()+1, rect.bottom()-1), ePoint(rect.right()-1, rect.bottom()-1) );
+		rc->line( ePoint(rect.left()+1, rect.top()+1), ePoint(rect.right()-1, rect.top()+1) );
+		rc->line( ePoint(rect.left()+1, rect.top()+2), ePoint(rect.left()+1, rect.bottom()-2) );
+		rc->line( ePoint(rect.right()-1, rect.top()+2), ePoint(rect.right()-1, rect.bottom()-2) );
+		rc->line( ePoint(rect.left()+2, rect.bottom()-2), ePoint(rect.right()-2, rect.bottom()-2) );
+		rc->line( ePoint(rect.left()+2, rect.top()+2), ePoint(rect.right()-2, rect.top()+2) );
+		rc->line( ePoint(rect.left()+2, rect.top()+3), ePoint(rect.left()+2, rect.bottom()-3) );
+		rc->line( ePoint(rect.right()-2, rect.top()+3), ePoint(rect.right()-2, rect.bottom()-3) );
+	}
+	return text;
 }
 
-void eListBoxEntryTextStream::redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state)
+eString eListBoxEntryTextStream::redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state)
 {
 	rc->setFont( font );
 
-	if ((coNormalB != -1 && !state) || (state && coActiveB != -1))
-	{
-		rc->setForegroundColor(state?coActiveB:coNormalB);
-		rc->fill(rect);
-		rc->setBackgroundColor(state?coActiveB:coNormalB);
-	} else
-	{
-		eWidget *w=listbox->getNonTransparentBackground();
-		rc->setForegroundColor(w->getBackgroundColor());
-		rc->fill(rect);
-		rc->setBackgroundColor(w->getBackgroundColor());
-	}
+	drawEntryRect( rc, rect, coActiveB, coActiveF, coNormalB, coNormalF, state );
 
 	rc->setForegroundColor(state?coActiveF:coNormalF);
 	rc->renderText(rect, text.str());
 
-	eWidget* p = listbox->getParent();			
-	if (state && p && p->LCDElement)
-		p->LCDElement->setText(text.str());
+	return text.str();
 }

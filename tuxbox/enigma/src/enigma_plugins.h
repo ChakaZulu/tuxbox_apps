@@ -3,7 +3,7 @@
 
 #include <core/gui/listbox.h>
 
-class ePlugin: eListBoxEntryText
+class ePlugin: public eListBoxEntryText
 {
 	friend class eZapPlugins;
 	friend class eListBox<ePlugin>;

@@ -48,6 +48,12 @@ void eMainMenu::setActive(int i)
 		description->setText(_("analog."));
 		break;
 	}
+
+	if (LCDTitle)
+		LCDTitle->setText(_("Mainmenu"));
+
+	if (LCDElement)
+		LCDElement->setText( description->getText() );
 }
 
 eMainMenu::eMainMenu()
@@ -89,7 +95,7 @@ eMainMenu::eMainMenu()
 		if (!pixmaps[i][1])
 			eFatal("error, mainmenu bug, mainmenu.%s.sel not defined", pixmap_name[i]);
 	}
-	
+
 	setActive(active=0);
 }
 

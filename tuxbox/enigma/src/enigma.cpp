@@ -224,8 +224,7 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 	ezapInitializeDyn(dyn_resolver);
 
 	fileresolver = new eHTTPFilePathResolver();
-	fileresolver->addTranslation("/var/tuxbox/htdocs", "/www"); /* TODO: make user configurable */
-	fileresolver->addTranslation("/", "/h4x0r");  // *REMOVE* before commit!
+  fileresolver->addTranslation("/var/tuxbox/htdocs", "/www"); /* TODO: make user configurable */
 	fileresolver->addTranslation(DATADIR "/enigma/htdocs", "/");
 
 	eDebug("[ENIGMA] starting httpd");

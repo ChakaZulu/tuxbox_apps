@@ -2,6 +2,7 @@
 #define __setupnetwork_h
 
 #include <core/gui/ewindow.h>
+#include <core/gui/statusbar.h>
 
 class eNumber;
 class eButton;
@@ -12,6 +13,7 @@ class eZapNetworkSetup: public eWindow
 	eNumber *ip, *netmask, *dns, *gateway;
 	eButton *ok, *abort;
 	eCheckbox *dosetup;
+	eStatusBar *statusbar;
 private:
 	void fieldSelected(int *number);
 	void okPressed();

@@ -111,6 +111,12 @@ eSize eLabel::getExtend()
 	return eSize(para->getBoundBox().width(), para->getBoundBox().height());
 }
 
+ePoint eLabel::getLeftTop()
+{
+	validate();
+	return ePoint(para->getBoundBox().left(), para->getBoundBox().top());
+}
+
 int eLabel::setProperty(const eString &prop, const eString &value)
 {
 	if (prop=="wrap" && value == "on")

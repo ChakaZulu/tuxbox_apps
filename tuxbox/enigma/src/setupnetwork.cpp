@@ -31,7 +31,7 @@ eZapNetworkSetup::eZapNetworkSetup():
 {
 	setText(_("Network setup"));
 	cmove(ePoint(150, 136));
-	cresize(eSize(420, 290));
+	cresize(eSize(420, 300));
 
 	__u32 sip=ntohl(0x0a000061), snetmask=ntohl(0xFF000000), sdns=ntohl(0x7f000001), sgateway=ntohl(0x7f000001);
 	int de[4];
@@ -54,6 +54,7 @@ eZapNetworkSetup::eZapNetworkSetup():
 	ip->move(ePoint(160, 20));
 	ip->resize(eSize(200, fd+10));
 	ip->setFlags(eNumber::flagDrawPoints);
+	ip->setHelpText(_("enter IP Adress of the box (0..9, left, right)"));
 
 	l=new eLabel(this);
 	l->setText("Netmask:");
@@ -65,6 +66,7 @@ eZapNetworkSetup::eZapNetworkSetup():
 	netmask->move(ePoint(160, 60));
 	netmask->resize(eSize(200, fd+10));
 	netmask->setFlags(eNumber::flagDrawPoints);
+	netmask->setHelpText(_("enter netmask of your network (0..9, left, right)"));
 	
 	l=new eLabel(this);
 	l->setText("Nameserver:");
@@ -76,6 +78,7 @@ eZapNetworkSetup::eZapNetworkSetup():
 	dns->move(ePoint(160, 100));
 	dns->resize(eSize(200, fd+10));
 	dns->setFlags(eNumber::flagDrawPoints);
+	dns->setHelpText(_("enter your domain name server (0..9, left, right)"));
 
 	l=new eLabel(this);
 	l->setText("Gateway:");
@@ -87,18 +90,21 @@ eZapNetworkSetup::eZapNetworkSetup():
 	gateway->move(ePoint(160, 140));
 	gateway->resize(eSize(200, fd+10));
 	gateway->setFlags(eNumber::flagDrawPoints);
+	gateway->setHelpText(_("enter ip of your gateway (0..9, left, right)"));
 
 	CONNECT(ip->selected, eZapNetworkSetup::fieldSelected);
 
-	dosetup=new eCheckbox(this, sdosetup, 1, fd);
+	dosetup=new eCheckbox(this, sdosetup, 1);
 	dosetup->setText("Configure Network");
 	dosetup->move(ePoint(100, 183));
 	dosetup->resize(eSize(fd+4+240, fd+4));
+	dosetup->setHelpText(_("enable/disable network config (ok)"));
 
 	ok=new eButton(this);
 	ok->setText(_("save"));
 	ok->move(ePoint(20, 230));
 	ok->resize(eSize(90, fd+4));
+	ok->setHelpText(_("close window and save changes"));
 	
 	CONNECT(ok->selected, eZapNetworkSetup::okPressed);
 
@@ -106,8 +112,14 @@ eZapNetworkSetup::eZapNetworkSetup():
 	abort->setText(_("abort"));
 	abort->move(ePoint(140, 230));
 	abort->resize(eSize(100, fd+4));
+	abort->setHelpText(_("close window (no changes are saved)"));
 
 	CONNECT(abort->selected, eZapNetworkSetup::abortPressed);
+
+	statusbar=new eStatusBar(this);
+	statusbar->move( ePoint(0, clientrect.height()-30 ) );
+	statusbar->resize( eSize( clientrect.width(), 30) );
+	statusbar->setFlags( eStatusBar::flagLoadDeco );
 }
 
 eZapNetworkSetup::~eZapNetworkSetup()
