@@ -12,8 +12,10 @@ EXTRA_DIST =  \
 install-data-local:
 	sh -c 'f=`pwd` ; \
 		tar jxf $$f/zoneinfo.tar.bz2 '
+	$(INSTALL) -d $(datadir)/zoneinfo
 	$(INSTALL_DATA) $(EXTRA_DIST) $(datadir)/zoneinfo
 	rm $(EXTRA_DIST)
+	$(INSTALL) -d $(sysconfdir)
 	ln -sf /var/etc/localtime $(sysconfdir)/localtime
 
 uninstall-local:
