@@ -30,5 +30,6 @@ zapit_LDADD = \
 	@XML_LIBS@ \
 	-lpthread
 
-install-data-local:
-	$(INSTALL) -d $(CONFIGDIR)/zapit
+installdir = $(CONFIGDIR)/zapit
+
+install_DATA = 
