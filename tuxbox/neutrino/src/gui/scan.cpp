@@ -305,7 +305,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 void CScanTs::hide()
 {
 	g_FrameBuffer->loadPal("radiomode.pal", 18, COL_MAXFREE);
-	g_FrameBuffer->paintBackgroundBoxRel(0,0, 719,575);
+	g_FrameBuffer->paintBackgroundBoxRel(0,0, 720,576);
 }
 
 
