@@ -1910,7 +1910,7 @@ public:
 							result << "<a href=\"javascript:record('ref="
 								<< ref2string(ref)
 								<< "&ID="
-								<< event.event_id
+								<< std::hex << event.event_id << std::dec
 								<< "&start="
 								<< event.start_time
 								<< "&duration="
@@ -1930,7 +1930,7 @@ public:
 								<< "<br><b>"
 
 //								<< "<a href=\'javascript:EPGDetails(\"ref=" << ref2string(ref)
-//								<< "&ID=" << eString().sprintf("%x", event.event_id)
+//								<< "&ID=" << std::hex << event.event_id << std:dec
 //								<< "\")\'>"
 
 								<< short_description
@@ -2066,7 +2066,7 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 					result << "<a href=\"javascript:record('ref="
 						<< ref2string(ref)
 						<< "&ID="
-						<< event.event_id
+						<< std::hex << event.event_id << std::dec
 						<< "&start="
 						<< event.start_time
 						<< "&duration="
@@ -2079,7 +2079,7 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 						<< std::setw(2) << t->tm_hour << ':'
 						<< std::setw(2) << t->tm_min << ' '
 						<< "<a href=\'javascript:EPGDetails(\"ref=" << serviceRef
-						<< "&ID=" << eString().sprintf("%x",event.event_id)
+						<< "&ID=" << std::hex << event.event_id << std::dec
 						<< "\")\'>"
 						<< ((ShortEventDescriptor*)descriptor)->event_name
 						<< "</a></span></u><br>\n";
