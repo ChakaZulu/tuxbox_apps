@@ -13,12 +13,12 @@ function removeMountPoint(id)
 	NewWindow('/control/removeMountPoint?id='+id, 'removeMountPoint', '200', '200', 'no', '5000');
 }
 
-function showEditMountPointWindow(id)
+function changeMountPoint(id)
 {
-	NewWindow('/control/editMountPointWindow?id='+id, 'editMountPoint', '780', '500', 'no');
+	NewWindow('/control/editMountPointWindow?id='+id, 'editMountPoint', '780', '400', 'no');
 }
 
-function showAddMountPointWindow(id)
+function addMountPoint(id)
 {
-	NewWindow('/control/addMountPointWindow?id='+id, 'addMountPoint', '780', '500', 'no');
+	NewWindow('/control/addMountPointWindow?id='+id, 'addMountPoint', '780', '400', 'no');
 }
