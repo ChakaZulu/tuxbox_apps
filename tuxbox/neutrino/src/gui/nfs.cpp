@@ -93,6 +93,44 @@ void *mount_thread(void* cmd)
 	pthread_exit(NULL);
 }
 
+CNFSMountGui::CNFSMountGui()
+{
+   m_cifs_sup = fsSupported(CIFS);
+   m_nfs_sup = fsSupported(NFS);
+}
+
+bool CNFSMountGui::fsSupported(FSType fstype)
+{
+   char fsname[10];
+   if(fstype==NFS)
+   {
+      strcpy(fsname,"nfs");
+   }
+   else if(fstype==CIFS)
+   {
+      strcpy(fsname,"cifs");
+   }
+   else
+   {
+      return false;
+   }
+	
+   ifstream in;
+   char buffer[100];
+	in.open("/proc/filesystems",ifstream::in);
+	while(in.good())
+	{
+		in.getline(buffer, 100);
+		if(strstr(buffer,fsname)!=NULL)
+	  	{
+         in.close();
+			return true;
+		}
+	}
+	in.close();
+   return false;
+}
+
 int CNFSMountGui::exec( CMenuTarget* parent, string actionKey )
 {
 //	printf("exec: %s\n", actionKey.c_str());
@@ -194,6 +232,15 @@ int CNFSMountGui::menuEntry(int nr)
 	sprintf(cmd,"domount%d",nr);
 	sprintf(cmd2,"dir%d",nr);
 
+   /* rewrite fstype in new entries */
+   if(strlen(local_dir)==0)
+   {
+      if(m_cifs_sup && !m_nfs_sup)
+         *type = (int) CIFS;
+   }
+   bool typeEnabled = (m_cifs_sup && m_nfs_sup) || (m_cifs_sup && *type != (int)CIFS)
+                                                || (m_nfs_sup  && *type != (int)NFS);
+
 	CMenuWidget mountMenuEntryW("nfs.mount", "network.raw",720);
 	mountMenuEntryW.addItem(new CMenuSeparator());
 	mountMenuEntryW.addItem(new CMenuForwarder("menu.back"));
@@ -212,7 +259,7 @@ int CNFSMountGui::menuEntry(int nr)
 	CStringInputSMS  passInput("nfs.password", password, 30,"","","abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/ ");
 	CMenuForwarder *password_fwd = new CMenuForwarder("nfs.password", *type==CIFS, "", &passInput);
 	CNFSMountGuiNotifier notifier(options1_fwd, options2_fwd, username_fwd, password_fwd, type);
-	CMenuOptionChooser *typeInput= new CMenuOptionChooser("nfs.type", type, true, &notifier);
+	CMenuOptionChooser *typeInput= new CMenuOptionChooser("nfs.type", type, typeEnabled, &notifier);
 	typeInput->addOption((int) NFS, "nfs.type_nfs");
 	typeInput->addOption((int) CIFS, "nfs.type_cifs");
 	mountMenuEntryW.addItem(typeInput);
@@ -239,10 +286,33 @@ void CNFSMountGui::mount(const char* ip, const char* dir, const char* local_dir,
    pthread_cond_init(&g_cond, NULL);
 	g_mntstatus=-1;
 
-	if(fstype==NFS)
-		printf("NFS-Mount %s:%s -> %s\n",ip,dir,local_dir);
-	else
+   bool cifs_sup = fsSupported(CIFS);
+   bool nfs_sup = fsSupported(NFS);
+	
+   if(fstype==NFS)
+   {
+      if(!nfs_sup)
+      {
+         ShowHintUTF("messagebox.info", g_Locale->getText("nfs.mounterror_notsup") + " (NFS)"); // UTF-8
+         printf("FS type %d not supported\n", (int) fstype);
+         return;
+      }
+      printf("NFS-Mount %s:%s -> %s\n",ip,dir,local_dir);
+   }
+   else if(fstype==CIFS)
+   {
+      if(!cifs_sup)
+      {
+         ShowHintUTF("messagebox.info", g_Locale->getText("nfs.mounterror_notsup") + " (CIFS)"); // UTF-8
+         printf("FS type %d not supported\n", (int) fstype);
+         return;
+      }
 		printf("CIFS-Mount //%s/%s -> %s\n",ip,dir,local_dir);
+   }
+   else
+   {
+      printf("Unknown FS type %d\n", (int) fstype);
+   }
 
 	ifstream in;
 	in.open("/proc/mounts",ifstream::in);
@@ -368,7 +438,6 @@ int CNFSUmountGui::menu()
 			count++;
 			string s1=string(mountDev) + " -> " + mountOn;
 			string s2=string("doumount ") + mountOn;
-#warning TODO: make sure s1 is UTF-8 encoded
 			umountMenu.addItem(new CMenuForwarder(s1.c_str(), true, NULL, this, s2));
 		}
 	}

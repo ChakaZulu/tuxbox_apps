@@ -41,19 +41,24 @@ using namespace std;
 
 class CNFSMountGui : public CMenuTarget
 {
-	private:
-		int menu();
-		int menuEntry(int nr);
-		char m_entry[4][200];
-
 	public:
 		enum FSType
 		{
 			NFS=0,
 			CIFS
 		};
-		
-		CNFSMountGui(){};
+	
+   private:
+		int menu();
+		int menuEntry(int nr);
+      static bool fsSupported(FSType fs);
+
+		char m_entry[4][200];
+      bool m_nfs_sup;
+      bool m_cifs_sup;
+
+   public:
+		CNFSMountGui();
 		~CNFSMountGui(){};
 		int  exec(CMenuTarget* parent, string actionKey);
 		static void mount(const char* ip, const char* dir, const char* local_dir, FSType fstype, 
