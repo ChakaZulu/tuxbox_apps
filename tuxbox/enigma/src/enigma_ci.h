@@ -9,10 +9,13 @@ class eNumber;
 class eButton;
 class eCheckbox;
 
+class eDVBCI;
+
 class enigmaCI: public eWindow
 {
 	eButton *ok,*reset,*init,*app;
 	eStatusBar *status;
+	eDVBCI *DVBCI;
 
 private:
 	void okPressed();
