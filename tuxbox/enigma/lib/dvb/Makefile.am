@@ -13,7 +13,7 @@ libdvb_a_SOURCES = \
 	epgcache.moc.cpp esection.cpp esection.moc.cpp frontend.cpp \
 	frontend.moc.cpp si.cpp si.moc.cpp
 
-AM_CXXFLAGS = -DPROFILE
+AM_CPPFLAGS = -DPROFILE
 
 %.moc.cpp: %.h
 	$(MOC) $< -o $@

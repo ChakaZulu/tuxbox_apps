@@ -22,42 +22,42 @@ enigma_SOURCES = \
 	streaminfo.moc.cpp
 
 enigma_LDADD = \
-	$(top_srcdir)/enigma/src/core/driver/libdriver.a \
-	$(top_srcdir)/enigma/src/core/dvb/libdvb.a \
-	$(top_srcdir)/enigma/src/core/dvb/lowlevel/liblowlevel.a \
-	$(top_srcdir)/enigma/src/core/gui/libgui.a \
-	$(top_srcdir)/enigma/src/core/gdi/libgdi.a \
-	$(top_srcdir)/enigma/src/core/system/libsystem.a \
-	$(top_srcdir)/enigma/src/core/xml/libxml.a \
-	$(top_srcdir)/edvb/miniqt/libminiqt.a \
+	$(top_builddir)/enigma/src/core/driver/libdriver.a \
+	$(top_builddir)/enigma/src/core/dvb/libdvb.a \
+	$(top_builddir)/enigma/src/core/dvb/lowlevel/liblowlevel.a \
+	$(top_builddir)/enigma/src/core/gui/libgui.a \
+	$(top_builddir)/enigma/src/core/gdi/libgdi.a \
+	$(top_builddir)/enigma/src/core/system/libsystem.a \
+	$(top_builddir)/enigma/src/core/xml/libxml.a \
+	$(top_builddir)/edvb/miniqt/libminiqt.a \
 	$(LIBFREETYPE_LIBS) \
 	-ldl -lpng -lpthread
 
 AM_CXXFLAGS = $(LIBFREETYPE_CFLAGS)
 
-$(top_srcdir)/enigma/src/core/driver/libdriver.a:
-	cd $(top_srcdir)/enigma/src/core/driver && $(MAKE)
+$(top_builddir)/enigma/src/core/driver/libdriver.a:
+	cd $(top_builddir)/enigma/src/core/driver && $(MAKE)
 
-$(top_srcdir)/enigma/src/core/dvb/libdvb.a:
-	cd $(top_srcdir)/enigma/src/core/dvb && $(MAKE)
+$(top_builddir)/enigma/src/core/dvb/libdvb.a:
+	cd $(top_builddir)/enigma/src/core/dvb && $(MAKE)
 
-$(top_srcdir)/enigma/src/core/dvb/lowlevel/liblowlevel.a:
-	cd $(top_srcdir)/enigma/src/core/dvb/lowlevel && $(MAKE)
+$(top_builddir)/enigma/src/core/dvb/lowlevel/liblowlevel.a:
+	cd $(top_builddir)/enigma/src/core/dvb/lowlevel && $(MAKE)
 
-$(top_srcdir)/enigma/src/core/gdi/libgdi.a:
-	cd $(top_srcdir)/enigma/src/core/gdi && $(MAKE)
+$(top_builddir)/enigma/src/core/gdi/libgdi.a:
+	cd $(top_builddir)/enigma/src/core/gdi && $(MAKE)
 
-$(top_srcdir)/enigma/src/core/gui/libgui.a:
-	cd $(top_srcdir)/enigma/src/core/gui && $(MAKE)
+$(top_builddir)/enigma/src/core/gui/libgui.a:
+	cd $(top_builddir)/enigma/src/core/gui && $(MAKE)
 
-$(top_srcdir)/enigma/src/core/system/libsystem.a:
-	cd $(top_srcdir)/enigma/src/core/system && $(MAKE)
+$(top_builddir)/enigma/src/core/system/libsystem.a:
+	cd $(top_builddir)/enigma/src/core/system && $(MAKE)
 
-$(top_srcdir)/enigma/src/core/xml/libxml.a:
-	cd $(top_srcdir)/enigma/src/core/xml && $(MAKE)
+$(top_builddir)/enigma/src/core/xml/libxml.a:
+	cd $(top_builddir)/enigma/src/core/xml && $(MAKE)
 
-$(top_srcdir)/edvb/miniqt/libminiqt.a:
-	cd $(top_srcdir)/edvb/miniqt && $(MAKE)
+$(top_builddir)/edvb/miniqt/libminiqt.a:
+	cd $(top_builddir)/edvb/miniqt && $(MAKE)
 
 %.moc.cpp: %.h
 	$(MOC) $< -o $@
