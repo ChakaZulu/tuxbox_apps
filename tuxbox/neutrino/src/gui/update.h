@@ -64,15 +64,10 @@ using namespace std;
 class CFlashTool_StatusViewer
 {
 	public:
-		virtual void showGlobalStatus(int prog)
-		{}
-		;
-		virtual void showLocalStatus(int prog)
-		{}
-		;
-		virtual void showStatusMessage(string text)
-		{}
-		;
+		virtual void showGlobalStatus(int prog){};
+		virtual int getGlobalStatus(){return 0;};
+		virtual void showLocalStatus(int prog){};
+		virtual void showStatusMessage(string text){};
 };
 
 
@@ -119,13 +114,17 @@ class CHTTPUpdater
 
 class CFlashUpdate : public CMenuTarget, CFlashTool_StatusViewer
 {
+		int fd_fp;
+
+		CHTTPUpdater httpUpdater;
+	
 		int x;
 		int y;
 		int width;
 		int height;
 		int hheight,mheight; // head/menu font height
 
-		int globalstatusX, globalstatusY, localstatusY;
+		int globalstatus, globalstatusX, globalstatusY, localstatusY;
 		int statusTextX, statusTextY;
 
 		int installed_major, installed_provider;
@@ -137,10 +136,11 @@ class CFlashUpdate : public CMenuTarget, CFlashTool_StatusViewer
 		void paint();
 
 		void showGlobalStatus(int prog);
+		int getGlobalStatus();
 		void showLocalStatus(int prog);
 		void showStatusMessage(string text);
-		void stopEPGScanning( bool onoff );
 
+		bool checkVersion4Update(int ypos, string &sFileName);
 	public:
 
 		CFlashUpdate();
