@@ -1,5 +1,5 @@
 /*
-$Id: dmx_pes.c,v 1.26 2004/03/31 21:14:23 rasc Exp $
+$Id: dmx_pes.c,v 1.27 2004/04/18 19:30:32 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dmx_pes.c,v 1.26 2004/03/31 21:14:23 rasc Exp $
 
 
 $Log: dmx_pes.c,v $
+Revision 1.27  2004/04/18 19:30:32  rasc
+Transport Stream payload sub-decoding (Section, PES data) improved
+
 Revision 1.26  2004/03/31 21:14:23  rasc
 New: Spider section pids  (snoop referenced section pids),
 some minor changes
@@ -408,7 +411,9 @@ static long pes_SyncRead (int fd, u_char *buf, u_long len, u_long *skipped_bytes
 
 
 
-
+// $$$ TODO:
+// read unbound video streams (length 0) until next sync is read
+// push back function for already pre-read bytes
 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: dmx_ts.c,v 1.24 2004/04/15 22:29:22 rasc Exp $
+$Id: dmx_ts.c,v 1.25 2004/04/18 19:30:32 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dmx_ts.c,v 1.24 2004/04/15 22:29:22 rasc Exp $
 
 
 $Log: dmx_ts.c,v $
+Revision 1.25  2004/04/18 19:30:32  rasc
+Transport Stream payload sub-decoding (Section, PES data) improved
+
 Revision 1.24  2004/04/15 22:29:22  rasc
 PMT: some brainded section check
 TS: filter single pids from multi-pid ts-input-file
@@ -272,6 +275,11 @@ int  doReadTS (OPTION *opt)
           decodeTS_buf (b, n ,opt->pid);
           out_nl (3,"==========================================================");
           out_NL (3);
+          if (opt->ts_subdecode) {
+             // -- check if stored packet(s) length is sufficient for output
+	     ts2SecPes_checkAndDo_PacketSubdecode_Output();
+          }
+
        }
     } // bin_out
 
