@@ -1625,12 +1625,17 @@ void eZapMain::receiveMMIMessageCI2( const char* data, int len )
 
 void eZapMain::handleMMIMessage( const eMMIMessage &msg )
 {
-	if ( !memcmp( msg.data, "\x9f\x88\x00", 3 ) )
+	enigmaMMI *p = enigmaMMI::getInstance(msg.from);
+
+	if ( p->connected() && !memcmp( msg.data, "\x9f\x88\x00", 3 ) )
 		postMessage(eZapMessage(0), 1);
 
 	if ( !strncmp( msg.data, "INIT", 4 ) )
-		postMessage(eZapMessage(0,"Common Interface",_("please wait while initializing Common Interface ..."),8),0);
-	else if ( !enigmaMMI::getInstance(msg.from)->handleMMIMessage( msg.data ) )
+	{
+		if ( !p->connected() )  // enigma ci menu open?
+			postMessage(eZapMessage(0,"Common Interface",_("please wait while initializing Common Interface ..."),8),0);
+	}
+	else if ( !p->handleMMIMessage( msg.data ) )
 		return;
 
 	delete [] msg.data;
@@ -3077,7 +3082,7 @@ void eZapMain::createMarker(eServiceSelector *sel)
 			if ( i->service == ref )
 				it = i;
 		}
-		eServiceReference mark( eServiceReference::idDVB, eServiceReference::isMarker, markerNums.size() ? (*markerNums.end())+1 : 1 );
+		eServiceReference mark( eServiceReference::idDVB, eServiceReference::isMarker, markerNums.size() ? (*(--markerNums.end()))+1 : 1 );
 		mark.descr=_("unnamed");
 		TextEditWindow wnd(_("Enter marker name:"));
 		wnd.setText(_("create marker"));
