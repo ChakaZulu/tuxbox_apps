@@ -1,8 +1,8 @@
 /*
- * $Id: pat.cpp,v 1.20 2002/05/08 14:32:57 faralla Exp $
+ * $Id: pat.cpp,v 1.21 2002/05/09 20:06:16 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org> jaja :)
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -34,33 +34,37 @@
 extern CEventServer *eventServer;
 extern uint32_t found_transponders;
 
-void fake_pat(uint16_t onid, FrontendParameters feparams)
+int fake_pat(uint16_t onid, FrontendParameters feparams)
 {
 	uint16_t tsid;
 	int demux_fd;
-	
+
 	if ((demux_fd = open(DEMUX_DEV, O_RDWR)) < 0)
 	{
 		perror("[pat.cpp] " DEMUX_DEV);
 		return;
 	}
-	
+
 	/* buffer for program association table */
 	unsigned char buffer[PAT_LENGTH];
-	
+
 	/* set filter for program association section */
-	setDmxSctFilter(demux_fd, 0x0000, 0x00);
+	if (setDmxSctFilter(demux_fd, 0x0000, 0x00) < 0)
+	{
+		return -1;
+	}
 
 	/* read section */
 	if (read(demux_fd, buffer, PAT_LENGTH) < 0)
 	{
 		perror("[pat.cpp] read");
-    		return;
-    	}
-    	
-    	tsid = (buffer[3]<<8)|buffer[4];
-    	
-    	if (scantransponders.count((tsid << 16) | onid) == 0)
+		close(demux_fd);
+		return -1;
+	}
+
+	tsid = (buffer[3]<<8)|buffer[4];
+
+	if (scantransponders.count((tsid << 16) | onid) == 0)
 	{
 		found_transponders++;
 
@@ -71,8 +75,8 @@ void fake_pat(uint16_t onid, FrontendParameters feparams)
 			&found_transponders,
 			sizeof(found_transponders)
 		);
-		
-    		scantransponders.insert
+
+		scantransponders.insert
 		(
 			std::pair <uint32_t, transpondermap>
 			(
@@ -88,8 +92,10 @@ void fake_pat(uint16_t onid, FrontendParameters feparams)
 			)
 		);
 	}
+
 	close(demux_fd);
-}	
+	return 0;
+}
 
 int parse_pat (int demux_fd, CZapitChannel * channel)
 {
@@ -105,14 +111,17 @@ int parse_pat (int demux_fd, CZapitChannel * channel)
 	do
 	{
 		/* set filter for program association section */
-		setDmxSctFilter(demux_fd, 0x0000, 0x00);
+		if (setDmxSctFilter(demux_fd, 0x0000, 0x00) < 0)
+		{
+			return -1;
+		}
 
 		/* read section */
 		if (read(demux_fd, buffer, PAT_LENGTH) < 0)
 		{
 			perror("[pat.cpp] read");
-    			return -1;
-    		}
+			return -1;
+		}
 
 		/* loop over service id / program map table pid pairs */
 		for (i = 8; i < (((buffer[1] & 0x0F) << 8) | buffer[2]) + 3; i += 4)
