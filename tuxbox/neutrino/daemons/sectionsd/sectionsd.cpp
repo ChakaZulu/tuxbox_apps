@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.178 2004/08/28 22:06:41 rasc Exp $
+//  $Id: sectionsd.cpp,v 1.179 2004/09/10 11:36:00 thegoodguy Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -119,10 +119,6 @@ CEventServer *eventServer;
 static pthread_mutex_t eventsLock = PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge events geschrieben und gelesen wird
 static pthread_mutex_t servicesLock = PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge services geschrieben und gelesen wird
 static pthread_mutex_t messagingLock = PTHREAD_MUTEX_INITIALIZER;
-
-extern short networkid;
-extern short streamid;
-extern short eit_networkid;
 
 inline void lockServices(void)
 {
@@ -1064,7 +1060,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.178 2004/08/28 22:06:41 rasc Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.179 2004/09/10 11:36:00 thegoodguy Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -3185,20 +3181,6 @@ static void *eitThread(void *)
 
 			if ((header.current_next_indicator) && (!dmxEIT.pauseCounter ))
 			{
-				// Wenn SDT-NID und EIT-NID ungleich dann Paket patchen mit SDT NID und TID
-						if(networkid != eit_networkid)
-						{
-						        dmxEIT.pause();
-							short val = networkid;
-							short val2 = streamid;
-							char *ptr = (char*) &val;
-							char *ptr2 = (char*) &val2;
-							buf[10] = *ptr++;
-							buf[11] = *ptr;
-							buf[8] = *ptr2++;
-							buf[9] = *ptr2;
-							dmxEIT.unpause();
-						}
 				// Wir wollen nur aktuelle sections
 
 				/*                // Zum debuggen
@@ -3501,7 +3483,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.178 2004/08/28 22:06:41 rasc Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.179 2004/09/10 11:36:00 thegoodguy Exp $\n");
 
 	try {
 		if (argc != 1 && argc != 2) {

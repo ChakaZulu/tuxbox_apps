@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.33 2004/08/28 22:06:41 rasc Exp $
+// $Id: SIsections.cpp,v 1.34 2004/09/10 11:36:00 thegoodguy Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -40,10 +40,6 @@
 #include <dmxapi.h>
 
 //#define DEBUG
-
-short networkid;
-short streamid;
-short eit_networkid;
 
 struct descr_generic_header {
 	unsigned descriptor_tag			: 8;
@@ -236,7 +232,6 @@ void SIsectionEIT::parse(void)
 		e.service_id = service_id();
 		e.original_network_id = original_network_id();
 		e.transport_stream_id = transport_stream_id();
-		eit_networkid = original_network_id();
 		descriptors_loop_length = (evt->descriptors_loop_length_hi << 8) | evt->descriptors_loop_length_lo;
 		parseDescriptors(((const char *)evt) + sizeof(struct eit_event), min((unsigned)(buffer + bufferLength - actPos), descriptors_loop_length), e);
 		evts.insert(e);
@@ -319,8 +314,6 @@ void SIsectionSDT::parse(void)
 		s.original_network_id = original_network_id();
 		s.transport_stream_id = transport_stream_id();
 		descriptors_loop_length = (sv->descriptors_loop_length_hi << 8) | sv->descriptors_loop_length_lo;
-		networkid = original_network_id();
-		streamid = transport_stream_id();
 		//printf("actpos: %p buf+bl: %p sid: %hu desclen: %hu\n", actPos, buffer+bufferLength, sv->service_id, sv->descriptors_loop_length);
 		parseDescriptors(((const char *)sv) + sizeof(struct sdt_service), descriptors_loop_length, s);
 		svs.insert(s);
