@@ -39,7 +39,6 @@
 #include <dbox/avs_core.h>
 #include <dbox/fp.h>
 #include <dbox/saa7126_core.h>
-#include <ost/video.h>
 
 #include <zapit/client/zapitclient.h>
 #include <eventserver.h>
@@ -274,21 +273,21 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 	{
 		//	?	case AVS_FNCOUT_INTTV	: videoDisplayFormat = VIDEO_PAN_SCAN;
 		case AVS_FNCOUT_EXT169	:
-			videoDisplayFormat = VIDEO_CENTER_CUT_OUT;
+			videoDisplayFormat = 2; // FIXME: define VIDEO_CENTER_CUT_OUT in zapit clientlib
 			wss = SAA_WSS_169F;
 			break;
 		case AVS_FNCOUT_EXT43	:
-			videoDisplayFormat = VIDEO_LETTER_BOX;
+			videoDisplayFormat = 1; // FIXME: define VIDEO_LETTER_BOX in zapit clientlib
 			wss = SAA_WSS_43F;
 			break;
 		default:
-			videoDisplayFormat = VIDEO_LETTER_BOX;
+			videoDisplayFormat = 1; // FIXME: define VIDEO_LETTER_BOX in zapit clientlib
 			wss = SAA_WSS_43F;
 			break;
 			//	?	case AVS_FNCOUT_EXT43_1	: videoDisplayFormat = VIDEO_PAN_SCAN;
 	}
 
-	zapit.setDisplayFormat((int)videoDisplayFormat);
+	zapit.setDisplayFormat(videoDisplayFormat);
 
 	if ( (fd = open(SAA7126_DEVICE,O_RDWR)) < 0)
 	{
@@ -773,7 +772,7 @@ void sig_catch(int signal)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.77 2002/10/19 21:47:44 obi Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.78 2002/11/05 19:47:21 obi Exp $\n\n");
 	
 	switch (fork())
 	{
