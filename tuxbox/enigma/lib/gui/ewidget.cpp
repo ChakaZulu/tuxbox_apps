@@ -443,7 +443,7 @@ void eWidget::addActionToHelpList(eAction *action)
 
 void eWidget::clearHelpList()
 {
- actionHelpList.clear();
+	actionHelpList.clear();
 }
 
 void eWidget::setHelpID(int fHelpID)

@@ -150,7 +150,7 @@ void eZapEPG::entry::redrawWidget(gPainter *target, const eRect &area)
 void eZapEPG::entry::gotFocus()
 {
 	sbar->setText( helptext );
- setBackgroundColor(entryColorSelected);
+	setBackgroundColor(entryColorSelected);
 }
 
 void eZapEPG::entry::lostFocus()
