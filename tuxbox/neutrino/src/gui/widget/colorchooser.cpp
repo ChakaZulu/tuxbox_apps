@@ -41,6 +41,17 @@
 #include "colorchooser.h"
 #include "messagebox.h"
 
+#define VALUE_R     0
+#define VALUE_G     1
+#define VALUE_B     2
+#define VALUE_ALPHA 3
+
+static const string iconnames[4] = {
+	"red",
+	"green",
+	"blue",
+	"alpha"
+};
 
 CColorChooser::CColorChooser(string Name, unsigned char *R, unsigned char *G, unsigned char *B, unsigned char* Alpha, CChangeObserver* Observer)
 {
@@ -54,26 +65,18 @@ CColorChooser::CColorChooser(string Name, unsigned char *R, unsigned char *G, un
 	x=((720-width) >> 1) -20;
 	y=(576-height)>>1;
 
-	r = R;
-	g = G;
-	b = B;
-	alpha = Alpha;
+	value[VALUE_R]     = R;
+	value[VALUE_G]     = G;
+	value[VALUE_B]     = B;
+	value[VALUE_ALPHA] = Alpha;
 }
 
 void CColorChooser::setColor()
 {
-	int color = convertSetupColor2RGB(*r,*g, *b);
-	if(!alpha)
-	{
-		frameBuffer->paletteSetColor(254, color, 0);
-		frameBuffer->paletteSet();
-	}
-	else
-	{
-		int tAlpha = convertSetupAlpha2Alpha( *alpha );
-		frameBuffer->paletteSetColor(254, color, tAlpha);
-		frameBuffer->paletteSet();
-	}
+	int color = convertSetupColor2RGB(*(value[VALUE_R]), *(value[VALUE_G]), *(value[VALUE_B]));
+	int tAlpha = (value[VALUE_ALPHA]) ? (convertSetupAlpha2Alpha(*(value[VALUE_ALPHA]))) : 0;
+	frameBuffer->paletteSetColor(254, color, tAlpha);
+	frameBuffer->paletteSet();
 	/*
 	char colorstr[30];
 	sprintf((char*)&colorstr, "%02x.%02x.%02x", *r, *g, *b);
@@ -89,13 +92,17 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 	{
 		parent->hide();
 	}
-	unsigned char r_alt= *r;
-	unsigned char g_alt= *g;
-	unsigned char b_alt= *b;
-	unsigned char a_alt = 0;
-	if (alpha)
-		a_alt= *alpha;
+	unsigned char r_alt= *value[VALUE_R];
+	unsigned char g_alt= *value[VALUE_G];
+	unsigned char b_alt= *value[VALUE_B];
+	unsigned char a_alt = (value[VALUE_ALPHA]) ? (*(value[VALUE_ALPHA])) : 0;
 
+	string names[4] = {
+		g_Locale->getText("colorchooser.red"),
+		g_Locale->getText("colorchooser.green"),
+		g_Locale->getText("colorchooser.blue"),
+		g_Locale->getText("colorchooser.alpha")
+	};
 
 	setColor();
 	paint();
@@ -116,150 +123,66 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 
 		switch ( msg )
 		{
-			case CRCInput::RC_down:
-				{
-					int max = 3;
-					if (alpha==NULL)
-						max=2;
-
-					if(selected<max)
-					{
-						paintSlider(x+10, y+ hheight, r, g_Locale->getText("colorchooser.red"),"red", false);
-						paintSlider(x+10, y+ hheight+ mheight, g, g_Locale->getText("colorchooser.green"),"green", false);
-						paintSlider(x+ 10, y+ hheight+ mheight* 2, b, g_Locale->getText("colorchooser.blue"),"blue", false);
-						paintSlider(x+ 10, y+ hheight+ mheight* 3, alpha,g_Locale->getText("colorchooser.alpha"),"alpha",false);
-						selected++;
-						switch (selected)
-						{
-							case 0:
-								paintSlider(x+ 10, y+ hheight, r, g_Locale->getText("colorchooser.red"),"red", true);
-								break;
-							case 1:
-								paintSlider(x+ 10, y+ hheight+ mheight, g, g_Locale->getText("colorchooser.green"),"green", true);
-								break;
-							case 2:
-								paintSlider(x+ 10, y+ hheight+ mheight* 2, b, g_Locale->getText("colorchooser.blue"),"blue", true);
-								break;
-							case 3:
-								paintSlider(x+ 10, y+ hheight+ mheight* 3, alpha, g_Locale->getText("colorchooser.alpha"),"alpha", true);
-								break;
-						}
-					}
-					break;
-    	        }
-			case CRCInput::RC_up:
-				if(selected>0)
-				{
-					paintSlider(x+10, y+hheight, r,g_Locale->getText("colorchooser.red"),"red", false);
-					paintSlider(x+10, y+hheight+mheight, g,g_Locale->getText("colorchooser.green"),"green", false);
-					paintSlider(x+10, y+hheight+mheight*2, b,g_Locale->getText("colorchooser.blue"),"blue", false);
-					paintSlider(x+10, y+hheight+mheight*3, alpha,g_Locale->getText("colorchooser.alpha"),"alpha",false);
-					selected--;
-					switch (selected)
-					{
-						case 0:
-							paintSlider(x+10, y+hheight, r,g_Locale->getText("colorchooser.red"),"red", true);
-							break;
-						case 1:
-							paintSlider(x+10, y+hheight+mheight, g,g_Locale->getText("colorchooser.green"),"green", true);
-							break;
-						case 2:
-							paintSlider(x+10, y+hheight+mheight*2, b,g_Locale->getText("colorchooser.blue"),"blue", true);
-							break;
-						case 3:
-							paintSlider(x+10, y+hheight+mheight*3, alpha,g_Locale->getText("colorchooser.alpha"),"alpha",true);
-							break;
-					}
-				}
+		case CRCInput::RC_down:
+		{
+			if (selected < ((value[VALUE_ALPHA]) ? 3 : 2))
+			{
+				paintSlider(x + 10, y + hheight + mheight * selected, value[selected], names[selected], iconnames[selected], false);
+				selected++;
+				paintSlider(x + 10, y + hheight + mheight * selected, value[selected], names[selected], iconnames[selected], true);
+			}
+			break;
+			
+		}
+		case CRCInput::RC_up:
+		{
+			if (selected > 0)
+			{
+				paintSlider(x + 10, y + hheight + mheight * selected, value[selected], names[selected], iconnames[selected], false);
+				selected--;
+				paintSlider(x + 10, y + hheight + mheight * selected, value[selected], names[selected], iconnames[selected], true);
+			}
+			break;
+		}
+		case CRCInput::RC_right:
+		{
+			if ((*value[selected]) < 100)
+			{
+				if ((*value[selected]) < 95)
+					(*value[selected]) += 5;
+				else
+					(*value[selected]) = 100;
+				
+				paintSlider(x + 10, y + hheight + mheight * selected, value[selected], names[selected], iconnames[selected], true);
+				setColor();
+			}
+			break;
+		}
+		case CRCInput::RC_left:
+		{
+			if ((*value[selected]) > 0)
+			{
+				if ((*value[selected]) > 5)
+					(*value[selected]) -= 5;
+				else
+					(*value[selected]) = 0;
+				
+				paintSlider(x + 10, y + hheight + mheight * selected, value[selected], names[selected], iconnames[selected], true);
+				setColor();
+			}
+			break;
+		}
+		case CRCInput::RC_home:
+			if (((*value[VALUE_R] != r_alt) || (*value[VALUE_G] != g_alt) || (*value[VALUE_B] != b_alt) || ((value[VALUE_ALPHA]) && (*(value[VALUE_ALPHA]) != a_alt))) &&
+			    (ShowMsg(name, g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel, "", 380 ) == CMessageBox::mbrCancel ))
 				break;
-
-			case CRCInput::RC_right:
-				switch (selected)
-				{
-					case 0:
-						if (*r<100)
-						{
-							*r+=5;
-							paintSlider(x+10, y+hheight, r,g_Locale->getText("colorchooser.red"),"red", true);
-							setColor();
-						}
-						break;
-					case 1:
-						if (*g<100)
-						{
-							*g+=5;
-							paintSlider(x+10, y+hheight+mheight, g,g_Locale->getText("colorchooser.green"),"green", true);
-							setColor();
-						}
-						break;
-					case 2:
-						if (*b<100)
-						{
-							*b+=5;
-							paintSlider(x+10, y+hheight+mheight*2, b,g_Locale->getText("colorchooser.blue"),"blue", true);
-							setColor();
-						}
-						break;
-					case 3:
-						if (*alpha<100)
-						{
-							*alpha+=5;
-							paintSlider(x+10, y+hheight+mheight*3, alpha,g_Locale->getText("colorchooser.alpha"),"alpha",true);
-							setColor();
-						}
-						break;
-				}
-				break;
-
-			case CRCInput::RC_left:
-				switch (selected)
-				{
-					case 0:
-						if (*r>0)
-						{
-							*r-=5;
-							paintSlider(x+10, y+hheight, r,g_Locale->getText("colorchooser.red"),"red", true);
-							setColor();
-						}
-						break;
-					case 1:
-						if (*g>0)
-						{
-							*g-=5;
-							paintSlider(x+10, y+hheight+mheight, g,g_Locale->getText("colorchooser.green"),"green", true);
-							setColor();
-						}
-						break;
-					case 2:
-						if (*b>0)
-						{
-							*b-=5;
-							paintSlider(x+10, y+hheight+mheight*2, b,g_Locale->getText("colorchooser.blue"),"blue", true);
-							setColor();
-						}
-						break;
-					case 3:
-						if (*alpha>0)
-						{
-							*alpha-=5;
-							paintSlider(x+10, y+hheight+mheight*3, alpha,g_Locale->getText("colorchooser.alpha"),"alpha",true);
-							setColor();
-						}
-						break;
-				}
-				break;
-
-			case CRCInput::RC_home:
-				if ( ( (*r != r_alt) || (*g != g_alt) || (*b != b_alt) || ( (alpha) && (*alpha != a_alt) ) ) &&
-			    	 ( ShowMsg(name, g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel, "", 380 ) == CMessageBox::mbrCancel ) )
-					break;
 
 				// sonst abbruch...
-				*r = r_alt;
-				*g = g_alt;
-				*b = b_alt;
-				if (alpha)
-					*alpha= a_alt;
+				*value[VALUE_R] = r_alt;
+				*value[VALUE_G] = g_alt;
+				*value[VALUE_B] = b_alt;
+				if (value[VALUE_ALPHA])
+					*value[VALUE_ALPHA] = a_alt;
 
 			case CRCInput::RC_timeout:
 			case CRCInput::RC_ok:
@@ -294,17 +217,21 @@ void CColorChooser::paint()
 	g_Fonts->menu_title->RenderString(x+10,y+hheight, width, g_Locale->getText(name).c_str(), COL_MENUHEAD);
 	frameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT);
 
-	paintSlider(x+10, y+hheight, r,g_Locale->getText("colorchooser.red"),"red", true);
-	paintSlider(x+10, y+hheight+mheight, g,g_Locale->getText("colorchooser.green"),"green", false);
-	paintSlider(x+10, y+hheight+mheight*2, b,g_Locale->getText("colorchooser.blue"),"blue",false);
-	paintSlider(x+10, y+hheight+mheight*3, alpha,g_Locale->getText("colorchooser.alpha"),"alpha",false);
+	string names[4] = {
+		g_Locale->getText("colorchooser.red"),
+		g_Locale->getText("colorchooser.green"),
+		g_Locale->getText("colorchooser.blue"),
+		g_Locale->getText("colorchooser.alpha")
+	};
+	for (int i = 0; i < 4; i++)
+		paintSlider(x + 10, y + hheight + mheight * i, value[i], names[i], iconnames[i], (i == 0));
 
 	//color preview
 	frameBuffer->paintBoxRel(x+220,y+hheight+5,    mheight*4,   mheight*4-10,   COL_MENUHEAD);
 	frameBuffer->paintBoxRel(x+222,y+hheight+2+5,  mheight*4-4 ,mheight*4-4-10, 254);
 }
 
-void CColorChooser::paintSlider(int x, int y, unsigned char *spos, string text, string iconname, bool selected)
+void CColorChooser::paintSlider(int x, int y, unsigned char *spos, const string text, const string iconname, const bool selected)
 {
 	if (!spos)
 		return;

@@ -52,10 +52,7 @@ class CColorChooser : public CMenuTarget
 		int height;
 		int hheight,mheight; // head/menu font height
 
-		unsigned char *r;
-		unsigned char *g;
-		unsigned char *b;
-		unsigned char *alpha;
+		unsigned char * value[4]; // r, g, b, alpha
 
 		string	name;
 
@@ -63,7 +60,7 @@ class CColorChooser : public CMenuTarget
 
 		void paint();
 		void setColor();
-		void paintSlider(int x, int y, unsigned char *spos, string text, string iconname, bool selected);
+		void paintSlider(int x, int y, unsigned char *spos, const string text, const string iconname, const bool selected);
 
 	public:
 
