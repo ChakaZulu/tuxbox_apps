@@ -106,13 +106,13 @@ const char * const background_path[NUMBER_OF_PATHS] = {
 bool CLCD::lcdInit(const char * fontfile, const char * fontname)
 {
 	fontRenderer = new LcdFontRenderClass(&display);
-	fontRenderer->AddFont(fontfile);
+	const char * style_name = fontRenderer->AddFont(fontfile);
 	fontRenderer->InitFontCache();
 
-	fonts.channelname = fontRenderer->getFont(fontname, "Regular", 15);
-	fonts.time        = fontRenderer->getFont(fontname, "Regular", 14);
-	fonts.menutitle   = fontRenderer->getFont(fontname, "Regular", 15);
-	fonts.menu        = fontRenderer->getFont(fontname, "Regular", 12);
+	fonts.channelname = fontRenderer->getFont(fontname, style_name, 15);
+	fonts.time        = fontRenderer->getFont(fontname, style_name, 14);
+	fonts.menutitle   = fontRenderer->getFont(fontname, style_name, 15);
+	fonts.menu        = fontRenderer->getFont(fontname, style_name, 12);
 
 	setAutoDimm(g_settings.lcd_setting[SNeutrinoSettings::LCD_AUTODIMM]);
 
