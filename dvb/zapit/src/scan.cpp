@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.60 2002/09/04 11:52:55 obi Exp $
+ * $Id: scan.cpp,v 1.61 2002/09/09 19:12:05 thegoodguy Exp $
  */
 
 #include <fcntl.h>
@@ -272,7 +272,7 @@ void write_transponder(FILE *fd, uint16_t transport_stream_id, uint16_t original
 			if (cI->second.name.length() == 0)
 			{
 				fprintf(fd,
-					"\t\t\t<channel service_id=\"%04x\" name=\"%04x\" service_type=\"%02x\" channel_nr=\"0\"/>\n",
+					"\t\t\t<channel service_id=\"%04x\" name=\"%04x\" service_type=\"%02x\"/>\n",
 					cI->second.sid,
 					cI->second.sid,
 					cI->second.service_type);
@@ -280,7 +280,7 @@ void write_transponder(FILE *fd, uint16_t transport_stream_id, uint16_t original
 			else
 			{
 				fprintf(fd,
-					"\t\t\t<channel service_id=\"%04x\" name=\"%s\" service_type=\"%02x\" channel_nr=\"0\"/>\n",
+					"\t\t\t<channel service_id=\"%04x\" name=\"%s\" service_type=\"%02x\"/>\n",
 					cI->second.sid,
 					cI->second.name.c_str(),
 					cI->second.service_type);
