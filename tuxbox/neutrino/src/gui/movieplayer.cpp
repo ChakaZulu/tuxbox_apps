@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.70 2004/02/07 14:05:59 thegoodguy Exp $
+  $Id: movieplayer.cpp,v 1.71 2004/02/07 15:34:39 zwen Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -1421,17 +1421,45 @@ CMoviePlayerGui::PlayStream (int streamtype)
 			}
 		}
 		*/
-		else if (msg == CRCInput::RC_right)
+		else if (msg == CRCInput::RC_1)
+		{
+			skipBox.paint();
+			skipvalue = "-00:01:00";
+			skipping=true;
+			playstate = CMoviePlayerGui::SKIP;
+		}
+		else if (msg == CRCInput::RC_3)
 		{
 			skipBox.paint();
 			skipvalue = "+00:01:00";
 			skipping=true;
 			playstate = CMoviePlayerGui::SKIP;
 		}
-		else if (msg == CRCInput::RC_left)
+		else if (msg == CRCInput::RC_4)
 		{
 			skipBox.paint();
-			skipvalue = "-00:01:00";
+			skipvalue = "-00:05:00";
+			skipping=true;
+			playstate = CMoviePlayerGui::SKIP;
+		}
+		else if (msg == CRCInput::RC_6)
+		{
+			skipBox.paint();
+			skipvalue = "+00:05:00";
+			skipping=true;
+			playstate = CMoviePlayerGui::SKIP;
+		}
+		else if (msg == CRCInput::RC_7)
+		{
+			skipBox.paint();
+			skipvalue = "-00:10:00";
+			skipping=true;
+			playstate = CMoviePlayerGui::SKIP;
+		}
+		else if (msg == CRCInput::RC_9)
+		{
+			skipBox.paint();
+			skipvalue = "+00:10:00";
 			skipping=true;
 			playstate = CMoviePlayerGui::SKIP;
 		}
@@ -1455,7 +1483,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		else if (msg == CRCInput::RC_help)
  		{
      		std::string helptext = g_Locale->getText("movieplayer.vlchelp");
-     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.70 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.71 $\n\nMovieplayer (c) 2003, 2004 by gagga";
      		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -1620,7 +1648,7 @@ CMoviePlayerGui::PlayFile (void)
  		else if (msg == CRCInput::RC_help)
  		{
 			std::string fullhelptext = g_Locale->getText("movieplayer.tshelp");
-			fullhelptext += "\nVersion: $Revision: 1.70 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			fullhelptext += "\nVersion: $Revision: 1.71 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else if (msg == CRCInput::RC_left)
