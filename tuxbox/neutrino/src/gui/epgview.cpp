@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: epgview.cpp,v 1.45 2002/03/06 11:18:39 field Exp $
+// $Id: epgview.cpp,v 1.46 2002/03/13 21:17:51 McClean Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.46  2002/03/13 21:17:51  McClean
+// block unknown caids
+//
 // Revision 1.45  2002/03/06 11:18:39  field
 // Fixes & Updates
 //
@@ -580,6 +583,9 @@ int CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long lo
 void CEpgData::hide()
 {
 	g_FrameBuffer->paintBackgroundBox (sx, sy- toph, sx+ ox, sy+ oy);
+	#ifdef USEACTIONLOG
+		g_ActionLog->println("epg: closed");
+	#endif
 }
 
 void CEpgData::GetEPGData( const string channelName, const unsigned int onid_tsid, unsigned long long id, time_t* startzeit )
@@ -694,7 +700,7 @@ void CEpgData::GetEPGData( const string channelName, const unsigned int onid_tsi
 
 			#ifdef USEACTIONLOG
 				char buf[1000];
-				sprintf((char*) buf, "epg: %08x \"%s\" %02d.%02d.%04d, %02d:%02d - \"%s\"", onid_tsid, channelName.c_str(), nSDay, nSMon, nSYear, nSH, nSM, epgData.title );
+				sprintf((char*) buf, "epg: %08x \"%s\" %s %s - %s, \"%s\"", onid_tsid, channelName.c_str(), epgData.date.c_str(), epgData.start.c_str(), epgData.end.c_str(), epgData.title.c_str() );
 				g_ActionLog->println(buf);
 			#endif
 
