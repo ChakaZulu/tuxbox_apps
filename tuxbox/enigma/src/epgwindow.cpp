@@ -172,11 +172,12 @@ const eString &eListBoxEntryEPG::redraw(gPainter *rc, const eRect& rect, gColor 
 
 void eEPGSelector::fillEPGList()
 {
-  eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(current);
-  if (service)
+	eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(current);
+	if (service)
 		setText(eString(_("EPG - "))+service->service_name);
- 	eDebug("get EventMap for onid: %02x, sid: %02x", current.getOriginalNetworkID().get(), current.getServiceID().get());
+	eDebug("get EventMap for onid: %02x, sid: %02x", current.getOriginalNetworkID().get(), current.getServiceID().get());
 
+	eEPGCache::getInstance()->Lock();
 	const timeMap* evt = eEPGCache::getInstance()->getTimeMap(current);
 	timeMap::const_iterator It;
 	if (evt)
@@ -266,6 +267,7 @@ void eEPGSelector::fillEPGList()
 	}
 	else for (It = evt->begin(); It != evt->end(); It++)
 		new eListBoxEntryEPG(*It->second, events, current);
+	eEPGCache::getInstance()->Unlock();
 }
 
 void eEPGSelector::entrySelected(eListBoxEntryEPG *entry)

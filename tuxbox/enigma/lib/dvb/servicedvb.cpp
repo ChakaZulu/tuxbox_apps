@@ -144,7 +144,6 @@ int eDVRPlayerThread::openFile(int slice)
 void eDVRPlayerThread::thread()
 {
 	lock.lock();
-	messages.start();
 	exec();
 	lock.unlock();
 }
@@ -632,7 +631,6 @@ eServiceHandlerDVB::eServiceHandlerDVB()
 	CONNECT(eServiceFileHandler::getInstance()->fileHandlers, eServiceHandlerDVB::addFile);
 	recording=0;
 	CONNECT(messages.recv_msg, eServiceHandlerDVB::gotMessage);
-	messages.start();
 #endif
 }
 

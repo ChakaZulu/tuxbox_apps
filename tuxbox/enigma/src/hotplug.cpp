@@ -32,7 +32,7 @@ eHotplug::eHotplug()
 		perror("[hotplug] listen");
 		return;
 	}
-	sn = new eSocketNotifier( eApp, listenfd, 19 ); // POLLIN/POLLPRI/POLLHUP
+	sn = new eSocketNotifier( eApp, listenfd, 17 ); // POLLIN/POLLPRI/POLLHUP
 	sn->start();
 	CONNECT( sn->activated, eHotplug::dataAvail );
 	eDebug("[eHotplug] created successfully");

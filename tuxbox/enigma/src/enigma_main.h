@@ -338,6 +338,7 @@ private:
 #ifndef DISABLE_CI
 	eFixedMessagePump<eMMIMessage> mmi_messages;
 #endif
+	eFixedMessagePump<eEPGCache::Message> epg_messages;
 
 	eTimer timeout, clocktimer, messagetimeout,
 					progresstimer, volumeTimer, recStatusBlink,
@@ -506,6 +507,11 @@ private:
 	void renameFile(eServiceSelector *);
 	void showHDDSpaceLeft(eLabel *);
 #endif // DISABLE_FILE
+
+// both called from other context.. 	
+	void EPGUpdated();
+	void EPGAvail(bool);
+
 public:
 	eServicePath getRoot(int list, int mode=-1);
 	int getFirstBouquetServiceNum( eServiceReference ref, int mode=-1);
@@ -518,6 +524,7 @@ public:
 	void toggleScart( int state );
 	void postMessage(const eZapMessage &message, int clear=0);
 	void gotMessage(const int &);
+	void gotEPGMessage(const eEPGCache::Message&);
 	void startMessages();
 	void stopMessages();
 	void pauseMessages();

@@ -236,6 +236,16 @@ eTimerManager::eTimerManager()
 
 	logfile = fopen(TIMER_LOGFILE, "a" );
 	writeToLogfile("Timer is comming up");
+
+	time_t now = time(0);
+	if ( now < 1072224000 ) // 01.01.2004
+		eDebug("RTC not ready... wait for transponder time");
+	else // inform all who's waiting for valid system time..
+	{
+		eDebug("Use valid Linux Time :) (RTC?)");
+		eDVB::getInstance()->time_difference=1;
+		/*emit*/ eDVB::getInstance()->timeUpdated();
+	}
 }
 
 void eTimerManager::loadTimerList()
@@ -1051,37 +1061,70 @@ long eTimerManager::getSecondsToEnd()
 	return (nextStartingEvent->time_begin + nextStartingEvent->duration) - nowTime;
 }
 
+// DBOX2 DEEPSTANDBY DEFINES
+#ifndef FP_IOCTL_SET_WAKEUP_TIMER
+#define FP_IOCTL_SET_WAKEUP_TIMER 6
+#endif
+
+#ifndef FP_IOCTL_CLEAR_WAKEUP_TIMER
+#define FP_IOCTL_CLEAR_WAKEUP_TIMER 10
+#endif
+
 eTimerManager::~eTimerManager()
 {
-	// deep standby wakeup only on dbox2 at moment
-	switch ( eSystemInfo::getInstance()->getHwType() )
+	if ( eSystemInfo::getInstance()->hasStandbyWakeupTimer() )
 	{
-		case eSystemInfo::dbox2Nokia:
-		case eSystemInfo::dbox2Philips:
-		case eSystemInfo::dbox2Sagem:
-			if ( nextStartingEvent != timerlist->getList().end() )
+		int fd = open("/dev/dbox/fp0", O_RDWR);
+		if ( nextStartingEvent != timerlist->getList().end() )
+		{
+			switch ( eSystemInfo::getInstance()->getHwType() )
 			{
-				int min = getSecondsToBegin() / 60;
-				min -= 6;   // we start the box 6 minutes before event begin
-
-				if ( min < 1 )
-					min = 1;
-
-				int erg;
-				int fd = open("/dev/dbox/fp0", O_RDWR);
-				if((erg=ioctl(fd, FP_IOCTL_SET_WAKEUP_TIMER, &min))<0)
+				case eSystemInfo::dbox2Nokia:
+				case eSystemInfo::dbox2Philips:
+				case eSystemInfo::dbox2Sagem:
 				{
-					if(erg==-1) // Wakeup not supported
-						eDebug("[eTimerManager] deepstandby wakeup not supported");
+					int min = getSecondsToBegin() / 60;
+					min -= 6;   // we start the box 6 minutes before event begin
+
+					if ( min < 1 )
+						min = 1;
+
+					int erg;
+					if((erg=ioctl(fd, FP_IOCTL_SET_WAKEUP_TIMER, &min))<0)
+					{
+						if(erg==-1) // Wakeup not supported
+							eDebug("[eTimerManager] deepstandby wakeup not supported");
+						else
+							eDebug("[eTimerManager] error setting wakeup");
+					}
 					else
-						eDebug("[eTimerManager] error setting wakeup");
+						eDebug("[eTimerManager] deepStandby wakeup in %d minutes programmed", min );
+					break;
 				}
-				else
-					eDebug("[eTimerManager] deepStandby wakeup in %d minutes programmed", min );
-				close(fd);
+				case eSystemInfo::DM7000:
+				{
+					time_t tmp=0;
+					if ( !(tmp = getNextEventStartTime( nextStartingEvent->time_begin, nextStartingEvent->duration, nextStartingEvent->type, nextStartingEvent->last_activation ) ) )
+						tmp=nextStartingEvent->time_begin;
+					tmp -= 5*60;
+					if(::ioctl(fd, FP_IOCTL_SET_WAKEUP_TIMER, &tmp)<0)
+						eDebug("FP_IOCTL_SET_WAKEUP_TIMER failed (%m)");
+					else
+					{
+						tm bla = *localtime(&tmp);
+						eDebug("Deepstandby wakeup at %02d.%02d, %02d:%02d", 
+							bla.tm_mday, bla.tm_mon+1, bla.tm_hour, bla.tm_min );
+					}
+					break;
+				}
+				default:
+					eDebug("no support for wakeup on this platform... ");
 			}
-		default:
-			eDebug("no support for wakeup from deepstandby yet... ");
+		}
+		else if ( ::ioctl(fd, FP_IOCTL_CLEAR_WAKEUP_TIMER) < 0 )
+			eDebug("FP_IOCTL_CLEAR_WAKEUP_TIMER failed (%m)");
+		else
+			eDebug("FP_IOCTL_CLEAR_WAKEUP_TIMER okay");
 	}
 	writeToLogfile("~eTimerManager()");
 	fclose(logfile);

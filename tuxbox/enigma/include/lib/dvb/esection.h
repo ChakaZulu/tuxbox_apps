@@ -53,7 +53,7 @@ private:
 	int lockcount;
 	int setFilter(int pid, int tableid, int tableidext, int version, const char *dmxdev=DEMUX0);
 public:
-	void setContext( eMainloop *context ) { this->context = context; }
+	void setContext( eMainloop *context );
 	void data(int socket);
 	void timeout();
 public:

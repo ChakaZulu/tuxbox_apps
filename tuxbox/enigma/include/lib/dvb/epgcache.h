@@ -10,6 +10,9 @@
 #include "si.h"
 #include "dvb.h"
 #include "edvb.h"
+#include <lib/base/ebase.h>
+#include <lib/base/thread.h>
+#include <lib/base/message.h>
 
 #define CLEAN_INTERVAL 60000    //  1 min
 #define UPDATE_INTERVAL 3600000  // 60 min
@@ -162,9 +165,19 @@ class eSchedule: public eSection
 	friend class eEPGCache;
 	inline int sectionRead(__u8 *data);
 	inline void sectionFinish(int);
-	eSchedule()  // 0x50, Filter 0xF0
-//		:eSection(0x12, 80, -1, -1, SECREAD_CRC, 240)
+	eSchedule()  // 0x50 .. 0x5F	
 			:eSection(0x12, 0x50, -1, -1, SECREAD_CRC, 0xF0)
+	{
+	}
+};
+
+class eScheduleOther: public eSection
+{
+	friend class eEPGCache;
+	inline int sectionRead(__u8 *data);
+	inline void sectionFinish(int);
+	eScheduleOther()  // 0x60 .. 0x6F
+			:eSection(0x12, 0x60, -1, -1, SECREAD_CRC, 0xF0)
 	{
 	}
 };
@@ -174,23 +187,56 @@ class eNowNext: public eSection
 	friend class eEPGCache;
 	inline int sectionRead(__u8 *data);
 	inline void sectionFinish(int);
-	eNowNext()  // 0x4E, 0x4F
-//		:eSection(0x12, 78 , -1, -1, SECREAD_CRC, 254)
+	eNowNext()  // 0x4E, 0x4F	
 		:eSection(0x12, 0x4E, -1, -1, SECREAD_CRC, 0xFE)
 	{
 	}
 };
 
-class eEPGCache: public Object
+class eEPGCache: public eMainloop, private eThread, public Object
 {
 public:
-	enum {SCHEDULE, NOWNEXT};
-
+	enum {SCHEDULE, NOWNEXT, SCHEDULE_OTHER};
 	friend class eSchedule;
+	friend class eScheduleOther;
 	friend class eNowNext;
+	struct Message
+	{
+		enum
+		{
+			flush,
+			enterService,
+			leaveService,
+			pause,
+			restart,
+			updated,
+			isavail,
+			quit
+		};
+		int type;
+		eServiceReferenceDVB service;
+		union { 
+			int err; 
+			time_t time; 
+			bool avail;
+		};
+		Message()
+			:type(0), time(0) {}
+		Message(int type)
+			:type(type) {}
+		Message(int type, bool b)
+			:type(type), avail(b) {}
+		Message(int type, const eServiceReferenceDVB& service, int err=0)
+			:type(type), service(service), err(err) {}
+		Message(int type, time_t time)
+			:type(type), time(time) {}
+	};                   
+	eFixedMessagePump<Message> messages;
+	static pthread_mutex_t cache_lock;
 private:
 	uniqueEPGKey current_service;
 	uniqueEvent firstScheduleEvent,
+							firstScheduleOtherEvent,
 							firstNowNextEvent;
 	int paused;
 	__u8 isRunning, firstStart;
@@ -202,31 +248,47 @@ private:
 	tmpMap temp;
 	nvodMap NVOD;
 	eSchedule scheduleReader;
+	eScheduleOther scheduleOtherReader;
 	eNowNext nownextReader;
 	eTimer CleanTimer;
 	eTimer zapTimer;
+	eTimer abortTimer;
 	bool finishEPG();
-public:
+	void abortNonAvail();
 	void flushEPG(const eServiceReferenceDVB& s=eServiceReferenceDVB());
 	void startEPG();
+
+	void changedService(const eServiceReferenceDVB &, int);
 	void abortEPG(const eServiceReferenceDVB& s=eServiceReferenceDVB());
+
+	// called from other thread context !!
 	void enterService(const eServiceReferenceDVB &, int);
+	void leaveService(const eServiceReferenceDVB &);
+
 	void cleanLoop();
-	void timeUpdated();
 	void pauseEPG();
 	void restartEPG();
+	void thread();
+	void gotMessage(const Message &message);
+	void timeUpdated();
+public:
 	eEPGCache();
 	~eEPGCache();
 	static eEPGCache *getInstance() { return instance; }
-	EITEvent *lookupEvent(const eServiceReferenceDVB &service, int event_id, bool plain=false );
-	EITEvent *lookupEvent(const eServiceReferenceDVB &service, time_t=0, bool plain=false );
+
+	inline void Lock();
+	inline void Unlock();
+
 	const eventMap* getEventMap(const eServiceReferenceDVB &service);
 	const timeMap* getTimeMap(const eServiceReferenceDVB &service);
+	const tmpMap* getUpdatedMap() { return &temp; }
 	const std::list<NVODReferenceEntry>* getNVODRefList(const eServiceReferenceDVB &service);
 
+	EITEvent *lookupEvent(const eServiceReferenceDVB &service, int event_id, bool plain=false );
+	EITEvent *lookupEvent(const eServiceReferenceDVB &service, time_t=0, bool plain=false );
+
 	Signal1<void, bool> EPGAvail;
-	Signal1<void, const tmpMap*> EPGUpdated;
-	Signal1<void, tsref> timeNotValid;
+	Signal0<void> EPGUpdated;
 };
 
 inline const std::list<NVODReferenceEntry>* eEPGCache::getNVODRefList(const eServiceReferenceDVB &service)
@@ -266,13 +328,29 @@ inline int eSchedule::sectionRead(__u8 *data)
 	return eEPGCache::getInstance()->sectionRead(data, eEPGCache::SCHEDULE);
 }
 
+inline int eScheduleOther::sectionRead(__u8 *data)
+{
+	return eEPGCache::getInstance()->sectionRead(data, eEPGCache::SCHEDULE_OTHER);
+}
+
 inline void eSchedule::sectionFinish(int err)
 {
 	eEPGCache *e = eEPGCache::getInstance();
 	if ( (e->isRunning & 1) && (err == -ETIMEDOUT || err == -ECANCELED ) )
 	{
 		e->isRunning &= ~1;
-		if ( e->firstScheduleEvent.valid() || e->firstNowNextEvent.valid() )
+		if ( e->firstScheduleEvent.valid() || e->firstNowNextEvent.valid() || e->firstScheduleOtherEvent.valid() )
+			e->finishEPG();
+	}
+}
+
+inline void eScheduleOther::sectionFinish(int err)
+{
+	eEPGCache *e = eEPGCache::getInstance();
+	if ( (e->isRunning & 4) && (err == -ETIMEDOUT || err == -ECANCELED ) )
+	{
+		e->isRunning &= ~4;
+		if ( e->firstScheduleEvent.valid() || e->firstNowNextEvent.valid() || e->firstScheduleOtherEvent.valid() )
 			e->finishEPG();
 	}
 }
@@ -283,9 +361,19 @@ inline void eNowNext::sectionFinish(int err)
 	if ( (e->isRunning & 2) && (err == -ETIMEDOUT || err == -ECANCELED ) )
 	{
 		e->isRunning &= ~2;
-		if ( e->firstScheduleEvent.valid() || e->firstNowNextEvent.valid() )
+		if ( e->firstScheduleEvent.valid() || e->firstNowNextEvent.valid() || e->firstScheduleOtherEvent.valid() )
 			e->finishEPG();
 	}
+}
+
+inline void eEPGCache::Lock()
+{
+	pthread_mutex_lock(&cache_lock);
+}
+
+inline void eEPGCache::Unlock()
+{
+	pthread_mutex_unlock(&cache_lock);
 }
 
 #endif

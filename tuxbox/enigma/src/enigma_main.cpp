@@ -73,6 +73,9 @@ struct enigmaMainActions
 		stop, pause, play, record,
 		startSkipForward, repeatSkipForward, stopSkipForward,
 		startSkipReverse, repeatSkipReverse, stopSkipReverse,
+		discrete_stop, discrete_pause, discrete_play, discrete_record,
+		discrete_startSkipForward, discrete_repeatSkipForward, discrete_stopSkipForward,
+		discrete_startSkipReverse, discrete_repeatSkipReverse, discrete_stopSkipReverse,
 		showUserBouquets, showDVBBouquets, showRecMovies, showPlaylist,
 		modeTV, modeRadio, modeFile,
 		toggleDVRFunctions, toggleIndexmark, indexSeekNext, indexSeekPrev;
@@ -121,6 +124,19 @@ struct enigmaMainActions
 		startSkipReverse(map, "startSkipR", _("start skipping reverse"), eAction::prioWidget),
 		repeatSkipReverse(map, "repeatSkipR", _("repeat skipping reverse"), eAction::prioWidget),
 		stopSkipReverse(map, "stopSkipR", _("stop skipping reverse"), eAction::prioWidget),
+
+		discrete_stop(map, "discrete_stop", _("stop playback"), eAction::prioWidget),
+		discrete_pause(map, "discrete_pause", _("pause playback"), eAction::prioWidget),
+		discrete_play(map, "discrete_play", _("resume playback"), eAction::prioWidget),
+		discrete_record(map, "discrete_record", _("record"), eAction::prioWidget),
+
+		discrete_startSkipForward(map, "discrete_startSkipF", _("start skipping forward"), eAction::prioWidget),
+		discrete_repeatSkipForward(map, "discrete_repeatSkipF", _("repeat skipping forward"), eAction::prioWidget),
+		discrete_stopSkipForward(map, "discrete_stopSkipF", _("stop skipping forward"), eAction::prioWidget),
+
+		discrete_startSkipReverse(map, "discrete_startSkipR", _("start skipping reverse"), eAction::prioWidget),
+		discrete_repeatSkipReverse(map, "discrete_repeatSkipR", _("repeat skipping reverse"), eAction::prioWidget),
+		discrete_stopSkipReverse(map, "discrete_stopSkipR", _("stop skipping reverse"), eAction::prioWidget),
 
 		showUserBouquets(map, "showUserBouquets", _("open the serviceselector and show bouquets"), eAction::prioWidget),
 		showDVBBouquets(map, "showDVBBouquets", _("open the serviceselector and show provider"), eAction::prioWidget),
@@ -508,9 +524,11 @@ void eVideoSelector::clear()
 
 void eVideoSelector::add(PMTEntry *stream)
 {
+	list.beginAtomic();
 	new eListBoxEntryText(&list,
 		eString().sprintf("PID %04x", stream->elementary_PID),
 		(void*)stream );
+	list.endAtomic();
 }
 
 struct updateAudioStream
@@ -638,6 +656,7 @@ ePSAudioSelector::ePSAudioSelector()
 
 void ePSAudioSelector::clear()
 {
+	list.beginAtomic();
 	list.clearList();
 	eListBoxEntryMulti *e = new eListBoxEntryMulti( (eListBox<eListBoxEntryMulti>*)&list, _("press left or right to change") );
 	e->add( _("   Left Mono  >"), -1 );
@@ -645,6 +664,7 @@ void ePSAudioSelector::clear()
 	e->add( _("<  Right Mono  "), -2 );
 	e->setCurrent(-3);
 	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+	list.endAtomic();
 }
 
 void ePSAudioSelector::add(unsigned int id)
@@ -710,17 +730,21 @@ eAudioSelector::eAudioSelector()
 void eAudioSelector::clear()
 {
 	list.clearList();
+	list.beginAtomic();
 	eListBoxEntryMulti *e = new eListBoxEntryMulti( (eListBox<eListBoxEntryMulti>*)&list, _("press left or right to change") );
 	e->add( _("   Left Mono  >"), -1 );
 	e->add( _("<  Stereo  >"), -3 );
 	e->add( _("<  Right Mono  "), -2 );
 	e->setCurrent(-3);
 	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+	list.endAtomic();
 }
 
 void eAudioSelector::add(eDVBServiceController::audioStream &pmt)
 {
+	list.beginAtomic();
 	new AudioStream(&list, pmt);
+	list.endAtomic();
 }
 
 SubService::SubService(eListBox<SubService> *listbox, eDVBNamespace dvb_namespace, const LinkageDescriptor *descr)
@@ -1360,6 +1384,7 @@ eZapMain::eZapMain()
 #ifndef DISABLE_CI
 	,mmi_messages(eApp, 1)
 #endif
+	,epg_messages(eApp, 1)
 	,timeout(eApp)
 	,clocktimer(eApp), messagetimeout(eApp), progresstimer(eApp)
 	,volumeTimer(eApp), recStatusBlink(eApp), doubleklickTimer(eApp), delayedStandbyTimer(eApp)
@@ -1515,7 +1540,8 @@ eZapMain::eZapMain()
 
 	CONNECT(eServiceInterface::getInstance()->serviceEvent, eZapMain::handleServiceEvent);
 
-	CONNECT(eEPGCache::getInstance()->EPGAvail, eZapMain::setEPGButton);
+	CONNECT(eEPGCache::getInstance()->EPGAvail, eZapMain::EPGAvail);
+	CONNECT(eEPGCache::getInstance()->EPGUpdated, eZapMain::EPGUpdated);
 
 	CONNECT(timeout.timeout, eZapMain::timeOut);
 
@@ -1528,6 +1554,7 @@ eZapMain::eZapMain()
 	CONNECT(eAVSwitch::getInstance()->volumeChanged, eZapMain::updateVolume);
 
 	CONNECT(message_notifier.recv_msg, eZapMain::gotMessage);
+	CONNECT(epg_messages.recv_msg, eZapMain::gotEPGMessage);
 
 	CONNECT(volumeTimer.timeout, eZapMain::hideVolumeSlider );
 #ifndef DISABLE_FILE
@@ -1591,7 +1618,6 @@ eZapMain::eZapMain()
 
 	eServiceReference::loadLockedList( (eplPath+"/services.locked").c_str() );
 	eTransponderList::getInstance()->readTimeOffsetData( (eplPath+"/timeOffsetMap").c_str() );
-//	CONNECT( eEPGCache::getInstance()->timeNotValid, eZapMain::ShowTimeCorrectionWindow );
 
 	mode=-1;  // fake mode for first call of setMode
 
@@ -1621,7 +1647,6 @@ eZapMain::eZapMain()
 	CONNECT( eStreamWatchdog::getInstance()->VCRActivityChanged, eZapMain::toggleScart );
 	eStreamWatchdog::getInstance()->reloadSettings();
 #ifndef DISABLE_CI
-	mmi_messages.start();
 	CONNECT( mmi_messages.recv_msg, eZapMain::handleMMIMessage );
 	if ( eDVB::getInstance()->DVBCI )
 		CONNECT( eDVB::getInstance()->DVBCI->ci_mmi_progress, eZapMain::receiveMMIMessageCI1 );
@@ -1692,9 +1717,6 @@ void eZapMain::handleMMIMessage( const eMMIMessage &msg )
 
 eZapMain::~eZapMain()
 {
-#ifndef DISABLE_CI
-	mmi_messages.stop();
-#endif
 #ifndef DISABLE_FILE
 	if ( state & stateRecording )
 	{
@@ -2910,10 +2932,15 @@ int eZapMain::recordDVR(int onoff, int user, time_t evtime, const char *timer_de
 			recStatusBlink.start(500, 1);
 			eZap::getInstance()->getServiceSelector()->actualize();
 
+			bool mustUnlock = false;
 			eit_event_struct *event=0;
 			EIT *eit=0;
 			if ( evtime )
+			{
+				eEPGCache::getInstance()->Lock();
 				event = (eit_event_struct*)eEPGCache::getInstance()->lookupEvent( (eServiceReferenceDVB&)eServiceInterface::getInstance()->service, evtime, true );
+				mustUnlock=true;
+			}
 			if ( !event )
 			{
 				eServiceHandler *service=eServiceInterface::getInstance()->getService();
@@ -2949,6 +2976,8 @@ int eZapMain::recordDVR(int onoff, int user, time_t evtime, const char *timer_de
 			}
 			if (eit)
 				eit->unlock();
+			if (mustUnlock)
+				eEPGCache::getInstance()->Unlock();
 		}
 		return 0;
 	}
@@ -4119,8 +4148,11 @@ void eZapMain::showEPGList(eServiceReferenceDVB service)
 {
 	if (service.type != eServiceReference::idDVB)
 		return;
+	eEPGCache::getInstance()->Lock();
 	const timeMap* e = eEPGCache::getInstance()->getTimeMap((eServiceReferenceDVB&)service);
-	if (e && !e->empty())
+	bool empty = e ? e->empty() : true;
+	eEPGCache::getInstance()->Unlock();
+	if (!empty)
 	{
 		eEPGSelector wnd(service);
 #ifndef DISABLE_LCD
@@ -4180,6 +4212,7 @@ void eZapMain::showEPG()
 	ePtrList<EITEvent> events;
 	if (isEPG)
 	{
+		eEPGCache::getInstance()->Lock();
 		const timeMap* pMap = eEPGCache::getInstance()->getTimeMap( ref );
 		if (pMap)  // EPG vorhanden
 		{
@@ -4192,6 +4225,7 @@ void eZapMain::showEPG()
 			}
 			actual_eventDisplay=new eEventDisplay( service->service_name.c_str(), ref, &events );
 		}
+		eEPGCache::getInstance()->Unlock();
 	}
 	else
 	{
@@ -4507,9 +4541,11 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		else if (event.action == &i_enigmaMainActions->toggleMute)
 			toggleMute();
 #ifndef DISABLE_FILE
-		else if (dvrfunctions && event.action == &i_enigmaMainActions->play)
+		else if (event.action == &i_enigmaMainActions->discrete_play 
+			|| (dvrfunctions && event.action == &i_enigmaMainActions->play))
 			play();
-		else if (dvrfunctions && event.action == &i_enigmaMainActions->stop)
+		else if (event.action == &i_enigmaMainActions->discrete_stop
+			|| (dvrfunctions && event.action == &i_enigmaMainActions->stop))
 		{
 			if ( state & stateRecording )
 			{
@@ -4519,9 +4555,11 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 			else
 				stop();
 		}
-		else if (dvrfunctions && event.action == &i_enigmaMainActions->pause)
+		else if (event.action == &i_enigmaMainActions->discrete_pause 
+			|| (dvrfunctions && event.action == &i_enigmaMainActions->pause))
 			pause();
-		else if (dvrfunctions && event.action == &i_enigmaMainActions->record )
+		else if (event.action == &i_enigmaMainActions->discrete_record 
+			|| (dvrfunctions && event.action == &i_enigmaMainActions->record))
 		{
 			if ( state & stateRecording && !(state & stateInTimerMode) )
 			{
@@ -4596,17 +4634,23 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 				record();
 			}
 		}
-		else if (dvrfunctions && event.action == &i_enigmaMainActions->startSkipForward)
+		else if (event.action == &i_enigmaMainActions->discrete_startSkipForward
+			|| (dvrfunctions && event.action == &i_enigmaMainActions->startSkipForward))
 			startSkip(skipForward);
-		else if (dvrfunctions && event.action == &i_enigmaMainActions->repeatSkipForward)
+		else if (event.action == &i_enigmaMainActions->discrete_repeatSkipForward
+			|| (dvrfunctions && event.action == &i_enigmaMainActions->repeatSkipForward))
 			repeatSkip(skipForward);
-		else if (dvrfunctions && event.action == &i_enigmaMainActions->stopSkipForward)
+		else if (event.action == &i_enigmaMainActions->discrete_stopSkipForward
+			|| (dvrfunctions && event.action == &i_enigmaMainActions->stopSkipForward))
 			stopSkip(skipForward);
-		else if (dvrfunctions && event.action == &i_enigmaMainActions->startSkipReverse)
+		else if (event.action == &i_enigmaMainActions->discrete_startSkipReverse
+			|| (dvrfunctions && event.action == &i_enigmaMainActions->startSkipReverse))
 			startSkip(skipReverse);
-		else if (dvrfunctions && event.action == &i_enigmaMainActions->repeatSkipReverse)
+		else if (event.action == &i_enigmaMainActions->discrete_repeatSkipReverse
+			|| (dvrfunctions && event.action == &i_enigmaMainActions->repeatSkipReverse))
 			repeatSkip(skipReverse);
-		else if (dvrfunctions && event.action == &i_enigmaMainActions->stopSkipReverse)
+		else if (event.action == &i_enigmaMainActions->discrete_stopSkipReverse
+			|| (dvrfunctions && event.action == &i_enigmaMainActions->stopSkipReverse))
 			stopSkip(skipReverse);
 #endif // DISABLE_FILE
 		else if (event.action == &i_enigmaMainActions->showEPG)
@@ -5713,9 +5757,9 @@ void eZapMain::setMode(int newmode, int user)
 		if ( eSystemInfo::getInstance()->getHwType() < 3 )  // dbox2
 		{
 			if ( newmode == modeFile && mode != newmode )
-				eEPGCache::getInstance()->pauseEPG();
+				eEPGCache::getInstance()->messages.send(eEPGCache::Message(eEPGCache::Message::pause));
 			else if ( mode == modeFile && mode != newmode && newmode != -1 )
-				eEPGCache::getInstance()->restartEPG();
+				eEPGCache::getInstance()->messages.send(eEPGCache::Message(eEPGCache::Message::restart));
 		}
 #endif
 //		eDebug("setting mode to %d", newmode);
@@ -6107,6 +6151,29 @@ void eZapMain::stopNGrabRecord()
 	ENgrab::getNew()->sendstop();
 }
 #endif
+
+void eZapMain::EPGAvail(bool avail)
+{
+	epg_messages.send( eEPGCache::Message(eEPGCache::Message::isavail,avail));
+}
+
+void eZapMain::EPGUpdated()
+{
+	epg_messages.send( eEPGCache::Message(eEPGCache::Message::updated));
+}
+
+void eZapMain::gotEPGMessage( const eEPGCache::Message &msg )
+{
+	switch(msg.type)
+	{
+		case eEPGCache::Message::isavail:
+			setEPGButton(msg.avail);
+			break;
+		case eEPGCache::Message::updated:
+			eZap::getInstance()->getServiceSelector()->EPGUpdated();
+			break;
+	}
+}
 
 eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eServiceReference &path, eWidget *lcdTitle, eWidget *lcdElement)
 : eListBoxWindow<eListBoxEntryText>(_("Service Menu"), 12, 400, true), ref(ref)

@@ -2241,13 +2241,17 @@ static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPCon
 	result+=eString("</span>");
 	result+=eString("<br>\n");
 
+	eEPGCache::getInstance()->Lock();
 	const timeMap* evt=ref ?
 		eEPGCache::getInstance()->getTimeMap((eServiceReferenceDVB&)ref)
 			:
 		eEPGCache::getInstance()->getTimeMap(sapi->service);
 
 	if (!evt)
+	{
+		eEPGCache::getInstance()->Unlock();
 		return eString("epg not ready yet");
+	}
 
 	timeMap::const_iterator It;
 
@@ -2268,6 +2272,7 @@ static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPCon
 		}
 	}
 	result += "</body></html>";
+	eEPGCache::getInstance()->Unlock();
 	return result;
 }
 
@@ -2292,6 +2297,7 @@ public:
 			current = eDVB::getInstance()->settings->getTransponders()->searchService(ref);
 			if (current)
 			{
+				eEPGCache::getInstance()->Lock();
 				const timeMap* evt = eEPGCache::getInstance()->getTimeMap((eServiceReferenceDVB&)ref);
 				if (evt)
 				{
@@ -2401,6 +2407,7 @@ public:
 
 					result << "</tr></table>";
 				}
+				eEPGCache::getInstance()->Unlock();
 
 				multiEPG += result.str();
 			}
@@ -2494,6 +2501,7 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 	if (!current)
 		return "EPG is not yet ready.";
 
+	eEPGCache::getInstance()->Lock();
 	const timeMap* evt = eEPGCache::getInstance()->getTimeMap((eServiceReferenceDVB&)ref);
 
 	if (!evt)
@@ -2536,6 +2544,7 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 			}
 		}
 	}
+	eEPGCache::getInstance()->Unlock();
 
 	eString tmp2 = readFile(TEMPLATE_DIR + "epg.tmp");
 	tmp2.strReplace("#CHANNEL#", filter_string(current->service_name));

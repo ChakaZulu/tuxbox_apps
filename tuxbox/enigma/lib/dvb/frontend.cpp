@@ -19,9 +19,6 @@
 #include <lib/system/info.h>
 #include <lib/driver/rc.h>
 
-#include <dbox/fp.h>
-#define FP_IOCTL_GET_LNB_CURRENT 9
-
 eFrontend* eFrontend::frontend;
 
 eFrontend::eFrontend(int type, const char *demod, const char *sec)
@@ -272,23 +269,35 @@ static Modulation getModulation(int mod)
 
 int gotoXTable[10] = { 0x00, 0x02, 0x03, 0x05, 0x06, 0x08, 0x0A, 0x0B, 0x0D, 0x0E };
 
-void eFrontend::readInputPower()
+int eFrontend::readInputPower()
 {
-	int tmp=0;
-	// open front prozessor
-	int fp=::open("/dev/dbox/fp0", O_RDWR);
-	if (fp < 0)
+	int power=0;
+	if ( eSystemInfo::getInstance()->canMeasureLNBCurrent() )
 	{
-		eDebug("couldn't open fp");
-		return;
+		switch ( eSystemInfo::getInstance()->getHwType() )
+		{
+			case eSystemInfo::DM7000:
+			{
+				// open front prozessor
+				int fp=::open("/dev/dbox/fp0", O_RDWR);
+				if (fp < 0)
+				{
+					eDebug("couldn't open fp");
+					return -1;
+				}
+				if ( ioctl(fp, eSystemInfo::getInstance()->hasStandbyWakeupTimer() ? 0x100 : 9, &power ) < 0 )
+				{
+					eDebug("FP_IOCTL_GET_LNB_CURRENT failed (%m)");
+					return -1;
+				}
+				::close(fp);  
+				break;
+			}
+			default:
+				eDebug("Inputpower read for platform %d not yet implemented", eSystemInfo::getInstance()->getHwType());
+		}
 	}
-	// get power input of Rotor in idle
-	if (ioctl(fp, FP_IOCTL_GET_LNB_CURRENT, &tmp )<0)
-	{
-		eDebug("FP_IOCTL_GET_LNB_CURRENT sucks.\n");
-		return;
-	}
-	::close(fp);  
+	return power;
 }
 
 #if HAVE_DVB_API_VERSION < 3
@@ -663,14 +672,6 @@ int eFrontend::RotorUseInputPower(eSecCmdSequence& seq, eLNB *lnb )
 	runningPowerInput=0;
 	int secTone = seq.continuousTone;
 
-	// open front prozessor
-	int fp=::open("/dev/dbox/fp0", O_RDWR);
-	if (fp < 0)
-	{
-		eDebug("couldn't open fp");
-		return -1;
-	}
-
 	// we send first the normal DiSEqC Switch Cmds
 	// and then the Rotor CMD
 	seq.numCommands--;
@@ -683,7 +684,6 @@ int eFrontend::RotorUseInputPower(eSecCmdSequence& seq, eLNB *lnb )
 	if ( SendSequence(seq) < 0 )
 	{
 		eDebug("SendSequence failed (%m)");
-		::close(fp);
 		return -2;
 	}
 	else if ( lnb->getDiSEqC().SeqRepeat )   // Sequence Repeat selected ?
@@ -703,14 +703,11 @@ int eFrontend::RotorUseInputPower(eSecCmdSequence& seq, eLNB *lnb )
 //		eDebug("sleep 100ms");
 	}
 
-	// get power input of Rotor on idle  not work on dbox yet .. only dreambox
-	if (ioctl(fp, FP_IOCTL_GET_LNB_CURRENT, &idlePowerInput )<0)
-	{
-		eDebug("FP_IOCTL_GET_LNB_CURRENT sucks. (%m)");
-		::close(fp);
-		return -1;
-	}
-//	eDebug("idle power input = %dmA", idlePowerInput );
+// get power input of Rotor on idle  not work on dbox yet .. only dreambox
+	idlePowerInput = readInputPower();
+	if ( idlePowerInput < 0 )
+		return idlePowerInput;
+// eDebug("idle power input = %dmA", idlePowerInput );
 
 	// send DiSEqC Sequence (Rotor)
 	seq.commands=&commands[seq.numCommands];  // last command is rotor cmd... see above...
@@ -722,10 +719,8 @@ int eFrontend::RotorUseInputPower(eSecCmdSequence& seq, eLNB *lnb )
 	if ( SendSequence(seq) < 0 )
 	{
 		eDebug("SendSequence failed (%m)");
-		::close(fp);
 		return -2;
 	}
-	::close(fp);
 	// set rotor start timeout  // 2 sek..
 	gettimeofday(&rotorTimeout,0);
 	rotorTimeout+=2000;
@@ -746,22 +741,12 @@ void eFrontend::RotorStartLoop()
 	}
 	else
 	{
-		// open front prozessor
-		int fp=::open("/dev/dbox/fp0", O_RDWR);
-		if (fp < 0)
-		{
-			eDebug("couldn't open fp");
+		runningPowerInput = readInputPower();
+		if ( runningPowerInput < 0 )
 			return;
-		}
-
-		if (ioctl(fp, FP_IOCTL_GET_LNB_CURRENT, &runningPowerInput)<0)
-		{
-			eDebug("FP_IOCTL_GET_LNB_CURRENT sucks.\n");
-			::close(fp);
-			return;
-		}
 //		eDebug("running %d mA", runningPowerInput);
 //		eDebug("delta %d mA", DeltaA);
+
 		if ( abs(runningPowerInput-idlePowerInput ) >= DeltaA ) // rotor running ?
 		{
 			eDebug("Rotor is Running");
@@ -774,7 +759,6 @@ void eFrontend::RotorStartLoop()
 		}
 		else
 			rotorTimer1.start(50,true);  // restart timer
-		::close(fp);
 	}
 }
 
@@ -789,20 +773,9 @@ void eFrontend::RotorRunningLoop()
 	}
 	else
 	{
-		// open front prozessor
-		int fp=::open("/dev/dbox/fp0", O_RDWR);
-		if (fp < 0)
-		{
-			eDebug("couldn't open fp");
+		runningPowerInput = readInputPower();
+		if ( runningPowerInput < 0 )
 			return;
-		}
-
-		if (ioctl(fp, FP_IOCTL_GET_LNB_CURRENT, &runningPowerInput)<0)
-		{
-			printf("FP_IOCTL_GET_LNB_CURRENT sucks.\n");
-			::close(fp);
-			return;
-		}
 //		eDebug("running %d mA", runningPowerInput);
 
 		if ( abs( idlePowerInput-runningPowerInput ) <= DeltaA ) // rotor stoped ?
@@ -813,7 +786,6 @@ void eFrontend::RotorRunningLoop()
 		}
 		else
 			rotorTimer2.start(50,true);  // restart timer
-		::close(fp);
 	}
 }
 

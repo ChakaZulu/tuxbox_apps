@@ -6,15 +6,6 @@
 #include <sselect.h>
 #include <epgwindow.h>
 
-// DBOX2 DEEPSTANDBY DEFINES
-#ifndef FP_IOCTL_SET_WAKEUP_TIMER
-#define FP_IOCTL_SET_WAKEUP_TIMER 6
-#endif
-
-#ifndef FP_IOCTL_IS_WAKEUP
-#define FP_IOCTL_IS_WAKEUP 9
-#endif
-
 class eTextInputField;
 class eNumber;
 class eButton;

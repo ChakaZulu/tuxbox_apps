@@ -6,7 +6,7 @@
 
 int eWizardTimezone::run()
 {
-	eZapTimeZoneSetup settimezone;
+	eZapTimeZoneSetup settimezone(false);
 	char *timezone=0;
 	if ( eConfig::getInstance()->getKey("/elitedvb/timezone", timezone) )
 	{

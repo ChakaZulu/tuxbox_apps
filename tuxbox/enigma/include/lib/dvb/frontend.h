@@ -145,7 +145,7 @@ public:
 	int Status();
 	int Locked() { return Status()&FE_HAS_LOCK; }
 	void InitDiSEqC();
-	void readInputPower();
+	int readInputPower();
   
 	uint32_t BER();
 	/**

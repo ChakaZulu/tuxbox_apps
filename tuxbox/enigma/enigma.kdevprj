@@ -88,11 +88,17 @@ sub_dirs=skins,resources
 type=normal
 
 [data/resources/Makefile.am]
-files=data/resources/rcdboxbuttons.xml,data/resources/rcdboxnew.xml,data/resources/rcdboxold.xml,data/resources/rcdreambox2.xml,data/resources/help.xml,data/resources/rcdbox_inputdev.xml,data/resources/rcdreambox_inputdev.xml,data/resources/rcgeneric_inputdev.xml
+files=data/resources/rcdboxbuttons.xml,data/resources/rcdboxnew.xml,data/resources/rcdboxold.xml,data/resources/rcdreambox2.xml,data/resources/help.xml,data/resources/rcdbox_inputdev.xml,data/resources/rcdreambox_inputdev.xml,data/resources/rcgeneric_inputdev.xml,data/resources/keymappings.xml,data/resources/rcdm5xxx.xml,data/resources/rcdm7000.xml,data/resources/rcdreambox_keyboard.xml,data/resources/rctrdvb272.xml,data/resources/rctriax.xml
 sub_dirs=
 type=normal
 
 [data/resources/help.xml]
+dist=true
+install=false
+install_location=
+type=DATA
+
+[data/resources/keymappings.xml]
 dist=true
 install=false
 install_location=
@@ -122,6 +128,18 @@ install=false
 install_location=
 type=DATA
 
+[data/resources/rcdm5xxx.xml]
+dist=true
+install=false
+install_location=
+type=DATA
+
+[data/resources/rcdm7000.xml]
+dist=true
+install=false
+install_location=
+type=DATA
+
 [data/resources/rcdreambox2.xml]
 dist=true
 install=false
@@ -134,7 +152,25 @@ install=false
 install_location=
 type=DATA
 
+[data/resources/rcdreambox_keyboard.xml]
+dist=true
+install=false
+install_location=
+type=DATA
+
 [data/resources/rcgeneric_inputdev.xml]
+dist=true
+install=false
+install_location=
+type=DATA
+
+[data/resources/rctrdvb272.xml]
+dist=true
+install=false
+install_location=
+type=DATA
+
+[data/resources/rctriax.xml]
 dist=true
 install=false
 install_location=
@@ -302,11 +338,17 @@ type=DATA
 
 [include/lib/base/Makefile.am]
 dist=true
-files=include/lib/base/buffer.h,include/lib/base/ebase.h,include/lib/base/eerror.h,include/lib/base/epoint.h,include/lib/base/eptrlist.h,include/lib/base/erect.h,include/lib/base/esize.h,include/lib/base/estring.h,include/lib/base/i18n.h,include/lib/base/Makefile.am,include/lib/base/message.h,include/lib/base/thread.h,include/lib/base/console.h,include/lib/base/ringbuffer.h
+files=include/lib/base/buffer.h,include/lib/base/ebase.h,include/lib/base/eerror.h,include/lib/base/epoint.h,include/lib/base/eptrlist.h,include/lib/base/erect.h,include/lib/base/esize.h,include/lib/base/estring.h,include/lib/base/i18n.h,include/lib/base/Makefile.am,include/lib/base/message.h,include/lib/base/thread.h,include/lib/base/console.h,include/lib/base/ringbuffer.h,include/lib/base/avltree.h
 install=false
 install_location=
 sub_dirs=
 type=DATA
+
+[include/lib/base/avltree.h]
+dist=true
+install=false
+install_location=
+type=HEADER
 
 [include/lib/base/buffer.h]
 dist=true
@@ -426,7 +468,7 @@ type=HEADER
 
 [include/lib/driver/Makefile.am]
 dist=true
-files=include/lib/driver/eavswitch.h,include/lib/driver/Makefile.am,include/lib/driver/rc.h,include/lib/driver/rcdreambox.h,include/lib/driver/rcdbox.h,include/lib/driver/rcdreambox2.h,include/lib/driver/streamwd.h,include/lib/driver/rfmod.h,include/lib/driver/rcinput.h
+files=include/lib/driver/eavswitch.h,include/lib/driver/Makefile.am,include/lib/driver/rc.h,include/lib/driver/rcdreambox.h,include/lib/driver/rcdbox.h,include/lib/driver/rcdreambox2.h,include/lib/driver/streamwd.h,include/lib/driver/rfmod.h,include/lib/driver/rcinput.h,include/lib/driver/rcconsole.h
 install=false
 install_location=
 sub_dirs=
@@ -439,6 +481,12 @@ install_location=
 type=HEADER
 
 [include/lib/driver/rc.h]
+dist=true
+install=false
+install_location=
+type=HEADER
+
+[include/lib/driver/rcconsole.h]
 dist=true
 install=false
 install_location=
@@ -482,7 +530,7 @@ type=HEADER
 
 [include/lib/dvb/Makefile.am]
 dist=true
-files=include/lib/dvb/decoder.h,include/lib/dvb/dvb.h,include/lib/dvb/dvbci.h,include/lib/dvb/dvbscan.h,include/lib/dvb/dvbservice.h,include/lib/dvb/dvbwidgets.h,include/lib/dvb/edvb.h,include/lib/dvb/epgcache.h,include/lib/dvb/esection.h,include/lib/dvb/frontend.h,include/lib/dvb/iso639.h,include/lib/dvb/Makefile.am,include/lib/dvb/record.h,include/lib/dvb/service.h,include/lib/dvb/servicecache.h,include/lib/dvb/servicedvb.h,include/lib/dvb/servicefile.h,include/lib/dvb/servicemp3.h,include/lib/dvb/serviceplaylist.h,include/lib/dvb/servicestructure.h,include/lib/dvb/settings.h,include/lib/dvb/si.h,include/lib/dvb/eaudio.h,include/lib/dvb/cahandler.h
+files=include/lib/dvb/decoder.h,include/lib/dvb/dvb.h,include/lib/dvb/dvbci.h,include/lib/dvb/dvbscan.h,include/lib/dvb/dvbservice.h,include/lib/dvb/dvbwidgets.h,include/lib/dvb/edvb.h,include/lib/dvb/epgcache.h,include/lib/dvb/esection.h,include/lib/dvb/frontend.h,include/lib/dvb/iso639.h,include/lib/dvb/Makefile.am,include/lib/dvb/record.h,include/lib/dvb/service.h,include/lib/dvb/servicecache.h,include/lib/dvb/servicedvb.h,include/lib/dvb/servicefile.h,include/lib/dvb/servicemp3.h,include/lib/dvb/serviceplaylist.h,include/lib/dvb/servicestructure.h,include/lib/dvb/settings.h,include/lib/dvb/si.h,include/lib/dvb/eaudio.h,include/lib/dvb/cahandler.h,include/lib/dvb/pvrparse.h
 install=false
 install_location=
 sub_dirs=lowlevel
@@ -662,6 +710,12 @@ install_location=
 type=HEADER
 
 [include/lib/dvb/lowlevel/ts.h]
+dist=true
+install=false
+install_location=
+type=HEADER
+
+[include/lib/dvb/pvrparse.h]
 dist=true
 install=false
 install_location=
@@ -1137,13 +1191,19 @@ type=SOURCE
 
 [lib/driver/Makefile.am]
 dist=true
-files=lib/driver/eavswitch.cpp,lib/driver/Makefile.am,lib/driver/rc.cpp,lib/driver/rcdbox.cpp,lib/driver/rcdreambox.cpp,lib/driver/rcdreambox2.cpp,lib/driver/streamwd.cpp,lib/driver/rfmod.cpp,lib/driver/rcinput.cpp
+files=lib/driver/eavswitch.cpp,lib/driver/Makefile.am,lib/driver/rc.cpp,lib/driver/rcdbox.cpp,lib/driver/rcdreambox.cpp,lib/driver/rcdreambox2.cpp,lib/driver/streamwd.cpp,lib/driver/rfmod.cpp,lib/driver/rcinput.cpp,lib/driver/rcconsole.cpp
 install=false
 install_location=
 sharedlib_LDFLAGS=-version-info 0:0:0
 sharedlib_rootname=driver
 sub_dirs=
 type=static_library
+
+[lib/driver/audiodynamic.cpp]
+dist=true
+install=false
+install_location=
+type=SOURCE
 
 [lib/driver/eavswitch.cpp]
 dist=true
@@ -1152,6 +1212,12 @@ install_location=
 type=SOURCE
 
 [lib/driver/rc.cpp]
+dist=true
+install=false
+install_location=
+type=SOURCE
+
+[lib/driver/rcconsole.cpp]
 dist=true
 install=false
 install_location=
@@ -1195,7 +1261,7 @@ type=SOURCE
 
 [lib/dvb/Makefile.am]
 dist=true
-files=lib/dvb/decoder.cpp,lib/dvb/dvb.cpp,lib/dvb/dvbci.cpp,lib/dvb/dvbscan.cpp,lib/dvb/dvbservice.cpp,lib/dvb/dvbwidgets.cpp,lib/dvb/edvb.cpp,lib/dvb/epgcache.cpp,lib/dvb/esection.cpp,lib/dvb/frontend.cpp,lib/dvb/Makefile.am,lib/dvb/record.cpp,lib/dvb/service.cpp,lib/dvb/servicedvb.cpp,lib/dvb/servicefile.cpp,lib/dvb/servicemp3.cpp,lib/dvb/serviceplaylist.cpp,lib/dvb/servicestructure.cpp,lib/dvb/settings.cpp,lib/dvb/si.cpp,lib/dvb/eaudio.cpp,lib/dvb/cahandler.cpp
+files=lib/dvb/decoder.cpp,lib/dvb/dvb.cpp,lib/dvb/dvbci.cpp,lib/dvb/dvbscan.cpp,lib/dvb/dvbservice.cpp,lib/dvb/dvbwidgets.cpp,lib/dvb/edvb.cpp,lib/dvb/epgcache.cpp,lib/dvb/esection.cpp,lib/dvb/frontend.cpp,lib/dvb/Makefile.am,lib/dvb/record.cpp,lib/dvb/service.cpp,lib/dvb/servicedvb.cpp,lib/dvb/servicefile.cpp,lib/dvb/servicemp3.cpp,lib/dvb/serviceplaylist.cpp,lib/dvb/servicestructure.cpp,lib/dvb/settings.cpp,lib/dvb/si.cpp,lib/dvb/eaudio.cpp,lib/dvb/cahandler.cpp,lib/dvb/pvrparse.cpp
 install=false
 install_location=
 sub_dirs=lowlevel
@@ -1282,6 +1348,12 @@ sub_dirs=
 type=DATA
 
 [lib/dvb/lowlevel/decode.cpp]
+dist=true
+install=false
+install_location=
+type=SOURCE
+
+[lib/dvb/pvrparse.cpp]
 dist=true
 install=false
 install_location=
@@ -1674,13 +1746,25 @@ type=PO
 
 [src/Makefile.am]
 dist=true
-files=src/channelinfo.cpp,src/channelinfo.h,src/download.cpp,src/download.h,src/enigma.cpp,src/enigma.h,src/enigma_dyn.h,src/enigma_event.cpp,src/enigma_event.h,src/enigma_info.cpp,src/enigma_info.h,src/enigma_lcd.cpp,src/enigma_lcd.h,src/enigma_main.cpp,src/enigma_main.h,src/enigma_mainmenu.cpp,src/enigma_mainmenu.h,src/enigma_plugins.cpp,src/enigma_plugins.h,src/enigma_scan.cpp,src/enigma_scan.h,src/enigma_setup.cpp,src/enigma_setup.h,src/enigma_vcr.cpp,src/enigma_vcr.h,src/enigma_xmlrpc.cpp,src/enigma_xmlrpc.h,src/epgwindow.cpp,src/epgwindow.h,src/Makefile.am,src/satconfig.cpp,src/satconfig.h,src/scan.cpp,src/scan.h,src/setup_harddisk.cpp,src/setup_harddisk.h,src/setup_language.cpp,src/setup_language.h,src/setup_lcd.cpp,src/setup_lcd.h,src/setup_osd.cpp,src/setup_osd.h,src/setup_rc.cpp,src/setup_rc.h,src/setupnetwork.cpp,src/setupnetwork.h,src/setupskin.cpp,src/setupskin.h,src/setupvideo.cpp,src/setupvideo.h,src/showbnversion.cpp,src/showbnversion.h,src/sselect.cpp,src/sselect.h,src/streaminfo.cpp,src/streaminfo.h,src/timer.cpp,src/timer.h,src/enigma_ci.h,src/enigma_ci.cpp,src/enigma_dyn.cpp,src/satfind.cpp,src/satfind.h,src/rotorconfig.cpp,src/rotorconfig.h,src/upgrade.cpp,src/upgrade.h,src/setup_rfmod.cpp,src/setup_rfmod.h,src/engrab.cpp,src/engrab.h,src/setupengrab.cpp,src/setupengrab.h,src/wizard_language.cpp,src/wizard_language.h,src/wizard_scan.cpp,src/wizard_scan.h,src/helpwindow.cpp,src/helpwindow.h,src/setup_extra.cpp,src/setup_extra.h,src/parentallock.h,src/parentallock.cpp,src/tpeditwindow.h,src/tpeditwindow.cpp,src/enigma_epg.cpp,src/enigma_epg.h,src/setup_timezone.cpp,src/setup_timezone.h,src/setup_audio.cpp,src/setup_audio.h,src/timecorrect.h,src/tzwizzard.h,src/wizzard_timezone.h,src/wizzard_timezone.cpp,src/setup_av.cpp,src/setup_av.h,src/system_settings.h,src/system_settings.cpp,src/setup_window.h,src/setup_window.cpp,src/time_settings.h,src/time_settings.cpp,src/software_update.h,src/software_update.cpp,src/enigma_mmi.h,src/enigma_mmi.cpp,src/mount_manager.cpp,src/mount_manager.h,src/enigma_standby.h,src/enigma_standby.cpp,src/enigma_bouquet.cpp,src/enigma_bouquet.h,src/enigma_mmisocket.cpp,src/enigma_mmisocket.h
+files=src/channelinfo.cpp,src/channelinfo.h,src/download.cpp,src/download.h,src/enigma.cpp,src/enigma.h,src/enigma_dyn.h,src/enigma_event.cpp,src/enigma_event.h,src/enigma_info.cpp,src/enigma_info.h,src/enigma_lcd.cpp,src/enigma_lcd.h,src/enigma_main.cpp,src/enigma_main.h,src/enigma_mainmenu.cpp,src/enigma_mainmenu.h,src/enigma_plugins.cpp,src/enigma_plugins.h,src/enigma_scan.cpp,src/enigma_scan.h,src/enigma_setup.cpp,src/enigma_setup.h,src/enigma_vcr.cpp,src/enigma_vcr.h,src/enigma_xmlrpc.cpp,src/enigma_xmlrpc.h,src/epgwindow.cpp,src/epgwindow.h,src/Makefile.am,src/satconfig.cpp,src/satconfig.h,src/scan.cpp,src/scan.h,src/setup_harddisk.cpp,src/setup_harddisk.h,src/setup_language.cpp,src/setup_language.h,src/setup_lcd.cpp,src/setup_lcd.h,src/setup_osd.cpp,src/setup_osd.h,src/setup_rc.cpp,src/setup_rc.h,src/setupnetwork.cpp,src/setupnetwork.h,src/setupskin.cpp,src/setupskin.h,src/setupvideo.cpp,src/setupvideo.h,src/showbnversion.cpp,src/showbnversion.h,src/sselect.cpp,src/sselect.h,src/streaminfo.cpp,src/streaminfo.h,src/timer.cpp,src/timer.h,src/enigma_ci.h,src/enigma_ci.cpp,src/enigma_dyn.cpp,src/satfind.cpp,src/satfind.h,src/rotorconfig.cpp,src/rotorconfig.h,src/upgrade.cpp,src/upgrade.h,src/setup_rfmod.cpp,src/setup_rfmod.h,src/engrab.cpp,src/engrab.h,src/setupengrab.cpp,src/setupengrab.h,src/wizard_language.cpp,src/wizard_language.h,src/wizard_scan.cpp,src/wizard_scan.h,src/helpwindow.cpp,src/helpwindow.h,src/setup_extra.cpp,src/setup_extra.h,src/parentallock.h,src/parentallock.cpp,src/tpeditwindow.h,src/tpeditwindow.cpp,src/enigma_epg.cpp,src/enigma_epg.h,src/setup_timezone.cpp,src/setup_timezone.h,src/setup_audio.cpp,src/setup_audio.h,src/timecorrect.h,src/tzwizzard.h,src/wizzard_timezone.h,src/wizzard_timezone.cpp,src/setup_av.cpp,src/setup_av.h,src/system_settings.h,src/system_settings.cpp,src/setup_window.h,src/setup_window.cpp,src/time_settings.h,src/time_settings.cpp,src/software_update.h,src/software_update.cpp,src/enigma_mmi.h,src/enigma_mmi.cpp,src/mount_manager.cpp,src/mount_manager.h,src/enigma_standby.h,src/enigma_standby.cpp,src/enigma_bouquet.cpp,src/enigma_bouquet.h,src/enigma_mmisocket.cpp,src/enigma_mmisocket.h,src/time_correction.cpp,src/time_correction.h,src/audio_dynamic.cpp,src/audio_dynamic.h,src/setup_keyboard.cpp,src/setup_keyboard.h,src/wizard_timezone.cpp,src/wizard_timezone.h
 install=false
 install_location=
 sharedlib_LDFLAGS=-version-info 0:0:0
 sharedlib_rootname=src
 sub_dirs=
 type=static_library
+
+[src/audio_dynamic.cpp]
+dist=true
+install=false
+install_location=
+type=SOURCE
+
+[src/audio_dynamic.h]
+dist=true
+install=false
+install_location=
+type=HEADER
 
 [src/channelinfo.cpp]
 dist=true
@@ -2066,6 +2150,18 @@ install=false
 install_location=
 type=HEADER
 
+[src/setup_keyboard.cpp]
+dist=true
+install=false
+install_location=
+type=SOURCE
+
+[src/setup_keyboard.h]
+dist=true
+install=false
+install_location=
+type=HEADER
+
 [src/setup_language.cpp]
 dist=true
 install=false
@@ -2258,6 +2354,18 @@ install=false
 install_location=
 type=HEADER
 
+[src/time_correction.cpp]
+dist=true
+install=false
+install_location=
+type=SOURCE
+
+[src/time_correction.h]
+dist=true
+install=false
+install_location=
+type=HEADER
+
 [src/time_settings.cpp]
 dist=true
 install=false
@@ -2337,6 +2445,18 @@ install_location=
 type=SOURCE
 
 [src/wizard_scan.h]
+dist=true
+install=false
+install_location=
+type=HEADER
+
+[src/wizard_timezone.cpp]
+dist=true
+install=false
+install_location=
+type=SOURCE
+
+[src/wizard_timezone.h]
 dist=true
 install=false
 install_location=

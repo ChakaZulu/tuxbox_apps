@@ -365,7 +365,6 @@ eHTTPDataSource *eMP3Decoder::createStreamSink(eHTTPConnection *conn)
 
 void eMP3Decoder::thread()
 {
-	messages.start();
 	exec();
 }
 
@@ -917,7 +916,7 @@ int eServiceHandlerMP3::play(const eServiceReference &service, int workaround )
 
 	flags=flagIsSeekable|flagSupportPosition;
 
-	if ( service.data[0] != eMP3Decoder::codecMPG )
+//	if ( service.data[0] != eMP3Decoder::codecMPG )
 		flags|=flagIsTrack;
 
 	serviceEvent(eServiceEvent(eServiceEvent::evtStart));

@@ -757,10 +757,14 @@ struct updateEPGChangedService
 	}
 };
 
-void eServiceSelector::EPGUpdated( const tmpMap *m)
+void eServiceSelector::EPGUpdated()
 {
-	services->forEachEntry( updateEPGChangedService( m ) );
-	services->forEachVisibleEntry( updateEPGChangedService( m, true ) );
+	eEPGCache *epgcache = eEPGCache::getInstance();
+	epgcache->Lock();
+	const tmpMap *tmp = epgcache->getUpdatedMap();
+	services->forEachEntry( updateEPGChangedService( tmp ) );
+	services->forEachVisibleEntry( updateEPGChangedService( tmp, true ) );
+	epgcache->Unlock();
 }
 
 void eServiceSelector::pathUp()
@@ -1583,7 +1587,6 @@ eServiceSelector::eServiceSelector()
 	CONNECT(eDVB::getInstance()->bouquetListChanged, eServiceSelector::actualize);
 	CONNECT(BrowseTimer.timeout, eServiceSelector::ResetBrowseChar);
 	CONNECT(ciDelay.timeout, eServiceSelector::updateCi );
-	CONNECT(eEPGCache::getInstance()->EPGUpdated, eServiceSelector::EPGUpdated);
 
 	addActionMap(&i_serviceSelectorActions->map);
 	addActionMap(&i_numberActions->map);

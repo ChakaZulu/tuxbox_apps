@@ -52,7 +52,6 @@ int enigmaMMI::eventHandler( const eWidgetEvent &e )
 	{
 		case eWidgetEvent::execBegin:
 			show();
-			mmi_messages.start();
 			beginExec();
 			return 1;
 		case eWidgetEvent::execDone:

@@ -11,7 +11,8 @@
 #include <lib/system/econfig.h>
 #include <enigma_main.h>
 
-eZapTimeZoneSetup::eZapTimeZoneSetup() : eWindow(0)
+eZapTimeZoneSetup::eZapTimeZoneSetup(bool showHint)
+	:eWindow(0), showHint(showHint)
 {
 	setText(_("Time Zone Setup"));
 	cmove(ePoint(110, 146));
@@ -80,11 +81,16 @@ void eZapTimeZoneSetup::okPressed()
 		}
 		eConfig::getInstance()->flush();
 		setTimeZone();
-		eMessageBox msg(_("You have to restart enigma to apply the new Timezone\nRestart now?"), _("Timezone changed"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btYes );
-		msg.show();
-		if ( msg.exec() == eMessageBox::btYes )
+		if (showHint)
+		{
+			eMessageBox msg(_("You have to restart enigma to apply the new Timezone\nRestart now?"), _("Timezone changed"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btYes );
+			msg.show();
+			if ( msg.exec() == eMessageBox::btYes )
+				eApp->quit(2);
+			msg.hide();
+		}
+		else
 			eApp->quit(2);
-		msg.hide();
 	}
 	close(0);
 }
@@ -92,7 +98,6 @@ void eZapTimeZoneSetup::okPressed()
 void eZapTimeZoneSetup::setTimeZone()
 {
 	char *ctimeZone=cmdTimeZones();
-	unsetenv("TZ");
 	if ( system(
 		eString().sprintf(
 			"cp /share/zoneinfo/%s /var/etc/localtime",

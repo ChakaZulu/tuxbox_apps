@@ -276,9 +276,13 @@ void eZapEPG::buildService(serviceentry &service)
 	int width = service.pos.width();
 	service.entries.setAutoDelete(1);
 	eEPGCache *epgcache=eEPGCache::getInstance();
+	epgcache->Lock();
 	const timeMap *evmap = epgcache->getTimeMap(service.service);
 	if (!evmap)
+	{
+		epgcache->Unlock();
 		return;
+	}
 
 	timeMap::const_iterator ibegin = evmap->lower_bound(start);
 	if ((ibegin != evmap->end()) && (ibegin != evmap->begin()) )
@@ -354,6 +358,7 @@ void eZapEPG::buildService(serviceentry &service)
 		else
 			delete ev;
 	}
+	epgcache->Unlock();
 }
 
 void eZapEPG::selService(int dir)
@@ -512,13 +517,9 @@ void eZapEPG::buildPage(int direction)
 		{
 			if ( s == services.end() )
 				break;
-			const EITEvent *e = eEPGCache::getInstance()->lookupEvent( *s, (time_t)(start+tmp) );
-			if ( e )
-			{
-				delete e;
-				if ( ++cnt > numservices )
+			const eit_event_struct *e = (const eit_event_struct*) eEPGCache::getInstance()->lookupEvent( *s, (time_t)(start+tmp), true );
+			if ( e && (++cnt > numservices) )
 					break;
-			}
 			if ( s != services.begin() )
 				--s;
 			else
@@ -561,10 +562,9 @@ void eZapEPG::buildPage(int direction)
 	{
 		if ( curE == services.end() )
 			break;
-		const EITEvent *e = eEPGCache::getInstance()->lookupEvent( *curE, (time_t)(start+tmp) );
+		const eit_event_struct *e = (const eit_event_struct*) eEPGCache::getInstance()->lookupEvent( *curE, (time_t)(start+tmp), true );
 		if ( e )
 		{
-			delete e;
 			serviceentries.push_back(serviceentry());
 			serviceentry &service = serviceentries.back();
 			service.header = new eLabel(eventWidget);

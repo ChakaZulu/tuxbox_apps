@@ -90,10 +90,10 @@ private:
 	void bouquetSelChanged( eListBoxEntryService *entry);
 	void ResetBrowseChar();
 	void gotoChar(char c);
-	void EPGUpdated( const tmpMap* );
 	void updateCi();
 	void doSPFlags(const eServiceReference &ref);
 public:
+	void EPGUpdated();
 	int eventHandler(const eWidgetEvent &event);
 	void setKeyDescriptions(bool editMode=false);
 	void forEachServiceRef( Signal1<void,const eServiceReference&>, bool );

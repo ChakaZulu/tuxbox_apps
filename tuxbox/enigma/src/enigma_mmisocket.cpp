@@ -99,7 +99,7 @@ void eSocketMMIHandler::listenDataAvail(int what)
 			fcntl(connfd, F_SETFL, O_NONBLOCK);
 			int val=1;
 			setsockopt(connfd, SOL_SOCKET, SO_REUSEADDR, &val, 4);
-			connsn = new eSocketNotifier( eApp, connfd, POLLIN|POLLPRI|POLLHUP|POLLERR );
+			connsn = new eSocketNotifier( eApp, connfd, POLLIN|POLLHUP|POLLERR );
 			CONNECT( connsn->activated, eSocketMMIHandler::connDataAvail );
 		}
 	}

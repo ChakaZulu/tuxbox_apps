@@ -580,7 +580,7 @@ void eUpgrade::flashImage(int checkmd5)
 				// file operations... then the update ist very slow on the
 				// dreambox
 				nice(-10);
-				eEPGCache::getInstance()->pauseEPG();
+				eEPGCache::getInstance()->messages.send(eEPGCache::Message(eEPGCache::Message::pause));
 
 				system("cp /sbin/rebootSE /tmp/reboot");
 

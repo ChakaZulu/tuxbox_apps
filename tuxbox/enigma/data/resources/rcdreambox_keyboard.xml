@@ -407,20 +407,20 @@
 			<action name="volumeDown" key="KEY_VOLUMEDOWN" flags="mr" />
 			<action name="toggleMute" key="KEY_MUTE" flags="mr" />
 
-			<action name="play" key="KEY_PLAY" flags="m" />
-			<action name="pause" key="KEY_PAUSE" flags="m" />
+			<action name="discrete_play" key="KEY_PLAY" flags="m" />
+			<action name="discrete_pause" key="KEY_PAUSE" flags="m" />
 
-			<action name="record" key="KEY_RECORD" flags="m" />
+			<action name="discrete_record" key="KEY_RECORD" flags="m" />
 			
-			<action name="startSkipF" key="KEY_FASTFORWARD" flags="m" />
-			<action name="repeatSkipF" key="KEY_FASTFORWARD" flags="r" />
-			<action name="stopSkipF" key="KEY_FASTFORWARD" flags="b" />
+			<action name="discrete_startSkipF" key="KEY_FASTFORWARD" flags="m" />
+			<action name="discrete_repeatSkipF" key="KEY_FASTFORWARD" flags="r" />
+			<action name="discrete_stopSkipF" key="KEY_FASTFORWARD" flags="b" />
 
-			<action name="startSkipR" key="KEY_REWIND" flags="m" />
-			<action name="repeatSkipR" key="KEY_REWIND" flags="r" />
-			<action name="stopSkipR" key="KEY_REWIND" flags="b" />
+			<action name="discrete_startSkipR" key="KEY_REWIND" flags="m" />
+			<action name="discrete_repeatSkipR" key="KEY_REWIND" flags="r" />
+			<action name="discrete_stopSkipR" key="KEY_REWIND" flags="b" />
 			
-			<action name="stop" key="KEY_STOP" flags="m" />
+			<action name="discrete_stop" key="KEY_STOP" flags="m" />
 
 			<action name="showUserBouquets" key="KEY_CHANNELUP" flags="m" />
 			<action name="showDVBBouquets" key="KEY_CHANNELDOWN" flags="m" />

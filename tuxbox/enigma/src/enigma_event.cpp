@@ -76,16 +76,16 @@ int eEventDisplay::eventHandler(const eWidgetEvent &event)
 				ePoint curPos = long_description->getPosition();
 				if ( curPos.y() < 0 )
 				{
-					long_description->move( ePoint( curPos.x(), curPos.y() + descr->getSize().height() ) );
+					long_description->move( ePoint( curPos.x(), curPos.y() + pageHeight ) );
 					updateScrollbar();
 				}
 			}
 			else if (total && event.action == &i_cursorActions->down)
 			{
 				ePoint curPos = long_description->getPosition();
-				if ( (total - descr->getSize().height() ) >= abs( curPos.y() - descr->getSize().height() ) )
+				if ( (total - pageHeight ) >= abs( curPos.y() - pageHeight ) )
 				{
-					long_description->move( ePoint( curPos.x(), curPos.y() - descr->getSize().height() ) );
+					long_description->move( ePoint( curPos.x(), curPos.y() - pageHeight ) );
 					updateScrollbar();
 				}
 			}
@@ -152,10 +152,10 @@ eEventDisplay::eEventDisplay(eString service, eServiceReferenceDVB &ref, const e
 
 	// try to recalc long description label... ( no broken text lines.. )
 	float lineheight=fontRenderClass::getInstance()->getLineHeight( long_description->getFont() );
-	int lines = descr->getSize().height() / (int)lineheight;
-	int newheight = lines * (int)lineheight + (int)(round(lineheight) - (int)lineheight);
-	descr->resize( eSize( descr->getSize().width(), newheight + (int)lineheight/6 ) );
-	long_description->resize(eSize(descr->getSize().width(), descr->getSize().height()*4));
+	int lines = (int)(descr->getSize().height() / lineheight);
+	pageHeight = (int)(lines * lineheight);
+	descr->resize( eSize( descr->getSize().width(), pageHeight+(int)(lineheight/6)));
+	long_description->resize(eSize(descr->getSize().width(), pageHeight*16));
 
 #ifndef DISABLE_FILE
 	addActionToHelpList( &i_epgSelectorActions->addDVRTimerEvent );
@@ -185,16 +185,16 @@ eEventDisplay::~eEventDisplay()
 
 void eEventDisplay::updateScrollbar()
 {
-	total = descr->getSize().height();
+	total = pageHeight;
 	int pages=1;
 	while( total < long_description->getExtend().height() )
 	{
-		total += descr->getSize().height();
+		total += pageHeight;
 		pages++;
 	}
 
 	int start=-long_description->getPosition().y()*100/total;
-	int vis=descr->getSize().height()*100/total;
+	int vis=pageHeight*100/total;
 	scrollbar->setParams(start, vis);
 	scrollbar->show();
 	if (pages == 1)

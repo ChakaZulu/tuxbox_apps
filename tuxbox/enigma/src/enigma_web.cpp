@@ -387,9 +387,13 @@ static eString erc_epg(eString request, eString dirpath, eString opt, eHTTPConne
 	
 	if (event_id == -1)
 	{
+		epgcache->Lock();
 		const timeMap *evmap = epgcache->getTimeMap((eServiceReferenceDVB&)ref);
 		if (!evmap)
+		{
+			epgcache->Unlock();
 			return "-no events for this service";
+		}
 	
 		timeMap::const_iterator ibegin = evmap->begin(), iend = evmap->end();
 		if (begin != 0)
@@ -411,7 +415,9 @@ static eString erc_epg(eString request, eString dirpath, eString opt, eHTTPConne
 			processEvent(res, ev, search, wantext);
 			delete ev;
 		}
-	} else
+		epgcache->Unlock();
+	} 
+	else
 	{
 		EITEvent *ev = epgcache->lookupEvent((eServiceReferenceDVB&)ref, event_id);
 		if (!ev)

@@ -17,9 +17,10 @@
 eSystemInfo *eSystemInfo::instance;
 
 eSystemInfo::eSystemInfo()
-	:hashdd(0), hasci(0), hasrfmod(0), haslcd(0), hasnetwork(1), haskeyboard(0)
-	,canmeasurelnbcurrent(0), hasnegfilter(0), canupdateTransponder(0)
-	,canshutdown(1), canrecordts(0), alphaincrement(10)
+	:hashdd(0), hasci(0), hasrfmod(0), haslcd(0), hasnetwork(1)
+	,haskeyboard(0) ,canmeasurelnbcurrent(0), hasnegfilter(0)
+	,canupdateTransponder(0), canshutdown(1), canrecordts(0)
+	,alphaincrement(10), hasstandbywakeuptimer(0)
 {
 	instance=this;
 #if HAVE_DVB_API_VERSION == 3
@@ -117,7 +118,7 @@ eSystemInfo::eSystemInfo()
 			caids.insert(0x1702);
 			caids.insert(0x1722);
 			caids.insert(0x1762);
-			haslcd=1;
+			hasstandbywakeuptimer=haslcd=1;
 			helpstr="dbox2";
 			modelstr="d-Box 2";
 			cpustr="XPC823, 66MHz";
@@ -166,6 +167,20 @@ eSystemInfo::eSystemInfo()
 					hwtype = DM7000;
 					caids.insert(0x4a70);
 					defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR;
+					{
+						// check if new FP Firmware is avail...
+						int fd = open("/dev/dbox/fp0", O_RDWR);
+						if ( fd >=0)
+						{
+#define FP_IOCTL_GET_ID 0
+							__u32 test;
+							if ( ::ioctl( fd, FP_IOCTL_GET_ID) > 0 )
+								hasstandbywakeuptimer=1;
+							else
+								eDebug("old fp software.. no wakeup timer");
+							close(fd);
+						}
+					}
 					break;
 				case 6:
 					midstr="6";
@@ -217,7 +232,7 @@ eSystemInfo::eSystemInfo()
 			caids.insert(0x1722);
 			caids.insert(0x1762);
 			defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recNgrab;
-			haslcd=1;
+			hasstandbywakeuptimer=haslcd=1;
 			switch ( mid )
 			{
 				case 1:
@@ -268,7 +283,7 @@ eSystemInfo::eSystemInfo()
 		if ( ::ioctl( fd, DMX_SET_NEGFILTER_MASK, 0 ) >= 0 )
 			hasnegfilter=1;
 		close(fd);
-  }
+	}
 #endif
 }
 

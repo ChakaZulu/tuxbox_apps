@@ -19,9 +19,9 @@ class eSystemInfo
 {
 	static eSystemInfo *instance;
 	int hashdd, hasci, hasrfmod, haslcd, hasnetwork, haskeyboard, 
-		canmeasurelnbcurrent, hwtype, fetype, hasnegfilter,
-		canupdateTransponder, canshutdown, canrecordts,
-		defaulttimertype, alphaincrement;
+		canmeasurelnbcurrent, hwtype, fetype, hasnegfilter, 
+		canupdateTransponder, canshutdown, canrecordts, defaulttimertype, 
+		alphaincrement, hasstandbywakeuptimer;
 	std::set<int> caids;
 	const char *helpstr, *midstr, *modelstr, *manufactstr, *cpustr;
 	eString getInfo(const char *info, bool dreambox=false);
@@ -51,6 +51,7 @@ public:
 	int getAlphaIncrement() { return alphaincrement; }
 	int getDefaultTimerType() { return defaulttimertype; }
 	int getFEType() { return fetype; }
+	int hasStandbyWakeupTimer() { return hasstandbywakeuptimer; }
 	const std::set<int> &getCAIDs() { return caids; }
 };
 

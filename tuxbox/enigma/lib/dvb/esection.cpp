@@ -20,7 +20,8 @@
 #include <linux/dvb/dmx.h>
 #endif
 
-static pthread_mutex_t slock=PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
+static pthread_mutex_t slock=
+	PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
 ePtrList<eSection> eSection::active;
 
 eSectionReader::eSectionReader()
@@ -171,17 +172,18 @@ int eSectionReader::read(__u8 *buf)
 eSection::eSection(int _pid, int _tableid, int _tableidext, int _version, int _flags, int _tableidmask)
 	:context(eApp), notifier(0), pid(_pid), tableid(_tableid)
 	,tableidext(_tableidext), tableidmask(_tableidmask), maxsec(0)
-	,section(-1), flags(_flags), timer(new eTimer(context))
+	,section(-1), flags(_flags), timer(0)
 	,lockcount(0), version(_version)
 {
-	CONNECT(timer->timeout, eSection::timeout);
+	setContext(context);
 }
 
 eSection::eSection()
 	:context(eApp), notifier(0), pid(0), tableid(0), tableidext(0)
 	,tableidmask(0), maxsec(0), section(-1), flags(0)
-	,timer(new eTimer(context)), lockcount(0), version(0)
+	,timer(0), lockcount(0), version(0)
 {
+	setContext(context);
 }
 
 eSection::~eSection()
@@ -271,10 +273,9 @@ void eSection::closeFilter()
 
 void eSection::data(int socket)
 {
-	int max = 200;
 	(void)socket;
-
-	while (max--)
+	
+	while (1)
 	{
 		if (lockcount)
 			eDebug("eSection::data on locked section!");
@@ -312,8 +313,8 @@ void eSection::data(int socket)
 		if (err)
 		{
 			if (err>0)
-				err=0;
-			closeFilter();
+				err=0;   
+			closeFilter();      
 			sectionFinish(err);
 			return;
 		}
@@ -350,8 +351,19 @@ int eSection::abort()
 
 int eSection::abortAll()
 {
-	while (active.begin() != active.end())
-		active.begin()->abort();
+	singleLock s(slock);
+	for (ePtrList<eSection>::iterator it(active.begin()); it != active.end();)
+	{
+		// abort only sections in main context..
+		if ( it->context == eApp )
+		{
+			eSection *sec = *it;
+			++it;
+			sec->abort();
+		}
+		else
+			++it;
+	}
 	return 0;
 }
 
@@ -377,6 +389,17 @@ int eSection::unlock()
 	else
 		eDebug("unlocking... but not locked");
 	return 0;
+}
+
+void eSection::setContext( eMainloop *context )
+{
+	this->context = context;
+	if ( timer )
+		delete timer;
+	timer = new eTimer(context);
+	CONNECT(timer->timeout, eSection::timeout);
+	if ( notifier )
+		eWarning("setContext with running notifier !!!");
 }
 
 void eTable::sectionFinish(int err)

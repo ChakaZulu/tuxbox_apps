@@ -74,15 +74,14 @@ eDVBCI::eDVBCI()
 
 void eDVBCI::thread()
 {
-	messages.start();
 	exec();
+	pollTimer.stop();
 }
 
 eDVBCI::~eDVBCI()
 {
-	pollTimer.stop();
-	quit(0);
-
+	messages.send(eDVBCIMessage(eDVBCIMessage::exit));
+	kill();
 	delete ci;
 	if (fd >= 0)
 		close(fd);

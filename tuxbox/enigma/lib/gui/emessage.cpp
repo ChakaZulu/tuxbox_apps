@@ -7,12 +7,27 @@
 #include <lib/base/i18n.h>
 
 eMessageBox::eMessageBox(eString message, eString caption, int flags, int def, int timeout )
-	:eWindow(0), icon(0), def(0), timeout(timeout)
+	:eWindow(0), timer(0), icon(0), def(0), timeout(timeout)
 {
 	if ( timeout )
 	{
 		timer = new eTimer(eApp);
-		CONNECT( timer->timeout, eMessageBox::pressedCancel );
+		switch(def)
+		{
+			case btYes:
+				CONNECT( timer->timeout, eMessageBox::pressedYes );
+				break;
+			case btNo:
+				CONNECT( timer->timeout, eMessageBox::pressedNo );
+				break;
+			case btOK:
+				CONNECT( timer->timeout, eMessageBox::pressedOK );
+				break;
+			default:
+			case btCancel:
+				CONNECT( timer->timeout, eMessageBox::pressedCancel );
+				break;
+		}
 	}
 	setText(caption);
 	int fontsize=eSkin::getActive()->queryValue("fontsize", 20);
@@ -136,6 +151,10 @@ int eMessageBox::eventHandler( const eWidgetEvent &e )
 {
 	switch (e.type)
 	{
+		case eWidgetEvent::evtAction:
+			if ( timer )
+				timer->stop();
+			break;
 		case eWidgetEvent::execBegin:
 			if ( def )
 			{
@@ -143,7 +162,7 @@ int eMessageBox::eventHandler( const eWidgetEvent &e )
 				return 1;
 			}
 			if ( timeout )
-				timer->start(timeout);
+				timer->start(timeout, true);
 		default:
 			break;
 	}

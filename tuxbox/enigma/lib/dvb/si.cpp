@@ -803,9 +803,8 @@ BouquetNameDescriptor::BouquetNameDescriptor(descr_gen_t *descr)
 	__u8 *data=(__u8*)descr;
 	int len=descr->descriptor_length;
 	data+=2;
-	name="";
-	while (len--)
-		name+=*data++;
+	if (len)
+		name.assign((char*)data, len);
 }
 
 #ifdef SUPPORT_XML
@@ -916,10 +915,8 @@ ComponentDescriptor::ComponentDescriptor(descr_component_struct *descr)
 	language_code[1]=descr->lang_code2;
 	language_code[2]=descr->lang_code3;
 	len-=sizeof(descr_component_struct);
-	__u8 *p=(__u8*)(descr+1);
-	text="";
-	while (len--)
-		text+=*p++;
+	if ( len > 0 )
+		text.assign((char*)(descr+1), len);
 }
 
 #ifdef SUPPORT_XML
@@ -969,10 +966,8 @@ LesRadiosDescriptor::LesRadiosDescriptor(descr_lesradios_struct *descr)
 	int len=descr->descriptor_length+2;
 	id=descr->id;
 	len-=sizeof(descr_lesradios_struct);
-	char *lname=(char*)(descr+1);
-	name="";
-	while (len--)
-		name+=*lname++;
+	if ( len > 0 )
+		name.assign((char*)(descr+1), len);
 }
 
 #ifdef SUPPORT_XML
@@ -1564,7 +1559,6 @@ int MHWEIT::sectionRead(__u8 *data)
 	event.service_id=HILO(table->tableid_ext);
 	event.starttime=HILO(table->starttime);
 	event.duration=HILO(table->duration);
-	event.event_name="";
 	event.flags=HILO(table->flags);
 	int len=30;
 	while (len-- && (table->event_name[len+1]==' '))
@@ -1573,7 +1567,6 @@ int MHWEIT::sectionRead(__u8 *data)
 	event.event_name.append( (char*) &table->event_name[0], len);
 
 	len=15;
-	event.short_description="";
 
 	while (len-- && (table->short_description[len+1]==' '))
 		;

@@ -25,6 +25,7 @@ class eEventDisplay: public eWindow
 	void updateScrollbar();
 	void checkTimerIcon(EITEvent *);
 	int valid;
+	int pageHeight;
 protected:
 	int eventHandler(const eWidgetEvent &event);
 public:
