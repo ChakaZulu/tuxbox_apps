@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.332 2003/10/14 12:48:59 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.333 2003/11/21 16:32:13 zwen Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -306,6 +306,8 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 #endif
 	{
 		bool failed = false;
+
+		thisChannel->resetPids();
 
 		DBG("looking up pids for channel_id " PRINTF_CHANNEL_ID_TYPE, thisChannel->getChannelID());
 
@@ -1545,7 +1547,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.332 2003/10/14 12:48:59 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.333 2003/11/21 16:32:13 zwen Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
