@@ -51,6 +51,8 @@ mainsettings.keybinding Tasten Einstellungen
 mainsettings.misc Diverse Einstellungen
 mainsettings.scan Einstellungen Kanalsuche
 
+mp3picsettings.general MP3 Player / Bildbetrachter
+
 miscsettings.head Diverse Einstellungen
 miscsettings.shutdown_real Standbymodus
 miscsettings.boxtype DBox Hersteller
@@ -664,6 +666,7 @@ mp3player.rewind schneller Rückl.
 mp3player.artist_title Interpret, Titel
 mp3player.title_artist Titel, Interpret
 mp3player.display_order Anzeige
+mp3player.follow Selektiere akt. Track
 
 filebrowser.head Filebrowser
 filebrowser.filter Filter

@@ -51,6 +51,8 @@ mainsettings.keybinding Key Setup
 mainsettings.misc Misc settings
 mainsettings.scan Scan settings
 
+mp3picsettings.general MP3 player / picturviewer
+
 miscsettings.head Misc settings
 miscsettings.shutdown_real Enable standby
 miscsettings.boxtype DBox type
@@ -664,6 +666,7 @@ mp3player.rewind rewind
 mp3player.artist_title Artist, Title
 mp3player.title_artist Title, Artist
 mp3player.display_order display order
+mp3player.follow auto select current
 
 filebrowser.head Filebrowser
 filebrowser.filter Filter

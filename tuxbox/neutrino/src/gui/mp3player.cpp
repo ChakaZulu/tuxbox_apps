@@ -717,7 +717,11 @@ void CMP3PlayerGui::paintInfo()
 		g_Fonts->menu->RenderString(x+xstart, y +4+ 2*fheight, width- 20, tmp, COL_MENUCONTENTSELECTED, 0, true); // UTF-8
 		tmp = playlist[current].Bitrate + " / " + playlist[current].Samplerate + " / " + playlist[current].ChannelMode + 
 			" / " + playlist[current].Layer;
-		updateMP3Infos();
+		// reset so fields get painted always
+      m_mp3info="";
+      m_time_total="0:00";
+      m_time_played="0:00";
+      updateMP3Infos();
 		updateTimes(true);
 	}
 }
@@ -1214,12 +1218,35 @@ void CMP3PlayerGui::play(int pos)
 {
 	//printf("MP3Playlist: play %d/%d\n",pos,playlist.size());
 	unsigned int old_current=current;
+   unsigned int old_selected=selected;
+
 	current=pos;
-	if(old_current - liststart >=0 && old_current - liststart < listmaxshow)
-		paintItem(old_current - liststart);
-	if(pos - liststart >=0 && pos - liststart < listmaxshow)
-		paintItem(pos - liststart);
-	
+	if(g_settings.mp3player_follow)
+      selected=pos;
+
+   if(selected - liststart >= listmaxshow && g_settings.mp3player_follow)
+   {
+      liststart=selected;
+      paint();
+   }
+   else if(liststart - selected < 0 && g_settings.mp3player_follow)
+   {
+      liststart=selected-listmaxshow+1;
+      paint();
+   }
+   else
+   {
+      if(old_current - liststart >=0 && old_current - liststart < listmaxshow)
+         paintItem(old_current - liststart);
+      if(pos - liststart >=0 && pos - liststart < listmaxshow)
+         paintItem(pos - liststart);
+      if(g_settings.mp3player_follow)
+      {
+         if(old_selected - liststart >=0 && old_selected - liststart < listmaxshow)
+            paintItem(old_selected - liststart);
+      }
+   }
+
 	if (playlist[pos].Artist.empty())
 	{
 		// id3tag noch nicht geholt

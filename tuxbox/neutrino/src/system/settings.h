@@ -231,6 +231,7 @@ struct SNeutrinoSettings
 
    //mp3player
    int   mp3player_display;
+   int   mp3player_follow;
 };
 
 struct SglobalInfo

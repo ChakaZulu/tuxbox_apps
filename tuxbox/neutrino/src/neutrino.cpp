@@ -501,6 +501,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.picviewer_scaling = configfile.getInt32("picviewer_scaling", 1 /*(int)CPictureViewer::SIMPLE*/);
 	
    g_settings.mp3player_display = configfile.getInt32("mp3player_display",(int)CMP3PlayerGui::ARTIST_TITLE);
+   g_settings.mp3player_follow  = configfile.getInt32("mp3player_follow",0);
 
 	if(configfile.getUnknownKeyQueryedFlag() && (erg==0))
 	{
@@ -725,6 +726,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "picviewer_scaling", g_settings.picviewer_scaling );
 
 	configfile.setInt32( "mp3player_display", g_settings.mp3player_display );
+	configfile.setInt32( "mp3player_follow", g_settings.mp3player_follow );
 	
    if(configfile.getModifiedFlag())
 	{
@@ -978,7 +980,7 @@ void CNeutrinoApp::SetupTiming()
 void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings,  CMenuWidget &audioSettings, CMenuWidget &parentallockSettings,
 										  CMenuWidget &networkSettings, CMenuWidget &recordingSettings, CMenuWidget &colorSettings, CMenuWidget &lcdSettings,
 										  CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings, CMenuWidget &miscSettings,
-										  CMenuWidget &service, CMenuWidget &fontSettings)
+										  CMenuWidget &service, CMenuWidget &fontSettings, CMenuWidget &mp3picSettings)
 {
 	dprintf(DEBUG_DEBUG, "init mainmenue\n");
 	mainMenu.addItem( new CMenuSeparator() );
@@ -1014,6 +1016,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainSettings.addItem( new CMenuForwarder("mainsettings.colors", true,"", &colorSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.lcd", true,"", &lcdSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.keybinding", true,"", &keySettings) );
+	mainSettings.addItem( new CMenuForwarder("mp3picsettings.general", true,"", &mp3picSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.misc", true, "", &miscSettings ) );
 
 }
@@ -1230,6 +1233,32 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 	}
 }
 
+void CNeutrinoApp::InitMp3PicSettings(CMenuWidget &mp3PicSettings)
+{
+	dprintf(DEBUG_DEBUG, "init mp3_pic_settings\n");
+	
+	mp3PicSettings.addItem( new CMenuSeparator() );
+	mp3PicSettings.addItem( new CMenuForwarder("menu.back") );
+	
+   CMenuOptionChooser *oj = new CMenuOptionChooser("pictureviewer.scaling", &g_settings.picviewer_scaling, true );
+	oj->addOption((int)CPictureViewer::SIMPLE, "Simple");
+	oj->addOption((int)CPictureViewer::COLOR, "Color Average");
+	oj->addOption((int)CPictureViewer::NONE, "None");
+	CStringInput*  pic_timeout= new CStringInput("pictureviewer.slide_time", g_settings.picviewer_slide_time, 2, "", "", "0123456789 ");
+	mp3PicSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "pictureviewer.head") );
+	mp3PicSettings.addItem( oj );
+	mp3PicSettings.addItem( new CMenuForwarder("pictureviewer.slide_time", true, g_settings.picviewer_slide_time, pic_timeout ));
+	
+   oj = new CMenuOptionChooser("mp3player.display_order", &g_settings.mp3player_display, true );
+	oj->addOption((int)CMP3PlayerGui::ARTIST_TITLE, "mp3player.artist_title"); 
+	oj->addOption((int)CMP3PlayerGui::TITLE_ARTIST, "mp3player.title_artist"); 
+   mp3PicSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "mp3player.name") );
+	mp3PicSettings.addItem( oj );
+   oj = new CMenuOptionChooser("mp3player.follow", &g_settings.mp3player_follow, true );
+	oj->addOption(0, "messagebox.no"); 
+	oj->addOption(1, "messagebox.yes"); 
+	mp3PicSettings.addItem( oj );
+}
 void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 {
 	dprintf(DEBUG_DEBUG, "init miscsettings\n");
@@ -1293,22 +1322,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 
 	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.RC") );
 	miscSettings.addItem( new CMenuForwarder("keybindingmenu.repeatblock", true, "", keySettings_repeatBlocker ));
- 	miscSettings.addItem( new CMenuForwarder("keybindingmenu.repeatblockgeneric", true, "", keySettings_repeat_genericblocker ));
-	
-	oj = new CMenuOptionChooser("pictureviewer.scaling", &g_settings.picviewer_scaling, true );
-	oj->addOption((int)CPictureViewer::SIMPLE, "Simple");
-	oj->addOption((int)CPictureViewer::COLOR, "Color Average");
-	oj->addOption((int)CPictureViewer::NONE, "None");
-	CStringInput*  pic_timeout= new CStringInput("pictureviewer.slide_time", g_settings.picviewer_slide_time, 2, "", "", "0123456789 ");
-	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "pictureviewer.head") );
-	miscSettings.addItem( oj );
-	miscSettings.addItem( new CMenuForwarder("pictureviewer.slide_time", true, g_settings.picviewer_slide_time, pic_timeout ));
-	
-   oj = new CMenuOptionChooser("mp3player.display_order", &g_settings.mp3player_display, true );
-	oj->addOption((int)CMP3PlayerGui::ARTIST_TITLE, "mp3player.artist_title"); 
-	oj->addOption((int)CMP3PlayerGui::TITLE_ARTIST, "mp3player.title_artist"); 
-   miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "mp3player.name") );
-	miscSettings.addItem( oj );
+ 	miscSettings.addItem( new CMenuForwarder("keybindingmenu.repeatblockgeneric", true, "", keySettings_repeat_genericblocker ));	
 }
 
 
@@ -2128,6 +2142,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget lcdSettings("lcdmenu.head", "lcd.raw");
 	CMenuWidget keySettings("keybindingmenu.head", "keybinding.raw", 400);
 	CMenuWidget miscSettings("miscsettings.head", "settings.raw");
+	CMenuWidget mp3picSettings("mp3picsettings.general", "settings.raw");
 	CMenuWidget scanSettings("servicemenu.scants", "settings.raw");
 	CMenuWidget service("servicemenu.head", "settings.raw");
 
@@ -2140,7 +2155,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	InitMainMenu(mainMenu, mainSettings, audioSettings, parentallockSettings, networkSettings, recordingSettings,
 					 colorSettings, lcdSettings, keySettings, videoSettings, languageSettings, miscSettings,
-					 service, fontSettings);
+					 service, fontSettings, mp3picSettings);
 
 	//service
 	InitServiceSettings(service, scanSettings);
@@ -2148,7 +2163,10 @@ int CNeutrinoApp::run(int argc, char **argv)
 	//language Setup
 	InitLanguageSettings(languageSettings);
 
-	//misc Setup
+	//mp3/picviewer Setup
+	InitMp3PicSettings(mp3picSettings);
+	
+   //misc Setup
 	InitMiscSettings(miscSettings);
 	miscSettings.setOnPaintNotifier(this);
 
@@ -3327,7 +3345,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.426 2003/03/14 13:29:52 alexw Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.427 2003/03/17 18:11:13 zwen Exp $\n\n");
 
 	tzset();
 	initGlobals();
