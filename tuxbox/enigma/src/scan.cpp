@@ -398,6 +398,12 @@ int tsAutomatic::tuneNext(int next)
 	return 0;
 }
 
+void tsAutomatic::openNetworkCombo()
+{
+	setFocus(l_network);
+	l_network->onOkPressed();
+}
+
 tsText::tsText(eString sheadline, eString sbody, eWidget *parent)
 	:eWidget(parent, 1)
 {
@@ -901,6 +907,7 @@ int TransponderScan::exec(tState initial)
 			automatic_scan.setLCD( LCDTitle, LCDElement);
 #endif
 			automatic_scan.show();
+			automatic_scan.openNetworkCombo();
 			current = &automatic_scan;
 
 			eDVB::getInstance()->setMode(eDVB::controllerScan);

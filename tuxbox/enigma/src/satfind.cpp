@@ -127,11 +127,10 @@ void eSatfind::tpChanged( eListBoxEntryText *tp )
 	updateTimer.stop();
 	if (tp && tp->getKey())
 	{
-		if ( !(*current == *((eTransponder*)tp->getKey())) )
-		{
-			current = (eTransponder*)(tp->getKey());
-			current->tune();
-		}
+		if ( current && *current == *((eTransponder*)tp->getKey()))
+			return;
+		current = (eTransponder*)(tp->getKey());
+		current->tune();
 	}
 	else
 		current = 0;

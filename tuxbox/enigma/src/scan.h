@@ -72,6 +72,7 @@ class tsAutomatic: public eWidget
 	int nextTransponder(int next);
 	int tuneNext(int next);
 public:
+	void openNetworkCombo();
 	tsAutomatic(eWidget *parent);
 };
 
