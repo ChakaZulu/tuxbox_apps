@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.100 2002/02/28 01:52:21 field Exp $
+//  $Id: sectionsd.cpp,v 1.101 2002/03/07 18:33:43 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.101  2002/03/07 18:33:43  field
+//  ClientLib angegangen, Events angefangen
+//
 //  Revision 1.100  2002/02/28 01:52:21  field
 //  Verbessertes Umschalt-Handling
 //
@@ -322,13 +325,6 @@
 #include <sys/wait.h>
 #include <sys/time.h>
 
-// Loki's SmartPointers benutzen SmallObjects zwecks Speicherverwaltung kleiner Objekte,
-// den SmartPointers. Das ist eine prima Sache nur fuer eine Multithreaded Umgebung
-// muss ich erst noch nachlesen wie ich diese SmallObjects anpassen muss
-//#define MAX_SMALL_OBJECT_SIZE 0 // -> normales new und delete -> kein threading-probs
-// geht nicht, da gcc 3.0 delete(void *, size_t) nicht kennt, muss mal schauen ob's anders geht
-//#include <loki/SmartPtr.h>
-
 // Daher nehmen wir SmartPointers aus der Boost-Lib (www.boost.org)
 #include <boost/smart_ptr.hpp>
 
@@ -337,6 +333,9 @@
 #include "SIservices.hpp"
 #include "SIevents.hpp"
 #include "SIsections.hpp"
+
+#include "eventserver.h"
+#include "sectionsdclient.h"
 
 // 5 Minuten Zyklus...
 // Zeit die fuer die scheduled eit's benutzt wird (in Sekunden)
@@ -362,6 +361,12 @@ static long secondsToCache=7*24*60L*60L; // 5 Tage
 static long oldEventsAre=60*60L; // 1h
 static int debug=0;
 static int scanning=1;
+
+
+// EVENTS...
+
+CEventServer    *eventServer;
+
 
 #define dprintf(fmt, args...) {if(debug) printf(fmt, ## args);}
 #define dputs(str) {if(debug) puts(str);}
@@ -1526,7 +1531,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.100 2002/02/28 01:52:21 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.101 2002/03/07 18:33:43 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -2536,51 +2541,70 @@ static void (*connectionCommands[sectionsd::numberOfCommands]) (struct connectio
 
 static void *connectionThread(void *conn)
 {
-struct connectionData *client=(struct connectionData *)conn;
+	struct connectionData *client=(struct connectionData *)conn;
 
-  try {
-  dprintf("Connection from %s\n", inet_ntoa(client->clientAddr.sin_addr));
+	try
+	{
+		dprintf("Connection from %s\n", inet_ntoa(client->clientAddr.sin_addr));
 
-  if(fcntl(client->connectionSocket, F_SETFL, O_NONBLOCK)) {
-    perror ("[sectionsd] fcntl");
-    return 0;
-  }
-  struct sectionsd::msgRequestHeader header;
-  memset(&header, 0, sizeof(header));
+		if(fcntl(client->connectionSocket, F_SETFL, O_NONBLOCK))
+		{
+			perror ("[sectionsd] fcntl");
+			return 0;
+		}
 
-  if(readNbytes(client->connectionSocket, (char *)&header, sizeof(header) , TIMEOUT_CONNECTIONS)>0) {
-    dprintf("version: %hhd, cmd: %hhd\n", header.version, header.command);
-    if(header.version==2 && header.command<sectionsd::numberOfCommands) {
-      dprintf("data length: %hd\n", header.dataLength);
-      char *data=new char[header.dataLength+1];
-      if(!data)
-        fprintf(stderr, "low on memory!\n");
-      else {
-        int rc=1;
-        if(header.dataLength)
-	  rc=readNbytes(client->connectionSocket, data, header.dataLength, TIMEOUT_CONNECTIONS);
-        if(rc>0) {
-          dprintf("Starting command %hhd\n", header.command);
-          connectionCommands[header.command](client, data, header.dataLength);
-        }
-        delete[] data;
-      }
-    }
-    else
-      dputs("Unknow format or version of request!");
-  }
-  close(client->connectionSocket);
-  dprintf("Connection from %s closed!\n", inet_ntoa(client->clientAddr.sin_addr));
-  delete client;
+		struct sectionsd::msgRequestHeader header;
+		memset(&header, 0, sizeof(header));
 
-  } // try
-  catch (std::exception& e) {
-    fprintf(stderr, "Caught std-exception in connection-thread %s!\n", e.what());
-  }
-  catch (...) {
-    fprintf(stderr, "Caught exception in connection-thread!\n");
-  }
-  return 0;
+		if(readNbytes(client->connectionSocket, (char *)&header, sizeof(header) , TIMEOUT_CONNECTIONS)>0)
+		{
+			dprintf("version: %hhd, cmd: %hhd\n", header.version, header.command);
+			if(header.version==2 && header.command<sectionsd::numberOfCommands)
+			{
+				dprintf("data length: %hd\n", header.dataLength);
+				char *data=new char[header.dataLength+1];
+				if(!data)
+					fprintf(stderr, "low on memory!\n");
+				else
+				{
+					int rc=1;
+					if(header.dataLength)
+						rc=readNbytes(client->connectionSocket, data, header.dataLength, TIMEOUT_CONNECTIONS);
+					if(rc>0)
+					{
+						dprintf("Starting command %hhd\n", header.command);
+						connectionCommands[header.command](client, data, header.dataLength);
+					}
+					delete[] data;
+				}
+			}
+			else if(header.version==3 && header.command<sectionsd::numberOfCommands_v3)
+			{
+				int connfd= client->connectionSocket;
+
+            	if ( header.command == sectionsd::CMD_registerEvents )
+					eventServer->registerEvent( connfd );
+				else if ( header.command == sectionsd::CMD_unregisterEvents )
+					eventServer->unRegisterEvent( connfd );
+
+			}
+			else
+				dputs("Unknow format or version of request!");
+		}
+		close(client->connectionSocket);
+		dprintf("Connection from %s closed!\n", inet_ntoa(client->clientAddr.sin_addr));
+		delete client;
+
+	} // try
+	catch (std::exception& e)
+	{
+		fprintf(stderr, "Caught std-exception in connection-thread %s!\n", e.what());
+	}
+	catch (...)
+	{
+		fprintf(stderr, "Caught exception in connection-thread!\n");
+	}
+	return 0;
 }
 
 //---------------------------------------------------------------------
@@ -2832,6 +2856,8 @@ char *buf;
     			}
   			}
   		} while (timeset!=1);
+
+  		eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD );
 
 /*  		if(dmxTOT.change( false ) ) // von TDT nach TOT wechseln
     		return 0;
@@ -3331,115 +3357,136 @@ static void signalHandler(int signum)
 
 int main(int argc, char **argv)
 {
-pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
-int rc;
-struct sockaddr_in serverAddr;
+	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
+	int rc;
+	struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.100 2002/02/28 01:52:21 field Exp $\n");
-  try {
+	printf("$Id: sectionsd.cpp,v 1.101 2002/03/07 18:33:43 field Exp $\n");
+	try
+	{
 
-  if(argc!=1 && argc!=2) {
-    printHelp();
-    return 1;
-  }
-  if(argc==2) {
-    if(!strcmp(argv[1], "-d"))
-      debug=1;
-    else {
-      printHelp();
-      return 1;
-    }
-  }
-  printf("caching %ld hours\n", secondsToCache/(60*60L));
-  printf("events are old %ldmin after their end time\n", oldEventsAre/60);
-  tzset(); // TZ auswerten
+		if(argc!=1 && argc!=2)
+		{
+			printHelp();
+			return 1;
+		}
+		if(argc==2)
+		{
+			if(!strcmp(argv[1], "-d"))
+				debug=1;
+			else
+			{
+				printHelp();
+				return 1;
+			}
+		}
 
-  if( fork()!= 0 ) // switching to background
-    return 0;
+		printf("caching %ld hours\n", secondsToCache/(60*60L));
+		printf("events are old %ldmin after their end time\n", oldEventsAre/60);
+		tzset(); // TZ auswerten
 
-  // from here on forked
+		if( fork()!= 0 ) // switching to background
+			return 0;
 
-  //catch all signals... (busybox workaround)
-  signal(SIGHUP, signalHandler);
-  signal(SIGINT, signalHandler);
-  signal(SIGKILL, signalHandler);
-  signal(SIGQUIT, signalHandler);
-  signal(SIGTERM, signalHandler);
+		// from here on forked
 
+		//catch all signals... (busybox workaround)
+		signal(SIGHUP, signalHandler);
+		signal(SIGINT, signalHandler);
+		signal(SIGKILL, signalHandler);
+		signal(SIGQUIT, signalHandler);
+		signal(SIGTERM, signalHandler);
 
-  for(int x=0;x<32;x++)
-     signal(x,signalHandler);
+		for(int x=0;x<32;x++)
+			signal(x,signalHandler);
 
-  // den Port fuer die Clients oeffnen
-  listenSocket = socket(AF_INET, SOCK_STREAM, 0);
-  memset( &serverAddr, 0, sizeof(serverAddr) );
-  serverAddr.sin_family = AF_INET;
-  serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-  serverAddr.sin_port = htons(sectionsd::portNumber);
-//  serverAddr.sin_port = htons(SECTIONSD_PORT_NUMBER);
-  if(bind(listenSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr) )) {
-    perror("[sectionsd] bind");
-    return 2;
-  }
-  if(listen(listenSocket, 5)) { // max. 5 Clients
-    perror("[sectionsd] listen");
-    return 3;
-  }
+		// den Port fuer die Clients oeffnen
+		listenSocket = socket(AF_INET, SOCK_STREAM, 0);
+		memset( &serverAddr, 0, sizeof(serverAddr) );
+		serverAddr.sin_family = AF_INET;
+		serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+		serverAddr.sin_port = htons(sectionsd::portNumber);
+		if(bind(listenSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr) ))
+		{
+			perror("[sectionsd] bind");
+			return 2;
+		}
+		if(listen(listenSocket, 5))
+		{ // max. 5 Clients
+			perror("[sectionsd] listen");
+			return 3;
+		}
 
-  // SDT-Thread starten
-  rc=pthread_create(&threadSDT, 0, sdtThread, 0);
-  if(rc) {
-    fprintf(stderr, "[sectionsd] failed to create sdt-thread (rc=%d)\n", rc);
-    return 1;
-  }
+		eventServer = new CEventServer;
 
-  // EIT-Thread starten
-  rc=pthread_create(&threadEIT, 0, eitThread, 0);
-  if(rc) {
-    fprintf(stderr, "[sectionsd] failed to create eit-thread (rc=%d)\n", rc);
-    return 1;
-  }
-  // time-Thread starten
-  rc=pthread_create(&threadTOT, 0, timeThread, 0);
-  if(rc) {
-    fprintf(stderr, "[sectionsd] failed to create time-thread (rc=%d)\n", rc);
-    return 1;
-  }
+		// SDT-Thread starten
+		rc=pthread_create(&threadSDT, 0, sdtThread, 0);
+		if(rc)
+		{
+			fprintf(stderr, "[sectionsd] failed to create sdt-thread (rc=%d)\n", rc);
+			return 1;
+		}
 
-  // housekeeping-Thread starten
-  rc=pthread_create(&threadHouseKeeping, 0, houseKeepingThread, 0);
-  if(rc) {
-    fprintf(stderr, "[sectionsd] failed to create houskeeping-thread (rc=%d)\n", rc);
-    return 1;
-  }
+		// EIT-Thread starten
+		rc=pthread_create(&threadEIT, 0, eitThread, 0);
+		if(rc)
+		{
+			fprintf(stderr, "[sectionsd] failed to create eit-thread (rc=%d)\n", rc);
+			return 1;
+		}
 
-  pthread_attr_t conn_attrs;
-  pthread_attr_init(&conn_attrs);
-  pthread_attr_setdetachstate(&conn_attrs, PTHREAD_CREATE_DETACHED);
-  // Unsere Endlosschliefe
-  socklen_t clientInputLen = sizeof(serverAddr);
-  for(;listenSocket;) {
-    // wir warten auf eine Verbindung
-    struct connectionData *client=new connectionData; // Wird vom Thread freigegeben
-    if(!client)
-      throw std::bad_alloc();
-    do {
-      client->connectionSocket = accept(listenSocket, (struct sockaddr *)&(client->clientAddr), &clientInputLen);
-    } while(client->connectionSocket == -1);
-    pthread_t threadConnection;
-    rc=pthread_create(&threadConnection, &conn_attrs, connectionThread, client);
-    if(rc) {
-      fprintf(stderr, "[sectionsd] failed to create connection-thread (rc=%d)\n", rc);
-      return 4;
-    }
-  }
-  } // try
-  catch (std::exception& e) {
-    fprintf(stderr, "[sectionsd] Caught std-exception in connection-thread %s!\n", e.what());
-  }
-  catch (...) {
-    fprintf(stderr, "[sectionsd] Caught exception in main-thread!\n");
-  }
-  printf("[sectionsd] ended\n");
-  return 0;
+		// time-Thread starten
+		rc=pthread_create(&threadTOT, 0, timeThread, 0);
+		if(rc)
+		{
+			fprintf(stderr, "[sectionsd] failed to create time-thread (rc=%d)\n", rc);
+			return 1;
+		}
+
+		// housekeeping-Thread starten
+		rc=pthread_create(&threadHouseKeeping, 0, houseKeepingThread, 0);
+		if(rc)
+		{
+			fprintf(stderr, "[sectionsd] failed to create houskeeping-thread (rc=%d)\n", rc);
+			return 1;
+		}
+
+		pthread_attr_t conn_attrs;
+		pthread_attr_init(&conn_attrs);
+		pthread_attr_setdetachstate(&conn_attrs, PTHREAD_CREATE_DETACHED);
+
+  		// Unsere Endlosschliefe
+
+		socklen_t clientInputLen = sizeof(serverAddr);
+		for(;listenSocket;)
+		{
+			// wir warten auf eine Verbindung
+			struct connectionData *client=new connectionData; // Wird vom Thread freigegeben
+			if(!client)
+				throw std::bad_alloc();
+			do
+			{
+				client->connectionSocket = accept(listenSocket, (struct sockaddr *)&(client->clientAddr), &clientInputLen);
+			} while(client->connectionSocket == -1);
+
+			pthread_t threadConnection;
+			rc = pthread_create(&threadConnection, &conn_attrs, connectionThread, client);
+			if(rc)
+			{
+				fprintf(stderr, "[sectionsd] failed to create connection-thread (rc=%d)\n", rc);
+				return 4;
+			}
+		}
+
+	} // try
+	catch (std::exception& e)
+	{
+		fprintf(stderr, "[sectionsd] Caught std-exception in connection-thread %s!\n", e.what());
+	}
+	catch (...)
+	{
+		fprintf(stderr, "[sectionsd] Caught exception in main-thread!\n");
+	}
+	printf("[sectionsd] ended\n");
+	return 0;
 }

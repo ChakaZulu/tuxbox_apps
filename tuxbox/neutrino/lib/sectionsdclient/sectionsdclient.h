@@ -19,36 +19,34 @@
 
 #include <string>
 
+#include "../sectionsdMsg.h"
+#include "eventserver.h"
+
 using namespace std;
 
 class CSectionsdClient
 {
-
-		int sectionsd_connect();
-		bool send(int fd, char* data, int size);
-		bool receive(int fd, char* data, int size);
-		bool sectionsd_close(int fd);
+        int sock_fd;
+		bool sectionsd_connect();
+		bool send(char* data, int size);
+		bool receive(char* data, int size);
+		bool sectionsd_close();
 
 	public:
-
-		static const char ACTVERSION = 2;
-
-		enum commands
+		enum events
 		{
+			EVT_TIMESET
 		};
 
-		//command structures
-		struct commandHead
-		{
-			unsigned char  version;
-			unsigned char  cmd;
-		};
+		/*
+			ein beliebiges Event anmelden
+		*/
+		void registerEvent(unsigned int eventID, unsigned int clientID, string udsName);
 
-		struct commandGetBouquets
-		{
-			bool emptyBouquetsToo;
-		};
-
+		/*
+			ein beliebiges Event abmelden
+		*/
+		void unRegisterEvent(unsigned int eventID, unsigned int clientID);
 
 		/* construktor */
 		CSectionsdClient();

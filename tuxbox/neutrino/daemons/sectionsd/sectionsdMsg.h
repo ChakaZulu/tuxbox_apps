@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.27 2002/02/08 17:50:05 field Exp $
+//  $Id: sectionsdMsg.h,v 1.28 2002/03/07 18:33:43 field Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -25,6 +25,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsdMsg.h,v $
+//  Revision 1.28  2002/03/07 18:33:43  field
+//  ClientLib angegangen, Events angefangen
+//
 //  Revision 1.27  2002/02/08 17:50:05  field
 //  Updates - neues Format bei sendEPG
 //
@@ -145,6 +148,12 @@ struct sectionsd {
     allEventsChannelID,
     timesNVODservice,
     getEPGPrevNext
+  };
+
+  static const int numberOfCommands_v3=2;
+  enum commands_3 {
+    CMD_registerEvents,
+    CMD_unregisterEvents
   };
 };
 
