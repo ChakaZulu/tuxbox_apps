@@ -1,8 +1,8 @@
 /*
- * $Id: zapit.cpp,v 1.122 2002/04/06 11:26:11 obi Exp $
+ * $Id: zapit.cpp,v 1.123 2002/04/08 20:51:58 Simplex Exp $
  *
  * zapit - d-box2 linux project
- * 
+ *
  * (C) 2001, 2002 by Philipp Leusmann <faralla@berlios.de>
  *
  * based on code from older applications of the d-box2 linux project.
@@ -663,7 +663,7 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 			{
 				debug("[zapit] audio device already closed.\n");
 			}
-			
+
 			if ((audio_fd = open(AUDIO_DEV, O_RDWR)) < 0)
 			{
 				perror("[zapit] unable to open audio device");
@@ -1979,6 +1979,14 @@ void parse_command()
 				send( connfd, &msgResponseIsScanReady, sizeof(msgResponseIsScanReady),0);
 			break;
 
+			case CZapitClient::CMD_SCANGETSATLIST :
+				CZapitClient::responseGetSatteliteList msgResponseGetSatteliteList;
+				strncpy( msgResponseGetSatteliteList.satName, "Dummy-Sat1", 30);
+				send( connfd, &msgResponseGetSatteliteList, sizeof(msgResponseGetSatteliteList),0);
+				strncpy( msgResponseGetSatteliteList.satName, "Dummy-Sat2", 30);
+				send( connfd, &msgResponseGetSatteliteList, sizeof(msgResponseGetSatteliteList),0);
+			break;
+
 			case CZapitClient::CMD_BQ_ADD_BOUQUET :
 				CZapitClient::commandAddBouquet msgAddBouquet;
 				read( connfd, &msgAddBouquet, sizeof(msgAddBouquet));
@@ -2233,7 +2241,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.122 2002/04/06 11:26:11 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.123 2002/04/08 20:51:58 Simplex Exp $\n\n");
 
 	if (argc > 1)
 	{
