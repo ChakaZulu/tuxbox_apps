@@ -375,7 +375,7 @@ void ePluginThread::start()
 					MakeParam(P_ID_FBUFFER, fbClass::getInstance()->lock());
 
 #ifndef DISABLE_LCD
-				if (needlcd)
+				if (needlcd && eSystemInfo::getInstance()->hasLCD())
 					MakeParam(P_ID_LCD, eDBoxLCD::getInstance()->lock() );
 #endif
 
@@ -470,7 +470,7 @@ void ePluginThread::finalize_plugin()
 		fbClass::getInstance()->unlock();
 
 #ifndef DISABLE_LCD
-	if (needlcd)
+	if (needlcd && eSystemInfo::getInstance()->hasLCD())
 	{
 		eDBoxLCD::getInstance()->unlock();
 		eZapLCD::getInstance()->invalidate();
