@@ -4,6 +4,9 @@
  *             (c) Thomas "LazyT" Loewe 2002-2003 (LazyT@gmx.net)             *
  ******************************************************************************
  * $Log: tuxtxt.c,v $
+ * Revision 1.54  2004/01/16 14:38:11  alexw
+ * follow freetype changes
+ *
  * Revision 1.53  2003/12/29 02:07:40  mws
  * shifting 0 bits? :)
  *
@@ -52,7 +55,7 @@
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.53 $", versioninfo[16];
+	char cvs_revision[] = "$Revision: 1.54 $", versioninfo[16];
 
 	//show versioninfo
 
@@ -332,16 +335,16 @@ int Init()
 			return 0;
 		}
 
-		desc0.font.face_id = TUXTXT0;
-		desc1.font.face_id = TUXTXT1;
-		desc2.font.face_id = TUXTXT2;
-		desc0.image_type = desc1.image_type = desc2.image_type = ftc_image_mono;
-		desc0.font.pix_width  = desc1.font.pix_width  = desc2.font.pix_width  = 16;
-		desc0.font.pix_height = desc1.font.pix_height = desc2.font.pix_height = 22;
+		type0.font.face_id = (FTC_FaceID) TUXTXT0;
+		type1.font.face_id = (FTC_FaceID) TUXTXT1;
+		type2.font.face_id = (FTC_FaceID) TUXTXT2;
+		type0.flags = type1.flags = type2.flags = FT_LOAD_MONOCHROME;
+		type0.font.pix_width  = type1.font.pix_width  = type2.font.pix_width  = (FT_UShort) 16;
+		type0.font.pix_height = type1.font.pix_height = type2.font.pix_height = (FT_UShort) 22;
 
 	//center screen
 
-		StartX = sx + (((ex-sx) - 40*desc0.font.pix_width) / 2);
+		StartX = sx + (((ex-sx) - 40*type0.font.pix_width) / 2);
 		StartY = sy + (((ey-sy) - 25*fixfontheight) / 2);
 
 	//get fixed screeninfo
@@ -950,8 +953,8 @@ void ConfigMenu(int Init)
 			ioctl(avs, AVSIOSSCARTPIN8, &fncmodes[screen_mode1]);
 			ioctl(saa, SAAIOSWSS, &saamodes[screen_mode1]);
 
-			desc0.font.pix_width = desc1.font.pix_width = desc2.font.pix_width = 16;
-			desc0.font.pix_height = desc1.font.pix_height = desc2.font.pix_height = 22;
+			type0.font.pix_width = type1.font.pix_width = type2.font.pix_width = 16;
+			type0.font.pix_height = type1.font.pix_height = type2.font.pix_height = 22;
 		}
 
 	//render menu
@@ -960,7 +963,7 @@ void ConfigMenu(int Init)
 
 		for(line = 0; line < 24; line++)
 		{
-			PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+			PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 
 			for(byte = 0; byte < 31; byte++)
 			{
@@ -987,14 +990,14 @@ void ConfigMenu(int Init)
 
 								switch(menuitem)
 								{
-									case 1:	PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+									case 1:	PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 											PosY = StartY + fixfontheight*7;
 											for(byte = 0; byte < 31; byte++)
 											{
 												RenderCharFB(menu[62*6 + byte], menu[62*6 + byte+31]);
 											}
 
-											PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+											PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 											PosY = StartY + fixfontheight*11;
 											for(byte = 0; byte < 31; byte++)
 											{
@@ -1002,14 +1005,14 @@ void ConfigMenu(int Init)
 											}
 											break;
 
-									case 2:	PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+									case 2:	PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 											PosY = StartY + fixfontheight*11;
 											for(byte = 0; byte < 31; byte++)
 											{
 												RenderCharFB(menu[62*10 + byte], menu[62*6 + byte+31]);
 											}
 
-											PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+											PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 											PosY = StartY + fixfontheight*13;
 											for(byte = 0; byte < 31; byte++)
 											{
@@ -1017,14 +1020,14 @@ void ConfigMenu(int Init)
 											}
 											break;
 
-									case 3:	PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+									case 3:	PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 											PosY = StartY + fixfontheight*13;
 											for(byte = 0; byte < 31; byte++)
 											{
 												RenderCharFB(menu[62*12 + byte], menu[62*6 + byte+31]);
 											}
 
-											PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+											PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 											PosY = StartY + fixfontheight*17;
 											for(byte = 0; byte < 31; byte++)
 											{
@@ -1032,14 +1035,14 @@ void ConfigMenu(int Init)
 											}
 											break;
 
-									case 4:	PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+									case 4:	PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 											PosY = StartY + fixfontheight*17;
 											for(byte = 0; byte < 31; byte++)
 											{
 												RenderCharFB(menu[62*16 + byte], menu[62*6 + byte+31]);
 											}
 
-											PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+											PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 											PosY = StartY + fixfontheight*21;
 											for(byte = 0; byte < 31; byte++)
 											{
@@ -1047,14 +1050,14 @@ void ConfigMenu(int Init)
 											}
 											break;
 
-									case 5: PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+									case 5: PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 											PosY = StartY + fixfontheight*21;
 											for(byte = 0; byte < 31; byte++)
 											{
 												RenderCharFB(menu[62*20 + byte], menu[62*6 + byte+31]);
 											}
 
-											PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+											PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 											PosY = StartY + fixfontheight*22;
 											for(byte = 0; byte < 31; byte++)
 											{
@@ -1068,14 +1071,14 @@ void ConfigMenu(int Init)
 
 								switch(menuitem)
 								{
-									case 2:	PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+									case 2:	PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 											PosY = StartY + fixfontheight*7;
 											for(byte = 0; byte < 31; byte++)
 											{
 												RenderCharFB(menu[62*6 + byte], menu[62*10 + byte+31]);
 											}
 
-											PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+											PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 											PosY = StartY + fixfontheight*11;
 											for(byte = 0; byte < 31; byte++)
 											{
@@ -1083,14 +1086,14 @@ void ConfigMenu(int Init)
 											}
 											break;
 
-									case 3:	PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+									case 3:	PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 											PosY = StartY + fixfontheight*11;
 											for(byte = 0; byte < 31; byte++)
 											{
 												RenderCharFB(menu[62*10 + byte], menu[62*10 + byte+31]);
 											}
 
-											PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+											PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 											PosY = StartY + fixfontheight*13;
 											for(byte = 0; byte < 31; byte++)
 											{
@@ -1098,14 +1101,14 @@ void ConfigMenu(int Init)
 											}
 											break;
 
-									case 4:	PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+									case 4:	PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 											PosY = StartY + fixfontheight*13;
 											for(byte = 0; byte < 31; byte++)
 											{
 												RenderCharFB(menu[62*12 + byte], menu[62*12 + byte+31]);
 											}
 
-											PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+											PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 											PosY = StartY + fixfontheight*17;
 											for(byte = 0; byte < 31; byte++)
 											{
@@ -1113,14 +1116,14 @@ void ConfigMenu(int Init)
 											}
 											break;
 
-									case 5:	PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+									case 5:	PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 											PosY = StartY + fixfontheight*17;
 											for(byte = 0; byte < 31; byte++)
 											{
 												RenderCharFB(menu[62*16 + byte], menu[62*16 + byte+31]);
 											}
 
-											PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+											PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 											PosY = StartY + fixfontheight*21;
 											for(byte = 0; byte < 31; byte++)
 											{
@@ -1134,14 +1137,14 @@ void ConfigMenu(int Init)
 										}
 										else
 										{
-											PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+											PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 											PosY = StartY + fixfontheight*21;
 											for(byte = 0; byte < 31; byte++)
 											{
 												RenderCharFB(menu[62*20 + byte], menu[62*20 + byte+31]);
 											}
 
-											PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+											PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 											PosY = StartY + fixfontheight*22;
 											for(byte = 0; byte < 31; byte++)
 											{
@@ -1177,7 +1180,7 @@ void ConfigMenu(int Init)
 													}
 												}
 
-												PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+												PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 												PosY = StartY + fixfontheight*7;
 												for(byte = 0; byte < 31; byte++)
 												{
@@ -1190,7 +1193,7 @@ void ConfigMenu(int Init)
  
  													memcpy(&menu[62*21 + 2], &countrystring[national_subset*26], 26);
  
-     													PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+     													PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
      													PosY = StartY + fixfontheight*22;
      													for(byte = 0; byte < 31; byte++)
      													{
@@ -1217,7 +1220,7 @@ void ConfigMenu(int Init)
 
 												memcpy(&menu[62*21 + 2], &countrystring[national_subset*26], 26);
 
-												PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+												PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 												PosY = StartY + fixfontheight*22;
 												for(byte = 0; byte < 31; byte++)
 												{
@@ -1253,7 +1256,7 @@ void ConfigMenu(int Init)
 													}
 												}
 
-												PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+												PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 												PosY = StartY + fixfontheight*7;
 												for(byte = 0; byte < 31; byte++)
 												{
@@ -1266,7 +1269,7 @@ void ConfigMenu(int Init)
  
  													memcpy(&menu[62*21 + 2], &countrystring[national_subset*26], 26);
  
-     													PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+     													PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
      													PosY = StartY + fixfontheight*22;
      													for(byte = 0; byte < 31; byte++)
      													{
@@ -1293,7 +1296,7 @@ void ConfigMenu(int Init)
 
 												memcpy(&menu[62*21 + 2], &countrystring[national_subset*26], 26);
 
-												PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+												PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 												PosY = StartY + fixfontheight*22;
 												for(byte = 0; byte < 31; byte++)
 												{
@@ -1422,7 +1425,7 @@ void ConfigMenu(int Init)
 											if(screen_mode1) memcpy(&menu[62*10 + 26], "ein", 3);
 											else			 memcpy(&menu[62*10 + 26], "aus", 3);
 
-											PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+											PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 											PosY = StartY + fixfontheight*11;
 											for(byte = 0; byte < 31; byte++)
 											{
@@ -1440,7 +1443,7 @@ void ConfigMenu(int Init)
 											if(screen_mode2) memcpy(&menu[62*12 + 26], "ein", 3);
 											else			 memcpy(&menu[62*12 + 26], "aus", 3);
 
-											PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+											PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 											PosY = StartY + fixfontheight*13;
 											for(byte = 0; byte < 31; byte++)
 											{
@@ -1454,7 +1457,7 @@ void ConfigMenu(int Init)
 											if(color_mode) memcpy(&menu[62*16 + 26], "ein", 3);
 											else		   memcpy(&menu[62*16 + 26], "aus", 3);
 
-											PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+											PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 											PosY = StartY + fixfontheight*17;
 											for(byte = 0; byte < 31; byte++)
 											{
@@ -1495,14 +1498,14 @@ void ConfigMenu(int Init)
 												if (national_subset != 12) menu[21*62 + 28] = 'î';
 											}
 
-											PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+											PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 											PosY = StartY + fixfontheight*21;
 											for(byte = 0; byte < 31; byte++)
 											{
 												RenderCharFB(menu[62*20 + byte], menu[62*6 + byte+31]);
 											}
 
-											PosX = StartX + desc0.font.pix_width*4 + desc0.font.pix_width/2;
+											PosX = StartX + type0.font.pix_width*4 + type0.font.pix_width/2;
 											PosY = StartY + fixfontheight*22;
 											for(byte = 0; byte < 31; byte++)
 											{
@@ -1567,17 +1570,17 @@ void PageInput(int Number)
 
 		switch(inputcounter)
 		{
-			case 2:	PosX = StartX + 8*desc0.font.pix_width;
+			case 2:	PosX = StartX + 8*type0.font.pix_width;
 					RenderCharFB(Number | '0', black<<4 | white);
 					RenderCharFB('-', black<<4 | white);
 					RenderCharFB('-', black<<4 | white);
 					break;
 
-			case 1:	PosX = StartX + 9*desc0.font.pix_width;
+			case 1:	PosX = StartX + 9*type0.font.pix_width;
 					RenderCharFB(Number | '0', black<<4 | white);
 					break;
 
-			case 0:	PosX = StartX + 10*desc0.font.pix_width;
+			case 0:	PosX = StartX + 10*type0.font.pix_width;
 					RenderCharFB(Number | '0', black<<4 | white);
 					break;
 		}
@@ -2107,7 +2110,7 @@ void RenderCatchedPage()
 
 	//restore pagenumber
 
-		PosX = StartX + old_col*desc0.font.pix_width;
+		PosX = StartX + old_col*type0.font.pix_width;
 		if(zoommode == 2) PosY = StartY + (old_row-12)*fixfontheight*((zoom>>10)+1);
 		else			  PosY = StartY + old_row*fixfontheight*((zoom>>10)+1);
 
@@ -2131,7 +2134,7 @@ void RenderCatchedPage()
 			CopyBB2FB();
 		}
 
-		PosX = StartX + catch_col*desc0.font.pix_width;
+		PosX = StartX + catch_col*type0.font.pix_width;
 		if(zoommode == 2) PosY = StartY + (catch_row-12)*fixfontheight*((zoom>>10)+1);
 		else			  PosY = StartY + catch_row*fixfontheight*((zoom>>10)+1);
 
@@ -2192,8 +2195,8 @@ void SwitchScreenMode()
 
 		if(screenmode)
 		{
-			desc0.font.pix_width = desc1.font.pix_width = desc2.font.pix_width = 8;
-			desc0.font.pix_height = desc1.font.pix_height = desc2.font.pix_height = 21;
+			type0.font.pix_width = type1.font.pix_width = type2.font.pix_width = 8;
+			type0.font.pix_height = type1.font.pix_height = type2.font.pix_height = 21;
 
 			ioctl(pig, VIDIOC_G_FMT, &format);
 
@@ -2212,8 +2215,8 @@ void SwitchScreenMode()
 		}
 		else
 		{
-			desc0.font.pix_width = desc1.font.pix_width = desc2.font.pix_width = 16;
-			desc0.font.pix_height = desc1.font.pix_height = desc2.font.pix_height = 22;
+			type0.font.pix_width = type1.font.pix_width = type2.font.pix_width = 16;
+			type0.font.pix_height = type1.font.pix_height = type2.font.pix_height = 22;
 
 			ioctl(pig, VIDIOC_OVERLAY, &screenmode);
 
@@ -2308,19 +2311,19 @@ void RenderCharFB(int Char, int Attribute)
 					case 0x5F:	Char = 0x07;
 				}
 
-			if((error = FTC_SBit_Cache_Lookup(cache, &desc2, Char + national_subset*13 + 1, &sbit)))
+			if((error = FTC_SBitCache_Lookup(cache, &type2, Char + national_subset*13 + 1, &sbit, NULL)))
 			{
-				printf("TuxTxt <FTC_SBit_Cache_Lookup (NS): 0x%.2X>\n", error);
-				PosX += desc2.font.pix_width;
+				printf("TuxTxt <FTC_SBitCache_Lookup (NS): 0x%x>\n", FT_ERROR_BASE(error));
+				PosX += type2.font.pix_width;
 				return;
 			}
 		}
 		else
 		{
-			if((error = FTC_SBit_Cache_Lookup(cache, &desc1, Char + ((((Attribute>>8) & 3) - 1) * 96) + 1, &sbit)))
+			if((error = FTC_SBitCache_Lookup(cache, &type1, Char + ((((Attribute>>8) & 3) - 1) * 96) + 1, &sbit, NULL)))
 			{
-				printf("TuxTxt <FTC_SBit_Cache_Lookup (G1): 0x%.2X>\n", error);
-				PosX += desc1.font.pix_width;
+				printf("TuxTxt <FTC_SBitCache_Lookup (G1): 0x%x>\n", FT_ERROR_BASE(error));
+				PosX += type1.font.pix_width;
 				return;
 			}
 		}
@@ -2372,19 +2375,19 @@ void RenderCharFB(int Char, int Attribute)
 				case 0x7E:	Char = 0x0C;
 			}
 
-			if((error = FTC_SBit_Cache_Lookup(cache, &desc2, Char + national_subset*13+ 1, &sbit)))
+			if((error = FTC_SBitCache_Lookup(cache, &type2, Char + national_subset*13+ 1, &sbit, NULL)))
 			{
-				printf("TuxTxt <FTC_SBit_Cache_Lookup (NS): 0x%.2X>\n", error);
-				PosX += desc2.font.pix_width;
+				printf("TuxTxt <FTC_SBitCache_Lookup (NS): 0x%x>\n", FT_ERROR_BASE(error));
+				PosX += type2.font.pix_width;
 				return;
 			}
 		}
 		else
 		{
-			if((error = FTC_SBit_Cache_Lookup(cache, &desc0, Char + 1, &sbit)))
+			if((error = FTC_SBitCache_Lookup(cache, &type0, Char + 1, &sbit, NULL))!=0)
 			{
-				printf("TuxTxt <FTC_SBit_Cache_Lookup (G0): 0x%.2X>\n", error);
-				PosX += desc0.font.pix_width;
+				printf("TuxTxt <FTC_SBitCache_Lookup (G0): 0x%x> '%d' '%d'\n", FT_ERROR_BASE(error), type0.font.pix_width, type0.font.pix_height);
+				PosX += type0.font.pix_width;
 				return;
 			}
 		}
@@ -2440,7 +2443,7 @@ void RenderCharFB(int Char, int Attribute)
 			else if(zoommode || (Attribute & 1<<10)) y++;
 		}
 
-	PosX += desc0.font.pix_width;
+	PosX += type0.font.pix_width;
 }
 
 /******************************************************************************
@@ -2456,7 +2459,7 @@ void RenderCharBB(int Char, int Attribute)
 
 		if(Char == 0xFF)
 		{
-			PosX += desc0.font.pix_width;
+			PosX += type0.font.pix_width;
 			return;
 		}
 
@@ -2488,19 +2491,19 @@ void RenderCharBB(int Char, int Attribute)
 					case 0x5F:	Char = 0x07;
 				}
 
-			if((error = FTC_SBit_Cache_Lookup(cache, &desc2, Char + national_subset*13 + 1, &sbit)))
+			if((error = FTC_SBitCache_Lookup(cache, &type2, Char + national_subset*13 + 1, &sbit, NULL)))
 			{
-				printf("TuxTxt <FTC_SBit_Cache_Lookup (NS): 0x%.2X>\n", error);
-				PosX += desc2.font.pix_width;
+				printf("TuxTxt <FTC_SBitCache_Lookup (NS): 0x%x>\n", FT_ERROR_BASE(error));
+				PosX += type2.font.pix_width;
 				return;
 			}
 		}
 		else
 		{
-			if((error = FTC_SBit_Cache_Lookup(cache, &desc1, Char + ((((Attribute>>8) & 3) - 1) * 96) + 1, &sbit)))
+			if((error = FTC_SBitCache_Lookup(cache, &type1, Char + ((((Attribute>>8) & 3) - 1) * 96) + 1, &sbit, NULL)))
 			{
-				printf("TuxTxt <FTC_SBit_Cache_Lookup (G1): 0x%.2X>\n", error);
-				PosX += desc1.font.pix_width;
+				printf("TuxTxt <FTC_SBitCache_Lookup (G1): 0x%x>\n", FT_ERROR_BASE(error));
+				PosX += type1.font.pix_width;
 				return;
 			}
 		}
@@ -2552,19 +2555,19 @@ void RenderCharBB(int Char, int Attribute)
 				case 0x7E:	Char = 0x0C;
 			}
 
-			if((error = FTC_SBit_Cache_Lookup(cache, &desc2, Char + national_subset*13 + 1, &sbit)))
+			if((error = FTC_SBitCache_Lookup(cache, &type2, Char + national_subset*13 + 1, &sbit, NULL)))
 			{
-				printf("TuxTxt <FTC_SBit_Cache_Lookup (NS): 0x%.2X>\n", error);
-				PosX += desc2.font.pix_width;
+				printf("TuxTxt <FTC_SBitCache_Lookup (NS): 0x%x>\n", FT_ERROR_BASE(error));
+				PosX += type2.font.pix_width;
 				return;
 			}
 		}
 		else
 		{
-			if((error = FTC_SBit_Cache_Lookup(cache, &desc0, Char + 1, &sbit)))
+			if((error = FTC_SBitCache_Lookup(cache, &type0, Char + 1, &sbit, NULL)))
 			{
-				printf("TuxTxt <FTC_SBit_Cache_Lookup (G0): 0x%.2X>\n", error);
-				PosX += desc0.font.pix_width;
+				printf("TuxTxt <FTC_SBitCache_Lookup (G0): 0x%x>\n", FT_ERROR_BASE(error));
+				PosX += type0.font.pix_width;
 				return;
 			}
 		}
@@ -2607,7 +2610,7 @@ void RenderCharBB(int Char, int Attribute)
 			if(Attribute & 1<<10) y++;
 		}
 
-	PosX += desc0.font.pix_width;
+	PosX += type0.font.pix_width;
 }
 
 /******************************************************************************
@@ -2694,7 +2697,7 @@ void RenderMessage(int Message)
 
 	//render infobar
 
-		PosX = StartX + desc0.font.pix_width+5;
+		PosX = StartX + type0.font.pix_width+5;
 		PosY = StartY + fixfontheight*16;
 		for(byte = 0; byte < 37; byte++)
 		{
@@ -2702,7 +2705,7 @@ void RenderMessage(int Message)
 		}
 		RenderCharFB(message_1[37], fbcolor<<4 | menu2);
 
-		PosX = StartX + desc0.font.pix_width+5;
+		PosX = StartX + type0.font.pix_width+5;
 		PosY = StartY + fixfontheight*17;
 		RenderCharFB(message_2[0], menucolor<<4 | menu2);
 		for(byte = 1; byte < 36; byte++)
@@ -2712,7 +2715,7 @@ void RenderMessage(int Message)
 		RenderCharFB(message_2[36], menucolor<<4 | menu2);
 		RenderCharFB(message_2[37], fbcolor<<4 | menu2);
 
-		PosX = StartX + desc0.font.pix_width+5;
+		PosX = StartX + type0.font.pix_width+5;
 		PosY = StartY + fixfontheight*18;
 		RenderCharFB(message_3[0], menucolor<<4 | menu2);
 		for(byte = 1; byte < 36; byte++)
@@ -2722,7 +2725,7 @@ void RenderMessage(int Message)
 		RenderCharFB(message_3[36], menucolor<<4 | menu2);
 		RenderCharFB(message_3[37], fbcolor<<4 | menu2);
 
-		PosX = StartX + desc0.font.pix_width+5;
+		PosX = StartX + type0.font.pix_width+5;
 		PosY = StartY + fixfontheight*19;
 		RenderCharFB(message_4[0], menucolor<<4 | menu2);
 		for(byte = 1; byte < 36; byte++)
@@ -2732,7 +2735,7 @@ void RenderMessage(int Message)
 		RenderCharFB(message_4[36], menucolor<<4 | menu2);
 		RenderCharFB(message_4[37], fbcolor<<4 | menu2);
 
-		PosX = StartX + desc0.font.pix_width+5;
+		PosX = StartX + type0.font.pix_width+5;
 		PosY = StartY + fixfontheight*20;
 		for(byte = 0; byte < 37; byte++)
 		{
@@ -2740,7 +2743,7 @@ void RenderMessage(int Message)
 		}
 		RenderCharFB(message_5[37], fbcolor<<4 | menu2);
 
-		PosX = StartX + desc0.font.pix_width+5;
+		PosX = StartX + type0.font.pix_width+5;
 		PosY = StartY + fixfontheight*21;
 		for(byte = 0; byte < 38; byte++)
 		{
@@ -2804,7 +2807,7 @@ void RenderPage()
 		{
 			//update timestring
 
-				PosX = StartX + 32*desc0.font.pix_width;
+				PosX = StartX + 32*type0.font.pix_width;
 				PosY = StartY;
 
 				for(byte = 0; byte < 8; byte++)

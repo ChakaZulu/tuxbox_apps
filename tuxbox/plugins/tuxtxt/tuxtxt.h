@@ -4,6 +4,9 @@
  *             (c) Thomas "LazyT" Loewe 2002-2003 (LazyT@gmx.net)             *
  ******************************************************************************
  * $Log: tuxtxt.h,v $
+ * Revision 1.38  2004/01/16 14:38:11  alexw
+ * follow freetype changes
+ *
  * Revision 1.37  2003/09/10 04:16:56  carjay
  * added error handling: "doubleheight" should not to be used in line 23 of
  * teletext but it seems this does not impress the broadcasters much
@@ -203,7 +206,7 @@ FT_Library		library;
 FTC_Manager		manager;
 FTC_SBitCache	cache;
 FTC_SBit		sbit;
-FTC_Image_Desc	desc0, desc1, desc2;
+FTC_ImageTypeRec	type0, type1, type2;
 FT_Face			face0, face1, face2;
 
 //some data
