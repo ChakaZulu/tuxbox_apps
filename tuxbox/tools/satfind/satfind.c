@@ -48,9 +48,9 @@ typedef unsigned char screen_t[LCD_BUFFER_SIZE];
 #define FILLED 4
 
 struct signal {
-  uint32_t ber;
-  uint16_t snr;
-  uint16_t strength;
+  __u32 ber;
+  __u16 snr;
+  __u16 strength;
   fe_status_t status;
 };
 
