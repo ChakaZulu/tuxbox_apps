@@ -175,7 +175,7 @@ int	tetris_getInfo( struct SPluginInfo *info )
 	info->pluginversion=1;
 	strcpy(info->name,"Tetris");
 	strcpy(info->desc,"i break together - tetris  :)");
-	*info->depend=0;
+	strcpy(info->depend,"libfx2.so");
 	info->type=1;
 	info->needfb=1;
 	info->needrc=1;
