@@ -3,6 +3,7 @@
 
 #include "esection.h"
 #include <qlist.h>
+#include <vector>
 #include "lowlevel/sdt.h"
 #include "lowlevel/descr.h"
 #include "lowlevel/ca.h"
@@ -233,6 +234,25 @@ public:
 	QString text;
 };
 
+class LesRadiosDescriptor: public Descriptor
+{
+public:
+	LesRadiosDescriptor(descr_lesradios_struct *descr);
+	QString toString();
+	
+	int id;
+	QString name;
+};
+
+class MHWDataDescriptor: public Descriptor
+{
+public:
+	MHWDataDescriptor(descr_mhw_data_struct *desrc);
+	QString toString();
+	
+	char type[8];
+};
+
 class PATEntry
 {
 public:
@@ -398,6 +418,31 @@ public:
 	int bouquet_id;
 	QList<Descriptor> bouquet_descriptors;
 	QList<BATEntry> entries;
+};
+
+class MHWEITEvent
+{
+public:
+	int service_id;
+	int starttime;
+	int duration;
+	QString event_name;
+	QString short_description;
+	QString extended_description;
+	int flags;
+};
+
+class MHWEIT: public eSection
+{
+	Q_OBJECT
+	int data(__u8 *data);
+	int available;
+	void sectionFinish(int);
+signals:
+	void ready(int);
+public:
+	MHWEIT(int pid, int service_id);
+	std::vector<MHWEITEvent> events;
 };
 
 #endif

@@ -98,6 +98,10 @@ Descriptor *Descriptor::create(descr_gen_t *descr)
 		return new ExtendedEventDescriptor(descr);
 	case DESCR_COMPONENT:
 		return new ComponentDescriptor((descr_component_struct*)descr);
+	case DESCR_LESRADIOS:
+		return new LesRadiosDescriptor((descr_lesradios_struct*)descr);
+	case DESCR_MHW_DATA:
+		return new MHWDataDescriptor((descr_mhw_data_struct*)descr);
 	case DESCR_COUNTRY_AVAIL:
 	case DESCR_TIME_SHIFTED_EVENT:
 	case DESCR_MOSAIC:
@@ -651,6 +655,43 @@ QString ComponentDescriptor::toString()
 	return res;
 }
 
+LesRadiosDescriptor::LesRadiosDescriptor(descr_lesradios_struct *descr): Descriptor(DESCR_LESRADIOS)
+{
+	int len=descr->descriptor_length+2;
+	id=descr->id;
+	len-=sizeof(descr_lesradios_struct);
+	char *lname=(char*)(descr+1);
+	name="";
+	while (len--)
+		name+=*lname++;
+}
+
+QString LesRadiosDescriptor::toString()
+{
+	QString res;
+	res="LesRadioDescriptor\n";
+	res+=QString().sprintf("  id: %d\n", id);
+	res+="  name";
+	res+=name;
+	res+="\n";
+	return res;
+}
+
+MHWDataDescriptor::MHWDataDescriptor(descr_mhw_data_struct *descr)
+	: Descriptor(DESCR_MHW_DATA)
+{
+	memcpy(type, descr->type, 8);
+}
+
+QString MHWDataDescriptor::toString()
+{
+	QString res;
+	res="MHWDataDescriptor\n  ";
+	for (int i=0; i<8; i++)
+		res+=type[i];
+	res+="\n";
+}
+
 PAT::PAT(): eTable(PID_PAT, TID_PAT)
 {
 	entries.setAutoDelete(true);
@@ -921,4 +962,75 @@ BAT::BAT(): eTable(PID_BAT, TID_BAT)
 {
 	bouquet_descriptors.setAutoDelete(true);
 	entries.setAutoDelete(true);
+}
+
+MHWEIT::MHWEIT(int pid, int service_id): eSection(pid, 0x90, service_id, -1, 0, 0xFD)
+{
+	available=0;
+	events.resize(2);
+}
+
+void MHWEIT::sectionFinish(int err)
+{
+	emit ready(err);
+}
+
+int MHWEIT::data(__u8 *data)
+{
+	struct mhweit90_s
+	{
+		__u8 table_id :8;
+		__u8 section_length_hi :8;
+		__u8 section_length_lo :8;
+		__u8 tableid_ext_hi :8;
+		__u8 tableid_ext_lo :8;
+		__u8 starttime_hi;
+		__u8 starttime_lo;
+		__u8 flags_hi;
+		__u8 flags_lo;
+		__u8 duration_hi;
+		__u8 duration_lo;
+		__u8 event_name[30];
+		__u8 short_description[15];
+	} *table=(mhweit90_s*)data;
+	if (table->table_id != 0x90)
+		return 0;
+	printf(" MHW EIT %s", table->event_name);
+	printf(" starttime %d:%02d\n", HILO(table->starttime)>>8, HILO(table->starttime)&0xFF);
+	
+	int nownext;
+	switch (HILO(table->flags)&3)
+	{
+	case 3:
+		nownext=0;
+		break;
+	case 1:
+		nownext=1;
+		break;
+	case 2:
+		printf("service not running\n");
+		break;
+	default:
+		printf("bla falsche flags\n");
+	}
+	available|=nownext?1:2;
+	MHWEITEvent &event=events[nownext];
+
+	event.service_id=HILO(table->tableid_ext);
+	event.starttime=HILO(table->starttime);
+	event.duration=HILO(table->duration);
+	event.event_name="";
+	event.flags=HILO(table->flags);
+	int len=30;
+	while (len-- && (table->event_name[len]==' '));
+	for (int i=0; i<len; i++)
+		event.event_name+=table->event_name[i];
+	len=15;
+	event.short_description="";
+	while (len-- && (table->short_description[len]==' '))
+	for (int i=0; i<len; i++)
+		event.short_description+=table->short_description[len];
+	if (available==3)
+		return 1;
+	return 0;
 }

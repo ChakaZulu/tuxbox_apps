@@ -124,6 +124,11 @@ QString AudioStream::getText(int col=0) const
 			language=getISO639Description(((ISO639LanguageDescriptor*)c)->language_code);
 		else if (c->Tag()==DESCR_STREAM_ID)
 			component_tag=((StreamIdentifierDescriptor*)c)->component_tag;
+		else if (c->Tag()==DESCR_LESRADIOS)
+		{
+			language=QString().sprintf("%d.) ", (((LesRadiosDescriptor*)c)->id));
+			language+=((LesRadiosDescriptor*)c)->name;
+		}
 	}
 	if (component_tag!=-1)
 	{

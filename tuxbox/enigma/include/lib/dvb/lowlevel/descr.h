@@ -83,6 +83,8 @@ typedef struct descr_gen_struct descr_gen_t;
 #define DESCR_CA_SYSTEM		0x65
 #define DESCR_DATA_BROADCAST_ID	0x66
 #define DESCR_AC3	0x6A
+#define DESCR_LESRADIOS  0xC5
+#define DESCR_MHW_DATA	0xC2
 /* 0x43 satellite delivery system descriptor */
 
 struct descr_satellite_delivery_system_struct {
@@ -174,6 +176,14 @@ struct descr_component_struct {
 	u_char	lang_code3		: 8;
 };
 
+struct descr_lesradios_struct
+{
+	u_char descriptor_tag : 8;
+	u_char descriptor_length : 8;
+	u_char id;
+		// name
+};
+
 struct descr_linkage_struct
 {
 	u_char	descriptor_tag		: 8;
@@ -214,6 +224,13 @@ struct descr_stream_identifier_struct
 	u_char  descriptor_tag          : 8;
 	u_char  descriptor_length       : 8;
 	u_char  component_tag           : 8;
+};
+
+struct descr_mhw_data_struct
+{
+	u_char	descriptor_tag		: 8;
+	u_char	descriptor_length	: 8;
+  u_char  type[8];
 };
 
 #endif
