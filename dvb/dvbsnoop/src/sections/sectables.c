@@ -1,5 +1,5 @@
 /*
-$Id: sectables.c,v 1.16 2003/12/26 23:27:40 rasc Exp $
+$Id: sectables.c,v 1.17 2003/12/27 00:21:16 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: sectables.c,v 1.16 2003/12/26 23:27:40 rasc Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.17  2003/12/27 00:21:16  rasc
+dsmcc section tables
+
 Revision 1.16  2003/12/26 23:27:40  rasc
 DSM-CC  UNT section
 
@@ -90,6 +93,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "eit.h"
 #include "emm_ecm.h"
 #include "userdef.h"
+#include "datacarousel/dsmcc.h"
 #include "datacarousel/datagram.h"
 #include "datacarousel/ints.h"
 #include "datacarousel/unts.h"
@@ -246,6 +250,7 @@ static TABLE_ID_FUNC table_id_func[] = {
      {  0x02, 0x02,  decode_PMT	},
      {  0x03, 0x03,  decode_TSDT },
      /* res. */
+     {  0x3a, 0x3d,  decode_DSMCC_section },  // $$$ TODO Datagram - where?
      {  0x3e, 0x3e,  decode_DSMCC_DATAGRAM },
      {  0x40, 0x41,  decode_NIT	},
      {  0x42, 0x42,  decode_SDT	},
