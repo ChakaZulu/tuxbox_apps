@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.73 2002/09/24 16:46:17 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.74 2002/09/25 12:12:54 thegoodguy Exp $
  */
 
 #include <fcntl.h>
@@ -20,7 +20,6 @@
 #include "settings.h"
 #include "bouquets.h"
 #include "scan.h"
-#include "zapit.h"
 #include "xmlinterface.h"
 
 short scan_runs;
@@ -237,8 +236,6 @@ void write_bouquets()
 	{
 		scanBouquetManager->saveBouquets();
 	}
-// TODO:
-// make zapit reload its bouquets
 }
 
 void write_transponder(FILE *fd, t_transport_stream_id transport_stream_id, t_original_network_id original_network_id, uint8_t diseqc)
@@ -516,16 +513,8 @@ void *start_scanthread(void *param)
 	printf("[scan.cpp] found %d transponders and %d channels\n", found_transponders, found_channels);
 
 	/* load new services */
-	if (prepare_channels() < 0)
-	{
-		printf("[scan.cpp] Error parsing Services\n");
-	}
-	else
-	{
-		printf("[scan.cpp] Channels loaded succesfully\n");
-	}
+	(new CZapitClient)->reinitChannels();
 
 	stop_scan();
 	pthread_exit(0);
 }
-

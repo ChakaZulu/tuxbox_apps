@@ -151,9 +151,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 		}
 	}
 
-
 	hide();
-	g_Zapit->reinitChannels();  // reload services & bouquets
 	g_Sectionsd->setPauseScanning( false );
 	ShowMsg ( "messagebox.info", g_Locale->getText("scants.finished"), CMessageBox::mbBack, CMessageBox::mbBack, "info.raw" );
 
