@@ -40,23 +40,22 @@ CControldClient::CControldClient()
 int CControldClient::send(bool closesock)
 {
 	int sock_fd;
-	SAI servaddr;
-	char rip[]="127.0.0.1";
 
-	sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	memset(&servaddr,0,sizeof(servaddr));
-	servaddr.sin_family=AF_INET;
-	servaddr.sin_port=htons(1610);
-	inet_pton(AF_INET, rip, &servaddr.sin_addr);
-
-	#ifdef HAS_SIN_LEN
- 		servaddr.sin_len = sizeof(servaddr); // needed ???
-	#endif
-
-
-	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
+	struct sockaddr_un servaddr, cliaddr;
+	int clilen;
+	memset(&servaddr, 0, sizeof(struct sockaddr_un));
+	servaddr.sun_family = AF_UNIX;
+	strcpy(servaddr.sun_path, CONTROLD_UDS_NAME);
+	clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
+	
+	if ((sock_fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
 	{
-  		perror("neutrino: connect(controld)");
+		perror("socket");
+	}	
+
+	if(connect(sock_fd, (struct sockaddr*) &servaddr, clilen) <0 )
+	{
+  		perror("controldclient: connect(controld)");
 		return -1;
 	}
 

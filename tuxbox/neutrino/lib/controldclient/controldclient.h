@@ -32,28 +32,24 @@
 #ifndef __controldclient__
 #define __controldclient__
 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/in_systm.h>
-#include <netinet/ip.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-
-#include <string>
 #include <stdio.h>
 #include <unistd.h>
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/un.h>
 
 #include <string>
 
 using namespace std;
 
-#define SA struct sockaddr
-#define SAI struct sockaddr_in
 
+#define CONTROLD_UDS_NAME "/tmp/controld.sock"
 
 
 class CControldClient
 {
+
 	struct ctrl_rmsg
 	{
 		unsigned char version;
@@ -164,5 +160,3 @@ class CControldClient
 };
 
 #endif
-
-

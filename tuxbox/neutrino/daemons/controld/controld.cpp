@@ -27,30 +27,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/in_systm.h>
-#include <netinet/ip.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <stdio.h>
 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <arpa/inet.h>
+
+#include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <signal.h>
-#include <stdio.h>
 
 #include "dbox/avs_core.h"
 #include "ost/video.h"
-#include <sys/ioctl.h>
 
 #include "../lcdd/lcdd.h"
 
 #include "eventwatchdog.h"
+#include "controldclient.h"
 
 #define CONF_FILE CONFIGDIR "/controld.conf"
 
@@ -122,7 +119,8 @@ void saveSettings()
 }
 
 
-void sendto_lcdd(unsigned char cmd, unsigned char param) {
+void sendto_lcdd(unsigned char cmd, unsigned char param)
+{
 	int sock_fd;
 	SAI servaddr;
 	struct lcdd_msg lmsg;
@@ -141,7 +139,6 @@ void sendto_lcdd(unsigned char cmd, unsigned char param) {
 		write(sock_fd,&lmsg,sizeof(lmsg));
 		close(sock_fd);
 	}
-
 }
 
 void shutdownBox()
@@ -519,24 +516,26 @@ void sig_catch(int)
 
 int main(int argc, char **argv)
 {
-
 	int listenfd, connfd;
-	socklen_t clilen;
-	SAI cliaddr, servaddr;
-
 	printf("Controld  0.1\n\n");
 
 	if (fork() != 0) return 0;
 
+	struct sockaddr_un servaddr;
+	int clilen;
+	memset(&servaddr, 0, sizeof(struct sockaddr_un));
+	servaddr.sun_family = AF_UNIX;
+	strcpy(servaddr.sun_path, CONTROLD_UDS_NAME);
+	clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
+	unlink(CONTROLD_UDS_NAME);
+
 	//network-setup
-	listenfd = socket(AF_INET, SOCK_STREAM, 0);
+	if ((listenfd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
+	{
+		perror("socket");
+	}
 
-	memset(&servaddr, 0, sizeof(servaddr));
-	servaddr.sin_family = AF_INET;
-	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	servaddr.sin_port = htons(1610);
-
-	if ( bind(listenfd, (SA *) &servaddr, sizeof(servaddr)) !=0)
+	if ( bind(listenfd, (struct sockaddr*) &servaddr, clilen) <0 )
 	{
 		perror("[controld] bind failed...\n");
 		exit(-1);
@@ -571,8 +570,7 @@ int main(int argc, char **argv)
 	setVideoFormat(settings.videoformat);
 	while(1)
 	{
-		clilen = sizeof(cliaddr);
-		connfd = accept(listenfd, (SA *) &cliaddr, &clilen);
+		connfd = accept(listenfd, (struct sockaddr*) &servaddr, (socklen_t*) &clilen);
 
 		memset(&rmsg, 0, sizeof(rmsg));
 		read(connfd,&rmsg,sizeof(rmsg));
