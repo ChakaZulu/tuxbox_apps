@@ -1,4 +1,4 @@
-SUBDIRS = data
+SUBDIRS = data data-alt2
 
 INCLUDES = \
 	-I$(top_srcdir)/lib \
