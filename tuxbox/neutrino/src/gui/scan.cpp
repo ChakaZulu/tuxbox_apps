@@ -166,7 +166,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 	hide();
 	g_RCInput->postMsg( NeutrinoMessages::EVT_SERVICESCHANGED, 0 );
 	g_Sectionsd->setPauseScanning( false );
-	ShowMsg ( "messagebox.info", g_Locale->getText("scants.finished"), CMessageBox::mbBack, CMessageBox::mbBack);
+	ShowMsg ( "messagebox.info", g_Locale->getText("scants.finished"), CMessageBox::mbBack, CMessageBox::mbBack, "info.raw" );
 
 	return menu_return::RETURN_REPAINT;
 }

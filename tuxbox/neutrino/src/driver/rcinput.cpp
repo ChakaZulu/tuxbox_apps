@@ -220,6 +220,53 @@ void CRCInput::restartInput()
 	open();
 }
 
+int CRCInput::messageLoop( bool anyKeyCancels, int timeout )
+{
+    int res = menu_return::RETURN_REPAINT;
+
+	bool doLoop = true;
+
+	if ( timeout == -1 )
+		timeout = g_settings.timing_menu ;
+
+	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( timeout );
+	uint msg; uint data;
+
+	while (doLoop)
+	{
+		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+
+        if ( ( msg == CRCInput::RC_timeout ) ||
+        	 ( msg == CRCInput::RC_home ) ||
+        	 ( msg == CRCInput::RC_ok ) )
+			doLoop = false;
+		else
+		{
+			int mr = CNeutrinoApp::getInstance()->handleMsg( msg, data );
+
+			if ( mr & messages_return::cancel_all )
+			{
+				res = menu_return::RETURN_EXIT_ALL;
+				doLoop = false;
+			}
+			else if ( mr & messages_return::unhandled )
+			{
+				if ( msg <= CRCInput::RC_MaxRC )
+				{
+					if ( anyKeyCancels )
+						doLoop = false;
+					else
+						timeoutEnd = g_RCInput->calcTimeoutEnd( timeout );
+				}
+			}
+		}
+
+
+	}
+	return res;
+}
+
+
 int CRCInput::addTimer(unsigned long long Interval, bool oneshot, bool correct_time )
 {
 	struct timeval tv;

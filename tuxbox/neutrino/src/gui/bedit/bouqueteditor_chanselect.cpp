@@ -162,11 +162,17 @@ int CBEChannelSelectWidget::exec(CMenuTarget* parent, string actionKey)
 
 	channelsChanged = false;
 	int oldselected = selected;
+
+	uint msg; uint data;
+	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_epg );
+
 	bool loop=true;
 	while (loop)
 	{
-		uint msg; uint data;
-		g_RCInput->getMsg( &msg, &data, g_settings.timing_epg );
+		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+
+		if ( msg <= CRCInput::RC_MaxRC )
+			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_epg );
 
 		if (( msg ==g_settings.key_channelList_cancel) || ( msg ==CRCInput::RC_home))
 		{

@@ -365,8 +365,6 @@ CFlashUpdate::CFlashUpdate()
 
 int CFlashUpdate::exec(CMenuTarget* parent, string)
 {
-	int res = menu_return::RETURN_REPAINT;
-
 	if (parent)
 	{
 		parent->hide();
@@ -375,29 +373,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, string)
 	paint();
 	g_Sectionsd->setPauseScanning( false );
 
-	bool doLoop = true;
-
-	uint msg; uint data;
-	while ( doLoop )
-	{
-		g_RCInput->getMsg( &msg, &data, 190);
-
-		if ( msg == CRCInput::RC_timeout )
-			doLoop = false;
-		else
-		{
-			int mr = CNeutrinoApp::getInstance()->handleMsg( msg, data );
-
-			if ( mr & messages_return::cancel_all )
-			{
-				res = menu_return::RETURN_EXIT_ALL;
-				doLoop = false;
-			}
-			else if ( mr & messages_return::unhandled )
-				doLoop = false;
-		}
-
-	}
+	int res = g_RCInput->messageLoop();
 
 	hide();
 	return res;

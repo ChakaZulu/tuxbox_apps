@@ -63,7 +63,7 @@ bool CCableSpectalInversionNotifier::changeNotify(string OptionName, void* Data)
 
 	if (!messageShowed)
 	{
-		ShowMsg ( "messagebox.error", g_Locale->getText("cablesetup.spectralInversionWarning"), CMessageBox::mbrYes, CMessageBox::mbYes);
+		ShowMsg ( "messagebox.info", g_Locale->getText("cablesetup.spectralInversionWarning"), CMessageBox::mbrYes, CMessageBox::mbYes, "info.raw");
 		messageShowed = true;
 	}
 

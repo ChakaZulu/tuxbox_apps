@@ -32,14 +32,16 @@
 
 #include "hintbox.h"
 #include "../global.h"
+#include "neutrino.h"
 
 #define borderwidth 4
 
-CHintBox::CHintBox( CMenuWidget* Parent, string Caption, string Text, int Width )
+CHintBox::CHintBox( string Caption, string Text, string Icon, int Width )
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	theight= g_Fonts->menu_title->getHeight();
 	fheight= g_Fonts->menu->getHeight();
+	iconfile = Icon;
 	caption = Caption;
 	Text = Text+ "\n";
 	text.clear();
@@ -58,6 +60,12 @@ CHintBox::CHintBox( CMenuWidget* Parent, string Caption, string Text, int Width 
 	height = theight+ fheight* ( text.size()+ 1 );
 
 	width = Width;
+	int nw= g_Fonts->menu_title->getRenderWidth( g_Locale->getText(caption).c_str() ) + 20;
+	if ( iconfile!="" )
+		nw+= 30;
+	if ( nw> width )
+		width= nw;
+
 	for (int i= 0; i< text.size(); i++)
 	{
 		int nw= g_Fonts->menu->getRenderWidth( text[i].c_str() ) + 20;
@@ -68,18 +76,12 @@ CHintBox::CHintBox( CMenuWidget* Parent, string Caption, string Text, int Width 
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 3) + g_settings.screen_StartY;
 
-	parent = Parent;
 	pixbuf= NULL;
 }
 
-void CHintBox::paint( bool saveScreen = true )
+void CHintBox::paint( bool saveScreen )
 {
-	if (!saveScreen)
-	{
-		if (parent)
-			parent->hide();
-	}
-	else
+	if (saveScreen)
 	{
 		pixbuf= new unsigned char[(width+ 2* borderwidth) * (height+ 2* borderwidth)];
 		if (pixbuf!= NULL)
@@ -93,7 +95,13 @@ void CHintBox::paint( bool saveScreen = true )
 	}
 
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width, g_Locale->getText(caption).c_str(), COL_MENUHEAD);
+	if ( iconfile!= "" )
+	{
+		frameBuffer->paintIcon(iconfile.c_str(),x+8,y+5);
+		g_Fonts->menu_title->RenderString(x+40, y+theight+0, width- 40, g_Locale->getText(caption).c_str(), COL_MENUHEAD);
+	}
+	else
+		g_Fonts->menu_title->RenderString(x+10, y+theight+0, width- 10, g_Locale->getText(caption).c_str(), COL_MENUHEAD);
 
 	frameBuffer->paintBoxRel(x,y+theight+0, width,height - theight + 0, COL_MENUCONTENT);
 	for (int i= 0; i< text.size(); i++)
@@ -110,5 +118,39 @@ void CHintBox::hide()
 	}
 	else
 		frameBuffer->paintBackgroundBoxRel(x, y, width, height);
+}
+
+int ShowHint ( string Caption, string Text, string Icon, int Width, int timeout )
+{
+ 	CHintBox* hintBox= new CHintBox( Caption, Text, Icon, Width );
+	hintBox->paint();
+
+	if ( timeout == -1 )
+		timeout = g_settings.timing_infobar ;
+
+	uint msg; uint data;
+	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( timeout );
+
+	int res = messages_return::none;
+
+	while ( ! ( res & ( messages_return::cancel_info | messages_return::cancel_all ) ) )
+	{
+    	g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+
+
+        res = CNeutrinoApp::getInstance()->handleMsg( msg, data );
+
+        if ( res == messages_return::unhandled )
+        {
+        	//printf(" g_RCInput->getMsgAbsoluteTimeout %x %x\n", msg, data);
+
+        	// raus hier und darüber behandeln...
+        	g_RCInput->postMsg(  msg, data );
+			res = messages_return::cancel_info;
+		}
+	}
+
+	hintBox->hide();
+	delete hintBox;
 }
 

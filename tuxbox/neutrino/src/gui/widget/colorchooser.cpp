@@ -102,13 +102,18 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 	paint();
 	setColor();
 
-	bool loop = true;
-
 	int selected = 0;
-	while(loop)
+
+	uint msg; uint data;
+	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
+
+	bool loop=true;
+	while (loop)
 	{
-		uint msg; uint data;
-		g_RCInput->getMsg( &msg, &data, 300, true );
+		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd, true );
+
+		if ( msg <= CRCInput::RC_MaxRC )
+			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
 
 		switch ( msg )
 		{
@@ -247,7 +252,7 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 
 			case CRCInput::RC_home:
 				if ( ( (*r != r_alt) || (*g != g_alt) || (*b != b_alt) || ( (alpha) && (*alpha != a_alt) ) ) &&
-			    	 ( ShowMsg(name, g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel, 380 ) == CMessageBox::mbrCancel ) )
+			    	 ( ShowMsg(name, g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel, "", 380 ) == CMessageBox::mbrCancel ) )
 					break;
 
 				// sonst abbruch...

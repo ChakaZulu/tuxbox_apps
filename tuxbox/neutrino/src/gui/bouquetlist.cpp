@@ -189,15 +189,20 @@ int CBouquetList::show()
 	int oldselected = selected;
 	int firstselected = selected+ 1;
 	int zapOnExit = false;
-	bool loop=true;
 
 	int chn= 0;
 	int pos= maxpos;
+
+	uint msg; uint data;
+	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_chanlist );
+
+	bool loop=true;
 	while (loop)
 	{
+		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 
-		uint msg; uint data;
-		g_RCInput->getMsg( &msg, &data, g_settings.timing_chanlist );
+		if ( msg <= CRCInput::RC_MaxRC )
+			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_chanlist );
 
 		if ( ( msg == CRCInput::RC_timeout ) ||
 			 ( msg == g_settings.key_channelList_cancel ) )

@@ -66,6 +66,7 @@ class CMessageBox
 		int						theight;
 		string					caption;
 		vector<string>			text;
+		string					iconfile;
 		CMessageBoxNotifier*	notifier;
 		int						selected;
 		int						showbuttons;
@@ -96,11 +97,11 @@ class CMessageBox
 			mbBack = 0x08
 		} buttons;
 
-		CMessageBox( string Caption, string Text, CMessageBoxNotifier* Notifier, int Width = 500, uint Default= mbrYes, uint ShowButtons= mbAll );
+		CMessageBox( string Caption, string Text, CMessageBoxNotifier* Notifier, string Icon="", int Width = 500, uint Default= mbrYes, uint ShowButtons= mbAll );
 		int exec(int timeout = -1);
 
 };
 
-int ShowMsg ( string Caption, string Text, uint Default, uint ShowButtons, int Width = 450, int timeout = -1 );
+int ShowMsg ( string Caption, string Text, uint Default, uint ShowButtons, string Icon="", int Width = 450, int timeout = -1 );
 
 #endif

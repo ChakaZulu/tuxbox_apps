@@ -93,26 +93,27 @@ int CKeyChooserItem::exec(CMenuTarget* parent, string)
 
 	g_RCInput->clearMsg();
 
-	bool doLoop = true;
-
 	uint msg; uint data;
-	while ( doLoop )
+	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
+
+	bool loop=true;
+	while (loop)
 	{
-		g_RCInput->getMsg( &msg, &data, 100 );
+		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 
 		if ( msg == CRCInput::RC_timeout )
-			doLoop = false;
+			loop = false;
 		else
 		{
 			if ( ( msg >= 0 ) && ( msg <= CRCInput::RC_MaxRC ) )
 			{
-				doLoop = false;
+				loop = false;
 				*key = msg;
 			}
 			else if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
 			{
 				res = menu_return::RETURN_EXIT_ALL;
-				doLoop = false;
+				loop = false;
 			}
 		}
 	}

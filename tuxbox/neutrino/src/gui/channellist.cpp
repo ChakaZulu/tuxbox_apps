@@ -190,11 +190,17 @@ int CChannelList::show()
 	int oldselected = selected;
 	int zapOnExit = false;
 	bool bShowBouquetList = false;
+
+	uint msg; uint data;
+	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_chanlist );
+
 	bool loop=true;
 	while (loop)
 	{
-		uint msg; uint data;
-		g_RCInput->getMsg( &msg, &data, g_settings.timing_chanlist );
+		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+
+		if ( msg <= CRCInput::RC_MaxRC )
+			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_chanlist );
 
 		if ( ( msg == CRCInput::RC_timeout ) ||
 			 ( msg == g_settings.key_channelList_cancel) )
@@ -420,17 +426,16 @@ int CChannelList::handleMsg(uint msg, uint data)
 // -- 2002-04-14 rasc
 //
 //
-void CChannelList::zapToOnidSid (unsigned int onid_sid)
+bool CChannelList::zapToOnidSid (unsigned int onid_sid)
 {
-	int i;
-
-	for (i=0; i<chanlist.size(); i++) {
+	for (int i=0; i<chanlist.size(); i++) {
 		if (chanlist[i]->onid_sid == onid_sid) {
 			zapTo (i);
-			break;
+			return true;
 		}
 	}
 
+    return false;
 }
 
 void CChannelList::adjustToOnidSid (unsigned int onid_sid)
@@ -456,7 +461,7 @@ void CChannelList::zapTo(int pos)
 {
 	if (chanlist.size() == 0)
 	{
-		ShowMsg ( "messagebox.error", g_Locale->getText("channellist.nonefound"), CMessageBox::mbrCancel, CMessageBox::mbCancel );
+		ShowMsg ( "messagebox.error", g_Locale->getText("channellist.nonefound"), CMessageBox::mbrCancel, CMessageBox::mbCancel, "error.raw" );
 		return;
 	}
 	if ( (pos >= (signed int) chanlist.size()) || (pos< 0) )
@@ -485,7 +490,7 @@ int CChannelList::numericZap(int key)
 
 	if(chanlist.size()==0)
 	{
-		ShowMsg ( "messagebox.error", g_Locale->getText("channellist.nonefound"), CMessageBox::mbrCancel, CMessageBox::mbCancel );
+		ShowMsg ( "messagebox.error", g_Locale->getText("channellist.nonefound"), CMessageBox::mbrCancel, CMessageBox::mbCancel, "error.raw" );
 		return res;
 	}
 

@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.244 2002/04/25 08:15:44 McClean Exp $
+        $Id: neutrino.cpp,v 1.245 2002/04/25 13:34:10 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -358,13 +358,6 @@ void CNeutrinoApp::setupDefaults()
 	g_settings.scan_bouquet = 256; // keep bouquets (because of favorites, and sort)
 
 
-	//timing  (10 = 1 sec )
-	g_settings.timing_menu = 1000;
-	g_settings.timing_chanlist = 300;
-	g_settings.timing_epg = 90000;
-	g_settings.timing_infobar = 15; // 15 means 7,5 sec
-
-
 	//network
 	strcpy(g_settings.network_netmask, "255.255.255.0");
 	strcpy(g_settings.network_defaultgateway, "");
@@ -575,7 +568,7 @@ void CNeutrinoApp::doChecks()
 	ucodes_ok= ucodes_ok&&(fd);
 
 	if ( !ucodes_ok )
-		ShowMsg ( "messagebox.error", g_Locale->getText("ucodes.failure"), CMessageBox::mbrCancel, CMessageBox::mbCancel );
+		ShowMsg ( "messagebox.error", g_Locale->getText("ucodes.failure"), CMessageBox::mbrCancel, CMessageBox::mbCancel, "error.raw" );
 }
 
 
@@ -1486,6 +1479,13 @@ int CNeutrinoApp::run(int argc, char **argv)
 		setupDefaults();
 		printf("using defaults...\n\n");
 	}
+
+	//timing  (Einheit= 1 sec )
+	g_settings.timing_menu = 60;
+	g_settings.timing_chanlist = 60;
+	g_settings.timing_epg = 2* 60;
+	g_settings.timing_infobar = 8;
+
 	//get dbox-type everytime!
 	g_settings.box_Type = g_Controld->getBoxType();
 	//printf("got boxtype from controld: %d\n", g_settings.box_Type);
@@ -1941,11 +1941,13 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	else if ( ( msg == NeutrinoMessages::EVT_BOUQUETSCHANGED ) ||
 			  ( msg == NeutrinoMessages::EVT_SERVICESCHANGED ) )
 	{
+		unsigned int old_id = channelList->getActiveChannelOnid_sid();
+
 		channelsInit();
 		tvMode( true );
 
-		// auf der sicheren Seite...
-		channelList->zapTo( 0 );
+		if ( ! channelList->zapToOnidSid ( old_id ) )
+			channelList->zapTo( 0 );
 
 		return messages_return::handled;
 	}
@@ -2348,7 +2350,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.244 2002/04/25 08:15:44 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.245 2002/04/25 13:34:10 field Exp $\n\n");
 	tzset();
 	initGlobals();
 

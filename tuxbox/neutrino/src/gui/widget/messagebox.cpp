@@ -37,11 +37,12 @@
 #define borderwidth 4
 
 
-CMessageBox::CMessageBox( string Caption, string Text, CMessageBoxNotifier* Notifier, int Width, uint Default, uint ShowButtons )
+CMessageBox::CMessageBox( string Caption, string Text, CMessageBoxNotifier* Notifier, string Icon, int Width, uint Default, uint ShowButtons )
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	theight= g_Fonts->menu_title->getHeight();
 	fheight= g_Fonts->menu->getHeight();
+	iconfile = Icon;
 
 	caption = Caption;
 	Text = Text+ "\n";
@@ -62,6 +63,13 @@ CMessageBox::CMessageBox( string Caption, string Text, CMessageBoxNotifier* Noti
 	width = Width;
 	if ( width< 450 )
 		width = 450;
+
+	int nw= g_Fonts->menu_title->getRenderWidth( g_Locale->getText(caption).c_str() ) + 20;
+	if ( iconfile!="" )
+		nw+= 30;
+	if ( nw> width )
+		width= nw;
+
 	for (int i= 0; i< text.size(); i++)
 	{
 		int nw= g_Fonts->menu->getRenderWidth( text[i].c_str() ) + 20;
@@ -95,7 +103,13 @@ void CMessageBox::paintHead()
 {
 
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width, g_Locale->getText(caption), COL_MENUHEAD);
+	if ( iconfile!= "" )
+	{
+		frameBuffer->paintIcon(iconfile.c_str(),x+8,y+5);
+		g_Fonts->menu_title->RenderString(x+40, y+theight+0, width- 40, g_Locale->getText(caption).c_str(), COL_MENUHEAD);
+	}
+	else
+		g_Fonts->menu_title->RenderString(x+10, y+theight+0, width- 10, g_Locale->getText(caption), COL_MENUHEAD);
 
 	frameBuffer->paintBoxRel(x,y+theight+0, width,height - theight + 0, COL_MENUCONTENT);
 	for (int i= 0; i< text.size(); i++)
@@ -108,9 +122,13 @@ void CMessageBox::paintButtons()
 	//irgendwann alle vergleichen - aber cancel ist sicher der längste
 	int MaxButtonTextWidth = g_Fonts->infobar_small->getRenderWidth(g_Locale->getText("messagebox.cancel").c_str());
 
-	int ButtonSpacing = 40;
 	int ButtonWidth = 20 + 33 + MaxButtonTextWidth;
-	int startpos = x + (width - ((ButtonWidth*3)+(ButtonSpacing*2))) / 2;
+
+//	int ButtonSpacing = 40;
+//	int startpos = x + (width - ((ButtonWidth*3)+(ButtonSpacing*2))) / 2;
+
+	int startpos = x + 10;
+	int ButtonSpacing = ( width- 20- (ButtonWidth*3) ) / 2;
 
 	int xpos = startpos;
 	int color = COL_INFOBAR_SHADOW;
@@ -196,11 +214,12 @@ int CMessageBox::exec(int timeout)
 		timeout = g_settings.timing_epg ;
 
 	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( timeout );
+	uint msg; uint data;
 
 	bool loop=true;
 	while (loop)
 	{
-		uint msg; uint data;
+
 		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 
 		if ( ( (msg==CRCInput::RC_timeout) ||
@@ -297,9 +316,9 @@ int CMessageBox::exec(int timeout)
 	return res;
 }
 
-int ShowMsg ( string Caption, string Text, uint Default, uint ShowButtons, int Width, int timeout )
+int ShowMsg ( string Caption, string Text, uint Default, uint ShowButtons, string Icon, int Width, int timeout )
 {
-   	CMessageBox* messageBox = new CMessageBox( Caption, Text, NULL, Width, Default, ShowButtons );
+   	CMessageBox* messageBox = new CMessageBox( Caption, Text, NULL, Icon, Width, Default, ShowButtons );
 	messageBox->exec( timeout );
 	int res= messageBox->result;
 	delete messageBox;

@@ -467,11 +467,16 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 
 	paint();
 
+    uint msg; uint data;
+	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
+
 	bool loop=true;
 	while (loop)
 	{
-		uint msg; uint data;
-		g_RCInput->getMsg( &msg, &data, g_settings.timing_menu );
+		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+
+		if ( msg <= CRCInput::RC_MaxRC )
+			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
 
 		if ( ( msg == CRCInput::RC_timeout ) ||
 			 ( msg == g_settings.key_channelList_cancel ) )

@@ -327,7 +327,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid,
     				if ( (!fadeOut) && ( mID>= 2 ) ) // only enx
     				{
                     	fadeOut = true;
-                    	fadeTimer = g_RCInput->addTimer(80000, false);
+                    	fadeTimer = g_RCInput->addTimer( 40000, false );
             			timeoutEnd = g_RCInput->calcTimeoutEnd( 1 );
     				}
     				else
@@ -407,33 +407,7 @@ void CInfoViewer::showIcon_VTXT()
 
 void CInfoViewer::showFailure()
 {
-	CHintBox* hintBox= new CHintBox(NULL, "messagebox.error", g_Locale->getText("infoviewer.notavailable"), 430 );
-	hintBox->paint();
-
-	uint msg; uint data;
-	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_infobar >> 1 );
-
-	int res = messages_return::none;
-
-	while ( ! ( res & ( messages_return::cancel_info | messages_return::cancel_all ) ) )
-	{
-    	g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
-
-
-        res = CNeutrinoApp::getInstance()->handleMsg( msg, data );
-
-        if ( res == messages_return::unhandled )
-        {
-        	//printf(" g_RCInput->getMsgAbsoluteTimeout %x %x\n", msg, data);
-
-        	// raus hier und darüber behandeln...
-        	g_RCInput->postMsg(  msg, data );
-			res = messages_return::cancel_info;
-		}
-	}
-
-	hintBox->hide();
-	delete hintBox;
+	ShowHint ( "messagebox.error", g_Locale->getText("infoviewer.notavailable"), "info.raw", 430 );
 }
 
 int CInfoViewer::handleMsg(uint msg, uint data)

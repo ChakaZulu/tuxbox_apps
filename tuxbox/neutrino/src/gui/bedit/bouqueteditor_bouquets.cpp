@@ -162,11 +162,17 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 
 	bouquetsChanged = false;
 	int oldselected = selected;
+
+	uint msg; uint data;
+	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_epg );
+
 	bool loop=true;
 	while (loop)
 	{
-		uint msg; uint data;
-		g_RCInput->getMsg( &msg, &data, g_settings.timing_epg );
+		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+
+		if ( msg <= CRCInput::RC_MaxRC )
+			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_epg );
 
 		if ( (msg==CRCInput::RC_timeout) ||
 			 (msg==g_settings.key_channelList_cancel))
@@ -444,7 +450,7 @@ void CBEBouquetWidget::internalMoveBouquet( unsigned int fromPosition, unsigned 
 
 void CBEBouquetWidget::saveChanges()
 {
-	CHintBox* hintBox= new CHintBox(this, "bouqueteditor.name", g_Locale->getText("bouqueteditor.savingchanges"), 480 );
+	CHintBox* hintBox= new CHintBox( "bouqueteditor.name", g_Locale->getText("bouqueteditor.savingchanges"), "info.raw", 480 );
 	hintBox->paint();
 	g_Zapit->saveBouquets();
 	g_Zapit->reinitChannels();
@@ -456,7 +462,7 @@ void CBEBouquetWidget::saveChanges()
 
 void CBEBouquetWidget::discardChanges()
 {
-	CHintBox* hintBox= new CHintBox(this, "bouqueteditor.name", g_Locale->getText("bouqueteditor.discardingchanges"), 480 );
+	CHintBox* hintBox= new CHintBox( "bouqueteditor.name", g_Locale->getText("bouqueteditor.discardingchanges"), "info.raw", 480 );
 	hintBox->paint();
 	g_Zapit->restoreBouquets();
 	hintBox->hide();

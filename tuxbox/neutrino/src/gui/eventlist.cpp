@@ -109,7 +109,6 @@ int EventList::exec(unsigned onidSid, const std::string& channelname)
 	paint();
 
 	int oldselected = selected;
-	bool loop=true;
 
 	#ifdef USEACTIONLOG
 		char buf[1000];
@@ -117,11 +116,16 @@ int EventList::exec(unsigned onidSid, const std::string& channelname)
 		g_ActionLog->println(buf);
 	#endif
 
+    uint msg; uint data;
+	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_chanlist );
 
+	bool loop=true;
 	while (loop)
 	{
-		uint msg; uint data;
-		g_RCInput->getMsg( &msg, &data, g_settings.timing_chanlist );
+		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+
+		if ( msg <= CRCInput::RC_MaxRC )
+			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_chanlist );
 
 		if ( msg == g_settings.key_channelList_pageup )
 		{

@@ -79,11 +79,13 @@ int CFavorites::addChannelToFavorites()
 	if (status) {
 		g_Zapit->saveBouquets();
 		g_Zapit->reinitChannels();
-
+/*
 		// -- same to Neutrino (keep current channel!)
 		CNeutrinoApp *neutrino = CNeutrinoApp::getInstance();
 		neutrino->channelsInit();
 		neutrino->channelList->zapToOnidSid(onid_sid);
+*/
+		g_RCInput->postMsg( NeutrinoMessages::EVT_BOUQUETSCHANGED, 0 );
 	}
 
 	return status;
@@ -112,7 +114,7 @@ int CFavorites::exec(CMenuTarget* parent, string)
 	}
 
 
-	CHintBox* hintBox= new CHintBox(NULL, "favorites.bouquetname", g_Locale->getText("favorites.addchannel"), 380 );
+	CHintBox* hintBox= new CHintBox( "favorites.bouquetname", g_Locale->getText("favorites.addchannel"), "info.raw", 380 );
 	hintBox->paint();
 
 	status = addChannelToFavorites();
@@ -121,17 +123,17 @@ int CFavorites::exec(CMenuTarget* parent, string)
 	delete hintBox;
 
 	// -- Display result
-	
+
 	str = "";
 	if (status & 1)  str += g_Locale->getText("favorites.bqcreated");
-	if (status & 2)  str += g_Locale->getText("favorites.chadded"); 
+	if (status & 2)  str += g_Locale->getText("favorites.chadded");
 	else             str += g_Locale->getText("favorites.chalreadyinbq");
 
 	if (status) str +=  g_Locale->getText("favorites.finalhint");
 
-	ShowMsg ( "favorites.bouquetname", str, CMessageBox::mbrBack, CMessageBox::mbBack );
+	ShowMsg ( "favorites.bouquetname", str, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw" );
 
- 
+
 	return res;
 }
 

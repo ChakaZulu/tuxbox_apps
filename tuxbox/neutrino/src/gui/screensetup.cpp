@@ -64,13 +64,18 @@ int CScreenSetup::exec( CMenuTarget* parent, string )
 
 	paint();
 
-	bool loop = true;
 	selected = 0;
 
-	while(loop)
+	uint msg; uint data;
+	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
+
+	bool loop=true;
+	while (loop)
 	{
-		uint msg; uint data;
-		g_RCInput->getMsg( &msg, &data, 300, true );
+		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd, true );
+
+		if ( msg <= CRCInput::RC_MaxRC )
+			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
 
 		switch ( msg )
 		{
@@ -88,7 +93,7 @@ int CScreenSetup::exec( CMenuTarget* parent, string )
     				   ( g_settings.screen_EndX != x_coord[1] ) ||
     				   ( g_settings.screen_StartY != y_coord[0] ) ||
     				   ( g_settings.screen_EndY != y_coord[1] ) ) &&
-			         ( ShowMsg("videomenu.screensetup", g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel, 450 ) == CMessageBox::mbrCancel ) )
+			         ( ShowMsg("videomenu.screensetup", g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel, "", 450 ) == CMessageBox::mbrCancel ) )
 					break;
 
 			case CRCInput::RC_timeout:

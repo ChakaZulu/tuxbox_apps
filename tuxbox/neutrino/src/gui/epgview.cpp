@@ -32,6 +32,7 @@
 #include "epgdata.h"
 #include "../global.h"
 #include "../neutrino.h"
+#include "widget/hintbox.h"
 
 
 CEpgData::CEpgData()
@@ -266,6 +267,7 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 
 	if(epgData.title.length()==0)
 	{
+/*
 		//no epg-data found :(
 		char *text = (char*) g_Locale->getText("epgviewer.notfound").c_str();
 		int oy = 30;
@@ -283,6 +285,9 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 		CNeutrinoApp::getInstance()->handleMsg( msg, data );
 
 		frameBuffer->paintBackgroundBoxRel(sx, sy, ox, height+10);
+*/
+		ShowHint ( "messagebox.info", g_Locale->getText("epgviewer.notfound"), "info.raw" );
+
 		return res;
 	}
 
@@ -386,10 +391,13 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 	{
 		bool loop=true;
 		int scrollCount;
+
+		uint msg; uint data;
+		unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_epg );
+
 		while(loop)
 		{
-			uint msg; uint data;
-			g_RCInput->getMsg( &msg, &data, g_settings.timing_epg );
+			g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 
 			scrollCount = medlinecount;
 

@@ -159,11 +159,16 @@ int CBEChannelWidget::exec(CMenuTarget* parent, string actionKey)
 
 	channelsChanged = false;
 	int oldselected = selected;
+	uint msg; uint data;
+	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_epg );
+
 	bool loop=true;
 	while (loop)
 	{
-		uint msg; uint data;
-		g_RCInput->getMsg( &msg, &data, g_settings.timing_epg );
+		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+
+		if ( msg <= CRCInput::RC_MaxRC )
+			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_epg );
 
 		if ((msg==CRCInput::RC_timeout) || (msg==g_settings.key_channelList_cancel))
 		{
@@ -176,7 +181,7 @@ int CBEChannelWidget::exec(CMenuTarget* parent, string actionKey)
 				cancelMoveChannel();
 			}
 		}
-		// 
+		//
 		// -- For more convenience: include browsing of list (paging)  (rasc, 2002-04-02)
 		// -- The keys should be configurable. Problem is: red/green key, which is the
 		// -- default in neutrino is used as a function key here... so use left/right
@@ -192,7 +197,7 @@ int CBEChannelWidget::exec(CMenuTarget* parent, string actionKey)
 			{
 				selected = Channels.size()-1;
 			}
-		
+
 			if (state == beDefault)
 			{
 				paintItem(prev_selected - liststart);
@@ -212,7 +217,7 @@ int CBEChannelWidget::exec(CMenuTarget* parent, string actionKey)
 				internalMoveChannel(prev_selected, selected);
 			}
 		}
-		else if (msg==CRCInput::RC_down || msg==CRCInput::RC_right) 
+		else if (msg==CRCInput::RC_down || msg==CRCInput::RC_right)
 		{
 			int step = 0;
 			int prev_selected = selected;

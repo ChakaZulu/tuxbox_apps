@@ -45,7 +45,7 @@ using namespace std;
 
 class CHintBox
 {
-	private: 
+	private:
 		CFrameBuffer			*frameBuffer;
 		int						width;
 		int						height;
@@ -55,18 +55,19 @@ class CHintBox
 		int						theight;
 		string					caption;
 		vector<string>			text;
+		string					iconfile;
 
-		CMenuWidget*			parent;
 		unsigned char*			pixbuf;
 
 
 	public:
-		CHintBox( CMenuWidget* Parent, string Caption, string Text, int Width = 500 );
+		CHintBox( string Caption, string Text, string Icon="info.raw", int Width = 500 );
 
 		void paint( bool saveScreen = true );
 		void hide();
 };
 
+int ShowHint ( string Caption, string Text, string Icon="info.raw", int Width = 450, int timeout = -1 );
 
 
 #endif

@@ -161,7 +161,7 @@ void CStringInput::keyRightPressed()
 int CStringInput::exec( CMenuTarget* parent, string )
 {
 	int res = menu_return::RETURN_REPAINT;
-	char oldval[size];
+	char oldval[size], dispval[size];
 
 	if (parent)
 	{
@@ -174,14 +174,22 @@ int CStringInput::exec( CMenuTarget* parent, string )
 
 	paint();
 
-	bool loop = true;
 	uint msg; uint data;
+	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
 
-	while(loop)
+	bool loop=true;
+	while (loop)
 	{
-		g_lcdd->setMenuText(1, value, selected+1);
+		if ( strcmp(value, dispval) != 0)
+		{
+			g_lcdd->setMenuText(1, value, selected+1);
+			strcpy(dispval, value);
+		}
 
-		g_RCInput->getMsg( &msg, &data, 300 );
+		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd, true );
+
+		if ( msg <= CRCInput::RC_MaxRC )
+			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
 
 		if (msg==CRCInput::RC_left)
 		{
@@ -224,7 +232,7 @@ int CStringInput::exec( CMenuTarget* parent, string )
 		else if ( (msg==CRCInput::RC_home) || (msg==CRCInput::RC_timeout) )
 		{
 			if ( ( strcmp(value, oldval) != 0) &&
-			     ( ShowMsg(name, g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel, 380 ) == CMessageBox::mbrCancel ) )
+			     ( ShowMsg(name, g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel, "", 380 ) == CMessageBox::mbrCancel ) )
 				continue;
 
 			strcpy(value, oldval);

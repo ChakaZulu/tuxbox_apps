@@ -107,12 +107,16 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 
 	paint();
 	int retval = menu_return::RETURN_REPAINT;
+
 	uint msg; uint data;
+	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
 
 	do
 	{
+		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 
-		g_RCInput->getMsg( &msg, &data, g_settings.timing_menu );
+		if ( msg <= CRCInput::RC_MaxRC )
+			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
 
 		int handled= false;
 

@@ -37,7 +37,7 @@
 #include "driver/fontrenderer.h"
 #include "driver/rcinput.h"
 #include "color.h"
-
+#include "messagebox.h"
 
 #include <stdio.h>
 
@@ -121,7 +121,7 @@ int CExtendedInput::exec( CMenuTarget* parent, string )
 {
 	onBeforeExec();
 	int res = menu_return::RETURN_REPAINT;
-	char oldval[inputFields.size()+10];
+	char oldval[inputFields.size()+10], dispval[inputFields.size()+10];
 
 	if (parent)
 	{
@@ -130,14 +130,19 @@ int CExtendedInput::exec( CMenuTarget* parent, string )
 
 	paint();
 
-	bool loop = true;
 	uint msg; uint data;
+	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
 
-	while(loop)
+	bool loop=true;
+	while (loop)
 	{
-		g_lcdd->setMenuText(1, value, selectedChar+ 1);
+		if ( strcmp(value, dispval) != 0)
+		{
+			g_lcdd->setMenuText(1, value, selectedChar+1);
+			strcpy(dispval, value);
+		}
 
-		g_RCInput->getMsg( &msg, &data, 300 );
+		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd, true );
 
 		if (msg==CRCInput::RC_left)
 		{
@@ -192,12 +197,12 @@ int CExtendedInput::exec( CMenuTarget* parent, string )
 			loop=false;
 		}
 		else if ( (msg==CRCInput::RC_home) || (msg==CRCInput::RC_timeout) )
-		{/*
+		{
 			if ( ( strcmp(value, oldval) != 0) &&
-			     ( ShowMsg(name, g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel, 380 ) == CMessageBox::mbrCancel ) )
+			     ( ShowMsg(name, g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel, "", 380 ) == CMessageBox::mbrCancel ) )
 				continue;
 
-			strcpy(value, oldval);*/
+			strcpy(value, oldval);
 			loop=false;
 		}
 		else if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
