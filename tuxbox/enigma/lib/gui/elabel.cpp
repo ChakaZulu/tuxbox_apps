@@ -72,7 +72,6 @@ int eLabel::eventFilter(const eWidgetEvent &event)
 QSize eLabel::getExtend()
 {
 	validate();
-	qDebug("extends: %d %d", para->getExtend().width(), para->getExtend().height());
 	return para->getExtend();
 }
 
