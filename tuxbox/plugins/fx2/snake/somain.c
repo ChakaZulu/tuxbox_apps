@@ -62,6 +62,9 @@ int snake_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 	
 			RcGetActCode( );
 			MoveSnake();
+#ifdef USEX
+			FBFlushGrafic();
+#endif
 		}
 
 		FreeSnake();
@@ -71,12 +74,15 @@ int snake_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 			actcode=0xee;
 			DrawFinalScore();
 			DrawGameOver();
+#ifdef USEX
+			FBFlushGrafic();
+#endif
 
 			doexit=0;
 			while(( actcode != RC_OK ) && !doexit )
 			{
 				tv.tv_sec = 0;
-				tv.tv_usec = 100000;
+				tv.tv_usec = 200000;
 				x = select( 0, 0, 0, 0, &tv );		/* 100ms pause */
 				RcGetActCode( );
 			}

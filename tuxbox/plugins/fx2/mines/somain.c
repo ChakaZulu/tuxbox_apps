@@ -61,6 +61,9 @@ int mines_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 	
 			RcGetActCode( );
 			MoveMouse();
+#ifdef USEX
+			FBFlushGrafic();
+#endif
 		}
 
 		if ( doexit != 3 )
@@ -70,6 +73,9 @@ int mines_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 				DrawScore();
 			else
 				DrawGameOver();
+#ifdef USEX
+			FBFlushGrafic();
+#endif
 			doexit=0;
 			while(( actcode != RC_OK ) && !doexit )
 			{

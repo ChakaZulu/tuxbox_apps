@@ -32,7 +32,7 @@ static	int		actplayer=0;
 static	Player	player[9];
 static	char	pig_dis = 0;
 
-static	int		pig_x[] = { 450, 450, 150, 150 };
+static	int		pig_x[] = { 500, 500, 150, 150 };
 
 static	int		myrand( int idx )
 {
@@ -112,6 +112,9 @@ void	EnterPlayer( void )
 
 	while( !doexit )
 	{
+		tv.tv_sec = 0;
+		tv.tv_usec = 100000;
+		select( 0, 0, 0, 0, &tv );
 		actcode=0xee;
 		RcGetActCode();
 		if (( actcode >= 1 ) && ( actcode <= 4 ))	/* RC_1 .. RC_4 */

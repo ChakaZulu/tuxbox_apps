@@ -1,4 +1,4 @@
-all:: yahtzee yahtzee.so
+all:: yahtzee.so
 
 # PREF=powerpc-linux-
 CC=$(PREF)gcc

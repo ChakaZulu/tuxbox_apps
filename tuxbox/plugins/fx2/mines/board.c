@@ -62,8 +62,10 @@ void	DrawScore( void )
 
 static	void	DrawMouse( void )
 {
-	FBDrawVLine( mouse_x * 32 + 15, mouse_y * 32 + 4, 24, GREEN );
-	FBDrawHLine( mouse_x * 32 + 4, mouse_y * 32 + 15, 24, GREEN );
+//	FBDrawVLine( mouse_x * 32 + 15, mouse_y * 32 + 4, 24, GREEN );
+//	FBDrawHLine( mouse_x * 32 + 4, mouse_y * 32 + 15, 24, GREEN );
+	FBFillRect( mouse_x * 32 + 4, mouse_y * 32 + 15, 24, 2, GREEN );
+	FBFillRect( mouse_x * 32 + 15, mouse_y * 32 + 4, 2, 24, GREEN );
 }
 
 static	int	DrawField( int x, int y )
@@ -153,7 +155,7 @@ void	DrawBoard( int rbomb )
 		}
 	}
 	FBDrawRect( 3*32-3, 3*32-3, 10*32+5, 10*32+5, WHITE );
-	FBDrawRect( 3*32-6, 3*32-6, 10*32+11, 10*32+11, WHITE );
+	FBDrawRect( 3*32-4, 3*32-4, 10*32+7, 10*32+7, WHITE );
 	FBDrawFx2Logo( LOGO_X, LOGO_Y );
 	gettimeofday(&starttv,0);
 

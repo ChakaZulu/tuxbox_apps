@@ -1,4 +1,4 @@
-all:: mines mines.so
+all:: mines.so
 
 #PREF=powerpc-linux-
 CC=$(PREF)gcc

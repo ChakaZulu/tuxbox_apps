@@ -1,4 +1,4 @@
-all:: pacman.so pac
+all:: pacman.so
 
 #PREF=powerpc-linux-
 CC=$(PREF)gcc

@@ -98,7 +98,7 @@ void	Fx2SetPig( int x, int y, int width, int height )
 
 void	Fx2ShowPig( int x, int y, int width, int height )
 {
-	FBFillRect( x, y, width, height, 3 );
+	FBFillRect( x, y, width, height, 4 );
 	l_x=x;
 	l_y=y;
 	l_width=width;

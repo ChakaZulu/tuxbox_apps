@@ -1,4 +1,4 @@
-all:: snake snake.so
+all:: snake.so
 
 # PREF=powerpc-linux-
 CC=$(PREF)gcc

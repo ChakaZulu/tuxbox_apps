@@ -70,6 +70,9 @@ int pacman_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 			MoveGhosts( );
 			DrawGhosts( );
 			DrawPac( );
+#ifdef USEX
+			FBFlushGrafic();
+#endif
 			RcGetActCode( );
 			CheckGhosts( );
 		}
@@ -81,6 +84,9 @@ int pacman_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 				DrawScore();
 			if ( !gametime )
 				DrawGameOver();
+#ifdef USEX
+			FBFlushGrafic();
+#endif
 			doexit=0;
 			while(( actcode != RC_OK ) && !doexit )
 			{
