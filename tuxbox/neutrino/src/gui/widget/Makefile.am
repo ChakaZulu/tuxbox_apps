@@ -22,5 +22,3 @@ libneutrino_gui_widget2_a_SOURCES = \
 libneutrino_gui_widget_basic_a_SOURCES = \
         component.cpp window.cpp
 
-AM_CPPFLAGS = -D_GNU_SOURCE
-

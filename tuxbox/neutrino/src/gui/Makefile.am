@@ -20,5 +20,3 @@ libneutrino_gui_a_SOURCES = \
 libneutrino_gui2_a_SOURCES = \
 	streaminfo.cpp
 
-AM_CPPFLAGS = -D_GNU_SOURCE
-

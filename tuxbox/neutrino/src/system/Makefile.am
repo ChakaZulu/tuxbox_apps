@@ -14,5 +14,3 @@ libneutrino_system_a_SOURCES = \
 	actionlog.cpp ping.c flashtool.cpp httptool.cpp \
 	settings.cpp lastchannel.cpp 
 
-AM_CPPFLAGS = -D_GNU_SOURCE
-

@@ -11,5 +11,3 @@ noinst_LIBRARIES = libneutrino_daemonc.a
 
 libneutrino_daemonc_a_SOURCES = remotecontrol.cpp
 
-AM_CPPFLAGS = -D_GNU_SOURCE
-

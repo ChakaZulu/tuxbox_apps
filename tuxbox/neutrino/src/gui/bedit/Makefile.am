@@ -14,5 +14,3 @@ libneutrino_gui_bedit_a_SOURCES = \
 	bouqueteditor_channels.cpp \
 	bouqueteditor_chanselect.cpp
 
-AM_CPPFLAGS = -D_GNU_SOURCE
-

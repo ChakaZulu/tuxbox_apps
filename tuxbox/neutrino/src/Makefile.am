@@ -36,5 +36,3 @@ neutrino_LDADD = \
 	@ZAPITCLIENT_LIBS@ \
 	-lpthread -lz
 
-AM_CPPFLAGS = -D_GNU_SOURCE
-
