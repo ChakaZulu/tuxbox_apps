@@ -385,10 +385,13 @@ bool CFileBrowser::readDir_std(std::string dirname, CFileList* flist)
 //			printf("file.Name: '%s', getFileName: '%s' getPath: '%s'\n",file.Name.c_str(),file.getFileName().c_str(),file.getPath().c_str());
 			if(stat((file.Name).c_str(),&statbuf) != 0)
 				perror("stat error");
-			file.Mode = statbuf.st_mode;
-			file.Size = statbuf.st_size;
-			file.Time = statbuf.st_mtime;
-			flist->push_back(file);
+			else
+			{
+				file.Mode = statbuf.st_mode;
+				file.Size = statbuf.st_size;
+				file.Time = statbuf.st_mtime;
+				flist->push_back(file);
+			}
 		}
 		free(namelist[i]);
 	}
