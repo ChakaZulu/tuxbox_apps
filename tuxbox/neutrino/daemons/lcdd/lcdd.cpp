@@ -45,7 +45,7 @@
 struct rmsg {
   unsigned char version;
   unsigned char cmd;
-  unsigned short param;
+  unsigned char param;
   unsigned short param2;
   char param3[30];
 
@@ -57,10 +57,10 @@ FontsDef			fonts;
 pthread_t			thrTime;
 
 void show_channelname(char *);
+void show_volume(unsigned char);
 void parse_command()
 {
   //byteorder!!!!!!
-  rmsg.param = ((rmsg.param & 0x00ff) << 8) | ((rmsg.param & 0xff00) >> 8);
   rmsg.param2 = ((rmsg.param2 & 0x00ff) << 8) | ((rmsg.param2 & 0xff00) >> 8);
 
   if(rmsg.version!=1)
@@ -74,6 +74,10 @@ void parse_command()
     case 1:
       show_channelname( rmsg.param3 );
       break;
+    case 2:
+      show_volume( rmsg.param );
+      break;
+
     default:  
 	    printf("unknown command\n");
   }
@@ -96,6 +100,13 @@ void show_time()
 
 	display.draw_fill_rect (90,54,120,64, CLCDDisplay::PIXEL_OFF);
 	fonts.time->RenderString(92,62, 50, timestr, CLCDDisplay::PIXEL_ON);
+	display.update();
+}
+
+void show_volume(unsigned char vol)
+{
+	display.draw_fill_rect (3,54,29,64, CLCDDisplay::PIXEL_ON);
+	display.draw_fill_rect (3+(vol>>2),54,29,64, CLCDDisplay::PIXEL_OFF);
 	display.update();
 }
 
