@@ -98,6 +98,7 @@ static eString switchService(eString request, eString path, eString opt, eHTTPCo
 	{
 			sapi->switchService(
 				eServiceReference(
+					eServiceReference::idDVB,
 					eTransportStreamID(transport_stream_id), 
 					eOriginalNetworkID(original_network_id),
 					eServiceID(service_id),
@@ -769,6 +770,7 @@ static eString switchServiceWeb(eString request, eString path, eString opt, eHTT
 	{
 		sapi->switchService(
 			eServiceReference(
+				eServiceReference::idDVB,
 				eTransportStreamID(transport_stream_id), 
 				eOriginalNetworkID(original_network_id),
 				eServiceID(service_id),

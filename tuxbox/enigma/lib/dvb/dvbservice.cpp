@@ -387,7 +387,7 @@ void eDVBServiceController::scanPMT()
 }
 
 
-void eDVBServiceController::setPID(PMTEntry *entry)
+void eDVBServiceController::setPID(const PMTEntry *entry)
 {
 	if (entry)
 	{
@@ -404,7 +404,7 @@ void eDVBServiceController::setPID(PMTEntry *entry)
 			break;
 			case 6:
 			{
-				for (ePtrList<Descriptor>::iterator i(entry->ES_info); i != entry->ES_info.end(); ++i)
+				for (ePtrList<Descriptor>::const_iterator i(entry->ES_info); i != entry->ES_info.end(); ++i)
 				{
 					if (i->Tag()==DESCR_AC3)
 					{

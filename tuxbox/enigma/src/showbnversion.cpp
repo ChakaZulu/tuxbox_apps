@@ -77,8 +77,10 @@ void ShowBNVersion::willShow()
 		return;
 	}
 	
-	sapi->switchService(eServiceReference(eTransportStreamID(0x0001), eOriginalNetworkID(0x0085), eServiceID(0x0F03), -1));
-	text->setText("Tuning in transponder...");
+	if (sapi->switchService(eServiceReference(eServiceReference::idDVB, eTransportStreamID(0x0001), eOriginalNetworkID(0x0085), eServiceID(0x0F03), -1)))
+		text->setText("Transponder not found. Do a channelsearch first.");
+	else
+		text->setText("Tuning in transponder...");
 }
 
 int ShowBNVersion::eventHandler(const eWidgetEvent &event)

@@ -69,8 +69,6 @@ class eWidget: public Object
 		stateVisible=2
 	};
 	
-	static std::list<eWidget*> toplevel;
-
 public:
 	/**
 	 * \brief Exits a (model) widget.
@@ -98,6 +96,7 @@ public:
 	void reject();
 	ePtrList<eWidget> childlist;
 protected:
+	static eWidget *root;
 	eWidget *parent;
 	eString name;
 	ePoint position;
@@ -115,9 +114,9 @@ protected:
 	
 	gDC *target;
 
-	inline eWidget *getTLW()
+	inline eWidget *getTLW()		// pseudoTLW !!
 	{
-		return parent?parent->getTLW():this;
+		return (parent && parent->parent)?parent->getTLW():this;
 	}
 	int result, in_loop, have_focus, just_showing;
 	void takeFocus();
@@ -191,9 +190,13 @@ public:
 	{
 		return (parent?(parent->getAbsolutePosition()+parent->clientrect.topLeft()+position):position);
 	}
-	inline ePoint getTLWPosition()
+	inline ePoint getRelativePosition(eWidget *e)
 	{
-		return (parent?(parent->getTLWPosition()+parent->clientrect.topLeft()+position):ePoint(0,0));
+		ePoint pos=position;
+		if (this != e)
+			for (eWidget *a=parent; a && (a != e); a=a->parent)
+				pos+=a->clientrect.topLeft();
+		return pos;
 	}
 	virtual void redrawWidget(gPainter *target, const eRect &area);
 	virtual void eraseBackground(gPainter *target, const eRect &area);
@@ -436,6 +439,8 @@ public:
 	virtual int setProperty(const eString &prop, const eString &value);
 	
 	eWidget *search(const eString &name);
+	
+	void makeRoot();
 };
 
 #endif

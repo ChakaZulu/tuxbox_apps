@@ -11,19 +11,19 @@
 #include <core/gui/guiactions.h>
 #include <core/system/init.h>
 
-std::list<eWidget*> eWidget::toplevel;
+eWidget *eWidget::root;
 
-eWidget::eWidget(eWidget *parent, int takefocus):
-	parent(parent),
+eWidget::eWidget(eWidget *_parent, int takefocus):
+	parent(_parent ? _parent : root),
 	focus(0), takefocus(takefocus),
 	font( parent ? parent->font : eSkin::getActive()->queryFont("global.normal") ),
-	backgroundColor(parent?gColor(-1):gColor(eSkin::getActive()->queryScheme("global.normal.background"))),
-	foregroundColor(parent?parent->foregroundColor:gColor(eSkin::getActive()->queryScheme("global.normal.foreground")))
+	backgroundColor(_parent?gColor(-1):gColor(eSkin::getActive()->queryScheme("global.normal.background"))),
+	foregroundColor(_parent?parent->foregroundColor:gColor(eSkin::getActive()->queryScheme("global.normal.foreground")))
 {
 	LCDTitle=0;
 	LCDElement=0;
 	LCDTmp=0;
-	target=parent?0:gFBDC::getInstance();
+	target=0;
 	in_loop=0;
 	if (parent && !(parent->state&stateVisible))
 		state=stateShow;
@@ -56,15 +56,20 @@ eWidget::~eWidget()
 
 void eWidget::takeFocus()
 {
-	if (parent)
-		return;
-
+		// desktop shouldnt receive global focus
+	ASSERT (parent);
+		// childs shouldnt receive global focus
+	ASSERT (!parent->parent);
+	
 	if (!have_focus)
 	{
 		oldTLfocus=eZap::getInstance()->focus;
 		eZap::getInstance()->focus=this;
 		if (oldTLfocus)
+		{
+			eDebug("focus problem");
 			eFatal("da hat %s den focus und %s wil ihn haben", oldTLfocus->getText().c_str(), getText().c_str());
+		}
 		addActionMap(&i_focusActions->map);
 	}
 	have_focus++;
@@ -72,8 +77,11 @@ void eWidget::takeFocus()
 
 void eWidget::releaseFocus()
 {
-	if (parent)
-		return;
+		// desktop shouldnt receive global focus
+	ASSERT (parent);
+		// childs shouldnt receive global focus
+	ASSERT (!parent->parent);
+	ASSERT (have_focus);
 
 	if (have_focus)
 	{
@@ -195,7 +203,10 @@ void eWidget::invalidate(eRect area)
 
 	eWidget *w=this;
 
+	// problem: überlappende, nicht transparente fenster
+
 	while (((int)w->getBackgroundColor())==-1)
+//	while (1)
 	{
 		if (!w->parent)	// spaetestens fuers TLW sollte backgroundcolor aber non-transparent sein
 			break;
@@ -251,23 +262,11 @@ int eWidget::exec()
 
 void eWidget::clear()
 {
-	if (parent)
-	{
-		eRect me(getTLWPosition(), size);
-		getTLW()->redraw(me);
-	} else
-	{
-		gPainter *p=getPainter();
-		p->setBackgroundColor(gColor(0));
-		p->clear();
-		delete p;
-		if (eWidget *n=toplevel.back())
-		{
-			eRect me(position, size);
-			me.moveBy(-n->position.x(), -n->position.y());
-			toplevel.back()->invalidate(me);
-		}
-	}
+	eWidget *root=this;
+	while (root->parent)
+		root=root->parent;
+	eRect me(getRelativePosition(root), size);
+	root->invalidate(me);
 }
 
 void eWidget::close(int res)
@@ -287,9 +286,6 @@ void eWidget::show()
 	ASSERT(!(state&stateVisible));
 
 	state|=stateShow;
-
-	if (!parent)
-		toplevel.push_back(this);
 
 	if (!parent || (parent->state&stateVisible))
 	{
@@ -336,13 +332,6 @@ void eWidget::hide()
 	if (state&stateVisible)
 	{
 		willHideChildren();
-
-		if (!parent)
-		{
-			if (toplevel.back() != this)
-				eFatal("wrong order while closing windows!");
-			toplevel.pop_back();
-		}
 
 		clear();	// hide -> immer erasen. dieses Hide ist IMMER explizit.
 		checkFocus();
@@ -530,7 +519,7 @@ void eWidget::eraseBackground(gPainter *target, const eRect &clip)
 
 void eWidget::focusNext(int dir)
 {
-	if (parent)
+	if (parent && parent->parent)
 		return getTLW()->focusNext(dir);
 
 	if (!_focusList.current())
@@ -671,7 +660,7 @@ void eWidget::focusNext(int dir)
 
 void eWidget::setFocus(eWidget *newfocus)
 {
-	if (parent)
+	if (parent && parent->parent)
 		return getTLW()->setFocus(newfocus);
 	if (focus == newfocus)
 		return;
@@ -743,7 +732,15 @@ gPainter *eWidget::getPainter(eRect area)
 	eRect myclip=eRect(getAbsolutePosition(), size);
 	if (parent)
 		myclip&=parent->clientclip;
-	gPainter *p=new gPainter(*getTLW()->target, myclip);
+	
+	eWidget *r=this;
+	while (r && !r->target)
+		r = r->parent;
+		
+	ASSERT(r);
+	ASSERT(r->target);
+
+	gPainter *p=new gPainter(*r->target, myclip);
 	if (!area.isNull())
 		p->clip(area);
 	p->setForegroundColor(foregroundColor);
@@ -922,6 +919,11 @@ eWidget *eWidget::search(const eString &sname)
 		}
 	}
 	return 0;
+}
+
+void eWidget::makeRoot()
+{
+	root=this;
 }
 
 static eWidget *create_eWidget(eWidget *parent)

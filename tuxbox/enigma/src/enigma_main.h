@@ -106,6 +106,7 @@ public:
 #define ENIGMA_SUBSERVICES 4
 
 class eEventDisplay;
+class eServiceEvent;
 
 class eZapMain: public eWidget
 {
@@ -166,12 +167,13 @@ class eZapMain: public eWidget
 protected:
 	int eventHandler(const eWidgetEvent &event);
 private:
-	void serviceChanged(const eServiceReference &, int);
-	void gotEIT(EIT *, int);
-	void gotSDT(SDT *);
-	void gotPMT(PMT *);
+	void handleServiceEvent(const eServiceEvent &event);
+	void startService(const eServiceReference &, int);
+	void gotEIT();
+	void gotSDT();
+	void gotPMT();
 	void timeOut();
-	void leaveService(const eServiceReference &);
+	void leaveService();
 	void clockUpdate();
 	void updateVolume(int vol);
 	void set16_9Logo(int aspect);

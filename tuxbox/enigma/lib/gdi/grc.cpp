@@ -1,5 +1,5 @@
 // for debugging use: 
-// #define SYNC_PAINT
+#define SYNC_PAINT
 #include "grc.h"
 
 #include <unistd.h>

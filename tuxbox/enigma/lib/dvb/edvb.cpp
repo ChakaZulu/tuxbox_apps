@@ -197,6 +197,11 @@ EIT *eDVB::getEIT()
 	return tEIT.ready()?tEIT.getCurrent():0;
 }
 
+SDT *eDVB::getSDT()
+{
+	return tSDT.ready()?tSDT.getCurrent():0;
+}
+
 void eDVB::changeVolume(int abs, int vol)
 {
 	switch (abs)

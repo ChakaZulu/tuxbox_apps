@@ -5,17 +5,16 @@
 #include <core/dvb/edvb.h>
 #include <core/dvb/dvb.h>
 #include <core/gdi/lcd.h>
-#include <core/gdi/glcddc.h>
 #include <core/gdi/font.h>
 #include <core/gui/emessage.h>
 #include <core/gui/eskin.h>
+#include <apps/enigma/enigma.h>
 
 eZapLCD* eZapLCD::instance;
 
-eZapLCD::eZapLCD(): eWidget()
+eZapLCD::eZapLCD(): eWidget(eZap::getInstance()->getDesktop(eZap::desktopLCD))
 {
 	instance = this;
-	setTarget(gLCDDC::getInstance());
 	move(ePoint(0, 0));
 	resize(eSize(120, 64));
 

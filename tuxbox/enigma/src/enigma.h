@@ -17,6 +17,8 @@ class eZap: public eApplication
 
 	__u32 lastTvChannel, lastRadioChannel;
 	int mode; // 0 = TV, 1 = Radio
+	
+	eWidget *desktop_lcd, *desktop_fb;
 
 private:
 	void keyEvent(const eRCKey &key);
@@ -39,7 +41,21 @@ public:
 
 	bool setMode(int mode);
  	int getMode() { return mode; }
-
+ 	
+ 	enum { desktopLCD, desktopFB };
+ 	
+ 	eWidget *getDesktop(int nr)
+ 	{
+ 		switch (nr)
+ 		{
+ 		case desktopLCD:
+ 			return desktop_lcd;
+ 		case desktopFB:
+ 			return desktop_fb;
+ 		default:
+ 			return 0;
+ 		}
+ 	}
 	static eZap *getInstance();
 	eWidget *focus;
 	eServiceSelector *getServiceSelector()

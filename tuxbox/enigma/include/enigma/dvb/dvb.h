@@ -272,24 +272,33 @@ public:
 
 struct eServiceReference
 {
+	enum
+	{
+		idInvalid=-1,
+		idDVB=0,
+		idUser=0x1000
+	};
+	int type;
+	
 	eTransportStreamID transport_stream_id;
 	eOriginalNetworkID original_network_id;
 	eServiceID service_id;
 	int service_type;
 	
-	eServiceReference(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, eServiceID service_id, int service_type):
-		transport_stream_id(transport_stream_id), original_network_id(original_network_id), service_id(service_id), service_type(service_type)
+	eServiceReference(int type, eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, eServiceID service_id, int service_type):
+		type(type), transport_stream_id(transport_stream_id), original_network_id(original_network_id), service_id(service_id), service_type(service_type)
 	{
 	}
 	
 	eServiceReference():
-		transport_stream_id(-1), original_network_id(-1), service_id(-1), service_type(-1)
+		type(-1), transport_stream_id(-1), original_network_id(-1), service_id(-1), service_type(-1)
 	{
 	}
 
 	bool operator==(const eServiceReference &c) const
 	{
-		return (transport_stream_id == c.transport_stream_id) && 
+		return (type == c.type) &&
+				(transport_stream_id == c.transport_stream_id) && 
 				(original_network_id == c.original_network_id) && 
 				(service_id == c.service_id) &&
 				(service_type == c.service_type);
@@ -302,6 +311,11 @@ struct eServiceReference
 	
 	bool operator < (const eServiceReference &c) const
 	{
+		if (type < c.type)
+			return 1;
+		if (type > c.type)
+			return 0;
+
 		if (transport_stream_id < c.transport_stream_id)
 			return 1;
 		if (transport_stream_id > c.transport_stream_id)
@@ -332,7 +346,8 @@ struct eServiceReference
 	{
 		bool operator()(const eServiceReference &a, const eServiceReference &b) const
 		{
-			return (a.service_id == b.service_id) &&
+			return (a.type == b.type) &&
+					(a.service_id == b.service_id) &&
 					(a.original_network_id == b.original_network_id);
 		}
 	};

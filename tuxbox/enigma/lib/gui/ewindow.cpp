@@ -41,7 +41,7 @@ eWindow::~eWindow()
 
 void eWindow::redrawWidget(gPainter *target, const eRect &where)
 {
-	if (where.contains(eRect(0, 0, width(), borderTop)))
+	if ((clientrect & where) != where)
 		drawTitlebar(target);
 
 	if (LCDTitle)

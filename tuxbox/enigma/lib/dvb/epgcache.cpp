@@ -46,7 +46,7 @@ int eEPGCache::sectionRead(__u8 *data)
 		eit_event_struct* eit_event = (eit_event_struct*) (data+ptr);
 		int eit_event_size;
 		int duration;
-		eServiceReference service(-1, original_network_id, service_id, -1);
+		eServiceReference service(eServiceReference::idDVB, -1, original_network_id, service_id, -1);
 		time_t TM;
 		updateMap::iterator It;
 		

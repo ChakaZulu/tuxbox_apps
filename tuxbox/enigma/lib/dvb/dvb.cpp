@@ -389,7 +389,7 @@ int eTransponderList::handleSDT(const SDT *sdt)
 			continue;
 		
 		eServiceReference sref=
-				eServiceReference(
+				eServiceReference(eServiceReference::idDVB, 
 					eTransportStreamID(sdt->transport_stream_id), 
 					eOriginalNetworkID(sdt->original_network_id), 
 					eServiceID(i->service_id),

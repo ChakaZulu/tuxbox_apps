@@ -75,7 +75,7 @@ public:
 	void BATready(int error);
 	void MHWEITready(int error);
 
-	void setPID(PMTEntry *entry);
+	void setPID(const PMTEntry *entry);
 	void setDecoder();
 
 	eDVBServiceController(eDVB &dvb);

@@ -28,7 +28,7 @@ static eServiceReference getServiceByID(const char *id)
 		if (sscanf(id, "E:%x:%x:%x:%x", &original_network_id, &transport_stream_id, &service_id, &service_type)!=4)
 			return eServiceReference();
 
-	return eServiceReference(eTransportStreamID(transport_stream_id), eOriginalNetworkID(original_network_id), eServiceID(service_id), service_type);
+	return eServiceReference(eServiceReference::idDVB, eTransportStreamID(transport_stream_id), eOriginalNetworkID(original_network_id), eServiceID(service_id), service_type);
 }
 
 static int testrpc(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant> &result)

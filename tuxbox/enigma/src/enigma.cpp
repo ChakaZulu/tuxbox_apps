@@ -13,6 +13,7 @@
 #include <core/dvb/dvb.h>
 #include <core/dvb/edvb.h>
 #include <core/gdi/gfbdc.h>
+#include <core/gdi/glcddc.h>
 #include <core/gui/emessage.h>
 #include <core/gui/actions.h>
 #include <core/system/econfig.h>
@@ -20,7 +21,7 @@
 #include <core/system/http_file.h>
 #include <core/system/http_dyn.h>
 #include <core/system/init.h>
-#include <core/gui/emessage.h>
+#include <core/gui/ebutton.h>
 #include <core/gui/actions.h>
 #include <core/driver/rc.h>
 #include <core/dvb/dvbservice.h>
@@ -68,10 +69,10 @@ bool eZap::setMode(int m)
 
 	__u32 channel;
 
-		if (mode == TV)
-				channel = lastTvChannel;
-		else
-				channel = lastRadioChannel;
+	if (mode == TV)
+		channel = lastTvChannel;
+	else
+		channel = lastRadioChannel;
 
 	serviceSelector->actualize();
 
@@ -138,9 +139,31 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 #endif
 
 	focus = 0;
-
-//	connect(eRCInput::getInstance(), SIGNAL(keyEvent(const eRCKey&)), SLOT(keyEvent(const eRCKey&)));
 	CONNECT(eRCInput::getInstance()->keyEvent, eZap::keyEvent);
+
+	desktop_fb=new eWidget();
+	desktop_fb->setName("desktop_fb");
+	desktop_fb->move(ePoint(0, 0));
+	desktop_fb->resize(eSize(720, 576));
+	desktop_fb->setTarget(gFBDC::getInstance());
+	desktop_fb->makeRoot();
+	desktop_fb->setBackgroundColor(gColor(0));
+	desktop_fb->show();
+	
+	desktop_lcd=new eWidget();
+	desktop_lcd->setName("desktop_lcd");
+	desktop_lcd->move(ePoint(0, 0));
+	desktop_lcd->resize(eSize(128, 64));
+	desktop_lcd->setTarget(gLCDDC::getInstance());
+	desktop_lcd->setBackgroundColor(gColor(0));
+	desktop_lcd->show();
+
+	eDebug("[ENIGMA] loading default keymaps...");
+	
+	eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdreambox.xml");
+	eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdboxold.xml");
+	eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdboxnew.xml");
+	eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdboxbuttons.xml");
 
 	eDVB::getInstance()->configureNetwork();
 	eDebug("<-- network");
@@ -208,13 +231,9 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 	httpd->addResolver(dyn_resolver);
 	httpd->addResolver(fileresolver);
 
-	eDebug("[ENIGMA] loading default keymaps...");
-	
-	eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdreambox.xml");
-	eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdboxold.xml");
-	eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdboxnew.xml");
-	eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdboxbuttons.xml");
+
 	eDebug("[ENIGMA] ok, beginning mainloop");
+
 
 	{
 		eMessageBox msg("Warning:\nThis version of enigma contains incomplete code.\n"
@@ -240,6 +259,8 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 	eConfig::getInstance()->setKey("/elitedvb/system/bootCount", bootcount);
 
 	init->setRunlevel(10);
+
+
 }
 
 eZap::~eZap()

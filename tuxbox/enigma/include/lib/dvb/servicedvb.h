@@ -1,0 +1,41 @@
+#ifndef __core_dvb_servicedvb_h
+#define __core_dvb_servicedvb_h
+
+#include <core/dvb/service.h>
+
+class eServiceHandlerDVB: public eServiceHandler
+{
+	void scrambledStatusChanged(bool);
+	void switchedService(const eServiceReference &, int);
+	void gotEIT(EIT *eit, int);
+	void gotSDT(SDT *sdt);
+	void gotPMT(PMT *pmt);
+	void leaveService(const eServiceReference &);
+	void aspectRatioChanged(int ratio);
+	int flags, state, aspect;
+public:
+	int getID() const;
+	eServiceHandlerDVB();
+	~eServiceHandlerDVB();
+	eService *lookupService(const eServiceReference &service);
+
+	int play(const eServiceReference &service);
+
+		// for DVB audio channels:
+	PMT *getPMT();
+	void setPID(const PMTEntry *);
+	
+		// for DVB nvod channels:
+	SDT *getSDT();
+
+		// for DVB events, nvod, audio....
+	EIT *getEIT();
+	
+	int getFlags();
+	int getAspectRatio();
+	int getState();
+
+	int stop();
+};
+
+#endif

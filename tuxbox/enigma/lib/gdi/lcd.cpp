@@ -75,7 +75,7 @@ color;return; RightAndUp2: AfbAddr+=fbXYincr; BfbAddr-=fbXYincr; P+=dPru; if ((d
 =color; if((dY & 1) == 0) return; *BfbAddr=color; return; // nun ist der tolle code leider zu ende. tut mir leid.
 } */
 
-eDBoxLCD::eDBoxLCD(): eLCD(eSize(120, 64))
+eDBoxLCD::eDBoxLCD(): eLCD(eSize(128, 64))
 {
 #ifndef NO_LCD
 	lcdfd=open("/dev/dbox/lcd0", O_RDWR);
@@ -172,7 +172,7 @@ void eDBoxLCD::update()
 			int pix=0;
 			for (yy=0; yy<8; yy++)
 			{
-				pix|=(_buffer[(y*8+yy)*120+x]>=108)<<yy;
+				pix|=(_buffer[(y*8+yy)*128+x]>=108)<<yy;
 			}
 			raw[y*120+x]=pix;
 		}

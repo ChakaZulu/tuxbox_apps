@@ -144,6 +144,7 @@ public:
 	
 	PMT *getPMT();
 	EIT *getEIT();
+	SDT *getSDT();
 
 		// -> decoder
 	int volume, mute;	
