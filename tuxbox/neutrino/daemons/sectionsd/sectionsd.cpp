@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.52 2001/08/29 22:41:51 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.53 2001/09/10 02:58:00 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.53  2001/09/10 02:58:00  fnbrd
+//  Cinedom-Hack
+//
 //  Revision 1.52  2001/08/29 22:41:51  fnbrd
 //  Fix error with pause.
 //
@@ -462,7 +465,7 @@ static void deleteService(const unsigned short serviceID)
 }
 */
 
-// Fuegt ein Event in alle Mengen ein
+// Fuegt ein Service in alle Mengen ein
 static void addService(const SIservice &s)
 {
   SIservice *sp=new SIservice(s);
@@ -478,6 +481,7 @@ static void addService(const SIservice &s)
   mySIservicesOrderUniqueKey.insert(std::make_pair(sptr->uniqueKey(), sptr));
   if(sptr->nvods.size())
     mySIservicesNVODorderUniqueKey.insert(std::make_pair(sptr->uniqueKey(), sptr));
+//  if(sptr->serviceID==0x01 || sptr->serviceID==0x02 || sptr->serviceID==0x04)
   mySIservicesOrderServiceName.insert(std::make_pair(sptr, sptr));
 }
 
@@ -790,6 +794,17 @@ static unsigned short findServiceIDforServiceName(const char *serviceName)
   MySIservicesOrderServiceName::iterator si=mySIservicesOrderServiceName.find(s);
   if(si!=mySIservicesOrderServiceName.end())
     return si->first->serviceID;
+#ifdef CINEDOM_CHANNELS_BIN_HACK
+  else {
+    if(s->serviceName.length()==sizeof("CINEDOM 1/1")-1) {
+      s->serviceName.resize(sizeof("CINEDOM 1")-1);
+      dprintf("CINEDOM-HACK: Search for Service '%s'\n", s->serviceName.c_str());
+      si=mySIservicesOrderServiceName.find(s);
+      if(si!=mySIservicesOrderServiceName.end())
+        return si->first->serviceID;
+    }
+  }    
+#endif
   dputs("Service not found");
   return 0;
 }
@@ -806,6 +821,19 @@ static unsigned findServiceUniqueKeyforServiceName(const char *serviceName)
   MySIservicesOrderServiceName::iterator si=mySIservicesOrderServiceName.find(s);
   if(si!=mySIservicesOrderServiceName.end())
     return si->first->uniqueKey();
+#ifdef CINEDOM_CHANNELS_BIN_HACK
+  else {
+    if(s->serviceName.length()==sizeof("CINEDOM 1/1")-1) {
+      s->serviceName.resize(sizeof("CINEDOM 1")-1);
+      dprintf("CINEDOM-HACK: Search for Service '%s'\n", s->serviceName.c_str());
+      si=mySIservicesOrderServiceName.find(s);
+      if(si!=mySIservicesOrderServiceName.end()) {
+//        dprintf("Service-Typ: 0x%hhx uniqueKey: \n", si->first->serviceID);
+        return si->first->uniqueKey();
+      }
+    }
+  }    
+#endif
   dputs("Service not found");
   return 0;
 }
@@ -869,10 +897,10 @@ static const SIevent &findNextSIevent(const unsigned long long uniqueKey, SItime
   return nullEvt;
 }
 
-//*********************************************************************
+//---------------------------------------------------------------------
 //			connection-thread
 // handles incoming requests
-//*********************************************************************
+//---------------------------------------------------------------------
 struct connectionData {
   int connectionSocket;
   struct sockaddr_in clientAddr;
@@ -1051,7 +1079,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.52 2001/08/29 22:41:51 fnbrd Exp $\n"
+    "$Id: sectionsd.cpp,v 1.53 2001/09/10 02:58:00 fnbrd Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1423,6 +1451,7 @@ static void sendEventList(struct connectionData *client, const unsigned char ser
   for(MySIservicesOrderServiceName::iterator s=mySIservicesOrderServiceName.begin(); s!=mySIservicesOrderServiceName.end(); s++)
     if(s->first->serviceTyp==serviceTyp1 || (serviceTyp2 && s->first->serviceTyp==serviceTyp2)) {
       SItime zeit(0, 0);
+//      dprintf("Servicename: '%s', Servicetyp: 0x%hhx, uniqueKey: %08x\n", s->first->serviceName.c_str(), s-first->serviceTyp, s->first->uniqueKey());
       const SIevent &evt=findActualSIeventForServiceUniqueKey(s->first->uniqueKey(), zeit);
       if(evt.serviceID!=0) {
         char id[20];
@@ -1648,10 +1677,10 @@ struct connectionData *client=(struct connectionData *)conn;
   return 0;
 }
 
-//*********************************************************************
+//---------------------------------------------------------------------
 //			sdt-thread
 // reads sdt for service list
-//*********************************************************************
+//---------------------------------------------------------------------
 static void *sdtThread(void *)
 {
 struct SI_section_header header;
@@ -1736,10 +1765,10 @@ const unsigned timeoutInSeconds=2;
   return 0;
 }
 
-//*********************************************************************
+//---------------------------------------------------------------------
 //			Time-thread
 // updates system time according TOT every 30 minutes
-//*********************************************************************
+//---------------------------------------------------------------------
 struct SI_section_TOT_header {
       unsigned char table_id : 8;
       // 1 byte
@@ -1931,10 +1960,10 @@ DMX dmxTOT(0x14, 0x73, 0xff, 0x70, 0xff, 256, 1);
   return 0;
 }
 
-//*********************************************************************
+//---------------------------------------------------------------------
 //			EIT-thread
 // reads EPG-datas
-//*********************************************************************
+//---------------------------------------------------------------------
 static void *eitThread(void *)
 {
 struct SI_section_header header;
@@ -1955,9 +1984,9 @@ const unsigned timeoutInSeconds=2;
       lockEvents();
       if(secondsToCache>24*60L*60L && mySIeventsOrderUniqueKey.size()>3000) {
         // kleiner als 1 Tag machen wir den Cache nicht,
-	// da die timeouts ja auch von einem Sender ohne EPG kommen kˆnnen
+	// da die timeouts ja auch von einem Sender ohne EPG kommen k˜nnen
 	// Die 3000 sind ne Annahme und beruhen auf (wenigen) Erfahrungswerten
-	// Man koennte auch ab 3000 Events nur noch jedes 3 Event o.‰. einsortieren
+	// Man koennte auch ab 3000 Events nur noch jedes 3 Event o.Ñ. einsortieren
         dmxSDT.pause();
         lockServices();
         unsigned anzEventsAlt=mySIeventsOrderUniqueKey.size();
@@ -2088,10 +2117,10 @@ const unsigned timeoutInSeconds=2;
   return 0;
 }
 
-//*********************************************************************
+//---------------------------------------------------------------------
 //			housekeeping-thread
 // does cleaning on fetched datas
-//*********************************************************************
+//---------------------------------------------------------------------
 static void *houseKeepingThread(void *)
 {
   try {
@@ -2132,8 +2161,8 @@ static void *houseKeepingThread(void *)
     if(debug) {
       lockServices();
       dprintf("Number of services: %u\n", mySIservicesOrderUniqueKey.size());
+      dprintf("Number of services (name): %u\n", mySIservicesOrderServiceName.size());
       dprintf("Number of cached nvod-services: %u\n", mySIservicesNVODorderUniqueKey.size());
-//      dprintf("Number of services: %u\n", services.size());
       unlockServices();
     }
     if(debug) {
@@ -2194,7 +2223,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.52 2001/08/29 22:41:51 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.53 2001/09/10 02:58:00 fnbrd Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
@@ -2221,7 +2250,7 @@ struct sockaddr_in serverAddr;
   signal(SIGTERM, signalHandler); // killall
   signal(SIGINT, signalHandler); // CTRL-C
 
-  // den Port f¸r die Clients ˆffnen
+  // den Port fÅr die Clients ˜ffnen
   listenSocket = socket(AF_INET, SOCK_STREAM, 0);
   memset( &serverAddr, 0, sizeof(serverAddr) );
   serverAddr.sin_family = AF_INET;
