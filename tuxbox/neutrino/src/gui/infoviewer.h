@@ -76,6 +76,7 @@ class CInfoViewer
 		CFrameBuffer	*frameBuffer;
 
 		bool	gotTime;
+		bool	recordModeActive;
 
 		int		InfoHeightY;
 		int		InfoHeightY_Info;
@@ -105,11 +106,13 @@ class CInfoViewer
 		void show_Data( bool calledFromEvent = false );
 		void paintTime( bool show_dot, bool firstPaint );
 
+
 		void showButton_Audio();
 		void showButton_SubServices();
 
 		void showIcon_16_9();
 		void showIcon_VTXT();
+		void showRecordIcon( bool show );
 	public:
 
 		bool	is_visible;
@@ -118,6 +121,7 @@ class CInfoViewer
 
 		void start();
 
+		void setRecordMode(bool active){recordModeActive=active;};
 		void showTitle( int ChanNum, string Channel, unsigned int onid_sid = 0, bool calledFromNumZap = false );
 		void killTitle();
 

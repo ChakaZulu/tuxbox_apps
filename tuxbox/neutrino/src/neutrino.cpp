@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.239 2002/04/20 23:19:52 McClean Exp $
+        $Id: neutrino.cpp,v 1.240 2002/04/20 23:52:56 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1953,11 +1953,17 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	else if ( msg == NeutrinoMessages::EVT_RECORDMODE_ACTIVATED )
 	{
 		printf("neutino - recordmode on\n");
+		if(!g_InfoViewer->is_visible)
+		{
+			g_RCInput->postMsg( CRCInput::RC_help, 0 );
+		}
+		g_InfoViewer->setRecordMode(true);
 		channelsInit();
 	}
 	else if ( msg == NeutrinoMessages::EVT_RECORDMODE_DEACTIVATED )
 	{
 		printf("neutino - recordmode off\n");
+		g_InfoViewer->setRecordMode(false);
 		channelsInit();
 	}
 	else if ( ( msg == NeutrinoMessages::EVT_BOUQUETSCHANGED ) ||
@@ -2370,7 +2376,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.239 2002/04/20 23:19:52 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.240 2002/04/20 23:52:56 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 

@@ -60,6 +60,7 @@ CInfoViewer::CInfoViewer()
 	// (tm)
 
 	BoxStartX= BoxStartY= BoxEndX= BoxEndY=0;
+	recordModeActive= false;
 	is_visible		= false;
 	showButtonBar	= false;
 	gotTime 		= g_Sectionsd->getIsTimeSet();
@@ -119,6 +120,22 @@ void CInfoViewer::paintTime( bool show_dot, bool firstPaint )
 			g_Fonts->infobar_channame->RenderString(BoxEndX- time_width+ time_left_width- 10, ChanNameY+ time_height, time_dot_width, ":", COL_INFOBAR);
             if ( show_dot )
         		frameBuffer->paintBoxRel(BoxEndX- time_left_width- time_dot_width- 10, ChanNameY, time_dot_width, time_height/2+2, COL_INFOBAR);
+		}
+	}
+}
+
+void CInfoViewer::showRecordIcon( bool show )
+{
+	if(recordModeActive)
+	{
+		int ChanNameX = BoxStartX + ChanWidth + 20;
+		if(show)
+		{
+			frameBuffer->paintIcon("rot.raw", ChanNameX, BoxStartY+10 );
+		}
+		else
+		{
+			frameBuffer->paintBoxRel(ChanNameX, BoxStartY+10, 20, 20, 255);
 		}
 	}
 }
@@ -340,6 +357,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid,
 				else if ( ( msg == NeutrinoMessages::EVT_TIMER ) && ( data == sec_timer_id ) )
 				{
         			paintTime( show_dot, false );
+					showRecordIcon(show_dot);
  					show_dot = !show_dot;
 				}
 				else
