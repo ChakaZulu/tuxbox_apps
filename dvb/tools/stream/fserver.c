@@ -15,7 +15,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 program: fserver by Axel Buehning <mail at diemade.de>
 
-$Id: fserver.c,v 1.3 2004/04/27 20:16:03 diemade Exp $
+$Id: fserver.c,v 1.4 2004/04/29 02:10:27 carjay Exp $
 
 */
 
@@ -63,7 +63,7 @@ int main(int argc, char * argv[])
 	struct sockaddr_in cliaddr;
 	socklen_t clilen = sizeof(cliaddr);
 
-	printf("[fserver.c] fserver version $Id: fserver.c,v 1.3 2004/04/27 20:16:03 diemade Exp $\n");
+	printf("[fserver.c] fserver version $Id: fserver.c,v 1.4 2004/04/29 02:10:27 carjay Exp $\n");
 	
 	// set signal handler for clean termination
 	signal(SIGTERM, clean_exit);
@@ -106,7 +106,7 @@ int main(int argc, char * argv[])
 	servaddr.sin_port = htons(Port);
 
 	i = 0;
-	while ((rc = bind(ListenSocket, (struct sockaddr_in *)&servaddr, sizeof(struct sockaddr_in))))
+	while ((rc = bind(ListenSocket, (struct sockaddr *)&servaddr, sizeof(struct sockaddr_in))))
 	{
 		fprintf(stderr, "[fserver.c] bind to port %d failed, RC=%d...\n",Port, rc);
 		if (i == 10) {
@@ -231,7 +231,7 @@ int main(int argc, char * argv[])
 						fprintf(stderr, "[fserver.c] VCR_RESUME NOT HANDLED\n");
 						break;
 					case CMD_VCR_AVAILABLE:
-						fprintf(stderr, "[fserver.c] VCR_AVAIABLE NOT HANDLED\n");
+						fprintf(stderr, "[fserver.c] VCR_AVAILABLE NOT HANDLED\n");
 						break;
 					default:
 						fprintf(stderr, "[fserver.c] unknown VCR command\n");

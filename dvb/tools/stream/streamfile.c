@@ -1,5 +1,5 @@
 /*
- * $Id: streamfile.c,v 1.4 2004/04/27 20:16:03 diemade Exp $
+ * $Id: streamfile.c,v 1.5 2004/04/29 02:10:27 carjay Exp $
  * 
  * streaming ts to file/disc
  * 
@@ -67,24 +67,23 @@
 
 unsigned char * buf;
 
-int dvrfd;
-int demuxfd[MAXPIDS];
+static int dvrfd;
+static int demuxfd[MAXPIDS];
 
-unsigned char demuxfd_count = 0;
-unsigned char exit_flag = 0;
+static unsigned char demuxfd_count = 0;
+static unsigned char exit_flag = 0;
 
-ringbuffer_t *ringbuf;
-int fd2 = -1;
+static ringbuffer_t *ringbuf;
+static int fd2 = -1;
 
-int silent = 0;
+static int silent = 0;
 #define dprintf(fmt, args...) {if(!silent) printf( "[streamfile] " fmt, ## args);}
 
 unsigned int limit=2;
 
 void clean_exit(int signal);
 
-static int
-sync_byte_offset (const unsigned char * buf, const unsigned int len) {
+static int sync_byte_offset (const unsigned char * buf, const unsigned int len) {
 
 	unsigned int i;
 
@@ -96,8 +95,7 @@ sync_byte_offset (const unsigned char * buf, const unsigned int len) {
 }
 
 
-static int
-setPesFilter (const unsigned short pid)
+static int setPesFilter (const unsigned short pid)
 {
 	int fd;
 	struct dmx_pes_filter_params flt; 
@@ -124,8 +122,7 @@ setPesFilter (const unsigned short pid)
 }
 
 
-static void
-unsetPesFilter (int fd) {
+static void unsetPesFilter (int fd) {
 	ioctl(fd, DMX_STOP);
 	close(fd);
 }
@@ -135,7 +132,6 @@ void *FileThread (void *v_arg)
 {
 	char mybuf[RINGBUFFERSIZE];
 	size_t readsize, len, maxreadsize=0;
-	ssize_t written;
 	unsigned long long filesize = 0;
 	unsigned int filecount = 0;
 	unsigned long long splitsize=1024*1024*1024; // 1GB
@@ -162,8 +158,8 @@ void *FileThread (void *v_arg)
 				sprintf(filename, "%s.%3.3d.ts", (char *)v_arg, ++filecount);
 				if (fd2 != -1 )
 					close(fd2);
-				if ((fd2 = open(filename, O_WRONLY | O_CREAT | O_NONBLOCK | O_TRUNC | O_EXCL | O_LARGEFILE, S_IRUSR | S_IWUSR)) < 0) {
-					perror("error opening outfile");
+				if ((fd2 = open(filename, O_WRONLY | O_CREAT | O_NONBLOCK | O_TRUNC | O_LARGEFILE, S_IRUSR | S_IWUSR)) < 0) {
+					perror("[streamfile]: opening outfile");
 					pthread_exit (NULL);
 				}
 				pfd[0].fd = fd2;
@@ -173,19 +169,22 @@ void *FileThread (void *v_arg)
 				timer1 = time(NULL);
 			}
 
-			if (poll(pfd, 1, 0)) {
+			if (poll(pfd, 1, 5000)>0) {
 				if (pfd[0].revents & POLLOUT) {
-					if ((written = write(fd2, mybuf, len)) < 0) {
-						// TODO: If written != len, keep rest of buffer and continue reading from ringbuffer before continuing writing
-						if (errno != EAGAIN)
-							perror("ts write");
-					}
-					else {
-						fdatasync(fd2);
-						filesize += (unsigned long long)written;
-						filesize2 += (unsigned long long)written;
-					}
+					ssize_t todo = len;
+					ssize_t written;
+					do {
+						if (((written = write(fd2, mybuf+(len-todo), todo)) < 0)&&(errno!=EAGAIN))
+							perror("[streamfile]: write");	// CIFS returns EINVAL all the time :S
+						else
+							todo-=written;
+					} while (todo>0 && !exit_flag);
+					fdatasync(fd2);
+					filesize += (unsigned long long)len;
+					filesize2 += (unsigned long long)len;
 				}
+			} else {
+				perror ("[streamfile]: poll");	
 			}
 
 			if ((time(NULL) - timer1) > 10) {
@@ -199,7 +198,7 @@ void *FileThread (void *v_arg)
 		else
 			usleep(1000);
 	}
-
+	if (fd2!=-1) close (fd2);
 	pthread_exit (NULL);
 }
 
@@ -210,13 +209,14 @@ main (int argc, char ** argv) {
 	int pid;
 	int pids[MAXPIDS];
 	unsigned char *bp;
+	char *fname;
 	ssize_t written;
 	int i;
 	pthread_t rcst;
 	int fd;
 
 	if (argc < 4 ) {
-		dprintf("Usage: stream_file file vpid apid [ pid3 pid4 ... ] (HEX-values without leading 0x!)\n");
+		dprintf("Usage: streamfile file vpid apid [ pid3 pid4 ... ] (HEX-values without leading 0x!)\n");
 		dprintf("file: filename without trailing '.ts'\n");
 		return EXIT_FAILURE;
 	}
@@ -240,20 +240,15 @@ main (int argc, char ** argv) {
 			sscanf(argv[++i], "%d", &limit);
 		i++;
 	}
-
-	ringbuf = ringbuffer_create (RINGBUFFERSIZE);
-	pthread_create (&rcst, 0, FileThread, argv[i++]);
-
-	// create and delete temp-file to wakeup the disk from standby
-	fd = open(".streamfile_tmp", O_SYNC | O_WRONLY | O_CREAT | O_TRUNC | O_NONBLOCK, S_IRUSR | S_IWUSR);
-	write(fd, buf, IN_SIZE);
-	fdatasync(fd);
-	close(fd);
-	unlink(".streamfile_tmp");
-
+	fname = argv[i++];
 	for (; i < argc; i++) {
 		sscanf(argv[i], "%x", &pid);
 
+		if (pid>0x1fff){
+			printf ("invalid pid 0x%04x specified\n",pid);
+			return EXIT_FAILURE;
+		}
+		
 		pids[demuxfd_count] = pid;
 
 		if ((demuxfd[demuxfd_count] = setPesFilter(pid)) < 0)
@@ -264,13 +259,24 @@ main (int argc, char ** argv) {
 		demuxfd_count++;
 	}
 
+	// create and delete temp-file to wakeup the disk from standby
+	fd = open(".streamfile_tmp", O_SYNC | O_WRONLY | O_CREAT | O_TRUNC | O_NONBLOCK, S_IRUSR | S_IWUSR);
+	write(fd, buf, IN_SIZE);
+	fdatasync(fd);
+	close(fd);
+	unlink(".streamfile_tmp");
+
 	bp = buf;
 
 	if ((dvrfd = open(DVRDEV, O_RDONLY)) < 0) {
 		free(buf);
+		perror ("[streamfile]: open dvr");
 		return EXIT_FAILURE;
 	}
 
+	ringbuf = ringbuffer_create (RINGBUFFERSIZE);
+	pthread_create (&rcst, 0, FileThread, fname);
+	
 	/* write raw transport stream */
 	int offset;
 
@@ -308,14 +314,17 @@ main (int argc, char ** argv) {
 			exit_flag = 1;
 		}
 	}
-	sleep(1); // give FileThread some time to write remaining content of ringbuffer to file
-	pthread_kill(rcst, SIGKILL);
+	exit_flag = 1;
+	//sleep(1); // give FileThread some time to write remaining content of ringbuffer to file
+	//	pthread_kill(rcst, SIGKILL);
 
 	while (demuxfd_count > 0)
 		unsetPesFilter(demuxfd[--demuxfd_count]);
 
 	close(dvrfd);
 
+	pthread_join(rcst,NULL);
+	
 	free(buf);
 
 	ringbuffer_free(ringbuf);
