@@ -75,6 +75,9 @@ miscsettings.startbhdriver zaladuj drivery BH
 miscsettings.general Glówne
 miscsettings.fb_destination Ekspert! -konsola
 miscsettings.infobar_sat_display Nazwa satelity na pasku
+miscsettings.sptsmode SPTS-Mode drivery ladowac
+miscsettings.hwsections HW-Sekcje uzywac
+miscsettings.driver_boot Ustawiena driverów i Startu
 
 languagesetup.head Wybór jezyka
 languagesetup.select jezyk
@@ -105,6 +108,8 @@ videomenu.videoformat_431 4:3 (PS)
 videomenu.videoformat_169 16:9
 videomenu.videoformat_autodetect autodetekcja
 videomenu.vcrswitch euro-automatyka
+videomenu.rgb_centering Wyposrodkowanie-RGB
+videomenu.csync Sync.-Korekcja
 
 networkmenu.head Ustawienia Sieci
 networkmenu.test testuj siec
@@ -127,10 +132,22 @@ recordingmenu.vcr_devicename marka video (lirc)
 recordingmenu.off wyl
 recordingmenu.server serwer
 recordingmenu.vcr video
+recordingmenu.file bezposrednio (Plik)
+recordingmenu.defdir Folder do nagrywania
+recordingmenu.filesettingsseparator filesettingsseparator
 recordingmenu.server_wakeup Uruchamianie nagrywania przez siec
 recordingmenu.server_mac MAC adres
 recordingmenu.setupnow wykonaj zmiany 
 recordingmenu.no_scart nie przelaczaj w tryb Euro
+recordingmenu.splitsize Max. wielkosc pliku(MB)
+recordingmenu.stream_all_audio_pids Nagrywaj wszystkie audio-kanaly
+
+streaming.buffer_overflow Nagrywanie zostalo przerwane,\nponiewarz plik nie mogl byc wystarczajaco \nszybko zapisany.
+streaming.busy Pzrynalmniej jeden proces nagrywania jest aktywny.\nJesli nagrywanie jest zakonczone,\npowinien ponowny start pomoc.
+streaming.dir_not_writable Nie moge pisac w podanym folderze.\nNagrywanie jest przez to nie mozliwe.
+streaming.success Nagranie zostalo pomyslnie zakonczone.
+streaming.write_error Nagranie zostalo niestety przerwane,\nponiewarz zaistnial blad podczas zapisu.
+streaming.write_error_open Nagranie zostalo niestety przerwane,\nponiewarz plik nie mogl zostac otwarty.
 
 streamingmenu.head Ustawienia odtwarzacza
 streamingmenu.streaming_type Typ serwera
@@ -147,6 +164,12 @@ streamingmenu.352x288 352x288
 streamingmenu.352x576 352x576
 streamingmenu.480x576 480x576
 streamingmenu.704x576 704x576
+streamingmenu.streaming_transcode_audio Transcod. Audio (dvd/vcd/mpg)
+streamingmenu.streaming_force_avi_rawaudio Wymus AC3 przy avi
+streamingmenu.streaming_force_transcode_video Transcoduj tez mpg/vcd obraz
+streamingmenu.streaming_transcode_video_codec MPEG Video Codec
+streamingmenu.mpeg1 MPEG1
+streamingmenu.mpeg2 MPEG2
 
 ping.ok osiagalny (ping)
 ping.unreachable nieosiagalny
@@ -210,10 +233,10 @@ keybindingmenu.cancel Zamknij liste kanalów
 keybindingmenu.cancel_head Zamknij liste kanalów
 keybindingmenu.sort Sortuj
 keybindingmenu.sort_head Sortuj
-keybindingmenu.addrecord dodaj timer
-keybindingmenu.addrecord_head dodaj timer
-keybindingmenu.addremind add zapto timer
-keybindingmenu.addremind_head add zapto timer
+keybindingmenu.addrecord dodaj timer nagrywania
+keybindingmenu.addrecord_head dodaj timer nagrywania
+keybindingmenu.addremind dodaj timer przelaczenia
+keybindingmenu.addremind_head dodaj timer przelaczenia
 keybindingmenu.channelup Kanal do góry
 keybindingmenu.channelup_head Kanal do góry
 keybindingmenu.channeldown Kanal na dol
@@ -239,7 +262,7 @@ colorchooser.alpha nasycenie
 lcdmenu.head Ustawienia LCD
 lcdmenu.inverse Inversja
 lcdmenu.power Wl / Wyl
-lcdmenu.autodimm Auto-rozmiar
+lcdmenu.autodimm Auto-zciemnij
 lcdmenu.lcdcontroler Kontrast / Jasnosc
 lcdmenu.statusline Linia Statusowa
 lcdmenu.statusline.volume Glosnosc
@@ -248,7 +271,7 @@ lcdmenu.statusline.both Glosnosc / Czas
 
 lcdcontroler.head Ustawienia LCD
 lcdcontroler.contrast Kontrast
-lcdcontroler.brightness Jasnosc
+lcdcontroler.brightness normalna Jasnosc
 lcdcontroler.brightnessstandby Jasnosc w standby
 
 keychoosermenu.setnew Wybierz nowy klawisz
@@ -266,7 +289,7 @@ bouquetlist.head Bukiety
 
 channellist.head Wszystkie Kanaly
 channellist.nonefound Brak listy kanalow!\nUruchom strojenie\n(ustawienia -> strojenie)
-channellist.since since %02d:%02d
+channellist.since od %02d:%02d
 
 infoviewer.epgnotload EPG nie zaladowane...
 infoviewer.epgwait Czekam na EPG...
@@ -278,7 +301,7 @@ infoviewer.cantdecode Kanal nie mozliwy do zdekodowania
 infoviewer.selecttime Wybor czasu
 infoviewer.nocurrent INFO nie dostepne dla tego kanalu
 infoviewer.noepg EPG nie dostepne
-infoviewer.subservice Subservices
+infoviewer.subservice Podkanaly
 infoviewer.waittime Oczekiwanie na czas...
 infoviewer.motor_moving Ustawianie anteny
 
@@ -307,7 +330,7 @@ streamfeatures.info Informacje o strumienu
 apidselector.head Wybór Jezyka
 
 nvodselector.head Czas rozpoczecia
-nvodselector.subservice Wybierz subservice
+nvodselector.subservice Wybierz podserwis
 nvodselector.directormode Tryb bezposredni
 
 ucodecheck.head Status UCodes
@@ -418,9 +441,10 @@ flashupdate.fileselector Wybór plikow
 flashupdate.titlewriteflash Zapis Flasha
 flashupdate.actionwriteflash zapis
 flashupdate.flashreadyreboot Image prawidlowo zapisany.\nDBox zresetuje sie.
-flashupdate.reallyflashmtd Napewno chcesz uaktualnic?\n\nJezeli wystapi blad lub plik image jest\nwadliwy, Dbox nie uruchomi sie.\n\nNazwa Image: %s\nCel: %s
+flashupdate.reallyflashmtd Napewno chcesz aktualizowac?\n\nJezeli wystapi blad lub plik image jest\nwadliwy, Dbox nie uruchomi sie.\n\nNazwa Image: %s\nCel: %s
 flashupdate.wrongbase Ta wersja Release cycle jest zbyt stara, \nprosze wgrac nowsza wersje!
-flashupdate.experimentalimage Wybrany image nie byl testowany, to\n oznacza, ze twój box moze nie\ndzialac po aktualizacji.\n\nCzy jestes pewny ze chcesz\ngo aktualizowac do tej wersji?
+flashupdate.experimentalimage Wybrany image nie byl testowany, to\n oznacza, ze twój box moze nie\ndzialac po aktualizacji.\n\nCzy jestes pewny ze chcesz\ngo aktualizowac? na ta wersje?
+flashupdate.squashfs.noversion Przy SquashFS aktualizacji sprawdzana jest wersja tylko przy aktualizacji prze WEB.\nCzy jestes pewny ze chcesz aktualizowac ?
 
 bouqueteditor.name Edytor Bukietów
 bouqueteditor.delete Kasuj
@@ -708,6 +732,7 @@ mp3player.display_order Kolejnosc
 mp3player.follow Auto-wybór biezacy
 mp3player.screensaver_timeout wygaszacz za:(min, 0=off)
 mp3player.defdir folder startowy
+mp3player.highprio Wysokie pierwschenstwo rozkodowywania
 
 movieplayer.name Odtwarzacz filmów
 movieplayer.head Odtwarzacz filmów 
@@ -724,15 +749,44 @@ movieplayer.pleasewait Poczekaj.\nLaczenie do streaming serwera...
 movieplayer.nostreamingserver Sreaming serwer nieosiagalny.
 movieplayer.defdir folder startowy
 movieplayer.buffering Buforuje...
+movieplayer.tsplayback Odtwarzaj TS
+movieplayer.pesplayback Odtwarzaj PES (Experymentalnie)
+movieplayer.fileplayback Plik przez VLC
+movieplayer.dvdplayback DVD
+movieplayer.vcdplayback (S)VCD
+movieplayer.tshelp CZERW./Home Stop\nZIEL. Resync\nZOLTY Przerwa/Dalej\nNIEBIE. zaznaczyc\nd-box Czas wysfietlic\n1 cofnij ok.1 minute\n3 przyspiesz ok.1 minute\n4 cofnij ok.5 minut\n6 przyspiesz ok.5 minut\n7 cofnij ok.10 minut\n9 przyspiesz ok.10 minut\nPomoc: http://www.giggo.de/dbox2/movieplayer.html\n
+movieplayer.vlchelp CZERW./Home Stop\nZIEL. Resync\nZOLTY Przerwa/Dalej\nNIEBIE. zaznaczyc\nd-box Czas wysfietlic\nv Skok\n1 cofnij ok.1 minute\n3 przyspiesz ok.1 minute\n4 cofnij ok.5 minut\n6 przyspiesz ok.5 minut\n7 cofnij ok.10 minut\n9 przyspiesz ok.10 minut\nPomoc: http://www.giggo.de/dbox2/movieplayer.html\n
+movieplayer.toomanybookmarks Zostalo juz za duzo zaznaczone.\nMusisz najpierw jakies zaznaczenie zmazac.
+movieplayer.bookmarkname Nazwa zaznaczenia
+movieplayer.bookmarkname_hint1 Podaj bowa nazwe dla zaznaczenia
+movieplayer.bookmarkname_hint2 
+movieplayer.goto Skoch do ...
+movieplayer.goto.h1 = -> absolutny skok
+movieplayer.goto.h2 +,- -> relatywny skok
+movieplayer.wrongvlcversion Funkcja jest z terazniejsza wersja VLC niedostepna
+
+bookmarkmanager.name Zaznaczenia
+bookmarkmanager.delete Zmazac
+bookmarkmanager.rename Zmienic nazwe
+bookmarkmanager.select Wybrac
 
 filebrowser.head Przegladarka
 filebrowser.filter.active Filtr wlaczony
 filebrowser.filter.inactive Filtr wylaczony
 filebrowser.select Wybierz
 filebrowser.mark Zaznacz
-filebrowser.scan Skanuj folder
+filebrowser.scan Przeszukaj folder
 filebrowser.sort.name (Nazwa)
-filebrowser.sort.date (Dane)
+filebrowser.sort.namedirsfirst (Nazwa2)
+filebrowser.sort.date (Data)
+filebrowser.sort.type (Typ)
+filebrowser.sort.size (Wielkosc)
+filebrowser.nextpage Nastepna strona
+filebrowser.prevpage Poprzednia strona
+filebrowser.showrights Pokarz prawa plikow
+filebrowser.delete zmazac
+filebrowser.dodelete1 Ma zostac
+filebrowser.dodelete2 zmazane ?
 
 nfs.mount Zamontuj volumin NFS/CIFS
 nfs.ip NFS/CIFS IP serwera
@@ -766,4 +820,26 @@ pictureviewer.slideshow przewijaj
 pictureviewer.slide_time czas przewijania
 pictureviewer.scaling skalowanie
 pictureviewer.defdir folder startowy
+
+rclock.menueadd Blokada pilota
+rclock.title zablokowac Pilota
+rclock.lockmsg Pilot d-boxa zablokowany.\n Aby zwolnic blokade\n <CZERW.> i <DBOX> na Pilocie\n nacisnac.
+rclock.unlockmsg DBOX2 Pilot odblokowany...
+
+EPGMenu.head EPG - Informacje o programie
+EPGMenu.eventinfo Info o audycji
+EPGMenu.eventlist Przeglad aktualnego programu
+EPGMenu.epgplus Przeglad
+EPGMenu.streaminfo Informacje techniczne
+
+EPGPlus.head Przeglad (EPG Plus)
+EPGPlus.record Nagrywanie
+EPGPlus.refresh_epg zaktualizowac
+EPGPlus.remind zaznaczyc
+EPGPlus.scroll_mode Scroll Mode
+EPGPlus.stretch_mode Stretch Mode
+
+eventlistbar.channelswitch Przelaczyc
+eventlistbar.recordevent Nagrac
+eventlistbar.eventsort Ulozyc
 
