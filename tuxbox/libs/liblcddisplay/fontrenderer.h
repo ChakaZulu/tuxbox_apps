@@ -100,13 +100,4 @@ class fontRenderClass
 	friend class Font;
 };
 
-
-class FontsDef
-{
-        public:
-                Font *channelname; Font* time; Font *menutitle; Font *menu;
-};
-
-
-
-#endif
+#endif /* __FONTRENDERER__ */
