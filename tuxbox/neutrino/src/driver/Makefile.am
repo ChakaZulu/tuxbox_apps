@@ -9,7 +9,7 @@ INCLUDES = \
 	@ZAPIT_CFLAGS@ \
 	-I$(top_srcdir)/lib
 
-noinst_LIBRARIES = libneutrino_driver.a
+noinst_LIBRARIES = libneutrino_driver.a libneutrino_driver_netfile.a
 
 libneutrino_driver_a_SOURCES = \
 	ringbuffer.c \
@@ -31,5 +31,7 @@ libneutrino_driver_a_SOURCES = \
 	file.cpp \
 	audiometadata.cpp \
 	audiofile.cpp
+
+libneutrino_driver_netfile_a_SOURCES = netfile.cpp
 
 AM_CPPFLAGS = -DSKIP_CA_STATUS

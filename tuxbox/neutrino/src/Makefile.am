@@ -25,6 +25,7 @@ neutrino_LDADD = \
 	driver/pictureviewer/libneutrino_pictureviewer.a \
 	driver/libneutrino_driver.a \
 	driver/audiodec/libneutrino_driver_audiodec.a \
+	driver/libneutrino_driver_netfile.a \
 	system/libneutrino_system.a \
 	gui/libneutrino_gui2.a \
 	$(top_builddir)/lib/controldclient/libcontroldclient.la \

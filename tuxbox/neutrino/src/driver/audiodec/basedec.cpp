@@ -41,7 +41,7 @@
 #include <driver/aviaext.h>
 #endif
 #define AVS_DEVICE "/dev/dbox/avs0"
-#include <driver/audiodec/netfile.h>
+#include <driver/netfile.h>
 
 unsigned int CBaseDec::mSamplerate=0;
 

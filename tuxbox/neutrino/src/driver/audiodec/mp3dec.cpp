@@ -46,7 +46,7 @@
 
 #include <id3tag.h>
 
-#include <driver/audiodec/netfile.h>
+#include <driver/netfile.h>
 
 /* libid3tag extension: This is neccessary in order to call fclose
    on the file. Normally libid3tag closes the file implicit.

@@ -31,7 +31,7 @@
 #include <linux/soundcard.h>
 #include <algorithm>
 #include <sstream>
-#include <driver/audiodec/netfile.h>
+#include <driver/netfile.h>
 
 #define ProgName "OggDec"
 // nr of msecs to skip in ff/rev mode

@@ -14,5 +14,4 @@ libneutrino_driver_audiodec_a_SOURCES = \
 	oggdec.cpp \
 	wavdec.cpp \
 	tag.c \
-	crc.c \
-	netfile.cpp
+	crc.c

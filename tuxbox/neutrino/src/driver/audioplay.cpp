@@ -41,7 +41,7 @@
 
 #include <neutrino.h>
 #include <driver/audioplay.h>
-#include <driver/audiodec/netfile.h>
+#include <driver/netfile.h>
 
 void CAudioPlayer::stop()
 {
