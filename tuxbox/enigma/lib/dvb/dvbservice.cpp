@@ -581,15 +581,13 @@ void eDVBServiceController::TDTready(int error)
 				eDebug("[TIME] diff after add correction is %d", ddiff);
 				if ( abs(ddiff) < 30*60 )
 				{
-					eDebug("[TIME] use stored correction", diff);
-					dvb.time_difference = enigma_diff + ddiff;
+					eDebug("[TIME] use stored correction");
+					dvb.time_difference = enigma_diff + it->second;
 				}
-				else  // big change in calced correction.. summer to winter timer..
+				else  // big change in calced correction..
 				{
-					eDebug("[TIME] diff > 30min... update time");
 					eDebug("[TIME] update stored correction to %d", diff);
 					tOffsMap[*transponder] = diff;
-					dvb.time_difference = enigma_diff + diff;
 				}
 			}
 			else
