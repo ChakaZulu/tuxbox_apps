@@ -341,21 +341,6 @@ void CFrameBuffer::paintBoxRel(int x, int y, int dx, int dy, unsigned char col)
 	}
 }
 
-void CFrameBuffer::paintBox(int xa, int ya, int xb, int yb, unsigned char col)
-{
-	if (!getActive())
-		return;
-
-	unsigned char* pos = getFrameBufferPointer() + xa + stride*ya;
-	int dx = xb-xa;
-	int dy = yb-ya;
-	for(int count=0;count<dy;count++)
-	{
-		memset(pos, col, dx);
-		pos += stride;
-	}
-}
-
 void CFrameBuffer::paintVLine(int x, int ya, int yb, unsigned char col)
 {
 	if (!getActive())

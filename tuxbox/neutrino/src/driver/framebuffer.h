@@ -109,8 +109,8 @@ class CFrameBuffer
 		//paint functions
 		void paintPixel(int x, int y, unsigned char col);
 
-		void paintBox(int xa, int ya, int xb, int yb, unsigned char col);
 		void paintBoxRel(int x, int y, int dx, int dy, unsigned char col);
+		inline void paintBox(int xa, int ya, int xb, int yb, unsigned char col) { paintBoxRel(xa, ya, xb - xa, yb - ya, col); }
 
 		void paintLine(int xa, int ya, int xb, int yb, unsigned char col);
 
