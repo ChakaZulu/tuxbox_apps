@@ -135,18 +135,10 @@ bool CVCRControl::CVCRDevice::Stop()
 {
 	deviceState = CMD_VCR_STOP;
 
-	if(last_mode == NeutrinoMessages::mode_radio)
-	{
-		g_RCInput->postMsg( NeutrinoMessages::CHANGEMODE , NeutrinoMessages::mode_radio);
-	}
-	else if(last_mode == NeutrinoMessages::mode_tv)
+	if(last_mode != NeutrinoMessages::mode_scart)
 	{
 		g_RCInput->postMsg( NeutrinoMessages::VCR_OFF, 0 );
-	}
-	else if(last_mode == NeutrinoMessages::mode_standby)
-	{
-		g_RCInput->postMsg( NeutrinoMessages::VCR_OFF, 0 );
-		g_RCInput->postMsg( NeutrinoMessages::STANDBY_ON, 0 );
+		g_RCInput->postMsg( NeutrinoMessages::CHANGEMODE , last_mode);
 	}
 	return ParseFile(LIRCDIR "stop.lirc");
 }
@@ -200,19 +192,16 @@ bool CVCRControl::CVCRDevice::ParseFile(string filename)
 	return false;
 }
 //-------------------------------------------------------------------------
-bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, unsigned long long epgid, uint apid)
+bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, int mode, unsigned long long epgid, uint apid)
 {
+	printf("Record channel_id: %x epg: %llx, apid %u mode \n", channel_id, epgid, apid);
 	// leave menu (if in any)
 	g_RCInput->postMsg( CRCInput::RC_timeout, 0 );
 	
 	last_mode = CNeutrinoApp::getInstance()->getMode();
-	if(last_mode == NeutrinoMessages::mode_radio)
+	if(mode != last_mode)
 	{
-		CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , NeutrinoMessages::mode_tv | NeutrinoMessages::norezap );
-	}
-	else if(last_mode == NeutrinoMessages::mode_standby)
-	{
-		CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , NeutrinoMessages::mode_tv | NeutrinoMessages::norezap );
+		CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , mode | NeutrinoMessages::norezap );
 	}
 	
 	if(channel_id != 0)		// wenn ein channel angegeben ist
@@ -273,6 +262,11 @@ bool CVCRControl::CServerDevice::Stop()
 		g_Zapit->startPlayBack();
 	g_Sectionsd->setPauseScanning(false);
 	g_Zapit->setRecordMode( false );
+	if(last_mode != NeutrinoMessages::mode_scart)
+	{
+		g_RCInput->postMsg( NeutrinoMessages::VCR_OFF, 0 );
+		g_RCInput->postMsg( NeutrinoMessages::CHANGEMODE , last_mode);
+	}
 	if(sendCommand(CMD_VCR_STOP))
 		return true;
 	else
@@ -280,17 +274,14 @@ bool CVCRControl::CServerDevice::Stop()
 }
 
 //-------------------------------------------------------------------------
-bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, unsigned long long epgid, uint apid) 
+bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode, unsigned long long epgid, uint apid) 
 {
 	printf("Record channel_id: %x epg: %llx, apid %u\n", channel_id, epgid, apid);
 	if(channel_id != 0)		// wenn ein channel angegeben ist
 	{
-/*
-		if(g_Zapit->getMode() != CZapitClient::MODE_TV)
-		{
-			CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , NeutrinoMessages::mode_tv | NeutrinoMessages::norezap );
-		}
-*/
+		last_mode = CNeutrinoApp::getInstance()->getMode();
+		if(mode != last_mode)
+			CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , mode | NeutrinoMessages::norezap );
 		if(g_Zapit->getCurrentServiceID() != channel_id)	// und momentan noch nicht getuned ist
 		{
 			g_Zapit->zapTo_serviceID(channel_id);		// dann umschalten

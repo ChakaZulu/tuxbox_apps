@@ -42,7 +42,6 @@
 #include "neutrinoMessages.h"
 #include "driver/framebuffer.h"
 #include "system/setting_helpers.h"
-#include "driver/vcrcontrol.h"
 
 
 using namespace std;
@@ -111,7 +110,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		CUCodeCheckExec			*UCodeChecker;
 		CStreamFeaturesChangeExec	*StreamFeaturesChanger;
 		CIPChangeNotifier		*MyIPChanger;
-		CVCRControl			*vcrControl;
+//		CVCRControl			*vcrControl;
 		CConsoleDestChangeNotifier	*ConsoleDestinationChanger;
 
 

@@ -105,11 +105,12 @@ class CVCRControl
 		{
 			public:
 				int sock_fd;
+				int last_mode;
 				std::string Name;
 				CVCRDevices deviceType;
 				CVCRStates  deviceState;
 				virtual bool Stop(){return false;};
-				virtual bool Record(const t_channel_id channel_id = 0, unsigned long long epgid = 0, uint apid = 0){return false;};
+				virtual bool Record(const t_channel_id channel_id = 0, int mode=1, unsigned long long epgid = 0, uint apid = 0){return false;};
 				virtual bool Pause(){return false;};
 				virtual bool Resume(){return false;};
 				virtual bool IsAvailable(){return false;};
@@ -119,11 +120,10 @@ class CVCRControl
 
 		class CVCRDevice : public CDevice		// VCR per IR
 		{
-			int last_mode;
 			bool ParseFile(std::string filename);
 			public:
-				virtual bool Stop();		// TODO: VCR ansteuerung
-				virtual bool Record(const t_channel_id channel_id = 0, unsigned long long epgid = 0, uint apid = 0);	
+				virtual bool Stop(); 
+				virtual bool Record(const t_channel_id channel_id = 0, int mode=1, unsigned long long epgid = 0, uint apid = 0);	
 				virtual bool Pause();
 				virtual bool Resume();
 				virtual bool IsAvailable(){return true;};
@@ -155,7 +155,7 @@ class CVCRControl
 				bool	StopSectionsd;
 
 				virtual bool Stop();
-				virtual bool Record(const t_channel_id channel_id = 0, unsigned long long epgid = 0, uint apid = 0);
+				virtual bool Record(const t_channel_id channel_id = 0, int mode=1, unsigned long long epgid = 0, uint apid = 0);
 				virtual bool Pause(){return false;};
 				virtual bool Resume(){return false;};
 				virtual bool IsAvailable(){return true;};
@@ -184,7 +184,12 @@ class CVCRControl
 		bool Stop(){return Device->Stop();};
 		bool Record(CTimerd::EventInfo *eventinfo)
 		{
-			return Device->Record(eventinfo->channel_id, eventinfo->epgID, eventinfo->apid); 
+			int mode;
+			if(eventinfo->mode==CTimerd::MODE_RADIO)
+				mode=NeutrinoMessages::mode_radio;
+			else
+				mode=NeutrinoMessages::mode_tv;
+			return Device->Record(eventinfo->channel_id, mode, eventinfo->epgID, eventinfo->apid); 
 		};
 		bool Pause(){return Device->Pause();};
 		bool Resume(){return Device->Resume();};

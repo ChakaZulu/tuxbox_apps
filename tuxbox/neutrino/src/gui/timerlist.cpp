@@ -94,9 +94,13 @@ public:
 		if(type == CTimerd::TIMER_RECORD ||
 			type == CTimerd::TIMER_ZAPTO ||
 			type == CTimerd::TIMER_NEXTPROGRAM)
+		{
 			m2->setActive(true);
+		}
 		else
+		{
 			m2->setActive(false);
+		}
 		if(type == CTimerd::TIMER_STANDBY)
 			m3->setActive(true);
 		else
@@ -195,10 +199,21 @@ int CTimerList::exec(CMenuTarget* parent, string actionKey)
 									timerNew.stopTime,timerNew.eventRepeat);
 		return menu_return::RETURN_EXIT;
 	}
-	else if(actionKey.substr(0,3)=="SC:")
+	else if(actionKey.substr(0,4)=="SCT:")
 	{
-		sscanf(actionKey.substr(3,10).c_str(),"%u",&timerNew.channel_id);
-		strncpy(timerNew_channel_name,actionKey.substr(13).c_str(),30);
+		sscanf(actionKey.substr(4,10).c_str(),"%u",&timerNew.channel_id);
+		strncpy(timerNew_channel_name,actionKey.substr(14).c_str(),30);
+		timerNew.mode=CTimerd::MODE_TV;
+		g_RCInput->postMsg(CRCInput::RC_timeout,0); // leave underlying menu also
+		g_RCInput->postMsg(CRCInput::RC_timeout,0); // leave underlying menu also
+		return menu_return::RETURN_EXIT;
+	}
+	else if(actionKey.substr(0,4)=="SCR:")
+	{
+		sscanf(actionKey.substr(4,10).c_str(),"%u",&timerNew.channel_id);
+		strncpy(timerNew_channel_name,actionKey.substr(14).c_str(),30);
+		timerNew.mode=CTimerd::MODE_RADIO;
+		g_RCInput->postMsg(CRCInput::RC_timeout,0); // leave underlying menu also
 		g_RCInput->postMsg(CRCInput::RC_timeout,0); // leave underlying menu also
 		return menu_return::RETURN_EXIT;
 	}
@@ -209,7 +224,8 @@ int CTimerList::exec(CMenuTarget* parent, string actionKey)
 		parent->hide();
 	}
 
-	channellist.clear();
+	channellist_tv.clear();
+	channellist_radio.clear();
 	int ret = show();
 
 	if( ret > -1)
@@ -427,7 +443,7 @@ void CTimerList::paintItem(int pos)
 			case CTimerd::TIMER_ZAPTO :
 			case CTimerd::TIMER_RECORD :
 				{
-					zAddData=convertChannelId2String(timer.channel_id);
+					zAddData=convertChannelId2String(timer.channel_id,timer.mode);
 					if(timer.apid!=0)
 					{
 						char capid[20];
@@ -466,7 +482,7 @@ void CTimerList::paintItem(int pos)
 				case CTimerd::TIMER_ZAPTO :
 					{
 						line1+=" ";
-						line1+=convertChannelId2String(timer.channel_id);
+						line1+=convertChannelId2String(timer.channel_id,timer.mode);
 					}
 					break;
 				case CTimerd::TIMER_STANDBY :
@@ -616,23 +632,42 @@ string CTimerList::convertTimerRepeat2String(CTimerd::CTimerEventRepeat rep)
 				return g_Locale->getText("timerlist.repeat.unknown");
 	}
 }
-string CTimerList::convertChannelId2String(t_channel_id id)
+string CTimerList::convertChannelId2String(t_channel_id id, CTimerd::CChannelMode mode)
 {
 	string name=g_Locale->getText("timerlist.program.unknown");
-
-	if(channellist.size()==0)
+   
+	if(mode==CTimerd::MODE_TV)
 	{
-		CZapitClient *Zapit = new CZapitClient();
-		Zapit->getChannels(channellist);
-		delete Zapit;
-	}
-	CZapitClient::BouquetChannelList::iterator channel = channellist.begin();
-	for(; channel != channellist.end();channel++)
-	{
-		if(channel->channel_id==id)
+		if(channellist_tv.size()==0)
 		{
-			name=channel->name;
-			break;
+			CZapitClient Zapit;
+			Zapit.getChannels(channellist_tv,CZapitClient::MODE_TV);
+		}
+		CZapitClient::BouquetChannelList::iterator channel = channellist_tv.begin();
+		for(; channel != channellist_tv.end();channel++)
+		{
+			if(channel->channel_id==id)
+			{
+				name=channel->name;
+				break;
+			}
+		}
+	}
+	else
+	{
+		if(channellist_radio.size()==0)
+		{
+			CZapitClient Zapit;
+			Zapit.getChannels(channellist_radio,CZapitClient::MODE_RADIO);
+		}
+		CZapitClient::BouquetChannelList::iterator channel = channellist_radio.begin();
+		for(; channel != channellist_radio.end();channel++)
+		{
+			if(channel->channel_id==id)
+			{
+				name=channel->name;
+				break;
+			}
 		}
 	}
 	return name;
@@ -736,24 +771,38 @@ void CTimerList::newTimer()
 	CZapitClient::BouquetList bouquetlist;
 	zapit.getBouquets(bouquetlist);
 	CZapitClient::BouquetList::iterator bouquet = bouquetlist.begin();
-	CMenuWidget* mc = new CMenuWidget("timerlist.bouquetselect", "settings.raw");
+	CMenuWidget* mctv = new CMenuWidget("timerlist.bouquetselect", "settings.raw");
+	CMenuWidget* mcradio = new CMenuWidget("timerlist.bouquetselect", "settings.raw");
 	for(; bouquet != bouquetlist.end();bouquet++)
 	{
-		CMenuWidget* mw = new CMenuWidget("timerlist.channelselect", "settings.raw");
+		CMenuWidget* mwtv = new CMenuWidget("timerlist.channelselect", "settings.raw");
+		CMenuWidget* mwradio = new CMenuWidget("timerlist.channelselect", "settings.raw");
 		CZapitClient::BouquetChannelList subchannellist;
-		zapit.getBouquetChannels(bouquet->bouquet_nr,subchannellist);
+		zapit.getBouquetChannels(bouquet->bouquet_nr,subchannellist,CZapitClient::MODE_TV);
 		CZapitClient::BouquetChannelList::iterator channel = subchannellist.begin();
 		for(; channel != subchannellist.end();channel++)
 		{
 			char cChannelId[11];
 			sprintf(cChannelId,"%010u",channel->channel_id);
-			mw->addItem(new CMenuForwarder(channel->name, true, "", this, string("SC:")+string(cChannelId)+string(channel->name)));
+			mwtv->addItem(new CMenuForwarder(channel->name, true, "", this, string("SCT:")+string(cChannelId)+string(channel->name)));
 		}
-		mc->addItem(new CMenuForwarder(bouquet->name, true, "",mw));
+		subchannellist.clear();
+		zapit.getBouquetChannels(bouquet->bouquet_nr,subchannellist,CZapitClient::MODE_RADIO);
+		channel = subchannellist.begin();
+		for(; channel != subchannellist.end();channel++)
+		{
+			char cChannelId[11];
+			sprintf(cChannelId,"%010u",channel->channel_id);
+			mwradio->addItem(new CMenuForwarder(channel->name, true, "", this, string("SCR:")+string(cChannelId)+string(channel->name)));
+		}
+		mctv->addItem(new CMenuForwarder(bouquet->name, true, "",mwtv));
+		mcradio->addItem(new CMenuForwarder(bouquet->name, true, "",mwradio));
 	}
+	CMenuWidget* mm = new CMenuWidget("timerlist.modeselect", "settings.raw");
+	mm->addItem(new CMenuForwarder("timerlist.modetv", true, "", mctv));
+	mm->addItem(new CMenuForwarder("timerlist.moderadio", true, "", mcradio));
 	strcpy(timerNew_channel_name,"---");
-	CMenuForwarder* m5 = new CMenuForwarder("timerlist.channel", false, timerNew_channel_name, mc); 
-
+	CMenuForwarder* m5 = new CMenuForwarder("timerlist.channel", false, timerNew_channel_name, mm); 
 
 	CMenuOptionChooser* m6 = new CMenuOptionChooser("timerlist.standby", &timerNew_standby_on , false); 
 	m6->addOption(0 , "timerlist.standby.off");
@@ -774,7 +823,6 @@ void CTimerList::newTimer()
 	m0->addOption((int)CTimerd::TIMER_RECORD, "timerlist.type.record");
 	m0->addOption((int)CTimerd::TIMER_SLEEPTIMER, "timerlist.type.sleeptimer");
 	m0->addOption((int)CTimerd::TIMER_REMIND, "timerlist.type.remind");
-
 
 	timerSettings.addItem( m0);
 	timerSettings.addItem( m1);

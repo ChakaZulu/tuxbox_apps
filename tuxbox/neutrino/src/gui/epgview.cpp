@@ -464,10 +464,16 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 						timerdclient = new CTimerdClient;
 						if(timerdclient->isTimerdAvailable())
 						{
+							CTimerd::CChannelMode mode;
+							if(CNeutrinoApp::getInstance()->getMode()==NeutrinoMessages::mode_radio)
+								mode = CTimerd::MODE_RADIO;
+							else
+								mode = CTimerd::MODE_TV;
 							timerdclient->addRecordTimerEvent(channel_id, epgData.eventID, 
 																		 epgData.epg_times.startzeit - (atoi(g_settings.record_safety_time)*60),
 																		 epgData.epg_times.startzeit - (ANNOUNCETIME + (atoi(g_settings.record_safety_time)*60)),
-																		 epgData.epg_times.startzeit + epgData.epg_times.dauer );
+																		 epgData.epg_times.startzeit + epgData.epg_times.dauer,
+																		 mode );
 							ShowMsg ( "timer.eventrecord.title", g_Locale->getText("timer.eventrecord.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 						}
 						else
@@ -482,7 +488,15 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 					timerdclient = new CTimerdClient;
 					if(timerdclient->isTimerdAvailable())
 					{
-						timerdclient->addZaptoTimerEvent(channel_id, epgData.eventID, epgData.epg_times.startzeit, epgData.epg_times.startzeit - ANNOUNCETIME, 0);
+						CTimerd::CChannelMode mode;
+						if(CNeutrinoApp::getInstance()->getMode()==NeutrinoMessages::mode_radio)
+							mode = CTimerd::MODE_RADIO;
+						else
+							mode = CTimerd::MODE_TV;
+						timerdclient->addZaptoTimerEvent(channel_id, epgData.eventID, 
+																	epgData.epg_times.startzeit,
+																	epgData.epg_times.startzeit - ANNOUNCETIME, 
+																	0, mode);
 						printf("Added ZaptoTimerEvent for channel_id: %08x epgID: %llu\n", channel_id, epgData.eventID);
 						ShowMsg ( "timer.eventtimed.title", g_Locale->getText("timer.eventtimed.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 					}

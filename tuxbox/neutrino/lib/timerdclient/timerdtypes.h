@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdtypes.h,v 1.5 2002/10/22 22:33:55 Zwen Exp $
+	$Id: timerdtypes.h,v 1.6 2002/11/08 09:25:22 Zwen Exp $
 
 	License: GPL
 
@@ -68,6 +68,11 @@ class CTimerd
 			TIMERSTATE_ISRUNNING, 
 			TIMERSTATE_HASFINISHED, 
 			TIMERSTATE_TERMINATED 
+		};
+		enum CChannelMode
+		{
+			MODE_TV=1,
+			MODE_RADIO
 		};
 
 		static const char ACTVERSION = 1;
@@ -154,6 +159,7 @@ class CTimerd
 			unsigned long long epgID;
 			t_channel_id       channel_id;
 			uint               apid;
+			CChannelMode       mode;
 		};
 
 		struct responseGetTimer
@@ -168,6 +174,7 @@ class CTimerd
 			t_channel_id channel_id; //only filled if applicable
 			unsigned long long epgID; //only filled if applicable
 			uint apid; //only filled if applicable
+			CChannelMode mode; //only filled if applicable
 			bool standby_on; //only filled if applicable
 			char message[REMINDER_MESSAGE_MAXLEN]; //only filled if applicable
 			bool operator< (const responseGetTimer& a) const

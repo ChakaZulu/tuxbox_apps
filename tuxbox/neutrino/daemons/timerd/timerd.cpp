@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerd.cpp,v 1.32 2002/10/19 21:47:44 obi Exp $
+	$Id: timerd.cpp,v 1.33 2002/11/08 09:25:22 Zwen Exp $
 
 	License: GPL
 
@@ -297,11 +297,13 @@ void parse_command(int connfd, CBasicMessage::Header * rmessage)
 						resp.epgID = static_cast<CTimerEvent_Record*>(event)->eventInfo.epgID;
 						resp.channel_id = static_cast<CTimerEvent_Record*>(event)->eventInfo.channel_id;
 						resp.apid = static_cast<CTimerEvent_Record*>(event)->eventInfo.apid;
+						resp.mode = static_cast<CTimerEvent_Record*>(event)->eventInfo.mode;
 					}
 					else if(event->eventID == CTimerd::TIMER_ZAPTO)
 					{
 						resp.epgID = static_cast<CTimerEvent_Zapto*>(event)->eventInfo.epgID;
 						resp.channel_id = static_cast<CTimerEvent_Zapto*>(event)->eventInfo.channel_id;
+						resp.mode = static_cast<CTimerEvent_Zapto*>(event)->eventInfo.mode;
 					}
 					else if(event->eventID == CTimerd::TIMER_REMIND)
 					{
@@ -341,11 +343,13 @@ void parse_command(int connfd, CBasicMessage::Header * rmessage)
 						resp.epgID = static_cast<CTimerEvent_Record*>(event)->eventInfo.epgID;
 						resp.channel_id = static_cast<CTimerEvent_Record*>(event)->eventInfo.channel_id;
 						resp.apid = static_cast<CTimerEvent_Record*>(event)->eventInfo.apid;
+						resp.mode = static_cast<CTimerEvent_Record*>(event)->eventInfo.mode;
 					}
 					else if(event->eventType == CTimerd::TIMER_ZAPTO)
 					{
 						resp.epgID = static_cast<CTimerEvent_Zapto*>(event)->eventInfo.epgID;
 						resp.channel_id = static_cast<CTimerEvent_Zapto*>(event)->eventInfo.channel_id;
+						resp.mode = static_cast<CTimerEvent_Zapto*>(event)->eventInfo.mode;
 					}
 					else if(event->eventType == CTimerd::TIMER_REMIND)
 					{
@@ -423,6 +427,7 @@ void parse_command(int connfd, CBasicMessage::Header * rmessage)
 															evInfo.channel_id,
 															evInfo.epgID,
 															evInfo.apid,
+															evInfo.mode,
 															msgAddTimer.eventRepeat);
 					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
 					break;
@@ -436,6 +441,7 @@ void parse_command(int connfd, CBasicMessage::Header * rmessage)
 															  msgAddTimer.alarmTime,
 															  evInfo.channel_id,
 															  evInfo.epgID,
+															  evInfo.mode,
 															  msgAddTimer.eventRepeat);
 						rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
 					}

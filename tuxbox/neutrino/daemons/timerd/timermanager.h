@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.h,v 1.27 2002/10/20 00:04:18 Zwen Exp $
+	$Id: timermanager.h,v 1.28 2002/11/08 09:25:22 Zwen Exp $
 
 	License: GPL
 
@@ -57,7 +57,7 @@ class CTimerEvent
 //		CTimerEvent();
 		CTimerEvent( CTimerd::CTimerEventTypes evtype, int mon = 0, int day = 0, int hour = 0, int min = 0, CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE);
 		CTimerEvent( CTimerd::CTimerEventTypes evtype, time_t announcetime, time_t alarmtime, time_t stoptime, CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE);
-                CTimerEvent( CTimerd::CTimerEventTypes evtype, CConfigFile *config, int iId);
+		CTimerEvent( CTimerd::CTimerEventTypes evtype, CConfigFile *config, int iId);
 		
 		void setState(CTimerd::CTimerEventStates newstate){previousState = eventState; eventState = newstate;};
 
@@ -121,7 +121,8 @@ class CTimerEvent_Record : public CTimerEvent
 
 		CTimerEvent_Record( time_t announceTime, time_t alarmTime, time_t stopTime, 
                           t_channel_id channel_id, unsigned long long epgID=0, 
-                          uint apid = 0, CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE);
+                          uint apid = 0, CTimerd::CChannelMode mode = CTimerd::MODE_TV,
+								  CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE);
 		CTimerEvent_Record(CConfigFile *config, int iId);
 		virtual void fireEvent();
 		virtual void announceEvent();
@@ -138,6 +139,7 @@ class CTimerEvent_Zapto : public CTimerEvent
 
 		CTimerEvent_Zapto( time_t announceTime, time_t alarmTime, 
 								 t_channel_id channel_id, unsigned long long epgID=0, 
+								 CTimerd::CChannelMode mode = CTimerd::MODE_TV,
 								 CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE);
 		CTimerEvent_Zapto(CConfigFile *config, int iId);
 		virtual void fireEvent();

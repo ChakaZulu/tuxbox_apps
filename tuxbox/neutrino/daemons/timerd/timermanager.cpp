@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.51 2002/11/04 18:59:35 Zwen Exp $
+   $Id: timermanager.cpp,v 1.52 2002/11/08 09:25:22 Zwen Exp $
 
 	License: GPL
 
@@ -645,12 +645,14 @@ void CTimerEvent_Standby::saveToConfig(CConfigFile *config)
 //=============================================================
 CTimerEvent_Record::CTimerEvent_Record( time_t announceTime, time_t alarmTime, time_t stopTime, 
 													 t_channel_id channel_id, unsigned long long epgID, uint apid,
+													 CTimerd::CChannelMode mode,
 													 CTimerd::CTimerEventRepeat evrepeat) :
 CTimerEvent(CTimerd::TIMER_RECORD, announceTime, alarmTime, stopTime, evrepeat)
 {
 	eventInfo.epgID = epgID;
 	eventInfo.channel_id = channel_id;
 	eventInfo.apid = apid;
+	eventInfo.mode = mode;
 }
 //------------------------------------------------------------
 CTimerEvent_Record::CTimerEvent_Record(CConfigFile *config, int iId):
@@ -662,6 +664,7 @@ CTimerEvent(CTimerd::TIMER_RECORD, config, iId)
 	eventInfo.epgID = config->getInt64("EVENT_INFO_EPG_ID_"+id);
 	eventInfo.channel_id = config->getInt32("EVENT_INFO_ONID_SID_"+id);
 	eventInfo.apid = config->getInt32("EVENT_INFO_APID_"+id);
+	eventInfo.mode = (CTimerd::CChannelMode) config->getInt32("EVENT_INFO_CHANNEL_MODE_"+id);
 }
 //------------------------------------------------------------
 void CTimerEvent_Record::announceEvent()
@@ -713,6 +716,7 @@ void CTimerEvent_Record::saveToConfig(CConfigFile *config)
 	config->setInt64("EVENT_INFO_EPG_ID_"+id,eventInfo.epgID);
 	config->setInt32("EVENT_INFO_ONID_SID_"+id,eventInfo.channel_id);
 	config->setInt32("EVENT_INFO_APID_"+id,eventInfo.apid);
+	config->setInt32("EVENT_INFO_CHANNEL_MODE_"+id, (int) eventInfo.mode);
 }
 //------------------------------------------------------------
 void CTimerEvent_Record::Reschedule()
@@ -726,11 +730,13 @@ void CTimerEvent_Record::Reschedule()
 //=============================================================
 CTimerEvent_Zapto::CTimerEvent_Zapto( time_t announceTime, time_t alarmTime, 
 												  t_channel_id channel_id, unsigned long long epgID, 
+												  CTimerd::CChannelMode mode,
 												  CTimerd::CTimerEventRepeat evrepeat) :
 CTimerEvent(CTimerd::TIMER_ZAPTO, announceTime, alarmTime, (time_t) 0, evrepeat)
 {
 	eventInfo.epgID = epgID;
 	eventInfo.channel_id = channel_id;
+	eventInfo.mode = mode;
 }
 //------------------------------------------------------------
 CTimerEvent_Zapto::CTimerEvent_Zapto(CConfigFile *config, int iId):
@@ -741,6 +747,7 @@ CTimerEvent(CTimerd::TIMER_ZAPTO, config, iId)
 	string id=ostr.str();
 	eventInfo.epgID = config->getInt64("EVENT_INFO_EPG_ID_"+id);
 	eventInfo.channel_id = config->getInt32("EVENT_INFO_ONID_SID_"+id);
+	eventInfo.mode = (CTimerd::CChannelMode) config->getInt32("EVENT_INFO_CHANNEL_MODE_"+id);
 }
 //------------------------------------------------------------
 void CTimerEvent_Zapto::announceEvent()
@@ -771,6 +778,7 @@ void CTimerEvent_Zapto::saveToConfig(CConfigFile *config)
 	string id=ostr.str();
 	config->setInt64("EVENT_INFO_EPG_ID_"+id,eventInfo.epgID);
 	config->setInt32("EVENT_INFO_ONID_SID_"+id,eventInfo.channel_id);
+	config->setInt32("EVENT_INFO_CHANNEL_MODE_"+id, (int) eventInfo.mode);
 }
 //------------------------------------------------------------
 void CTimerEvent_Zapto::Reschedule()
