@@ -155,14 +155,14 @@ unsigned short CMP3Player::MadFixedToUshort(mad_fixed_t Fixed)
 /****************************************************************************
  * Print human readable informations about an audio MPEG frame.				*
  ****************************************************************************/
-int CMP3Player::PrintFrameInfo(FILE *fp, struct mad_header *Header)
+void CMP3Player::CreateInfo()
 {
 	const char	*Layer,
-				*Mode,
-				*Emphasis;
-
+				   *Mode,
+				   *Emphasis,
+               *Vbr;
 	/* Convert the layer number to it's printed representation. */
-	switch(Header->layer)
+	switch(m_layer)
 	{
 		case MAD_LAYER_I:
 			Layer="I";
@@ -174,12 +174,12 @@ int CMP3Player::PrintFrameInfo(FILE *fp, struct mad_header *Header)
 			Layer="III";
 			break;
 		default:
-			Layer="(unexpected layer value)";
+			Layer="?";
 			break;
 	}
 
 	/* Convert the audio mode to it's printed representation. */
-	switch(Header->mode)
+	switch(m_mode)
 	{
 		case MAD_MODE_SINGLE_CHANNEL:
 			Mode="single channel";
@@ -194,12 +194,12 @@ int CMP3Player::PrintFrameInfo(FILE *fp, struct mad_header *Header)
 			Mode="normal stereo";
 			break;
 		default:
-			Mode="(unexpected mode value)";
+			Mode="unkn. mode";
 			break;
 	}
 
 	/* Convert the emphasis to it's printed representation. */
-	switch(Header->emphasis)
+	switch(m_emphasis)
 	{
 		case MAD_EMPHASIS_NONE:
 			Emphasis="no";
@@ -215,14 +215,21 @@ int CMP3Player::PrintFrameInfo(FILE *fp, struct mad_header *Header)
 			break;
 	}
 
+   if(m_vbr)
+      Vbr="VBR ";
+   else
+      Vbr="";
+
 //	fprintf(fp,"%s: %lu kb/s audio mpeg layer %s stream %s crc, "
 //			"%s with %s emphasis at %d Hz sample rate\n",
 //			ProgName,Header->bitrate,Layer,
 //			Header->flags&MAD_FLAG_PROTECTION?"with":"without",
 //			Mode,Emphasis,Header->samplerate);
-   sprintf(m_mp3info,"%lukbs / %.1fKHz / %s / layer %s",Header->bitrate/1000,(float)Header->samplerate/1000,
-           Mode,Layer);
-	return(ferror(fp));
+   
+   sprintf(m_mp3info,"%s%lukbs / %.1fKHz / %s / layer %s", Vbr, m_bitrate/1000,
+           (float)m_samplerate/1000, Mode,Layer);
+   long secs = m_filesize * 8 / m_bitrate;
+   sprintf(m_timeTotal,"%lu:%02lu", secs/60, secs%60);
 }
 
 /****************************************************************************
@@ -241,7 +248,7 @@ int CMP3Player::MpegAudioDecoder(FILE *InputFp,FILE *OutputFp)
 						*OutputPtr=OutputBuffer;
 	const unsigned char	*OutputBufferEnd=OutputBuffer+OUTPUT_BUFFER_SIZE;
 	int					Status=0,
-						i;
+						i,ret;
 	unsigned long		FrameCount=0;
 
 	/* First the structures used by libmad must be initialized. */
@@ -255,10 +262,15 @@ int CMP3Player::MpegAudioDecoder(FILE *InputFp,FILE *OutputFp)
 	 */
 
 	/* This is the decoding loop. */
-	do_loop = true;
 	state = PLAY;
 	do
 	{
+      if(state==PAUSE)
+      {
+         // in pause mode do nothing
+         usleep(100000);
+         continue;
+      }
 		/* The input bucket must be filled if it becomes empty or if
 		 * it's the first execution of the loop.
 		 */
@@ -351,42 +363,66 @@ int CMP3Player::MpegAudioDecoder(FILE *InputFp,FILE *OutputFp)
 		 * this case one can call again mad_frame_decode() in order to
 		 * skip the faulty part and re-sync to the next frame.
 		 */
-		if(mad_frame_decode(&Frame,&Stream))
-			if(MAD_RECOVERABLE(Stream.error))
-			{
-				fprintf(stderr,"%s: recoverable frame level error (%s)\n",
-						ProgName,MadErrorString(&Stream));
-				fflush(stderr);
-				continue;
-			}
-			else
-				if(Stream.error==MAD_ERROR_BUFLEN)
-					continue;
-				else
-				{
-					fprintf(stderr,"%s: unrecoverable frame level error (%s).\n",
-							ProgName,MadErrorString(&Stream));
-					Status=1;
-					break;
-				}
+		// decode 5 frames each 75 frames in ff mode
+      if( state!=FF || FrameCount % 75 < 5 )
+			ret=mad_frame_decode(&Frame,&Stream);
+		else
+			ret=mad_header_decode(&Frame.header,&Stream);
 
-		/* The characteristics of the stream's first frame is printed
-		 * on stderr. The first frame is representative of the entire
+       if(ret)
+       {
+          if(MAD_RECOVERABLE(Stream.error))
+          {
+				 // no errrors in FF mode
+				 if(state!=FF)
+				 {
+					 fprintf(stderr,"%s: recoverable frame level error (%s)\n",
+								ProgName,MadErrorString(&Stream));
+					 fflush(stderr);
+				 }
+             continue;
+          }
+          else
+             if(Stream.error==MAD_ERROR_BUFLEN)
+                continue;
+             else
+             {
+                fprintf(stderr,"%s: unrecoverable frame level error (%s).\n",
+                        ProgName,MadErrorString(&Stream));
+                Status=1;
+               break;
+             }
+       }
+
+		/* On first frame set DSP & save header info
+		 * The first frame is representative of the entire
 		 * stream.
 		 */
 		if(FrameCount==0)
 		{
-			if(PrintFrameInfo(stderr,&Frame.header))
-			{
-				Status=1;
-				break;
-			}
 			if (SetDSP(OutputFp, &Frame.header))
 			{
 				Status=1;
 				break;
 			}
-		}
+         m_samplerate=Frame.header.samplerate;
+         m_bitrate=Frame.header.bitrate;
+         m_mode=Frame.header.mode;
+         m_layer=Frame.header.layer;
+         m_emphasis=Frame.header.emphasis;
+         m_vbr=false;
+         CreateInfo();
+      }
+      else
+      {
+         if(m_bitrate!=Frame.header.bitrate)
+         {
+            m_vbr=true;
+            double fract = (double)FrameCount/(FrameCount+1);
+            m_bitrate= (int)((double)m_bitrate*fract + ((double)Frame.header.bitrate)/(FrameCount+1));
+            CreateInfo();
+         }
+      }
 
 		/* Accounting. The computed frame duration is in the frame
 		 * header structure. It is expressed as a fixed point number
@@ -399,50 +435,58 @@ int CMP3Player::MpegAudioDecoder(FILE *InputFp,FILE *OutputFp)
 		 */
 		FrameCount++;
 		mad_timer_add(&Timer,Frame.header.duration);
+		mad_timer_string(Timer,m_timePlayed,"%lu:%02lu",
+                       MAD_UNITS_MINUTES,MAD_UNITS_MILLISECONDS,0);
+
 				
-		/* Once decoded the frame is synthesized to PCM samples. No errors
-		 * are reported by mad_synth_frame();
-		 */
-		mad_synth_frame(&Synth,&Frame);
+		// decode 5 frames each 75 frames in ff mode
+      if( state!=FF || FrameCount % 75 < 5)
+      {
+		
+         /* Once decoded the frame is synthesized to PCM samples. No errors
+		    * are reported by mad_synth_frame();
+		    */
+         mad_synth_frame(&Synth,&Frame);
 		
 
-		/* Synthesized samples must be converted from mad's fixed
-		 * point number to the consumer format. Here we use unsigned
-		 * 16 bit big endian integers on two channels. Integer samples
-		 * are temporarily stored in a buffer that is flushed when
-		 * full.
-		 */
-		for(i=0;i<Synth.pcm.length;i++)
-		{
-			unsigned short	Sample;
+		   /* Synthesized samples must be converted from mad's fixed
+		    * point number to the consumer format. Here we use unsigned
+		    * 16 bit big endian integers on two channels. Integer samples
+		    * are temporarily stored in a buffer that is flushed when
+		    * full.
+		    */
+         for(i=0;i<Synth.pcm.length;i++)
+         {
+            unsigned short	Sample;
 
-			/* Left channel */
-			Sample=MadFixedToUshort(Synth.pcm.samples[0][i]);
-			*(OutputPtr++)=Sample>>8;
-			*(OutputPtr++)=Sample&0xff;
+            /* Left channel */
+            Sample=MadFixedToUshort(Synth.pcm.samples[0][i]);
+            *(OutputPtr++)=Sample>>8;
+            *(OutputPtr++)=Sample&0xff;
 
-			/* Right channel. If the decoded stream is monophonic then
-			 * the right output channel is the same as the left one.
-			 */
-			if(MAD_NCHANNELS(&Frame.header)==2)
-				Sample=MadFixedToUshort(Synth.pcm.samples[1][i]);
-			*(OutputPtr++)=Sample>>8;
-			*(OutputPtr++)=Sample&0xff;
+			   /* Right channel. If the decoded stream is monophonic then
+			    * the right output channel is the same as the left one.
+			    */
+            if(MAD_NCHANNELS(&Frame.header)==2)
+               Sample=MadFixedToUshort(Synth.pcm.samples[1][i]);
+            *(OutputPtr++)=Sample>>8;
+            *(OutputPtr++)=Sample&0xff;
 
-			/* Flush the buffer if it is full. */
-			if(OutputPtr==OutputBufferEnd)
-			{
-				if(fwrite(OutputBuffer,1,OUTPUT_BUFFER_SIZE,OutputFp)!=OUTPUT_BUFFER_SIZE)
-				{
-					fprintf(stderr,"%s: PCM write error (%s).\n",
-						ProgName,strerror(errno));
-					Status=2;
-					break;
-				}
+			   /* Flush the buffer if it is full. */
+            if(OutputPtr==OutputBufferEnd)
+            {
+               if(fwrite(OutputBuffer,1,OUTPUT_BUFFER_SIZE,OutputFp)!=OUTPUT_BUFFER_SIZE)
+               {
+                  fprintf(stderr,"%s: PCM write error (%s).\n",
+                          ProgName,strerror(errno));
+                  Status=2;
+                  break;
+               }
 			
-				OutputPtr=OutputBuffer;
-			}
-		}
+               OutputPtr=OutputBuffer;
+            }
+         }
+      }
 	}while(do_loop);
 
 	/* Mad is no longer used, the structures that were initialized must
@@ -470,8 +514,6 @@ int CMP3Player::MpegAudioDecoder(FILE *InputFp,FILE *OutputFp)
 	/* Accounting report if no error occured. */
 	if(!Status)
 	{
-		char	Buffer[80];
-
 		/* The duration timer is converted to a human readable string
 		 * with the versatile but still constrained mad_timer_string()
 		 * function, in a fashion not unlike strftime(). The main
@@ -488,7 +530,7 @@ int CMP3Player::MpegAudioDecoder(FILE *InputFp,FILE *OutputFp)
 		 * of the available units, fraction of units, their meanings,
 		 * the format arguments, etc.
 		 */
-		mad_timer_string(Timer,Buffer,"%lu:%02lu.%03u",
+		mad_timer_string(Timer,m_timePlayed,"%lu:%02lu",
 						 MAD_UNITS_MINUTES,MAD_UNITS_MILLISECONDS,0);
 //		fprintf(stderr,"%s: %lu frames decoded (%s).\n",
 //				ProgName,FrameCount,Buffer);
@@ -532,10 +574,21 @@ void CMP3Player::stop()
 {
 	do_loop = false;
 	pthread_join(thrPlay,NULL);
-//	pthread_cancel(thrPlay);
-//	fcloseall();
 }
-
+void CMP3Player::pause()
+{
+   if(state==PLAY || state==FF)
+      state=PAUSE;
+   else if(state==PAUSE)
+      state=PLAY;
+}
+void CMP3Player::ff()
+{
+   if(state==PLAY || state==PAUSE)
+      state=FF;
+   else if(state==FF)
+      state=PLAY;
+}
 CMP3Player* CMP3Player::getInstance()
 {
 	static CMP3Player* mp3player = NULL;
@@ -556,6 +609,10 @@ void* CMP3Player::PlayThread(void * filename)
 		fp = ::fopen((char *)filename,"r");
 		if (fp!=NULL)
 		{
+         /* Calc file length */
+         fseek(fp, 0, SEEK_END);
+         CMP3Player::getInstance()->m_filesize=ftell(fp);
+         rewind(fp);
 			/* Decode stdin to stdout. */
 			int Status = CMP3Player::getInstance()->MpegAudioDecoder(fp,soundfd);
 			if(Status > 0)
@@ -581,6 +638,10 @@ bool CMP3Player::play(const char *filename)
 	if(true)
 	{
 		stop();
+		strcpy(m_mp3info,"");
+		strcpy(m_timePlayed,"0:00");
+		strcpy(m_timeTotal,"0:00");
+      do_loop = true;
 		state = PLAY;
 		if (pthread_create (&thrPlay, NULL, PlayThread,(void *) filename) != 0 )
 		{
@@ -612,5 +673,4 @@ CMP3Player::CMP3Player()
 void CMP3Player::init()
 {
 	state = STOP;
-	strcpy(m_mp3info,"");
 }

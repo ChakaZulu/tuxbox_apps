@@ -320,29 +320,49 @@ void CLCD::showMP3(const std::string artist, const std::string title,
 		return;
 	}
 	// reload specified line
-	display.draw_fill_rect (-1,10,106,24, CLCDDisplay::PIXEL_OFF);
-	display.draw_fill_rect (-1,20,106,37, CLCDDisplay::PIXEL_OFF);
+	display.draw_fill_rect (-1,10,104,24, CLCDDisplay::PIXEL_OFF);
+	display.draw_fill_rect (-1,20,104,37, CLCDDisplay::PIXEL_OFF);
 	display.draw_fill_rect (-1,33,121,50, CLCDDisplay::PIXEL_OFF);
-	fonts.menu->RenderString(0,22, 111, artist.c_str() , CLCDDisplay::PIXEL_ON, 0);
-	fonts.menu->RenderString(0,35, 111, album.c_str() , CLCDDisplay::PIXEL_ON, 0);
+	fonts.menu->RenderString(0,22, 107, artist.c_str() , CLCDDisplay::PIXEL_ON, 0);
+	fonts.menu->RenderString(0,35, 107, album.c_str() , CLCDDisplay::PIXEL_ON, 0);
 	fonts.menu->RenderString(0,48, 125, title.c_str() , CLCDDisplay::PIXEL_ON, 0);
 	display.update();
 }
 
-void CLCD::showMP3Play(bool play)
+void CLCD::showMP3Play(MP3MODES m)
 {
 	display.draw_fill_rect (109,21,119,31, CLCDDisplay::PIXEL_OFF);
-	if(play)
+	switch(m)
 	{
-		int x=112,y=22;
-		display.draw_line(x  ,y  ,x  ,y+8, CLCDDisplay::PIXEL_ON);
-		display.draw_line(x+1,y+1,x+1,y+7, CLCDDisplay::PIXEL_ON);
-		display.draw_line(x+2,y+2,x+2,y+6, CLCDDisplay::PIXEL_ON);
-		display.draw_line(x+3,y+3,x+3,y+5, CLCDDisplay::PIXEL_ON);
-		display.draw_line(x+4,y+4,x+4,y+4, CLCDDisplay::PIXEL_ON);
+		case MP3_PLAY:
+			{
+				int x=112,y=22;
+				display.draw_line(x  ,y  ,x  ,y+8, CLCDDisplay::PIXEL_ON);
+				display.draw_line(x+1,y+1,x+1,y+7, CLCDDisplay::PIXEL_ON);
+				display.draw_line(x+2,y+2,x+2,y+6, CLCDDisplay::PIXEL_ON);
+				display.draw_line(x+3,y+3,x+3,y+5, CLCDDisplay::PIXEL_ON);
+				display.draw_line(x+4,y+4,x+4,y+4, CLCDDisplay::PIXEL_ON);
+				break;
+			}
+		case MP3_STOP:
+			display.draw_fill_rect (110,22,118,30, CLCDDisplay::PIXEL_ON);
+			break;
+		case MP3_PAUSE:
+			display.draw_line(111,23,111,29, CLCDDisplay::PIXEL_ON);
+			display.draw_line(112,23,112,29, CLCDDisplay::PIXEL_ON);
+			display.draw_line(116,23,116,29, CLCDDisplay::PIXEL_ON);
+			display.draw_line(117,23,117,29, CLCDDisplay::PIXEL_ON);
+			break;
+		case MP3_FF:
+			display.draw_line(111,23,114,26, CLCDDisplay::PIXEL_ON);
+			display.draw_line(114,26,110,29, CLCDDisplay::PIXEL_ON);
+			display.draw_line(114,23,117,26, CLCDDisplay::PIXEL_ON);
+			display.draw_line(117,26,113,29, CLCDDisplay::PIXEL_ON);
+			break;
+		case MP3_REV:
+			break;
 	}
-	else
-		display.draw_fill_rect (110,22,118,30, CLCDDisplay::PIXEL_ON);
+	display.update();
 }
 void CLCD::setMode(MODES m, std::string title)
 {
@@ -383,7 +403,10 @@ void CLCD::setMode(MODES m, std::string title)
 			display.draw_line(x+11,y+3,x+13,y+3,CLCDDisplay::PIXEL_ON);
 			display.draw_line(x+11,y+6,x+13,y+6,CLCDDisplay::PIXEL_ON);
 
-			showMP3Play(false);
+			display.draw_line(x-2,12,x-2,32, CLCDDisplay::PIXEL_ON);
+			display.draw_line(x-2,32,x+14,32, CLCDDisplay::PIXEL_ON);
+
+			showMP3Play(MP3_STOP);
 			showVolume(volume);
 			showTime();
 			display.update();

@@ -50,6 +50,14 @@ class CLCD
 			MODE_MENU_UTF8,
 			MODE_MP3
 		};
+		enum MP3MODES
+		{
+			MP3_PLAY,
+			MP3_STOP,
+			MP3_FF,
+			MP3_PAUSE,
+			MP3_REV
+		};
 
 
 	private:
@@ -108,7 +116,7 @@ class CLCD
 		void showVolume(char vol);
 		void showMenuText(const int position, const std::string text, const int highlight = -1, const bool utf_encoded = false);
 		void showMP3(const std::string artist, const std::string title, const std::string album);
-		void showMP3Play(bool play=true);
+		void showMP3Play(MP3MODES m=MP3_PLAY);
 		void setBrightness(int);
 		int getBrightness();
 

@@ -652,6 +652,9 @@ mp3player.title Tytul
 mp3player.artist Wykonawca
 mp3player.playing Bierzacy
 mp3player.id3scan Skanuj ID3 info
+mp3player.keylevel undef
+mp3player.fastforward undef
+mp3player.pause undef
 
 filebrowser.head Przegladarka
 filebrowser.filter Filtr

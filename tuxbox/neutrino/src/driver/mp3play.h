@@ -58,22 +58,38 @@ class CMP3Player
 	FILE		*fp;
 	static void* PlayThread(void*);
    char m_mp3info[100];
+   char m_timePlayed[11];
+   char m_timeTotal[11];
+   long m_filesize;
+   enum mad_layer m_layer;
+   enum mad_mode m_mode;
+   enum mad_emphasis m_emphasis;
+   unsigned long m_bitrate;
+   unsigned int m_samplerate;
+   bool m_vbr;
+
 
 	const char		*MadErrorString(const struct mad_stream *Stream);
 	unsigned short	MadFixedToUshort(mad_fixed_t Fixed);
-	int				PrintFrameInfo(FILE *fp, struct mad_header *Header);
+	void				CreateInfo();
 	int				MpegAudioDecoder(FILE *InputFp,FILE *OutputFp);
 
 
 public:
-	enum State {STOP = 0, PLAY};
+	enum State {STOP = 0, PLAY, PAUSE, FF};
 	State state;
 	static CMP3Player* getInstance();
 	bool SetDSP(FILE *soundfd, struct mad_header *Header);
 	bool play(const char *filename);
 	void stop();
+   void pause();
 	void init();
+   void ff();
+//   void rev();
    char* getMp3Info(){return m_mp3info;}
+   char* getTimePlayed(){return m_timePlayed;}
+   char* getTimeTotal(){return m_timeTotal;}
+
 	CMP3Player();
 	~CMP3Player();
 

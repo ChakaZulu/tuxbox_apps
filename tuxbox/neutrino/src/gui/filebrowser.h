@@ -44,7 +44,6 @@
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
 #include <system/settings.h>
-#include <driver/mp3play.h>
 
 #include "color.h"
 #include "infoviewer.h"

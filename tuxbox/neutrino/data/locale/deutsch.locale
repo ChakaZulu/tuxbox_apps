@@ -652,6 +652,9 @@ mp3player.title Titel
 mp3player.artist Interpret
 mp3player.playing Aktueller Track
 mp3player.id3scan Scanne ID3-Tags
+mp3player.keylevel Tasten-Umschaltung
+mp3player.fastforward schneller Vorl.
+mp3player.pause Pause
 
 filebrowser.head Filebrowser
 filebrowser.filter Filter

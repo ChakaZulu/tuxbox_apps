@@ -55,6 +55,7 @@ public:
    string Samplerate;
    string Layer;
 	string Duration;
+	string Genre;
 	bool VBR;
 	int Index;
 };
@@ -68,7 +69,10 @@ class CMP3PlayerGui : public CMenuTarget
 		enum State
 		{
 			PLAY=0,
-			STOP=1
+			STOP,
+			PAUSE,
+			FF,
+			REV
 		};
 	private:
 		CFrameBuffer		*frameBuffer;
@@ -83,13 +87,15 @@ class CMP3PlayerGui : public CMenuTarget
 		int					buttonHeight;
 		int               title_height;
 		int               info_height;
+		int               key_level;
 		bool				visible;			
 		State          m_state;
-		time_t         m_starttime;
+		string         m_time_total;
+		string         m_time_played;
+		string         m_mp3info;
 
 		CPlayList			playlist;
 		string				Path;
-		string m_mp3info;
 
 		int 			width;
 		int 			height;
@@ -114,8 +120,11 @@ class CMP3PlayerGui : public CMenuTarget
 		void clearItemID3DetailsLine ();
 		void play(int pos);
 		void stop();
+		void pause();
+		void ff();
 		int getNext();
-		void showTime();
+		void updateMP3Infos();
+		void updateTimes(bool force=false);
 		void showMP3Info();
 
 	public:

@@ -652,6 +652,9 @@ mp3player.title Titl
 mp3player.artist Sänga
 mp3player.playing Spuin
 mp3player.id3scan ID3-Tags durchsuacha
+mp3player.keylevel undef
+mp3player.fastforward undef
+mp3player.pause undef
 
 filebrowser.head Datiesucha
 filebrowser.filter Fuita

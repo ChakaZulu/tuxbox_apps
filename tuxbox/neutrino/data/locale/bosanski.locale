@@ -652,6 +652,9 @@ mp3player.title naslov
 mp3player.artist pjevac
 mp3player.playing pjesma
 mp3player.id3scan citaj id3-tag
+mp3player.keylevel undef
+mp3player.fastforward undef
+mp3player.pause undef
 
 filebrowser.head pretrazivac datoteka
 filebrowser.filter filter
