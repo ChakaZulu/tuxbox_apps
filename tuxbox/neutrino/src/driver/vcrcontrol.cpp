@@ -258,12 +258,15 @@ bool CVCRControl::CVCRDevice::Resume()
 bool CVCRControl::CServerDevice::Stop()
 {
 	printf("Stop\n"); 
-	if(!g_Zapit->isPlayBackActive())
+	if(!g_Zapit->isPlayBackActive() && 
+		CNeutrinoApp::getInstance()->getMode() != NeutrinoMessages::mode_standby)
 		g_Zapit->startPlayBack();
 	g_Sectionsd->setPauseScanning(false);
 	g_Zapit->setRecordMode( false );
-	// alten mode wieder herstellen
-	g_RCInput->postMsg( NeutrinoMessages::CHANGEMODE , last_mode);
+	// alten mode wieder herstellen (ausser wen zwischenzeitlich auf sb geschalten wurde)
+	if(CNeutrinoApp::getInstance()->getMode() != last_mode && 
+		CNeutrinoApp::getInstance()->getMode() != NeutrinoMessages::mode_standby)
+		g_RCInput->postMsg( NeutrinoMessages::CHANGEMODE , last_mode);
 
 	if(sendCommand(CMD_VCR_STOP))
 		return true;
