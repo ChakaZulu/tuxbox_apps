@@ -236,6 +236,13 @@ void eDVB::configureNetwork()
 			buffer.sprintf("/sbin/route add default gw %d.%d.%d.%d", gateway[0], gateway[1], gateway[2], gateway[3]);
 			if (system(buffer.c_str())>>8)
 				eDebug("'%s' failed", buffer.c_str());
+			if (maxmtu != 0)
+			{
+				buffer.sprintf("/sbin/ifconfig eth0 mtu %d", maxmtu);
+				printf("[EDVB] configureNetwork: setting MAXMTU to %d\n", maxmtu);
+				if (system(buffer.c_str())>>8)
+					eDebug("'%s' failed", buffer.c_str());
+			}
 		}
 		system("killall nmbd");
 		signal(SIGCHLD, SIG_IGN);
@@ -255,13 +262,6 @@ void eDVB::configureNetwork()
 				close(i);
 			execlp("smbd", "smbd", "-D", NULL);
 			_exit(0);
-		}
-		if (maxmtu != 0)
-		{
-			char setmtu[32];
-			sprintf(setmtu, "ifconfig eth0 mtu %d", maxmtu);
-			printf("[EDVB] configureNetwork: setting MAXMTU to %d\n", maxmtu);
-			system(setmtu);
 		}
 	}
 }
