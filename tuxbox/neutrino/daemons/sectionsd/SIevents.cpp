@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.9 2001/07/16 13:33:40 fnbrd Exp $
+// $Id: SIevents.cpp,v 1.10 2001/07/16 15:19:32 fnbrd Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.cpp,v $
+// Revision 1.10  2001/07/16 15:19:32  fnbrd
+// removeOldEvents beschleunigt.
+//
 // Revision 1.9  2001/07/16 13:33:40  fnbrd
 // removeOldEvents geaendert.
 //
@@ -353,32 +356,34 @@ void SIevents::removeOldEvents(long seconds)
 {
   // Alte events loeschen
   time_t zeit=time(NULL);
-  // Muss unbedingt ne andere Menge nehmen, bei der man Elemente loeschen kann
+  // Muss unbedingt ne andere Menge (maps) nehmen, bei der man Elemente loeschen kann
   // ohne das der iterator ungültig wird
-  int restartEvents=1;
-  for(;restartEvents;) {
-    restartEvents=0;
-    for(SIevents::iterator e=begin(); e!=end(); e++) {
-      int restartTimes=1;
-      SIevent evt(*e);
-      for(;restartTimes;) {
-        restartTimes=0; // wird gesetzt falls nochmal alle events durchgegangen werden muessen
-        for(SItimes::iterator t=evt.times.begin(); t!=evt.times.end(); t++)
-          if(t->startzeit+(int)t->dauer<zeit-seconds) {
-            evt.times.erase(*t); // -> iterator ungueltig :(
-            restartTimes=1;
-	    restartEvents=1;
-            break;
-          }
-      } // for restartTimes
-      if(restartEvents) {
-        erase(evt);
-        if(evt.times.size()!=0)
-	  insert(evt);
-	break;
-      }
-    } // for SIevents
-  } // for restartEvents
+  SIevents eventsToDelete;
+  SIevents eventsToInsert;
+  for(SIevents::iterator e=begin(); e!=end(); e++) {
+    int restartTimes=1;
+    SIevent evt(*e);
+    int evtChanged=0;
+    for(;restartTimes;) {
+      restartTimes=0; // wird gesetzt falls nochmal alle times durchgegangen werden muessen
+      for(SItimes::iterator t=evt.times.begin(); t!=evt.times.end(); t++)
+        if(t->startzeit+(int)t->dauer<zeit-seconds) {
+          evt.times.erase(*t); // -> iterator ungueltig :(
+	  evtChanged=1;
+          restartTimes=1;
+          break;
+        }
+    } // for restartTimes
+    if(evtChanged) {
+      eventsToDelete.insert(evt);
+      if(evt.times.size()!=0)
+	 eventsToInsert.insert(evt);
+    } // if evtChanged
+  } // for SIevents
+  for(SIevents::iterator e=eventsToDelete.begin(); e!=eventsToDelete.end(); e++)
+    erase(*e);
+  for(SIevents::iterator e=eventsToInsert.begin(); e!=eventsToInsert.end(); e++)
+    insert(*e);
 }
 
 // Entfernt anhand der Services alle time shifted events (ohne Text,
