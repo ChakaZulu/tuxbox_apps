@@ -30,11 +30,9 @@ eMainMenu::eMainMenu()
 
 int eMainMenu::exec()
 {
-	eEPGCache::getInstance()->stopEPG();
 	window->show();
 	int res=window->exec();
 	window->hide();
-	eEPGCache::getInstance()->startEPG();
 	return res;
 }
 

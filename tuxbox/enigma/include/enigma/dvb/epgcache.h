@@ -91,13 +91,13 @@ public:
 
 inline void eEPGCache::enterService()
 {
-	zapTimer.start(3000, 1);
+	zapTimer.start(4000, 1);
 }
 
 inline void eEPGCache::enterTransponder()
 {
 	if (!zapTimer.isActive())
-		zapTimer.start(3000, 1);
+		zapTimer.start(4000, 1);
 }
 
 inline void eEPGCache::startEPG()
