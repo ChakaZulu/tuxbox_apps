@@ -80,7 +80,6 @@ CPictureViewerGui::CPictureViewerGui()
 
 	visible = false;
 	selected = 0;
-	listmaxshow = (height-theight-0)/fheight;
 	m_sort = FILENAME;
 	m_viewer = new CPictureViewer();
 	m_filebrowser = new CFileBrowser();
