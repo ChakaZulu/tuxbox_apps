@@ -291,7 +291,7 @@ void eServicePlaylistHandler::removeRef(const eServiceReference &service)
 
 void eServicePlaylistHandler::enterDirectory(const eServiceReference &dir, Signal1<void,const eServiceReference&> &callback)
 {
-	if (dir.type == id)
+	if (dir.type == id)  // for playlists in other playlists..
 	{
 		ePlaylist *service=(ePlaylist*)addRef(dir);
 		if (!service)
@@ -301,7 +301,9 @@ void eServicePlaylistHandler::enterDirectory(const eServiceReference &dir, Signa
 			callback(*i);
 
 		removeRef(dir);
+		return;
 	}
+	// for playlists in any other root.. but not in another playlist..
 	std::pair<std::multimap<eServiceReference,eServiceReference>::const_iterator,std::multimap<eServiceReference,eServiceReference>::const_iterator>
 		range=playlists.equal_range(dir);
 	while (range.first != range.second)
