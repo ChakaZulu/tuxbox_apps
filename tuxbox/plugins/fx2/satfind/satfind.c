@@ -30,6 +30,7 @@
 #include <sys/ioctl.h>
 #include <string.h>
 #include <errno.h>
+#include <stdint.h>
 
 #include <dbox/lcd-ks0713.h>
 
@@ -53,9 +54,9 @@ typedef unsigned char screen_t[LCD_BUFFER_SIZE];
 #define FILLED 4
 
 struct signal {
-  __u32 ber;
-  __u16 snr;
-  __u16 strength;
+  uint32_t ber;
+  uint16_t snr;
+  uint16_t strength;
   fe_status_t status;
 };
 

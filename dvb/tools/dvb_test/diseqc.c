@@ -14,11 +14,12 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <linux/dvb/frontend.h>
+#include <stdint.h>
 
 
 struct diseqc_cmd {
 	struct dvb_diseqc_master_cmd cmd;
-	__u32 wait;
+	uint32_t wait;
 };
 
 
@@ -45,7 +46,7 @@ struct diseqc_cmd switch_cmds[] = {
 /*--------------------------------------------------------------------------*/
 
 static inline
-void msleep(__u32 msec)
+void msleep(uint32_t msec)
 {
 	struct timespec req = { msec / 1000, 1000000 * (msec % 1000) };
 
