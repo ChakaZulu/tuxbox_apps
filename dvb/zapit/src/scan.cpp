@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.104 2003/05/05 08:38:03 mws Exp $
+ * $Id: scan.cpp,v 1.105 2003/05/05 18:00:17 digi_casi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -316,6 +316,105 @@ FILE *write_provider(FILE *fd, const char *type, const char *provider_name, cons
 	return fd;
 }
 
+int scan_transponder(xmlNodePtr transponder, bool satfeed, uint8_t diseqc_pos, char * type)
+{
+	uint8_t polarization = 0;
+	dvb_frontend_parameters feparams;
+		
+	feparams.frequency = xmlGetNumericAttribute(transponder, "frequency", 0);
+	feparams.inversion = INVERSION_AUTO;
+
+	/* cable */
+	if (frontend->getInfo()->type == FE_QAM)
+	{
+		feparams.u.qam.symbol_rate = xmlGetNumericAttribute(transponder, "symbol_rate", 0);
+		feparams.u.qam.fec_inner = (fe_code_rate_t) xmlGetNumericAttribute(transponder, "fec_inner", 0);
+		feparams.u.qam.modulation = (fe_modulation_t) xmlGetNumericAttribute(transponder, "modulation", 0);
+	}
+
+	/* satellite */
+	else if (frontend->getInfo()->type == FE_QPSK)
+	{
+		feparams.u.qpsk.symbol_rate = xmlGetNumericAttribute(transponder, "symbol_rate", 0);
+		feparams.u.qpsk.fec_inner = (fe_code_rate_t) xmlGetNumericAttribute(transponder, "fec_inner", 0);
+		polarization = xmlGetNumericAttribute(transponder, "polarization", 0);
+	}
+
+	/* terrestrial */
+	else if (frontend->getInfo()->type == FE_OFDM)
+	{
+		feparams.u.ofdm.bandwidth = (fe_bandwidth_t) xmlGetNumericAttribute(transponder, "bandwidth", 0);
+		feparams.u.ofdm.code_rate_HP = FEC_AUTO;
+		feparams.u.ofdm.code_rate_LP = FEC_AUTO;
+		feparams.u.ofdm.constellation = QAM_AUTO;
+		feparams.u.ofdm.transmission_mode = TRANSMISSION_MODE_AUTO;
+		feparams.u.ofdm.guard_interval = GUARD_INTERVAL_AUTO;
+		feparams.u.ofdm.hierarchy_information = HIERARCHY_AUTO;
+	}
+
+	/* build special transponder for cable with satfeed */
+	if (!strcmp(type,"cable") && satfeed) {
+		status = build_bf_transponder(&feparams);
+	}
+
+	/* read network information table */
+	else {
+		status = get_nits(&feparams, polarization, diseqc_pos);
+	}
+	return 0;
+}
+
+void scan_provider(xmlNodePtr search, char * providerName, bool satfeed, uint8_t diseqc_pos, char * type)
+{
+	xmlNodePtr transponder = NULL;
+	
+	/* send sat name to client */
+	eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &providerName, strlen(providerName) + 1);
+	transponder = search->xmlChildrenNode;
+
+	/* read all transponders */
+	while ((transponder = xmlGetNextOccurence(transponder, "transponder")) != NULL)
+	{
+		scan_transponder(transponder, satfeed, diseqc_pos, type);
+
+		/* next transponder */
+		transponder = transponder->xmlNextNode;
+	}
+
+	/* 
+	 * parse:
+	 * service description table,
+	 * program association table,
+	 * bouquet association table,
+	 * network information table
+	 */
+	status = get_sdts();
+
+	/*
+	 * channels from PAT do not have service_type set.
+	 * some channels set the service_type in the BAT or the NIT.
+	 * should the NIT be parsed on every transponder?
+	 */
+	std::map <t_channel_id, uint8_t>::iterator stI;
+	for (stI = service_types.begin(); stI != service_types.end(); stI++)
+	{
+		tallchans_iterator scI = allchans.find(stI->first);
+
+		if (scI != allchans.end())
+		{
+			if (scI->second.getServiceType() != stI->second)
+			{
+				INFO("setting service_type of channel_id " PRINTF_CHANNEL_ID_TYPE " from %02x to %02x",
+					stI->first,
+					scI->second.getServiceType(),
+					stI->second);
+						
+				scI->second.setServiceType(stI->second);
+			}
+		}
+	}
+}
+
 void *start_scanthread(void *)
 {
 	FILE *fd = NULL;
@@ -324,7 +423,6 @@ void *start_scanthread(void *)
 	char *type;
 
 	uint8_t diseqc_pos = 0;
-	uint8_t polarization = 0;
 
 	bool satfeed = false;
 
@@ -382,94 +480,9 @@ void *start_scanthread(void *)
 		/* satellite receivers might need diseqc */
 		if (frontend->getInfo()->type == FE_QPSK)
 			diseqc_pos = spI->first;
-
-		/* send sat name to client */
-		eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &providerName, strlen(providerName) + 1);
-		transponder = search->xmlChildrenNode;
-
-		/* read all transponders */
-		while ((transponder = xmlGetNextOccurence(transponder, "transponder")) != NULL)
-		{
-			dvb_frontend_parameters feparams;
-
-			feparams.frequency = xmlGetNumericAttribute(transponder, "frequency", 0);
-			feparams.inversion = INVERSION_AUTO;
-
-			/* cable */
-			if (frontend->getInfo()->type == FE_QAM)
-			{
-				feparams.u.qam.symbol_rate = xmlGetNumericAttribute(transponder, "symbol_rate", 0);
-				feparams.u.qam.fec_inner = (fe_code_rate_t) xmlGetNumericAttribute(transponder, "fec_inner", 0);
-				feparams.u.qam.modulation = (fe_modulation_t) xmlGetNumericAttribute(transponder, "modulation", 0);
-			}
-
-			/* satellite */
-			else if (frontend->getInfo()->type == FE_QPSK)
-			{
-				feparams.u.qpsk.symbol_rate = xmlGetNumericAttribute(transponder, "symbol_rate", 0);
-				feparams.u.qpsk.fec_inner = (fe_code_rate_t) xmlGetNumericAttribute(transponder, "fec_inner", 0);
-				polarization = xmlGetNumericAttribute(transponder, "polarization", 0);
-			}
-
-			/* terrestrial */
-			else if (frontend->getInfo()->type == FE_OFDM)
-			{
-				feparams.u.ofdm.bandwidth = (fe_bandwidth_t) xmlGetNumericAttribute(transponder, "bandwidth", 0);
-				feparams.u.ofdm.code_rate_HP = FEC_AUTO;
-				feparams.u.ofdm.code_rate_LP = FEC_AUTO;
-				feparams.u.ofdm.constellation = QAM_AUTO;
-				feparams.u.ofdm.transmission_mode = TRANSMISSION_MODE_AUTO;
-				feparams.u.ofdm.guard_interval = GUARD_INTERVAL_AUTO;
-				feparams.u.ofdm.hierarchy_information = HIERARCHY_AUTO;
-			}
-
-			/* build special transponder for cable with satfeed */
-			if (!strcmp(type,"cable") && satfeed) {
-				status = build_bf_transponder(&feparams);
-			}
-
-			/* read network information table */
-			else {
-				status = get_nits(&feparams, polarization, diseqc_pos);
-			}
-
-			/* next transponder */
-			transponder = transponder->xmlNextNode;
-		}
-
-		/* 
-		 * parse:
-		 * service description table,
-		 * program association table,
-		 * bouquet association table,
-		 * network information table
-		 */
-		status = get_sdts();
-
-		/*
-		 * channels from PAT do not have service_type set.
-		 * some channels set the service_type in the BAT or the NIT.
-		 * should the NIT be parsed on every transponder?
-		 */
-		std::map <t_channel_id, uint8_t>::iterator stI;
-		for (stI = service_types.begin(); stI != service_types.end(); stI++)
-		{
-			tallchans_iterator scI = allchans.find(stI->first);
-
-			if (scI != allchans.end())
-			{
-				if (scI->second.getServiceType() != stI->second)
-				{
-					INFO("setting service_type of channel_id " PRINTF_CHANNEL_ID_TYPE " from %02x to %02x",
-							stI->first,
-							scI->second.getServiceType(),
-							stI->second);
-
-					scI->second.setServiceType(stI->second);
-				}
-			}
-		}
-
+			
+		scan_provider(search, providerName, satfeed, diseqc_pos, type);
+		
 		/* write services */
 		fd = write_provider(fd, type, providerName, diseqc_pos);
 
