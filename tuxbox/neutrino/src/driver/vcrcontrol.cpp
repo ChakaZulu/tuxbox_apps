@@ -32,11 +32,11 @@
 #include <string.h>
 
 #include <global.h>
+#include <neutrinoMessages.h>
 
 #include <gui/widget/messagebox.h>
 
 #include "vcrcontrol.h"
-#include "neutrinoMessages.h"
 
 
 #define SA struct sockaddr
