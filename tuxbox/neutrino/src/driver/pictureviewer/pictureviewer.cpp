@@ -376,7 +376,7 @@ void CPictureViewer::showBusy(int sx, int sy, int width, char r, char g, char b)
 	rgb_buffer[1]=g;
 	rgb_buffer[2]=b;
 
-	fb_buffer = (unsigned char*) convertRGB2FB(rgb_buffer, 1, var->bits_per_pixel, &cpp);
+	fb_buffer = (unsigned char*) convertRGB2FB(rgb_buffer, 1, 1, var->bits_per_pixel, &cpp);
 	if(fb_buffer==NULL)
 	{
 		printf("Error: malloc\n");

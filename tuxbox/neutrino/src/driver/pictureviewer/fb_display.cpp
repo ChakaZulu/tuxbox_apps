@@ -77,7 +77,7 @@ void fb_display(unsigned char *rgbbuff, int x_size, int y_size, int x_pan, int y
     if(y_offs + y_size > (int)var->yres) y_offs = 0;
     
     /* blit buffer 2 fb */
-    fbbuff = (unsigned short *) convertRGB2FB(rgbbuff, x_size * y_size, var->bits_per_pixel, &bp);
+    fbbuff = (unsigned short *) convertRGB2FB(rgbbuff, x_size, y_size, var->bits_per_pixel, &bp);
     if(fbbuff==NULL)
 		 return;
 	 /* ClearFB if image is smaller */
@@ -244,13 +244,14 @@ inline unsigned short make16color(uint32_t r, uint32_t g, uint32_t b,
 	    ((b    >> (8 - bl)) << bo));
 }
 
-void* convertRGB2FB(unsigned char *rgbbuff, unsigned long count, int bpp, int *cpp)
+void* convertRGB2FB(unsigned char *rgbbuff, unsigned long x, unsigned long y, int bpp, int *cpp)
 {
     unsigned long i;
     void *fbbuff = NULL;
     unsigned char *c_fbbuff;
     unsigned short *s_fbbuff;
     unsigned int *i_fbbuff;
+	 unsigned long count = x*y;
     uint32_t rl, ro, gl, go, bl, bo, tl, to;
     
 	 struct fb_var_screeninfo *var;
@@ -280,26 +281,28 @@ void* convertRGB2FB(unsigned char *rgbbuff, unsigned long count, int bpp, int *c
 	    break;
 	case 15:
 	    *cpp = 2;
-	    s_fbbuff = (unsigned short *) malloc(count * sizeof(unsigned short));
+/*	    s_fbbuff = (unsigned short *) malloc(count * sizeof(unsigned short));
 		 if(s_fbbuff==NULL)
 		 {
 			 printf("Error: malloc\n");
 			 return NULL;
 		 }
 	    for(i = 0; i < count ; i++)
-		s_fbbuff[i] = make15color(rgbbuff[i*3], rgbbuff[i*3+1], rgbbuff[i*3+2]);
+			 s_fbbuff[i] = make15color(rgbbuff[i*3], rgbbuff[i*3+1], rgbbuff[i*3+2]);*/
+		 s_fbbuff = (unsigned short*) make15color_errdiff(rgbbuff, x, y);
 	    fbbuff = (void *) s_fbbuff;
 	    break;
 	case 16:
 	    *cpp = 2;
-	    s_fbbuff = (unsigned short *) malloc(count * sizeof(unsigned short));
+/*	    s_fbbuff = (unsigned short *) malloc(count * sizeof(unsigned short));
 		 if(s_fbbuff==NULL)
 		 {
 			 printf("Error: malloc\n");
 			 return NULL;
 		 }
 	    for(i = 0; i < count ; i++)
-			 s_fbbuff[i]=make16color(rgbbuff[i*3], rgbbuff[i*3+1], rgbbuff[i*3+2], rl, ro, gl, go, bl, bo, tl, to);
+			 s_fbbuff[i]=make16color(rgbbuff[i*3], rgbbuff[i*3+1], rgbbuff[i*3+2], rl, ro, gl, go, bl, bo, tl, to);*/
+		 s_fbbuff = (unsigned short*) make15color_errdiff(rgbbuff, x, y);
 		 fbbuff = (void *) s_fbbuff;
 	    break;
 	case 24:
