@@ -154,19 +154,7 @@ int CBEChannelSelectWidget::exec(CMenuTarget* parent, string actionKey)
 		}
 		else if (key==CRCInput::RC_down)
 		{
-			int prevselected=selected;
-			selected = (selected+1)%Channels.size();
-			paintItem(prevselected - liststart);
-			unsigned int oldliststart = liststart;
-			liststart = (selected/listmaxshow)*listmaxshow;
-			if(oldliststart!=liststart)
-			{
-				paint();
-			}
-			else
-			{
-				paintItem(selected - liststart);
-			}
+			rcDown();
 		}
 		else if (key==g_settings.key_channelList_pageup)
 		{
@@ -217,7 +205,8 @@ void CBEChannelSelectWidget::switchChannel()
 	}
 	bouquetChannels.clear();
 	g_Zapit->getBouquetChannels( bouquet, bouquetChannels, mode);
-	paintItem( selected - liststart);
+	rcDown();
+//	paintItem( selected - liststart);
 }
 
 bool CBEChannelSelectWidget::isChannelInBouquet( int index)
@@ -237,4 +226,20 @@ bool CBEChannelSelectWidget::hasChanged()
 	return (channelsChanged);
 }
 
+void CBEChannelSelectWidget::rcDown()
+{
+	int prevselected=selected;
+	selected = (selected+1)%Channels.size();
+	paintItem(prevselected - liststart);
+	unsigned int oldliststart = liststart;
+	liststart = (selected/listmaxshow)*listmaxshow;
+	if(oldliststart!=liststart)
+	{
+		paint();
+	}
+	else
+	{
+		paintItem(selected - liststart);
+	}
+}
 

@@ -42,6 +42,8 @@ using namespace std;
 		void paintFoot();
 		void hide();
 
+		void rcDown();
+
 	public:
 		CBEChannelSelectWidget( string Caption, unsigned int Bouquet, CZapitClient::channelsMode Mode);
 
