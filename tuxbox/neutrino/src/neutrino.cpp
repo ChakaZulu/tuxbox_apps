@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.79 2001/11/23 13:47:37 faralla Exp $
+        $Id: neutrino.cpp,v 1.80 2001/11/23 13:48:35 faralla Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.80  2001/11/23 13:48:35  faralla
+  check if card fits camalpha.bin
+
   Revision 1.79  2001/11/23 13:47:37  faralla
   check if card fits camalpha.bin
 
@@ -664,7 +667,6 @@ void CNeutrinoApp::isCamValid()
 		exit(-1);
 	}
 	
-	printf("ca_verid: %d\n", ca_verid);
 	if (ca_verid != 33 && ca_verid != 18 && ca_verid != 68)
 	{
 		printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n!!\t\t\t\t\t\t\t!!\n!!\tATTENTION, YOUR CARD DOES NOT MATCH CAMALPHA.BIN!!\n!!\t\t\t\t\t\t\t!!\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
@@ -1907,7 +1909,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.79 2001/11/23 13:47:37 faralla Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.80 2001/11/23 13:48:35 faralla Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;
