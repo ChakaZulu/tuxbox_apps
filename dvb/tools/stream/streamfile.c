@@ -1,5 +1,5 @@
 /*
- * $Id: streamfile.c,v 1.2 2004/04/26 14:50:41 diemade Exp $
+ * $Id: streamfile.c,v 1.3 2004/04/26 15:17:14 diemade Exp $
  * 
  * streaming ts to file/disc
  * 
@@ -27,8 +27,9 @@
  *
  */
 
-
-#define __USE_LARGEFILE64 1
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -311,6 +312,7 @@ main (int argc, char ** argv) {
 			exit_flag = 1;
 		}
 	}
+	sleep(1); // give FileThread some time to write remaining content of ringbuffer to file
 	pthread_kill(rcst, SIGKILL);
 
 	while (demuxfd_count > 0)
