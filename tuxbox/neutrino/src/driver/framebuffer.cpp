@@ -868,15 +868,14 @@ void CFrameBuffer::switch_signal (int signal)
 
 void CFrameBuffer::ClearFrameBuffer()
 {
-	if(getActive())
-		memset(getFrameBufferPointer(), 255, stride * 576);
-
-	//backgroundmode
 	setBackgroundColor(COL_BACKGROUND);
 	useBackground(false);
 
+	paintBackground();
+
 	//background
 	paletteSetColor(COL_BACKGROUND, 0x000000, 0xffff);
+
 	//Windows Colors
 	paletteSetColor(0x1, 0x010101, 0);
 	paletteSetColor(0x2, 0x800000, 0);
