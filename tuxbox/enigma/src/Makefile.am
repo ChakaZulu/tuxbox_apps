@@ -25,6 +25,6 @@ enigma_LDADD = \
 	@MD5SUM_LIBS@ \
 	@SIGC_LIBS@ \
 	@XMLTREE_LIBS@ \
-	-ldl -lpthread -lid3tag -lmad -lcrypt -lresolv -ltuxbox -lmd5sum
+	-ldl -lpthread -lid3tag -lmad -lcrypt -lresolv -ltuxbox
 #\
 #	/dbox2/cdkroot/lib/libmpatrolmt.a -lpthread -lbfd -liberty
