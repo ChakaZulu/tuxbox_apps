@@ -398,15 +398,29 @@ int eAVSwitch::setAspectRatio(eAVAspectRatio as)
 
 void eAVSwitch::setVSystem(eVSystem _system)
 {
-	unsigned int palM = 0;
-	eConfig::getInstance()->getKey("/elitedvb/video/palM", palM );
+	unsigned int tvsystem = 0;
+	eConfig::getInstance()->getKey("/elitedvb/video/tvsystem", tvsystem );
+	
+	int saa;
+	// we *want* to set _system, but let's see if we support this
+	if ((_system == vsPAL) & (tvsystem & 1))
+		saa = SAA_PAL;
+	else if ((_system == vsNTSC) & (tvsystem & 2))
+		saa = SAA_NTSC;
+	else if ((_system == vsNTSC) & (tvsystem & 4))
+		saa = SAA_PAL_M;
+				// we give up.
+	else if (tvsystem & 1)
+		saa = SAA_PAL;
+	else if (tvsystem & 2)
+		saa = SAA_NTSC;
+				// we are broken.
+	else
+		saa = SAA_PAL;
+		
+	if ( ::ioctl(saafd, SAAIOSENC, &saa) < 0 )
+		eDebug("SAAIOSENC failed (%m)");
 
-//	if (system != _system)
-	{
-		int saa = (_system == vsNTSC) ? (palM ? SAA_PAL_M : SAA_NTSC) : SAA_PAL;
-		if ( ::ioctl(saafd, SAAIOSENC, &saa) < 0 )
-			eDebug("SAAIOSENC failed (%m)");
-	}
 	system = _system;
 }
 

@@ -13,17 +13,17 @@ class eZapVideoSetup: public eWindow
 {
 	eButton *ok;
 	eStatusBar *status;
-	eCheckbox *c_disableWSS, *ac3default, *palM, *VCRSwitching;
-	eListBox<eListBoxEntryText> *colorformat, *pin8;
+	eCheckbox *c_disableWSS, *ac3default, *VCRSwitching;
+	eListBox<eListBoxEntryText> *colorformat, *pin8, *tvsystem;
 
-	unsigned int v_colorformat, v_pin8, v_disableWSS, v_palM, v_VCRSwitching;
+	unsigned int v_colorformat, v_pin8, v_disableWSS, v_tvsystem, v_VCRSwitching;
 	eStatusBar *statusbar;
 private:
 	void ac3defaultChanged( int i );
 	void CFormatChanged( eListBoxEntryText * );
 	void VPin8Changed( eListBoxEntryText *);
 	void DisableWSSChanged(int);
-	void palMChanged(int);
+	void TVSystemChanged( eListBoxEntryText * );
 	void VCRChanged(int);	
 	void okPressed();
 	int eventHandler( const eWidgetEvent &e );

@@ -32,8 +32,11 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	if (eConfig::getInstance()->getKey("/elitedvb/video/disableWSS", v_disableWSS ))
 		v_disableWSS = 0;
 
-	if (eConfig::getInstance()->getKey("/elitedvb/video/palM", v_palM ))
-		v_palM=0;
+	if (eConfig::getInstance()->getKey("/elitedvb/video/tvsystem", v_tvsystem ))
+		v_tvsystem = 1;
+		
+	if (!v_tvsystem)
+		v_tvsystem = 1;
 
 	if (eConfig::getInstance()->getKey("/elitedvb/video/vcr_switching", v_VCRSwitching ))
 		v_VCRSwitching=1;
@@ -85,8 +88,49 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	pin8->setCurrent(entrys[v_pin8]);
 	CONNECT( pin8->selchanged, eZapVideoSetup::VPin8Changed );
 
+	l=new eLabel(this);
+	l->setText(_("TV System:"));
+	l->move(ePoint(20, 100));
+	l->resize(eSize(150, fd+4));
+	
+	tvsystem=new eListBox<eListBoxEntryText>(this, l);
+	tvsystem->loadDeco();	
+	tvsystem->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
+	
+	// our bitmask is:
+	
+	// have pal     1
+	// have ntsc    2
+	// have pal60   4  (aka. PAL-M bis wir PAL60 supporten)
+	
+	// allowed bitmasks:
+	
+	//  1    pal only, no ntsc
+	//  2    ntsc only, no pal
+	//  3    multinorm
+	//  5    pal, pal60
+	
+	tvsystem->move(ePoint(180, 100));
+	tvsystem->resize(eSize(170, 35));
+	tvsystem->setHelpText(_("choose TV system ( left, right )"));
+	entrys[0]=new eListBoxEntryText(tvsystem, "PAL", (void*)1);
+	entrys[1]=new eListBoxEntryText(tvsystem, "PAL + PAL60", (void*)5);
+	entrys[2]=new eListBoxEntryText(tvsystem, "Multinorm", (void*)3);
+	entrys[3]=new eListBoxEntryText(tvsystem, "NTSC", (void*)2);
+	
+	int i = 0;
+	switch (v_tvsystem)
+	{
+	case 1: i = 0; break;
+	case 5: i = 1; break;
+	case 3: i = 2; break;
+	case 2: i = 3; break;
+	}
+	tvsystem->setCurrent(entrys[i]);
+	CONNECT( tvsystem->selchanged, eZapVideoSetup::TVSystemChanged );
+
 	c_disableWSS = new eCheckbox(this, v_disableWSS, 1);
-	c_disableWSS->move(ePoint(20,100));
+	c_disableWSS->move(ePoint(20,140));
 	c_disableWSS->resize(eSize(350,30));
 	c_disableWSS->setText(_("Disable WSS on 4:3"));
 	c_disableWSS->setHelpText(_("don't send WSS signal when A-ratio is 4:3"));
@@ -97,17 +141,10 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 
 	ac3default=new eCheckbox(this, sac3default, 1);
 	ac3default->setText(_("AC3 default output"));
-	ac3default->move(ePoint(20, 135));
+	ac3default->move(ePoint(20, 175));
 	ac3default->resize(eSize(350, 30));
 	ac3default->setHelpText(_("enable/disable ac3 default output (ok)"));
 	CONNECT( ac3default->checked, eZapVideoSetup::ac3defaultChanged );
-
-	palM=new eCheckbox(this, v_palM, 1);
-	palM->setText(_("use PAL-M for NTSC"));
-	palM->move(ePoint(20, 170));
-	palM->resize(eSize(350, 30));
-	palM->setHelpText(_("use PAL-M instead of real NTSC"));
-	CONNECT( palM->checked, eZapVideoSetup::palMChanged );
 
 	VCRSwitching=new eCheckbox(this, v_VCRSwitching, 1);
 	VCRSwitching->setText(_("Auto VCR switching"));
@@ -146,7 +183,7 @@ void eZapVideoSetup::okPressed()
 	eConfig::getInstance()->setKey("/elitedvb/video/colorformat", v_colorformat );
 	eConfig::getInstance()->setKey("/elitedvb/video/pin8", v_pin8 );
 	eConfig::getInstance()->setKey("/elitedvb/video/disableWSS", v_disableWSS );
-	eConfig::getInstance()->setKey("/elitedvb/video/palM", v_palM);
+	eConfig::getInstance()->setKey("/elitedvb/video/tvsystem", v_tvsystem);
 	eAudio::getInstance()->saveSettings();
 	eConfig::getInstance()->flush();
 	close(1);
@@ -216,15 +253,18 @@ void eZapVideoSetup::VCRChanged( int i )
 	eConfig::getInstance()->setKey("/elitedvb/video/vcr_switching", old );
 }
 
-void eZapVideoSetup::palMChanged( int i )
+void eZapVideoSetup::TVSystemChanged( eListBoxEntryText *e )
 {
 	unsigned int old = 0;
-	eConfig::getInstance()->getKey("/elitedvb/video/palM", old );
+	eConfig::getInstance()->getKey("/elitedvb/video/tvsystem", old );
 
-	v_palM = (unsigned int) i;
-	eConfig::getInstance()->setKey("/elitedvb/video/palM", v_palM);
-	eAVSwitch::getInstance()->reloadSettings();
-	eConfig::getInstance()->setKey("/elitedvb/video/palM", old );
+	if (e)
+	{
+		v_tvsystem = (unsigned int) e->getKey();
+		eConfig::getInstance()->setKey("/elitedvb/video/tvsystem", v_tvsystem);
+		eAVSwitch::getInstance()->reloadSettings();
+		eConfig::getInstance()->setKey("/elitedvb/video/tvsystem", old );
+	}
 }
 
 void eZapVideoSetup::ac3defaultChanged( int i )
