@@ -3970,8 +3970,8 @@ static eString editTimerEvent(eString request, eString dirpath, eString opts, eH
 	time_t eventStart = atoi(eventStartTime.c_str());
 	time_t eventEnd = eventStart + atoi(eventDuration.c_str());
 	tm start = *localtime(&eventStart);
-	if (eventEnd % 5 > 0)
-		eventEnd = eventEnd / 5 * 5 + 5;
+	if (eventEnd % 300 > 0)
+		eventEnd = eventEnd / 300 * 300 + 300;
 	tm end = *localtime(&eventEnd);
 	int evType = atoi(eventType.c_str());
 
