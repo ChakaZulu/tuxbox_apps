@@ -43,7 +43,6 @@
 	</fontalias>
 
 	<colors>
-		<color name="white" color="#ffffff" />
 		<color name="001" color="#00B4BAB4" />
 		<color name="002" color="#00B4B6B4" />
 		<color name="003" color="#00ACB2AC" />
@@ -340,10 +339,10 @@
 		<eLabel position="640:490" size="12:15" pixmap="osd_crypt_on" name="osd_crypt_on" />
 		<eLabel position="568:490" size="28:15" pixmap="osd_format_on" name="osd_format_on"/>
 		<eLabel position="605:490" size="25:15" pixmap="osd_dolby_on" name="osd_dolby_on"/>
-		<eLabel position="130:489" size="23:20" pixmap="button_blue" name="button_blue_enabled" alphatest="on" />
-		<eLabel position="107:489" size="23:20" pixmap="button_yellow" name="button_yellow_enabled" alphatest="on" />
-		<eLabel position="84:489" size="23:20" pixmap="button_green" name="button_green_enabled" alphatest="on" />
-		<eLabel position="64:489" size="23:20" pixmap="button_red" name="button_red_enabled" alphatest="on" />
+		<eLabel position="130:489" size="23:20" pixmap="button_blue" name="button_blue_enabled" />
+		<eLabel position="107:489" size="23:20" pixmap="button_yellow" name="button_yellow_enabled" />
+		<eLabel position="84:489" size="23:20" pixmap="button_green" name="button_green_enabled" />
+		<eLabel position="64:489" size="23:20" pixmap="button_red" name="button_red_enabled" />
 		<eLabel name="recStatus" position="447:435" size="18:18" pixmap="rec_symbol" alphatest="on" />
 		<eLabel name="dvrInfoBar" position="170:419" size="433:62" alphatest="on" pixmap="dvrtable">
 		<eLabel name="TimeLeft" position="330:4" size="150:51" alphatest="on" font="Blue.Regular;24"
@@ -363,41 +362,13 @@
 		<eLabel position="570:450" size="80:18" font="Blue.Bold;22" name="e_next_duration"
 				foregroundColor="text1" align="center" />
 		</eWidget>
+		<eWidget name="fileInfoBar" position="195:428" size="433:42">
+		<eLabel position="0:0" size="e:e" font="Blue.Regular;22" name="fileinfos" backgroundColor="content" foregroundColor="text1" 	wrap="on" />
+		</eWidget>
 		</eZapMain>
 	</object>
 
 	<object name="eServiceSelector_singleColumn">
-		<eServiceSelector cposition="80:105" csize="570:385" text="Services">
-		<eWidget position="0:0" size="575:385" backgroundColor="content" />
-		<eListbox name="services" position="0:5" size="e:e-82" />
-		<eChannelInfo name="channelinfo" position="0:e-80" size="e:80" loadDeco="" />
-		</eServiceSelector>
-	</object>
-
-	<object name="eServiceSelector_multiColumn">
-		<eServiceSelector cposition="80:105" csize="570:385" text="Services">
-		<eWidget position="0:0" size="570:385" backgroundColor="content" />
-		<eListbox name="services" columns="2" position="0:5" size="e:e-82" />
-		<eChannelInfo name="channelinfo" position="0:e-80" size="e:80" loadDeco="" />
-		</eServiceSelector>
-	</object>
-
-	<object name="eServiceSelector_combiColumn">
-		<eServiceSelector cposition="80:105" csize="570:385" text="Services">
-		<eWidget position="0:0" size="570:385" backgroundColor="content" />
-		<eListbox name="bouquets" position="0:2" size="202:e-82" loadDeco="" />
-		<eListbox name="services" columns="1" position="205:4" size="e:e-82" />
-		<eChannelInfo name="channelinfo" position="0:e-80" size="e:80" loadDeco="" />
-		</eServiceSelector>
-	</object>
-
-	<object name="eEPGSelector">
-		<eBouquetSelector cposition="80:105" csize="570:385" text="EPG">
-		<eListbox name="events" position="0:0" size="e:e" />
-		</eBouquetSelector>
-	</object>
-
-<object name="eServiceSelector_singleColumn">
 		<eServiceSelector cposition="80:105" csize="570:385" text="Services">
 		<eWidget position="0:0" size="575:385" backgroundColor="content" />
 		<eListbox name="services" position="0:5" size="e:e-80" />
@@ -427,14 +398,18 @@
 
 	<object name="eServiceSelector_singleColumn_buttons">
 		<eServiceSelector cposition="80:105" csize="570:385" text="Services">
-		<eButton name="key_red" position="0:0" size="142:28" backgroundColor="std_dred" loadDeco=""
-			font="epg.title" align="center" vcenter="on"/>
-		<eButton name="key_green" position="143:0" size="143:28" backgroundColor="std_dgreen" loadDeco=""
-			font="epg.title" align="center" vcenter="on"/>
-		<eButton name="key_yellow" position="285:0" size="142:28" backgroundColor="std_dyellow" loadDeco=""
-			font="epg.title" align="center" vcenter="on"/>
-		<eButton name="key_blue" position="427:0" size="143:28" backgroundColor="std_dblue" loadDeco=""
-			font="epg.title" align="center" vcenter="on"/>
+		<eLabel position="0:5" size="23:20" pixmap="button_red" />
+		<eLabel position="143:5" size="23:20" pixmap="button_green" />
+		<eLabel position="286:5" size="23:20" pixmap="button_yellow" />
+		<eLabel position="428:5" size="23:20" pixmap="button_blue" />
+		<eButton name="key_red" position="0:0" size="142:28" backgroundColor="content" loadDeco=""
+			font="Blue.Bold;22" align="center" foregroundColor="white" vcenter="on" alphatest="on" />
+		<eButton name="key_blue" position="428:0" size="142:28" backgroundColor="content" loadDeco=""
+			font="Blue.Bold;22" align="center" foregroundColor="white" vcenter="on" alphatest="on" />
+		<eButton name="key_yellow" position="286:0" size="142:28" backgroundColor="content" loadDeco=""
+			font="Blue.Bold;22" align="center" foregroundColor="white" vcenter="on" alphatest="on" />
+		<eButton name="key_green" position="143:0" size="143:28" backgroundColor="content" loadDeco=""
+			font="Blue.Bold;22" align="center" foregroundColor="white" vcenter="on" alphatest="on" />
 		<eListbox name="services" position="0:33" size="e:e-80" />
 		<eWidget position="0:e-82" size="e:2" backgroundColor="white" />
 		<eChannelInfo name="channelinfo" position="0:e-80" size="e:80" />
@@ -443,14 +418,18 @@
 
 	<object name="eServiceSelector_multiColumn_buttons">
 		<eServiceSelector cposition="80:105" csize="570:385" text="Services">
-		<eButton name="key_red" position="0:0" size="142:28" backgroundColor="std_dred" loadDeco=""
-			font="epg.title" align="center" vcenter="on"/>
-		<eButton name="key_green" position="143:0" size="143:28" backgroundColor="std_dgreen" loadDeco=""
-			font="epg.title" align="center" vcenter="on"/>
-		<eButton name="key_yellow" position="285:0" size="142:28" backgroundColor="std_dyellow" loadDeco=""
-			font="epg.title" align="center" vcenter="on"/>
-		<eButton name="key_blue" position="427:0" size="143:28" backgroundColor="std_dblue" loadDeco=""
-			font="epg.title" align="center" vcenter="on"/>
+		<eLabel position="0:5" size="23:20" pixmap="button_red" />
+		<eLabel position="143:5" size="23:20" pixmap="button_green" />
+		<eLabel position="286:5" size="23:20" pixmap="button_yellow" />
+		<eLabel position="428:5" size="23:20" pixmap="button_blue" />
+		<eButton name="key_red" position="0:0" size="142:28" backgroundColor="content" loadDeco=""
+			font="Blue.Bold;22" align="center" foregroundColor="white" vcenter="on" alphatest="on" />
+		<eButton name="key_blue" position="428:0" size="142:28" backgroundColor="content" loadDeco=""
+			font="Blue.Bold;22" align="center" foregroundColor="white" vcenter="on" alphatest="on" />
+		<eButton name="key_yellow" position="286:0" size="142:28" backgroundColor="content" loadDeco=""
+			font="Blue.Bold;22" align="center" foregroundColor="white" vcenter="on" alphatest="on" />
+		<eButton name="key_green" position="143:0" size="143:28" backgroundColor="content" loadDeco=""
+			font="Blue.Bold;22" align="center" foregroundColor="white" vcenter="on" alphatest="on" />
 		<eListbox name="services" columns="2" position="0:33" size="e:e-80" />
 		<eWidget position="0:e-82" size="e:2" backgroundColor="white" />
 		<eChannelInfo name="channelinfo" position="0:e-80" size="e:80" />
@@ -459,14 +438,18 @@
 
 	<object name="eServiceSelector_combiColumn_buttons">
 		<eServiceSelector cposition="80:105" csize="570:385" text="Services">
-		<eButton name="key_red" position="0:0" size="142:28" backgroundColor="std_dred" loadDeco=""
-			font="epg.title" align="center" vcenter="on"/>
-		<eButton name="key_green" position="143:0" size="143:28" backgroundColor="std_dgreen" loadDeco=""
-			font="epg.title" align="center" vcenter="on"/>
-		<eButton name="key_yellow" position="285:0" size="142:28" backgroundColor="std_dyellow" loadDeco=""
-			font="epg.title" align="center" vcenter="on"/>
-		<eButton name="key_blue" position="427:0" size="143:28" backgroundColor="std_dblue" loadDeco=""
-			font="epg.title" align="center" vcenter="on"/>
+		<eLabel position="0:5" size="23:20" pixmap="button_red" />
+		<eLabel position="143:5" size="23:20" pixmap="button_green" />
+		<eLabel position="286:5" size="23:20" pixmap="button_yellow" />
+		<eLabel position="428:5" size="23:20" pixmap="button_blue" />
+		<eButton name="key_red" position="0:0" size="142:28" backgroundColor="content" loadDeco=""
+			font="Blue.Bold;22" align="center" foregroundColor="white" vcenter="on" alphatest="on" />
+		<eButton name="key_blue" position="428:0" size="142:28" backgroundColor="content" loadDeco=""
+			font="Blue.Bold;22" align="center" foregroundColor="white" vcenter="on" alphatest="on" />
+		<eButton name="key_yellow" position="286:0" size="142:28" backgroundColor="content" loadDeco=""
+			font="Blue.Bold;22" align="center" foregroundColor="white" vcenter="on" alphatest="on" />
+		<eButton name="key_green" position="143:0" size="143:28" backgroundColor="content" loadDeco=""
+			font="Blue.Bold;22" align="center" foregroundColor="white" vcenter="on" alphatest="on" />
 		<eListbox name="bouquets" position="0:30" size="202:e-83" loadDeco="" />
 		<eListbox name="services" columns="1" position="205:32" size="e:e-80" />
 		<eWidget position="0:e-82" size="e:2" backgroundColor="white" />
