@@ -4010,7 +4010,7 @@ static eString addTimerEvent2(eString request, eString dirpath, eString opts, eH
 	int timeroffset = 0;
 	eConfig::getInstance()->getKey("/enigma/timeroffset", timeroffset);
 
-	int start1 = eventStartTime - (timeroffset * 60);
+	time_t start1 = eventStartTime - (timeroffset * 60);
 	duration = duration + (2 * timeroffset * 60);
 
 	ePlaylistEntry entry(string2ref(serviceRef), start1, duration, eventid, ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR);
