@@ -17,8 +17,10 @@ Makefile
 libavs/Makefile
 liblcddisplay/Makefile
 liblircdclient/Makefile
+libtuxbox/Makefile
 tuxbox-avs.pc
 tuxbox-lcddisplay.pc
 tuxbox-lircdclient.pc
+tuxbox-tuxbox.pc
 ])
 
