@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.h,v 1.14 2002/06/24 23:17:18 dirch Exp $
+	$Id: timermanager.h,v 1.15 2002/08/29 21:51:47 dirch Exp $
 
 	License: GPL
 
@@ -199,7 +199,6 @@ class CTimerEvent_NextProgram : public CTimerEvent
 class CTimerEvent_Zapto : public CTimerEvent
 {
 	public:
-
 		CTimerEvent::EventInfo eventInfo;
 
 		CTimerEvent_Zapto( time_t announceTime, time_t alarmTime, time_t stopTime, CTimerEventRepeat evrepeat = TIMERREPEAT_ONCE) :

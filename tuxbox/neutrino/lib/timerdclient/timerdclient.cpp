@@ -1,10 +1,9 @@
 /*
-	Neutrino-GUI  -   DBoxII-Project
+	Timer Daemon  -   DBoxII-Project
 
-	Copyright (C) 2001 Steffen Hehn 'McClean'
-	Homepage: http://dbox.cyberphoria.org/
+	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.15 2002/08/21 11:21:14 obi Exp $
+	$Id: timerdclient.cpp,v 1.16 2002/08/29 21:51:47 dirch Exp $
 
 	License: GPL
 
@@ -33,6 +32,7 @@ CTimerdClient::CTimerdClient()
 {
 	sock_fd = 0;
 }
+//-------------------------------------------------------------------------
 
 bool CTimerdClient::timerd_connect()
 {
@@ -58,6 +58,7 @@ bool CTimerdClient::timerd_connect()
 	}
 	return true;
 }
+//-------------------------------------------------------------------------
 
 bool CTimerdClient::timerd_close()
 {
@@ -72,16 +73,19 @@ bool CTimerdClient::timerd_close()
 		return false;
 	}
 }
+//-------------------------------------------------------------------------
 
 bool CTimerdClient::send(char* data, int size)
 {
 	return( write(sock_fd, data, size) == size);
 }
+//-------------------------------------------------------------------------
 
 bool CTimerdClient::receive(char* data, int size)
 {
 	return( read(sock_fd, data, size) == size);
 }
+//-------------------------------------------------------------------------
 
 void CTimerdClient::registerEvent(unsigned int eventID, unsigned int clientID, string udsName)
 {
@@ -100,6 +104,7 @@ void CTimerdClient::registerEvent(unsigned int eventID, unsigned int clientID, s
 	send((char*)&msg2, sizeof(msg2));
 	timerd_close();
 }
+//-------------------------------------------------------------------------
 
 void CTimerdClient::unRegisterEvent(unsigned int eventID, unsigned int clientID)
 {
@@ -117,6 +122,7 @@ void CTimerdClient::unRegisterEvent(unsigned int eventID, unsigned int clientID)
 	send((char*)&msg2, sizeof(msg2));
 	timerd_close();
 }
+//-------------------------------------------------------------------------
 
 int CTimerdClient::setSleeptimer(time_t announcetime, time_t alarmtime, int timerid)
 {
@@ -140,6 +146,7 @@ int timerID;
 
 	return timerID;	
 }
+//-------------------------------------------------------------------------
 
 int CTimerdClient::getSleeptimerID()
 {
@@ -150,9 +157,9 @@ int CTimerdClient::getSleeptimerID()
 	send((char*)&msg, sizeof(msg));
 	CTimerd::responseGetSleeptimer response;
 	receive((char*)&response, sizeof(CTimerd::responseGetSleeptimer));
-	dprintf("sleeptimer ID : %d\n",response.eventID);
 	return response.eventID;
 }
+//-------------------------------------------------------------------------
 
 int CTimerdClient::getSleepTimerRemaining()
 {
@@ -161,16 +168,15 @@ int CTimerdClient::getSleepTimerRemaining()
 	{
 		CTimerd::responseGetTimer timer;
 		getTimer( timer, timerID);
-		dprintf("Remaining sleeptimer ID: %d\n",timerID);
 		return (timer.alarmTime - time(NULL)) / 60;
 	}
 	else
 		return 0;
 }
+//-------------------------------------------------------------------------
 
 void CTimerdClient::getTimerList( CTimerd::TimerList &timerlist)
 {
-	dprintf("getTimerList\n");
 	CTimerd::commandHead msg;
 	msg.version=CTimerd::ACTVERSION;
 	msg.cmd=CTimerd::CMD_GETTIMERLIST;
@@ -181,11 +187,12 @@ void CTimerdClient::getTimerList( CTimerd::TimerList &timerlist)
 	CTimerd::responseGetTimer response;
 	while ( receive((char*)&response, sizeof(CTimerd::responseGetTimer)))
 	{
-		dprintf("received one event\n");
-		timerlist.insert( timerlist.end(), response);
+		if(response.eventState != CTimerEvent::TIMERSTATE_TERMINATED)
+			timerlist.insert( timerlist.end(), response);
 	}
 	timerd_close();
 }
+//-------------------------------------------------------------------------
 
 void CTimerdClient::getTimer( CTimerd::responseGetTimer &timer, unsigned timerID)
 {
@@ -202,6 +209,7 @@ void CTimerdClient::getTimer( CTimerd::responseGetTimer &timer, unsigned timerID
 	timer = response;
 	timerd_close();
 }
+//-------------------------------------------------------------------------
 
 
 bool CTimerdClient::modifyTimerEvent(int eventid, time_t announcetime, time_t alarmtime, time_t stoptime)
@@ -223,14 +231,15 @@ bool CTimerdClient::modifyTimerEvent(int eventid, time_t announcetime, time_t al
 
 	timerd_close();
 	return true;
-
 }
+//-------------------------------------------------------------------------
 
 bool CTimerdClient::rescheduleTimerEvent(int eventid, time_t diff)
 {
 	rescheduleTimerEvent(eventid,diff,diff,diff);
 	return true;
 }
+//-------------------------------------------------------------------------
 
 bool CTimerdClient::rescheduleTimerEvent(int eventid, time_t announcediff, time_t alarmdiff, time_t stopdiff)
 {
@@ -252,6 +261,7 @@ bool CTimerdClient::rescheduleTimerEvent(int eventid, time_t announcediff, time_
 	return true;
 
 }
+//-------------------------------------------------------------------------
 
 /*
 int CTimerdClient::addTimerEvent( CTimerEvent::CTimerEventTypes evType, void* data , int min, int hour, int day, int month, CTimerEvent::CTimerEventRepeat evrepeat)
@@ -272,6 +282,8 @@ int CTimerdClient::addTimerEvent( CTimerEvent::CTimerEventTypes evType, void* da
 	addTimerEvent(evType,true,data,0,mktime(actTime),0);
 }
 */
+//-------------------------------------------------------------------------
+
 int CTimerdClient::addTimerEvent( CTimerEvent::CTimerEventTypes evType, void* data, time_t announcetime, time_t alarmtime,time_t stoptime, CTimerEvent::CTimerEventRepeat evrepeat)
 {
 	dprintf("addTimerEvent(Type: %d, announce: %ld, alarm: %ld, stop: %ld repeat: %d\n",evType,announcetime,alarmtime,stoptime,evrepeat);
@@ -317,6 +329,7 @@ int CTimerdClient::addTimerEvent( CTimerEvent::CTimerEventTypes evType, void* da
 
 	return( response.eventID);
 }
+//-------------------------------------------------------------------------
 
 void CTimerdClient::removeTimerEvent( int evId)
 {
@@ -334,6 +347,7 @@ void CTimerdClient::removeTimerEvent( int evId)
 	dprintf("removed event %d\n",evId);
 	
 }
+//-------------------------------------------------------------------------
 
 bool CTimerdClient::isTimerdAvailable()
 {
