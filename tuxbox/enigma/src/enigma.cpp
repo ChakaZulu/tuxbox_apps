@@ -337,7 +337,8 @@ void eZap::reconfigureHTTPServer()
 
 #if 1
 	logOutputConsole=1;
-	int disableSerialDebugOutput=0;
+	int disableSerialDebugOutput=eSystemInfo::getInstance()->hasNetwork();
+	eConfig::getInstance()->getKey("/ezap/extra/disableSerialOutput", disableSerialDebugOutput);
 	if ( !SerialConsoleActivated && !disableSerialDebugOutput )
 	{
 		eDebug("[ENIGMA] starting httpd on serial port...");
