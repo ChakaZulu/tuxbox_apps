@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
   
-  $Id: zapit.cpp,v 1.28 2001/11/03 16:27:50 field Exp $
+  $Id: zapit.cpp,v 1.29 2001/11/08 13:25:10 field Exp $
   
   Done 2001 by Philipp Leusmann using many parts of code from older 
   applications by the DBoxII-Project.
@@ -70,6 +70,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   $Log: zapit.cpp,v $
+  Revision 1.29  2001/11/08 13:25:10  field
+  Poll-Timeout heruntergedreht
+
   Revision 1.28  2001/11/03 16:27:50  field
   Perspektiven Displayname gefixt
 
@@ -357,7 +360,7 @@ pids parse_pmt(int pid, int ca_system_id)
   flt.filter.filter[0]=2;
   
   flt.filter.mask[0]  =0xFF;
-  flt.timeout=5000;
+//  flt.timeout=5000;
   flt.flags=DMX_ONESHOT | DMX_CHECK_CRC;
   
   //printf("parsepmt is setting DMX-FILTER\n");
@@ -374,11 +377,12 @@ pids parse_pmt(int pid, int ca_system_id)
   dmx_fd.events = POLLIN;
   dmx_fd.revents = 0;
   
-  pt = poll(&dmx_fd, 1, 500);  // war 500;
+  // wenn er ordentlich tuned, dann hat er nach 250ms die pmt, wenn nicht, dann hilft längeres warten auch nicht....
+  pt = poll(&dmx_fd, 1, 250);  // war 500;
   
   if (!pt)
     {
-      dprintf("[zapit] poll timeout - zapping is going probably to fail...\n");
+      dprintf("[zapit] poll timeout - zapping is probably going to fail...\n");
       close(fd);
       return ret_pids;
     }
@@ -1924,7 +1928,7 @@ int main(int argc, char **argv) {
     }
   
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.28 2001/11/03 16:27:50 field Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.29 2001/11/08 13:25:10 field Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
