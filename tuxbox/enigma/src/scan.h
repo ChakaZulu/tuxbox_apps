@@ -13,10 +13,8 @@ class tsText: public eWidget
 {
 	eLabel *headline, *body;
 protected:
-	int keyUp(int rc);
-	int eventFilter(const eWidgetEvent &event);
+	int eventHandler(const eWidgetEvent &event);
 public:
-	void redrawWidget();
 	tsText(eString headline, eString body, eWidget *parent);
 };
 
@@ -44,9 +42,8 @@ class tsFindInit: public eWidget
 	};
 	void scanPacket();
 	int state;
-	virtual int eventFilter(const eWidgetEvent &event);
 protected:
-	int keyUp(int rc);
+	int eventHandler(const eWidgetEvent &event);
 private:
 	void tunedIn(eTransponder *trans, int error);
 	void showSignalStrength();

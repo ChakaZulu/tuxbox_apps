@@ -13,9 +13,11 @@
 #include "rc.h"
 
 #include <core/base/i18n.h>
+#include <core/gui/guiactions.h>
 
 tsText::tsText(eString sheadline, eString sbody, eWidget *parent): eWidget(parent, 1)
 {
+	addActionMap(&i_cursorActions->map);
 	headline=new eLabel(this);
 	headline->setText(sheadline);
 	headline->setFont(gFont("NimbusSansL-Regular Sans L Regular", 32));
@@ -23,7 +25,7 @@ tsText::tsText(eString sheadline, eString sbody, eWidget *parent): eWidget(paren
 	body->setText(sbody);
 }
 
-int tsText::eventFilter(const eWidgetEvent &event)
+int tsText::eventHandler(const eWidgetEvent &event)
 {
 	switch (event.type)
 	{
@@ -34,31 +36,21 @@ int tsText::eventFilter(const eWidgetEvent &event)
 		body->move(ePoint(0, 40));
 		body->resize(eSize(size.width(), size.height()-40));
 		break;
-	}
-	return 0;
-}
-
-int tsText::keyUp(int rc)
-{
-	switch(rc)
-	{
-	case eRCInput::RC_OK:
-		close(0);
+	case eWidgetEvent::evtAction:
+		if (event.action == &i_cursorActions->ok)
+			close(0);
+		else if (event.action == &i_cursorActions->cancel)
+			close(2);
+		else
+			break;
 		return 1;
-	case eRCInput::RC_HELP:
-		close(2);
-		return 1;
-	default:
-		return 0;
 	}
-}
-
-void tsText::redrawWidget()
-{
+	return eWidget::eventHandler(event);
 }
 
 tsFindInit::tsFindInit(eWidget *parent): eWidget(parent, 1), sstimer(eApp)
 {
+	addActionMap(&i_cursorActions->map);
 	headline=new eLabel(this);
 	headline->setText("Empfange");
 	headline->setFont(gFont("NimbusSansL-Regular Sans L Regular", 32));
@@ -87,7 +79,7 @@ void tsFindInit::scanPacket()
 	packets.current()->possibleTransponders.front()->tune();
 }
 
-int tsFindInit::eventFilter(const eWidgetEvent &event)
+int tsFindInit::eventHandler(const eWidgetEvent &event)
 {
 	switch (event.type)
 	{
@@ -104,11 +96,10 @@ int tsFindInit::eventFilter(const eWidgetEvent &event)
 			p=new tpPacket("Cable", SCAN_SKIP);
 			for (f=330000; f<=460000; f+=8000)
 			{
-				t=new eTransponder(-1, f/8000); t->setCable(f, 6900000, 0);
-				t=new eTransponder(-2, f/8000); t->setCable(f, 6900000, 1);
-				t=new eTransponder(-3, f/8000); t->setCable(f, 6875000, 0);
-				t=new eTransponder(-4, f/8000); t->setCable(f, 6875000, 1);
-				p->possibleTransponders.push_back(t);
+				t=new eTransponder(-1, f/8000); t->setCable(f, 6900000, 0);	p->possibleTransponders.push_back(t);
+				t=new eTransponder(-2, f/8000); t->setCable(f, 6900000, 1);	p->possibleTransponders.push_back(t);
+				t=new eTransponder(-3, f/8000); t->setCable(f, 6875000, 0);	p->possibleTransponders.push_back(t);
+				t=new eTransponder(-4, f/8000); t->setCable(f, 6875000, 1);	p->possibleTransponders.push_back(t);
 			}
 			t=new eTransponder(-1, -2); t->setCable(330000, 6875000, 1); p->possibleTransponders.push_back(t);
 			packets.push_back(p);
@@ -178,8 +169,24 @@ int tsFindInit::eventFilter(const eWidgetEvent &event)
 		state=sInactive;
 		sstimer.stop();
 		break;
+	case eWidgetEvent::evtAction:
+		if (event.action == &i_cursorActions->ok)
+		{
+			eDebug("OK action, state %d", state);
+			if (state==sFound)
+				close(0);
+			if (state==sFailed)
+				close(1);
+		} else if (event.action == &i_cursorActions->cancel)
+		{
+			eDebug("cancel");
+			close(2);
+		}
+		else
+			break;
+		return 1;
 	}
-	return 0;
+	return eWidget::eventHandler(event);
 }
 
 void tsFindInit::tunedIn(eTransponder *trans, int error)
@@ -225,24 +232,6 @@ void tsFindInit::showSignalStrength()
 	if (sig<0)
 		sig=0;
 	signalbar->setPerc(sig);
-}
-
-int tsFindInit::keyUp(int rc)
-{
-	switch(rc)
-	{
-	case eRCInput::RC_OK:
-		if (state==sFound)
-			close(0);
-		if (state==sFailed)
-			close(1);
-		return 1;
-	case eRCInput::RC_HELP:
-		close(2);
-		return 1;
-	default:
-		return 0;
-	}
 }
 
 void tsFindInit::redrawWidget()
@@ -374,21 +363,19 @@ TransponderScan::TransponderScan()
 			window->getClientSize().width(), window->getClientSize().height()-30));
 	s->hide();
 	mp.addPage(s);
-	qDebug("%x", s);
 
 	s=new tsFindInit(window);
 	s->move(ePoint(0, 0));
 	s->resize(eSize(window->getClientSize().width(), window->getClientSize().height()-30));
 	s->hide();
 	mp.addPage(s);
-	qDebug("%x", s);
 
 	s=new tsDoScan((tsFindInit*)s, window);
 	s->move(ePoint(0, 0));
 	s->resize(eSize(window->getClientSize().width(), window->getClientSize().height()-30));
 	s->hide();
 	mp.addPage(s);
-	qDebug("%x", s);
+
 	s=new tsText("ÜBERSTANDEN!",
 		"Herzlichen Glückwunsch!\n"
 		"Sie haben es heil überstanden!\n\n"
@@ -401,7 +388,6 @@ TransponderScan::TransponderScan()
 			window->getClientSize().width(), window->getClientSize().height()-30));
 	s->hide();
 	mp.addPage(s);
-	qDebug("%x", s);
 }
 
 TransponderScan::~TransponderScan()
