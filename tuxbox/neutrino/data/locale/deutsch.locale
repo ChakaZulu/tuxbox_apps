@@ -819,6 +819,7 @@ timerlist.modetv TV Kanäle
 timerlist.modify Bearbeiten
 timerlist.name Timerliste
 timerlist.new Neuer Timer
+timerlist.overlapping_timer Timer überschneiden sich. Neuen Timer trotzdem anlegen?
 timerlist.plugin Plugin
 timerlist.program.unknown Programm unbekannt
 timerlist.recording_dir Aufnahmeverzeichnis

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.52 2005/01/12 20:27:14 chakazulu Exp $
+	$Id: timerdclient.cpp,v 1.53 2005/03/26 12:06:03 chakazulu Exp $
 
 	License: GPL
 
@@ -238,8 +238,21 @@ int CTimerdClient::addTimerEvent( CTimerEventTypes evType, void* data , int min,
 }
 */
 //-------------------------------------------------------------------------
-int CTimerdClient::addTimerEvent( CTimerd::CTimerEventTypes evType, void* data, time_t announcetime, time_t alarmtime,time_t stoptime, CTimerd::CTimerEventRepeat evrepeat, uint repeatcount)
+int CTimerdClient::addTimerEvent( CTimerd::CTimerEventTypes evType, void* data, time_t announcetime, time_t alarmtime,time_t stoptime,
+				  CTimerd::CTimerEventRepeat evrepeat, uint repeatcount,bool forceadd)
 {
+
+	if (!forceadd)
+	{
+		//printf("[CTimerdClient] checking for overlapping timers\n");
+		CTimerd::TimerList overlappingTimer = getOverlappingTimers(announcetime, stoptime);
+		if (overlappingTimer.size() > 0)
+		{
+			// timerd starts eventID at 0 so we can return -1
+			return -1;
+		}
+	}
+
 	CTimerd::TransferEventInfo tei; 
 	CTimerd::TransferRecordingInfo tri;
 	CTimerdMsg::commandAddTimer msgAddTimer;
@@ -331,6 +344,25 @@ bool CTimerdClient::isTimerdAvailable()
 	return ret;
 }
 //-------------------------------------------------------------------------
+
+CTimerd::TimerList CTimerdClient::getOverlappingTimers(time_t& announcetime, time_t& stopTime)
+{
+	CTimerd::TimerList timerlist;
+	CTimerd::TimerList overlapping;
+	getTimerList(timerlist);
+	for (CTimerd::TimerList::iterator it = timerlist.begin();
+	     it != timerlist.end();it++)
+	{
+		if (!((stopTime < it->announceTime) || (announcetime > it->stopTime)))
+		{
+			overlapping.push_back(*it);
+		}
+	}
+	return overlapping;
+}
+
+//-------------------------------------------------------------------------
+
 bool CTimerdClient::shutdown()
 {
 	send(CTimerdMsg::CMD_SHUTDOWN);

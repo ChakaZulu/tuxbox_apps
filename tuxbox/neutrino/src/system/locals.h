@@ -2,7 +2,7 @@
 #define __locals__
 
 /*
- * $Id: locals.h,v 1.42 2005/03/25 18:42:58 chakazulu Exp $
+ * $Id: locals.h,v 1.43 2005/03/26 12:01:17 chakazulu Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -846,6 +846,7 @@ typedef enum
 	LOCALE_TIMERLIST_MODIFY,
 	LOCALE_TIMERLIST_NAME,
 	LOCALE_TIMERLIST_NEW,
+	LOCALE_TIMERLIST_OVERLAPPING_TIMER,
 	LOCALE_TIMERLIST_PLUGIN,
 	LOCALE_TIMERLIST_PROGRAM_UNKNOWN,
 	LOCALE_TIMERLIST_RECORDING_DIR,

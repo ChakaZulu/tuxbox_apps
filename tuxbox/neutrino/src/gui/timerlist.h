@@ -82,10 +82,12 @@ class CTimerList : public CMenuTarget
 		void updateEvents(void);
 		int  show();
 		int  exec(CMenuTarget* parent, const std::string & actionKey);
-		const char * convertTimerType2String(const CTimerd::CTimerEventTypes type); // UTF-8
-		std::string convertTimerRepeat2String(const CTimerd::CTimerEventRepeat rep); // UTF-8
-		std::string convertChannelId2String(const t_channel_id id); // UTF-8
+		static const char * convertTimerType2String(const CTimerd::CTimerEventTypes type); // UTF-8
+		static std::string convertTimerRepeat2String(const CTimerd::CTimerEventRepeat rep); // UTF-8
+		static std::string convertChannelId2String(const t_channel_id id); // UTF-8
 };
+
+bool askUserOnTimerConflict(time_t announceTime, time_t stopTime);
 
 
 #endif

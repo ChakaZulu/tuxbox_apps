@@ -39,6 +39,7 @@
 #include <gui/widget/icons.h>
 #include <gui/widget/messagebox.h>
 #include <gui/widget/mountchooser.h>
+#include <gui/timerlist.h>
 
 #include <global.h>
 #include <neutrino.h>
@@ -557,13 +558,27 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 							}
 							if (recDir != NULL)
 							{
-								timerdclient.addRecordTimerEvent(channel_id,
-												 epgData.epg_times.startzeit,
-												 epgData.epg_times.startzeit + epgData.epg_times.dauer,
-												 epgData.eventID, epgData.epg_times.startzeit,
-												 epgData.epg_times.startzeit - (ANNOUNCETIME + 120 ),
-												 "", true, recDir);
-								ShowLocalizedMessage(LOCALE_TIMER_EVENTRECORD_TITLE, LOCALE_TIMER_EVENTRECORD_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
+								if (timerdclient.addRecordTimerEvent(channel_id,
+												     epgData.epg_times.startzeit,
+												     epgData.epg_times.startzeit + epgData.epg_times.dauer,
+												     epgData.eventID, epgData.epg_times.startzeit,
+												     epgData.epg_times.startzeit - (ANNOUNCETIME + 120 ),
+												     "", true, recDir,false) == -1)
+								{
+									if(askUserOnTimerConflict(epgData.epg_times.startzeit - (ANNOUNCETIME + 120),
+												  epgData.epg_times.startzeit + epgData.epg_times.dauer))
+									{
+										timerdclient.addRecordTimerEvent(channel_id,
+														 epgData.epg_times.startzeit,
+														 epgData.epg_times.startzeit + epgData.epg_times.dauer,
+														 epgData.eventID, epgData.epg_times.startzeit,
+														 epgData.epg_times.startzeit - (ANNOUNCETIME + 120 ),
+														 "", true, recDir,true);
+										ShowLocalizedMessage(LOCALE_TIMER_EVENTRECORD_TITLE, LOCALE_TIMER_EVENTRECORD_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
+									}
+								} else {
+									ShowLocalizedMessage(LOCALE_TIMER_EVENTRECORD_TITLE, LOCALE_TIMER_EVENTRECORD_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
+								}
 							}
 						}
 						else

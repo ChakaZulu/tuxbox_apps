@@ -816,6 +816,7 @@ timerlist.modetv TV channels
 timerlist.modify Modify
 timerlist.name Timer list
 timerlist.new New timer
+timerlist.overlapping_timer Timer conflict. Create the timer anyway?
 timerlist.plugin Plugin
 timerlist.program.unknown Program unknown
 timerlist.recording_dir recording directory

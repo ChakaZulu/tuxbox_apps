@@ -267,8 +267,18 @@ int CTimerList::exec(CMenuTarget* parent, const std::string & actionKey)
 		}
 		if(timerNew.eventRepeat >= CTimerd::TIMERREPEAT_WEEKDAYS)
 			Timer->getWeekdaysFromStr((int *)&timerNew.eventRepeat, m_weekdaysStr);
-		Timer->addTimerEvent(timerNew.eventType,data,timerNew.announceTime,timerNew.alarmTime,
-				     timerNew.stopTime, timerNew.eventRepeat,timerNew.repeatCount);
+		
+		if (Timer->addTimerEvent(timerNew.eventType,data,timerNew.announceTime,timerNew.alarmTime,
+					 timerNew.stopTime,timerNew.eventRepeat,timerNew.repeatCount,false) == -1)
+		{
+			bool forceAdd = askUserOnTimerConflict(timerNew.announceTime,timerNew.stopTime);
+ 
+			if (forceAdd)
+			{
+				Timer->addTimerEvent(timerNew.eventType,data,timerNew.announceTime,timerNew.alarmTime,
+						     timerNew.stopTime, timerNew.eventRepeat,timerNew.repeatCount,true);		
+			}
+		}
 		return menu_return::RETURN_EXIT;
 	}
 	else if (strncmp(key, "SC:", 3) == 0)
@@ -1002,4 +1012,37 @@ int CTimerList::newTimer()
 	toDelete.clear();
 
 	return ret;
+}
+
+bool askUserOnTimerConflict(time_t announceTime, time_t stopTime)
+{
+	CTimerdClient Timer;
+	CTimerd::TimerList overlappingTimers = Timer.getOverlappingTimers(announceTime,stopTime);
+	//printf("[CTimerdClient] attention\n%d\t%d\t%d conflicts with:\n",timerNew.announceTime,timerNew.alarmTime,timerNew.stopTime);
+	
+	std::string timerbuf = g_Locale->getText(LOCALE_TIMERLIST_OVERLAPPING_TIMER);
+	timerbuf += "\n";
+	for (CTimerd::TimerList::iterator it = overlappingTimers.begin();
+	     it != overlappingTimers.end();it++) 
+	{
+		timerbuf += CTimerList::convertTimerType2String(it->eventType);
+		timerbuf += ": ";
+		char at[25] = {0};
+		struct tm *annTime = localtime(&(it->announceTime));
+		strftime(at,20,"%d.%m. %H:%M",annTime);
+		timerbuf += at;
+		timerbuf += " - ";
+		
+		char st[25] = {0};
+		struct tm *sTime = localtime(&(it->stopTime));
+		strftime(st,20,"%d.%m. %H:%M",sTime);
+		timerbuf += st;
+		timerbuf += "\n";
+		//printf("%d\t%d\t%d\n",it->announceTime,it->alarmTime,it->stopTime);
+	}
+	//printf("message:\n%s\n",timerbuf.c_str());
+	// todo: localize message
+	//g_Locale->getText(TIMERLIST_OVERLAPPING_MESSAGE);
+	
+	return (ShowMsgUTF(LOCALE_MESSAGEBOX_INFO,timerbuf,CMessageBox::mbrNo,CMessageBox::mbNo|CMessageBox::mbYes) == CMessageBox::mbrYes);
 }
