@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.17 2001/07/26 21:36:59 fnbrd Exp $
+// $Id: SIsections.cpp,v 1.18 2001/09/20 10:12:46 fnbrd Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.cpp,v $
+// Revision 1.18  2001/09/20 10:12:46  fnbrd
+// Fehler behoben.
+//
 // Revision 1.17  2001/07/26 21:36:59  fnbrd
 // Ein paar Absicherungen gegen defekte EIT-Packete.
 //
@@ -147,7 +150,7 @@ void SIsectionEIT::parseComponentDescriptor(const char *buf, SIevent &e, unsigne
 void SIsectionEIT::parseContentDescriptor(const char *buf, SIevent &e, unsigned maxlen)
 {
   struct descr_generic_header *cont=(struct descr_generic_header *)buf;
-  if(buf+cont->descriptor_length+sizeof(struct descr_generic_header)>=buf+maxlen)
+  if(buf+cont->descriptor_length+sizeof(struct descr_generic_header)>buf+maxlen)
     return; // defekt
   const char *classification=buf+sizeof(struct descr_generic_header);
   while(classification<=buf+sizeof(struct descr_generic_header)+cont->descriptor_length-2) {
@@ -162,7 +165,7 @@ void SIsectionEIT::parseContentDescriptor(const char *buf, SIevent &e, unsigned 
 void SIsectionEIT::parseParentalRatingDescriptor(const char *buf, SIevent &e, unsigned maxlen)
 {
   struct descr_generic_header *cont=(struct descr_generic_header *)buf;
-  if(buf+cont->descriptor_length+sizeof(struct descr_generic_header)>=buf+maxlen)
+  if(buf+cont->descriptor_length+sizeof(struct descr_generic_header)>buf+maxlen)
     return; // defekt
   const char *s=buf+sizeof(struct descr_generic_header);
   while(s<buf+sizeof(struct descr_generic_header)+cont->descriptor_length-4) {
@@ -174,7 +177,7 @@ void SIsectionEIT::parseParentalRatingDescriptor(const char *buf, SIevent &e, un
 void SIsectionEIT::parseExtendedEventDescriptor(const char *buf, SIevent &e, unsigned maxlen)
 {
   struct descr_extended_event_header *evt=(struct descr_extended_event_header *)buf;
-  if(buf+evt->descriptor_length+sizeof(struct descr_extended_event_header)>=buf+maxlen)
+  if(buf+evt->descriptor_length+sizeof(struct descr_extended_event_header)>buf+maxlen)
     return; // defekt
   unsigned char *items=(unsigned char *)(buf+sizeof(struct descr_extended_event_header));
   while(items<(unsigned char *)(buf+sizeof(struct descr_extended_event_header)+evt->length_of_items)) {
@@ -204,7 +207,7 @@ void SIsectionEIT::parseExtendedEventDescriptor(const char *buf, SIevent &e, uns
 void SIsectionEIT::parseShortEventDescriptor(const char *buf, SIevent &e, unsigned maxlen)
 {
   struct descr_short_event_header *evt=(struct descr_short_event_header *)buf;
-  if(buf+evt->descriptor_length+sizeof(struct descr_short_event_header)>=buf+maxlen)
+  if(buf+evt->descriptor_length+sizeof(struct descr_short_event_header)>buf+maxlen)
     return; // defekt
   buf+=sizeof(struct descr_short_event_header);
   if(evt->event_name_length) {
