@@ -490,7 +490,6 @@ int CNeutrinoApp::loadSetup()
 		scanSettings.useDefaults();
 	}
 
-
 	return erg;
 }
 
@@ -1709,8 +1708,6 @@ void CNeutrinoApp::ShowStreamFeatures()
 	int cnt = 0;
 	int enabled_count = 0;
 
-    g_PluginList->loadPlugins();
-
 	for(unsigned int count=0;count < (unsigned int) g_PluginList->getNumberOfPlugins();count++)
 	{
     	if ( g_PluginList->getType(count)== 2 )
@@ -1719,7 +1716,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 
 			sprintf(id, "%d", count);
 
-			bool enable_it = ( ( !g_PluginList->getVTXT(count) )  || (g_RemoteControl->current_PIDs.PIDs.vtxtpid!=0) );
+			bool enable_it = true; //( ( !g_PluginList->getVTXT(count) )  || (g_RemoteControl->current_PIDs.PIDs.vtxtpid!=0) );
 			if ( enable_it )
 				enabled_count++;
 
@@ -1964,6 +1961,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 		ShowHint ( "messagebox.info", g_Locale->getText("settings.missingoptionsconffile") );
 	}
 
+	g_lcdd->setServiceName("Waiting...");
 	//init programm
 	InitZapper();
 
@@ -1984,6 +1982,9 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	current_volume= g_Controld->getVolume();
 	AudioMute( g_Controld->getMute(), true );
+
+	//load Pluginlist
+	g_PluginList->loadPlugins();
 
 	RealRun(mainMenu);
 
@@ -2798,7 +2799,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.316 2002/09/04 15:57:12 dirch Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.317 2002/09/07 14:57:37 alexw Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
