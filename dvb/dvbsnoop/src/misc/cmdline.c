@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.26 2004/02/16 22:45:37 rasc Exp $
+$Id: cmdline.c,v 1.27 2004/02/20 22:18:40 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,12 @@ $Id: cmdline.c,v 1.26 2004/02/16 22:45:37 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.27  2004/02/20 22:18:40  rasc
+DII complete (hopefully)
+BIOP::ModuleInfo  (damned, who is spreading infos over several standards???)
+maybe someone give me a hint on the selector_byte info!!!
+some minor changes...
+
 Revision 1.26  2004/02/16 22:45:37  rasc
 small bugfix: crc is 32 bit
 
@@ -142,8 +148,8 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
   */
 
   opt->buffer_hexdump = 1;
-  opt->printhex = -1;
-  opt->printdecode = -1;
+  opt->printhex = -1;		// see below
+  opt->printdecode = -1;	// see below
   opt->binary_out = 0;
   opt->inpPidFile = (char *) NULL;
   opt->devDemux = DEMUX_DEVICE;
@@ -226,7 +232,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
    -- standard if no print decode or printhex given
   */
 
-  if (opt->printhex    < 0) opt->printhex = 1;
+  if (opt->printhex    < 0) opt->printhex = 4;
   if (opt->printdecode < 0) opt->printdecode = 7;
 
 
@@ -293,7 +299,7 @@ static void usage (void)
     printf("   -n count:     receive count packets (0=no limit) [-n 0]\n");
     printf("   -b:           binary output of packets (disables other output)\n");
     printf("   -if:          input file, reads from binary file instead of demux device\n");
-    printf("   -ph mode:     data hex dump mode, modes: [-ph 1]\n");
+    printf("   -ph mode:     data hex dump mode, modes: [-ph 4]\n");
     printf("                   0=none, 1=hexdump, 2=hex line 3=ascii line 4=hexdump2\n");
     printf("   -nph:         don't print hex dump of buffer [= -nohexdumpbuffer -ph 0]\n");
     printf("   -hexdumpbuffer:    print hex dump of read buffer [-hexdumpbuffer]\n");

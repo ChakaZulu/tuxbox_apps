@@ -1,5 +1,5 @@
 /*
-$Id: sectables.c,v 1.20 2004/02/07 01:28:04 rasc Exp $
+$Id: sectables.c,v 1.21 2004/02/20 22:18:42 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,12 @@ $Id: sectables.c,v 1.20 2004/02/07 01:28:04 rasc Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.21  2004/02/20 22:18:42  rasc
+DII complete (hopefully)
+BIOP::ModuleInfo  (damned, who is spreading infos over several standards???)
+maybe someone give me a hint on the selector_byte info!!!
+some minor changes...
+
 Revision 1.20  2004/02/07 01:28:04  rasc
 MHP Application  Information Table
 some AIT descriptors
@@ -319,7 +325,7 @@ void  guess_table (u_char *buf, int len, u_int pid)
   if (t->func == NULL) {
    	out_SB_NL (2,"Unknown, reserved or not (yet) implemented - TableID: ",table_id);
 	out_nl    (2,"--> %s",dvbstrTableID (table_id));
-	printhexdump_buf (5,buf,len);
+	printhex_buf (5,buf,len);
 	return;
   }
 

@@ -1,5 +1,5 @@
 /*
-$Id: mhp_ait_descriptor.c,v 1.6 2004/02/15 01:01:03 rasc Exp $ 
+$Id: mhp_ait_descriptor.c,v 1.7 2004/02/20 22:18:39 rasc Exp $ 
 
 
  DVBSNOOP
@@ -17,6 +17,12 @@ $Id: mhp_ait_descriptor.c,v 1.6 2004/02/15 01:01:03 rasc Exp $
 
 
 $Log: mhp_ait_descriptor.c,v $
+Revision 1.7  2004/02/20 22:18:39  rasc
+DII complete (hopefully)
+BIOP::ModuleInfo  (damned, who is spreading infos over several standards???)
+maybe someone give me a hint on the selector_byte info!!!
+some minor changes...
+
 Revision 1.6  2004/02/15 01:01:03  rasc
 DSM-CC  DDB (DownloadDataBlock Message)
 DSM-CC  U-N-Message  started
@@ -278,8 +284,8 @@ void descriptorMHP_AIT_transport_protocol (u_char *b)
 		outBit_S2x_NL (4,"Original_network_id: ",	b,  0, 16,
 			(char *(*)(u_long)) dvbstrOriginalNetwork_ID);
 		outBit_Sx_NL  (4,"transport_stream_ID: ",	b, 16, 16);
-		outBit_Sx     (4,"service_ID: ",		b, 32, 16);
-			out_nl (4," --> refers to PMS program_number"); 
+		outBit_S2Tx_NL(4,"service_ID: ",		b, 32, 16,
+			" --> refers to PMS program_number"); 
 		b += 6;
 		len -= 6;
 	}
@@ -629,10 +635,10 @@ void descriptorMHP_AIT_DII_location (u_char *b)
   indent(+1);
   while (len > 0) {
 	out_NL (4);
-  	outBit_Sx_NL (4,"reserved: ",		b,  0,  1);
-  	outBit_Sx (4,"DII_identification: ",	b,  1, 15);
-	   out_nl (4, "  [= refers to identification in transaction_id]");
-  	outBit_Sx_NL (4,"association_tag: ",	b, 16, 16);
+  	outBit_Sx_NL   (4,"reserved: ",		b,  0,  1);
+  	outBit_S2Tx_NL (4,"DII_identification: ",	b,  1, 15,
+	   	        "refers to identification in transaction_id");
+  	outBit_Sx_NL   (4,"association_tag: ",	b, 16, 16);
 	b += 4;
 	len -= 4;
   }

@@ -1,5 +1,5 @@
 /*
-$Id: pes_misc.c,v 1.6 2004/02/05 10:30:57 rasc Exp $
+$Id: pes_misc.c,v 1.7 2004/02/20 22:18:41 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,12 @@ $Id: pes_misc.c,v 1.6 2004/02/05 10:30:57 rasc Exp $
 
 
 $Log: pes_misc.c,v $
+Revision 1.7  2004/02/20 22:18:41  rasc
+DII complete (hopefully)
+BIOP::ModuleInfo  (damned, who is spreading infos over several standards???)
+maybe someone give me a hint on the selector_byte info!!!
+some minor changes...
+
 Revision 1.6  2004/02/05 10:30:57  rasc
 no message
 
@@ -115,12 +121,8 @@ void  print_xTS_field (int v, const char *str, u_char *b, int bit_offset)
 void pack_header (int v, u_char *b, int len)
 {
 
-	/*  ... $$$ TODO   */
 	/* z.B. H.222 ISO 13818-1 Table 2-33 */
 	/* 	ISO 11172-1 pack header */
-
-   printhexdump_buf (v, b, len);
-
 
 
    int 	v1 = v+1;
@@ -178,7 +180,7 @@ void system_header (int v, u_char *b, int len)
 
 
    // $$$ TODO  PS system header
-   printhexdump_buf (v, b, len);
+   printhex_buf (v, b, len);
 
 
 

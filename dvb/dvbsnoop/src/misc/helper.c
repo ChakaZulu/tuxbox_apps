@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.25 2004/02/12 21:21:20 rasc Exp $
+$Id: helper.c,v 1.26 2004/02/20 22:18:40 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,12 @@ $Id: helper.c,v 1.25 2004/02/12 21:21:20 rasc Exp $
 
 
 $Log: helper.c,v $
+Revision 1.26  2004/02/20 22:18:40  rasc
+DII complete (hopefully)
+BIOP::ModuleInfo  (damned, who is spreading infos over several standards???)
+maybe someone give me a hint on the selector_byte info!!!
+some minor changes...
+
 Revision 1.25  2004/02/12 21:21:20  rasc
 MHP AIT descriptors
 some smaller changes
@@ -128,6 +134,8 @@ dvbsnoop v0.7  -- Commit to CVS
   -- return: (unsigned long) value
  */
 
+// out text and values without CR/LF
+
 u_long outBit_Sx (int verbosity, const char *text, u_char *buf, int startbit, int bitlen)
 {
    u_long value;
@@ -149,6 +157,8 @@ u_long outBit_Sx (int verbosity, const char *text, u_char *buf, int startbit, in
 
 
 
+// out text and values
+
 u_long outBit_Sx_NL (int verbosity, const char *text, u_char *buf, int startbit, int bitlen)
 {
   u_long value;
@@ -161,6 +171,8 @@ u_long outBit_Sx_NL (int verbosity, const char *text, u_char *buf, int startbit,
 
 
 
+
+// out text, values and string related to value (string table function)
 
 u_long outBit_S2x_NL (int verbosity, const char *text, u_char *buf, int startbit, int bitlen, char *(*f)(u_long) )
 {
@@ -180,6 +192,30 @@ u_long outBit_S2x_NL (int verbosity, const char *text, u_char *buf, int startbit
 
    return value;
 }
+
+
+
+// out text, values and text2
+
+u_long outBit_S2Tx_NL (int verbosity, const char *text, u_char *buf, int startbit, int bitlen, const char *text2 )
+{
+   u_long value;
+
+   value =  getBits(buf,0,startbit,bitlen);
+
+   if (bitlen <= 8) {
+	 out_S2B_NL (verbosity,text,(int)value, text2);
+   } else if (bitlen <= 16) {
+	 out_S2W_NL (verbosity,text,(int)value, text2);
+   } else if (bitlen <= 24) {
+	 out_S2T_NL (verbosity,text,(int)value, text2);
+   } else {
+	 out_S2L_NL (verbosity,text,     value, text2);
+   }
+
+   return value;
+}
+
 
 
 
@@ -567,7 +603,7 @@ void print_databytes (int v, const char *str, u_char *b, u_int len)
 {
   out_nl (v,str);
 	indent (+1);
-	printhexdump_buf (v+1,b,len);
+	printhex_buf (v+1,b,len);
 	indent (-1);
 }
 

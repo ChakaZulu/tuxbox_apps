@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.c,v 1.16 2004/01/17 23:06:08 rasc Exp $
+$Id: mpeg_descriptor.c,v 1.17 2004/02/20 22:18:39 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,12 @@ $Id: mpeg_descriptor.c,v 1.16 2004/01/17 23:06:08 rasc Exp $
 
 
 $Log: mpeg_descriptor.c,v $
+Revision 1.17  2004/02/20 22:18:39  rasc
+DII complete (hopefully)
+BIOP::ModuleInfo  (damned, who is spreading infos over several standards???)
+maybe someone give me a hint on the selector_byte info!!!
+some minor changes...
+
 Revision 1.16  2004/01/17 23:06:08  rasc
 minor stuff, some restructs in output
 
@@ -1504,7 +1510,7 @@ void descriptorMPEG_FMXBufferSize (u_char *b)
 
   out_nl (4,"($$$TODO):");
   indent (+1);
-  printhexdump_buf (4, b+2, descriptor_length-2);
+  printhex_buf (4, b+2, descriptor_length-2);
   indent (-1);
 
 
@@ -1533,10 +1539,8 @@ void descriptorMPEG_MultiplexBuffer (u_char *b)
   // d.descriptor_length       	 = b[1];
 
 
- outBit_Sx (4,"MB_buffer_size: ",  	b,16,24);
- 	out_nl (4," (bytes)");
- outBit_Sx (4,"TB_leak_rate: ",  	b,40,24);
- 	out_nl (4," (* 400 bit/s)");
+ outBit_S2Tx_NL (4,"MB_buffer_size: ", 	b,16,24,"bytes");
+ outBit_S2Tx_NL (4,"TB_leak_rate: ",  	b,40,24,"(x 400 bit/s)");
 
 }
 
@@ -1554,11 +1558,10 @@ void descriptorMPEG_FlexMuxTiming (u_char *b)
   // d.descriptor_length       	 = b[1];
 
 
- outBit_Sx_NL (4,"FCR_ES_ID: ",  		b,16,16);
- outBit_Sx    (4,"FCRResolution: ",  		b,32,32);
- 	out_nl (4," (cycles/s)");
- outBit_Sx_NL (4,"FCRLength: ",  		b,64, 8);
- outBit_Sx_NL (4,"FCRRateLength: ",  		b,72, 8);
+ outBit_Sx_NL   (4,"FCR_ES_ID: ",  	b,16,16);
+ outBit_S2Tx_NL (4,"FCRResolution: ",  	b,32,32,"(cycles/s)");
+ outBit_Sx_NL   (4,"FCRLength: ",  	b,64, 8);
+ outBit_Sx_NL   (4,"FCRRateLength: ",  	b,72, 8);
 
 }
 

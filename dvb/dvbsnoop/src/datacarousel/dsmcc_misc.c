@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_misc.c,v 1.10 2004/02/17 23:54:12 rasc Exp $
+$Id: dsmcc_misc.c,v 1.11 2004/02/20 22:18:38 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,12 @@ $Id: dsmcc_misc.c,v 1.10 2004/02/17 23:54:12 rasc Exp $
 
 
 $Log: dsmcc_misc.c,v $
+Revision 1.11  2004/02/20 22:18:38  rasc
+DII complete (hopefully)
+BIOP::ModuleInfo  (damned, who is spreading infos over several standards???)
+maybe someone give me a hint on the selector_byte info!!!
+some minor changes...
+
 Revision 1.10  2004/02/17 23:54:12  rasc
 Bug (not fixed yet): DSM-CC  DII Carousel Descriptor Loop is strange
 
@@ -216,6 +222,8 @@ static int subDescriptor (u_char *b)
 /*
  * ISO/IEC 13818-6
  * dsmccMessageHeader() 
+ * returns some header info in DSM_MSG_HD struct
+ * (msg_len is len after read header incl. adaption field)
  */
 
 int dsmcc_MessageHeader (int v, u_char *b, int len,  DSMCC_MSG_HD *d)
@@ -266,6 +274,7 @@ int dsmcc_MessageHeader (int v, u_char *b, int len,  DSMCC_MSG_HD *d)
 		x = dsmcc_AdaptationHeader (v, b, adapt_len);
 		b += x;
 		// len -= x;
+		d->msg_len -= x;
 	}
 
 	indent (-1);
@@ -309,6 +318,7 @@ int dsmcc_AdaptationHeader (int v, u_char *b, int len)
 		case 0x02: 		// user ID
 			dsmcc_UserID (v, b, len);
 			break;
+			// $$$ TODO  0x03 (arib)  and 0x04  (ATSC a91)
 
 		default:
   			print_databytes (v,"adaptationDataByte:", b, len);
@@ -456,8 +466,8 @@ int  dsmcc_carousel_NSAP_address_B20 (int v, const char *s, u_char *b)
 		outBit_Sx_NL  (4,"transport_stream_ID: ",	b,  0, 16);
 		outBit_S2x_NL (4,"Original_network_id: ",	b, 16, 16,
 				(char *(*)(u_long)) dvbstrOriginalNetwork_ID);
-		outBit_Sx     (4,"service_ID: ",		b, 32, 16);
-				out_nl (4," --> refers to PMS program_number"); 
+		outBit_S2Tx_NL(4,"service_ID: ",		b, 32, 16,
+				  "--> refers to PMS program_number"); 
 		outBit_Sx_NL  (4,"reserved: ",			b, 48, 32);
 
 	}

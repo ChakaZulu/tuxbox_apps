@@ -1,5 +1,5 @@
 /*
-$Id: hexprint.c,v 1.5 2004/01/01 20:09:26 rasc Exp $
+$Id: hexprint.c,v 1.6 2004/02/20 22:18:40 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,12 @@ $Id: hexprint.c,v 1.5 2004/01/01 20:09:26 rasc Exp $
 
 
 $Log: hexprint.c,v $
+Revision 1.6  2004/02/20 22:18:40  rasc
+DII complete (hopefully)
+BIOP::ModuleInfo  (damned, who is spreading infos over several standards???)
+maybe someone give me a hint on the selector_byte info!!!
+some minor changes...
+
 Revision 1.5  2004/01/01 20:09:26  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -58,6 +64,10 @@ dvbsnoop v0.7  -- Commit to CVS
 int HexPrintmode = 0;
 
 
+
+static void printhexdump_buf (int verbose, u_char *buf, int len);
+static void printhexdump2_buf (int verbose, u_char *buf, int len);
+static void printhexline_buf (int verbose, u_char *buf, int len);
 
 
 
@@ -126,7 +136,7 @@ void printhex_buf (int verbose, u_char *buf, int n)
   0000:   B  .  Y  .  A  .  .  .  .  .  .  .  .  .  .  . 
 
 */
-void printhexdump_buf (int verbose, u_char *buf, int n)
+static void printhexdump_buf (int verbose, u_char *buf, int n)
 {
  int i, j;
  u_char c;
@@ -165,7 +175,7 @@ while (j*WID < n) {
  -- single line dump HEX
    42 f1 59 04 41 f1 00 00 00 01 ff 2e e3 ff 80 1f 4
 */
-void printhexline_buf (int verbose, u_char *buf, int n)
+static void printhexline_buf (int verbose, u_char *buf, int n)
 {
  int i;
 
@@ -199,7 +209,7 @@ void printasciiline_buf (int verbose, u_char *buf, int n)
 /*
  -- single line dump HEX+ASCII
 */
-void printhexdump2_buf (int verbose, u_char *buf, int n)
+static void printhexdump2_buf (int verbose, u_char *buf, int n)
 {
  int    i, j;
  int    k;

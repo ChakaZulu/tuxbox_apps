@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_int_unt_descriptor.c,v 1.15 2004/02/09 21:24:57 rasc Exp $ 
+$Id: dsmcc_int_unt_descriptor.c,v 1.16 2004/02/20 22:18:39 rasc Exp $ 
 
 
  DVBSNOOP
@@ -17,6 +17,12 @@ $Id: dsmcc_int_unt_descriptor.c,v 1.15 2004/02/09 21:24:57 rasc Exp $
 
 
 $Log: dsmcc_int_unt_descriptor.c,v $
+Revision 1.16  2004/02/20 22:18:39  rasc
+DII complete (hopefully)
+BIOP::ModuleInfo  (damned, who is spreading infos over several standards???)
+maybe someone give me a hint on the selector_byte info!!!
+some minor changes...
+
 Revision 1.15  2004/02/09 21:24:57  rasc
 AIT descriptors
 minor redesign on output routines
@@ -264,8 +270,7 @@ void descriptorDSMCC_update (u_char *b)
                         (char *(*)(u_long)) dsmccStr_UpdateFlag );     
  outBit_S2x_NL (4,"update_method: ",	  b,18, 4,
                         (char *(*)(u_long)) dsmccStr_UpdateMethod );     
- outBit_Sx     (4,"update_priority: ",	  b,22, 2);
- 		out_nl (4,"  [0=highest]");
+ outBit_S2Tx_NL (4,"update_priority: ",	  b,22, 2, "0=highest");
  
  print_private_data (4,b+3,len-1);
 }

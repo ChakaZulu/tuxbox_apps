@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_unm_dii.c,v 1.3 2004/02/17 23:54:12 rasc Exp $
+$Id: dsmcc_unm_dii.c,v 1.4 2004/02/20 22:18:38 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,12 @@ $Id: dsmcc_unm_dii.c,v 1.3 2004/02/17 23:54:12 rasc Exp $
 
 
 $Log: dsmcc_unm_dii.c,v $
+Revision 1.4  2004/02/20 22:18:38  rasc
+DII complete (hopefully)
+BIOP::ModuleInfo  (damned, who is spreading infos over several standards???)
+maybe someone give me a hint on the selector_byte info!!!
+some minor changes...
+
 Revision 1.3  2004/02/17 23:54:12  rasc
 Bug (not fixed yet): DSM-CC  DII Carousel Descriptor Loop is strange
 
@@ -36,6 +42,7 @@ DSM-CC  data/object carousell continued   (DSI, DII, DDB, DCancel)
 #include "dvbsnoop.h"
 #include "dsmcc_unm_dii.h"
 #include "dsmcc_misc.h"
+#include "biop_modinfo.h"
 #include "misc/output.h"
 #include "misc/hexprint.h"
 
@@ -54,7 +61,7 @@ int dsmcc_DownloadInfoIndication (int v, u_char *b, u_int len)
    int   	len_org = len;
    int		n_modules;
    int 		len2;
-   int		x;
+   int		i, x;
 
 
 
@@ -77,18 +84,15 @@ int dsmcc_DownloadInfoIndication (int v, u_char *b, u_int len)
 	b += 2;
 	len -= 2;
 
-
-	indent (+1);
-	while (n_modules > 0) {
+	for (i=1; i <= n_modules; i++) {
 		u_int    mId;
 
 		out_NL (v);
-		out_nl (v, "Module:");
+		out_nl (v, "Module (%d):",i);
 		indent (+1);
 
 		mId = outBit_Sx (v,"moduleId: ",	b,  0, 16);
-		      out_nl (v, "%s", (mId < 0xFFF0)
-				? "" : "  [= DAVIC application]");
+		      out_nl (4, "%s", (mId < 0xFFF0) ? "" : "  [= DAVIC application]");
 		outBit_Sx_NL (v,"moduleSize: "	,	b, 16, 32);
 		outBit_Sx_NL (v,"moduleVersion: ",	b, 48,  8);
 		len2 = outBit_Sx_NL (v,"moduleInfoLength: ",	b, 56,  8);
@@ -102,10 +106,10 @@ int dsmcc_DownloadInfoIndication (int v, u_char *b, u_int len)
 		// this case, the moduleInfoByte structure contains the ModuleInfo
 		// structure as defined by DAVIC with the privateDataByte field of that
 		// structure as a loop of descriptors.
+		// ISO 13818-6:2000  11.3.3.2
 
-// $$$ TODO  BUG-FIX !!!!: we have a bug here!
 		if (mId < 0xFFF0) {
-			dsmcc_CarouselDescriptor_Loop ("ModuleInfo", b, len2);
+			biop_ModuleInfo (v, b, len2);
 		} else {
 			print_databytes (v, "moduleInfoBytes: ", b, len2);  // $$$ TODO Davic
 		}
@@ -113,7 +117,6 @@ int dsmcc_DownloadInfoIndication (int v, u_char *b, u_int len)
 		len -= len2;
 
 		indent (-1);
-		n_modules--;
 	}
 	out_NL (v);
 	indent (-1);
@@ -160,7 +163,7 @@ int dsmcc_DownloadInfoIndication (int v, u_char *b, u_int len)
 // !! moduleInfoByte: these fields shall convey a list of descriptors
 // !! which each define one or more attributes of the described module,
 // !! except when the moduleId is within the range of 0xFFF0-0xFFFF. In
-// !! this case, the moduleInfoByte structure contains the ModuleInfo
+// !! this case, the _moduleInfoByte structure_ contains the ModuleInfo
 // !! structure as defined by DAVIC with the privateDataByte field of that
 // !! structure as a loop of descriptors.
 //
@@ -168,31 +171,4 @@ int dsmcc_DownloadInfoIndication (int v, u_char *b, u_int len)
 // privateDataByte field.
 //
 // privateDataByte: these fields are user defined.
-
-
-
-
-
-// $$$ TODO
-
-
-// TS 102 812 --  B.2.2.2 DownloadInfoIndication
-// The DownloadInfoIndication is a message that describes a set of modules and gives the necessary parameters to locate the module and retrieve it.
-
-// B.2.2.4 ModuleInfo
-// The moduleInfo structure is placed in the moduleInfo 
-//
-// BIOP::ModuleInfo::Taps
-// The .rst tap shall have the "use"value 0x0017 (BIOP_OBJECT_USE).The
-// id and selector .elds are not used and the MHP terminal may ignore them.
-// The MHP terminal may ignore possible other taps in the list.
-// DVB
-// BIOP::ModuleInfo::
-// UserInfo
-// The userInfo .eld contains a loop of descriptors.These are speci .ed in the
-// DVB Data Broadcasting standard and/or this speci .cation.The MHP
-// terminal shall support the compressed_module_descriptor (tag 0x09)used
-// to signal that the module is transmitted in compressed form.The userInfo
-// .eld may also contain a caching_priority_descriptor and one or more label_
-// descriptors.  // DVB /This // spec.
 

@@ -1,5 +1,5 @@
 /*
-$Id: pes_dsmcc.c,v 1.9 2004/01/17 23:06:10 rasc Exp $
+$Id: pes_dsmcc.c,v 1.10 2004/02/20 22:18:41 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,12 @@ $Id: pes_dsmcc.c,v 1.9 2004/01/17 23:06:10 rasc Exp $
 
 
 $Log: pes_dsmcc.c,v $
+Revision 1.10  2004/02/20 22:18:41  rasc
+DII complete (hopefully)
+BIOP::ModuleInfo  (damned, who is spreading infos over several standards???)
+maybe someone give me a hint on the selector_byte info!!!
+some minor changes...
+
 Revision 1.9  2004/01/17 23:06:10  rasc
 minor stuff, some restructs in output
 
@@ -109,7 +115,7 @@ void  PES_decodeDSMCC (u_char *b, int len)
 		default:
 			out_nl (4," Unknown DSM-CC commandID/dsmcc_discriminator");
 			indent (+1);
-			printhexdump_buf (4, b, len);		
+			printhex_buf (4, b, len);		
 			indent (-1);
 			break;
 		      

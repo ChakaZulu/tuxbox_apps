@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.29 2004/02/15 20:46:10 rasc Exp $
+$Id: dsmcc_str.c,v 1.30 2004/02/20 22:18:42 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,12 @@ $Id: dsmcc_str.c,v 1.29 2004/02/15 20:46:10 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.30  2004/02/20 22:18:42  rasc
+DII complete (hopefully)
+BIOP::ModuleInfo  (damned, who is spreading infos over several standards???)
+maybe someone give me a hint on the selector_byte info!!!
+some minor changes...
+
 Revision 1.29  2004/02/15 20:46:10  rasc
 DSM-CC  data/object carousell continued   (DSI, DII, DDB, DCancel)
 
@@ -844,6 +850,7 @@ char *dsmccStrOUI  (u_int id)
 {
   STR_TABLE  TableIDs[] = {
 	{ 0x000000, 0x000000,   "EtherType or routed non-OSI protocol" },
+	{ 0x000979, 0x000979,   "ATSC" },  // ATSC a_95
 	{ 0x0080c2, 0x0080c2,   "Bridged protocol" },
 	{ 0x000000, 0xFFFFFF,  	"http://standards.ieee.org/regauth/oui/" },
       	{  0,0, NULL }

@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_carousel_descriptor.c,v 1.20 2004/02/17 23:54:13 rasc Exp $ 
+$Id: dsmcc_carousel_descriptor.c,v 1.21 2004/02/20 22:18:38 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,12 @@ $Id: dsmcc_carousel_descriptor.c,v 1.20 2004/02/17 23:54:13 rasc Exp $
 
 
 $Log: dsmcc_carousel_descriptor.c,v $
+Revision 1.21  2004/02/20 22:18:38  rasc
+DII complete (hopefully)
+BIOP::ModuleInfo  (damned, who is spreading infos over several standards???)
+maybe someone give me a hint on the selector_byte info!!!
+some minor changes...
+
 Revision 1.20  2004/02/17 23:54:13  rasc
 Bug (not fixed yet): DSM-CC  DII Carousel Descriptor Loop is strange
 
@@ -276,8 +282,8 @@ void descriptorDSMCC_location (u_char *b)
   // descriptor_tag	= b[0];
   // len	        = b[1];
  
-  outBit_Sx (4,"location: ", b,16, 8);
-  out_nl (4,"  [=  --> refers to component_tag in stream_identifier_descriptor]"); 
+  outBit_S2Tx_NL (4,"location: ", b,16, 8,
+	   "--> refers to component_tag in stream_identifier_descriptor"); 
 }
 
 
@@ -292,8 +298,7 @@ void descriptorDSMCC_est_download_time (u_char *b)
   // descriptor_tag	= b[0];
   // len	        = b[1];
  
-  outBit_Sx (4,"est_download_time: ", b,16, 32);
-  out_nl (4,"  [= seconds]");
+  outBit_S2Tx_NL (4,"est_download_time: ", b,16, 32, "(seconds)");
 }
 
 
@@ -330,8 +335,7 @@ void descriptorDSMCC_compressed_module (u_char *b)
 
   outBit_S2x_NL(4,"compression_method: ",  b,16, 8,
 			(char *(*)(u_long)) dsmccStr_compression_method);
-  outBit_Sx    (4,"original_size: ", b,24,32);
-     out_nl (4,"  [= bytes]");
+  outBit_S2Tx_NL (4,"original_size: ", b,24,32, "(bytes)");
 }
 
 
@@ -386,8 +390,8 @@ void descriptorDSMCC_MHP_caching_priority (u_char *b)
   // tag	= b[0];
   // len        = b[1];
 
-  outBit_Sx_NL (4,"priority_value: ", 		b, 0, 8);
-  outBit_S2x_NL(4,"transparency_level: ",	b, 8, 8,
+  outBit_Sx_NL (4,"priority_value: ", 		b, 16, 8);
+  outBit_S2x_NL(4,"transparency_level: ",	b, 24, 8,
 			(char *(*)(u_long)) dsmccStrMHP_caching_transparency_level);
 }
 

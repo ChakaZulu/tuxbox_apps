@@ -1,5 +1,5 @@
 /*
-$Id: test0x1d.c,v 1.6 2004/01/01 20:09:42 rasc Exp $
+$Id: test0x1d.c,v 1.7 2004/02/20 22:18:44 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,12 @@ $Id: test0x1d.c,v 1.6 2004/01/01 20:09:42 rasc Exp $
 
 
 $Log: test0x1d.c,v $
+Revision 1.7  2004/02/20 22:18:44  rasc
+DII complete (hopefully)
+BIOP::ModuleInfo  (damned, who is spreading infos over several standards???)
+maybe someone give me a hint on the selector_byte info!!!
+some minor changes...
+
 Revision 1.6  2004/01/01 20:09:42  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -89,7 +95,7 @@ void decode_TESTDATA (u_char *b, int len)
  out_nl (3,"... $$$ TODO ....");
  out_nl (3,"... Report!!! if you find a transponder with test data!!! ....");
  // $$$ TODO   ...
- printhexdump_buf (5, b, len);
+ printhex_buf (5, b, len);
 
 }
 
