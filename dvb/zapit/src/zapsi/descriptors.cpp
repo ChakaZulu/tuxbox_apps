@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.69 2005/01/23 19:29:25 thegoodguy Exp $
+ * $Id: descriptors.cpp,v 1.70 2005/01/25 18:50:19 thegoodguy Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -456,7 +456,7 @@ void service_descriptor(const unsigned char * const buffer, const t_service_id s
 
  //scanifostruct scaninfo;
 
-	if (providerName == "")
+	if (providerName.empty())
 		providerName = CDVBString(UNKNOWN_PROVIDER_NAME, strlen(UNKNOWN_PROVIDER_NAME)).getContent();
 
 	if (lastProviderName != providerName)
