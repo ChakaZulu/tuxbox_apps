@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.166 2002/04/29 20:24:24 obi Exp $
+ * $Id: zapit.cpp,v 1.167 2002/05/03 22:37:23 McClean Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1468,6 +1468,19 @@ void parse_command ()
 				send( connfd, &msgCurrentSID, sizeof(msgCurrentSID), 0);
 			break;
 
+			case CZapitClient::CMD_GET_CURRENT_SERVICEINFO :
+				CZapitClient::responseCurrentServiceInfo msgCurrentServiceInfo;
+				msgCurrentServiceInfo.onid = channel->getOnidSid() >> 8;
+				msgCurrentServiceInfo.sid = channel->getOnidSid() & 0xffff;
+				msgCurrentServiceInfo.tsid = frontend->getTsidOnid() >> 8;
+				msgCurrentServiceInfo.vdid = channel->getVideoPid();
+				msgCurrentServiceInfo.apid = channel->getAudioChannel();
+				msgCurrentServiceInfo.vtxtpid = channel->getTeletextPid();
+				msgCurrentServiceInfo.pcrpid = channel->getPcrPid();;
+
+				send( connfd, &msgCurrentServiceInfo, sizeof(msgCurrentServiceInfo), 0);
+			break;
+
 			case CZapitClient::CMD_GET_BOUQUETS :
 				CZapitClient::commandGetBouquets msgGetBouquets;
 				read( connfd, &msgGetBouquets, sizeof(msgGetBouquets));
@@ -1873,7 +1886,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.166 2002/04/29 20:24:24 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.167 2002/05/03 22:37:23 McClean Exp $\n\n");
 
 	if (argc > 1)
 	{

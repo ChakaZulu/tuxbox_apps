@@ -145,6 +145,31 @@ unsigned int CZapitClient::getCurrentServiceID()
 	return response.serviceID;
 }
 
+CZapitClient::CCurrentServiceInfo CZapitClient::getCurrentServiceInfo()
+{
+	commandHead msgHead;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_GET_CURRENT_SERVICEINFO;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+
+	responseCurrentServiceInfo response;
+	receive((char* )&response, sizeof(response));
+
+	CZapitClient::CCurrentServiceInfo erg;
+
+	erg.onid = response.onid;
+	erg.sid  = response.sid;
+	erg.tsid = response.tsid;
+	erg.vdid = response.vdid;
+	erg.apid = response.apid;
+	erg.pcrpid = response.pcrpid;
+
+	zapit_close();
+	return erg;
+}
+
 void CZapitClient::getLastChannel( string &channame, unsigned int &channumber, char &mode)
 {
 	commandHead msgHead;
