@@ -75,7 +75,7 @@ int CSleepTimerWidget::exec(CMenuTarget* parent, const std::string &)
 //		shutdown_min = 10;		// set to 10 min default
 
 	sprintf(value,"%03d",shutdown_min);
-	inbox = new CStringInput("sleeptimerbox.title",value,3,"sleeptimerbox.hint1","sleeptimerbox.hint2","0123456789 ");
+	inbox = new CStringInput(LOCALE_SLEEPTIMERBOX_TITLE, value, 3, LOCALE_SLEEPTIMERBOX_HINT1, LOCALE_SLEEPTIMERBOX_HINT2, "0123456789 ");
 	inbox->exec (NULL, "");
 	inbox->hide ();
 

@@ -113,8 +113,8 @@ int CScreenSetup::exec(CMenuTarget* parent, const std::string &)
 					int x=15*5;
 					int y=15*24;
 
-					g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+30,y+29, 15*23, g_Locale->getText("screensetup.upperleft"), (selected == 0)?COL_MENUHEAD:COL_MENUCONTENT, 0, true); // UTF-8
-					g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+30,y+49, 15*23, g_Locale->getText("screensetup.lowerright"), (selected == 1)?COL_MENUHEAD:COL_MENUCONTENT, 0, true); // UTF-8
+					g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+30,y+29, 15*23, g_Locale->getText(LOCALE_SCREENSETUP_UPPERLEFT ), (selected == 0)?COL_MENUHEAD:COL_MENUCONTENT, 0, true); // UTF-8
+					g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+30,y+49, 15*23, g_Locale->getText(LOCALE_SCREENSETUP_LOWERRIGHT), (selected == 1)?COL_MENUHEAD:COL_MENUCONTENT, 0, true); // UTF-8
                 	break;
                 }
 			case CRCInput::RC_up:
@@ -241,8 +241,8 @@ void CScreenSetup::paint()
 	int y=15*24;
 	frameBuffer->paintBoxRel(x,y, 15*23,15*4, COL_MENUCONTENT_PLUS_0);
 
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+30,y+29, 15*23, g_Locale->getText("screensetup.upperleft"), COL_MENUHEAD, 0, true); // UTF-8
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+30,y+49, 15*23, g_Locale->getText("screensetup.lowerright"), COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+30,y+29, 15*23, g_Locale->getText(LOCALE_SCREENSETUP_UPPERLEFT ), COL_MENUHEAD   , 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+30,y+49, 15*23, g_Locale->getText(LOCALE_SCREENSETUP_LOWERRIGHT), COL_MENUCONTENT, 0, true); // UTF-8
 
 	paintBorderUL();
 	paintBorderLR();

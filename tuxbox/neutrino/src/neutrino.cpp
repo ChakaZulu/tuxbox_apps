@@ -1405,16 +1405,16 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 	service.addItem(GenericMenuSeparator);
 	service.addItem(GenericMenuBack);
 	service.addItem(GenericMenuSeparatorLine);
-	service.addItem( new CMenuForwarder(LOCALE_BOUQUETEDITOR_NAME, true, NULL, new CBEBouquetWidget()));
-	service.addItem( new CMenuForwarder("servicemenu.scants", true, NULL, &scanSettings ) );
-	service.addItem( new CMenuForwarder("servicemenu.reload", true, NULL, this, "reloadchannels" ) );
-	service.addItem( new CMenuForwarder("servicemenu.ucodecheck", true, NULL, UCodeChecker ) );
+	service.addItem(new CMenuForwarder(LOCALE_BOUQUETEDITOR_NAME    , true, NULL, new CBEBouquetWidget()                  ));
+	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_SCANTS    , true, NULL, &scanSettings                           ));
+	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_RELOAD    , true, NULL, this                  , "reloadchannels"));
+	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_UCODECHECK, true, NULL, UCodeChecker                            ));
 
 	//softupdate
 	if(softupdate)
 	{
 		dprintf(DEBUG_DEBUG, "init soft-update-stuff\n");
-		CMenuWidget* updateSettings = new CMenuWidget("servicemenu.update", "softupdate.raw", 550);
+		CMenuWidget* updateSettings = new CMenuWidget(LOCALE_SERVICEMENU_UPDATE, "softupdate.raw", 550);
 		updateSettings->addItem(GenericMenuSeparator);
 		updateSettings->addItem(GenericMenuBack);
 		updateSettings->addItem(GenericMenuSeparatorLine);
@@ -1433,15 +1433,15 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		mtdexpert->addItem( new CMenuForwarder("flashupdate.writeflashmtd", true, NULL, fe, "writeflashmtd") );
 		mtdexpert->addItem(GenericMenuSeparatorLine);
 
-		CStringInputSMS * updateSettings_url_file = new CStringInputSMS("flashupdate.url_file", g_settings.softupdate_url_file, 30, NULL, NULL, "abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-. ");
-		mtdexpert->addItem(new CMenuForwarder("flashupdate.url_file", true, g_settings.softupdate_url_file, updateSettings_url_file));
+		CStringInputSMS * updateSettings_url_file = new CStringInputSMS(LOCALE_FLASHUPDATE_URL_FILE, g_settings.softupdate_url_file, 30, NULL, NULL, "abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-. ");
+		mtdexpert->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_URL_FILE, true, g_settings.softupdate_url_file, updateSettings_url_file));
 
 		updateSettings->addItem( new CMenuForwarder("flashupdate.expertfunctions", true, NULL, mtdexpert ) );
 
 		updateSettings->addItem(GenericMenuSeparatorLine);
-		CMenuOptionChooser *oj = new CMenuOptionChooser("flashupdate.updatemode", &g_settings.softupdate_mode,true);
-		oj->addOption(0, "flashupdate.updatemode_manual");
-		oj->addOption(1, "flashupdate.updatemode_internet");
+		CMenuOptionChooser *oj = new CMenuOptionChooser(LOCALE_FLASHUPDATE_UPDATEMODE, &g_settings.softupdate_mode, true);
+		oj->addOption(0, LOCALE_FLASHUPDATE_UPDATEMODE_MANUAL  );
+		oj->addOption(1, LOCALE_FLASHUPDATE_UPDATEMODE_INTERNET);
 		updateSettings->addItem( oj );
 
 
@@ -1477,7 +1477,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		updateSettings->addItem(GenericMenuSeparatorLine);
 		updateSettings->addItem(new CMenuForwarder("flashupdate.checkupdate", true, NULL, new CFlashUpdate()));
 
-		service.addItem(new CMenuForwarder("servicemenu.update", true, NULL, updateSettings));
+		service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_UPDATE, true, NULL, updateSettings));
 	}
 }
 
@@ -1888,48 +1888,48 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 
 void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 {
-	CIPInput * streamingSettings_server_ip = new CIPInput("streamingmenu.server_ip",  g_settings.streaming_server_ip, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
-	CStringInput * streamingSettings_server_port = new CStringInput("streamingmenu.server_port", g_settings.streaming_server_port, 6, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2,"0123456789 ");
- 	CStringInputSMS * cddriveInput = new CStringInputSMS("streamingmenu.streaming_server_cddrive", g_settings.streaming_server_cddrive, 20, NULL, NULL, "abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-:\\ ");
-	CStringInput * streamingSettings_videorate = new CStringInput("streamingmenu.streaming_videorate", g_settings.streaming_videorate, 5, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2,"0123456789 ");
-	CStringInput * streamingSettings_audiorate = new CStringInput("streamingmenu.streaming_audiorate", g_settings.streaming_audiorate, 5, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2,"0123456789 ");
-	CStringInputSMS * startdirInput = new CStringInputSMS("streamingmenu.streaming_server_startdir", g_settings.streaming_server_startdir, 30, NULL, NULL,"abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-:\\ ");
+	CIPInput * streamingSettings_server_ip = new CIPInput(LOCALE_STREAMINGMENU_SERVER_IP, g_settings.streaming_server_ip, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
+	CStringInput * streamingSettings_server_port = new CStringInput(LOCALE_STREAMINGMENU_SERVER_PORT, g_settings.streaming_server_port, 6, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2,"0123456789 ");
+ 	CStringInputSMS * cddriveInput = new CStringInputSMS(LOCALE_STREAMINGMENU_STREAMING_SERVER_CDDRIVE, g_settings.streaming_server_cddrive, 20, NULL, NULL, "abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-:\\ ");
+	CStringInput * streamingSettings_videorate = new CStringInput(LOCALE_STREAMINGMENU_STREAMING_VIDEORATE, g_settings.streaming_videorate, 5, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2,"0123456789 ");
+	CStringInput * streamingSettings_audiorate = new CStringInput(LOCALE_STREAMINGMENU_STREAMING_AUDIORATE, g_settings.streaming_audiorate, 5, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2,"0123456789 ");
+	CStringInputSMS * startdirInput = new CStringInputSMS(LOCALE_STREAMINGMENU_STREAMING_SERVER_STARTDIR, g_settings.streaming_server_startdir, 30, NULL, NULL,"abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-:\\ ");
 
-	CMenuForwarder* mf1 = new CMenuForwarder("streamingmenu.server_ip", (g_settings.streaming_type==1), g_settings.streaming_server_ip,streamingSettings_server_ip);
-	CMenuForwarder* mf2 = new CMenuForwarder("streamingmenu.server_port", (g_settings.streaming_type==1), g_settings.streaming_server_port,streamingSettings_server_port);
-	CMenuForwarder* mf3 = new CMenuForwarder("streamingmenu.streaming_server_cddrive", (g_settings.streaming_type==1), g_settings.streaming_server_cddrive,cddriveInput);
-	CMenuForwarder* mf4 = new CMenuForwarder("streamingmenu.streaming_videorate", (g_settings.streaming_type==1), g_settings.streaming_videorate,streamingSettings_videorate);
-	CMenuForwarder* mf5 = new CMenuForwarder("streamingmenu.streaming_audiorate", (g_settings.streaming_type==1), g_settings.streaming_audiorate,streamingSettings_audiorate);
-	CMenuForwarder* mf6 = new CMenuForwarder("streamingmenu.streaming_server_startdir", (g_settings.streaming_type==1), g_settings.streaming_server_startdir,startdirInput);
+	CMenuForwarder* mf1 = new CMenuForwarder(LOCALE_STREAMINGMENU_SERVER_IP                , (g_settings.streaming_type==1), g_settings.streaming_server_ip      , streamingSettings_server_ip);
+	CMenuForwarder* mf2 = new CMenuForwarder(LOCALE_STREAMINGMENU_SERVER_PORT              , (g_settings.streaming_type==1), g_settings.streaming_server_port    , streamingSettings_server_port);
+	CMenuForwarder* mf3 = new CMenuForwarder(LOCALE_STREAMINGMENU_STREAMING_SERVER_CDDRIVE , (g_settings.streaming_type==1), g_settings.streaming_server_cddrive , cddriveInput);
+	CMenuForwarder* mf4 = new CMenuForwarder(LOCALE_STREAMINGMENU_STREAMING_VIDEORATE      , (g_settings.streaming_type==1), g_settings.streaming_videorate      , streamingSettings_videorate);
+	CMenuForwarder* mf5 = new CMenuForwarder(LOCALE_STREAMINGMENU_STREAMING_AUDIORATE      , (g_settings.streaming_type==1), g_settings.streaming_audiorate      , streamingSettings_audiorate);
+	CMenuForwarder* mf6 = new CMenuForwarder(LOCALE_STREAMINGMENU_STREAMING_SERVER_STARTDIR, (g_settings.streaming_type==1), g_settings.streaming_server_startdir, startdirInput);
 	CMenuForwarder* mf7 = new CMenuForwarder(LOCALE_MOVIEPLAYER_DEFDIR, true, g_settings.network_nfs_moviedir,this,"moviedir");
  
-	CMenuOptionChooser* oj1 = new CMenuOptionChooser("streamingmenu.streaming_transcode_audio", &g_settings.streaming_transcode_audio, true);
+	CMenuOptionChooser* oj1 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_TRANSCODE_AUDIO      , &g_settings.streaming_transcode_audio      , true);
 	oj1->addOption(0, LOCALE_MESSAGEBOX_NO);
 	oj1->addOption(1, LOCALE_MESSAGEBOX_YES);
                                              
-	CMenuOptionChooser* oj2 = new CMenuOptionChooser("streamingmenu.streaming_force_avi_rawaudio", &g_settings.streaming_force_avi_rawaudio, true);
+	CMenuOptionChooser* oj2 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_FORCE_AVI_RAWAUDIO   , &g_settings.streaming_force_avi_rawaudio   , true);
 	oj2->addOption(0, LOCALE_MESSAGEBOX_NO);
 	oj2->addOption(1, LOCALE_MESSAGEBOX_YES);
                                              
-	CMenuOptionChooser* oj3 = new CMenuOptionChooser("streamingmenu.streaming_force_transcode_video", &g_settings.streaming_force_transcode_video, true);
+	CMenuOptionChooser* oj3 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_FORCE_TRANSCODE_VIDEO, &g_settings.streaming_force_transcode_video, true);
 	oj3->addOption(0, LOCALE_MESSAGEBOX_NO);
 	oj3->addOption(1, LOCALE_MESSAGEBOX_YES);
 
 // not yet supported by VLC
-	CMenuOptionChooser* oj4 = new CMenuOptionChooser("streamingmenu.streaming_transcode_video_codec", &g_settings.streaming_transcode_video_codec, true);
-	oj4->addOption(0, "streamingmenu.mpeg1");
-	oj4->addOption(1, "streamingmenu.mpeg2");
+	CMenuOptionChooser* oj4 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_TRANSCODE_VIDEO_CODEC, &g_settings.streaming_transcode_video_codec, true);
+	oj4->addOption(0, LOCALE_STREAMINGMENU_MPEG1);
+	oj4->addOption(1, LOCALE_STREAMINGMENU_MPEG2);
 
-  CMenuOptionChooser* oj5 = new CMenuOptionChooser("streamingmenu.streaming_resolution", &g_settings.streaming_resolution, true);
-	oj5->addOption(0, "streamingmenu.352x288");
-	oj5->addOption(1, "streamingmenu.352x576");
-	oj5->addOption(2, "streamingmenu.480x576");
-	oj5->addOption(3, "streamingmenu.704x576");
+	CMenuOptionChooser* oj5 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_RESOLUTION           , &g_settings.streaming_resolution           , true);
+	oj5->addOption(0, LOCALE_STREAMINGMENU_352x288);
+	oj5->addOption(1, LOCALE_STREAMINGMENU_352x576);
+	oj5->addOption(2, LOCALE_STREAMINGMENU_480x576);
+	oj5->addOption(3, LOCALE_STREAMINGMENU_704x576);
 
   CStreamingNotifier *StreamingNotifier = new CStreamingNotifier(mf1,mf2,mf3,mf4,mf5,mf6,mf7,oj1,oj2,oj3,oj4,oj5);
-	CMenuOptionChooser* oj0 = new CMenuOptionChooser("streamingmenu.streaming_type", &g_settings.streaming_type, true, StreamingNotifier);
-	oj0->addOption(0, "streamingmenu.off");
-	oj0->addOption(1, "streamingmenu.on");
+	CMenuOptionChooser* oj0 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_TYPE                 , &g_settings.streaming_type                 , true, StreamingNotifier);
+	oj0->addOption(0, LOCALE_STREAMINGMENU_OFF);
+	oj0->addOption(1, LOCALE_STREAMINGMENU_ON );
 
 
 	streamingSettings.addItem(GenericMenuSeparator);
@@ -2667,15 +2667,15 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget    parentallockSettings(LOCALE_PARENTALLOCK_PARENTALLOCK, "lock.raw"            , 500);
 	CMenuWidget    networkSettings     (LOCALE_NETWORKMENU_HEAD         , "network.raw"         );
 	CMenuWidget    recordingSettings   (LOCALE_RECORDINGMENU_HEAD       , "recording.raw"       );
-	CMenuWidget    streamingSettings   ("streamingmenu.head"            , "streaming.raw"       );
+	CMenuWidget    streamingSettings   (LOCALE_STREAMINGMENU_HEAD       , "streaming.raw"       );
 	CMenuWidget    colorSettings       (LOCALE_COLORMENU_HEAD           , "colors.raw"          );
 	CMenuWidget    fontSettings        ("fontmenu.head"                 , "colors.raw"          );
 	CMenuWidget    lcdSettings         (LOCALE_LCDMENU_HEAD             , "lcd.raw"             );
 	CMenuWidget    keySettings         (LOCALE_KEYBINDINGMENU_HEAD      , "keybinding.raw"      , 400);
 	CMenuWidget    miscSettings        (LOCALE_MISCSETTINGS_HEAD        , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    mp3picSettings      (LOCALE_MP3PICSETTINGS_GENERAL   , NEUTRINO_ICON_SETTINGS);
-	CMenuWidget    scanSettings        ("servicemenu.scants"            , NEUTRINO_ICON_SETTINGS);
-	CMenuWidget    service             ("servicemenu.head"              , NEUTRINO_ICON_SETTINGS);
+	CMenuWidget    scanSettings        (LOCALE_SERVICEMENU_SCANTS       , NEUTRINO_ICON_SETTINGS);
+	CMenuWidget    service             (LOCALE_SERVICEMENU_HEAD         , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    moviePlayer         (LOCALE_MOVIEPLAYER_HEAD         , "streaming.raw"       );
     
 	InitMainMenu(mainMenu, mainSettings, audioSettings, parentallockSettings, networkSettings, recordingSettings,
@@ -2780,14 +2780,14 @@ int CNeutrinoApp::run(int argc, char **argv)
 	if(loadSettingsErg==1)
 	{
 		dprintf(DEBUG_INFO, "config file missing\n");
-		ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText("settings.noconffile")); // UTF-8
+		ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_SETTINGS_NOCONFFILE));
 		configfile.setModifiedFlag(true);
 		saveSetup();
 	}
 	else if(loadSettingsErg==2)
 	{
 		dprintf(DEBUG_INFO, "parts of configfile missing\n");
-		ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText("settings.missingoptionsconffile")); // UTF-8
+		ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_SETTINGS_MISSINGOPTIONSCONFFILE));
 		configfile.setModifiedFlag(true);
 		saveSetup();
 	}
@@ -3246,7 +3246,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 	else if( msg == NeutrinoMessages::ANNOUNCE_SLEEPTIMER)
 	{
 		if( mode != mode_scart )
-			ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText("sleeptimerbox.announce")); // UTF-8
+			ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_SLEEPTIMERBOX_ANNOUNCE));
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::SLEEPTIMER)
@@ -3289,7 +3289,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 	else if( msg == NeutrinoMessages::ANNOUNCE_SHUTDOWN)
 	{
 		if( mode != mode_scart )
-			skipShutdownTimer = (ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText("shutdowntimer.announce"), CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, NULL, 450, 5) == CMessageBox::mbrYes); // UTF-8
+			skipShutdownTimer = (ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_SHUTDOWNTIMER_ANNOUNCE), CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, NULL, 450, 5) == CMessageBox::mbrYes);
 	}
 	else if( msg == NeutrinoMessages::SHUTDOWN )
 	{
@@ -3898,7 +3898,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 	}
 	else if(actionKey=="reloadchannels")
 	{
-	 	CHintBox * hintBox = new CHintBox(LOCALE_MESSAGEBOX_INFO, g_Locale->getText("servicemenu.reload_hint")); // UTF-8
+	 	CHintBox * hintBox = new CHintBox(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_SERVICEMENU_RELOAD_HINT));
 		hintBox->paint();
 
 		g_Zapit->reinitChannels();
