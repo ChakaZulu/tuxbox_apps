@@ -73,22 +73,33 @@ const char * getISO639Description(const char *iso)
 		return it->second.c_str();
 }
 
-void CLocaleManager::loadLocale(std::string locale)
+
+const char * path[2] = {"/var/tuxbox/config/locale/", DATADIR "/neutrino/locale/"};
+
+void CLocaleManager::loadLocale(const std::string & locale)
 {
+	int i;
+	FILE * fd;
+
 	initialize_iso639_map();
-	std::string filename[] = {"/var/tuxbox/config/locale/" + locale + ".locale",DATADIR  "/neutrino/locale/" + locale + ".locale"};
-	FILE* fd = fopen(filename[0].c_str(), "r");
-	if(!fd)
+
+	for (i = 0; i < 2; i++)
 	{
-		fd = fopen(filename[1].c_str(), "r");
-		if(!fd)
-		{		
-			perror("cannot read locale");
-			return;
-		}
+		std::string filename = path[i];
+		filename += locale;
+		filename += ".locale";
+		
+		fd = fopen(filename.c_str(), "r");
+		if (fd)
+			break;
+	}
+	
+	if (i == 2)
+	{		
+		perror("cannot read locale");
+		return;
 	}
 
-	//	printf("read locale: %s\n", locale.c_str() );
 	localeData.clear();
 
 	char buf[1000];
@@ -144,7 +155,7 @@ const char * CLocaleManager::getText(const char * const keyName) const
 		return (it->second).c_str();
 }
 
-const char * CLocaleManager::getText(const std::string keyName) const
+const char * CLocaleManager::getText(const std::string & keyName) const
 {
 	mapLocaleData::const_iterator it = localeData.find(keyName);
 	if (it == localeData.end())
