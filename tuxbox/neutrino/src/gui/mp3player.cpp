@@ -224,7 +224,10 @@ int CMP3PlayerGui::show()
 		if(m_state != CMP3PlayerGui::STOP && CMP3Player::getInstance()->state==CMP3Player::STOP && playlist.size() >0)
 		{
 			int next = getNext();
-			play(next);
+			if(next>=0)
+				play(next);
+			else
+				stop();
 		}
 
 		if(update)
@@ -262,19 +265,24 @@ int CMP3PlayerGui::show()
 		{
 			if(key_level==1)
 			{
-				if(current-1 > 0)
+				if(current==-1)
+					stop();
+				else if(current-1 > 0)
 					play(current-1);
 				else
 					play(0);
 			}
 			else
 			{
-				if ((int(selected)-int(listmaxshow))<0)
-					selected=playlist.size()-1;
-				else
-					selected -= listmaxshow;
-				liststart = (selected/listmaxshow)*listmaxshow;
-				update=true;
+				if(selected >0 )
+				{
+					if ((int(selected)-int(listmaxshow))<0)
+						selected=playlist.size()-1;
+					else
+						selected -= listmaxshow;
+					liststart = (selected/listmaxshow)*listmaxshow;
+					update=true;
+				}
 			}
 
 		}
@@ -283,18 +291,24 @@ int CMP3PlayerGui::show()
 			if(key_level==1)
 			{
 				int next = getNext();
-				play(next);
+				if(next>=0)
+					play(next);
+				else
+					stop();
 			}
 			else
 			{
-				selected+=listmaxshow;
-				if (selected>playlist.size()-1)
-					selected=0;
-				liststart = (selected/listmaxshow)*listmaxshow;
-				update=true;
+				if(selected!=playlist.size()-1 && !playlist.empty())
+				{
+					selected+=listmaxshow;
+					if (selected>playlist.size()-1)
+						selected=0;
+					liststart = (selected/listmaxshow)*listmaxshow;
+					update=true;
+				}
 			}
 		}
-		else if( msg == CRCInput::RC_up && playlist.size() > 0)
+		else if( msg == CRCInput::RC_up && !playlist.empty())
 		{
 			int prevselected=selected;
 			if(selected==0)
@@ -315,7 +329,7 @@ int CMP3PlayerGui::show()
 				paintItem(selected - liststart);
 			}
 		}
-		else if( msg == CRCInput::RC_down && playlist.size() > 0)
+		else if( msg == CRCInput::RC_down && !playlist.empty() > 0)
 		{
 			int prevselected=selected;
 			selected = (selected+1)%playlist.size();
@@ -331,7 +345,7 @@ int CMP3PlayerGui::show()
 				paintItem(selected - liststart);
 			}
 		}
-		else if( msg == CRCInput::RC_ok && playlist.size() > 0)
+		else if( msg == CRCInput::RC_ok && !playlist.empty())
 		{
 			// OK button
 			play(selected);
@@ -340,14 +354,14 @@ int CMP3PlayerGui::show()
 		{
 			if(key_level==0)
 			{
-				if (playlist.size() > 0)
+				if (!playlist.empty())
 				{
 					CPlayList::iterator p = playlist.begin()+selected;
 					playlist.erase(p);
 					if((int)selected==current)
 					{
 						current--;
-						stop(); // Stop if song is deleted, next song will be startet automat.
+						//stop(); // Stop if song is deleted, next song will be startet automat.
 					}
 					if(selected > playlist.size()-1)
 						selected = playlist.size()-1;
@@ -435,7 +449,7 @@ int CMP3PlayerGui::show()
 		{
 			if(key_level==0)
 			{
-				stop();
+				//stop();
 				playlist.clear();
 				current=-1;
 				selected=0;
@@ -756,21 +770,21 @@ void CMP3PlayerGui::paintInfo()
 		if(xstart < 10)
 			xstart=10;
 		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+xstart, y + 4 + 1*fheight, width- 20, tmp, COL_MENUCONTENTSELECTED, 0, true); // UTF-8
-		if (playlist[current].Title.empty())
-			tmp = playlist[current].Artist;
-		else if (playlist[current].Artist.empty())
-			tmp = playlist[current].Title;
+		if (curr_mp3.Title.empty())
+			tmp = curr_mp3.Artist;
+		else if (curr_mp3.Artist.empty())
+			tmp = curr_mp3.Title;
 		else if (g_settings.mp3player_display == TITLE_ARTIST)
 		{
-			tmp = playlist[current].Title;
+			tmp = curr_mp3.Title;
 			tmp += " / ";
-			tmp += playlist[current].Artist;
+			tmp += curr_mp3.Artist;
 		}
 		else //if(g_settings.mp3player_display == ARTIST_TITLE)
 		{
-			tmp = playlist[current].Artist;
+			tmp = curr_mp3.Artist;
 			tmp += " / ";
-			tmp += playlist[current].Title;
+			tmp += curr_mp3.Title;
 		}
 
 		w = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(tmp, true); // UTF-8
@@ -779,7 +793,7 @@ void CMP3PlayerGui::paintInfo()
 			xstart=10;
 		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+xstart, y +4+ 2*fheight, width- 20, tmp, COL_MENUCONTENTSELECTED, 0, true); // UTF-8
 #ifdef INCLUDE_UNUSED_STUFF
-		tmp = playlist[current].Bitrate + " / " + playlist[current].Samplerate + " / " + playlist[current].ChannelMode + " / " + playlist[current].Layer;
+		tmp = curr_mp3.Bitrate + " / " + curr_mp3.Samplerate + " / " + curr_mp3.ChannelMode + " / " + curr_mp3.Layer;
 #endif
 		// reset so fields get painted always
 		m_mp3info="";
@@ -813,8 +827,8 @@ void CMP3PlayerGui::paint()
 
 	paintFoot();
 	paintInfo();
-	
 	visible = true;
+	
 }
 
 //------------------------------------------------------------------------
@@ -1163,7 +1177,7 @@ void CMP3PlayerGui::paintItemID3DetailsLine (int pos)
 	frameBuffer->paintBackgroundBoxRel(xpos - 1, y + title_height, ConnectLineBox_Width + 1, height - title_height);
 
 	// paint Line if detail info (and not valid list pos)
-	if ((playlist.size() > 0) && (pos >= 0))
+	if (!playlist.empty() && (pos >= 0))
 	{
 		// 1. col thick line
 		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos1, 4,fheight,     col1);
@@ -1334,8 +1348,9 @@ void CMP3PlayerGui::play(int pos)
 	m_time_played="0:00";
 	m_time_total=playlist[current].Duration;
 	m_state=CMP3PlayerGui::PLAY;
+	curr_mp3 = playlist[current];
 	// Play
-	CMP3Player::getInstance()->play(playlist[current].Filename.c_str()); 
+	CMP3Player::getInstance()->play(curr_mp3.Filename.c_str()); 
 	//LCD
 	paintLCD();
 	// Display
@@ -1349,6 +1364,8 @@ void CMP3PlayerGui::play(int pos)
 int CMP3PlayerGui::getNext()
 {
 	int ret=current+1;
+	if(playlist.empty())
+		return -1;
 	if((unsigned)ret+1 > playlist.size())
 		ret=0;
 	return ret;
@@ -1377,9 +1394,11 @@ void CMP3PlayerGui::updateTimes(const bool force)
 		if (m_time_total != CMP3Player::getInstance()->getTimeTotal())
 		{
 			m_time_total = CMP3Player::getInstance()->getTimeTotal();
-			if (playlist[current].Duration != CMP3Player::getInstance()->getTimeTotal())
+			if (curr_mp3.Duration != CMP3Player::getInstance()->getTimeTotal())
 			{
-				playlist[current].Duration = CMP3Player::getInstance()->getTimeTotal();
+				curr_mp3.Duration = CMP3Player::getInstance()->getTimeTotal();
+				if(current >=0)
+					playlist[current].Duration = CMP3Player::getInstance()->getTimeTotal();
 			}
 			updateTotal = true;
 		}
@@ -1421,15 +1440,15 @@ void CMP3PlayerGui::paintLCD()
 		break;
 	case CMP3PlayerGui::PLAY:
 		CLCD::getInstance()->showMP3Play(CLCD::MP3_PLAY);
-		CLCD::getInstance()->showMP3(playlist[current].Artist, playlist[current].Title, playlist[current].Album);
+		CLCD::getInstance()->showMP3(curr_mp3.Artist, curr_mp3.Title, curr_mp3.Album);
 		break;
 	case CMP3PlayerGui::PAUSE:
 		CLCD::getInstance()->showMP3Play(CLCD::MP3_PAUSE);
-		CLCD::getInstance()->showMP3(playlist[current].Artist, playlist[current].Title, playlist[current].Album);
+		CLCD::getInstance()->showMP3(curr_mp3.Artist, curr_mp3.Title, curr_mp3.Album);
 		break;
 	case CMP3PlayerGui::FF:
 		CLCD::getInstance()->showMP3Play(CLCD::MP3_FF);
-		CLCD::getInstance()->showMP3(playlist[current].Artist, playlist[current].Title, playlist[current].Album);
+		CLCD::getInstance()->showMP3(curr_mp3.Artist, curr_mp3.Title, curr_mp3.Album);
 		break;
 	case CMP3PlayerGui::REV:
 		break;

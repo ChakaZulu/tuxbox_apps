@@ -101,6 +101,7 @@ class CMP3PlayerGui : public CMenuTarget
 	std::string    m_mp3info;
 
 	CPlayList      playlist;
+	CMP3           curr_mp3;
 	std::string    Path;
 
 	int            width;
