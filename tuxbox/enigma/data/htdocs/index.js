@@ -75,3 +75,8 @@ function stopPlugin()
 {
 	win=window.open("/cgi-bin/stopPlugin?requester=webif", "switchStatus","width=1,height=1,left=0,top=0");
 }
+
+function sendMessage2TV()
+{
+	NewWindow("/tvMessageWindow", "msg", "650", "150", "no");
+}
