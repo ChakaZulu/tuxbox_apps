@@ -72,29 +72,3 @@ int checkFile(char* filename, char* result)
 	strcpy(result, "unknown");
 	return 0;
 }
-
-
-
-int main(int argc, char **argv)
-{
-	char res[60];
-	
-	
-	checkFile("/ucodes/avia500.ux", (char*) &res);
-	printf("avia500: %s\n", res);
-
-	checkFile("/ucodes/avia600.ux", (char*) &res);
-        printf("avia600: %s\n", res);
-
-        checkFile("/ucodes/ucode.bin", (char*) &res);
-        printf("ucodes: %s\n", res);
-
-        checkFile("/ucodes/cam-alpha.bin", (char*) &res);
-        printf("cam-alpha: %s\n", res);
-
-
-
-
-
-	return 1;
-}
