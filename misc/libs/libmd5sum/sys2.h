@@ -135,13 +135,13 @@ char *alloca ();
 void free ();
 #endif
 
-#ifndef HAVE_DECL_MALLOC
-char *malloc ();
-#endif
+//#ifndef HAVE_DECL_MALLOC
+//char *malloc ();
+//#endif
 
-#ifndef HAVE_DECL_MEMCHR
-char *memchr ();
-#endif
+//#ifndef HAVE_DECL_MEMCHR
+//char *memchr ();
+//#endif
 
 #ifndef HAVE_DECL_REALLOC
 char *realloc ();
