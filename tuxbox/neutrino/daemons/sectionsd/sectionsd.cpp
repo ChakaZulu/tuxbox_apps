@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.122 2002/04/24 10:56:46 field Exp $
+//  $Id: sectionsd.cpp,v 1.123 2002/04/25 16:17:10 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.123  2002/04/25 16:17:10  field
+//  Updates
+//
 //  Revision 1.122  2002/04/24 10:56:46  field
 //  Kleinigkeiten
 //
@@ -398,11 +401,15 @@
 #include "timerdclient.h"
 #include "../timermanager.h"
 
-// 10 Minuten Zyklus...
-#define TIME_EIT_SCHEDULED_PAUSE 10* 60
-
+// 60 Minuten Zyklus...
+#define TIME_EIT_SCHEDULED_PAUSE 60* 60
 // Zeit die fuer die gewartet wird, bevor der Filter weitergeschaltet wird, falls es automatisch nicht klappt
-#define TIME_EIT_SKIPPING 60
+#define TIME_EIT_SKIPPING 30
+
+// 12h Pause für SDT
+#define TIME_SDT_SCHEDULED_PAUSE 12* 60* 60
+#define TIME_SDT_SKIPPING 60
+
 
 // Timeout bei tcp/ip connections in s
 #define TIMEOUT_CONNECTIONS 2
@@ -1129,7 +1136,7 @@ int DMX::change(int new_filter_index)
 		return 0;	// läuft nicht (zB streaming)
 	}
 
-	if(pID==0x12) // Nur bei EIT
+//	if(pID==0x12) // Nur bei EIT
 		dprintf("changeDMX -> %s (%d)\n", (new_filter_index==0) ? "current/next" : "scheduled", new_filter_index );
 
 	if (ioctl (fd, DMX_STOP, 0) == -1)
@@ -1640,7 +1647,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.122 2002/04/24 10:56:46 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.123 2002/04/25 16:17:10 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1934,7 +1941,11 @@ static void commandLinkageDescriptorsUniqueKey(struct connectionData *client, ch
 static unsigned	messaging_current_servicekey = 0;
 std::vector<long long> 	messaging_skipped_sections_ID [0x22];		// 0x4e .. 0x6f
 static long long 		messaging_sections_max_ID [0x22];			// 0x4e .. 0x6f
-static int 		messaging_sections_got_all [0x22];			// 0x4e .. 0x6f
+static int 				messaging_sections_got_all [0x22];			// 0x4e .. 0x6f
+std::vector<long long>	messaging_sdt_skipped_sections_ID [2];		// 0x42, 0x46
+static long long 		messaging_sdt_sections_max_ID [2];			// 0x42, 0x46
+static int 				messaging_sdt_sections_got_all [2];			// 0x42, 0x46
+
 static bool		messaging_wants_current_next_Event = false;
 static time_t 	messaging_last_requested = time(NULL);
 static bool		messaging_neutrino_sets_time = false;
@@ -1966,6 +1977,13 @@ showProfiling("before messaging lock");
     		messaging_sections_got_all[i- 0x4e] = false;
     	}
 
+    	for ( int i= 0; i<= 1; i++)
+    	{
+    		messaging_sdt_skipped_sections_ID[i].clear();
+    		messaging_sdt_sections_max_ID[i] = -1;
+    		messaging_sdt_sections_got_all[i] = false;
+    	}
+
 		doWakeUp = true;
 	}
 
@@ -1989,9 +2007,8 @@ showProfiling("before wakeup");
 	if ( doWakeUp )
 	{
 		// nur wenn lange genug her, oder wenn anderer Service :)
-
-		// aufwecken - mit current-next
 		dmxEIT.change( 0 );
+		dmxSDT.change( 0 );
     }
     else
     	dprintf("[sectionsd] ignoring wakeup request...\n");
@@ -2935,10 +2952,13 @@ static void *connectionThread(void *conn)
 //---------------------------------------------------------------------
 static void *sdtThread(void *)
 {
-struct SI_section_header header;
-char *buf;
-const unsigned timeoutInSeconds=2;
-    dmxSDT.addfilter(0x42, 0xff);
+	struct SI_section_header header;
+	char *buf;
+	const unsigned timeoutInSeconds=2;
+	bool sendToSleepNow= false;
+
+    dmxSDT.addfilter(0x42, 0xff );
+    dmxSDT.addfilter(0x46, 0xff );
 
 	try
 	{
@@ -2949,6 +2969,59 @@ const unsigned timeoutInSeconds=2;
 
   		for(;;)
   		{
+  			time_t zeit=time(NULL);
+
+  			if(timeset)
+            {
+            	// Nur wenn ne richtige Uhrzeit da ist
+				if( (sendToSleepNow) )
+                {
+					sendToSleepNow= false;
+                    struct timespec abs_wait;
+        			struct timeval now;
+
+                    gettimeofday(&now, NULL);
+					TIMEVAL_TO_TIMESPEC(&now, &abs_wait);
+					abs_wait.tv_sec += (TIME_SDT_SCHEDULED_PAUSE);
+
+					dmxSDT.real_pause();
+					pthread_mutex_lock( &dmxSDT.start_stop_mutex );
+					dprintf("dmxSDT: going to sleep...\n");
+
+					int rs=pthread_cond_timedwait( &dmxSDT.change_cond, &dmxSDT.start_stop_mutex, &abs_wait );
+
+					if (rs==ETIMEDOUT)
+					{
+						dprintf("dmxSDT: waking up again - looking for new events :)\n");
+						pthread_mutex_unlock( &dmxSDT.start_stop_mutex );
+						dmxSDT.change( 0 ); // -> restart
+					}
+					else if (rs==0)
+					{
+						dprintf("dmxSDT: waking up again - requested from .change()\n");
+						pthread_mutex_unlock( &dmxSDT.start_stop_mutex );
+					}
+					else
+					{
+						dprintf("dmxSDT:  waking up again - unknown reason?!\n");
+						pthread_mutex_unlock( &dmxSDT.start_stop_mutex );
+						dmxSDT.real_unpause();
+                    }
+                }
+                else if(zeit>dmxSDT.lastChanged + TIME_SDT_SKIPPING )
+                {
+                	lockMessaging();
+                    if ( dmxSDT.filter_index < ( dmxSDT.filters.size()- 1 ) )
+					{
+						dmxSDT.change(dmxSDT.filter_index+ 1);
+						dprintf("[sdtThread] skipping to next filter (> TIME_SDT_SKIPPING)\n" );
+					}
+					else
+						sendToSleepNow = true;
+					unlockMessaging();
+				};
+            }
+
     		if(timeoutsDMX>=RESTART_DMX_AFTER_TIMEOUTS)
     		{
       			timeoutsDMX=0;
@@ -3015,9 +3088,79 @@ const unsigned timeoutInSeconds=2;
       			for(SIservices::iterator s=sdt.services().begin(); s!=sdt.services().end(); s++)
         			addService(*s);
       			unlockServices();
+
+
+      			lockMessaging();
+				SI_section_SDT_header* _header = (SI_section_SDT_header*) &header;
+				int msg_index= ( header.table_id== 0x42) ? 0 : 1;
+
+				if ( !messaging_sdt_sections_got_all[msg_index] )
+				{
+					long long _id= (((unsigned long long)header.table_id)<<40) +
+        						   (((unsigned long long)header.table_id_extension)<<32) +
+        							 (header.section_number<<16) +
+        							 (header.version_number<<8) +
+        							 header.current_next_indicator;
+
+					if ( messaging_sdt_sections_max_ID[msg_index] == -1 )
+	                {
+						messaging_sdt_sections_max_ID[msg_index] = _id;
+	    	        }
+    	    	    else
+					{
+            	      	if ( !messaging_sdt_sections_got_all[msg_index] )
+                	   	{
+                      		for ( std::vector<long long>::iterator i= messaging_sdt_skipped_sections_ID[msg_index].begin();
+                       		  	  i!= messaging_sdt_skipped_sections_ID[msg_index].end(); ++i )
+                       			if ( *i == _id)
+	                       		{
+									messaging_sdt_skipped_sections_ID[msg_index].erase(i);
+									break;
+								}
+
+    	                   	if ( ( messaging_sdt_sections_max_ID[msg_index] == _id ) &&
+        	               		 ( messaging_sdt_skipped_sections_ID[msg_index].size() == 0 ) )
+            	           	{
+                	       		// alle pakete für den ServiceKey da!
+                        		dprintf("[sdtThread] got all packages for table_id 0x%x (%d)\n", header.table_id, msg_index);
+                       			messaging_sdt_sections_got_all[msg_index] = true;
+                       		}
+                       	}
+					}
+
+					// überprüfen, ob nächster Filter gewünscht :)
+					if ( messaging_sdt_sections_got_all[dmxSDT.filter_index] )
+					{
+						if ( dmxSDT.filter_index < ( dmxSDT.filters.size()- 1 ) )
+						{
+							dmxSDT.change(dmxSDT.filter_index+ 1);
+						}
+						else
+                       		sendToSleepNow = true;
+					}
+    			}
+				unlockMessaging();
+
+
     		} // if
     		else
+    		{
+    			lockMessaging();
+
+                int msg_index= ( header.table_id== 0x42) ? 0 : 1;
+            	long long _id= (((unsigned long long)header.table_id)<<40) +
+        					   (((unsigned long long)header.table_id_extension)<<32) +
+        						 (header.section_number<<16) +
+        						 (header.version_number<<8) +
+        						 header.current_next_indicator;
+
+            		if ( messaging_sdt_sections_max_ID[msg_index] != -1 )
+	            		messaging_sdt_skipped_sections_ID[msg_index].push_back(_id);
+            	unlockMessaging();
+
+                dprintf("[sdtThread] skipped sections for table 0x%x\n", header.table_id);
       			delete[] buf;
+      		}
   		} // for
 
   		dmxSDT.closefd();
@@ -3308,7 +3451,8 @@ static void *eitThread(void *)
 	char *buf;
 	unsigned timeoutInSeconds=1;
 	bool sendToSleepNow= false;
-    dmxEIT.addfilter( 0x4f, (0xff- 0x01) );
+	dmxEIT.addfilter( 0x4e, (0xff) );
+    dmxEIT.addfilter( 0x4f, (0xff) );
     dmxEIT.addfilter( 0x50, (0xff) );
     dmxEIT.addfilter( 0x51, (0xff) );
     dmxEIT.addfilter( 0x53, (0xff- 0x01) );
@@ -3371,7 +3515,7 @@ static void *eitThread(void *)
 							if ( dmxEIT.filter_index < ( dmxEIT.filters.size()- 1 ) )
 							{
 								dmxEIT.change(dmxEIT.filter_index+ 1);
-								dprintf("[eitThread] timeoutsDMX for 0x%x reset to 0 (skipping to next filter)\n", messaging_current_servicekey );
+								dprintf("[eitThread] timeoutsDMX for 0x%x reset to 0 (skipping to next filter)\n" );
 
     	            			timeoutsDMX=0;
 							}
@@ -3424,7 +3568,8 @@ static void *eitThread(void *)
             }
 
             if(timeset)
-            { // Nur wenn ne richtige Uhrzeit da ist
+            {
+            	// Nur wenn ne richtige Uhrzeit da ist
 				if( (sendToSleepNow) )
                 {
 					sendToSleepNow= false;
@@ -3467,6 +3612,8 @@ static void *eitThread(void *)
 						dmxEIT.change(dmxEIT.filter_index+ 1);
 						dprintf("[eitThread] skipping to next filter (> TIME_EIT_SKIPPING)\n", messaging_current_servicekey );
 					}
+					else
+						sendToSleepNow = true;
 					unlockMessaging();
 				};
             }
@@ -3548,7 +3695,9 @@ static void *eitThread(void *)
 */
                 SIsectionEIT eit(SIsection(sizeof(header)+header.section_length-5, buf));
                 if(eit.header())
-                { // == 0 -> kein event
+                {
+                	// == 0 -> kein event
+
                     zeit=time(NULL);
                     // Nicht alle Events speichern
                     for(SIevents::iterator e=eit.events().begin(); e!=eit.events().end(); e++)
@@ -3590,12 +3739,17 @@ static void *eitThread(void *)
                 } // if
 
 				lockMessaging();
-				SI_section_EIT_header* _header = (SI_section_EIT_header*) &header;
-                if ( ( header.table_id != 0x4e ) || ( _header->service_id == ( messaging_current_servicekey & 0xFFFF ) ) )
+
+                if ( ( header.table_id != 0x4e ) ||
+                	 ( header.table_id_extension == ( messaging_current_servicekey & 0xFFFF ) ) )
 				{
 					if ( !messaging_sections_got_all[header.table_id- 0x4e] )
 					{
-						long long _id= (((long long)_header->service_id) << 64 ) + (((long long)_header->transport_stream_id) << 32 ) + (((long long)_header->original_network_id) << 16 ) + (_header->section_number);
+						long long _id= (((unsigned long long)header.table_id)<<40) +
+        					   		   (((unsigned long long)header.table_id_extension)<<32) +
+        						 	   (header.section_number<<16) +
+        						 	   (header.version_number<<8) +
+        						 	   header.current_next_indicator;
 
 						if ( messaging_sections_max_ID[header.table_id- 0x4e] == -1 )
                     	{
@@ -3661,13 +3815,14 @@ static void *eitThread(void *)
             	lockMessaging();
             	SI_section_EIT_header* _header = (SI_section_EIT_header*) &header;
 
-            	//if ( header.table_id_extension == ( messaging_current_servicekey & 0xFFFF ) )
-            	{
-            		long long _id= ( ((long long)_header->service_id << 64 ) + ((long long)_header->transport_stream_id << 32 ) + ((long long)_header->original_network_id << 16 ) + (_header->section_number) );
+           		long long _id= (((unsigned long long)header.table_id)<<40) +
+   					   		   (((unsigned long long)header.table_id_extension)<<32) +
+   						 	   (header.section_number<<16) +
+   						 	   (header.version_number<<8) +
+   						 	   header.current_next_indicator;
 
-            		if ( messaging_sections_max_ID[header.table_id- 0x4e] != -1 )
-	            		messaging_skipped_sections_ID[header.table_id- 0x4e].push_back(_id);
-            	}
+           		if ( messaging_sections_max_ID[header.table_id- 0x4e] != -1 )
+            		messaging_skipped_sections_ID[header.table_id- 0x4e].push_back(_id);
             	unlockMessaging();
 
                 delete[] buf;
@@ -3796,7 +3951,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.122 2002/04/24 10:56:46 field Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.123 2002/04/25 16:17:10 field Exp $\n");
 	try
 	{
 
