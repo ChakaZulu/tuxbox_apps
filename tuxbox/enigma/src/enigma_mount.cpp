@@ -11,7 +11,8 @@
 #include <vector>
 #include <lib/base/estring.h>
 #include <configfile.h>
-#include "enigma_mount.h"
+#include <enigma_dyn_utils.h>
+#include <enigma_mount.h>
 
 using namespace std;
 
@@ -58,8 +59,9 @@ eMountPoint::eMountPoint(eString plocalDir, int pfstype, eString ppassword, eStr
 	id         = pid;
 }
 
-void eMountPoint::save(FILE *out)
+void eMountPoint::save(FILE *out, int pid)
 {
+	id = pid;
 	fprintf(out,"ip_%d=%d.%d.%d.%d\n", id, ip[0], ip[1], ip[2], ip[3]);
 	fprintf(out,"fstype_%d=%d\n", id, fstype);
 	fprintf(out,"localdir_%d=%s\n", id, localDir.c_str());
@@ -113,7 +115,7 @@ bool eMountPoint::in_proc_filesystems(eString fsname)
 	return false;
 }
 
-int eMountPoint::readMounts(eString localdir)
+int eMountPoint::isMounted(eString localdir)
 {
 	std::ifstream in;
 	eString mountDev;
@@ -122,23 +124,22 @@ int eMountPoint::readMounts(eString localdir)
 	eString buffer;
 	std::stringstream tmp;
 
+	int rc =0;
 	in.open("/proc/mounts", std::ifstream::in);
 	while(getline(in, buffer, '\n'))
 	{
-		mountDev = "";
-		mountOn = "";
-		mountType = "";
+		mountDev = mountOn = mountType = "";
 		tmp.str(buffer);
 		tmp >> mountDev >> mountOn >> mountType;
 		tmp.clear();
-		if(mountOn == localdir)
+		if (mountOn == localdir)
 		{
-			in.close();
-			return -1;
+			rc = -1;
+			break;
 		}
 	}
 	in.close();
-	return 0;
+	return rc;
 }
 
 int eMountPoint::mount()
@@ -152,7 +153,7 @@ int eMountPoint::mount()
 		pthread_mutex_init(&g_mut1, NULL);
 		pthread_cond_init(&g_cond1, NULL);
 		g_mntstatus1 = -1;
-		if (readMounts(localDir) != -1)
+		if (isMounted(localDir) != -1)
 		{
 			if (!(access(localDir.c_str(), R_OK)))
 				system(eString("mkdir" + localDir).c_str());
@@ -160,8 +161,8 @@ int eMountPoint::mount()
 			{
 				
 				useoptions = options + ownOptions;
-				if (useoptions[useoptions.length() - 1] == ',')
-					useoptions = useoptions.left(useoptions.length() - 1);
+				if (useoptions[useoptions.length() - 1] == ',') //remove?
+					useoptions = useoptions.left(useoptions.length() - 1); //remove?
 				ip.sprintf("%d.%d.%d.%d", ip[0], ip[1],	ip[2], ip[3]);
 				switch(fstype)
 				{
@@ -204,24 +205,24 @@ int eMountPoint::mount()
 					pthread_create(&g_mnt1, 0, mountThread, (void *)cmd.c_str());
 
 					struct timespec timeout;
-					int retcode;
+					int rc1;
 
 					pthread_mutex_lock(&g_mut1);
 					timeout.tv_sec = time(NULL) + 8;
 					timeout.tv_nsec = 0;
-					retcode = pthread_cond_timedwait(&g_cond1, &g_mut1, &timeout);
-					if (retcode == ETIMEDOUT)
+					rc1 = pthread_cond_timedwait(&g_cond1, &g_mut1, &timeout);
+					if (rc1 == ETIMEDOUT)
 						pthread_cancel(g_mnt1);
 					pthread_mutex_unlock(&g_mut1);
 
 					if (g_mntstatus1 != 0)
 						rc = -5; //mount failed (timeout)
 					else
-						mounted = true;
+						mounted = true; //everything is fine :-)
 				}
 			}
 			else
-				rc = -10;
+				rc = -10; //couldn't create local dir
 		}
 		else
 			rc = -2; //local dir is already a mountpoint
@@ -239,12 +240,9 @@ int eMountPoint::mount()
 */
 }
 
-bool eMountPoint::unmount()
+int eMountPoint::unmount()
 {
-	if (umount2(localDir.c_str(), MNT_FORCE))
-		return false;
-	else
-		return true;
+	return umount2(localDir.c_str(), MNT_FORCE);
 }
 
 eMountMgr::eMountMgr()
@@ -264,11 +262,13 @@ eMountMgr::~eMountMgr()
 void eMountMgr::addMountPoint(eString plocalDir, int pfstype, eString ppassword, eString puserName, eString pmountDir, int pautomount, int prsize, int pwsize, eString poptions, eString pownOptions, int pid)
 {
 	mountPoints.push_back(eMountPoint(plocalDir, pfstype, ppassword, puserName, pmountDir, pautomount, prsize, pwsize, poptions, pownOptions, pid));
+	save();
 }
 
 void eMountMgr::changeMountPoint(eString plocalDir, int pfstype, eString ppassword, eString puserName, eString pmountDir, int pautomount, int prsize, int pwsize, eString poptions, eString pownOptions, int pid)
 {
 	for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
+	{
 		if (mp_it->id == pid)
 		{
 			mp_it->localDir = plocalDir;
@@ -281,7 +281,10 @@ void eMountMgr::changeMountPoint(eString plocalDir, int pfstype, eString ppasswo
 			mp_it->wsize = pwsize;
 			mp_it->options = poptions;
 			mp_it->ownOptions = pownOptions;
+			break;
 		}
+	}
+	save();
 }
 
 void eMountMgr::removeMountPoint(int id)
@@ -289,6 +292,7 @@ void eMountMgr::removeMountPoint(int id)
 	for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
 		if (mp_it->id == id)
 			mountPoints.erase(mp_it);
+	save();
 }
 
 int eMountMgr::mountMountPoint(int id)
@@ -300,13 +304,66 @@ int eMountMgr::mountMountPoint(int id)
 	return rc;
 }
 
-bool eMountMgr::unmountMountPoint(int id)
+int eMountMgr::unmountMountPoint(int id)
 {
-	bool rc = true;
+	int rc = 0;
 	for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
 		if (mp_it->id == id)
 			rc = mp_it->unmount();
 	return rc;
+}
+
+eString eMountMgr::getMountPointData(int id)
+{
+	eString result;
+	for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
+		if (mp_it->id == id)
+		{
+			int i = 1;
+//TODO: get data 
+		}
+	return result;
+}
+
+eString eMountMgr::listMountPoints(eString skelleton)
+{
+	eString result, mountStatus, action;
+	if (mountPoints.size() > 0)
+		for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
+		{
+			eString tmp = skelleton;
+			if (mp_it->mounted)
+			{
+				mountStatus = "<img src=\"on.gif\" alt=\"online\" border=0>";
+				action = button(100, "Unmount", RED, "javascript:unmountMountPoint(" + eString().sprintf("%d", mp_it->id) + ")");
+			}
+			else
+			{ 
+				mountStatus = "<img src=\"off.gif\" alt=\"offline\" border=0>";
+				action = button(100, "Mount", GREEN, "javascript:mountMountPoint(" + eString().sprintf("%d", mp_it->id) + ")");
+			}
+			tmp.strReplace("#ACTIONBUTTON#", action);
+			action = button(100, "Change", BLUE, "javascript:changeMountPoint(" + eString().sprintf("%d", mp_it->id) + ")");
+			tmp.strReplace("#CHANGEBUTTON#", action);
+			tmp.strReplace("#MOUNTED#", mountStatus);
+			tmp.strReplace("#ID#", eString().sprintf("%d", mp_it->id));
+			tmp.strReplace("#LDIR#", mp_it->localDir);
+			tmp.strReplace("#MDIR#", mp_it->mountDir);
+			tmp.strReplace("#IP#", eString().sprintf("%03d.%03d.%03d.%03d", mp_it->ip[0], mp_it->ip[1], mp_it->ip[2], mp_it->ip[3]));
+			tmp.strReplace("#USER#", mp_it->userName);
+			tmp.strReplace("#PW#", mp_it->password);
+			tmp.strReplace("#FSTYPE#", (mp_it->fstype == 0) ? "NFS" : "CIFS");
+			tmp.strReplace("#AUTO#", eString().sprintf("%d", mp_it->automount));
+			tmp.strReplace("#OPTIONS#", mp_it->options);
+			tmp.strReplace("#OWNOPTIONS#", mp_it->ownOptions);
+			tmp.strReplace("#RSIZE#", eString().sprintf("%d", mp_it->rsize));
+			tmp.strReplace("#WSIZE#", eString().sprintf("%d", mp_it->wsize));
+			result += tmp + "\n";
+		}
+	else
+		result = "<tr><td>No mount points available.</td></tr>";
+	
+	return result;
 }
 
 void eMountMgr::init()
@@ -330,8 +387,12 @@ void eMountMgr::save()
 	FILE *out = fopen(MOUNTCONFIGFILE, "w");
 	if (out)
 	{
+		int i = 1;
 		for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
-			mp_it->save(out);
+		{
+			mp_it->save(out, i);
+			i++;
+		}
 		fclose(out);
 	}
 }

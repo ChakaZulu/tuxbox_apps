@@ -12,7 +12,7 @@ class eMountPoint
 {
 private:
 	bool in_proc_filesystems(eString);
-	int readMounts(eString);
+	int isMounted(eString);
 public:
 	int id;			//sequential number
 	eString	userName;	//username, only for CIFS
@@ -32,9 +32,9 @@ public:
 	eMountPoint(eString, int, eString, eString, eString, int, int, int, eString, eString, int);
 	~eMountPoint();
 	
-	void save(FILE *);
+	void save(FILE *, int);
 	int mount(void);
-	bool unmount(void);
+	int unmount(void);
 };
 
 class eMountMgr
@@ -44,15 +44,15 @@ private:
 	std::vector <eMountPoint> mountPoints;
 	std::vector <eMountPoint>::iterator mp_it;
 public:
+	eString listMountPoints(eString);
 	void removeMountPoint(int);
 	void addMountPoint(eString, int, eString, eString, eString, int, int, int, eString, eString, int);
 	void changeMountPoint(eString, int, eString, eString, eString, int, int, int, eString, eString, int);
 	int mountMountPoint(int);
-	bool unmountMountPoint(int);
+	int unmountMountPoint(int);
+	eString getMountPointData(int);
 	void save();
 	void init();
-	std::vector<eMountPoint> *mountPointList() {return &mountPoints;}
-	eMountPoint *mountPoint(int);
 
 	static eMountMgr *getInstance() {return (instance) ? instance : new eMountMgr();}
 

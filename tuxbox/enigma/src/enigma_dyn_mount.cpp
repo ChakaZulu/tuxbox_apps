@@ -24,6 +24,14 @@
 
 using namespace std;
 
+eString getConfigMountMgr(void)
+{
+	eString result = readFile(TEMPLATE_DIR + "mountPoints.tmp");
+	eString skelleton = readFile(TEMPLATE_DIR + "mountPoint.tmp");
+	result.strReplace("#BODY#", eMountMgr::getInstance()->listMountPoints(skelleton));
+	return result;
+}
+
 static eString addMountPoint(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString,eString> opt = getRequestOptions(opts, '&');
@@ -73,13 +81,6 @@ static eString editMountPoint(eString request, eString dirpath, eString opts, eH
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eMountMgr::getInstance()->changeMountPoint(localDir, fstype, password, userName, mountDir, atoi(automount.c_str()), atoi(rsize.c_str()), atoi(wsize.c_str()), options, ownOptions, atoi(id.c_str()));
 	return "<html><body>Mount point changed successfully.</body></html>";
-}
-
-static eString showMountPoints(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-
-	return "+ok";
 }
 
 static eString addMountPointWindow(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -136,7 +137,7 @@ static eString mountMountPoint(eString request, eString dirpath, eString opts, e
 			result = "Mount failed (timeout).";
 			break;
 		case -10:
-			result = "Unable to create mount dir.";
+			result = "Unable to create mount directory.";
 			break;
 		default:
 			result = "Mount point mounted successfully.";
@@ -154,9 +155,9 @@ static eString unmountMountPoint(eString request, eString dirpath, eString opts,
 	eString id = opt["id"];
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	bool rc = eMountMgr::getInstance()->unmountMountPoint(atoi(id.c_str()));
+	int rc = eMountMgr::getInstance()->unmountMountPoint(atoi(id.c_str()));
 
-	if (rc)
+	if (rc > 0)
 		result = "<html><body>Mount point unmounted successfully.</body></html>";
 	else
 		result = "<html><body>Mount point unmount failed.</body></html>";
@@ -169,7 +170,6 @@ void ezapMountInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 	dyn_resolver->addDyn("GET", "/control/addMountPointWindow", addMountPointWindow, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/editMountPoint", editMountPoint, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/editMountPointWindow", editMountPointWindow, lockWeb);
-	dyn_resolver->addDyn("GET", "/control/showMountPoints", showMountPoints, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/mountMountPoint", mountMountPoint, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/unmountMountPoint", unmountMountPoint, lockWeb);
 }
