@@ -639,11 +639,14 @@ void eDVBServiceController::TDTready(int error)
 
  // current linux time
 		time_t linuxTime = time(0);
+
  // current enigma time
 		time_t nowTime=linuxTime+dvb.time_difference;
 
 	// difference between current enigma time and transponder time
 		int enigma_diff = tdt->UTC_time-nowTime;
+
+		int new_diff=0;
 
 		if ( dvb.time_difference )  // ref time ready?
 		{
@@ -654,25 +657,25 @@ void eDVBServiceController::TDTready(int error)
 			{
 				eDebug("[TIME] diff < 120 .. use Transponder Time");
 				tOffsMap[*transponder] = 0;
-				dvb.time_difference = enigma_diff;
+				new_diff = enigma_diff;
 			}
 			else if ( it != tOffsMap.end() ) // correction saved?
 			{
 				eDebug("[TIME] we have correction %d", it->second);
 				time_t CorrectedTpTime = tdt->UTC_time+it->second;
-				int ddiff = nowTime-CorrectedTpTime;
+				int ddiff = CorrectedTpTime-nowTime;
 				eDebug("[TIME] diff after add correction is %d", ddiff);
 				if ( abs(it->second) < 300 ) // stored correction < 5 min
 				{
 					eDebug("[TIME] use stored correction(<5 min)");
-					dvb.time_difference = ddiff;
+					new_diff = ddiff;
 				}
 				else if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020 &&
 						getRTC() )
 				{
 					time_t rtc=getRTC();
 					tOffsMap[*transponder] = rtc-tdt->UTC_time;
-					dvb.time_difference = nowTime-rtc;  // set enigma time to rtc
+					new_diff = rtc-nowTime;  // set enigma time to rtc
 					eDebug("[TIME] update stored correction to %d (calced against RTC time)", rtc-tdt->UTC_time );
 				}
 				else if ( abs(ddiff) <= 120 )
@@ -681,20 +684,18 @@ void eDVBServiceController::TDTready(int error)
 // this don't help when a transponder have a clock running to slow or to fast
 // then its better to have a DM7020 with always running RTC
 					eDebug("[TIME] use stored correction(corr < 2 min)");
-					dvb.time_difference = ddiff;
+					new_diff = ddiff;
 				}
 				else  // big change in calced correction.. hold current time and update correction
 				{
 					eDebug("[TIME] update stored correction to %d", -enigma_diff);
 					tOffsMap[*transponder] = -enigma_diff;
-					dvb.time_difference=0;  // we better do not use stored correction..
 				}
 			}
 			else
 			{
 				eDebug("[TIME] no correction found... store calced correction(%d)",-enigma_diff);
 				tOffsMap[*transponder] = -enigma_diff;
-				dvb.time_difference=0;  // dont change enigma time
 			}
 		}
 		else  // no time setted yet
@@ -706,24 +707,23 @@ void eDVBServiceController::TDTready(int error)
 			}
 			else
 				eDebug("[TIME] dont have correction.. set Transponder Diff");
-			dvb.time_difference=enigma_diff;
+			new_diff=enigma_diff;
 		}
 
-		if (!dvb.time_difference)
+		if (!new_diff)
 		{
 			eDebug("[TIME] not changed");
-			dvb.time_difference=1;
 			return;
 		}
 
-		time_t t = nowTime+dvb.time_difference;
+		time_t t = nowTime+new_diff;
 		tm now = *localtime(&t);
 		eDebug("[TIME] time update to %02d:%02d:%02d",
 			now.tm_hour,
 			now.tm_min,
 			now.tm_sec);
 
-		dvb.time_difference = t - linuxTime;
+		dvb.time_difference = t - linuxTime;   // calc our new linux_time -> enigma_time correction
 		eDebug("[TIME] time_difference is %d", dvb.time_difference );
 
 		if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020 )
