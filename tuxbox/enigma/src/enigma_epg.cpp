@@ -15,6 +15,7 @@
 #include <lib/gui/guiactions.h>
 #include <lib/gui/statusbar.h>
 #include <lib/gdi/font.h>
+#include <lib/gui/numberactions.h>
 
 gPixmap *eZapEPG::entry::inTimer=0;
 gPixmap *eZapEPG::entry::inTimerRec=0;
@@ -52,13 +53,34 @@ eZapEPG::eZapEPG()
 	addActionMap( &i_epgSelectorActions->map );
 	addActionMap( &i_focusActions->map );
 	addActionMap( &i_cursorActions->map );
+	addActionMap( &i_numberActions->map );
+
+#ifndef DISABLE_FILE
+	addActionToHelpList( &i_epgSelectorActions->addDVRTimerEvent );
+#endif
+#ifndef DISABLE_NETWORK
+	addActionToHelpList( &i_epgSelectorActions->addNGRABTimerEvent );
+#endif
+	addActionToHelpList( &i_epgSelectorActions->addSwitchTimerEvent );
+	addActionToHelpList( &i_epgSelectorActions->removeTimerEvent );
+
 	Signal1<void,const eServiceReference& > callback;
 	CONNECT( callback, eZapEPG::addToList );
 	eZap::getInstance()->getServiceSelector()->forEachServiceRef( callback, false );
 	curS = curE = services.begin();
 	sbar = new eStatusBar(this);
-
+	sbar->move( ePoint(0, clientrect.height()-50) );
+	sbar->resize( eSize( clientrect.width(), 50) );
+	sbar->loadDeco();
 	sbar->setFlags( eStatusBar::flagOwnerDraw|RS_WRAP);
+
+	eLabel *l = new eLabel(this);
+	l->move(ePoint(100, clientrect.height()-80) );
+	l->setFont( eSkin::getActive()->queryFont("eStatusBar") );
+	l->resize( eSize( clientrect.width()-100, 30) );
+	l->setText(_("press 1 ... 6 to select count of visible hours"));
+	l->setFlags( eLabel::flagVCenter );
+
 	setHelpID(13);
 }
 
@@ -135,14 +157,6 @@ int eZapEPG::eventHandler(const eWidgetEvent &event)
 {
 	switch (event.type)
 	{
-	case eWidgetEvent::execBegin:
-		if ( sbar->getPosition().isNull() )
-		{
-			sbar->move( ePoint(0, clientrect.height()-50) );
-			sbar->resize( eSize( clientrect.width(), 50) );
-			sbar->loadDeco();
-		}
-		break;
 	case eWidgetEvent::evtAction:
 	{
 		int addtype=-1;
@@ -198,7 +212,38 @@ int eZapEPG::eventHandler(const eWidgetEvent &event)
 			ei.hide();
 			show();
 			drawTimeLines();
-		} else
+		}
+		else if (event.action == &i_numberActions->key1)
+		{
+			hours=1;
+			close(5);
+		}
+		else if (event.action == &i_numberActions->key2)
+		{
+			hours=2;
+			close(5);
+		}
+		else if (event.action == &i_numberActions->key3)
+		{
+			hours=3;
+			close(5);
+		}
+		else if (event.action == &i_numberActions->key4)
+		{
+			hours=4;
+			close(5);
+		}
+		else if (event.action == &i_numberActions->key5)
+		{
+			hours=5;
+			close(5);
+		}
+		else if (event.action == &i_numberActions->key6)
+		{
+			hours=6;
+			close(5);
+		}
+		else
 			break;
 		if (eventvalid && (addtype != -1))
 		{
@@ -423,20 +468,24 @@ void eZapEPG::selEntry(int dir)
 void eZapEPG::buildPage(int direction)
 {
 	/*
-			direction 1  ->  left
-			direction 2  ->  right
-			direction 3  ->  up
-			direction 4  ->  down  */
+			direction 1  ->  up
+			direction 2  ->  down
+			direction 3  ->  left
+			direction 4  ->  right */
+	NowTimeLineXPos = -1;
+
 	if ( eventWidget )
 		eventWidget->hide();
 	timeLine.clear();
+
 	serviceentries.clear();
 	current_service = serviceentries.end();
+
 	delete eventWidget;
 	eventWidget = new eWidget( this );
 	eventWidget->move(ePoint(0,0));
 	eSize tmps = clientrect.size();
-	tmps.setHeight( clientrect.height()-50 );
+	tmps.setHeight( clientrect.height()-80 );
 	eventWidget->resize( tmps );
 
 #ifndef DISABLE_LCD
@@ -444,7 +493,7 @@ void eZapEPG::buildPage(int direction)
 #endif
 
 	start=time(0)+eDVB::getInstance()->time_difference+offs;
-	unsigned int tmp = start % 1800;  // align to half hours
+	unsigned int tmp = start % 900;  // align to 15min
 	start -= tmp;
 	end=start+hours*3600;
 
@@ -487,10 +536,10 @@ void eZapEPG::buildPage(int direction)
 	int serviceheight = (eventWidget->height()-40) / numservices;
 
 	time_t tmpTime=start;
-	int timeWidth = (width - 100) / (hours*2);
-	for (unsigned int i=0; i < hours*2; ++i)
+	int timeWidth = (width - 100) / (hours>3?hours:hours*2);
+	for (unsigned int i=0; i < (hours>3?hours:hours*2); ++i)
 	{
-		tmpTime+=i?1800:0;
+		tmpTime+=i?(hours>3?3600:1800):0;
 		eLabel *l = new eLabel(eventWidget);
 		l->move(ePoint( i*timeWidth-(timeWidth/2)+100, 0));
 		l->resize(eSize(timeWidth,30));
@@ -501,7 +550,7 @@ void eZapEPG::buildPage(int direction)
 		timeLine.push_back(l);
 	}
 
-	int p = 0;
+	int p=0;
 	do
 	{
 		if ( curE == services.end() )
@@ -549,6 +598,7 @@ void eZapEPG::buildPage(int direction)
 			curE = services.begin();
 	}
 	while( serviceentries.size() < numservices && curE != curS );
+
 	if (!p)
 	{
 		sbar->setText("");
@@ -577,7 +627,7 @@ void eZapEPG::drawTimeLines()
 	if ( eventWidget && eventWidget->isVisible() && timeLine.size() )
 	{
 		gPainter *p = getPainter(eRect(eventWidget->getPosition(),eventWidget->getSize()));
-		int incWidth=((eventWidget->width()-100)/(hours*2));
+		int incWidth=((eventWidget->width()-100)/(hours>3?hours:hours*2));
 		int pos=100;
 		int lineheight = eventWidget->height();
 		if ( NowTimeLineXPos != -1 )

@@ -3,69 +3,60 @@
 <KDevPrjSession>
  <LastCompileConfig>(Default)</LastCompileConfig>
  <Mainframe MaximizeMode="1" />
- <DocsAndViews NumberOfDocuments="21" >
-  <Doc0 CursorPosLine="222" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/include/lib/gdi/grc.h" >
+ <DocsAndViews NumberOfDocuments="18" >
+  <Doc0 CursorPosLine="586" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="30" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/src/enigma_epg.cpp" >
    <View0 Top="24" Width="400" Attach="1" Height="300" Left="3" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc0>
-  <Doc1 CursorPosLine="88" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="6" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/lib/gdi/grc.cpp" >
-   <View0 Top="46" Width="778" Attach="1" Height="506" Left="25" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  <Doc1 CursorPosLine="20" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="1" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/src/enigma_epg.h" >
+   <View0 Top="46" Width="746" Attach="1" Height="414" Left="25" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc1>
-  <Doc2 CursorPosLine="53" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/lib/gdi/gpixmap.cpp" >
-   <View0 Top="68" Width="778" Attach="1" Height="506" Left="47" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  <Doc2 CursorPosLine="88" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="43" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/include/lib/dvb/epgcache.h" >
+   <View0 Top="68" Width="746" Attach="1" Height="414" Left="47" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc2>
-  <Doc3 CursorPosLine="95" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/src/enigma_epg.cpp" >
-   <View0 Top="66" Width="784" Attach="1" Height="533" Left="66" Focus="1" Type="KWriteView" MinMaxMode="2" />
+  <Doc3 CursorPosLine="269" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="6" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/data/skins/default.esml" >
+   <View0 Top="90" Width="746" Attach="1" Height="414" Left="69" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc3>
-  <Doc4 CursorPosLine="28" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/src/enigma_epg.h" >
-   <View0 Top="112" Width="778" Attach="1" Height="506" Left="91" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  <Doc4 CursorPosLine="190" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/include/lib/dvb/edvb.h" >
+   <View0 Top="112" Width="746" Attach="1" Height="415" Left="91" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc4>
-  <Doc5 CursorPosLine="85" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="55" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/data/skins/default.esml" >
-   <View0 Top="134" Width="778" Attach="1" Height="506" Left="113" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  <Doc5 CursorPosLine="272" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="49" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/lib/dvb/edvb.cpp" >
+   <View0 Top="134" Width="746" Attach="1" Height="414" Left="113" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc5>
-  <Doc6 CursorPosLine="152" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/lib/gui/elabel.cpp" >
-   <View0 Top="156" Width="778" Attach="1" Height="508" Left="135" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  <Doc6 CursorPosLine="70" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/src/setupnetwork.h" >
+   <View0 Top="156" Width="746" Attach="1" Height="415" Left="135" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc6>
-  <Doc7 CursorPosLine="81" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/lib/gui/enumber.cpp" >
-   <View0 Top="178" Width="778" Attach="1" Height="506" Left="157" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  <Doc7 CursorPosLine="1047" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="4" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/src/setupnetwork.cpp" >
+   <View0 Top="154" Width="752" Attach="1" Height="441" Left="154" Focus="1" Type="KWriteView" MinMaxMode="2" />
   </Doc7>
-  <Doc8 CursorPosLine="9" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/include/lib/gui/elabel.h" >
-   <View0 Top="200" Width="778" Attach="1" Height="506" Left="179" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  <Doc8 CursorPosLine="38" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="26" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/lib/system/econfig.cpp" >
+   <View0 Top="200" Width="746" Attach="1" Height="414" Left="179" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc8>
-  <Doc9 CursorPosLine="135" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/include/lib/gdi/font.h" >
-   <View0 Top="222" Width="778" Attach="1" Height="506" Left="201" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  <Doc9 CursorPosLine="42" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="32" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/src/enigma_mainmenu.h" >
+   <View0 Top="222" Width="746" Attach="1" Height="414" Left="201" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc9>
-  <Doc10 CursorPosLine="324" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="14" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/lib/gdi/font.cpp" >
-   <View0 Top="244" Width="778" Attach="1" Height="506" Left="223" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  <Doc10 CursorPosLine="204" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="51" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/src/enigma_mainmenu.cpp" >
+   <View0 Top="244" Width="746" Attach="1" Height="414" Left="223" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc10>
-  <Doc11 CursorPosLine="35" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/lib/gdi/glcddc.cpp" >
-   <View0 Top="266" Width="778" Attach="1" Height="506" Left="245" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  <Doc11 CursorPosLine="2418" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="26" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/src/enigma_main.cpp" >
+   <View0 Top="266" Width="746" Attach="1" Height="414" Left="245" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc11>
-  <Doc12 CursorPosLine="192" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/lib/gui/ewidget.cpp" >
-   <View0 Top="288" Width="778" Attach="1" Height="506" Left="267" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  <Doc12 CursorPosLine="298" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="35" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/include/lib/gui/listbox.h" >
+   <View0 Top="288" Width="746" Attach="1" Height="414" Left="267" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc12>
-  <Doc13 CursorPosLine="450" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/include/lib/gui/ewidget.h" >
-   <View0 Top="310" Width="778" Attach="1" Height="506" Left="289" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  <Doc13 CursorPosLine="58" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/src/enigma_setup.cpp" >
+   <View0 Top="310" Width="746" Attach="1" Height="414" Left="289" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc13>
-  <Doc14 CursorPosLine="283" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="32" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/lib/gui/textinput.cpp" >
-   <View0 Top="332" Width="778" Attach="1" Height="506" Left="311" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  <Doc14 CursorPosLine="505" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="19" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/lib/gui/listbox.cpp" >
+   <View0 Top="332" Width="746" Attach="1" Height="414" Left="311" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc14>
-  <Doc15 CursorPosLine="276" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="50" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/src/enigma_event.cpp" >
-   <View0 Top="354" Width="778" Attach="1" Height="506" Left="333" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  <Doc15 CursorPosLine="28" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="18" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/lib/gui/eskin_register.cpp" >
+   <View0 Top="354" Width="876" Attach="1" Height="460" Left="333" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc15>
-  <Doc16 CursorPosLine="386" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/src/setupvideo.cpp" >
-   <View0 Top="376" Width="1086" Attach="1" Height="506" Left="355" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  <Doc16 CursorPosLine="74" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/src/setupskin.cpp" >
+   <View0 Top="376" Width="876" Attach="1" Height="460" Left="355" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc16>
-  <Doc17 CursorPosLine="459" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/src/enigma_mmi.cpp" >
-   <View0 Top="398" Width="1086" Attach="1" Height="506" Left="377" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  <Doc17 CursorPosLine="23" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/include/lib/gui/eskin.h" >
+   <View0 Top="398" Width="876" Attach="1" Height="460" Left="377" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc17>
-  <Doc18 CursorPosLine="106" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/src/setupengrab.cpp" >
-   <View0 Top="420" Width="1086" Attach="1" Height="467" Left="399" Focus="0" Type="KWriteView" MinMaxMode="0" />
-  </Doc18>
-  <Doc19 CursorPosLine="13" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="48" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/lib/gui/statusbar.cpp" >
-   <View0 Top="442" Width="778" Attach="1" Height="467" Left="421" Focus="0" Type="KWriteView" MinMaxMode="0" />
-  </Doc19>
-  <Doc20 CursorPosLine="60" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="45" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/src/setup_timezone.cpp" >
-   <View0 Top="24" Width="778" Attach="1" Height="467" Left="443" Focus="0" Type="KWriteView" MinMaxMode="0" />
-  </Doc20>
  </DocsAndViews>
 </KDevPrjSession>
