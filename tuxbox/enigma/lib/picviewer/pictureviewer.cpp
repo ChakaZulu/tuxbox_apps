@@ -329,13 +329,13 @@ bool ePictureViewer::DecodeImage(const std::string& name, bool unscaled)
 	return(m_NextPic_Buffer != NULL);
 }
 
-bool ePictureViewer::ShowImage(const std::string & filename, bool unscaled)
+bool ePictureViewer::ShowImage(const std::string& filename, bool unscaled)
 {
 	eDebug("Show Image {");
-	int pos = filename.find_last_of("/");
-	if (pos == -1)
+	unsigned int pos = filename.find_last_of("/");
+	if (pos == eString::npos)
 		pos = filename.length() - 1;
-	eString directory = pos ? filename.substr(0, pos) : "/";
+	eString directory = pos ? filename.substr(0, pos) : "";
 	eDebug("---directory: %s", directory.c_str());
 	slideshowList.clear();
 	int includesubdirs = 0;
@@ -500,17 +500,23 @@ void ePictureViewer::listDirectory(eString directory, int includesubdirs)
 		}
 		closedir(d);
 	}
-	piclist.sort();
-	for (picIt = piclist.begin(); picIt != piclist.end(); picIt++)
+	if (!piclist.empty())
 	{
-		eString tmp = *picIt;
-		slideshowList.push_back(tmp);
+		piclist.sort();
+		for (picIt = piclist.begin(); picIt != piclist.end(); picIt++)
+		{
+			eString tmp = *picIt;
+			slideshowList.push_back(tmp);
+		}
 	}
-	dirlist.sort();
-	for (dirIt = dirlist.begin(); dirIt != dirlist.end(); dirIt++)
+	if (!dirlist.empty())
 	{
-		eString tmp = *dirIt;
-		listDirectory(tmp, includesubdirs);
+		dirlist.sort();
+		for (dirIt = dirlist.begin(); dirIt != dirlist.end(); dirIt++)
+		{
+			eString tmp = *dirIt;
+			listDirectory(tmp, includesubdirs);
+		}
 	}
 }
 
