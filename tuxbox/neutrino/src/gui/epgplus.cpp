@@ -30,7 +30,7 @@
 #include <global.h>
 #include <neutrino.h>
 
-#include <gui/EPGPlus.h>
+#include <gui/epgplus.h>
 #include <sectionsdclient/sectionsdclient.h>
 
 #include <gui/widget/icons.h>
