@@ -550,9 +550,12 @@ int CNeutrinoApp::run(int argc, char **argv)
 	//clear frame...
 	memset(frameBuffer.lfb, 255, frameBuffer.Stride()*576);
 
+	//backgroundmode
+	frameBuffer.setBackgroundColor(COL_BACKGROUND);
+	frameBuffer.useBackground(false);
 
 	//background
-	frameBuffer.paletteSetColor(255, 0x000000, 0xffff); 
+	frameBuffer.paletteSetColor(COL_BACKGROUND, 0x000000, 0xffff); 
 	//Windows Colors
 	frameBuffer.paletteSetColor(0x0, 0x010101, 0);
 	frameBuffer.paletteSetColor(0x1, 0x800000, 0);
@@ -802,7 +805,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 			nRun=false;
 		}
 		
-		if (mode==mode_tv || mode==mode_radio)
+		if ((mode==mode_tv) || ((mode==mode_radio) && (zapit)) )
 		{
 			if (key==CRCInput::RC_ok)
 			{	//channellist
@@ -947,10 +950,13 @@ void CNeutrinoApp::tvMode()
 	mode = mode_tv;
 	infoViewer.killTitle();
 	memset(frameBuffer.lfb, 255, frameBuffer.Stride()*576);
-	if (zapit) {
-	remoteControl.tvMode();
-	channelsInit();
-	channelList->zapTo(&remoteControl, &infoViewer,  0);
+	frameBuffer.useBackground(false);
+
+	if (zapit)
+	{
+		remoteControl.tvMode();
+		channelsInit();
+		channelList->zapTo(&remoteControl, &infoViewer,  0);
 	}
 }
 
@@ -960,15 +966,15 @@ void CNeutrinoApp::radioMode()
 	infoViewer.killTitle();
 	frameBuffer.loadPal("dboxradio.pal", 18, 199);
 	frameBuffer.paintIcon8("dboxradio.raw",0,0, 18);
-	if (zapit) {
-	remoteControl.radioMode();
-	channelsInit();
-	channelList->zapTo(&remoteControl, &infoViewer,  0);
-	} else {
-	while(rcInput.getKey(1)!=-1);
-	rcInput.getKey(600);
-	tvMode();
-	}
+	frameBuffer.loadBackground("dboxradio.raw", 18);
+	frameBuffer.useBackground(true);
+
+	if (zapit)
+	{
+		remoteControl.radioMode();
+		channelsInit();
+		channelList->zapTo(&remoteControl, &infoViewer,  0);
+	} 
 }
 
 
