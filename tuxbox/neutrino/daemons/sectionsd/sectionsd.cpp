@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.93 2002/02/04 14:43:42 field Exp $
+//  $Id: sectionsd.cpp,v 1.94 2002/02/08 17:50:05 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.94  2002/02/08 17:50:05  field
+//  Updates - neues Format bei sendEPG
+//
 //  Revision 1.93  2002/02/04 14:43:42  field
 //  Start/Stop/Restart u. Threading veraendert ;)
 //
@@ -323,19 +326,20 @@
 #include "SIevents.hpp"
 #include "SIsections.hpp"
 
+// 5 Minuten Zyklus...
 // Zeit die fuer die scheduled eit's benutzt wird (in Sekunden)
-#define TIME_EIT_SCHEDULED 20
+#define TIME_EIT_SCHEDULED 60
 
-#define TIME_EIT_SCHEDULED_PAUSE 120
+#define TIME_EIT_SCHEDULED_PAUSE 220
 
 // Zeit die fuer die present/following (und nvods) eit's benutzt wird (in Sekunden)
-#define TIME_EIT_PRESENT 10
+#define TIME_EIT_PRESENT 20
 
 // Timeout bei tcp/ip connections in s
 #define TIMEOUT_CONNECTIONS 2
 
 // Gibt die Anzahl Timeouts an, nach der die Verbindung zum DMX neu gestartet wird (wegen evtl. buffer overflow)
-#define RESTART_DMX_AFTER_TIMEOUTS 15
+#define RESTART_DMX_AFTER_TIMEOUTS 5
 
 // Gibt die Anzahl Timeouts an, nach der überprüft wird, ob die Timeouts von einem Sender ohne EIT kommen oder nicht
 #define CHECK_RESTART_DMX_AFTER_TIMEOUTS 3
@@ -1198,6 +1202,7 @@ return nullEvt;
 }
 
 
+
 // Sucht das naechste Event anhand unique key und Startzeit
 static const SIevent &findNextSIevent(const unsigned long long uniqueKey, SItime &zeit)
 {
@@ -1506,7 +1511,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.93 2002/02/04 14:43:42 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.94 2002/02/08 17:50:05 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1535,7 +1540,6 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   return;
 }
 
-static bool currentNextWasOk=false;
 static unsigned currentServiceKey=0;
 
 // Mostly copied from epgd (something bugfixed ;) )
@@ -1611,12 +1615,10 @@ static void commandCurrentNextInfoChannelName(struct connectionData *client, cha
     else
       dputs("[sectionsd] Fehler/Timeout bei write");
     delete[] pResultData;
-    currentNextWasOk=true;
   }
   else
   {
     dprintf("current/next EPG not found!\n");
-    currentNextWasOk=false;
   }
   return;
 }
@@ -1709,6 +1711,10 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
         }
     }
     //dprintf("[sectionsd] current flag %d\n", flag);
+
+    // hierher - ist im Lock :)
+    currentServiceKey= *uniqueServiceKey;
+
     unlockServices();
 
     SIevent nextEvt;
@@ -1722,7 +1728,27 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
     }
     else
     if ( flag & sectionsd::epg_has_anything )
+    {
+
         nextEvt=findNextSIeventForServiceUniqueKey(*uniqueServiceKey, zeitEvt2);
+
+        if(nextEvt.serviceID!=0)
+        {
+        	MySIeventsOrderUniqueKey::iterator eFirst=mySIeventsOrderUniqueKey.find(*uniqueServiceKey);
+    		if(eFirst!=mySIeventsOrderUniqueKey.end())
+    		{
+        		eFirst--;
+        		if(eFirst!=mySIeventsOrderUniqueKey.begin())
+        		{
+            		time_t azeit=time(NULL);
+
+                	if ( ( eFirst->second->times.begin()->startzeit < azeit ) &&
+                	     ( eFirst->second->uniqueKey()== (nextEvt.uniqueKey()- 1) ) )
+						flag|= sectionsd::epg_has_no_current;
+				}
+			}
+		}
+    }
 
     if(nextEvt.serviceID!=0)
     {
@@ -1803,9 +1829,6 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
     unlockEvents();
     dmxEIT.unpause(); // -> unlock
 
-    currentNextWasOk= ( flag & sectionsd::epg_has_current );
-    currentServiceKey= *uniqueServiceKey;
-
     // response
     struct sectionsd::msgResponseHeader pmResponse;
     pmResponse.dataLength=nResultDataSize;
@@ -1823,10 +1846,10 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
         dprintf("[sectionsd] current/next EPG not found!\n");
     }
 
-	if(!currentNextWasOk)
-    	dmxEIT.change( false );
-	else
+	if( ( flag & (sectionsd::epg_has_current) ) && ( flag & (sectionsd::epg_has_next) ) )
     	dmxEIT.change( true ); // auf scheduled umschalten / current/next ist eh' schon da...
+	else
+    	dmxEIT.change( false );
 
     return;
 }
@@ -1838,29 +1861,22 @@ struct sectionsd::msgResponseHeader responseHeader;
 
   if(!shortepg)
   {
+    // new format - 0 delimiters
     responseHeader.dataLength=
-     12+1+				// Unique-Key + del
+     sizeof(unsigned long long)+       // Unique-Key
      strlen(e.name.c_str())+1+		// Name + del
      strlen(e.text.c_str())+1+		// Text + del
      strlen(e.extendedText.c_str())+1+	// ext + del
-     8+1+				// start time + del
-     8+1+1;				// duration + del + 0
-
-/*    unsigned wh= 0;
-    for(SItimes::iterator tm=e.times.begin(); tm!=e.times.end(); tm++)
-      if (tm->startzeit> t.startzeit )
-      {
-        wh+= 8;
-        if (wh== 4*8)
-            break;
-      }
-    responseHeader.dataLength+= wh+ 1; */
+     strlen(e.contentClassification.c_str())+1+		// Text + del
+     strlen(e.userClassification.c_str())+1+	// ext + del
+     sizeof(sectionsd::sectionsdTime); // zeit
   }
   else
     responseHeader.dataLength=
      strlen(e.name.c_str())+1+		// Name + del
      strlen(e.text.c_str())+1+		// Text + del
      strlen(e.extendedText.c_str())+1+1;// ext + del + 0
+
   char* msgData = new char[responseHeader.dataLength];
   if(!msgData) {
     fprintf(stderr, "low on memory!\n");
@@ -1868,42 +1884,30 @@ struct sectionsd::msgResponseHeader responseHeader;
     dmxEIT.unpause(); // -> unlock
     return;
   }
+
   if(!shortepg)
   {
-/*    std::string  whs;
-    for(SItimes::iterator tm=e.times.begin(); tm!=e.times.end(); tm++)
-      if (tm->startzeit> t.startzeit )
-      {
-        char wht[10];
-        sprintf(wht, "%08lx", tm->startzeit);
-         printf("sec: wh: %s\n", wht);
-        whs+= wht;
-        if (whs.size()== 4*8)
-            break;
-      }
-    whs+= "\xFF";
-    printf("sec: whs: %s\n", whs.c_str());
+	char *p=msgData;
+    *((unsigned long long *)p)=e.uniqueKey();
+    p+=sizeof(unsigned long long);
 
-    sprintf(msgData,
-      "%012llx\xFF%s\xFF%s\xFF%s\xFF%s\xFF%08lx\xFF%08x\xFF",
-      e.uniqueKey(),
-      e.name.c_str(),
-      e.text.c_str(),
-      e.extendedText.c_str(),
-      whs.c_str(),
-      t.startzeit,
-      t.dauer
-    );
-*/
-    sprintf(msgData,
-      "%012llx\xFF%s\xFF%s\xFF%s\xFF%08lx\xFF%08x\xFF",
-      e.uniqueKey(),
-      e.name.c_str(),
-      e.text.c_str(),
-      e.extendedText.c_str(),
-      t.startzeit,
-      t.dauer
-    );
+	strcpy(p, e.name.c_str());
+	p+=strlen(e.name.c_str())+1;
+	strcpy(p, e.text.c_str());
+	p+=strlen(e.text.c_str())+1;
+	strcpy(p, e.extendedText.c_str());
+	p+=strlen(e.extendedText.c_str())+1;
+	strcpy(p, e.contentClassification.c_str());
+	p+=strlen(e.contentClassification.c_str())+1;
+	strcpy(p, e.userClassification.c_str());
+	p+=strlen(e.userClassification.c_str())+1;
+
+    sectionsd::sectionsdTime zeit;
+    zeit.startzeit=t.startzeit;
+    zeit.dauer=t.dauer;
+    *((sectionsd::sectionsdTime *)p)=zeit;
+    p+=sizeof(sectionsd::sectionsdTime);
+
   }
   else
     sprintf(msgData,
@@ -3129,8 +3133,8 @@ char *buf;
                     {
                         if(e->times.size()>0)
                         {
-                            if( e->times.begin()->startzeit < zeit+secondsToCache &&
-                                e->times.begin()->startzeit+(long)e->times.begin()->dauer > zeit-oldEventsAre )
+                            if( ( e->times.begin()->startzeit < zeit+secondsToCache ) &&
+                                ( ( e->times.begin()->startzeit+(long)e->times.begin()->dauer ) > zeit-oldEventsAre ) )
                             {
                                 lockEvents();
                                 addEvent(*e);
@@ -3274,7 +3278,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.93 2002/02/04 14:43:42 field Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.94 2002/02/08 17:50:05 field Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {

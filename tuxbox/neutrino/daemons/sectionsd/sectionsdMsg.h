@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.26 2001/11/22 13:19:00 field Exp $
+//  $Id: sectionsdMsg.h,v 1.27 2002/02/08 17:50:05 field Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -25,6 +25,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsdMsg.h,v $
+//  Revision 1.27  2002/02/08 17:50:05  field
+//  Updates - neues Format bei sendEPG
+//
 //  Revision 1.26  2001/11/22 13:19:00  field
 //  Liefert nun auch nur NEXT Epg ab
 //
@@ -101,6 +104,7 @@ struct sectionsd {
   static const unsigned char epg_has_current= 0x04;
   static const unsigned char epg_not_broadcast= 0x08;
   static const unsigned char epg_has_next= 0x10;
+  static const unsigned char epg_has_no_current= 0x20;
 
   struct msgRequestHeader {
     char version;
@@ -249,7 +253,7 @@ struct sectionsd {
 //   data of response:
 //     for every service:
 //       1. unique-service-key (4 bytes)
-//       2. unique-event-key (8 bytes) 
+//       2. unique-event-key (8 bytes)
 //       3. event name (c-string with 0)
 //
 // actualEventListRadioShortIDs:
@@ -257,7 +261,7 @@ struct sectionsd {
 //     -
 //   data of response:
 //       1. unique-service-key (4 bytes)
-//       2. unique-event-key (8 bytes) 
+//       2. unique-event-key (8 bytes)
 //       3. event name (c-string with 0)
 //
 // currentNextInformationID:
@@ -266,10 +270,10 @@ struct sectionsd {
 //     1 byte number of Events (noch nicht implementiert)
 //   data of response:
 //     is a string (c-string) describing the current/next EPGs
-//     every event: 
-//       1. 8 bytes unique key (unsigned long long), 
-//       2. struct sectionsdTime (8 bytes) 
-//       3. name (c-string with 0)     
+//     every event:
+//       1. 8 bytes unique key (unsigned long long),
+//       2. struct sectionsdTime (8 bytes)
+//       3. name (c-string with 0)
 //
 // epgEPGid:
 //   data of request:
