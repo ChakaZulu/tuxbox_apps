@@ -34,7 +34,8 @@ class CKeyChooserItem : public CMenuTarget
 	int y;
 	int width;
 	int height;
-
+	int hheight,mheight; // head/menu font height
+	
 	string	name;
 	int		*key;
 	FontsDef	*fonts;

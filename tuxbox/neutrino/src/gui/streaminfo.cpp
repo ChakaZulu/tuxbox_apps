@@ -5,7 +5,9 @@ CStreamInfo::CStreamInfo(FontsDef *Fonts)
 {
 	fonts = Fonts;
 	width = 300;
-	height = 155;
+	hheight = fonts->menu_title->getHeight();
+	mheight = fonts->menu->getHeight();
+	height = hheight+5*mheight;
 	x=((720-width) >> 1) -20;
 	y=(576-height)>>1;
 }
@@ -32,11 +34,13 @@ void CStreamInfo::hide(CFrameBuffer* frameBuffer)
 
 void CStreamInfo::paint(CFrameBuffer* frameBuffer)
 {
+	int ypos=y;
+	frameBuffer->paintBoxRel(x,ypos, width,hheight, COL_MENUHEAD);
+	fonts->menu_title->RenderString(x+10,ypos+hheight, width,"Streaminfo", COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x,ypos+hheight, width,height-hheight, COL_MENUCONTENT);
 
-	frameBuffer->paintBoxRel(x,y, width,30, COL_MENUHEAD);
-	fonts->menu_title->RenderString(x+10,y+30, width,"Streaminfo", COL_MENUHEAD);
-	frameBuffer->paintBoxRel(x,y+30, width,height-30, COL_MENUCONTENT);
-
+	ypos+=hheight;
+	
 	FILE* fd = fopen("/proc/bus/bitstream", "rt");
 	if (fd==NULL)
 	{
@@ -68,10 +72,12 @@ void CStreamInfo::paint(CFrameBuffer* frameBuffer)
 	
 	//paint msg...
 	sprintf((char*) buf, "Resolution: %dx%d", bitInfo[0], bitInfo[1] );
-	fonts->menu->RenderString(x+10,y+60, width, buf, COL_MENUCONTENT);
+	fonts->menu->RenderString(x+10,ypos+mheight, width, buf, COL_MENUCONTENT);
+	ypos+=mheight;
 
 	sprintf((char*) buf, "Bitrate: %d bit/sec", bitInfo[4]*50);
-	fonts->menu->RenderString(x+10,y+80, width, buf, COL_MENUCONTENT);
+	fonts->menu->RenderString(x+10,ypos+mheight, width, buf, COL_MENUCONTENT);
+	ypos+=mheight;
 
 
 	switch ( bitInfo[2] )
@@ -81,7 +87,8 @@ void CStreamInfo::paint(CFrameBuffer* frameBuffer)
 		case 4: strcpy(buf, "Aspect Ratio: 2.21:1"); break;
 		default: strcpy(buf, "Aspect Ratio: unknown");
 	}
-	fonts->menu->RenderString(x+10,y+100, width, buf, COL_MENUCONTENT);
+	fonts->menu->RenderString(x+10,ypos+mheight, width, buf, COL_MENUCONTENT);
+	ypos+=mheight;
 
 
 	switch ( bitInfo[3] )
@@ -90,7 +97,8 @@ void CStreamInfo::paint(CFrameBuffer* frameBuffer)
 		case 6: strcpy(buf, "Framerate: 50fps"); break;
 		default: strcpy(buf, "Framerate: unknown");
 	}
-	fonts->menu->RenderString(x+10,y+120, width, buf, COL_MENUCONTENT);
+	fonts->menu->RenderString(x+10,ypos+mheight, width, buf, COL_MENUCONTENT);
+	ypos+=mheight;
 
 
 	switch ( bitInfo[6] )
@@ -101,6 +109,7 @@ void CStreamInfo::paint(CFrameBuffer* frameBuffer)
 		case 4: strcpy(buf, "Audiotype:  stereo"); break;
 		default: strcpy(buf, "Audiotype: unknown");
 	}
-	fonts->menu->RenderString(x+10,y+140, width, buf, COL_MENUCONTENT);
+	fonts->menu->RenderString(x+10,ypos+mheight, width, buf, COL_MENUCONTENT);
+	ypos+=mheight;
 }
 

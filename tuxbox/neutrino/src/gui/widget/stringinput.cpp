@@ -8,7 +8,9 @@ CStringInput::CStringInput(string Name, FontsDef *Fonts, char* Value, int Size)
 	fonts = Fonts;
 	size = Size;
 	width = 400;
-	height = 110;
+	hheight = fonts->menu_title->getHeight();
+	mheight = fonts->menu->getHeight();
+	height = hheight+mheight+50;
 	x=((720-width) >> 1) -50;
 	y=((500-height)>>1);
 	selected = 0;
@@ -109,10 +111,9 @@ void CStringInput::hide(CFrameBuffer* frameBuffer)
 
 void CStringInput::paint(CFrameBuffer* frameBuffer)
 {
-
-	frameBuffer->paintBoxRel(x,y, width,30, COL_MENUHEAD);
-	fonts->menu_title->RenderString(x+10,y+23, width, name.c_str(), COL_MENUHEAD);
-	frameBuffer->paintBoxRel(x,y+30, width,height-30, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD);
+	fonts->menu_title->RenderString(x+10,y+hheight, width, name.c_str(), COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT);
 
 	for (int count=0;count<size;count++)
 		paintChar(frameBuffer, count);
@@ -122,9 +123,9 @@ void CStringInput::paint(CFrameBuffer* frameBuffer)
 void CStringInput::paintChar(CFrameBuffer* frameBuffer, int pos)
 {
 	int xs = 20;
-	int ys = 30;
+	int ys = mheight;
 	int xpos = x+20+ pos*xs;
-	int ypos = y+55;
+	int ypos = y+hheight+25;
 
 	string ch = "";
 	if(pos<(int)strlen(value))
@@ -139,5 +140,5 @@ void CStringInput::paintChar(CFrameBuffer* frameBuffer, int pos)
 
 	int xfpos = xpos + ((xs-fonts->menu->getRenderWidth(ch.c_str()))>>1);
 
-	fonts->menu->RenderString(xfpos,ypos+ys-8, width, ch.c_str(), color);
+	fonts->menu->RenderString(xfpos,ypos+ys, width, ch.c_str(), color);
 }

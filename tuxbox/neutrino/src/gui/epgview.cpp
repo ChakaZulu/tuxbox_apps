@@ -1,7 +1,10 @@
 //
-// $Id: epgview.cpp,v 1.6 2001/08/20 13:07:10 tw-74 Exp $
+// $Id: epgview.cpp,v 1.7 2001/09/03 03:34:04 tw-74 Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.7  2001/09/03 03:34:04  tw-74
+// cosmetic fixes, own "Mg" fontmetrics
+//
 // Revision 1.6  2001/08/20 13:07:10  tw-74
 // cosmetic changes and changes for variable font size
 //
@@ -37,10 +40,10 @@ void CEpgData::start(CFrameBuffer *FrameBuffer, FontsDef *Fonts, CRCInput* RcInp
 	oy = 290;
 
 	topheight=fonts->epg_title->getHeight();
-	topboxheight=topheight+10;
+	topboxheight=topheight+6;
 	botheight=fonts->epg_date->getHeight();
 	botboxheight=botheight+6;
-	medlineheight=fonts->epg_info->getHeight();
+	medlineheight=fonts->epg_info1->getHeight();
 	medlinecount=(oy-topboxheight-botboxheight)/medlineheight;
 
 	oy=topboxheight+botboxheight+medlinecount*medlineheight; // recalculate
@@ -81,7 +84,7 @@ void CEpgData::processTextToArray( char* text  )
 		{
 			//check the wordwidth - add to this line if size ok
 			aktWord += ' ';
-			int aktWordWidth = fonts->epg_info->getRenderWidth(aktWord.c_str());
+			int aktWordWidth = fonts->epg_info2->getRenderWidth(aktWord.c_str());
 			if((aktWordWidth+aktWidth)<(ox-20))
 			{//space ok, add
 				aktWidth += aktWordWidth;
@@ -121,14 +124,14 @@ void CEpgData::showText( int startPos, int ypos )
 	frameBuffer->paintBoxRel(sx, y, ox, linecount*medlineheight, COL_MENUCONTENT);
 	if(startPos==0){
 		t=epgData.info1;
-		fonts->epg_info->RenderString(sx+10,y+medlineheight,ox-15,t.c_str(),COL_MENUCONTENT);
+		fonts->epg_info1->RenderString(sx+10,y+medlineheight,ox-15,t.c_str(),COL_MENUCONTENT);
 		y+=medlineheight;
 		linecount--;
 	}
 	for(int i=startPos; i<textCount && i<startPos+linecount; i++,y+=medlineheight)
 	{
 		t=epgText[i];
-		fonts->epg_info->RenderString(sx+10, y+medlineheight, ox-15, t.c_str(), COL_MENUCONTENT);
+		fonts->epg_info2->RenderString(sx+10, y+medlineheight, ox-15, t.c_str(), COL_MENUCONTENT);
 	}
 }
 
@@ -147,12 +150,12 @@ void CEpgData::show( string channelName )
 		//no epg-data found :(
 		char *text = "no epg found";
 		int oy = 30;
-		int ox = fonts->epg_info->getRenderWidth(text)+30;
+		int ox = fonts->epg_info2->getRenderWidth(text)+30;
 		int sx = (((settings->screen_EndX-settings->screen_StartX)-ox) / 2) + settings->screen_StartX;
 		int sy = (((settings->screen_EndY-settings->screen_StartY)-oy) / 2) + settings->screen_StartY;
-		height=fonts->epg_info->getHeight();
+		height=fonts->epg_info2->getHeight();
 		frameBuffer->paintBoxRel(sx, sy, ox, height+10, COL_MENUHEAD);
-		fonts->epg_info->RenderString(sx+15, sy+height+5, ox-15, text, COL_MENUHEAD);
+		fonts->epg_info2->RenderString(sx+15, sy+height+5, ox-15, text, COL_MENUHEAD);
 		rcInput->getKey(20); 
 		frameBuffer->paintBoxRel(sx, sy, ox, height+10, COL_BACKGROUND);
 		return;
@@ -166,7 +169,7 @@ void CEpgData::show( string channelName )
 
 	//show the epg
 	frameBuffer->paintBoxRel(sx, sy, ox, topboxheight, COL_MENUHEAD);
-	fonts->epg_title->RenderString(sx+10, sy+topheight+5, ox-15, epgData.title, COL_MENUHEAD);
+	fonts->epg_title->RenderString(sx+10, sy+topheight+3, ox-15, epgData.title, COL_MENUHEAD);
 
 	//show date-time....
 	frameBuffer->paintBoxRel(sx, sy+oy-botboxheight, ox, botboxheight, COL_MENUHEAD);

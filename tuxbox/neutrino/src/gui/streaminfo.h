@@ -21,7 +21,8 @@ class CStreamInfo : public CMenuTarget
 		int width;
 		int height;
 		FontsDef *fonts;
-
+		int hheight,mheight; // head/menu font height
+		
 		void paint(CFrameBuffer* frameBuffer);
 
 	public:

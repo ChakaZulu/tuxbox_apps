@@ -108,16 +108,16 @@ void CMenuWidget::hide(CFrameBuffer* frameBuffer)
 void CMenuWidget::paint(CFrameBuffer* frameBuffer)
 {
 	width = 400;
-	height = 400; // height(menu_title)+10+...
+	height = 450; // height(menu_title)+10+...
 	x=((720-width)>>1) -20;
 	y=(576-height)>>1;
-	int hheight= 30; //fonts->menu_title->getHeight()+10;
-	frameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD); //hheight was: 30
-
-	fonts->menu_title->RenderString(x+36,y+hheight, width, name.c_str(), COL_MENUHEAD); //hheight was: 23
+	int hheight=fonts->menu_title->getHeight();
+	frameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD);
+	
+	fonts->menu_title->RenderString(x+36,y+hheight, width, name.c_str(), COL_MENUHEAD);
 	frameBuffer->paintIcon(iconfile.c_str(),x+8,y+6);
 
-	int ypos = y+hheight; //hheight was: 30
+	int ypos = y+hheight;
 
 	for(unsigned int count=0;count<items.size();count++)
 	{
@@ -139,7 +139,7 @@ void CMenuWidget::paint(CFrameBuffer* frameBuffer)
 CMenuOptionChooser::CMenuOptionChooser(string OptionName, FontsDef* Fonts, int* OptionValue, bool Active, CChangeObserver* Observ)
 {
 	fonts=Fonts;
-	height=fonts->menu->getHeight(); //was: 26;
+	height=fonts->menu->getHeight();
 	optionName = OptionName;
 	active = Active;
 	optionValue = OptionValue;
@@ -164,7 +164,7 @@ void CMenuOptionChooser::addOption(int key, string value)
 		options.insert(options.end(), tmp);
 }
 
-int CMenuOptionChooser::exec(CFrameBuffer*	frameBuffer, CRCInput*, CMenuTarget*)
+int CMenuOptionChooser::exec(CFrameBuffer* frameBuffer, CRCInput*, CMenuTarget*)
 {
 	for(unsigned int count=0;count<options.size();count++)
 	{
@@ -205,9 +205,9 @@ int CMenuOptionChooser::paint(CFrameBuffer*	frameBuffer, bool selected)
 		}
 	}
 
-	int stringwidth =  fonts->menu->getRenderWidth(option.c_str());
-	int stringstartposName = x+ 10;
-	int stringstartposOption = x+ dx - stringwidth - 10;
+	int stringwidth = fonts->menu->getRenderWidth(option.c_str());
+	int stringstartposName = x + 10;
+	int stringstartposOption = x + dx - stringwidth - 10;
 
 	fonts->menu->RenderString(stringstartposName,   y+height,dx,  optionName.c_str(), color);
 
@@ -220,7 +220,7 @@ int CMenuOptionChooser::paint(CFrameBuffer*	frameBuffer, bool selected)
 CMenuForwarder::CMenuForwarder(string Text, FontsDef* Fonts, bool Active, char* Option, CMenuTarget* Target, string ActionKey="")
 {
 	fonts=Fonts;
-	height=fonts->menu->getHeight(); //was:26
+	height=fonts->menu->getHeight();
 	text=Text;
 	option = Option;
 	active = Active;
@@ -256,8 +256,8 @@ int CMenuForwarder::paint(CFrameBuffer*	frameBuffer, bool selected)
 
 	if(option)
 	{
-		int stringwidth =  fonts->menu->getRenderWidth(option);
-		int stringstartposOption = x+ dx - stringwidth - 10;
+		int stringwidth = fonts->menu->getRenderWidth(option);
+		int stringstartposOption = x + dx - stringwidth - 10;
 		fonts->menu->RenderString(stringstartposOption, y+height,dx,  option, color);
 	}
 
@@ -270,7 +270,7 @@ CMenuSeparator::CMenuSeparator(int Type, string Text, FontsDef* Fonts)
 {
 	fonts = Fonts;
 	if(fonts!=NULL)
-	    height = fonts->menu->getHeight(); // was: Height;
+	    height = fonts->menu->getHeight();
 	else
 	    height=6;
 	text = Text;
@@ -283,7 +283,6 @@ CMenuSeparator::CMenuSeparator(int Type, string Text, FontsDef* Fonts)
 	{
 		type=Type | ALIGN_CENTER;
 	}
-
 }
 
 
@@ -297,24 +296,23 @@ int CMenuSeparator::paint(CFrameBuffer*	frameBuffer, bool selected)
 	}
 	if(type&STRING)
 	{
-		int stringwidth =  fonts->menu->getRenderWidth(text.c_str());
+		int stringwidth = fonts->menu->getRenderWidth(text.c_str());
 		int stringstartposX = 0;
 
 		if(type&ALIGN_CENTER)
 		{
-			stringstartposX = (x+ (dx >> 1)) - (stringwidth>>1);
+			stringstartposX = (x + (dx >> 1)) - (stringwidth>>1);
 		}
 		else if(type&ALIGN_LEFT)
 		{
-			stringstartposX = x+ 20;
+			stringstartposX = x + 20;
 		}
 		else if(type&ALIGN_RIGHT)
 		{
-			stringstartposX = x+ dx - stringwidth - 20;
+			stringstartposX = x + dx - stringwidth - 20;
 		}
-	
 
-		frameBuffer->paintBoxRel(stringstartposX-5, y, stringwidth +10, height, COL_MENUCONTENT );
+		frameBuffer->paintBoxRel(stringstartposX-5, y, stringwidth+10, height, COL_MENUCONTENT );
 
 		fonts->menu->RenderString(stringstartposX, y+height,dx,  text.c_str(), COL_MENUCONTENT);
 	}

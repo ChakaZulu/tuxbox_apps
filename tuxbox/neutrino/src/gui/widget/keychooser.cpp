@@ -7,7 +7,7 @@ CKeyChooser::CKeyChooser( int* Key, string title, FontsDef *Fonts, string Icon )
 	keyChooser = new CKeyChooserItem("key setup", fonts, key);
 	keyDeleter = new CKeyChooserItemNoKey(key);
 
-	addItem( new CMenuSeparator() );
+	addItem( new CMenuSeparator(CMenuSeparator::STRING, " ", fonts) );
 	addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	addItem( new CMenuForwarder("back", fonts) );
 	addItem( new CMenuSeparator(CMenuSeparator::LINE) );
@@ -28,7 +28,7 @@ void CKeyChooser::paint(CFrameBuffer* frameBuffer)
 	CMenuWidget::paint(frameBuffer);
 	
 	string text = "current key: " + CRCInput::getKeyName(*key);
-	fonts->menu->RenderString(x+10,y+70, width, text.c_str(), COL_MENUCONTENT);
+	fonts->menu->RenderString(x+10,y+65, width, text.c_str(), COL_MENUCONTENT);
 }
 
 //*****************************
@@ -37,8 +37,10 @@ CKeyChooserItem::CKeyChooserItem(string Name, FontsDef *Fonts, int *Key)
 	name = Name;
 	fonts = Fonts;
 	key = Key;
-	width = 300;
-	height = 105;
+	width = 350;
+	hheight = fonts->menu_title->getHeight();
+	mheight = fonts->menu->getHeight();
+	height = hheight+2*mheight;
 	x=((720-width) >> 1) -20;
 	y=(576-height)>>1;
 }
@@ -70,12 +72,12 @@ void CKeyChooserItem::hide(CFrameBuffer* frameBuffer)
 void CKeyChooserItem::paint(CFrameBuffer* frameBuffer)
 {
 
-	frameBuffer->paintBoxRel(x,y, width,30, COL_MENUHEAD);
-	fonts->menu_title->RenderString(x+10,y+23, width, name.c_str(), COL_MENUHEAD);
-	frameBuffer->paintBoxRel(x,y+30, width,height-30, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD);
+	fonts->menu_title->RenderString(x+10,y+hheight, width, name.c_str(), COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT);
 
 	//paint msg...
-	fonts->menu->RenderString(x+10,y+60, width, "please press the new key", COL_MENUCONTENT);
-	fonts->epg_info->RenderString(x+10,y+90, width, "wait a few seconds for cancel", COL_MENUCONTENT);
+	fonts->menu->RenderString(x+10,y+hheight+mheight, width, "please press the new key", COL_MENUCONTENT);
+	fonts->menu->RenderString(x+10,y+hheight+mheight*2, width, "wait a few seconds for cancel", COL_MENUCONTENT);
 }
 

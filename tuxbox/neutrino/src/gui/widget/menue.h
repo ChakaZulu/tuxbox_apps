@@ -88,12 +88,12 @@ class CMenuSeparator : public CMenuItem
 
 class CMenuForwarder : public CMenuItem
 {
-	int			height;
-	string			text;
-	char*			option;
-	bool			active;
-	CMenuTarget*		jumpTarget;
-	string			actionKey;
+	int		height;
+	string		text;
+	char*		option;
+	bool		active;
+	CMenuTarget*	jumpTarget;
+	string		actionKey;
 
 	public:
 		
@@ -148,7 +148,7 @@ class CMenuWidget : public CMenuTarget
 		int			selected;
 
 	public:
-		CMenuWidget(){name="";iconfile="";selected = -1;fonts=NULL;};
+		CMenuWidget(){name="";iconfile="";selected=-1;fonts=NULL;};
 		CMenuWidget(string Name, FontsDef *Fonts, string Icon="");
 		~CMenuWidget();
 

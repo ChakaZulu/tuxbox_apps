@@ -127,8 +127,6 @@ int CScreenSetup::exec(CFrameBuffer* frameBuffer, CRCInput *rcInput,CMenuTarget*
 					paintBorderLR( frameBuffer );
 			}
 		}
-		
-
 	}
 	
 	hide(frameBuffer);
@@ -156,10 +154,10 @@ void CScreenSetup::paintBorderUL(CFrameBuffer* frameBuffer)
 	sprintf((char*) &xepos, "EX: %d", settings->screen_EndX);
 	sprintf((char*) &yepos, "EY: %d", settings->screen_EndY);
 
-	fonts->menu_title->RenderString(x+10,y+23, 200, xpos, COL_MENUHEAD);
-	fonts->menu_title->RenderString(x+10,y+43, 200, ypos, COL_MENUHEAD);
-	fonts->menu_title->RenderString(x+10,y+63, 200, xepos, COL_MENUHEAD);
-	fonts->menu_title->RenderString(x+10,y+83, 200, yepos, COL_MENUHEAD);
+	fonts->fixedabr20->RenderString(x+10,y+30, 200, xpos, COL_MENUHEAD);
+	fonts->fixedabr20->RenderString(x+10,y+50, 200, ypos, COL_MENUHEAD);
+	fonts->fixedabr20->RenderString(x+10,y+70, 200, xepos, COL_MENUHEAD);
+	fonts->fixedabr20->RenderString(x+10,y+90, 200, yepos, COL_MENUHEAD);
 }
 
 void CScreenSetup::paintBorderLR(CFrameBuffer* frameBuffer)
@@ -178,10 +176,10 @@ void CScreenSetup::paintBorderLR(CFrameBuffer* frameBuffer)
 	sprintf((char*) &xepos, "EX: %d", settings->screen_EndX);
 	sprintf((char*) &yepos, "EY: %d", settings->screen_EndY);
 
-	fonts->menu_title->RenderString(x+10,y+23, 200, xpos, COL_MENUHEAD);
-	fonts->menu_title->RenderString(x+10,y+43, 200, ypos, COL_MENUHEAD);
-	fonts->menu_title->RenderString(x+10,y+63, 200, xepos, COL_MENUHEAD);
-	fonts->menu_title->RenderString(x+10,y+83, 200, yepos, COL_MENUHEAD);
+	fonts->fixedabr20->RenderString(x+10,y+30, 200, xpos, COL_MENUHEAD);
+	fonts->fixedabr20->RenderString(x+10,y+50, 200, ypos, COL_MENUHEAD);
+	fonts->fixedabr20->RenderString(x+10,y+70, 200, xepos, COL_MENUHEAD);
+	fonts->fixedabr20->RenderString(x+10,y+90, 200, yepos, COL_MENUHEAD);
 }
 
 void CScreenSetup::paint(CFrameBuffer* frameBuffer)
@@ -200,6 +198,7 @@ void CScreenSetup::paint(CFrameBuffer* frameBuffer)
 	int x=15*5;
 	int y=15*24;
 	frameBuffer->paintBoxRel(x,y, 15*23,15*4, COL_MENUHEAD);
+	
 	fonts->menu->RenderString(x+30,y+26, 15*23, "red = setup upper left", COL_MENUHEAD);
 	fonts->menu->RenderString(x+30,y+46, 15*23, "green = setup lower right", COL_MENUHEAD);
 

@@ -19,7 +19,8 @@ class CStringInput : public CMenuTarget
 	int y;
 	int width;
 	int height;
-
+	int hheight,mheight; // head/menu font height
+	
 	string	name;
 	char*	value;
 	int		size;

@@ -19,7 +19,8 @@ class CColorChooser : public CMenuTarget
 	int y;
 	int width;
 	int height;
-
+	int hheight,mheight; // head/menu font height
+	
 	unsigned char *r;
 	unsigned char *g;
 	unsigned char *b;

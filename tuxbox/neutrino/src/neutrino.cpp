@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.20 2001/08/22 07:40:09 faralla Exp $
+        $Id: neutrino.cpp,v 1.21 2001/09/03 03:34:04 tw-74 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.21  2001/09/03 03:34:04  tw-74
+  cosmetic fixes, own "Mg" fontmetrics
+
   Revision 1.20  2001/08/22 07:40:09  faralla
   works with zapit again
 
@@ -141,7 +144,7 @@ class CVideoSetupNotifier : public CChangeObserver
 	};
 };
 
-void setNetworkAdress(char* ip, char* netmask, char* broadcast)
+void setNetworkAddress(char* ip, char* netmask, char* broadcast)
 {
 	printf("IP       : %s\n", ip);
 	printf("Netmask  : %s\n", netmask);
@@ -180,7 +183,7 @@ class CNetworkSetupNotifier : public CChangeObserver
 			{
 				printf("doing network setup...\n");
 				//setup network
-				setNetworkAdress(settings->network_ip, settings->network_netmask, settings->network_broadcast);
+				setNetworkAddress(settings->network_ip, settings->network_netmask, settings->network_broadcast);
 				setDefaultGateway(settings->network_defaultgateway);
 
 				FILE* fd = fopen("/etc/resolv.conf", "w");
@@ -232,7 +235,7 @@ void CNeutrinoApp::setupNetwork(SNeutrinoSettings* settings, bool force)
 	{
 		printf("doing network setup...\n");
 		//setup network
-		setNetworkAdress(settings->network_ip, settings->network_netmask, settings->network_broadcast);
+		setNetworkAddress(settings->network_ip, settings->network_netmask, settings->network_broadcast);
 		setDefaultGateway(settings->network_defaultgateway);
 
 		FILE* fd = fopen("/etc/resolv.conf", "w");
@@ -651,30 +654,37 @@ void CNeutrinoApp::SetupFrameBuffer()
 void CNeutrinoApp::SetupFonts()
 {
 	fonts = new FontsDef();
-	fonts->menu=fontRenderer->getFont("Arial", "Bold", 20);
+	fonts->menu=fontRenderer->getFont("Arial", "Regular", 20); // was "Arial" "Bold" 20
 	fonts->menu->RenderString( 10,100, 500, "DEMO!", 0 );
-	fonts->menu_title=fontRenderer->getFont("Arial Black", "Regular", 24);
+	fonts->menu_title=fontRenderer->getFont("Arial", "Regular", 30); // was: "Arial Black", "Regular", 30
+	                                                              // but this font has wrong metric! (getHeight())
 	fonts->menu_title->RenderString( 10,100, 500, "DEMO!", 0 );
 	fonts->epg_title=fontRenderer->getFont("Arial", "Regular", 30);
 	fonts->epg_title->RenderString( 10,100, 500, "DEMO!", 0 );
-
-	// only one epg_info font instead of info1 and info2 (too complicated rendering calcs for epgviewer):
-	fonts->epg_info=fontRenderer->getFont("Arial", "Regular", 17);
-	fonts->epg_info->RenderString( 10,100, 500, "DEMO!", 0 );
+	
+	fonts->epg_info1=fontRenderer->getFont("Arial", "Italic", 17); // info1 must be same size as info2, but italic
+	fonts->epg_info1->RenderString( 10,100, 500, "DEMO!", 0 );
+	fonts->epg_info2=fontRenderer->getFont("Arial", "Regular", 17);
+	fonts->epg_info2->RenderString( 10,100, 500, "DEMO!", 0 );
 
 	fonts->epg_date=fontRenderer->getFont("Arial", "Regular", 15);
 	fonts->epg_date->RenderString( 10,100, 500, "DEMO!", 0 );
 	fonts->alert=fontRenderer->getFont("Arial", "Regular", 100);
+
 	fonts->channellist=fontRenderer->getFont("Arial", "Regular", 20);
 	fonts->channellist->RenderString( 10,100, 500, "DEMO!", 0 );
 	fonts->channellist_number=fontRenderer->getFont("Arial", "Regular", 14);
-	fonts->channellist_number->RenderString( 10,100, 500, "DEMO!", 0 );
+	fonts->channellist_number->RenderString( 10,100, 500, "DEMO!", 0);
+	
 	fonts->infobar_number=fontRenderer->getFont("Arial", "Regular", 50);
 	fonts->infobar_number->RenderString( 10,100, 500, "DEMO!", 0 );
 	fonts->infobar_channame=fontRenderer->getFont("Arial", "Regular", 30);
 	fonts->infobar_channame->RenderString( 10,100, 500, "DEMO!", 0 );
 	fonts->infobar_info=fontRenderer->getFont("Arial", "Regular", 20);
 	fonts->infobar_info->RenderString( 10,100, 500, "DEMO!", 0 );
+
+	fonts->fixedabr20=fontRenderer->getFont("Arial Black", "Regular", 20);
+	fonts->fixedabr20->RenderString( 10,100, 500, "DEMO!", 0 );
 }
 
 void CNeutrinoApp::ClearFrameBuffer()
@@ -781,12 +791,12 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings, CNetworkSet
 	networkSettings.addItem( oj );	
 
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-		CStringInput*	networkSettings_NetworkIP= new CStringInput("IP Adress", fonts, settings.network_ip, 3*4+3);
+		CStringInput*	networkSettings_NetworkIP= new CStringInput("IP Address", fonts, settings.network_ip, 3*4+3);
 		CStringInput*	networkSettings_NetMask= new CStringInput("Network mask", fonts, settings.network_netmask, 3*4+3);
 		CStringInput*	networkSettings_Broadcast= new CStringInput("Broadcast", fonts, settings.network_broadcast, 3*4+3);
 		CStringInput*	networkSettings_Gateway= new CStringInput("Default gateway", fonts, settings.network_defaultgateway, 3*4+3);
 		CStringInput*	networkSettings_NameServer= new CStringInput("Nameserver", fonts, settings.network_nameserver, 3*4+3);
-	networkSettings.addItem( new CMenuForwarder("IP Adress", fonts, true, settings.network_ip, networkSettings_NetworkIP ));
+	networkSettings.addItem( new CMenuForwarder("IP Address", fonts, true, settings.network_ip, networkSettings_NetworkIP ));
 	networkSettings.addItem( new CMenuForwarder("Netmask", fonts, true, settings.network_netmask, networkSettings_NetMask ));
 	networkSettings.addItem( new CMenuForwarder("Broadcast", fonts, true, settings.network_broadcast, networkSettings_Broadcast ));
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
@@ -1031,7 +1041,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget mainSettings("Neutrino Setup",fonts,"settings.raw");
 	CMenuWidget videoSettings("Video Setup",fonts,"video.raw");
 	CMenuWidget audioSettings("Audio Setup",fonts,"audio.raw");
-	CMenuWidget networkSettings("Network Setups",fonts,"settings.raw");
+	CMenuWidget networkSettings("Network Setup",fonts,"settings.raw");
 	CMenuWidget colorSettings("Color Setup",fonts,"settings.raw");
 	CMenuWidget keySettings("Key Setup",fonts,"settings.raw");
 //	CMenuWidget screenSettings("",fonts,"");

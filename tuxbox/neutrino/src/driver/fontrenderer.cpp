@@ -4,15 +4,9 @@
 #include <stdlib.h>
 #include "fontrenderer.h"
 
-#include <freetype/freetype.h>
-
-/* the following header shouldn't be used in normal programs */
-#include <freetype/internal/ftdebug.h>
-
-/* showing driver name */
-#include <freetype/ftmodule.h>
-#include <freetype/internal/ftobjs.h>
-#include <freetype/internal/ftdriver.h>
+// this method is recommended for FreeType >2.0.x:
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
 FT_Error fontRenderClass::myFTC_Face_Requester(FTC_FaceID  face_id,
                             FT_Library  library,
@@ -151,6 +145,36 @@ Font::Font(CFrameBuffer *fb, fontRenderClass *render, FTC_FaceID faceid, int isi
 	font.font.pix_height = isize;
 	font.image_type = ftc_image_grays;
 	font.image_type |= ftc_image_flag_autohinted;
+
+	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
+	{ 
+		printf("FTC_Manager_Lookup_Size failed!\n");
+		return;
+	}
+	// hack begin (this is a hack to get correct font metrics, didn't find any other way which gave correct values)
+	FTC_SBit glyph;
+	int index;
+
+	index=FT_Get_Char_Index(face, 'M'); // "M" gives us ascender
+	getGlyphBitmap(index, &glyph);
+	int tM=glyph->top;
+
+	index=FT_Get_Char_Index(face, 'g'); // "g" gives us descender
+	getGlyphBitmap(index, &glyph);
+	int hg=glyph->height;
+	int tg=glyph->top;
+
+	ascender=tM;
+	descender=tg-hg; //this is a negative value!
+	int halflinegap= -(descender>>1); // |descender/2| - we use descender as linegap, half at top, half at bottom
+	upper = halflinegap+ascender+3;   // we add 3 at top
+	lower = -descender+halflinegap+1; // we add 1 at bottom
+	height=upper+lower;               // this is total height == distance of lines
+	// hack end
+	
+	//printf("glyph: hM=%d tM=%d hg=%d tg=%d ascender=%d descender=%d height=%d linegap/2=%d upper=%d lower=%d\n",
+	//       hM,tM,hg,tg,ascender,descender,height,halflinegap,upper,lower);
+	//printf("font metrics: height=%ld\n", (size->metrics.height+32) >> 6);
 }
 
 FT_Error Font::getGlyphBitmap(FT_ULong glyph_index, FTC_SBit *sbit)
@@ -160,12 +184,7 @@ FT_Error Font::getGlyphBitmap(FT_ULong glyph_index, FTC_SBit *sbit)
 
 int Font::getHeight(void)
 {
-	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
-	{ 
-		printf("FTC_Manager_Lookup_Size failed!\n");
-		return 1;
-	}
-	return ((size->metrics.height+32) >> 6); // was (why?): (size->metrics.height >> 6)*3/4 + 4;
+	return height;
 }
 
 void Font::RenderString(int x, int y, int width, const char *string, unsigned char color, int boxheight)
@@ -175,43 +194,36 @@ void Font::RenderString(int x, int y, int width, const char *string, unsigned ch
 		printf("FTC_Manager_Lookup_Size failed!\n");
 		return;
 	}
-  
+	int use_kerning=FT_HAS_KERNING(face);
+	
 	int left=x;
-	int step_y=((size->metrics.height+32) >> 6); // was (why?): (size->metrics.height >> 6 )*3/4 + 4;
+	int step_y=height;
 
 	// ----------------------------------- box upper end (this is NOT a font metric, this is our method for y centering)
 	//
-	// *  -------------------------------- y=baseline+ascender+linegap/2
-	// |
-	// |  --------------------*----------- y=baseline+ascender
-	// |                     * *
-	// h                    *   *
-	// e     *        *    *     *
-	// i      *      *     *******
-	// g       *    *      *     *
-	// h        *  *       *     *
-	// t  -------**--------*-----*-------- y=baseline
-	// |         *
-	// |        *
-	// |  -----**------------------------- y=baseline+descender   // descender is a NEGATIVE value
-	// |
-	// *  -------------------------------- y=baseline+descender-linegap/2 == YCALLER
+	// **  -------------------------------- y=baseline-upper
+	// ||
+	// |u  --------------------*----------- y=baseline+ascender
+	// |p                     * *
+	// hp                    *   *
+	// ee     *        *    *     *
+	// ir      *      *     *******
+	// g|       *    *      *     *
+	// h|        *  *       *     *
+	// t*  -------**--------*-----*-------- y=baseline
+	// |l         *
+	// |o        *
+	// |w  -----**------------------------- y=baseline+descender   // descender is a NEGATIVE value
+	// |r
+	// **  -------------------------------- y=baseline+lower == YCALLER
 	//
 	// ----------------------------------- box lower end (this is NOT a font metric, this is our method for y centering)
 	
 	// height = ascender + -1*descender + linegap           // descender is negative!
 	
 	// now we adjust the given y value (which is the line marked as YCALLER) to be the baseline after adjustment:
-	int linegap = size->metrics.height - size->metrics.ascender + size->metrics.descender;
-	y += ((size->metrics.descender - (linegap>>1)) >> 6);
+	y -= lower;
 	// y coordinate now gives font baseline which is used for drawing
-
-	//printf("a %lx - d %lx + l %lx = h %lx\n",
-	//    (size->metrics.ascender) >> 6,
-	//    (size->metrics.descender) >> 6,
-	//    (size->metrics.height-size->metrics.ascender+size->metrics.descender) >> 6,
-	//    (size->metrics.height) >> 6
-	//);
 
 	// caution: this only works if we print a single line of text
 	// if we have multiple lines, don't use boxheight or specify boxheight==0.
@@ -223,14 +235,13 @@ void Font::RenderString(int x, int y, int width, const char *string, unsigned ch
 			y += (boxheight>>1);		// half of border value at lower end, half at upper end
 	}
 		
-	int lastindex=-1;
+	int lastindex=0; // 0 == missing glyph (never has kerning values)
 	FT_Vector kerning;
 	int pen1=-1; // "pen" positions for kerning, pen2 is "x"
   
 	for (; *string; string++)
 	{
 		FTC_SBit glyph;
-		//if ((x + size->metrics.x_ppem > (left+width)) || (*string=='\n'))
 		if (*string=='\n')
 		{
 			x  = left;
@@ -246,15 +257,14 @@ void Font::RenderString(int x, int y, int width, const char *string, unsigned ch
 		}
     
 		// width clip
-		if(x+glyph->xadvance >= left+width)
+		if(x+glyph->xadvance > left+width)
 			return;
 
 		//kerning
-		if(lastindex>=0){ // are we writing the 2nd or later character ?
-			FT_Get_Kerning(face,lastindex,index,0,&kerning);
-			int k=(kerning.x+32)>>6; // kerning!
-			// printf("Kerning (%c,%c) == %d\n", *(string-1),*string,k);
-			x+=k;
+		if(use_kerning)
+		{
+		    FT_Get_Kerning(face,lastindex,index,0,&kerning);
+		    x+=(kerning.x+32)>>6; // kerning!
 		}
 
 		int rx=x+glyph->left;
@@ -266,13 +276,12 @@ void Font::RenderString(int x, int y, int width, const char *string, unsigned ch
 		for (int ay=0; ay<glyph->height; ay++)
 		{
 			__u8 *td=d;
-			int ax=0;
 			int w=glyph->width;
-  
-			for (; ax<w; ax++)
+ 			int ax; 
+			for (ax=0; ax<w; ax++)
 			{
-				int c = (*s++>>5);
-				*td++=color + c;
+				int c = (*s++>>5); // c = 0..7
+				*td++=color + c;   // we use color as "base color" plus 7 consecutive colors for anti-aliasing
 			}
 			s+=glyph->pitch-ax;
 			d+=framebuffer->Stride();
@@ -287,13 +296,14 @@ void Font::RenderString(int x, int y, int width, const char *string, unsigned ch
 
 int Font::getRenderWidth(const char *string)
 {
+	int use_kerning=FT_HAS_KERNING(face);
 	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
 	{ 
 		printf("FTC_Manager_Lookup_Size failed!\n");
 		return -1;
 	}
 	int x=0;
-        int lastindex=-1;
+        int lastindex=0; // 0==missing glyph (never has kerning)
         FT_Vector kerning;
         int pen1=-1; // "pen" positions for kerning, pen2 is "x"
 	for (; *string; string++)
@@ -309,11 +319,9 @@ int Font::getRenderWidth(const char *string)
 			continue;
 		}
                 //kerning
-		if(lastindex>=0){ // are we writing the 2nd or later character ?
+		if(use_kerning){
 			FT_Get_Kerning(face,lastindex,index,0,&kerning);
-			int k=(kerning.x+32)>>6; // kerning!
-			// printf("Kerning (%c,%c) == %d\n", *(string-1),*string,k);
-			x+=k;
+			x+=(kerning.x+32)>>6; // kerning!
 		}
     
 		x+=glyph->xadvance+1;

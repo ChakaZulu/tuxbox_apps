@@ -1,7 +1,10 @@
 //
-// $Id: channellist.cpp,v 1.11 2001/08/21 00:30:38 tw-74 Exp $
+// $Id: channellist.cpp,v 1.12 2001/09/03 03:34:04 tw-74 Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.12  2001/09/03 03:34:04  tw-74
+// cosmetic fixes, own "Mg" fontmetrics
+//
 // Revision 1.11  2001/08/21 00:30:38  tw-74
 // more fontrendering (see comments there), screen cosmetics
 //
@@ -117,10 +120,10 @@ CChannelList::CChannelList(SNeutrinoSettings *settings, int Key=-1, string Name=
 	selected = 0;
 	width = 500;
 	height = 440;
-	theight=fonts->menu->getHeight();
+	theight=fonts->menu_title->getHeight();
 	fheight=fonts->channellist->getHeight();
-	listmaxshow = (height-theight-10)/fheight;
-	height = theight+10+listmaxshow*fheight; // recalc height
+	listmaxshow = (height-theight-0)/fheight;
+	height = theight+0+listmaxshow*fheight; // recalc height
 	x=(((settings->screen_EndX-settings->screen_StartX)-width) / 2) + settings->screen_StartX;
 	y=(((settings->screen_EndY-settings->screen_StartY)-height) / 2) + settings->screen_StartY;
 	liststart = 0;
@@ -367,7 +370,7 @@ void CChannelList::quickZap(CFrameBuffer* frameBuffer, CRCInput* rcInput, CRemot
 
 void CChannelList::paintItem(CFrameBuffer* frameBuffer, int pos)
 {
-	int ypos = y+ theight+10 + pos*fheight;
+	int ypos = y+ theight+0 + pos*fheight;
 	int color = COL_MENUCONTENT;
 	if (liststart+pos==selected)
 	{
@@ -397,8 +400,8 @@ void CChannelList::paintItem(CFrameBuffer* frameBuffer, int pos)
 
 void CChannelList::paintHead(CFrameBuffer* frameBuffer)
 {
-	frameBuffer->paintBoxRel(x,y, width,theight+10, COL_MENUHEAD);
-	fonts->menu_title->RenderString(x+10,y+theight+10, width, name.c_str(), COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
+	fonts->menu_title->RenderString(x+10,y+theight+0, width, name.c_str(), COL_MENUHEAD);
 }
 
 void CChannelList::paint(CFrameBuffer* frameBuffer)
@@ -407,15 +410,15 @@ void CChannelList::paint(CFrameBuffer* frameBuffer)
 	int lastnum =  chanlist[liststart]->number + listmaxshow;
 
 	if(lastnum<10)
-	    numwidth = fonts->menu->getRenderWidth("0");
+	    numwidth = fonts->channellist_number->getRenderWidth("0");
 	else if(lastnum<100)
-	    numwidth = fonts->menu->getRenderWidth("00");
+	    numwidth = fonts->channellist_number->getRenderWidth("00");
 	else if(lastnum<1000)
-	    numwidth = fonts->menu->getRenderWidth("000");
+	    numwidth = fonts->channellist_number->getRenderWidth("000");
 	else if(lastnum<10000)
-	    numwidth = fonts->menu->getRenderWidth("0000");
+	    numwidth = fonts->channellist_number->getRenderWidth("0000");
 	else // if(lastnum<100000)
-	    numwidth = fonts->menu->getRenderWidth("00000");
+	    numwidth = fonts->channellist_number->getRenderWidth("00000");
 	
 	for(unsigned int count=0;count<listmaxshow;count++)
 	{
