@@ -13,7 +13,7 @@ class eExpertSetup: public eSetupWindow
 	void factory_reset();
 	void rc_setup();
 	void colorbuttonsChanged(bool);
-	void serialDebugChanged(bool);
+	void reinitializeHTTPServer(bool);
 	void fastZappingChanged(bool b);
 public:
 	eExpertSetup();

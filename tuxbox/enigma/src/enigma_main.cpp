@@ -2560,6 +2560,17 @@ void eZapMain::playlistNextService()
 
 void eZapMain::volumeUp()
 {
+	if ( eZapStandby::getInstance() || enigmaVCR::getInstance() )
+		switch ( eSystemInfo::getInstance()->getHwType() )
+		{
+			case eSystemInfo::dbox2Nokia:
+			case eSystemInfo::dbox2Philips:
+			case eSystemInfo::dbox2Sagem:
+				break;
+			default:
+				return;
+		}
+
 	if (eAudioDynamicCompression::getInstance() &&
 			eAudioDynamicCompression::getInstance()->getEnable())
 		{
@@ -2581,6 +2592,17 @@ void eZapMain::volumeUp()
 
 void eZapMain::volumeDown()
 {
+	if ( eZapStandby::getInstance() || enigmaVCR::getInstance() )
+		switch ( eSystemInfo::getInstance()->getHwType() )
+		{
+			case eSystemInfo::dbox2Nokia:
+			case eSystemInfo::dbox2Philips:
+			case eSystemInfo::dbox2Sagem:
+				break;
+			default:
+				return;
+		}
+	
 	if (eAudioDynamicCompression::getInstance() &&
 			eAudioDynamicCompression::getInstance()->getEnable())
 		{
@@ -2607,6 +2629,16 @@ void eZapMain::hideVolumeSlider()
 
 void eZapMain::toggleMute()
 {
+	if ( eZapStandby::getInstance() || enigmaVCR::getInstance() )
+		switch ( eSystemInfo::getInstance()->getHwType() )
+		{
+			case eSystemInfo::dbox2Nokia:
+			case eSystemInfo::dbox2Philips:
+			case eSystemInfo::dbox2Sagem:
+				break;
+			default:
+				return;
+		}
 #ifndef DISABLE_FILE
 	eServiceReference &ref = eServiceInterface::getInstance()->service;
 // sorry.. disable Mute when playback TS or MPG File..

@@ -4480,7 +4480,9 @@ static eString wap_web_root(eString request, eString dirpath, eString opts, eHTT
 void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 {
 	int lockWebIf = 1;
-	eConfig::getInstance()->getKey("/ezap/webif/lockWebIf", lockWebIf);
+	if ( eConfig::getInstance()->getKey("/ezap/webif/lockWebIf", lockWebIf) )
+		eConfig::getInstance()->setKey("/ezap/webif/lockWebIf", lockWebIf);
+	
 	printf("[ENIGMA_DYN] lockWebIf = %d\n", lockWebIf);
 	bool lockWeb = (lockWebIf == 1) ? true : false;
 
