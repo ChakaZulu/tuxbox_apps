@@ -85,6 +85,12 @@ int CRemoteControl::handleMsg(uint msg, uint data)
     		// warte auf keine Meldung vom ZAPIT -> jemand anderer hat das zappen ausgelöst...
     		if ( data != current_channel_id )
     		{
+				CZapitClient::BouquetChannelList channellist;
+				g_Zapit->getChannels(channellist);
+				CZapitClient::BouquetChannelList::iterator i = channellist.begin();
+				for (;i != channellist.end() && i->channel_id != data; i++);
+				if(i->channel_id == data)
+					current_channel_name = i->name;
 				CLCD::getInstance()->showServicename(current_channel_name); // UTF-8
 				current_channel_id = data;
 				is_video_started= true;
