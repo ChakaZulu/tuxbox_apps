@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.180 2002/03/01 15:31:28 field Exp $
+        $Id: neutrino.cpp,v 1.181 2002/03/01 22:30:30 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.181  2002/03/01 22:30:30  McClean
+  disable the cam-warning (chooseable)
+
   Revision 1.180  2002/03/01 15:31:28  field
   Updates
 
@@ -740,6 +743,7 @@ void CNeutrinoApp::setupDefaults()
 	g_settings.box_Type = g_Controld->getBoxType();
 	g_settings.shutdown_real = 1;
 	g_settings.shutdown_showclock = 1;
+	g_settings.show_camwarning = 1;
 
 	//video
 	g_settings.video_Signal = 0; //composite?
@@ -1008,7 +1012,16 @@ void CNeutrinoApp::isCamValid()
 	if  ( (ca_verid != 33 && ca_verid != 18 && ca_verid != 68) )
 	{
 		printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n!!\t\t\t\t\t\t\t!!\n!!\tATTENTION, YOUR CARD DOES NOT MATCH CAMALPHA.BIN!!\n!!\t\t\t\t\t\t\t!!\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-		ShowMsg ( "messagebox.error", g_Locale->getText("cam.wrong"), CMessageBox::mbrCancel, CMessageBox::mbCancel );
+		//ShowMsg ( "messagebox.error", g_Locale->getText("cam.wrong"), CMessageBox::mbrCancel, CMessageBox::mbCancel );
+		
+		if (g_settings.show_camwarning)
+		{
+			if( ShowMsg ( "messagebox.error", g_Locale->getText("cam.wrong"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo ) == CMessageBox::mbrNo )
+			{
+				g_settings.show_camwarning = 0;
+				saveSetup();
+			}
+		}
 	}
 
 }
@@ -2687,7 +2700,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.180 2002/03/01 15:31:28 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.181 2002/03/01 22:30:30 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

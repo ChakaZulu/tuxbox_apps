@@ -288,7 +288,7 @@ messagebox.cancel Abbruch
 messagebox.back Zurück
 messagebox.error Fehler
 
-cam.wrong Achtung, Ihre CAM_ALPHA.BIN passt\nnicht zu Ihrer Smart-Card!!!
+cam.wrong Achtung, Ihre CAM_ALPHA.BIN passt\nnicht zu Ihrer Smart-Card!!!\n\nWollen Sie diese Warnung wieder sehen?
 
 stringinput.caps Groß-/Kleinbuchstaben
 

@@ -30,12 +30,15 @@
 */
 
 /*
- $Id: rcinput.cpp,v 1.35 2002/02/28 23:40:36 McClean Exp $
+ $Id: rcinput.cpp,v 1.36 2002/03/01 22:30:30 McClean Exp $
 
  Module for Remote Control Handling
 
 History:
  $Log: rcinput.cpp,v $
+ Revision 1.36  2002/03/01 22:30:30  McClean
+ disable the cam-warning (chooseable)
+
  Revision 1.35  2002/02/28 23:40:36  McClean
  reverse frontpanelcode
 
@@ -286,7 +289,7 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 			{
 				if(rc_key!=0x5cfe)
 				{
-					printf("got key native key: %04x %04x\n", rc_key, rc_key&0x1f );
+					//printf("got key native key: %04x %04x\n", rc_key, rc_key&0x1f );
 					long long now_pressed;
 					bool keyok = true;
 
