@@ -2964,7 +2964,7 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 	return tmp;
 }
 
-static eString wapEPG(void)
+static eString wapEPG(int page)
 {
 	std::stringstream result;
 	eString description/*, ext_description*/;
@@ -2993,36 +2993,39 @@ static eString wapEPG(void)
 		timeMap::const_iterator It;
 
 		int i = 0;
-		for(It=evt->begin(); (It!= evt->end()) && (i < 25); It++)
+		for(It=evt->begin(); It!= evt->end(); It++)
 		{
-//			ext_description = "";
-			EITEvent event(*It->second);
-			for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
+			if ((i >= page * 25) && (i < (page + 1) * 25))
 			{
-				Descriptor *descriptor = *d;
-#if 0
-				if (descriptor->Tag() == DESCR_EXTENDED_EVENT)
-					ext_description += ((ExtendedEventDescriptor*)descriptor)->text;
-#endif
-				if (descriptor->Tag() == DESCR_SHORT_EVENT)
-					description = ((ShortEventDescriptor*)descriptor)->event_name;
+				EITEvent event(*It->second);
+				for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
+				{
+					Descriptor *descriptor = *d;
+					if (descriptor->Tag() == DESCR_SHORT_EVENT)
+						description = ((ShortEventDescriptor*)descriptor)->event_name;
+				}
+
+				tm* t = localtime(&event.start_time);
+
+				result	<< std::setw(2) << t->tm_mday << '.'
+					<< std::setw(2) << t->tm_mon+1 << ". - "
+					<< std::setw(2) << t->tm_hour << ':'
+					<< std::setw(2) << t->tm_min << ' '
+					<< "<br/>";
+
+				result << "<a href=\"/wap?mode=epgDetails"
+							<< ",path=" << ref2string(ref)
+							<< ",ID=" << std::hex << event.event_id << std::dec
+							<< "\">"
+							<< filter_string(description)
+							<< "</a><br/>\n";
 			}
-
-			tm* t = localtime(&event.start_time);
-
-			result	<< std::setw(2) << t->tm_mday << '.'
-				<< std::setw(2) << t->tm_mon+1 << ". - "
-				<< std::setw(2) << t->tm_hour << ':'
-				<< std::setw(2) << t->tm_min << ' '
-				<< "<br/>";
-
-			result << "<a href=\"/wap?mode=epgDetails"
-						<< ",path=" << ref2string(ref)
-						<< ",ID=" << std::hex << event.event_id << std::dec
-						<< "\">"
-						<< filter_string(description)
-						<< "</a><br/>\n";
 			i++;
+		}
+		if (i >= (page + 1) * 25)
+		{
+			page++;
+			result << "<a href=\"wap?mode=epg,page=" << eString().sprintf("%d", page) << "\">Next Page</a><br/>";
 		}
 	}
 	eEPGCache::getInstance()->Unlock();
@@ -4398,7 +4401,8 @@ static eString wap_web_root(eString request, eString dirpath, eString opts, eHTT
 	else
 	if (mode == "epg")
 	{
-		result = wapEPG();
+		eString page = opt["page"];
+		result = wapEPG(atoi(page.c_str()));
 	}
 	else
 	if (mode == "epgDetails")
