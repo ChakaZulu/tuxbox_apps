@@ -2467,7 +2467,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 
 	// -- there will be a new EPG menue (red button) shown EPG CHANNEL (EPGList) & EPG Overview (PLUS) & INFO (=?)
 // 	StreamFeatureSelector.addItem(new CMenuForwarder("experimental", true, NULL, new CEPGplusHandler(), id, true, CRCInput::RC_nokey, ""), false);
-	StreamFeatureSelector.addItem(new CMenuForwarder("experimental", true, NULL, new CEPGMenuHandler(), id, true, CRCInput::RC_nokey, ""), false);
+	StreamFeatureSelector.addItem(new CMenuForwarder("experimental", true, NULL, new CEPGMenuHandler(), id, true, CRCInput::RC_setup, NEUTRINO_ICON_BUTTON_DBOX), false);
 
 #endif
 	// ------
