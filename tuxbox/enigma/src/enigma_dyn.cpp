@@ -4765,6 +4765,12 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 
 	if (zapMode >= 0 && zapMode <= 4 && zapSubMode >= 0 && zapSubMode <= 4)
 		path = zap[zapMode][zapSubMode];
+	else
+	{
+		zapMode = ZAPMODETV;
+		zapSubMode = ZAPSUBMODEBOUQUETS;
+		path = zap[zapMode][zapSubMode];
+	}
 
 	if (zapMode != previousZapMode || zapSubMode != previousZapSubMode)
 	{
