@@ -20,7 +20,7 @@
  * 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *  									      
  ******************************************************************************
- * $Id: fbtest.c,v 1.4 2003/12/22 02:54:23 carjay Exp $
+ * $Id: fbtest.c,v 1.5 2005/01/14 23:14:41 carjay Exp $
  ******************************************************************************/
 
 // TODO: - should restore the colour map and mode to what it was before
@@ -396,6 +396,7 @@ int main (int argc,char **argv){
 		for (i_size=0;i_size<VIDSIZENUM;i_size++){
 			if (smode!=-1 && i_size!=smode) continue;
 			printf ("%dx%d ",vidsizetable[i_size].width,vidsizetable[i_size].height);
+			fflush(stdout);
 			if ((i_size%4)==3) printf ("\n");
 			
 			// try to set mode
