@@ -1,5 +1,5 @@
 /*
-$Id: descriptor.c,v 1.18 2004/01/02 22:59:58 rasc Exp $
+$Id: descriptor.c,v 1.19 2004/01/03 00:30:06 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: descriptor.c,v 1.18 2004/01/02 22:59:58 rasc Exp $
 
 
 $Log: descriptor.c,v $
+Revision 1.19  2004/01/03 00:30:06  rasc
+DSM-CC  STREAM descriptors module (started)
+
 Revision 1.18  2004/01/02 22:59:58  rasc
 DSM-CC  modules renaming...
 
@@ -72,6 +75,7 @@ kleiner Fehler
 #include "descriptor.h"
 #include "mpeg_descriptor.h"
 #include "dvb_descriptor.h"
+#include "dsmcc_stream_descriptor.h"
 #include "dsmcc_module_descriptor.h"
 #include "dsmcc_int_unt_descriptor.h"
 #include "misc/hexprint.h"
@@ -108,9 +112,7 @@ int  descriptor  (u_char *b, DTAG_SCOPE scope)
   switch  (scope) {
 
      case DSMCC_STREAM:
-//  		descriptorDSMCC_STREAM (b);  // $$$ TODO
-		out_nl (4,"$$$ TODO: DSMCC_STREAM Descriptor: %d", id);
-	    	descriptor_any (b);
+  		descriptorDSMCC_STREAM (b); 
 		break;
 
      case DSMCC_MODULE:
@@ -118,7 +120,7 @@ int  descriptor  (u_char *b, DTAG_SCOPE scope)
 		break;
 
      case DSMCC_INT_UNT:
-  		if (id < 0x40)	descriptorDSMCC_INT_UNT_Private (b);
+  		if (id < 0x40)	descriptorDSMCC_INT_UNT (b);
 		else 		descriptorDVB (b);
 		break;
 
@@ -167,23 +169,5 @@ void descriptor_any (u_char *b)
 
 
 
-/*
- * $$$ TODO  DSMCC-stream descriptors
-8.	DSMCC Stream Descriptors
-Stream descriptors may be used to provide DSM-CC information that is
-correlated with a MPEG-2 Transport Stream or Program Stream. These
-descriptors are in the format of Program and Program Element Descriptors
-as defined in ISO/IEC 13818-1. DSM-CC stream descriptors shall only
-be carried in a DSMCC_section (see Chapter 9). This creates a unique
-identifier space (from that defined by ISO/IEC 13818-1) for descriptor
-tag values.
-
-0x00	ISO/IEC 13818-6 reserved.
-0x01	NPT Reference descriptor.
-0x02	NPT Endpoint descriptor.
-0x03	Stream Mode descriptor.
-0x04	Stream Event descriptor.
-0x05 - 0xFF	ISO/IEC 13818-6 reserved.
 
 
-*/

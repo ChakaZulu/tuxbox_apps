@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_int_unt_descriptor.c,v 1.13 2004/01/02 22:59:59 rasc Exp $ 
+$Id: dsmcc_int_unt_descriptor.c,v 1.14 2004/01/03 00:30:06 rasc Exp $ 
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: dsmcc_int_unt_descriptor.c,v 1.13 2004/01/02 22:59:59 rasc Exp $
 
 
 $Log: dsmcc_int_unt_descriptor.c,v $
+Revision 1.14  2004/01/03 00:30:06  rasc
+DSM-CC  STREAM descriptors module (started)
+
 Revision 1.13  2004/01/02 22:59:59  rasc
 DSM-CC  modules renaming...
 
@@ -85,7 +88,7 @@ more PES stuff, DSM descriptors, testdata
 
 /*
   determine descriptor type and print it...
-  !!! DSMCC descriptors are in a private tag space !!!
+  !!! DSMCC INT/UNT descriptors are in a private tag space !!!
 
   EN 301 192:
   Descriptors from the DVB SI range (0x40 - 0x7F) shall have their standard
@@ -101,7 +104,7 @@ more PES stuff, DSM descriptors, testdata
   return byte length
 */
 
-int  descriptorDSMCC_INT_UNT_Private  (u_char *b)
+int  descriptorDSMCC_INT_UNT  (u_char *b)
 
 {
  int len;

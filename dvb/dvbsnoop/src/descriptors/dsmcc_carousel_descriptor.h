@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_carousel_descriptor.h,v 1.8 2004/01/02 22:25:35 rasc Exp $ 
+$Id: dsmcc_carousel_descriptor.h,v 1.9 2004/01/03 00:30:06 rasc Exp $ 
 
 
  DVBSNOOP
@@ -11,11 +11,14 @@ $Id: dsmcc_carousel_descriptor.h,v 1.8 2004/01/02 22:25:35 rasc Exp $
 
 
  -- Private TAG Space  DSM-CC
- -- DSM-CC Descriptors  ISO 13818-6  // TR 102 006
+ -- DSM-CC MODULE Descriptors 
 
 
 
 $Log: dsmcc_carousel_descriptor.h,v $
+Revision 1.9  2004/01/03 00:30:06  rasc
+DSM-CC  STREAM descriptors module (started)
+
 Revision 1.8  2004/01/02 22:25:35  rasc
 DSM-CC  MODULEs descriptors complete
 
@@ -49,8 +52,8 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 */
 
 
-#ifndef __DSM_DESCRIPTOR_H
-#define __DSM_DESCRIPTOR_H 1
+#ifndef __DSM_MODULE_DESCRIPTOR_H
+#define __DSM_MODULE_DESCRIPTOR_H 1
 
 
 int  descriptorDSMCC_MODULE (u_char *b);
