@@ -1262,6 +1262,8 @@ void eTimerManager::switchedService( const eServiceReferenceDVB &ref, int err)
 		writeToLogfile("--> switchedService()");
 		if ( nextStartingEvent->service != (eServiceReference&)ref )
 		{
+			if ( Decoder::locked )
+				Decoder::locked = 0;
 			writeToLogfile("call abortEvent");
 			abortEvent( ePlaylistEntry::errorZapFailed );
 		}

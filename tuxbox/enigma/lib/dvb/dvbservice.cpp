@@ -249,11 +249,14 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		if ( service.path )  // replay ?
 		{
 			if ( !service.getServiceID().get() && spSID != -1 )
+			{
 				service.data[1] = spSID;
+				eServiceInterface::getInstance()->service.data[1] = spSID;
+			}
 
 			dvb.setState(eDVBServiceState(eDVBServiceState::stateServiceGetPAT));
 			dvb.tPAT.start(new PAT());
-			eServiceInterface::getInstance()->removeRef(service);
+
 			break;
 		}
 		if (!nopmt && service.getServiceID().get() ) // if not a dvb service, don't even try to search a PAT, PMT etc.
@@ -382,6 +385,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 								{
 									pmtpid = *it;
 									service.data[1] = i->program_number;
+									eServiceInterface::getInstance()->service.data[1] = i->program_number;
 									break;
 								}
 						}
