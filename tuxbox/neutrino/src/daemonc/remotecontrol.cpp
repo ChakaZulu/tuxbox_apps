@@ -51,7 +51,6 @@ CRemoteControl::CRemoteControl()
 	director_mode = 0;
 	current_programm_timer = 0;
 	is_video_started = true;
-	zapCount = 	0;
 }
 
 int CRemoteControl::handleMsg(uint msg, uint data)
@@ -520,7 +519,6 @@ void CRemoteControl::zapTo_ChannelID(const t_channel_id channel_id, const std::s
 	selected_subchannel = -1;
 	needs_nvods = false;
 	director_mode = 0;
-	zapCount++;
 
 	#ifdef USEACTIONLOG
 		if(channame!="")
