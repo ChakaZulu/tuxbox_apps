@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.c,v 1.10 2004/01/01 20:09:20 rasc Exp $
+$Id: mpeg_descriptor.c,v 1.11 2004/01/01 20:31:22 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: mpeg_descriptor.c,v 1.10 2004/01/01 20:09:20 rasc Exp $
 
 
 $Log: mpeg_descriptor.c,v $
+Revision 1.11  2004/01/01 20:31:22  rasc
+PES program stream map, minor descriptor cleanup
+
 Revision 1.10  2004/01/01 20:09:20  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -60,6 +63,7 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 
 
 #include "dvbsnoop.h"
+#include "descriptor.h"
 #include "mpeg_descriptor.h"
 #include "strings/dvb_str.h"
 #include "strings/dsmcc_str.h"
@@ -140,8 +144,7 @@ int  descriptorMPEG  (u_char *b)
 	if (b[0] < 0x80) {
 	   out_nl (0,"  ----> ERROR: unimplemented descriptor (mpeg context), Report!");
 	}
-	descriptorMPEG_any (b);
-    	// descriptorMPEG_UserPrivate (b);  break; 
+	descriptor_any (b);
 	break;
   } 
 
@@ -150,38 +153,6 @@ int  descriptorMPEG  (u_char *b)
 }
 
 
-
-
-
-/*
-  Any  descriptor  (Basic Descriptor output)
-  ETSI 300 468 
-*/
-
-void descriptorMPEG_any (u_char *b)
-
-{
-
- typedef struct  _descANY {
-    u_int      descriptor_tag;
-    u_int      descriptor_length;		
-
-    // private data bytes
-
- } descANY;
-
-
- descANY  d;
-
-
-
- d.descriptor_tag		 = b[0];
- d.descriptor_length       	 = b[1];
-
- out_nl (4,"Descriptor-Data:");
- printhexdump_buf (4,b+2,d.descriptor_length);
-
-}
 
 
 
