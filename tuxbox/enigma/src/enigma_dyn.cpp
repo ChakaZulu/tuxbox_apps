@@ -3,6 +3,7 @@
 #include <qfile.h>
 #include <qtextstream.h>
 #include "enigma.h"
+#include "decoder.h"
 #include "enigma_dyn.h"
 #include "http_dyn.h"
 #include "dvb.h"
@@ -496,6 +497,10 @@ static QString web_root(QString request, QString path, QString opts, const eHTTP
 	tmp.sprintf("<span class=\"white\">booted enigma %d times</span>", bootcount);
 	stats+=tmp;
 
+	stats+=" | ";
+	tmp.sprintf("<span class=\"white\">vpid: %x, apid: %x</span>", Decoder::parms.vpid, Decoder::parms.apid);
+	stats+=tmp;
+	
 	tvc="normal";
 	radioc="normal";
 	aboutc="normal";
