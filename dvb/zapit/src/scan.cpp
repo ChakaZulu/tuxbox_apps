@@ -1,9 +1,12 @@
 /*
-$Id: scan.cpp,v 1.33 2002/04/04 14:41:08 rasc Exp $
+$Id: scan.cpp,v 1.34 2002/04/04 23:40:13 obi Exp $
 
 
 
 $Log: scan.cpp,v $
+Revision 1.34  2002/04/04 23:40:13  obi
+show number of found transponders / channels on console
+
 Revision 1.33  2002/04/04 14:41:08  rasc
 - New functions in zapitclient for handling favorites
   - test if a bouquet exists
@@ -52,6 +55,9 @@ std::string logfile = "/tmp/zapit_scan.log";
 int prepare_channels();
 short scan_runs;
 short curr_sat;
+
+extern int found_transponders;
+extern int found_channels;
 
 int issatbox()
 {
@@ -653,6 +659,8 @@ void *start_scanthread(void *param)
 
 	write_xml_footer(fd);
 	write_bouquets(do_diseqc);
+
+	printf("[scan.cpp] found %d transponders and %d channels\n", found_transponders, found_channels);
 
 	if (prepare_channels() < 0)
 	{
