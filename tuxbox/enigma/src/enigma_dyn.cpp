@@ -48,6 +48,9 @@
 #include <enigma_dyn_utils.h>
 #include <enigma_dyn_mount.h>
 #include <enigma_dyn_wap.h>
+#ifdef ENABLE_DYN_CONF
+#include <enigma_dyn_conf.h>
+#endif
 
 using namespace std;
 
@@ -1824,25 +1827,6 @@ static eString getDiskInfo(void)
 	return result.str();
 }
 
-static eString getConfigHDD(void)
-{
-	eString result;
-	result = "<table border=0 cellspacing=0 cellpadding=0>"
-		 + getDiskInfo()
-		 + "</table>"
-		 + "<br>"
-		 + readFile(TEMPLATE_DIR + "configHDD.tmp");
-		 
-	int swapfile = 0;
-	eConfig::getInstance()->getKey("/extras/swapfile", swapfile);
-	char *swapfilename;
-	if (eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename))
-		swapfilename = "";
-	result.strReplace("#SWAPHDD#", (swapfile == 2) ? "checked" : "");
-	result.strReplace("#HDDSWAPFILE#", (swapfile == 2) ? eString(swapfilename) : "none");
-	return result;
-}
-
 static eString getUSBInfo(void)
 {
 	std::stringstream result;
@@ -1876,110 +1860,6 @@ static eString getUSBInfo(void)
 		unlink("/tmp/usbstick.tmp");
 	}
 	return result.str();
-}
-
-void activateSwapFile(eString swapFile)
-{
-	eString cmd;
-	cmd = "mkswap " + swapFile;
-	system(cmd.c_str());
-	cmd = "swapon " + swapFile;
-	system(cmd.c_str());
-}
-
-void deactivateSwapFile(eString swapFile)
-{
-	eString cmd;
-	cmd = "swapoff " + swapFile;
-	system(cmd.c_str());
-}
-
-void setSwapFile(int nextswapfile, eString nextswapfilename)
-{
-	int curswapfile = 0;
-	eConfig::getInstance()->getKey("/extras/swapfile", curswapfile);
-	char *curswapfilename;
-	if (eConfig::getInstance()->getKey("/extras/swapfilename", curswapfilename))
-		curswapfilename = "";
-	
-	if (curswapfile != nextswapfile)
-	{
-		if (curswapfile != 0)
-			deactivateSwapFile(eString(curswapfilename));
-			
-		if (nextswapfile != 0)
-			activateSwapFile(nextswapfilename);
-		else 
-			deactivateSwapFile(nextswapfilename);
-			
-		eConfig::getInstance()->setKey("/extras/swapfile", nextswapfile);
-		eConfig::getInstance()->setKey("/extras/swapfilename", nextswapfilename.c_str());
-	}
-}
-
-static eString getConfigUSB(void)
-{
-	eString result;
-	result = "<table border=0 cellspacing=0 cellpadding=0>"
-		 + getUSBInfo()
-		 + "</table>"
-		 + "<br>"
-		 + readFile(TEMPLATE_DIR + "configUSB.tmp");
-
-	int swapfile = 0;
-	eConfig::getInstance()->getKey("/extras/swapfile", swapfile);
-	char *swapfilename;
-	if (eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename))
-		swapfilename = "";
-	result.strReplace("#SWAPUSB#", (swapfile == 1) ? "checked" : "");
-	result.strReplace("#USBSWAPFILE#", (swapfile == 1) ? eString(swapfilename) : "none");
-	return result;
-}
-
-static eString setConfigUSB(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{
-	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	eString swapUSB = opt["swapusb"];
-	eString swapUSBFile = opt["swapusbfile"];
-	eString bootUSB = opt["bootUSB"];
-	eString bootUSBImage = opt["bootusbimage"];
-	
-	if (swapUSB == "on")
-	{
-		setSwapFile(1, swapUSBFile);
-	}
-	else
-	{
-		int curswapfile = 0;
-		eConfig::getInstance()->getKey("/extras/swapfile", curswapfile);
-		if (curswapfile == 1)
-			setSwapFile(0, swapUSBFile);
-	}
-
-	return closeWindow(content, "", 500);
-}
-
-static eString setConfigHDD(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{
-	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	eString swapHDD = opt["swaphdd"];
-	eString swapHDDFile = opt["swaphddfile"];
-	eString bootHDD = opt["bootHDD"];
-	eString bootHDDImage = opt["boothddimage"];
-	
-	if (swapHDD == "on")
-	{
-		setSwapFile(2, swapHDDFile);
-	}
-	else
-	{
-		int curswapfile = 0;
-		eConfig::getInstance()->getKey("/extras/swapfile", curswapfile);
-		if (curswapfile == 2)
-			setSwapFile(0, swapHDDFile);
-	}
-
-	return closeWindow(content, "", 500);
 }
 #endif
 
@@ -2205,6 +2085,46 @@ static eString showTimerList(eString request, eString dirpath, eString opt, eHTT
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	result = readFile(TEMPLATE_DIR + "timerList.tmp");
 	result.strReplace("#BODY#", getControlTimerList());
+	return result;
+}
+#endif
+
+#ifndef DISABLE_FILE
+eString getConfigUSB(void)
+{
+	eString result;
+	result = "<table border=0 cellspacing=0 cellpadding=0>"
+		 + getUSBInfo()
+		 + "</table>"
+		 + "<br>"
+		 + readFile(TEMPLATE_DIR + "configUSB.tmp");
+
+	int swapfile = 0;
+	eConfig::getInstance()->getKey("/extras/swapfile", swapfile);
+	char *swapfilename;
+	if (eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename))
+		swapfilename = "";
+	result.strReplace("#SWAPUSB#", (swapfile == 1) ? "checked" : "");
+	result.strReplace("#USBSWAPFILE#", (swapfile == 1) ? eString(swapfilename) : "none");
+	return result;
+}
+
+eString getConfigHDD(void)
+{
+	eString result;
+	result = "<table border=0 cellspacing=0 cellpadding=0>"
+		 + getDiskInfo()
+		 + "</table>"
+		 + "<br>"
+		 + readFile(TEMPLATE_DIR + "configHDD.tmp");
+
+	int swapfile = 0;
+	eConfig::getInstance()->getKey("/extras/swapfile", swapfile);
+	char *swapfilename;
+	if (eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename))
+		swapfilename = "";
+	result.strReplace("#SWAPHDD#", (swapfile == 2) ? "checked" : "");
+	result.strReplace("#HDDSWAPFILE#", (swapfile == 2) ? eString(swapfilename) : "none");
 	return result;
 }
 #endif
@@ -4280,10 +4200,6 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/selectAudio", selectAudio, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/setAudio", setAudio, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/selectSubChannel", selectSubChannel, lockWeb);
-#ifndef DISABLE_FILE
-	dyn_resolver->addDyn("GET", "/cgi-bin/setConfigUSB", setConfigUSB, lockWeb);
-	dyn_resolver->addDyn("GET", "/cgi-bin/setConfigHDD", setConfigHDD, lockWeb);
-#endif
 	dyn_resolver->addDyn("GET", "/cgi-bin/getPMT", getPMT, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getEIT", getEIT, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/message", message, lockWeb);
@@ -4327,6 +4243,9 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	ezapWapInitializeDyn(dyn_resolver, lockWeb);
 #ifdef ENABLE_DYN_MOUNT
 	ezapMountInitializeDyn(dyn_resolver, lockWeb);
+#endif
+#ifdef ENABLE_DYN_CONF
+	ezapConfInitializeDyn(dyn_resolver, lockWeb);
 #endif
 }
 
