@@ -5,6 +5,7 @@
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
+ *    V1.5 (LazyT): added newsflash/subtitle support                          *
  *    V1.4 (LazyT): skip not received pages on +/-10, some mods               *
  *    V1.3 (LazyT): segfault fixed                                            *
  *    V1.2 (trh)  : made it work under enigma                                 *
@@ -21,7 +22,7 @@ void plugin_exec(PluginParam *par)
 {
 	//show versioninfo
 
-		printf("\nTuxTxt [1.4]\n\n");
+		printf("\nTuxTxt [1.5]\n\n");
 
 	//get params
 
@@ -208,9 +209,9 @@ void plugin_exec(PluginParam *par)
 
 									PosX = StartX + 8*fontwidth;
 									PosY = StartY;
-									RenderCharFB('+', white);
-									RenderCharFB('0', white);
-									RenderCharFB('1', white);
+									RenderCharFB('-', white);
+									RenderCharFB('-', white);
+									RenderCharFB('>', white);
 
 									update = 1;
 									break;
@@ -256,9 +257,9 @@ void plugin_exec(PluginParam *par)
 
 									PosX = StartX + 8*fontwidth;
 									PosY = StartY;
+									RenderCharFB('<', white);
 									RenderCharFB('-', white);
-									RenderCharFB('0', white);
-									RenderCharFB('1', white);
+									RenderCharFB('-',white);
 
 									update = 1;
 									break;
@@ -300,9 +301,9 @@ void plugin_exec(PluginParam *par)
 
 									PosX = StartX + 8*fontwidth;
 									PosY = StartY;
-									RenderCharFB('+', white);
-									RenderCharFB('1', white);
-									RenderCharFB('0', white);
+									RenderCharFB('-', white);
+									RenderCharFB('>', white);
+									RenderCharFB('>', white);
 
 									update = 1;
 									break;
@@ -349,9 +350,9 @@ void plugin_exec(PluginParam *par)
 
 									PosX = StartX + 8*fontwidth;
 									PosY = StartY;
+									RenderCharFB('<', white);
+									RenderCharFB('<', white);
 									RenderCharFB('-', white);
-									RenderCharFB('1', white);
-									RenderCharFB('0', white);
 
 									update = 1;
 									break;
@@ -392,15 +393,15 @@ void plugin_exec(PluginParam *par)
 		printf("stopping decode-thread...");
 		if(pthread_cancel(thread_id1) != 0)
 		{
-			printf("cancel failed!\n");
+			printf("cancel failed!\n\n");
 			return;
 		}
 		if(pthread_join(thread_id1, &thread_result1) != 0)
 		{
-			printf("join failed!\n");
+			printf("join failed!\n\n");
 			return;
 		}
-		printf("done\n");
+		printf("done\n\n");
 
 		ioctl(dmx, DMX_STOP);
 
@@ -445,7 +446,7 @@ int Init()
 		memset(pagebuffer, ' ', 0x899 * 40*24);
 		memset(pagetable, 0, 0x899);
 		memset(page_char, ' ', sizeof(page_char));
-		memset(page_atrb, white, sizeof(page_atrb));
+		memset(page_atrb, transp<<4 | transp, sizeof(page_atrb));
 
 	//init fontlibrary
 
@@ -561,7 +562,7 @@ void RenderChar(int Char, int Attribute)
 
 	//load char
 
-		if(FT_Load_Char(face, Char + (((Attribute>>6) & 3)*(128-32)), FT_LOAD_RENDER | FT_LOAD_MONOCHROME) != 0)
+		if(FT_Load_Char(face, Char + (((Attribute>>8) & 3)*(128-32)), FT_LOAD_RENDER | FT_LOAD_MONOCHROME) != 0)
 		{
 			printf("load char %.2X failed!\n", Char);
 			return;
@@ -577,20 +578,20 @@ void RenderChar(int Char, int Attribute)
 				{
 					if((face->glyph->bitmap.buffer[Row * face->glyph->bitmap.pitch + Pitch]) & 1<<Bit)
 					{
-						backbuffer[(x+PosX) + ((y+PosY)*var_screeninfo.xres)] = Attribute & 7;
+						backbuffer[(x+PosX) + ((y+PosY)*var_screeninfo.xres)] = Attribute & 15;
 
-						if((Attribute>>8) & 1)
+						if((Attribute>>10) & 1)
 						{
-							backbuffer[(x+PosX) + ((y+PosY+1)*var_screeninfo.xres)] = Attribute & 7;
+							backbuffer[(x+PosX) + ((y+PosY+1)*var_screeninfo.xres)] = Attribute & 15;
 						}
 					}
 					else
 					{
-						backbuffer[(x+PosX) + ((y+PosY)*var_screeninfo.xres)] = (Attribute>>3) & 7;
+						backbuffer[(x+PosX) + ((y+PosY)*var_screeninfo.xres)] = (Attribute>>4) & 15;
 
-						if((Attribute>>8) & 1)
+						if((Attribute>>10) & 1)
 						{
-							backbuffer[(x+PosX) + ((y+PosY+1)*var_screeninfo.xres)] = (Attribute>>3) & 7;
+							backbuffer[(x+PosX) + ((y+PosY+1)*var_screeninfo.xres)] = (Attribute>>4) & 15;
 						}
 					}
 
@@ -601,7 +602,7 @@ void RenderChar(int Char, int Attribute)
 			x = 0;
 			y++;
 
-			if((Attribute>>8) & 1)
+			if((Attribute>>10) & 1)
 			{
 				y++;
 			}
@@ -628,7 +629,7 @@ void RenderCharFB(int Char, int Attribute)
 
 	//load char
 
-		if(FT_Load_Char(face, Char + (((Attribute>>6) & 3)*(128-32)), FT_LOAD_MONOCHROME) != 0)
+		if(FT_Load_Char(face, Char + (((Attribute>>8) & 3)*(128-32)), FT_LOAD_RENDER | FT_LOAD_MONOCHROME) != 0)
 		{
 			printf("load char %.2X failed!\n", Char);
 			return;
@@ -644,20 +645,20 @@ void RenderCharFB(int Char, int Attribute)
 				{
 					if((face->glyph->bitmap.buffer[Row * face->glyph->bitmap.pitch + Pitch]) & 1<<Bit)
 					{
-						*(lfb + (x+PosX) + ((y+PosY)*var_screeninfo.xres)) = Attribute & 7;
+						*(lfb + (x+PosX) + ((y+PosY)*var_screeninfo.xres)) = Attribute & 15;
 
-						if((Attribute>>8) & 1)
+						if((Attribute>>10) & 1)
 						{
-							*(lfb + (x+PosX) + ((y+PosY+1)*var_screeninfo.xres)) = Attribute & 7;
+							*(lfb + (x+PosX) + ((y+PosY+1)*var_screeninfo.xres)) = Attribute & 15;
 						}
 					}
 					else
 					{
-						*(lfb + (x+PosX) + ((y+PosY)*var_screeninfo.xres)) = (Attribute>>3) & 7;
+						*(lfb + (x+PosX) + ((y+PosY)*var_screeninfo.xres)) = (Attribute>>4) & 15;
 
-						if((Attribute>>8) & 1)
+						if((Attribute>>15) & 1)
 						{
-							*(lfb + (x+PosX) + ((y+PosY+1)*var_screeninfo.xres)) = (Attribute>>3) & 7;
+							*(lfb + (x+PosX) + ((y+PosY+1)*var_screeninfo.xres)) = (Attribute>>4) & 15;
 						}
 					}
 
@@ -668,7 +669,7 @@ void RenderCharFB(int Char, int Attribute)
 			x = 0;
 			y++;
 
-			if((Attribute>>8) & 1)
+			if((Attribute>>10) & 1)
 			{
 				y++;
 			}
@@ -739,23 +740,23 @@ void RenderString()
 		PosY = StartY + fontheight*11;
 		for(x = 0; x < 39; x++)
 		{
-			RenderCharFB(message_1[x], 1<<6 | red<<3 | white);
+			RenderCharFB(message_1[x], 1<<8 | red<<4 | white);
 		}
 
 		PosX = StartX + fontwidth/2;
 		PosY = StartY + fontheight*12;
-		RenderCharFB(message_2[0], 1<<6 | red<<3 | white);
+		RenderCharFB(message_2[0], 1<<8 | red<<4 | white);
 		for(x = 1; x < 38; x++)
 		{
-			RenderCharFB(message_2[x], red<<3 | white);
+			RenderCharFB(message_2[x], red<<4 | white);
 		}
-		RenderCharFB(message_2[38], 1<<6 | red<<3 | white);
+		RenderCharFB(message_2[38], 1<<8 | red<<4 | white);
 
 		PosX = StartX + fontwidth/2;
 		PosY = StartY + fontheight*13;
 		for(x = 0; x < 39; x++)
 		{
-			RenderCharFB(message_3[x], 1<<6 | red<<3 | white);
+			RenderCharFB(message_3[x], 1<<8 | red<<4 | white);
 		}
 }
 
@@ -837,7 +838,7 @@ void RenderPage()
 void DecodePage()
 {
 	int col, row, loop;
-	int foreground, background, charset, doubleheight;
+	int foreground, background, charset, doubleheight, boxed, page_is_boxed = 0;
 
 	//copy page to decode buffer, modify header & update time
 
@@ -855,8 +856,8 @@ void DecodePage()
 			background = black;
 			doubleheight = 0;
 			charset = 0;
+			boxed = 0;
 			//steady ?
-			//end box ?
 			//release mosaic ?
 
 		for(col = 0; col < 40; col++)
@@ -868,148 +869,154 @@ void DecodePage()
 					//set-at codes
 
 						case steady:			//todo
-												page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+												page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												break;
 
 						case normal_size:		doubleheight = 0;
-												page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+												page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												break;
 
 						case conceal:			//todo
-												page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+												page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												break;
 
 						case contiguous_mosaic:	//charset = 1;
-												page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+												page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												break;
 
 						case separated_mosaic:	//charset = 2;
-												page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+												page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												break;
 
 						case black_background:	background = black;
-												page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+												page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												break;
 
 						case new_background:	background = foreground;
-												page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+												page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												break;
 
 						case hold_mosaic:
-												page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+												page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												break;
 
 					//set-after codes
 
-						case alpha_black:		page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+						case alpha_black:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												foreground = black;
 												charset = 0;
 												break;
 
-						case alpha_red:			page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+						case alpha_red:			page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												foreground = red;
 												charset = 0;
 												break;
 
-						case alpha_green:		page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+						case alpha_green:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												foreground = green;
 												charset = 0;
 												break;
 
-						case alpha_yellow:		page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+						case alpha_yellow:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												foreground = yellow;
 												charset = 0;
 												break;
 
-						case alpha_blue:		page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+						case alpha_blue:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												foreground = blue;
 												charset = 0;
 												break;
 
-						case alpha_magenta:		page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+						case alpha_magenta:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												foreground = magenta;
 												charset = 0;
 												break;
 
-						case alpha_cyan:		page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+						case alpha_cyan:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												foreground = cyan;
 												charset = 0;
 												break;
 
-						case alpha_white:		page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+						case alpha_white:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												foreground = white;
 												charset = 0;
 												break;
 
-						case flash:				page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+						case flash:				page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												//todo
 												break;
 
-						case end_box:			page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
-												//todo
+						case end_box:			page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
+												boxed = 0;
 												break;
 
-						case start_box:			page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
-												//todo
+						case start_box:			page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
+
+												if(page_char[row*40 + col +1] == start_box)
+												{
+													boxed = 1;
+													page_is_boxed = 1;
+												}
+
 												break;
 
-						case double_height:		page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+						case double_height:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												doubleheight = 1;
 												break;
 
-						case double_width:		page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+						case double_width:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												//todo
 												break;
 
-						case double_size:		page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+						case double_size:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												//todo
 												break;
 
-						case mosaic_black:		page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+						case mosaic_black:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												foreground = black;
 												charset = 1;
 												break;
 
-						case mosaic_red:		page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+						case mosaic_red:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												foreground = red;
 												charset = 1;
 												break;
 
-						case mosaic_green:		page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+						case mosaic_green:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												foreground = green;
 												charset = 1;
 												break;
 
-						case mosaic_yellow:		page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+						case mosaic_yellow:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												foreground = yellow;
 												charset = 1;
 												break;
 
-						case mosaic_blue:		page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+						case mosaic_blue:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												foreground = blue;
 												charset = 1;
 												break;
 
-						case mosaic_magenta:	page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+						case mosaic_magenta:	page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												foreground = magenta;
 												charset = 1;
 												break;
 
-						case mosaic_cyan:		page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+						case mosaic_cyan:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												foreground = cyan;
 												charset = 1;
 												break;
 
-						case mosaic_white:		page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+						case mosaic_white:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												foreground = white;
 												charset = 1;
 												break;
 
-						case esc:				page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+						case esc:				page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												//todo
 												break;
 
-						case release_mosaic:	page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+						case release_mosaic:	page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 												//todo
 												break;
 				}
@@ -1020,7 +1027,7 @@ void DecodePage()
 			}
 			else
 			{
-				page_atrb[row*40 + col] = doubleheight<<8 | charset<<6 | background<<3 | foreground;
+				page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
 
 				//skip doubleheight in lower line
 
@@ -1037,12 +1044,25 @@ void DecodePage()
 			{
 				for(loop = 0; loop < 40; loop++)
 				{
-					page_atrb[(row+1)*40 + loop] = (page_atrb[row*40 + loop] & 0x38) | (page_atrb[row*40 + loop] & 0x38)>>3;
+					page_atrb[(row+1)*40 + loop] = (page_atrb[row*40 + loop] & 0xF0) | (page_atrb[row*40 + loop] & 0xF0)>>4;
 				}
 
 				row++;
 			}
 	}
+
+	//search page for boxed chars
+
+		if(page_is_boxed)
+		{
+			for(loop = 0; loop < 40*24; loop++)
+			{
+				if(((page_atrb[loop]>>11) & 1) != 1)
+				{
+					page_atrb[loop] = transp<<4 | transp;
+				}
+			}
+		}
 }
 
 /******************************************************************************

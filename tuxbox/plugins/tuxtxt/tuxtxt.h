@@ -167,7 +167,7 @@ unsigned char  pagetable[0x899];
 unsigned char  backbuffer[720*576];
 unsigned char  timestring[8];
 unsigned char  page_char[40*24];
-unsigned short page_atrb[40*24];
+unsigned short page_atrb[40*24];// ????:b:h:cc:bbbb:ffff -> ?=reserved, b=boxed, h=double height, c=charset, b=background, f=forground
 
 //hamming table
 
