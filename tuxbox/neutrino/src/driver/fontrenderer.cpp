@@ -29,54 +29,6 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-/*
-$Id: fontrenderer.cpp,v 1.23 2002/02/14 00:02:15 field Exp $
-
--- misc font / text rendering functions
-
-$Log: fontrenderer.cpp,v $
-Revision 1.23  2002/02/14 00:02:15  field
-Cache verbessert ?!
-
-Revision 1.22  2002/02/10 14:17:34  McClean
-simplify usage (part 2)
-
-Revision 1.21  2002/02/05 11:34:40  field
-VTxt Icon
-
-Revision 1.20  2002/01/03 20:03:20  McClean
-cleanup
-
-Revision 1.19  2001/12/03 23:21:23  McClean
-hmm?
-
-Revision 1.18  2001/12/02 11:59:51  waldi
-- add config.h include
-- change dir for fonts
-
-Revision 1.17  2001/11/26 02:34:03  McClean
-include (.../../stuff) changed - correct unix-formated files now
-
-Revision 1.16  2001/11/15 11:42:41  McClean
-gpl-headers added
-
-Revision 1.15  2001/10/18 10:55:56  field
-Rendert jetzt auch Schriftfarben zwischen den Hauptfarben richtig (zb
-COLOR_MENUCONTENT+1)
-
-Revision 1.14  2001/10/16 19:11:16  rasc
--- CR LF --> LF in einigen Modulen
-
-Revision 1.13  2001/10/14 15:48:16  McClean
-use font-cache
-
-Revision 1.12  2001/10/14 14:30:47  rasc
--- EventList Darstellung ueberarbeitet
--- kleiner Aenderungen und kleinere Bugfixes
--- locales erweitert..
-
-
-*/
 
 #include <config.h>
 
@@ -362,14 +314,14 @@ void Font::RenderString(int x, int y, int width, const char *text, unsigned char
 		int rx=x+glyph->left;
 		int ry=y-glyph->top;
 
-		__u8 *d=g_FrameBuffer->lfb + g_FrameBuffer->Stride()*ry + rx;
+		__u8 *d=g_FrameBuffer->getFrameBufferPointer() + g_FrameBuffer->getStride()*ry + rx;
 		__u8 *s=glyph->buffer;
 
 		int coff=(color+ 2)%8;
 
 		int w =	glyph->width;
 		int h =	glyph->height;
-		int stride= g_FrameBuffer->Stride();
+		int stride= g_FrameBuffer->getStride();
 		int pitch = glyph->pitch;
 		for (int ay=0; ay<h; ay++)
 		{

@@ -29,50 +29,11 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-/*
-
-$Id: framebuffer.cpp,v 1.16 2002/02/25 01:27:33 field Exp $
-
-
-
-$Log: framebuffer.cpp,v $
-Revision 1.16  2002/02/25 01:27:33  field
-Key-Handling umgestellt (moeglicherweise beta ;)
-
-Revision 1.15  2002/01/18 02:08:45  McClean
-speedup backgrounds
-
-Revision 1.14  2002/01/03 20:03:20  McClean
-cleanup
-
-Revision 1.13  2001/12/18 00:20:07  McClean
-update scanmenue
-
-Revision 1.12  2001/12/17 22:56:37  McClean
-add dump-function
-
-Revision 1.11  2001/12/17 01:28:26  McClean
-accelerate radiomode-logo-paint
-
-Revision 1.10  2001/11/15 11:42:41  McClean
-gpl-headers added
-
-Revision 1.9  2001/11/04 01:04:18  McClean
-fix transparency bug
-
-Revision 1.8  2001/10/16 19:11:16  rasc
--- CR LF --> LF in einigen Modulen
-
-
-
-
-*/
-
 
 #include "framebuffer.h"
 #include "../global.h"
 
-CFrameBuffer::CFrameBuffer(const char *fb)
+CFrameBuffer::CFrameBuffer()
 {
 	iconBasePath = "";
 	available=0;
@@ -86,11 +47,31 @@ CFrameBuffer::CFrameBuffer(const char *fb)
 	useBackgroundPaint = false;
 	background = NULL;
 	backgroundFilename = "";
+	fd = 0;
+}
 
-	fd=open(fb, O_RDWR);
+CFrameBuffer* CFrameBuffer::getInstance()
+{
+	static CFrameBuffer* frameBuffer = NULL;
+
+	if(!frameBuffer)
+	{
+		frameBuffer = new CFrameBuffer();
+		printf("[neutrino] frameBuffer Instance created\n");
+	}
+	else
+	{
+		printf("[neutrino] frameBuffer Instace requested\n");
+	}
+	return frameBuffer;
+}
+
+void CFrameBuffer::init(string fbDevice)
+{
+	fd=open(fbDevice.c_str(), O_RDWR);
 	if (fd<0)
 	{
-		perror(fb);
+		perror(fbDevice.c_str());
 		goto nolfb;
 	}
 
@@ -140,6 +121,21 @@ CFrameBuffer::~CFrameBuffer()
 	if (lfb)
 		munmap(lfb, available);
 		*/
+}
+
+int CFrameBuffer::getFileHandle()
+{
+	return fd;
+}
+
+unsigned int CFrameBuffer::getStride()
+{
+	return stride;
+}
+
+unsigned char* CFrameBuffer::getFrameBufferPointer()
+{
+	return lfb;
 }
 
 int CFrameBuffer::setMode(unsigned int nxRes, unsigned int nyRes, unsigned int nbpp)
@@ -659,11 +655,11 @@ void CFrameBuffer::paintBackground()
 {
 	if(!useBackgroundPaint)
 	{
-		memset(g_FrameBuffer->lfb, 255, g_FrameBuffer->Stride()*576);
+		memset(lfb, 255, stride*576);
 	}
 	else
 	{
-		memcpy(g_FrameBuffer->lfb, background, g_FrameBuffer->Stride()*576);
+		memcpy(lfb, background, stride*576);
 	}
 }
 

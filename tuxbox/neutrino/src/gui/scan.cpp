@@ -46,7 +46,7 @@ CScanTs::CScanTs()
 int CScanTs::exec(CMenuTarget* parent, string)
 {
 	g_FrameBuffer->loadPal("scan.pal", 37, COL_MAXFREE);
-	g_FrameBuffer->loadPicture2Mem("scan.raw", g_FrameBuffer->lfb);
+	g_FrameBuffer->loadPicture2Mem("scan.raw", g_FrameBuffer->getFrameBufferPointer());
 
 	g_Sectionsd->setPauseScanning( true );
 	g_Zapit->startScan( g_settings.scan_astra | g_settings.scan_eutel | g_settings.scan_kopernikus | g_settings.scan_digituerk | g_settings.scan_sirius | g_settings.scan_thor | g_settings.scan_bouquet );

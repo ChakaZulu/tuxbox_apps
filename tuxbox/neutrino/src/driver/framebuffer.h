@@ -29,40 +29,6 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-/*
-$Id: framebuffer.h,v 1.13 2002/02/25 01:27:33 field Exp $
-
-
-$Log: framebuffer.h,v $
-Revision 1.13  2002/02/25 01:27:33  field
-Key-Handling umgestellt (moeglicherweise beta ;)
-
-Revision 1.12  2002/01/18 02:08:45  McClean
-speedup backgrounds
-
-Revision 1.11  2002/01/03 20:03:20  McClean
-cleanup
-
-Revision 1.10  2001/12/17 22:56:37  McClean
-add dump-function
-
-Revision 1.9  2001/12/17 01:28:26  McClean
-accelerate radiomode-logo-paint
-
-Revision 1.8  2001/11/26 02:34:03  McClean
-include (.../../stuff) changed - correct unix-formated files now
-
-Revision 1.7  2001/11/15 11:42:41  McClean
-gpl-headers added
-
-Revision 1.6  2001/10/16 19:11:16  rasc
--- CR LF --> LF in einigen Modulen
-
-
-
-
-*/
-
 
 #ifndef __framebuffer__
 #define __framebuffer__
@@ -82,9 +48,13 @@ Revision 1.6  2001/10/16 19:11:16  rasc
 using namespace std;
 
 
+/** Ausführung als Singleton */
 class CFrameBuffer
 {
 	private:
+
+		CFrameBuffer();
+		~CFrameBuffer();
 
 		struct rgbData
 		{
@@ -93,15 +63,16 @@ class CFrameBuffer
 			unsigned char b;
 		};
 
-		string iconBasePath;
+		string			iconBasePath;
 
 		int				fd;
+		unsigned char	*lfb;
 		int				available;
 		unsigned char	*background;
 		int				backgroundColor;
 		string			backgroundFilename;
 		bool			useBackgroundPaint;
-		unsigned int xRes, yRes, stride, bpp;
+		unsigned int	xRes, yRes, stride, bpp;
 		struct fb_var_screeninfo screeninfo, oldscreen;
 		fb_cmap cmap;
 		__u16 red[256], green[256], blue[256], trans[256];
@@ -109,24 +80,17 @@ class CFrameBuffer
 		void paletteFade(int i, __u32 rgb1, __u32 rgb2, int level);
 
 	public:
-		int getFileHandle()
-		{
-			return fd;
-		}
-		; //only used for plugins (games) !!
 
-		//pointer to framebuffer
-		unsigned char *lfb;
-		unsigned int Stride()
-		{
-			return stride;
-		}
+		static CFrameBuffer* getInstance();
 
-		CFrameBuffer(const char *fb="/dev/fb/0");
-		~CFrameBuffer();
-
+		void init(string fbDevice="/dev/fb/0");
 		int setMode(unsigned int xRes, unsigned int yRes, unsigned int bpp);
 
+
+		int getFileHandle(); //only used for plugins (games) !!
+
+		unsigned char* getFrameBufferPointer(); //pointer to framebuffer
+		unsigned int getStride(); //stride (anzahl bytes die eine Zeile im Framebuffer belegt)
 
 		//Palette stuff
 		void paletteGenFade(int in, __u32 rgb1, __u32 rgb2, int num, int tr=0);
@@ -166,7 +130,6 @@ class CFrameBuffer
 
 		void SaveScreen(int x, int y, int dx, int dy, unsigned char* memp);
 		void RestoreScreen(int x, int y, int dx, int dy, unsigned char* memp);
-
 };
 
 

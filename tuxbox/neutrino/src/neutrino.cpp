@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.214 2002/04/05 22:42:45 rasc Exp $
+        $Id: neutrino.cpp,v 1.215 2002/04/06 13:28:23 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -30,17 +30,7 @@
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
-	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-
-$Log: neutrino.cpp,v $
-Revision 1.214  2002/04/05 22:42:45  rasc
--- Default for Scan changed: keep bouquet
-
-Revision 1.213  2002/04/05 01:14:43  rasc
--- Favorites Bouquet handling (Easy Add Channels)
-
-
+	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA
 */
 
 #include <config.h>
@@ -88,7 +78,7 @@ static void initGlobals(void)
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 CNeutrinoApp::CNeutrinoApp()
 {
-	g_FrameBuffer = new CFrameBuffer;
+	g_FrameBuffer = CFrameBuffer::getInstance();
 	g_FrameBuffer->setIconBasePath(DATADIR "/neutrino/icons/");
 
 	g_fontRenderer = new fontRenderClass;
@@ -624,6 +614,7 @@ void CNeutrinoApp::CmdParser(int argc, char **argv)
 
 void CNeutrinoApp::SetupFrameBuffer()
 {
+	g_FrameBuffer->init();
 	if (g_FrameBuffer->setMode(720, 576, 8))
 	{
 		printf("Error while setting framebuffer mode\n");
@@ -671,7 +662,7 @@ void CNeutrinoApp::SetupFonts()
 
 void CNeutrinoApp::ClearFrameBuffer()
 {
-	memset(g_FrameBuffer->lfb, 255, g_FrameBuffer->Stride()*576);
+	memset(g_FrameBuffer->getFrameBufferPointer(), 255, g_FrameBuffer->getStride()*576);
 
 	//backgroundmode
 	g_FrameBuffer->setBackgroundColor(COL_BACKGROUND);
@@ -1849,12 +1840,11 @@ void CNeutrinoApp::ExitRun()
 	//shutdown screen
 	g_lcdd->shutdown();
 
-	//memset(frameBuffer.lfb, 255, frameBuffer.Stride()*576);
 	for(int x=0;x<256;x++)
 		g_FrameBuffer->paletteSetColor(x, 0x000000, 0xffff);
 	g_FrameBuffer->paletteSet();
 
-	g_FrameBuffer->loadPicture2Mem("shutdown.raw", g_FrameBuffer->lfb );
+	g_FrameBuffer->loadPicture2Mem("shutdown.raw", g_FrameBuffer->getFrameBufferPointer() );
 	g_FrameBuffer->loadPal("shutdown.pal");
 
 	saveSetup();
@@ -2000,7 +1990,7 @@ void CNeutrinoApp::tvMode( bool rezap )
 
 	//printf( "tv-mode\n" );
 
-	memset(g_FrameBuffer->lfb, 255, g_FrameBuffer->Stride()*576);
+	memset(g_FrameBuffer->getFrameBufferPointer(), 255, g_FrameBuffer->getStride()*576);
 	g_FrameBuffer->useBackground(false);
 
     if ( rezap )
@@ -2023,8 +2013,7 @@ void CNeutrinoApp::scartMode( bool bOnOff )
 	if ( bOnOff )
 	{
 		// SCART AN
-
-		memset(g_FrameBuffer->lfb, 255, g_FrameBuffer->Stride()*576);
+		memset(g_FrameBuffer->getFrameBufferPointer(), 255, g_FrameBuffer->getStride()*576);
 		g_Controld->setScartMode( 1 );
 
 		lastMode = mode;
@@ -2070,7 +2059,7 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 			g_Controld->setScartMode( 0 );
 		}
 
-		memset(g_FrameBuffer->lfb, 255, g_FrameBuffer->Stride()*576);
+		memset(g_FrameBuffer->getFrameBufferPointer(), 255, g_FrameBuffer->getStride()*576);
 
 		g_lcdd->setMode(CLcddClient::MODE_STANDBY);
 		g_Controld->videoPowerDown(true);
@@ -2231,7 +2220,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.214 2002/04/05 22:42:45 rasc Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.215 2002/04/06 13:28:23 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 
