@@ -28,6 +28,7 @@ extern	double	sqrt( double in );
 
 extern	int		doexit;
 
+extern	unsigned short	realcode;
 extern	unsigned short	actcode;
 
 static	long	score = 0;
@@ -388,12 +389,16 @@ static	void	RotateLeft( void )
 
 void	MoveSide( void )
 {
-static int blocker = 5;
+static int blocker = 0;
+static	short last = 0;
 
-	blocker--;
-	if ( blocker > 0 )
+	if ( realcode == 0xee )
+		blocker=0;
+
+	if ( blocker && ( actcode == last ))
 		return;
-	blocker=5;
+
+	last=actcode;
 
 	switch( actcode )
 	{
@@ -408,11 +413,11 @@ static int blocker = 5;
 		break;
 	case RC_UP :
 		RotateLeft();
-		blocker += 10;
+		blocker =1;
 		break;
 	case RC_OK :
 		RotateRight();
-		blocker += 10;
+		blocker =1;
 		break;
 	}
 

@@ -12,8 +12,7 @@
 #include <draw.h>
 #include <board.h>
 #include <colors.h>
-
-#include <../../mczap/neutrinoNG/plugins/gameplugins.h>
+#include <pig.h>
 
 extern	int	doexit;
 extern	int	debug;
@@ -44,6 +43,8 @@ int mines_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 
 	if ( RcInitialize( fdrc ) < 0 )
 		return -1;
+
+	Fx2ShowPig( 440, 300, 160, 144 );
 
 	while( doexit != 3 )
 	{
@@ -79,22 +80,10 @@ int mines_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 		}
 	}
 
+	Fx2StopPig();
+
 	RcClose();
 	FBClose();
-
-	return 0;
-}
-
-int	mines_getInfo( struct SPluginInfo *info )
-{
-	info->pluginversion = 1;
-	strcpy(info->name,"Minesweeper");
-	strcpy(info->desc,"classic Minesweeper");
-	strcpy(info->depend,"libfx2.so");
-	info->type=1;
-	info->needfb=1;
-	info->needrc=1;
-	info->needlcd=0;
 
 	return 0;
 }

@@ -1,0 +1,19 @@
+all:: mines mines.so
+
+PREF=powerpc-linux-
+CC=$(PREF)gcc
+STRIP=$(PREF)strip
+CDEBUGFLAGS=-g -O2 -Wall -pedantic
+INCLUDES=-I. -I../lib
+OBJS=board.o
+
+SingleProgramTarget(mines,main.o $(OBJS),,-L../lib -lfx2)
+
+board.o: pics.h
+
+mines.so: somain.o $(OBJS)
+	$(CC) -o mines.so -shared -Wl,-soname,mines.so somain.o $(OBJS)
+	$(STRIP) mines.so
+
+clean::
+	rm -f mines.so

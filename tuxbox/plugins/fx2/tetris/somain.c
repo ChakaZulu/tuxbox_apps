@@ -12,8 +12,7 @@
 #include <draw.h>
 #include <colors.h>
 #include <board.h>
-
-#include <../../mczap/neutrinoNG/plugins/gameplugins.h>
+#include <pig.h>
 
 extern	int				debug;
 extern	int				doexit;
@@ -125,6 +124,8 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 	if ( RcInitialize( fdrc ) < 0 )
 		return -1;
 
+	Fx2ShowPig( 450, 105, 128, 96 );
+
 	while( doexit != 3 )
 	{
 		BoardInitialize();
@@ -164,22 +165,10 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 		}
 	}
 
+	Fx2StopPig();
+
 	RcClose();
 	FBClose();
-
-	return 0;
-}
-
-int	tetris_getInfo( struct SPluginInfo *info )
-{
-	info->pluginversion=1;
-	strcpy(info->name,"Tetris");
-	strcpy(info->desc,"i break together - tetris  :)");
-	strcpy(info->depend,"libfx2.so");
-	info->type=1;
-	info->needfb=1;
-	info->needrc=1;
-	info->needlcd=0;
 
 	return 0;
 }

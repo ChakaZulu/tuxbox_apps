@@ -14,8 +14,6 @@
 #include <colors.h>
 #include <maze.h>
 
-#include <../../mczap/neutrinoNG/plugins/gameplugins.h>
-
 extern	int	doexit;
 extern	int	debug;
 extern	int	gametime;
@@ -101,20 +99,6 @@ int pacman_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 
 	RcClose();
 	FBClose();
-
-	return 0;
-}
-
-int	pacman_getInfo( struct SPluginInfo *info )
-{
-	info->pluginversion = 1;
-	strcpy(info->name,"Pacman");
-	strcpy(info->desc,"The good old pacman in new dboxII generation");
-	strcpy(info->depend,"libfx2.so");
-	info->type=1;
-	info->needfb=1;
-	info->needrc=1;
-	info->needlcd=1;
 
 	return 0;
 }
