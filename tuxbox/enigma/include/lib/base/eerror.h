@@ -13,9 +13,8 @@ void eFatal(const char* fmt, ...);
     void eDebug(const char* fmt, ...);
     void eDebugNoNewLine(const char* fmt, ...);
     void eWarning(const char* fmt, ...);
-		#define ASSERT(x) { if (!(x)) eFatal("%s:%d ASSERTION %s FAILED!", __FILE__, __LINE__, #x); }
+    #define ASSERT(x) { if (!(x)) eFatal("%s:%d ASSERTION %s FAILED!", __FILE__, __LINE__, #x); }
 #else
-#error NO DEBUG !!
     inline void eDebug(const char* fmt, ...)
     {
     }
@@ -27,7 +26,7 @@ void eFatal(const char* fmt, ...);
     inline void eWarning(const char* fmt, ...)
     {
     }
-		#define ASSERT(x) do { } while (0)
+    #define ASSERT(x) do { } while (0)
 #endif //__DEBUG__
 
 #endif // __E_ERROR__
