@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.22 2002/07/22 01:57:19 Homar Exp $
+ * $Id: frontend.cpp,v 1.23 2002/08/27 16:00:42 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -21,7 +21,6 @@
 
 /* system c */
 #include <fcntl.h>
-#include <stdio.h>
 #include <sys/ioctl.h>
 #include <sys/poll.h>
 #include <sys/stat.h>
@@ -54,7 +53,7 @@ CFrontend::CFrontend ()
 
 	info = new FrontendInfo();
 
-	if ((frontend_fd = open(FRONTEND_DEVICE, O_RDWR)) < 0)
+	if ((frontend_fd = open(FRONTEND_DEVICE, O_RDWR|O_NONBLOCK)) < 0)
 	{
 		perror(FRONTEND_DEVICE);
 		initialized = false;
@@ -314,7 +313,17 @@ const uint32_t CFrontend::getNextSymbolRate (uint32_t rate)
 
 void CFrontend::setFrontend (FrontendParameters *feparams)
 {
+	FrontendEvent *event = new FrontendEvent();
+
 	tuned = false;
+
+	std::cout << "[CFrontend::setFrontend] freq " << feparams->Frequency << std::endl;
+
+	/* clear old events */
+	while (ioctl(frontend_fd, FE_GET_EVENT, event) >= 0)
+		std::cout << "[CFrontend::setFrontend] discard event" << std::endl;
+
+	delete event;
 
 	if (ioctl(frontend_fd, FE_SET_FRONTEND, feparams) < 0)
 	{
@@ -323,7 +332,6 @@ void CFrontend::setFrontend (FrontendParameters *feparams)
 	}
 	else
 	{
-		currentFrequency = feparams->Frequency;
 		failed = false;
 	}
 }
@@ -356,7 +364,7 @@ const bool CFrontend::getEvent ()
 
 	failed = true;
 
-	switch (poll(pfd, 1, 750))
+	switch (poll(pfd, 1, 10000))
 	{
 	case -1:
 		perror("[CFrontend::getEvent] poll");
@@ -372,6 +380,7 @@ const bool CFrontend::getEvent ()
 			if (ioctl(frontend_fd, FE_GET_EVENT, event) < 0)
 			{
 				perror("[CFrontend::getEvent] FE_GET_EVENT");
+				break;
 			}
 			else
 			{
@@ -389,7 +398,8 @@ const bool CFrontend::getEvent ()
 				break;
 
 			case FE_COMPLETION_EV:
-				std::cout << "[CFrontend::getEvent] FE_COMPLETION_EV" << std::endl;
+				currentFrequency = event->u.completionEvent.Frequency;
+				std::cout << "[CFrontend::getEvent] FE_COMPLETION_EV: freq " << currentFrequency << std::endl;
 				tuned = true;
 				break;
 			}
@@ -401,9 +411,10 @@ const bool CFrontend::getEvent ()
 		break;
 	}
 
-	if ((tuned == false) && (getStatus() & FE_HAS_LOCK))
+	if (tuned == false)
 	{
-		tuned = true;
+		currentFrequency = 0;
+		currentTsidOnid = 0;
 	}
 
 	delete event;
@@ -493,24 +504,23 @@ void CFrontend::secResetOverload ()
  */
 const bool CFrontend::tuneChannel (CZapitChannel *channel)
 {
-  bool noNit = false;
+	bool noNit = false;
+
 	if (transponders.count(channel->getTsidOnid()) == 0)
 	{
-		/* if not found, lookup in nit */
-		if ( (parse_nit(channel->getDiSEqC()) < 0))
+		/* if not found, look up in nit */
+		if ((parse_nit(channel->getDiSEqC()) < 0))
 		{
-			currentTsidOnid = get_sdt_TsidOnid ();
+			currentTsidOnid = get_sdt_TsidOnid();
 			noNit = true;
-			printf("[frontend.cpp] versuche zu tunen");
 		}
 		else if (transponders.count(channel->getTsidOnid()) == 0)
 		{
-			printf("[frontend.cpp] kann nicht tunen");
 			return false;
 		}
 	}
 
-	currentTsidOnid = ( noNit ? currentTsidOnid : channel->getTsidOnid() );
+	currentTsidOnid = noNit ? currentTsidOnid : channel->getTsidOnid();
 
 	std::map <uint32_t, transponder>::iterator transponder = transponders.find(currentTsidOnid);
 
@@ -616,11 +626,13 @@ const bool CFrontend::tuneFrequency (FrontendParameters feparams, uint8_t polari
 		/* wait for completion */
 		getEvent();
 
-		if (tuned == false)
+		/*
+		 * the frontend got lock at a different frequency
+		 * than requested, so we need to look up the tsid/onid.
+		 */
+		if ((tuned == true) && (currentFrequency != feparams.Frequency))
 		{
-			// unknown state
-			currentFrequency = 0;
-			currentTsidOnid = 0;
+			currentTsidOnid = get_sdt_TsidOnid();
 		}
 	}
 
