@@ -135,6 +135,18 @@ class CBHDriverNotifier : public CChangeObserver
 		bool changeNotify(const std::string & OptionName, void*);
 };
 
+class CSPTSModeNotifier : public CChangeObserver
+{
+	public:
+		bool changeNotify(const std::string & OptionName, void*);
+};
+
+class CHWSectionsNotifier : public CChangeObserver
+{
+	public:
+		bool changeNotify(const std::string & OptionName, void*);
+};
+
 class CColorSetupNotifier : public CChangeObserver
 {
 	public:

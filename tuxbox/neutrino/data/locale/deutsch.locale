@@ -75,6 +75,8 @@ miscsettings.startbhdriver BH-Mode Treiber laden
 miscsettings.general Allgemein
 miscsettings.fb_destination EXPERT! Boot-Konsole
 miscsettings.infobar_sat_display Infobar Satellitenanzeige
+miscsettings.sptsmode SPTS-Mode Treiber laden
+miscsettings.hwsections HW-Sections verwenden
 
 languagesetup.head Spracheinstellungen
 languagesetup.select Sprache

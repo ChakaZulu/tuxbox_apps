@@ -288,6 +288,45 @@ bool CBHDriverNotifier::changeNotify(const std::string & OptionName, void* Data)
 	return true;
 }
 
+bool CSPTSModeNotifier::changeNotify(const std::string & OptionName, void* Data)
+{
+	if( *((int*) Data)!=0)
+	{	//file anlegen (SPTS-Mode)
+		FILE* fd = fopen("/var/etc/.spts", "w");
+		if(fd)
+		{
+			fclose(fd);
+		}
+		else
+			return false;
+	}
+	else
+	{
+		remove("/var/etc/.spts");
+	}
+	return true;
+}
+
+bool CHWSectionsNotifier::changeNotify(const std::string & OptionName, void* Data)
+{
+	if( *((int*) Data)!=1)
+	{	//file anlegen (KEINE hw-sections)
+		FILE* fd = fopen("/var/etc/.hw_sections", "w");
+		if(fd)
+		{
+			fclose(fd);
+		}
+		else
+			return false;
+	}
+	else
+	{
+		remove("/var/etc/.hw_sections");
+	}
+	return true;
+}
+
+
 bool CIPChangeNotifier::changeNotify(const std::string & OptionName, void* Data)
 {
 	char ip[16];

@@ -1557,6 +1557,31 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 		miscSettings.addItem( oj );
 #endif
 
+		static int dummy3 = 0;
+		fd = fopen("/var/etc/.spts", "r");
+		if(fd)
+		{
+			dummy3=1;
+			fclose(fd);
+		}
+		oj = new CMenuOptionChooser("miscsettings.sptsmode", &dummy3, true, new CSPTSModeNotifier );
+		oj->addOption(0, "options.off");
+		oj->addOption(1, "options.on");
+		miscSettings.addItem( oj );
+
+		static int dummy4 = 1;
+		fd = fopen("/var/etc/.hw_sections", "r");
+		if(fd)
+		{
+			dummy4=0;
+			fclose(fd);
+		}
+		oj = new CMenuOptionChooser("miscsettings.hwsections", &dummy4, true, new CHWSectionsNotifier );
+		oj->addOption(0, "options.off");
+		oj->addOption(1, "options.on");
+		miscSettings.addItem( oj );
+
+
 		oj = new CMenuOptionChooser("miscsettings.fb_destination", &g_settings.uboot_console, true, ConsoleDestinationChanger );
 		oj->addOption(0, "options.null");
 		oj->addOption(1, "options.serial");
