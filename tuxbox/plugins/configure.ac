@@ -33,6 +33,7 @@ fx2/lcdcirc/Makefile
 fx2/satfind/Makefile
 fx2/vierg/Makefile
 tuxmail/Makefile
+tuxmail/daemon/Makefile
 tuxtxt/Makefile
 tuxtxt/font/Makefile
 tuxbox-plugins.pc

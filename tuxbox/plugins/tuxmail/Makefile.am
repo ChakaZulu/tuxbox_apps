@@ -1,15 +1,8 @@
+SUBDIRS = daemon
+
 INCLUDES = \
 	@FREETYPE_CFLAGS@ \
-	@CURL_CFLAGS@ \
 	-I$(top_srcdir)/include
-
-bin_PROGRAMS = tuxmaild
-
-tuxmaild_SOURCES = daemon/tuxmaild.c
-
-tuxmaild_LDADD = \
-	@CURL_LIBS@ \
-	-lpthread
 
 noinst_LTLIBRARIES = tuxmail.la
 
