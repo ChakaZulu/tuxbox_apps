@@ -64,7 +64,7 @@
 #include "gui/epgview.h"
 #include "gui/update.h"
 #include "gui/scan.h"
-//#include "gui/favorites.h"
+#include "gui/favorites.h"
 #include "gui/sleeptimer.h"
 #include "gui/dboxinfo.h"
 #include "gui/timerlist.h"
@@ -1842,8 +1842,8 @@ void CNeutrinoApp::ShowStreamFeatures()
 	sprintf(id, "%d", -1);
 
 	// -- Add Channel to favorites
-//	StreamFeatureSelector.addItem( new CMenuForwarder("favorites.menueadd", true, "",
-//		new CFavorites, id, true, CRCInput::RC_yellow, "gelb.raw"), false );
+	StreamFeatureSelector.addItem( new CMenuForwarder("favorites.menueadd", true, "",
+		new CFavorites, id, true, CRCInput::RC_green, "gruen.raw"), false );
 	
 	// start/stop streaming
 	if(g_settings.network_streaming_use)
@@ -3055,7 +3055,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.321 2002/09/12 19:23:36 dirch Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.322 2002/09/12 22:19:25 thegoodguy Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
