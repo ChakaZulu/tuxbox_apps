@@ -1,22 +1,27 @@
 /*
-  Client-Interface für zapit  -   DBoxII-Project
-
-  License: GPL
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.49 2002/09/24 00:13:26 thegoodguy Exp $ *
+ *
+ * Client-Interface für zapit - DBoxII-Project
+ *
+ * (C) 2002 by thegoodguy <thegoodguy@berlios.de> & the DBoxII-Project
+ *
+ * License: GPL
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ */
 
 #include <stdio.h>
 #include <unistd.h>
@@ -38,7 +43,7 @@
 
 CZapitClient::CZapitClient()
 {
-	sock_fd = 0;
+	sock_fd = -1;
 }
 
 bool CZapitClient::zapit_connect()
@@ -57,12 +62,14 @@ bool CZapitClient::zapit_connect()
 	if ((sock_fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
 	{
 		perror("zapitclient: socket");
+		sock_fd = -1;
 		return false;
 	}
 
 	if(connect(sock_fd, (struct sockaddr*) &servaddr, clilen) <0 )
 	{
 		perror("zapitclient: connect");
+		zapit_close();
 		return false;
 	}
 	return true;
@@ -70,21 +77,25 @@ bool CZapitClient::zapit_connect()
 
 void CZapitClient::zapit_close()
 {
-	if(sock_fd!=0)
+	if(sock_fd != -1)
 	{
 		close(sock_fd);
-		sock_fd=0;
+		sock_fd = -1;
 	}
 }
 
 inline void CZapitClient::send(char* data, const unsigned int size)
 {
-	write(sock_fd, data, size);
+	if (sock_fd != -1)
+		write(sock_fd, data, size);
 }
 
 bool CZapitClient::receive(char* data, const unsigned int size)
 {
-	return (read(sock_fd, data, size) > 0);
+	if (sock_fd == -1)
+		return false;
+	else
+		return (read(sock_fd, data, size) > 0);
 }
 
 void CZapitClient::send(const commands command, char* data, const unsigned int size)
@@ -433,16 +444,20 @@ void CZapitClient::setVolume (unsigned int left, unsigned int right)
 /***********************************************/
 
 /* start TS-Scan */
-void CZapitClient::startScan( )
+bool CZapitClient::startScan()
 {
 	commandHead msgHead;
 	msgHead.version=ACTVERSION;
 	msgHead.cmd=CMD_SCANSTART;
 
-	zapit_connect();
+	if (!zapit_connect())
+		return false;
+
 	send((char*)&msgHead, sizeof(msgHead));
 
 	zapit_close();
+
+	return true;
 }
 
 /* query if ts-scan is ready - response gives status */
