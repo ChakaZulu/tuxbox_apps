@@ -1,5 +1,5 @@
 /*
- * $Id: channel.h,v 1.2 2002/05/13 18:24:00 McClean Exp $
+ * $Id: channel.h,v 1.3 2002/05/13 20:25:10 McClean Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -46,7 +46,7 @@ class CZapitChannel
 		std::string name;
 
 		/* pids of this channel */
-		std::vector <CZapitAudioChannel *> audioChannels;
+		std::vector <CZapitAudioChannel*> audioChannels;
 		unsigned short pcrPid;
 		unsigned short pmtPid;
 		unsigned short teletextPid;
@@ -57,9 +57,6 @@ class CZapitChannel
 
 		/* last selected audio channel */
 		unsigned char currentAudioChannel;
-
-		/* number of audio channels */
-		unsigned char audioChannelCount;
 
 		/* number in channel list */
 		unsigned short channelNumber;
@@ -90,7 +87,7 @@ class CZapitChannel
 
 		/* get methods - read and write variables */
 		std::string getName()			{ return name; }
-		unsigned char getAudioChannelCount()	{ return audioChannelCount; }
+		unsigned char getAudioChannelCount()	{ return audioChannels.size(); }
 		unsigned short getPcrPid()		{ return pcrPid; }
 		unsigned short getPmtPid()		{ return pmtPid; }
 		unsigned short getTeletextPid()		{ return teletextPid; }

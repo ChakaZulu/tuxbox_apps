@@ -1,5 +1,5 @@
 /*
- * $Id: channel.cpp,v 1.2 2002/05/13 18:24:00 McClean Exp $
+ * $Id: channel.cpp,v 1.3 2002/05/13 20:25:10 McClean Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -23,8 +23,6 @@
 
 CZapitChannel::CZapitChannel (std::string p_name, unsigned short p_sid, unsigned short p_tsid, unsigned short p_onid, unsigned char p_service_type, unsigned short p_chan_nr, unsigned char p_DiSEqC)
 {
-	unsigned char i;
-
 	name = p_name;
 	serviceId = p_sid;
 	transportStreamId = p_tsid;
@@ -34,98 +32,78 @@ CZapitChannel::CZapitChannel (std::string p_name, unsigned short p_sid, unsigned
 	DiSEqC = p_DiSEqC;
 
 	caPmt = NULL;
-
-	for (i = 0; i < MAX_AUDIO_PIDS; i++)
-	{
-		audioChannels[i] = NULL;
-	}
-
-	currentAudioChannel = 0;
-	audioChannelCount = 0;
-
-	pcrPid = 0;
-	pmtPid = 0;
-	teletextPid = 0;
-	videoPid = 0;
-
-	pidsFlag = false;
+	resetPids();
 }
 
 CZapitChannel::~CZapitChannel ()
 {
-	unsigned char i;
-
-	for (i = 0; i < audioChannelCount; i++)
+	resetPids();
+	if(caPmt)
 	{
-		delete audioChannels[i];
+		delete caPmt;
 	}
-
-	delete caPmt;
 }
 
-CZapitAudioChannel * CZapitChannel::getAudioChannel (unsigned char index)
+CZapitAudioChannel* CZapitChannel::getAudioChannel (unsigned char index)
 {
-	if (index == 0xFF)
+	CZapitAudioChannel* retval = NULL;
+
+	if ((index == 0xFF) && (currentAudioChannel<getAudioChannelCount()))
 	{
-		return audioChannels[currentAudioChannel];
+		retval = audioChannels[currentAudioChannel];
+	}
+	else if (index < getAudioChannelCount())
+	{
+		retval = audioChannels[index];
 	}
 
-	if (index < audioChannelCount)
-	{
-		return audioChannels[index];
-	}
-
-	return NULL;
+	return retval;
 }
 
 unsigned short CZapitChannel::getAudioPid (unsigned char index = 0xFF)
 {
-	if (index == 0xFF)
+	unsigned short retval = 0;
+
+	if ((index == 0xFF) && (currentAudioChannel<getAudioChannelCount()))
 	{
-		return audioChannels[currentAudioChannel]->pid;
+		retval = audioChannels[currentAudioChannel]->pid;
 	}
-	if (index < audioChannelCount)
+	else if (index < getAudioChannelCount())
 	{
-		return audioChannels[index]->pid;
+		retval = audioChannels[index]->pid;
 	}
 
-	return 0;
+	return retval;
 }
 
 int CZapitChannel::addAudioChannel(unsigned short pid, bool isAc3, std::string description, unsigned char componentTag)
 {
-	unsigned char i;
-
-	for (i = 0; i < audioChannelCount; i++)
+	for (std::vector<CZapitAudioChannel*>::iterator aI=audioChannels.begin(); aI!=audioChannels.end(); ++aI)
 	{
-		if (audioChannels[i]->pid == pid)
+		if ( (*aI)->pid==pid)
 		{
 			return -1;
 		}
 	}
 
-	audioChannels[audioChannelCount] = new CZapitAudioChannel();
-	audioChannels[audioChannelCount]->pid = pid;
-	audioChannels[audioChannelCount]->isAc3 = isAc3;
-	audioChannels[audioChannelCount]->description = description;
-	audioChannels[audioChannelCount]->componentTag = componentTag;
-	audioChannelCount++;
+	CZapitAudioChannel* tmp = new CZapitAudioChannel();
+		tmp->pid = pid;
+		tmp->isAc3 = isAc3;
+		tmp->description = description;
+		tmp->componentTag = componentTag;
+	audioChannels.insert(audioChannels.end(), tmp);
 
 	return 0;
 }
 
 void CZapitChannel::resetPids()
 {
-	unsigned char i;
-
-	for (i = 0; i < audioChannelCount; i++)
+	for (std::vector<CZapitAudioChannel*>::iterator aI=audioChannels.begin(); aI!=audioChannels.end(); ++aI)
 	{
-		delete audioChannels[i];
-		audioChannels[i] = NULL;
+		delete *aI;
 	}
-
+	audioChannels.clear();
 	currentAudioChannel = 0;
-	audioChannelCount = 0;
 
 	pcrPid = 0;
 	pmtPid = 0;
