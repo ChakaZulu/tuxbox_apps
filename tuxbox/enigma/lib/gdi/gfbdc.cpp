@@ -45,6 +45,8 @@ void gFBDC::exec(gOpcode *o)
 			fb->CMAP()->green[i]=o->parm.setPalette.palette->data[i].g<<8;
 			fb->CMAP()->blue[i]=o->parm.setPalette.palette->data[i].b<<8;
 			fb->CMAP()->transp[i]=o->parm.setPalette.palette->data[i].a<<8;
+			if (!fb->CMAP()->red[i])
+				fb->CMAP()->red[i]=0x100;
 		}
 		fb->PutCMAP();
 		gPixmapDC::exec(o);
