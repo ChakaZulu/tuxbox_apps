@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.17 2001/08/21 18:30:15 ge0rg Exp $
+        $Id: neutrino.cpp,v 1.18 2001/08/22 00:03:24 ge0rg Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.18  2001/08/22 00:03:24  ge0rg
+  verständliche Fehlermeldungen
+
   Revision 1.17  2001/08/21 18:30:15  ge0rg
   added power down LCD logo
 
@@ -472,7 +475,7 @@ void CNeutrinoApp::firstChannel()
 
 	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
 	{
-  		perror("Couldn't connect to server!");
+  		perror("neutrino: connect(zapit)");
 		exit(-1);
 	}
 
@@ -481,7 +484,7 @@ void CNeutrinoApp::firstChannel()
 	memset(return_buf, 0, sizeof(return_buf));
 	
 	if (recv(sock_fd, return_buf, 3,0) <= 0 ) {
-		perror("Nothing could be received\n");
+		perror("recv(zapit)");
 		exit(-1);
 	}
 	
@@ -536,7 +539,7 @@ void CNeutrinoApp::channelsInit()
 
 		if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
 		{
- 	 		perror("Couldn't connect to server!");
+ 	 		perror("neutrino: connect(zapit)");
 			exit(-1);
 		}
 
@@ -544,7 +547,7 @@ void CNeutrinoApp::channelsInit()
 		return_buf = (char*) malloc(4);
 		memset(return_buf, 0, sizeof(return_buf));
 		if (recv(sock_fd, return_buf, 3,0) <= 0 ) {
-			perror("Nothing could be received\n");
+			perror("recv(zapit)");
 			exit(-1);
 		}
 	
