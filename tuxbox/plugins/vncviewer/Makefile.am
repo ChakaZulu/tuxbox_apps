@@ -14,4 +14,4 @@ install-exec-local:
 	install -d $(CONFIGDIR)
 	$(LIBTOOL) install vnc.la $(PLUGINDIR)
 	install -m 0644 $(srcdir)/vnc.cfg $(PLUGINDIR)
-	install -m 0644 $(srcdir)/vnc.conf $(CONFIGDIR)
+	if test ! -e  $(CONFIGDIR)/vnc.conf; then cp $(srcdir)/vnc.conf $(CONFIGDIR);fi
