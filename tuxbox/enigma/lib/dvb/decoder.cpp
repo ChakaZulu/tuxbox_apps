@@ -12,6 +12,8 @@
 #include <signal.h>
 #include <errno.h>
 
+//#define OLD_VBI
+
 #undef strcpy
 #undef strcmp
 #undef strlen
@@ -21,6 +23,10 @@
 #include <ost/dmx.h>
 #include <ost/video.h>
 #include <ost/audio.h>
+
+#ifdef OLD_VBI  // oldvbi header
+#include <dbox/avia_gt_vbi.h>
+#endif
 
 typedef unsigned char __u8;
 
@@ -187,9 +193,43 @@ int Decoder::Set()
 	eDebug(" ------------> changed! %x", changed);
 
 
-  if (changed & 4)  // vtxt reinsertion (ost api)
+  if (changed & 4)
 	{
-		if ( fd.demux_vtxt == -1 )
+#ifdef OLD_VBI // for old drivers in alexW Image...
+    // vtxt reinsertion (ost api)
+    if ( fd.demux_vtxt == -1 )
+		{
+			fd.demux_vtxt=open("/dev/dbox/vbi0, O_RDWR");
+			if (fd.demux_vtxt<0)
+				eDebug("fd.demux_vtxt couldn't be opened");
+/*			else
+				eDebug("fd.demux_vtxt opened");*/
+		}
+		if ( current.tpid != -1 ) // we stop old vbi vtxt insertion
+		{
+			eDebugNoNewLine("VBI_DEV_STOP - vtxt - ");
+			if (ioctl(fd.demux_vtxt, AVIA_VBI_STOP_VTXT )<0)
+				perror("failed");
+			else
+				eDebug("ok");
+		}
+		if ( parms.tpid != -1 )  // we start old vbi vtxt insertion
+		{
+			eDebugNoNewLine("VBI_DEV_START - vtxt - ");
+			if (ioctl(fd.demux_vtxt, AVIA_VBI_START_VTXT, parms.tpid)<0)
+				perror("failed");
+			else
+				eDebug("ok");
+		}
+		else  // we have no tpid ... close device
+		{
+			close(fd.demux_vtxt);
+			fd.demux_vtxt = -1;
+//			eDebug("fd.demux_vtxt closed");
+		}
+#else
+    // vtxt reinsertion (ost api)
+    if ( fd.demux_vtxt == -1 )
 		{
 			fd.demux_vtxt=open(DEMUX_DEV, O_RDWR);
 			if (fd.demux_vtxt<0)
@@ -229,6 +269,7 @@ int Decoder::Set()
 			fd.demux_vtxt = -1;
 //			eDebug("fd.demux_vtxt closed");
 		}
+#endif    
 	}
 
 	if (changed & 0xF7)
@@ -446,7 +487,7 @@ int Decoder::Set()
  //			eDebug("fd.demux_audio closed");
  		}
 
-    if ( (changed & 0x0F) != 2 )
+    if ( (changed & 0x0F) != 2 )  //  only apid changed
     {
       if ( parms.vpid != -1 )
    		{
