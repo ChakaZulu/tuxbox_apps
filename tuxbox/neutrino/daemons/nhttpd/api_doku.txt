@@ -5,7 +5,57 @@ nhttpd /control api doku
 Der Neutrino HTTP-Server läuft auf Port 80. Die Steuerfunktionen für externe Programme sind unter dem Context /control/ zu finden. 
 Bei Problem oder Fragen Mail an derdirch@web.de oder Dirch in #dbox2
 
+1. Die Kanalliste				http://dbox/control/channellist
+2. EPG-Abfrage					http://dbox/control/epg
+3. Die DBox herunterfahren		http://dbox/control/shutdown
+4. Standby Mode					http://dbox/control/standby
+5. Lautstärke-Steuerung			http://dbox/control/volume
+6. Programm umschalten / Recode-Mode Steuerung	http://dbox/control/zapto
+7. Datum von der Box abfragen	http://dbox/control/getdate
+8. Uhrzeit von der Box abfragen	http://dbox/control/gettime
+9. Allgemeine Informationen 	http://dbox/control/info
+10. Aktuellen Kanal abfragen	http://dbox/control/getonidsid
+11. services.xml lesen			http://dbox/control/getservicesxml
+12. bouquets.xml auslesen		http://dbox/control/getbouquetsxml
+13. aktuelle cramfs Version 	http://dbox/control/version (veraltet, bitte /control/info?version benutzen)
+14. Bouquetlist abfragen	http://dbox/control/getbouquets
+15. Bouquet abfragen		http://dbox/control/getbouquet
+
+
+TODO:
+bouquets
+bouquet
+[13:16] <|McClean> dbox/setmode?radio
+[13:16] <|McClean> dbox/setmode?tv
+[13:16] <|McClean> dbox/setmode?record
+[13:16] <|McClean> wobei record optionen zusätzlich verstehen muss
+[13:16] <|McClean> dbox/setmode?record=start
+[13:16] <|McClean> dbox/setmode?record=stop
+[13:17] <|McClean> dbox/setmode?record=stop&stopplayback=true
+[13:17] <|McClean> wobei stopplayback optional sein muss
+[13:17] <|McClean> und normal nicht gestoppt werden soll
+[13:17] <Dirch> und dbox/setmode?status
+[13:17] <|McClean> sectionsd stoppen wir immer
+[13:17] <|McClean> jo status
+[13:17] <|McClean> zum abfragen
+[13:17] <|McClean> wär ok
+
+[14:11] <|McClean> so dann machst das um shutdown zu machen:
+[14:14] <|McClean> CEventServer evServer;
+[14:14] <|McClean> evServer.registerEvent2( NeutrinoMessages::SHUTDOWN, CEventServer::INITID_NHTTPD, "/tmp/neutrino.sock");
+[14:14] <|McClean> evServer.sendEvent(NeutrinoMessages::SHUTDOWN, 80);
+[14:14] <|McClean> so - das sollte gehen
+[14:14] <|McClean> wenns in nhttpd drin ist sag bidde bescheit
+[14:14] <|McClean> neutrino macht da im moment noch nix
+[14:16] <|McClean> den eventserver kannst dir global in nhttpd machen
+[14:16] <|McClean> und das registerevent dann nur 1x
+[14:16] <|McClean> und dann wo dus brauchst das sendevent
+[14:16] <Dirch> ok, ich probiers mal aus
+[14:16] <|McClean> denn du noch STANDBY_ON und STANDBY_OFF registerst kannst das alles schicken
+
+**********************************************************************************************
 1. Die Kanalliste
+**********************************************************************************************
 Handler: http://dbox/control/channellist
 
 Parameter: keine
@@ -30,7 +80,9 @@ Beispiel:
 
 
 
+**********************************************************************************************
 2. EPG-Abfrage
+**********************************************************************************************
 Handler: http://dbox/control/epg
 
 Parameter: keine
@@ -110,7 +162,12 @@ Beispiel:
 69531 20:00 15 4556783630 News on the Hour
 
 
+
+
+
+**********************************************************************************************
 3. Die DBox herunterfahren
+**********************************************************************************************
 Handler: http://dbox/control/shutdown
 
 Parameter: keine
@@ -129,7 +186,41 @@ ok
 
 
 
-4. Lautstärke-Steuerung
+
+**********************************************************************************************
+4. Standby Mode 
+**********************************************************************************************
+Handler: http://dbox/control/standby
+
+Parameter: on
+Rückgabe:
+
+Schaltet in den Standby Mode
+
+Rückgabe-Format: ok /error
+
+Beispiel:
+
+>>>http://dbox/control/standby?on
+ok
+
+Parameter: off
+Rückgabe:
+
+Schaltet den Standby Mode aus
+
+Rückgabe-Format: ok /error
+
+Beispiel:
+
+>>>http://dbox/control/standby?off
+ok
+
+
+
+**********************************************************************************************
+5. Lautstärke-Steuerung
+**********************************************************************************************
 Handler: http://dbox/control/volume
 
 Parameter: keine
@@ -210,7 +301,10 @@ Beispiel:
 
 
 
-5. Programm umschalten / Recode-Mode Steuerung
+
+**********************************************************************************************
+6. Programm umschalten / Recode-Mode Steuerung
+**********************************************************************************************
 Handler: http://dbox/control/zapto
 
 Parameter: keine
@@ -333,7 +427,7 @@ ok
 
 
 
-6. Datum von der Box abfragen
+7. Datum von der Box abfragen
 Handler: http://dbox/control/getdate
 
 Parameter: keine
@@ -352,7 +446,10 @@ Beispiel:
 
 
 
-7. Uhrzeit von der Box abfragen
+
+**********************************************************************************************
+8. Uhrzeit von der Box abfragen
+**********************************************************************************************
 Handler: http://dbox/control/gettime
 
 Parameter: keine
@@ -371,7 +468,10 @@ Beispiel:
 
 
 
-8. Allgemeine Informationen abfragen
+
+**********************************************************************************************
+9. Allgemeine Informationen abfragen
+**********************************************************************************************
 Handler: http://dbox/control/info
 
 Parameter: streaminfo
@@ -418,7 +518,11 @@ videoformat 4:3
 
 
 
- 9. Aktuellen Kanal abfragen
+
+
+**********************************************************************************************
+10. Aktuellen Kanal abfragen
+**********************************************************************************************
 Handler: http://dbox/control/getonidsid
 
 Parameter: 
@@ -433,8 +537,14 @@ Beispiel:
 >>>http://dbox/control/getonidsid
 93647
 
-10. services.xml lesen
-Handler: http://dbox/control/getservices
+
+
+
+
+**********************************************************************************************
+11. services.xml lesen
+**********************************************************************************************
+Handler: http://dbox/control/getservicesxml
 
 Parameter: 
 Rückgabe:
@@ -444,7 +554,7 @@ Es wird der Inhalt der Datei /var/tuxbox/config/zapit/services.xml zurückgegeben
 
 Beispiel:
 
->>>http://dbox/control/getservices
+>>>http://dbox/control/getservicesxml
 <?xml version="1.0" encoding="iso-8859-1"?>
 <ZAPIT>
 <cable>
@@ -454,8 +564,12 @@ Beispiel:
 
 
 
-11 bouquets.xml auslesen
-Handler: http://dbox/control/getbouquets
+
+
+**********************************************************************************************
+12. bouquets.xml auslesen
+**********************************************************************************************
+Handler: http://dbox/control/getbouquetsxml
 
 Parameter: 
 Rückgabe:
@@ -465,7 +579,7 @@ Es wird der Inhalt der Datei /var/tuxbox/config/zapit/bouquet.xml zurückgegeben.
 
 Beispiel:
 
->>>http://dbox/control/getbouquets
+>>>http://dbox/control/getbouquetsxml
 
 <?xml version="1.0" encoding="iso-8859-1"?>
 <ZAPIT>
@@ -474,7 +588,11 @@ Beispiel:
 ...
 
 
-12 aktuelle cramfs Version auslesen ( veraltet, bitte /control/info?version benutzen )
+
+
+**********************************************************************************************
+13. aktuelle cramfs Version auslesen ( veraltet, bitte /control/info?version benutzen )
+**********************************************************************************************
 Handler: http://dbox/control/version
 
 Parameter: 
@@ -490,3 +608,46 @@ version: 1.1.27032002-21.8
 md5sum: f1d7d47578bb9040a82085182934ce0e
 Erstellt von alexW
 
+
+
+
+**********************************************************************************************
+14. Bouquetlist abfragen
+**********************************************************************************************
+Handler: http://dbox/control/getbouquets
+
+Parameter: 
+Rückgabe:
+
+Es werden alle Bouquets zurückgeliefert
+
+Beispiel:
+
+>>>http://dbox/control/getbouquets
+1 ARD
+3 Premiere World
+4 VisionProgramme
+5 ZDFvision
+
+
+
+
+**********************************************************************************************
+15. Bouquet abfragen
+**********************************************************************************************
+Handler: http://dbox/control/getbouquet
+
+Parameter: Bouquet Nr.
+Rückgabe:
+
+Es werden alle Sender des Bouquets zurückgeliefert
+
+Beispiel:
+>>>http://dbox/control/getbouquet?1
+1 93754 ARD-Online-Kanal
+2 93742 B1 Berlin
+3 93737 EinsExtra
+4 93738 EinsFestival
+5 93739 EinsMuXx
+6 93740 MDR FERNSEHEN
+7 93760 NDR Fernsehen

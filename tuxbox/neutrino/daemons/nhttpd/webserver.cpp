@@ -3,6 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski
 
+	$Id: webserver.cpp,v 1.9 2002/04/22 20:38:13 dirch Exp $
 
 	License: GPL
 
@@ -20,7 +21,6 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-	$ID$
 
 */
 
@@ -31,6 +31,7 @@
 #include <sys/socket.h> 
 #include <sys/wait.h> 
 
+#define NHTTPD_CONFIGFILE CONFIGDIR "/nhttpd.conf"
 
 //-------------------------------------------------------------------------
 TWebserver::TWebserver()
@@ -39,23 +40,24 @@ TWebserver::TWebserver()
 	ListenSocket = 0;
 	PublicDocumentRoot = "";
 	PrivateDocumentRoot = "";
-	TimerList = NULL;
 	DEBUG=false;
 }
 //-------------------------------------------------------------------------
 TWebserver::~TWebserver()
 {
+	Config->saveConfig(NHTTPD_CONFIGFILE );
+
 	if(ListenSocket)
 		Stop();
 
 	if(WebDbox)
 		delete WebDbox;
-	if(TimerList)
-		delete TimerList;
 }
 //-------------------------------------------------------------------------
-bool TWebserver::Init(int port,string publicdocumentroot,bool debug,bool verbose,bool threads, bool auth)
+//bool TWebserver::Init(int port,string publicdocumentroot,bool debug,bool verbose,bool threads, bool auth)
+bool TWebserver::Init()
 {
+/*
 	Port=port;
 	DEBUG = debug;
 	THREADS = threads;
@@ -63,6 +65,36 @@ bool TWebserver::Init(int port,string publicdocumentroot,bool debug,bool verbose
 	MustAuthenticate = auth;
 	PrivateDocumentRoot = PRIVATEDOCUMENTROOT;
 	PublicDocumentRoot = publicdocumentroot;
+*/
+	Config = new CConfigFile(',');
+
+	char tmp[16];
+
+	if (!Config->loadConfig(NHTTPD_CONFIGFILE) )
+	{
+		Config->setInt("Port", 80);
+		Config->setBool("DEBUG",false);
+		Config->setBool("THREADS",false);
+		Config->setBool("VERBOSE",false);
+		Config->setBool("Authenticate",false);
+		Config->setString("User","root");
+		Config->setString("Password","dbox2");
+		Config->setString("PublicDocRoot",PUBLICDOCUMENTROOT);
+		Config->setString("PrivatDocRoot",PRIVATEDOCUMENTROOT);
+		Config->saveConfig(NHTTPD_CONFIGFILE);
+	}
+ 
+	Port = Config->getInt("Port");
+	DEBUG = Config->getBool("DEBUG");
+	THREADS = Config->getBool("THREADS");
+	VERBOSE = Config->getBool("VERBOSE");
+	MustAuthenticate = Config->getBool("Authenticate");
+	PrivateDocumentRoot = Config->getString("PrivatDocRoot");
+	PublicDocumentRoot = Config->getString("PublicDocRoot");
+
+	EventServer.registerEvent2( NeutrinoMessages::SHUTDOWN, CEventServer::INITID_NHTTPD, "/tmp/neutrino.sock");
+	EventServer.registerEvent2( NeutrinoMessages::STANDBY_ON, CEventServer::INITID_NHTTPD, "/tmp/neutrino.sock");
+	EventServer.registerEvent2( NeutrinoMessages::STANDBY_OFF, CEventServer::INITID_NHTTPD, "/tmp/neutrino.sock");
 	WebDbox = new TWebDbox(this);
 	if(DEBUG) printf("WebDbox initialized\n");
 	return true;
@@ -80,7 +112,6 @@ bool TWebserver::Start()
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	servaddr.sin_port = htons(Port);
-	TimerList = new TTimerList(this);
 	
 	if ( bind(ListenSocket, (SA *) &servaddr, sizeof(servaddr)) !=0)
 	{
@@ -138,8 +169,6 @@ CWebserverRequest *req = (CWebserverRequest *)request;
 	ThreadsCount--;
 	if(req->Parent->DEBUG) printf("*********** Thread %X beendet, ThreadCount: %d\n",(int)pthread_self(),ThreadsCount);
 	pthread_exit((void *)NULL);
-//	if(req->Parent->DEBUG) printf("*********** Thread %ld gelöscht\n",(int)pthread_self());
-//	pthread_detach(pthread_self());
 }
 //-------------------------------------------------------------------------
 void TWebserver::DoLoop()

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$ID$
+	$Id: request.cpp,v 1.9 2002/04/22 20:38:13 dirch Exp $
 
 	License: GPL
 
@@ -44,7 +44,7 @@ CWebserverRequest::CWebserverRequest(TWebserver *server)
 	Param_String="";
 	ContentType = "";
 //	Boundary = NULL;
-	Upload = NULL;
+//	Upload = NULL;
 	HttpStatus = 0;
 }
 
@@ -72,6 +72,7 @@ bool CWebserverRequest::GetRawRequest()
 //-------------------------------------------------------------------------
 void CWebserverRequest::SplitParameter(string param_str)
 {
+string nummer = "1";
 	if(param_str.length() > 0)
 	{
 		int pos = param_str.find('=');
@@ -82,7 +83,8 @@ void CWebserverRequest::SplitParameter(string param_str)
 		}
 		else
 		{
-			ParameterList["1"] = param_str;
+			ParameterList[nummer] = param_str;
+			nummer[0]++;
 			if(Parent->DEBUG) printf("Parameter[1] = '%s'\n",param_str.c_str());
 		}
 	}
@@ -194,6 +196,34 @@ string sheader;
 }
 
 //-------------------------------------------------------------------------
+bool CWebserverRequest::ParseBoundaries(string bounds)
+{
+	printf("formdata: '%s'\n",bounds.c_str());
+	int i=0;
+	char * e_ende;
+	char * anfang = (char *) bounds.c_str();
+	char * ende = (char *) bounds.c_str() + bounds.length();
+	do
+	{	
+		anfang = strstr(anfang,Boundary.c_str());
+//		printf("anfang: %s\n",anfang);
+		if(anfang != 0)
+		{
+			e_ende = strstr(anfang +1,Boundary.c_str());
+			if(e_ende == 0)
+				e_ende = ende - 4;
+//			printf("ende: %s\n",e_ende); 
+			boundaries[i] = string(anfang + Boundary.length() +2,e_ende - (anfang + Boundary.length()+2) -2);
+			printf("boundary[%d]='%s'\n",i,boundaries[i].c_str());
+			anfang = e_ende;
+			i++;
+		}
+	}while(anfang > 0 && anfang < (ende - 2));
+
+	return true;
+}
+
+//-------------------------------------------------------------------------
 bool CWebserverRequest::ParseRequest()
 {
 //int i = 0,zeile2_offset = 0;
@@ -214,18 +244,46 @@ int ende;
 
 		if(ParseFirstLine(zeile1))
 		{
-			int headerende = rawbuffer.length() - 1;
+			int i;
+			for(i = 0; ((rawbuffer[i] != '\n') || (rawbuffer[i+2] != '\n')) && (i < rawbuffer.length());i++);
+//				printf("rawbuffer[%d] = '%c',rawbuffer[%d] = '%c'\n",i,rawbuffer[i],i+1,rawbuffer[i+1]);
+			int headerende = i; //rawbuffer.find("\n\n");//length() - 1;
+			if(Parent->DEBUG) printf("headerende: %d buffer_len: %d\n",headerende,rawbuffer_len);
 			if(headerende == 0)
 			{
 				printf("Keine Header gefunden\n");
 				Send500Error();
 				return false;
 			}
-			string header = rawbuffer.substr(ende+1,headerende - ende - 4);
+			string header = rawbuffer.substr(ende+1,headerende - ende - 2);
 			ParseHeader(header);
+			if(Method == M_POST) // TODO: Und testen ob content = formdata
+			{				
+				string t = "multipart/form-data; boundary=";
+				if(HeaderList["Content-Type"].compare(0,t.length(),t) == 0)
+				{
+					Boundary = "--" + HeaderList["Content-Type"].substr(t.length(),HeaderList["Content-Type"].length() - t.length());
+					if(Parent->DEBUG) printf("Boundary: '%s'\n",Boundary.c_str());
+					if((headerende + 3) < rawbuffer_len)
+						ParseBoundaries(rawbuffer.substr(headerende + 3,rawbuffer_len - (headerende + 3)));
+					HandleUpload();
+				}			
+				else if(HeaderList["Content-Type"].compare("application/x-www-form-urlencoded") == 0)
+				{
+					if(Parent->DEBUG) printf("Form Daten in Parameter String\n");
+					if((headerende + 3) < rawbuffer_len)
+					{
+						string params = rawbuffer.substr(headerende + 3,rawbuffer_len - (headerende + 3));
+						if(params[params.length()-1] == '\n')
+							params.substr(0,params.length() -2);
+						ParseParams(params);
+					}
+				}
+				
+				if(Parent->DEBUG) printf("Method Post !\n");
+			}
 
-
-/*			
+/*
 			if(Method == M_POST) // TODO: Und testen ob content = formdata
 			{
 				if( (ende + 3) < rawbuffer + rawbuffer_len)
@@ -264,7 +322,55 @@ int ende;
 	}
 }
 //-------------------------------------------------------------------------
+bool CWebserverRequest::HandleUpload()
+{
+//	char buffer[1024];
+	int t = 0;
+	FILE *output;
+	int count = 0;
 
+	SocketWrite("HTTP/1.1 100 Continue \n");		// Erstmal weitere Daten anfordern
+
+	if(HeaderList["Content-Length"] != "")
+	{
+		if(Parent->DEBUG) printf("Contenlaenge gefunden\n");
+		int contentsize = atol(HeaderList["Content-Length"].c_str());
+		if(Parent->DEBUG) printf("Contenlaenge :%ld\n",contentsize);
+		char *buffer2 =(char *) malloc(contentsize);
+		if(!buffer2)
+		{
+			printf("Kein Speicher für upload\n");
+			return false;
+		}
+		long long gelesen = 0;
+		if(Parent->DEBUG) printf("Buffer ok Groesse:%ld\n",contentsize);
+		while(gelesen < contentsize)
+		{
+			t = read(Socket,&buffer2[gelesen],contentsize-gelesen);
+			if(t <= 0)
+				printf("nix mehr\n");
+			gelesen += t;
+			if(Parent->DEBUG) printf("gelesen %lld\n",gelesen);
+		}
+		printf("fertig\n");
+		FILE *out = fopen("/var/tmp/test.ausgabe","w");
+		if(out != NULL)
+		{
+			fwrite(buffer2,gelesen,1,out);
+			fclose(out);
+		}
+		else
+			printf("nicht geschreiben\n");
+		free(buffer2);
+		
+		if(gelesen == contentsize)
+		{
+			if(Parent->DEBUG) printf("Upload komplett gelesen: %ld bytes\n",contentsize);
+			return true;
+		}
+	}
+}
+//-------------------------------------------------------------------------
 void CWebserverRequest::PrintRequest()
 {
 	char method[6] = {0};
@@ -311,14 +417,16 @@ void CWebserverRequest::Send500Error()
 }
 //-------------------------------------------------------------------------
 
-void CWebserverRequest::SendPlainHeader(char *contenttype = NULL)
+void CWebserverRequest::SendPlainHeader(string contenttype = "text/plain")
 {
-	SocketWrite("HTTP/1.0 200 OK\nContent-Type: ");
+	SocketWrite("HTTP/1.0 200 OK\nContent-Type: " + contenttype + "\n\n");
+/*
 	if(contenttype)
 		SocketWrite(contenttype);
 	else
 		SocketWrite("text/plain");
 	SocketWrite("\n\n");
+*/
 	HttpStatus = 200;
 }
 
@@ -349,13 +457,10 @@ void CWebserverRequest::RewriteURL()
 			printf("[nhttpd] Kein Dateiname !\n");	
 	}
 
-	if(Parent->DEBUG) printf("Path: '%s'\n",Path.c_str());
-	if(Parent->DEBUG) printf("Filename: '%s'\n",Filename.c_str());
-
 	if( (strncmp(Path.c_str(),"/fb",3) != 0) && (strncmp(Path.c_str(),"/control",8) != 0) )	// Nur umschreiben wenn nicht mit /fb/ anfängt
 	{
 //		sprintf(urlbuffer,"%s%s\0",Parent->PublicDocumentRoot->c_str(),Path.c_str());
-		Path = Parent->PublicDocumentRoot + Path;
+		Path = Parent->PrivateDocumentRoot + Path;
 //		Path = urlbuffer;
 		if(Parent->DEBUG) printf("Umgeschrieben: '%s'\n",Path.c_str());
 	}
@@ -396,7 +501,7 @@ void CWebserverRequest::RewriteURL()
 
 		if(fileext > 0)		// Dateiendung
 		{
-			FileExt = Filename.substr(fileext,Filename.length()-fileext);
+			FileExt = Filename.substr(fileext+1,Filename.length()-(fileext+1));
 			if(Parent->DEBUG) printf("FileExt = %s\n",FileExt.c_str());
 		}
 	}
@@ -405,7 +510,6 @@ void CWebserverRequest::RewriteURL()
 //-------------------------------------------------------------------------
 bool CWebserverRequest::SendResponse()
 {
-int file;
 	if(Parent->DEBUG) printf("SendeResponse()\n");
 
 	RewriteURL();		// Erst mal die URL umschreiben
@@ -426,35 +530,28 @@ int file;
 	{
 	// Normale Datei
 		if(Parent->DEBUG) printf("Normale Datei\n");
-		if( (file = OpenFile(Path,Filename) ) != -1 )		// Testen ob Datei auf Platte geöffnet werden kann
+		if( (tmpint = OpenFile(Path,Filename) ) != -1 )		// Testen ob Datei auf Platte geöffnet werden kann
 		{											// Wenn Datei geöffnet werden konnte
 			SocketWrite("HTTP/1.0 200 OK\n");		
 			HttpStatus = 200;
-			if( FileExt != "" )		// Anhand der Dateiendung den Content bestimmen
+			if( FileExt == "" )		// Anhand der Dateiendung den Content bestimmen
 				ContentType = "text/html";
 			else
 			{
-				
-				if( (strcasecmp(FileExt.c_str(),"html") == 0) || (strcasecmp(FileExt.c_str(),"htm") == 0) )
-				{
+				if(  (FileExt.compare("html") == 0) || (FileExt.compare("htm") == 0) )
 					ContentType = "text/html";
-				}
-				else if(strcasecmp(FileExt.c_str(),"gif") == 0)
-				{
+				else if(FileExt.compare("gif") == 0)
 					ContentType = "image/gif";
-				}
-				else if(strcasecmp(FileExt.c_str(),"jpg") == 0)
-				{
+				else if(FileExt.compare("jpg") == 0)
 					ContentType = "image/jpeg";
-				}
+				else if(FileExt.compare("xml") == 0)
+					ContentType = "text/xml";
 				else
 					ContentType = "text/plain";
 
 			}
 			SocketWrite("Content-Type: " + ContentType + "\n\n");
-
-			if(Parent->DEBUG) printf("content-type: %s - %s\n", ContentType.c_str(),Filename.c_str());
-			SendOpenFile(file);
+			SendOpenFile(tmpint);
 		}
 		else
 		{											// Wenn Datei nicht geöffnet werden konnte
@@ -470,7 +567,6 @@ bool CWebserverRequest::EndRequest()
 	if(Socket)
 	{
 		close(Socket);
-		if(Parent->DEBUG) printf("Socket geschlossen\n");
 		Socket = 0;
 	}
 	return true;
@@ -495,10 +591,9 @@ void CWebserverRequest::SocketWriteData( char* data, long length )
 
 bool CWebserverRequest::SendFile(string path,string filename)
 {
-int file;
-	if( (file = OpenFile(path,filename) ) != -1 )		// Testen ob Datei auf Platte geöffnet werden kann
+	if( (tmpint = OpenFile(path,filename) ) != -1 )		// Testen ob Datei auf Platte geöffnet werden kann
 	{											// Wenn Datei geöffnet werden konnte
-		SendOpenFile(file);
+		SendOpenFile(tmpint);
 		return true;
 	}
 	else
@@ -507,63 +602,47 @@ int file;
 //-------------------------------------------------------------------------
 void CWebserverRequest::SendOpenFile(int file)
 {
-	long filesize = lseek( file, 0, SEEK_END);
+#define BUFSIZE 1024
+	tmplong  = lseek( file, 0, SEEK_END);
 	lseek( file, 0, SEEK_SET);
 
-	char buf[1024];
-	long fsize = filesize;
-	while(fsize>0)
+	char *buf = new char[BUFSIZE] ;
+	while(tmplong>0)
 	{
-		long block = fsize;
-		if(block>(long)sizeof(buf))
+		long block = tmplong;
+		if(block>BUFSIZE)
 		{
-			block = sizeof(buf);
+			block = BUFSIZE;
 		}
-		read( file, &buf, block);
-		SocketWriteData((char *)&buf, block);
-		fsize -= block;
+		read( file, buf, block);
+		SocketWriteData(buf, block);
+		tmplong -= block;
 	}
 	close(file);
+	delete[] buf;
 	if(Parent->DEBUG) printf("Datei gesendet\n");
 }
 //-------------------------------------------------------------------------
 int CWebserverRequest::OpenFile(string path, string filename)
 {
-int file = 0;
-string path_name;
-	
+//tmpint als file und
+//tmpstring als pathfilename missbraucht
+	tmpint = 0;
+	if(Parent->DEBUG) printf("OpenFile: %s %s\n",path.c_str(),filename.c_str());
 	if(path[path.length()-1] != '/')
-		path_name = path + "/" + filename;
+		tmpstring = path + "/" + filename;
 	else
-		path_name = path + filename;
-	if(path_name.length() > 0)
+		tmpstring = path + filename;
+	if(tmpstring.length() > 0)
 	{
-		file = open( path_name.c_str(), O_RDONLY );
-		if (file<=0)
+		tmpint = open( tmpstring.c_str(), O_RDONLY );
+		if (tmpint<=0)
 		{
-			printf("cannot open file %s\n", path_name.c_str());
+			printf("cannot open file %s\n", tmpstring.c_str());
 			if(Parent->DEBUG) perror("");
 		}	
 	}
-	return file;
-/*
-	char *fname = new char[strlen(path) + strlen(filename)+1];
-	if(fname)
-	{
-		char format[8]={0};
-		strcpy(format,((path[strlen(path)-1] != '/') && (filename[0] != '/'))?"%s/%s\0":"%s%s\0");
-		memset(fname,0,strlen(path) + strlen(filename)+1);
-		sprintf(fname,format,path,filename);
-		file = open( fname, O_RDONLY );
-		if (file<=0)
-		{
-			printf("cannot open file %s\n", fname);
-			if(Parent->DEBUG) perror("");
-		}	
-		delete[] fname;
-	}
-	return file;
-*/
+	return tmpint;
 }
 
 

@@ -16,11 +16,10 @@
 #include "../controld/clientlib/controldclient.h"
 #include "../../sections/clientlib/sectionsdclient.h"
 #include "../../zapit/clientlib/zapitclient.h"
+#include "../timerd/clientlib/timerdclient.h"
 
 
 using namespace std;
-
-#define EZAP_PORT 1505
 
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
@@ -42,6 +41,7 @@ class TWebDbox
 	CControldClient controld;
 	CSectionsdClient sectionsd;
 	CZapitClient zapit;
+	CTimerdClient timerd;
 	CZapitClient::BouquetChannelList ChannelList;
 	map<unsigned, CChannelEvent *> ChannelListEvents;
 	map<int, CZapitClient::BouquetChannelList> BouquetsList;

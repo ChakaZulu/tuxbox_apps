@@ -14,6 +14,10 @@
 
 #include "pthread.h"
 #include "timer.h"
+#include "config.h"
+#include "../../libconfigfile/configfile.h"
+#include "../neutrinoNG/neutrinoMessages.h"
+#include "../libevent/eventserver.h"
 
 using namespace std;
 
@@ -24,7 +28,7 @@ using namespace std;
 
 class TWebDbox;
 class TWebserverRequest;
-class TTimerList;
+//class TTimerList;
 
 struct Tmconnect
 {
@@ -42,18 +46,22 @@ class TWebserver
 	pthread_t		Thread1;
 	pthread_t		timerthread;
 	bool			THREADS;
-	TTimerList		*TimerList;
+//	TTimerList		*TimerList;
+
 
 public:
 	bool			DEBUG;
 	bool			VERBOSE;
 	bool			MustAuthenticate;
 	TWebDbox		*WebDbox;
+	CEventServer	EventServer;
+	CConfigFile		*Config;
 
 	TWebserver();
 	~TWebserver();
 
-	bool Init(int port,string publicdocumentroot,bool debug, bool verbose,bool threads,bool auth);
+//	bool Init(int port,string publicdocumentroot,bool debug, bool verbose,bool threads,bool auth);
+	bool Init();
 	bool Start();
 	void DoLoop();
 	void Stop();

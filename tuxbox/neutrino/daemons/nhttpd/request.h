@@ -40,7 +40,13 @@ private:
 
 	int OpenFile(string path, string filename);
 	void SendOpenFile(int );
-//	TString *Boundary;
+
+	string Boundary;
+	
+	long tmplong;
+	int tmpint;
+	string tmpstring;
+	
 
 public:
  	int sock_fd;
@@ -57,6 +63,9 @@ public:
 
 	void SendHTMLFooter();
 	void SendHTMLHeader(char * Titel);
+	void SendPlainHeader(string contenttype = "text/plain");
+	void Send404Error();
+	void Send500Error();
 
 	int Method;
 	string URL;
@@ -68,6 +77,8 @@ public:
 
 	CStringList ParameterList;
 	CStringList HeaderList;
+	map<int,string> boundaries;
+
 	
 	int HttpStatus;
 
@@ -75,19 +86,20 @@ public:
 
 	CWebserverRequest(TWebserver *server);
 	~CWebserverRequest();
+
 	bool GetRawRequest();
 	bool ParseRequest();
 	bool ParseParams(string param_string);
 	bool ParseFirstLine(string zeile);
 	bool ParseHeader(string header);
-	void Send404Error();
-	void Send500Error();
-	void SendPlainHeader(char *contenttype = NULL);
+	bool ParseBoundaries(string bounds);
+
+	bool HandleUpload();
 	bool HandleUpload(char * Name);
 	void PrintRequest();
 	bool SendResponse();
 	bool EndRequest();
-	TUpload *Upload;
+//	TUpload *Upload;
 	friend class TWebDbox;
 //	friend class TUpload;
 };
