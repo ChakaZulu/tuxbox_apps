@@ -34,6 +34,7 @@
 
 #include "../widget/menue.h"
 #include "libnet.h"
+#include "libucodes/libucodes.h"
 
 
 class CStartNeutrinoDirectNotifier : public CChangeObserver
@@ -91,6 +92,12 @@ class CNVODChangeExec : public CMenuTarget
 };
 
 class CStreamFeaturesChangeExec : public CMenuTarget
+{
+	public:
+		int exec(CMenuTarget* parent, string actionKey);
+};
+
+class CUCodeCheckExec : public CMenuTarget
 {
 	public:
 		int exec(CMenuTarget* parent, string actionKey);

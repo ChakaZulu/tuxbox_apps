@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.178 2002/02/28 12:05:34 field Exp $
+        $Id: neutrino.cpp,v 1.179 2002/02/28 15:03:55 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,8 +32,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
-  Revision 1.178  2002/02/28 12:05:34  field
-  Kleinigkeiten
+  Revision 1.179  2002/02/28 15:03:55  field
+  Weiter Updates :)
 
   Revision 1.177  2002/02/28 01:49:27  field
   Ein/Aus Handling verbessert, SectionsD gepaused beim Update
@@ -516,7 +516,6 @@
 #include <config.h>
 
 #include "neutrino.h"
-#include "include/debug.h"
 
 #define NEUTRINO_CPP
 #include "global.h"
@@ -545,7 +544,6 @@ static void initGlobals(void)
 	g_EventList = NULL;
 	g_StreamInfo = NULL;
 	g_ScreenSetup = NULL;
-	g_UcodeCheck = NULL;
 
 	g_Locale = NULL;
 	g_PluginList = NULL;
@@ -1004,9 +1002,10 @@ void CNeutrinoApp::isCamValid()
 		exit(-1);
 	}
 
-	if (ca_verid != 33 && ca_verid != 18 && ca_verid != 68)
+	if  (ca_verid != 33 && ca_verid != 18 && ca_verid != 68)
 	{
 		printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n!!\t\t\t\t\t\t\t!!\n!!\tATTENTION, YOUR CARD DOES NOT MATCH CAMALPHA.BIN!!\n!!\t\t\t\t\t\t\t!!\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+		ShowMsg ( "messagebox.error", g_Locale->getText("cam.wrong"), CMessageBox::mbrCancel, CMessageBox::mbCancel );
 	}
 
 }
@@ -1380,7 +1379,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service)
 	service.addItem( new CMenuForwarder("servicemenu.scants", true, "", TSScan) );
 
 	//ucodecheck
-	service.addItem( new CMenuForwarder("servicemenu.ucodecheck", true, "", g_UcodeCheck ) );
+	service.addItem( new CMenuForwarder("servicemenu.ucodecheck", true, "", UCodeChecker ) );
 	//	miscSettings.addItem( new CMenuForwarder("miscsettings.reload_services", true, "", g_ReloadServices ) );
 
 
@@ -1929,7 +1928,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_InfoViewer = new CInfoViewer;
 	g_StreamInfo = new CStreamInfo;
 	g_ScanTS = new CScanTs;
-	g_UcodeCheck = new CUCodeCheck;
 	g_ScreenSetup = new CScreenSetup;
 	g_EventList = new EventList;
 	g_Update = new CFlashUpdate;
@@ -1949,6 +1947,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	audioSetupNotifier = new CAudioSetupNotifier;
 	videoSetupNotifier = new CVideoSetupNotifier;
 	APIDChanger        = new CAPIDChangeExec;
+	UCodeChecker	   = new CUCodeCheckExec;
 	NVODChanger        = new CNVODChangeExec;
 	StreamFeaturesChanger = new CStreamFeaturesChangeExec;
 
@@ -2689,7 +2688,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.178 2002/02/28 12:05:34 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.179 2002/02/28 15:03:55 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

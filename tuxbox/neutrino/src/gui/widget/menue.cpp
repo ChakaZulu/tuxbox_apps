@@ -30,11 +30,14 @@
 */
 
 /*
-$Id: menue.cpp,v 1.43 2002/02/28 12:05:34 field Exp $
+$Id: menue.cpp,v 1.44 2002/02/28 15:03:55 field Exp $
 
 
 History:
  $Log: menue.cpp,v $
+ Revision 1.44  2002/02/28 15:03:55  field
+ Weiter Updates :)
+
  Revision 1.43  2002/02/28 12:05:34  field
  Kleinigkeiten
 
@@ -127,7 +130,6 @@ History:
 
 
 #include "menue.h"
-#include "../include/debug.h"
 #include "../global.h"
 
 CMenuWidget::CMenuWidget(string Name, string Icon, int mwidth, int mheight)
@@ -281,7 +283,7 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 					}
 					break;
 
-				//pushback only these Keys
+/*				//pushback only these Keys
 				case (CRCInput::RC_red):
 				case (CRCInput::RC_green):
 				case (CRCInput::RC_yellow):
@@ -291,6 +293,7 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 						msg = CRCInput::RC_timeout;
 					}
 					break;
+*/
 				default:
 					if ( neutrino->handleMsg( msg, data ) == messages_return::cancel_all )
 					{

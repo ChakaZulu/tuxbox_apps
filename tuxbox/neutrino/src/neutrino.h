@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.56 2002/02/28 12:05:34 field Exp $
+//  $Id: neutrino.h,v 1.57 2002/02/28 15:03:55 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,8 +31,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
-//  Revision 1.56  2002/02/28 12:05:34  field
-//  Kleinigkeiten
+//  Revision 1.57  2002/02/28 15:03:55  field
+//  Weiter Updates :)
 //
 //  Revision 1.55  2002/02/28 01:49:27  field
 //  Ein/Aus Handling verbessert, SectionsD gepaused beim Update
@@ -208,7 +208,6 @@
 #include "helpers/settings.h"
 #include "helpers/streaminfo.h"
 #include "helpers/locale.h"
-#include "helpers/ucodecheck.h"
 #include "widget/messagebox.h"
 
 #include <string>
@@ -306,6 +305,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		CKeySetupNotifier       *keySetupNotifier;
 		CAPIDChangeExec         *APIDChanger;
 		CNVODChangeExec         *NVODChanger;
+		CUCodeCheckExec			*UCodeChecker;
 		CStreamFeaturesChangeExec	*StreamFeaturesChanger;
 
 		CChannelList		*channelList;

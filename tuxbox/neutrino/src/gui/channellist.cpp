@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.68 2002/02/27 22:51:13 field Exp $
+// $Id: channellist.cpp,v 1.69 2002/02/28 15:03:55 field Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.69  2002/02/28 15:03:55  field
+// Weiter Updates :)
+//
 // Revision 1.68  2002/02/27 22:51:13  field
 // Tasten kaputt gefixt - sollte wieder gehen :)
 //
@@ -225,7 +228,6 @@
 //
 
 #include "channellist.h"
-#include "../include/debug.h"
 #include "../global.h"
 
 #define info_height 60
@@ -628,6 +630,7 @@ void CChannelList::zapTo(int pos)
 {
 	if ( (pos >= (signed int) chanlist.size()) || (pos< 0) )
 	{
+		ShowMsg ( "messagebox.error", g_Locale->getText("channellist.nonefound"), CMessageBox::mbrCancel, CMessageBox::mbCancel );
 		return;
 	}
 	selected= pos;
@@ -651,7 +654,7 @@ int CChannelList::numericZap(int key)
 
 	if(chanlist.size()==0)
 	{
-		//evtl. anzeige dass keine kanalliste....
+		ShowMsg ( "messagebox.error", g_Locale->getText("channellist.nonefound"), CMessageBox::mbrCancel, CMessageBox::mbCancel );
 		return res;
 	}
 

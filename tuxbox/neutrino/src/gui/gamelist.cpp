@@ -28,9 +28,12 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-$Id: gamelist.cpp,v 1.36 2002/02/27 22:51:13 field Exp $
+$Id: gamelist.cpp,v 1.37 2002/02/28 15:03:55 field Exp $
 
 $Log: gamelist.cpp,v $
+Revision 1.37  2002/02/28 15:03:55  field
+Weiter Updates :)
+
 Revision 1.36  2002/02/27 22:51:13  field
 Tasten kaputt gefixt - sollte wieder gehen :)
 
@@ -77,7 +80,6 @@ gamelist: eigener Fontdef fuer 2-zeiliges Menue
 */
 
 #include "gamelist.h"
-//#include "../include/debug.h"
 #include "../global.h"
 
 #include <strstream.h>

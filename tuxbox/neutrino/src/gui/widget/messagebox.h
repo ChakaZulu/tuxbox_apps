@@ -26,7 +26,7 @@ using namespace std;
 		int						fheight;
 		int						theight;
 		string					caption;
-		string					text;
+		vector<string>			text;
 		CMessageBoxNotifier*	notifier;
 		int						selected;
 		int						showbuttons;
@@ -44,7 +44,8 @@ using namespace std;
 		{
 			mbrYes,
 			mbrNo,
-			mbrCancel
+			mbrCancel,
+			mbrBack
 		} result;
 
 		enum buttons_
@@ -52,12 +53,15 @@ using namespace std;
 			mbYes= 0x01,
 			mbNo = 0x02,
 			mbCancel = 0x04,
-			mbAll = 0x07
+			mbAll = 0x07,
+			mbBack = 0x08
 		} buttons;
 
 		CMessageBox( string Caption, string Text, CMessageBoxNotifier* Notifier, int Width = 500, uint Default= mbrYes, uint ShowButtons= mbAll );
 		int exec(CMenuTarget* parent, string actionKey);
 
 	};
+
+int ShowMsg ( string Caption, string Text, uint Default, uint ShowButtons );
 
 #endif

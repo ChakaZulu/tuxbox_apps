@@ -184,6 +184,30 @@ int CStreamFeaturesChangeExec::exec(CMenuTarget* parent, string actionKey)
 	return menu_return::RETURN_EXIT;
 }
 
+int CUCodeCheckExec::exec(CMenuTarget* parent, string actionKey)
+{
+	string 	text;
+	char res[60];
+	char buf[200];
+
+	checkFile( UCODEDIR "/avia500.ux", (char*) &res);
+	sprintf((char*) buf, "%s: %s", g_Locale->getText("ucodecheck.avia500").c_str(), res );
+	text= buf;
+
+	checkFile( UCODEDIR "/avia600.ux", (char*) &res);
+	sprintf((char*) buf, "%s: %s", g_Locale->getText("ucodecheck.avia600").c_str(), res );
+	text= text+ "\n"+ buf;
+
+	checkFile( UCODEDIR "/ucode.bin", (char*) &res);
+	sprintf((char*) buf, "%s: %s", g_Locale->getText("ucodecheck.ucode").c_str(), res );
+	text= text+ "\n"+ buf;
+
+	checkFile( UCODEDIR "/cam-alpha.bin", (char*) &res);
+	sprintf((char*) buf, "%s: %s", g_Locale->getText("ucodecheck.cam-alpha").c_str(), res );
+	text= text+ "\n"+ buf;
+
+	ShowMsg( "ucodecheck.head", text, CMessageBox::mbrBack, CMessageBox::mbBack );
+}
 
 void setNetworkAddress(char* ip, char* netmask, char* broadcast)
 {
@@ -229,23 +253,32 @@ void testNetworkSettings(char* ip, char* netmask, char* broadcast, char* gateway
 	printf("testNw Gateway: %s\n", gateway);
 	printf("testNw Nameserver: %s\n", nameserver);
 
+	string 	text;
+	char _text[100];
+
 	if (pinghost(ip))
-		printf("%s ist erreichbar (ping)\n", ip );
+		sprintf(_text, "%s ist erreichbar (ping)\n", ip );
 	else
-		printf("%s ist nicht erreichbar (ping)\n", ip );
+		sprintf(_text, "%s ist nicht erreichbar (ping)\n", ip );
+	text= _text;
 
 	if (pinghost(gateway))
-		printf("Gateway %s ist erreichbar (ping)\n", gateway );
+		sprintf(_text, "Gateway %s ist erreichbar (ping)\n", gateway );
 	else
-		printf("Gateway %s nicht erreichbar (ping)\n", gateway );
+		sprintf(_text, "Gateway %s nicht erreichbar (ping)\n", gateway );
+	text= text+ _text;
 
 	if (pinghost(nameserver))
-		printf("Nameserver %s ist erreichbar (ping)\n", gateway );
+		sprintf(_text, "Nameserver %s ist erreichbar (ping)\n", gateway );
 	else
-		printf("Nameserver %s nicht erreichbar (ping)\n", gateway );
+		sprintf(_text, "Nameserver %s nicht erreichbar (ping)\n", gateway );
+	text= text+ _text;
 
 	if (pinghost("dboxupdate.berlios.de"))
-		printf("dboxupdate.berlios.de ist erreichbar (ping)\n" );
+		sprintf(_text, "dboxupdate.berlios.de ist erreichbar (ping)\n" );
 	else
-		printf("dboxupdate.berlios.de nicht erreichbar (ping)\n" );
+		sprintf(_text, "dboxupdate.berlios.de nicht erreichbar (ping)\n" );
+	text= text+ _text;
+
+	ShowMsg( "networkmenu.test", text, CMessageBox::mbrBack, CMessageBox::mbBack );
 }

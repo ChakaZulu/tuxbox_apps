@@ -143,6 +143,8 @@ screensetup.upperleft rot = EKRAN KENARI ÜST, SOL
 screensetup.lowerright grün = EKRAN KENARI ALT, SAG
 
 channellist.head BÜTÜN KANLLAR
+channellist.nonefound No channels were found!\nPlease execute a scan\n(dbox-key -> service)
+channellist.since since %02d:%02d
 
 infoviewer.epgnotload EPG DAHA BULUNMADI...
 infoviewer.epgwait EPG BEKLENIYOR...
@@ -160,8 +162,6 @@ epgviewer.notfound EPG BILGISI BULUNAMADI
 epgviewer.nodetailed AYRINTILI BILGI YOK
 epglist.head GELECEK PROGRAMDAN PARCALAR - %s
 epglist.noevents EPG YOK...
-
-channellist.since since %02d:%02d
 
 streaminfo.head BILGI
 streaminfo.resolution EKRAN CÖZÜMÜ
@@ -284,6 +284,10 @@ bouqueteditor.return ready
 messagebox.yes Yes
 messagebox.no No
 messagebox.cancel Cancel
+messagebox.back Back
+messagebox.error Error
+
+cam.wrong ATTENTION, YOUR CARD \nDOES NOT MATCH CAMALPHA.BIN!!\n
 
 stringinput.caps caps / no caps
 

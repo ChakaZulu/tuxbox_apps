@@ -5,14 +5,38 @@
 
 CMessageBox::CMessageBox( string Caption, string Text, CMessageBoxNotifier* Notifier, int Width, uint Default, uint ShowButtons )
 {
-	width = Width;
-	height = 150;
 	theight= g_Fonts->menu_title->getHeight();
-	fheight= g_Fonts->channellist->getHeight();
+	fheight= g_Fonts->menu->getHeight();
+
+	caption = Caption;
+	Text = Text+ "\n";
+	text.clear();
+
+	int pos;
+	do
+	{
+		pos = Text.find_first_of("\n");
+		if ( pos!=-1 )
+		{
+			text.insert( text.end(), Text.substr( 0, pos ) );
+			Text= Text.substr( pos+ 1, uint(-1) );
+		}
+	} while ( ( pos != -1 ) );
+	height = theight+ fheight* ( text.size()+ 3 );
+
+	width = Width;
+	if ( width< 450 )
+		width = 450;
+	for (int i= 0; i< text.size(); i++)
+	{
+		int nw= g_Fonts->menu->getRenderWidth( text[i].c_str() ) + 20;
+		if ( nw> width )
+			width= nw;
+	}
+
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
-	caption = Caption;
-	text = Text;
+
 	notifier = Notifier;
 	switch (Default)
 	{
@@ -23,6 +47,9 @@ CMessageBox::CMessageBox( string Caption, string Text, CMessageBoxNotifier* Noti
 			selected = 1;
 			break;
 		case mbrCancel:
+			selected = 2;
+			break;
+		case mbrBack:
 			selected = 2;
 			break;
 	}
@@ -36,7 +63,8 @@ void CMessageBox::paintHead()
 	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width, g_Locale->getText(caption), COL_MENUHEAD);
 
 	g_FrameBuffer->paintBoxRel(x,y+theight+0, width,height - theight + 0, COL_MENUCONTENT);
-	g_Fonts->menu_info->RenderString(x+10,y+theight+20+20, width, g_Locale->getText(text), COL_MENUCONTENT);
+	for (int i= 0; i< text.size(); i++)
+		g_Fonts->menu->RenderString(x+10,y+ theight+ (fheight>>1)+ fheight* (i+ 1), width, text[i].c_str(), COL_MENUCONTENT);
 
 }
 
@@ -75,7 +103,7 @@ void CMessageBox::paintButtons()
     }
 
     xpos = startpos+ButtonWidth*2+ButtonSpacing*2;
-    if ( showbuttons & mbCancel )
+    if ( ( showbuttons & mbCancel ) || ( showbuttons & mbBack ) )
 	{
 		color = COL_INFOBAR_SHADOW;
 		if(selected==2)
@@ -83,7 +111,7 @@ void CMessageBox::paintButtons()
 
 		g_FrameBuffer->paintBoxRel(xpos, y+height-fheight-20, ButtonWidth, fheight, color);
 		g_FrameBuffer->paintIcon("home.raw", xpos+10, y+height-fheight-19);
-		g_Fonts->infobar_small->RenderString(xpos + 43, y+height-fheight+4, ButtonWidth- 53, g_Locale->getText("messagebox.cancel"), color);
+		g_Fonts->infobar_small->RenderString(xpos + 43, y+height-fheight+4, ButtonWidth- 53, g_Locale->getText( ( showbuttons & mbCancel ) ? "messagebox.cancel" : "messagebox.back" ), color);
 	}
 }
 
@@ -103,7 +131,10 @@ void CMessageBox::no()
 
 void CMessageBox::cancel()
 {
-	result = mbrCancel;
+	if ( showbuttons & mbCancel )
+		result = mbrCancel;
+	else
+		result = mbrBack;
 }
 
 void CMessageBox::hide()
@@ -135,7 +166,7 @@ int CMessageBox::exec(CMenuTarget* parent, string actionKey)
 
 		if ( ( (msg==CRCInput::RC_timeout) ||
 			   (msg==g_settings.key_channelList_cancel) ) &&
-			 ( showbuttons & mbCancel ) )
+			 ( ( showbuttons & mbCancel ) || ( showbuttons & mbBack ) ) )
 		{
 			cancel();
 			loop=false;
@@ -168,7 +199,7 @@ int CMessageBox::exec(CMenuTarget* parent, string actionKey)
 						ok = ( showbuttons & mbNo );
 						break;
 					case 2:
-						ok = ( showbuttons & mbCancel );
+						ok = ( ( showbuttons & mbCancel ) || ( showbuttons & mbBack ) );
 						break;
 				}
 			}
@@ -193,7 +224,7 @@ int CMessageBox::exec(CMenuTarget* parent, string actionKey)
 						ok = ( showbuttons & mbNo );
 						break;
 					case 2:
-						ok = ( showbuttons & mbCancel );
+						ok = ( ( showbuttons & mbCancel ) || ( showbuttons & mbBack ) );
 						break;
 				}
 			}
@@ -224,6 +255,16 @@ int CMessageBox::exec(CMenuTarget* parent, string actionKey)
 	}
 
 	g_FrameBuffer->RestoreScreen(x- borderwidth, y- borderwidth, width+ 2* borderwidth, height+ 2* borderwidth, pixbuf);
+	return res;
+}
+
+int ShowMsg ( string Caption, string Text, uint Default, uint ShowButtons )
+{
+   	CMessageBox* messageBox = new CMessageBox( Caption, Text, NULL, 450, Default, ShowButtons );
+	messageBox->exec( NULL, "");
+	int res= messageBox->result;
+	delete messageBox;
+
 	return res;
 }
 

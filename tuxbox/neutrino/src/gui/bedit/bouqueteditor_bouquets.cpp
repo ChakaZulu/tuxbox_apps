@@ -136,7 +136,7 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 			{
 				if (bouquetsChanged)
 				{
-					CMessageBox* messageBox = new CMessageBox( "bouqueteditor.name", "bouqueteditor.savechanges?", NULL );
+					CMessageBox* messageBox = new CMessageBox( "bouqueteditor.name", g_Locale->getText("bouqueteditor.savechanges?"), NULL, 480 );
 					messageBox->exec( this, "");
 					switch( messageBox->result)
 					{
@@ -388,7 +388,7 @@ void CBEBouquetWidget::internalMoveBouquet( unsigned int fromPosition, unsigned 
 
 void CBEBouquetWidget::saveChanges()
 {
-	CHintBox* hintBox= new CHintBox(this, "bouqueteditor.name", "bouqueteditor.savingchanges");
+	CHintBox* hintBox= new CHintBox(this, "bouqueteditor.name", g_Locale->getText("bouqueteditor.savingchanges"), 480 );
 	hintBox->paint();
 	g_Zapit->saveBouquets();
 	g_Zapit->reinitChannels();
@@ -400,7 +400,7 @@ void CBEBouquetWidget::saveChanges()
 
 void CBEBouquetWidget::discardChanges()
 {
-	CHintBox* hintBox= new CHintBox(this, "bouqueteditor.name", "bouqueteditor.discardingchanges");
+	CHintBox* hintBox= new CHintBox(this, "bouqueteditor.name", g_Locale->getText("bouqueteditor.discardingchanges"), 480 );
 	hintBox->paint();
 	g_Zapit->restoreBouquets();
 	hintBox->hide();

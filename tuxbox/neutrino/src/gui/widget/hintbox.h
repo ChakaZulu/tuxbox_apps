@@ -19,7 +19,7 @@ using namespace std;
 		int						fheight;
 		int						theight;
 		string					caption;
-		string					text;
+		vector<string>			text;
 
 		CMenuWidget*			parent;
 		unsigned char*			pixbuf;

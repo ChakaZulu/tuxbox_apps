@@ -144,6 +144,8 @@ screensetup.upperleft czerw = Rog u gory, po lewej
 screensetup.lowerright ziel = Rog na dole, po prawej
 
 channellist.head Wszystkie Kanaly
+channellist.nonefound No channels were found!\nPlease execute a scan\n(dbox-key -> service)
+channellist.since since %02d:%02d
 
 infoviewer.epgnotload EPG jeszcze nie zaladowane...
 infoviewer.epgwait Czekam na EPG...
@@ -161,8 +163,6 @@ epgviewer.notfound EPG-Informacje nie znalezione
 epgviewer.nodetailed Informacje nie sa dostepne
 epglist.head Vorschau - %s
 epglist.noevents EPG niedostepne...
-
-channellist.since since %02d:%02d
 
 streaminfo.head Informacje
 streaminfo.resolution Rozdzielczosc
@@ -298,6 +298,10 @@ bouqueteditor.return ready
 messagebox.yes Yes
 messagebox.no No
 messagebox.cancel Cancel
+messagebox.back Back
+messagebox.error Error
+
+cam.wrong ATTENTION, YOUR CARD \nDOES NOT MATCH CAMALPHA.BIN!!\n
 
 stringinput.caps caps / no caps
 

@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: global.h,v 1.23 2002/02/22 16:01:16 field Exp $
+// $Id: global.h,v 1.24 2002/02/28 15:03:55 field Exp $
 //
 // $Log: global.h,v $
+// Revision 1.24  2002/02/28 15:03:55  field
+// Weiter Updates :)
+//
 // Revision 1.23  2002/02/22 16:01:16  field
 // Plugin-Interface weiter verbessert
 //
@@ -143,7 +146,6 @@ NEUTRINO_CPP  CEpgData			*g_EpgData;
 NEUTRINO_CPP  CInfoViewer		*g_InfoViewer;
 NEUTRINO_CPP  EventList			*g_EventList;
 NEUTRINO_CPP  CStreamInfo		*g_StreamInfo;
-NEUTRINO_CPP  CUCodeCheck		*g_UcodeCheck;
 NEUTRINO_CPP  CScanTs			*g_ScanTS;
 NEUTRINO_CPP  CFlashUpdate		*g_Update;
 

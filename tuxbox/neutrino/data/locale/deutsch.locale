@@ -144,6 +144,8 @@ screensetup.upperleft rot = Bildrand oben, links
 screensetup.lowerright grün = Bildrand unten, rechts
 
 channellist.head Alle Kanäle
+channellist.nonefound Es wurden keine Kanäle gefunden!\nFühren Sie bitte eine Kanal-Scan durch\n(dbox-Taste -> Service)
+channellist.since seit %02d:%02d
 
 infoviewer.epgnotload Informationen noch nicht geladen...
 infoviewer.epgwait Warte auf EPG-Informationen...
@@ -161,8 +163,6 @@ epgviewer.notfound keine Programminformationen (EPG) gefunden
 epgviewer.nodetailed Keine ausführlichen Informationen verfügbar
 epglist.head Vorschau - %s
 epglist.noevents Keine EPG-Information verfügbar.
-
-channellist.since seit %02d:%02d
 
 streaminfo.head Informationen
 streaminfo.resolution Auflösung
@@ -285,6 +285,10 @@ bouqueteditor.return Fertig
 messagebox.yes Ja
 messagebox.no Nein
 messagebox.cancel Abbruch
+messagebox.back Zurück
+messagebox.error Fehler
+
+cam.wrong Achtung, Ihre CAM_ALPHA.BIN passt\nnichtzu Ihrer Smart-Card!!!
 
 stringinput.caps Groß-/Kleinbuchstaben
 

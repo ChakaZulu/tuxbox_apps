@@ -145,6 +145,8 @@ screensetup.upperleft rouge = Découpe en haut, à gauche
 screensetup.lowerright vert = Découpe vers le bas, à droite
 
 channellist.head tous les canaux
+channellist.nonefound No channels were found!\nPlease execute a scan\n(dbox-key -> service)
+channellist.since since %02d:%02d
 
 infoviewer.epgnotload EPG pas encore non chargé ...
 infoviewer.epgwait attendent EPG...
@@ -162,8 +164,6 @@ epgviewer.notfound pas d' EPG informations trouvé
 epgviewer.nodetailed No detailed informations available
 epglist.head l' événement énumérerait - %s
 epglist.noevents Pas d'cEpg disponible ...
-
-channellist.since since %02d:%02d
 
 streaminfo.head Informations
 streaminfo.resolution Qualité d'image
@@ -289,6 +289,10 @@ bouqueteditor.return ready
 messagebox.yes Oui
 messagebox.no Non
 messagebox.cancel Cancel
+messagebox.back Back
+messagebox.error Error
+
+cam.wrong ATTENTION, YOUR CARD \nDOES NOT MATCH CAMALPHA.BIN!!\n
 
 stringinput.caps caps / no caps
 

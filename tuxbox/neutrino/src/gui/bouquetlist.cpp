@@ -1,4 +1,3 @@
-#include "../include/debug.h"
 #include "../global.h"
 
 CBouquetList::CBouquetList( const std::string &Name )
