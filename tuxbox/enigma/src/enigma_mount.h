@@ -9,8 +9,6 @@
 
 #define	MOUNTCONFIGFILE	"/var/tuxbox/config/enigma/mount.conf"
 
-class eListBoxEntryMountOSD;
-
 typedef struct
 {
 	int id;			//sequential number
@@ -57,7 +55,6 @@ private:
 	void addMountedFileSystems(void);
 public:
 	eString listMountPoints(eString); // for webif
-	void listMountPoints(eListBox<eListBoxEntryMountOSD> *); // for osd
 	void removeMountPoint(int);
 	int addMountPoint(t_mount);
 	void changeMountPoint(int, t_mount);

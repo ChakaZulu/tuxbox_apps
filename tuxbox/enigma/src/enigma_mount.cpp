@@ -15,7 +15,6 @@
 #include <configfile.h>
 #include <enigma_dyn_utils.h>
 #include <enigma_mount.h>
-#include <enigma_osd_mount.h>
 
 using namespace std;
 
@@ -411,13 +410,6 @@ eString eMountMgr::listMountPoints(eString skelleton)
 	return result;
 }
 
-void eMountMgr::listMountPoints(eListBox<eListBoxEntryMountOSD> *mountList)
-{
-	if (mountPoints.size() > 0)
-		for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
-			new eListBoxEntryMountOSD(mountList, mp_it->mp.id);
-}
-
 void eMountMgr::addMountedFileSystems()
 {
 	std::ifstream in;
@@ -428,7 +420,7 @@ void eMountMgr::addMountedFileSystems()
 	std::stringstream tmp;
 	bool found = false;
 	t_mount mp;
-	
+
 	in.open("/proc/mounts", std::ifstream::in);
 	while(getline(in, buffer, '\n'))
 	{
