@@ -36,6 +36,7 @@
 #include "menue.h"
 
 #include <driver/framebuffer.h>
+#include <system/localize.h>
 
 #include <string>
 
@@ -136,8 +137,8 @@ class CPLPINInput : public CPINInput
 class CPINChangeWidget : public CStringInput
 {
 	public:
-		CPINChangeWidget(const char * const Name, char* Value, int Size, const char * const Hint_1 = NULL, const char * const Hint_2 = NULL, char* Valid_Chars= "0123456789", CChangeObserver* Observ = NULL)
-		: CStringInput(Name, Value, Size, Hint_1, Hint_2, Valid_Chars, Observ){};
+		CPINChangeWidget(const neutrino_locale_t Name, char* Value, int Size, const neutrino_locale_t Hint_1, char* Valid_Chars= "0123456789", CChangeObserver* Observ = NULL)
+		: CStringInput(Name, Value, Size, Hint_1, NULL, Valid_Chars, Observ){};
 };
 
 

@@ -669,11 +669,11 @@ int CPLPINInput::exec( CMenuTarget* parent, const std::string & )
 	frameBuffer->paintBackgroundBoxRel(x+ width, y, borderwidth, height);
 
 	if (fsk == 0x100)
-		hint_1 = g_Locale->getText("parentallock.lockedsender");
+		hint_1 = g_Locale->getText(LOCALE_PARENTALLOCK_LOCKEDCHANNEL);
 	else
 	{
 		char hint[100];
-		sprintf(hint, g_Locale->getText("parentallock.lockedprogram"), fsk );
+		sprintf(hint, g_Locale->getText(LOCALE_PARENTALLOCK_LOCKEDPROGRAM), fsk );
 		hint_1 = hint;
 	}
 

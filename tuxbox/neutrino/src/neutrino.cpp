@@ -417,7 +417,7 @@ int CNeutrinoApp::loadSetup()
 	} 
 	//video
 	g_settings.video_Signal = configfile.getInt32( "video_Signal", 1 ); //RGB + CVBS
-	g_settings.video_Format = configfile.getInt32( "video_Format", 2 ); //4:3
+	g_settings.video_Format = configfile.getInt32("video_Format", CControldClient::VIDEOFORMAT_4_3);
 	g_settings.video_csync = configfile.getInt32( "video_csync", 0 ); 
 
 	//fb-alphawerte für gtx
@@ -596,7 +596,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.bouquetlist_mode = configfile.getInt32( "bouquetlist_mode", 0 );
 
 	// parentallock
-	if(!parentallocked) 	 
+	if (!parentallocked) 	 
   	{	 
 	  	g_settings.parentallock_prompt = configfile.getInt32( "parentallock_prompt", 0 );
 		g_settings.parentallock_lockage = configfile.getInt32( "parentallock_lockage", 12 );
@@ -1248,9 +1248,9 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_VIDEO     , true, NULL, &videoSettings    , NULL, true, CRCInput::RC_1));
 	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_AUDIO     , true, NULL, &audioSettings    , NULL, true, CRCInput::RC_2));
 	if(g_settings.parentallock_prompt)
-		mainSettings.addItem(new CLockedMenuForwarder("parentallock.parentallock", g_settings.parentallock_pincode, true, true, NULL, &parentallockSettings, NULL, true, CRCInput::RC_3));
+		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_PARENTALLOCK_PARENTALLOCK, g_settings.parentallock_pincode, true, true, NULL, &parentallockSettings, NULL, true, CRCInput::RC_3));
 	else
-		mainSettings.addItem(new CMenuForwarder("parentallock.parentallock", true, NULL, &parentallockSettings, NULL, true, CRCInput::RC_4));
+		mainSettings.addItem(new CMenuForwarder(LOCALE_PARENTALLOCK_PARENTALLOCK, true, NULL, &parentallockSettings, NULL, true, CRCInput::RC_4));
 	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_NETWORK   , true, NULL, &networkSettings  , NULL, true, CRCInput::RC_5));
 	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_RECORDING , true, NULL, &recordingSettings, NULL, true, CRCInput::RC_6));
 	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_STREAMING , true, NULL, &streamingSettings, NULL, true, CRCInput::RC_7));
@@ -1693,7 +1693,7 @@ void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings)
 	oj->addOption(1, LOCALE_VIDEOMENU_VIDEOFORMAT_169       );
 	oj->addOption(0, LOCALE_VIDEOMENU_VIDEOFORMAT_AUTODETECT);
 
-	if (g_settings.video_Format == 0) // autodetect has to be initialized
+	if (g_settings.video_Format == CControldClient::VIDEOFORMAT_AUTO)
 	{
 		videoSetupNotifier->changeNotify(LOCALE_VIDEOMENU_VIDEOFORMAT, NULL);
 	}
@@ -1715,21 +1715,21 @@ void CNeutrinoApp::InitParentalLockSettings(CMenuWidget &parentallockSettings)
 	parentallockSettings.addItem(GenericMenuBack);
 	parentallockSettings.addItem(GenericMenuSeparatorLine);
 
-	CMenuOptionChooser* oj = new CMenuOptionChooser("parentallock.prompt", &g_settings.parentallock_prompt, !parentallocked);
-	oj->addOption(PARENTALLOCK_PROMPT_NEVER         , "parentallock.never");
-//	oj->addOption(PARENTALLOCK_PROMPT_ONSTART       , "parentallock.onstart");
-	oj->addOption(PARENTALLOCK_PROMPT_CHANGETOLOCKED, "parentallock.changetolocked");
-	oj->addOption(PARENTALLOCK_PROMPT_ONSIGNAL      , "parentallock.onsignal");
+	CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_PARENTALLOCK_PROMPT, &g_settings.parentallock_prompt, !parentallocked);
+	oj->addOption(PARENTALLOCK_PROMPT_NEVER         , LOCALE_PARENTALLOCK_NEVER         );
+//	oj->addOption(PARENTALLOCK_PROMPT_ONSTART       , LOCALE_PARENTALLOCK_ONSTART       );
+	oj->addOption(PARENTALLOCK_PROMPT_CHANGETOLOCKED, LOCALE_PARENTALLOCK_CHANGETOLOCKED);
+	oj->addOption(PARENTALLOCK_PROMPT_ONSIGNAL      , LOCALE_PARENTALLOCK_ONSIGNAL      );
 	parentallockSettings.addItem( oj );
 
-	oj = new CMenuOptionChooser("parentallock.lockage", &g_settings.parentallock_lockage, !parentallocked);
-	oj->addOption(12, "parentallock.lockage12");
-	oj->addOption(16, "parentallock.lockage16");
-	oj->addOption(18, "parentallock.lockage18");
+	oj = new CMenuOptionChooser(LOCALE_PARENTALLOCK_LOCKAGE, &g_settings.parentallock_lockage, !parentallocked);
+	oj->addOption(12, LOCALE_PARENTALLOCK_LOCKAGE12);
+	oj->addOption(16, LOCALE_PARENTALLOCK_LOCKAGE16);
+	oj->addOption(18, LOCALE_PARENTALLOCK_LOCKAGE18);
 	parentallockSettings.addItem( oj );
 
-	CPINChangeWidget * pinChangeWidget = new CPINChangeWidget("parentallock.changepin", g_settings.parentallock_pincode, 4, "parentallock.changepin_hint1");
-	parentallockSettings.addItem( new CMenuForwarder("parentallock.changepin", true, g_settings.parentallock_pincode, pinChangeWidget));
+	CPINChangeWidget * pinChangeWidget = new CPINChangeWidget(LOCALE_PATENTALLOCK_CHANGEPIN, g_settings.parentallock_pincode, 4, LOCALE_PARENTALLOCK_CHANGEPIN_HINT1);
+	parentallockSettings.addItem( new CMenuForwarder(LOCALE_PATENTALLOCK_CHANGEPIN, true, g_settings.parentallock_pincode, pinChangeWidget));
 }
 
 void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
@@ -2637,24 +2637,24 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	dprintf( DEBUG_NORMAL, "menue setup\n");
 	//Main settings
-	CMenuWidget mainMenu            (LOCALE_MAINMENU_HEAD       , "mainmenue.raw"       );
-	CMenuWidget mainSettings        (LOCALE_MAINSETTINGS_HEAD   , NEUTRINO_ICON_SETTINGS);
-	CMenuWidget languageSettings    (LOCALE_LANGUAGESETUP_HEAD  , "language.raw"        );
-	CMenuWidget videoSettings       (LOCALE_VIDEOMENU_HEAD      , "video.raw"           );
-	CMenuWidget audioSettings       (LOCALE_AUDIOMENU_HEAD      , "audio.raw"           );
-	CMenuWidget parentallockSettings("parentallock.parentallock", "lock.raw"            , 500);
-	CMenuWidget networkSettings     (LOCALE_NETWORKMENU_HEAD    , "network.raw"         );
-	CMenuWidget recordingSettings   ("recordingmenu.head"       , "recording.raw"       );
-	CMenuWidget streamingSettings   ("streamingmenu.head"       , "streaming.raw"       );
-	CMenuWidget colorSettings       (LOCALE_COLORMENU_HEAD      , "colors.raw"          );
-	CMenuWidget fontSettings        ("fontmenu.head"            , "colors.raw"          );
-	CMenuWidget lcdSettings         (LOCALE_LCDMENU_HEAD        , "lcd.raw"             );
-	CMenuWidget keySettings         ("keybindingmenu.head"      , "keybinding.raw"      , 400);
-	CMenuWidget miscSettings        (LOCALE_MISCSETTINGS_HEAD   , NEUTRINO_ICON_SETTINGS);
-	CMenuWidget mp3picSettings      ("mp3picsettings.general"   , NEUTRINO_ICON_SETTINGS);
-	CMenuWidget scanSettings        ("servicemenu.scants"       , NEUTRINO_ICON_SETTINGS);
-	CMenuWidget service             ("servicemenu.head"         , NEUTRINO_ICON_SETTINGS);
-	CMenuWidget moviePlayer         (LOCALE_MOVIEPLAYER_HEAD    , "streaming.raw"       );
+	CMenuWidget mainMenu            (LOCALE_MAINMENU_HEAD            , "mainmenue.raw"       );
+	CMenuWidget mainSettings        (LOCALE_MAINSETTINGS_HEAD        , NEUTRINO_ICON_SETTINGS);
+	CMenuWidget languageSettings    (LOCALE_LANGUAGESETUP_HEAD       , "language.raw"        );
+	CMenuWidget videoSettings       (LOCALE_VIDEOMENU_HEAD           , "video.raw"           );
+	CMenuWidget audioSettings       (LOCALE_AUDIOMENU_HEAD           , "audio.raw"           );
+	CMenuWidget parentallockSettings(LOCALE_PARENTALLOCK_PARENTALLOCK, "lock.raw"            , 500);
+	CMenuWidget networkSettings     (LOCALE_NETWORKMENU_HEAD         , "network.raw"         );
+	CMenuWidget recordingSettings   ("recordingmenu.head"            , "recording.raw"       );
+	CMenuWidget streamingSettings   ("streamingmenu.head"            , "streaming.raw"       );
+	CMenuWidget colorSettings       (LOCALE_COLORMENU_HEAD           , "colors.raw"          );
+	CMenuWidget fontSettings        ("fontmenu.head"                 , "colors.raw"          );
+	CMenuWidget lcdSettings         (LOCALE_LCDMENU_HEAD             , "lcd.raw"             );
+	CMenuWidget keySettings         ("keybindingmenu.head"           , "keybinding.raw"      , 400);
+	CMenuWidget miscSettings        (LOCALE_MISCSETTINGS_HEAD        , NEUTRINO_ICON_SETTINGS);
+	CMenuWidget mp3picSettings      ("mp3picsettings.general"        , NEUTRINO_ICON_SETTINGS);
+	CMenuWidget scanSettings        ("servicemenu.scants"            , NEUTRINO_ICON_SETTINGS);
+	CMenuWidget service             ("servicemenu.head"              , NEUTRINO_ICON_SETTINGS);
+	CMenuWidget moviePlayer         (LOCALE_MOVIEPLAYER_HEAD         , "streaming.raw"       );
     
 	InitMainMenu(mainMenu, mainSettings, audioSettings, parentallockSettings, networkSettings, recordingSettings,
 					 colorSettings, lcdSettings, keySettings, videoSettings, languageSettings, miscSettings,
@@ -2671,7 +2671,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 
    	//misc Setup
 	InitMiscSettings(miscSettings);
-	miscSettings.setOnPaintNotifier(this);
 
 	//audio Setup
 	InitAudioSettings(audioSettings, audioSetupNotifier);
@@ -2681,7 +2680,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	videoSettings.setOnPaintNotifier(this);
 
 	// Parentallock settings
-	InitParentalLockSettings( parentallockSettings);
+	InitParentalLockSettings(parentallockSettings);
 
 	// ScanSettings
 	InitScanSettings(scanSettings);

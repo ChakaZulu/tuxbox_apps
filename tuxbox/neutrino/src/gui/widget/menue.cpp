@@ -819,9 +819,9 @@ bool CZapProtection::check()
 	{
 		cPIN[0] = 0;
 
-		CPLPINInput* PINInput = new CPLPINInput( "parentallock.head", cPIN, 4, hint2, fsk );
+		CPLPINInput* PINInput = new CPLPINInput(LOCALE_PARENTALLOCK_HEAD, cPIN, 4, hint2, fsk );
 
-		res = PINInput->exec( getParent(), "");
+		res = PINInput->exec(getParent(), "");
 		delete PINInput;
 
 		hint2 = "pinprotection.wrongcode";
