@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.311 2003/05/11 15:23:04 digi_casi Exp $
+ * $Id: zapit.cpp,v 1.312 2003/05/12 05:14:41 digi_casi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -736,18 +736,14 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	
 	case CZapitMessages::CMD_SCANSETSCANMOTORPOSLIST:
 	{
-		CZapitClient::commandSetScanMotorPosList sat;
-		FILE * fd = NULL;
+		CZapitClient::commandSetScanMotorPosList pos;
 		
-		fopen(MOTORCONFIGFILE, "w");
 		motorPositions.clear();
-		while (CBasicServer::receive_data(connfd, &sat, sizeof(sat))) 
+		while (CBasicServer::receive_data(connfd, &pos, sizeof(pos))) 
 		{
-			DBG("adding %s (motorPos %d)", sat.satName, sat.motorPos);
-			motorPositions[sat.satName] = sat.motorPos;
-			fprintf(fd, "%s %d\n", sat.satName, sat.motorPos);
+			DBG("adding %s (motorPos %d)", pos.satName, pos.motorPos);
+			motorPositions[pos.satName] = pos.motorPos;
 		}
-		fclose(fd);
 		break;
 	}
 	
@@ -1459,7 +1455,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.311 2003/05/11 15:23:04 digi_casi Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.312 2003/05/12 05:14:41 digi_casi Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
