@@ -146,7 +146,10 @@ bool CLocaleManager::loadLocale(const char * const locale)
 	fclose(fd);
 
 #warning TODO: implement real check to determine whether we need a font with more than Basic Latin & Latin-1 Supplement characters
-	return (strcmp(locale, "bosanski") == 0);
+	return (
+		(strcmp(locale, "bosanski") == 0) ||
+		(strcmp(locale, "russkij") == 0)
+		);
 }
 
 const char * CLocaleManager::getText(const char * const keyName) const
