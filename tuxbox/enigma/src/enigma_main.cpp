@@ -1402,17 +1402,21 @@ void eZapMain::loadUserBouquets( bool destroy )
 	int i=0;
 	for (int d = modeTV; d <= modeFile; d++)
 	{
+		eServiceReference parentRef;
 		ePlaylist* parentList=0;
 		switch(d)
 		{
 			case modeTV:
 				parentList = userTVBouquets;
+				parentRef = userTVBouquetsRef;
 				break;
 			case modeRadio:
 				parentList = userRadioBouquets;
+				parentRef = userRadioBouquetsRef;
 				break;
 			case modeFile:
 				parentList = userFileBouquets;
+				parentRef = userFileBouquetsRef;	
 				break;
 		}
 		for ( std::list<ePlaylistEntry>::iterator it(parentList->getList().begin()); it != parentList->getList().end(); it++, i++)
@@ -1421,6 +1425,7 @@ void eZapMain::loadUserBouquets( bool destroy )
 			eServiceReference ref = eServiceReference( eServicePlaylistHandler::ID, eServiceReference::flagDirectory, 0, it->service.data[1] );
 			ref.path = it->service.path;
 			(ePlaylist*)eServiceInterface::getInstance()->addRef(ref);
+			eServicePlaylistHandler::getInstance()->newPlaylist(parentRef,ref);
 		}
 	}
 
@@ -1431,27 +1436,31 @@ void eZapMain::loadUserBouquets( bool destroy )
 		{
 			eServiceReference ref = eServicePlaylistHandler::getInstance()->newPlaylist();
 			ePlaylist* parentList=0;
+			eServiceReference parentRef;
 			eString path;
 			eString name;
 			switch(i)
 			{
 				case modeTV:
 					parentList = userTVBouquets;
+					parentRef = userTVBouquetsRef;
 					path = eplPath+'/'+eString().sprintf("userbouquet.%x.tv",ref.data[1]);
 					name = _("Favourites (TV)");
 					break;
 				case modeRadio:
 					parentList = userRadioBouquets;
+					parentRef = userRadioBouquetsRef;
 					path = eplPath+'/'+eString().sprintf("userbouquet.%x.radio",ref.data[1]);
 					name = _("Favourites (Radio)");
 					break;
 				case modeFile:
 					parentList = userFileBouquets;
+					parentRef = userFileBouquetsRef;
 					path = eplPath+'/'+eString().sprintf("userbouquet.%x.file",ref.data[1]);
 					name = _("Favourites (File)");
 					break;
 			}
-			addUserBouquet( parentList, path, name, ref, true );
+			addUserBouquet( parentRef, parentList, path, name, ref, true );
 		}
 	}
 	if ( destroy )
@@ -1872,31 +1881,24 @@ eZapMain::~eZapMain()
 	}
 #endif
 	getPlaylistPosition();
-
 #ifndef DISABLE_FILE
 	saveRecordings(true);
 #endif
 	savePlaylist(true);
-
 	destroyUserBouquets(true);
-
 	// get current selected serviceselector path
 	if ( mode != -1 ) // valid mode?
 		getServiceSelectorPath(modeLast[mode]);
-
   // save last mode to registry
 	eConfig::getInstance()->setKey("/ezap/ui/lastmode", mode );
-
 	// save for all modes the servicePath to registry
 	for (mode=modeTV; mode < modeEnd; mode++ )
 	{
 		eString str = modeLast[mode].toString();
 		eConfig::getInstance()->setKey( eString().sprintf("/ezap/ui/modes/%d/path0", mode).c_str(), str.c_str() );
 	}
-
 	if (instance == this)
 		instance = 0;
-
 #ifndef DISABLE_LCD
 	eZapLCD *pLCD=eZapLCD::getInstance();
 	pLCD->lcdMain->hide();
@@ -1906,7 +1908,6 @@ eZapMain::~eZapMain()
 		eDBoxLCD::getInstance()->switchLCD(0);
 #endif
 	delete subtitle;
-
 	eConfig::getInstance()->setKey("/ezap/ui/serviceSelectorStyle", eZap::getInstance()->getServiceSelector()->getStyle() );
 	eConfig::getInstance()->setKey("/ezap/ui/playlistmode", playlistmode);
 	eServiceReference::saveLockedList( (eplPath+"/services.locked").c_str() );
@@ -3287,7 +3288,7 @@ void eZapMain::stopSkip(int dir)
 int eZapMain::handleStandby(int i)
 {
 	int force=0;
-	if ( i <= 0 )
+		if ( i <= 0 )
 	{
 		if ( state & stateSleeping )
 		{
@@ -3356,7 +3357,7 @@ int eZapMain::handleStandby(int i)
 	return 0;
 }
 
-ePlaylist *eZapMain::addUserBouquet( ePlaylist *list, const eString &path, const eString &name, eServiceReference& ref, bool save )
+ePlaylist *eZapMain::addUserBouquet( eServiceReference &parent, ePlaylist *list, const eString &path, const eString &name, eServiceReference& ref, bool save )
 {
 	ePlaylist *pl = (ePlaylist*)eServiceInterface::getInstance()->addRef(ref);
 	pl->service_name = name;
@@ -3364,6 +3365,7 @@ ePlaylist *eZapMain::addUserBouquet( ePlaylist *list, const eString &path, const
 	pl->save();
 	eServiceInterface::getInstance()->removeRef(ref);
 	ref.path=path;
+	eServicePlaylistHandler::getInstance()->newPlaylist(parent, ref); // add to playlists multimap
 	pl = (ePlaylist*)eServiceInterface::getInstance()->addRef(ref);
 	pl->load( path.c_str() );
 	list->getList().push_back( ref );
@@ -3793,14 +3795,14 @@ void eZapMain::createEmptyBouquet(int mode)
 		switch ( mode )
 		{
 			case modeTV:
-				addUserBouquet( userTVBouquets, eplPath+'/'+eString().sprintf("userbouquet.%x.tv",newList.data[1]), wnd.getEditText(), newList, true );
+				addUserBouquet( userTVBouquetsRef, userTVBouquets, eplPath+'/'+eString().sprintf("userbouquet.%x.tv",newList.data[1]), wnd.getEditText(), newList, true );
 				break;
 			case modeRadio:
-				addUserBouquet( userRadioBouquets, eplPath+'/'+eString().sprintf("userbouquet.%x.radio",newList.data[1]), wnd.getEditText(), newList, true );
+				addUserBouquet( userRadioBouquetsRef, userRadioBouquets, eplPath+'/'+eString().sprintf("userbouquet.%x.radio",newList.data[1]), wnd.getEditText(), newList, true );
 				break;
 #ifndef DISABLE_FILE
 			case modeFile:
-				addUserBouquet( userFileBouquets, eplPath+'/'+eString().sprintf("userbouquet.%x.file",newList.data[1]), wnd.getEditText(), newList, true );
+				addUserBouquet( userFileBouquetsRef, userFileBouquets, eplPath+'/'+eString().sprintf("userbouquet.%x.file",newList.data[1]), wnd.getEditText(), newList, true );
 				break;
 #endif
 		}
@@ -3873,10 +3875,10 @@ void eZapMain::createMarker(eServiceSelector *sel)
 	switch ( mode )
 	{
 		case modeTV:
-			currentSelectedUserBouquet = addUserBouquet( userTVBouquets, eplPath+'/'+eString().sprintf("userbouquet.%x.tv",currentSelectedUserBouquetRef.data[1]), name, currentSelectedUserBouquetRef, false );
+			currentSelectedUserBouquet = addUserBouquet( userTVBouquetsRef, userTVBouquets, eplPath+'/'+eString().sprintf("userbouquet.%x.tv",currentSelectedUserBouquetRef.data[1]), name, currentSelectedUserBouquetRef, false );
 			break;
 		case modeRadio:
-			currentSelectedUserBouquet = addUserBouquet( userRadioBouquets, eplPath+'/'+eString().sprintf("userbouquet.%x.radio",currentSelectedUserBouquetRef.data[1]), name, currentSelectedUserBouquetRef, false );
+			currentSelectedUserBouquet = addUserBouquet( userRadioBouquetsRef, userRadioBouquets, eplPath+'/'+eString().sprintf("userbouquet.%x.radio",currentSelectedUserBouquetRef.data[1]), name, currentSelectedUserBouquetRef, false );
 			break;
 	}
 
@@ -5308,7 +5310,7 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 	case eServiceEvent::evtFlagsChanged:
 	{
 		serviceFlags = eServiceInterface::getInstance()->getService()->getFlags();
-		if ( timeshift && serviceFlags & eServiceHandler::flagIsSeekable )
+		if ( timeshift && !(serviceFlags & eServiceHandler::flagIsSeekable) )
 			timeshift=0;
 		setSmartcardLogo( serviceFlags & eServiceHandler::flagIsScrambled );
 		if (serviceFlags & eServiceHandler::flagSupportPosition)
@@ -5983,7 +5985,7 @@ void eZapMain::gotMessage(const int &c)
 		if (!eZapStandby::getInstance())
 		{
 	// close all open windows before goto standby
-			if(eApp->looplevel() > 1)
+				if(eApp->looplevel() > 1)
 			{
 				eApp->exit_loop();
 				message_notifier.send(c);

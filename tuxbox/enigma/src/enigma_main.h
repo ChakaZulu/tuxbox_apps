@@ -386,7 +386,7 @@ private:
 
 	eString eplPath; // where we store Favlists? user changeable...
 
-	ePlaylist *addUserBouquet( ePlaylist*, const eString&, const eString&, eServiceReference &, bool );
+	ePlaylist *addUserBouquet( eServiceReference&, ePlaylist*, const eString&, const eString&, eServiceReference &, bool );
 
 	int timeshift;
 	int playlistmode; // curlist is a list controlled by the user (not just a history).
