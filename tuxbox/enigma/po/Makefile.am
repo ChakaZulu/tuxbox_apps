@@ -148,7 +148,7 @@ uninstall-local-yes:
 
 mostlyclean-local:
 	rm -f remove-potcdate.sed
-	rm -f core core.* $(DOMAIN).po $(DOMAIN).1po $(DOMAIN).2po *.new.po
+	rm -f lib lib.* $(DOMAIN).po $(DOMAIN).1po $(DOMAIN).2po *.new.po
 	rm -fr *.o
 
 distclean-local:

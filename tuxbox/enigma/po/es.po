@@ -345,7 +345,7 @@ msgid "add service to playlist"
 msgstr "es: Service zu Favouritenliste hinzufügen"
 
 #: enigma/src/apps/enigma/enigma_mainmenu.cpp:33
-#: enigma/src/core/dvb/servicestructure.cpp:10
+#: enigma/src/lib/dvb/servicestructure.cpp:10
 msgid "TV mode"
 msgstr "Modo TV"
 
@@ -1070,49 +1070,49 @@ msgstr "es: Bitte Sprache auswählen (links, rechts)"
 msgid "set RC repeat delay ( left / right )"
 msgstr "es: Bitte Sprache auswählen (links, rechts)"
 
-#: enigma/src/core/dvb/dvbwidgets.cpp:50
+#: enigma/src/lib/dvb/dvbwidgets.cpp:50
 msgid "vertical"
 msgstr "es: vertikal"
 
-#: enigma/src/core/dvb/dvbwidgets.cpp:51
+#: enigma/src/lib/dvb/dvbwidgets.cpp:51
 msgid "horizontal"
 msgstr "es: horizontal"
 
-#: enigma/src/core/dvb/servicestructure.cpp:9
+#: enigma/src/lib/dvb/servicestructure.cpp:9
 msgid "root node"
 msgstr "es: root"
 
-#: enigma/src/core/dvb/servicestructure.cpp:11
+#: enigma/src/lib/dvb/servicestructure.cpp:11
 msgid "Radio Mode"
 msgstr "es: Radio-Modus"
 
-#: enigma/src/core/dvb/servicestructure.cpp:12
+#: enigma/src/lib/dvb/servicestructure.cpp:12
 msgid "File Mode"
 msgstr "es: Datei-Modus"
 
-#: enigma/src/core/dvb/servicestructure.cpp:13
+#: enigma/src/lib/dvb/servicestructure.cpp:13
 msgid "Favourites"
 msgstr "es: Favouritenliste"
 
-#: enigma/src/core/dvb/serviceplaylist.cpp:109
+#: enigma/src/lib/dvb/serviceplaylist.cpp:109
 #, c-format
 msgid " (%d entries)"
 msgstr "es:  (%d Einträge)"
 
-#: enigma/src/core/gui/emessage.cpp:95
+#: enigma/src/lib/gui/emessage.cpp:95
 msgid "OK"
 msgstr "es: OK"
 
-#: enigma/src/core/gui/emessage.cpp:96
+#: enigma/src/lib/gui/emessage.cpp:96
 #, fuzzy
 msgid "Cancel"
 msgstr "es: Abbrechen"
 
-#: enigma/src/core/gui/emessage.cpp:97
+#: enigma/src/lib/gui/emessage.cpp:97
 msgid "Yes"
 msgstr "es: Ja"
 
-#: enigma/src/core/gui/emessage.cpp:98
+#: enigma/src/lib/gui/emessage.cpp:98
 msgid "No"
 msgstr "es: Nein"
 
