@@ -846,6 +846,10 @@ int CTimerList::modifyTimer()
 	CMenuOptionChooser* m3 = new CMenuOptionChooser(LOCALE_TIMERLIST_REPEAT, (int *)&timer->eventRepeat, TIMERLIST_REPEAT_OPTIONS, TIMERLIST_REPEAT_OPTION_COUNT, true, &notifier);
 
 	CMountChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,NULL,timer->recordingDir,g_settings.network_nfs_recordingdir);
+	if (!recDirs.hasItem()) 
+	{
+		printf("[CTimerList] warning: no network devices available\n");									
+	}
 	bool recDirEnabled = (timer->eventType == CTimerd::TIMER_RECORD) && (g_settings.recording_type == RECORDING_FILE);
 	CMenuForwarder* m6 = new CMenuForwarder(LOCALE_TIMERLIST_RECORDING_DIR,recDirEnabled,timer->recordingDir, &recDirs);
 
@@ -953,6 +957,10 @@ int CTimerList::newTimer()
 	CMenuForwarder* m6 = new CMenuForwarder(LOCALE_TIMERLIST_CHANNEL, false, timerNew_channel_name, &mm);
 
 	CMountChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,NULL,timerNew.recordingDir,g_settings.network_nfs_recordingdir);
+	if (!recDirs.hasItem()) 
+	{
+		printf("[CTimerList] warning: no network devices available\n");									
+	}
 	CMenuForwarder* m7 = new CMenuForwarder(LOCALE_TIMERLIST_RECORDING_DIR,false,timerNew.recordingDir, &recDirs);
 	
 	CMenuOptionChooser* m8 = new CMenuOptionChooser(LOCALE_TIMERLIST_STANDBY, &timerNew_standby_on, TIMERLIST_STANDBY_OPTIONS, TIMERLIST_STANDBY_OPTION_COUNT, false); 

@@ -541,10 +541,15 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 							{
 								int id = -1;
 								CMountChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,&id,NULL,g_settings.network_nfs_recordingdir);
-								hide();
-								recDirs.exec(NULL,"");
-								show(channel_id,a_id,a_startzeit,false);
-
+								if (recDirs.hasItem()) 
+								{
+									hide();
+									recDirs.exec(NULL,"");
+									show(channel_id,a_id,a_startzeit,false);
+								} else
+								{
+									printf("no network devices available\n");					
+								}
 								if (id != -1)
 									recDir = g_settings.network_nfs_local_dir[id];
 								else 

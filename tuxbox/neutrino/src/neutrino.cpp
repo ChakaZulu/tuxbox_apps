@@ -2893,40 +2893,45 @@ bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer)
 					int userDecision = -1;
 					
 					CMountChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,&userDecision,NULL,g_settings.network_nfs_recordingdir);
-					recDirs.exec(NULL,"");
-					refreshGui = true;
-					//streamFeatures->paint();
-					if (userDecision != -1)
-					{
-						if (!CFSMounter::isMounted(g_settings.network_nfs_local_dir[userDecision]))
+					if (recDirs.hasItem()) {
+						recDirs.exec(NULL,"");
+						refreshGui = true;
+						if (userDecision != -1)
 						{
-							CFSMounter::MountRes mres = 
-								CFSMounter::mount(g_settings.network_nfs_ip[userDecision].c_str(),
-										  g_settings.network_nfs_dir[userDecision], 
-										  g_settings.network_nfs_local_dir[userDecision],
-										  (CFSMounter::FSType) g_settings.network_nfs_type[userDecision],
-										  g_settings.network_nfs_username[userDecision],
-										  g_settings.network_nfs_password[userDecision],
-										  g_settings.network_nfs_mount_options1[userDecision], 
-										  g_settings.network_nfs_mount_options2[userDecision]);
-							if (mres == CFSMounter::MRES_OK)
+							if (!CFSMounter::isMounted(g_settings.network_nfs_local_dir[userDecision]))
 							{
-								recDir = g_settings.network_nfs_local_dir[userDecision];
-							} else {
-								doRecord = false;
-								const char * merr = mntRes2Str(mres);
-								int msglen = strlen(merr) + strlen(g_settings.network_nfs_local_dir[userDecision]) + 7;
-								char msg[msglen];
-								strcpy(msg,merr);
-								strcat(msg,"\nDir: ");
-								strcat(msg,g_settings.network_nfs_local_dir[userDecision]);
-								
-								ShowMsgUTF(LOCALE_MESSAGEBOX_ERROR, msg,
-									   CMessageBox::mbrBack, CMessageBox::mbBack,NEUTRINO_ICON_ERROR, 450, 10); // UTF-8
-							}
-						}	
-					} else 
+								CFSMounter::MountRes mres = 
+									CFSMounter::mount(g_settings.network_nfs_ip[userDecision].c_str(),
+											  g_settings.network_nfs_dir[userDecision], 
+											  g_settings.network_nfs_local_dir[userDecision],
+											  (CFSMounter::FSType) g_settings.network_nfs_type[userDecision],
+											  g_settings.network_nfs_username[userDecision],
+											  g_settings.network_nfs_password[userDecision],
+											  g_settings.network_nfs_mount_options1[userDecision], 
+											  g_settings.network_nfs_mount_options2[userDecision]);
+								if (mres == CFSMounter::MRES_OK)
+								{
+									recDir = g_settings.network_nfs_local_dir[userDecision];
+								} else {
+									doRecord = false;
+									const char * merr = mntRes2Str(mres);
+									int msglen = strlen(merr) + strlen(g_settings.network_nfs_local_dir[userDecision]) + 7;
+									char msg[msglen];
+									strcpy(msg,merr);
+									strcat(msg,"\nDir: ");
+									strcat(msg,g_settings.network_nfs_local_dir[userDecision]);
+									
+									ShowMsgUTF(LOCALE_MESSAGEBOX_ERROR, msg,
+										   CMessageBox::mbrBack, CMessageBox::mbBack,NEUTRINO_ICON_ERROR, 450, 10); // UTF-8
+								}
+							}	
+						} else 
+						{
+							doRecord = false;
+						}
+					} else
 					{
+						printf("[neutrino.cpp] no network devices available\n");
 						doRecord = false;
 					}
 				}
@@ -3357,7 +3362,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				SelectAPID();
 			}
 			else if( msg == CRCInput::RC_yellow )
-			{	// NVODs
+			{       // NVODs
 				SelectNVOD();
 			}
 			else if (CRCInput::isNumeric(msg) && g_RemoteControl->director_mode )
@@ -4306,6 +4311,7 @@ void CNeutrinoApp::startNextRecording()
 					if (!doRecord)
 					{
 						// recording dir does not seem to exist in config anymore
+						// or an error occured while mounting
 						// -> try default dir
 						recDir = g_settings.network_nfs_recordingdir;
 						doRecord = true;

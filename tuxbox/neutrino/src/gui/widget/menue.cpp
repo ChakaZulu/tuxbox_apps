@@ -108,6 +108,11 @@ void CMenuWidget::addItem(CMenuItem* menuItem, const bool defaultselected)
 	items.push_back(menuItem);
 }
 
+bool CMenuWidget::hasItem()
+{
+	return !items.empty();
+}
+
 int CMenuWidget::exec(CMenuTarget* parent, const std::string &)
 {
 	neutrino_msg_t      msg;

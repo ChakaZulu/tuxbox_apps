@@ -291,6 +291,7 @@ class CMenuWidget : public CMenuTarget
 		~CMenuWidget();
 
 		virtual void addItem(CMenuItem* menuItem, const bool defaultselected = false);
+		bool hasItem();
 		virtual void paint();
 		virtual void hide();
 		virtual int exec(CMenuTarget* parent, const std::string & actionKey);
