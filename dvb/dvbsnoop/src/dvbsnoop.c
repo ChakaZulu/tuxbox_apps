@@ -1,30 +1,32 @@
 /*
-$Id: dvbsnoop.c,v 1.5 2003/02/26 16:45:16 obi Exp $
+$Id: dvbsnoop.c,v 1.6 2003/07/06 02:22:46 rasc Exp $
 
- -- dvbsnoop
- -- a dvb sniffer tool
- -- mainly for me to learn about dvb and dvb streams
 
- -- it's forbidden to use this program to try to hack 
- -- dvb streams, etc.
 
- -- I also don't garantee, that the data output is correct in any way.
+ DVBSNOOP
 
- -- (c) 2001 rasc
+ a dvb sniffer tool
+ mainly for me to learn about dvb streams, mpeg, mhp, and dsm-cc
+
+ it's forbidden to use this program for hacking encryption
+ information (like ECM/EMM streams to get extract keys, etc.).
+
+ I also don't garantee, that data output is correct in any way.
+
+ (c) 2001-2003   Rainer.Scherg@t-online.de
 
 
  -- Sorry for the bad coding, it's really quick and dirty. ;-)
  -- But this programm was for learning and testing only.
  -- The code could be heavily optimized...
- -- E.g.: I used the routine getBits instead of bitfields.
- --       This is intended...
-
- --  For more information please see: ISO 13818-1 and ETSI 300 468
-
+ -- For more information please see: ISO 13818-1 and ETSI 300 468
  -- READ THE LICENCE FILE!
 
 
 $Log: dvbsnoop.c,v $
+Revision 1.6  2003/07/06 02:22:46  rasc
+no message
+
 Revision 1.5  2003/02/26 16:45:16  obi
 - make dvbsnoop work on little endian machines again
 - fixed mask in getBits for bitlen >= 32
@@ -82,7 +84,7 @@ int main(int argc, char **argv)
 
   indent (0);
   if (! opt.binary_out) {
-     out_nl (1, "DvbSnoop   Vers. %s   -- (c) rasc",VERSION);
+     out_nl (1, "DvbSnoop   Vers. %s   -- (c) Rainer Scherg",VERSION);
      out_nl (9, "   PID   : %d (0x%04x)",opt.pid,opt.pid);
      out_nl (9, "   Filter: %d (0x%04x)",opt.filter,opt.filter);
      out_nl (9, "   Mask  : %d (0x%04x)",opt.mask,opt.mask);
