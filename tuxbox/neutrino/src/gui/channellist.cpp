@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.58 2002/01/30 17:28:37 McClean Exp $
+// $Id: channellist.cpp,v 1.59 2002/01/30 23:06:24 field Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.59  2002/01/30 23:06:24  field
+// eventlist aus channellist aufrufbar
+//
 // Revision 1.58  2002/01/30 17:28:37  McClean
 // new channellist painting
 //
@@ -510,6 +513,19 @@ int CChannelList::show()
 			selected = oldselected;
 			g_RCInput->pushbackKey (key);
 			loop=false;
+		}
+		else if (key==CRCInput::RC_help)
+		{
+			hide();
+
+			g_EventList->exec(chanlist[selected]->onid_sid, chanlist[selected]->name );
+
+			key = g_RCInput->getKey(0);
+			if ((key!=CRCInput::RC_red) && (key!=CRCInput::RC_timeout))
+				g_RCInput->pushbackKey(key);
+
+			paintHead();
+			paint();
 		}
 	}
 	hide();
