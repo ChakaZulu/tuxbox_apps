@@ -1469,7 +1469,7 @@ static eString getEITC2()
 	result.strReplace("#VOLBAR#", getVolBar());
 	eString curService = filter_string(getCurService());
 	if (curService == "n/a")
-		curService;
+		curService = "";
 	result.strReplace("#SERVICENAME#", curService);
 	result.strReplace("#STATS#", getStats());
 	result.strReplace("#EMPTYCELL#", "&nbsp;");
