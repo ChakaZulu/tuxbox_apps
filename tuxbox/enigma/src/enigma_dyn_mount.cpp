@@ -296,7 +296,7 @@ static eString unmountMountPoint(eString request, eString dirpath, eString opts,
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	int rc = eMountMgr::getInstance()->unmountMountPoint(atoi(id.c_str()));
 
-	if (rc > 0)
+	if (rc == 0)
 		result = "Mount point unmounted successfully.";
 	else
 		result = "Mount point unmount failed.";

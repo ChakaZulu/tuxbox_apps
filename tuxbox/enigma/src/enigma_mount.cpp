@@ -257,6 +257,7 @@ int eMountPoint::mount()
 
 int eMountPoint::unmount()
 {
+	mp.mounted = false;
 	return umount2(mp.localDir.c_str(), MNT_FORCE);
 }
 
