@@ -140,7 +140,17 @@ cam::cam()
 	cmdEMM.unknowna = 0x1;
 	cmdEMM.unknownb = 0x4;
 
+	camfd = open("/dev/dvb/adapter0/ca0", O_RDWR);
 
+	if (camfd < 0) {
+		perror("/dev/dvb/adapter0/ca0");
+		exit(1);
+	}
+}
+
+cam::~cam()
+{
+	close(camfd);
 }
 
 void cam::initialize()
@@ -169,18 +179,13 @@ void cam::initialize()
 void cam::cam_answer()
 {
 	ca_msg_t ca_msg;
-	int camfd, len = 0;
+	int len = 0;
 	unsigned char buffer[128];
 
-	camfd=open("/dev/dvb/adapter0/ca0", O_RDWR);
-	if( camfd <= 0 )
-	{
-		perror("open ca0");
-		return;
-	}
 	while (len <=0)
 	{
 		ca_msg.length = 4;
+
 		if (ioctl(camfd,CA_GET_MSG,&ca_msg) != 0)
 		{
 			perror("ioctl");
@@ -188,6 +193,7 @@ void cam::cam_answer()
 		}
 	
 		len = ca_msg.length;
+
 		if ( len <= 0 )
 		{
 			usleep(500);
@@ -195,32 +201,30 @@ void cam::cam_answer()
 		}
 	
 	}
+
 	memcpy(buffer, ca_msg.msg, ca_msg.length);
 
 	len=buffer[2] & 0x7F;
 
 	ca_msg.length = len;
 
-	if ( ioctl(camfd, CA_GET_MSG, &ca_msg) != 0 )
-    {
+	if (ioctl(camfd, CA_GET_MSG, &ca_msg) < 0)
+	{
 		perror("ioctl");
 		return;
-    }
+	}
 
 	if ( (int)ca_msg.length != len )
 	{
-		perror("length");
+		printf("%s: length mismatch\n", __FUNCTION__);
 		return;
 	}
 
 	memcpy(buffer+4,ca_msg.msg,ca_msg.length);
-
-	close (camfd);
 }
 
 void cam::sendCAM(void *data, unsigned int len)
 {
-	int fd;
 	ca_msg_t ca_msg;
 	int crc = 0;
 	unsigned char command[255];
@@ -234,6 +238,7 @@ void cam::sendCAM(void *data, unsigned int len)
 
 	for (unsigned int i = 0; i < len - 1; i++)
 		crc ^= command[i];
+
 	command[len - 1] = crc;
 
 	ca_msg.index = 0;
@@ -242,24 +247,14 @@ void cam::sendCAM(void *data, unsigned int len)
 	ca_msg.length = len - 1;
 	memcpy(ca_msg.msg, command + 1, len - 1);
 	
-	fd=open("/dev/dvb/adapter0/ca0", O_RDWR);
-
-	if (fd < 0) {
-		perror("/dev/dvb/adapter0/ca0");
-		return;
-	}
-	
-	if (ioctl(fd, CA_SEND_MSG, &ca_msg) < 0)
-	{
-		perror("cam-ioctl");
-	}
-	close(fd);
-
+	if (ioctl(camfd, CA_SEND_MSG, &ca_msg) < 0)
+		perror("CA_SEND_MSG");
 }
 
 void cam::readCAID()
 {
 	CAID = 0;
+
 	while(CAID < 1)
 	{
 		sendCAM(&cmdCAID, sizeof(cmdCAID_s));
@@ -267,20 +262,14 @@ void cam::readCAID()
 		int len = 0;
 		ca_msg_t ca_msg;
 		unsigned char buffer[128];
-		int fd;
 	
-		fd=open("/dev/dvb/adapter0/ca0", O_RDWR);
-		if(fd < 0)
-		{
-			perror("open ca0");
-			return;
-		}
 		while (len <=0)
 		{
 			ca_msg.length = 4;
-			if ( ioctl(fd,CA_GET_MSG,&ca_msg) != 0 )
+
+			if (ioctl(camfd, CA_GET_MSG, &ca_msg) < 0)
 			{
-				perror("ioctl");
+				perror("CA_GET_MSG");
 				return;
 			}
 		
@@ -294,53 +283,43 @@ void cam::readCAID()
 		}
 		memcpy(buffer, ca_msg.msg, ca_msg.length);
 		
-		if (buffer[2] == 04) // CAM-Error... Shit!!!
-		{
-			close(fd);
+		if (buffer[2] == 4) // CAM-Error... Shit!!!
 			continue;
-		}
-	
+
 		len=buffer[2] & 0x7F;
 		
 		ca_msg.length = len;
 		
-		if ( ioctl(fd, CA_GET_MSG, &ca_msg) != 0 )
+		if (ioctl(camfd, CA_GET_MSG, &ca_msg) < 0)
 		{
-			perror("ioctl");
+			perror("CA_GET_MSG");
 			return;
 		}
 		
-		if ( (int)ca_msg.length != len )
+		if ((int)ca_msg.length != len)
 		{
-			perror("length");
+			printf("%s: length mismatch", __FUNCTION__);
 			return;
 		}
 		
 		memcpy(buffer+4,ca_msg.msg,ca_msg.length);
 		CAID = (buffer[6]<<8)|buffer[7];
-
-		close(fd);
 	}
 }
 
 bool cam::isfree()
 {
 	ca_msg_t ca_msg;
-	int camfd, len = 0;
+	int len = 0;
 	unsigned char buffer[128];
 
-	camfd=open("/dev/dvb/adapter0/ca0", O_RDWR);
-	if( camfd <= 0 )
-	{
-		perror("open ca0");
-		return true;
-	}
-	while (len <=0)
+	while (len <= 0)
 	{
 		ca_msg.length = 4;
-		if (ioctl(camfd,CA_GET_MSG,&ca_msg) != 0)
+
+		if (ioctl(camfd,CA_GET_MSG,&ca_msg) < 0)
 		{
-			perror("ioctl");
+			perror("CA_GET_MSG");
 			return true;
 		}
 	
@@ -358,22 +337,20 @@ bool cam::isfree()
 
 	ca_msg.length = len;
 
-	if ( ioctl(camfd, CA_GET_MSG, &ca_msg) != 0 )
-    {
-		perror("ioctl");
-		return true;
-    }
-
-	if ( (int)ca_msg.length != len )
+	if (ioctl(camfd, CA_GET_MSG, &ca_msg) < 0)
 	{
-		perror("length");
+		perror("CA_GET_MSG");
+		return true;
+	}
+
+	if ((int)ca_msg.length != len)
+	{
+		printf("%s: length mismatch", __FUNCTION__);
 		return true;
 	}
 
 	memcpy(buffer+4,ca_msg.msg,ca_msg.length);
 	
-	close (camfd);
-
 	return (buffer[12] == 0x1d);
 }
 

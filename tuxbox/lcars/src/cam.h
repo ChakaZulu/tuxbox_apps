@@ -6,6 +6,9 @@
  ***************************************************************************/
 /*
 $Log: cam.h,v $
+Revision 1.6  2002/11/16 02:34:55  obi
+use only one ca file descriptor
+
 Revision 1.5  2002/06/08 20:21:09  TheDOC
 adding the cam-sources with slight interface-changes
 
@@ -31,8 +34,11 @@ class cam
 	unsigned short ECM;
 	unsigned short EMM;
 	pmt_data pmt_entry;
+
+	int camfd;
 public:
 	cam();
+	~cam();
 
 	void initialize();
 
