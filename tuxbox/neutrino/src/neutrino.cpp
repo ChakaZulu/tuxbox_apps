@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.33 2001/09/17 23:57:50 McClean Exp $
+        $Id: neutrino.cpp,v 1.34 2001/09/18 10:49:49 fnbrd Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.34  2001/09/18 10:49:49  fnbrd
+  Eventlist, quick'n dirty
+
   Revision 1.33  2001/09/17 23:57:50  McClean
   increase shutdown-logo-loadspeed
 
@@ -163,6 +166,7 @@ CNeutrinoApp::CNeutrinoApp()
 
 	mode = 0;
 	channelList = NULL;
+  eventlist = NULL;
 }
 
 /*-------------------------------------------------------------------------------------
@@ -174,6 +178,8 @@ CNeutrinoApp::~CNeutrinoApp()
 {
 	if (channelList)
 		delete channelList;
+  if (channelList)
+    delete eventlist;
 }
 
 void CNeutrinoApp::setupNetwork(bool force)
@@ -944,6 +950,10 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainSettings)
 			{	//channellist
 				channelList->exec();
 			}
+			else if (key==CRCInput::RC_yellow)
+			{	// eventlist
+				eventlist->exec("Premiere 1");
+			}
 			else if ((key==g_settings.key_quickzap_up) || (key==g_settings.key_quickzap_down))
 			{
 				//quickzap
@@ -1039,6 +1049,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	setupNetwork();
 
 	channelList = new CChannelList( 1, "channellist.head" );
+	eventlist = new EventList( 1, "channellist.head" );
 
 	//Main settings
 	CMenuWidget mainSettings("mainmenu.head", "settings.raw");

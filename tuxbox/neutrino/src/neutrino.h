@@ -1,4 +1,6 @@
 /*
+//  $Id: neutrino.h,v 1.15 2001/09/18 10:49:49 fnbrd Exp $
+
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -27,6 +29,12 @@
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+//  $Log: neutrino.h,v $
+//  Revision 1.15  2001/09/18 10:49:49  fnbrd
+//  Eventlist, quick'n dirty
+//
+
 */
 
 
@@ -48,6 +56,7 @@
 #include "driver/fontrenderer.h"
 #include "driver/rcinput.h"
 
+#include "widget/eventlist.hpp"
 #include "widget/color.h"
 #include "widget/menue.h"
 #include "widget/channellist.h"
@@ -83,12 +92,14 @@ using namespace std;
 
 class CNeutrinoApp : public CMenuTarget
 {
+  private:
 	enum
 	{
 		mode_tv = 1,
 		mode_radio = 2
 	};
 
+    EventList *eventlist;
 	string				settingsFile;
 
 	bool				nRun;
