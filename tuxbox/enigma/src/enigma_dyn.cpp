@@ -1923,6 +1923,53 @@ static eString neutrino_suck_getchannellist(eString request, eString dirpath, eS
 	return channelstring;
 }
 
+static eString cleanupTimerList(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	eString result = "";
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	result+="<script language=\"javascript\">window.close();</script>";
+	eTimerManager::getInstance()->cleanupEvents();
+	return result;
+}
+
+// extern eString buildDayString(int type);
+
+struct getEntryString: public std::unary_function<ePlaylistEntry*, void>
+{
+	eString &result;
+	eString begin;
+
+	getEntryString(eString &result): result(result)
+	{
+	}
+
+	void operator()(ePlaylistEntry* se)
+	{
+		begin = "";
+		tm evtTime = *localtime(&se->time_begin);
+//		printf(" - isRepeating event (days %s)", buildDayString(se->type).c_str());
+		begin.sprintf("%02d.%02d. - %02d:%02d", evtTime.tm_mday, evtTime.tm_mon+1, evtTime.tm_hour, evtTime.tm_min);
+//		result += eString().sprintf("%X", se->type) + ": ";
+		result += begin;
+		result += " (" + eString().sprintf("%d", se->duration / 60) + " min) ";
+		eString description = se->service.descr.mid(1, strlen(se->service.descr.c_str()));
+		result += description;
+		result += "<br>";
+	}
+};
+
+static eString showTimerList(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	eString result = "";
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	eTimerManager::getInstance()->forEachEntry(getEntryString(result));
+	if (result == "")
+		result = "No Timer Events available";
+	eString tmp = read_file(TEMPLATE_DIR + "timerList.tmp");
+	tmp.strReplace("#BODY#", result);
+	return tmp;
+}
+
 void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 {
 	dyn_resolver->addDyn("GET", "/", web_root);
@@ -1938,6 +1985,8 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/setVolume", setVolume);
 	dyn_resolver->addDyn("GET", "/record", record);
 	dyn_resolver->addDyn("GET", "/EPGDetails", EPGDetails);
+	dyn_resolver->addDyn("GET", "/showTimerList", showTimerList);
+	dyn_resolver->addDyn("GET", "/cleanupTimerList", cleanupTimerList);
 	dyn_resolver->addDyn("GET", "/cgi-bin/status", doStatus);
 	dyn_resolver->addDyn("GET", "/cgi-bin/switchService", switchService);
 	dyn_resolver->addDyn("GET", "/cgi-bin/admin", admin);
