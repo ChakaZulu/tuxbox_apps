@@ -28,9 +28,12 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-$Id: gamelist.cpp,v 1.18 2001/12/05 21:38:09 rasc Exp $
+$Id: gamelist.cpp,v 1.19 2001/12/12 18:45:39 McClean Exp $
 
 $Log: gamelist.cpp,v $
+Revision 1.19  2001/12/12 18:45:39  McClean
+fix gamelist-design, manual-update bug, add save settings now
+
 Revision 1.18  2001/12/05 21:38:09  rasc
 gamelist: eigener Fontdef fuer 2-zeiliges Menue
 
@@ -258,14 +261,27 @@ void CGameList::hide()
 
 void CGameList::paintItem(int pos)
 {
-	int ypos = y+ theight+0 + pos*fheight;
+	int ypos = (y+theight) + pos*fheight;
+	int itemheight = fheight;
+	if(pos==0)
+	{	//back is half-height...
+		itemheight = (fheight / 2) + 3;
+		g_FrameBuffer->paintBoxRel(x,ypos+itemheight, width, 15, COL_MENUCONTENT);
+		g_FrameBuffer->paintBoxRel(x+10,ypos+itemheight+5, width-20, 1, COL_MENUCONTENT+5);
+		g_FrameBuffer->paintBoxRel(x+10,ypos+itemheight+6, width-20, 1, COL_MENUCONTENT+2);
+	}
+	else
+	{
+		ypos -= (fheight / 2) - 15;
+	}
+
 	int color = COL_MENUCONTENT;
 	if (liststart+pos==selected)
 	{
 		color = COL_MENUCONTENTSELECTED;
 	}
 
-	g_FrameBuffer->paintBoxRel(x,ypos, width, fheight, color);
+	g_FrameBuffer->paintBoxRel(x,ypos, width, itemheight, color);
 	if(liststart+pos<gamelist.size())
 	{
 		game* aktgame = gamelist[liststart+pos];
@@ -278,7 +294,7 @@ void CGameList::paintItem(int pos)
 
 void CGameList::paintHead()
 {
-	g_FrameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
+	g_FrameBuffer->paintBoxRel(x,y, width,theight, COL_MENUHEAD);
 	g_FrameBuffer->paintIcon("games.raw",x+8,y+5);
 	g_Fonts->menu_title->RenderString(x+38,y+theight+1, width, g_Locale->getText(name).c_str(), COL_MENUHEAD);
 }

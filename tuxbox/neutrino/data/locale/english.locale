@@ -12,6 +12,7 @@ mainmenu.shutdown Shutdown
 mainmenu.settings Settings
 
 mainsettings.head Settings
+mainsettings.savesettingsnow save settings now
 mainsettings.language Language
 mainsettings.audio Audio
 mainsettings.video Video

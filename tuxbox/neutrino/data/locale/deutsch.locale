@@ -195,11 +195,11 @@ scants.services Services:
 mainsettings.scants Transponderscan
 
 mainsettings.update Software-Aktualisierung
-flashupdate.head Software-Aktualisierung
+flashupdate.head Aktualisierung
 flashupdate.action Aktion:
 flashupdate.globalprogress Gesamtstatus:
 flashupdate.getinfofile lade Versioninfo
-flashupdate.getinfofileerror kann Versioninfo nicht laden
+flashupdate.getinfofileerror kann Info nicht laden
 flashupdate.getupdatefile lade Update
 flashupdate.getupdatefileerror kann Update nicht laden
 flashupdate.cantopenfile kann Datei nicht öffnen

@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.95 2001/12/12 12:03:46 McClean Exp $
+        $Id: neutrino.cpp,v 1.96 2001/12/12 18:45:39 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.96  2001/12/12 18:45:39  McClean
+  fix gamelist-design, manual-update bug, add save settings now
+
   Revision 1.95  2001/12/12 12:03:46  McClean
   make flash-compatible
 
@@ -1037,6 +1040,8 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainSettings.addItem( new CMenuSeparator() );
 	mainSettings.addItem( new CMenuForwarder("menu.back") );
 	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	mainSettings.addItem( new CMenuForwarder("mainsettings.savesettingsnow", true, "", this, "savesettings") );
+	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.scants", true, "", g_ScanTS) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.video", true, "", &videoSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.audio", true, "", &audioSettings) );
@@ -1980,6 +1985,10 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 	{
 		setupNetwork( true );
 	}
+	else if(actionKey=="savesettings")
+	{
+		saveSetup();
+	}
 
 	return returnval;
 }
@@ -1993,7 +2002,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.95 2001/12/12 12:03:46 McClean Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.96 2001/12/12 18:45:39 McClean Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;

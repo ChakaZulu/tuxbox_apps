@@ -431,11 +431,15 @@ void CFlashUpdate::paint()
 	ypos+= mheight >>1;
 	showGlobalStatus(0);
 
-	if(!http.getFile())
+	if(g_settings.softupdate_mode==1) //internet-update
 	{
-		showStatusMessage(g_Locale->getText("flashupdate.getupdatefileerror") );
-		return;
+		if(!http.getFile())
+		{
+			showStatusMessage(g_Locale->getText("flashupdate.getupdatefileerror") );
+			return;
+		}
 	}
+
 	showGlobalStatus(25);
 
 	//md5check...
