@@ -1,8 +1,9 @@
 /*
- *  mpegtools for the Siemens Fujitsu DVB PCI card
+ *  dvb-mpegtools for the Siemens Fujitsu DVB PCI card
  *
  * Copyright (C) 2000, 2001 Marcus Metzler 
  *            for convergence integrated media GmbH
+ * Copyright (C) 2002 Marcus Metzler 
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -22,9 +23,7 @@
  * Or, point your browser to http://www.gnu.org/copyleft/gpl.html
  * 
 
- * The author can be reached at marcus@convergence.de, 
-
- * the project's page is at http://linuxtv.org/dvb/
+ * The author can be reached at mocm@metzlerbros.de, 
  */
 
 #include "ctools.h"
@@ -46,6 +45,7 @@ ssize_t save_read(int fd, void *buf, size_t count)
 	while(neof >= 0 && re < count){
 		neof = read(fd, buf+re, count - re);
 		if (neof > 0) re += neof;
+		else break;
 	}
 
 	if (neof < 0 && re == 0) return neof;
@@ -1342,6 +1342,11 @@ void filter(trans *p)
 	cpid[1] = p->packet[2];
 	tpid = get_pid(cpid);
 
+	/*if ( p->packet[1]&0x80){
+		fprintf(stderr,"Error in TS for PID: %d\n", 
+			tpid);
+	}*/
+
 	flag = cpid[0];
 	flags = p->packet[3];
 	
@@ -2367,3 +2372,8 @@ int http_open (char *url)
 	return sock;
 }
 
+extern int errno;
+const char * strerrno (void)
+{
+	return strerror(errno);
+}

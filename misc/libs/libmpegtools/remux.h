@@ -1,8 +1,9 @@
 /*
- *  mpegtools for the Siemens Fujitsu DVB PCI card
+ *  dvb-mpegtools for the Siemens Fujitsu DVB PCI card
  *
  * Copyright (C) 2000, 2001 Marcus Metzler 
  *            for convergence integrated media GmbH
+ * Copyright (C) 2002 Marcus Metzler 
  * 
  *
  * This program is free software; you can redistribute it and/or
@@ -23,9 +24,7 @@
  * Or, point your browser to http://www.gnu.org/copyleft/gpl.html
  * 
 
- * The author can be reached at marcus@convergence.de, 
-
- * the project's page is at http://linuxtv.org/dvb/
+ * The author can be reached at mocm@metzlerbros.de, 
  */
 
 #include <stdio.h>
@@ -38,7 +37,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
-#include <libgen.h>
+//#include <libgen.h>
 #include <stdint.h>
 
 #include "ringbuffy.h"

@@ -1,8 +1,9 @@
 /*
- *  mpegtools for the Siemens Fujitsu DVB PCI card
+ *  dvb-mpegtools for the Siemens Fujitsu DVB PCI card
  *
  * Copyright (C) 2000, 2001 Marcus Metzler 
  *            for convergence integrated media GmbH
+ * Copyright (C) 2002  Marcus Metzler 
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -22,9 +23,8 @@
  * Or, point your browser to http://www.gnu.org/copyleft/gpl.html
  * 
 
- * The author can be reached at marcus@convergence.de, 
+ * The author can be reached at mocm@metzlerbros.de, 
 
- * the project's page is at http://linuxtv.org/dvb/
  */
 
 #ifndef _TS_TRANSFORM_H_
@@ -114,12 +114,13 @@ extern "C" {
 
 #define P2P_LENGTH 2048
 
-	enum{NOPES, AUDIO, VIDEO};
+	enum{NOPES, AUDIO, VIDEO, AC3};
 
 	typedef struct p2pstruct {
 		int found;
 		uint8_t buf[MMAX_PLENGTH];
 		uint8_t cid;
+		uint8_t subid;
 		uint32_t plength;
 		uint8_t plen[2];
 		uint8_t flag1;
@@ -136,7 +137,7 @@ extern "C" {
 		int done;
 		int repack;
 		uint16_t bigend_repack;
-		void (*func)(uint8_t *buf, int count, struct p2pstruct *p);
+		void (*func)(uint8_t *buf, int count, void *p);
 		int startv;
                 int starta;
 		int64_t apts;
@@ -156,16 +157,16 @@ extern "C" {
 	int write_ts_header(uint16_t pid, uint8_t *counter, int pes_start, 
 			    uint8_t *buf, uint8_t length);
 	uint16_t get_pid(uint8_t *pid);
-	void init_p2p(p2p *p, void (*func)(uint8_t *buf, int count, p2p *p),
+	void init_p2p(p2p *p, void (*func)(uint8_t *buf, int count, void *p),
 		      int repack);
 	void get_pes (uint8_t *buf, int count, p2p *p, void (*func)(p2p *p));
 	void get_pes (uint8_t *buf, int count, p2p *p, void (*func)(p2p *p));
 	void pes_repack(p2p *p);
 	void setup_pes2ts( p2p *p, uint32_t pida, uint32_t pidv, 
-			   void (*ts_write)(uint8_t *buf, int count, p2p *p));
+			   void (*ts_write)(uint8_t *buf, int count, void *p));
 	void kpes_to_ts( p2p *p,uint8_t *buf ,int count );
 	void setup_ts2pes( p2p *pa, p2p *pv, uint32_t pida, uint32_t pidv, 
-			   void (*pes_write)(uint8_t *buf, int count, p2p *p));
+			   void (*pes_write)(uint8_t *buf, int count, void *p));
 	void kts_to_pes( p2p *p, uint8_t *buf);
 	void pes_repack(p2p *p);
 	void extract_from_pes(int fdin, int fdout, uint8_t id, int es);
@@ -175,6 +176,8 @@ extern "C" {
 	int get_ainfo(uint8_t *mbuf, int count, AudioInfo *ai, int pr);
 	int get_vinfo(uint8_t *mbuf, int count, VideoInfo *vi, int pr);
 	int get_ac3info(uint8_t *mbuf, int count, AudioInfo *ai, int pr);
+	void filter_audio_from_pes(int fdin, int fdout, uint8_t id, 
+				   uint8_t subid);
 
 
 //instant repack
@@ -222,6 +225,7 @@ extern "C" {
 			  uint16_t pidv, int es);
 
 	void ts2es(int fdin,  uint16_t pidv);
+	void ts2es_opt(int fdin,  uint16_t pidv, ipack *p, int verb);
 	void insert_pat_pmt( int fdin, int fdout);
 	void change_aspect(int fdin, int fdout, int aspect);
 

@@ -1,3 +1,31 @@
+/*
+ *  dvb-mpegtools for the Siemens Fujitsu DVB PCI card
+ *
+ * Copyright (C) 2000, 2001 Marcus Metzler 
+ *            for convergence integrated media GmbH
+ * Copyright (C) 2002 Marcus Metzler 
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * Or, point your browser to http://www.gnu.org/copyleft/gpl.html
+ * 
+
+ * The author can be reached at mocm@metzlerbros.de, 
+ */
+
 #include "remux.h"
 
 unsigned int bitrates[3][16] =
@@ -273,7 +301,8 @@ void find_vframes( Remux *rem, uint8_t *buf, int l)
 					rem->video_info.framerate 
 					+ rem->vpts_off;
 			
-				/*	
+
+/*
 fprintf(stderr,"MYPTS:");
 printpts((uint32_t)pts-rem->vpts_off);
  fprintf(stderr,"   REALPTS:");
@@ -283,7 +312,8 @@ printpts((uint32_t)pts-rem->vpts_off);
  fprintf(stderr,"   DIST: %4d",-rem->vpts_list[rem->vptsn-1].pos+(rem->vwrite+c-4));
  //fprintf(stderr,"   ERR: %3f",(double)(-rem->vpts_list[rem->vptsn-1].PTS+pts)/(rem->vframe+1));
  fprintf(stderr,"\r");
-				*/
+ */
+
 				
 				
 				rem->vptsn = add_pts(rem->vpts_list,(uint32_t)pts
@@ -322,7 +352,7 @@ void find_aframes( Remux *rem, uint8_t *buf, int l)
 			  pts = ( (uint64_t)rem->aframe * sam * 900ULL)/fr
 				  + rem->apts_off;
 				
-			  /*  	  
+/*
 fprintf(stderr,"MYPTS:");
 printpts((uint32_t)pts-rem->apts_off);
  fprintf(stderr," REALPTS:");
@@ -331,7 +361,7 @@ printpts((uint32_t)pts-rem->apts_off);
  printpts((uint32_t)((uint64_t)rem->apts_list[rem->aptsn-1].PTS-pts));
  fprintf(stderr," DIST: %4d",-rem->apts_list[rem->aptsn-1].pos+(rem->awrite+c-2));
  fprintf(stderr,"\r");
-			  */
+*/
 			  rem->aptsn = add_pts(rem->apts_list,(uint32_t)pts
 					     ,rem->awrite+c-2,
 					     rem->vwrite,
@@ -843,6 +873,11 @@ void remux(int fin, int fout, int pack_size, int mult)
 	init_ptsl(abufl);
 	init_ptsl(vbufl);
 
+/*	if (mult < 0 || mult >1000){
+		fprintf(stderr,"Multipler too large\n");
+		exit(1);
+	}
+	*/
 	init_remux(&rem, fin, fout, mult);
 	rem.pack_size = pack_size;
 	data_size = pack_size - MAX_H_SIZE;
@@ -1067,10 +1102,11 @@ void init_REMUX(REMUX *rem)
 #define ABUF_SIZE   REPACK*1024
 #define VBUF_SIZE   REPACK*10240
 
-void remux_main(uint8_t *buf, int count, p2p *p)
+void remux_main(uint8_t *buf, int count, void *pr)
 {
 	int i, b;
 	int bufsize = 0;
+	p2p *p = (p2p *) pr;
 	PESBuffer *pbuf;
 	REMUX *rem = (REMUX *) p->data;
 	uint8_t type = buf[3];
