@@ -102,13 +102,9 @@ int CFile::getType()
 
 std::string CFile::getFileName()		// return name.extension or folder name without trailing /
 {
-	int namepos = Name.rfind('/');
-	if( namepos >= 0)
-	{
-		return Name.substr(namepos + 1);
-	}
-	else
-		return Name;
+	std::string::size_type namepos = Name.rfind('/');
+
+	return (namepos == std::string::npos) ? Name : Name.substr(namepos + 1);
 }
 
 //------------------------------------------------------------------------
