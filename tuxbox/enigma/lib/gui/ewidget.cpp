@@ -491,7 +491,7 @@ void eWidget::checkFocus()
 	{
 		l->first();
 
-		while (l->current() && !(l->current()->stateVisible))
+		while (l->current() && !(l->current()->state&stateVisible))
 			l->next();
 
 		setFocus(l->current());
