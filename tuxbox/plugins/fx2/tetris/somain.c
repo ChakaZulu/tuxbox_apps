@@ -16,9 +16,11 @@
 #include <plugin.h>
 #include <fx2math.h>
 
+#ifndef __i386__
 #include <curl/curl.h>
 #include <curl/types.h>
 #include <curl/easy.h>
+#endif
 
 extern	int				debug;
 extern	int				doexit;
@@ -30,10 +32,46 @@ static	char			*proxy_addr=0;
 static	char			*proxy_user=0;
 static	char			*hscore=0;
 
+typedef struct _HScore
+{
+	char	name[12];
+	long	points;
+} HScore;
+
+static	HScore	hsc[8];
+
+static	void	LocalSave( void )
+{
+	int		x;
+	char	*user;
+	int		i;
+
+	for( i=0; i < 8; i++ )
+		if ( score > hsc[i].points )
+			break;
+	if ( i==8 )
+		return;
+
+	FBFillRect( 150,420,470,64,BLACK );
+	FBDrawRect( 149,419,472,66,WHITE );
+	FBDrawRect( 148,418,474,68,WHITE );
+	x=FBDrawString( 154,420,64,"name : ",WHITE,0);
+	user=FBEnterWord(154+x,420,64,9,WHITE);
+
+	if ( i < 7 )
+		memmove( hsc+i+1,hsc+i,sizeof(HScore)*(7-i) );
+	strcpy(hsc[i].name,user);
+	hsc[i].points=score;
+}
+
 static	void	SaveGame( void )
 {
+#ifndef __i386__
 	CURL		*curl;
 	CURLcode	res;
+#else
+	int			res;
+#endif
 	FILE		*fp;
 	char		url[ 512 ];
 	char		*user="nobody";
@@ -41,8 +79,16 @@ static	void	SaveGame( void )
 	char		*p;
 	struct timeval	tv;
 
-	if ( !score || !hscore )
+	doexit=0;
+
+	if ( score < 31 )
 		return;
+
+	if ( !hscore )
+	{
+		LocalSave();
+		return;
+	}
 
 	FBDrawString( 150,350,64,"Save Highscore ? (OK/BLUE)",WHITE,0);
 
@@ -50,7 +96,6 @@ static	void	SaveGame( void )
 		RcGetActCode();
 
 	actcode=0xee;
-	doexit=0;
 	while( !doexit )
 	{
 		tv.tv_sec = 0;
@@ -78,6 +123,7 @@ static	void	SaveGame( void )
 			memcpy(p,p+1,x);
 	}
 
+#ifndef __i386__
 	sprintf(url,"%s/games/tetris.php?action=put&user=%s&score=%d",
 		hscore,user,score);
 
@@ -100,21 +146,48 @@ static	void	SaveGame( void )
 			curl_easy_setopt( curl, CURLOPT_PROXYUSERPWD, proxy_user );
 	}
 	res = curl_easy_perform(curl);
+#else
+	res=1;
+#endif
 
 	if ( !res )
 		FBDrawString( 170,415,64,"success",WHITE,0);
 	else
 		FBDrawString( 170,415,64,"failed",WHITE,0);
 
+#ifndef __i386__
 	curl_easy_cleanup(curl);
 	fclose( fp );
 	unlink( "/var/tmp/trash" );
+#endif
 
 	tv.tv_sec = 2;
 	tv.tv_usec = 0;
 	select( 0,0,0,0, &tv );
 
 	return;
+}
+
+static	void	ShowHScore( void )
+{
+	int				i;
+	int				x;
+	char			pp[64];
+
+	FBFillRect( 0, 0, 720, 576, BLACK );
+
+	FBDrawString( 170, 200, 64, "play again with OK",GRAY,0);
+
+	FBDrawString( 190, 32, 64, "HighScore", RED, BLACK );
+	for( i=0; i < 8; i++ )
+	{
+		FBDrawString( 100, 100+i*48, 48, hsc[i].name, WHITE, 0 );
+		sprintf(pp,"%d",hsc[i].points);
+		x = FBDrawString( 400, 100+i*48, 48, pp, BLACK, BLACK );
+		FBDrawString( 500-x, 100+i*48, 48, pp, WHITE, BLACK );
+	}
+	while( realcode != 0xee )
+		RcGetActCode();
 }
 
 static	void	setup_colors(void)
@@ -213,6 +286,8 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 {
 	struct timeval	tv;
 	int				x;
+	int				i;
+	int				fd;
 
 	if ( FBInitialize( 720, 576, 8, fdfb ) < 0 )
 		return -1;
@@ -221,6 +296,21 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 
 	if ( RcInitialize( fdrc ) < 0 )
 		return -1;
+
+	fd = open( "/var/games/tetris.hscore", O_RDONLY );
+	if ( fd == -1 )
+	{
+		for( i=0; i < 8; i++ )
+		{
+			strcpy(hsc[i].name,"nobody");
+			hsc[i].points=30;
+		}
+	}
+	else
+	{
+		read( fd, hsc, sizeof(hsc) );
+		close(fd);
+	}
 
 	Fx2ShowPig( 450, 105, 128, 96 );
 
@@ -244,6 +334,9 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 				if ( !NextItem() )
 					doexit=1;
 			}
+#ifdef USEX
+			FBFlushGrafic();
+#endif
 
 			RcGetActCode( );
 		}
@@ -253,7 +346,10 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 			actcode=0xee;
 			DrawGameOver();
 			SaveGame();
-			FBDrawString( 170, 350, 64, " play again with OK ",WHITE,BLACK);
+			ShowHScore();
+#ifdef USEX
+			FBFlushGrafic();
+#endif
 			doexit=0;
 			while(( actcode != RC_OK ) && !doexit )
 			{
@@ -269,6 +365,14 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 
 	RcClose();
 	FBClose();
+
+/* save hscore */
+	fd = open( "/var/games/tetris.hscore", O_CREAT|O_WRONLY, 438 );
+	if ( fd != -1 )
+	{
+		write( fd, hsc, sizeof(hsc) );
+		close(fd);
+	}
 
 	return 0;
 }

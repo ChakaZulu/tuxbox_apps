@@ -6,7 +6,7 @@
 
 static	unsigned char	maze[] =\
 "                      "\
-"                      "\
+"  #          #        "\
 "  #          #        "\
 "  #          #        "\
 "  #          #        "\
