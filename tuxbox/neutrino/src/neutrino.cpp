@@ -151,7 +151,6 @@ static CFontSizeNotifier fontsizenotifier;
 extern const char * locale_real_names[]; /* #include <system/locals_intern.h> */
 
 CZapitClient::SatelliteList satList;
-CZapitClient::SatelliteList::iterator satList_it;
 
 CVCRControl::CDevice * recordingdevice = NULL;
 

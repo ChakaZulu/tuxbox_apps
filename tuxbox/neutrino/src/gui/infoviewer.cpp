@@ -75,7 +75,6 @@ int time_height;
 char old_timestr[10];
 
 extern CZapitClient::SatelliteList satList;
-extern CZapitClient::SatelliteList::iterator satList_it;
 
 CInfoViewer::CInfoViewer()
 {
@@ -212,38 +211,28 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 	frameBuffer->paintBoxRel(BoxStartX+10, BoxStartY+10, ChanWidth, ChanHeight, COL_INFOBAR_SHADOW_PLUS_0);
 	frameBuffer->paintBoxRel(BoxStartX,    BoxStartY,    ChanWidth, ChanHeight, COL_INFOBAR_PLUS_0);
 
-	if ((!g_settings.infobar_sat_display) || (satellitePosition == 0))
-	{
-		//channel number
-		char strChanNum[10];
-		sprintf( (char*) strChanNum, "%d", ChanNum);
-		int ChanNumXPos = BoxStartX + ((ChanWidth - g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_NUMBER]->getRenderWidth(strChanNum))>>1);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_NUMBER]->RenderString(ChanNumXPos, BoxStartY+ChanHeight, ChanWidth, strChanNum, COL_INFOBAR);
-	}
-	else
-	{
-		//channel number
-		char strChanNum[10];
-		sprintf( (char*) strChanNum, "%d", ChanNum);
-		int ChanNumXPos = BoxStartX + ((ChanWidth - g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_NUMBER]->getRenderWidth(strChanNum))>>1);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_NUMBER]->RenderString(ChanNumXPos, BoxStartY+ChanHeight + 10, ChanWidth, strChanNum, COL_INFOBAR);
+	int ChanNumYPos = BoxStartY + ChanHeight;
 
-       		//satellite
-       		char satelliteName[30];
-       		for (satList_it = satList.begin(); satList_it != satList.end(); satList_it++)
-       			if (satList_it->satPosition == satellitePosition)
-       			{
-       				strcpy(satelliteName, satList_it->satName);
-       				break;
-       			}
-//		printf("satelliteName = %s, satellitePosition = %d\n", satelliteName, satellitePosition);
-		
-       		int satNameWidth = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getRenderWidth(satelliteName);
-       		if (satNameWidth > ChanWidth)
-       			satNameWidth = ChanWidth;
-		int ChanSatXPos = BoxStartX + ((ChanWidth - satNameWidth)>>1);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(ChanSatXPos, BoxStartY + 22, ChanWidth, satelliteName, COL_INFOBAR);
+	if (g_settings.infobar_sat_display)
+	{
+		for (CZapitClient::SatelliteList::const_iterator satList_it = satList.begin(); satList_it != satList.end(); satList_it++)
+			if (satList_it->satPosition == satellitePosition)
+			{
+				int satNameWidth = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getRenderWidth(satList_it->satName);
+				if (satNameWidth > ChanWidth)
+					satNameWidth = ChanWidth;
+
+				g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(BoxStartX + ((ChanWidth - satNameWidth)>>1), BoxStartY + 22, ChanWidth, satList_it->satName, COL_INFOBAR);
+
+				ChanNumYPos += 10;
+
+				break;
+			}
 	}
+
+	char strChanNum[10];
+	sprintf( (char*) strChanNum, "%d", ChanNum);
+	g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_NUMBER]->RenderString(BoxStartX + ((ChanWidth - g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_NUMBER]->getRenderWidth(strChanNum))>>1), ChanNumYPos, ChanWidth, strChanNum, COL_INFOBAR);
 
 	//infobox
 	int ChanNameX = BoxStartX + ChanWidth + 10;
