@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.53 2002/10/12 23:14:20 obi Exp $
+ * $Id: getservices.cpp,v 1.54 2002/10/14 23:54:38 obi Exp $
  */
 
 #include <stdio.h>
@@ -50,7 +50,7 @@ void ParseTransponders (XMLTreeNode *node, uint8_t DiSEqC)
 		{
 			sscanf(node->GetAttributeValue("symbol_rate"), "%u", &feparams.u.qpsk.SymbolRate);
 			sscanf(node->GetAttributeValue("fec_inner"), "%hhu", &tmp);
-			feparams.u.qam.FEC_inner = CFrontend::getFEC(tmp);
+			feparams.u.qpsk.FEC_inner = CFrontend::getFEC(tmp);
 			sscanf(node->GetAttributeValue("polarization"), "%hhu", &polarization);
 		}
 
