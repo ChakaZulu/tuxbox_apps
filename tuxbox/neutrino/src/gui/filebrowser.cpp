@@ -318,27 +318,23 @@ void CFileBrowser::ChangeDir(const std::string & filename)
 	std::string newpath;
 	if(filename == "..")
 	{
-		unsigned int pos;
-		if (strncmp(Path.c_str(), VLC_URI, strlen(VLC_URI)) == 0)
-		{
-			pos = Path.substr(strlen(VLC_URI), Path.length()-strlen(VLC_URI)-1).rfind('/');
-			if (pos != std::string::npos)
-				pos += strlen(VLC_URI);
-		}
-		else
-		{
-			pos = Path.substr(0,Path.length()-1).rfind('/');
-		}
+		std::string::size_type pos = Path.substr(0,Path.length()-1).rfind('/');
+
+		bool is_vlc = (strncmp(Path.c_str(), VLC_URI, strlen(VLC_URI)) == 0);
+
 		if (pos == std::string::npos)
 		{
 			newpath = Path;
 		}
 		else
 		{
-			newpath = Path.substr(0, pos + 1);
+			if (is_vlc && (pos < strlen(VLC_URI) - 1))
+				newpath = VLC_URI;
+			else
+				newpath = Path.substr(0, pos + 1);
 		}
 		
-		if (strncmp(newpath.c_str(), base.c_str(), base.length()) != 0)
+		if (strncmp(is_vlc ? &(newpath.c_str()[strlen(VLC_URI)]) : newpath.c_str(), base.c_str(), base.length()) != 0)
 			return;
 	}
 	else
