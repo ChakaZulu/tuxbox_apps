@@ -1,3 +1,5 @@
+SUBDIRS = data
+
 INCLUDES = \
 	@ZAPIT_CFLAGS@ \
 	-I$(top_srcdir)/src \
@@ -21,4 +23,3 @@ nhttpd_LDADD = \
 	@UCODES_LIBS@ \
 	@ZAPIT_LIBS@ \
 	-lpthread
-

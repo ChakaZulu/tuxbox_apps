@@ -15,4 +15,3 @@ install-data-local:
 uninstall-local:
 	-rm -rf $(DATADIR)/neutrino/icons
 	-rmdir $(DATADIR)/neutrino
-
