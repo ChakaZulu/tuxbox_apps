@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.163 2003/03/03 05:42:58 obi Exp $
+//  $Id: sectionsd.cpp,v 1.164 2003/03/03 13:38:33 obi Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1052,7 +1052,7 @@ static void commandDumpStatusInformation(int connfd, char *data, const unsigned 
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.163 2003/03/03 05:42:58 obi Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.164 2003/03/03 13:38:33 obi Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -2838,7 +2838,8 @@ static void *sdtThread(void *)
 	}
 
 	dprintf("sdt-thread ended\n");
-	return 0;
+
+	pthread_exit(NULL);
 }
 
 //---------------------------------------------------------------------
@@ -2924,32 +2925,33 @@ static void *timeThread(void *)
 			{
 				tim = changeUTCtoCtime((const unsigned char *) &UTC);
 				
-				if (tim)
-				{
-					if (!messaging_neutrino_sets_time)
-						if (stime(&tim) < 0)
-						{
-							perror("[sectionsd] FATAL: cannot set date"); /* EPERM  The caller is not the super-user. */
-							return 0;
+				if (tim) {
+					if ((!messaging_neutrino_sets_time) && (geteuid() == 0)) {
+						struct timeval tv;
+						tv.tv_sec = tim;
+						tv.tv_usec = 0;
+						if (settimeofday(&tv, NULL) < 0) {
+							perror("[sectionsd] settimeofday");
+							pthread_exit(NULL);
 						}
+					}
+					
 					timeset = true;
 					eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD, &tim, sizeof(tim));
 				}
 			}
 			
-			if (timeset && first_time)
-			{
+			if (timeset && first_time) {
 				first_time = false;
 			}
-			else
-			{
-				if (timeset)
-				{
+			else {
+				if (timeset) {
 					seconds = 60 * 30;
 					dprintf("dmxTOT: going to sleep for %d seconds.\n", seconds);
 				}
-				else
+				else {
 					seconds = 1;
+				}
 				
 				while (seconds)
 					seconds = sleep(seconds);
@@ -2966,7 +2968,8 @@ static void *timeThread(void *)
 	}
 
 	dprintf("time-thread ended\n");
-	return 0;
+
+	pthread_exit(NULL);
 }
 
 //---------------------------------------------------------------------
@@ -3369,7 +3372,8 @@ static void *eitThread(void *)
 	}
 
 	dputs("[eitThread] end");
-	return 0;
+
+	pthread_exit(NULL);
 }
 
 //---------------------------------------------------------------------
@@ -3460,7 +3464,7 @@ static void *houseKeepingThread(void *)
 
 	dprintf("housekeeping-thread ended.\n");
 
-	return 0;
+	pthread_exit(NULL);
 }
 
 static void printHelp(void)
@@ -3487,7 +3491,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.163 2003/03/03 05:42:58 obi Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.164 2003/03/03 13:38:33 obi Exp $\n");
 
 	try
 	{

@@ -1,5 +1,5 @@
 //
-// $Id: SIutils.cpp,v 1.13 2002/11/03 22:26:54 thegoodguy Exp $
+// $Id: SIutils.cpp,v 1.14 2003/03/03 13:38:33 obi Exp $
 //
 // utility functions for the SI-classes (dbox-II-project)
 //
@@ -22,6 +22,11 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIutils.cpp,v $
+// Revision 1.14  2003/03/03 13:38:33  obi
+// - cleaned up changeUTCtoCtime a bit
+// - finish pthreads using pthread_exit(NULL) instead of return 0
+// - use settimeofday() instead of stime()
+//
 // Revision 1.13  2002/11/03 22:26:54  thegoodguy
 // Use more frequently types defined in zapittypes.h(not complete), fix some warnings, some code cleanup
 //
@@ -68,8 +73,6 @@
 
 #include <time.h>
 #include <string.h>
-
-//#include <libxml/encoding.h>
 
 static const char descr_tbl[][50] = {
 // defined by ISO/IEC 13818-1 P64
@@ -158,54 +161,47 @@ const char *decode_descr (unsigned char _index) {
 	return descr_tbl[index];
 }
 
-#ifdef SEPARATE_MKTIME
-time_t separate_mktime (struct tm *tp) __THROW;
-#endif
-
 // Thanks to kwon
 time_t changeUTCtoCtime(const unsigned char *buffer, int local_time)
 {
-    int year, month, day, y_, m_, k,
-        hour, minutes, seconds;
-    int mjd, time;
+	int year, month, day, y_, m_, k, hour, minutes, seconds, mjd;
 
-    mjd  = (((unsigned)buffer[0])<< 8) + buffer[1];
-    time = (((unsigned)buffer[2]) << 16) + (((unsigned)buffer[3]) << 8) + buffer[4];
-    if(mjd == 0xffff && time == 0xffffff)
-      // keine Uhrzeit
-      return 0;
+	if (!memcmp(buffer, "\xff\xff\xff\xff\xff", 5))
+		return 0; // keine Uhrzeit
 
-    y_   = (int) ((mjd - 15078.2) / 365.25);
-    m_   = (int) ((mjd - 14956.1 - (int) (y_ * 365.25)) / 30.6001);
-    day  = mjd - 14956 - (int) (y_ * 365.25) - (int) (m_ * 30.60001);
-    if ((m_ == 14) || (m_ == 15))
-      k = 1;
-    else
-      k = 0;
-    year  = y_ + k + 1900;
-    month = m_ - 1 - k*12;
+	mjd = (buffer[0] << 8) | buffer[1];
+	hour = buffer[2];
+	minutes = buffer[3];
+	seconds = buffer[4];
 
-    hour    = (time >> 16) & 0xff;
-    minutes = (time >>  8) & 0xff;
-    seconds = (time      ) & 0xff;
-    struct tm zeit;
-    memset(&zeit, 0, sizeof(zeit));
-    zeit.tm_mday=day;
-    zeit.tm_mon=month-1;
-    zeit.tm_year=year-1900;
-    zeit.tm_hour=(hour>>4)*10+(hour&0x0f);
-    zeit.tm_min=(minutes>>4)*10+(minutes&0x0f);
-    zeit.tm_sec=(seconds>>4)*10+(seconds&0x0f);
-//    printf ("Startzeit: GMT: %.2d.%.2d.%.4d  %.2x:%.2x:%.2x\n",
-//            day, month, year, hour, minutes, seconds);
-//    printf ("Startzeit: GMT: %.2d.%.2d.%.4d  %.2d:%.2d:%.2d\n",
-//      zeit.tm_mday, zeit.tm_mon+1, zeit.tm_year+1900,
-//      zeit.tm_hour, zeit.tm_min, zeit.tm_sec);
-#ifdef SEPARATE_MKTIME
-    return separate_mktime(&zeit)+ (local_time ? -timezone : 0);
-#else
-    return mktime(&zeit)+ (local_time ? -timezone : 0);
+	y_   = (int) ((mjd - 15078.2) / 365.25);
+	m_   = (int) ((mjd - 14956.1 - (int) (y_ * 365.25)) / 30.6001);
+	day  = mjd - 14956 - (int) (y_ * 365.25) - (int) (m_ * 30.60001);
+
+	k = !!((m_ == 14) || (m_ == 15));
+
+	year  = y_ + k + 1900;
+	month = m_ - 1 - k * 12;
+
+	struct tm time;
+	memset(&time, 0, sizeof(struct tm));
+
+	time.tm_mday = day;
+	time.tm_mon = month - 1;
+	time.tm_year = year - 1900;
+	time.tm_hour = (hour >> 4) * 10 + (hour & 0x0f);
+	time.tm_min = (minutes >> 4) * 10 + (minutes & 0x0f);
+	time.tm_sec = (seconds >> 4) * 10 + (seconds & 0x0f);
+
+#if 0
+	printf ("Startzeit: GMT: %.2d.%.2d.%.4d  %.2x:%.2x:%.2x\n",
+	      day, month, year, hour, minutes, seconds);
+	printf ("Startzeit: GMT: %.2d.%.2d.%.4d  %.2d:%.2d:%.2d\n",
+	      time.tm_mday, time.tm_mon + 1, time.tm_year + 1900,
+	      time.tm_hour, time.tm_min, time.tm_sec);
 #endif
+
+	return mktime(&time) + (local_time ? -timezone : 0);
 }
 
 // Thanks to tmbinc
