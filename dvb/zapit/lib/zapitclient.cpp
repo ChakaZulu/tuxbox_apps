@@ -773,6 +773,23 @@ void CZapitClient::stopPlayBack()
 	zapit_close();
 }
 
+bool CZapitClient::isPlayBackActive()
+{
+	commandHead msgHead;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_SB_GET_PLAYBACK_ACTIVE;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+
+	responseGetPlaybackState response;
+	receive((char* )&response, sizeof(response));
+
+	zapit_close();
+	return response.activated;
+}
+
+
 void CZapitClient::setRecordMode( bool activate )
 {
 	commandHead msgHead;

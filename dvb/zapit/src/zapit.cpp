@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.146 2002/04/20 18:14:04 McClean Exp $
+ * $Id: zapit.cpp,v 1.147 2002/04/20 18:31:46 McClean Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -885,6 +885,39 @@ void parseScanInputXml ()
 	}
 }
 
+/*
+ * get current playback state
+ *
+ * -1: failure
+ *  0: stopped
+ *  1: playing
+ */
+int getPlaybackStatus ()
+{
+	videoStatus status;
+
+	if (video_fd == -1)
+	{
+		return 0;
+	}
+
+	if (ioctl(video_fd, VIDEO_GET_STATUS, &status) < 0)
+	{
+		perror("[zapit] VIDEO_GET_STATUS");
+		return -1;
+	}
+
+	if (status.playState == VIDEO_PLAYING)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+
 void parse_command ()
 {
 	char *status;
@@ -1595,6 +1628,12 @@ void parse_command ()
 				send( connfd, &msgGetRecordModeState, sizeof(msgGetRecordModeState),0);
 			break;
 
+			case CZapitClient::CMD_SB_GET_PLAYBACK_ACTIVE :
+				CZapitClient::responseGetPlaybackState msgGetPlaybackState;
+				msgGetPlaybackState.activated = getPlaybackStatus ();
+				send( connfd, &msgGetPlaybackState, sizeof(msgGetPlaybackState),0);
+			break;
+
 			case CZapitClient::CMD_BQ_ADD_BOUQUET :
 				CZapitClient::commandAddBouquet msgAddBouquet;
 				read( connfd, &msgAddBouquet, sizeof(msgAddBouquet));
@@ -1878,7 +1917,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.146 2002/04/20 18:14:04 McClean Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.147 2002/04/20 18:31:46 McClean Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -2376,38 +2415,6 @@ int stopPlayBack()
 	dmx_pcr_fd = unsetPesFilter(dmx_pcr_fd);
 
 	return 0;
-}
-
-/*
- * get current playback state
- *
- * -1: failure
- *  0: stopped
- *  1: playing
- */
-int getPlaybackStatus ()
-{
-	videoStatus status;
-
-	if (video_fd == -1)
-	{
-		return 0;
-	}
-
-	if (ioctl(video_fd, VIDEO_GET_STATUS, &status) < 0)
-	{
-		perror("[zapit] VIDEO_GET_STATUS");
-		return -1;
-	}
-
-	if (status.playState == VIDEO_PLAYING)
-	{
-		return 1;
-	}
-	else
-	{
-		return 0;
-	}
 }
 
 unsigned zapTo (unsigned int bouquet, unsigned int channel)
