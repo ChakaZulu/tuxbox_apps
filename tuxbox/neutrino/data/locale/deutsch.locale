@@ -461,3 +461,7 @@ favorites.bqcreated Bouquet "Meine Favoriten" wurde angelegt...\n
 favorites.chadded Der aktuelle Kanal wurde Ihren Favoriten hinzugefügt...\n
 favorites.chalreadyinbq Der aktuelle Kanal ist bereits in Ihren Favoriten...\n
 favorites.finalhint \nVersehentlich hinzugefügte Kanäle können mit\nder Bouquetverwaltung korrigiert werden.\n
+
+sleeptimerbox.title Sleeptimer
+sleeptimerbox.hint1 Ausschaltzeit in Min.
+sleeptimerbox.hint1 Die dbox2 wird sich nach der angegebenen Zeitspanne ausschalten.

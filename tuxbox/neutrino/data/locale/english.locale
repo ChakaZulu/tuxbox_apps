@@ -464,3 +464,7 @@ favorites.bqcreated Bouquet "My Favorites" has been created...\n
 favorites.chadded The current channel has been added to your favorites...\n
 favorites.chalreadyinbq The current channel is already in your favorites...\n
 favorites.finalhint \nUse the bouqueteditor to modify your favorites.\n
+
+sleeptimerbox.title Sleeptimer
+sleeptimerbox.hint1 Shutdown time in min.
+sleeptimerbox.hint1 The dbox2 will shutdown after the given time.

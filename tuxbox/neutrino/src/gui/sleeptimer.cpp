@@ -24,14 +24,17 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <stdlib.h>
+
 #include "global.h"
 #include "neutrino.h"
 #include "sleeptimer.h"
 
+#include "gui/widget/stringinput.h"
+#include "system/timer.h"
+
 #include "gui/widget/messagebox.h"
 #include "gui/widget/hintbox.h"
-#include "../system/timer.h"
-
 
 //
 // -- Input Widget for setting shutdown time
@@ -44,6 +47,8 @@ int CSleepTimerWidget::exec(CMenuTarget* parent, string)
 {
 	int    res = menu_return::RETURN_EXIT_ALL;
 	int    shutdown_min;
+	char   value[16];
+	CStringInput  *inbox;
 
 	if (parent)
 	{
@@ -51,14 +56,18 @@ int CSleepTimerWidget::exec(CMenuTarget* parent, string)
 	}
    
 
+	// remaining shutdown time?
 	shutdown_min = g_Timer->actionGetShutdown () / 60;
+	if (shutdown_min) shutdown_min++;  // because of fractions...
 
+	sprintf(value,"%03d",shutdown_min);
+	inbox = new CStringInput("sleeptimerbox.title",value,3,"sleeptimerbox.hint1","sleeptimerbox.hint2","0123456789 ");
+	inbox->exec (NULL, "");
+	inbox->hide ();
 
-shutdown_min = 5;
-ShowMsg ( "Sleeptimer", "... TEST: set to 5 minutes fix", CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw" );
+	delete inbox;
 
-
-
+	shutdown_min = atoi (value);
 	g_Timer->actionSetShutdown (shutdown_min * 60);
 
 	return res;
