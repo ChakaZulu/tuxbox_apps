@@ -10,6 +10,7 @@ mainmenu.scartmode Scart-Mode
 mainmenu.games w Gry grac
 mainmenu.shutdown Wylaczyc
 mainmenu.settings Settings
+mainmenu.service Service
 
 servicemenu.head Service
 servicemenu.update Software Update

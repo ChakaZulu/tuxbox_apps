@@ -10,6 +10,7 @@ mainmenu.scartmode Scart-Mode
 mainmenu.games Play Games
 mainmenu.shutdown mettre hors circuit
 mainmenu.settings Settings
+mainmenu.service Service
 
 servicemenu.head Service
 servicemenu.update Software Update

@@ -10,6 +10,7 @@ mainmenu.scartmode Scart-Eingang
 mainmenu.games Spiele spielen
 mainmenu.shutdown Ausschalten
 mainmenu.settings Einstellungen
+mainmenu.service Service
 
 servicemenu.head Service
 servicemenu.update Software-Aktualisierung

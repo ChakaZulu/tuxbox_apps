@@ -10,6 +10,7 @@ mainmenu.scartmode SCART
 mainmenu.games OYUNLAR
 mainmenu.shutdown KAPAT
 mainmenu.settings AYARLAR
+mainmenu.service Service
 
 servicemenu.head Service
 servicemenu.update Software Update
