@@ -25,6 +25,7 @@ protected:
 	enum  { arNothing, arCurrentOld, arAll};
 	int MaxEntries, item_height, flags, columns, in_atomic, atomic_redraw, atomic_old, atomic_new;
 	bool atomic_selchanged;
+	int movemode;
 public:
 	enum	{		flagNoUpDownMovement=1,		flagNoPageMovement=2,		flagShowEntryHelp=4	};
 	enum	{		OK = 0,		ERROR=1,		E_ALLREADY_SELECTED = 2,		E_COULDNT_FIND = 4,		E_INVALID_ENTRY = 8,	 E_NOT_VISIBLE = 16		};
@@ -33,6 +34,7 @@ public:
 	void invalidateEntry(int n){	invalidate(getEntryRect(n));}
 	void setColumns(int col);
 	int getColumns() { return columns; }
+	void setMoveMode(int move) { movemode=move; }
 protected:
 	eListBoxBase(eWidget* parent, const eWidget* descr=0, const char *deco="eListBox" );
 	eRect getEntryRect(int n);
@@ -73,6 +75,7 @@ public:
 
 	int setCurrent(const T *c);
 	T* getCurrent()	{ return current != childs.end() ? *current : 0; }
+	T *getNext() { ePtrList_T_iterator c=current; ++c; return c != childs.end() ? *c : 0; }
 	T* goNext();
 	T* goPrev();
 
@@ -531,6 +534,8 @@ inline int eListBox<T>::moveSelection(int dir)
 	
 	if (current != oldptr)  // current has changed
 	{
+		if (movemode)
+			std::iter_swap(current, oldptr);
 		if (!in_atomic)
 			selchanged(*current);
 		else

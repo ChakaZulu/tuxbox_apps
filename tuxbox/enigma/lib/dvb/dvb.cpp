@@ -691,3 +691,7 @@ eServiceReference eServicePath::current() const
 	return eServiceStructureHandler::getRoot(eServiceStructureHandler::modeRoot);
 }
 
+int eServicePath::size() const
+{
+	return path.size();
+}

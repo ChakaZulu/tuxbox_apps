@@ -237,6 +237,7 @@ void eDVB::configureNetwork()
 
 void eDVB::recBegin(const char *filename)
 {
+	eDebug("recBegin");
 	if (recorder)
 		recEnd();
 	recorder=new eDVBRecorder();

@@ -122,12 +122,6 @@ void eServiceFileHandler::leaveDirectory(const eServiceReference &dir)
 	cache.leaveDirectory(dir);
 }
 
-int eServiceFileHandler::deleteService(const eServiceReference &dir, const eServiceReference &ref)
-{
-	::unlink(ref.path.c_str());
-	return cache.deleteService(dir, ref);
-}
-
 eService *eServiceFileHandler::addRef(const eServiceReference &service)
 {
 	return cache.addRef(service);

@@ -83,7 +83,7 @@ public:
 	 */
 	void open(const char *filename)
 	{
-		messagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::mOpen, strcpy(new char[strlen(filename+1)], filename)));
+		messagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::mOpen, strcpy(new char[strlen(filename)+1], filename)));
 	}
 	/**
 	 * \brief Adds a PID.

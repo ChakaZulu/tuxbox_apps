@@ -8,6 +8,8 @@
 #include <id3tag.h>
 #include <linux/soundcard.h>
 #include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <errno.h>
 
 /*
 	note: mp3 decoding is done in ONE seperate thread with multiplexed input/
@@ -38,14 +40,17 @@ eMP3Decoder::eMP3Decoder(const char *filename, eServiceHandlerMP3 *handler): han
 	sourcefd=::open(filename, O_RDONLY);
 	if (sourcefd<0)
 	{
+		error=errno;
 		eDebug("error opening %s", filename);
 		state=stateError;
+	} else
+	{
+		filelength=::lseek(sourcefd, 0, SEEK_END);
+		lseek(sourcefd, 0, SEEK_SET);
 	}
 	
-	filelength=::lseek(sourcefd, 0, SEEK_END);
 	length=-1;
 	avgbr=-1;
-	lseek(sourcefd, 0, SEEK_SET);
 
 	pcmsettings.reconfigure=1;
 	
@@ -53,13 +58,23 @@ eMP3Decoder::eMP3Decoder(const char *filename, eServiceHandlerMP3 *handler): han
 	if (dspfd<0)
 	{
 		eDebug("output failed! (%m)");
+		error=errno;
 		state=stateError;
 	}
 	
-	outputsn=new eSocketNotifier(this, dspfd, eSocketNotifier::Write, 0);
-	CONNECT(outputsn->activated, eMP3Decoder::outputReady);
-	inputsn=new eSocketNotifier(this, sourcefd, eSocketNotifier::Read, 0);
-	CONNECT(inputsn->activated, eMP3Decoder::decodeMore);
+	if (dspfd >= 0)
+	{
+		outputsn=new eSocketNotifier(this, dspfd, eSocketNotifier::Write, 0);
+		CONNECT(outputsn->activated, eMP3Decoder::outputReady);
+	} else
+		outputsn=0;
+	
+	if (sourcefd >= 0)
+	{
+		inputsn=new eSocketNotifier(this, sourcefd, eSocketNotifier::Read, 0);
+		CONNECT(inputsn->activated, eMP3Decoder::decodeMore);
+	} else
+		inputsn=0;
 	
 	CONNECT(messages.recv_msg, eMP3Decoder::gotMessage);
 	
@@ -68,8 +83,7 @@ eMP3Decoder::eMP3Decoder(const char *filename, eServiceHandlerMP3 *handler): han
 	speed=1;
 	framecnt=0;
 
-	if (state != stateError)
-		run();
+	run();
 }
 
 void eMP3Decoder::thread()
@@ -116,7 +130,8 @@ void eMP3Decoder::outputReady(int what)
 
 void eMP3Decoder::dspSync()
 {
-	::ioctl(dspfd, SNDCTL_DSP_RESET);
+	if (dspfd >= 0)
+		::ioctl(dspfd, SNDCTL_DSP_RESET);
 }
 
 static inline unsigned short MadFixedToUshort(mad_fixed_t Fixed)
@@ -277,8 +292,10 @@ eMP3Decoder::~eMP3Decoder()
 {
 	kill(); // wait for thread exit.
 
-	delete inputsn;
-	delete outputsn;
+	if (inputsn)
+		delete inputsn;
+	if (outputsn)
+		delete outputsn;
 	mad_synth_finish(&synth);
 	mad_frame_finish(&frame);
 	mad_stream_finish(&stream);
@@ -293,6 +310,8 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 	switch (message.type)
 	{
 	case eMP3DecoderMessage::start:
+		if (state == stateError)
+			break;
 		if (state == stateInit)
 		{
 			state=stateBuffering;
@@ -304,6 +323,8 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 		quit();
 		break;
 	case eMP3DecoderMessage::setSpeed:
+		if (state == stateError)
+			break;
 		speed=message.parm;
 		if (message.parm == 0)
 		{
@@ -330,6 +351,8 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 	case eMP3DecoderMessage::seekreal:
 	case eMP3DecoderMessage::skip:
 	{
+		if (state == stateError)
+			break;
 		int offset=0;
 		eDebug("cmd");
 		
@@ -499,15 +522,23 @@ eService *eServiceHandlerMP3::createService(const eServiceReference &service)
 
 int eServiceHandlerMP3::play(const eServiceReference &service)
 {
-	state=statePlaying;
-	
 	decoder=new eMP3Decoder(service.path.c_str(), this);
 	decoder->messages.send(eMP3Decoder::eMP3DecoderMessage(eMP3Decoder::eMP3DecoderMessage::start));
+	
+	if (!decoder->getError())
+		state=statePlaying;
+	else
+		state=stateError;
 	
 	serviceEvent(eServiceEvent(eServiceEvent::evtStart));
 	serviceEvent(eServiceEvent(eServiceEvent::evtFlagsChanged) );
 
 	return 0;
+}
+
+int eServiceHandlerMP3::getErrorInfo()
+{
+	return decoder ? decoder->getError() : -1;
 }
 
 int eServiceHandlerMP3::serviceCommand(const eServiceCommand &cmd)
@@ -567,7 +598,12 @@ eServiceHandlerMP3::~eServiceHandlerMP3()
 void eServiceHandlerMP3::addFile(void *node, const eString &filename)
 {
 	if (filename.right(4).upper()==".MP3")
+	{
+		struct stat s;
+		if (::stat(filename.c_str(), &s))
+			return;
 		eServiceFileHandler::getInstance()->addReference(node, eServiceReference(id, 0, filename));
+	}
 }
 
 eService *eServiceHandlerMP3::addRef(const eServiceReference &service)
@@ -588,11 +624,6 @@ int eServiceHandlerMP3::getFlags()
 int eServiceHandlerMP3::getState()
 {
 	return state;
-}
-
-int eServiceHandlerMP3::getErrorInfo()
-{
-	return 0;
 }
 
 int eServiceHandlerMP3::stop()

@@ -19,10 +19,8 @@ void eDVBRecorder::dataAvailable(int what)
 
 void eDVBRecorder::thread()
 {
-	eDebug("enter thread");	
 	messagepump.start();
 	enter_loop();
-	eDebug("leave recording thread");
 	lock.unlock();
 }
 

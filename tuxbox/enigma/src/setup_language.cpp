@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_language.cpp,v 1.8 2002/10/03 18:13:36 Ghostrider Exp $
+ * $Id: setup_language.cpp,v 1.9 2002/10/06 00:25:26 Ghostrider Exp $
  */
 
 #include "setup_language.h"
@@ -45,13 +45,40 @@ eZapLanguageSetup::eZapLanguageSetup(): eWindow(0)
 	language->move(ePoint(140, 20));
 	language->resize(eSize(150, 35));
 	language->setHelpText(_("select your language (left, right)"));
-	new eListBoxEntryText(language, "Englisch", (void*) new eString("C"));
-	new eListBoxEntryText(language, "Deutsch", (void*) new eString("de_DE"));
+	
+	FILE *f=fopen("/share/locale/locales", "rt");
+
 	char *temp;
 	if ( eConfig::getInstance()->getKey("/elitedvb/language", temp) )
-		temp=NULL;
-	if (temp && !strcmp(temp, "de_DE") )
-		language->goNext();
+		temp=0;
+		
+	eListBoxEntryText *cur;
+
+	if (!f)
+	{
+		new eListBoxEntryText(language, "Englisch", (void*) new eString("C"));
+		new eListBoxEntryText(language, "Deutsch", (void*) new eString("de_DE"));
+	} else
+	{
+		char line[256];
+		while (fgets(line, 256, f))
+		{
+			line[strlen(line)-1]=0;
+			char *id=line, *d;
+			if ((d=strchr(line, ' ')))
+			{
+				*d++=0;
+				eListBoxEntryText *l=new eListBoxEntryText(language, d, (void*) new eString(id));
+				if (temp && !strcmp(id, temp))
+					cur=l;
+			}
+		}
+		fclose(f);
+	}
+	
+	free(temp);
+	
+	language->setCurrent(cur);
 
 	ok=new eButton(this);
 	ok->setText(_("save"));

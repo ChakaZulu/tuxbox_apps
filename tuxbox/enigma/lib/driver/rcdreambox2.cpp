@@ -152,12 +152,81 @@ eRCDreamboxDriver2::eRCDreamboxDriver2(): eRCShortDriver("/dev/rawir2")
 {
 }
 
+	/* ----------------------- dbox buttons ---------------------- */
+void eRCDeviceDreamboxButton::handleCode(int code)
+{
+	code=(~code)&0x7;
+	
+	for (int i=0; i<4; i++)
+		if ((last&~code) & (1<<i))
+		{
+			eDebug("up %d", i);
+			/*emit*/ input->keyPressed(eRCKey(this, i, eRCKey::flagBreak));
+		} else if ((~last&code)&(1<<i))
+		{
+			eDebug("down %d", i);
+			/*emit*/ input->keyPressed(eRCKey(this, i, 0));
+		}
+	if (code)
+		repeattimer.start(eRCInput::getInstance()->config.rdelay, 1);
+	else
+		repeattimer.stop();
+	last=code;
+}
+
+void eRCDeviceDreamboxButton::repeat()
+{
+	for (int i=0; i<4; i++)
+		if (last&(1<<i))
+			/*emit*/ input->keyPressed(eRCKey(this, i, eRCKey::flagRepeat));
+	repeattimer.start(eRCInput::getInstance()->config.rrate, 1);
+}
+
+eRCDeviceDreamboxButton::eRCDeviceDreamboxButton(eRCDriver *driver): eRCDevice("DreamboxButton", driver), repeattimer(eApp)
+{
+	last=0;
+	CONNECT(repeattimer.timeout, eRCDeviceDreamboxButton::repeat);
+}
+
+const char *eRCDeviceDreamboxButton::getDescription() const
+{
+	return "dreambox Buttons";
+}
+
+const char *eRCDeviceDreamboxButton::getKeyDescription(const eRCKey &key) const
+{
+	switch (key.code)
+	{
+	case 1: return "down";
+	case 2: return "up";
+	case 3: return "power";
+	default: return 0;
+	}
+}
+
+int eRCDeviceDreamboxButton::getKeyCompatibleCode(const eRCKey &key) const
+{
+	switch (key.code)
+	{
+	case 1: return eRCInput::RC_LEFT;
+	case 2: return eRCInput::RC_RIGHT;
+	case 3: return eRCInput::RC_STANDBY;
+	}
+	return -1;
+}
+
+eRCDreamboxButtonDriver::eRCDreamboxButtonDriver(): eRCShortDriver("/dev/dbox/fpkeys0")
+{
+}
+
 class eDreamboxRCHardware2
 {
+	eRCDreamboxButtonDriver buttondriver;
+	eRCDeviceDreamboxButton buttondevice;
 	eRCDreamboxDriver2 driver;
 	eRCDeviceDreambox2 device;
 public:
-	eDreamboxRCHardware2(): device(&driver)
+	eDreamboxRCHardware2(): device(&driver), buttondevice(&buttondriver)
 	{
 	}
 };

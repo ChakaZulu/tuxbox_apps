@@ -3,7 +3,6 @@
 #include <core/dvb/dvbservice.h>
 #include <core/system/init.h>
 #include <core/driver/streamwd.h>
-#include <core/dvb/servicefile.h>
 #include <core/dvb/servicestructure.h>
 #include <core/dvb/dvb.h>
 #include <core/dvb/decoder.h>
@@ -212,41 +211,6 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 	}
 }
 
-void eServiceHandlerDVB::addFile(void *node, const eString &filename)
-{
-	if (filename.right(3).upper()==".TS")
-	{
-		unsigned int pos;
-		eString part=filename.left(filename.rfind("."));
-		if ((pos=part.rfind(".")) == eString::npos)
-			return;
-		eString service_type=part.mid(pos+1);
-		part=part.left(pos);
-		if ((pos=part.rfind(".")) == eString::npos)
-			return;
-		eString sid=part.mid(pos+1);
-		part=part.left(pos);
-		if ((pos=part.rfind("/")) == eString::npos)
-			if ((pos=part.rfind(".")) == eString::npos)
-				return;
-		eString onid=part.mid(pos+1);
-
-		int original_network_id, service_id;
-		sscanf(onid.c_str(), "%04x", &original_network_id);
-		sscanf(sid.c_str(), "%04x", &service_id);
-
-		eServiceReferenceDVB ref(
-				eTransportStreamID(-1),
-				eOriginalNetworkID(original_network_id), 
-				eServiceID(service_id), 
-				atoi(service_type.c_str())
-			);
-		ref.path=filename;
-		
-		eServiceFileHandler::getInstance()->addReference(node, ref);
-	}
-}
-
 int eServiceHandlerDVB::getID() const
 {
 	return eServiceReference::idDVB;
@@ -311,8 +275,6 @@ eServiceHandlerDVB::eServiceHandlerDVB()
 	if (eServiceInterface::getInstance()->registerHandler(id, this)<0)
 		eFatal("couldn't register serviceHandler %d", id);
 
-	CONNECT(eServiceFileHandler::getInstance()->fileHandlers, eServiceHandlerDVB::addFile);
-
 	CONNECT(eDVB::getInstance()->scrambled, eServiceHandlerDVB::scrambledStatusChanged);
 	CONNECT(eDVB::getInstance()->switchedService, eServiceHandlerDVB::switchedService);
 	CONNECT(eDVB::getInstance()->gotEIT, eServiceHandlerDVB::gotEIT);
@@ -345,10 +307,14 @@ eServiceHandlerDVB::eServiceHandlerDVB()
 			eServiceReference(eServiceReference::idDVB, eServiceReference::flagDirectory|eServiceReference::shouldSort, -2, 1<<2 ), 	// radio
 			new eService(eServiceReference::idDVB, "DVB - Radio services")
 		);
+		
+	recording=0;
 }
 
 eServiceHandlerDVB::~eServiceHandlerDVB()
 {
+	if (recording)
+		eDVB::getInstance()->recEnd();
 	if (eServiceInterface::getInstance()->unregisterHandler(id)<0)
 		eFatal("couldn't unregister serviceHandler %d", id);
 }
@@ -383,31 +349,39 @@ int eServiceHandlerDVB::serviceCommand(const eServiceCommand &cmd)
 	{
 	case eServiceCommand::cmdRecordOpen:
 	{
-		eString servicename="/mnt/movie/";
-		const eServiceReference &service=eServiceInterface::getInstance()->service;
-		eService *s=addRef(service);
-		if (s)
+		if (!recording)
 		{
-			servicename+=s->service_name;
-			removeRef(service);
+			char *filename=reinterpret_cast<char*>(cmd.parm);
+			eDVB::getInstance()->recBegin(filename);
+			delete[] (filename);
+			recording=1;
 		} else
-			servicename+="unnamed";
-		servicename += eString().sprintf(".%d.", time(0)+eDVB::getInstance()->time_difference);
-		servicename += eString().sprintf("%04x.", ((eServiceReferenceDVB&)service).getOriginalNetworkID().get());
-		servicename += eString().sprintf("%04x.", ((eServiceReferenceDVB&)service).getServiceID().get());
-		servicename += eString().sprintf("%d.ts", ((eServiceReferenceDVB&)service).getServiceType());
-		eDebug("begin recording to %s", servicename.c_str());
-		eDVB::getInstance()->recBegin(servicename.c_str());
+			return -1;
 		break;
 	}
 	case eServiceCommand::cmdRecordStart:
-		eDVB::getInstance()->recResume();
+		if (recording == 1)
+		{
+			eDVB::getInstance()->recResume();
+			recording=2;
+		} else	
+			return -1;
 		break;
 	case eServiceCommand::cmdRecordStop:
-		eDVB::getInstance()->recPause();
+		if (recording == 2)
+		{
+			eDVB::getInstance()->recPause();
+			recording=1;
+		} else
+			return -1;
 		break;
 	case eServiceCommand::cmdRecordClose:
-		eDVB::getInstance()->recEnd();
+		if (recording)
+		{
+			recording=0;
+			eDVB::getInstance()->recEnd();
+		} else
+			return -1;
 		break;
 	case eServiceCommand::cmdSetSpeed:
 		if ((state == statePlaying) || (state == statePause) || (state == stateSkipping))
@@ -650,28 +624,25 @@ void eServiceHandlerDVB::leaveDirectory(const eServiceReference &dir)
 
 eService *eServiceHandlerDVB::addRef(const eServiceReference &service)
 {
-	if (service.data[0] < 0)
+	if ((service.data[0] < 0) || (service.path.length()))
 	{
 		eService *s=cache.addRef(service);
 		if (s)
 			return s;
 		else
 			return 0;
-	} else if (!service.path.length())
+	} else
 	{
 		eTransponderList *tl=eTransponderList::getInstance();
 		if (!tl)
 			return 0;
 		return tl->searchService(service);
-	} else
-		return eServiceFileHandler::getInstance()->addRef(service);
+	}
 }
 
 void eServiceHandlerDVB::removeRef(const eServiceReference &service)
 {
-	if (service.path.length())
-		return eServiceFileHandler::getInstance()->removeRef(service);
-	else if (service.data[0] < 0)
+	if ((service.data[0] < 0) || (service.path.length()))
 		cache.removeRef(service);
 }
 

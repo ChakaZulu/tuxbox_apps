@@ -211,7 +211,7 @@ int eFrontend::tune(eTransponder *trans,
 	secDiseqcCmd DiSEqC;
 	int hi;
 	
-	Decoder::Flush();
+//	Decoder::Flush();
 	eSection::abortAll();
 	timer->stop();
 	if (state==stateTuning)

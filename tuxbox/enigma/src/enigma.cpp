@@ -34,6 +34,8 @@
 #include <apps/enigma/enigma_xmlrpc.h>
 #include <apps/enigma/enigma_main.h>
 
+// #include <mcheck.h>
+
 eZap *eZap::instance;
 
 static char copyright[]="enigma, Copyright (C) dbox-Project\n"
@@ -214,11 +216,16 @@ int main(int argc, char **argv)
 	setlocale (LC_ALL, "");
 	bindtextdomain ("tuxbox-enigma", "/share/locale");
 	textdomain ("tuxbox-enigma");
-
+	
+//	mtrace();
+//	mcheck(0);
+	
 	{
 		eZap ezap(argc, argv);
 		ezap.exec();
 	}
+//	mcheck_check_all();
+//	muntrace();
 	// system("/sbin/halt &");
 }
 

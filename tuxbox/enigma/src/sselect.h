@@ -67,6 +67,8 @@ class eServiceSelector: public eWindow
 	char BrowseChar;
 	eTimer BrowseTimer;
 	eTimer ciDelay;
+	
+	int movemode;
 protected:
 	int eventHandler(const eWidgetEvent &event);
 private:
@@ -90,6 +92,11 @@ public:
 	Signal1<void,const eServiceReference &> addServiceToList;
 	Signal1<void,eServiceSelector*> showFavourite, showMenu, addServiceToFavourite, toggleStyle;
 	Signal1<void,int> setMode;
+	Signal3<void,
+		const eServiceReference &, 		// path
+		const eServiceReference &, 		// service to move
+		const eServiceReference &			// service AFTER moved service
+		> moveEntry;
 	
 	const eServicePath &getPath()	{	return path; }
 	void setPath(const eServicePath &path, const eServiceReference &select=eServiceReference());
@@ -105,6 +112,8 @@ public:
 	const eServiceReference *choose(int irc=-1);
 	const eServiceReference *next();
 	const eServiceReference *prev();
+	
+	void setMoveMode(int movemode);
 };
 
 #endif

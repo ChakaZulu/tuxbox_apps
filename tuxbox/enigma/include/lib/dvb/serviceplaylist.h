@@ -9,9 +9,9 @@ struct ePlaylistEntry
 	enum
 	{
 		PlaylistEntry=1, SwitchTimerEntry=2, RecTimerEntry=4,	
-		stateWaiting=64, stateRunning=128, statePaused=256,
-		stateFinished=512, stateEventOutdated=1024,	stateNoSpaceLeft=2048,
-		stateUserAborted=4096, stateZapFailed=8192, typeSmartTimer=32768
+		stateWaiting=32, stateRunning=64,	statePaused=128, stateFinished=256, stateError=512,
+		errorNoSpaceLeft=1024, errorUserAborted=2048, errorZapFailed=4096, errorOutdated=8192,
+		boundFile=16384, typeSmartTimer=32768
 	};
 
 	eServiceReference service;
@@ -57,6 +57,9 @@ public:
 
 	int load(const char *filename);
 	int save(const char *filename);
+	
+	int deleteService(std::list<ePlaylistEntry>::iterator it);
+	int moveService(std::list<ePlaylistEntry>::iterator it, std::list<ePlaylistEntry>::iterator before);
 
 	ePlaylist();
 };
@@ -80,9 +83,6 @@ public:
 		// service list functions
 	void enterDirectory(const eServiceReference &dir, Signal1<void,const eServiceReference&> &callback);
 	void leaveDirectory(const eServiceReference &dir);
-
-	int deleteService(const eServiceReference &dir, const eServiceReference &ref);
-	int moveService(const eServiceReference &dir, const eServiceReference &ref, int dr);
 
 	eService *addRef(const eServiceReference &service);
 	void removeRef(const eServiceReference &service);

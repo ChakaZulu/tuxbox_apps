@@ -400,6 +400,7 @@ public:
 	bool up();
 	void down(const eServiceReference &ref);
 	eServiceReference current() const;
+	int size() const;
 };
 
 struct eServiceReferenceDVB: public eServiceReference

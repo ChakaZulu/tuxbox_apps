@@ -28,6 +28,7 @@ class eMP3Decoder: public eThread, public eMainloop, public Object
 	int sourcefd;
 	int speed;
 	int framecnt;
+	int error;
 	eSocketNotifier *inputsn, *outputsn;
 	void decodeMore(int what);
 	void outputReady(int what);
@@ -81,6 +82,8 @@ public:
 	int getPosition(int);
 	int getLength(int);
 	
+	int getError() const { return (state != stateError) ? error : 0; }
+	
 	void thread();
 };
 
@@ -125,6 +128,7 @@ public:
 	int stop();
 	
 	int getPosition(int what);
+	int getErrorInfo() const;
 
 	eService *addRef(const eServiceReference &service);
 	void removeRef(const eServiceReference &service);

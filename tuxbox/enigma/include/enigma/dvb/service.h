@@ -126,9 +126,6 @@ public:
 	virtual void enterDirectory(const eServiceReference &dir, Signal1<void,const eServiceReference&> &callback);
 	virtual void leaveDirectory(const eServiceReference &dir);
 
-	virtual int deleteService(const eServiceReference &dir, const eServiceReference &ref);
-	virtual int moveService(const eServiceReference &dir, const eServiceReference &ref, int dr);
-	
 	virtual eService *addRef(const eServiceReference &service);
 	virtual void removeRef(const eServiceReference &service);
 };
@@ -173,10 +170,6 @@ public:
 	void leaveDirectory(const eServiceReference &dir);
 	
 		// stuff for modifiying ...
-
-	int deleteService(const eServiceReference &dir, const eServiceReference &ref);
-	enum { dirUp, dirDown };
-	int moveService(const eServiceReference &dir, const eServiceReference &ref, int dr);
 
 	eService *addRef(const eServiceReference &service);
 	void removeRef(const eServiceReference &service);

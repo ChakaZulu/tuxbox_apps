@@ -222,10 +222,9 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 		MakeParam(P_ID_END_Y, 576);
 	}
 
+	int tpid = -1;
  	if (plugin->needvtxtpid)
  	{
-		// versuche, den gtx/enx_vbi zu stoppen	
-		eDebug("try to stop gtx/enx_vbi");
 		if(Decoder::parms.tpid==-1)
 		{
 			MakeParam(P_ID_VTXTPID, 0);
@@ -234,15 +233,15 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 		{
 			MakeParam(P_ID_VTXTPID, Decoder::parms.tpid);
 		}
-		int fd = open("/dev/dbox/vbi0", O_RDWR);
-		if (fd > 0)
+		// stop vtxt reinsertion
+		tpid = Decoder::parms.tpid;
+		if (tpid != -1)
 		{
-			eDebug("stop gtx/enx_vbi");
-			ioctl(fd, AVIA_VBI_STOP_VTXT, 0);
-			::close(fd);
+			eDebug("stop vtxt reinsertion");
+			Decoder::parms.tpid=-1;
+			Decoder::Set();
 		}
 	}
-
 /*	for(PluginParam *par = first; par; par=par->next )
 	{
 		printf ("id: %s - val: %s\n", par->id, par->val);
@@ -312,16 +311,14 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 
  	if (plugin->needvtxtpid)
  	{
-		// versuche, den gtx/enx_vbi wieder zu starten
-		eDebug("try to restart gtx/enx_vbi");
- 		int fd = open("/dev/dbox/vbi0", O_RDWR);
-		if (fd > 0)
+		// start vtxt reinsertion
+		if (tpid != -1)
 		{
-			ioctl(fd, AVIA_VBI_START_VTXT, Decoder::parms.tpid);
-			::close(fd);
+			eDebug("restart vtxt reinsertion");
+			Decoder::parms.tpid = tpid;
+			Decoder::Set();
 		}
 	}
-
 }
 
 void eZapPlugins::selected(ePlugin *plugin)

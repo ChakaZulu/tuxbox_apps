@@ -2,6 +2,7 @@
 #include <core/dvb/servicefile.h>
 #include <core/system/init.h>
 #include <core/base/i18n.h>
+#include <unistd.h>
 
 /*
 		eServicePlaylistHandler hooks into the file handler eServiceFileHandler
@@ -140,6 +141,28 @@ int ePlaylist::save(const char *filename)
 	return 0;
 }
 
+int ePlaylist::deleteService(std::list<ePlaylistEntry>::iterator it)
+{
+	if (it != list.end())
+	{
+		if ((it->type & ePlaylistEntry::boundFile) && (it->service.path.size()))
+			::unlink(it->service.path.c_str());
+		list.erase(it);
+		return 0;
+	}
+	return -1;
+}
+
+int ePlaylist::moveService(std::list<ePlaylistEntry>::iterator it, std::list<ePlaylistEntry>::iterator before)
+{
+	if (current == it)
+		current=list.insert(before, *it);
+	else
+		list.insert(before, *it);
+	list.erase(it);
+	return 0;
+}
+
 void eServicePlaylistHandler::addFile(void *node, const eString &filename)
 {
 	if (filename.right(4).upper()==".M3U")
@@ -208,27 +231,6 @@ void eServicePlaylistHandler::enterDirectory(const eServiceReference &dir, Signa
 
 void eServicePlaylistHandler::leaveDirectory(const eServiceReference &dir)
 {
-}
-
-int eServicePlaylistHandler::deleteService(const eServiceReference &dir, const eServiceReference &ref)
-{
-	ePlaylist *pl=(ePlaylist*)addRef(dir);
-	if (!pl)
-		return -1;
-	for (std::list<ePlaylistEntry>::iterator i(pl->list.begin()); i != pl->list.end();)
-		if (i->service == ref)
-		{
-			if (pl->current == i)
-				pl->current++;
-			i = pl->list.erase(i);
-		} else
-			++i;
-	return 0;
-}
-
-int eServicePlaylistHandler::moveService(const eServiceReference &dir, const eServiceReference &ref, int dr)
-{
-	return -1;
 }
 
 eServiceReference eServicePlaylistHandler::newPlaylist(const eServiceReference &parent, const eServiceReference &ref)

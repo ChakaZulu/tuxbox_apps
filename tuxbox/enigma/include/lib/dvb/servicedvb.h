@@ -60,6 +60,7 @@ class eServiceHandlerDVB: public eServiceHandler
 {
 	void addFile(void *node, const eString &filename);
 	friend class eDVRPlayerThread;
+	int recording;
 
 	struct eDVRPlayerThreadMessage
 	{

@@ -51,6 +51,14 @@ void eWindow::redrawWidget(gPainter *target, const eRect &where)
 		LCDTitle->setText(text);
 }
 
+void eWindow::eraseBackground(gPainter *target, const eRect &clip)
+{
+	target->clip(getClientRect());
+	target->clear();
+	target->flush();
+	target->clippop();
+}
+
 void eWindow::drawTitlebar(gPainter *target)
 {
 	target->setForegroundColor(titleBarColor);

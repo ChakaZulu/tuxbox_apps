@@ -20,6 +20,7 @@ protected:
 	int borderTop, borderLeft, borderBottom, borderRight;
 	int titleOffsetX, titleOffsetY, titleFontSize, titleHeight, titleBorderY;
 	void redrawWidget(gPainter *target, const eRect &where);
+	void eraseBackground(gPainter *target, const eRect &where);
 	void drawTitlebar(gPainter *target);
 	void recalcClientRect();
 	int eventHandler(const eWidgetEvent &event);

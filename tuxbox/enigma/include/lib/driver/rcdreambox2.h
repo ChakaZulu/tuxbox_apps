@@ -24,4 +24,24 @@ public:
 	eRCDreamboxDriver2();
 };
 
+class eRCDeviceDreamboxButton: public eRCDevice
+{
+	int last;
+	eTimer repeattimer;
+private:
+	void repeat();
+public:
+	void handleCode(int code);
+	eRCDeviceDreamboxButton(eRCDriver *driver);
+	const char *getDescription() const;
+
+	const char *getKeyDescription(const eRCKey &key) const;
+	int getKeyCompatibleCode(const eRCKey &key) const;
+};
+
+class eRCDreamboxButtonDriver: public eRCShortDriver
+{
+public:
+	eRCDreamboxButtonDriver();
+};
 #endif

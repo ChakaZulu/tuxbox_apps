@@ -184,7 +184,8 @@ private:
 
 	eTimer timeout, clocktimer, messagetimeout, progresstimer, volumeTimer;
 
-	int cur_start, cur_duration;
+	int cur_start, cur_duration, cur_event_id;
+	eString cur_event_text;
 	
 	eNVODSelector nvodsel;
 	eSubServiceSelector subservicesel;
@@ -194,8 +195,13 @@ private:
 	
 	ePlaylist *curlist;		// history / current playlist entries
 	eServiceReference playlistref;
+
 	ePlaylist *favourite[modeFile+1];
 	eServiceReference favouriteref[modeFile+1];
+
+	ePlaylist *recordings;
+	eServiceReference recordingsref;
+
 	int playlistmode; // curlist is a list controlled by the user (not just a history).
 	int entered_playlistmode;
 	
@@ -306,6 +312,8 @@ public:
 	void setServiceSelectorPath(eServicePath path);
 	void getServiceSelectorPath(eServicePath &path);
 
+	void moveService(const eServiceReference &path, const eServiceReference &ref, const eServiceReference &after);
+
 	eZapMain();
 	~eZapMain();
 };
@@ -315,7 +323,7 @@ class eServiceContextMenu: public eListBoxWindow<eListBoxEntryText>
 	eServiceReference ref;
 	void entrySelected(eListBoxEntryText *s);
 public:
-	eServiceContextMenu(const eServiceReference &ref);
+	eServiceContextMenu(const eServiceReference &ref, const eServiceReference &path);
 };
 
 #endif /* __enigma_main_h */

@@ -18,7 +18,8 @@ eListBoxBase::eListBoxBase(eWidget* parent, const eWidget* descr, const char *de
 		colorActiveF(eSkin::getActive()->queryScheme("global.selected.foreground")),
 		flags(0),
 		columns(1),
-		in_atomic(0)
+		in_atomic(0),
+		movemode(0)
 {
 }
 

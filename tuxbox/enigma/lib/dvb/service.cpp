@@ -85,16 +85,6 @@ void eServiceHandler::leaveDirectory(const eServiceReference &dir)
 	return;
 }
 
-int eServiceHandler::deleteService(const eServiceReference &dir, const eServiceReference &ref)
-{
-	return -1;
-}
-
-int eServiceHandler::moveService(const eServiceReference &dir, const eServiceReference &ref, int dr)
-{
-	return -1;
-}
-
 eService *eServiceHandler::addRef(const eServiceReference &service)
 {
 	return 0;
@@ -217,24 +207,6 @@ eService *eServiceInterface::addRef(const eServiceReference &service)
 		return handler->addRef(service);
 	else
 		return 0;
-}
-
-int eServiceInterface::deleteService(const eServiceReference &dir, const eServiceReference &ref)
-{
-	eServiceHandler *handler=getServiceHandler(dir.type);
-	if (handler)
-		return handler->deleteService(dir, ref);
-	else
-		return -1;
-}
-
-int eServiceInterface::moveService(const eServiceReference &dir, const eServiceReference &ref, int dr)
-{
-	eServiceHandler *handler=getServiceHandler(service.type);
-	if (handler)
-		return handler->moveService(dir, ref, dr);
-	else
-		return -1;
 }
 
 void eServiceInterface::removeRef(const eServiceReference &service)

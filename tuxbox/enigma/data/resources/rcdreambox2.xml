@@ -145,4 +145,23 @@
 			<action name="removeTimerEntry" key="red" flags="m" />
 		</actionmap>
 	</device>
+
+	<device identifier="DreamboxButton" >
+		<keys>
+			<key name="down" code="1" />
+			<key name="up" code="2" />
+			<key name="power" code="3" />
+		</keys>
+
+		<actionmap name="enigmaMain">
+			<action name="standby_press" key="power" flags="m" />
+			<action name="standby_repeat" key="power" flags="r" />
+			<action name="standby_release" key="power" flags="b" />
+			<action name="nextService" key="down" flags="mr" />
+			<action name="prevService" key="up" flags="mr" />
+		</actionmap>
+		<actionmap name="enigmaStandby">
+			<action name="wakeUp" key="power" flags="m" />
+		</actionmap>
+	</device>
 </rcdefaults>

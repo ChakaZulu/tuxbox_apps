@@ -226,11 +226,11 @@ int eActionMapList::loadXML(const char *filename)
 	
 	XMLTreeNode *node=parser->RootNode();
 	
-	std::map<std::string,int> keymap;
 	
 	for (node=node->GetChild(); node; node=node->GetNext())
 		if (!strcmp(node->GetType(), "device"))
 		{
+			std::map<std::string,int> keymap;
 			const char *identifier=node->GetAttributeValue("identifier");
 			if (!identifier)
 			{
