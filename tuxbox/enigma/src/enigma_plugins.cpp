@@ -78,17 +78,17 @@ ePlugin::ePlugin(eListBox<ePlugin> *parent, const char *cfgfile, const char* des
 	:eListBoxEntryText((eListBox<eListBoxEntryText>*)parent)
 {
 	eDebug(cfgfile);
-	text=getInfo(cfgfile, "name");
+	name=text=getInfo(cfgfile, "name");
 
 	if (text.isNull())
 		text="(" + eString(cfgfile) + " is invalid)";
 		
-	eString desc=getInfo(cfgfile, "desc");
+	desc=getInfo(cfgfile, "desc");
 
 	if (desc)
 	{
-		text+=" - "+desc;
-	}
+		helptext+=" - "+desc;
+	} 
 
 	depend=getInfo(cfgfile, "depend");
 
@@ -101,6 +101,8 @@ ePlugin::ePlugin(eListBox<ePlugin> *parent, const char *cfgfile, const char* des
 					aneedoffsets=getInfo(cfgfile, "needoffsets"),
 					apigon=getInfo(cfgfile, "pigon");
 
+	cfgname=cfgfile;
+	requires=getInfo(cfgfile, "requires");
 	needfb=(aneedfb.isNull()?false:atoi(aneedfb.c_str()));
 	needlcd=(aneedlcd.isNull()?false:atoi(aneedlcd.c_str()));
 	needrc=(aneedrc.isNull()?false:atoi(aneedrc.c_str()));
@@ -119,6 +121,7 @@ ePlugin::ePlugin(eListBox<ePlugin> *parent, const char *cfgfile, const char* des
 eZapPlugins::eZapPlugins(int type, eWidget* lcdTitle, eWidget* lcdElement)
 	:eListBoxWindow<ePlugin>(type==2?_("Plugins"):_("Games"), 8, 400), type(type)
 {
+	
 	PluginPath[0] = "/var/tuxbox/plugins/";
 	PluginPath[1] = PLUGINDIR "/";
 	PluginPath[2] = "";
@@ -130,11 +133,16 @@ eZapPlugins::eZapPlugins(int type, eWidget* lcdTitle, eWidget* lcdElement)
 	CONNECT(list.selected, eZapPlugins::selected);
 }
 
-int eZapPlugins::exec()
+int eZapPlugins::find(bool ignore_requires)
 {
 	int cnt=0;
 	ePlugin *plg=0;
 	std::set<eString> exist;
+	int connType=0;
+	eConfig::getInstance()->getKey("/elitedvb/network/connectionType", connType);
+	bool hasNetwork = eSystemInfo::getInstance()->hasNetwork();
+	
+
 	for ( int i = 0; i < 2; i++ )
 	{
 		DIR *d=opendir(PluginPath[i].c_str());
@@ -153,8 +161,6 @@ int eZapPlugins::exec()
 			}
 			continue;
 		}
-		int connType=0;
-		eConfig::getInstance()->getKey("/elitedvb/network/connectionType", connType);
 		while (struct dirent *e=readdir(d))
 		{
 			eString FileName = e->d_name;
@@ -168,15 +174,14 @@ int eZapPlugins::exec()
 					if ( exist.find(FileName) != exist.end() )
 						continue;
 					exist.insert(FileName);
-					// EVIL HACK
-					if ( !connType && cfgname.find("dsl") != eString::npos &&
-						cfgname.find("connect") != eString::npos )
-						continue;
-					////////////
-					// EVIL HACK
-					if ( !eSystemInfo::getInstance()->hasNetwork() && cfgname.find("Ngrab") != eString::npos )
-						continue;
-					////////////
+					// check for required specifications
+					eString requires = getInfo(cfgname.c_str(), "requires");
+					if (!ignore_requires) {
+						if ((!hasNetwork) && (requires.find("network") != eString::npos))
+							continue;
+						if ((!connType) && (requires.find("dsl") != eString::npos))
+							continue;
+					}
 					plg = new ePlugin(&list, cfgname.c_str());
 					++cnt;
 				}
@@ -184,12 +189,19 @@ int eZapPlugins::exec()
 		}
 		closedir(d);
 	}
-	int res=0;
+	return cnt;
+}
+
+int eZapPlugins::exec()
+{
+	int cnt=0;
+	int res = 0;
+
+	cnt = find();
 	if ((type == 2) && (cnt == 1))
 	{
-		selected(plg);
-	} else
-	{
+		selected(list.getFirst());
+	} else {
 		show();
 		res=eListBoxWindow<ePlugin>::exec();
 		hide();

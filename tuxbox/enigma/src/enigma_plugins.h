@@ -11,7 +11,7 @@ class ePlugin: public eListBoxEntryText
 	friend class eListBox<ePlugin>;
 public:
 	int version;
-	eString depend, sopath, pluginname;
+	eString depend, sopath, pluginname, requires, cfgname, desc, name;
 	bool needfb, needrc, needlcd, needvtxtpid, needoffsets, showpig;
 	int posx, posy, sizex, sizey;
 	ePlugin(eListBox<ePlugin> *parent, const char *cfgfile, const char* descr=0);
@@ -28,6 +28,7 @@ public:
 	eString execPluginByName(const char* name);
 	void execPlugin(ePlugin* plugin);
 	int exec();
+	int find(bool ignore_requires=false);
 };
 
 class ePluginThread: public eThread, public Object
@@ -46,7 +47,7 @@ class ePluginThread: public eThread, public Object
 	void finalize_plugin();
 	void recv_msg(const int &);
 public:
-	ePluginThread( ePlugin *p, eString PluginPath[3], eZapPlugins *wnd )
+	ePluginThread( ePlugin *p, const eString PluginPath[3], eZapPlugins *wnd )
 		:message(eApp,1), depend(p->depend), sopath(p->sopath), pluginname(p->pluginname),
 		needfb(p->needfb), needrc(p->needrc), needlcd(p->needlcd),
 		needvtxtpid(p->needvtxtpid), needoffsets(p->needoffsets),

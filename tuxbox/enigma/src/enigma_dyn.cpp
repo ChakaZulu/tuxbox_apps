@@ -146,45 +146,39 @@ static eString tvMessageWindow(eString request, eString dirpath, eString opt, eH
 	return readFile(TEMPLATE_DIR + "sendMessage.tmp");
 }
 
+class PluginCollector
+{
+	std::stringstream& result;
+public:
+	explicit PluginCollector(std::stringstream &res)
+		:result(res)
+	{
+	}
+	bool operator() (ePlugin& plugin) 
+	{
+		result << "<tr><td width=100>"
+					 << button(100, "Start", GREEN, "javascript:startPlugin('" + plugin.cfgname+ "')")
+					 << "</td><td>"
+					 << plugin.name
+					 << "</td><td>"
+					 << (plugin.desc ? plugin.desc : _("(no description)"))
+					 << "</td><td>";
+		return false; // must return false in order to continue for_each loop
+	}
+};
+
 static eString getControlPlugins(void)
 {
-	std::stringstream result, tmp;
-	struct dirent **e;
-	eString line;
-	eString pluginsDir[2] = {"/lib/tuxbox/plugins/", "/var/tuxbox/plugins/"};
+	std::stringstream result;
 	result << "<table width=100% border=1 cellspacing=0 cellpadding=0>";
-	for (int j = 0; j < 2; j++)
-	{
-		int n = scandir(pluginsDir[j].c_str(), &e, 0, alphasort);
-		if (n > 0)
-		{
-			for (int i = 0; i < n; i++)
-			{
-				line = e[i]->d_name;
-				if (line.find(".cfg") != eString::npos)
-				{
-					tmp	<< "<tr>"
-						<< "<td width=100>"
-						<< button(100, "Start", GREEN, "javascript:startPlugin('" + getLeft(line, '.') + ".cfg')")
-						<< "</td>"
-						<< "<td>"
-						<< getAttribute(pluginsDir[j] + line, "name")
-						<< "</td>"
-						<< "<td>"
-						<< getAttribute(pluginsDir[j] + line, "desc")
-						<< "</td>"
-						<< "</tr>";
-				}
-				free(e[i]);
-			}
-			free(e);
-		}
-	}
-	if (tmp.str() == "")
+	eZapPlugins plugins(-1);
+	plugins.find();
+	
+	if (!plugins.list.getCount())
 		result << "<tr><td>No plugins found.</td></tr>";
 	else
-		result << tmp.str();
-
+		plugins.list.forEachEntry(PluginCollector(result));
+	
 	result << "</table>";
 	result << "<br>";
 	result << button(100, "Stop", RED, "javascript:stopPlugin()");
@@ -1525,7 +1519,7 @@ void sortServices(eString &serviceRefList, eString &serviceList)
 	{
 		serviceRef = "";
 		serviceName = "";
-		int pos1 = serviceRefList.find("\",") + 1;
+		unsigned int pos1 = serviceRefList.find("\",") + 1;
 		if (pos1 != eString::npos)
 		{
 			serviceRef = serviceRefList.left(pos1);
@@ -1534,7 +1528,7 @@ void sortServices(eString &serviceRefList, eString &serviceList)
 		else
 			serviceRefList = "";
 
-		int pos2 = serviceList.find("\",") + 1;
+		unsigned int pos2 = serviceList.find("\",") + 1;
 		if (pos2 != eString::npos)
 		{
 			serviceName = serviceList.left(pos2);
@@ -3743,10 +3737,6 @@ struct listContent: public Object
 	}
 	void addToString(const eServiceReference& ref)
 	{
-/*		if ( ref.path
-			|| ref.flags & eServiceReference::isDirectory
-			|| ref.type != eServiceReference::idDVB )
-			return;*/
 		// sorry.. at moment we dont show any directory.. or locked service in webif
 		if (ref.isLocked() && eConfig::getInstance()->pLockActive())
 			return;
@@ -3757,9 +3747,33 @@ struct listContent: public Object
 		if ( ref.descr )
 			result += filter_string(ref.descr);
 		else if ( service )
+		{
 			result += filter_string(service->service_name);
+			if ( ref.type == eServiceReference::idDVB && !(ref.flags & eServiceReference::isDirectory) )
+			{
+				result += ';';
+				result += filter_string(((eServiceDVB*)service)->service_provider);
+			}
+		}
 		else
+		{
 			result += "unnamed service";
+			if ( ref.type == eServiceReference::idDVB && !(ref.flags & eServiceReference::isDirectory) )
+				result += ";unnamed provider";
+		}
+		if ( ref.type == eServiceReference::idDVB && !(ref.flags & eServiceReference::isDirectory) )
+		{
+			const eServiceReferenceDVB& dvb_ref = (const eServiceReferenceDVB&)ref;
+			eTransponder *tp = eTransponderList::getInstance()->searchTS(
+				dvb_ref.getDVBNamespace(),
+				dvb_ref.getTransportStreamID(),
+				dvb_ref.getOriginalNetworkID());
+			if ( tp && tp->satellite.isValid())
+			{
+				result += ';';
+				result += eString().setNum(tp->satellite.orbital_position);
+			}
+		}
 		result += "\n";
 		if (service)
 			iface->removeRef(ref);
