@@ -37,6 +37,11 @@ void eEPGWindow::fillEPGList()
 
 void eEPGWindow::entrySelected(eListboxEntry *entry)
 {
+	if (!entry);
+	{
+		close(0);
+		return;
+	}
 	hide();
 	eEventDisplay ei(eDVB::getInstance()->service->service_name.c_str(), 0, ((eListboxEntryEPG*)entry)->event);
 	ei.show();
