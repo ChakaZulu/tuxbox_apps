@@ -27,5 +27,9 @@ typedef int	(*PluginExec)( PluginParam *par );
 #define P_ID_HSCORE		"hscore"		// highscore-server (as url)
 #define P_ID_OFF_X		"off_x"			// screen-top-offset x
 #define P_ID_OFF_Y		"off_y"			// screen-top-offset y
+#define P_ID_END_X		"end_x"			// screen-end-offset x
+#define P_ID_END_Y		"end_y"			// screen-end-offset y
+#define	P_ID_RCBLK_ANF	"rcblk_anf"		// Key-Repeatblocker Anfang
+#define	P_ID_RCBLK_REP	"rcblk_rep"     // Key-Repeatblocker Wiederholung
 
 #endif
