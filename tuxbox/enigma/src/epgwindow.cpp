@@ -80,8 +80,8 @@ int eEPGWindow::eventFilter(const eWidgetEvent &event)
 			return 1;	
 		}
 	}
-	return 0;
 #endif
+	return 0;
 }
 
 void eEPGWindow::closeWnd()

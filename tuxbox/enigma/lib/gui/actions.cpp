@@ -228,6 +228,7 @@ int eActionMapList::loadXML(const char *filename)
 		if (!strcmp(node->GetType(), "device"))
 		{
 			const char *identifier=node->GetAttributeValue("identifier");
+			eDebug("Device = %s", identifier);
 			
 			eRCDevice *device=0;
 			if (identifier)

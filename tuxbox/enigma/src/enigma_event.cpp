@@ -1,54 +1,54 @@
 #include <time.h>
-#include "enigma_event.h"
-#include "rc.h"
-#include "font.h"
-#include "elabel.h"
+
 #include "enigma.h"
-#include "eskin.h"
-#include <eerror.h>
+#include "enigma_event.h"
 
-int eEventDisplay::keyDown(int rc)
+#include <core/base/eerror.h>
+#include <core/driver/rc.h>
+#include <core/gdi/font.h>
+#include <core/gui/elabel.h>
+#include <core/gui/eskin.h>
+#include <core/gui/guiactions.h>
+
+void eEventDisplay::nextEvent()
 {
-	if (!eventlist)
-		return 0;
-		
-	switch (rc)
+	if (*events == --eventlist->end())
+		*events = eventlist->begin();
+	else
+		++(*events);
+   	
+	setEvent(**events);
+}
+
+void eEventDisplay::prevEvent()
+{
+	if (*events == eventlist->begin())
+		*events = --eventlist->end();
+ 	else
+		--(*events);	
+  	
+	setEvent(**events);
+}
+
+int eEventDisplay::eventFilter(const eWidgetEvent &event)
+{
+	eDebug("event.type = %i == %i", event.type, eWidgetEvent::evtAction );
+	switch (event.type)
 	{
-		case eRCInput::RC_RIGHT:
-			if (*events == --eventlist->end())
-				*events = eventlist->begin();
+		case eWidgetEvent::evtAction:
+			if (event.action == &i_cursorActions->left)
+				if (events) prevEvent();
+			else if (event.action == &i_cursorActions->right)
+				if (events) nextEvent();
+			else if(event.action == &i_cursorActions->cancel)
+				close(0);
 			else
-				++(*events);
-    	
-			setEvent(**events);
-		break;
-
-		case eRCInput::RC_LEFT:
-			if (*events == eventlist->begin())
-				*events = --eventlist->end();
-	  	else
-				--(*events);	
-    	
-			setEvent(**events);
-		break;
-	default:
-		return 0;
-	}
-	return 1;
-}
-
-int eEventDisplay::keyUp(int rc)
-{
-	switch (rc)
-	{
-	case eRCInput::RC_OK:
-	case eRCInput::RC_HELP:
-		close(0);
+				return 0;
 		return 1;
-	default:
-		return 0;
 	}
+	return eWidget::eventHandler(event);
 }
+
 
 eEventDisplay::eEventDisplay(eString service, const ePtrList<EITEvent>* e, EITEvent* evt)
 : eWindow(1), service(service)
@@ -91,6 +91,8 @@ eEventDisplay::eEventDisplay(eString service, const ePtrList<EITEvent>* e, EITEv
 		setList(*e);
 	else if (evt)
 		setEvent(evt);
+
+	addActionMap(&i_cursorActions->map);
 }
 
 eEventDisplay::~eEventDisplay()

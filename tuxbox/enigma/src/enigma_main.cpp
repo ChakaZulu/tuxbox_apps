@@ -731,7 +731,7 @@ void eZapMain::nextService()
 		return;
 	if (service)
 		if (eDVB::getInstance()->switchService(service))
-			serviceChanged(service, -EAGAIN);
+			serviceChanged(service, -EAGAIN);	
 }
 
 void eZapMain::prevService()
@@ -849,17 +849,11 @@ void eZapMain::showSubserviceMenu()
 			timeout.stop();
 			hide();
 		}
-		eZapLCD* pLCD = eZapLCD::getInstance();
-		pLCD->lcdMain->hide();
-		pLCD->lcdMenu->show();
-		eMainMenu mm;
-		mm.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
-		if (mm.exec())
-			eZap::getInstance()->quit();
-		pLCD->lcdMenu->hide();
-		pLCD->lcdMain->show();
+		nvodsel.show();
+		nvodsel.exec();
+		nvodsel.hide();
 	}
-	if (flags&ENIGMA_SUBSERVICES)
+	else if (flags&ENIGMA_SUBSERVICES)
 	{
 		if (isVisible())
 		{

@@ -206,13 +206,13 @@ inline void eListbox::setActiveColor(gColor active)
 
 inline eListboxEntry *eListbox::goNext()
 {
-	keyDown(eRCInput::RC_DOWN);
+	moveSelection(dirDown);
 	return current?current->current():0;
 }
 
 inline eListboxEntry *eListbox::goPrev()
 {
-	keyDown(eRCInput::RC_UP);
+	moveSelection(dirUp);
 	return current?current->current():0;
 }
 

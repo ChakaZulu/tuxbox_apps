@@ -12,14 +12,14 @@ class eEventDisplay: public eWindow
 	ePtrList<EITEvent>::iterator *events;
 	ePtrList<EITEvent> *eventlist;
 	eLabel *title, *long_description, *eventDate, *eventTime, *channel;
+	void nextEvent();
+	void prevEvent();
+	void setEvent(EITEvent *event);
 protected:
-	int keyDown(int rc);
-	int keyUp(int rc);
+	int eventFilter(const eWidgetEvent &event);
 public:
 	eEventDisplay(eString service, const ePtrList<EITEvent>* e=0, EITEvent* evt=0);
 	~eEventDisplay();
-	
-	void setEvent(EITEvent *event);
 	void setList(const ePtrList<EITEvent> &events);
 };
 
