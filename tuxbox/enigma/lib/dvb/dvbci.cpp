@@ -680,7 +680,7 @@ void eDVBCI::incoming(unsigned char *buffer,int len)
 	tc_id=buffer[x++];
 	m_l=buffer[x++];
 
-	if(len<6)
+	if(len<7)
 		return;
 	//the cheapest defrag on earth *g*
 	if(m_l && ml_bufferlen==0)			//first fragment

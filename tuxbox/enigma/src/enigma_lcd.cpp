@@ -33,9 +33,7 @@ eZapLCD::eZapLCD(): eWidget(eZap::getInstance()->getDesktop(eZap::desktopLCD))
 
 eZapLCD::~eZapLCD()
 {
-	eDebug("about to delete lcdMain (%p)", lcdMain);
 	delete lcdMain;
-	eDebug("ok.");
 	delete lcdMenu;
 	delete lcdScart;
 	delete lcdStandby;

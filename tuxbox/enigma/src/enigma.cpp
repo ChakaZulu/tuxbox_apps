@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <termios.h>
+#include <signal.h>
 
 #include <lib/base/i18n.h>
 #include <lib/driver/rc.h>
@@ -242,9 +243,21 @@ eZap::~eZap()
 	instance = 0;
 }
 
+void fault(int x)
+{
+	printf(" ----- segfault :/\n");
+	exit(2);
+}
+
+extern "C" void __mp_initsection();
+
 int main(int argc, char **argv)
 {
 	time_t t=0;
+	int res;
+//	signal(SIGSEGV, fault);
+//	printf("(secret data: %x)\n", __mp_initsection);
+
 	stime(&t);
 	eDebug("%s", copyright);
 
@@ -257,8 +270,9 @@ int main(int argc, char **argv)
 	
 	{
 		eZap ezap(argc, argv);
-		ezap.exec();
+		res=ezap.exec();
 	}
+	exit(res);
 //	mcheck_check_all();
 //	muntrace();
 	// system("/sbin/halt &");

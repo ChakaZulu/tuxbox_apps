@@ -798,7 +798,9 @@ bool eServiceSelector::selectService(const eServiceReference &ref)
 {
 	if ( services->forEachEntry( _selectService(ref) ) )
 	{
-		services->moveSelection( eListBox<eListBoxEntryService>::dirFirst );
+		// services->moveSelection( eListBox<eListBoxEntryService>::dirFirst );
+		// ersten service NICHT selecten (warum auch - evtl. ist ja der aktuelle sinnvoller,
+		// und bei einem entsprechenden returncode kann ja jeder sehen was er will)
 		return false;
 	}
 	else
