@@ -159,7 +159,7 @@ int CMenuWidget::exec(CMenuTarget* parent, const std::string &)
 							{
 								pos = selected- count;
 								if ( pos<0 )
-									pos = items.size()-1;
+									pos += items.size();
 							}
 							else
 							{
