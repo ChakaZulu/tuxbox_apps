@@ -331,6 +331,7 @@ void eSubtitleWidget::stop()
 	delete sn;
 	sn = 0;
 	subtitle_screen_enable(subtitle, 0);
+	subtitle_reset(subtitle);
 	if (fd != -1)
 		::close(fd);
 }

@@ -101,6 +101,7 @@ int subtitle_process_pixel_data(struct subtitle_ctx *sub, struct subtitle_page *
 int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment);
 void subtitle_process_pes(struct subtitle_ctx *sub, void *buffer, int len);
 void subtitle_clear_screen(struct subtitle_ctx *sub);
+void subtitle_reset(struct subtitle_ctx *sub);
 void subtitle_redraw_all(struct subtitle_ctx *sub);
 void subtitle_redraw(struct subtitle_ctx *sub, int pageid);
 void subtitle_screen_enable(struct subtitle_ctx *sub, int enable);

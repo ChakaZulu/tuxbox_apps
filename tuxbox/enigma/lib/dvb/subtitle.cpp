@@ -697,6 +697,48 @@ void subtitle_redraw_all(struct subtitle_ctx *sub)
 	}
 }
 
+void subtitle_reset(struct subtitle_ctx *sub)
+{
+	while (struct subtitle_page *page = sub->pages)
+	{
+			/* free page regions */
+		while (page->page_regions)
+		{
+			struct subtitle_page_region *p = page->page_regions->next;
+			free(page->page_regions);
+			page->page_regions = p;
+		}
+			/* free regions */
+		while (page->regions)
+		{
+			struct subtitle_region *region = page->regions;
+			
+			while (region->region_objects)
+			{
+				struct subtitle_region_object *obj = region->region_objects;
+				region->region_objects = obj->next;
+				free(obj);
+			}
+			
+			free(region->region_buffer);
+			
+			page->regions = region->next;
+			free(region);
+		}
+			
+			/* free CLUTs */
+		while (page->cluts)
+		{
+			struct subtitle_clut *clut = page->cluts;
+			page->cluts = clut->next;
+			free(clut);
+		}
+		
+		sub->pages = page->next;
+		free(page);
+	}
+}
+
 void subtitle_redraw(struct subtitle_ctx *sub, int page_id)
 {
 	struct subtitle_page *page = sub->pages;
