@@ -5,5 +5,6 @@ all-local:
 
 clean-local:
 	-rm -rf src
-
+else
+clean-local:
 endif
