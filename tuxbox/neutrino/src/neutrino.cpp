@@ -2553,6 +2553,16 @@ void CNeutrinoApp::setupRecordingDevice(void)
 		CVCRControl::getInstance()->registerDevice(CVCRControl::DEVICE_SERVER,info);
 		delete info;
 		
+		if (fserverpid != -1) {
+            // stop fserver process
+            if(kill(fserverpid,SIGTERM)) {
+                fprintf(stderr,"\n[neutrino.cpp] fserver process not killed\n");
+            }
+        }
+        waitpid(fserverpid,0,0);
+        fprintf(stderr,"[neutrino.cpp] fserver stopped\n");
+        fserverpid = -1;
+
 		if (fserverpid == -1) {
     	    // start fserver process
 			fserverpid = fork();
