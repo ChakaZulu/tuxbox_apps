@@ -397,7 +397,7 @@ public:
 	eServicePath(const eServiceReference &ref);
 	void setString( const eString& data );
 	eString toString();
-	void up();
+	bool up();
 	void down(const eServiceReference &ref);
 	eServiceReference current() const;
 };

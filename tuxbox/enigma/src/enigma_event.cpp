@@ -158,19 +158,24 @@ void eEventDisplay::setEvent(EITEvent *event)
 		}
 
 		if (!_title)
-			_title = _("no description available");
+			_title = _("no info available");
 
 		eventTime->setText(_eventTime);
 		eventDate->setText(_eventDate);
 
 		title->setText(_title);
-		long_description->setText(_long_description);
+	
+		if (!_long_description)
+			long_description->setText(_("no description available"));
+		else
+			long_description->setText(_long_description);
+
 		channel->setText(service);
 	} 
 	else
 	{
 		title->setText(service);
-		long_description->setText("keine Beschreibung verfügbar");
+		long_description->setText(_("no description available"));
 	}
 }
 

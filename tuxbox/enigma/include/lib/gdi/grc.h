@@ -9,6 +9,7 @@
 
 #include <pthread.h>
 #include <deque>
+#include <stack>
 
 #include <core/base/estring.h>
 #include <core/base/erect.h>
@@ -146,7 +147,7 @@ class gPainter
 	gOpcode *beginptr;
 
 			/* paint states */	
-	eRect cliparea;
+	std::stack<eRect> cliparea;
 	gFont font;
 	gColor foregroundColor, backgroundColor;
 	ePoint logicalZero;
@@ -179,6 +180,7 @@ public:
 	void resetLogicalZero();
 	
 	void clip(eRect clip);
+	void clippop();
 
 	void flush();
 };

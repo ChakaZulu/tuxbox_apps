@@ -170,8 +170,10 @@ eZap::eZap(int argc, char **argv)
 	if (eConfig::getInstance()->getKey("/elitedvb/system/bootCount", bootcount))
 	{
 		bootcount = 1;
-		eMessageBox msg("Willkommen zu enigma.\n\nBitte führen sie zunächst eine Kanalsuche durch, indem sie die d-Box-Taste drücken um in das "
-			"Hauptmenü zu gelangen. Dort gibt es den Unterpunkt \"Transponder Scan\", der genau das macht, was sie glauben.\n", "enigma - erster Start");
+		eMessageBox msg(_("Welcome to enigma.\n\n"
+											"Please do a transponderscan first.\n(mainmenu > setup > channels > transponder scan)"),
+										_("First start of enigma"),
+										eMessageBox::btOK|eMessageBox::iconInfo, eMessageBox::btOK );
 		msg.show();
 		msg.exec();
 		msg.hide();

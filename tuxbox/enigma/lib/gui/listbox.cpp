@@ -17,6 +17,7 @@ eListBoxBase::eListBoxBase(eWidget* parent, const eWidget* descr, const char *de
 		colorActiveB(eSkin::getActive()->queryScheme("global.selected.background")),
 		colorActiveF(eSkin::getActive()->queryScheme("global.selected.foreground")),
 		flags(0),
+		columns(1),
 		in_atomic(0)
 {
 }
@@ -33,22 +34,31 @@ void eListBoxBase::removeFlags(int _flags)
 
 void eListBoxBase::recalcMaxEntries()
 {
+		// MaxEntries is PER COLUMN
 	if (deco_selected && have_focus)
-		MaxEntries = crect_selected.height() / item_height;
+		MaxEntries = ( crect_selected.height() / item_height );
 	else if (deco)
-		MaxEntries = crect.height() / item_height;
+		MaxEntries = (crect.height() / item_height);
 	else
-		MaxEntries = height() / item_height;
+		MaxEntries = (height() / item_height);
 }
 
 eRect eListBoxBase::getEntryRect(int pos)
 {
 	if ( deco_selected && have_focus )
-		return eRect( ePoint( deco_selected.borderLeft, deco_selected.borderTop+pos*item_height ), eSize( crect_selected.width(), item_height ) );
-	else if (deco )
-		return eRect( ePoint( deco.borderLeft, deco.borderTop+pos*item_height ), eSize( crect.width(), item_height ) );
+		return eRect( ePoint( deco_selected.borderLeft + ( ( pos / MaxEntries) * ( crect_selected.width() / columns ) ) , deco_selected.borderTop + ( pos % MaxEntries) * item_height ), eSize( crect_selected.width() / columns , item_height ) );
+	else if (deco)
+		return eRect( ePoint( deco.borderLeft + ( ( pos / MaxEntries ) * ( crect.width() / columns ) ) , deco.borderTop + ( pos % MaxEntries) * item_height ), eSize( crect.width() / columns , item_height ) );
+	else if ( deco_selected )
+		return eRect( ePoint( deco_selected.borderLeft + ( ( pos / MaxEntries) * ( crect_selected.width() / columns ) ) , deco_selected.borderTop + ( pos % MaxEntries) * item_height ), eSize( crect_selected.width() / columns , item_height ) );
 	else
-		return eRect( ePoint(0, pos*item_height), eSize(size.width(), item_height));
+		return eRect( ePoint( ( ( pos / MaxEntries ) * ( size.width() / columns ) ) , ( pos % MaxEntries) * item_height ), eSize( size.width() / columns , item_height ) );
+}
+
+void eListBoxBase::setColumns(int col)
+{
+	if (col)
+		columns=col;
 }
 
 int eListBoxBase::setProperty(const eString &prop, const eString &value)
@@ -73,6 +83,8 @@ int eListBoxBase::setProperty(const eString &prop, const eString &value)
 		colorActiveB=eSkin::getActive()->queryScheme(value);
 	else if (prop=="showEntryHelp")
 		setFlags( flagShowEntryHelp );
+	else if (prop=="columns")
+		setColumns( value?atoi(value.c_str()):1 );
 	else
 		return eDecoWidget::setProperty(prop, value);
 
@@ -81,7 +93,7 @@ int eListBoxBase::setProperty(const eString &prop, const eString &value)
 
 void eListBoxBase::redrawBorder(gPainter *target, eRect& where)
 {
-	if ( where.contains( eRect(0, 0, width(), height() ) ) )
+	if ( where.contains( eRect( 0, 0, size.width(), size.height() ) ) )
 	{
 		if (deco_selected && have_focus)
 		{
@@ -102,15 +114,15 @@ void eListBoxBase::recalcClientRect()
 		{
 			crect.setLeft( deco.borderLeft );
 			crect.setTop( deco.borderTop );
-			crect.setRight( width() - 1 - deco.borderRight );
-			crect.setBottom( height() - 1 - deco.borderBottom );
+			crect.setRight( width() - deco.borderRight );
+			crect.setBottom( height()  - deco.borderBottom );
 		}
 		if (deco_selected)
 		{
 			crect_selected.setLeft( deco_selected.borderLeft );
 			crect_selected.setTop( deco_selected.borderTop );
-			crect_selected.setRight( width() - 1 - deco_selected.borderRight );
-			crect_selected.setBottom( height() - 1 -deco_selected.borderBottom );
+			crect_selected.setRight( width() - deco_selected.borderRight );
+			crect_selected.setBottom( height() - deco_selected.borderBottom );
 		}
 }
 
@@ -237,32 +249,33 @@ const eString& eListBoxEntryText::redraw(gPainter *rc, const eRect& rect, gColor
 		state = 0;
 
 	drawEntryRect( rc, rect, coActiveB, coActiveF, coNormalB, coNormalF, state );
-	
+
 	if (!para)
 	{
 		para = new eTextPara( eRect( rect.left(), 0, rect.width(), rect.height() ) );
 		para->setFont( font );
 		para->renderString(text);
 		para->realign(align);
-		yOffs = ((rect.height() - para->getBoundBox().height()) / 2 + 0) - para->getBoundBox().top() ;
+//		yOffs = ((rect.height() - para->getBoundBox().height()) / 2 + 0) - para->getBoundBox().top() ;
 	}		
+	yOffs=0;
 	rc->renderPara(*para, ePoint(0, rect.top() + yOffs ) );
 
 	if (b)
 	{
 		rc->setForegroundColor(coActiveB);
-		rc->line( ePoint(rect.left(), rect.bottom()), ePoint(rect.right(), rect.bottom()) );
-		rc->line( ePoint(rect.left(), rect.top()), ePoint(rect.right(), rect.top()) );
-		rc->line( ePoint(rect.left(), rect.top()), ePoint(rect.left(), rect.bottom()) );
-		rc->line( ePoint(rect.right(), rect.top()), ePoint(rect.right(), rect.bottom()) );
-		rc->line( ePoint(rect.left()+1, rect.bottom()-1), ePoint(rect.right()-1, rect.bottom()-1) );
-		rc->line( ePoint(rect.left()+1, rect.top()+1), ePoint(rect.right()-1, rect.top()+1) );
-		rc->line( ePoint(rect.left()+1, rect.top()+2), ePoint(rect.left()+1, rect.bottom()-2) );
-		rc->line( ePoint(rect.right()-1, rect.top()+2), ePoint(rect.right()-1, rect.bottom()-2) );
-		rc->line( ePoint(rect.left()+2, rect.bottom()-2), ePoint(rect.right()-2, rect.bottom()-2) );
-		rc->line( ePoint(rect.left()+2, rect.top()+2), ePoint(rect.right()-2, rect.top()+2) );
-		rc->line( ePoint(rect.left()+2, rect.top()+3), ePoint(rect.left()+2, rect.bottom()-3) );
-		rc->line( ePoint(rect.right()-2, rect.top()+3), ePoint(rect.right()-2, rect.bottom()-3) );
+		rc->line( ePoint(rect.left(), rect.bottom()-1), ePoint(rect.right()-1, rect.bottom()-1) );
+		rc->line( ePoint(rect.left(), rect.top()), ePoint(rect.right()-1, rect.top()) );
+		rc->line( ePoint(rect.left(), rect.top()), ePoint(rect.left(), rect.bottom()-1) );
+		rc->line( ePoint(rect.right()-1, rect.top()), ePoint(rect.right()-1, rect.bottom()-1) );
+		rc->line( ePoint(rect.left()+1, rect.bottom()-2), ePoint(rect.right()-2, rect.bottom()-2) );
+		rc->line( ePoint(rect.left()+1, rect.top()+1), ePoint(rect.right()-2, rect.top()+1) );
+		rc->line( ePoint(rect.left()+1, rect.top()+2), ePoint(rect.left()+1, rect.bottom()-3) );
+		rc->line( ePoint(rect.right()-2, rect.top()+2), ePoint(rect.right()-2, rect.bottom()-3) );
+		rc->line( ePoint(rect.left()+2, rect.bottom()-3), ePoint(rect.right()-3, rect.bottom()-3) );
+		rc->line( ePoint(rect.left()+2, rect.top()+2), ePoint(rect.right()-3, rect.top()+2) );
+		rc->line( ePoint(rect.left()+2, rect.top()+3), ePoint(rect.left()+2, rect.bottom()-4) );
+		rc->line( ePoint(rect.right()-3, rect.top()+3), ePoint(rect.right()-3, rect.bottom()-4) );
 	}
 	return text;
 }

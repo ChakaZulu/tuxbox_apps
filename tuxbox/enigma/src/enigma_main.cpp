@@ -407,12 +407,13 @@ void eZapMain::eraseBackground(gPainter *painter, const eRect &where)
 }
 
 eZapMain::eZapMain()
-	:eWidget(0, 1), mute( eZap::getInstance()->getDesktop( eZap::desktopFB ) ),
-	 pMsg(0), message_notifier(eApp), timeout(eApp), clocktimer(eApp), messagetimeout(eApp), progresstimer(eApp)
+	:eWidget(0, 1), mute( eZap::getInstance()->getDesktop( eZap::desktopFB ) ), volume( eZap::getInstance()->getDesktop( eZap::desktopFB ) ),
+	VolumeBar( &volume ), pMsg(0), message_notifier(eApp), timeout(eApp), clocktimer(eApp), messagetimeout(eApp), progresstimer(eApp), volumeTimer(eApp)
 {
 	if (!instance)
 		instance=this;
 
+// Mute Symbol
 	gPixmap *pm = eSkin::getActive()->queryImage("mute_symbol");
 	int x = eSkin::getActive()->queryValue("mute.pos.x", 0),
 		  y = eSkin::getActive()->queryValue("mute.pos.y", 0);
@@ -426,6 +427,38 @@ eZapMain::eZapMain()
 		mute.hide();
 		mute.setBlitFlags( BF_ALPHATEST );
 	}
+
+// Volume Pixmap
+	pm = eSkin::getActive()->queryImage("volume_grafik");
+	x = eSkin::getActive()->queryValue("volume.grafik.pos.x", 0),
+	y = eSkin::getActive()->queryValue("volume.grafik.pos.y", 0);
+
+	if (pm && x && y )
+	{
+		volume.setPixmap(pm);
+		volume.move( ePoint(x, y) );
+		volume.resize( eSize( pm->x, pm->y ) );
+		volume.pixmap_position = ePoint(0,0);
+		volume.hide();
+		volume.setBlitFlags( BF_ALPHATEST );
+	}
+
+// Volume Slider
+	x = eSkin::getActive()->queryValue("volume.slider.pos.x", 0),
+	y = eSkin::getActive()->queryValue("volume.slider.pos.y", 0);
+	
+	if ( x && y )
+		VolumeBar.move( ePoint(x, y) );
+
+	x = eSkin::getActive()->queryValue("volume.slider.width", 0),
+	y = eSkin::getActive()->queryValue("volume.slider.height", 0);
+
+	if ( x && y )
+		VolumeBar.resize( eSize( x, y ) );
+
+	VolumeBar.setLeftColor( eSkin::getActive()->queryColor("volume_left") );
+	VolumeBar.setRightColor( eSkin::getActive()->queryColor("volume_right") );
+	VolumeBar.setBorder(0);
 
 	isVT=0;
 	eSkin *skin=eSkin::getActive();
@@ -449,7 +482,7 @@ eZapMain::eZapMain()
 	ASSIGN(EINextTime, eLabel, "e_next_time");
 
 	ASSIGN(Description, eLabel, "description");
-	ASSIGN(VolumeBar, eProgress, "volume_bar");
+//	ASSIGN(VolumeBar, eProgress, "volume_bar");
 	ASSIGN(Progress, eProgress, "progress_bar");
 	
 	ASSIGN(ButtonRedEn, eLabel, "button_red_enabled");
@@ -502,6 +535,8 @@ eZapMain::eZapMain()
 	CONNECT(eAVSwitch::getInstance()->volumeChanged, eZapMain::updateVolume);
 
 	CONNECT(message_notifier.recv_msg, eZapMain::gotMessage);
+
+	CONNECT( volumeTimer.timeout, eZapMain::hideVolumeSlider );
 
 	actual_eventDisplay=0;
 
@@ -577,19 +612,25 @@ eZapMain::eZapMain()
 
 	int tmp;
   // read last mode from registry
-  if ( eConfig::getInstance()->getKey("ezap/ui/lastmode", tmp ) )
+  if ( eConfig::getInstance()->getKey("/ezap/ui/lastmode", tmp ) )
 		tmp = 0;  // defaut TV Mode
 
 	mode=-1;  // fake mode for first call of setMode
 	curlist->load(CONFIGDIR "/enigma/playlist.epl");
+
+	int style;
+	if ( eConfig::getInstance()->getKey("/ezap/ui/serviceSelectorStyle", style ) )
+		style=eServiceSelector::styleSingleColumn;  // default we use single Column Style
+	
+	eZap::getInstance()->getServiceSelector()->setStyle(style);  // set the style..
 
 	// now we set the last mode
 	setMode(tmp);
 
 	if (curlist->current != curlist->list.end())
 		playService(*curlist->current, psDontAdd);
-
 	startMessages();
+
 }
 
 eZapMain::~eZapMain()
@@ -623,6 +664,9 @@ eZapMain::~eZapMain()
 	eZapLCD *pLCD=eZapLCD::getInstance();
 	pLCD->lcdMain->hide();
 	pLCD->lcdShutdown->show();
+	eDBoxLCD::getInstance()->switchLCD(0);
+
+	eConfig::getInstance()->setKey("/ezap/ui/serviceSelectorStyle", eZap::getInstance()->getServiceSelector()->getStyle() );
 }
 
 void eZapMain::set16_9Logo(int aspect)
@@ -916,6 +960,7 @@ void eZapMain::showServiceSelector(int dir)
 
 	if (!service)
 	{
+		eServicePath p = modeLast[mode];
 		setServiceSelectorPath(modeLast[mode]);
 		return;
 	}
@@ -994,7 +1039,12 @@ void eZapMain::playlistNextService()
 
 void eZapMain::volumeUp()
 {
-	eAVSwitch::getInstance()->changeVolume(0, -4);
+	eAVSwitch::getInstance()->changeVolume(0, -2);
+	if (!volume.isVisible())
+	{
+		volume.show();
+		volumeTimer.start(5000, true);
+	}
 //		if (!isVisible())
 //			show();
 //		timeout.start(1000, 1);
@@ -1002,10 +1052,21 @@ void eZapMain::volumeUp()
 
 void eZapMain::volumeDown()
 {
-	eAVSwitch::getInstance()->changeVolume(0, +4);
+	eAVSwitch::getInstance()->changeVolume(0, +2);
+	if (!volume.isVisible())
+	{
+		volume.show();
+		volumeTimer.start(2000, true);
+	}
 //		if (!isVisible())
 //			show();
 //		timeout.start(1000, 1);
+}
+
+void eZapMain::hideVolumeSlider()
+{
+	if ( volume.isVisible() )
+		volume.hide();
 }
 
 void eZapMain::toggleMute()
@@ -1068,14 +1129,20 @@ void eZapMain::standbyRelease()
 
 void eZapMain::showInfobar()
 {
-	timeout.start(10000, 1);
-	show();
+	if ( !isVisible() )
+		show();
+
+	if (eServiceInterface::getInstance()->service.type == eServiceReference::idDVB)
+		timeout.start(10000, 1);
 }
 
 void eZapMain::hideInfobar()
 {
-	timeout.stop();
-	hide();
+	if (eServiceInterface::getInstance()->service.type == eServiceReference::idDVB)
+	{
+		timeout.stop();
+		hide();
+	}
 }
 
 void eZapMain::play()
@@ -1202,8 +1269,8 @@ void eZapMain::stopSkip(int dir)
 		if (handler)
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, speed));
 	}
-	if (isVisible())
-		timeout.start(1000, 1);
+/*	if (isVisible())
+		timeout.start(1000, 1);*/
 }
 
 void eZapMain::showServiceMenu(eServiceSelector *sel)
@@ -1219,7 +1286,7 @@ void eZapMain::showServiceMenu(eServiceSelector *sel)
 		break;
 	case 1:
 	{
-		eMessageBox box(_("Really delete this service?"), _("delete service"), eMessageBox::btYes|eMessageBox::btNo, eMessageBox::btNo);
+		eMessageBox box(_("Really delete this service?"), _("delete service"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btNo);
 		box.show();
 		int r=box.exec();
 		box.hide();
@@ -1233,7 +1300,7 @@ void eZapMain::showServiceMenu(eServiceSelector *sel)
 				sel->actualize();
 			else
 			{
-				eMessageBox box(_("Sorry, you cannot delete this service."), _("delete service"));
+				eMessageBox box(_("Sorry, you cannot delete this service."), _("delete service"), eMessageBox::iconWarning|eMessageBox::btOK );
 				box.show();
 				box.exec();
 				box.hide();
@@ -1244,12 +1311,14 @@ void eZapMain::showServiceMenu(eServiceSelector *sel)
 	}
 	case 2:
 	{
-		eMessageBox box(_("Sorry, not yet implemented."), _("move service"));
+		eMessageBox box(_("Sorry, not yet implemented."), _("move service"), eMessageBox::iconInfo|eMessageBox::btOK );
 		box.show();
 		box.exec();
 		box.hide();
 		break;
 	}
+	case 3:
+		doPlaylistAdd(sel->getSelected());
 	}
 	sel->show();
 }
@@ -1308,7 +1377,7 @@ void eZapMain::playService(const eServiceReference &service, int flags)
 		if (first)
 			curlist->current=curlist->list.begin();
 		else if (curlist->current != curlist->list.end())
-			curlist->current++;
+			++curlist->current;
 		
 		if (curlist->current != curlist->list.end())
 			eServiceInterface::getInstance()->play(*curlist->current);
@@ -1332,6 +1401,8 @@ void eZapMain::addService(const eServiceReference &service)
 		eServiceInterface::getInstance()->leaveDirectory(service);
 	} else
 	{
+		if (curlist->current != curlist->list.end() && *curlist->current == service)
+			++curlist->current;
 		curlist->list.remove(service);
 		curlist->list.push_back(ePlaylistEntry(service));
 	}
@@ -1359,7 +1430,7 @@ void eZapMain::addServiceToFavourite(eServiceSelector *sel)
 	for (std::list<ePlaylistEntry>::iterator i(favourite[mode]->list.begin()); i != favourite[mode]->list.end(); ++i)
 		if (i->service == service)
 		{
-			eMessageBox box(_("This service is already in your favourite list."), _("Add Channel to Favourite"), eMessageBox::btOK);
+			eMessageBox box(_("This service is already in your favourite list."), _("Add Channel to Favourite"), eMessageBox::iconWarning|eMessageBox::btOK);
 			sel->hide();
 			box.show();
 			box.exec();
@@ -1368,7 +1439,7 @@ void eZapMain::addServiceToFavourite(eServiceSelector *sel)
 			return;
 		}
 
-	eMessageBox box(_("Really add this channel to your favourite list?"), _("Add Channel to Favourite"), eMessageBox::btYes|eMessageBox::btNo);
+	eMessageBox box(_("Really add this channel to your favourite list?"), _("Add Channel to Favourite"), eMessageBox::iconQuestion|eMessageBox::btYes|eMessageBox::btNo);
 	sel->hide();
 	box.show();
 	int res=box.exec();
@@ -1451,7 +1522,7 @@ void eZapMain::runVTXT()
 		if (n < 0)
 		{
 			eDebug("Error Read Plugin Directory");
-			eMessageBox msg("Error Read Plugin Directory", "Error");
+			eMessageBox msg("Error Read Plugin Directory", "Error", eMessageBox::iconError|eMessageBox::btOK );
 			msg.show();
 			msg.exec();
 			msg.hide();
@@ -1516,10 +1587,13 @@ void eZapMain::showEPGList()
 
 void eZapMain::showEPG()
 {
-	eService* service = eDVB::getInstance()->settings->getTransponders()->searchService(eServiceInterface::getInstance()->service);
+	const eService *service=eServiceInterface::getInstance()->addRef( eServiceInterface::getInstance()->service );
 
-	if (!service)
+	if (!service && eServiceInterface::getInstance()->service.type == eServiceReference::idDVB && !(eServiceInterface::getInstance()->service.flags & eServiceReference::isDirectory) )
+	{
+		eServiceInterface::getInstance()->removeRef( eServiceInterface::getInstance()->service );
 		return;
+	}
 		
 	if (isVisible())
 	{
@@ -1527,43 +1601,22 @@ void eZapMain::showEPG()
 		hide();
 	}
 
-#ifdef USE_CACHED_EPG
-#error no
-	const eventMap* pMap = eEPGCache::getInstance()->getEventMap(service->getOriginalNetworkID(), service->getServiceID());
-
-	if (pMap && isEPG)  // EPG vorhanden
+	if (isEPG)
 	{
-		eventMap::const_iterator It = pMap->begin();
-			
-		ePtrList<EITEvent> events;
-		events.setAutoDelete(true);
-			
-		while (It != pMap->end())  // sicher ist sicher !
+		const eventMap* pMap = eEPGCache::getInstance()->getEventMap( (eServiceReferenceDVB&)eServiceInterface::getInstance()->service );
+		if (pMap)  // EPG vorhanden
 		{
-			events.push_back( new EITEvent(*It->second));
-			It++;
-		}
-		eEventDisplay ei(service->service_name.c_str(), &events);			
-		actual_eventDisplay=&ei;
-		eZapLCD* pLCD = eZapLCD::getInstance();
-		pLCD->lcdMain->hide();
-		pLCD->lcdMenu->show();
-		ei.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
-		ei.show();
-		ei.exec();
-		ei.hide();
-		pLCD->lcdMenu->hide();
-		pLCD->lcdMain->show();
-		actual_eventDisplay=0;
-	} else	
-#else
-	{
-		EIT *eit=eDVB::getInstance()->getEIT();
-		ePtrList<EITEvent> dummy;
-		{
-			eEventDisplay ei(service->service_name.c_str(), eit?&eit->events:&dummy);
-			if (eit)
-				eit->unlock();		// HIER liegt der hund begraben.
+			eventMap::const_iterator It = pMap->begin();
+				
+			ePtrList<EITEvent> events;
+			events.setAutoDelete(true);
+			
+			while (It != pMap->end())
+			{
+				events.push_back( new EITEvent(*It->second) );
+				It++;
+			}
+			eEventDisplay ei( service->service_name.c_str(), &events );			
 			actual_eventDisplay=&ei;
 			eZapLCD* pLCD = eZapLCD::getInstance();
 			pLCD->lcdMain->hide();
@@ -1577,7 +1630,26 @@ void eZapMain::showEPG()
 			actual_eventDisplay=0;
 		}
 	}
-#endif
+	else	
+	{
+		EIT *eit=eDVB::getInstance()->getEIT();
+		ePtrList<EITEvent> dummy;
+		eEventDisplay ei(service->service_name.c_str(), eit?&eit->events:&dummy);
+		if (eit)
+			eit->unlock();		// HIER liegt der hund begraben.
+		actual_eventDisplay=&ei;
+		eZapLCD* pLCD = eZapLCD::getInstance();
+		pLCD->lcdMain->hide();
+		pLCD->lcdMenu->show();
+		ei.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
+		ei.show();
+		ei.exec();
+		ei.hide();
+		pLCD->lcdMenu->hide();
+		pLCD->lcdMain->show();
+		actual_eventDisplay=0;
+	}
+	eServiceInterface::getInstance()->removeRef( eServiceInterface::getInstance()->service );
 }
 
 int eZapMain::eventHandler(const eWidgetEvent &event)
@@ -1610,8 +1682,6 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 			runVTXT();
 		else if (event.action == &i_enigmaMainActions->showEPGList)
 			showEPGList();
-		else if (event.action == &i_enigmaMainActions->showEPG)
-			showEPG();
 		else if (event.action == &i_enigmaMainActions->nextService)
 			nextService();
 		else if (event.action == &i_enigmaMainActions->prevService)
@@ -1650,6 +1720,8 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 			repeatSkip(skipReverse);
 		else if (isSeekable() && event.action == &i_enigmaMainActions->stopSkipReverse)
 			stopSkip(skipReverse);
+		else if (event.action == &i_enigmaMainActions->showEPG)
+			showEPG();
 		else if (event.action == &i_numberActions->key1)
 			num=1;
 		else if (event.action == &i_numberActions->key2)
@@ -1928,7 +2000,8 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 // Quick und Dirty ... damit die aktuelle Volume sofort angezeigt wird.
 	eAVSwitch::getInstance()->sendVolumeChanged();
 
-	timeout.start((sapi->getState() == eServiceHandler::statePlaying)?10000:2000, 1);
+	if ( eServiceInterface::getInstance()->service.type == eServiceReference::idDVB )
+		timeout.start((sapi->getState() == eServiceHandler::statePlaying)?10000:2000, 1);
 }
 
 void eZapMain::gotEIT()
@@ -1947,8 +2020,10 @@ void eZapMain::gotEIT()
 
 		if (!eZap::getInstance()->focus && state)
 		{
-			show();
-			timeout.start((sapi->getState() == eServiceHandler::statePlaying)?10000:2000, 1);
+			if (!isVisible())
+				show();
+			if (eServiceInterface::getInstance()->service.type == eServiceReference::idDVB)
+				timeout.start((sapi->getState() == eServiceHandler::statePlaying)?10000:2000, 1);
 		}
 		eit->unlock();
 	}
@@ -2077,11 +2152,15 @@ void eZapMain::clockUpdate()
 void eZapMain::updateVolume(int vol)
 {
 	if ( vol == 63 && !mute.isVisible() )
+	{
+		if ( volume.isVisible() )
+			volume.hide();
 		mute.show();
+	}
 	else if (vol < 63 && mute.isVisible() )
 		mute.hide();
 
-	VolumeBar->setPerc((63-vol)*100/63);
+	VolumeBar.setPerc((63-vol)*100/63);
 }
 
 void eZapMain::postMessage(const eZapMessage &message, int clear)
@@ -2114,6 +2193,13 @@ void eZapMain::gotMessage(const int &c)
 {
 	if ((!c) && pMsg) // noch eine gueltige message vorhanden
 	{
+		return;
+	}
+	if ((!isVisible()) && eZap::getInstance()->focus)
+	{
+		eDebug("message will be delivered later.");
+		pauseMessages();
+		message_notifier.send(c);
 		return;
 	}
 	pauseMessages();
@@ -2209,10 +2295,11 @@ void eZapMain::setMode(int newmode, int user)
 
 	mode=newmode;
 
-	if (mode != -1)
-		setServiceSelectorPath(modeLast[mode]);
 	if (user)
 		playService(modeLast[mode].current(), psDontAdd);
+
+	if (mode != -1)
+		setServiceSelectorPath(modeLast[mode]);
 }
 
 void eZapMain::setModeD(int newmode)
@@ -2224,7 +2311,7 @@ void eZapMain::setServiceSelectorPath(eServicePath path)
 {
 	eServiceReference ref=path.current();
 	path.up();
-	eServicePath p = path;
+//	eServicePath p = path;
 //	eDebug("Setting currentService to %s", ref.toString().c_str() );
 //	eDebug("setting path to %s", p.toString().c_str());
 	eZap::getInstance()->getServiceSelector()->setPath(path, ref);
@@ -2233,10 +2320,8 @@ void eZapMain::setServiceSelectorPath(eServicePath path)
 void eZapMain::getServiceSelectorPath(eServicePath &path)
 {
 //	eDebug("selected = %s",eZap::getInstance()->getServiceSelector()->getSelected().toString().c_str() );
-
 	path=eZap::getInstance()->getServiceSelector()->getPath();
 	path.down(eZap::getInstance()->getServiceSelector()->getSelected());
-
 //	eDebug("stored path for mode %d: %s", mode, eServicePath(path).toString().c_str());
 }
 
@@ -2246,6 +2331,7 @@ eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref): eListBox
 	new eListBoxEntryText(&list, _("back"), (void*)0);
 	new eListBoxEntryText(&list, _("delete service"), (void*)1);
 	new eListBoxEntryText(&list, _("move service"), (void*)2);
+	new eListBoxEntryText(&list, _("add service to playlist"), (void*)3);
 	CONNECT(list.selected, eServiceContextMenu::entrySelected);
 }
 

@@ -74,12 +74,12 @@ void eLabel::redrawWidget(gPainter *target, const eRect &rc)
 
 	if (deco_selected && have_focus)
 	{
-		deco_selected.drawDecoration(target, ePoint(width(), height()) );
+		deco_selected.drawDecoration(target, ePoint(width(), height()));
 		area=crect_selected;
 	}
 	else if (deco)
 	{
-		deco.drawDecoration(target, ePoint(width(), height()) );
+		deco.drawDecoration(target, ePoint(width(), height()));
 		area=crect;
 	}
 	else

@@ -1,7 +1,7 @@
 #ifndef __core_gui_decoration_h
 #define __core_gui_decoration_h
 
-#include <core/base/epoint.h>
+#include <core/base/erect.h>
 #include <core/base/estring.h>
 class gPixmap;
 class gPainter;

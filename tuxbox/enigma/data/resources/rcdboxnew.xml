@@ -75,17 +75,28 @@
 			<action name="toggleMute" key="mute" flags="mr" />
 			<!--action name="playlistNextService" key="3" flags="mr" />
 			<action name="playlistPrevService" key="1" flags="mr" /-->
+  		<action name="startSkipR" key="red" flags="m" />
+			<action name="repeatSkipR" key="red" flags="r" />
+			<action name="stopSkipR" key="red" flags="b" />
+			<action name="play" key="green" flags="m" />
+			<action name="pause" key="yellow" flags="m" />
+			<action name="stop" key="home" flags="m" />
+			<action name="startSkipF" key="blue" flags="m" />
+			<action name="repeatSkipF" key="blue" flags="r" />
+			<action name="stopSkipF" key="blue" flags="b" />
 		</actionmap>
 
 		<actionmap name="serviceSelector">
 			<action name="nextBouquet" key="+" flags="mr" />
 			<action name="prevBouquet" key="-" flags="mr" />
-			<action name="showBouquetSelector" key="d-box" flags="m" />
+			<action name="pathUp" key="d-box" flags="m" />
 			<action name="showEPGSelector" key="?" flags="m" />
-			<action name="addService" key="yellow" flags="m" />
+			<action name="toggleStyle" key="mute" flags="m" />
+			<action name="addService" key="green" flags="m" />
 			<action name="showMenu" key="red" flags="m" />
 			<action name="showFavourite" key="blue" flags="m" />
-			<action name="addServiceToFavourite" key="green" flags="m" />
+			<!--action name="addServiceToFavourite" key="yellow" flags="m" /-->
+			<action name="toggleFocus" key="yellow" flags="m" />
 		</actionmap>
 
 		<actionmap name="numbers">

@@ -1,5 +1,5 @@
-#ifndef __ss_listbox_h
-#define __ss_listbox_h
+#ifndef __listbox_h
+#define __listbox_h
 
 #include <sstream>
 
@@ -23,7 +23,7 @@ protected:
 	gColor colorActiveB, colorActiveF;
 	eRect crect, crect_selected;
 	enum  { arNothing, arCurrentOld, arAll};
-	int MaxEntries, item_height, flags, in_atomic, atomic_redraw, atomic_old, atomic_new;
+	int MaxEntries, item_height, flags, columns, in_atomic, atomic_redraw, atomic_old, atomic_new;
 	bool atomic_selchanged;
 public:
 	enum	{		flagNoUpDownMovement=1,		flagNoPageMovement=2,		flagShowEntryHelp=4	};
@@ -31,6 +31,8 @@ public:
 	void setFlags(int);
 	void removeFlags(int);
 	void invalidateEntry(int n){	invalidate(getEntryRect(n));}
+	void setColumns(int col);
+	int getColumns() { return columns; }
 protected:
 	eListBoxBase(eWidget* parent, const eWidget* descr=0, const char *deco="eListBox" );
 	eRect getEntryRect(int n);
@@ -324,7 +326,7 @@ inline void eListBox<T>::redrawWidget(gPainter *target, const eRect &where)
 	eListBoxBase::redrawBorder(target, rc);
 
 	// rc wird in eListBoxBase ggf auf den neuen Client Bereich ohne Rand verkleinert
-	
+
 	int i=0;
 	for (ePtrList_T_iterator entry(top); (entry != bottom) && (entry != childs.end()); ++entry)
 	{
@@ -333,6 +335,8 @@ inline void eListBox<T>::redrawWidget(gPainter *target, const eRect &where)
 		eString s;
 
 		if ( rc.contains(rect) )
+		{
+			target->clip(rect);
 			if ( entry == current )
 			{
 				if ( LCDTmp ) // LCDTmp is only valid, when we have the focus
@@ -343,7 +347,9 @@ inline void eListBox<T>::redrawWidget(gPainter *target, const eRect &where)
 					entry->redraw(target, rect, colorActiveB, colorActiveF, getBackgroundColor(), getForegroundColor(), ( have_focus ? 1 : ( MaxEntries > 1 ? 2 : 0 ) )	);		
 			}
 			else
-				entry->redraw(target, rect, colorActiveB, colorActiveF, getBackgroundColor(), getForegroundColor(), ( have_focus ? 0 : ( MaxEntries > 1 ? 2 : 0 ) )	);
+				entry->redraw(target, rect, colorActiveB, colorActiveF, getBackgroundColor(), getForegroundColor(), 0 /*( have_focus ? 0 : ( MaxEntries > 1 ? 2 : 0 ) )*/	);
+			target->clippop();
+		}
 
 		i++;
 	}
@@ -406,7 +412,7 @@ inline void eListBox<T>::init()
 {
 	current = top = bottom = childs.begin();
 
-	for (int i = 0; i < MaxEntries; i++, bottom++)
+	for (int i = 0; i < (MaxEntries*columns); ++i, ++bottom)
 		if (bottom == childs.end() )
 			break;	
 	if (!in_atomic)
@@ -426,55 +432,66 @@ inline int eListBox<T>::moveSelection(int dir)
 	switch (dir)
 	{
 		case dirPageDown:
-			if (bottom == childs.end())
+			for (int i = 0; i < MaxEntries; i++)
 			{
-				current = bottom;		// --bottom always valid because !childs.empty()
-				--current;
-			} else
-				for (int i = 0; i < MaxEntries; i++)
+				if (++current == bottom) // unten (rechts) angekommen? page down
 				{
-					if (bottom == childs.end())
+					if (bottom == childs.end()) // einzige ausnahme: unten (rechts) angekommen
+					{
+						--current;
 						break;
-					bottom++;
-					top++;
-					current++;
+					}
+					for (int i = 0; i < MaxEntries * columns; ++i)
+					{
+						if (bottom != childs.end())
+						{
+							++bottom;
+							++top;
+						}
+					}
 				}
+			}
 		break;
 
 		case dirPageUp:
-			if (top == childs.begin())
-				current = top;
-			else
-				for (int i = 0; i < MaxEntries; ++i)
-				{	
-					if (top == childs.begin())
-						break;
-					top--;
-					current--;
+			for (int i = 0; i < MaxEntries; ++i)
+			{
+				if (current == childs.begin())
+					break;
+
+				if (current-- == top/* && current != childs.begin()*/ )	// oben (links) angekommen? page up
+				{
+					for (int i = 0; i < MaxEntries * columns; ++i)
+					{
+						if (--top == childs.begin()) 		// einzige ausnahme: oben (links) angekommen
+							break;
+					}
+
+					// und einmal bottom neuberechnen :)
+					bottom=top;
+					for (int i = 0; i < MaxEntries*columns; ++i)
+						if (bottom != childs.end())
+							++bottom;
 				}
-				bottom=top;
-				for (int i = 0; i < MaxEntries; ++i, ++bottom)
-					if (bottom == childs.end())
-						break;
-		break;
+			}
+			break;
 		
 		case dirUp:
 			if ( current == childs.begin() )				// wrap around?
 			{
 				current = --childs.end();					// select last
 				top = bottom = childs.end();
-				for (int i = 0; i < MaxEntries; i++, top--)
+				for (int i = 0; i < MaxEntries*columns; i++, top--)
 					if (top == childs.begin())
 						break;
-			}
-			else
+			} else
 				if (current-- == top) // new top must set
 				{
-					for (int i = 0;i < MaxEntries; i++, top--)
+					for (int i = 0; i < MaxEntries*columns; i++, top--)
 						if (top == childs.begin())
 							break;
 					bottom=top;
-					for (int i = 0; i < MaxEntries; ++i, ++bottom)
+					for (int i = 0; i < MaxEntries*columns; ++i, ++bottom)
 						if (bottom == childs.end())
 							break;
 				}
@@ -483,8 +500,8 @@ inline int eListBox<T>::moveSelection(int dir)
 		case dirDown:
 			if ( current == --childs.end() )				// wrap around?
 			{
-				top = current = bottom = childs.begin(); 	// goto first;
-				for (int i = 0; i < MaxEntries; i++, bottom++)
+				top = current = bottom = childs.begin(); 	// goto first
+				for (int i = 0; i < MaxEntries * columns; ++i, ++bottom)
 					if ( bottom == childs.end() )
 						break;
 			}
@@ -492,15 +509,19 @@ inline int eListBox<T>::moveSelection(int dir)
 			{
 				if (++current == bottom)   // ++current ??
 				{
-					for (int i = 0; i<MaxEntries; i++, top++, bottom++)
-						if ( bottom == childs.end() )
-							break;
+					for (int i = 0; i<MaxEntries * columns; ++i)
+					{
+						if (bottom != childs.end() )
+							++bottom;
+						if (top != childs.end() )
+							++top;
+					}
 				}
 			}
 			break;
 		case dirFirst:
 			top = current = bottom = childs.begin(); 	// goto first;
-			for (int i = 0; i < MaxEntries; i++, bottom++)
+			for (int i = 0; i < MaxEntries * columns; i++, bottom++)
 				if ( bottom == childs.end() )
 					break;
 			break;
@@ -517,7 +538,7 @@ inline int eListBox<T>::moveSelection(int dir)
 	}
 
 	if (flags & flagShowEntryHelp)
-		setHelpText( current != childs.end() ? current->getHelpText():eString(_("no description avail")));
+		setHelpText( current != childs.end() ? current->getHelpText():eString(_("no description available")));
 
 	if (isVisible())
 	{
@@ -658,7 +679,7 @@ inline int eListBox<T>::setCurrent(const T *c)
 			if ( bottom != childs.end() )
 				top = bottom;		// nächster Durchlauf
 
-			for (	i = 0; (i < MaxEntries) && (bottom != childs.end()); ++bottom, ++i)
+			for (	i = 0; (i < (MaxEntries*columns) ) && (bottom != childs.end()); ++bottom, ++i)
 			{
 				if (bottom == item)
 				{

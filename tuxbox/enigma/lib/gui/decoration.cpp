@@ -77,7 +77,7 @@ void eDecoration::drawDecoration(gPainter *target, ePoint size)
 		target->flush();
 	} else
 	{
-		target->fill(eRect(0, 0, size.x(), borderTop));
+		target->fill( eRect( 0, 0, size.x(), borderTop ) );
 		target->flush();
 	}
 
@@ -94,7 +94,7 @@ void eDecoration::drawDecoration(gPainter *target, ePoint size)
 	if (iBottomRight)
 	{
 		xm-=iBottomRight->x;
-		target->blit(*iBottomRight, ePoint(xm, size.y()-iBottomRight->y), eRect(x, size.y()-iBottomRight->y, size.x()-x, iBottomRight->y));
+ 		target->blit(*iBottomRight, ePoint(xm, size.y()-iBottomRight->y), eRect(x, size.y()-iBottomRight->y, size.x()-x, iBottomRight->y));
 		target->flush();
 	}
 	

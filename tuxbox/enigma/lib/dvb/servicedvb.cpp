@@ -302,7 +302,7 @@ void eServiceHandlerDVB::aspectRatioChanged(int isanamorph)
 	serviceEvent(eServiceEvent(eServiceEvent::evtAspectChanged));
 }
 
-eServiceHandlerDVB::eServiceHandlerDVB(): eServiceHandler(eServiceReference::idDVB), messages(eApp), cache(*this)
+eServiceHandlerDVB::eServiceHandlerDVB(): eServiceHandler(eServiceReference::idDVB), messages(eApp), cache(*this), flags(0)
 {
 	if (eServiceInterface::getInstance()->registerHandler(id, this)<0)
 		eFatal("couldn't register serviceHandler %d", id);

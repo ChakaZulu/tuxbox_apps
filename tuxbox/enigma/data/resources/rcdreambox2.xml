@@ -103,8 +103,8 @@
 		<actionmap name="serviceSelector">
 			<action name="nextBouquet" key="next" flags="mr" />
 			<action name="prevBouquet" key="prev" flags="mr" />
-			<action name="showBouquetSelector" key="bouqup" flags="m" />
-			<action name="showBouquetSelector" key="bouqdown" flags="m" />
+			<action name="pathUp" key="bouqup" flags="m" />
+			<action name="pathUp" key="bouqdown" flags="m" />
 			<action name="showEPGSelector" key="info" flags="m" />
 
 			<action name="showMenu" key="red" flags="m" />

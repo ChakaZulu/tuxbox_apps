@@ -15,6 +15,7 @@ class eLabel;
 
 class eListBoxEntryService: public eListBoxEntry
 {
+	friend class eServiceSelector;
 	friend class eListBox<eListBoxEntryService>;
 	friend struct moveFirstChar;
 	friend struct moveServiceNum;
@@ -24,6 +25,7 @@ class eListBoxEntryService: public eListBoxEntry
 	eString sort;
 	eString short_name;
 	static gFont serviceFont, descrFont, numberFont;
+	static int maxNumSize;
 	eTextPara *numPara, *namePara, *descrPara;
 	int nameXOffs, descrXOffs, numYOffs, nameYOffs, descrYOffs;
 	int num;
@@ -51,49 +53,53 @@ class eServiceSelector: public eWindow
 {
 	eServiceReference selected;
 	eServiceReference *result;
-	eListBox<eListBoxEntryService> *services;
+	eListBox<eListBoxEntryService> *services, *bouquets;
 
 	eChannelInfo* ci;
 
 	eServicePath path;
 	
 	void addService(const eServiceReference &service);
+	int style;
+	char BrowseChar;
+
+	eTimer BrowseTimer;
+	eTimer ciDelay;
 protected:
 	int eventHandler(const eWidgetEvent &event);
 private:
 	void fillServiceList(const eServiceReference &ref);
 	void entrySelected(eListBoxEntryService *entry);
 	void selchanged(eListBoxEntryService *entry);
-	char BrowseChar;
-	eTimer BrowseTimer;
 	void ResetBrowseChar();
 	void gotoChar(char c);
+	void EPGUpdated( const tmpMap* );
+	void updateCi();
 public:
+	enum { styleMultiColumn, styleSingleColumn };
+	enum { dirNo, dirUp, dirDown };
+
+	eServiceSelector();
+	~eServiceSelector();
+
 	Signal1<void,const eServiceReference &> addServiceToList;
-	Signal1<void,eServiceSelector*> showFavourite, showMenu, addServiceToFavourite;
+	Signal1<void,eServiceSelector*> showFavourite, showMenu, addServiceToFavourite, toggleStyle;
 	Signal1<void,int> setMode;
 	
 	const eServicePath &getPath()	{	return path; }
 	void setPath(const eServicePath &path, const eServiceReference &select=eServiceReference());
 
-	enum
-	{
-		dirNo,
-		dirUp,
-		dirDown
-	};
+	int getStyle()	{ return style; }
+	void setStyle(int newStyle=-1);	
 	void actualize();
 	void selectService(const eServiceReference &ref);
 	bool selectService(int num);	
 	int getServiceNum( const eServiceReference &ref);
 	void enterDirectory(const eServiceReference &ref);
 	const eServiceReference &getSelected() { return selected; }
-	eServiceSelector();
-	~eServiceSelector();
 	const eServiceReference *choose(int irc=-1);
 	const eServiceReference *next();
 	const eServiceReference *prev();
-	void EPGUpdated( const tmpMap* );
 };
 
 #endif

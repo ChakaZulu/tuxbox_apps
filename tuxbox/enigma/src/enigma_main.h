@@ -169,16 +169,16 @@ private:
 		*ButtonBlueEn, *ButtonBlueDis;
 	
 	eLabel *DolbyOn, *DolbyOff, *CryptOn, *CryptOff, *WideOn, *WideOff;
-	eLabel mute;
+	eLabel mute, volume;
 	
-	eProgress *Progress, *VolumeBar;
+	eProgress *Progress, VolumeBar;
 	eMessageBox *pMsg;
 
 	eLock messagelock;
 	std::list<eZapMessage> messages;
 	eFixedMessagePump<int> message_notifier;
 
-	eTimer timeout, clocktimer, messagetimeout, progresstimer;
+	eTimer timeout, clocktimer, messagetimeout, progresstimer, volumeTimer;
 
 	int cur_start, cur_duration;
 	
@@ -218,6 +218,7 @@ private:
 	void playlistPrevService();
 	void volumeUp();
 	void volumeDown();
+	void hideVolumeSlider();
 	void toggleMute();
 	void showMainMenu();
 	

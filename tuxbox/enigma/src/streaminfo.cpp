@@ -18,7 +18,6 @@
 #include <core/dvb/dvbservice.h>
 
 
-
 int eStreaminfo::eventHandler(const eWidgetEvent &event)
 {
 	switch (event.type)
@@ -159,7 +158,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	
 	vpid[1]=new eLabel(this);
 	vpid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
-	vpid[1]->setText((parms.vpid==-1)?eString("keine"):eString().sprintf("%04xh  (%dd)", parms.vpid, parms.vpid));
+	vpid[1]->setText((parms.vpid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", parms.vpid, parms.vpid));
 	vpid[1]->move(ePoint(185, yOffs+2));
 	vpid[1]->resize(eSize(260, fs+5));
 	yOffs+=fs+5;
@@ -170,7 +169,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	apid[0]->resize(eSize(140, fs+5));
 	
 	apid[1]=new eLabel(this);
-	apid[1]->setText((parms.apid==-1)?eString("keine"):eString().sprintf("%04xh  (%dd)", parms.apid, parms.apid));
+	apid[1]->setText((parms.apid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", parms.apid, parms.apid));
 	apid[1]->move(ePoint(185, yOffs+2));
 	apid[1]->resize(eSize(260, fs+5));
 	apid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
@@ -182,7 +181,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	pcrpid[0]->resize(eSize(140, fs+5));
 	
 	pcrpid[1]=new eLabel(this);
-	pcrpid[1]->setText((parms.pcrpid==-1)?eString("keine"):eString().sprintf("%04xh  (%dd)", parms.pcrpid, parms.pcrpid));
+	pcrpid[1]->setText((parms.pcrpid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", parms.pcrpid, parms.pcrpid));
 	pcrpid[1]->move(ePoint(185, yOffs+2));
 	pcrpid[1]->resize(eSize(260, fs+5));
 	pcrpid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
@@ -194,7 +193,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	tpid[0]->resize(eSize(140, fs+5));
 	
 	tpid[1]=new eLabel(this);
-	tpid[1]->setText((parms.tpid==-1)?eString("keine"):eString().sprintf("%04xh  (%dd)", parms.tpid, parms.tpid));
+	tpid[1]->setText((parms.tpid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", parms.tpid, parms.tpid));
 	tpid[1]->move(ePoint(185, yOffs+2));
 	tpid[1]->resize(eSize(260, fs+5));
 	tpid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
@@ -234,7 +233,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	}
 	
 	vform[0]=new eLabel(this);
-	vform[0]->setText("Videoformat:");
+	vform[0]->setText(_("Video format:"));
 	vform[0]->move(ePoint(10, yOffs));
 	vform[0]->resize(eSize(150, fs+5));
 	
@@ -302,12 +301,12 @@ siCA::siCA(eWidget *parent): eWidget(parent)
 	int yOffs=0;
 	int fs=eSkin::getActive()->queryValue("fontsize", 20);
 	availca[0]=new eLabel(this);
-	availca[0]->setText("Unterstützte Verschlüsselungssyst.:");
+	availca[0]->setText(_("supported coding systems:"));
 	availca[0]->move(ePoint(10, 0));
 	availca[0]->resize(eSize(420, fs+5));
 	yOffs+=fs+5;
 
-	eString availcas="keine";
+	eString availcas=_("none");
 
 	int numsys=0;
 	std::list<int>& availCA = sapi->availableCASystems;
@@ -334,11 +333,11 @@ siCA::siCA(eWidget *parent): eWidget(parent)
 	int y=numsys*fs+fs*2+20;
 
 	usedca[0]=new eLabel(this);
-	usedca[0]->setText("davon benutzt:");
+	usedca[0]->setText(_("by it uses:"));
 	usedca[0]->move(ePoint(10, y));
 	usedca[0]->resize(eSize(420, fs));
 
-	eString usedcas="keines";
+	eString usedcas=_("none");
 	
 	numsys=0;
 

@@ -1,5 +1,6 @@
 #include "channelinfo.h"
 
+#include <core/base/i18n.h>
 #include <core/system/init.h>
 #include <core/gui/eskin.h>
 #include <core/gdi/font.h>
@@ -163,7 +164,7 @@ void eChannelInfo::ParseEITInfo(EITEvent *e)
 				{
 					if(genresTableShort[ce->content_nibble_level_1*16+ce->content_nibble_level_2])
 					{
-						genre += genresTableShort[ce->content_nibble_level_1*16+ce->content_nibble_level_2];
+						genre += gettext( genresTableShort[ce->content_nibble_level_1*16+ce->content_nibble_level_2] );
 						genre += " ";
 					}
 				}
@@ -212,7 +213,7 @@ void eChannelInfo::getServiceInfo( const eServiceReferenceDVB& service )
 	}
 	else  // we parse the eit...
 	{
-		cname.setText("no data for this service avail");
+		cname.setText(_("no data for this service avail"));
 
 		eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 		if (!sapi)
@@ -242,7 +243,6 @@ void eChannelInfo::EITready( int err )
 
 void eChannelInfo::update( const eServiceReferenceDVB& service )
 {
-	clear();
 	if (service)
 	{
 		current = service;
@@ -275,11 +275,11 @@ int eChannelInfo::LayoutIcon(eLabel *icon, int doit, int num )
 		{
 			case 0:
 				x=2;
-				y=32;
+				y=28;
 				break;
 			case 1:
 				x=44;
-				y=32;
+				y=28;
 				break;
 			case 2:
 				x=2;
@@ -299,7 +299,8 @@ int eChannelInfo::LayoutIcon(eLabel *icon, int doit, int num )
 		num++;
 
 	}
-	else icon->hide();
+	else
+		icon->hide();
 
 	return num;
 
@@ -307,11 +308,10 @@ int eChannelInfo::LayoutIcon(eLabel *icon, int doit, int num )
 
 void eChannelInfo::redrawWidget(gPainter *target, const eRect& where)
 {
-	if ( deco && where.contains( eRect(0, 0, width(), height() ) ) )
+	if ( deco )
 		deco.drawDecoration(target, ePoint(width(), height()));
 
-	if ( where.contains( clientrect ) )
-		target->line( ePoint(clientrect.left() + clientrect.width()/8 + 1, clientrect.top()),ePoint(clientrect.left() + clientrect.width()/8 + 1,clientrect.bottom()));
+	target->line( ePoint(clientrect.left() + clientrect.width()/8 + 1, clientrect.top()),ePoint(clientrect.left() + clientrect.width()/8 + 1,clientrect.bottom()));
 }
 
 int eChannelInfo::eventHandler(const eWidgetEvent &event)
@@ -341,3 +341,22 @@ int eChannelInfo::eventHandler(const eWidgetEvent &event)
 	}
 	return eDecoWidget::eventHandler(event);
 }
+static eWidget *create_eChannelInfo(eWidget *parent)
+{
+	return new eChannelInfo(parent);
+}
+
+class eChannelInfoSkinInit
+{
+public:
+	eChannelInfoSkinInit()
+	{
+		eSkin::addWidgetCreator("eChannelInfo", create_eChannelInfo);
+	}
+	~eChannelInfoSkinInit()
+	{
+		eSkin::removeWidgetCreator("eChannelInfo", create_eChannelInfo);
+	}
+};
+
+eAutoInitP0<eChannelInfoSkinInit> init_eChannelInfoSkinInit(3, "eChannelInfo");

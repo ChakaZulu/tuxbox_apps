@@ -443,16 +443,16 @@ void eLNBSelitor::lnbChanged( eListBoxEntryText *lnb )
 void eLNBSelitor::onSave()
 {
 	eLNB *p = (eLNB*) lnb_list->getCurrent()->getKey();
-	eDebug("onSave lnb_list->getCurrent()->getKey() = %p", p );
+//	eDebug("onSave lnb_list->getCurrent()->getKey() = %p", p );
 
 	if ( !p )  // then we must create new LNB; (New is selected)
 	{
     eTransponderList::getInstance()->getLNBs().push_back( eLNB( *eTransponderList::getInstance() ) );  // add new LNB
 		p = &eTransponderList::getInstance()->getLNBs().back();   // get adresse from the new lnb
-		eDebug("now we have a new LNB Created = %p", p );
+//		eDebug("now we have a new LNB Created = %p", p );
 	}
-	else
-		eDebug("do not create LNB");
+/*	else
+		eDebug("do not create LNB");*/
 
 	p->setLOFLo( lofL->getNumber() * 1000 );
 	p->setLOFHi( lofH->getNumber() * 1000 );
@@ -464,16 +464,16 @@ void eLNBSelitor::onSave()
 	if ( p != sat->getLNB() )  // the satellite must removed from the old lnb and inserts in the new
 	{
 		p->addSatellite( sat->getLNB()->takeSatellite( sat ) );
-		eDebug("remove satellite from lnb... now %i satellites left", sat->getLNB()->getSatelliteList().size() );
-		eDebug("added satellite to lnb... now %i satellites in lnb", p->getSatelliteList().size() );		
+/*		eDebug("remove satellite from lnb... now %i satellites left", sat->getLNB()->getSatelliteList().size() );
+		eDebug("added satellite to lnb... now %i satellites in lnb", p->getSatelliteList().size() );		*/
 
 		if ( !sat->getLNB()->getSatelliteList().size() )   // the lnb that have no more satellites must delete
 		{
-			eDebug("delete no more used lnb");
+//			eDebug("delete no more used lnb");
 		  eTransponderList::getInstance()->getLNBs().remove( *sat->getLNB() );
 		}
-		else
-			eDebug("lnb not deleted");
+/*		else
+			eDebug("lnb not deleted");*/
 
 		// now we must set the LNB Pointer in eSatellite...
 		sat->setLNB(p);		

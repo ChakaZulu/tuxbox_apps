@@ -530,7 +530,7 @@ void eTextPara::blit(gPixmapDC &dc, const ePoint &offset, const gRGB &background
 			sx=clip.right()-rx;
 		if (rx < clip.left())
 		{
-			int diff=clip.left()-ry;
+			int diff=clip.left()-rx;
 			s+=diff;
 			sx-=diff;
 			rx+=diff;

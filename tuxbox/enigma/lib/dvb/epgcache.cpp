@@ -11,8 +11,8 @@ int eventData::CacheSize=0;
 eEPGCache *eEPGCache::instance;
 
 #define HILO(x) (x##_hi << 8 | x##_lo)
-eEPGCache::eEPGCache():
-			CleanTimer(eApp), zapTimer(eApp), paused(0)
+eEPGCache::eEPGCache()
+	:paused(0), CleanTimer(eApp), zapTimer(eApp)
 {
 	eDebug("[EPGC] Initialized EPGCache");
 	isRunning=0;

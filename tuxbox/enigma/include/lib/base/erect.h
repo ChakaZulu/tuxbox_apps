@@ -4,10 +4,13 @@
 #include <core/base/esize.h>
 #include <core/base/epoint.h>
 
+
+// x2 = x1 + width  (AND NOT, NEVER, NEVER EVER +1 or -1 !!!!)
+
 class eRect					// rectangle class
 {
 public:
-    eRect()	{ x1 = y1 = 0; x2 = y2 = -1; }
+    eRect()	{ x1 = y1 = x2 = y2 = 0; }
     eRect( const ePoint &topleft, const ePoint &bottomright );
     eRect( const ePoint &topleft, const eSize &size );
     eRect( int left, int top, int width, int height );
@@ -67,9 +70,9 @@ public:
     eRect&  operator|=(const eRect &r);
     eRect&  operator&=(const eRect &r);
 
-    bool   contains( const ePoint &p, bool proper=false ) const;
-    bool   contains( int x, int y, bool proper=false ) const;
-    bool   contains( const eRect &r, bool proper=false ) const;
+    bool   contains( const ePoint &p) const;
+    bool   contains( int x, int y) const;
+    bool   contains( const eRect &r) const;
     eRect  unite( const eRect &r ) const;
     eRect  intersect( const eRect &r ) const;
     bool   intersects( const eRect &r ) const;
@@ -118,12 +121,12 @@ inline eRect::eRect( int left, int top, int width, int height )
 {
     x1 = left;
     y1 = top;
-    x2 = (left+width-1);
-    y2 = (top+height-1);
+    x2 = left+width;
+    y2 = top+height;
 }
 
 inline bool eRect::isNull() const
-{ return x2 == x1-1 && y2 == y1-1; }
+{ return x2 == x1 && y2 == y1; }
 
 inline bool eRect::isEmpty() const
 { return x1 > x2 || y1 > y2; }
@@ -195,22 +198,18 @@ inline ePoint eRect::center() const
 { return ePoint((x1+x2)/2, (y1+y2)/2); }
 
 inline int eRect::width() const
-{ return  x2 - x1 + 1; }
+{ return  x2 - x1; }
 
 inline int eRect::height() const
-{ return  y2 - y1 + 1; }
+{ return  y2 - y1; }
 
 inline eSize eRect::size() const
-{ return eSize(x2-x1+1, y2-y1+1); }
+{ return eSize(x2-x1, y2-y1); }
 
-inline bool eRect::contains( int x, int y, bool proper ) const
+inline bool eRect::contains( int x, int y) const
 {
-    if ( proper )
-        return x > x1 && x < x2 &&
-               y > y1 && y < y2;
-    else
-        return x >= x1 && x <= x2 &&
-               y >= y1 && y <= y2;
+	return x >= x1 && x < x2 &&
+			y >= y1 && y < y2;
 }
 
 #endif // eRect_H

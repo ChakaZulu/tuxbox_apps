@@ -669,10 +669,13 @@ eString eServicePath::toString()
 	return erg;
 }
 
-void eServicePath::up()
+bool eServicePath::up()
 {
 	if (path.size()>1)
 		path.pop();
+	else
+		return false;
+	return true;
 }
 
 void eServicePath::down(const eServiceReference &ref)

@@ -64,7 +64,7 @@ void gPixmap::fill(const eRect &area, const gColor &color)
 {
 	if ((area.height()<=0) || (area.width()<=0))
 		return;
-	for (int y=area.top(); y<=area.bottom(); y++)
+	for (int y=area.top(); y<area.bottom(); y++)
 		memset(((__u8*)data)+y*stride+area.left(), color.color, area.width());
 }
 

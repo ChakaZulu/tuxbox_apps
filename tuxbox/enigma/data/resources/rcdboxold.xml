@@ -84,7 +84,7 @@
 		<actionmap name="serviceSelector">
 			<action name="nextBouquet" key="+" flags="mr" />
 			<action name="prevBouquet" key="-" flags="mr" />
-			<action name="showBouquetSelector" key="d-box" flags="m" />
+			<action name="pathUp" key="d-box" flags="m" />
 			<action name="showEPGSelector" key="red" flags="m" />
 		</actionmap>
 

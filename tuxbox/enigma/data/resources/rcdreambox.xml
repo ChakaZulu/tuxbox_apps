@@ -111,7 +111,7 @@
 		<actionmap name="serviceSelector">
 			<action name="nextBouquet" key="next" flags="mr" />
 			<action name="prevBouquet" key="prev" flags="mr" />
-			<action name="showBouquetSelector" key="guide" flags="m" />
+			<action name="pathUp" key="guide" flags="m" />
 			<action name="showEPGSelector" key="info" flags="m" />
 			<action name="showMenu" key="tv" flags="m" />
 			<action name="addService" key="red" flags="m" />

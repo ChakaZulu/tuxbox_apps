@@ -11,12 +11,6 @@ eWindow::eWindow(int takefocus)
 {
 	deco.load("eWindow");
 
-/*	borderTop=deco.borderTop;
-	borderLeft=deco.borderLeft;
-	borderRight=deco.borderRight;
-	borderBottom=deco.borderBottom;*/
-	
-//	setBackgroundColor(eSkin::getActive()->queryScheme("global.normal.background"));
 	titleBarColor=eSkin::getActive()->queryScheme("eWindow.titleBar");
 	fontColor=eSkin::getActive()->queryScheme("eWindow.titleBarFont");
 
@@ -47,9 +41,8 @@ eRect eWindow::getTitleBarRect()
 
 void eWindow::redrawWidget(gPainter *target, const eRect &where)
 {
-//	eDebug( "redraw Window where left = %i. top = %i, width = %i, height = %i", where.left(), where.top(), where.width(), where.height() );
-	if ( deco && where.contains( eRect( 0,0, width(), height() ) ) )  // then draw Deco
-		deco.drawDecoration(target, ePoint(width(), height()));	
+	if ( deco )  // then draw Deco
+		deco.drawDecoration(target, ePoint(width(), height()));
 
 	if ( where.contains( getTitleBarRect() ) );
 		drawTitlebar(target);

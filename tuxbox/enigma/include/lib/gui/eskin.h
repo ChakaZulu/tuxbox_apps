@@ -3,11 +3,11 @@
 
 #include <list>
 #include <map>
+#include <xmltree.h>
 
 #include <core/base/estring.h>
 #include <core/base/eptrlist.h>
 #include <core/gdi/grc.h>
-#include <xmltree.h>
 
 class eWidget;
 class gPixmap;

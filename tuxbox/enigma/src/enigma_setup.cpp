@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_setup.cpp,v 1.21 2002/09/16 01:48:03 Ghostrider Exp $
+ * $Id: enigma_setup.cpp,v 1.22 2002/09/22 12:24:00 Ghostrider Exp $
  */
 
 #include "enigma_setup.h"
@@ -38,7 +38,7 @@
 #include <core/gui/elabel.h>
 
 eZapSetup::eZapSetup()
-	:eListBoxWindow<eListBoxEntryMenu>(_("Setup"), 8, 220, true)
+	:eListBoxWindow<eListBoxEntryMenu>(_("Setup"), 9, 220, true)
 {
 	eDebug("statusbar = %p", statusbar);
 	move(ePoint(150, 136));
@@ -57,8 +57,8 @@ eZapSetup::eZapSetup()
 
 void eZapSetup::onSelChanged( eListBoxEntryMenu* p)
 {
-	eDebug("Update Statusbar to %s", p->getHelpText().c_str() );
-	eDebug("Statusbar pos is left = %i, top = %i, width = %i, height = %i", statusbar->getLabel().getPosition().x(), statusbar->getLabel().getPosition().y(), statusbar->getLabel().getSize().width(), statusbar->getLabel().getSize().height() );
+//	eDebug("Update Statusbar to %s", p->getHelpText().c_str() );
+//	eDebug("Statusbar pos is left = %i, top = %i, width = %i, height = %i", statusbar->getLabel().getPosition().x(), statusbar->getLabel().getPosition().y(), statusbar->getLabel().getSize().width(), statusbar->getLabel().getSize().height() );
 	statusbar->getLabel().setText( p->getHelpText() );		
 }
 

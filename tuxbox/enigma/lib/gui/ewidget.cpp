@@ -905,9 +905,9 @@ int eWidget::setProperty(const eString &prop, const eString &value)
 		}
 		setText(text);
 	}*/
-		setText(value);
+		setText(::gettext(value.c_str()));
 	else if (prop=="helptext")
-		setHelpText(value);
+		setHelpText(::gettext(value.c_str()));
 	else if (prop=="font")
 		setFont(eSkin::getActive()->queryFont(value));	
 	else if (prop=="name")

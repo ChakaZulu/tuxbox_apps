@@ -18,7 +18,7 @@
 		<map name="eWindow.Childs" font="Blue.Regular" size="30" />
 
 		<map name="eListBox.EntryText.normal" font="Blue.Regular" size="30" />
-		<map name="eServiceSelector.Entry.Name" font="Blue.Regular" size="30" />
+		<map name="eServiceSelector.singleColumn.Entry.Name" font="Blue.Regular" size="30" />
 		<!--map name="eBouquetSelector.Entry.Name" font="Blue.Regular" size="32" /-->
 		<map name="eEPGSelector.Entry.Description" font="Blue.Regular" size="30" />
 		<map name="eEPGSelector.Entry.DateTime" font="Blue.Bold" size="24" />

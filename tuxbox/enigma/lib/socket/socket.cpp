@@ -121,7 +121,7 @@ int eSocket::writeBlock(const char *data, unsigned int len)
 	int w=len;
 	if (writebuffer.empty())
 	{
-		int tw=::send(getDescriptor(), data, len, MSG_NOSIGNAL);
+		int tw=::write(getDescriptor(), data, len);
 		if ((tw < 0) && (errno != EWOULDBLOCK))
 			eDebug("write: %m");
 		
@@ -149,7 +149,6 @@ int eSocket::connectToHost(eString hostname, int port)
 	struct hostent		*server;
 
 	if(!socketdesc){
-		eDebug("connectoToHost without having a socket called.");
 		error_(-1);
 		return(-1);
 	}
@@ -168,7 +167,7 @@ int eSocket::connectToHost(eString hostname, int port)
 	serv_addr.sin_port=htons(port);
 	if(connect(socketdesc, (const sockaddr*)&serv_addr, sizeof(serv_addr)) < 0)
 	{
-		eDebug("can't connect to host: %s", hostname.c_str());
+		eDebug("can't connet to host: %s", hostname.c_str());
 		error_(-1);
 		return(-1);
 	}

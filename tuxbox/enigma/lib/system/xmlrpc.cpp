@@ -1,9 +1,7 @@
-
 #include "xmlrpc.h"
 
 #include <core/dvb/dvb.h>
 #include <core/dvb/edvb.h>
-
 
 static std::map<eString, int (*)(std::vector<eXMLRPCVariant>&, ePtrList<eXMLRPCVariant>&)> rpcproc;
 

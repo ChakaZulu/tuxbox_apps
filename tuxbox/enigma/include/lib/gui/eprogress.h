@@ -36,6 +36,9 @@ public:
 	 * \sa eWidget::setProperty
 	 */
 	int setProperty(const eString &prop, const eString &value);
+	void setBorder( int b ) { border = b; }
+	void setLeftColor( const gColor& c )	{ left = c; }
+	void setRightColor( const gColor& c )	{ right = c; }
 };
 
 #endif

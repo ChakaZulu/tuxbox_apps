@@ -14,7 +14,7 @@ enigma_SOURCES = \
 	enigma_mainmenu.cpp satconfig.cpp epgwindow.cpp setup_language.cpp enigma_info.cpp \
 	enigma_scan.cpp setupskin.cpp setup_osd.cpp timer.cpp setup_lcd.cpp enigma_vcr.cpp \
 	setup_rc.cpp
-
+	
 enigma_LDADD = \
 	$(top_builddir)/enigma/src/core/driver/libenigma_driver.la \
 	$(top_builddir)/enigma/src/core/base/libenigma_base.la \
@@ -25,8 +25,7 @@ enigma_LDADD = \
 	$(top_builddir)/enigma/src/core/socket/libenigma_socket.la \
 	$(top_builddir)/enigma/src/core/system/libenigma_system.la \
 	$(top_builddir)/libxmltree/libxmltree.la \
-	$(LIBSIGC_LIBS) \
-	$(INTLLIBS) \
+	$(LIBSIGC_LIBS) $(INTLLIBS) \
 	-ldl -lpthread -lid3tag -lmad
 
 # -lmpatrolmt -lbfd -liberty 
@@ -58,5 +57,5 @@ $(top_builddir)/enigma/src/core/socket/libenigma_socket.la:
 $(top_builddir)/enigma/src/core/system/libenigma_system.la:
 	$(MAKE) -C $(top_builddir)/enigma/src/core/system
 
-$(top_builddir)/libxmltree.la:
+$(top_builddir)/libxmltree/libxmltree.la:
 	$(MAKE) -C $(top_builddir)/libxmltree

@@ -10,7 +10,7 @@ class eLabel;
  */
 class eMessageBox: public eWindow
 {
-	eLabel *text;
+	eLabel *text, *icon;
 public:
 	void pressedOK();
 	void pressedCancel();
@@ -18,6 +18,7 @@ public:
 	void pressedNo();
 public:
 	enum { btOK=1, btCancel=2, btYes=4, btNo=8, btMax};
+	enum { iconInfo=16, iconWarning=32, iconQuestion=64, iconError=128 };
 	/**
 	 * \brief Creates a messagebox.
 	 *
@@ -32,7 +33,7 @@ public:
 	 * \param string The string displayed inside the messagebox.
 	 * \param caption The title of the messagebox.
 	 */
-	eMessageBox(eString string, eString caption, int flags=btOK, int def=btOK);
+	eMessageBox(eString string, eString caption, int flags=btOK, int def=btOK );
 	~eMessageBox();
 };
 

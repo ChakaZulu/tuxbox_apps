@@ -59,6 +59,7 @@ void *gRC::thread()
 #ifndef SYNC_PAINT
 	pthread_exit(0);
 #endif
+	return 0;
 }
 
 gRC &gRC::getInstance()
@@ -106,8 +107,9 @@ void gPainter::begin(const eRect &rect)
 	o.opcode=gOpcode::begin;
 	o.parm.begin=new gOpcode::para::pbegin(rect);
 	
-	cliparea=rect;
-	setLogicalZero(cliparea.topLeft());
+	cliparea=std::stack<eRect>();
+	cliparea.push(rect);
+	setLogicalZero(cliparea.top().topLeft());
 	rc.submit(o);
 }
 
@@ -155,7 +157,7 @@ void gPainter::fill(const eRect &area)
 	o.opcode=gOpcode::fill;
 	eRect a=area;
 	a.moveBy(logicalZero.x(), logicalZero.y());
-	a&=cliparea;
+	a&=cliparea.top();
 	
 	o.parm.fill=new gOpcode::para::pfill(a, foregroundColor);
 	rc.submit(o);
@@ -178,7 +180,7 @@ void gPainter::clear()
 	gOpcode o;
 	o.dc=&dc;
 	o.opcode=gOpcode::fill;
-	o.parm.fill=new gOpcode::para::pfill(cliparea, backgroundColor);
+	o.parm.fill=new gOpcode::para::pfill(cliparea.top(), backgroundColor);
 	rc.submit(o);
 }
 
@@ -237,9 +239,20 @@ void gPainter::clip(eRect clip)
 	o.dc=&dc;
 	o.opcode=gOpcode::clip;
 	clip.moveBy(logicalZero.x(), logicalZero.y());
-	o.parm.clip=new gOpcode::para::pclip(clip);
+	cliparea.push(cliparea.top()&clip);
+	o.parm.clip=new gOpcode::para::pclip(cliparea.top());
 
-	cliparea&=clip;
+	rc.submit(o);
+}
+
+void gPainter::clippop()
+{
+	ASSERT (cliparea.size()>1);
+	gOpcode o;
+	o.dc=&dc;
+	o.opcode=gOpcode::clip;
+	cliparea.pop();
+	o.parm.clip=new gOpcode::para::pclip(cliparea.top());
 	rc.submit(o);
 }
 
@@ -337,7 +350,7 @@ void gPixmapDC::exec(gOpcode *o)
 		delete o->parm.line;
 		break;
 	case gOpcode::clip:
-		clip&=o->parm.clip->clip;
+		clip=o->parm.clip->clip;
 		delete o->parm.clip;
 		break;
 	case gOpcode::end:

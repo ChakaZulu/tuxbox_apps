@@ -24,6 +24,9 @@
 	</colors>
 
 	<colorscheme>
+		<map name="eStatusBar.background" color="content" />
+		<map name="eStatusBar.foreground" color="content+15" />
+
 		<map name="global.normal.background" color="content" />
 		<map name="global.normal.foreground" color="content+15" />
 

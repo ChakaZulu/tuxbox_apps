@@ -137,7 +137,7 @@ static std::map<eString,eString> getRequestOptions(eString opt)
 	return result;
 }
 
-static eString doStatus(eString request, eString path, eString opt, eHTTPConnection *content)
+static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html";
 	eString result;
@@ -159,13 +159,9 @@ static eString doStatus(eString request, eString path, eString opt, eHTTPConnect
 	return result;
 }
 
-static eString switchService(eString request, eString path, eString opt, eHTTPConnection *content)
+static eString switchService(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html";
-	
-	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-	if (!sapi)
-		return "ERROR not available";
 	
 	int service_id=-1, original_network_id=-1, transport_stream_id=-1, service_type=-1;
 	unsigned int optval=opt.find("=");
@@ -177,16 +173,15 @@ static eString switchService(eString request, eString path, eString opt, eHTTPCo
 	
 	if ((service_id!=-1) && (original_network_id!=-1) && (transport_stream_id!=-1) && (service_type!=-1))
 	{
-			sapi->switchService(
-				eServiceReferenceDVB(
-					eTransportStreamID(transport_stream_id), 
-					eOriginalNetworkID(original_network_id),
-					eServiceID(service_id),
-					service_type));
-		result+="OK\n";
+		eServiceInterface *iface=eServiceInterface::getInstance();
+		if(!iface)
+			return "-1";
+		eServiceReferenceDVB *ref=new eServiceReferenceDVB(eTransportStreamID(transport_stream_id), eOriginalNetworkID(original_network_id), eServiceID(service_id), service_type);
+		iface->play(*ref);
+		result="0";
 	} else
 	{
-		result+="ERROR wrong parms\n";
+		result+="-1";
 	}
 	return result;
 }
@@ -209,7 +204,7 @@ struct listService: public std::unary_function<std::pair<eServiceReferenceDVB,eS
 	}
 };
 
-static eString listServices(eString request, eString path, eString opts, eHTTPConnection *content)
+static eString listServices(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html";
 	eString result;
@@ -231,7 +226,7 @@ static eString listServices(eString request, eString path, eString opts, eHTTPCo
 	return result;
 }
 
-static eString admin(eString request, eString path, eString opts, eHTTPConnection *content)
+static eString admin(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html";
 	std::map<eString,eString> opt=getRequestOptions(opts);
@@ -244,7 +239,7 @@ static eString admin(eString request, eString path, eString opts, eHTTPConnectio
 		return "<html><head><title>Error</title></head><body>Unknown admin command.</body></html>\n";
 }
 
-static eString audio(eString request, eString path, eString opts, eHTTPConnection *content)
+static eString audio(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html";
 	std::map<eString,eString> opt=getRequestOptions(opts);
@@ -266,7 +261,7 @@ static eString audio(eString request, eString path, eString opts, eHTTPConnectio
 	return result;
 }
 
-static eString getPMT(eString request, eString path, eString opt, eHTTPConnection *content)
+static eString getPMT(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="x-application/PMT";
 	PMT *pmt=eDVB::getInstance()->getPMT();
@@ -292,7 +287,7 @@ static eString getPMT(eString request, eString path, eString opt, eHTTPConnectio
 	return res;
 }
 
-static eString version(eString request, eString path, eString opt, eHTTPConnection *content)
+static eString version(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/plain";
 	eString result;
@@ -300,7 +295,7 @@ static eString version(eString request, eString path, eString opt, eHTTPConnecti
 	return result;
 }
 
-static eString channels_getcurrent(eString request, eString path, eString opt, eHTTPConnection *content)
+static eString channels_getcurrent(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eString result="";
 	content->local_header["Content-Type"]="text/plain";
@@ -309,13 +304,11 @@ static eString channels_getcurrent(eString request, eString path, eString opt, e
 	if (!sapi)
 		return "-1";
 		
-	eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
-	
-/*	if (service)
-		result+=eString().sprintf("%d", service->service_number);
-	else*/
-		result+="-1";
-	return result+"\r\n";
+	eService *current=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
+	if(current)
+		return current->service_name.c_str();
+	else
+		return "-1";
 }
 
 static eString getVolume()
@@ -323,7 +316,7 @@ static eString getVolume()
 	return eString().setNum((63-eAVSwitch::getInstance()->getVolume())*100/63, 10);
 }
 
-static eString setVolume(eString request, eString path, eString opts, eHTTPConnection *content)
+static eString setVolume(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString,eString> opt=getRequestOptions(opts);
 	eString mute="0";
@@ -385,6 +378,17 @@ static eString read_file(eString filename)
 	return result;
 }
 
+static eString ref2string(const eServiceReference &r)
+{
+	return httpEscape(r.toString());
+}
+
+static eServiceReference string2ref(const eString &service)
+{
+	eString str=httpUnescape(service);
+	return eServiceReference(str);
+}
+
 static eString getIP()
 {
 	eString tmp;
@@ -408,28 +412,14 @@ static eString getIP()
 	return tmp;
 }
 
-
 static eString filter_string(eString string)
 {
 	return string.removeChars('\x86').removeChars('\x87').removeChars('\x05');
 }
 
-
-eBouquet *getBouquet(int bouquet_id)
-{
-	ePtrList<eBouquet>* b;
-	b=eDVB::getInstance()->settings->getBouquets();
-
-	for (ePtrList<eBouquet>::iterator It(*b); It != b->end(); It++)
-		if (It->bouquet_id == bouquet_id)
-			return *It;
-	
-	return 0;
-}
-
-
 static eString getVolBar()
 {
+// returns the volumebar
 	eString result="";
 	int volume=atoi(getVolume().c_str());
 
@@ -464,160 +454,118 @@ static eString getVolBar()
 	return result;
 }
 
-static eString getWatchContent(eString mode, int bouquetid)
+class eWebNavigatorListDirectory: public Object
 {
-	ePtrList<eBouquet>* bouquets;
-	std::list<eServiceReferenceDVB> esref;
-	eService *es;
-	eString result("");
-	eString tmp("");
-
-	bouquets=eDVB::getInstance()->settings->getBouquets();
-
-	if(mode=="tv")
+	eString &result;
+	eString origpath;
+	eString path;
+	eServiceInterface &iface;
+	int num;
+public:
+	eWebNavigatorListDirectory(eString &result, eString origpath, eString path, eServiceInterface &iface): result(result), origpath(origpath), path(path), iface(iface)
 	{
-		result+="<form action=\"/?mode=tv\" method=\"get\" name=\"bouquetsel\">";
-		result+="<select name=\"bouquetid\" size=\"1\" onChange=\"javascript:getNewPageTV(this.form.bouquetid.options[this.form.bouquetid.options.selectedIndex].value)\">";
-		for(ePtrList<eBouquet>::iterator i(*bouquets); i != bouquets->end(); ++i)
-		{
-			for(std::list<eServiceReferenceDVB>::iterator s = i->list.begin(); s != i->list.end(); s++)
-			{
-				if(s->getServiceType()==1 || s->getServiceType()==4)
-				{
-					tmp=eString(filter_string(i->bouquet_name.c_str()));
-					result+="<option value=\"" + eString().setNum(i->bouquet_id, 10) + "\"";
-					if(i->bouquet_id==bouquetid)
-					{
-						result+=" selected";
-					}
-					result+=">" + tmp + "</option>";
-					break;
-				}
-			}
-		}
-		result+="</select>";
-		result+="<select name=\"channel\" size=\"1\" onChange=\"javascript:switchtoChannel(this.form.channel.options[this.form.channel.options.selectedIndex].value)\"><option>-----</option>";
-		eBouquet *act;
-
-		act=getBouquet(bouquetid);
-		if(!act)
-			return eString("no bouquets");
-		esref=act->list;
-		for(std::list<eServiceReferenceDVB>::iterator j = esref.begin(); j != esref.end() ; j++)
-		{
-			es=eDVB::getInstance()->settings->getTransponders()->searchService(*j);
-			if (es)
-			{
-				if(es->service_type==1||es->service_type==4)
-				{
-					result+="<option value=\"";
-					tmp.sprintf("%x:%x:%x:%x", j->getServiceID().get(), j->getTransportStreamID().get(), j->getOriginalNetworkID().get(), j->getServiceType());
-					result+=tmp;
-					result+="\">";
-					result+=filter_string(es->service_name.c_str());
-					result+="</option>";
-				}
-			}
-		}
-		result+="</select>";
-		result+="</form>";
+		eDebug("path: %s", path.c_str());
+		num=0;
 	}
-
-	if(mode=="radio")
+	void addEntry(const eServiceReference &e)
 	{
-		result+="<form action=\"/?mode=radio\" method=\"get\" name=\"bouquetsel\">";
-		result+="<select name=\"bouquetid\" size=\"1\" onChange=\"javascript:getNewPageRadio(this.form.bouquetid.options[this.form.bouquetid.options.selectedIndex].value)\">";
-		for(ePtrList<eBouquet>::iterator i(*bouquets); i != bouquets->end(); ++i)
-		{
-			for(std::list<eServiceReferenceDVB>::iterator s = i->list.begin(); s != i->list.end(); s++)
-			{
-				if(s->getServiceType()==2)
-				{
-					tmp=eString(filter_string(i->bouquet_name.c_str()));
-					result+="<option value=\"" + eString().setNum(i->bouquet_id, 10) + "\"";
-					if(i->bouquet_id==bouquetid)
-					{
-						result+=" selected";
-					}
-					result+=">" + tmp + "</option>";
-					break;
-				}
-			}
-		}
-		result+="</select>";
-		result+="<select name=\"channel\" size=\"1\" onChange=\"javascript:switchtoChannel(this.form.channel.options[this.form.channel.options.selectedIndex].value)\"><option>-----</option>";
-		eBouquet *act;
-		act=getBouquet(bouquetid);
-		esref=act->list;
-		for(std::list<eServiceReferenceDVB>::iterator j = esref.begin(); j != esref.end() ; j++)
-		{
-			es=eDVB::getInstance()->settings->getTransponders()->searchService(*j);
-			if (es)
-			{
-				if(es->service_type==2)
-				{
-					result+="<option value=\"";
-					tmp.sprintf("%x:%x:%x:%x", j->getServiceID().get(), j->getTransportStreamID().get(), j->getOriginalNetworkID().get(), j->getServiceType());
-					result+=tmp;
-					result+="\">";
-					result+=filter_string(es->service_name.c_str());
-					result+="</option>";
-				}
-			}
-		}
-		result+="</select>";
-		result+="</form>";
+		result+="<tr><td bgcolor=\"#";
+		if (num & 1)
+			result += "c0c0c0";
+		else
+			result += "d0d0d0";
+		result+="\"><font color=\"#000000\">";
+		if (!(e.flags & eServiceReference::isDirectory))
+			result+="[PLAY] ";
+
+		result+=eString("<a href=\"/")+ "?path=" + origpath + ";" + ref2string(e) + "\">";
+
+		eService *service=iface.addRef(e);
+		if (!service)
+			result+="N/A";
+		else
+			result+=service->service_name;
+		iface.removeRef(e);
+
+		result+="</a></font></td></tr>\n";
+		eDebug("ok");
+		num++;
 	}
+};
 
-	return result;
-}
-
-static eString getContent(eString mode, int bouquetid)
+static eString getWatchContent(eString mode, eString path)
 {
 	eString result("");
-#if 0
-	if(mode=="tv"||mode=="radio")
+	eString tpath;
+
+	if(mode!="zap")
+		return "";
+
+	int pos=0, lastpos=0, temp=0;
+
+	if((path.find(";", 0))==-1)
+		path=";"+path;
+
+	while((pos=path.find(";", lastpos))!=-1)
 	{
-		if(!bouquetid)
+		lastpos=pos+1;
+		if((temp=path.find(";", lastpos))!=-1)
 		{
-			int imode=eZap::TV;
-			if(mode=="radio")
-				imode=eZap::Radio;
-			eZap::getInstance()->setMode(imode);
-			bouquetid=eZap::getInstance()->getServiceSelector()->getCurrentBouquet();
+			tpath=path.mid(lastpos, temp-lastpos);
 		}
 		else
 		{
-/*
-	buggy stuff... :(
-			if(eZap::getInstance()->getServiceSelector()->getCurrentBouquet()!=bouquetid)
-			{
-				eZap::getInstance()->getServiceSelector()->useBouquet(getBouquet(bouquetid));
-			}		
-*/
+			tpath=path.mid(lastpos, strlen(path.c_str())-lastpos);
 		}
 
-		result=getWatchContent(mode, bouquetid);
+		eServiceReference current_service=string2ref(tpath);
+		eServiceInterface *iface=eServiceInterface::getInstance();
+
+		if (! (current_service.flags&eServiceReference::isDirectory))	// is playable
+		{
+			iface->play(current_service);
+			result+="ok, hear the music..";
+		} else
+		{
+			eWebNavigatorListDirectory navlist(result, path, tpath, *iface);
+			Signal1<void,const eServiceReference&> signal;
+			signal.connect(slot(navlist, &eWebNavigatorListDirectory::addEntry));
+	
+			result+="<table width=\"100%%\">\n";
+			iface->enterDirectory(current_service, signal);
+			result+="</table>\n";
+			eDebug("entered");
+			iface->leaveDirectory(current_service);
+			eDebug("leaved");
+		}
 	}
+	return result;
+}
+
+static eString getContent(eString mode, eString path)
+{
+	eString result("");
+	result=getWatchContent(mode, path);
 
 	if(result.length()<3)
 		result="not ready yet";
-#endif
 
 	return result;
 }
 
 static eString getCurService()
 {
+	eString result;
+
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (!sapi)
-		return "not available";
-	
+		return "n/a";
+		
 	eService *current=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
 	if(current)
 		return current->service_name.c_str();
 	else
-		return "no channel selected";
+		return "n/a";
 }
 
 static eString getEITC()
@@ -765,19 +713,16 @@ static eString getStats()
 
 static eString getNavi(eString mode)
 {
-	eString radioc, tvc, aboutc, linksc, updatesc;
+	eString zapc, aboutc, linksc, updatesc;
 	eString result;
 
-	tvc="normal";
-	radioc="normal";
+	zapc="normal";
 	aboutc="normal";
 	linksc="normal";
 	updatesc="normal";
 
-	if(mode=="tv")
-		tvc="white";
-	if(mode=="radio")
-		radioc="white";
+	if(mode=="zap")
+		zapc="white";
 	if(mode=="about")
 		aboutc="white";
 	if(mode=="links")
@@ -787,10 +732,8 @@ static eString getNavi(eString mode)
 
 
 	result="<a class=\"";
-	result+=tvc;
-	result+="\" href=\"/?mode=tv\">tv</a> | <a class=\"";
-	result+=radioc;
-	result+="\" href=\"/?mode=radio\">radio</a> | <a class=\"";
+	result+=zapc;
+	result+="\" href=\"/?mode=zap\">zap</a> | <a class=\"";
 	result+=aboutc;
 	result+="\" href=\"/?mode=about\">about</a> | <a class=\"";
 	result+=linksc;
@@ -809,105 +752,7 @@ static eString getMode(eString mode)
 	return result;
 }
 
-static eString web_root(eString request, eString path, eString opts, eHTTPConnection *content)
-{
-	eString result;
-	std::map<eString,eString> opt=getRequestOptions(opts);
-	content->local_header["Content-Type"]="text/html";
-
-	eString mode=opt["mode"];
-	eString bid="0";
-
-	if(opt["bouquetid"])
-		bid=opt["bouquetid"];
-
-	int bouquetid=atoi(bid.c_str());
-
-	if(!mode)
-	{
-		switch(0) // eZap::getInstance()->getMode())
-		{
-			case 0:
-				mode="tv";
-				break;
-			case 1:
-				mode="radio";
-				break;
-			default:
-				mode="tv";
-				break;
-		}
-	}
-
-	result=read_file(TEMPLATE_DIR+"index.tmp");
-
-	result.strReplace("#STATS#", getStats());
-	result.strReplace("#NAVI#", getNavi(mode));
-	result.strReplace("#MODE#", getMode(mode));
-	result.strReplace("#COP#", getContent(mode, bouquetid));
-
-	if((mode=="tv")||
-           (mode=="radio"))
-	{
-		result.strReplace("#EIT#", getEITC() );
-		result.strReplace("#SERVICENAME#", filter_string(getCurService()));
-		
-		eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-
-		if(sapi && sapi->service)
-		{
-			result.strReplace("#EPG#", "<u><a href=\"javascript:openEPG()\" class=\"small\">epg</a></u>");
-			result.strReplace("#SI#", "<u><a href=\"javascript:openSI()\" class=\"small\">si</a></u>");
-		}
-		else
-		{
-			DELETE(#EPG#);
-			DELETE(#SI#);
-		}
-	}
-	else
-	{
-		DELETE(#SERVICENAME#);
-		DELETE(#EPG#);
-		DELETE(#SI#);
-		DELETE(#EIT#);
-	}
-	result.strReplace("#VOLBAR#", getVolBar());
-	return result;
-}
-
-static eString switchServiceWeb(eString request, eString path, eString opt, eHTTPConnection *content)
-{
-	content->local_header["Content-Type"]="text/html";
-
-	int service_id=-1, original_network_id=-1, transport_stream_id=-1, service_type=-1;
-	unsigned int optval=opt.find("=");
-	if (optval!=eString::npos)
-		opt=opt.mid(optval+1);
-	if(opt)
-		sscanf(opt.c_str(), "%x:%x:%x:%x", &service_id, &transport_stream_id, &original_network_id, &service_type);
-	eString result="";
-	
-	if ((service_id!=-1) && (original_network_id!=-1) && (transport_stream_id!=-1) && (service_type!=-1))
-	{
-#if 0
-		eZap::getInstance()->getServiceSelector()->actualize();
-#endif
-		if(eDVB::getInstance()->settings->getTransponders())
-		{
-			const eServiceReferenceDVB *ref=eDVB::getInstance()->settings->getTransponders()->searchService(eOriginalNetworkID(original_network_id), eServiceID(service_id));
-			if(ref)
-				eServiceInterface::getInstance()->play(*ref);
-		}
-		result+="<script language=\"javascript\">window.close();</script>";
-	} else
-	{
-		result+="<script language=\"javascript\">alert(\"ERROR wrong parms\")</script>";
-	}
-	return result;
-}
-
-static eString audiom3u(eString request, eString path, eString opt, eHTTPConnection *content)
+static eString audiom3u(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eString result;
 	eString tmp;
@@ -919,30 +764,7 @@ static eString audiom3u(eString request, eString path, eString opt, eHTTPConnect
 	return result;
 }
 
-
-static eString getbouq(eString request, eString path, eString opt, eHTTPConnection *content)
-{
- 	eString result;
-	eString tmp;
-
-	ePtrList<eBouquet>* bouquets;
-	std::list<eServiceReferenceDVB> esref;
-
-	content->local_header["Content-Type"]="text/html";
-
-	bouquets=eDVB::getInstance()->settings->getBouquets();
-	result=eString("");
-
-	for(ePtrList<eBouquet>::iterator i(*bouquets); i != bouquets->end(); ++i)
-	{
-		tmp=eString(i->bouquet_name.c_str());
-		result+=eString(i->bouquet_name.c_str());
-	}
-	
-	return result;
-}
-
-static eString getcurepg(eString request, eString path, eString opt, eHTTPConnection *content)
+static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eString result("");
 	eString tmp;
@@ -991,7 +813,7 @@ static eString getcurepg(eString request, eString path, eString opt, eHTTPConnec
 	return result;
 }
 
-static eString getsi(eString request, eString path, eString opt, eHTTPConnection *content)
+static eString getsi(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eString result("");
 	eString name("");
@@ -1075,15 +897,15 @@ static eString getsi(eString request, eString path, eString opt, eHTTPConnection
 	return result;
 }
 
-static eString neutrino_suck_zapto(eString request, eString path, eString opt, eHTTPConnection *content)
+static eString neutrino_suck_zapto(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	if(opt!="getpids")
-		return(eString("ok\n"));
+		return eString("ok\n");
 	else
-		return(eString().sprintf("%u\n%u\n", Decoder::parms.vpid, Decoder::parms.apid));
+		return eString().sprintf("%u\n%u\n", Decoder::parms.vpid, Decoder::parms.apid);
 }
 
-static eString message(eString request, eString path, eString opt, eHTTPConnection *content)
+static eString message(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	if (opt.length())
 	{
@@ -1094,7 +916,7 @@ static eString message(eString request, eString path, eString opt, eHTTPConnecti
 		return eString("error\n");
 }
 
-static eString xmessage(eString request, eString path, eString opt, eHTTPConnection *content)
+static eString xmessage(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	std::map<eString,eString> opts=getRequestOptions(opt);
 	
@@ -1119,7 +941,7 @@ static eString xmessage(eString request, eString path, eString opt, eHTTPConnect
 }
 
 /*
-static eString record_off(eString request, eString path, eString opt, eHTTPConnection *content)
+static eString record_off(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	DVRSocket *dvr;
 	dvr=new DVRSocket(eString("10.0.0.2"), 3000, NGRAB);
@@ -1128,7 +950,7 @@ static eString record_off(eString request, eString path, eString opt, eHTTPConne
 	return "ok";
 }
 
-static eString record_on(eString request, eString path, eString opt, eHTTPConnection *content)
+static eString record_on(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	DVRSocket *dvr;
 	dvr=new DVRSocket(eString("10.0.0.2"), 3000, NGRAB);;
@@ -1136,17 +958,6 @@ static eString record_on(eString request, eString path, eString opt, eHTTPConnec
 	return "ok";
 }
 */
-
-static eString ref2string(const eServiceReference &r)
-{
-	return httpEscape(r.toString());
-}
-
-static eServiceReference string2ref(const eString &service)
-{
-	eString str=httpUnescape(service);
-	return eServiceReference(str);
-}
 
 #define NAVIGATOR_PATH "/cgi-bin/navigator"
 
@@ -1188,7 +999,7 @@ public:
 	}
 };
 
-static eString navigator(eString request, eString path, eString opt, eHTTPConnection *content)
+static eString navigator(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	std::map<eString,eString> opts=getRequestOptions(opt);
 	
@@ -1219,6 +1030,7 @@ static eString navigator(eString request, eString path, eString opt, eHTTPConnec
 		spath="";
 	}
 	
+	eDebug("current service: %s\n", current.c_str());
 	eServiceReference current_service=string2ref(current);
 
 	eString res;
@@ -1253,15 +1065,63 @@ static eString navigator(eString request, eString path, eString opt, eHTTPConnec
 	return res;
 }
 
+static eString web_root(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	eString result;
+	std::map<eString,eString> opt=getRequestOptions(opts);
+	content->local_header["Content-Type"]="text/html";
+
+	eString mode=opt["mode"];
+	eString spath=opt["path"];
+
+	if(!spath)
+		spath=ref2string(eServiceReference(eServiceReference::idStructure, eServiceReference::isDirectory, 0));
+
+	if(!mode)
+		mode="zap";
+
+	result=read_file(TEMPLATE_DIR+"index.tmp");
+
+	result.strReplace("#STATS#", getStats());
+	result.strReplace("#NAVI#", getNavi(mode));
+	result.strReplace("#MODE#", getMode(mode));
+	result.strReplace("#COP#", getContent(mode, spath));
+
+	if(mode=="zap")
+	{
+		result.strReplace("#EIT#", getEITC() );
+		result.strReplace("#SERVICENAME#", filter_string(getCurService()));
+		
+		eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+
+		if(sapi && sapi->service)
+		{
+			result.strReplace("#EPG#", "<u><a href=\"javascript:openEPG()\" class=\"small\">epg</a></u>");
+			result.strReplace("#SI#", "<u><a href=\"javascript:openSI()\" class=\"small\">si</a></u>");
+		}
+		else
+		{
+			DELETE(#EPG#);
+			DELETE(#SI#);
+		}
+	}
+	else
+	{
+		DELETE(#SERVICENAME#);
+		DELETE(#EPG#);
+		DELETE(#SI#);
+		DELETE(#EIT#);
+	}
+	result.strReplace("#VOLBAR#", getVolBar());
+
+	return result;
+}
+
 void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 {
 	dyn_resolver->addDyn("GET", "/", web_root);
-	dyn_resolver->addDyn("GET", "/switchTo", switchServiceWeb);
 	dyn_resolver->addDyn("GET", "/setVolume", setVolume);
-/*
-	dyn_resolver->addDyn("GET", "/record/on", record_on);
-	dyn_resolver->addDyn("GET", "/record/off", record_off);
-*/
+
 	dyn_resolver->addDyn("GET", "/cgi-bin/status", doStatus);
 	dyn_resolver->addDyn("GET", "/cgi-bin/switchService", switchService);
 	dyn_resolver->addDyn("GET", "/cgi-bin/listServices", listServices);
@@ -1270,11 +1130,11 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/getPMT", getPMT);
 	dyn_resolver->addDyn("GET", "/cgi-bin/message", message);
 	dyn_resolver->addDyn("GET", "/cgi-bin/xmessage", xmessage);
+
 	dyn_resolver->addDyn("GET", NAVIGATOR_PATH, navigator);
 
 	dyn_resolver->addDyn("GET", "/audio.m3u", audiom3u);
 	dyn_resolver->addDyn("GET", "/version", version);
-	dyn_resolver->addDyn("GET", "/cgi-bin/getbouquets", getbouq);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg", getcurepg);
 	dyn_resolver->addDyn("GET", "/cgi-bin/streaminfo", getsi);
 	dyn_resolver->addDyn("GET", "/channels/getcurrent", channels_getcurrent);
@@ -1282,6 +1142,10 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 
 	dyn_resolver->addDyn("GET", "/control/zapto", neutrino_suck_zapto);
 
+/*
+	dyn_resolver->addDyn("GET", "/record/on", record_on);
+	dyn_resolver->addDyn("GET", "/record/off", record_off);
+*/
 /*	dyn_resolver->addDyn("GET", "/channels/numberchannels", channels_numberchannels);
 	dyn_resolver->addDyn("GET", "/channels/gethtmlchannels", channels_gethtmlchannels);
 	dyn_resolver->addDyn("GET", "/channels/getchannels", channels_getgetchannels);
