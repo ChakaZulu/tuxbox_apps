@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.70 2002/12/08 10:46:10 thegoodguy Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.71 2002/12/18 12:39:14 thegoodguy Exp $ *
  *
  * Client-Interface für zapit - DBoxII-Project
  *
@@ -282,8 +282,10 @@ void CZapitClient::getBouquets(BouquetList& bouquets, const bool emptyBouquetsTo
 
 /* gets all channels that are in specified bouquet */
 /* bouquets are numbered starting at 0 */
-void CZapitClient::getBouquetChannels(const unsigned int bouquet, BouquetChannelList& channels, channelsMode mode)
+void CZapitClient::getBouquetChannels(const unsigned int bouquet, BouquetChannelList& channels, channelsMode mode, const bool utf_encoded)
 {
+	char buffer[30 + 1];
+
 	CZapitMessages::commandGetBouquetChannels msg;
 
 	msg.bouquet = bouquet;
@@ -295,14 +297,22 @@ void CZapitClient::getBouquetChannels(const unsigned int bouquet, BouquetChannel
 	while (CBasicClient::receive_data((char*)&response, sizeof(responseGetBouquetChannels)))
 	{
 		response.nr++;
+		if (!utf_encoded)
+		{
+			buffer[30] = (char) 0x00;
+			strncpy(buffer, response.name, 30);
+			strncpy(response.name, Utf8_to_Latin1(std::string(buffer)).c_str(), 30);
+		}
 		channels.push_back(response);
 	}
 	close_connection();
 }
 
 /* gets all channels */
-void CZapitClient::getChannels( BouquetChannelList& channels, channelsMode mode, channelsOrder order)
+void CZapitClient::getChannels( BouquetChannelList& channels, channelsMode mode, channelsOrder order, const bool utf_encoded)
 {
+	char buffer[30 + 1];
+
 	CZapitMessages::commandGetChannels msg;
 
 	msg.mode = mode;
@@ -314,6 +324,12 @@ void CZapitClient::getChannels( BouquetChannelList& channels, channelsMode mode,
 	while (CBasicClient::receive_data((char*)&response, sizeof(responseGetBouquetChannels)))
 	{
 		response.nr++;
+		if (!utf_encoded)
+		{
+			buffer[30] = (char) 0x00;
+			strncpy(buffer, response.name, 30);
+			strncpy(response.name, Utf8_to_Latin1(std::string(buffer)).c_str(), 30);
+		}
 		channels.push_back(response);
 	}
 	close_connection();

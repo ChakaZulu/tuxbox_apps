@@ -232,10 +232,10 @@ class CZapitClient:public CBasicClient
 
 	/* gets all channels that are in specified bouquet */
 	/* bouquets are numbered starting at 0 */
-	void getBouquetChannels(const unsigned int bouquet, BouquetChannelList& channels, channelsMode mode = MODE_CURRENT);
+	void getBouquetChannels(const unsigned int bouquet, BouquetChannelList& channels, const channelsMode mode = MODE_CURRENT, const bool utf_encoded = false);
 
 	/* gets all channels */
-	void getChannels( BouquetChannelList& channels, channelsMode mode = MODE_CURRENT, channelsOrder order = SORT_BOUQUET);
+	void getChannels( BouquetChannelList& channels, const channelsMode mode = MODE_CURRENT, const channelsOrder order = SORT_BOUQUET, const bool utf_encoded = false);
 
 	/* restore bouquets so as if they where just loaded*/
 	void restoreBouquets();
