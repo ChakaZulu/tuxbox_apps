@@ -1,5 +1,4 @@
 #include "enigma_setup.h"
-#include "setupaudio.h"
 #include "setupnetwork.h"
 #include "setupvideo.h"
 #include "setup_osd.h"
@@ -15,7 +14,7 @@ eZapSetup::eZapSetup()
 	connect(new eListboxEntryText(window->list, "[Zurück]"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_close(eListboxEntry*)));
 	connect(new eListboxEntryText(window->list, "Bouquets..."), SIGNAL(selected(eListboxEntry*)), SLOT(sel_bouquet(eListboxEntry*)));
 	connect(new eListboxEntryText(window->list, "Network..."), SIGNAL(selected(eListboxEntry*)), SLOT(sel_network(eListboxEntry*)));
-	connect(new eListboxEntryText(window->list, "Audio..."), SIGNAL(selected(eListboxEntry*)), SLOT(sel_sound(eListboxEntry*)));
+//	connect(new eListboxEntryText(window->list, "Audio..."), SIGNAL(selected(eListboxEntry*)), SLOT(sel_sound(eListboxEntry*)));
 	connect(new eListboxEntryText(window->list, "Video..."), SIGNAL(selected(eListboxEntry*)), SLOT(sel_video(eListboxEntry*)));
 	connect(new eListboxEntryText(window->list, "OSD..."), SIGNAL(selected(eListboxEntry*)), SLOT(sel_osd(eListboxEntry*)));
 }
@@ -55,12 +54,6 @@ void eZapSetup::sel_network(eListboxEntry *lbe)
 
 void eZapSetup::sel_sound(eListboxEntry *lbe)
 {
-	eZapAudioSetup setup;
-	window->hide();
-	setup.show();
-	setup.exec();
-	setup.hide();
-	window->show();
 }
 
 void eZapSetup::sel_video(eListboxEntry *lbe)

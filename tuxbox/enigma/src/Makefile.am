@@ -15,8 +15,8 @@ enigma_SOURCES = \
 	enigma_event.cpp enigma_event.moc.cpp enigma_lcd.cpp enigma_lcd.moc.cpp \
 	enigma_main.cpp enigma_main.moc.cpp enigma_plugins.cpp enigma_plugins.moc.cpp \
 	enigma_setup.cpp enigma_setup.moc.cpp enigma_xmlrpc.cpp scan.cpp \
-	scan.moc.cpp setup_osd.cpp setup_osd.moc.cpp setupaudio.cpp \
-	setupaudio.moc.cpp setupnetwork.cpp setupnetwork.moc.cpp \
+	scan.moc.cpp setup_osd.cpp setup_osd.moc.cpp \
+	setupnetwork.cpp setupnetwork.moc.cpp \
 	setupvideo.cpp setupvideo.moc.cpp showbnversion.cpp \
 	showbnversion.moc.cpp sselect.cpp sselect.moc.cpp streaminfo.cpp \
 	streaminfo.moc.cpp
