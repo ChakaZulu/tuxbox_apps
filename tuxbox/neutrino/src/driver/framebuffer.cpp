@@ -1,41 +1,44 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
- 
+
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
- 
+
 	Kommentar:
- 
+
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-	
- 
+
+
 	License: GPL
- 
+
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
- 
+
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 /*
- 
-$Id: framebuffer.cpp,v 1.15 2002/01/18 02:08:45 McClean Exp $
- 
- 
- 
+
+$Id: framebuffer.cpp,v 1.16 2002/02/25 01:27:33 field Exp $
+
+
+
 $Log: framebuffer.cpp,v $
+Revision 1.16  2002/02/25 01:27:33  field
+Key-Handling umgestellt (moeglicherweise beta ;)
+
 Revision 1.15  2002/01/18 02:08:45  McClean
 speedup backgrounds
 
@@ -44,25 +47,25 @@ cleanup
 
 Revision 1.13  2001/12/18 00:20:07  McClean
 update scanmenue
- 
+
 Revision 1.12  2001/12/17 22:56:37  McClean
 add dump-function
- 
+
 Revision 1.11  2001/12/17 01:28:26  McClean
 accelerate radiomode-logo-paint
- 
+
 Revision 1.10  2001/11/15 11:42:41  McClean
 gpl-headers added
- 
+
 Revision 1.9  2001/11/04 01:04:18  McClean
 fix transparency bug
- 
+
 Revision 1.8  2001/10/16 19:11:16  rasc
 -- CR LF --> LF in einigen Modulen
- 
- 
- 
- 
+
+
+
+
 */
 
 
@@ -569,7 +572,7 @@ bool CFrameBuffer::loadBackground(string filename, unsigned char col)
 		//ist bereits geladen
 		return true;
 	}
-	
+
 	if(background)
 	{
 		delete[] background;
@@ -664,4 +667,27 @@ void CFrameBuffer::paintBackground()
 	}
 }
 
+void CFrameBuffer::SaveScreen(int x, int y, int dx, int dy, unsigned char* memp)
+{
+    unsigned char *fbpos = lfb + x + stride*y;
+	unsigned char *bkpos = memp;
+	for(int count=0;count<dy;count++)
+	{
+		memcpy(bkpos, fbpos, dx);
+		fbpos += stride;
+		bkpos += dx;
+	}
 
+}
+
+void CFrameBuffer::RestoreScreen(int x, int y, int dx, int dy, unsigned char* memp)
+{
+	unsigned char *fbpos = lfb + x + stride*y;
+	unsigned char *bkpos = memp;
+	for(int count=0;count<dy;count++)
+	{
+		memcpy(fbpos, bkpos, dx);
+		fbpos += stride;
+		bkpos += dx;
+	}
+}

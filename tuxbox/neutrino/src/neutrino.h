@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.47 2002/02/22 20:30:22 field Exp $
+//  $Id: neutrino.h,v 1.48 2002/02/25 01:27:33 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.48  2002/02/25 01:27:33  field
+//  Key-Handling umgestellt (moeglicherweise beta ;)
+//
 //  Revision 1.47  2002/02/22 20:30:22  field
 //  Stream-Info durch "Features" ersetzt (vtxt usw :)
 //
@@ -315,6 +318,8 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		bool onPaintNotify(string MenuName);
 		//onchange
 		bool changeNotify(string OptionName);
+
+		bool HandleKeys(int key);
 
 	friend class CNeutrinoBouquetEditorEvents;
 };

@@ -211,6 +211,10 @@ int CStringInput::exec( CMenuTarget* parent, string )
 			strcpy(value, oldval);
 			loop=false;
 		}
+		else
+		{
+			neutrino->HandleKeys( key );
+		}
 	}
 
 	hide();

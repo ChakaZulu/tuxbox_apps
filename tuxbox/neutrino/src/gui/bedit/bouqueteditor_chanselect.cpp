@@ -177,6 +177,10 @@ int CBEChannelSelectWidget::exec(CMenuTarget* parent, string actionKey)
 		{
 			switchChannel();
 		}
+		else
+		{
+			neutrino->HandleKeys( key );
+		}
 		//kein pushback - wenn man versehentlich wo draufkommt is die edit-arbeit umsonst
 		/*
 		else if( (key==CRCInput::RC_spkr) || (key==CRCInput::RC_plus) || (key==CRCInput::RC_minus)

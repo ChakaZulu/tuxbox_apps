@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: epgview.cpp,v 1.39 2002/02/23 14:53:47 McClean Exp $
+// $Id: epgview.cpp,v 1.40 2002/02/25 01:27:33 field Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.40  2002/02/25 01:27:33  field
+// Key-Handling umgestellt (moeglicherweise beta ;)
+//
 // Revision 1.39  2002/02/23 14:53:47  McClean
 // dd fsk
 //
@@ -526,7 +529,10 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
 			{
 				loop = false;
 			}
-
+			else
+			{
+				neutrino->HandleKeys( key );
+			}
 		}
 		hide();
 	}

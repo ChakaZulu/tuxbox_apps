@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.63 2002/02/04 06:15:30 field Exp $
+// $Id: channellist.cpp,v 1.64 2002/02/25 01:27:33 field Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.64  2002/02/25 01:27:33  field
+// Key-Handling umgestellt (moeglicherweise beta ;)
+//
 // Revision 1.63  2002/02/04 06:15:30  field
 // sectionsd interface verbessert (bug beseitigt)
 //
@@ -517,8 +520,8 @@ int CChannelList::show()
 			bShowBouquetList = true;
 			loop=false;
 		}
-		else if( (key==CRCInput::RC_spkr) || (key==CRCInput::RC_plus) || (key==CRCInput::RC_minus)
-		         || (key==CRCInput::RC_red) || (key==CRCInput::RC_green) || (key==CRCInput::RC_yellow) || (key==CRCInput::RC_blue)
+		else if( (key==CRCInput::RC_red) || (key==CRCInput::RC_green) || (key==CRCInput::RC_yellow)
+				 || (key==CRCInput::RC_blue)
 		         || (key==CRCInput::RC_standby)
 		         || (CRCInput::isNumeric(key)) )
 		{	//pushback key if...
@@ -539,6 +542,10 @@ int CChannelList::show()
 			paintHead();
 			paint();
 		}
+		else
+		{
+			neutrino->HandleKeys( key );
+		};
 	}
 	hide();
 	if (bShowBouquetList)
@@ -694,6 +701,10 @@ void CChannelList::numericZap(int key)
 
 			chn = tuned + 1;
 			break;
+		}
+		else
+		{
+			neutrino->HandleKeys( key );
 		};
 	}
 

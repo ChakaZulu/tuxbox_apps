@@ -30,13 +30,16 @@
 */
 
 //
-// $Id: eventlist.cpp,v 1.35 2002/02/04 06:15:30 field Exp $
+// $Id: eventlist.cpp,v 1.36 2002/02/25 01:27:33 field Exp $
 //
 //  -- EPG Event List // Vorschau
 //
 //
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.36  2002/02/25 01:27:33  field
+// Key-Handling umgestellt (moeglicherweise beta ;)
+//
 // Revision 1.35  2002/02/04 06:15:30  field
 // sectionsd interface verbessert (bug beseitigt)
 //
@@ -453,6 +456,10 @@ void EventList::exec(unsigned onidSid, const std::string& channelname)
 				paint();
 			}
 		}
+		else
+		{
+			neutrino->HandleKeys( key );
+		};
 	}
 
 	hide();

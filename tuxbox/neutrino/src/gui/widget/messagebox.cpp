@@ -34,7 +34,7 @@ void CMessageBox::paintButtons()
 	int ButtonSpacing = 40;
 	int ButtonWidth = 20 + 33 + MaxButtonTextWidth;
 	int startpos = x + (width - ((ButtonWidth*3)+(ButtonSpacing*2))) / 2;
-	
+
 	int xpos = startpos;
 	int color = COL_INFOBAR_SHADOW;
 	if(selected==0)
@@ -146,6 +146,10 @@ int CMessageBox::exec(CMenuTarget* parent, string actionKey)
 					break;
 			}
 			loop=false;
+		}
+		else
+		{
+			neutrino->HandleKeys( key );
 		}
 
 	}

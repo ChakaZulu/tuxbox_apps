@@ -252,8 +252,7 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 				finishMoveBouquet();
 			}
 		}
-		else if( (key==CRCInput::RC_spkr) || (key==CRCInput::RC_plus) || (key==CRCInput::RC_minus)
-		         || (key==CRCInput::RC_standby)
+		else if( (key==CRCInput::RC_standby)
 		         || (CRCInput::isNumeric(key)) )
 		{
 			if (state == beDefault)
@@ -267,6 +266,10 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 			{
 				cancelMoveBouquet();
 			}
+		}
+		else
+		{
+			neutrino->HandleKeys( key );
 		}
 	}
 	hide();

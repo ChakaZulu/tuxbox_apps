@@ -28,9 +28,12 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-$Id: gamelist.cpp,v 1.32 2002/02/22 22:10:38 field Exp $
+$Id: gamelist.cpp,v 1.33 2002/02/25 01:27:33 field Exp $
 
 $Log: gamelist.cpp,v $
+Revision 1.33  2002/02/25 01:27:33  field
+Key-Handling umgestellt (moeglicherweise beta ;)
+
 Revision 1.32  2002/02/22 22:10:38  field
 vtxt: avia_vbi start/stop
 
@@ -571,14 +574,17 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 				runGame( selected );
 			}
 		}
-		else if( (key==CRCInput::RC_spkr) || (key==CRCInput::RC_plus) || (key==CRCInput::RC_minus)
-		         || (key==CRCInput::RC_red) || (key==CRCInput::RC_green) || (key==CRCInput::RC_yellow) || (key==CRCInput::RC_blue)
+		else if( (key==CRCInput::RC_red) || (key==CRCInput::RC_green) || (key==CRCInput::RC_yellow) || (key==CRCInput::RC_blue)
 		         || (key==CRCInput::RC_standby)
 		         || (CRCInput::isNumeric(key)) )
 		{
 			g_RCInput->pushbackKey (key);
 			loop=false;
 		}
+		else
+		{
+			neutrino->HandleKeys( key );
+		};
 	}
 	hide();
 	return RETURN_REPAINT;

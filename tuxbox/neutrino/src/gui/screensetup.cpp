@@ -112,6 +112,10 @@ int CScreenSetup::exec( CMenuTarget* parent, string )
 				else
 					paintBorderUL();
 			}
+			else
+			{
+				neutrino->HandleKeys( key );
+			}
 		}
 		else if(selected==2)
 		{//upper left setup
@@ -155,7 +159,12 @@ int CScreenSetup::exec( CMenuTarget* parent, string )
 				else
 					paintBorderLR();
 			}
+			else
+			{
+				neutrino->HandleKeys( key );
+			}
 		}
+
 	}
 
 	hide();

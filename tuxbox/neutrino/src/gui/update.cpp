@@ -360,7 +360,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, string)
 	}
 	paint();
 
-	g_RCInput->getKey(190);
+	neutrino->HandleKeys( g_RCInput->getKey(190) );
 
 	hide();
 	return CMenuTarget::RETURN_REPAINT;

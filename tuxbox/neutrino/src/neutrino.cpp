@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.168 2002/02/24 21:41:58 field Exp $
+        $Id: neutrino.cpp,v 1.169 2002/02/25 01:27:33 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,8 +32,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
-  Revision 1.168  2002/02/24 21:41:58  field
-  User-Interface verbessert
+  Revision 1.169  2002/02/25 01:27:33  field
+  Key-Handling umgestellt (moeglicherweise beta ;)
 
   Revision 1.166  2002/02/23 20:19:51  field
   version-filename angepasst
@@ -2166,14 +2166,6 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			{ //numeric zap
 				channelList->numericZap( key );
 			}
-			else if (key==CRCInput::RC_spkr)
-			{	//mute
-				AudioMuteToggle();
-			}
-			else if ((key==CRCInput::RC_plus) || (key==CRCInput::RC_minus))
-			{	//volume
-				setVolume( key );
-			}
 			else if (key==g_settings.key_subchannel_up)
 			{
 				g_RemoteControl->subChannelUp();
@@ -2182,6 +2174,11 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			{
 				g_RemoteControl->subChannelDown();
 			}
+			else
+			{
+				HandleKeys( key );
+			}
+
 		}
 	}
 }
@@ -2257,8 +2254,11 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 	int x = (((g_settings.screen_EndX- g_settings.screen_StartX)- dx) / 2) + g_settings.screen_StartX;
 	int y = g_settings.screen_EndY- 100;
 
+	unsigned char pixbuf[dx*dy];
+
 	if (bDoPaint)
 	{
+		g_FrameBuffer->SaveScreen(x, y, dx, dy, pixbuf);
 		g_FrameBuffer->paintIcon("volume.raw",x,y, COL_INFOBAR);
 	}
 
@@ -2282,7 +2282,7 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 		}
 		else
 		{
-			if (key!=CRCInput::RC_ok)
+			if ( (key!=CRCInput::RC_ok) || (key!=CRCInput::RC_home) )
 				g_RCInput->pushbackKey(key);
 
 			key= CRCInput::RC_timeout;
@@ -2305,9 +2305,7 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 	}
 	while ( key != CRCInput::RC_timeout );
     if (bDoPaint)
-	{
-		g_FrameBuffer->paintBackgroundBoxRel(x, y, dx, dy);
-	}
+		g_FrameBuffer->RestoreScreen(x, y, dx, dy, pixbuf);
 }
 
 void CNeutrinoApp::tvMode()
@@ -2373,6 +2371,21 @@ void CNeutrinoApp::scartMode()
 		mode = -1;
 		tvMode();
 	}
+}
+
+bool CNeutrinoApp::HandleKeys(int key)
+{
+	//printf("[CNeutrinoApp]: HandleKeys 0x%x\n", key);
+	if ((key==CRCInput::RC_plus) || (key==CRCInput::RC_minus))
+	{	//volume
+		setVolume( key );
+		return true;
+	}
+	else if (key==CRCInput::RC_spkr)
+	{	//mute
+		AudioMuteToggle();
+	}
+	return false;
 }
 
 void CNeutrinoApp::radioMode()
@@ -2504,7 +2517,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.168 2002/02/24 21:41:58 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.169 2002/02/25 01:27:33 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

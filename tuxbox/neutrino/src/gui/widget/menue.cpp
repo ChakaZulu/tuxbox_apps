@@ -30,11 +30,14 @@
 */
 
 /*
-$Id: menue.cpp,v 1.38 2002/02/24 21:41:58 field Exp $
+$Id: menue.cpp,v 1.39 2002/02/25 01:27:33 field Exp $
 
 
 History:
  $Log: menue.cpp,v $
+ Revision 1.39  2002/02/25 01:27:33  field
+ Key-Handling umgestellt (moeglicherweise beta ;)
+
  Revision 1.38  2002/02/24 21:41:58  field
  User-Interface verbessert
 
@@ -268,9 +271,6 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 					break;
 
 				//pushback only these Keys
-				case (CRCInput::RC_spkr):
-				case (CRCInput::RC_plus):
-				case (CRCInput::RC_minus):
 				case (CRCInput::RC_red):
 				case (CRCInput::RC_green):
 				case (CRCInput::RC_yellow):
@@ -281,6 +281,10 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 						key = CRCInput::RC_timeout;
 					}
 					break;
+				default:
+				{
+					neutrino->HandleKeys( key );
+				}
 			}
 		}
 
