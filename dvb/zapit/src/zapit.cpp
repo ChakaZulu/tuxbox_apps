@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.364 2005/01/24 19:19:21 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.365 2005/01/30 18:14:13 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -127,9 +127,6 @@ extern std::map<t_satellite_position, uint8_t> motorPositions;
 extern std::map<t_satellite_position, uint8_t>::iterator mpos_it;
 
 extern std::map<string, t_satellite_position> satellitePositions;
-
-extern std::map<string, int> satelliteDiseqcs; //diseqcs per satellite
-extern std::map<string, int>::iterator satdiseqc_it;
 
 bool standby = true;
 
@@ -838,7 +835,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 				strncpy(sat.satName, satname, 29);
 				sat.satPosition = satellitePositions[satname];
 				sat.motorPosition = motorPositions[sat.satPosition];
-				sat.satDiseqc = satelliteDiseqcs[satname];
+				sat.satDiseqc = -1; /* FIXME */
 				satlength = sizeof(sat);
 				//printf("[zapit] sending %s, %d, %d\n", sat.satName, sat.satPosition, sat.motorPosition);
 				CBasicServer::send_data(connfd, &satlength, sizeof(satlength));
@@ -1764,7 +1761,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.364 2005/01/24 19:19:21 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.365 2005/01/30 18:14:13 thegoodguy Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {

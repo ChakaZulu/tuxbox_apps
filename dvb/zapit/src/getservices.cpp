@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.89 2005/01/23 19:29:24 thegoodguy Exp $
+ * $Id: getservices.cpp,v 1.90 2005/01/30 18:14:13 thegoodguy Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -34,9 +34,6 @@ std::map<std::string, t_satellite_position> satellitePositions; //satellite posi
 
 std::map<t_satellite_position, uint8_t> motorPositions; //stored satellitepositions in diseqc 1.2 motor
 std::map<t_satellite_position, uint8_t>::iterator mpos_it;
-
-std::map<string, int> satelliteDiseqcs; //diseqcs per satellite
-std::map<string, int>::iterator satdiseqc_it;
 
 void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC, t_satellite_position satellitePosition)
 {
