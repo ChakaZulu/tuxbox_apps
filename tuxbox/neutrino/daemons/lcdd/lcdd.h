@@ -26,6 +26,8 @@
 #ifndef __lcdd__
 #define __lcdd__
 
+#include <netinet/in.h>
+
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
 
@@ -59,7 +61,7 @@ enum lcdd_cmd {
 /* param für LC_SET_MODE-Befehl,
  *
  * LCDM_TV        Normaler Anzeigemodus von Kanal (gross), Lautstärke und Zeit
- * LCDM_MENU      Menü-Ansicht mit Überschrift und Menülisting
+ * LCDM_MENU      Menü-Ansicht (param=Markierung; p3=Titel; p4[0..3]=Inhalt)
  * LCDM_SAVER     Startet einen Screenhack der eigenen Wahl (irgendwann mal)
  * LCDM_POWEROFF  Setzt shutdown-Logo, beendet aber NICHT den lcdd.
  */

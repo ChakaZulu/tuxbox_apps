@@ -41,7 +41,6 @@
 #include "lcdd.h"
 
 
-struct lcdd_msg rmsg;
 
 CLCDDisplay		display;
 fontRenderClass		*fontRenderer;
@@ -59,10 +58,11 @@ bool			muted;
 
 void show_channelname(char *);
 void show_volume(unsigned char);
+void show_menu(lcdd_msg msg);
 void set_mode(lcdd_mode);
 void set_poweroff();
 
-void parse_command() {
+void parse_command(lcdd_msg rmsg) {
 	//byteorder!!!!!!
 	rmsg.param2 = ntohs(rmsg.param2);
 
@@ -91,11 +91,12 @@ void parse_command() {
 		show_volume(volume);
 		break;
 	case LC_SET_MODE:
-		mode = (lcdd_mode)rmsg.param;
-		set_mode(mode);
+		set_mode((lcdd_mode)rmsg.param);
+		break;
+	case LC_MENU_MSG:
+		show_menu(rmsg);
 		break;
 	case LC_POWEROFF:
-		mode = LCDM_POWEROFF;
 		set_mode(LCDM_POWEROFF);
 		exit(0);
 		break;
@@ -136,10 +137,27 @@ void show_volume(unsigned char vol)
 	display.update();
 }
 
-void set_mode(lcdd_mode mode) {
+
+void show_menu(lcdd_msg msg) {
+	int i;
+
+	mode = LCDM_MENU;
+	display.load_screen(&icon_setup);
+	fonts.channelname->RenderString(1,15, 120, msg.param3, CLCDDisplay::PIXEL_ON);
+	for (i=0; i<4; i++) {
+		if (i==msg.param) {
+			display.draw_fill_rect (0,18+11*i,120,30+11*i, CLCDDisplay::PIXEL_ON);
+		}
+		fonts.menu->RenderString(1,27+11*i, 120, msg.param4[i], CLCDDisplay::PIXEL_INV);
+	}
+	display.update();
+}
+
+
+void set_mode(lcdd_mode m) {
 	//int y, t;
 	//raw_display_t s;
-	switch (mode) {
+	switch (m) {
 	case LCDM_TV:
 		/*display.dump_screen(&s);
 		for (t=0; t<23; t++) {
@@ -151,22 +169,25 @@ void set_mode(lcdd_mode mode) {
 			display.update();
 			usleep(10*1000);
 		}*/
-		display.load_screen(&icon_setup);
-		display.update();
-		break;
-	case LCDM_MENU:
 		display.load_screen(&icon_lcd);
 		show_volume(volume);
 		show_channelname(channelname);
 		show_time();
+		display.update();
+		break;
+	case LCDM_MENU:
+		display.load_screen(&icon_setup);
+		display.update();
 		break;
 	case LCDM_POWEROFF:
 		display.load_screen(&icon_power);
 		display.update();
 		break;
 	default:
-		printf("[lcdd] Unknown mode: %i\n", mode);
+		printf("[lcdd] Unknown mode: %i\n", m);
+		return;
 	}
+	mode = m;
 } 
 
 
@@ -184,11 +205,10 @@ int main(int argc, char **argv)
 {
 	printf("Network LCD-Driver 0.1\n\n");
 
-	if (fork() != 0) return 0;
-
 	fontRenderer = new fontRenderClass( &display );
 	fonts.channelname=fontRenderer->getFont("Arial", "Regular", 12);
 	fonts.time=fontRenderer->getFont("Arial", "Regular", 8);
+	fonts.menu=fontRenderer->getFont("Arial", "Regular", 10);
 	display.setIconBasePath("/usr/lib/icons/");
 
 	if(!display.isAvailable())
@@ -218,6 +238,7 @@ int main(int argc, char **argv)
 	}
 	display.dump_screen(&icon_lcd);
 	mode = LCDM_TV;
+	//set_mode(LCDM_TV);
 
 	show_channelname("");
 	show_time();
@@ -231,6 +252,7 @@ int main(int argc, char **argv)
 	int listenfd, connfd;
 	socklen_t clilen;
 	SAI cliaddr, servaddr;
+	struct lcdd_msg rmsg;
 
 	//network-setup
 	listenfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -246,14 +268,16 @@ int main(int argc, char **argv)
 		exit(-1);
 	}
 
-
 	if (listen(listenfd, 5) !=0)
 	{
 		perror("listen failed...\n");
 		exit( -1 );
 	}
-
 	printf("\n");
+
+	/* alles geladen, daemonize Now! ;) */
+	if (fork() != 0) return 0;
+
 	while(1)
 	{
 		clilen = sizeof(cliaddr);
@@ -261,7 +285,7 @@ int main(int argc, char **argv)
 
 		memset(&rmsg, 0, sizeof(rmsg));
 		read(connfd,&rmsg,sizeof(rmsg));
-		parse_command();
+		parse_command(rmsg);
 		close(connfd);
 	}
 
