@@ -203,7 +203,7 @@ int eSection::start( const char* dmxdev )
 			pid == 0x10     /* NIT */ ? 12000 :
 			pid == 0x00     /* PAT */ ?  4000 :
 			pid == 0x11     /* SDT */ ?  5000 :
-			pid == 0x12     /* EIT */ ?  5000 :
+			pid == 0x12     /* EIT */ ? 15000 :
 			tableid == 0x02 /* PMT */ ?  4000 : 10000, true);
 	return setFilter(pid, tableid, tableidext, version, dmxdev);
 }
