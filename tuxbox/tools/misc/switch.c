@@ -21,6 +21,9 @@
  *
  *
  *   $Log: switch.c,v $
+ *   Revision 1.7  2001/04/01 10:30:15  gillem
+ *   - fix volume
+ *
  *   Revision 1.6  2001/03/25 13:57:24  gillem
  *   - update includes
  *
@@ -40,7 +43,7 @@
  *
  *
  *
- *   $Revision: 1.6 $
+ *   $Revision: 1.7 $
  *
  */
 
@@ -221,7 +224,7 @@ void volume_show() {
 void volume_set(int i) {
 
   if (i < 0)  i=0;
-  if (i > 56) i=56;
+  if (i > 63) i=63;
   if (ioctl(fd,AVSIOSVOL,&i)< 0) {
     perror("AVSIOGVOL:");
   }
@@ -368,11 +371,11 @@ int main (int argc, char **argv) {
       while(1) {
 	fnc_set(0);
 	printf(".");
-	fflush(stdout);
+//	fflush(stdout);
 	usleep(500);
 	fnc_set(1);
 	printf("O");
-	fflush(stdout);
+//	fflush(stdout);
 	usleep(500);
       }
     }

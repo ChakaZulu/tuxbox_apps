@@ -21,6 +21,9 @@
  *
  *
  *   $Log: switch_new.c,v $
+ *   Revision 1.4  2001/04/01 10:30:15  gillem
+ *   - fix volume
+ *
  *   Revision 1.3  2001/03/25 16:47:42  gillem
  *   - add options
  *
@@ -31,7 +34,7 @@
  *   - switch rewrite
  *
  *
- *   $Revision: 1.3 $
+ *   $Revision: 1.4 $
  *
  */
 
@@ -265,9 +268,9 @@ int set_volume(int i)
 	{
 		i=0;
 	}
-	else if (i > 56)
+	else if (i > 63)
 	{
-		i=56;
+		i=63;
 	}
 
 	if (ioctl(fd,AVSIOSVOL,&i)< 0)
