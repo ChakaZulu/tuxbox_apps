@@ -475,8 +475,6 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
     tmp->name = g_Locale->getText("menu.back");
     gamelist.insert(gamelist.end(), tmp);
 
-	g_PluginList->loadPlugins();
-
 	for(unsigned int count=0;count < (unsigned int)g_PluginList->getNumberOfPlugins();count++)
 	{
     	if ( g_PluginList->getType(count)== 1 )
