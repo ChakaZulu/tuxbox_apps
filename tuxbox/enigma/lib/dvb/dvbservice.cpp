@@ -655,6 +655,7 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 	for (ePtrList<PMTEntry>::iterator i(pmt->streams); i != pmt->streams.end(); ++i)
 	{
 		PMTEntry *pe=*i;
+		bool isAudio=false;
 
 		switch (pe->stream_type)
 		{
@@ -665,17 +666,13 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 				isca+=checkCA(calist, pe->ES_info, pmt->program_number);
 				videoStreams.push_back(pe);
 				break;
-			case 3:	// ISO/IEC 11172 Audio
+			case 3: // ISO/IEC 11172 Audio
 			case 4: // ISO/IEC 13818-3 Audio
+				isAudio=true;
 			case 6:
 			{
-				bool skip=false;
-				audioStream stream(pe);
-
-				if ( (!audio) || (pe->elementary_PID == audiopid) )
-					audio=pe;
 				isca+=checkCA(calist, pe->ES_info, pmt->program_number);
-
+				audioStream stream(pe);
 				for (ePtrList<Descriptor>::iterator i(pe->ES_info); i != pe->ES_info.end(); ++i)
 				{
 					switch( i->Tag() )
@@ -684,15 +681,12 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 							stream.isAC3=1;
 							break;
 						case DESCR_REGISTRATION:
-						{
 							if (!memcmp(((RegistrationDescriptor*)*i)->format_identifier, "DTS", 3))
 								stream.isDTS=1;
 							break;
-						}
 						case DESCR_TELETEXT:
 							if ( (!teletext) || (pe->elementary_PID == tpid) )
 								teletext=pe;
-							skip=true;
 							break;
 						case DESCR_ISO639_LANGUAGE:
 							stream.text=getISO639Description(((ISO639LanguageDescriptor*)*i)->language_code);
@@ -706,28 +700,35 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 							if ( d->id && d->name )
 								stream.text.sprintf("%d.) %s", d->id, d->name.c_str());
 							else
-								skip=true;
+								isAudio=false;
 							break;
 						}
 						default:
 							break;
 					}
-					if (stream.isAC3 || stream.isDTS)
-					{ 
-						if ( (!ac3_audio) || (pe->elementary_PID == ac3pid) )
-							ac3_audio=pe;
-					}
 				}
-				
+
+				if (stream.isAC3)
+				{
+					stream.text+=" (AC3)";
+					isAudio=true;
+					if ( (!ac3_audio) || (pe->elementary_PID == ac3pid) )
+						ac3_audio=pe;
+				}
+				else if (stream.isDTS)
+				{
+					stream.text+=" (DTS)";
+					isAudio=true;
+					if ( (!ac3_audio) || (pe->elementary_PID == ac3pid) )
+						ac3_audio=pe;
+				}
+				else if (isAudio && ( (!audio) || (pe->elementary_PID == audiopid) ) )
+					audio=pe;
+
 				if (!stream.text)
 					stream.text.sprintf("PID %04x", pe->elementary_PID);
 
-				if (stream.isAC3)
-					stream.text+=" (AC3)";
-				if (stream.isDTS)
-					stream.text+=" (DTS)";
-
-				if (!skip)
+				if (isAudio)
 					audioStreams.push_back(stream);
 			}
 			default:
