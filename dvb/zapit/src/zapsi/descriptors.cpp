@@ -66,7 +66,7 @@ int cable_deliv_system_desc(char *buffer, int tsid)
 {
   int len = buffer[1];
   int freq = (((buffer[2] & 0xf0) >> 4) * 10000) + ((buffer[2] & 0xf) * 1000) + (((buffer[3] & 0xf0) >> 4) * 100) + ((buffer[3] & 0xf)*10) + (((buffer[4]&0xf0)>>4)) ;
-  int symbolrate = (((buffer[9] & 0xf0) >> 4) * 100000) + ((buffer[9] & 0xf) * 10000) + (((buffer[10] & 0xf0) >> 4) * 1000) + ((buffer[10] & 0xf)*100) + (((buffer[11]&0xf0)<<4)*10) + (buffer[11]&0xf);
+  int symbolrate = (((buffer[9] & 0xf0) >> 4) * 100000) + ((buffer[9] & 0xf) * 10000) + (((buffer[10] & 0xf0) >> 4) * 1000) + ((buffer[10] & 0xf)*100) + (((buffer[11]&0xf0)>>4)*10) + (buffer[11]&0xf);
   int fec_inner = (buffer[12]&0xF);
   
   //printf("frequency: %d\n",freq);
@@ -93,10 +93,9 @@ int sat_deliv_system_desc(char *buffer, int tsid,int diseqc)
 {
   int len = buffer[1];
   int freq = (((buffer[2] & 0xf0) >> 4) * 100000) + ((buffer[2] & 0xf) * 10000) + (((buffer[3] & 0xf0) >> 4) * 1000) + ((buffer[3] & 0xf)*100) + (((buffer[4]&0xf0)>>4)*10) + (buffer[4]&0xf);
-  int symbolrate = (((buffer[9] & 0xf0) >> 4) * 100000) + ((buffer[9] & 0xf) * 10000) + (((buffer[10] & 0xf0) >> 4) * 1000) + ((buffer[10] & 0xf)*100) + (((buffer[11]&0xf0)<<4)*10) + (buffer[11]&0xf);
+  int symbolrate = (((buffer[9] & 0xf0) >> 4) * 100000) + ((buffer[9] & 0xf) * 10000) + (((buffer[10] & 0xf0) >> 4) * 1000) + ((buffer[10] & 0xf)*100) + (((buffer[11]&0xf0)>>4)*10) + (buffer[11]&0xf);
   int fec_inner = (buffer[12]&0xF);
   int polarization = ((buffer[8]&0x60)>>5);
-  
 
 	
 	if (scantransponders.count(tsid) == 0)
