@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 	
-	$Id: timerdclient.cpp,v 1.9 2002/05/21 13:07:01 dirch Exp $
+	$Id: timerdclient.cpp,v 1.10 2002/05/21 15:50:30 dirch Exp $
 
 	License: GPL
 
@@ -26,7 +26,7 @@
 #include "timerdclient.h"
 #include "timerdMsg.h"
 #include "../timermanager.h"
-#include "debug.h"
+#include "../debug.h"
 
 
 CTimerdClient::CTimerdClient()
