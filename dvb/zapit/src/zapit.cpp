@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.46 2001/12/17 19:17:09 faralla Exp $
+  $Id: zapit.cpp,v 1.47 2001/12/17 21:45:06 faralla Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -90,6 +90,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.47  2001/12/17 21:45:06  faralla
+  removed byteorder-conversion
+
   Revision 1.46  2001/12/17 19:17:09  faralla
   small fix
 
@@ -1545,7 +1548,7 @@ void parse_command()
   //printf ("parse_command\n");
 
   //byteorder!!!!!!
-  rmsg.param2 = ((rmsg.param2 & 0x00ff) << 8) | ((rmsg.param2 & 0xff00) >> 8);
+  //rmsg.param2 = ((rmsg.param2 & 0x00ff) << 8) | ((rmsg.param2 & 0xff00) >> 8);
 
   /*
     printf("Command received\n");
@@ -2222,7 +2225,7 @@ int main(int argc, char **argv) {
 
   system("/usr/bin/killall camd");
   system("cp /var/zapit/last_chan /tmp/zapit_last_chan");
-  printf("Zapit $Id: zapit.cpp,v 1.46 2001/12/17 19:17:09 faralla Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.47 2001/12/17 21:45:06 faralla Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
