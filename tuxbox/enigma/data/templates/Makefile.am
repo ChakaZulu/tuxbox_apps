@@ -1,5 +1,4 @@
-EXTRA_DIST = eit.tmp index.tmp
+installdir = $(DATADIR)/enigma/templates
 
-install-data-local:
-	install -d $(DATADIR)/enigma/templates
-	install -m 0644 $(EXTRA_DIST) $(DATADIR)/enigma/templates
+install_DATA = eit.tmp index.tmp
+

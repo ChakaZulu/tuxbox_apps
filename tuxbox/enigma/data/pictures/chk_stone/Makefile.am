@@ -1,4 +1,6 @@
-EXTRA_DIST = \
+installdir = $(DATADIR)/enigma/pictures/chk_stone
+
+install_DATA = \
 	3D_border_unselected_corner_darkLight.png 3D_border_unselected_corner_darkLight_swap.png\
 	3D_border_unselected_corner_dark.png 3D_border_unselected_corner_dark_swap.png\
 	3D_border_unselected_corner_lightDark.png 3D_border_unselected_corner_lightDark_swap.png\
@@ -12,6 +14,3 @@ EXTRA_DIST = \
 	png.png red-button.png r.png speaker.png tl.png t.png tr.png unchecked.png\
 	yellow-button.png mainmenu/background-fs8.png folder.png rec_symbol-fs8.png
 
-install-data-local:
-	install -d $(DATADIR)/enigma/pictures/chk_stone
-	install -m 0644 $(EXTRA_DIST)  $(DATADIR)/enigma/pictures/chk_stone

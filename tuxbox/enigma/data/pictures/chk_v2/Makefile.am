@@ -1,4 +1,6 @@
-EXTRA_DIST = \
+installdir = $(DATADIR)/enigma/pictures/chk_v2
+
+install_DATA = \
 	bl2.png bl.png b.png br2.png br.png crypt_off.png crypt_on.png \
 	dolby_off.png dolby_on.png format_off.png format_on.png lcdmenu.png \
 	logo.png speaker.png tl.png t.png tr.png lbarrow.png lbarrow_left.png \
@@ -9,6 +11,3 @@ EXTRA_DIST = \
 	3D_border_unselected_hor_light.png 3D_border_unselected_hor_dark.png \
 	combo_arrow.png dvr-fs8.png
 
-install-data-local:
-	install -d $(DATADIR)/enigma/pictures/chk_v2
-	install -m 0644 $(EXTRA_DIST) $(DATADIR)/enigma/pictures/chk_v2
