@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.66 2003/11/30 13:21:02 zwen Exp $
+   $Id: timermanager.cpp,v 1.67 2004/01/14 19:20:22 zwen Exp $
 
 	License: GPL
 
@@ -218,7 +218,10 @@ bool CTimerManager::listEvents(CTimerEventMap &Events)
 	Events.clear();
 
 	for (CTimerEventMap::iterator pos = events.begin(); pos != events.end(); pos++)
+	{
+		pos->second->Refresh();
 		Events[pos->second->eventID] = pos->second;
+	}
 
 	return true;
 }
@@ -914,15 +917,17 @@ CTimerEvent(CTimerd::TIMER_RECORD, config, iId)
 //------------------------------------------------------------
 void CTimerEvent_Record::announceEvent()
 {
+	Refresh();
 	CTimerManager::getInstance()->getEventServer()->sendEvent(
-																				CTimerdClient::EVT_ANNOUNCE_RECORD,
-																				CEventServer::INITID_TIMERD);
+									CTimerdClient::EVT_ANNOUNCE_RECORD,
+									CEventServer::INITID_TIMERD);
 	dprintf("Record announcement\n"); 
 }
 //------------------------------------------------------------
 void CTimerEvent_Record::stopEvent()
 {
 	CTimerd::RecordingStopInfo stopinfo;
+	// Set EPG-ID if not set
 	stopinfo.eventID = eventID;
 	CTimerManager::getInstance()->getEventServer()->sendEvent(
 																				CTimerdClient::EVT_RECORD_STOP,
@@ -936,16 +941,13 @@ void CTimerEvent_Record::stopEvent()
 
 void CTimerEvent_Record::fireEvent()
 {
-	// Set EPG-ID if not set
-	if(eventInfo.epgID == 0)
-		getEpgId();
- 	
+	
 	CTimerd::RecordingInfo ri=eventInfo;
 	ri.eventID=eventID;
 	CTimerManager::getInstance()->getEventServer()->sendEvent(
-																				CTimerdClient::EVT_RECORD_START,
-																				CEventServer::INITID_TIMERD,
-																				&ri, sizeof(CTimerd::RecordingInfo));
+								CTimerdClient::EVT_RECORD_START,
+								CEventServer::INITID_TIMERD,
+								&ri, sizeof(CTimerd::RecordingInfo));
 	dprintf("Record Timer fired\n"); 
 }
 
@@ -976,16 +978,22 @@ void CTimerEvent_Record::getEpgId()
 	CSectionsdClient sdc;
 	CChannelEventList evtlist = sdc.getEventsServiceKey(eventInfo.channel_id);
 	// we check for a time in the middle of the recording
-	time_t check_time=(alarmTime + stopTime) / 2;
+	time_t check_time=alarmTime/2 + stopTime/2;
 	for ( CChannelEventList::iterator e= evtlist.begin(); e != evtlist.end(); ++e )
 	{
-    	if ( e->startTime <= check_time && (e->startTime + (int)e->duration) >= check_time)
+	    	if ( e->startTime <= check_time && (e->startTime + (int)e->duration) >= check_time)
 		{
 			eventInfo.epgID = e->eventID;
 			eventInfo.epg_starttime = e->startTime;
 			break;
 		}
 	}
+}
+//------------------------------------------------------------
+void CTimerEvent_Record::Refresh()
+{
+	if(eventInfo.epgID == 0)
+		getEpgId();
 }
 //=============================================================
 // Zapto Event
@@ -1072,6 +1080,12 @@ void CTimerEvent_Zapto::getEpgId()
 			break;
 		}
 	}
+}
+//------------------------------------------------------------
+void CTimerEvent_Zapto::Refresh()
+{
+	if(eventInfo.epgID == 0)
+		getEpgId();
 }
 //=============================================================
 // NextProgram Event

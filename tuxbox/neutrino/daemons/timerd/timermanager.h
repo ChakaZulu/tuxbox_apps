@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.h,v 1.33 2003/11/30 13:21:02 zwen Exp $
+	$Id: timermanager.h,v 1.34 2004/01/14 19:20:22 zwen Exp $
 
 	License: GPL
 
@@ -69,6 +69,7 @@ class CTimerEvent
 		virtual void stopEvent(){};
 		virtual void announceEvent(){};
                 virtual void saveToConfig(CConfigFile *config);
+                virtual void Refresh(){};
 };
 
 typedef map<int, CTimerEvent*> CTimerEventMap;
@@ -131,6 +132,7 @@ class CTimerEvent_Record : public CTimerEvent
 		virtual void saveToConfig(CConfigFile *config);
 		virtual void Reschedule();
 		void getEpgId();
+                virtual void Refresh();
 };
 
 class CTimerEvent_Zapto : public CTimerEvent
@@ -151,6 +153,7 @@ class CTimerEvent_Zapto : public CTimerEvent
 		virtual void saveToConfig(CConfigFile *config);
 		virtual void Reschedule();
 		void getEpgId();
+                virtual void Refresh();
 };
 
 class CTimerEvent_NextProgram : public CTimerEvent
