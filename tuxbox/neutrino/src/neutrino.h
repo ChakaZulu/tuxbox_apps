@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.71 2002/04/05 14:20:18 happydude Exp $
+//  $Id: neutrino.h,v 1.72 2002/04/06 20:06:42 Simplex Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -141,10 +141,12 @@ struct messages {
 			EVT_SCAN_COMPLETE	=		CRCInput::RC_Events + 16,
 			EVT_SCAN_NUM_TRANSPONDERS =	CRCInput::RC_Events + 17,
 			EVT_SCAN_NUM_CHANNELS =		CRCInput::RC_Events + 18,
+			EVT_SHUTDOWN =				CRCInput::RC_Events + 19,
 
 			EVT_CURRENTEPG 		=		CRCInput::RC_WithData + 1,
 			EVT_SCAN_SATELLITE	=		CRCInput::RC_WithData + 2,
-			EVT_SCAN_PROVIDER	=	 	CRCInput::RC_WithData + 3
+			EVT_SCAN_PROVIDER	=		CRCInput::RC_WithData + 3,
+			EVT_NEXTPROGRAM		=		CRCInput::RC_WithData + 4
 		};
 };
 

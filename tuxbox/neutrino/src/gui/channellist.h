@@ -129,7 +129,8 @@ class CChannelList
 		{
 			return chanlist[selected]->onid_sid;
 		}
-		const std::string getActiveChannelID();
+		const string getActiveChannelID();
+		string getNameFromOnidSid(int onidSid);
 		void zapTo(int pos);
 		bool showInfo(int pos);
 		void updateEvents(void);

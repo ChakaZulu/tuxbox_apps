@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.215 2002/04/06 13:28:23 McClean Exp $
+        $Id: neutrino.cpp,v 1.216 2002/04/06 20:06:42 Simplex Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -56,6 +56,7 @@ static void initGlobals(void)
 	g_RCInput = NULL;
 	g_lcdd = NULL;
 	g_Controld = NULL;
+	g_Timerd = NULL;
 	g_Zapit = NULL;
 	g_RemoteControl = NULL;
 
@@ -1380,6 +1381,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_lcdd = new CLcddClient;
 	g_Zapit = new CZapitClient;
 	g_Sectionsd = new CSectionsdClient;
+	g_Timerd = new CTimerdClient;
 
 	g_RemoteControl = new CRemoteControl;
 	g_EpgData = new CEpgData;
@@ -1471,6 +1473,8 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_NUM_CHANNELS, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_PROVIDER, 222, NEUTRINO_UDS_NAME);
 
+	g_Timerd->registerEvent(CTimerdClient::EVT_SHUTDOWN, 222, NEUTRINO_UDS_NAME);
+	g_Timerd->registerEvent(CTimerdClient::EVT_NEXTPROGRAM, 222, NEUTRINO_UDS_NAME);
 	//init programm
 	InitZapper();
 
@@ -1819,6 +1823,22 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		// auf der sicheren Seite...
 		channelList->zapTo( 0 );
 
+		return messages_return::handled;
+	}
+
+	else if ( msg == messages::EVT_NEXTPROGRAM )
+	{
+		int* p = (int*)data;
+		int evUniqueKey = *p;
+		p++;
+		int evOnidSid = *p;
+		p++;
+		char evName[50];
+		strncpy( evName, (char*)p, 50);
+		(char*)p += 50;
+		int evFSK = *(int*)p;
+		string evChannel = channelList->getNameFromOnidSid(evOnidSid);
+		printf("[neutrino] now starting %s on  %s (FSK: %d)\n", evName, evChannel.c_str(), evFSK);
 		return messages_return::handled;
 	}
 
@@ -2220,7 +2240,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.215 2002/04/06 13:28:23 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.216 2002/04/06 20:06:42 Simplex Exp $\n\n");
 	tzset();
 	initGlobals();
 

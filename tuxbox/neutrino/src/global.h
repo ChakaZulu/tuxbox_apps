@@ -37,6 +37,7 @@
 #include "lcddclient.h"
 #include "zapitclient.h"
 #include "sectionsdclient.h"
+#include "timerdclient.h"
 #include "daemonc/remotecontrol.h"
 
 #include "driver/fontrenderer.h"
@@ -70,6 +71,7 @@ NEUTRINO_CPP  CLcddClient		*g_lcdd;
 NEUTRINO_CPP  CControldClient	*g_Controld;
 NEUTRINO_CPP  CZapitClient		*g_Zapit;
 NEUTRINO_CPP  CSectionsdClient	*g_Sectionsd;
+NEUTRINO_CPP  CTimerdClient		*g_Timerd;
 NEUTRINO_CPP  CRemoteControl	*g_RemoteControl;
 
 NEUTRINO_CPP  fontRenderClass	*g_fontRenderer;

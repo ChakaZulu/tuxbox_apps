@@ -56,7 +56,7 @@ CChannelList::CChannel::CChannel()
 // and currently running program
 bool CChannelList::CChannel::isCurrentlyLocked()
 {
-	printf("bAlwaysLocked: %d, bLockedProgramIsRunning %d\n",bAlwaysLocked,bAlwaysLocked );
+	printf("bAlwaysLocked: %d, bLockedProgramIsRunning %d\n",bAlwaysLocked,bLockedProgramIsRunning );
 	return ( bAlwaysLocked || bLockedProgramIsRunning);
 }
 
@@ -918,5 +918,15 @@ void CChannelList::paint()
 
 	g_FrameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
 
+}
+
+string CChannelList::getNameFromOnidSid(int onidSid)
+{
+	for (uint i=0; i< chanlist.size();i++)
+	{
+		if (chanlist[i]->onid_sid == onidSid)
+			return chanlist[i]->name;
+	}
+	return("");
 }
 

@@ -343,15 +343,15 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 				{
 					bool dont_delete_p = false;
 
-                    unsigned char* p;
+					unsigned char* p;
 					p= new unsigned char[ emsg.dataSize + 1 ];
 					if ( p!=NULL )
 					{
 						read_bytes= recv(fd_eventclient, p, emsg.dataSize, MSG_WAITALL);
 						//printf("[neutrino] eventbody read %d bytes - initiator %x\n", read_bytes, emsg.initiatorID );
 
-                        if ( emsg.initiatorID == CEventServer::INITID_CONTROLD )
-                        {
+						if ( emsg.initiatorID == CEventServer::INITID_CONTROLD )
+						{
 							if (emsg.eventID==CControldClient::EVT_VOLUMECHANGED)
 							{
 								*msg = messages::EVT_VOLCHANGED;
@@ -364,19 +364,19 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 							}
 							else if (emsg.eventID==CControldClient::EVT_VCRCHANGED)
 							{
-            		            *msg = messages::EVT_VCRCHANGED;
+								*msg = messages::EVT_VCRCHANGED;
 								*data = *(int*) p;
 							}
 							else if (emsg.eventID==CControldClient::EVT_MODECHANGED)
 							{
-        	    	            *msg = messages::EVT_MODECHANGED;
+								*msg = messages::EVT_MODECHANGED;
 								*data = *(int*) p;
 							}
 							else
 								printf("[neutrino] event INITID_CONTROLD - unknown eventID 0x%x\n",  emsg.eventID );
 						}
 						else if ( emsg.initiatorID == CEventServer::INITID_SECTIONSD )
-                        {
+						{
 							//printf("[neutrino] event - from SECTIONSD %x %x\n", emsg.eventID, *(unsigned*) p);
 							if (emsg.eventID==CSectionsdClient::EVT_TIMESET)
 							{
@@ -393,8 +393,8 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 								printf("[neutrino] event INITID_SECTIONSD - unknown eventID 0x%x\n",  emsg.eventID );
 						}
 						else if ( emsg.initiatorID == CEventServer::INITID_ZAPIT )
-                        {
-                        	//printf("[neutrino] event - from ZAPIT %x %x\n", emsg.eventID, *(unsigned*) p);
+						{
+							//printf("[neutrino] event - from ZAPIT %x %x\n", emsg.eventID, *(unsigned*) p);
 							if (emsg.eventID==CZapitClient::EVT_ZAP_COMPLETE)
 							{
 								*msg = messages::EVT_ZAP_COMPLETE;
@@ -444,6 +444,15 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 							}
 							else
 								printf("[neutrino] event INITID_ZAPIT - unknown eventID 0x%x\n",  emsg.eventID );
+						}
+						else if ( emsg.initiatorID == CEventServer::INITID_TIMERD )
+						{
+							if (emsg.eventID==CTimerdClient::EVT_NEXTPROGRAM)
+							{
+								*msg = messages::EVT_NEXTPROGRAM;
+								*data = (unsigned) p;
+								dont_delete_p = true;
+							}
 						}
 						else
 							printf("[neutrino] event - unknown initiatorID 0x%x\n",  emsg.initiatorID);
