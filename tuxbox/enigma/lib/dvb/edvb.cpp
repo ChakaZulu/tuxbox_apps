@@ -313,11 +313,11 @@ void eDVB::configureNetwork()
 			    case  1:opt=opt+"ro";break;
 			    case  2:opt=opt+"rw";break;
 			    case  3:opt=opt+"ro,nolock";break;
-			    case  4:opt=opt+"rw,noclock";break;
+			    case  4:opt=opt+"rw,nolock";break;
 			    case  5:opt=opt+"ro,soft";break;
 			    case  6:opt=opt+"rw,soft";break;	
 			    case  7:opt=opt+"ro,soft,nolock";break;
-			    case  8:opt=opt+"rw,soft,nolcok";break;
+			    case  8:opt=opt+"rw,soft,nolock";break;
 			    case  9:opt=opt+"ro,udp,nolock";break;
 			    case 10:opt=opt+"rw,udp,nolock";break;
 			    case 11:opt=opt+"ro,soft,udp";break;

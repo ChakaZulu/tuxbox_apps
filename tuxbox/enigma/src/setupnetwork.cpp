@@ -809,11 +809,11 @@ eNFSSetup::eNFSSetup(): eWindow(0)
 	new eListBoxEntryText( *combo_options, "ro", (void*)1, 0);
 	new eListBoxEntryText( *combo_options, "rw", (void*)2, 0);
 	new eListBoxEntryText( *combo_options, "ro,nolock", (void*)3, 0);
-	new eListBoxEntryText( *combo_options, "rw,noclock", (void*)4, 0);
+	new eListBoxEntryText( *combo_options, "rw,nolock", (void*)4, 0);
 	new eListBoxEntryText( *combo_options, "ro,soft", (void*)5, 0);
 	new eListBoxEntryText( *combo_options, "rw,soft", (void*)6, 0);	
 	new eListBoxEntryText( *combo_options, "ro,soft,nolock", (void*)7, 0);
-	new eListBoxEntryText( *combo_options, "rw,soft,nolcok", (void*)8, 0);	
+	new eListBoxEntryText( *combo_options, "rw,soft,nolock", (void*)8, 0);	
 	new eListBoxEntryText( *combo_options, "ro,udp,nolock", (void*)9, 0);
 	new eListBoxEntryText( *combo_options, "rw,udp,nolock", (void*)10, 0);
 	new eListBoxEntryText( *combo_options, "ro,soft,udp", (void*)11, 0);
