@@ -5979,7 +5979,7 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 
 			int showSatPos = 1;
 			eConfig::getInstance()->getKey("/extras/showSatPos", showSatPos);
-			if (showSatPos == 1)
+			if (showSatPos == 1 && eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite)
 				name+=eString().sprintf(" (%d.%d\xC2\xB0%c)", abs(opos / 10), abs(opos % 10), opos>0?'E':'W');
 //			name+=eString().sprintf("(%04x)",((eServiceReferenceDVB&)_serviceref).getServiceID().get() );
 		}
