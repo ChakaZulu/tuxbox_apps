@@ -30,11 +30,14 @@
 */
 
 /*
-$Id: menue.cpp,v 1.37 2002/02/23 14:31:07 field Exp $
+$Id: menue.cpp,v 1.38 2002/02/24 21:41:58 field Exp $
 
 
 History:
  $Log: menue.cpp,v $
+ Revision 1.38  2002/02/24 21:41:58  field
+ User-Interface verbessert
+
  Revision 1.37  2002/02/23 14:31:07  field
  neue Icons
 
@@ -314,7 +317,8 @@ void CMenuWidget::paint()
 	iconOffset= 0;
 	for (int i= 0; i< items.size(); i++)
 	{
-		if (items[i]->iconName!= "")
+		if ( (items[i]->iconName!= "") ||
+			 ((items[i]->directKey>= CRCInput::RC_0) && (items[i]->directKey<= CRCInput::RC_9)) )
 		{
 			iconOffset= g_Fonts->menu->getHeight();
 			break;
@@ -593,11 +597,19 @@ int CMenuForwarder::paint(bool selected)
 		color = COL_MENUCONTENTINACTIVE;
 
 	g_FrameBuffer->paintBoxRel(x,y, dx, height, color );
-	g_Fonts->menu->RenderString(stringstartposX, y+height,dx- (stringstartposX - x),  l_text.c_str(), color);
+	g_Fonts->menu->RenderString(stringstartposX, y+ height, dx- (stringstartposX - x),  l_text.c_str(), color);
 
 	if (iconName!="")
 	{
 		g_FrameBuffer->paintIcon(iconName.c_str(), x + 10, y+ ((height- 20)>>1) );
+	}
+	else if ((directKey>= CRCInput::RC_0) && (directKey<= CRCInput::RC_9))
+	{
+		//number
+		char tmp[10];
+		sprintf((char*) tmp, "%d", directKey);
+
+		g_Fonts->channellist_number->RenderString(x + 10, y+ height, height, tmp, color, height);
 	}
 
 	if(option)
