@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.51 2004/02/01 20:11:25 carjay Exp $
+	$Id: webdbox.cpp,v 1.52 2004/02/08 20:00:07 carjay Exp $
 
 	License: GPL
 
@@ -199,7 +199,7 @@ bool CWebDbox::GetChannelEvents(void)
 		return false;
 	
 	for (eventIterator = eList.begin(); eventIterator != eList.end(); eventIterator++)
-		ChannelListEvents[(*eventIterator).serviceID()] = &(*eventIterator);
+		ChannelListEvents[(*eventIterator).get_channel_id()] = &(*eventIterator);
 
 	return true;
 }
