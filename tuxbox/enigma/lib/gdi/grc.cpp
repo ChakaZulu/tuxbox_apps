@@ -147,7 +147,7 @@ void gPainter::fill(const eRect &area)
 	rc.submit(o);
 }
 
-void gPainter::blit(gPixmap &pixmap, ePoint pos, eRect clip)
+void gPainter::blit(gPixmap &pixmap, ePoint pos, eRect clip, int flags)
 {
 	gOpcode o;
 	o.dc=&dc;
@@ -157,6 +157,7 @@ void gPainter::blit(gPixmap &pixmap, ePoint pos, eRect clip)
 	o.parm.blit.clip=new eRect(clip);
 	(*o.parm.blit.clip).moveBy(logicalZero.x(), logicalZero.y());
 	o.parm.blit.pixmap=pixmap.lock();
+	o.flags=flags;
 	rc.submit(o);
 }
 
@@ -301,7 +302,7 @@ void gPixmapDC::exec(gOpcode *o)
 			*o->parm.blit.clip=clip;
 		else
 			(*o->parm.blit.clip)&=clip;
-		pixmap->blit(*o->parm.blit.pixmap, *o->parm.blit.position, *o->parm.blit.clip);
+		pixmap->blit(*o->parm.blit.pixmap, *o->parm.blit.position, *o->parm.blit.clip, o->flags);
 		o->parm.blit.pixmap->unlock();
 		delete o->parm.blit.position;
 		delete o->parm.blit.clip;

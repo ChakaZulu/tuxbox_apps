@@ -83,7 +83,12 @@ struct gPixmap
 	eSize getSize() const { return eSize(x, y); }
 	
 	void fill(const eRect &area, const gColor &color);
-	void blit(const gPixmap &src, ePoint pos, const eRect &clip=eRect());
+	
+	enum
+	{
+		blitAlphaTest=1
+	};
+	void blit(const gPixmap &src, ePoint pos, const eRect &clip=eRect(), int flags=0);
 	
 	void mergePalette(const gPixmap &target);
 	void line(ePoint start, ePoint end, gColor color);

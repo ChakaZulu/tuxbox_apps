@@ -19,7 +19,7 @@ void gPixmap::fill(const eRect &area, const gColor &color)
 		memset(((__u8*)data)+y*stride+area.left(), color.color, area.width());
 }
 
-void gPixmap::blit(const gPixmap &src, ePoint pos, const eRect &clip)
+void gPixmap::blit(const gPixmap &src, ePoint pos, const eRect &clip, int flag)
 {
 	if (bpp != src.bpp)
 		eFatal("cannot blit %dbpp from %dbpp", bpp, src.bpp);
@@ -42,7 +42,22 @@ void gPixmap::blit(const gPixmap &src, ePoint pos, const eRect &clip)
 
 	for (int y=0; y<area.height(); y++)
 	{
-		memcpy(dstptr, srcptr, area.width()*bypp); 
+		if (flag & blitAlphaTest)
+		{
+				// no real alphatest yet
+			int width=area.width();
+			unsigned char *src=(unsigned char*)srcptr;
+			unsigned char *dst=(unsigned char*)dstptr;
+				// use duff's device here!
+			while (width--)
+				if (!*src)
+				{
+					src++;
+					dst++;
+				} else
+					*src++=*dst++;
+		} else
+			memcpy(dstptr, srcptr, area.width()*bypp); 
 		srcptr+=src.stride;
 		dstptr+=stride;
 	}
@@ -62,19 +77,19 @@ void gPixmap::mergePalette(const gPixmap &target)
 			int ttd;
 			int td=(signed)(clut[i].r-target.clut[t].r); td*=td; td*=(255-clut[i].a);
 			ttd=td;
-			if (ttd>difference)
+			if (ttd>=difference)
 				continue;
 			td=(signed)(clut[i].g-target.clut[t].g); td*=td; td*=(255-clut[i].a);
 			ttd+=td;
-			if (ttd>difference)
+			if (ttd>=difference)
 				continue;
 			td=(signed)(clut[i].b-target.clut[t].b); td*=td; td*=(255-clut[i].a);
 			ttd+=td;
-			if (ttd>difference)
+			if (ttd>=difference)
 				continue;
 			td=(signed)(clut[i].a-target.clut[t].a); td*=td; td*=255;
 			ttd+=td;
-			if (ttd>difference)
+			if (ttd>=difference)
 				continue;
 			difference=ttd;
 			best_choice=t;

@@ -152,7 +152,7 @@ public:
 	
 	void clear();
 	
-	void blit(gPixmap &src, ePoint pos, eRect clip=eRect());
+	void blit(gPixmap &src, ePoint pos, eRect clip=eRect(), int flags=0);
 
 	void setPalette(gRGB *colors, int start=0, int len=256);
 	void mergePalette(gPixmap &target);
