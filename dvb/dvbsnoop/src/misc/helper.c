@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.21 2004/01/13 21:04:21 rasc Exp $
+$Id: helper.c,v 1.22 2004/01/13 23:23:38 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: helper.c,v 1.21 2004/01/13 21:04:21 rasc Exp $
 
 
 $Log: helper.c,v $
+Revision 1.22  2004/01/13 23:23:38  rasc
+new getBits routine (hopfully more optimized)
+
 Revision 1.21  2004/01/13 21:04:21  rasc
 BUGFIX: getbits overflow fixed...
 
@@ -180,40 +183,104 @@ u_long outBit_S2x_NL (int verbosity, const char *text, u_char *buf, int startbit
   $$$ TODO  to be performance optimized!!
 */
 
+//unsigned long XXgetBits (u_char *buf, int byte_offset, int startbit, int bitlen)
+//{
+// u_char *b;
+// unsigned long  v;
+// unsigned long mask;
+// unsigned long tmp_long;
+//
+//
+// b = &buf[byte_offset + (startbit / 8)];
+// startbit %= 8;
+//
+// if (bitlen > 24) {
+//	 // -- 24..32 bit
+//   return (unsigned long) getBits48 (b, 0, startbit, bitlen);
+// }
+//
+// // -- safe is 24 bitlen
+// tmp_long = (unsigned long)(
+//		 (*(b  )<<24) + (*(b+1)<<16) +
+//		 (*(b+2)<< 8) +  *(b+3) );
+//
+// startbit = 32 - startbit - bitlen;
+//
+// tmp_long = tmp_long >> startbit;
+// mask     = (1ULL << bitlen) - 1;  // 1ULL !!!
+// v        = tmp_long & mask;
+//
+// return v;
+//}
+
+
+/* 
+  -- get bits out of buffer (max 32 bit!!!)
+  -- return: value
+*/
+
 unsigned long getBits (u_char *buf, int byte_offset, int startbit, int bitlen)
 {
  u_char *b;
  unsigned long  v;
  unsigned long mask;
  unsigned long tmp_long;
+ int           bitHigh;
 
 
- b = &buf[byte_offset + (startbit / 8)];
+ b = &buf[byte_offset + (startbit >> 3)];
  startbit %= 8;
 
- if (bitlen > 24) {
-   return (unsigned long) getBits48 (b, 0, startbit, bitlen);
+ switch ((bitlen-1) >> 3) {
+	 case -1:	// -- <=0 bits: always 0
+		return 0L;
+		break;
+
+	case 0:		// -- 1..8 bit
+ 		tmp_long = (unsigned long)(
+			(*(b  )<< 8) +  *(b+1) );
+		bitHigh = 16;
+		break;
+
+	case 1:		// -- 9..16 bit
+ 		tmp_long = (unsigned long)(
+		 	(*(b  )<<16) + (*(b+1)<< 8) +  *(b+2) );
+		bitHigh = 24;
+		break;
+
+	case 2:		// -- 17..24 bit
+ 		tmp_long = (unsigned long)(
+		 	(*(b  )<<24) + (*(b+1)<<16) +
+			(*(b+2)<< 8) +  *(b+3) );
+		bitHigh = 32;
+		break;
+
+	case 3:		// -- 25..32 bit
+			// -- to be safe, we need 32+8 bit as shift range 
+		return (unsigned long) getBits48 (b, 0, startbit, bitlen);
+		break;
+
+	default:	// -- 33.. bits: fail, deliver constant fail value
+		return (unsigned long) 0xFEFEFEFE;
+		break;
  }
 
-
- tmp_long = (unsigned long)(
-		 (*(b  )<<24) + (*(b+1)<<16) +
-		 (*(b+2)<< 8) +  *(b+3) );
-
- startbit = 32 - startbit - bitlen;
-
+ startbit = bitHigh - startbit - bitlen;
  tmp_long = tmp_long >> startbit;
- // ja, das ULL muss so sein (fuer bitlen == 32 z.b.)...
- mask = (1ULL << bitlen) - 1;
- v = tmp_long & mask;
+ mask     = (1ULL << bitlen) - 1;  // 1ULL !!!
+ v        = tmp_long & mask;
 
  return v;
 }
 
 
+
+
+
+
 /*
-  -- get bits out of buffer
-  -- extended bitrange, so it's slower (max 48 bit!)
+  -- get bits out of buffer  (max 48 bit)
+  -- extended bitrange, so it's slower
   -- return: value
  */
 
@@ -224,25 +291,57 @@ long long getBits48 (u_char *buf, int byte_offset, int startbit, int bitlen)
  unsigned long long mask;
  unsigned long long tmp;
 
+ if (bitlen > 48) return 0xFEFEFEFEFEFEFEFELL;
+ 
+
  b = &buf[byte_offset + (startbit / 8)];
  startbit %= 8;
 
+
+ // -- safe is 48 bitlen
  tmp = (unsigned long long)(
-		 ((unsigned long long)*(b  )<<48) + ((unsigned long long)*(b+1)<<40) +
-		 ((unsigned long long)*(b+2)<<32) + ((unsigned long long)*(b+3)<<24) +
-		 (*(b+4)<<16) + (*(b+5)<< 8) + *(b+6) );
+	 ((unsigned long long)*(b  )<<48) + ((unsigned long long)*(b+1)<<40) +
+	 ((unsigned long long)*(b+2)<<32) + ((unsigned long long)*(b+3)<<24) +
+	 (*(b+4)<<16) + (*(b+5)<< 8) + *(b+6) );
 
  startbit = 56 - startbit - bitlen;
-
- tmp  = tmp >> startbit;
- mask = (1ULL << bitlen) - 1;
- v    = tmp & mask;
+ tmp      = tmp >> startbit;
+ mask     = (1ULL << bitlen) - 1;	// 1ULL !!!
+ v        = tmp & mask;
 
  return v;
 }
 
 
 
+/*
+  -- get bits out of buffer   (max 64 bit)
+  -- extended bitrange, so it's slower 
+  -- return: value
+ */
+
+unsigned long long getBits64 (u_char *buf, int byte_offset, int startbit, int bitlen)
+{
+  unsigned long long x1,x2,x3;
+
+  if (bitlen <= 32) {
+     x3 = getBits (buf,byte_offset,startbit,bitlen); 
+  } else {
+     x1 = getBits (buf,byte_offset,startbit,32); 
+     x2 = getBits (buf,byte_offset,startbit+32,bitlen-32); 
+     x3 = (x1<<(bitlen-32)) + x2;
+  }
+  return x3;
+}
+
+
+
+
+
+
+/*
+  -----------------------------------------------------------------------------------
+ */
 
 
 
