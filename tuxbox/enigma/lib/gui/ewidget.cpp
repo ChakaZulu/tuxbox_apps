@@ -64,6 +64,7 @@ eWidget::~eWidget()
 
 void eWidget::setActive( bool active, eWidget *insert, bool after )
 {
+	eWidget *tlw = getTLW();
 	if (active && !takefocus)
 	{
 		ePtrList<eWidget> &list = *getTLW()->focusList();
@@ -78,15 +79,17 @@ void eWidget::setActive( bool active, eWidget *insert, bool after )
 		}
 		else
 			list.push_back(this);
-		getTLW()->takeFocus();
+		if ( tlw->isVisible() )
+			tlw->takeFocus();
 		takefocus=1;
 	}
 	else if (!active && takefocus)
 	{
 		if ( have_focus )
 			lostFocus();
-		getTLW()->releaseFocus();
-		getTLW()->focusList()->remove(this);
+		if ( tlw->isVisible() )
+			tlw->releaseFocus();
+		tlw->focusList()->remove(this);
 		takefocus=0;
 	}
 }
