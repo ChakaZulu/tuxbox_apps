@@ -440,12 +440,13 @@ int CStreamFeaturesChangeExec::exec(CMenuTarget* parent, const std::string & act
 	int sel= atoi(actionKey.c_str());
 
 	parent->hide();
-	if (sel==-1)
-	{
-		CStreamInfo StreamInfo;
-		StreamInfo.exec(NULL, "");
-	}
-	else if (sel>=0)
+	// -- obsolete (rasc 2004-06-10)
+	// if (sel==-1)
+	// {
+	// 	CStreamInfo StreamInfo;
+	//	StreamInfo.exec(NULL, "");
+	// } else
+	if (sel>=0)
 	{
 		g_PluginList->startPlugin(sel);
 	}
