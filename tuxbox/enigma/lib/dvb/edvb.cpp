@@ -65,7 +65,10 @@ void eDVB::tunedIn(eTransponder *trans, int err)
 }
 
 eDVB::eDVB()
-	:parentEIT(0), recorder(0), DVBCI(0), DVBCI2(0)
+	:parentEIT(0), recorder(0)
+	#ifndef DISABLE_CI
+	, DVBCI(0), DVBCI2(0)
+	#endif
 	,state(eDVBState::stateIdle)
 {
 	settings=0;
