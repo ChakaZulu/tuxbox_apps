@@ -16,6 +16,19 @@ TUXBOX_APPS_LIB_CONFIG(FREETYPE,freetype-config)
 AC_OUTPUT([
 Makefile
 include/Makefile
+fx2/Makefile
+fx2/lemm/Makefile
+fx2/master/Makefile
+fx2/pac/Makefile
+fx2/tank/Makefile
+fx2/yahtzee/Makefile
+fx2/bouquet/Makefile
+fx2/lib/Makefile
+fx2/mines/Makefile
+fx2/snake/Makefile
+fx2/tetris/Makefile
+tuxtxt/Makefile
+tuxtxt/font/Makefile
 tuxbox-plugins.pc
 ])
 
