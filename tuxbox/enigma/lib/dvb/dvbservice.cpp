@@ -767,7 +767,7 @@ void eDVBServiceController::TDTready(int error)
 				now.tm_hour,
 				now.tm_min,
 				now.tm_sec);
-			dvb.time_difference = linuxTime - rtc_time;
+			dvb.time_difference = rtc_time - linuxTime;
 			eDebug("[TIME] RTC to Receiver time difference is %d seconds", nowTime - rtc_time );
 			if ( abs(dvb.time_difference) > 59 )
 			{
@@ -778,7 +778,7 @@ void eDVBServiceController::TDTready(int error)
 				settimeofday(&tnow,0);
 				for (ePtrList<eMainloop>::iterator it(eMainloop::existing_loops)
 					;it != eMainloop::existing_loops.end(); ++it)
-					it->setTimerOffset(nowTime-rtc_time);
+					it->setTimerOffset(dvb.time_difference);
 				dvb.time_difference=1;
 			}
 			else if ( !dvb.time_difference )
