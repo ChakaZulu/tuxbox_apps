@@ -363,6 +363,9 @@ void eWidget::findAction(eActionPrioritySet &prio, const eRCKey &key, eWidget *c
 {
 	for (actionMapList::iterator i = actionmaps.begin(); i != actionmaps.end(); ++i)
 		(*i)->findAction(prio, key, context);
+		
+	if (focus && focus != this)
+		focus->findAction(prio, key, context);
 }
 
 int eWidget::eventFilter(const eWidgetEvent &event)
