@@ -37,7 +37,7 @@ class CControld : public CBasicMessage
 
 	public:
 
-		static const CBasicMessage::t_version ACTVERSION = 1;
+		static const CBasicMessage::t_version ACTVERSION = 2;
 
 		enum commands
 		{
@@ -57,9 +57,6 @@ class CControld : public CBasicMessage
 			CMD_MUTE_AVS,
 			CMD_UNMUTE_AVS,
 			CMD_GETMUTESTATUS_AVS,
-
-			CMD_SETANALOGMODE,
-			CMD_GETANALOGMODE,
 
 			CMD_SETVIDEOFORMAT,
 			CMD_GETVIDEOFORMAT,

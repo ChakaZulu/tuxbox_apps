@@ -683,11 +683,6 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute, sizeof(settings.mute));
 		break;
 		
-	case CControld::CMD_SETANALOGMODE:
-		CControld::commandAnalogMode msgmd;
-		CBasicServer::receive_data(connfd, &msgmd, sizeof(msgmd));
-		zapit.setAudioMode(msgmd.mode);
-		break;
 	case CControld::CMD_SETVIDEOFORMAT:
 		//printf("[controld] set videoformat\n");
 		CControld::commandVideoFormat msg2;
@@ -799,7 +794,7 @@ int main(int argc, char **argv)
 
 	CBasicServer controld_server;
 
-	printf("$Id: controld.cpp,v 1.102 2003/03/14 06:29:11 obi Exp $\n\n");
+	printf("$Id: controld.cpp,v 1.103 2003/03/17 23:33:32 thegoodguy Exp $\n\n");
 
 	for (int i = 1; i < argc; i++)
 	{

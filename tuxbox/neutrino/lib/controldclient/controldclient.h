@@ -114,10 +114,6 @@ class CControldClient:private CBasicClient
 		*/
 		void UnMute(const bool avs = true);
 
-		/*
-			Setzen des AnalogOutputs (0 = stereo, 1 = mono left, 2 = mono right)
-		*/
-		void setAnalogOutput(int mode);
 
 		/*
 			setVideoFormat(char) : Setzten des Bildformates ( 4:3 / 16:9 )

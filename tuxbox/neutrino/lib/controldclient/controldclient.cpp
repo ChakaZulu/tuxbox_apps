@@ -222,17 +222,6 @@ bool CControldClient::getMute(const bool avs)
 	return rmsg.mute;
 }
 
-void CControldClient::setAnalogOutput(int mode)
-{
-	CControld::commandAnalogMode msg2;
-
-	msg2.mode = mode;
-
-	send(CControld::CMD_SETANALOGMODE, (char*)&msg2, sizeof(msg2));
-
-	close_connection();
-}
-
 void CControldClient::registerEvent(unsigned int eventID, unsigned int clientID, string udsName)
 {
 	CEventServer::commandRegisterEvent msg2;
