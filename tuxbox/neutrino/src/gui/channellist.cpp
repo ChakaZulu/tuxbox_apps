@@ -87,108 +87,17 @@ int CChannelList::exec()
 	}
 }
 
-// quick'n dirty
 void CChannelList::updateEvents(void)
 {
-	char rip[]="127.0.0.1";
+	CChannelEventList events = g_Sectionsd->getChannelEvents();
 
-	//printf("\n START CChannelList::updateEvents \n\n");
-	int sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	SAI servaddr;
-	memset(&servaddr,0,sizeof(servaddr));
-	servaddr.sin_family=AF_INET;
-	servaddr.sin_port=htons(sectionsd::portNumber);
-	inet_pton(AF_INET, rip, &servaddr.sin_addr);
-
-	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
-	{
-		perror("Couldn't connect to sectionsd!");
-		return;
-	}
-
-	sectionsd::msgRequestHeader req;
-	req.version = 2;
-
-	req.command = sectionsd::actualEventListTVshortIDs;
-	req.dataLength = 0;
-	write(sock_fd,&req,sizeof(req));
-
-	sectionsd::msgResponseHeader resp;
-	memset(&resp, 0, sizeof(resp));
-	if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0)
-	{
-		close(sock_fd);
-		return;
-	}
-	if(resp.dataLength<=0)
-	{
-		close(sock_fd);
-		return;
-	}
-
-	char* pData = new char[resp.dataLength] ;
-	if ( recv(sock_fd, pData, resp.dataLength, MSG_WAITALL)!= resp.dataLength )
-	{
-		delete[] pData;
-		close(sock_fd);
-		return;
-	}
-
-	close(sock_fd);
-
-	char *actPos = pData;
-
-/*	FILE *file=fopen("channellist.list", "wb");
-        if(file) {
-            fwrite(pData,  resp.dataLength, 1, file);
-            fclose(file);
-        }
-*/
-	for(unsigned int count=0;count<chanlist.size();count++)
-		chanlist[count]->currentEvent.description="";
-
-	//printf("\n read finished CChannelList::updateEvents \n\n");
-
-//	printf("data length: 0x%x\n", resp.dataLength);
-	while(actPos<pData+resp.dataLength)
-	{
-		unsigned* serviceID = (unsigned*) actPos;
-		actPos+=4;
-
-		unsigned long long* evt_id = (unsigned long long*) actPos;
-		actPos+=8;
-
-		time_t* startt = (time_t*) actPos;
-		actPos+=4;
-
-		unsigned* dauert = (unsigned*) actPos;
-		actPos+=4;
-
-		string descriptiont= actPos;
-		actPos+=strlen(actPos)+1;
-		string textt= actPos;
-		actPos+=strlen(actPos)+1;
-
-		// quick'n dirty, sollte man mal anders machen
-		for (unsigned int count=0;count<chanlist.size();count++)
-		{
-			if (chanlist[count]->onid_sid==*serviceID)
+	for (uint count=0; count<chanlist.size(); count++)
+		for ( CChannelEventList::iterator e= events.begin(); e != events.end(); ++e )
+			if (chanlist[count]->onid_sid == e->serviceID() )
 			{
-				chanlist[count]->currentEvent.id= *evt_id;
-				chanlist[count]->currentEvent.description= descriptiont;
-				chanlist[count]->currentEvent.text_1= textt;
-				chanlist[count]->currentEvent.startzeit= *startt;
-				chanlist[count]->currentEvent.dauer= *dauert;
-				//	printf("Channel found: %s\n", actPos);
+				chanlist[count]->currentEvent= *e;
 				break;
 			}
-		}
-
-	}
-
-	delete[] pData;
-	//printf("\n END CChannelList::updateEvents \n\n");
-	return;
 }
 
 void CChannelList::addChannel(int key, int number, const std::string& name, unsigned int ids)
@@ -446,7 +355,8 @@ int CChannelList::handleMsg(uint msg, uint data)
 {
 	if ( msg == NeutrinoMessages::EVT_PROGRAMLOCKSTATUS )
 	{
-		// 0x100 als FSK-Status zeigt an, dass (noch) kein EPG zu einem Kanal der NICHT angezeigt wird da ist
+		// 0x100 als FSK-Status zeigt an, dass (noch) kein EPG zu einem Kanal der NICHT angezeigt
+		// werden sollte (vorgesperrt) da ist
 
 		//printf("program-lock-status: %d\n", data);
 
@@ -467,6 +377,7 @@ int CChannelList::handleMsg(uint msg, uint data)
 						if ( zapProtection->check() )
 						{
 							g_RemoteControl->startvideo();
+
 							// merken fürs nächste hingehen
 							chanlist[selected]->last_unlocked_EPGid= g_RemoteControl->current_EPGid;
 						}
@@ -732,19 +643,19 @@ void CChannelList::paintDetails(int index)
 		char cNoch[50];
 		char cSeit[50];
 
-        struct		tm *pStartZeit = localtime(&chanlist[index]->currentEvent.startzeit);
-        unsigned 	seit = ( time(NULL) - chanlist[index]->currentEvent.startzeit ) / 60;
+        struct		tm *pStartZeit = localtime(&chanlist[index]->currentEvent.startTime);
+        unsigned 	seit = ( time(NULL) - chanlist[index]->currentEvent.startTime ) / 60;
         sprintf( cSeit, g_Locale->getText("channellist.since").c_str(), pStartZeit->tm_hour, pStartZeit->tm_min); //, seit );
         int seit_len= g_Fonts->channellist_descr->getRenderWidth(cSeit);
 
-        int noch = ( chanlist[index]->currentEvent.startzeit + chanlist[index]->currentEvent.dauer - time(NULL)   ) / 60;
+        int noch = ( chanlist[index]->currentEvent.startTime + chanlist[index]->currentEvent.duration - time(NULL)   ) / 60;
         if ( (noch< 0) || (noch>=10000) )
         	noch= 0;
         sprintf( cNoch, "(%d / %d min)", seit, noch );
         int noch_len= g_Fonts->channellist_number->getRenderWidth(cNoch);
 
 		string text1= chanlist[index]->currentEvent.description;
-		string text2= chanlist[index]->currentEvent.text_1;
+		string text2= chanlist[index]->currentEvent.text;
 
 		int xstart = 10;
 		if ( g_Fonts->channellist->getRenderWidth(text1.c_str())> (width - 30 - seit_len) )

@@ -30,13 +30,16 @@
 */
 
 //
-// $Id: eventlist.cpp,v 1.43 2002/03/22 17:34:04 field Exp $
+// $Id: eventlist.cpp,v 1.44 2002/04/18 10:42:55 field Exp $
 //
 //  -- EPG Event List // Vorschau
 //
 //
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.44  2002/04/18 10:42:55  field
+// Updates, sectionsd clientlib
+//
 // Revision 1.43  2002/03/22 17:34:04  field
 // Massive Umstellungen - NVODs/SubChannels=KAPUTT!
 // Infoviewer tw. kaputt! NON-STABLE!
@@ -173,151 +176,25 @@
 #include "eventlist.hpp"
 #include "../global.h"
 
-static char* copyStringto(const char* from, char* to, int len, char delim)
-{
-	const char *fromend=from+len;
-	while(*from!=delim && from<fromend && *from)
-	{
-		*(to++)=*(from++);
-	}
-	*to=0;
-	return (char *)++from;
-}
-
-// quick'n dirty
 void EventList::readEvents(unsigned onidSid, const std::string& channelname)
 {
-	char rip[]="127.0.0.1";
-
-	int sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	SAI servaddr;
-	memset(&servaddr,0,sizeof(servaddr));
-	servaddr.sin_family=AF_INET;
-	servaddr.sin_port=htons(sectionsd::portNumber);
-	inet_pton(AF_INET, rip, &servaddr.sin_addr);
-
-	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
-	{
-		perror("Couldn't connect to sectionsd!");
-		return;
-	}
-	sectionsd::msgRequestHeader req;
-	req.version = 2;
-	req.command = sectionsd::allEventsChannelID;
-	req.dataLength = 4;
-	write(sock_fd, &req, sizeof(req));
-	write(sock_fd, &onidSid, req.dataLength);
-	sectionsd::msgResponseHeader resp;
-	memset(&resp, 0, sizeof(resp));
-	if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0)
-	{
-		close(sock_fd);
-		return;
-	}
-
-	removeAllEvents(); // Alle gespeicherten Events loeschen
 	current_event = (unsigned int)-1;
+	evtlist = g_Sectionsd->getEventsServiceKey( onidSid );
+    time_t azeit=time(NULL);
 
-	if ( resp.dataLength>0 )
+	for ( CChannelEventList::iterator e= evtlist.begin(); e != evtlist.end(); ++e )
 	{
-		char* pData = new char[resp.dataLength] ;
-		if ( recv(sock_fd, pData, resp.dataLength, MSG_WAITALL)!= resp.dataLength )
-		{
-			delete[] pData;
-			close(sock_fd);
-			printf("EventList::readEvents - read from socket failed!");
-			return;
-		}
-		char epgID[20];
-		char edate[6];
-		char etime[6];
-		char eduration[10];
-		char ename[100];
-		char tmpstr[256];
-		char *actPos=pData;
-
-		struct  tm tmZeit;
-		struct  tm *tmZeit_now;
-		int     evtTime, aktTime;
-		time_t  tZeit  = time(NULL);
-		tmZeit_now = localtime(&tZeit);
-		aktTime = (tmZeit_now->tm_mon+ 1)* 1000000+ (tmZeit_now->tm_mday)* 10000+ (tmZeit_now->tm_hour)* 100+ tmZeit_now->tm_min;
-		tmZeit = *tmZeit_now;
-
-		while(*actPos && actPos<pData+resp.dataLength)
-		{
-			*epgID=0;
-			actPos = copyStringto( actPos, epgID, sizeof(epgID), ' ');
-			*edate=0;
-			actPos = copyStringto( actPos, edate, sizeof(edate), ' ');
-			*etime=0;
-			actPos = copyStringto( actPos, etime, sizeof(etime), ' ');
-			*eduration=0;
-			actPos = copyStringto( actPos, eduration, sizeof(eduration), ' ');
-			*ename=0;
-			actPos = copyStringto( actPos, ename, sizeof(ename), '\n');
-
-			event* evt = new event();
-
-
-			sscanf(epgID, "%llx", &evt->epg.id);
-			sscanf(edate, "%02d.%02d", &tmZeit.tm_mday, &tmZeit.tm_mon);
-			tmZeit.tm_mon--;
-			sscanf(etime, "%02d:%02d", &tmZeit.tm_hour, &tmZeit.tm_min);
-			evtTime = (tmZeit.tm_mon+ 1)* 1000000+ (tmZeit.tm_mday)* 10000+ (tmZeit.tm_hour)* 100+ tmZeit.tm_min;
-			tmZeit.tm_sec= 0;
-
-			evt->epg.startzeit = mktime(&tmZeit);
-			//            printf("Time: %02d.%02d %02d:%02d %lx\n", tmZeit.tm_mday, tmZeit.tm_mon+ 1, tmZeit.tm_hour, tmZeit.tm_min, evt->startzeit);
-
-			if ( (evtTime- aktTime) <= 0 )
-				current_event++;
-
-			evt->epg.description=std::string(ename);
-
-			// -- Create strings:   "Mon,  14:30, "      and   "23. Okt."
-			// -- and  duration string "[999 min]"
-			// -- rasc 2001-10-14
-
-			// -- localized day   (strftime has to return english values!
-			strftime(tmpstr,sizeof(tmpstr), "date.%a",&tmZeit);
-			evt->datetime1_str = std::string(g_Locale->getText(tmpstr));
-			strftime(tmpstr,sizeof(tmpstr), ". %H:%M, ",&tmZeit);
-			evt->datetime1_str += std::string(tmpstr);
-
-			strftime(tmpstr,sizeof(tmpstr), " %d. ",&tmZeit);
-			evt->datetime2_str = std::string(tmpstr);
-			strftime(tmpstr,sizeof(tmpstr), "date.%b",&tmZeit);
-			evt->datetime2_str += std::string(g_Locale->getText(tmpstr));
-			evt->datetime2_str += std::string(".");
-
-
-			evt->duration_str=std::string("[");
-			evt->duration_str+=std::string(eduration);
-			evt->duration_str+=std::string(" min] ");
-
-
-
-			//            printf("id: %s - name: %s\n", epgID, evt->name.c_str());
-			//    tmp->number=number;
-			//    tmp->name=name;
-			if(evt->epg.description !="")
-				evtlist.insert(evtlist.end(), evt);
-		}
-
-		delete[] pData;
+    	if ( e->startTime > azeit )
+    		break;
+    	current_event++;
 	}
-	close(sock_fd);
 
 	if ( evtlist.size() == 0 )
 	{
-		event* evt = new event();
+		CChannelEvent evt;
 
-		evt->epg.description= g_Locale->getText("epglist.noevents") ;
-		evt->datetime1_str = std::string("");
-		evt->datetime2_str = std::string("");
-		evt->duration_str  = std::string("");
-		evt->epg.id = 0;
+		evt.description= g_Locale->getText("epglist.noevents") ;
+		evt.eventID = 0;
 		evtlist.insert(evtlist.end(), evt);
 
 	}
@@ -356,16 +233,9 @@ EventList::EventList()
 	liststart = 0;
 }
 
-void EventList::removeAllEvents(void)
-{
-	for(unsigned int count=0; count<evtlist.size(); count++)
-		delete evtlist[count];
-	evtlist.clear();
-}
 
 EventList::~EventList()
 {
-	removeAllEvents();
 }
 
 int EventList::exec(unsigned onidSid, const std::string& channelname)
@@ -461,12 +331,11 @@ int EventList::exec(unsigned onidSid, const std::string& channelname)
 		}
 		else if (msg==CRCInput::RC_help || msg==CRCInput::RC_right)
 		{
-			event* evt = evtlist[selected];
-			if ( evt->epg.id != 0 )
+			if ( evtlist[selected].eventID != 0 )
 			{
 				hide();
 
-				res = g_EpgData->show(channelname, onidSid, evt->epg.id, &evt->epg.startzeit);
+				res = g_EpgData->show(channelname, onidSid, evtlist[selected].eventID, &evtlist[selected].startTime);
                 if ( res == menu_return::RETURN_EXIT_ALL )
                 {
                 	loop = false;
@@ -515,6 +384,7 @@ void EventList::paintItem(unsigned int pos)
 {
 	int color;
 	int ypos = y+ theight+0 + pos*fheight;
+	string datetime1_str, datetime2_str, duration_str;
 
 	if (liststart+pos==selected)
 	{
@@ -533,24 +403,36 @@ void EventList::paintItem(unsigned int pos)
 
 	if(liststart+pos<evtlist.size())
 	{
-		event* evt = evtlist[liststart+pos];
+		if ( evtlist[liststart+pos].eventID != 0 )
+		{
+			char tmpstr[256];
+			struct tm *tmStartZeit = localtime(&evtlist[liststart+pos].startTime);
 
-		//		printf("Rendering '%s'\n", evt->name.c_str());
-		//		printf("date time duration '%s'\n", evt->datetimeduration.c_str());
 
-		//$$$ auch sollten wg. der besseren Darstellung andere Fontmappings benutzt werden...
+			strftime(tmpstr, sizeof(tmpstr), "date.%a", tmStartZeit );
+			datetime1_str = std::string( g_Locale->getText(tmpstr) );
 
-		//  datetime1_str  datetime2_str    duration_str
-		//  evt->epg.description
+			strftime(tmpstr, sizeof(tmpstr), ". %H:%M, ", tmStartZeit );
+			datetime1_str += std::string( tmpstr );
+
+			strftime(tmpstr, sizeof(tmpstr), " %d. ", tmStartZeit );
+			datetime2_str = std::string( tmpstr );
+			strftime(tmpstr,sizeof(tmpstr), "date.%b", tmStartZeit );
+			datetime2_str += std::string( g_Locale->getText(tmpstr) );
+			datetime2_str += std::string(".");
+
+        	sprintf(tmpstr, "[%d min]", evtlist[liststart+pos].duration / 60 );
+        	duration_str = std::string( tmpstr );
+        }
 
 		// 1st line
 		g_Fonts->eventlist_datetime->RenderString(x+5,         ypos+ fheight1+3, fwidth1+5,
-		        evt->datetime1_str.c_str(), color);
+		        datetime1_str.c_str(), color);
 		g_Fonts->eventlist_datetime->RenderString(x+5+fwidth1, ypos+ fheight1+3, width-fwidth1-10- 20,
-		        evt->datetime2_str.c_str(), color);
+		        datetime2_str.c_str(), color);
 
-		int seit = ( evt->epg.startzeit - time(NULL) ) / 60;
-		if ( (seit> 0) && (seit<100) && (evt->duration_str.length()!=0) )
+		int seit = ( evtlist[liststart+pos].startTime - time(NULL) ) / 60;
+		if ( (seit> 0) && (seit<100) && (duration_str.length()!=0) )
 		{
 			char beginnt[100];
 			sprintf((char*) &beginnt, "in %d min", seit);
@@ -559,10 +441,10 @@ void EventList::paintItem(unsigned int pos)
 			g_Fonts->eventlist_itemSmall->RenderString(x+width-fwidth2-5- 20- w, ypos+ fheight1+3, fwidth2, beginnt, color);
 		}
 		g_Fonts->eventlist_itemSmall->RenderString(x+width-fwidth2-5- 20, ypos+ fheight1+3, fwidth2,
-		        evt->duration_str.c_str(), color);
+		        duration_str.c_str(), color);
 		// 2nd line
 		g_Fonts->eventlist_itemLarge->RenderString(x+ 20, ypos+ fheight, width- 25- 20,
-		        evt->epg.description.c_str(), color);
+		        evtlist[liststart+pos].description.c_str(), color);
 	}
 }
 
@@ -580,7 +462,7 @@ void EventList::paint()
 {
 	liststart = (selected/listmaxshow)*listmaxshow;
 
-	if (evtlist[0]->epg.id != 0)
+	if (evtlist[0].eventID != 0)
 		g_FrameBuffer->paintIcon("help.raw", x+ width- 30, y+ 5 );
 
 	for(unsigned int count=0;count<listmaxshow;count++)

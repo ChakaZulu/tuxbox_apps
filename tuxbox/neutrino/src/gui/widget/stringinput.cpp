@@ -215,10 +215,27 @@ int CStringInput::exec( CMenuTarget* parent, string )
 			strcpy(value, oldval);
 			loop=false;
 		}
-		else if ( neutrino->handleMsg( msg, data ) & messages_return::cancel_all )
+		else
 		{
-			loop = false;
-			res = menu_return::RETURN_EXIT_ALL;
+			int r = handleOthers( msg, data );
+			if ( r&messages_return::cancel_all )
+        	{
+            	loop = false;
+				res = menu_return::RETURN_EXIT_ALL;
+			}
+			else if ( r & messages_return::cancel_info )
+        	{
+            	loop = false;
+				res = menu_return::RETURN_EXIT;
+			}
+			else if ( r & messages_return::unhandled )
+			{
+				if ( neutrino->handleMsg( msg, data ) & messages_return::cancel_all )
+				{
+					loop = false;
+					res = menu_return::RETURN_EXIT_ALL;
+				}
+			}
 		}
 	}
 
@@ -241,6 +258,11 @@ int CStringInput::exec( CMenuTarget* parent, string )
 	}
 
 	return res;
+}
+
+int CStringInput::handleOthers( uint msg, uint data )
+{
+	return messages_return::unhandled;
 }
 
 void CStringInput::hide()
@@ -404,16 +426,8 @@ void CPINInput::paintChar(int pos)
 	g_Fonts->menu->RenderString(xfpos,ypos+ys, width, ch.c_str(), color);
 }
 
-int CPLPINInput::exec( CMenuTarget* parent, string )
+int CPINInput::exec( CMenuTarget* parent, string )
 {
-	char hint[100];
-	if ( fsk == 0x100 )
-		strcpy(hint, g_Locale->getText("parentallock.lockedsender").c_str());
-	else
-		sprintf(hint, g_Locale->getText("parentallock.lockedprogram").c_str(), fsk );
-
-	hint_1= hint;
-
 	int res = menu_return::RETURN_REPAINT;
 	char oldval[size];
 
@@ -461,19 +475,29 @@ int CPLPINInput::exec( CMenuTarget* parent, string )
 		{
 			loop=false;
 		}
-		else if ( msg == NeutrinoMessages::EVT_PROGRAMLOCKSTATUS )
+		else
 		{
-			// trotzdem handlen
-			neutrino->handleMsg( msg, data );
+			int r = handleOthers( msg, data );
+			if ( r & messages_return::cancel_all )
+        	{
+            	loop = false;
+				res = menu_return::RETURN_EXIT_ALL;
+			}
+			else if ( r & messages_return::cancel_info )
+        	{
+            	loop = false;
+				res = menu_return::RETURN_EXIT;
+			}
+			else if ( r & messages_return::unhandled )
+			{
+				if ( neutrino->handleMsg( msg, data ) & messages_return::cancel_all )
+				{
+					loop = false;
+					res = menu_return::RETURN_EXIT_ALL;
+				}
+			}
+		}
 
-			if ( data != fsk )
-				loop = false; // raus hier
-		}
-		else if ( neutrino->handleMsg( msg, data ) & messages_return::cancel_all )
-		{
-			loop = false;
-			res = menu_return::RETURN_EXIT_ALL;
-		}
 	}
 
 	hide();
@@ -495,5 +519,35 @@ int CPLPINInput::exec( CMenuTarget* parent, string )
 	}
 
 	return res;
+}
+
+int CPLPINInput::handleOthers( uint msg, uint data )
+{
+	int res = messages_return::unhandled;
+
+	if ( msg == NeutrinoMessages::EVT_PROGRAMLOCKSTATUS )
+	{
+		// trotzdem handlen
+		neutrino->handleMsg( msg, data );
+
+		if ( data != fsk )
+			res = messages_return::cancel_info;
+	}
+
+	return messages_return::unhandled;
+}
+
+
+int CPLPINInput::exec( CMenuTarget* parent, string )
+{
+	char hint[100];
+	if ( fsk == 0x100 )
+		strcpy(hint, g_Locale->getText("parentallock.lockedsender").c_str());
+	else
+		sprintf(hint, g_Locale->getText("parentallock.lockedprogram").c_str(), fsk );
+
+	hint_1= hint;
+
+	return ( CPINInput::exec ( parent, "" ) );
 }
 

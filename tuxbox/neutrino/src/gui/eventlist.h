@@ -1,29 +1,29 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
- 
+
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
- 
+
 	Kommentar:
- 
+
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
- 
- 
+
+
 	License: GPL
- 
+
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
- 
+
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -40,34 +40,17 @@
 #include "helpers/settings.h"
 #include "menue.h"
 #include "color.h"
+#include "sectionsdclient.h"
 
 #include <string>
 #include <vector>
 
 using namespace std;
 
-struct epg_event
-{
-	unsigned long long id;
-	time_t	startzeit;
-	unsigned	dauer;
-	string	description;
-	string	text_1;
-};
-
 class EventList
 {
 	private:
-
-		struct event
-		{
-			epg_event   epg;
-			string      datetime1_str;
-			string      datetime2_str;
-			string      duration_str;
-		};
-
-		void removeAllEvents(void);
+        CChannelEventList	evtlist;
 		void readEvents(unsigned onidSid, const std::string& channelname); // I really don't like handling names
 		unsigned int	selected;
 		unsigned int	current_event;
@@ -81,7 +64,6 @@ class EventList
 
 		int				key;
 		string			name;
-		vector<event*>	evtlist;
 
 		int 			width;
 		int 			height;

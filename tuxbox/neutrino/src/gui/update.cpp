@@ -430,7 +430,7 @@ void CFlashUpdate::showGlobalStatus(int prog)
 	g_FrameBuffer->paintBox(x+10, globalstatusY, x+width-10, globalstatusY+10, COL_MENUCONTENT +2);
 	if(prog!=0)
 	{
-		int pos = x+10+(prog*3);
+		int pos = x+10+( (width- 20)/100* prog);
 		g_FrameBuffer->paintBox(x+10, globalstatusY,pos, globalstatusY+10, COL_MENUCONTENT +7);
 	}
 }
@@ -457,7 +457,7 @@ void CFlashUpdate::showLocalStatus(int prog)
 	g_FrameBuffer->paintBox(x+10, localstatusY, x+width-10, localstatusY+10, COL_MENUCONTENT +2);
 	if(prog!=0)
 	{
-		int pos = x+10+(prog*3);
+		int pos = x+10+((width- 20)/100* prog);
 		g_FrameBuffer->paintBox(x+10, localstatusY, pos, localstatusY+10, COL_MENUCONTENT +7);
 	}
 }

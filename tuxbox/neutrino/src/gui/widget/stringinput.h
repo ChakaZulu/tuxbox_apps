@@ -71,6 +71,8 @@ class CStringInput : public CMenuTarget
 		virtual void keyLeftPressed();
 		virtual void keyRightPressed();
 
+		virtual int handleOthers( uint msg, uint data );
+
 	public:
 
 		CStringInput(string Name, char* Value, int Size, string Hint_1 = "", string Hint_2 = "", char* Valid_Chars= "0123456789. ", CChangeObserver* Observ = NULL );
@@ -109,12 +111,16 @@ class CPINInput : public CStringInput
 	public:
 		CPINInput(string Name, char* Value, int Size, string Hint_1 = "", string Hint_2 = "", char* Valid_Chars= "0123456789", CChangeObserver* Observ = NULL)
 		 : CStringInput(Name, Value, Size, Hint_1, Hint_2, Valid_Chars, Observ) {};
+
+		 int exec( CMenuTarget* parent, string actionKey );
 };
 
 class CPLPINInput : public CPINInput
 {
 	protected:
 		int	fsk;
+
+		virtual int handleOthers( uint msg, uint data );
 	public:
 		CPLPINInput(string Name, char* Value, int Size, string Hint_1, int FSK )
 		 : CPINInput(Name, Value, Size, " ", Hint_1) { fsk= FSK; };

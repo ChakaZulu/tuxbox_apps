@@ -43,6 +43,8 @@
 #include "eventlist.hpp"
 #include "menue.h"
 #include "color.h"
+#include "sectionsdclient.h"
+
 
 #include <string>
 #include <vector>
@@ -59,11 +61,11 @@ class CChannelList
 				unsigned long long	last_unlocked_EPGid;
 
 			public:
-				int         key;
-				int         number;
-				string      name;
-				unsigned int onid_sid;
-				epg_event   currentEvent;
+				int         	key;
+				int         	number;
+				string      	name;
+				unsigned int 	onid_sid;
+				CChannelEvent	currentEvent;
 
 				// flag that tells if channel is staticly locked by bouquet-locking
 				bool bAlwaysLocked;
