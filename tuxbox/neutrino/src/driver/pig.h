@@ -1,5 +1,3 @@
-work in progress   (rasc)
-
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -36,22 +34,26 @@ work in progress   (rasc)
 #include <dbox/avia_gt_pig.h>
 
 
+#define PIG_DEV "/dev/dbox/pig"			// pig_nr will be appended!!
+
 class CPIG
 {
 	public:
-		void CPIG (int pig_nr = 0);
-		void CPIG (int pig_nr, int x, int y, int w, int h);
-		void ~CPIG (void);
+		CPIG (void);
+		CPIG (int pig_nr = 0);		// incl. open
+		CPIG (int pig_nr, int x, int y, int w, int h); // open + set_coord
+		~CPIG (void);
 
+		int  pigopen  (int pig_nr);
+		void pigclose (void);
 		void set_coord (int x, int y, int w, int h);
 		void set_xy    (int x, int y);
 		void set_size  (int w, int h);
+		void set_source(int x, int y);
 		void set_stackpos  (int pos);
 		void show (void);
 		void show (int x, int y, int w, int h);
 		void hide (void);
-
-		void copy2buf (.....);
 
 		enum PigStatus { CLOSED, HIDE, SHOW };
 		PigStatus getStatus(void);
@@ -62,17 +64,7 @@ class CPIG
 		int	stackpos;		// Order (Framebuffer, PIGs)
 		PigStatus  status;		// on display?
 
-		int  open_pig (int nr);
-		void close_pig (void);
 
-
-#define PIG_DEV "/dev/dbox/pig"
-		static char  *pigdevs[] = {
-			PIG_DEV "0"		// PIG device 0
-			// PIG_DEV "1",		// PIG device 1
-			// PIG_DEV "2",		// PIG device ...
-			// PIG_DEV "3"
-		}
 };
 
 
