@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.53 2001/10/04 19:28:43 fnbrd Exp $
+        $Id: neutrino.cpp,v 1.54 2001/10/04 23:16:20 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.54  2001/10/04 23:16:20  McClean
+  get volume from controld
+
   Revision 1.53  2001/10/04 19:28:43  fnbrd
   Eventlist benutzt ID bei zapit und laesst sich per rot wieder schliessen.
 
@@ -1411,6 +1414,8 @@ void CNeutrinoApp::setVolume(int key)
 
 	g_FrameBuffer->paintIcon("volume.raw",x,y, COL_INFOBAR);
 
+	char volume = g_Controld->getVolume();
+
     do
 	{
         if (key==CRCInput::RC_plus)
@@ -1550,7 +1555,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.53 2001/10/04 19:28:43 fnbrd Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.54 2001/10/04 23:16:20 McClean Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;
