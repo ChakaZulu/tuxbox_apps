@@ -1,5 +1,5 @@
 //
-// $Id: epg.cpp,v 1.14 2001/05/19 20:15:08 fnbrd Exp $
+// $Id: epg.cpp,v 1.15 2001/06/11 19:22:54 fnbrd Exp $
 //
 // Beispiel zur Benutzung der SI class lib (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: epg.cpp,v $
+// Revision 1.15  2001/06/11 19:22:54  fnbrd
+// Events haben jetzt mehrere Zeiten, fuer den Fall von NVODs (cinedoms)
+//
 // Revision 1.14  2001/05/19 20:15:08  fnbrd
 // Kleine Aenderungen (und epgXML).
 //
@@ -69,7 +72,7 @@
 #include <algorithm>
 #include <string>
 
-//#include "SIutils.hpp"
+#include "SIutils.hpp"
 #include "SIservices.hpp"
 #include "SIevents.hpp"
 #include "SIsections.hpp"
@@ -102,6 +105,10 @@ int main(int argc, char **argv)
   SIservices services;
   for(SIsectionsSDT::iterator k=sdtset.begin(); k!=sdtset.end(); k++)
     services.insert((k->services()).begin(), (k->services()).end());
+
+  // Damit wir die Zeiten der nvods richtig einsortiert bekommen
+  // Ist bei epgLarge eigentlich nicht noetig, da die NVODs anscheinend nur im present/actual (epgSmall) vorkommen
+  events.mergeAndRemoveTimeShiftedEvents(services);
 
   for_each(events.begin(), events.end(), printSIeventWithService(services));
 //  for_each(events.begin(), events.end(), printSIevent());

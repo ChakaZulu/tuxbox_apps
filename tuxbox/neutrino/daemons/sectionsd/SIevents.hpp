@@ -1,7 +1,7 @@
 #ifndef SIEVENTS_HPP
 #define SIEVENTS_HPP
 //
-// $Id: SIevents.hpp,v 1.8 2001/06/11 01:15:16 fnbrd Exp $
+// $Id: SIevents.hpp,v 1.9 2001/06/11 19:22:54 fnbrd Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -24,6 +24,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.hpp,v $
+// Revision 1.9  2001/06/11 19:22:54  fnbrd
+// Events haben jetzt mehrere Zeiten, fuer den Fall von NVODs (cinedoms)
+//
 // Revision 1.8  2001/06/11 01:15:16  fnbrd
 // NVOD reference descriptors und Service-Typ
 //
@@ -53,6 +56,7 @@
 
 // forward references
 class SIservice;
+class SIservices;
 
 struct eit_event {
   unsigned short event_id : 16;
@@ -172,6 +176,55 @@ struct saveSIparentalRatingXML : public unary_function<SIparentalRating, void>
 
 typedef set <SIparentalRating, less<SIparentalRating> > SIparentalRatings;
 
+class SItime {
+  public:
+    SItime(time_t s, unsigned d) {
+      startzeit=s;
+      dauer=d; // in Sekunden, 0 -> time shifted (cinedoms)
+    }
+    // Std-Copy
+    SItime(const SItime &t) {
+      startzeit=t.startzeit;
+      dauer=t.dauer;
+    }
+    // Der Operator zum sortieren
+    bool operator < (const SItime& t) const {
+      return startzeit < t.startzeit;
+    }
+    void dump(void) const {
+      printf("Startzeit: %s", ctime(&startzeit));
+      printf("Dauer: %02u:%02u:%02u (%umin, %us)\n", dauer/3600, (dauer%3600)/60, dauer%60, dauer/60, dauer);
+    }
+    int saveXML(FILE *file) const { // saves the time
+      // Ist so noch nicht in Ordnung, das sollte untergliedert werden,
+      // da sonst evtl. time,date,duration,time,date,... auftritt
+      // und eine rein sequentielle Ordnung finde ich nicht ok.
+      struct tm *zeit=localtime(&startzeit);
+      fprintf(file, "    <time>%02d:%02d:%02d</time>\n", zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
+      fprintf(file, "    <date>%02d.%02d.%04d</date>\n", zeit->tm_mday, zeit->tm_mon+1, zeit->tm_year+1900);
+      fprintf(file, "    <duration>%u</duration>\n", dauer);
+      return 0;
+    }
+    time_t startzeit;  // lokale Zeit, 0 -> time shifted (cinedoms)
+    unsigned dauer; // in Sekunden, 0 -> time shifted (cinedoms)
+};
+
+typedef set <SItime, less<SItime> > SItimes;
+
+// Fuer for_each
+struct printSItime : public unary_function<SItime, void>
+{
+  void operator() (const SItime &t) { t.dump();}
+};
+
+// Fuer for_each
+struct saveSItimeXML : public unary_function<SItime, void>
+{
+  FILE *f;
+  saveSItimeXML(FILE *fi) { f=fi;}
+  void operator() (const SItime &t) { t.saveXML(f);}
+};
+
 class SIevent {
   public:
     SIevent(const struct eit_event *);
@@ -179,8 +232,8 @@ class SIevent {
     SIevent(const SIevent &);
     SIevent(void) {
       serviceID=eventID=0;
-      dauer=0;
-      startzeit=0;
+//      dauer=0;
+//      startzeit=0;
     }
     unsigned short eventID;
     string name; // Name aus dem Short-Event-Descriptor
@@ -190,11 +243,12 @@ class SIevent {
     string extendedText; // Aus dem Extended Descriptor
     string contentClassification; // Aus dem Content Descriptor, als String, da mehrere vorkommen koennen
     string userClassification; // Aus dem Content Descriptor, als String, da mehrere vorkommen koennen
-    time_t startzeit; // lokale Zeit, 0 -> time shifted (cinedoms)
-    unsigned dauer; // in Sekunden, 0 -> time shifted (cinedoms)
+//    time_t startzeit; // lokale Zeit, 0 -> time shifted (cinedoms)
+//    unsigned dauer; // in Sekunden, 0 -> time shifted (cinedoms)
     unsigned short serviceID;
     SIcomponents components;
     SIparentalRatings ratings;
+    SItimes times;
     // Der Operator zum sortieren
     bool operator < (const SIevent& e) const {
       // Erst nach Service-ID, dann nach Event-ID sortieren
@@ -252,15 +306,28 @@ struct printSIeventWithService : public unary_function<SIevent, void>
   void operator() (const SIevent &e) {
     SIservices::iterator k=s->find(SIservice(e.serviceID));
     if(k!=s->end()) {
-      printf("%s\n", k->serviceName.c_str());
-      printf("%s\n", k->providerName.c_str());
+      char servicename[50];
+      strncpy(servicename, k->serviceName.c_str(), sizeof(servicename)-1);
+      servicename[sizeof(servicename)-1]=0;
+      removeControlCodes(servicename);
+      printf("Service-Name: %s\n", servicename);
+//      printf("Provider-Name: %s\n", k->providerName.c_str());
     }
-    e.dump();
-//    e.dumpSmall();
+//    e.dump();
+    e.dumpSmall();
+    printf("\n");
   }
   const SIservices *s;
 };
 
-typedef set <SIevent, less<SIevent> > SIevents;
+//typedef set <SIevent, less<SIevent> > SIevents;
+
+class SIevents : public set <SIevent, less<SIevent> >
+{
+  public:
+    // Entfernt anhand der Services alle time shifted events (Service-Typ 0)
+    // und sortiert deren Zeiten in die Events mit dem Text ein.
+    void mergeAndRemoveTimeShiftedEvents(const SIservices &);
+};
 
 #endif // SIEVENTS_HPP

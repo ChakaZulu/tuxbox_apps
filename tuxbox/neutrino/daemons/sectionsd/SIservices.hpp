@@ -1,7 +1,7 @@
 #ifndef SISERVICES_HPP
 #define SISERVICES_HPP
 //
-// $Id: SIservices.hpp,v 1.2 2001/06/11 01:15:16 fnbrd Exp $
+// $Id: SIservices.hpp,v 1.3 2001/06/11 19:22:54 fnbrd Exp $
 //
 // classes SIservices and SIservices (dbox-II-project)
 //
@@ -24,6 +24,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIservices.hpp,v $
+// Revision 1.3  2001/06/11 19:22:54  fnbrd
+// Events haben jetzt mehrere Zeiten, fuer den Fall von NVODs (cinedoms)
+//
 // Revision 1.2  2001/06/11 01:15:16  fnbrd
 // NVOD reference descriptors und Service-Typ
 //
@@ -147,6 +150,10 @@ struct printSIservice : public unary_function<SIservice, void>
   void operator() (const SIservice &s) { s.dump();}
 };
 
-typedef set <SIservice, less<SIservice> > SIservices;
+//typedef set <SIservice, less<SIservice> > SIservices;
+// Als Klasse, da ich nicht weiss, wie man eine Forward-Refernez auf ein typedef macht
+class SIservices : public set <SIservice, less<SIservice> >
+{
+};
 
 #endif // SISERVICES_HPP

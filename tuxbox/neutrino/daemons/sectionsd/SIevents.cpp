@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.5 2001/06/10 15:48:31 fnbrd Exp $
+// $Id: SIevents.cpp,v 1.6 2001/06/11 19:22:54 fnbrd Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.cpp,v $
+// Revision 1.6  2001/06/11 19:22:54  fnbrd
+// Events haben jetzt mehrere Zeiten, fuer den Fall von NVODs (cinedoms)
+//
 // Revision 1.5  2001/06/10 15:48:31  fnbrd
 // Noch einen kleinen Fehler behoben.
 //
@@ -57,13 +60,14 @@
 SIevent::SIevent(const struct eit_event *e)
 {
   eventID=e->event_id;
-  startzeit=changeUTCtoCtime(((const unsigned char *)e)+2);
-  if(e->duration==0xffffff)
-    dauer=0; // keine Dauer
-  else
+  time_t startzeit=changeUTCtoCtime(((const unsigned char *)e)+2);
+  unsigned dauer=0;
+  if(e->duration!=0xffffff)
     dauer=((e->duration)>>20)*10*3600L+(((e->duration)>>16)&0x0f)*3600L+
       (((e->duration)>>12)&0x0f)*10*60L+(((e->duration)>>8)&0x0f)*60L+
       (((e->duration)>>4)&0x0f)*10+((e->duration)&0x0f);
+  if(startzeit && dauer)
+    times.insert(SItime(startzeit, dauer));
   serviceID=0;
 }
 
@@ -73,8 +77,9 @@ SIevent::SIevent(const SIevent &e)
   eventID=e.eventID;
   name=e.name;
   text=e.text;
-  startzeit=e.startzeit;
-  dauer=e.dauer;
+//  startzeit=e.startzeit;
+//  dauer=e.dauer;
+  times=e.times;
   serviceID=e.serviceID;
   itemDescription=e.itemDescription;
   item=e.item;
@@ -133,6 +138,7 @@ int SIevent::saveXML2(FILE *file) const
     saveStringToXMLfile(file, extendedText.c_str());
     fprintf(file, "</extended_text>\n");
   }
+/*
   if(startzeit) {
     struct tm *zeit=localtime(&startzeit);
     fprintf(file, "    <time>%02d:%02d:%02d</time>\n", zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
@@ -140,6 +146,8 @@ int SIevent::saveXML2(FILE *file) const
   }
   if(dauer)
     fprintf(file, "    <duration>%u</duration>\n", dauer);
+*/
+  for_each(times.begin(), times.end(), saveSItimeXML(file));
   for(unsigned i=0; i<contentClassification.length(); i++)
     fprintf(file, "    <content_classification>0x%02hhx</content_classification>\n", contentClassification[i]);
   for(unsigned i=0; i<userClassification.length(); i++)
@@ -177,11 +185,13 @@ void SIevent::dump(void) const
       printf(" 0x%02hhx", userClassification[i]);
     printf("\n");
   }
+/*
   if(startzeit)
     printf("Startzeit: %s", ctime(&startzeit));
   if(dauer)
     printf("Dauer: %02u:%02u:%02u (%umin, %us)\n", dauer/3600, (dauer%3600)/60, dauer%60, dauer/60, dauer);
-  printf("\n");
+*/
+  for_each(times.begin(), times.end(), printSItime());
   for_each(components.begin(), components.end(), printSIcomponent());
   for_each(ratings.begin(), ratings.end(), printSIparentalRating());
 }
@@ -194,12 +204,14 @@ void SIevent::dumpSmall(void) const
     printf("Text: %s\n", text.c_str());
   if(extendedText.length())
     printf("Extended-Text: %s\n", extendedText.c_str());
+/*
   if(startzeit)
     printf("Startzeit: %s", ctime(&startzeit));
   if(dauer)
     printf("Dauer: %02u:%02u:%02u (%umin, %us)\n", dauer/3600, (dauer%3600)/60, dauer%60, dauer/60, dauer);
+*/
+  for_each(times.begin(), times.end(), printSItime());
   for_each(ratings.begin(), ratings.end(), printSIparentalRating());
-  printf("\n");
 }
 
 // Liest n Bytes aus einem Socket per read
@@ -273,14 +285,76 @@ SIevent SIevent::readActualEvent(unsigned short serviceID, unsigned timeoutInSec
       SIsectionEIT e(SIsection(sizeof(header)+header.section_length-5, buf));
       time_t zeit=time(NULL);
       for(SIevents::iterator k=e.events().begin(); k!=e.events().end(); k++)
-        if(k->serviceID==serviceID && k->startzeit<=zeit && zeit<=(long)(k->startzeit+k->dauer)) {
-	  close(fd);
-	  return SIevent(*k);
-        }
+        if(k->serviceID==serviceID)
+          for(SItimes::iterator t=k->times.begin(); t!=k->times.end(); t++)
+            if(t->startzeit<=zeit && zeit<=(long)(t->startzeit+t->dauer)) {
+	      close(fd);
+	      return SIevent(*k);
+            }
     }
     else
       delete[] buf;
   } while (time(NULL)<szeit+(long)(timeoutInSeconds));
   close(fd);
   return evt;
+}
+
+// Entfernt anhand der Services alle time shifted events (ohne Text,
+// mit service-id welcher im nvod steht)
+// und sortiert deren Zeiten in die Events mit dem Text ein.
+void SIevents::mergeAndRemoveTimeShiftedEvents(const SIservices &services)
+{
+  // Wir gehen alle services durch, suchen uns die services mit nvods raus
+  // und fuegen dann die Zeiten der Events mit der service-id eines nvods
+  // in das entsprechende Event mit der service-id das die nvods hat ein.
+  // die 'nvod-events' werden auch geloescht
+
+//  SIevents eventsToDelete; // Hier rein kommen Events die geloescht werden sollen
+  for(SIservices::iterator k=services.begin(); k!=services.end(); k++)
+    if(k->nvods.size()) {
+      // NVOD-Referenzen gefunden
+      // Zuerst mal das Event mit dem Text holen
+//      iterator e;
+      iterator e;
+      for(e=begin(); e!=end(); e++)
+        if(e->serviceID==k->serviceID)
+          break;
+      if(e!=end()) {
+        // *e == event mit dem Text
+	SIevent newEvent(*e); // Kopie des Events
+	// Jetzt die nvods druchgehen und deren Uhrzeiten in obiges Event einfuegen
+        for(SInvodReferences::iterator n=k->nvods.begin(); n!=k->nvods.end(); n++) {
+          // Alle druchgehen und deren Events suchen
+          for(iterator en=begin(); en!=end(); en++) {
+	    if(en->serviceID==n->serviceID) {
+              newEvent.times.insert(en->times.begin(), en->times.end());
+//              newEvent.times.insert(SItime(en->startzeit, en->dauer));
+//	      eventsToDelete.insert(SIevent(*en));
+            }
+	  }
+        }
+	erase(e); // Altes Event loeschen -> iterator (e) ungültig
+	insert(newEvent); // und das erweiterte Event wieder einfuegen
+      }
+    }
+  // Jetzt loeschen wir alle Events die eine Service-ID haben deren Service vom Typ 0 ist
+  // Untenstehender Algo ist so zwar relativ langsam, aber es funktioniert
+  // Bei Gelegenheit mach ich das mal anders
+  for(;;) {
+    int erased=0;
+    for(iterator e=begin(); e!=end(); e++) {
+      SIservices::iterator s=services.find(e->serviceID);
+      if(s!=services.end())
+        if(s->serviceTyp==0) {
+	  erase(e); // -> e wird ungueltig
+	  erased=1;
+	  break;
+        }
+    }
+    if(!erased)
+      break;
+  }
+  // Hiermit loeschen wir ungewollte Events (oben aussortierte)
+//  for(iterator e=eventsToDelete.begin(); e!=eventsToDelete.end(); e++)
+//    erase(*e);
 }
