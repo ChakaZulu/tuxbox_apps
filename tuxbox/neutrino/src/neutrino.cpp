@@ -844,10 +844,6 @@ void CNeutrinoApp::CmdParser(int argc, char **argv)
 			dprintf(DEBUG_NORMAL, "Software update enabled\n");
 			softupdate = true;
 		}
-		else if( !strcmp(argv[x], "-z"))
-		{
-			dprintf(DEBUG_NORMAL, "zapitmode is default..\n");
-		}
 		else if( !strcmp(argv[x], "-flash"))
 		{
 			dprintf(DEBUG_NORMAL, "enable flash\n");
@@ -3254,7 +3250,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.363 2002/11/24 19:55:56 Zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.364 2002/11/25 19:13:07 thegoodguy Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
