@@ -1,3 +1,4 @@
+#ifndef DISABLE_CI
 #ifndef __ENIGMA_MMI_H_
 #define __ENIGMA_MMI_H_
 
@@ -49,3 +50,4 @@ public:
 };
 
 #endif // __ENIGMA_MMI_H_
+#endif // DISABLE_CI

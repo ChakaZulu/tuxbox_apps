@@ -1,3 +1,4 @@
+#ifndef DISABLE_CI
 #include <enigma_mmisocket.h>
 #include <enigma.h>
 #include <unistd.h>
@@ -186,3 +187,4 @@ void eSocketMMI::beginExec()
 
 eAutoInitP0<eDreamcryptMMI> init_eDreamcryptMMI(eAutoInitNumbers::osd-2, "dreamcrypt mmi socket");
 
+#endif // DISABLE_CI
