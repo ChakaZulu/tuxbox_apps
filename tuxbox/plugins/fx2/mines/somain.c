@@ -13,7 +13,7 @@
 #include <board.h>
 #include <colors.h>
 #include <pig.h>
-#include <plugin.h>
+#include <include/plugin.h>
 #include <fx2math.h>
 
 extern	int	doexit;
