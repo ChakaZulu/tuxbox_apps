@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.61 2002/09/09 19:12:05 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.62 2002/09/11 08:55:43 thegoodguy Exp $
  */
 
 #include <fcntl.h>
@@ -52,7 +52,17 @@ void stop_scan()
 	scan_runs = 0;
 	eventServer->sendEvent(CZapitClient::EVT_SCAN_COMPLETE, CEventServer::INITID_ZAPIT);
 	if (scanBouquetManager)
+	{
+		for (vector<CBouquet*>::iterator it = scanBouquetManager->Bouquets.begin(); it != scanBouquetManager->Bouquets.end(); it++)
+		{
+			for (vector<CZapitChannel*>::iterator jt = (*it)->tvChannels.begin(); jt != (*it)->tvChannels.end(); jt++)
+				delete (*jt);
+			for (vector<CZapitChannel*>::iterator jt = (*it)->radioChannels.begin(); jt != (*it)->radioChannels.end(); jt++)
+				delete (*jt);
+		}
+		scanBouquetManager->clearAll();
 		delete scanBouquetManager;
+	}
 }
 
 /* build transponder for cable-users with sat-feed*/
