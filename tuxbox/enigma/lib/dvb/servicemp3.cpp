@@ -639,7 +639,7 @@ eMP3Decoder::~eMP3Decoder()
 	bool wasOpen = fd != -1;
 	if (!wasOpen)
 		fd = open(AUDIO_DEV, O_RDWR);
-	if (ioctl(fd, AUDIO_SET_MUTE, 0) < 0)
+	if ( type == codecMPG && ioctl(fd, AUDIO_SET_MUTE, 0) < 0)
 		eDebug("AUDIO_SET_MUTE error (%m)");
 	if (!wasOpen)
 		close(fd);
