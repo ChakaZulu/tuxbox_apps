@@ -593,7 +593,7 @@ void CRemoteControl::setAPID(int APID)
 
 	remotemsg.version=1;
 	remotemsg.cmd=9;
-	snprintf( (char*) &remotemsg.param, 2, "%.1d", APID);
+	snprintf( (char*) &remotemsg.param, 3, "%.1d", APID);
 	audio_chans_int.selected = APID;
 	// printf("changing APID to %d\n", audio_chans_int.selected);
 
