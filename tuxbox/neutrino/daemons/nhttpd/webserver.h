@@ -10,7 +10,8 @@
 #include <netdb.h>
 #include <config.h>
 
-#include "helper.h"
+#include <string>
+
 #include "pthread.h"
 #include "timer.h"
 
@@ -36,8 +37,8 @@ class TWebserver
 {
 	int				Port;
 	int				ListenSocket;
-	TString			*PrivateDocumentRoot;
-	TString			*PublicDocumentRoot;
+	string			PrivateDocumentRoot;
+	string			PublicDocumentRoot;
 	pthread_t		Thread1;
 	pthread_t		timerthread;
 	bool			THREADS;
@@ -51,7 +52,7 @@ public:
 	TWebserver();
 	~TWebserver();
 
-	bool Init(int port,char * publicdocumentroot,bool debug, bool verbose,bool threads);
+	bool Init(int port,string publicdocumentroot,bool debug, bool verbose,bool threads);
 	bool Start();
 	void DoLoop();
 	void Stop();

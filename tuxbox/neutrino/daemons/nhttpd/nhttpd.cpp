@@ -3,6 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski
 
+	$ID$
 
 	License: GPL
 
@@ -66,7 +67,7 @@ int main(int argc, char **argv)
 {
 	bool debug = false;
 	bool verbose = false;
-	bool threads = true;
+	bool threads = false;
 	bool do_fork = true;
 	int i;
 
@@ -89,7 +90,7 @@ int main(int argc, char **argv)
 			}
 			else if (strncmp(argv[i], "-t", 2) == 0)
 			{
-				threads = false;
+				threads = true;
 			}
 			else if (strncmp(argv[i],"--version", 9) == 0) 
 			{
@@ -102,7 +103,7 @@ int main(int argc, char **argv)
 				printf("nhttpd parameters:\n");
 				printf("-d\t\tdebug\n");
 				printf("-v\t\tverbose\n");
-				printf("-t\t\trun single-threaded\n");
+				printf("-t\t\trun multi-threaded\n");
 				printf("-f\t\tdo not fork\n");
 				printf("--version\tversion\n");
 				printf("--help\t\tthis text\n\n");
@@ -113,7 +114,7 @@ int main(int argc, char **argv)
 
 	if (debug)
 	{
-		printf("Starte %s\n",threads?"threaded":"nicht threaded");
+		printf("Starte %s\n",threads?"multi threaded":"single threaded");
 	}
 
 	signal(SIGINT,sig_catch);

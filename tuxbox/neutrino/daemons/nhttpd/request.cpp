@@ -43,28 +43,15 @@ CWebserverRequest::CWebserverRequest(TWebserver *server)
 	Path = "";
 	Param_String="";
 	ContentType = "";
-	Boundary = NULL;
+//	Boundary = NULL;
 	Upload = NULL;
 	HttpStatus = 0;
-
-//	ParameterList= new TParameterList; 
-//	HeaderList = new TParameterList;
 }
 
 //-------------------------------------------------------------------------
 CWebserverRequest::~CWebserverRequest() 
 {
 	if(Upload) delete Upload;
-/*
-	if(URL != NULL) delete URL;
-	if(Path) delete Path;
-	if(Filename) delete Filename;
-	if(Param_String) delete Param_String;
-//	if(ParameterList) delete ParameterList;
-	if(FileExt) delete FileExt;
-	if(ContentType) delete ContentType;
-	if(Boundary) delete Boundary;
-*/
 //	if(HeaderList) delete HeaderList;
 	if(rawbuffer) 
 	{
@@ -72,8 +59,6 @@ CWebserverRequest::~CWebserverRequest()
 		rawbuffer=NULL;
 		rawbuffer_len = 0;
 	}
-
-	if(Parent->DEBUG) printf("Request destruktor ok\n");	
 }
 
 //-------------------------------------------------------------------------
@@ -114,65 +99,11 @@ void CWebserverRequest::SplitParameter(string param_str)
 			if(Parent->DEBUG) printf("Parameter[1] = '%s'\n",param_str.c_str());
 		}
 	}
-/*
-TString *Name,*Value;
-	if(Parent->DEBUG) printf("Splitte Parameter\n");
-	if( (strlen(parameter) > 0) )
-	{
-	int i;
-	char *t;
-
-		if(len == 0)								// Wenn keine Länge angegeben dann ganzer String
-			len = strlen(parameter);
-
-		if(parameter[len] == '\n')				// Wenn letztes Zeichen \n dann abschneiden
-			len--;
-
-		t = strchr(parameter,seperator);						//Nach Trennzeichen suchen
-		if( t && (t < parameter + len) )
-		{												// Wenn Trennzeichen gefunden			
-			Name = new TString(parameter,t - parameter);
-			char *start = t+1;
-			int laenge = parameter + len - t;
-			for(;*start == ' ';start++,laenge--);
-			for(;(start[laenge] == ' ') || (start[laenge] == '\n');laenge--);
-			Value = new TString(start,laenge);
-			if(Name && Parent->DEBUG)
-				printf("Name: '%s' Value '%s'\n",Name->c_str(),Value->c_str());
-		}
-		else 
-		{												// Wenn kein Trennzeichen dann nur Namen mit " " speichern
-			if(Parent->DEBUG) printf("[nhttpd] Kein Trennzeichen '%c' gefunden\n",seperator);
-			int laenge = len+1;
-			char *start = parameter;
-			if(Parent->DEBUG) printf("start[laenge] '%c' start[laenge-1]: '%c'\n",start[laenge],start[laenge-1]);
-			while(*start == ' ')
-			{
-				start++;
-				laenge--;
-			};
-			while( (start[laenge-1] == ' ') || (start[laenge-1] == '\n') || (start[laenge-1] == 0) )
-			{
-				laenge--;
-			};
-			Value = new TString(start,laenge);
-			Name = new TString("1");
-			if(Parent->DEBUG) printf("Name: '%s' Value '%s'\n",Name->c_str(),Value->c_str());
-
-		}
-		sprintf("Parameter: name= '%s' value= '%s'\n",Name->c_str(),Value->c_str());
-		ParameterList[Name->c_str()] = Value->c_str();
-//		printf("TParameter: %x\n",this);
-		
-	}
-*/
 }
 //-------------------------------------------------------------------------
 
 bool CWebserverRequest::ParseParams(string param_string)
 {
-//char * anfang;
-//char * ende;
 string name,value,param;
 string param_str;
 int pos;
@@ -181,7 +112,7 @@ bool ende = false;
 	if(Parent->DEBUG) printf("param_string: %s\n",param_string.c_str());
 	if(param_string.length() <= 0)
 		return false;
-//	for(int i = strlen(
+
 	param_str = param_string;
 	while(!ende)
 	{
@@ -196,86 +127,83 @@ bool ende = false;
 			param = param_str;
 			ende = true;
 		}
-		printf("param: '%s' param_str: '%s'\n",param.c_str(),param_str.c_str());
+		if(Parent->DEBUG) printf("param: '%s' param_str: '%s'\n",param.c_str(),param_str.c_str());
 		SplitParameter(param);
 	}
-/*	
-	anfang = param_string;
-	do{
-		ende = strchr(anfang,'&');
-		if(Parent->DEBUG) printf("anfang: %X ende: %X\n",anfang,ende);
-		if(!ende)
-		{
-//			ParameterList->Add(anfang, param_string + strlen(param_string) - anfang);
-			SplitParameter(anfang, param_string + strlen(param_string) - anfang);
-//			name = anfang;
-//			value = param_string + strlen(param_string) - anfang;
-//			ParameterList.insert(value_type(t,s));
-		}
-		else
-		{
-//			ParameterList->Add(anfang, ende - anfang -1);
-			SplitParameter(anfang, ende - anfang -1);
-//			name = anfang;
-//			value =  ende - anfang -1;
-		}
-
-		anfang = ende + 1;
-	}while(ende);
-*/
 	return true;
 };
 //-------------------------------------------------------------------------
 
-void CWebserverRequest::ParseHeader(char * t, int len)
+
+bool CWebserverRequest::ParseFirstLine(string zeile)
 {
-//	if(!HeaderList)
-//		HeaderList = new TParameterList;
-	
-//	HeaderList->Add(t,len,':');
+int ende, anfang, t;
+
+	anfang = zeile.find(' ');				// GET /images/elist.gif HTTP/1.1 
+	ende = zeile.rfind(' ');				// nach leerzeichen splitten
+
+	if (anfang > 0 && ende > 0 && anfang != ende)
+	{
+		string method,url,http;
+		method= zeile.substr(0,anfang);
+		url = zeile.substr(anfang+1,ende - (anfang+1));
+		http = zeile.substr(ende+1,zeile.length() - ende+1);
+//		if(Parent->DEBUG) printf("m: '%s' u: '%s' h:'%s'\n",method.c_str(),url.c_str(),http.c_str());
+
+		if(method.compare("POST") == 0)
+			Method = M_POST;
+		else if(method.compare("GET") == 0)
+			Method = M_GET;
+		else if(method.compare("PUT") == 0)
+			Method = M_PUT;
+		else
+		{
+			Parent->Ausgabe("Ungültige Methode oder fehlerhaftes Packet");
+			if(Parent->DEBUG) printf("Request: '%s'\n",rawbuffer);
+			return false;
+		}
+		
+		if((t = url.find('?')) > 0)			// eventuellen Parameter inner URL finden
+		{
+			URL = url.substr(0,t);
+			Param_String = url.substr(t+1,url.length() - (t+1));
+
+			return ParseParams(Param_String);
+		}
+		else
+			URL = url;
+	}
+	return true;
 }
 
 
-bool CWebserverRequest::ParseFirstLine(char * zeile, int len)
+//-------------------------------------------------------------------------
+bool CWebserverRequest::ParseHeader(string header)
 {
-char *ende, *anfang, *t;
-
-	if(strncmp("POST",zeile,4) == 0)
-		Method = M_POST;
-	if(strncmp("GET",zeile,3) == 0)
-		Method = M_GET;
-	if(strncmp("PUT",zeile,3) == 0)
-		Method = M_PUT;
-//			printf("Method=%ld\n",Method);
-	if(Method == M_UNKNOWN)
+bool ende = false;
+int pos;
+string sheader;
+	if(Parent->DEBUG) printf("Header:\n");
+	while(!ende)
 	{
-		Parent->Ausgabe("Ungültige Methode oder fehlerhaftes Packet");
-		if(Parent->DEBUG) printf("Request: '%s'\n",rawbuffer);
-		return false;
-	}
-
-	anfang = strchr(zeile,' ')+1;
-	ende = strchr(anfang,' ');
-	if( ((t = strchr(anfang,'?')) != 0) && (t < ende) )
-	{
-		Param_String = string(t+1,ende - (t+1));
-		URL = string(anfang,t - anfang);
-		// URL in Path und Filename aufsplitten
-
-		if(Parent->DEBUG) printf("URL: '%s'\nParams: '%s'\n",URL.c_str(),Param_String.c_str());
-		if(ParseParams(Param_String))
-			return true;
+		if((pos = header.find_first_of("\n")) > 0)
+		{
+			sheader = header.substr(0,pos-1);	
+			header = header.substr(pos+1,header.length() - (pos+1));
+		}
 		else
-			return false;
-
+		{
+			sheader = header;
+			ende = true;
+		}
+		
+		if((pos = sheader.find_first_of(':')) > 0)
+		{
+			HeaderList[sheader.substr(0,pos)] = sheader.substr(pos+2,sheader.length() - pos - 2);
+			if(Parent->DEBUG) printf("%s: %s\n",sheader.substr(0,pos).c_str(),HeaderList[sheader.substr(0,pos)].c_str());
+		}
 	}
-	else
-	{
-		 URL = string(anfang,ende - anfang);
-		if(Parent->DEBUG) printf("URL: %s\n",URL.c_str());
-		return true;
-	}
-	return true;
+	
 }
 
 //-------------------------------------------------------------------------
@@ -287,38 +215,29 @@ int ende;
 string buffer;
 	if(rawbuffer && (rawbuffer_len > 0) )
 	{
-		buffer= string(rawbuffer);
-		if(Parent->DEBUG) printf("Parse jetzt Request . . .\n");
-		if((ende = buffer.find('\n')) == 0)
+		buffer= string(rawbuffer,rawbuffer_len);
+		if((ende = buffer.find_first_of('\n')) == 0)
 		{
 			printf("Kein Zeilenende gefunden\n");
 			Send500Error();
 			return false;
 		}
 		string zeile1 = buffer.substr(0,ende-1);
-		if(Parent->DEBUG) printf("zeile1: '%s'\n",zeile1.c_str());
+		if(Parent->DEBUG) printf("REQUEST: '%s'\n",zeile1.c_str());
 
-		if(ParseFirstLine((char *) zeile1.c_str(),zeile1.length()))
+		if(ParseFirstLine(zeile1))
 		{
-			int headerende = buffer.find("\n\n");
-
+			int headerende = buffer.length() - 1;
 			if(headerende == 0)
 			{
 				printf("Keine Header gefunden\n");
 				Send500Error();
 				return false;
 			}
-			string header = buffer.substr(ende+1,headerende-2 -(ende+1));
-//			if(Parent->DEBUG) printf("Alle Header: %s\n",header.c_str());
-/*			
-			if(Parent->DEBUG) printf("Und jetzt die Header :\n");
-			do{
-				ende = strchr(anfang,'\n');
-				if(ende <(rawbuffer + rawbuffer_len))
-					ParseHeader(anfang, ende - anfang);
-				anfang = ende + 1;
-			}while( (ende[2] != '\n') && (ende < (rawbuffer + rawbuffer_len)) );
-*/
+			string header = buffer.substr(ende+1,headerende - ende - 4);
+			ParseHeader(header);
+
+
 /*			
 			if(Method == M_POST) // TODO: Und testen ob content = formdata
 			{
@@ -355,11 +274,6 @@ string buffer;
 */
 		}
 		return true;
-	}
-	else
-	{
-		printf("rawbuffer_len = 0\n");
-		return false;
 	}
 }
 //-------------------------------------------------------------------------
@@ -427,10 +341,6 @@ void CWebserverRequest::RewriteURL()
 
 	if(Parent->DEBUG) printf("Schreibe URL um\n");
 
-//	if(  (URL[URL.length()] == ' ') || (URL[URL.length()] == '\n') )
-//		URL = URL.substr(1,URL.length() - 1);
-	if(Parent->DEBUG) printf("Vor split URL:'%s'\n",URL.c_str());
-	
 	if(( URL.length() == 1) && (URL[URL.length()-1] == '/' ))		// Wenn letztes Zeichen ein / ist dann index.html anhängen
 	{
 		Path = URL;
@@ -438,24 +348,18 @@ void CWebserverRequest::RewriteURL()
 	}
 	else
 	{		// Sonst aufsplitten
-//		if(strchr(a,'/') != strrchr(a,'/'))
-		{
-			int split = URL.rfind('/') + 1;
+		int split = URL.rfind('/') + 1;
 
-			if(split > 0)
-				Path = URL.substr(0,split);
-			else
-				Path = "/";
+		if(split > 0)
+			Path = URL.substr(0,split);
+		else
+			Path = "/";
 
 
-			if(split < URL.length())
-			{
-				Filename= URL.substr(split,URL.length()- split);
-			}
-			else
-				printf("[nhttpd] Kein Dateiname !\n");
-		}
-		
+		if(split < URL.length())
+			Filename= URL.substr(split,URL.length()- split);
+		else
+			printf("[nhttpd] Kein Dateiname !\n");	
 	}
 	
 	if(Parent->DEBUG) printf("Path: '%s'\n",Path.c_str());
@@ -463,15 +367,16 @@ void CWebserverRequest::RewriteURL()
 
 	if( (strncmp(Path.c_str(),"/fb",3) != 0) && (strncmp(Path.c_str(),"/control",8) != 0) )	// Nur umschreiben wenn nicht mit /fb/ anfängt
 	{
-		char urlbuffer[255]={0};
-		if(Parent->DEBUG) printf("Umschreiben\n");
-		sprintf(urlbuffer,"%s%s\0",Parent->PublicDocumentRoot->c_str(),Path.c_str());
-		Path = urlbuffer;
+//		sprintf(urlbuffer,"%s%s\0",Parent->PublicDocumentRoot->c_str(),Path.c_str());
+		Path = Parent->PublicDocumentRoot + Path;
+//		Path = urlbuffer;
+		if(Parent->DEBUG) printf("Umgeschrieben: '%s'\n",Path.c_str());
 	}
 	else
 		if(Parent->DEBUG) printf("FB oder control, URL nicht umgeschrieben\n",Path.c_str());
 	
 	if(Parent->DEBUG) printf("Auf Sonderzeichen prüfen\n");
+/*
 	if(strchr(Filename.c_str(),'%'))	// Wenn Sonderzeichen im Dateinamen sind
 	{
 		char filename[255]={0};
@@ -495,6 +400,7 @@ void CWebserverRequest::RewriteURL()
 		if(Parent->DEBUG) printf("Ohne Sonderzeichen: '%s'\n",filename);
 		Filename = filename;
 	}
+*/
 	if(Parent->DEBUG) printf("Auf FileExtension prüfen: ");
 	FileExt = "";
 	if(Filename.length() > 0) 
@@ -502,9 +408,7 @@ void CWebserverRequest::RewriteURL()
 		int fileext = Filename.rfind('.');
 
 		if(fileext == -1)		// Dateiendung
-		{
 			if(Parent->DEBUG) printf("Keine Dateiendung gefunden !\n");
-		}
 		else
 		{
 			FileExt = Filename.substr(fileext,Filename.length()-fileext);
@@ -605,10 +509,10 @@ void CWebserverRequest::SocketWriteData( char* data, long length )
 }
 //-------------------------------------------------------------------------
 
-bool CWebserverRequest::SendFile(char *path,char *filename)
+bool CWebserverRequest::SendFile(string path,string filename)
 {
 int file;
-	if( (file = OpenFile(path,filename) ) != -1 )		// Testen ob Datei auf Platte geöffnet werden kann
+	if( (file = OpenFile(path.c_str(),filename.c_str()) ) != -1 )		// Testen ob Datei auf Platte geöffnet werden kann
 	{											// Wenn Datei geöffnet werden konnte
 		SendOpenFile(file);
 		return true;

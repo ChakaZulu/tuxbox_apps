@@ -11,7 +11,6 @@
 #include <map>
 
 #include "request.h"
-#include "helper.h"
 #include "controldclient.h"
 
 #include "../controld/clientlib/controldclient.h"

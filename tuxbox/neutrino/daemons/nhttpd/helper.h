@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 //----------------------------------------------------------------------
+
 class TString
 {
 	int laenge;
@@ -20,5 +21,6 @@ public:
 	TString(char *t){Set(t,strlen(t));}
 	TString(char *t,int len){Set(t,len);}
 
-}; 
+};
+
 #endif

@@ -14,13 +14,12 @@
 #include <vector>
 #include <map>
 
-#include "helper.h"
 #include "webserver.h"
 #include "upload.h"
 
 using namespace std;
 
-typedef map<string,string> CParameterList;
+typedef map<string,string> CStringList;
 
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
@@ -34,15 +33,14 @@ class CWebserverRequest
 private:
 	char * rawbuffer;
 	int rawbuffer_len;
-	void ParseHeader(char * t, int len);
-//	void SplitParameter(char *parameter,int len,char seperator='=');
+
 	void SplitParameter(string param_str);
 
 	void RewriteURL();
 
 	int OpenFile(const char *path, const char *filename);
 	void SendOpenFile(int );
-	TString *Boundary;
+//	TString *Boundary;
 
 public:
  	int sock_fd;
@@ -55,7 +53,7 @@ public:
 	void SocketWriteData( char* data, long length );
 	void SocketWrite(string text){SocketWrite( (char *)text.c_str());}
 	void SocketWriteLn(string text){SocketWriteLn( (char *)text.c_str());}
-	bool SendFile(char *path,char *filename);
+	bool SendFile(string path,string filename);
 
 	void SendHTMLFooter();
 	void SendHTMLHeader(char * Titel);
@@ -68,8 +66,8 @@ public:
 	string Param_String;
 	string ContentType;
 
-	CParameterList ParameterList;
-//	TParameterList *HeaderList;
+	CStringList ParameterList;
+	CStringList HeaderList;
 	
 	int HttpStatus;
 
@@ -80,7 +78,8 @@ public:
 	bool GetRawRequest(int socket);
 	bool ParseRequest();
 	bool ParseParams(string param_string);
-	bool ParseFirstLine(char * zeile, int len);
+	bool ParseFirstLine(string zeile);
+	bool ParseHeader(string header);
 	void Send404Error();
 	void Send500Error();
 	void SendPlainHeader(char *contenttype = NULL);

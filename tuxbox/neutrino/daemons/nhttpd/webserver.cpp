@@ -37,8 +37,8 @@ TWebserver::TWebserver()
 {
 	Port=0;
 	ListenSocket = 0;
-	PublicDocumentRoot = NULL;
-	PrivateDocumentRoot = NULL;
+	PublicDocumentRoot = "";
+	PrivateDocumentRoot = "";
 	TimerList = NULL;
 	DEBUG=false;
 }
@@ -48,25 +48,20 @@ TWebserver::~TWebserver()
 	if(ListenSocket)
 		Stop();
 
-	if(PrivateDocumentRoot)
-		delete PrivateDocumentRoot;
-	if(PublicDocumentRoot)
-		delete PublicDocumentRoot;
-
 	if(WebDbox)
 		delete WebDbox;
 	if(TimerList)
 		delete TimerList;
 }
 //-------------------------------------------------------------------------
-bool TWebserver::Init(int port,char * publicdocumentroot,bool debug,bool verbose,bool threads)
+bool TWebserver::Init(int port,string publicdocumentroot,bool debug,bool verbose,bool threads)
 {
 	Port=port;
 	DEBUG = debug;
 	THREADS = threads;
 	VERBOSE = verbose;
-	PrivateDocumentRoot = new TString(PRIVATEDOCUMENTROOT);
-	PublicDocumentRoot = new TString(publicdocumentroot);
+	PrivateDocumentRoot = PRIVATEDOCUMENTROOT;
+	PublicDocumentRoot = publicdocumentroot;
 	WebDbox = new TWebDbox(this);
 	if(DEBUG) printf("WebDbox initialized\n");
 	return true;

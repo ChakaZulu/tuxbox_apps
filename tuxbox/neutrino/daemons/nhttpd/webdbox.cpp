@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.18 2002/04/17 01:31:50 dirch Exp $
+	$Id: webdbox.cpp,v 1.19 2002/04/17 20:15:48 dirch Exp $
 
 	License: GPL
 
@@ -87,6 +87,26 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 		}
 	}
 
+	if(request->Filename.compare("gettime") == 0)
+	{
+		request->SendPlainHeader();          // Standard httpd header senden
+		if (request->ParameterList.size()==0)
+		{	//paramlos
+			char *timestr = new char[50];
+			time_t jetzt = time(NULL);
+			struct tm *tm = localtime(&jetzt);
+			strftime(timestr, 50, "%H:%M:%S\n", tm );	// aktuelles datum ausgeben
+			request->SocketWrite(timestr);
+			delete[] timestr;
+			return true;
+		}
+		else
+		{
+			request->SocketWrite("error");
+			return false;
+		}
+	}
+
 	if(request->Filename.compare("settings") == 0)		// sendet die settings
 	{
 		request->SendPlainHeader();
@@ -117,25 +137,6 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 		return true;
 	}
 	
-	if(request->Filename.compare("gettime") == 0)
-	{
-		request->SendPlainHeader();          // Standard httpd header senden
-		if (request->ParameterList.size()==0)
-		{	//paramlos
-			char *timestr = new char[50];
-			time_t jetzt = time(NULL);
-			struct tm *tm = localtime(&jetzt);
-			strftime(timestr, 50, "%H:%M:%S\n", tm );	// aktuelles datum ausgeben
-			request->SocketWrite(timestr);
-			delete[] timestr;
-			return true;
-		}
-		else
-		{
-			request->SocketWrite("error");
-			return false;
-		}
-	}
 
 	if(request->Filename.compare("info") == 0)
 	{
@@ -321,7 +322,26 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 		else
 		if (request->ParameterList.size() == 1)
 		{
-			if(request->ParameterList["1"] == "getpids")
+			if(request->ParameterList["mode"] != "")			// TV oder RADIO - Mode
+			{
+				if(request->ParameterList["mode"] == "TV")
+				{				
+					zapit.setMode(CZapitClient::MODE_RADIO);
+					if(request->Parent->DEBUG) printf("switched to tvmode");
+					sleep(1);
+					UpdateBouquets();
+				}
+				else if(request->ParameterList["mode"] == "RADIO")
+				{				
+					zapit.setMode(CZapitClient::MODE_RADIO);
+					if(request->Parent->DEBUG) printf("switched to radiomode");
+					sleep(1);
+					UpdateBouquets();
+				}
+				else
+					return false;
+			}
+			if(request->ParameterList["1"] == "getpids")		// getpids !
 			{
 				SendcurrentVAPid(request);
 			}
@@ -330,7 +350,6 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 				zapit.stopPlayBack();
 				sectionsd.setPauseScanning(true);
 				request->SocketWrite("ok");
-				if(Parent->VERBOSE) printf("stop playback requested..\n");
 			}
 			else if(request->ParameterList["1"] == "startplayback")
 			{
@@ -342,18 +361,16 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 			else if(request->ParameterList["1"] == "stopsectionsd")
 			{
 				sectionsd.setPauseScanning(true);
-				if(Parent->VERBOSE) printf("stop sectionsd requested..\n");
 				request->SocketWrite("ok");
 			}
 			else if(request->ParameterList["1"] == "startsectionsd")
 			{
 				sectionsd.setPauseScanning(false);
-				if(Parent->VERBOSE) printf("stop sectionsd requested..\n");
 				request->SocketWrite("ok");
 			}
 			else
 			{
-				ZapTo( (char *)request->ParameterList[0].c_str() );
+				ZapTo( (char *)request->ParameterList["1"].c_str() );
 				request->SocketWrite("ok");
 			}
 		}
@@ -369,7 +386,7 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 
 bool TWebDbox::Execute(CWebserverRequest* request)
 {
-	if(Parent->DEBUG) printf("executing\n");
+	if(Parent->DEBUG) printf("Executing %s\n",request->Filename.c_str());
 	if(request->Filename.compare("test.dbox2") == 0)
 	{
 
@@ -464,7 +481,7 @@ bool TWebDbox::Execute(CWebserverRequest* request)
 				if(request->ParameterList["eventid"] != "")
 				{
 					unsigned long long epgid;
-					sscanf(request->ParameterList["epgid"].c_str(), "%llx", &epgid);
+					sscanf(request->ParameterList["eventid"].c_str(), "%llx", &epgid);
 					CShortEPGData epg;
 					if(sectionsd.getEPGidShort(epgid,&epg))
 					{
@@ -526,7 +543,7 @@ bool TWebDbox::Execute(CWebserverRequest* request)
 				if(request->ParameterList["1"] == "shutdown")
 				{
 					request->SendPlainHeader("text/html");
-					request->SendFile(request->Parent->PrivateDocumentRoot->c_str(),"/shutdown.include");
+					request->SendFile(request->Parent->PrivateDocumentRoot,"/shutdown.include");
 					request->EndRequest();
 					sleep(1);
 					controld.shutdown();
@@ -938,13 +955,13 @@ void TWebDbox::ShowControlpanel(CWebserverRequest* request)
 {
 	if (request->ParameterList.size() > 0)
 	{
-		if( request->ParameterList["1"] != "volumemute")
+		if( request->ParameterList["1"] == "volumemute")
 		{
 			bool mute = controld.getMute();
 			controld.setMute( !mute );
 			if(request->Parent->DEBUG) printf("mute\n");
 		}
-		else if( request->ParameterList["1"] != "volumeplus")
+		else if( request->ParameterList["1"] == "volumeplus")
 		{
 			char vol = controld.getVolume();
 			vol+=5;
@@ -953,7 +970,7 @@ void TWebDbox::ShowControlpanel(CWebserverRequest* request)
 			controld.setVolume(vol);
 			if(request->Parent->DEBUG) printf("Volume plus: %d\n",vol);
 		}
-		else if( request->ParameterList["1"] != "volumeminus")
+		else if( request->ParameterList["1"] == "volumeminus")
 		{
 			char vol = controld.getVolume();
 			if (vol>0)
@@ -978,10 +995,10 @@ void TWebDbox::ShowControlpanel(CWebserverRequest* request)
 	char volstr_off[10]={0};
 	sprintf((char*) &volstr_on, "%d", vol);
 	sprintf((char*) &volstr_off, "%d", 100-vol);
-	request->SendFile(request->Parent->PrivateDocumentRoot->c_str(),"/controlpanel.include1");
+	request->SendFile(request->Parent->PrivateDocumentRoot.c_str(),"/controlpanel.include1");
 	//muted
 	request->SocketWrite(mutestr);
-	request->SendFile(request->Parent->PrivateDocumentRoot->c_str(),"/controlpanel.include2");
+	request->SendFile(request->Parent->PrivateDocumentRoot.c_str(),"/controlpanel.include2");
 	//volume bar...
 	request->SocketWrite("<td><img src=../images/vol_flashed.jpg width=");
 	request->SocketWrite(volstr_on);
@@ -989,7 +1006,7 @@ void TWebDbox::ShowControlpanel(CWebserverRequest* request)
 	request->SocketWrite("<td><img src=../images/vol_unflashed.jpg width=");
 	request->SocketWrite(volstr_off);
 	request->SocketWrite(" height=10 border=0><br></td>\n");
-	request->SendFile(request->Parent->PrivateDocumentRoot->c_str(),"/controlpanel.include3");
+	request->SendFile(request->Parent->PrivateDocumentRoot.c_str(),"/controlpanel.include3");
 	delete[] mutestr;
 }
 

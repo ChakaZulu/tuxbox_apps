@@ -243,7 +243,23 @@ Beispiel:
 305
 306
  
- 
+
+
+Parameter: mode=TV|RADIO
+Rückgabe:
+
+	Schaltet in den Radio oder TV - Mode. 
+
+Rückgabe-Format: ok / error
+
+Beispiel:
+
+>>>http://dbox/control/zapto?mode=TV
+ok
+
+>>>http://dbox/control/zapto?mode=RADIO
+ok
+
 
 
 Parameter: stopplayback
