@@ -1076,7 +1076,7 @@ void eDVBCI::stopTimer()
 void eDVBCI::dataAvailable(int what)
 {
 	int present;
-	unsigned char buffer[256];
+	unsigned char buffer[1024];
 	int size;
 	(void)what;
 
@@ -1085,7 +1085,7 @@ void eDVBCI::dataAvailable(int what)
 	if (::ioctl(fd,CI_GET_STATUS,&present)<0)
 		eDebug("CI_GET_STATUS failed (%m)");
 
-	if(present!=1)						//CI removed
+	if(present == 2 || present != 1) 
 	{
 		eDebug("[DVBCI] module removed");	
 
