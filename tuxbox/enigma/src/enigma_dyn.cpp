@@ -1601,19 +1601,24 @@ public:
 				for (It = evt->begin(); It != evt->end(); It++)
 				{
 					EITEvent event(*It->second);
-					for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
+					time_t now = time(0) + eDVB::getInstance()->time_difference;
+					//tm start = *localtime(&now);
+					if ((now >= event.start_time) && (now <= event.start_time + event.duration))
 					{
-						Descriptor *descriptor=*d;
-						if (descriptor->Tag() == DESCR_SHORT_EVENT)
+						for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
 						{
-							short_description = ((ShortEventDescriptor*)descriptor)->event_name;
+							Descriptor *descriptor=*d;
+							if (descriptor->Tag() == DESCR_SHORT_EVENT)
+							{
+								short_description = ((ShortEventDescriptor*)descriptor)->event_name;
+							}
 						}
 					}
 				}
 			}
 			eEPGCache::getInstance()->Unlock();
-			
-			
+
+
 			result1 += "\"" + ref2string(e) + "\", ";
 			eString tmp = filter_string(service->service_name);
 			tmp.strReplace("\"", "'");
