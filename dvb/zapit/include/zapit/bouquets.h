@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.32 2002/09/01 22:03:21 thegoodguy Exp $
+ * $Id: bouquets.h,v 1.33 2002/09/06 00:37:24 thegoodguy Exp $
  */
 
 #ifndef __bouquets_h__
@@ -51,7 +51,9 @@ class CBouquet
 		ChannelList radioChannels;
 		ChannelList tvChannels;
 
-		CBouquet(string name) { Name=name; bHidden = false; bLocked = false; }
+		CBouquet(const string name) { Name=name; bHidden = false; bLocked = false; }
+		CBouquet(const CBouquet&);
+
 		~CBouquet();
 
 		void addService (CZapitChannel* newChannel);

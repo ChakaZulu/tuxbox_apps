@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.50 2002/09/04 11:52:55 obi Exp $
+ * $Id: bouquets.cpp,v 1.51 2002/09/06 00:37:24 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -32,6 +32,16 @@
 extern tallchans allchans_tv, allchans_radio;   //  defined in zapit.cpp
 
 /**** class CBouquet ********************************************************/
+CBouquet::CBouquet(const CBouquet& bouquet)
+{
+        Name = bouquet.Name;
+        bHidden = bouquet.bHidden;
+        bLocked = bouquet.bLocked;
+        for(unsigned int i = 0; i < bouquet.tvChannels.size(); i++)
+                addService(new CZapitChannel(*(bouquet.tvChannels[i])));
+        for(unsigned int i = 0; i < bouquet.radioChannels.size(); i++)
+                addService(new CZapitChannel(*(bouquet.radioChannels[i])));
+}
 
 CBouquet::~CBouquet()
 {
@@ -397,7 +407,6 @@ void CBouquetManager::makeRemainingChannelsBouquet(unsigned int tvChanNr, unsign
 	remainChannels = addBouquet(strTitle);
 
 	for (tallchans_iterator it=allchans_tv.begin(); it!=allchans_tv.end(); it++)
-//		if (it->second.getChannelNumber() == 0)
 		if (tvchans_processed->find(it->second.getOnidSid()) == tvchans_processed->end())  // not found == not yet processed
 			unnumberedChannels.push_back(&(it->second));
 
@@ -414,7 +423,6 @@ void CBouquetManager::makeRemainingChannelsBouquet(unsigned int tvChanNr, unsign
 	unnumberedChannels.clear();
 
 	for (tallchans_iterator it = allchans_radio.begin(); it != allchans_radio.end(); it++)
-//		if (it->second.getChannelNumber() == 0)
 		if (radiochans_processed->find(it->second.getOnidSid()) == radiochans_processed->end())  // not found == not yet processed
 			unnumberedChannels.push_back(&(it->second));
 
