@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.40 2001/10/18 21:03:14 field Exp $
+// $Id: infoviewer.cpp,v 1.41 2001/10/21 13:06:17 field Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.41  2001/10/21 13:06:17  field
+// nvod-zeiten funktionieren!
+//
 // Revision 1.40  2001/10/18 21:03:14  field
 // EPG Previous/Next
 //
@@ -316,7 +319,7 @@ void CInfoViewer::showButtonNVOD()
     if ( strcmp(g_RemoteControl->nvods.name, to_compare )== 0 )
     {
         // gelbe Taste für NVODs
-        if ( g_RemoteControl->nvods.count_nvods> 0 )
+        if ( g_RemoteControl->nvods.count_nvods> 1 )
         {
             g_FrameBuffer->paintIcon("gelb.raw", BoxEndX- 2* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
             g_Fonts->infobar_small->RenderString(BoxEndX- 2* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.selecttime").c_str(), COL_INFOBAR);

@@ -52,6 +52,7 @@ struct st_audio_info
 struct nvod_info
 {
     time_t          startzeit;
+    unsigned        dauer;
     unsigned int    onid_sid;
     unsigned short  tsid;
 };

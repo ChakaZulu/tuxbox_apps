@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.66 2001/10/15 17:27:19 field Exp $
+        $Id: neutrino.cpp,v 1.67 2001/10/21 13:06:17 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.67  2001/10/21 13:06:17  field
+  nvod-zeiten funktionieren!
+
   Revision 1.66  2001/10/15 17:27:19  field
   nvods (fast) implementiert (umschalten funkt noch nicht)
 
@@ -1611,7 +1614,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.66 2001/10/15 17:27:19 field Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.67 2001/10/21 13:06:17 field Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;

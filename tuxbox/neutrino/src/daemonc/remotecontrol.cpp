@@ -1,7 +1,10 @@
 //
-// $Id: remotecontrol.cpp,v 1.25 2001/10/18 21:03:14 field Exp $
+// $Id: remotecontrol.cpp,v 1.26 2001/10/21 13:06:17 field Exp $
 //
 // $Log: remotecontrol.cpp,v $
+// Revision 1.26  2001/10/21 13:06:17  field
+// nvod-zeiten funktionieren!
+//
 // Revision 1.25  2001/10/18 21:03:14  field
 // EPG Previous/Next
 //
@@ -73,8 +76,10 @@ static void getNVODs(unsigned onidSid, st_nvod_info *nvods )
 {
     char rip[]="127.0.0.1";
 
-
+    bool got_times= false;
     int rep_cnt= 0;
+    nvod_info   n_nvods[10];
+    int         count= 0;
     do
     {
         rep_cnt++;
@@ -119,37 +124,66 @@ static void getNVODs(unsigned onidSid, st_nvod_info *nvods )
                     //printf("dataLength: %u\n", resp.dataLength);
                     char *p=pData;
 
-                    nvods->count_nvods = 0;
+                    count = 0;
                     while(p<pData+resp.dataLength)
                     {
-                        nvods->count_nvods+= 1;
+                        count+= 1;
                         unsigned onidsid2=*(unsigned *)p;
                         // printf("onid_sid: 0x%x\n", onidsid2);
-                        nvods->nvods[nvods->count_nvods- 1].onid_sid = onidsid2;
+                        n_nvods[count- 1].onid_sid = onidsid2;
 
                         p+=4;
                         unsigned short tsid=*(unsigned short *)p;
                         // printf("tsid: 0x%x\n", tsid);
-                        nvods->nvods[nvods->count_nvods- 1].tsid = tsid;
+                        n_nvods[count- 1].tsid = tsid;
 
                         p+=2;
-                        unsigned char numberOfTimes=*p;
-                        p++;
-                        for(int i=0; i<numberOfTimes; i++)
-                        {
-                            time_t zeit=*(time_t *)p;
-                            p+=4;
-                            // printf("%s", ctime(&zeit));
-                            if (i == 0)
-                                nvods->nvods[nvods->count_nvods- 1].startzeit = zeit;
-                        }
+                        time_t zeit=*(time_t *)p;
+                        n_nvods[count- 1].startzeit = zeit;
+                        p+=4;
+                        //printf("%s", ctime(&zeit));
+
+                        n_nvods[count- 1].dauer = *(unsigned *)p;
+                        p+=4;
+
+                        if (n_nvods[count- 1].dauer!= 0)
+                            got_times= true;
                     }
                 }
                 delete[] pData;
             }
             close(sock_fd);
         }
-    } while ( ( nvods->count_nvods== 0 ) && ( rep_cnt< 20) );
+    } while ( ( ( count== 0 ) || ( !got_times ) ) && ( rep_cnt< 20) );
+
+    if ( count> 0 )
+    {
+        //sortieren
+        time_t  min_zeit;
+        int     min_index;
+        nvods->count_nvods= 0;
+        for (int j=0;j<count;j++)
+        {
+            min_zeit= 0x7FFFFFFF;
+            min_index= -1;
+
+            for (int i=0;i<count;i++)
+            {
+                if ( (n_nvods[i].dauer!= 0) && (n_nvods[i].startzeit< min_zeit) )
+                {
+                    min_index= i;
+                    min_zeit= n_nvods[i].startzeit;
+                }
+            }
+            if ( min_index!= -1)
+            {
+                memcpy(&nvods->nvods[nvods->count_nvods], &n_nvods[min_index], sizeof(nvod_info));
+                n_nvods[min_index].dauer= 0;
+                //printf("%s - %x\n", ctime(&nvods->nvods[nvods->count_nvods].startzeit), (unsigned int)nvods->nvods[nvods->count_nvods].startzeit);
+                nvods->count_nvods++;
+            }
+        }
+    }
 }
 
 void * CRemoteControl::RemoteControlThread (void *arg)
