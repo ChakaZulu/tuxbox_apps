@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.86 2002/03/14 20:16:38 McClean Exp $
+  $Id: zapit.cpp,v 1.87 2002/03/14 20:42:47 McClean Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -2039,10 +2039,11 @@ void parse_command()
       		status = "00h";
       	else
       		status = "-0h";
-      	if (send(connfd, status, strlen(status),0) == -1) {
-		perror("[zapit] could not send any return\n");
-		return;
-	}
+      	if (send(connfd, status, strlen(status),0) == -1) 
+		{
+			perror("[zapit] could not send any return\n");
+			return;
+		}
 		if (send(connfd, &curr_sat, sizeof(short),0) == -1)
 		{
 		perror("[zapit] could not send any return\n");
@@ -2243,6 +2244,10 @@ void parse_command()
 				msgResponseIsScanReady.satellite   = curr_sat;
 				msgResponseIsScanReady.transponder = found_transponders;
 				msgResponseIsScanReady.services    = found_channels;
+		      	if (scan_runs>0)
+						msgResponseIsScanReady.scanReady   = false;
+					else
+						msgResponseIsScanReady.scanReady   = true;
 				write( connfd, &msgStartScan, sizeof(msgStartScan));
 			break;
 			
@@ -2492,7 +2497,7 @@ int main (int argc, char **argv)
 	}
 
 	system("cp " CONFIGDIR "/zapit/last_chan /tmp/zapit_last_chan");
-	printf("Zapit $Id: zapit.cpp,v 1.86 2002/03/14 20:16:38 McClean Exp $\n\n");
+	printf("Zapit $Id: zapit.cpp,v 1.87 2002/03/14 20:42:47 McClean Exp $\n\n");
 	scan_runs = 0;
 	found_transponders = 0;
 	found_channels = 0;

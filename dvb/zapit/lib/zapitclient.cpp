@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: zapitclient.cpp,v 1.12 2002/03/14 20:16:38 McClean Exp $
+  $Id: zapitclient.cpp,v 1.13 2002/03/14 20:42:47 McClean Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapitclient.cpp,v $
+  Revision 1.13  2002/03/14 20:42:47  McClean
+  fixme
+
   Revision 1.12  2002/03/14 20:16:38  McClean
   final addition of ts-scan (new commandinterface)
 
@@ -258,7 +261,7 @@ void CZapitClient::startScan( int satelliteMask )
 }
 
 /* query if ts-scan is ready - response gives status */
-bool CZapitClient::isScanReady(int &satellite, int &transponder, int &services )
+bool CZapitClient::isScanReady(unsigned int &satellite, unsigned int &transponder, unsigned int &services )
 {
 	commandHead msgHead;
 	msgHead.version=ACTVERSION;
@@ -275,6 +278,7 @@ bool CZapitClient::isScanReady(int &satellite, int &transponder, int &services )
 	services = response.services;
 
 	zapit_close();
+	return response.scanReady;
 }
 
 
