@@ -1,5 +1,5 @@
 /*
- * $Id: pat.cpp,v 1.26 2002/07/22 01:57:19 Homar Exp $
+ * $Id: pat.cpp,v 1.27 2002/07/22 15:00:50 Homar Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org> jaja :)
  *
@@ -33,10 +33,11 @@
 
 extern CEventServer * eventServer;
 extern unsigned int found_transponders;
+static int status = 0;
 
 int fake_pat (uint32_t TsidOnid, FrontendParameters feparams, uint8_t polarity, uint8_t DiSEqC)
 {
-	if (scantransponders.count(TsidOnid) == 0)
+	if ((status = scantransponders.count(TsidOnid)) == 0)
 	{
 		found_transponders++;
 
@@ -65,7 +66,7 @@ int fake_pat (uint32_t TsidOnid, FrontendParameters feparams, uint8_t polarity, 
 		);
 	}
 
-	return 0;
+	return status;
 }
 
 int parse_pat (int demux_fd, CZapitChannel * channel)
@@ -80,18 +81,18 @@ int parse_pat (int demux_fd, CZapitChannel * channel)
 	unsigned short i;
 
 	/* set filter for program association section */
-	if (setDmxSctFilter(demux_fd, 0x0000, 0x00) < 0)
+	if ((status = setDmxSctFilter(demux_fd, 0x0000, 0x00)) < 0)
 	{
-		return -1;
+		return status;
 	}
 
 	do
 	{
 		/* read section */
-		if (read(demux_fd, buffer, PAT_LENGTH) < 0)
+		if ((status = read(demux_fd, buffer, PAT_LENGTH)) < 0)
 		{
 			perror("[pat.cpp] read");
-			return -1;
+			return status;
 		}
 
 		/* loop over service id / program map table pid pairs */
@@ -108,6 +109,6 @@ int parse_pat (int demux_fd, CZapitChannel * channel)
 	}
 	while (section++ != buffer[7]);
 
-	return -1;
+	return status;
 }
 

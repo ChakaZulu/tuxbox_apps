@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.53 2002/07/22 01:57:19 Homar Exp $
+ * $Id: scan.cpp,v 1.54 2002/07/22 15:00:50 Homar Exp $
  */
 
 #include <clientlib/zapitclient.h>
@@ -25,6 +25,9 @@ typedef std::multimap <std::string, bouquet_mulmap>::iterator sbiterator;
 
 short scan_runs;
 short curr_sat;
+static int status = 0;
+
+
 
 CBouquetManager* scanBouquetManager;
 
@@ -40,7 +43,7 @@ extern CZapitClient::bouquetMode bouquetMode;
 extern CEventServer *eventServer;
 
 /* build transponder for cable-users with sat-feed*/
-void build_bf_transponder(uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, Modulation modulation)
+int build_bf_transponder(uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, Modulation modulation)
 {
 	FrontendParameters feparams;
 	feparams.Frequency = frequency;
@@ -59,12 +62,14 @@ void build_bf_transponder(uint32_t frequency, uint32_t symbol_rate, CodeRate FEC
 
 	if (frontend->tuneFrequency(feparams, 0, 0) == true)
 	{
-		fake_pat(get_sdt_TsidOnid(), feparams,0,0);
+		status = fake_pat(get_sdt_TsidOnid(), feparams,0,0);
 	}
 	else
 	{
 		printf("No signal found on transponder\n");
+		status = -1;
 	}
+	return status;
 }
 
 int get_nits (uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, uint8_t polarity, uint8_t DiSEqC, Modulation modulation)
@@ -87,24 +92,33 @@ int get_nits (uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, uint
 
 	if (frontend->tuneFrequency(feparams, polarity, DiSEqC) == true)
 	{
-		if(parse_nit(DiSEqC) == -2)
+		if((status = parse_nit(DiSEqC)) <= -2)
 		{
 			/* NIT war leer, leese TS-ID und ON-ID von der SDT aus */
-			printf("[scan.cpp] NIT war leer, lese SDT aus\n");
-			fake_pat(get_sdt_TsidOnid(), feparams, polarity, DiSEqC);
+			switch (status)
+			{
+				case (-2):
+					printf("[scan.cpp] NIT nicht frontendkonform, lese SDT aus\n");
+					break;
+				case (-3):
+					printf("[scan.cpp] NIT war leer, lese SDT aus\n");
+					break;
+				//todo weitere stati abfragen
+			}
+
+			status = fake_pat(get_sdt_TsidOnid(), feparams, polarity, DiSEqC);
 			printf("[scan.cpp] TS-ON ID = %08x\n", get_sdt_TsidOnid() );
 		}
-
-		return 0;
 	}
 	else
 	{
 		printf("No signal found on transponder\n");
-		return -1;
+		status = -1;
 	}
+	return status;
 }
 
-void get_sdts()
+int get_sdts()
 {
 	stiterator tI;
 
@@ -113,13 +127,15 @@ void get_sdts()
 		if (frontend->tuneFrequency(tI->second.feparams, tI->second.polarization, tI->second.DiSEqC) == true)
 		{
 			printf("[scan.cpp] parsing sdt of tsid %04x, onid %04x\n", tI->second.transport_stream_id, tI->second.original_network_id);
-			parse_sdt();
+			status = parse_sdt();
 		}
 		else
 		{
 			printf("[scan.cpp] No signal found on transponder\n");
+			status = -1;
 		}
 	}
+	return status;
 }
 
 FILE *write_xml_header (const char *filename)
@@ -145,12 +161,13 @@ int write_xml_footer(FILE *fd)
 	if (fd != NULL)
 	{
 		fprintf(fd, "</zapit>\n");
-		return fclose(fd);
+		status = fclose(fd);
 	}
 	else
 	{
-		return -1;
+		status = -1;
 	}
+	return status;
 }
 
 void write_bouquets()
@@ -401,17 +418,18 @@ void *start_scanthread(void *param)
 
 			if (!strcmp(type,"cable") && satfeed)
 				/* build special transponder for cable with satfeed*/
-				build_bf_transponder(frequency, symbol_rate, CFrontend::getFEC(fec_inner), CFrontend::getModulation(modulation));
+				status = build_bf_transponder(frequency, symbol_rate, CFrontend::getFEC(fec_inner), CFrontend::getModulation(modulation));
 			else
 				/* read network information table */
-				get_nits(frequency, symbol_rate, CFrontend::getFEC(fec_inner), polarization, diseqc_pos, CFrontend::getModulation(modulation));
-
+				status = get_nits(frequency, symbol_rate, CFrontend::getFEC(fec_inner), polarization, diseqc_pos, CFrontend::getModulation(modulation));
 			/* next transponder */
 			transponder = transponder->GetNext();
 		}
 
 		/* read service description table */
-		get_sdts();
+		status = get_sdts();
+
+		//todo: Statiauswertung
 
 		/* write services */
 		fd = write_provider(fd, type, providerName, diseqc_pos);
