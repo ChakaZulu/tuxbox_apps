@@ -121,44 +121,30 @@ void show_servicename( string name )
 		return;
 	}
 	display.draw_fill_rect (0,14,120,48, CLCDDisplay::PIXEL_OFF);
+
 	if (fonts.channelname->getRenderWidth(name.c_str())>120)
 	{
-		//try split...
-		int pos = name.find(" ");
-		if (pos == -1)
-			pos = name.find("-");
-		if (pos == -1)
-			pos = name.find(".");
+		int pos;
+		string text1 = name;
+    	do
+    	{
+			pos = text1.find_last_of("[ -.]+");
+			if ( pos!=-1 )
+				text1 = text1.substr( 0, pos );
+		} while ( ( pos != -1 ) && ( fonts.channelname->getRenderWidth(text1.c_str())> 120 ) );
 
-		if(pos!=-1)
-		{		//ok-show 2-line text
-				string text1 = name.substr(0,pos);
-				string text2 = name.substr(pos+1, name.length()-(pos+1) );
-
-				if (fonts.channelname->getRenderWidth(text2.c_str())>120)
-				{
-					// try second split...
-					int pos = text2.find(" ");
-					if (pos == -1)
-						pos = text2.find("-");
-					if (pos == -1)
-						pos = text2.find(".");
-					if(pos!=-1)
-					{
-						string text3 = text1+ " "+ text2.substr(0, pos);
-						if (fonts.channelname->getRenderWidth(text3.c_str())< 120)
-						{
-							text1 = text3;
-							text2 = text2.substr(pos+1, text2.length()-(pos+1) );
-						}
-					}
-				}
-
-				fonts.channelname->RenderString(1,29, 130, text1.c_str(), CLCDDisplay::PIXEL_ON);
-				fonts.channelname->RenderString(1,29+16, 130, text2.c_str(), CLCDDisplay::PIXEL_ON);
-		}
+		if ( fonts.channelname->getRenderWidth(text1.c_str())<= 120 )
+			fonts.channelname->RenderString(1,29+16, 130, name.substr(text1.length()+ 1, -1).c_str(), CLCDDisplay::PIXEL_ON);
 		else
-			fonts.channelname->RenderString(1,37, 130, name.c_str(), CLCDDisplay::PIXEL_ON);
+		{
+			string text1 = name;
+			while (fonts.channelname->getRenderWidth(text1.c_str())> 120)
+				text1= text1.substr(0, text1.length()- 1);
+
+			fonts.channelname->RenderString(1,29+16, 130, name.substr(text1.length(), -1).c_str(), CLCDDisplay::PIXEL_ON);
+		}
+
+		fonts.channelname->RenderString(1,29, 130, text1.c_str(), CLCDDisplay::PIXEL_ON);
 	}
 	else
 	{
