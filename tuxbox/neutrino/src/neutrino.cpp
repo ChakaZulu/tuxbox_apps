@@ -2398,7 +2398,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 			enabled_count++;
 
 #warning TODO: make sure g_PluginList->getName(count) is UTF-8 encoded
-			StreamFeatureSelector.addItem( new CMenuForwarder((g_PluginList->getName(count)).c_str(), true, NULL, StreamFeaturesChanger, id, false, (cnt== 0) ? CRCInput::RC_blue : CRCInput::RC_nokey, (cnt== 0)?NEUTRINO_ICON_BUTTON_BLUE:""), (cnt == 0) );
+			StreamFeatureSelector.addItem( new CMenuForwarder((g_PluginList->getName(count)).c_str(), true, NULL, StreamFeaturesChanger, id, false, (cnt== 0) ? CRCInput::RC_blue :(uint)(CRCInput::convertDigitToKey(enabled_count-1 )), (cnt== 0)?NEUTRINO_ICON_BUTTON_BLUE:""), (cnt == 0) );
 			cnt++;
 		}
 	}
