@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.46 2002/09/11 07:34:18 thegoodguy Exp $
+ * $Id: getservices.cpp,v 1.47 2002/09/11 21:14:22 thegoodguy Exp $
  */
 
 #include <stdio.h>
@@ -7,6 +7,7 @@
 #include <zapost/frontend.h>
 
 #include "bouquets.h"
+#include "channel.h"
 #include "getservices.h"
 
 uint8_t curr_diseqc = 0;
@@ -99,9 +100,9 @@ void ParseChannels (XMLTreeNode *node, uint16_t transport_stream_id, uint16_t or
 		case DIGITAL_RADIO_SOUND_SERVICE:
 			allchans.insert
 			(
-				std::pair <uint32_t, CZapitChannel>
+				std::pair <t_channel_id, CZapitChannel>
 				(
-					(original_network_id << 16) | service_id,
+					CREATE_CHANNEL_ID,
 					CZapitChannel
 					(
 						name,

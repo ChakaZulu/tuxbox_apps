@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.58 2002/09/11 20:12:42 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.59 2002/09/11 21:14:22 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -255,7 +255,7 @@ void CBouquetManager::parseBouquetsXml(const XMLTreeNode *root)
 			search = search->GetNext();
 		}
 
-		unsigned int onid, sid;
+		unsigned int original_network_id, service_id;
 
 		printf("[zapit] reading Bouquets ");
 		while ((search) && (!(strcmp(search->GetType(), "Bouquet"))))
@@ -269,10 +269,10 @@ void CBouquetManager::parseBouquetsXml(const XMLTreeNode *root)
 
 			while (channel_node)
 			{
-				sscanf(channel_node->GetAttributeValue("serviceID"), "%x", &sid);
-				sscanf(channel_node->GetAttributeValue("onid"), "%x", &onid);
+				sscanf(channel_node->GetAttributeValue("serviceID"), "%x", &service_id);
+				sscanf(channel_node->GetAttributeValue("onid"), "%x", &original_network_id);
 
-				CZapitChannel* chan = findChannelByChannelID( (onid << 16) + sid);
+				CZapitChannel* chan = findChannelByChannelID(CREATE_CHANNEL_ID);
 
 				if (chan != NULL)
 					newBouquet->addService(chan);

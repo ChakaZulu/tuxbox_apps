@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.222 2002/09/11 20:12:42 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.223 2002/09/11 21:14:22 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1009,7 +1009,7 @@ void parse_command (CZapitClient::commandHead &rmsg)
 					//printf("got subchan %x %x\n", msgAddSubService.onidsid, msgAddSubService.tsid);
 					nvodchannels.insert
 					(
-					    std::pair <int, CZapitChannel>
+					    std::pair <t_channel_id, CZapitChannel>
 					    (
 						msgAddSubService.onidsid,
 						CZapitChannel
@@ -1079,7 +1079,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.222 2002/09/11 20:12:42 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.223 2002/09/11 21:14:22 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{
