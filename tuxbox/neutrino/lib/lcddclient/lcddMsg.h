@@ -25,17 +25,6 @@
 #ifndef __lcddmsg__
 #define __lcddmsg__
 
-#include <stdio.h>
-#include <unistd.h>
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-
-#include <string>
-
-using namespace std;
-
 
 #define LCDD_UDS_NAME "/tmp/lcdd.sock"
 
@@ -45,7 +34,7 @@ class CLcddMsg
 
 	public:
 
-		static const char ACTVERSION = 4;
+		static const char ACTVERSION = 0;
 
 		enum commands
 		{
@@ -74,7 +63,6 @@ class CLcddMsg
 		//command structures
 		struct commandHead
 		{
-			unsigned char messageType;
 			unsigned char version;
 			unsigned char cmd;
 		};
