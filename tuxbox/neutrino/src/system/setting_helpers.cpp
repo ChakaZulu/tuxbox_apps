@@ -32,6 +32,8 @@
 #include "setting_helpers.h"
 #include "../global.h"
 
+extern "C" int pinghost( const char *hostname );
+
 bool CStartNeutrinoDirectNotifier::changeNotify(string OptionName, void* Data)
 {
 	if( *((int*) Data)!=0)
@@ -219,5 +221,24 @@ void testNetworkSettings(char* ip, char* netmask, char* broadcast, char* gateway
 	printf("testNw Broadcast: %s\n", broadcast);
 	printf("testNw Gateway: %s\n", gateway);
 	printf("testNw Nameserver: %s\n", nameserver);
-	// netSetIP( "eth0", ip, netmask, broadcast);
+
+	if (pinghost(ip))
+		printf("%s ist erreichbar (ping)\n", ip );
+	else
+		printf("%s ist nicht erreichbar (ping)\n", ip );
+
+	if (pinghost(gateway))
+		printf("Gateway %s ist erreichbar (ping)\n", gateway );
+	else
+		printf("Gateway %s nicht erreichbar (ping)\n", gateway );
+
+	if (pinghost(nameserver))
+		printf("Nameserver %s ist erreichbar (ping)\n", gateway );
+	else
+		printf("Nameserver %s nicht erreichbar (ping)\n", gateway );
+
+	if (pinghost("dboxupdate.berlios.de"))
+		printf("dboxupdate.berlios.de ist erreichbar (ping)\n" );
+	else
+		printf("dboxupdate.berlios.de nicht erreichbar (ping)\n" );
 }
