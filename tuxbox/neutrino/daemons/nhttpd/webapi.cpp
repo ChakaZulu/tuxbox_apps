@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.38 2003/04/23 18:02:45 zwen Exp $
+	$Id: webapi.cpp,v 1.39 2003/07/10 14:41:45 dirch Exp $
 
 	License: GPL
 
@@ -698,6 +698,8 @@ bool CWebAPI::ShowEPG(CWebserverRequest *request,string Title, string Info1, str
 	params["Title"] = (Title != "")?Title:"Kein EPG vorhanden";
 	params["Info1"] = (Info1 != "")?Info1:"keine ausführlichen Informationen verfügbar";
 	params["Info2"] = (Info2 != "")?Info2:" ";
+
+	request->SendPlainHeader("text/html");
 	request->ParseFile("epg.html",params);
 	return true;
 }
