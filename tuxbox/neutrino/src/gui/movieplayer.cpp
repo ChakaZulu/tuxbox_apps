@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.78 2004/02/10 17:56:31 gagga Exp $
+  $Id: movieplayer.cpp,v 1.79 2004/02/12 21:08:01 zwen Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -61,6 +61,7 @@
 
 #include <algorithm>
 #include <fstream>
+#include <sstream>
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -125,7 +126,7 @@ std::string skipvalue;
 
 long long startposition;
 int jumpminutes = 1;
-
+int buffer_time = 0;
 //------------------------------------------------------------------------
 size_t
 CurlDummyWrite (void *ptr, size_t size, size_t nmemb, void *data)
@@ -182,7 +183,7 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 		parent->hide ();
 	}
 
-	CBookmark * theBookmark;
+	CBookmark * theBookmark=NULL;
     if (actionKey=="bookmarkplayback") {
         isBookmark = true;
         theBookmark = bookmarkmanager->getBookmark(NULL);
@@ -404,7 +405,7 @@ bool VlcRequestStream(int  transcodeVideo, int transcodeAudio)
 	return true; // TODO error checking
 }
 //------------------------------------------------------------------------
-bool VlcGetStreamTime(std::string& stream_time)
+int VlcGetStreamTime()
 {
 	// TODO calculate REAL position as position returned by VLC does not take the ringbuffer into consideration
 	std::string positionurl = "http://";
@@ -418,11 +419,30 @@ bool VlcGetStreamTime(std::string& stream_time)
 	printf("[movieplayer.cpp] httpres=%d, response.length()=%d, stream_time = %s\n",httpres,response.length(),response.c_str());
 	if(httpres== 0 && response.length() > 0)
 	{
-		stream_time = response;
-		return true;
+		return atoi(response.c_str());
 	}
 	else
-		return false;
+		return -1;
+}
+//------------------------------------------------------------------------
+int VlcGetStreamLength()
+{
+	// TODO calculate REAL position as position returned by VLC does not take the ringbuffer into consideration
+	std::string positionurl = "http://";
+	positionurl += g_settings.streaming_server_ip;
+	positionurl += ':';
+	positionurl += g_settings.streaming_server_port;
+	positionurl += "/admin/dboxfiles.html?stream_length=true";
+	printf("[movieplayer.cpp] positionurl=%s\n",positionurl.c_str());
+	std::string response = "";
+	CURLcode httpres = sendGetRequest(positionurl, response, true);
+	printf("[movieplayer.cpp] httpres=%d, response.length()=%d, stream_length = %s\n",httpres,response.length(),response.c_str());
+	if(httpres== 0 && response.length() > 0)
+	{
+		return atoi(response.c_str());
+	}
+	else
+		return -1;
 }
 //------------------------------------------------------------------------
 void *
@@ -634,10 +654,12 @@ ReceiveStreamThread (void *mrl)
 		else {
 			if (playstate == CMoviePlayerGui::PLAY) {
 				nothingreceived++;
-				if (nothingreceived > 200) {
+				if (nothingreceived > (buffer_time + 3)*100) // wait at least buffer time secs +3 to play buffer when stream ends
+			   {
 					printf ("[movieplayer.cpp] ReceiveStreamthread: Didn't receive for a while. Stopping.\n");
 					playstate = CMoviePlayerGui::STOPPED;	
-				}	
+				}
+				usleep(10000); //sleep 10 ms
 			}
 		}
       
@@ -762,6 +784,10 @@ PlayStreamThread (void *mrl)
 				ioctl (dmxa, DMX_START);
 				printf ("[movieplayer.cpp] PlayStreamthread: Driver successfully set up\n");
 				bufferingBox->hide ();
+				// Calculate diffrence between vlc time and play time
+				// movieplayer is about to start playback so ask vlc for his position
+				if ((buffer_time = VlcGetStreamTime()) < 0)
+					buffer_time=0;
 			}
 
 			len = ringbuffer_read (ringbuf, buf, (readsize / 188) * 188);
@@ -1460,6 +1486,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 			//TODO: Add Dialog (Remove Dialog later)
 			hintBox = new CHintBox("messagebox.info", g_Locale->getText("movieplayer.pleasewait")); // UTF-8
 			hintBox->paint();
+			buffer_time=0;
 			if (pthread_create (&rct, 0, PlayStreamThread, (void *) mrl) != 0)
 			{
 				break;
@@ -1492,10 +1519,12 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		{
 			if (bookmarkmanager->getBookmarkCount() < bookmarkmanager->getMaxBookmarkCount()) 
 			{
-				std::string stream_time;
-    			if (VlcGetStreamTime(stream_time))
+				int stream_time;
+    			if ((stream_time=VlcGetStreamTime()) >= 0)
 				{
-					bookmarkmanager->createBookmark(filename, stream_time);
+					std::stringstream stream_time_ss;
+					stream_time_ss << (stream_time - buffer_time);
+					bookmarkmanager->createBookmark(filename, stream_time_ss.str());
     			}
     			else {
         			DisplayErrorMessage(g_Locale->getText("movieplayer.wrongvlcversion")); // UTF-8
@@ -1564,21 +1593,35 @@ CMoviePlayerGui::PlayStream (int streamtype)
  		{
 			if(StreamTime.IsVisible())
 			{
-				StreamTime.hide();
+				if(StreamTime.GetMode() == CTimeOSD::MODE_ASC)
+				{
+					int stream_length = VlcGetStreamLength();
+					int stream_time = VlcGetStreamTime();
+					if (stream_time >=0 && stream_length >=0)
+					{
+						StreamTime.SetMode(CTimeOSD::MODE_DESC);
+						StreamTime.show(stream_length - stream_time + buffer_time);
+					}
+					else
+						StreamTime.hide();
+				}
+				else
+					StreamTime.hide();
 			}
 			else
 			{
-				std::string stream_time;
-				if (VlcGetStreamTime(stream_time))
+				int stream_time;
+				if ((stream_time = VlcGetStreamTime())>=0)
 				{
-					StreamTime.show(atoi(stream_time.c_str()));
+					StreamTime.SetMode(CTimeOSD::MODE_ASC);
+					StreamTime.show(stream_time-buffer_time);
 				}
 			}
  		}
 		else if (msg == CRCInput::RC_help)
  		{
      		std::string helptext = g_Locale->getText("movieplayer.vlchelp");
-     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.78 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.79 $\n\nMovieplayer (c) 2003, 2004 by gagga";
      		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -1750,7 +1793,7 @@ CMoviePlayerGui::PlayFile (void)
  		else if (msg == CRCInput::RC_help)
  		{
 			std::string fullhelptext = g_Locale->getText("movieplayer.tshelp");
-			fullhelptext += "\nVersion: $Revision: 1.78 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			fullhelptext += "\nVersion: $Revision: 1.79 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
  		else if (msg == CRCInput::RC_setup)

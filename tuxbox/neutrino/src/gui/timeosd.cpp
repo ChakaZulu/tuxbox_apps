@@ -31,6 +31,7 @@ CTimeOSD::CTimeOSD()
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	visible=false;
+	m_mode=MODE_ASC;
 	GetDimensions();
 }
 
@@ -62,14 +63,24 @@ void CTimeOSD::update()
 	if(visible)
 	{
 		char cDisplayTime[8+1];
-		time_t tDisplayTime = m_time_show + (time(NULL) - m_time_dis);
+		time_t tDisplayTime;
+		unsigned char color;
+		if(m_mode == MODE_ASC)
+		{
+			tDisplayTime = m_time_show + (time(NULL) - m_time_dis);
+			color = COL_MENUCONTENT;
+		}
+		else
+		{
+			tDisplayTime = m_time_show + (m_time_dis - time(NULL));
+			color = COL_MENUCONTENTSELECTED;
+		}
+
 		strftime(cDisplayTime, 9, "%T", gmtime(&tDisplayTime));
 		frameBuffer->paintBackgroundBoxRel(m_xend - m_width -20, m_y - 10 , m_width + 40, m_height + 20);
-		frameBuffer->paintBoxRel(m_xend - m_width - 10, m_y , m_width + 10 , m_height, COL_MENUCONTENT);
-		g_Font[SNeutrinoSettings::TIMEOSD_FONT]->RenderString(m_xend - m_width - 5,m_y + m_height,
-																								  m_width+5,
-																								  cDisplayTime, 
-																								  COL_MENUCONTENT);
+		frameBuffer->paintBoxRel(m_xend - m_width - 10, m_y , m_width + 10 , m_height, color);
+		g_Font[TIMEOSD_FONT]->RenderString(m_xend - m_width - 5,m_y + m_height,
+																				m_width+5, cDisplayTime, color);
 	}
 }
 

@@ -30,12 +30,20 @@
 
 class CTimeOSD
 {
+	public:
+		enum mode
+		{
+			MODE_ASC,
+			MODE_DESC
+		};
+	
 	private:
 		CFrameBuffer		*frameBuffer;
 		time_t m_time_dis;
 		time_t m_time_show;
 		bool visible;
 		int m_xstart,m_xend,m_y,m_height, m_width;
+		mode m_mode;
 		void GetDimensions();
 
 	public:
@@ -45,5 +53,7 @@ class CTimeOSD
 		void update(void);
 		void hide();
 		bool IsVisible() {return visible;}
+		void SetMode(mode m) { m_mode = m;}
+		mode GetMode() { return m_mode;}
 };
 #endif
