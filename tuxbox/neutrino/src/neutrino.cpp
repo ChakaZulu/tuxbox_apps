@@ -3395,8 +3395,14 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 			/* 
 			 * note that changeNotify does not distinguish between LOCALE_MAINMENU_RECORDING_START and LOCALE_MAINMENU_RECORDING_STOP
 			 * instead it checks the state of the variable recordingstatus
-			 */ 
+			 */
+			int tmp = recording_id;
+
+			/* restart recording */
 			changeNotify(LOCALE_MAINMENU_RECORDING_START, NULL);
+
+			/* workaround to ensure that we listen to the events for the original recording (especially the STOP event) */
+			recording_id = tmp;
 		}
 
 		delete (unsigned char*) data;
