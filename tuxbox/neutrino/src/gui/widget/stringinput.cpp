@@ -42,6 +42,8 @@
 #include "messagebox.h"
 #include "stringinput.h"
 
+#include <gui/widget/icons.h>
+
 
 CStringInput::CStringInput(const char * const Name, char* Value, int Size, const char * const Hint_1, const char * const Hint_2, const char * const Valid_Chars, CChangeObserver* Observ, const char * const Icon)
 {
@@ -463,9 +465,9 @@ void CStringInputSMS::paint()
 	frameBuffer->paintBoxRel(x,y+height-25, width,25, COL_MENUHEAD);
 	frameBuffer->paintHLine(x, x+width,  y+height-25, COL_INFOBAR_SHADOW);
 
-	frameBuffer->paintIcon("rot.raw", x+8, y+height-25+1);
+	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, x+8, y+height-25+1);
 	g_Fonts->infobar_small->RenderString(x+28, y+height-25+24 - 2, width, g_Locale->getText("stringinput.caps"), COL_INFOBAR, 0, true); // UTF-8
-	frameBuffer->paintIcon("gelb.raw", x+238, y+height-25+1);
+	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x+238, y+height-25+1);
 	g_Fonts->infobar_small->RenderString(x+258, y+height-25+24 - 2, width, g_Locale->getText("stringinput.clear"), COL_INFOBAR, 0, true); // UTF-8
 }
 

@@ -35,6 +35,8 @@
 
 #include "messagebox.h"
 
+#include <gui/widget/icons.h>
+
 //#define borderwidth 4
 
 
@@ -142,7 +144,7 @@ void CMessageBox::paintButtons()
 		if(selected==0)
 			color = COL_MENUCONTENTSELECTED;
 		window->paintBoxRel(xpos, height - fheight - 20, ButtonWidth, fheight, (CFBWindow::color_t)color);
-		window->paintIcon("rot.raw", xpos + 14, height - fheight - 15);
+		window->paintIcon(NEUTRINO_ICON_BUTTON_RED, xpos + 14, height - fheight - 15);
 		window->RenderString(g_Fonts->infobar_small, xpos + 43, height-fheight+4, ButtonWidth- 53, g_Locale->getText("messagebox.yes"), (CFBWindow::color_t)color, 0, true); // UTF-8
 	}
 
@@ -155,7 +157,7 @@ void CMessageBox::paintButtons()
 			color = COL_MENUCONTENTSELECTED;
 
 		window->paintBoxRel(xpos, height-fheight-20, ButtonWidth, fheight, (CFBWindow::color_t)color);
-		window->paintIcon("gruen.raw", xpos+14, height-fheight-15);
+		window->paintIcon(NEUTRINO_ICON_BUTTON_GREEN, xpos+14, height-fheight-15);
 		window->RenderString(g_Fonts->infobar_small, xpos + 43, height-fheight+4, ButtonWidth- 53, g_Locale->getText("messagebox.no"), (CFBWindow::color_t)color, 0, true); // UTF-8
     }
 
@@ -167,7 +169,7 @@ void CMessageBox::paintButtons()
 			color = COL_MENUCONTENTSELECTED;
 
 		window->paintBoxRel(xpos, height-fheight-20, ButtonWidth, fheight, (CFBWindow::color_t)color);
-		window->paintIcon("home.raw", xpos+10, height-fheight-19);
+		window->paintIcon(NEUTRINO_ICON_BUTTON_HOME, xpos+10, height-fheight-19);
 		window->RenderString(g_Fonts->infobar_small, xpos + 43, height-fheight+4, ButtonWidth- 53, g_Locale->getText( ( showbuttons & mbCancel ) ? "messagebox.cancel" : "messagebox.back" ), (CFBWindow::color_t)color, 0, true); // UTF-8
 	}
 }

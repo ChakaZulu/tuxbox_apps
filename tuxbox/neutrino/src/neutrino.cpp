@@ -61,10 +61,11 @@
 #include "driver/vcrcontrol.h"
 #include "driver/irsend.h"
 
+#include "gui/widget/colorchooser.h"
 #include "gui/widget/menue.h"
 #include "gui/widget/messagebox.h"
 #include "gui/widget/hintbox.h"
-#include "gui/widget/colorchooser.h"
+#include "gui/widget/icons.h"
 #include "gui/widget/lcdcontroler.h"
 #include "gui/widget/keychooser.h"
 #include "gui/widget/stringinput.h"
@@ -1056,10 +1057,10 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 {
 	dprintf(DEBUG_DEBUG, "init mainmenue\n");
 	mainMenu.addItem( new CMenuSeparator() );
-	mainMenu.addItem( new CMenuForwarder("mainmenu.tvmode", true, "", this, "tv", true, CRCInput::RC_red, "rot.raw"), true );
-	mainMenu.addItem( new CMenuForwarder("mainmenu.radiomode", true, "", this, "radio", true, CRCInput::RC_green, "gruen.raw") );
-	mainMenu.addItem( new CMenuForwarder("mainmenu.scartmode", true, "", this, "scart", true, CRCInput::RC_yellow, "gelb.raw") );
-	mainMenu.addItem( new CMenuForwarder("mainmenu.games", true, "", new CGameList("mainmenu.games"), "", true, CRCInput::RC_blue, "blau.raw") );
+	mainMenu.addItem( new CMenuForwarder("mainmenu.tvmode", true, "", this, "tv", true, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED), true );
+	mainMenu.addItem( new CMenuForwarder("mainmenu.radiomode", true, "", this, "radio", true, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN) );
+	mainMenu.addItem( new CMenuForwarder("mainmenu.scartmode", true, "", this, "scart", true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW) );
+	mainMenu.addItem( new CMenuForwarder("mainmenu.games", true, "", new CGameList("mainmenu.games"), "", true, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE) );
 	mainMenu.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.mp3player", true, "", new CMP3PlayerGui(), "", true) );
 
@@ -1158,7 +1159,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 			ojDiseqcRepeats->addOption(i, ii);
 		}
 
-		CMenuWidget* extSatSettings = new CMenuWidget("satsetup.extended", "settings.raw");
+		CMenuWidget* extSatSettings = new CMenuWidget("satsetup.extended", NEUTRINO_ICON_SETTINGS);
 		extSatSettings->addItem( new CMenuSeparator() );
 		extSatSettings->addItem( new CMenuForwarder("menu.back") );
 		extSatSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
@@ -1177,7 +1178,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 			extSatSettings->addItem( oj);
 		}
 
-		CMenuWidget* extMotorSettings = new CMenuWidget("satsetup.extended_motor", "settings.raw");
+		CMenuWidget* extMotorSettings = new CMenuWidget("satsetup.extended_motor", NEUTRINO_ICON_SETTINGS);
 		extMotorSettings->addItem( new CMenuSeparator() );
 		extMotorSettings->addItem( new CMenuForwarder("menu.back") );
 		extMotorSettings->addItem( new CMenuForwarder("satsetup.savesettingsnow", true, "", this, "savesettings") );
@@ -1844,21 +1845,21 @@ void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fo
 	colorSettings.addItem( new CMenuForwarder("menu.back") );
 	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
-	CMenuWidget *colorSettings_Themes = new CMenuWidget("colorthememenu.head", "settings.raw");
+	CMenuWidget *colorSettings_Themes = new CMenuWidget("colorthememenu.head", NEUTRINO_ICON_SETTINGS);
 	InitColorThemesSettings(*colorSettings_Themes);
 
 	colorSettings.addItem( new CMenuForwarder("colormenu.themeselect", true, "", colorSettings_Themes) );
-	CMenuWidget *colorSettings_menuColors = new CMenuWidget("colormenusetup.head", "settings.raw", 400, 400);
+	CMenuWidget *colorSettings_menuColors = new CMenuWidget("colormenusetup.head", NEUTRINO_ICON_SETTINGS, 400, 400);
 	InitColorSettingsMenuColors(*colorSettings_menuColors);
 	colorSettings.addItem( new CMenuForwarder("colormenu.menucolors", true, "", colorSettings_menuColors) );
 
-	CMenuWidget *colorSettings_statusbarColors = new CMenuWidget("colormenu.statusbar", "settings.raw");
+	CMenuWidget *colorSettings_statusbarColors = new CMenuWidget("colormenu.statusbar", NEUTRINO_ICON_SETTINGS);
 	InitColorSettingsStatusBarColors(*colorSettings_statusbarColors);
 	colorSettings.addItem( new CMenuForwarder("colorstatusbar.head", true, "", colorSettings_statusbarColors) );
 
 	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	colorSettings.addItem( new CMenuForwarder("colormenu.font", true,"", &fontSettings) );
-	CMenuWidget *colorSettings_timing = new CMenuWidget("colormenu.timing", "settings.raw");
+	CMenuWidget *colorSettings_timing = new CMenuWidget("colormenu.timing", NEUTRINO_ICON_SETTINGS);
 	InitColorSettingsTiming(*colorSettings_timing);
 	colorSettings.addItem( new CMenuForwarder("timing.head", true, "", colorSettings_timing) );
 
@@ -2014,19 +2015,19 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 	keySettings.addItem( new CMenuSeparator() );
 	keySettings.addItem( new CMenuForwarder("menu.back") );
 
-	CKeyChooser*   keySettings_tvradio_mode = new CKeyChooser(&g_settings.key_tvradio_mode, "keybindingmenu.tvradiomode_head", "settings.raw");
-	CKeyChooser*   keySettings_channelList_pageup = new CKeyChooser(&g_settings.key_channelList_pageup, "keybindingmenu.pageup_head", "settings.raw");
-	CKeyChooser*   keySettings_channelList_pagedown = new CKeyChooser(&g_settings.key_channelList_pagedown, "keybindingmenu.pagedown_head", "settings.raw");
-	CKeyChooser*   keySettings_channelList_cancel = new CKeyChooser(&g_settings.key_channelList_cancel, "keybindingmenu.cancel_head", "settings.raw");
-	CKeyChooser*   keySettings_channelList_sort = new CKeyChooser(&g_settings.key_channelList_sort, "keybindingmenu.sort_head", "settings.raw");
-	CKeyChooser*   keySettings_channelList_addrecord = new CKeyChooser(&g_settings.key_channelList_addrecord, "keybindingmenu.addrecord_head", "settings.raw");
-	CKeyChooser*   keySettings_channelList_addremind = new CKeyChooser(&g_settings.key_channelList_addremind, "keybindingmenu.addremind_head", "settings.raw");
-	CKeyChooser*   keySettings_quickzap_up = new CKeyChooser(&g_settings.key_quickzap_up, "keybindingmenu.channelup_head",   "settings.raw");
-	CKeyChooser*   keySettings_quickzap_down = new CKeyChooser(&g_settings.key_quickzap_down, "keybindingmenu.channeldown_head", "settings.raw");
-	CKeyChooser*   keySettings_bouquet_up = new CKeyChooser(&g_settings.key_bouquet_up, "keybindingmenu.bouquetup_head",   "settings.raw");
-	CKeyChooser*   keySettings_bouquet_down = new CKeyChooser(&g_settings.key_bouquet_down, "keybindingmenu.bouquetdown_head", "settings.raw");
-	CKeyChooser*   keySettings_subchannel_up = new CKeyChooser(&g_settings.key_subchannel_up, "keybindingmenu.subchannelup_head",   "settings.raw");
-	CKeyChooser*   keySettings_subchannel_down = new CKeyChooser(&g_settings.key_subchannel_down, "keybindingmenu.subchanneldown_head", "settings.raw");
+	CKeyChooser*   keySettings_tvradio_mode = new CKeyChooser(&g_settings.key_tvradio_mode, "keybindingmenu.tvradiomode_head", NEUTRINO_ICON_SETTINGS);
+	CKeyChooser*   keySettings_channelList_pageup = new CKeyChooser(&g_settings.key_channelList_pageup, "keybindingmenu.pageup_head", NEUTRINO_ICON_SETTINGS);
+	CKeyChooser*   keySettings_channelList_pagedown = new CKeyChooser(&g_settings.key_channelList_pagedown, "keybindingmenu.pagedown_head", NEUTRINO_ICON_SETTINGS);
+	CKeyChooser*   keySettings_channelList_cancel = new CKeyChooser(&g_settings.key_channelList_cancel, "keybindingmenu.cancel_head", NEUTRINO_ICON_SETTINGS);
+	CKeyChooser*   keySettings_channelList_sort = new CKeyChooser(&g_settings.key_channelList_sort, "keybindingmenu.sort_head", NEUTRINO_ICON_SETTINGS);
+	CKeyChooser*   keySettings_channelList_addrecord = new CKeyChooser(&g_settings.key_channelList_addrecord, "keybindingmenu.addrecord_head", NEUTRINO_ICON_SETTINGS);
+	CKeyChooser*   keySettings_channelList_addremind = new CKeyChooser(&g_settings.key_channelList_addremind, "keybindingmenu.addremind_head", NEUTRINO_ICON_SETTINGS);
+	CKeyChooser*   keySettings_quickzap_up = new CKeyChooser(&g_settings.key_quickzap_up, "keybindingmenu.channelup_head", NEUTRINO_ICON_SETTINGS);
+	CKeyChooser*   keySettings_quickzap_down = new CKeyChooser(&g_settings.key_quickzap_down, "keybindingmenu.channeldown_head", NEUTRINO_ICON_SETTINGS);
+	CKeyChooser*   keySettings_bouquet_up = new CKeyChooser(&g_settings.key_bouquet_up, "keybindingmenu.bouquetup_head", NEUTRINO_ICON_SETTINGS);
+	CKeyChooser*   keySettings_bouquet_down = new CKeyChooser(&g_settings.key_bouquet_down, "keybindingmenu.bouquetdown_head", NEUTRINO_ICON_SETTINGS);
+	CKeyChooser*   keySettings_subchannel_up = new CKeyChooser(&g_settings.key_subchannel_up, "keybindingmenu.subchannelup_head", NEUTRINO_ICON_SETTINGS);
+	CKeyChooser*   keySettings_subchannel_down = new CKeyChooser(&g_settings.key_subchannel_down, "keybindingmenu.subchanneldown_head", NEUTRINO_ICON_SETTINGS);
 
 	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.modechange") );
 	keySettings.addItem( new CMenuForwarder("keybindingmenu.tvradiomode", true, "", keySettings_tvradio_mode ));
@@ -2111,7 +2112,7 @@ void CNeutrinoApp::SelectNVOD()
 		if( g_RemoteControl->are_subchannels )
 		{
 			NVODSelector.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-			CMenuOptionChooser* oj = new CMenuOptionChooser("nvodselector.directormode", &g_RemoteControl->director_mode, true, NULL, true, CRCInput::RC_yellow, "gelb.raw" );
+			CMenuOptionChooser* oj = new CMenuOptionChooser("nvodselector.directormode", &g_RemoteControl->director_mode, true, NULL, true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW);
 			oj->addOption(0, "options.off");
 			oj->addOption(1, "options.on");
 			NVODSelector.addItem( oj );
@@ -2161,7 +2162,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 			enabled_count++;
 
 #warning TODO: make sure g_PluginList->getName(count) is UTF-8 encoded
-			StreamFeatureSelector.addItem( new CMenuForwarder((g_PluginList->getName(count)).c_str(), true, "", StreamFeaturesChanger, id, false, (cnt== 0) ? CRCInput::RC_blue : CRCInput::RC_nokey, (cnt== 0)?"blau.raw":""), (cnt == 0) );
+			StreamFeatureSelector.addItem( new CMenuForwarder((g_PluginList->getName(count)).c_str(), true, "", StreamFeaturesChanger, id, false, (cnt== 0) ? CRCInput::RC_blue : CRCInput::RC_nokey, (cnt== 0)?NEUTRINO_ICON_BUTTON_BLUE:""), (cnt == 0) );
 			cnt++;
 		}
 	}
@@ -2175,12 +2176,12 @@ void CNeutrinoApp::ShowStreamFeatures()
 
 	// -- Add Channel to favorites
 	StreamFeatureSelector.addItem( new CMenuForwarder("favorites.menueadd", true, "",
-																	  new CFavorites, id, true, CRCInput::RC_green, "gruen.raw"), false );
+																	  new CFavorites, id, true, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN), false );
 
 	// start/stop recording
 	if(g_settings.recording_type > 0)
 	{
-		CMenuOptionChooser* oj = new CMenuOptionChooser("mainmenu.recording", &recordingstatus, true, this, true, CRCInput::RC_red, "rot.raw" );
+		CMenuOptionChooser* oj = new CMenuOptionChooser("mainmenu.recording", &recordingstatus, true, this, true, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED);
 		oj->addOption(0, "mainmenu.recording_start");
 		oj->addOption(1, "mainmenu.recording_stop");
 		StreamFeatureSelector.addItem( oj );
@@ -2188,7 +2189,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 	}
 	// -- Timer Liste
 	StreamFeatureSelector.addItem( new CMenuForwarder("timerlist.name", true, "",
-																	  new CTimerList(), id, true, CRCInput::RC_yellow, "gelb.raw"), false );
+																	  new CTimerList(), id, true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW), false );
 
 	// -- Sectionsd pause
 	int dummy = g_Sectionsd->getIsScanningActive();
@@ -2339,7 +2340,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	dprintf( DEBUG_NORMAL, "menue setup\n");
 	//Main settings
 	CMenuWidget mainMenu("mainmenu.head", "mainmenue.raw");
-	CMenuWidget mainSettings("mainsettings.head", "settings.raw");
+	CMenuWidget mainSettings("mainsettings.head", NEUTRINO_ICON_SETTINGS);
 	CMenuWidget languageSettings("languagesetup.head", "language.raw");
 	CMenuWidget videoSettings("videomenu.head", "video.raw");
 	CMenuWidget audioSettings("audiomenu.head", "audio.raw");
@@ -2351,10 +2352,10 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget fontSettings("fontmenu.head", "colors.raw");
 	CMenuWidget lcdSettings("lcdmenu.head", "lcd.raw");
 	CMenuWidget keySettings("keybindingmenu.head", "keybinding.raw", 400);
-	CMenuWidget miscSettings("miscsettings.head", "settings.raw");
-	CMenuWidget mp3picSettings("mp3picsettings.general", "settings.raw");
-	CMenuWidget scanSettings("servicemenu.scants", "settings.raw");
-	CMenuWidget service("servicemenu.head", "settings.raw");
+	CMenuWidget miscSettings("miscsettings.head", NEUTRINO_ICON_SETTINGS);
+	CMenuWidget mp3picSettings("mp3picsettings.general", NEUTRINO_ICON_SETTINGS);
+	CMenuWidget scanSettings("servicemenu.scants", NEUTRINO_ICON_SETTINGS);
+	CMenuWidget service("servicemenu.head", NEUTRINO_ICON_SETTINGS);
 
 	CMenuWidget fontSettings_Channellist("fontmenu.channellist", "colors.raw");
 	CMenuWidget fontSettings_Eventlist("fontmenu.eventlist", "colors.raw");
@@ -3145,7 +3146,7 @@ void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
          if( current_muted )
          {
             frameBuffer->paintBoxRel(x, y, dx, dy, COL_INFOBAR);
-            frameBuffer->paintIcon("mute.raw", x+5, y+5);
+            frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_MUTE, x+5, y+5);
          }
          else
             frameBuffer->paintBackgroundBoxRel(x, y, dx, dy);

@@ -34,6 +34,7 @@
 #include <global.h>
 #include <neutrino.h>
 
+#include <gui/widget/icons.h>
 #include "widget/hintbox.h"
 #include "widget/messagebox.h"
 
@@ -691,11 +692,11 @@ void CEpgData::showTimerEventBar (bool show)
 	if(g_settings.recording_type)
 	{			// display record button only if recording to server or vcr
 		pos = 0;
-		frameBuffer->paintIcon("rot.raw", x+8+cellwidth*pos, y+h_offset );
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, x+8+cellwidth*pos, y+h_offset );
 		g_Fonts->infobar_small->RenderString(x+29+cellwidth*pos, y+h-h_offset, w-30, g_Locale->getText("timerbar.recordevent"), COL_INFOBAR, 0, true); // UTF-8
 	}
     // Button: Timer Channelswitch
     pos = 2;
-    frameBuffer->paintIcon("gelb.raw", x+8+cellwidth*pos, y+h_offset );
+    frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x+8+cellwidth*pos, y+h_offset );
     g_Fonts->infobar_small->RenderString(x+29+cellwidth*pos, y+h-h_offset, w-30, g_Locale->getText("timerbar.channelswitch"), COL_INFOBAR, 0, true); // UTF-8
 }

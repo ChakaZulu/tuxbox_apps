@@ -42,6 +42,7 @@
 #include "bouqueteditor_bouquets.h"
 #include "bouqueteditor_channels.h"
 
+#include <gui/widget/icons.h>
 
 CBEBouquetWidget::CBEBouquetWidget()
 {
@@ -73,7 +74,7 @@ void CBEBouquetWidget::paintItem(int pos)
 	frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, color);
 	if ((liststart+pos==selected) && (state == beMoving))
 	{
-		frameBuffer->paintIcon("gelb.raw", x + 8, ypos+4);
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x + 8, ypos+4);
 	}
 	if(liststart+pos<Bouquets.size())
 	{
@@ -134,16 +135,16 @@ void CBEBouquetWidget::paintFoot()
 	frameBuffer->paintBoxRel(x,y+height, width,ButtonHeight, COL_MENUHEAD);
 	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW);
 
-	frameBuffer->paintIcon("rot.raw", x+width- 4* ButtonWidth - 20, y+height+4);
+	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, x+width- 4* ButtonWidth - 20, y+height+4);
 	g_Fonts->infobar_small->RenderString(x+width- 4* ButtonWidth, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.delete"), COL_INFOBAR, 0, true); // UTF-8
 
-	frameBuffer->paintIcon("gruen.raw", x+width- 3* ButtonWidth - 30, y+height+4);
+	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_GREEN, x+width- 3* ButtonWidth - 30, y+height+4);
 	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.add"), COL_INFOBAR, 0, true); // UTF-8
 
-	frameBuffer->paintIcon("gelb.raw", x+width- 2* ButtonWidth - 30, y+height+4);
+	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x+width- 2* ButtonWidth - 30, y+height+4);
 	g_Fonts->infobar_small->RenderString(x+width- 2* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.move"), COL_INFOBAR, 0, true); // UTF-8
 
-	frameBuffer->paintIcon("blau.raw", x+width- ButtonWidth - 30, y+height+4);
+	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_BLUE, x+width- ButtonWidth - 30, y+height+4);
 	switch( blueFunction)
 	{
 		case beRename:
@@ -156,7 +157,7 @@ void CBEBouquetWidget::paintFoot()
 			g_Fonts->infobar_small->RenderString(x+width- ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 10, g_Locale->getText("bouqueteditor.lock"), COL_INFOBAR, 0, true); // UTF-8
 		break;
 	}
-	frameBuffer->paintIcon("dbox.raw", x+width - 28, y+height);
+	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_DBOX, x+width - 28, y+height);
 }
 
 void CBEBouquetWidget::hide()

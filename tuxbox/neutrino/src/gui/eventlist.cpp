@@ -32,13 +32,15 @@
 
 #include "eventlist.h"
 
-#include <zapit/client/zapitclient.h> /* CZapitClient::Utf8_to_Latin1 */
-
-#include <algorithm>
 #include <global.h>
 #include <neutrino.h>
 
+#include <gui/widget/icons.h>
 #include "widget/messagebox.h"
+
+#include <zapit/client/zapitclient.h> /* CZapitClient::Utf8_to_Latin1 */
+
+#include <algorithm>
 
 // sort operators
 bool sortById (const CChannelEvent& a, const CChannelEvent& b)
@@ -428,7 +430,7 @@ void EventList::paint()
 	liststart = (selected/listmaxshow)*listmaxshow;
 
 	if (evtlist[0].eventID != 0)
-		frameBuffer->paintIcon("help.raw", x+ width- 30, y+ 5 );
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ width- 30, y+ 5 );
 
 	for(unsigned int count=0;count<listmaxshow;count++)
 	{

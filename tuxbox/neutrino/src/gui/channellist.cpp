@@ -37,6 +37,7 @@
 #include <system/settings.h>
 #include <system/lastchannel.h>
 
+#include <gui/widget/icons.h>
 #include "widget/menue.h"
 #include "widget/messagebox.h"
 
@@ -895,9 +896,9 @@ void CChannelList::paintHead()
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
 	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width- 65, strCaption.c_str(), COL_MENUHEAD, 0, true); // UTF-8
 
-	frameBuffer->paintIcon("help.raw", x+ width- 30, y+ 5 );
+	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ width- 30, y+ 5 );
 	if (bouquetList!=NULL)
-		frameBuffer->paintIcon("dbox.raw", x+ width- 60, y+ 5 );
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_DBOX, x+ width- 60, y+ 5 );
 }
 
 void CChannelList::paint()

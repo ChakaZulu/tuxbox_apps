@@ -39,6 +39,7 @@
 
 #include "bouqueteditor_chanselect.h"
 
+#include <gui/widget/icons.h>
 
 CBEChannelSelectWidget::CBEChannelSelectWidget(string Caption, unsigned int Bouquet, CZapitClient::channelsMode Mode)
 	:CListBox(Caption.c_str())
@@ -87,7 +88,7 @@ void CBEChannelSelectWidget::paintItem(uint itemNr, int paintNr, bool selected)
 
 		if( isChannelInBouquet(itemNr))
 		{
-			frameBuffer->paintIcon("gruen.raw", x+8, ypos+4);
+			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_GREEN, x+8, ypos+4);
 		}
 		else
 		{
@@ -128,9 +129,9 @@ void CBEChannelSelectWidget::paintFoot()
 	frameBuffer->paintBoxRel(x,y+height, width,ButtonHeight, COL_MENUHEAD);
 	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW);
 
-	frameBuffer->paintIcon("ok.raw", x+width- 3* ButtonWidth+ 8, y+height+1);
+	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, x+width- 3* ButtonWidth+ 8, y+height+1);
 	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth+ 38, y+height+24 - 2, width, g_Locale->getText("bouqueteditor.switch"), COL_INFOBAR, 0, true); // UTF-8
 
-	frameBuffer->paintIcon("home.raw", x+width - ButtonWidth+ 8, y+height+1);
+	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HOME, x+width - ButtonWidth+ 8, y+height+1);
 	g_Fonts->infobar_small->RenderString(x+width - ButtonWidth+ 38, y+height+24 - 2, width, g_Locale->getText("bouqueteditor.return"), COL_INFOBAR, 0, true); // UTF-8
 }

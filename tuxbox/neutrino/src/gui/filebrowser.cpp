@@ -37,6 +37,7 @@
 
 #include <driver/encoding.h>
 
+#include <gui/widget/icons.h>
 #include "widget/messagebox.h"
 
 #include <algorithm>
@@ -833,11 +834,11 @@ void CFileBrowser::paintFoot()
 
 		if( (type != CFile::FILE_UNKNOWN) || (S_ISDIR(filelist[selected].Mode)) )
 		{
-			frameBuffer->paintIcon("ok.raw", x +3 , by -3);
+			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, x +3 , by -3);
 			g_Fonts->infobar_small->RenderString(x + 35, ty, dx - 35, g_Locale->getText("filebrowser.select"), COL_INFOBAR, 0, true); // UTF-8
 		}
 
-		frameBuffer->paintIcon("help.raw", x + (1 * dx), by -3);
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x + (1 * dx), by -3);
 		if( smode == 1 )
 			nextsort = g_Locale->getText("filebrowser.sort.name");
 		else
@@ -846,14 +847,14 @@ void CFileBrowser::paintFoot()
 
 		if(Multi_Select)
 		{
-			frameBuffer->paintIcon("gelb.raw", x + (2 * dx), by);
+			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x + (2 * dx), by);
 			g_Fonts->infobar_small->RenderString(x + 25 + (2 * dx), ty, dx - 25, g_Locale->getText("filebrowser.mark"), COL_INFOBAR, 0, true); // UTF-8
 			
 		}
 
 		if(Filter != NULL)
 		{
-			frameBuffer->paintIcon("blau.raw", x + (3 * dx), by);
+			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_BLUE, x + (3 * dx), by);
 			g_Fonts->infobar_small->RenderString(x + 25 + (3 * dx), ty, dx - 25, use_filter?g_Locale->getText("filebrowser.filter.inactive"):g_Locale->getText("filebrowser.filter.active"), COL_INFOBAR, 0, true); // UTF-8
 		}
 	}
@@ -866,7 +867,7 @@ void CFileBrowser::paint()
 	liststart = (selected/listmaxshow)*listmaxshow;
 
 //	if (filelist[0].Name.length() != 0)
-//		frameBuffer->paintIcon("help.raw", x+ width- 30, y+ 5 );
+//		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ width- 30, y+ 5 );
 	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, g_Locale->getText("filebrowser.head") );
 
 	for(unsigned int count=0;count<listmaxshow;count++)

@@ -49,6 +49,8 @@
 #include "widget/hintbox.h"
 #include "widget/stringinput.h"
 
+#include <gui/widget/icons.h>
+
 #define info_height 60
 
 
@@ -555,9 +557,9 @@ void CTimerList::paintHead()
 	frameBuffer->paintIcon("timer.raw",x+5,y+4);
 	g_Fonts->menu_title->RenderString(x+35,y+theight+0, width- 45, g_Locale->getText("timerlist.name"), COL_MENUHEAD, 0, true); // UTF-8
 
-	frameBuffer->paintIcon("help.raw", x+ width- 30, y+ 5 );
+	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ width- 30, y+ 5 );
 /*	if (bouquetList!=NULL)
-		frameBuffer->paintIcon("dbox.raw", x+ width- 60, y+ 5 );*/
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_DBOX, x+ width- 60, y+ 5 );*/
 }
 
 void CTimerList::paintFoot()
@@ -568,18 +570,18 @@ void CTimerList::paintFoot()
 
 	if(timerlist.size()>0)
 	{
-		frameBuffer->paintIcon("rot.raw", x+width- 4* ButtonWidth - 20, y+height+4);
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, x+width- 4* ButtonWidth - 20, y+height+4);
 		g_Fonts->infobar_small->RenderString(x+width- 4* ButtonWidth, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.delete"), COL_INFOBAR, 0, true); // UTF-8
 
-		frameBuffer->paintIcon("ok.raw", x+width- 1* ButtonWidth - 30, y+height);
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, x+width- 1* ButtonWidth - 30, y+height);
 		g_Fonts->infobar_small->RenderString(x+width-1 * ButtonWidth , y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.modify"), COL_INFOBAR, 0, true); // UTF-8
 
 	}
 
-	frameBuffer->paintIcon("gruen.raw", x+width- 3* ButtonWidth - 30, y+height+4);
+	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_GREEN, x+width- 3* ButtonWidth - 30, y+height+4);
 	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.new"), COL_INFOBAR, 0, true); // UTF-8
 
-	frameBuffer->paintIcon("gelb.raw", x+width- 2* ButtonWidth - 30, y+height+4);
+	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x+width- 2* ButtonWidth - 30, y+height+4);
 	g_Fonts->infobar_small->RenderString(x+width- 2* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.reload"), COL_INFOBAR, 0, true); // UTF-8
 
 }
@@ -715,7 +717,7 @@ std::string CTimerList::convertChannelId2String(const t_channel_id id, const CTi
 int CTimerList::modifyTimer()
 {
 	CTimerd::responseGetTimer* timer=&timerlist[selected];
-	CMenuWidget timerSettings("timerlist.menumodify", "settings.raw");
+	CMenuWidget timerSettings("timerlist.menumodify", NEUTRINO_ICON_SETTINGS);
 	timerSettings.addItem( new CMenuSeparator() );
 	timerSettings.addItem( new CMenuForwarder("menu.back") );
 	timerSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
@@ -776,7 +778,7 @@ int CTimerList::newTimer()
 	strcpy(timerNew.message, "");
 	timerNew_standby_on =false;
 
-	CMenuWidget timerSettings("timerlist.menunew", "settings.raw");
+	CMenuWidget timerSettings("timerlist.menunew", NEUTRINO_ICON_SETTINGS);
 	timerSettings.addItem( new CMenuSeparator() );
 	timerSettings.addItem( new CMenuForwarder("menu.back") );
 	timerSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
@@ -805,13 +807,13 @@ int CTimerList::newTimer()
 	CZapitClient::BouquetList bouquetlist;
 	zapit.getBouquets(bouquetlist, false, true); // UTF-8
 	CZapitClient::BouquetList::iterator bouquet = bouquetlist.begin();
-	CMenuWidget mctv("timerlist.bouquetselect", "settings.raw");
-	CMenuWidget mcradio("timerlist.bouquetselect", "settings.raw");
+	CMenuWidget mctv("timerlist.bouquetselect", NEUTRINO_ICON_SETTINGS);
+	CMenuWidget mcradio("timerlist.bouquetselect", NEUTRINO_ICON_SETTINGS);
 	for(; bouquet != bouquetlist.end();bouquet++)
 	{
-		CMenuWidget* mwtv = new CMenuWidget("timerlist.channelselect", "settings.raw");
+		CMenuWidget* mwtv = new CMenuWidget("timerlist.channelselect", NEUTRINO_ICON_SETTINGS);
 		toDelete.push_back(mwtv);
-		CMenuWidget* mwradio = new CMenuWidget("timerlist.channelselect", "settings.raw");
+		CMenuWidget* mwradio = new CMenuWidget("timerlist.channelselect", NEUTRINO_ICON_SETTINGS);
 		toDelete.push_back(mwradio);
 		CZapitClient::BouquetChannelList subchannellist;
 		zapit.getBouquetChannels(bouquet->bouquet_nr,subchannellist,CZapitClient::MODE_TV, true); // UTF-8
@@ -836,7 +838,7 @@ int CTimerList::newTimer()
 		if (subchannellist.size()>0)
 			mcradio.addItem(new CMenuForwarder(bouquet->name, true, NULL, mwradio));
 	}
-	CMenuWidget mm("timerlist.modeselect", "settings.raw");
+	CMenuWidget mm("timerlist.modeselect", NEUTRINO_ICON_SETTINGS);
 	mm.addItem(new CMenuForwarder("timerlist.modetv", true, NULL, &mctv));
 	mm.addItem(new CMenuForwarder("timerlist.moderadio", true, NULL, &mcradio));
 	strcpy(timerNew_channel_name,"---");

@@ -31,17 +31,20 @@
 
 #include <sys/timeb.h>
 #include <time.h>
-#include <string>
 
 #include <global.h>
 #include <neutrino.h>
 
 #include "infoviewer.h"
 
+#include <gui/widget/icons.h>
+
 #include "widget/hintbox.h"
 
 #include <daemonc/remotecontrol.h>
 extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
+
+#include <string>
 
 #define COL_INFOBAR_BUTTONS			COL_INFOBAR_SHADOW+ 1
 #define COL_INFOBAR_BUTTONS_GRAY		COL_INFOBAR_SHADOW+ 1
@@ -146,7 +149,7 @@ void CInfoViewer::showRecordIcon(const bool show)
 		int ChanNameX = BoxStartX + ChanWidth + 20;
 		if(show)
 		{
-			frameBuffer->paintIcon("rot.raw", ChanNameX, BoxStartY+10 );
+			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, ChanNameX, BoxStartY+10 );
 		}
 		else
 		{
@@ -274,7 +277,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string Channel, const 
         if ( showButtonBar )
         {
 			// blau
-			frameBuffer->paintIcon("blau.raw", BoxEndX- ICON_OFFSET- ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_BLUE, BoxEndX- ICON_OFFSET- ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 			g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.streaminfo"), COL_INFOBAR_BUTTONS, 0, true); // UTF-8
 
 			showButton_Audio();
@@ -485,7 +488,7 @@ void CInfoViewer::showSubchan()
 
 		if ( g_RemoteControl->director_mode )
 		{
-			frameBuffer->paintIcon("gelb.raw", x+ 8, y+ dy- 20 );
+			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x+ 8, y+ dy- 20 );
 			g_Fonts->infobar_small->RenderString(x+ 30, y+ dy- 2, dx- 40, g_Locale->getText("nvodselector.directormode"), COL_MENUCONTENT, 0, true); // UTF-8
         }
 
@@ -696,7 +699,7 @@ void CInfoViewer::showButton_SubServices()
 	if ( g_RemoteControl->subChannels.size()> 0 )
 	{
 		// gelbe Taste für NVODs / Subservices
-		frameBuffer->paintIcon("gelb.raw", BoxEndX- ICON_OFFSET- 2* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, BoxEndX- ICON_OFFSET- 2* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 
 		if ( g_RemoteControl->are_subchannels )
 			// SubServices
@@ -813,7 +816,7 @@ void CInfoViewer::show_Data( bool calledFromEvent)
 
 			if ( info_CurrentNext.flags & CSectionsdClient::epgflags::has_anything )
 			{
-				frameBuffer->paintIcon("rot.raw", BoxEndX- ICON_OFFSET- 4* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+				frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, BoxEndX- ICON_OFFSET- 4* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 				g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- 4* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.eventlist"), COL_INFOBAR_BUTTONS, 0, true); // UTF-8
 			}
 		}
@@ -918,7 +921,7 @@ void CInfoViewer::showButton_Audio()
 	uint count = g_RemoteControl->current_PIDs.APIDs.size();
 	if ( count > 1 )
 	{
-		frameBuffer->paintIcon("gruen.raw", BoxEndX- ICON_OFFSET- 3* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_GREEN, BoxEndX- ICON_OFFSET- 3* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 		g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- 3* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.languages"), COL_INFOBAR_BUTTONS, 0, true); // UTF-8
 	};
 

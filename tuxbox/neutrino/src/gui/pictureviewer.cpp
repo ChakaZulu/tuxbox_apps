@@ -40,9 +40,9 @@
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
 #include <daemonc/remotecontrol.h>
+#include <gui/widget/icons.h>
 #include <system/settings.h>
-#include <algorithm>
-#include <sys/time.h>
+
 
 #include "nfs.h"
 
@@ -51,7 +51,9 @@
 #include "widget/hintbox.h"
 #include "widget/stringinput.h"
 
+#include <algorithm>
 #include <sys/stat.h>
+#include <sys/time.h>
 
 //------------------------------------------------------------------------
 bool sortByDate (const CPicture& a, const CPicture& b)
@@ -538,7 +540,7 @@ void CPictureViewerGui::paintHead()
 	int ypos=y+0;
 	if(theight > 26)
 		ypos = (theight-26) / 2 + y ;
-	frameBuffer->paintIcon("dbox.raw", x+ width- 30, ypos );
+	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_DBOX, x+ width- 30, ypos );
 //	printf("paintHead}\n");
 }
 
@@ -554,10 +556,10 @@ void CPictureViewerGui::paintFoot()
 
 	if(playlist.size()>0)
 	{
-		frameBuffer->paintIcon("ok.raw", x + 1* ButtonWidth2 + 25, y+(height-buttonHeight)-3);
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, x + 1* ButtonWidth2 + 25, y+(height-buttonHeight)-3);
 		g_Fonts->infobar_small->RenderString(x + 1 * ButtonWidth2 + 53 , y+(height-buttonHeight)+24 - 4, 
 						     ButtonWidth2- 28, g_Locale->getText("pictureviewer.show"), COL_INFOBAR, 0, true); // UTF-8
-		frameBuffer->paintIcon("help.raw", x+ 0* ButtonWidth2 + 25, y+(height-buttonHeight)-3);
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ 0* ButtonWidth2 + 25, y+(height-buttonHeight)-3);
 		string tmp = g_Locale->getText("pictureviewer.sortorder");
 		tmp += " ";
 		if(m_sort==FILENAME)
@@ -567,20 +569,20 @@ void CPictureViewerGui::paintFoot()
 		g_Fonts->infobar_small->RenderString(x+ 0* ButtonWidth2 +53 , y+(height-buttonHeight)+24 - 4, 
 														 ButtonWidth2- 28, tmp, COL_INFOBAR, 0, true); // UTF-8
 
-		frameBuffer->paintIcon("rot.raw", x+ 0* ButtonWidth + 10, y+(height-2*buttonHeight)+4);
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, x+ 0* ButtonWidth + 10, y+(height-2*buttonHeight)+4);
 		g_Fonts->infobar_small->RenderString(x + 0* ButtonWidth + 30, y+(height-2*buttonHeight)+24 - 1, 
 														 ButtonWidth- 20, g_Locale->getText("mp3player.delete"), COL_INFOBAR, 0, true); // UTF-8
 
-		frameBuffer->paintIcon("gelb.raw", x+ 2* ButtonWidth + 10, y+(height-2*buttonHeight)+4);
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x+ 2* ButtonWidth + 10, y+(height-2*buttonHeight)+4);
 		g_Fonts->infobar_small->RenderString(x+ 2* ButtonWidth + 30, y+(height-2*buttonHeight)+24 - 1, 
 														 ButtonWidth- 20, g_Locale->getText("mp3player.deleteall"), COL_INFOBAR, 0, true); // UTF-8
 
-		frameBuffer->paintIcon("blau.raw", x+ 3* ButtonWidth + 10, y+(height-2*buttonHeight)+4);
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_BLUE, x+ 3* ButtonWidth + 10, y+(height-2*buttonHeight)+4);
 		g_Fonts->infobar_small->RenderString(x+ 3* ButtonWidth +30 , y+(height-2*buttonHeight)+24 - 1, 
 														 ButtonWidth- 20, g_Locale->getText("pictureviewer.slideshow"), COL_INFOBAR, 0, true); // UTF-8
 	}
 
-	frameBuffer->paintIcon("gruen.raw", x+ 1* ButtonWidth + 10, y+(height-2*buttonHeight)+4);
+	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_GREEN, x+ 1* ButtonWidth + 10, y+(height-2*buttonHeight)+4);
 	g_Fonts->infobar_small->RenderString(x+ 1* ButtonWidth +30, y+(height-2*buttonHeight)+24 - 1, 
 													 ButtonWidth- 20, g_Locale->getText("mp3player.add"), COL_INFOBAR, 0, true); // UTF-8
 //	printf("paintFoot}\n");
