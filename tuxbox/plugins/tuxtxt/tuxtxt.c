@@ -50,14 +50,15 @@ void prev_dec(int *i)           /* counting down */
 		*i = 0x899;
 }
 
-void next_hex(int *i, int inc) /* skip to next */
+int next_hex(int i) /* return next non-decimal */
 {
-	(*i) += inc;
-
-	if (*i > 0x8FF)
-		*i = 0x100;
-	else if (*i < 0x100)
-		*i = 0x8FF;
+	do
+	{
+		i++;
+		if (i > 0x8FF)
+			i = 0x10F;
+	} while (((i & 0x00F) <= 9) && ((i & 0x0F0) <= 0x90));
+	return i;
 }
 
 int getIndexOfPageInHotlist()
@@ -393,7 +394,7 @@ void ClearB(int color)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.66 $", versioninfo[16];
+	char cvs_revision[] = "$Revision: 1.67 $", versioninfo[16];
 
 	/* show versioninfo */
 	sscanf(cvs_revision, "%*s %s", versioninfo);
@@ -484,7 +485,7 @@ void plugin_exec(PluginParam *par)
 						while (GetRCCode() != 1) /* wait for any key */
 							UpdateLCD();
 
-						for (i=1; i < 7; i += ((RCCode == RC_HELP) ? 2 : 1)) /* exit with ?: just restore video, leave audio */
+						for (i=0; i < 7; i += ((RCCode == RC_HELP) ? 2 : 1)) /* exit with ?: just restore video, leave audio */
 						{
 							n = avstable_dvb[vendor][i];
 							if ((ioctl(avs, avstable_ioctl[i], &n)) < 0)
@@ -926,7 +927,7 @@ void CleanUp()
 
 	if (--vendor < 3)	/* scart-parameters only known for 3 dboxes, FIXME: order must be like in info.h */
 	{
-		for (i=0; i < 7; i++) /* reactivate dvb */
+		for (i = 1; i < 6; i += 2) /* restore audio to dvb */
 		{
 			n = avstable_dvb[vendor][i];
 			if ((ioctl(avs, avstable_ioctl[i], &n)) < 0)
@@ -2155,10 +2156,7 @@ void GetNextPageOne()
 	lastpage = page;
 
 	do {
-		if (showhex)
-			next_hex(&page, 1);
-		else
-			next_dec(&page);
+		next_dec(&page);
 	} while (subpagetable[page] == 0xFF && page != lastpage);
 
 	/* update page */
@@ -2191,10 +2189,7 @@ void GetPrevPageOne()
 	lastpage = page;
 
 	do {
-		if (showhex)
-			next_hex(&page, -1);
-		else
-			prev_dec(&page);
+		prev_dec(&page);
 	} while (subpagetable[page] == 0xFF && page != lastpage);
 
 	/* update page */
@@ -3693,7 +3688,11 @@ void CreateLine25()
 {
 	int byte;
 
+#if (LINE25MODE == 1)
 	char line25_1[] = "   ?00<      ??0<      >??0      >?00   ((((((((((1111111111AAAAAAAAAAXXXXXXXXXX";
+#else
+	char line25_1[] = "   ?00<     >??0       >??0      >?00   ((((((((((1111111111AAAAAAAAAAXXXXXXXXXX";
+#endif
 
 	if (!bttok && cachetable[0x1f0][0] && cachetable[0x1f0][0][40+799]) /* btt received and not yet decoded */
 		decode_btt();
@@ -3704,10 +3703,16 @@ void CreateLine25()
 /*  2: blk-1, grp+1, grp+2, blk+1 */
 #if (LINE25MODE == 1)
 	prev_10  = toptext_getnext(page, 0, 1); /* arguments: startpage, up, findgroup */
-	prev_100 = toptext_getnext(prev_10, 0, 0);
+	if (showhex)
+		prev_100 = next_hex(page);
+	else
+		prev_100 = toptext_getnext(prev_10, 0, 0);
 	next_10  = toptext_getnext(page, 1, 1);
 #else
-	prev_100 = toptext_getnext(page, 0, 0);
+	if (showhex)
+		prev_100 = next_hex(page);
+	else
+		prev_100 = toptext_getnext(page, 0, 0);
 	prev_10  = toptext_getnext(page, 1, 1);
 	next_10  = toptext_getnext(prev_10, 1, 1);
 #endif
