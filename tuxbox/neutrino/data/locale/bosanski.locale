@@ -655,6 +655,7 @@ mp3player.id3scan citaj id3-tag
 mp3player.keylevel promijeniti tipke
 mp3player.fastforward brzo naprijed
 mp3player.pause pausa
+mp3player.rewind rewind
 
 filebrowser.head pretrazivac datoteka
 filebrowser.filter filter

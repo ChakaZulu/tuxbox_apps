@@ -325,7 +325,7 @@ int CMP3PlayerGui::show()
 			}
 			else
 			{
-				ff();
+				rev();
 			}
 		}
 		else if(msg==CRCInput::RC_yellow)
@@ -345,7 +345,7 @@ int CMP3PlayerGui::show()
 		}
 		else if(msg==CRCInput::RC_blue)
 		{
-			if(/*key_level==0*/1)
+			if(key_level==0)
 			{
 				int i=0;
 				srandom((unsigned int) time(NULL));
@@ -365,6 +365,10 @@ int CMP3PlayerGui::show()
 				else
 					current=-1;
 				update=true;
+			}
+			else
+			{
+				ff();
 			}
 
 		}
@@ -613,7 +617,7 @@ void CMP3PlayerGui::paintFoot()
 
 		frameBuffer->paintIcon("gruen.raw", x+ 1* ButtonWidth + 10, y+(height-info_height-2*buttonHeight)+4);
 		g_Fonts->infobar_small->RenderString(x+ 1* ButtonWidth +30, y+(height-info_height-2*buttonHeight)+24 - 1, 
-						     ButtonWidth- 20, g_Locale->getText("mp3player.fastforward").c_str(), COL_INFOBAR, 0, true); // UTF-8
+						     ButtonWidth- 20, g_Locale->getText("mp3player.rewind").c_str(), COL_INFOBAR, 0, true); // UTF-8
 		
 		frameBuffer->paintIcon("gelb.raw", x+ 2* ButtonWidth + 10, y+(height-info_height-2*buttonHeight)+4);
 		g_Fonts->infobar_small->RenderString(x+ 2* ButtonWidth + 30, y+(height-info_height-2*buttonHeight)+24 - 1, 
@@ -621,7 +625,7 @@ void CMP3PlayerGui::paintFoot()
 
 		frameBuffer->paintIcon("blau.raw", x+ 3* ButtonWidth + 10, y+(height-info_height-2*buttonHeight)+4);
 		g_Fonts->infobar_small->RenderString(x+ 3* ButtonWidth +30 , y+(height-info_height-2*buttonHeight)+24 - 1, 
-						     ButtonWidth- 20, g_Locale->getText("mp3player.shuffle").c_str(), COL_INFOBAR, 0, true); // UTF-8
+						     ButtonWidth- 20, g_Locale->getText("mp3player.fastforward").c_str(), COL_INFOBAR, 0, true); // UTF-8
 	}
 //	printf("paintFoot}\n");
 }
@@ -1068,7 +1072,7 @@ void CMP3PlayerGui::stop()
 
 void CMP3PlayerGui::pause()
 {
-	if(m_state==PLAY || m_state==FF)
+	if(m_state==PLAY || m_state==FF || m_state==REV)
 	{
 		m_state=PAUSE;
 		CMP3Player::getInstance()->pause();
@@ -1088,10 +1092,25 @@ void CMP3PlayerGui::ff()
 		m_state=PLAY;
 		CMP3Player::getInstance()->ff();
 	}
-	else if(m_state==PLAY || m_state==PAUSE)
+	else if(m_state==PLAY || m_state==PAUSE || m_state==REV)
 	{
 		m_state=FF;
 		CMP3Player::getInstance()->ff();
+	}
+	paintLCD();
+}
+
+void CMP3PlayerGui::rev()
+{
+	if(m_state==REV)
+	{
+		m_state=PLAY;
+		CMP3Player::getInstance()->rev();
+	}
+	else if(m_state==PLAY || m_state==PAUSE || m_state==FF)
+	{
+		m_state=FF;
+		CMP3Player::getInstance()->rev();
 	}
 	paintLCD();
 }

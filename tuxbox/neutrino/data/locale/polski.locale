@@ -655,6 +655,7 @@ mp3player.id3scan Skanuj ID3 info
 mp3player.keylevel undef
 mp3player.fastforward undef
 mp3player.pause undef
+mp3player.rewind rewind
 
 filebrowser.head Przegladarka
 filebrowser.filter Filtr

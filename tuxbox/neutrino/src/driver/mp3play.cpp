@@ -43,6 +43,11 @@
 
 #include "mp3play.h"
 
+// Frames to skip in ff/rev mode
+#define FRAMES_TO_SKIP 75 
+// nr of frames to play after skipping in rev/ff mode
+#define FRAMES_TO_PLAY 5
+
 /****************************************************************************
  * Global variables.														*
  ****************************************************************************/
@@ -356,25 +361,63 @@ int CMP3Player::MpegAudioDecoder(FILE *InputFp,FILE *OutputFp)
 		 * the end of the buffer if those bytes forms an incomplete
 		 * frame. Before refilling, the remainign bytes must be moved
 		 * to the begining of the buffer and used for input for the
-		 * next mad_frame_decode() invocation. (See the comments marked
+q		 * next mad_frame_decode() invocation. (See the comments marked
 		 * {1} earlier for more details.)
 		 *
 		 * Recoverable errors are caused by malformed bit-streams, in
 		 * this case one can call again mad_frame_decode() in order to
 		 * skip the faulty part and re-sync to the next frame.
 		 */
-		// decode 5 frames each 75 frames in ff mode
-      if( state!=FF || FrameCount % 75 < 5 )
+		// decode 'FRAMES_TO_PLAY' frames each 'FRAMES_TO_SKIP' frames in ff/rev mode 
+      if( (state!=FF && state!=REV) || FrameCount % FRAMES_TO_SKIP < FRAMES_TO_PLAY )
 			ret=mad_frame_decode(&Frame,&Stream);
-		else
+		else if(state==FF) // in FF mode just decode the header, this sets bufferptr to next frame and also gives stats about the frame for totals
 			ret=mad_header_decode(&Frame.header,&Stream);
+		else
+		{ //REV
+			// Jump back 
+			long bytesBack = (Stream.bufend - Stream.this_frame) + ((ftell(InputFp)+Stream.this_frame-Stream.bufend) / FrameCount)*(FRAMES_TO_SKIP + FRAMES_TO_PLAY);
+			if (fseek(InputFp, -1*(bytesBack), SEEK_CUR)!=0)
+			{
+				// Reached beginning
+				fseek(InputFp, 0, SEEK_SET);
+				Timer.fraction=0;
+				Timer.seconds=0;
+				FrameCount=0;
+				state=PLAY;
+			}
+			else
+			{
+				// Calculate timer
+				mad_timer_t m;
+				mad_timer_set(&m, 0, 32 * MAD_NSBSAMPLES(&Frame.header) *(FRAMES_TO_SKIP + FRAMES_TO_PLAY), Frame.header.samplerate);
+				Timer.seconds -= m.seconds;
+				if(Timer.fraction < m.fraction)
+				{
+					Timer.seconds--;
+					Timer.fraction+= MAD_TIMER_RESOLUTION - m.fraction;
+				}
+				else
+					Timer.fraction-= m.fraction;
+				// in case we calculated wrong...
+				if(Timer.seconds < 0)
+				{
+					Timer.seconds=0;
+					Timer.fraction=0;
+				}
+				FrameCount-=FRAMES_TO_SKIP + FRAMES_TO_PLAY;
+			}
+			Stream.buffer=NULL;
+			Stream.next_frame=NULL;
+			continue;
+		}
 
        if(ret)
        {
           if(MAD_RECOVERABLE(Stream.error))
           {
 				 // no errrors in FF mode
-				 if(state!=FF)
+				 if(state!=FF && state!=REV)
 				 {
 					 fprintf(stderr,"%s: recoverable frame level error (%s)\n",
 								ProgName,MadErrorString(&Stream));
@@ -577,16 +620,23 @@ void CMP3Player::stop()
 }
 void CMP3Player::pause()
 {
-   if(state==PLAY || state==FF)
+   if(state==PLAY || state==FF || state==REV)
       state=PAUSE;
    else if(state==PAUSE)
       state=PLAY;
 }
 void CMP3Player::ff()
 {
-   if(state==PLAY || state==PAUSE)
+   if(state==PLAY || state==PAUSE || state==REV)
       state=FF;
    else if(state==FF)
+      state=PLAY;
+}
+void CMP3Player::rev()
+{
+   if(state==PLAY || state==PAUSE || state==FF)
+      state=REV;
+   else if(state==REV)
       state=PLAY;
 }
 CMP3Player* CMP3Player::getInstance()

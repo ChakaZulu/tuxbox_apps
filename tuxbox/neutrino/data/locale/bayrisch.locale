@@ -655,6 +655,7 @@ mp3player.id3scan ID3-Tags durchsuacha
 mp3player.keylevel Tasdn-Umschoitung
 mp3player.fastforward schnei vieri
 mp3player.pause Pause
+mp3player.rewind rewind
 
 filebrowser.head Datiesucha
 filebrowser.filter Fuita
