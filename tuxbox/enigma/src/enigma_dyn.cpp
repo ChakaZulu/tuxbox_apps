@@ -599,32 +599,32 @@ static eString aboutDreambox(void)
 	switch (eSystemInfo::getInstance()->getHwType())
 	{
 		case eSystemInfo::dbox2Nokia:
-			result += "<tr><td>Box:</td><td>d-Box 2</td></tr>";
+			result += "<tr><td>Model:</td><td>d-Box 2</td></tr>";
 			result += "<tr><td>Manufacturer:</td><td>Nokia</td></tr>";
 			result += "<tr><td>Processor:</td><td>XPC823, 66MHz</td></tr>";
 			break;
 		case eSystemInfo::dbox2Philips:
-			result += "<tr><td>Box:</td><td>d-Box 2</td></tr>";
+			result += "<tr><td>Model:</td><td>d-Box 2</td></tr>";
 			result += "<tr><td>Manufacturer</td><td>Philips</td></tr>";
 			result += "<tr><td>Processor</td><td>XPC823, 66MHz</td></tr>";
 			break;
 		case eSystemInfo::dbox2Sagem:
-			result += "<tr><td>Box:</td><td>d-Box 2</td></tr>";
+			result += "<tr><td>Model:</td><td>d-Box 2</td></tr>";
 			result += "<tr><td>Manufacturer:</td><td>Sagem</td></tr>";
 			result += "<tr><td>Processor</td><td>XPC823, 66MHz</td></tr>";
 			break;
 		case eSystemInfo::DM5600:
-			result += "<tr><td>Box:</td><td>DM5600</td></tr>";
+			result += "<tr><td>Model:</td><td>DM5600</td></tr>";
 			result += "<tr><td>Manufacturer</td><td>Dream-Multimedia-TV</td></tr>";
 			result += "<tr><td>Processor:</td><td>STBx25xx, 252MHz</td></tr>";
 			break;
 		case eSystemInfo::DM5620:
-			result += "<tr><td>Box:</td><td>DM5620</td></tr></td></tr>";
+			result += "<tr><td>Model:</td><td>DM5620</td></tr></td></tr>";
 			result += "<tr><td>Manufacturer:</td><td>Box: Dream-Multimedia-TV</td></tr>";
 			result += "<tr><td>Processor:</td><td>STBx25xx, 252MHz</td></tr>";
 			break;
 		case eSystemInfo::DM7000:
-			result += "<tr><td>Box:</td><td>DM7000</td></tr>";
+			result += "<tr><td>Model:</td><td>DM7000</td></tr>";
 			result += "<tr><td>Manufacturer:</td><td>Dream-Multimedia-TV</td></tr>";
 			result += "<tr><td>Processor:</td><td>STB04500, 252MHz</td></tr>";
 			break;
