@@ -284,6 +284,9 @@ int service_name_desc(char *buffer, int sid, int tsid, int onid,bool scan_mode, 
 		scanchannels.insert(std::pair<int,scanchannel>((tsid<<16)+sid,scanchannel(servicename,sid,tsid,onid,service_type)));
 	}
 	
+	if (provname == "")
+		provname = "Unknown Provider";
+		
 	if (service_type == 1 || service_type == 2 || service_type == 4 || service_type == 5)
 		scanbouquets.insert(std::pair<std::string,bouquet_mulmap>(provname.c_str(),bouquet_mulmap(provname, servicename, sid,onid)));
 	
