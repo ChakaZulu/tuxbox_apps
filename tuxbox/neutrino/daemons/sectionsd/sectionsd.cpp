@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.148 2002/12/09 20:07:52 thegoodguy Exp $
+//  $Id: sectionsd.cpp,v 1.149 2003/01/07 01:28:39 obi Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -803,14 +803,13 @@ int DMX::start(void)
 		return 2;
 	}
 
-	if (dmxBufferSizeInKB != 256)
-		if (ioctl (fd, DMX_SET_BUFFER_SIZE, (unsigned long)(dmxBufferSizeInKB*1024UL)) == -1)
-		{
-			closefd();
-			perror ("[sectionsd] DMX: DMX_SET_BUFFER_SIZE");
-			pthread_mutex_unlock( &start_stop_mutex );
-			return 3;
-		}
+	if (ioctl (fd, DMX_SET_BUFFER_SIZE, (unsigned long)(dmxBufferSizeInKB*1024UL)) == -1)
+	{
+		closefd();
+		perror ("[sectionsd] DMX: DMX_SET_BUFFER_SIZE");
+		pthread_mutex_unlock( &start_stop_mutex );
+		return 3;
+	}
 
 	struct dmx_sct_filter_params flt;
 
@@ -989,14 +988,13 @@ int DMX::change(int new_filter_index)
 			return 2;
 		}
 
-		if (dmxBufferSizeInKB != 256)
-			if (ioctl (fd, DMX_SET_BUFFER_SIZE, (unsigned long)(dmxBufferSizeInKB*1024UL)) == -1)
-			{
-				closefd();
-				perror ("[sectionsd] DMX: DMX_SET_BUFFER_SIZE");
-				pthread_mutex_unlock( &start_stop_mutex );
-				return 3;
-			}
+		if (ioctl (fd, DMX_SET_BUFFER_SIZE, (unsigned long)(dmxBufferSizeInKB*1024UL)) == -1)
+		{
+			closefd();
+			perror ("[sectionsd] DMX: DMX_SET_BUFFER_SIZE");
+			pthread_mutex_unlock( &start_stop_mutex );
+			return 3;
+		}
 
 		struct dmx_sct_filter_params flt;
 
@@ -1050,11 +1048,11 @@ int DMX::change(int new_filter_index)
 // k.A. ob volatile im Kampf gegen Bugs trotz mutex's was bringt,
 // falsch ist es zumindest nicht
 /*
-static DMX dmxEIT(0x12, 0x4f, (0xff- 0x01), 0x50, (0xff- 0x0f), 384);
+static DMX dmxEIT(0x12, 0x4f, (0xff- 0x01), 0x50, (0xff- 0x0f), 256);
 static DMX dmxSDT(0x11, 0x42, 0xff, 0x42, 0xff, 256);
 static DMX dmxTOT(0x14, 0x73, 0xff, 0x70, (0xff- 0x03), 256, 1);
 */
-static DMX dmxEIT(0x12, 384);
+static DMX dmxEIT(0x12, 256);
 static DMX dmxSDT(0x11, 256);
 static DMX dmxTOT(0x14, 256, 1);
 
@@ -1624,7 +1622,7 @@ static void commandDumpStatusInformation(int connfd, char *data, const unsigned 
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.148 2002/12/09 20:07:52 thegoodguy Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.149 2003/01/07 01:28:39 obi Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -4238,7 +4236,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.148 2002/12/09 20:07:52 thegoodguy Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.149 2003/01/07 01:28:39 obi Exp $\n");
 
 	try
 	{
