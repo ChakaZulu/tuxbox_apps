@@ -2171,8 +2171,7 @@ void CNeutrinoApp::SelectNVOD()
 			}
 			else
 			{
-#warning TODO: check whether subservice_name is UTF-8 encoded or not
-				NVODSelector.addItem( new CMenuForwarder((e->subservice_name).c_str(), true, "", NVODChanger, nvod_id, false, (count<10)? (count) : CRCInput::RC_nokey ), (count == g_RemoteControl->selected_subchannel) );
+				NVODSelector.addItem( new CMenuForwarder((CZapitClient::Utf8_to_Latin1(e->subservice_name)).c_str(), true, "", NVODChanger, nvod_id, false, (count<10)? (count) : CRCInput::RC_nokey ), (count == g_RemoteControl->selected_subchannel) );
 			}
 
 			count++;
