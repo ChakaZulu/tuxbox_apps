@@ -56,6 +56,11 @@ function admin(xy)
 	NewWindow(xy+'&requester=webif', 'admin', '200', '100', 'no', '3000');
 }
 
+function vcontrol(xy)
+{
+	NewWindow('/videocontrol?command='+xy, 'vcontrol', '200', '100', 'no', '300');
+}
+
 function openSI()
 {
 	NewWindow("/cgi-bin/streaminfo?requester=webif", "si", "300", "250", "no");
