@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.50 2003/05/22 11:52:29 digi_casi Exp $
+ * $Id: frontend.cpp,v 1.51 2003/05/22 12:34:09 digi_casi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -438,7 +438,7 @@ void CFrontend::sendMotorCommand(uint8_t cmdtype, uint8_t address, uint8_t comma
 	cmd.msg[2] = command; //command
 	cmd.msg[3] = parameter1;
 	cmd.msg[4] = parameter2;
-	cmd.msg_len = 5;
+	cmd.msg_len = 3 + num_parameters;
 	
 	sendDiseqcCommand(&cmd, 15);
 	printf("[frontend] motor positioning command sent.\n");
