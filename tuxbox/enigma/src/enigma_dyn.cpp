@@ -578,9 +578,12 @@ static eString admin2(eString command)
 	else
 	if (command == "standby")
 	{
-		if (!(eZapStandby::getInstance()))
+		if (eZapStandby::getInstance())
+			int i=0;
+		else
 			eZapMain::getInstance()->gotoStandby();
 	}
+
 	return "<?xml version=\"1.0\"?><!DOCTYPE wml PUBLIC \"-//WAPFORUM//DTD WML 1.1//EN\" \"http://www.wapforum.org/DTD/wml_1.1.xml\"><wml><card title=\"Info\"><p>Command " + command + " initiated.</p></card></wml>";
 }
 
@@ -2817,6 +2820,81 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 	return tmp;
 }
 
+static eString wapEPG(void)
+{
+	std::stringstream result;
+	eString description/*, ext_description*/;
+	result << std::setfill('0');
+
+	eService* current;
+
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (!sapi)
+		return "No EPG available";
+
+	eServiceReference ref = sapi->service;
+
+	current = eDVB::getInstance()->settings->getTransponders()->searchService(ref);
+
+	if (!current)
+		return "No EPG available";
+
+	eEPGCache::getInstance()->Lock();
+	const timeMap* evt = eEPGCache::getInstance()->getTimeMap((eServiceReferenceDVB&)ref);
+
+	if (!evt)
+		return "No EPG available";
+	else
+	{
+		timeMap::const_iterator It;
+
+		for(It=evt->begin(); It!= evt->end(); It++)
+		{
+//			ext_description = "";
+			EITEvent event(*It->second);
+			for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
+			{
+				Descriptor *descriptor = *d;
+#if 0
+				if (descriptor->Tag() == DESCR_EXTENDED_EVENT)
+					ext_description += ((ExtendedEventDescriptor*)descriptor)->text;
+#endif
+				if (descriptor->Tag() == DESCR_SHORT_EVENT)
+					description = ((ShortEventDescriptor*)descriptor)->event_name;
+			}
+
+			tm* t = localtime(&event.start_time);
+
+//			result	<< std::setw(2) << t->tm_mday << '.'
+//				<< std::setw(2) << t->tm_mon+1 << ". - "
+			result	<< std::setw(2) << t->tm_hour << ':'
+				<< std::setw(2) << t->tm_min << ' ';
+#if 0
+#ifndef DISABLE_FILE
+			result << "<td>"
+				<< "<a href=\"javascript:record('"
+				<< "ref=" << ref2string(ref)
+				<< "&ID=" << std::hex << event.event_id << std::dec
+				<< "&start=" << event.start_time
+				<< "&duration=" << event.duration
+				<< "&descr=" << filter_string(description)
+				<< "&channel=" << filter_string(current->service_name)
+				<< "')\"><img src=\"timer.gif\" border=0></a>"
+				<< "</td>";
+#endif
+#endif
+			result	<< filter_string(description)
+				<< "<br/>\n";
+		}
+	}
+	eEPGCache::getInstance()->Unlock();
+
+	eString tmp = readFile(TEMPLATE_DIR + "wapepg.tmp");
+	tmp.strReplace("#CHANNEL#", filter_string(current->service_name));
+	tmp.strReplace("#BODY#", result.str());
+	return tmp;
+}
+
 static eString getstreaminfo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::stringstream result;
@@ -3325,6 +3403,11 @@ static eString wap_web_root(eString request, eString dirpath, eString opts, eHTT
 	{
 		eString command = opt["command"];
 		result = admin2(command);
+	}
+	else
+	if (mode == "epg")
+	{
+		result = wapEPG();
 	}
 	else
 	{
