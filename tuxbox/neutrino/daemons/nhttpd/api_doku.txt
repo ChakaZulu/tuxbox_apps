@@ -918,7 +918,8 @@ a/sy  = Jahr
 a/sh  = Stunde
 a/smi = Minute
 
-Channel_id ist onid des Senders mit dem Prefix "R" für Radiokanäle und "T" für TV-Kanäle
+mode ist "R" fuer Radiokanaele und "T" fuer TV-Kanaele.
+channel_id ist die Kennung des Senders (als Hexadezimalzahl ohne '0x'-Prefix).
 msg ist die Message die bei REMIND gesendet wird
 
 Ist der Parameter "rs" auf "1" gesetzt, so wird bei Aufnahmetimern, die in Neutrino konfigurierte 
@@ -931,5 +932,5 @@ Rückgabe-Format: ok / error
 
 Beispiel:
 
->>>http://dbox/control/timer?action=new&alarm=1034309576&stop=1034284376&announce=1034309576&type=1&rep=1&channel_id=T555089
+>>>http://dbox/control/timer?action=new&alarm=1034309576&stop=1034284376&announce=1034309576&type=1&rep=1&mode=T&channel_id=16dcb
 ok

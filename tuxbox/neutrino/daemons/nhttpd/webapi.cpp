@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.50 2004/02/21 08:52:27 thegoodguy Exp $
+	$Id: webapi.cpp,v 1.51 2004/02/22 19:23:20 thegoodguy Exp $
 
 	License: GPL
 
@@ -327,29 +327,34 @@ bool CWebAPI::EPG(CWebserverRequest* request)
 // show epg for eventid or epgid and startzeit
 {
 
-	if(request->ParameterList.size() > 0)
+	if (!(request->ParameterList.empty()))
 	{											
 
-		if(request->ParameterList["eventlist"] != "")				// what the hell has this to to here ?
-		{															// TBD: move it here
+		if (!(request->ParameterList["eventlist"].empty())) // what the hell has this to to here ?
+		{								// TBD: move it here
 			request->SendPlainHeader("text/html");
-			unsigned id = atol( request->ParameterList["eventlist"].c_str() );
-			ShowEventList( request, id );
+			t_channel_id channel_id;
+
+			sscanf(request->ParameterList["eventlist"].c_str(),
+			       SCANF_CHANNEL_ID_TYPE,
+			       &channel_id);
+
+			ShowEventList(request, channel_id);
 			return true;
 		}
 		if(request->ParameterList["1"] == "eventlist")				// s.a.
 		{
 			request->SendPlainHeader("text/html");
-			ShowEventList( request, Parent->Zapit->getCurrentServiceID() );
+			ShowEventList(request, Parent->Zapit->getCurrentServiceID());
 			return true;
 		}
 
-		if(request->ParameterList["eventid"] != "")
+		if (!(request->ParameterList["eventid"].empty()))
 		{
 			ShowEpg(request,request->ParameterList["eventid"]);
 			return true;
 		}
-		else if(request->ParameterList["epgid"] != "")
+		else if (!(request->ParameterList["epgid"].empty()))
 		{
 			ShowEpg(request,request->ParameterList["epgid"],request->ParameterList["startzeit"]);
 			return true;
@@ -496,19 +501,16 @@ bool CWebAPI::ShowCurrentStreamInfo(CWebserverRequest* request)
 //-------------------------------------------------------------------------
 bool CWebAPI::ShowEventList(CWebserverRequest *request,t_channel_id channel_id)
 {
-char classname;
-int pos = 0;
-char mode;
-
-	mode = (Parent->Zapit->getMode() == CZapitClient::MODE_RADIO)?'R':'T';
+	char classname;
+	int pos = 0;
+	char mode = (Parent->Zapit->getMode() == CZapitClient::MODE_RADIO) ? 'R' : 'T';
 	Parent->eList = Parent->Sectionsd->getEventsServiceKey(channel_id);
 	CChannelEventList::iterator eventIterator;
 	request->SendHTMLHeader("DBOX2-Neutrino Channellist");
 
-
-	request->SocketWriteLn("<CENTER><H3 CLASS=\"epg\">Programmvorschau: " + Parent->GetServiceName(channel_id) + "</H3></CENTER>");
-
-	request->SocketWrite("<CENTER><TABLE WIDTH=\"95%\" CELLSPACING=\"0\">\n");
+	request->SocketWrite("<CENTER><H3 CLASS=\"epg\">Programmvorschau: " + Parent->GetServiceName(channel_id));
+	request->SocketWrite("</H3></CENTER>\n"
+			     "<CENTER><TABLE WIDTH=\"95%\" CELLSPACING=\"0\">\n");
 
 	for( eventIterator = Parent->eList.begin(); eventIterator != Parent->eList.end(); eventIterator++, pos++ )
 	{
@@ -518,11 +520,17 @@ char mode;
 		strftime(zbuffer,20,"%d.%m. %H:%M",mtime);
 		request->printf("<TR VALIGN=\"middle\" HEIGHT=\"%d\" CLASS=\"%c\">\n",(eventIterator->duration > 20 * 60)?(eventIterator->duration / 60):20 , classname);
 		request->printf("<TD><NOBR>");
-		request->printf("<A HREF=\"/fb/timer.dbox2?action=new&type=%d&alarm=%u&stop=%u&channel_id=%c%u&rs=1\">&nbsp;<IMG BORDER=0 SRC=\"/images/record.gif\" WIDTH=\"16\" HEIGHT=\"16\" ALT=\"Sendung aufnehmen\"></A>&nbsp;\n",CTimerd::TIMER_RECORD,(uint) eventIterator->startTime,(uint) eventIterator->startTime + eventIterator->duration,mode,channel_id); 
-		request->printf("<A HREF=\"/fb/timer.dbox2?action=new&type=%d&alarm=%u&channel_id=%c%u\">&nbsp;<IMG BORDER=0 SRC=\"/images/timer.gif\" WIDTH=\"21\" HEIGHT=\"21\" ALT=\"Timer setzen\"></A>&nbsp;\n",CTimerd::TIMER_ZAPTO,(uint) eventIterator->startTime,mode,channel_id); 
+		request->printf("<A HREF=\"/fb/timer.dbox2?action=new&amp;type=%d&amp;alarm=%u&amp;stop=%u&amp;mode=%c&amp;channel_id="
+				PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+				"&amp;rs=1\">&nbsp;<IMG BORDER=0 SRC=\"/images/record.gif\" WIDTH=\"16\" HEIGHT=\"16\" ALT=\"Sendung aufnehmen\"></A>&nbsp;\n",CTimerd::TIMER_RECORD,(uint) eventIterator->startTime,(uint) eventIterator->startTime + eventIterator->duration,mode,
+				channel_id); 
+		request->printf("<A HREF=\"/fb/timer.dbox2?action=new&amp;type=%d&amp;alarm=%u&amp;mode=%c&amp;channel_id="
+				PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+				"\">&nbsp;<IMG BORDER=0 SRC=\"/images/timer.gif\" WIDTH=\"21\" HEIGHT=\"21\" ALT=\"Timer setzen\"></A>&nbsp;\n",CTimerd::TIMER_ZAPTO,(uint) eventIterator->startTime,mode,
+				channel_id); 
 		request->printf("</NOBR></TD><TD><NOBR>%s&nbsp;<font size=\"-2\">(%d min)</font>&nbsp;</NOBR></TD>\n", zbuffer, eventIterator->duration / 60);
 		request->printf("<TD><A CLASS=\"elist\" HREF=epg.dbox2?eventid=%llx>%s</A></TD>\n</TR>\n", eventIterator->eventID, eventIterator->description.c_str());
-		if(eventIterator->text.length() > 0)
+		if (!(eventIterator->text.empty()))
 			request->printf("<TR VALIGN=\"middle\" CLASS=\"%c\"><TD COLSPAN=2><IMG SRC=/images/blank.gif WIDTH=1 HEIGHT=1></TD><TD>%s</TD></TR>\n",classname,eventIterator->text.c_str());
 
 	}
@@ -583,7 +591,9 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 		request->printf("<tr style=\"border-top: 2px solid #707070\"><td colspan=\"2\" class=\"%c\">",classname);
 		request->printf("%s<a class=\"clist\" href=\"switch.dbox2?zapto="
 				PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
-				",%s\">%d. %s%s</a>&nbsp;<a href=\"epg.dbox2?eventlist=%u\">%s</a>",
+				",%s\">%d. %s%s</a>&nbsp;<a href=\"epg.dbox2?eventlist="
+				PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+				"\">%s</a>",
 				((channel->channel_id == current_channel) ? "<a name=\"akt\"></a>" : " "),
 				channel->channel_id,
 				bouquetstr.c_str(),
@@ -1356,11 +1366,13 @@ time_t	announceTimeT = 0,
 	eventinfo.epg_starttime = 0;
 	eventinfo.apids = "";
 	eventinfo.recordingSafety = (request->ParameterList["rs"] == "1");
-	if(request->ParameterList["channel_id"].substr(0,1)=="R")
-		eventinfo.mode = CTimerd::MODE_RADIO;
-	else
-		eventinfo.mode = CTimerd::MODE_TV;
-	sscanf(request->ParameterList["channel_id"].substr(1).c_str(),"%u",&eventinfo.channel_id);
+
+	eventinfo.mode = (request->ParameterList["mode"].c_str()[0] == 'R') ? CTimerd::MODE_RADIO : CTimerd::MODE_TV;
+
+	sscanf(request->ParameterList["channel_id"].c_str(),
+	       SCANF_CHANNEL_ID_TYPE,
+	       &eventinfo.channel_id);
+
 	void *data=NULL;
 	if(type == CTimerd::TIMER_RECORD)
 		announceTimeT-=120;
@@ -1385,4 +1397,3 @@ void CWebAPI::timeString(time_t time, char string[6])
 	if (!strftime(string, 6, "%H:%M", tm))
 		sprintf(string, "??:??");
 }
-
