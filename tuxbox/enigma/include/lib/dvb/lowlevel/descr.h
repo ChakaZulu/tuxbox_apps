@@ -123,7 +123,7 @@ struct descr_satellite_delivery_system_struct {
 };
 
 
-/* 0x44 satellite delivery system descriptor */
+/* 0x44 cable delivery system descriptor */
 
 struct descr_cable_delivery_system_struct {
 	u_char	descriptor_tag		: 8;
@@ -155,6 +155,45 @@ struct descr_cable_delivery_system_struct {
 	u_char	fec_inner		: 4;
 	u_char	symbol_rate4		: 4;
 #endif
+};
+
+
+/* 0x5a terrestrial delivery system descriptor */
+
+struct descr_terrestrial_delivery_system_struct {
+	u_char	descriptor_tag		: 8;
+	u_char	descriptor_length	: 8;
+	u_char	centre_frequency1	: 8;
+	u_char	centre_frequency2	: 8;
+	u_char	centre_frequency3	: 8;
+	u_char	centre_frequency4	: 8;
+
+#if BYTE_ORDER == BIG_ENDIAN
+	u_char	bandwidth		: 3;
+	u_char	reserved1		: 5;
+	u_char	constellation		: 2;
+	u_char	hierarchy_information	: 3;
+	u_char	code_rate_hp_stream	: 3;
+	u_char	code_rate_lp_stream	: 3;
+	u_char	guard_interval		: 2;
+	u_char	transmission_mode	: 2;
+	u_char	other_frequency_flag	: 1;
+#else
+	u_char	reserved1		: 5;
+	u_char	bandwidth		: 3;
+	u_char	code_rate_hp_stream	: 3;
+	u_char	hierarchy_information	: 3;
+	u_char	constellation		: 2;
+	u_char	other_frequency_flag	: 1;
+	u_char	transmission_mode	: 2;
+	u_char	guard_interval		: 2;
+	u_char	code_rate_lp_stream	: 3;
+#endif
+
+	u_char	reserved2		: 8;
+	u_char	reserved3		: 8;
+	u_char	reserved4		: 8;
+	u_char	reserved5		: 8;
 };
 
 

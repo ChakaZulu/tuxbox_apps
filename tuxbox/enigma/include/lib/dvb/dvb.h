@@ -203,17 +203,56 @@ public:
 			return frequency < s.frequency;
 		}
 	} satellite;
+	struct terrestrial
+	{
+		int valid;
+		int centre_frequency, bandwidth, constellation, hierarchy_information, code_rate_hp, code_rate_lp, guard_interval, transmission_mode, inversion;
+		void set(const TerrestrialDeliverySystemDescriptor *descriptor);
+		int tune(eTransponder *);
+		int isValid() const { return valid; }
+		bool operator == (const terrestrial &t) const
+		{
+			if (valid != t.valid)
+				return 0;
+			if (centre_frequency != t.centre_frequency)
+				return 0;
+			if (bandwidth != t.bandwidth)
+				return 0;
+			if (constellation != t.constellation)
+				return 0;
+			if (hierarchy_information != t.hierarchy_information)
+				return 0;
+			if (code_rate_hp != t.code_rate_hp)
+				return 0;
+			if (code_rate_lp != t.code_rate_lp)
+				return 0;
+			if (guard_interval != t.guard_interval)
+				return 0;
+			if (transmission_mode != t.transmission_mode)
+				return 0;
+			if (inversion != 2 && t.inversion != 2 && inversion != t.inversion)
+				return 0;
+			return 1;
+		}
+		bool operator<(const terrestrial &t) const
+		{
+			return centre_frequency < t.centre_frequency;
+		}
+	} terrestrial;
 	eTransponder(eTransponderList &tplist, eDVBNamespace dvbnamespace, eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id);
 	eTransponder(eTransponderList &tplist);
 	void setSatellite(SatelliteDeliverySystemDescriptor *descr) { satellite.set(descr); }
 	void setCable(CableDeliverySystemDescriptor *descr) { cable.set(descr); }
+	void setTerrestrial(TerrestrialDeliverySystemDescriptor *descr) { terrestrial.set(descr); }
 	void setSatellite(int frequency, int symbol_rate, int polarisation, int fec, int orbital_position, int inversion);
 	void setCable(int frequency, int symbol_rate, int inversion, int modulation );
-	
+	void setTerrestrial(int centre_frequency, int bandwidth, int constellation, int hierarchy_information, int code_rate_hp, int code_rate_lp, int guard_interval, int transmission_mode, int inversion);
+
 	eTransponder &operator=(const eTransponder &ref)
 	{
 		cable=ref.cable;
 		satellite=ref.satellite;
+		terrestrial=ref.terrestrial;
 		state=ref.state;
 		transport_stream_id=ref.transport_stream_id;
 		original_network_id=ref.original_network_id;
@@ -258,6 +297,8 @@ public:
 				return satellite == c.satellite;
 			if (cable.valid && c.cable.valid)
 				return cable == c.cable;
+			if (terrestrial.valid && c.terrestrial.valid)
+				return terrestrial == c.terrestrial;
 		}
 		return 1;
 	}

@@ -81,6 +81,26 @@ int eTransponder::satellite::tune(eTransponder *trans)
 	return eFrontend::getInstance()->tune_qpsk(trans, frequency, polarisation, symbol_rate, fec, inversion, *it->second );
 }
 
+void eTransponder::terrestrial::set(const TerrestrialDeliverySystemDescriptor *descriptor)
+{
+	centre_frequency=descriptor->centre_frequency;
+	bandwidth=descriptor->bandwidth;
+	constellation=descriptor->constellation;
+	hierarchy_information=descriptor->hierarchy_information;
+	code_rate_hp=descriptor->code_rate_hp_stream;
+	code_rate_lp=descriptor->code_rate_lp_stream;
+	guard_interval=descriptor->guard_interval;
+	transmission_mode=descriptor->transmission_mode;
+	inversion=INVERSION_AUTO;
+	valid=1;
+}
+
+int eTransponder::terrestrial::tune(eTransponder *trans)
+{
+	eDebug("[TUNE] tuning to %d", centre_frequency);
+	return eFrontend::getInstance()->tune_ofdm(trans, centre_frequency, bandwidth, constellation, hierarchy_information, code_rate_hp, code_rate_lp, guard_interval, transmission_mode, inversion);
+}
+
 eService::eService(const eString &service_name, int spflags)
 	: service_name(service_name), spflags(spflags), dvb(0)
 #ifndef DISABLE_FILE
@@ -147,12 +167,13 @@ eTransponder::eTransponder(eTransponderList &tplist, eDVBNamespace dvb_namespace
 {
 	cable.valid=0;
 	satellite.valid=0;
+	terrestrial.valid=0;
 	state=stateToScan;
 }
 
 eTransponder::eTransponder(eTransponderList &tplist): tplist(tplist), dvb_namespace(-1), transport_stream_id(-1), original_network_id(-1)
 {
-	cable.valid=satellite.valid=0;
+	cable.valid=satellite.valid=terrestrial.valid=0;
 	state=stateToScan;
 }
 
@@ -180,6 +201,20 @@ void eTransponder::setCable(int frequency, int symbol_rate, int inversion, int m
 	cable.valid=1;
 }
 
+void eTransponder::setTerrestrial(int centre_frequency, int bandwidth, int constellation, int hierarchy_information, int code_rate_hp, int code_rate_lp, int guard_interval, int transmission_mode, int inversion)
+{
+	terrestrial.centre_frequency=centre_frequency;
+	terrestrial.bandwidth=bandwidth;
+	terrestrial.constellation=constellation;
+	terrestrial.hierarchy_information=hierarchy_information;
+	terrestrial.code_rate_hp=code_rate_hp;
+	terrestrial.code_rate_lp=code_rate_lp;
+	terrestrial.guard_interval=guard_interval;
+	terrestrial.transmission_mode=transmission_mode;
+	terrestrial.inversion=inversion;
+	terrestrial.valid=1;
+}
+
 int eTransponder::tune()
 {
 	switch (eFrontend::getInstance()->Type())
@@ -192,6 +227,11 @@ int eTransponder::tune()
 	case eSystemInfo::feSatellite:
 		if (satellite.isValid())
 			return satellite.tune(this);
+		else
+			return -ENOENT;
+	case eSystemInfo::feTerrestrial:
+		if (terrestrial.isValid())
+			return terrestrial.tune(this);
 		else
 			return -ENOENT;
 	default:
@@ -207,6 +247,8 @@ int eTransponder::isValid()
 		return cable.isValid();
 	case eSystemInfo::feSatellite:
 		return satellite.isValid();
+	case eSystemInfo::feTerrestrial:
+		return terrestrial.isValid();
 	default:
 		return 0;
 	}
@@ -319,22 +361,25 @@ std::map<int,tpPacket>& existNetworks::getNetworkNameMap()
 
 int existNetworks::saveNetworks()
 {
-	const char *filename=0;
+	const char *filename;
 
 	switch (fetype)
 	{
 	case eSystemInfo::feSatellite:
 		filename="/var/etc/satellites.xml";
 		break;
+#if 0
 	case eSystemInfo::feCable:
 		filename="/var/etc/cables.xml";
 		break;
-	default:
+	case eSystemInfo::feTerrestrial:
+		filename="/var/etc/terrestrial.xml";
 		break;
-	}
-
-	if (!filename)
+#endif
+	default:
+		eDebug("FIXME: implement existNetworks::saveNetworks() for cable and terrestrial");
 		return -1;
+	}
 
 	FILE *out=fopen(filename, "w+");
 	if (!out)
@@ -394,6 +439,9 @@ int existNetworks::reloadNetworks()
 	case eSystemInfo::feCable:
 		filename="/var/etc/cables.xml";
 		break;
+	case eSystemInfo::feTerrestrial:
+		filename="/var/etc/terrestrial.xml";
+		break;
 	default:
 		break;
 	}
@@ -412,6 +460,9 @@ int existNetworks::reloadNetworks()
 				break;
 			case eSystemInfo::feCable:
 				filename="/share/tuxbox/cables.xml";
+				break;
+			case eSystemInfo::feTerrestrial:
+				filename="/share/tuxbox/terrestrial.xml";
 				break;
 			default:
 				break;
@@ -458,7 +509,12 @@ int existNetworks::reloadNetworks()
 				networks.push_back(pkt);
 				names[pkt.orbital_position]=networks.back();
 			}
-		} else
+		} else if (!strcmp(node->GetType(), "terrestrial"))
+		{
+			tpPacket pkt;
+			if (!addNetwork(pkt, node, eSystemInfo::feTerrestrial))
+				networks.push_back(pkt);
+		} else 
 			eFatal("unknown packet %s", node->GetType());
 
 	return 0;
@@ -540,6 +596,47 @@ int existNetworks::addNetwork(tpPacket &packet, XMLTreeNode *node, int type)
 					polarisation=atoi(apolarisation), fec_inner=atoi(afec_inner),
 					inversion=atoi(ainversion);
 			t.setSatellite(frequency, symbol_rate, polarisation, fec_inner, orbital_position, inversion);
+			break;
+		}
+		case eSystemInfo::feTerrestrial:
+		{
+			const char *acentre_frequency=node->GetAttributeValue("centre_frequency"),
+					*abandwidth=node->GetAttributeValue("bandwidth"),
+					*aconstellation=node->GetAttributeValue("constellation"),
+					*ahierarchy_information=node->GetAttributeValue("hierarchy_information"),
+					*acode_rate_hp=node->GetAttributeValue("code_rate_hp"),
+					*acode_rate_lp=node->GetAttributeValue("code_rate_lp"),
+					*aguard_interval=node->GetAttributeValue("guard_interval"),
+					*atransmission_mode=node->GetAttributeValue("transmission_mode"),
+					*ainversion=node->GetAttributeValue("inversion");
+			if (!acentre_frequency)
+				continue;
+			if (!abandwidth)
+				continue;
+			if (!aconstellation)
+				continue;
+			if (!ahierarchy_information)
+				continue;
+			if (!acode_rate_hp)
+				continue;
+			if (!acode_rate_lp)
+				continue;
+			if (!aguard_interval)
+				continue;
+			if (!atransmission_mode)
+				continue;
+			if (!ainversion)
+				ainversion="2";
+			int centre_frequency=atoi(acentre_frequency),
+				bandwidth=atoi(abandwidth),
+				constellation=atoi(aconstellation),
+				hierarchy_information=atoi(ahierarchy_information),
+				code_rate_hp=atoi(acode_rate_hp),
+				code_rate_lp=atoi(acode_rate_lp),
+				guard_interval=atoi(aguard_interval),
+				transmission_mode=atoi(atransmission_mode),
+				inversion=atoi(ainversion);
+			t.setTerrestrial(centre_frequency, bandwidth, constellation, hierarchy_information, code_rate_hp, code_rate_lp, guard_interval, transmission_mode, inversion);
 			break;
 		}
 		default:

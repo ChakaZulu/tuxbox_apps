@@ -266,7 +266,7 @@
 			<key name="KEY_KEYBOARD" code="176" />
 			<key name="KEY_SCREEN" code="177" />
 			<key name="KEY_PC" code="178" />
-			<key name="KEY_TV" code="179" />
+			<key name="KEY_TV" code="181" />
 			<key name="KEY_TV2" code="17a" />
 			<key name="KEY_VCR" code="17b" />
 			<key name="KEY_VCR2" code="17c" />
@@ -274,7 +274,7 @@
 			<key name="KEY_SAT2" code="17e" />
 			<key name="KEY_CD" code="17f" />
 			<key name="KEY_TAPE" code="180" />
-			<key name="KEY_RADIO" code="181" />
+			<key name="KEY_RADIO" code="179" />
 			<key name="KEY_TUNER" code="182" />
 			<key name="KEY_PLAYER" code="183" />
 			<key name="KEY_TEXT" code="184" />
@@ -392,6 +392,7 @@
 			<action name="showSubservices" key="KEY_GREEN" flags="m" />
 			<action name="showAudio" key="KEY_YELLOW" flags="m" />
 			<action name="showAudio" key="KEY_AUDIO" flags="m" />
+			<action name="pluginExt" key="KEY_BLUE" flags="m" />
 			<action name="pluginVTXT" key="KEY_TEXT" flags="m" />
 			<action name="showEPGList" key="KEY_RED" flags="m" />
 			<action name="playlistNextService" key="KEY_PAGEDOWN" flags="mr" />

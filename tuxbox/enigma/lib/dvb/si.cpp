@@ -157,6 +157,8 @@ Descriptor *Descriptor::create(descr_gen_t *descr)
 		return new ContentDescriptor((descr_gen_struct*)descr);
 	case DESCR_REGISTRATION:
 		return new RegistrationDescriptor((descr_gen_struct*)descr);
+	case DESCR_TERR_DEL_SYS:
+		return new TerrestrialDeliverySystemDescriptor((descr_terrestrial_delivery_system_struct*)descr);
 	case DESCR_STUFFING:
 	case DESCR_COUNTRY_AVAIL:
 	case DESCR_MOSAIC:
@@ -164,7 +166,6 @@ Descriptor *Descriptor::create(descr_gen_t *descr)
 	case DESCR_TELEPHONE:
 	case DESCR_LOCAL_TIME_OFF:
 	case DESCR_SUBTITLING:
-	case DESCR_TERR_DEL_SYS:
 	case DESCR_ML_NW_NAME:
 	case DESCR_ML_BQ_NAME:
 	case DESCR_ML_SERVICE_NAME:
@@ -505,7 +506,7 @@ CableDeliverySystemDescriptor::~CableDeliverySystemDescriptor()
 eString CableDeliverySystemDescriptor::toString()
 {
 	eString res="<CableDeliverySystemDescriptor>";
-	res+=eString().sprintf("<frequency>%d</frequency>\n", frequency);
+	res+=eString().sprintf("<frequency>%d</frequency>", frequency);
 	res+=eString().sprintf("<FEC_outer>%d</FEC_outer>", FEC_outer);
 	res+=eString().sprintf("<modulation>QAM%d</modulation>", 8<<modulation);
 	res+=eString().sprintf("<symbol_rate>%d</symbol_rate>", symbol_rate);
@@ -556,11 +557,11 @@ eString SatelliteDeliverySystemDescriptor::toString()
 	res+="<polarisation>";
 	switch (polarisation)
 	{
-	case 0: res+="horizontal\n"; break;
-	case 1: res+="vertical\n"; break;
-	case 2: res+="left\n"; break;
+	case 0: res+="horizontal"; break;
+	case 1: res+="vertical"; break;
+	case 2: res+="left"; break;
 	case 3: res+="right"; break;
-  }
+	}
 	res+=eString().sprintf("</polarisation><modulation>%d</modulation>", modulation);
 	res+=eString().sprintf("<symbol_rate>%d</symbol_rate>", symbol_rate);
 	res+=eString().sprintf("<FEC_inner>%d/%d</FEC_inner></SatelliteDeliverySystemDescriptor>\n", FEC_inner, FEC_inner+1);
@@ -568,11 +569,93 @@ eString SatelliteDeliverySystemDescriptor::toString()
 }
 #endif
 
+TerrestrialDeliverySystemDescriptor::TerrestrialDeliverySystemDescriptor(descr_terrestrial_delivery_system_struct *descr)
+	:Descriptor((descr_gen_t*)descr) 
+	{ 
+		centre_frequency=(descr->centre_frequency1<<24)|
+				(descr->centre_frequency2<<16)|
+				(descr->centre_frequency3<<8)|
+				(descr->centre_frequency4);
+		bandwidth=descr->bandwidth;
+		constellation=descr->constellation;
+		hierarchy_information=descr->hierarchy_information;
+		code_rate_hp_stream=descr->code_rate_hp_stream;
+		code_rate_lp_stream=descr->code_rate_lp_stream;
+		guard_interval=descr->guard_interval;
+		transmission_mode=descr->transmission_mode;
+		other_frequency_flag=descr->other_frequency_flag;
+	}
+
+TerrestrialDeliverySystemDescriptor::~TerrestrialDeliverySystemDescriptor()
+{ 
+}
+
+#ifdef SUPPORT_XML
+eString TerrestrialDeliverySystemDescriptor::toString()
+{
+	eString res=eString().sprintf("<TerrestrialDeliverySystemDescriptor><centre_frequency>%u</centre_frequency><bandwidth>", centre_frequency);
+	switch (bandwidth)
+	{
+	case 0: res+="8MHz"; break;
+	case 1: res+="7MHz"; break;
+	case 2: res+="6MHz"; break;
+	}
+	res+="</bandwidth><constellation>";
+	switch (constellation)
+	{
+		case 0: res+="QPSK"; break;
+		case 1: res+="QAM16"; break;
+		case 2: res+="QAM64"; break;
+	} 
+	res+="</constellation><hierarchy_information>";
+	switch (hierarchy_information)
+	{
+		case 0: res+="none"; break;
+		case 1: res+="1"; break;
+		case 2: res+="2"; break;
+		case 3: res+="3"; break;
+	}
+	res+="</hierarchy_information><code_rate_hp_stream>";
+	switch (code_rate_hp_stream)
+	{
+		case 0: res+="1/2"; break;
+		case 1: res+="2/3"; break;
+		case 2: res+="3/4"; break;
+		case 3: res+="5/6"; break;
+		case 4: res+="7/8"; break;
+	} 
+	res+="</code_rate_hp_stream><code_rate_lp_stream>";
+	switch (code_rate_lp_stream)
+	{
+		case 0: res+="1/2"; break;
+		case 1: res+="2/3"; break;
+		case 2: res+="3/4"; break;
+		case 3: res+="5/6"; break;
+		case 4: res+="7/8"; break;
+	}
+	res+="</code_rate_lp_stream><guard_interval>"; 
+	switch (guard_interval)
+	{
+		case 0: res+="1/32"; break;
+		case 1: res+="1/16"; break;
+		case 2: res+="1/8"; break;
+		case 3: res+="1/4"; break;
+	}
+	res+="</guard_interval><transmission_mode>";
+	switch (transmission_mode)
+	{
+		case 0: res+="2k"; break;
+		case 1: res+="8k"; break;
+	}
+	res+=eString().sprintf("</transmission_mode><other_frequency_flag>%d</other_frequency_flag></TerrestrialDeliverySystemDescriptor>", other_frequency_flag);
+	return res;
+}
+#endif
+									  
 ServiceListDescriptorEntry::ServiceListDescriptorEntry(__u16 service_id, __u8 service_type)
 	:service_id(service_id), service_type(service_type)
 {
 }
-
 
 ServiceListDescriptorEntry::~ServiceListDescriptorEntry()
 {

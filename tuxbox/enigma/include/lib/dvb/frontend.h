@@ -46,7 +46,7 @@ struct eSecCmdSequence
 	enum { NONE=SEC_MINI_NONE, TONEBURST_A=SEC_MINI_A, TONEBURST_B=SEC_MINI_B };
 	secCommand *commands;
 #else
-	enum {VOLTAGE_13=SEC_VOLTAGE_13, VOLTAGE_18=SEC_VOLTAGE_18, VOLTAGE_OFF };
+	enum {VOLTAGE_13=SEC_VOLTAGE_13, VOLTAGE_18=SEC_VOLTAGE_18, VOLTAGE_OFF=SEC_VOLTAGE_OFF };
 	enum {TONEBURST_A=SEC_MINI_A, TONEBURST_B=SEC_MINI_B, NONE };
 	dvb_diseqc_master_cmd *commands;
 #endif
@@ -181,7 +181,18 @@ public:
 			int inversion,					// spectral inversion on(1)/off(0)
 			int QAM);								// Modulation according to etsi (1=QAM16, ...)
 
-		// switches of as much as possible.
+	int tune_ofdm(eTransponder *transponder,
+			int centre_frequency,
+			int bandwidth,
+			int constellation,
+			int hierarchy_information,
+			int code_rate_hp,
+			int code_rate_lp,
+			int guard_interval,
+			int transmission_mode,
+			int inversion);
+
+		// switches off as much as possible.
 	int savePower();
 };
 

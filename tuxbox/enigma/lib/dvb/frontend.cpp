@@ -1670,6 +1670,25 @@ send:
 				break;
 			case eSystemInfo::feTerrestrial:
 				eDebug("DVB-T Frontend detected");
+#if HAVE_DVB_API_VERSION < 3
+				// FIXME: v1 has no *_AUTO parameters for DVB-T
+				front.u.ofdm.bandWidth=BANDWIDTH_8_MHZ;	// random
+				front.u.ofdm.HP_CodeRate=FEC_AUTO;
+				front.u.ofdm.LP_CodeRate=FEC_AUTO;
+				front.u.ofdm.Constellation=QAM_16; // random
+				front.u.ofdm.TransmissionMode=TRANSMISSION_MODE_2K; // random
+				front.u.ofdm.guardInterval=GUARD_INTERVAL_1_32;	// random
+				front.u.ofdm.HierarchyInformation=HIERARCHY_NONE; // random
+#else
+				// FIXME: no frontend can handle all these AUTOs
+				front.u.ofdm.bandwidth=BANDWIDTH_AUTO;
+				front.u.ofdm.code_rate_HP=FEC_AUTO;
+				front.u.ofdm.code_rate_LP=FEC_AUTO;
+				front.u.ofdm.constellation=QAM_AUTO;
+				front.u.ofdm.transmission_mode=TRANSMISSION_MODE_AUTO;
+				front.u.ofdm.guard_interval=GUARD_INTERVAL_AUTO;
+				front.u.ofdm.hierarchy_information=HIERARCHY_AUTO;
+#endif
 				break;
 		}
 		if (ioctl(fd, FE_SET_FRONTEND, &front)<0)
@@ -1710,6 +1729,21 @@ int eFrontend::tune_qam(eTransponder *transponder,
 	return tune(transponder, Frequency, 0, SymbolRate, getFEC(FEC_inner), Inversion==2?INVERSION_AUTO:Inversion?INVERSION_ON:INVERSION_OFF, 0, getModulation(QAM));
 }
 
+int eFrontend::tune_ofdm(eTransponder *transponder,
+		int centre_frequency,
+		int bandwidth,
+		int constellation,
+		int hierarchy_information,
+		int code_rate_hp,
+		int code_rate_lp,
+		int guard_interval,
+		int transmission_mode,
+		int inversion)
+{
+	// FIXME add all the other parameters
+	return tune(transponder, centre_frequency, 0, 0, FEC_AUTO, inversion==2?INVERSION_AUTO:inversion?INVERSION_ON:INVERSION_OFF, 0, QAM_16);
+}
+
 int eFrontend::savePower()
 {
 #if HAVE_DVB_API_VERSION < 3
@@ -1734,6 +1768,11 @@ int eFrontend::savePower()
 		}
 	}
 	needreset = 2;
+#else
+	if (ioctl(fd, FE_SET_VOLTAGE, SEC_VOLTAGE_OFF) < 0)
+		eDebug("FE_SET_VOLTAGE (off) failed (%m)");
+	if (ioctl(fd, FE_SET_TONE, SEC_TONE_OFF) < 0)
+		eDebug("FE_SET_TONE (off) failed (%m)");
 #endif
 	return 0;
 }

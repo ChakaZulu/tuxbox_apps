@@ -196,6 +196,23 @@ public:
   eString toString();
 };
 
+class TerrestrialDeliverySystemDescriptor: public Descriptor
+{
+public:
+  __u32 centre_frequency;
+  int bandwidth;
+  int constellation;
+  int hierarchy_information;
+  int code_rate_hp_stream;
+  int code_rate_lp_stream;
+  int guard_interval;
+  int transmission_mode;
+  int other_frequency_flag;
+  TerrestrialDeliverySystemDescriptor(descr_terrestrial_delivery_system_struct *descr);
+  ~TerrestrialDeliverySystemDescriptor();
+  eString toString();
+};
+
 class ServiceListDescriptorEntry
 {
 public:
