@@ -371,14 +371,13 @@ static eString getVolBar()
 	return result;
 }
 
-
-static eString getContent(eString mode, int bouquetid)
+static eString getWatchContent(eString mode, int bouquetid)
 {
-	eString result("");
-	eString tmp("");
 	ePtrList<eBouquet>* bouquets;
 	std::list<eServiceReference> esref;
 	eService *es;
+	eString result("");
+	eString tmp("");
 
 	bouquets=eDVB::getInstance()->getBouquets();
 
@@ -455,6 +454,18 @@ static eString getContent(eString mode, int bouquetid)
 		}
 		result+="</select>";
 		result+="</form>";
+	}
+
+	return result;
+}
+
+static eString getContent(eString mode, int bouquetid)
+{
+	eString result("");
+
+	if(mode=="tv"||mode=="radio")
+	{
+		result=getWatchContent(mode, bouquetid);
 	}
 
 	if(result.length()<3)
