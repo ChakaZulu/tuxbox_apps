@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicclient.cpp,v 1.6 2002/12/02 13:31:52 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicclient.cpp,v 1.7 2002/12/07 19:14:54 thegoodguy Exp $
  *
  * Basic Client Class (Neutrino) - DBoxII-Project
  *
@@ -31,6 +31,7 @@
 #include <sys/un.h>
 
 #include "basicclient.h"
+#include "basicmessage.h"
 
 CBasicClient::CBasicClient()
 {
@@ -69,7 +70,7 @@ bool CBasicClient::open_connection(const char* socketname)
 
 void CBasicClient::close_connection()
 {
-	if(sock_fd != -1)
+	if (sock_fd != -1)
 	{
 		close(sock_fd);
 		sock_fd = -1;
@@ -97,3 +98,21 @@ bool CBasicClient::receive_data(char* data, const size_t size)
 	else
 		return (read(sock_fd, data, size) > 0);  // case size == 0 uncorrect handled ?
 }
+
+bool CBasicClient::send(const char* socketname, const unsigned char version, const unsigned char command, char* data, const unsigned int size)
+{
+	CBasicMessage::Header msgHead;
+	msgHead.version = version;
+	msgHead.cmd     = command;
+
+	open_connection(socketname); // if the return value is false, the next send_data call will return false, too
+
+	if (!send_data((char*)&msgHead, sizeof(msgHead)))
+	    return false;
+	
+	if (size != 0)
+	    return send_data(data, size);
+
+	return true;
+}
+

@@ -38,15 +38,7 @@
 
 void CControldClient::send(const unsigned char command, char* data = NULL, const unsigned int size = 0)
 {
-	CControld::Header msgHead;
-	msgHead.version = CControld::ACTVERSION;
-	msgHead.cmd     = command;
-
-	open_connection(CONTROLD_UDS_NAME);
-
-	send_data((char*)&msgHead, sizeof(msgHead));
-	if (size != 0)
-	    send_data(data, size);
+	CBasicClient::send(CONTROLD_UDS_NAME, CControld::ACTVERSION, command, data, size);
 }
 
 void  CControldClient::shutdown()

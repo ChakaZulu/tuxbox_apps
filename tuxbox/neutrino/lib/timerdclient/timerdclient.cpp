@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.38 2002/12/03 11:15:11 thegoodguy Exp $
+	$Id: timerdclient.cpp,v 1.39 2002/12/07 19:14:54 thegoodguy Exp $
 
 	License: GPL
 
@@ -31,19 +31,7 @@
 
 bool CTimerdClient::send(const unsigned char command, char* data = NULL, const unsigned int size = 0)
 {
-	CBasicMessage::Header msgHead;
-	msgHead.version = CTimerdMsg::ACTVERSION;
-	msgHead.cmd     = command;
-
-	open_connection(TIMERD_UDS_NAME);
-
-	if(!send_data((char*)&msgHead, sizeof(msgHead)))
-		return false;
-
-	if(size != 0)
-		return send_data(data, size);
-
-	return true;
+	return CBasicClient::send(TIMERD_UDS_NAME, CTimerdMsg::ACTVERSION, command, data, size);
 }
 
 //-------------------------------------------------------------------------

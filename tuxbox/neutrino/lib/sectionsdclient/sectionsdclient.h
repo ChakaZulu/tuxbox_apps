@@ -62,7 +62,7 @@ class CSectionsdClient : private CBasicClient
  private:
 
 	int readResponse(char* data = NULL, int size= 0);
-	bool send(const unsigned char command, char* data, const unsigned int size, const unsigned char version);
+	bool send(const unsigned char command, char* data, const unsigned int size);
 
  public:
 		enum events
@@ -103,12 +103,12 @@ class CSectionsdClient : private CBasicClient
 		/*
 			ein beliebiges Event anmelden
 		*/
-		void registerEvent(unsigned int eventID, unsigned int clientID, string udsName);
+		void registerEvent(const unsigned int eventID, const unsigned int clientID, const string udsName);
 
 		/*
 			ein beliebiges Event abmelden
 		*/
-		void unRegisterEvent(unsigned int eventID, unsigned int clientID);
+		void unRegisterEvent(const unsigned int eventID, const unsigned int clientID);
 
 };
 

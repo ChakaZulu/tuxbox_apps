@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.27 2002/11/03 22:26:55 thegoodguy Exp $
+  $Id: sectionsdclient.cpp,v 1.28 2002/12/07 19:14:55 thegoodguy Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: sectionsdclient.cpp,v $
+  Revision 1.28  2002/12/07 19:14:55  thegoodguy
+  Move more code to basicclient & make sectionsd use basicserver
+
   Revision 1.27  2002/11/03 22:26:55  thegoodguy
   Use more frequently types defined in zapittypes.h(not complete), fix some warnings, some code cleanup
 
@@ -136,11 +139,11 @@ int CSectionsdClient::readResponse(char* data, int size)
 }
 
 
-bool CSectionsdClient::send(const unsigned char command, char* data = NULL, const unsigned int size = 0, const unsigned char version = 2)
+bool CSectionsdClient::send(const unsigned char command, char* data = NULL, const unsigned int size = 0)
 {
 	sectionsd::msgRequestHeader msgHead;
 
-	msgHead.version    = version;
+	msgHead.version    = sectionsd::ACTVERSION;
 	msgHead.command    = command;
 	msgHead.dataLength = size;
 
@@ -155,7 +158,7 @@ bool CSectionsdClient::send(const unsigned char command, char* data = NULL, cons
         return true;
 }
 
-void CSectionsdClient::registerEvent(unsigned int eventID, unsigned int clientID, string udsName)
+void CSectionsdClient::registerEvent(const unsigned int eventID, const unsigned int clientID, const string udsName)
 {
 	CEventServer::commandRegisterEvent msg2;
 
@@ -164,19 +167,19 @@ void CSectionsdClient::registerEvent(unsigned int eventID, unsigned int clientID
 
 	strcpy(msg2.udsName, udsName.c_str());
 	
-	send(sectionsd::CMD_registerEvents, (char*)&msg2, sizeof(msg2), 3);
+	send(sectionsd::CMD_registerEvents, (char*)&msg2, sizeof(msg2));
 
 	close_connection();
 }
 
-void CSectionsdClient::unRegisterEvent(unsigned int eventID, unsigned int clientID)
+void CSectionsdClient::unRegisterEvent(const unsigned int eventID, const unsigned int clientID)
 {
 	CEventServer::commandUnRegisterEvent msg2;
 
 	msg2.eventID = eventID;
 	msg2.clientID = clientID;
 
-	send(sectionsd::CMD_unregisterEvents, (char*)&msg2, sizeof(msg2), 3);
+	send(sectionsd::CMD_unregisterEvents, (char*)&msg2, sizeof(msg2));
 
 	close_connection();
 }

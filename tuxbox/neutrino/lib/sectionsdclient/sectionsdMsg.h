@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.2 2002/11/03 22:26:55 thegoodguy Exp $
+//  $Id: sectionsdMsg.h,v 1.3 2002/12/07 19:14:55 thegoodguy Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -31,7 +31,8 @@
 #include <vector>
 
 
-#include <zapit/client/zapittypes.h>  // t_channel_id, t_service_id, t_original_network_id, t_transport_stream_id;
+#include <connection/basicmessage.h>
+#include <zapit/client/zapittypes.h>  /* t_channel_id, t_service_id, t_original_network_id, t_transport_stream_id; */
 
 
 using namespace std;
@@ -40,6 +41,8 @@ using namespace std;
 
 struct sectionsd
 {
+	static const CBasicMessage::t_version ACTVERSION = 4;
+
 	struct epgflags {
 		enum
 		{
@@ -71,7 +74,6 @@ struct sectionsd
 		unsigned dauer;
 	} __attribute__ ((packed)) ;
 
-	static const int numberOfCommands=26;
 	enum commands
 	{
 		actualEPGchannelName=0,
@@ -99,14 +101,10 @@ struct sectionsd
 		getIsTimeSet,
 		serviceChanged,
 		LinkageDescriptorsUniqueKey,
-		pauseSorting
-	};
-
-	static const int numberOfCommands_v3=2;
-	enum commands_3
-	{
+		pauseSorting,
 		CMD_registerEvents,
-		CMD_unregisterEvents
+		CMD_unregisterEvents,
+		numberOfCommands        // <- no actual command, end of command marker
 	};
 
 	struct commandSetServiceChanged

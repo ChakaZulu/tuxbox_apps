@@ -39,19 +39,7 @@
 
 bool CLcddClient::send(const unsigned char command, char* data = NULL, const unsigned int size = 0)
 {
-	CLcddMsg::Header msgHead;
-	msgHead.version = CLcddMsg::ACTVERSION;
-	msgHead.cmd     = command;
-
-	open_connection(LCDD_UDS_NAME);
-
-	if (!send_data((char*)&msgHead, sizeof(msgHead)))
-	    return false;
-	
-	if (size != 0)
-	    return send_data(data, size);
-
-	return true;
+	return CBasicClient::send(LCDD_UDS_NAME, CLcddMsg::ACTVERSION, command, data, size);
 }
 
 

@@ -1,5 +1,6 @@
 INCLUDES = \
 	-I$(top_srcdir)/lib \
+	@CONNECTION_CFLAGS@ \
 	@EVENTSERVER_CFLAGS@
 
 bin_PROGRAMS = bat epg epgMini nit sectionsd sdt
@@ -12,6 +13,7 @@ sectionsd_SOURCES = sectionsd.cpp SIsections.cpp SIevents.cpp SIutils.cpp
 sdt_SOURCES = sdt.cpp SIsections.cpp SIevents.cpp SIutils.cpp
 
 sectionsd_LDADD = \
+	@CONNECTION_LIBS@ \
 	@EVENTSERVER_LIBS@ \
 	-lpthread
 

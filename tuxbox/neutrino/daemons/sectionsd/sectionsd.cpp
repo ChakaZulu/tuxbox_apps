@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.143 2002/11/28 18:05:16 obi Exp $
+//  $Id: sectionsd.cpp,v 1.144 2002/12/07 19:14:54 thegoodguy Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -55,6 +55,8 @@
 
 #include <sys/wait.h>
 #include <sys/time.h>
+
+#include <connection/basicserver.h>
 
 // Daher nehmen wir SmartPointers aus der Boost-Lib (www.boost.org)
 #include <boost/shared_ptr.hpp>
@@ -1296,7 +1298,7 @@ struct connectionData
 	struct sockaddr_in clientAddr;
 };
 
-static void commandPauseScanning(struct connectionData *client, char *data, const unsigned dataLength)
+static void commandPauseScanning(int connfd, char *data, const unsigned dataLength)
 {
 	if (dataLength != 4)
 		return ;
@@ -1327,12 +1329,12 @@ static void commandPauseScanning(struct connectionData *client, char *data, cons
 
 	msgResponse.dataLength = 0;
 
-	writeNbytes(client->connectionSocket, (const char *)&msgResponse, sizeof(msgResponse), TIMEOUT_CONNECTIONS);
+	writeNbytes(connfd, (const char *)&msgResponse, sizeof(msgResponse), TIMEOUT_CONNECTIONS);
 
 	return ;
 }
 
-static void commandPauseSorting(struct connectionData *client, char *data, const unsigned dataLength)
+static void commandPauseSorting(int connfd, char *data, const unsigned dataLength)
 {
 	if (dataLength != 4)
 		return ;
@@ -1353,12 +1355,12 @@ static void commandPauseSorting(struct connectionData *client, char *data, const
 
 	msgResponse.dataLength = 0;
 
-	writeNbytes(client->connectionSocket, (const char *)&msgResponse, sizeof(msgResponse), TIMEOUT_CONNECTIONS);
+	writeNbytes(connfd, (const char *)&msgResponse, sizeof(msgResponse), TIMEOUT_CONNECTIONS);
 
 	return ;
 }
 
-static void commandDumpAllServices(struct connectionData *client, char *data, const unsigned dataLength)
+static void commandDumpAllServices(int connfd, char *data, const unsigned dataLength)
 {
 	if (dataLength)
 		return ;
@@ -1401,10 +1403,10 @@ static void commandDumpAllServices(struct connectionData *client, char *data, co
 	if (msgResponse.dataLength == 1)
 		msgResponse.dataLength = 0;
 
-	if (writeNbytes(client->connectionSocket, (const char *)&msgResponse, sizeof(msgResponse), TIMEOUT_CONNECTIONS) > 0)
+	if (writeNbytes(connfd, (const char *)&msgResponse, sizeof(msgResponse), TIMEOUT_CONNECTIONS) > 0)
 	{
 		if (msgResponse.dataLength)
-			writeNbytes(client->connectionSocket, serviceList, msgResponse.dataLength, TIMEOUT_CONNECTIONS);
+			writeNbytes(connfd, serviceList, msgResponse.dataLength, TIMEOUT_CONNECTIONS);
 	}
 	else
 		dputs("[sectionsd] Fehler/Timeout bei write");
@@ -1414,7 +1416,7 @@ static void commandDumpAllServices(struct connectionData *client, char *data, co
 	return ;
 }
 
-static void commandSetEventsAreOldInMinutes(struct connectionData *client, char *data, const unsigned dataLength)
+static void commandSetEventsAreOldInMinutes(int connfd, char *data, const unsigned dataLength)
 {
 	if (dataLength != 2)
 		return ;
@@ -1427,12 +1429,12 @@ static void commandSetEventsAreOldInMinutes(struct connectionData *client, char 
 
 	responseHeader.dataLength = 0;
 
-	writeNbytes(client->connectionSocket, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
+	writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
 
 	return ;
 }
 
-static void commandSetHoursToCache(struct connectionData *client, char *data, const unsigned dataLength)
+static void commandSetHoursToCache(int connfd, char *data, const unsigned dataLength)
 {
 	if (dataLength != 2)
 		return ;
@@ -1445,12 +1447,12 @@ static void commandSetHoursToCache(struct connectionData *client, char *data, co
 
 	responseHeader.dataLength = 0;
 
-	writeNbytes(client->connectionSocket, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
+	writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
 
 	return ;
 }
 
-static void sendAllEvents(struct connectionData *client, t_channel_id serviceUniqueKey, bool oldFormat = true )
+static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFormat = true )
 {
 	char *evtList = new char[65*1024]; // 65kb should be enough and dataLength is unsigned short
 
@@ -1548,10 +1550,10 @@ static void sendAllEvents(struct connectionData *client, t_channel_id serviceUni
 	if ( responseHeader.dataLength == 1 )
 		responseHeader.dataLength = 0;
 
-	if (writeNbytes(client->connectionSocket, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS) > 0)
+	if (writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS) > 0)
 	{
 		if (responseHeader.dataLength)
-			writeNbytes(client->connectionSocket, evtList, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
+			writeNbytes(connfd, evtList, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
 	}
 	else
 		dputs("[sectionsd] Fehler/Timeout bei write");
@@ -1561,18 +1563,18 @@ static void sendAllEvents(struct connectionData *client, t_channel_id serviceUni
 	return ;
 }
 
-static void commandAllEventsChannelName(struct connectionData *client, char *data, const unsigned dataLength)
+static void commandAllEventsChannelName(int connfd, char *data, const unsigned dataLength)
 {
 	data[dataLength - 1] = 0; // to be sure it has an trailing 0
 	dprintf("Request of all events for '%s'\n", data);
 	lockServices();
 	t_channel_id uniqueServiceKey = findServiceUniqueKeyforServiceName(data);
 	unlockServices();
-	sendAllEvents(client, uniqueServiceKey);
+	sendAllEvents(connfd, uniqueServiceKey);
 	return ;
 }
 
-static void commandAllEventsChannelID(struct connectionData *client, char *data, const unsigned dataLength)
+static void commandAllEventsChannelID(int connfd, char *data, const unsigned dataLength)
 {
 	if (dataLength != sizeof(t_channel_id))
 		return ;
@@ -1581,12 +1583,12 @@ static void commandAllEventsChannelID(struct connectionData *client, char *data,
 
 	dprintf("Request of all events for " PRINTF_CHANNEL_ID_TYPE "\n", serviceUniqueKey);
 
-	sendAllEvents(client, serviceUniqueKey, false);
+	sendAllEvents(connfd, serviceUniqueKey, false);
 
 	return ;
 }
 
-static void commandDumpStatusInformation(struct connectionData *client, char *data, const unsigned dataLength)
+static void commandDumpStatusInformation(int connfd, char *data, const unsigned dataLength)
 {
 	if (dataLength)
 		return ;
@@ -1622,7 +1624,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.143 2002/11/28 18:05:16 obi Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.144 2002/12/07 19:14:54 thegoodguy Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -1645,10 +1647,10 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
 
 	responseHeader.dataLength = strlen(stati) + 1;
 
-	if (writeNbytes(client->connectionSocket, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS) > 0)
+	if (writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS) > 0)
 	{
 		if (responseHeader.dataLength)
-			writeNbytes(client->connectionSocket, stati, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
+			writeNbytes(connfd, stati, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
 	}
 	else
 		dputs("[sectionsd] Fehler/Timeout bei write");
@@ -1656,7 +1658,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
 	return ;
 }
 
-static void commandCurrentNextInfoChannelName(struct connectionData *client, char *data, const unsigned dataLength)
+static void commandCurrentNextInfoChannelName(int connfd, char *data, const unsigned dataLength)
 {
 	int nResultDataSize = 0;
 	char* pResultData = 0;
@@ -1740,12 +1742,12 @@ static void commandCurrentNextInfoChannelName(struct connectionData *client, cha
 
 	struct sectionsd::msgResponseHeader pmResponse;
 	pmResponse.dataLength = nResultDataSize;
-	int rc = writeNbytes(client->connectionSocket, (const char *)&pmResponse, sizeof(pmResponse), TIMEOUT_CONNECTIONS);
+	int rc = writeNbytes(connfd, (const char *)&pmResponse, sizeof(pmResponse), TIMEOUT_CONNECTIONS);
 
 	if ( nResultDataSize > 0 )
 	{
 		if (rc > 0)
-			writeNbytes(client->connectionSocket, pResultData, nResultDataSize, TIMEOUT_CONNECTIONS);
+			writeNbytes(connfd, pResultData, nResultDataSize, TIMEOUT_CONNECTIONS);
 		else
 			dputs("[sectionsd] Fehler/Timeout bei write");
 
@@ -1759,7 +1761,7 @@ static void commandCurrentNextInfoChannelName(struct connectionData *client, cha
 	return ;
 }
 
-static void commandComponentTagsUniqueKey(struct connectionData *client, char *data, const unsigned dataLength)
+static void commandComponentTagsUniqueKey(int connfd, char *data, const unsigned dataLength)
 {
 	int nResultDataSize = 0;
 	char* pResultData = 0;
@@ -1838,10 +1840,10 @@ static void commandComponentTagsUniqueKey(struct connectionData *client, char *d
 	struct sectionsd::msgResponseHeader responseHeader;
 	responseHeader.dataLength = nResultDataSize;
 
-	if (writeNbytes(client->connectionSocket, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS) > 0)
+	if (writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS) > 0)
 	{
 		if (responseHeader.dataLength)
-			writeNbytes(client->connectionSocket, pResultData, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
+			writeNbytes(connfd, pResultData, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
 	}
 	else
 		dputs("[sectionsd] Fehler/Timeout bei write");
@@ -1851,7 +1853,7 @@ static void commandComponentTagsUniqueKey(struct connectionData *client, char *d
 	return ;
 }
 
-static void commandLinkageDescriptorsUniqueKey(struct connectionData *client, char *data, const unsigned dataLength)
+static void commandLinkageDescriptorsUniqueKey(int connfd, char *data, const unsigned dataLength)
 {
 	int nResultDataSize = 0;
 	char* pResultData = 0;
@@ -1934,10 +1936,10 @@ static void commandLinkageDescriptorsUniqueKey(struct connectionData *client, ch
 	struct sectionsd::msgResponseHeader responseHeader;
 	responseHeader.dataLength = nResultDataSize;
 
-	if (writeNbytes(client->connectionSocket, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS) > 0)
+	if (writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS) > 0)
 	{
 		if (responseHeader.dataLength)
-			writeNbytes(client->connectionSocket, pResultData, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
+			writeNbytes(connfd, pResultData, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
 	}
 	else
 		dputs("[sectionsd] Fehler/Timeout bei write");
@@ -1961,7 +1963,7 @@ static time_t	messaging_last_requested = time(NULL);
 static bool	messaging_neutrino_sets_time = false;
 static bool 	messaging_WaitForServiceDesc = false;
 
-static void commandserviceChanged(struct connectionData *client, char *data, const unsigned dataLength)
+static void commandserviceChanged(int connfd, char *data, const unsigned dataLength)
 {
 
 	if (dataLength != sizeof(sectionsd::commandSetServiceChanged))
@@ -2059,12 +2061,12 @@ static void commandserviceChanged(struct connectionData *client, char *data, con
 
 	msgResponse.dataLength = 0;
 
-	writeNbytes(client->connectionSocket, (const char *)&msgResponse, sizeof(msgResponse), TIMEOUT_CONNECTIONS);
+	writeNbytes(connfd, (const char *)&msgResponse, sizeof(msgResponse), TIMEOUT_CONNECTIONS);
 
 	return ;
 }
 
-static void commandCurrentNextInfoChannelID(struct connectionData *client, char *data, const unsigned dataLength)
+static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsigned dataLength)
 {
 	int nResultDataSize = 0;
 	char* pResultData = 0;
@@ -2212,12 +2214,12 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
 
 	struct sectionsd::msgResponseHeader pmResponse;
 	pmResponse.dataLength = nResultDataSize;
-	int rc = writeNbytes(client->connectionSocket, (const char *)&pmResponse, sizeof(pmResponse), TIMEOUT_CONNECTIONS);
+	int rc = writeNbytes(connfd, (const char *)&pmResponse, sizeof(pmResponse), TIMEOUT_CONNECTIONS);
 
 	if ( nResultDataSize > 0 )
 	{
 		if (rc > 0)
-			writeNbytes(client->connectionSocket, pResultData, nResultDataSize, TIMEOUT_CONNECTIONS);
+			writeNbytes(connfd, pResultData, nResultDataSize, TIMEOUT_CONNECTIONS);
 		else
 			dputs("[sectionsd] Fehler/Timeout bei write");
 
@@ -2233,7 +2235,7 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
 
 // Sendet ein EPG, unlocked die events, unpaused dmxEIT
 
-static void sendEPG(struct connectionData *client, const SIevent& e, const SItime& t, int shortepg = 0)
+static void sendEPG(int connfd, const SIevent& e, const SItime& t, int shortepg = 0)
 {
 
 	struct sectionsd::msgResponseHeader responseHeader;
@@ -2305,17 +2307,17 @@ static void sendEPG(struct connectionData *client, const SIevent& e, const SItim
 
 	dmxEIT.unpause(); // -> unlock
 
-	int rc = writeNbytes(client->connectionSocket, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
+	int rc = writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
 
 	if (rc > 0)
-		writeNbytes(client->connectionSocket, msgData, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
+		writeNbytes(connfd, msgData, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
 	else
 		dputs("[sectionsd] Fehler/Timeout bei write");
 
 	delete[] msgData;
 }
 
-static void commandGetNextEPG(struct connectionData *client, char *data, const unsigned dataLength)
+static void commandGetNextEPG(int connfd, char *data, const unsigned dataLength)
 {
 	if (dataLength != 8 + 4)
 		return ;
@@ -2338,7 +2340,7 @@ static void commandGetNextEPG(struct connectionData *client, char *data, const u
 	if (nextEvt.serviceID != 0)
 	{
 		dprintf("next epg found.\n");
-		sendEPG(client, nextEvt, zeit);
+		sendEPG(connfd, nextEvt, zeit);
 	}
 	else
 	{
@@ -2348,13 +2350,13 @@ static void commandGetNextEPG(struct connectionData *client, char *data, const u
 
 		struct sectionsd::msgResponseHeader responseHeader;
 		responseHeader.dataLength = 0;
-		writeNbytes(client->connectionSocket, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
+		writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
 	}
 
 	return ;
 }
 
-static void commandActualEPGchannelID(struct connectionData *client, char *data, const unsigned dataLength)
+static void commandActualEPGchannelID(int connfd, char *data, const unsigned dataLength)
 {
 	if (dataLength != sizeof(t_channel_id))
 		return ;
@@ -2375,7 +2377,7 @@ static void commandActualEPGchannelID(struct connectionData *client, char *data,
 	if (evt.serviceID != 0)
 	{
 		dprintf("EPG found.\n");
-		sendEPG(client, evt, zeit);
+		sendEPG(connfd, evt, zeit);
 	}
 	else
 	{
@@ -2385,13 +2387,13 @@ static void commandActualEPGchannelID(struct connectionData *client, char *data,
 
 		struct sectionsd::msgResponseHeader responseHeader;
 		responseHeader.dataLength = 0;
-		writeNbytes(client->connectionSocket, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
+		writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
 	}
 
 	return ;
 }
 
-static void commandGetEPGPrevNext(struct connectionData *client, char *data, const unsigned dataLength)
+static void commandGetEPGPrevNext(int connfd, char *data, const unsigned dataLength)
 {
 	if (dataLength != 8 + 4)
 		return ;
@@ -2446,10 +2448,10 @@ static void commandGetEPGPrevNext(struct connectionData *client, char *data, con
 	unlockEvents();
 	dmxEIT.unpause(); // -> unlock
 
-	int rc = writeNbytes(client->connectionSocket, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
+	int rc = writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
 
 	if (rc > 0)
-		writeNbytes(client->connectionSocket, msgData, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
+		writeNbytes(connfd, msgData, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
 	else
 		dputs("[sectionsd] Fehler/Timeout bei write");
 
@@ -2460,7 +2462,7 @@ static void commandGetEPGPrevNext(struct connectionData *client, char *data, con
 
 // Mostly copied from epgd (something bugfixed ;) )
 
-static void commandActualEPGchannelName(struct connectionData *client, char *data, const unsigned dataLength)
+static void commandActualEPGchannelName(int connfd, char *data, const unsigned dataLength)
 {
 	int nResultDataSize = 0;
 	char* pResultData = 0;
@@ -2535,12 +2537,12 @@ static void commandActualEPGchannelName(struct connectionData *client, char *dat
 
 	pmResponse.dataLength = nResultDataSize;
 
-	int rc = writeNbytes(client->connectionSocket, (const char *)&pmResponse, sizeof(pmResponse), TIMEOUT_CONNECTIONS);
+	int rc = writeNbytes(connfd, (const char *)&pmResponse, sizeof(pmResponse), TIMEOUT_CONNECTIONS);
 
 	if ( nResultDataSize > 0 )
 	{
 		if (rc > 0)
-			writeNbytes(client->connectionSocket, pResultData, nResultDataSize, TIMEOUT_CONNECTIONS);
+			writeNbytes(connfd, pResultData, nResultDataSize, TIMEOUT_CONNECTIONS);
 		else
 			dputs("[sectionsd] Fehler/Timeout bei write");
 
@@ -2548,7 +2550,7 @@ static void commandActualEPGchannelName(struct connectionData *client, char *dat
 	}
 }
 
-static void sendEventList(struct connectionData *client, const unsigned char serviceTyp1, const unsigned char serviceTyp2 = 0, int sendServiceName = 1)
+static void sendEventList(int connfd, const unsigned char serviceTyp1, const unsigned char serviceTyp2 = 0, int sendServiceName = 1)
 {
 	char *evtList = new char[128* 1024]; // 256kb..? should be enough and dataLength is unsigned short
 
@@ -2682,10 +2684,10 @@ static void sendEventList(struct connectionData *client, const unsigned char ser
 	if ( msgResponse.dataLength == 1 )
 		msgResponse.dataLength = 0;
 
-	if (writeNbytes(client->connectionSocket, (const char *)&msgResponse, sizeof(msgResponse), TIMEOUT_CONNECTIONS) > 0)
+	if (writeNbytes(connfd, (const char *)&msgResponse, sizeof(msgResponse), TIMEOUT_CONNECTIONS) > 0)
 	{
 		if (msgResponse.dataLength)
-			writeNbytes(client->connectionSocket, evtList, msgResponse.dataLength, TIMEOUT_CONNECTIONS);
+			writeNbytes(connfd, evtList, msgResponse.dataLength, TIMEOUT_CONNECTIONS);
 	}
 	else
 		dputs("[sectionsd] Fehler/Timeout bei write");
@@ -2695,7 +2697,7 @@ static void sendEventList(struct connectionData *client, const unsigned char ser
 
 // Sendet ein short EPG, unlocked die events, unpaused dmxEIT
 
-static void sendShort(struct connectionData *client, const SIevent& e, const SItime& t)
+static void sendShort(int connfd, const SIevent& e, const SItime& t)
 {
 
 	struct sectionsd::msgResponseHeader responseHeader;
@@ -2725,17 +2727,17 @@ static void sendShort(struct connectionData *client, const SIevent& e, const SIt
 	unlockEvents();
 	dmxEIT.unpause(); // -> unlock
 
-	int rc = writeNbytes(client->connectionSocket, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
+	int rc = writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
 
 	if (rc > 0)
-		writeNbytes(client->connectionSocket, msgData, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
+		writeNbytes(connfd, msgData, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
 	else
 		dputs("[sectionsd] Fehler/Timeout bei write");
 
 	delete[] msgData;
 }
 
-static void commandGetNextShort(struct connectionData *client, char *data, const unsigned dataLength)
+static void commandGetNextShort(int connfd, char *data, const unsigned dataLength)
 {
 	if (dataLength != 8 + 4)
 		return ;
@@ -2758,7 +2760,7 @@ static void commandGetNextShort(struct connectionData *client, char *data, const
 	if (nextEvt.serviceID != 0)
 	{
 		dprintf("next short found.\n");
-		sendShort(client, nextEvt, zeit);
+		sendShort(connfd, nextEvt, zeit);
 	}
 	else
 	{
@@ -2768,61 +2770,61 @@ static void commandGetNextShort(struct connectionData *client, char *data, const
 
 		struct sectionsd::msgResponseHeader responseHeader;
 		responseHeader.dataLength = 0;
-		writeNbytes(client->connectionSocket, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
+		writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
 	}
 
 	return ;
 }
 
-static void commandEventListTV(struct connectionData *client, char *data, const unsigned dataLength)
+static void commandEventListTV(int connfd, char *data, const unsigned dataLength)
 {
 	if (dataLength)
 		return ;
 
 	dputs("Request of TV event list.\n");
 
-	sendEventList(client, 0x01, 0x04);
+	sendEventList(connfd, 0x01, 0x04);
 
 	return ;
 }
 
-static void commandEventListTVids(struct connectionData *client, char *data, const unsigned dataLength)
+static void commandEventListTVids(int connfd, char *data, const unsigned dataLength)
 {
 	if (dataLength)
 		return ;
 
 	dputs("Request of TV event list (IDs).\n");
 
-	sendEventList(client, 0x01, 0x04, 0);
+	sendEventList(connfd, 0x01, 0x04, 0);
 
 	return ;
 }
 
-static void commandEventListRadio(struct connectionData *client, char *data, const unsigned dataLength)
+static void commandEventListRadio(int connfd, char *data, const unsigned dataLength)
 {
 	if (dataLength)
 		return ;
 
 	dputs("Request of radio event list.\n");
 
-	sendEventList(client, 0x02);
+	sendEventList(connfd, 0x02);
 
 	return ;
 }
 
-static void commandEventListRadioIDs(struct connectionData *client, char *data, const unsigned dataLength)
+static void commandEventListRadioIDs(int connfd, char *data, const unsigned dataLength)
 {
 	if (dataLength)
 		return ;
 
 	dputs("Request of radio event list (IDs).\n");
 
-	sendEventList(client, 0x02, 0, 0);
+	sendEventList(connfd, 0x02, 0, 0);
 
 	return ;
 }
 
-static void commandEPGepgID(struct connectionData *client, char *data, const unsigned dataLength)
+static void commandEPGepgID(int connfd, char *data, const unsigned dataLength)
 {
 	if (dataLength != 8 + 4)
 		return ;
@@ -2858,7 +2860,7 @@ static void commandEPGepgID(struct connectionData *client, char *data, const uns
 		{
 			dputs("EPG found.");
 			// Sendet ein EPG, unlocked die events, unpaused dmxEIT
-			sendEPG(client, evt, *t);
+			sendEPG(connfd, evt, *t);
 		}
 	}
 	else
@@ -2871,12 +2873,12 @@ static void commandEPGepgID(struct connectionData *client, char *data, const uns
 		struct sectionsd::msgResponseHeader pmResponse;
 		pmResponse.dataLength = 0;
 
-		if (writeNbytes(client->connectionSocket, (const char *)&pmResponse, sizeof(pmResponse), TIMEOUT_CONNECTIONS) <= 0)
+		if (writeNbytes(connfd, (const char *)&pmResponse, sizeof(pmResponse), TIMEOUT_CONNECTIONS) <= 0)
 			dputs("[sectionsd] Fehler/Timeout bei write");
 	}
 }
 
-static void commandEPGepgIDshort(struct connectionData *client, char *data, const unsigned dataLength)
+static void commandEPGepgIDshort(int connfd, char *data, const unsigned dataLength)
 {
 	if (dataLength != 8)
 		return ;
@@ -2895,7 +2897,7 @@ static void commandEPGepgIDshort(struct connectionData *client, char *data, cons
 	if (evt.serviceID != 0)
 	{ // Event found
 		dputs("EPG found.");
-		sendEPG(client, evt, SItime(0, 0), 1);
+		sendEPG(connfd, evt, SItime(0, 0), 1);
 	}
 	else
 	{
@@ -2907,12 +2909,12 @@ static void commandEPGepgIDshort(struct connectionData *client, char *data, cons
 		struct sectionsd::msgResponseHeader pmResponse;
 		pmResponse.dataLength = 0;
 
-		if (writeNbytes(client->connectionSocket, (const char *)&pmResponse, sizeof(pmResponse), TIMEOUT_CONNECTIONS) <= 0)
+		if (writeNbytes(connfd, (const char *)&pmResponse, sizeof(pmResponse), TIMEOUT_CONNECTIONS) <= 0)
 			dputs("[sectionsd] Fehler/Timeout bei write");
 	}
 }
 
-static void commandTimesNVODservice(struct connectionData *client, char *data, const unsigned dataLength)
+static void commandTimesNVODservice(int connfd, char *data, const unsigned dataLength)
 {
 	if (dataLength != sizeof(t_channel_id))
 		return ;
@@ -2993,13 +2995,13 @@ static void commandTimesNVODservice(struct connectionData *client, char *data, c
 	}
 
 	dprintf("data bytes: %u\n", responseHeader.dataLength);
-	int rc = writeNbytes(client->connectionSocket, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
+	int rc = writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
 
 	if (rc > 0)
 	{
 		if (responseHeader.dataLength)
 		{
-			writeNbytes(client->connectionSocket, msgData, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
+			writeNbytes(connfd, msgData, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
 			delete[] msgData;
 		}
 	}
@@ -3014,7 +3016,7 @@ static void commandTimesNVODservice(struct connectionData *client, char *data, c
 }
 
 
-static void commandGetIsTimeSet(struct connectionData *client, char *data, const unsigned dataLength)
+static void commandGetIsTimeSet(int connfd, char *data, const unsigned dataLength)
 {
 	if (dataLength)
 		return ;
@@ -3029,9 +3031,9 @@ static void commandGetIsTimeSet(struct connectionData *client, char *data, const
 
 	responseHeader.dataLength = sizeof(rmsg);
 
-	if (writeNbytes(client->connectionSocket, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS) > 0)
+	if (writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS) > 0)
 	{
-		writeNbytes(client->connectionSocket, (const char *)&rmsg, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
+		writeNbytes(connfd, (const char *)&rmsg, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
 	}
 	else
 		dputs("[sectionsd] Fehler/Timeout bei write");
@@ -3040,8 +3042,28 @@ static void commandGetIsTimeSet(struct connectionData *client, char *data, const
 }
 
 
+static void commandRegisterEventClient(int connfd, char *data, const unsigned dataLength)
+{
+	if (dataLength == sizeof(CEventServer::commandRegisterEvent))
+	{
+		eventServer->registerEvent2(((CEventServer::commandRegisterEvent*)data)->eventID, ((CEventServer::commandRegisterEvent*)data)->clientID, ((CEventServer::commandRegisterEvent*)data)->udsName);
 
-static void (*connectionCommands[sectionsd::numberOfCommands]) (struct connectionData *, char *, const unsigned) =
+		if (((CEventServer::commandRegisterEvent*)data)->eventID == CSectionsdClient::EVT_TIMESET)
+			messaging_neutrino_sets_time = true;
+	}
+}
+
+
+
+static void commandUnRegisterEventClient(int connfd, char *data, const unsigned dataLength)
+{
+	if (dataLength == sizeof(CEventServer::commandUnRegisterEvent))
+		eventServer->unRegisterEvent2(((CEventServer::commandUnRegisterEvent*)data)->eventID, ((CEventServer::commandUnRegisterEvent*)data)->clientID);
+}
+
+
+
+static void (*connectionCommands[sectionsd::numberOfCommands]) (int connfd, char *, const unsigned) =
     {
         commandActualEPGchannelName,
         commandEventListTV,
@@ -3068,19 +3090,30 @@ static void (*connectionCommands[sectionsd::numberOfCommands]) (struct connectio
         commandGetIsTimeSet,
         commandserviceChanged,
         commandLinkageDescriptorsUniqueKey,
-        commandPauseSorting
+        commandPauseSorting,
+	commandRegisterEventClient,
+	commandUnRegisterEventClient
     };
 
-static void *connectionThread(void *conn)
+//static void *connectionThread(void *conn)
+bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 {
-
-	struct connectionData *client = (struct connectionData *)conn;
-
+	/*
+	  pthread_t threadConnection;
+	  rc = pthread_create(&threadConnection, &conn_attrs, connectionThread, client);
+	  if(rc)
+	  {
+	  fprintf(stderr, "[sectionsd] failed to create connection-thread (rc=%d)\n", rc);
+	  return 4;
+	  }
+	*/
+	// VERSUCH OHNE CONNECTION-THREAD!
+	// spart die thread-creation-zeit, und die Locks lassen ohnehin nur ein cmd gleichzeitig zu
 	try
 	{
 		dprintf("Connection from UDS\n");
 
-		if (fcntl(client->connectionSocket, F_SETFL, O_NONBLOCK))
+		if (fcntl(connfd, F_SETFL, O_NONBLOCK))
 		{
 			perror ("[sectionsd] fcntl");
 			return 0;
@@ -3088,15 +3121,16 @@ static void *connectionThread(void *conn)
 
 		struct sectionsd::msgRequestHeader header;
 
-		memset(&header, 0, sizeof(header));
+		memcpy(&header, &rmsg, sizeof(CBasicMessage::Header));
+		memset((&header) + sizeof(CBasicMessage::Header), 0, sizeof(header) - sizeof(CBasicMessage::Header));
 
-		int readbytes = readNbytes(client->connectionSocket, (char *) & header, sizeof(header) , TIMEOUT_CONNECTIONS);
+		int readbytes = readNbytes(connfd, (char *) ((&header) + sizeof(CBasicMessage::Header)), sizeof(header) - sizeof(CBasicMessage::Header), TIMEOUT_CONNECTIONS);
 
 		if (readbytes > 0)
 		{
 			dprintf("version: %hhd, cmd: %hhd, numbytes: %d\n", header.version, header.command, readbytes);
 
-			if (header.version == 2 && header.command < sectionsd::numberOfCommands)
+			if (header.version == sectionsd::ACTVERSION && header.command < sectionsd::numberOfCommands)
 			{
 				dprintf("data length: %hd\n", header.dataLength);
 				char *data = new char[header.dataLength + 1];
@@ -3108,50 +3142,20 @@ static void *connectionThread(void *conn)
 					int rc = 1;
 
 					if (header.dataLength)
-						rc = readNbytes(client->connectionSocket, data, header.dataLength, TIMEOUT_CONNECTIONS);
+						rc = readNbytes(connfd, data, header.dataLength, TIMEOUT_CONNECTIONS);
 
 					if (rc > 0)
 					{
 						dprintf("Starting command %hhd\n", header.command);
-						connectionCommands[header.command](client, data, header.dataLength);
+						connectionCommands[header.command](connfd, data, header.dataLength);
 					}
 
 					delete[] data;
 				}
 			}
-			else if (header.version == 3 && header.command < sectionsd::numberOfCommands_v3)
-			{
-				int connfd = client->connectionSocket;
-
-				if ( header.command == sectionsd::CMD_registerEvents )
-				{
-
-					CEventServer::commandRegisterEvent msg;
-
-					//int readresult= readNbytes(client->connectionSocket, (char *)&msg, sizeof(msg) , TIMEOUT_CONNECTIONS);
-					readNbytes(client->connectionSocket, (char *)&msg, sizeof(msg) , TIMEOUT_CONNECTIONS);
-
-					//printf("[connectionThread]: read bytes  %d/%d\n", readresult,  sizeof(msg));
-					//printf("[connectionThread]: register event (%d) to: %d - %s\n", msg.eventID, msg.clientID, msg.udsName);
-					eventServer->registerEvent2(msg.eventID, msg.clientID, msg.udsName);
-
-					if ( msg.eventID == CSectionsdClient::EVT_TIMESET )
-						messaging_neutrino_sets_time = true;
-
-					//eventServer->registerEvent( connfd );
-				}
-				else if ( header.command == sectionsd::CMD_unregisterEvents )
-					eventServer->unRegisterEvent( connfd );
-
-			}
 			else
 				dputs("Unknow format or version of request!");
 		}
-
-		close(client->connectionSocket);
-		dprintf("Connection closed!\n");
-		delete client;
-
 	} // try
 	catch (std::exception& e)
 	{
@@ -3162,7 +3166,7 @@ static void *connectionThread(void *conn)
 		fprintf(stderr, "Caught exception in connection-thread!\n");
 	}
 
-	return 0;
+	return true;
 }
 
 //---------------------------------------------------------------------
@@ -4215,8 +4219,6 @@ static void printHelp(void)
 	printf("\nUsage: sectionsd [-d]\n\n");
 }
 
-static int listenSocket = 0;
-
 // Just to get our listen socket closed cleanly
 static void signalHandler(int signum)
 {
@@ -4227,12 +4229,6 @@ static void signalHandler(int signum)
 		break;
 
 	default:
-
-		if (listenSocket)
-			close(listenSocket);
-
-		listenSocket = 0;
-
 		exit(0);
 	}
 }
@@ -4242,7 +4238,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.143 2002/11/28 18:05:16 obi Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.144 2002/12/07 19:14:54 thegoodguy Exp $\n");
 
 	try
 	{
@@ -4267,6 +4263,12 @@ int main(int argc, char **argv)
 		printf("caching %ld hours\n", secondsToCache / (60*60L));
 		printf("events are old %ldmin after their end time\n", oldEventsAre / 60);
 		tzset(); // TZ auswerten
+
+
+		CBasicServer sectionsd_server;
+
+		if (!sectionsd_server.prepare(SECTIONSD_UDS_NAME))
+			return -1;
 
 		switch (fork()) // switching to background
 		{
@@ -4301,40 +4303,6 @@ int main(int argc, char **argv)
 
 		for (int x = 0;x < 32;x++)
 			signal(x, signalHandler);
-
-		struct sockaddr_un servaddr;
-
-		int clilen;
-
-		memset(&servaddr, 0, sizeof(struct sockaddr_un));
-
-		servaddr.sun_family = AF_UNIX;
-
-		strcpy(servaddr.sun_path, SECTIONSD_UDS_NAME);
-
-		clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
-
-		unlink(SECTIONSD_UDS_NAME);
-
-		//network-setup
-		if ((listenSocket = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
-		{
-			perror("socket");
-		}
-
-		if ( bind(listenSocket, (struct sockaddr*) &servaddr, clilen) < 0 )
-		{
-			perror("sectionsd] bind failed...\n");
-			exit( -1);
-		}
-
-
-		if (listen(listenSocket, 5) != 0)
-		{
-			perror("[sectionsd] listen failed...\n");
-			exit( -1 );
-		}
-
 
 		eventServer = new CEventServer;
 		/*
@@ -4387,43 +4355,7 @@ int main(int argc, char **argv)
 		pthread_attr_init(&conn_attrs);
 		pthread_attr_setdetachstate(&conn_attrs, PTHREAD_CREATE_DETACHED);
 
-		// Unsere Endlosschliefe
-
-		socklen_t clientInputLen = sizeof(servaddr);
-
-		for (;listenSocket;)
-		{
-			// wir warten auf eine Verbindung
-
-			struct connectionData *client = new connectionData; // Wird vom Thread freigegeben
-
-			if (!client)
-			{
-				printf("[sectionsd::main] new connectionData failed.\n");
-				throw std::bad_alloc();
-			}
-
-			do
-			{
-
-				client->connectionSocket = accept(listenSocket, (struct sockaddr *) & (client->clientAddr), &clientInputLen);
-			}
-			while (client->connectionSocket == -1);
-
-			/*
-						pthread_t threadConnection;
-						rc = pthread_create(&threadConnection, &conn_attrs, connectionThread, client);
-						if(rc)
-						{
-							fprintf(stderr, "[sectionsd] failed to create connection-thread (rc=%d)\n", rc);
-							return 4;
-						}
-			*/
-			// VERSUCH OHNE CONNECTION-THREAD!
-			// spart die thread-creation-zeit, und die Locks lassen ohnehin nur ein cmd gleichzeitig zu
-			connectionThread(client);
-		}
-
+		sectionsd_server.run(parse_command, sectionsd::ACTVERSION);
 	} // try
 	catch (std::exception& e)
 	{
