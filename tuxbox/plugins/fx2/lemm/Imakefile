@@ -1,11 +1,11 @@
 all:: lemmings.so
 
-PREF=powerpc-linux-
+#PREF=powerpc-linux-
 CC=$(PREF)gcc
 STRIP=$(PREF)strip
 CDEBUGFLAGS=-g -O2 -Wall -pedantic -DUSEX
 INCLUDES=-I. -I../lib -I../../include -I../..
-OBJS=sprite.o pic.o lemm.o
+OBJS=sprite.o pic.o lemm.o sound.o
 
 SingleProgramTarget(lemmings,main.o $(OBJS),,-L../lib -lfx2 -lX11)
 

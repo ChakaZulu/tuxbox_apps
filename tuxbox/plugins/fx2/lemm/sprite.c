@@ -19,8 +19,6 @@ extern	unsigned short	actcode;
 
 extern	unsigned char	*GetPic( int idx,int *maxani,int *width, int *height );
 extern	unsigned char *GetMirrorPic( char picid );
-extern	void	bgGetImage( int x1, int y1, int width, int height,
-					unsigned char *to );
 
 static	Sprite	*root=0;
 static	Sprite	*last=0;
@@ -34,18 +32,22 @@ void	DrawSprite( Sprite *s )
 	x=s->x;
 	y=s->y;
 
-	if (( x+s->width+s->width<main_x ) ||
-		( x>main_x+656 ))
+	if (( x+s->width<main_x ) ||
+		( x>main_x+328 ))
 			return;
 
-	FB2CopyImage( x-main_x+32, y+32, s->width, s->height, s->data+s->ani*s->sz, 1 );
+	x-=main_x;
+	x<<=1;
+	y<<=1;
+
+	FB2CopyImage( x+32, y+32, s->width, s->height, s->data+s->ani*s->sz, 1 );
 }
 
 int SpriteCollide( Sprite *s, int x, int y )
 {
-	return ((x <  s->x+s->width+s->width) &&
+	return ((x <  s->x+s->width) &&
 			(x >= s->x) &&
-			(y <  s->y+s->height+s->height) &&
+			(y <  s->y+s->height) &&
 			(y >= s->y ));
 }
 
@@ -122,10 +124,6 @@ void	SpriteGetBackground( Sprite *s )
 {
 	s->oldx=s->x;
 	s->oldy=s->y;
-return;
-	if ( !s->back )
-		s->back=malloc(s->sz*4);
-	bgGetImage(s->x,s->y,s->width+s->width,s->height+s->height,s->back);
 }
 
 void	SpritesGetBackground( void )
@@ -133,17 +131,19 @@ void	SpritesGetBackground( void )
 	Sprite	*s;
 
 	for( s=root; s; s=s->next )
-		if ( !s->backlocked )
-			SpriteGetBackground(s);
+		SpriteGetBackground(s);
 }
 
 void	FreeSprites( void )
 {
 	Sprite	*s;
+	Sprite	*n;
 
-	for( s=root; s; s=s->next )
-		if ( s->back )
-			free(s->back);
+	for( s=root; s; s=n )
+	{
+		n=s->next;
+		free(s);
+	}
 	root=0;
 	last=0;
 }
@@ -152,9 +152,6 @@ void	SpriteChangePic( Sprite *s, int picid )
 {
 	int		ma;
 
-	if( s->back )
-		free(s->back);
-	s->back=0;
 	s->picid = (char)picid;
 	s->ori_data= GetPic( picid, &ma, &s->width, &s->height );
 	s->data = s->ori_data;

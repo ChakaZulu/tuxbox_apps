@@ -19,10 +19,19 @@ extern	unsigned short	actcode;
 
 extern	unsigned char	*GetAniPic( int idx, int ani, int *width, int *height );
 extern	int				LoadPics( void );
+extern	void			SoundPlay( int pnr );
+extern	void			SoundStart( void );
+
+#define	SND_DIE			0
+#define	SND_DOOR		1
+#define	SND_OING		2
+#define	SND_OHNO		3
+#define	SND_EXPLODE		4
+#define	SND_LETSGO		5
 
 static	int	portfolio[8];		// Wieviele Stopper/Buddler/Lemmings
 static	int	level=1;
-		int	main_x=1320;
+		int	main_x=660;
 static	Sprite	*deko[10];
 static	Sprite	*lemm[100];
 static	unsigned char	*bgImage=0;
@@ -45,97 +54,52 @@ static	int		sel_sprite=-1;
 
 static	unsigned char	*svdimage[12];
 
-#define	stride	3200
+#define	stride	1600
 #define	lfb		bgImage
 
 static	int		isBrick( int x, int y )
 {
-	return ((y<320)&&(*(lfb+stride*y+x)!=14)&&(*(lfb+stride*y+x)!=STEELBLUE));
+	return ((y<160)&&(*(lfb+stride*y+x)!=14)&&(*(lfb+stride*y+x)!=STEELBLUE));
 }
 
 static	void	CopyBg2Screen( int srcx, int srcy, int dstx, int dsty,
 					int dx, int dy )
 {
 	int				y;
-	unsigned char	*p = bgImage+(srcy*stride)+srcx;
+	unsigned char	*p;
+
+	dstx<<=1;
+	dsty<<=1;
+
+	p = bgImage+(srcy*stride)+srcx;
 
 	/* line per line ! - because stride */
-	for( y=0; y<dy; y++, p += stride )
-		FBCopyImage( dstx, dsty+y, dx, 1, p );
+	for( y=0; y<dy+dy; y+=2, p += stride )
+		FB2CopyImage( dstx+32, dsty+y+32, dx, 1, p, 1 );
 }
 
 void	UndrawSprite( Sprite *s )
 {
 	CopyBg2Screen( s->oldx,s->oldy,
-			s->oldx-main_x+32, s->oldy+32,
-			s->width+s->width, s->height+s->height);
+			s->oldx-main_x, s->oldy,
+			s->width, s->height);
 }
 
-
-void	bgGetImage( int x1, int y1, int width, int height, unsigned char *to )
-{
-	int				y;
-	unsigned char	*p=lfb + stride*y1 + x1;
-
-	for(y=0;y<height;y++)
-	{
-		if (( y+y1<320 ) && ( y+y1>=0 ))
-			memcpy(to,p,width);
-		else
-			memset(to,STEELBLUE,width);
-		to+=width;
-		p+=stride;
-	}
-}
-
-void	bg2CopyImage( int x1, int y1, int dx, int dy, unsigned char *src, int dbl )
+void	bg2CopyImage( int x1, int y1, int dx, int dy, unsigned char *src )
 {
 	int				x;
 	int				y;
-	unsigned char	*d;
-	unsigned char	*d1;
-	unsigned char	*d2;
-	unsigned char	*s;
 
 	if ( !dx || !dy )
 		return;
-	if ( !dbl )
+
+	for( y=0; (y < dy) && (y+y1<160); y++ )
 	{
-		for( y=0; (y < dy) && (y+y1<320); y++ )
+		for( x=0; (x < dx) && (x+x1<1600) && (y+y1>=0); x++ )
 		{
-			for( x=0; (x < dx) && (x+x1<3200) && (y+y1>=0); x++ )
-			{
-				if ( ( x+x1>=0 ) && *(src+dx*y+x) )
-					*(lfb+(y1+y)*stride+x1+x) = *(src+dx*y+x);
-			}
+			if ( ( x+x1>=0 ) && *(src+dx*y+x) )
+				*(lfb+(y1+y)*stride+x1+x) = *(src+dx*y+x);
 		}
-		return;
-	}
-	s=src;
-	for( y=0; (y < dy) && (y+y1+y<320); y++ )
-	{
-		if ( y+y1+y<0 )
-			continue;
-		d=lfb+(y1+y+y)*stride+x1;
-		d2=d+stride;
-		d1=d-x1+3200;
-		for( x=0; (x < dx) && (d<d1); x++, s++ )
-		{
-			if ( (x+x1>=0) && *s )
-			{
-				*d=*s;
-				d++;
-				*d=*s;
-				d++;
-			}
-			else
-			{
-				d+=2;
-			}
-		}
-		// line 2
-		if ( x )
-			memcpy(d2,d-x-x,x+x);
 	}
 }
 
@@ -154,19 +118,15 @@ static	void	bgvLine( int x, int y, int l, unsigned char *c, int clen )
 			*(lfb+sy*stride+sx) = c[sx-x];
 }
 
-static	void	inBg( int picid, int ani, int x, int y, int usedbl )
+static	void	inBg( int picid, int ani, int x, int y )
 {
 	unsigned char	*data;
 	int				width;
 	int				height;
 
 	data=GetAniPic(picid,ani,&width,&height);
-	if ( usedbl & 2 )
-	{
-		x<<=1;
-		y<<=1;
-	}
-	bg2CopyImage( x, y, width, height, data, usedbl & 1 );
+
+	bg2CopyImage( x, y, width, height, data );
 }
 
 static	void	inSc( int picid, int ani, int x, int y, int usedbl )
@@ -215,39 +175,37 @@ void	DrawLevelIntoBg( void )
 		/* stein */
 		for( y=0; y<160; y+= 32 )
 			for( x=530; x < 1038; x+=32 )
-				inBg(10,0,x,y,3);
+				inBg(10,0,x,y);
 		/* masken */
-		inBg(15,0,530,0,3);
-		inBg(16,0,664,28,3);
-		inBg(17,0,685,3,3);
-		inBg(18,0,996,0,3);
+		inBg(15,0,530,0);
+		inBg(16,0,664,28);
+		inBg(17,0,685,3);
+		inBg(18,0,996,0);
 		/* moos */
-		inBg(12,0,714,15,3);
+		inBg(12,0,714,15);
 		/* boden */
-		inBg(13,0,687,68,3);
-		inBg(13,0,713,70,3);
-		inBg(13,0,739,68,3);
-		inBg(13,0,763,71,3);
-		inBg(13,0,789,74,3);
-		inBg(13,0,815,74,3);
-		inBg(13,0,828,74,3);
-		inBg(13,0,665,123,3);
-		inBg(13,0,691,124,3);
-		inBg(13,0,717,124,3);
+		inBg(13,0,687,68);
+		inBg(13,0,713,70);
+		inBg(13,0,739,68);
+		inBg(13,0,763,71);
+		inBg(13,0,789,74);
+		inBg(13,0,815,74);
+		inBg(13,0,828,74);
+		inBg(13,0,665,123);
+		inBg(13,0,691,124);
+		inBg(13,0,717,124);
 		for(i=0;i<5;i++)
-			inBg(13,0,743+26*i,126,3);
-		inBg(13,0,873,127,3);
-		inBg(13,0,899,128,3);
+			inBg(13,0,743+26*i,126);
+		inBg(13,0,873,127);
+		inBg(13,0,899,128);
 		/* aeste */
-		inBg(14,0,555,17,3);
-		inBg(14,0,573,38,3);
-		inBg(14,0,829,11,3);
+		inBg(14,0,555,17);
+		inBg(14,0,573,38);
+		inBg(14,0,829,11);
 		/* torleiste */
-		inBg(11,0,726,36,3);
+		inBg(11,0,726,36);
 		/* tor zu */
-		inBg(1,0,1452,78,1);
-//		/* haus */
-//		inBg(7,0,1742,212,1);
+		inBg(1,0,726,39);
 		break;
 	}
 }
@@ -278,25 +236,25 @@ void	InitLevel( void )
 	lem_in=0;
 	lem_run=0;
 	afunc=-1;
-	main_x=1320;
+	main_x=660;
 	memset(deko,0,sizeof(deko));
-	deko[0]=CreateSprite(0,0,main_x+320,160);			// cursor
+	deko[0]=CreateSprite(0,0,main_x+160,80);			// cursor
 	deko[0]->anilocked=1;
 	switch( level )
 	{
 	case 1 :
 	case 4 :
 		/* deko */
-		deko[1]=CreateSprite(1,0,1452,78);		// tor
+		deko[1]=CreateSprite(1,0,726,39);		// tor
 		deko[1]->anilocked=1;
 		deko[1]->backlocked=1;
 		/* zielhaus */
-		deko[2]=CreateSprite(7,0,1742,212);		// haus
+		deko[2]=CreateSprite(7,0,871,106);		// haus
 		deko[2]->anilocked=1;
 		deko[2]->backlocked=1;
-		deko[3]=CreateSprite(2,0,1752,216);		// flamme
+		deko[3]=CreateSprite(2,0,876,108);		// flamme
 		deko[3]->backlocked=1;
-		deko[4]=CreateSprite(2,3,1804,216);		// flamme
+		deko[4]=CreateSprite(2,3,902,108);		// flamme
 		deko[4]->backlocked=1;
 		MirrorSprite( deko[4] );
 
@@ -304,16 +262,16 @@ void	InitLevel( void )
 		memset(lemm,0,sizeof(lemm));
 		memset(portfolio,0,sizeof(portfolio));
 		portfolio[7]=10;
-		haus_x=1778;
-		haus_y1=234;
-		haus_y2=270;
+		haus_x=889;
+		haus_y1=117;
+		haus_y2=135;
 		to_rescue=5;
 		newspeed=50;
 		lem_cnt=10;
 		break;
 	}
 	DrawLevelIntoBg();
-	CopyBg2Screen( main_x, 0, 32, 32, 656, 320 );
+	CopyBg2Screen( main_x, 0, 0, 0, 328, 160 );
 	SpritesGetBackground();
 	DrawSprites();
 	/* Draw Menu-Item-Numbers */
@@ -328,6 +286,7 @@ void	InitLevel( void )
 	FBDrawString( 78,387,16,text,28,0);
 	/* copy level to screen */
 	DrawInfo(3);
+	SoundPlay( SND_LETSGO );
 }
 
 void	AnimateDeko( void )
@@ -342,8 +301,8 @@ void	AnimateDeko( void )
 				( deko[l]->ani == deko[l]->maxani ))
 			{
 				deko[l]->anilocked=1;
-				inBg(1,deko[l]->maxani,1452,78,1);	// store open gate in bg
-				action=2;				// send lemmings into level
+				inBg(1,deko[l]->maxani,726,39);	// store open gate in bg
+				action=2;						// send lemmings into level
 			}
 			SpriteNextPic( deko[l] );
 			DrawSprite( deko[l] );
@@ -371,8 +330,9 @@ int	InitLemm( void )
 
 		if ( LoadPics() == -1 )
 			return -1;
-		bgImage=malloc(3200*320);
-		memset(bgImage,STEELBLUE,3200*320);
+		bgImage=malloc(1600*160);
+		memset(bgImage,STEELBLUE,1600*160);
+		SoundStart();
 	}
 
 	if ( !bgImage )
@@ -410,6 +370,7 @@ static	int		step=2;
 static	int		cnt=0;
 	int			nac;
 	int			sel_type=0;
+	char		text[64];
 
 	if ( realcode == 0xee )
 	{
@@ -420,81 +381,80 @@ static	int		cnt=0;
 
 	cnt++;
 	if( cnt > 8 )
-		step=32;
-	else if( cnt > 6 )
 		step=16;
-	else if( cnt > 4 )
+	else if( cnt > 6 )
 		step=8;
-	else if( cnt > 2 )
+	else if( cnt > 4 )
 		step=4;
+	else if( cnt > 2 )
+		step=2;
 
 	switch( actcode )
 	{
 	case RC_LEFT :
 		s=deko[0];
-		if ( !s ||
-			( s->x < 100 ))
+		if ( !s || ( s->x < 32 ))
 				break;
-		if ( s->x == main_x - 12 )	// move screen
+		if ( s->x == main_x - 6 )	// move screen
 		{
-			if ( s->y > 304 )
+			if ( s->y > 152 )
 				break;
 			main_x -= step;
-			FBMove( 32, 32, 32+step, 32, 656-step, 320 );
-			CopyBg2Screen( main_x, 0, 32, 32, step, 320 );
+			FBMove( 32, 32, 32+step+step, 32, 656-step-step, 320 );
+			CopyBg2Screen( main_x, 0, 0, 0, step, 160 );
 			SpriteGetBackground( s );
 			pic_moved=1;		// mark for redraw unanimated deko-sprites
 			break;
 		}
 		UndrawSprite( s );
 		s->x -= step;
-		if ( s->x < main_x - 12 )
-			s->x = main_x - 12;
+		if ( s->x < main_x - 6 )
+			s->x = main_x - 6;
 		SpriteGetBackground( s );
 		DrawSprite( s );
 		break;
 	case RC_RIGHT :
 		s=deko[0];
 		if ( !s ||
-			( s->x > 3160 ))
+			( s->x > 1580 ))
 				break;
-		if ( s->x == main_x+640 )
+		if ( s->x == main_x+320 )
 		{
-			if ( s->y > 304 )
+			if ( s->y > 152 )
 				break;
 			main_x += step;
-			FBMove( 32+step, 32, 32, 32, 656-step, 320 );
-			CopyBg2Screen( main_x+656-step, 0, 688-step, 32, step, 320 );
+			FBMove( 32+step+step, 32, 32, 32, 656-step-step, 320 );
+			CopyBg2Screen( main_x+328-step, 0, 328-step, 0, step, 160 );
 			SpriteGetBackground( s );
 			pic_moved=1;		// mark for redraw unanimated deko-sprites
 			break;
 		}
 		UndrawSprite( s );
 		s->x += step;
-		if ( s->x > main_x+640 )
-			s->x=main_x+640;
+		if ( s->x > main_x+320 )
+			s->x=main_x+320;
 		SpriteGetBackground( s );
 		DrawSprite( s );
 		break;
 	case RC_UP :
 		s=deko[0];
-		if ( s->y == - 12 )
+		if ( s->y == -6 )
 				break;
 		UndrawSprite( s );
 		s->y -= step;
-		if ( s->y < - 12 )
-			s->y = - 12;
+		if ( s->y < - 6 )
+			s->y = - 6;
 		SpriteGetBackground( s );
 		DrawSprite( s );
 		break;
 	case RC_DOWN :
 		s=deko[0];
-		if ( s->y == 304 )
+		if ( s->y == 152 )
 				break;
 		UndrawSprite( s );
 		s->y += step;
-		if ( s->y > 304 )
-			s->y=304;
+		if ( s->y > 152 )
+			s->y=152;
 		SpriteGetBackground( s );
 		DrawSprite( s );
 		break;
@@ -541,6 +501,7 @@ static	int		cnt=0;
 			action=1;
 			s=deko[1];	// tor;
 			s->anilocked=0;
+			SoundPlay( SND_DOOR );
 			break;
 		}
 		if (( action == 1 ) || pause || ( sel_sprite == -1 ))
@@ -552,6 +513,8 @@ static	int		cnt=0;
 		{
 			s->type |= TYP_EXPLODE;
 			portfolio[ afunc ]--;
+			sprintf(text,"%d ",portfolio[afunc]);
+			FBDrawString( 110+afunc*32,387,16,text,28,53);
 		}
 		else
 		{
@@ -568,6 +531,8 @@ static	int		cnt=0;
 			{
 				s->type = sel_type;
 				portfolio[ afunc ]--;
+				sprintf(text,"%d ",portfolio[afunc]);
+				FBDrawString( 110+afunc*32,387,16,text,28,53);
 				if ( sel_type == TYP_DIGGER )
 				{
 					SpriteChangePic( s, 5 );	// lemming3
@@ -636,7 +601,7 @@ static	int		blinkc=0;
 
 	if (( lem_run < lem_cnt ) && !( counter1%((newspeed/2)+1) ))
 	{
-		lemm[ lem_run ] = CreateSprite(3,0,1490,78);		// lemming1
+		lemm[ lem_run ] = CreateSprite(3,0,745,39);		// lemming1
 		lemm[ lem_run ]->dir=0;		// rechts
 		lemm[ lem_run ]->type = TYP_WALKER;
 		in_level++;
@@ -667,7 +632,7 @@ static	int		blinkc=0;
 		{
 			if ( s->type&TYP_ATHOME )
 			{
-				s->y-=2;
+				s->y-=1;
 				if((s->ani==4)||(s->ani==8))
 				{
 					s->counter2++;
@@ -687,12 +652,13 @@ static	int		blinkc=0;
 					s->type=TYP_ATHOME;
 					s->counter2=0;
 					SpriteChangePic( s, 6 );	// lemming4
+					SoundPlay( SND_OING );
 				}
 				else
 				{	/* kein bodenkontakt ? */
-					if(!isBrick(s->x+4,s->y+s->height*2)&&
-					   !isBrick(s->x-6+s->width*2,
-								s->y+s->height*2))
+					if(!isBrick(s->x+2,s->y+s->height)&&
+					   !isBrick(s->x-3+s->width,
+								s->y+s->height))
 					{
 						if( !( s->type&TYP_WALKER ) )
 						{
@@ -702,12 +668,14 @@ static	int		blinkc=0;
 								MirrorSprite( s );
 						}
 						// freier fall
-						s->y += 4;
+						s->y += 2;
 						s->counter2++;
 						// aus bild gefallen
-						if(s->y>=320)
+						if(s->y>=160)
 						{
+							SoundPlay( SND_DIE );
 							killlem(i);
+							DrawInfo(1);
 						}
 					}
 					else
@@ -717,6 +685,7 @@ static	int		blinkc=0;
 							if(s->counter2>=40)
 							{
 								s->type=TYP_FALLEN;
+								SoundPlay( SND_DIE );
 							}
 							else
 							{	/* wieder auf boden */
@@ -724,7 +693,7 @@ static	int		blinkc=0;
 								/* laeufer - getestet wird oben */
 								if((isBrick(s->x,s->y)&&
 									(s->dir==1))||
-								   (isBrick(s->x+s->width*2,s->y)&&
+								   (isBrick(s->x+s->width,s->y)&&
 									(s->dir==0)))
 								{
 									MirrorSprite( s );
@@ -732,27 +701,27 @@ static	int		blinkc=0;
 								}
 								else
 								{
-									s->x += (s->dir?-2:2);
+									s->x += (s->dir?-1:1);
 									if ( s->dir )
 									{
-										for(b=16;b>0;b-=2)
+										for(b=8;b>0;b--)
 										{
 											if(isBrick(s->x,
-												s->y+s->height*2-b))
+												s->y+s->height-b))
 											{
-												s->y-=2;
+												s->y-=1;
 												b=0;
 											}
 										}
 									}
 									else
 									{
-										for(b=16;b>0;b-=2)
+										for(b=8;b>0;b--)
 										{
-											if(isBrick(s->x+s->width*2,
-												s->y+s->height*2-b))
+											if(isBrick(s->x+s->width,
+												s->y+s->height-b))
 											{
-												s->y-=2;
+												s->y-=1;
 												b=0;
 											}
 										}
@@ -764,14 +733,14 @@ static	int		blinkc=0;
 						{
 							if(!(counter1%8))
 							{
-								if(s->y<320)
+								if(s->y<160)
 								{
-									unsigned char	c[26];
-									memset(c,STEELBLUE,26);
+									unsigned char	c[14];
+									memset(c,STEELBLUE,14);
 #define max(a,b)	((a)>(b)?(a):(b))
-									bghLine( s->x+4, s->y, 16,c,
-										24-max(0,s->y-274));
-									s->y+=2;
+									bghLine( s->x+2, s->y, 8,c,
+										12-max(0,s->y-148));
+									s->y+=1;
 									cursor_get=1;
 								}
 							}
@@ -788,7 +757,7 @@ static	int		blinkc=0;
 		DrawSprite( s );
 		if (( afunc != -1 ) && ( portfolio[ afunc ] ))
 		{
-			if ( SpriteCollide( s, deko[0]->x+14, deko[0]->y+14 ) )
+			if ( SpriteCollide( s, deko[0]->x+7, deko[0]->y+7 ) )
 			{
 				sel_sprite=i;
 			}

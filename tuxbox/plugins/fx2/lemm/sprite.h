@@ -4,7 +4,6 @@ typedef struct _Sprite
 	unsigned char	*ori_data;
 	unsigned char	*flip_data;
 	unsigned char	*data;
-	unsigned char	*back;
 	int				width;
 	int				height;
 	int				oldx;
@@ -34,7 +33,6 @@ extern	void	DrawSprite( Sprite *s );
 extern	void	FreeSprites( void );
 extern	void	SpritesGetBackground( void );
 extern	void	SpriteGetBackground( Sprite *s );
-//extern	void	UndrawSprite( Sprite *s );
 extern	void	DrawSprites( void );
 extern	void	SpriteChangePic( Sprite *s, int picid );
 

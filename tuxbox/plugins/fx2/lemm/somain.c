@@ -34,6 +34,7 @@ extern	void	AnimateDeko( void );
 extern	void	RunKey( void );
 extern	void	RunLemm( void );
 extern	void	RemoveBg( void );
+extern	void	SoundPlay( int pnr );
 
 static	void	setup_colors( void )
 {
@@ -105,6 +106,16 @@ int lemmings_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 			}
 		}
 	}
+
+#if 0
+	ModifyColor( 15, 14, 6 );
+	ModifyColor( 16, 14, 6 );
+	ModifyColor( 17, 14, 6 );
+	ModifyColor( 18, 14, 6 );
+	WritePics();
+#endif
+
+	SoundPlay(-2);	// stop thread
 
 	RemoveBg();
 

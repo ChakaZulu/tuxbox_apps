@@ -177,6 +177,37 @@ static	int		piccolors[] = {
 
 int	LoadPics( void )
 {
+#if 0
+	int				i;
+	gzFile			fd;
+	unsigned char	*data;
+	int				sz;
+int				fd2;
+unsigned char	*data2;
+unsigned long	dstl;
+
+	fd=gzopen( "pics.img.gz", "r" );
+	data = malloc(UNZSIZE);
+	if ( gzread( fd, data, UNZSIZE ) != UNZSIZE )
+		return -1;
+
+data2=malloc(UNZSIZE*2);
+dstl=UNZSIZE*2;
+printf("compress:%d\n",compress(data2,&dstl,data,UNZSIZE));
+fd2=open("ml.img.gz",O_CREAT|O_WRONLY,0666);
+write(fd2,data2,dstl);
+close(fd2);
+
+	pics[0].pic_data=data;
+	sz=pics[0].width*pics[0].height*pics[0].ani;
+	for( i=1; i<31; i++ )
+	{
+		data+=sz;
+		pics[i].pic_data=data;
+		sz=pics[i].width*pics[i].height*pics[i].ani;
+	}
+#endif
+#if 1
 	unsigned long	i;
 	unsigned char	*data;
 	int				sz;
@@ -197,9 +228,42 @@ int	LoadPics( void )
 		pics[i].pic_data=data;
 		sz=pics[i].width*pics[i].height*pics[i].ani;
 	}
-
+#endif
 	return 0;
 }
+
+#if 0
+void	WritePics( void )
+{
+	int			i;
+	int			sz;
+	int			fd;
+
+	fd=open("pics.img",O_CREAT|O_WRONLY,0666);
+	if ( fd != -1 )
+	{
+		for( i=0; i<31; i++ )
+		{
+			sz=pics[i].width*pics[i].height*pics[i].ani;
+			write(fd,pics[i].pic_data,sz);
+		}
+		close(fd);
+	}
+}
+
+void	ModifyColor( int picid, unsigned char cfrom, unsigned char cto )
+{
+	unsigned char	*p;
+	int				sz;
+
+	sz=pics[picid].width*pics[picid].height*pics[picid].ani;
+	for( p=pics[picid].pic_data; sz; sz--, p++ )
+	{
+		if ( *p == cfrom )
+			*p = cto;
+	}
+}
+#endif
 
 unsigned char	*GetAniPic( int idx, int ani, int *width, int *height )
 {
