@@ -59,7 +59,6 @@
 #include <lib/system/info.h>
 #include <src/time_correction.h>
 #include <lib/driver/audiodynamic.h>
-#include <picviewer.h>
 
 		// bis waldi das in nen .h tut
 #define MOVIEDIR "/hdd/movie"
@@ -5739,19 +5738,6 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 		gotPMT();
 		break;
 #ifndef DISABLE_FILE
-#ifdef PICVIEWER
-	case eServiceEvent::evtPicViewer:
-	{
-		ePicViewerStyleSelector e(1);
-#ifndef DISABLE_LCD
-		e.setLCD( LCDTitle, LCDElement );
-#endif
-		e.show();
-		e.exec();
-		e.hide();
-		break;
-	}
-#endif
 	case eServiceEvent::evtRecordFailed:
 	{
 		int freespace = freeRecordSpace();
