@@ -652,9 +652,9 @@ mp3player.title Tytul
 mp3player.artist Wykonawca
 mp3player.playing Bierzacy
 mp3player.id3scan Skanuj ID3 info
-mp3player.keylevel undef
-mp3player.fastforward undef
-mp3player.pause undef
+mp3player.keylevel poziom
+mp3player.fastforward przewin.
+mp3player.pause pauza
 mp3player.rewind rewind
 
 filebrowser.head Przegladarka
@@ -675,5 +675,5 @@ nfs.umounterror blad odmontowania voluminu
 nfs.alreadymounted katalog juz zamontowny
 nfsmenu.head unset
 
-apids.hint_1 undef
-apids.hint_2 undef
+apids.hint_1 Podaj APIDy do odbioru w
+apids.hint_2 formacie hex rozdzielone przez ' '
