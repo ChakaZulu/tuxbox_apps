@@ -165,7 +165,7 @@ function sendMessage2TV()
 
 function selectAudio()
 {
-	NewWindow("cgi-bin/selectAudio?requester=webif", "audio", "200", "100", "no");
+	NewWindow("cgi-bin/selectAudio?requester=webif", "audio", "250", "130", "no");
 }
 
 function selectSubChannel()
