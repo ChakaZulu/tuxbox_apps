@@ -29,102 +29,6 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-/*
- $Id: rcinput.cpp,v 1.36 2002/03/01 22:30:30 McClean Exp $
-
- Module for Remote Control Handling
-
-History:
- $Log: rcinput.cpp,v $
- Revision 1.36  2002/03/01 22:30:30  McClean
- disable the cam-warning (chooseable)
-
- Revision 1.35  2002/02/28 23:40:36  McClean
- reverse frontpanelcode
-
- Revision 1.34  2002/02/28 22:59:38  McClean
- nokia frontpanel-fix
-
- Revision 1.33  2002/02/28 01:49:27  field
- Ein/Aus Handling verbessert, SectionsD gepaused beim Update
-
- Revision 1.30  2002/02/25 19:32:26  field
- Events <-> Key-Handling umgestellt! SEHR BETA!
-
- Revision 1.29  2002/02/23 17:34:28  field
- Update gefixt, Fronttasten implementiert ;)
-
- Revision 1.28  2002/02/19 23:41:48  McClean
- add neutrino-direct-start option (for alexW's-Images only at the moment)
-
- Revision 1.27  2002/02/17 15:55:56  McClean
- prepare for keyboard - useless at the moment
-
- Revision 1.26  2002/01/29 17:26:51  field
- Jede Menge Updates :)
-
- Revision 1.25  2002/01/16 02:09:04  McClean
- cleanups+quickzap-fix
-
- Revision 1.24  2002/01/10 12:45:09  McClean
- fix rc-timeout-prob
-
- Revision 1.23  2002/01/10 01:23:22  McClean
- optimize rc-routines
-
- Revision 1.22  2002/01/09 00:05:08  McClean
- secure-...
-
- Revision 1.21  2002/01/08 23:22:08  McClean
- fix for old nokia-fb's
-
- Revision 1.20  2002/01/08 12:34:28  McClean
- better rc-handling - add flat-standby
-
- Revision 1.19  2002/01/08 03:08:20  McClean
- improve input-handling
-
- Revision 1.18  2002/01/06 03:04:04  McClean
- busybox 0.60 workarround
-
- Revision 1.17  2002/01/03 20:03:20  McClean
- cleanup
-
- Revision 1.16  2001/12/25 11:40:30  McClean
- better pushback handling
-
- Revision 1.15  2001/12/25 03:28:42  McClean
- better pushback-handling
-
- Revision 1.14  2001/11/26 02:34:04  McClean
- include (.../../stuff) changed - correct unix-formated files now
-
- Revision 1.13  2001/11/15 11:42:41  McClean
- gpl-headers added
-
- Revision 1.12  2001/10/29 16:49:00  field
- Kleinere Bug-Fixes (key-input usw.)
-
- Revision 1.11  2001/10/27 11:54:08  field
- Tastenwiederholblocker entruempelt
-
- Revision 1.10  2001/10/11 21:00:56  rasc
- clearbuffer() fuer RC-Input bei Start,
- Klassen etwas erweitert...
-
- Revision 1.9  2001/10/01 20:41:08  McClean
- plugin interface for games - beta but nice.. :)
-
- Revision 1.8  2001/09/23 21:34:07  rasc
- - LIFObuffer Module, pushbackKey fuer RCInput,
- - In einige Helper und widget-Module eingebracht
-   ==> harmonischeres Menuehandling
- - Infoviewer Breite fuer Channelsdiplay angepasst (>1000 Channels)
-
-
-*/
-
-
 
 #include "rcinput.h"
 #include "../global.h"
@@ -154,6 +58,7 @@ void CRCInput::open()
 {
 	close();
 
+	//+++++++++++++++++++++++++++++++++++++++
 	fd_rc=::open("/dev/dbox/rc0", O_RDONLY);
 	if (fd_rc<0)
 	{
@@ -163,7 +68,8 @@ void CRCInput::open()
 	ioctl(fd_rc, RC_IOCTL_BCODES, 1);
 	fcntl(fd_rc, F_SETFL, O_NONBLOCK );
 
-	fd_keyb= 0;
+	//+++++++++++++++++++++++++++++++++++++++
+	fd_keyb = 0;
 	/*
 	::open("/dev/dbox/rc0", O_RDONLY);
 	if (fd_keyb<0)
@@ -174,7 +80,39 @@ void CRCInput::open()
 	*/
 	fcntl(fd_keyb, F_SETFL, O_NONBLOCK );
 
-	fd_max = fd_rc;
+	//+++++++++++++++++++++++++++++++++++++++
+	fd_event = 0;
+	fd_eventclient = -1;
+	
+	//network-setup
+	struct sockaddr_un servaddr;
+	int clilen;
+	memset(&servaddr, 0, sizeof(struct sockaddr_un));
+	servaddr.sun_family = AF_UNIX;
+	strcpy(servaddr.sun_path, NEUTRINO_UDS_NAME);
+	clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
+	unlink(NEUTRINO_UDS_NAME);
+
+	//network-setup
+	if ((fd_event = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
+	{
+		perror("[neutrino] socket\n");
+	}
+
+	if ( bind(fd_event, (struct sockaddr*) &servaddr, clilen) <0 )
+	{
+		perror("[neutrino] bind failed...\n");
+		exit(-1);
+	}
+
+
+	if (listen(fd_event, 5) !=0)
+	{
+		perror("[neutrino] listen failed...\n");
+		exit( -1 );
+	}
+
+	calculateMaxFd();
 }
 
 void CRCInput::close()
@@ -189,7 +127,21 @@ void CRCInput::close()
 		::close(fd_keyb);
 	}
 */
+	if(fd_event)
+	{
+		::close(fd_event);
+	}
 }
+
+void CRCInput::calculateMaxFd()
+{
+	fd_max = fd_rc;
+	if(fd_event > fd_max)
+		fd_max = fd_event;
+	if(fd_eventclient > fd_max)
+		fd_max = fd_eventclient;
+}
+
 
 /**************************************************************************
 *	Destructor - close the input-device
@@ -273,6 +225,12 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 		FD_ZERO(&rfds);
 		FD_SET(fd_rc, &rfds);
 		//FD_SET(fd_keyb, &rfds);
+		FD_SET(fd_event, &rfds);
+		if(fd_eventclient!=-1)
+		{
+			FD_SET(fd_eventclient, &rfds);
+		}
+		calculateMaxFd();
 		int status =  select(fd_max+1, &rfds, NULL, NULL, tvslectp);
 /*
 		if(FD_ISSET(fd_keyb, &rfds))
@@ -282,6 +240,37 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 			printf("keyboard: %d\n", rc_key);
 		}
 */
+		if(FD_ISSET(fd_event, &rfds))
+		{
+			printf("[neutrino] network - accept!\n");
+			socklen_t	clilen;
+			SAI			cliaddr;
+			clilen = sizeof(cliaddr);
+			fd_eventclient = accept(fd_event, (SA *) &cliaddr, &clilen);
+
+		}
+		if(fd_eventclient!=-1)
+		{
+			if(FD_ISSET(fd_eventclient, &rfds))
+			{
+				printf("[neutrino] network - read!\n");
+				CEventServer::eventHead emsg;
+				if ( recv(fd_eventclient, &emsg, sizeof(emsg), MSG_WAITALL)== sizeof(emsg) )
+				{
+					if (emsg.eventID==CControldClient::EVT_VOLUMECHANGED)
+					{
+						printf("[neutrino] network - event -> volume changed!\n");
+					}
+				}
+				else
+				{
+					printf("[neutrino] network - read failed!\n");
+				}
+				::close(fd_eventclient);
+				fd_eventclient = -1;
+			}
+		}
+
 		if(FD_ISSET(fd_rc, &rfds))
 		{
 			status = read(fd_rc, &rc_key, sizeof(rc_key));

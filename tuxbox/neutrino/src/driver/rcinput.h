@@ -30,12 +30,15 @@
 */
 
 /*
-$Id: rcinput.h,v 1.20 2002/02/28 01:49:27 field Exp $
+$Id: rcinput.h,v 1.21 2002/03/02 14:55:21 McClean Exp $
 
  Module  RemoteControle Handling
 
 History:
  $Log: rcinput.h,v $
+ Revision 1.21  2002/03/02 14:55:21  McClean
+ base-functions for eventhandling (dont worxx)
+
  Revision 1.20  2002/02/28 01:49:27  field
  Ein/Aus Handling verbessert, SectionsD gepaused beim Update
 
@@ -112,6 +115,9 @@ History:
 
 using namespace std;
 
+
+#define NEUTRINO_UDS_NAME "/tmp/neutrino.sock"
+
 class CRCInput
 {
 	private:
@@ -123,6 +129,8 @@ class CRCInput
 
 		int         fd_rc;
 		int			fd_keyb;
+		int			fd_event;
+		int			fd_eventclient;
 		int			fd_max;
 		CRingBuffer pb_keys;
 
@@ -131,6 +139,8 @@ class CRCInput
 		void open();
 		void close();
 		int translate(int code);
+
+		void calculateMaxFd();
 
 	public:
 		//rc-code definitions
