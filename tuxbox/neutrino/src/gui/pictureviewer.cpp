@@ -66,24 +66,11 @@ bool comparePictureByDate (const CPicture& a, const CPicture& b)
 //------------------------------------------------------------------------
 bool comparePictureByFilename (const CPicture& a, const CPicture& b)
 {
-    char ch1; char ch2;
-    unsigned int len = a.Filename.length();
-    if (b.Filename.length() < len) {
-      len = b.Filename.length();
-    }
-
-    for (unsigned int i = 0; i<len; i++){
-      ch1 = a.Filename[i];
-      ch2 = b.Filename[i];
-      if (tolower(ch1) < tolower(ch2)){
-        return true;
-      }else if (tolower(ch1) > tolower(ch2)){
-        return false;
-      }
-
-    }
-    return false;
-
+	std::string sa=a.Filename;
+	std::string sb=b.Filename;
+	std::transform(sa.begin(), sa.end(), sa.begin(), tolower);
+	std::transform(sb.begin(), sb.end(), sb.begin(), tolower);
+	return sa < sb;
 }
 //------------------------------------------------------------------------
 

@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.50 2003/10/12 16:33:26 gagga Exp $
+ * $Id: bouquets.h,v 1.51 2003/10/13 18:08:00 zwen Exp $
  */
 
 #ifndef __bouquets_h__
@@ -31,23 +31,11 @@ struct CmpChannelByChName: public binary_function <CZapitChannel* , CZapitChanne
 {
 	bool operator() (CZapitChannel*  c1, CZapitChannel*  c2)
 	{
-    char ch1; char ch2;
-    unsigned int len = c1->getName().length();
-    if (c2->getName().length() < len) {
-      len = c2->getName().length();
-    }
-
-    for (unsigned int i = 0; i<len; i++){
-      ch1 = c1->getName()[i];
-      ch2 = c2->getName()[i];
-      if (tolower(ch1) < tolower(ch2)){
-        return true;
-      }else if (tolower(ch1) > tolower(ch2)){
-        return false;
-      }
-
-    }
-    return false;
+		std::string sa=c1->getName();
+		std::string sb=c2->getName();
+		std::transform(sa.begin(), sa.end(), sa.begin(), tolower);
+		std::transform(sb.begin(), sb.end(), sb.begin(), tolower);
+		return (sa < sb);
 	};
 };
 
