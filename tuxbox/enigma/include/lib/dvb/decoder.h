@@ -55,6 +55,7 @@ public:
 	static void clearScreen();
 	static void getVideoPTS( unsigned int &dest );
 	static void setAutoFlushScreen(int);
+	static void setFastZap(int);
 };
 
 #endif

@@ -698,6 +698,8 @@ int Decoder::displayIFrame(const char *frame, int len)
 	write(fdv, &buf, 128);
 
 	setAutoFlushScreen(0);
+	if ( ::ioctl(fd.video, VIDEO_SET_BLANK, 0) < 0 )
+		eDebug("VIDEO_SET_BLANK failed (%m)");
 	if ( !wasOpen )
 	{
 		::close(fd.video);
@@ -735,6 +737,7 @@ int Decoder::displayIFrameFromFile(const char *filename)
 #define VIDEO_GET_PTS           _IOR('o', 1, unsigned int*)
 #define VIDEO_SET_AUTOFLUSH     _IOW('o', 2, int)
 #define VIDEO_CLEAR_SCREEN      3
+#define VIDEO_SET_FASTZAP	_IOW('o', 4, int)
 
 void Decoder::flushClipBuffer()
 {
@@ -778,6 +781,23 @@ void Decoder::getVideoPTS( unsigned int &dest )
 	}
 	if ( ::ioctl(fd.mpeg, VIDEO_GET_PTS, &dest) < 0 )
 		eDebug("VIDEO_GET_PTS failed (%m)");
+}
+
+void Decoder::setFastZap(int val)
+{
+	int wasOpen = fd.mpeg != -1;
+	if ( !wasOpen )
+		fd.mpeg = ::open("/dev/video", O_WRONLY);
+	if ( fd.mpeg > -1 )
+	{
+		if ( ::ioctl(fd.mpeg, VIDEO_SET_FASTZAP, val) < 0 )
+			eDebug("VIDEO_SET_FASTZAP failed (%m)");
+		if (!wasOpen)
+		{
+			::close(fd.mpeg);
+			fd.mpeg = -1;
+		}
+	}
 }
 
 void Decoder::setAutoFlushScreen( int on )
