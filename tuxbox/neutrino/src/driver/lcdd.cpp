@@ -280,7 +280,7 @@ void CLCD::showTime()
 		{
 			if (CNeutrinoApp::getInstance ()->recordingstatus && clearClock == 1)
 			{
-				strcat(timestr,"  :  ");
+				strcpy(timestr,"  :  ");
 				clearClock = 0;
 			}
 			else
