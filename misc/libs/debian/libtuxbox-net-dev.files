@@ -3,3 +3,4 @@ usr/lib/libtuxbox-net.la
 usr/lib/libtuxbox-net.a
 usr/lib/pkgconfig/tuxbox-net.pc
 usr/include/tuxbox/libnet.h
+usr/include/tuxbox/network_interfaces.h
