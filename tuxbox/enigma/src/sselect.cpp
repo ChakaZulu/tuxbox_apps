@@ -101,11 +101,6 @@ int eServiceSelector::eventFilter(const eWidgetEvent &event)
 				useBouquet(b);
 			return 1;
 		}
-		}
-		break;
-	case eWidgetEvent::keyUp:
-		switch (event.parameter)
-		{
 		case eRCInput::RC_DBOX:
 		{
 			eBouquet *b;
@@ -122,6 +117,11 @@ int eServiceSelector::eventFilter(const eWidgetEvent &event)
 			fillServiceList();
 			return 1;
 		}
+		}
+		break;
+	case eWidgetEvent::keyUp:
+		switch (event.parameter)
+		{
 		}
 		break;
 	}
