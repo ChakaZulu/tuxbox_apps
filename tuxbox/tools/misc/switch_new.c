@@ -21,6 +21,9 @@
  *
  *
  *   $Log: switch_new.c,v $
+ *   Revision 1.3  2001/03/25 16:47:42  gillem
+ *   - add options
+ *
  *   Revision 1.2  2001/03/25 13:57:24  gillem
  *   - update includes
  *
@@ -28,7 +31,7 @@
  *   - switch rewrite
  *
  *
- *   $Revision: 1.2 $
+ *   $Revision: 1.3 $
  *
  */
 
@@ -53,13 +56,12 @@ static struct argp_option options[] = {
   {"mute",                'm', 0,          0,  "Mute" },
   {"show",                's', 0,          0,  "Show current settings" },
   {"unmute",              'u', 0,          0,  "Unmute" },
-
   {"volume",              'l', "VOL",      0,  "Set volume" },
-  {"zc-detector",         'z', "ON/OFF",   0,  "Set zero cross detector" },
+  {"zc-detector",         'z', "0/1",      0,  "Set zero cross detector" },
   {"video-fs-ctrl",       'f', "<0-3>",    0,  "Set video function switch control" },
-  {"ycmix",               'y', "ON/OFF",   0,  "Set y/c mix" },
+  {"ycmix",               'y', "0/1",      0,  "Set y/c mix" },
   {"video-fb-ctrl",       'b', "<0-3>",    0,  "Set video fast blanking control" },
-  {"logic",               'c', "ON/OFF",   0,  "Set logic" },
+  {"logic",               'c', "0/1",      0,  "Set logic" },
   {"route-video",         'v', "SRC:DEST", 0,  "Route video" },
   {"route-audio",         'a', "SRC:DEST", 0,  "Route audio" },
 
@@ -85,6 +87,14 @@ int fd;
 
 /* Our argp parser. */
 static struct argp argp = { options, parse_opt, 0, doc };
+
+char *dest[3] = {"TV","VCR","AUX"};
+
+char *src[3][8] = {
+{"DE1","DE2","VCR","AUX","DE3","DE4","DE5","VM1"},
+{"DE1","DE2","VCR","AUX","DE3","VM1","VM2","VM3"},
+{"DE1","VM1","VCR","AUX","DE2","VM2","VM3","VM4"}
+};
 
 /* ---------------------------------------------------------------------- */
 
@@ -145,6 +155,7 @@ int show_zcd()
 	}
 
 	printf("ZCD: %d\n",i);
+
 	return 0;
 }
 
@@ -159,6 +170,7 @@ int show_fnc()
 	}
 
 	printf("FNC: %d\n",i);
+
 	return 0;
 }
 
@@ -173,6 +185,45 @@ int show_fblk()
 	}
 
 	printf("FBLK: %d\n",i);
+
+	return 0;
+}
+
+int show_volume()
+{
+	int i;
+
+	if (ioctl(fd,AVSIOGVOL,&i)< 0)
+	{
+		perror("AVSIOGVOL:");
+		return -1;
+	}
+
+	printf("TV Volume: %d\n",i);
+
+	return 0;
+}
+
+int show_mute()
+{
+	int i;
+
+	if (ioctl(fd,AVSIOGMUTE,&i)< 0)
+	{
+		perror("AVSIOGMUTE:");
+		return -1;
+	}
+
+	if (i == 0)
+	{
+		printf(" (muted)",i);
+	}
+	else
+	{
+		printf(" (unmuted)",i);
+	}
+	printf("\n");
+
 	return 0;
 }
 
@@ -208,10 +259,239 @@ int unmute()
 	return 0;
 }
 
+int set_volume(int i)
+{
+	if (i < 0)
+	{
+		i=0;
+	}
+	else if (i > 56)
+	{
+		i=56;
+	}
+
+	if (ioctl(fd,AVSIOSVOL,&i)< 0)
+	{
+		perror("AVSIOGVOL:");
+		return -1;
+	}
+
+	return 0;
+}
+
+int set_zcd(int i)
+{
+	if (i < 0)
+	{
+		i=0;
+	}
+	else if (i > 1)
+	{
+		i=1;
+	}
+
+	if (ioctl(fd,AVSIOSZCD,&i)< 0)
+	{
+		perror("AVSIOSZCD:");
+		return -1;
+	}
+
+	return 0;
+}
+
+int set_fnc(int i)
+{
+	if (i < 0)
+	{
+		i=0;
+	}
+	else if (i > 3)
+	{
+		i=3;
+	}
+
+	if (ioctl(fd,AVSIOSFNC,&i)< 0)
+	{
+		perror("AVSIOSFNC:");
+		return -1;
+	}
+
+
+	return 0;
+}
+
+int set_ycm(int i)
+{
+	if (i < 0)
+	{
+		i=0;
+	}
+	else if (i > 1)
+	{
+		i=1;
+	}
+
+	if (ioctl(fd,AVSIOSYCM,&i)< 0)
+	{
+		perror("AVSIOSYCM:");
+		return -1;
+	}
+
+	return 0;
+}
+
+int set_fblk(int i)
+{
+	if (i < 0)
+	{
+		i=0;
+	}
+	else if (i > 3)
+	{
+		i=3;
+	}
+
+	if (ioctl(fd,AVSIOSFBLK,&i)< 0)
+	{
+		perror("AVSIOSFBLK:");
+		return -1;
+	}
+
+	return 0;
+}
+
+int set_video( int src, int dest )
+{
+	int i;
+
+	switch(dest)
+	{
+		case 0:
+			i = AVSIOSVSW1;
+			break;
+
+		case 1:
+			i = AVSIOSVSW2;
+			break;
+
+		case 2:
+			i = AVSIOSVSW3;
+			break;
+
+		default:
+			return -1;
+	}
+
+	if (ioctl(fd,i,&src)< 0)
+	{
+		perror("AVSIOSVSW");
+		return -1;
+	}
+
+	return 0;
+}
+
+int set_audio( int src, int dest )
+{
+	int i;
+
+	switch(dest)
+	{
+		case 0:
+			i = AVSIOSASW1;
+			break;
+
+		case 1:
+			i = AVSIOSASW2;
+			break;
+
+		case 2:
+			i = AVSIOSASW3;
+			break;
+
+		default:
+			return -1;
+	}
+
+	if (ioctl(fd,i,&src)< 0)
+	{
+		perror("AVSIOSASW");
+		return -1;
+	}
+
+	return 0;
+}
+
 /* ---------------------------------------------------------------------- */
+
+int parse_route_arg(char *arg, int *s, int *d)
+{
+	int i,z;
+	char *cs,*cd=0;
+
+	if (!arg || !s || !d)
+	{
+		return -1;
+	}
+
+	cs = arg;
+
+	for(i=0;i<strlen(arg);i++)
+	{
+		if (arg[i]==':')
+		{
+			z=i;
+			cd = arg+i+1;
+		}
+	}
+
+	if (cd==0)
+	{
+		return -1;
+	}
+
+	*d = -1;
+
+	for(i=0;i<3;i++)
+	{
+		if ( strncmp(cd,dest[i],strlen(dest[i])) == 0 )
+		{
+			if ( strlen(cd) == strlen(dest[i]) )
+			{
+				*d = i;
+			}
+		}
+	}
+
+	if (*d==-1)
+	{
+		return -1;
+	}
+
+	*s = -1;
+
+	for(i=0;i<8;i++)
+	{
+		if ( strncmp(cs,src[*d][i],strlen(src[*d][i])) == 0 )
+		{
+			if ( z == strlen(src[*d][i]) )
+			{
+				*s = i;
+			}
+		}
+	}
+
+	if (*s==-1)
+	{
+		return -1;
+	}
+
+	return 0;
+}
 
 static error_t parse_opt (int key, char *arg, struct argp_state *state)
 {
+	int s,d;
 	struct arguments *arguments = state->input;
 
 	switch (key)
@@ -222,14 +502,52 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state)
 			show_fnc();
 			show_ycm();
 			show_fblk();
+			show_volume();
+			show_mute();
 			break;
 
 		case 'm':
-	        mute();
+	        	mute();
 			break;
 
 		case 'u':
-	        unmute();
+	        	unmute();
+			break;
+
+		case 'l':
+			set_volume(atoi(arg));
+			break;
+
+		case 'z':
+			set_zcd(atoi(arg));
+			break;
+
+		case 'f':
+			set_fnc(atoi(arg));
+			break;
+
+		case 'y':
+			set_ycm(atoi(arg));
+			break;
+
+		case 'v':
+			if ( parse_route_arg(arg,&s,&d) < 0 )
+			{
+				return ARGP_ERR_UNKNOWN;
+			}
+
+			set_video(s,d);
+
+			break;
+
+		case 'a':
+			if ( parse_route_arg(arg,&s,&d) < 0 )
+			{
+				return ARGP_ERR_UNKNOWN;
+			}
+
+			set_audio(s,d);
+
 			break;
 
 		default:
