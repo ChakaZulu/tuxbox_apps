@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.16 2002/05/21 14:20:33 dirch Exp $
+	$Id: request.cpp,v 1.17 2002/05/26 15:54:03 Leahcim Exp $
 
 	License: GPL
 
@@ -295,15 +295,16 @@ int ende;
 			ParseHeader(header);
 			if(Method == M_POST) // TODO: Und testen ob content = formdata
 			{				
-/*
+
 				string t = "multipart/form-data; boundary=";
 				if(HeaderList["Content-Type"].compare(0,t.length(),t) == 0)
 				{
-					Boundary = "--" + HeaderList["Content-Type"].substr(t.length(),HeaderList["Content-Type"].length() - t.length());
+					SocketWriteLn("Sorry, momentant broken >(\n");
+					/*Boundary = "--" + HeaderList["Content-Type"].substr(t.length(),HeaderList["Content-Type"].length() - t.length());
 					if(Parent->DEBUG) printf("Boundary: '%s'\n",Boundary.c_str());
 					if((headerende + 3) < rawbuffer_len)
 						ParseBoundaries(rawbuffer.substr(headerende + 3,rawbuffer_len - (headerende + 3)));
-					HandleUpload();
+					HandleUpload();*/
 				}			
 				else if(HeaderList["Content-Type"].compare("application/x-www-form-urlencoded") == 0)
 				{
@@ -316,8 +317,7 @@ int ende;
 						ParseParams(params);
 					}
 				}
-*/				
-				SocketWriteLn("Sorry, momentant broken >(\n");
+				
 				if(Parent->DEBUG) printf("Method Post !\n");
 			}
 
