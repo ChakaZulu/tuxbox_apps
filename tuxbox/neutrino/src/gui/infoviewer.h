@@ -126,8 +126,8 @@ class CInfoViewer
 		void showData();
 		void showWarte();
 		void showButtonAudio();
-		void showButtonNVOD(bool CalledFromShowData = false);
-		void show16_9();
+		void showButtonNVOD( bool CalledFromShowData = false );
+		void show16_9( bool showAnyWay = false );
 	public:
 
 		bool			is_visible;

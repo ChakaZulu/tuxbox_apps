@@ -130,6 +130,9 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
         KillShowEPG = false;
         pthread_mutex_unlock( &epg_mutex );
 
+ 		if ( !gotTime )
+ 			gotTime = g_Sectionsd->getIsTimeSet();
+
 		// kill linke seite
         g_FrameBuffer->paintBackgroundBox(BoxStartX, BoxStartY+ ChanHeight, BoxStartX + (ChanWidth/3), BoxStartY+ ChanHeight+ InfoHeightY_Info+ 10);
         // kill progressbar
@@ -160,7 +163,8 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
         strftime((char*) &timestr, 20, "%H:%M", localtime(&tm.time) );
         int timewidth = g_Fonts->infobar_channame->getRenderWidth(timestr);
 
-      	g_Fonts->infobar_channame->RenderString(BoxEndX-timewidth-10, ChanNameY+height, timewidth+ 5, timestr, COL_INFOBAR);
+        if ( gotTime )
+	      	g_Fonts->infobar_channame->RenderString(BoxEndX-timewidth-10, ChanNameY+height, timewidth+ 5, timestr, COL_INFOBAR);
 
 		// ... with channel name
         g_Fonts->infobar_channame->RenderString(ChanNameX+ 10, ChanNameY+height, BoxEndX- (ChanNameX+ 20)- timewidth- 15, Channel.c_str(), COL_INFOBAR);
@@ -204,7 +208,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 
                 g_RemoteControl->CopyPIDs();
                 showButtonAudio();
-                show16_9();
+                show16_9( true );
         }
 
 		// Schatten
@@ -275,9 +279,9 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
         }
 }
 
-void CInfoViewer::show16_9()
+void CInfoViewer::show16_9( bool showAnyWay )
 {
-	if ( ( is_visible ) && ( showButtonBar ) )
+	if ( ( is_visible || showAnyWay ) && ( showButtonBar ) )
 		g_FrameBuffer->paintIcon( ( aspectRatio == 3 )?"16_9.raw":"16_9_gray.raw", BoxEndX- 2* ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 }
 

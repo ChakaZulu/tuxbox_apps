@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.196 2002/03/17 23:12:00 McClean Exp $
+        $Id: neutrino.cpp,v 1.197 2002/03/18 15:04:40 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -254,7 +254,7 @@ void CNeutrinoApp::setupDefaults()
 
 	//misc
 	//g_settings.box_Type = 1;
-	g_settings.box_Type = g_Controld->getBoxType();
+	//g_settings.box_Type = g_Controld->getBoxType(); //passiert ohnehin immer...
 	g_settings.shutdown_real = 1;
 	g_settings.shutdown_showclock = 1;
 	g_settings.show_camwarning = 1;
@@ -1455,7 +1455,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	}
 	//get dbox-type everytime!
 	g_settings.box_Type = g_Controld->getBoxType();
-	printf("got boxtype from controld: %d\n", g_settings.box_Type);
+	//printf("got boxtype from controld: %d\n", g_settings.box_Type);
 
 	CmdParser(argc, argv);
 
@@ -2062,23 +2062,21 @@ void CNeutrinoApp::scartMode( bool bOnOff )
 	else
 	{
 	    // SCART AUS
-
 		g_Controld->setScartMode( 0 );
+
+        mode = mode_unknown;
 
 		//re-set mode
 		if ( lastMode == mode_radio )
 		{
-			mode = mode_unknown;
 			radioMode( false );
 		}
 		else if ( lastMode == mode_tv )
 		{
-			mode = mode_unknown;
 			tvMode( false );
 		}
 		else if ( lastMode == mode_standby )
 		{
-			usleep(100000);
 			standbyMode( true );
 		}
 	}
@@ -2272,7 +2270,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.196 2002/03/17 23:12:00 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.197 2002/03/18 15:04:40 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

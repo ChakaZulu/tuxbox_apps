@@ -238,9 +238,10 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 		tvslectp = &tvselect;
 	}
 
-	// wiederholung reinmachen - dass wirklich die ganze zeit gis timeout gewartet wird!
+	// wiederholung reinmachen - dass wirklich die ganze zeit bis timeout gewartet wird!
 	gettimeofday( &tv, NULL );
 	getKeyBegin = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
+
 	while(1)
 	{
 		//nicht genau - verbessern!
@@ -272,14 +273,15 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 			SAI			cliaddr;
 			clilen = sizeof(cliaddr);
 			fd_eventclient = accept(fd_event, (SA *) &cliaddr, &clilen);
-		}
+// DIREKT ABHOLEN (einstweilen), weil sonst timeout-probs bei EVT_TIMESET
+/*		}
 
 		if(fd_eventclient!=-1)
 		{
 			if(FD_ISSET(fd_eventclient, &rfds))
 			{
-				*msg = RC_nokey;
-				//printf("[neutrino] network - read!\n");
+*/				*msg = RC_nokey;
+				//printf("[neutrino] network event - read!\n");
 				CEventServer::eventHead emsg;
 				int read_bytes= recv(fd_eventclient, &emsg, sizeof(emsg), MSG_WAITALL);
 				//printf("[neutrino] event read %d bytes - following %d bytes\n", read_bytes, emsg.dataSize );
@@ -323,6 +325,7 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 							{
 								*msg = messages::EVT_TIMESET;
 								*data = 0;
+								//printf("[neutrino] event - CSectionsdClient::EVT_TIMESET\n");
 							}
 							else
 								printf("[neutrino] event INITID_SECTIONSD - unknown eventID 0x%x\n",  emsg.eventID );
@@ -349,7 +352,7 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 					//printf("[neutrino] event 0x%x\n", *msg);
 					return;
 				}
-			}
+//			}
 		}
 
 		if(FD_ISSET(fd_rc, &rfds))
@@ -425,15 +428,17 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 		{//nicht warten wenn kein key da ist
 		   	*msg = RC_timeout;
 			*data = 0;
+			//printf("[rcin] no timeout\n");
 			return;
 		}
 		else if(tvslectp != NULL)
 		{//timeout neu kalkulieren
 			gettimeofday( &tv, NULL );
 			long long getKeyNow = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
-			long long diff = abs( (getKeyNow - getKeyBegin) / 100000 );
+			long long diff = (getKeyNow - getKeyBegin) / 100000;
+			//printf("[rcin] timeout before: %d\n", Timeout );
 			Timeout -= diff;
-			//printf("[rcin] diff timeout: %lld, %d von %d\n", diff, Timeout, Timeout2);
+			//printf("[rcin] diff timeout: %lld, %d\n", diff, Timeout );
 			if( Timeout <= 0 )
 			{
 				*msg = RC_timeout;
