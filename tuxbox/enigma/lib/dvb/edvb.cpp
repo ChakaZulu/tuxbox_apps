@@ -574,8 +574,8 @@ void eDVB::scanPMT()
 			for (QListIterator<Descriptor> i(pe->ES_info); i.current(); ++i)
 			{
 				Descriptor *d=i.current();
-				if ((d->Tag()==DESCR_AC3))
-					audio=pe;
+				/* if ((d->Tag()==DESCR_AC3))
+					audio=pe; */
 				if (d->Tag()==DESCR_TELETEXT)
 					teletext=pe;
 			}
