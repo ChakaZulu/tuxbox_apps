@@ -485,7 +485,7 @@ bool CChannelList::handleLockage( CChannel* chan)
 	if (chan->isCurrentlyLocked())
 	{
 		printf("[neutrino] channel is locked\n");
-		g_Zapit->stopPlayBack();
+//		g_Zapit->stopPlayBack();
 		CZapProtection zapProtection( g_settings.parentallock_pincode);
 		if (!zapProtection.check())
 		{
@@ -495,7 +495,7 @@ bool CChannelList::handleLockage( CChannel* chan)
 			return( false);
 		}
 	}
-	g_Zapit->startPlayBack();
+//	g_Zapit->startPlayBack();
 	return( true);
 }
 
