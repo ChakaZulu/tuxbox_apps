@@ -30,8 +30,22 @@ int fh_png_load(const char *name,unsigned char *buffer,int x,int y)
 	unsigned int i;
 	int bit_depth, color_type, interlace_type;
 	int number_passes,pass;
-	char *fbptr;
-	FILE *fh;
+	png_byte * fbptr;
+	FILE     * fh;
+	/*
+	libpng-1.2.5/pngrutil.c:
+
+	png_memcpy(row, png_ptr->row_buf + 1,
+	(png_size_t)((png_ptr->width *
+	png_ptr->row_info.pixel_depth + 7) >> 3));
+
+	png_ptr->row_info.pixel_depth == 32 !
+
+	hence we need a buffer of size x * 4
+
+	*/
+
+	png_byte line[x * 4];
 
 	if(!(fh=fopen(name,"rb")))	return(FH_ERROR_FILE);
 
@@ -63,10 +77,11 @@ int fh_png_load(const char *name,unsigned char *buffer,int x,int y)
 
 	for(pass = 0; pass < number_passes; pass++)
 	{
-		fbptr = (char *)buffer;
+		fbptr = (png_byte *)buffer;
 		for(i=0;i<height;i++,fbptr+=width*3)
 		{
-			png_read_row(png_ptr, (png_byte*)fbptr, NULL);
+			png_read_row(png_ptr, line, NULL);
+			memcpy(fbptr, line, width * 3);
 		}
 	}
 	png_read_end(png_ptr, info_ptr);
