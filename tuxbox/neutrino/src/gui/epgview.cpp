@@ -293,6 +293,8 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 		return res;
 	}
 
+
+
 	int pos;
 	string text1 = epgData.title;
 	string text2 = "";
@@ -375,6 +377,9 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 	int textypos = sy;
 	showText(showPos, textypos);
 
+	// show Timer Event Buttons
+	showTimerEventBar (true);
+
 	//show progressbar
 	if ( epg_done!= -1 )
 	{
@@ -451,6 +456,12 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 						showText(showPos,textypos);
 					break;
 
+				// -- 2002-05-13 rasc  Switch Channel
+				case CRCInput::RC_yellow:
+					// $$ EPG ID muss noch mit rein...
+					g_Timer->storeEvent (onid_sid, epgData.eventID, SwitchChannel, epgData.epg_times.startzeit, 0);
+					break;
+
 				case CRCInput::RC_red:
 					g_RCInput->postMsg( msg, data );
 
@@ -482,6 +493,7 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 void CEpgData::hide()
 {
 	frameBuffer->paintBackgroundBox (sx, sy- toph, sx+ ox, sy+ oy);
+        showTimerEventBar (false);
 	#ifdef USEACTIONLOG
 		g_ActionLog->println("epg: closed");
 	#endif
@@ -618,3 +630,42 @@ int CEpgData::FollowScreenings (unsigned int onid_sid, string title)
 
 	return count;
 }
+
+
+//
+// -- Just display or hide TimerEventbar
+// -- 2002-05-13 rasc
+//
+
+void CEpgData::showTimerEventBar (bool show)
+
+{
+  int  x,y,w,h;
+  int  cellwidth;		// 4 cells
+  int  h_offset;
+
+  w = ox;
+  h = 30;
+  x = sx;
+  y = sy + oy;
+  h_offset = 5;
+  cellwidth = w / 4;
+
+
+    frameBuffer->paintBackgroundBoxRel(x,y,w,h);
+    // hide only?
+    if (! show) return;
+
+    frameBuffer->paintBoxRel(x,y,w,h, COL_INFOBAR_SHADOW+1);
+
+
+    // Button: Timer Channelswitch
+
+    frameBuffer->paintIcon("gelb.raw", x+8, y+h_offset );
+
+    g_Fonts->infobar_small->RenderString(x + 29, y+h-h_offset, w-30, g_Locale->getText("timerbar.channelswitch").c_str(), COL_INFOBAR);
+
+
+    
+}
+

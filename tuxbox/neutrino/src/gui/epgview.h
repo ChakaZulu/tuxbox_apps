@@ -78,6 +78,7 @@ class CEpgData
 		void processTextToArray( string text );
 		void showText( int startPos, int ypos );
 		int FollowScreenings(unsigned int onid_sid, string title);
+		void showTimerEventBar(bool show);
 
 	public:
 
