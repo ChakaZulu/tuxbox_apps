@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.154 2002/04/20 23:38:35 Simplex Exp $
+ * $Id: zapit.cpp,v 1.155 2002/04/21 18:19:26 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -68,6 +68,8 @@ CFrontend *frontend = NULL;
 CZapitChannel *channel = NULL;
 /* the transponder scan xml input */
 XMLTreeParser *scanInputParser = NULL;
+/* the bouquet manager */
+CBouquetManager* g_BouquetMan = NULL;
 
 /* the map which stores the wanted cable/satellites */
 std::map <uint8_t, std::string> scanProviders;
@@ -115,6 +117,7 @@ int dmx_audio_fd = -1;
 int dmx_general_fd = -1;
 int dmx_pcr_fd = -1;
 int dmx_video_fd = -1;
+int vbi_fd = -1;
 
 /* channellists */
 std::map <uint32_t, uint32_t> allnumchannels_tv;
@@ -139,12 +142,6 @@ extern int found_channels;
 extern short curr_sat;
 extern short scan_runs;
 CZapitClient::bouquetMode bouquetMode = CZapitClient::BM_CREATEBOUQUETS;
-
-/* videotext */
-bool use_vtxtd = false;
-dvb_pid_t vtxt_pid;
-
-CBouquetManager* g_BouquetMan;
 
 #ifdef USE_EXTERNAL_CAMD
 static int camdpid = -1;
@@ -184,81 +181,43 @@ void signal_handler (int signum)
 }
 
 #ifdef DBOX2
-int set_vtxt (dvb_pid_t teletext_pid)
+int startVbi (int fd, dvb_pid_t teletext_pid)
 {
-	int fd;
-	int vtxtsock;
-	FILE *vtxtfd;
-	struct sockaddr_un vtxtsrv;
-	char vtxtbuf[255];
-	char hexpid[20];
-
-	vtxt_pid = teletext_pid;
-
-	if (use_vtxtd)
+	if ((teletext_pid == NONE) || (teletext_pid >= INVALID))
 	{
-		memset(&hexpid, 0, sizeof(hexpid));
-		sprintf(hexpid, "%x", teletext_pid);
-		vtxtsock=socket(AF_LOCAL, SOCK_STREAM, 0);
-		memset(&vtxtsrv, 0, sizeof(vtxtsrv));
-		vtxtsrv.sun_family = AF_LOCAL;
-		strcpy(vtxtsrv.sun_path, "/var/dvb/vtxtd");
-		connect(vtxtsock, (const struct sockaddr *) &vtxtsrv, sizeof(vtxtsrv));
-		vtxtfd=fdopen(vtxtsock, "a+");
-		setlinebuf(vtxtfd);
-
-		if (vtxtfd == NULL)
-		{
-			perror("[zapit] vtxtd fdopen");
-		}
-		else
-		{
-			if (teletext_pid == 0)
-			{
-				fprintf(vtxtfd,"stop\n");
-				debug("[zapit] vtxtd returned: %s\n", fgets(vtxtbuf, 255, vtxtfd));
-			}
-			else
-			{
-				fprintf(vtxtfd,"stop\n");
-				debug("[zapit] vtxtd returned: %s\n", fgets(vtxtbuf, 255, vtxtfd));
-				fprintf(vtxtfd,"pid %s\n", hexpid);
-				debug("[zapit] vtxtd returned: %s\n", fgets(vtxtbuf, 255, vtxtfd));
-			}
-			fclose(vtxtfd);
-		}
+		return fd;
 	}
-	else
+
+	if ((fd == -1) && ((fd = open(VBI_DEV, O_RDWR)) < 0))
 	{
-		if ((fd = open(VBI_DEV, O_RDWR)) < 0)
-		{
-			perror ("[zapit] " VBI_DEV);
-			return -1;
-		}
+		perror ("[zapit] " VBI_DEV);
+		return -1;
+	}
 
-		if (teletext_pid == 0)
-		{
-			if (ioctl(fd, AVIA_VBI_STOP_VTXT, teletext_pid) < 0)
-			{
-				close(fd);
-				perror("[zapit] VBI_STOP_VTXT");
-				return -1;
-			}
-		}
-		else
-		{
-			if (ioctl(fd, AVIA_VBI_START_VTXT, teletext_pid) < 0)
-			{
-				close(fd);
-				perror("[zapit] VBI_START_VTXT");
-				return -1;
-			}
-		}
-
+	if (ioctl(fd, AVIA_VBI_START_VTXT, teletext_pid) < 0)
+	{
+		perror("[zapit] VBI_START_VTXT");
 		close(fd);
+		return -1;
 	}
 
-	return 0;
+	return fd;
+}
+
+int stopVbi (int fd)
+{
+	if (fd == -1)
+	{
+		return fd;
+	}
+
+	if (ioctl(fd, AVIA_VBI_STOP_VTXT, 0) < 0)
+	{
+		perror("[zapit] VBI_STOP_VTXT");
+	}
+
+	close(fd);
+	return -1;
 }
 #endif /* DBOX2 */
 
@@ -1420,18 +1379,21 @@ void parse_command ()
 			break;
 		}
 		case 'u':
+		{
+			dvb_pid_t teletextPid = channel->getTeletextPid();
 			status = "00u";
 			if (send(connfd, status, strlen(status),0) == -1)
 			{
 				perror("[zapit] send");
 				return;
 			}
-			if (send(connfd, &vtxt_pid, sizeof(int),0) == -1)
+			if (send(connfd, &teletextPid, sizeof(int),0) == -1)
 			{
 				perror("[zapit] send");
 				return;
 			}
 			break;
+		}
 		default:
 			status = "000";
 			if (send(connfd, status, strlen(status),0) == -1)
@@ -1919,7 +1881,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.154 2002/04/20 23:38:35 Simplex Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.155 2002/04/21 18:19:26 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1942,14 +1904,9 @@ int main (int argc, char **argv)
 				if ((fd = open("/dev/null", O_WRONLY)) != STDERR_FILENO)
 					close(fd);
 			}
-			else if (!strcmp(argv[i], "-v"))
-			{
-				printf("[zapit] using vtxtd\n");
-				use_vtxtd = true;
-			}
 			else
 			{
-				printf("Usage: zapit [-d] [-q] [-v]\n");
+				printf("Usage: zapit [-d] [-q]\n");
 				exit(0);
 			}
 		}
@@ -2381,8 +2338,7 @@ int startPlayBack()
 #endif
 
 #ifdef DBOX2
-	debug("[zapit] setting vtxt\n");
-	set_vtxt(channel->getTeletextPid());
+	vbi_fd = startVbi(vbi_fd, channel->getTeletextPid());
 #endif /* DBOX2 */
 
 	return 0;
@@ -2392,7 +2348,7 @@ int stopPlayBack()
 {
 
 #ifndef DBOX2
-	set_vtxt(0);
+	vbi_fd = stopVbi(vbi_fd);
 #endif /* DBOX2 */
 
 #ifdef USE_EXTERNAL_CAMD
