@@ -95,7 +95,6 @@
 #include "gui/favorites.h"
 #include "gui/sleeptimer.h"
 #include "gui/rc_lock.h"
-#include "gui/dboxinfo.h"
 #include "gui/timerlist.h"
 #include "gui/alphasetup.h"
 #include "gui/audioplayer.h"
