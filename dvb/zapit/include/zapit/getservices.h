@@ -7,6 +7,7 @@
 #include <vector>
 #include <string>
 
+#include <ost/dmx.h>
 #include <ost/frontend.h>
 
 #include "eventserver.h"
@@ -93,29 +94,27 @@ typedef struct channel_msg_struct_2 {
     unsigned int onid_tsid;
 } channel_msg_2;
 
-typedef struct apid_struct_2 {
-    uint    pid;
-    char    desc[25];
-    int     is_ac3;
-    int     component_tag;
-}apid_struct;
+typedef struct apid_struct {
+	dvb_pid_t pid;
+	char desc[25];
+	int is_ac3;
+	int component_tag;
+} apid_struct;
 
 #define max_num_apids 13
-#define no_ecmpid_found 0x10000
-#define invalid_ecmpid_found 0x10001
-
+#define no_ecmpid_found 0x0000
+#define invalid_ecmpid_found 0x1FFF
 #define zapped_chan_is_nvod 0x80
 
-typedef struct pids{
+typedef struct pids {
         ushort count_vpids;
-        uint vpid;
+        dvb_pid_t vpid;
         ushort count_apids;
         apid_struct apids[max_num_apids];
-        uint ecmpid;
-        uint vtxtpid;
-		uint pcrpid;
-}pids;
-
+        dvb_pid_t ecmpid;
+        dvb_pid_t vtxtpid;
+	dvb_pid_t pcrpid;
+} pids;
 
 extern std::map<uint, transponder>transponders;
 extern std::map<uint, channel> allchans_tv;
@@ -125,6 +124,5 @@ extern std::map<uint, channel> allchans_radio;
 extern std::map<uint, uint> numchans_radio;
 extern std::map<std::string, uint> namechans_radio;
 
+#endif /* __getservices_h__ */
 
-
-#endif

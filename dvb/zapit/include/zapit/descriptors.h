@@ -7,6 +7,7 @@
 CodeRate getFEC(uint8_t FEC_inner);
 Modulation getModulation (uint8_t modulation);
 
+uint8_t ca_descriptor(uint8_t *buffer, uint16_t ca_system_id, uint16_t* ca_pid);
 uint8_t stuffing_desc(uint8_t *buffer);
 uint8_t linkage_desc(uint8_t *buffer);
 uint8_t priv_data_desc(uint8_t *buffer);

@@ -1,8 +1,11 @@
 /*
- $Id: zapit.h,v 1.43 2002/04/04 14:41:08 rasc Exp $
+ $Id: zapit.h,v 1.44 2002/04/04 19:36:49 obi Exp $
 
 
 $Log: zapit.h,v $
+Revision 1.44  2002/04/04 19:36:49  obi
+some code sorting
+
 Revision 1.43  2002/04/04 14:41:08  rasc
 - New functions in zapitclient for handling favorites
   - test if a bouquet exists
@@ -51,9 +54,11 @@ Revision 1.43  2002/04/04 14:41:08  rasc
 
 #include "bouquets.h"
 #include "getservices.h"
-#include "ca-ids.h"
+#include "cam.h"
+#include "cat.h"
 #include "nit.h"
 #include "pat.h"
+#include "pmt.h"
 #include "sdt.h"
 #include "tune.h"
 #include "zapitclient.h"
@@ -68,7 +73,6 @@ Revision 1.43  2002/04/04 14:41:08  rasc
 #define AUDIO_DEV "/dev/ost/audio0"
 
 #define CAT_SIZE	1024
-#define PMT_SIZE	1024
 
 #ifdef DVBS
 #define USE_EXTERNAL_CAMD

@@ -1,3 +1,7 @@
+/*
+ * $Id: pat.h,v 1.3 2002/04/04 19:36:49 obi Exp $
+ */
+
 #ifndef __pat_h__
 #define __pat_h__
 

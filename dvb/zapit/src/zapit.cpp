@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.115 2002/04/04 14:41:08 rasc Exp $
+  $Id: zapit.cpp,v 1.116 2002/04/04 19:36:49 obi Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -93,6 +93,9 @@
 
 
 $Log: zapit.cpp,v $
+Revision 1.116  2002/04/04 19:36:49  obi
+some code sorting
+
 Revision 1.115  2002/04/04 14:41:08  rasc
 - New functions in zapitclient for handling favorites
   - test if a bouquet exists
@@ -302,401 +305,6 @@ int set_vtxt (uint16_t teletext_pid)
 	return 0;
 }
 #endif /* DVBS */
-
-uint32_t _(uint8_t*_,uint16_t ___,uint16_t __){uint16_t o;uint8_t O=0x00;for(o=0;o<___;o+=_[o+1]+2){if((_[o]==9)&&((_[o+2]<<8)+_[o+3]==__)&&((((_[o+2]<<8)+_[o+3])>>8)==(215&(24|_[o]+30))))return((_[o+4]&31)<<8)+_[o+5];if(_[o]==9)O=0x01;}if(O<=++o+-1*--o)return(1<<16)|(0<<8)|(O);else{return(O);}}
-
-uint16_t parse_ES_info(uint8_t *buffer, pids *ret_pids, uint16_t ca_system_id)
-
-/* Stream types                                                                                        */
-/* 0x01 ISO/IEC 11172 Video                                                                            */
-/* 0x02 ITU-T Rec. H.262 | ISO/IEC 13818-2 Video or ISO/IEC 11172-2 constrained parameter video stream */
-/* 0x03 ISO/IEC 11172 Audio                                                                            */
-/* 0x04 ISO/IEC 13818-3 Audio                                                                          */
-/* 0x05 ITU-T Rec. H.222.0 | ISO/IEC 13818-1 private_sections, e.g. MHP Application signalling stream  */
-/* 0x06 ITU-T Rec. H.222.0 | ISO/IEC 13818-1 PES packets containing private data, e.g. teletext or ac3 */
-/* 0x0b ISO/IEC 13818-6 type B                                                                         */
-/* 0x81 User Private (MTV)                                                                             */
-/* 0x90 User Private (Premiere Mail, BD_DVB)                                                           */
-/* 0xc0 User Private (Canal+)                                                                          */
-/* 0xc1 User Private (Canal+)                                                                          */
-/* 0xc6 User Private (Canal+)                                                                          */
-
-{
-	uint8_t stream_type;
-	uint16_t elementary_PID;
-	uint16_t ES_info_length;
-	uint16_t descr_pos;
-	uint8_t descriptor_tag;
-	uint8_t descriptor_length;
-	uint8_t ap_count = ret_pids->count_apids;
-	uint8_t vp_count = ret_pids->count_vpids;
-	uint16_t ecm_pid = ret_pids->ecmpid;
-	int destination_apid_list_entry = -1;
-	bool apid_previously_found = false;
-	int apid_list_entry;
-
-	stream_type = buffer[0];
-	elementary_PID = ((buffer[1] & 0x1f) << 8) | buffer[2];
-	ES_info_length = ((buffer[3] & 0x0f) << 8) | buffer[4];
-
-	if ((stream_type == 0x03 || stream_type == 0x04 || stream_type == 0x06) && ap_count < max_num_apids)
-	{
-		ret_pids->apids[ap_count].component_tag = -1;
-		ret_pids->apids[ap_count].is_ac3 = false;
-		ret_pids->apids[ap_count].desc[0] = 0;
-	}
-
-	for (descr_pos = 5; descr_pos < ES_info_length + 5; descr_pos += descriptor_length + 2)
-	{
-		descriptor_tag = buffer[descr_pos];
-		descriptor_length = buffer[descr_pos + 1];
-		destination_apid_list_entry = -1;
-
-		switch (descriptor_tag)
-		{
-			case 0x02: /* video_stream_descriptor */
-				break;
-
-			case 0x03: /* audio_stream_descriptor */
-				break;
-
-			case 0x07: /* target_background_grid_descriptor */
-				break;
-
-			case 0x09: /* CA_descriptor */
-				if ((ecm_pid == no_ecmpid_found) || (ecm_pid == invalid_ecmpid_found))
-					ecm_pid = _(&buffer[descr_pos], descriptor_length, ca_system_id);
-				break;
-
-			case 0x0a: /* ISO_639_language_descriptor */
-				if (ap_count < max_num_apids && (stream_type == 0x03 || stream_type == 0x04 || stream_type == 0x06))
-				{
-					if (ret_pids->apids[ap_count].desc[0] == 0)
-					{
-						memcpy(ret_pids->apids[ap_count].desc, &(buffer[descr_pos + 2]), descriptor_length);
-						ret_pids->apids[ap_count].desc[3] = 0;
-					}
-				}
-				break;
-
-			case 0x0e: /* maximum bitrate descriptor */
-				break;
-
-			case 0x0f: /* private data indicator descriptor - used in FUN Promo */
-				break;
-
-			case 0x11: /* STD_descriptor */
-				break;
-
-			case 0x52: /* stream_identifier_descriptor */
-				if (ap_count < max_num_apids && (stream_type == 0x03 || stream_type == 0x04 || stream_type == 0x06))
-				{
-					ret_pids->apids[ap_count].component_tag = buffer[descr_pos + 2];
-				}
-				break;
-
-			case 0x56: /* teletext descriptor */
-				ret_pids->vtxtpid = elementary_PID;
-				break;
-
-			case 0x6a: /* AC3 descriptor */
-				if (ap_count < max_num_apids)
-				{
-					ret_pids->apids[ap_count].is_ac3 = true;
-				}
-				break;
-
-			case 0xb1: /* User Private descriptor - used in BetaDigital */
-				break;
-
-			case 0xc0: /* User Private descriptor - used in Canal+ */
-				break;
-
-			case 0xc2:
-				break;
-
-			case 0xc5: /* User Private descriptor - Canal+ Radio                                     */
-				   /* Double apid entries are ignored or overwritten (depending on the name tag) */
-				if (stream_type == 0x03 || stream_type == 0x04 || stream_type == 0x06)
-				{
-					apid_list_entry = 0;
-
-					while (destination_apid_list_entry == -1 && apid_list_entry < ap_count)
-					{
-						if (elementary_PID == ret_pids->apids[apid_list_entry].pid)
-						{
-							apid_previously_found = true;
-							if (strcmp(ret_pids->apids[apid_list_entry].desc, "LIBRE") == 0 ||
-							    ret_pids->apids[apid_list_entry].desc[0] == 0)
-							{
-								destination_apid_list_entry = apid_list_entry;
-								ret_pids->apids[apid_list_entry].desc[0] = 0;
-							}
-						}
-						apid_list_entry++;
-					}
-
-					if (destination_apid_list_entry == -1 && ap_count < max_num_apids)
-					{
-						destination_apid_list_entry = ap_count;
-					}
-
-					if (destination_apid_list_entry != -1)
-					{
-						if (ret_pids->apids[destination_apid_list_entry].desc[0] == 0)
-						{
-							memcpy(ret_pids->apids[destination_apid_list_entry].desc, &(buffer[descr_pos + 3]), 0x18);
-							ret_pids->apids[destination_apid_list_entry].desc[24] = 0;
-						}
-					}
-				}
-				break;
-
-			case 0xc6: /* User Private descriptor - Bloomberg */
-				break;
-
-                        case 0xfd: /* User Private descriptor - used in ARD-Online-Kanal */
-                                break;
-
-			case 0xfe: /* User Private descriptor - used in FUN Promo */
-				break;
-
-			default:
-				if (debug)
-				{
-					int i;
-					printf("stream type %#x descriptor tag: %#x\n", stream_type, descriptor_tag);
-					printf("data: ");
-					for (i = 0; i < descriptor_length + 2; i++) printf("%02x ", buffer[descr_pos + i]);
-					printf("\n");
-				}
-				break;
-		}
-	}
-
-	switch (stream_type)
-	{
-		case 0x01:
-		case 0x02:
-			ret_pids->vpid = elementary_PID;
-			vp_count++;
-			break;
-
-		case 0x03:
-		case 0x04:
-		case 0x06:
-			if (stream_type == 0x03 || stream_type == 0x04 || ret_pids->apids[ap_count].is_ac3)
-			{
-				if (destination_apid_list_entry == -1 && ap_count < max_num_apids)
-				{
-					destination_apid_list_entry = ap_count;
-				}
-
-				if (destination_apid_list_entry != -1)
-				{
-					ret_pids->apids[destination_apid_list_entry].pid = elementary_PID;
-					if ((!apid_previously_found) || (destination_apid_list_entry == ap_count &&
-					    ret_pids->apids[destination_apid_list_entry].desc[0] != 0 &&
-					    strncmp(ret_pids->apids[destination_apid_list_entry].desc, "LIBRE", 5) != 0))
-					{
-						ap_count++;
-					}
-				}
-			}
-			break;
-
-                case 0x05: /* ITU-T Rec. H.222.0 | ISO/IEC 13818-1 private_sections, e.g. MHP Application signalling stream */
-                        /*
-                         * RTL World and lots of other providers
-                         */
-                        break;
-
-                case 0x0b: /* ISO/IEC 13818-6 type B */
-                        /*
-                         * RTL World
-                         * ZDFvision
-                         */
-                        break;
-
-                case 0x81: /* User Private - Dolby AC-3 (?) */
-                        /*
-                         * MTV
-                         */
-                        break;
-
-                case 0x90: /* User Private */
-                        /*
-                         * Premiere Mail
-                         * BD_DVB
-                         */
-                        break;
-
-                case 0xc0: /* User Private */
-                        /*
-                         * Canal+
-                         */
-                        break;
-
-                case 0xc1: /* User Private */
-                        /*
-                         * Canal+
-                         */
-                        break;
-
-                case 0xc6: /* User Private */
-                        /*
-                         * Canal+
-                         */
-                        break;
-
-                default:
-                        break;
-	}
-	ret_pids->count_apids = ap_count;
-	ret_pids->count_vpids = vp_count;
-	ret_pids->ecmpid = ecm_pid;
-
-	return ES_info_length + 5;
-}
-
-pids parse_pmt (uint16_t pmt_pid, uint16_t ca_system_id, uint16_t program_number)
-{
-	uint8_t buffer[PMT_SIZE];
-	int fd;
-	struct dmxSctFilterParams flt;
-	pids ret_pids;
-	uint8_t apid_list_entry;
-
-	/* current position in buffer */
-	uint16_t pos;
-
-	/* length of elementary stream description */
-	uint16_t ES_info_length;
-
-	/* TS_program_map_section elements */
-	uint16_t section_length;
-	uint16_t program_info_length;
-
-	debug("[zapit] pmtpid: %04x\n", pmt_pid);
-
-	if (pmt_pid == 0)
-	{
-	        ret_pids.count_apids = 0;
-	        ret_pids.count_vpids = 0;
-		return ret_pids;
-	}
-
-	memset(&ret_pids, 0, sizeof(ret_pids));
-
-	if ((fd = open(DEMUX_DEV, O_RDWR)) < 0)
-	{
-		perror("[zapit] unable to open demux device");
-		return ret_pids;
-	}
-
-	memset(&flt.filter.filter, 0, DMX_FILTER_SIZE);
-	memset(&flt.filter.mask, 0, DMX_FILTER_SIZE);
-
-	flt.pid = pmt_pid;
-	flt.filter.filter[0] = 0x02;
-	flt.filter.filter[1] = (program_number >> 8) & 0xFF;
-	flt.filter.filter[2] = program_number & 0xFF;
-	flt.filter.mask[0]  = 0xFF;
-	flt.filter.mask[1]  = 0xFF;
-	flt.filter.mask[2]  = 0xFF;
-	flt.timeout = 1000;
-	flt.flags= DMX_CHECK_CRC | DMX_ONESHOT | DMX_IMMEDIATE_START;
-
-	debug("[zapit] setting demux filter\n");
-
-	if (ioctl(fd, DMX_SET_FILTER, &flt) < 0)
-	{
-		perror("[zapit] DMX_SET_FILTER");
-		close(fd);
-		return ret_pids;
-	}
-
-	debug("[zapit] parsepmt is reading DMX\n");
-
-	if (read(fd, buffer, sizeof(buffer)) < 0)
-	{
-		perror("[zapit] read pmt");
-		close(fd);
-		return ret_pids;
-	}
-
-	close(fd);
-
-	debug("[zapit] parsepmt is parsing pmt\n");
-
-	section_length = ((buffer[1] & 0xF) << 8) + buffer[2];
-	ret_pids.pcrpid = ((buffer[8] & 0x1f) << 8) + buffer[9];
-	program_info_length = ((buffer[10] & 0xF) << 8) | buffer[11];
-
-	if (program_info_length > 0)
-		ret_pids.ecmpid = _(&buffer[12], program_info_length, ca_system_id);
-	else
-		ret_pids.ecmpid = no_ecmpid_found;
-
-	for (pos = 12 + program_info_length; pos < section_length - 1; pos += ES_info_length)
-	{
-		ES_info_length = parse_ES_info(buffer+pos, &ret_pids, ca_system_id);
-	}
-
-	for (apid_list_entry = 0; apid_list_entry < ret_pids.count_apids; apid_list_entry++)
-	{
-		if (ret_pids.apids[apid_list_entry].desc[0] == 0)
-		{
-			sprintf(ret_pids.apids[apid_list_entry].desc, "%02d", apid_list_entry + 1);
-		}
-	}
-
-	return ret_pids;
-}
-
-int find_emmpid (uint16_t id)
-{
-	char buf[CAT_SIZE];
-	int fd;
-	uint16_t pos;
-	struct dmxSctFilterParams flt;
-
-	if ((fd = open(DEMUX_DEV, O_RDWR)) < 0)
-	{
-		perror("[zapit] unable to open demux device");
-		return 0;
-	}
-
-	memset(&flt.filter.filter, 0, DMX_FILTER_SIZE);
-	memset(&flt.filter.mask, 0, DMX_FILTER_SIZE);
-
-	flt.pid = 0x0001;
-	flt.filter.filter[0] = 0x01;
-	flt.filter.mask[0] = 0xFF;
-	flt.timeout = 1000;
-	flt.flags = DMX_ONESHOT | DMX_CHECK_CRC | DMX_IMMEDIATE_START;
-
-	if (ioctl(fd, DMX_SET_FILTER, &flt) < 0)
-	{
-		perror("[zapit] DMX_SET_FILTER");
-		close(fd);
-		return 0;
-	}
-
-	if (read(fd, buf, sizeof(buf)) <= 0)
-	{
-		perror("[zapit] unable to read from demux device");
-		close(fd);
-		return 0;
-	}
-
-	close(fd);
-
-	for(pos=8;pos<((buf[1]&0x0F)<<8)|buf[2]-1;pos+=buf[pos+1]+2)
-		if((buf[pos]==9)&&(((buf[pos+2]<<8)|buf[pos+3])==id)&&(buf[pos+2]==((0x18|0x27)&0xD7)))
-			return((buf[pos+4]&0x1F)<<8)|buf[pos+5];
-	return 0;
-}
 
 #ifndef USE_EXTERNAL_CAMD
 int _writecamnu (uint8_t cmd, uint8_t *data, uint8_t len)
@@ -936,7 +544,7 @@ void *decode_thread(void *ptr)
 {
 	decode_vals *vals;
 	vals = (decode_vals *) ptr;
-	int emmpid = 0;
+	dvb_pid_t emmpid = 0x0000;
 
 	debug("[zapit] starting decode_thread\n");
 
@@ -949,7 +557,7 @@ void *decode_thread(void *ptr)
 
 	if (vals->do_search_emmpids)
 	{
-		if((emmpid = find_emmpid(caid)) != 0)
+		if(parse_cat(caid, &emmpid) == 0)
 		{
 			debug("[zapit] emmpid >0x%04x< found for caid 0x%04x\n", emmpid, caid);
 			setemm(0x104, caid, emmpid);
@@ -2858,7 +2466,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.115 2002/04/04 14:41:08 rasc Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.116 2002/04/04 19:36:49 obi Exp $\n\n");
 
 	if (argc > 1)
 	{

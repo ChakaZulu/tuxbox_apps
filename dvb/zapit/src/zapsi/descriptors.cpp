@@ -53,6 +53,20 @@ Modulation getModulation (uint8_t modulation)
 	}
 }
 
+uint8_t ca_descriptor(uint8_t *buffer, uint16_t ca_system_id, uint16_t* ca_pid)
+{
+	if (((((buffer[2] & 0x1F) << 8) | buffer[3]) == ca_system_id) && ((buffer[2] & 0x1F) == 0x17))
+	{
+		*ca_pid = ((buffer[4] & 0x1F) << 8) | buffer[5];
+	}
+	else
+	{
+		*ca_pid = 0x1FFF;
+	}
+
+	return buffer[1];
+}
+
 uint8_t stuffing_desc(uint8_t *buffer)
 {
 	return buffer[1];
