@@ -94,7 +94,7 @@ public:
 		dvb[0] = 5;
 		dvb[1] = 1;
 		dvb[2] = 1;
-		dvb[3] = 0;
+		dvb[3] = 1;
 		dvb[4] = 1;
 		dvb[5] = 1;
 		init();
