@@ -57,8 +57,10 @@ using namespace std;
 #define YELLOW "#F5FF3C"
 #define LIGHTGREY "#DEE6D6"
 #define DARKGREY "#ABABAB"
-#define LEFTNAVICOLOR "#316183"
-#define TOPNAVICOLOR "#316183"
+//#define LEFTNAVICOLOR "#316183" color is set in weif.css
+#define LEFTNAVICOLOR ""
+//#define TOPNAVICOLOR "#316183" color is set in webif.css
+#define TOPNAVICOLOR ""
 #define OCKER "#FFCC33"
 
 extern eString getRight(const eString&, char); // implemented in timer.cpp
@@ -999,10 +1001,7 @@ static eString deleteMovie(eString request, eString dirpath, eString opts, eHTTP
 			}
 			while(!ret);
 
-			eString fname = ref.path;
-			fname.erase(fname.length() - 2, 2); // remove ts
-			fname += "eit";
-			::unlink(fname.c_str());
+			::unlink(eString().sprintf("%s.eit", getLeft(ref.path, '.').c_str()).c_str());
 		}
 	}
 	return "<script language=\"javascript\">window.close();</script>";
@@ -1639,7 +1638,7 @@ static eString getContent(eString mode, eString path)
 	if (mode == "about")
 	{
 		result = getTitle("About");
-		result += "Enigma Web Control<br>Version 0.5";
+		result += "Enigma Web Control<br>Version 0.6";
 	}
 	else
 	if (mode == "aboutDreambox")
@@ -1975,18 +1974,6 @@ public:
 						{
 							result << "<td width=" << colWidth << ">"
 								<< "<span class=\"epg\">";
-#if 0
-							tm* t2 = localtime(&tableTime);
-							result << tablePos << "/" << colWidth << ":"
-								<< std::setfill('0')
-								<< std::setw(2) << t2->tm_mday << '.'
-								<< std::setw(2) << t2->tm_mon+1 << ". - "
-								<< std::setw(2) << t2->tm_hour << ':'
-								<< std::setw(2) << t2->tm_min << ' '
-								<< "<br>"
-								<< eventDuration
-								<< "<br>";
-#endif
 #ifndef DISABLE_FILE
 							result << "<a href=\"javascript:record('ref="
 								<< ref2string(ref)
@@ -2139,7 +2126,7 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 				if (descriptor->Tag() == DESCR_SHORT_EVENT)
 				{
 					tm* t = localtime(&event.start_time);
-					result << "<span class=\"epg\">";
+					result << "<div class=\"epg\">";
 #ifndef DISABLE_FILE
 					result << "<a href=\"javascript:record('ref="
 						<< ref2string(ref)
@@ -2160,7 +2147,7 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 						<< "&ID=" << std::hex << event.event_id << std::dec
 						<< "\")\'>"
 						<< ((ShortEventDescriptor*)descriptor)->event_name
-						<< "</a></span></u><br>\n";
+						<< "</a></div></u><br>\n";
 				}
 			}
 		}
@@ -2286,13 +2273,21 @@ static eString getsi(eString request, eString dirpath, eString opts, eHTTPConnec
 
 static eString message(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	if (opt.length())
+	std::map<eString,eString> opts=getRequestOptions(opt);
+	eString msg = opts["msg"];
+	eString result = "-error";
+	if (msg == "")
+		msg = opt;
+	if (msg.length())
 	{
-		opt = httpUnescape(opt);
-		eZapMain::getInstance()->postMessage(eZapMessage(1, "External Message", opt, 10), 0);
-		return eString("+ok");
-	} else
-		return eString("-error\n");
+		msg = httpUnescape(msg);
+		eZapMain::getInstance()->postMessage(eZapMessage(1, "External Message", msg, 10), 0);
+		result = "+ok";
+	}
+	if (opts.find("msg") == opts.end())
+		return result;
+	else
+		return "<script language=\"javascript\">window.close();</script>";
 }
 
 static eString start_plugin(eString request, eString dirpath, eString opt, eHTTPConnection *content)
