@@ -271,10 +271,10 @@ void *start_scanthread(void *param)
 		eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName) + 1);
 
 		curr_sat = 0;
-		int symbolrate = 6900;
-		int symbolrate2 = 6875;
+		const int symbolrate = 6900;
+		const int symbolrate2 = 6875;
 
-		for (int freq = 3300; freq <= 4600; freq += 80)
+		for (int freq = 3060; freq <= 4600; freq += 80)
 		{
 			if (finaltune(freq, symbolrate, 0, 0, 0) == 0)
 			{
