@@ -1,5 +1,5 @@
 /*
- * $Id: ci.cpp,v 1.3 2002/07/17 02:16:50 obi Exp $
+ * $Id: ci.cpp,v 1.4 2002/08/27 12:31:34 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -33,7 +33,7 @@ void CCaTable::addCaDescriptor (unsigned char * buffer)
 
 	descriptor->descriptor_tag = buffer[0];
 	descriptor->descriptor_length = buffer[1];
-	descriptor->CA_system_ID = (buffer[2] << 8) | buffer[3];
+	descriptor->CA_system_ID = *(unsigned*)(&(buffer[2]));
 	descriptor->reserved1 = buffer[4] >> 5;
 	descriptor->CA_PID = ((buffer[4] & 0x1F) << 8) | buffer[5];
 

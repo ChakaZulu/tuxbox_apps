@@ -1,5 +1,5 @@
 /*
- * $Id: cam.cpp,v 1.17 2002/07/17 02:16:50 obi Exp $
+ * $Id: cam.cpp,v 1.18 2002/08/27 12:31:34 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -153,8 +153,7 @@ int CCam::setCaPmt (CCaPmt * caPmt)
 		{
 			buffer[pos] = caPmt->ca_descriptor[i]->descriptor_tag;
 			buffer[pos + 1] = caPmt->ca_descriptor[i]->descriptor_length;
-			buffer[pos + 2] = caPmt->ca_descriptor[i]->CA_system_ID >> 8;
-			buffer[pos + 3] = caPmt->ca_descriptor[i]->CA_system_ID;
+			*(unsigned short*)(&(buffer[pos + 2])) = caPmt->ca_descriptor[i]->CA_system_ID;
 			buffer[pos + 4] = (caPmt->ca_descriptor[i]->reserved1 << 5) | (caPmt->ca_descriptor[i]->CA_PID >> 8);
 			buffer[pos + 5] = caPmt->ca_descriptor[i]->CA_PID;
 
@@ -181,8 +180,7 @@ int CCam::setCaPmt (CCaPmt * caPmt)
 			{
 				buffer[pos2] = caPmt->es_info[i]->ca_descriptor[j]->descriptor_tag;
 				buffer[pos2 + 1] = caPmt->es_info[i]->ca_descriptor[j]->descriptor_length;
-				buffer[pos2 + 2] = caPmt->es_info[i]->ca_descriptor[j]->CA_system_ID >> 8;
-				buffer[pos2 + 3] = caPmt->es_info[i]->ca_descriptor[j]->CA_system_ID;
+				*(unsigned short*)(&(buffer[pos2 + 2])) = caPmt->es_info[i]->ca_descriptor[j]->CA_system_ID;
 				buffer[pos2 + 4] = (caPmt->es_info[i]->ca_descriptor[j]->reserved1 << 5) | (caPmt->es_info[i]->ca_descriptor[j]->CA_PID >> 8);
 				buffer[pos2 + 5] = caPmt->es_info[i]->ca_descriptor[j]->CA_PID;
 
