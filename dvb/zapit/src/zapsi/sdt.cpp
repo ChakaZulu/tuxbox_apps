@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.cpp,v 1.27 2002/09/10 18:28:23 obi Exp $
+ * $Id: sdt.cpp,v 1.28 2002/09/10 18:34:26 obi Exp $
  */
 
 /* system c */
@@ -16,7 +16,7 @@
 #include "descriptors.h"
 #include "sdt.h"
 
-#define SDT_SIZE 1024 + 3
+#define SDT_SIZE 1024
 
 unsigned int get_sdt_TsidOnid ()
 {

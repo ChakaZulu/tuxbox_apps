@@ -1,5 +1,5 @@
 /*
- * $Id: nit.cpp,v 1.24 2002/09/10 18:28:23 obi Exp $
+ * $Id: nit.cpp,v 1.25 2002/09/10 18:34:26 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -36,7 +36,7 @@
 #include "descriptors.h"
 #include "nit.h"
 
-#define NIT_SIZE 1024 + 3
+#define NIT_SIZE 1024
 
 extern std::map <unsigned int, transponder> transponders;
 

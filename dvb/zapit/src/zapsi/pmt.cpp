@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.25 2002/09/10 18:28:23 obi Exp $
+ * $Id: pmt.cpp,v 1.26 2002/09/10 18:34:26 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -33,7 +33,7 @@
 #include "descriptors.h"
 #include "pmt.h"
 
-#define PMT_SIZE 1024 + 3
+#define PMT_SIZE 1024
 
 /*
  * Stream types

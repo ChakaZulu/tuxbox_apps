@@ -1,5 +1,5 @@
 /*
- * $Id: pat.cpp,v 1.31 2002/09/10 18:28:23 obi Exp $
+ * $Id: pat.cpp,v 1.32 2002/09/10 18:34:26 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org> jaja :)
  *
@@ -29,7 +29,7 @@
 
 #include "pat.h"
 
-#define PAT_SIZE 1024 + 3
+#define PAT_SIZE 1024
 
 extern CEventServer * eventServer;
 extern unsigned int found_channels;
