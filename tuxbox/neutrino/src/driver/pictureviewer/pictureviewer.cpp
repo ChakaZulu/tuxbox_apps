@@ -15,38 +15,40 @@ extern unsigned char * color_average_resize(unsigned char * orgin,int ox,int oy,
 
 #ifdef FBV_SUPPORT_GIF
     extern int fh_gif_getsize(const char *,int *,int*,int,int);
-    extern int fh_gif_load(const char *,unsigned char *,int,int);
+    extern int fh_gif_load(const char *,unsigned char **,int*,int*);
     extern int fh_gif_id(const char *);
 #endif
 #ifdef FBV_SUPPORT_JPEG
     extern int fh_jpeg_getsize(const char *,int *,int*,int,int);
-    extern int fh_jpeg_load(const char *,unsigned char *,int,int);
+    extern int fh_jpeg_load(const char *,unsigned char **,int*,int*);
     extern int fh_jpeg_id(const char *);
 #endif
 #ifdef FBV_SUPPORT_PNG
     extern int fh_png_getsize(const char *,int *,int*,int,int);
-    extern int fh_png_load(const char *,unsigned char *,int,int);
+    extern int fh_png_load(const char *,unsigned char **,int*,int*);
     extern int fh_png_id(const char *);
 #endif
 #ifdef FBV_SUPPORT_BMP
     extern int fh_bmp_getsize(const char *,int *,int*,int,int);
-    extern int fh_bmp_load(const char *,unsigned char *,int,int);
+    extern int fh_bmp_load(const char *,unsigned char **,int*,int*);
     extern int fh_bmp_id(const char *);
 #endif
 #ifdef FBV_SUPPORT_CRW
     extern int fh_crw_getsize(const char *,int *,int*,int,int);
-    extern int fh_crw_load(const char *,unsigned char *,int,int);
+    extern int fh_crw_load(const char *,unsigned char **,int*,int*);
     extern int fh_crw_id(const char *);
 #endif
 
-void CPictureViewer::add_format(int (*picsize)(const char *,int *,int*,int,int ),int (*picread)(const char *,unsigned char *,int,int), int (*id)(const char*))
+double CPictureViewer::m_aspect_ratio_correction;
+
+void CPictureViewer::add_format(int (*picsize)(const char *,int *,int*,int,int ),int (*picread)(const char *,unsigned char **,int*,int*), int (*id)(const char*))
 {
-    CFormathandler *fhn;
-    fhn=(CFormathandler *) malloc(sizeof(CFormathandler));
-    fhn->get_size=picsize; 
+	CFormathandler *fhn;
+	fhn=(CFormathandler *) malloc(sizeof(CFormathandler));
+	fhn->get_size=picsize; 
 	fhn->get_pic=picread; 
 	fhn->id_pic=id;
-    fhn->next=fh_root; 
+	fhn->next=fh_root; 
 	fh_root=fhn;
 }
 
@@ -115,20 +117,19 @@ bool CPictureViewer::DecodeImage(const std::string & name, bool showBusySign, bo
 		}
 		
 //      dbout("---Decoding Start(%d/%d)\n",x,y);
-		if(fh->get_pic(name.c_str(),m_NextPic_Buffer,x,y)==FH_ERROR_OK)
+		if(fh->get_pic(name.c_str(),&m_NextPic_Buffer,&x,&y)==FH_ERROR_OK)
 		{
 //			dbout("---Decoding Done\n");
 			if((x>(m_endx-m_startx) || y>(m_endy-m_starty)) && m_scaling!=NONE && !unscaled)
 			{
-				double aspect_ratio_correction = m_aspect / ((double)xs/ys); 
-				if( (aspect_ratio_correction*y*(m_endx-m_startx)/x) <= (m_endy-m_starty))
+				if( (m_aspect_ratio_correction*y*(m_endx-m_startx)/x) <= (m_endy-m_starty))
 				{
 					imx=(m_endx-m_startx);
-					imy=(int)(aspect_ratio_correction*y*(m_endx-m_startx)/x);
+					imy=(int)(m_aspect_ratio_correction*y*(m_endx-m_startx)/x);
 				}
 				else
 				{
-					imx=(int)((1.0/aspect_ratio_correction)*x*(m_endy-m_starty)/y);
+					imx=(int)((1.0/m_aspect_ratio_correction)*x*(m_endy-m_starty)/y);
 					imy=(m_endy-m_starty);
 				}
 				if(m_scaling==SIMPLE)
@@ -354,6 +355,7 @@ CPictureViewer::CPictureViewer()
 	m_endx   = xs-1;
 	m_starty = 0;
 	m_endy   = ys-1;
+	m_aspect_ratio_correction = m_aspect / ((double)xs/ys); 
 
    m_busy_buffer=NULL;
 	

@@ -608,6 +608,8 @@ parentallock.never Nie
 parentallock.onsignal Bei gesendeter Vorsperre
 parentallock.parentallock Jugendschutz
 parentallock.prompt PIN-Eingabe
+pictureviewer.decode_server_ip Decoding-Server IP
+pictureviewer.decode_server_port Decoding-Server Port
 pictureviewer.defdir Start-Verz.
 pictureviewer.head Bildbetrachter
 pictureviewer.help1 Menü-Modus

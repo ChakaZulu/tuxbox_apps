@@ -158,14 +158,14 @@ void crw_cb_error_exit(j_common_ptr cinfo)
 //	 dbout("crw_cb_error_exit }\n");
 }
 
-int fh_crw_load(const char *filename,unsigned char *buffer,int x,int y)
+int fh_crw_load(const char *filename,unsigned char **buffer,int* xp,int* yp)
 {
 //	dbout("fh_crw_load (%d/%d) {\n",x,y);
 	struct jpeg_decompress_struct cinfo;
 	struct jpeg_decompress_struct *ciptr;
 	struct r_crw_jpeg_error_mgr emgr;
 	unsigned char *bp;
-	int px,py,c;
+	int px,py,c,x=*xp;
 	FILE *fh;
 	JSAMPLE *lb;
 
@@ -207,7 +207,7 @@ int fh_crw_load(const char *filename,unsigned char *buffer,int x,int y)
 	if(c==3)
 	{
 		lb=(JSAMPLE*)(*ciptr->mem->alloc_small)((j_common_ptr) ciptr,JPOOL_PERMANENT,c*px);
-		bp=buffer;
+		bp=*buffer;
 		while(ciptr->output_scanline < ciptr->output_height)
 		{
 			jpeg_read_scanlines(ciptr, &lb, 1);

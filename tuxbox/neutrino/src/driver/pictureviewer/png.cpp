@@ -24,7 +24,7 @@ int fh_png_id(const char *name)
 }
 
 
-int fh_png_load(const char *name,unsigned char *buffer,int x,int y)
+int fh_png_load(const char *name,unsigned char **buffer,int* xp,int* yp)
 {
 	static const png_color_16 my_background = {0, 0, 0, 0, 0};
 
@@ -98,7 +98,7 @@ int fh_png_load(const char *name,unsigned char *buffer,int x,int y)
 
 	for(pass = 0; pass < number_passes; pass++)
 	{
-		fbptr = (png_byte *)buffer;
+		fbptr = (png_byte *)(*buffer);
 		for (i = 0; i < height; i++, fbptr += width * 3)
 		{
 			png_read_row(png_ptr, fbptr, NULL);

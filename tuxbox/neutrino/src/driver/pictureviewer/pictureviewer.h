@@ -35,8 +35,8 @@ class CPictureViewer
 	struct cformathandler 
 	{
 		struct cformathandler *next;
-		int (*get_size)(const char *,int *,int*,int,int);
-		int (*get_pic)(const char *,unsigned char *,int,int);
+		int (*get_size)(const char *,int *,int*, int, int);
+		int (*get_pic)(const char *,unsigned char **,int* ,int*);
 		int (*id_pic)(const char *);
 	};
 	typedef  struct cformathandler CFormathandler;
@@ -61,7 +61,8 @@ class CPictureViewer
 	void Move(int dx, int dy);
 	void Cleanup();
 	void SetVisible(int startx, int endx, int starty, int endy);
-	
+	static double m_aspect_ratio_correction;
+
  private:
 	CFormathandler *fh_root;
 	ScalingMode m_scaling;
@@ -96,7 +97,7 @@ class CPictureViewer
 	
 	CFormathandler * fh_getsize(const char *name,int *x,int *y, int width_wanted, int height_wanted);
 	void init_handlers(void);
-	void add_format(int (*picsize)(const char *,int *,int*,int,int),int (*picread)(const char *,unsigned char *,int,int), int (*id)(const char*));
+	void add_format(int (*picsize)(const char *,int *,int*,int,int),int (*picread)(const char *,unsigned char **,int*,int*), int (*id)(const char*));
 
 };
 

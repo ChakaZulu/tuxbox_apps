@@ -1,0 +1,58 @@
+INTRO
+======
+The neutrino picserver is an external program that helps neutrino decode
+digital pictures (JPEGs only at the moment). 
+This decreases the time it takes for a compressed picture to be displays
+in neutrino (usually 7-8 sec for a jpeg, with picserver between 3 to 4 sec). 
+To achieve this , the pictures are not decoded on the dbox but on an
+external server. Neutrino just sends a request to the server, the
+server decodes the compressed image and sends it back uncompressed to 
+neutrino.
+
+   Neutrino                            Server(with picserver prog)
+=====================================================================
+   Send Request (decode picture xyz)------------->
+                                       Decode and Resize picture
+    <--------------------------------- Send back decoded picture
+   display picture
+
+There is a sample picserver program for unix servers in the tuxbox cvs.
+(hostapps/neutrino_picserver/)
+Should run with cygwin on win32 servers also.
+Native ports to othe rplatforms are welcome. The protocol used is very
+simple (see unix picserver.c). In case of questions feel free to ask...
+
+Notes: 
+- Neutrino does not send the data of the compressed picture (e.g. jpeg) to
+  the server, since this would take too much time (slow network) and would
+  eat up almost all speed increase. There for only 
+  the path of the pic is sent. This means the picture
+  needs to be accesible by the server somehow. The fastest
+  solution is to run the picserver prog on the machine
+  that hosts the pictures. 
+  Since pathnames are not identical on client (mounted filesys)
+  and server (local filesys). The server needs to do some mapping.
+  (e.g. convert /mnt/photos/pic1.jpg -> /data/photos/pic1.jpg)
+- The server sends the pic to neutrino in 16 bit resultion (RGB555)
+  This decreases the amount of data that need to be transferred to the 
+  box via network by 33% and results in a overall speed increase.
+  The neutrino picviewer on the dbox2 does not display the pic with
+  more colors anyway...
+- Picviewer works with jpeg only at the moment...
+- If the picserver is not reachable or the picture cannot be decoded by the
+  server for whatever reason, the picture is decoded locally.
+
+Limitations (at the moment)
+- Only one picserver can be defined
+- If picserver is enabled, all JPEG are tried to be decoded via this 
+  server. 
+
+Configuration
+==============
+- Enter ip and port of decode server in neutrino picviwer settings.
+- Start picserver programm on server (use same port)
+  e.g. picserver -d -r "/mnt/photos,/data/src/pix" 9999
+
+
+
+

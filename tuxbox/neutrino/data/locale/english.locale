@@ -570,6 +570,8 @@ parentallock.never never
 parentallock.onsignal on broadcasted lock
 parentallock.parentallock Youth protection
 parentallock.prompt prompt for PIN
+pictureviewer.decode_server_ip decode server ip
+pictureviewer.decode_server_port decode server port
 pictureviewer.defdir start dir.
 pictureviewer.head Picture viewer
 pictureviewer.help1 menu mode

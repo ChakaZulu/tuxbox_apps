@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.38 2005/01/12 20:57:16 chakazulu Exp $
+ * $Id: locals_intern.h,v 1.39 2005/01/26 20:03:25 zwen Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -635,6 +635,8 @@ const char * locale_real_names[] =
 	"parentallock.onsignal",
 	"parentallock.parentallock",
 	"parentallock.prompt",
+	"pictureviewer.decode_server_ip",
+	"pictureviewer.decode_server_port",
 	"pictureviewer.defdir",
 	"pictureviewer.head",
 	"pictureviewer.help1",

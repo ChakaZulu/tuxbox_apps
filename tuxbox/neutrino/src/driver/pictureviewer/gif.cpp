@@ -41,10 +41,11 @@ inline void m_rend_gif_decodecolormap(unsigned char *cmb,unsigned char *rgbb,Col
 		*(rgbb++)=cmentry->Blue;
 	}
 }
-int fh_gif_load(const char *name,unsigned char *buffer,int x,int y)
+int fh_gif_load(const char *name,unsigned char **buffer,int* xp,int* yp)
 {
 	int px,py,i,fby,fbx,fbl,ibxs;
 	int eheight,j;
+	int x=*xp,y=*yp;
 	unsigned char *fbptr;
 	unsigned char *lb;
 	unsigned char *slb;
@@ -77,7 +78,7 @@ int fh_gif_load(const char *name,unsigned char *buffer,int x,int y)
 					cmaps=cmap->ColorCount;
 
 					ibxs=ibxs*3;
-					fbptr=buffer;
+					fbptr=*buffer;
 					if(!(gft->Image.Interlace))
 					{
 						for(i=0;i<py;i++,fbptr+=px*3)
@@ -91,7 +92,7 @@ int fh_gif_load(const char *name,unsigned char *buffer,int x,int y)
 					{
 						for(j=0;j<4;j++)
 						{
-							fbptr=buffer;
+							fbptr=*buffer;
 							for(i=0;i<py;i++,fbptr+=px*3)
 							{
 								if(DGifGetLine(gft,slb,px)==GIF_ERROR)	mgrflush;

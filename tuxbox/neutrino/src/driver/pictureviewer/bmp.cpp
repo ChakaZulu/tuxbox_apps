@@ -58,12 +58,12 @@ void fetch_pallete(int fd, struct color pallete[], int count)
 	return;
 }
 
-int fh_bmp_load(const char *name,unsigned char *buffer,int x,int y)
+int fh_bmp_load(const char *name,unsigned char **buffer,int* xp,int* yp)
 {
 //	dbout("fh_bmp_load {\n");
-	int fd, bpp, raster, i, j, k, skip;
+	int fd, bpp, raster, i, j, k, skip, x=*xp, y=*yp;
 	unsigned char buff[4];
-	unsigned char *wr_buffer = buffer + x*(y-1)*3;
+	unsigned char *wr_buffer = *buffer + x*(y-1)*3;
 	struct color pallete[256];
 
 	fd = open(name, O_RDONLY);

@@ -1,5 +1,7 @@
 INCLUDES = \
 	-I$(top_srcdir)/src \
+	@FREETYPE_CFLAGS@ \
+	@ZAPIT_CFLAGS@ \
 	-I$(top_srcdir)/lib
  
 noinst_LIBRARIES = libneutrino_pictureviewer.a

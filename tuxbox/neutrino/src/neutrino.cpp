@@ -743,6 +743,8 @@ int CNeutrinoApp::loadSetup()
 	//Picture-Viewer
 	strcpy( g_settings.picviewer_slide_time, configfile.getString( "picviewer_slide_time", "10" ).c_str() );
 	g_settings.picviewer_scaling = configfile.getInt32("picviewer_scaling", 1 /*(int)CPictureViewer::SIMPLE*/);
+	g_settings.picviewer_decode_server_ip = configfile.getString("picviewer_decode_server_ip", "");
+	strcpy(g_settings.picviewer_decode_server_port, configfile.getString("picviewer_decode_server_port", "").c_str());
 
 	//Audio-Player
 	g_settings.audioplayer_display = configfile.getInt32("audioplayer_display",(int)CAudioPlayerGui::ARTIST_TITLE);
@@ -1063,6 +1065,8 @@ void CNeutrinoApp::saveSetup()
 	//Picture-Viewer
 	configfile.setString( "picviewer_slide_time", g_settings.picviewer_slide_time );
 	configfile.setInt32( "picviewer_scaling", g_settings.picviewer_scaling );
+	configfile.setString( "picviewer_decode_server_ip", g_settings.picviewer_decode_server_ip );
+	configfile.setString( "picviewer_decode_server_port", g_settings.picviewer_decode_server_port);
 
 	//Audio-Player
 	configfile.setInt32( "audioplayer_display", g_settings.audioplayer_display );
@@ -1718,6 +1722,10 @@ void CNeutrinoApp::InitAudioplPicSettings(CMenuWidget &audioplPicSettings)
 	CStringInput * pic_timeout= new CStringInput(LOCALE_PICTUREVIEWER_SLIDE_TIME, g_settings.picviewer_slide_time, 2, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ");
 	audioplPicSettings.addItem(new CMenuForwarder(LOCALE_PICTUREVIEWER_SLIDE_TIME, true, g_settings.picviewer_slide_time, pic_timeout));
 	audioplPicSettings.addItem(new CMenuForwarder(LOCALE_PICTUREVIEWER_DEFDIR, true, g_settings.network_nfs_picturedir, this, "picturedir"));
+	CIPInput * audioplPicSettings_DecServerIP = new CIPInput( LOCALE_PICTUREVIEWER_DECODE_SERVER_IP, g_settings.picviewer_decode_server_ip, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
+	audioplPicSettings.addItem(new CMenuForwarder(LOCALE_PICTUREVIEWER_DECODE_SERVER_IP, true, g_settings.picviewer_decode_server_ip, audioplPicSettings_DecServerIP));
+	CStringInput * audioplPicSettings_DecServerPort= new CStringInput(LOCALE_PICTUREVIEWER_DECODE_SERVER_PORT, g_settings.picviewer_decode_server_port, 5, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ");
+	audioplPicSettings.addItem(new CMenuForwarder(LOCALE_PICTUREVIEWER_DECODE_SERVER_PORT, true, g_settings.picviewer_decode_server_port, audioplPicSettings_DecServerPort));
 
 	audioplPicSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_AUDIOPLAYER_NAME));
 	audioplPicSettings.addItem(new CMenuOptionChooser(LOCALE_AUDIOPLAYER_DISPLAY_ORDER, &g_settings.audioplayer_display     , AUDIOPLAYER_DISPLAY_ORDER_OPTIONS, AUDIOPLAYER_DISPLAY_ORDER_OPTION_COUNT, true ));
