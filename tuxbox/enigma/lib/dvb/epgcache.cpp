@@ -673,6 +673,8 @@ void eEPGCache::startEPG()
 		isRunning |= 2;
 		scheduleOtherReader.start();
 		isRunning |= 4;
+		abortTimer.start(15000,true);  
+	// when after 15seks non data is received.. this service have no epg
 	}
 	else
 	{
@@ -683,6 +685,12 @@ void eEPGCache::startEPG()
 
 void eEPGCache::abortNonAvail()
 {
+	if ( !firstNowNextEvent.valid() && (isRunning&2) )
+	{
+		eDebug("[EPGC] abort non avail nownext reading");
+		isRunning &= ~2;
+		nownextReader.abort();
+	}
 	if ( !firstScheduleEvent.valid() && (isRunning&1) )
 	{
 		eDebug("[EPGC] abort non avail schedule reading");
