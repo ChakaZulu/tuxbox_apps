@@ -1,11 +1,14 @@
 //
-// $Id: eventlist.cpp,v 1.16 2001/10/18 14:31:23 field Exp $
+// $Id: eventlist.cpp,v 1.17 2001/10/18 22:01:31 field Exp $
 //
 //  -- EPG Event List // Vorschau 
 //
 //
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.17  2001/10/18 22:01:31  field
+// kleiner Bugfix
+//
 // Revision 1.16  2001/10/18 14:31:23  field
 // Scrollleisten :)
 //
@@ -358,6 +361,10 @@ void EventList::exec(unsigned onidSid, const std::string& channelname)
     			hide();
 
     			g_EpgData->show("", 0, evt->epg.id, &evt->epg.startzeit);
+
+                key = g_RCInput->getKey(100);
+                if (key!=CRCInput::RC_red)
+                    g_RCInput->pushbackKey(key);
 
     			paintHead();
     			paint();

@@ -1,9 +1,9 @@
 //
-// $Id: epgview.cpp,v 1.19 2001/10/18 21:03:14 field Exp $
+// $Id: epgview.cpp,v 1.20 2001/10/18 22:01:31 field Exp $
 //
 // $Log: epgview.cpp,v $
-// Revision 1.19  2001/10/18 21:03:14  field
-// EPG Previous/Next
+// Revision 1.20  2001/10/18 22:01:31  field
+// kleiner Bugfix
 //
 // Revision 1.18  2001/10/18 17:14:08  field
 // bugfix
@@ -255,7 +255,7 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
 	g_Fonts->epg_date->RenderString(sx+ox-40-widthr,  sy+oy-3, widthr, epgData.date, COL_MENUHEAD);
 
 	int showPos = 0;
-	int textCount = epgText.size();
+	textCount = epgText.size();
 	int textypos = sy+topboxheight;
 	showText(showPos, textypos);
 
@@ -288,7 +288,7 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
     	int scrollCount;
     	while(loop)
     	{
-    		int key = g_RCInput->getKey(40);
+    		int key = g_RCInput->getKey(150);
 
     		scrollCount = medlinecount;
 
@@ -303,8 +303,7 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
                 }
 
     		}
-            else
-            if (key==CRCInput::RC_right)
+            else if (key==CRCInput::RC_right)
     		{
                 if (next_id != 0)
                 {
@@ -315,8 +314,7 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
                 }
 
     		}
-            else
-    		if (key==CRCInput::RC_down)
+            else if (key==CRCInput::RC_down)
     		{
     			if(showPos+scrollCount<textCount)
     			{
@@ -332,10 +330,16 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
                 else
     				showText(showPos,textypos);
     		}
-    		else if ( (key==CRCInput::RC_ok) || (key==CRCInput::RC_help)  || (key==g_settings.key_channelList_cancel) || (key==CRCInput::RC_left) || (key==CRCInput::RC_timeout))
+            else if (key==CRCInput::RC_red)
+    		{
+                g_RCInput->pushbackKey(key);
+    			loop = false;
+    		}
+    		else if ( (key==CRCInput::RC_ok) || (key==CRCInput::RC_help)  || (key==g_settings.key_channelList_cancel) || (key==CRCInput::RC_timeout))
     		{
     			loop = false;
     		}
+
     	}
     	hide();
     }
