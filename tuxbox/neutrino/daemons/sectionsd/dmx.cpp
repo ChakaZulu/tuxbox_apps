@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.12 2003/03/01 13:40:55 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.13 2003/03/01 14:48:53 thegoodguy Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -89,19 +89,28 @@ void DMX::addfilter(const unsigned char filter, const unsigned char mask)
 	filters.push_back(tmp);
 }
 
-int DMX::stop(void)
+int DMX::immediate_stop(void)
 {
-	if (!fd)
+	if (fd == 0)
 		return 1;
-	
-	pthread_mutex_lock(&start_stop_mutex);
 	
 	if (real_pauseCounter == 0)
 		closefd();
 	
+	return 0;
+}
+
+int DMX::stop(void)
+{
+	int rc;
+	
+	pthread_mutex_lock(&start_stop_mutex);
+	
+	rc = immediate_stop();
+	
 	pthread_mutex_unlock(&start_stop_mutex);
 	
-	return 0;
+	return rc;
 }
 
 void DMX::lock(void)
@@ -212,20 +221,13 @@ char * DMX::getSection(const unsigned timeoutInMSeconds, int &timeouts)
 	return buf;
 }
 
-int DMX::start(void)
+int DMX::immediate_start(void)
 {
-	if (fd)
-	{
+	if (fd != 0)
 		return 1;
-	}
-
-	pthread_mutex_lock(&start_stop_mutex);
 
 	if (real_pauseCounter != 0)
-	{
-		pthread_mutex_unlock(&start_stop_mutex);
 		return 0;
-	}
 
 	if ((fd = open(DEMUX_DEVICE, O_RDWR)) == -1)
 	{
@@ -248,12 +250,20 @@ int DMX::start(void)
 		pthread_mutex_unlock(&start_stop_mutex);
 		return 4;
 	}
+	return 0;
+}
 
-/*  	if (timeset)
-	lastChanged=time(NULL);*/
+int DMX::start(void)
+{
+	int rc;
+	
+	pthread_mutex_lock(&start_stop_mutex);
+
+	rc = immediate_start(void);
+
 	pthread_mutex_unlock(&start_stop_mutex);
 
-	return 0;
+	return rc;
 }
 
 int DMX::real_pause(void)
@@ -266,7 +276,7 @@ int DMX::real_pause(void)
 	if (real_pauseCounter == 0)
 	{
 #ifdef PAUSE_EQUALS_STOP	       
-		stop();
+		immediate_stop();
 #else
 		if (ioctl(fd, DMX_STOP, 0) == -1)
 		{
@@ -294,7 +304,7 @@ int DMX::real_unpause(void)
 	if (real_pauseCounter == 0)
 	{
 #ifdef PAUSE_EQUALS_STOP	       
-		start();
+		immediate_start();
 #else
 		if (ioctl(fd, DMX_START, 0) == -1)
 		{

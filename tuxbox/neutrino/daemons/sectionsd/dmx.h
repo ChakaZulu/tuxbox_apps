@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.h,v 1.1 2003/02/05 22:13:10 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.h,v 1.2 2003/03/01 14:48:53 thegoodguy Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -35,6 +35,9 @@ class DMX
 	unsigned char   pID;
 	unsigned short  dmxBufferSizeInKB;
 	bool            noCRC; // first filter always without CRC
+
+	int immediate_start(void); /* mutex must be locked before and unlocked after this method */
+	int immediate_stop(void);  /* mutex must be locked before and unlocked after this method */
 
  public:
 	struct s_filters
