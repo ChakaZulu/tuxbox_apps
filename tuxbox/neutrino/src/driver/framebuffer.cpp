@@ -2,7 +2,7 @@
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
-	Homepage: http://dbox.cyberphoria.org/
+                      2003 thegoodguy
 
 	License: GPL
 
@@ -39,6 +39,8 @@
 #include "gui/color.h"
 
 #define BACKGROUNDIMAGEWIDTH 720
+
+static uint8_t * virtual_fb = NULL;
 
 CFrameBuffer::CFrameBuffer()
 : active ( true )
@@ -188,6 +190,9 @@ CFrameBuffer::~CFrameBuffer()
 	if (lfb)
 		munmap(lfb, available);
 		*/
+	
+	if (virtual_fb == NULL)
+		delete[] virtual_fb;
 }
 
 int CFrameBuffer::getFileHandle()
@@ -202,12 +207,15 @@ unsigned int CFrameBuffer::getStride()
 
 unsigned char* CFrameBuffer::getFrameBufferPointer()
 {
-	return lfb;
+	if (active || (virtual_fb == NULL))
+		return lfb;
+	else
+		return virtual_fb;
 }
 
 bool CFrameBuffer::getActive()
 {
-	return active;
+	return (active || (virtual_fb != NULL));
 }
 
 t_fb_var_screeninfo *CFrameBuffer::getScreenInfo()
@@ -250,7 +258,7 @@ int CFrameBuffer::setMode(unsigned int nxRes, unsigned int nyRes, unsigned int n
 	}
 
 	stride=fix.line_length;
-	memset(lfb, 0, stride*yRes);
+	memset(getFrameBufferPointer(), 0, stride*yRes);
 	return 0;
 }
 
@@ -322,7 +330,10 @@ void CFrameBuffer::paletteSet(struct fb_cmap *map)
 
 void CFrameBuffer::paintBoxRel(int x, int y, int dx, int dy, unsigned char col)
 {
-	unsigned char* pos = lfb + x + stride*y;
+	if (!getActive())
+		return;
+
+	unsigned char* pos = getFrameBufferPointer() + x + stride*y;
 	for(int count=0;count<dy;count++)
 	{
 		memset(pos, col, dx);
@@ -332,10 +343,10 @@ void CFrameBuffer::paintBoxRel(int x, int y, int dx, int dy, unsigned char col)
 
 void CFrameBuffer::paintBox(int xa, int ya, int xb, int yb, unsigned char col)
 {
-	if (!active)
+	if (!getActive())
 		return;
 
-	unsigned char* pos = lfb + xa + stride*ya;
+	unsigned char* pos = getFrameBufferPointer() + xa + stride*ya;
 	int dx = xb-xa;
 	int dy = yb-ya;
 	for(int count=0;count<dy;count++)
@@ -347,10 +358,10 @@ void CFrameBuffer::paintBox(int xa, int ya, int xb, int yb, unsigned char col)
 
 void CFrameBuffer::paintVLine(int x, int ya, int yb, unsigned char col)
 {
-	if (!active)
+	if (!getActive())
 		return;
 
-	unsigned char* pos = lfb + x + stride*ya;
+	unsigned char* pos = getFrameBufferPointer() + x + stride*ya;
 	int dy = yb-ya;
 	for(int count=0;count<dy;count++)
 	{
@@ -361,10 +372,10 @@ void CFrameBuffer::paintVLine(int x, int ya, int yb, unsigned char col)
 
 void CFrameBuffer::paintVLineRel(int x, int y, int dy, unsigned char col)
 {
-	if (!active)
+	if (!getActive())
 		return;
 
-	unsigned char* pos = lfb + x + stride*y;
+	unsigned char* pos = getFrameBufferPointer() + x + stride*y;
 	for(int count=0;count<dy;count++)
 	{
 		*pos = col;
@@ -374,20 +385,20 @@ void CFrameBuffer::paintVLineRel(int x, int y, int dy, unsigned char col)
 
 void CFrameBuffer::paintHLine(int xa, int xb, int y, unsigned char col)
 {
-	if (!active)
+	if (!getActive())
 		return;
 
-	unsigned char* pos = lfb + xa + stride*y;
+	unsigned char* pos = getFrameBufferPointer() + xa + stride*y;
 	int dx = xb -xa;
 	memset(pos, col, dx);
 }
 
 void CFrameBuffer::paintHLineRel(int x, int dx, int y, unsigned char col)
 {
-	if (!active)
+	if (!getActive())
 		return;
 
-	unsigned char* pos = lfb + x + stride*y;
+	unsigned char* pos = getFrameBufferPointer() + x + stride*y;
 	memset(pos, col, dx);
 }
 
@@ -398,7 +409,7 @@ void CFrameBuffer::setIconBasePath(std::string iconPath)
 
 bool CFrameBuffer::paintIcon8(const std::string filename, int x, int y, unsigned char offset)
 {
-	if (!active)
+	if (!getActive())
 		return false;
 
 	struct rawHeader header;
@@ -419,7 +430,7 @@ bool CFrameBuffer::paintIcon8(const std::string filename, int x, int y, unsigned
 	height = (header.height_hi << 8) | header.height_lo;
 
 	unsigned char pixbuf[768];
-	unsigned char *d = lfb + x +stride*y;
+	unsigned char *d = getFrameBufferPointer() + x +stride*y;
 	unsigned char *d2;
 	for (int count=0; count<height; count ++ )
 	{
@@ -444,7 +455,7 @@ bool CFrameBuffer::paintIcon8(const std::string filename, int x, int y, unsigned
 
 bool CFrameBuffer::paintIcon(const std::string filename, int x, int y, unsigned char offset)
 {
-	if (!active)
+	if (!getActive())
 		return false;
 
 	struct rawHeader header;
@@ -465,7 +476,7 @@ bool CFrameBuffer::paintIcon(const std::string filename, int x, int y, unsigned 
 	height = (header.height_hi << 8) | header.height_lo;
 
 	unsigned char pixbuf[768];
-	unsigned char *d = lfb + x +stride*y;
+	unsigned char *d = getFrameBufferPointer() + x +stride*y;
 	unsigned char *d2;
 	for (int count=0; count<height; count ++ )
 	{
@@ -498,7 +509,7 @@ bool CFrameBuffer::paintIcon(const std::string filename, int x, int y, unsigned 
 }
 void CFrameBuffer::loadPal(const std::string filename, unsigned char offset, unsigned char endidx )
 {
-	if (!active)
+	if (!getActive())
 		return;
 
 	struct rgbData rgbdata;
@@ -530,16 +541,16 @@ void CFrameBuffer::loadPal(const std::string filename, unsigned char offset, uns
 
 void CFrameBuffer::paintPixel(int x, int y, unsigned char col)
 {
-	if (!active)
+	if (!getActive())
 		return;
 
-	unsigned char* pos = lfb + x + stride*y;
+	unsigned char* pos = getFrameBufferPointer() + x + stride*y;
 	*pos = col;
 }
 
 void CFrameBuffer::paintLine(int xa, int ya, int xb, int yb, unsigned char col)
 {
-	if (!active)
+	if (!getActive())
 		return;
 
 	int dx = abs (xa - xb);
@@ -667,6 +678,9 @@ bool CFrameBuffer::loadPicture2Mem(const std::string filename, uint8_t * memp)
 
 bool CFrameBuffer::loadPicture2FrameBuffer(const std::string filename)
 {
+	if (!getActive())
+		return false;
+
 	return loadPictureToMem(filename, BACKGROUNDIMAGEWIDTH, 576, getStride(), getFrameBufferPointer());
 }
 
@@ -784,7 +798,7 @@ void CFrameBuffer::paintBackgroundBox(int xa, int ya, int xb, int yb)
 
 void CFrameBuffer::paintBackgroundBoxRel(int x, int y, int dx, int dy)
 {
-	if (!active)
+	if (!getActive())
 		return;
 
 	if(!useBackgroundPaint)
@@ -793,7 +807,7 @@ void CFrameBuffer::paintBackgroundBoxRel(int x, int y, int dx, int dy)
 	}
 	else
 	{
-		unsigned char *fbpos = lfb + x + stride*y;
+		unsigned char *fbpos = getFrameBufferPointer() + x + stride*y;
 		unsigned char *bkpos = background + x + BACKGROUNDIMAGEWIDTH * y;
 		for(int count=0;count<dy;count++)
 		{
@@ -811,24 +825,24 @@ void CFrameBuffer::paintBackgroundBoxRel(CPoint origin, CDimension dimension)
 
 void CFrameBuffer::paintBackground()
 {
-	if (!active)
+	if (!getActive())
 		return;
 
 	if (useBackgroundPaint && (background != NULL))
 	{
 		for (int i = 0; i < 576; i++)
-			memcpy(lfb + i * stride, background + i * BACKGROUNDIMAGEWIDTH, BACKGROUNDIMAGEWIDTH);
+			memcpy(getFrameBufferPointer() + i * stride, background + i * BACKGROUNDIMAGEWIDTH, BACKGROUNDIMAGEWIDTH);
 	}
 	else
-		memset(lfb, backgroundColor, stride*576);
+		memset(getFrameBufferPointer(), backgroundColor, stride*576);
 }
 
 void CFrameBuffer::SaveScreen(int x, int y, int dx, int dy, unsigned char* memp)
 {
-	if (!active)
+	if (!getActive())
 		return;
 
-    unsigned char *fbpos = lfb + x + stride*y;
+    unsigned char *fbpos = getFrameBufferPointer() + x + stride*y;
 	unsigned char *bkpos = memp;
 	for(int count=0;count<dy;count++)
 	{
@@ -841,10 +855,10 @@ void CFrameBuffer::SaveScreen(int x, int y, int dx, int dy, unsigned char* memp)
 
 void CFrameBuffer::RestoreScreen(int x, int y, int dx, int dy, unsigned char* memp)
 {
-	if (!active)
+	if (!getActive())
 		return;
 
-	unsigned char *fbpos = lfb + x + stride*y;
+	unsigned char *fbpos = getFrameBufferPointer() + x + stride*y;
 	unsigned char *bkpos = memp;
 	for(int count=0;count<dy;count++)
 	{
@@ -858,23 +872,31 @@ void CFrameBuffer::switch_signal (int signal)
 {
 	CFrameBuffer * thiz = CFrameBuffer::getInstance();
 	if (signal == SIGUSR1) {
-		ioctl(thiz->tty, VT_RELDISP, 1);
+		if (virtual_fb == NULL)
+			delete[] virtual_fb;
+		virtual_fb = new uint8_t[thiz->stride * thiz->yRes];
 		thiz->active = false;
+		if (virtual_fb != NULL)
+			memcpy(virtual_fb, thiz->lfb, thiz->stride * thiz->yRes);
+		ioctl(thiz->tty, VT_RELDISP, 1);
 		printf ("release display\n");
 	}
 	else if (signal == SIGUSR2) {
 		ioctl(thiz->tty, VT_RELDISP, VT_ACKACQ);
 		thiz->active = true;
-		printf ("ackquire display\n");
+		printf ("acquire display\n");
 		thiz->paletteSet(NULL);
-		memset(thiz->lfb, 0, thiz->stride*thiz->yRes);
+		if (virtual_fb != NULL)
+			memcpy(thiz->lfb, virtual_fb, thiz->stride * thiz->yRes);
+		else
+			memset(thiz->lfb, 0, thiz->stride*thiz->yRes);
 	}
 }
 
 void CFrameBuffer::ClearFrameBuffer()
 {
 	if(getActive())
-		memset(lfb, 255, stride * 576);
+		memset(getFrameBufferPointer(), 255, stride * 576);
 
 	//backgroundmode
 	setBackgroundColor(COL_BACKGROUND);
