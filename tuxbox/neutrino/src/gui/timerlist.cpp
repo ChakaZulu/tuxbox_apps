@@ -694,9 +694,9 @@ int CTimerList::modifyTimer()
 {
 	CTimerd::responseGetTimer* timer=&timerlist[selected];
 	CMenuWidget timerSettings("timerlist.menumodify", NEUTRINO_ICON_SETTINGS);
-	timerSettings.addItem( new CMenuSeparator() );
-	timerSettings.addItem( new CMenuForwarder("menu.back") );
-	timerSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	timerSettings.addItem(GenericMenuSeparator);
+	timerSettings.addItem(GenericMenuBack);
+	timerSettings.addItem(GenericMenuSeparatorLine);
 
 	char type[80];
 	strcpy(type, CZapitClient::Utf8_to_Latin1(convertTimerType2String(timer->eventType)).c_str()); // UTF8, UTF8 -> Latin1
@@ -755,9 +755,9 @@ int CTimerList::newTimer()
 	timerNew_standby_on =false;
 
 	CMenuWidget timerSettings("timerlist.menunew", NEUTRINO_ICON_SETTINGS);
-	timerSettings.addItem( new CMenuSeparator() );
-	timerSettings.addItem( new CMenuForwarder("menu.back") );
-	timerSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	timerSettings.addItem(GenericMenuSeparator);
+	timerSettings.addItem(GenericMenuBack);
+	timerSettings.addItem(GenericMenuSeparatorLine);
 
 	CDateInput timerSettings_alarmTime("timerlist.alarmtime", &(timerNew.alarmTime) , "ipsetup.hint_1", "ipsetup.hint_2");
 	CMenuForwarder *m1 = new CMenuForwarder("timerlist.alarmtime", true, timerSettings_alarmTime.getValue (), &timerSettings_alarmTime );
