@@ -40,6 +40,15 @@
 	</td>	
 </tr>
 </table>
+<h2>Audio Channels Priority</h2>
+Specifies the priority of audio channels (e.g. german english...). When zapped to a tv channel, the audio channel (if available) will be selected with this priority.
+<table border=0 cellspacing=5 cellpadding=0>
+<tr>
+	<td>
+		<input style="color:#000000" name="audiochannelspriority" type="text" size="100" maxlenght="100" value="#AUDIOCHANNELSPRIORITY#">
+	</td>	
+</tr>
+</table>
 <h2>Miscellaneous</h2>
 <table border=0 cellspacing=5 cellpdding=0>
 <tr>
