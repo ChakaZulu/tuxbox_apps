@@ -122,6 +122,7 @@ class CMP3PlayerGui : public CMenuTarget
 		void stop();
 		void pause();
 		void ff();
+		void rev();
 		int getNext();
 		void updateMP3Infos();
 		void updateTimes(bool force=false);

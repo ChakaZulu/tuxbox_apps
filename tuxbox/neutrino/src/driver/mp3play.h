@@ -76,7 +76,7 @@ class CMP3Player
 
 
 public:
-	enum State {STOP = 0, PLAY, PAUSE, FF};
+	enum State {STOP = 0, PLAY, PAUSE, FF, REV};
 	State state;
 	static CMP3Player* getInstance();
 	bool SetDSP(FILE *soundfd, struct mad_header *Header);
@@ -85,7 +85,7 @@ public:
    void pause();
 	void init();
    void ff();
-//   void rev();
+   void rev();
    char* getMp3Info(){return m_mp3info;}
    char* getTimePlayed(){return m_timePlayed;}
    char* getTimeTotal(){return m_timeTotal;}
