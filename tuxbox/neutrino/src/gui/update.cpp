@@ -192,7 +192,7 @@ bool CFlashUpdate::selectHttpImage(void)
 				
 				descriptions.push_back(description); /* workaround since CMenuForwarder does not store the Option String itself */
 
-				SelectionWidget.addItem(new CMenuForwarder(names[i].c_str(), true, descriptions[i].c_str(), new CUpdateMenuTarget(i, &selected)));
+				SelectionWidget.addItem(new CMenuForwarderNonLocalized(names[i].c_str(), true, descriptions[i].c_str(), new CUpdateMenuTarget(i, &selected)));
 				i++;
 			}
 		}
@@ -530,7 +530,7 @@ void CFlashExpert::showMTDSelector(const std::string & actionkey)
 	{
 		char sActionKey[20];
 		sprintf(sActionKey, "%s%d", actionkey.c_str(), x);
-		mtdselector->addItem(new CMenuForwarder(mtdInfo->getMTDName(x).c_str(), true, NULL, this, sActionKey));
+		mtdselector->addItem(new CMenuForwarderNonLocalized(mtdInfo->getMTDName(x).c_str(), true, NULL, this, sActionKey));
 	}
 	mtdselector->exec(NULL,"");
 }
@@ -556,7 +556,7 @@ void CFlashExpert::showFileSelector(const std::string & actionkey)
 			int pos = filen.find(".img");
 			if(pos!=-1)
 			{
-				fileselector->addItem(new CMenuForwarder(filen.c_str(), true, NULL, this, (actionkey + filen).c_str()));
+				fileselector->addItem(new CMenuForwarderNonLocalized(filen.c_str(), true, NULL, this, (actionkey + filen).c_str()));
 #warning TODO: make sure filen is UTF-8 encoded
 			}
 			free(namelist[count]);

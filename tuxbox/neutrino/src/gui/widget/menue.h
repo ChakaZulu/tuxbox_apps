@@ -292,7 +292,7 @@ class CMenuWidget : public CMenuTarget
 	public:
 		CMenuWidget()
 		{
-			name="";
+			name = NONEXISTANT_LOCALE;
 			iconfile="";
 			selected=-1;
 			iconOffset= 0;

@@ -506,7 +506,7 @@ void CBEBouquetWidget::switchLockBouquet()
 	paint();
 }
 
-std::string CBEBouquetWidget::inputName(const char * const defaultName, const char * const caption)
+std::string CBEBouquetWidget::inputName(const char * const defaultName, const neutrino_locale_t caption)
 {
 	char Name[30];
 

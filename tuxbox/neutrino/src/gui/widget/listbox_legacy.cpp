@@ -30,7 +30,7 @@
 
 CListBoxExt::CListBoxExt(void) : CListBox("")
 {
-	saveBoxCaption = NULL;
+	saveBoxCaption = NONEXISTANT_LOCALE;
 	saveBoxText = NULL;
 }
 
@@ -42,7 +42,7 @@ void CListBoxExt::setTitle(const char * const title)
 void CListBoxExt::hide()
 {
 	//want2save?
-	if ((modified) && (saveBoxCaption != NULL) && (saveBoxText != NULL))
+	if ((modified) && (saveBoxCaption != NONEXISTANT_LOCALE) && (saveBoxText != NULL))
 	{
 		if (ShowMsgUTF(saveBoxCaption, saveBoxText, CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo) == CMessageBox::mbrYes) // UTF-8
 			onSaveData();
@@ -51,7 +51,7 @@ void CListBoxExt::hide()
 	CListBox::hide();
 }
 
-void CListBoxExt::setSaveDialogText(const char * const title, const char * const text)
+void CListBoxExt::setSaveDialogText(const neutrino_locale_t title, const char * const text)
 {
 	saveBoxCaption = title;
 	saveBoxText = text;

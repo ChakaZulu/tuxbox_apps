@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.93 2004/06/06 20:53:19 thegoodguy Exp $
+  $Id: movieplayer.cpp,v 1.94 2004/06/06 21:52:52 thegoodguy Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -1794,7 +1794,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		else if (msg == CRCInput::RC_help)
  		{
 			std::string fullhelptext = g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP);
-			fullhelptext += "\nVersion: $Revision: 1.93 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			fullhelptext += "\nVersion: $Revision: 1.94 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -1930,31 +1930,31 @@ CMoviePlayerGui::PlayFile (void)
 		}
 
 		if (showaudioselectdialog) {
-            CMenuWidget APIDSelector(LOCALE_APIDSELECTOR_HEAD, "audio.raw", 300);
-    		APIDSelector.addItem(GenericMenuSeparator);
-    		apidchanged = 0;
-    		CAPIDSelectExec *APIDChanger;
-    		APIDChanger = new CAPIDSelectExec;
-    		for( unsigned int count=0; count<numpida; count++ )
-    		{
-    			char apidnumber[3];
-    			sprintf(apidnumber, "%d", count+1);
-
-    			std::string apidtitle = "Stream ";
-    			apidtitle.append(apidnumber);
-    			if (ac3flags[count]) {
-        			apidtitle.append(" (AC3)");
-    			}
-    			    
-    			APIDSelector.addItem(new CMenuForwarder(apidtitle.c_str(), true, NULL, APIDChanger, apidnumber, CRCInput::convertDigitToKey(count+1)), (count == 0));
+			CMenuWidget APIDSelector(LOCALE_APIDSELECTOR_HEAD, "audio.raw", 300);
+			APIDSelector.addItem(GenericMenuSeparator);
+			apidchanged = 0;
+			CAPIDSelectExec *APIDChanger;
+			APIDChanger = new CAPIDSelectExec;
+			for( unsigned int count=0; count<numpida; count++ )
+			{
+				char apidnumber[3];
+				sprintf(apidnumber, "%d", count+1);
+				
+				std::string apidtitle = "Stream ";
+				apidtitle.append(apidnumber);
+				if (ac3flags[count]) {
+					apidtitle.append(" (AC3)");
+				}
+				
+				APIDSelector.addItem(new CMenuForwarderNonLocalized(apidtitle.c_str(), true, NULL, APIDChanger, apidnumber, CRCInput::convertDigitToKey(count+1)), (count == 0));
 			}
-		    APIDSelector.exec(NULL, "");
-            if (currentapid == 0) {
-                currentapid = apids[0];
-                currentac3 = ac3flags[0];
-            }
-            showaudioselectdialog = false;
-        }
+			APIDSelector.exec(NULL, "");
+			if (currentapid == 0) {
+				currentapid = apids[0];
+				currentac3 = ac3flags[0];
+			}
+			showaudioselectdialog = false;
+		}
         		
 		g_RCInput->getMsg (&msg, &data, 10);	// 1 secs..
 		if(FileTime.IsVisible())
@@ -1997,7 +1997,7 @@ CMoviePlayerGui::PlayFile (void)
  		else if (msg == CRCInput::RC_help)
  		{
 			std::string fullhelptext = g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP);
-			fullhelptext += "\nVersion: $Revision: 1.93 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			fullhelptext += "\nVersion: $Revision: 1.94 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
  		else if (msg == CRCInput::RC_setup)

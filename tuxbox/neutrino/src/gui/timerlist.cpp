@@ -843,10 +843,10 @@ int CTimerList::newTimer()
 				PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
 				",",
 				channel->channel_id);
-			mwtv->addItem(new CMenuForwarder(channel->name, true, NULL, this, (std::string(cChannelId) + channel->name).c_str()));
+			mwtv->addItem(new CMenuForwarderNonLocalized(channel->name, true, NULL, this, (std::string(cChannelId) + channel->name).c_str()));
 		}
 		if (!subchannellist.empty())
-			mctv.addItem(new CMenuForwarder(bouquet->name, true, NULL, mwtv));
+			mctv.addItem(new CMenuForwarderNonLocalized(bouquet->name, true, NULL, mwtv));
 		subchannellist.clear();
 		zapit.getBouquetChannels(bouquet->bouquet_nr,subchannellist,CZapitClient::MODE_RADIO, true); // UTF-8
 		channel = subchannellist.begin();
@@ -858,10 +858,10 @@ int CTimerList::newTimer()
 				PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
 				",",
 				channel->channel_id);
-			mwradio->addItem(new CMenuForwarder(channel->name, true, NULL, this, (std::string(cChannelId) + channel->name).c_str()));
+			mwradio->addItem(new CMenuForwarderNonLocalized(channel->name, true, NULL, this, (std::string(cChannelId) + channel->name).c_str()));
 		}
 		if (!subchannellist.empty())
-			mcradio.addItem(new CMenuForwarder(bouquet->name, true, NULL, mwradio));
+			mcradio.addItem(new CMenuForwarderNonLocalized(bouquet->name, true, NULL, mwradio));
 	}
 	CMenuWidget mm(LOCALE_TIMERLIST_MODESELECT, NEUTRINO_ICON_SETTINGS);
 	mm.addItem(new CMenuForwarder(LOCALE_TIMERLIST_MODETV, true, NULL, &mctv));
@@ -871,7 +871,7 @@ int CTimerList::newTimer()
 
 	CMenuOptionChooser* m6 = new CMenuOptionChooser(LOCALE_TIMERLIST_STANDBY, &timerNew_standby_on, TIMERLIST_STANDBY_OPTIONS, TIMERLIST_STANDBY_OPTION_COUNT, false); 
 
-	CStringInputSMS timerSettings_msg(LOCALE_TIMERLIST_MESSAGE, timerNew.message, 30, NULL, NULL, "abcdefghijklmnopqrstuvwxyz0123456789-.,:!?/ ");
+	CStringInputSMS timerSettings_msg(LOCALE_TIMERLIST_MESSAGE, timerNew.message, 30, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789-.,:!?/ ");
 	CMenuForwarder *m7 = new CMenuForwarder(LOCALE_TIMERLIST_MESSAGE, false, NULL, &timerSettings_msg );
 
 	CTimerListNewNotifier notifier2((int *)&timerNew.eventType,

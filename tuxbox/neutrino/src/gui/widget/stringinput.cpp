@@ -48,7 +48,7 @@
 #include <neutrino.h>
 
 
-CStringInput::CStringInput(const char * const Name, char* Value, int Size, const neutrino_locale_t Hint_1, const neutrino_locale_t Hint_2, const char * const Valid_Chars, CChangeObserver* Observ, const char * const Icon)
+CStringInput::CStringInput(const neutrino_locale_t Name, char* Value, int Size, const neutrino_locale_t Hint_1, const neutrino_locale_t Hint_2, const char * const Valid_Chars, CChangeObserver* Observ, const char * const Icon)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	name =  Name;
@@ -66,7 +66,7 @@ CStringInput::CStringInput(const char * const Name, char* Value, int Size, const
 	if (width<420)
 		width = 420;
 
-	int neededWidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getRenderWidth(g_Locale->getText(name.c_str()), true); // FIXME // UTF-8
+	int neededWidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getRenderWidth(g_Locale->getText(name), true); // UTF-8
 	if (!(iconfile.empty()))
 		neededWidth += 28;
 	if (neededWidth+20> width)
@@ -277,7 +277,7 @@ int CStringInput::exec( CMenuTarget* parent, const std::string & )
 		else if ( (msg==CRCInput::RC_home) || (msg==CRCInput::RC_timeout) )
 		{
 			if ( ( strcmp(value, oldval) != 0) &&
-			     (ShowMsgUTF(name.c_str(), g_Locale->getText(LOCALE_MESSAGEBOX_DISCARD), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel) == CMessageBox::mbrCancel)) // UTF-8
+			     (ShowMsgUTF(name, g_Locale->getText(LOCALE_MESSAGEBOX_DISCARD), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel) == CMessageBox::mbrCancel)) // UTF-8
 				continue;
 
 			strcpy(value, oldval);
@@ -317,7 +317,7 @@ int CStringInput::exec( CMenuTarget* parent, const std::string & )
 
 	if ( (observ) && (msg==CRCInput::RC_ok) )
 	{
-	  observ->changeNotify(name.c_str(), value); // FIXME
+		observ->changeNotify(name, value);
 	}
 
 	return res;
@@ -353,7 +353,7 @@ void CStringInput::paint()
 	else
 		iconoffset = 0;
 
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+ 10+ iconoffset, y+ hheight, width- 10- iconoffset, g_Locale->getText(name.c_str()), COL_MENUHEAD, 0, true); // FIXME // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+ 10+ iconoffset, y+ hheight, width- 10- iconoffset, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
 
 	if (hint_1 != NONEXISTANT_LOCALE)
 	{
@@ -404,7 +404,7 @@ void CStringInput::paintChar(int pos)
 		paintChar(pos, value[pos]);
 }
 
-CStringInputSMS::CStringInputSMS(const char * const Name, char* Value, int Size, const neutrino_locale_t Hint_1, const neutrino_locale_t Hint_2, const char * const Valid_Chars, CChangeObserver* Observ, const char * const Icon)
+CStringInputSMS::CStringInputSMS(const neutrino_locale_t Name, char* Value, int Size, const neutrino_locale_t Hint_1, const neutrino_locale_t Hint_2, const char * const Valid_Chars, CChangeObserver* Observ, const char * const Icon)
 		: CStringInput(Name, Value, Size, Hint_1, Hint_2, Valid_Chars, Observ, Icon)
 {
 	last_digit = -1;				// no key pressed yet
@@ -638,7 +638,7 @@ int CPINInput::exec( CMenuTarget* parent, const std::string & )
 
 	if ( (observ) && (msg==CRCInput::RC_ok) )
 	{
-		observ->changeNotify(name.c_str(), value); // FIXME
+		observ->changeNotify(name, value);
 	}
 
 	return res;

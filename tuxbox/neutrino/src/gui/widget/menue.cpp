@@ -59,7 +59,7 @@ CMenuForwarder * const GenericMenuBack = &CGenericMenuBack;
 
 
 
-CMenuWidget::CMenuWidget(const char * const Name, const std::string & Icon, const int mwidth, const int mheight)
+CMenuWidget::CMenuWidget(const neutrino_locale_t Name, const std::string & Icon, const int mwidth, const int mheight)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	name = Name;
@@ -524,7 +524,7 @@ int CMenuOptionChooser::paint( bool selected )
 
 	frameBuffer->paintBoxRel(x, y, dx, height, bgcolor);
 
-	const char * option = "error";
+	neutrino_locale_t option = NONEXISTANT_LOCALE;
 
 	for(unsigned int count = 0 ; count < number_of_options; count++)
 	{

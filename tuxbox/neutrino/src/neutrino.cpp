@@ -144,6 +144,8 @@ static bool parentallocked = false;
 static CTimingSettingsNotifier timingsettingsnotifier;
 static CFontSizeNotifier fontsizenotifier;
 
+extern const char * locale_real_names[]; /* #include <system/locals_intern.h> */
+
 CZapitClient::SatelliteList satList;
 CZapitClient::SatelliteList::iterator satList_it;
 
@@ -720,7 +722,7 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.parentallock_pincode, configfile.getString( "parentallock_pincode", "0000" ).c_str() );
 
 	for (int i = 0; i < TIMING_SETTING_COUNT; i++)
-		g_settings.timing[i] = configfile.getInt32(timing_setting_name[i], default_timing[i]);
+		g_settings.timing[i] = configfile.getInt32(locale_real_names[timing_setting_name[i]], default_timing[i]);
 
 	for (int i = 0; i < LCD_SETTING_COUNT; i++)
 		g_settings.lcd_setting[i] = configfile.getInt32(lcd_setting[i].name, lcd_setting[i].default_value);
@@ -1029,7 +1031,7 @@ void CNeutrinoApp::saveSetup()
 
 	//timing
 	for (int i = 0; i < TIMING_SETTING_COUNT; i++)
-		configfile.setInt32(timing_setting_name[i], g_settings.timing[i]);
+		configfile.setInt32(locale_real_names[timing_setting_name[i]], g_settings.timing[i]);
 
 	for (int i = 0; i < LCD_SETTING_COUNT; i++)
 		configfile.setInt32(lcd_setting[i].name, g_settings.lcd_setting[i]);
@@ -1283,7 +1285,7 @@ void CNeutrinoApp::SetupFonts()
 
 	for (int i = 0; i < FONT_TYPE_COUNT; i++)
 	{
-		g_Font[i] = g_fontRenderer->getFont(font.name, style[neutrino_font[i].style], configfile.getInt32(neutrino_font[i].name, neutrino_font[i].defaultsize) + neutrino_font[i].size_offset * font.size_offset);
+		g_Font[i] = g_fontRenderer->getFont(font.name, style[neutrino_font[i].style], configfile.getInt32(locale_real_names[neutrino_font[i].name], neutrino_font[i].defaultsize) + neutrino_font[i].size_offset * font.size_offset);
 	}
 }
 
@@ -2119,19 +2121,19 @@ protected:
 
 	virtual const char * getOption(void)
 		{
-			sprintf(value, "%u", configfile->getInt32(text, defaultvalue));
+			sprintf(value, "%u", configfile->getInt32(locale_real_names[text], defaultvalue));
 			return value;
 		}
 
 	virtual bool changeNotify(const neutrino_locale_t OptionName, void * Data)
 		{
-			configfile->setInt32(text, atoi(value));
+			configfile->setInt32(locale_real_names[text], atoi(value));
 			return observer->changeNotify(OptionName, Data);
 		}
   
 
 public:
-	CMenuNumberInput(const char * const Text, const int32_t DefaultValue, CChangeObserver * const _observer, CConfigFile * const _configfile) : CMenuForwarder(Text, true, NULL, this)
+	CMenuNumberInput(const neutrino_locale_t Text, const int32_t DefaultValue, CChangeObserver * const _observer, CConfigFile * const _configfile) : CMenuForwarder(Text, true, NULL, this)
 		{
 			observer     = _observer;
 			configfile   = _configfile;
@@ -4087,7 +4089,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 				for (unsigned int j = 0; j < font_sizes_groups[i].count; j++)
 				{
 					SNeutrinoSettings::FONT_TYPES k = font_sizes_groups[i].content[j];
-					configfile.setInt32(neutrino_font[k].name, neutrino_font[k].defaultsize);
+					configfile.setInt32(locale_real_names[neutrino_font[k].name], neutrino_font[k].defaultsize);
 				}
 		}
 		fontsizenotifier.changeNotify(NONEXISTANT_LOCALE, NULL);

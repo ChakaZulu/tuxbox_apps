@@ -46,7 +46,7 @@
 #include <neutrino.h>
 
 
-CExtendedInput::CExtendedInput(const neutrino_locale_t Name, char* Value, const char * const Hint_1, const char * const Hint_2, CChangeObserver* Observ, bool* Cancel)
+CExtendedInput::CExtendedInput(const neutrino_locale_t Name, char* Value, const neutrino_locale_t Hint_1, const neutrino_locale_t Hint_2, CChangeObserver* Observ, bool* Cancel)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	name = Name;
@@ -375,7 +375,7 @@ void CExtendedInput_Item_Char::keyPressed(const int key)
 
 //-----------------------------#################################-------------------------------------------------------
 
-CIPInput::CIPInput(const neutrino_locale_t Name, std::string & Value, const char * const Hint_1, const char * const Hint_2, CChangeObserver* Observ)
+CIPInput::CIPInput(const neutrino_locale_t Name, std::string & Value, const neutrino_locale_t Hint_1, const neutrino_locale_t Hint_2, CChangeObserver* Observ)
 	: CExtendedInput(Name, IP, Hint_1, Hint_2, Observ)
 {
 	ip = &Value;
@@ -426,7 +426,7 @@ void CIPInput::onAfterExec()
 }
 
 //-----------------------------#################################-------------------------------------------------------
-CDateInput::CDateInput(const neutrino_locale_t Name, time_t* Time, const char * const Hint_1, const char * const Hint_2, CChangeObserver* Observ)
+CDateInput::CDateInput(const neutrino_locale_t Name, time_t* Time, const neutrino_locale_t Hint_1, const neutrino_locale_t Hint_2, CChangeObserver* Observ)
 	: CExtendedInput(Name, "", Hint_1, Hint_2, Observ)
 {
 	time=Time;
@@ -512,7 +512,7 @@ void CDateInput::onAfterExec()
 }
 //-----------------------------#################################-------------------------------------------------------
 
-CMACInput::CMACInput(const neutrino_locale_t Name, char* Value, const char * const Hint_1, const char * const Hint_2, CChangeObserver* Observ)
+CMACInput::CMACInput(const neutrino_locale_t Name, char* Value, const neutrino_locale_t Hint_1, const neutrino_locale_t Hint_2, CChangeObserver* Observ)
 	: CExtendedInput(Name, Value, Hint_1, Hint_2, Observ)
 {
 	frameBuffer = CFrameBuffer::getInstance();
@@ -561,7 +561,7 @@ void CMACInput::onAfterExec()
 
 //-----------------------------#################################-------------------------------------------------------
 
-CTimeInput::CTimeInput(const neutrino_locale_t Name, char* Value, const char * const Hint_1, const char * const Hint_2, CChangeObserver* Observ, bool* Cancel)
+CTimeInput::CTimeInput(const neutrino_locale_t Name, char* Value, const neutrino_locale_t Hint_1, const neutrino_locale_t Hint_2, CChangeObserver* Observ, bool* Cancel)
 	: CExtendedInput(Name, Value, Hint_1, Hint_2, Observ, Cancel)
 {
 	frameBuffer = CFrameBuffer::getInstance();

@@ -52,7 +52,7 @@ class CStringInput : public CMenuTarget
 		int mheight; // menu font height
 		int iheight;
 
-		std::string name;
+		neutrino_locale_t name;
 		neutrino_locale_t hint_1, hint_2;
 		std::string iconfile;
 		const char * validchars;
@@ -80,8 +80,7 @@ class CStringInput : public CMenuTarget
 
 	public:
 
-		// Name: UTF-8 encoded
-		CStringInput(const char * const Name, char* Value, int Size, const neutrino_locale_t Hint_1 = NONEXISTANT_LOCALE, const neutrino_locale_t Hint_2 = NONEXISTANT_LOCALE, const char * const Valid_Chars= "0123456789. ", CChangeObserver* Observ = NULL, const char * const Icon = NULL);
+		CStringInput(const neutrino_locale_t Name, char* Value, int Size, const neutrino_locale_t Hint_1 = NONEXISTANT_LOCALE, const neutrino_locale_t Hint_2 = NONEXISTANT_LOCALE, const char * const Valid_Chars= "0123456789. ", CChangeObserver* Observ = NULL, const char * const Icon = NULL);
 
 		void hide();
 		int exec( CMenuTarget* parent, const std::string & actionKey );
@@ -109,7 +108,7 @@ class CStringInputSMS : public CStringInput
 		virtual void paint();
 
 	public:
-		CStringInputSMS(const char * const Name, char* Value, int Size, const neutrino_locale_t Hint_1, const neutrino_locale_t Hint_2, const char * const Valid_Chars, CChangeObserver* Observ = NULL, const char * const Icon = NULL);
+		CStringInputSMS(const neutrino_locale_t Name, char* Value, int Size, const neutrino_locale_t Hint_1, const neutrino_locale_t Hint_2, const char * const Valid_Chars, CChangeObserver* Observ = NULL, const char * const Icon = NULL);
 };
 
 class CPINInput : public CStringInput

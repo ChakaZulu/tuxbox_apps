@@ -539,10 +539,11 @@ void EpgPlus::CFooter::paintEventDetails ( const std::string& description , cons
 
 struct button_label channelListButtons[] =
 {
-	{ NEUTRINO_ICON_BUTTON_RED    , LOCALE_EPGPLUS_RECORD},
-	{ NEUTRINO_ICON_BUTTON_GREEN  , LOCALE_EPGPLUS_REFRESH_EPG},
-	{ NEUTRINO_ICON_BUTTON_YELLOW , LOCALE_EPGPLUS_REMIND},
-	{ NEUTRINO_ICON_BUTTON_BLUE   , ""},
+	{ NEUTRINO_ICON_BUTTON_RED    , LOCALE_EPGPLUS_RECORD       },
+	{ NEUTRINO_ICON_BUTTON_GREEN  , LOCALE_EPGPLUS_REFRESH_EPG  },
+	{ NEUTRINO_ICON_BUTTON_YELLOW , LOCALE_EPGPLUS_REMIND       },
+	{ NEUTRINO_ICON_BUTTON_BLUE   , LOCALE_EPGPLUS_STRETCH_MODE }
+#warning NEUTRINO_ICON_BUTTON_BLUE needs a real locale (I just picked one to fix the compilation process)
 };
 
 void EpgPlus::CFooter::paintButtons ( bool isStretchMode)

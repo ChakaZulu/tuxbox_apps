@@ -275,7 +275,7 @@ int CNFSMountGui::menu()
 	{
 		sprintf(s2,"mountentry%d",i);
 		ISO_8859_1_entry[i] = ZapitTools::UTF8_to_Latin1(m_entry[i]); 
-		mountMenuW.addItem(new CMenuForwarder("", true, ISO_8859_1_entry[i], this, s2));
+		mountMenuW.addItem(new CMenuForwarderNonLocalized("", true, ISO_8859_1_entry[i].c_str(), this, s2));
 	}
 	int ret=mountMenuW.exec(this,"");
 	return ret;
@@ -530,7 +530,7 @@ int CNFSUmountGui::menu()
 			s1 += mountOn;
 			std::string s2 = "doumount ";
 			s2 += mountOn;
-			umountMenu.addItem(new CMenuForwarder(s1.c_str(), true, NULL, this, s2.c_str()));
+			umountMenu.addItem(new CMenuForwarderNonLocalized(s1.c_str(), true, NULL, this, s2.c_str()));
 		}
 	}
 	in.close();

@@ -632,7 +632,7 @@ bool CFileBrowser::exec(std::string Dirname)
 				msg += filelist[selected].getFileName();
 			msg += ' ';
 			msg += g_Locale->getText(LOCALE_FILEBROWSER_DODELETE2);
-			if (ShowMsgUTF("", msg, CMessageBox::mbrNo, CMessageBox::mbYes|CMessageBox::mbNo)==CMessageBox::mbrYes)
+			if (ShowMsgUTF(LOCALE_FILEBROWSER_DELETE, msg, CMessageBox::mbrNo, CMessageBox::mbYes|CMessageBox::mbNo)==CMessageBox::mbrYes)
 			{
 				recursiveDelete(filelist[selected].Name.c_str());
 				ChangeDir(Path);

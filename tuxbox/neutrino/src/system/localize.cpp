@@ -35,6 +35,7 @@
 #endif
 
 #include <system/localize.h>
+#include <system/locals_intern.h>
 
 #include <fstream>
 #include <iostream>
@@ -152,9 +153,9 @@ CLocaleManager::loadLocale_ret_t CLocaleManager::loadLocale(const char * const l
 
 const char * CLocaleManager::getText(const neutrino_locale_t keyName) const
 {
-	mapLocaleData::const_iterator it = localeData.find(keyName);
+	mapLocaleData::const_iterator it = localeData.find(locale_real_names[keyName]);
 	if (it == localeData.end())
-		return keyName;
+		return locale_real_names[keyName];
 	else
 		return (it->second).c_str();
 }

@@ -29,13 +29,13 @@
 class CListBoxExt : public CListBox
 {
  protected:
-	const char *    saveBoxCaption;
-	const char *    saveBoxText;
+	neutrino_locale_t saveBoxCaption;
+	const char *      saveBoxText;
     
 	void setTitle(const char * const title);
 
 	virtual void hide();
-	void setSaveDialogText(const char * const title, const char * const text);
+	void setSaveDialogText(const neutrino_locale_t title, const char * const text);
 	virtual void onSaveData(){};
     
  public:
