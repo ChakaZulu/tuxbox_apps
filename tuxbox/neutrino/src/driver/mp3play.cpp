@@ -498,7 +498,6 @@ int CMP3Player::MpegAudioDecoder(FILE *InputFp,FILE *OutputFp)
 	}
 
 	/* That's the end of the world (in the H. G. Wells way). */
-	state = STOP;
 	return(Status);
 }
 
@@ -535,9 +534,9 @@ bool  CMP3Player::SetDSP(FILE *soundfd, struct mad_header *Header)
 void CMP3Player::stop()
 {
 	do_loop = false;
-//	pthread_join(thrPlay,NULL);
-	pthread_cancel(thrPlay);
-	fcloseall();
+	pthread_join(thrPlay,NULL);
+//	pthread_cancel(thrPlay);
+//	fcloseall();
 }
 
 CMP3Player* CMP3Player::getInstance()
@@ -552,6 +551,7 @@ CMP3Player* CMP3Player::getInstance()
 
 void* CMP3Player::PlayThread(void * filename)
 {
+	CMP3Player::getInstance()->state = PLAY;
 	FILE *fp = fopen((char *)filename,"r");
 	FILE *soundfd=::fopen("/dev/sound/dsp","w");
 
@@ -562,6 +562,7 @@ void* CMP3Player::PlayThread(void * filename)
 	
 	fclose(fp);
 	fclose(soundfd);
+	CMP3Player::getInstance()->state = STOP;
 	pthread_exit(0);
 	return NULL;
 }
@@ -572,7 +573,6 @@ bool CMP3Player::play(const char *filename)
 	if(true)
 	{
 		stop();
-		CMP3Player::getInstance()->state = PLAY;
 		if (pthread_create (&thrPlay, NULL, PlayThread,(void *) filename) != 0 )
 		{
 			perror("mp3play: pthread_create(PlayThread)");
