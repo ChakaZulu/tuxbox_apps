@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.29 2003/12/27 00:21:17 rasc Exp $
+$Id: dvb_str.c,v 1.30 2003/12/27 18:17:18 rasc Exp $
 
 
  http://dvbsnoop.sourceforge.net/
@@ -18,6 +18,9 @@ $Id: dvb_str.c,v 1.29 2003/12/27 00:21:17 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.30  2003/12/27 18:17:18  rasc
+dsmcc PES dsmcc_program_stream_descriptorlist
+
 Revision 1.29  2003/12/27 00:21:17  rasc
 dsmcc section tables
 
@@ -183,13 +186,13 @@ char *dvbstrTableID (u_int id)
      {  0x04, 0x04,  "ISO_IEC_14496_scene_description_section" },	/* $$$ TODO */
      {  0x05, 0x05,  "ISO_IEC_14496_object_description_section" },	/* $$$ TODO */
       {  0x06, 0x37,  "ITU-T Rec. H.222.0|ISO/IEC13818 reserved" },
-      {  0x38, 0x39,  "DSM-CC - reserved " },				/* $$$ ??? TODO */
-      {  0x3a, 0x3a,  "DSM-CC - multiprotocol encapsulated data" },		/* $$$ ??? TODO */
-      {  0x3b, 0x3b,  "DSM-CC - U-N messages (DSI or DII)" },
-      {  0x3c, 0x3c,  "DSM-CC - Download Data Messages (DDB)" },    /* TR 101 202 */
-      {  0x3d, 0x3d,  "DSM-CC - stream descriptorlist" },	/* $$$ ??? TODO */
-      {  0x3e, 0x3e,  "DSM-CC - private data section (datagram)" },
-      {  0x3f, 0x3f,  "DSM-CC - addressable sections" },
+      {  0x38, 0x39,  "DSM-CC - reserved " },
+     {  0x3a, 0x3a,  "DSM-CC - multiprotocol encapsulated data" },
+     {  0x3b, 0x3b,  "DSM-CC - U-N messages (DSI or DII)" },
+     {  0x3c, 0x3c,  "DSM-CC - Download Data Messages (DDB)" },    /* TR 101 202 */
+     {  0x3d, 0x3d,  "DSM-CC - stream descriptorlist" },
+     {  0x3e, 0x3e,  "DSM-CC - private data section (datagram)" },
+      {  0x3f, 0x3f,  "DSM-CC - addressable sections" },	// $$$ TODO
 
      {  0x40, 0x40,  "network_information_section - actual network" },
      {  0x41, 0x41,  "network_information_section - other network" },

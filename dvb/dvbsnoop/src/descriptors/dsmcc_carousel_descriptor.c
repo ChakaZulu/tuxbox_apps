@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_carousel_descriptor.c,v 1.9 2003/11/01 21:40:27 rasc Exp $ 
+$Id: dsmcc_carousel_descriptor.c,v 1.10 2003/12/27 18:17:17 rasc Exp $ 
 
 
   dvbsnoop
@@ -12,6 +12,9 @@ $Id: dsmcc_carousel_descriptor.c,v 1.9 2003/11/01 21:40:27 rasc Exp $
 
 
 $Log: dsmcc_carousel_descriptor.c,v $
+Revision 1.10  2003/12/27 18:17:17  rasc
+dsmcc PES dsmcc_program_stream_descriptorlist
+
 Revision 1.9  2003/11/01 21:40:27  rasc
 some broadcast/linkage descriptor stuff
 
@@ -41,7 +44,7 @@ more PES stuff, DSM descriptors, testdata
   return byte length
 */
 
-int  descriptorDSMCC_DataCarousel_Private  (u_char *b)
+int  descriptorDSMCC  (u_char *b)
 
 {
  int len;
@@ -52,12 +55,9 @@ int  descriptorDSMCC_DataCarousel_Private  (u_char *b)
   len = ((int) b[1]) + 2;
 
   out_NL (4);
-  out_S2B_NL (4,"DSM_CC-DataCarousel-DescriptorTag: ",id,
-		  dsmccStrDSMCC_DataCarousel_DescriptorTAG (id));
+  out_S2B_NL (4,"DSM_CC-DescriptorTag: ",id,
+		  dsmccStrDSMCC_DescriptorTAG (id));
   out_SB_NL  (5,"Descriptor_length: ",b[1]);
-  /* $$$$ TODO */
-out_nl (1," ... TODO... $$$ not yet done");
-return len;
 
   // empty ??
   len = ((int)b[1]) + 2;

@@ -1,12 +1,10 @@
 /*
-$Id: dvb_descriptor.h,v 1.5 2003/11/26 23:54:47 rasc Exp $ 
+$Id: dvb_descriptor.h,v 1.6 2003/12/27 18:17:17 rasc Exp $ 
 
 
  DVBSNOOP
 
  a dvb sniffer  and mpeg2 stream analyzer tool
- mainly for me to learn about dvb streams, mpeg2, mhp, dsm-cc, ...
-
  http://dvbsnoop.sourceforge.net/
 
  (c) 2001-2003   Rainer.Scherg@gmx.de
@@ -17,6 +15,9 @@ $Id: dvb_descriptor.h,v 1.5 2003/11/26 23:54:47 rasc Exp $
 
 
 $Log: dvb_descriptor.h,v $
+Revision 1.6  2003/12/27 18:17:17  rasc
+dsmcc PES dsmcc_program_stream_descriptorlist
+
 Revision 1.5  2003/11/26 23:54:47  rasc
 -- bugfixes on Linkage descriptor
 

@@ -1,5 +1,5 @@
 /*
-$Id: pes_dsmcc.c,v 1.2 2003/12/27 14:35:01 rasc Exp $
+$Id: pes_dsmcc.c,v 1.3 2003/12/27 18:17:18 rasc Exp $
 
 
 
@@ -17,6 +17,9 @@ $Id: pes_dsmcc.c,v 1.2 2003/12/27 14:35:01 rasc Exp $
 
 
 $Log: pes_dsmcc.c,v $
+Revision 1.3  2003/12/27 18:17:18  rasc
+dsmcc PES dsmcc_program_stream_descriptorlist
+
 Revision 1.2  2003/12/27 14:35:01  rasc
 dvb-t descriptors
 DSM-CC: SSU Linkage/DataBroadcast descriptors
@@ -32,6 +35,7 @@ PES DSM-CC  ack and control commands  according ITU H.222.0 Annex B
 
 
 #include "dvbsnoop.h"
+#include "descriptors/dsm_descriptor.h"
 #include "strings/dsmcc_str.h"
 #include "misc/hexprint.h"
 #include "misc/output.h"
@@ -43,7 +47,7 @@ PES DSM-CC  ack and control commands  according ITU H.222.0 Annex B
 static  void dsmcc_control (u_char *b, int len);
 static  void dsmcc_ack (u_char *b, int len);
 static  int  dsmcc_timecode (u_char *b);
-
+static  void dsmcc_program_stream_descriptorlist_loop (u_char *b, int len);
 
 
 
@@ -62,27 +66,32 @@ void  PES_decodeDSMCC (u_char *b, int len)
  /* ITU H.222.0 Annex B */
 
 
-   int   commandID;
+   int   commandID;	// same as 'dsmcc_discriminator'
 
    // -- already processed:
    // --- packet_start_code_prefix 	24 bslbf
    // --- stream_id 			8 uimsbf
    // --- packet_length			24 uimsbf
 
-   commandID = outBit_S2x_NL (4,"Command_ID: ",	b,0,8,
+
+	commandID = outBit_S2x_NL (4,"Command_ID/dsmcc_discriminator: ",	b,0,8,
 			(char *(*)(u_long)) dsmccStr_Command_ID);
-   b++;
-   len--;
+	b++;
+	len--;
 
-   if (commandID == 0x01) {
+	switch (commandID) {
+		case 0x01: dsmcc_control (b,len); break;
+		case 0x02: dsmcc_ack (b,len); break;
+		case 0x80: dsmcc_program_stream_descriptorlist_loop (b,len); break;
 
-	dsmcc_control (b,len);
-
-   } else if (commandID == 0x02) {
-
-	dsmcc_ack (b,len);
-
-   }
+		default:
+			out_nl (4," Unknown DSM-CC commandID/dsmcc_discriminator");
+			indent (+1);
+			printhexdump_buf (4, b, len);		
+			indent (-1);
+			break;
+		      
+   	}
 
 
 }
@@ -295,6 +304,33 @@ static int  dsmcc_timecode (u_char *b)
 
 
 
+static void  dsmcc_program_stream_descriptorlist_loop (u_char *b, int len)
+{
+  int first = 1;
+
+  // dsmcc_discriminator is already displayed for the first pass of the loop
+
+
+  while (len > 0) {
+	  int i;
+
+	  if (! first) {
+		outBit_S2x_NL (4,"dsmcc_discriminator: ",	b,0,8,
+			(char *(*)(u_long)) dsmccStr_Command_ID);
+		b++;
+		len--;
+  	  }
+
+	  i = descriptorDSMCC  (b);
+	  b += i;
+	  len -= i;
+
+	  first = 0;
+  }
+
+
+
+}
 
 
 

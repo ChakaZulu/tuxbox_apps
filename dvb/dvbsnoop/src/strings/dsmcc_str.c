@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.9 2003/12/26 23:27:40 rasc Exp $
+$Id: dsmcc_str.c,v 1.10 2003/12/27 18:17:18 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dsmcc_str.c,v 1.9 2003/12/26 23:27:40 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.10  2003/12/27 18:17:18  rasc
+dsmcc PES dsmcc_program_stream_descriptorlist
+
 Revision 1.9  2003/12/26 23:27:40  rasc
 DSM-CC  UNT section
 
@@ -95,7 +98,7 @@ static char *findTableID (STR_TABLE *t, u_int id)
   -- see EN 192
  */
 
-char *dsmccStrDSMCC_DataCarousel_DescriptorTAG (u_int i)
+char *dsmccStrDSMCC_DescriptorTAG (u_int i)
 
 {
   STR_TABLE  Table[] = {
@@ -450,6 +453,7 @@ char *dsmccStrOUI  (u_int id)
 
 /*
   --  Command_ID
+  --  also  dsmcc_discriminator
   --  e.g. from ITU H.222.0 Annex B
   --  
 */
@@ -461,7 +465,9 @@ char *dsmccStr_Command_ID  (u_int id)
 	{ 0x00, 0x00,   "forbidden" },
 	{ 0x01, 0x01,   "control" },
 	{ 0x02, 0x02,   "Acknownledge" },
-	{ 0x03, 0xFF,   "reserved" },
+	{ 0x03, 0x7F,   "reserved" },
+	{ 0x80, 0x80,   "DSMCC_program_stream_descriptor_list" },
+	{ 0x81, 0xFF,   "reserved" },
       	{  0,0, NULL }
   };
 

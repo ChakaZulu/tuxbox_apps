@@ -1,5 +1,5 @@
 /*
-$Id: dsm_descriptor.h,v 1.4 2003/11/26 19:55:32 rasc Exp $ 
+$Id: dsm_descriptor.h,v 1.5 2003/12/27 18:17:17 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dsm_descriptor.h,v 1.4 2003/11/26 19:55:32 rasc Exp $
 
 
 $Log: dsm_descriptor.h,v $
+Revision 1.5  2003/12/27 18:17:17  rasc
+dsmcc PES dsmcc_program_stream_descriptorlist
+
 Revision 1.4  2003/11/26 19:55:32  rasc
 no message
 
@@ -40,7 +43,7 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 #define __DSM_DESCRIPTOR_H 1
 
 
-int   descriptorDSMCCPrivate (u_char *b);
+int   descriptorDSMCC (u_char *b);
 void  descriptorDSMCC_any (u_char *b);
 
 

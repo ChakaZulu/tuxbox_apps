@@ -1,17 +1,25 @@
 /*
-$Id: dsm_int_unt_descriptor.c,v 1.3 2003/12/27 14:35:00 rasc Exp $ 
+$Id: dsm_int_unt_descriptor.c,v 1.4 2003/12/27 18:17:17 rasc Exp $ 
 
 
-  dvbsnoop
-  (c) Rainer Scherg 2001-2003
+ DVBSNOOP
 
-  Private TAG Space  DSM-CC INT UNT
-  DSM-CC Descriptors  ISO 13818-6  // TR 102 006
+ a dvb sniffer  and mpeg2 stream analyzer tool
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2003   Rainer.Scherg@gmx.de
+
+
+ -- Private TAG Space  DSM-CC INT UNT
+ -- DSM-CC Descriptors  ISO 13818-6  // TR 102 006
 
 
 
 
 $Log: dsm_int_unt_descriptor.c,v $
+Revision 1.4  2003/12/27 18:17:17  rasc
+dsmcc PES dsmcc_program_stream_descriptorlist
+
 Revision 1.3  2003/12/27 14:35:00  rasc
 dvb-t descriptors
 DSM-CC: SSU Linkage/DataBroadcast descriptors
@@ -61,9 +69,6 @@ int  descriptorDSMCC_INT_UNT_Private  (u_char *b)
   out_S2B_NL (4,"DSM_CC-INT-UNT-DescriptorTag: ",id,
 		  dsmccStrDSMCC_INT_UNT_DescriptorTAG(id));
   out_SB_NL  (5,"Descriptor_length: ",b[1]);
-  /* $$$$ TODO */
-out_nl (1," ... TODO... $$$ not yet done");
-return len;
 
   // empty ??
   len = ((int)b[1]) + 2;
@@ -101,9 +106,13 @@ return len;
 //     {  0x80, 0xFE,  "user_private_descriptor" },
 
 
+
+     case 0x57:  descriptorDVB_Telephone (b);  break;
+     case 0x5F:  descriptorDVB_PrivateDataSpecifier (b);  break;
+
      default: 
 	if (b[0] < 0x80) {
-	    out_nl (0,"  ----> ERROR: unimplemented descriptor (DSM-CC context), Report!");
+	    out_nl (0,"  ----> ERROR: unimplemented descriptor (DSM-CC INT/UNT context), Report!");
 	}
 	descriptorDSMCC_any (b);
 	break;
