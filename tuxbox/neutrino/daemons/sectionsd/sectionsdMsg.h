@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.9 2001/07/20 00:02:47 fnbrd Exp $
+//  $Id: sectionsdMsg.h,v 1.10 2001/07/25 11:39:42 fnbrd Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -25,6 +25,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsdMsg.h,v $
+//  Revision 1.10  2001/07/25 11:39:42  fnbrd
+//  Added Port number
+//
 //  Revision 1.9  2001/07/20 00:02:47  fnbrd
 //  Kleiner Hack fuer besseres Zusammenspiel mit Neutrino.
 //
@@ -50,6 +53,8 @@
 //  first release
 //
 //
+
+#define SECTIONSD_PORT_NUMBER 1600
 
 struct msgSectionsdRequestHeader {
   char version;
