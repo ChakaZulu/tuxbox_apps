@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.261 2002/10/17 09:41:10 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.262 2002/10/17 20:51:18 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -47,6 +47,7 @@
 
 /* zapit headers */
 #include <zapit/audio.h>
+#include <zapit/basicserver.h>
 #include <zapit/cam.h>
 #include <zapit/client/msgtypes.h>
 #include <zapit/dmx.h>
@@ -94,8 +95,6 @@ enum
 
 int currentMode;
 
-int connfd;
-
 #ifdef DBOX2
 CLcddClient lcdd;
 #endif /* DBOX2 */
@@ -141,10 +140,12 @@ void CZapitDestructor()
 
 	save_settings(true);
 
+	/*
 	if (connfd != -1)
 	{
 		close(connfd);
 	}
+	*/
 
 	stopPlayBack();
 
@@ -549,7 +550,7 @@ int start_scan ()
 	return 0;
 }
 
-bool parse_command(CBasicMessage::Header &rmsg)
+bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 {
 	debug("[zapit] cmd %d (version %d) received\n", rmsg.cmd, rmsg.version);
 
@@ -655,21 +656,21 @@ bool parse_command(CBasicMessage::Header &rmsg)
 			{
 				CZapitMessages::commandGetBouquets msgGetBouquets;
 				read(connfd, &msgGetBouquets, sizeof(msgGetBouquets));
-				sendBouquets(msgGetBouquets.emptyBouquetsToo); // bouquet & channel number are already starting at 0!
+				sendBouquets(connfd, msgGetBouquets.emptyBouquetsToo); // bouquet & channel number are already starting at 0!
 				break;
 			}
 			case CZapitMessages::CMD_GET_BOUQUET_CHANNELS:
 			{
 				CZapitMessages::commandGetBouquetChannels msgGetBouquetChannels;
 				read(connfd, &msgGetBouquetChannels, sizeof(msgGetBouquetChannels));
-				sendBouquetChannels(msgGetBouquetChannels.bouquet, msgGetBouquetChannels.mode); // bouquet & channel number are already starting at 0!
+				sendBouquetChannels(connfd, msgGetBouquetChannels.bouquet, msgGetBouquetChannels.mode); // bouquet & channel number are already starting at 0!
 				break;
 			}
 			case CZapitMessages::CMD_GET_CHANNELS:
 			{
 				CZapitMessages::commandGetChannels msgGetChannels;
 				read(connfd, &msgGetChannels, sizeof(msgGetChannels));
-				sendChannels(msgGetChannels.mode, msgGetChannels.order); // bouquet & channel number are already starting at 0!
+				sendChannels(connfd, msgGetChannels.mode, msgGetChannels.order); // bouquet & channel number are already starting at 0!
 				break;
 			}
 			case CZapitMessages::CMD_RESTORE_BOUQUETS:
@@ -939,7 +940,7 @@ bool parse_command(CBasicMessage::Header &rmsg)
 				responseGetOtherPIDs.pcrpid = channel->getPcrPid();
 				responseGetOtherPIDs.selected_apid = channel->getAudioChannelIndex();
 				send(connfd, &responseGetOtherPIDs, sizeof(responseGetOtherPIDs), 0);
-				sendAPIDs();
+				sendAPIDs(connfd);
 				break;
 			}
 			case CZapitMessages::CMD_SETSUBSERVICES:
@@ -1014,14 +1015,10 @@ bool parse_command(CBasicMessage::Header &rmsg)
 
 int main (int argc, char **argv)
 {
-	int listenfd;
-	struct sockaddr_un servaddr;
-	int clilen;
-
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.261 2002/10/17 09:41:10 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.262 2002/10/17 20:51:18 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1134,31 +1131,6 @@ int main (int argc, char **argv)
 	/* initialize cam */
 	cam = new CCam();
 
-	/* network setup */
-	std::string filename = ZAPIT_UDS_NAME;
-
-	memset(&servaddr, 0, sizeof(struct sockaddr_un));
-	servaddr.sun_family = AF_UNIX;
-	strcpy(servaddr.sun_path, filename.c_str());
-	clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
-	unlink(filename.c_str());
-
-	if ((listenfd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
-	{
-		perror("[zapit] socket");
-		return -1;
-	}
-	if (bind(listenfd, (struct sockaddr*) &servaddr, clilen) < 0)
-	{
-		perror("[zapit] bind");
-		return -1;
-	}
-	if (listen(listenfd, 5) != 0)
-	{
-		perror("[zapit] listen");
-		return -1;
-	}
-
 	signal(SIGHUP, signal_handler);
 	signal(SIGTERM, signal_handler);
 	signal(SIGUSR1, signal_handler);
@@ -1187,23 +1159,14 @@ int main (int argc, char **argv)
 	// create eventServer
 	eventServer = new CEventServer;
 
-	bool parse_another_command;
-	
-	do
-	{
-		CBasicMessage::Header rmsg;
-		connfd = accept(listenfd, (struct sockaddr*) &servaddr, (socklen_t*) &clilen);
-		memset(&rmsg, 0, sizeof(rmsg));
-		read(connfd, &rmsg, sizeof(rmsg));
-		parse_another_command = parse_command(rmsg);
-		close(connfd);
-		connfd = -1;
-	}
-	while (parse_another_command);
+	CBasicServer zapit_server;
+	zapit_server.run(ZAPIT_UDS_NAME, parse_command);
 
 	CZapitDestructor();
 
-	return 0;
+	sleep(5);
+
+	return 1;
 }
 
 /****************************************************************/
@@ -1227,7 +1190,7 @@ void addChannelToBouquet(const unsigned int bouquet, const t_channel_id channel_
 		printf("channel_id not found in channellist!\n");
 }
 
-void sendBouquets(bool emptyBouquetsToo)
+void sendBouquets(int connfd, const bool emptyBouquetsToo)
 {
 	for (uint i=0; i<bouquetManager->Bouquets.size(); i++)
 	{
@@ -1256,7 +1219,7 @@ void sendBouquets(bool emptyBouquetsToo)
 	}
 }
 
-void internalSendChannels(ChannelList* channels, const unsigned int first_channel_nr)
+void internalSendChannels(int connfd, ChannelList* channels, const unsigned int first_channel_nr)
 {
 	for (uint32_t i = 0; i < channels->size();i++)
 	{
@@ -1276,7 +1239,7 @@ void internalSendChannels(ChannelList* channels, const unsigned int first_channe
 	}
 }
 
-void sendAPIDs()
+void sendAPIDs(int connfd)
 {
 	for (uint32_t i = 0; i < channel->getAudioChannelCount(); i++)
 	{
@@ -1295,7 +1258,7 @@ void sendAPIDs()
 }
 
 
-void sendBouquetChannels(const unsigned int bouquet, CZapitClient::channelsMode mode)
+void sendBouquetChannels(int connfd, const unsigned int bouquet, const CZapitClient::channelsMode mode)
 {
 	if (bouquet >= bouquetManager->Bouquets.size())
 	{
@@ -1304,12 +1267,12 @@ void sendBouquetChannels(const unsigned int bouquet, CZapitClient::channelsMode 
 	}
 
 	if (((currentMode & RADIO_MODE) && (mode == CZapitClient::MODE_CURRENT)) || (mode == CZapitClient::MODE_RADIO))
-		internalSendChannels(&(bouquetManager->Bouquets[bouquet]->radioChannels), bouquetManager->radioChannelsBegin().getNrofFirstChannelofBouquet(bouquet));
+		internalSendChannels(connfd, &(bouquetManager->Bouquets[bouquet]->radioChannels), bouquetManager->radioChannelsBegin().getNrofFirstChannelofBouquet(bouquet));
 	else
-		internalSendChannels(&(bouquetManager->Bouquets[bouquet]->tvChannels), bouquetManager->tvChannelsBegin().getNrofFirstChannelofBouquet(bouquet));
+		internalSendChannels(connfd, &(bouquetManager->Bouquets[bouquet]->tvChannels), bouquetManager->tvChannelsBegin().getNrofFirstChannelofBouquet(bouquet));
 }
 
-void sendChannels( CZapitClient::channelsMode mode, CZapitClient::channelsOrder order)
+void sendChannels(int connfd, const CZapitClient::channelsMode mode, const CZapitClient::channelsOrder order)
 {
 	ChannelList channels;
 
@@ -1336,7 +1299,7 @@ void sendChannels( CZapitClient::channelsMode mode, CZapitClient::channelsOrder 
 		sort(channels.begin(), channels.end(), CmpChannelByChName());
 	}
 
-	internalSendChannels(&channels, 0);
+	internalSendChannels(connfd, &channels, 0);
 }
 
 int startPlayBack()
