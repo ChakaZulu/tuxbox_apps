@@ -1,7 +1,7 @@
 #ifndef RC_INPUT_H
 #define RC_INPUT_H
 
-#include <linux/input.h>
+#include "input_fake.h"
 
 #define RC_0			KEY_0
 #define RC_1			KEY_1
