@@ -57,7 +57,7 @@
 
 using namespace std;
 
-#define WEBIFVERSION "2.4.0"
+#define WEBIFVERSION "2.4.1"
 
 #define KEYBOARDNORMAL 0
 #define KEYBOARDVIDEO 1
@@ -2617,6 +2617,7 @@ static eString audiom3u(eString request, eString dirpath, eString opt, eHTTPConn
 
 static eString videopls(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
+	system("killall -9 streamts");
 	eString vpid = eString().sprintf("%04x", Decoder::current.vpid);
 	eString apid = eString().sprintf("%04x", Decoder::current.apid);
 	eString pmt = eString().sprintf("%04x", Decoder::current.pmtpid);
