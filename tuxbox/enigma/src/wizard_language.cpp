@@ -129,10 +129,10 @@ eWizardLanguage::eWizardLanguage()
 	while (fgets(line, 256, f))
 	{
 		line[strlen(line)-1]=0;
-		char *id=line, *d;
-		if ((d=strchr(line, ' ')))
+		char *d=line, *id;
+		if ((id=strchr(line, ' ')))
 		{
-			*d++=0;
+			*id++=0;
 			eLanguageEntry *c=new eLanguageEntry(list, id, d);
 			
 			if ((current && !strcmp(id, current)) || !cur)
@@ -197,7 +197,7 @@ class eWizardLanguageInit
 public:
 	eWizardLanguageInit()
 	{
-		FILE *f=fopen(LOCALEDIR "/locales", "rt");
+		FILE *f=fopen(LOCALEDIR "/locale.alias", "rt");
 			// only run wizzard when language not yet setup'ed
 		char *temp;
 		if (!eConfig::getInstance()->getKey("/elitedvb/language", temp) )
