@@ -515,8 +515,11 @@ void eMP3Decoder::checkFlow(int last)
 		&& o[0] > (inputsn?minOutputBufferSize:minOutputBufferSize*16) )
 	{
 //		eDebug("statePlaying...");
-		http_status=_("playing...");
-		handler->messages.send(eServiceHandlerMP3::eMP3DecoderMessage(eServiceHandlerMP3::eMP3DecoderMessage::status));
+		if ( !inputsn && http )
+		{
+			http_status=_("playing...");
+			handler->messages.send(eServiceHandlerMP3::eMP3DecoderMessage(eServiceHandlerMP3::eMP3DecoderMessage::status));
+		}
 		state=statePlaying;
 		outputsn[0]->start();
 		if (outputsn[1])
