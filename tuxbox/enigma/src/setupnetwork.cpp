@@ -11,6 +11,7 @@
 #include <pthread.h>
 #include <lib/gui/multipage.h>
 #include <lib/gui/emessage.h>
+#include <lib/base/console.h>
 #endif
 
 #include <enigma.h>
@@ -369,17 +370,6 @@ eZapNetworkSetup::eZapNetworkSetup():
 	CONNECT( tdsl->selected, eZapNetworkSetup::tdslPressed );
 #endif
 
-#ifndef DISABLE_NFS
-	nfs = new eButton(this);
-	nfs->move(ePoint(370,90));
-	nfs->resize(eSize(70, fd+10));
-	nfs->setText("NFS");
-	nfs->loadDeco();
-	nfs->show();
-	nfs->setHelpText(_("to setup nfs entries"));
-	CONNECT( nfs->selected, eZapNetworkSetup::nfsPressed );
-#endif
-	
 	lNameserver=new eLabel(this);
 	lNameserver->setText("Nameserver:");
 	lNameserver->move(ePoint(20, 130));
@@ -511,8 +501,20 @@ eZapNetworkSetup::eZapNetworkSetup():
 	ok->resize(eSize(220, 40));
 	ok->setHelpText(_("save changes and return"));
 	ok->loadDeco();
-	
 	CONNECT(ok->selected, eZapNetworkSetup::okPressed);
+
+#ifndef DISABLE_NFS
+	nfs = new eButton(this);
+	nfs->move(ePoint(250,295));
+	nfs->resize(eSize(clientrect.width()-250, 40));
+	nfs->setText(_("mounts"));
+	nfs->setShortcut("blue");
+	nfs->setShortcutPixmap("blue");
+	nfs->loadDeco();
+	nfs->show();
+	nfs->setHelpText(_("here you can setup nfs/cifs mounts"));
+	CONNECT( nfs->selected, eZapNetworkSetup::nfsPressed );
+#endif
 
 	statusbar=new eStatusBar(this);
 	statusbar->move( ePoint(0, clientrect.height()-50 ) );
@@ -618,10 +620,7 @@ void eZapNetworkSetup::typeChanged(eListBoxEntryText *le)
 			rejectFTP->show();
 			rejectTelnet->show();
 			rejectSamba->show();
-#ifndef DISABLE_NFS
-			nfs->hide();	//nfs
-#endif
-			tdsl->show();			
+			tdsl->show();
 			lNameserver->hide();
 			lGateway->hide();
 			dns->hide();
@@ -638,9 +637,6 @@ void eZapNetworkSetup::typeChanged(eListBoxEntryText *le)
 			rejectTelnet->hide();
 			rejectSamba->hide();
 			tdsl->hide();
-#ifndef DISABLE_NFS
-			nfs->show();   //nfs
-#endif
 			lLogin->hide();
 			lPassword->hide();
 			login->hide();
@@ -732,15 +728,17 @@ static void errorMessage(const eString message, int type=0)
 	mb.hide();
 }
 
-eNFSSetup::eNFSSetup(): eWindow(0)
+eNFSSetup::eNFSSetup()
+	:eWindow(0), timeout(eApp)
 {
+	CONNECT(timeout.timeout, eNFSSetup::mountTimeout);
 	cur_entry=0;
 	headline.sprintf("NFS/CIFS Setup (%d/%d)",cur_entry + 1, MAX_NFS_ENTRIES);
 	
 	setText(headline);
-	cmove(ePoint(140,100));
-	cresize(eSize(450,380));
-	
+	cmove(ePoint(140,90));
+	cresize(eSize(450,400));
+
 	__u32 sip=ntohl(0x0a000061);
     
 	int de[4];
@@ -880,37 +878,37 @@ eNFSSetup::eNFSSetup(): eWindow(0)
 
 	//buttons
 	prev = new eButton(this);
-	prev->move(ePoint(10, clientrect.height() - (60+fd+10) ));
-	prev->resize(eSize(40, fd+10));
-	prev->setText("<<");
+	prev->move(ePoint(10, clientrect.height() - (80+fd) ));
+	prev->resize(eSize(40, 40));
+	prev->setText("<");
 	prev->loadDeco();
 	CONNECT(prev->selected, eNFSSetup::prevPressed);
 
 	mount = new eButton(this);
-	mount->move(ePoint(55, clientrect.height() - (60+fd+10) ));
-	mount->resize(eSize(100, fd+10));
+	mount->move(ePoint(55, clientrect.height() - (80+fd) ));
+	mount->resize(eSize(100, 40));
 	mount->setText("mount");
 	mount->loadDeco();
 	CONNECT(mount->selected, eNFSSetup::mountPressed);
 
 	ok = new eButton(this);
-	ok->move(ePoint(160, clientrect.height() - (60+fd+10) ));
-	ok->resize(eSize(130, fd+10));
+	ok->move(ePoint(160, clientrect.height() - (80+fd) ));
+	ok->resize(eSize(130, 40));
 	ok->setText(_("save"));
 	ok->loadDeco();
 	CONNECT(ok->selected, eNFSSetup::okPressed);
 
 	umount = new eButton(this);
-	umount->move(ePoint(clientrect.width() - 155, clientrect.height() - (60+fd+10) ));
-	umount->resize(eSize(100, fd+10));
+	umount->move(ePoint(clientrect.width() - 155, clientrect.height() - (80+fd) ));
+	umount->resize(eSize(100, 40));
 	umount->setText("umount");
 	umount->loadDeco();
 	CONNECT(umount->selected, eNFSSetup::umountPressed);
 
 	next = new eButton(this);
-	next->move(ePoint(clientrect.width() - 50, clientrect.height() - (60+fd+10) ));
-	next->resize(eSize(40, fd+10));
-	next->setText(">>");
+	next->move(ePoint(clientrect.width() - 50, clientrect.height() - (80+fd) ));
+	next->resize(eSize(40, 40));
+	next->setText(">");
 	next->loadDeco();
 	CONNECT(next->selected, eNFSSetup::nextPressed);
 
@@ -975,26 +973,46 @@ void eNFSSetup::load_config()
 
 	combo_fstype->setCurrent(itmp, true);
 
-	eConfig::getInstance()->getKey((cmd+"sdir").c_str(), ctmp);
-	sdir->setText(ctmp);
+	if (!eConfig::getInstance()->getKey((cmd+"sdir").c_str(), ctmp))
+	{
+		sdir->setText(ctmp);
+		free(ctmp);
+	}
 
-	eConfig::getInstance()->getKey((cmd+"ldir").c_str(), ctmp);
-	ldir->setText(ctmp);
-	if(ldir->getText().length()==0)
+	if (!eConfig::getInstance()->getKey((cmd+"ldir").c_str(), ctmp))
+	{
+		ldir->setText(ctmp);
+		free(ctmp);
+	}
+
+	if(!ldir->getText())
 		ldir->setText("/mnt");
 
+	itmp=0;
 	eConfig::getInstance()->getKey((cmd+"options").c_str(), itmp);
 	combo_options->setCurrent(itmp, true);
 
-	eConfig::getInstance()->getKey((cmd+"extraoptions").c_str(), ctmp);
-	extraoptions->setText(ctmp);
-	if(extraoptions->getText().length()==0)
+	if (!eConfig::getInstance()->getKey((cmd+"extraoptions").c_str(), ctmp))
+	{
+		extraoptions->setText(ctmp);
+		free(ctmp);
+	}
+	else if (!itmp)
 		extraoptions->setText("nolock,rsize=8192,wsize=8192");
 
-	eConfig::getInstance()->getKey((cmd+"username").c_str(), ctmp);
-	user->setText(ctmp);
-	eConfig::getInstance()->getKey((cmd+"password").c_str(), ctmp);
-	pass->setText(ctmp);
+	if (!eConfig::getInstance()->getKey((cmd+"username").c_str(), ctmp))
+	{
+		user->setText(ctmp);
+		free(ctmp);
+	}
+
+	if (!eConfig::getInstance()->getKey((cmd+"password").c_str(), ctmp))
+	{
+		pass->setText(ctmp);
+		free(ctmp);
+	}
+
+	itmp=0;
 	eConfig::getInstance()->getKey((cmd+"automount").c_str(), itmp);
 	doamount->setCheck(itmp);
 }
@@ -1027,7 +1045,7 @@ void eNFSSetup::okPressed()
 	
 	if(sdir->getText().length()==0 || ldir->getText().length()==0)
 	{
-		errorMessage("invalid or missing dir or local dir");
+		errorMessage(_("invalid or missing dir or local dir"));
 		return;
 	}
 	else
@@ -1045,8 +1063,8 @@ void eNFSSetup::okPressed()
 	}
 	
 	eMessageBox msg(
-		_("NFS-Entry stored. Further entry?\n"),
-		_("NFS-Setup..."),
+		_("NFS/CIFS-Entry stored. Further entry?\n"),
+		_("NFS/CIFS-Setup..."),
 		eMessageBox::btYes|eMessageBox::btNo, eMessageBox::btNo);
 
 	msg.show();
@@ -1086,107 +1104,113 @@ void eNFSSetup::mountPressed()
 {
 	if(sdir->getText().length()==0 || ldir->getText().length()==0)
 	{
-		errorMessage("invalid or missing dir or local dir");
+		errorMessage(_("invalid or missing dir or local dir"));
 		return;
 	}
 	else 
 	{
 		if(ismounted())
 		{
-			errorMessage("NFS/CIFS mount error already mounted");
+			errorMessage(_("NFS/CIFS mount error already mounted"));
 			return;
 		}
     
-		eString cmd,opt;
+		eString opt;
 
 		switch((int)combo_fstype->getCurrent()->getKey())
 		{
-			case 0:
-			{//NFS
-				cmd.sprintf("%d.%d.%d.%d:%s",ip->getNumber(0),ip->getNumber(1),ip->getNumber(2),ip->getNumber(3),sdir->getText().c_str());
+			case 0: // NFS
+			{
+				opt.sprintf("/bin/mount -t nfs %d.%d.%d.%d:/%s",
+					ip->getNumber(0),ip->getNumber(1),
+					ip->getNumber(2),ip->getNumber(3),
+					sdir->getText().c_str());
 
-				if((int)combo_options->getCurrent()->getKey() > 0 && extraoptions->getText().length()!=0)
-					opt.sprintf("%s,%s",combo_options->getCurrent()->getText().c_str(),extraoptions->getText().c_str());
-				else if((int)combo_options->getCurrent()->getKey() != 0 && extraoptions->getText().length()==0)
-					opt.sprintf("%s",combo_options->getCurrent()->getText().c_str());
-				else if((int)combo_options->getCurrent()->getKey() == 0 && extraoptions->getText().length()!=0)
-					opt.sprintf("%s",extraoptions->getText().c_str());
-				else
-					opt.sprintf("");
+				if( combo_options->getCurrent()->getKey() && extraoptions->getText() )
+					opt+=eString().sprintf(" -o %s,%s",
+									combo_options->getCurrent()->getText().c_str(),
+									extraoptions->getText().c_str());
+				else if( combo_options->getCurrent()->getKey() )
+					opt+=eString().sprintf(" -o %s", combo_options->getCurrent()->getText().c_str());
+				else if( extraoptions->getText() )
+					opt+=eString().sprintf(" -o %s", extraoptions->getText().c_str());
 				break;
 			}
-			case 1:{//CIFS
-				if(user->getText().length()==0 || pass->getText().length()==0)
+			case 1: // CIFS
+			{
+				if(!user->getText() || !pass->getText())
 				{
 					errorMessage("missing username and password");
 					return;
 				}
-				cmd.sprintf("//%d.%d.%d.%d/%s",ip->getNumber(0),ip->getNumber(1),ip->getNumber(2),ip->getNumber(3),sdir->getText().c_str());
-
-				eString opt_p;
-				opt_p.sprintf("username=%s,password=%s,unc=%s",user->getText().c_str(),pass->getText().c_str(),cmd.c_str());
+				opt.sprintf("/bin/mount -t cifs //bla -o user=%s,pass=%s,unc=//%d.%d.%d.%d/%s",
+					user->getText().c_str(), pass->getText().c_str(),
+					ip->getNumber(0),ip->getNumber(1),
+					ip->getNumber(2),ip->getNumber(3),
+					sdir->getText().c_str());
    
-				if((int)combo_options->getCurrent()->getKey() > 0 && extraoptions->getText().length()!=0)
-					opt.sprintf(",%s,%s",combo_options->getCurrent()->getText().c_str(),extraoptions->getText().c_str());
-				else if((int)combo_options->getCurrent()->getKey() != 0 && extraoptions->getText().length()==0)
-					opt.sprintf(",%s",combo_options->getCurrent()->getText().c_str());
-				else if((int)combo_options->getCurrent()->getKey() == 0 && extraoptions->getText().length()!=0)
-					opt.sprintf(",%s",extraoptions->getText().c_str());
-				else
-					opt.sprintf("");
-   
-				opt=opt_p+opt;
+				if( combo_options->getCurrent()->getKey() && extraoptions->getText() )
+					opt+=eString().sprintf(",%s,%s",
+									combo_options->getCurrent()->getText().c_str(),
+									extraoptions->getText().c_str());
+				else if( combo_options->getCurrent()->getKey() )
+					opt+=eString().sprintf(",%s", combo_options->getCurrent()->getText().c_str());
+				else if( extraoptions->getText() )
+					opt+=eString().sprintf(",%s", extraoptions->getText().c_str());
 				break;
 			}
 			default:
 				errorMessage("not supported network file system");
 				return;
 		}
+		opt+=' ';
+		opt+=ldir->getText().c_str();
 
-		signal(SIGCHLD, SIG_IGN);
-		if (fork() == 0)
+		if (!mountContainer)
 		{
-			for (unsigned int i=3; i < 90; ++i )
-				close(i);
-
-			if(combo_fstype->getCurrent()->getKey())
-				execlp("busybox", "mount", "-t", "cifs", cmd.c_str(), ldir->getText().c_str(), "-o", opt.c_str(), NULL);
-			else
-				execlp("busybox", "mount", "-t", "nfs", cmd.c_str(), ldir->getText().c_str(), "-o", opt.c_str(), NULL);
-			_exit(0);
+			eDebug("%s", opt.c_str() );
+			mountContainer = new eConsoleAppContainer(opt.c_str());
+			CONNECT(mountContainer->appClosed, eNFSSetup::appClosed);
 		}
-    
-		eString error;
-		if(ismounted())
-		{
-			error.sprintf("NFS mount: \"%s %s -o %s\"",cmd.c_str(), ldir->getText().c_str(), opt.c_str());
-			errorMessage(error);
-		}
-		else
-		{
-			error.sprintf("NFS mount error: \"%s %s -o %s\"",cmd.c_str(), ldir->getText().c_str(), opt.c_str());
-			errorMessage(error);
-		}
+		timeout.start(3000,true);
 	}
 }
     
 void eNFSSetup::umountPressed() 
 {
-	if(ismounted())
-	{
-		eString error;
+	eString error;
 
-		if (umount2(ldir->getText().c_str(), MNT_FORCE) != 0)
-		{
-			error.sprintf("NFS umount error: \"%s\"",ldir->getText().c_str());
-			errorMessage(error.c_str());
-		}
-		else
-		{
-			error.sprintf("NFS umount: \"%s\"",ldir->getText().c_str());
-			errorMessage(error.c_str());			
-		}
-	}
+	error.sprintf("%s umount '%s' %s",
+		(int)combo_fstype->getCurrent()->getKey()?"CIFS":"NFS",
+		ldir->getText().c_str(),
+		umount2(ldir->getText().c_str(), MNT_FORCE)?"FAILED!":"OK!");
+
+	errorMessage(error.c_str());
+}
+
+void eNFSSetup::mountTimeout()
+{
+	delete mountContainer;
+	mountContainer=0;
+}
+
+void eNFSSetup::appClosed(int)
+{
+	delete mountContainer;
+	mountContainer=0;
+
+	if ( timeout.isActive() )
+		timeout.stop();
+
+	eString error;
+	error.sprintf("%s mount '%d.%d.%d.%d/%s %s' %s",
+		(int)combo_fstype->getCurrent()->getKey()?"CIFS":"NFS",
+		ip->getNumber(0),ip->getNumber(1),
+		ip->getNumber(2),ip->getNumber(3),
+		sdir->getText().c_str(),
+		ldir->getText().c_str(),
+		ismounted()?"OK!":"FAILED!" );
+		errorMessage(error);
 }
 
 void eNFSSetup::automount()
@@ -1203,6 +1227,23 @@ void eNFSSetup::automount()
 		}
 	}
 }
+
+int eNFSSetup::eventHandler(const eWidgetEvent &e)
+{
+	if (e.type == eWidgetEvent::execBegin )
+	{
+		errorMessage(
+		_("Recording on CIFS shares is unstable.\n"
+			"Therefore CIFS support is not included "
+			"in the standard distribution. To use it "
+			"you must copy a driver called 'cifs.o' to "
+			"the '/var' directory and load it at system "
+			"startup.") );
+		return 1;
+	}
+	return eWindow::eventHandler(e);
+}
+
 #endif
 
 #endif // DISABLE_NETWORK

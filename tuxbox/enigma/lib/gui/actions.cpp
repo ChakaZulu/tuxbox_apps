@@ -141,7 +141,7 @@ eActionMapList::eActionMapList()
 	else
 	{
 		currentStyles.insert(tmp);
-		delete [] tmp;
+		free(tmp);
 	}
 	xmlfiles.setAutoDelete(true);
 }

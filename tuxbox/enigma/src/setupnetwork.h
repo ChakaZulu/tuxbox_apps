@@ -14,8 +14,10 @@ class eTextInputField;
 class eListBoxEntryText;
 
 #ifndef DISABLE_NFS
+class eConsoleAppContainer;
 class eNFSSetup: public eWindow
 {
+	eTimer timeout;
 	eButton *ok, *mount, *umount, *prev, *next;
 	eCheckbox *doamount;
 	eComboBox *combo_fstype, *combo_options;
@@ -25,18 +27,22 @@ class eNFSSetup: public eWindow
 	eString cmd,headline;
 	eTextInputField *sdir, *ldir, *user, *pass, *extraoptions;
 	int cur_entry;
-    
+	eConsoleAppContainer *mountContainer;
+     
 	void fieldSelected(int *number) { focusNext(eWidget::focusDirNext); }
 	void fstypeChanged(eListBoxEntryText *le);
     
 	void load_config();
-    
+
+	int eventHandler(const eWidgetEvent &e);
+	void appClosed(int);
 	void okPressed();
 	void prevPressed();
 	void nextPressed();
 	void mountPressed();
 	void umountPressed();
 	bool ismounted();
+	void mountTimeout();
 public:
 	eNFSSetup();
 	~eNFSSetup(){};

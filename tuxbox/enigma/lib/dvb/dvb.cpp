@@ -1040,11 +1040,12 @@ void eTransponderList::readLNBData()
 		lnb.getDiSEqC().gotoXXLongitude = tmpdouble;
 
 		char* tmpStr=0;
-		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/RotorTable").c_str(), tmpStr );    
+		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/RotorTable").c_str(), tmpStr );
 
 		if (tmpStr)
 		{
 			eString tmp = tmpStr;
+			free(tmpStr);
 			for (unsigned int i=0; i < tmp.length(); i+=7)
 			{
 				eString cur = tmp.mid(i);
@@ -1062,9 +1063,12 @@ void eTransponderList::readLNBData()
 			if ( eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/satellites/"+eString().setNum(satread)+"/OrbitalPosition").c_str(), tmpint) )
 				break;  // no satellite for this lnb found
 
-			eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/satellites/"+eString().setNum(satread)+"/description").c_str(), descr) ;
 			eSatellite *sat = lnb.addSatellite(tmpint);
-			sat->setDescription(descr);
+			if (!eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/satellites/"+eString().setNum(satread)+"/description").c_str(), descr))
+			{
+				sat->setDescription(descr);
+				free(descr);
+			}
 
 			eSwitchParameter &sParams = sat->getSwitchParams();
 

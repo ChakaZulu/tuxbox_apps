@@ -404,7 +404,6 @@ eDVBRecorder::eDVBRecorder(PMT *pmt,PAT *pat)
 	if (pmt)
 	{
 		CONNECT( tPMT.tableReady, eDVBRecorder::PMTready );
-		// use DEMUX1_DEV when it can handle.. but at moment not :(
 		tPMT.start((PMT*)pmt->createNext(), DEMUX1_DEV );
 		PmtData=pmt->getRAW();
 		pmtpid=pmt->pid;

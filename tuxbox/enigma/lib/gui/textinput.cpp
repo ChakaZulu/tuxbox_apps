@@ -45,9 +45,12 @@ eTextInputField::eTextInputField( eWidget *parent, eLabel *descr, eTextInputFiel
 	align=eTextPara::dirLeft;
 	table=5;
 	char *language=0;
-	eConfig::getInstance()->getKey("/elitedvb/language", language);
-	if (language && strstr(language,"ru_RU"))
-		table=1;
+	if (!eConfig::getInstance()->getKey("/elitedvb/language", language))
+	{
+		if (strstr(language,"ru_RU"))
+			table=1;
+		free(language);
+	}
 	if ( helpwidget )
 		editHelpText=_("press ok to save");
 	updateHelpWidget();
@@ -153,13 +156,14 @@ void eTextInputField::updateHelpWidget()
 			{
 				keysStr = capslock ? keymappings[language][i].second :
 					keymappings[language][i].first;
-				free(language);
 			}
 			else
 			{
 				keysStr = capslock ? keymappings["default"][i].second :
 					keymappings["default"][i].first;
 			}
+			if ( language )
+				free(language);
 
 			eString tmpStr = convertUTF8DVB(keysStr, table);
 
@@ -510,13 +514,14 @@ int eTextInputField::eventHandler( const eWidgetEvent &event )
 				{
 					keysStr = capslock ? keymappings[language][key].second :
 						keymappings[language][key].first;
-					free(language);
 				}
 				else
 				{
 					keysStr = capslock ? keymappings["default"][key].second :
 						keymappings["default"][key].first;
 				}
+				if ( language )
+					free(language);
 
 				eString tmpStr=convertUTF8DVB(keysStr, table);
 

@@ -121,7 +121,7 @@ eWizardLanguage::eWizardLanguage()
 	char *current;
 	if ( eConfig::getInstance()->getKey("/elitedvb/language", current) )
 		current=0;
-	
+
 	char line[256];
 	while (fgets(line, 256, f))
 	{
