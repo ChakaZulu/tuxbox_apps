@@ -1,5 +1,5 @@
 /*
- * $Id: pat.cpp,v 1.30 2002/09/04 11:52:56 obi Exp $
+ * $Id: pat.cpp,v 1.31 2002/09/10 18:28:23 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org> jaja :)
  *
@@ -29,7 +29,7 @@
 
 #include "pat.h"
 
-#define PAT_LENGTH 1024
+#define PAT_SIZE 1024 + 3
 
 extern CEventServer * eventServer;
 extern unsigned int found_channels;
@@ -75,7 +75,7 @@ int fake_pat (uint32_t TsidOnid, FrontendParameters feparams, uint8_t polarity, 
 int parse_pat (int demux_fd, CZapitChannel * channel, unsigned short original_network_id)
 {
 	/* buffer for program association table */
-	unsigned char buffer[PAT_LENGTH];
+	unsigned char buffer[PAT_SIZE];
 
 	/* current positon in buffer */
 	unsigned short i;
@@ -100,7 +100,7 @@ int parse_pat (int demux_fd, CZapitChannel * channel, unsigned short original_ne
 		}
 		
 		/* read section */
-		if ((status = read(demux_fd, buffer, PAT_LENGTH)) < 0)
+		if ((status = read(demux_fd, buffer, PAT_SIZE)) < 0)
 		{
 			perror("[pat.cpp] read");
 			return status;

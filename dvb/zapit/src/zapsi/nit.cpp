@@ -1,5 +1,5 @@
 /*
- * $Id: nit.cpp,v 1.23 2002/09/04 11:52:56 obi Exp $
+ * $Id: nit.cpp,v 1.24 2002/09/10 18:28:23 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -36,12 +36,14 @@
 #include "descriptors.h"
 #include "nit.h"
 
+#define NIT_SIZE 1024 + 3
+
 extern std::map <unsigned int, transponder> transponders;
 
 int parse_nit (unsigned char DiSEqC)
 {
 	int demux_fd;
-	unsigned char buffer[1024];
+	unsigned char buffer[NIT_SIZE];
 
 	/* position in buffer */
 	unsigned short pos;
@@ -80,7 +82,7 @@ int parse_nit (unsigned char DiSEqC)
 			return -1;
 		}
 
-		if ((read(demux_fd, buffer, sizeof(buffer))) < 0)
+		if (read(demux_fd, buffer, NIT_SIZE) < 0)
 		{
 			perror("[nit.cpp] read");
 			close(demux_fd);

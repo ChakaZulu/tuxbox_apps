@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.cpp,v 1.26 2002/08/24 11:10:53 obi Exp $
+ * $Id: sdt.cpp,v 1.27 2002/09/10 18:28:23 obi Exp $
  */
 
 /* system c */
@@ -16,10 +16,12 @@
 #include "descriptors.h"
 #include "sdt.h"
 
+#define SDT_SIZE 1024 + 3
+
 unsigned int get_sdt_TsidOnid ()
 {
 	int demux_fd;
-	unsigned char buffer[1024];
+	unsigned char buffer[SDT_SIZE];
 
 	/* service_description_section elements */
 	uint16_t transport_stream_id;
@@ -46,7 +48,7 @@ unsigned int get_sdt_TsidOnid ()
 		return 0;
 	}
 
-	if (read(demux_fd, buffer, sizeof(buffer)) < 0)
+	if (read(demux_fd, buffer, SDT_SIZE) < 0)
 	{
 		perror("[sdt.cpp] read");
 		close(demux_fd);
@@ -64,7 +66,7 @@ unsigned int get_sdt_TsidOnid ()
 int parse_sdt ()
 {
 	int demux_fd;
-	unsigned char buffer[1024];
+	unsigned char buffer[SDT_SIZE];
 
 	/* position in buffer */
 	unsigned short pos;
@@ -102,7 +104,7 @@ int parse_sdt ()
 			return -1;
 		}
 
-		if (read(demux_fd, buffer, sizeof(buffer)) < 0)
+		if (read(demux_fd, buffer, SDT_SIZE) < 0)
 		{
 			perror("[sdt.cpp] read");
 			close(demux_fd);

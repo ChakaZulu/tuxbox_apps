@@ -1,5 +1,5 @@
 /*
- * $Id: bat.cpp,v 1.5 2002/09/04 11:52:56 obi Exp $
+ * $Id: bat.cpp,v 1.6 2002/09/10 18:28:23 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -35,7 +35,7 @@
 #include "bat.h"
 #include "descriptors.h"
 
-#define BAT_SIZE 1024
+#define BAT_SIZE 1024 + 3
 
 int parse_bat (int demux_fd)
 {
@@ -73,7 +73,7 @@ int parse_bat (int demux_fd)
 			return -1;
 		}
 
-		if (read(demux_fd, buffer, sizeof(buffer)) < 0)
+		if (read(demux_fd, buffer, BAT_SIZE) < 0)
 		{
 			perror("[bat.cpp] read");
 			return -1;
