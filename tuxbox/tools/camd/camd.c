@@ -1,5 +1,5 @@
 /*
- * $Id: camd.c,v 1.19 2003/11/13 22:37:00 carjay Exp $
+ * $Id: camd.c,v 1.20 2003/11/20 03:15:07 obi Exp $
  *
  * (C) 2001, 2002, 2003 by gillem, Hunz, kwon, tmbinc, TripleDES, obi
  *
@@ -110,29 +110,29 @@ int writecam(unsigned char *data, unsigned short len)
 	return _writecam(0x23, data, len);
 }
 
-int descramble(unsigned short onID, unsigned short serviceID, unsigned short caID, unsigned short ecmpid, unsigned char numpids, unsigned short *pid)
+int descramble(descrambleservice_s *service)
 {
 	/* FIXME: create directly from capmt */
 	unsigned char i;
-	unsigned char buffer[12 + (numpids << 2)];
+	unsigned char buffer[12 + (service->numpids << 2)];
 
 	buffer[0] = 0x0F;  //0x0D
-	buffer[1] = onID >> 8;
-	buffer[2] = onID;
-	buffer[3] = serviceID >> 8;
-	buffer[4] = serviceID;
+	buffer[1] = service->onID >> 8;
+	buffer[2] = service->onID;
+	buffer[3] = service->sID >> 8;
+	buffer[4] = service->sID;
 	buffer[5] = 0x01;	/* number of descriptors following? */
 	buffer[6] = 0x04;	/* descriptor length */
-	buffer[7] = caID >> 8;
-	buffer[8] = caID;
-	buffer[9] = ecmpid >> 8;
-	buffer[10] = ecmpid;
-	buffer[11] = numpids;
+	buffer[7] = service->caID >> 8;
+	buffer[8] = service->caID;
+	buffer[9] = service->ecmPID >> 8;
+	buffer[10] = service->ecmPID;
+	buffer[11] = service->numpids;
 
 	/* es info */
-	for (i = 0; i < numpids; i++) {
-		buffer[12 + (i << 2)] = pid[i] >> 8;
-		buffer[13 + (i << 2)] = pid[i];
+	for (i = 0; i < service->numpids; i++) {
+		buffer[12 + (i << 2)] = service->pid[i] >> 8;
+		buffer[13 + (i << 2)] = service->pid[i];
 		buffer[14 + (i << 2)] = 0x80;
 		buffer[15 + (i << 2)] = 0x00;
 	}
@@ -213,69 +213,44 @@ int setemm(unsigned short ca_system_id, unsigned short ca_pid)
 	return writecam(buffer, 7);
 }
 
-void startdescramble (void)
+void startdescramble(void)
 {
 	unsigned char i;
 
 	for (i = 0; i < MAX_SERVICES; i++) {
 		if ((descrambleservice[i].valid == 1) && (descrambleservice[i].started == 0)) {
 			printf("[camd] starting onid %04x sid %04x\n", descrambleservice[i].onID, descrambleservice[i].sID);
-
-			descramble(
-				descrambleservice[i].onID,
-				descrambleservice[i].sID,
-				descrambleservice[i].caID,
-				descrambleservice[i].ecmPID,
-				descrambleservice[i].numpids,
-				descrambleservice[i].pid
-			);
-
+			descramble(&descrambleservice[i]);
 			descrambleservice[i].started = 1;
 		}
 	}
 }
 
-int adddescrambleservice(unsigned char numpids, unsigned short onid, unsigned short sid, unsigned short caid, unsigned short ecmpid, unsigned short *pid)
+void add_descrambleservice(descrambleservice_s *src)
 {
-	unsigned char i;
-	unsigned char j;
+	descrambleservice_s *dst;
+	int i;
 
 	for (i = 0; i < MAX_SERVICES; i++) {
-		if ((descrambleservice[i].caID == caid) && (descrambleservice[i].sID == sid) && (descrambleservice[i].ecmPID == ecmpid)) {
-			printf("[camd] refusing duplicate service\n");
-			return -1;
-		}
-
-		if (descrambleservice[i].valid == 0)
+		dst = &descrambleservice[i];
+		if ((src->caID == dst->caID) && (src->sID == dst->sID) && (src->ecmPID == dst->ecmPID))
+			break;
+		if (!dst->valid)
 			break;
 	}
 
 	if (i == MAX_SERVICES) {
 		printf("[camd] no free service, reset needed\n");
 		reset();
-		i = 0;
+		dst = &descrambleservice[0];
 	}
 
-	descrambleservice[i].valid = 1;
-	descrambleservice[i].started = 0;
-	descrambleservice[i].status = 0;
-	descrambleservice[i].onID = onid;
-	descrambleservice[i].sID = sid;
-	descrambleservice[i].caID = caid;
-	descrambleservice[i].ecmPID = ecmpid;
-	descrambleservice[i].numpids = numpids;
-
-	for (j = 0; j < numpids; j++)
-		descrambleservice[i].pid[j] = pid[j];
+	memcpy(dst, src, sizeof(descrambleservice_s));
+	dst->valid = 1;
+	dst->started = 0;
+	dst->status = 0;
 
 	startdescramble();
-
-	return 0;
-}
-
-int adddescrambleservicestruct(descrambleservice_s * service)
-{
-	return adddescrambleservice(service->numpids, service->onID, service->sID, service->caID, service->ecmPID, service->pid);
 }
 
 void class_23(unsigned char *buffer, unsigned int len)
@@ -548,7 +523,8 @@ int parse_ca_pmt(const unsigned char *buffer, const unsigned int length)
 
 	if ((service.numpids != 0) && (service.caID != 0)) {
 		service.onID = 0x0001;
-		return adddescrambleservicestruct(&service);
+		add_descrambleservice(&service);
+		return 0;
 	}
 
 	return -1;
