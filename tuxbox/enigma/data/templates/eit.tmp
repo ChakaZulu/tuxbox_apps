@@ -27,4 +27,7 @@
 			<textarea name="nextlt" rows=3 cols=78 readonly>#NEXTLT#</textarea>
 		</td>
 	</tr>
+	<tr>
+		<td>&nbsp;</td>
+	</tr>
 </table>
