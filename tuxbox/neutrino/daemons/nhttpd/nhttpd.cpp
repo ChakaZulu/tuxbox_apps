@@ -44,7 +44,7 @@ using namespace std;
 
 //-------------------------------------------------------------------------
 
-CWebserver* webserver;
+CWebserver* webserver = NULL;
 
 
 //-------------------------------------------------------------------------
@@ -59,7 +59,8 @@ void sig_catch(int msignal)
 
 		case SIGHUP :
 				aprintf("got signal HUP, reading config\n");
-				webserver->ReadConfig();
+				if (webserver)
+					webserver->ReadConfig();
 			break;
 /*
 		case SIGUSR1 :
@@ -69,8 +70,10 @@ void sig_catch(int msignal)
 */
 		default:
 				aprintf("stop requested......\n");
-				webserver->Stop();
-				delete(webserver);
+				if (webserver) {
+					webserver->Stop();
+					delete(webserver);
+				}
 				exit(0);
 	}
 	signal(msignal, sig_catch);
@@ -84,37 +87,34 @@ int main(int argc, char **argv)
 
 	int i;
 
-	if (argc > 1)
+	for(i = 1; i < argc; i++)
 	{
-		for(i = 1; i < argc; i++)
+
+		if (strncmp(argv[i], "-d", 2) == 0)
 		{
+			CDEBUG::getInstance()->Debug = true;
+			do_fork = false;
+		}
+		else 
 
-			if (strncmp(argv[i], "-d", 2) == 0)
-			{
-				CDEBUG::getInstance()->Debug = true;
-				do_fork = false;
-			}
-			else 
-
-			if (strncmp(argv[i], "-f", 2) == 0)
-			{
-				do_fork = false;
-			}
-			else if (strncmp(argv[i],"--version", 9) == 0) 
-			{
-				printf("nhttp - Neutrino Webserver\n");
-				printf("Version: %s\n", NHTTPD_VERSION);
-				return 0;
-			}
-			else if ((strncmp(argv[i], "--help", 6) == 0) || (strncmp(argv[i], "-h", 2) == 0))
-			{
-				printf("nhttpd parameters:\n");
-				printf("-d\t\tdebug\n");
-				printf("-f\t\tdo not fork\n");
-				printf("--version\tversion\n");
-				printf("--help\t\tthis text\n\n");
-				return 0;
-			}
+		if (strncmp(argv[i], "-f", 2) == 0)
+		{
+			do_fork = false;
+		}
+		else if (strncmp(argv[i],"--version", 9) == 0) 
+		{
+			printf("nhttp - Neutrino Webserver\n");
+			printf("Version: %s\n", NHTTPD_VERSION);
+			return 0;
+		}
+		else if ((strncmp(argv[i], "--help", 6) == 0) || (strncmp(argv[i], "-h", 2) == 0))
+		{
+			printf("nhttpd parameters:\n");
+			printf("-d\t\tdebug\n");
+			printf("-f\t\tdo not fork\n");
+			printf("--version\tversion\n");
+			printf("--help\t\tthis text\n\n");
+			return 0;
 		}
 	}
 
@@ -160,6 +160,9 @@ int main(int argc, char **argv)
 		aprintf("Error initializing nhttpd\n");
 		return -1;
 	}
+
+	webserver->Stop();
+        delete(webserver);
 
 	return 0; 
 }
