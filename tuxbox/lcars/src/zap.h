@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: zap.h,v $
+Revision 1.5  2002/06/08 20:21:09  TheDOC
+adding the cam-sources with slight interface-changes
+
 Revision 1.4  2002/05/18 02:55:24  TheDOC
 LCARS 0.21TP7
 
@@ -50,7 +53,7 @@ public:
 	~zap();
 
 	void zap_allstop();
-	void zap_to(int VPID, int APID, int PCR, int ECM, int SID, int ONID, int TS, int PID1 = -1, int PID2 = -1);
+	void zap_to(pmt_data pmt, int VPID, int APID, int PCR, int ECM, int SID, int ONID, int TS, int PID1 = -1, int PID2 = -1);
 	void zap_audio(int VPID, int APID, int ECM, int SID, int ONID);
 	void close_dev();
 	void dmx_start();

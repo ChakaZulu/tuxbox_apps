@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: zap.cpp,v $
+Revision 1.6  2002/06/08 20:21:09  TheDOC
+adding the cam-sources with slight interface-changes
+
 Revision 1.5  2002/06/02 12:18:47  TheDOC
 source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
 
@@ -111,7 +114,7 @@ void zap::zap_allstop()
 	ioctl(aud, AUDIO_STOP, true);
 }
 
-void zap::zap_to(int VPID, int APID, int PCR, int ECM, int SID, int ONID, int TS, int PID1, int PID2)
+void zap::zap_to(pmt_data pmt, int VPID, int APID, int PCR, int ECM, int SID, int ONID, int TS, int PID1, int PID2)
 {
 	zap_allstop();
 
@@ -217,6 +220,7 @@ void zap::zap_to(int VPID, int APID, int PCR, int ECM, int SID, int ONID, int TS
 		ca.setECM(ECM);
 		ca.setSID(SID);
 		ca.setONID(ONID);
+		ca.setPMTentry(pmt);
 		if (PID1 != -1)
 		{
 			ca.addPID(PID1);

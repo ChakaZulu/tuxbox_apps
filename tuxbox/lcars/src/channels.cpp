@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: channels.cpp,v $
+Revision 1.14  2002/06/08 20:21:09  TheDOC
+adding the cam-sources with slight interface-changes
+
 Revision 1.13  2002/06/08 15:11:47  TheDOC
 autostart in yadd added
 
@@ -206,9 +209,9 @@ void channels::setPerspective(int number)
 		osd_obj->addCommand("SHOW perspective");*/
 	//printf("%s\n", tmp_link.name);
 	if (tmp_link.APIDcount == 1)
-		zap_obj->zap_to(tmp_link.VPID, tmp_link.APID[apid], tmp_link.PCR, ECM, tmp_link.SID, tmp_link.ONID, tmp_link.TS);
+		zap_obj->zap_to(pmt_entry, tmp_link.VPID, tmp_link.APID[apid], tmp_link.PCR, ECM, tmp_link.SID, tmp_link.ONID, tmp_link.TS);
 	else
-		zap_obj->zap_to(tmp_link.VPID, tmp_link.APID[0], tmp_link.PCR, ECM, tmp_link.SID, tmp_link.ONID, tmp_link.TS, tmp_link.APID[1]);
+		zap_obj->zap_to(pmt_entry, tmp_link.VPID, tmp_link.APID[0], tmp_link.PCR, ECM, tmp_link.SID, tmp_link.ONID, tmp_link.TS, tmp_link.APID[1]);
 
 }
 
@@ -279,9 +282,9 @@ void channels::zapCurrentChannel()
 
 		hardware_obj->useDD(getCurrentDD(0));
 		if (getCurrentAPIDcount() == 1)
-			(*zap_obj).zap_to(getCurrentVPID(), getCurrentAPID(0), getCurrentPCR(), ECM, getCurrentSID(), getCurrentONID(), getCurrentTS());
+			(*zap_obj).zap_to(pmt_entry, getCurrentVPID(), getCurrentAPID(0), getCurrentPCR(), ECM, getCurrentSID(), getCurrentONID(), getCurrentTS());
 		else
-			(*zap_obj).zap_to(getCurrentVPID(), getCurrentAPID(0), getCurrentPCR(), ECM, getCurrentSID(), getCurrentONID(), getCurrentTS(), getCurrentAPID(1));
+			(*zap_obj).zap_to(pmt_entry, getCurrentVPID(), getCurrentAPID(0), getCurrentPCR(), ECM, getCurrentSID(), getCurrentONID(), getCurrentTS(), getCurrentAPID(1));
 
 
 
