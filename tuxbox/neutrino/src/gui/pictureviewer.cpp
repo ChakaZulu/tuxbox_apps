@@ -50,7 +50,11 @@
 #include <gui/widget/icons.h>
 #include <gui/widget/menue.h>
 #include <gui/widget/messagebox.h>
+
+// remove this
 #include <gui/widget/hintbox.h>
+
+#include <gui/widget/helpbox.h>
 #include <gui/widget/stringinput.h>
 
 #include <system/settings.h>
@@ -381,9 +385,8 @@ int CPictureViewerGui::show()
 		{
 			if (m_state == MENU)
 			{
-				std::string fullhelptext = g_Locale->getText(LOCALE_PICTUREVIEWER_HELP);
-				fullhelptext += "\n\nVersion: $Revision: 1.55 $";
-				ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+				showHelp();
+				paint();
 			}
 		}
 		else if( msg == CRCInput::RC_1 )
@@ -692,4 +695,38 @@ void CPictureViewerGui::endView()
 		frameBuffer->ClearFrameBuffer();
 		m_state=MENU;
 	}
+}
+
+void CPictureViewerGui::showHelp()
+{
+	Helpbox helpbox;
+	helpbox.addLine(g_Locale->getText(LOCALE_PICTUREVIEWER_HELP1));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_OKAY, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP2));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_5, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP3));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_0, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP4));
+	helpbox.addPagebreak();
+	helpbox.addLine(g_Locale->getText(LOCALE_PICTUREVIEWER_HELP5));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_LEFT, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP6));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_RIGHT, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP7));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_5, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP8));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_HOME, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP9));
+	helpbox.addPagebreak();
+	helpbox.addLine(g_Locale->getText(LOCALE_PICTUREVIEWER_HELP10));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_OKAY, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP11));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_LEFT, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP12));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_RIGHT, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP13));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_1, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP14));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_3, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP15));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_2, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP16));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_4, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP17));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_6, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP18));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_8, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP19));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_5, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP20));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_0, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP21));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_HOME, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP22));
+
+	helpbox.addLine("Version: $Revision: 1.56 $");
+	hide();
+	helpbox.show(LOCALE_MESSAGEBOX_INFO);
+	printf("help vorbei\n");
 }

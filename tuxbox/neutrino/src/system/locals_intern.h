@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.23 2004/10/19 20:18:46 zwen Exp $
+ * $Id: locals_intern.h,v 1.24 2004/10/23 18:03:40 chakazulu Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -606,7 +606,28 @@ const char * locale_real_names[] =
 	"parentallock.prompt",
 	"pictureviewer.defdir",
 	"pictureviewer.head",
-	"pictureviewer.help",
+	"pictureviewer.help1",
+	"pictureviewer.help2",
+	"pictureviewer.help3",
+	"pictureviewer.help4",
+	"pictureviewer.help5",
+	"pictureviewer.help6",
+	"pictureviewer.help7",
+	"pictureviewer.help8",
+	"pictureviewer.help9",
+	"pictureviewer.help10",
+	"pictureviewer.help11",
+	"pictureviewer.help12",
+	"pictureviewer.help13",
+	"pictureviewer.help14",
+	"pictureviewer.help15",
+	"pictureviewer.help16",
+	"pictureviewer.help17",
+	"pictureviewer.help18",
+	"pictureviewer.help19",
+	"pictureviewer.help20",
+	"pictureviewer.help21",
+	"pictureviewer.help22",
 	"pictureviewer.resize.color_average",
 	"pictureviewer.resize.none",
 	"pictureviewer.resize.simple",

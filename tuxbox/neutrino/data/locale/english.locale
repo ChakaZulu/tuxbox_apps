@@ -131,7 +131,7 @@ audioplayer.playlist_fileoverwrite_title Overwrite?
 audioplayer.playlist_name filename of the play list
 audioplayer.playlist_name_hint1 Please enter the filename of the playlist
 audioplayer.playlist_name_hint2 The extension .m3u will be added automatically
-audioplayer.reading_files reading files
+audioplayer.reading_files reading meta data
 audioplayer.repeat_on enable repeat mode
 audioplayer.rewind rewind
 audioplayer.save_playlist save play list
@@ -540,7 +540,28 @@ parentallock.parentallock Youth protection
 parentallock.prompt prompt for PIN
 pictureviewer.defdir start dir.
 pictureviewer.head Picture viewer
-pictureviewer.help menu mode\n OK display image\n 5 change sort order\n 0 do not scale picture\n\ndiashow mode\n LEFT previous image\n RIGHT next image\n 5 change sort order\n HOME exit\n\nshow mode\n \n OK reread image\n LEFT previous image\n RIGHT next image\n 1 Zoom out\n 3 Zoom in\n 2 scroll up\n 4 scroll left\n 6 scroll right\n scroll down\n 5 change sort order\n 0 reread image (no scaling)\n  HOME exit
+pictureviewer.help1 menu mode
+pictureviewer.help2 display image
+pictureviewer.help3 change sort order
+pictureviewer.help4 do not scale picture
+pictureviewer.help5 diashow mode
+pictureviewer.help6 previous image
+pictureviewer.help7 next image
+pictureviewer.help8 change sort order
+pictureviewer.help9 exit
+pictureviewer.help10 show mode
+pictureviewer.help11 reread image
+pictureviewer.help12 previous image
+pictureviewer.help13 next image
+pictureviewer.help14 Zoom out
+pictureviewer.help15 Zoom in
+pictureviewer.help16 scroll up
+pictureviewer.help17 scroll left
+pictureviewer.help18 scroll right
+pictureviewer.help19 scroll down
+pictureviewer.help20 change sort order
+pictureviewer.help21 reread image (no scaling)
+pictureviewer.help22 exit
 pictureviewer.resize.color_average advanced
 pictureviewer.resize.none none
 pictureviewer.resize.simple simple

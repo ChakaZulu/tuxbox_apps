@@ -169,7 +169,7 @@ audioplayer.playlist_fileoverwrite_title Überschreiben?
 audioplayer.playlist_name Dateiname der Playlist
 audioplayer.playlist_name_hint1 Geben Sie den Dateinamen der Playlist ein
 audioplayer.playlist_name_hint2 Die Erweiterung .m3u wird automatisch angehängt
-audioplayer.reading_files Lese die Dateien ein
+audioplayer.reading_files Lese die Metadaten ein
 audioplayer.repeat_on Repeatmodus aktivieren
 audioplayer.rewind schneller Rückl.
 audioplayer.save_playlist Playlist speichern
@@ -578,7 +578,28 @@ parentallock.parentallock Jugendschutz
 parentallock.prompt PIN-Eingabe
 pictureviewer.defdir Start-Verz.
 pictureviewer.head Bildbetrachter
-pictureviewer.help Menü-Modus\n OK Bild anzeigen\n 5 Sortierung ändern\n 0 Bild unskaliert einlesen\n\nDiashow-Modus\n LINKS vorheriges Bild\n RECHTS nächstes Bild\n 5 Sortierung ändern\n HOME Modus verlassen\n\nAnzeige-Modus\n  OK Bild neu einlesen\n LINKS vorheriges Bild\n RECHTS nächstes Bild\n 1 Zoom out\n 3 Zoom in\n 2 Scroll hoch\n 4 Scroll links\n 6 Scroll rechts\n 8 Scroll herunter\n 5 Sortierung ändern\n 0 Bild unskaliert einlesen\n HOME Modus verlassen\n
+pictureviewer.help1 Menü-Modus
+pictureviewer.help2 Bild anzeigen
+pictureviewer.help3 Sortierung ändern
+pictureviewer.help4 Bild unskaliert einlesen
+pictureviewer.help5 Diashow-Modus
+pictureviewer.help6 vorheriges Bild
+pictureviewer.help7 nächstes Bild
+pictureviewer.help8 Sortierung ändern
+pictureviewer.help9 Modus verlassen
+pictureviewer.help10 Anzeige-Modus
+pictureviewer.help11 Bild neu einlesen
+pictureviewer.help12 vorheriges Bild
+pictureviewer.help13 nächstes Bild
+pictureviewer.help14 Zoom out
+pictureviewer.help15 Zoom in
+pictureviewer.help16 Scroll hoch
+pictureviewer.help17 Scroll links
+pictureviewer.help18 Scroll rechts
+pictureviewer.help19 Scroll herunter
+pictureviewer.help20 Sortierung ändern
+pictureviewer.help21 Bild unskaliert einlesen
+pictureviewer.help22 Modus verlassen
 pictureviewer.resize.color_average aufwendig
 pictureviewer.resize.none keine
 pictureviewer.resize.simple einfach

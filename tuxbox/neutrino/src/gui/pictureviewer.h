@@ -106,6 +106,8 @@ class CPictureViewerGui : public CMenuTarget
 		void endView();
 		int  show();
 
+		void showHelp();
+
 	public:
 		CPictureViewerGui();
 		~CPictureViewerGui();
