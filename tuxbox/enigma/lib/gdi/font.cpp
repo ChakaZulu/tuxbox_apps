@@ -21,6 +21,8 @@
 #include <freetype/internal/ftobjs.h>
 #include <freetype/internal/ftdriver.h>
 
+#include "config.h"
+
 fontRenderClass *fontRenderClass::instance;
 static eLock ftlock;
 
@@ -117,8 +119,8 @@ fontRenderClass::fontRenderClass(): fb(fbClass::getInstance())
 	printf("\n[FONT] loading fonts...\n");
 	fflush(stdout);
 	font=0;
-	AddFont("/usr/lib/fonts/free/unmrs.pfa");
-	AddFont("/usr/lib/fonts/Marlett.ttf");
+	AddFont(FONTDIR "/unmrs.pfa");
+	AddFont(FONTDIR "/Marlett.ttf");
 	
 	int maxbytes=4*1024*1024;
 	printf("[FONT] Intializing font cache, using max. %dMB...", maxbytes/1024/1024);
