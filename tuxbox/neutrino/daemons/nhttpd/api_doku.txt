@@ -351,13 +351,25 @@ Beispiel:
 ok
  
  
+Parameter: statusplayback
+Rückgabe:
+'1': Playback aktiv, '0': kein Playback aktiv
+
+Rückgabe-Format: 0/1
+
+Beispiel:
+
+>>>http://dbox/control/zapto?statusplayback
+0
+ 
+ 
 
 
 Parameter: stopsectionsd
 Rückgabe:
 Stoppt den Sectionsd zum Grabben. Rückgabewert sollte ok für Erfolg sein.
 
-Rückgabe-Format: 0k
+Rückgabe-Format: ok
 
 Beispiel:
 
@@ -377,6 +389,18 @@ Beispiel:
 
 >>>http://dbox/control/zapto?startsectionsd
 ok
+ 
+
+Parameter: statussectionsd
+Rückgabe:
+gibt den status des sectionsd zurück. (Scanning, bzw, kein scanning)
+
+Rückgabe-Format: '1': sectionsd scanning an, '0': sectionsd scanning aus
+
+Beispiel:
+
+>>>http://dbox/control/zapto?statussectionsd
+1
  
  
 
@@ -442,12 +466,18 @@ Parameter: record
 Rückgabe:
 
 Schaltet in den record mode
+Dies beinhaltet auch das stoppen, bzw, das starten des sectionsd scanning,
+das starten des playbacks(immer) und stoppen des playbacks 
+(nur bei stopplayback=true).
 
 Rückgabe-Format: ok / error
 
 Beispiel:
 
 >>>http://dbox/control/setmode?record=start
+ok
+
+>>>http://dbox/control/setmode?record=start&stopplayback=true
 ok
 
 >>>http://dbox/control/setmode?record=stop
