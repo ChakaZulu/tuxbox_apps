@@ -43,6 +43,7 @@
 #include <driver/rcinput.h>
 
 #include <gui/color.h>
+#include <gui/filebrowser.h>
 #include <gui/nfs.h>
 
 #include <gui/widget/messagebox.h>
@@ -197,8 +198,24 @@ bool CFlashUpdate::checkVersion4Update()
 	}
 	else
 	{
-		//manuelles update -- filecheck + abfrage
-		FILE* fd = fopen((gTmpPath+ ImageFile).c_str(), "r");
+		CFileBrowser CramfsBrowser;
+
+		CFileFilter CramfsFilter;
+		CramfsFilter.addFilter("cramfs");
+
+		CramfsBrowser.Filter = &CramfsFilter;
+		
+		if (!(CramfsBrowser.exec(gTmpPath)))
+			return false;
+		
+		CFile * CFileSelected = CramfsBrowser.getSelectedFile();
+
+		if (CFileSelected == NULL)
+			return false;
+
+		filename = CFileSelected->Name;
+
+		FILE* fd = fopen(filename.c_str(), "r");
 		if(fd)
 		{
 			fclose(fd);
@@ -206,7 +223,7 @@ bool CFlashUpdate::checkVersion4Update()
 		else
 		{
 			hide();
-			printf("flash-file not found: %s\n", (gTmpPath+ ImageFile).c_str() );
+			printf("flash-file not found: %s\n", filename.c_str());
 			ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.cantopenfile")); // UTF-8
 			return false;
 		}
@@ -214,13 +231,14 @@ bool CFlashUpdate::checkVersion4Update()
 		
 		//bestimmung der CramfsDaten
 		char cramfsName[30];
-		cramfs_name( (char*) (gTmpPath+ImageFile).c_str(), (char*) &cramfsName);
+		cramfs_name((char *) filename.c_str(), (char *) &cramfsName);
 
 		versionInfo = new CFlashVersionInfo(cramfsName);
 
 		msg_body = "flashupdate.msgbox_manual";
 	}
 	sprintf(msg, g_Locale->getText(msg_body), versionInfo->getDate(), versionInfo->getTime(), versionInfo->getBaseImageVersion(), versionInfo->getType());
+
 	if (strcmp("1.7", versionInfo->getBaseImageVersion()))
 	{
 		delete versionInfo;
@@ -239,7 +257,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 	}
 	paint();
 
-	// Umpount all NFS volumes
+	// Unmount all NFS & CIFS volumes
 	CNFSUmountGui::umount();
 
 	if(!checkVersion4Update())
@@ -259,6 +277,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 			ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.getupdatefileerror")); // UTF-8
 			return menu_return::RETURN_REPAINT;
 		}
+		filename = gTmpPath + ImageFile;
 	}
 
 	showGlobalStatus(40);
@@ -267,11 +286,9 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 	ft.setMTDDevice("/dev/mtd/2");
 	ft.setStatusViewer(this);
 
-	std::string sFileName = gTmpPath+ ImageFile;
-
 	//image-check
 	showStatusMessageUTF(g_Locale->getText("flashupdate.md5check")); // UTF-8
-	if(!ft.check_cramfs(sFileName))
+	if(!ft.check_cramfs(filename))
 	{
 		hide();
 		ShowHintUTF( "messagebox.error", g_Locale->getText("flashupdate.md5sumerror")); // UTF-8
@@ -283,7 +300,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 	showGlobalStatus(60);
 
 	//flash it...
-	if(!ft.program(sFileName, 80, 100))
+	if(!ft.program(filename, 80, 100))
 	{
 		hide();
 		ShowHintUTF("messagebox.error", ft.getErrorMessage().c_str()); // UTF-8

@@ -48,6 +48,8 @@ class CFlashUpdate : public CProgressWindow
 		std::string	ImageFile;
 		std::string	VersionFile;
 
+		std::string     filename;
+
 		std::string	installedVersion;
 		std::string	newVersion;
 
