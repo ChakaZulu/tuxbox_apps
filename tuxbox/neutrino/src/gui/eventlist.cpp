@@ -34,9 +34,12 @@
 #endif
 
 #include <gui/eventlist.h>
+#include <gui/timerlist.h>
 
 #include <gui/widget/icons.h>
 #include <gui/widget/messagebox.h>
+#include <gui/widget/mountchooser.h>
+
 
 #include <global.h>
 #include <neutrino.h>
@@ -222,13 +225,52 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 				CTimerdClient timerdclient;
 				if(timerdclient.isTimerdAvailable())
 				{
-					timerdclient.addRecordTimerEvent(channel_id,
-									 evtlist[selected].startTime,
-									 evtlist[selected].startTime + evtlist[selected].duration,
-									 evtlist[selected].eventID, evtlist[selected].startTime,
-									 evtlist[selected].startTime - (ANNOUNCETIME + 120),
-									 "", true );
-					ShowLocalizedMessage(LOCALE_TIMER_EVENTRECORD_TITLE, LOCALE_TIMER_EVENTRECORD_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
+					char *recDir = g_settings.network_nfs_recordingdir;
+					if (g_settings.recording_choose_direct_rec_dir)
+					{
+						int id = -1;
+						CMountChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,&id,NULL,g_settings.network_nfs_recordingdir);
+						if (recDirs.hasItem()) 
+						{
+							hide();
+							recDirs.exec(NULL,"");
+							paint();
+						} else
+						{
+							printf("[CEventList] no network devices available\n");					
+						}
+						if (id != -1)
+							recDir = g_settings.network_nfs_local_dir[id];
+						else 
+							recDir = NULL;
+					}
+					if (recDir != NULL)
+					{
+						
+						if (timerdclient.addRecordTimerEvent(channel_id,
+										     evtlist[selected].startTime,
+										     evtlist[selected].startTime + evtlist[selected].duration,
+										     evtlist[selected].eventID, evtlist[selected].startTime,
+										     evtlist[selected].startTime - (ANNOUNCETIME + 120),
+										     "", true, recDir,false) == -1)
+						{
+							if(askUserOnTimerConflict(evtlist[selected].startTime - (ANNOUNCETIME + 120),
+										  evtlist[selected].startTime + evtlist[selected].duration))
+							{
+								timerdclient.addRecordTimerEvent(channel_id,
+												 evtlist[selected].startTime,
+												 evtlist[selected].startTime + evtlist[selected].duration,
+												 evtlist[selected].eventID, evtlist[selected].startTime,
+												 evtlist[selected].startTime - (ANNOUNCETIME + 120),
+												 "", true, recDir,true);
+								ShowLocalizedMessage(LOCALE_TIMER_EVENTRECORD_TITLE, LOCALE_TIMER_EVENTRECORD_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
+							}
+						} else {
+							ShowLocalizedMessage(LOCALE_TIMER_EVENTRECORD_TITLE, LOCALE_TIMER_EVENTRECORD_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
+						}
+					}
+
+
 				}
 				else
 					printf("timerd not available\n");
@@ -244,7 +286,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 								evtlist[selected].startTime - ANNOUNCETIME, 0,
 								evtlist[selected].eventID, evtlist[selected].startTime,
 								"");
-				ShowMsgUTF(LOCALE_TIMER_EVENTTIMED_TITLE, g_Locale->getText(LOCALE_TIMER_EVENTTIMED_MSG), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+				ShowLocalizedMessage(LOCALE_TIMER_EVENTTIMED_TITLE, LOCALE_TIMER_EVENTTIMED_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 			}
 			else
 				printf("timerd not available\n");

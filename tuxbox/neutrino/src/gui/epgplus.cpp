@@ -31,12 +31,15 @@
 #include <neutrino.h>
 
 #include <gui/epgplus.h>
+#include <gui/timerlist.h>
+
 #include <sectionsdclient/sectionsdclient.h>
 
 #include <gui/widget/icons.h>
 #include <gui/widget/buttons.h>
 #include <gui/widget/messagebox.h>
 #include <gui/widget/stringinput.h>
+#include <gui/widget/mountchooser.h>
 #include "bouquetlist.h"
 
 #include <zapit/client/zapittools.h> /* ZapitTools::UTF8_to_Latin1 */
@@ -2230,21 +2233,64 @@ int EpgPlus::MenuTargetAddRecordTimer::exec
 		CTimerdClient timerdclient;
 		if (timerdclient.isTimerdAvailable())
 		{
-			#ifdef DEBUG_
-				std::cout << "add record timer 3" << std::endl;
-			#endif
-
-			timerdclient.addRecordTimerEvent
-				( this->epgPlus->selectedChannelEntry->channel->channel_id
-				, (*It)->channelEvent.startTime
-				, (*It)->channelEvent.startTime + (*It)->channelEvent.duration
-				, (*It)->channelEvent.eventID
-				, (*It)->channelEvent.startTime
-				, (*It)->channelEvent.startTime - (ANNOUNCETIME + 120)
-				, ""
-				, true
-				);
-			ShowLocalizedMessage(LOCALE_TIMER_EVENTRECORD_TITLE, LOCALE_TIMER_EVENTRECORD_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
+#ifdef DEBUG_
+			std::cout << "add record timer 3" << std::endl;
+#endif
+			char *recDir = g_settings.network_nfs_recordingdir;
+			if (g_settings.recording_choose_direct_rec_dir)
+			{
+				int id = -1;
+				CMountChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,&id,NULL,g_settings.network_nfs_recordingdir);
+				if (recDirs.hasItem()) 
+				{
+					epgPlus->hide();
+					recDirs.exec(NULL,"");
+					epgPlus->paint();
+				} else
+				{
+					printf("[CEventList] no network devices available\n");					
+				}
+				if (id != -1)
+					recDir = g_settings.network_nfs_local_dir[id];
+				else 
+					recDir = NULL;
+			}
+			if (recDir != NULL)
+			{
+				
+				if (timerdclient.addRecordTimerEvent
+				    ( this->epgPlus->selectedChannelEntry->channel->channel_id
+				      , (*It)->channelEvent.startTime
+				      , (*It)->channelEvent.startTime + (*It)->channelEvent.duration
+				      , (*It)->channelEvent.eventID
+				      , (*It)->channelEvent.startTime
+				      , (*It)->channelEvent.startTime - (ANNOUNCETIME + 120)
+				      , ""
+				      , true
+				      , recDir
+				      , false
+				      ) == -1) 
+				{	
+					if(askUserOnTimerConflict((*It)->channelEvent.startTime - (ANNOUNCETIME + 120),
+								  (*It)->channelEvent.startTime + (*It)->channelEvent.duration))
+					{
+						timerdclient.addRecordTimerEvent(this->epgPlus->selectedChannelEntry->channel->channel_id
+										 , (*It)->channelEvent.startTime
+										 , (*It)->channelEvent.startTime + (*It)->channelEvent.duration
+										 , (*It)->channelEvent.eventID
+										 , (*It)->channelEvent.startTime
+										 , (*It)->channelEvent.startTime - (ANNOUNCETIME + 120)
+										 , ""
+										 , true
+										 , recDir
+										 , true);
+						ShowLocalizedMessage(LOCALE_TIMER_EVENTRECORD_TITLE, LOCALE_TIMER_EVENTRECORD_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
+					}
+				} else {
+					ShowLocalizedMessage(LOCALE_TIMER_EVENTRECORD_TITLE, LOCALE_TIMER_EVENTRECORD_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
+				}
+			}
+			
 		}
 		else
 			printf("timerd not available\n");
