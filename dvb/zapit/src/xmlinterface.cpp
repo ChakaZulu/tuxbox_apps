@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.3 2002/09/19 10:39:09 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.4 2002/09/30 12:58:04 thegoodguy Exp $
  *
  * xmlinterface for zapit - d-box2 linux project
  *
@@ -30,28 +30,30 @@ std::string convertForXML(const std::string s)
 {
 	std::string r;
 	unsigned int i;
-	for (i=0; i<s.length(); i++)
+	for (i = 0; i < s.length(); i++)
 	{
-		switch (s[i])          // cf. xml/xmltimpl.c: PREFIX(predefinedEntityName)
+		switch (s[i])          // cf. xmltimpl.c: PREFIX(predefinedEntityName)
 		{
-		  case '<':           
+		case '<':           
 			r += "&lt;";
 			break;
-		  case '>':
+		case '>':
 			r += "&gt;";
 			break;
-		  case '&':
+		case '&':
 			r += "&amp;";
 			break;
-		  case '\"':
+		case '\"':
 			r += "&quot;";
 			break;
-		  case '\'':
+		case '\'':
 			r += "&apos;";
 			break;
-		  default:
+		default:
 #ifdef MASK_SPECIAL_CHARACTERS
-			if ((((unsigned char)s[i])>=32) && (((unsigned char)s[i])<128))
+			if ((((unsigned char)s[i]) >= 32) && (((unsigned char)s[i]) < 128))
+#else
+			if (((unsigned char)s[i]) >= 32)    // skip strange characters
 #endif
 				r += s[i];
 #ifdef MASK_SPECIAL_CHARACTERS
@@ -68,18 +70,22 @@ std::string convertForXML(const std::string s)
 }
 
 
-std::string Utf8_to_Latin1(const std::string s)  // only works correct if we had latin1 in the parsed xml-file
+std::string Utf8_to_Latin1(const std::string s)
 {
 	std::string r;
 	unsigned int i;
-	for (i=0; i<s.length(); i++)
+	for (i = 0; i < s.length(); i++)
 	{
-	    if ((i < s.length() - 1) && ((s[i] & 0xc0) == 0xc0))
-	    {
-		r += ((s[i] & 3) << 6) | (s[i + 1] & 0x3f);
-		i++;
-	    }
-	    else r += s[i];
+		if ((i < s.length() - 3) && ((s[i] & 0xf0) == 0xf0))      // skip (can't be encoded in Latin1)
+			i += 3;
+		else if ((i < s.length() - 2) && ((s[i] & 0xe0) == 0xe0)) // skip (can't be encoded in Latin1)
+			i += 2;
+		else if ((i < s.length() - 1) && ((s[i] & 0xc0) == 0xc0))
+		{
+			r += ((s[i] & 3) << 6) | (s[i + 1] & 0x3f);
+			i++;
+		}
+		else r += s[i];
 	}
 	return r;
 }

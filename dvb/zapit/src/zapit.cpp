@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.243 2002/09/26 16:20:43 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.244 2002/09/30 12:58:04 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -531,6 +531,25 @@ int prepare_channels ()
 	return 0;
 }
 
+
+void parseScanInputXml()
+{
+	switch (frontend->getInfo()->type)
+	{
+	case FE_QPSK:
+		scanInputParser = parseXmlFile(string(SATELLITES_XML));
+		break;
+		
+	case FE_QAM:
+		scanInputParser = parseXmlFile(string(CABLES_XML));
+		break;
+		
+	default:
+		printf("Unknown type %d\n", frontend->getInfo()->type);
+		return;
+	}
+}
+
 /*
  * return 0 on success
  * return -1 otherwise
@@ -539,8 +558,12 @@ int start_scan ()
 {
 	if (scanInputParser == NULL)
 	{
-		printf("[zapit] scan not configured. won't scan.\n");
-		return -1;
+		parseScanInputXml();
+		if (scanInputParser == NULL)
+		{
+			printf("[zapit] scan not configured. won't scan.\n");
+			return -1;
+		}
 	}
 
 	transponders.clear();
@@ -562,23 +585,6 @@ int start_scan ()
 	}
 
 	return 0;
-}
-
-void parseScanInputXml()
-{
-	switch (frontend->getInfo()->type)
-	{
-			case FE_QPSK:
-			scanInputParser = parseXmlFile(string(SATELLITES_XML));
-			break;
-
-			case FE_QAM:
-			scanInputParser = parseXmlFile(string(CABLES_XML));
-			break;
-
-			default:
-			return;
-	}
 }
 
 void parse_command (CZapitMessages::commandHead &rmsg)
@@ -1050,7 +1056,7 @@ int main (int argc, char **argv)
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.243 2002/09/26 16:20:43 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.244 2002/09/30 12:58:04 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{
