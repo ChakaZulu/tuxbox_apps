@@ -23,14 +23,12 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <liblcddisplay.h>
 
+#include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/in_systm.h>
-#include <netinet/ip.h>
-#include <netdb.h>
+#include <sys/un.h>
 #include <arpa/inet.h>
+
 #include <unistd.h>
 #include <stdio.h>
 #include <sys/timeb.h>
@@ -39,76 +37,81 @@
 
 /* Signal quality */
 #include <ost/frontend.h>
+#include <liblcddisplay.h>
+#include "lcddclient.h"
 
-#include "lcdd.h"
 #include "config.h"
 
 
 CLCDDisplay		display;
-fontRenderClass		*fontRenderer;
+fontRenderClass	*fontRenderer;
 FontsDef		fonts;
 pthread_t		thrTime;
 
-lcdd_mode		mode;
-raw_display_t		icon_lcd;
-raw_display_t		icon_setup;
-raw_display_t		icon_power;
+CLcddClient::mode		mode;
+raw_display_t	icon_lcd;
+raw_display_t	icon_setup;
+raw_display_t	icon_power;
 
-char			channelname[30];
-unsigned char		volume;
-bool			muted, shall_exit;
+char			servicename[40];
+char			volume;
+bool			muted, shall_exit, debugoutput;
 
-void show_channelname(string);
-void show_volume(unsigned char);
-void show_menu(lcdd_msg msg);
-void set_mode(lcdd_mode, char *title);
-void set_poweroff();
+void show_servicename(string);
+void show_volume(char);
+void set_mode(CLcddClient::mode, char *title);
+void show_menu(int position, char* text, int highlight=0);
 
-void parse_command(lcdd_msg rmsg) {
 
-	if(rmsg.version > LCDD_VERSION)
+void parse_command(int connfd, CLcddClient::commandHead rmsg)
+{
+	if(rmsg.version != CLcddClient::ACTVERSION)
 	{
-		printf("unsupported protocol version %i, this lcdd"
-		    " supports only <=%i\n", rmsg.version, LCDD_VERSION);
+		printf("[lcdd] unknown version\n");
 		return;
 	}
 
-	//printf("[LCDD] received cmd=%i param=%i param2=%i\n", rmsg.cmd, rmsg.param, rmsg.param2);
 	switch (rmsg.cmd)
 	{
-	case LC_CHANNEL:
-		channelname = rmsg.param3;
-		show_channelname(channelname);
-		break;
-	case LC_VOLUME:
-		volume = rmsg.param;
-		show_volume(volume);
-		break;
-	case LC_MUTE:
-		if (rmsg.param == LC_MUTE_ON)
-			muted = true;
-		else
-			muted = false;
-		show_volume(volume);
-		break;
-	case LC_SET_MODE:
-		set_mode((lcdd_mode)rmsg.param, rmsg.param3);
-		break;
-	case LC_MENU_MSG:
-		show_menu(rmsg);
-		break;
-	case LC_POWEROFF:
-		set_mode(LCDM_POWEROFF, NULL);
-		shall_exit = true;
-		break;
-	default: 
-		printf("unknown command %i\n", rmsg.cmd);
+		case CLcddClient::CMD_SETSERVICENAME:
+			CLcddClient::commandServiceName msg;
+			read(connfd, &msg, sizeof(msg));
+			strcpy(servicename, msg.servicename);
+			show_servicename(servicename);
+			break;
+		case CLcddClient::CMD_SETVOLUME:
+			CLcddClient::commandVolume msg2;
+			read(connfd, &msg2, sizeof(msg2));
+			volume = msg2.volume;
+			show_volume(volume);
+			break;
+		case CLcddClient::CMD_SETMUTE:
+			CLcddClient::commandMute msg3;
+			read(connfd, &msg3, sizeof(msg3));
+			muted = msg3.mute;
+			show_volume(volume);
+			break;
+		case CLcddClient::CMD_SETMODE:
+			CLcddClient::commandMode msg4;
+			read(connfd, &msg4, sizeof(msg4));
+			set_mode((CLcddClient::mode) msg4.mode, msg4.text);
+			break;
+		case CLcddClient::CMD_SETMENUTEXT:
+			CLcddClient::commandMenuText msg5;
+			read(connfd, &msg5, sizeof(msg5));
+			show_menu(msg5.position, msg5.text, msg5.highlight);
+			break;
+		default: 
+			printf("unknown command %i\n", rmsg.cmd);
 	}
 }
 
-void show_channelname( string name )
+void show_servicename( string name )
 {
-	if (mode!=LCDM_TV) return;
+	if (mode!=CLcddClient::MODE_TVRADIO) 
+	{	
+		return;
+	}
 	display.draw_fill_rect (0,14,120,48, CLCDDisplay::PIXEL_OFF);
 	if (fonts.channelname->getRenderWidth(name.c_str())>120)
 	{
@@ -136,11 +139,10 @@ void show_time()
 {
 	char timestr[50];
 	struct timeb tm;
-	if ((mode==LCDM_TV) || (mode==LCDM_SCART))
+	if ((mode==CLcddClient::MODE_TVRADIO) || (mode==CLcddClient::MODE_SCART))
 	{
 		ftime(&tm);
 		strftime((char*) &timestr, 20, "%H:%M", localtime(&tm.time) );
-
 
 		display.draw_fill_rect (81,50,120,64, CLCDDisplay::PIXEL_OFF);
 		fonts.time->RenderString(82,62, 50, timestr, CLCDDisplay::PIXEL_ON);
@@ -148,8 +150,8 @@ void show_time()
 	}
 }
 
-
-void show_signal() {
+void show_signal()
+{
 	int fd, status, signal, res;
 
 	if((fd = open("/dev/ost/qpskfe0", O_RDONLY)) < 0)
@@ -165,9 +167,9 @@ void show_signal() {
 }
 
 
-void show_volume(unsigned char vol)
+void show_volume(char vol)
 {
-if ((mode==LCDM_TV) || (mode==LCDM_SCART))
+if ((mode==CLcddClient::MODE_TVRADIO) || (mode==CLcddClient::MODE_SCART))
 	{
 		display.draw_fill_rect (1,52,73,61, CLCDDisplay::PIXEL_OFF);
 		//strichlin
@@ -185,54 +187,54 @@ if ((mode==LCDM_TV) || (mode==LCDM_SCART))
 	}
 }
 
-void show_menu(lcdd_msg msg) {
-	int i;
-
-	if (mode != LCDM_MENU) return;
-	/* WARNING: interface change; if something doesn't work, read lcdd.h */
+void show_menu(int position, char* text, int highlight )
+{
+	if (mode != CLcddClient::MODE_MENU)
+	{
+		return;
+	}
 	// reload specified line
-	i = msg.param;
-	display.draw_fill_rect(-1,35+14*i,120,35+14+14*i, CLCDDisplay::PIXEL_OFF);
-	fonts.menu->RenderString(0,35+11+14*i, 140, msg.param3,
-	    CLCDDisplay::PIXEL_INV, msg.param2);
+	display.draw_fill_rect(-1,35+14*position,120,35+14+14*position, CLCDDisplay::PIXEL_OFF);
+	fonts.menu->RenderString(0,35+11+14*position, 140, text , CLCDDisplay::PIXEL_INV, highlight);
 	display.update();
 }
 
 
-void set_mode(lcdd_mode m, char *title) {
-	//int y, t;
-	//raw_display_t s;
-	switch (m) {
-	case LCDM_TV:
-		display.load_screen(&icon_lcd);
-		mode = m;
-		show_volume(volume);
-		show_channelname(channelname);
-		show_time();
-		display.update();
-		break;
-	case LCDM_SCART:
-		display.load_screen(&icon_lcd);
-		mode = m;
-		show_volume(volume);
-		show_time();
-		display.update();
-		break;
-	case LCDM_MENU:
-		mode = m;
-		display.load_screen(&icon_setup);
-		fonts.menutitle->RenderString(-1,28, 140, title,
-		    CLCDDisplay::PIXEL_ON);
-		display.update();
-		break;
-	case LCDM_POWEROFF:
-		mode = m;
-		display.load_screen(&icon_power);
-		display.update();
-		break;
-	default:
-		printf("[lcdd] Unknown mode: %i\n", m);
-		return;
+void set_mode(CLcddClient::mode m, char *title)
+{
+	switch (m)
+	{
+		case CLcddClient::MODE_TVRADIO:
+			display.load_screen(&icon_lcd);
+			mode = m;
+			show_volume(volume);
+			show_servicename(servicename);
+			show_time();
+			display.update();
+			break;
+		case CLcddClient::MODE_SCART:
+			display.load_screen(&icon_lcd);
+			mode = m;
+			show_volume(volume);
+			show_time();
+			display.update();
+			break;
+		case CLcddClient::MODE_MENU:
+			mode = m;
+			display.load_screen(&icon_setup);
+			fonts.menutitle->RenderString(-1,28, 140, title,
+				CLCDDisplay::PIXEL_ON);
+			display.update();
+			break;
+		case CLcddClient::MODE_SHUTDOWN:
+			mode = m;
+			display.load_screen(&icon_power);
+			display.update();
+			shall_exit = true;
+			break;
+		default:
+			printf("[lcdd] Unknown mode: %i\n", m);
+			return;
 	}
 } 
 
@@ -249,6 +251,8 @@ void * TimeThread (void *)
 
 int main(int argc, char **argv)
 {
+	debugoutput = true;
+
 	printf("Network LCD-Driver 0.1\n\n");
 
 	fontRenderer = new fontRenderClass( &display );
@@ -283,39 +287,40 @@ int main(int argc, char **argv)
 		printf("exit...(no neutrino_lcd.raw)\n");
 		exit(-1);
 	}
-	display.dump_screen(&icon_lcd);
-	mode = LCDM_TV;
-	//set_mode(LCDM_TV);
 
-	show_channelname("");
+	display.dump_screen(&icon_lcd);
+	mode = CLcddClient::MODE_TVRADIO;
+	show_servicename("");
 	show_time();
 
 
+	//network-setup
 	int listenfd, connfd;
-	socklen_t clilen;
-	SAI cliaddr, servaddr;
-	struct lcdd_msg rmsg;
+	struct sockaddr_un servaddr;
+	int clilen;
+	memset(&servaddr, 0, sizeof(struct sockaddr_un));
+	servaddr.sun_family = AF_UNIX;
+	strcpy(servaddr.sun_path, LCDD_UDS_NAME);
+	clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
+	unlink(LCDD_UDS_NAME);
 
 	//network-setup
-	listenfd = socket(AF_INET, SOCK_STREAM, 0);
-
-	memset(&servaddr, 0, sizeof(servaddr));
-	servaddr.sin_family = AF_INET;
-	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	servaddr.sin_port = htons(LCDD_PORT);
-
-	if ( bind(listenfd, (SA *) &servaddr, sizeof(servaddr)) !=0)
+	if ((listenfd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
 	{
-		perror("bind failed...\n");
+		perror("socket");
+	}
+
+	if ( bind(listenfd, (struct sockaddr*) &servaddr, clilen) <0 )
+	{
+		perror("[lcdd] bind failed...\n");
 		exit(-1);
 	}
 
 	if (listen(listenfd, 5) !=0)
 	{
-		perror("listen failed...\n");
+		perror("[lcdd] listen failed...\n");
 		exit( -1 );
 	}
-	printf("\n");
 
 	/* alles geladen, daemonize Now! ;) */
 	if (fork() != 0) return 0;
@@ -323,18 +328,16 @@ int main(int argc, char **argv)
 	/* Thread erst nach dem forken erstellen, da sonst Abbruch */
 	if (pthread_create (&thrTime, NULL, TimeThread, NULL) != 0 )
 	{
-		perror("lcdd: pthread_create(TimeThread)");
+		perror("[lcdd]: pthread_create(TimeThread)");
 	}
 
 	shall_exit = false;
 	while(!shall_exit)
 	{
-		clilen = sizeof(cliaddr);
-		connfd = accept(listenfd, (SA *) &cliaddr, &clilen);
-
-		memset(&rmsg, 0, sizeof(rmsg));
+		connfd = accept(listenfd, (struct sockaddr*) &servaddr, (socklen_t*) &clilen);
+		CLcddClient::commandHead rmsg;
 		read(connfd,&rmsg,sizeof(rmsg));
-		parse_command(rmsg);
+		parse_command(connfd, rmsg);
 		close(connfd);
 	}
 	close(listenfd);
