@@ -26,13 +26,18 @@ eAudio *eAudio::getInstance()
 
 void eAudio::setAC3default(int a)
 {
-	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-
 	ac3default=a;
 
-	if (sapi)
-		sapi->scanPMT();
+	eDVB *dvb = eDVB::getInstance();
 
+	PMT *pmt=dvb->tPMT.ready()?dvb->tPMT.getCurrent():0;
+	if ( pmt )
+	{
+		eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+		if ( sapi )
+			eDVBCaPMTClientHandler::distribute_gotPMT( sapi->service, pmt);
+		pmt->unlock();
+	}
 }
 
 void eAudio::saveSettings()

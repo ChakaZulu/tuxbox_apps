@@ -405,10 +405,10 @@ int existNetworks::reloadNetworks()
 		switch (fetype)
 		{
 			case eSystemInfo::feSatellite:
-				filename="/share/satellites.xml";
+				filename="/share/tuxbox/satellites.xml";
 				break;
 			case eSystemInfo::feCable:
-				filename="/share/cables.xml";
+				filename="/share/tuxbox/cables.xml";
 				break;
 			default:
 				break;

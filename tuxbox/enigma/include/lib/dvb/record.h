@@ -74,13 +74,14 @@ class eDVBRecorder: private eThread, public Object
 	void gotBackMessage(const eDVBRecorderMessage &msg);
 	inline int flushBuffer();
 	void openFile(int suffix=0);
-
 public:
+	void PMTready(int error);
+	eAUTable<PMT> tPMT;
 	eString getFilename() { return filename; }
-	eServiceReference recRef;
+	eServiceReferenceDVB recRef;
 	bool scrambled;
 		/// the constructor
-	eDVBRecorder();
+	eDVBRecorder(PMT *);
 		/// the destructor
 	~eDVBRecorder();
 

@@ -73,7 +73,7 @@ class eDVBCI: private eThread, public eMainloop, public Object
 	static int instance_count;
 	std::priority_queue<queueData> queue;
 protected:
- enum
+	enum
 	{
 		stateInit, stateError, statePlaying, statePause
 	};

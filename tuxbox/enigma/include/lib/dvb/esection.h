@@ -43,7 +43,7 @@ class eSection: public Object
 protected:
 	int pid, tableid, tableidext, tableidmask;
 private:
-	int maxsec, section, flags;
+	int maxsec, section, flags, prevSection, count;
 	void closeFilter();
 	eTimer *timer;
 	__u8 buf[65536];

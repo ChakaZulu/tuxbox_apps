@@ -129,7 +129,6 @@ protected:
 	eDVBController *controller;
 
 private:
-	void recUpdatePIDs(PMT*);
 	void tunedIn(eTransponder*, int);
 	eDVBState state;
 	int mID;

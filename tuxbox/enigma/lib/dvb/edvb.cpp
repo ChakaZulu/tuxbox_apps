@@ -131,10 +131,6 @@ eDVB::eDVB()
 		// init dvb recorder
 	recorder=0;
 
-#ifndef DISABLE_FILE
-	CONNECT( gotPMT, eDVB::recUpdatePIDs );
-#endif
-
 	eDebug("eDVB::eDVB done.");
 }
 
@@ -263,61 +259,14 @@ void eDVB::configureNetwork()
 }
 
 #ifndef DISABLE_FILE
-void eDVB::recUpdatePIDs( PMT *pmt )
-{
-	if ( recorder && pmt &&
-		eServiceInterface::getInstance()->service == recorder->recRef )
-	{
-		eDebug("recUpdatePIDs");
-		pmt->lock();
-
-		recorder->addNewPID(0); // PAT
-
-		if (Decoder::parms.pmtpid != -1)  // PMT
-			recorder->addNewPID(Decoder::parms.pmtpid);
-
-		recorder->addNewPID(pmt->PCR_PID);  // PCR
-
-		for (ePtrList<PMTEntry>::iterator i(pmt->streams); i != pmt->streams.end(); ++i)
-		{
-			int record=0;
-			switch (i->stream_type)
-			{
-			case 1:	// video..
-			case 2:
-				record=1;
-				break;
-			case 3:	// audio..
-			case 4:
-				record=1;
-				break;
-			case 6:
-				for (ePtrList<Descriptor>::iterator it(i->ES_info); it != i->ES_info.end(); ++it)
-				{
-					if (it->Tag() == DESCR_AC3)
-						record=1;
-#ifdef RECORD_TELETEXT
-					if (it->Tag() == DESCR_TELETEXT)
-						record=1;
-#endif
-				}
-				break;
-			}
-			if (record)
-				recorder->addNewPID(i->elementary_PID);
-		}
-		pmt->unlock();
-		recorder->validatePIDs();
-	}
-}
-
 void eDVB::recBegin(const char *filename, eServiceReferenceDVB service)
 {
 	if (recorder)
 		recEnd();
 
-	recorder=new eDVBRecorder();
-	recorder->recRef=eServiceInterface::getInstance()->service;
+	PMT *pmt=getPMT();
+	recorder=new eDVBRecorder(pmt);
+	recorder->recRef=(eServiceReferenceDVB&)eServiceInterface::getInstance()->service;
 
 	eServiceHandler *handler = eServiceInterface::getInstance()->getService();
 	recorder->scrambled = handler->getFlags() & eServiceHandler::flagIsScrambled;
@@ -331,7 +280,6 @@ void eDVB::recBegin(const char *filename, eServiceReferenceDVB service)
 	if (Decoder::parms.pmtpid != -1)
 		recorder->addPID(Decoder::parms.pmtpid);
 
-	PMT *pmt=getPMT();
 	if (!pmt)
 	{
 		if (Decoder::parms.apid != -1)

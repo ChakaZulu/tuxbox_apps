@@ -385,7 +385,7 @@ void eServiceSelector::addService(const eServiceReference &ref)
 	if ( eDVB::getInstance()->recorder && eZapMain::getInstance()->getMode() != eZapMain::modeFile )
 	{
 		eServiceReferenceDVB &Ref = (eServiceReferenceDVB&) ref;
-		eServiceReferenceDVB &rec = (eServiceReferenceDVB&) eDVB::getInstance()->recorder->recRef;
+		eServiceReferenceDVB &rec = eDVB::getInstance()->recorder->recRef;
 		if ( rec.getTransportStreamID() != Ref.getTransportStreamID() ||
 				 rec.getOriginalNetworkID() != Ref.getOriginalNetworkID() ||
 				 rec.getDVBNamespace() != Ref.getDVBNamespace() )

@@ -3458,7 +3458,7 @@ void eZapMain::playService(const eServiceReference &service, int flags)
 			return;
 		}
 		eServiceReferenceDVB &Ref = (eServiceReferenceDVB&)service;
-		eServiceReferenceDVB &rec = (eServiceReferenceDVB&)eDVB::getInstance()->recorder->recRef;
+		eServiceReferenceDVB &rec = eDVB::getInstance()->recorder->recRef;
 
 		if ( rec.getTransportStreamID() != Ref.getTransportStreamID() ||
 				 rec.getOriginalNetworkID() != Ref.getOriginalNetworkID() ||
@@ -5219,7 +5219,7 @@ void eZapMain::setMode(int newmode, int user)
 		if ( eDVB::getInstance()->recorder && !cur.path )
 		{
 			eServiceReferenceDVB &ref = (eServiceReferenceDVB&) cur;
-			eServiceReferenceDVB &rec = (eServiceReferenceDVB&) eDVB::getInstance()->recorder->recRef;
+			eServiceReferenceDVB &rec = eDVB::getInstance()->recorder->recRef;
 			if ( !ref.path && ref.getTransportStreamID() != rec.getTransportStreamID() ||
 				ref.getOriginalNetworkID() != rec.getOriginalNetworkID() ||
 				ref.getDVBNamespace() != rec.getDVBNamespace() )

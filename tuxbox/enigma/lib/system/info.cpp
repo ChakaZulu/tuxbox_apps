@@ -107,16 +107,15 @@ eSystemInfo::eSystemInfo()
 	switch (mid)
 	{
 		case 5:
-			hashdd = haslcd = hasnetwork = canmeasurelnbcurrent = 1;
-			hasci = 1;
+			hashdd = haslcd = hasnetwork = canmeasurelnbcurrent = hasci = 1;
 			hwtype = DM7000;
 			caids.insert(0x4a70);
 			break;
 		case 6:
 			hasci = 2;
 			hwtype = getInfo("type", true) == "DM5600" ? DM5600 : DM5620;
-			if ( hwtype == DM5620 )
-				hasnetwork=1;
+			if ( hwtype == DM5600 )
+				hasnetwork=0;
 			caids.insert(0x4a70);
 			break;
 		case 1 ... 3:

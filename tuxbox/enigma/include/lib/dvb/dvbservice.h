@@ -41,10 +41,57 @@ public:
 	eDVBServiceState(int state): eDVBState(state) { }
 };
 
-class eDVBServiceController: public eDVBController, public Object
+class eDVBCaPMTClient
+{
+	int lastPMTVersion;
+public:
+	virtual void scanPMT(const eServiceReferenceDVB &, PMT *pmt) { }
+	virtual void enterService(const eServiceReferenceDVB &) { }
+	virtual void leaveService(const eServiceReferenceDVB &) { }
+};
+
+class eDVBCaPMTClientHandler
+{
+	static std::set<eDVBCaPMTClient*> capmtclients;
+public:
+	static void registerCaPMTClient( eDVBCaPMTClient* cl )
+	{
+		capmtclients.insert( cl );
+	}
+
+	static void unregisterCaPMTClient( eDVBCaPMTClient* cl )
+	{
+		capmtclients.erase( cl );
+	}
+
+	static void distribute_enterService( const eServiceReferenceDVB &service )
+	{
+		for ( std::set<eDVBCaPMTClient*>::iterator it(capmtclients.begin());
+			it != capmtclients.end(); ++it )
+		(*it)->enterService(service);
+	}
+
+	static void distribute_leaveService( const eServiceReferenceDVB &service )
+	{
+		for ( std::set<eDVBCaPMTClient*>::iterator it(capmtclients.begin());
+			it != capmtclients.end(); ++it )
+		(*it)->leaveService(service);
+	}
+
+	static void distribute_gotPMT(const eServiceReferenceDVB &service, PMT *pmt)
+	{
+		for ( std::set<eDVBCaPMTClient*>::iterator it(capmtclients.begin());
+			it != capmtclients.end(); ++it )
+		(*it)->scanPMT(service,pmt);
+	}
+};
+
+class eDVBServiceController
+	:public eDVBController, public eDVBCaPMTClient, public Object
 {
 	Signal0<void> freeCheckFinishedCallback;
 	void freeCheckFinished();
+	int lastPMTVersion;
 public:
 		/* current service */
 	eServiceReferenceDVB service,  // meta-service
@@ -59,18 +106,18 @@ public:
 	{
 		int casysid, ecmpid, emmpid;
 	};
-	
+
 	std::set<int> availableCASystems, usedCASystems;
 	ePtrList<CA> calist;		/** currently used ca-systems */
 
 	int checkCA(ePtrList<CA> &list, const ePtrList<Descriptor> &descriptors, int sid);
-	
+
 #ifndef DISABLE_CI
 	eDVBCI *DVBCI;
 	eDVBCI *DVBCI2;
 #endif
 
-	void scanPMT();
+	void scanPMT(const eServiceReferenceDVB &, PMT*);
 
 	void PATready(int error);
 	void SDTready(int error);
@@ -90,7 +137,7 @@ public:
 	void handleEvent(const eDVBEvent &event);
 
 	int switchService(const eServiceReferenceDVB &service); /** -> eventServiceSwitched */
-	
+
 	void initCAlist();
 	void clearCAlist();
 };

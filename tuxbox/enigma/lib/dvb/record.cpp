@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
+#include <lib/dvb/dvbservice.h>
 
 #if HAVE_DVB_API_VERSION < 3
 #include <ost/dmx.h>
@@ -54,6 +55,62 @@ void eDVBRecorder::thread()
 			openFile(++splits);
 	}
 	rmessagepump.stop();
+}
+
+void eDVBRecorder::PMTready(int error)
+{
+	eDebug("eDVBRecorder PMTready");
+	if ( !error )
+	{
+		PMT *pmt=tPMT.ready()?tPMT.getCurrent():0;
+		if ( pmt )
+		{
+			eDVBCaPMTClientHandler::distribute_gotPMT(recRef, pmt);
+
+			eDebug("UpdatePIDs");
+			addNewPID(0); // PAT
+			addNewPID(pmt->pid);  // PMT
+			addNewPID(pmt->PCR_PID);  // PCR
+
+			for (ePtrList<PMTEntry>::iterator i(pmt->streams); i != pmt->streams.end(); ++i)
+			{
+				int record=0;
+				switch (i->stream_type)
+				{
+					case 1:	// video..
+					case 2:
+						record=1;
+						break;
+					case 3:	// audio..
+					case 4:
+						record=1;
+						break;
+					case 6:
+					for (ePtrList<Descriptor>::iterator it(i->ES_info); it != i->ES_info.end(); ++it)
+					{
+						if (it->Tag() == DESCR_AC3)
+						{
+							record=1;
+							break;
+						}
+#ifdef RECORD_TELETEXT
+						if (it->Tag() == DESCR_TELETEXT)
+						{
+							record=1;
+							break;
+						}
+#endif
+					}
+					break;
+				}
+				if (record)
+					addNewPID(i->elementary_PID);
+			}
+			validatePIDs();
+
+			pmt->unlock();
+		}
+	}
 }
 
 void eDVBRecorder::gotBackMessage(const eDVBRecorderMessage &msg)
@@ -281,15 +338,24 @@ void eDVBRecorder::close()
 	}
 }
 
-eDVBRecorder::eDVBRecorder()
+eDVBRecorder::eDVBRecorder(PMT *pmt)
 :state(stateStopped), rmessagepump(eApp, 1), dvrfd(-1), outfd(-1), bufptr(0)
 {
 	CONNECT(rmessagepump.recv_msg, eDVBRecorder::gotBackMessage);
+
+	if (pmt)
+	{
+		CONNECT( tPMT.tableReady, eDVBRecorder::PMTready );
+		tPMT.start((PMT*)pmt->createNext());
+	}
 //	pthread_mutex_init(&bufferLock, 0);
 }
 
 eDVBRecorder::~eDVBRecorder()
 {
+	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
+	if ( sapi && sapi->service != recRef )
+		eDVBCaPMTClientHandler::distribute_leaveService(recRef);
 	close();
 }
 

@@ -188,7 +188,7 @@ static eString switchService(eString request, eString dirpath, eString opt, eHTT
 		{
 			if ( eDVB::getInstance()->recorder->scrambled )
 				return "-1";
-			eServiceReferenceDVB &rec = (eServiceReferenceDVB&) eDVB::getInstance()->recorder->recRef;
+			eServiceReferenceDVB &rec = eDVB::getInstance()->recorder->recRef;
 			if ( ref->getTransportStreamID() != rec.getTransportStreamID() ||
 					ref->getOriginalNetworkID() != rec.getOriginalNetworkID() ||
 					ref->getDVBNamespace() != rec.getDVBNamespace() )
@@ -456,7 +456,7 @@ public:
 		if ( eDVB::getInstance()->recorder && !e.path && !e.flags )
 		{
 			eServiceReferenceDVB &ref = (eServiceReferenceDVB&)e;
-			eServiceReferenceDVB &rec = (eServiceReferenceDVB&)eDVB::getInstance()->recorder->recRef;
+			eServiceReferenceDVB &rec = eDVB::getInstance()->recorder->recRef;
 			if ( rec.getTransportStreamID() != ref.getTransportStreamID() ||
 					 rec.getOriginalNetworkID() != ref.getOriginalNetworkID() ||
 					 rec.getDVBNamespace() != ref.getDVBNamespace() )

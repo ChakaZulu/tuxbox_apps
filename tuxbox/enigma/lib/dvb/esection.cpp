@@ -140,9 +140,8 @@ int eSectionReader::read(__u8 *buf)
 eSection::eSection(int _pid, int _tableid, int _tableidext, int _version, int _flags, int _tableidmask)
 	:context(eApp), pid(_pid), tableid(_tableid), tableidext(_tableidext), tableidmask(_tableidmask), flags(_flags), version(_version)
 {
+	count=prevSection=section=lockcount=0;
 	notifier=0;
-	section=0;
-	lockcount=0;
 	timer=new eTimer(context);
 	CONNECT(timer->timeout, eSection::timeout);
 }
@@ -150,10 +149,8 @@ eSection::eSection(int _pid, int _tableid, int _tableidext, int _version, int _f
 eSection::eSection()
 	:context(eApp)
 {
-	timer=0;
+	count=prevSection=section=lockcount=0;
 	notifier=0;
-	section=0;
-	lockcount=0;
 }
 
 eSection::~eSection()
@@ -254,15 +251,29 @@ void eSection::data(int socket)
 			timer->start(10000, true);
 		if (reader.read(buf))
 			break;
+
 		maxsec=buf[7];
 
 		//  printf("%d/%d, we want %d  | service_id %04x | version %04x\n", buf[6], maxsec, section, (buf[3]<<8)|buf[4], buf[5]);
 
-		if (flags&SECREAD_INORDER)
-			version=buf[5];
-
-		if ((!(flags&SECREAD_INORDER)) || (section==buf[6]))
+		if ( flags&SECREAD_INORDER )
 		{
+			version=buf[5];
+			if ( section == buf[6] )
+				goto doit;   // YES .. GOTO
+			else if ( count > (maxsec*4) )
+			{
+				eDebug("ERROR !!!!!!!!!");
+				timeout();
+			}
+			else if ( prevSection == section )
+				count++;
+		}
+		else
+		{
+doit:
+			count=0;
+			prevSection=section;
 			int err;
 			if ((err=sectionRead(buf)))
 			{
@@ -275,7 +286,7 @@ void eSection::data(int socket)
 			section=buf[6]+1;
 		}
 
-		if ((section>maxsec) && (flags&SECREAD_INORDER))		// last section?
+		if (section > maxsec && flags&SECREAD_INORDER)// last section?
 		{
 			closeFilter();										// stop feeding
 			sectionFinish(0);

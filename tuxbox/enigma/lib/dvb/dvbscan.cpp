@@ -187,7 +187,6 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 				}
 			}
 			sdt->unlock();
-
 			if ( flags & flagOnlyFree )
 			{
 				dvb.setState(eDVBScanState(eDVBScanState::stateScanWait));
@@ -195,8 +194,8 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 			}
 		}
 
-		eDebug("scanOK %d", scanOK);
 		scanOK|=1;
+		eDebug("scanOK %d", scanOK);
 		if (scanOK==15)
 			dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanComplete));
 

@@ -148,10 +148,15 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 		break;
 	case eDVBCIMessage::PMTaddPID:
 //		eDebug("[DVBCI] got PMTaddPID message..");
+//		eDebug("addPID %04x, type %02x", message.pid, message.streamtype );
 		PMTaddPID(message.sid,message.pid,message.streamtype);
 		break;
 	case eDVBCIMessage::PMTaddDescriptor:
 //		eDebug("[DVBCI] got PMTaddDescriptor message..");
+//		eDebug("addDescr len %02x", message.data[1]+2);
+//		for (int i=0; i < message.data[1]+2; ++i)
+//			eDebugNoNewLine("%02x ", message.data[i]);
+//		eDebug("");
 		PMTaddDescriptor(message.sid, message.data);
 		break;
 	case eDVBCIMessage::enable_ts:
@@ -285,6 +290,7 @@ void eDVBCI::newService()
 	for (std::map<int, std::list<tempPMT_t> >::iterator it = services.begin();
 		it != services.end(); ++it )
 	{
+//		eDebug("service id %04x", it->first );
 		cnt++;
 		capmt[3]=i;			//session_id
 		capmt[7]=0x81;
