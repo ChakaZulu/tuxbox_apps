@@ -68,6 +68,7 @@ int keyboardMode = KEYBOARDNORMAL;
 int pdaScreen = 0;
 int screenWidth = 1024;
 eString lastTransponder;
+bool streamingActive;
 
 eString playStatus = "Off";
 
@@ -3312,6 +3313,7 @@ static eString zapTo(eString request, eString dirpath, eString opts, eHTTPConnec
 {
 	eString result;
 	std::map<eString,eString> opt = getRequestOptions(opts, '&');
+	eServiceReference streamingRef;
 
 	eString mode = opt["mode"];
 	eString path = opt["path"];
@@ -3324,8 +3326,9 @@ static eString zapTo(eString request, eString dirpath, eString opts, eHTTPConnec
 
 	eServiceReference current_service = string2ref(path);
 
-	if (!(current_service.flags&eServiceReference::isDirectory))	// is playable
+	if (!(current_service.flags&eServiceReference::isDirectory))
 	{
+		streamingActive = eStreamer::getInstance()->getServiceReference(streamingRef);
 		playService(current_service);
 		result = closeWindow(content, "Please wait...", 3000);
 	}
@@ -3402,14 +3405,15 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 	std::map<eString,eString> opt = getRequestOptions(opts, '&');
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
-	eConfig::getInstance()->getKey("/ezap/webif/pdaScreen", pdaScreen);
+	eConfig::getInstance()->getKey("/ezap/webif/screenWidth", screenWidth);
+	pdaScreen = (screenWidth < 800) ? 1 : 0;
 
 	if (opts.find("screenWidth") != eString::npos)
 	{
 		eString sWidth = opt["screenWidth"];
 		screenWidth = atoi(sWidth.c_str());
+		eConfig::getInstance()->setKey("/ezap/webif/screenWidth", screenWidth);
 		pdaScreen = (screenWidth < 800) ? 1 : 0;
-		eConfig::getInstance()->setKey("/ezap/webif/pdaScreen", pdaScreen);
 	}
 	else
 	{
@@ -4627,7 +4631,7 @@ static eString data(eString request, eString dirpath, eString opt, eHTTPConnecti
 	result.strReplace("#VOLUME#", (eAVSwitch::getInstance()->getMute()) ? "0" : eString().sprintf("%d", 63 - eAVSwitch::getInstance()->getVolume()));
 
 	// mute
-	result.strReplace("#MUTE2#", (eAVSwitch::getInstance()->getMute()) ? "1" : "0");
+	result.strReplace("#MUTE#", (eAVSwitch::getInstance()->getMute()) ? "1" : "0");
 
 	// channel stats
 	result.strReplace("#DOLBY#", (eZapMain::getInstance()->getAC3Logo()) ? "1" : "0");
@@ -4642,6 +4646,8 @@ static eString data(eString request, eString dirpath, eString opt, eHTTPConnecti
 #endif
 	// vlc streaming
 	result.strReplace("#SERVICEREFERENCE#", (eServiceInterface::getInstance()->service) ? eServiceInterface::getInstance()->service.toString() : "");
+	result.strReplace("#STREAMING#", (streamingActive) ? "1" : "0");
+
 	return result;
 }
 
@@ -4680,6 +4686,8 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 	eString result;
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
+
+	eConfig::getInstance()->getKey("/ezap/webif/screenWidth", screenWidth);
 
 	int previousZapMode = zapMode;
 	int previousZapSubMode = zapSubMode;

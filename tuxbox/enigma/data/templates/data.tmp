@@ -26,7 +26,7 @@
 	var upTime = "#UPTIME#";
 	<!-- volume bar -->
 	var volume = #VOLUME#;
-	var mute = #MUTE2#;
+	var mute = #MUTE#;
 	<!-- channel stats -->
 	var dolby = #DOLBY#;
 	var crypt = #CRYPT#;
@@ -35,6 +35,7 @@
 	var recording = #RECORDING#;
 	<!-- vlc streaming -->
 	var serviceReference = "#SERVICEREFERENCE#";
+	var streaming = "#STREAMING#";
 </script>
 </body>
 </html>
