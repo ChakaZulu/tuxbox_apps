@@ -90,8 +90,8 @@ void *mount_thread(void* cmd)
 
 CNFSMountGui::CNFSMountGui()
 {
-	m_nfs_sup = fsSupported(NFS);
-	m_cifs_sup = fsSupported(CIFS);
+	m_nfs_sup = fsSupported(CNFSMountGui::NFS);
+	m_cifs_sup = fsSupported(CNFSMountGui::CIFS);
 	printf("SUPPORT: NFS: %d, CIFS: %d\n", m_nfs_sup, m_cifs_sup);
 }
 
@@ -128,13 +128,13 @@ bool insert_modules(const CNFSMountGui::FSType fstype)
 	return false;
 }
 
+static bool nfs_mounted_once = false;
+
 bool remove_modules(const CNFSMountGui::FSType fstype)
 {
 	if (fstype == CNFSMountGui::NFS)
 	{
-		system("rmmod nfs");
-		system("rmmod lockd");
-		system("rmmod sunrpc");
+		return ((system("rmmod nfs") == 0) && (system("rmmod lockd") == 0) && (system("rmmod sunrpc") == 0));
 	}
 	return false;
 }
@@ -155,8 +155,15 @@ CNFSMountGui::FS_Support CNFSMountGui::fsSupported(const CNFSMountGui::FSType fs
 	{
 		if (in_proc_filesystems(fsname))
 		{
-			if (!keep_modules)
+			if (keep_modules)
+			{
+				if (fstype == CNFSMountGui::NFS)
+					nfs_mounted_once = true;
+			}
+			else
+			{
 				remove_modules(fstype);
+			}
 
 			return FS_NEEDS_MODULES;
 		}
@@ -477,6 +484,7 @@ void CNFSUmountGui::umount(const std::string dir)
 		if (umount2(dir.c_str(), MNT_FORCE) != 0)
 		{
 			ShowHintUTF("messagebox.info", g_Locale->getText("nfs.umounterror")); // UTF-8
+			return;
 		}
 	}
 	else
@@ -498,6 +506,8 @@ void CNFSUmountGui::umount(const std::string dir)
 			}
 		}
 	}
+	if (nfs_mounted_once)
+		remove_modules(CNFSMountGui::NFS);
 }
 
 int CNFSSmallMenu::exec( CMenuTarget* parent, std::string actionKey )
