@@ -642,7 +642,7 @@ void eDVBServiceController::scanPMT()
 		case eSystemInfo::dbox2Nokia:
 		case eSystemInfo::dbox2Philips:
 		case eSystemInfo::dbox2Sagem:
-			needAC3Workaround=0;
+			needAC3Workaround=1;
 		default:
 			break;
 	}
