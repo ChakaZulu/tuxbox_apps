@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.21 2002/08/13 06:06:41 happydude Exp $
+ * $Id: pzapit.cpp,v 1.22 2002/08/27 23:43:46 obi Exp $
  *
  * simple commandline client for zapit
  *
@@ -206,7 +206,6 @@ int main (int argc, char** argv)
 		{
 			if ((sscanf(argv[i], "%d", &bouquet) > 0) && (sscanf(argv[++i], "%d", &channel) > 0))
 			{
-				cout << "bouquet: " << bouquet << ", channel: " << channel << std::endl;
 				continue;
 			}
 			else
@@ -442,21 +441,26 @@ int main (int argc, char** argv)
 	{
 		CZapitClient::responseGetPIDs pids;
 
-		std::cout << "zapping to  channel " << channels[channel-1].name << "." << std::endl;
-
 		zapit->zapTo(channels[channel-1].nr);
 		zapit->getPIDS(pids);
 
-		std::cout << "vpid: 0x" << std::hex << pids.PIDs.vpid << std::endl;
-		std::cout << "vtxtpid: 0x" << std::hex << pids.PIDs.vtxtpid << std::endl;
-		std::cout << "pcrpid: 0x" << std::hex << pids.PIDs.pcrpid << std::endl;
-		std::cout << "audio channels:" << std::endl;
+		std::cout << "zapped to " << channels[channel-1].name << std::endl;
+
+		if (pids.PIDs.vpid)
+			std::cout << "   video: 0x" << std::hex << pids.PIDs.vpid << std::endl;
+
+		if (pids.PIDs.vtxtpid)
+			std::cout << "teletext: 0x" << std::hex << pids.PIDs.vtxtpid << std::endl;
+
+		if (pids.PIDs.pcrpid)
+			std::cout << "     pcr: 0x" << std::hex << pids.PIDs.pcrpid << std::endl;
 
 		for (count = 0; count < pids.APIDs.size(); count++)
 		{
-			std::cout << std::dec << count + 1 << ") " << "pid: 0x" << std::hex << pids.APIDs[count].pid << ", description: " << pids.APIDs[count].desc;
-			if (pids.APIDs[count].is_ac3) std::cout << " (ac3)";
-			std::cout << std::endl;
+			std::cout << " audio " << std::dec << count + 1 << ": 0x" << std::hex << pids.APIDs[count].pid << " (" << pids.APIDs[count].desc;
+			if (pids.APIDs[count].is_ac3)
+				std::cout << ", ac3";
+			std::cout << ")" << std::endl;
 		}
 	}
 
