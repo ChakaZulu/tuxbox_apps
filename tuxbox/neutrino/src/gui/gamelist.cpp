@@ -28,11 +28,11 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-$Id: gamelist.cpp,v 1.29 2002/02/22 17:23:24 field Exp $
+$Id: gamelist.cpp,v 1.30 2002/02/22 18:07:54 field Exp $
 
 $Log: gamelist.cpp,v $
-Revision 1.29  2002/02/22 17:23:24  field
-Neues Offset-Cmd
+Revision 1.30  2002/02/22 18:07:54  field
+Hiding plugins
 
 Revision 1.26  2002/01/29 17:26:51  field
 Jede Menge Updates :)
@@ -75,8 +75,8 @@ gamelist: eigener Fontdef fuer 2-zeiliges Menue
 
 void CPlugins::loadPlugins()
 {
-	printf("Checking plugins-directory\n");
-	printf("Dir: %s\n", PLUGINDIR "/");
+	printf("[CPlugins] Checking plugins-directory\n");
+	printf("[CPlugins] Dir: %s\n", PLUGINDIR "/");
 
 	struct dirent **namelist;
 
@@ -108,7 +108,7 @@ void CPlugins::loadPlugins()
 			plugin_list.insert(plugin_list.end(), new_plugin);
 		}
 	}
-	printf("%d plugins found...\n", number_of_plugins);
+	printf("[CPlugins] %d plugins found...\n", number_of_plugins);
 
 }
 
@@ -168,6 +168,7 @@ void CPlugins::parseCfg(plugin *plugin_data)
 	plugin_data->vtxtpid = false;
 	plugin_data->showpig = false;
 	plugin_data->needoffset = false;
+	plugin_data->type = 1;
 
 	for (int i = 0; i < linecount; i++)
 	{
@@ -229,7 +230,7 @@ void CPlugins::parseCfg(plugin *plugin_data)
 
 PluginParam* CPlugins::makeParam(std::string id, PluginParam *next)
 {
-	cout << "Adding " << id << " With Value " << params.find(id)->second.c_str() << " and next: " << (int) next << endl;
+	// cout << "Adding " << id << " With Value " << params.find(id)->second.c_str() << " and next: " << (int) next << endl;
 
 	PluginParam *startparam = new PluginParam;
 	startparam->next = next;
@@ -238,7 +239,7 @@ PluginParam* CPlugins::makeParam(std::string id, PluginParam *next)
 	strcpy(startparam->id, id.c_str());
 	strcpy(startparam->val, params.find(id)->second.c_str());
 
-	cout << "Startparam: " << (int) startparam << endl;
+	// cout << "Startparam: " << (int) startparam << endl;
 	return startparam;
 }
 
@@ -266,17 +267,15 @@ void CPlugins::startPlugin(int number)
 
 	if (plugin_list[number].fb)
 	{
-		cout << "With FB " << params.find(P_ID_FBUFFER)->second.c_str() <<endl;
+		// cout << "With FB " << params.find(P_ID_FBUFFER)->second.c_str() <<endl;
 		startparam = makeParam(P_ID_FBUFFER, startparam);
-		cout << "New Startparam: " << startparam << endl;
-		cout << "New Tmpparam: " << tmpparam << endl;
-
-
+		//cout << "New Startparam: " << startparam << endl;
+		//cout << "New Tmpparam: " << tmpparam << endl;
 	}
 	if (plugin_list[number].rc)
 	{
 		setrc( g_RCInput->getFileHandle() );
-		cout << "With RC " << params.find(P_ID_RCINPUT)->second.c_str() << endl;
+		// cout << "With RC " << params.find(P_ID_RCINPUT)->second.c_str() << endl;
 		startparam = makeParam(P_ID_RCINPUT, startparam);
 	}
 	else
@@ -286,13 +285,13 @@ void CPlugins::startPlugin(int number)
 
 	if (plugin_list[number].lcd)
 	{
-		cout << "With LCD " << endl;
+		// cout << "With LCD " << endl;
 
 		startparam = makeParam(P_ID_LCD, startparam);
 	}
 	if (plugin_list[number].vtxtpid)
 	{
-		cout << "With VTXTPID " << params.find(P_ID_VTXTPID)->second.c_str() << endl;
+		// cout << "With VTXTPID " << params.find(P_ID_VTXTPID)->second.c_str() << endl;
 
 		startparam = makeParam(P_ID_VTXTPID, startparam);
 	}
@@ -300,7 +299,7 @@ void CPlugins::startPlugin(int number)
 	{
 		addParm(P_ID_OFF_X, g_settings.screen_StartX);
 		addParm(P_ID_OFF_Y, g_settings.screen_StartY);
-		cout << "With OFFSETS " << params.find(P_ID_OFF_X)->second.c_str() << ":" << params.find(P_ID_OFF_Y)->second.c_str() << endl;
+		// cout << "With OFFSETS " << params.find(P_ID_OFF_X)->second.c_str() << ":" << params.find(P_ID_OFF_Y)->second.c_str() << endl;
 
 		startparam = makeParam(P_ID_OFF_X, startparam);
 		startparam = makeParam(P_ID_OFF_Y, startparam);
@@ -309,17 +308,13 @@ void CPlugins::startPlugin(int number)
 	PluginParam *par = startparam;
 	for( ; par; par=par->next )
 	{
-		printf ("id: %s - val: %s\n", par->id, par->val);
-		printf("%d\n", par->next);
+		// printf ("id: %s - val: %s\n", par->id, par->val);
+		// printf("%d\n", par->next);
 	}
-
-	cout << "Mark-2" << endl;
 
 	std::string pluginname = plugin_list[number].filename;
 
 	strcpy(depstring, plugin_list[number].depend.c_str());
-
-	cout << "Mark-1" << endl;
 
 	argc=0;
 	if ( depstring[0] )
@@ -339,11 +334,11 @@ void CPlugins::startPlugin(int number)
 				break;
 		}
 	}
-	cout << "Mark0" << endl;
+
 	for( i=0; i<argc; i++ )
 	{
 		std::string libname = argv[i];
-		printf("try load shared lib : %s\n",argv[i]);
+		printf("[CPlugins] try load shared lib : %s\n",argv[i]);
 		libhandle[i] = dlopen ( *argv[i] == '/' ?
 			argv[i] : (PLUGINDIR "/"+libname).c_str(),
 			RTLD_NOW | RTLD_GLOBAL );
@@ -353,7 +348,6 @@ void CPlugins::startPlugin(int number)
 			break;
 		}
 	}
-	cout << "Mark1" << endl;
 	while ( i == argc )		// alles geladen
 	{
 		handle = dlopen ( plugin_list[number].sofile.c_str(), RTLD_NOW);
@@ -371,10 +365,10 @@ void CPlugins::startPlugin(int number)
 			//should unload libs!
 			break;
 		}
-		printf("try exec...\n");
+		printf("[CPlugins] try exec...\n");
 		execPlugin(startparam);
 		dlclose(handle);
-		printf("exec done...\n");
+		printf("[CPlugins] exec done...\n");
 		//restore framebuffer...
 
 
@@ -573,7 +567,7 @@ void CGameList::paintItem(int pos)
 		color = COL_MENUCONTENTSELECTED;
 	}
 
-	if(pos==0)
+	if(liststart+pos==0)
 	{	//back is half-height...
 		itemheight = (fheight / 2) + 3;
 		g_FrameBuffer->paintBoxRel(x,ypos+itemheight, width, 15, COL_MENUCONTENT);
