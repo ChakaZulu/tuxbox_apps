@@ -1,5 +1,5 @@
 /*
- * $Id: streamfile.c,v 1.1 2004/04/26 08:32:59 diemade Exp $
+ * $Id: streamfile.c,v 1.2 2004/04/26 14:50:41 diemade Exp $
  * 
  * streaming ts to file/disc
  * 
@@ -181,14 +181,12 @@ void *FileThread (void *v_arg)
 					}
 					else {
 						fdatasync(fd2);
+						filesize += (unsigned long long)written;
+						filesize2 += (unsigned long long)written;
 					}
 				}
 			}
 
-
-			//written = write(fd2, mybuf, len);
-			filesize += (unsigned long long)written;
-			filesize2 += (unsigned long long)written;
 			if ((time(NULL) - timer1) > 10) {
 				bitrate = (filesize2 / (time(NULL) - timer1) * 8);
 				dprintf("Datarate %d bits/sec, %d Kbits/sec, max. rb used %d bytes\n"
