@@ -30,10 +30,12 @@
 */
 
 
-#include <stdio.h>
+#include <string.h>
+
 
 #include <lcddclient/lcddMsg.h>
 #include <lcddclient/lcddclient.h>
+
 
 bool CLcddClient::send(const unsigned char command, char* data = NULL, const unsigned int size = 0)
 {

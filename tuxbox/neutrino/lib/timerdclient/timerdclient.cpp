@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.33 2002/10/19 21:47:45 obi Exp $
+	$Id: timerdclient.cpp,v 1.34 2002/10/20 12:32:45 thegoodguy Exp $
 
 	License: GPL
 
@@ -22,7 +22,7 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <stdio.h>
+#include <string.h>
 
 #include <eventserver.h>
 #include <timerdclient/timerdclient.h>
