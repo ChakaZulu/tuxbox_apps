@@ -27,7 +27,7 @@
 
 using namespace std;
 
-extern int smallScreen;
+extern int pdaScreen;
 
 eString getAttribute(eString filename, eString attribute)
 {
@@ -70,7 +70,7 @@ eString button(int width, eString buttonText, eString buttonColor, eString butto
 
 	std::stringstream result;
 	int height = 22;
-	if (smallScreen == 1)
+	if (pdaScreen == 1)
 	{
 		width = width / 2;
 		height = 14;
