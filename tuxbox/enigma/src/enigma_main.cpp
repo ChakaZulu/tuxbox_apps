@@ -591,15 +591,15 @@ void eZapMain::keyDown(int code)
 	}
 	case eRCInput::RC_MINUS:
 		eDVB::getInstance()->changeVolume(0, +4);
-		if (!isVisible())
-			show();
-		timeout.start(1000, 1);
+//		if (!isVisible())
+//			show();
+//		timeout.start(1000, 1);
 		break;
 	case eRCInput::RC_PLUS:
 		eDVB::getInstance()->changeVolume(0, -4);
-		if (!isVisible())
-			show();
-		timeout.start(1000, 1);
+//		if (!isVisible())
+//			show();
+//		timeout.start(1000, 1);
 		break;
 	case eRCInput::RC_MUTE:
 		eDVB::getInstance()->changeVolume(2, 1);
