@@ -1256,7 +1256,7 @@ static eString getEITC(eString result)
 static eString getVolBar()
 {
 	std::stringstream result;
-	int volume = 63 - eAVSwitch::getInstance()->getVolume();
+	int volume = (eAVSwitch::getInstance()->getMute()) ? 0 : 63 - eAVSwitch::getInstance()->getVolume();
 
 	for (int i = 9; i <= 63; i+=6)
 	{
@@ -1635,7 +1635,7 @@ public:
 			eEPGCache::getInstance()->Unlock();
 
 			eString tmp = filter_string(service->service_name);
-			if (short_description && (zapSubMode != ZAPMODERECORDINGS))
+			if (short_description && (zapMode != ZAPMODERECORDINGS))
 				tmp = tmp + " - " + event_start + " (" + event_duration + ") " + filter_string(short_description);
 			tmp.strReplace("\"", "'");
 			if (!((zapSubMode == ZAPSUBMODESATELLITES) && (tmp.find("Provider") != eString::npos)))
