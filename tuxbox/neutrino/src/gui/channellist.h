@@ -130,7 +130,7 @@ class CChannelList
 			return chanlist[selected]->onid_sid;
 		}
 		const string getActiveChannelID();
-		string getNameFromOnidSid(int onidSid);
+		CChannel* getChannelFromOnidSid(int onidSid);
 		void zapTo(int pos);
 		bool showInfo(int pos);
 		void updateEvents(void);
@@ -140,6 +140,7 @@ class CChannelList
 		void quickZap(int key);
 		int  hasChannel(int nChannelNr);
 		void setSelected( int nChannelNr); // for adjusting bouquet's channel list after numzap or quickzap
+		bool handleLockage( CChannel* chan);
 }
 ;
 

@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.217 2002/04/08 00:11:44 flfs Exp $
+        $Id: neutrino.cpp,v 1.218 2002/04/08 18:48:40 Simplex Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1811,14 +1811,6 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		AudioMute( (bool)data, true );
 		return messages_return::handled;
 	}
-/*	else if ( ( msg == messages::EVT_BOUQUETSCHANGED ) ||
-			  ( msg == messages::EVT_SERVICESCHANGED ) )
-	{
-		channelsInit();
-
-		return messages_return::handled;
-	}
-*/
 	else if ( ( msg == messages::EVT_BOUQUETSCHANGED ) ||
 			  ( msg == messages::EVT_SERVICESCHANGED ) )
 	{
@@ -1842,8 +1834,24 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		strncpy( evName, (char*)p, 50);
 		(char*)p += 50;
 		int evFSK = *(int*)p;
-		string evChannel = channelList->getNameFromOnidSid(evOnidSid);
-		printf("[neutrino] now starting %s on  %s (FSK: %d)\n", evName, evChannel.c_str(), evFSK);
+		CChannelList::CChannel* evChannel = channelList->getChannelFromOnidSid(evOnidSid);
+		if (evChannel != NULL)
+		{
+			printf("[neutrino] now starting %s on  %s (FSK: %d)\n", evName, evChannel->name.c_str(), evFSK);
+
+			if (evFSK > 0)
+			{
+				evChannel->lockedProgramStarts( evFSK);
+				if ( channelList->getActiveChannelOnid_sid() == evOnidSid)
+				{
+					channelList->handleLockage( evChannel);
+				}
+			}
+			else
+			{
+				evChannel->lockedProgramEnds();
+			}
+		}
 		return messages_return::handled;
 	}
 
@@ -2245,7 +2253,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.217 2002/04/08 00:11:44 flfs Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.218 2002/04/08 18:48:40 Simplex Exp $\n\n");
 	tzset();
 	initGlobals();
 

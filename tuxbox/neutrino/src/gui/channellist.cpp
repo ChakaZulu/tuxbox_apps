@@ -58,6 +58,7 @@ bool CChannelList::CChannel::isCurrentlyLocked()
 {
 	printf("bAlwaysLocked: %d, bLockedProgramIsRunning %d\n",bAlwaysLocked,bLockedProgramIsRunning );
 	return ( bAlwaysLocked || bLockedProgramIsRunning);
+//	return( true);
 }
 
 // lockedProgramStarts should be called when a locked program starts
@@ -478,6 +479,26 @@ bool CChannelList::showInfo(int pos)
 	return true;
 }
 
+bool CChannelList::handleLockage( CChannel* chan)
+{
+	printf("[neutrino] handleLockage\n");
+	if (chan->isCurrentlyLocked())
+	{
+		printf("[neutrino] channel is locked\n");
+		g_Zapit->stopPlayBack();
+		CZapProtection zapProtection( g_settings.parentallock_pincode);
+		if (!zapProtection.check())
+		{
+			if (bouquetList != NULL)
+				bouquetList->adjustToChannel( getActiveChannelNumber());
+			g_InfoViewer->killTitle(); // in case we came from numzap
+			return( false);
+		}
+	}
+	g_Zapit->startPlayBack();
+	return( true);
+}
+
 void CChannelList::zapTo(int pos)
 {
 	if (chanlist.size() == 0)
@@ -490,16 +511,9 @@ void CChannelList::zapTo(int pos)
 		pos = 0;
 	}
 
-	if (chanlist[pos]->isCurrentlyLocked())
+	if (!handleLockage( chanlist[pos]))
 	{
-		CZapProtection zapProtection( g_settings.parentallock_pincode);
-		if (!zapProtection.check())
-		{
-			if (bouquetList != NULL)
-				bouquetList->adjustToChannel( getActiveChannelNumber());
-			g_InfoViewer->killTitle(); // in case we came from numzap
-			return;
-		}
+		return;
 	}
 
 	selected= pos;
@@ -920,13 +934,13 @@ void CChannelList::paint()
 
 }
 
-string CChannelList::getNameFromOnidSid(int onidSid)
+CChannelList::CChannel* CChannelList::getChannelFromOnidSid(int onidSid)
 {
 	for (uint i=0; i< chanlist.size();i++)
 	{
 		if (chanlist[i]->onid_sid == onidSid)
-			return chanlist[i]->name;
+			return chanlist[i];
 	}
-	return("");
+	return(NULL);
 }
 
