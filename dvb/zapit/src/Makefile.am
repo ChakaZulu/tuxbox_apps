@@ -7,6 +7,7 @@ INCLUDES = \
 	@XML_CFLAGS@
 
 bin_PROGRAMS = pzapit zapit
+sbin_PROGRAMS = udpstreampes
 
 pzapit_SOURCES = \
 	pzapit.cpp
@@ -14,6 +15,14 @@ pzapit_SOURCES = \
 pzapit_LDADD = \
 	$(top_builddir)/lib/libzapitclient.la \
 	@CONNECTION_LIBS@
+
+udpstreampes_SOURCES = \
+	udpstreampes.cpp
+
+udpstreampes_LDADD = \
+	$(top_builddir)/lib/libzapitclient.la \
+	@CONNECTION_LIBS@ \
+	-lpthread
 
 zapit_SOURCES = \
 	bouquets.cpp channel.cpp dvbstring.cpp \
