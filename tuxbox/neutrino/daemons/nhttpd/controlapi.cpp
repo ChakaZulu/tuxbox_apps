@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.14 2002/11/13 20:44:43 Zwen Exp $
+	$Id: controlapi.cpp,v 1.15 2003/01/04 15:51:44 dirch Exp $
 
 	License: GPL
 
@@ -318,7 +318,6 @@ bool CControlAPI::MessageCGI(CWebserverRequest *request)
 	
 bool CControlAPI::InfoCGI(CWebserverRequest *request)
 {
-	request->SendPlainHeader("text/plain");          // Standard httpd header senden
 	if (request->ParameterList.size() == 0)
 	{	//paramlos
 		request->SocketWrite("Neutrino NG\n");
@@ -328,11 +327,13 @@ bool CControlAPI::InfoCGI(CWebserverRequest *request)
 	{
 		if (request->ParameterList["1"] == "streaminfo")	// streaminfo ausgeben
 		{
+			request->SendPlainHeader("text/plain");			// Standard httpd header senden
 			SendStreamInfo(request);
 			return true;
 		}
 		else if (request->ParameterList["1"] == "settings")	// settings ausgeben
 		{
+			request->SendPlainHeader("text/plain");			// Standard httpd header senden
 			SendSettings(request);
 			return true;
 		}
@@ -343,6 +344,7 @@ bool CControlAPI::InfoCGI(CWebserverRequest *request)
 		}
 		else if (request->ParameterList["1"] == "httpdversion")	// httpd version ausgeben
 		{
+			request->SendPlainHeader("text/plain");			// Standard httpd header senden
 			request->SocketWrite("2");
 			return true;
 		}

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.34 2002/12/09 17:59:27 dirch Exp $
+	$Id: request.cpp,v 1.35 2003/01/04 15:51:44 dirch Exp $
 
 	License: GPL
 
@@ -703,11 +703,13 @@ string tmpfilename;
 		tmpfilename = path + "/" + filename;
 	else
 		tmpfilename = path + filename;
-
+	
 	if( access(string(Parent->PublicDocumentRoot + tmpfilename).c_str(),4) == 0)
 			tmpfilename = Parent->PublicDocumentRoot + tmpfilename;
-	else if(access(string(Parent->PrivateDocumentRoot + tmpfilename).c_str(),4) == 0)		
+	else if(access(string(Parent->PrivateDocumentRoot + tmpfilename).c_str(),4) == 0)
 			tmpfilename = Parent->PrivateDocumentRoot + tmpfilename;
+	else if(access(tmpfilename.c_str(),4) == 0)
+			;
 	else
 	{
 		return "";
