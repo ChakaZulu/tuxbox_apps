@@ -20,6 +20,7 @@ struct channel {
   uint chan_nr;
   ushort service_type;
 
+  unsigned int OnidSid(){return( (onid << 16)|sid);}
   channel(std::string Name, time_t Last_update, uint Vpid, uint Apid, uint Pmt, uint Ecmpid, uint Sid, uint Tsid, uint Onid, ushort Service_type)
   {
     name = Name;
