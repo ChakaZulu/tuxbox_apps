@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_setup.cpp,v 1.33 2003/02/16 01:03:45 waldi Exp $
+ * $Id: enigma_setup.cpp,v 1.34 2003/02/19 13:14:30 obi Exp $
  */
 
 #include <enigma_setup.h>
@@ -41,7 +41,7 @@
 #include <lib/dvb/edvb.h>
 #include <lib/gui/eskin.h>
 #include <lib/gui/elabel.h>
-#include <tuxbox/tuxbox.h>
+#include <libtuxbox.h>
 #include "upgrade.h"
 
 eZapSetup::eZapSetup()
