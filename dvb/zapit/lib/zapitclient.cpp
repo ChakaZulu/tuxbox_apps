@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.54 2002/09/26 16:20:43 thegoodguy Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.55 2002/10/02 10:58:11 thegoodguy Exp $ *
  *
  * Client-Interface für zapit - DBoxII-Project
  *
@@ -238,8 +238,11 @@ void CZapitClient::getBouquets( BouquetList& bouquets, bool emptyBouquetsToo)
 	send(CZapitMessages::CMD_GET_BOUQUETS, (char*)&msg, sizeof(msg));
 
 	responseGetBouquets response;
-	while ( CBasicClient::receive_data((char*)&response, sizeof(responseGetBouquets)))
+	while (CBasicClient::receive_data((char*)&response, sizeof(responseGetBouquets)))
+	{
+		response.bouquet_nr++;
 		bouquets.push_back(response);
+	}
 	zapit_close();
 }
 
@@ -254,8 +257,11 @@ void CZapitClient::getBouquetChannels( unsigned int bouquet, BouquetChannelList&
 	send(CZapitMessages::CMD_GET_BOUQUET_CHANNELS, (char*)&msg, sizeof(msg));
 
 	responseGetBouquetChannels response;
-	while ( CBasicClient::receive_data((char*)&response, sizeof(responseGetBouquetChannels)))
+	while (CBasicClient::receive_data((char*)&response, sizeof(responseGetBouquetChannels)))
+	{
+		response.nr++;
 		channels.push_back(response);
+	}
 	zapit_close();
 }
 
@@ -270,8 +276,11 @@ void CZapitClient::getChannels( BouquetChannelList& channels, channelsMode mode,
 	send(CZapitMessages::CMD_GET_CHANNELS, (char*)&msg, sizeof(msg));
 
 	responseGetBouquetChannels response;
-	while ( CBasicClient::receive_data((char*)&response, sizeof(responseGetBouquetChannels)))
+	while (CBasicClient::receive_data((char*)&response, sizeof(responseGetBouquetChannels)))
+	{
+		response.nr++;
 		channels.push_back(response);
+	}
 	zapit_close();
 }
 
