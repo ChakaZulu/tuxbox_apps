@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.25 2002/09/05 23:48:50 thegoodguy Exp $
+ * $Id: pzapit.cpp,v 1.26 2002/09/09 16:06:50 thegoodguy Exp $
  *
  * simple commandline client for zapit
  *
@@ -32,7 +32,7 @@ int usage (std::string basename)
 	std::cout << "bouquet list: " << basename << " [-ra]" << std::endl;
 	std::cout << "channel list: " << basename << " [-ra] <bouquet-number>" << std::endl;
 	std::cout << "zap by number: " << basename << " [-ra] <bouquet-number> <channel-number>" << std::endl;
-	std::cout << "zap by name: " << basename << " [-ra] <channel-name>" << std::endl;
+	std::cout << "zap by name: " << basename << " [-ra] -n <channel-name>" << std::endl;
 	std::cout << "set diseqc type: " << basename << " -dt <type>" << std::endl;
 	std::cout << "set diseqc repeats: " << basename << " -dr <count>" << std::endl;
 	std::cout << "(-ra toggles radio mode)" << std::endl;
