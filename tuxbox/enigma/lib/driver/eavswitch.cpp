@@ -16,6 +16,7 @@
 #define SAAIOSOUT               3 /* output control                     */
 #define SAAIOSENC               4 /* set encoder (pal/ntsc)             */
 #define SAAIOSMODE              5 /* set mode (rgb/fbas/svideo) */
+#define SAAIOSWSS		10 /* set wide screen signaling data */
 
 #define SAA_MODE_RGB    0
 #define SAA_MODE_FBAS   1
@@ -30,6 +31,9 @@
 #define SAA_INP_DEMOFF  6
 #define SAA_INP_SYMP    8
 #define SAA_INP_CBENB   128
+
+#define SAA_WSS_43F	0
+#define SAA_WSS_169F	7
 
 eAVSwitch *eAVSwitch::instance=0;
 
@@ -265,7 +269,10 @@ int eAVSwitch::setInput(int v)
 
 int eAVSwitch::setAspectRatio(eAVAspectRatio as)
 {
+	int saa;
 	aspect=as;
+	saa = (aspect==r169) ? SAA_WSS_169F : SAA_WSS_43F;
+	ioctl(saafd,SAAIOSWSS,&saa);
 	return setTVPin8(active?((aspect==r169)?6:12):0);
 }
 
