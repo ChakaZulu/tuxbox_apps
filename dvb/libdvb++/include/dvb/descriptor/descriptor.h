@@ -1,5 +1,5 @@
 /*
- * $Id: descriptor.h,v 1.1 2003/07/17 01:07:14 obi Exp $
+ * $Id: descriptor.h,v 1.2 2003/09/17 16:03:20 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -37,6 +37,8 @@ class Descriptor
 
 		uint8_t getTag(void) const;
 		uint8_t getLength(void) const;
+
+		size_t writeToBuffer(uint8_t * const buffer) const;
 };
 
 typedef std::vector<Descriptor *> DescriptorVector;

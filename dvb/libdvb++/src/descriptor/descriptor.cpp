@@ -1,5 +1,5 @@
 /*
- * $Id: descriptor.cpp,v 1.1 2003/07/17 01:07:42 obi Exp $
+ * $Id: descriptor.cpp,v 1.2 2003/09/17 16:03:21 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -35,5 +35,15 @@ uint8_t Descriptor::getTag(void) const
 uint8_t Descriptor::getLength(void) const
 {
 	return descriptorLength;
+}
+
+size_t Descriptor::writeToBuffer(uint8_t * const buffer) const
+{
+	size_t total = 0;
+
+	buffer[total++] = descriptorTag;
+	buffer[total++] = descriptorLength;
+
+	return total;
 }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: capmt.cpp,v 1.2 2003/08/20 22:47:35 obi Exp $
+ * $Id: capmt.cpp,v 1.3 2003/09/17 16:03:21 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -18,6 +18,10 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  */
+
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #include <dvb/id/descriptor_tag.h>
 #include <dvb/table/capmt.h>
@@ -39,9 +43,25 @@ CaLengthField::CaLengthField(const uint32_t length)
 			mask = (mask << 8) | 0xff;
 		}
 
-		for (uint8_t i = lengthFieldSize; i > 0; i--)
+		for (uint8_t i = lengthFieldSize; i > 0; --i)
 			lengthValueByte.push_back((length >> ((i - 1) << 3)) & 0xff);
 	}
+}
+
+size_t CaLengthField::writeToBuffer(uint8_t * const buffer) const
+{
+	size_t total = 0;
+
+	if (sizeIndicator == 0) {
+		buffer[total++] = lengthValue;
+	}
+	else {
+		buffer[total++] = (sizeIndicator << 7) | lengthFieldSize;
+		for (std::vector<uint8_t>::const_iterator i = lengthValueByte.begin(); i != lengthValueByte.end(); i++)
+			buffer[total++] = *i;
+	}
+
+	return total;
 }
 
 CaElementaryStreamInfo::CaElementaryStreamInfo(const ElementaryStreamInfo * const info, const uint8_t cmdId)
@@ -71,6 +91,25 @@ CaElementaryStreamInfo::~CaElementaryStreamInfo(void)
 uint16_t CaElementaryStreamInfo::getLength(void) const
 {
 	return esInfoLength + 5;
+}
+
+size_t CaElementaryStreamInfo::writeToBuffer(uint8_t * const buffer) const
+{
+	size_t total = 0;
+
+	buffer[total++] = streamType;
+	buffer[total++] = (elementaryPid >> 8) & 0xff;
+	buffer[total++] = (elementaryPid >> 0) & 0xff;
+	buffer[total++] = (esInfoLength >> 8) & 0xff;
+	buffer[total++] = (esInfoLength >> 0) & 0xff;
+
+	if (esInfoLength != 0) {
+		buffer[total++] = caPmtCmdId;
+		for (CaDescriptorConstIterator i = descriptors.begin(); i != descriptors.end(); ++i)
+			total += (*i)->writeToBuffer(&buffer[total]);
+	}
+
+	return total;
 }
 
 CaProgramMapTable::CaProgramMapTable(const ProgramMapTable * const pmt, const uint8_t listManagement, const uint8_t cmdId)
@@ -115,5 +154,44 @@ CaProgramMapTable::~CaProgramMapTable(void)
 		delete *i;
 
 	delete lengthField;
+}
+
+size_t CaProgramMapTable::writeToBuffer(uint8_t * const buffer) const
+{
+	size_t total = 0;
+
+	buffer[total++] = (caPmtTag >> 16) & 0xff;
+	buffer[total++] = (caPmtTag >>  8) & 0xff;
+	buffer[total++] = (caPmtTag >>  0) & 0xff;
+
+	total += lengthField->writeToBuffer(&buffer[total]);
+
+	buffer[total++] = caPmtListManagement;
+	buffer[total++] = (programNumber >> 8) & 0xff;
+	buffer[total++] = (programNumber >> 0) & 0xff;
+	buffer[total++] = (versionNumber << 1) | currentNextIndicator;
+	buffer[total++] = (programInfoLength >> 8) & 0xff;
+	buffer[total++] = (programInfoLength >> 0) & 0xff;
+
+	if (programInfoLength) {
+		buffer[total++] = caPmtCmdId;
+		for (CaDescriptorConstIterator i = descriptors.begin(); i != descriptors.end(); ++i)
+			total += (*i)->writeToBuffer(&buffer[total]);
+	}
+
+	for (CaElementaryStreamInfoConstIterator i = esInfo.begin(); i != esInfo.end(); ++i)
+		total += (*i)->writeToBuffer(&buffer[total]);
+
+	return total;
+}
+
+ssize_t CaProgramMapTable::writeToFile(const int fd) const
+{
+	unsigned char buffer[4096];
+	size_t length;
+
+	length = writeToBuffer(buffer);
+
+	return write(fd, buffer, length);
 }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: capmt.h,v 1.2 2003/08/20 22:47:24 obi Exp $
+ * $Id: capmt.h,v 1.3 2003/09/17 16:03:20 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -35,6 +35,8 @@ class CaLengthField
 
 	public:
 		CaLengthField(const uint32_t length);
+
+		size_t writeToBuffer(uint8_t * const buffer) const;
 };
 
 class CaElementaryStreamInfo
@@ -51,6 +53,8 @@ class CaElementaryStreamInfo
 		~CaElementaryStreamInfo(void);
 
 		uint16_t getLength(void) const;
+
+		size_t writeToBuffer(uint8_t * const buffer) const;
 };
 
 typedef std::vector<CaElementaryStreamInfo *> CaElementaryStreamInfoVector;
@@ -74,6 +78,9 @@ class CaProgramMapTable
 	public:
 		CaProgramMapTable(const ProgramMapTable * const pmt, const uint8_t listManagement, const uint8_t cmdId);
 		~CaProgramMapTable(void);
+
+		size_t writeToBuffer(uint8_t * const buffer) const;
+		ssize_t writeToFile(int fd) const;
 };
 
 typedef std::vector<CaProgramMapTable *> CaProgramMapTableVector;

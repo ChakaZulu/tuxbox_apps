@@ -1,5 +1,5 @@
 /*
- * $Id: ca_descriptor.cpp,v 1.2 2003/08/20 22:47:27 obi Exp $
+ * $Id: ca_descriptor.cpp,v 1.3 2003/09/17 16:03:21 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -44,5 +44,22 @@ uint16_t CaDescriptor::getCaPid(void) const
 const PrivateDataByteVector *CaDescriptor::getPrivateDataBytes(void) const
 {
 	return &privateDataBytes;
+}
+
+size_t CaDescriptor::writeToBuffer(uint8_t * const buffer) const
+{
+	size_t total = 0;
+
+	total += Descriptor::writeToBuffer(buffer);
+
+	buffer[total++] = (caSystemId >> 8) & 0xff;
+	buffer[total++] = (caSystemId >> 0) & 0xff;
+	buffer[total++] = (caPid >> 8) & 0xff;
+	buffer[total++] = (caPid >> 0) & 0xff;
+
+	for (PrivateDataByteConstIterator i = privateDataBytes.begin(); i != privateDataBytes.end(); ++i)
+		buffer[total++] = *i;
+
+	return total;
 }
 
