@@ -177,6 +177,12 @@ if test "$DVBINCLUDES"; then
 	CPPFLAGS="$CPPFLAGS -I$DVBINCLUDES"
 fi
 
+AC_CHECK_HEADERS(ost/dmx.h,[
+	DVB_API_VERSION=1
+	AC_MSG_NOTICE([found dvb version 1])
+])
+
+if test -z "$DVB_API_VERSION"; then
 AC_CHECK_HEADERS(linux/dvb/version.h,[
 	AC_LANG_PREPROC_REQUIRE()
 	AC_REQUIRE([AC_PROG_EGREP])
@@ -188,12 +194,6 @@ version DVB_API_VERSION
 	rm -f conftest*
 
 	AC_MSG_NOTICE([found dvb version $DVB_API_VERSION])
-])
-
-if test -z "$DVB_API_VERSION"; then
-AC_CHECK_HEADERS(ost/dmx.h,[
-	DVB_API_VERSION=1
-	AC_MSG_NOTICE([found dvb version 1])
 ])
 fi
 
