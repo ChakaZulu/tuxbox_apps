@@ -347,34 +347,85 @@ void CFrameBuffer::paintPixel(int x, int y, unsigned char col)
 
 void CFrameBuffer::paintLine(int xa, int ya, int xb, int yb, unsigned char col)
 {
-  int dx = abs (xa - xb), dy = abs (ya - yb);
-  int p = 2 * dy - dx;
-  int twoDy = 2 * dy, twoDyDx = 2 * (dy - dx);
-  int x, y, xEnd;
+	int dx = abs (xa - xb);
+	int	dy = abs (ya - yb);
+	int	x;
+	int	y;
+	int	End;
+	int	step;
 
-  /* Determine which point to use as start, which as end */
-  if (xa > xb) {
-    x = xb;
-    y = yb;
-    xEnd = xa;
-  }
-  else {
-    x = xa;
-    y = ya;
-    xEnd = xb;
-  }
-  paintPixel (x, y, col);
+	if ( dx > dy )
+	{
+		int	p = 2 * dy - dx;
+		int	twoDy = 2 * dy;
+		int	twoDyDx = 2 * (dy-dx);
 
-  while (x < xEnd) {
-    x++;
-    if (p < 0)
-      p += twoDy;
-    else {
-      y++;
-      p += twoDyDx; 
-    }
-    paintPixel (x, y, col);
-  }
+		if ( xa > xb )
+		{
+			x = xb;
+			y = yb;
+			End = xa;
+			step = ya < yb ? -1 : 1;
+		}
+		else
+		{
+			x = xa;
+			y = ya;
+			End = xb;
+			step = yb < ya ? -1 : 1;
+		}
+
+		paintPixel (x, y, col);
+
+		while( x < End )
+		{
+			x++;
+			if ( p < 0 )
+				p += twoDy;
+			else
+			{
+				y += step;
+				p += twoDyDx;
+			}
+			paintPixel (x, y, col);
+		}
+	}
+	else
+	{
+		int	p = 2 * dx - dy;
+		int	twoDx = 2 * dx;
+		int	twoDxDy = 2 * (dx-dy);
+
+		if ( ya > yb )
+		{
+			x = xb;
+			y = yb;
+			End = ya;
+			step = xa < xb ? -1 : 1;
+		}
+		else
+		{
+			x = xa;
+			y = ya;
+			End = yb;
+			step = xb < xa ? -1 : 1;
+		}
+
+		paintPixel (x, y, col);
+
+		while( y < End )
+		{
+			y++;
+			if ( p < 0 )
+				p += twoDx;
+			else
+			{
+				x += step;
+				p += twoDxDy;
+			}
+			paintPixel (x, y, col);
+		}
+	}
 }
 
 void CFrameBuffer::setBackgroundColor(int color)
