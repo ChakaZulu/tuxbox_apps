@@ -64,7 +64,7 @@
 #include "gui/epgview.h"
 #include "gui/update.h"
 #include "gui/scan.h"
-#include "gui/favorites.h"
+//#include "gui/favorites.h"
 #include "gui/sleeptimer.h"
 #include "gui/dboxinfo.h"
 #include "gui/timerlist.h"
@@ -916,7 +916,8 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 
 	mainMenu.addItem( new CMenuForwarder("mainmenu.shutdown", true, "", this, "shutdown", true, CRCInput::RC_standby, "power.raw") );
 	mainMenu.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	streamstatus = 0;
+
+/*
 	if(g_settings.network_streaming_use)
 	{
 		CMenuOptionChooser* oj = new CMenuOptionChooser("mainmenu.streaming", &streamstatus, true, this );
@@ -925,6 +926,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 		mainMenu.addItem( oj );
 		mainMenu.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	}
+*/
 	mainMenu.addItem( new CMenuForwarder("mainmenu.settings", true, "", &mainSettings) );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.service", true, "", &service) );
 //	mainMenu.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
@@ -1737,10 +1739,22 @@ void CNeutrinoApp::ShowStreamFeatures()
 	// -- Add Channel to favorites
 //	StreamFeatureSelector.addItem( new CMenuForwarder("favorites.menueadd", true, "",
 //		new CFavorites, id, true, CRCInput::RC_yellow, "gelb.raw"), false );
-
-	// -- Stream Info
+	
+	streamstatus = 0;
+	// start/stop streaming
+	if(g_settings.network_streaming_use)
+	{
+		CMenuOptionChooser* oj = new CMenuOptionChooser("mainmenu.streaming", &streamstatus, true, this, true, CRCInput::RC_red, "rot.raw" );
+		oj->addOption(0, "mainmenu.streaming_start");
+		oj->addOption(1, "mainmenu.streaming_stop");
+		StreamFeatureSelector.addItem( oj );
+		StreamFeatureSelector.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	}
+	// -- Timer Liste
 	StreamFeatureSelector.addItem( new CMenuForwarder("timerlist.name", true, "", 
 		new CTimerList(), id, true, CRCInput::RC_yellow, "gelb.raw"), false );
+
+	// -- Stream Info
 	StreamFeatureSelector.addItem( new CMenuForwarder("streamfeatures.info", true, "",
 		StreamFeaturesChanger, id, true, CRCInput::RC_help, "help_small.raw"), false );
 
@@ -2784,7 +2798,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.315 2002/09/04 13:57:39 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.316 2002/09/04 15:57:12 dirch Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
