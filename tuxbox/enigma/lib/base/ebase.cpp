@@ -53,6 +53,8 @@ void eSocketNotifier::stop()
 					// timer
 void eTimer::start(long msek, bool singleShot)
 {
+	if (bActive)
+		stop();
 	if (!bActive)
 	{
 		bActive = true;
@@ -91,7 +93,6 @@ void eTimer::changeInterval(long msek)
 
 void eTimer::activate()   // Internal Funktion... called from eApplication
 {
-	/*emit*/ timeout();
 //	printf("Timer emitted\n");
 	context.removeTimer(this);
 
@@ -102,6 +103,8 @@ void eTimer::activate()   // Internal Funktion... called from eApplication
 	}
 	else
 		bActive=false;
+
+	/*emit*/ timeout();
 }
 						// mainloop
 
