@@ -45,10 +45,9 @@ static eString addMountPoint(eString request, eString dirpath, eString opts, eHT
 	eString wsize = opt["wsize"];
 	eString options = opt["options"];
 	eString ownOptions = opt["ownoptions"];
-	eString id = opt["id"];
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	eMountMgr::getInstance()->addMountPoint(localDir, fstype, password, userName, mountDir, atoi(automount.c_str()), atoi(rsize.c_str()), atoi(wsize.c_str()), options, ownOptions, atoi(id.c_str()));
+	eMountMgr::getInstance()->addMountPoint(localDir, fstype, password, userName, mountDir, atoi(automount.c_str()), atoi(rsize.c_str()), atoi(wsize.c_str()), options, ownOptions);
 	return "<html><body>Mount point added successfully.</body></html>";
 }
 
@@ -63,7 +62,7 @@ static eString removeMountPoint(eString request, eString dirpath, eString opts, 
 	return "<html><body>Mount point removed successfully.</body></html>";
 }
 
-static eString editMountPoint(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+static eString changeMountPoint(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString,eString> opt = getRequestOptions(opts, '&');
 	eString localDir = opt["ldir"];
@@ -168,7 +167,7 @@ void ezapMountInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 	dyn_resolver->addDyn("GET", "/control/addMountPoint", addMountPoint, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/removeMountPoint", removeMountPoint, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/addMountPointWindow", addMountPointWindow, lockWeb);
-	dyn_resolver->addDyn("GET", "/control/editMountPoint", editMountPoint, lockWeb);
+	dyn_resolver->addDyn("GET", "/control/changeMountPoint", changeMountPoint, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/editMountPointWindow", editMountPointWindow, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/mountMountPoint", mountMountPoint, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/unmountMountPoint", unmountMountPoint, lockWeb);

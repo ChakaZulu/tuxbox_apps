@@ -259,10 +259,32 @@ eMountMgr::~eMountMgr()
 	mountPoints.clear();
 }
 
-void eMountMgr::addMountPoint(eString plocalDir, int pfstype, eString ppassword, eString puserName, eString pmountDir, int pautomount, int prsize, int pwsize, eString poptions, eString pownOptions, int pid)
+void eMountMgr::addMountPoint(eString plocalDir, int pfstype, eString ppassword, eString puserName, eString pmountDir, int pautomount, int prsize, int pwsize, eString poptions, eString pownOptions)
 {
+	int pid = mountPoints.size();
 	mountPoints.push_back(eMountPoint(plocalDir, pfstype, ppassword, puserName, pmountDir, pautomount, prsize, pwsize, poptions, pownOptions, pid));
 	save();
+}
+
+void eMountMgr::getMountPointData(eString *plocalDir, int *pfstype, eString *ppassword, eString *puserName, eString *pmountDir, int *pautomount, int *prsize, int *pwsize, eString *poptions, eString *pownOptions, int pid)
+{
+	for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
+	{
+		if (mp_it->id == pid)
+		{
+			*plocalDir = mp_it->localDir;
+			*pfstype = mp_it->fstype;
+			*ppassword = mp_it->password;
+			*puserName = mp_it->userName;
+			*pmountDir = mp_it->mountDir;
+			*pautomount = mp_it->automount;
+			*prsize = mp_it->rsize;
+			*pwsize = mp_it->wsize;
+			*poptions = mp_it->options;
+			*pownOptions = mp_it->ownOptions;
+			break;
+		}
+	}
 }
 
 void eMountMgr::changeMountPoint(eString plocalDir, int pfstype, eString ppassword, eString puserName, eString pmountDir, int pautomount, int prsize, int pwsize, eString poptions, eString pownOptions, int pid)
@@ -313,18 +335,6 @@ int eMountMgr::unmountMountPoint(int id)
 	return rc;
 }
 
-eString eMountMgr::getMountPointData(int id)
-{
-	eString result;
-	for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
-		if (mp_it->id == id)
-		{
-			int i = 1;
-//TODO: get data 
-		}
-	return result;
-}
-
 eString eMountMgr::listMountPoints(eString skelleton)
 {
 	eString result, mountStatus, action;
@@ -338,7 +348,7 @@ eString eMountMgr::listMountPoints(eString skelleton)
 				action = button(100, "Unmount", RED, "javascript:unmountMountPoint(" + eString().sprintf("%d", mp_it->id) + ")");
 			}
 			else
-			{ 
+			{
 				mountStatus = "<img src=\"off.gif\" alt=\"offline\" border=0>";
 				action = button(100, "Mount", GREEN, "javascript:mountMountPoint(" + eString().sprintf("%d", mp_it->id) + ")");
 			}
@@ -362,7 +372,7 @@ eString eMountMgr::listMountPoints(eString skelleton)
 		}
 	else
 		result = "<tr><td>No mount points available.</td></tr>";
-	
+
 	return result;
 }
 
@@ -372,7 +382,7 @@ void eMountMgr::init()
 	CConfigFile *config = new CConfigFile(',');
 	if (config->loadConfig(MOUNTCONFIGFILE))
 	{
-		for (int i = 1; true; i++)
+		for (int i = 0; true; i++)
 		{
 			if (config->getString(eString().sprintf("localdir_%d", i)) != "")
 				mountPoints.push_back(eMountPoint(config, i));
@@ -387,7 +397,7 @@ void eMountMgr::save()
 	FILE *out = fopen(MOUNTCONFIGFILE, "w");
 	if (out)
 	{
-		int i = 1;
+		int i = 0;
 		for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
 		{
 			mp_it->save(out, i);
