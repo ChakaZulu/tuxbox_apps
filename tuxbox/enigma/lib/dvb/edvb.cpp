@@ -858,10 +858,10 @@ eDVB::eDVB()
 		break;
 /*	case 2:
 		new eAVSwitchPhilips;
-		break;
+		break; */
 	case 3:
 		new eAVSwitchSagem;
-		break;	*/
+		break;
 	default:
 		new eAVSwitchNokia;
 		break;
