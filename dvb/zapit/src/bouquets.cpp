@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.83 2003/06/01 17:01:35 digi_casi Exp $
+ * $Id: bouquets.cpp,v 1.84 2003/06/03 22:18:06 digi_casi Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -201,7 +201,7 @@ void CBouquetManager::saveBouquets(void)
 				Bouquets[i]->bLocked ? 1 : 0);
 			for ( unsigned int j=0; j<Bouquets[i]->tvChannels.size(); j++)
 			{
-				fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" tsid=\"%04x\" onid=\"%04x\" sat_position=\"%04x\"/>\n",
+				fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" tsid=\"%04x\" onid=\"%04x\" sat_position=\"%d\"/>\n",
 						Bouquets[i]->tvChannels[j]->getServiceId(),
 						convert_UTF8_To_UTF8_XML(Bouquets[i]->tvChannels[j]->getName()).c_str(),
 						Bouquets[i]->tvChannels[j]->getTransportStreamId(), 
@@ -210,7 +210,7 @@ void CBouquetManager::saveBouquets(void)
 			}
 			for ( unsigned int j=0; j<Bouquets[i]->radioChannels.size(); j++)
 			{
-				fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" tsid=\"%04x\" onid=\"%04x\" sat_position=\"%04x\"/>\n",
+				fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" tsid=\"%04x\" onid=\"%04x\" sat_position=\"%d\"/>\n",
 						Bouquets[i]->radioChannels[j]->getServiceId(),
 						convert_UTF8_To_UTF8_XML(Bouquets[i]->radioChannels[j]->getName()).c_str(),
 						Bouquets[i]->radioChannels[j]->getTransportStreamId(), 
