@@ -65,5 +65,5 @@ Specifies the priority of audio channels (e.g. german english...). When zapped t
 </tr>
 </table>
 <br><br>
-<input style="color: #000000" type="submit" size="100px" value="Save">
+<input style="color: #000000; width: 100px" type="submit" size="100px" value="Save">
 </form>
