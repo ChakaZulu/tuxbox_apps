@@ -34,7 +34,7 @@
 #include <config.h>
 #endif
 
-#include "localize.h"
+#include <system/localize.h>
 
 #include <fstream>
 #include <iostream>
@@ -135,7 +135,7 @@ void CLocaleManager::loadLocale(std::string locale)
 	fclose(fd);
 }
 
-const char * CLocaleManager::getText(const char * const keyName)
+const char * CLocaleManager::getText(const char * const keyName) const
 {
 	mapLocaleData::const_iterator it = localeData.find(keyName);
 	if (it == localeData.end())
@@ -144,7 +144,7 @@ const char * CLocaleManager::getText(const char * const keyName)
 		return (it->second).c_str();
 }
 
-const char * CLocaleManager::getText(const std::string keyName)
+const char * CLocaleManager::getText(const std::string keyName) const
 {
 	mapLocaleData::const_iterator it = localeData.find(keyName);
 	if (it == localeData.end())
