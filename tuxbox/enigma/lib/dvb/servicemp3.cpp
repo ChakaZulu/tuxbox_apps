@@ -156,6 +156,7 @@ eMP3Decoder::eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *han
 	pthread_mutexattr_destroy(&attr);
 
 	http=0;
+
 	seekbusy=0;
 
 //	filename="http://205.188.209.193:80/stream/1003";
@@ -268,13 +269,28 @@ eMP3Decoder::eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *han
 		audiodecoder=new eAudioDecoderMP3(input, output);
 		break;
 	case codecMPG:
-		audiodecoder=new eMPEGDemux(input, output, output2, dspfd[0]);
+	{
+		eString fname=filename;
+		if (fname.right(4).upper()==".PVA")
+			audiodecoder=new ePVADemux(input, output, output2, dspfd[0]);
+		else
+			audiodecoder=new eMPEGDemux(input, output, output2, dspfd[0]);
 		CONNECT(checkVideoFinishedTimer.timeout, eMP3Decoder::checkVideoFinished );
 		break;
+	}
 	}
 
 	if (sourcefd >= 0)
 	{
+		if ( type == codecMPG )
+		{
+			unsigned char buffer[256*1024];
+			eString fname=filename;
+			off64_t oldpos = lseek64(sourcefd,
+				fname.right(4).upper()==".BIN" ? 1024*1024 : 0, SEEK_CUR);
+			((eDemux*)audiodecoder)->extractSequenceHeader(buffer, read(sourcefd, buffer, 256*1024));
+			lseek64(sourcefd, oldpos, SEEK_SET);
+		}
 		inputsn=new eSocketNotifier(this, sourcefd, eSocketNotifier::Read, 0);
 		CONNECT(inputsn->activated, eMP3Decoder::decodeMore);
 	}
@@ -1078,7 +1094,8 @@ void eServiceHandlerMP3::addFile(void *node, const eString &filename)
 			|| (filename.right(4).upper()==".VOB")
 			|| (filename.right(4).upper()==".DAT")
 			|| (filename.right(4).upper()==".BIN")
-			|| (filename.right(4).upper()==".VDR"))
+			|| (filename.right(4).upper()==".VDR")
+			|| (filename.right(4).upper()==".PVA"))
 		{
 			eServiceReference ref(id, 0, filename);
 			ref.data[0]=eMP3Decoder::codecMPG;

@@ -9,7 +9,7 @@
 #include <lib/base/eerror.h>
 #include <lib/system/econfig.h>
 
-unsigned long eMPEGDemux::getLong()
+unsigned long eDemux::getLong()
 {
 	unsigned long c;
 	if (input.read(&c, 4) != 4)
@@ -21,13 +21,13 @@ unsigned long eMPEGDemux::getLong()
 	return c;
 }
 
-void eMPEGDemux::refill()
+void eDemux::refill()
 {
 	last=getLong();
 	remaining=32;
 }
 
-unsigned long eMPEGDemux::getBits(unsigned int num)
+unsigned long eDemux::getBits(unsigned int num)
 {
 	unsigned long res=0;
 	while (num)
@@ -45,7 +45,7 @@ unsigned long eMPEGDemux::getBits(unsigned int num)
 	return res;
 }
 
-void eMPEGDemux::syncBits()
+void eDemux::syncBits()
 {
 		// round UP. so we re-read the last octet.
 		// that's ok, since syncBits() only does something
@@ -55,22 +55,23 @@ void eMPEGDemux::syncBits()
 	remaining&=~7;
 }
 
-eMPEGDemux::eMPEGDemux(eIOBuffer &input, eIOBuffer &video, eIOBuffer &audio, int fd)
+eDemux::eDemux(eIOBuffer &input, eIOBuffer &video, eIOBuffer &audio, int fd)
 	:input(input), video(video), audio(audio), minFrameLength(4096),
-	mpegtype(-1), curAudioStreamID(0), synced(0), fd(fd)
+	mpegtype(-1), curAudioStreamID(0), synced(0), fd(fd), sheader(0)
 {
 	remaining=0;
 	memset(&pcmsettings, 0, sizeof(pcmsettings));
 }
 
-eMPEGDemux::~eMPEGDemux()
+eDemux::~eDemux()
 {
 	eConfig::getInstance()->setKey("/ezap/audio/prevAudioStreamID", curAudioStreamID);
+	delete [] sheader;
 }
 
 int eMPEGDemux::decodeMore(int last, int maxsamples, Signal1<void,unsigned int>*newastreamid )
 {
-//	eDebug("decoderMore");
+//	eDebug("decodeMore");
 	int written=0;
 	(void)last;
 
@@ -120,7 +121,7 @@ a:
 								break;
 						}
 						mpegtype=type;
-						eDebug("set %s", type == 1 ? "MPEG-2" : "MPEG-1" );
+//						eDebug("set %s", type == 1 ? "MPEG-2" : "MPEG-1" );
 					}
 					if (type != 1)
 					{
@@ -185,8 +186,7 @@ a:
 				}
 				case 0xbc: // program_stream_map
 				{
-					eDebug("program stream map!\n");
-#if 0  //
+#if 0
 					int program_stream_map_length=getBits(16);
 					eDebug("program stream map!\n");
 					int current_next_indicator=getBits(1);
@@ -227,7 +227,7 @@ a:
 #endif
 					break;
 				}
-  			case 0xC0 ... 0xCF:  // Audio Stream
+				case 0xC0 ... 0xCF:  // Audio Stream
 				case 0xD0 ... 0xDF:
 				{
 					int &cnt = audiostreams[code];
@@ -253,7 +253,7 @@ a:
 					int length=getBits(16);
 					if ( (length+6) > minFrameLength )
 					{
-						
+
 						if ( (minFrameLength+2048) > (length+6) )
 							minFrameLength=length+6;
 						else
@@ -280,7 +280,7 @@ a:
 					if ( length )
 					{
 						int rd = input.read(buffer+p, length);
-						if ( rd != length ) 
+						if ( rd != length )
 						{  // buffer empty.. put all data back in input buffer
 							input.write(buffer, p+rd);
 							return written;
@@ -297,7 +297,7 @@ a:
 
 //						eDebug("offs = %02x, subid = %02x",offs, subid);
 
-						
+
 //						if ( offs == 0x24 && subid == 0x10 ) // TTX stream...
 //							break;
 
@@ -370,7 +370,37 @@ a:
 							; // dont play video streams != 0xE0 when 0xE0 is avail...
 						else
 						{
-							video.write(buffer, p);
+							bool sent=false;
+							if ( synced==1 && sheader)
+							{
+								int pos = 6;
+								while(pos < p)
+								{
+									if ( buffer[pos++] )
+										continue;
+									if ( buffer[pos++] )
+										continue;
+									while ( !buffer[pos] )
+										pos++;
+									if ( buffer[pos++] != 1 )
+										continue;
+									if ( buffer[pos++] != 0xb8 ) // group start code
+										continue;
+									pos-=4; // before GROUP START
+									int length=(buffer[4]<<8)|buffer[5];
+									length+=sheader_len;
+									buffer[4]=length>>8;
+									buffer[5]=length&0xFF;
+									video.write(buffer, pos);
+									video.write(sheader, sheader_len);
+									video.write(buffer+pos, p-pos);
+									synced++;
+									sent=true;
+									break;
+								}
+							}
+							if ( !sent )
+								video.write(buffer, p);
 							written+=p;
 						}
 					}
@@ -460,7 +490,324 @@ finish:
 	return written;
 }
 
-void eMPEGDemux::resync()
+int ePVADemux::decodeMore(int last, int maxsamples, Signal1<void,unsigned int>*newastreamid )
+{
+//	eDebug("decodeMore");
+	int written=0;
+	(void)last;
+
+	while (written < maxsamples)
+	{
+		bool readedPTS=false;
+		unsigned char tmp[8];
+		unsigned char pts[4];
+		while (1)	// search for start code.
+		{
+			if (input.size() < 4096)
+			{
+				maxsamples=0;
+				break;
+			}
+			syncBits();
+
+			tmp[0]=getBits(8);
+
+			if (tmp[0] != 0x41)
+				continue;
+
+			tmp[1]=getBits(8);
+
+			if (tmp[1] != 0x56)
+				continue;
+
+			tmp[2]=getBits(8);
+			tmp[3]=getBits(8);
+			tmp[4]=getBits(8);
+
+			if ( tmp[4] != 0x55 )
+			{
+				unsigned int cnt=0;
+				unsigned char backbuff[input.size()+4+3];
+				backbuff[cnt++]=tmp[2];
+				backbuff[cnt++]=tmp[3];
+				backbuff[cnt++]=tmp[4];
+				while (remaining)
+					backbuff[cnt++]=getBits(8);
+				cnt+=input.read(backbuff+cnt, input.size());
+				input.write(backbuff, cnt);
+				continue;
+			}
+
+			tmp[5]=getBits(8);
+			tmp[6]=getBits(8);
+			tmp[7]=getBits(8);
+			int length=tmp[6]<<8|tmp[7];
+			int rd=8;
+
+			unsigned int code = tmp[2];
+
+			if ( code == 1 && tmp[5] & 0x10 )
+			{
+				pts[0]=getBits(8);
+				pts[1]=getBits(8);
+				pts[2]=getBits(8);
+				pts[3]=getBits(8);
+				length-=4;
+				rd+=4;
+				readedPTS=true;
+			}
+			else
+				readedPTS=false;
+
+			if (code == 2)
+				code = 0xC0;
+			else if (code == 1)
+				code = 0xE0;
+			switch (code)
+			{
+				case 0x80 ... 0x87:  // AC3
+				{
+					code <<= 8;
+					code |= 0xBD;
+				}
+				case 0xC0 ... 0xCF:  // Audio Stream
+				case 0xD0 ... 0xDF:
+				{
+					int &cnt = audiostreams[code];
+					if ( cnt < 10 )
+					{
+						cnt++;
+						if ( cnt == 10 )
+						{
+//							eDebug("/*emit*/ (*newastreamid)(%02x)", code);
+							if ( !curAudioStreamID )
+							{
+								Decoder::parms.audio_type = (code&0xFF==0xBD) ?
+									DECODE_AUDIO_AC3_VOB : DECODE_AUDIO_MPEG;
+								Decoder::Set();
+								curAudioStreamID = code;
+//								eDebug("set %02x", code);
+							}
+							/*emit*/ (*newastreamid)(code);
+						}
+					}
+				}
+				case 0xE0 ... 0xEF:  // Video Stream
+				{
+					if ( (length+rd) > minFrameLength )
+					{
+						if ( (minFrameLength+2048) > (length+rd) )
+							minFrameLength=length+rd;
+						else
+							minFrameLength+=2048;
+						eDebug("minFrameLength now %d", minFrameLength );
+					}
+					unsigned char buffer[length];
+					unsigned int p=0;
+					while ( length && remaining )
+					{
+						buffer[p++]=getBits(8);
+						--length;
+					}
+					if ( length )
+					{
+						int rd = input.read(buffer+p, length);
+						if ( rd != length )
+						{  // buffer empty.. put all data back in input buffer
+							input.write(tmp, 8);  // put pva header back into buffer
+							if (readedPTS) // pts read?
+								input.write(pts,4); // put pts bytes back into buffer
+							input.write(buffer, rd); // put all readed bytes back into buffer
+							return written;
+						}
+//						else
+//							eDebug("read %04x bytes", length);
+						p+=length;
+					}
+
+		// check old audiopackets in syncbuffer
+					unsigned int VideoPTS=0xFFFFFFFF;
+					Decoder::getVideoPTS(VideoPTS);
+					if ( syncbuffer.size() )
+					{
+						if ( VideoPTS != 0xFFFFFFFF )
+						{
+							std::list<syncAudioPacket>::iterator it( syncbuffer.begin() );
+							for (;it != syncbuffer.end(); ++it )
+							{
+								if ( abs(VideoPTS - it->pts) <= 0x1000 )
+								{
+									eDebug("synced2 :)");
+									break;
+								}
+							}
+							if ( it != syncbuffer.end() )
+							{
+								synced=1;
+		// write data from syncbuffer to audio device
+								for (;it != syncbuffer.end(); ++it )
+									audio.write( it->data, it->len );
+		// cleanup syncbuffer
+								for (it=syncbuffer.begin();it != syncbuffer.end(); ++it )
+									delete [] it->data;
+								syncbuffer.clear();
+							}
+						}
+					}
+					if (code > 0xDF && code < 0xF0)
+					{
+						videostreams.insert(code);
+						if ( code != 0xE0 && videostreams.find(240) != videostreams.end() )
+							; // dont play video streams != 1 when 0xE0 is avail...
+						else
+						{
+							int headerPos=-1;
+							if ( synced==1 && sheader)
+							{
+								unsigned int pos = 0;
+								while(pos < p)
+								{
+									if ( buffer[pos++] )
+										continue;
+									if ( buffer[pos++] )
+										continue;
+									while ( !buffer[pos] )
+										pos++;
+									if ( buffer[pos++] != 1 )
+										continue;
+									if ( buffer[pos++] != 0xb8 ) // group start code
+										continue;
+									pos-=4; // before GROUP START
+									headerPos=pos;
+									break;
+								}
+							}
+							if ( readedPTS )
+							{
+								VideoPTS=pts[0]<<24|pts[1]<<16|pts[2]<<8|pts[3];
+								int payload_length = tmp[6]<<8 | tmp[7];
+								payload_length+=3;
+								if (headerPos!=-1)
+									payload_length+=sheader_len;
+								char buf[14] = { 0, 0, 1, code&0xFF,
+									(payload_length & 0xFF00)>>8,
+									payload_length&0xFF,
+									0x80, 0x80, 0x05,
+									0x20|((VideoPTS&0xC0000000)>>29)|1,
+									(VideoPTS&0x3FC00000)>>22,
+									((VideoPTS&0x3F8000)>>14)|1,
+									(VideoPTS&0x7F80)>>7,
+									((VideoPTS&0x7F)<<1)|1};
+								video.write(buf, 14);
+							}
+							else
+							{
+								int payload_length = tmp[6]<<8 | tmp[7];
+								payload_length+=3;
+								if (headerPos!=-1)
+									payload_length+=sheader_len;
+								char buf[9] = { 0, 0, 1, code&0xFF,
+									(payload_length & 0xFF00)>>8,
+									payload_length&0xFF,
+									0x80, 0, 0 };
+								video.write(buf, 9);
+							}
+							if (headerPos != -1)
+							{
+								video.write(buffer,headerPos);
+								video.write(sheader,sheader_len);
+								video.write(buffer+headerPos, p-headerPos);
+								synced++;
+							}
+							else
+								video.write(buffer, p);
+							written+=p;
+						}
+					}
+					else if ( code == curAudioStreamID )
+					{
+		// check current audiopacket
+						if (!synced)
+						{
+							unsigned int AudioPTS = 0xFFFFFFFF,
+											VideoPTS = 0xFFFFFFFF,
+											pos=5;
+							while( buffer[++pos] == 0xFF );  // stuffing überspringen
+							if ( (buffer[pos] & 0xC0) == 0x40 ) // buffer scale size
+								pos+=2;
+							if ( ((buffer[pos] & 0xF0) == 0x20) ||  //MPEG1
+									 ((buffer[pos] & 0xF0) == 0x30) ||  //MPEG1
+									 ((buffer[pos] & 0xC0) == 0x80) )   //MPEG2
+							{
+								int type=0;
+								int readPTS=1;
+								if ((buffer[pos] & 0xC0) == 0x80) // we must skip many bytes
+								{
+									type=1;
+									++pos; // flags
+									if ( ((buffer[pos]&0xC0) != 0x80) &&
+											 ((buffer[pos]&0xC0) != 0xC0) )
+										readPTS=0;
+									pos+=2;
+								}
+								if ( type != mpegtype )
+								{
+									if ( type == 1 )
+										Decoder::SetStreamType(TYPE_PES);
+									else
+										Decoder::SetStreamType(TYPE_MPEG1);
+									mpegtype=type;
+//									eDebug("set %s", type == 1 ? "MPEG-2" : "MPEG-1" );
+								}
+								if (readPTS)
+								{
+									AudioPTS = (buffer[pos++] >> 1) << 29;
+									AudioPTS |= buffer[pos++] << 21;
+									AudioPTS |=(buffer[pos++] >> 1) << 14;
+									AudioPTS |= buffer[pos++] << 6;
+									AudioPTS |= buffer[pos] >> 2;
+//									eDebug("APTS %08x", AudioPTS);
+								}
+							}
+							Decoder::getVideoPTS(VideoPTS);
+//							eDebug("VPTS %08x", VideoPTS);
+							if ( VideoPTS != 0xFFFFFFFF && abs(VideoPTS - AudioPTS) <= 0x1000 )
+							{
+								synced=1;
+								eDebug("synced1 :)");
+		// cleanup syncbuffer.. we don't need content of it
+								std::list<syncAudioPacket>::iterator it( syncbuffer.begin() );
+								for (;it != syncbuffer.end(); ++it )
+									delete [] it->data;
+								syncbuffer.clear();
+							}
+							else if ( (AudioPTS > VideoPTS) || VideoPTS == 0xFFFFFFFF )
+							{
+								syncAudioPacket pack;
+								pack.pts = AudioPTS;
+								pack.len = p;
+								pack.data = new __u8[p];
+								memcpy( pack.data, buffer, pack.len );
+								syncbuffer.push_back( pack );
+//								eDebug("PTSA = %08x\nPTSV = %08x\nDIFF = %08x",
+//									AudioPTS, VideoPTS, abs(AudioPTS-VideoPTS) );
+							}
+						}
+						if ( synced )
+							audio.write(buffer, p);
+						written+=p;
+					}
+					break;
+				}
+				default:
+					/*eDebug("unhandled code %02x", tmp[2])*/;
+			}
+		}
+	}
+	return written;
+}
+
+void eDemux::resync()
 {
 	remaining=synced=0;
 // clear syncbuffer
@@ -470,17 +817,17 @@ void eMPEGDemux::resync()
 	syncbuffer.clear();
 }
 
-int eMPEGDemux::getMinimumFramelength()
+int eDemux::getMinimumFramelength()
 {
 	return minFrameLength;
 }
 
-int eMPEGDemux::getAverageBitrate()
+int eDemux::getAverageBitrate()
 {
 	return 3*1024*1024;
 }
 
-void eMPEGDemux::setAudioStream( unsigned int id )
+void eDemux::setAudioStream( unsigned int id )
 {
 	if ( curAudioStreamID != id && audiostreams.find(id) != audiostreams.end() )
 	{
@@ -497,6 +844,96 @@ void eMPEGDemux::setAudioStream( unsigned int id )
 			Decoder::Set();
 		}
 		curAudioStreamID = id;
+	}
+}
+
+void eDemux::extractSequenceHeader( unsigned char *buffer, unsigned int len )
+{
+	if (!sheader) // we have no sequence header
+	{
+		unsigned int pos = 0;
+
+		while(pos < len)
+		{
+			if ( buffer[pos++] )
+				continue;
+			if ( pos >=len )
+				return;
+			if ( buffer[pos++] )
+				continue;
+			if ( pos >=len )
+				return;
+			while ( !buffer[pos] )
+			{
+				pos++;
+				if ( pos >=len )
+					return;
+			}
+			if ( buffer[pos++] != 1 )
+				continue;
+			if ( pos >=len )
+				return;
+			if ( buffer[pos++] != 0xB3 )
+				continue;
+			if ( pos >=len )
+				return;
+			pos+=7;
+			if ( pos >=len )
+				return;
+			sheader_len=12;
+			if ( buffer[pos] & 2 ) // intra matrix avail?
+			{
+				pos+=64;
+				if ( pos >=len )
+					return;
+				sheader_len+=64;
+			}
+			if ( buffer[pos] & 1 ) // non intra matrix avail?
+			{
+				pos+=64;
+				if ( pos >=len )
+					return;
+				sheader_len+=64;
+			}
+			pos+=1;
+			if ( pos+3 >=len )
+				return;
+			// extended start code
+			if ( !buffer[pos] && !buffer[pos+1] && buffer[pos+2] && buffer[pos+3] == 0xB5 )
+			{
+				pos+=3;
+				sheader_len+=3;
+				do
+				{
+					pos+=1;
+					++sheader_len;
+					if (pos+2 > len)
+						return;
+				}
+				while( buffer[pos] || buffer[pos+1] || !buffer[pos+2] );
+			}
+			if ( pos+3 >=len )
+				return;
+			if ( !buffer[pos] && !buffer[pos+1] && buffer[pos+2] && buffer[pos+3] == 0xB2 )
+			{
+				pos+=3;
+				sheader_len+=3;
+				do
+				{
+					pos+=1;
+					++sheader_len;
+					if (pos+2 > len)
+						return;
+				}
+				while( buffer[pos] || buffer[pos+1] || !buffer[pos+2] );
+			}
+			sheader = new unsigned char[sheader_len];
+			memcpy(sheader, &buffer[pos-sheader_len], sheader_len);
+//			for (unsigned int i=0; i < sheader_len; ++i)
+//				eDebugNoNewLine("%02x", sheader[i]);
+//			eDebug("");
+			return;
+		}
 	}
 }
 
