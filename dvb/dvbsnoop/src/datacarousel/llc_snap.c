@@ -1,5 +1,5 @@
 /*
-$Id: llc_snap.c,v 1.1 2003/11/26 20:02:31 rasc Exp $
+$Id: llc_snap.c,v 1.2 2003/11/26 20:31:50 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: llc_snap.c,v 1.1 2003/11/26 20:02:31 rasc Exp $
 
 
 $Log: llc_snap.c,v $
+Revision 1.2  2003/11/26 20:31:50  rasc
+no message
+
 Revision 1.1  2003/11/26 20:02:31  rasc
 LLC-SNAP
 
@@ -43,22 +46,41 @@ LLC-SNAP
 int  llc_snap (int v, u_char *b)
 
 {
+  int dsap, ssap, ctrl;
+  int oui, prot;
 
   out_nl (v,"LLC/SNAP:");
   indent (+1);
   out_nl (v,"LLC:");
-  outBit_Sx_NL (v," DSAP: ",  		b, 0, 8);
-  outBit_Sx_NL (v," SSAP: ",  		b, 8, 8);
-  outBit_Sx_NL (v," Control: ", 	b,16, 8);
+  dsap = outBit_Sx_NL (v," DSAP: ",  		b, 0, 8);
+  ssap = outBit_Sx_NL (v," SSAP: ",  		b, 8, 8);
+  ctrl = outBit_Sx_NL (v," Control: ", 	b,16, 8);
   
   out_nl (v,"SNAP:");
-  outBit_Sx_NL (v," Protocol ID/Ord Code: ", 	b,24,24);
-  outBit_Sx_NL (v," EtherType: ", 		b,48,16);
+  oui   = outBit_Sx_NL (v," Org. Unique ID: ", 		b,24,24);
+  prot  = outBit_Sx_NL (v," Protocol Identifier: ", 	b,48,16);
   indent (-1);
+
+  // $$$ TODO  tables
 
   return 8;
 
 }
 
+/*
+ *
+ LLCSNAP() -- This structure shall contain the datagram according to the ISO/IEC 8802-2 Logical Link Control
+(LLC) and ISO/IEC 8802-1a SubNetwork Attachment Point (SNAP) specifications. In LLC Type 1 operation,
+unacknowledged connectionless mode, the LLC header is three bytes long and consists of a one byte
+Destination Service Access Point (DSAP) field, a one byte Source Service Access Point (SSAP) field, a one
+byte Control field. The values 0xAA in the LLC header's DSAP and SSAP fields indicate that an IEEE 802.2
+SNAP header follows. The Control value of 0x03 specifies an Unnumbered Information Command PDU. The
+SNAP header is five bytes long and consists of a three byte Organizationally Unique Identifier (OUI) field and a
+two byte Protocol Identifier. The SNAP OUI value 0x00-00-00 specifies the Protocol Identifier as an EtherType
+or routed non-OSI protocol. The SNAP OUI of 0x00-80-C2 indicates a Bridged Protocol. When the OUI is set
+to 0x00-00-00 then the SNAP Protocol Identifier for IP is 0x08-00. For Internet Protocol datagrams, the
+complete LLC/SNAP header is 0xAA-AA-03-00-00-00-08-00.
 
+
+*/
 
