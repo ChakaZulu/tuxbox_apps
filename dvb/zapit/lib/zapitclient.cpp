@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: zapitclient.cpp,v 1.3 2002/01/12 22:07:01 Simplex Exp $
+  $Id: zapitclient.cpp,v 1.4 2002/01/29 23:17:54 Simplex Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapitclient.cpp,v $
+  Revision 1.4  2002/01/29 23:17:54  Simplex
+  bugfix
+
   Revision 1.3  2002/01/12 22:07:01  Simplex
   method for zapping with bouquet and channel
 
@@ -107,15 +110,17 @@ void CZapitClient::zapTo( unsigned int bouquet, unsigned int channel )
 }
 
 /* gets all bouquets */
-void CZapitClient::getBouquets( BouquetList& bouquets)
+void CZapitClient::getBouquets( BouquetList& bouquets, bool emptyBouquetsToo = false)
 {
 	commandHead msgHead;
 	commandGetBouquets msg;
 	msgHead.version=ACTVERSION;
 	msgHead.cmd=CMD_GET_BOUQUETS;
+	msg.emptyBouquetsToo = emptyBouquetsToo;
 
 	zapit_connect();
 	send((char*)&msgHead, sizeof(msgHead));
+	send((char*)&msg, sizeof(msg));
 
 	responseGetBouquets response;
 	while ( receive((char*)&response, sizeof(responseGetBouquets)))
