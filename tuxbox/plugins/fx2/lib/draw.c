@@ -511,14 +511,22 @@ void	FBBlink( int x, int y, int dx, int dy, int count )
 
 void	FBMove( int x, int y, int x2, int y2, int dx, int dy )
 {
-	unsigned char	back[ stride ];
+	unsigned char	*back;
 	int				i;
+	unsigned long	f=y*stride+x;
+	unsigned long	t=y2*stride+x2;
 
-	for( i=0; i < dy; i++ )
+	if ( f < t )
 	{
-		memcpy(back,lfb+(y+i)*stride+x,dx);
-		FBCopyImage( x2, y2+i, dx, 1, back );
+		back=malloc(dx*dy);
+		for( i=0; i < dy; i++, f+=stride )
+			memcpy(back+(i*dx),lfb+f,dx);
+
+		FBCopyImage( x2, y2, dx, dy, back );
+		return;
 	}
+	for( i=0; i < dy; i++, f+=stride, t+=stride )
+		memcpy(lfb+t,lfb+f,dx);
 }
 
 #if 0
