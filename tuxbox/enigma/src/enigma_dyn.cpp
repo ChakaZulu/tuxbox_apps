@@ -857,17 +857,17 @@ static eString getLeftNavi(eString mode, eString path)
 		{
 			if (zap[zapMode][ZAPSUBMODESATELLITES])
 			{
-				result += button(110, "Satellites", LEFTNAVICOLOR, "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODETV) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODESATELLITES));
+				result += button(110, "Satellites", LEFTNAVICOLOR, "?mode=zap&zapmode=" + eString().sprintf("%d", zapMode) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODESATELLITES));
 				result += "<br>";
 			}
 			if (zap[zapMode][ZAPSUBMODEPROVIDERS])
 			{
-				result += button(110, "Providers", LEFTNAVICOLOR, "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODETV) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEPROVIDERS));
+				result += button(110, "Providers", LEFTNAVICOLOR, "?mode=zap&zapmode=" + eString().sprintf("%d", zapMode) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEPROVIDERS));
 				result += "<br>";
 			}
 			if (zap[zapMode][ZAPSUBMODEBOUQUETS])
 			{
-				result += button(110, "Bouquets", LEFTNAVICOLOR, "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODETV) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEBOUQUETS));
+				result += button(110, "Bouquets", LEFTNAVICOLOR, "?mode=zap&zapmode=" + eString().sprintf("%d", zapMode) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEBOUQUETS));
 				result += "<br>";
 			}
 		}
