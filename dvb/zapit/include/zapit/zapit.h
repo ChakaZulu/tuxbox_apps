@@ -6,6 +6,8 @@
 #include <unistd.h>
 #include <signal.h>
 #include <time.h>
+#include <sys/poll.h>
+#include <sys/stat.h>
 
 /* NAPI */
 #include <ost/dmx.h>
@@ -64,7 +66,9 @@ typedef enum {
 int listenfd, connfd;
 socklen_t clilen;
 SAI cliaddr, servaddr;
-int EMMPID=0; 
+int offset=0; 
+int caid = 0;
+
 
 struct rmsg {
   		unsigned char version;
@@ -80,6 +84,9 @@ struct rmsg {
 
 
 extern chanptr LoadServices(int serv_mode);
+
+int get_caid();
+
 /*
 void *start_camd(void *args);
 void end_cam();
