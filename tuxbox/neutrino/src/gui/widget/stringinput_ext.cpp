@@ -43,11 +43,12 @@
 #include <neutrino.h>
 
 
-CExtendedInput::CExtendedInput(const char * const Name, char* Value, const char * const Hint_1, const char * const Hint_2, CChangeObserver* Observ, bool Localizing)
+CExtendedInput::CExtendedInput(const char * const Name, char* Value, const char * const Hint_1, const char * const Hint_2, CChangeObserver* Observ, bool Localizing, bool* Cancel)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	name = Name;
 	value = Value;
+	cancel = Cancel;
 
 	hint_1 = Hint_1 ? Hint_1 : "";
 	hint_2 = Hint_2 ? Hint_2 : "";
@@ -192,6 +193,8 @@ int CExtendedInput::exec( CMenuTarget* parent, const std::string & )
 		else if (msg==CRCInput::RC_ok)
 		{
 			loop=false;
+			if(cancel != NULL)
+				*cancel = false;
 		}
 		else if ( (msg==CRCInput::RC_home) || (msg==CRCInput::RC_timeout) )
 		{
@@ -200,9 +203,13 @@ int CExtendedInput::exec( CMenuTarget* parent, const std::string & )
 				 if(erg==CMessageBox::mbrYes){
 					strcpy(value, oldval);
 					loop=false;
+					if(cancel != NULL)
+						*cancel = true;
 				 }
 				 else if(erg==CMessageBox::mbrNo){
 					 loop=false;
+					 if(cancel != NULL)
+						 *cancel = false;
 				 }
 				 else if(erg==CMessageBox::mbrCancel){
 				 }
@@ -532,6 +539,38 @@ void CMACInput::onAfterExec()
 	sprintf( value, "%02x:%02x:%02x:%02x:%02x:%02x", _mac[0], _mac[1], _mac[2], _mac[3], _mac[4], _mac[5]);
 	if(strcmp(value,"00:00:00:00:00:00")==0)
 		value[0] = 0; /* strcpy(value, ""); */
+}
+
+//-----------------------------#################################-------------------------------------------------------
+
+CTimeInput::CTimeInput(const char * const Name, char* Value, const char * const Hint_1, const char * const Hint_2, CChangeObserver* Observ, bool* Cancel)
+	: CExtendedInput(Name, Value, Hint_1, Hint_2, Observ, true, Cancel)
+{
+	frameBuffer = CFrameBuffer::getInstance();
+	addInputField( new CExtendedInput_Item_Char("=+-") );
+	addInputField( new CExtendedInput_Item_Spacer(20) );
+	addInputField( new CExtendedInput_Item_Char("0123456789") );
+	addInputField( new CExtendedInput_Item_Char("0123456789") );
+	addInputField( new CExtendedInput_Item_Char(":",false) );
+	addInputField( new CExtendedInput_Item_Char("0123456789") );
+	addInputField( new CExtendedInput_Item_Char("0123456789") );
+	addInputField( new CExtendedInput_Item_Char(":",false) );
+	addInputField( new CExtendedInput_Item_Char("0123456789") );
+	addInputField( new CExtendedInput_Item_Char("0123456789") );
+	addInputField( new CExtendedInput_Item_newLiner(30) );
+	calculateDialog();
+}
+
+void CTimeInput::onBeforeExec()
+{
+	strcpy(value, "= 00:00:00");
+}
+
+void CTimeInput::onAfterExec()
+{
+	char tmp[10+1];
+	strcpy(tmp, value);
+	strcpy(value+1, tmp+2);
 }
 
 //-----------------------------#################################-------------------------------------------------------

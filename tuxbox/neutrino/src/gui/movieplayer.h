@@ -62,6 +62,7 @@ class CMoviePlayerGui : public CMenuTarget
 		    RESYNC      =  7,
 		    JF          =  9,
 		    JB          = 10,
+			 SKIP       =  11,
 		    SOFTRESET   = 99
 		};
 

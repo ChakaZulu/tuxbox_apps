@@ -64,7 +64,7 @@ class CExtendedInput : public CMenuTarget
 		std::string  hint_2;
 		char*	value;
 		CChangeObserver*   observ;
-
+		bool* cancel;
 
 		virtual void paint();
 		virtual void onBeforeExec(){};
@@ -72,7 +72,7 @@ class CExtendedInput : public CMenuTarget
 
 	public:
 
-		CExtendedInput(const char * const Name, char* Value, const char * const Hint_1 = NULL, const char * const Hint_2 = NULL, CChangeObserver* Observ = NULL, bool Localizing=true);
+		CExtendedInput(const char * const Name, char* Value, const char * const Hint_1 = NULL, const char * const Hint_2 = NULL, CChangeObserver* Observ = NULL, bool Localizing=true, bool* cancel = NULL);
 
 		void hide();
 		int exec( CMenuTarget* parent, const std::string & actionKey );
@@ -185,6 +185,18 @@ class CMACInput : public CExtendedInput
 
 	public:
 		CMACInput(const char * const Name, char* Value, const char * const Hint_1 = NULL, const char * const Hint_2 = NULL, CChangeObserver* Observ = NULL);
+};
+
+//----------------------------------------------------------------------------------------------------
+
+class CTimeInput : public CExtendedInput
+{
+	protected:
+		virtual void onBeforeExec();
+		virtual void onAfterExec();
+
+	public:
+		CTimeInput(const char * const Name, char* Value, const char * const Hint_1 = NULL, const char * const Hint_2 = NULL, CChangeObserver* Observ = NULL, bool* cancel=NULL);
 };
 
 
