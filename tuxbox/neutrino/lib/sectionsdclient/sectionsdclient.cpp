@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.8 2002/03/22 17:12:06 field Exp $
+  $Id: sectionsdclient.cpp,v 1.9 2002/03/28 14:58:30 dirch Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: sectionsdclient.cpp,v $
+  Revision 1.9  2002/03/28 14:58:30  dirch
+  getChannelEvents() gefixt
+
   Revision 1.8  2002/03/22 17:12:06  field
   Weitere Updates, compiliert wieder
 
@@ -426,16 +429,16 @@ CChannelEventList CSectionsdClient::getChannelEvents()
 	{
 		CChannelEvent aEvent;
 
-		aEvent.serviceID = (unsigned) *actPos;
+		aEvent.serviceID = *((unsigned *) actPos);
 		actPos+=4;
 
-		aEvent.eventID = (unsigned long long) *actPos;
+		aEvent.eventID = *((unsigned long long *) actPos);
 		actPos+=8;
 
-		aEvent.startTime = (time_t) *actPos;
+		aEvent.startTime = *((time_t *) actPos);
 		actPos+=4;
 
-		aEvent.duration = (unsigned) *actPos;
+		aEvent.duration = *((unsigned *) actPos);
 		actPos+=4;
 
 		aEvent.description= actPos;
