@@ -1,7 +1,10 @@
 //
-// $Id: eventlist.cpp,v 1.4 2001/09/18 14:58:20 field Exp $
+// $Id: eventlist.cpp,v 1.5 2001/09/18 15:26:09 field Exp $
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.5  2001/09/18 15:26:09  field
+// Handelt nun auch "kein epg"
+//
 // Revision 1.4  2001/09/18 14:58:20  field
 // Eventlist verbessert
 //
@@ -61,25 +64,26 @@ void EventList::readEvents(const std::string& channelname)
     close(sock_fd);
     return;
   }
-  removeAllEvents(); // Alle gespeicherten Events loeschen
-  current_event = -1;
 
-  if(resp.dataLength>0)
-  {
-      char* pData = new char[resp.dataLength] ;
-      if(read(sock_fd, pData, resp.dataLength)<=0) {
-        delete[] pData;
-        close(sock_fd);
-        printf("EventList::readEvents - read from socket failed!");
-        return;
-      }
+    removeAllEvents(); // Alle gespeicherten Events loeschen
+    current_event = -1;
 
-      char epgID[20];
-      char edate[6];
-      char etime[6];
-      char eduration[10];
-      char ename[100];
-      char *actPos=pData;
+    if ( resp.dataLength>0 )
+    {
+        char* pData = new char[resp.dataLength] ;
+        if(read(sock_fd, pData, resp.dataLength)<=0)
+        {
+            delete[] pData;
+            close(sock_fd);
+            printf("EventList::readEvents - read from socket failed!");
+            return;
+        }
+        char epgID[20];
+        char edate[6];
+        char etime[6];
+        char eduration[10];
+        char ename[100];
+        char *actPos=pData;
 
         struct  tm   *tmZeit;
         int     mm, dd, hh, mn, evtTime, aktTime;
@@ -121,7 +125,8 @@ void EventList::readEvents(const std::string& channelname)
             evt->datetimeduration+=std::string(" (");
             evt->datetimeduration+=std::string(eduration);
             evt->datetimeduration+=std::string(" m)");
-//    printf("name: %s\n", evt->name.c_str());
+
+//            printf("id: %s - name: %s\n", epgID, evt->name.c_str());
 //    tmp->number=number;
 //    tmp->name=name;
             evtlist.insert(evtlist.end(), evt);
@@ -137,6 +142,7 @@ void EventList::readEvents(const std::string& channelname)
 
         evt->name= g_Locale->getText("epglist.noevents") ;
         evt->datetimeduration= std::string("");
+        evtlist.insert(evtlist.end(), evt);
         current_event++;
     }
     selected= current_event;
