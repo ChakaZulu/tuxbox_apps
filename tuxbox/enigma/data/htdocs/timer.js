@@ -1,13 +1,19 @@
 function cleanupTimerList()
 {
-	document.location = "cleanupTimerList";
-	setTimeout("reload()", 500);
+	if (confirmAction('Do you really want to delete ALL COMPLETED timer events?'))
+	{
+		document.location = "cleanupTimerList";
+		setTimeout("reload()", 500);
+	}
 }
 
 function clearTimerList()
 {
-	document.location = "clearTimerList";
-	setTimeout("reload()", 500);
+	if (confirmAction('Do you really want to delete ALL timer events?'))
+	{
+		document.location = "clearTimerList";
+		setTimeout("reload()", 500);
+	}
 }
 
 function editTimerEvent(xy)
