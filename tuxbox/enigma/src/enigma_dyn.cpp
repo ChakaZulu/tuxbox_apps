@@ -4077,22 +4077,36 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 		oldType |= atoi(after_event.c_str());
 	}
 
-	if (atoi(oldEventType.c_str()) & ePlaylistEntry::isRepeating)
+	if (oldType & ePlaylistEntry::isRepeating)
 	{
 		if (mo == "on")
 			oldType |= ePlaylistEntry::Mo;
+		else
+			oldType &= ~ePlaylistEntry::Mo;
 		if (tu == "on")
 			oldType |= ePlaylistEntry::Tue;
+		else
+			oldType &= ~ePlaylistEntry::Tue;
 		if (we == "on")
 			oldType |= ePlaylistEntry::Wed;
+		else
+			oldType &= ~ePlaylistEntry::Wed;
 		if (th == "on")
 			oldType |= ePlaylistEntry::Thu;
+		else
+			oldType &= ~ePlaylistEntry::Thu;
 		if (fr == "on")
 			oldType |= ePlaylistEntry::Fr;
+		else
+			oldType &= ~ePlaylistEntry::Fr;
 		if (sa == "on")
 			oldType |= ePlaylistEntry::Sa;
+		else
+			oldType &= ~ePlaylistEntry::Sa;
 		if (su == "on")
 			oldType |= ePlaylistEntry::Su;
+		else
+			oldType &= ~ePlaylistEntry::Su;
 	}
 
 	ref.descr = channel + "/" + description;
