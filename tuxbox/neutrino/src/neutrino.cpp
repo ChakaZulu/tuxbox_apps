@@ -3503,7 +3503,12 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 			else
 				goto skip_message;
 
-			ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(msgbody), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+			/*
+			 * use a short timeout of only 5 seconds in case it was only a temporary network problem 
+			 * in case of STREAM2FILE_STATUS_IDLE we might even have to immediately start the next recording
+			 */
+#warning TODO: it might make some sense to have some log-file (but where do we store this information? nfs/flash/ram?) that collects these messages and maybe a menu-entry to view the lasted XXX messages
+			ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(msgbody), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw", 450, 5); // UTF-8
 
 		skip_message:
 			;
