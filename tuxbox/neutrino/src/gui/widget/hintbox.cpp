@@ -137,16 +137,23 @@ int ShowHint ( string Caption, string Text, string Icon, int Width, int timeout 
 	{
     	g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 
+		if((msg==CRCInput::RC_timeout) || (msg==CRCInput::RC_home) || (msg==CRCInput::RC_ok))
+		{
+				printf("hintbox: locally handled stuff\n");
+				res = messages_return::cancel_info;
+		}
+		else
+		{
+	        res = CNeutrinoApp::getInstance()->handleMsg( msg, data );
+			printf("event hintbox: g_RCInput->getMsgAbsoluteTimeout: %x %x (%x)\n", msg, data, res);
 
-        res = CNeutrinoApp::getInstance()->handleMsg( msg, data );
+			if ( res == messages_return::unhandled )
+			{
 
-        if ( res == messages_return::unhandled )
-        {
-        	//printf(" g_RCInput->getMsgAbsoluteTimeout %x %x\n", msg, data);
-
-        	// raus hier und darüber behandeln...
-        	g_RCInput->postMsg(  msg, data );
-			res = messages_return::cancel_info;
+				// raus hier und darüber behandeln...
+				g_RCInput->postMsg(  msg, data );
+				res = messages_return::cancel_info;
+			}
 		}
 	}
 
