@@ -1,6 +1,6 @@
 /*
  
-        $Id: neutrino.cpp,v 1.127 2002/01/10 21:09:42 McClean Exp $
+        $Id: neutrino.cpp,v 1.128 2002/01/11 00:09:10 McClean Exp $
  
 	Neutrino-GUI  -   DBoxII-Project
  
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  
   $Log: neutrino.cpp,v $
+  Revision 1.128  2002/01/11 00:09:10  McClean
+  -> missed
+
   Revision 1.127  2002/01/10 21:09:42  McClean
   shutdown-time
 
@@ -1998,7 +2001,7 @@ void CNeutrinoApp::ExitRun()
 {
 	printf("neutrino exit\n");
 	//shutdown screen
-	g_lcdd.shutdown();
+	g_lcdd->shutdown();
 
 	//memset(frameBuffer.lfb, 255, frameBuffer.Stride()*576);
 	for(int x=0;x<256;x++)
@@ -2287,7 +2290,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.127 2002/01/10 21:09:42 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.128 2002/01/11 00:09:10 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;
