@@ -52,6 +52,7 @@
 #include <enigma_dyn_wap.h>
 #include <enigma_dyn_conf.h>
 #include <enigma_dyn_flash.h>
+#include <enigma_dyn_rotor.h>
 
 using namespace std;
 
@@ -978,7 +979,11 @@ static eString getLeftNavi(eString mode, bool javascript)
 		result += button(110, "Multi-Boot", LEFTNAVICOLOR, pre + "?mode=configMultiBoot" + post);
 		result += "<br>";
 		result += button(110, "Settings", LEFTNAVICOLOR, pre + "?mode=configSettings" + post);
+		result += "<br>";
 #endif
+#endif
+#ifdef ENABLE_DYN_ROTOR
+		result += button(110, "Rotor", LEFTNAVICOLOR, pre + "?mode=configRotorConfig" + post);
 #endif
 	}
 	else
@@ -4934,6 +4939,9 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 #endif
 #ifdef ENABLE_DYN_FLASH
 	ezapFlashInitializeDyn(dyn_resolver, lockWeb);
+#endif
+#ifdef ENABLE_DYN_ROTOR
+	ezapRotorInitializeDyn(dyn_resolver, lockWeb);
 #endif
 }
 
