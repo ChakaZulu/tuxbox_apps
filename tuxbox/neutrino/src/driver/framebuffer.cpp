@@ -242,7 +242,9 @@ int CFrameBuffer::setMode(unsigned int nxRes, unsigned int nyRes, unsigned int n
 	if (ioctl(fd, FBIOPUT_VSCREENINFO, &screeninfo)<0)
 	{
 		perror("FBIOPUT_VSCREENINFO");
+#if 0
 		return -1;
+#endif
 	}
 
 	if ((screeninfo.xres!=nxRes) && (screeninfo.yres!=nyRes) && (screeninfo.bits_per_pixel!=nbpp))
