@@ -745,11 +745,11 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
             {
                if(!iev.value) // key pressed event
 					{
-                  mouse_button |= 2;
+                  mouse_button |= 4;
 					}
 					else
 					{
-						mouse_button &= ~2;
+						mouse_button &= ~4;
                }
 					retval=FBVNC_EVENT_TS_MOVE;
             }
@@ -757,11 +757,11 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
             {
                if(!iev.value) // key pressed event
 					{
-                  mouse_button |= 4;
+                  mouse_button |= 2;
 					}
 					else
 					{
-						mouse_button &= ~4;
+						mouse_button &= ~2;
                }
 					retval=FBVNC_EVENT_TS_MOVE;
             }
