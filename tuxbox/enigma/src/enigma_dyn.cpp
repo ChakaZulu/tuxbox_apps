@@ -55,7 +55,7 @@
 
 using namespace std;
 
-#define WEBIFVERSION "2.1.1"
+#define WEBIFVERSION "2.2.0"
 
 int pdaScreen = 0;
 int screenWidth = 1024;
@@ -804,7 +804,7 @@ eString getCurService(void)
 
 static eString getChannelNavi(void)
 {
-	eString result = "&nbsp;";
+	eString result;
 
 	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
 
@@ -813,7 +813,7 @@ static eString getChannelNavi(void)
 		result = button(100, "Audio", OCKER, "javascript:selectAudio()");
 		result += button(100, "Video", OCKER, "javascript:selectSubChannel()");
 
-		if (getCurService() != "&nbsp;" || getCurrentSubChannel(ref2string(sapi->service)))
+		if (getCurService() || getCurrentSubChannel(ref2string(sapi->service)))
 		{
 			result += button(100, "EPG", GREEN, "javascript:openEPG()");
 			if (pdaScreen == 0)
@@ -994,19 +994,27 @@ static eString getLeftNavi(eString mode, bool javascript)
 	return result;
 }
 
-static eString getTopNavi(void)
+static eString getTopNavi(bool javascript)
 {
 	eString result;
-	result += button(100, "ZAP", TOPNAVICOLOR, "?mode=zap");
-	result += button(100, "CONTROL", TOPNAVICOLOR, "?mode=control");
+	eString pre, post;
+
+	if (javascript)
+	{
+		pre = "javascript:topnavi('";
+		post = "')";
+	}
+
+	result += button(100, "ZAP", TOPNAVICOLOR, pre + "?mode=zap" + post);
+	result += button(100, "CONTROL", TOPNAVICOLOR, pre + "?mode=control" + post);
 	if (pdaScreen == 0)
 	{
 #if ENABLE_DYN_MOUNT || ENABLE_DYN_CONF || ENABLE_DYN_FLASH
-		result += button(100, "CONFIG", TOPNAVICOLOR, "?mode=config");
+		result += button(100, "CONFIG", TOPNAVICOLOR, pre + "?mode=config" + post);
 #endif
-		result += button(100, "UPDATES", TOPNAVICOLOR, "?mode=updates");
+		result += button(100, "UPDATES", TOPNAVICOLOR, pre + "?mode=updates" + post);
 	}
-	result += button(100, "HELP", TOPNAVICOLOR, "?mode=help");
+	result += button(100, "HELP", TOPNAVICOLOR, pre + "?mode=help" + post);
 
 	return result;
 }
@@ -2714,7 +2722,6 @@ eString getEITC(eString result)
 			curService = curSubService;
 	}
 	result.strReplace("#SERVICENAME#", curService);
-	result.strReplace("#EMPTYCELL#", "&nbsp;");
 
 	return result;
 }
@@ -3479,7 +3486,7 @@ eString getPDAContent(eString mode, eString path, eString opts)
 	result.strReplace("#CONTENT#", getContent(mode, path, opts));
 	result.strReplace("#VOLBAR#", getVolBar());
 	result.strReplace("#MUTE#", getMute());
-	result.strReplace("#TOPNAVI#", getTopNavi());
+	result.strReplace("#TOPNAVI#", getTopNavi(false));
 	result.strReplace("#CHANNAVI#", getChannelNavi());
 	result.strReplace("#LEFTNAVI#", getLeftNavi(mode, false));
 	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
@@ -3540,11 +3547,23 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 	if (pdaScreen == 0)
 	{
 		result = readFile(TEMPLATE_DIR + "index_big.tmp");
-		result.strReplace("#TOPNAVI#", getTopNavi());
 		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
 			result.strReplace("#BOX#", "Dreambox");
 		else
 			result.strReplace("#BOX#", "dBox");
+		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
+			result.strReplace("#TOPBALK#", "topbalk.png");
+		else
+		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Nokia)
+			result.strReplace("#TOPBALK#", "topbalk2.png");
+		else
+		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Sagem)
+			result.strReplace("#TOPBALK#", "topbalk3.png");
+		else
+//		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Philips)
+			result.strReplace("#TOPBALK#", "topbalk4.png");
+		result.strReplace("#EMPTYCELL#", "&nbsp;");
+		result.strReplace("#TOPNAVI#", getTopNavi(true));
 	}
 	else
 	{
@@ -4613,10 +4632,10 @@ static eString EPGDetails(eString request, eString dirpath, eString opts, eHTTPC
 	return result;
 }
 
-static eString topnavi(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+static eString blank(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	eString result = readFile(TEMPLATE_DIR + "topnavi.tmp");
+	eString result = readFile(TEMPLATE_DIR + "blank.tmp");
 	return result;
 }
 
@@ -4641,6 +4660,7 @@ static eString channavi(eString request, eString dirpath, eString opt, eHTTPConn
 	return result;
 }
 
+#if 0
 static eString header(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
@@ -4656,10 +4676,10 @@ static eString header(eString request, eString dirpath, eString opt, eHTTPConnec
 	else
 //	if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Philips)
 		result.strReplace("#TOPBALK#", "topbalk4.png");
-	result.strReplace("#CHANNAVI#", getChannelNavi());
 	result.strReplace("#EMPTYCELL#", "&nbsp;");
 	return getEITC(result);
 }
+#endif
 
 static eString data(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
@@ -4853,10 +4873,10 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/satFinder", satFinder, lockWeb);
 	dyn_resolver->addDyn("GET", "/audio.m3u", audiom3u, lockWeb);
 	dyn_resolver->addDyn("GET", "/version", version, lockWeb);
-	dyn_resolver->addDyn("GET", "/header", header, lockWeb);
+//	dyn_resolver->addDyn("GET", "/header", header, lockWeb);
 	dyn_resolver->addDyn("GET", "/body", body, lockWeb);
 	dyn_resolver->addDyn("GET", "/data", data, lockWeb);
-	dyn_resolver->addDyn("GET", "/topnavi", topnavi, lockWeb);
+	dyn_resolver->addDyn("GET", "/blank", blank, lockWeb);
 	dyn_resolver->addDyn("GET", "/leftnavi", leftnavi, lockWeb);
 	dyn_resolver->addDyn("GET", "/channavi", channavi, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg", getcurepg, lockWeb);

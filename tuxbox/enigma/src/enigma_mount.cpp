@@ -377,7 +377,7 @@ eString eMountMgr::listMountPoints(eString skelleton)
 			tmp.strReplace("#ACTIONBUTTON#", action);
 			action = button(75, "Change", BLUE, "javascript:changeMountPoint('" + eString().sprintf("%d", mp_it->mp.id) + "')", "#FFFFFF");
 			tmp.strReplace("#CHANGEBUTTON#", action);
-			action = button(75, "Delete", RED, "javascript:deleteMountPoint('" + eString().sprintf("%d", mp_it->mp.id) + "')");
+			action = button(75, "Delete", RED, "javascript:deleteMountPoint('" + eString().sprintf("%d", mp_it->mp.id) + "')", "#FFFFFF");
 			tmp.strReplace("#DELETEBUTTON#", action);
 			tmp.strReplace("#MOUNTED#", mountStatus);
 			tmp.strReplace("#ID#", eString().sprintf("%d", mp_it->mp.id));

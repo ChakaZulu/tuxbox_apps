@@ -1,12 +1,8 @@
 <html>
 <head>
-<script>
-	var timer = 0;
-	var updateNow = 0;
-</script>
 <script type="text/javascript" src="data.js"></script>
 </head>
-<body onLoad="init()">
+<body onLoad="update()">
 <script>
 	<!-- variables set by box -->
 	var updateCycleTime = #UPDATECYCLE#;
@@ -37,6 +33,7 @@
 	var format = #FORMAT#;
 	<!-- recording -->
 	var recording = #RECORDING2#;
+	update();
 </script>
 </body>
 </html>

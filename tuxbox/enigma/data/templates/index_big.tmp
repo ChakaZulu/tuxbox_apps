@@ -3,24 +3,194 @@
 		<title>Enigma Web Interface - #BOX#</title>
 		<link rel="stylesheet" type="text/css" href="webif.css">
 		<script language="javascript" type="text/javascript" src="dhtml.js"></script>
+		<script language="javascript" type="text/javascript" src="index.js"></script>
 		<script>
+			function headerUpdateVolumeBar(volume, mute)
+			{
+				for (var i = 9; i <= 63; i += 6)
+				{
+					var vol = 0;
+					if (mute == 0)
+						vol = volume;
+					if (i <= vol)
+						getElem("id", "imgVol" + i, null).src = "led_on.gif";
+					else
+						getElem("id", "imgVol" + i, null).src = "led_off.gif";
+				}
+				if (mute == 0)
+					getElem("id", "mute", null).src = "speak_on.gif";
+				else
+					getElem("id", "mute", null).src = "speak_off.gif";
+			}
+			function headerUpdateRecording(recording)
+			{
+				if (recording == 1)
+					getElem("id", "recording", null).src = "blinking_red.gif";
+				else
+					getElem("id", "recording", null).src = "trans.gif";
+			}
+			function headerUpdateChannelStatusBar(dolby, crypt, format)
+			{
+				if (dolby == 1)
+					getElem("id", "imgDolby", null).src = "dolby_on.png";
+				else
+					getElem("id", "imgDolby", null).src = "dolby_off.png";
+				if (crypt == 1)
+					getElem("id", "imgCrypt", null).src = "crypt_on.png";
+				else
+					getElem("id", "imgCrypt", null).src = "crypt_off.png";
+				if (format == 1)
+					getElem("id", "imgFormat", null).src = "format_on.png";
+				else
+					getElem("id", "imgFormat", null).src = "format_off.png";
+			}
+			function headerUpdateStatusBar(diskGB, diskH, vpid, apid, ip, lock, upTime)
+			{
+				getElem("id", "diskgb", null).firstChild.nodeValue = diskGB;
+				getElem("id", "diskh", null).firstChild.nodeValue = diskH;
+				getElem("id", "vpid", null).firstChild.nodeValue = vpid;
+				getElem("id", "apid", null).firstChild.nodeValue = apid;
+				getElem("id", "ip", null).firstChild.nodeValue = ip;
+				getElem("id", "lock", null).firstChild.nodeValue = lock;
+				getElem("id", "uptime", null).firstChild.nodeValue = upTime;
+			}
+			function headerUpdateEPGData(serviceName, nowT, nowD, nowSt, nextT, nextD, nextSt)
+			{
+				getElem("id", "servicename", null).firstChild.nodeValue = serviceName;
+				getElem("id", "nowt", null).firstChild.nodeValue = nowT;
+				getElem("id", "nowd", null).firstChild.nodeValue = nowD;
+				getElem("id", "nowst", null).firstChild.nodeValue = nowSt;
+				getElem("id", "nextt", null).firstChild.nodeValue = nextT;
+ 				getElem("id", "nextd", null).firstChild.nodeValue = nextD;
+				getElem("id", "nextst", null).firstChild.nodeValue = nextSt;
+			}
+			function topnavi(command)
+			{
+				parent.body.location = "body" + command;
+				parent.leftnavi.location = "leftnavi" + command;
+			}
 			function setTitle(title)
 			{
 				getElem("id", "title", null).firstChild.nodeValue = title;
 			}
+			function init()
+			{
+				data.location = "data";
+			}
 		</script>
 	</head>
-	<body id="index_big" style="margin: 0px; border: 0px; padding: 0px" background="bg.png">
+	<body id="index_big" style="margin: 0px; border: 0px; padding: 0px" background="bg.png" onLoad="init()">
 		<table width="780px" height="100%" align="center" border="0" cellspacing="0" cellpadding="0">
 		<tbody valign="top">
 		<tr>
-			<td colspan="2"><iframe name="header" width="100%" height="112px" src="header" scrolling="no" frameborder="0" marginwidth="0" marginheight="0"></iframe></td>
+			<td colspan="2">
+			<!--iframe name="header" width="100%" height="112px" src="header" scrolling="no" frameborder="0" marginwidth="0" marginheight="0"></iframe-->
+				<!-- begin header -->
+				<table id="headTable" width="100%" height="112px" border="0" cellpadding="0" cellspacing="0" background="#TOPBALK#">
+				<tr>
+					<td>
+						<img width="150" height="0" border="0" src="trans.gif">
+					</td>
+					<td>
+						<table id="headercell" width=100% border="0" cellpadding="0" cellspacing="0">
+						<tr>
+							<td>
+								<table width=100% border="0" height="68px"cellpadding="0" cellspacing="0">
+								<tr>
+									<td id="servicename" colspan="6" class="servicename" colspan=6 align=left>&nbsp;</td>
+									<td width="190px" id="empty" align=right>#EMPTYCELL#</td>
+								</tr>
+								<tr>
+									<td id="nowt" class="epgzeit_bold" width=40 align=left>&nbsp;</td>
+									<td width=5>&nbsp;</td>
+									<td id="nowd" class="epgdur" width=50 align=left>&nbsp;</td>
+									<td width=5>&nbsp;</td>
+									<td id="nowst" class="epgname_bold" width=320 align=left>&nbsp;</td>
+									<td width=5>&nbsp;</td>
+									<td width=190px align=right>
+										<table border="0" cellspacing="0" cellpadding="0">
+										<tr>
+											<td><a href="javascript:setVol(9)"><img id="imgVol9" src="led_on.gif" border="0" width="15" height="8"></a></td>
+											<td><a href="javascript:setVol(15)"><img id="imgVol15" src="led_on.gif" border="0" width="15" height="8"></a></td>
+											<td><a href="javascript:setVol(21)"><img id="imgVol21" src="led_on.gif" border="0" width="15" height="8"></a></td>
+											<td><a href="javascript:setVol(27)"><img id="imgVol27" src="led_on.gif" border="0" width="15" height="8"></a></td>
+											<td><a href="javascript:setVol(33)"><img id="imgVol33" src="led_on.gif" border="0" width="15" height="8"></a></td>
+											<td><a href="javascript:setVol(39)"><img id="imgVol39" src="led_on.gif" border="0" width="15" height="8"></a></td>
+											<td><a href="javascript:setVol(45)"><img id="imgVol45" src="led_on.gif" border="0" width="15" height="8"></a></td>
+											<td><a href="javascript:setVol(51)"><img id="imgVol51" src="led_on.gif" border="0" width="15" height="8"></a></td>
+											<td><a href="javascript:setVol(57)"><img id="imgVol57" src="led_on.gif" border="0" width="15" height="8"></a></td>
+											<td><a href="javascript:setVol(63)"><img id="imgVol63" src="led_on.gif" border="0" width="15" height="8"></a></td>
+											<td>&nbsp;</td>
+											<td><a href="javascript:toggleMute()"><img id="mute" border="0" src="speak_on.gif"></a></td>
+										</tr>
+										</table>
+									</td>
+								</tr>
+								<tr>
+									<td id="nextt" class="epgzeit" width=40 align=left>&nbsp;</td>
+									<td width=5>&nbsp;</td>
+									<td id="nextd" class="epgdur" width=50 align=left>&nbsp;</td>
+									<td width=5>&nbsp;</td>
+									<td id="nextst" class="epgname" width=320 align=left>&nbsp;</td>
+									<td width=5>&nbsp;</td>
+									<td width="190px" align="right">
+										<img id="recording" width="12" border="0" src="trans.gif">
+										<img height="0" width="5" border="0" src="trans.gif">
+										<img id="imgDolby" src="dolby_off.png" border="0">
+										<img height="0" width="5" border="0" src="trans.gif">
+										<img id="imgCrypt" src="crypt_off.png" border="0">
+										<img height="0" width="5" border="0" src="trans.gif">
+										<img id="imgFormat" src="format_off.png" border="0">
+									</td>
+								</tr>
+								</table>
+								<table id="statcell" border="0" cellpadding="0" cellspacing="0" height="34px">
+								<tr>
+									<td id="lock">&nbsp;</td>
+									<td>&nbsp;<img src="squ.png">&nbsp;</td>
+									<td>disk space:&nbsp;</td>
+									<td id="diskgb">&nbsp;</td>
+									<td>&nbsp;</td>
+									<td id="diskh">&nbsp;</td>
+									<td>&nbsp;</td>
+									<td>&nbsp;<img src="squ.png">&nbsp;</td>
+									<td id="uptime">&nbsp;</td>
+									<td>&nbsp;</td>
+									<td>&nbsp;<img src="squ.png">&nbsp;</td>
+									<td id="ip">&nbsp;</td>
+									<td>&nbsp;<img src="squ.png">&nbsp;</td>
+									<td>vpid:&nbsp;</td>
+									<td id="vpid">&nbsp;</td>
+									<td>&nbsp;<img src="squ.png">&nbsp;</td>
+									<td>apid:&nbsp;<a id="apid" href="audio.m3u">&nbsp;</a></td>
+								</tr>
+								</table>
+							</td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+				</table>
+				<!-- end header -->
+			</td>
 		</tr>
 		<tr>
 			<td colspan="2"><iframe name="channavi" width="100%" height="24px" src="channavi" scrolling="no" frameborder="0" marginwidth="0" marginheight="0"></iframe></td>
 		</tr>
 		<tr>
-			<td colspan="2"><iframe name="topnavi" width="100%" height="24px" src="topnavi" scrolling="no" frameborder="0" marginwidth="0" marginheight="0"></iframe></td>
+			<td colspan="2">
+			<!--iframe name="topnavi" width="100%" height="24px" src="topnavi" scrolling="no" frameborder="0" marginwidth="0" marginheight="0"></iframe-->
+				<!-- topnavi start -->
+				<table id="topnavi" border="0" width="100%" height="22px" cellspacing="0" cellpadding="0">
+				<tbody align="left">
+				<tr>
+					<td width="120">&nbsp;</td>
+					<td align="left">#TOPNAVI#</td>
+				</tr>
+				</tbody>
+				</table>
+				<!-- topnavi end -->
+			</td>
 		</tr>
 		<tr>
 			<td colspan="2">
@@ -37,7 +207,7 @@
 			<td><iframe name="body" width="670px" height="100%" src="body" scrolling="auto" frameborder="0" marginwidth="0" marginheight="0"></iframe></td>
 		</tr>
 		<tr>
-			<td colspan="2"><iframe name="data" src="data" width="100%" height="0" frameborder="0" framemargin="0" framewidth="0"></iframe></td>
+			<td colspan="2"><iframe name="data" src="blank" width="100%" height="0" frameborder="0" framemargin="0" framewidth="0"></iframe></td>
 		</tr>
 		</tbody>
 		</table>

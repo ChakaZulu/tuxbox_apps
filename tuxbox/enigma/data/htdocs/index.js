@@ -1,17 +1,20 @@
-function setVol(xy)
+function setVol(volume)
 {
-	document.location = "setVolume?volume="+xy;
+	document.location = "setVolume?volume=" + volume;
 	if (window.screen.width < 800)
 		setTimeout("reload()", 1000);
 	else
-		headerUpdate();
+	{
+		headerUpdateVolumeBar(volume, 0);
+		data.location.reload();
+	}
 }
 
 function setVid(xy)
 {
 	document.location = "setVideo?position="+xy;
 	setTimeout("reload()", 1000);
-}	
+}
 
 function toggleMute(xy)
 {
@@ -19,15 +22,10 @@ function toggleMute(xy)
 	if (window.screen.width < 800)
 		setTimeout("reload()", 1000);
 	else
-		headerUpdate();
-}
-
-function headerUpdate()
-{
-	if (parent.data.updateNow)
-		parent.data.requestUpdateNow();
-	else
-		setTimeout("headerUpdate()", 250);
+	{
+		headerUpdateVolumeBar(data.volume, 0);
+		data.location.reload();
+	}
 }
 
 function switchChannel(xy, bouquet, channel)
@@ -41,9 +39,9 @@ function switchChannel(xy, bouquet, channel)
 		if (zapMode < 4)
 			document.location = "cgi-bin/zapTo?path="+xy+"&curBouquet="+bouquet+"&curChannel="+channel;
 		else
-			document.location = "?path="+xy;
-			
-		headerUpdate();
+			document.location = "?path = "+xy;
+
+		setTimeout("parent.data.location.reload()", 2000);
 		setTimeout("parent.channavi.location.reload()", 2000);
 	}
 }
