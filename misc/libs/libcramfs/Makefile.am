@@ -5,4 +5,3 @@ tuxboxinclude_HEADERS = libcramfs.h
 
 libcramfs_la_SOURCES = libcramfs.c
 
-AM_CPPFLAGS = -D_GNU_SOURCE
