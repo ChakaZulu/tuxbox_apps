@@ -217,7 +217,8 @@ void eSection::closeFilter()
 
 void eSection::data(int socket)
 {
-	while (1)
+	int max = 100;
+	while (max--)
 	{
 		if (lockcount)
 			qFatal("eSection::data on locked section!");
