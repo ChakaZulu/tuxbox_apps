@@ -189,6 +189,7 @@ infoviewer.waittime Waiting for time...
 
 epgviewer.notfound no epg found
 epgviewer.nodetailed No detailed informations available
+epgviewer.More_Screenings More Screenings on this Channel
 epglist.head Event-list - %s
 epglist.noevents EPG is not available...
 
