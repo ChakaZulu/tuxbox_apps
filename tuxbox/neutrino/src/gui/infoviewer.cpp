@@ -661,7 +661,7 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 	}
     else if ( msg == NeutrinoMessages::EVT_MODECHANGED )
 	{
-        aspectRatio = data;
+        aspectRatio = data & 0xFF; // strip away VCR aspect ratio
         if ( is_visible && showButtonBar )
 			showIcon_16_9();
 
