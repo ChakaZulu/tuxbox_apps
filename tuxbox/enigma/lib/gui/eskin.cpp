@@ -500,8 +500,6 @@ gPixmap *eSkin::queryImage(const eString& name) const
 	if (it != images.end())
 		return it->second;
 	
-	eDebug("%s does not exist", name.c_str());
-
 	return 0;
 }
 
