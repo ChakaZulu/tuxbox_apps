@@ -86,7 +86,8 @@ AC_ARG_WITH($1,[  $6$7 [[PREFIX$4$5]]],[
 	fi
 ])
 
-AC_SUBST($2)
+dnl automake <= 1.6 don't support this
+dnl AC_SUBST($2)
 AC_DEFINE_UNQUOTED($2,"$_$2",$7)
 ])
 
@@ -125,6 +126,16 @@ TUXBOX_APPS_DIRECTORY_ONE(plugindir,PLUGINDIR,libdir,/lib,/tuxbox/plugins,
 TUXBOX_APPS_DIRECTORY_ONE(ucodedir,UCODEDIR,localstatedir,/var,/tuxbox/ucodes,
 	[--with-ucodedir=PATH    ],[where to find the ucodes])
 ])
+
+dnl automake <= 1.6 needs this specifications
+AC_SUBST(CONFIGDIR)
+AC_SUBST(DATADIR)
+AC_SUBST(FONTDIR)
+AC_SUBST(GAMESDIR)
+AC_SUBST(LIBDIR)
+AC_SUBST(PLUGINDIR)
+AC_SUBST(UCODEDIR)
+dnl end workaround
 
 AC_DEFUN(TUXBOX_APPS_ENDIAN,[
 AC_CHECK_HEADERS(endian.h)
