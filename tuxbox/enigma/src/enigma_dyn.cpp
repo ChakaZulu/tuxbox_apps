@@ -1106,12 +1106,12 @@ static eString getVolBar()
 	for (int i = 1; i <= (volume / 10); i++)
 	{
 		result << "<td width=15 height=8><a class=\"volgreen\" href=\"javascript:setVol(" << i << ")\">"
-			"<img src=\"trans.gif\" border=0></a></span></td>";
+			"<img src=\"trans.gif\" border=0></a></td>";
 	}
 	for (int i = (volume / 10) + 1; i <= 10; i++)
 	{
 		result << "<td width=15 height=8><a class=\"volnot\" href=\"javascript:setVol(" << i << ")\">"
-			"<img src=\"trans.gif\" border=0></a></span></td>";
+			"<img src=\"trans.gif\" border=0></a></td>";
 	}
 
 	result << "<td>"
@@ -1154,12 +1154,12 @@ static eString getVideoBar()
 	for (int i = 1; i <= videopos; i++)
 	{
 		result << "<td width=15 height=8><a class=\"vidblue\" href=\"javascript:setVid(" << i << ")\">"
-			"<img src=\"trans.gif\" border=0></a></span></td>";
+			"<img src=\"trans.gif\" border=0></a></td>";
 	}
 	for (int i = videopos + 1; i <= 10; i++)
 	{
 		result << "<td width=15 height=8><a class=\"vidnot\" href=\"javascript:setVid(" << i << ")\">"
-			"<img src=\"trans.gif\" border=0></a></span></td>";
+			"<img src=\"trans.gif\" border=0></a></td>";
 	}
 
 	result << "<td>&nbsp;&nbsp;-" << min << ":" << sec << "</td>";

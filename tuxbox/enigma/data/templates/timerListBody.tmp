@@ -1,8 +1,8 @@
 <h2>Regular Timers</h2>
 <table width=100% border=1 rules=all>
 	<thead>
-		<th align="left">Delete</td>
-		<th align="left">Edit</td>
+		<th align="left">Delete</th>
+		<th align="left">Edit</th>
 		<th align="left">State</th>
 		<th align="left">Start Time</th>
 		<th align="left">End Time</th>
@@ -16,8 +16,8 @@
 <h2>Repeated Timers</h2>
 <table width=100% border=1 rules=all>
 	<thead>
-		<th align="left">Delete</td>
-		<th align="left">Edit</td>
+		<th align="left">Delete</th>
+		<th align="left">Edit</th>
 		<th align="left">State</th>
 		<th align="left">Days</th>
 		<th align="left">From - To</th>

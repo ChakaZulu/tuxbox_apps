@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setupskin.cpp,v 1.16 2003/09/07 00:03:58 ghostrider Exp $
+ * $Id: setupskin.cpp,v 1.17 2004/04/28 09:52:07 ghostrider Exp $
  */
 
 #include <setupskin.h>
@@ -100,15 +100,13 @@ void eSkinSetup::accept()
 void eSkinSetup::skinSelected(eListBoxEntrySkin *skin)
 {
 	if (!skin)
-	{
 		close(1);
-		return;
+	else
+	{
+		eConfig::getInstance()->setKey("/ezap/ui/skin", skin->getESML().c_str());
+		eConfig::getInstance()->flush();
+		close(0);
 	}
-
-	eConfig::getInstance()->setKey("/ezap/ui/skin", skin->getESML().c_str());
-	eConfig::getInstance()->flush();
-
-	close(0);
 }
 
 eSkinSetup::eSkinSetup()
@@ -143,17 +141,16 @@ int eSkinSetup::eventHandler(const eWidgetEvent &event)
 {
 	switch (event.type)
 	{
-	case eWidgetEvent::evtAction:
-		if (event.action == &i_cursorActions->left)
-			focusNext(eWidget::focusDirW);
-		else if (event.action == &i_cursorActions->right)
-			focusNext(eWidget::focusDirE);
-		else
+		case eWidgetEvent::evtAction:
+			if (event.action == &i_cursorActions->left)
+				focusNext(eWidget::focusDirW);
+			else if (event.action == &i_cursorActions->right)
+				focusNext(eWidget::focusDirE);
+			else
+				break;
+			return 1;
+		default:
 			break;
-		return 1;
-
-	default:
-		break;
 	}
 	return eWindow::eventHandler(event);
 }
