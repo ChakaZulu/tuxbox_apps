@@ -29,8 +29,8 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __mp3playergui__
-#define __mp3playergui__
+#ifndef __audioplayergui__
+#define __audioplayergui__
 
 
 #include "driver/framebuffer.h"

@@ -142,7 +142,7 @@ struct SNeutrinoSettings
 	int  network_nfs_type[4];
 	char network_nfs_username[4][31];
 	char network_nfs_password[4][31];
-	char network_nfs_mp3dir[100];
+	char network_nfs_audioplayerdir[100];
 	char network_nfs_picturedir[100];
 	char network_nfs_moviedir[100];
 	char network_nfs_recordingdir[100];
@@ -276,12 +276,12 @@ struct SNeutrinoSettings
 	char   picviewer_slide_time[3];
 	int    picviewer_scaling;
 
-   	//mp3player
-	int   mp3player_display;
-	int   mp3player_follow;
-	char  mp3player_screensaver[3];
-	int   mp3player_highprio;
-	int   mp3player_select_title_by_name;
+   	//audioplayer
+	int   audioplayer_display;
+	int   audioplayer_follow;
+	char  audioplayer_screensaver[3];
+	int   audioplayer_highprio;
+	int   audioplayer_select_title_by_name;
 
 	//Filebrowser
 	int filebrowser_showrights;
