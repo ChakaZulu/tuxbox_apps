@@ -2,7 +2,7 @@
 	Control-Daemon  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
-	Homepage: http://mcclean.cyberphoria.org/
+	Homepage: http://dbox.cyberphoria.org/
 
 
 
@@ -63,7 +63,9 @@ struct rmsg {
 
 struct Ssettings
 {
-	char gen_Volume;
+	char volume;
+	char videotype;
+	char videoformat;
 }settings;
 
 
@@ -154,7 +156,7 @@ void setVideoRGB()
 void setVolume(char volume)
 {
 	int fd;
-	settings.gen_Volume = volume;
+	settings.volume = volume;
 
 	int i = 64-int(volume*64.0/100.0);
 	printf("[controld] set volume: %d\n", i );
@@ -269,7 +271,7 @@ void parse_command(int connfd)
       break;
 	case 128:
 		printf("get volume\n");
-		write(connfd,&settings.gen_Volume,sizeof(settings.gen_Volume));
+		write(connfd,&settings.volume,sizeof(settings.volume));
 		break;
 
     default:
@@ -326,12 +328,14 @@ int main(int argc, char **argv)
 	if (!loadSettings())
 	{
 		printf("[controld] useing defaults\n");
-		settings.gen_Volume = 100;
+		settings.volume = 100;
+		settings.videotype = 0;
+		settings.videoformat = 0;
 	}
 
 
 	//init 
-	setVolume(settings.gen_Volume);
+	setVolume(settings.volume);
 	while(1)
 	{
 		clilen = sizeof(cliaddr);
