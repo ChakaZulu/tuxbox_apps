@@ -370,43 +370,65 @@ void CNFSMountGui::mount(const char * const ip, const char * const dir, const ch
 	}
 	in.close();
 
-   if(g_settings.network_nfs_mount_options[0][0] == '\0')
-   {
-      strcpy(g_settings.network_nfs_mount_options[0],g_settings.network_nfs_mount_options[1]);
-      g_settings.network_nfs_mount_options[1][0] = '\0';
-   }
-
-   if((g_settings.network_nfs_mount_options[0][0] == '\0') && (g_settings.network_nfs_mount_options[1][0] == '\0'))
-   {
-      if(fstype == NFS)
-      {
-         strcpy(g_settings.network_nfs_mount_options[0],"ro,soft,udp");
-         strcpy(g_settings.network_nfs_mount_options[1],"nolock,rsize=8192,wsize=8192");
-      }
-      else if(fstype == CIFS)
-      {
-         strcpy(g_settings.network_nfs_mount_options[0],"ro");
-         strcpy(g_settings.network_nfs_mount_options[1],"");
-      }
-   }
-	
-   if(fstype == NFS)
+	if(g_settings.network_nfs_mount_options[0][0] == '\0')
 	{
-      cmd = std::string("mount -t nfs ") + ip + ':' + dir + ' ' + local_dir + " -o " + 
-         g_settings.network_nfs_mount_options[0];
+		strcpy(g_settings.network_nfs_mount_options[0],g_settings.network_nfs_mount_options[1]);
+		g_settings.network_nfs_mount_options[1][0] = '\0';
+	}
+	
+	if((g_settings.network_nfs_mount_options[0][0] == '\0') && (g_settings.network_nfs_mount_options[1][0] == '\0'))
+	{
+		if(fstype == NFS)
+		{
+			strcpy(g_settings.network_nfs_mount_options[0],"ro,soft,udp");
+			strcpy(g_settings.network_nfs_mount_options[1],"nolock,rsize=8192,wsize=8192");
+		}
+		else if(fstype == CIFS)
+		{
+			strcpy(g_settings.network_nfs_mount_options[0],"ro");
+			strcpy(g_settings.network_nfs_mount_options[1],"");
+		}
+	}
+	
+	if(fstype == NFS)
+	{
+		cmd = "mount -t nfs ";
+		cmd += ip;
+		cmd += ':';
+		cmd += dir;
+		cmd += ' ';
+		cmd += local_dir;
+		cmd += " -o ";
+		cmd += g_settings.network_nfs_mount_options[0];
 	}
 	else
 	{
-		cmd = std::string("mount -t cifs //") + ip + '/' + dir + ' ' + local_dir + 
-         " -o username=" +  username + ",password=" + password + 
-         ",unc=//" + ip + '/' + dir + ',' + g_settings.network_nfs_mount_options[0];
+		cmd = "mount -t cifs //";
+		cmd += ip;
+		cmd += '/';
+		cmd += dir;
+		cmd += ' ';
+		cmd += local_dir;
+		cmd += " -o username=";
+		cmd += username;
+		cmd += ",password=";
+		cmd += password;
+		cmd += ",unc=//";
+		cmd += ip;
+		cmd += '/';
+		cmd += dir;
+		cmd += ',';
+		cmd += g_settings.network_nfs_mount_options[0];
 	}
-   if(g_settings.network_nfs_mount_options[1][0] !='\0')
-      cmd = cmd + ',' + g_settings.network_nfs_mount_options[1];
-
+	if (g_settings.network_nfs_mount_options[1][0] !='\0')
+	{
+		cmd += ',';
+		cmd += g_settings.network_nfs_mount_options[1];
+	}
+	
 	sprintf(buffer,"%s",cmd.c_str());
 	pthread_create(&g_mnt, 0, mount_thread, buffer);
-
+	
 	struct timespec timeout;
 	int retcode;
 
@@ -415,7 +437,7 @@ void CNFSMountGui::mount(const char * const ip, const char * const dir, const ch
 	timeout.tv_nsec = 0;
 	retcode = pthread_cond_timedwait(&g_cond, &g_mut, &timeout);
 	if (retcode == ETIMEDOUT) 
-   {  // timeout occurred
+	{  // timeout occurred
 		pthread_cancel(g_mnt);
 	}
 	pthread_mutex_unlock(&g_mut);
@@ -463,8 +485,7 @@ int CNFSUmountGui::exec( CMenuTarget* parent, std::string actionKey )
 int CNFSUmountGui::menu()
 {
 	char buffer[200+1],mountDev[100],mountOn[100],mountType[20];
-	std::ifstream in;
-	in.open("/proc/mounts",std::ifstream::in);
+	std::ifstream in("/proc/mounts", std::ifstream::in);
 	int count=0;
 	CMenuWidget umountMenu("nfs.umount", "network.raw",720);
 	umountMenu.addItem(new CMenuSeparator());
@@ -480,8 +501,11 @@ int CNFSUmountGui::menu()
 		if(strcmp(mountType,"nfs")==0 || strcmp(mountType,"cifs")==0)
 		{
 			count++;
-			std::string s1=std::string(mountDev) + " -> " + mountOn;
-			std::string s2=std::string("doumount ") + mountOn;
+			std::string s1 = mountDev;
+			s1 += " -> ";
+			s1 += mountOn;
+			std::string s2 = "doumount ";
+			s2 += mountOn;
 			umountMenu.addItem(new CMenuForwarder(s1.c_str(), true, NULL, this, s2));
 		}
 	}
@@ -506,8 +530,7 @@ void CNFSUmountGui::umount(const char * const dir)
 	else
 	{
 		char buffer[200+1],mountDev[100],mountOn[100],mountType[20];
-		std::ifstream in;
-		in.open("/proc/mounts",std::ifstream::in);
+		std::ifstream in("/proc/mounts", std::ifstream::in);
 		while(in.good())
 		{
 			mountDev[0] = 0; /* strcpy(mountDev,""); */

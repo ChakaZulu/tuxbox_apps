@@ -292,7 +292,8 @@ bool CFileBrowser::readDir_vlc(std::string dirname, CFileList* flist)
 	printf("readDir_vlc %s\n",dirname.c_str());
 	std::string answer="";
 	char *dir_escaped = curl_escape(dirname.substr(strlen(VLC_URI)).c_str(), 0);
-	std::string url = m_baseurl + dir_escaped;
+	std::string url = m_baseurl;
+	url += dir_escaped;
 	curl_free(dir_escaped);
 	std::cout << "[FileBrowser] vlc URL: " << url << std::endl;
 	CURL *curl_handle;

@@ -520,7 +520,10 @@ void CPictureViewerGui::paintItem(int pos)
 	frameBuffer->paintBoxRel(x,ypos, width-15, fheight, color);
 	if(liststart+pos<playlist.size())
 	{
-		std::string tmp=playlist[liststart+pos].Name + " (" + playlist[liststart+pos].Type + ')';
+		std::string tmp = playlist[liststart+pos].Name;
+		tmp += " (";
+		tmp += playlist[liststart+pos].Type;
+		tmp += ')';
 		char timestring[18];
 		strftime(timestring, 18, "%d-%m-%Y %H:%M", gmtime(&playlist[liststart+pos].Date));
 		int w = g_Fonts->menu->getRenderWidth(timestring);

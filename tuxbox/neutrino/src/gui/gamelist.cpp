@@ -78,8 +78,8 @@ int CPlugins::find_plugin(std::string filename)
 
 void CPlugins::scanDir(const char *dir)
 {
-struct dirent **namelist;
-std::string fname;
+	struct dirent **namelist;
+	std::string fname;
 
 	int number_of_files = scandir(dir, &namelist, 0, alphasort);
 
@@ -93,7 +93,8 @@ std::string fname;
 		{
 			plugin new_plugin;
 			new_plugin.filename = filename.substr(0, pos);
-			fname = std::string(dir) + '/';
+			fname = dir;
+			fname += '/';
 			new_plugin.cfgfile = fname.append(new_plugin.filename);
 			new_plugin.cfgfile.append(".cfg");
 			new_plugin.sofile = fname;

@@ -317,7 +317,9 @@ void CFlashExpert::readmtd(int readmtd)
 {
 	char tmp[10];
 	sprintf(tmp, "%d", readmtd);
-	std::string filename = std::string("/tmp/mtd") + tmp + ".img"; // US-ASCII (subset of UTF-8 and ISO8859-1)
+	std::string filename = "/tmp/mtd";
+	filename += tmp;
+	filename += ".img"; // US-ASCII (subset of UTF-8 and ISO8859-1)
 	if (readmtd == -1)
 	{
 		//ganzes flashimage lesen
