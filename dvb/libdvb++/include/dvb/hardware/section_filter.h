@@ -1,5 +1,5 @@
 /*
- * $Id: section_filter.h,v 1.1 2003/07/17 01:07:32 obi Exp $
+ * $Id: section_filter.h,v 1.2 2003/10/14 15:27:52 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -355,7 +355,7 @@ bool SectionFilter<T>::filter(const uint16_t pid)
 	}
 
 	dsfp.pid = pid;
-	dsfp.timeout = T::TIMEOUT;
+	dsfp.timeout = 0;
 
 	if (T::SYNTAX == 0)
 		dsfp.flags = DMX_ONESHOT | DMX_IMMEDIATE_START;
