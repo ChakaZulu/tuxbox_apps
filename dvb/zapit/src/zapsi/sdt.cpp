@@ -45,7 +45,7 @@ int sdt(uint osid, bool scan_mode)
       flt.pid              = 0x11;
       flt.filter.filter[0] = 0x42;
       flt.filter.mask[0]  =0xFF;
-      flt.timeout=25000;
+      flt.timeout=10000;
       flt.flags=DMX_CHECK_CRC;
       
       if (ioctl(demux, DMX_SET_FILTER, &flt)<0)  {
@@ -53,7 +53,7 @@ int sdt(uint osid, bool scan_mode)
       }
       
       ioctl(demux, DMX_START, 0);
-      
+/*      
       dmx_fd.fd = demux;
       dmx_fd.events = POLLIN;
       dmx_fd.revents = 0;
@@ -68,10 +68,10 @@ int sdt(uint osid, bool scan_mode)
 	  return -1;
 	}
       
-      
+*/      
       
       if ((r=read(demux, buffer, 3))<=0)  {
-	perror("read");
+	perror("[zapit] read sdt");
 	close(demux);
 	continue;
 	//exit(0);
@@ -82,7 +82,7 @@ int sdt(uint osid, bool scan_mode)
       //printf("The section is %d byte long\n", sec_len + 3);
       
       if ((r=read(demux, buffer+3, sec_len))<=0)  {
-	perror("read");
+	perror("[zapit] read sdt");
 	close(demux);
 	//exit(0);
 	continue;

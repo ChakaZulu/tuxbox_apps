@@ -44,7 +44,7 @@ void nit(int diseqc)
   	flt.pid=0x10;
   	flt.filter.filter[0] = 0x40;
     	flt.filter.mask[0]  =0xFF;
-  	flt.timeout=25000;
+  	flt.timeout=10000;
   	flt.flags=DMX_CHECK_CRC;
   	
   	if (ioctl(demux, DMX_SET_FILTER, &flt)<0)  {
@@ -52,7 +52,7 @@ void nit(int diseqc)
   		}
   
   	ioctl(demux, DMX_START, 0);
-  
+/*  
   	dmx_fd.fd = demux;
   	dmx_fd.events = POLLIN;
   	dmx_fd.revents = 0;
@@ -66,10 +66,10 @@ void nit(int diseqc)
 		close(demux);
 		return;
   	}
-  	
+*/  	
   	
   	if ((r=read(demux, buffer, 3))<=0)  {
-   		perror("read NIT.");
+   		perror("[zapit] read NIT.");
     		close(demux);
     		continue;
     	}
@@ -78,7 +78,7 @@ void nit(int diseqc)
   	//printf("Section-length: %d bytes\n", sec_len);
   	
     	if ((r=read(demux, buffer+3, sec_len))<=0)  {
-    		perror("read NIT.");
+    		perror("[zapit] read NIT.");
     		close(demux);
     		continue;
 	}

@@ -38,15 +38,15 @@ int fake_pat(std::map<int,transpondermap> *tmap, int freq, int sr)
   
   	flt.pid=0;
     	flt.filter.mask[0]  =0xFF;
-  	flt.timeout=5000;
-  	flt.flags=DMX_IMMEDIATE_START | DMX_CHECK_CRC;
+  	flt.timeout=1000;
+  	flt.flags=DMX_CHECK_CRC;
   	
   	if (ioctl(demux, DMX_SET_FILTER, &flt)<0)  {
     		perror("DMX_SET_FILTER");
   		}
   
   	ioctl(demux, DMX_START, 0);
-  
+/*
   	dmx_fd.fd = demux;
   	dmx_fd.events = POLLIN;
   	dmx_fd.revents = 0;
@@ -55,19 +55,19 @@ int fake_pat(std::map<int,transpondermap> *tmap, int freq, int sr)
 
   	if (!pt)
   	{
-  		printf("Poll Timeout\n");
+  		printf("[zapit] PAT Poll Timeout\n");
   		close(demux);
   		return -1;
   	}
   	else
   	{
-  		char buffer[1024];
+*/  		char buffer[1024];
   		int r;
   		int sec_len;
   		int tsid;
   		
 		if ((r=read(demux, buffer, 3))<=0)  {
-   			perror("read");
+   			perror("[zapit] read Pat");
     			close(demux);
     			return -1;
     		}
@@ -75,7 +75,7 @@ int fake_pat(std::map<int,transpondermap> *tmap, int freq, int sr)
   		sec_len = (((buffer[1]&0xF)<<8) + buffer[2]);
 
     		if ((r=read(demux, buffer+3, sec_len))<=0)  {
-    			perror("read");
+    			perror("[zapit] read Pat");
     			close(demux);
     			return -1;
 		}
@@ -87,7 +87,7 @@ int fake_pat(std::map<int,transpondermap> *tmap, int freq, int sr)
 		(*tmap).insert(std::pair<int,transpondermap>(tsid,transpondermap(tsid, freq, sr, 0)));
 		found_transponders++;
 		
-	}
+//	}
 	return 23;
 }
 
@@ -107,15 +107,15 @@ int pat(uint oonid,std::map<uint,channel> *cmap)
   
   	flt.pid=0;
     	flt.filter.mask[0]  =0xFF;
-  	flt.timeout=5000;
-  	flt.flags=DMX_IMMEDIATE_START | DMX_CHECK_CRC;
+  	flt.timeout=1000;
+  	flt.flags=DMX_CHECK_CRC;
   	
   	if (ioctl(demux, DMX_SET_FILTER, &flt)<0)  {
     		perror("DMX_SET_FILTER");
   		}
   
   	ioctl(demux, DMX_START, 0);
-  
+/*  
   	dmx_fd.fd = demux;
   	dmx_fd.events = POLLIN;
   	dmx_fd.revents = 0;
@@ -130,13 +130,13 @@ int pat(uint oonid,std::map<uint,channel> *cmap)
   	}
   	else
   	{
-  		char buffer[1024];
+*/  		char buffer[1024];
   		int r;
   		int current, sec_len;
   		int tsid;
   		
 		if ((r=read(demux, buffer, 3))<=0)  {
-   			perror("read");
+   			perror("[zapit] read Pat");
     			close(demux);
     			return -1;
     		}
@@ -144,7 +144,7 @@ int pat(uint oonid,std::map<uint,channel> *cmap)
   		sec_len = (((buffer[1]&0xF)<<8) + buffer[2]);
 
     		if ((r=read(demux, buffer+3, sec_len))<=0)  {
-    			perror("read");
+    			perror("[zapit] read Pat");
     			close(demux);
     			return -1;
 		}
@@ -186,7 +186,7 @@ int pat(uint oonid,std::map<uint,channel> *cmap)
 			
 			current = current+4;
 		}
-	}
+//	}
 	close(demux);
 	return 1;
 }
