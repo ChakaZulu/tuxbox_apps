@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.257 2002/05/01 01:18:58 McClean Exp $
+        $Id: neutrino.cpp,v 1.258 2002/05/01 03:00:17 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1632,6 +1632,8 @@ void CNeutrinoApp::InitZapper()
 
 int CNeutrinoApp::run(int argc, char **argv)
 {
+	CmdParser(argc, argv);
+
 	g_info.box_Type = atoi(getenv("mID"));
 	g_info.gtx_ID = -1;
 	sscanf(getenv("gtxID"), "%x", &g_info.gtx_ID);
@@ -1649,7 +1651,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_settings.timing_epg = 2* 60;
 	g_settings.timing_infobar = 6;
 
-	CmdParser(argc, argv);
 
 	g_Fonts = new FontsDef;
 	SetupFonts();
@@ -2521,7 +2522,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.257 2002/05/01 01:18:58 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.258 2002/05/01 03:00:17 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 
