@@ -455,7 +455,7 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.streaming_videorate,  configfile.getString("streaming_videorate", "1000").c_str() );
 	strcpy( g_settings.streaming_audiorate, configfile.getString("streaming_audiorate", "192").c_str() );
 	strcpy( g_settings.streaming_server_startdir, configfile.getString("streaming_server_startdir", "C:/Movies").c_str() );
-	g_settings.streaming_type = configfile.getInt32( "streaming_ac3_enabled", 0 );
+	g_settings.streaming_ac3_enabled = configfile.getInt32( "streaming_ac3_enabled", 0 );
 	
 	//rc-key configuration
 	g_settings.key_tvradio_mode = configfile.getInt32( "key_tvradio_mode", CRCInput::RC_nokey );
@@ -1610,7 +1610,7 @@ void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNoti
 
 	videoSettings.addItem( oj );
 
-	oj = new CMenuOptionChooser("videomenu.vcrswitch", &g_settings.vcr_AutoSwitch, true, NULL);
+	oj = new CMenuOptionChooser("videomenu.vcrswitch", &g_settings.vcr_AutoSwitch, true);
 	oj->addOption(0, "options.off");
 	oj->addOption(1, "options.on");
 	videoSettings.addItem( oj );
@@ -1781,16 +1781,12 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 
 	CMenuForwarder* mf7 = new CMenuForwarder("movieplayer.defdir", true, g_settings.network_nfs_moviedir,this,"moviedir");
 	
-	CMenuOptionChooser* oj0 = new CMenuOptionChooser("streamingmenu.streaming_ac3_enabled", &g_settings.streaming_ac3_enabled,
-                                                    true, NULL);
+	CMenuOptionChooser* oj0 = new CMenuOptionChooser("streamingmenu.streaming_ac3_enabled", &g_settings.streaming_ac3_enabled);
 	oj0->addOption(0, "streamingmenu.off");
 	oj0->addOption(1, "streamingmenu.on");
                                               
-	CStreamingNotifier *StreamingNotifier =
-		new CStreamingNotifier(mf1,mf2,mf3,mf4,mf5,mf6,oj0);
-
-        CMenuOptionChooser* oj1 = new CMenuOptionChooser("streamingmenu.streaming_type", &g_settings.streaming_type,
-                                                    true, StreamingNotifier);
+	CStreamingNotifier *StreamingNotifier = new CStreamingNotifier(mf1,mf2,mf3,mf4,mf5,mf6,oj0);
+	CMenuOptionChooser* oj1 = new CMenuOptionChooser("streamingmenu.streaming_type", &g_settings.streaming_type, true, StreamingNotifier);
 	oj1->addOption(0, "streamingmenu.off");
 	oj1->addOption(1, "streamingmenu.on");
 
