@@ -289,7 +289,7 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 				avsiosfncFormat=2;
 				break;
 			case 2 :
-				avsiosfncFormat=1;
+				avsiosfncFormat=3;
 				break;
 		}
 	}
@@ -802,7 +802,7 @@ void sig_catch(int)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.49 2002/03/12 18:11:16 field Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.50 2002/03/14 10:14:52 field Exp $\n\n");
 
 	//printf("[controld] mainThread-pid: %d\n", getpid());
 	if (fork() != 0)
