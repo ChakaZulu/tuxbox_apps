@@ -50,23 +50,26 @@ FT_Error fontRenderClass::myFTC_Face_Requester(FTC_FaceID  face_id,
 
 fontRenderClass::fontRenderClass(CLCDDisplay *fb)
 {
-		framebuffer = fb;
+	framebuffer = fb;
 	printf("[FONT] initializing core...");
+	fflush(stdout);
 	if (FT_Init_FreeType(&library))
 	{
 		printf("failed.\n");
 		return;
 	}
-	printf("\n[FONT] loading fonts...\n");
-	fflush(stdout);
+	printf("\n");
 	font=0;
+}
 
-	AddFont(FONTDIR "/Arial.ttf");
-	AddFont(FONTDIR "/Arial_Bold.ttf");
-	AddFont(FONTDIR "/Arial_Italic.ttf");
-	AddFont(FONTDIR "/Arial_Black.ttf");
+fontRenderClass::~fontRenderClass()
+{
+	FTC_Manager_Done(cacheManager);
+	FT_Done_FreeType(library);
+}
 
-
+void fontRenderClass::InitFontCache()
+{
 	printf("[FONT] Intializing font cache...");
 	fflush(stdout);
 	if (FTC_Manager_New(library, 0, 0, 0, myFTC_Face_Requester, this, &cacheManager))
@@ -88,15 +91,7 @@ fontRenderClass::fontRenderClass(CLCDDisplay *fb)
 	{
 		printf(" imagecache failed!\n");
 	}
-  
 	printf("\n");
-	return;
-}
-
-fontRenderClass::~fontRenderClass()
-{
-	FTC_Manager_Done(cacheManager);
-	FT_Done_FreeType(library);
 }
 
 FT_Error fontRenderClass::FTC_Face_Requester(FTC_FaceID  face_id,

@@ -77,11 +77,13 @@ class fontRenderClass
 	FTC_Image_Cache	imageCache;          /* the glyph image cache           */
 	FTC_SBit_Cache	sbitsCache;          /* the glyph small bitmaps cache   */
 
-	int AddFont(const char *filename);
 	FTC_FaceID getFaceID(const char *family, const char *style);
 	FT_Error getGlyphBitmap(FTC_Image_Desc *font, FT_ULong glyph_index, FTC_SBit *sbit);
 
 	public:
+		int AddFont(const char *filename);
+		void InitFontCache();
+
 		FT_Error FTC_Face_Requester(FTC_FaceID  face_id,
                               FT_Face*    aface);
 
