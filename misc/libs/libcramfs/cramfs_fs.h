@@ -117,7 +117,6 @@ struct cramfs_super {
 #endif /* not __BYTE_ORDER */
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
-#warning  "__BYTE_ORDER == __LITTLE_ENDIAN"
 #define CRAMFS_16(x)	(x)
 #define CRAMFS_24(x)	(x)
 #define CRAMFS_32(x)	(x)
@@ -126,7 +125,6 @@ struct cramfs_super {
 #define CRAMFS_SET_OFFSET(x,y)	((x)->offset = (y))
 #define CRAMFS_SET_NAMELEN(x,y)	((x)->namelen = (y))
 #elif __BYTE_ORDER == __BIG_ENDIAN
-#warning "__BYTE_ORDER == __BIG_ENDIAN"
 #ifdef __KERNEL__
 #define CRAMFS_16(x)	swab16(x)
 #define CRAMFS_24(x)	((swab32(x)) >> 8)
