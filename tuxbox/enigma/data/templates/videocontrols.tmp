@@ -1,3 +1,6 @@
+<table border="1" cellpadding="5" cellspacing="0">
+<tr>
+<td>
 <table border="0" cellpadding="0" cellspacing="0">
 <tr>
 	<td><a href="javascript:vcontrol('rewind')"><img src="player_rew.png" border="0"></a></td>
@@ -14,7 +17,11 @@
 <br>
 <table border="0" cellpadding="0" cellspacing="0">
 <tr>
-	<td>#VIDEOBAR#</td>
+	<td align="center">#VIDEOBAR#</td>
+</tr>
+</table>
+<br>
+</td>
 </tr>
 </table>
 <br>
