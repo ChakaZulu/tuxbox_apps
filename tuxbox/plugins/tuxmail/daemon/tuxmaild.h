@@ -2,7 +2,13 @@
  *                       <<< TuxMailD - POP3 Daemon >>>
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
- * $LOG$
+ * $Log: tuxmaild.h,v $
+ * Revision 1.2  2003/04/29 10:36:43  lazyt
+ * enable/disable audio via .conf
+ *
+ *
+ * Revision 1.1  2003/04/21 09:24:52  lazyt
+ * add tuxmail, todo: sync (filelocking?) between daemon and plugin
  ******************************************************************************/
 
 #include <errno.h>
@@ -61,6 +67,7 @@ int startdelay, intervall;
 char online = 1;
 char pop3log;
 char logmode;
+char audio;
 int accounts;
 int sock;
 int messages, deleted_messages;

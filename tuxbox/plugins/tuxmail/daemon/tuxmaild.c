@@ -2,7 +2,13 @@
  *                       <<< TuxMailD - POP3 Daemon >>>
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
- * $LOG$
+ * $Log: tuxmaild.c,v $
+ * Revision 1.2  2003/04/29 10:36:43  lazyt
+ * enable/disable audio via .conf
+ *
+ *
+ * Revision 1.1  2003/04/21 09:24:52  lazyt
+ * add tuxmail, todo: sync (filelocking?) between daemon and plugin
  ******************************************************************************/
 
 #include "tuxmaild.h"
@@ -104,6 +110,7 @@ int ReadConf()
 			fprintf(fd_conf, "INTERVALL=15\n");
 			fprintf(fd_conf, "POP3LOG=Y\n");
 			fprintf(fd_conf, "LOGMODE=S\n");
+			fprintf(fd_conf, "AUDIO=Y\n");
 			fprintf(fd_conf, "HTTPCMD=http://127.0.0.1/cgi-bin/startPlugin?name=tuxmail.cfg\n");
 
 			fprintf(fd_conf, "NAME0=\n");
@@ -119,7 +126,7 @@ int ReadConf()
 	//clear database
 
 		memset(account_db, 0, sizeof(account_db));
-		startdelay = intervall = pop3log = logmode = http_command[0] = 0;
+		startdelay = intervall = pop3log = logmode = audio = http_command[0] = 0;
 
 	//fill database
 
@@ -132,6 +139,8 @@ int ReadConf()
 			else if((ptr = strstr(line_buffer, "POP3LOG="))) sscanf(ptr + 8, "%c", &pop3log);
 
 			else if((ptr = strstr(line_buffer, "LOGMODE="))) sscanf(ptr + 8, "%c", &logmode);
+
+			else if((ptr = strstr(line_buffer, "AUDIO="))) sscanf(ptr + 6, "%c", &audio);
 
 			else if((ptr = strstr(line_buffer, "HTTPCMD="))) sscanf(ptr + 8, "%s", http_command);
 
@@ -213,6 +222,12 @@ int ReadConf()
 		{
 			printf("TuxMailD <LOGMODE=%c invalid, set to \"S\">\n", logmode);
 			logmode = 'S';
+		}
+
+		if(audio != 'Y' && audio != 'N')
+		{
+			printf("TuxMailD <AUDIO=%c invalid, set to \"Y\">\n", audio);
+			audio = 'Y';
 		}
 
 		if(!http_command[0]) printf("TuxMailD <HTTPCMD empty, Notification disabled>\n");
@@ -716,10 +731,10 @@ void NotifyUser()
 	CURLcode res;
 	char errorbuffer[CURL_ERROR_SIZE];
 
+	if(audio == 'Y') PlaySound();
+
 	if(http_command[0])
 	{
-		PlaySound();
-
 		if((curl = curl_easy_init()))
 		{
 			curl_easy_setopt(curl, CURLOPT_URL, http_command);
@@ -762,7 +777,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.1 $", versioninfo[12];
+	char cvs_revision[] = "$Revision: 1.2 $", versioninfo[12];
 	int account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
