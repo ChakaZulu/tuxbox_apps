@@ -1,5 +1,5 @@
 /*
- * $Id: saa.c,v 1.11 2004/12/01 02:57:42 carjay Exp $
+ * $Id: saa.c,v 1.12 2004/12/01 03:04:49 carjay Exp $
  * 
  * Test tool for the SAA 7126H/7127H-driver
  *
@@ -39,8 +39,7 @@
 void help(char *prog_name) {
  	printf("Version %s\n",VERSION);
  	printf("Usage: %s <options>\n\n",prog_name);
- 	printf("       without options current status is printed\n"
-		"Switches:\n"
+ 	printf("Switches:\n"
 		"-h, --help            help\n"
 		"-o, --power-save <X>  power save mode\n"
 		"                      none get power save state\n"
