@@ -1,11 +1,14 @@
 /*
-$Id: version.h,v 1.3 2003/10/25 19:11:48 rasc Exp $
+$Id: version.h,v 1.4 2003/10/26 23:05:30 rasc Exp $
 
   dvbsnoop
   (c) rasc
 
 
 $Log: version.h,v $
+Revision 1.4  2003/10/26 23:05:30  rasc
+no message
+
 Revision 1.3  2003/10/25 19:11:48  rasc
 no message
 
@@ -26,5 +29,5 @@ no message
  * Version of dvbsnoop
  * */
 
-#define DVBSNOOP_VERSION  "1.1.0"
+#define DVBSNOOP_VERSION  "1.1.1a"
 
