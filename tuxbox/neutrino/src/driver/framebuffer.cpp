@@ -383,6 +383,34 @@ void CFrameBuffer::setBackgroundColor(int color)
 	backgroundColor = color;
 }
 
+bool CFrameBuffer::loadPicture2Mem(string filename, unsigned char* memp)
+{
+	short width, height;
+	unsigned char tr;
+	int fd;
+	filename = iconBasePath + filename;
+
+	fd = open(filename.c_str(), O_RDONLY );
+	
+	if (fd==-1)
+	{
+		printf("error while loading icon: %s", filename.c_str() );
+		return false;
+	}
+
+	read(fd, &width,  2 );
+	read(fd, &height, 2 );
+	read(fd, &tr, 1 );
+
+	width= ((width & 0xff00) >> 8) | ((width & 0x00ff) << 8);
+	height=((height & 0xff00) >> 8) | ((height & 0x00ff) << 8);
+
+	read(fd, memp, width*height);
+
+	close(fd);
+	return true;
+}
+
 bool CFrameBuffer::loadBackground(string filename, unsigned char col)
 {
 	if(background)

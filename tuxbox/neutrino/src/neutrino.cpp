@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.32 2001/09/17 18:36:56 fnbrd Exp $
+        $Id: neutrino.cpp,v 1.33 2001/09/17 23:57:50 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.33  2001/09/17 23:57:50  McClean
+  increase shutdown-logo-loadspeed
+
   Revision 1.32  2001/09/17 18:36:56  fnbrd
   Fixed use of unwanted globals ;)
 
@@ -986,7 +989,9 @@ void CNeutrinoApp::ExitRun()
 		g_FrameBuffer->paletteSetColor(x, 0x000000, 0xffff);
 
 	g_FrameBuffer->paletteSet();
-	g_FrameBuffer->paintIcon8("shutdown.raw",0,0);
+
+	g_FrameBuffer->loadPicture2Mem("shutdown.raw", g_FrameBuffer->lfb );
+//	g_FrameBuffer->paintIcon8("shutdown.raw",0,0);
 	g_FrameBuffer->loadPal("shutdown.pal");
 
 	g_Controld->shutdown();

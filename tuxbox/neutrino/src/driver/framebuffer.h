@@ -77,6 +77,7 @@ class CFrameBuffer
 		void loadPal(string filename, unsigned char offset=0, unsigned char endidx=255 );
 		void setIconBasePath(string);
 
+		bool CFrameBuffer::loadPicture2Mem(string filename, unsigned char* memp);
 
 		void setBackgroundColor(int color);
 		bool loadBackground(string filename, unsigned char col = 0);
