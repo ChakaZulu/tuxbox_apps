@@ -11,6 +11,7 @@ mainmenu.tvmode TV-modus
 mainmenu.radiomode Radio-modus
 mainmenu.scartmode Scart-modus
 mainmenu.games Hry
+mainmenu.mp3player unset
 mainmenu.sleeptimer SleepTimer
 mainmenu.shutdown vypnut dbox
 mainmenu.settings nastavenia
@@ -626,3 +627,8 @@ fontmenu.infobar unset
 colormenu.gtx_alpha unset
 gtxalpha.alpha1 tr1
 gtxalpha.alpha2 tr2
+
+mp3player.name Mp3
+mp3player.play unset
+mp3player.add unset
+mp3player.delete unset

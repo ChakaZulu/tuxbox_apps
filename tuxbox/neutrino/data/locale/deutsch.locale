@@ -11,6 +11,7 @@ mainmenu.tvmode TV-Modus
 mainmenu.radiomode Radio-Modus
 mainmenu.scartmode Scart-Eingang
 mainmenu.games Spiele
+mainmenu.mp3player MP3 Player
 mainmenu.sleeptimer SleepTimer
 mainmenu.shutdown Ausschalten
 mainmenu.settings Einstellungen
@@ -632,3 +633,9 @@ fontmenu.gamelist Gameliste
 colormenu.gtx_alpha Transparenz (GTX)
 gtxalpha.alpha1 Alpha 1
 gtxalpha.alpha2 Alpha 2
+
+mp3player.name Mp3 Player
+mp3player.play abspielen
+mp3player.add hinzufuegen
+mp3player.delete loeschen
+mp3player.stop stop

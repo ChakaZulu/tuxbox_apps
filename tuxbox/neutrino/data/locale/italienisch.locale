@@ -11,6 +11,7 @@ mainmenu.tvmode Modo-TV
 mainmenu.radiomode Modo-Radio
 mainmenu.scartmode Entrata Scart
 mainmenu.games Giochi
+mainmenu.mp3player unset
 mainmenu.sleeptimer SleepTimer
 mainmenu.shutdown Spegnere
 mainmenu.settings Impostazioni
@@ -625,3 +626,8 @@ fontmenu.infobar unset
 colormenu.gtx_alpha unset
 gtxalpha.alpha1 tr1
 gtxalpha.alpha2 tr2
+
+mp3player.name Mp3
+mp3player.play unset
+mp3player.add unset
+mp3player.delete unset

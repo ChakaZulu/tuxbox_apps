@@ -11,6 +11,7 @@ mainmenu.tvmode '|'\/-/\/\*|]3
 mainmenu.radiomode |24|]¡0-/\/\0|]3
 mainmenu.scartmode 5[4|2+-/\/\0|]3
 mainmenu.games @4/\/\3$
+mainmenu.mp3player unset
 mainmenu.sleeptimer $133p7!/\/\3|2
 mainmenu.shutdown 5|-|µ7|)*\/\//\/
 mainmenu.settings $3'|''|'¡/\/6$
@@ -626,3 +627,8 @@ fontmenu.infobar unset
 colormenu.gtx_alpha unset
 gtxalpha.alpha1 unset
 gtxalpha.alpha2 unset
+
+mp3player.name Mp3
+mp3player.play unset
+mp3player.add unset
+mp3player.delete unset
