@@ -3,13 +3,18 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+
+#include "fp.h"
 #include "lcd-ks0713.h"
 
 #include <core/base/esize.h>
 #include <core/system/init.h>
 #include <core/gdi/glcddc.h>
+#include <core/system/econfig.h>
 
 eLCD *eLCD::primary;
+
+eDBoxLCD *eDBoxLCD::instance;
 
 eLCD::eLCD(eSize size): res(size)
 {
@@ -77,19 +82,63 @@ eDBoxLCD::eDBoxLCD(): eLCD(eSize(120, 64))
 #else
 	lcdfd=-1;
 #endif
+	instance=this;
+
 	if (lcdfd<0)
 		eDebug("couldn't open LCD - load lcd.o!");
 	else
 	{
 		int i=LCD_MODE_BIN;
 		ioctl(lcdfd, LCD_IOCTL_ASC_MODE, &i);
+		int lcdbrightness=0, lcdcontrast=0;
+		eConfig::getInstance()->getKey("/ezap/lcd/brightness", lcdbrightness);
+		eConfig::getInstance()->getKey("/ezap/lcd/contrast", lcdcontrast);
+
+		if(!lcdbrightness)
+		{
+			lcdbrightness=130;
+			eConfig::getInstance()->setKey("/ezap/lcd/brightness", lcdbrightness);
+		}
+		if(!lcdcontrast)
+		{
+			lcdcontrast=13;
+			eConfig::getInstance()->setKey("/ezap/lcd/contrast", lcdcontrast);
+		}
+		setLCDParameter(lcdbrightness, lcdcontrast);
 	}
+}
+
+int eDBoxLCD::setLCDParameter(int brightness, int contrast)
+{
+	int fp;
+	if((fp=open("/dev/dbox/fp0", O_RDWR))<=0)
+	{
+		eDebug("[LCD] can't open /dev/dbox/fp0");
+		return(-1);
+	}
+
+	if(ioctl(lcdfd, LCD_IOCTL_SRV, &contrast))
+	{
+		eDebug("[LCD] can't set lcd contrast");
+	}
+
+	if(ioctl(fp, FP_IOCTL_LCD_DIMM, &brightness))
+	{
+		eDebug("[LCD] can't set lcd brightness");
+	}
+	eDebug("[LCD] set brightness %d, contrast %d", brightness, contrast);
+	return(0);
 }
 
 eDBoxLCD::~eDBoxLCD()
 {
 	if (lcdfd>0)
 		close(lcdfd);
+}
+
+eDBoxLCD *eDBoxLCD::getInstance()
+{
+	return instance;
 }
 
 void eDBoxLCD::update()

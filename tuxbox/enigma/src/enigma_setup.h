@@ -14,6 +14,8 @@ private:
 	void sel_language();
 	void sel_skin();
 	void sel_osd();
+	void sel_lcd();
+	
 public:
 	eZapSetup();
 	~eZapSetup();

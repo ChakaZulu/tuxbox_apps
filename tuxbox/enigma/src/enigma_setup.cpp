@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_setup.cpp,v 1.17 2002/07/02 00:19:33 Ghostrider Exp $
+ * $Id: enigma_setup.cpp,v 1.18 2002/07/16 15:47:10 trh Exp $
  */
 
 #include "enigma_setup.h"
@@ -27,6 +27,7 @@
 #include <apps/enigma/setupvideo.h>
 #include <apps/enigma/setup_language.h>
 #include <apps/enigma/setup_osd.h>
+#include <apps/enigma/setup_lcd.h>
 #include <apps/enigma/enigma_scan.h>
 #include <apps/enigma/setupskin.h>
 #include <core/gui/emessage.h>
@@ -44,6 +45,7 @@ eZapSetup::eZapSetup()
 	CONNECT((new eListBoxEntryMenu(&list, _("Network...")))->selected, eZapSetup::sel_network);
 //	CONNECT((list, _("Audio...")))->selected, sel_sound);
 	CONNECT((new eListBoxEntryMenu(&list, _("OSD...")))->selected, eZapSetup::sel_osd);
+	CONNECT((new eListBoxEntryMenu(&list, _("LCD...")))->selected, eZapSetup::sel_lcd);
 	CONNECT((new eListBoxEntryMenu(&list, _("Video...")))->selected, eZapSetup::sel_video);
 	CONNECT((new eListBoxEntryMenu(&list, _("Skin...")))->selected, eZapSetup::sel_skin);
 	CONNECT((new eListBoxEntryMenu(&list, _("Language...")))->selected, eZapSetup::sel_language);
@@ -88,6 +90,17 @@ void eZapSetup::sel_osd()
 {
 	hide();
 	eZapOsdSetup setup;
+	setup.setLCD(LCDTitle, LCDElement);
+	setup.show();
+	setup.exec();
+	setup.hide();
+	show();
+}
+
+void eZapSetup::sel_lcd()
+{
+	hide();
+	eZapLCDSetup setup;
 	setup.setLCD(LCDTitle, LCDElement);
 	setup.show();
 	setup.exec();

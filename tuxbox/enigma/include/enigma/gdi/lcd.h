@@ -5,6 +5,11 @@
 #include <core/base/esize.h>
 #include <core/base/erect.h>
 
+#define LCD_CONTRAST_MIN 0
+#define LCD_CONTRAST_MAX 63
+#define LCD_BRIGHTNESS_MIN 0
+#define LCD_BRIGHTNESS_MAX 255
+
 class eLCD
 {
 protected:
@@ -31,7 +36,10 @@ public:
 
 class eDBoxLCD: public eLCD
 {
+	static eDBoxLCD *instance;
 public:
+	static eDBoxLCD *getInstance();
+	int setLCDParameter(int brightness, int contrast);
 	eDBoxLCD();
 	~eDBoxLCD();
 	void update();
