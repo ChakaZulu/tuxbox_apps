@@ -974,8 +974,10 @@ static eString getLeftNavi(eString mode, bool javascript)
 #ifdef ENABLE_DYN_CONF
 		result += button(110, "Swap File", LEFTNAVICOLOR, pre + "?mode=configSwapFile" + post);
 		result += "<br>";
+#if
 		result += button(110, "Multi-Boot", LEFTNAVICOLOR, pre + "?mode=configMultiBoot" + post);
 		result += "<br>";
+#endif
 		result += button(110, "Settings", LEFTNAVICOLOR, pre + "?mode=configSettings" + post);
 		result += "<br>";
 #endif
@@ -1274,7 +1276,7 @@ static eString getVideoBar()
 	for (int i = 1; i <= 10; i++)
 	{
 		result << "<td width=\"15\" height=\"8\">"
-			"<a href=\"javascript:setVol(" << i << ")\">";
+			"<a href=\"javascript:setVid(" << i << ")\">";
 		if (i <= videopos)
 			result << "<img src=\"led_on.gif\" border=\"0\" width=\"15\" height=\"8\">";
 		else
