@@ -3,6 +3,10 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.8  2004/07/10 11:38:15  lazyt
+ * use -DOLDFT for older FreeType versions
+ * replaced all remove() with unlink()
+ *
  * Revision 1.7  2004/06/29 16:33:10  lazyt
  * fix commandline interface
  *
@@ -985,7 +989,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.7 $", versioninfo[12];
+	char cvs_revision[] = "$Revision: 1.8 $", versioninfo[12];
 	int account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
@@ -1131,7 +1135,7 @@ int main(int argc, char **argv)
 		    system("cp /tmp/tuxmail.[0-9] /var/tuxbox/config/tuxmail 2>/dev/null");
 		}
 		
-		remove(PIDFILE);
+		unlink(PIDFILE);
 
 		time(&tt);
 		strftime(timeinfo, 22, "%d.%m.%Y - %T", localtime(&tt));

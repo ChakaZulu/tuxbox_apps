@@ -3,6 +3,10 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.9  2004/07/10 11:38:14  lazyt
+ * use -DOLDFT for older FreeType versions
+ * replaced all remove() with unlink()
+ *
  * Revision 1.8  2004/04/24 22:24:23  carjay
  * fix compiler warnings
  *
@@ -847,7 +851,7 @@ int Add2SpamList(int account, int mailindex)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.8 $", versioninfo[12];
+	char cvs_revision[] = "$Revision: 1.9 $", versioninfo[12];
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
@@ -942,8 +946,11 @@ void plugin_exec(PluginParam *par)
 		use_kerning = FT_HAS_KERNING(face);
 
 		desc.font.face_id = FONT;
+#ifdef OLDFT
+		desc.type = ftc_image_mono;
+#else
 		desc.flags = FT_LOAD_MONOCHROME;
-
+#endif
 	//init backbuffer
 
 		if(!(lbb = malloc(var_screeninfo.xres*var_screeninfo.yres)))
@@ -1201,7 +1208,7 @@ void plugin_exec(PluginParam *par)
 				case RC_STANDBY:if((fd_run = fopen(RUNFILE, "r")))
 						{
 							fclose(fd_run);
-							remove(RUNFILE);
+							unlink(RUNFILE);
 							ShowMessage(BOOTOFF);
 						}
 						else

@@ -3,6 +3,10 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.h,v $
+ * Revision 1.5  2004/07/10 11:38:14  lazyt
+ * use -DOLDFT for older FreeType versions
+ * replaced all remove() with unlink()
+ *
  * Revision 1.4  2004/06/23 11:05:04  obi
  * compile fix
  *
@@ -121,7 +125,11 @@ FT_Library		library;
 FTC_Manager		manager;
 FTC_SBitCache		cache;
 FTC_SBit		sbit;
+#ifdef OLDFT
+FTC_ImageDesc		desc;
+#else
 FTC_ImageTypeRec	desc;
+#endif
 FT_Face			face;
 FT_UInt			prev_glyphindex;
 FT_Bool			use_kerning;
