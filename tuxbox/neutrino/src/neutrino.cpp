@@ -1041,6 +1041,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 	{
 		settings.addItem( new CMenuSeparator() );
 		settings.addItem( new CMenuForwarder("menu.back") );
+		settings.addItem( new CMenuForwarder("mainsettings.savesettingsnow", true, "", this, "savesettings") );
 		settings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
 		CZapitClient::SatelliteList satList;
@@ -1070,7 +1071,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		{
 			CMenuOptionChooser* oj = new CMenuOptionChooser( satList[i].satName, scanSettings.diseqscOfSat( satList[i].satName), true/*, new CSatelliteNotifier*/);
 			oj->addOption( -1, "options.off");
-			for( int j=0; j<scanSettings.satCount; j++)
+			for( int j=0; j<satList.size(); j++)
 			{
 				char jj[2 + 1];
 				sprintf( jj, "%d", j + 1);
@@ -1082,6 +1083,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		CMenuWidget* extMotorSettings = new CMenuWidget("satsetup.extended_motor", "settings.raw");
 		extMotorSettings->addItem( new CMenuSeparator() );
 		extMotorSettings->addItem( new CMenuForwarder("menu.back") );
+		extMotorSettings->addItem( new CMenuForwarder("satsetup.savesettingsnow", true, "", this, "savesettings") );
 		extMotorSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 		
 		CMenuForwarder* ojExtMotorSettings = new CMenuForwarder("satsetup.extended_motor", (scanSettings.diseqcMode == DISEQC_1_2), "", extMotorSettings);
@@ -1089,7 +1091,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		{
 			CMenuOptionChooser* oj = new CMenuOptionChooser( satList[i].satName, scanSettings.motorPosOfSat( satList[i].satName), true/*, new CSatelliteNotifier*/);
 			oj->addOption( -1, "options.off");
-			for( int j=0; j<scanSettings.satCount; j++)
+			for( int j=0; j<satList.size(); j++)
 			{
 				char jj[2 + 1];
 				sprintf( jj, "%d", j + 1);
@@ -1111,7 +1113,6 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		settings.addItem( ojSat);
 		settings.addItem( ojDiseqcRepeats );
 		settings.addItem( ojExtSatSettings);
-		//settings.addItem( ojExtLnbSettings);
 		//settings.addItem( ojExtMotorSettings);
 
 	}
@@ -3402,7 +3403,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.443 2003/05/13 07:03:06 digi_casi Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.444 2003/05/14 08:57:51 digi_casi Exp $\n\n");
 
 	tzset();
 	initGlobals();

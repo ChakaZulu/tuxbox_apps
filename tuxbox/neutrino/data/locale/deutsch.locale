@@ -39,9 +39,10 @@ satsetup.diseqc11 DiSEqC 1.1
 satsetup.diseqc12 DiSEqC 1.2
 satsetup.smatvremote SMATV Remote Tuning
 satsetup.diseqcrepeat DiSEqC-Wiederholungen
+satsetup.savesettingsnow Einstellungen jetzt speichern
 
 mainsettings.head Einstellungen
-mainsettings.savesettingsnow Einstellung jetzt speichern
+mainsettings.savesettingsnow Einstellungen jetzt speichern
 mainsettings.language Sprache
 mainsettings.audio Audio
 mainsettings.video Video
@@ -339,7 +340,7 @@ scants.bouquet_leave nicht ändern
 scants.bouquet_create neu erstellen
 scants.bouquet_erase löschen
 scants.failed Kanalsuche fehlgeschlagen!
-scants.finished Kanalsuche erfolgreich beendet!
+scants.finished Kanalsuche erfolgreich beendet! 
 
 flashupdate.head Aktualisierung
 flashupdate.action Aktion:
