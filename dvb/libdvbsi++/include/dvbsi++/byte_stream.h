@@ -1,5 +1,5 @@
 /*
- * $Id: byte_stream.h,v 1.2 2004/02/14 21:57:43 obi Exp $
+ * $Id: byte_stream.h,v 1.3 2004/02/16 20:50:06 obi Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -25,23 +25,23 @@
 #include "compat.h"
 
 #if __BYTE_ORDER == __BIG_ENDIAN
-#define r16(p)		*(const uint16_t * const)(p)
-#define r32(p)		*(const uint32_t * const)(p)
-#define r64(p)		*(const uint64_t * const)(p)
-#define w16(p,v)	*(uint16_t * const)(p) = ((const uint16_t)v)
-#define w32(p,v)	*(uint32_t * const)(p) = ((const uint32_t)v)
-#define w64(p,v)	*(uint64_t * const)(p) = ((const uint64_t)v)
+#define r16(p)		(*(const uint16_t * const)(p))
+#define r32(p)		(*(const uint32_t * const)(p))
+#define r64(p)		(*(const uint64_t * const)(p))
+#define w16(p,v)	do { *(uint16_t * const)(p) = ((const uint16_t)v) } while (0)
+#define w32(p,v)	do { *(uint32_t * const)(p) = ((const uint32_t)v) } while (0)
+#define w64(p,v)	do { *(uint64_t * const)(p) = ((const uint64_t)v) } while (0)
 #else
 #define r16(p)		bswap_16(*(const uint16_t * const)p)
 #define r32(p)		bswap_32(*(const uint32_t * const)p)
 #define r64(p)		bswap_64(*(const uint64_t * const)p)
-#define w16(p,v)	*(uint16_t * const)(p) = bswap_16((const uint16_t)v)
-#define w32(p,v)	*(uint32_t * const)(p) = bswap_32((const uint32_t)v)
-#define w64(p,v)	*(uint64_t * const)(p) = bswap_64((const uint64_t)v)
+#define w16(p,v)	do { *(uint16_t * const)(p) = bswap_16((const uint16_t)v) } while (0)
+#define w32(p,v)	do { *(uint32_t * const)(p) = bswap_32((const uint32_t)v) } while (0)
+#define w64(p,v)	do { *(uint64_t * const)(p) = bswap_64((const uint64_t)v) } while (0)
 #endif
 
-#define DVB_LENGTH(p)	r16(p) & 0xffff
-#define DVB_PID(p)	r16(p) & 0x1fff
+#define DVB_LENGTH(p)	(r16(p) & 0x0fff)
+#define DVB_PID(p)	(r16(p) & 0x1fff)
 
 // deprecated
 #define UINT16(p)	r16(p)
