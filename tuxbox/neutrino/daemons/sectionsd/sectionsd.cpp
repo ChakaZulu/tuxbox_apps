@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.154 2003/02/24 14:39:28 thegoodguy Exp $
+//  $Id: sectionsd.cpp,v 1.155 2003/02/24 21:16:56 thegoodguy Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -86,7 +86,7 @@
 
 
 // Timeout bei tcp/ip connections in ms
-#define TIMEOUT_CONNECTIONS 2000
+#define READ_TIMEOUT_IN_SECONDS  2
 #define WRITE_TIMEOUT_IN_SECONDS 2
 
 // Gibt die Anzahl Timeouts an, nach der die Verbindung zum DMX neu gestartet wird (wegen evtl. buffer overflow)
@@ -450,76 +450,21 @@ static void addService(const SIservice &s)
 	mySIservicesOrderServiceName.insert(std::make_pair(sptr, sptr));
 }
 
-//------------------------------------------------------------
-// other stuff
-//------------------------------------------------------------
+/*
+ *
+ * communication with sectionsdclient:
+ *
+ */
 
-// Liest n Bytes aus einem Socket per read
-// Liefert 0 bei timeout
-// und -1 bei Fehler
-// ansonsten die Anzahl gelesener Bytes
-/* inline */
-int readNbytes(int fd, char *buf, const size_t n, unsigned timeoutInMSeconds)
+inline bool readNbytes(int fd, char *buf, const size_t numberOfBytes, const time_t timeoutInSeconds)
 {
-	size_t j;
-
-	//	timeoutInSeconds*; // in Millisekunden aendern
-
-	for (j = 0; j < n;)
-	{
-
-		struct pollfd ufds;
-		ufds.fd = fd;
-		ufds.events = POLLIN;
-		ufds.revents = 0;
-		int rc = poll(&ufds, 1, timeoutInMSeconds);
-
-		if (!rc)
-			return 0; // timeout
-		else if (rc < 0 && errno == EINTR)
-			continue; // interuppted
-		else if (rc < 0)
-		{
-			perror ("[sectionsd] poll");
-			//printf("errno: %d\n", errno);
-			return -1;
-		}
-
-		if (!(ufds.revents&POLLIN))
-		{
-			// POLLHUP, beim dmx bedeutet das DMXDEV_STATE_TIMEDOUT
-			// kommt wenn ein Timeout im Filter gesetzt wurde
-			// dprintf("revents: 0x%hx\n", ufds.revents);
-
-			usleep(100*1000UL); // wir warten 100 Millisekunden bevor wir es nochmal probieren
-
-			if (timeoutInMSeconds <= 200000)
-				return 0; // timeout
-
-			timeoutInMSeconds -= 200000;
-
-			continue;
-		}
-
-		int r = read (fd, buf, n - j);
-
-		if (r > 0)
-		{
-			j += r;
-			buf += r;
-		}
-		else if (r <= 0 && errno != EINTR)
-		{
-			//printf("errno: %d\n", errno);
-			perror ("[sectionsd] read");
-			return -1;
-		}
-	}
-
-	return j;
+	timeval timeout;
+	timeout.tv_sec  = timeoutInSeconds;
+	timeout.tv_usec = 0;
+	return receive_data(fd, buf, numberOfBytes, timeout);
 }
 
-inline bool writeNbytes(int fd,  const char *buf,  const size_t numberOfBytes, const time_t timeoutInSeconds)
+inline bool writeNbytes(int fd, const char *buf,  const size_t numberOfBytes, const time_t timeoutInSeconds)
 {
 	timeval timeout;
 	timeout.tv_sec  = timeoutInSeconds;
@@ -1105,7 +1050,7 @@ static void commandDumpStatusInformation(int connfd, char *data, const unsigned 
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.154 2003/02/24 14:39:28 thegoodguy Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.155 2003/02/24 21:16:56 thegoodguy Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -2592,20 +2537,14 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	{
 		dprintf("Connection from UDS\n");
 
-		if (fcntl(connfd, F_SETFL, O_NONBLOCK))
-		{
-			perror ("[sectionsd] fcntl");
-			return 0;
-		}
-
 		struct sectionsd::msgRequestHeader header;
 
 		memcpy(&header, &rmsg, sizeof(CBasicMessage::Header));
 		memset(((char *)&header) + sizeof(CBasicMessage::Header), 0, sizeof(header) - sizeof(CBasicMessage::Header));
 
-		int readbytes = readNbytes(connfd, ((char *)&header) + sizeof(CBasicMessage::Header), sizeof(header) - sizeof(CBasicMessage::Header), TIMEOUT_CONNECTIONS);
+		bool readbytes = readNbytes(connfd, ((char *)&header) + sizeof(CBasicMessage::Header), sizeof(header) - sizeof(CBasicMessage::Header), READ_TIMEOUT_IN_SECONDS);
 
-		if (readbytes > 0)
+		if (readbytes == true)
 		{
 			dprintf("version: %hhd, cmd: %hhd, numbytes: %d\n", header.version, header.command, readbytes);
 
@@ -2618,12 +2557,12 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 					fprintf(stderr, "low on memory!\n");
 				else
 				{
-					int rc = 1;
+					bool rc = true;
 
 					if (header.dataLength)
-						rc = readNbytes(connfd, data, header.dataLength, TIMEOUT_CONNECTIONS);
+						rc = readNbytes(connfd, data, header.dataLength, READ_TIMEOUT_IN_SECONDS);
 
-					if (rc > 0)
+					if (rc == true)
 					{
 						dprintf("Starting command %hhd\n", header.command);
 						connectionCommands[header.command](connfd, data, header.dataLength);
@@ -3717,7 +3656,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.154 2003/02/24 14:39:28 thegoodguy Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.155 2003/02/24 21:16:56 thegoodguy Exp $\n");
 
 	try
 	{
