@@ -642,7 +642,7 @@ void CPictureViewerGui::view(unsigned int index, bool unscaled)
 	CLCD::getInstance()->showMenuText(1, timestring);
 	
 	if(m_state == MENU)
-		frameBuffer->setMode(720,576,16);
+		frameBuffer->setMode(720, 576, 16);
 	if(unscaled)
 		m_viewer->DecodeImage(playlist[index].Filename, true, unscaled);
 	m_viewer->ShowImage(playlist[index].Filename, unscaled);
@@ -663,7 +663,7 @@ void CPictureViewerGui::endView()
 {
 	if(m_state != MENU)
 	{
-		frameBuffer->setMode(720,576,8);
+		frameBuffer->setMode(720, 576, 8 * sizeof(fb_pixel_t));
 		frameBuffer->ClearFrameBuffer();
 		m_state=MENU;
 	}

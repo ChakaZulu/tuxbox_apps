@@ -384,7 +384,7 @@ void CPictureViewer::showBusy(int sx, int sy, int width, char r, char g, char b)
 		return;
 	}
 	busy_buffer_wrk = m_busy_buffer;
-	unsigned char* fb = CFrameBuffer::getInstance()->getFrameBufferPointer();
+	unsigned char * fb = (unsigned char *)CFrameBuffer::getInstance()->getFrameBufferPointer();
 	unsigned int stride = CFrameBuffer::getInstance()->getStride();
 
 	for(int y=sy ; y < sy+width; y++)
@@ -408,7 +408,7 @@ void CPictureViewer::hideBusy()
 //	dbout("Hide Busy{\n");
 	if(m_busy_buffer!=NULL)
 	{
-		unsigned char* fb = CFrameBuffer::getInstance()->getFrameBufferPointer();
+		unsigned char * fb = (unsigned char *)CFrameBuffer::getInstance()->getFrameBufferPointer();
 		unsigned int stride = CFrameBuffer::getInstance()->getStride();
 		unsigned char* busy_buffer_wrk = m_busy_buffer;
 

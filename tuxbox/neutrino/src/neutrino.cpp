@@ -1105,7 +1105,7 @@ void CNeutrinoApp::CmdParser(int argc, char **argv)
 void CNeutrinoApp::SetupFrameBuffer()
 {
 	frameBuffer->init();
-	if(frameBuffer->setMode(720, 576, 8))
+	if(frameBuffer->setMode(720, 576, 8 * sizeof(fb_pixel_t)))
 	{
 		dprintf(DEBUG_NORMAL, "Error while setting framebuffer mode\n");
 		exit(-1);
@@ -3430,11 +3430,11 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 	int x = (((g_settings.screen_EndX- g_settings.screen_StartX)- dx) / 2) + g_settings.screen_StartX;
 	int y = g_settings.screen_EndY- 100;
 
-	unsigned char* pixbuf = NULL;
+	fb_pixel_t * pixbuf = NULL;
 
 	if(bDoPaint)
 	{
-		pixbuf= new unsigned char[ dx * dy ];
+		pixbuf = new fb_pixel_t[dx * dy];
 		if(pixbuf!= NULL)
 			frameBuffer->SaveScreen(x, y, dx, dy, pixbuf);
 		frameBuffer->paintIcon("volume.raw",x,y, COL_INFOBAR);

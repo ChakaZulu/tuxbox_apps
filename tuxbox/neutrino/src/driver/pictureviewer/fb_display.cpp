@@ -67,7 +67,7 @@ void fb_display(unsigned char *rgbbuff, int x_size, int y_size, int x_pan, int y
     /* read current video mode */
     var = CFrameBuffer::getInstance()->getScreenInfo();
 
-    lfb = CFrameBuffer::getInstance()->getFrameBufferPointer();
+    lfb = (unsigned char *)CFrameBuffer::getInstance()->getFrameBufferPointer();
 
     /* correct panning */
     if(x_pan > x_size - (int)var->xres) x_pan = 0;
