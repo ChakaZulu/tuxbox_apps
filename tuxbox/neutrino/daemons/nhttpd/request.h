@@ -1,9 +1,9 @@
 /*      
-        webserver  -   DBoxII-Project
+        nhttpd  -  DBoxII-Project
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: request.h,v 1.23 2003/02/21 19:23:49 dirch Exp $
+        $Id: request.h,v 1.24 2003/03/14 07:20:01 obi Exp $
 
         License: GPL
 
@@ -24,118 +24,110 @@
 */
 
 
-#ifndef __webserver_request__
-#define __webserver_request__
-
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/in_systm.h>
-#include <netinet/ip.h>
-#include <netdb.h>
-#include <config.h>
+#ifndef __nhttpd_request_h__
+#define __nhttpd_request_h__
 
 #include <string>
 #include <map>
 
 #include "webserver.h"
 
+typedef std::map<std::string, std::string> CStringList;
 
-using namespace std;
-
-typedef map<string,string> CStringList;
-
-
-enum Method_Typ {M_UNKNOWN=0,M_POST = 1,M_GET = 2,M_PUT = 3,M_HEAD = 4};
-
+enum Method_Typ
+{
+	M_UNKNOWN = 0,
+	M_POST = 1,
+	M_GET = 2,
+	M_PUT = 3,
+	M_HEAD = 4
+};
 
 class CWebserverRequest
 {
-
-private:
+protected:
 	bool RequestCanceled;
-	string rawbuffer;
+	std::string rawbuffer;
 	int rawbuffer_len;
 	char *outbuf;
-	string Boundary;
+	std::string Boundary;
 	
 	long tmplong;
 	int tmpint;
-	string tmpstring;
+	std::string tmpstring;
 
-	bool CheckAuth();
-	string GetContentType(string ext);
-	string GetFileName(string path, string filename);
+	bool CheckAuth(void);
+	std::string GetContentType(std::string ext);
+	std::string GetFileName(std::string path, std::string filename);
 	void SplitParameter(char *param_str);
-	void RewriteURL();
-	int OpenFile(string path, string filename);
-
+	void RewriteURL(void);
+	int OpenFile(std::string path, std::string filename);
 
 public:
-	string			Client_Addr;
-	int				Socket;
-	unsigned long	RequestNumber;
+	std::string Client_Addr;
+	int Socket;
+	unsigned long RequestNumber;
 
-	void printf ( const char *fmt, ... );
+	void printf(const char *fmt, ...);
 
-	bool SocketWrite( char const * text);
-	bool SocketWriteLn( char const * text);
-	bool SocketWriteData( char const * data, long length );
-	bool SocketWrite(const string text){return SocketWrite( text.c_str());}
-	bool SocketWriteLn(const string text){return SocketWriteLn( text.c_str());}
-	bool SendFile(const string path,const string filename);
+	bool SocketWrite(char const *text);
+	bool SocketWriteLn(char const *text);
+	bool SocketWriteData(char const *data, long length);
+	bool SocketWrite(const std::string text) { return SocketWrite(text.c_str()); }
+	bool SocketWriteLn(const std::string text) { return SocketWriteLn(text.c_str()); }
+	bool SendFile(const std::string path, const std::string filename);
 
-	void SendHTMLFooter();
-	void SendHTMLHeader(string Titel);
-	void SendPlainHeader(string contenttype = "text/plain");
+	void SendHTMLFooter(void);
+	void SendHTMLHeader(std::string Titel);
+	void SendPlainHeader(std::string contenttype = "text/plain");
 	void Send302(char const *URI);
-	void Send404Error();
-	void Send500Error();
+	void Send404Error(void);
+	void Send500Error(void);
 
-	bool Authenticate();
+	bool Authenticate(void);
 
-	long ParseBuffer(char *file_buffer, long file_length, char *out_buffer, long out_buffer_size,CStringList &params);
-	bool ParseFile(const string filename, CStringList &params);
+	long ParseBuffer(char *file_buffer, long file_length, char *out_buffer, long out_buffer_size, CStringList &params);
+	bool ParseFile(const std::string filename, CStringList &params);
 
-//	bool ParseFile2(const string filename, const CStringList params);
-//	string ParseLine(const string line,const CStringList params);
+	//bool ParseFile2(const std::string filename, const CStringList params);
+	//std::string ParseLine(const std::string line,const CStringList params);
 
 	int Method;
 	int HttpStatus;
 
-	string Host;
-	string URL;
-	string Path;
-	string Filename;
-	string FileExt;
-	string Param_String;
+	std::string Host;
+	std::string URL;
+	std::string Path;
+	std::string Filename;
+	std::string FileExt;
+	std::string Param_String;
 
 	CStringList ParameterList;
 	CStringList HeaderList;
 	
-	map<int,string> boundaries;
+	std::map<int, std::string> boundaries;
 
-	class CWebserver * Parent;
+	class CWebserver *Parent;
 
 	CWebserverRequest(CWebserver *server);
-	~CWebserverRequest();
+	~CWebserverRequest(void);
 
-	bool GetRawRequest();
-	bool ParseRequest();
-	bool ParseParams(string param_string);
-	bool ParseFirstLine(string zeile);
-	bool ParseHeader(string header);
-	bool ParseBoundaries(string bounds);
-	void URLDecode(string &encodedString);
-	bool HandleUpload();
-	bool HandleUpload(char * Name);
-	void PrintRequest();
-	bool SendResponse();
-	bool EndRequest();
-	void SendOk();
-	void SendError();
+	bool GetRawRequest(void);
+	bool ParseRequest(void);
+	bool ParseParams(std::string param_string);
+	bool ParseFirstLine(std::string zeile);
+	bool ParseHeader(std::string header);
+	bool ParseBoundaries(std::string bounds);
+	void URLDecode(std::string &encodedString);
+	bool HandleUpload(void);
+	bool HandleUpload(char *Name);
+	void PrintRequest(void);
+	bool SendResponse(void);
+	bool EndRequest(void);
+	void SendOk(void);
+	void SendError(void);
 
 	friend class TWebDbox;
 };
-#endif
+
+#endif /* __nhttpd_request_h__ */

@@ -1,9 +1,9 @@
 /*
-	webserver  -   DBoxII-Project
+	nhttpd  -  DBoxII-Project
 
 	Copyright (C) 2001/2002 Dirk Szymanski
 
-	$Id: webserver.cpp,v 1.25 2003/03/07 22:06:04 thegoodguy Exp $
+	$Id: webserver.cpp,v 1.26 2003/03/14 07:20:02 obi Exp $
 
 	License: GPL
 
@@ -24,14 +24,21 @@
 
 */
 
+// c++
+#include <cerrno>
 
-#include <netinet/in.h> 
-#include <netinet/tcp.h>
+// system
 #include <arpa/inet.h>
+#include <netinet/tcp.h>
 #include <sys/socket.h> 
-#include <sys/wait.h> 
-#include <errno.h> 
+#include <sys/types.h>
+#include <unistd.h>
 
+// tuxbox
+#include <config.h>
+#include <configfile.h>
+
+// nhttpd
 #include "webserver.h"
 #include "request.h"
 #include "webdbox.h"
@@ -39,24 +46,23 @@
 
 #define NHTTPD_CONFIGFILE CONFIGDIR "/nhttpd.conf"
 
-
 struct Cmyconn
 {
-	socklen_t			clilen;
-	string				Client_Addr;
-	int				Socket;
-	CWebserver			*Parent;	
+	socklen_t	clilen;
+	string		Client_Addr;
+	int		Socket;
+	CWebserver	*Parent;	
 };
 
-pthread_mutex_t ServerData_mutex;
-unsigned long Requests = 0;
-int ThreadsCount = 0;
+static pthread_mutex_t ServerData_mutex;
+static unsigned long Requests = 0;
 
 //-------------------------------------------------------------------------
+
 CWebserver::CWebserver(bool debug)
 {
-	Port=0;
-	ListenSocket = 0;
+	Port = 0;
+	ListenSocket = -1;
 	PublicDocumentRoot = "";
 	PrivateDocumentRoot = "";
 	STOP = false;
@@ -70,58 +76,63 @@ CWebserver::CWebserver(bool debug)
 	WebDbox = new CWebDbox(this);
 	dprintf("WebDbox initialized\n");
 }
-//-------------------------------------------------------------------------
-CWebserver::~CWebserver()
-{
 
-	if(ListenSocket)
+//-------------------------------------------------------------------------
+
+CWebserver::~CWebserver(void)
+{
+	if (ListenSocket != -1)
 		Stop();
 
-	if(WebDbox)
+	if (WebDbox)
 		delete WebDbox;
 }
+
 //-------------------------------------------------------------------------
 
-void CWebserver::ReadConfig()
+void CWebserver::ReadConfig(void)
 {
-	CConfigFile	*Config = new CConfigFile(',');
+	CConfigFile *Config = new CConfigFile(',');
 
 	Config->loadConfig(NHTTPD_CONFIGFILE);
 
 	Port = Config->getInt32("Port", 80);
-	THREADS = Config->getBool("THREADS",true);
-	CDEBUG::getInstance()->Verbose = Config->getBool("VERBOSE",false);
-	CDEBUG::getInstance()->Log = Config->getBool("LOG",false);
-	MustAuthenticate = Config->getBool("Authenticate",false);
-	PrivateDocumentRoot = Config->getString("PrivatDocRoot",PRIVATEDOCUMENTROOT);
-	PublicDocumentRoot = Config->getString("PublicDocRoot",PUBLICDOCUMENTROOT);
-	NewGui = Config->getBool("NewGui",true);
-	Zapit_XML_Path = Config->getString("Zapit_XML_Path","/var/tuxbox/config/zapit");
-	AuthUser = Config->getString("AuthUser","root");
-	AuthPassword = Config->getString("AuthPassword","dbox2");
+	THREADS = Config->getBool("THREADS", true);
+	CDEBUG::getInstance()->Verbose = Config->getBool("VERBOSE", false);
+	CDEBUG::getInstance()->Log = Config->getBool("LOG", false);
+	MustAuthenticate = Config->getBool("Authenticate", false);
+	PrivateDocumentRoot = Config->getString("PrivatDocRoot", PRIVATEDOCUMENTROOT);
+	PublicDocumentRoot = Config->getString("PublicDocRoot", PUBLICDOCUMENTROOT);
+	NewGui = Config->getBool("NewGui", true);
+	Zapit_XML_Path = Config->getString("Zapit_XML_Path", "/var/tuxbox/config/zapit");
+	AuthUser = Config->getString("AuthUser", "root");
+	AuthPassword = Config->getString("AuthPassword", "dbox2");
 
 	if (Config->getUnknownKeyQueryedFlag() == true)
 		Config->saveConfig(NHTTPD_CONFIGFILE);
 
 	delete Config;
 }
+
 //-------------------------------------------------------------------------
 
-bool CWebserver::Init(bool debug)
+bool CWebserver::Init(bool /*debug*/)
 {
 	return true;
 }
+
 //-------------------------------------------------------------------------
 
-bool CWebserver::Start()
+bool CWebserver::Start(void)
 {
 	SAI servaddr;
 
-	if ((Port < 1024) && (geteuid() != 0)) {
+	if ((Port < 1024) && (geteuid() != 0))
+	{
 		aprintf("cannot bind to port %d without superuser privilleges. aborting.\n", Port);
 		return false;
 	}
-	
+
 	//network-setup
 	ListenSocket = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -131,169 +142,202 @@ bool CWebserver::Start()
 	servaddr.sin_port = htons(Port);
 
         SetSockOpts();
-	
-	if ( bind(ListenSocket, (SA *) &servaddr, sizeof(servaddr)) !=0)
+
+	if (bind(ListenSocket, (SA *)&servaddr, sizeof(servaddr)) == -1)
 	{
-		int i = 1;
-			do
-			{
-				aprintf("bind to port %d failed. retry %d in 5 seconds...\n",Port, i++);
-				sleep(5);
-			}while((bind(ListenSocket, (SA *) &servaddr, sizeof(servaddr)) !=0) && i <= 10);
+		perror("bind");
+		Stop();
+		return false;
 	}
 
-	if (listen(ListenSocket, 5) !=0)
+	if (listen(ListenSocket, 5) != 0)
 	{
-			perror("listen failed...");
-			return false;
+		perror("listen");
+		Stop();
+		return false;
 	}
+
 	dprintf("Server started\n");
-				
+
 	return true;
 }
+
 //-------------------------------------------------------------------------
-void * WebThread(void * myconn)
+
+void *WebThread(void *args)
 {
-CWebserverRequest	*req;
+	CWebserverRequest *req;
+	Cmyconn *myconn = (Cmyconn *) args;
+
+	if (!myconn) {
+		aprintf("WebThread called without arguments!\n");
+		pthread_exit(NULL);
+	}
+
 	pthread_detach(pthread_self());
-	req = new CWebserverRequest(((Cmyconn *)myconn)->Parent);
-	req->Client_Addr = ((Cmyconn *)myconn)->Client_Addr;
-	req->Socket = ((Cmyconn *)myconn)->Socket;
-	
-	if(req->GetRawRequest())
+
+	req = new CWebserverRequest(myconn->Parent);
+	req->Client_Addr = myconn->Client_Addr;
+	req->Socket = myconn->Socket;
+
+	if (req->GetRawRequest())
 	{
-		dprintf("++ Thread 0x06%X gestartet\n",(int)pthread_self());
-		if(req->ParseRequest())
+		dprintf("++ Thread 0x06%X gestartet\n", (int) pthread_self());
+		
+		if (req->ParseRequest())
 		{
 			req->SendResponse();
 			req->PrintRequest();
 			req->EndRequest();
 		}
 		else
+		{
 			dperror("Error while parsing request\n");
+		}
 
 		dprintf("-- Thread 0x06%X beendet\n",(int)pthread_self());
 	}
+
 	delete req;
-	delete (Cmyconn *) myconn;
-	pthread_exit((void *)NULL);
-	return NULL;
+	delete myconn;
+
+	pthread_exit(NULL);
 }
+
 //-------------------------------------------------------------------------
-void CWebserver::DoLoop()
+
+void CWebserver::DoLoop(void)
 {
-socklen_t			clilen;
-SAI					cliaddr;
-CWebserverRequest	*req;
-int sock_connect;
-int thread_num =0;
-int t = 1;
-pthread_t Threads[30];
+	socklen_t clilen;
+	SAI cliaddr;
+	CWebserverRequest *req;
+	int sock_connect;
+	int thread_num = 0;
+	int t = 1;
+	pthread_t Threads[30];
 
-
-   pthread_attr_t attr;
-   pthread_attr_init(&attr);
-   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-   pthread_mutex_init( &ServerData_mutex, NULL );
+	pthread_attr_t attr;
+	pthread_attr_init(&attr);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+	pthread_mutex_init(&ServerData_mutex, NULL);
 
 	clilen = sizeof(cliaddr);
-	while(!STOP)
+
+	while (!STOP)
 	{
 		memset(&cliaddr, 0, sizeof(cliaddr));
-		if ((sock_connect = accept(ListenSocket, (SA *) &cliaddr, &clilen)) == -1)		// accepting requests
+		
+		// accepting requests
+		if ((sock_connect = accept(ListenSocket, (SA *) &cliaddr, &clilen)) == -1)
 		{
 			perror("Error in accept");
 			continue;
 		}
-		setsockopt(sock_connect,SOL_TCP,TCP_CORK,&t,sizeof(t));
-		dprintf("nhttpd: got connection from %s\n", inet_ntoa(cliaddr.sin_addr));		// request from client arrives
 
+		setsockopt(sock_connect, SOL_TCP, TCP_CORK, &t, sizeof(t));
 
-		if(THREADS)		
-		{																						// Multi Threaded 
-			Cmyconn *myconn = new Cmyconn;														// prepare Cmyconn struct
+		// request from client arrives
+		dprintf("nhttpd: got connection from %s\n", inet_ntoa(cliaddr.sin_addr));
+
+		if (THREADS) // Multi Threaded
+		{
+			// prepare Cmyconn struct
+			Cmyconn *myconn = new Cmyconn;
 			myconn->clilen = clilen;
 			myconn->Client_Addr = inet_ntoa(cliaddr.sin_addr);
 			myconn->Socket = sock_connect;
 			myconn->Parent = this;
-			if (pthread_create (&Threads[thread_num], &attr, WebThread, (void *)myconn) != 0 )	// start WebThread 
+			
+			// start WebThread
+			if (pthread_create(&Threads[thread_num], &attr, WebThread, (void *)myconn) != 0)
 				dperror("pthread_create(WebThread)");
-			if(thread_num == 20)																// testing
+			if (thread_num == 20) // testing ??
 				thread_num = 0;
 			else
 				thread_num++;
 		}
-		else
-		{													// Single Threaded
-			req = new CWebserverRequest(this);													// create new request
-			req->Socket = sock_connect;	
+		else // Single Threaded
+		{
+			// create new request
+			req = new CWebserverRequest(this);
+			req->Socket = sock_connect;
 			req->Client_Addr = inet_ntoa(cliaddr.sin_addr);
 			req->RequestNumber = Requests++;
-			if(req->GetRawRequest())															//read request from client
+			
+			if (req->GetRawRequest()) //read request from client
 			{
-				if(req->ParseRequest())															// parse it
+				if (req->ParseRequest()) // parse it
 				{
-					req->SendResponse();														// send the proper response
-					req->PrintRequest();									// and print if wanted
+					// send the proper response
+					req->SendResponse();
+					// and print if wanted
+					req->PrintRequest();
 				}
-				else
+				else {
 					dperror("Error while parsing request");
+				}
 			}
-			req->EndRequest();																// end the request
-			delete req;													
+			
+			// end the request
+			req->EndRequest();
+			
+			delete req;
 			req = NULL;
 		}
 	}
 }
 
 //-------------------------------------------------------------------------
-void CWebserver::Stop()
+
+void CWebserver::Stop(void)
 {
-	if(ListenSocket != 0)
+	if (ListenSocket != -1)
 	{
-		close( ListenSocket );					
-		ListenSocket = 0;
+		close(ListenSocket);
+		ListenSocket = -1;
 	}
 }
 
 //-------------------------------------------------------------------------
 
-int CWebserver::SocketConnect(Tmconnect * con,int Port)
+int CWebserver::SocketConnect(Tmconnect *con, int Port)
 {
-	char rip[]="127.0.0.1";
+	char rip[] = "127.0.0.1";
 
 	con->sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	memset(&con->servaddr,0,sizeof(SAI));
-	con->servaddr.sin_family=AF_INET;
-	con->servaddr.sin_port=htons(Port);
+	memset(&con->servaddr, 0, sizeof(SAI));
+	con->servaddr.sin_family = AF_INET;
+	con->servaddr.sin_port = htons(Port);
 	inet_pton(AF_INET, rip, &con->servaddr.sin_addr);
 
-	#ifdef HAS_SIN_LEN
-		servaddr.sin_len = sizeof(servaddr); // needed ???
-	#endif
+#ifdef HAS_SIN_LEN
+	servaddr.sin_len = sizeof(servaddr); // needed ???
+#endif
 
-
-	if(connect(con->sock_fd, (SA *)&con->servaddr, sizeof(con->servaddr))==-1)
+	if (connect(con->sock_fd, (SA *)&con->servaddr, sizeof(con->servaddr)) == -1)
 	{
 		aprintf("[nhttp]: connect to socket %d failed\n",Port);
 		return -1;
 	}
-	else
+	else {
 		return con->sock_fd;
+	}
 }
 
-void CWebserver::SetSockOpts() {
+//-------------------------------------------------------------------------
+
+void CWebserver::SetSockOpts(void)
+{
 	// if no valid socket, return
 	if (ListenSocket < 0)
-           return;
+		return;
 
-	int opt;
-
+#ifdef SO_REUSEADDR
 	// Most important socket opt for us: SO_REUSEADDR, so bindings
 	// on a port after fast restart of webserver do not fail
-#ifdef SO_REUSEADDR
-	opt = 1;
+	int opt = 1;
 	if (setsockopt(ListenSocket, SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt)) < 0)
-  	  fprintf(stderr, "setsockopt(SO_REUSEADDR): %s\n", strerror(errno));
+		fprintf(stderr, "setsockopt(SO_REUSEADDR): %s\n", strerror(errno));
 #endif
 }
+

@@ -1,9 +1,9 @@
 /*
-	webserver  -   DBoxII-Project
+	nhttpd  -  DBoxII-Project
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.37 2003/02/21 19:23:49 dirch Exp $
+	$Id: request.cpp,v 1.38 2003/03/14 07:20:01 obi Exp $
 
 	License: GPL
 
@@ -21,26 +21,26 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-
-
 */
 
+// c++
+#include <cstdarg>
+#include <cstdio>
 
-#include <arpa/inet.h> 
+// system
+#include <fcntl.h>
 #include <sys/sendfile.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <sys/socket.h>
 #include <unistd.h>
-#include <iostream>
 
-#include "request.h"
-#include "webdbox.h"
+// nhttpd
 #include "debug.h"
+#include "webdbox.h"
 
 #define OUTBUFSIZE 2048
 
-
 //-------------------------------------------------------------------------
+
 CWebserverRequest::CWebserverRequest(CWebserver *server) 
 {
 	Parent = server;
@@ -60,34 +60,41 @@ CWebserverRequest::CWebserverRequest(CWebserver *server)
 }
 
 //-------------------------------------------------------------------------
-CWebserverRequest::~CWebserverRequest() 
+
+CWebserverRequest::~CWebserverRequest(void)
 {
-	if(outbuf)
+	if (outbuf)
 		delete[] outbuf;
 
 	EndRequest();
 }
 
 //-------------------------------------------------------------------------
-bool CWebserverRequest::Authenticate()			// check if authentication is required
+
+// check if authentication is required
+bool CWebserverRequest::Authenticate(void)
 {
-	if(!Parent->MustAuthenticate)
+	if (!Parent->MustAuthenticate)
 		return true;
 
-	if(CheckAuth())
+	if (CheckAuth())
 		return true;
 
 	SocketWriteLn("HTTP/1.0 401 Unauthorized");
 	SocketWriteLn("WWW-Authenticate: Basic realm=\"dbox\"\r\n");
+
 	if (Method != M_HEAD)
 		SocketWriteLn("Access denied.");
+
 	return false;
 }
 
 //-------------------------------------------------------------------------
-bool CWebserverRequest::CheckAuth()			// check if given username an pssword are valid
+
+// check if given username an pssword are valid
+bool CWebserverRequest::CheckAuth()
 {
-	if(HeaderList["Authorization"] == "")
+	if (HeaderList["Authorization"] == "")
 		return false;
 
 	string encodet = HeaderList["Authorization"].substr(6,HeaderList["Authorization"].length() - 6);
@@ -101,41 +108,51 @@ bool CWebserverRequest::CheckAuth()			// check if given username an pssword are 
 }
 
 //-------------------------------------------------------------------------
+
 bool CWebserverRequest::GetRawRequest()
 {
 #define bufferlen 1024
-	char *buffer;
-	buffer = new char[bufferlen+1];
-	if((rawbuffer_len = read(Socket,buffer,bufferlen)) < 1)
+	char *buffer = new char[bufferlen+1];
+
+	if ((rawbuffer_len = read(Socket,buffer,bufferlen)) < 1)
 	{
 		delete[] buffer;
 		return false;
 	}
-	rawbuffer = string(buffer,rawbuffer_len);
+
+	rawbuffer = string(buffer, rawbuffer_len);
+
 	delete[] buffer;
 	return true;
 }
+
 //-------------------------------------------------------------------------
+
 void CWebserverRequest::SplitParameter(char *param_copy)
 {
         if (param_copy == NULL)
 		return;
 	
 	char *p = strchr(param_copy, '=');
-	if(p == NULL) {
+
+	if (p == NULL) {
 		char number_buf[20];
  		sprintf(number_buf, "%d", ParameterList.size()+1); 
 		ParameterList[number_buf] = param_copy;
 		return;
         }
+
 	*p = '\0';
+
 	if (ParameterList[param_copy].length() == 0)
 		ParameterList[param_copy] = p + 1;
+
 	else {
 		*p  = ',';
 		ParameterList[param_copy] += p;
 	}
 }
+
 //-------------------------------------------------------------------------
 
 bool CWebserverRequest::ParseParams(string param_string)			// parse parameter string
@@ -172,7 +189,7 @@ bool CWebserverRequest::ParseParams(string param_string)			// parse parameter st
 
 bool CWebserverRequest::ParseFirstLine(string zeile)				// parse first line of request
 {
-int ende, anfang, t;
+	int ende, anfang, t;
 
 	anfang = zeile.find(' ');				// GET /images/elist.gif HTTP/1.1 
 	ende = zeile.rfind(' ');				// nach leerzeichen splitten
@@ -218,9 +235,10 @@ int ende, anfang, t;
 //-------------------------------------------------------------------------
 bool CWebserverRequest::ParseHeader(string header)					// parse the header of the request
 {
-bool ende = false;
-int pos;
-string sheader;
+	bool ende = false;
+	int pos;
+	string sheader;
+
 	while(!ende)
 	{
 		if((pos = header.find_first_of("\n")) > 0)
@@ -240,7 +258,8 @@ string sheader;
 //			dprintf("%s: %s\n",sheader.substr(0,pos).c_str(),HeaderList[sheader.substr(0,pos)].c_str());
 		}
 	}
-return true;	
+
+	return true;	
 }
 
 //-------------------------------------------------------------------------
@@ -274,7 +293,8 @@ bool CWebserverRequest::ParseBoundaries(string bounds)			// parse boundaries of 
 //-------------------------------------------------------------------------
 bool CWebserverRequest::ParseRequest()
 {
-int ende;
+	int ende;
+	
 	if(rawbuffer_len > 0 )
 	{
 		if((ende = rawbuffer.find_first_of('\n')) == 0)
@@ -379,7 +399,9 @@ int ende;
 		return false;
 	}
 }
+
 //-------------------------------------------------------------------------
+
 bool CWebserverRequest::HandleUpload()				// momentan broken 
 {
 	int t = 0;
@@ -438,12 +460,14 @@ bool CWebserverRequest::HandleUpload()				// momentan broken
 	}
 }
 //-------------------------------------------------------------------------
-void CWebserverRequest::PrintRequest()					// for debugging and verbose output
+
+void CWebserverRequest::PrintRequest(void)					// for debugging and verbose output
 {
 	CDEBUG::getInstance()->LogRequest(this);
 }
 
 //-------------------------------------------------------------------------
+
 void CWebserverRequest::SendHTMLHeader(string Titel)
 {
 	SocketWriteLn("<html>\n<head><title>" + Titel + "</title><link rel=\"stylesheet\" type=\"text/css\" href=\"../global.css\">");
@@ -452,11 +476,14 @@ void CWebserverRequest::SendHTMLHeader(string Titel)
 }
 
 //-------------------------------------------------------------------------
-void CWebserverRequest::SendHTMLFooter()
+
+void CWebserverRequest::SendHTMLFooter(void)
 {
 	SocketWriteLn("</body></html>");
 }
+
 //-------------------------------------------------------------------------
+
 void CWebserverRequest::Send302(char const *URI)
 {
 	printf("HTTP/1.0 302 Moved Permanently\r\nLocation: %s\r\nContent-Type: text/html\r\n\r\n",URI);
@@ -466,8 +493,10 @@ void CWebserverRequest::Send302(char const *URI)
 	}
 	HttpStatus = 302;
 }
+
 //-------------------------------------------------------------------------
-void CWebserverRequest::Send404Error()
+
+void CWebserverRequest::Send404Error(void)
 {
 	SocketWrite("HTTP/1.0 404 Not Found\r\n");		//404 - file not found
 	SocketWrite("Content-Type: text/plain\r\n\r\n");
@@ -476,8 +505,10 @@ void CWebserverRequest::Send404Error()
 	}
 	HttpStatus = 404;
 }
+
 //-------------------------------------------------------------------------
-void CWebserverRequest::Send500Error()
+
+void CWebserverRequest::Send500Error(void)
 {
 	SocketWrite("HTTP/1.0 500 InternalError\r\n");		//500 - internal error
 	SocketWrite("Content-Type: text/plain\r\n\r\n");
@@ -486,6 +517,7 @@ void CWebserverRequest::Send500Error()
 	}
 	HttpStatus = 500;
 }
+
 //-------------------------------------------------------------------------
 
 void CWebserverRequest::SendPlainHeader(string contenttype)
@@ -495,6 +527,7 @@ void CWebserverRequest::SendPlainHeader(string contenttype)
 }
 
 //-------------------------------------------------------------------------
+
 void CWebserverRequest::RewriteURL()
 {
 
@@ -554,6 +587,7 @@ void CWebserverRequest::RewriteURL()
 }		
 
 //-------------------------------------------------------------------------
+
 bool CWebserverRequest::SendResponse()
 {
 	RewriteURL();		// Erst mal die URL umschreiben
@@ -574,7 +608,9 @@ bool CWebserverRequest::SendResponse()
 		return SendFile(Path,Filename);
 	}
 }
+
 //-------------------------------------------------------------------------
+
 bool CWebserverRequest::EndRequest()
 {
 	if(Socket)
@@ -585,17 +621,23 @@ bool CWebserverRequest::EndRequest()
 	}
 	return true;
 }
+
 //-------------------------------------------------------------------------
+
 void CWebserverRequest::SendOk()
 {
 	SocketWrite("ok");
 }
+
 //-------------------------------------------------------------------------
+
 void CWebserverRequest::SendError()
 {
 	SocketWrite("error");
 }
+
 //-------------------------------------------------------------------------
+
 void CWebserverRequest::printf ( const char *fmt, ... )
 {
 	bzero(outbuf,OUTBUFSIZE);
@@ -608,18 +650,23 @@ void CWebserverRequest::printf ( const char *fmt, ... )
 
 
 //-------------------------------------------------------------------------
+
 bool CWebserverRequest::SocketWrite(char const *text)
 {
 	return SocketWriteData(text, strlen(text));
 }
+
 //-------------------------------------------------------------------------
+
 bool CWebserverRequest::SocketWriteLn(char const *text)
 {
 	if(!SocketWriteData(text, strlen(text)))
 		return false;
 	return SocketWriteData("\r\n",2);
 }
+
 //-------------------------------------------------------------------------
+
 bool CWebserverRequest::SocketWriteData( char const * data, long length )
 {
 	if(RequestCanceled)
@@ -632,11 +679,12 @@ bool CWebserverRequest::SocketWriteData( char const * data, long length )
 	}
 	return true;
 }
+
 //-------------------------------------------------------------------------
 
 string CWebserverRequest::GetContentType(string ext)
 {
-string ctype;
+	string ctype;
 		// Anhand der Dateiendung den Content bestimmen
 	if(  (ext.compare("html") == 0) || (ext.compare("htm") == 0) )
 		ctype = "text/html";
@@ -659,7 +707,6 @@ string ctype;
 
 bool CWebserverRequest::SendFile(const string path,const string filename)
 {
-	
 	if( (tmpint = OpenFile(path, filename) ) != -1 )		
 	{											// Wenn Datei geöffnet werden konnte
 		if (!SocketWrite("HTTP/1.0 200 OK\r\n"))
@@ -697,7 +744,7 @@ bool CWebserverRequest::SendFile(const string path,const string filename)
 
 string CWebserverRequest::GetFileName(string path, string filename)
 {
-string tmpfilename;
+	string tmpfilename;
 	if(path[path.length()-1] != '/')
 		tmpfilename = path + "/" + filename;
 	else
@@ -715,7 +762,9 @@ string tmpfilename;
 	}
 	return tmpfilename;
 }
+
 //-------------------------------------------------------------------------
+
 int CWebserverRequest::OpenFile(string path, string filename)
 {
 	struct stat statbuf;
@@ -740,15 +789,14 @@ int CWebserverRequest::OpenFile(string path, string filename)
 	return fd;
 }
 
-
 //-------------------------------------------------------------------------
 
 bool CWebserverRequest::ParseFile(const string filename,CStringList &params)
 {
-char *file_buffer, *out_buffer;
-long file_length= 0,out_buffer_size = 0;
-int out_len = 0;
-FILE * fd;
+	char *file_buffer, *out_buffer;
+	long file_length= 0,out_buffer_size = 0;
+	int out_len = 0;
+	FILE * fd;
 
 	tmpstring = GetFileName("/",filename);
 	if(tmpstring.length() > 0)
@@ -786,8 +834,8 @@ FILE * fd;
 //-------------------------------------------------------------------------
 long CWebserverRequest::ParseBuffer(char *file_buffer, long file_length, char *out_buffer, long out_buffer_size, CStringList &params)
 {
-long pos = 0, outpos = 0, endpos = 0;
-string parameter = "";
+	long pos = 0, outpos = 0, endpos = 0;
+	string parameter = "";
 
 	while(pos < file_length && outpos < out_buffer_size)
 	{
@@ -823,11 +871,11 @@ string parameter = "";
 // Decode URLEncoded string
 void CWebserverRequest::URLDecode(string &encodedString) 
 {
-char *newString=NULL;
-const char *string = encodedString.c_str();
-int count=0;
-char hex[3]={'\0'};
-unsigned long iStr;
+	char *newString=NULL;
+	const char *string = encodedString.c_str();
+	int count=0;
+	char hex[3]={'\0'};
+	unsigned long iStr;
 
 	count = 0;
 	if((newString = (char *)malloc(sizeof(char) * strlen(string) + 1) ) != NULL)
@@ -865,3 +913,4 @@ unsigned long iStr;
 	encodedString = newString;
 	free(newString);
 }
+

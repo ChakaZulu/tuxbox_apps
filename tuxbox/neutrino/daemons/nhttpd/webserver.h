@@ -1,9 +1,9 @@
 /*      
-        webserver  -   DBoxII-Project
+        nhttpd  -  DBoxII-Project
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: webserver.h,v 1.21 2003/03/07 22:06:04 thegoodguy Exp $
+        $Id: webserver.h,v 1.22 2003/03/14 07:20:02 obi Exp $
 
         License: GPL
 
@@ -23,25 +23,20 @@
 
 */
 
+#ifndef __nhttpd_webserver_h__
+#define __nhttpd_webserver_h__
 
-#ifndef __webserver__
-#define __webserver__
-
-#include <unistd.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <config.h>
+// c++
 #include <string>
 
-#include <configfile.h>
+// system
+#include <netinet/in.h>
 
+#define SA	struct sockaddr
+#define SAI	struct sockaddr_in
 
-using namespace std;
-
-#define SA struct sockaddr
-#define SAI struct sockaddr_in
-#define PRIVATEDOCUMENTROOT "/share/tuxbox/neutrino/httpd"
-#define PUBLICDOCUMENTROOT "/var/httpd"
+#define PRIVATEDOCUMENTROOT	"/share/tuxbox/neutrino/httpd"
+#define PUBLICDOCUMENTROOT	"/var/httpd"
 
 class CWebDbox;
 class TWebserverRequest;
@@ -52,47 +47,43 @@ struct Tmconnect
 	SAI servaddr;
 };
 
-//----------------------------------------------------------------------
 class CWebserver
 {
+protected:
 	int			Port;
 	int			ListenSocket;
 	bool			THREADS;
 
 public:
-// config vars / switches
+	// config vars / switches
 	bool			STOP;
 	bool			VERBOSE;
 	bool			MustAuthenticate;
 	bool			NewGui;
 
-	string			PrivateDocumentRoot;
-	string			PublicDocumentRoot;
-	string			Zapit_XML_Path;
+	std::string		PrivateDocumentRoot;
+	std::string		PublicDocumentRoot;
+	std::string		Zapit_XML_Path;
 
-	string			AuthUser;
-	string			AuthPassword;
-
-
+	std::string		AuthUser;
+	std::string		AuthPassword;
 
 	CWebDbox		*WebDbox;
 
 	CWebserver(bool debug);
-	~CWebserver();
+	~CWebserver(void);
 
 	bool Init(bool debug);
-	bool Start();
-	void DoLoop();
-	void Stop();
+	bool Start(void);
+	void DoLoop(void);
+	void Stop(void);
 
-	int SocketConnect(Tmconnect * con,int Port);
-	void SetSockOpts();
-	void ReadConfig();
+	int SocketConnect(Tmconnect *con, int Port);
+	void SetSockOpts(void);
+	void ReadConfig(void);
 
 	friend class CWebserverRequest;
 	friend class TWebDbox;
-
 };
 
-
-#endif
+#endif /* __nhttpd_webserver_h__ */

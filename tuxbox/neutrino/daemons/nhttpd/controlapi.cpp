@@ -1,9 +1,9 @@
 /*
-	webserver  -   DBoxII-Project
+	nhttpd  -  DBoxII-Project
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.18 2003/03/04 19:34:37 dirch Exp $
+	$Id: controlapi.cpp,v 1.19 2003/03/14 07:20:01 obi Exp $
 
 	License: GPL
 
@@ -23,127 +23,137 @@
 
 */
 
+// system
+#include <unistd.h>
+
+// tuxbox
 #include <neutrinoMessages.h>
 
-
-#include "webdbox.h"
+// nhttpd
 #include "controlapi.h"
 #include "debug.h"
 
-
 bool CControlAPI::Execute(CWebserverRequest* request)
 {
-	const char *operations[] = {
+	unsigned int operation = 0;
+	const char *operations[] =
+	{
 		"timer","setmode","standby","getdate","gettime","settings","getservicesxml",
 		"getbouquetsxml","getonidsid","message","info","shutdown","volume",
-		"channellist","getbouquet","getbouquets","epg","version","zapto", NULL };
-	unsigned operation = 0;
+		"channellist","getbouquet","getbouquets","epg","version","zapto", NULL
+	};
 
 	dprintf("Execute CGI : %s\n",request->Filename.c_str());
 
-	while (operations[operation]) {
-		if (request->Filename.compare(operations[operation]) == 0) {
+	while (operations[operation])
+	{
+		if (request->Filename.compare(operations[operation]) == 0)
 			break;
-		}
+
 		operation++;
 	}
+
 	if (operations[operation] == NULL) {
 		request->Send404Error();
 		return false;
 	}
-	if (request->Method == M_HEAD) {
-		if ( (operation != 6) && (operation != 7) ) {
+
+	if (request->Method == M_HEAD)
+	{
+		if ((operation != 6) && (operation != 7))
 			request->SendPlainHeader("text/plain");
-		}
-		else {
+		else
 			request->SendPlainHeader("text/xml");
-		}
 		return true;
 	}	
 
-	switch(operation)
-	{
-		case 0 : return TimerCGI(request);
-				break;
-		case 1 : return SetModeCGI(request);
-				break;
-		case 2 : return StandbyCGI(request);
-				break;	
-		case 3 : return GetDateCGI(request);
-				break;	
-		case 4 : return GetTimeCGI(request);
-				break;	
-		case 5 : return SettingsCGI(request);
-				break;	
-		case 6 : return GetServicesxmlCGI(request);
-				break;	
-		case 7 : return GetBouquetsxmlCGI(request);
-				break;	
-		case 8 : return GetChannel_IDCGI(request);
-				break;	
-		case 9 : return MessageCGI(request);
-				break;	
-		case 10 : return InfoCGI(request);
-				break;	
-		case 11 : return ShutdownCGI(request);
-				break;	
-		case 12 : return VolumeCGI(request);
-				break;	
-		case 13 : return ChannellistCGI(request);
-				break;	
-		case 14 : return GetBouquetCGI(request);
-				break;	
-		case 15 : return GetBouquetsCGI(request);
-				break;	
-		case 16 : return EpgCGI(request);
-				break;	
-		case 17 : return VersionCGI(request);
-				break;	
-		case 18 : return ZaptoCGI(request);
-				break;	
-		default:
-			request->SendError();
-			return false;
+	switch (operation) {
+	case 0:
+		return TimerCGI(request);
+	case 1:
+		return SetModeCGI(request);
+	case 2:
+		return StandbyCGI(request);
+	case 3:
+		return GetDateCGI(request);
+	case 4:
+		return GetTimeCGI(request);
+	case 5:
+		return SettingsCGI(request);
+	case 6:
+		return GetServicesxmlCGI(request);
+	case 7:
+		return GetBouquetsxmlCGI(request);
+	case 8:
+		return GetChannel_IDCGI(request);
+	case 9:
+		return MessageCGI(request);
+	case 10:
+		return InfoCGI(request);
+	case 11:
+		return ShutdownCGI(request);
+	case 12:
+		return VolumeCGI(request);
+	case 13:
+		return ChannellistCGI(request);
+	case 14:
+		return GetBouquetCGI(request);
+	case 15:
+		return GetBouquetsCGI(request);
+	case 16:
+		return EpgCGI(request);
+	case 17:
+		return VersionCGI(request);
+	case 18:
+		return ZaptoCGI(request);
+	default:
+		request->SendError();
+		return false;
 	}
-	return true;
 }
 
 //-------------------------------------------------------------------------
 
-//	if(operation == 0)			// timer funktionen
 bool CControlAPI::TimerCGI(CWebserverRequest *request)
 {
 	request->SendPlainHeader("text/plain");
-	if(Parent->Timerd->isTimerdAvailable())
+	
+	if (Parent->Timerd->isTimerdAvailable())
 	{
-		if((request->ParameterList.size() > 0))
+		if ((request->ParameterList.size() > 0))
 		{
-			if(request->ParameterList["action"] == "new")
+			if (request->ParameterList["action"] == "new")
 			{
 				Parent->WebAPI->doNewTimer(request);
 				request->SendOk();
 			}
 		}
 		else
+		{
 			SendTimers(request);
+		}
+
 		return true;
 	}
 
 	request->SendError();
 	return false;
 }
+
 //-------------------------------------------------------------------------
 
 bool CControlAPI::SetModeCGI(CWebserverRequest *request)
 {
-int mode;
+	int mode;
 
-	request->SendPlainHeader("text/plain");          // Standard httpd header senden
-	if(request->ParameterList.size() > 0)
+	// Standard httpd header senden
+	request->SendPlainHeader("text/plain");
+	
+	if (request->ParameterList.size() > 0)
 	{
-		if(request->ParameterList["1"] == "status")
+		if (request->ParameterList["1"] == "status")
 		{
-			if(Parent->Zapit->isRecordModeActive())
+			if (Parent->Zapit->isRecordModeActive())
 				request->SocketWriteLn("on");
 			else
 				request->SocketWriteLn("off");
@@ -177,6 +187,7 @@ int mode;
 			Parent->Sectionsd->setPauseScanning(false);
 			Parent->Zapit->startPlayBack();
 		}
+
 		request->SendOk();
 		return true;
 	}
@@ -192,27 +203,28 @@ int mode;
 bool CControlAPI::StandbyCGI(CWebserverRequest *request)
 {
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
+
 	if (request->ParameterList.size() == 1)
 	{
 		if (request->ParameterList["1"] == "on")	// in standby mode schalten
-		{
 			Parent->EventServer->sendEvent(NeutrinoMessages::STANDBY_ON, CEventServer::INITID_HTTPD);
-		}
 		if (request->ParameterList["1"] == "off")	// standby mode ausschalten
-		{
 			Parent->EventServer->sendEvent(NeutrinoMessages::STANDBY_OFF, CEventServer::INITID_HTTPD);
-		}
 	}
+
 	request->SendOk();
 	return true;
 }
+
 //-------------------------------------------------------------------------
 
 bool CControlAPI::GetDateCGI(CWebserverRequest *request)
 {
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
-	if (request->ParameterList.size()==0)
-	{	//paramlos
+
+	if (request->ParameterList.size() == 0)
+	{
+		//paramlos
 		char *timestr = new char[50];
 		struct timeb tm;
 		ftime(&tm);
@@ -227,15 +239,18 @@ bool CControlAPI::GetDateCGI(CWebserverRequest *request)
 		return false;
 	}
 }
+
 //-------------------------------------------------------------------------
 
 bool CControlAPI::GetTimeCGI(CWebserverRequest *request)
 {
-time_t now = time(NULL);
+	time_t now = time(NULL);
 
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
-	if (request->ParameterList.size()==0)
-	{	//paramlos
+	
+	if (request->ParameterList.size() == 0)
+	{
+		//paramlos
 		char *timestr = new char[50];
 		struct tm *tm = localtime(&now);
 		strftime(timestr, 50, "%H:%M:%S\n", tm );	// aktuelles datum ausgeben
@@ -244,7 +259,7 @@ time_t now = time(NULL);
 		return true;
 	}
 
-	if( request->ParameterList["1"].compare("rawtime") == 0)
+	if (request->ParameterList["1"].compare("rawtime") == 0)
 	{
 		request->printf("%ld\n",now);
 		return true;
@@ -254,6 +269,7 @@ time_t now = time(NULL);
 	request->SendError();
 	return false;
 }
+
 //-------------------------------------------------------------------------
 
 bool CControlAPI::SettingsCGI(CWebserverRequest *request)		// sendet die settings
@@ -280,13 +296,16 @@ bool CControlAPI::GetBouquetsxmlCGI(CWebserverRequest *request)		// sendet die d
 	request->SendFile("/var/tuxbox/config/zapit","bouquets.xml");
 	return true;
 }
+
 //-------------------------------------------------------------------------
+
 bool CControlAPI::GetChannel_IDCGI(CWebserverRequest *request) // sendet die aktuelle channel_id
 {
 	request->SendPlainHeader("text/plain");
 	request->printf("%u\n", Parent->Zapit->getCurrentServiceID());
 	return true;
 }
+
 //-------------------------------------------------------------------------
 
 bool CControlAPI::MessageCGI(CWebserverRequest *request)
@@ -300,33 +319,37 @@ bool CControlAPI::MessageCGI(CWebserverRequest *request)
 		request->SendError();
 		return false;
 	}
-	if( request->ParameterList["popup"] != "")
+	
+	if (request->ParameterList["popup"] != "")
 	{
 		message = request->ParameterList["popup"];
 		event = NeutrinoMessages::EVT_POPUP;
 	}
-	else if( request->ParameterList["nmsg"] != "")
+	else if (request->ParameterList["nmsg"] != "")
 	{
 		message = request->ParameterList["nmsg"];
 		event = NeutrinoMessages::EVT_EXTMSG;
 	}
-	if(event != 0)
+	
+	if (event != 0)
 	{
 		request->URLDecode(message);
 		Parent->EventServer->sendEvent(event, CEventServer::INITID_HTTPD, (void *) message.c_str(), message.length() + 1);
 		request->SendOk();
 		return true;
 	}
+	
 	request->SendError();
 	return false;
 }
+
 //-------------------------------------------------------------------------
 
-	
 bool CControlAPI::InfoCGI(CWebserverRequest *request)
 {
 	if (request->ParameterList.size() == 0)
-	{	//paramlos
+	{
+		//paramlos
 		request->SocketWrite("Neutrino NG\n");
 		return true;
 	}
@@ -362,15 +385,17 @@ bool CControlAPI::InfoCGI(CWebserverRequest *request)
 		}
 	}
 }
+
 //-------------------------------------------------------------------------
 
 bool CControlAPI::ShutdownCGI(CWebserverRequest *request)
 {
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
+	
 	if (request->ParameterList.size() == 0)
-	{	//paramlos
+	{
+		//paramlos
 		Parent->EventServer->sendEvent(NeutrinoMessages::SHUTDOWN, CEventServer::INITID_HTTPD);
-
 		request->SendOk();
 		return true;
 	}
@@ -380,36 +405,35 @@ bool CControlAPI::ShutdownCGI(CWebserverRequest *request)
 		return false;
 	}
 }
+
 //-------------------------------------------------------------------------
 
 bool CControlAPI::VolumeCGI(CWebserverRequest *request)
 {
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
+	
 	if (request->ParameterList.size() == 0)
 	{	//paramlos - aktuelle volume anzeigen
 		request->printf("%d", Parent->Controld->getVolume());			// volume ausgeben
 		return true;
 	}
-	else
-	if (request->ParameterList.size() == 1)
+	else if (request->ParameterList.size() == 1)
 	{
-		if(request->ParameterList["1"].compare("mute") == 0)
+		if (request->ParameterList["1"].compare("mute") == 0)
 		{
 			Parent->Controld->setMute(true);
 			request->SendOk();					// muten
 			return true;
 		}
-		else
-		if(request->ParameterList["1"].compare("unmute") == 0)
+		else if (request->ParameterList["1"].compare("unmute") == 0)
 		{
 			Parent->Controld->setMute(false);
 			request->SendOk();					// unmuten
 			return true;
 		}
-		else
-		if(request->ParameterList["1"].compare("status") == 0)
+		else if (request->ParameterList["1"].compare("status") == 0)
 		{
-			request->SocketWrite( (char *) (Parent->Controld->getMute()?"1":"0") );	//  mute
+			request->SocketWrite((char *) (Parent->Controld->getMute() ? "1" : "0"));	//  mute
 			return true;
 		}
 		else
@@ -426,6 +450,7 @@ bool CControlAPI::VolumeCGI(CWebserverRequest *request)
 		return false;
 	}
 }
+
 //-------------------------------------------------------------------------
 
 bool CControlAPI::ChannellistCGI(CWebserverRequest *request)
@@ -439,31 +464,35 @@ bool CControlAPI::ChannellistCGI(CWebserverRequest *request)
 
 bool CControlAPI::GetBouquetCGI(CWebserverRequest *request)
 {
-CZapitClient::BouquetChannelList *bouquet;
+	CZapitClient::BouquetChannelList *bouquet;
+
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
-	if(request->ParameterList.size() > 0)
+
+	if (request->ParameterList.size() > 0)
 	{
 		int mode = CZapitClient::MODE_CURRENT;
-		if(request->ParameterList["mode"] != "")
+		
+		if (request->ParameterList["mode"] != "")
 		{
-			if(request->ParameterList["mode"].compare("TV") == 0)
+			if (request->ParameterList["mode"].compare("TV") == 0)
 				mode = CZapitClient::MODE_TV;
-			if(request->ParameterList["mode"].compare("RADIO") == 0)
+			if (request->ParameterList["mode"].compare("RADIO") == 0)
 				mode = CZapitClient::MODE_RADIO;
 		}
 		
 		bouquet = Parent->GetBouquet(atoi(request->ParameterList["bouquet"].c_str()), mode);
 		CZapitClient::BouquetChannelList::iterator channel = bouquet->begin();
 
-		for(unsigned int i = 0; channel != bouquet->end(); channel++,i++)
-		{ 
+		for (unsigned int i = 0; channel != bouquet->end(); channel++,i++)
 			request->printf("%u %u %s\n",channel->nr, channel->channel_id, channel->name);
-		}
+
 		return true;
 	}
 	else
+	{
 		request->SocketWriteLn("error");
-	return false;
+		return false;
+	}
 }
 
 //-------------------------------------------------------------------------
@@ -472,10 +501,9 @@ bool CControlAPI::GetBouquetsCGI(CWebserverRequest *request)
 {
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
 
-	for(unsigned int i = 0; i < Parent->BouquetList.size();i++)
-	{
+	for (unsigned int i = 0; i < Parent->BouquetList.size();i++)
 		request->printf("%u %s\n", (Parent->BouquetList[i].bouquet_nr) + 1, Parent->BouquetList[i].name);
-	}
+
 	return true;
 }
 
@@ -484,31 +512,35 @@ bool CControlAPI::GetBouquetsCGI(CWebserverRequest *request)
 bool CControlAPI::EpgCGI(CWebserverRequest *request)
 {
 	CChannelEvent *event;
+	
 	Parent->GetChannelEvents();
+
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
-	if(request->ParameterList.size() == 0)
+
+	if (request->ParameterList.size() == 0)
 	{
 		CZapitClient::BouquetChannelList *channellist = Parent->GetChannelList(CZapitClient::MODE_CURRENT);
 		
 		CZapitClient::BouquetChannelList::iterator channel = channellist->begin();
+
 		for(; channel != channellist->end();channel++)
 		{
 			event = Parent->ChannelListEvents[channel->channel_id];
-			if(event)
-			{
+
+			if (event)
 				request->printf("%u %llu %s\n",channel->channel_id,event->eventID,event->description.c_str() /*eList[n].eventID,eList[n].description.c_str()*/);
-			}
 		}
+
 		return true;
 	}
-	else if(request->ParameterList.size() == 1)
+	else if (request->ParameterList.size() == 1)
 	{
 
-		if(request->ParameterList["1"] == "ext")
+		if (request->ParameterList["1"] == "ext")
 		{
 			CZapitClient::BouquetChannelList *channellist = Parent->GetChannelList(CZapitClient::MODE_CURRENT);
-			
 			CZapitClient::BouquetChannelList::iterator channel = channellist->begin();
+
 			for(; channel != channellist->end();channel++)
 			{
 				event = Parent->ChannelListEvents[channel->channel_id];
@@ -517,14 +549,17 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 					request->printf("%u %ld %u %llu %s\n",channel->channel_id,event->startTime,event->duration,event->eventID,event->description.c_str() /*eList[n].eventID,eList[n].description.c_str()*/);
 				}
 			}
+
 			return true;
 		}
-		else if(request->ParameterList["eventid"] != "")
-		{	//special epg query
+		else if (request->ParameterList["eventid"] != "")
+		{
+			//special epg query
 			unsigned long long epgid;
 			sscanf( request->ParameterList["eventid"].c_str(), "%llu", &epgid);
 			CShortEPGData epg;
-			if(Parent->Sectionsd->getEPGidShort(epgid,&epg))
+			
+			if (Parent->Sectionsd->getEPGidShort(epgid,&epg))
 			{
 				request->SocketWriteLn(epg.title);
 				request->SocketWriteLn(epg.info1);
@@ -533,15 +568,18 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 			}
 		}
 		else
-		{	//eventlist for a chan
+		{
+			//eventlist for a chan
 			unsigned id = atol( request->ParameterList["1"].c_str());
 			SendEventList( request, id);
 			return true;
 		}
 	}
+	
 	request->SendError();
 	return false;
 }
+
 //-------------------------------------------------------------------------
 
 bool CControlAPI::VersionCGI(CWebserverRequest *request)
@@ -557,8 +595,10 @@ bool CControlAPI::VersionCGI(CWebserverRequest *request)
 bool CControlAPI::ZaptoCGI(CWebserverRequest *request)
 {
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
+
 	if (request->ParameterList.size() == 0)
-	{	//paramlos - aktuelles programm anzeigen
+	{
+		//paramlos - aktuelles programm anzeigen
 		request->printf("%u\n", Parent->Zapit->getCurrentServiceID());
 		return true;
 	}
@@ -586,30 +626,30 @@ bool CControlAPI::ZaptoCGI(CWebserverRequest *request)
 			}
 		}
 */
-		if(request->ParameterList["1"] == "getpids")		// getpids !
+		if (request->ParameterList["1"] == "getpids")		// getpids !
 		{
 			SendcurrentVAPid(request);
 			return true;
 		}
-		else if(request->ParameterList["1"] == "stopplayback")
+		else if (request->ParameterList["1"] == "stopplayback")
 		{
 			Parent->Zapit->stopPlayBack();
 			Parent->Sectionsd->setPauseScanning(true);
 			request->SendOk();
 		}
-		else if(request->ParameterList["1"] == "startplayback")
+		else if (request->ParameterList["1"] == "startplayback")
 		{
 			Parent->Zapit->startPlayBack();
 			Parent->Sectionsd->setPauseScanning(false);
 			dprintf("start playback requested..\n");
 			request->SendOk();
 		}
-		else if(request->ParameterList["1"] == "stopsectionsd")
+		else if (request->ParameterList["1"] == "stopsectionsd")
 		{
 			Parent->Sectionsd->setPauseScanning(true);
 			request->SendOk();
 		}
-		else if(request->ParameterList["1"] == "startsectionsd")
+		else if (request->ParameterList["1"] == "startsectionsd")
 		{
 			Parent->Sectionsd->setPauseScanning(false);
 			request->SendOk();
@@ -619,8 +659,10 @@ bool CControlAPI::ZaptoCGI(CWebserverRequest *request)
 			Parent->ZapTo(request->ParameterList["1"]);
 			request->SendOk();
 		}
+		
 		return true;
 	}
+	
 	request->SendError();
 	return false;
 }
@@ -631,25 +673,24 @@ bool CControlAPI::ZaptoCGI(CWebserverRequest *request)
 
 void CControlAPI::SendEventList(CWebserverRequest *request,unsigned channel_id)
 {
-int pos;
+	int pos;
 
 	Parent->eList = Parent->Sectionsd->getEventsServiceKey(channel_id);
 	CChannelEventList::iterator eventIterator;
-	for( eventIterator = Parent->eList.begin(); eventIterator != Parent->eList.end(); eventIterator++, pos++ )
-	{
+
+	for (eventIterator = Parent->eList.begin(); eventIterator != Parent->eList.end(); eventIterator++, pos++)
 		request->printf("%llu %ld %d %s\n", eventIterator->eventID, eventIterator->startTime, eventIterator->duration, eventIterator->description.c_str());
-	}
 }
+
 //-------------------------------------------------------------------------
+
 void CControlAPI::SendChannelList(CWebserverRequest *request)
 {
 	CZapitClient::BouquetChannelList *channellist = Parent->GetChannelList(CZapitClient::MODE_CURRENT);
-
 	CZapitClient::BouquetChannelList::iterator channel = channellist->begin();
+	
 	for(; channel != channellist->end();channel++)
-	{
 		request->printf("%u %s\n",channel->channel_id, channel->name);
-	}
 };
 
 //-------------------------------------------------------------------------
@@ -662,7 +703,7 @@ void CControlAPI::SendStreamInfo(CWebserverRequest* request)
 	request->printf("%d\n%d\n", bitInfo[0], bitInfo[1] );	//Resolution x y
 	request->printf("%d\n", bitInfo[4]*50);					//Bitrate bit/sec
 	
-	switch ( bitInfo[2] ) //format
+	switch (bitInfo[2]) //format
 	{
 		case 2: request->SocketWrite("4:3\n"); break;
 		case 3: request->SocketWrite("16:9\n"); break;
@@ -670,12 +711,13 @@ void CControlAPI::SendStreamInfo(CWebserverRequest* request)
 		default: request->SocketWrite("unknown\n"); break;
 	}
 
-	switch ( bitInfo[3] ) //fps
+	switch (bitInfo[3]) //fps
 	{
 		case 3: request->SocketWrite("25\n"); break;
 		case 6: request->SocketWrite("50\n"); break;
 		default: request->SocketWrite("unknown\n");
 	}
+
 	request->SocketWriteLn(Parent->audiotype_names[bitInfo[6]]);
 
 }
@@ -683,17 +725,23 @@ void CControlAPI::SendStreamInfo(CWebserverRequest* request)
 
 void CControlAPI::SendcurrentVAPid(CWebserverRequest* request)
 {
-CZapitClient::responseGetPIDs pids;
+	CZapitClient::responseGetPIDs pids;
 	Parent->Zapit->getPIDS(pids);
 
 	request->printf("%u\n%u\n", pids.PIDs.vpid, pids.APIDs[0].pid);
 }
 
 //-------------------------------------------------------------------------
+
 void CControlAPI::SendSettings(CWebserverRequest* request)
 {
-	request->SocketWriteLn("Boxtype "+Parent->Dbox_Hersteller[Parent->Controld->getBoxType()]+"\nvideooutput "+Parent->videooutput_names[Parent->Controld->getVideoOutput()]+"\nvideoformat "+Parent->videoformat_names[Parent->Controld->getVideoFormat()]);
+	request->SocketWriteLn(
+		"Boxtype " + Parent->Dbox_Hersteller[Parent->Controld->getBoxType()] + "\n" + 
+		"videooutput " + Parent->videooutput_names[Parent->Controld->getVideoOutput()] + "\n" +
+		"videoformat " + Parent->videoformat_names[Parent->Controld->getVideoFormat()]
+	);
 }
+
 //-------------------------------------------------------------------------
 
 void CControlAPI::SendTimers(CWebserverRequest* request)
@@ -709,71 +757,83 @@ void CControlAPI::SendTimers(CWebserverRequest* request)
 	channellist_radio.clear();
 
 	CTimerd::TimerList::iterator timer = timerlist.begin();
+	
 	for(; timer != timerlist.end();timer++)
 	{
-	// Add Data
-		char zAddData[20+1]={0};
-		switch(timer->eventType)
-		{
-			case CTimerd::TIMER_NEXTPROGRAM :
-			case CTimerd::TIMER_ZAPTO :
-			case CTimerd::TIMER_RECORD :
-	{
-				if(timer->mode == CTimerd::MODE_RADIO)
-				{ // Radiokanal
-					if(channellist_radio.size()==0)
+		// Add Data
+		char zAddData[20+1] = { 0 };
+		
+		switch(timer->eventType) {
+		case CTimerd::TIMER_NEXTPROGRAM:
+		case CTimerd::TIMER_ZAPTO:
+		case CTimerd::TIMER_RECORD:
+			if (timer->mode == CTimerd::MODE_RADIO)
+			{
+				// Radiokanal
+				if (channellist_radio.size() == 0)
+					Parent->Zapit->getChannels(channellist_radio,CZapitClient::MODE_RADIO);
+
+				CZapitClient::BouquetChannelList::iterator channel = channellist_radio.begin();
+				
+				for(; channel != channellist_radio.end();channel++)
+				{
+					if (channel->channel_id == timer->channel_id)
 					{
-						Parent->Zapit->getChannels(channellist_radio,CZapitClient::MODE_RADIO);
+						strncpy(zAddData, channel->name, 20);
+						zAddData[20]=0;
+						break;
 					}
-					CZapitClient::BouquetChannelList::iterator channel = channellist_radio.begin();
-					for(; channel != channellist_radio.end();channel++)
-					{
-						if (channel->channel_id == timer->channel_id)
-						{
-							strncpy(zAddData, channel->name, 20);
-							zAddData[20]=0;
-							break;
-						}
-					}
-					if(channel == channellist_radio.end())
-						strcpy(zAddData,"Unbekannter Radiokanal");
 				}
-				else
-				{ //TV Kanal
-					if(channellist_tv.size()==0)
-					{
-						Parent->Zapit->getChannels(channellist_tv, CZapitClient::MODE_TV);
+
+				if (channel == channellist_radio.end())
+					strcpy(zAddData,"Unbekannter Radiokanal");
+
+			}
+			else
+			{
+				//TV Kanal
+				if (channellist_tv.size() == 0)
+					Parent->Zapit->getChannels(channellist_tv, CZapitClient::MODE_TV);
+
+				CZapitClient::BouquetChannelList::iterator channel = channellist_tv.begin();
+
+				for(; channel != channellist_tv.end();channel++)
+				{
+					if (channel->channel_id == timer->channel_id)	
+					{				
+						strncpy(zAddData, channel->name, 20);						
+						zAddData[20]=0;						
+						break;						
 					}
-					CZapitClient::BouquetChannelList::iterator channel = channellist_tv.begin();
-					for(; channel != channellist_tv.end();channel++)
-					{
-						if (channel->channel_id == timer->channel_id)
-						{
-							strncpy(zAddData, channel->name, 20);
-							zAddData[20]=0;
-							break;
-						}
-					}
-					if(channel == channellist_tv.end())
-						strcpy(zAddData,"Unbekannter TV-Kanal");
 				}
+
+				if (channel == channellist_tv.end())
+					strcpy(zAddData,"Unbekannter TV-Kanal");
+
 			}
 			break;
 			
-			case CTimerd::TIMER_STANDBY :
-            {
-               sprintf(zAddData,"Standby: %s",(timer->standby_on ? "ON" : "OFF"));
-            }
-            break;
-			case CTimerd::TIMER_REMIND :
-			{
-				strncpy(zAddData, timer->message, 20);
-				zAddData[20]=0;
-			}
-         default:{}
+		case CTimerd::TIMER_STANDBY:
+			sprintf(zAddData,"Standby: %s",(timer->standby_on ? "ON" : "OFF"));
+			break;
+
+		case CTimerd::TIMER_REMIND :
+			strncpy(zAddData, timer->message, 20);
+			zAddData[20]=0;
+			break;
+
+		default:
+			break;
 		}
-		request->printf("%d %d %d %d %d %d %d %s\n",timer->eventID,(int)timer->eventType,
-             (int)timer->eventRepeat,(int)timer->announceTime,
-             (int)timer->alarmTime,(int)timer->stopTime, zAddData);
+
+		request->printf("%d %d %d %d %d %d %d %s\n",
+			timer->eventID,
+			(int)timer->eventType,
+			(int)timer->eventRepeat,
+			(int)timer->announceTime,
+			(int)timer->alarmTime,
+			(int)timer->stopTime,
+			zAddData);
 	}
 }
+

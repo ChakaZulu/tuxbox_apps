@@ -1,9 +1,9 @@
 /*
-	webserver  -   DBoxII-Project
+	nhttpd  -  DBoxII-Project
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: debug.h,v 1.5 2002/12/09 17:59:27 dirch Exp $
+	$Id: debug.h,v 1.6 2003/03/14 07:20:01 obi Exp $
 
 	License: GPL
 
@@ -22,42 +22,51 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __nhttpd_debug__
-#define __nhttpd_debug__
+#ifndef __nhttpd_debug_h__
+#define __nhttpd_debug_h__
 
-#include <stdio.h>
+// system
 #include <pthread.h>
-#include <stdarg.h>
 
+// nhttpd
 #include "request.h"
 
 class CDEBUG
 {
-	private:
+	protected:
 		pthread_mutex_t Log_mutex;
 		char *buffer;
 		FILE *Logfile;
 
-		CDEBUG();
-		~CDEBUG();
+		static CDEBUG *instance;
+
+		CDEBUG(void);
+		~CDEBUG(void);
 
 	public:
 		bool Debug;
 		bool Log;
 		bool Verbose;
 
-		static CDEBUG* getInstance();
-		void printf( const char *fmt, ... );
-		void debugprintf( const char *fmt, ... );
-		void logprintf( const char *fmt, ... );
+		static CDEBUG *getInstance(void);
+		static void deleteInstance(void);
+
+		void printf(const char *fmt, ...);
+		void debugprintf(const char *fmt, ...);
+		void logprintf(const char *fmt, ...);
 		void LogRequest(CWebserverRequest *Request);
-
-
 };
 
-#define aprintf(fmt, args...) {CDEBUG::getInstance()->printf( "[nhttpd] " fmt, ## args);}
-#define dprintf(fmt, args...) {CDEBUG::getInstance()->debugprintf( "[nhttpd] " fmt, ## args);}
-#define lprintf(fmt, args...) {CDEBUG::getInstance()->logprintf( "[nhttpd] " fmt, ## args);}
-#define dperror(str) {perror("[nhttpd] " str);}
+#define aprintf(fmt, args...) \
+	do { CDEBUG::getInstance()->printf("[nhttpd] " fmt, ## args); } while (0)
 
-#endif
+#define dprintf(fmt, args...) \
+	do { CDEBUG::getInstance()->debugprintf("[nhttpd] " fmt, ## args); } while (0)
+
+#define lprintf(fmt, args...) \
+	do { CDEBUG::getInstance()->logprintf("[nhttpd] " fmt, ## args); } while (0)
+
+#define dperror(str) \
+	do { perror("[nhttpd] " str); } while (0)
+
+#endif /* __nhttpd_debug_h__ */

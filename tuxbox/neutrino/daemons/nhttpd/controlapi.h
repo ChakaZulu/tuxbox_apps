@@ -1,9 +1,9 @@
 /*      
-        webserver  -   DBoxII-Project
+        nhttpd  -  DBoxII-Project
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: controlapi.h,v 1.3 2002/10/18 12:42:13 thegoodguy Exp $
+        $Id: controlapi.h,v 1.4 2003/03/14 07:20:01 obi Exp $
 
         License: GPL
 
@@ -24,23 +24,18 @@
 */
 
 
-#ifndef __controlapi__
-#define __controlapi__
-
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
+#ifndef __nhttpd_controlapi_h__
+#define __nhttpd_controlapi_h__
 
 #include "request.h"
 #include "webdbox.h"
 
-
 class CControlAPI
 {
-	private:
+	protected:
 		CWebDbox * Parent;
 
-// send functions for ExecuteCGI (controld api)
+		// send functions for ExecuteCGI (controld api)
 		void SendEventList(CWebserverRequest *request,t_channel_id channel_id);
 		void SendcurrentVAPid(CWebserverRequest* request);
 		void SendSettings(CWebserverRequest* request);
@@ -50,8 +45,7 @@ class CControlAPI
 		void SendChannelList(CWebserverRequest *request);
 		void SendTimers(CWebserverRequest* request);
 
-
-// CGI functions for ExecuteCGI
+		// CGI functions for ExecuteCGI
 		bool TimerCGI(CWebserverRequest *request);
 		bool SetModeCGI(CWebserverRequest *request);
 		bool StandbyCGI(CWebserverRequest *request);
@@ -73,9 +67,8 @@ class CControlAPI
 		bool ZaptoCGI(CWebserverRequest *request);
 
 	public:
-		CControlAPI(CWebDbox *parent){Parent = parent;};
-		~CControlAPI(){};
-		bool Execute(CWebserverRequest* request);
+		CControlAPI(CWebDbox *parent) { Parent = parent; };
+		bool Execute(CWebserverRequest *request);
 };
 
-#endif
+#endif /* __nhttpd_controlapi_h__ */

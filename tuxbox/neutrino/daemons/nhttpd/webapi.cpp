@@ -1,9 +1,9 @@
 /*
-	webserver  -   DBoxII-Project
+	nhttpd  -  DBoxII-Project
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.34 2003/03/06 21:45:31 obi Exp $
+	$Id: webapi.cpp,v 1.35 2003/03/14 07:20:01 obi Exp $
 
 	License: GPL
 
@@ -25,6 +25,7 @@
 
 #include <neutrinoMessages.h>
 
+#include <unistd.h>
 
 #include "webapi.h"
 #include "debug.h"
@@ -363,7 +364,7 @@ bool CWebAPI::Switch(CWebserverRequest* request)
 	if(request->ParameterList.size() > 0)
 	{
 
-		if(request->ParameterList["zapto"] != "")					// zap to channel and redirect to channel/bouquet list
+		if(request->ParameterList["zapto"] != "")				// zap to channel and redirect to channel/bouquet list
 		{
 			if(!request->Authenticate())
 				return false;
@@ -378,6 +379,20 @@ bool CWebAPI::Switch(CWebserverRequest* request)
 			return true;
 		}
 
+		if(request->ParameterList["zaptosubservice"] != "")			// zap to sub service
+		{
+			if(!request->Authenticate())
+				return false;
+
+			Parent->ZapToSubService(request->ParameterList["zaptosubservice"]);
+			request->SocketWriteLn("HTTP/1.0 302 Moved Temporarily");
+
+			if(request->ParameterList["bouquet"] != "")
+				request->SocketWriteLn("Location: channellist.dbox2?bouquet="+request->ParameterList["bouquet"]+"#akt");
+			else
+				request->SocketWriteLn("Location: channellist.dbox2#akt");
+			return true;
+		}
 
 		if(request->ParameterList["1"] == "shutdown")				// turn box off
 		{
@@ -529,25 +544,77 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 	CZapitClient::BouquetChannelList::iterator channel = channellist->begin();
 	for (; channel != channellist->end();channel++)
 	{
-		classname = (i++ & 1)?'a':'b';
+		classname = (i++ & 1) ? 'a' : 'b';
 		if (channel->channel_id == current_channel)
 			classname = 'c';
 
 		string bouquetstr = (BouquetNr >= 0) ? "&bouquet=" + itoa(BouquetNr) : "";
 		
 		request->printf("<TR><TD colspan=2 CLASS=\"%c\">",classname);
-		request->printf("%s<A CLASS=\"clist\" HREF=\"switch.dbox2?zapto=%d%s\">%d. %s</A>&nbsp;<A HREF=\"epg.dbox2?eventlist=%u\">%s</A>",((channel->channel_id == current_channel)?"<A NAME=akt></a>":" "),channel->channel_id,bouquetstr.c_str(),channel->nr,channel->name,channel->channel_id,((Parent->ChannelListEvents[channel->channel_id])?"<img border=0 src=\"../images/elist.gif\" ALT=\"Programmvorschau\">":""));
+		request->printf("%s<A CLASS=\"clist\" HREF=\"switch.dbox2?zapto=%d%s\">%d. %s%s</A>&nbsp;<A HREF=\"epg.dbox2?eventlist=%u\">%s</A>",
+				((channel->channel_id == current_channel) ? "<A NAME=akt></a>" : " "),
+				channel->channel_id,
+				bouquetstr.c_str(),
+				channel->nr,
+				channel->name,
+				(channel->service_type == ST_NVOD_REFERENCE_SERVICE) ? " (NVOD)" : "",
+				channel->channel_id,
+				((Parent->ChannelListEvents[channel->channel_id]) ? "<img border=0 src=\"../images/elist.gif\" ALT=\"Programmvorschau\">" : ""));
 
 		if (channel->channel_id == current_channel)
 			request->printf("&nbsp;&nbsp;<A HREF=\"/fb/info.dbox2\"><IMG SRC=\"/images/streaminfo.png\" BORDER=0 ALT=\"Streaminfo\"></A>");
+
 		request->printf("</TD></TR>");
 
-		CChannelEvent *event = Parent->ChannelListEvents[channel->channel_id];
-
-		bool has_current_next = Parent->Sectionsd->getCurrentNextServiceKey(channel->channel_id, currentNextInfo);
-
-		if (event)
+		CChannelEvent *event;
+		
+		if (channel->service_type == ST_NVOD_REFERENCE_SERVICE)
 		{
+			CSectionsdClient::NVODTimesList nvod_list;
+
+			if (Parent->Sectionsd->getNVODTimesServiceKey(channel->channel_id, nvod_list))
+			{
+				CZapitClient::subServiceList subServiceList;
+				
+				for (CSectionsdClient::NVODTimesList::iterator ni = nvod_list.begin(); ni != nvod_list.end(); ni++)
+				{
+					CZapitClient::commandAddSubServices cmd;
+					CEPGData epg;
+					
+					cmd.original_network_id = ntohs(ni->original_network_id);
+					cmd.service_id = ntohs(ni->service_id);
+					cmd.transport_stream_id = ntohs(ni->transport_stream_id);
+
+					t_channel_id channel_id = (cmd.original_network_id << 16) | cmd.service_id;
+					
+					timeString(ni->zeit.startzeit, timestr); // FIXME: time is wrong (at least on little endian)!
+
+					Parent->Sectionsd->getActualEPGServiceKey(channel_id, &epg); // FIXME: der scheissendreck geht nit!!!
+
+					request->printf("<TR><TD align=left width=31 CLASS=\"%cepg\">&nbsp;</TD>", classname);
+					request->printf("<TD CLASS=\"%cepg\">%s&nbsp;", classname, timestr);
+					request->printf("%s<A HREF=\"switch.dbox2?zaptosubservice=%d%s\">%04x:%04x:%04x %s</A>", // FIXME: get name
+							(channel_id == current_channel) ? "<A NAME=akt></a>" : " ",
+							channel_id,
+							bouquetstr.c_str(),
+							cmd.transport_stream_id,
+							cmd.original_network_id,
+							cmd.service_id,
+							epg.title.c_str());
+					request->printf("</TD></TR>");
+
+					subServiceList.push_back(cmd);
+				}
+
+				if (subServiceList.begin() != subServiceList.end())
+					Parent->Zapit->setSubServices(subServiceList);
+			}
+		}
+
+		
+		else if ((event = Parent->ChannelListEvents[channel->channel_id]))
+		{
+			bool has_current_next = Parent->Sectionsd->getCurrentNextServiceKey(channel->channel_id, currentNextInfo);
 			prozent = 100 * (time(NULL) - event->startTime) / event->duration;
 			timeString(event->startTime, timestr);
 			request->printf("<TR><TD align=left width=31 CLASS=\"%cepg\">",classname);
@@ -556,7 +623,9 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 			request->printf("<TD CLASS=\"%cepg\">",classname);
 			request->printf("<A CLASS=\"clistsmall\" HREF=epg.dbox2?epgid=%llx>",event->eventID);
 //			request->printf("<A CLASS=\"clistsmall\" HREF=epg.dbox2?epgid=%llx&startzeit=%lx>",event->eventID,event->startTime);
-			request->printf("%s&nbsp;%s&nbsp;", timestr, event->description.c_str()); 
+			if ((event) && (event->description.size()) && (event->description.c_str()))
+				request->printf("%s&nbsp;%s&nbsp;", timestr, event->description.c_str()); 
+
 			request->printf("<font size=-3><NOBR>(%ld von %d min, %d%%)</NOBR></font></a>", (time(NULL) - event->startTime)/60,event->duration / 60,prozent);
 
 			if ((has_current_next) && (currentNextInfo.flags & CSectionsdClient::epgflags::has_next)) {

@@ -1,9 +1,9 @@
 /*      
-	webserver  -   DBoxII-Project
+	nhttpd  -  DBoxII-Project
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: debug.cpp,v 1.3 2002/12/09 17:59:27 dirch Exp $
+	$Id: debug.cpp,v 1.4 2003/03/14 07:20:01 obi Exp $
 
 	License: GPL
 
@@ -23,68 +23,89 @@
 
 */
 
+// c++
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
 
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-
+// nhttpd
 #include "debug.h"
 
+//-------------------------------------------------------------------------
+
+CDEBUG *CDEBUG::instance = NULL;
 
 //-------------------------------------------------------------------------
 
-CDEBUG* CDEBUG::getInstance()
+CDEBUG *CDEBUG::getInstance(void)
 {
-	static CDEBUG* cdebug = NULL;
-	if(cdebug == NULL)
-	{
-		cdebug = new CDEBUG();
-	}
-	return cdebug;
+	if (!instance)
+		instance = new CDEBUG();
+
+	return instance;
 }
+
 //-------------------------------------------------------------------------
 
-CDEBUG::CDEBUG()
+void CDEBUG::deleteInstance(void)
+{
+	if (instance)
+		delete instance;
+
+	instance = NULL;
+}
+
+//-------------------------------------------------------------------------
+
+CDEBUG::CDEBUG(void)
 {
 	Debug = false;
 	Log = false;
 	Verbose = false;
-	Logfile = 0;
-	buffer = new char[1024*4];
-	pthread_mutex_init( &Log_mutex, NULL );
+	Logfile = NULL;
+	buffer = new char[1024 * 4];
+	pthread_mutex_init(&Log_mutex, NULL);
 }
+
 //-------------------------------------------------------------------------
 
-CDEBUG::~CDEBUG()
+CDEBUG::~CDEBUG(void)
 {
-	if(Logfile > 0)
+	if (Logfile)
 	{
 		fclose(Logfile);
-		Logfile = 0;
+		Logfile = NULL;
 	}
+
 	delete[] buffer;
 }
 //-------------------------------------------------------------------------
 
 void CDEBUG::LogRequest(CWebserverRequest *Request)
 {
-	if(Log || Verbose)
+	if ((Log) || (Verbose))
 	{
-		if(Log && Logfile == 0)
+		if ((Log) && (!Logfile))
 			Logfile = fopen("/tmp/httpd_log","a");
-		pthread_mutex_lock( &Log_mutex );
-		string method;
-		switch(Request->Method)
-		{
-			case M_GET :	method = "GET";
-				break;
-			case M_POST	:	method = "POST";
-				break;
-			case M_HEAD :	method = "HEAD";
-				break;
-			default :
-				method = "unknown";
+
+		pthread_mutex_lock(&Log_mutex);
+		std::string method;
+
+		switch (Request->Method) {
+		case M_GET:
+			method = "GET";
+			break;
+		case M_POST:
+			method = "POST";
+			break;
+		case M_HEAD:
+			method = "HEAD";
+			break;
+		default:
+			method = "unknown";
+			break;
 		}
+
 		struct tm *time_now;
 		time_t now = time(NULL);
 		char zeit[80];
@@ -92,22 +113,22 @@ void CDEBUG::LogRequest(CWebserverRequest *Request)
 		time_now = localtime(&now);
 		strftime(zeit, 80, "[%d/%b/%Y:%H:%M:%S]", time_now);
 
-
 		::sprintf(buffer,"%s %s %s %d %s %s\n",
 			Request->Client_Addr.c_str(),
-				zeit,
-					method.c_str(),
-						Request->HttpStatus,
-							Request->URL.c_str(),
-//								Request->ContentType.c_str(),
-									Request->Param_String.c_str());
+			zeit,
+			method.c_str(),
+			Request->HttpStatus,
+			Request->URL.c_str(),
+			//Request->ContentType.c_str(),
+			Request->Param_String.c_str());
 
-		if(Log && Logfile > 0)
-			::fprintf(Logfile,"%s",buffer);
-		if(Verbose)
+		if ((Log) && (Logfile))
+			::fprintf(Logfile, "%s", buffer);
+
+		if (Verbose)
 			::printf("%s",buffer);
 
-		pthread_mutex_unlock( &Log_mutex );
+		pthread_mutex_unlock(&Log_mutex);
 	}
 }
 

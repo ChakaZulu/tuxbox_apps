@@ -1,9 +1,9 @@
 /*      
-        webserver  -   DBoxII-Project
+        nhttpd  -  DBoxII-Project
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: webapi.h,v 1.6 2003/03/06 21:45:31 obi Exp $
+        $Id: webapi.h,v 1.7 2003/03/14 07:20:01 obi Exp $
 
         License: GPL
 
@@ -24,49 +24,44 @@
 */
 
 
-#ifndef __webapi__
-#define __webapi__
+#ifndef __nhttpd_webapi_h__
+#define __nhttpd_webapi_h__
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
+#include <ctime>
 #include <sys/timeb.h>
 
 #include "request.h"
 #include "webdbox.h"
 
-
-using namespace std;
-
 //-------------------------------------------------------------------------
+
 class CWebAPI
 {
-	private:
-		CWebDbox * Parent;
+	protected:
+		CWebDbox *Parent;
 
-// show functions for Execute (web api)
-		bool ShowDboxMenu(CWebserverRequest* request);
-		bool ShowTimerList(CWebserverRequest* request);
-		bool ShowEventList(CWebserverRequest* request, t_channel_id channel_id);
-		bool ShowBouquet(CWebserverRequest *request,int BouquetNr = -1);
+		// show functions for Execute (web api)
+		bool ShowDboxMenu(CWebserverRequest *request);
+		bool ShowTimerList(CWebserverRequest *request);
+		bool ShowEventList(CWebserverRequest *request, t_channel_id channel_id);
+		bool ShowBouquet(CWebserverRequest *request, int BouquetNr = -1);
 		bool ShowBouquets(CWebserverRequest *request);
-		bool ShowControlpanel(CWebserverRequest* request);
-		bool ShowCurrentStreamInfo(CWebserverRequest* request);
-		bool ShowEpg(CWebserverRequest* request,string EpgID,string Startzeit = "");
-		bool ShowEPG(CWebserverRequest *request,string Title, string Info1, string Info2);
+		bool ShowControlpanel(CWebserverRequest *request);
+		bool ShowCurrentStreamInfo(CWebserverRequest *request);
+		bool ShowEpg(CWebserverRequest *request, std::string EpgID, std::string Startzeit = "");
+		bool ShowEPG(CWebserverRequest *request, std::string Title, std::string Info1, std::string Info2);
 		bool ShowActualEpg(CWebserverRequest *request);
 
-		bool Test(CWebserverRequest* request);
-		bool Timer(CWebserverRequest* request);
-		bool Dbox(CWebserverRequest* request);
-		bool Channellist(CWebserverRequest* request);
-		bool Controlpanel(CWebserverRequest* request);
-		bool ActualEPG(CWebserverRequest* request);
-		bool EPG(CWebserverRequest* request);
-		bool Switch(CWebserverRequest* request);
+		bool Test(CWebserverRequest *request);
+		bool Timer(CWebserverRequest *request);
+		bool Dbox(CWebserverRequest *request);
+		bool Channellist(CWebserverRequest *request);
+		bool Controlpanel(CWebserverRequest *request);
+		bool ActualEPG(CWebserverRequest *request);
+		bool EPG(CWebserverRequest *request);
+		bool Switch(CWebserverRequest *request);
 
-		void loadTimerMain(CWebserverRequest* request);
+		void loadTimerMain(CWebserverRequest *request);
 		void correctTime(struct tm *zt);
 		void showTimer(CWebserverRequest *request);
 		void doModifyTimer(CWebserverRequest *request);
@@ -75,13 +70,11 @@ class CWebAPI
 		void doNewTimer(CWebserverRequest *request);
 		void timeString(time_t time, char string[6]);
 
-
 	public:
-		CWebAPI(CWebDbox *parent){Parent = parent;};
-		~CWebAPI(){};
+		CWebAPI(CWebDbox *parent) { Parent = parent; }
 		bool Execute(CWebserverRequest* request);
 
 	friend class CControlAPI;
 };
 
-#endif
+#endif /* __nhttpd_webapi_h__ */

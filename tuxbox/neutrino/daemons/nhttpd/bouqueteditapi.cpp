@@ -1,9 +1,9 @@
 /*
-	webserver  -   DBoxII-Project
+	nhttpd  -  DBoxII-Project
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: bouqueteditapi.cpp,v 1.12 2003/02/18 10:29:11 dirch Exp $
+	$Id: bouqueteditapi.cpp,v 1.13 2003/03/14 07:20:01 obi Exp $
 
 	License: GPL
 
@@ -23,12 +23,11 @@
 
 */
 
-
 #include "bouqueteditapi.h"
 #include "debug.h"
 
-
 //-------------------------------------------------------------------------
+
 bool CBouqueteditAPI::Execute(CWebserverRequest* request)
 {
 	unsigned operation = 0;

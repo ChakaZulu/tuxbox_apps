@@ -1,23 +1,22 @@
 SUBDIRS = data
 
 INCLUDES = \
-	@ZAPIT_CFLAGS@ \
+	-I$(top_srcdir)/lib \
 	-I$(top_srcdir)/src \
+	@ZAPIT_CFLAGS@ \
 	@CONNECTION_CFLAGS@ \
-	@EVENTSERVER_CFLAGS@ \
-	-I$(top_srcdir)/lib
-
+	@EVENTSERVER_CFLAGS@
 
 bin_PROGRAMS = nhttpd
 
 nhttpd_SOURCES = \
-	webserver.cpp nhttpd.cpp webdbox.cpp helper.cpp \
-	request.cpp webapi.cpp controlapi.cpp bouqueteditapi.cpp debug.cpp
+	controlapi.cpp bouqueteditapi.cpp debug.cpp helper.cpp \
+	nhttpd.cpp request.cpp webapi.cpp webdbox.cpp webserver.cpp
 
 nhttpd_LDADD = \
 	$(top_builddir)/lib/controldclient/libcontroldclient.la \
-	$(top_builddir)/lib/timerdclient/libtimerdclient.la \
 	$(top_builddir)/lib/sectionsdclient/libsectionsdclient.la \
+	$(top_builddir)/lib/timerdclient/libtimerdclient.la \
 	@CONFIGFILE_LIBS@ \
 	@CONNECTION_LIBS@ \
 	@ZAPIT_LIBS@ \

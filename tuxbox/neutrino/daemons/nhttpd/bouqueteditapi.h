@@ -1,9 +1,9 @@
 /*      
-        webserver  -   DBoxII-Project
+        nhttpd  -  DBoxII-Project
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: bouqueteditapi.h,v 1.3 2002/10/15 20:39:47 woglinde Exp $
+        $Id: bouqueteditapi.h,v 1.4 2003/03/14 07:20:01 obi Exp $
 
         License: GPL
 
@@ -23,43 +23,30 @@
 
 */
 
-
-#ifndef __bouqueteditapi__
-#define __bouqueteditapi__
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <sys/timeb.h>
+#ifndef __nhttpd_bouqueteditapi_h__
+#define __nhttpd_bouqueteditapi_h__
 
 #include "request.h"
 #include "webdbox.h"
 
-
-using namespace std;
-
-//-------------------------------------------------------------------------
 class CBouqueteditAPI
 {
-	private:
-		CWebDbox * Parent;
+	protected:
+		CWebDbox *Parent;
 
-	bool showBouquets(CWebserverRequest* request);
-	bool addBouquet(CWebserverRequest* request);
-	bool moveBouquet(CWebserverRequest* request);
-	bool deleteBouquet(CWebserverRequest* request);
-	bool saveBouquet(CWebserverRequest* request);
-	bool renameBouquet(CWebserverRequest* request);
-	bool editBouquet(CWebserverRequest* request);
-	bool changeBouquet(CWebserverRequest* request);
-	bool setBouquet(CWebserverRequest* request);
-
+		bool showBouquets(CWebserverRequest *request);
+		bool addBouquet(CWebserverRequest *request);
+		bool moveBouquet(CWebserverRequest *request);
+		bool deleteBouquet(CWebserverRequest *request);
+		bool saveBouquet(CWebserverRequest *request);
+		bool renameBouquet(CWebserverRequest *request);
+		bool editBouquet(CWebserverRequest *request);
+		bool changeBouquet(CWebserverRequest *request);
+		bool setBouquet(CWebserverRequest *request);
 
 	public:
-		CBouqueteditAPI(CWebDbox *parent){Parent = parent;};
-		~CBouqueteditAPI(){};
-		bool Execute(CWebserverRequest* request);
+		CBouqueteditAPI(CWebDbox *parent) { Parent = parent; };
+		bool Execute(CWebserverRequest *request);
 };
 
-#endif
+#endif /* __nhttpd_bouqueteditapi_h__ */

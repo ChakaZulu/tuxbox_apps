@@ -1,9 +1,9 @@
 /*
-	webserver  -   DBoxII-Project
+	nhttpd  -  DBoxII-Project
 
 	Copyright (C) 2001/2002 Dirk Szymanski
 
-	$ID$
+	$Id: nhttpd.cpp,v 1.18 2003/03/14 07:20:01 obi Exp $
 
 	License: GPL
 
@@ -23,61 +23,70 @@
 
 	// Revision 1.1  11.02.2002 20:20  dirch
 	// Revision 1.2  22.03.2002 20:20  dirch
-	// Revision 2.0b  20.09.2002 16:20  dirch
+	// Revision 2.0b 20.09.2002 16:20  dirch
+	// Revision 2.0c 14.03.2003 05:00  obi
 
 */
-#define NHTTPD_VERSION "2.0b"
 
-#include <signal.h>
- 
-#include <sys/types.h>
-#include <stdio.h>
+#define NHTTPD_VERSION "2.0c"
 
-#include <config.h>
+// c++
+#include <csignal>
 
+// system
+#include <unistd.h>
+
+// nhttpd
 #include "webserver.h"
-#include "webdbox.h"
 #include "debug.h"
 
+//-------------------------------------------------------------------------
 
-using namespace std;
+static CWebserver *webserver = NULL;
 
 //-------------------------------------------------------------------------
 
-CWebserver* webserver = NULL;
-
-
-//-------------------------------------------------------------------------
-
-void sig_catch(int msignal)
+static void sig_catch(int msignal)
 {
-	switch(msignal)
-	{
-		case SIGPIPE:
-                                aprintf("got signal PIPE, nice!\n");
-			break;
-
-		case SIGHUP :
-				aprintf("got signal HUP, reading config\n");
-				if (webserver)
-					webserver->ReadConfig();
-			break;
-/*
-		case SIGUSR1 :
-				aprintf("got signal USR1, toogling Debug\n");
-				CDEBUG::getInstance()->Debug = !CDEBUG:getInstance()->Debug;
-			break;
-*/
-		default:
-				aprintf("stop requested......\n");
-				if (webserver) {
-					webserver->Stop();
-					delete(webserver);
-				}
-				exit(0);
+	switch (msignal) {
+	case SIGPIPE:
+		aprintf("got signal PIPE, nice!\n");
+		break;
+	case SIGHUP:
+		aprintf("got signal HUP, reading config\n");
+		if (webserver)
+			webserver->ReadConfig();
+		break;
+	default:
+		aprintf("stop requested......\n");
+		if (webserver) {
+			webserver->Stop();
+			delete webserver;
+			webserver = NULL;
+		}
+		exit(EXIT_SUCCESS); //FIXME: return to main() some way...
 	}
-	signal(msignal, sig_catch);
 }
+
+//-------------------------------------------------------------------------
+
+static void version(FILE *dest)
+{
+	fprintf(dest, "nhttpd - Neutrino Webserver v%s\n", NHTTPD_VERSION);
+}
+
+//-------------------------------------------------------------------------
+
+static void usage(FILE *dest)
+{
+	version(dest);
+	fprintf(dest, "command line parameters:\n");
+	fprintf(dest, "-d, --debug    enable debugging code (implies -f)\n");
+	fprintf(dest, "-f, --fork     do not fork\n");
+	fprintf(dest, "-h, --help     display this text and exit\n\n");
+	fprintf(dest, "-v, --version  display version and exit\n");
+}
+
 //-------------------------------------------------------------------------
 
 int main(int argc, char **argv)
@@ -85,85 +94,77 @@ int main(int argc, char **argv)
 	bool debug = false;
 	bool do_fork = true;
 
-	int i;
-
-	for(i = 1; i < argc; i++)
+	for (int i = 1; i < argc; i++)
 	{
-
-		if (strncmp(argv[i], "-d", 2) == 0)
+		if ((!strncmp(argv[i], "-d", 2)) || (!strncmp(argv[i], "--debug", 7)))
 		{
 			CDEBUG::getInstance()->Debug = true;
 			do_fork = false;
 		}
-		else 
-
-		if (strncmp(argv[i], "-f", 2) == 0)
+		else if ((!strncmp(argv[i], "-f", 2)) || (!strncmp(argv[i], "--fork", 6)))
 		{
 			do_fork = false;
 		}
-		else if (strncmp(argv[i],"--version", 9) == 0) 
+		else if ((!strncmp(argv[i], "-h", 2)) || (!strncmp(argv[i], "--help", 6)))
 		{
-			printf("nhttp - Neutrino Webserver\n");
-			printf("Version: %s\n", NHTTPD_VERSION);
-			return 0;
+			usage(stdout);
+			return EXIT_SUCCESS;
 		}
-		else if ((strncmp(argv[i], "--help", 6) == 0) || (strncmp(argv[i], "-h", 2) == 0))
+		else if ((!strncmp(argv[i], "-v", 2)) || (!strncmp(argv[i],"--version", 9))) 
 		{
-			printf("nhttpd parameters:\n");
-			printf("-d\t\tdebug\n");
-			printf("-f\t\tdo not fork\n");
-			printf("--version\tversion\n");
-			printf("--help\t\tthis text\n\n");
-			return 0;
+			version(stdout);
+			return EXIT_SUCCESS;
+		}
+		else
+		{
+			usage(stderr);
+			return EXIT_FAILURE;
 		}
 	}
 
-	signal(SIGPIPE,sig_catch);
-	signal(SIGINT,sig_catch);
-	signal(SIGHUP,sig_catch);
-//	signal(SIGUSR1,sig_catch);
-	signal(SIGTERM,sig_catch);
+	signal(SIGPIPE, sig_catch);
+	signal(SIGINT, sig_catch);
+	signal(SIGHUP, sig_catch);
+	signal(SIGTERM, sig_catch);
 
 	aprintf("Neutrino HTTP-Server starting..\n");
-	
+
 	if (do_fork)
 	{
-		switch (fork())
-		{
+		switch (fork()) {
 		case -1:
 			dperror("fork");
 			return -1;
 		case 0:
 			break;
 		default:
-			return 0;
+			return EXIT_SUCCESS;
 		}
 
 		if (setsid() == -1)
 		{
 			dperror("[nhttpd] Error setsid");
-			return -1;
+			return EXIT_FAILURE;
 		}
 	}
 
-	if ((webserver = new CWebserver(debug)) != NULL)
+	if ((webserver = new CWebserver(debug)))
 	{
-			if (webserver->Start())
-			{
-//				if(debug) printf("httpd gestartet\n");
-				webserver->DoLoop();
-				webserver->Stop();
-			}
+		if (webserver->Start())
+		{
+			webserver->DoLoop();
+			webserver->Stop();
+		}
 	}
 	else
 	{
 		aprintf("Error initializing nhttpd\n");
-		return -1;
+		return EXIT_FAILURE;
 	}
 
 	webserver->Stop();
-        delete(webserver);
+        delete webserver;
 
-	return 0; 
+	return EXIT_SUCCESS; 
 }
 

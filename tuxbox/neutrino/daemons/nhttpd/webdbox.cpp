@@ -1,9 +1,9 @@
 /*
-	webserver  -   DBoxII-Project
+	nhttpd  -  DBoxII-Project
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.47 2003/03/03 03:40:05 obi Exp $
+	$Id: webdbox.cpp,v 1.48 2003/03/14 07:20:01 obi Exp $
 
 	License: GPL
 
@@ -23,63 +23,63 @@
 
 */
 
+// c++
+#include <cstdlib>
+#include <cstring>
 
-#include <stdlib.h>
-#include <string.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/in_systm.h>
-#include <netinet/ip.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <stdio.h>
-
+// tuxbox
 #include <neutrinoMessages.h>
 
-#include "webdbox.h"
-#include "webserver.h"
-#include "request.h"
-#include "helper.h"
+// nhttpd
 #include "debug.h"
-
-#define SA struct sockaddr
-#define SAI struct sockaddr_in
-
+#include "webdbox.h"
 
 //-------------------------------------------------------------------------
+
 void CWebDbox::UpdateBouquets(void)
 {
 	BouquetList.clear();
-	Zapit->getBouquets(BouquetList,true); 
+	Zapit->getBouquets(BouquetList, true); 
 
-	for(unsigned int i = 1; i <= BouquetList.size();i++)
+	for (unsigned int i = 1; i <= BouquetList.size(); i++)
 		UpdateBouquet(i);
+
 	UpdateChannelList();
 }
+
 //-------------------------------------------------------------------------
 
 void CWebDbox::ZapTo(string target)
 {
 	t_channel_id channel_id = atoi(target.c_str());
-	if(channel_id == Zapit->getCurrentServiceID())
+	
+	if (channel_id == Zapit->getCurrentServiceID())
 	{
-//		printf("Kanal ist aktuell\n");
+		//printf("Kanal ist aktuell\n");
 		return;
 	}
+	
 	unsigned int status = Zapit->zapTo_serviceID(channel_id);
-	if(status != CZapitClient::ZAP_INVALID_PARAM)
+	
+	if (status != CZapitClient::ZAP_INVALID_PARAM)
 	{
-		if(status == CZapitClient::ZAP_IS_NVOD)
-		{
-			Zapit->zaptoNvodSubService(1);
-		}
-		Sectionsd->setServiceChanged(channel_id,false);
+		Sectionsd->setServiceChanged(channel_id, false);
 	}
 }
+
 //-------------------------------------------------------------------------
 
+void CWebDbox::ZapToSubService(string target)
+{
+	t_channel_id channel_id = atoi(target.c_str());
+
+	unsigned int status = Zapit->zapTo_subServiceID(channel_id);
+
+	if (status != CZapitClient::ZAP_INVALID_PARAM)
+	{
+		Sectionsd->setServiceChanged(channel_id, false);
+	}
+}
 
 //-------------------------------------------------------------------------
 // Konstruktor und destruktor
@@ -88,7 +88,7 @@ void CWebDbox::ZapTo(string target)
 CWebDbox::CWebDbox(CWebserver *server)
 {
 	Parent=server;
-//	standby_mode=false;
+	//standby_mode=false;
 
 	Controld = new CControldClient();
 	Sectionsd = new CSectionsdClient();
@@ -127,30 +127,24 @@ CWebDbox::CWebDbox(CWebserver *server)
 }
 //-------------------------------------------------------------------------
 
-CWebDbox::~CWebDbox()
+CWebDbox::~CWebDbox(void)
 {
-	if(BouqueteditAPI)
+	if (BouqueteditAPI)
 		delete BouqueteditAPI;
-	if(WebAPI)
+	if (WebAPI)
 		delete WebAPI;
-	if(ControlAPI)
+	if (ControlAPI)
 		delete ControlAPI;
-
-	if(Controld)
+	if (Controld)
 		delete Controld;
-	Controld = NULL;
-	if(Sectionsd)
+	if (Sectionsd)
 		delete Sectionsd;
-	Sectionsd = NULL;
-	if(Zapit)
+	if (Zapit)
 		delete Zapit;
-	Zapit = NULL;
-	if(Timerd)
+	if (Timerd)
 		delete Timerd;
-	Timerd = NULL;
-	if(EventServer)
+	if (EventServer)
 		delete EventServer;
-	EventServer = NULL;
 }
 
 //-------------------------------------------------------------------------
@@ -159,31 +153,33 @@ CWebDbox::~CWebDbox()
 
 bool CWebDbox::GetStreamInfo(int bitInfo[10])
 {
-	char *key,*tmpptr,buf[100];
-	int value, pos=0;
+	char *key, *tmpptr, buf[100];
+	int pos = 0;
 
-	FILE* fd = fopen("/proc/bus/bitstream", "rt");
+	memset(bitInfo, 0, sizeof(bitInfo));
 
-	if (fd==NULL)
+	FILE *fd = fopen("/proc/bus/bitstream", "rt");
+
+	if (fd == NULL)
 	{
 		dprintf("error while opening proc-bitstream\n" );
 		return false;
 	}
 
-	fgets(buf,29,fd);//dummy
-	while(!feof(fd))
+	fgets(buf, 29, fd); //dummy
+
+	while (!feof(fd))
 	{
-		if(fgets(buf,29,fd)!=NULL)
+		if (fgets(buf, 29, fd) != NULL)
 		{
-			buf[strlen(buf)-1]=0;
-			tmpptr=buf;
-			key=strsep(&tmpptr,":");
-			for(;tmpptr[0]==' ';tmpptr++);
-			value=atoi(tmpptr);
-			bitInfo[pos]= value;
-			pos++;
+			buf[strlen(buf) - 1] = 0;
+			tmpptr = buf;
+			key = strsep(&tmpptr,":");
+			for (; tmpptr[0] == ' '; tmpptr++);
+			bitInfo[pos++] = atoi(tmpptr);
 		}
 	}
+
 	fclose(fd);
 
 	return true;
@@ -191,56 +187,73 @@ bool CWebDbox::GetStreamInfo(int bitInfo[10])
 
 //-------------------------------------------------------------------------
 
-void CWebDbox::GetChannelEvents()
+bool CWebDbox::GetChannelEvents(void)
 {
 	eList = Sectionsd->getChannelEvents();
 	CChannelEventList::iterator eventIterator;
 
-    for( eventIterator = eList.begin(); eventIterator != eList.end(); eventIterator++ )
+	ChannelListEvents.clear();
+	
+	if (eList.begin() == eList.end())
+		return false;
+	
+	for (eventIterator = eList.begin(); eventIterator != eList.end(); eventIterator++)
 		ChannelListEvents[(*eventIterator).serviceID()] = &(*eventIterator);
+
+	return true;
 }
+
 //-------------------------------------------------------------------------
+
 string CWebDbox::GetServiceName(t_channel_id channel_id)
 {
-	for(unsigned int i = 0; i < TVChannelList.size();i++)
-		if( TVChannelList[i].channel_id == channel_id)
+	unsigned int i;
+
+	for (i = 0; i < TVChannelList.size(); i++)
+		if (TVChannelList[i].channel_id == channel_id)
 			return TVChannelList[i].name;
-	for(unsigned int i = 0; i < RadioChannelList.size();i++)
-		if( RadioChannelList[i].channel_id == channel_id)
+	for (i = 0; i < RadioChannelList.size(); i++)
+		if (RadioChannelList[i].channel_id == channel_id)
 			return RadioChannelList[i].name;
 	return "";
 }
 
-
 //-------------------------------------------------------------------------
-CZapitClient::BouquetChannelList * CWebDbox::GetBouquet(unsigned int BouquetNr, int Mode)
+
+CZapitClient::BouquetChannelList *CWebDbox::GetBouquet(unsigned int BouquetNr, int Mode)
 {
-int mode;
-	if(Mode == CZapitClient::MODE_CURRENT )
+	int mode;
+	
+	if (Mode == CZapitClient::MODE_CURRENT)
 		mode = Zapit->getMode();
 	else
 		mode = Mode;
 	
-	if(mode == CZapitClient::MODE_TV)
+	if (mode == CZapitClient::MODE_TV)
 		return &TVBouquetsList[BouquetNr];
 	else
 		return &RadioBouquetsList[BouquetNr];
 }
+
 //-------------------------------------------------------------------------
-CZapitClient::BouquetChannelList * CWebDbox::GetChannelList(int Mode)
+
+CZapitClient::BouquetChannelList *CWebDbox::GetChannelList(int Mode)
 {
-int mode;
-	if(Mode == CZapitClient::MODE_CURRENT )
+	int mode;
+	
+	if (Mode == CZapitClient::MODE_CURRENT)
 		mode = Zapit->getMode();
 	else
 		mode = Mode;
 	
-	if(mode == CZapitClient::MODE_TV)
+	if (mode == CZapitClient::MODE_TV)
 		return &TVChannelList;
 	else
 		return &RadioChannelList;
 }
+
 //-------------------------------------------------------------------------
+
 void CWebDbox::UpdateBouquet(unsigned int BouquetNr)
 {
 	TVBouquetsList[BouquetNr].clear();
@@ -248,6 +261,7 @@ void CWebDbox::UpdateBouquet(unsigned int BouquetNr)
 	Zapit->getBouquetChannels(BouquetNr - 1, TVBouquetsList[BouquetNr], CZapitClient::MODE_TV);
 	Zapit->getBouquetChannels(BouquetNr - 1, RadioBouquetsList[BouquetNr], CZapitClient::MODE_RADIO);
 }
+
 //-------------------------------------------------------------------------
 
 void CWebDbox::UpdateChannelList(void)
@@ -257,73 +271,96 @@ void CWebDbox::UpdateChannelList(void)
 	Zapit->getChannels(RadioChannelList, CZapitClient::MODE_RADIO);
 	Zapit->getChannels(TVChannelList, CZapitClient::MODE_TV);
 }
+
 //-------------------------------------------------------------------------
 
-void CWebDbox::timerEventType2Str(CTimerd::CTimerEventTypes type, char *str,int len)
+void CWebDbox::timerEventType2Str(CTimerd::CTimerEventTypes type, char *str, int len)
 {
-   switch(type)
-   {
-      case CTimerd::TIMER_SHUTDOWN : strncpy(str, "Shutdown",len);
-         break;
-      case CTimerd::TIMER_NEXTPROGRAM : strncpy(str, "Nächstes Programm", len);
-         break;
-      case CTimerd::TIMER_ZAPTO : strncpy(str, "Umschalten", len);
-         break;
-      case CTimerd::TIMER_STANDBY : strncpy(str, "Standby", len);
-         break;
-      case CTimerd::TIMER_RECORD : strncpy(str, "Aufnahme", len);
-         break;
-      case CTimerd::TIMER_REMIND : strncpy(str, "Erinnerung", len);
-         break;
-      case CTimerd::TIMER_SLEEPTIMER: strncpy(str, "Sleeptimer", len);
-         break;
-      default: strncpy(str, "Unbekannt", len);
-   }
-   str[len]=0;
+	switch (type) {
+	case CTimerd::TIMER_SHUTDOWN:
+		strncpy(str, "Shutdown", len);
+		break;
+	case CTimerd::TIMER_NEXTPROGRAM:
+		strncpy(str, "Nächstes Programm", len);
+		break;
+	case CTimerd::TIMER_ZAPTO:
+		strncpy(str, "Umschalten", len);
+		break;
+	case CTimerd::TIMER_STANDBY:
+		strncpy(str, "Standby", len);
+		break;
+	case CTimerd::TIMER_RECORD:
+		strncpy(str, "Aufnahme", len);
+		break;
+	case CTimerd::TIMER_REMIND:
+		strncpy(str, "Erinnerung", len);
+		break;
+	case CTimerd::TIMER_SLEEPTIMER:
+		strncpy(str, "Sleeptimer", len);
+		break;
+	default:
+		strncpy(str, "Unbekannt", len);
+		break;
+	}
+
+	str[len] = 0;
 }
+
 //-------------------------------------------------------------------------
-void CWebDbox::timerEventRepeat2Str(CTimerd::CTimerEventRepeat rep, char *str,int len)
+
+void CWebDbox::timerEventRepeat2Str(CTimerd::CTimerEventRepeat rep, char *str, int len)
 {
-   switch(rep)
-   {
-      case CTimerd::TIMERREPEAT_ONCE : strncpy(str, "einmal",len);
-         break;
-      case CTimerd::TIMERREPEAT_DAILY : strncpy(str, "täglich",len);
-         break;
-      case CTimerd::TIMERREPEAT_WEEKLY : strncpy(str, "wöchentlich",len);
-         break;
-      case CTimerd::TIMERREPEAT_BIWEEKLY : strncpy(str, "2-wöchentlich",len);
-         break;
-      case CTimerd::TIMERREPEAT_FOURWEEKLY : strncpy(str, "4-wöchentlich",len);
-         break;
-      case CTimerd::TIMERREPEAT_MONTHLY : strncpy(str, "monatlich",len);
-         break;
-      case CTimerd::TIMERREPEAT_BYEVENTDESCRIPTION : strncpy(str, "siehe event",len);
-         break;
-      case CTimerd::TIMERREPEAT_WEEKDAYS : strncpy(str, "wochentage",len);
-         break;
-		default: 
-			if(rep > CTimerd::TIMERREPEAT_WEEKDAYS)
-			{
-				str[0]=0;
-				if(rep & 0x200)
-					strcat(str,"Mo ");
-				if(rep & 0x400)
-					strcat(str,"Di ");
-				if(rep & 0x800)
-					strcat(str,"Mi ");
-				if(rep & 0x1000)
-					strcat(str,"Do ");
-				if(rep & 0x2000)
-					strcat(str,"Fr ");
-				if(rep & 0x4000)
-					strcat(str,"Sa ");
-				if(rep & 0x8000)
-					strcat(str,"So ");
-			}
-			else
-				strncpy(str, "Unbekannt", len);
-   }
-   str[len]=0;
+	switch (rep) {
+	case CTimerd::TIMERREPEAT_ONCE:
+		strncpy(str, "einmal", len);
+		break;
+	case CTimerd::TIMERREPEAT_DAILY:
+		strncpy(str, "täglich", len);
+		break;
+	case CTimerd::TIMERREPEAT_WEEKLY:
+		strncpy(str, "wöchentlich", len);
+		break;
+	case CTimerd::TIMERREPEAT_BIWEEKLY:
+		strncpy(str, "2-wöchentlich", len);
+		break;
+	case CTimerd::TIMERREPEAT_FOURWEEKLY:
+		strncpy(str, "4-wöchentlich", len);
+		break;
+	case CTimerd::TIMERREPEAT_MONTHLY:
+		strncpy(str, "monatlich", len);
+		break;
+	case CTimerd::TIMERREPEAT_BYEVENTDESCRIPTION:
+		strncpy(str, "siehe event", len);
+		break;
+	case CTimerd::TIMERREPEAT_WEEKDAYS:
+		strncpy(str, "wochentage", len);
+		break;
+	default:
+		if (rep > CTimerd::TIMERREPEAT_WEEKDAYS)
+		{
+			str[0] = 0;
+			
+			if (rep & 0x0200)
+				strcat(str,"Mo ");
+			if (rep & 0x0400)
+				strcat(str,"Di ");
+			if (rep & 0x0800)
+				strcat(str,"Mi ");
+			if (rep & 0x1000)
+				strcat(str,"Do ");
+			if (rep & 0x2000)
+				strcat(str,"Fr ");
+			if (rep & 0x4000)
+				strcat(str,"Sa ");
+			if (rep & 0x8000)
+				strcat(str,"So ");
+		}
+		else 
+		{
+			strncpy(str, "Unbekannt", len);
+		}
+	}
+
+	str[len] = 0;
 }
-//-------------------------------------------------------------------------
+
