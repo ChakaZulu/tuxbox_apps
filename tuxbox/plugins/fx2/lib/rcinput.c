@@ -9,6 +9,8 @@
 #include <draw.h>
 
 static	int				fd = -1;
+static	int				keydown=0;
+static	unsigned short	lastcode=0xee;
 		unsigned short	actcode=0xee;
 		int				doexit=0;
 		int				debug=0;
@@ -99,6 +101,7 @@ void		RcGetActCode( void )
 	int				x;
 	unsigned short	code = 0;
 static  unsigned short cw=0;
+	int				newkey=0;
 
 	x = read( fd, buf, 32 );
 	if ( x < 2 )
@@ -113,7 +116,25 @@ static  unsigned short cw=0;
 	code = translate(code);
 
 	if ( code == 0xee )
+	{
+		keydown=0;
 		return;
+	}
+	if ( !keydown )
+	{
+		newkey=1;
+	}
+	else
+	{
+		if ( lastcode == code )
+		{
+			actcode=0xee;
+			return;
+		}
+	}
+	lastcode=code;
+
+	keydown=1;
 
 	Debug("code=%04x\n",code);
 
