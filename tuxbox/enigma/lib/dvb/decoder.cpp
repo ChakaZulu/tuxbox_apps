@@ -882,7 +882,7 @@ int priorityApid(int apid)
 	int apid2 = apid;
 	apid = 0;
 
-	char *audiochannelspriority=0;
+	char *audiochannelspriority = 0;
 	eConfig::getInstance()->getKey("/extras/audiochannelspriority", audiochannelspriority);
 
 	eString audiochannel;
@@ -894,6 +894,7 @@ int priorityApid(int apid)
 		if (sapi)
 		{
 			std::list<eDVBServiceController::audioStream> &astreams(sapi->audioStreams);
+			audiochannels.clear();
 			audiochannels.str(eString(audiochannelspriority));
 			while (audiochannels && apid == 0)
 			{
