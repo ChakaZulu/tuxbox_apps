@@ -1,6 +1,7 @@
 <html>
 	<head>
 		<title>Add Timer Event</title>
+		<script language="javascript" type="text/javascript" src="window.js"></script>
 		<script language="javascript" type="text/javascript" src="timer.js"></script>
 	</head>
 	<body onLoad=init()>
