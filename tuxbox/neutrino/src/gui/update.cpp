@@ -138,7 +138,7 @@ bool CFlashUpdate::selectHttpImage(void)
 			startpos += 2;
 			endpos    = url.find('/', startpos);
 		}
-		cramfs_lists.push_back(url.substr(startpos, endpos));
+		cramfs_lists.push_back(url.substr(startpos, endpos - startpos));
 
 		SelectionWidget.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, cramfs_lists.rbegin()->c_str()));
 		
