@@ -4,8 +4,10 @@
 #include <config.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <errno.h>
 #include <sys/ioctl.h>
 #include <lib/dvb/dvbservice.h>
+#include <signal.h>
 
 #if HAVE_DVB_API_VERSION < 3
 #include <ost/dmx.h>
@@ -16,6 +18,8 @@
 #define DVR_DEV "/dev/dvb/adapter0/dvr1"
 #define DEMUX1_DEV "/dev/dvb/adapter0/demux1"
 #endif
+
+static pthread_mutex_t PMTLock=PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
 
 static int section_length(const unsigned char *buf)
 {
@@ -82,21 +86,38 @@ int eDVBRecorder::flushBuffer()
 	return 0;
 }
 
+void SAHandler(int ptr)
+{
+	if ( eDVB::getInstance()->recorder )
+		eDVB::getInstance()->recorder->setWritePatPmtFlag();
+}
+
 void eDVBRecorder::thread()
 {
+	struct sigaction act;
+	act.sa_handler = SAHandler;
+	sigemptyset (&act.sa_mask);
+	act.sa_flags = 0;
+	sigaction (SIGALRM, &act, NULL);
+	PatPmtWrite();
 	while (state == stateRunning)
 	{
-		singleLock s(bufferLock);
-
 		int r = ::read(dvrfd, buf+bufptr, 65424-bufptr );
 		if ( r < 0 )
 			continue;
 
 		bufptr += r;
 
-		if ( bufptr > 65423 )
+		if ( writePatPmt )  // is set in SAHandler
+		{
+			PatPmtWrite();
+			writePatPmt=false;
+		}
+		else if ( bufptr > 65423 )
+		{
 			if (flushBuffer())
 				state = stateError;
+		}
 
 		if (size > splitsize)
 			if (openFile(++splits))
@@ -105,6 +126,7 @@ void eDVBRecorder::thread()
 				rmessagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::rWriteError));
 			}
 	}
+	alarm(0);
 }
 
 void eDVBRecorder::PMTready(int error)
@@ -158,6 +180,7 @@ void eDVBRecorder::PMTready(int error)
 			}
 			validatePIDs();
 
+			singleLock s(PMTLock);
 			delete [] PmtData;
 			PmtData = pmt->getRAW();
 
@@ -335,7 +358,6 @@ void eDVBRecorder::start()
 	}
 	while(!thread_running() )
 		usleep(1000);
-	PatPmtTimer.start(0,true);
 
 	for (std::set<pid_t>::iterator i(pids.begin()); i != pids.end(); ++i)
 	{
@@ -357,7 +379,6 @@ void eDVBRecorder::stop()
 
 	eDebug("eDVBRecorder::stop()");
 
-	PatPmtTimer.stop();
 	state = stateStopped;
 
 	int timeout=20;
@@ -397,8 +418,8 @@ void eDVBRecorder::close()
 
 eDVBRecorder::eDVBRecorder(PMT *pmt,PAT *pat)
 :state(stateStopped), rmessagepump(eApp, 1), dvrfd(-1) ,outfd(-1)
-,bufptr(0), PatPmtTimer(eApp), PmtData(NULL), PatData(NULL)
-,PmtCC(0), PatCC(0)
+,bufptr(0), PmtData(NULL), PatData(NULL)
+,PmtCC(0), PatCC(0), writePatPmt(true)
 {
 	CONNECT(rmessagepump.recv_msg, eDVBRecorder::gotBackMessage);
 	rmessagepump.start();
@@ -409,7 +430,6 @@ eDVBRecorder::eDVBRecorder(PMT *pmt,PAT *pat)
 		tPMT.start((PMT*)pmt->createNext(), DEMUX1_DEV );
 		PmtData=pmt->getRAW();
 		pmtpid=pmt->pid;
-		CONNECT( PatPmtTimer.timeout, eDVBRecorder::PatPmtWrite);
 		if (pat)
 		{
 			PAT p;
@@ -428,7 +448,6 @@ eDVBRecorder::eDVBRecorder(PMT *pmt,PAT *pat)
 			}
 		}
 	}
-	pthread_mutex_init(&bufferLock, 0);
 }
 
 eDVBRecorder::~eDVBRecorder()
@@ -460,8 +479,6 @@ void eDVBRecorder::writeSection(void *data, int pid, unsigned int &cc)
 
 	if ( len )
 	{
-		singleLock s(bufferLock);
-
 		if ( (bufptr+len) > 65423 )
 			flushBuffer();
 
@@ -472,13 +489,15 @@ void eDVBRecorder::writeSection(void *data, int pid, unsigned int &cc)
 
 void eDVBRecorder::PatPmtWrite()
 {
+//eDebug("PatPmtWrite");
 	if ( PatData )
 		writeSection(PatData, 0, PatCC );
 
+	singleLock s(PMTLock);
 	if ( PmtData )
 		writeSection(PmtData, pmtpid, PmtCC );
 
-	PatPmtTimer.start(1500,true);
+	alarm(2);  
 }
 
 #endif //DISABLE_FILE

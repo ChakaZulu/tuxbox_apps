@@ -200,11 +200,10 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 				break;
 			}
 		}
-
 		if (!nopmt && service.getServiceID().get() ) // if not a dvb service, don't even try to search a PAT, PMT etc.
 		{
 // workaround for zap in background before recordings
-			if ( Decoder::locked == 2 && !eDVB::getInstance()->recorder )
+			if ( Decoder::locked == 2 && !dvb.recorder )
 			{
 				eDebug("start PAT on demux1");
 				dvb.tPAT.start(new PAT(), DEMUX1_DEV);
@@ -215,7 +214,6 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 				dvb.tPAT.start(new PAT());
 			}
 		}
-
 		if (nopmt || ( service.path.size() && !service.getServiceID().get() ) )
 		{
 			dvb.tEIT.start(new EIT(EIT::typeNowNext, service.getServiceID().get(), EIT::tsActual));
@@ -279,7 +277,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		eDebug("[TUNE] tune failed");
 		service_state=ENOENT;
 		dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceFailed));
-		transponder=0;
+//		transponder=0;
 		break;
 	case eDVBServiceEvent::eventServiceGotPAT:
 	{
@@ -358,7 +356,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		dvb.setState(eDVBServiceState(eDVBServiceState::stateServiceGetPMT));
 
 // workaround for zap in background before recordings
-		if ( Decoder::locked == 2 && !service.path && !eDVB::getInstance()->recorder )
+		if ( Decoder::locked == 2 && !service.path && !dvb.recorder )
 		{
 			eDebug("start PMT on demux1");
 			dvb.tPMT.start(new PMT(pmtpid, service.getServiceID().get()), DEMUX1_DEV );
@@ -681,7 +679,7 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 
 	int hideerror=0;
 	eConfig::getInstance()->getKey("/elitedvb/extra/hideerror", hideerror);	
-	if ( hideerror || (eDVB::getInstance()->recorder && service.path) )
+	if ( hideerror || (dvb.recorder && service.path) )
 		;
 	else if (isca && !service.path && !calist )
 	{
@@ -717,8 +715,8 @@ int eDVBServiceController::switchService(const eServiceReferenceDVB &newservice)
 
 #ifndef DISABLE_FILE
 	eServiceReferenceDVB recRef =
-		eDVB::getInstance()->recorder && eDVB::getInstance()->recorder->recRef ?
-			eDVB::getInstance()->recorder->recRef : eServiceReferenceDVB();
+		dvb.recorder && dvb.recorder->recRef ?
+			dvb.recorder->recRef : eServiceReferenceDVB();
 	recRef.data[0] = service.getServiceType();
 #endif
 

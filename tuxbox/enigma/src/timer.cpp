@@ -25,6 +25,8 @@
 
 #define TIMER_LOGFILE CONFIGDIR "/enigma/timer.log"
 
+static int logfilesize;
+
 static const unsigned char monthdays[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 /* bug fix - at localization, 
    macro the type _ ("xxxxx") for a constant does not work, 
@@ -52,7 +54,7 @@ bool onSameTP( const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref
 				ref1.getDVBNamespace() == ref2.getDVBNamespace() );
 }
 
-static time_t getNextEventStartTime( time_t t, int duration, int type, bool notToday )
+static time_t getNextEventStartTime( time_t t, int duration, int type, int last_activation=-1 )
 {
 	if ( type < ePlaylistEntry::isRepeating )
 		return 0;
@@ -68,23 +70,41 @@ static time_t getNextEventStartTime( time_t t, int duration, int type, bool notT
 
 	bool found=false;
 
-	for ( int d=0; d<8; d++,
+	int checkDays=8;
+	for ( int d=0; d<=checkDays; d++,
 											i*=2,
 											tmp.tm_mday++ )
 	{
+//		eDebug("d = %d, tmp.tm_mday = %d", d, tmp.tm_mday);
 		if ( i > ePlaylistEntry::Sa )  // wrap around..
 			i = ePlaylistEntry::Su;
 
 		if ( type & i )
 		{
-			if ( !d ) // if this today ?
+//			eDebug("match");
+			if ( !d )
 			{
+				// in normal case we must check only 7 days ...
+				// but when the event do begin at next day... 
+				// and the timer is aborted in old day (in startCountDown state)
+				// we must check on day more
+				--checkDays;  
+//				eDebug("today");
 				int begTimeSec = tmp2.tm_hour*3600+tmp2.tm_min*60+tmp2.tm_sec;
 				int nowTimeSec = tmp.tm_hour*3600+tmp.tm_min*60+tmp.tm_sec;
-
-				if ( nowTimeSec > begTimeSec+duration || notToday )
+				if ( nowTimeSec > begTimeSec+duration )
+				{
+//					eDebug("%d > %d ... continue", nowTimeSec, begTimeSec+duration);
 					continue;
+				}
 			}
+			int activation=((100+tmp.tm_mday)*1000000)+((100+tmp.tm_mon+1)*1000)+tmp.tm_year;
+			if ( activation <= last_activation )
+			{
+//				eDebug("%d <= %d ... continue", activation, last_activation );
+				continue;
+			}
+//			eDebug("found");
 			found = true;
 			break;
 		}
@@ -176,8 +196,9 @@ void eTimerManager::writeToLogfile( const char *str )
 	{
 		time_t tmp = time(0)+eDVB::getInstance()->time_difference;
 		tm now = *localtime( &tmp );
-		fprintf(logfile, "%02d.%02d, %02d:%02d - %s\n", now.tm_mday, now.tm_mon+1, now.tm_hour, now.tm_min, str );
-		fflush(logfile);
+		eString str2;
+		str2.sprintf("%02d.%02d, %02d:%02d - %s\n", now.tm_mday, now.tm_mon+1, now.tm_hour, now.tm_min, str );
+		logfilesize+=fwrite(str2.c_str(), str2.size(), 1, logfile);
 	}
 }
 
@@ -201,59 +222,54 @@ eTimerManager::eTimerManager()
 	timerlist->load(CONFIGDIR "/enigma/timer.epl");
 	nextStartingEvent=timerlist->getList().end();
 	CONNECT( actionTimer.timeout, eTimerManager::actionHandler );
-	conn = CONNECT( timer.timeout, eTimerManager::waitClock );
-	waitClock();
+	CONNECT( eDVB::getInstance()->timeUpdated, eTimerManager::timeChanged );
 
 	struct stat tmp;
 	if ( stat( TIMER_LOGFILE, &tmp ) != -1 )
-	{
-		if ( tmp.st_size > 102400 )
-		{
-			eDebug("timer logfile is bigger than 100Kbyte.. shrink to 32kByte");
-			rename(TIMER_LOGFILE, "/var/timer.old");
-		}
-	}
-	logfile = fopen(TIMER_LOGFILE, "a" );
-
-	FILE *old = fopen("/var/timer.old", "r");
-	if ( old )
-	{
-		fseek(old, tmp.st_size-32768, SEEK_SET );
-		char buf[32768];
-		int rbytes=0;
-		if( ( rbytes = fread( buf, 1, 32768, old ) ) )
-			fwrite( buf, 1, rbytes, logfile );
-		fclose(old);
-		unlink("/var/timer.old");
-	}
-	writeToLogfile("Timer is comming up");
-}
-
-// called only once... at start of eTimerManager
-void eTimerManager::waitClock()
-{
-	if (eDVB::getInstance()->time_difference)
-	{
-		eDebug("[eTimerManager] timeUpdated");
-		writeToLogfile("Time is updated");
-		nextAction = setNextEvent;
-		actionTimer.start(0, true);
-	}
+		logfilesize=tmp.st_size;
 	else
 	{
-		eDebug("[eTimerManager] wait for clock update");
-		timer.start(1000, true);  // next check in 1 sec
+		eDebug("[eTimerManager] stat logfile failed (%m)");
+		unlink(TIMER_LOGFILE);
+		logfilesize=0;
 	}
+
+	logfile = fopen(TIMER_LOGFILE, "a" );
+	writeToLogfile("Timer is comming up");
 }
 
 void eTimerManager::loadTimerList()
 {
 	writeToLogfile("--> loadTimerList()");
-	timerlist->load(CONFIGDIR "/enigma/timer.epl");
-	if ( !(nextStartingEvent->type & ePlaylistEntry::stateRunning) )
+	if ( nextStartingEvent == timerlist->getList().end() || (!(nextStartingEvent->type & ePlaylistEntry::stateRunning)) )
 	{
+		timerlist->load(CONFIGDIR "/enigma/timer.epl");
 		nextAction = setNextEvent;
 		actionTimer.start(0,true);
+	}
+	else
+	{
+		ePlaylistEntry current = *nextStartingEvent;
+		timerlist->load(CONFIGDIR "/enigma/timer.epl");
+		for (nextStartingEvent = timerlist->getList().begin();
+			nextStartingEvent != timerlist->getList().end();
+			++nextStartingEvent )
+		{
+			if ( *nextStartingEvent == current )
+			{
+				*nextStartingEvent = current;  // for running state..
+				eDebug("found nextStartingEvent");
+				break;
+			}
+		}
+		if ( nextStartingEvent == timerlist->getList().end() )
+		{
+			eDebug("nextStartingEvent removed from external app... stop running timer");
+			timerlist->getList().push_back(current);
+			nextStartingEvent=timerlist->getList().end();
+			--nextStartingEvent;
+			abortEvent( ePlaylistEntry::errorUserAborted );
+		}
 	}
 	writeToLogfile("<-- loadTimerList()");
 }
@@ -267,8 +283,9 @@ void eTimerManager::saveTimerList()
 void eTimerManager::timeChanged()
 {
 	writeToLogfile("--> timeChanged()");
-	if ( nextStartingEvent != timerlist->getConstList().end()
-		&& !(nextStartingEvent->type & ePlaylistEntry::stateRunning) )
+	if ( nextStartingEvent == timerlist->getConstList().end() // no event as next event set
+		|| (nextStartingEvent != timerlist->getConstList().end()  // event is set.. but not running
+		&& !(nextStartingEvent->type & ePlaylistEntry::stateRunning)) )
 	{
 		nextAction=setNextEvent;
 		actionTimer.start(0, true);
@@ -478,7 +495,13 @@ void eTimerManager::actionHandler()
 			if ( nextStartingEvent->type & ePlaylistEntry::isRepeating )
 			{
 				writeToLogfile("set last_activation for repeated event");
-				nextStartingEvent->last_activation = getDate();
+				time_t tmp = getNextEventStartTime(
+					nextStartingEvent->time_begin,
+					nextStartingEvent->duration,
+					nextStartingEvent->type);
+				tm bla = *localtime(&tmp);
+				nextStartingEvent->last_activation =
+					((100+bla.tm_mday)*1000000)+((100+bla.tm_mon+1)*1000)+bla.tm_year;
 			}
 			nextStartingEvent->type &= ~ePlaylistEntry::stateWaiting;
 
@@ -561,11 +584,11 @@ void eTimerManager::actionHandler()
 					writeToLogfile("abort running sleeptimer don't handleStandby");
 				else
 				{
-					int i=0;
+					int i=-1;
 					if ( nextStartingEvent->type&ePlaylistEntry::doShutdown )
-						i = 2;
+						i=2;
 					else if ( nextStartingEvent->type&ePlaylistEntry::doGoSleep )
-						i = 3;
+						i=3;
 					writeToLogfile(eString().sprintf("call eZapMain::handleStandby(%d)",i));
 					eZapMain::getInstance()->handleStandby(i);
 				}
@@ -591,6 +614,26 @@ void eTimerManager::actionHandler()
 
 		case setNextEvent:
 		{
+//////////// SHRINK LOGFILE WHEN TO BIG //////////////////
+			if ( logfilesize > 100*1024 )
+			{
+				eDebug("timer logfile is bigger than 100Kbyte.. shrink to 32kByte");
+				rename(TIMER_LOGFILE, "/var/timer.old");
+				logfile = fopen(TIMER_LOGFILE, "a" );
+				FILE *old = fopen("/var/timer.old", "r");
+				if ( old )
+				{
+					fseek(old, logfilesize-32768, SEEK_SET );
+					char buf[32768];
+					int rbytes=0;
+					if( ( rbytes = fread( buf, 1, 32768, old ) ) )
+						fwrite( buf, 1, rbytes, logfile );
+					fclose(old);
+					unlink("/var/timer.old");
+					logfilesize=32768;
+				}
+			}
+///////////////////////////////////////////
 			writeToLogfile(eString().sprintf("--> actionHandler() calldepth=%d setNextEvent", ++calldepth));
 			eDebug("[eTimerManager] setNextEvent");
 			if (conn.connected() )
@@ -607,7 +650,7 @@ void eTimerManager::actionHandler()
 					writeToLogfile(eString().sprintf(" - time_begin = %d, getDate()=%d, lastActivation=%d", i->time_begin,
 						getDate(),
 						i->last_activation ));
-					time_t tmp = getNextEventStartTime( i->time_begin, i->duration, i->type, getDate() == i->last_activation );
+					time_t tmp = getNextEventStartTime( i->time_begin, i->duration, i->type, i->last_activation );
 					tm evtTime = *localtime( &tmp );
 					writeToLogfile(eString().sprintf(" - isRepeating event (days %s)", buildDayString(i->type).c_str() ));
 					writeToLogfile(eString().sprintf(" - starts at %d (%02d.%02d, %02d:%02d)", tmp, evtTime.tm_mday, evtTime.tm_mon+1, evtTime.tm_hour, evtTime.tm_min));
@@ -618,6 +661,7 @@ void eTimerManager::actionHandler()
 						writeToLogfile(eString().sprintf(" - is our new nextEvent... timeToNextEvent is %d", timeToNextEvent));
 					}
 					count++;
+
 				}
 				else if ( i->type & ePlaylistEntry::stateWaiting )
 				{
@@ -684,7 +728,7 @@ void eTimerManager::actionHandler()
 								(nextStartingEvent->last_activation % 100000)/1000,
 								(nextStartingEvent->last_activation % 100) + 2000 ));
 
-					time_t tmp = getNextEventStartTime( nextStartingEvent->time_begin, nextStartingEvent->duration, nextStartingEvent->type, getDate() == nextStartingEvent->last_activation );
+					time_t tmp = getNextEventStartTime( nextStartingEvent->time_begin, nextStartingEvent->duration, nextStartingEvent->type, nextStartingEvent->last_activation );
 					if ( tmp )
 						evtTime=*localtime( &tmp );
 				}
@@ -744,7 +788,7 @@ void eTimerManager::actionHandler()
 				if ( nextStartingEvent->type & ePlaylistEntry::isRepeating )
 				{
 					writeToLogfile("repeating");
-					tmp = getNextEventStartTime( nextStartingEvent->time_begin, nextStartingEvent->duration, nextStartingEvent->type, false );
+					tmp = getNextEventStartTime( nextStartingEvent->time_begin, nextStartingEvent->duration, nextStartingEvent->type );
 					const eString &descr=getEventDescrFromEPGCache( nextStartingEvent->service, tmp+nextStartingEvent->duration/2 );
 					if ( descr ) // build Episode Information
 					{
@@ -914,6 +958,7 @@ void eTimerManager::actionHandler()
 			eDebug("unhandled timer action %d", nextAction);
 		}
 	}
+	fflush(logfile);
 }
 
 void eTimerManager::switchedService( const eServiceReferenceDVB &ref, int err)
@@ -954,10 +999,22 @@ void eTimerManager::abortEvent( int err )
 	{
 		nextStartingEvent->type &= ~ePlaylistEntry::stateWaiting;
 		nextStartingEvent->type |= ePlaylistEntry::stateRunning;
+		if (nextStartingEvent->type & ePlaylistEntry::isRepeating)
+		{
+				writeToLogfile("set last_activation for aborted repeated event");
+				time_t tmp = getNextEventStartTime(
+					nextStartingEvent->time_begin,
+					nextStartingEvent->duration,
+					nextStartingEvent->type);
+				tm bla = *localtime(&tmp);
+				nextStartingEvent->last_activation =
+					((100+bla.tm_mday)*1000000)+((100+bla.tm_mon+1)*1000)+bla.tm_year;
+		}
 	}
 	writeToLogfile(eString().sprintf("--> abortEvent(err %d)",err));
 	eDebug("[eTimerManager] abortEvent");
 	nextAction=stopEvent;
+
 	nextStartingEvent->type |= (ePlaylistEntry::stateError|err);
 	actionHandler();
 	writeToLogfile("<-- abortEvent");
@@ -980,7 +1037,7 @@ long eTimerManager::getSecondsToBegin()
 {
 	time_t nowTime = time(0)+eDVB::getInstance()->time_difference;
 	time_t tmp=0;
-	if ( (tmp = getNextEventStartTime( nextStartingEvent->time_begin, nextStartingEvent->duration, nextStartingEvent->type, getDate() == nextStartingEvent->last_activation ) ) )
+	if ( (tmp = getNextEventStartTime( nextStartingEvent->time_begin, nextStartingEvent->duration, nextStartingEvent->type, nextStartingEvent->last_activation ) ) )
 		return tmp - nowTime;
 	return nextStartingEvent->time_begin - nowTime;
 }
@@ -989,7 +1046,7 @@ long eTimerManager::getSecondsToEnd()
 {
 	time_t nowTime = time(0)+eDVB::getInstance()->time_difference;
 	time_t tmp=0;
-	if ( (tmp = getNextEventStartTime( nextStartingEvent->time_begin, nextStartingEvent->duration, nextStartingEvent->type, false ) ) )
+	if ( (tmp = getNextEventStartTime( nextStartingEvent->time_begin, nextStartingEvent->duration, nextStartingEvent->type ) ) )
 		return (tmp + nextStartingEvent->duration) - nowTime;
 	return (nextStartingEvent->time_begin + nextStartingEvent->duration) - nowTime;
 }
@@ -1027,6 +1084,7 @@ eTimerManager::~eTimerManager()
 			eDebug("no support for wakeup from deepstandby yet... ");
 	}
 	writeToLogfile("~eTimerManager()");
+	fclose(logfile);
 	eDebug("[eTimerManager] down ( %d events in list )", timerlist->getList().size() );
 	if (this == instance)
 		instance = 0;
@@ -1167,6 +1225,7 @@ bool eTimerManager::removeEventFromTimerList( eWidget *sel, const ePlaylistEntry
 			}
 			if (ret == eMessageBox::btYes)
 			{
+				eDebug("remove Event");
 				timerlist->getList().erase(i);
 				if ( &(*nextStartingEvent) == &entry )
 				{
@@ -2257,7 +2316,24 @@ void eTimerEditView::scanEPGPressed()
 	if ( getData( newEventBegin, newEventDuration ) )  // all is okay... we add the event..
 	{
 		if ( multiple->isChecked() )
-			newEventBegin = getNextEventStartTime( newEventBegin, newEventDuration, ePlaylistEntry::isRepeating, false );
+		{
+			int ttype = ePlaylistEntry::isRepeating;
+			if ( cMo->isChecked() )
+				ttype |= ePlaylistEntry::Mo;
+			if ( cTue->isChecked() )
+				ttype |= ePlaylistEntry::Tue;
+			if ( cWed->isChecked() )
+				ttype |= ePlaylistEntry::Wed;
+			if ( cThu->isChecked() )
+				ttype |= ePlaylistEntry::Thu;
+			if ( cFr->isChecked() )
+				ttype |= ePlaylistEntry::Fr;
+			if ( cSa->isChecked() )
+				ttype |= ePlaylistEntry::Sa;
+			if ( cSu->isChecked() )
+				ttype |= ePlaylistEntry::Su;
+			newEventBegin = getNextEventStartTime( newEventBegin, newEventDuration, ttype );
+		}
 		const eString &descr = getEventDescrFromEPGCache( tmpService, newEventBegin+newEventDuration/2);
 		if ( descr )
 		{

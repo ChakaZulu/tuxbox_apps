@@ -645,8 +645,6 @@ void eDVB::UDHCPC_DataAvail(eString str)
 	if ( str.find("lease") != eString::npos
 		&& str.find("obtained") != eString::npos )
 	{
-// start timer for execute restartSamba and doMounts in 1 second
-// i don't know why the kernel oopses, when i not do this via timer
 		delayTimer.start(2000,true);
 	}
 }
@@ -661,8 +659,6 @@ void eDVB::restartSamba()
 	int samba=1;
 	eConfig::getInstance()->getKey("/elitedvb/network/samba", samba);
 	eDebug("[eDVB] restart Samba");
-	system("killall nmbd");
-	system("killall smbd");
 	if (samba != 0)
 	{
 		signal(SIGCHLD, SIG_IGN);
@@ -670,14 +666,10 @@ void eDVB::restartSamba()
 		{
 			for (unsigned int i=3; i < 90; ++i )
 				close(i);
-			execlp("nmbd", "nmbd", "-D", NULL);
-			_exit(0);
-		}
-		if (fork() == 0)
-		{
-			for (unsigned int i=3; i < 90; ++i )
-				close(i);
-			execlp("smbd", "smbd", "-D", NULL);
+			system("killall nmbd");
+			system("killall smbd");
+			system("smbd -D");
+			system("nmbd -D");
 			_exit(0);
 		}
 	}

@@ -42,6 +42,8 @@ void eSectionReader::close()
 
 int eSectionReader::open(int pid, __u8 *data, __u8 *mask, __u8 *mode, int len, int _flags, const char* dmxdev)
 {
+	tableid=data[0];
+	tableid_mask=mask[0];
 	flags=_flags;
 #if HAVE_DVB_API_VERSION < 3
 	dmxSctFilterParams secFilterParams;
@@ -127,18 +129,42 @@ int eSectionReader::open(int pid, __u8 *data, __u8 *mask, __u8 *mode, int len, i
 
 int eSectionReader::read(__u8 *buf)
 {
-	if (::read(handle, buf, 3)<0)
+	int rd = ::read(handle, buf, 4098);
+	if ( rd < 0 )
 	{
 		if (errno==EAGAIN)
 			return errno;
-		perror("read section");
+		eDebug("section read(%m)");
 		return errno;
 	}
-	int seclen=0;
-	seclen |= ((buf[1] & 0x0F) << 8);
-	seclen |= (buf[2] & 0xFF);
-	::read(handle, buf+3, seclen);
+	if( (buf[0] & tableid_mask) != tableid )
+	{
+		eDebug("skip section data.. table_id isn't valid");
+		return -2;
+	}
+#if 0
+	ASSERT(rd <= 4098);
+	if ( rd < 3 )
+	{
+		eFatal("read less then 3 bytes from section.. skip");
+		return -1;
+	}
+	int seclen=(buf[1]&0x0F)<<8;
+	seclen|=buf[2]&0xFF;
 	seclen+=3;
+	if ( rd < seclen )
+	{
+		eFatal("cannot read the complete section(%d/%d)",
+			rd, seclen);
+		return -1;
+	}
+	if ( rd > seclen )
+	{
+		eFatal("read more bytes than section length(%d/%d)",
+			rd, seclen);
+		return -1;
+	}
+#endif
 	return 0;
 }
 
@@ -259,8 +285,15 @@ void eSection::data(int socket)
 			timer->start(10000, true);
 		}
 
-		if (reader.read(buf))
+		int ret=reader.read(buf);
+		if (ret)
+		{
+			// restart timer when data from another table_id
+			// is received
+			if ( ret == 2 )
+				timer->start(10000, true);
 			break;
+		}
 
 		maxsec=buf[7];
 
@@ -275,9 +308,8 @@ void eSection::data(int socket)
 		version=buf[5];
 
 		// get new valid data restart timeout
-		timer->start(10000,true);
-		int err;
-		if ((err=sectionRead(buf)))
+		int err=sectionRead(buf);
+		if (err)
 		{
 			if (err>0)
 				err=0;
@@ -293,6 +325,8 @@ void eSection::data(int socket)
 			sectionFinish(0);
 			break;
 		}
+		// when more data to read.. restart timeout..
+		timer->start(10000,true);
 	}
 }
 

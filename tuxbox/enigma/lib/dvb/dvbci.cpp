@@ -60,6 +60,12 @@ eDVBCI::eDVBCI()
 	memset(appName,0,sizeof(appName));
 	tempPMTentrys=0;
 
+	for (int i=0; i < MAXTRANSPORTSESSIONS; ++i)
+	{
+		lpduReceiveQueues[i].numLPDUS=0;
+		lpduReceiveQueues[i].firstLPDU=NULL;
+	}
+
 	run();
 
 	while ( !thread_running() )  // wait for thread running
@@ -74,6 +80,7 @@ void eDVBCI::thread()
 
 eDVBCI::~eDVBCI()
 {
+	pollTimer.stop();
 	quit(0);
 
 	delete ci;
@@ -96,10 +103,10 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 		break;
 	case eDVBCIMessage::reset:
 //		eDebug("[DVBCI] got reset message..");
-		while(queue.size())
+		while(sendqueue.size())
 		{
-			delete [] queue.top().data;
-			queue.pop();
+			delete [] sendqueue.top().data;
+			sendqueue.pop();
 		}
 		if(!ci_state)
 			ci_progress(_("no module"));	
@@ -529,22 +536,22 @@ void eDVBCI::sendTPDU(unsigned char tpdu_tag,unsigned int len,unsigned char tc_i
 			eDebugNoNewLine("%02x ", buffer[i+2] );
 		eDebug("");*/
 
-		if ( queue.empty() )
+		if ( sendqueue.empty() )
 		{
 //			eDebug("queue empty.. try to send data");
 
 			if ( !sendData(tc_id,buffer+2,len+5) )
 			{
-//				eDebug("CI is busy... push to queue..");
-				queue.push( queueData(tc_id, buffer, len+5) );
+//				eDebug("CI is busy... push to sendqueue..");
+				sendqueue.push( queueData(tc_id, buffer, len+5) );
 			}
 			else
 				delete [] buffer;
 		}
-		else  // already data in queue.. push to end of queue
+		else  // already data in sendqueue.. push to end of queue
 		{
-//			eDebug("queuesize = %d.. append new data to queue", queue.size());
-			queue.push( queueData(tc_id, buffer, len+5) );
+//			eDebug("queuesize = %d.. append new data to queue", sendqueue.size());
+			sendqueue.push( queueData(tc_id, buffer, len+5) );
 		}
 	}
 	else
@@ -555,21 +562,21 @@ void eDVBCI::sendTPDU(unsigned char tpdu_tag,unsigned int len,unsigned char tc_i
 /*		for ( int i=0; i < len+3; i++ )
 			eDebugNoNewLine("%02x ", buffer[i+2] );
 		eDebug("");*/
-		if ( queue.empty() )
+		if ( sendqueue.empty() )
 		{
 //			eDebug("queue empty.. try to send data");
 			if ( !sendData(tc_id,buffer+2,len+3) )
 			{
-//				eDebug("CI is busy... push to queue..");
-				queue.push( queueData(tc_id, buffer, len+3) );
+//				eDebug("CI is busy... push to sendqueue..");
+				sendqueue.push( queueData(tc_id, buffer, len+3) );
 			}
 			else
 				delete [] buffer;
 		}
 		else
 		{
-//			eDebug("queusize = %d.. append new data to queue", queue.size());
-			queue.push( queueData(tc_id, buffer, len+3) );
+//			eDebug("queusize = %d.. append new data to queue", sendqueue.size());
+			sendqueue.push( queueData(tc_id, buffer, len+3) );
 		}
 	}
 }
@@ -1043,17 +1050,15 @@ void eDVBCI::incoming(unsigned char *buffer,int len)
 ptrlpduQueueElem eDVBCI::AllocLpduQueueElem(unsigned char t_c_id)
 {
 	ptrlpduQueueElem curElem;
-	
+
 	curElem = (ptrlpduQueueElem) malloc(sizeof(lpduQueueElem));
-		
-	//memset(curElem, 0, sizeof(lpduQueueElem));
-			
+
 	curElem->lpduLen = 0;
-			
+
 	(curElem->lpdu)[0] = t_c_id;
-						
+
 	curElem->nextElem = NULL;
-						
+
 	return curElem;
 }
 
@@ -1134,7 +1139,7 @@ void eDVBCI::incoming(unsigned char *buffer,int len)
 			// And remove element
 			free(lastElem);
 		}
-		
+
 		lpduReceiveQueues[t_c_id].numLPDUS = 0;
 		lpduReceiveQueues[t_c_id].firstLPDU = NULL;
 	
@@ -1212,11 +1217,28 @@ void eDVBCI::dataAvailable(int what)
 	{
 		eDebug("[DVBCI] module removed");	
 
-		// clear sendqueue
-		while(queue.size())
+		// clear receive lpdu queues
+		ptrlpduQueueElem curElem, lastElem;
+		for (int i=0; i < MAXTRANSPORTSESSIONS; ++i)
 		{
-			delete [] queue.top().data;
-			queue.pop();
+			if (lpduReceiveQueues[i].numLPDUS)
+			{
+				curElem = lpduReceiveQueues[i].firstLPDU;
+				while (curElem != NULL)
+				{
+					lastElem = curElem;
+					curElem = curElem->nextElem;
+					// And remove element
+					free(lastElem);
+				}
+			}
+		}
+
+		// clear sendqueue
+		while(sendqueue.size())
+		{
+			delete [] sendqueue.top().data;
+			sendqueue.pop();
 		}
 
 		memset(appName,0,sizeof(appName));
@@ -1239,6 +1261,7 @@ void eDVBCI::dataAvailable(int what)
 	{
 		int i;
 		eDebug("[DVBCI] module inserted");	
+
 		ci_progress("module found");
 
 //		eZapMain::getInstance()->postMessage(eZapMessage(1,"Common Interface","CI inserted - initializing...",10),0);
@@ -1262,11 +1285,11 @@ void eDVBCI::dataAvailable(int what)
 		}
 
 		// clear sendqueue
-		while ( queue.size() )
+		while ( sendqueue.size() )
 		{
 			eDebug("clear queue");
-			delete [] queue.top().data;
-			queue.pop();
+			delete [] sendqueue.top().data;
+			sendqueue.pop();
 		}
 				
 		ci_state=1;
@@ -1285,14 +1308,14 @@ void eDVBCI::dataAvailable(int what)
 #endif	
 		incoming(buffer,size);
 
-		if ( queue.size() )
+		if ( sendqueue.size() )
 		{
-			queueData d = queue.top();
-			queue.pop();
+			queueData d = sendqueue.top();
+			sendqueue.pop();
 			if ( !sendData( d.tc_id, d.data+2, d.len ) )
 			{
-				// add this entry with higher priority to queue..
-				queue.push( queueData( d.tc_id, d.data, d.len, 1 ) );
+				// add this entry with higher priority to sendqueue..
+				sendqueue.push( queueData( d.tc_id, d.data, d.len, 1 ) );
 			}
 		}
 

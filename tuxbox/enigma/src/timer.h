@@ -58,9 +58,6 @@ class eTimerManager: public Object
 	long getSecondsToBegin();
 	long getSecondsToEnd();
 
-// this Method is called multiple at the start of the eTimerManager....
-	void waitClock();
-
 	void writeToLogfile( const char *str );
 	void writeToLogfile( eString str );
 public:

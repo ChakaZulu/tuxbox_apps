@@ -229,7 +229,7 @@ eZapOsdSetup::eZapOsdSetup()
 	simpleMainMenu->setText(_("Show Mainmenu like Listbox"));
 	simpleMainMenu->setHelpText(_("show the Mainmenu in normal listbox style"));
 	simpleMainMenu->move(ePoint(20,140));
-	simpleMainMenu->resize(eSize(350,35));
+	simpleMainMenu->resize(eSize(420,35));
 	int bla=0;
 	eConfig::getInstance()->getKey("/ezap/osd/simpleMainMenu", bla);
 	simpleMainMenu->setCheck(bla);

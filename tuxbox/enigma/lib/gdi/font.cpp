@@ -120,7 +120,6 @@ FT_Error fontRenderClass::getGlyphBitmap(FTC_Image_Desc *font, FT_ULong glyph_in
 eString fontRenderClass::AddFont(const eString &filename, const eString &name, int scale)
 {
 	eDebugNoNewLine("[FONT] adding font %s...", filename.c_str());
-	fflush(stdout);
 	int error;
 	fontListEntry *n=new fontListEntry;
 
@@ -158,12 +157,10 @@ fontRenderClass::fontRenderClass(): fb(fbClass::getInstance())
 		}
 	}
 	eDebug("[FONT] loading fonts...");
-	fflush(stdout);
 	font=0;
 	
 	int maxbytes=4*1024*1024;
 	eDebug("[FONT] Intializing font cache, using max. %dMB...", maxbytes/1024/1024);
-	fflush(stdout);
 	{
 		if (FTC_Manager_New(library, 8, 8, maxbytes, myFTC_Face_Requester, this, &cacheManager))
 		{

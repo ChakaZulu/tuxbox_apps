@@ -75,20 +75,21 @@ class eDVBRecorder: private eThread, public Object
 	inline int flushBuffer();
 	int openFile(int suffix=0);
 	void PatPmtWrite();
-	eTimer PatPmtTimer;
 	__u8 *PmtData, *PatData;
 	unsigned int PmtCC, PatCC;
 	int pmtpid;
 	eAUTable<PMT> tPMT;
-public:
+	bool writePatPmt;
 	void PMTready(int error);
-	eString getFilename() { return filename; }
-	eServiceReferenceDVB recRef;
-	bool scrambled;
+public:
 		/// the constructor
 	eDVBRecorder(PMT *, PAT*);
 		/// the destructor
 	~eDVBRecorder();
+
+	void setWritePatPmtFlag() { writePatPmt=true; }
+
+	eString getFilename() { return filename; }
 
 	/**
 	 * \brief Opens a file
@@ -162,6 +163,8 @@ public:
 
 	enum { recWriteError };
 	Signal1<void,int> recMessage;
+	eServiceReferenceDVB recRef;
+	bool scrambled;
 };
 
 #endif

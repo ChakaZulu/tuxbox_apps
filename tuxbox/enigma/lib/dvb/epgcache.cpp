@@ -43,7 +43,7 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 	int eit_event_size;
 	int duration;
 
-	time_t TM = parseDVBtime( eit_event->start_time_1, eit_event->start_time_2,	eit_event->start_time_3, eit_event->start_time_4,	eit_event->start_time_5);
+	time_t TM = parseDVBtime( eit_event->start_time_1, eit_event->start_time_2,	eit_event->start_time_3, eit_event->start_time_4, eit_event->start_time_5);
 	time_t now = time(0)+eDVB::getInstance()->time_difference;
 
 	tmpMap::iterator it = temp.find( service );
@@ -66,8 +66,7 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 			else if ( firstScheduleEvent == event )  // epg around
 			{
 				eDebug("[EPGC] schedule data ready");
-				scheduleReader.abort();
-				return -1;
+				return -ECANCELED;
 			}
 		}
 		else // if ( source == NOWNEXT )
@@ -80,8 +79,7 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 			else if ( firstNowNextEvent == event ) // now next ready
 			{
 				eDebug("[EPGC] nownext data ready");
-				nownextReader.abort();
-				return -1;
+				return -ECANCELED;
 			}
 		}
 	}

@@ -16,6 +16,7 @@
 #include <lib/base/i18n.h>
 #include <lib/gui/guiactions.h>
 #include <lib/system/init_num.h>
+#include <lib/system/info.h>
 
 struct enigmaMainmenuActions
 {
@@ -35,15 +36,20 @@ eAutoInitP0<enigmaMainmenuActions> i_mainmenuActions(eAutoInitNumbers::actions, 
 
 void eMainMenu::setActive(int i)
 {
+	int count = MENU_ENTRIES;
+#ifdef DISABLE_FILE
+	if (eSystemInfo::getInstance()->getHwType()==eSystemInfo::DM500)
+		--count;
+#endif
 	for (int a=0; a<7; a++)
 	{
-		int c=(i+a+MENU_ENTRIES-3)%MENU_ENTRIES;
+		int c=(i+a+count-3)%count;
 		if (a != 3)
 			label[a]->setPixmap(pixmaps[c][0]);	// unselected
 		else
 			label[a]->setPixmap(pixmaps[c][1]); // selected
 	}
-	
+
 	switch (i)
 	{
 	case 0:
@@ -69,28 +75,24 @@ void eMainMenu::setActive(int i)
 		description->setText(eString("(7) ") + eString(_("Games")));
 		break;
 	case 7:
-		description->setText(eString("(8) ") + eString(_("VCR")));
+		description->setText(eString("(8) ") + eString(_("Timer")));
 		break;
 	case 8:
-		description->setText(eString("(9) ") + eString(_("Timer")));
+		description->setText(eString("(9) ") + eString(_("VCR")));
+		break;
 #else
 	case 2:
 		description->setText(eString("(3) ") + eString(_("Information")));
 		break;
-//	case 3:
-//		description->setText(eString("(4) ") + eString(_("Shutdown")));
-//		break;
 	case 3:
-		description->setText(eString("(5) ") + eString(_("Setup")));
+		description->setText(eString("(4) ") + eString(_("Setup")));
 		break;
-//	case 4:
-//		description->setText(eString("(6) ") + eString(_("Games")));
-//		break;
 	case 4:
-		description->setText(eString("(7) ") + eString(_("VCR")));
+		description->setText(eString("(5) ") + eString(_("Timer")));
 		break;
 	case 5:
-		description->setText(eString("(8) ") + eString(_("Timer")));
+		description->setText(eString("(6) ") + eString(_("VCR")));
+		break;
 #endif
 	}
 #ifndef DISABLE_LCD
@@ -107,7 +109,7 @@ eMainMenu::eMainMenu()
 #ifndef DISABLE_FILE	
 	11,
 #else
-	8,
+	eSystemInfo::getInstance()->getHwType()==eSystemInfo::DM500?7:8,
 #endif
 	350),
 	wndShowTimer(eApp)
@@ -158,8 +160,9 @@ eMainMenu::eMainMenu()
 #ifndef DISABLE_FILE
 		"games",
 #endif
-		"scart",
-		"timer"};
+		"timer",
+		"scart"
+		};
 
 		for (int i=0; i<MENU_ENTRIES; i++)
 		{
@@ -191,7 +194,8 @@ eMainMenu::eMainMenu()
 		new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)wnd.getList(), eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 		CONNECT((new eListBoxEntryMenu(wnd.getList(), _("Shutdown"), eString().sprintf("(%d) %s", ++entry, _("Shutdown")) ))->selected, eMainMenu::sel_quit);
 #else
-		CONNECT((new eListBoxEntryMenu(wnd.getList(), _("VCR"), eString().sprintf("(%d) %s", ++entry, _("VCR")) ))->selected, eMainMenu::sel_vcr);
+		if ( eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM500 )
+			CONNECT((new eListBoxEntryMenu(wnd.getList(), _("VCR"), eString().sprintf("(%d) %s", ++entry, _("VCR")) ))->selected, eMainMenu::sel_vcr);
 		new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)wnd.getList(), eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 		CONNECT((new eListBoxEntryMenu(wnd.getList(), _("Timer"), eString().sprintf("(%d) %s", ++entry, _("Timer")) ))->selected, eMainMenu::sel_timer);
 		CONNECT((new eListBoxEntryMenu(wnd.getList(), _("Setup"), eString().sprintf("(%d) %s", ++entry, _("Setup")) ))->selected, eMainMenu::sel_setup);
@@ -436,29 +440,23 @@ void eMainMenu::selected(int i)
 		sel_plugins();
 		break;
 	case 7:
-		sel_vcr();
+		sel_timer();
 		break;
 	case 8:
-		sel_timer();
+		sel_vcr();
 		break;
 #else
 	case 2:
 		sel_info();
 		break;
-//	case 3:
-//		sel_quit();
-//		break;
 	case 3:
 		sel_setup();
 		break;
-//	case 4:
-//		sel_plugins();
-//		break;
 	case 4:
-		sel_vcr();
+		sel_timer();
 		break;
 	case 5:
-		sel_timer();
+		sel_vcr();
 		break;
 #endif
 	}

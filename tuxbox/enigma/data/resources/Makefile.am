@@ -1,6 +1,7 @@
 EXTRA_DIST = rcdboxnew.xml rcdboxold.xml rcdboxbuttons.xml help.xml \
-	rcdreambox2.xml rcdbox_inputdev.xml rcgeneric_inputdev.xml \
-	rcdreambox_inputdev.xml keymappings.xml
+	rcdm7000.xml rcdm5xxx.xml rctrdvb272.xml \
+	rcdreambox_inputdev.xml rcgeneric_inputdev.xml rcdbox_inputdev.xml \
+	keymappings.xml
 
 install-data-local:
 	install -d $(DATADIR)/enigma/resources

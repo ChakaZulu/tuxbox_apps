@@ -122,6 +122,9 @@ eWizardLanguage::eWizardLanguage()
 	if ( eConfig::getInstance()->getKey("/elitedvb/language", current) )
 		current=0;
 
+	if ( current )
+		oldLanguage=current;
+
 	char line[256];
 	while (fgets(line, 256, f))
 	{
@@ -156,14 +159,28 @@ void eWizardLanguage::selchanged(eLanguageEntry *entry)
 	}
 }
 
+int eWizardLanguage::eventHandler( const eWidgetEvent &e )
+{
+	switch( e.type )
+	{
+		case eWidgetEvent::wantClose:
+			if (!e.parameter)
+				eConfig::getInstance()->setKey("/elitedvb/language", list->getCurrent()->getLanguageID().c_str());
+			else
+				setlocale(LC_ALL, oldLanguage?oldLanguage.c_str():"");
+			return eWindow::eventHandler(e);
+		default:
+			break;
+	}
+	return eWindow::eventHandler(e);
+}
+
 void eWizardLanguage::selected(eLanguageEntry *entry)
 {
 	if (entry)
-	{
-		setlocale(LC_ALL, entry->getLanguageID().c_str());
-		eConfig::getInstance()->setKey("/elitedvb/language", entry->getLanguageID().c_str());
-	}
-	close(! entry);
+		accept();
+	else
+		reject();
 }
 
 int eWizardLanguage::run()

@@ -78,7 +78,6 @@ eSatelliteConfigurationManager::eSatelliteConfigurationManager()
 	createControlElements();
 
 	complexity=checkComplexity();
-	eConfig::getInstance()->getKey("/elitedvb/DVB/config/lnbs/type", complexity);
 	combo_type->setCurrent( (void*)complexity, true );
 
 	for ( int i = 0; i < 17; i++ )

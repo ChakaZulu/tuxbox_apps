@@ -109,6 +109,8 @@ public:
 	void enable(int en) { enabled=en; }
 
 	virtual void flushBuffer() const {};
+	virtual void lock() const {};
+	virtual void unlock() const {};
 };
 
 #if HAVE_DVB_API_VERSION < 3
@@ -126,6 +128,16 @@ public:
 		__u16 buf;
 		if (handle != -1)
 			while ( ::read(handle, &buf, 2) == 2 );
+	}
+	void lock() const
+	{
+		if ( sn )
+			sn->stop();
+	}
+	void unlock() const
+	{
+		if ( sn )
+			sn->start();
 	}
 };
 #endif
@@ -145,6 +157,16 @@ public:
 		struct input_event ev;
 		if (handle != -1)
 			while ( ::read(handle, &ev, sizeof(struct input_event)) == sizeof(struct input_event) );
+	}
+	void lock() const
+	{
+		if ( sn )
+			sn->stop();
+	}
+	void unlock() const
+	{
+		if ( sn )
+			sn->start();
 	}
 };
 

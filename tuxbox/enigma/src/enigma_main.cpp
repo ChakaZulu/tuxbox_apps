@@ -2281,10 +2281,19 @@ void eZapMain::nextService(int add)
 						|| p.current() == userFileBouquetsRef
 						|| p.current() == userRadioBouquetsRef )
 				{
-					if ( !switchToNum( ssel->getServiceNum(eServiceInterface::getInstance()->service)+1 ) )
-						ok=true;
-					else if ( !switchToNum( 1 ) ) // wrap around
-						ok=true;
+					int num=ssel->getServiceNum(eServiceInterface::getInstance()->service)+1;
+					int ret = 0;
+					do
+					{
+						ret = switchToNum( num );
+						if ( ret == -1 )
+							++num;
+						else if ( ret )  // last service in bouquet(s)... wrap around
+							num=1;
+						else
+							ok=true;
+					}
+					while ( ret ); //parental locked
 				}
 			}
 		}
@@ -2330,13 +2339,19 @@ void eZapMain::prevService()
 					|| p.current() == userRadioBouquetsRef )
 				{
 					int newNum = ssel->getServiceNum(eServiceInterface::getInstance()->service);
-					newNum-=1;
-
-					if ( !newNum ) 
-						newNum=INT_MAX - switchToNum(INT_MAX);
-
-					if ( !switchToNum(newNum) )
-						ok=true;
+					int ret=0;
+					do
+					{
+						newNum-=1;
+						if ( !newNum ) // end of bouquet
+							newNum=INT_MAX - switchToNum(INT_MAX);  // fake call for get last service in last bouquet
+						ret = switchToNum(newNum);
+						if ( ret == -1 )  // parental locked.. try next..
+							continue;
+						else if ( !ret )
+							ok=true;
+					}
+					while ( ret == -1 );  // parental locked
 				}
 			}
 		}
@@ -3004,7 +3019,8 @@ void eZapMain::handleStandby(int i)
 	{
 		if ( state & stateSleeping )  // we are already sleeping
 			return;
-		wasSleeping = i;
+		if ( i > 0 )
+			wasSleeping = i;
 	}
 
 	if (state & stateSleeping)
@@ -3014,24 +3030,27 @@ void eZapMain::handleStandby(int i)
 		// this breakes the eZapStandby mainloop...
 		// and enigma wakes up
 	}
-	else switch(wasSleeping) // before record we was in sleep mode...
+	else if ( i )
 	{
-		case 1: // delayed standby
-			if ( delayedStandbyTimer.isActive() )
-				delayedStandbyTimer.stop();
-			else // delayed Standby after 10min
-				delayedStandbyTimer.start( 1000 * 60 * 10, true );
-			break;
-		case 2: // complete Shutdown
+		switch(wasSleeping) // before record we was in sleep mode...
+		{
+			case 1: // delayed standby
+				if ( delayedStandbyTimer.isActive() )
+					delayedStandbyTimer.stop();
+				else // delayed Standby after 10min
+					delayedStandbyTimer.start( 1000 * 60 * 10, true );
+				break;
+			case 2: // complete Shutdown
 			// we do hardly shutdown the box..
 			// any pending timers are ignored
-			message_notifier.send(eZapMain::messageShutdown);
-			break;
-		case 3: // immediate go to standby
-			delayedStandby();
-			break;
-		default:
-			break;
+				message_notifier.send(eZapMain::messageShutdown);
+				break;
+			case 3: // immediate go to standby
+				delayedStandby();
+				break;
+			default:
+				break;
+		}
 	}
 }
 
@@ -3040,7 +3059,8 @@ void eZapMain::delayedStandby()
 	wasSleeping=0;
 	// use message_notifier to goto sleep...
 	// we will not block the mainloop...
-	message_notifier.send(eZapMain::messageGoSleep);
+	if (!eServiceInterface::getInstance()->service.path)
+		message_notifier.send(eZapMain::messageGoSleep);
 }
 
 ePlaylist *eZapMain::addUserBouquet( ePlaylist *list, const eString &path, const eString &name, eServiceReference& ref, bool save )
@@ -4058,7 +4078,8 @@ void eZapMain::showEPGList(eServiceReferenceDVB service)
 		pLCD->lcdMenu->show();
 		wnd.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 #endif
-		if (isVisible())
+		int wasVisible=isVisible();
+		if (wasVisible)
 		{
 			timeout.stop();
 			hide();
@@ -4072,7 +4093,7 @@ void eZapMain::showEPGList(eServiceReferenceDVB service)
 		if ( bMain )
 			pLCD->lcdMain->show();
 #endif
-		if (currentFocus == this && !doHideInfobar())
+		if (wasVisible && !doHideInfobar())
 			show();
 	}
 }
@@ -4096,7 +4117,8 @@ void eZapMain::showEPG()
 	if (!service && !(ref.flags & eServiceReference::isDirectory) )
 		return;
 
-	if (isVisible())
+	int wasVisible=isVisible();
+	if (wasVisible)
 	{
 		timeout.stop();
 		hide();
@@ -4153,7 +4175,7 @@ void eZapMain::showEPG()
 	}
 
 	eServiceInterface::getInstance()->removeRef( ref );
-	if (currentFocus == this && !doHideInfobar())
+	if (wasVisible && !doHideInfobar())
 		show();
 }
 
@@ -4671,7 +4693,8 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 			int number = s.exec();
 			s.hide();
 			int num = number;
-			switchToNum(num);
+			while( switchToNum(num) == -1 ) // parental locked
+				++num;
 			num = 0;
   	}
 		return 1;
@@ -4731,6 +4754,8 @@ int eZapMain::switchToNum( int num )
 							path.down(i->service);
 							setServiceSelectorPath(path);
 							modeLast[mode]=path;
+							if ( i->service.isLocked() && (eConfig::getInstance()->pLockActive()&2) )
+								return -1;
 							playService( i->service, 0);
 							return 0;
 						}
@@ -4757,6 +4782,8 @@ int eZapMain::switchToNum( int num )
 					path.down(i->service);
 					setServiceSelectorPath(path);
 					modeLast[mode]=path;
+					if ( i->service.isLocked() && (eConfig::getInstance()->pLockActive()&2) )
+						return -1;
 					playService( i->service, 0);
 					return 0;
 				}
@@ -4772,6 +4799,8 @@ int eZapMain::switchToNum( int num )
 				path.down(s); // current service
 				setServiceSelectorPath(path);
 				modeLast[mode]=path;
+				if ( s.isLocked() )
+					return -1;
 				playService(s, 0);
 				return 0;
 			}
@@ -4847,14 +4876,16 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 				if (ref.type == eServiceReference::idUser &&
 					ref.data[0] == eMP3Decoder::codecMP3 )
 				{
+					eAVSwitch::getInstance()->setVSystem(vsPAL);
 					showMP3Pic();
+					break;
 				}
-				break;
 #endif
 			case modeRadio:
 				if (ref.type == eServiceReference::idDVB &&
 					Decoder::current.vpid == -1)
 				{
+					eAVSwitch::getInstance()->setVSystem(vsPAL);
 					showRadioPic();
 				}
 				break;
@@ -5253,8 +5284,9 @@ void eZapMain::gotEIT()
 
 			if (old_event_id == -1 || state)
 			{
-				showInfobar();
-				if (doHideInfobar())
+				if (old_event_id != -1)
+					showInfobar();
+				if ( doHideInfobar() && isVisible() )
 					timeout.start((sapi->getState() == eServiceHandler::statePlaying)?6000:2000, 1);
 			}
 		}
@@ -5857,6 +5889,7 @@ eServicePath eZapMain::getRoot(int list, int _mode)
 	return b;
 }
 
+#ifndef DISABLE_FILE
 void eZapMain::showHDDSpaceLeft(eLabel *DVRSpaceLeft)
 {
 	static int swp;
@@ -5883,6 +5916,7 @@ void eZapMain::showHDDSpaceLeft(eLabel *DVRSpaceLeft)
 		DVRSpaceLeft->show();
 	}
 }
+#endif
 
 void eZapMain::showServiceInfobar(int show)
 {
@@ -5895,7 +5929,8 @@ void eZapMain::showServiceInfobar(int show)
 		fileInfoBar->hide();
 		dvrInfoBar->show();
 #ifndef DISABLE_FILE
-		showHDDSpaceLeft(DVRSpaceLeft);
+// 	i don't like always running HDD !!
+//	showHDDSpaceLeft(DVRSpaceLeft);
 #endif
 		prepareDVRHelp();
 	} else
@@ -6232,6 +6267,9 @@ eSleepTimerContextMenu::eSleepTimerContextMenu( eWidget* lcdTitle, eWidget *lcdE
 		case eSystemInfo::DM5620:
 			new eListBoxEntryText(&list, _("reboot now"), (void*)4, 0, _("restart your dreambox"));
 			break;
+		case eSystemInfo::TR_DVB272S:
+			new eListBoxEntryText(&list, _("reboot now"), (void*)4, 0, _("restart your receiver"));
+			break;
 		case eSystemInfo::DM7000:
 			new eListBoxEntryText(&list, _("shutdown now"), (void*)1, 0, _("shutdown your dreambox"));
 			new eListBoxEntryText(&list, _("restart"), (void*)4, 0, _("restart your dreambox"));
@@ -6525,4 +6563,3 @@ void UserBouquetSelector::selected( eListBoxEntryText *sel )
 
 	close(0);
 }
-

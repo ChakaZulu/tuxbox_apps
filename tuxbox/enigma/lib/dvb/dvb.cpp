@@ -1116,6 +1116,7 @@ void eTransponderList::readLNBData()
 			sParams.VoltageMode = eSwitchParameter::HV;
 			sParams.HiLoSignal = eSwitchParameter::HILO;
 		}
+#if 0
 		{
 			lnbs.push_back(eLNB(*this));
 			eLNB &lnb=lnbs.back();
@@ -1135,6 +1136,7 @@ void eTransponderList::readLNBData()
 			sParams.VoltageMode = eSwitchParameter::HV;
 			sParams.HiLoSignal = eSwitchParameter::HILO;
 		}
+#endif
 	}
 	eDebug("%i lnbs readed", lnbread);
 }
@@ -1143,13 +1145,54 @@ void eTransponderList::writeLNBData()
 {
 	eString basepath="/elitedvb/DVB/config/lnbs/";
 
+	// remove all LNB and Satellite Data from registry
+	for (int delLNB=0; delLNB < 16; ++delLNB)
+	{
+		eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/lofH").c_str());
+		eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/lofL").c_str());
+		eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/lofThreshold").c_str());
+		eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/IncreasedVoltage").c_str());
+		eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/DiSEqCMode").c_str());
+		eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/MiniDiSEqCParam").c_str());
+		eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/DiSEqCParam").c_str());
+		eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/DiSEqCRepeats").c_str());
+		eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/FastDiSEqC").c_str());
+		eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/SeqRepeat").c_str());
+		eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/SwapCmds").c_str());
+		eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/uncommitted_cmd").c_str());
+		eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/useGotoXX").c_str());
+		eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/useRotorInPower").c_str());
+		eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/DegPerSec").c_str());
+		eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/gotoXXLaDirection").c_str());
+		eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/gotoXXLoDirection").c_str());
+		eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/gotoXXLatitude").c_str());
+		eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/gotoXXLongitude").c_str());
+		eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/RotorTable").c_str());
+// delete ALL satellites from LNB
+		int satdel=0;
+		int tmpint;
+		while(1)
+		{
+			if ( !eConfig::getInstance()->getKey( (basepath+eString().setNum(delLNB)+"/satellites/"+eString().setNum(satdel)+"/OrbitalPosition").c_str(), tmpint ) )
+			{
+				eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/satellites/"+eString().setNum(satdel)+"/OrbitalPosition").c_str() );
+				eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/satellites/"+eString().setNum(satdel)+"/description").c_str() );
+				eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/satellites/"+eString().setNum(satdel)+"/VoltageMode").c_str() );
+				eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/satellites/"+eString().setNum(satdel)+"/HiLoSignal").c_str() );
+				++satdel;
+			}
+			else
+				break;
+		}
+	}
+
 	int lnbwrite=0;
 	for ( std::list<eLNB>::iterator it( lnbs.begin() ); it != lnbs.end(); ++it)
 	{
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/lofH").c_str(), it->getLOFHi() );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/lofL").c_str(), it->getLOFLo() );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/lofThreshold").c_str(), it->getLOFThreshold() );
-		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/IncreasedVoltage").c_str(), it->getIncreasedVoltage() );    
+		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/IncreasedVoltage").c_str(), it->getIncreasedVoltage() );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/DiSEqCMode").c_str(), (int) it->getDiSEqC().DiSEqCMode );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/MiniDiSEqCParam").c_str(), (int) it->getDiSEqC().MiniDiSEqCParam );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/DiSEqCParam").c_str(), (int) it->getDiSEqC().DiSEqCParam );
@@ -1176,7 +1219,8 @@ void eTransponderList::writeLNBData()
 //		eDebug("satpos %s",tmpStr.c_str());
 
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/RotorTable").c_str(), tmpStr.c_str() );
-        
+
+// write ALL existing satellites for this lnb
 		int satwrite=0;
 		for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); ++s)
 		{
@@ -1187,20 +1231,12 @@ void eTransponderList::writeLNBData()
 			eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/satellites/"+eString().setNum(satwrite)+"/HiLoSignal").c_str(), (int) sParams.HiLoSignal );
 			++satwrite;
 		}
-		// we must delete no more exist Satellites from registry...
-		int tmp;
-		while ( !eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbwrite)+"/satellites/"+eString().setNum(satwrite)+"/OrbitalPosition").c_str(), tmp ) )
-		{
-			eConfig::getInstance()->delKey( (basepath+eString().setNum(lnbwrite)+"/satellites/"+eString().setNum(satwrite++)).c_str() );
-			eDebug("delete satellite");
-		}
-		///////////////////////
 		++lnbwrite;
 	}
 	eDebug("%i LNBs written", lnbwrite);
 	// we must delete no more exist lnbs from registry
 	unsigned int tmp;
-	while (	!eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbwrite)+"/lofH").c_str(), tmp) )	// erase no more exist lnbs...
+		while (	!eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbwrite)+"/lofH").c_str(), tmp) )	// erase no more exist lnbs...
 	{
 		eConfig::getInstance()->delKey( (basepath+eString().setNum(lnbwrite++)).c_str() );
 		eDebug("delete lnb");		

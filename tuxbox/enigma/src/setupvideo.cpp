@@ -89,7 +89,8 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	entrys[0]=new eListBoxEntryText(pin8, _("4:3 letterbox"), (void*)0);
 	entrys[1]=new eListBoxEntryText(pin8, _("4:3 panscan"), (void*)1);
 	entrys[2]=new eListBoxEntryText(pin8, _("16:9"), (void*)2);
-	entrys[3]=new eListBoxEntryText(pin8, _("always 16:9"), (void*)3);
+	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
+		entrys[3]=new eListBoxEntryText(pin8, _("always 16:9"), (void*)3);
 	pin8->setCurrent(entrys[v_pin8]);
 	CONNECT( pin8->selchanged, eZapVideoSetup::VPin8Changed );
 
@@ -151,12 +152,15 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	ac3default->setHelpText(_("enable/disable ac3 default output (ok)"));
 	CONNECT( ac3default->checked, eZapVideoSetup::ac3defaultChanged );
 
-	VCRSwitching=new eCheckbox(this, v_VCRSwitching, 1);
-	VCRSwitching->setText(_("Auto VCR switching"));
-	VCRSwitching->move(ePoint(20, 205));
-	VCRSwitching->resize(eSize(350, 30));
-	VCRSwitching->setHelpText(_("auto switch to VCR connector"));
-	CONNECT( VCRSwitching->checked, eZapVideoSetup::VCRChanged );
+	if ( eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM500 )
+	{
+		VCRSwitching=new eCheckbox(this, v_VCRSwitching, 1);
+		VCRSwitching->setText(_("Auto VCR switching"));
+		VCRSwitching->move(ePoint(20, 205));
+		VCRSwitching->resize(eSize(350, 30));
+		VCRSwitching->setHelpText(_("auto switch to VCR connector"));
+		CONNECT( VCRSwitching->checked, eZapVideoSetup::VCRChanged );
+	}
 
 	ok=new eButton(this);
 	ok->setText(_("save"));

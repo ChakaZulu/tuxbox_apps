@@ -150,6 +150,7 @@ class eServiceHandlerMP3: public eServiceHandler
 
 	int state;
 	eMP3Decoder *decoder;
+	eServiceReference runningService;
 public:
 	int getID() const;
 

@@ -346,7 +346,7 @@ a:
 							{
 								if ( abs(VideoPTS - it->pts) <= 0x1000 )
 								{
-									eDebug("found :)");
+									eDebug("synced2 :)");
 									break;
 								}
 							}
@@ -414,6 +414,7 @@ a:
 							if ( VideoPTS != 0xFFFFFFFF && abs(VideoPTS - AudioPTS) <= 0x1000 )
 							{
 								synced=1;
+								eDebug("synced1 :)");
 		// cleanup syncbuffer.. we don't need content of it
 								std::list<syncAudioPacket>::iterator it( syncbuffer.begin() );
 								for (;it != syncbuffer.end(); ++it )

@@ -103,7 +103,7 @@ eSystemInfo::eSystemInfo()
 		case TUXBOX_SUBMODEL_DREAMBOX_DM7000:
 			defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR;
 			canupdateTransponder = canrecordts = hashdd =
-			haslcd = hasnetwork = canmeasurelnbcurrent =
+			haslcd = canmeasurelnbcurrent =
 			hasci = 1;
 			hwtype = DM7000;
 			caids.insert(0x4a70);
@@ -160,7 +160,7 @@ eSystemInfo::eSystemInfo()
 					midstr="5";
 					modelstr="DM7000";
 					cpustr="STB04500, 252MHz";
-					hashdd = haslcd = hasnetwork = canmeasurelnbcurrent = hasci =
+					hashdd = haslcd = canmeasurelnbcurrent = hasci =
 					canupdateTransponder = canrecordts = 1;
 					hwtype = DM7000;
 					caids.insert(0x4a70);
@@ -171,6 +171,7 @@ eSystemInfo::eSystemInfo()
 					cpustr="STBx25xx, 252MHz";
 					alphaincrement=25;
 					canshutdown=0;
+					canupdateTransponder=1;
 					hasci = 2;
 					hwtype = getInfo("type", true) == "DM5600" ? DM5600 : DM5620;
 					if ( hwtype == DM5600 )
@@ -193,7 +194,7 @@ eSystemInfo::eSystemInfo()
 					alphaincrement=25;
 					defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recNgrab;
 					canshutdown=0;
-					hasnetwork = 1;
+					canupdateTransponder=1;
 					hwtype = DM500;
 					caids.insert(0x4a70);
 					break;
@@ -238,8 +239,10 @@ eSystemInfo::eSystemInfo()
 			alphaincrement=25;
 			defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recNgrab;
 			canshutdown=0;
-			hasnetwork=1;
+			canupdateTransponder=1;
 			hwtype = TR_DVB272S;
+			caids.insert(0x4a70);
+			hasci=2;
 			break;
 		default:
 			break;

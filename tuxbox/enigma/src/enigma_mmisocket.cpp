@@ -138,6 +138,7 @@ void eSocketMMIHandler::connDataAvail(int what)
 		case POLLERR:
 		case POLLHUP:
 			closeConn();
+			eSocketMMI::getInstance(this)->gotMMIData("\x9f\x88\x00\x00",4);
 			break;
 	}
 }

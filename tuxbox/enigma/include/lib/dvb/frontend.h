@@ -86,7 +86,7 @@ class eFrontend: public Object
 	eTransponder *transponder;
 	eFrontend(int type, const char *demod=DEMOD_DEV, const char *sec=SEC_DEV);
 	static eFrontend *frontend;
-	eTimer *timer, timer2, rotorTimer1, rotorTimer2;
+	eTimer *timer, timer2, timer3, rotorTimer1, rotorTimer2;
 	int tries, noRotorCmd;
 	int tune(eTransponder *transponder, 
 			uint32_t Frequency, int polarisation,
@@ -112,6 +112,7 @@ class eFrontend: public Object
 	void RotorFinish(bool tune=true);
 	int SendSequence( const eSecCmdSequence &seq );
 	void checkLock();
+	void checkRotorLock();
 	void updateTransponder( eTransponder * );
 public:
 	void disableRotor() { noRotorCmd = 1, lastRotorCmd=-1; } // no more rotor cmd is sent when tune

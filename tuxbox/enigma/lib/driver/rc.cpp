@@ -121,7 +121,15 @@ bool eRCInput::open()
 
 int eRCInput::lock()
 {
-	locked=1;
+	if ( !locked )
+	{
+		locked=1;
+		for ( std::map<eString,eRCDevice*,lstr>::iterator it( devices.begin() );
+			it != devices.end(); ++it)
+		{
+			it->second->getDriver()->lock();
+		}
+	}
 	return handle;
 }
 
@@ -133,6 +141,7 @@ void eRCInput::unlock()
 			it != devices.end(); ++it)
 		{
 			it->second->getDriver()->flushBuffer();
+			it->second->getDriver()->unlock();
 		}
 		locked=0;
 	}
@@ -204,8 +213,6 @@ eRCShortDriver::~eRCShortDriver()
 
 void eRCShortDriver::keyPressed(int)
 {
-	if ( input->islocked() )
-		return;
 	__u16 rccode;
 	while (1)
 	{
@@ -244,8 +251,6 @@ eRCInputEventDriver::~eRCInputEventDriver()
 
 void eRCInputEventDriver::keyPressed(int)
 {
-	if ( input->islocked() )
-		return;
 	struct input_event ev;
 	while (1)
 	{

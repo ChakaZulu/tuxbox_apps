@@ -25,6 +25,8 @@ class eSectionReader
 {
 	int handle;
 	int flags;
+	int tableid;
+	int tableid_mask;
 public:
 	eSectionReader();
 	int getHandle();		// for SocketNotifiers
@@ -47,7 +49,7 @@ private:
 	int maxsec, section, flags, prevSection;
 	void closeFilter();
 	eTimer *timer;
-	__u8 buf[65536];
+	__u8 buf[4098];
 	int lockcount;
 	int setFilter(int pid, int tableid, int tableidext, int version, const char *dmxdev=DEMUX0);
 public:

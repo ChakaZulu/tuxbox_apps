@@ -351,6 +351,7 @@ static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConn
 	return result;
 }
 
+#ifndef DISABLE_FILE
 static eString pause(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
@@ -388,6 +389,7 @@ static eString record(eString request, eString dirpath, eString opts, eHTTPConne
 		return "<html>" CHARSETMETA "<head><title>Record</title></head><body>Recording stopped.</body></html>";
 	}
 }
+#endif
 
 static eString switchService(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
@@ -503,6 +505,7 @@ static eString admin(eString request, eString dirpath, eString opts, eHTTPConnec
 	return "<html>" CHARSETMETA "<head><title>Error</title></head><body>Unknown admin command.(valid commands are: shutdown, reboot, restart, standby, wakeup) </body></html>";
 }
 
+#ifndef DISABLE_FILE
 static eString videocontrol(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
@@ -537,6 +540,7 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 
 	return "<script language=\"javascript\">window.close();</script>";
 }
+#endif
 
 static eString audio(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
@@ -649,12 +653,14 @@ static eString version(eString request, eString dirpath, eString opt, eHTTPConne
 	return result;
 }
 
+#ifndef DISABLE_FILE
 static eString setFakeRecordingState(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	int state = (opt == "on") ? 1 : 0;
 	eZapMain::getInstance()->setFakeRecordingState(state);
 	return "+ok";
 }
+#endif
 
 static eString channels_getcurrent(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
@@ -942,10 +948,11 @@ static eString getChannelStats()
 static eString getRecordingStat()
 {
 	std::stringstream result;
-
+#ifndef DISABLE_FILE
 	if (eZapMain::getInstance()->isRecording())
 		result << "<img src=\"blinking_red.gif\" border=0>";
 	else
+#endif
 		result << "&nbsp;";
 		
 	return result.str();
@@ -3439,7 +3446,9 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/screenshot", osdshot); // for backward compatibility
 	dyn_resolver->addDyn("GET", "/cgi-bin/currentService", getCurrentServiceRef);
 	dyn_resolver->addDyn("GET", "/cgi-bin/currentTransponderServices", getTransponderServices);
+#ifndef DISABLE_FILE
 	dyn_resolver->addDyn("GET", "/cgi-bin/setFakeRecordingState", setFakeRecordingState);
+#endif
 	dyn_resolver->addDyn("GET", "/control/zapto", neutrino_suck_zapto);
 	dyn_resolver->addDyn("GET", "/control/getonidsid", neutrino_suck_getonidsid);
 	dyn_resolver->addDyn("GET", "/control/channellist", neutrino_suck_getchannellist);

@@ -97,9 +97,10 @@ enigmaCI::enigmaCI()
 		int handleTwo=0;
 		eConfig::getInstance()->getKey("/ezap/ci/handleTwoServices", handleTwo);
 		twoServices = new eCheckbox(this);
-		twoServices->move(ePoint(10,133));
-		twoServices->resize(eSize(330,fd+10));
+		twoServices->move(ePoint(10,128));
+		twoServices->resize(eSize(330,(fd+10)*2));
 		twoServices->setCheck(handleTwo);
+		twoServices->setFlags(RS_WRAP|eLabel::flagVCenter);
 		twoServices->setText(_("can handle two services"));
 		twoServices->setHelpText(_("can your CI descramble two services at the same time?"));
 		CONNECT(twoServices->checked, enigmaCI::handleTwoServicesChecked);

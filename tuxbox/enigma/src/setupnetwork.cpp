@@ -1005,39 +1005,45 @@ eNFSSetup::eNFSSetup()
 	//buttons
 	prev = new eButton(this);
 	prev->move(ePoint(10, clientrect.height() - (80+fd) ));
-	prev->resize(eSize(40, 40));
+	prev->resize(eSize(30, 40));
 	prev->setText("<");
 	prev->setHelpText(_("go to previous share"));
 	prev->loadDeco();
 	CONNECT(prev->selected, eNFSSetup::prevPressed);
 
-	mount = new eButton(this);
-	mount->move(ePoint(55, clientrect.height() - (80+fd) ));
-	mount->resize(eSize(100, 40));
-	mount->setText("mount");
-	mount->setHelpText(_("press ok to mount this share"));
-	mount->loadDeco();
-	CONNECT(mount->selected, eNFSSetup::mountPressed);
-
-	ok = new eButton(this);
-	ok->move(ePoint(160, clientrect.height() - (80+fd) ));
-	ok->resize(eSize(130, 40));
-	ok->setText(_("save"));
-	ok->setHelpText(_("press ok to save this share"));
-	ok->loadDeco();
-	CONNECT(ok->selected, eNFSSetup::okPressed);
-
 	umount = new eButton(this);
-	umount->move(ePoint(clientrect.width() - 155, clientrect.height() - (80+fd) ));
-	umount->resize(eSize(100, 40));
+	umount->move(ePoint(45, clientrect.height() - (80+fd) ));
+	umount->resize(eSize(109, 40));
 	umount->setText("umount");
 	umount->setHelpText(_("press ok to unmount this share"));
+	umount->setShortcut("red");
+	umount->setShortcutPixmap("red");
 	umount->loadDeco();
 	CONNECT(umount->selected, eNFSSetup::umountPressed);
 
+	mount = new eButton(this);
+	mount->move(ePoint(159, clientrect.height() - (80+fd) ));
+	mount->resize(eSize(107, 40));
+	mount->setText("mount");
+	mount->setHelpText(_("press ok to mount this share"));
+	mount->loadDeco();
+	mount->setShortcut("green");
+	mount->setShortcutPixmap("green");
+	CONNECT(mount->selected, eNFSSetup::mountPressed);
+
+	ok = new eButton(this);
+	ok->move(ePoint(271, clientrect.height() - (80+fd) ));
+	ok->resize(eSize(137, 40));
+	ok->setText(_("save"));
+	ok->setHelpText(_("press ok to save this share"));
+	ok->loadDeco();
+	ok->setShortcut("yellow");
+	ok->setShortcutPixmap("yellow");
+	CONNECT(ok->selected, eNFSSetup::okPressed);
+
 	next = new eButton(this);
-	next->move(ePoint(clientrect.width() - 50, clientrect.height() - (80+fd) ));
-	next->resize(eSize(40, 40));
+	next->move(ePoint(414, clientrect.height() - (80+fd) ));
+	next->resize(eSize(30, 40));
 	next->setText(">");
 	next->loadDeco();
 	next->setHelpText(_("go to next share"));
@@ -1154,7 +1160,7 @@ void eNFSSetup::prevPressed()
 	load_config();
 	headline.sprintf("NFS/CIFS Setup (%d/%d)",cur_entry + 1, MAX_NFS_ENTRIES);
 	setText(headline);
-	next->setFocus(prev);
+	setFocus(prev);
 }
     
 void eNFSSetup::nextPressed()
@@ -1163,7 +1169,7 @@ void eNFSSetup::nextPressed()
 	load_config();
 	headline.sprintf("NFS/CIFS Setup (%d/%d)",cur_entry + 1, MAX_NFS_ENTRIES);
 	setText(headline);
-	next->setFocus(next);
+	setFocus(next);
 }
     
 void eNFSSetup::okPressed()
@@ -1202,10 +1208,11 @@ void eNFSSetup::okPressed()
 	int res=msg.exec();
 	msg.hide();
 
-	if (res != eMessageBox::btYes)
-		close(0);
-	else
+	if (res == eMessageBox::btYes)
+	{
 		nextPressed();
+		setFocus(ip);
+	}
 }
 
 extern bool ismounted( eString mountpoint );
@@ -1340,13 +1347,17 @@ void eNFSSetup::automount()
 
 int eNFSSetup::eventHandler(const eWidgetEvent &e)
 {
-	if (e.type == eWidgetEvent::execBegin && combo_fstype->getCount() > 1 )
+	if (e.type == eWidgetEvent::execBegin )
 	{
-		errorMessage(
-		_("Recording on CIFS shares is unstable.\n"
-			"Therefore CIFS support is not included "
-			"in the standard distribution. Use it at "
-			"your own risk!"));
+		if ( combo_fstype->getCount() > 1 )
+		{
+			errorMessage(
+				_("Recording on CIFS shares is unstable.\n"
+					"Therefore CIFS support is not included "
+					"in the standard distribution. Use it at "
+					"your own risk!"));
+		}
+		setFocus(ip);
 		return 1;
 	}
 	return eWindow::eventHandler(e);

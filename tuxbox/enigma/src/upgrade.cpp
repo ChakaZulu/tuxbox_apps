@@ -538,8 +538,10 @@ void eUpgrade::flashImage(int checkmd5)
 					strcpy(mtd,"/dev/mtd/2");
 					mtdsize=0x6e0000;
 					break;
-				case 5:   // dreambox
-				case 6:
+				case 5:   // dm7000
+				case 6:   // dm56xx
+				case 7:   // dm500
+				case 8:   // tr272S
 					strcpy(mtd,"/dev/mtd/0");
 					mtdsize=0x600000;
 					break;

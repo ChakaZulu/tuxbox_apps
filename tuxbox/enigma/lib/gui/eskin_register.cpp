@@ -1,6 +1,7 @@
 #include <lib/gui/eskin_register.h>
 #include <lib/gui/eskin.h>
 #include <lib/gdi/gfbdc.h>
+#include <lib/system/info.h>
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
 #include <lib/system/econfig.h>
@@ -18,6 +19,9 @@ public:
 				eFatal("skin load failed (" DATADIR "/enigma/skins/default.esml)");
 
 		eString skinfile=DEFAULTSKIN;
+
+		if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::TR_DVB272S )
+			skinfile = "small_red.esml";
 
 		char *temp=0;
 		if (!eConfig::getInstance()->getKey("/ezap/ui/skin", temp))

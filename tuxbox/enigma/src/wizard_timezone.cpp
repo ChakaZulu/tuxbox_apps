@@ -19,8 +19,8 @@ int eWizardTimezone::run()
 	{
 		free(timezone);
 		eDebug("Dont run Timezone Setup.. timezone is already selected");
+		settimezone.setTimeZone();
 	}
-	settimezone.setTimeZone();
 	return 0;
 }
 

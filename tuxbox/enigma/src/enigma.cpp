@@ -26,6 +26,7 @@
 #include <lib/system/http_dyn.h>
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
+#include <lib/system/info.h>
 #include <lib/gui/ebutton.h>
 #include <lib/gui/actions.h>
 #include <lib/driver/rc.h>
@@ -136,12 +137,35 @@ eZap::eZap(int argc, char **argv)
 #endif
 	eDebug("[ENIGMA] loading default keymaps...");
 
-#ifndef DISABLE_DREAMBOX_RC
-	if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdreambox2.xml") )
-		eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdreambox2.xml");
-#endif
-
 #if HAVE_DVB_API_VERSION < 3
+#ifndef DISABLE_DREAMBOX_RC
+	switch( eSystemInfo::getInstance()->getHwType() )
+	{
+		case eSystemInfo::DM7000:
+			if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdm7000.xml") )
+				if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdreambox2.xml") )
+					if ( eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdm7000.xml") )
+						if ( eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdreambox2.xml") )
+							eFatal("couldn't load RC Mapping file for DM7000");
+			if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdreambox_keyboard.xml") )
+				if ( eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdreambox_keyboard.xml") )
+					eDebug("couldn't load Dreambox keyboard mapping (rcdreambox_keyboard.xml)");
+			break;
+		case eSystemInfo::TR_DVB272S:
+		case eSystemInfo::DM5600:
+		case eSystemInfo::DM5620:
+		case eSystemInfo::DM500:
+			if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdm5xxx.xml") )
+				if ( eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdm5xxx.xml") )
+					eFatal("couldn't load RC Mapping file for DM5XXX");
+			break;
+/*		case eSystemInfo::TR_DVB272S:
+			if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rctrdvb272.xml") )
+				eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rctrdvb272.xml");*/
+		default:
+			break;
+	}
+#endif
 #ifndef DISABLE_DBOX_RC
 	if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdboxold.xml") )
 		eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdboxold.xml");

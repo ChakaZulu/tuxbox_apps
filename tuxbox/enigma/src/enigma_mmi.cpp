@@ -97,12 +97,12 @@ long LengthField(unsigned char *lengthfield,long maxlength,int *fieldlen)
 
 void enigmaMMI::showWaitForAnswer(int ret)
 {
-	if ( ret != -1 )
+//	if ( ret != -1 )
 	{
 		if ( conn.connected() )
 		{
 			show();
-			responseTimer.start(10000,true);
+			responseTimer.start(5000,true);
 		}
 	}
 }
@@ -340,7 +340,6 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 		open = &wnd;
 		int ret = wnd.exec();
 		open = 0;
-//		eDebug("ret = %d",ret);
 		if ( ret > -2 )
 		{
 			if ( ret == -1 )
@@ -362,7 +361,6 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 		eDebug("CLOSE");
 		closeMMI();
 	}
-
 	return true;
 }
 

@@ -76,7 +76,7 @@ struct _lpduQueueHeader
 class eDVBCI: private eThread, public eMainloop, public Object
 {
 	static int instance_count;
-	std::priority_queue<queueData> queue;
+	std::priority_queue<queueData> sendqueue;
 	bool newTransponder;
 protected:
 	enum
@@ -108,7 +108,6 @@ protected:
 	int ml_buffersize;
 
 	//----------------------
-	lpduQueueHeader lpduSendQueues[MAXTRANSPORTSESSIONS];
 	lpduQueueHeader lpduReceiveQueues[MAXTRANSPORTSESSIONS];
 
 	ptrlpduQueueElem eDVBCI::AllocLpduQueueElem(unsigned char t_c_id);

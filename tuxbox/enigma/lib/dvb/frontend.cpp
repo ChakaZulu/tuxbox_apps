@@ -17,7 +17,7 @@
 #include <lib/dvb/decoder.h>
 #include <lib/system/econfig.h>
 #include <lib/system/info.h>
-#include <lib/gui/emessage.h>
+#include <lib/driver/rc.h>
 
 #include <dbox/fp.h>
 #define FP_IOCTL_GET_LNB_CURRENT 9
@@ -26,16 +26,17 @@ eFrontend* eFrontend::frontend;
 
 eFrontend::eFrontend(int type, const char *demod, const char *sec)
 :type(type), curRotorPos( 1000 ), state(stateIdle),
-	transponder(0), timer2(eApp), rotorTimer1(eApp), rotorTimer2(eApp), 
+	transponder(0), timer2(eApp), timer3(eApp), rotorTimer1(eApp), rotorTimer2(eApp), 
 	noRotorCmd(0)
 {
 	timer=new eTimer(eApp);
 	CONNECT(eDVB::getInstance()->leaveTransponder, eFrontend::updateTransponder );
 	CONNECT(rotorTimer1.timeout, eFrontend::RotorStartLoop );
 	CONNECT(rotorTimer2.timeout, eFrontend::RotorRunningLoop );
-	CONNECT(timer2.timeout, eFrontend::checkLock );
-
 	CONNECT(timer->timeout, eFrontend::timeout);
+	CONNECT(timer2.timeout, eFrontend::checkLock );
+	CONNECT(timer3.timeout, eFrontend::checkRotorLock );
+
 	fd=::open(demod, O_RDWR);
 	if (fd<0)
 	{
@@ -71,15 +72,46 @@ void eFrontend::checkLock()
 	}
 }
 
+void eFrontend::checkRotorLock()
+{
+	if ( Locked() )
+	{
+		curRotorPos=1000;
+		eApp->exit_loop();
+	}
+	else if ( curRotorPos < (eDVB::getInstance()->getScanAPI()?1010:1040) )
+	{
+		++curRotorPos;
+		transponder->tune();
+		if ( curRotorPos == 1001 )
+			timer3.start(1000,true);
+		else
+			timer3.start(3000,true);
+	}
+	else
+	{
+		curRotorPos=1000;
+		eApp->exit_loop();
+	}
+}
+
 void eFrontend::InitDiSEqC()
 {
 	lastcsw = lastSmatvFreq = lastRotorCmd = lastucsw = lastToneBurst = -1;
 	lastLNB=0;
-	// DiSEqC Reset
-	sendDiSEqCCmd( 0, 0 );
-	// peripheral power supply on
-	sendDiSEqCCmd( 0, 3 );
-	usleep(150000);
+	std::list<eLNB> &lnbs = eTransponderList::getInstance()->getLNBs();
+	for (std::list<eLNB>::iterator it(lnbs.begin()); it != lnbs.end(); ++it)
+		if ( it->getDiSEqC().DiSEqCMode != eDiSEqC::NONE &&
+			( it->getDiSEqC().DiSEqCParam != eDiSEqC::SENDNO ||
+				it->getDiSEqC().uncommitted_cmd ) )
+	{
+		// DiSEqC Reset
+		sendDiSEqCCmd( 0, 0 );
+		// peripheral power supply on
+		sendDiSEqCCmd( 0, 3 );
+		usleep(150000);
+		break;
+	}
 }
 
 void eFrontend::timeout()
@@ -597,14 +629,19 @@ int eFrontend::RotorUseTimeout(eSecCmdSequence& seq, eLNB *lnb )
 		eDebug("Rotor Cmd is sent");
 
 	/* emit */ s_RotorRunning(newPos);
-
-	if ( curRotorPos != 1000 ) // uninitialized  
+	if ( curRotorPos == 1000 ) // uninitialized
+	{
+		eRCInput::getInstance()->lock();
+		timer3.start(0,true);
+		eApp->enter_loop();
+		eDebug("raus");
+		eRCInput::getInstance()->unlock();
+	}
+	else
 		usleep( (int)( abs(newPos - curRotorPos) * TimePerDegree * 100) + startDelay );
 
 	/* emit */ s_RotorStopped();
-
 	curRotorPos = newPos;
-
 	return 0;
 }
 
@@ -1523,7 +1560,9 @@ int eFrontend::tune(eTransponder *trans,
 		seq.commands=commands;
 
 		// handle DiSEqC Rotor
-		if ( lastRotorCmd != RotorCmd && !noRotorCmd )
+		if ( curRotorPos > 1000 )
+			eDebug("check Lock in rotor krams");
+		else if ( lastRotorCmd != RotorCmd && !noRotorCmd )
 		{
 //			eDebug("handle DISEqC Rotor.. cmdCount = %d", cmdCount);
 /*			eDebug("0x%02x,0x%02x,0x%02x,0x%02x,0x%02x",
@@ -1533,8 +1572,13 @@ int eFrontend::tune(eTransponder *trans,
 				commands[cmdCount-1].u.diseqc.params[0],
 				commands[cmdCount-1].u.diseqc.params[1]);*/
 
-			// drive rotor always with 18V ( is faster )
-			seq.voltage = eSecCmdSequence::VOLTAGE_18;
+			// drive rotor with 18V when we can measure inputpower
+			// or we know which orbital pos currently is selected
+			if ( lnb->getDiSEqC().useRotorInPower&1
+				|| curRotorPos < 1000 )
+				seq.voltage = eSecCmdSequence::VOLTAGE_18;
+			else
+				seq.voltage = voltage;
 
 			lastRotorCmd=RotorCmd;
 
@@ -1635,10 +1679,12 @@ send:
 		}
 		eDebug("FE_SET_FRONTEND OK");
 
-		state=stateTuning;
-		tries=20;
-
-		timer->start(50, true);
+		if ( curRotorPos < 1001 )
+		{
+			state=stateTuning;
+			tries=20;
+			timer->start(50, true);
+		}
   }
 	return 0;
 }

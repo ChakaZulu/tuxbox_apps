@@ -259,8 +259,17 @@ void RotorConfig::setLNBData( eLNB *lnb )
 
 		useGotoXX->setCheck( (int) (lnb->getDiSEqC().useGotoXX & 1 ? 1 : 0) );
 		gotoXXChanged( (int) lnb->getDiSEqC().useGotoXX & 1 );
-		useRotorInPower->setCheck( (int) lnb->getDiSEqC().useRotorInPower & 1 );
-		useRotorInPowerChanged( (int) lnb->getDiSEqC().useRotorInPower & 1 );
+		if ( eSystemInfo::getInstance()->canMeasureLNBCurrent() )
+		{
+			useRotorInPower->setCheck( (int) lnb->getDiSEqC().useRotorInPower & 1 );
+			useRotorInPowerChanged( (int) lnb->getDiSEqC().useRotorInPower & 1 );
+		}
+		else
+		{
+			useRotorInPower->setCheck( 0 );
+			useRotorInPowerChanged( 0 );
+		}
+
 		Latitude->setFixedNum( lnb->getDiSEqC().gotoXXLatitude );
 		LaDirection->setCurrent( (void*) lnb->getDiSEqC().gotoXXLaDirection );
 		Longitude->setFixedNum( lnb->getDiSEqC().gotoXXLongitude );

@@ -810,7 +810,7 @@ int eMP3Decoder::getPosition(int real)
 		unsigned int position=::lseek(sourcefd, 0, SEEK_CUR);
 		if ( !position )
 			return 0;
-		eDebug("position = %d", position);
+//		eDebug("position = %d", position);
 		position-=1024*1024*2;// latency
 		position-=input.size();
 		position-=output.size();
@@ -898,6 +898,11 @@ int eServiceHandlerMP3::play(const eServiceReference &service, int workaround )
 	}
 	else
 		return -1;
+
+	runningService=service;
+	eService *s = addRef(service);
+	if ( s && s->id3 )
+		s->id3->getID3Tags();
 
 	if (!workaround)
 	{
@@ -1035,6 +1040,8 @@ int eServiceHandlerMP3::stop( int workaround )
 	{
 		decoder->messages.send(eMP3Decoder::eMP3DecoderMessage(eMP3Decoder::eMP3DecoderMessage::exit));
 		delete decoder;
+		removeRef(runningService);
+		runningService=eServiceReference();
 		decoder=0;
 	}
 	serviceEvent(eServiceEvent(eServiceEvent::evtStop));
