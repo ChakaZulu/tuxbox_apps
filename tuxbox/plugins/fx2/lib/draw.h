@@ -26,6 +26,10 @@ extern	void	FBBlink( int x, int y, int dx, int dy, int count );
 extern	void	FBMove( int x, int y, int x2, int y2, int dx, int dy );
 extern	void	FBPrintScreen( void );
 extern	void	FBPause( void );
+extern	int		FBDrawString( int xpos, int ypos, int height, char *msg,
+					unsigned char col,		/* text color */
+					unsigned char backcol );/* background 0==transp */
+extern	void	FBDrawFx2Logo( int x, int y );
 #ifdef USEX
 extern	void	FBFlushGrafic( void );
 #endif
@@ -33,5 +37,6 @@ extern	void	FBFlushGrafic( void );
 #define BNR0			0
 #define BLACK			1
 #define	WHITE			2
+#define	RED				3
 
 #endif

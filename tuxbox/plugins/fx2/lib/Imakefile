@@ -1,9 +1,9 @@
 all:: libfx2.so
 
-PREF=powerpc-linux-
+#PREF=powerpc-linux-
 CC=$(PREF)gcc
 STRIP=$(PREF)strip
-CDEBUGFLAGS=-g -O2 -Wall -pedantic
+CDEBUGFLAGS=-g -O2 -Wall -pedantic -DUSEX
 INCLUDES=-I.
 OBJS=draw.o rcinput.o pig.o
 
