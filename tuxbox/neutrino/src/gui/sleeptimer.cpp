@@ -46,7 +46,7 @@
 int CSleepTimerWidget::exec(CMenuTarget* parent, string)
 {
 	int    res = menu_return::RETURN_EXIT_ALL;
-	int    shutdown_min;
+	int    shutdown_min, t;
 	char   value[16];
 	CStringInput  *inbox;
 
@@ -57,8 +57,11 @@ int CSleepTimerWidget::exec(CMenuTarget* parent, string)
    
 
 	// remaining shutdown time?
-	shutdown_min = g_Timer->actionGetShutdown () / 60;
-	if (shutdown_min) shutdown_min++;  // because of fractions...
+	t = g_Timer->actionGetShutdown ();
+	shutdown_min = t / 60;
+	if ( (t>0) && ((t%60) > 30) ) {
+		shutdown_min++;
+	}
 
 	sprintf(value,"%03d",shutdown_min);
 	inbox = new CStringInput("sleeptimerbox.title",value,3,"sleeptimerbox.hint1","sleeptimerbox.hint2","0123456789 ");

@@ -476,4 +476,4 @@ favorites.finalhint \nUse the bouqueteditor to modify your favorites.\n
 
 sleeptimerbox.title Sleeptimer
 sleeptimerbox.hint1 Shutdown time in min.
-sleeptimerbox.hint1 The dbox2 will shutdown after the given time.
+sleeptimerbox.hint2 The dbox2 will shutdown after this time.
