@@ -27,6 +27,14 @@
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+$Id: gamelist.h,v 1.6 2001/12/05 21:17:50 rasc Exp $
+
+$Log: gamelist.h,v $
+Revision 1.6  2001/12/05 21:17:50  rasc
+gamelist 2-spaltig mit description... Font muss noch verbessert werden
+
+
 */
 
 #ifndef __gamelist__
@@ -63,8 +71,10 @@ class CGameList : public CMenuTarget
 	string				name;
 	vector<game*>	gamelist;
 
-	int					fheight; // Fonthoehe Channellist-Inhalt
-	int					theight; // Fonthoehe Channellist-Titel
+	int			fheight; // Fonthoehe Channellist-Inhalt
+	int			theight; // Fonthoehe Channellist-Titel
+
+	int			fheight1,fheight2;
 
 	int 			width;
 	int 			height;

@@ -27,6 +27,14 @@
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+$Id: gamelist.cpp,v 1.17 2001/12/05 21:17:50 rasc Exp $
+
+$Log: gamelist.cpp,v $
+Revision 1.17  2001/12/05 21:17:50  rasc
+gamelist 2-spaltig mit description... Font muss noch verbessert werden
+
+
 */
 
 #include "gamelist.h"
@@ -45,7 +53,16 @@ CGameList::CGameList(string Name)
 	width = 500;
 	height = 440;
 	theight= g_Fonts->menu_title->getHeight();
-	fheight= g_Fonts->channellist->getHeight();
+//
+	fheight1= g_Fonts->eventlist_itemLarge->getHeight();
+	{
+	  int h1,h2; 
+		h1 = g_Fonts->eventlist_itemSmall->getHeight();
+		h2 = g_Fonts->eventlist_datetime->getHeight();
+		fheight2 = (h1 > h2) ? h1 : h2;
+	}
+	fheight = fheight1 + fheight2 + 2;
+//
 	listmaxshow = (height-theight-0)/fheight;
 	height = theight+0+listmaxshow*fheight; // recalc height
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
@@ -150,6 +167,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 			    tmp->desc = info.desc;
 			    tmp->depend = info.depend;
 				tmp->filename = pluginname;
+printf ("Gamelist: name: _%s_ desc: _%s_ depend: _%s_\n",info.name,info.desc,info.depend);
 				gamelist.insert(gamelist.end(), tmp);
 			}
 			free(namelist[count]);
@@ -257,7 +275,11 @@ void CGameList::paintItem(int pos)
 	if(liststart+pos<gamelist.size())
 	{
 		game* aktgame = gamelist[liststart+pos];
-		g_Fonts->channellist->RenderString(x+10, ypos+fheight, width-20, aktgame->name.c_str(), color);
+		g_Fonts->eventlist_itemLarge->RenderString(x+10, ypos+fheight1+3, width-20, aktgame->name.c_str(), color);
+		g_Fonts->eventlist_itemSmall->RenderString(x+20, ypos+fheight,    width-20, aktgame->desc.c_str(), color);
+
+// g_Fonts->eventlist_itemSmall->getHeight();
+// g_Fonts->eventlist_datetime->getHeight();
 	}
 }
 
@@ -352,7 +374,7 @@ void CGameList::runGame(int selected )
 		dlclose(handle);
 		printf("exec done...\n");
 		g_RCInput->restartInput();
-		while(g_RCInput->getKey(1)!=-1);
+		g_RCInput->clear();
 		//restore framebuffer...
 		g_FrameBuffer->paletteSet();
 		g_FrameBuffer->paintBackgroundBox(0,0,720,576);		
