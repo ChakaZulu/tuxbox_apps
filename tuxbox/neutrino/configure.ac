@@ -19,6 +19,8 @@ daemons/Makefile
 daemons/controld/Makefile
 daemons/controld/driver/Makefile
 daemons/lcdd/Makefile
+daemons/lcdd/clock/Makefile
+daemons/lcdd/icons/Makefile
 daemons/sectionsd/Makefile
 daemons/timerd/Makefile
 libs/Makefile
