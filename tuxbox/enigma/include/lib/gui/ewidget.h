@@ -98,6 +98,10 @@ public:
 	{
 		return (parent?(parent->getAbsolutePosition()+parent->clientrect.topLeft()+position):position);
 	}
+	inline QPoint getTLWPosition()
+	{
+		return (parent?(parent->getTLWPosition()+parent->clientrect.topLeft()+position):QPoint(0,0));
+	}
 	virtual void redrawWidget(gPainter *target, const QRect &area);
 	virtual void eraseBackground(gPainter *target, const QRect &area);
 	eWidget(eWidget *parent=0, int takefocus=0);

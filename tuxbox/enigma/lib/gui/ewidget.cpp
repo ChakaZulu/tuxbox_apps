@@ -97,7 +97,7 @@ void eWidget::move(QPoint nposition)
 	recalcClip();
 }
 
-void eWidget::redraw(QRect area)
+void eWidget::redraw(QRect area)		// area bezieht sich nicht auf die clientarea
 {
 	if (getTLW()->just_showing)
 		return;
@@ -114,14 +114,18 @@ void eWidget::redraw(QRect area)
 		}
 		if (children())
 		{
-			area.moveBy(-clientrect.x(), -clientrect.y());
+			area.moveBy(-clientrect.x(), -clientrect.y());		// ab hier jetzt schon.  
 			QObjectListIt it(*children());
 			eWidget *w;
 			while((w=(eWidget *)it.current()))
 			{
 				++it;
-				if (area.contains(QRect(QPoint(0, 0), w->size)))
-					w->redraw();
+				QRect cr=area&QRect(w->position, w->size);
+				if (!cr.isEmpty())
+				{
+					cr.moveBy(-w->position.x(), -w->position.y());
+					w->redraw(cr);
+				}
 			}
 		}
 	}
@@ -204,10 +208,15 @@ int eWidget::exec()
 
 void eWidget::clear()
 {
-	if (isVisible())
+	if (parent)
+	{
+		QRect me(getTLWPosition(), size);
+		qDebug("CLEAR %d %d %d %d", me.x(), me.y(), me.width(), me.height());
+		getTLW()->redraw(me);
+	} else
 	{
 		gPainter *p=getPainter();
-		p->setBackgroundColor(parent?parent->getBackgroundColor():gColor(0));
+		p->setBackgroundColor(gColor(0));
 		p->clear();
 		delete p;
 	}
@@ -277,8 +286,8 @@ void eWidget::hide()
 	if (state&stateShow)
 	{
 		willHideChildren();
-		clear();	// hide -> immer erasen. dieses Hide ist IMMER explizit.
 		state&=~stateShow;
+		clear();	// hide -> immer erasen. dieses Hide ist IMMER explizit.
 		checkFocus();
 	}
 }
@@ -399,20 +408,29 @@ void eWidget::setFont(const gFont &fnt)
 
 void eWidget::setText(const QString &label)
 {
-	text=label;
-	event(eWidgetEvent(eWidgetEvent::changedText));
+	if (label != text)	// ein compare ist immer weniger arbeit als ein unnoetiges redraw
+	{
+		text=label;
+		event(eWidgetEvent(eWidgetEvent::changedText));
+	}
 }
 
 void eWidget::setBackgroundColor(gColor color)
 {
-	backgroundColor=color;
-	event(eWidgetEvent(eWidgetEvent::changedBackgroundColor));
+	if (color!=backgroundColor)
+	{
+		backgroundColor=color;
+		event(eWidgetEvent(eWidgetEvent::changedBackgroundColor));
+	}
 }
 
 void eWidget::setForegroundColor(gColor color)
 {
-	foregroundColor=color;
-	event(eWidgetEvent(eWidgetEvent::changedForegroundColor));
+	if (color != foregroundColor)
+	{
+		foregroundColor=color;
+		event(eWidgetEvent(eWidgetEvent::changedForegroundColor));
+	}
 }
 
 void eWidget::setPixmap(gPixmap *pmap)
@@ -513,7 +531,7 @@ int eWidget::setProperty(const QString &prop, const QString &value)
 		setBackgroundColor(eSkin::getActive()->queryColor(value));
 	else
 	{
-		qFatal("bla");
+		qFatal("skin property %s does not exist", (const char*)prop);
 		return -ENOENT;
 	}
 	return 0;
