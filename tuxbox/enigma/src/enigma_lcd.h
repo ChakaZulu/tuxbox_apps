@@ -2,14 +2,16 @@
 #define __enigma_lcd_h
 
 #include "ewidget.h"
+#include "epixmap.h"
+#include "eprogress.h"
+#include "elabel.h"
 #include "multipage.h"
 #include "qtimer.h"
 
-class eLabel;
 class eService;
-class eProgress;
 class eZapLCDMain;
 class eZapLCDMenu;
+class eZapLCDScart;
 
 class eZapLCD: public eWidget
 {
@@ -19,7 +21,9 @@ public:
 	static eZapLCD* getInstance() { return instance; }
 	eZapLCDMain* lcdMain;
 	eZapLCDMenu* lcdMenu;
+	eZapLCDScart* lcdScart;
 	eZapLCD();
+	~eZapLCD();
 };
 
 class eZapLCDMain: public eWidget
@@ -45,6 +49,16 @@ public:
 	eLabel *Title;
 	eWidget *Element;
 	eZapLCDMenu(eWidget *parent);
+};
+
+class eZapLCDScart: public eWidget
+{
+	Q_OBJECT
+private slots:
+
+public:
+	ePixmap *Title, *Scart;
+	eZapLCDScart(eWidget *parent);
 };
 
 #endif /* __enigma_lcd_h */

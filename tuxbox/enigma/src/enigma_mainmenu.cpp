@@ -10,6 +10,7 @@
 #include "enigma_lcd.h"
 #include "elabel.h"
 #include "epgcache.h"
+#include "epixmap.h"
 
 eMainMenu::eMainMenu()
 {
@@ -52,7 +53,12 @@ void eMainMenu::sel_vcr(eListboxEntry *lbe)
 	eAVSwitch::getInstance()->setInput(1);
 	eMessageBox mb("If you can read this, your scartswitch doesn't work", "VCR");
 	mb.show();
+	eZapLCD *pLCD=eZapLCD::getInstance();
+	pLCD->lcdMenu->hide();
+	pLCD->lcdScart->show();
 	mb.exec();
+	pLCD->lcdScart->hide();
+	pLCD->lcdMenu->show();
 	mb.hide();
 	eAVSwitch::getInstance()->setInput(0);
 	window->show();

@@ -1,10 +1,8 @@
 #include <time.h>
 #include "edvb.h"
 #include "enigma_lcd.h"
-#include "elabel.h"
 #include "dvb.h"
 #include "lcd.h"
-#include "eprogress.h"
 #include "glcddc.h"
 #include "font.h"
 #include "emessage.h"
@@ -21,7 +19,16 @@ eZapLCD::eZapLCD(): eWidget()
 
 	lcdMain = new eZapLCDMain(this);
 	lcdMenu = new eZapLCDMenu(this);
+	lcdScart = new eZapLCDScart(this);
 	lcdMenu->hide();
+	lcdScart->hide();
+}
+
+eZapLCD::~eZapLCD()
+{
+	delete lcdMain;
+	delete lcdMenu;
+	delete lcdScart;
 }
 
 void eZapLCDMain::clockUpdate()
@@ -79,4 +86,13 @@ eZapLCDMenu::eZapLCDMenu(eWidget *parent): eWidget(parent, 0)
 
 	ASSIGN(Title, eLabel, "title");
 	ASSIGN(Element, eLabel, "element");
+}
+
+eZapLCDScart::eZapLCDScart(eWidget *parent): eWidget(parent, 0)
+{	
+	if (eSkin::getActive()->build(this, "enigma_lcd_scart"))
+		qFatal("skin load of \"enigma_lcd_scart\" failed");
+
+	ASSIGN(Title, ePixmap, "enigma_logo");
+	ASSIGN(Scart, ePixmap, "lcd_scart");
 }
