@@ -46,17 +46,20 @@ int CSleepTimerWidget::exec(CMenuTarget* parent, string)
 
 	delete inbox;
 
-	shutdown_min = atoi (value);
-	printf("sleeptimer min: %d\n",shutdown_min);
-	if (shutdown_min == 0)			// if set to zero remove existing sleeptimer
+	if(shutdown_min!=atoi(value))
 	{
-		if(timerdclient->getSleeptimerID() > 0)
+		shutdown_min = atoi (value);
+		printf("sleeptimer min: %d\n",shutdown_min);
+		if (shutdown_min == 0)			// if set to zero remove existing sleeptimer
 		{
-			timerdclient->removeTimerEvent(timerdclient->getSleeptimerID());
+			if(timerdclient->getSleeptimerID() > 0)
+			{
+				timerdclient->removeTimerEvent(timerdclient->getSleeptimerID());
+			}
 		}
+		else							// set the sleeptimer to actual time + shutdown mins and announce 1 min before
+			timerdclient->setSleeptimer(time(NULL) + ((shutdown_min -1) * 60),time(NULL) + shutdown_min * 60,0);
 	}
-	else							// set the sleeptimer to actual time + shutdown mins and announce 1 min before
-		timerdclient->setSleeptimer(time(NULL) + ((shutdown_min -1) * 60),time(NULL) + shutdown_min * 60,0);
 	delete timerdclient;
 	return res;
 }
