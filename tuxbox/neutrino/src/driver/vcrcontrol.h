@@ -106,21 +106,21 @@ class CVCRControl
 				std::string Name;
 				CVCRDevices deviceType;
 				CVCRStates  deviceState;
-				virtual bool Stop(){};
-				virtual bool Record(unsigned onidsid = 0, unsigned long long epgid = 0){};
-				virtual bool Pause(){};
-				virtual bool Resume(){};
-				virtual bool IsAvailable(){};
+				virtual bool Stop(){return false;};
+				virtual bool Record(unsigned onidsid = 0, unsigned long long epgid = 0){return false;};
+				virtual bool Pause(){return false;};
+				virtual bool Resume(){return false;};
+				virtual bool IsAvailable(){return false;};
 				CDevice(int deviceid, CVCRDevices devicetype){deviceID = deviceid; deviceType = devicetype; deviceState = CMD_VCR_STOP;};
 		};
 
 		class CVCRDevice : public CDevice		// VCR per IR
 		{
 			public:
-				virtual bool Stop(){};		// TODO: VCR ansteuerung
-				virtual bool Record(unsigned onidsid = 0, unsigned long long epgid = 0){};	
-				virtual bool Pause(){};
-				virtual bool Resume(){};
+				virtual bool Stop(){return false;};		// TODO: VCR ansteuerung
+				virtual bool Record(unsigned onidsid = 0, unsigned long long epgid = 0){return false;};	
+				virtual bool Pause(){return false;};
+				virtual bool Resume(){return false;};
 				virtual bool IsAvailable(){return true;};
 				CVCRDevice(int deviceid) : CDevice(deviceid,DEVICE_VCR) {};
 		};
@@ -132,7 +132,7 @@ class CVCRControl
 				{
 					unsigned char		messageType;		// egal
 					unsigned char		version;			// momentan 1
-					unsigned int		command;			// siehe externalcommands
+					unsigned char		command;			// siehe externalcommands
 					unsigned long long	epgID;				// may be zero
 					unsigned int		onidsid;			// may be zero
 				};

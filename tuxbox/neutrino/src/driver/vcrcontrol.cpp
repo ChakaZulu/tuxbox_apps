@@ -143,14 +143,39 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command,unsigned onidsi
 	printf("Send command: %d onidsid: %x epgid: %llx\n",command, onidsid, epgid);
 	if(serverConnect())
 	{
-		externalCommand extcommand;
-		extcommand.messageType = 0; // unused
-		extcommand.version	= 2;
-		extcommand.command	= command;
-		extcommand.onidsid	= onidsid;
-		extcommand.epgID	= epgid;
+		char tmp[40];
+		string extCommand="unknown";
+		string extOnidsid="error";
+		string extEpgid="error";
+		sprintf(tmp,"%ud", onidsid);
+		extOnidsid = tmp;
+		sprintf(tmp,"%ll", epgid);  //todo - ergibt immer leeren string  -- fixen!
+		extEpgid = tmp;
 
-		write(sock_fd, &extcommand, sizeof(externalCommand));
+		switch(command)
+		{
+			case CMD_VCR_RECORD: extCommand="record";
+				break;
+			case CMD_VCR_STOP: extCommand="stop";
+				break;
+			case CMD_VCR_PAUSE: extCommand="pause";
+				break;
+			case CMD_VCR_RESUME: extCommand="resume";
+				break;
+			case CMD_VCR_AVAILABLE: extCommand="available";
+				break;
+		}
+	
+		string extMessage = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n\n";
+		extMessage +="<neutrino commandversion=\"1\">\n";
+		extMessage +="    <record command=\"" + extCommand + "\">\n";
+		extMessage +="        <onidsid>" + extOnidsid + "</onidsid>\n";
+		extMessage +="        <epgid>" + extEpgid + "</epgid>\n";
+		extMessage +="    </record>\n";
+		extMessage +="</neutrino>\n";
+
+		printf("sending to vcr-client:\n\n%s\n", extMessage.c_str());
+		write(sock_fd, extMessage.c_str() , extMessage.length() );
 		
 		serverDisconnect();
 
