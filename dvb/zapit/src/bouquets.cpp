@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.81 2003/03/14 07:31:51 obi Exp $
+ * $Id: bouquets.cpp,v 1.82 2003/03/14 08:22:04 obi Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -396,7 +396,7 @@ bool CBouquetManager::existsChannelInBouquet( unsigned int bq_id, const t_channe
 	bool     status = false;
 	CZapitChannel  *ch = NULL;
 
-	if (bq_id >= 0 && bq_id <= Bouquets.size()) {
+	if (bq_id <= Bouquets.size()) {
 		// query TV-Channels  && Radio channels
 		ch = Bouquets[bq_id]->getChannelByChannelID(channel_id, 0);
 		if (ch)  status = true;

@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.cpp,v 1.43 2003/01/30 17:21:17 obi Exp $
+ * $Id: sdt.cpp,v 1.44 2003/03/14 08:22:04 obi Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -209,7 +209,7 @@ int parse_sdt(
 					break;
 
 				case 0x48:
-					service_descriptor(buffer + pos2, service_id, transport_stream_id, original_network_id, DiSEqC, free_CA_mode);
+					service_descriptor(buffer + pos2, service_id, transport_stream_id, original_network_id, DiSEqC);
 					break;
 
 				case 0x49:
