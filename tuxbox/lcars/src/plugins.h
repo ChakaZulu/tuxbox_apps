@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: plugins.h,v $
+Revision 1.10  2004/06/16 08:46:45  thegoodguy
+fix compilation (untested)
+
 Revision 1.9  2003/01/05 19:52:47  TheDOC
 forgot include
 
@@ -101,7 +104,7 @@ public:
 
 	void setPluginDir(std::string dir) { plugin_dir = dir; }
 
-	PluginParam* makeParam(std::string id, PluginParam *next);
+	PluginParam* makeParam(const char * const id, PluginParam *next);
 
 	void addParm(std::string cmd, int value);
 	void addParm(std::string cmd, std::string value);

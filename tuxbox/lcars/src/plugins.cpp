@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: plugins.cpp,v $
+Revision 1.10  2004/06/16 08:46:45  thegoodguy
+fix compilation (untested)
+
 Revision 1.9  2002/06/02 12:18:47  TheDOC
 source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
 
@@ -243,15 +246,14 @@ void plugins::parseCfg(plugin *plugin_data)
 	fclose(fd);*/
 }
 
-PluginParam* plugins::makeParam(std::string id, PluginParam *next)
+PluginParam* plugins::makeParam(const char * const id, PluginParam *next)
 {
 	//std::cout << "Adding " << id << " With Value " << params.find(id)->second.c_str() << " and next: " << (int) next << std::endl;
 
 	PluginParam *startparam = new PluginParam;
 	startparam->next = next;
-	startparam->id = new char[id.length() + 2];
+	startparam->id = id;
 	startparam->val = new char[params.find(id)->second.length() + 2];
-	strcpy(startparam->id, id.c_str());
 	strcpy(startparam->val, params.find(id)->second.c_str());
 
 	//std::cout << "Startparam: " << (int) startparam << std::endl;
