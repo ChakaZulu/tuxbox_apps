@@ -7,9 +7,7 @@ std::list<std::pair<int,eAutoInit*> > *eInit::cl;
 void eInit::add(int trl, eAutoInit *c)
 {
 	if (!cl)
-	{
 		cl=new std::list<std::pair<int,eAutoInit*> >;
-	}
 	cl->push_back(std::pair<int,eAutoInit*>(trl, c));
 	if (rl>=trl)
 		c->initNow();
@@ -17,6 +15,8 @@ void eInit::add(int trl, eAutoInit *c)
 
 void eInit::remove(int trl, eAutoInit *c)
 {
+	if (!cl)
+		return;
 	cl->remove(std::pair<int,eAutoInit*>(trl, c));
 	if (rl>=trl)
 		c->closeNow();
@@ -30,6 +30,7 @@ eInit::~eInit()
 {
 	setRunlevel(-1);
 	delete cl;
+	cl=0;
 }
 
 void eInit::setRunlevel(int nrl)

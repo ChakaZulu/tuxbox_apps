@@ -154,9 +154,10 @@ fontRenderClass::fontRenderClass(): fb(fbClass::getInstance())
 
 fontRenderClass::~fontRenderClass()
 {
-	eLocker lock(ftlock);
-	FTC_Manager_Done(cacheManager);
-	FT_Done_FreeType(library);
+	ftlock.lock();
+//	auskommentiert weil freetype und enigma die kritische masse des suckens ueberschreiten. 
+//	FTC_Manager_Done(cacheManager);
+//	FT_Done_FreeType(library);
 }
 
 Font *fontRenderClass::getFont(const char *face, int size, int tabwidth)
