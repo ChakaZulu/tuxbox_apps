@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.66 2002/02/26 17:24:16 field Exp $
+// $Id: channellist.cpp,v 1.67 2002/02/27 16:08:27 field Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.67  2002/02/27 16:08:27  field
+// Boeser Tasten-Bug behoben, sollte wieder normal laufen :)
+//
 // Revision 1.66  2002/02/26 17:24:16  field
 // Key-Handling weiter umgestellt EIN/AUS= KAPUTT!
 //
@@ -264,14 +267,24 @@ CChannelList::~CChannelList()
 	chanlist.clear();
 }
 
-void CChannelList::exec()
+int CChannelList::exec()
 {
-	int nNewChannel;
+	int nNewChannel = show();
 
-	nNewChannel = show();
-	if (nNewChannel > -1)
+	if ( nNewChannel > -1)
 	{
 		zapTo(nNewChannel);
+		return menu_return::RETURN_REPAINT;
+	}
+	else if ( nNewChannel = -1)
+	{
+		// -1 bedeutet nur REPAINT
+		return menu_return::RETURN_REPAINT;
+	}
+	else
+	{
+		// -2 bedeutet EXIT_ALL
+		return menu_return::RETURN_EXIT_ALL;
 	}
 }
 
@@ -437,7 +450,6 @@ int CChannelList::show()
 	bool loop=true;
 	while (loop)
 	{
-
 		int msg; uint data;
 		g_RCInput->getMsg( &msg, &data, g_settings.timing_chanlist );
 
@@ -509,7 +521,6 @@ int CChannelList::show()
 				bouquetList->activateBouquet( nNext );
 				res = bouquetList->showChannelList();
 				loop = false;
-
 			}
 		}
 		else if ( ( msg == g_settings.key_bouquet_down ) && ( bouquetList != NULL ) )
@@ -594,6 +605,7 @@ int CChannelList::show()
 	{
 		return(res);
 	}
+
 }
 
 void CChannelList::hide()
@@ -607,9 +619,10 @@ bool CChannelList::showInfo(int pos)
 	{
 		return false;
 	}
-	selected=pos;
-	channel* chan = chanlist[selected];
-	g_InfoViewer->showTitle(selected+1, chan->name, chan->onid_sid, true );
+//	selected=pos;
+
+	channel* chan = chanlist[pos];
+	g_InfoViewer->showTitle(pos+1, chan->name, chan->onid_sid, true );
 	return true;
 }
 
@@ -628,7 +641,8 @@ void CChannelList::zapTo(int pos)
 		tuned = pos;
 		g_RemoteControl->zapTo_onid_sid( chan->onid_sid, chan->name );
 	}
-	g_InfoViewer->showTitle(selected+ 1, chan->name, chan->onid_sid);
+	g_RCInput->pushbackMsg( messages::SHOW_INFOBAR, 0 );
+
 	if (bouquetList != NULL)
 		bouquetList->adjustToChannel( getActiveChannelNumber());
 }
@@ -776,7 +790,7 @@ void CChannelList::quickZap(int key)
                 return;
         }
 
-        //      printf("quickzap start\n");
+              printf("quickzap start\n");
         if (key==g_settings.key_quickzap_down)
         {
                 if(selected==0)

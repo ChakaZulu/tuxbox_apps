@@ -59,6 +59,8 @@ int CBouquetList::showChannelList( int nBouquet = -1 )
 	{
 		selected = nBouquet;
 		orgChannelList->zapTo(Bouquets[selected]->channelList->getKey(nNewChannel)-1);
+
+		nNewChannel= -2; // exit!
 	}
 
 	return nNewChannel;

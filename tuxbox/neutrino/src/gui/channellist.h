@@ -32,9 +32,12 @@
 #ifndef __channellist__
 #define __channellist__
 //
-// $Id: channellist.h,v 1.25 2002/02/25 19:32:26 field Exp $
+// $Id: channellist.h,v 1.26 2002/02/27 16:08:27 field Exp $
 //
 // $Log: channellist.h,v $
+// Revision 1.26  2002/02/27 16:08:27  field
+// Boeser Tasten-Bug behoben, sollte wieder normal laufen :)
+//
 // Revision 1.25  2002/02/25 19:32:26  field
 // Events <-> Key-Handling umgestellt! SEHR BETA!
 //
@@ -178,7 +181,7 @@ class CChannelList
 		void updateEvents(void);
 		int numericZap(int key);
 		int  show();
-		void exec();
+		int	 exec();
 		void quickZap(int key);
 		int  hasChannel(int nChannelNr);
 		void setSelected( int nChannelNr); // for adjusting bouquet's channel list after numzap or quickzap

@@ -30,12 +30,15 @@
 */
 
 /*
-$Id: rcinput.h,v 1.17 2002/02/26 17:24:16 field Exp $
+$Id: rcinput.h,v 1.18 2002/02/27 16:08:27 field Exp $
 
  Module  RemoteControle Handling
 
 History:
  $Log: rcinput.h,v $
+ Revision 1.18  2002/02/27 16:08:27  field
+ Boeser Tasten-Bug behoben, sollte wieder normal laufen :)
+
  Revision 1.17  2002/02/26 17:24:16  field
  Key-Handling weiter umgestellt EIN/AUS= KAPUTT!
 
@@ -111,10 +114,18 @@ using namespace std;
 class CRCInput
 {
 	private:
+		struct event
+		{
+			int         key;
+			uint        data;
+		};
+
 		int         fd_rc;
 		int			fd_keyb;
 		int			fd_max;
 		CRingBuffer pb_keys;
+
+		//vector<event*>	eventlist;
 
 		void open();
 		void close();
