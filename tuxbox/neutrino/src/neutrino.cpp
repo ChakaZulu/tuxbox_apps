@@ -3924,8 +3924,17 @@ bool CNeutrinoApp::changeNotify(const char * const OptionName, void * data)
 			{
 				CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo();
 				eventinfo.channel_id = CREATE_CHANNEL_ID_FROM_SERVICE_ORIGINALNETWORK_TRANSPORTSTREAM_ID(si.sid, si.onid, si.tsid);
-				eventinfo.epgID = g_RemoteControl->current_EPGid;
-				eventinfo.epg_starttime = 0;
+				CEPGData		epgData;
+				if (g_Sectionsd->getActualEPGServiceKey(g_RemoteControl->current_channel_id, &epgData ))
+				{
+					eventinfo.epgID = epgData.eventID;
+					eventinfo.epg_starttime = epgData.epg_times.startzeit;
+				}
+				else
+				{
+					eventinfo.epgID = 0;
+					eventinfo.epg_starttime = 0;
+				}
 				strcpy(eventinfo.apids, "");
 
 				if(CVCRControl::getInstance()->Record(&eventinfo)==false)
