@@ -1,9 +1,10 @@
 #ifndef __enumber_h
 #define __enumber_h
 
-#include "ewidget.h"
-#include "elabel.h"
-#include "grc.h"
+#include <core/gui/ewidget.h>
+
+class eLabel;
+class gPainter;
 
 class eNumber: public eWidget
 {
@@ -32,6 +33,7 @@ public:
 	eNumber(eWidget *parent, int len, int min, int max, int maxdigits, int *init, int isactive=0, eLabel* descr=0, int grabfocus=1);
 	~eNumber();
 	int getNumber(int f=0) { if ((f>=0) && (f<len)) return number[f]; return -1; }
+	void setNumber(int f, int n);
 };
 
 #endif

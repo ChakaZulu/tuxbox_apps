@@ -81,17 +81,22 @@ class eListBoxEntryText: public eListBoxEntry
 	friend class eListBox<eListBoxEntryText>;
 protected:
 	eString text;
+	void *key;
 public:
-	eListBoxEntryText(eListBox<eListBoxEntryText>* lb, const char* txt=0)
-		:eListBoxEntry((eListBox<eListBoxEntry>*)lb), text(txt)
-	{		
-	
+	eListBoxEntryText(eListBox<eListBoxEntryText>* lb, const char* txt=0, void *key=0)
+		:eListBoxEntry((eListBox<eListBoxEntry>*)lb), text(txt), key(0)
+	{
 	}
 
 	bool operator < ( const eListBoxEntryText& e) const
 	{
-		return text < e.text;	
+		if (key == e.key)
+			return text < e.text;	
+		else
+			return key < e.key;
 	}
+	
+	void *getKey() { return key; }
 
 protected:
 	void redraw(gPainter *rc, const eRect& rect, const gColor& coActive, const gColor& coNormal, bool highlited) const
@@ -296,9 +301,6 @@ inline eListBox<T>::~eListBox()
 template <class T>
 inline void eListBox<T>::redrawWidget(gPainter *target, const eRect &where)
 {
-	if (!have_focus)
-		return;
-
 	ePtrList_T_iterator entry(top);   // refresh bottom here...
 
 	int i=0;
@@ -307,7 +309,7 @@ inline void eListBox<T>::redrawWidget(gPainter *target, const eRect &where)
 		eRect rect = getEntryRect(i);
 
 		if ( where.contains(rect) )
-			entry->redraw(target, rect, col_active, getBackgroundColor(), entry == current);
+			entry->redraw(target, rect, col_active, getBackgroundColor(), have_focus && (entry == current));
 		
 		i++;
 	}

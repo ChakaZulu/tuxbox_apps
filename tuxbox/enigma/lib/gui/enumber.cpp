@@ -2,6 +2,8 @@
 #include "fb.h"
 #include "rc.h"
 #include "eskin.h"
+#include "elabel.h"
+#include <core/gdi/grc.h>
 
 eRect eNumber::getNumberRect(int n)
 {
@@ -178,4 +180,11 @@ void eNumber::lostFocus()
 
 	have_focus--;
 	invalidate(getNumberRect(active));
+}
+
+void eNumber::setNumber(int f, int n)
+{
+	if ((f>=0) && (f<len))
+		number[f]=n;
+	invalidate(getNumberRect(f));
 }

@@ -1,9 +1,9 @@
 #ifndef __elabel_h
 #define __elabel_h
 
-#include "ewidget.h"
+#include <core/gui/ewidget.h>
 #include "qstring.h"
-#include "grc.h"
+#include <core/gdi/grc.h>
 
 class eLabel: public eWidget
 {
