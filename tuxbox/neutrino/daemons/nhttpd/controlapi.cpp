@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.30 2004/02/19 15:37:49 thegoodguy Exp $
+	$Id: controlapi.cpp,v 1.31 2004/02/19 16:02:08 thegoodguy Exp $
 
 	License: GPL
 
@@ -711,7 +711,7 @@ bool CControlAPI::ZaptoCGI(CWebserverRequest *request)
 		}
 		else
 		{
-			Parent->ZapTo(request->ParameterList["1"]);
+			Parent->ZapTo(request->ParameterList["1"].c_str()); /* FIXME: CHANGE TO HEX */
 			request->SendOk();
 		}
 		

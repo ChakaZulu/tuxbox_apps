@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.54 2004/02/10 15:30:39 metallica Exp $
+	$Id: webdbox.cpp,v 1.55 2004/02/19 16:02:08 thegoodguy Exp $
 
 	License: GPL
 
@@ -49,9 +49,9 @@ void CWebDbox::UpdateBouquets(void)
 
 //-------------------------------------------------------------------------
 
-void CWebDbox::ZapTo(std::string target)
+void CWebDbox::ZapTo(const char * const target)
 {
-	t_channel_id channel_id = atoi(target.c_str());
+	t_channel_id channel_id = atoi(target);
 	
 	if (channel_id == Zapit->getCurrentServiceID())
 	{
@@ -69,16 +69,16 @@ void CWebDbox::ZapTo(std::string target)
 
 //-------------------------------------------------------------------------
 
-void CWebDbox::ZapToSubService(std::string target)
+void CWebDbox::ZapToSubService(const char * const target)
 {
-	t_channel_id channel_id = atoi(target.c_str());
+	t_channel_id channel_id;
 
-	unsigned int status = Zapit->zapTo_subServiceID(channel_id);
+	sscanf(target,
+	       SCANF_CHANNEL_ID_TYPE,
+	       &channel_id);
 
-	if (status != CZapitClient::ZAP_INVALID_PARAM)
-	{
+	if (Zapit->zapTo_subServiceID(channel_id) != CZapitClient::ZAP_INVALID_PARAM)
 		Sectionsd->setServiceChanged(channel_id, false);
-	}
 }
 
 //-------------------------------------------------------------------------

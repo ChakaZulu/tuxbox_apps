@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.47 2004/02/19 15:37:49 thegoodguy Exp $
+	$Id: webapi.cpp,v 1.48 2004/02/19 16:02:08 thegoodguy Exp $
 
 	License: GPL
 
@@ -371,7 +371,7 @@ bool CWebAPI::Switch(CWebserverRequest* request)
 			if(!request->Authenticate())
 				return false;
 
-			Parent->ZapTo(request->ParameterList["zapto"]);
+			Parent->ZapTo(request->ParameterList["zapto"].c_str());
 			request->SocketWriteLn("HTTP/1.0 302 Moved Temporarily");
 
 			if(request->ParameterList["bouquet"] != "")
@@ -386,7 +386,7 @@ bool CWebAPI::Switch(CWebserverRequest* request)
 			if(!request->Authenticate())
 				return false;
 
-			Parent->ZapToSubService(request->ParameterList["zaptosubservice"]);
+			Parent->ZapToSubService(request->ParameterList["zaptosubservice"].c_str());
 			request->SocketWriteLn("HTTP/1.0 302 Moved Temporarily");
 
 			if(request->ParameterList["bouquet"] != "")
@@ -611,6 +611,7 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 					CZapitClient::commandAddSubServices cmd;
 					CEPGData epg;
 					
+#warning fixme: verify why there are ntohs conversions here
 					cmd.original_network_id = ntohs(ni->original_network_id);
 					cmd.service_id = ntohs(ni->service_id);
 					cmd.transport_stream_id = ntohs(ni->transport_stream_id);
@@ -623,7 +624,9 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 
 					request->printf("<tr><td align=\"left\" style=\"width: 31px\" class=\"%cepg\">&nbsp;</td>", classname);
 					request->printf("<td class=\"%cepg\">%s&nbsp;", classname, timestr);
-					request->printf("%s<a href=\"switch.dbox2?zaptosubservice=%d%s\">%04x:%04x:%04x %s</a>", // FIXME: get name
+					request->printf("%s<a href=\"switch.dbox2?zaptosubservice="
+							PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+							",%s\">%04x:%04x:%04x %s</a>", // FIXME: get name
 							(channel_id == current_channel) ? "<a name=\"akt\"></a>" : " ",
 							channel_id,
 							bouquetstr.c_str(),
@@ -636,7 +639,7 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 					subServiceList.push_back(cmd);
 				}
 
-				if (subServiceList.begin() != subServiceList.end())
+				if (!(subServiceList.empty()))
 					Parent->Zapit->setSubServices(subServiceList);
 			}
 		}

@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: webdbox.h,v 1.38 2004/02/10 15:30:39 metallica Exp $
+        $Id: webdbox.h,v 1.39 2004/02/19 16:02:08 thegoodguy Exp $
 
         License: GPL
 
@@ -94,8 +94,8 @@ class CWebDbox
 	CZapitClient::BouquetChannelList *GetChannelList(int Mode);
 
 	// support functions
-	void ZapTo(std::string target);
-	void ZapToSubService(std::string target);
+	void ZapTo          (const char * const target);
+	void ZapToSubService(const char * const target);
 
 	void UpdateBouquet(unsigned int BouquetNr);
 	void UpdateChannelList(void);
