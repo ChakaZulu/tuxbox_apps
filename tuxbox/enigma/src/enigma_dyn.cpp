@@ -1982,12 +1982,6 @@ static eString msgWindow(eString request, eString dirpath, eString opts, eHTTPCo
 	return getMsgWindow(title, msg);
 }
 
-static eString getLinuxVersion()
-{
-	system("uname -a > /tmp/linux.tmp");
-	return readFile("/tmp/linux.tmp");
-}
-
 static eString aboutDreambox(void)
 {
 	std::stringstream result;
@@ -2007,7 +2001,7 @@ static eString aboutDreambox(void)
 	result << getDiskInfo();
 	result << getUSBInfo();
 #endif
-	result	<< "<tr><td>Linux:</td><td>" << getLinuxVersion() << "</td></tr>"
+	result	<< "<tr><td>Linux Kernel:</td><td>" << readFile("/proc/version") << "</td></tr>"
 		<< "<tr><td>Firmware:</td><td>" << firmwareLevel(getAttribute("/.version", "version")) << "</td></tr>";
 		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000)
 			result << "<tr><td>FP Firmware:</td><td>" << eString().sprintf(" 1.%02d", eDreamboxFP::getFPVersion()) << "</td></tr>";
