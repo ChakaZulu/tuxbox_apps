@@ -82,7 +82,7 @@ AC_ARG_WITH($1,[  $6$7 [[PREFIX$4$5]]],[
 	if test "$TARGET" = "cdk"; then
 		_$2=`eval echo "${target$3}$5"`
 	else
-		_$2=`eval echo "$$2"`
+		_$2=`eval echo "${$3}$5"`
 	fi
 ])
 
