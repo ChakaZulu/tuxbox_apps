@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.198 2002/08/25 14:21:27 obi Exp $
+ * $Id: zapit.cpp,v 1.199 2002/08/27 15:50:33 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -364,6 +364,7 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 
 		if (frontend->tuneChannel(channel) == false)
 		{
+#ifdef EXCESSIVE_TUNING_RETRIES
 			unsigned char retries;
 
 			for (retries = 0; retries < 5; retries++)
@@ -380,6 +381,16 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 			{
 				return -1;
 			}
+#else
+			return -1;
+#endif
+		}
+		
+		if (channel->getTsidOnid() != frontend->getTsidOnid())
+		{
+			printf("[zapit] zigzag tuning probably failed:\n");
+			printf("[zapit] requested tsid/onid %08x but frontend is at tsid/onid %08x\n", channel->getTsidOnid(), frontend->getTsidOnid());
+			return -1;
 		}
 
 		transponder_change = true;
@@ -1122,7 +1133,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.198 2002/08/25 14:21:27 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.199 2002/08/27 15:50:33 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
