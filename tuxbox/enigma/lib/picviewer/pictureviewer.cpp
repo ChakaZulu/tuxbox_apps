@@ -21,6 +21,7 @@
 #include <lib/picviewer/pictureviewer.h>
 #include "fb_display.h"
 #include "format_config.h"
+#include <lib/driver/eavswitch.h>
 
 /* resize.cpp */
 extern unsigned char *simple_resize(unsigned char *orgin, int ox, int oy, int dx, int dy);
@@ -108,14 +109,26 @@ ePictureViewer::ePictureViewer(const eString &filename)
 	int showbusysign = 1;
 	eConfig::getInstance()->getKey("/picviewer/showbusysign", showbusysign);
 	showBusySign = (showbusysign == 1);
-
 	unsigned int v_pin8 = 0;
 	eConfig::getInstance()->getKey("/elitedvb/video/pin8", v_pin8);
+	switchto43 = false;
 	if ((v_pin8 > 1) && (eServiceInterface::getInstance()->getService()->getAspectRatio() == 1))
+	{
 		m_aspect = 16.0 / 9;
+	}
 	else
+	{
 		m_aspect = 4.0 / 3;
+		switchto43 = true;
+	}
 
+	format169 = 0;
+	eConfig::getInstance()->getKey("/picviewer/format169", format169);
+	if (format169)
+	{
+		eAVSwitch::getInstance()->setAspectRatio(r169);
+		m_aspect = 16.0 / 9;
+	}
 	m_busy_buffer = NULL;
 
 	init_handlers();
@@ -315,7 +328,6 @@ bool ePictureViewer::ShowImage(const std::string & filename, bool unscaled)
 	eDebug("---directory: %s", directory.c_str());
 	slideshowList.clear();
 	listDirectory(directory, 0);
-	slideshowList.sort();
 	for (myIt = slideshowList.begin(); myIt != slideshowList.end(); myIt++)
 	{
 		eString tmp = *myIt;
@@ -393,7 +405,7 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 				slideshowTimeout();
 			}
 			else
-			if (evt.action == &i_cursorActions->down ||
+			if (evt.action == &i_cursorActions->up ||
 			    evt.action == &i_cursorActions->right ||
 			    evt.action == &i_shortcutActions->blue)
 			{
@@ -402,7 +414,7 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 				DisplayNextImage();
 			}
 			else
-			if (evt.action == &i_cursorActions->up ||
+			if (evt.action == &i_cursorActions->down ||
 			    evt.action == &i_cursorActions->left ||
 			    evt.action == &i_shortcutActions->red)
 			{
@@ -414,12 +426,7 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 		}
 		case eWidgetEvent::execBegin:
 		{
-			int mode = 0;
-			eConfig::getInstance()->getKey("/picviewer/lastPicViewerStyle", mode);
-			if (mode)
-				ShowSlideshow(filename, false);
-			else
-				ShowImage(filename, false);
+			ShowImage(filename, false);
 			break;
 		}
 		case eWidgetEvent::execDone:
@@ -427,6 +434,8 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 			fbClass::getInstance()->SetMode(720, 576, 8);
 			fbClass::getInstance()->PutCMAP();
 			fbClass::getInstance()->unlock();
+			if (switchto43 && format169)
+				eAVSwitch::getInstance()->setAspectRatio(r43);
 			break;
 		}
 		default:

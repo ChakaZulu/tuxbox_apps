@@ -32,6 +32,8 @@ class ePictureViewer: public eWidget
 	void previousPicture();
 	bool showBusySign;
 	bool slideshowPaused;
+	bool switchto43;
+	int format169;
 public:
 	ePictureViewer( const eString &filename);
 	~ePictureViewer();
