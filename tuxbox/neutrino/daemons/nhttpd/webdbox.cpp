@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.26 2002/05/12 18:16:09 dirch Exp $
+	$Id: webdbox.cpp,v 1.27 2002/05/12 20:29:14 dirch Exp $
 
 	License: GPL
 
@@ -39,7 +39,6 @@
 #include "webserver.h"
 #include "request.h"
 #include "helper.h"
-#include "avcontrol.h"
 
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
