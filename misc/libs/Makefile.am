@@ -7,7 +7,8 @@ SUBDIRS = \
 	libmd5sum \
 	libmpegtools \
 	libnet \
-	libucodes
+	libucodes \
+	libxmltree
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = \
@@ -17,5 +18,6 @@ pkgconfig_DATA = \
 	tuxbox-md5sum.pc \
 	tuxbox-mpegtools.pc \
 	tuxbox-net.pc \
-	tuxbox-ucodes.pc
+	tuxbox-ucodes.pc \
+	tuxbox-xmltree.pc
 
