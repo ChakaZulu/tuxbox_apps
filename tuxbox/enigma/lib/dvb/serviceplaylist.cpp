@@ -4,6 +4,7 @@
 #include <lib/system/init_num.h>
 #include <lib/system/econfig.h>
 #include <lib/base/i18n.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 /*
@@ -214,14 +215,29 @@ int ePlaylist::deleteService(std::list<ePlaylistEntry>::iterator it)
 		if ((it->type & ePlaylistEntry::boundFile) && (it->service.path.size()))
 		{
 			int slice=0;
+			eString filename;
 			while (1)
 			{
-				eString filename=it->service.path;
+				filename=it->service.path;
 				if (slice)
 					filename+=eString().sprintf(".%03d", slice);
 				slice++;
-				if (::unlink(filename.c_str()))
+				struct stat s;
+				if (::stat(filename.c_str(), &s) < 0)
 					break;
+				if ( fork() == 0 )
+				{
+					char *fname = strdup(filename.c_str());
+					for (unsigned int i=3; i < 90; ++i )
+						close(i);
+					struct stat s;
+					if ( ::unlink(fname) < 0 )
+						eDebug("remove File %s failed (%m)", fname );
+					free(fname);
+					_exit(0);
+				}
+				else
+					usleep(20*1000);  // 20msek wait for strdup
 			}
 		}
 		list.erase(it);

@@ -381,6 +381,7 @@ void eZap::reconfigureHTTPServer()
 
 eZap::~eZap()
 {
+	while (waitpid(-1,0,0)>0);
 	eDebug("[ENIGMA] beginning clean shutdown");
 	eDebug("[ENIGMA] main");
 	delete main;

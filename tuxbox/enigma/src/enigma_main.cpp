@@ -3921,39 +3921,51 @@ void eZapMain::deleteFile( eServiceSelector *sel )
 
 	if (removeEntry)
 	{
-		if ( ::unlink(ref.path.c_str() ) < 0 )
-			eDebug("remove File %s failed (%m)", ref.path.c_str() );
-		else
+		if ( ref.path.right(3).upper() == ".TS" )
 		{
-			if ( ref.path.right(3).upper() == ".TS" )
+			for ( std::list<ePlaylistEntry>::iterator it(recordings->getList().begin());
+				it != recordings->getList().end(); ++it )
 			{
-				for ( std::list<ePlaylistEntry>::iterator it(recordings->getList().begin());
-					it != recordings->getList().end(); ++it )
+				if ( it->service.path == ref.path )
 				{
-					if ( it->service.path == ref.path )
-					{
-						recordings->getList().erase(it);
-						recordings->save();
-						break;
-					}
+					recordings->getList().erase(it);
+					recordings->save();
+					break;
 				}
-				int ret = 0;
-				int cnt = 1;
-				do
-				{
-					eString tmp;
-					tmp.sprintf("%s.%03d", ref.path.c_str(), cnt++);
-					ret = ::unlink(tmp.c_str());
-				}
-				while( !ret );
-				eString fname=ref.path;
-				fname.erase(fname.length()-2,2);
-				fname+="eit";
-				::unlink(fname.c_str());
-				::unlink((ref.path+".indexmarks").c_str());
 			}
-			sel->removeCurrent(false);
+			int slice=0;
+			eString filename;
+			while (1)
+			{
+				filename=ref.path;
+				if (slice)
+					filename+=eString().sprintf(".%03d", slice);
+				slice++;
+				struct stat s;
+				if (::stat(filename.c_str(), &s) < 0)
+					break;
+				if ( fork() == 0 )
+				{
+					char *fname = strdup(filename.c_str());
+					for (unsigned int i=3; i < 90; ++i )
+						close(i);
+					if ( ::unlink(fname) < 0 )
+						eDebug("remove File %s failed (%m)", fname );
+					free(fname);
+					_exit(0);
+				}
+				else
+					usleep(20*1000);  // 20msek wait for strdup
+			}
+			filename=ref.path;
+			filename.erase(filename.length()-2,2);
+			filename+="eit";
+			::unlink(filename.c_str());
+			::unlink((ref.path+".indexmarks").c_str());
 		}
+		else if ( ::unlink(ref.path.c_str() ) < 0 )
+			eDebug("remove File %s failed (%m)", ref.path.c_str() );
+		sel->removeCurrent(false);
 	}
 }
 
