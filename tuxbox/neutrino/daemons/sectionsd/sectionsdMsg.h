@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.5 2001/07/17 12:39:18 fnbrd Exp $
+//  $Id: sectionsdMsg.h,v 1.6 2001/07/19 22:02:13 fnbrd Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -25,6 +25,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsdMsg.h,v $
+//  Revision 1.6  2001/07/19 22:02:13  fnbrd
+//  Mehr Befehle.
+//
 //  Revision 1.5  2001/07/17 12:39:18  fnbrd
 //  Neue Kommandos
 //
@@ -52,18 +55,25 @@ struct msgSectionsdResponseHeader {
   unsigned short dataLength;
 };
 
-#define NUMBER_OF_SECTIONSD_COMMANDS 5
+#define NUMBER_OF_SECTIONSD_COMMANDS 9
 
 enum sectionsdCommands {
   actualEPGchannelName=0,
   actualEventListTVshort,
   currentNextInformation,
   dumpStatusinformation,
-  allEventsChannelName
+  allEventsChannelName,
+  setHoursToCache,
+  setEventsAreOldInMinutes,
+  dumpAllServices,
+  actualEventListRadioshort,
 };
 
 //
 // Description of Commands:
+//
+// If a command is recognize then sectionsd will always send a response.
+// When requested datas are not found the data length of the response is 0.
 //
 // actualEPGchannelName:
 //   data of request:
@@ -71,5 +81,42 @@ enum sectionsdCommands {
 //   data of response:
 //     is a string (c-string) describing the EPG (for
 //     compatibility with old epgd)
-
+//
+// actualEventListTVshort:
+//   data of request:
+//     -
+//   data of response:
+//     is a string (c-string) with all cached actual events,
+//     2 lines per service, first line service name, second line event name
+//
+// currentNextInformation:
+//   data of request:
+//     is channel name with trailing 0 (c-string)
+//   data of response:
+//     is a string (c-string) describing the current/next EPGs
+//
+// dumpStatusinformation:
+//   data of request:
+//     -
+//   data of response:
+//     is a string (c-string) describing current status of sectionsd
+//
+// allEventsChannelName:
+//   data of request:
+//     is channel name with trailing 0 (c-string)
+//   data of response:
+//     is a string (c-string) describing the cached events for the requestet channel
+//     1 line per event format DD.MM HH:MM durationInMinutes Event name
+//
+// setHoursToCache
+//   data of request:
+//     unsigned short (hours to cache)
+//   data of response:
+//     -
+//
+// setEventsAreOldInMinutes
+//   data of request:
+//     unsigned short (minutes after events are old (after their end time))
+//   data of response:
+//     -
 #endif // SECTIONSDMSG_H

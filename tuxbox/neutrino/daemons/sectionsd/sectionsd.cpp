@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.26 2001/07/19 14:12:30 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.27 2001/07/19 22:02:13 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.27  2001/07/19 22:02:13  fnbrd
+//  Mehr Befehle.
+//
 //  Revision 1.26  2001/07/19 14:12:30  fnbrd
 //  Noch ein paar Kleinigkeiten verbessert.
 //
@@ -135,11 +138,10 @@
 #include "SIsections.hpp"
 
 #define PORT_NUMBER 1600
-// Wieviele Stunden EPG gecached werden sollen
-#define HOURS_TO_CACHE 24
-// Ab wann ein Event als alt gilt (in minuten)
-#define OLD_EVENTS_ARE 120
-
+// Wieviele Sekunden EPG gecached werden sollen
+static long secondsToCache=24*60L*60L; // 24h
+// Ab wann ein Event als alt gilt (in Sekunden)
+static long oldEventsAre=120*60L; // 2h
 static int debug=0;
 
 #define dprintf(fmt, args...) {if(debug) printf(fmt, ## args);}
@@ -162,7 +164,8 @@ static SIevent nullEvt; // Null-Event, falls keins gefunden
 //------------------------------------------------------------
 using namespace Loki;
 
-typedef SmartPtr<class SIevent, RefCounted, DisallowConversion, AssertCheckStrict>
+//typedef SmartPtr<class SIevent, RefCounted, DisallowConversion, AssertCheckStrict>
+typedef SmartPtr<class SIevent, RefCounted, DisallowConversion, NoCheck>
   SIeventPtr;
 
 // Key ist unsigned short (Event-ID), data ist ein SIeventPtr
@@ -237,7 +240,8 @@ static void removeOldEvents(long seconds)
   return;
 }
 
-typedef SmartPtr<class SIservice, RefCounted, DisallowConversion, AssertCheckStrict>
+//typedef SmartPtr<class SIservice, RefCounted, DisallowConversion, AssertCheckStrict>
+typedef SmartPtr<class SIservice, RefCounted, DisallowConversion, NoCheck>
   SIservicePtr;
 
 // Key ist unsigned short (Sevice-ID), data ist ein SIservicePtr
@@ -502,7 +506,7 @@ int j;
       j+=r;
       buf+=r;
     }
-    else if(r<=0 && errno!=EINTR) {
+    else if(r<=0 && errno!=EINTR && errno!=EAGAIN) {
       perror ("read");
       return -1;
     }
@@ -518,6 +522,68 @@ struct connectionData {
   int connectionSocket;
   struct sockaddr_in clientAddr;
 };
+
+static void commandDumpAllServices(struct connectionData *client, char *data, unsigned dataLength)
+{
+  if(dataLength)
+    return;
+  dputs("Request of service list.\n");
+  char *serviceList=new char[65*1024]; // 65kb should be enough and dataLength is unsigned short
+  if(!serviceList) {
+    fprintf(stderr, "low on memory!\n");
+    return;
+  }
+  *serviceList=0;
+  pthread_mutex_lock(&servicesLock);
+  char daten[200];
+  for(MySIservicesOrderServiceName::iterator s=mySIservicesOrderServiceName.begin(); s!=mySIservicesOrderServiceName.end(); s++) {
+    sprintf(daten, "%hu %hhu %d %d %d %d %u ",
+      s->first->serviceID, s->first->serviceTyp,
+      s->first->eitScheduleFlag(), s->first->eitPresentFollowingFlag(),
+      s->first->runningStatus(), s->first->freeCAmode(),
+      s->first->nvods.size());
+    strcat(serviceList, daten);
+    strcat(serviceList, "\n");
+    strcat(serviceList, s->first->serviceName.c_str());
+    strcat(serviceList, "\n");
+    strcat(serviceList, s->first->providerName.c_str());
+    strcat(serviceList, "\n");
+  }
+  pthread_mutex_unlock(&servicesLock);
+  struct msgSectionsdResponseHeader msgResponse;
+  msgResponse.dataLength=strlen(serviceList)+1;
+  if(msgResponse.dataLength==1)
+    msgResponse.dataLength=0;
+  write(client->connectionSocket, &msgResponse, sizeof(msgResponse));
+  if(msgResponse.dataLength)
+    write(client->connectionSocket, serviceList, msgResponse.dataLength);
+  delete[] serviceList;
+  return;
+}
+
+static void commandSetEventsAreOldInMinutes(struct connectionData *client, char *data, unsigned dataLength)
+{
+  if(dataLength!=2)
+    return;
+  dprintf("Set events are old after minutes: %hd\n", *((unsigned short*)data));
+  oldEventsAre=*((unsigned short*)data)*60L;
+  struct msgSectionsdResponseHeader responseHeader;
+  responseHeader.dataLength=0;
+  write(client->connectionSocket, &responseHeader, sizeof(responseHeader));
+  return;
+}
+
+static void commandSetHoursToCache(struct connectionData *client, char *data, unsigned dataLength)
+{
+  if(dataLength!=2)
+    return;
+  dprintf("Set hours to cache: %hd\n", *((unsigned short*)data));
+  secondsToCache=*((unsigned short*)data)*60L*60L;
+  struct msgSectionsdResponseHeader responseHeader;
+  responseHeader.dataLength=0;
+  write(client->connectionSocket, &responseHeader, sizeof(responseHeader));
+  return;
+}
 
 static void commandAllEventsChannelName(struct connectionData *client, char *data, unsigned dataLength)
 {
@@ -573,10 +639,9 @@ static void commandAllEventsChannelName(struct connectionData *client, char *dat
 
 static void commandDumpStatusInformation(struct connectionData *client, char *data, unsigned dataLength)
 {
-char stati[1024];
-
+  if(dataLength)
+    return;
   dputs("Request of status information");
-
   pthread_mutex_lock(&eventsLock);
   unsigned anzEvents=mySIeventsOrderEventID.size();
   pthread_mutex_unlock(&eventsLock);
@@ -586,16 +651,17 @@ char stati[1024];
   pthread_mutex_unlock(&servicesLock);
   struct mallinfo speicherinfo=mallinfo();
   time_t zeit=time(NULL);
+  char stati[1024];
   sprintf(stati,
     "Current time: %s"
-    "Hours to cache: %d\n"
-    "Events are old %dmin after their end time\n"
+    "Hours to cache: %ld\n"
+    "Events are old %ldmin after their end time\n"
     "Number of cached services: %u\n"
     "Number of cached events: %u\n"
     "Total size of memory occupied by chunks handed out by malloc: %d\n"
     "Total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %.2fMB)\n",
     ctime(&zeit),
-    HOURS_TO_CACHE, OLD_EVENTS_ARE, anzServices, anzEvents, speicherinfo.uordblks,
+    secondsToCache/(60*60L), oldEventsAre/60, anzServices, anzEvents, speicherinfo.uordblks,
     speicherinfo.arena, speicherinfo.arena/1024, (float)speicherinfo.arena/(1024.*1024.)
     );
   struct msgSectionsdResponseHeader responseHeader;
@@ -735,9 +801,8 @@ static void commandActualEPGchannelName(struct connectionData *client, char *dat
   }
 }
 
-static void commandEventListTV(struct connectionData *client, char *data, unsigned dataLength)
+static void sendEventList(struct connectionData *client, unsigned char serviceTyp)
 {
-  dputs("Request of TV event list.\n");
   char *evtList=new char[65*1024]; // 65kb should be enough and dataLength is unsigned short
   if(!evtList) {
     fprintf(stderr, "low on memory!\n");
@@ -751,7 +816,7 @@ static void commandEventListTV(struct connectionData *client, char *data, unsign
   pthread_mutex_lock(&servicesLock);
   pthread_mutex_lock(&eventsLock);
   for(MySIservicesOrderServiceName::iterator s=mySIservicesOrderServiceName.begin(); s!=mySIservicesOrderServiceName.end(); s++)
-    if(s->first->serviceTyp==0x01) { // TV
+    if(s->first->serviceTyp==serviceTyp) {
       const SIevent &evt=findActualSIeventForServiceID(s->first->serviceID);
       strcat(evtList, s->first->serviceName.c_str());
       strcat(evtList, "\n");
@@ -771,6 +836,23 @@ static void commandEventListTV(struct connectionData *client, char *data, unsign
   if(msgResponse.dataLength)
     write(client->connectionSocket, evtList, msgResponse.dataLength);
   delete[] evtList;
+}
+
+static void commandEventListTV(struct connectionData *client, char *data, unsigned dataLength)
+{
+  if(dataLength)
+    return;
+  dputs("Request of TV event list.\n");
+  sendEventList(client, 0x01);
+  return;
+}
+
+static void commandEventListRadio(struct connectionData *client, char *data, unsigned dataLength)
+{
+  if(dataLength)
+    return;
+  dputs("Request of radio event list.\n");
+  sendEventList(client, 0x02);
   return;
 }
 
@@ -779,7 +861,11 @@ static void (*connectionCommands[NUMBER_OF_SECTIONSD_COMMANDS]) (struct connecti
   commandEventListTV,
   commandCurrentNextInfoChannelName,
   commandDumpStatusInformation,
-  commandAllEventsChannelName
+  commandAllEventsChannelName,
+  commandSetHoursToCache,
+  commandSetEventsAreOldInMinutes,
+  commandDumpAllServices,
+  commandEventListRadio
 };
 
 static void *connectionThread(void *conn)
@@ -1147,8 +1233,8 @@ const unsigned timeoutInSeconds=2;
       // Nicht alle Events speichern
       for(SIevents::iterator e=eit.events().begin(); e!=eit.events().end(); e++)
         if(e->times.size()>0) {
-	  if(e->times.begin()->startzeit < zeit+(long)HOURS_TO_CACHE*60L*60L &&
-	    e->times.begin()->startzeit+(long)e->times.begin()->dauer > zeit-(long)OLD_EVENTS_ARE*60L
+	  if(e->times.begin()->startzeit < zeit+secondsToCache &&
+	    e->times.begin()->startzeit+(long)e->times.begin()->dauer > zeit-oldEventsAre
 	  ) {
             pthread_mutex_lock(&eventsLock);
 	    addEvent(*e);
@@ -1242,7 +1328,7 @@ const unsigned timeoutInSeconds=2;
           if(e->times.size()>0) { // Geht schief bei nvods
             if(e->times.begin()->startzeit<zeit+(long)HOURS_TO_CACHE*60L*60L) {
               pthread_mutex_lock(&eventsLock);
-              events.insert(*e);
+	      addEvent(*e);
               pthread_mutex_unlock(&eventsLock);
             }
 	  }
@@ -1290,7 +1376,7 @@ static void *houseKeepingThread(void *)
       printf("Removed %d time-shifted events.\n", anzEventsAlt-events.size());
 */
     unsigned anzEventsAlt=mySIeventsOrderEventID.size();
-    removeOldEvents(OLD_EVENTS_ARE*60); // alte Events
+    removeOldEvents(oldEventsAre); // alte Events
     if(mySIeventsOrderEventID.size()!=anzEventsAlt)
       dprintf("Removed %d old events.\n", anzEventsAlt-mySIeventsOrderEventID.size());
     dprintf("Number of sptr events (event-ID): %u\n", mySIeventsOrderEventID.size());
@@ -1330,7 +1416,7 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.26 2001/07/19 14:12:30 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.27 2001/07/19 22:02:13 fnbrd Exp $\n");
 
   if(argc!=1 && argc!=2) {
     printHelp();
@@ -1344,8 +1430,8 @@ struct sockaddr_in serverAddr;
       return 1;
     }
   }
-  printf("caching %d hours\n", HOURS_TO_CACHE);
-  printf("events are old %dmin after their end time\n", OLD_EVENTS_ARE);
+  printf("caching %ld hours\n", secondsToCache/(60*60L));
+  printf("events are old %ldmin after their end time\n", oldEventsAre/60);
   tzset(); // TZ auswerten
 
   if( fork()!= 0 ) // switching to background
