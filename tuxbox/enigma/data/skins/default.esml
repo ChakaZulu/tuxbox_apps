@@ -545,8 +545,9 @@
 			<eLabel position="10:135" size="200:30" text="Progress:" />
 			<eProgress name="scan_progress" position="140:140" size="e-10:20" />
 			<eLabel name="time_left" position="10:175" size="e-10:30" align="right" />
-			<eLabel name="service_name" position="10:245" size="e-10:30" />
-			<eLabel name="service_provider" position="10:285" size="e-10:30" />
+			<eLabel name="transponder_data" position="10:225" size="e-10:30" />
+			<eLabel name="service_name" position="10:260" size="e-10:30" />
+			<eLabel name="service_provider" position="10:295" size="e-10:30" />
 		</tsScan>
 	</object>
 
