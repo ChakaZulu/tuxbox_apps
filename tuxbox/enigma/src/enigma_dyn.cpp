@@ -49,8 +49,8 @@
 
 #define BLUE "12259E"
 #define RED "CB0303"
-#define OCKER "FFCC33"
-#define BBLUE "316183"
+#define LEFTNAVICOLOR "316183"
+#define TOPNAVICOLOR "316183"
 
 extern eString getRight(const eString&, char );  // implemented in timer.cpp
 extern eString getLeft( const eString&, char );  // implemented in timer.cpp
@@ -533,47 +533,47 @@ static eString getNavi(eString mode, eString path)
 	eString result;
 	if (mode.find("zap") == 0)
 	{
-		result += button(110, "TV", BBLUE, "?path=;0:7:1:0:0:0:0:0:0:0:");
+		result += button(110, "TV", LEFTNAVICOLOR, "?path=;0:7:1:0:0:0:0:0:0:0:");
 		result += "<br>";
-		result += button(110, "Radio", BBLUE, "?path=;0:7:2:0:0:0:0:0:0:0:");
+		result += button(110, "Radio", LEFTNAVICOLOR, "?path=;0:7:2:0:0:0:0:0:0:0:");
 		result += "<br>";
-		result += button(110, "Data", BBLUE, "?path=;0:7:6:0:0:0:0:0:0:0:");
+		result += button(110, "Data", LEFTNAVICOLOR, "?path=;0:7:6:0:0:0:0:0:0:0:");
 		result += "<br>";
-		result += button(110, "Root", BBLUE, "?path=;2:47:0:0:0:0:%2f");
+		result += button(110, "Root", LEFTNAVICOLOR, "?path=;2:47:0:0:0:0:%2f");
 #ifndef DISABLE_FILE
 		result += "<br>";
-		result += button(110, "Harddisk", BBLUE, "?path=;2:47:0:0:0:0:%2fhdd%2f");
+		result += button(110, "Harddisk", LEFTNAVICOLOR, "?path=;2:47:0:0:0:0:%2fhdd%2f");
 		result += "<br>";
-		result += button(110, "Recordings", BBLUE, "?path=;4097:7:0:1:0:0:0:0:0:0:");
+		result += button(110, "Recordings", LEFTNAVICOLOR, "?path=;4097:7:0:1:0:0:0:0:0:0:");
 #endif
 	}
 	else
 	if (mode.find("menu") == 0)
 	{
-		result += button(110, "Shutdown", BBLUE, "?mode=menuShutdown");
+		result += button(110, "Shutdown", LEFTNAVICOLOR, "?mode=menuShutdown");
 		result += "<br>";
-		result += button(110, "Restart", BBLUE, "?mode=menuRestart");
+		result += button(110, "Restart", LEFTNAVICOLOR, "?mode=menuRestart");
 		result += "<br>";
-		result += button(110, "Reboot", BBLUE, "?mode=menuReboot");
+		result += button(110, "Reboot", LEFTNAVICOLOR, "?mode=menuReboot");
 		result += "<br>";
-		result += button(110, "Standby", BBLUE, "?mode=menuStandby");
+		result += button(110, "Standby", LEFTNAVICOLOR, "?mode=menuStandby");
 		result += "<br>";
-		result += button(110, "Wakeup", BBLUE, "?mode=menuWakeup");
+		result += button(110, "Wakeup", LEFTNAVICOLOR, "?mode=menuWakeup");
 		result += "<br>";
-		result += button(110, "Frameshot", BBLUE, "?mode=menuFBShot");
+		result += button(110, "Frameshot", LEFTNAVICOLOR, "?mode=menuFBShot");
 		result += "<br>";
-		result += button(110, "Screenshot", BBLUE, "?mode=menuScreenShot");
+		result += button(110, "Screenshot", LEFTNAVICOLOR, "?mode=menuScreenShot");
 		result += "<br>";
-		result += button(110, "Timer List", BBLUE, "?mode=menuTimerList");
+		result += button(110, "Timer List", LEFTNAVICOLOR, "?mode=menuTimerList");
 	}
 	else
 	if (mode.find("links") == 0)
 	{
-		result += button(110, "DMM Sites", BBLUE, "?mode=linksOfficialSites");
+		result += button(110, "DMM Sites", LEFTNAVICOLOR, "?mode=linksOfficialSites");
 		result += "<br>";
-		result += button(110, "Other Sites", BBLUE, "?mode=linksOtherSites");
+		result += button(110, "Other Sites", LEFTNAVICOLOR, "?mode=linksOtherSites");
 		result += "<br>";
-		result += button(110, "Forums", BBLUE, "?mode=linksForums");
+		result += button(110, "Forums", LEFTNAVICOLOR, "?mode=linksForums");
 		result += "<br>";
 	}
 	else
@@ -583,9 +583,9 @@ static eString getNavi(eString mode, eString path)
 	else
 	if (mode.find("about") == 0)
 	{
-		result += button(110, "Receiver", BBLUE, "?mode=aboutDreambox");
+		result += button(110, "Receiver", LEFTNAVICOLOR, "?mode=aboutDreambox");
 		result += "<br>";
-		result += button(110, "DMM", BBLUE, "?mode=aboutDMM");
+		result += button(110, "DMM", LEFTNAVICOLOR, "?mode=aboutDMM");
 	}
 
 	return result;
@@ -594,12 +594,12 @@ static eString getNavi(eString mode, eString path)
 static eString getTopNavi(eString mode, eString path)
 {
 	eString result;
-	result += button(100, "ZAP", BBLUE, "?mode=zap");
-	result += button(100, "CONTROL", BBLUE, "?mode=menu");
-	result += button(100, "LINKS", BBLUE, "?mode=links");
-	result += button(100, "UPDATES", BBLUE, "?mode=updates");
-	result += button(100, "ABOUT", BBLUE, "?mode=about");
-	
+	result += button(100, "ZAP", TOPNAVICOLOR, "?mode=zap");
+	result += button(100, "CONTROL", TOPNAVICOLOR, "?mode=menu");
+	result += button(100, "LINKS", TOPNAVICOLOR, "?mode=links");
+	result += button(100, "UPDATES", TOPNAVICOLOR, "?mode=updates");
+	result += button(100, "ABOUT", TOPNAVICOLOR, "?mode=about");
+
 	return result;
 }
 
@@ -1615,7 +1615,7 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 								<< "&ID=" << event.event_id
 								<< "\")\'>"
 								<< std::setw(2) << t->tm_mday << '.'
-								<< std::setw(2) << t->tm_mon+1 << " - "
+								<< std::setw(2) << t->tm_mon+1 << ". - "
 								<< std::setw(2) << t->tm_hour << ':'
 								<< std::setw(2) << t->tm_min << ' '
 								<< ((ShortEventDescriptor*)descriptor)->event_name
