@@ -17,7 +17,7 @@
 
 using namespace std;
 
-eMountMgr *eMountMgr::instance = NULL;
+eMountMgr *eMountMgr::instance;
 
 pthread_mutex_t g_mut1;
 pthread_cond_t g_cond1;
@@ -86,13 +86,14 @@ bool eMountPoint::fileSystemIsSupported(eString fsname)
 
 	if (fsname == "NFS")
 	{
-#ifdef HAVE_MODPROBE
-		system("modprobe nfs");
-#else
-		system("insmod sunrpc");
-		system("insmod lockd");
-		system("insmod nfs");
-#endif
+		if (access("/bin/modprobe", X_OK) || access("/sbin/modprobe", X_OK))
+			system("modprobe nfs");
+		else
+		{
+			system("insmod sunrpc");
+			system("insmod lockd");
+			system("insmod nfs");
+		}
 	}
 	else
 	if (fsname == "CIFS")

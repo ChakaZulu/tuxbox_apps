@@ -19,7 +19,7 @@
 			</tr>
 			<tr>
 				<td>Auto Mount: </td>
-				<td><input type="checkbox" name="automount" value="#AUTO#"></td>
+				<td><input type="checkbox" name="automount" value="on" #AUTO#></td>
 			</tr>
 			<tr>
 				<td>Client Directory: </td>

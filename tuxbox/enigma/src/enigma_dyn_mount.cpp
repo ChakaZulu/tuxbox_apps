@@ -46,7 +46,7 @@ static eString addChangeMountPoint(eString request, eString dirpath, eString opt
 	mp.password = opt["password"];
 	mp.userName = opt["username"];
 	mp.mountDir = opt["mountdir"];
-	mp.automount = atoi(opt["automount"].c_str());
+	mp.automount = (opt["automount"] == "on") ? 1: 0;
 	mp.rsize = atoi(opt["rsize"].c_str());
 	mp.wsize = atoi(opt["wsize"].c_str());
 	mp.ownOptions = opt["ownoptions"];
@@ -96,7 +96,7 @@ static eString addChangeMountPoint(eString request, eString dirpath, eString opt
 	if (udp == "on")
 		mp.options += "udp,";
 	if (mp.options.length() > 0)
-		mp.options = mp.options.substr(0, mp.options.length() - 2); //remove last comma
+		mp.options = mp.options.substr(0, mp.options.length() - 1); //remove last comma
 
 	eString result;
 	if (action == "change")
@@ -148,6 +148,12 @@ static eString mountPointWindow(eString request, eString dirpath, eString opts, 
 		mp.rsize = 4096;
 		mp.wsize = 4096;
 		mp.options = "nolock,intr,soft,udp";
+		mp.ip[0] = 0;
+		mp.ip[1] = 0;
+		mp.ip[2] = 0;
+		mp.ip[3] = 0;
+		mp.fstype = 0;
+		mp.automount = 0;
 		cmd = "add";
 	}
 
@@ -214,10 +220,7 @@ static eString mountPointWindow(eString request, eString dirpath, eString opts, 
 	result.strReplace("#PW#", mp.password);
 	result.strReplace("#USER#", mp.userName);
 	result.strReplace("#MDIR#", mp.mountDir);
-	if (mp.automount == 1)
-		result.strReplace("#AUTO#", "checked");
-	else
-		result.strReplace("#AUTO#", "");
+	result.strReplace("#AUTO#", (mp.automount == 1) ? "checked" : "");
 	result.strReplace("#RSIZE#", eString().sprintf("%d", mp.rsize));
 	result.strReplace("#WSIZE#", eString().sprintf("%d", mp.wsize));
 	result.strReplace("#OWNOPTIONS#", mp.ownOptions);
