@@ -81,11 +81,11 @@ void CBEBouquetWidget::paintItem(int pos)
 	{
 		if (Bouquets[liststart+pos].locked)
 		{
-			frameBuffer->paintIcon("lock.raw", x + 28, ypos);
+			frameBuffer->paintIcon("lock.raw", x + 7, ypos);
 		}
 		if (Bouquets[liststart+pos].hidden)
 		{
-			//frameBuffer->paintIcon("hidden.raw", x + 48, ypos);
+			frameBuffer->paintIcon("hidden.raw", x + 37, ypos);
 		}
 		g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x+68, ypos+ fheight, width-68, Bouquets[liststart+pos].name, color);
 	}
