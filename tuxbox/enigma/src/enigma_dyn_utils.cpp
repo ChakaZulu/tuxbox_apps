@@ -19,6 +19,10 @@
 #include <iomanip>
 #include <iostream>
 #include <fstream>
+#include <lib/dvb/servicestructure.h>
+#include <lib/dvb/decoder.h>
+#include <lib/dvb/dvbservice.h>
+#include <lib/dvb/service.h>
 #include <enigma_dyn_utils.h>
 
 using namespace std;
@@ -168,6 +172,17 @@ eString httpEscape(const eString &string)
 			result += eString().sprintf("%%%x", c);
 	}
 	return result;
+}
+
+eString ref2string(const eServiceReference &r)
+{
+	return httpEscape(r.toString());
+}
+
+eServiceReference string2ref(const eString &service)
+{
+	eString str = httpUnescape(service);
+	return eServiceReference(str);
 }
 
 std::map<eString, eString> getRequestOptions(eString opt, char delimiter)

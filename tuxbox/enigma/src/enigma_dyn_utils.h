@@ -1,6 +1,14 @@
 #ifndef __enigma_dyn_utils_h
 #define __enigma_dyn_utils_h
 
+#include <lib/dvb/dvb.h>
+#include <lib/dvb/edvb.h>
+#include <lib/dvb/servicestructure.h>
+#include <lib/dvb/decoder.h>
+#include <lib/dvb/dvbservice.h>
+#include <lib/dvb/service.h>
+#include <lib/dvb/serviceplaylist.h>
+
 #define TEMPLATE_DIR DATADIR+eString("/enigma/templates/")
 #define HTDOCS_DIR DATADIR+eString("/enigma/htdocs/")
 
@@ -28,6 +36,8 @@ eString httpUnescape(const eString &string);
 eString filter_string(eString string);
 eString httpEscape(const eString &string);
 std::map<eString, eString> getRequestOptions(eString opt, char delimiter);
+eString ref2string(const eServiceReference &r);
+eServiceReference string2ref(const eString &service);
 
 extern eString getRight(const eString&, char); // implemented in timer.cpp
 extern eString getLeft(const eString&, char);  // implemented in timer.cpp
