@@ -5,5 +5,6 @@ install_DATA = \
 	lcd2.png \
 	lcd3.png \
 	power.png \
-	setup.png
+	setup.png \
+	rclock.raw
 

@@ -41,6 +41,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <daemonc/remotecontrol.h>
+extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
 CLCD::CLCD()
 	: configfile('\t')
@@ -328,6 +330,31 @@ void CLCD::showTime()
 
 			fonts.time->RenderString(122 - fonts.time->getRenderWidth(timestr), 62, 50, timestr, CLCDDisplay::PIXEL_ON);
 		}
+		displayUpdate();
+	}
+}
+
+void CLCD::showRCLock(bool set_tvmode, int duration)
+{
+	std::string icon = DATADIR "/lcdd/icons/rclock.raw";
+	raw_display_t curr_screen;
+
+	// Saving the whole screen is not really nice since the clock is updated
+	// every second. Restoring the screen can cause a short travel to the past ;)
+	if (set_tvmode) 
+		display.dump_screen(&curr_screen);
+	display.draw_fill_rect (-1,10,121,50, CLCDDisplay::PIXEL_OFF);
+	display.paintIcon(icon,44,25,false);
+	wake_up();
+	displayUpdate();
+	// not really nice...
+	sleep(duration);
+	if (set_tvmode)
+		setMode(MODE_TVRADIO);
+	else
+	{
+		display.load_screen(&curr_screen);
+		wake_up();
 		displayUpdate();
 	}
 }

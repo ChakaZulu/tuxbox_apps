@@ -112,6 +112,8 @@ class CLCD
 
 		void showServicename(const std::string & name); // UTF-8
 		void showTime();
+		/** blocks for duration seconds */
+		void showRCLock(bool set_tvmode, int duration = 2);
 		void showVolume(const char vol, const bool perform_update = true);
 		void showPercentOver(const unsigned char perc, const bool perform_update = true);
 		void showMenuText(const int position, const char * text, const int highlight = -1, const bool utf_encoded = false);

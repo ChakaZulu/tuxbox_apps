@@ -31,14 +31,15 @@
 #include <global.h>
 #include <neutrino.h>
 
+#include <driver/lcdd.h>
+
 #include <gui/rc_lock.h>
 
 #include <gui/widget/hintbox.h>
 #include <gui/widget/messagebox.h>
 #include <gui/widget/stringinput.h>
 
-
-
+const std::string CRCLock::NO_USER_INPUT = "noUserInput";
 
 //
 // -- Menue Handler Interface
@@ -46,62 +47,65 @@
 // -- 2003-12-01 rasc
 //
 
-int CRCLock::exec(CMenuTarget* parent, const std::string &)
+int CRCLock::exec(CMenuTarget* parent, const std::string &actionKey)
 {
 
 	if (parent)
 		parent->hide();
 
-	ShowLocalizedMessage(LOCALE_RCLOCK_TITLE, LOCALE_RCLOCK_LOCKMSG  , CMessageBox::mbrYes , CMessageBox::mbYes , "info.raw");
+	bool no_input = (actionKey == NO_USER_INPUT);
+	if (ShowLocalizedMessage(LOCALE_RCLOCK_TITLE, LOCALE_RCLOCK_LOCKMSG, 
+				 CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel, 
+				 NEUTRINO_ICON_INFO,450,no_input ? 5 : -1,no_input) == CMessageBox::mbrCancel)
+		return menu_return::RETURN_EXIT_ALL;
 
-	// -- Lockup Box
-	
-	lockBox ();
+	// -- Lockup Box	
+	lockBox(parent != NULL);
 
-	ShowLocalizedMessage(LOCALE_RCLOCK_TITLE, LOCALE_RCLOCK_UNLOCKMSG, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
-
+	ShowLocalizedMessage(LOCALE_RCLOCK_TITLE, LOCALE_RCLOCK_UNLOCKMSG, CMessageBox::mbrBack, CMessageBox::mbBack, NEUTRINO_ICON_INFO,450, no_input ? 5 : -1);
 	return  menu_return::RETURN_EXIT_ALL;
 }
 
-
-
-
-
-
-void CRCLock::lockBox(void)
+void CRCLock::lockBox(bool set_tvmode)
 {
 	neutrino_msg_t      msg;
 	neutrino_msg_data_t data;
 
 	unsigned long long timeoutEnd;
 
-
+	// if called by menu restore LCD
+	if (set_tvmode)
+		CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
 	// -- Loop until release key pressed
 	// -- Key sequence:  <RED> <DBOX> within 5 secs
-
-
 	while  (1) {
 
-		timeoutEnd = CRCInput::calcTimeoutEnd( 9999999 );
+		timeoutEnd = CRCInput::calcTimeoutEnd(9999999);
 		g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd);
 
+		if (msg == NeutrinoMessages::UNLOCK_RC)
+			break;
 
-		if ( msg == CRCInput::RC_red)  {
-			timeoutEnd = CRCInput::calcTimeoutEnd( 5 );
+		if (msg == CRCInput::RC_red)  {
+			timeoutEnd = CRCInput::calcTimeoutEnd(5);
 			g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd);
 
-			if ( msg == CRCInput::RC_setup)  break;
+			if (msg == CRCInput::RC_setup)  break;
 		}
 
-		if ( msg == CRCInput::RC_timeout ) continue;
+		if (msg == CRCInput::RC_timeout) continue;
 
 		// -- Zwen told me: Eating only RC events would be nice
 		// -- so be it...
 
-		if ( msg >  CRCInput::RC_MaxRC ) {
+		if (msg >  CRCInput::RC_MaxRC) {
 			CNeutrinoApp::getInstance()->handleMsg(msg, data); 
+		} else {
+			CLCD::getInstance()->showRCLock(set_tvmode);
+			// Since showRCLock blocks 2secs for each key we eat all
+			// messages created during this time. Hopefully this ok...
+			g_RCInput->clearRCMsg();
 		}
-
 	}
 
 	return;

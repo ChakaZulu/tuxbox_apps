@@ -37,10 +37,10 @@
 class CRCLock: public CMenuTarget
 {
 
-	public:
-
-		int  exec(CMenuTarget* parent, const std::string & actionKey);
-		void lockBox(void);
+public:
+	static const std::string NO_USER_INPUT; 
+	int  exec(CMenuTarget* parent, const std::string & actionKey);
+	void lockBox(bool set_tvmode);
 };
 
 
