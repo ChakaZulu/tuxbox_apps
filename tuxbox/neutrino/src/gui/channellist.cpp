@@ -60,7 +60,7 @@
 
 extern CBouquetList * bouquetList;       /* neutrino.cpp */
 extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
-
+extern bool recordStatus; /* neutrino.cpp */
 int info_height = 0;
 
 
@@ -936,8 +936,8 @@ void CChannelList::paintItem(int pos)
 		CChannel* chan = chanlist[liststart+pos];
 		//number
 		char tmp[10];
-    sprintf((char*) tmp, "%d", this->historyMode?pos:chan->number);
-
+		sprintf((char*) tmp, "%d", this->historyMode?pos:recordStatus ?pos+1: chan->number);
+		
 		if (liststart+pos==selected)
 		{
 			CLCD::getInstance()->showMenuText(0, chan->name.c_str(), -1, true); // UTF-8
