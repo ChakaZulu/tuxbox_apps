@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.cpp,v 1.5 2004/05/03 15:24:38 thegoodguy Exp $
+ * $Id: stream2file.cpp,v 1.6 2004/05/03 19:58:34 thegoodguy Exp $
  * 
  * streaming ts to file/disc
  * 
@@ -99,7 +99,7 @@ static int sync_byte_offset (const unsigned char * buf, const unsigned int len) 
 }
 
 
-static int setPesFilter (const unsigned short pid)
+static int setPesFilter(const unsigned short pid, const dmx_output_t dmx_output)
 {
 	int fd;
 	struct dmx_pes_filter_params flt; 
@@ -112,8 +112,9 @@ static int setPesFilter (const unsigned short pid)
 
 	flt.pid = pid;
 	flt.input = DMX_IN_FRONTEND;
-	flt.output = DMX_OUT_TS_TAP;
+	flt.output = dmx_output;
 	flt.pes_type = DMX_PES_OTHER;
+	/* what about DMX_CHECK_CRC and/or DMX_IMMEDIATE_START ? */
 	flt.flags = 0;
 
 	if (ioctl(fd, DMX_SET_PES_FILTER, &flt) < 0)
@@ -140,7 +141,6 @@ void * FileThread(void * v_arg)
 	unsigned int filecount = 0;
 	const unsigned long long splitsize = (limit / TS_SIZE) * TS_SIZE;
 	unsigned long long remfile=0;
-	char filename[FILENAMEBUFFERSIZE];
 	int fd2 = -1;
 
 	while (1)
@@ -152,7 +152,9 @@ void * FileThread(void * v_arg)
 			// Do Splitting if necessary
 			if (remfile == 0)
 			{
-				sprintf(filename, "%s.%3.3d.ts", myfilename, ++filecount);
+				char filename[FILENAMEBUFFERSIZE];
+
+				sprintf(filename, "%s.%3.3d.ts", (char *)v_arg, ++filecount);
 				if (fd2 != -1)
 					close(fd2);
 				if ((fd2 = open(filename, O_WRONLY | O_CREAT | O_SYNC | O_TRUNC | O_LARGEFILE, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) < 0)
@@ -247,7 +249,7 @@ void * DMXThread(void * v_arg)
 		goto the_end;
 	}
 
-	pthread_create(&file_thread, 0, FileThread, NULL);
+	pthread_create(&file_thread, 0, FileThread, myfilename);
 
 	while (!exit_flag)
 	{
@@ -350,13 +352,12 @@ bool start_recording(const char * const filename,
 
 	strcpy(myfilename, filename);
 
-	// create and delete temp-file to wakeup the disk from standby
+	// write stream information (should wakeup the disk from standby, too)
 	sprintf(buf, "%s.info", filename);
-	fd = open(buf, O_SYNC | O_WRONLY | O_CREAT | O_TRUNC | O_NONBLOCK, S_IRUSR | S_IWUSR);
+	fd = open(buf, O_SYNC | O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 	write(fd, info, strlen(info));
 	fdatasync(fd);
 	close(fd);
-	unlink(buf);
 
 	if (splitsize < TS_SIZE)
 	{
@@ -374,7 +375,7 @@ bool start_recording(const char * const filename,
 			return false;
 		}
 		
-		if ((demuxfd[i] = setPesFilter(pids[i])) < 0)
+		if ((demuxfd[i] = setPesFilter(pids[i], DMX_OUT_TS_TAP)) < 0)
 		{
 			for (unsigned int j = 0; j < i; j++)
 				unsetPesFilter(demuxfd[j]);
