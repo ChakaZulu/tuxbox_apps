@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdMsg.h,v 1.9 2002/05/27 21:53:30 dirch Exp $
+	$Id: timerdMsg.h,v 1.10 2002/05/28 08:45:26 dirch Exp $
 
 	License: GPL
 
@@ -53,11 +53,11 @@ class CTimerd
 
 		enum externalcommands 
 		{
-			CMD_VCR_UNKNOWN =	0;
-			CMD_VCR_START	=	1;
-			CMD_VCR_STOP	=	2;
-			CMD_VCR_PAUSE	=	3;
-			CMD_VCR_RESUME	=	4;
+			CMD_VCR_UNKNOWN =	0,
+			CMD_VCR_START	=	1,
+			CMD_VCR_STOP	=	2,
+			CMD_VCR_PAUSE	=	3,
+			CMD_VCR_RESUME	=	4
 		};
 
 
