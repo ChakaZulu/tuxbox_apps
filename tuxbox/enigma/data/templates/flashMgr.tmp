@@ -8,7 +8,6 @@ function saveMenu(xy)
 	NewWindow('cgi-bin/showReadMenu?mtd=' + xy, 'saveMenu', '780', '370', 'no');
 }
 </script>
-<h2>Available Flash Partitions</h2>
 <table border="1" cellspacing="0" cellpadding="5">
 	<thead align="left">
 		<th>#H1#</th>
