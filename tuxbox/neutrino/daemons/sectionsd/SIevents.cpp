@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.8 2001/07/14 22:59:58 fnbrd Exp $
+// $Id: SIevents.cpp,v 1.9 2001/07/16 13:33:40 fnbrd Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.cpp,v $
+// Revision 1.9  2001/07/16 13:33:40  fnbrd
+// removeOldEvents geaendert.
+//
 // Revision 1.8  2001/07/14 22:59:58  fnbrd
 // removeOldEvents() in SIevents
 //
@@ -346,7 +349,7 @@ SIevent SIevent::readActualEvent(unsigned short serviceID, unsigned timeoutInSec
   return evt;
 }
 
-void SIevents::removeOldEvents(void)
+void SIevents::removeOldEvents(long seconds)
 {
   // Alte events loeschen
   time_t zeit=time(NULL);
@@ -361,7 +364,7 @@ void SIevents::removeOldEvents(void)
       for(;restartTimes;) {
         restartTimes=0; // wird gesetzt falls nochmal alle events durchgegangen werden muessen
         for(SItimes::iterator t=evt.times.begin(); t!=evt.times.end(); t++)
-          if(t->startzeit+(int)t->dauer<zeit) {
+          if(t->startzeit+(int)t->dauer<zeit-seconds) {
             evt.times.erase(*t); // -> iterator ungueltig :(
             restartTimes=1;
 	    restartEvents=1;
