@@ -17,11 +17,14 @@
 #include <sys/ioctl.h>
 #include <sys/types.h>
 
-#include "lcd-ks0713.h"
+#include <lcd-ks0713.h>
+#include <avia_gt_capture.h>
+
 
 typedef unsigned char screen_t[LCD_BUFFER_SIZE];
 
 int lcd_fd;
+int stride;
 
 inline int compute(int l, int d)
 {
@@ -61,8 +64,11 @@ inline int compute(int l, int d)
 		return l-2;
 	}
 }
-#define XRES	160
-#define YRES  72
+
+#define XRES	120
+#define YRES	65
+//#define XRES	160
+//#define YRES  72
 
 void clr() {
 	if (ioctl(lcd_fd,LCD_IOCTL_CLEAR) < 0) {
@@ -107,13 +113,13 @@ void draw_gol(unsigned char *src, screen_t s)
 
 void read_frame(unsigned char *out, int fd)
 {
-	unsigned short buffer[XRES*YRES/2];
+	unsigned short buffer[stride*YRES/2];
 	int x, y, lum=0;
-	read(fd, buffer, XRES*YRES);
+	read(fd, buffer, stride * YRES);
 	for (y=0; y<YRES; y++)
 		for (x=0; x<XRES/2; x++)
 		{
-			int val=buffer[y*XRES/2+x];
+			int val=buffer[y*stride/2+x];
 			int dy[2]={val&0xF, (val>>8)&0xF};
 			lum=compute(lum, dy[1]);
 			out[y*XRES+x*2]=lum;
@@ -127,8 +133,17 @@ unsigned char image[(LCD_ROWS+1)*LCD_COLS*8], intensity[LCD_ROWS*LCD_COLS*8];
 void *update_thread(void*dummy)
 {
 	unsigned char pic[XRES*YRES];	
-	int capture=open("/dev/dbox/capture", O_RDONLY);
+	int capture=open("/dev/dbox/capture0", O_RDONLY);
 	int x, y;
+	
+	capture_stop(capture);
+	capture_set_input_pos(capture, 0, 0);
+	capture_set_input_size(capture, 720, 576);
+	capture_set_output_size(capture, XRES, YRES*2);
+	stride = capture_start(capture);
+	
+	printf("Capture driver reports stride=%d\n", stride);
+	
 	while (1)
 	{
 		read_frame(pic, capture);
@@ -138,6 +153,8 @@ void *update_thread(void*dummy)
 				image[LCD_COLS*y+x]=pic[y*XRES+x];
 		}
 	}
+
+	capture_stop(capture);
 	close(capture);
 }
 
