@@ -1,5 +1,0 @@
-14.01.2003
- MPB - Rewrite CWebserverRequest::ParseParams
-08.01.2003
- MPB - SIGPIPE handling added
- MPB - Memleak in webserver.cpp fixed (CWebserverRequest)
