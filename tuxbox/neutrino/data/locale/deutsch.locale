@@ -274,8 +274,8 @@ flashupdate.msgbox_manual Es wurde ein neues Image gefunden:\nDatum: %s, %s\nBas
 flashupdate.mtdselector Partitions-Auswahl
 flashupdate.programmingflash programmiere Flash
 flashupdate.proxypassword Passwort
-flashupdate.proxypassword_hint1 Geben sie das Proxy-Passwort ein
-flashupdate.proxypassword_hint2
+flashupdate.proxypassword_hint1 Geben sie das
+flashupdate.proxypassword_hint2 Proxy-Passwort ein
 flashupdate.proxyserver Proxyname
 flashupdate.proxyserver_hint1 Geben Sie den Proxynamen oder IP ein (Host:Port)
 flashupdate.proxyserver_hint2 Ein leerer Eintrag bedeutet kein Proxy
@@ -455,8 +455,8 @@ miscsettings.startbhdriver BH-Mode Treiber laden
 motorcontrol.head Motor-Setup
 movieplayer.bookmark Bookmarks
 movieplayer.bookmarkname Bookmark Name
-movieplayer.bookmarkname_hint1 Geben Sie den Namen für das neue Bookmark ein
-movieplayer.bookmarkname_hint2 
+movieplayer.bookmarkname_hint1 Geben Sie den Namen
+movieplayer.bookmarkname_hint2 für das neue Bookmark ein
 movieplayer.buffering Puffern...
 movieplayer.defdir Start-Verz.
 movieplayer.dvdplayback DVD

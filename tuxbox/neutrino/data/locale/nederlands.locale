@@ -151,10 +151,10 @@ colormenusetup.menuhead Menu bovenkant
 colorstatusbar.head Infobar
 colorstatusbar.text Infobar
 colorthememenu.classic_theme Classic thema
-colorthememenu.head Themakeuze
-colorthememenu.neutrino_theme Neutrino thema
 colorthememenu.dblue_theme Donkerblauw thema
 colorthememenu.dvb2k_theme DVB2000 thema
+colorthememenu.head Themakeuze
+colorthememenu.neutrino_theme Neutrino thema
 date.Apr April
 date.Aug Augustus
 date.Dec December
@@ -417,8 +417,8 @@ miscsettings.startbhdriver load BH-Mode drivers
 motorcontrol.head Motor-Setup
 movieplayer.bookmark Favorieten
 movieplayer.bookmarkname Bookmark Naam
-movieplayer.bookmarkname_hint1 Geef de naam voor de nieuwe favoriet in
-movieplayer.bookmarkname_hint2
+movieplayer.bookmarkname_hint1 Geef de naam voor de
+movieplayer.bookmarkname_hint2 nieuwe favoriet in
 movieplayer.buffering Bufferen...
 movieplayer.defdir startdirectory
 movieplayer.dvdplayback DVD
@@ -561,7 +561,7 @@ satsetup.diseqc11 DiSEqC 1.1
 satsetup.diseqc12 DiSEqC 1.2
 satsetup.diseqcrepeat DiSEqC-herhaling
 satsetup.extended DiSEqC-Settings
-satsetup.extended_lnb LNB-Settings
+satsetup.extended_motor Motorsettings
 satsetup.minidiseqc Mini-DiSEqC
 satsetup.motorcontrol Manuele Setup van de motor
 satsetup.nodiseqc Geen DiSEqC
@@ -612,7 +612,7 @@ streaminfo.bitrate Bitrate
 streaminfo.framerate Framerate
 streaminfo.framerate_unknown Framerate: onbekend
 streaminfo.head Stream-Informatie
-streaminfo.not_crypted Ongecodeerde uitzending
+streaminfo.not_available Niet beschikbaar
 streaminfo.resolution Resolutie
 streaming.buffer_overflow De opname is afgebroken \nomdat doelmap niet kon geopend worden.
 streaming.busy Een of meerdere opnames zijn bezig.\nAls U deze oodschap krijgt en er is geen opname\nbezig herstart dan Neutrino.

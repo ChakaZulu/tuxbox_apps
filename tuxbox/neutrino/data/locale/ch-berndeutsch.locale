@@ -274,8 +274,8 @@ flashupdate.msgbox_manual äs isch äs nöis Image gfunge worde:\nDatum: %s, %s\
 flashupdate.mtdselector Partitions-Uswau
 flashupdate.programmingflash programmierä Flash
 flashupdate.proxypassword Passwort
-flashupdate.proxypassword_hint1 Gib s'Proxy-Passwort i
-flashupdate.proxypassword_hint2
+flashupdate.proxypassword_hint1 Gib s'Proxy
+flashupdate.proxypassword_hint2 Passwort i
 flashupdate.proxyserver Proxyname
 flashupdate.proxyserver_hint1 Gib ä Proxyname oder IP i (Host:Port)
 flashupdate.proxyserver_hint2 ä läre Iitrag bedütet kei Proxy
