@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.34 2002/11/18 00:27:57 obi Exp $
+ * $Id: frontend.cpp,v 1.35 2002/11/19 20:29:02 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -288,12 +288,19 @@ struct dvb_frontend_event CFrontend::getEvent ()
 
 			INFO("event after %d milliseconds", TIMEOUT_MAX_MS - msec);
 
+			memset(&event, 0, sizeof(struct dvb_frontend_event));
+			
 			DVB_IOCTL(FE_GET_EVENT, &event);
 
 			if (event.status & FE_HAS_LOCK) {
 				currentFrequency = event.parameters.frequency;
 				INFO("FE_HAS_LOCK: freq %u", currentFrequency);
 				tuned = true;
+				break;
+			}
+
+			else if (event.status & FE_TIMEDOUT) {
+				WARN("FE_TIMEDOUT");
 				break;
 			}
 
