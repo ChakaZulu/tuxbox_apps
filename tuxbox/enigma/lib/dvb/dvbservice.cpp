@@ -547,8 +547,8 @@ void eDVBServiceController::EITready(int error)
 void eDVBServiceController::TDTready(int error)
 {
 	eDebug("TDTready %d", error);
-	// receive new TDT every 10 minutes
-	updateTDTTimer.start(10*60*1000,true);
+	// receive new TDT every 90 minutes
+	updateTDTTimer.start(90*60*1000,true);
 	if (!error && transponder)
 	{
 		std::map<tsref,int> &tOffsMap = eTransponderList::getInstance()->TimeOffsetMap;
@@ -579,7 +579,7 @@ void eDVBServiceController::TDTready(int error)
 				time_t CorrectedTpTime = TPTime+it->second;
 				int ddiff = nowTime-CorrectedTpTime;
 				eDebug("[TIME] diff after add correction is %d", ddiff);
-				if ( abs(ddiff) < 30*60 )
+				if ( abs(ddiff) < 120 )
 				{
 					eDebug("[TIME] use stored correction");
 					dvb.time_difference = enigma_diff + it->second;
