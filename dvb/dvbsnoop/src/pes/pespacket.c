@@ -1,8 +1,12 @@
 /*
-$Id: pespacket.c,v 1.11 2003/11/24 23:52:17 rasc Exp $
+$Id: pespacket.c,v 1.12 2003/11/26 16:27:47 rasc Exp $
 
-   -- PES Decode/Table section
 
+
+ DVBSNOOP
+
+ a dvb sniffer  and mpeg2 stream analyzer tool
+ mainly for me to learn about dvb streams, mpeg2, mhp, dsm-cc, ...
 
  http://dvbsnoop.sourceforge.net/
 
@@ -10,8 +14,15 @@ $Id: pespacket.c,v 1.11 2003/11/24 23:52:17 rasc Exp $
 
 
 
+ -- PES Decode/Table section
+
+
 
 $Log: pespacket.c,v $
+Revision 1.12  2003/11/26 16:27:47  rasc
+- mpeg4 descriptors
+- simplified bit decoding and output function
+
 Revision 1.11  2003/11/24 23:52:17  rasc
 -sync option, some TS and PES stuff;
 dsm_addr inactive, may be wrong - due to missing ISO 13818-6
@@ -95,11 +106,12 @@ void decodePES_buf (u_char *b, u_int len, int pid)
 
 
  if (p.packet_start_code_prefix != 0x000001) {
-    out_nl (3," Packet_Start_CODE is wrong (= no PES)!!!\n");
-    return;
+    out_nl (3," !!! Packet_Start_CODE [%06lx] is wrong (= no PES)!!!\n",
+		p.packet_start_code_prefix);
+    // $$$    return;
  }
  if (len < 6) {
-    out_nl (3," Packet length  too short (= no PES)!!!\n");
+    out_nl (3," !!! Opps, read pes stream length too short (= no PES)!!!\n");
     return;
  }
 
@@ -225,7 +237,7 @@ void  PES_decode2 (u_char *b, int len, int pid)
  if (p.PTS_DTS_flags & 0x02) {    // 10
    out_nl (3,"PTS: ");
    indent (+1);
-   out_SB_NL  (3,"Fixed: ", getBits (b, 0,  0, 4) );
+   outBit_Sx_NL (3,"Fixed: ",b,0,4);
    print_xTS_field (b, 4) ;
    indent (-1);
    b += 5;
@@ -235,7 +247,7 @@ void  PES_decode2 (u_char *b, int len, int pid)
    // PTS from "if" before...
    out_nl (3,"DTS: ");
    indent (+1);
-   out_SB_NL  (6,"Fixed: ", getBits (b, 0,  0, 4) );
+   outBit_Sx_NL (3,"Fixed: ",b,0,4);
    print_xTS_field (b, 4) ;
    indent (-1);
    b += 5;
@@ -245,10 +257,10 @@ void  PES_decode2 (u_char *b, int len, int pid)
    out_nl (3,"ESCR_flag: ");
    indent (+1);
    out_nl (3,"ESCR_base: ");
-   out_SB_NL  (3,"Reserved: ", getBits (b, 0,  0, 2) );
+   outBit_Sx_NL (6,"reserved: ",      b,0,2);
    print_xTS_field (b, 2) ;
-   out_SW_NL  (3,"ESCR_extension: ", getBits (b, 0, 38, 9) );
-   out_SB_NL  (3,"marker_bit: ",     getBits (b, 0, 47, 1) );
+   outBit_Sx_NL (3,"ESCR_extension: ",b,38,9);
+   outBit_Sx_NL (3,"marker_bit: ",    b,47,1);
    indent (-1);
    b += 6;
  }
@@ -258,58 +270,43 @@ void  PES_decode2 (u_char *b, int len, int pid)
  if (p.ES_rate_flag == 0x01) {
    out_nl (3,"ES_rate_flag: ");
    indent (+1);
-   out_SB_NL  (3,"Marker_bit: ", getBits (b, 0,  0,  1) );
-   out_SL_NL  (3,"ES_rate: ",    getBits (b, 0,  1, 22) );
-   out_SB_NL  (3,"Marker_bit: ", getBits (b, 0, 23,  1) );
+   outBit_Sx_NL (3,"marker_bit: ",b, 0, 1);
+   outBit_Sx_NL (3,"ES_rate: ",   b, 1,22);
+   outBit_Sx_NL (3,"marker_bit: ",b,23, 1);
    indent (-1);
    b += 3;
  }
 
  if (p.DSM_trick_mode_flag == 0x01) {
    u_int  trick_mode_control;
-   u_int  field_id;
-   u_int  intra_slice_refresh;
-   u_int  frequency_truncation;
-   u_int  rep_control;
-   u_int  reserved;
+
 
    out_nl (3,"Trick_mode_control: ");
    indent (+1);
 
-   trick_mode_control			= getBits (b, 0,  0,  3);
-   out_S2B_NL  (3,"trick_mode_control: ", trick_mode_control,
-		   dvbstrPESTrickModeControl (trick_mode_control) );
+   trick_mode_control = outBit_S2x_NL  (3,"trick_mode_control: ", b,0,3,
+		   (char *(*)(u_int)) dvbstrPESTrickModeControl);
 
    if ( (trick_mode_control == 0x0) ||			/* fast forward */
         (trick_mode_control == 0x3) ) {			/* fast reverse */
 
-	   field_id 			= getBits (b, 0,  3,  2);
-	   intra_slice_refresh		= getBits (b, 0,  5,  1);
-	   frequency_truncation		= getBits (b, 0,  6,  2);
-
-   	   out_SB_NL  (3,"field_id: ", field_id);	/* $$$ Table */
-   	   out_SB_NL  (3,"intra_slice_refresh: ", intra_slice_refresh);
-   	   out_SB_NL  (3,"frequency_truncation: ", frequency_truncation);
+	   outBit_Sx_NL (3,"field_id: ",b, 3, 2);	/* $$$ TABLE ?? */
+	   outBit_Sx_NL (3,"intra_slice_refresh: ",b, 5, 1);
+	   outBit_Sx_NL (3,"frequency_truncation: ",b, 6, 2);
 
    } else if ( (trick_mode_control == 0x1) ||		/* slow motion  */
                (trick_mode_control == 0x4) ) {		/* slow reverse */
 
-	   rep_control 			= getBits (b, 0,  3,  5);
-
-   	   out_SB_NL  (3,"rep_control: ", rep_control);
+	   outBit_Sx_NL (3,"rep_control: ",b, 3, 5);
 
    } else if (trick_mode_control == 0x2) {		/* freeze frame */
 
-	   field_id 			= getBits (b, 0,  3,  2);
-	   reserved 			= getBits (b, 0,  3,  5);
-
-   	   out_SB_NL  (3,"field_id: ", field_id);	/* $$$ Table */
-   	   out_SB_NL  (6,"reserved: ", reserved);
+	   outBit_Sx_NL (3,"field_id: ",b, 3, 2);	/* $$$ TABLE ?? */
+	   outBit_Sx_NL (6,"reserved: ",b, 5, 3);
 
    } else {						/* reserved     */
 
-	   reserved 			= getBits (b, 0,  3,  8);
-   	   out_SB_NL  (6,"reserved: ", reserved);
+	   outBit_Sx_NL (6,"reserved: ",b, 3, 8);
 
    }
 
@@ -323,8 +320,8 @@ void  PES_decode2 (u_char *b, int len, int pid)
 
    out_nl (3,"additional_copy_info: ");
    indent (+1);
-   out_SB_NL  (3,"marker_bit: ", getBits (b, 0,  0,  1) );
-   out_SB_NL  (3,"additional_copy_info: ", getBits (b, 0,  1,  7) );
+   outBit_Sx_NL (3,"marker_bit: ",b, 0, 1);
+   outBit_Sx_NL (3,"additional_copy_info: ",b, 1, 7);
    b += 1;
    indent (-1);
 
@@ -335,7 +332,7 @@ void  PES_decode2 (u_char *b, int len, int pid)
 
    out_nl (3,"PES_CRC: ");
    indent (+1);
-   out_SW_NL  (3,"previous_PES_packet_CRC: ", getBits (b, 0,  0, 16) );
+   outBit_Sx_NL (3,"previous_PES_packet_CRC: ",b, 0, 16);
    b += 2;
    indent (-1);
 

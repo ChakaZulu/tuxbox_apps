@@ -1,19 +1,29 @@
 /*
-$Id: dvb_descriptor.c,v 1.17 2003/11/24 23:52:16 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.18 2003/11/26 16:27:45 rasc Exp $ 
 
 
-  dvbsnoop
-  (c) Rainer Scherg 2001-2003
+ DVBSNOOP
 
-  DVB Descriptors  ETSI 300 468
+ a dvb sniffer  and mpeg2 stream analyzer tool
+ mainly for me to learn about dvb streams, mpeg2, mhp, dsm-cc, ...
+
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2003   Rainer.Scherg@gmx.de
 
 
-  EN/ISO/TR document references in comments may habe been changed
-  during updates of documents by ETSI.
+
+ -- DVB Descriptors  ETSI 300 468
+ -- EN/ISO/TR document references in comments may habe been changed
+ -- during updates of documents by ETSI.
 
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.18  2003/11/26 16:27:45  rasc
+- mpeg4 descriptors
+- simplified bit decoding and output function
+
 Revision 1.17  2003/11/24 23:52:16  rasc
 -sync option, some TS and PES stuff;
 dsm_addr inactive, may be wrong - due to missing ISO 13818-6

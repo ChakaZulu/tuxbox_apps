@@ -1,7 +1,19 @@
 /*
-$Id: dmx_sect.c,v 1.8 2003/10/24 22:45:06 rasc Exp $
+$Id: dmx_sect.c,v 1.9 2003/11/26 16:27:46 rasc Exp $
 
- -- (c) 2001 rasc
+
+
+ DVBSNOOP
+
+ a dvb sniffer  and mpeg2 stream analyzer tool
+ mainly for me to learn about dvb streams, mpeg2, mhp, dsm-cc, ...
+
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2003   Rainer.Scherg@gmx.de
+
+
+
  --  Sections Streams
  --  For more information please see:
  --  ISO 13818 (-1) and ETSI 300 468
@@ -10,6 +22,10 @@ $Id: dmx_sect.c,v 1.8 2003/10/24 22:45:06 rasc Exp $
 
 
 $Log: dmx_sect.c,v $
+Revision 1.9  2003/11/26 16:27:46  rasc
+- mpeg4 descriptors
+- simplified bit decoding and output function
+
 Revision 1.8  2003/10/24 22:45:06  rasc
 code reorg...
 

@@ -1,5 +1,5 @@
 /*
-$Id: dmx_pes.c,v 1.10 2003/11/24 23:52:16 rasc Exp $
+$Id: dmx_pes.c,v 1.11 2003/11/26 16:27:46 rasc Exp $
 
  -- PE Streams
  --  For more information please see:
@@ -14,6 +14,10 @@ $Id: dmx_pes.c,v 1.10 2003/11/24 23:52:16 rasc Exp $
 
 
 $Log: dmx_pes.c,v $
+Revision 1.11  2003/11/26 16:27:46  rasc
+- mpeg4 descriptors
+- simplified bit decoding and output function
+
 Revision 1.10  2003/11/24 23:52:16  rasc
 -sync option, some TS and PES stuff;
 dsm_addr inactive, may be wrong - due to missing ISO 13818-6
@@ -67,8 +71,9 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 
-static long pes_UnsyncRead (int fd, u_char *buf, long len);
-static long pes_SyncRead   (int fd, u_char *buf, long len, long *skipped_bytes);
+static long pes_UnsyncRead (int fd, u_char *buf, u_long len);
+static long pes_SyncRead   (int fd, u_char *buf, u_long len, u_long *skipped_bytes);
+
 
 
 
@@ -143,7 +148,7 @@ int  doReadPES (OPTION *opt)
   count = 0;
   while (1) {
     long    n;
-    long    skipped_bytes = 0;
+    u_long  skipped_bytes = 0;
 
 
     /*
@@ -238,7 +243,7 @@ int  doReadPES (OPTION *opt)
   -- return: len // read()-return code
 */
 
-static long pes_UnsyncRead (int fd, u_char *buf, long len)
+static long pes_UnsyncRead (int fd, u_char *buf, u_long len)
 
 {
     long    n,n1;
@@ -274,7 +279,7 @@ static long pes_UnsyncRead (int fd, u_char *buf, long len)
   -- return: len // read()-return code
 */
 
-static long pes_SyncRead (int fd, u_char *buf, long len, long *skipped_bytes)
+static long pes_SyncRead (int fd, u_char *buf, u_long len, u_long *skipped_bytes)
 
 {
     long    n,n1;
@@ -311,7 +316,10 @@ static long pes_SyncRead (int fd, u_char *buf, long len, long *skipped_bytes)
         l = (buf[4]<<8) + buf[5];		// PES packet size...
 
 	if (l > 0) {
-           if ( (l+6) > len) return -1;		// prevent buffer overflow
+           if ( (l+6) > len) {
+		fprintf (stderr,"buffer to small on pes read (%ld)\n",l);
+	   	return -1;		// prevent buffer overflow
+	   }
 
            n1 = read(fd, buf+6, (unsigned int) l );
            n = (n1 < 0) ? n1 : 6+n1;		// we already read 3+3 bytes

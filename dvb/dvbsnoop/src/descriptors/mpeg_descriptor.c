@@ -1,14 +1,29 @@
 /*
-$Id: mpeg_descriptor.c,v 1.8 2003/10/27 22:43:49 rasc Exp $
+$Id: mpeg_descriptor.c,v 1.9 2003/11/26 16:27:45 rasc Exp $
 
-  dvbsnoop
-  (c) Rainer Scherg 2001-2003
 
-  MPEG Descriptors  ISO/IEC 13818-2
-  all descriptors are returning their length used in buffer
+ DVBSNOOP
+
+ a dvb sniffer  and mpeg2 stream analyzer tool
+ mainly for me to learn about dvb streams, mpeg2, mhp, dsm-cc, ...
+
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2003   Rainer.Scherg@gmx.de
+
+
+
+ -- MPEG Descriptors  ISO/IEC 13818-2
+ -- all descriptors are returning their length used in buffer
+
+
 
 
 $Log: mpeg_descriptor.c,v $
+Revision 1.9  2003/11/26 16:27:45  rasc
+- mpeg4 descriptors
+- simplified bit decoding and output function
+
 Revision 1.8  2003/10/27 22:43:49  rasc
 carousel info descriptor and more
 
@@ -1256,31 +1271,13 @@ void descriptorMPEG_Deferred_Association_tags (u_char *b)
 void descriptorMPEG_MPEG4_video (u_char *b)
 
 {
-
- typedef struct  _descMPEG4video {
-    u_int      descriptor_tag;
-    u_int      descriptor_length;		
-
-    u_int      mpeg4_visual_profile_and_level;
-
- } descMPEG4video;
-
-
- descMPEG4video d;
-
-
-
- d.descriptor_tag		 = b[0];
- d.descriptor_length       	 = b[1];
-
- d.mpeg4_visual_profile_and_level = getBits (b, 0, 16, 8);
-
- out_SB_NL (4,"MPEG4 visual profile and level: ",d.mpeg4_visual_profile_and_level);
-
+ // d.descriptor_tag		 = b[0];
+ // d.descriptor_length       	 = b[1];
+ outBit_Sx_NL (4,"MPEG4 visual profile and level: ",  	b,16,8); /* $$$  Table */
 }
 
 
-
+ 
 /*
   0x1C  MPEG4 audio  descriptor 
   ISO 13818-1  
@@ -1289,54 +1286,201 @@ void descriptorMPEG_MPEG4_video (u_char *b)
 void descriptorMPEG_MPEG4_audio (u_char *b)
 
 {
+ // d.descriptor_tag		 = b[0];
+ // d.descriptor_length       	 = b[1];
 
- typedef struct  _descMPEG4audio {
-    u_int      descriptor_tag;
-    u_int      descriptor_length;		
-
-    u_int      mpeg4_audio_profile_and_level;
-
- } descMPEG4audio;
-
-
- descMPEG4audio d;
+ outBit_Sx_NL (4,"MPEG4 audio profile and level: ",  	b,16,8); /* $$$  Table */
+}
 
 
 
- d.descriptor_tag		 = b[0];
- d.descriptor_length       	 = b[1];
 
- d.mpeg4_audio_profile_and_level = getBits (b, 0, 16, 8);
+/*
+  0x1D  IOD - InitialObjectDescriptor
+  ISO 13818-1  
+*/
 
- out_SB_NL (4,"MPEG4 audio profile and level: ",d.mpeg4_audio_profile_and_level); /* $$$  Table .... */
+void descriptorMPEG_IOD (u_char *b)
 
+{
+ // d.descriptor_tag		 = b[0];
+ // d.descriptor_length       	 = b[1];
+
+ outBit_Sx_NL (4,"Scope_of_IOD: ",  	b,16,8);
+ outBit_Sx_NL (4,"IOD_label: ",  	b,24,8);
+ outBit_Sx_NL (4,"InitialObjectDescriptor: ", b,32,8);	// $$$ TODO defined in subclause 8.6.3.1 of ISO/IEC 14496-1
+}
+
+
+
+/*
+  0x1E  SL descriptor
+  ISO 13818-1  
+*/
+
+void descriptorMPEG_SL (u_char *b)
+
+{ 
+ // d.descriptor_tag		 = b[0];
+ // d.descriptor_length       	 = b[1];
+
+ outBit_Sx_NL (4,"ES_ID: ",  	b,16,16);
+}
+
+
+
+
+/*
+  0x1F  FMC descriptor
+  ISO 13818-1  
+*/
+
+void descriptorMPEG_FMC (u_char *b)
+
+{
+  int descriptor_length;
+
+  // d.descriptor_tag		 = b[0];
+  descriptor_length       	 = b[1];
+
+  b += 2;
+  while (descriptor_length > 0 ) {
+ 	outBit_Sx_NL (4,"ES_ID: ",  		b, 0,16);
+ 	outBit_Sx_NL (4,"FlexMuxChannel: ",  	b,16, 8);
+	b += 3;
+	descriptor_length -= 3;
+  }
+
+}
+
+
+
+/*
+  0x20  External SL descriptor
+  ISO 13818-1  
+*/
+
+void descriptorMPEG_External_ES_ID (u_char *b)
+
+{ 
+ // d.descriptor_tag		 = b[0];
+ // d.descriptor_length       	 = b[1];
+
+ outBit_Sx_NL (4,"ES_ID: ",  	b,16,16);
 }
 
 
 
 
 
+/*
+  0x21  MuxCode descriptor
+  ISO 13818-1  
+*/
 
-/* ... TODO ... */
+void descriptorMPEG_MuxCode (u_char *b)
 
-void descriptorMPEG_IOD (u_char *b)	 { out_nl (4," ... $$$ Todo"); descriptorMPEG_any (b); }
-void descriptorMPEG_SL (u_char *b)	 { out_nl (4," ... $$$ Todo"); }
-void descriptorMPEG_FMC (u_char *b)	 { out_nl (4," ... $$$ Todo"); }
-void descriptorMPEG_External_ES_ID (u_char *b)	 { out_nl (4," ... $$$ Todo"); }
-void descriptorMPEG_MuxCode (u_char *b)	 { out_nl (4," ... $$$ Todo"); }
-void descriptorMPEG_FMXBufferSize (u_char *b)	 { out_nl (4," ... $$$ Todo"); }
-void descriptorMPEG_MultiplexBuffer (u_char *b)	 { out_nl (4," ... $$$ Todo"); }
-void descriptorMPEG_FlexMuxTiming (u_char *b)	 { out_nl (4," ... $$$ Todo"); }
+{
+  int descriptor_length;
 
-
-
+  // d.descriptor_tag		 = b[0];
+  descriptor_length       	 = b[1];
 
 
 
+ out_nl (4,"MuxCodeTableEntry ($$$TODO):");
+ indent (+1);
+ printhexdump_buf (4, b+2, descriptor_length-2);
+ indent (-1);
+
+
+   // $$$ TODO  defined in subclause 11.2.4.3 of ISO/IEC 14496-1.
+   // Muxcode_descriptor () {
+   // 	descriptor_tag 8 uimsbf
+   // 	descriptor_length 8 uimsbf
+   // 	for (i = 0; i < N; i++) {
+   // 		MuxCodeTableEntry ()
+   // 	}
+   // }
+
+
+}
+
+
+/*
+  0x22  FMX Buffer Size descriptor
+  ISO 13818-1  
+*/
+
+void descriptorMPEG_FMXBufferSize (u_char *b)
+
+{
+  int descriptor_length;
+
+  // d.descriptor_tag		 = b[0];
+  descriptor_length       	 = b[1];
 
 
 
+  out_nl (4,"($$$TODO):");
+  indent (+1);
+  printhexdump_buf (4, b+2, descriptor_length-2);
+  indent (-1);
 
+
+   // $$$ TODO defined in subclause 11.2 of ISO/IEC 14496-1.
+   // FmxBufferSize_descriptor () {
+   // 	descriptor_tag 8 uimsbf
+   // 	descriptor_length 8 uimsbf
+   // 	DefaultFlexMuxBufferDescriptor()
+   // 	for (i=0; i<descriptor_length; i += 4) {
+   // 		FlexMuxBufferDescriptor()
+   // 	}
+   // }
+
+}
+
+
+/*
+  0x23   Multiplex Buffer descriptor
+  ISO 13818-1  
+*/
+
+void descriptorMPEG_MultiplexBuffer (u_char *b)
+
+{
+  // d.descriptor_tag		 = b[0];
+  // d.descriptor_length       	 = b[1];
+
+
+ outBit_Sx (4,"MB_buffer_size: ",  	b,16,24);
+ 	out_nl (4," (bytes)");
+ outBit_Sx (4,"TB_leak_rate: ",  	b,40,24);
+ 	out_nl (4," (* 400 bit/s)");
+
+}
+
+
+
+/*
+  0x24   Flex-Mux-Timing descriptor
+  ITU-T H.222.0-I-Cor1 
+*/
+
+void descriptorMPEG_FlexMuxTiming (u_char *b)
+
+{
+  // d.descriptor_tag		 = b[0];
+  // d.descriptor_length       	 = b[1];
+
+
+ outBit_Sx_NL (4,"FCR_ES_ID: ",  		b,16,16);
+ outBit_Sx    (4,"FCRResolution: ",  		b,32,32);
+ 	out_nl (4," (cycles/s)");
+ outBit_Sx_NL (4,"FCRLength: ",  		b,64, 8);
+ outBit_Sx_NL (4,"FCRRateLength: ",  		b,72, 8);
+
+}
 
 
 

@@ -1,14 +1,29 @@
 /*
-$Id: test0x1d.c,v 1.1 2003/10/29 21:00:22 rasc Exp $
+$Id: test0x1d.c,v 1.2 2003/11/26 16:27:48 rasc Exp $
+
+
+ DVBSNOOP
+
+ a dvb sniffer  and mpeg2 stream analyzer tool
+ mainly for me to learn about dvb streams, mpeg2, mhp, dsm-cc, ...
+
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2003   Rainer.Scherg@gmx.de
+
+
 
    -- test data section
    -- DVB test and measurement signalling channel
    -- ETSI TR 101 291
 
-   (c) rasc
 
 
 $Log: test0x1d.c,v $
+Revision 1.2  2003/11/26 16:27:48  rasc
+- mpeg4 descriptors
+- simplified bit decoding and output function
+
 Revision 1.1  2003/10/29 21:00:22  rasc
 more PES stuff, DSM descriptors, testdata
 

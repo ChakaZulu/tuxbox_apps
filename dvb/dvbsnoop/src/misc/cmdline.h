@@ -1,9 +1,17 @@
 /*
 
- -- (c) 2001 rasc
+
+ DVBSNOOP
+
+ a dvb sniffer  and mpeg2 stream analyzer tool
+ mainly for me to learn about dvb streams, mpeg2, mhp, dsm-cc, ...
+
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2003   Rainer.Scherg@gmx.de
 
 
-$Id: cmdline.h,v 1.5 2003/11/24 23:52:17 rasc Exp $
+$Id: cmdline.h,v 1.6 2003/11/26 16:27:46 rasc Exp $
 
 
 */
