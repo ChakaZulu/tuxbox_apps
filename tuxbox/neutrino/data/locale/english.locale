@@ -541,14 +541,6 @@ parentallock.prompt prompt for PIN
 pictureviewer.defdir start dir.
 pictureviewer.head Picture viewer
 pictureviewer.help1 menu mode
-pictureviewer.help2 display image
-pictureviewer.help3 change sort order
-pictureviewer.help4 do not scale picture
-pictureviewer.help5 diashow mode
-pictureviewer.help6 previous image
-pictureviewer.help7 next image
-pictureviewer.help8 change sort order
-pictureviewer.help9 exit
 pictureviewer.help10 show mode
 pictureviewer.help11 reread image
 pictureviewer.help12 previous image
@@ -559,9 +551,17 @@ pictureviewer.help16 scroll up
 pictureviewer.help17 scroll left
 pictureviewer.help18 scroll right
 pictureviewer.help19 scroll down
+pictureviewer.help2 display image
 pictureviewer.help20 change sort order
 pictureviewer.help21 reread image (no scaling)
 pictureviewer.help22 exit
+pictureviewer.help3 change sort order
+pictureviewer.help4 do not scale picture
+pictureviewer.help5 diashow mode
+pictureviewer.help6 previous image
+pictureviewer.help7 next image
+pictureviewer.help8 change sort order
+pictureviewer.help9 exit
 pictureviewer.resize.color_average advanced
 pictureviewer.resize.none none
 pictureviewer.resize.simple simple
@@ -601,6 +601,7 @@ recordingmenu.stopplayback stop playback
 recordingmenu.stopsectionsd stop sectionsd
 recordingmenu.stream_all_audio_pids record all audio pids
 recordingmenu.stream_vtxt_pid record videotext
+recordingmenu.use_fdatasync write synchronous (fdatasync)
 recordingmenu.use_o_sync write synchronous (O_SYNC)
 recordingmenu.vcr vcr
 recordtimer.announce Recording starts in a few minutes
@@ -619,6 +620,20 @@ satsetup.nodiseqc no DiSEqC
 satsetup.satellite Satellite
 satsetup.savesettingsnow save settings now
 satsetup.smatvremote SMATV Remote Tuning
+scantp.abort_scan Abort Scan
+scantp.fec FEC
+scantp.fec_1_2 1/2
+scantp.fec_2_3 2/3
+scantp.fec_3_4 3/4
+scantp.fec_5_6 5/6
+scantp.fec_7_8 7/8
+scantp.freq Frequency
+scantp.pol Polarization
+scantp.pol_h H
+scantp.pol_v V
+scantp.rate Symbol rate
+scantp.scan Manual Scan
+scantp.scanmode Fast Scan
 scants.actcable Cable:
 scants.actsatellite Satellite:
 scants.bouquet Bouquet
@@ -793,17 +808,3 @@ videomenu.videosignal_svideo S-Video
 videomenu.videosignal_yuv_c YUV + CVBS
 videomenu.videosignal_yuv_v YUV + VBS
 zaptotimer.announce Zapto timer in one minute
-scantp.abort_scan Abort Scan
-scantp.fec_1_2 1/2
-scantp.fec_2_3 2/3
-scantp.fec_3_4 3/4
-scantp.fec_5_6 5/6
-scantp.fec_7_8 7/8
-scantp.pol_h H
-scantp.pol_v V
-scantp.scanmode Fast Scan
-scantp.scan Manual Scan
-scantp.freq Frequency
-scantp.rate Symbol rate
-scantp.fec FEC
-scantp.pol Polarization
