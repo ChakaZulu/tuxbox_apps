@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.121 2002/04/19 07:04:44 field Exp $
+//  $Id: sectionsd.cpp,v 1.122 2002/04/24 10:56:46 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.122  2002/04/24 10:56:46  field
+//  Kleinigkeiten
+//
 //  Revision 1.121  2002/04/19 07:04:44  field
 //  Zeit-setzen verbessert
 //
@@ -1637,7 +1640,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.121 2002/04/19 07:04:44 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.122 2002/04/24 10:56:46 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1929,8 +1932,8 @@ static void commandLinkageDescriptorsUniqueKey(struct connectionData *client, ch
 }
 
 static unsigned	messaging_current_servicekey = 0;
-std::vector<int> messaging_skipped_sections_ID [0x22];		// 0x4e .. 0x6f
-static int 		messaging_sections_max_ID [0x22];			// 0x4e .. 0x6f
+std::vector<long long> 	messaging_skipped_sections_ID [0x22];		// 0x4e .. 0x6f
+static long long 		messaging_sections_max_ID [0x22];			// 0x4e .. 0x6f
 static int 		messaging_sections_got_all [0x22];			// 0x4e .. 0x6f
 static bool		messaging_wants_current_next_Event = false;
 static time_t 	messaging_last_requested = time(NULL);
@@ -1965,7 +1968,20 @@ showProfiling("before messaging lock");
 
 		doWakeUp = true;
 	}
-	messaging_wants_current_next_Event = *requestCN_Event;
+
+
+
+	if ( ( !doWakeUp ) && ( messaging_sections_got_all[0] ) && ( *requestCN_Event ) )
+	{
+		messaging_wants_current_next_Event = false;
+        eventServer->sendEvent(CSectionsdClient::EVT_GOT_CN_EPG, CEventServer::INITID_SECTIONSD, &messaging_current_servicekey, sizeof(messaging_current_servicekey) );
+	}
+	else
+	{
+		messaging_wants_current_next_Event = *requestCN_Event;
+		if (messaging_wants_current_next_Event)
+			dprintf("[sectionsd] requesting current_next event...\n");
+	}
 
 showProfiling("before wakeup");
 	messaging_last_requested = zeit;
@@ -1974,17 +1990,8 @@ showProfiling("before wakeup");
 	{
 		// nur wenn lange genug her, oder wenn anderer Service :)
 
-		if ( messaging_wants_current_next_Event )
-		{
-			dprintf("[sectionsd] requesting current_next event...\n");
-			// aufwecken - mit current-next
-			dmxEIT.change( 0 );
-		}
-		else
-		{
-			// aufwecken - mit scheduled
-    		dmxEIT.change( 1 );
-    	}
+		// aufwecken - mit current-next
+		dmxEIT.change( 0 );
     }
     else
     	dprintf("[sectionsd] ignoring wakeup request...\n");
@@ -3185,21 +3192,6 @@ static void *timeThread(void *)
 								dmxTOT.closefd();
 								continue;
       						}
-/*
-                        else
-                        {
-                        	struct timeval tv_n;
-        					gettimeofday( &tv_n, NULL );
-
-        					long long timeNew = (long long) tv_n.tv_usec + (long long)((long long) tv_n.tv_sec * (long long) 1000000);
-        					long long timeOld = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
-        					timeDiff = timeNew - timeOld;
-
-	      					timeset=1;
-    	  					time_t t=time(NULL);
-      						dprintf("TDT/TOT: local time: %s", ctime(&t));
-      					}
-*/
 						timeset=1;
     				}
 
@@ -3210,7 +3202,6 @@ static void *timeThread(void *)
 			}
   		} while (timeset!=1);
 
-//  		eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD, &timeDiff, sizeof(timeDiff) );
 		eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD, &tim, sizeof(tim) );
 
 		dmxTOT.closefd();
@@ -3270,24 +3261,6 @@ static void *timeThread(void *)
     		time_t tim=changeUTCtoCtime(((const unsigned char *)&header)+3);
     		if(tim)
     		{
-//      timeOffsetFound=0;
-//      parseDescriptors(buf+sizeof(struct SI_section_TOT_header), ((struct SI_section_TOT_header *)buf)->descriptors_loop_length, "DEU");
-//      printf("local time: %s", ctime(&tim));
-//      printf("Time offset %d", timeOffsetMinutes);
-//      if(timeOffsetFound)
-//        tim+=timeOffsetMinutes*60L;
-
-/*				if(stime(&tim)< 0)
-				{
-        			perror("[sectionsd] cannot set date");
-    				dmxTOT.closefd();
-    				break;
-				}
-
-      			timeset=1;
-				time_t t=time(NULL);
-      			dprintf("TOT: local time: %s", ctime(&t));
-*/
 				if ( !messaging_neutrino_sets_time )
 					if(stime(&tim)< 0)
     				{
@@ -3617,43 +3590,37 @@ static void *eitThread(void *)
                 } // if
 
 				lockMessaging();
-                if ( header.table_id_extension == ( messaging_current_servicekey & 0xFFFF ) )
+				SI_section_EIT_header* _header = (SI_section_EIT_header*) &header;
+                if ( ( header.table_id != 0x4e ) || ( _header->service_id == ( messaging_current_servicekey & 0xFFFF ) ) )
 				{
 					if ( !messaging_sections_got_all[header.table_id- 0x4e] )
 					{
-                		if ( !header.section_number && !header.last_section_number )
-                    	{
-                    		// nur eine section...
-	                    	dprintf("[eitThread] got all packages for table_id 0x%x... (only one!)\n", header.table_id);
-							messaging_sections_got_all[header.table_id- 0x4e] = true;
-						}
-            	        else
-                	    {
-							if ( messaging_sections_max_ID[header.table_id- 0x4e] == -1 )
-                    		{
-								messaging_sections_max_ID[header.table_id- 0x4e] = header.section_number;
-	                        }
-    	                    else
-        	                {
-            	            	if ( !messaging_sections_got_all[header.table_id- 0x4e] )
-                	        	{
-                    	    		for ( std::vector<int>::iterator i= messaging_skipped_sections_ID[header.table_id- 0x4e].begin();
-                        				  i!= messaging_skipped_sections_ID[header.table_id- 0x4e].end(); ++i )
-                        				if ( *i == header.section_number)
-	                        			{
-											messaging_skipped_sections_ID[header.table_id- 0x4e].erase(i);
-											break;
-										}
+						long long _id= (((long long)_header->service_id) << 64 ) + (((long long)_header->transport_stream_id) << 32 ) + (((long long)_header->original_network_id) << 16 ) + (_header->section_number);
 
-    	                    		if ( ( messaging_sections_max_ID[header.table_id- 0x4e] == header.section_number ) &&
-        	                			 ( messaging_skipped_sections_ID[header.table_id- 0x4e].size() == 0 ) )
-            	            		{
-                	        			// alle pakete für den ServiceKey da!
-                    	    			dprintf("[eitThread] got all packages for table_id 0x%x\n", header.table_id);
-                        				messaging_sections_got_all[header.table_id- 0x4e] = true;
-                        			}
+						if ( messaging_sections_max_ID[header.table_id- 0x4e] == -1 )
+                    	{
+							messaging_sections_max_ID[header.table_id- 0x4e] = _id;
+	                    }
+    	                else
+        	            {
+            	          	if ( !messaging_sections_got_all[header.table_id- 0x4e] )
+                	       	{
+                    	   		for ( std::vector<long long>::iterator i= messaging_skipped_sections_ID[header.table_id- 0x4e].begin();
+                        		  	  i!= messaging_skipped_sections_ID[header.table_id- 0x4e].end(); ++i )
+                        			if ( *i == _id)
+	                        		{
+										messaging_skipped_sections_ID[header.table_id- 0x4e].erase(i);
+										break;
+									}
+
+    	                    	if ( ( messaging_sections_max_ID[header.table_id- 0x4e] == _id ) &&
+        	                		 ( messaging_skipped_sections_ID[header.table_id- 0x4e].size() == 0 ) )
+            	            	{
+                	        		// alle pakete für den ServiceKey da!
+                    	    		dprintf("[eitThread] got all packages for table_id 0x%x\n", header.table_id);
+                        			messaging_sections_got_all[header.table_id- 0x4e] = true;
                         		}
-	                       	}
+                        	}
 						}
 
 						if ( messaging_wants_current_next_Event && messaging_sections_got_all[0] )
@@ -3692,10 +3659,14 @@ static void *eitThread(void *)
             else
             {
             	lockMessaging();
-            	if ( header.table_id_extension == ( messaging_current_servicekey & 0xFFFF ) )
+            	SI_section_EIT_header* _header = (SI_section_EIT_header*) &header;
+
+            	//if ( header.table_id_extension == ( messaging_current_servicekey & 0xFFFF ) )
             	{
+            		long long _id= ( ((long long)_header->service_id << 64 ) + ((long long)_header->transport_stream_id << 32 ) + ((long long)_header->original_network_id << 16 ) + (_header->section_number) );
+
             		if ( messaging_sections_max_ID[header.table_id- 0x4e] != -1 )
-	            		messaging_skipped_sections_ID[header.table_id- 0x4e].push_back(header.section_number);
+	            		messaging_skipped_sections_ID[header.table_id- 0x4e].push_back(_id);
             	}
             	unlockMessaging();
 
@@ -3825,7 +3796,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.121 2002/04/19 07:04:44 field Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.122 2002/04/24 10:56:46 field Exp $\n");
 	try
 	{
 
