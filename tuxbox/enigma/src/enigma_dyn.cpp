@@ -2137,7 +2137,7 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 		}
 	}
 
-	description = current->service_name + "/" + description;
+	description = filter_string(current->service_name) + "/" + description;
 
 	int timeroffset = 0;
 //	if ((eConfig::getInstance()->getKey("/enigma/timeroffset", timeroffset)) != 0)
