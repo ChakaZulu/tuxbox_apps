@@ -55,7 +55,7 @@
 
 using namespace std;
 
-#define WEBXFACEVERSION "1.5.4"
+#define WEBXFACEVERSION "1.5.5"
 
 int pdaScreen = 0;
 int screenWidth = 1024;
@@ -65,9 +65,9 @@ int currentBouquet = 0;
 int currentChannel = -1;
 
 int zapMode = ZAPMODETV;
-int zapSubMode = ZAPSUBMODEBOUQUETS;
 
-extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
+int zapSubMode = ZAPSUBMODEBOUQUETS;
+eString zapSubModes[5] = {"", "", "Satellites", "Providers", "Bouquets"};
 
 eString zap[5][5] =
 {
@@ -77,6 +77,8 @@ eString zap[5][5] =
 	{"Recordings", ";4097:7:0:1:0:0:0:0:0:0:", /* Satellites */ "", /* Providers */ "", /* Bouquets */ ""},
 	{"Root", ";2:47:0:0:0:0:/", /* Satellites */ "", /* Providers */ "", /* Bouquets */ ""}
 };
+
+extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
 
 eString removeBadChars(eString s)
 {
@@ -177,7 +179,7 @@ static eString getControlPlugins(void)
 	result << "<table width=100% border=1 cellspacing=0 cellpadding=0>";
 	eZapPlugins plugins(-1);
 	plugins.find();
-	
+
 	if (!plugins.list.getCount())
 		result << "<tr><td>No plugins found.</td></tr>";
 	else
@@ -430,7 +432,8 @@ static eString switchService(eString request, eString dirpath, eString opt, eHTT
 
 void tuneTransponder(eString transponder)
 {
-	int frequency, symbol_rate, polarisation, fec, orbital_position, inversion;
+	unsigned int frequency, symbol_rate;
+	int polarisation, fec, orbital_position, inversion;
 	sscanf(transponder.c_str(), "%d:%d:%d:%d:%d:%d:", &frequency, &symbol_rate, &polarisation, &fec, &orbital_position, &inversion);
 
 	// search for the right transponder...
@@ -458,59 +461,57 @@ static eString admin(eString request, eString dirpath, eString opts, eHTTPConnec
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString command = opt["command"];
 	eString result =  "Unknown admin command. (valid commands are: shutdown, reboot, restart, standby, wakeup)";
-	if (command)
+	if (command == "shutdown")
 	{
-		if (command == "shutdown")
+		if (eSystemInfo::getInstance()->canShutdown())
 		{
-			if (eSystemInfo::getInstance()->canShutdown())
-			{
-				eZap::getInstance()->quit();
-				result = "Shutdown initiated...";
-			}
-			else
-			{
-				result = "No shutdown function available for this box.";
-			}
+			eZap::getInstance()->quit();
+			result = "Shutdown initiated...";
 		}
 		else
-		if (command == "reboot")
 		{
-			eZap::getInstance()->quit(4);
-			result = "Reboot initiated...";
-		}
-		else
-		if (command == "restart")
-		{
-			eZap::getInstance()->quit(2);
-			result = "Restart initiated...";
-		}
-		else
-		if (command == "wakeup")
-		{
-			if (eZapStandby::getInstance())
-			{
-				eZapStandby::getInstance()->wakeUp(0);
-				result = "Enigma is waking up...";
-			}
-			else
-			{
-				result = "Enigma doesn't sleep.";
-			}
-		}
-		else
-		if (command == "standby")
-		{
-			if (eZapStandby::getInstance())
-			{
-				result = "Enigma is already sleeping.";
-			}
-			else
-			{
-				eZapMain::getInstance()->gotoStandby();
-				result = "Standby initiated...";
-			}
+			result = "No shutdown function available for this box.";
 		}
 	}
+	else
+	if (command == "reboot")
+	{
+		eZap::getInstance()->quit(4);
+		result = "Reboot initiated...";
+	}
+	else
+	if (command == "restart")
+	{
+		eZap::getInstance()->quit(2);
+		result = "Restart initiated...";
+	}
+	else
+	if (command == "wakeup")
+	{
+		if (eZapStandby::getInstance())
+		{
+			eZapStandby::getInstance()->wakeUp(0);
+			result = "Enigma is waking up...";
+		}
+		else
+		{
+			result = "Enigma doesn't sleep.";
+		}
+	}
+	else
+	if (command == "standby")
+	{
+		if (eZapStandby::getInstance())
+		{
+			result = "Enigma is already sleeping.";
+		}
+		else
+		{
+			eZapMain::getInstance()->gotoStandby();
+			result = "Standby initiated...";
+		}
+	}
+
 	return "<html>" + eString(CHARSETMETA) + "<head><title>" + command + "</title></head><body>" + result + "</body></html>";
 }
 
@@ -1707,7 +1708,7 @@ public:
 				tmp = tmp + " - " + event_start + " (" + event_duration + ") " + filter_string(short_description);
 			tmp.strReplace("\"", "'");
 
-			if (!(e.data[0] == -1 && e.data[2] != 0xFFFFFFFF))
+			if (!(e.data[0] == -1 && e.data[2] != (int)0xFFFFFFFF))
 				myList.push_back(myService(ref2string(e), tmp));
 			iface.removeRef(e);
 		}
@@ -2572,31 +2573,10 @@ static eString getContent(eString mode, eString path, eString opts)
 		tmp = "ZAP";
 		if (pdaScreen == 0)
 		{
-			if (zapMode == ZAPMODERECORDINGS)
-				tmp += ": Recordings";
-			else
-			if (zapMode == ZAPMODEROOT)
-				tmp += ": ROOT";
-			else
-			{
-				if (zapMode >= 0)
-					tmp += ": " + zap[zapMode][ZAPMODENAME];
-				if (zapSubMode >= 0)
-				{
-					switch(zapSubMode)
-					{
-						case ZAPSUBMODESATELLITES:
-							tmp += " - Satellites";
-							break;
-						case ZAPSUBMODEPROVIDERS:
-							tmp += " - Providers";
-							break;
-						case ZAPSUBMODEBOUQUETS:
-							tmp += " - Bouquets";
-							break;
-					}
-				}
-			}
+			if (zapMode >= 0)
+				tmp += ": " + zap[zapMode][ZAPMODENAME];
+			if (zapSubMode >= 2)
+				tmp += " - " + zapSubModes[zapSubMode];
 		}
 
 		result = getTitle(tmp);
@@ -2687,10 +2667,16 @@ static eString getContent(eString mode, eString path, eString opts)
 	{
 		result = getTitle("CONTROL: OSDShot");
 		if (!getOSDShot("fb"))
+		{
+			result += "<table bgcolor=\"" + eString(DARKGREY) + "\" cellpadding=\"0\" cellspacing=\"0\">";
+			result += "<tr><td>";
 			if (pdaScreen == 0)
 				result += "<img width=\"620\" src=\"/root/tmp/osdshot.png\" border=0>";
 			else
 				result += "<img width=\"240\" src=\"/root/tmp/osdshot.png\" border=0>";
+			result += "</td></tr>";
+			result += "</table>";
+		}
 	}
 	else
 #ifndef DISABLE_LCD
@@ -3607,10 +3593,10 @@ static eString zapTo(eString request, eString dirpath, eString opts, eHTTPConnec
 	eString mode = opt["mode"];
 	eString spath = opt["path"];
 	eString curBouquet = opt["curBouquet"];
-	eString curChannel = opt["curChannel"];
-	if (opts.find("curBouquet") != eString::npos)
+	if (curBouquet)
 		currentBouquet = atoi(curBouquet.c_str());
-	if (opts.find("curChannel") != eString::npos)
+	eString curChannel = opt["curChannel"];
+	if (curChannel)
 		currentChannel = atoi(curChannel.c_str());
 
 	eServiceReference current_service = string2ref(spath);
@@ -3877,7 +3863,7 @@ static eString remoteControl(eString request, eString dirpath, eString opts, eHT
 
 	while (keysS)
 	{
-		int pos;
+		unsigned int pos;
 		eString keyS;
 		if ((pos = keyS.find(",")) != eString::npos)
 		{
@@ -4128,7 +4114,7 @@ static eString cleanupTimerList(eString request, eString dirpath, eString opt, e
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eTimerManager::getInstance()->cleanupEvents();
-	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
+	eTimerManager::getInstance()->saveTimerList();
 	return closeWindow(content, "", 500);
 }
 
@@ -4136,7 +4122,7 @@ static eString clearTimerList(eString request, eString dirpath, eString opt, eHT
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eTimerManager::getInstance()->clearEvents();
-	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
+	eTimerManager::getInstance()->saveTimerList();
 	return closeWindow(content, "", 500);
 }
 
@@ -4789,10 +4775,10 @@ static eString header(eString request, eString dirpath, eString opt, eHTTPConnec
 	}
 	else
 	{
-		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Nokia)
+		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Nokia)
 			result.strReplace("#TOPBALK#", "topbalk2.png");
 		else
-		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Sagem)
+		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Sagem)
 			result.strReplace("#TOPBALK#", "topbalk3.png");
 		else
 //		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Philips)
