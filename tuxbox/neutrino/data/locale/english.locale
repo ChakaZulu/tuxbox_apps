@@ -473,11 +473,11 @@ movieplayer.goto.h1 = -> absolute jump
 movieplayer.goto.h2 +,- -> relative jump
 movieplayer.head Movieplayer
 movieplayer.nostreamingserver The streaming server could not be reached.
-movieplayer.pesplayback Play PES (Experimental)
 movieplayer.pleasewait Please wait.\nConnecting to the streaming server...
 movieplayer.toomanybookmarks There are too many bookmarks.\nYou need to delete one of them first.
 movieplayer.tshelp Red/Home Stop\nGREEN Select audio track\nYELLOW Pause/Continue\nBLUE Create bookmark\nd-box Show progress\n1 approx. 1 minute back\n3 skip approx. 1 minute\n4 approx. 5 minutes back\n6 skip approx. 5 minutes\n7 approx. 10 minutes back\n9 skip approx. 10 minutes\nHelp: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.tsplayback Play TS
+movieplayer.tsplayback_pc Play TS with PIN protect
 movieplayer.vcdplayback (S)VCD
 movieplayer.vlchelp Red/Home Stop\nGREEN Resync\nYELLOW Pause/Continue\nBLUE Create bookmark\nd-box Show progress\n1 approx. 1 minute back\n3 skip approx. 1 minute\n4 approx. 5 minutes back\n6 skip approx. 5 minutes\n7 approx. 10 minutes back\n9 skip approx. 10 minutes\nHelp: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.wrongvlcversion This feature is not support by your current version of VLC

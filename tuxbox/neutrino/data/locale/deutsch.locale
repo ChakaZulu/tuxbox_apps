@@ -511,11 +511,11 @@ movieplayer.goto.h1 = -> absoluter Sprung
 movieplayer.goto.h2 +,- -> relativer Sprung
 movieplayer.head Movieplayer
 movieplayer.nostreamingserver Es konnte keine Verbindung\nzum Streamingserver hergestellt werden.
-movieplayer.pesplayback PES Abspielen (Experimentell)
 movieplayer.pleasewait Bitte warten Sie.\nDie Verbindung zum Streamingserver wird hergestellt.
 movieplayer.toomanybookmarks Sie haben bereits zu viele Bookmarks angelegt.\nEs muß erst ein anderes gelöscht werden.
 movieplayer.tshelp ROT/Home Stop\nGRÜN Auswahl der Tonspur\nGELB Pause/Weiter\nBLAU Bookmark setzen\nd-box Zeit einblenden\n1 ca. 1 Minute zurück\n3 ca. 1 Minute vor\n4 ca. 5 Minuten zurück\n6 ca. 5 Minuten vor\n7 ca. 10 Minuten zurück\n9 ca. 10 Minuten vor\nHilfe: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.tsplayback TS Abspielen
+movieplayer.tsplayback_pc TS Abspielen mit PIN
 movieplayer.vcdplayback (S)VCD
 movieplayer.vlchelp ROT/Home Stop\nGRÜN Resync\nGELB Pause/Weiter\nBLAU Bookmark setzen\nd-box Zeit einblenden\nv Sprung\n1 ca. 1 Minute zurück\n3 ca. 1 Minute vor\n4 ca. 5 Minuten zurück\n6 ca. 5 Minuten vor\n7 ca. 10 Minuten zurück\n9 ca. 10 Minuten vor\nHilfe: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.wrongvlcversion Funktion ist mit der benutzten Version des VLC nicht möglich
