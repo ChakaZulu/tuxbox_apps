@@ -880,6 +880,7 @@ tsMultiSatScan::tsMultiSatScan(eWidget *parent)
 
 	satellites = new eListBox<eListBoxEntrySat>(this);
 	satellites->setName("satellites");
+	satellites->setFlags(eListBoxBase::flagLostFocusOnFirst|eListBoxBase::flagLostFocusOnLast);
 
 	eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "tsMultiSat"))
