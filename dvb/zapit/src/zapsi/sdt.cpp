@@ -47,7 +47,7 @@ int sdt(uint16_t oservice_id, bool scan_mode)
 	flt.pid = 0x0011;
 	flt.filter.filter[0] = 0x42;
 	flt.filter.mask[0] = 0xFF;
-	flt.timeout = 1000;
+	flt.timeout = 5000;
 	flt.flags = DMX_CHECK_CRC | DMX_IMMEDIATE_START;
 
 	if (ioctl(demux_fd, DMX_SET_FILTER, &flt) < 0)

@@ -1,12 +1,17 @@
 #ifndef __getservices__
 #define __getservices__
 
+#include <stdint.h>
+
 #include <map>
 #include <vector>
 #include <string>
 
-#include <config.h>
+#include <ost/frontend.h>
+
 #include "eventserver.h"
+
+#include "config.h"
 
 // EVENTS...
 extern CEventServer *eventServer;
@@ -45,24 +50,29 @@ struct channel {
 
 struct transponder
 {
-  uint tsid;
-  uint frequency;
-  uint symbolrate;
-  ushort polarity;
-  uint diseqc;
-  ushort fec;
-  uint onid;
+	uint16_t transport_stream_id;
+	FrontendParameters feparams;
+	uint8_t polarization;
+	uint8_t DiSEqC;
+	uint16_t original_network_id;
 
-  transponder(uint Tsid, uint Frequency, uint Symbolrate, uint Polarity, uint Diseqc, ushort Fec, uint Onid)
-  {
-    tsid = Tsid;
-    frequency = Frequency;
-    symbolrate = Symbolrate;
-    polarity = Polarity;
-    diseqc = Diseqc;
-    fec = Fec;
-    onid = Onid;
-  }
+	transponder(uint16_t p_transport_stream_id, FrontendParameters p_feparams)
+	{
+		transport_stream_id = p_transport_stream_id;
+		feparams = p_feparams;
+		polarization = 0;
+		DiSEqC = 0;
+		original_network_id = 0;
+	}
+
+	transponder(uint16_t p_transport_stream_id, FrontendParameters p_feparams, uint16_t p_polarization, uint8_t p_DiSEqC, uint16_t p_original_network_id)
+	{
+		transport_stream_id = p_transport_stream_id;
+		feparams = p_feparams;
+		polarization = p_polarization;
+		DiSEqC = p_DiSEqC;
+		original_network_id = p_original_network_id;
+	}
 };
 
 typedef struct bouquet_msg_struct {

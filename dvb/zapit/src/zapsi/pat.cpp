@@ -8,7 +8,9 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <string>
+
 #include <ost/dmx.h>
+#include <ost/frontend.h>
 
 #include "pat.h"
 #include "sdt.h"
@@ -23,7 +25,8 @@ map<uint,channel> nvodchannels;
 map<uint,channel>::iterator cI;
 extern int found_transponders;
 
-int fake_pat(std::map<int,transpondermap> *tmap, int frequency, int symbol_rate)
+/* cable only */
+int fake_pat(std::map<int,transpondermap> *tmap, FrontendParameters feparams)
 {
 	struct dmxSctFilterParams flt;
 	int demux_fd;
@@ -61,7 +64,7 @@ int fake_pat(std::map<int,transpondermap> *tmap, int frequency, int symbol_rate)
 
 	transport_stream_id = (buffer[3] << 8) | buffer[4];
 
-	(*tmap).insert(std::pair<int, transpondermap>(transport_stream_id, transpondermap(transport_stream_id, frequency, symbol_rate, 0)));
+	(*tmap).insert(std::pair<int, transpondermap>(transport_stream_id, transpondermap(transport_stream_id, feparams)));
 	found_transponders++;
 
 	return 23;

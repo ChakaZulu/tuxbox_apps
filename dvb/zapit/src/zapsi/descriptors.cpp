@@ -13,6 +13,46 @@ int found_transponders;
 int found_channels;
 char last_provider[100];
 
+CodeRate getFEC(uint8_t FEC_inner)
+{
+	switch (FEC_inner)
+	{
+	case 0x01:
+		return FEC_1_2;
+	case 0x02:
+		return FEC_2_3;
+	case 0x03:
+		return FEC_3_4;
+	case 0x04:
+		return FEC_5_6;
+	case 0x05:
+		return FEC_7_8;
+	case 0x0F:
+		return FEC_NONE;
+	default:
+		return FEC_AUTO;
+	}
+}
+
+Modulation getModulation (uint8_t modulation)
+{
+	switch (modulation)
+	{
+	case 0x01:
+		return QAM_16;
+	case 0x02:
+		return QAM_32;
+	case 0x03:
+		return QAM_64;
+	case 0x04:
+		return QAM_128;
+	case 0x05:
+		return QAM_256;
+	default:
+		return QAM_64;
+	}
+}
+
 uint8_t stuffing_desc(uint8_t *buffer)
 {
 	return buffer[1];
@@ -64,54 +104,51 @@ uint8_t service_list_desc(uint8_t *buffer)
 
 uint8_t cable_deliv_system_desc(uint8_t *buffer, uint16_t transport_stream_id)
 {
-	uint8_t descriptor_length = buffer[1];
-	uint32_t frequency = ((buffer[2] >> 4) * 10000) + ((buffer[2] & 0x0F) * 1000) + ((buffer[3] >> 4) * 100) + ((buffer[3] & 0x0F) * 10) + (buffer[4] >> 4);
-	uint8_t FEC_outer = buffer[7] & 0x0F;
-	uint8_t modulation = buffer[8];
-	uint32_t symbol_rate = ((buffer[9] >> 4) * 100000) + ((buffer[9] & 0x0F) * 10000) + ((buffer[10] >> 4) * 1000) + ((buffer[10] & 0x0F) * 100) + ((buffer[11] >> 4) * 10) + (buffer[11] & 0x0F);
-	uint8_t FEC_inner = buffer[12] & 0x0F;
+	FrontendParameters feparams;
 
-	printf("[descriptor.cpp] frequency: %d\n", frequency);
-	printf("[descriptor.cpp] modulation %d, symbol_rate %d, FEC_inner %d, FEC_outer %d\n", modulation, symbol_rate, FEC_inner, FEC_outer);
+	feparams.Frequency = (((buffer[2] >> 4) * 10000) + ((buffer[2] & 0x0F) * 1000) + ((buffer[3] >> 4) * 100) + ((buffer[3] & 0x0F) * 10) + (buffer[4] >> 4)) * 100;
+	feparams.Inversion = INVERSION_AUTO;
+	feparams.u.qam.SymbolRate = (((buffer[9] >> 4) * 100000) + ((buffer[9] & 0x0F) * 10000) + ((buffer[10] >> 4) * 1000) + ((buffer[10] & 0x0F) * 100) + ((buffer[11] >> 4) * 10) + (buffer[11] & 0x0F)) * 1000;
+	feparams.u.qam.FEC_inner = getFEC(buffer[12] & 0x0F);
+	feparams.u.qam.QAM = getModulation(buffer[8]);
 
-	if (FEC_inner == 15)
-		FEC_inner = 0;
+	printf("[descriptor.cpp] frequency: %d\n", feparams.Frequency);
+	printf("[descriptor.cpp] modulation %d, symbol_rate %d, FEC_inner %d\n", feparams.u.qam.QAM, feparams.u.qam.SymbolRate, feparams.u.qam.FEC_inner);
 
 	if (scantransponders.count(transport_stream_id) == 0)
 	{
 		printf("[descriptor.cpp] new transponder - transport_stream_id: %04x\n", transport_stream_id);
 		found_transponders++;
 		eventServer->sendEvent(CZapitClient::EVT_SCAN_NUM_TRANSPONDERS, CEventServer::INITID_ZAPIT, &found_transponders, sizeof(found_transponders));
-		scantransponders.insert(std::pair<int, transpondermap>(transport_stream_id, transpondermap(transport_stream_id, frequency, symbol_rate, FEC_inner)));
+		scantransponders.insert(std::pair<int, transpondermap>(transport_stream_id, transpondermap(transport_stream_id, feparams)));
 	}
 
-	return descriptor_length;
+	return buffer[1];
 }
 
-uint8_t sat_deliv_system_desc(uint8_t *buffer, uint16_t transport_stream_id, int diseqc)
+uint8_t sat_deliv_system_desc(uint8_t *buffer, uint16_t transport_stream_id, int DiSEqC)
 {
-	uint8_t descriptor_length = buffer[1];
-	uint32_t frequency = ((buffer[2] >> 4) * 100000) + ((buffer[2] & 0x0F) * 10000) + ((buffer[3] >> 4) * 1000) + ((buffer[3] & 0x0F) * 100) + ((buffer[4] >> 4) * 10) + (buffer[4]&0x0F);
-	uint16_t orbital_position = ((buffer[6] >> 4) * 1000) + ((buffer[6] & 0x0F) * 100) + ((buffer[7] >> 4) * 10) + (buffer[7] & 0x0F);
-	uint8_t west_east_flag = (buffer[8] >> 7) & 0x01;
-	uint8_t polarization = (buffer[8] >> 5) & 0x03;
-	uint8_t modulation = buffer[8] & 0x1F;
-	uint32_t symbol_rate = ((buffer[9] >> 4) * 100000) + ((buffer[9] & 0x0F) * 10000) + ((buffer[10] >> 4) * 1000) + ((buffer[10] & 0x0F) * 100) + ((buffer[11] >> 4) * 10) + (buffer[11] & 0x0F);
-	uint8_t FEC_inner = buffer[12] & 0x0F;
+	FrontendParameters feparams;
+	uint8_t polarization;
+	
+	feparams.Frequency = (((buffer[2] >> 4) * 100000) + ((buffer[2] & 0x0F) * 10000) + ((buffer[3] >> 4) * 1000) + ((buffer[3] & 0x0F) * 100) + ((buffer[4] >> 4) * 10) + (buffer[4]&0x0F)) * 1000;
+	feparams.Inversion = INVERSION_AUTO;
+	feparams.u.qpsk.SymbolRate = (((buffer[9] >> 4) * 100000) + ((buffer[9] & 0x0F) * 10000) + ((buffer[10] >> 4) * 1000) + ((buffer[10] & 0x0F) * 100) + ((buffer[11] >> 4) * 10) + (buffer[11] & 0x0F)) * 1000;
+	feparams.u.qpsk.FEC_inner = getFEC(buffer[12] & 0x0F);
+	polarization = (buffer[8] >> 5) & 0x03;
 
-	printf("[descriptor.cpp] orbital_position: %.1f %s\n", orbital_position * 0.1, west_east_flag ? "East" : "West");
-	printf("[descriptor.cpp] frequency: %d %s\n", frequency, polarization ? "V" : "H");
-	printf("[descriptor.cpp] modulation %d, symbol_rate %d, FEC_inner %d\n", modulation, symbol_rate, FEC_inner);
+	printf("[descriptor.cpp] frequency: %d, polarization: %s\n", feparams.Frequency, polarization ? "V" : "H");
+	printf("[descriptor.cpp] symbol_rate %d, FEC_inner %d\n", feparams.u.qpsk.SymbolRate, feparams.u.qpsk.FEC_inner);
 
 	if (scantransponders.count(transport_stream_id) == 0)
 	{
 		printf("[descriptor.cpp] new transponder - transport_stream_id: %04x\n", transport_stream_id);
 		found_transponders++;
 		eventServer->sendEvent(CZapitClient::EVT_SCAN_NUM_TRANSPONDERS, CEventServer::INITID_ZAPIT, &found_transponders, sizeof(found_transponders) );
-		scantransponders.insert(std::pair<int, transpondermap>(transport_stream_id, transpondermap(transport_stream_id, frequency, symbol_rate, FEC_inner, polarization, diseqc)));
+		scantransponders.insert(std::pair<int, transpondermap>(transport_stream_id, transpondermap(transport_stream_id, feparams, polarization, DiSEqC)));
 	}
 
-	return descriptor_length;
+	return buffer[1];
 }
 
 uint8_t terr_deliv_system_desc(uint8_t *buffer)

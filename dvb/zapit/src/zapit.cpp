@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.112 2002/03/31 12:16:11 Ghostrider Exp $
+  $Id: zapit.cpp,v 1.113 2002/04/02 15:18:57 obi Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -117,8 +117,12 @@ struct {
 } lastChannel;
 
 int connfd;
-int lofHigh = 10600;
-int lofLow = 9750;
+
+/* lnb offsets */
+uint32_t lnb_offset_low = 9750000;
+uint32_t lnb_offset_high = 10600000;
+
+/* ca stuff */
 uint16_t caid = 0;
 int caver = 0;
 
@@ -2834,7 +2838,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.112 2002/03/31 12:16:11 Ghostrider Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.113 2002/04/02 15:18:57 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -2844,13 +2848,13 @@ int main (int argc, char **argv)
 			{
 				debug = 1;
 			}
-			else if (!strcmp(argv[i], "-lofLow"))
+			else if (!strcmp(argv[i], "-lo"))
 			{
-				lofLow = atoi(argv[++i]);
+				lnb_offset_low = atoi(argv[++i]) * 1000;
 			}
-			else if (!strcmp(argv[i], "-lofHigh"))
+			else if (!strcmp(argv[i], "-ho"))
 			{
-				lofHigh = atoi(argv[++i]);
+				lnb_offset_high = atoi(argv[++i]) * 1000;
 			}
 			else if (!strcmp(argv[i], "-q"))
 			{
@@ -2872,7 +2876,7 @@ int main (int argc, char **argv)
 			}
 			else
 			{
-				printf("Usage: zapit [-d] [-lofLow LOF in kHz] [-lofHigh LOF in kHz] [-q] [-v]\n");
+				printf("Usage: zapit [-d] [-ho <high offset in kHz>] [-lo <low offset in kHz>] [-q] [-v]\n");
 				exit(0);
 			}
 		}

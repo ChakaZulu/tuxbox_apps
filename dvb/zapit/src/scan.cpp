@@ -59,9 +59,15 @@ int issatbox()
 	return fe;
 }
 
-void get_nits(int frequency, int symbol_rate, int polarity, int FEC_inner, int DiSEqC)
+void get_nits(uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, uint8_t polarity, uint8_t DiSEqC)
 {
-	if (finaltune(frequency, symbol_rate, polarity, FEC_inner, DiSEqC) == 0)
+	FrontendParameters feparams;
+	feparams.Frequency = frequency;
+	feparams.Inversion = INVERSION_AUTO;
+	feparams.u.qpsk.SymbolRate = symbol_rate;
+	feparams.u.qpsk.FEC_inner = FEC_inner;
+
+	if (finaltune(feparams, polarity, DiSEqC) == 0)
 		nit(DiSEqC);
 	else
 		printf("No signal found on transponder\n");
@@ -70,28 +76,47 @@ void get_nits(int frequency, int symbol_rate, int polarity, int FEC_inner, int D
 void get_sdts()
 {
 	int sdt_tries;
-	
+
 	for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
 	{
 		sdt_tries = 0;
 
-		if (finaltune(tI->second.freq, tI->second.symbolrate, tI->second.polarization, tI->second.fec_inner, tI->second.diseqc) == 0)
+		if (finaltune(tI->second.feparams, tI->second.polarization, tI->second.DiSEqC) == 0)
 		{
-			//if (pat(tI->second.freq,tI->second.symbolrate) >0)
-			//{
-				printf("GETTING SDT FOR TSID: %04x\n", tI->second.tsid);
-				while (sdt(tI->second.tsid, true) == -2 && sdt_tries != 5)
+			printf("[scan.cpp] GETTING SDT FOR TSID: %04x\n", tI->second.transport_stream_id);
+			
+			while ((sdt(tI->second.transport_stream_id, true) == -2) && (sdt_tries != 5))
 				sdt_tries++;
-			//}
 		}
 		else
-			printf("No signal found on transponder\n");
+		{
+			printf("[scan.cpp] No signal found on transponder\n");
+		}
 	}
 }
 
-void write_fake_bouquets(FILE *fd)
+FILE *write_xml_header (const char *filename)
 {
-	fprintf(fd, "<Bouquet name=\"dummy\">\n\t<channel id=\"0000\"/>\n</Bouquet>\n");
+	FILE *fd = fopen(filename, "w");
+
+	if (fd == NULL)
+	{
+		perror("[scan.cpp] fopen");
+		scan_runs = 0;
+		pthread_exit(0);
+	}
+	else
+	{
+		fprintf(fd, "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n<zapit>\n");
+	}
+
+	return fd;
+}
+
+int write_xml_footer(FILE *fd)
+{
+	fprintf(fd, "</zapit>\n");
+	return fclose(fd);
 }
 
 void write_bouquets(unsigned short mode)
@@ -100,47 +125,30 @@ void write_bouquets(unsigned short mode)
 	std::string oldname = "";
 
 	/*
-	mode&1024 == löschn bouqets und erstelle sich nicht neu.
-	mode&512 == erstelle bouquets immer neu
-	mode&256 = keine änderung an bouqets.
+	mode&1024 - loesche bouquets und erstelle sich nicht neu
+	mode&512 - erstelle bouquets immer neu
+	mode&256 - keine aenderung an bouqets
 	*/
 
-	if (mode&1024)
+	if (mode & 1024)
 	{
-		printf("[zapit] removin existing bouqets.xml\n");
+		printf("[zapit] removing existing bouqets.xml\n");
 		system("/bin/rm " CONFIGDIR "/zapit/bouquets.xml");
 		scanbouquets.clear();
 		return;
 	}
 
-	bouq_fd = fopen(CONFIGDIR "/zapit/bouquets.xml", "r");
-
-
-	if (mode&256 || scanbouquets.empty())
+	if ((mode & 256) || (scanbouquets.empty()))
 	{
 		printf("[zapit] leavin bouquets.xml untouched\n");
 		scanbouquets.clear();
-		if (bouq_fd != NULL)
-			fclose(bouq_fd);
 		return;
 	}
 	else
 	{
 		printf("[zapit] creating new bouquets.xml\n");
-		if (bouq_fd != NULL)
-			fclose(bouq_fd);
-		bouq_fd = fopen(CONFIGDIR "/zapit/bouquets.xml", "w");
 
-		if (bouq_fd == NULL)
-			{
-				perror("fopen " CONFIGDIR "/zapit/bouquets.xml");
-				scanbouquets.clear();
-				return;
-			}
-
-
-		fprintf(bouq_fd, "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n<ZAPIT>\n");
-
+		bouq_fd = write_xml_header(CONFIGDIR "/zapit/bouquets.xml");
 		for (sbiterator bI = scanbouquets.begin(); bI != scanbouquets.end(); bI++)
       		{
       			if (bI->second.provname != oldname)
@@ -148,102 +156,120 @@ void write_bouquets(unsigned short mode)
       				if (oldname != "")
       				{
       					fprintf(bouq_fd, "</Bouquet>\n");
-      					//printf("</Bouquet>\n");
       				}
 
       				fprintf(bouq_fd, "<Bouquet name=\"%s\">\n", bI->second.provname.c_str());
-      				//printf("<Bouquet name=\"%s\">\n", bI->second.provname.c_str());
 
       			}
       			fprintf(bouq_fd, "\t<channel serviceID=\"%04x\" name=\"%s\" onid=\"%04x\"/>\n", bI->second.sid, bI->second.servname.c_str(), bI->second.onid);
-      			//printf("\t<channel serviceID=\"%04x\" name=\"%s\" onid=\"%04x\"/>\n", bI->second.sid, bI->second.servname.c_str(), bI->second.onid);
 
       			oldname = bI->second.provname;
       		}
 
-      		fprintf(bouq_fd, "</Bouquet>\n</ZAPIT>\n");
-      		//printf("</Bouquet>\n</ZAPIT>\n");
+      		fprintf(bouq_fd, "</Bouquet>\n");
+		write_xml_footer(bouq_fd);
       	}
       	scanbouquets.clear();
-      	fclose(bouq_fd);
+	return;
 }
 
-
-
-void write_transponder(int tsid, FILE *fd)
+void write_transponder(FILE *fd, uint16_t transport_stream_id)
 {
-  std::string transponder;
-  stiterator tI = scantransponders.find(tsid);
-  char freq[6];
-  char sr[6];
-  char fec[2];
-  char pol[2];
+	std::string transponder;
+	stiterator tI = scantransponders.find(transport_stream_id);
 
+	char frequency[9];
+	char symbol_rate[9];
+	char FEC_inner[2];
+	char polarization[2];
+	char modulation[2];
 
-  sprintf(freq, "%05d", tI->second.freq);
-  sprintf(sr, "%05d", tI->second.symbolrate);
-  sprintf(fec, "%01d", tI->second.fec_inner);
-  sprintf(pol, "%01d", tI->second.polarization);
+	char service_id[5];
+	char original_network_id[5];
+	char service_type[5];
 
-  if (issatbox())
-    transponder = "<sat ";
-  else
-    transponder = "<cable ";
+	sprintf(frequency, "%8d", tI->second.feparams.Frequency);
 
-
-  transponder += "frequency=\"";
-  transponder += freq;
-  transponder += "\" symbolRate=\"";
-  transponder += sr;
-  transponder += "\" fec=\"";
-  transponder += fec;
-  transponder += "\" polarity=\"";
-  transponder += pol;
-  transponder += "\"/>\n";
-
-
-  for (sciterator cI = scanchannels.begin(); cI != scanchannels.end(); cI++)
-    {
-      if (cI->second.tsid == tsid)
+	if (issatbox())
 	{
+		sprintf(symbol_rate, "%8d", tI->second.feparams.u.qpsk.SymbolRate);
+		sprintf(FEC_inner, "%1d", tI->second.feparams.u.qpsk.FEC_inner);
+		sprintf(polarization, "%1d", tI->second.polarization);
 
-	  char sid[5];
-//	  char tsid[5];
-	  char pmt[5];
-	  char onid[5];
-	  char service_type[5];
-
-	  sprintf(sid, "%04x", cI->second.sid);
-//	  sprintf(tsid, "%04x", cI->second.tsid);
-	  sprintf(pmt, "%04x", cI->second.pmt);
-	  sprintf(onid, "%04x", cI->second.onid);
-	  sprintf(service_type, "%04x", cI->second.service_type);
-
-	  if (cI->second.name.length() > 0)
-	    {
-	      transponder += "\t\t<channel ServiceID=\"";
-	      transponder += sid;
-	      transponder += "\" name=\"";
-	      transponder += cI->second.name;
-	      transponder += "\" pmt=\"";
-	      transponder += pmt;
-	      transponder += "\" onid=\"";
-	      transponder += onid;
-//	      transponder += "\" tsid=\"";
-//	      transponder += tsid;
-	      transponder += "\" serviceType=\"";
-	      transponder += service_type;
-//	      transponder += "\" channelNR=\"0\" ecmpid=\"0\">\n";
-//	      transponder += "\" channelNR=\"0\">\n";
-	      transponder += "\" channelNR=\"0\" />\n";
-//	      transponder += "\t\t</channel>\n";
-
-
-	      //printf("%30s tsid: %04x sid: %04x pmt: %04x onid: %04x\n", cI->second.name.c_str(),cI->second.tsid, cI->second.sid, cI->second.pmt, cI->second.onid);
-	    }
+		transponder = "\t\t<sat ";
+		transponder += "frequency=\"";
+		transponder += frequency;
+		transponder += "\" symbolRate=\"";
+		transponder += symbol_rate;
+		transponder += "\" fec=\"";
+		transponder += FEC_inner;
+		transponder += "\" polarity=\"";
+		transponder += polarization;
 	}
-    }
-  fprintf(fd,"%s\n",transponder.c_str());
+	else
+	{
+		sprintf(symbol_rate, "%05d", tI->second.feparams.u.qam.SymbolRate);
+		sprintf(FEC_inner, "%01d", tI->second.feparams.u.qam.FEC_inner);
+		sprintf(modulation, "%01d", tI->second.feparams.u.qam.QAM);
+
+		transponder = "\t\t<cable ";
+		transponder += "frequency=\"";
+		transponder += frequency;
+		transponder += "\" symbolRate=\"";
+		transponder += symbol_rate;
+		transponder += "\" fec=\"";
+		transponder += FEC_inner;
+		transponder += "\" modulation=\"";
+		transponder += modulation;
+	}
+
+	transponder += "\"/>\n";
+
+	for (sciterator cI = scanchannels.begin(); cI != scanchannels.end(); cI++)
+	{
+		if (cI->second.tsid == transport_stream_id)
+		{
+			sprintf(service_id, "%04x", cI->second.sid);
+			sprintf(original_network_id, "%04x", cI->second.onid);
+			sprintf(service_type, "%04x", cI->second.service_type);
+
+			if (cI->second.name.length() > 0)
+			{
+				transponder += "\t\t<channel ServiceID=\"";
+				transponder += service_id;
+				transponder += "\" name=\"";
+				transponder += cI->second.name;
+				transponder += "\" onid=\"";
+				transponder += original_network_id;
+				transponder += "\" serviceType=\"";
+				transponder += service_type;
+				transponder += "\" channelNR=\"0\"/>\n";
+			}
+		}
+	}
+
+	fprintf(fd, "<transponder transportID=\"%d\" networkID=\"0\">\n", transport_stream_id);
+	fprintf(fd, "%s", transponder.c_str());
+	fprintf(fd, "</transponder>\n");
+	return;
+}
+
+void write_sat(FILE *fd, const char *satname, const uint8_t diseqc_pos)
+{
+	if (!scantransponders.empty())
+	{
+		if (fd == NULL)
+			fd = write_xml_header(services_xml.c_str());
+
+		fprintf(fd, "<satellite name=\"%s\" diseqc=\"%hhd\">\n", satname, diseqc_pos);
+		for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
+		{
+			write_transponder(fd, tI->second.transport_stream_id);
+		}
+		fprintf(fd, "</satellite>\n");
+	}
+	scanchannels.clear();
+	scantransponders.clear();
 }
 
 void *start_scanthread(void *param)
@@ -253,17 +279,16 @@ void *start_scanthread(void *param)
 	int is_satbox = issatbox();
 	char satName[50];
 	unsigned short do_diseqc = *(unsigned short *) (param);
+	FrontendParameters feparams;
+	uint8_t diseqc_pos; // TODO: get as parameter for each sat
+
+	scan_runs = 1;
 
 	if (is_satbox == -1)
 	{
-		printf("Is your dbox properly set up?\n");
-		scan_runs = 1; //start_scan is waiting till scan_runs = 1
-		usleep(500);
 		scan_runs = 0;
 		pthread_exit(0);
 	}
-	
-	scan_runs = 1;
 
 	if (!is_satbox)
 	{
@@ -271,23 +296,31 @@ void *start_scanthread(void *param)
 		eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName) + 1);
 
 		curr_sat = 0;
-		const int symbolrate = 6900;
-		const int symbolrate2 = 6875;
+		feparams.Inversion = INVERSION_AUTO;
+		feparams.u.qam.SymbolRate = 6900000;
+		feparams.u.qam.FEC_inner = FEC_AUTO;
+		feparams.u.qam.QAM = QAM_64;
 
-		for (int freq = 3060; freq <= 4600; freq += 80)
+		for (feparams.Frequency = 306000; feparams.Frequency <= 460000; feparams.Frequency += 8000)
 		{
-			if (finaltune(freq, symbolrate, 0, 0, 0) == 0)
+			if (finaltune(feparams, 0, 0) == 0)
 			{
-				fake_pat(&scantransponders, freq, symbolrate);
+				fake_pat(&scantransponders, feparams);
 			}
 			else
 			{
-				printf("[scan.cpp] No signal found on transponder. Trying SR 6875\n");
+				printf("[scan.cpp] No signal found on transponder. Trying SymbolRate 6875000\n");
+				feparams.u.qam.SymbolRate = 6875000;
 
-				if (finaltune(freq, symbolrate2, 0, 0, 0) == 0)
-					fake_pat(&scantransponders, freq, symbolrate2);
+				if (finaltune(feparams, 0, 0) == 0)
+				{
+					fake_pat(&scantransponders, feparams);
+				}
 				else
+				{
 					printf("[scan.cpp] No signal found on transponder\n");
+					feparams.u.qam.SymbolRate = 6900000;
+				}
 			}
 		}
 
@@ -295,22 +328,12 @@ void *start_scanthread(void *param)
 
 		if (!scantransponders.empty())
 		{
-			fd = fopen(services_xml.c_str(), "w" );
+			fd = write_xml_header(services_xml.c_str());
 
-			if (fd == NULL)
-			{
-				perror("[zapit.cpp] open services.xml");
-				scan_runs = 0;
-				pthread_exit(0);
-			}
-
-			fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
-			fprintf(fd,"<ZAPIT>\n<cable>\n");
+			fprintf(fd,"<cable>\n");
 			for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
 			{
-				fprintf(fd, "<transponder transportID=\"%05d\" networkID=\"0\">\n", tI->second.tsid);
-				write_transponder(tI->second.tsid, fd);
-				fprintf(fd, "</transponder>\n");
+				write_transponder(fd, tI->second.transport_stream_id);
 			}
 			fprintf(fd,"</cable>\n");
 		}
@@ -322,390 +345,264 @@ void *start_scanthread(void *param)
 	{
 		if (do_diseqc & 1)
 		{
+			diseqc_pos = 0;
 			curr_sat = 1;
-			strcpy(satName, "ASTRA");
-			eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName)+ 1 );
+			strcpy(satName, "Astra 19.2E");
+			eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName) + 1);
 
-			printf("[scan.cpp] SCANNING ASTRA\n");
-			get_nits(11797, 27500, 0, 0, 0);
-			get_nits(12551, 22000, 1, 5, 0);
-			get_nits(12168, 27500, 1, 3, 0);
-			get_nits(12692, 22000, 0, 5, 0);
-			get_nits(11913, 27500, 0, 3, 0);
-			get_nits(11954, 27500, 0, 3, 0);
-			get_nits(12051, 27500, 1, 3, 0);
+			printf("[scan.cpp] scanning %s\n", satName);
+			//get_nits(10788000, 22000000, FEC_5_6, 1, diseqc_pos);	// 54
+			get_nits(10832000, 22000000, FEC_5_6, 0, diseqc_pos);	// 57 **
+			//get_nits(10862000, 22000000, FEC_5_6, 0, diseqc_pos);	// 59
+			get_nits(10876000, 22000000, FEC_5_6, 1, diseqc_pos);	// 60 **
+#if 0
+			get_nits(11719500, 27500000, FEC_3_4, 0, diseqc_pos);	// 65
+			get_nits(11739500, 27500000, FEC_3_4, 1, diseqc_pos);	// 66
+			get_nits(11758500, 27500000, FEC_3_4, 0, diseqc_pos);	// 67
+			get_nits(11778000, 27500000, FEC_3_4, 1, diseqc_pos);	// 68
+			get_nits(11798000, 27500000, FEC_3_4, 0, diseqc_pos);	// 69 *
+			get_nits(11817000, 27500000, FEC_3_4, 1, diseqc_pos);	// 70
+			get_nits(11836500, 27500000, FEC_3_4, 0, diseqc_pos);	// 71
+			get_nits(11856000, 27500000, FEC_3_4, 1, diseqc_pos);	// 72
+			get_nits(11876000, 27500000, FEC_3_4, 0, diseqc_pos);	// 73
+			get_nits(11895000, 27500000, FEC_3_4, 1, diseqc_pos);	// 74
+			get_nits(11914000, 27500000, FEC_3_4, 0, diseqc_pos);	// 75 *
+			get_nits(11934000, 27500000, FEC_3_4, 1, diseqc_pos);	// 76
+			get_nits(11953500, 27500000, FEC_3_4, 0, diseqc_pos);	// 77 *
+			get_nits(11973000, 27500000, FEC_3_4, 1, diseqc_pos);	// 78
+			get_nits(11992500, 27500000, FEC_3_4, 0, diseqc_pos);	// 79
+			get_nits(12012000, 27500000, FEC_3_4, 1, diseqc_pos);	// 80
+			get_nits(12031500, 27500000, FEC_3_4, 0, diseqc_pos);	// 81
+			get_nits(12051000, 27500000, FEC_3_4, 1, diseqc_pos);	// 82 *
+			get_nits(12070500, 27500000, FEC_3_4, 0, diseqc_pos);	// 83
+			get_nits(12090000, 27500000, FEC_3_4, 1, diseqc_pos);	// 84
+			get_nits(12109500, 27500000, FEC_3_4, 0, diseqc_pos);	// 85
+			get_nits(12129000, 27500000, FEC_3_4, 1, diseqc_pos);	// 86
+			get_nits(12148000, 27500000, FEC_3_4, 0, diseqc_pos);	// 87
+			get_nits(12168000, 27500000, FEC_3_4, 1, diseqc_pos);	// 88 *
+#endif
+			get_nits(12187500, 27500000, FEC_3_4, 0, diseqc_pos);	// 89 *
+#if 0
+			get_nits(12207000, 27500000, FEC_3_4, 1, diseqc_pos);	// 90
+			get_nits(12226000, 27500000, FEC_3_4, 0, diseqc_pos);	// 91
+			get_nits(12246000, 27500000, FEC_3_4, 1, diseqc_pos);	// 92
+			get_nits(12265500, 27500000, FEC_3_4, 0, diseqc_pos);	// 93
+			get_nits(12285000, 27500000, FEC_3_4, 1, diseqc_pos);	// 94
+			get_nits(12304500, 27500000, FEC_3_4, 0, diseqc_pos);	// 95
+			get_nits(12324000, 27500000, FEC_3_4, 1, diseqc_pos);	// 96
+			get_nits(12343500, 27500000, FEC_3_4, 0, diseqc_pos);	// 97
+			get_nits(12363000, 27500000, FEC_3_4, 1, diseqc_pos);	// 98
+			get_nits(12382500, 27500000, FEC_3_4, 0, diseqc_pos);	// 99
+			get_nits(12402000, 27500000, FEC_3_4, 1, diseqc_pos);	// 100
+#endif
+			get_nits(12422000, 27500000, FEC_3_4, 0, diseqc_pos);	// 101 empty?
+#if 0
+			get_nits(12441000, 27500000, FEC_3_4, 1, diseqc_pos);	// 102
+			get_nits(12460000, 27500000, FEC_3_4, 0, diseqc_pos);	// 103
+			get_nits(12480000, 27500000, FEC_3_4, 1, diseqc_pos);	// 104
+			get_nits(12515300, 22000000, FEC_5_6, 0, diseqc_pos);	// 105
+			get_nits(12522000, 22000000, FEC_5_6, 1, diseqc_pos);	// 106
+			get_nits(12545000, 22000000, FEC_5_6, 0, diseqc_pos);	// 107
+#endif
+			get_nits(12551000, 22000000, FEC_5_6, 1, diseqc_pos);	// 108 *
+#if 0
+			get_nits(12574200, 22000000, FEC_5_6, 0, diseqc_pos);	// 109
+			get_nits(12581000, 22000000, FEC_5_6, 1, diseqc_pos);	// 110
+			get_nits(12604000, 22000000, FEC_5_6, 0, diseqc_pos);	// 111
+			get_nits(12610500, 22000000, FEC_5_6, 1, diseqc_pos);	// 112
+			get_nits(12633000, 22000000, FEC_5_6, 0, diseqc_pos);	// 113
+			get_nits(12640000, 22000000, FEC_5_6, 1, diseqc_pos);	// 114
+			get_nits(12663000, 22000000, FEC_5_6, 0, diseqc_pos);	// 115 empty?
+			get_nits(12669500, 22000000, FEC_5_6, 1, diseqc_pos);	// 116
+			get_nits(12692000, 22000000, FEC_5_6, 0, diseqc_pos);	// 117 *
+			get_nits(12699000, 22000000, FEC_5_6, 1, diseqc_pos);	// 118
+			get_nits(12722000, 22000000, FEC_5_6, 0, diseqc_pos);	// 119
+			get_nits(12728000, 22000000, FEC_5_6, 1, diseqc_pos);	// 120 empty?
+#endif
 			get_sdts();
-
-			if (!scantransponders.empty())
-			{
-				if (fd == NULL)
-				{
-					fd = fopen(services_xml.c_str(), "w" );
-
-					if (fd == NULL)
-					{
-						perror("[scan.cpp] open services.xml");
-						scan_runs = 0;
-						pthread_exit(0);
-					}
-
-					fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
-					fprintf(fd,"<ZAPIT>\n");
-				}
-
-				fprintf(fd, "<satellite name=\"Astra 19.2E\" diseqc=\"0\">\n");
-				for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
-				{
-					fprintf(fd, "<transponder transportID=\"%d\" networkID=\"0\">\n", tI->second.tsid);
-					write_transponder(tI->second.tsid,fd);
-					fprintf(fd, "</transponder>\n");
-				}
-				fprintf(fd, "</satellite>\n");
-			}
-
-			scanchannels.clear();
-			scantransponders.clear();
+			write_sat(fd, satName, diseqc_pos);
 		}
 
 		if (do_diseqc & 2)
 		{
+			diseqc_pos = 1;
 			curr_sat = 2;
-			strcpy(satName, "HOTBIRD");
+			strcpy(satName, "Hotbird 13.0E");
+			eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName) + 1);
 
-			eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName)+ 1 );
+			printf("[scan.cpp] scanning %s\n", satName);
+			get_nits(10723000, 29900000, FEC_3_4, 0, diseqc_pos); // 111
+			get_nits(10775000, 28000000, FEC_3_4, 0, diseqc_pos); // 113
+			get_nits(11060000,  6510000, FEC_5_6, 1, diseqc_pos); // 128L
+			get_nits(11131000,  5632000, FEC_3_4, 1, diseqc_pos); // 130U
+			get_nits(11178000, 22000000, FEC_3_4, 0, diseqc_pos); // 131U
+			get_nits(11196000,  9100000, FEC_1_2, 1, diseqc_pos); // 132U
+			get_nits(11205000,  4000000, FEC_3_4, 0, diseqc_pos); // 1L
+			get_nits(11283000, 27500000, FEC_3_4, 1, diseqc_pos); // 4
+			get_nits(11304000, 30000000, FEC_3_4, 0, diseqc_pos); // 5
+			get_nits(11338000,  5632000, FEC_3_4, 1, diseqc_pos); // 6U
+			get_nits(11413000,  6200000, FEC_7_8, 0, diseqc_pos); // 11L
+			get_nits(11464000,  4400000, FEC_7_8, 0, diseqc_pos); // 12U
+			get_nits(11747000, 27500000, FEC_3_4, 0, diseqc_pos); // 51
+			get_nits(11804000, 27500000, FEC_2_3, 1, diseqc_pos); // 54
+			get_nits(11919000, 27500000, FEC_2_3, 1, diseqc_pos); // 60
+			get_nits(12034000, 27500000, FEC_3_4, 1, diseqc_pos); // 66
+			get_nits(12111000, 27500000, FEC_3_4, 1, diseqc_pos); // 70
+			get_nits(12169000, 27500000, FEC_3_4, 0, diseqc_pos); // 72
+			get_nits(12539000, 27500000, FEC_3_4, 0, diseqc_pos); // 91
+			get_nits(12692000, 27500000, FEC_3_4, 0, diseqc_pos); // 99
+			get_sdts();
+			write_sat(fd, satName, diseqc_pos);
+		}
 
-			printf("[scan.cpp] SCANNING HOTBIRD\n");
-			get_nits(12692, 27500, 0, 3, 1);
-			get_nits(12539, 27500, 0, 3, 1);
-			get_nits(11746, 27500, 0, 3, 1);
-			get_nits(12168, 27500, 0, 3, 1);
-			get_nits(12034, 27500, 1, 3, 1);
-			get_nits(11919, 27500, 1, 2, 1);
-			get_nits(11804, 27500, 1, 2, 1);
-			get_nits(12169, 27500, 0, 3, 1);
-			get_nits(12539, 27500, 0, 3, 1);
-			get_nits(12111, 27500, 1, 3, 1);
-			get_nits(12168, 27500, 0, 3, 1);
-			get_nits(11283, 27500, 1, 3, 1);
-			get_nits(12283, 27500, 1, 3, 1);
-			get_nits(11331,  6111, 1, 3, 1);
-			get_nits(11412,  6198, 0, 7, 1);
-			get_nits(10723, 29895, 0, 3, 1);
-			get_nits(10775, 28000, 0, 3, 1);
-			get_nits(10975,  4340, 0, 3, 1);
-			get_nits(11060,  6510, 1, 5, 1);
-			get_nits(11131,  5632, 1, 3, 1);
-			get_nits(11178, 21100, 0, 3, 1);
-			get_nits(11196,  9100, 1, 1, 1);
-			get_nits(11205,  4000, 0, 3, 1);
-			get_nits(11304, 30000, 0, 3, 1);
-			get_nits(11338,  5632, 1, 3, 1);
-			get_nits(11457,  6111, 0, 3, 1);
-			get_nits(11464,  4398, 0, 7, 1);
+		if (do_diseqc & 4)
+		{
+			diseqc_pos = 2;
+			curr_sat = 4;
+			strcpy(satName, "Kopernikus 23.5E");
+			eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName) + 1);
+
+			printf("[scan.cpp] scanning %s\n", satName);
+			get_nits(11466000, 27500000, FEC_3_4, 0, diseqc_pos); // A
+			get_nits(11646000, 27500000, FEC_3_4, 0, diseqc_pos); // C
+			get_nits(11681000, 27500000, FEC_3_4, 0, diseqc_pos); // C
+			get_nits(12541000,  2168000, FEC_7_8, 1, diseqc_pos); // 1
+			get_nits(12658000, 27500000, FEC_3_4, 1, diseqc_pos); // 5
+			get_sdts();
+			write_sat(fd, satName, diseqc_pos);
+		}
+
+		if (do_diseqc & 8)
+		{
+			diseqc_pos = 3;
+			curr_sat = 8;
+			strcpy(satName, "Tuerksat 42.0E");
+			eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName) + 1);
+
+			printf("[scan.cpp] scanning %s\n", satName);
+			get_nits(10986000,  2342000, FEC_3_4, 0, diseqc_pos); // 12
+			get_nits(11110000,  4557000, FEC_5_6, 1, diseqc_pos); // 7
+			get_nits(11135000,  4444000, FEC_5_6, 1, diseqc_pos); // 8
+			get_nits(11154000,  4557000, FEC_3_4, 1, diseqc_pos); // 8
+			get_nits(11457000,  5632000, FEC_3_4, 1, diseqc_pos); // 1
+			get_sdts();
+			write_sat(fd, satName, diseqc_pos);
+		}
+
+		if (do_diseqc & 16)
+		{
+			diseqc_pos = 2;
+			curr_sat = 16;
+			strcpy(satName, "Sirius 5.0E");
+			eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName) + 1);
+
+			printf("[scan.cpp] scanning %s\n", satName);
 #if 0
-			get_nits(12211,  5632, 0, 3, 1);
-			get_nits(12220,  6161, 0, 3, 1);
-			get_nits(12236, 13400, 1, 3, 1);
-			get_nits(12198, 12130, 0, 7, 1);
-			get_nits(12484,  8300, 1, 3, 1);
-			get_nits(12573,  5632, 0, 3, 1);
-			get_nits(12581,  5632, 0, 3, 1);
-			get_nits(12590,  5632, 0, 3, 1);
+			get_nits(12050, 27500, 1, 3, 2);
+			get_nits(11975, 27500, 1, 3, 2);
+			get_nits(12028, 27500, 0, 3, 2);
+			get_nits(11994, 27500, 0, 3, 2);
+			get_nits(11880, 27500, 0, 3, 2);
+			get_nits(11804, 27500, 0, 3, 2);
+			get_nits(11823, 27500, 1, 3, 2);
+			get_nits(12380, 27500, 0, 3, 2);
+			get_nits(11547, 27500, 0, 3, 2);
+			get_nits(11727, 27500, 0, 3, 2);
+			get_nits(11766, 27500, 0, 3, 2);
+			get_nits(12073, 25376, 0, 3, 2);
+			get_nits(12153,  7028, 0, 3, 2);
+			get_nits(12188, 24500, 0, 7, 2);
+			get_nits(12226, 25540, 0, 7, 2);
+			get_nits(12245, 27500, 1, 7, 2);
+			get_nits(12280, 27500, 1, 3, 2);
+			get_nits(12303, 25548, 0, 7, 2);
+			get_nits(12340, 20000, 0, 3, 2);
+			get_nits(12415, 25540, 0, 7, 2);
+			get_nits(12450, 18056, 0, 3, 2);
+			get_nits(12469,  5185, 0, 3, 2);
+			get_nits(12590,  6111, 1, 3, 2);
+			get_nits(12600,  6111, 1, 3, 2);
+			get_nits(12608,  6111, 1, 3, 2);
+			get_nits(12616,  6111, 1, 3, 2);
+			get_nits(12629,  3222, 1, 7, 2);
+			get_nits(12633,  3643, 1, 7, 2);
+			get_nits(12640,  4000, 1, 3, 2);
+			get_nits(12644,  3200, 1, 3, 2);
+			get_nits(12649,  3977, 1, 3, 2);
+			get_nits(12661,  6110, 0, 3, 2);
+			get_nits(12674,  6666, 1, 1, 2);
+			get_nits(12674,  6110, 0, 3, 2);
+			get_nits(12683,  6666, 1, 1, 2);
+			get_nits(12686,  3400, 0, 3, 2);
+			get_nits(12690,  3980, 1, 3, 2);
+			get_nits(12718,  4000, 0, 7, 2);
 #endif
 			get_sdts();
-
-			if (!scantransponders.empty())
-			{
-				if (fd == NULL)
-				{
-					fd = fopen(services_xml.c_str(), "w" );
-					
-					if (fd == NULL)
-					{
-						perror("[scan.cpp] open services.xml");
-						scan_runs = 0;
-						pthread_exit(0);
-					}
-
-					fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
-					fprintf(fd,"<ZAPIT>\n");
-				}
-
-				fprintf(fd, "<satellite name=\"Hotbird 13.0E\" diseqc=\"1\">\n");
-				for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
-				{
-					fprintf(fd, "<transponder transportID=\"%d\" networkID=\"0\">\n", tI->second.tsid);
-					write_transponder(tI->second.tsid,fd);
-					fprintf(fd,"</transponder>\n");
-				}
-				fprintf(fd, "</satellite>\n");
-			}
-
-			scanchannels.clear();
-			scantransponders.clear();
+			write_sat(fd, satName, diseqc_pos);
 		}
 
-      if (do_diseqc & 4)
-      {
-      	curr_sat = 4;
-      	strcpy(satName, "KOPERNIKUS");
-    	eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName)+ 1 );
-
-      printf("[scan.cpp] SCANNING KOPERNIKUS\n");
-      get_nits(12655,27500,1,3,2);
-      get_nits(12521,27500,1,3,2);
-      get_sdts();
-
-       if (!scantransponders.empty())
-	{
-		if (fd == NULL)
-	  {
-	  	fd = fopen(services_xml.c_str(), "w" );
-	  	if (fd == NULL)
-      		{
-			perror("[scan.cpp] open services.xml");
-      			scan_runs = 0;
-  			pthread_exit(0);
-  		}
-	  	fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
-      	  	fprintf(fd,"<ZAPIT>\n");
-      	}
-	fprintf(fd, "<satellite name=\"Kopernikus\" diseqc=\"2\">\n");
-	  for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
-	    {
-	    fprintf(fd, "<transponder transportID=\"%d\" networkID=\"0\">\n", tI->second.tsid);
-	      write_transponder(tI->second.tsid,fd);
-	      fprintf(fd,"</transponder>\n");
-	    }
-	  fprintf(fd, "</satellite>\n");
-	}
-       scanchannels.clear();
-       scantransponders.clear();
-       }
-
-      if (do_diseqc & 16)
-      {
-      	curr_sat = 16;
-		strcpy(satName, "SIRIUS");
-    	eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName)+ 1 );
-
-      printf("[scan.cpp] SCANNING SIRIUS\n");
-      get_nits(12050, 27500, 1, 3, 2);
-      get_nits(11975, 27500, 1, 3, 2);
-      get_nits(12028, 27500, 0, 3, 2);
-      get_nits(11994, 27500, 0, 3, 2);
-      get_nits(11880, 27500, 0, 3, 2);
-      get_nits(11804, 27500, 0, 3, 2);
-      get_nits(11823, 27500, 1, 3, 2);
-      get_nits(12380, 27500, 0, 3, 2);
-      get_nits(11547, 27500, 0, 3, 2);
-      get_nits(11727, 27500, 0, 3, 2);
-      get_nits(11766, 27500, 0, 3, 2);
-      get_nits(12073, 25376, 0, 3, 2);
-      get_nits(12153,  7028, 0, 3, 2);
-      get_nits(12188, 24500, 0, 7, 2);
-      get_nits(12226, 25540, 0, 7, 2);
-      get_nits(12245, 27500, 1, 7, 2);
-      get_nits(12280, 27500, 1, 3, 2);
-      get_nits(12303, 25548, 0, 7, 2);
-      get_nits(12340, 20000, 0, 3, 2);
-      get_nits(12415, 25540, 0, 7, 2);
-      get_nits(12450, 18056, 0, 3, 2);
-      get_nits(12469,  5185, 0, 3, 2);
-      get_nits(12590,  6111, 1, 3, 2);
-      get_nits(12600,  6111, 1, 3, 2);
-      get_nits(12608,  6111, 1, 3, 2);
-      get_nits(12616,  6111, 1, 3, 2);
-      get_nits(12629,  3222, 1, 7, 2);
-      get_nits(12633,  3643, 1, 7, 2);
-      get_nits(12640,  4000, 1, 3, 2);
-      get_nits(12644,  3200, 1, 3, 2);
-      get_nits(12649,  3977, 1, 3, 2);
-      get_nits(12661,  6110, 0, 3, 2);
-      get_nits(12674,  6666, 1, 1, 2);
-      get_nits(12674,  6110, 0, 3, 2);
-      get_nits(12683,  6666, 1, 1, 2);
-      get_nits(12686,  3400, 0, 3, 2);
-      get_nits(12690,  3980, 1, 3, 2);
-      get_nits(12718,  4000, 0, 7, 2);
-      get_sdts();
-
-       if (!scantransponders.empty())
-	{
-		if (fd == NULL)
-	  {
-	  	fd = fopen(services_xml.c_str(), "w" );
-	  	if (fd == NULL)
-      		{
-			perror("[scan.cpp] open services.xml");
-      			scan_runs = 0;
-  			pthread_exit(0);
-  		}
-	  	fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
-      	  	fprintf(fd,"<ZAPIT>\n");
-      	}
-	fprintf(fd, "<satellite name=\"Sirius 5.0E\" diseqc=\"2\">\n");
-	  for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
-	    {
-	    fprintf(fd, "<transponder transportID=\"%d\" networkID=\"0\">\n", tI->second.tsid);
-	      write_transponder(tI->second.tsid,fd);
-	      fprintf(fd,"</transponder>\n");
-	    }
-	  fprintf(fd, "</satellite>\n");
-	}
-       scanchannels.clear();
-       scantransponders.clear();
-       }
-
-	if (do_diseqc & 18)
-	{
-		curr_sat = 18;
-		strcpy(satName, "THOR");
-		eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName)+ 1 );
-
-		printf("[scan.cpp] SCANNING THOR\n");
-		get_nits(10966,  2963, 1, 3, 3);
-		get_nits(10984,  6666, 1, 7, 3);
-		get_nits(10984,  5924, 1, 3, 3);
-		get_nits(10995, 10000, 1, 3, 3);
-		get_nits(11003, 13300, 1, 7, 3);
-		get_nits(11014, 26000, 0, 3, 3);
-		get_nits(11029,  2816, 1, 3, 3);
-		get_nits(11044,  5632, 1, 3, 3);
-		get_nits(11054,  6110, 1, 3, 3);
-		get_nits(11064,  6110, 1, 3, 3);
-		get_nits(11174, 22500, 0, 2, 3);
-		get_nits(11459,  3149, 0, 3, 3);
-		get_nits(11468,  5632, 0, 3, 3);
-		get_nits(11477,  5632, 0, 3, 3);
-		get_nits(11484,  6140, 0, 7, 3);
-		get_nits(11495,  5632, 0, 3, 3);
-		get_nits(11504,  6110, 1, 3, 3);
-		get_nits(11527,  4203, 0, 2, 3);
-		get_nits(11540, 26000, 1, 3, 3);
-		get_nits(11553, 26000, 0, 3, 3);
-		get_nits(11587,  5632, 0, 3, 3);
-		get_nits(11596,  6110, 0, 3, 3);
-		get_nits(11597,  6110, 1, 3, 3);
-		get_nits(11605,  6110, 1, 3, 3);
-		get_nits(11619,  2940, 1, 3, 3);
-		get_nits(11623,  2295, 1, 7, 3);
-		get_nits(11630,  8054, 1, 7, 3);
-		get_nits(11639,  4202, 1, 2, 3);
-		get_nits(11652,  4202, 1, 2, 3);
-		get_nits(11665,  6110, 1, 3, 3);
-		get_nits(11677, 26000, 0, 3, 3);
-		get_nits(11686, 11017, 1, 3, 3);
-		get_nits(11229, 24500, 0, 7, 3);
-		get_nits(11247, 24500, 1, 7, 3);
-		get_nits(11278, 24500, 1, 7, 3);
-		get_nits(11309, 24500, 1, 7, 3);
-		get_nits(11372, 24500, 1, 7, 3);
-		get_nits(11403, 24500, 1, 7, 3);
-		get_nits(12054, 28000, 0, 7, 3);
-		get_nits(12169, 28000, 0, 7, 3);
-		get_nits(12226, 28000, 1, 7, 3);
-		get_nits(12303, 27800, 1, 3, 3);
-		get_nits(12322, 27800, 0, 3, 3);
-		get_nits(12399, 28000, 0, 7, 3);
-		get_nits(12456, 28000, 1, 3, 3);
-		get_nits(12476, 27800, 0, 3, 3);
-		get_sdts();
-
-		if (!scantransponders.empty())
+		if (do_diseqc & 32)
 		{
-			if (fd == NULL)
-			{
-				fd = fopen(services_xml.c_str(), "w" );
-					if (fd == NULL)
-				{
-					perror("[scan.cpp] open services.xml");
-					scan_runs = 0;
-					pthread_exit(0);
-				}
-					fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
-				fprintf(fd,"<ZAPIT>\n");
-			}
-				fprintf(fd, "<satellite name=\"Thor 0.8W\" diseqc=\"3\">\n");
-			for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
-			{
-				fprintf(fd, "<transponder transportID=\"%d\" networkID=\"0\">\n", tI->second.tsid);
-				write_transponder(tI->second.tsid,fd);
-				fprintf(fd, "</transponder>\n");
-			}
-			fprintf(fd, "</satellite>\n");
+			diseqc_pos = 3;
+			curr_sat = 32;
+			strcpy(satName, "Thor 0.8W");
+			eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName) + 1);
+
+			printf("[scan.cpp] scanning %s\n", satName);
+#if 0
+			get_nits(10966,  2963, 1, 3, 3);
+			get_nits(10984,  6666, 1, 7, 3);
+			get_nits(10984,  5924, 1, 3, 3);
+			get_nits(10995, 10000, 1, 3, 3);
+			get_nits(11003, 13300, 1, 7, 3);
+			get_nits(11014, 26000, 0, 3, 3);
+			get_nits(11029,  2816, 1, 3, 3);
+			get_nits(11044,  5632, 1, 3, 3);
+			get_nits(11054,  6110, 1, 3, 3);
+			get_nits(11064,  6110, 1, 3, 3);
+			get_nits(11174, 22500, 0, 2, 3);
+			get_nits(11459,  3149, 0, 3, 3);
+			get_nits(11468,  5632, 0, 3, 3);
+			get_nits(11477,  5632, 0, 3, 3);
+			get_nits(11484,  6140, 0, 7, 3);
+			get_nits(11495,  5632, 0, 3, 3);
+			get_nits(11504,  6110, 1, 3, 3);
+			get_nits(11527,  4203, 0, 2, 3);
+			get_nits(11540, 26000, 1, 3, 3);
+			get_nits(11553, 26000, 0, 3, 3);
+			get_nits(11587,  5632, 0, 3, 3);
+			get_nits(11596,  6110, 0, 3, 3);
+			get_nits(11597,  6110, 1, 3, 3);
+			get_nits(11605,  6110, 1, 3, 3);
+			get_nits(11619,  2940, 1, 3, 3);
+			get_nits(11623,  2295, 1, 7, 3);
+			get_nits(11630,  8054, 1, 7, 3);
+			get_nits(11639,  4202, 1, 2, 3);
+			get_nits(11652,  4202, 1, 2, 3);
+			get_nits(11665,  6110, 1, 3, 3);
+			get_nits(11677, 26000, 0, 3, 3);
+			get_nits(11686, 11017, 1, 3, 3);
+			get_nits(11229, 24500, 0, 7, 3);
+			get_nits(11247, 24500, 1, 7, 3);
+			get_nits(11278, 24500, 1, 7, 3);
+			get_nits(11309, 24500, 1, 7, 3);
+			get_nits(11372, 24500, 1, 7, 3);
+			get_nits(11403, 24500, 1, 7, 3);
+			get_nits(12054, 28000, 0, 7, 3);
+			get_nits(12169, 28000, 0, 7, 3);
+			get_nits(12226, 28000, 1, 7, 3);
+			get_nits(12303, 27800, 1, 3, 3);
+			get_nits(12322, 27800, 0, 3, 3);
+			get_nits(12399, 28000, 0, 7, 3);
+			get_nits(12456, 28000, 1, 3, 3);
+			get_nits(12476, 27800, 0, 3, 3);
+#endif
+			get_sdts();
+			write_sat(fd, satName, diseqc_pos);
 		}
-			scanchannels.clear();
-		scantransponders.clear();
 	}
 
-      if (do_diseqc & 8)
-      {
-      	curr_sat = 8;
-      	strcpy(satName, "TÜRKSAT");
-    	eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName)+ 1 );
-
-      printf("[scan.cpp] SCANNING TÜRKSAT\n");
-      get_nits(10985, 23420, 0, 3, 3);
-      get_nits(11015, 41790, 0, 3, 3);
-      get_nits(11028, 35720, 0, 5, 3);
-      get_nits(11037, 23420, 0, 5, 3);
-      get_nits(11054, 70000, 1, 3, 3);
-      get_nits(11088, 56320, 1, 3, 3);
-      get_nits(11100, 56320, 1, 3, 3);
-      get_nits(11110, 56320, 1, 3, 3);
-      get_nits(11117, 56320, 1, 3, 3);
-      get_nits(11117, 30550, 1, 3, 3);
-      get_nits(11133, 45550, 1, 5, 3);
-      get_nits(11134, 26000, 0, 7, 3);
-      get_nits(11137, 31500, 0, 5, 3);
-      get_nits(11156, 21730, 1, 5, 3);
-      get_nits(11160, 21730, 1, 5, 3);
-      get_nits(11162, 21730, 1, 5, 3);
-      get_nits(11166, 56320, 1, 5, 3);
-      get_nits(11168, 21730, 1, 5, 3);
-      get_nits(11172, 21730, 1, 5, 3);
-      get_nits(11193, 54980, 1, 5, 3);
-      get_nits(11453, 19830, 0, 7, 3);
-      get_nits(11567, 20000, 0, 3, 3);
-      get_sdts();
-
-       if (!scantransponders.empty())
-	{
-		if (fd == NULL)
-	  {
-	  	fd = fopen(services_xml.c_str(), "w" );
-	  	if (fd == NULL)
-      		{
-			perror("[scan.cpp] open services.xml");
-      			scan_runs = 0;
-  			pthread_exit(0);
-  		}
-	  	fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
-      	  	fprintf(fd,"<ZAPIT>\n");
-      	}
-	fprintf(fd, "<satellite name=\"Türksat\" diseqc=\"3\">\n");
-	  for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
-	    {
-	    fprintf(fd, "<transponder transportID=\"%d\" networkID=\"0\">\n", tI->second.tsid);
-	      write_transponder(tI->second.tsid,fd);
-	      fprintf(fd,"</transponder>\n");
-	    }
-	  fprintf(fd, "</satellite>\n");
-	}
-       scanchannels.clear();
-       scantransponders.clear();
-       }
-
-
-
-      }
-	
-
-	write_fake_bouquets(fd);
-	fprintf(fd,"</ZAPIT>\n");
-	fclose(fd);
-
+	write_xml_footer(fd);
 	write_bouquets(do_diseqc);
 
 	if (prepare_channels() < 0)
@@ -717,7 +614,7 @@ void *start_scanthread(void *param)
 	printf("[scan.cpp] Channels have been loaded succesfully\n");
 
 	scan_runs = 0;
-	eventServer->sendEvent(CZapitClient::EVT_SCAN_COMPLETE, CEventServer::INITID_ZAPIT );
+	eventServer->sendEvent(CZapitClient::EVT_SCAN_COMPLETE, CEventServer::INITID_ZAPIT);
 	pthread_exit(0);
 }
 

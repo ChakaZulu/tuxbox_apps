@@ -2,6 +2,10 @@
 #define __descriptors__
 
 #include <stdint.h>
+#include <ost/frontend.h>
+
+CodeRate getFEC(uint8_t FEC_inner);
+Modulation getModulation (uint8_t modulation);
 
 uint8_t stuffing_desc(uint8_t *buffer);
 uint8_t linkage_desc(uint8_t *buffer);

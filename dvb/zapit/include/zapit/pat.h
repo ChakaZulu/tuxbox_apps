@@ -5,6 +5,6 @@
 #include "scan.h"
 
 int pat(uint oonid,std::map<uint, channel> *cmap);
-int fake_pat(std::map<int,transpondermap> *tmap, int freq, int sr);
+int fake_pat(std::map<int,transpondermap> *tmap, FrontendParameters feparams);
 
 #endif /* __pat_h__ */

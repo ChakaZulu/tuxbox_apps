@@ -1,5 +1,5 @@
-#ifndef __scan__
-#define __scan__
+#ifndef __scan_h__
+#define __scan_h__
 
 
 #include <config.h>
@@ -42,36 +42,29 @@ struct scanchannel{
 		onid = 0;
 		service_type = 0;
 	}
-} ;
+};
 
 struct transpondermap
 {
-	int tsid;
-	int freq;
-	int symbolrate;
-	int fec_inner;
-	int polarization;
-	int diseqc;
+	uint16_t transport_stream_id;
+	FrontendParameters feparams;
+	uint8_t polarization;
+	uint8_t DiSEqC;
 
-
-	transpondermap(int Tsid, int Freq, int Symbolrate, int Fec_inner)
+	transpondermap(uint16_t p_transport_stream_id, FrontendParameters p_feparams)
 	{
-		tsid = Tsid;
-		freq = Freq;
-		symbolrate = Symbolrate;
-		fec_inner = Fec_inner;
+		transport_stream_id = p_transport_stream_id;
+		feparams = p_feparams;
 		polarization = 0;
-		diseqc=0;
+		DiSEqC = 0;
 	}
 
-	transpondermap(int Tsid, int Freq, int Symbolrate, int Fec_inner,int Polarization,int Diseqc)
+	transpondermap(uint16_t p_transport_stream_id, FrontendParameters p_feparams, uint8_t p_polarization, uint8_t p_DiSEqC)
 	{
-		tsid = Tsid;
-		freq = Freq;
-		symbolrate = Symbolrate;
-		fec_inner = Fec_inner;
-		polarization = Polarization;
-		diseqc = Diseqc;
+		transport_stream_id = p_transport_stream_id;
+		feparams = p_feparams;
+		polarization = p_polarization;
+		DiSEqC = p_DiSEqC;
 	}
 };
 
@@ -91,11 +84,8 @@ struct bouquet_mulmap
 	}
 };
 
-
-// #define NVOD_HACK
-
 extern std::map<int, transpondermap> scantransponders;
 extern std::map<int, scanchannel> scanchannels;
 extern std::multimap<std::string, bouquet_mulmap> scanbouquets;
 
-#endif
+#endif /* __scan_h__ */
