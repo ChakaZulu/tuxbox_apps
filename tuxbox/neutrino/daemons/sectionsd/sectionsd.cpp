@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.103 2002/03/18 15:08:50 field Exp $
+//  $Id: sectionsd.cpp,v 1.104 2002/03/18 16:55:16 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,8 +23,8 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
-//  Revision 1.103  2002/03/18 15:08:50  field
-//  Updates...
+//  Revision 1.104  2002/03/18 16:55:16  field
+//  Bugfix
 //
 //  Revision 1.102  2002/03/12 16:12:55  field
 //  Bugfixes
@@ -1508,7 +1508,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.103 2002/03/18 15:08:50 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.104 2002/03/18 16:55:16 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1703,6 +1703,7 @@ static void commandserviceChanged(struct connectionData *client, char *data, con
 
 	if ( *requestCN_Event )
 	{
+		dprintf("[sectionsd] requesting current_next event...\n");
 		// aufwecken - mit current-next
 		dmxEIT.change( false );
 	}
@@ -3275,9 +3276,13 @@ static void *eitThread(void *)
                         	if ( ( messaging_current_Section_MaxID == header.section_number ) )
                         	{
                         		// alle current-next- pakete für den messaging_current_ServiceKey da!
+                        		dprintf("[eitThread] got all current_next packages...\n");
                         		if ( messaging_wants_current_next_Event )
-                					eventServer->sendEvent(CSectionsdClient::EVT_GOT_CN_EPG, CEventServer::INITID_SECTIONSD, &messaging_current_ServiceKey, sizeof(messaging_current_ServiceKey) );
+                        		{
 
+                        			messaging_wants_current_next_Event = false;
+                					eventServer->sendEvent(CSectionsdClient::EVT_GOT_CN_EPG, CEventServer::INITID_SECTIONSD, &messaging_current_ServiceKey, sizeof(messaging_current_ServiceKey) );
+                                }
                         		dmxEIT.change( true );
                         	}
                        	}
@@ -3400,7 +3405,7 @@ int main(int argc, char **argv)
 	int rc;
 	struct sockaddr_in serverAddr;
 
-	printf("$Id: sectionsd.cpp,v 1.103 2002/03/18 15:08:50 field Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.104 2002/03/18 16:55:16 field Exp $\n");
 	try
 	{
 

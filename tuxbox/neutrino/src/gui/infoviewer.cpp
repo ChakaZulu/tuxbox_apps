@@ -209,6 +209,8 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
                 g_RemoteControl->CopyPIDs();
                 showButtonAudio();
                 show16_9( true );
+
+                g_Sectionsd->setServiceChanged( onid_tsid, true );
         }
 
 		// Schatten
