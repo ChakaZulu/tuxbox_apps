@@ -38,7 +38,7 @@
 						</table>
 						<table id="statcell" width=100% border=0 cellpadding=0 cellspacing=0 height=35>
 						<tr>
-							<td align=left valign=center><span class="white">#STATS#</span></td>
+							<td align=left valign=center><span class="stats">#STATS#</span></td>
 						</tr>
 						</table>
 					</td>

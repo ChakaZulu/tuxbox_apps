@@ -1,14 +1,9 @@
-a.mute { color:#ffffff; font-size:8pt; font-family:tahoma, arial; }
-a.audio { color:#000000; font-size:8pt; font-family:Verdana; }
-.white { color:#000000; font-size: 8pt; font-family: Verdana; }
-.black { color:#000000; font-size: 9pt; font-family: Verdana; }
-.button { color:#ffffff; font-size: 10pt; font-weight: bold; font-family: Verdana; }
 .servicename { color:#ffffff; font-size:13pt; font-family: tahoma, arial; }
 .epgzeit { color:#000000; font-size:12pt; font-family: tahoma, arial; }
 .epgdur { color:#000000; font-size:10pt; font-family: tahoma, arial; }
 .epgname { color:#000000; font-size:12pt; font-family: tahoma, arial; }
 .epgdesc { color:#000000; font-size:10pt; font-family: tahoma, arial; }
-td.menu { font-family: Verdana; font-size: 10pt; font-weight: bold}
+.stats { color:#000000; font-size: 10px; }
 .title { color:#000000; font-size:13pt; font-weight: bold; font-family: Verdana; background: #d9e0e7; }
 .epg { color:#000000; font-size:10pt; font-family:tahoma,arial; }
 body {
@@ -18,7 +13,6 @@ body {
 
 #mainbody {
 	background-image: url(bg.png);
-	background-color: #ffffff;
 }
 
 #headbody {
@@ -46,12 +40,13 @@ a {
 	color: #263971;
 	text-decoration: underline;
 }
+
 a:hover {
 	color: #A91111;
 }
 
 #contentcell {
-	background-color: #ffffff;
+	background-color: #f4f4f4;
 	padding-left: 10px;
 	padding-top: 10px;
 	padding-right: 10px;
@@ -70,6 +65,7 @@ a:hover {
 	padding-right: 0px;
 	padding-top: 10px;
 	padding-bottom: 0px;
+	font-size: 8px;
 }
 
 #contentcell TD {

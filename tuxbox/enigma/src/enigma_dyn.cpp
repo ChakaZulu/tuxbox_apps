@@ -2593,14 +2593,14 @@ public:
 								<< " (" << event.duration / 60 << " min)"
 								<< "</span>"
 								<< "<br><b>"
-								<< "<a href=\'javascript:switchChannel(\"" << ref2string(ref) << "\")\' "
+								<< "<a href=\'javascript:switchChannel(\"" << ref2string(ref) << "\")\'>"
 								<< "<span class=\"event\">"
 								<< short_description
 								<< "</span>"
 								<< "</a>"
 
 								<< "</b><br>";
-								
+
 							if (eventDuration >= 15 * 60)
 							{
 								result << "<span class=\"description\">"
