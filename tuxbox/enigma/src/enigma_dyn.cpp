@@ -1769,6 +1769,7 @@ static eString getZapContent3(eString mode, eString path)
 	eString result, result1, result2;
 	eString bouquets, bouquetrefs, channels, channelrefs;
 	eString tpath;
+	eServiceReference current_service;
 
 	unsigned int pos = 0, lastpos = 0, temp = 0;
 
@@ -1783,52 +1784,63 @@ static eString getZapContent3(eString mode, eString path)
 		else
 			tpath = path.mid(lastpos, strlen(path.c_str()) - lastpos);
 
-		eServiceReference current_service = string2ref(tpath);
+		current_service = string2ref(tpath);
 		eServiceInterface *iface = eServiceInterface::getInstance();
 
-		eWebNavigatorListDirectory2 navlist(result1, result2, path, tpath, *iface);
-		Signal1<void, const eServiceReference&> signal;
-		signal.connect(slot(navlist, &eWebNavigatorListDirectory2::addEntry));
+		if (!(current_service.flags&eServiceReference::isDirectory))	// is playable
+		{
+			playService(current_service);
+			result = "";
+		}
+		else
+		{
+			eWebNavigatorListDirectory2 navlist(result1, result2, path, tpath, *iface);
+			Signal1<void, const eServiceReference&> signal;
+			signal.connect(slot(navlist, &eWebNavigatorListDirectory2::addEntry));
 
-		channels += "channels[0] = new Array(";
-		channelrefs += "channelRefs[0] = new Array(";
+			channels += "channels[0] = new Array(";
+			channelrefs += "channelRefs[0] = new Array(";
 
-		iface->enterDirectory(current_service, signal);
-		eDebug("entered");
+			iface->enterDirectory(current_service, signal);
+			eDebug("entered");
 
-		channels += result2.left(result2.length() - 2);
-		channels += ");";
-		channelrefs += result1.left(result1.length() - 2);
-		channelrefs += ");";
+			channels += result2.left(result2.length() - 2);
+			channels += ");";
+			channelrefs += result1.left(result1.length() - 2);
+			channelrefs += ");";
 
-		iface->leaveDirectory(current_service);
-		eDebug("exited");
+			iface->leaveDirectory(current_service);
+			eDebug("exited");
+		}
 	}
 
-	bouquets = "\"dummy bouquet\"";
-	bouquetrefs = "\"dummy bouquet ref\"";
+	if (current_service.flags&eServiceReference::isDirectory)
+	{
+		bouquets = "\"dummy bouquet\"";
+		bouquetrefs = "\"dummy bouquet ref\"";
 
-	eString tmpFile = readFile(HTDOCS_DIR + "zapdata.js");
-	tmpFile.strReplace("#BOUQUETS#", bouquets);
-	tmpFile.strReplace("#BOUQUETREFS#", bouquetrefs);
-	tmpFile.strReplace("#CHANNELS#", channels);
-	tmpFile.strReplace("#CHANNELREFS#", channelrefs);
-	tmpFile.strReplace("#CURRENTBOUQUET#", eString().sprintf("%d", currentBouquet));
-	tmpFile.strReplace("#CURRENTCHANNEL#", eString().sprintf("%d", currentChannel));
-	tmpFile.strReplace("#AUTOBOUQUETCHANGE#", "0");
-	tmpFile.strReplace("#ZAPMODE#", eString().sprintf("%d", zapMode));
-	tmpFile.strReplace("#ZAPSUBMODE#", eString().sprintf("%d", zapSubMode));
+		eString tmpFile = readFile(HTDOCS_DIR + "zapdata.js");
+		tmpFile.strReplace("#BOUQUETS#", bouquets);
+		tmpFile.strReplace("#BOUQUETREFS#", bouquetrefs);
+		tmpFile.strReplace("#CHANNELS#", channels);
+		tmpFile.strReplace("#CHANNELREFS#", channelrefs);
+		tmpFile.strReplace("#CURRENTBOUQUET#", eString().sprintf("%d", currentBouquet));
+		tmpFile.strReplace("#CURRENTCHANNEL#", eString().sprintf("%d", currentChannel));
+		tmpFile.strReplace("#AUTOBOUQUETCHANGE#", "0");
+		tmpFile.strReplace("#ZAPMODE#", eString().sprintf("%d", zapMode));
+		tmpFile.strReplace("#ZAPSUBMODE#", eString().sprintf("%d", zapSubMode));
 
-	result = readFile(TEMPLATE_DIR + "rec.tmp");
-	result.strReplace("#ZAPDATA#", tmpFile);
-	if (screenWidth > 1024)
-		result.strReplace("#SELSIZE#", "25");
-	else
-		result.strReplace("#SELSIZE#", "10");
-	if (zapMode == ZAPMODERECORDINGS)
-		result.strReplace("#BUTTON#", button(100, "Delete", RED, "javascript:deleteMovie()"));
-	else
-		result.strReplace("#BUTTON#", "");
+		result = readFile(TEMPLATE_DIR + "rec.tmp");
+		result.strReplace("#ZAPDATA#", tmpFile);
+		if (screenWidth > 1024)
+			result.strReplace("#SELSIZE#", "25");
+		else
+			result.strReplace("#SELSIZE#", "10");
+		if (zapMode == ZAPMODERECORDINGS)
+			result.strReplace("#BUTTON#", button(100, "Delete", RED, "javascript:deleteMovie()"));
+		else
+			result.strReplace("#BUTTON#", "");
+	}
 	return result;
 }
 
@@ -1851,7 +1863,11 @@ static eString getZap(eString mode, eString path)
 #endif
 		if (zapMode == ZAPMODEROOT) // root
 		{
-			result += getZapContent3(mode, path);
+			eString tmp = getZapContent3(mode, path);
+			if (tmp != "")
+				result += tmp;
+			else
+				result = "";
 		}
 		else
 		{
@@ -2396,7 +2412,11 @@ static eString getContent(eString mode, eString path)
 		}
 
 		result = getTitle(tmp);
-		result += getZap(mode, path);
+		eString tmp = getZap(mode, path);
+		if (tmp != "")
+			result += tmp;
+		else
+			result = "";
 	}
 	else
 #if ENABLE_DYN_MOUNT || ENABLE_DYN_CONF || ENABLE_DYN_FLASH
@@ -3372,8 +3392,6 @@ static eString zapTo(eString request, eString dirpath, eString opts, eHTTPConnec
 		playService(current_service);
 		result = closeWindow(content, "Please wait...", 3000);
 	}
-	else
-		result = getZapContent3("zap", spath);
 	return result;
 }
 
@@ -4333,12 +4351,19 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 	result = readFile(TEMPLATE_DIR + "index2.tmp");
 	result.strReplace("#TOPNAVI#", getTopNavi(mode, spath));
 	result.strReplace("#LEFTNAVI#", getLeftNavi(mode, spath));
-	result.strReplace("#CONTENT#", getContent(mode, spath));
+	eString tmp = getContent(mode, spath);
+	if (tmp != "")
+		result.strReplace("#CONTENT#", tmp);
+	else
+		result = "";
 
 	if (mode == "zap")
 		result.strReplace("#ONLOAD#", "onLoad=init()");
 	else
 		result.strReplace("#ONLOAD#", "");
+
+	if (result == "")
+		result = closeWindow(content, "Please wait...", 3000);
 
 	return result;
 }
@@ -4348,7 +4373,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	int lockWebIf = 1;
 	if (eConfig::getInstance()->getKey("/ezap/webif/lockWebIf", lockWebIf))
 		eConfig::getInstance()->setKey("/ezap/webif/lockWebIf", lockWebIf);
-	
+
 	eDebug("[ENIGMA_DYN] lockWebIf = %d", lockWebIf);
 	bool lockWeb = (lockWebIf == 1) ? true : false;
 

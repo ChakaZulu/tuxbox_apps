@@ -25,15 +25,10 @@ function switchChannel(xy, bouquet, channel)
 	else
 	{
 		if (zapMode < 4)
-		{
 			document.location = "/cgi-bin/zapTo?path="+xy+"&curBouquet="+bouquet+"&curChannel="+channel;
-			setTimeout("zapHeaderReload()", 3000);
-		}
 		else
-		{
-			document.location = "/cgi-bin/zapTo?path="+xy;
-			setTimeout("zapBodyReload()", 3000);
-		}
+			document.location = "?path="+xy;
+		setTimeout("zapHeaderReload()", 3000);
 	}
 }
 
